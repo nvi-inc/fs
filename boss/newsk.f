@@ -26,13 +26,14 @@ C
       integer ichcm_ch
       logical kpast,ktime
       dimension it(5)
-      integer*2 ib(50)
+      integer*2 ib(50), lsor
       character*100 ibc
       character cjchar
       equivalence (ib,ibc)
-      data  ibl/50/
+      data  ibl/50/, lsor/2h::/
 C
 C  First check 1st line of schedule for experiment name and year
+      ilog=0
       irecln = 1
       ilen = fmpreadstr(idcbsk,ierr,ibc)
       irecln = irecln + 1
@@ -45,7 +46,7 @@ C  First check 1st line of schedule for experiment name and year
       nch = 2
 C  If 1st line is a comment, get experiment name here
       call gtfld(ib,nch,ibl*2,icf,ic2)
-      if(icf.eq.0) goto 100
+      if(icf.eq.0) goto 99
       nc = min0(8,ic2-icf+1)
       lexper=' '
       call ifill_ch(ilexper,1,8,' ')
@@ -54,10 +55,10 @@ C  If 1st line is a comment, get experiment name here
       call fs_set_lexper(ilexper)
 C  Now get the year of the schedule
       call gtfld(ib,nch,ibl*2,icf,ic2)
-      if(icf.eq.0) goto 100
+      if(icf.eq.0) goto 99
       nc = min0(4,ic2-icf+1)
       iy = ias2b(ib,icf,nc)
-      if(iy.lt.0) goto 100
+      if(iy.lt.0) goto 99
       if(iy.lt.100) iy = iy+1900
 C  Make sure schedule year is same as current year
       call fc_rte_time(it,iyr)
@@ -67,6 +68,14 @@ C  Make sure schedule year is same as current year
         goto 900
       endif
       iyear = iy
+C
+C count all the leading comments in the schdeule
+C
+ 99   continue
+      ilog=ilog+1
+      ilen = fmpreadstr(idcbsk,ierr,ibc)
+      if(cjchar(ib,1).ne.'"') goto 100
+      goto 99
 C
 100   idum = fmpsetpos(idcbsk,ierr,0,id)
       irecln = 1 
@@ -116,6 +125,7 @@ C
         ierr = -1
         goto 900
       endif
+      if(iline.le.ilog) iline=ilog+1
       if (iline.le.1) goto 800
       irec2 = iline
       idum = fmpsetline(idcbsk,ierr,irec2-1)
