@@ -87,7 +87,9 @@ C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen,it(6)
       integer rddev, opbrd, iserial,opdev, wrdev, idum,statbrd,rspdev
-      integer idum,fc_rte_prior, no_after
+      integer idum,fc_rte_prior, no_after, no_online, no_write_ren
+      integer set_remote_enable,no_interface_clear_board
+      integer interface_clear_converter
       double precision timnow,timlst(imaxdev)
       integer*4 oldcmd(imaxdev)
       integer*2 moddev(imaxdev,idevln)
@@ -152,10 +154,35 @@ C     Read table from class buffer
 C 
       icount=0
       no_after=0
+      no_online=0
+      no_write_ren=0
+      set_remote_enable=0
+      no_interface_clear_board=0
+      interface_clear_board=0
       do i=1,nclrec
          ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
          if(ichcm_ch(ibuf,1,'no_untalk/unlisten_after').eq.0) THEN
             no_after=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'no_online').eq.0) THEN
+            no_online=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'no_write_ren').eq.0) THEN
+            no_write_ren=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'set_remote_enable').eq.0) THEN
+            set_remote_enable=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'no_interface_clear_board').eq.0) THEN
+            no_interface_clear_board=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'interface_clear_converter').eq.0) THEN
+            interface_clear_converter=1
             goto 150
          endif
          icount=icount+1
@@ -202,7 +229,9 @@ C
          goto 1090
       endif
       ingpib = iflch(idevgpib,idevln)
-      iserial=opbrd(idevgpib,ingpib,ierr,ipcode)  	!! OPEN BOARD
+      iserial=opbrd(idevgpib,ingpib,ierr,ipcode,no_online,
+     &     set_remote_enable,no_interface_clear_board,
+     &     interface_clear_board)            !! OPEN BOARD
       if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
       call fc_rte_time(it,it(6))
       do i=1,ndev   !! OPEN DEVICES
@@ -346,7 +375,7 @@ C
          if(imode.eq.4) ibin=1
          call fs_get_kecho(kecho)
          idum=wrdev(ibin,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300,
-     &        no_after,kecho,0,centisec)
+     &        no_after,kecho,0,centisec,no_write_ren)
          if (ierr .eq. -4) then
             idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
          endif
@@ -376,7 +405,7 @@ C
          endif
          call fs_get_kecho(kecho)
          idum=wrdev(ibin,idevid(idev),ibuf(4),nchar-6,ierr,ipcode,300,
-     &        no_after,kecho,itime,centisec)
+     &        no_after,kecho,itime,centisec,no_write_ren)
          if (ierr .eq. -4) then
             idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
          endif
