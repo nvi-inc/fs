@@ -140,7 +140,23 @@ C  Skip checking the drive if tape speed is 0.
         ierr = -301
 C          if vacuum not ready, forget it
         goto 990
-410   ibuf(1) = 0
+410   continue
+      nrec = 0
+      iclass = 0
+
+      call fs_get_rack(rack)
+      if(rack.eq.MK4) then
+         ibuf(1)=9
+         if(ienatp.eq.0) then
+            call char2hol('fm/rec 0',ibuf(2),1,8)
+         else
+            call char2hol('fm/rec 1',ibuf(2),1,8)
+         endif
+         call put_buf(iclass,ibuf,-10,'fs','  ')
+         nrec = nrec+1
+      endif
+
+      ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
       call fs_get_drive(drive)
       if (MK3.eq.and(drive,MK3)) then
@@ -149,14 +165,14 @@ C          if vacuum not ready, forget it
         call fs_get_kena(kenastk)
         call en2ma4(ibuf(3),ienatp,kenastk)
       endif
-      iclass = 0
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call fs_get_lgen(lgen)
       call mv2ma(ibuf(3),idirtp,ispeed,lgen)
       call put_buf(iclass,ibuf,-13,'fs','  ')
+      nrec = nrec +2
 C
-      call run_matcn(iclass,2)
+      call run_matcn(iclass,nrec)
       call rmpar(ip)
       call stdis(ip,iclcm)
 C
