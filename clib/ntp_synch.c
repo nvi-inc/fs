@@ -38,6 +38,9 @@ int errors;
 
      input: errors  !=0 print errors, ==0 no errors
      
+     If environment variable FS_CHECK_NTP does not exist, this routine
+     is essentiall a NOOP and will just return -1
+
      if errors ==1 on the first call to ntp_synch then on subsequent calls
      even if errors == 0, some other errors may be printed, but only the frist
      time they occur
@@ -63,6 +66,16 @@ int errors;
   static wait_1st_time=1;      /* are in initial wait errors report? */
   int status;                  /* return status of wait4() */
   int iret;                    /* kill() return value */
+  static int env_check=-1;     /* have check the environment variable */ 
+
+  if(env_check==-1) {
+    if(getenv("FS_CHECK_NTP")==NULL)
+      env_check=0;
+    else
+      env_check=1;
+  }
+  if(env_check==0)
+    return -1;
 
   if(errors < 0) /* remove negative values */
     errors=1;
@@ -159,8 +172,8 @@ int errors;
       
       FD_ZERO(&rfds);
       FD_SET(file_pipes[0],&rfds);
-      tv.tv_sec=5;
-      tv.tv_usec=0;
+      tv.tv_sec=0;
+      tv.tv_usec=500000; /* one half second */
       retval=select(file_pipes[0]+1,&rfds,NULL,NULL,&tv);
       
       if(retval==-1) { /* error */
