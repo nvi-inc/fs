@@ -153,3 +153,10 @@ fs=state,18,1,822.99,i1,2,162.99,i1
 fs=start
 fs=save,e3-ivs
 enddef
+define  checkmk5a     00000000000 
+scan_check
+enddef
+define  checkk5       00000000000 
+enddef
+define  ready_k5      00000000000 
+enddef
