@@ -109,14 +109,14 @@ This will give you the PID's for the tacdclient that is running at the time:
 
    prompt> log in as root
    prompt> ps -ef | grep tacdclient
-   prompt> kill PID
+   prompt> kill -15 PID
 
 example:
    prompt> ps -ef | grep tacdclient
 
    prog     31850 29135  0 17:33 pts/5    00:00:00 tacdclient /usr2/fs/st.default/st-0.0.0/tacdclient/tacdlog.ctl
 
-   prompt> kill 31850
+   prompt> kill -15 31850
 
 If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.
 
