@@ -132,7 +132,11 @@ int *kecho;
   if (*mode == 0 && ascii_last!=1) {
     if (!serial) {
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
       val = REOS | LF;
+#else
+      val = (REOS << 8) + LF;
+#endif
       ibeos(*devid,val);        /* set to read until REOS+EOS is detected */
       if ((ibsta & (ERR|TIMO)) != 0) {
 	if(iberr==0)
