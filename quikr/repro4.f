@@ -181,7 +181,8 @@ C  DEFAULT EQUALIZER IS 2 IF MODE IS READ OR DISABLE.
 C
       goto 250
 242   continue
-      do i=1,4   !! selects one of 0,1,2,3
+      do j=1,4   !! selects one of 0,1,2,3
+        i=j
         if (parm.eq.ibws1(i)) goto 246
       enddo
       do j=1,4   !! or selects one of 80,135,160,270
@@ -252,18 +253,6 @@ C
       call rpbr2ma4(ibuf(3),ibr,vac4)
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 2
-
-      call fs_get_rack(rack)
-      if(rack.eq.MK4) then
-         ibuf(1)=9
-         if(iby.eq.0) then
-            call char2hol('fm/rec 0',ibuf(2),1,8)
-         else
-            call char2hol('fm/rec 1',ibuf(2),1,8)
-         endif
-         call put_buf(iclass,ibuf,-10,'fs','  ')
-         nrec = nrec+1
-      endif
       goto 800
 C
 C
