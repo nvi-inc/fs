@@ -1,14 +1,12 @@
 #!/usr/bin/wish -f
 # vue_fshelp source
 # Basic font for button, menus and labels for FS Help
-# Modified by Raymond Gonzalez 2000
+# Product NVI,Inc./GSFC (2000)
 # to be incorporated into the VLBI Field System.
-  # Window manager configurations
-  set icondir /usr2/fs/fsvue
-  set hfont {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
-  set bfont {-*-lucida-normal-r-*-sans-16-*-*-*-*-*-*-*}
-  set bfont2 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
 
+# Window manager configurations for directories
+  set icondir /usr2/fs/fsvue
+  set bindir /usr2/fs/bin
   set helpdir /usr2/fs/help/
 
   global tkVersion
@@ -23,6 +21,12 @@
   set w .
   $w config -cursor {top_left_arrow black white}
 
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+  } else { 
+      set bfont {9x15}
+  }
   
 # Top frame is a menubar
 # there is more magic that you can do with this
