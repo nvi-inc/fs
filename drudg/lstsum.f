@@ -592,9 +592,12 @@ C the counter to zero to start the new forward pass.
      >        iDur,counter_print,cpass,cnewtap,cdir,
      >        cscan,ctmp_source)
 
+
+
       write(luprt, "()") ! skip line
       if(kdisk) then
-         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1000
+         counter_now=counter_print+idur*speed_recorder
+         write(luprt,'("   Total",f8.1, " Gbytes")') counter_now/1000
       else
         write(luprt, '("   Total number of tapes: ",i3)')num_tapes
       endif

@@ -16,8 +16,7 @@ C INPUT
 C OUTPUT
 C     LMODE in common is modified with the Mk3 mode.
 c LOCAL
-      integer idum,ntra,i,j,k,l,m
-      integer ichmv_ch
+      integer ntra
 C History
 C 020909 nrv If a station has all the tracks of a standard mode
 C            plus some others, it should not be classified as a
@@ -25,6 +24,7 @@ C            standard mode.  Count tracks in itras and compare
 C            to 28.
 C 25Jul2003 JMG  Changed itras to be a function.
 !           JMG  Quick exit if ntra<>28
+! 2004Feb16 JMG Got rid of all holleriths.
 
 C     itras(bit,sb,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
 
@@ -78,7 +78,8 @@ C  Check the tracks
      .     nchan(istn,icode).eq.14 .and.
      .     npassf(istn,icode).eq.2 ) then ! mode C
         call ifill(lmode(1,istn,icode),1,8,oblank)
-        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'C') 
+!        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'C')
+        cmode(istn,icode)="C"
       endif ! mode C
 
       if ( itras(1,1,1, 1,1,istn,icode).eq. 1 .and.
@@ -111,8 +112,9 @@ C  Check the tracks
      .     itras(2,1,1,14,1,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.28 .and.
      .     npassf(istn,icode).eq.1 ) then ! mode A
-        call ifill(lmode(1,istn,icode),1,8,oblank)
-        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'A') 
+!        call ifill(lmode(1,istn,icode),1,8,oblank)
+!        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'A')
+        cmode(istn,icode)="A"
       endif ! mode A
 
       if ( itras(1,1,1, 1,1,istn,icode).eq. 1 .and.
@@ -145,8 +147,9 @@ C  Check the tracks
      .     itras(2,1,1,14,2,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.14 .and.
      .     npassf(istn,icode).eq.2 ) then ! mode B
-        call ifill(lmode(1,istn,icode),1,8,oblank)
-        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'B') 
+!        call ifill(lmode(1,istn,icode),1,8,oblank)
+!        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'B')
+        cmode(istn,icode)="B"
       endif ! mode B
 
       if ( itras(1,1,1, 1,1,istn,icode).eq. 1 .and.
@@ -179,8 +182,9 @@ C  Check the tracks
      .     itras(1,1,1, 7,4,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq. 7 .and.
      .     npassf(istn,icode).eq.4 ) then ! mode E
-        call ifill(lmode(1,istn,icode),1,8,oblank)
-        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'E') 
+!        call ifill(lmode(1,istn,icode),1,8,oblank)
+!        idum = ichmv_ch(LMODE(1,istn,ICODE),1,'E')
+        cmode(istn,icode)="E"
       endif ! mode E
 
       return

@@ -5,6 +5,7 @@ C
 C 000110 nrv New.
 C 000818 nrv New scan name format.
 C 001114 nrv Scan names are character now.
+! 2004Feb16 JMG.  Fixed some bugs.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -34,6 +35,7 @@ C LOCAL:
       integer nstnsk,istnsk,isor
       integer ierr
       INTEGER IC
+      integer i
 
       character*(max_sorlen) csname
       character*2 cstn(max_stn)
@@ -57,6 +59,10 @@ C
 100   FORMAT(' FAKEsum output for ',A,' from schedule ',A) 
 
       ituse=1
+
+      do i=1,max_stn
+        cstn(i)=" "  	!initialize
+      end do
 
       do iobs=1,nobs
         cbuf=cskobs(iskrec(iobs))
@@ -91,7 +97,7 @@ C       Use scan IDs already generated.
 C       write(scan_id,'(i3.3,"-",2i2.2,"_",20a2)') idayr,ihr,imin,
 C    .  (lsname(i),i=1,max_sorlen/2)
 C       write(scan_id,'(5a2)') (scan_name(i,iobs+1),i=1,5)
-        scan_id = scan_name(iobs+1)
+        scan_id = scan_name(iobs)
         il=trimlen(scan_id)
         write(lu_outfile,'("    scan ",a,";")') scan_id(1:il)
 C       write(lu_outfile,'("    scan ",5a2,";")')

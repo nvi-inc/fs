@@ -1,6 +1,0 @@
-cd /usr2/control
-rm -f mdlpo.new
-sed 's/^ /*/' mdlpo.ctl >mdlpo.new
-sed '1,/new_model/ d' /usr2/log/err$1 >>mdlpo.new
-mv -f mdlpo.ctl mdlpo.old
-mv -f mdlpo.new mdlpo.ctl

@@ -24,7 +24,7 @@ C Local
       real spdips
       character*28 cpass,cvpass
       character*1 cp ! selection from cpass or cvpass
-      integer iflch,ichmv_ch,ichmv,jchar
+      integer iflch,ichmv_ch,ichmv
       integer num_trk_rec
       data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
       data cvpass /'ABCDEFGHIJKLMNOPQRSTUVWXYZAB'/

@@ -7285,3 +7285,43 @@ Version 9.7.5 041215
            Created
 
 Version 9.7.6 050126
+
+050211 weh quikv/quikv.c
+           control/fscmd.ctl
+           quikv/scan_check.c
+           include/scan_check_ds.h
+           scan_check command created
+
+050214 weh quikv/Makefile
+           clib/Makefile
+           include/fs_types.h
+           clib/scan_check_util.c
+           control/fserr.ctl
+           quikv/scan_check_dis.c
+           more changes for scan_check command creation
+
+050215 weh st.default/proc/newmk5ak5.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/k42station.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/4station.prc
+           new standard checkmk5a and checkk5 procedures
+
+050216 weh misc/fix_perm
+           Perl version
+
+Version 9.7.7 050216
+

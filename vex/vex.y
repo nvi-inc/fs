@@ -1460,7 +1460,7 @@ data_modulation:	T_DATA_MODULATION '=' T_NAME ';' {$$=$3;}
 ;
 vlba_frmtr_sys_trk:	T_VLBA_FRMTR_SYS_TRK '=' value ':' T_NAME ':'
 			value ':' value ';'
-                        {$$=make_vlba_frmtr_sys_trk($3,$5,$7,$9);};
+                        {$$=make_vlba_frmtr_sys_trk($3,$5,$7,$9);}
 			| T_VLBA_FRMTR_SYS_TRK '=' value ':' T_NAME ':'
 			value ';'
                         {$$=make_vlba_frmtr_sys_trk($3,$5,$7,NULL);}
@@ -1471,12 +1471,12 @@ vlba_trnsprt_sys_trk:	T_VLBA_TRNSPRT_SYS_TRK '=' value ':' value ';'
 s2_recording_mode:	T_S2_RECORDING_MODE '=' T_NAME ';' {$$=$3;}
 ;
 s2_data_source:	T_S2_DATA_SOURCE '=' T_NAME ':' T_LINK ':' T_LINK ';'
-                {$$=make_s2_data_source($3,$5,$7);};
+                {$$=make_s2_data_source($3,$5,$7);}
 		| T_S2_DATA_SOURCE '=' T_NAME ';'
                 {$$=make_s2_data_source($3,NULL,NULL);}
 ;
 bit_stream_list:	bit_stream_list ':' T_LINK ':' T_NAME 
-                                        {$$=add_list(add_list($1,$3),$5);};
+                                        {$$=add_list(add_list($1,$3),$5);}
 			| T_LINK ':' T_NAME	
                                         {$$=add_list(add_list(NULL,$1),$3);}
 ;

@@ -36,7 +36,8 @@ calrx_util.o ds_util.o dscon_util.o bsfo2vars.o lbaifpd.o lba_cor_util.o \
 lba_ft_util.o lba_ifp_util.o lba_mon_util.o lba_trkfrm_util.o tpi_lba.o \
 dscon_v.o fsmetc.o get_rxgain.o lower.o disk_serial_util.o disk_pos_util.o\
 m5_utils.o data_check_util.o disk_record_util.o bank_check_util.o\
-disk2file_util.o in2net_util.o user_device_util.o ntp_synch.o
+disk2file_util.o in2net_util.o user_device_util.o ntp_synch.o\
+scan_check_util.o
 #
 #FFLAGS = 
 #

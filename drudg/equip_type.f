@@ -30,17 +30,18 @@ C 020515 nrv Check length of rack/rec name as well as letters, so
 C            that "VLBA" does not match "VLBA4" if only the first
 C            four letters are checked.
 C 17Apr2003  JMG.  Added Mark5 option.
+! 2005Feb15  JMG. Got rid of most holleriths.
 
 C Input:
       character*(*) cr1
+! functions
+      integer trimlen
 C LOCAL:
       integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ix
-      integer irack_in,irec1_in,irec2_in,irec2_fix
-      integer idum,ias2b,ichmv_ch,ichcm_ch,iflch,ichmv,ichcm
+      integer irack_in,irec1_in,irec2_in
+      integer ias2b
       integer max_rack_local,max_rec_local,max_rec2_local
-      integer*2 lrec1
-      character*80 ctmp
-      character*1 crec1
+      character*2 crec1
       character*1 cx(20),cit_rack(20),cit_rec1(20),cit_rec2(20),
      .            cy(20)
       data cx/'1','2',18*' '/
@@ -64,8 +65,8 @@ C       max_rec_local = 7
           cit_rec2(i)=' '
           cy(i)=' '
         enddo
-        if (ichcm_ch(lfirstrec(istn),1,'1').eq.0) cy(1)='*'
-        if (ichcm_ch(lfirstrec(istn),1,'2').eq.0) cy(2)='*'
+        if(cfirstrec(istn) .eq. '1') cy(1)='*'
+        if(cfirstrec(istn) .eq. '2') cy(2)='*'
         irack_in=1
         do while (irack_in.le.max_rack_local.and.
      >        cstrack(istn) .ne. crack_type(irack_in))
@@ -110,8 +111,7 @@ C 1. Batch input
 9994      format('EQUIP06 - Invalid starting recorder.')
           return
         else
-          call ifill(lrec1,1,2,oblank)
-          call char2hol(crec1,lrec1,1,1)
+          crec1=" "
         endif
 
 C 2. Interactive input
@@ -168,11 +168,9 @@ C 2. Interactive input
         irack=0
         irec1=0
         irec2=0
-        idum = ichmv_ch(lrec1,1,'0 ')
-        read(luusr,'(a)') ctmp
-        call ifill(ibuf,1,80,oblank)
-        call char2hol(ctmp,ibuf,1,ibuf_len)
-        nch = iflch(ibuf,80)
+        crec1="0 "
+        read(luusr,'(a)') cbuf
+        nch=trimlen(cbuf)
         ich=1
         call gtfld(ibuf,ich,nch,ic1,ic2) ! rack field
         if (ic1.eq.0) return
@@ -198,10 +196,10 @@ C 2. Interactive input
             endif
             call gtfld(ibuf,ich,nch,ic1,ic2) ! starting rec field
             if (ic1.ne.0) then ! rec1 specified
-              idum = ichmv(lrec1,1,ibuf,ic1,1)
-              if (ichcm_ch(ibuf,ic1,'0').ne.0.and.
-     .          ichcm_ch(ibuf,ic1,'1').ne.0.and.
-     .          ichcm_ch(ibuf,ic1,'2').ne.0) then
+!              idum = ichmv(lrec1,1,ibuf,ic1,1)
+              crec1=cbuf(ic1:ic1)
+              if (crec1 .ne. "0" .and. crec1 .ne. "1" .and.
+     >            crec1 .ne. "2") then
                 write(luscn,9994)
                 GOTO 1
               endif
@@ -232,9 +230,8 @@ C formatter because they can't record V modes.
                 write(luscn,903) cnafrq(ic)
 903             format('EQUIP01 - WARNING: changed recording ',
      .           'format for mode ',a,' from VLBA to Mk4.')
-C               don't change because it could be a Mk3 mode??
-C               idum = ichmv_ch(lmode(1,istn,ic),1,'M       ')
-                idum = ichmv_ch(lmfmt(1,istn,ic),1,'M       ')
+!                idum = ichmv_ch(lmfmt(1,istn,ic),1,'M       ')
+                cmfmt(istn,ic)='M'
                 if (bitdens(istn,ic).lt.40000.d0) then
                   bitdens(istn,ic) = 33333.0
                 else
@@ -248,121 +245,53 @@ C               idum = ichmv_ch(lmode(1,istn,ic),1,'M       ')
      .           ' with this change.')
               enddo
             endif ! v--> M
-C Remove switching from M to V because both Mk4 and VLBA formatters
-C can record M modes.
-C            if (ichcm_ch(lmode(1,istn,1),1,'M').eq.0.and.
-C     .          ichcm_ch(lstrack(1,istn),1,'VLBA').eq.0) then ! swap M->V
-C              do ic=1,ncodes
-C                write(luscn,904) (lnafrq(i,ic),i=1,4)
-C904             format('EQUIP02 - WARNING: changed recording ',
-C     .          'format for mode ',4a2,' from Mk4 to VLBA.')
-C                idum = ichmv_ch(lmfmt(1,istn,ic),1,'V       ')
-C                if (bitdens(istn,ic).lt.40000.d0) then
-C                  bitdens(istn,ic) = 34020.0
-C                else
-C                  bitdens(istn,ic) = 56700.0
-C                endif
-C                write(luscn,908) bitdens(istn,ic)
-C908             format('EQUIP07 - WARNING: changed recording ',
-C     .           'bit density to ',f8.0)
-C                write(luscn,905)
-C              enddo
-C            endif ! v--> M
           endif
         endif
 
 C 4. Modify rec 1
 
-        if (irec1.ne.0) then ! modify
-          if (irec1.ge.1.and.irec1.le.max_rec_local) then
-            if (cstrec(istn) .ne. crec_type(irec1)) then
-              write(luscn,902) cantna(istn),
-     .          cstrec(istn),crec_type(irec1)
-902           format('EQUIP03 - CHANGED ',a,' recorder 1 from ',
-     .        a,' to ',a)
-              cstrec(istn)=crec_type(irec1)
-            endif ! change
-          endif
-        endif
+      if((irec1.ge.1.and.irec1.le.max_rec_local) .and.
+     >     (cstrec(istn) .ne. crec_type(irec1))) then
+         write(luscn,902) cantna(istn),cstrec(istn),crec_type(irec1)
+902      format('EQUIP03-CHANGED ',a,' recorder 1 from ',a,' to ',a)
+         cstrec(istn)=crec_type(irec1)
+      endif
 
 C 5. Modify rec 2
 C    If rec 1 is K4, S2 or Mk3 then can't have rec 2
-C       if ((ichcm_ch(lstrec(1,istn),1,'K4').eq.0.or.
-C    .    ichcm_ch(lstrec(1,istn),1,'Mark3A').eq.0.or.
-C    .    ichcm_ch(lstrec(1,istn),1,'S2').eq.0).and.
-C    .    irec2_in.gt.1) then !  force rec 2 to none
-C           irec2 = 1
-C           irec2_fix = 1
-C       endif
-        if (irec2.ne.0) then ! modify
-          if (irec2.ge.1.and.irec2.le.max_rec2_local) then
-            if (cstrec2(istn) .ne. crec_type(irec2)) then
-C             If rec 1 is K4, S2 or Mk3 then can't have rec 2
-C             if ((ichcm_ch(lstrec(1,istn),1,'K4').eq.0.or.
-C    .             ichcm_ch(lstrec(1,istn),1,'Mark3A').eq.0.or.
-C    .             ichcm_ch(lstrec(1,istn),1,'S2').eq.0).and.
-C    .          (irec2.gt.1.or.(irec2.eq.1.and.irec2_fix.eq.1))) then ! 
-C               write(luscn,915)
-C915             format('EQUIP15 - Currently only recorder 1 is'
-C    .          ' supported for K4, S2, and Mark3A.'/
-C    .                 '          Recorder 2 set to none.')
-C               irec2 = 1
-C               call ifill(lstrec2(1,istn),1,8,oblank)
-C               idum = ichmv_ch(lstrec2(1,istn),1,rec_type(irec2)(1:il))
-C             else ! change
-                write(luscn,909) cantna(istn),
-     .          cstrec2(istn),crec_type(irec2)
-909             format('EQUIP09 - CHANGED ',a,' recorder 2 from ',
-     .           a,' to ',a)
-                cstrec2(istn)=crec_type(irec2)
-C             endif
-            endif ! try to change
-            if (nrecst(istn).eq.1.and.irec2.gt.1) then
-              write(luscn,910) cantna(istn)
-910           format('EQUIP10 - WARNING: Second recorder was added to ',
+      if((irec2.ge.1.and.irec2.le.max_rec2_local) .and.
+     >    (cstrec2(istn) .ne. crec_type(irec2))) then
+        write(luscn,909) cantna(istn),cstrec2(istn),crec_type(irec2)
+909     format('EQUIP09 - CHANGED ',a,' recorder 2 from ',a,' to ',a)
+        cstrec2(istn)=crec_type(irec2)
+        if (nrecst(istn).eq.1.and.irec2.gt.1) then
+          write(luscn,910) cantna(istn)
+910       format('EQUIP10 - WARNING: Second recorder was added to ',
      .        'the equipment for ',a,'.')
               nrecst(istn)=2
-            else if (nrecst(istn).eq.2.and.irec2.eq.1) then
-              write(luscn,911) cantna(istn)
-911           format('EQUIP11 - WARNING: Second recorder was removed ',
+        else if (nrecst(istn).eq.2.and.irec2.eq.1) then
+           write(luscn,911) cantna(istn)
+911        format('EQUIP11 - WARNING: Second recorder was removed ',
      .        'from equipment for ',a8,'.')
               nrecst(istn)=1
-            endif
-          endif
-        else ! check rec 2 anyway because rec 1 may have changed
-        endif ! modify rec2
+         endif
+      endif ! modify rec2
 
 C 6. Modify first recorder
 
-        if (ichcm_ch(lrec1,1,'0').ne.0) then ! modify firstrec
-          call hol2upper(lrec1,2)
-          if (ichcm(lfirstrec(istn),1,lrec1,1,1).ne.0) then ! change
-            write(luscn,912) cantna(istn),
-     .      lfirstrec(istn),lrec1
-912         format('EQUIP12 - CHANGED ',a,' first recorder from '
-     .      a1,' to ',a1)
-            call ifill(lfirstrec(istn),1,2,oblank)
-            idum = ichmv(lfirstrec(istn),1,lrec1,1,1)
-          endif ! change
-        endif !modify firstrec
-C       Now check firstrec
-        if (ichcm_ch(lfirstrec(istn),1,'2').eq.0.and.
-     .    (ichcm_ch(lstrec2(1,istn),1,'unused').eq.0.or.
-     .    ichcm_ch(lstrec2(1,istn),1,'none').eq.0)) then ! can't do
-          write(luscn,913)
-913       format("EQUIP13 - Can't start the schedule with ",
-     .    "Recorder 2 because it is "/" set to 'none' or 'unused'."/
-     .    " First recorder has been reset to 1.") 
-          idum = ichmv_ch(lfirstrec(istn),1,'1 ')
-        elseif (ichcm_ch(lfirstrec(istn),1,'1').eq.0.and.
-     .    (ichcm_ch(lstrec(1,istn),1,'unused').eq.0.or.
-     .    ichcm_ch(lstrec(1,istn),1,'none').eq.0)) then ! can't do
-          write(luscn,914)
-914       format("EQUIP14 - Can't start the schedule with ",
-     .    "Recorder 1 because it is "/" set to 'none' or 'unused'."/
-     .    " First recorder has been reset to 2.") 
-          idum = ichmv_ch(lfirstrec(istn),1,'2 ')
-        else ! ok
-        endif ! can't / ok
+      if(crec1 .eq.'0' .or. cfirstrec(istn) .eq. crec1) then
+         continue       ! no change.
+      else if((crec1 .eq. '1' .and.
+     >   (cstrec(istn).eq.'unused'.or.cstrec(istn).eq.'none'))
+     >    .or. (crec1 .eq. '2' .and.
+     >   (cstrec2(istn).eq.'unused'.or.cstrec2(istn).eq.'none'))) then
+            write(luscn,'(a,a,/,a)')
+     >   "EQUIP12 - Can't start the schedule with Recorder ",crec1,
+     >   " because it is set to 'none' or 'unused'."
+      else
+        write(luscn,912) cantna(istn), cfirstrec(istn),crec1
+912     format('EQUIP13: CHANGED ',a,' first recorder from ',a,' to ',a)
+        cfirstrec(istn)=crec1
+      endif !modify firstrec
       return
       end
