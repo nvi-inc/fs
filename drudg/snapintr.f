@@ -17,7 +17,7 @@ C  INPUT:
 C
 C  LOCAL:
       character*1 lq
-      character*2 cprefix
+      character*2 cprfx
 C     IYR - start time of obs.
       character*4 laxistype(7)
       integer i
@@ -46,18 +46,18 @@ C
       lq='"'
 ! this is the start of the line
       IF (IFUNC.EQ.1) THEN
-        cprefix=lq
+        cprfx=lq
       ELSE IF (IFUNC.EQ.2) THEN
-        cprefix="!*"
+        cprfx="!*"
       END IF
 
       if(cexper .eq. " ") cexper='XXX'
 
-      write(lu_outfile,"(a,a8,2x,i4,1x,a,1x,a,1x,a)") cprefix,
+      write(lu_outfile,"(a,a8,2x,i4,1x,a,1x,a,1x,a)") cprfx,
      >cexper(1:8), iyr,cstnna(istn),cstcod(istn),cpocod(istn)
 C
 C     write antenna line
-      write(lu_outfile,"(a,3(a,1x),$)") cprefix,
+      write(lu_outfile,"(a,3(a,1x),$)") cprfx,
      > cstcod(istn),cstnna(istn),laxistype(iaxis(istn))
       write(lu_outfile,"(f7.4,1x,$)") axisof(istn)
       do i=1,2
@@ -68,30 +68,30 @@ C     write antenna line
       write(lu_outfile,"(F5.1,2(1x,a))")
      > diaman(istn), cpocod(istn),cterid(istn)
 !
-      write(lu_outfile,"(a,a,1x,a,3(1x,f14.5),1x,a)") cprefix,
+      write(lu_outfile,"(a,a,1x,a,3(1x,f14.5),1x,a)") cprfx,
      > cpocod(istn), cstnna(istn),
      > (stnxyz(i,istn),i=1,3), coccup(istn)
 
 C     Write terminal line
-      write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i5)') cprefix,
+      write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i5)') cprfx,
      > cterid(istn)(1:4),cterna(istn)(1:8),maxpas(istn),maxtap(istn)
 
 C  Write drudg version
       write(lu_outfile,
      >"(a,'drudg version ',a6,' compiled under FS ',2(i1,'.'),i2.2)")
-     >cprefix,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+     >cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
 
 C       Write equipment line
       IF (IFUNC.EQ.1) THEN ! only for non-VLBA
         write(lu_outfile,
      >  '(a, "Rack=",a8, "  Recorder 1=",a8, "  Recorder 2=",a8)')
-     >     cprefix,cstrack(istn),cstrec(istn),cstrec2(istn)
+     >     cprfx,cstrack(istn),cstrec(istn),cstrec2(istn)
       endif
       if(KM5A_Piggy)  write(lu_outfile,'(a,a)')
-     >      cprefix,"Mark5A operating in piggyback mode "
+     >      cprfx,"Mark5A operating in piggyback mode "
 
       if(KM5P_Piggy)  write(lu_outfile,'(a)')
-     >      cprefix,"Mark5P operating in piggyback mode "
+     >      cprfx,"Mark5P operating in piggyback mode "
 
 
       RETURN

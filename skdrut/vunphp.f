@@ -40,14 +40,14 @@ C                    <0 indicates invalid value for a field
       character*3 cpassl(max_pass) ! list of passes
       integer npassl ! number of passes found
 C
+! functions
+      integer fvex_len,fvex_double,fvex_int,fvex_field,fget_all_lowl,
+     .fvex_units,ptr_ch
+
 C  LOCAL:
       character*128 cout,cunit
       double precision d
-      character*12 cx
-      integer*2 ldum(6)
       integer il,ip,i,j,ih,ih1
-      integer fvex_len,fvex_double,fvex_int,fvex_field,fget_all_lowl,
-     .fvex_units,ias2b,ptr_ch
 C
 C  Initialize.
       nhdpos=0
@@ -148,9 +148,8 @@ C  2.1 <index><subpass>
           il=fvex_len(cout)
           cpassl(i)=cout(1:il) ! save the pass-order list
           csubl(i)=cout(il:il) ! one-character subpass is the last char
-          cx = cout(1:il-1)
-          call char2hol(cx,ldum,1,il-1)
-          j=ias2b(ldum,1,il-1)
+          read(cout(1:il-1),*,err=500) j
+
           if (j.lt.0.or.j.gt.nhdpos) then
             ierr=-3
             write(lu,'("VUNPHP03 - Invalid index in pass list",i5)') j
@@ -163,5 +162,9 @@ C  2.1 <index><subpass>
       npassl = i-1
 
       if (ierr.gt.0) ierr=0
+      return
+500   continue
+      write(*,*) "VUNPH04: Error reading pass ",cout(1:il-1)
+      ierr=-3
       return
       end

@@ -1,5 +1,6 @@
       SUBROUTINE vunps2m(modef,stdef,ivexnum,iret,ierr,lu,
-     .cs2m,cs2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
+     > cs2m,cs2d,
+     > cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
 C
 C     VUNPS2M gets the S2 mode from the $TRACKS section 
 C     for station STDEF and mode MODEF. 
@@ -18,7 +19,6 @@ C 970117 nrv Remove "track_frame_format", irrelevant for S2.
 C 970124 nrv Remove "lsm" from call.
 C 021111 jfq Add ls2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac
 C            - supporting S2_data_source and fanout_def
-! 2004JMG modified ls2m,ls2d to be ASCII, not hollerrith.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -33,8 +33,8 @@ C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
 !      integer*2 ls2m(8) ! recording format
 !      integer*2 ls2d(4) ! data source
-      character*16 cs2m
-      character*8 cs2d
+      character*8 cs2d   ! recording format
+      character*16 cs2m  ! data source        
       character*1 cp(max_track) ! subpass
       character*6 cchref(max_track) ! channel ID ref
       character*1 csm(max_track) ! sign/mag
@@ -91,7 +91,7 @@ C
         iret=-1
       else
 !        IDUMY = ICHMV_ch(LS2D,1,cout(1:NCH))
-        cs2d=cout(1:nch)
+         cs2d=cout(1:nch)
       END IF  !
 C
 C  2. Fanout def statements

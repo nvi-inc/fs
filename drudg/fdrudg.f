@@ -203,7 +203,7 @@ C Initialize some things.
 
 
 C Initialize the version date.
-      cversion = '041208'
+      cversion = '050125'
 C Initialize FS version
 
 C PeC Permissions on output files

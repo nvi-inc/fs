@@ -29,7 +29,7 @@ C     IFTOLD - foot count at end of previous observation
 C     TSPINS - time, in seconds, to spin tape
 
 ! Arguments to UNPSK
-      integer*2 ilen
+      integer ilen
       integer*2 lsname(max_sorlen/2)
       integer   ical
       integer*2 lfreq
@@ -70,7 +70,7 @@ C     TSPINS - time, in seconds, to spin tape
 
 ! Arguments to UNPSK for the next scan
       integer*2 ibuf_next(ibuf_len)
-      integer*2 ilen_next
+      integer ilen_next
       integer*2 lsname_next(max_sorlen/2)
       integer   ical_next
       integer*2 lfreq_next
@@ -409,6 +409,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 !   "                  For in2net, changed postob_mk5a to postob
 ! 2004Nov22-23 JMG    Fixed bug in S2 adaptive schedules. Drudg issued stop commands
 !                     when it shouldn't have.
+!                     Also stopped issuing st=for,slp commands in s2 case if tape is moving.
 !
 
 

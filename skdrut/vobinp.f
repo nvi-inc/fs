@@ -1,4 +1,4 @@
-      SUBROUTINE VOBINP(ivexnum,LU,iret,IERR)
+      SUBROUTine VOBINP(ivexnum,LU,iret,IERR)
 
 C  This routine gets all the observations from the vex file.
 C
@@ -32,6 +32,7 @@ C
       integer fget_station_scan,fget_scan
       integer fget_data_transfer_scan
       integer ivgtso,ivgtmo,ivgtst
+      integer iwhere_in_string_list
 C  LOCAL:
       integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
       integer irec
@@ -163,12 +164,19 @@ C       Keep good data offset and duration separate
           iret = fvex_field(5,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
           il = fvex_len(cout)
-          ip=1
-          do while (ip.le.npassl(istn,icod).and.cout(1:il).ne.
-     .              cpassorderl(ip,istn,icod)(1:il))
-            ip=ip+1
-          enddo
-          if (ip.gt.npassl(istn,icod)) return ! pass not found
+! fixup for Mark5.
+          if(cstrec(istn)(1:5) .eq. "Mark5" .and. il .eq. 0) then
+             ip=1
+             if(npassl(istn,icod) .eq. 0) then
+                npassl(istn,icod)=1
+              endif
+          else
+            ip =iwhere_in_string_list(cpassorderl(1,istn,icod),
+     >         npassl(istn,icod),cout(1:il))
+          endif
+
+          if(ip .eq. 0) return     ! pass not found
+
           ierr = 6 ! pointing sector
           iret = fvex_field(6,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
