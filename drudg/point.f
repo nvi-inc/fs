@@ -20,7 +20,7 @@ C LOCAL:
       integer mon,ida,mjd,iyr,idayr,ihr,imin,isc,iyr2,idayr2,
      .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp
       integer isor,istnsk,icod,idummy,istin,itype
-      real*4 decs,has,ras,ras2,decs2,has2
+      real decs,has,ras,ras2,decs2,has2
       integer irah,iram,idecd,idecm,ihah,iham,
      .irah2,iram2,idecd2,idecm2,ihah2,iham2,
      .iras,isra,idecs
@@ -29,7 +29,7 @@ C LOCAL:
 	integer*2 ldirr,ldirf !REV,FOR
       integer ilennr,nchar,j,idum,itnum,ilenef,ilenwe,
      .ilenha,ilenon
-      real*4 dut,eeq
+      real dut,eeq
 	character*128 cbuf
         integer ih
 	integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
@@ -42,14 +42,14 @@ C LOCAL:
 	CHARACTER*4 RESPONSE
         character*2 scode
         integer*2 lna(4)
-	real*8 GST,UT,HA,HA2
+	double precision GST,UT,HA,HA2
 	integer IC
 	LOGICAL EX
 Cinteger*4 ifbrk
 	integer Z20,Z24
       integer ias2b,trimlen,jchar,iflch,ichmv,ib2as ! functions
       integer ichmv_ch,ichcm_ch
-      real*4 speed ! function
+      real speed ! function
 	DATA Z20/Z'20'/, Z24/Z'24'/
 
 C Initialized:
@@ -83,6 +83,11 @@ C 951012 nrv Remove DSN output to separate subroutine
 C 960223 nrv Call chmod to change permissions.
 C 960810 nrv Change ITEARL to an array
 C 970114 nrv Write out first 8 char of source name only.
+C 970204 nrv Remove all options except VLBA, 85-3, and DSN in prompt.
+C            Code was not changed except to limit these options.
+C 970303 nrv Put back on 140. change next to last field to 0 instead of 1.
+C 970304 nrv Back up 6 characters in PNTNAME for VLBA file name.
+C 970307 nrv Use ISKREC pointer array to insure time order!
 
 	kintr = .false.
       if (kbatch) then
@@ -95,15 +100,22 @@ C 970114 nrv Write out first 8 char of source name only.
       else
  1    WRITE(LUSCN,9019) (lantna(I,ISTN),I=1,4)
 9019  FORMAT(' Select type of pointing output for: ',4a2/
-     .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
-     .       ' 3 - DSN stations         4 - Bonn     '/
-     .       ' 5 - VLBA terminal only   6 - VLBA antenna'/
-     .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
+     .       ' 1 - NRAO 85-3 '/
+     .       ' 2 - NRAO 140 '/
+     .       ' 3 - DSN stations '/
+     .       ' 6 - VLBA antenna'/
+     .       ' 0 - QUIT '/' ? ',$)
+C    .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
+C    .       ' 3 - DSN stations         4 - Bonn     '/
+C    .       ' 5 - VLBA terminal only   6 - VLBA antenna'/
+C    .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
 
 	call gtrsp(ibuf,80,luusr,nch)
 	istin= ias2b(ibuf(1),1,1)
 	IF (ISTIN.EQ.0) RETURN
-	IF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
+CIF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
+        if (istin.ne.1.and.istin.ne.2.and.istin.ne.3.and.istin.ne.6) 
+     .  goto 1
       endif
 C
 C 2. First get output file or LU for pointing commands.
@@ -113,7 +125,7 @@ C If problems, quit.
 	if (istin.eq.5.or.istin.eq.6) then
           ih=0
           do i=1,max_pass
-            if (ihdpos(i,istn,1).ne.0) ih=ih+1
+            if (ihdpos(1,i,istn,1).ne.0) ih=ih+1
           enddo
           if (ih.eq.0) then
             write(luscn,9211) (lantna(i,istn),i=1,4)
@@ -142,7 +154,7 @@ C check to see if the file exists first
           endif
           call hol2lower(lna,8)
           call hol2char(lna,1,2,scode)
-	  pntname = pntname(1:ic-5)//'.'//scode
+	  pntname = pntname(1:ic-6)//'.'//scode
 	endif
 	INQUIRE(FILE=PNTNAME,EXIST=EX,IOSTAT=IERR)
 	IF (EX) THEN
@@ -217,7 +229,7 @@ C
 C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
        call ifill(ibuf,1,ibuf_len*2,oblank)
        if (iobs+1.le.nobs) then
-         idum = ichmv(ibuf,1,lskobs(1,iobs+1),1,ibuf_len*2)
+         idum = ichmv(ibuf,1,lskobs(1,iskrec(iobs+1)),1,ibuf_len*2)
          ilen = iflch(ibuf,ibuf_len*2)
        else
          ilen=-1
@@ -287,7 +299,9 @@ C
      .            IRAH,IRAM,IRAS,ISRA,LDSIGN,
      .            IDECD,IDECM,IDECS,IHR2,MIN2,ISC2,LPROC
 9420        FORMAT('S ',4A2,5X,'2 ',3i2.2,'.',I1,1X,A1,3i2.2,14X,
-     .             'GMT ',3i2.2,'    1',10X,4A2)
+C    .             'GMT ',3i2.2,'    1',10X,4A2)
+C Change '1' to '0' per F. Ghigo's request 970303.
+     .             'GMT ',3i2.2,'    0',10X,4A2)
 		CALL CHAR2HOL(CBUF,IBUF,1,80)
 		NCHAR = ILENNR*2
 		CALL writf_asc(LU_OUTFILE,IERR,IBUF,NCHAR/2)
@@ -413,7 +427,7 @@ C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
 	    iobs=iobs+1
           call ifill(ibuf,1,ibuf_len*2,oblank)
           if (iobs+1.le.nobs) then
-            idum = ichmv(ibuf,1,lskobs(1,iobs+1),1,ibuf_len*2)
+            idum = ichmv(ibuf,1,lskobs(1,iskrec(iobs+1)),1,ibuf_len*2)
             ilen=iflch(ibuf,ibuf_len*2)
           else
             ilen=-1
