@@ -16,7 +16,6 @@ C
 C  COMMON:
 C
       include '../include/fscom.i'
-      include 'bosscm.i'
 C
 C
 C  LOCAL:
@@ -25,7 +24,7 @@ C
       integer fmpposition,fmpreadstr,fmpsetpos,fmpsetline
       integer ichcm_ch
       logical kpast,ktime
-      dimension it(5)
+      integer it(6)
       integer*2 ib(50), lsor
       character*100 ibc
       character cjchar
@@ -53,21 +52,6 @@ C  If 1st line is a comment, get experiment name here
       idummy = ichmv(ilexper,1,ib,icf,nc)
       call hol2char(ilexper,1,8,lexper)
       call fs_set_lexper(ilexper)
-C  Now get the year of the schedule
-      call gtfld(ib,nch,ibl*2,icf,ic2)
-      if(icf.eq.0) goto 99
-      nc = min0(4,ic2-icf+1)
-      iy = ias2b(ib,icf,nc)
-      if(iy.lt.0) goto 99
-      if(iy.lt.100) iy = iy+1900
-C  Make sure schedule year is same as current year
-      call fc_rte_time(it,iyr)
-      if(iy.ne.iyr) then
-        call logit6c(0,0,0,0,-137,'bo')
-        ierr = -1
-        goto 900
-      endif
-      iyear = iy
 C
 C count all the leading comments in the schdeule
 C
@@ -97,7 +81,7 @@ C    #nnn = start with line nnn in file.
 C
 105   irec = -1
       if (nchar.lt.ic1.or.ic2.le.ic1+1) then
-        call fc_rte_time(it,idum)      ! Get current time ...
+        call fc_rte_time(it,it(6))      ! Get current time ...
         call iadt(it,5,3)           ! ... and add 5 minutes to it
         goto 200
       endif
@@ -108,11 +92,12 @@ C                            #
           call logit6c(0,0,0,0,ierr,'sp')
           goto 900
         endif
+        it(6) = it1/1024+1970
         it(5) = mod(it1,1024)
         it(4) = it2/60
         it(3) = mod(it2,60)
         it(2) = it3/100
-        it(1) = 0
+        it(1) = mod(it3,100)
         goto 200
       endif
 C
@@ -188,3 +173,4 @@ C ** CLOSE DCB IF AN ERROR OCCURRED -- NRV 840709
 
       return
       end
+
