@@ -7,7 +7,7 @@ C
 C********************************************************************
 C NOTE: If you have FS Linux 1 you may have to change parameters
 C           max_stn from 30 to 20
-C           max_frq from 20 to 17 
+C           max_frq from 20 to 13 
 C so that drudg will compile and load.
 C********************************************************************
 C

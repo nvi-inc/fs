@@ -180,7 +180,7 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '020510'
+      cversion = '020515'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL

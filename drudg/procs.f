@@ -217,6 +217,8 @@ C 020327 nrv Add ":1" for roll on VLBA racks if it's not there.
 C 020327 nrv Check data modulation and insert "ON" if on.
 C 020508 nrv Add TPI daemon commands.
 C 020510 nrv Add tpi sideband to VC commands.
+C 020514 nrv Check head 2 for BBC connections.
+C 020515 nrv Correct the placement of TPI daemon commands.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -944,10 +946,6 @@ C  IFDff
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif ! kvrack or km3rac.or.km4rackk
-C  TPICD=
-          call ifill(ibuf,1,ibuflen,oblank)
-          nch = ichmv_ch(IBUF,1,'tpicd=')
-          CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  PCALD=
           if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -1092,7 +1090,7 @@ C  !*
             nch = ichmv_ch(ibuf,1,'!*')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
-C  TPICD=
+C  TPICD=no,period
           if (km3rack.or.km4rack.or.kvrack.or.kv4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'tpicd=no,')
@@ -1427,6 +1425,10 @@ C  PCALD
               nch = ichmv_ch(IBUF,1,'pcald')
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
+C  TPICD always issued
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(IBUF,1,'tpicd')
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C ENDDEF
           CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
 
@@ -1665,16 +1667,20 @@ C               TPI selection
                 if (km3rack.or.km4rack) then 
                   NCH = MCOMA(IBUF,NCH)
 C                 itras(sideband,bit,head,channel,subpass,station,code)
-                  ku = itras(1,1,1,ic,1,istn,icode).ne.-99
+                  ku = itras(1,1,1,ic,1,istn,icode).ne.-99  
+     .            .or.  itras(1,1,2,ic,1,istn,icode).ne.-99  ! head 2
                   kl = itras(2,1,1,ic,1,istn,icode).ne.-99
+     .            .or.  itras(2,1,2,ic,1,istn,icode).ne.-99  ! head 2
 C                 Find other channels that this BBC goes to.
                   DO ichanx=ic,nchan(istn,icode) !remaining channels
                     icx=invcx(ichanx,istn,icode) ! channel number
                     ibx=ibbcx(icx,istn,icode) ! BBC number
                     if (ibx.eq.ib) then ! same BBC
                       kux = itras(1,1,1,icx,1,istn,icode).ne.-99
+     .                 .or.  itras(1,1,2,icx,1,istn,icode).ne.-99
                       klx = itras(2,1,1,icx,1,istn,icode).ne.-99
-                      kul = ku.and.klx .or. kux.and.kl
+     .                 .or.  itras(2,1,2,icx,1,istn,icode).ne.-99
+                      kul = ku.and.klx .or. kux.and.kl 
                     endif
                   enddo
                   if (ku.and..not.kul) nch = ichmv_ch(ibuf,nch,'u')

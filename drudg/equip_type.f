@@ -25,11 +25,14 @@ C 991211 nrv Mk3A is legal rec 2. Use max_rec2_type instead of a number.
 C 000321 nrv For non-K4 FS restrict types to be displayed.
 C 000814 nrv For FS 9.5 display all types.
 C 010820 nrv Don't switch mode M to V, ok to switch V to M.
+C 020515 nrv Check length of rack/rec name as well as letters, so
+C            that "VLBA" does not match "VLBA4" if only the first
+C            four letters are checked.
 
 C Input:
       character*(*) cr1
 C LOCAL:
-      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,il,ix
+      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ilx,il,ix
       integer irack_in,irec1_in,irec2_in,irec2_fix
       integer idum,ias2b,ichmv_ch,ichcm_ch,iflch,ichmv,trimlen,ichcm
       integer max_rack_local,max_rec_local,max_rec2_local
@@ -208,8 +211,9 @@ C Now modify the common variables and send warnings.
         if (irack.ne.0) then ! modify
           if ((irack.ge.1.and.irack.le.max_rack_local)) then 
             il=trimlen(rack_type(irack))
+            ilx=iflch(lstrack(1,istn),8)
             if (ichcm_ch(lstrack(1,istn),1,
-     .          rack_type(irack)(1:il)).ne.0) then ! change
+     .          rack_type(irack)(1:il)).ne.0.or.il.ne.ilx) then ! change
               write(luscn,901) (lantna(i,istn),i=1,4),
      .        (lstrack(i,istn),i=1,4),rack_type(irack)(1:il)
 901           format('EQUIP05 - CHANGED ',4a2,' rack from ',
@@ -271,8 +275,9 @@ C 4. Modify rec 1
         if (irec1.ne.0) then ! modify
           if (irec1.ge.1.and.irec1.le.max_rec_local) then
             il=trimlen(rec_type(irec1))
+            ilx=iflch(lstrec(1,istn),8)
             if (ichcm_ch(lstrec(1,istn),1,
-     .          rec_type(irec1)(1:il)).ne.0) then ! change
+     .          rec_type(irec1)(1:il)).ne.0.or.il.ne.ilx) then ! change
               write(luscn,902) (lantna(i,istn),i=1,4),
      .        (lstrec(i,istn),i=1,4),rec_type(irec1)(1:il)
 902           format('EQUIP03 - CHANGED ',4a2,' recorder 1 from ',
@@ -295,8 +300,9 @@ C       endif
         if (irec2.ne.0) then ! modify
           if (irec2.ge.1.and.irec2.le.max_rec2_local) then
             il=trimlen(rec_type(irec2))
+            ilx=iflch(lstrec2(1,istn),8)
             if (ichcm_ch(lstrec2(1,istn),1,
-     .            rec_type(irec2)(1:il)).ne.0) then ! try to change
+     .            rec_type(irec2)(1:il)).ne.0.or.il.ne.ilx) then ! try to change
 C             If rec 1 is K4, S2 or Mk3 then can't have rec 2
 C             if ((ichcm_ch(lstrec(1,istn),1,'K4').eq.0.or.
 C    .             ichcm_ch(lstrec(1,istn),1,'Mark3A').eq.0.or.
