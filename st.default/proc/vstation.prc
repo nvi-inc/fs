@@ -507,6 +507,9 @@ enddef
 define  precond       00000000000
 schedule=vprepass,#1
 enddef
+define  precondthin   00000000000
+schedule=vprethin,#1
+enddef
 define  preob         00000000000
 onsource
 bbcman
@@ -535,14 +538,46 @@ wakeup
 rec=release
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
-"re-thread the tape. type cont when finished.
+"re-thread the tape. use the cont command when finished.
 halt
 xdisp=off
 rec=load
+!+10s
 srw
 !+5m28s
 et
 !+9s
+rec=unload
+enddef
+define  prepassthin   00000000000
+wakeup
+xdisp=on
+" mount the next tape without cleaning the tape drive.
+" use the cont command when finished
+halt
+xdisp=off
+check=*,-tp
+rec=load
+!+10s
+tape=low,reset
+sff
+!+10m54s
+et
+!+9s
+wakeup
+rec=release
+xdisp=on
+"drop vacuum loop, clean the tape drive thoroughly.
+"re-thread the tape. use the cont command when finished.
+halt
+xdisp=off
+rec=load
+!+10s
+srw
+!+10m54s
+et
+!+9s
+rec=unload
 enddef
 define  ready         00000000000
 sxcts
