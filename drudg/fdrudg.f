@@ -28,7 +28,7 @@ C LOCAL:
       integer TRIMLEN,pcode
       character*128 cdum
       character*128 cdrudg,csked,cexpna
-      logical kskd
+      logical kskd,kskdfile,kdrgfile
       integer nch
       character*2  response
       character    lower, scode
@@ -83,6 +83,7 @@ C  930803 nrv Check for "all stations" before trying to print a name
 C             with the main menu
 C  940620 nrv non-interactive (batch) mode
 C  950626 nrv Case-sensitive station IDs
+C  951003 nrv Try to open ".drg" file after trying ".skd" file
 C
 C
       luscn = STDOUT
@@ -96,6 +97,8 @@ C
       klab = .false.
       ifunc = -1
       ierr=0
+      kskdfile = .false.
+      kdrgfile = .false.
 C
 C
 C     0. Set up for break routines.
@@ -115,7 +118,7 @@ C***********************************************************
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
       if (nch.gt.0) then
-        tmpname = ctmpnam(:nch)//'DG.tmp'
+        tmpname = ctmpnam(:nch)//'DR.tmp'
       else
         tmpname = 'DG.tmp'
       endif
@@ -156,19 +159,21 @@ C   Check for non-interactive mode.
         if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
+        if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
 9020    FORMAT(' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 950515)')
+     .  '(NRV 951001)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
           write(luscn,9920)
-9920      format(' Schedule file name (.skd assumed, <return> if none,',
-     .     ':: to quit) ? ',$)
+9920      format(' Schedule file name (.skd or .drg assumed, ',
+     .    '<return> if none, :: to quit) ? ',$)
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
         else ! command line file name
           call char2hol(cfile,ibuf,1,nch)
         endif 
+        endif
         IF (NCH.GT.0) THEN !got a name
           IF (ichcm(IBUF(1),1,H2C,1,2).eq.0) GOTO 990
           call hol2char(ibuf,1,256,cbuf)
@@ -183,7 +188,15 @@ C   Check for non-interactive mode.
           endif
           ix=index(lskdfi,'.')
           l=trimlen(lskdfi)
-          if (ix.eq.0) lskdfi=lskdfi(1:l)//'.skd'
+          if (ix.eq.0) then ! automatic extension
+            if (.not.kskdfile) then ! try .skd
+              lskdfi=lskdfi(1:l)//'.skd'
+              kskdfile = .true.
+            else ! try .drg
+              lskdfi=lskdfi(1:l)//'.drg'
+              kdrgfile = .true.
+            endif
+          endif
           ixp=1
           ix=1
           do while (ix.ne.0)
@@ -217,6 +230,8 @@ C
      .    ,'start with EARLY = ',i3,' seconds.')
 	  endif
 	  IF (IERR.NE.0) GOTO 200
+          kskdfile = .false.
+          kdrgfile = .false.
 C
 C     Now go back and pick up station elevations.
 C
@@ -284,9 +299,10 @@ C
       if (.not.kbatch) then
         if (kskd) then
           WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
-9053      FORMAT(' Stations: ',20(A2,'(',4A2,')',1X))
+9053      FORMAT(' Stations: ', 5(A2,'(',4A2,')',1X)/
+     .     10(   '           ',5 (A2,'(',4A2,')',1X)/))
           WRITE(LUSCN,9050)
-9050      FORMAT(' NOTE: Station codes are CaSe SeNsItIvE !'/
+9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
      .    ' Output for which station (type a code, :: to ',
      .    'quit, = for all) ? ',$)
         else
