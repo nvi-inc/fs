@@ -23,7 +23,7 @@ C
       INTEGER I
 C
       IF(IC.LE.0.OR.NC.LT.0) THEN
-	  WRITE(6,*) ' IFILL: Illegal arguments',IC,NC
+	  WRITE(6,*) ' IFILL_CH: Illegal arguments',IC,NC
         STOP
       ENDIF
 C
