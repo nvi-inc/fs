@@ -7,6 +7,8 @@ int *error;
 long *record,*position;
 
 {
+  if(*dcb==NULL)
+    return 0;
   *record = ftell(*dcb);
   return(*error);
 }
