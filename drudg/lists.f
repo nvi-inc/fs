@@ -44,7 +44,7 @@ C NLOBS - number of observation lines written for this station
 C NLINES, Lnobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
       INTEGER IC, TRIMLEN
-      LOGICAL KNEWT
+      LOGICAL KNEWT,knewtp,ks2
 C function to determine if a new tape has started
       double precision RA,DEC
       double precision TJD,RAH,DECD,RADH,DECDD
@@ -99,6 +99,7 @@ C 970303 nrv For S2, don't try to print the Mk3 configuration. Update
 C            footage with duration only (assumes no stops).
 C 970304 nrv Add COPTION for defaults.
 C 970307 nrv Use pointer array ISKREC to insure time order of obs.
+C 971003 nrv Add a check for S2 and determine tape changes for it separately.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -140,6 +141,11 @@ C
       NTAPES = 0
       LNOBS = 0
       nlobs = 0 ! number of scan line written 
+      ks2=.false.
+      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
+     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
+        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      endif
       kwrap=.false.
       if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
      .kwrap=.true.
@@ -358,9 +364,18 @@ C ENDT new page
           ENDIF
           IDIR=+1
           IF (LDIR(ISTNSK).EQ.HHR)IDIR=-1
-          IF (KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,
-     .        IDIR,IDIRP,IFTOLD)) THEN
+          if (ks2) then
+            knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+          else if (idir.ne.0) then
+            KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
+     .      IDIRP,IFTOLD)
+          else
+            knewtp = .false.
+          endif
+C         IF (KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,
+C    .        IDIR,IDIRP,IFTOLD)) THEN
 C THEN BEGIN new tape
+          if (knewtp) then
             WRITE(luprt,9320)
 9320        FORMAT('    *** NEW TAPE ***'/)
             NTAPES = NTAPES + 1
