@@ -71,6 +71,8 @@ int rlen;
     equip1='4';
   else if(VLBA==*rack)
     equip1='v';
+  else
+    equip1='_';
 
   if(decloc != NULL)
     equip2=*(decloc+2);
@@ -80,6 +82,10 @@ int rlen;
     equip2='4';
   else if(VLBA==*drive)
     equip2='v';
+  else if(S2==*drive)
+    equip2='s';
+  else
+    equip1='_';
 
   *ierr = -3;
   while(-1!=fscanf(idum,"%s",outbuf)){
@@ -87,9 +93,10 @@ int rlen;
     if(decloc != NULL) {
       ch1=*(decloc+1);
       ch2=*(decloc+2);
- 
-      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4')) &&
-          (ch2==equip2 || ch2=='_' || (ch2 =='m' && equip2 == '4'))   ) {
+ /* m4 defaulting to m3 works because 4 preceeds m in ls order */
+      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4'))
+	  && (ch2==equip2 || ch2=='_' || (ch2 =='m' && equip2 == '4')
+	      || (ch2=='x' && equip2 != 's'))   ) {
         strcpy(runstr,outbuf);
         *ierr = 0;
         break;
