@@ -17,7 +17,7 @@ C 960517 nrv New.
 C 960521 nrv Revised.
 C 960810 nrv Add tape motion fields
 C 960817 nrv Add S2 tape length and tape motion fields
-C 960913 nrv Recognize "none" and "NONE" as valid rack types.
+C 961022 nrv Change MARK to Mark if found in rack and recorder names.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -66,16 +66,19 @@ C
           write(lu,'("VUNPDAS01 - Recorder type name too long")')
           ierr=-1
         else
-          IDUMY = ICHMV_ch(lrec,1,cout(1:NCH))
-          ks2 = cout(1:2).eq.'S2'
           IDUMY = ICHMV_ch(lrec,1,cout(1:nch))
+          if (ichcm_ch(lrec,1,'MARK3A').eq.0) 
+     .    IDUMY = ICHMV_ch(lrec,1,'Mark3A')
+          if (ichcm_ch(lrec,1,'MARK4').eq.0) 
+     .    IDUMY = ICHMV_ch(lrec,1,'Mark4')
           if (ichcm_ch(lrec,1,'S2').ne.0.and.
      .        ichcm_ch(lrec,1,'VLBA').ne.0.and.
-     .        ichcm_ch(lrec,1,'MARK3A').ne.0.and.
-     .        ichcm_ch(lrec,1,'MARK4').ne.0) then
+     .        ichcm_ch(lrec,1,'Mark3A').ne.0.and.
+     .        ichcm_ch(lrec,1,'Mark4').ne.0) then
             write(lu,'("VUNPDAS22 - Unrecognized recorder type: ",a)')
      .      cout(1:nch)
           endif
+          ks2 = cout(1:2).eq.'S2'
         endif
       endif
 
@@ -95,6 +98,10 @@ C
           ierr=-2
         else
           IDUMY = ICHMV_ch(lrack,1,cout(1:nch))
+          if (ichcm_ch(lrack,1,'MARK3A').eq.0)
+     .    IDUMY = ICHMV_ch(lrack,1,'Mark3A')
+          if (ichcm_ch(lrack,1,'MARK4').eq.0)
+     .    IDUMY = ICHMV_ch(lrack,1,'Mark4')
           if (ichcm_ch(lrack,1,'VLBA').ne.0.and.
      .        ichcm_ch(lrack,1,'VLBAG').ne.0.and.
      .        ichcm_ch(lrack,1,'Mark3A').ne.0.and.
