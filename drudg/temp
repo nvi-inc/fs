@@ -1,1 +1,3 @@
-C 961105 nrv Don't write out fan if it's 1:1 and there is no roll.
+C 961202 nrv No special handling for 8-BBCs for modes A or C.
+C            Use "mx" groups for tracks instead of listing them all.
+C            Edit trackform section to use indices instead of max_chan.
