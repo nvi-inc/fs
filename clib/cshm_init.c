@@ -7,7 +7,7 @@
 
 void cshm_init()
 {
-  int i;
+  int i,j;
 
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
@@ -35,6 +35,9 @@ void cshm_init()
   shm_addr->user_info.field2[0]=0;
   shm_addr->user_info.field3[0]=0;
   shm_addr->user_info.field4[0]=0;
+
+  shm_addr->data_valid.user_dv=0;
+  shm_addr->data_valid.user_dv=0;
 
   shm_addr->s2st.dir=0;
   shm_addr->s2st.speed=-1;
@@ -76,6 +79,40 @@ void cshm_init()
   shm_addr->vacsw=0;
 
   shm_addr->vac4=-1;
+
+  shm_addr->rvac.inches=0;
+  shm_addr->rvac.set=0;
+
+  shm_addr->wvolt.volts[0]=0;
+  shm_addr->wvolt.set[0]=0;
+  shm_addr->wvolt.volts[1]=0;
+  shm_addr->wvolt.set[1]=0;
+
+  shm_addr->lo.lo[0]=-1.0;
+  shm_addr->lo.lo[1]=-1.0;
+  shm_addr->lo.lo[2]=-1.0;
+  shm_addr->lo.lo[3]=-1.0;
+
+  shm_addr->lo.sideband[0]=0;
+  shm_addr->lo.sideband[1]=0;
+  shm_addr->lo.sideband[2]=0;
+  shm_addr->lo.sideband[3]=0;
+
+  for (i=0;i<2;i++)
+    for (j=0;j<14;j++) {
+      shm_addr->pcalform.count[i][j]=0;
+      shm_addr->pcald.count[i][j]=0;
+    }
+
+  shm_addr->pcald.continuous=0;
+  shm_addr->pcald.bits=0;
+  shm_addr->pcald.integration=0;
+
+  for (i=0;i<MAX_BBC;i++)
+    shm_addr->bbc[i].source=-1;
+
+  shm_addr->imixif3=-1;
+
   return;
 }
 
