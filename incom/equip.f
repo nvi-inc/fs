@@ -110,6 +110,11 @@ C **** Modified jfq
         rack = LBA4
         rack_type = LBA
 C **** end modify jfq
+C **** Modified mb
+      else if (ichcm_ch(ibuf,ic1,'s2').eq.0.and.il.eq.2) then
+        rack = S2
+        rack_type = S2
+C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -525,8 +530,33 @@ C **** MET3 Sensor line 16
         call logit7ci(0,0,0,1,-140,'bo',16)
         goto 990
       endif
-      call fs_set_met(wx_met)
+      call fs_set_wx_met(wx_met)
 C **** end modify rdg
+C mk4 synch test parameter
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',17)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',17)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      if (ichcm_ch(ibuf,ic1,'off').eq.0.and.il.eq.3) then
+        mk4sync_dflt= -1
+      else
+         mk4sync_dflt = ias2b(ibuf,ic1,ic2-ic1+1)
+         if (mk4sync_dflt.lt.0.or.mk4sync_dflt.gt.16) then
+            call logit7ci(0,0,0,1,-140,'bo',17)
+            goto 990
+         endif
+      endif
+      call fs_set_mk4sync_dflt(mk4sync_dflt)
       return
 
  990  call fmpclose(idcb,ierr)
