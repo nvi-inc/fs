@@ -28,7 +28,7 @@ long ip[5];                           /* ipc parameters */
       char *arg_next();
       float fvacuum;
 
-      int verr, lerr, vacuum();
+      int verr, lerr, vacuum(), volt;
       
       void rec_dis();
       void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
@@ -118,10 +118,34 @@ long ip[5];                           /* ipc parameters */
               request.data = bits16on(14) & (int)(fvacuum);
               add_req(&buffer,&request);
 
-              request.addr=0xd3;                 /* head write voltage */
-/* the write voltage (millivolts) to send to record is a factor of 2 */
-              request.data= bits16on(14) & (int)((shm_addr->wrvolt/2)*1000);
+              request.addr=0xd3;                 /* head 1 write voltage */
+/* the write voltage (millivolts) to send to record is divided by 2 */
+
+	      if(shm_addr->vacsw == 1 )
+		if(shm_addr->thin)
+		  volt = (int)((shm_addr->wrvolt/2)*1000);
+		else
+		  volt = (int)((shm_addr->wrvolt2/2)*1000);
+	      else
+		  volt = (int)((shm_addr->wrvolt/2)*1000);
+
+              request.data= bits16on(14) & volt;
               add_req(&buffer,&request);
+
+	      if(shm_addr->equip.drive == VLBA4) {
+		request.addr=0xd2;                 /* head 2 write voltage */
+/* the write voltage (millivolts) to send to record is divided by 2*/
+		if(shm_addr->vacsw == 1 )
+		  if(shm_addr->thin)
+		    volt = (int)((shm_addr->wrvolt4/2)*1000);
+		  else
+		    volt = (int)((shm_addr->wrvolt42/2)*1000);
+		else
+		  volt = (int)((shm_addr->wrvolt4/2)*1000);
+
+		request.data= bits16on(14) & volt;
+		add_req(&buffer,&request);
+	      }
 
 	      shm_addr->thin=-1;
 	    } else {
@@ -151,7 +175,14 @@ long ip[5];                           /* ipc parameters */
              ierr = lerr;
              goto error;
            } 
-            request.type=0;
+
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	     setMK4FMrec(0,ip);
+	     if(ip[2]<0)
+	       return;
+	   }
+
+	    request.type=0;
             memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
             lcl.general=0;                  /* turn off record */
             shm_addr->venable.general=0;
@@ -182,6 +213,13 @@ long ip[5];                           /* ipc parameters */
              ierr = lerr;
              goto error;
            } 
+
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	     setMK4FMrec(0,ip);
+	     if(ip[2]<0)
+	       return;
+	   }
+
             request.type=0;
             memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
             lcl.general=0;                  /* turn off record */
@@ -228,6 +266,12 @@ long ip[5];                           /* ipc parameters */
              ierr = lerr;
              goto error;
            } 
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	     setMK4FMrec(0,ip);
+	     if(ip[2]<0)
+	       return;
+  	   }
+
             request.type=0;
             memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
             lcl.general=0;                  /* turn off record */
