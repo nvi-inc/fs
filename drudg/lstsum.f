@@ -594,7 +594,7 @@ C the counter to zero to start the new forward pass.
 
       write(luprt, "()") ! skip line
       if(kdisk) then
-         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1024.
+         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1000
       else
         write(luprt, '("   Total number of tapes: ",i3)')num_tapes
       endif

@@ -26,8 +26,10 @@ C  LOCAL:
       integer ix,n,ITRK(4,max_subpass,max_headstack)
       integer*2 LNA(4)
       integer idum,ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
-      integer icx,nvlist,ivlist(max_chan),ir,it,iu
+      integer icx,nvlist,ivlist(max_chan),ir
       integer*2 lc,lsg,lm(8),lid,lin,ls
+      character*16 cm
+      equivalence (cm,lm)
       integer*2 lst(4,max_stn)
       character*8 cst(max_stn)
       equivalence (lst,cst)
@@ -159,23 +161,29 @@ C         Any LSB to be recorded is specified in track assignments,
 C         i.e. for mode A and mode B&E.
           idum = ichmv_ch(lnetsb(icx,is,icode),1,'U') 
 C         Initialize lmode to blanks.
-          call ifill(lmode(1,is,icode),1,16,oblank)
-          idum = ichmv(LMODE(1,is,ICODE),1,LM,1,16) ! recording mode
+!          call ifill(lmode(1,is,icode),1,16,oblank)
+!          idum = ichmv(LMODE(1,is,ICODE),1,LM,1,16) ! recording mode
+          cmode(is,icode)=cm
+
 C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
 C         modify this when it gets user input on the formatter type.
 C         This is used by SPEED.
-          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,16) ! recording format
+!          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,16) ! recording format
+          cmfmt(is,icode)=cm
 C         Initialize S2 mode to blank. It's probably safe to put 
 C         LMODE into LS2MODE.
 C         Not safe because the mode may be already there from the equip line.
-          if (ichcm_ch(ls2mode(1,is,icode),1,' ').eq.0) then ! it's blank
-            idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
-          else ! leave it alone
+          if(cs2mode(is,icode) .eq. " ") then
+              cs2mode(is,icode)=cm
           endif
+!          if (ichcm_ch(ls2mode(1,is,icode),1,' ').eq.0) then ! it's blank
+!            idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
+!          else ! leave it alone
+!          endif
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
-          ix = iscn_ch(lmode(1,is,icode),1,16,'1:') 
-C         iy = iscn_ch(lmode(1,is,icode),1,16,':1') 
+          ix = iscn_ch(lmode(1,is,icode),1,16,'1:')
+C         iy = iscn_ch(lmode(1,is,icode),1,16,':1')
           if (ix.ne.0) then ! possible fan-out
             n=ias2b(lmode(1,is,icode),ix+2,1)
             if (n.gt.0) ifan(is,icode)=n
@@ -184,14 +192,15 @@ C           n=ias2b(lmode(1,is,icode),iy+2,1)
 C           if (n.gt.0) ifan(is,icode)=n
           endif
 C         Set bit density depending on the mode
-          if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then 
+          if(cmode(is,icode)(1:1) .eq. "V") then
             bitden=34020 ! VLBA non-data replacement
           else 
             bitden=33333 ! Mark3/4 data replacement
           endif
 C         If "56000" was specified, use higher station bit density
-          if (ibitden_save(is).eq.56000) then 
-            if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then 
+          if (ibitden_save(is).eq.56000) then
+            if(cmode(is,icode)(1:1) .eq. "V") then
+!            if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then
               bitden=56700 ! VLBA non-data replacement
             else 
               bitden=56250 ! Mark3/4 data replacement

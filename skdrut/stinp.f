@@ -260,7 +260,7 @@ C
         i=iwhere_in_string_list(cpocod,nstatn,cid)
         if(i .eq. 0) then
           write(lu,'("STINP- Problem with: ",a)') cbufin0(1:nch)
-          write(lu, "('STINP21 - Pointer not found: ',a)") ,cid
+          write(lu,'("STINP21 - Pointer not found: ",a)') cid
           return
         endif
 C
@@ -450,12 +450,8 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
         ELSE  ! keep it
           if (kline) then
             klineseg(i)=.true.
-C           write(lu,'("STINP255 - Line segment horizon mask being ",
-C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
           else
             klineseg(i)=.false.
-C           write(lu,'("STINP255 - Step function horizon mask being ",
-C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
           endif
           NHORZ(I) = NHZ
           DO J=1,NHORZ(I)

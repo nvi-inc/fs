@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.4/misc/fs9704up.txt  Version: 1.1 Date: 041119
+File: /usr2/fs-9.7.4/misc/fs9704up.txt  Version: 1.2 Date: 041119
 
 I. Introduction
 
@@ -124,7 +124,7 @@ numbered 53 and above were added after 9.7.3.
 54. VEX parser tester compiles in place
 55. Ari's archive of "dila" for making Mark5 labels is included
 56. Log recovery error handling improved slightly, but not visibly.
-57. Help files for "form4" and "decode4" include web deocumentation
+57. Help files for "form4" and "decode4" include web documentation
     references.
 58. Internal buffers for decode4 command expanded
 59. VEX parser extended to handle de facto Mark 5 VEX standard.
@@ -686,7 +686,7 @@ after 9.7.1.  Items numbered 31 and above were added after
 37. Fixed page overflow in summary listings.
 38. Does not check for enough time for a tape change if Mark5 only
     recorder.
-39. Line length and lines/page unified beween SNAP, schedule, and
+39. Line length and lines/page unified between SNAP, schedule, and
     summary listings.
 40. Form of issued "disk2file" command changed.
 41. Modified printer.c to pass "Recode latin1..ibmpc" in linux system.
@@ -695,7 +695,6 @@ after 9.7.1.  Items numbered 31 and above were added after
     and "data_valid=off" commands.
 44. After an "in2net" scan, a "postob" command is used instead of
     "postob_mk5a".
-
 
 A more detailed discussion of these changes follows.
 
