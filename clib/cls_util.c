@@ -71,7 +71,8 @@ if ( msqid == -1 ) {
 sem_take( SEM_CLS);
 
 while ( -1 !=
- msgrcv( msqid, &msg, sizeof( msg.messg ), -LONG_MAX, IPC_NOWAIT|MSG_NOERROR));
+ msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg ), -LONG_MAX,
+	IPC_NOWAIT|MSG_NOERROR));
 if( errno != ENOMSG){
     perror("cls_ini: error cleaning class numbers");
     exit(-1);
@@ -121,7 +122,8 @@ msg.mtype = *class;
 msg.messg.parm[0]=parm3;
 msg.messg.parm[1]=parm4;
 s1=memcpy( msg.messg.mtext, buffer, length);
-status = msgsnd( msqid, &msg, length+sizeof( msg.messg.parm), 0);
+status = msgsnd( msqid, (struct msgbuf *) &msg,
+		length+sizeof( msg.messg.parm), 0);
 if ( status == -1 ) {
     perror("cls_snd: sending message");
     exit(-1);
@@ -180,7 +182,8 @@ void sem_take(), sem_put();
    if(save   != 0 || sc) save = 1;
    
    sem_take( SEM_CLS);
-   nchars = msgrcv( msqid, &msg, sizeof( msg.messg), class+MAX_CLS,IPC_NOWAIT);
+   nchars = msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg),
+		   class+MAX_CLS,IPC_NOWAIT);
    if ( (nchars == -1) && (errno != ENOMSG)) {
       fprintf( stderr,"cls_rcv: msqid %d class %d,",msqid,class);
       perror("getting saved class");
@@ -194,7 +197,8 @@ void sem_take(), sem_put();
       sem_put(SEM_CLS);
    }
 
-   nchars = msgrcv( msqid, &msg, sizeof( msg.messg ), class, msgflg);
+   nchars = msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg ),
+		   class, msgflg);
    if ( (nchars == -1) && (errno != ENOMSG)) {
       fprintf( stderr,"cls_rcv: msqid %d class %d,",msqid,class);
       perror("getting class");
@@ -210,7 +214,7 @@ void sem_take(), sem_put();
 copy:
    if( sb ) {
       msg.mtype = class + MAX_CLS;
-      if ( -1 == msgsnd( msqid, &msg, nchars, IPC_NOWAIT)) {
+      if ( -1 == msgsnd( msqid, (struct msgbuf *) &msg, nchars, IPC_NOWAIT)) {
          perror("cls_rcv: sending saved message");
          exit(-1);
       }
@@ -239,14 +243,16 @@ void sem_take(), sem_put();
    sem_take( SEM_CLS);
 
 while ( -1 !=
- msgrcv( msqid, &msg, sizeof( msg.messg ), class, IPC_NOWAIT|MSG_NOERROR));
+ msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg ), class,
+	IPC_NOWAIT|MSG_NOERROR));
 if( errno != ENOMSG){
     perror("cls_clr: error clearing class buffers");
     exit(-1);
 }
 
 while ( -1 !=
-msgrcv(msqid,&msg,sizeof( msg.messg), class+MAX_CLS, IPC_NOWAIT|MSG_NOERROR));
+msgrcv(msqid,(struct msgbuf *) &msg,sizeof( msg.messg), class+MAX_CLS,
+       IPC_NOWAIT|MSG_NOERROR));
 if( errno != ENOMSG){
     perror("cls_clr: error clearing saved class buffers");
     exit(-1);

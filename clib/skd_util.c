@@ -76,7 +76,8 @@ if ( msqid == -1 ) {
 }
 
 while ( -1 !=
-msgrcv( msqid, &sched, sizeof( sched.messg), -LONG_MAX,IPC_NOWAIT|MSG_NOERROR));
+msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+       -LONG_MAX,IPC_NOWAIT|MSG_NOERROR));
 if( errno != ENOMSG){
     perror("skd_ini: error cleaning skd queue\n");
     exit(-1);
@@ -126,7 +127,7 @@ n=strlen(arg)+1;
 n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
 strncpy(sched.messg.arg,arg,n);
 
-if ( -1 == msgsnd(msqid, &sched,
+if ( -1 == msgsnd(msqid, (struct msgbuf *) &sched,
 		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1),
 		  0 ) ) {
        fprintf( stderr,"skd_run: msqid %d,",msqid);
@@ -136,7 +137,8 @@ if ( -1 == msgsnd(msqid, &sched,
 
 if(w != 'w') return;
 
-if(-1== msgrcv( msqid, &sched, sizeof(sched.messg), sched.messg.rtype, 0)){
+if(-1== msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
+	       sched.messg.rtype, 0)){
         perror("skd_run: receiving return message");
         exit( -1);
 }
@@ -195,9 +197,10 @@ if( rtype != 0) {
       sched.messg.ip[i]=ip[i];
   }
   sched.mtype=rtype;
-  if ( -1 == msgsnd( msqid, &sched, sizeof( sched.messg), 0 )) {
-        perror("skd_wait: sending termination message");
-  	exit( -1);
+  if ( -1 == msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		    0 )) {
+    perror("skd_wait: sending termination message");
+    exit( -1);
   }
 }
 
@@ -213,7 +216,8 @@ if(centisec !=0) {
 }
 
 waitr:
-status = msgrcv( msqid, &sched, sizeof( sched.messg), type, 0);
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		type, 0);
 if (centisec !=0) {
    rte_alarm((unsigned) 0);
    if(signal(SIGALRM,SIG_DFL) == BADSIG){
@@ -256,7 +260,8 @@ char *s1;
 type=mtype(name);
 
 waitr:
-status = msgrcv( msqid, &sched, sizeof( sched.messg), type, IPC_NOWAIT);
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		type, IPC_NOWAIT);
    
 if (status == -1 && errno == EINTR) goto waitr;
 else if ( status == -1 && errno != ENOMSG) {
