@@ -86,6 +86,17 @@ struct station {
 	
 typedef struct station Station;
 
+struct data_transfer {
+  char *key;
+  char *method;
+  char *destination;
+  struct dvalue *start;
+  struct dvalue *stop;
+  char *options;
+};
+	
+typedef struct data_transfer Data_transfer;
+
 struct axis_type {
   char *axis1;
   char *axis2;
@@ -341,6 +352,11 @@ struct switching_cycle *make_switching_cycle(char *origin,
 struct station  *make_station(char *key, struct dvalue *start,
 			      struct dvalue *stop, struct dvalue *start_pos,
 			      char *pass, char *sector, struct llist *drives);
+struct data_transfer  *make_data_transfer(char *key, char *method,
+					  char *destination,
+					  struct dvalue *start,
+					  struct dvalue *stop, 
+					  char *options);
 struct axis_type *make_axis_type(char *axis1, char *axis2);
 struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
 					   struct dvalue *offset); 
@@ -531,6 +547,18 @@ get_station_scan_next();
 void *
 get_station_scan(Llist *lowls_in);
 
+void *
+get_scan_data_transfer_next(Llist **lowls_scan, char **scanid);
+
+void *
+get_scan_data_transfer(Llist **lowls_scan, char **scanid,
+		       char *data_transfer_in, struct vex *vex_in);
+void *
+get_data_transfer_scan_next();
+
+void *
+get_data_transfer_scan(Llist *lowls_in);
+
 Llist *
 find_next_def(Llist *defs);
 
@@ -630,8 +658,14 @@ void *
 create_station(char *str, char *str2, char *str3, char *str4,
 	       char *str5, char *str6, char *str7, char *str8,
 	       char *str9);
+
 void *
 create_station_drive_list(char *str);
+
+void *
+create_data_transfer(char *str, char *str2, char *str3, char *str4,
+		     char *str5, char *str6, char *str7, char *str8);
+
 /*---------------------------------------------------------------------------*/
 /* ANTENNA block builders                                                    */
 /*---------------------------------------------------------------------------*/

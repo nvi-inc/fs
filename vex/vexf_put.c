@@ -487,6 +487,74 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_data_transfer__
+#else
+fcreate_data_transfer
+#endif
+(str, str2, str3, str4, str5, str6, str7, str8)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+char **str8;
+/*<      subroutine fcreate_data_transfer(ptr_ch(str)//(char *)0, >*/
+/*<                                       ptr_ch(str2)//(char *)0, >*/
+/*<                                       ptr_ch(str3)//(char *)0, >*/
+/*<                                       ptr_ch(str4)//(char *)0, >*/
+/*<                                       ptr_ch(str5)//(char *)0, >*/
+/*<                                       ptr_ch(str6)//(char *)0, >*/
+/*<                                       ptr_ch(str7)//(char *)0, >*/
+/*<                                       ptr_ch(str8)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4 >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7 >*/
+/*<      character*(*) str8; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string 1 */
+/*   character*(*) str2      - string 2 */
+/*   character*(*) str3      - string 3 */
+/*   character*(*) str4      - string 4 */
+/*   character*(*) str5      - string 5 */
+/*   character*(*) str6      - string 6 */
+/*   character*(*) str7      - string 7 */
+/*   character*(*) str8      - string 8 */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  if(strlen(*str)==0) *str=NULL;
+  if(strlen(*str2)==0) *str2=NULL;
+  if(strlen(*str3)==0) *str3=NULL;
+  if(strlen(*str4)==0) *str4=NULL;
+  if(strlen(*str5)==0) *str5=NULL;
+  if(strlen(*str6)==0) *str6=NULL;
+  if(strlen(*str7)==0) *str7=NULL;
+  if(strlen(*str8)==0) *str8=NULL;
+  create_data_transfer(*str,
+		       *str2,
+		       *str3,
+		       *str4,
+		       *str5,
+		       *str6,
+		       *str7,
+		       *str8);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_antenna_diam__
 #else
 fcreate_antenna_diam
