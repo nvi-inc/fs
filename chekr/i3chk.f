@@ -15,7 +15,7 @@ C
 C  LOCAL VARIABLES: 
       integer get_buf
       integer ni3err
-      parameter (ni3err=11)
+      parameter (ni3err=13)
       integer inerr(ni3err)
 C 
       integer*4 ip(5)             ! - for RMPAR
@@ -54,16 +54,21 @@ C
       if (ierr.lt.0) then
         call clrcl(iclass)
         call logit7ic(0,0,0,0,ierr,lwho,'i3')
+        mifd_tpi(3)=65536
+        call fs_set_mifd_tpi(mifd_tpi,3)
         goto 880
       endif
       ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
       ireg(2) = get_buf(iclass,ibuf2,-10,idum,idum)
       call ma2i3(ibuf1,ibuf2,iat,imix,isw(1),isw(2),isw(3),isw(4),
-     &                iswp,freq,irem,ilo,tpi)
+     &                ipcalp,iswp,freq,irem,ipcal,ilo,tpi)
 C
 C Now compare values with acceptable limits
-      if(irem.ne.1)          inerr(1)=inerr(1)+1
-      if(iat.ne.iatif3_fs)   inerr(2)=inerr(2)+1
+      mifd_tpi(3)=nint(tpi)
+      call fs_set_mifd_tpi(mifd_tpi,3)
+      if(irem.ne.1)       inerr(1)=inerr(1)+1
+      call fs_get_iat3if(iat3if)
+      if(iat.ne.iat3if)   inerr(2)=inerr(2)+1
       call fs_get_imixif3(imixif3)
       if(imix.ne.imixif3) inerr(3)=inerr(3)+1
       iswc=0
@@ -76,7 +81,7 @@ C Now compare values with acceptable limits
       call fs_get_freqif3(freqif3)
       if(freq.ne.freqif3) inerr(8)=inerr(8)+1
       if(ilo.ne.1) inerr(9) = inerr(9)+1
-      if(tpi.gt.65534.5) inerr(10)=inerr(10)+1
+      if(tpi.ge.65534.5) inerr(10)=inerr(10)+1
 c
       ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
       kalarm = ichcm_ch(ibuf1,3,'nak').eq.0
@@ -84,9 +89,15 @@ c
         ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
         inerr(11)=inerr(11)+1
       endif
+c
+      if(pcalcntrl.eq.3.and.ipcalp.ne.1) inerr(12)=inerr(12)+1
+c
+      if(pcalcntrl.eq.3) then
+         if(ipcal.ne.ipcalif3) inerr(13)=inerr(13)+1
+      endif
 C
-      call fs_get_icheck(icheck(21),21)
-      if(icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 880
+      call fs_get_icheck(icheck(23),23)
+      if(icheck(23).le.0.or.ichecks(23).ne.icheck(23)) goto 880
       if(inerr(1).ne.0) then
         call logit7ic(0,0,0,0,-361,lwho,'i3')
         goto 880
