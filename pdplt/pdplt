@@ -42,6 +42,7 @@ set current_MDLPO "/usr2/control/mdlpo.ctl"  ;# Control file for error.
 set current_XTRAC "/tmp/pdplt.xtr"            ;# Temporary output file for xtrac.
 set current_ERROR "/tmp/pdplt.err"            ;# Temporary output file for error.
 set current_TEMP  "/tmp/pdplt.tmp"            ;# Temporary file for greps and prints
+set current_FLAGFILE "/tmp/pdplt.mdl"        ;# Temporary file for flags
 set current_XSAVE "(will be set when a file is opened)"
                                               # Output file for xtrac output saves.
 set current_ESAVE "(will be set when a file is opened)"
@@ -78,6 +79,7 @@ set text_title_print "Print plot"
 set text_title_sigma "x-sigma"
 set text_title_preferences "I/O setup"
 set text_title_quit "Quit"
+set text_title_modify "Modify Parameters"
 
 set text_processing_wait "Processing internal data, please wait..."
 set text_running_error "Running error external program, please wait..."
@@ -130,6 +132,13 @@ set YPointSigmaLabel "2nd sigma:"
 
 set plotsize [expr 180*$size]
 set plotsize [expr double($plotsize)]
+
+# Initialization of the number of parameters and how they ae displayed
+# --------------------------------------------------------------------
+
+set flagColumns 10
+set flagRows 2
+
 
 # ============================================================================
 #
@@ -565,9 +574,10 @@ proc saveFile {} {
 }
 
 proc doExit {} {
-    global current_XTRAC current_ERROR
+    global current_XTRAC current_ERROR current_FLAGFILE
     exec rm -f $current_XTRAC
     exec rm -f $current_ERROR
+    exec rm -f $current_FLAGFILE
     exit
 }
 
@@ -1520,7 +1530,197 @@ proc open_fileselection_dialog {} {
 
 }
 
+# ==========================================================================
+#
+#                         FLAG MODIFIER SECTION
+#            written by Carl Holmstrom, calle@leo.gsfc.nasa.gov
+#
+# ==========================================================================
 
+# ------------------------------------------
+# Reading function for the flags and parameters
+# ------------------------------------------
+
+proc readFlags {} {
+global flagArray flagRows flagColumns current_MDLPO
+exec cp $current_MDLPO tempFile
+set temp [open tempFile r]
+set k 0
+set l 0
+while {-1 != [gets $temp line]} {
+        incr k
+        if {$k%13==6} {
+	    set flagList $line
+	    split $flagList
+	    if {([llength $flagList]<=[expr $flagRows*$flagColumns+1])} {
+		for {set p 0} {($p<=[expr $flagRows*$flagColumns+1])} {incr p} {
+                    set flagArray($p) [lindex $flagList $p]
+		}
+	    }
+	}	    
+}
+}
+
+# ------------------------------------------
+# Save function for the flags and parameters
+# ------------------------------------------
+
+proc saveFlags {} {
+global flagArray flagRows flagColumns current_MDLPO current_FLAGFILE
+exec cp $current_MDLPO tempFile2
+set temp2 [open tempFile2 r]
+set outFile [open $current_FLAGFILE w+]
+set k 0
+while {-1 != [gets $temp2 line]} {
+    #This if expression will only be true if
+    #the read line is uncommented.
+    if {[string index $line 0] != "\*"} {
+	incr k
+	#This if expression reads the second uncommented line
+	if {$k == 2} {
+	    for {set p 0} {($p<=[expr $flagRows*$flagColumns])} {incr p} {
+		lappend flagList $flagArray($p)
+		}
+	    set line $flagList
+	    }
+	puts $outFile $line
+    } else {
+	puts $outFile $line
+    }
+}
+close $outFile
+set current_MDLPO $current_FLAGFILE
+}
+
+# ---------------------------------------
+# Procedure for explanation of parameters
+# ---------------------------------------
+
+proc paramExplain {} {
+global XPointLabel YPointLabel
+
+if {([string index $XPointLabel 0] == "A") && ([string index $XPointLabel 1] == "z")} {
+    set XFlagLabel "AZ"
+    set YFlagLabel "EL"
+} elseif {([string index $XPointLabel 0] == "H") && ([string index $XPointLabel 1] == "o")} {
+    set XFlagLabel "HA"
+    set YFlagLabel "DC"
+} else {
+    set XFlagLabel "X"
+    set YFlagLabel "Y"
+}
+
+toplevel .explanation
+wm title .explanation "Parameter Explanation"
+label .explanation.param1 -text "Parameter 1:${XFlagLabel}-angle Encoder Offset"
+label .explanation.param2 -text "Parameter 2:${XFlagLabel}-angle Sag"
+label .explanation.param3 -text "Parameter 3:Axis Skew"
+label .explanation.param4 -text "Parameter 4:Box Offset"
+label .explanation.param5 -text "Parameter 5:Tilt Out (tilt of ${YFlagLabel}=+90 toward \
+	{$XFlagLabel},{$YFlagLabel}=(0,0))"
+label .explanation.param6 -text "Parameter 6:Tilt Over (tilt of ${YFlagLabel}=+90 toward \
+	{$XFlagLabel},{$YFlagLabel}=(0,0))"
+label .explanation.param7 -text "Parameter 7:${YFlagLabel}-angle Encoder Offset"
+label .explanation.param8 -text "Parameter 8:${YFlagLabel}-angle Sag"
+label .explanation.param9 -text "Parameter 9:ad hoc ${YFlagLabel}-angle Slope (degrees/radian)"
+label .explanation.param10 -text "Parameter 10:ad hoc delta${YFlagLabel}cos${YFlagLabel} \
+	Coefficient"
+label .explanation.param11 -text "Parameter 11:ad hoc delta${YFlagLabel}sin${YFlagLabel} \
+	Coefficient"
+label .explanation.param12 -text "Parameter 12:ad hoc ${XFlagLabel}-angle Slope (degrees/radian)"
+label .explanation.param13 -text "Parameter 13:ad hoc delta${XFlagLabel}cos${XFlagLabel} \
+	Coefficient"
+label .explanation.param14 -text "Parameter 14:ad hoc delta${XFlagLabel}sin${XFlagLabel} \
+	Coefficient"
+label .explanation.param15 -text "Parameter 15:ad hoc delta${YFlagLabel}cos2${XFlagLabel} \
+	Coefficient"
+label .explanation.param16 -text "Parameter 16:ad hoc delta${YFlagLabel}sin2${XFlagLabel} \
+	Coefficient"
+
+for {set i 1} {$i<=16} {incr i} {
+    pack .explanation.param$i -in .explanation -side top -anchor w
+}
+button .explanation.okButton -text "OK" -command {destroy .explanation}
+pack .explanation.okButton -in .explanation -side top -anchor center
+}
+
+
+proc runFlags {} {
+global flagArray flagRows flagColumns current_MDLPO text_title_modify
+
+readFlags; #Reads the flags from mdlpo.ctl
+
+toplevel .controlWindow; #Total frame
+wm title .controlWindow $text_title_modify
+
+#Parts of the controlWindow
+frame .controlWindow.text
+frame .controlWindow.huge
+frame .controlWindow.buttons
+
+# Create the text inside the modifier window
+# ------------------------------------------
+
+label .controlWindow.instructions -text "Please choose one flag(0-4) for each \
+	parameter(1-20)"
+label .controlWindow.empty1
+label .controlWindow.flagZero -text "Flag 0: This parameter is not in use."
+label .controlWindow.flagOne -text "Flag 1: This parameter is in use."
+label .controlWindow.flagTwo -text "Flag 2: This parameter is in use, but its value is \
+	hardwired."
+label .controlWindow.flagThree -text "Flag 3: Update 3's only, hardwire 1's and 2's."
+label .controlWindow.flagFour -text "Flag 4: This parameter is used in current model, but \
+	don't use in new model."
+label .controlWindow.empty2
+pack .controlWindow.instructions .controlWindow.empty1 .controlWindow.flagZero \
+	.controlWindow.flagOne .controlWindow.flagTwo .controlWindow.flagThree \
+	.controlWindow.flagFour .controlWindow.empty2 -in .controlWindow.text -side top -anchor w 
+
+# Create the buttons for the modifier window
+# ------------------------------------------
+
+button .controlWindow.explainParam -text "Parameter explanation" -command {paramExplain}
+pack .controlWindow.explainParam -in .controlWindow.text -side top -anchor center
+
+for {set j 0} {$j<$flagRows} {incr j} {
+    frame .controlWindow.large$j                               ; #the frame for one row
+    frame .controlWindow.values$j
+    label .controlWindow.labelEmpty$j
+    label .controlWindow.labelZero$j -text "0"
+    label .controlWindow.labelOne$j -text "1"
+    label .controlWindow.labelTwo$j -text "2"
+    label .controlWindow.labelThree$j -text "3"
+    label .controlWindow.labelFour$j -text "4"
+    pack  .controlWindow.labelEmpty$j .controlWindow.labelZero$j .controlWindow.labelOne$j \
+	    .controlWindow.labelTwo$j .controlWindow.labelThree$j .controlWindow.labelFour$j \
+	    -in .controlWindow.values$j -side top -pady 0.3m -fill y
+    pack .controlWindow.values$j -in .controlWindow.large$j -side left -pady 3m
+    
+    for {set i [expr 1 + ($flagColumns*$j)]} {$i<=[expr $flagColumns + \
+	    ($flagColumns*$j)]} {incr i} {
+	frame .controlWindow.left$i; #the frame for one set of parameters
+	foreach flagNo {0 1 2 3 4} {
+	    radiobutton .controlWindow.rb$flagNo$i \
+		    -relief flat -variable flagArray($i) -value $flagNo
+	}
+	label .controlWindow.paramNo$i -text "$i"; #names of parameters
+	pack .controlWindow.paramNo$i .controlWindow.rb0$i .controlWindow.rb1$i \
+		.controlWindow.rb2$i .controlWindow.rb3$i .controlWindow.rb4$i -in \
+		.controlWindow.left$i -side top -anchor w
+	pack .controlWindow.left$i -in .controlWindow.large$j -side left -padx 2m -pady 4m    
+    }
+    pack .controlWindow.large$j -in .controlWindow.huge -side top 
+}
+
+button .controlWindow.save -text Save -command {saveFlags; destroy .controlWindow}
+button .controlWindow.cancel -text Cancel -command {destroy .controlWindow}
+pack .controlWindow.save -in .controlWindow.buttons -side left
+pack .controlWindow.cancel -in .controlWindow.buttons -side right
+pack .controlWindow.text .controlWindow.huge .controlWindow.buttons -in .controlWindow \
+	-side top -fill x
+
+
+}
 
 # ==========================================================================
 #
@@ -1600,6 +1800,7 @@ if { $tk_version < 4.2 } {
 .mbar.edit.menu add separator
 .mbar.edit.menu add command -label "Reprocess" -command runError
 .mbar.edit.menu add command -label "x-sigma" -command runSigma
+.mbar.edit.menu add command -label "Modify Parameters" -command runFlags
 
 .mbar.data.menu add radio -label "Raw Data" -variable currentData -value 1 -command changeData
 .mbar.data.menu add radio -label "Residuals" -variable currentData -value 2 -command changeData
