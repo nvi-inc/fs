@@ -56,6 +56,7 @@ vc01
 vc05
 vc09
 tpi=formvc,formif
+caltemp=formvc,formif
 tsys=formvc,formif
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
@@ -182,6 +183,7 @@ calon
 tpical=formvc,formif
 tpidiff=formvc,formif
 caloff
+caltemp=formvc,formif
 tsys=formvc,formif
 enddef
 define  tapeforma     00000000000

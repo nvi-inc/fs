@@ -233,6 +233,8 @@ main()
   wcounts("ONSC",0.0,0.0,&onoff,&sample);
   inc_accum(&onoff.itpis,&onscal,&sample);
 
+  scmds("caloffnf");
+
   red_accum(&onoff.itpis,&ons);
   red_accum(&onoff.itpis,&onscal);
   red_accum(&onoff.itpis,&ofs);

@@ -20,7 +20,7 @@ int min(int x, int y);
 int main(int argc, char *argv[])
 {
   char onoffFileName[64], *cptr;
-  char parsedFileName[64];
+  char parsedFileName[64], parsedFileName2[64];
   char rxgFileName[20];
   double azimuth, elevation, skyfreq, gainc, tsys, sefd, tcaljy, tcalk, calratio, tcal_ass;
   double flux_ass, tcalk_over_jy_ass, gcurve_ass, dpfu_gcurve_ass, LO;
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
   rxcount=0;
   strncpy(onoffFileName,argv[1],STL(onoffFileName,argv[1]));
   strncpy(parsedFileName,argv[2],STL(parsedFileName,argv[2]));
+  strncpy(parsedFileName2,argv[2],STL(parsedFileName2,argv[2]));
   work = ((int) argv[3]);
   onoffFile = fopen(onoffFileName, "r");
   if(onoffFile == NULL)
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
   parsedFile = fopen(parsedFileName, "w");
   if(parsedFile == NULL)
     {
-      printf("Error opening file parsed.txt");
+      printf("Error opening file: %s", parsedFileName);
       exit(0);
     }
   fputs("$ANTENNA\n", parsedFile);
@@ -132,12 +133,11 @@ int main(int argc, char *argv[])
       rxgFile = fopen(rxgFileName, "r");
       if(rxgFile == NULL)
 	{
-	  fclose(rxgFile);
-	  exit(-1);
+	  printf("-1\n");
+	  exit(0);
 	}
       fclose(rxgFile);      
       error = get_rxgain(rxgFileName, &rxgain[rxcount]);
-      /*printf("error %d name %s type %c \n",error,rxgFileName,rxgain[rxcount].type);*/
       rxcount++;
 
     }
@@ -149,7 +149,6 @@ int main(int argc, char *argv[])
 	strcpy(onetime,BADSTRVALUE);
       }
       detcount=0;
-      
     }
     if(strstr(line,"APR") != NULL) {
       if(firstapr==1) {
@@ -266,7 +265,7 @@ int main(int argc, char *argv[])
 	  tcal_ass_array[i]=tcal;
 	  dpfu_ass_array[i]=dpfu;
 	  gcurve_ass_array[i]=gain;
-	  if(tcaljy_array[i]<0) {
+	  if(tcaljy_array[i]<=0 || tcal_ass_array[i]<=0) {
 	    tcalk_array[i]=BADVALUE;
 	    calratio_array[valcount]=BADVALUE;
 	  } else {
@@ -291,7 +290,7 @@ int main(int argc, char *argv[])
 	  fprintf(parsedFile, "%.3f ", tcaljy_array[valcount]);
 	  fprintf(parsedFile, "%.3f ", tcalk_array[valcount]);
 	  fprintf(parsedFile, "%.2f ", calratio_array[valcount]);
-	  if(tcaljy_array[i]<0) {
+	  if(tcaljy_array[i]<=0) {
 	    fprintf(parsedFile, "%.2f ", BADVALUE);
 	  } else {
 	    fprintf(parsedFile, "%.4f ", tcal_ass_array[i]/tcaljy_array[valcount]);
@@ -308,7 +307,6 @@ int main(int argc, char *argv[])
       valcount++;
     }
   }
-  
   fputs("*\n", parsedFile);
   
   fputs("$STATS\n", parsedFile);
@@ -346,3 +344,12 @@ int min(int x, int y) {
         return y; 
     } 
 } 
+
+
+
+
+
+
+
+
+

@@ -12,7 +12,7 @@ vueinfo.o what_help.o
 #
 ../bin/fsvue: fsvue
 	rm -f ../bin/fsvue
-	ln -s ../fsvue/fsvue ../bin/fsvue
+	ln -s ../fsvue/fsvue_start ../bin/fsvue
 #
 ../bin/vueinfo: $(OBJECTS)
 	$(CC)  -o ../bin/vueinfo $(OBJECTS) $(LIBES)
