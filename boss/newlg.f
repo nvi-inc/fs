@@ -186,6 +186,8 @@ c
         nch=ichmv_ch(ib,nch,'lba')
       else if(rack.eq.LBA4) then
         nch=ichmv_ch(ib,nch,'lba4')
+      else if(rack.eq.S2) then
+        nch=ichmv_ch(ib,nch,'s2')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -312,6 +314,42 @@ c
       call fs_get_imk4fmv(imk4fmv)
       nch = nch + ib2as(imk4fmv,ib,nch,z'8005')
 
+      nch=mcoma(ib,nch)
+      call fs_get_ndas(ndas)
+      nch = nch + ib2as(ndas,ib,nch,z'8002')
+
+      nch=mcoma(ib,nch)
+      call fs_get_idasfilt(idasfilt)
+      if (idasfilt.eq.0) then
+         nch=ichmv_ch(ib,nch,'out')
+      else if (idasfilt.eq.1) then
+         nch=ichmv_ch(ib,nch,'in')
+      endif
+
+      nch=mcoma(ib,nch)
+      call fs_get_idasbits(idasbits)
+      if (idasbits.eq.0) then
+         nch=ichmv_ch(ib,nch,'8bit')
+      else if (idasbits.eq.1) then
+         nch=ichmv_ch(ib,nch,'4bit')
+      endif
+
+      nch=mcoma(ib,nch)
+      call fs_get_wx_met(wx_met)
+      if (wx_met.eq.0) then
+         nch=ichmv_ch(ib,nch,'cdp')
+      else if (wx_met.eq.MET3) then
+         nch=ichmv_ch(ib,nch,'met3')
+      endif
+
+      nch=mcoma(ib,nch)
+      call fs_get_mk4sync_dflt(mk4sync_dflt)
+      if(mk4sync_dflt.eq.-1) then
+         nch=ichmv_ch(ib,nch,'off')
+      else
+         nch = nch + ib2as(mk4sync_dflt,ib,nch,z'8002')
+      endif
+
       call logit3(ib,nch-1,lsor)
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
@@ -350,7 +388,7 @@ c
       else if (model.eq.'r') then
          nch=ichmv_ch(ib,nch,'rate')
       else if (model.eq.'c') then
-         nch=ichmv_ch(ib,nch,'ntp')
+         nch=ichmv_ch(ib,nch,'computer')
       endif
       call logit3(ib,nch-1,lsor)
 C
