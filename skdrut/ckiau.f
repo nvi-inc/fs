@@ -48,7 +48,7 @@ C 3. Convert integer to ASCII
 
 C 4. Compare to input name
 
-      if (ichcm(liau,1,iau_ck,1,8).ne.0) then !disagreement
+      if (ichcm(liau,1,iau_ck,1,8).ne.0.and.lu.gt.0) then !disagreement
         write(lu,9100) liau,lcom,iau_ck
 9100    format('NOTE: IAU name for ',4a2,' (',4a2,') should be ',4a2)
       endif
