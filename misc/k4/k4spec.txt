@@ -1,6 +1,7 @@
 Draft Specification for K4 Implementation in the FS
 
-WEH 990524
+WEH   990524
+OSAKI 020325
 
 RACK AND RECORDER TYPES
 
@@ -89,20 +90,23 @@ was requested or "PLY" if was not.
 ----------------------------------------------------------------------------
 REC_MODE - Set recording mode
 
-Syntax: rec_mode=<bw>,<bits>,<chan>
+Syntax: rec_mode=<bw>,<bits>,<chan>,<im>,<nm>
 
-Response: rec_mode/<bw>,<bits>,<chan>,<form>,<ts>,<im>,<nm>,<ta>,<pb>
+Response: rec_mode/<bw>,<bits>,<chan>,<im>,<nm>,<form>,<ts>,<ta>,<pb>
 
-<bw>:   overall recording bandwidth in MHz, 64 (default) , 128, or 256
+<bw>:   overall recording bandwidth in MHz, 16, 32, 64, 128 (default),
+        or 256.
 <bits>: number of bits per sample: 1 (default), 2, 4, or 8
 <chan>: channels recorded: 1, 2, 4, 8, or 16 (default)
+<im>:   insertion mode for time stamp: FB (fixed bit) or FT (fixed time),
+        Default FB for 256 MHz BW, FT for all others.
+<nm>:   insertion number: 0 to 30, or 99 (0 and 99 for infinitive), Default
+        15 for 128 MHz BW, 30 for 256 MHz, 0 for all others.
 
-Monitor-only parameters: 
+Monitor-only parameters:
 
 <form>: recording format: OLD or NEW
-<ts>:   time stamp: ON or OFF 
-<im>:   insertion mode for time stamp: FB (fixed bit) or FT (fixed time)
-<nm>:   insertion number: 0 to 30
+<ts>:   time stamp: ON or OFF
 <ta>:   TAP setting mode: 0 or 1
 <pb>:   pass-band setting: 0 to 16
 
