@@ -80,6 +80,7 @@ C
         goto 990
       else if(cjchar(parm,1).eq.'*') then
         call fs_get_ipashd(ipashd)
+        call fs_get_posnhd(posnhd)
         call mic2vlt(1,ipashd(1),kautohd_fs,posnhd(1),volts(1),ip)
         if(ip(3).ne.0) goto 990
         kvolts(1)=.true.
@@ -104,6 +105,7 @@ C
         goto 990
       else if(cjchar(parm,1).eq.'*') then
         call fs_get_ipashd(ipashd)
+        call fs_get_posnhd(posnhd)
         call mic2vlt(2,ipashd(2),kautohd_fs,posnhd(2),volts(2),ip)
         if(ip(3).ne.0) goto 990
         kvolts(2)=.true.
@@ -138,6 +140,7 @@ C
 C  save the results in common
 C
       call fs_get_ipashd(ipashd)
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(kvolts(i)) then
           call vlt2mic(i,0,.false.,volts(i),microns(i),ip)
@@ -148,6 +151,7 @@ C
         endif
       enddo
       call fs_set_ipashd(ipashd)
+      call fs_set_posnhd(posnhd)
 C
       call set_vlt(ihd,volts,ip,0.40)
       if(ip(3).ne.0) go to 800
@@ -238,6 +242,7 @@ C
 C
       if(itask.eq.3) then
       call fs_get_ipashd(ipashd)
+      call fs_get_posnhd(posnhd)
       call fs_get_drive_type(drive_type)
         do i=1,2
           if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
@@ -245,7 +250,7 @@ C
             if(drive_type.ne.VLBA2) then
                nch = nch+ir2as(volt(i),ibuf,nch,8,3)
             else
-               nch = nch+ir2as(volt(i),ibuf,nch,6,0)
+               nch = nch+ir2as(volt(i),ibuf,nch,7,0)
             endif 
           endif
           nch = mcoma(ibuf,nch)
@@ -257,7 +262,7 @@ C
           if(drive_type.ne.VLBA2) then
             nch = nch+ir2as(volts(i),ibuf,nch,8,3)
           else
-            nch = nch+ir2as(volts(i),ibuf,nch,6,0)
+            nch = nch+ir2as(volts(i),ibuf,nch,7,0)
           endif
         endif
         nch = mcoma(ibuf,nch)
@@ -269,7 +274,7 @@ C
             if(drive_type.ne.VLBA2) then
               nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
             else
-              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,6,0)
+              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,7,0)
             endif
           endif
           nch = mcoma(ibuf,nch)
