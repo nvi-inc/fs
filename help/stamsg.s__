@@ -1,0 +1,21 @@
+               stamsg - decode status code (S2 racks)
+
+            Syntax: stamsg=code 
+
+            Response: stamsg/statxt
+  
+            code   : Status code to be decoded. Always positive.
+            statxt : Description of the status.
+  
+Settable Parameters: none
+
+  
+Monitor-only Parameters: none
+
+Comments: 
+
+Used to decode status code obtain with s2status command.  
+  
+  
+  
+  

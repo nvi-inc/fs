@@ -1,0 +1,28 @@
+               agc - gain control mode (S2 racks)
+
+            Syntax: agc=gainmode 
+
+            Response: agc/gainmode 
+  
+  
+Settable Parameters:
+
+   gainmode : Global gain control mode for all BBC. Either on or off. No default.
+              Use on to activate automatic gain control on all BBC. 
+  
+Monitor-only Parameters: none 
+
+Comments: 
+
+This command selects the Automatic Gain Control mode for all BBC on S2 rack. For 
+individual control over AGC settings for individual BBC, see bbcn 
+Normal setting during an experiment is on. 
+To hold the gain at a given value, switch to off gain control. The BBC gain 
+value will stay at the value it had when the AGC was changed to off. Then use on 
+to return to AGC control. This method is used for radiometry by onoff and fivpt. 
+
+  
+  
+  
+  
+  

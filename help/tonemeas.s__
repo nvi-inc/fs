@@ -1,0 +1,26 @@
+               tonemeas - tone detector measurement (S2 racks)
+
+            Syntax: tonemeas=bbc (non frequency switching) 
+            Syntax: tonemeas=bbc,state (frequency switching) 
+  
+            Response: tonedet/bbc,amplitude1,phase1,amplitude2,phase2
+            Response: tonedet/bbc:state,amplitude1,phase1,amplitude2,phase2
+
+            bbc   : bbc number for tone measurement.
+            state : state number when in frequency switching mode.
+
+Settable Parameters: none
+
+Monitor-only Parameters:
+ 
+            amplituden : Amplitude measured by tone detector n. 
+            phasen     : Phase in degree measured by tone detector n. 
+
+Comments:
+
+If state is not specified during frequency switching, tone detector for current state
+is displayed. In that case the state number is unknown. Always used format with state
+during frequency switching.
+  
+  
+  

@@ -1,0 +1,21 @@
+               errmsg - decode error code (S2 racks)
+
+            Syntax: errmsg=code 
+
+            Response: errmsg/errtxt
+  
+            code   : Error code to be decoded. Always negative.
+            errtxt : Description of the error.
+  
+Settable Parameters: none
+
+  
+Monitor-only Parameters: none
+
+Comments: 
+
+Used to decode error return by s2das.  
+  
+  
+  
+  

@@ -1,0 +1,20 @@
+               tonedet - tone detector (S2 racks)
+
+            Syntax: tonedet=freq1,sideband1,freq2,sideband2,avper 
+  
+            Response: tonedet/freq1,sideband1,freq2,sideband2,avper
+
+
+Settable Parameters: 
+
+  freqx     : Frequncy in MHz for detector x. Valid range is 0 to BMHz where B is the
+              lowest current BBC bandwidth setting. 
+  sidebandx : Sideband selection for detector x (usb or lsb).
+  avper     : Averaging period for tone detect in seconds (0.01 to 10 seconds). 
+  
+Monitor-only Parameters: none
+ 
+  
+  
+  
+  

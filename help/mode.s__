@@ -1,0 +1,20 @@
+               mode - observing mode (S2 racks)
+
+            Syntax: mode=name,bwset 
+  
+            Response: mode/name 
+
+Settable Parameters:
+
+    name  : S2DAS observing mode. See S2DAS manual for list of 262 possible modes. 
+    bwset : Force bw setting to be compatible with this mode. yes ro no. Default no.
+ 
+Monitor-only Parameters: none
+
+Comments: 
+
+Sets the S2DAS mode, which determines the data channelization,
+sideband selection, and expected channel data rate. This command
+configures the RIC crossbar switches as required. This command 
+do not set bandwidth for each bbc. bbcn command should be used.
+

@@ -1,0 +1,25 @@
+               s2status - status report (S2 racks)
+
+            Syntax: s2status=type,read 
+            Syntax: s2status 
+
+            Response: s2status/err1,err2,...,errn
+  
+            type : type of report (long, brief, short).
+            read : force new status reading. Default blank.
+  
+Settable Parameters: none
+
+  
+Monitor-only Parameters:
+
+            errn : code for error message. 
+Comments: 
+
+s2status can be used to read code of present since last reading. The long report will output
+description of error codes.
+  
+  
+  
+  
+  

@@ -1,0 +1,18 @@
+               encode - sampler encoding mode (S2 racks)
+
+            Syntax: encode=scheme 
+  
+            Response: encode/scheme 
+
+Settable Parameters:
+
+    scheme : Sampler encoding scheme. Either vlba or sbin. 
+  
+Monitor-only Parameters: none
+
+Comments: 
+
+Sets the sampler encoding scheme to be used by all BBCs. There are two available 
+encoding schemes: vlba encoding (same as used by the VLBA), and signed-binary 
+encoding sbin. 
+  
