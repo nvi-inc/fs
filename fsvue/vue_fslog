@@ -95,7 +95,7 @@ text .t -yscrollc {.sb set} -font $bfont -bg linen
 scrollbar .sb -bg linen -command {.t yview}
 text .t2 -height 1 -font $bfont2 -bg white -fg Red
 
-.t tag configure errtag -foreground black -background darkred
+.t tag configure errtag -foreground black -background red
 
 pack .sb -side right -fill y
 pack .t .t2 -side top -fill both -expand 1
