@@ -6,12 +6,13 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
+get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal,
+	      trec,tspill)
      struct rxgain_ds rxgain[];
      int maxrx;
      double lo,center,diam,el;
      char pol;
-     float *fwhm, *tcal, *dpfu, *gain;
+     float *fwhm, *tcal, *dpfu, *gain, *trec, *tspill;
 {
   int i, ir, ifirst, ilast;
   double arg;
@@ -20,6 +21,8 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
   *dpfu=0.0;
   *tcal=0.0;
   *gain=0.0;
+  *trec=0.0;
+  *tspill=0.0;
 
   ir=-1;
   for(i=0;i<maxrx;i++) {
@@ -122,15 +125,32 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
   default:
     break;
   }
+  *trec=rxgain[ir].trec;
+
+  /* iterpolate spillover */
+
+  ifirst=-1;
+  ilast=-1;
+  for(i=0;i<rxgain[ir].spill_ntable;i++)
+    if( rxgain[ir].spill[i].el <= el)
+	ifirst=i;
+      else if( el < rxgain[ir].spill[i].el) {
+	ilast=i;
+	goto interp_spill;
+      }
+  interp_spill:
+  if(ifirst==-1 && ilast == -1)
+    *tspill=0.0;
+  else if(ifirst==-1 && ilast != -1)
+    *tspill=rxgain[ir].spill[ilast].tk;
+  else if(ifirst!=-1 && ilast ==-1)
+    *tspill=rxgain[ir].spill[ifirst].tk;
+  else if(ifirst!=-1 && ilast!=-1)
+    *tspill=rxgain[ir].spill[ifirst].tk+
+      (el-rxgain[ir].spill[ifirst].el)*
+      (rxgain[ir].spill[ilast].tk-
+       rxgain[ir].spill[ifirst].tk)/
+      (rxgain[ir].spill[ilast].el-
+       rxgain[ir].spill[ifirst].el);
+
 }
-
-
-
-
-
-
-
-
-
-
-

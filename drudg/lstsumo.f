@@ -109,11 +109,14 @@ C Local
       equivalence (ccodetmp,lcodetmp)
       integer nch
       integer itype
-      integer num_sub_pass
+      integer num_sub_pass,num_recs
       character*12 lfilnam
 ! tape type
       character*6 cTapeType     !THICK,THIN SHORT
       character*4 cTapeDens     !HIGH, LOW
+      logical kdisk
+
+      kdisk=km5A .or. KM5P
 
 ! Initialize
       if(npage .eq. 0 .and. iline .eq. maxline) then
@@ -123,7 +126,7 @@ C Local
         end do
       endif
 
-      kmv=.not.(ks2.or.kk4 .or. km5.or.km5p) ! kmv=Mk3/4 or VLBA
+      kmv=.not.(ks2.or.kk4 .or. kdisk) ! kmv=Mk3/4 or VLBA
       kcont=.true. ! if we don't know, include the column
       if (kskd) kcont=tape_motion_type(istn).eq.'CONTINUOUS'.or.
      >                tape_motion_type(istn).eq.'ADAPTIVE'  .or.
@@ -146,7 +149,7 @@ C  1. Headers.
         else
           write(luprt,9203) cstn,cid,cexper
 9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
-          if(km5 .or. km5p) then
+          if(kdisk) then
             write(luprt)
      >       "Warning! Can't give byte-count without schedule file."
           else if(kk4) then
@@ -171,9 +174,9 @@ C  1. Headers.
             write(luprt,  '(" Recorder type:   S2")')
           else if (kk4) then
             write(luprt,  '(" Recorder type:   K4")')
-          else if(km5 .or. km5p) then
+          else if(kdisk) then
             write(luprt,  '(" Recorder type:   DISK")')
-          else if(.not. (km5 .or. km5p)) then
+          else if(.not. (kdisk)) then
             if (bitdens(istn,1).gt.56000.0) then
                cTapeDens='High'
             else
@@ -191,23 +194,31 @@ C  1. Headers.
           endif
         endif
 
-        write(luprt,9210)  crack
+        write(luprt,9210)  cstrack(istn)
 9210    format(" Rack:            ",a)
-        write(luprt, 9211)    creca,itearl_local
+        write(luprt, 9211)    cstrec(istn),itearl_local
 9211    format(" Recorder 1:      ",a,14x,"Early start: ",i6,1x,"sec")
-        write(luprt, 9212)    crecb,itlate_local
+        write(luprt, 9212)    cstrec2(istn),itlate_local
 9212    format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
 
 ! Put out procedure names
-        if (km5.or. km5p .or.ks2.or.kk4) then ! setup proc names
+        if (kdisk .or.ks2.or.kk4) then ! setup proc names
           itype=1
         else
           itype=2
         endif
+
+        num_recs=nrecst(istn)
+        if(nrecst(istn) .eq. 2) then
+          if(crecb .eq. "unused" .or. crecb .eq. "none") then
+             num_recs=1
+           endif
+        endif
+
         do icode=1,ncodes
-          num_sub_pass=npassf(istn,icode)
-          if(num_sub_pass .ge. 1) then
-            if(km5)  num_sub_pass=1
+          do irec=1,num_recs ! loop on number of recorders
+            num_sub_pass=npassf(istn,icode)
+            if(kdisk)  num_sub_pass=1
             write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
             do ipass=1,num_sub_pass
               cnamep=" "
@@ -218,7 +229,7 @@ C  1. Headers.
             lcodeTmp=lcode(icode)
             call c2lower(ccodetmp,ccodetmp)
             write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
-          endif
+          end do
         end do
 ! End of put out procedure names.
 
@@ -238,7 +249,7 @@ C  1. Headers.
         elseif(kk4) then
           write(luprt,'(a)')
      >   ' Counts = tape counts at start of scan'
-        else if(km5 .or. km5p) then
+        else if(kdisk) then
           write(luprt,'(a)')
      >   ' Gbyte  = Gigabytes at start of scan'
         else
@@ -286,7 +297,7 @@ C  2. Column heads.
            cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
         else if(ks2) then
            cbuf=cbuf(1:il)//'      Dur  Group (min)'
-        else if(km5 .or. km5p) then
+        else if(kdisk) then
            if(kskd) then
              cbuf=cbuf(1:il)//'      Dur    Gbyte'
            else
@@ -400,7 +411,7 @@ C  Duration
       idurs = idur - idurm*60
       write(luprt,'(2x,i3,":",i2.2,$)') iDurM,iDurS
 C  Pass
-      if (.not.(kk4 .or. km5 .or. km5p)) then ! pass or S2 group
+      if (.not.(kk4 .or. kdisk)) then ! pass or S2 group
         if (cnewtap.eq.'@   ') then
           write(luprt,'(1x,"--",$)') 
         else
@@ -417,9 +428,9 @@ C  Footage
         endif
       else if(ks2) then
         write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
-      else if(km5 .or. km5p) then
+      else if(kdisk) then
         if(kskd) then
-          write(luprt,'(f8.1,$)') counter/1024.  !convert megabytes to Gigabytes
+          write(luprt,'(f8.1,$)') counter/1000   !convert megabytes to Gigabytes
         endif
       else if(kk4) then
         if(kskd) then

@@ -107,17 +107,32 @@ C        beginning the current observation
       integer itemp             !short lived variable
       real    speed_ft          !Speed in feet.
       integer icod_old          !previous code.
+      integer imin,isec         !iminutes, seconds
 ! Logical variables
       logical kcont 		! true for CONTINUOUS recording
       logical kadap 		! true for ADAPTIVE recording in VEX file
       logical kcontpass       	! true if a pass is actually continuous
+      logical kcontpass_prev    ! Continuous before this obs?
       logical knewpass  	! true if this obs on new pass.
       logical klast_tape        ! last tape?
+      logical kfirst_tape       ! first tape
 !
       character*1 crecorder     ! temporary characer
       integer isession_len      !length of session code
       character*80 ldum
       character*12 lsession      !filename
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
+
+      character*(max_sorlen) csname_next
+      character*2 cstn_next(max_stn)
+      character*2 cfreq_next
+      equivalence (csname_next,lsname_next),(lstn_next,cstn_next)
+      equivalence (cfreq_next,lfreq)
+      logical km5  !recorder is Mark5P or Mark5A
 
 ! counter
       integer i
@@ -308,7 +323,10 @@ C 021017 nrv Use FSPIN for superfast tape spinning.
 C 021021 nrv If last pass of a tape scheduled as ADAPTIVE is actually 
 C            continuous, then don't need to postpass.
 C 021111 jfq Add klrack into set_type call.
-C
+
+C 2003Jun11 JMGipson. Fixed bug with kcontpass. kcontpass was "off by 1".
+C                     Solved by using kcontpass_old
+C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 
       icod_old=-1
       iblen = ibuf_len*2
@@ -336,6 +354,9 @@ C
       call init_hardware_common(istn)
       MaxTapeLen=MaxTap(istn)
       krec_append = nrecst(istn).gt.1 .and. cstrec(istn)(1:4).ne."none"
+      kcontpass=.true.  !Passes always start out as continous.
+      kcontpass_prev=.true.
+      kfirst_tape=.true.
 
 C 2. Check the type of equipment so that bit density is correct.
 C   For VEX files the rack and recorder info is taken from the schedule. 
@@ -385,7 +406,7 @@ C    and whether maximal checks are wanted.
       ierr=1
 
       if (ks2rec(1).or.ks2rec(2).or.kk41rec(1).or.kk41rec(2).or.
-     .    kk42rec(1).or.kk42rec(2).or.km5rec(1).or.km5rec(2)) then
+     .    kk42rec(1).or.kk42rec(2).or.km5Arec(1).or.km5Arec(2)) then
         maxchk = 'N'
         dopre = 'N'
       else
@@ -449,17 +470,14 @@ C Initialize recorder information.
       call hol2char(lfirstrec(istn),1,1,crecorder)
       if (crecorder.eq.'1') then ! first recorder
         irec=1
-        kk4 = kk41rec(1).or.kk42rec(1)
-        ks2 = ks2rec(1)
-        krec= cstrec(istn) .ne. 'none'
-        km5 = km5rec(1) .or. km5prec(1)
       else ! second recorder
         irec=2
-        kk4 = kk41rec(2).or.kk42rec(2)
-        ks2 = ks2rec(2)
-        km5 = km5rec(2) .or. km5prec(2)
-        krec= cstrec2(istn) .ne. 'none'
       endif
+      kk4 = kk41rec(irec).or.kk42rec(irec)
+      ks2 = ks2rec(irec)
+      km5 = km5Arec(irec) .or. km5prec(irec).or.km5APigwire(irec)
+      krec= cstrec(istn) .ne. 'none'
+
 
       iobs=0
       do while (istnsk.eq.0.and.ilen.ge.0) ! Get first scan for this station into IBUF
@@ -473,7 +491,9 @@ C Initialize recorder information.
      >      itime_scan_beg(4),itime_scan_beg(5),
      >      IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      >      MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-          CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+!          CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+          call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+
           IF (ISOR.EQ.0.OR.ICOD.EQ.0) RETURN
         else
           ilen=-1
@@ -515,7 +535,7 @@ C
      >        LMID_next,LPST_next,NSTNSK_next,LSTN_next,LCABLE_next,
      >        MJD_next,UT_next,GST_next,MON_next,IDA_next,
      >        LMON_next,LDAY_next,IERR_next,KFLG_next,ioff_next)
-            CALL CKOBS(LSNAME_next,LSTN_next,NSTNSK_next,LFREQ_next,
+            CALL CKOBS(cSNAME_next,cSTN_next,NSTNSK_next,cFREQ_next,
      >        isor_next,ISTNSK_next,ICOD_next)
 C           call sname(idayr_next,ihr_next,imin_next,
 C    .      scan_namep,scan_name_next)
@@ -528,6 +548,7 @@ C           idum = ichmv(scan_namep,1,scan_name_next,1,16)
         enddo ! get NEXT scan for this station into ibuf_next
 
         if(istnsk_next .ne. 999) ifeet_next=ift(istnsk_next)
+
 C
         IF (ISTNSK.NE.0)  THEN ! our station is in this scan
           IF (ichcm_ch(LDIR(ISTNSK),1,'R').eq.0) IDIR=-1
@@ -565,6 +586,7 @@ C         Force new tape on the first scan on tape.
               itime_tape_stop_prev(i)	=itime_tape_stop(i)
             end do
           endif
+          kcontpass_prev=kcontpass
 
           if(knewtp .or. icod .ne. icod_old) then
             speed_ft=speed(icod,istn)
@@ -596,6 +618,8 @@ C
         if(kadap) then
           if(ks2) then          !s2
             if (iobsst.gt.0) then ! got a previous scan
+              call TimeAdd(itime_scan_end_prev,itlate(istn),
+     >             itime_pass_end)
               idt = iTimeDifSec(itime_early,itime_tape_stop_prev)
               ket = idt.gt.itgap(istn)
             else ! first scan
@@ -609,9 +633,11 @@ C This is restricted to "adaptive" coming from VEX files.
                 idt=iTimeDifSec(itime_scan_beg_next,itime_tape_stop)-
      >                              itearl(istn)
                 ket = idt.gt.itgap(istn)
-                if (ket) kcontpass = .false. ! this pass not continuous
+                if (ket) then
+                  kcontpass = .false. ! this pass not continuous
+                endif
+
 C               Use the offsets instead of slewing to determine good data time
-C               time5 = data start = tape start + offset
                 call TimeAdd(itime_scan_beg,ioff(istnsk),itime_off)
                 do i=1,5
                   itime_tape_start(i)=itime_off(i)
@@ -806,17 +832,28 @@ C Unload tape.
           IF (.not.km5.and.(KNEWTP.AND.IOBSst.NE.0)) THEN !unload old tape
 
             klast_tape=.false.
-            call TimeSub(itime_tape_start,420,itime_tape_need)
+            call TimeSub(itime_tape_start,itctim,itime_tape_need)
+            if(ks2) then
+              call snap_wait_time(lu_outfile,itime_pass_end)
+            endif
+
             call snap_unload_tape(luscn,itime_tape_stop_prev,
      >          itime_tape_stop_spin,itime_tape_need,nrecst(istn),ntape,
-     >          kpostpass,kcontpass,kcont,klast_tape)
+     >          kpostpass,kcontpass_prev,kcont,klast_tape)
 
             idt=iTimeDifSec(iTime_tape_stop_spin,iTime_tape_need) !tape_stop-tape_start
             if(idt .gt. 0) then    !not enough time.
-               write(luscn,'(a)')
+               imin=itctim/60
+               isec=itctim-imin*60
+               write(luscn,'(a,$)')
      >             "SNAP05: Not enough time to change tape!"
-               write(luscn,'(a,$)') "Tape stops moving at:  "
+               write(luscn,'(a,i2.2,"m",1x,i2.2,"s",a)')
+     >            " Schedule says you need ",imin,isec,
+     >            " seconds to change tape."
+               write(luscn,'(a,$)') "Tape stops moving at:   "
                call snap_wait_time(luscn,itime_tape_stop_spin)
+               write(luscn,'(a,$)') "Next obs is at:         "
+               call snap_wait_time(luscn,itime_tape_start)
                write(luscn,'(a,$)') "Should have stopped by: "
                call snap_wait_time(luscn,itime_tape_need)
             endif
@@ -829,15 +866,13 @@ C Switch recorders if we have two of them, and they are both used.
      >                                                             then
               if (irec.eq.1) then
                 irec=2
-                kk4 = kk41rec(2).or.kk42rec(2)
-                ks2 = ks2rec(2)
-                krec=cstrec(istn) .ne. "none"
               else
                 irec=1
-                kk4 = kk41rec(1).or.kk42rec(1)
-                ks2 = ks2rec(2)
-                krec=cstrec2(istn) .ne. "none"
               endif
+              kk4 = kk41rec(irec).or.kk42rec(irec)
+              ks2 = ks2rec(irec)
+              km5 = km5Arec(irec).or.km5prec(irec).or.km5APigwire(irec)
+              krec= cstrec(istn) .ne. 'none'
             endif ! don't/switch
 ! do end of tape housework
           END IF !unload old tape.
@@ -895,7 +930,8 @@ C READY
           if (iobss.eq.0) then ! do a SETUP first
              call snap_setup(ipas,istnsk,icod,iobs,kerr)
           endif ! do a SETUP first
-          call snap_ready(ntape)
+          call snap_ready(ntape,kfirst_tape)
+          kfirst_tape=.false.
 
 C Prepass new tape
           IF (dopre.eq.'Y'.and.KFLG(3)) THEN !prepass
@@ -965,7 +1001,7 @@ C  Wait until ITEARL before start time
           call snap_wait_time(lu_outfile,itime_tape_start)
 C   Write out tape monitor command at early start
           call snap_monitor()
-          if(.not. krunning) call snap_start_recording()
+          if(.not. krunning.or. ks2) call snap_start_recording()
         endif ! continuous
         endif !start tape early/issue ST again
         endif !non-zero scan
@@ -1033,6 +1069,9 @@ C         Wait until late stop time before issuing ET
             if (km5) then ! disk
               call snap_disc_end()
             else ! tape
+              if(KM5A_piggy .or. KM5P_piggy) then
+                 call snap_disc_end()
+              endif
               call snap_et()
             endif
           endif! ET command
@@ -1063,7 +1102,11 @@ C Save information about this scan before going on to the next one
      .        IDUR(ISTNSK))*speed_ft)
         endif ! update direction and footage
 C POSTOB
-        call snap_hol_wrt(lu_outfile,lpst,6)
+        if(km5a.or.km5a_piggy) then
+          write(lu_outfile,'(a)') "postob_mk5a"
+        else
+          call snap_hol_wrt(lu_outfile,lpst,6)
+        endif
 
 !       utpre = ihr4*3600.d0+min4*60.d0+isc4 + idur(istnsk)
         mjdpre = JULDA(1,itime_scan_end(2),itime_scan_end(1)-1900)
@@ -1084,13 +1127,21 @@ C     Copy ibuf_next into IBUF and unpack it.
      >      itime_scan_beg(4),itime_scan_beg(5),
      >      IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      >      MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-        CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+!        CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+        call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+
       endif
 
       END DO ! ilen.gt.0,kerr.eq.0,ierr.eq.0
 
 ! Finish up.
       klast_tape=.true.
+      if(ks2) then
+        call TimeAdd(itime_scan_end,itlate(istn),
+     >             itime_pass_end)
+         call snap_wait_time(lu_outfile,itime_pass_end)
+      endif
+
       call snap_unload_tape(luscn,itime_tape_stop_prev,
      >    itime_tape_stop_spin,itime_tape_need,nrecst(istn),ntape,
      >    kpostpass,kcontpass,kcont,klast_tape)

@@ -5,6 +5,8 @@
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
       include 'hardware.ftni'
+! 28Aug2003  JMGipson. Divide Gbyte count by ifan_fact.
+
 ! passed
       integer icode                     ! current mode
       logical kskd                      ! do we have a sked file? need to get speed for Mark5A or Mark5P
@@ -16,23 +18,25 @@
       integer ntracks_rec_mk5
       integer nchans_obs               !Number recorded
       integer ifan_fact                 !ifan_factor
+      integer ipass
 
-      if(km5 .or. km5p .or. km5A_piggy .or. km5P_piggy) then
+      ipass=1
+
+      if(km5A .or. km5p .or. km5A_piggy .or. km5P_piggy) then
         if(kskd) then
           ifan_fact=max(1,ifan(istn,icode))
-          call find_num_chans_rec(itras(1,1,1,1,1,istn,icode),
+          call find_num_chans_rec(ipass,istn,icode,
      >            ifan_fact,nchans_obs,ntracks_rec_mk5)
-          if(km5) then
-            if(km5A_piggy) ntracks_rec_mk5=32
+          if(km5A.or. Km5A_piggy) then
             conv=(1./8.)     		!= 1byte/8bits
-            spd_rec=(ntracks_rec_mk5/ifan_fact)*samprate(icode)*conv
-          else if(km5p) then
-            if(km5P_piggy) nchans_obs=32/ifan_fact
+            spd_rec=ntracks_rec_mk5*samprate(icode)*conv
+          else if(km5p .or. Km5P_piggy) then
+!            if(km5P_piggy) nchans_obs=32/ifan_fact
             conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
             spd_rec=nchans_obs*samprate(icode)*conv
           endif
-          spd_rec=1.
         endif
+        spd_rec=spd_rec/ifan_fact
       else if(kk4) then
          if(kskd) then
            conv = 55.389387393d0 ! counts/sec

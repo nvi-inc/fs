@@ -36,14 +36,23 @@
 
       iwait5sec=5
 
-! stop the tape if necessary.
-      if(.not. (km5 .or. kk4)) then
-        if(krunning) call snap_et()
-      endif ! shut it down
+! stop and unload tape if neccesary.
+! Take care of some simple cases.
+      if(KM5A .or. KM5P) then
+        return
+      else if(kk4) then
+        call snap_unlod(ntape)
+        krunning=.false.
+        return
+      else if(ks2) then
+        call snap_et()
+        call snap_unlod(ntape)
+        krunning=.false.
+        return
+      endif
 
 !      itime_tape_stop_spin=itime_tape_stop      !default is no time for spin down.
       call TimeAdd(itime_tape_stop,0,itime_tape_stop_spin)
-      if(km5 .or. ks2 .or. kk4) goto 500        !this goes to unload tape.
 
 ! In principle need to postpass.
       if (MaxTapeLen.gt.10000.and.kpostpass .and. .not. kcont) then

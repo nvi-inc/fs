@@ -6020,3 +6020,155 @@ Version 9.6.3 030520
 	   and tcal curves.
 
 Version 9.6.4 030604
+
+030609 CMH gndat/gndat
+	   gndat now gets trec and tspill from .rxg files
+
+030609 CMH gnplt/gnplt
+	   gain fitting option, "Scale TCal(K)", now works
+
+030610 CMH gnplt/gnplt
+	   gain can be corrected for opacities
+
+030611 CMH gnplt/gnplt
+	   the user can fit for trec, and setting the time interval for 
+	   doing so
+
+030613 CMH gnplt/manual.txt
+           updated
+
+030613 WEH matcn/matcn.c
+           test properly for time-out for raw hardware address in string
+           and add sensible default if not found
+
+030616 GM  vmk5/vk5.tcl
+           vmk5/Notes_about_visual_Mark5_v_2.0.txt
+	   vmk5/Makefile
+           version 2.0
+
+030617 WEH misc/rxgfix
+           created
+
+030623 WEH st.default/oper/.fvwmrc
+           st.default/prog/.fvwmrc
+           fix-ed bug in quoting for "Window Ops2"
+
+030623 WEH st.default/oper/.fvwm2rc
+           st.default/prog/.fvwm2rc
+           created
+
+030623 WEH st.default/oper/.Xresources
+           st.default/prog/.Xresources
+           add VT100 colors for FS Linux 5
+
+030623 WEH st.default/oper/.cshrc
+           st.default/prog/.cshrc
+           fixed ps aux
+
+030625 WEH quikv/ed.c
+           fixed class number eating problem
+
+030625 RDG st.default/st-0.0.0/metserver/src/metget.c
+           /usr2/fs/clib/fsmetc.c
+           returns errors
+
+030625 RDG st.default/st-0.0.0/metclient/src/metclient.c
+           /usr2/fs/quikr/wx.f
+           now consistent with FS log error format
+
+030708 WEH st.default/control/flagr.ctl
+           default is disabled
+           <0 means local interval
+
+030708 WEH st.default/control/x.rxg
+           st.default/control/s.rxg
+           new format
+
+030709 WEH mk5cn/mk5cn.c
+           add MSG_DONTWAIT|MSG_NOSIGNAL to send()
+            
+Version 9.6.5 030714
+
+030715 WEH mk5cn/mk5cn.c
+           make MSG_DONTWAIT|MSG_NOSIGNAL usage backward compatible
+
+030716 WEH quikv/onoff.c
+           fix USB center frequency for Mark III/IV
+
+030716 WEH msg/msg
+           support disc_start for auto-start feature
+
+030722 RDG st.default/st-0.0.0/metclient/INSTALL
+           st.default/st-0.0.0/metserver/INSTALL
+           st.default/st-0.0.0/tacdclient/INSTALL
+           new improved instructions
+
+030723 WEH mk5cn/mk5cn.c
+           add variable time-out feature
+           make 2 seconds the minimum time-out
+
+030723 WEH quikv/bank_check.c
+           add 4 second delay for delayed completion for bank_check=inc
+
+030723 WEH quikv/bank_check.c
+           quikv/bank_check_dis.c
+           quikv/bank_inc_check.c
+           retrieve serial numbers also
+
+030724 WEH misc/INSTALL-rc.fs.txt
+           created
+
+030724 WEH mk5cn/mk5cn.c
+           make record off time-out 4 seconds
+
+Version 9.6.6 030803
+
+030805 RDG /usr2/fs/Makefile
+           removed tacd directory.
+
+030813 RDG quikr/wx.f
+           Wind direction now displayed left-justified to conform
+           to Field System display format.
+
+030822 RDG quikv/tacd.c
+           A 'return' was replaced by a 'goto error'. A return
+           will cause tacd to continue on an infinit loop if
+           file is empty.
+
+030829 WEH quikr/party.f
+           help/parity._l_
+           control/fserr.ctl
+           added "*" syntax for track list so that tracks can be 'added'
+
+030830 WEH control/fserr.ctl
+           added Mk5 returns codes 7 and 8
+
+030902 WEH st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/change_pack.prc
+           quikv/bank_check.c
+           add change_pack procedure call
+
+030904 WEH vmk5/
+           removed, now available from ftp://web.haystack.edu/pub/mark5/vMk5/
+
+030905 RDG clib/fsmetc.c
+           st.default/st-0.0.0/metserver/src/metserver.c
+           Server will return information to 'wx' SNAP command
+           instantly. The oldest met data will be 4secs. 
+
+Version 9.6.7 030905

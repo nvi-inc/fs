@@ -11,9 +11,9 @@ C This routine types labels for Mark III tapes
 C INPUT:
 C        PCODE - 1 or 2 open file
 C                1 or 3 close file
-        integer pcode
-        logical kskd
-        character*(*) cr1,cr2,cr3,cr4
+      integer pcode
+      logical kskd
+      character*(*) cr1,cr2,cr3,cr4
       integer inew ! 1 to start a new ps barcode file
 C OUTPUT: none
 C LOCAL:
@@ -23,7 +23,9 @@ C LOCAL:
      .          lstnam(4),lco
       integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
       integer iob,idum,ilabrowin,ilabcolin
-        LOGICAL   KEX,ks2
+      LOGICAL   KEX,ks2
+
+
 C IYR, MON, IDA, IHR, iMIN, IDUR, ICAL, IDLE,
 C LFREQ, ISP, LMODE,
 C These are holders for the information contained
@@ -36,28 +38,33 @@ C NLAB - number of labels across a page
       integer mjd,ida,iyr2,iyear,iyr,idayr,ihr,imin,isc,
      .idayr2,ihr2,min2,isc2,mon
       integer ipsy1,ipsy2,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2
-      integer istnsk,isor,icod,i,iftold,nout,nlabpr,l,ilen,ical,
+      integer istnsk,isor,icod,iftold,nout,nlabpr,l,ilen,ical,
      .nstnsk,idir,idirp,ipasp,ierr,ntape
       integer*2 lfreq
-        integer IY1(5),ID1(5),IH1(5),IM1(5),
+      integer IY1(5),ID1(5),IH1(5),IM1(5),
      .          iy2(5),ID2(5),IH2(5),IM2(5) ! holders for row of labels
-        LOGICAL KNEWT
+      LOGICAL KNEWT
       LOGICAL KNEW
-        CHARACTER*50 CLASER,cbuf
-        character*8 cexper,cstn
-        character*1 cid1
-         character*2 cid2
+      CHARACTER*50 CLASER,cbuf
+      character*8 cexper,cstat
+      character*1 cid1
+      character*2 cid2
       INTEGER IC, TRIMLEN,jchar,ichmv,iflch
       character*20 response
       real speed ! function
-        integer Z24
-        integer*2 hhr
-         integer ichcm_ch,copen,cclose
-       character upper
+      integer Z24
+      integer*2 hhr
+      integer ichcm_ch,copen
+      character upper
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
 
 C INITIALIZED:
-        DATA IPASP/-1/, IFTOLD/0/
-        DATA Z24/Z'24'/, HHR/2HR /
+      DATA IPASP/-1/, IFTOLD/0/
+      DATA Z24/Z'24'/, HHR/2HR /
 
 C SUBROUTINES CALLED:
 C  UNPSK - unpacks schedule file entry
@@ -112,8 +119,8 @@ C 1. First get set up with schedule or SNAP file.
 
       if (kskd) then
         IC = TRIMLEN(LSKDFI)
-        WRITE(LUSCN,9100) (LSTNNA(I,ISTN),I=1,4),LSKDFI(1:ic)
-9100    FORMAT(' TAPE LABELS FOR ',4A2,' FROM SCHEDULE FILE ',A)
+        WRITE(LUSCN,9100) cSTNNA(ISTN),LSKDFI(1:ic)
+9100    FORMAT(' TAPE LABELS FOR ',A8,' FROM SCHEDULE FILE ',A)
       else ! Check existence of SNAP file.
         IC = TRIMLEN(CINNAME)
         INQUIRE(FILE=CINNAME,EXIST=KEX)
@@ -134,21 +141,22 @@ C 1. First get set up with schedule or SNAP file.
         read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
 C       read(cbuf,9001) cexper,iyear,cstn,cid
 C9001    format(2x,a8,2x,i4,1x,a8,2x,a1)
-        call read_snap1(cbuf,cexper,iyear,cstn,cid1,cid2,ierr)
+        call read_snap1(cbuf,cexper,iyear,cstat,cid1,cid2,ierr)
         if (ierr.lt.0) then ! set defaults instead
           if (ierr.ge.-1) cexper='XXX'
           if (ierr.ge.-2) iyear=0
-          if (ierr.ge.-3) cstn='        '
+          if (ierr.ge.-3) cstat='        '
           if (ierr.ge.-4) cid1=' '
           if (ierr.ge.-5) cid2='  '
         endif
         ierr=0
         call char2hol(cexper,lexper,1,8)
-        call char2hol(cstn,lstnna(1,1),1,8)
+!        call char2hol(jcstn,lstnna(1,1),1,8)
+        cstat(1:8)=cstnna(1)(1:8)
         call char2hol(cid1,lstcod(istn),1,8)
         ic=trimlen(cinname)
-        write(luscn,9002) (lstnna(i,1),i=1,4),cinname(1:ic)
-9002    format(' Tape labels for ',4a2,' from SNAP file ',a)
+        write(luscn,9002) cstat,cinname(1:ic)
+9002    format(' Tape labels for ',a8,' from SNAP file ',a)
       endif
 C
 C
@@ -371,7 +379,8 @@ C Preset ISTNSK = 0 in case of EOF, this simplifies the
 C logic in "process this observation".
         ISTNSK=0
         IF (ILEN.GT.0.AND.JCHAR(IBUF,1).NE.Z24)
-     .  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+!     .  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+     >   call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
         IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 900
 C
         IF (ISTNSK.NE.0.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) THEN ! process
@@ -415,6 +424,10 @@ C
                 ipsd2=id2(1)
                 ipsh2=ih2(1)
                 ipsm2=im2(1)
+                write(luscn,
+     >           '(i2,3x,2(2x,i3,":",i2.2,":",i2.2))')
+     >           nlabpr, ipsd1,ipsh1,ipsm1, ipsd2,ipsh2,ipsm2
+
                 call make_pslabel(fileptr,lstnam,lco,lexper,
      .          ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
      .          inew,rlabsize,ilabrow,ilabcol,inewpage)
@@ -502,8 +515,8 @@ C       call prtmp(0)
 C
 990   IF (IERR.NE.0) WRITE(LUSCN,9900) IERR
 9900  FORMAT(' ERROR ',I3,' READING FILE')
-      WRITE(LUSCN,9901) (LSTNNA(I,ISTN),I=1,4), NLABPR
-9901  FORMAT(' NUMBER OF LABELS PRINTED FOR ',4A2,': ',I5)
+      WRITE(LUSCN,9901) cSTNNA(ISTN), NLABPR
+9901  FORMAT(' NUMBER OF LABELS PRINTED FOR ',A8,': ',I5)
 
       RETURN
       END

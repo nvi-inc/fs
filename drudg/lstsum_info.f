@@ -28,7 +28,7 @@ C Local
       integer nline,ix
       character*128 cbuf_in,cbuf
       character*20 c1,c2,c3
-      integer trimlen,ichcm_ch
+      integer trimlen
 
 C 4.1 Whether we have a .skd file or not, read line 1 of SNAP file
 C     Read first line of SNAP file to get year, experiment name, station.
@@ -92,19 +92,19 @@ C    Read line 3 to get XYZ position
       endif ! common/read axis type and position
 
 C 4.3  Find out the equipment.
-      if (kskd.and.ichcm_ch(lstrack(1,istn),1,'unknown').ne.0.and.
-     .  ichcm_ch(lstrec(1,istn),1,'unknown').ne.0) then ! got it
-        call hol2char(lstrack(1,istn),1,8,crack)
-        call hol2char(lstrec(1,istn),1,8,creca)
-        call hol2char(lstrec2(1,istn),1,8,crecb)
+      if (kskd.and.cstrack(istn).ne.'unknown'. and.
+     >             cstrec(istn).ne. 'unknown') then ! got it
+        crack=cstrack(istn)
+        creca=cstrec(istn)
+        crecb=cstrec2(istn)
 
         call init_hardware_common(istn)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
 C       because the "kk4" or "ks2" flag gets set.
         kk4 = kk41rec(1).or.kk42rec(1).or.kk41rec(2).or.kk42rec(2)
         ks2 = ks2rec(1).or.ks2rec(2)
-        km5 = km5rec(1) .or. km5rec(2)
-        km5p = km5prec(1) .or. km5prec(2)
+!       km5A = km5Arec(1) .or. km5Arec(2)   !These are done in
+!       km5P = km5prec(1) .or. km5prec(2)   !   init_hardware_common
       endif
 ! Got defaults from Sked file. Now readwhat snap file says, and overwrite defaults.
 !      else ! read .snp file
@@ -121,25 +121,22 @@ C       Read line 6 (equipment)
         call read_snap6(cbuf_in,crack,creca,crecb,ierr)
         if (ierr.eq.0) then !
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
-          kk4 = creca(1:2).eq.'K4'.or.crecb(1:2).eq.'K4'
-          ks2 = creca(1:2).eq.'S2'.or.crecb(1:2).eq.'S2'
-          km5 =  creca(1:6) .eq. 'Mark5A' .or. crecb(1:6) .eq. 'Mark5A'
+          kk4 =  creca(1:2).eq.'K4'.or.crecb(1:2).eq.'K4'
+          ks2 =  creca(1:2).eq.'S2'.or.crecb(1:2).eq.'S2'
+          km5A = creca(1:6) .eq. 'Mark5A' .or. crecb(1:6) .eq. 'Mark5A'
           km5p = creca(1:6) .eq. 'Mark5P' .or. crecb(1:6) .eq. 'Mark5P'       !note the capital P
-
-!          km4 = creca(1:5) .eq. 'Mark3' .or. crecb(1:5) .eq. 'Mark3'
-!          km3 = creca(1:5) .eq. 'Mark3' .or. crecb(1:5) .eq. 'Mark3'
         else
 C    Couldn't figure out the equipment from the .snp file header,
 C    so look at the actual commands.
           nline=0
           ks2=.false.
           kk4=.false.
-          km5=.false.
-          do while (nline.lt.50.and..not.(kk4.or. ks2 .or. km5))
+          km5A=.false.
+          do while (nline.lt.50.and..not.(kk4.or. ks2 .or. km5A))
             read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
             nline=nline+1
             call c2upper(cbuf_in,cbuf)
-            km5 = cbuf(1:4) .eq. "DISC"
+            km5A = cbuf(1:4) .eq. "DISC"
             kk4 = index(cbuf,'STA=RECORD').ne.0.or.
      .            index(cbuf,'STB=RECORD').ne.0
             ks2 = index(cbuf,'FOR,SLP').ne.0.or.

@@ -15,6 +15,8 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
+
+      integer itras
 C
 C  Input
       integer luscn ! for error messages
@@ -25,7 +27,7 @@ C  Output
 C  LOCAL VARIABLES:
       integer ih,ip(max_headstack),is,it(max_headstack),
      .np(max_headstack),
-     .j,k,i,l,itrk(max_subpass,max_headstack),
+     .j,k,l,itrk(max_subpass,max_headstack),
      .ic1,maxp(max_frq)
       integer ix,iprr,ipmax(max_headstack),ic,m,nvc,ichcm_ch
       logical kmiss
@@ -52,6 +54,7 @@ C 000905 nrv If the second headstack isn't used, don't check it. If
 C            it is used, remember it.
 C 001011 nrv Initialize number of headstacks found in this code.
 C 010817 nrv Not for K4 either.
+! 2003Jul25  JMG  Changed itras to be a function.
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -104,32 +107,32 @@ C
                 else ! check second
                   nhstack(is,ic) = ih
                   if (np(ih).ne.npassf(is,ic)) then ! inconsistent
-                    write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
+                    write(luscn,9907) lcode(ic),cstnna(is)
 9907                format('GNPAS07 - Inconsistent number of ',
      .              'sub-passes between headstacks 1 and 2 for ',
-     .              'code ',a2,' at ', 4a2)
+     .              'code ',a2,' at ', a)
                   endif ! check for consistency
                   if (itrk(1,1).ne.itrk(1,ih)) then ! inconsistent 
-                    write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
+                    write(luscn,9908) lcode(ic),cstnna(is)
 9908                format('GNPAS08 - Inconsistent number of tracks ',
      .              'per pass between',
-     .              ' headstacks 1 and 2 for code',a2,' at ', 4a2)
+     .              ' headstacks 1 and 2 for code',a2,' at ', a)
                   endif
                 endif ! one head/check second
               endif ! set/check
             enddo ! for each headstack
             if (nhstack(is,ic).gt.nheadstack(is)) then ! can't do it
-              write(luscn,9910) (lstnna(i,is),i=1,4),nheadstack(is),
+              write(luscn,9910) cstnna(is),nheadstack(is),
      .        lcode(ic),nhstack(is,ic)
-9910          format('GNPAS10 - Station ',4a2,' has only ',i1,
+9910          format('GNPAS10 - Station ',a,' has only ',i1,
      .        'headstack but code ',a2,' uses ',i1,' headstacks.')
             endif ! can't do it
             if (ipmax(1).ne.npassf(is,ic)) then ! inconsistent
               ierr=1
               iserr(is)=1
-              write(luscn,9904) lcode(ic),(lstnna(i,is),i=1,4)
+              write(luscn,9904) lcode(ic),cstnna(is)
 9904          format('GNPAS04 - Inconsistent number of sub-passes ',
-     .        'between tracks and headpos for ',a2,' at ',4a2)
+     .        'between tracks and headpos for ',a2,' at ',a)
             endif
             j=1
             do while (j.lt.np(1).and.itrk(j,1).eq.itrk(j+1,1))
@@ -139,20 +142,21 @@ C
      .        np(1).gt.max_subpass) then
               ierr=1
               if (itrk(1,1).eq.0.or.np(1).eq.0) then
-                write(luscn,9903) lcode(ic),(lstnna(j,is),j=1,4)
-9903            format('GNPAS03 - No passes found in track assignments '
-     .          ,' for ',a2,', at ',4a2)
+                write(luscn,9903) lcode(ic),cstnna(is)
+9903            format('GNPAS03 - No passes found in trck assignments '
+     .          ,' for ',a2,', at ',a)
               endif
               if (j.lt.np(1).or.np(1).gt.max_subpass) then
-                write(luscn,9901) lcode(ic),(lstnna(j,is),j=1,4)
+                write(luscn,9901) lcode(ic),cstnna(is)
 9901            format('GNPAS01 - Inconsistent pass/track assignments '
-     .          ,' for ',a2,', at ',4a2)
+     .          ,' for ',a2,', at ',a)
               endif
             endif
           endif ! S2/K4 or not
           endif ! defined
         enddo ! stations
       END DO  ! codes
+
 C
 C  2. Now count up the number of passes, i.e. different head positions.
 C     Look in ihddir and count the non-zero entries. Do this only for
@@ -161,8 +165,7 @@ C     Check for different numbers of passes used in different frequency
 C     codes--this should not be attempted in a single experiment. 
 
       do is=1,nstatn ! stations
-        if (ichcm_ch(lstrec(1,is),1,'S2').ne.0.and.
-     .      ichcm_ch(lstrec(1,is),1,'K4').ne.0) then ! not for S2 or K4
+        if (cstrec(is) .ne. 'S2' .and. cstrec(is)(1:2) .ne. 'K4') then
         ic1=0
         do ic=1,ncodes ! codes
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
@@ -175,18 +178,18 @@ C     codes--this should not be attempted in a single experiment.
             if (ip(ih).eq.0) then
               ierr=1
               iserr(is)=1
-              write(luscn,9902) ih,lcode(ic),(lstnna(i,is),i=1,4)
+              write(luscn,9902) ih,lcode(ic),cstnna(is)
 9902          format('GNPAS02 - No passes found in $HEAD section ',
-     .        'for head ',i1,' for ',a2,' at ',4a2)
+     .        'for head ',i1,' for ',a2,' at ',a)
             endif
             if (ih.eq.1) then
               maxp(ic)=ip(ih)
             else
               if (ip(ih).gt.0.and.ip(ih).ne.ip(1)) then
-                write(luscn,9909) lcode(ic),(lstnna(i,is),i=1,4)
+                write(luscn,9909) lcode(ic),cstnna(is)
 9909            format('GNPAS09 - Inconsistent number of passes in',
      .          ' $HEAD',
-     .          ' between headstacks 1 and 2 for ',a2,' at ',4a2)
+     .          ' between headstacks 1 and 2 for ',a2,' at ',a)
               endif
             endif
           enddo ! each headstack
@@ -202,10 +205,9 @@ C     codes--this should not be attempted in a single experiment.
           if (iprr.ne.0) then
             ierr=1
             iserr(is)=1
-            write(luscn,9905) (lstnna(i,is),i=1,4)
+            write(luscn,9905) cstnna(is)
 9905        format('GNPAS05 - Warning: different frequency codes ',
-     .      'in this experiment have different numbers of passes',
-     .      ' at ',4a2)
+     .      'in this experiment have different numbers of passes at ',a)
           endif
           maxpas(is)=maxp(ic1)
         endif ! some code is defined
@@ -223,9 +225,9 @@ C 3. Check for LOs present and issue warning if not.
             if (freqlo(nvc,is,ic).lt.0.0.or.
      .      ichcm_ch(lifinp(nvc,is,ic),1,'  ').eq.0) kmiss=.true.
           enddo
-          if (kmiss) write(luscn,9906) lcode(ic),(lstnna(i,is),i=1,4)
+          if (kmiss) write(luscn,9906) lcode(ic),cstnna(is)
 9906      format('GNPAS06 - Warning: ',a2,' LO information missing ',
-     .    'for ',4a2)
+     .    'for ',a)
           endif ! defined
         enddo
       enddo

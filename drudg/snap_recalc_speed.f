@@ -20,9 +20,10 @@
         itime2stop=3
       endif
 ! get ascii version of speed.
-      if(.not.km5) then
-        lspeed=" "
-        if(ks2) then
+      lspeed=" "
+      if(km5A) then
+        continue
+      else if(ks2) then
           if(kvex) then
             ispeed(1)=ls2speed(1)
             ispeed(2)=ls2speed(2)
@@ -31,15 +32,14 @@
             lspeed="slp"
           endif
           nspdCh=4
-        else if(.not.kk4) then
-          speed_inches = 12.0*speed_ft
-          call spdstr(speed_inches,ispeed,nspdCh)   !return speed as holerith in ispeed.
-          if (nspdCh.le.0) then
-            write(luscn,'("SNAP_RECALC_SPEED: Illegal speed! ",f6.2)')
-     >          speed_inches
-            write(luscn,'("After: ",40a2)') ibuf(1:40)
-            stop
-          endif
+      else if(.not.kk4) then
+        speed_inches = 12.0*speed_ft
+        call spdstr(speed_inches,ispeed,nspdCh)   !return speed as holerith in ispeed.
+        if (nspdCh.le.0) then
+          write(luscn,'("SNAP_RECALC_SPEED: Illegal speed! ",f6.2)')
+     >        speed_inches
+          write(luscn,'("After: ",40a2)') ibuf(1:40)
+          stop
         endif
       endif
       return

@@ -7,6 +7,7 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
+
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -71,6 +72,7 @@ C            Store S2 mode into LMODE as well as LS2MODE.
 C 011011 nrv If S2 mode was already set up from the equip line, don't
 C            overwrite it.
 C 020114 nrv Fill in roll defs.
+C 2003Jul25 JMG  ITRAS changed to function
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -185,13 +187,13 @@ C         Store the track assignments.
           DO  I=1,max_subpass
             do ix=1,max_headstack
               IF (ITRK(1,I,ix).NE.-99) 
-     .        itras(1,1,ix,icx,i,is,icode)=itrk(1,i,ix)
+     .        call set_itras(1,1,ix,icx,i,is,icode,itrk(1,i,ix))
               IF (ITRK(2,I,ix).NE.-99) 
-     .        itras(2,1,ix,icx,i,is,icode)=itrk(2,i,ix)
+     .        call set_itras(2,1,ix,icx,i,is,icode,itrk(2,i,ix))
               IF (ITRK(3,I,ix).NE.-99) 
-     .        itras(1,2,ix,icx,i,is,icode)=itrk(3,i,ix)
+     .        call set_itras(1,2,ix,icx,i,is,icode,itrk(3,i,ix))
               IF (ITRK(4,I,ix).NE.-99) 
-     .        itras(2,2,ix,icx,i,is,icode)=itrk(4,i,ix)
+     .        call set_itras(2,2,ix,icx,i,is,icode,itrk(4,i,ix))
             enddo
           END DO 
           cset(icx,is,icode) = cs
@@ -355,7 +357,7 @@ C 6. This section for the barrel roll line.
                 nrollsteps(i,icode) = nrcan_steps(ir)
                 do iu=1,nrcan_defs(ir)
                   do it=1,2+nrcan_steps(ir)
-                    iroll_def(it,iu,i,icode) = icantrk(it,iu,ir)
+                    call set_iroll_def(it,iu,i,icode,icantrk(it,iu,ir))
                   enddo
                 enddo
               endif ! fill roll table

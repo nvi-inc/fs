@@ -26,9 +26,10 @@ C
 
       logical klineseg
 
-      character*128 stndefnames,tape_motion_type,rack_type,
-     .rec_type,tape_allocation,tape_motion_save
+      character*128 stndefnames,tape_motion_type,
+     > tape_allocation,tape_motion_save
 C
+      character*8 crack_type,crec_type
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
      .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
      .       R1(MAX_STN),R2(MAX_STN),
@@ -66,21 +67,23 @@ C
      .       klineseg(max_stn)
 
 ! This allows easily manipulation of what are, really, character arrays.
-      character*8 cstnna(max_stn)
-      equivalence (lstnna,cstnna)
-      character*8 cstrec(max_stn),cstrack(max_stn),cstrec2(max_stn)
-      equivalence (lstrec,cstrec),(lstrack,cstrack),(lstrec2,cstrec2)
-      character*2 cpocod(max_stn),cstcod(max_stn)
-      equivalence (cpocod,lpocod),(cstcod,lstcod)
+      character*8 cstnna(max_stn), cterna(max_stn),  cantna(max_stn)
+      equivalence (lstnna,cstnna), (lterna,cterna),  (lantna,cantna)
+      character*8 cstrec(max_stn), cstrack(max_stn), cstrec2(max_stn)
+      equivalence (lstrec,cstrec), (lstrack,cstrack),(lstrec2,cstrec2)
+      character*8 coccup(max_stn)
+      equivalence (coccup,loccup)
 
-!      character*6 cTapeType(max_stn)
-!      character*4 cTapeDens(max_stn)
-!      common /statn_ch/cTapeType,cTapeDens
+      character*4 cs2speed(max_stn),  cterid(max_stn)
+      equivalence (cs2speed,ls2speed),(cterid,lterid)
 
+      character*2 cpocod(max_stn), cstcod(max_stn),  cposid(max_stn)
+
+      equivalence (cpocod,lpocod), (cstcod,lstcod), (cposid,lposid)
 
       COMMON /STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
-     .rack_type(max_rack_type),rec_type(max_rec_type),
-     .tape_allocation(max_stn),tape_motion_save(max_stn)
+     > crack_type(max_rack_type),crec_type(max_rec_type),
+     > tape_allocation(max_stn),tape_motion_save(max_stn)
 C 
 C two_letter_code is a unique identifier for each DAS.
 C  NSTN   - number of stations
@@ -93,7 +96,7 @@ C                        (2,2) upper limit, axis 2
 C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute) 
 C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
 C  LSTCOD - station codes, 2 characters
-C  LITERID - terminal ID, up to 4 characters
+C  LTERID - terminal ID, up to 4 characters
 C  LSTREC - recorder type
 C  LSTRACK - rack type
 C  STNELV - station elevation limit, assigned in SKED 

@@ -9,16 +9,17 @@ C
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+      include 'hardware.ftni'
 C
 C  INPUT:
       integer ifunc,IYR ! ifunc=1 for " comments, ifunc=2 for !* comments
-      logical kk4,ks2
 C
 C  LOCAL:
       integer*2 IBUF2(80)
 C               - DCB, buffer for output
-	character*16 cstring
-	integer iblen
+      character*16 cstring
+      integer iblen
+      character*1 lq
 C     IYR - start time of obs.
       integer idummy,nch,kerr
       integer ichcm_ch,ichmv,ib2as,ir2as,ichmv_ch
@@ -42,6 +43,7 @@ C 990803 nrv Merge drudg and FS lines and reformat.
 C 991102 nrv Add recorder B.
 C
 C
+      lq='"'
       iblen = 128
       IF (ichcm_ch(LEXPER,1,'        ').EQ.0)  THEN
         IDUMMY = ichmv_ch(LEXPER,1,'XXX     ')
@@ -196,6 +198,12 @@ C       Write equipment line
         nch = ichmv(ibuf2,nch,lstrec2(1,istn),1,8)
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
       endif
+      if(KM5A_Piggy)  write(lu_outfile,'(a)')
+     >      lq//" Mark5A operating in piggyback mode "
+
+      if(KM5P_Piggy)  write(lu_outfile,'(a)')
+     >      lq//" Mark5P operating in piggyback mode "
+
 
       RETURN
       END

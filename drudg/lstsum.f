@@ -293,7 +293,7 @@ C    information from common.
 ! This initializes a common block.
       call lstsum_info(kskd)
 
-      kdisk=km5.or.km5p
+      kdisk=km5A.or.km5p
 C
 C Calculate different kinds of scaling.
 
@@ -374,7 +374,7 @@ C           Here is where we determine early start without the schedule
           cpass_p       =cpass
 ! adjust for next pack.
 !          if(km5) then
-!           if(counter_data_valid_on/1024. .gt. ipack_size(ipack)) then
+!           if(counter_data_valid_on/1000. .gt. ipack_size(ipack)) then
 !               if(ipack .gt. Num_packs) then
 !                  write(luprt,
 !     >             '(10x,"******  Out of space in diskpacks ****")')
@@ -382,15 +382,20 @@ C           Here is where we determine early start without the schedule
 !                 write(luprt,
 !     >          '(10x,"******* Swap out diskpack ",i4," ******")') ipack
 !                 counter_now=counter_now-counter_prev
-!                 ipack_use(ipack)=ipack_size(ipack)-counter_now/1024.
+!                 ipack_use(ipack)=ipack_size(ipack)-counter_now/1000.
 !                counter_data_valid_on=counter_data_valid_on-counter_prev
 !                 ipack=ipack+1
 !               endif
 !!             endif
 !          endif
 
-!          counter_print_p=counter_data_valid_on
-          counter_print_p=counter_tape_start
+          if(tape_motion_type(istn) .eq. "CONTINUOUS" .or.
+     >       tape_motion_type(istn) .eq. "ADAPTIVE") then
+            counter_print_p=counter_data_valid_on
+          else
+            counter_print_p=counter_tape_start
+          endif
+
           counter_source=counter_now
 
           idur=-1                               !recalculate for next scan.
@@ -443,7 +448,7 @@ C       Now get the source info for the new scan
 ! Data start command.
         else if(cbuf(1:10) .eq. "DISC_START") then
           idur=-1 ! make sure we calculate duration from this point
-          if(km5 .or. km5p) idir=1  ! discs always go forward.
+          if(kdisk) idir=1  ! discs always go forward.
           do i=1,5
             itime_tape_start(i)=itime_now(i)
           end do
@@ -594,8 +599,15 @@ C the counter to zero to start the new forward pass.
 990   continue
       ierr=0
 
-      counter_print=counter_tape_start
 !      counter_print=counter_data_valid_on
+       if(tape_motion_type(istn) .eq. "CONTINUOUS" .or.
+     >       tape_motion_type(istn) .eq. "ADAPTIVE") then
+          counter_print=counter_data_valid_on
+       else
+            counter_print=counter_tape_start
+       endif
+
+
 
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
      >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
@@ -606,8 +618,8 @@ C the counter to zero to start the new forward pass.
      >        cscan,cbuf_source)
 
       write(luprt, "()") ! skip line
-      if(km5 .or. km5p) then
-         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1024.
+      if(kdisk) then
+         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1000.
       else
         write(luprt, '("   Total number of tapes: ",i3)')num_tapes
       endif

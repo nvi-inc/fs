@@ -1,4 +1,5 @@
 #define MAX_TCAL 400
+#define MAX_SPILL 20
 
 struct rxgain_ds {
   char type;   /* LO type 'f' for fixed, 'r' for range */
@@ -19,6 +20,7 @@ struct rxgain_ds {
     char type;            /* 'p' for poly */
     float coeff[10]; /* polynomial coefficent, maximum 10 */
     int ncoeff;
+    char opacity;         /* 'y' if opacity corrected, 'n' if not */
   } gain;
 
   int tcal_ntable;  /* number of points in table */
@@ -27,5 +29,13 @@ struct rxgain_ds {
     char pol;       /* polarization 'l' (lcp) or 'r' (rcp) */
     float freq;     /* tabular point for frequency MNz */
     float tcal;     /* cal temperature (degrees K) */
-  } tcal[MAX_TCAL];/* group by polarization, then sorted by increasing freq */
+  } tcal[MAX_TCAL]; /* group by polarization, then sorted by increasing freq */
+
+  float trec;       /* receiver temperature (degrees K) < 0 undefined */
+
+  int spill_ntable;  /* number of points in table */
+  struct {
+    float el;         /* tabular point for elevation (degrees) */
+    float tk;         /* spill contribution temperature (degrees K) */
+  } spill[MAX_SPILL]; /* sorted by increasing elevation */
 };

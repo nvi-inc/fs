@@ -19,10 +19,7 @@ C LOCAL:
      . LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
       integer ipas(max_stn),ift(max_stn),idur(max_stn),
      .ioff(max_stn)
-      integer ipasp,iftold,idirp,idir,ituse,idum,lnobs,il,ilen,ihead
-      character*8 cstn
-      character*128 csor
-      character*2 cid
+      integer iftold,idir,ituse,idum,lnobs,il,ilen,ihead
       character*18 cstart,cstop
       character*128 scan_id
       integer i,id
@@ -35,17 +32,23 @@ C LOCAL:
       integer ierr
       INTEGER IC, TRIMLEN
       integer iflch,ichcm_ch,ichmv  ! functions
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
+
 C
 C INITIALIZED:
-      DATA IPASP/-1/, IFTOLD/0/, IDIRP/0/
+      DATA IFTOLD/0/
 C
       call lv_open(ierr) ! get output file name
-      call hol2char(lstnna(1,istn),1,8,cstn)
-      il=trimlen(cstn)
-      call hol2char(lpocod(istn),1,2,cid)
-      write(lu_outfile,9100) cstn(1:il),cid
+!      call hol2char(lstnna(1,istn),1,8,cstn)
+      il=trimlen(cstnna(istn))
+!      call hol2char(lpocod(istn),1,2,cid)
+      write(lu_outfile,9100) cstnna(istn)(1:il),cpocod(istn)
 9100  format("*FAKE Summary for ",a". Station ID ",a2,".")
-      write(lu_outfile,9101) cid,cstn(1:il)
+      write(lu_outfile,9101) cpocod(istn),cstn(istn)(1:il)
 9101  format("*"/
      .       "  def ",a2,";    * ",a)
 
@@ -68,7 +71,9 @@ C
      .     IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .     NSTNSK,LSTN,LCABLE,
      .     MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-        CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+!        CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+        call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+
         IF (ISOR.EQ.0.OR.ICOD.EQ.0) return
 C
         IF (ISTNSK.NE.0)  THEN
@@ -102,9 +107,9 @@ C    .      (scan_name(i,lnobs+1),i=1,5)
      .  " ft : 0 in/sec;")') cstart,ift(istnsk)
         write(lu_outfile,'("      stop_tape = ",a," : ",i5.5,
      .  " ft ;")') cstop,iftold
-        call hol2char(lsorna(1,isor),1,max_sorlen,csor)
-        il=trimlen(csor)
-        write(lu_outfile,'("      source = ",a,";")') csor(1:il)
+!        call hol2char(lsorna(1,isor),1,max_sorlen,csor)
+        il=trimlen(csorna(isor))
+        write(lu_outfile,'("      source = ",a,";")') csorna(isor)(1:il)
         write(lu_outfile,'("    endscan;")')
         endif
         LNOBS = LNOBS + 1

@@ -61,7 +61,7 @@ C 020112 nrv Remove max_roll. Each station and mode may have a roll table.
 C            Add max_roll_def = nhd*ntrk
 C 020620 nrv Add max_change_list
 C 020923 nrv Change max_rec_type to 10 to allow Mark5.
-C 021111 jfq Change max_rack_type to 15 to allow LBA.
+C 2003Jul23 JMG changed to 12 params
 C
 C********************************************************************
 C
@@ -376,7 +376,7 @@ C     MAX_FRQ*MAX_STN.
 C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
       PARAMETER (MAX_RACK_TYPE= 15)
-      PARAMETER (MAX_REC_TYPE = 11)
+      PARAMETER (MAX_REC_TYPE = 12)
       PARAMETER (MAX_REC2_TYPE = 6)
 
 C     The name of the control files. These files are

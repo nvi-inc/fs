@@ -6,6 +6,8 @@ C   COMMON BLOCKS USED
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
+
+      integer itras
 C
 C  LOCAL VARIABLES
       integer*2 lb(max_band),ls1,ls2

@@ -1,6 +1,6 @@
 LIBES = ../vis/vis.a ../clib/clib.a
 OBJECTS= gnfit.o fit2.o  fpoly.o  scaler.o unscaler.o inine.o incne.o \
-dppco.o dppfa.o dppin.o dppsl.o
+dppco.o dppfa.o dppin.o dppsl.o ftau.o
 #
 FFLAGS = -c 
 ../bin/gnfit: $(OBJECTS)

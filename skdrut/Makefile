@@ -33,7 +33,10 @@
 ARC = skdrut
  
 OBJECTS=\
-itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
+istringminmatch.o itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
+capitalize.o ifill4.o\
+iroll_def.o itras.o \
+sktime.o \
 aposn.o axtyp.o backward.o cablw.o ckiau.o clear_array.o clndr.o\
 cvpos.o flinp.o forward.o frinp.o gnpas.o hdinp.o hol2lower.o\
 hol2upper.o iday0.o idate.o igtba.o igtfr.o igtso.o igtst.o igtst2.o\

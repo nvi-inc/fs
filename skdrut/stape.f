@@ -15,13 +15,24 @@ C     include 'skcom.ftni'
       include '../skdrincl/statn.ftni'
 C
 C  Calls: gtfld, igtst2, ifill, wrerr
+! functions
+      integer istringminmatch
 
 C  LOCAL
-      integer*2 lkeyw2(12),LKEYWD(12),lkey
-      integer ikey_len,ikey,ich,ic1,ic2,nch,i,j,idummy,istn
+      integer*2 lkeywd(12)
+      integer ikey_len,ikey,ich,ic1,ic2,nch,i,idummy,istn
       integer idum,il
-      integer ias2b,ichcm_ch,trimlen,igtky,i2long,igtst2,ichmv,jchar 
+      integer ias2b,ichcm_ch,trimlen,i2long,igtst2,ichmv,jchar
       logical kold ! true for the old format TAPE_MOTION ADAPTIVE GAP 10
+
+      character*24 ckeywd
+      equivalence (lkeywd,ckeywd)
+
+      integer ilist_len
+      parameter (ilist_len=3)
+      character*12 list(ilist_len)
+      data list/'CONTINUOUS','ADAPTIVE','START&STOP'/
+
       data ikey_len/20/
 C
 C MODIFICATIONS:
@@ -33,6 +44,7 @@ C 980629 nrv Add tape length to listing.
 C 980629 nrv Allow DYNAMIC type.
 C 021010 nrv Save tape motion for later restoring.
 C
+C 2003July03  JMG  Modified to use new scheme.
 
 C     1. Check for some input.  If none, write out current.
 C
@@ -44,13 +56,11 @@ C
           write(luscn,'("STAPE00 - Select stations first.")') 
           RETURN
         END IF  !no stations selected
-        WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  TAPE_MOTION (gap) ')
+        WRITE(LUDSP,"(' ID  STATION  TAPE_MOTION (gap) ')")
         DO  I=1,NSTATN
           il=trimlen(tape_motion_type(i))
-          WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4),
-     .    tape_motion_type(i)(1:il)
-9111      FORMAT(1X,A2,2X,4A2,3X,a,$)
+          WRITE(LUDSP,"(1X,A2,2X,A8,3X,a,$)")
+     >      cpoCOD(I),cSTNNA(I), tape_motion_type(i)(1:il)
           if (tape_motion_type(i).eq.'ADAPTIVE') then
             write(ludsp,'(3x,i5)') itgap(i)
           else
@@ -65,11 +75,11 @@ C     2. Something is specified.  Get each station/type combination.
 C
       DO WHILE (IC1.NE.0) !more decoding
         NCH = IC2-IC1+1
-        CALL IFILL(LKEYWD,1,ikey_len,oblank)
+        ckeywd=" "
         IDUMMY = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
         IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
           istn=0
-        else if (ichcm_ch(lkeywd,1,'ADAPTIVE').eq.0) then !old format
+        else if (ckeywd .eq. 'ADAPTIVE') then !old format
           istn=0
           kold=.true.
         else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
@@ -83,42 +93,33 @@ C       if (kold) ic1 and ic2 already cover 'adaptive'
         if (.not.kold) CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),
      .         IC1,IC2) ! type
         IF  (IC1.EQ.0) THEN  !no matching type
-          write(luscn,9201)
-9201      format('STAPE02 Error - You must specify a type.')
+          write(luscn,*) 'STAPE02 Error - You must specify a type.'
           RETURN
         END IF  !no matching type
         nch=min0(ikey_len,ic2-ic1+1)
-        idummy = ichmv(lkeyw2(2),1,linstq(2),ic1,nch)
-        lkeyw2(1)=nch
-        ikey = IGTKY(LKEYW2,14,LKEY)
+        ckeywd=" "
+        idummy = ichmv(lkeywd,1,linstq(2),ic1,nch)
+        ikey=istringminmatch(ckeywd,list,ilist_len)
         if (ikey.eq.0) then ! invalid type
-          write(luscn,9203) (lkeyw2(i),i=1,12)
-9203      format('STAPE03 Error - invalid type: ',12a2) 
-        END IF  !invalid type
-        if (ichcm_ch(lkey,1,'AD').eq.0) then ! get gap
+          write(luscn,"('STAPE03 Error - invalid type: ',a)")ckeywd
+        else
+          if (list(ikey) .eq. "ADAPTIVE") then
 C         For old format, skip the 'gap' key word
-          if (kold) CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) 
-          CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) 
-          idum=ias2b(linstq(2),ic1,ic2-ic1+1)
-          if (idum.lt.0) write(luscn,'("STAPE03 Error - Invalid gap.")')
-        endif ! get gap
-        DO  I = 1,NSTATN
-          if ((istn.eq.0).or.(istn.gt.0.and.i.eq.istn)) then
-            if (ichcm_ch(lkey,1,'AD').eq.0) then
-              tape_motion_type(i)='ADAPTIVE'
-              itgap(i)=idum
-            else if (ichcm_ch(lkey,1,'CO').eq.0) then
-              tape_motion_type(i)='CONTINUOUS'
-            else if (ichcm_ch(lkey,1,'SS').eq.0) then
-              tape_motion_type(i)='START&STOP'
-            else if (ichcm_ch(lkey,1,'DY').eq.0) then
-              tape_motion_type(i)='DYNAMIC'
+           if (kold) CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+           idum=ias2b(linstq(2),ic1,ic2-ic1+1)
+           if(idum.lt.0) write(luscn,*) " STAPE03 Error - Invalid gap."
+          endif ! get gap
+          DO  I = 1,NSTATN
+            if ((istn.eq.0).or.(istn.gt.0.and.i.eq.istn)) then
+              tape_motion_type(i)=list(ikey)
+              if(tape_motion_type(i) .eq. "ADAPTIVE") itgap(i)=idum
+              tape_motion_save(i)=tape_motion_type(i)
             endif
-            tape_motion_save(i)=tape_motion_type(i)
-          endif
-        END DO
+          END DO
 C       get next station name
-        CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+          CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+        ENDIF
       END DO  !more decoding
 C
       RETURN

@@ -27,7 +27,7 @@
       character*80 ldum
 
 ! start of code
-      if (km5.or. km5p .or.ks2.or.kk4) then ! setup proc names
+      if (km5A.or. km5p .or.ks2.or.kk4) then ! setup proc names
         itype=1
       else ! mnemonic proc names
         itype=2
@@ -48,7 +48,7 @@
       call setup_name(itype,icod,ndx,lnamep)
       call c2lower(cnamep,cnamep)  		!make it lower case
 C     Don't use the pass number for Mk5-only
-      if(km5) then
+      if(km5A .or. KM5P) then
          write(lufile,"(a)") cnamep
       else
          write(ldum,"(a,'=',i3)") cnamep,ipas(istnsk)

@@ -11,6 +11,9 @@ C  Common blocks:
       include '../skdrincl/skobs.ftni'
       include 'hardware.ftni'
 
+! called functions
+      logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
+
 C Subroutine interface:
 C     Called by: drudg (C routine)
 
@@ -37,10 +40,14 @@ C LOCAL:
       character*8 dr_rack_type, dr_rec1_type, dr_rec2_type
       integer cclose,inew,ivexnum,heqb
       character*256 cbuf
-      integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
+      integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
      .idummy,inext,isatl,ifunc,nstnx
       integer ichmv_ch,ichmv,ichcm,ichcm_ch ! functions
       integer nch1,nch2,nch3,iserr(max_stn)
+
+      logical kallowpig
+
+
       data heqb/2h= /
 C
 C  DATE   WHO CHANGES
@@ -183,14 +190,16 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '030603'
+      cversion = '030904'
 C Initialize FS version
+
+!      iVerMajor_FS = 09
+!      iVerMinor_FS = 06
+!      iVerPatch_FS = 06
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-!      iVerMajor_FS = 09
-!      iVerMinor_FS = 06
-!      iVerPatch_FS = 05
+
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -442,8 +451,8 @@ C     Derive number of passes for each code
      .      ' SNAP or procedure output may be incorrect',
      .      ' or may cause a program abort for:'/)
             do i=1,nstatn
-              if (iserr(i).ne.0) write(luscn,9998) (lstnna(j,i),j=1,4)
-9998          format(1x,4a2,1x,$)
+              if (iserr(i).ne.0) write(luscn,9998) cstnna(i)
+9998          format(1x,a,1x,$)
             enddo
             write(luscn,'()')
           endif
@@ -482,13 +491,14 @@ C     5. Ask for the station(s) to be processed.  These will be done
 C        in the outer loop.
 C
 500   CONTINUE
+      km5A_piggy=.false.
+      km5p_piggy=.false.
       call clear_array(response)
       if (.not.kbatch) then
         if (kskd) then
-          WRITE(LUSCN,9053) (lpocod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
-C         WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
+          WRITE(LUSCN,9053) (lpocod(K),cstnna(K),K=1,NSTATN)
 9053      FORMAT(' Stations: '/
-     .     10(   '  ', 5(A2,' (',4A2,')',1X)/))
+     .     10(   '  ', 5(A2,' (',A8,')',1X)/))
            WRITE(LUSCN,9050)
 C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
 9050       format(/' Output for which station (type a code, :: to ',
@@ -589,48 +599,31 @@ C
         if (istn.gt.0) then !one station
 C  Set equipment from control file, if equipment is unknown, and
 C  if it was not set by the schedule.
-          kknown = .not. (ichcm_ch(lstrec(1,istn),1,'unknown').eq.0.or.
-     .    ichcm_ch(lstrack(1,istn),1,'unknown').eq.0)
+          kknown = .not.
+     >      (cstrec(istn).eq.'unknown'.or. cstrack(istn) .eq. 'unknown')
           if (.not.kknown.and.kdr_type) then ! equipment is in control file
-C           if (ichcm_ch(lstrack(1,istn),1,'unknown').eq.0) then
-              call ifill(lstrack(1,istn),1,8,oblank)
-              idummy = ichmv_ch(lstrack(1,istn),1,dr_rack_type)
-C              write(luscn,9166) (lstrack(i,istn),i=1,4)
-C9166          format(' Rack       set to ',4a2,' from control file.')
-C           endif
-C           if (ichcm_ch(lstrec(1,istn),1,'unknown').eq.0) then
-              call ifill(lstrec(1,istn),1,8,oblank)
-              idummy = ichmv_ch(lstrec(1,istn),1,dr_rec1_type)
-C              write(luscn,9165) (lstrec(i,istn),i=1,4)
-C9165          format(' Recorder 1 set to ',4a2, ' from control file.')
-C           endif
-C           if (ichcm_ch(lstrec2(1,istn),1,'none').eq.0) then
-              call ifill(lstrec2(1,istn),1,8,oblank)
-              idummy = ichmv_ch(lstrec2(1,istn),1,dr_rec2_type)
-C              write(luscn,9167) (lstrec2(i,istn),i=1,4)
-C9167          format(' Recorder 2 set to ',4a2, ' from control file.')
-              if (ichcm_ch(lstrec2(1,istn),1,'none').ne.0.and.
-     .        ichcm_ch(lstrec(1,istn),1,'nono').ne.0) nrecst(istn) = 2
-C           endif
+              cstrack(istn)=dr_rack_type
+              cstrec(istn) =dr_rec1_type
+              cstrec2(istn)=dr_rec2_type
+              if(cstrec2(istn) .ne. 'none' .and.
+     >           cstrec(istn) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
         else !all stations
           write(luscn,9067) lskdfi(1:l)
-          do i=1,nstatn  
-            if (ichcm_ch(lstrec(1,i),1,'unknown').eq.0.or.
-     .      ichcm_ch(lstrack(1,i),1,'unknown').eq.0)
-     .      kknown=.false.
+          do i=1,nstatn
+            if(cstrec(i)  .eq. 'unknown' .or.
+     >         cstrack(i) .eq. 'unknown') kknown=.false.
           enddo
         endif
 C       Are the equipment types now known?
         if (istn.gt.0) then !one station check equipment
-        kknown = .not. (ichcm_ch(lstrec(1,istn),1,'unknown').eq.0.or.
-     .    ichcm_ch(lstrack(1,istn),1,'unknown').eq.0)
-        if (kknown) then  ! write equipment 
-          write(luscn,9069) (lstnna(i,istn),i=1,4),
-     .    (lstrack(i,istn),i=1,4), (lstrec(i,istn),i=1,4),
-     .    (lstrec2(i,istn),i=1,4)
-9069      format(/' Equipment at ',4a2,':'/'   Rack: ',4a2,
-     .    ' Recorder 1: ',4a2,' Recorder 2: ',4a2)
+          kknown = .not.
+     >      (cstrec(istn).eq.'unknown'.or. cstrack(istn) .eq. 'unknown')
+        if (kknown) then  ! write equipment
+          write(luscn,9069)
+     >      cstnna(istn), cstrack(istn), cstrec(istn), cstrec2(istn)
+9069      format(/' Equipment at ',a,':'/'   Rack: ',a,
+     .    ' Recorder 1: ',a,' Recorder 2: ',a)
           if (nrecst(istn).eq.2) write(luscn,9070) lfirstrec(istn)
 9070      format(' Schedule will start with recorder ',a1,'.')
           if(km5a_piggy)
@@ -639,43 +632,54 @@ C       Are the equipment types now known?
      >        write(luscn,'("   Mark5P in piggyback mode. ")')
 
         else
-          write(luscn,9169) (lstnna(i,istn),i=1,4)
-9169      format(/' Equipment at ',4a2,' is unknown. Use Option 11',
+          write(luscn,9169) cstnna(istn)
+9169      format(/' Equipment at ',a,' is unknown. Use Option 11',
      .    ' to specify equipment.')
         endif ! write equipment 
 C  Write warning messages if control file and schedule do not agree.
         if (kdr_type) then ! check it
-        if (ichcm_ch(lstrack(1,istn),1,dr_rack_type).ne.0) then
-          write(luscn,9066) (lstrack(i,istn),i=1,4),dr_rack_type
-9066      format(' WARNING: Schedule rack: ',4a2,' is different ',
+        if (cstrack(istn).ne. dr_rack_type) then
+          write(luscn,9066) cstrack(istn),dr_rack_type
+9066      format(' WARNING: Schedule rack: ',a,' is different ',
      .           'from '/'          control file rack: ',a)
         endif
-        if (ichcm_ch(lstrec(1,istn),1,dr_rec1_type).ne.0) then
-          write(luscn,9065) (lstrec(i,istn),i=1,4),dr_rec1_type
-9065      format(' WARNING: Schedule recorder 1: ',4a2,
+        if (cstrec(istn).ne. dr_rec1_type) then
+          write(luscn,9065) cstrec(istn),dr_rec1_type
+9065      format(' WARNING: Schedule recorder 1: ',a,
      .           ' is different from'/ '          control file ',
      .           'recorder 1: ',a)
         endif
-        if (ichcm_ch(lstrec2(1,istn),1,dr_rec2_type).ne.0) then
-          write(luscn,9064) (lstrec2(i,istn),i=1,4),dr_rec2_type
-9064      format(' WARNING: Schedule recorder 2: ',4a2, 
+        if (cstrec2(istn) .ne. dr_rec2_type) then
+          write(luscn,9064) cstrec2(istn),dr_rec2_type
+9064      format(' WARNING: Schedule recorder 2: ',a,
      .           ' is different'/
      .           '         from control file ',
      .           'recorder 2: ',a)
         endif
         endif ! check it
         endif ! one station check equipment
+
+        kallowpig=(istn .gt. 0)
         if (istn.gt.0) then !one station check equipment
-          WRITE(LUSCN,9068) lskdfi(1:l),(lstnna(i,istn),i=1,4)
+          WRITE(LUSCN,9068) lskdfi(1:l),cstnna(istn)
 9068      FORMAT(/' Select DRUDG option for schedule ',A,
-     .    ' at ',4A2)
-        else 
+     .    ' at ',A8)
+          if(kheaduse(2,istn).or.               !can't do piggy if 2nd head is active.
+     >       (cstrack(istn) .eq. "Mark3A") .or. !or for mark3 formatters
+     >       (cstrack(istn)(1:2).eq."K4".and.   !or k4 (non-mk4 formatters)
+     >               cstrack(istn)(6:7) .ne."M4") .or.
+     >        cstrec(istn) .eq. "Mark5A"  .or.     !Can't do piggyback with Mark5A or Mark5P recorders.
+     >        cstrec(istn) .eq. "Mk5APigW" .or.
+     >        cstrec(istn) .eq. "Mark5P") then
+              kallowpig=.false.
+           endif
+        else
           write(luscn,9067) lskdfi(1:l)
 9067      FORMAT(/' Select DRUDG option for schedule ',A,
      .    ' (all stations)'/)
-        endif ! one station check equipment
-            write(luscn,9073)
-9073        FORMAT(
+       endif ! one station check equipment
+          write(luscn,9073)
+9073      FORMAT(
      .      ' 1 = Print the schedule               ',
      .      '  7 = Re-specify stations'/
      .      ' 2 = Make antenna pointing file       ',
@@ -683,35 +687,39 @@ C  Write warning messages if control file and schedule do not agree.
      .      ' 3 = Make SNAP file (.SNP)            ',
      .      '  9 = Change output destination, format '/
      .      ' 4 = Print complete .SNP file         ',
-     .      ' 10 = Shift the .SKD file  '/,
-     .      ' 5 = Print summary of .SNP file       ',
-     .      ' 11 = Show/set equipment type')
+     .      ' 10 = Shift the .SKD file  '/
+     >      ' 5 = Print summary of .SNP file       ',$)
+          if(istn .gt. 0) then
+            write(luscn,'(a)')
+     >          ' 11 = Show/set equipment type'
+          else
+            write(luscn,'()')
+          endif
+
             if (clabtyp.eq.'POSTSCRIPT') then
               write(luscn,9173)
 9173          FORMAT(
      .        ' 6 = Make PostScript label file       ',
      .        ' 12 = Make procedures (.PRC) '/,
-     .        ' 61= Print PostScript label file      '
-     .        ' 13 = Toggle Mk5A piggyback mode ',
-     .        '                                      ',
-     .        ' 14 = Toggle Mk5P piggyback mode '
-     .      )
+     .        ' 61= Print PostScript label file      ')
             else
-              write(luscn,9273)
-9273          FORMAT(
+              write(luscn,9174)
+9174          FORMAT(
      .        ' 6 = Make tape labels                 ',
-     .        ' 12 = Make procedures (.PRC) '/
-     .        '                                      ',
-     .        ' 13 = Toggle Mk5A piggyback mode '/
-     .        '                                      ',
-     .        ' 14 = Toggle Mk5P piggyback mode ')
+     .        ' 12 = Make procedures (.PRC) ')
             endif
-            if (kdrg_infile.or.kvex) then 
-              write(luscn,9274)
-9274          FORMAT(' 51 = Print PI cover letter') 
+            if(kallowpig) then
+                write(luscn,9175)
+9175              Format(
+     >        '                                      ',
+     >        ' 13 = Toggle Mk5A piggyback mode '/
+     >        '                                      ',
+     >        ' 14 = Toggle Mk5P piggyback mode ')
+            endif
+            if (kdrg_infile.or.kvex) then
+              write(luscn,"(' 51 = Print PI cover letter')")
             else ! .skd file
-              write(luscn,9275)
-9275          FORMAT(' 51 = Print notes file (.TXT)') 
+              write(luscn,"(' 51 = Print notes file (.TXT)')")
             endif ! .drg/.skd
             write(luscn,'(a)') ' 0 = Done with DRUDG '
 !            write(luscn,'(a)') '20 = Make fake lvex  '
@@ -771,6 +779,9 @@ C    .      ' 11 = Show/set equipment type')
      >   "Unknown label printer type in the control file."
         goto 700
       endif
+
+      if( ifunc.eq.11 .and. istn .le. 0) goto 700
+      if((ifunc.eq.13 .or. ifunc.eq.14).and. .not.kallowpig) goto 700
 
       IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991

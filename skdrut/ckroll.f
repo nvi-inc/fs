@@ -37,7 +37,7 @@ C    Store the roll into common now.
       nrollsteps(istn,icode) = nsteps
       do i=1,ndefs
         do j=1,2+nsteps
-          iroll_def(j,i,istn,icode)=irtrk(j,i)
+          call set_iroll_def(j,i,istn,icode,irtrk(j,i))
         enddo
       enddo
 

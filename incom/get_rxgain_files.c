@@ -12,7 +12,7 @@ get_rxgain_files(ierr)
      int *ierr;
 {
   char outbuf[80];
-  int freq, icount;
+  int freq, icount, i;
   FILE *idum;
 
   strcpy(outbuf,"ls ");
@@ -38,6 +38,31 @@ get_rxgain_files(ierr)
       printf(" ierr = %d on %s\n",*ierr,outbuf);
       return;
     }
+    /* test code
+    printf(" file %s\n",outbuf);
+    printf(" gain curve: count %d\n", shm_addr->rxgain[icount].gain.ncoeff);
+    printf(" gain curve: opacity corrected %c\n",
+	   shm_addr->rxgain[icount].gain.opacity);
+    for (i=0;i<shm_addr->rxgain[icount].gain.ncoeff;i++)
+      printf(" %f ",shm_addr->rxgain[icount].gain.coeff[i]);
+    printf(" \n");
+    printf(" tcal table: count %d\n", shm_addr->rxgain[icount].tcal_ntable);
+    for (i=0;i<shm_addr->rxgain[icount].tcal_ntable;i++)
+      printf(" %c %f %f\n ",
+	     shm_addr->rxgain[icount].tcal[i].pol,
+	     shm_addr->rxgain[icount].tcal[i].freq,
+	     shm_addr->rxgain[icount].tcal[i].tcal);
+    printf(" trec %f\n",shm_addr->rxgain[icount].trec);
+    printf(" spill table: count %d\n", shm_addr->rxgain[icount].spill_ntable);
+    for (i=0;i<shm_addr->rxgain[icount].spill_ntable;i++)
+      printf("%f %f\n ",
+	     shm_addr->rxgain[icount].spill[i].el,
+	     shm_addr->rxgain[icount].spill[i].tk);
+
+    printf(" \n");
+    *ierr=-999;
+    return;
+*/
   }
   *ierr=0;
   return;
