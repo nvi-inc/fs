@@ -14,6 +14,10 @@ s2label.o s2label_dis.o s2rec.o s2rec_dis.o get_s2speed.o get_s2state.o\
 get_s2tapetype.o form4.o form4_dis.o logmatmsg.o tracks4.o tracks4_dis.o\
 trkfrm4.o trkfrm4_dis.o rvac.o rvac_dis.o wvolt.o wvolt_dis.o lo.o lo_dis.o\
 pcalform.o pcalform_dis.o pcald.o pcald_dis.o pcalports.o pcalports_dis.o\
+k4ib.o k4ib_dis.o k4et.o k4st.o k4st_dis.o k4tape.o k4tape_dis.o k4rec.o\
+k4rec_dis.o k4vclo.o k4vclo_dis.o k4vc.o k4vc_dis.o k4vcif.o k4vcif_dis.o\
+k4vcbw.o k4vcbw_dis.o k3fm.o k3fm_dis.o k4label.o k4label_dis.o k4newtp.o\
+k4oldtp.o\
 logmatmsgfm.o
 #
 ../bin/quikv: $(OBJECTS)

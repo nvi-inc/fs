@@ -110,6 +110,7 @@ C 980728 nrv Comment out lines no longer needed because VLBA is
 C            now using dynamic tape allocation. These are marked
 C            with Cdyn.
 C 980924 nrv Replace the commented code for RDV11.
+C 981207 nrv Comment out again.
 C
 C  Initialization
 
@@ -220,7 +221,8 @@ C  Set up tape parameters
       call char2hol('-',LSPDIR,1,1)
       if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp)
      .  call char2hol('+',LSPDIR,1,1)
-Cdyn call char2hol('+',LSPDIR,1,1) ! forward, always
+Cdyn 
+      call char2hol('+',LSPDIR,1,1) ! forward, always
 C  ihead is the head offset position in microns
       IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
 C  ihddir is not really "direction", it is the corresponding pass within
@@ -308,8 +310,8 @@ C     ktrack=.true. !****************** always write them for pol
         ktape = .true.
       ENDIF !change direction
 Cdyn
-Cdyn  ktrack = .false. ! always, for dynamic
-Cdyn  ktape = .true.   ! always, for dynamic
+      ktrack = .false. ! always, for dynamic
+      ktape = .true.   ! always, for dynamic
 
       IF (.not.kcont.or.(kcont.and.(IDIR.NE.IDIRP.or.iobs.eq.0))) THEN ! 
         call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec) ! stop/head
@@ -413,11 +415,11 @@ C  Start the tape moving
       CALL M3INF(ICOD,SPDIPS,ISP)
       ISP=SPDIPS*135.0/120.0
 Cdyn  The tape direction has already been set up above
-      IF (IDIR.EQ.+1) then
-        call char2hol('+',LSPDIR,1,1)
-      else
-        call char2hol('-',LSPDIR,1,1)
-      end if
+Cdyn  IF (IDIR.EQ.+1) then
+Cdyn    call char2hol('+',LSPDIR,1,1)
+Cdyn  else
+Cdyn    call char2hol('-',LSPDIR,1,1)
+Cdyn  end if
       iwr = 1
       ktape=.false.
       if (.not.kcont.or.(kcont.and.(idir.ne.idirp)))

@@ -147,6 +147,45 @@ loop:
       case 54:
 	pcalports(&command,itask,ip);
 	break;
+      case 55:
+	k4ib(&command,itask,ip);
+        break;
+      case 56:
+        k4et(&command,itask,ip);
+        break;
+      case 57:
+        k4st(&command,itask,ip);
+        break;
+      case 58:
+        k4tape(&command,itask,ip);
+        break;
+      case 59:
+        k4rec(&command,itask,ip);
+        break;
+      case 60:
+	k4vclo(&command,itask,ip);
+        break;
+      case 61:
+	k4vc(&command,itask,ip);
+        break;
+      case 62:
+	k4vcif(&command,itask,ip);
+        break;
+      case 63:
+	k4vcbw(&command,itask,ip);
+        break;
+      case 64:
+	k3fm(&command,itask,ip);
+        break;
+      case 65:
+	k4newtp(&command,itask,ip);
+        break;
+      case 66:
+	k4label(&command,itask,ip);
+        break;
+      case 67:
+	k4oldtp(&command,itask,ip);
+        break;
       default:
 	ierr=-4;
 	goto error;

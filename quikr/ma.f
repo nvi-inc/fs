@@ -35,6 +35,7 @@ C        ILEN   - length of IBUF, chars
       dimension ireg(2) 
       integer get_buf
 C               - registers from EXEC calls 
+      character*1 cjchar
 C 
       equivalence (reg,ireg(1)) 
 C 
@@ -66,8 +67,26 @@ C
       iclass = 0
       ifc = 1+ieq
       call upper(ibuf,1,nchar)
-C
-200   icom = iscn_ch(ibuf,ifc,nchar,',')
+C      
+200   continue
+      ichr=ifc
+ 202  continue
+      if(ichr.le.nchar) then
+         if(cjchar(ibuf,ichr).eq.'\\') then
+            do i=ichr,nchar-1
+               call pchar(ibuf,i,jchar(ibuf,i+1))
+            enddo
+            nchar=nchar-1
+         else if(cjchar(ibuf,ichr).eq.',') then
+            icom=ichr
+            goto 203
+         endif
+         ichr=ichr+1
+         goto 202
+      else
+         icom=0
+      endif
+ 203  continue
       if (icom.eq.0) icom = nchar + 1
       nch = icom - ifc
       if (nch.le.0) goto 210

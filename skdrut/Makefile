@@ -19,7 +19,7 @@
 # 970406 nrv Move c2upper here from drudg                               #
 # 970722 nrv Add feetscan, durscan, gdscan                              #
 # 971211 nrv Add VUNPPCAL.                                              #
-# 990217 nrv Add LSKORDER.                                              #
+# 980302 nrv Add LSKORDER.                                              #
 #                                                                       #
 #########################################################################
  

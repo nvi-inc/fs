@@ -15,7 +15,7 @@ c
       INTEGER I20KCH, I70KCH, IACFTP, IACTTP, IBDB, ILENAL,
      . ILENTS, ILVTL_FS, IMONDS, INTAMP, INTPHA, IRDCL_FS,
      . ITR2VC(28,4), IWRCL_FS, 
-     . IYRCTL_FS, LVSENS, MODSA, NHORWV, rxncodes,
+     . LVSENS, MODSA, NHORWV, rxncodes,
      . NPRSET, NRX_FS, RPDT_FS, RPRO_FS, RDHD_FS,
      . iswavif3_fs,
      . b_init(INT_ALIGN),e_init
@@ -40,7 +40,7 @@ c
      . I20KCH, I70KCH, IACFTP, IACTTP, IBDB, ILENAL,
      . ILENTS, ILVTL_FS, IMONDS, INTAMP, INTPHA, 
      . IRDCL_FS, ITR2VC, IWRCL_FS, 
-     . IYRCTL_FS, LVSENS,
+     . LVSENS,
      . MODSA, NHORWV, rxncodes,
      . NPRSET, NRX_FS, RPDT_FS, RPRO_FS, RDHD_FS,
      . iswavif3_fs,

@@ -14,7 +14,8 @@ C          1) epoch 1950 or 2000 <<<<<<< moved to control file
 C          2) add checks Y or N <<<< not for S2
 C          3) force checks Y or N <<<<<<< removed
       integer iin ! 1=Mk3/4 back end, 2=VLBA back end. 
-C                   3=K4
+C                   3=K4 type 2, 4=other K3/4
+C                   The difference is that K4 type 2 has "rec=drum_on"
 C       This is ignored for VEX files which already have this information.
 C
 C  LOCAL:
@@ -227,6 +228,8 @@ C 980910 nrv Remove all time formatting to a subroutine timout.
 C 980916 nrv Change CHECK back to 2c1/2 until automatic checks are ready.
 C 980917 nrv Change "data_valid" back to comments until command is ready.
 C 981016 nrv Now can use data_valid command and checkf
+C 990112 nrv Add REC=DRUM_ON before PREOB for K4 recorders.
+C 990113 nrv Add "iin" option 4 for K4 type 2, option 5 other K4. Disable 3.
 C
 C
       iblen = ibuf_len*2
@@ -248,6 +251,7 @@ C   for the rack type.
      .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
         ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
         kk4=   ichcm_ch(lstrec(1,istn),1,'K4').eq.0 
+C NOTE: types of K4 recorders need to be expanded in VEX!
       else ! take user input 
 C     Modify bit density and recording format according to formatter type.
         if (iin.eq.1) then ! Mark III/IV formatter and DR format
@@ -270,7 +274,7 @@ C           else
 C             bitdens(istn,i) = 56700.0 
 C           endif
 C         enddo
-        else if (iin.eq.3) then ! K4 recorder
+        else if (iin.ge.3) then ! K4 recorder
           kk4=.true.
         endif
       endif
@@ -291,7 +295,7 @@ C    and whether maximal checks are wanted.
        else ! interactive
         write(luscn,9112) cepoch(1:trimlen(cepoch))
 9112    format(' Source commands will be written with epoch ',a,'.')
-        if (ks2) then ! parity/prepass
+        if (ks2.or.kk4) then ! parity/prepass
           maxchk = 'N'
         else 
         if (kparity) then
@@ -799,7 +803,7 @@ C Calculate tape spin time
 C
 C Unload old tape
           IF (KNEWTP.AND.IOBSst.NE.0) THEN !get rid of old tape
-            IF (.not.ks2.and.IFTOLD.GT.50 ) THEN !spin down remaining tape
+            IF (.not.ks2.and..not.kk4.and.IFTOLD.GT.50 ) THEN !spin down remaining tape
               CALL IFILL(IBUF2,1,iblen,32)
               TSPINS=TSPIN(IFTOLD,ISPM,ISPS)
               idirsp=-1
@@ -813,7 +817,7 @@ C Unload old tape
               nch = ichmv_ch(IBUF2,1,'et')
               krunning = .false.
               call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
-              if (.not.ks2) then ! wait for tape to stop
+              if (.not.ks2.and..not.kk4) then ! wait for tape to stop
                 idum = ichmv_ch(IBUF2,1,'!+3S')
                 if (speed(icod,istn).gt.15.0) 
      .             idum = ichmv_ch(IBUF2,1,'!+5s')
@@ -831,7 +835,7 @@ C Check procedure
 C             for continuous, check after tape stops at end of a pass
           ICHK = 0
 C         Add "not krunning" so we don't try a check while it's moving!
-          IF (.not.krunning.and..not.ks2
+          IF (.not.krunning.and..not.ks2.and..not.kk4
      .      .and..NOT.KNEWTP.AND.IOBSst.GT.0) THEN !check procedure
           IF ((.not.kcont.and.KFLG(2).and.(iobsp.eq.2.or.icheckp.eq.1))
      .       .or.(kcont.and.kflg(2).and.iobsp.eq.1)
@@ -909,12 +913,12 @@ C READY
           nch = ichmv_ch(IBUF2,1,'ready  ')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
 C Prepass new tape
-          IF (dopre.eq.'Y'.and..not.ks2.AND.KFLG(3)) THEN !prepass
+          IF (dopre.eq.'Y'.and..not.ks2.and..not.kk4.AND.KFLG(3)) THEN !prepass
             CALL IFILL(IBUF2,1,iblen,32)
             NCH = ichmv_ch(IBUF2,1,'prepass  ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch-1)/2)
           END IF !prepass
-          IF (.not.ks2.and.IFT(ISTNSK).GT.100) THEN !spin up
+          IF (.not.ks2.and..not.kk4.and.IFT(ISTNSK).GT.100) THEN !spin up
             TSPINS=TSPIN(IFT(ISTNSK),ISPM,ISPS)
             idirsp=+1
             CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
@@ -977,8 +981,8 @@ C Called for S2 if the group changed since the last pass
 C
 C Spin new tape if necessary to reach footage
 C Don't spin if we're already running. (? shouldn't happen?)
-        IF (idir.ne.0.and..not.krunning.and..not.ks2.and.TSPINS.GT.5.0) 
-     .    THEN
+        IF (idir.ne.0.and..not.krunning.and..not.ks2.and..not.kk4.
+     .     and.TSPINS.GT.5.0) THEN
           CALL IFILL(IBUF2,1,iblen,32)
           CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
           call hol2lower(ibuf2,(nch+1))
@@ -1061,6 +1065,12 @@ C No PREOB if tape is running in a VEX file.
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
 C                   Wait until ICAL before start time
 C PREOB procedure
+          if (kk4) then ! turn on the drum
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ICHMV_ch(IBUF2,1,'rec=drum_on')
+            call hol2lower(ibuf2,(nch+1))
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
           CALL IFILL(IBUF2,1,iblen,32)
           idum = ICHMV(IBUF2,1,LPRE,1,6)
           call hol2lower(ibuf2,(6+1))
@@ -1236,7 +1246,7 @@ C     Copy ibuf_next into IBUF
 C
       CONTINUE
       TSPINS = TSPIN(IFTOLD,ISPM,ISPS)
-      IF (.not.ks2.and.TSPINS.GT.5.) THEN
+      IF (.not.ks2.and..not.kk4.and.TSPINS.GT.5.) THEN
 C       THEN BEGIN "spin off the last tape"
         if (krunning) then ! stop it first
           idum = ichmv_ch(IBUF2,1,'et  ')

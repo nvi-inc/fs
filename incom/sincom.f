@@ -18,6 +18,7 @@ C  Functions
 C  End 600 variables
       character*80 ibc, model
       character*4 yesno
+      character*8 cpu
       equivalence (ibc,ibuf)
       data ibaud  /110,300,600,1200,2400,4800,9600/
       data ibauddb/110,300,600,1200,2400,4800,9600,115200/
@@ -477,6 +478,7 @@ C LINE #7  NEAREST PAST DECADE
         ierrx = -1
         goto 990
       endif
+      call fs_set_iyrctl_fs(iyrctl_fs)
 C LINE #8  HORIZON MASK
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
@@ -624,6 +626,51 @@ C LINE #7  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
         rack = VLBA4
         rack_type = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'k41').eq.0.and.il.eq.3) then
+        rack = K4
+        rack_type = K41
+      else if (ichcm_ch(ibuf,ic1,'k41u').eq.0.and.il.eq.4) then
+        rack = K4
+        rack_type = K41U
+      else if (ichcm_ch(ibuf,ic1,'k42').eq.0.and.il.eq.3) then
+        rack = K4
+        rack_type = K42
+      else if (ichcm_ch(ibuf,ic1,'k42a').eq.0.and.il.eq.4) then
+        rack = K4
+        rack_type = K42A
+      else if (ichcm_ch(ibuf,ic1,'k42bu').eq.0.and.il.eq.5) then
+        rack = K4
+        rack_type = K42BU
+      else if (ichcm_ch(ibuf,ic1,'k41/k3').eq.0.and.il.eq.6) then
+        rack = K4
+        rack_type = K41K3
+      else if (ichcm_ch(ibuf,ic1,'k41u/k3').eq.0.and.il.eq.7) then
+        rack = K4
+        rack_type = K41UK3
+      else if (ichcm_ch(ibuf,ic1,'k42/k3').eq.0.and.il.eq.6) then
+        rack = K4
+        rack_type = K42K3
+      else if (ichcm_ch(ibuf,ic1,'k42a/k3').eq.0.and.il.eq.7) then
+        rack = K4
+        rack_type = K42AK3
+      else if (ichcm_ch(ibuf,ic1,'k42bu/k3').eq.0.and.il.eq.8) then
+        rack = K4
+        rack_type = K42BUK3
+      else if (ichcm_ch(ibuf,ic1,'k41/mk4').eq.0.and.il.eq.7) then
+        rack = K4MK4
+        rack_type = K41MK4
+      else if (ichcm_ch(ibuf,ic1,'k41u/mk4').eq.0.and.il.eq.8) then
+        rack = K4MK4
+        rack_type = K41UMK4
+      else if (ichcm_ch(ibuf,ic1,'k42/mk4').eq.0.and.il.eq.7) then
+        rack = K4MK4
+        rack_type = K42MK4
+      else if (ichcm_ch(ibuf,ic1,'k42a/mk4').eq.0.and.il.eq.8) then
+        rack = K4MK4
+        rack_type = K42AMK4
+      else if (ichcm_ch(ibuf,ic1,'k42bu/mk4').eq.0.and.il.eq.9) then
+        rack = K4MK4
+        rack_type = K42BUMK4
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -663,6 +710,12 @@ C LINE #8  TYPE OF RECORDER - drive
       else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
         drive = VLBA4
         drive_type = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'k41').eq.0.and.il.eq.3) then
+        drive = K4
+        drive_type = K41
+      else if (ichcm_ch(ibuf,ic1,'k42').eq.0.and.il.eq.3) then
+        drive = K4
+        drive_type = K42
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive = 0
         drive_type = 0
@@ -1518,7 +1571,7 @@ C
       ilen=0
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-209,'bo',ierr)
+        call logit7ci(0,0,0,1,-201,'bo',ierr)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -1527,7 +1580,7 @@ C
       call hol2char(ibuf,ic1,ic2,yesno)
       if(yesno.ne.'yes'.and.yesno.ne.'no')
      &  then
-        call logit7ci(0,0,0,1,-181,'bo',0)
+        call logit7ci(0,0,0,1,-201,'bo',0)
         goto 990
       endif
       if(yesno.eq.'yes') then
@@ -1538,6 +1591,30 @@ C
          call fs_set_vac4(vac4)
       endif
       call fs_set_vacsw(vacsw)
+C
+C  recorder CPU board
+C
+      ilen=0
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-202,'bo',ierr)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      call hol2char(ibuf,ic1,ic2,cpu)
+      if(cpu.ne.'mvme162'.and.cpu.ne.'mvme117') then
+        call logit7ci(0,0,0,1,-202,'bo',0)
+        reccpu=0
+        call fs_set_reccpu(reccpu)
+        goto 990
+      else if(cpu.eq.'mvme162') then
+         reccpu=162
+      else
+         reccpu=117
+      endif
+      call fs_set_reccpu(reccpu)
       call fmpclose(idcb,ierr)
       goto 990
 C

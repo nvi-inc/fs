@@ -33,4 +33,5 @@
 #define S_EOFL     3		/* serial buffer overflow */
 #define S_EFRM     4		/* incorrect stop bits or BREAK */
 
-int sib(int hpib, char *buffer, int len_in, int max_out, int timeout);
+int sib(int hpib, char *buffer, int len_in, int max_out, int timeout,
+	int itime, long centisec[2]);

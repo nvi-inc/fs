@@ -1,5 +1,5 @@
       subroutine lstsumo(iline,npage,cstn,cid,cexper,maxline,
-     .      itearl_local,itlate_local,kwrap,ks2,cday,kazel,ksat,
+     .      itearl_local,itlate_local,kwrap,kk4,ks2,cday,kazel,ksat,
      .      kstart,kend,nsline,csor,cwrap,ch1,cm1,cs1,
      .      ihd,imd,isd,ih2,im2,is2,ch3,cm3,cs3,
      .      idm,ids,cpass,ifeet,cnewtap,cdir,
@@ -29,6 +29,8 @@ C 970728 nrv If no tape motion, print "--" in pass field.
 C 970812 nrv Print ifeet to nearest 20 feet (=1 sec at fast speed)
 C 971210 nrv Print ifeet to nearest 1 min for S2. Change some headers.
 C 980914 nrv Print full date. Add IYEAR to call.
+C 990117 nrv Add KK4 to call. Add S2 or K4 to header. Change output
+C            for K4 types.
 
 C Input
       double precision rarad,dcrad,xpos,ypos,zpos,ut
@@ -44,7 +46,7 @@ C** temporary
       character*2 cpass,ch1,cm1,cs1,ch3,cm3,cs3
       character*2 cid
       character*7 cwrap
-      logical kskd,kend,kstart,ks2
+      logical kskd,kend,kstart,kk4,ks2,kmv
       logical kwrap, kazel,ksat
 
 C Output
@@ -58,14 +60,17 @@ C Local
       character*128 cbuf
 
 
+      kmv=.not.ks2.and..not.kk4 ! kmv=Mk3/4 or VLBA
       kcont=.true. ! if we don't know, include the column
       if (kskd) kcont=tape_motion_type(istn).eq.'CONTINUOUS'.or.
      .tape_motion_type(istn).eq.'ADAPTIVE'.or.itlate(istn).gt.0
       kearl=itearl_local.gt.0
-      if (.not.ks2) then
-        ifeet_print = 10*ifix(float((ifeet+9)/10)) ! nearest 10 feet
-      else
+      if (ks2) then
         ifeet_print = ifeet/60 ! convert seconds to minutes
+      else if (kk4) then
+        ifeet_print = ifeet  ! counts
+      else
+        ifeet_print = 10*ifix(float((ifeet+9)/10)) ! nearest 10 feet
       endif
 
 C  1. Headers.
@@ -83,7 +88,14 @@ C  1. Headers.
           write(luprt,9203) tape_motion_type(istn)(1:i)
 9203      format(' Tape motion type: ',a,$)
           if (tape_motion_type(istn).eq.'ADAPTIVE') then
-            write(luprt,'(5x,"gap: ",i3," seconds")') itgap(istn)
+            write(luprt,'(5x,"gap: ",i3," seconds",$)') itgap(istn)
+          else
+            write(luprt,'($)')
+          endif
+          if (ks2) then
+            write(luprt,'(5x,"Recorder type: S2")')
+          else if (kk4) then
+            write(luprt,'(5x,"Recorder type: K4")')
           else
             write(luprt,'()')
           endif
@@ -101,8 +113,10 @@ C  1. Headers.
      .  ' Dur=time interval of on-source data (Start Data to',
      .  ' Stop Data) in mmm:ss'/
      .  ' Data and tape times are in the format hh:mm:ss'/
-     .  ' Feet = footage at start of scan, to nearest 10 feet or',
-     .  ' nearest minute for S2'/
+     .  ' Feet = footage at start of scan, ',
+     .         'to nearest 10 feet (Mk3/4/VLBA)'/
+     .  ' Counts = tape counts at start of scan (K4)'/
+     .  ' Group (min) = group number and nearest minute on tape (S2)'/
      .  ' Key for Tape Usage:  XXX=tape change, *=parity',
      .  ' check, @=no tape motion'/
      .  )
@@ -120,7 +134,7 @@ C  2. Column heads.
         if (kcont) cbuf=cbuf(1:il)//'     Stop'
         il=trimlen(cbuf)
         if (.not.ks2) cbuf=cbuf(1:il)//'                     Tape '
-        if (     ks2) cbuf=cbuf(1:il)//'               Tape'
+        if (ks2) cbuf=cbuf(1:il)//'               Tape' ! no stops
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
         cbuf=' Line#  Source   Az El'
@@ -134,8 +148,9 @@ C  2. Column heads.
         il=trimlen(cbuf)
         if (kcont) cbuf=cbuf(1:il)//'     Tape'
         il=trimlen(cbuf)
-        if (.not.ks2) cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
-        if (     ks2) cbuf=cbuf(1:il)//'      Dur Group (min)'
+        if (kmv) cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
+        if (ks2) cbuf=cbuf(1:il)//'      Dur Group (min)'
+        if (kk4) cbuf=cbuf(1:il)//'      Dur   Counts Usage'
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
 
@@ -187,20 +202,23 @@ C  Continuous or adaptive, "Tape Stop" field
 C  Duration
       write(luprt,'(2x,i3,":",i2.2,$)') idm,ids
 C  Pass
-      if (cnewtap.eq.'@  ') then
-        write(luprt,'(1x,"--",$)') 
-      else
-        write(luprt,'(1x,a2,$)') cpass
-      endif
+      if (.not.kk4) then ! pass or S2 group
+        if (cnewtap.eq.'@  ') then
+          write(luprt,'(1x,"--",$)') 
+        else
+          write(luprt,'(1x,a2,$)') cpass
+        endif
+      endif ! pass or S2 group
 C  Footage
-      if (.not.ks2) then
+      if (kmv) then
         if (cnewtap.eq.'@  ') then
           write(luprt,'("-",1x,i5,$)') ifeet_print
         else
           write(luprt,'(a1,1x,i5,$)') cdir(1:1),ifeet_print
         endif
       endif
-      if (     ks2) write(luprt,'(i5,$)') ifeet_print
+      if (ks2) write(luprt,'(i5,$)') ifeet_print
+      if (kk4) write(luprt,'(i8,$)') ifeet_print
 C  New tape flag
       write(luprt,'(1x,a3,$)') cnewtap
  

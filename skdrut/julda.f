@@ -17,7 +17,8 @@ C     21MX COMPUTER (+- 32767)
 CY2K  980804 nrv Add 100 to input year if it's 0 to 50. Use IYIN
 C                in this routine so that IYEAR is not modified.
       iyin = iyear
-      if (iyear.ge.0.and.iyear.lt.50) iyin=iyear+100
+C     This is not correct. The input is years since 1900. Don't change it.
+C     if (iyear.ge.0.and.iyear.lt.50) iyin=iyear+100
       IYR1  =0
       IYR   =IYIN/4
       IF(IYIN) 3,21,7

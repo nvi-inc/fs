@@ -44,7 +44,7 @@ long ip[5];
     dev2[1]=device2[1];
 
     kuser2=device2[0]=='u';
-    if(!kuser2 && ierr!=0)
+    if(!kuser2 && *ierr!=0)
 	return;
 
     *ierr=0;

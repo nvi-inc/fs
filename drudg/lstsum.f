@@ -63,10 +63,13 @@ C 980914 nrv Print out the full date for each new day. Add IYEAR to
 C            LSTSUMO call. Handle both new and old style SNAP dates.
 C 980916 nrv Remove decoding time field to a subroutine TIMIN.
 C 980917 nrv Recognize either "data_valid" command or "data xx" comment.
+C 990115 nrv Recognize ST=RECORD in SNAP file as a K4 command.
+C 990117 nrv Calculate K4 footage using K4 speeds
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 C
 C Input:
@@ -80,9 +83,11 @@ C Local:
      .ifeet,inewp,iyear,ix,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,
      .idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save,
-     .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift
+     .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift,idif
       real rs,ds,val
       real speed_snap ! speed from SNAP file
+      real speed_k4 ! speed for K4
+      real conv_k4 ! speed scaling for feet-->counts
       integer ichcm_ch,isecdif,julda ! function
       LOGICAL   KEX
       logical     kazel,kwrap,ksat
@@ -94,7 +99,7 @@ C Local:
       character*2 cid,cpassp,cpass,ch1,cm1,cs1,ch3,cm3,cs3
       character*1 cid1,cs,csgn
       character*7 cwrap
-      logical kgot,kend,kstart,ks2,krunning
+      logical kgot,kend,kstart,kk4,ks2,krunning
       double precision xpos,ypos,zpos,rarad,dcrad,ut,az,el
       integer nsline_s,ihd_s,imd_s,isd_s,
      .ih2_s,im2_s,is2_s,idurm_s,idurs_s,ifeet_print_s,mjd_s
@@ -181,12 +186,11 @@ C 4. Loop over SNAP file records
       cday_sor=' '
       idir = 0
       speed_snap=0
+      iline = maxline
       ifdur_save=0
-      nline = 0
       ntapes = 0
       ncount = 0
       npage = 0
-      iline = maxline
       cday_save = ' '
       cday_prev = ' '
       idur=-1
@@ -195,21 +199,32 @@ C 4. Loop over SNAP file records
       ifeet_print=-1 ! set as a flag
       inewp = 0
       cnewtap = '   '
-      if (kskd) then
-        ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
-      else ! read SNAP file
-        ks2=.false.
-        do while (.not.ks2)
-          read(lu_infile,'(a)',err=991,end=440,iostat=IERR) cbuf_in
+      kk4=.false.
+      ks2=.false.
+      if (kskd.and.kvex) then ! from sked file
+        ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0 ! from VEX file
+      else ! check first 50 lines of snap file
+        nline=0
+        do while (nline.lt.50.and..not.kk4.and..not.ks2)
+          read(lu_infile,'(a)',err=991,end=441,iostat=IERR) cbuf_in
+          nline=nline+1
           call c2upper(cbuf_in,cbuf)
-C         No longer works to identify S2 because all have this command.
-C         if (index(cbuf,'DATA_VALID').ne.0) ks2=.true. 
-          if (index(cbuf,'for,slp').ne.0.or.index(cbuf,'for,lp').ne.0) 
-     .          ks2=.true. 
+          kk4 = index(cbuf,'ST=RECORD').ne.0
+          ks2 = index(cbuf,'FOR,SLP').ne.0.or.index(cbuf,'FOR,LP').ne.0 
         enddo
-440     rewind(lu_infile)
+      endif ! sked/snap
+441   rewind(lu_infile)
+      if (kk4) then ! K4 speed 
+C       scaling factor is 55 cpd/11.25 fps if the schedule
+C       was produced using sked with Mk/VLBA footage calculations
+C       and no fan-out or fan-in. Footages were therefore already
+C       scaled by bandwidth calculations in sked.
+        conv_k4 = 55.389387393/11.25 ! counts/foot
+        speed_k4 = 55*vcband(1,1,1)/2.0 ! 55, 110, or 220 cps
+        ifeet = 54
       endif
 
+      nline = 0
       do while (.true.) ! read loop
         read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
           call c2upper(cbuf_in,cbuf)
@@ -358,6 +373,7 @@ C         kend=.false.
         else if (index(cbuf,'READY').ne.0) then
           cnewtap = 'XXX'
           ifeet = 0
+          if (kk4) ifeet = 54
 
         else if (index(cbuf,'MIDTP').ne.0) then
           inewp = 1
@@ -374,6 +390,8 @@ C         kend=.false.
             irun = isecdif(idd,ihd,imd,isd,idr,ihr,imr,isr)
             if (ks2) then
               ifeet = ifeet + irun ! seconds
+            else if (kk4) then
+              ifeet = ifeet + irun*speed_k4 ! counts
             else
               ifeet = ifeet + irun*idir*(speed_snap/12.0) ! feet
             endif
@@ -394,7 +412,8 @@ C        Now print the line because we would have found the ET by now.
             if (cnewtap_s.eq.'   '.and..not.kmotion_s) cnewtap_s='@  '
             if (ifeet_print_s.eq.-1) ifeet_print_s=0
             call lstsumo(iline,npage,cstn,cid,cexper,maxline,
-     .      itearl_local,itlate_local,kwrap,ks2,cday_save,kazel,ksat,
+     .      itearl_local,itlate_local,kwrap,kk4,ks2,cday_save,kazel,
+     .      ksat,
      .      kstart_s,kend,nsline_s,csor_s,cwrap_s,ch1_s,cm1_s,cs1_s,
      .      ihd_s,imd_s,isd_s,ih2_s,im2_s,is2_s,ch3,cm3,cs3,
      .      idurm_s,idurs_s,cpass_s,ifeet_print_s,
@@ -440,11 +459,13 @@ C             Do this round off just before printing, in lstsumo
             if (cdir.eq.'REV') idir=-1
           else ! update footage 
             read(cti,ctiformat) idt,iht,imt,ist
-            ift = isecdif(idt,iht,imt,ist,idr,ihr,imr,isr)
+            idif = isecdif(idt,iht,imt,ist,idr,ihr,imr,isr)
             if (ks2) then
-              ifeet = ifeet + ift ! seconds
+              ifeet = ifeet + idif ! seconds
+            else if (kk4) then
+              ifeet = ifeet + idif*speed_k4 ! counts
             else
-              ifeet = ifeet + ift*idir*(speed_snap/12.0) ! feet
+              ifeet = ifeet + idif*idir*(speed_snap/12.0) ! feet
             endif
 C           Restart the running time clock
             idr=idt
@@ -476,6 +497,8 @@ C           Update running time
 C           Update footage with timing
             if (ks2) then
               ifeet = ifeet + idur ! seconds
+            else if (kk4) then
+              ifeet = ifeet + idur*speed_k4
             else
               ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
             endif
@@ -505,7 +528,11 @@ C non-tape and not running (no updating).
             if (ks2) then
               ifeet = ifeet + idur ! seconds
             else if (krunning) then
-              ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
+              if (kk4) then
+                ifeet = ifeet + idur*speed_k4 ! feet
+              else
+                ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
+              endif
             endif
           endif ! no stop yet
 
@@ -556,7 +583,7 @@ C     Output the final scan
         iline=iline+1
       endif
       call lstsumo(iline,npage,cstn,cid,cexper,maxline,
-     .itearl_local,itlate_local,kwrap,ks2,cday_sor,kazel,ksat,
+     .itearl_local,itlate_local,kwrap,kk4,ks2,cday_sor,kazel,ksat,
      .kstart,kend,nsline,csor,cwrap,ch1,cm1,cs1,
      .ihd,imd,isd,ih2,im2,is2,
      .ch3,cm3,cs3,

@@ -30,7 +30,6 @@ C LOCAL:
       integer idd3,idm3,idd1,idm1,idd2,idm2
       real ras,decs,ras3,ras2,ras1,dcs1,dcs2,dcs3,has,d
       real tslew,dum
-      logical ks2rec
       integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod,
      .mjdpre,ispre,iyr2,idayr2,ihr2,min2,isc2
       integer*2 lfreq,lcbpre,lcbnew
@@ -101,6 +100,7 @@ C 970304 nrv Add COPTION for defaults.
 C 970307 nrv Use pointer array ISKREC to insure time order of obs.
 C 971003 nrv Add a check for S2 and determine tape changes for it separately.
 C 980916 nrv Change date header on source page to yyyy.ddd
+C 981202 nrv Add warning message about negative slewing times.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -113,7 +113,6 @@ C
         if (coption(1)(1:1).eq.'L') iwid=137 
         if (coption(1)(1:1).eq.'P') iwid=80 
       endif
-      ks2rec=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
 
       if (iwid.eq.80) then ! portrait
         if (cs.eq.'S') then 
@@ -406,6 +405,12 @@ C CONVERT BACK TO DOUBLE
      .           LHSIGN,IHAH,IHAM,HAS)
           ENDIF
 C
+          if (tslew.lt.0.0) then 
+            WRITE(luprt,9331)
+9331        FORMAT('  THE FOLLOWING SOURCE REQUIRES NEGATIVE ',
+     .             'SLEWING TIME.  INFORM THE SCHEDULER!'/)
+                  NLINES = NLINES + 1
+          endif
           IF (KUP) THEN !source is up
             lcbnew=lcable(istnsk)
             CALL SLEWo(ISPRE,MJDPRE,UTPRE,ISOR,ISTN,
@@ -439,7 +444,7 @@ C         IF (iwid.EQ.137) then
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',a5,' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
-            if (ks2rec) then
+            if (ks2) then
               write(luprt,9511) IFT(ISTNSK)/60 ! in minutes
 9511          format(I5,
      .        ' _________________________________________________'/)
@@ -457,7 +462,7 @@ C         else IF (iwid.EQ. 80) then
 9518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
      .      a5,' ',F4.1,$)
-            if (ks2rec) then
+            if (ks2) then
               write(luprt,9517) IFT(ISTNSK)/60
 9517          format(I5,' ',' ________________'/)
             else
@@ -477,7 +482,7 @@ C         IF (iwid.EQ.137) then
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
-            if (ks2rec) then
+            if (ks2) then
               write(luprt,8511) IFT(ISTNSK)/60
 8511          format(i5,
      .        ' ____________________________________________________'/)
@@ -493,7 +498,7 @@ C         else IF (iwid.EQ. 80) then
      .      MIN2,ISC2,(LSNAME(i),i=1,4),LHSIGN,IHAH,IHAM,AZ,EL,TSLEW
 8518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',F4.1,$)
-            if (ks2rec) then
+            if (ks2) then
               write(luprt,8517) IFT(ISTNSK)/60
 8517          format(I5,' ',' ________________'/)
             else
@@ -506,7 +511,7 @@ C
           NLINES = NLINES + 1
           nlobs = nlobs + 1
           IPASP = IPAS(ISTNSK)
-          if (ks2rec) then
+          if (ks2) then
             IFTOLD = IFT(ISTNSK)+IDUR(ISTNSK)
           else
             IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL(istn)+

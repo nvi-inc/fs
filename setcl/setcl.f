@@ -97,9 +97,9 @@ c
         goto 999
       endif
       idum=fc_rte_prior(CL_PRIOR)
-      call rmpar(ip)
       nerr = 0
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       call fs_get_drive(drive)
 c
 50    continue
@@ -120,6 +120,18 @@ c
             goto 998
          endif
          goto 200
+      else if(K4.eq.drive ) then
+        idum=rn_take('fsctl',0)
+        call fc_get_k4time(centisec,it,ip)
+        centisec(2)=centisec(1)
+        call rn_put('fsctl')
+        if(ip(3).lt.0) then
+           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+           nerr=nerr+1
+           if(nerr.le.3) goto 50
+           goto 998
+        endif
+        goto 200
       else if (VLBA.eq.rack) then
         idum=rn_take('fsctl',0)
         call fc_get_vtime(centisec,it,ip)
@@ -131,7 +143,7 @@ c
            goto 998
         endif
         goto 200
-      else if (MK4.eq.rack.or.VLBA4.eq.rack) then
+      else if (MK4.eq.rack.or.VLBA4.eq.rack.or.rack.eq.K4MK4) then
         ibuf(1) = -54
         idum = ichmv_ch(ibuf,3,'fm')
         idum = ichmv_ch(ibuf,5,'/TIM')
@@ -150,6 +162,24 @@ C             two return buffers with imode = -53
         ibuf(1) = -4
         nrec = nrec + 1
         call put_buf(iclasm,ibuf,-4,'fs','  ')
+      else if(K4.eq.rack. and. (
+     &       K41K3 .eq.rack_type.or.
+     &       K41UK3.eq.rack_type.or.
+     &       K42K3 .eq.rack_type.or.
+     &       K42AK3.eq.rack_type.or.
+     &       K42BUK3.eq.rack_type)
+     &       ) then
+        idum=rn_take('fsctl',0)
+        call fc_get_k3time(centisec,it,ip)
+        centisec(2)=centisec(1)
+        call rn_put('fsctl')
+        if(ip(3).lt.0) then
+           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+           nerr=nerr+1
+           if(nerr.le.3) goto 50
+           goto 998
+        endif
+        goto 200
       else
          call logit7ci(idum,idum,idum,-1,-11,'sc',0)
          goto 1
@@ -196,6 +226,7 @@ C
         ireg(2) = get_buf(iclass,ibuf,-20,idum,idum)
 c
         nch = ichmv_ch(ibuf2,1,'tm,')
+        call fs_get_iyrctl_fs(iyrctl_fs)
         nch = nch+ib2as(iyrctl_fs/10,ibuf2,nch,3)
         nch = ichmv(ibuf2,nch,ibuf,4,1)
 C                   The last digit of the year

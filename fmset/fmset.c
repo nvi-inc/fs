@@ -124,7 +124,7 @@ mvwaddstr( maindisp,  ROW+2, 10,
 mvwaddstr( maindisp, ROW+3, 10, 
  "    '.'   to set formatter time to Field System time.");
 irow=4;
-if(rack& MK4 || rack &VLBA4)
+if(rack& MK4 || rack & K4MK4 || rack &VLBA4)
   mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    's' or 'S' to SYNCH formatter (rarely needed)");
 if(!toggle) {

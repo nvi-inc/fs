@@ -3491,7 +3491,7 @@ Version 9.3.23 980216
            add ?WWW to MA -100 error (unable to open dev)
 
 980407 WEH fmpsee/fmpclose.c
-           if *dcb is null, then no-op
+           if *dcb is null, then no-op (lost change now recovered)
 
 980407 WEH fs/fs.c
            initialize les, lesm, lesam, lesm2 to -1
@@ -3512,12 +3512,12 @@ Version 9.3.23 980216
            don't define sys_errlist if Linux
 
 980509 WEH skdrut/fc_gwinsz.c
-           skdrut/fc_gwinw.c
+           skdrut/fc_gswinw.c
            include termio.h not sys/termio.h
            change declarations to return int not pointer to int
 
 980509 WEH mcbcn/mcbcn.c
-           include termios. not termio.h
+           include termios.h not termio.h
 
 980521 WEH fmset/Makefile
            remove reference to clear_scrn.o
@@ -3526,14 +3526,17 @@ Version 9.3.23 980216
            deleted
 
 980521 WEH fmset/fmset.c
-           added wrefresh call that RedHat Linux 2.0.31 seems to need
+           added wrefresh call that RedHat 5.0 seems to need
            remove clear_scrn call and substituted wclear
 
 980521 WEH poclb/pmdlq.c
            clib/dqa_util.c
            use (float) for double args fo flt2str
 
-Version 9.3.24 980521
+980604 WEH ibcon/opbrd.c
+           put ierr=0 for REV 1 on ibonl()
+
+Version 9.3.24 980604
 
 970915 NRV drudg/fdrudg.f
            Add VLBA4 option for procedures.
@@ -3556,8 +3559,11 @@ Version 9.3.24 980521
            st.default/oper/bin/update*
 	   insert #!/bin/tcsh as first line
 
+970917 weh include/params.i
+           add VLBA4 rack and recorder, redefine _type values
+
 970917 weh include/fscom_quik.i
-           remove itrkpar4 since party4.f is gone
+           remove itrkpar4 since party4.f
 
 970917 weh bosslb/gtnam.f
            modified for more rack/recorder types
@@ -3722,52 +3728,32 @@ Version 9.3.24 980521
            further changes for VLBA4
 
 971103 WEH quikr/fvpnt.f
-           quikr/onofc.f
-           fivpt/fivpt.f
-           fivpt/tsys.f
-           fivpt/volts.f
-           onoff/onoff.f
-           onoff/tzer.f
-           onoff/vlts2.f
-           add support for VLBA4
-           simplify bit logic
-
+971103 WEH quikr/onofc.f
+971103 WEH fivpt/fivpt.f
+971103 WEH fivpt/tsys.f
+971103 WEH fivpt/volts.f
+971103 WEH onoff/onoff.f
+971103 WEH onoff/tzer.f
+971103 WEH onoff/vlts2.f
+971105 WEH fslb/novas.f
+971105 WEH fslb/sunpo.f
 971105 WEH quikr/tsys.f
-           quikr/tpi.f
-           updated for VLBA4
-           simplify bit logic
-
+971105 WEH quikr/tpi.f
 971105 WEH polb/gtdbl.f
-           make gtdbl double precision
-
 971105 WEH error/kgpnt.f
-           error/error.f
-           error/kpdat.f
-           error/kpdat2.f
-           adjust arrays to double and use gtdbl
-           use sngl for calling some formatting routines
-
+971105 WEH error/error.f
 971105 WEH lnfch/Makefile
-           lnfch/id2as.f
-           add id2as
-
 971105 WEH polb/Makefile
-           include gtdbl
-
 971105 WEH polb/jd2as.f
-           created
-
+971105 WEH error/kpdat.f
+971105 WEH error/kpdat2.f
+971105 WEH lnfch/id2as.f
 971107 WEH st.default/sched/v4hdcal.snp
-           created
-
 971107 WEH st.default/sched/v2hdcal.snp
-           st.default/sched/3vhdcal.snp
-           st.default/sched/1hdcal.snp
-           st.default/sched/hdcal.snp
-           st.default/sched/vhdcal.snp
-           use Reverse calibration when setting head for reverse tape motion
-           start with tape flipped, ask for label when tape is re-threaded
-           run tape off end at 80 ips for safer treatment of thin tape
+971107 WEH st.default/sched/3vhdcal.snp
+971107 WEH st.default/sched/1hdcal.snp
+971107 WEH st.default/sched/hdcal.snp
+971107 WEH st.default/sched/vhdcal.snp
 
 971113 WEH clib/vst_util.c
            fix VLBA4 rack case for bit_density
@@ -3836,7 +3822,7 @@ Version 9.3.24 980521
 971205 WEH monit/mout2.c
            fixed for 5 and 330 ips for Mark III/IV
 
-971205 WEH chekr/gettp.f
+971205 WEH /chekr/gettp.f
            control/fserr.ctl
            check rate generator against request instead of all possibilities
 
@@ -3853,7 +3839,7 @@ Version 9.3.24 980521
 971205 WEH st.default/proc/4station.prc
            add st=for,0,on before CRC check in set-up procedures
 
-971205 WEH boss/bwork.f
+971205 WEH boss/bwork
            fix logging of schedule/, proc/, log/, and add ti
 
 971205 WEH chekr/hdchk.f
@@ -3933,6 +3919,10 @@ Version 9.3.24 980521
            Add reading the phase cal spacing and base frequencies.
 971208 NRV skdrut/vunpfrq.f
            Add reading the phase cal ref.
+971209 WEH st.default/proc/point.prc.2000
+           st.default/proc/vpoint.prc.2000
+           st.default/control/ctlpo.ctl.2000
+           j2000 versions created
 
 971209 NRV skdrut/frinp.f
            Set net sideband to 'U' for all non-VEX files. Set LO sideband
@@ -4371,8 +4361,73 @@ Version 9.3.24 980521
 980129 WEH vex/vex.yy.l
            clean-up missing braces for lex and add lex directives per Colin
 
-980217 WEH ibcon/opbrd.c
-           put ierr=0 for REV 1 on ibonl()
+980129 WEH monit/monit1.c
+           monit/monit2.c
+           monit/monit3.c
+           add cbreak to make it work with new curses
+
+980203 WEH rtelb/rte_prior.c
+           don't print error message if not permitted
+
+980203 WEH st.default/prog/.xsession
+           st.default/oper/.xsession
+           add "source .profile"
+
+980203 WEH st.default/prog/.profile
+           st.default/prog/.login
+           set FC to fort77
+
+980204 WEH st.default/prog/.xsession
+           st.default/oper/.xsession
+           new cleaner version
+
+980204 WEH st.default/prog/.xsession.old
+           st.default/oper/.xsession.old
+           st.default/prog/.profile.old
+           st.default/prog/.login.old
+           versions for old kernel
+
+980209 WEH ibcon/Makefile
+           detect REV_2 gpib driver based on ugpib.h
+
+980209 WEH ibcon/opbrd.c
+           make ibonl call if REV_2 gpib driver
+
+980209 WEH st.default/prog/.profile
+           st.default/prog/.login
+           add new FC logic
+
+980209 WEH st.default/prog/.profile
+           st.default/prog/.login
+           st.default/oper/.profile
+           st.default/oper/.login
+           add LESS variable
+
+980209 WEH st.default/prog/.profile
+           st.default/oper/.profile
+           add logic to reduce extra fs/bin and st/bins in path
+
+980209 WEH st.default/prog/.xsession.1.2.12
+           st.default/oper/.xsession.1.2.12
+           st.default/prog/.profile.1.2.12
+           st.default/prog/.login.1.2.12
+           renamed from *.old
+
+980209 WEH st.default/prog/.xsession
+           st.default/prog/.xsession
+           delete some extra blank lines
+
+980210 WEH st.default/oper/.profile
+           st.default/prog/.profile
+           correct path redundacy logic
+
+980210 WEH st.default/prog/.login
+           st.default/oper/.login
+           add path redundancy prevention logic
+
+980216 WEH st.default/prog.1.2.12
+           st.default/oper.1.2.12
+           created and moved the .*.1.2.12 files from prog and oper
 
 980218 WEH control/fserr.ctl
            improve fivept/onoff command detector device error messages
@@ -4381,54 +4436,57 @@ Version 9.3.24 980521
            onoff/vlts2.f
            corrected for user devices
 
-980310 WEH st.default/sched/3bhdcal.snp
-           st.default/sched/4hdcal.snp
-           st.default/sched/hdcal.snp
-           explicitly reset the tape footage at remount for unmodified drives
+960617 WEH quikv/k4label.c
+           quikv/k4label_dis.c
+           clib/k4label_util.c
+           created
 
-980310 WEH st.default/sched/prethin.snp
-           st.default/sched/vprethin.snp
-           call prepassthin instead of prepass
+980617 Y?? quikv/k4newtp.c
+           quikv/k4oldtp.c
+           created
 
-980310 WEH st.default/proc/3vstation.prc
-           st.default/proc/3bstation.prc
-           st.default/proc/4station.prc
-           st.default/proc/4switch.prc
-           st.default/proc/v2station.prc
-           st.default/proc/station.prc
-           st.default/proc/v4station.prc
-           st.default/proc/vstation.prc
-           st.default/proc/vswitch.prc
-           make all prepass(thin) procedures uniformly ask
-             for the label at the start and "cont" at turn around
+980617 Y?? quikv/quikv.c
+           control/fscmd.ctl
+           updated for k4 label, oldtape and newtape
 
-980311 WEH include/params.h
-           increased number of pages for C shared memory area to 6
+980812 WEH clib/k4vc_util.c
+           only decode attenators for type 2 VC
 
-980311 WEH st.default/sched/3bhdcal.snp
-980311 WEH st.default/sched/3vhdcal.snp
-980311 WEH st.default/sched/4hdcal.snp
-980311 WEH st.default/sched/hdcal.snp
-980311 WEH st.default/sched/v2hdcal.snp
-980311 WEH st.default/sched/v4hdcal.snp
-980311 WEH st.default/sched/vhdcal.snp
-           change references of write head to head 1 and read to head 2
- 
-980313 WEH quikr/party.f
-           add automatic selection of tracks as default
+980812 WEH quikv/k4vclo.c
+           add missing "task" args to util calls
 
-Version 9.3.30 980528
+980908 WEH clib/k4vclo_util.c
+           decode "unlock" as "U" not "N"
 
-980924 WEH clib/pcald_util.c
-           must increment count for explicit frequencies
+981015 WEH control/fserr.ctl
+           add missing KI -301 message
 
-980925 WEH quikv/pcald.c
-980925 WEH quikv/pcald_dis.c
-980925 WEH control/fserr.ctl
-           change pcalform error code to PF
-           add PD codes for pcald command
+981027 WEH oprin/Makefile
+           oprin/patch-rl-2.0
+           updated for patch 2.5 (still works for 2.1)
 
-Version 9.3.31 980925
+981130 WEH pcald/pcald.c
+           add dummy rms amp and phase output
+
+
+990111 WEH quikv/Makefile
+           updated for k4 label, oldtape, and newtape
+
+990111 WEH include/k4label_ds.h
+           include/fs_types.h
+           include/fscom.h
+           updated for k4label_cmd data structure
+
+990111 WEH clib/Makefile
+           update for k4label_util.c
+
+990111 WEH clib/k4label_util.c
+           correct incorrect limits on copying to label member
+
+990111 WEH quikv/k4oldtp.c
+           updated to reduce interaction with equipment
+
+Version 9.3.108 990111
 
 980903 WEH fslb/logen.f
            ddout/ddout.c
@@ -4595,8 +4653,6 @@ Version 9.3.31 980925
 981019 WEH chekr/gettp.f
            don't complain about rate generator if speed is or should be 0
 
-Version 9.3.201 981019
-
 981020 WEH onoff/matcn.f
            fivpt/matcn.f
            use -1 rather +1 for break
@@ -4650,8 +4706,6 @@ Version 9.3.201 981019
 981027 WEH oprin/Makefile
            oprin/patch-rl-2.0
            updated for patch 2.5 (still works for 2.1)
-
-Version 9.3.202 981104
 
 981117 WEH ibcon/ibcon.f
            ibcon/opdev.c
@@ -4729,8 +4783,6 @@ Version 9.3.202 981104
 981123 WEH oprin/Makefile
            remove accidental generation of file "1"
 
-Version 9.3.203 981123
-
 981125 WEH rclcn/rclcn.c
            control/fserr.ctl
            added "ping" check for rcl device opening
@@ -4759,3 +4811,93 @@ Version 9.3.203 981123
            removed erronous clear of command class number
 
 Version 9.3.204 981202
+
+981203 WEH st.default/st-0.0.0/Makefile
+           st.default/st-0.0.0/misc/stbackup-exclude
+           exclude netscape cache files
+
+981207 WEH ibcon/sib.c
+           ibcon/rddev.c
+           ibcon/opbrd.c
+           ibcon/wrdev.c
+           changed write length in sib to be "-1" for use "strlen()" for actual
+               and 0 for "no write"
+           changed read length to -1 for no "status expected"
+         
+981207 WEH ibcon/opbrd.c
+           changed "onl" call to "-1" for read length
+           generate errors the same for all other sib calls
+
+981207 WEH boss/binit.f
+           use "0" as 4th arg of logit7() for rdtib
+
+981210 WEH fivpt/fivpt.f
+           Don't check for transition at 360 degrees unless azel
+           
+981210 WEH quikv/logmatmsgfm.c
+           fix debug output and combine sequential "ack"s in one log entry
+
+981210 WEH pdplt/pdplt
+           handle new log format for xtr and err output file names
+
+981210 WEH Makefile
+           exclude "rclco/rcl/all" from distribitions
+           don't delete "y.tab.h" for clean
+
+981210 WEH quikr/rwff.f
+           only disable general enable for Mark IV
+
+981214 WEH st.default/st-0.0.0/Makefile
+           use tabs instead of spaces for action lines for lib
+
+990111 WEH quikv/Makefile
+           include/fs_types.h
+           include/fscom.h
+           include/k4label_ds.h
+           clib/Makefile
+           clib/k4label_util.c
+           modified or created for k4 label/oldtape/newtape
+
+990114 WEH misc/cmdctlfix3
+           fixed to use 7f for "all"
+           made executable
+
+990114 WEH ibcon/rddev.c
+           use -1 for "tmo 3" string length
+
+990115 WEH quikv/k4label.c
+           removed unneeded cls_clr, but included necessary setting ip[]=0
+
+990118 WEH clib/get_k4time.c
+           decode milliseconds correctly
+
+990118 WEH ibcon/opbrd.c
+           fix problem with -1 for max_in for "o 1" sib call
+
+990119 WEH monit/monit2.c
+           monit/m2init.c
+           monit/mout2.c
+           add k4 display items
+
+990119 WEH clib/k4vcbw_util.c
+           fix bw "keys" to reflect type
+
+990119 WEH quikv/newtp.c
+           change check for negative buffer after ib_res_ascii to before
+           change error code to "kn"
+
+990119 WEH quikv/oldtp.c
+           change error code to "ko"
+
+990119 WEH quikv/k4rec.c
+           change error code to "ko"
+           fix a 201 error code to -201
+
+990119 WEH control/fserr.ctl
+           add k4 error messages
+
+990122 WEH fserr/hashcode.c
+           limit hash range [0,(MAXERRORS-1)]
+
+Version 9.3.110 990122
+

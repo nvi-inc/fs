@@ -92,7 +92,11 @@ C
         ip(3) = -201
       else
         ichnl = ias2b(parm,3,1)
-        if (ichnl.lt.1 .or. ichnl.gt.3) ip(3)= -201
+        if(MK3.eq.rack.or.MK4.eq.rack) then
+           if (ichnl.lt.1 .or. ichnl.gt.3) ip(3)= -201
+        else if(K4.eq.rack) then
+           if (ichnl.lt.1 .or. ichnl.gt.2) ip(3)= -301
+        endif
       endif
       if (ip(3).eq.-201) return
 C 
@@ -106,7 +110,9 @@ C
 C
 C  Loop through until end of input, then exit.
 C
-300   call gtprm(ibuf,ich,nchar,0,parm,ierr) 
+      call fs_get_rack(rack)
+ 300  isave=ich
+      call gtprm(ibuf,ich,nchar,0,parm,ierr) 
       if (cjchar(parm,1).eq.',') then
         if (ifc.le.0) then
           ip(3) = -102
@@ -119,15 +125,32 @@ C
         return
       endif
       nch = 2 
-      if (cjchar(parm,3).eq.' ') nch = 1 
-      ivc = ias2b(parm,1,nch) 
-      if (ivc.lt.1 .or. ivc.gt.14) ip(3)= -202
-      if (cjchar(parm,nch+1).ne.'h' .and.cjchar(parm,nch+1).ne.'l')
-     :    ip(3) = -203
-      if (ip(3).lt.0) return
-      ivl = 1
-      if (cjchar(parm,nch+1).eq.'l') ivl = -1 
-      ifp(ivc) = ivl*ichnl
+      if(MK3.eq.rack.or.MK4.eq.rack) then
+         if (cjchar(parm,3).eq.' ') nch = 1 
+         ivc = ias2b(parm,1,nch) 
+         if (ivc.lt.1 .or. ivc.gt.14) ip(3)= -202
+         if (cjchar(parm,nch+1).ne.'h' .and.cjchar(parm,nch+1).ne.'l')
+     :        ip(3) = -203
+         if (ip(3).lt.0) return
+         ivl = 1
+         if (cjchar(parm,nch+1).eq.'l') ivl = -1 
+         ifp(ivc) = ivl*ichnl
+      else if(K4.eq.rack) then
+         call gtfld(ibuf,isave,ich-2,ic1,ic2)
+         il=ic2-ic1+1
+         if (ichcm_ch(ibuf,ic1,'1-4').eq.0.and.il.eq.3) then
+            ifp(1)=ichnl
+         else if (ichcm_ch(ibuf,ic1,'5-8').eq.0.and.il.eq.3) then
+            ifp(5)=ichnl
+          else if (ichcm_ch(ibuf,ic1,'9-12').eq.0.and.il.eq.4) then
+            ifp(9)=ichnl
+         else if (ichcm_ch(ibuf,ic1,'13-16').eq.0.and.il.eq.5) then
+            ifp(13)=ichnl
+         else
+            ip(3) = -204
+            if (ip(3).lt.0) return
+         endif
+      endif
       ifc = ifc+1 
       goto 300
 C

@@ -13,6 +13,10 @@ long ip[5];
       struct res_buf buffer_out;
       struct res_rec response;
 
+      if(shm_addr->reccpu==162) {
+	ip[0]=ip[1]=ip[2]=0;
+	return;
+      }
       shm_addr->klvdt_fs=0;
       ini_req(&buffer);                      /* format the buffer */
       memcpy(request.device,DEV_VRC,2);
@@ -45,3 +49,6 @@ long ip[5];
        ip[0]=ip[1]=ip[2]=0;
        return;
 }
+
+
+

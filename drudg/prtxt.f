@@ -2,12 +2,16 @@
 
 C Print .txt file (if any)
 C 980916 nrv Copy from prcov
+C 990117 nrv Simply call 'printer' to print the file instead of
+C            reading then writing each line.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
 
 C Local
       integer i,ierr,ilen
+      integer printer ! function
+      character*20 ccmd
       logical kex
 
       INQUIRE(FILE=ctextname,EXIST=KEX)
@@ -17,21 +21,27 @@ C Local
         return
       endif ! none found
 
-      open(unit=LU_INFILE,file=ctextname,status='old',iostat=IERR)
-      if (ierr.ne.0) then
-        write(luscn,9101) ierr,ctextname
-9101    format('PRCOV01 - Error ',i5,' opening ',a)
-        return
-      endif
+C     open(unit=LU_INFILE,file=ctextname,status='old',iostat=IERR)
+C     if (ierr.ne.0) then
+C       write(luscn,9101) ierr,ctextname
+C9101    format('PRCOV01 - Error ',i5,' opening ',a)
+C       return
+C     endif
+C     close(lu_infile)
 
-      call setprint(ierr,0)
-      CALL READF_ASC(LU_INFILE,IERR,IBUF,ISKLEN,ILEN)
-      DO WHILE (IERR.GE.0.AND.ILEN.NE.-1)
-        write(luprt,'(80a2)') (ibuf(i),i=1,ilen)
-        CALL READF_ASC(LU_INFILE,IERR,IBUF,ISKLEN,ILEN)
-      enddo
+C     call setprint(ierr,0)
+C     CALL READF_ASC(LU_INFILE,IERR,IBUF,ISKLEN,ILEN)
+C     DO WHILE (IERR.GE.0.AND.ILEN.NE.-1)
+C       write(luprt,'(80a2)') (ibuf(i),i=1,ilen)
+C       CALL READF_ASC(LU_INFILE,IERR,IBUF,ISKLEN,ILEN)
+C     enddo
 
-      close(luprt)
-      call prtmp(0)
+C     close(luprt)
+C     call prtmp(0)
+
+      call null_term(ctextname)
+      ccmd = 'lpr'
+      call null_term(ccmd)
+      ierr = printer(ctextname,'t',ccmd)
       return
       end

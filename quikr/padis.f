@@ -72,22 +72,47 @@ C
       iclass = 0
 C 
       nch = ichmv_ch(ibuf2,nch,'lo') 
-      do  j = 1,3
+      call fs_get_rack(rack)
+      if(rack.eq.K4) then
+         iend=2
+      else if(rack.eq.MK3.or.rack.eq.MK4) then
+         iend=3
+      endif
+      do  j = 1,iend
           nch = nch+ib2as(j,ibuf2,nch,o'100000'+1)
           ic1 = nch 
           jc = 0
 C 
           call fs_get_ifp2vc(ifp2vc)
-          do  i = 1,14 
-            if (iabs(ifp2vc(i)).eq.j) then
-              nch = mcoma(ibuf2,nch)
-              nch = nch+ib2as(i,ibuf2,nch,o'100000'+2)
-              call char2hol('h ',l,1,2)
-              if (ifp2vc(i).lt.0) call char2hol('l ',l,1,2)
-              nch = ichmv(ibuf2,nch,l,1,1)
-              jc = jc+1 
-            endif
-          enddo
+          if(rack.eq.MK3.or.rack.eq.MK4) then
+             do  i = 1,14 
+                if (iabs(ifp2vc(i)).eq.j) then
+                   nch = mcoma(ibuf2,nch)
+                   nch = nch+ib2as(i,ibuf2,nch,o'100000'+2)
+                   call char2hol('h ',l,1,2)
+                   if (ifp2vc(i).lt.0) call char2hol('l ',l,1,2)
+                   nch = ichmv(ibuf2,nch,l,1,1)
+                   jc = jc+1 
+                endif
+             enddo
+          else
+             if(ifp2vc(1).eq.j) then
+                nch=ichmv_ch(ibuf2,nch,',1-4')
+                jc = jc+1 
+             endif
+             if(ifp2vc(5).eq.j) then
+                nch=ichmv_ch(ibuf2,nch,',5-8')
+                jc = jc+1 
+             endif
+             if(ifp2vc(9).eq.j) then
+                nch=ichmv_ch(ibuf2,nch,',9-12')
+                jc = jc+1 
+             endif
+             if(ifp2vc(13).eq.j) then
+                nch=ichmv_ch(ibuf2,nch,',13-16')
+                jc = jc+1 
+             endif
+          endif
 C 
           if (jc.eq.0) nch = ic1
 C 
@@ -100,7 +125,7 @@ C
 C                   Send buffer starting with IFD to display, ignoring
       if (.not.kcheck) ierr = 0 
       ip(1) = iclass
-      ip(2) = 3 
+      ip(2) = iend
       ip(3) = ierr
       call char2hol('qq',ip(4),1,2)
 

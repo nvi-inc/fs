@@ -3,6 +3,11 @@ C
 C        *YDJUL CONVERTS JULIAN DATE @ MIDNIGHT TO YEAR AND DAY OF YEAR. *
 C        * COPIED FROM DOUG'S  #$%!   MDYJL *
 C        * NRV 810331                       *
+C Input: FJD
+C Output: IYEAR, IDAY
+C 981113 nrv Y2K. Commented out do-nothing statements. Return
+C            a 4-digit year with the century depending on the
+C            year.
 C
       implicit none
       integer iyear,iday
@@ -25,7 +30,10 @@ C     DAYS DUE TO LEAP YEARS
       GO TO 16
 C**** IYEAR (O THRU 99) YEAR OF THE CENTURY
    23 IYEAR = NYR - IC * 100
-      ITIME = IC - 3
-      NYR = IYEAR
+      if (iyear.ge.00.and.iyear.le.49) iyear = iyear + 2000
+      if (iyear.ge.50.and.iyear.le.99) iyear = iyear + 1900
+C These two statements do nothing. Commented out 981113.
+C     ITIME = IC - 3
+C     NYR = IYEAR
       RETURN
       END
