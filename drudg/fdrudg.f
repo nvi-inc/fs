@@ -103,6 +103,8 @@ C 961007 nrv Re-initialize kskdfile and kdrgfile to false if we didn't
 C            find either one on the first two tries.
 C 961022 nrv Add Mark IV as a procedures option
 C 961031 nrv Change SNAP option to either Mk3/4 or VLBA rack.
+C 961104 nrv change ISKLEN to be the same size as IBUF (why were they 
+c            different variables?)
 C
 C Initialize some things.
 
@@ -113,7 +115,7 @@ C Initialize LU's
       LU_OUTFILE =21
       LUPRT =     22
 C The length of a schedule file record
-      ISKLEN=128
+      ISKLEN=ibuf_len
 C Initialize the number of labels and lines/label
       NLAB=1
       NLLAB=9
@@ -216,7 +218,7 @@ C   Check for non-interactive mode.
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 961020)')
+     .  '(NRV 961104)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
