@@ -1,0 +1,530 @@
+File: /usr2/fs/misc/fstime.txt  Version: 0.3  Date: 040707
+
+		  Operational use of time in the FS
+
+			      Ed Himwich
+
+INTRODUCTION
+
+This document explains how UT time is defined in the FS.  It also
+includes a discussion of operational procedures for setting and
+checking the time.  It provides an explanation of how apparent
+discrepancies in the various times that are used should be understood
+and corrected, if appropriate.
+
+There are three "times" that the FS deals with: Formatter time, FS
+time, and Computer time.  The "Formatter time", is the time set in the
+formatter, or whatever device is responsible for formatting the data.
+Other possible devices include S2 recorder, K4 recorder, and Mark 5B
+modules.  In any event, this time is the time that is used to time-tag
+the data.  As such it is in some sense the fundamental time of the
+station.
+
+The "FS time" is the time that the FS keeps internally.  It is based
+on the 100 Hz clock "tick" of the operating system.  The 100 Hz tick
+runs at a rate slightly different than UT, typically on the order of
+1e5, i.e., a second a day.  Typically the rate is fairly stable over
+hours and days, but is expected to show variations with room
+temperature and the age of the crystal.  The FS time is calculated
+from the 100 Hz tick by correcting it with an offset and rate.  The
+offset and rate are determined by comparison with the formatter.  The
+resulting time is typically more reliable than either the formatter or
+NTP time.  All FS calculations and sequencing of events are based on
+FS time.  Please note that after a system boot and until the first
+successful reading of the formatter by "setcl", the FS will use
+computer time.
+
+The "Computer time" is the time of the FS computer.  The computer time
+may or not be synchronized to Network Time Protocol (NTP) servers.  If
+it is synchronized to an accurate server, it can give a very accurate
+time value.  However, if there are network problems or trouble with
+the NTP servers in use, the computer may not be synchronized to NTP
+and may drift in the same fashion as the 100 Hz tick as described in
+the discussion of "FS time".  The FS reports the status of the NTP
+time as either "synch'd", "not synch'd" or "unknown".  If an accurate
+server is use and the status is "synch'd", the computer time is
+probably accurate.  However, NTP is not able to determine if the
+server in use has a fixed offset relative to UT or is drifting slowly
+relative to it.  There is no a priori way to detect these conditions.
+It can only be accomplished by the operator comparing the computer to
+other time standards, such as (a correctly set) formatter.  Therefore
+NTP time, like the formatter time and FS time must be treated with
+some skepticism.  Being "synch'd" is no guarantee of having accurate
+time.  The FS reports "unknown" if it encounters some error while
+trying to determine the status of NTP.  If this happens, to avoid
+possible extra delays and error messages, the reported status will be
+"unknown" until the next time the FS is restarted.
+
+The FS provides two primary tools for dealing with time, the "fmset"
+and "setcl" programs.  The "fmset" program is used exclusively for
+setting the formatter (or other data time-tagging device) time.  The
+"setcl" program allows monitoring and control of the FS time model.
+
+Separate remaining sections in this document deal with: Normal
+Operations, Handling Problems, Setup, and detailed descriptions of the
+"setcl" and "fmset" programs and the "time.ctl" file.
+
+NORMAL OPERATIONS
+
+This section describes normal operation of the FS time model.  After a
+reboot, the first time the FS is restarted, "setcl" will check the
+formatter time and the FS will extrapolate the time using the rate
+from the "time.ctl" file.  Beginning about an hour after this first
+successful running of "setcl" and during each observation, the rate
+will automatically be adjusted to compensate for any error.
+
+After a power-up of the formatter, its time is usually wrong, so you
+will need to set it.  You can do this with the "fmset" program, either
+from the hot key sequence "Control-Shift-T" or from the menu you get
+when the middle mouse button is clicked on the background.  You should
+not set the formatter unless it needs to be set.  There are a few
+cases where you should probably reset the time as a matter of course,
+these include: (1) after powering up the system, (2) after an extended
+interruption in the supplied frequency reference for the formatter,
+(3) if the formatter time is wrong before an experiment starts, and
+(4) (only for data to be correlated at at WACO, Haystack, or Bonn) if
+the formatter time jumps so that there is an time error of more than
++/- 5 seconds during a session, or the "fmout-gps" measured sub-second
+offset of the formatter relative to the reference UT 1 PPS exceeds +/-
+30 milliseconds.  However, in other cases, you should presume the
+formatter does not need to be set until you have a positive indication
+otherwise.  You should not need to set the formatter time at the start
+of every experiment.  It should of course be checked before each
+experiment, but changed only if it is wrong.  However, resetting the
+time before an experiment even if it isn't wrong should be benign.
+
+When you set the formatter time, please be sure to first
+re-synchronize your formatter to the reference 1 PPS (either with
+"fmset" for a Mark IV formatter or with some hardware control), if
+your formatter requires this.  When the formatter time is changed, you
+should always issue the SNAP command "sy=run setcl offset &"
+afterwards.  If you set the formatter time or resynchronize it using
+"fmset" this is taken care of automatically for you when "fmset" is
+exited.
+
+When setting or checking the formatter time, you should compare the
+displayed time in "fmset", or the formatter's front panel display, to
+the time from a reliable hardware clock synchronized to UT (or if none
+is available, you can try the USNO Master Clock at +1-202-762-1069,
+but line delays outside the contiguous 48 United States may be
+significant, other options may be available in other locations).
+
+In order to make it efficient and responsive, the "fmset" program
+monopolizes FS resources when it is running.  For this reason, it
+should not be left running any longer than is necessary to set the
+formatter time.  It is a good discipline to always end "fmset" as soon
+as you have set or checked the formatter time.  The "setcl" program
+can be used be in most cases to check the formatter time; using
+"setcl" instead of "fmset" helps minimize the amount of time "fmset"
+is running.
+
+You can force a manual check of the formatter-to-FS time difference by
+entering the command: "sy=run setcl &" or executing "setcl" from
+either the hot key sequence "Control-Shift-S" or from the menu you get
+when the middle mouse button is clicked on the background.  When
+"setcl" is executed in this way, it will not change the FS time, but
+will merely compare it to formatter time.  The last parameter on the
+#setcl#time/ log output entry is the formatter to FS difference in
+centiseconds.
+
+If you want to test an experiment schedule, you can do this by setting
+the formatter time to an appropriate time for the test and then
+executing a "sy=run setcl offset".  This will work unless the time you
+pick is more than 248 days from the computer time (it will not work
+however, if you are using a "computer" FS time model).  After the
+test, please be sure to reset the formatter to the correct time and
+re-execute: "sy=run setcl offset".  Note that "setcl" is run for you
+automatically if you use "fmset" when changing the formatter time.
+
+HANDLING PROBLEMS
+
+This section describes the most common sorts of problems that will
+come up and how to handle them.  An important point to make at the
+outset is that resetting the formatter time should not be your first
+response to a problem.  Normally, the formatter keeps time very
+reliably.  There are occasional formatter clock jumps, but these are
+fairly rare and the time keeping system is designed to help you
+identify these cases.  The output of the "setcl" program includes
+information on the time difference between the FS, formatter, and
+computer times at the centisecond level.  Interpreting these values
+can often help you to understand what if anything has happened.
+
+The most common problem that is likely to occur is that the "sy=run
+setcl adapt" in "midob" will complain that the formatter to FS time
+difference exceeds 0.5 seconds.  The last parameter on the
+#setcl#time/ log output entry is the formatter to FS difference in
+centiseconds.  The typical causes of this error are: (1) the formatter
+has jumped by an integer number of seconds, (2) the clock rate
+estimate being used by the FS is very poor.  To decide what has
+happened, check the formatter time (using either "fmset" or a front
+panel display as appropriate) against a reliable hardware clock (or if
+none is available you can try the USNO Master Clock at
++1-202-762-1069, but line delays outside the contiguous 48 United
+States may be significant, other options may be available in other
+locations).  If at the level of integer seconds, the formatter has
+jumped after the start of an experiment so that the error is now more
+than +/- 5 seconds and the data will be correlated at Haystack, WACO,
+or Bonn, you should reset the formatter as soon as possible.  For a
+smaller jump or if the data is going to another correlator, you can
+either disable the warning using a "tnx=sc,-13" SNAP command or tell
+"setcl" to accept the current level of jump.  The latter option is
+better but more complicated.  Which you use is your choice.  Informing
+"setcl" of the jump is accomplished with the SNAP command: "sy=run
+setcl <n> &", where "<n>" is a positive or negative number of
+centiseconds ("setcl" will internally round the value to the nearest
+whole second) that the formatter has jumped.  You can normally use the
+last parameter with sign from the #setcl#time/ log entry for "<n>".
+This will disable the complaints about clock offset unless there is
+another jump (this is advantage of this method, you will get a warning
+if there is another jump).  The displayed offset will still show the
+actual offset from FS time.  Additional jumps can also be compensated
+for in this way (use the new value at the end of #setcl#time/ for each
+jump).
+
+If on the other hand the formatter time appears to be correct, but the
+FS time differs from it by more than 0.5 seconds, then the problem is
+most likely that the FS has a poor model for the rate.  This may
+happen if for example the rate value in the "time.ctl" is not very
+accurate and/or a long time, perhaps on the order of a day, has
+elapsed since the last time the FS was synchronized to the formatter.
+In this case, you can force a rate update to a more accurate value
+with a "sy=run setcl rate &".  Please note that if the span in the
+"time.ctl" file is longer than the last time since the FS was
+synchronized to the formatter it will be impossible to update the
+rate.  However, this shouldn't happen if the span in "time.ctl" is
+approximately one hour as it will be if the instructions in the
+"SETUP" section of this document were followed.
+
+Another potential problem is it may be that the FS can't read the time
+from the formatter.  If this has been the case since the last FS
+computer boot, the FS will continue to use the computer time until
+"setcl" succeeds in reading the formatter time.  This is about the
+best you can do in this case.  If communication with the formatter is
+eventually established during an experiment, the FS model can then be
+manually synchronized to the formatter with "sy=run setcl offset &".
+If communication is lost with the formatter after the experiment has
+begun, there are two cases that should be considered: either the FS
+time is well synchronized to the formatter and is already running at
+the correct rate or it is not.  If it is well synchronized to the
+formatter, then it may be best to leave it running as is.  If FS is
+not well synchronized to the formatter and if the computer is
+synchronized well to NTP, you may wish to switch to use the computer
+time.  You can do this with "sy=run setcl computer &".  If
+communication with the formatter is later re-established, you can
+return to using the FS time model with a "sy=run setcl fs &".  Please
+note that when communication with the formatter is not available, the
+FS is unable to check whether the formatter time is correct or not.
+If possible you should monitor the formatter by some other means,
+typically a front panel display.
+
+SETUP
+
+In order to set-up the Field System to handle time well, the following
+steps are recommended:
+
+1. Make sure there is a "sy=run setcl &" in the "initi" procedure of
+   the "station" procedure library.  It should go as early as possible
+   in the procedure.
+
+2. Make sure there is a "sy=run setcl adapt &" in the "midob"
+   procedure in "station".
+
+3. Set-up the "time.ctl" file with the following steps.  Please note
+   that this procedure should be repeated whenever you change FS
+   computers or upgrade kernels.  Another case where you should redo
+   this step is if the crystal has either because of aging or other
+   reasons, like replacement, changed significantly in rate.
+
+   A. Put the following line in your "time.ctl" file as the only
+      non-comment line:
+
+        0.000 0.010 rate
+
+   B. Start the FS
+
+   C. Execute the SNAP command: "sy=run setcl offset &"
+
+   D. Leave the computer running for about one hour.  You can start
+      and stop the FS, login and logout as many times as you wish.
+      Just don't reboot the computer.
+
+   E. Execute the SNAP command: "sy=run setcl rate &"
+
+   F. Execute the SNAP command: "sy=run setcl save &"
+
+   G. At a shell prompt execute:
+
+        cd /usr2/control
+        mv time.new time.ctl
+
+   As long as there were no communication or permission errors, your
+   "time.ctl" file should be updated with a reasonable rate value.
+
+SETCL
+
+The "setcl" program is the main tool for setting and monitoring the FS
+time.  When the FS is started for the first time after a system boot,
+it will use the computer time for its time.  The first time "setcl" is
+run, usually by the "initi" procedure with no command line arguments,
+it will synchronize the FS time calculated from the 100 Hz tick to the
+formatter using an offset and the rate specified in the
+"/usr2/control/time.ctl" to model the time.  Thereafter each time the
+clock value is checked with "setcl" in "midob" with the "adapt"
+option, the rate will be adjusted to make the FS time agree with the
+formatter time.
+
+The "setcl" program is typically run from the middle mouse button menu
+when the mouse is over the display background ("root" window) or by
+the Control-Shift-S hot-key.  It can be run from a SNAP command as
+"sy=run setcl <option> &" or from a shell prompt as "run setcl
+<option>"; "<option>" is described below.
+  
+The output log entries of "setcl" contain a lot information.  Except
+for some recently added parameters, they are not normally useful.  The
+old parameters are described in the "setcl" section of the "Utility
+Programs" manual in Volume 1 of the FS manuals.  The most useful
+parameters are at the ends of the log entries and are described here,
+as are the parameters added since the "setcl" documentation was
+prepared.  The most important number is the last number on the
+"#setcl#time/" log entry.  This is the difference between the
+formatter time and the FS time model in centiseconds, positive means
+the formatter is ahead.  It is expected that this value will be small,
+less than 50 centiseconds unless the formatter has jumped (in general
+it should be within 50 centiseconds of the "formatter jump
+compensation" shown on the next line of "setcl" output, described
+next).  The last five parameters on the "#setcl#model/old" log entry
+are in order: (1) model in use, (2) the formatter jump compensation
+(amount the formatter time is in error if the operator has specified
+that a jump has occurred, in centiseconds, positive if the formatter
+is fast), (3) NTP sync state ("sync", "no_sync", or "unknown"), PLEASE
+NOTE: just because the state is "sync", it does not mean that the time
+is accurate, it can be subtly or grossly wrong, (4) FS to computer
+time difference in centiseconds, positive if the FS is ahead, and (5)
+formatter to computer time difference in centiseconds, positive if the
+formatter is ahead.
+
+The "setcl" program will refuse to use the time offset between the
+formatter and the computer if the difference is greater than 248 days.
+In general the time modeling will fail if any of the following
+quantities (including some combinations) exceeds about 248 days
+(2^31-1 centiseconds actually): (1) difference between the FS and
+computer time, (2) the elapsed time since the last boot, and (3)
+either the offset and/or the rate contribution to the clock
+correction.  Normally, none of these conditions should occur.
+
+The "setcl" program accepts one argument.  This may be "offset",
+"rate", "adapt", "save", "computer", "fs", "a positive or negative
+integer or zero", "s2das", or null (no argument).  These cases are
+described below:
+
+  null (no argument) - This case checks the current formatter time
+  unless the formatter has not been checked successfully since the
+  computer was booted.  In this case, the operation become "offset".
+  The null argument case is used by the "initi" procedure and the hot
+  key sequence Control-Shift-S and the middle mouse button root menu
+  option.
+
+  "offset" - This option causes the offset between FS time and
+  formatter time to be determined and used.  This command should be
+  used whenever the formatter time is changed or it is resynchronized
+  ("fmset" will automatically run "setcl" in the "offset" mode when it
+  is stopped if you use it to either change the time or resynchronize
+  the formatter).  If a formatter jump compensation has been entered
+  (see below under "a positive or negative integer or zero") it is
+  reset to zero since the assumption is that the "offset" command is
+  used to reset the time model after the formatter time has been
+  changed.  Note that if model is "computer" in "time.ctl", no offset
+  will be determined since the FS time is always the computer time
+  in this case.
+
+  "rate" - This option causes the rate model parameter to be adjusted
+  if the time span since the last "offset" operation is greater than
+  that used for the current model, in essence if it would a more
+  precise measurement.  The initial rate and span come from "time.ctl"
+  control file.  If the rate of the computer has changed radically, it
+  may be necessary to reduce the span in the "time.ctl" file and
+  restart the FS in order to determine a new rate easily.
+
+  "adapt" - This option is similar to "rate", but in this case it will
+  update the rate only if the current difference between the FS model
+  time and the formatter time is less than 50 centiseconds and the
+  span is greater than one hour or the span of the old model,
+  whichever is smaller.  This parameter is intended to be used by
+  "setcl" in "midob" to cause the rate to be adjusted dynamically
+  unless there is a formatter clock jump.  These jumps can usually
+  only be detected at the integer second level by "setcl".
+
+  "save" - This option causes the most recently determined rate and
+  the span that was used to determine it to be written to the
+  "/usr2/control/time.new" file.  This file is a "new" version of the
+  "time.ctl" file and can be put into place for use the next time the
+  FS is started (these values are already in use in the current FS
+  session) using the shell commands:
+
+    cd /usr2/control
+    mv time.new time.ctl
+
+  This is intended to provide an easy way to update the "time.ctl"
+  file with new rate information.  The "save" option can be used even
+  if the FS is not running (using "run setcl save" from a shell
+  prompt).
+
+  "s2das" - In this case if the rack type is a S2 DAS, the time offset
+  for it will be checked. However, the model is not updated.  This
+  option is provided only so that there is a way to record the S2DAS
+  time in the log.
+
+  "computer" - This option can be used to force the FS to use the
+  computer time.  This would normally only be useful if communication
+  had been lost to formatter and if the computer time is reliably
+  synchronized to NTP and the Field System time is drifting away from
+  the formatter and computer time.  If communication with the
+  formatter is re-established, use of formatter calibrated FS time can
+  be restored by execution of "sy=run setl fs &".  Note that when in
+  "computer" model mode, other options, including "adapt" will not
+  change the model back to rate, so that, e.g., a "setcl" with an
+  "adapt" argument in "midob" will continue to be useful for time
+  monitoring even when the operator has forced the model to
+  "computer".
+
+  "fs" - This option can be used to re-establish use of the FS time
+  model if it has been disabled by the "computer" option.
+
+  "a positive or negative integer or zero" - This option is used to
+  inform "setcl" of a formatter clock jump, in centiseconds (in
+  numeric form).  The "setcl" program will use this value, rounded to
+  the nearest whole second, when determining whether or not to
+  generate an error message based on the time difference between the
+  formatter and the FS.  Please note that the displayed time error for
+  the formatter will continue to show the full offset.  All other
+  options except "offset" utilize this value, so that, e.g., "adapt"
+  will calculate the correct rate.  The "offset" option will set the
+  compensation back to zero.  The entered value is the clock offset in
+  centiseconds.  It is rounded to the nearest whole second since it is
+  only intended to compensate for integer second clock jumps.  The
+  last value on the #setcl#time/ line can be entered directly for this
+  value.  The sign of this number is positive if the formatter is
+  fast.
+
+FMSET
+
+The "fmset" program is used to set the formatter (or other data
+time-tagging device) time.  All checks and error messages related to
+time are based on this time.  Because the formatter time is used to
+format the VLBI data it has become from the Field System's
+point-of-view the most fundamental time at the station.  Needless to
+say it is necessary for the formatter time be set correctly.  It is
+recommended that you compare the time displayed by "fmset" to a
+reliable hardware clock (or if none is available, you can try the USNO
+Master Clock at +1-202-762-1069, but line delays outside the
+contiguous 48 United States may be significant, other options may be
+available in other locations).  This should only be necessary once at
+the start of each experiment.  Unless there are formatter clock jumps
+the time should not need to be changed, only checked.
+
+In order to make it efficient and responsive, the "fmset" program
+monopolizes FS resources when it is running.  For this reason, it
+should not be left running any longer than is necessary to set the
+formatter time.  It is a good discipline to always end "fmset" as soon
+as you have set or checked the formatter time.  The "setcl" program
+can be used be in most cases to check the formatter time; using
+"setcl" instead of "fmset" helps minimize the amount of time "fmset"
+is running.
+
+The "fmset" program is typically run from the middle mouse button menu
+when the mouse is over the display background ("root" window) or by
+the Control-Shift-T hot-key.  It can also be run in an "xterm" as
+"fmset".  Only one copy of "fmset" can be running at one time.  The
+program displays the formatter, FS, and computer times.  The line
+showing the FS time shows which model type is in use.  The line for
+the computer time shows whether NTP thinks it is sync'd or not (If NTP
+is not running, NTP "sync" will never be achieved).  Computer time is
+displayed here only for convenience and should not be used as a guide
+for accurately setting the formatter time.  If the computer is using
+NTP, the computer time may be accurate, but it should be treated
+skeptically, especially in the first 10 minutes or so after a boot
+before NTP achieves "sync".  PLEASE NOTE: just because the state is
+"sync'd", it does not mean that the time is accurate.  It can be
+subtly or grossly wrong.
+
+The "fmset" program includes several useful options for setting the
+formatter time.  The "." command can be used to set the formatter to
+the approximate FS time.  There is also an "=" command to allow you to
+specify an arbitrary time.  Those two commands are good for setting
+the time approximately.  Once that has been accomplished, you can
+"walk" it in the last little bit if necessary with the "+" and "-"
+commands to increment and decrement, respectively, the time by one
+second.  The displayed formatter time should be compared to a reliable
+hardware clock to assure its accuracy.  The display is timed to show
+the formatter time at whole seconds, approximately (at least for Mark
+IV and VLBA formatters); it is hoped that this will assist users in
+comparing the time to a hardware clock.  Note that the formatter time
+may appear to be up to around 0.1 seconds late compared to the
+hardware clock because of processing delays in the FS computer.
+
+For the Mark IV formatters, the "fmset" program also includes an
+option to send a command to the formatter to cause it to synchronize
+itself to the 1 PPS input signal.  This should not be necessary except
+when the formatter needs to have its time set.  It is however, a
+recommended first step as part of changing the time.
+
+The "fmset" program will automatically run the "setcl" program in the
+"offset" mode if either the time is changed or the Mark IV formatter
+is sent the command to re-synchronize itself.  It will also add
+appropriate comments to the log to record what changed.
+
+TIME.CTL
+
+The "time.ctl" file has one non-comment line.  Lines that start with
+an asterisk "*" are comments.  The contents of the non-comment line
+are:
+
+     rate   span   model
+
+where:
+
+  "rate" is a real number representing the computer drift rate in
+  seconds per day, positive if the computer runs slow
+
+  "span" is a real number representing the time span over which the
+  rate was determined, in hours.  This is a rough measure of the
+  precision of the model.  If we assume the error in individual offset
+  measurements is 1 centisecond, the error in the rate is
+  approximately sqrt(2)*.01/(span in days) or about 0.340 seconds/day
+  for a one hour span or about 0.014 seconds/day for a one day span.
+  If the rate of the computer has changed radically, it may be
+  necessary to reduce the span in the "time.ctl" file and restart the
+  FS in order to determine a new rate easily.
+
+  "model" is the type of model the FS uses.  Please note that until
+  the FS has been able to check the time of the formatter, it
+  implicitly will use "computer" as the model.  Once the formatter
+  time has been checked, it will revert to the specified model.  The
+  model types are:
+
+     "none" means that the time is calculated using the estimated
+     system time at the time of the last boot and the number of 100 Hz
+     ticks that have occurred.  The time value is not corrected either
+     with an offset or rate.  This option is generally not useful and
+     exists mostly for historical reasons.  Under almost all
+     conditions where "none" seems like a good choice, "computer"
+     would be better,
+
+     "offset" means the FS time is corrected only with an offset to
+     the formatter.  This is only useful if your computer reliably
+     runs with a perfect rate.  This seems unlikely.
+
+     "rate" means that the FS time is corrected with both an offset
+     and a rate.  This choice is normally the best one.
+
+     "computer" means that the FS will use the computer time instead
+     of trying to synchronize itself with the formatter.  Generally,
+     this option is not useful especially since the FS will run on
+     computer time anyway if "setcl" is never run or never
+     successfully manages to read the time from the formatter.  The
+     two cases where it would be most useful are: (1) if the formatter
+     for some reason at least sometimes returns an incorrect
+     time-value that the FS might try to synchronize itself to or (2)
+     the communication with the formatter is completely lost and the
+     computer is synchronized to NTP and the FS time is drifting from
+     the computer time.
