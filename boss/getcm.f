@@ -90,7 +90,7 @@ C                                      functions have priority.
      &    iscn_ch(ibuf,1,nchar,'@').ne.0)) return
       endif
       ierr = 0      !  reset error flag from gtnam, we'll discover it later
-      call put_buf(iclop2,ibuf,-nchar,'fs',iwait)
+      call put_bufi(iclop2,ibuf,-nchar,'fs',iwait)
 C                   In this case, it's an ordinary command.  Put it into
 C                   the secondary operator class for later pick-up.
       goto 200
