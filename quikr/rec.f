@@ -82,6 +82,13 @@ C                   No default for parameter
             call rpbr2ma4(ibuf(3),ibr4tap,vac4)
             call put_buf(iclass,ibuf,-13,'fs','  ')
             nrec=nrec+1
+            call run_matcn(iclass,nrec)
+            call rmpar(ip)
+            if(ip(3).lt.0) return
+            call clrcl(ip(1))
+            call susp(2,3)
+            iclass=0
+            nrec=0
          endif
          call fs_get_idirtp(idirtp)
          if(idirtp.eq.-1) then
