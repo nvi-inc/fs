@@ -143,8 +143,13 @@ parse:
       pong=1-pong;
       shm_addr->monit5.pong=pong;
 
-      if(ip[2] <0)  /* read failed, we are done */
+      if(ip[2]<0) { /* read failed, we are done */
+	if(ip[1]!=0) {
+	  cls_clr(ip[0]);
+	  ip[1]=0;
+	}
 	return;
+      }
 
       increment=FALSE;
       if((itask==8 && ipass <=2) || 
@@ -171,9 +176,11 @@ parse:
 	rte_rawt(&before);
 	skd_run("mk5cn",'w',ip);
 	skd_par(ip);
-	
-	if(ip[1]!=0)
+
+	if(ip[1]!=0) {
 	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
 	if(ip[2]<0) return;
        
 	if(itask!=8 &&
@@ -198,8 +205,13 @@ parse:
 	rte_rawt(&after);
 	while((!done) && ((401-(after-before))>0)) {
 	  bank_set_check(&done,ip);
-	  if(ip[2]<0)
+	  if(ip[2]<0) {
+	    if(ip[1]!=0) {
+	      cls_clr(ip[0]);
+	      ip[1]=0;
+	    }
 	    return;
+	  }
 	  if(done)
 	    break;
 	  rte_sleep(51);
@@ -274,7 +286,14 @@ mk5cn:
       skd_run("mk5cn",'w',ip);
       skd_par(ip);
 
-      if(ip[2]<0) return;
+      if(ip[2]<0) {
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	return;
+      }
+
       bank_check_dis(command,itask,ip,increment);
 
       return;
