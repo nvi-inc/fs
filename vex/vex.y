@@ -508,6 +508,12 @@ data_transfer:	T_DATA_TRANSFER '=' scan_id ':' /* name */
 		unit_value2 ':'		       /* data stop */
 		options ';'                    /* future use, empty now */
 		{$$=make_data_transfer($3,$5,$7,$9,$11,$13);}
+                | T_DATA_TRANSFER '=' scan_id ':' /* name */
+                method ':'                     /* method disk2file or in2net */
+                destination ':'                /* filename or blank */
+                unit_value2 ':'                /* data start */
+                unit_value2 ';'                /* data stop */
+                {$$=make_data_transfer($3,$5,$7,$9,$11,NULL);}
 ;
 start_position:	/* empty */			{$$=NULL;}
 		| unit_value			{$$=$1;}
@@ -689,6 +695,8 @@ number_drives:		T_NUMBER_DRIVES '=' value ';'		{$$=$3;}
 ;
 headstack:	T_HEADSTACK '=' value ':' T_NAME ':' value ';'
 					{$$=make_headstack($3,$5,$7);}
+        	| T_HEADSTACK '=' value ':' ':' value ';'
+					{$$=make_headstack($3,NULL,$6);}
 ;
 record_density:	T_RECORD_DENSITY '=' T_NAME T_NAME ';'
 						{$$=make_dvalue($3,$4);}
@@ -1442,6 +1450,9 @@ fanin_def:	T_FANIN_DEF '=' T_NAME ':' value ':' value ':'
 fanout_def:	T_FANOUT_DEF '=' T_NAME ':' bit_stream_list ':'
 		value ':' value_list ';'
                 {$$=make_fanout_def($3,$5,$7,$9);}
+                | T_FANOUT_DEF '=' ':' bit_stream_list ':'
+		  value ':' value_list ';'
+                  {$$=make_fanout_def(NULL,$4,$6,$8);}
 ;
 track_frame_format:	T_TRACK_FRAME_FORMAT '=' T_NAME ';' {$$=$3;}
 ;
