@@ -17,8 +17,7 @@ pcalform.o pcalform_dis.o pcald.o pcald_dis.o pcalports.o pcalports_dis.o\
 k4ib.o k4ib_dis.o k4et.o k4st.o k4st_dis.o k4tape.o k4tape_dis.o k4rec.o\
 k4rec_dis.o k4vclo.o k4vclo_dis.o k4vc.o k4vc_dis.o k4vcif.o k4vcif_dis.o\
 k4vcbw.o k4vcbw_dis.o k3fm.o k3fm_dis.o k4label.o k4label_dis.o k4newtp.o\
-k4oldtp.o\
-logmatmsgfm.o
+k4oldtp.o k4rec_mode.o k4rec_mode_dis.o logmatmsgfm.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
