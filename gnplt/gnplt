@@ -157,7 +157,9 @@ proc fileselection_dialog {} {
 	    readData $currentOutputFile
 	}
     } else {
-	set statusMessage "Please try opening a file again."
+	if {![info exists number_of_datalines]} {
+	    set statusMessage "Please try opening a file again."
+	}
     }
 }
 
@@ -466,8 +468,8 @@ proc correctForOpacities {} {
     if {$maxvalue>0} {
 	if {$opacityCorrect==1} {
 	    toplevel .tatmChoice
-	    wm title .tatmChoice "Select TCal(K)"
-	    label .tatmChoice.header -text "Please select TCal(K)"
+	    wm title .tatmChoice "Select Tatm"
+	    label .tatmChoice.header -text "Please select Tatm"
 	    entry .tatmChoice.entry -width 3 -textvariable tatm
 	    button .tatmChoice.ok -text "OK" -command {
 		set opacityFlag 1
@@ -1118,7 +1120,7 @@ proc drawPoly {DPFU coefflist tag type args} {
 		($pixelynew>=[expr $pixelymin-$pointoffplot] && $pixelynew<=[expr $pixelymax+$pointoffplot])} {
 	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags $tag -fill $color -width $width
 	}
-	if {[lindex $args 0]=="dash" && $i%$dash==0} {
+	if {[lindex $args 0]=="dash" && [expr $i%$dash]==0} {
 	    incr i $dash 
 	    set xold [expr double($globalxmin)+double($range)/double($step)*$i]
 	    set yold 0
@@ -1273,7 +1275,6 @@ proc drawTrecCurve {trec tau tatm tag args} {
 	    set yold $ynew
 	}
     }
-    #set statusMessage "Ready."
 }
 
 
@@ -2384,6 +2385,8 @@ proc createSelectionMenu {} {
     menu .menuBar.edit.menu.shortGain 
     .menuBar.edit.menu add cascade -label "TCal vs. Freq. Shortcut" -menu .menuBar.edit.menu.shortTCal
     menu .menuBar.edit.menu.shortTCal 
+    .menuBar.edit.menu add cascade -label "Tsys-Tspill vs. Airmass Shortcut" -menu .menuBar.edit.menu.shortTrec
+    menu .menuBar.edit.menu.shortTrec 
     .menuBar.edit.menu.shortGain add cascade -label "Left" -menu .menuBar.edit.menu.shortGain.left
     .menuBar.edit.menu.shortGain add cascade -label "Right" -menu .menuBar.edit.menu.shortGain.right
     menu .menuBar.edit.menu.shortGain.left 
@@ -2392,37 +2395,115 @@ proc createSelectionMenu {} {
     menu .menuBar.edit.menu.shortGain.left.all 
     set i 0
     set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.left.all add command -label "All Frequencies" -command {
+	    gainShortcutFreq left All All
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.left.all add separator
+	incr k
+    }
     foreach freq $leftfreqlist {
 	set j [lsearch $leftfreqlist $freq]
 	incr k
 	if {[expr $k%30]==0} {
 	    .menuBar.edit.menu.shortGain.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
 		-columnbreak 1 -command {
-		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
 		    gainShortcutFreq left $thisFreq All
 		}
 	} else {
 	    .menuBar.edit.menu.shortGain.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
 		-columnbreak 0 -command {
-		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
 		    gainShortcutFreq left $thisFreq All
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortGain.left add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortGain.left.allc
+    menu .menuBar.edit.menu.shortGain.left.allc 
+    set i 0
+    set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.left.allc add command -label "All Frequencies" -command {
+	    gainShortcutFreq left All AllC
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.left.allc add separator
+	incr k
+    }
+    foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.left.allc add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq left $thisFreq AllC
+		}
+	} else {
+	    .menuBar.edit.menu.shortGain.left.allc add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq left $thisFreq AllC
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortGain.left add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortGain.left.allcp
+    menu .menuBar.edit.menu.shortGain.left.allcp
+    set i 0
+    set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.left.allcp add command -label "All Frequencies" -command {
+	    gainShortcutFreq left All AllCP
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.left.allcp add separator
+	incr k
+    }
+    foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.left.allcp add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq left $thisFreq AllCP
+		}
+	} else {
+	    .menuBar.edit.menu.shortGain.left.allcp add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq left $thisFreq AllCP
 		}
 	}
 	incr i
     }
     .menuBar.edit.menu.shortGain.left add separator
     foreach sou $sourcelist {
+	#set sourcelabel [format "%-10s %s" $sou [lindex $sourcetypelist $i]]
 	.menuBar.edit.menu.shortGain.left add cascade -label "$sou" -menu .menuBar.edit.menu.shortGain.left.$sou
 	menu .menuBar.edit.menu.shortGain.left.$sou 
 	set i 0
 	set k 0
+	if {[llength $leftfreqlist]>0} {
+	    .menuBar.edit.menu.shortGain.left.$sou add command -label "All Frequencies" -command {
+		set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		gainShortcutFreq left All $thisSou
+	    }
+	    incr k
+	    .menuBar.edit.menu.shortGain.left.$sou add separator
+	    incr k
+	}
 	foreach freq $leftfreqlist {
 	    set j [lsearch $leftfreqlist $freq]
 	    incr k
 	    if {[expr $k%30]==0} {
 		.menuBar.edit.menu.shortGain.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
 		    -columnbreak 1 -command {
-			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
 			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
 			gainShortcutFreq left $thisFreq $thisSou
 		    }
@@ -2430,7 +2511,7 @@ proc createSelectionMenu {} {
 		.menuBar.edit.menu.shortGain.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
 		    -columnbreak 0 -command {
 			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
-			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
 			gainShortcutFreq left $thisFreq $thisSou
 		    }
 	    }
@@ -2441,20 +2522,88 @@ proc createSelectionMenu {} {
     menu .menuBar.edit.menu.shortGain.right.all 
     set i 0
     set k 0
+    if {[llength $rightfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.right.all add command -label "All Frequencies" -command {
+	    gainShortcutFreq right All All
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.right.all add separator
+	incr k
+    }
     foreach freq $rightfreqlist {
 	set j [lsearch $rightfreqlist $freq]
 	incr k
 	if {[expr $k%30]==0} {
 	    .menuBar.edit.menu.shortGain.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
 		-columnbreak 1 -command {
-		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
 		    gainShortcutFreq right $thisFreq All
 		}
 	} else {
 	    .menuBar.edit.menu.shortGain.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
 		-columnbreak 0 -command {
-		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
 		    gainShortcutFreq right $thisFreq All
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortGain.right add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortGain.right.allc
+    menu .menuBar.edit.menu.shortGain.right.allc
+    set i 0
+    set k 0
+    if {[llength $rightfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.right.allc add command -label "All Frequencies" -command {
+	    gainShortcutFreq right All AllC
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.right.allc add separator
+	incr k
+    }
+    foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.right.allc add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq right $thisFreq AllC
+		}
+	} else {
+	    .menuBar.edit.menu.shortGain.right.allc add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq right $thisFreq AllC
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortGain.right add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortGain.right.allcp
+    menu .menuBar.edit.menu.shortGain.right.allcp
+    set i 0
+    set k 0
+    if {[llength $rightfreqlist]>0} {
+	.menuBar.edit.menu.shortGain.right.allcp add command -label "All Frequencies" -command {
+	    gainShortcutFreq right All AllCP
+	}
+	incr k
+	.menuBar.edit.menu.shortGain.right.allcp add separator
+	incr k
+    }
+    foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.right.allcp add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq right $thisFreq AllCP
+		}
+	} else {
+	    .menuBar.edit.menu.shortGain.right.allcp add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    gainShortcutFreq right $thisFreq AllCP
 		}
 	}
 	incr i
@@ -2465,13 +2614,22 @@ proc createSelectionMenu {} {
 	menu .menuBar.edit.menu.shortGain.right.$sou 
 	set i 0
 	set k 0
+	if {[llength $rightfreqlist]>0} {
+	    .menuBar.edit.menu.shortGain.right.$sou add command -label "All Frequencies" -command {
+		set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		gainShortcutFreq right All $thisSou
+	    }
+	    incr k
+	    .menuBar.edit.menu.shortGain.right.$sou add separator
+	    incr k
+	}
 	foreach freq $rightfreqlist {
 	    set j [lsearch $rightfreqlist $freq]
 	    incr k
 	    if {[expr $k%30]==0} {
 		.menuBar.edit.menu.shortGain.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
 			-columnbreak 1 -command {
-		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
 		    set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
 		    gainShortcutFreq right $thisFreq $thisSou
 		}
@@ -2479,7 +2637,7 @@ proc createSelectionMenu {} {
 		.menuBar.edit.menu.shortGain.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
 			-columnbreak 0 -command {
 		    set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
-		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
 		    gainShortcutFreq right $thisFreq $thisSou
 		}
 	    }
@@ -2523,6 +2681,74 @@ proc createSelectionMenu {} {
 		    }
 	}
     }
+    .menuBar.edit.menu.shortTCal.left add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortTCal.left.allc
+    menu .menuBar.edit.menu.shortTCal.left.allc
+    set leftincludedlist {}
+    foreach LO $LONamelist {
+	set included 0
+	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	}
+	if {$included==1} {
+	    lappend leftincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.left.allc add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $leftincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO AllC
+		    }
+	}
+    }
+    .menuBar.edit.menu.shortTCal.left add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortTCal.left.allcp
+    menu .menuBar.edit.menu.shortTCal.left.allcp
+    set leftincludedlist {}
+    foreach LO $LONamelist {
+	set included 0
+	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	}
+	if {$included==1} {
+	    lappend leftincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.left.allcp add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $leftincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO AllCP
+		    }
+	}
+    }
+
+
     .menuBar.edit.menu.shortTCal.left add separator
     foreach sou $sourcelist {
 	.menuBar.edit.menu.shortTCal.left add cascade -label $sou -menu .menuBar.edit.menu.shortTCal.left.$sou
@@ -2568,7 +2794,7 @@ proc createSelectionMenu {} {
 	set included 0
 	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
-		if {$dataMatrix($i,Polarization)=="l" && \
+		if {$dataMatrix($i,Polarization)=="r" && \
 			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
 			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
@@ -2577,7 +2803,7 @@ proc createSelectionMenu {} {
 	    }
 	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
-		if {$dataMatrix($i,Polarization)=="l" && \
+		if {$dataMatrix($i,Polarization)=="r" && \
 			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
 			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
@@ -2594,6 +2820,73 @@ proc createSelectionMenu {} {
 		    }
 	}
     }
+    .menuBar.edit.menu.shortTCal.right add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortTCal.right.allc
+    menu .menuBar.edit.menu.shortTCal.right.allc
+    set rightincludedlist {}
+    foreach LO $LONamelist {
+	set included 0
+	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="r" && \
+			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="r" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	}
+	if {$included==1} {
+	    lappend rightincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.right.allc add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $rightincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO AllC
+		    }
+	}
+    }
+    .menuBar.edit.menu.shortTCal.right add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortTCal.right.allcp
+    menu .menuBar.edit.menu.shortTCal.right.allcp
+    set rightincludedlist {}
+    foreach LO $LONamelist {
+	set included 0
+	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="r" && \
+			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="r" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		    set included 1
+		    break
+		}
+	    }
+	}
+	if {$included==1} {
+	    lappend rightincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.right.allcp add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $rightincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO AllCP
+		    }
+	}
+    }
+    
     .menuBar.edit.menu.shortTCal.right add separator
     foreach sou $sourcelist {
 	.menuBar.edit.menu.shortTCal.right add cascade -label $sou -menu .menuBar.edit.menu.shortTCal.right.$sou
@@ -2632,6 +2925,262 @@ proc createSelectionMenu {} {
 	    }
 	}
     }
+    .menuBar.edit.menu.shortTrec add cascade -label "Left" -menu .menuBar.edit.menu.shortTrec.left
+    .menuBar.edit.menu.shortTrec add cascade -label "Right" -menu .menuBar.edit.menu.shortTrec.right
+    menu .menuBar.edit.menu.shortTrec.left 
+    menu .menuBar.edit.menu.shortTrec.right 
+    .menuBar.edit.menu.shortTrec.left add cascade -label "All" -menu .menuBar.edit.menu.shortTrec.left.all
+    menu .menuBar.edit.menu.shortTrec.left.all 
+    set i 0
+    set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortTrec.left.all add command -label "All Frequencies" -command {
+	    trecShortcutFreq left All All
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.left.all add separator
+	incr k
+    }
+    foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq All
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq All
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.left add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortTrec.left.allc
+    menu .menuBar.edit.menu.shortTrec.left.allc 
+    set i 0
+    set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortTrec.left.allc add command -label "All Frequencies" -command {
+	    trecShortcutFreq left All AllC
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.left.allc add separator
+	incr k
+    }
+    foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.left.allc add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq AllC
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.left.allc add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq AllC
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.left add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortTrec.left.allcp
+    menu .menuBar.edit.menu.shortTrec.left.allcp
+    set i 0
+    set k 0
+    if {[llength $leftfreqlist]>0} {
+	.menuBar.edit.menu.shortTrec.left.allcp add command -label "All Frequencies" -command {
+	    trecShortcutFreq left All AllCP
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.left.allcp add separator
+	incr k
+    }
+    foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.left.allcp add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq AllCP
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.left.allcp add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq left $thisFreq AllCP
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.left add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortTrec.left add cascade -label "$sou" -menu .menuBar.edit.menu.shortTrec.left.$sou
+	menu .menuBar.edit.menu.shortTrec.left.$sou 
+	set i 0
+	set k 0
+	if {[llength $leftfreqlist]>0} {
+	    .menuBar.edit.menu.shortTrec.left.$sou add command -label "All Frequencies" -command {
+		set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		trecShortcutFreq left All $thisSou
+	    }
+	    incr k
+	    .menuBar.edit.menu.shortTrec.left.$sou add separator
+	    incr k
+	}
+	foreach freq $leftfreqlist {
+	    set j [lsearch $leftfreqlist $freq]
+	    incr k
+	    if {[expr $k%30]==0} {
+		.menuBar.edit.menu.shortTrec.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		    -columnbreak 1 -command {
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			trecShortcutFreq left $thisFreq $thisSou
+		    }
+	    } else {
+		.menuBar.edit.menu.shortTrec.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		    -columnbreak 0 -command {
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-3]]
+			trecShortcutFreq left $thisFreq $thisSou
+		    }
+	    }
+	    incr i
+	}
+    }
+    .menuBar.edit.menu.shortTrec.right add cascade -label "All" -menu .menuBar.edit.menu.shortTrec.right.all
+    menu .menuBar.edit.menu.shortTrec.right.all 
+    set i 0
+    set k 0
+    if {[llength $rightfreqlist]>0} {
+	.menuBar.edit.menu.shortTrec.right.all add command -label "All Frequencies" -command {
+	    trecShortcutFreq right All All
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.right.all add separator
+	incr k
+    }
+    foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq All
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq All
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.right add cascade -label "All Calibrators" -menu .menuBar.edit.menu.shortTrec.right.allc
+    menu .menuBar.edit.menu.shortTrec.right.allc
+    set i 0
+    set k 0
+    if {[llength $rightfreqlist]>0} {    
+	.menuBar.edit.menu.shortTrec.right.allc add command -label "All Frequencies" -command {
+	    trecShortcutFreq right All AllC
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.right.allc add separator
+	incr k
+    }
+    foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.right.allc add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq AllC
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.right.allc add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq AllC
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.right add cascade -label "All Calibrators & Pointing" -menu .menuBar.edit.menu.shortTrec.right.allcp
+    menu .menuBar.edit.menu.shortTrec.right.allcp
+    set i 0
+    set k 0
+    if {[llength $rightfreqlist]>0} {    
+	.menuBar.edit.menu.shortTrec.right.allcp add command -label "All Frequencies" -command {
+	    trecShortcutFreq right All AllCP
+	}
+	incr k
+	.menuBar.edit.menu.shortTrec.right.allcp add separator
+	incr k
+    }
+    foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
+	incr k
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortTrec.right.allcp add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq AllCP
+		}
+	} else {
+	    .menuBar.edit.menu.shortTrec.right.allcp add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq AllCP
+		}
+	}
+	incr i
+    }
+    .menuBar.edit.menu.shortTrec.right add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortTrec.right add cascade -label "$sou" -menu .menuBar.edit.menu.shortTrec.right.$sou
+	menu .menuBar.edit.menu.shortTrec.right.$sou 
+	set i 0
+	set k 0
+	if {[llength $rightfreqlist]>0} {
+	    .menuBar.edit.menu.shortTrec.right.$sou add command -label "All Frequencies" -command {
+		set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		trecShortcutFreq right All $thisSou
+	    }
+	    incr k
+	    .menuBar.edit.menu.shortTrec.right.$sou add separator
+	    incr k
+	}
+	foreach freq $rightfreqlist {
+	    set j [lsearch $rightfreqlist $freq]
+	    incr k
+	    if {[expr $k%30]==0} {
+		.menuBar.edit.menu.shortTrec.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
+			-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		    trecShortcutFreq right $thisFreq $thisSou
+		}
+	    } else {
+		.menuBar.edit.menu.shortTrec.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
+			-columnbreak 0 -command {
+		    set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-3]]
+		    trecShortcutFreq right $thisFreq $thisSou
+		}
+	    }
+	    incr i
+	}
+    }
     set statusMessage $text_ready
     update
 }
@@ -2641,9 +3190,7 @@ proc tcalShortcut {pol type index sourceindex} {
     global leftfreqlist rightfreqlist leftfreqArray rightfreqArray hasScaled globalxmin globalxmax globalymin globalymax
     global LONamelist LOTypelist LOFirstlist LOSecondlist LOFilelist sourcetypelist leftfreqLOlist rightfreqLOlist
     global dataMatrix text_zero scaling
-    if {$items!="TCal(K)"} {
-	set scaling Auto
-    }
+    set scaling Auto
     set xitem "Frequency"
     set items "TCal(K)"
     set i 0
@@ -2652,6 +3199,34 @@ proc tcalShortcut {pol type index sourceindex} {
 	    foreach time $timelist {
 		set timeAndSourceMatrix($time,$sou) 1
 	    }
+	}
+    } elseif {$sourceindex=="AllC"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
+	}
+    } elseif {$sourceindex=="AllCP"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c" || [lindex $sourcetypelist $i]=="p"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
 	}
     } else {
 	foreach sou $sourcelist {
@@ -2717,6 +3292,7 @@ proc tcalShortcut {pol type index sourceindex} {
     }
     set hasScaled 0
     autoScale
+    destroy .scaleWindow  
     if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
 	replot
     } else {
@@ -2726,11 +3302,9 @@ proc tcalShortcut {pol type index sourceindex} {
 
 
 proc gainShortcutFreq {pol thisFreq sourceindex} {
-    global sourcelist timeAndSourceMatrix sourcetypelist timelist hasScaled statusMessage xitem items gainChoice
+    global sourcelist timeAndSourceMatrix sourcetypelist timelist hasScaled statusMessage xitem items gainChoice scaling
     global leftfreqlist rightfreqlist leftfreqArray rightfreqArray globalxmin globalxmax globalymin globalymax text_zero
-    if {$items!="Gain"} {
-	set scaling Auto
-    }
+    set scaling Auto
     set xitem "Elevation"
     set items "Gain"
     if {![info exists gainChoice] || $gainChoice==0 || $gainChoice==""} {
@@ -2742,6 +3316,34 @@ proc gainShortcutFreq {pol thisFreq sourceindex} {
 	    foreach time $timelist {
 		set timeAndSourceMatrix($time,$sou) 1
 	    }
+	}
+    } elseif {$sourceindex=="AllC"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
+	}
+    } elseif {$sourceindex=="AllCP"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c" || [lindex $sourcetypelist $i]=="p"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
 	}
     } else {
 	foreach sou $sourcelist {
@@ -2763,14 +3365,116 @@ proc gainShortcutFreq {pol thisFreq sourceindex} {
     foreach freq $rightfreqlist {
 	set rightfreqArray($freq) 0
     }
-    if {$pol=="left"} {
-	set leftfreqArray($thisFreq) 1
-    }
-    if {$pol=="right"} {
-	set rightfreqArray($thisFreq) 1
+    if {$thisFreq=="All"} {
+	if {$pol=="left"} {
+	    foreach freq $leftfreqlist {
+		set leftfreqArray($freq) 1
+	    }
+	} elseif {$pol=="right"} {
+	    foreach freq $rightfreqlist {
+		set rightfreqArray($freq) 1
+	    }
+	}
+    } else {
+	if {$pol=="left"} {
+	    set leftfreqArray($thisFreq) 1
+	}
+	if {$pol=="right"} {
+	    set rightfreqArray($thisFreq) 1
+	}
     }
     set hasScaled 0
     autoScale
+    destroy .scaleWindow  
+    if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
+	replot
+    } else {
+	set statusMessage $text_zero
+    }
+}
+
+proc trecShortcutFreq {pol thisFreq sourceindex} {
+    global sourcelist timeAndSourceMatrix sourcetypelist timelist hasScaled statusMessage xitem items scaling
+    global leftfreqlist rightfreqlist leftfreqArray rightfreqArray globalxmin globalxmax globalymin globalymax text_zero
+    set scaling Auto
+    set xitem "Airmass"
+    set items "Tsys-Tspill"
+    set i 0
+    if {$sourceindex=="All"} {
+	foreach sou $sourcelist {
+	    foreach time $timelist {
+		set timeAndSourceMatrix($time,$sou) 1
+	    }
+	}
+    } elseif {$sourceindex=="AllC"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
+	}
+    } elseif {$sourceindex=="AllCP"} {
+	set i 0
+	foreach sou $sourcelist {
+	    if {[lindex $sourcetypelist $i]=="c" || [lindex $sourcetypelist $i]=="p"} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
+	}
+    } else {
+	foreach sou $sourcelist {
+	    if {[lindex $sourcelist $sourceindex]==$sou} {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 1
+		}
+	    } else {
+		foreach time $timelist {
+		    set timeAndSourceMatrix($time,$sou) 0
+		}
+	    }
+	    incr i
+	}
+    }
+    foreach freq $leftfreqlist {
+	set leftfreqArray($freq) 0
+    }
+    foreach freq $rightfreqlist {
+	set rightfreqArray($freq) 0
+    }
+    if {$thisFreq=="All"} {
+	if {$pol=="left"} {
+	    foreach freq $leftfreqlist {
+		set leftfreqArray($freq) 1
+	    }
+	} elseif {$pol=="right"} {
+	    foreach freq $rightfreqlist {
+		set rightfreqArray($freq) 1
+	    }
+	}
+    } else {
+	if {$pol=="left"} {
+	    set leftfreqArray($thisFreq) 1
+	}
+	if {$pol=="right"} {
+	    set rightfreqArray($thisFreq) 1
+	}
+    }
+    set hasScaled 0
+    autoScale
+    destroy .scaleWindow  
     if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
 	replot
     } else {
@@ -2925,7 +3629,7 @@ proc createToolsMenu xitem {
     global items sourcelist fitchoice currentPol currentRXG pixelx pixely number_of_LO number_of_pol pointoffplot gctype
     global fctk statusMessage fgc thickline dataMatrix xoffset pointoffplot globalxmin globalxmax globalymin globalymax
     global hourint opacityCorrect fittedtrecmark avgtrec trecmarkerlist trecfitlist minvalue maxvalue timeinseconds
-    global opacityCurveCorrect trecsigmafitlist thickline
+    global opacityCurveCorrect trecsigmafitlist thickline 
     destroy .menuBar.tools.menu
     menu .menuBar.tools.menu
     if {$items=="TCal Ratio" || $items=="Gain Compression"} {
@@ -2935,17 +3639,21 @@ proc createToolsMenu xitem {
 		set test 0
 		set corr 0
 		#If the user has entered GC in percent, this sets it back to unity
-		for {set i 1} {$i < $number_of_datalines} {incr i} {
-		    if {$dataMatrix($i,$gcl)>0 && $dataMatrix($i,$gcl)<5000} {
-			set test [expr $test+$dataMatrix($i,$gcl)]
-		    } else {
-			incr corr
-		    }
-		}
-		if {[expr $test/($number_of_datalines-$corr)]>10} {
-		    set factor 100
-		} else {
+		if {$items=="TCal Ratio"} {
 		    set factor 1
+		} else {
+		    for {set i 1} {$i < $number_of_datalines} {incr i} {
+			if {$dataMatrix($i,$gcl)>0 && $dataMatrix($i,$gcl)<5000} {
+			    set test [expr $test+$dataMatrix($i,$gcl)]
+			} else {
+			    incr corr
+			}
+		    }
+		    if {[expr $test/($number_of_datalines-$corr)]>10} {
+			set factor 100
+		    } else {
+			set factor 1
+		    }
 		}
 		toPixels $globalxmin [expr 1*$factor]
 		set pixelxmin $pixelx
@@ -3078,8 +3786,8 @@ proc createToolsMenu xitem {
 			    set m [expr [lindex $ylist 1]-$k*[lindex $xlist 1]]
 			    set xstart $globalxmin
 			    set xstop $globalxmax
-			    set ystart [expr $k*$xstart-$m]
-			    set ystop [expr $k*$xstop-$m]
+			    set ystart [expr $k*$xstart+$m]
+			    set ystop [expr $k*$xstop+$m]
 			    toPixels $xstart $ystart
 			    set pixelxstart $pixelx
 			    set pixelystart $pixely
@@ -3090,13 +3798,75 @@ proc createToolsMenu xitem {
 				    -tags tcalcurve -fill green3 -width $thickline
 			} else {
 			    for {set i 0} {$i<[expr [llength $xlist]-1]} {incr i} {
-				if {[lindex $xlist $i]<$globalxmin || [lindex $xlist [expr $i+1]]>$globalxmax} {
+				if {[lindex $xlist $i]<$globalxmin || [lindex $xlist [expr $i+1]]>$globalxmax} { 
 				} elseif {[lindex $ylist [expr $i+1]]>=$globalymin && \
 					[lindex $ylist [expr $i+1]]<=$globalymax} {
 				    drawTCalCurve [lindex $xlist $i] [lindex $ylist $i] [lindex $xlist [expr $i+1]] \
 					    [lindex $ylist [expr $i+1]] tcalcurve
 				}
 			    }
+			}
+			#Check edges match:
+			if {[lsearch $xlist $globalxmin]==-1} {
+			    set i 0
+			    foreach x $xlist {
+				if {$x>$globalxmin} {
+				    break
+				}
+				incr i
+			    }
+			    if {$i==0} {
+				set xstart $globalxmin
+				set xstop [lindex $xlist $i]
+				set ystart [lindex $ylist $i]
+				set ystop [lindex $ylist $i]
+			    } else {
+				set k [expr ([lindex $ylist $i]-[lindex $ylist [expr $i-1]])/([lindex $xlist $i]-[lindex $xlist [expr $i-1]])]
+				set m [expr [lindex $ylist $i]-$k*[lindex $xlist $i]]
+				set xstart $globalxmin
+				set xstop [lindex $xlist $i]
+				set ystart [lindex $ylist $i]
+				set ystop [expr $k*$xstop+$m]
+			    }
+			    toPixels $xstart $ystart
+			    set pixelxstart $pixelx
+			    set pixelystart $pixely
+			    toPixels $xstop $ystop
+			    set pixelxstop $pixelx
+			    set pixelystop $pixely
+			    .c create line $pixelxstart $pixelystart $pixelxstop $pixelystop \
+				    -tags tcalcurve -fill green3 -width $thickline
+			}
+			if {[lsearch $xlist $globalxmax]==-1} {
+			    set i 0
+			    foreach x $xlist {
+				if {$x>$globalxmax} {
+				    break
+				}
+				incr i
+			    }
+			    incr i -1 ;#one step back needed, i is the first element outside the plot
+			    if {$i==[expr [llength $xlist]+1]} {
+				set xstart [lindex $xlist $i]
+				set xstop $globalxmax
+				set ystart [lindex $ylist $i]
+				set ystop [lindex $ylist $i]
+			    } else {
+				set k [expr ([lindex $ylist [expr $i+1]]-[lindex $ylist $i])/([lindex $xlist [expr $i+1]]-[lindex $xlist $i])]
+				set m [expr [lindex $ylist $i]-$k*[lindex $xlist $i]]
+				set xstart [lindex $xlist $i]
+				set xstop $globalxmax
+				set ystart [lindex $ylist $i]
+				set ystop [expr $k*$xstop+$m]
+			    }
+			    toPixels $xstart $ystart
+			    set pixelxstart $pixelx
+			    set pixelystart $pixely
+			    toPixels $xstop $ystop
+			    set pixelxstop $pixelx
+			    set pixelystop $pixely
+			    .c create line $pixelxstart $pixelystart $pixelxstop $pixelystop \
+				    -tags tcalcurve -fill green3 -width $thickline
 			}
 		    }
 		    if {$tck==0} {
@@ -3151,8 +3921,9 @@ proc createToolsMenu xitem {
 			.c create line [expr $xoffset-10] $y [expr $xoffset-$pointoffplot] $y -tags trecmarker
 		    } elseif {$trec==0} {
 			set statusMessage "No trec in file"
+			set trecmark 0
 		    } else {
-			set statusMessage "Trec out of range (=$trec)"
+			set statusMessage "Trec in file outside of current range (Trec=$trec)"
 		    }
 		} else {
 		    .c delete trecmarker
@@ -3196,11 +3967,14 @@ proc createToolsMenu xitem {
 	    set realtimemax $timeinseconds
 	    set range [expr $realtimemax-$realtimemin]
 	    toplevel .trecintChoice
-	    wm title .trecintChoice "Select Interval"
+	    wm title .trecintChoice "Select Interval and Tatm"
+	    frame .trecintChoice.frame0
 	    frame .trecintChoice.frame1
 	    frame .trecintChoice.frame2
 	    frame .trecintChoice.frame3
+	    label .trecintChoice.header0 -text "Please select Tatm:"
 	    label .trecintChoice.header -text "Please select time interval for fit:"
+	    entry .trecintChoice.entry0 -width 3 -textvariable tatm
 	    entry .trecintChoice.entry -width 3 -textvariable hourint
 	    label .trecintChoice.hour -text "hours"
 	    label .trecintChoice.total -text "Total time range of selected points:"
@@ -3213,37 +3987,43 @@ proc createToolsMenu xitem {
 	    button .trecintChoice.cancel -text "Cancel" -command {
 		destroy .trecintChoice
 	    }
+	    pack .trecintChoice.header0 .trecintChoice.entry0 -in .trecintChoice.frame0 \
+		-side left -padx 3m -fill x
 	    pack .trecintChoice.header .trecintChoice.entry .trecintChoice.hour -in .trecintChoice.frame1 \
 		-side left -padx 3m -fill x
 	    pack .trecintChoice.total .trecintChoice.total2 -in .trecintChoice.frame2 \
 		-side left -padx 2m -fill x
 	    pack .trecintChoice.ok .trecintChoice.cancel -in .trecintChoice.frame3 \
 		-side left -ipadx 2m 
-	    pack .trecintChoice.frame1 .trecintChoice.frame2 .trecintChoice.frame3 \
+	    pack .trecintChoice.frame0 .trecintChoice.frame1 .trecintChoice.frame2 .trecintChoice.frame3 \
 		    -in .trecintChoice -anchor center -side top -pady 1m 
 	}
 	.menuBar.tools.menu add command -label "Recalculate Trec" -command {
-	    .c delete fittedtrecmarkaverage
-	    set sum 0
-	    set inc 0
-	    set sigmasum 0
-	    for {set i 0} {$i<[llength $trecfitlist]} {incr i} {
-		if {[lindex $trecmarkerlist $i]==1} {
-		    set sum [expr $sum+[lindex $trecfitlist $i]/pow([lindex $trecsigmafitlist $i],2)]
-		    set sigmasum [expr $sigmasum+1/pow([lindex $trecsigmafitlist $i],2)]
+	    if {[info exists trecfitlist]} {
+		.c delete fittedtrecmarkaverage
+		set sum 0
+		set inc 0
+		set sigmasum 0
+		for {set i 0} {$i<[llength $trecfitlist]} {incr i} {
+		    if {[lindex $trecmarkerlist $i]==1} {
+			set sum [expr $sum+[lindex $trecfitlist $i]/pow([lindex $trecsigmafitlist $i],2)]
+			set sigmasum [expr $sigmasum+1/pow([lindex $trecsigmafitlist $i],2)]
+		    }
 		}
-	    }
-	    set avgtrec [format %.3f [expr $sum/$sigmasum]]
-	    if {$avgtrec>=$globalymin && $avgtrec <=$globalymax && $avgtrec!=0} {
-		set r 4
-		toPixels 0 $avgtrec
-		set x $pixelx
-		set y $pixely
-		.c create oval [expr $x-$r] [expr $y-$r] [expr $x+$r] [expr $y+$r] \
+		set avgtrec [format %.3f [expr $sum/$sigmasum]]
+		if {$avgtrec>=$globalymin && $avgtrec <=$globalymax && $avgtrec!=0} {
+		    set r 4
+		    toPixels 0 $avgtrec
+		    set x $pixelx
+		    set y $pixely
+		    .c create oval [expr $x-$r] [expr $y-$r] [expr $x+$r] [expr $y+$r] \
 			-fill black -tags fittedtrecmarkaverage -width 1
-		.c create text [expr $x-[string length $avgtrec]*6] $y -text $avgtrec -tags fittedtrecmarkaverage
-		.c create line [expr $xoffset-10] $y [expr $xoffset-$pointoffplot] $y -tags fittedtrecmarkaverage
-		set fittedtrecmark 1
+		    .c create text [expr $x-[string length $avgtrec]*6] $y -text $avgtrec -tags fittedtrecmarkaverage
+		    .c create line [expr $xoffset-10] $y [expr $xoffset-$pointoffplot] $y -tags fittedtrecmarkaverage
+		    set fittedtrecmark 1
+		}
+	    } else {
+		set statusMessage "Can't recalculate. No fit available."
 	    }
 	}
 	.menuBar.tools.menu add separator
@@ -3251,6 +4031,29 @@ proc createToolsMenu xitem {
 	    if {[info exists avgtrec]} {
 		updateRXGwithTrec $avgtrec
 	    }
+	}
+	.menuBar.tools.menu add separator
+	.menuBar.tools.menu add command -label "Statistics for fit" -command {
+
+	    toplevel .trecStat
+	    wm title .trecStat "Statistics for Trec fit"
+	    
+	    frame .trecStat.frame1
+
+	    if {![info exists trecfitlist]} {
+		label .trecStat.label -text "No statistics found."
+		pack .trecStat.label -in .trecStat.frame1 -side top -fill x -pady 2m
+	    } else {
+		for {set i 0} {$i<[llength $trecfitlist]} {incr i} {
+		    label .trecStat.label$i \
+			-text "Segment:$i Trec:[format %.4f [lindex $trecfitlist $i]] Sigma:[format %.4f [lindex $trecsigmafitlist $i]]"
+		    pack .trecStat.label$i -in .trecStat.frame1 -side top -fill x -pady 2m
+		}
+	    }
+
+	    button .trecStat.ok -text "OK" -command {destroy .trecStat}
+
+	    pack .trecStat.frame1 .trecStat.ok -in .trecStat -side top -fill x -pady 1m
 	}
     }
 }
@@ -3442,6 +4245,7 @@ proc outputFit choice {
 		}
 	    }
 	    set avgtcal [format %.4f [expr double($totaltcal)/$tcalcount]]
+	    set statusMessage "TCal table will be scaled by a factor of $avgtcal. To apply this change, update the working file."
 	}
     }
     if {[info exists rchi] && [info exists DPFU] && [info exists coefflist]} {
@@ -3475,7 +4279,7 @@ proc fitToGainCurve {} {
     puts $outFile "[expr $polydeg+1] $gctype"
     puts $outFile "*Gain Elevation"
     for {set i 1} {$i<$number_of_datalines} {incr i} {
-	if {$dataMatrix($i,inUse)==1} {
+	if {$dataMatrix($i,inUse)==1 && $dataMatrix($i,Gain)>0} {
 	    puts $outFile "$dataMatrix($i,Gain) $dataMatrix($i,Elevation)"
 	}
     }
@@ -3523,7 +4327,7 @@ proc fitToGainCurve {} {
 }
 
 # ------------------------------------------------------------------------------------
-# This procedures updates the .rxg file in accordance to the selected fitting options.
+# This procedure updates the .rxg file in accordance to the selected fitting options.
 # 1 = Only the DPFU is updated.
 # 2 = The gain curve and the DPFU is both updated.
 # 3 = The Tcal(K) vs. Frequency table is scaled by the correct factor.
@@ -3751,7 +4555,7 @@ proc fitForTrec {} {
     global sourcelist timelist timeAndSourceMatrix number_of_LO dataMatrix number_of_datalines timeinseconds size
     global hourint minvalue maxvalue currentInputFitFile currentOutputFitFile statusMessage tatm trecmark trecfitlist
     global globalymin globalymax pixelx pixely xoffset yoffset pointoffplot avgtrec fittedtrecmark trecmarkerlist
-    global trecsigmafitlist
+    global trecsigmafitlist hasScaled
     .c delete treccurve
     .c delete fittedtrecmarker
     .c delete fittedtrecmarkaverage
@@ -3785,7 +4589,7 @@ proc fitForTrec {} {
 		set trec $dataMatrix($i,Trec)
 		set tspill $dataMatrix($i,Tspill)
 		set airmass $dataMatrix($i,Airmass)
-		if {$tsys>0 && $trec>0 && $airmass>0} {
+		if {$tsys>0 && $airmass>0} {
 		    puts $outFile "[expr $tsys-$tspill] $airmass"
 		}
 	    }
@@ -3813,7 +4617,7 @@ proc fitForTrec {} {
 		set tau [lindex $line 7]
 		set trecsigma [lindex $line 9]
  	    }
-	    if {$steps>0} {
+	    if {$steps>0 && [catch {set dummy [expr int($trec)]}]==0 && [catch {set dummy [expr int($tau)]}]==0} {
 		close $fileID
 		lappend trecfitlist $trec
 		lappend taufitlist $tau
@@ -3838,25 +4642,57 @@ proc fitForTrec {} {
 	    lappend trecmarkerlist 1
 	}
     }
-    set sum 0
-    set sigmasum 0
-    for {set i 0} {$i<[llength $trecfitlist]} {incr i} {
-	set sum [expr $sum+[lindex $trecfitlist $i]/pow([lindex $trecsigmafitlist $i],2)]
-	set sigmasum [expr $sigmasum+1/pow([lindex $trecsigmafitlist $i],2)]
+    set trecmin [lindex [lsort -real $trecfitlist] 0]
+    set trecmax [lindex [lsort -real $trecfitlist] [expr [llength $trecfitlist]-1]]
+    if {$trecmin<$globalymin || $trecmax>$globalymax} {
+	if {$trecmin<$globalymin} {
+	    set globalymin [expr 0.98*$trecmin]
+	} 
+	if {$trecmax>$globalymax} {
+	    set globalymax [expr 1.02*$trecmax]
+	}
+	set hasScaled 1
+	replot
+	set j 0
+	foreach trec $trecfitlist {
+	    set tau [lindex $taufitlist [lsearch $trecfitlist $trec]]
+	    drawTrecCurve $trec $tau $tatm treccurve
+	    set r 4
+	    toPixels 0 $trec
+	    set x $pixelx
+	    set y $pixely
+	    if {$trec!=0} {
+		.c create oval [expr $x-$r] [expr $y-$r] [expr $x+$r] [expr $y+$r] \
+		    -fill white -tags trecmarker$j -width 1
+	    }
+	    .c addtag fittedtrecmarker withtag trecmarker$j
+	    incr j
+	}
     }
-    set avgtrec [format %.3f [expr $sum/$sigmasum]]
-    if {$avgtrec>=$globalymin && $avgtrec <=$globalymax && $avgtrec!=0} {
-	set r 4
-	toPixels 0 $avgtrec
-	set x $pixelx
-	set y $pixely
-	.c create oval [expr $x-$r] [expr $y-$r] [expr $x+$r] [expr $y+$r] \
+    if {[llength $trecfitlist]>0} {
+	set sum 0
+	set sigmasum 0
+	for {set i 0} {$i<[llength $trecfitlist]} {incr i} {
+	    set sum [expr $sum+[lindex $trecfitlist $i]/pow([lindex $trecsigmafitlist $i],2)]
+	    set sigmasum [expr $sigmasum+1/pow([lindex $trecsigmafitlist $i],2)]
+	}
+	set avgtrec [format %.3f [expr $sum/$sigmasum]]
+	if {$avgtrec>=$globalymin && $avgtrec <=$globalymax && $avgtrec!=0} {
+	    set r 4
+	    toPixels 0 $avgtrec
+	    set x $pixelx
+	    set y $pixely
+	    .c create oval [expr $x-$r] [expr $y-$r] [expr $x+$r] [expr $y+$r] \
 		-fill black -tags fittedtrecmarkaverage -width 1
-	.c create text [expr $x-[string length $avgtrec]*6] $y -text $avgtrec -tags fittedtrecmarkaverage
-	.c create line [expr $xoffset-10] $y [expr $xoffset-$pointoffplot] $y -tags fittedtrecmarkaverage
-	set fittedtrecmark 1
+	    .c create text [expr $x-[string length $avgtrec]*6] $y -text $avgtrec -tags fittedtrecmarkaverage
+	    .c create line [expr $xoffset-10] $y [expr $xoffset-$pointoffplot] $y -tags fittedtrecmarkaverage
+	    set fittedtrecmark 1
+	}
+	set statusMessage "Ready."
     }
-    set statusMessage "Ready."
+    .c bind fittedtrecmarker <Button-1>  {
+	toggleTrec
+    }
 }
 
 proc updateRXGwithTrec {trec} {
@@ -4394,14 +5230,14 @@ proc createShortcutWindow {} {
 
 proc doExit {} {
     global currentOutputFile currentInputFitFile currentOutputFitFile writeflag editedlist pid LOFilelist
-    if {$currentOutputFile!=-1} {
-	exec rm -f $currentOutputFile
-    }
-    exec rm -f $currentInputFitFile
-    exec rm -f $currentOutputFitFile
     if {$writeflag==1} {
 	createOverwriteWindow
     } else {
+	  if {$currentOutputFile!=-1} {
+	      exec rm -f $currentOutputFile
+	  }
+	exec rm -f $currentInputFitFile
+	exec rm -f $currentOutputFitFile
 	foreach rxgfile $editedlist {
 	    exec rm -f $rxgfile   ;#These files are only the working files, and NOT the real ones!
 	}
@@ -4424,8 +5260,22 @@ proc createOverwriteWindow {} {
     
     message .over.message -width 500 -text $overWriteText
 
-    button .over.buttonOK -text "Yes" -width 10 -command {copyRXG;destroy .over;exit}
-    button .over.buttonCancel -text "No" -width 10 -command {
+    button .over.buttonOK -text "Yes" -width 10 -command {
+	if {$currentOutputFile!=-1} {
+	    exec rm -f $currentOutputFile
+	}
+	exec rm -f $currentInputFitFile
+	exec rm -f $currentOutputFitFile
+	copyRXG
+	destroy .over
+	exit
+    }
+    button .over.buttonNo -text "No" -width 10 -command {
+	if {$currentOutputFile!=-1} {
+	    exec rm -f $currentOutputFile
+	}
+	exec rm -f $currentInputFitFile
+	exec rm -f $currentOutputFitFile
 	foreach rxg $LOFilelist {
 	    if {[string first $pid $rxg]==-1} {
 		exec rm -f $rxg.work.$pid
@@ -4436,13 +5286,16 @@ proc createOverwriteWindow {} {
 	destroy .over
 	exit
     }
+    button .over.buttonCancel -text "Cancel" -width 10 -command {
+	destroy .over
+    }
 
     pack .over.frame1 -fill x -padx 8m -pady 4m -in .over
     pack .over.frame4 -padx 8m -pady 4m -side bottom -in .over
     
     pack .over.message -padx 2m -in .over.frame1
 
-    pack .over.buttonOK .over.buttonCancel -padx 3m -pady 3m -side left -in .over.frame4
+    pack .over.buttonOK .over.buttonNo .over.buttonCancel -padx 3m -pady 3m -side left -in .over.frame4
 
     focus .over
 }
@@ -4712,10 +5565,6 @@ bind .c <ButtonRelease-3> {boxChange %x %y 0}
     updatePointData
 }
 
-.c bind fittedtrecmarker <Button-1> {
-    toggleTrec
-}
-
 .c bind points <Any-Leave> {
     clearPointData
 }
@@ -4737,10 +5586,13 @@ bind .c <ButtonRelease-3> {boxChange %x %y 0}
     toggleManyPoints
 }
 
+#.c bind fittedtrecmarker <Button-1>  {
+#    toggleTrec
+#}
+
 bind . <KeyPress-s> {
     showAlmostAll
 }
-
 
 bind . <KeyPress-r> {
     replot
