@@ -454,6 +454,7 @@ long ip[5];
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
+  int itry;
 
   long in_class;
   long out_class=0;
@@ -527,6 +528,23 @@ long ip[5];
       fprintf(stderr,"\n");
     }
 #endif
+    itry=0;
+  try:
+    if(iecho && strlen(secho)> 0) {
+      logit(secho,0,NULL);
+      secho[0]=0;
+    }
+  if(!is_open) {
+    if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+#ifdef DEBUG
+      printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
+#endif
+      ip[2]=error;
+      goto error;
+    }
+    rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
+                      a Mark 5 or Linux problem? */
+  }
     if(iecho) {
       int in, out;
       strcpy(secho,"[");
@@ -600,17 +618,22 @@ long ip[5];
 #endif
  
     if(retval == -1) {
-      logit(NULL,errno,"un");
+      if(itry>0)
+	logit(NULL,errno,"un");
       fclose(fsock);
       close(sock);
       is_open=FALSE;
       ip[2]=-105;
+      if(++itry<2)
+	goto try;
       goto error;
     } else if (!retval) {
       fclose(fsock);
       close(sock);
       is_open=FALSE;
       ip[2]=-104;
+      if(++itry<2)
+	goto try;
       goto error;
     }
 
@@ -621,11 +644,14 @@ long ip[5];
 		       "%s ERROR: \007 fgets() on socket returned ", me); 
       perror("error"); 
 #endif
-      logit(NULL,errno,"un");
+      if(itry>0)
+	logit(NULL,errno,"un");
       fclose(fsock);
       close(sock);
       is_open=FALSE;
       ip[2] = -103;
+      if(++itry<2)
+	goto try;
       goto error;
     }
     if(iecho) {
@@ -705,6 +731,7 @@ long ip[5];
 error:
   if(iecho && strlen(secho)> 0) {
     logit(secho,0,NULL);
+    secho[0]=0;
   }
 error2:
   cls_clr(in_class);
