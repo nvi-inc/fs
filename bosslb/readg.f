@@ -15,7 +15,7 @@ C  CBUF: Character buffer used in input
       integer IERR
       integer ILEN
       integer IBUF(1)
-      character*256 CBUF
+      character*100 CBUF
       integer fmpreadstr
 
 5     ilen = fmpreadstr(IDCB,IERR,CBUF)
