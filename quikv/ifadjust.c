@@ -114,6 +114,11 @@ void ifadjust(command,itask,ip)
       if(shm_addr->form4.codes[i]!=-1) {
         if(((1<<4)&shm_addr->form4.codes[i]) && 
            !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+	  int ivc,m;
+	  ivc=shm_addr->form4.codes[i]&0xF;
+	  for (m=0;m<j;m++)
+	    if(vcnum_l[m]==ivc)
+	      goto endl;
           vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
           /* Look for the patch */
           if(!iuse[vcnum_l[j]]) {
@@ -125,8 +130,14 @@ void ifadjust(command,itask,ip)
           /* */
           lu[0]=1;
           j++;
-        } else if(!((1<<4)&shm_addr->form4.codes[i]) && 
+	  endl:
+	} else if(!((1<<4)&shm_addr->form4.codes[i]) && 
                   !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+	  int ivc,m;
+	  ivc=shm_addr->form4.codes[i]&0xF;
+	  for (m=0;m<k;m++)
+	    if(vcnum_u[m]==ivc)
+	      goto endu;
           vcnum_u[k]=shm_addr->form4.codes[i]&0xF;
           /* Look for the patch */
           if(!iuse[vcnum_u[k]]) {
@@ -138,6 +149,7 @@ void ifadjust(command,itask,ip)
           /* */
           lu[1]=1;
           k++;
+	endu:
         }
       }
     }
@@ -240,25 +252,31 @@ void ifadjust(command,itask,ip)
    */
 
   for(i=0; i<14; i++) {
-    if(iuse[i]) {
-      iclass=0;
-      nrec=0;
-      memcpy(buff+1,lvcn+i*2,2);
-      buff[0]=-1;
-      cls_snd(&iclass,buff,4,0,0); nrec++;
-
-      ip[0]=iclass;
-      ip[1]=nrec;
-
-      skd_run("matcn",'w',ip);
-      skd_par(ip);
-      
-      if(ip[2]<0) return;
-      iclass=ip[0];
-
-      nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0); 
-      memcpy(&vc_parms_save[i][0],(char *)buff,10);
+    int j;
+    for(j=0;j<14;j++) {
+      if(vcnum_l[j]==i||vcnum_u[j]==i) {
+	goto get;
+      }
     }
+    continue;
+  get:
+    iclass=0;
+    nrec=0;
+    memcpy(buff+1,lvcn+i*2,2);
+    buff[0]=-1;
+    cls_snd(&iclass,buff,4,0,0); nrec++;
+    
+    ip[0]=iclass;
+    ip[1]=nrec;
+    
+    skd_run("matcn",'w',ip);
+    skd_par(ip);
+    
+    if(ip[2]<0) return;
+    iclass=ip[0];
+      
+    nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0); 
+    memcpy(&vc_parms_save[i][0],(char *)buff,10);
   }
 
   /* get attenuator settings */
@@ -317,6 +335,11 @@ sample:
       for(i=0;i<3;i++)
 	if(!kok[i])
 	  logit(NULL,-506-i,"if");
+      if(ierr=set_att(iat[0],iat[1],iat[2],
+		      patched_ifs,&iat,isave,&isave3))
+	return;
+      if(ierr=reset_vc(vc_parms_save,vcnum_l,vcnum_u))
+	return;
       ierr=-505;
       goto error;
     } else {
@@ -433,9 +456,12 @@ sample:
     itry++;
     goto sample;
   }
-  inew[0]=imin[0];
-  inew[1]=imin[1];
-  inew[2]=imin[2];
+  if(patched_ifs[0])
+    inew[0]=imin[0];
+  if(patched_ifs[1])
+    inew[1]=imin[1];
+  if(patched_ifs[2])
+    inew[2]=imin[2];
   if(!sb_flag) {
     sprintf(msg,"ifadjust/%d,%02d,%02d,%02d,LSB Converged",
 	    itp_ref,inew[0],inew[1],inew[2]);
@@ -475,15 +501,17 @@ uplow:
     }
   }
 sample2:
+
     if(lu[0] && lu[1]){
       for(i=0;i<3;i++) {
 	if(up[i] && lp[i])
 	  if(saveatt[i]<inew[i]) inew[i]=saveatt[i];
       }
     }
+
     if(ierr=set_att(inew[0],inew[1],inew[2],patched_ifs,&iat,isave,&isave3))
       return;
-    if(ierr=reset_vc(vc_parms_save,iuse)) return;
+    if(ierr=reset_vc(vc_parms_save,vcnum_l,vcnum_u)) return;
 
     if(lu[0] || lu[1]) {
       shm_addr->iat1if=inew[0];
