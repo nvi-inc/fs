@@ -43,24 +43,18 @@ char *ptr;
 	lcl->destination.state.error=0;
         break;
       case 3:
-        ierr=arg_float(ptr,&lcl->start.start,0.0,FALSE);
-        if(ierr==0 && lcl->start.start<0.0)
+	if(strlen(ptr)>sizeof(lcl->start.start)-1)
 	  ierr=-200;
-	else if(ierr==-100) {
-	  lcl->start.start=-1;
-	  ierr=0;
-	}
+	else
+	  strcpy(lcl->start.start,ptr);
 	lcl->start.state.known=1;
 	lcl->start.state.error=0;
         break;
       case 4:
-        ierr=arg_float(ptr,&lcl->end.end,0.0,FALSE);
-        if(ierr==0 && (lcl->end.end - lcl->start.start <= 0.000001 ))
+	if(strlen(ptr)>sizeof(lcl->end.end)-1)
 	  ierr=-200;
-	else if(ierr==-100) {
-	  lcl->end.end=-1;
-	  ierr=0;
-	}
+	else
+	  strcpy(lcl->end.end,ptr);
 	lcl->end.state.known=1;
 	lcl->end.state.error=0;
         break;
@@ -100,32 +94,10 @@ struct disk2file_cmd *lcl;
 		&lcl->destination.state);
       break;
     case 3:
-      if(lcl->start.start>0.0) {
-	m5sprintf(output,"%f",&lcl->start.start,&lcl->start.state);
-	for(i=strlen(output)-1;i>=0;i--) {
-	  if(output[i]=='.') {
-	    output[i]=0;
-	    break;
-	  }
-	  if(output[i]!='0')
-	    break;
-	  output[i]=0;
-	}
-      }
+      m5sprintf(output,"%s",&lcl->start.start,&lcl->start.state);
       break;
     case 4:
-      if(lcl->end.end>0.0) {
-	m5sprintf(output,"%f",&lcl->end.end,&lcl->end.state);
-	for(i=strlen(output)-1;i>=0;i--) {
-	  if(output[i]=='.') {
-	    output[i]=0;
-	    break;
-	  }
-	  if(output[i]!='0')
-	    break;
-	  output[i]=0;
-	}
-      }
+      m5sprintf(output,"%s",&lcl->end.end,&lcl->end.state);
       break;
     case 5:
       m5sprintf(output,"%s",&lcl->options.options,&lcl->options.state);
@@ -192,37 +164,11 @@ struct disk2file_cmd *lcl;
 
   strcat(ptr," : ");
 
-  if(lcl->start.start > 0.000001 ) {/*special case to avoid Mark5A bug */
-    sprintf(ptr+strlen(ptr),"+%f",lcl->start.start);
-    for(i=strlen(ptr)-1;i>=0;i--) {
-      if(ptr[i]=='.') {
-	ptr[i]=0;
-	break;
-      }
-      if(ptr[i]!='0')
-	break;
-      ptr[i]=0;
-    }
-    strcat(ptr,"s");
-  }
+  strcat(ptr,lcl->start.start);
+
   strcat(ptr," : ");
 
-  if(lcl->end.end > 0.0) {
-    if(lcl->start.start>=0.0)
-      sprintf(ptr+strlen(ptr),"+%f",lcl->end.end-lcl->start.start);
-    else
-      sprintf(ptr+strlen(ptr),"+%f",lcl->end.end);      
-    for(i=strlen(ptr)-1;i>=0;i--) {
-      if(ptr[i]=='.') {
-	ptr[i]=0;
-	break;
-      }
-      if(ptr[i]!='0')
-	break;
-      ptr[i]=0;
-    }
-    strcat(ptr,"s");
-  }
+  strcat(ptr,lcl->end.end);
 
   strcat(ptr," ; \n ");
 

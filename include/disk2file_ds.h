@@ -10,11 +10,11 @@ struct disk2file_cmd {
     struct m5state state;
   } destination ;
   struct {
-    float start;
+    char start[33];
     struct m5state state;
   } start ;
   struct {
-    float end;
+    char end[33];
     struct m5state state;
   } end ;
   struct {

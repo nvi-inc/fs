@@ -213,10 +213,10 @@ scan name too long (maximum 32 characters)
 destinaton file name too long (maximum 64 characters)
 ""
 5F -203
-start time must be non-negative
+start time too long (maximum 32 characters)
 ""
 5F -204
-end time must be greater start time
+end time too long (maximum 32 characters)
 ""
 5F -205
 options too long (maximum 32 characters)
