@@ -326,6 +326,15 @@ Error initiliazing mcbcn, internal error ?WWW
 BO -191
 Error initiliazing rclcn, internal error ?WWW
 ""
+BO -200
+Error opening SW.CTL FMP ?FFF
+""
+BO -201
+Error vacuum switching field in SW.CTL
+""
+BO -209
+Error reading SW.CTL FMP ?FFF
+""
 CH   -1
 Trouble with class buffer in CHEKR
 ""
@@ -1367,8 +1376,14 @@ Tape number must be 8 charaters.
 QA -202
 Check label doesn't match.  Check it and try again.
 ""
+QA -203
+Thin/thick override must be "thin" or "thick".
+""
 QA -301
 Error RP'ing program PRLAB
+""
+QA -303
+Thin/thick override not allowed unless vaccum switching is enabled.
 ""
 QB -1
 Must have parameters, see help file
@@ -1513,6 +1528,9 @@ Odd and Even tracks requested with Odd or Even electronics.
 ""
 QG -310
 Asterisk (*) notation not supported for tracks with PARITY command.
+""
+QG -311
+Vacuum level must be established with rec= command first
 ""
 QH -101
 No default for calibration temperature.
@@ -1771,6 +1789,9 @@ Equalizer in disagreement with common.
 ""
 QR -306
 Bitrate in disagreement with common.
+""
+QR -307
+Vacuum level must be set with rec=load or rec=novac first.
 ""
 QS -101
 No default for source name.
@@ -2087,6 +2108,21 @@ Tape drive has an error condition, not ready.
 Q< -303
 program error: incorrect number of responses from recorder.
 ""
+Q< -401
+no default for or old value for parameter
+""
+Q< -501
+parameter must be load or novac
+""
+Q< -502
+Tape thickness must be set with LABEL=... before loading
+""
+Q< -503
+novac can only be used for MK4 drives with vacuum switching
+""
+Q< -504
+rec must set at least one parameter
+""
 Q?   -2
 Tape position must be greater than or equal to 0
 ""
@@ -2392,6 +2428,9 @@ Can't set footage of a VLBA2 drive.
 ""
 RC -205
 Can't reboot a VLBA2 drive.
+""
+RC -206
+Tape thickness must be set with LABEL=... before loading
 ""
 RC -401
 program error: incorrect number of responses in rec.
