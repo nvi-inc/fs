@@ -87,7 +87,7 @@ C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen
       integer rddev, opbrd, iserial,opdev, wrdev, idum
-      integer idum,fc_rte_prior
+      integer idum,fc_rte_prior, no_after
       integer*2 moddev(imaxdev,idevln)
 C               - module device name
       integer idevid(imaxdev)   
@@ -122,10 +122,6 @@ C
       ierr = 0
 C
 C                   Initialize return class and number of records 
-      if (iclass.eq.0) then
-        ierr = -1 
-        goto 1090 
-      endif
 C
       if (.not.kfirst) goto 200
       kfirst=.false.
@@ -134,27 +130,38 @@ C
 C     1.5  Read in device address table.
 C     Read table from class buffer
 C 
+      icount=0
+      no_after=0
       do i=1,nclrec
-        call ifill_ch(ibuf,1,ilen,' ')
-        ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
-        if (i.le.imaxdev) then
-          modtbl(1,i) = ibuf(1)
+         call ifill_ch(ibuf,1,ilen,' ')
+         ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
+         if(ichcm_ch(ibuf,1,'no_untalk/unlisten_after').eq.0) THEN
+            no_after=1
+            goto 150
+         endif
+         icount=icount+1
+         if (icount.gt.imaxdev) then
+            call logit7ci(0,0,0,1,-101,'ib',imaxdev)
+            call clrcl(iclass)
+            goto 151
+         endif
+         modtbl(1,icount) = ibuf(1)
 C !! FIND COMMA AND MOVE DEVICE NAME INTO VARIABLE
 C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE 
-          icomma = iscn_ch(ibuf,4,ireg,',') 
-          if (icomma.eq.0) then
+         icomma = iscn_ch(ibuf,4,ireg,',') 
+         if (icomma.eq.0) then
             iend=ireg+1 
-            modtbl(2,i) = 0
-          else
+            modtbl(2,icount) = 0
+         else
             iend = icomma
-            modtbl(2,i) = ias2b(ibuf,icomma+1,1)
-          endif
-          idum = ichmv(moddev(1,i),1,ibuf,4,iend-4)
-        endif
+            modtbl(2,icount) = ias2b(ibuf,icomma+1,1)
+         endif
+         idum = ichmv(moddev(1,icount),1,ibuf,4,iend-4)
+ 150     continue
       enddo
-      if (nclrec.gt.imaxdev) call logit7ci(0,0,0,1,-101,'ib',imaxdev)
+ 151  continue
 C
-      ndev = min0(nclrec,imaxdev)
+      ndev = min0(icount,imaxdev)
 C
       call fs_get_idevgpib(idevgpib)
       if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
@@ -179,6 +186,10 @@ C     Search the module table for a match.
 C 
 C
 200   continue
+      if (iclass.eq.0) then
+        ierr = -1 
+        goto 1090 
+      endif
       if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
          ierr = -12
          goto 910
@@ -219,7 +230,8 @@ C
         goto 910
       endif
 
-      ireg = rddev(imode,idevid(idev),ibuf,ilen,ierr,ipcode,300)
+      ireg = rddev(imode,idevid(idev),ibuf,ilen,ierr,ipcode,300,
+     &     no_after)
       if (ierr .eq. -4) then
         idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
       endif
@@ -251,7 +263,8 @@ C
         goto 910
       endif
 C
-      idum=wrdev(imode,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300)
+      idum=wrdev(imode,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300,
+     &     no_after)
       if (ierr .eq. -4) then
         idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
       endif
