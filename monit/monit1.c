@@ -27,8 +27,10 @@ main()
   }
 
   initscr(); /* the first routine called should almost always be initscr */
-
   signal(SIGINT, die);
+  noecho ();
+  nodelay(stdscr, TRUE);
+
   curs_set(0);
   clear();
   refresh();
@@ -36,6 +38,8 @@ main()
   m1init();
 
   while(1) {
+    while(ERR!=getch())
+      ;
     move(ROW1,COL1+16);
     rte_time(it,&iyear);
     move(ROW1,COL1+16);
