@@ -55,7 +55,7 @@ C
       integer*2 ihas(2)
       equivalence (ihc,ihas)
       character*11 cmax,cmin
-      integer imin(5),imax(5)
+      integer*2 imin(6),imax(6)
 C        - Contains the min,max scale values in double precision.
 C          This is done because there are no routines to convert
 C          double precision to ASCII.
@@ -215,7 +215,7 @@ C
       ierr=0
       call fmprewind(idcb1,ierr)
       if (ierr.lt.0) goto 1100
-      if (nplot.le.1) then
+      if (nplot.lt.1) then
         call po_put_c(' no plot points - plot deleted.')
         goto 1200
       end if
