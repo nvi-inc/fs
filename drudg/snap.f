@@ -32,8 +32,8 @@ C     TSPINS - time, in seconds, to spin tape
      .idum,ispm,isps,ic,ichk,ihd,isppl,iyr4,idayr4,ihr4,
      .min4,isc4,itch,iyrch,idayrch,ihrch,minch,iscch,ndx,isp,il
       real*4 tspins,d,epoc,ras,dcs,spdips
-      integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
-     .          LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
+     .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
       integer*2 lcable2(max_stn)
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
       integer npmode,itrk(36),nco,idt
@@ -139,6 +139,9 @@ C 961031 nrv Add "iin" to calling sequence. iin=1 is Mk3/4 SNAP file
 C            with speeds 135/270, iin=2 is VLBA back end with NDR
 C            densities possible. Modify bit density in common based
 C            on this input.
+C 961126 nrv Reinitialize the TSPINS after a READY even if there was no
+C            spin for the new tape.
+C 970114 nrv Change 8 to max_sorlen
 C
 C
       iblen = ibuf_len*2
@@ -430,8 +433,8 @@ C SOURCE command
 C         For celestial sources, set up normal command
 C               SOURCE=name,ra,dec,epoch 
         IF (ISOR.LE.NCELES) THEN !celestial source
-          NC = ISCNC(LSORNA(1,ISOR),1,8,Z20)
-          IF (NC.EQ.0) NC=9
+          NC = ISCNC(LSORNA(1,ISOR),1,max_sorlen,Z20)
+          IF (NC.EQ.0) NC=max_sorlen+1
           NCH = ICHMV(IBUF2,NCH,LSORNA(1,ISOR),1,NC-1)
           NCH = MCOMA(IBUF2,NCH)
             IF (cepoch.EQ.'1950') THEN 
@@ -676,8 +679,10 @@ C READY
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
             kspin = .true. !Just wrote a FASTx command
             call inc(LU_OUTFILE,KERR)
-            TSPINS=0.0
           END IF
+C Set TSPINS zero here so that no other spin is done
+C (move out from previous if test)
+          TSPINS=0.0
         END IF
 
 C LOADER 
