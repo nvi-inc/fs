@@ -15,7 +15,6 @@ int *ierr;
 {
   long ip[5];                           /* ipc parameters */
   int i, j;
-  int  aux_track;
   unsigned long iptr;
   struct req_rec request;        /* mcbcn request record */
   struct req_buf buffer;         /* mcbcn request buffer */
@@ -42,29 +41,11 @@ int *ierr;
   request.addr=0x8F; add_req(&buffer,&request); /* system track enables*/
   request.addr=0x90; add_req(&buffer,&request);
   request.addr=0x91; add_req(&buffer,&request);
+  request.addr=0x92; add_req(&buffer,&request);
+  request.addr=0x93; add_req(&buffer,&request);
   request.addr=0x99; add_req(&buffer,&request);
   request.addr=0x9A; add_req(&buffer,&request);
   request.addr=0xAD; add_req(&buffer,&request);
-
-  goto skip_aux;
-  for (i=0;i<28;i++) {                   /* 28 tracks of aux data */
-    if(i<14) aux_track=i+1; /* calculate formatter track number */
-    else aux_track=i+3;
-
-    iptr=aux_track*16;                   /* indirect address */
-
-    request.type=0;                      /* set aux buffer address */
-    request.data=0xFFFF & (iptr>>16);    /* msw */
-    request.addr=0xD4; add_req(&buffer,&request);
-
-    request.data=0xFFFF & iptr;          /* lsw */
-    request.addr=0xD5; add_req(&buffer,&request);
-
-    request.type=1;                      /* fetch aux data */
-    request.addr=0xD6;
-    for (j=0;j<4;j++) add_req(&buffer,&request);  /* 4 words per track */
-  }
-skip_aux:
 
   end_req(ip,&buffer);
   nsem_take("fsctl",0);
