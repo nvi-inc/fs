@@ -71,6 +71,7 @@ C
       write(16,9027) tbuff(1:8),lnaant
       write(16,9020)
       write(16,9030)
+      call fs_get_wrhd_fs(wrhd_fs)
       write(16,9040)
      &        type(wrhd_fs),type(rdhd_fs),type(rpro_fs),type(rpdt_fs)
       write(16,9020)
@@ -84,7 +85,11 @@ C
       else
         slow='no'
       endif
-      write(16,9044)
+      if(VLBA2.ne.drive_type) then
+         write(16,9044)
+      else
+         write(16,9144)
+      endif
       write(16,9045) posit,slow,lvbosc_fs,ilvtl_fs
       write(16,9020)
 C
@@ -156,6 +161,7 @@ C
      & "* write heads  read heads  reproduce: electronics  detector")
 9040  format(5x,a4,8x,a4,20x,a4,8x,a4)
 9044  format("*  positioning  slow  osc (mhz)  a/d tol. (counts)")
+9144  format("*  positioning  slow  osc (mhz)  a/d tol. (microns)")
 9045  format(5x,a8,4x,a3,1x,f8.4,2x,i6)
 9050  format("* write    read")
 9060  format(2(f7.1,1x),"  fast out inchworm speed (microns/sec)")
@@ -166,9 +172,9 @@ C
 9110  format(2(f7.1,1x),
      & "  (reverse)-(forward) relative offset (microns)")
 9120  format(2f8.2,     "  positive voltage scale (microns/volt)")
-9121  format(2f8.4,     "  positive voltage scale (microns/volt)")
+9121  format(2f8.5,     "  positive voltage scale (microns/kA)")
 9130  format(2f8.2,     "  negative voltage scale (microns/volt)")
-9131  format(2f8.4,     "  negative voltage scale (microns/volt)")
+9131  format(2f8.5,     "  negative voltage scale (microns/kA)")
 C
 99999 continue
       end
