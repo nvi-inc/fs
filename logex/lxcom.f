@@ -2,7 +2,7 @@
       include 'lxcom.i'
 C 
 C 
-      data iblen/50/
+      data iblen/256/
       data icmd/0/
       data icode /0/
       data isld/0/
