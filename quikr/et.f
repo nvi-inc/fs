@@ -30,7 +30,7 @@ C
       if (ieq.ne.0) goto 100
 C                   If parameters, error
       call fs_get_drive(drive)
-      if (VLBA .eq. and(drive,VLBA)) goto 200
+      if (VLBA .eq. drive.or.VLBA4.eq.drive) goto 200
 C 
 C     1. Set up buffer for ending tape, i.e. send zero speed: 
 C                   mmTP)=07200000
@@ -60,24 +60,36 @@ C                   Put stopped indicator in common
       call fs_set_irdytp(irdytp)
       call fs_set_lfeet_fs(lfeet_fs)
 C
-      ibuf(1) = 0
-      call char2hol('tp',ibuf(2),1,2)
       iclass = 0
       nrec = 0
+C
+C disable formatter for Mark IV rack
+C
+      call fs_get_rack(rack)
+      if(rack.eq.MK4) then
+         ibuf(1)=9
+         call char2hol('fm/rec 0',ibuf(2),1,8)
+         call put_buf(iclass,ibuf,-10,'fs','  ')
+         nrec = nrec+1
+      endif
+C
+      ibuf(1) = 0
+      call char2hol('tp',ibuf(2),1,2)
 C
 C  DISABLE RECORD ENABLE ON MARK III DRIVE
 C
       ienatp = 0
       call fs_set_ienatp(ienatp)
-      call fs_get_kena(kenastk)
+      call fs_get_kenastk(kenastk)
 C                   Indicate disabled in common
-      if (MK3.eq.and(drive,MK3)) then
+      if (MK3.eq.drive) then
         call en2ma(ibuf(3),ienatp,-1,ltrken)
-      else if (MK4.eq.and(drive,MK4)) then
+      else if (MK4.eq.drive) then
         call en2ma4(ibuf(3),ienatp,kenastk)
       endif
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = nrec + 1
+
 C
 C  VACUUM MUST BE UP
 C
