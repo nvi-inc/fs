@@ -195,6 +195,8 @@ C 970728 nrv No setup or preob for adaptive if the tape is running.
 C 970729 nrv Compute good data start using offsets in VEX file
 C 970730 nrv Don't write extra !time and TAPE for continuous scans.
 C 970731 nrv Add IOBSST to count number of obs recorded on tape
+C 970909 nrv Do PREOB if it's not a VEX file, only skip it if the
+C            tape is continuously running.
 C
 C
       iblen = ibuf_len*2
@@ -970,7 +972,7 @@ C         call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
         endif !non-zero scan
 C Wait until CAL time. Antenna is on-source as of this time.
 C No PREOB if tape is running in a VEX file.
-        IF (ICAL.GE.1.and.(kvex.and..not.krunning)) THEN
+        IF (ICAL.GE.1.and.(.not.kvex.or.(kvex.and..not.krunning))) THEN
           CALL IFILL(IBUF2,1,iblen,32)
           idum = ichmv_ch(IBUF2,1,'!')
           idum = IB2AS(IDAYR3,IBUF2,2,Z4000+3*Z100+3)
