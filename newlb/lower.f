@@ -12,8 +12,10 @@ c
       if (nchar.le.0) return
       do i=1,nchar
         ival=jchar(ibuf,i)
-        if(ival.ge.65.and.ival.le.90) ival=ival+32
-        call pchar(ibuf,i,ival)
+        if(ival.ge.65.and.ival.le.90) then
+           ival=ival+32
+           call pchar(ibuf,i,ival)
+        endif
       enddo
 c
       return
