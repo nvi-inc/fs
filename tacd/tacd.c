@@ -22,6 +22,7 @@
 #include "../include/shm_addr.h"      /* declaration of pointer to fscom */
 /*  */
 #define MAX_BUF 256
+int tacd_srv();
 
 main()
 {
@@ -29,23 +30,27 @@ main()
   long ip[5];
   char buff[120];
   char mode_str[MAX_BUF];
-  struct tacd_shm tacd;
+  /*struct tacd_shm tacd;*/
   /* HOST and PORT definition file located in /usr2/control/tacd.ctl */
   FILE *fp;
   char host_name[80];
-  int *port_num=0;
-  int tacd_srv();
 
 /* connect me to the FS */
   putpname("tacd");
   setup_ids();
+
+  i=0;
+  shm_addr->tacd.day_frac=0;
+  shm_addr->tacd.day_frac_a=0;
+  shm_addr->tacd.day_frac_old=0;
+  shm_addr->tacd.day_frac_old_a=0;
 
 restart_tac:
   /* Opening file for host and port number. */
   if ((fp=fopen(FS_ROOT"/control/tacd.ctl","r")) == 0) {
     /* If the file does not exist complain only once. */
     logit(NULL,-1,"ta");
-    exit(0);
+    /*exit(0);*/
   } else {
     /* Read the contents of the file then close  */
     i=0;
@@ -55,11 +60,15 @@ restart_tac:
 	for(i=0; mode_str[i]!='\n'; i++) {
 	  if(mode_str[i]==',') {
 	    logit(NULL,-8,"ta");
-	    exit(0);
+	    /* exit(0);*/
+	    i=0;
+	    break;
 	  }
 	}
 	sscanf(&mode_str[0],"%s %d %d\n",
-	       host_name, &port_num, &shm_addr->tacd.check);
+	       &shm_addr->tacd.hostpc, 
+	       &shm_addr->tacd.port,
+	       &shm_addr->tacd.check);
 	continue;
       }
     }
@@ -83,8 +92,7 @@ restart_tac:
     } else {
       shm_addr->tacd.check=30*100;  /* default is 30 secs. */
     }
-    i = strlen(host_name);
-    host_name[i]='\0';
+    shm_addr->tacd.hostpc[strlen(shm_addr->tacd.hostpc)]='\0';
   }
   close(fp);  
 
@@ -104,14 +112,10 @@ no_tac:
     goto loop;
   }
 
-  /* If we get this far save these in FS memory */
-  strcpy(shm_addr->tacd.hostpc,host_name);
-  shm_addr->tacd.port=(int)port_num;
-
   /* Run tacd_srv the first time thru. */
   if(shm_addr->tacd.hostpc[0] != '\0')
-    tacd_srv(host_name,port_num);
-  
+    tacd_srv();
+
   sprintf(buff,"tacd/%s,%d,%d",
 	  shm_addr->tacd.hostpc,
 	  shm_addr->tacd.port,
@@ -137,10 +141,10 @@ loop:
   }
 
 wakeup_block:
-  memcpy(&tacd,&shm_addr->tacd,sizeof(tacd));
+  /*memcpy(&tacd,&shm_addr->tacd,sizeof(tacd));*/
 
   if(!shm_addr->tacd.stop_request) {
-    tacd_srv(host_name,port_num);
+    tacd_srv();
   }
 
   if(!shm_addr->tacd.continuous)
@@ -152,7 +156,7 @@ wakeup_block:
   while(TRUE) {
 
     if(!shm_addr->tacd.stop_request) {
-      if(tacd_srv(host_name,port_num) == -1) {
+      if(tacd_srv() == -1) {
 	logit(NULL,-3,"ta");
 	shm_addr->tacd.continuous=1;
 	goto loop;
@@ -177,3 +181,4 @@ wakeup_block:
   }
   exit(-1);
 }  /* end main */
+
