@@ -52,6 +52,7 @@ C               - registers from EXEC calls
 C               - hex characters corresponding to 1 - 14. 
 C 
       character cjchar
+      integer*4 il
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
 C 4.  CONSTANTS USED
@@ -88,6 +89,7 @@ C
 C                   If no parameters, go read VC
       call fs_get_lfreqv(lfreqv)
       call fs_get_freqvc(freqvc)
+      call fs_get_extbwvc(extbwvc)
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(4) = o'77'
 C       IP(5) = ICLCM
@@ -132,7 +134,7 @@ C                   Get the bandwidth as characters
       else if (cjchar(parm,1).eq.',') then
         ibw = 5       !  default is 2 mhz
       else
-        call ivced(1,ibw,ibuf,ic1,ich-2)
+        call ivced(1,ibw,extbw,ibuf,ic1,ich-2)
         if (ibw.lt.0) then
           ierr = -202
           goto 990
@@ -147,7 +149,7 @@ C                   Get the TPI code, ASCII
       else if (cjchar(parm,1).eq.',') then
         itp = 2           !  the default is usb
       else
-        call ivced(2,itp,parm,1,2)
+        call ivced(2,itp,extbw,parm,1,2)
         if (itp.lt.0) then
           ierr = -203
           goto 990
@@ -193,10 +195,16 @@ C
       idumm1 = ichmv(lfreqv(1,ivcn),1,lfr,1,6)
       call fs_set_lfreqv(lfreqv)
 C     FREQVC(IVCN) = DAS2B(LFREQV(1,IVCN),1,6,IERR) 
-      freqvc(ivcn) = freq - amod(freq+.001,.01) 
+c      freqvc(ivcn) = freq - amod(freq,.01) 
+      il=freq*100+0.5
+      freqvc(ivcn)=il/100.
       call fs_set_freqvc(freqvc)
       ibwvc(ivcn) = ibw 
       call fs_set_ibwvc(ibwvc)
+      if(ibw.eq.0) then
+         extbwvc(ivcn) = extbw
+         call fs_set_extbwvc(extbwvc)
+      endif
       itpivc(ivcn) = itp
       iatuvc(ivcn) = ia(1)
       iatlvc(ivcn) = ia(2)
