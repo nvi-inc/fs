@@ -1,10 +1,16 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <errno.h>
 #include <string.h>
 #include <signal.h>
 #include <termio.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/ipc.h>
 
+#include "../include/ipckeys.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -34,7 +40,7 @@ long cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
 int parse();
 char *fgets();
-FILE *fopen();
+FILE *fopen(), *tee;
 static void nullfcn();
 
 static int npids, pids[ MAX_PIDS], ipids;
@@ -48,19 +54,22 @@ main()
     int les=-1, lesm=-1, lesam=-1, lesm2=-1;
     int klesam;
     FILE *fp;
-    char *s1, line[ MAX_LINE], line2[ 5+MAX_LINE];
+    char *s1, line[ MAX_LINE], line2[ 5+MAX_LINE], file[MAX_LINE];
     char *argv[ MAX_PROG_ARGS], *name;
     short fs;
     key_t key;
+    time_t ti;
+    struct tm *tm;
+    int kfirst=TRUE;
+    int normal=FALSE;
+    int iret;
 
-    strncpy((char *)&fs,"fs",2);
-    klesam=FALSE;
-    okay = FALSE;
-    npids=0;
-    ipids=-1;
-
-    setup_ids();
-
+    ti=time(NULL);
+    tm=gmtime(&ti);
+    (void) strftime(file,MAX_LINE,"~/fs.%Y.%b.%d.%H.%M.%S.err",tm);
+    strcpy(line,"/usr/bin/tee ");
+    strcat(line,file);
+    
              /* ignore signals that might accidently abort */
              /* note this behaviour trickles down by default to all children */
 
@@ -74,9 +83,30 @@ main()
       exit(-1);
     }
 
+    tee = popen(line,"w");
+    if(tee!=NULL) {
+      setvbuf(tee, NULL, _IONBF, BUFSIZ);
+      dup2(fileno(tee),STDERR_FILENO);
+    } else
+      perror("opening tee to fs.err file");
+
+    strncpy((char *)&fs,"fs",2);
+
+    klesam=FALSE;
+    okay = FALSE;
+    npids=0;
+    ipids=-1;
+
+    setup_ids();
+
     if ( 1 == nsem_take("fs   ",1)) {
        fprintf( stderr,"fs already running\n");
          exit( -1);
+    }
+    if ( 1 == nsem_test("fmset")) {
+      fprintf( stderr,
+	       "fmset is still running, fs can't start until it terminates\n");
+      exit(-1);
     }
 
     if ( 1 == nsem_take("fsctl",1)) {
@@ -248,6 +278,14 @@ waitfor:
             klesam=TRUE;
        }
        while((wpid=wait(&status)) == -1);
+       if(kfirst) {
+	 normal=WIFEXITED(status) && (WEXITSTATUS(status)==0);
+#ifdef DEBUG
+	 fprintf(stderr," status %x %d %d \n",status,WIFEXITED(status),
+		 WEXITSTATUS(status));
+#endif
+	 kfirst=FALSE;
+       }
        for (i=0;i<=ipids;i++) {
           if(wpid==pids[i]) {
             pids[i]=0;
@@ -265,10 +303,25 @@ waitfor:
        npids--;
        if(okay) goto cleanup;
      }
-exit:
-    if(ioctl(0,TCFLSH,0)==-1)
+ exit:
+     if(ioctl(0,TCFLSH,0)==-1)
        perror("fs: flushing input queue");
-    exit( 0);
+    
+     if(normal && shm_addr->abend.normal_end && !shm_addr->abend.other_error) {
+       strcpy(line,"rm ");
+       strcat(line,file);
+       
+       iret=system(line);
+       if(iret==-1)
+	 perror("deleting fs.err file");
+       else if(iret==127)
+	 perror("execve() call for /bin/sh failed deleting fs.err file");
+       else if(iret!=0)
+	 fprintf(stderr,"rm returned %d deleting fs.err file\n",iret);
+     }
+	  
+     exit( 0);
+    
 }
 
 int parse(line2,maxl,line,ampr,les,name)
@@ -279,13 +332,13 @@ int maxl,*ampr,*les;
     char *ptr;
 
     if(NULL==(*name=strtok(line," "))) {
-      printf(" error1\n");
+      fprintf(stderr," error1\n");
       return -1;
     }
 
     
     if(NULL==(ptr=strtok(NULL," "))) {
-      printf(" error 2\n");
+      fprintf(stderr," error 2\n");
       return -1;
     } else if (strlen(ptr) == 1 && *ptr == 'n') {
       *les=0;
@@ -294,15 +347,15 @@ int maxl,*ampr,*les;
     } else if (strlen(ptr) == 2 && *ptr == 'l' && *(ptr+1) == 'a') {
       *les=-1;
     } else {
-      printf(" error 2a\n");
+      fprintf(stderr," error 2a\n");
       return -1;
     }
 
     if(NULL==(ptr=strtok(NULL,""))) {
-      printf(" error 3\n");
+      fprintf(stderr," error 3\n");
       return -1;
     } else if (strlen(ptr) >= maxl) {
-      printf(" error 3a\n");
+      fprintf(stderr," error 3a\n");
       return -1;
     }
     ptr=strncpy(line2,ptr,maxl);
@@ -357,3 +410,4 @@ int sig;
   }
   return;
 }
+
