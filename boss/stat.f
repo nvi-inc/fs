@@ -140,7 +140,7 @@ C
       nch = ichmv_ch(lm1,nch,'.')
       nch = nch + ib2as(mod(it3,100),lm1,nch,o'41002')
       nch = ichmv_ch(lm1,nch,'  ')
-220   if (ichcm_ch(ib,1,'et').ne.0.or.kendo) goto 230
+220   if (ichcm_ch(ib,1,'data_valid=off').ne.0.or.kendo) goto 230
 C  End of observation
       if (ksto) then
         nch = ichmv_ch(lm1,nch0,'end of next observation   ')
@@ -170,7 +170,7 @@ C  End of tape
       kendtp = .true.
       goto 200
 C
-240   if (ichcm_ch(ib,1,'st=').ne.0) goto 200
+240   if (ichcm_ch(ib,1,'data_valid=on').ne.0) goto 200
       if (ksto) goto 250
 C  Start of observation
       nch = ichmv_ch(lm1,nch0,'start of next observation')
