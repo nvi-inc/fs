@@ -183,14 +183,14 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '030514'
+      cversion = '030603'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-!      iVerMajor_FS = 02
-!      iVerMinor_FS = 02
-!      iVerPatch_FS = 13
+!      iVerMajor_FS = 09
+!      iVerMinor_FS = 06
+!      iVerPatch_FS = 05
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's

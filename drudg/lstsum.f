@@ -187,6 +187,7 @@ C Local:
       integer icode                     !Read from "SETUPxx" command
       integer icode_old                 !old version
       integer ifan_fact                 !fan factor for current mode
+      character*2 ccode_tmp
 
 ! All of this is to keep track of packs. But we decided we didn't want to!
 !      integer num_packs,max_packs,ipack
@@ -303,7 +304,7 @@ C   scaled by bandwidth calculations in sked.
 
       icode=1
       icode_old=1
-      call find_recorder_speed(icode,speed_recorder)
+      call find_recorder_speed(icode,speed_recorder,kskd)
 
 !      if(km5) then
 !         kgotpacks=.false.
@@ -557,15 +558,20 @@ C the counter to zero to start the new forward pass.
 !             kmidtp=.false.
 !          endif ! this was FASTR
 
-        else if (cbuf(1:6) .eq. 'CHECK ') then
+        else if (cbuf(1:5) .eq. 'CHECK') then
           cnewtap = ' *  '
-        else if (cbuf(1:5) .eq. "SETUP") then
-           read(cbuf(6:7),*) icode
-           if(icode .ne. icode_old) then
-             call find_recorder_speed(icode,speed_recorder)
-             write(cnewtap,"('Mode',i2)") icode
-             icode_old=icode
-           endif
+        else if (cbuf(1:5) .eq. "SETUP" .and. kskd) then  !We get code info from Setup. Can only do if have sked file.
+          do itemp=1,NCodes
+             call c2upper(ccode(itemp),ccode_Tmp)
+             if(ccode_tmp .eq. cbuf(6:7)) then
+                 icode=itemp
+                 if(icode .ne. icode_old) then
+                   call find_recorder_speed(icode,speed_recorder,kskd)
+                   write(cnewtap,"('Mode',i2)") icode
+                   icode_old=icode
+                 endif
+             endif
+           end do
         else if (index(cbuf,'=').ne.0) then !might be setup proc
           if (index(cbuf,'DATA_VALID').eq.0.and.
      .        index(cbuf,'ST1=').eq.0.and.index(cbuf,'ST2=').eq.0) then ! setup

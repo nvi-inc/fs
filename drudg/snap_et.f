@@ -13,6 +13,8 @@
         write(luFile,'(a)', err=100) 'et'
       endif
 
+      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disc_end")')
+
       if(itime2stop .ne. 0) then
         write(luFile,'("!+",i1,"s")',err=100) itime2Stop
       endif

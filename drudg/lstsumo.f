@@ -146,6 +146,13 @@ C  1. Headers.
         else
           write(luprt,9203) cstn,cid,cexper
 9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
+          if(km5 .or. km5p) then
+            write(luprt)
+     >       "Warning! Can't give byte-count without schedule file."
+          else if(kk4) then
+            write(luprt)
+     >       "Warning! Can't give count without schedule file."
+          endif
         endif
 
         if(kskd) then
@@ -280,9 +287,17 @@ C  2. Column heads.
         else if(ks2) then
            cbuf=cbuf(1:il)//'      Dur  Group (min)'
         else if(km5 .or. km5p) then
-           cbuf=cbuf(1:il)//'      Dur    Gbyte'
+           if(kskd) then
+             cbuf=cbuf(1:il)//'      Dur    Gbyte'
+           else
+             cbuf=cbuf(1:il)//'      Dur '
+           endif
         else if(kk4) then
-           cbuf=cbuf(1:il)//'      Dur  Counts Usage'
+           if(kskd) then
+              cbuf=cbuf(1:il)//'      Dur  Counts Usage'
+            else
+              cbuf=cbuf(1:il)//'      Dur  Usage'
+            endif
         else
            cbuf=cbuf(1:il)//'      Beats me!!'
         endif
@@ -403,9 +418,13 @@ C  Footage
       else if(ks2) then
         write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
       else if(km5 .or. km5p) then
-        write(luprt,'(f8.1,$)') counter/1024.  !convert megabytes to Gigabytes
+        if(kskd) then
+          write(luprt,'(f8.1,$)') counter/1024.  !convert megabytes to Gigabytes
+        endif
       else if(kk4) then
-        write(luprt,'(i7,$)') int(counter)      !counts
+        if(kskd) then
+          write(luprt,'(i7,$)') int(counter)      !counts
+        endif
       endif
 C  New tape flag
       write(luprt,'(1x,a)') cnewtap
