@@ -28,6 +28,7 @@ int delta;
 struct tm *fmtime;  /* pointer to tm structure */
 short sh9={9};
 int count;
+ char *name;
 
 	memcpy(outbuf,&sh9,2);
 
@@ -56,8 +57,18 @@ ip[1] = 1;        /* only one buf */
 ip[2] = 0;
 ip[3] = 0;
 ip[4] = 0;
+ name="matcn";
 nsem_take("fsctl",0);
-skd_run("matcn",'w',ip);
+
+	while(skd_run_to(name,'w',ip,100)==1) {
+	  if (nsem_test(NSEM_NAME) != 1) {
+	    endwin();
+	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    exit(0);
+	  }
+	  name=NULL;
+	}
+
 nsem_put("fsctl");
 
 /* get reply from matcn */
@@ -66,7 +77,7 @@ inclass = ip[0];
 if( ip[2] < 0 )
 	{
 	endwin();
-	printf("Error %d from formatter\n",ip[2]);
+	fprintf(stderr,"Error %d from formatter\n",ip[2]);
         logita(NULL,ip[2],ip+3,ip+4);
 	cls_clr(outclass);
 	cls_clr(inclass);
