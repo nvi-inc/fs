@@ -1,4 +1,40 @@
 ""
+4F -201
+Mode must be one of: a, b1, b2, c1, c2, d1, ..., d28, e1, ..., e4.
+""
+4F -202
+Rate must be one of: 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32.
+""
+4F -203
+Fan must be on of 1:1, 1:2, 1:4.
+""
+4F -204
+Barrel-roll must be off.
+""
+4F -303
+Trackform incompatable with VLBA fan-out.
+""
+4M -100
+no default for trackform track number
+""
+4M -200
+trackform track must be 2-33, 102-133.
+""
+4M -301
+trackform internal error, bsfo2code bs=NULL
+""
+4M -302
+no default for trackform bitstream
+""
+4M -303
+unknown trackform bit-stream 
+""
+4N -100
+no default for tracks track number
+""
+4N -200
+tracks track must be an v0, v1, v2, v3, 2-33, or 102-133. 
+""
 AN   -1
 Illegal mode
 ""
@@ -812,6 +848,9 @@ fmset: Error receiving message from mcbcn
 FV   -5
 fmset: Bad completion code from mcbcn
 ""
+FV   -6
+fmset: Error receiving message from matcn
+""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
 ""
@@ -1054,6 +1093,114 @@ Number of entries from MATAD control file exceed table limit of ?WWW
 ""
 MA -102
 Unsupported BAUD rate, use one of 110, 300, 600, 1200, 2400, 4800, or 9600.
+""
+MA -801
+MK4 FM auxdata loading conflict 
+""
+MA -802
+MK4 FM auxdata not in idle state 
+""
+MA -803
+MK4 FM system not in STOP state 
+""
+MA -804
+MK4 FM board number out of range 
+""
+MA -805
+MK4 FM illegal a/d converter bit 
+""
+MA -806
+MK4 FM no tokens found 
+""
+MA -807
+MK4 FM don't recognize command 
+""
+MA -808
+MK4 FM parameter out of range 
+""
+MA -809
+MK4 FM MUX - SAMPLE RATE conflict 
+""
+MA -810
+MK4 FM phasecal select conflict 
+""
+MA -811
+MK4 FM A/D converter vs. mode conflict 
+""
+MA -812
+MK4 FM unknown configuration mode  
+""
+MA -813
+MK4 FM map parameter out of range 
+""
+MA -814
+MK4 FM track parameter out of range 
+""
+MA -815
+MK4 FM a/d parameter out of range 
+""
+MA -816
+MK4 FM bad a/d selection 
+""
+MA -817
+MK4 FM bcd out of range 
+""
+MA -818
+MK4 FM bad parameter count 
+""
+MA -819
+MK4 FM parameter out of range 
+""
+MA -820
+MK4 FM parameter conflict  
+""
+MA -821
+MK4 FM no site 1 pps signal    
+""
+MA -822
+MK4 FM no 2 msec warning from internal clock 
+""
+MA -823
+MK4 FM clock out of sync 
+""
+MA -824
+MK4 FM format is not synced to internal 1pps 
+""
+MA -825
+MK4 FM no mk4 frame detected 
+""
+MA -826
+MK4 FM display controller stays busy  
+""
+MA -827
+MK4 FM illegal bits/sample 
+""
+MA -828
+MK4 FM illegal multiplex mode 
+""
+MA -829
+MK4 FM illegal sample rate  
+""
+MA -830
+MK4 FM xilinx reprogram error  
+""
+MA -831
+MK4 FM front panel display hung busy 
+""
+MA -851
+MK4 FM C_FIRMWARE_ERROR -1
+""
+MA -851
+MK4 FM T_LATCH_ERROR -2
+""
+MA -851
+MK4 FM X_FIRMWARE_ERROR -3
+""
+MA -851
+MK4 FM V_FIRMWARE_ERROR -4    
+""
+MA -999
+MK4 FM error exceeds FS reportable range
 ""
 MC   -1
 Interface ?W timed-out.

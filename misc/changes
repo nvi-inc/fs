@@ -1517,3 +1517,56 @@ Version 9.2.0 960913
 
 Version 9.2.1 961007
 
+961020 nrv skdrut/cablw.f
+           Add special logic for Noto slewing through south
+
+961020 nrv skdrut/frinp.f
+           Set the BBC sideband to "U" for non-Vex file
+
+961020 nrv skdrut/vunproll.f
+           New. Reads the $ROLL section.
+
+961020 nrv skdrut/vunpdas.f
+           If MARK is found, change it to Mark.
+
+961022 nrv drudg/procs.f, fdrudg.f
+           Add "Mark IV" option for procedures from non-Vex file.
+
+961022 nrv skdrut/vmoinp.f
+           Change MARK to Mark when checking types of rac/rec.
+
+961023 nrv drudg/sread.f
+           Decoding the parameter time for TAPE was incorrect.
+
+961030 nrv drudg/procs.f
+           Add subpass index to Mk3 modes for Mk4 formatter.
+           No FORM=RESET for Mk4 formatters.
+
+961031 nrv drudg/fdrudg.f
+           Change option 3 to be for a Mk3/4 rack and add option 31 for
+           a VLBA rack.
+
+961031 nrv drudg/snap.f
+           Add to calling sequence to indicate user's input type of rack.
+           Modify the bit density and recording format to force it to
+           "M" for Mk3/4 rack, leave alone for VLBA types and for VEX
+           file.
+
+961031 nrv skdrut/speed.f
+           Check for the recording format in LMFMT instead of LMODE.
+
+961031 nrv skdrut/vmoinp.f
+           Store the recording format in LMFMT as well as in LMODE.
+
+961031 nrv skdrut/frinp.f
+           Store the recording format in LMFMT as well as in LMODE.
+
+961031 nrv drudg/procs.f
+           Force LMFMT to "M" for Mk4 formatters.
+
+961031 nrv skdrut/vmoinp.f
+           If there are no chan_def's for a station, do not try to get
+           or save anything else.
+
+Version 9.3.0 961031
+

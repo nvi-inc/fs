@@ -153,19 +153,6 @@ C
       call inc(LU_OUTFILE,KERR)
 C
 C     end PAKVT
-C
-C     Write a line with the SKED parameters
-C
-C     call ifill(ibuf2,1,iblen,32)
-C     IF (IFUNC.EQ.1) THEN
-C       nch=ichmv(ibuf2,1,2h" ,1,2)
-C     ELSE IF (IFUNC.EQ.2) then
-C       NCH = ICHMV(IBUF2,1,3H!* ,1,3)
-C     END IF
-C     nch = ichmv(ibuf2,nch+1,6hEARLY ,1,6)
-C     nch = nch + ib2as(itearl,ibuf2,nch+1,3)
-C     call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
-C     call inc(LU_OUTFILE,KERR)
 
       RETURN
       END

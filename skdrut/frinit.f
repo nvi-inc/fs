@@ -1,7 +1,6 @@
       subroutine frinit(nst,nco)
 
-C  FRINIT initializes arrays in freqs.ftni before
-C  reading from a schedule file.
+C  FRINIT initializes arrays in freqs.ftni before reading from a schedule file.
 
 C 960610 nrv New.
 C 960709 nrv Add barrel initialization.

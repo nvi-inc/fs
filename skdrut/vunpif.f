@@ -119,7 +119,7 @@ C  1.4 IF input
               write(lu,'("VUNPIFD05 - Invalid IF input")')
             endif
           endif
-        else ! not there, use last char of ref
+        else ! not there, use last char of ref <<<<<<<<<<< kludge
           nch = trimlen(cifref(id))
           idum = ichmv_ch(lin(id),1,cifref(id)(nch:nch))
         endif
