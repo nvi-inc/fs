@@ -136,7 +136,17 @@ loop:
 	wvolt(&command,itask,ip);
 	break;
       case 51:
-	lo(&command,itask,ip);
+	switch(itask) {
+	case 1:
+	  lo(&command,itask,ip);
+	  break;
+	case 2:
+	  user_device(&command,itask,ip);
+	  break;
+	default:
+	  ierr=-4;
+	  break;
+	}
 	break;
       case 52:
 	pcalform(&command,itask,ip);
@@ -219,28 +229,32 @@ loop:
 	  mk5(&command,itask,ip);
 	  break;
 	case 1:
-	  sd(&command,itask,ip);
+	  disk_record(&command,itask,ip);
 	  break;
 	case 2:
-	  ed(&command,itask,ip);
+	  disk_pos(&command,itask,ip);
 	  break;
 	case 3:
-	  pd(&command,itask,ip);
+	  disk_serial(&command,itask,ip);
 	  break;
 	case 4:
-	  disc_serial(&command,itask,ip);
+	  data_check(&command,itask,ip);
 	  break;
 	case 5:
-	  disc_check(&command,itask,ip);
-	  break;
-	case 6:
 	  mk5relink(&command,itask,ip);
 	  break;
-	case 7:
+	case 6:
 	  mk5close(&command,itask,ip);
 	  break;
+	case 7:
 	case 8:
 	  bank_check(&command,itask,ip);
+	  break;
+	case 9:
+	  disk2file(&command,itask,ip);
+	  break;
+	case 10:
+	  in2net(&command,itask,ip);
 	  break;
 	default:
 	  ierr=-4;
@@ -277,6 +291,43 @@ loop:
       case 88:
         lba_trkfrm(&command,itask,ip);
         break;
+/* Modified mb */
+      case 90:
+	s2bbc( &command,itask,ip);
+        break;
+      case 91:
+	switch (itask) {
+	case  0: s2agc( &command,itask,ip); break;
+	case  1: s2diag(&command,itask,ip); break;
+	case  2: s2encode(&command,itask,ip); break;
+	case  3: s2fs(&command,itask,ip); break;
+	case  4: s2ifx(&command,itask,ip); break;
+	case  5: s2version(&command,itask,ip); break;
+	case  6: s2mode(&command,itask,ip); break;
+	case  7: s2ping(&command,itask,ip); break;
+        case  8: s2pwrmon(&command,itask,ip); break;
+	case  9: s2status( &command,itask,ip); break;
+        case 10: s2chkr( &command,itask,ip); break;
+        case 11: s2delay(&command,itask,ip); break;
+
+        default:
+	ierr=-4;
+	goto error;
+        }
+        break;
+      case 92:
+	s2decode(&command,itask,ip); break;
+        break;
+      case 93:
+	switch (itask) {
+	case  0: s2tonedet( &command,itask,ip); break;
+	case  1: s2tonedetmeas( &command,itask,ip); break;
+        default:
+	ierr=-4;
+	goto error;
+        }
+        break;
+/* end modified mb */
       default:
 	ierr=-4;
 	goto error;
