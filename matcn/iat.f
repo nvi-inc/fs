@@ -9,6 +9,7 @@ C  MWH  870911  Modify for use with A400 8-channel MUX
 C  gag  920716  Added mode -54.
 C
       include 'matcm.i'
+      include '../include/time_arrays.i'
 C 
 C  INPUT VARIABLES:
 C 
@@ -118,10 +119,12 @@ C  Write message on the screen if echo is on
       if(imode.eq.-53) then
         ierr=portwrite(lumat,itran,nctran-1)
         idum=ichmv(irecx,1,itran,nctran,1)
-        call fc_rte_rawt(centisec(1))
+        call fc_rte_cmpt(unixsec(1),unixhs(1))
+        call fc_rte_ticks(centisec(1))
         ierr=portwrite(lumat,irecx,1)
       else if(imode.eq.-54) then
-        call fc_rte_rawt(centisec(1))
+        call fc_rte_cmpt(unixsec(1),unixhs(1))
+        call fc_rte_ticks(centisec(1))
         ierr=portwrite(lumat,itran,nctran)
       else
         ierr=portwrite(lumat,itran,nctran)
@@ -154,7 +157,8 @@ C
 C  at this time, don't know how many characters are expected 7/16/92
       if(imode.eq.-53) then
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
-        call fc_rte_rawt(centisec(2))
+        call fc_rte_ticks(centisec(2))
+        call fc_rte_cmpt(unixsec(2),unixhs(2))
         ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,-1,itimeout)
         idum=ichmv(irecv,1,irecx,1,1)
         idum=ichmv(irecv,2,irecx(2),1,maxc-1)
@@ -163,7 +167,8 @@ C  at this time, don't know how many characters are expected 7/16/92
         maxc=40
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
         if(ireg(1).eq.0.and.ilen.eq.1) then
-           call fc_rte_rawt(centisec(2))
+           call fc_rte_ticks(centisec(2))
+           call fc_rte_cmpt(unixsec(2),unixhs(2))
            ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,10,itimeout)
            idum=ichmv(irecv,1,irecx,1,1)
            idum=ichmv(irecv,2,irecx(2),1,maxc-1)

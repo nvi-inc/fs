@@ -74,6 +74,7 @@ C   COMMON BLOCKS USED
 C 
       include '../include/fscom.i'
       include 'matcm.i'
+      include '../include/time_arrays.i'
 C 
 C   SUBROUTINE INTERFACE: 
 C 
@@ -287,7 +288,7 @@ C
 C                   Put proper strobe character followed by > into buffer 
         call fs_get_kecho(kecho)
         if (ktp) call iat(ibuf,nchar,lumat,kecho,ibuf2(2),
-     .    nch2,ierr,itn)
+     &    nch2,ierr,itn)
 C                   Send #nns> to the tape drive and let it get 
 C                   ready for the following data request. 
         if (ktp) nchar = 4
@@ -340,7 +341,7 @@ c when an answer is expected
 501     continue
         call fs_get_kecho(kecho)
         call iat(ibuf(2),nchar-2,lumat,kecho,ibuf2(2),
-     .    nch2,ierr,itn)
+     &    nch2,ierr,itn)
         goto 899
 C
 C
@@ -369,7 +370,7 @@ C
 700     idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn)
 C                   Send ' to query alarm 
         if (ierr.lt.0.or.nch2.eq.0) goto 900
         call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
@@ -377,12 +378,12 @@ C                   Send ' to query alarm
         idum=ichmv_ch(ibuf,4,'"') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn)
 C                   Send " to reset alarm 
         idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn)
         goto 899
 C 
 C 
@@ -398,7 +399,7 @@ C
            call pchar(ibuf,nchar,ichar('$'))
         endif
         call fs_get_kecho(kecho)
-        call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn)
         goto 899
 C 
 C 
@@ -420,7 +421,7 @@ C                   the actual response - it might be interesting.
         nclrer = nclrer + 1 
 C                   Put response into class 
         if(imode.eq.-53 .or. imode.eq.-54) then
-          call put_buf(iclasr,centisec,-8,'fs','  ')
+          call put_buf(iclasr,centisec,-24,'fs','  ')
           nclrer=nclrer +1
         endif
         if (ierr.ne.+2) goto 900
