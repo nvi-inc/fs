@@ -1,1 +1,55 @@
-vcnn.n__
+         vcnn - video converter (Mark III, Mark IV racks)
+ 
+              Syntax:      vcnn=freq,bandwidth,TPIsel,attenU,attenl
+ 
+              Response:    vcnn/freq,bandwidth,TPIsel,attenU,attenl,
+          rem/lcl,LOlock,TP
+ 
+ 
+ Settable parameters:
+            freq       Synthesizer frequency in MHz, value must be less
+            than 500.00 MHz. No default.
+            bandwidth    Final filter bandwidth in MHz, default 2. Choices
+            for Mark III are:
+              0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0 (external
+ filter).
+                   Choices for Mark IV are:
+              0.125, 0.5, 2.0, 4.0, 8.0, 16.0, 0 (external
+ filter).
+                   Value may be integer for bandwidths of 1, 2, 4, 8,
+          or 16 MHz.
+            TPIsel     Total power integrator selection. Choices are ul, l,
+            u, if, lo, gr (ground). Default u.
+            attenU     USB attenuator, 0 or 10 db (default) only. 
+            attenL     LSB attenuator, 0 or 10 db (default) only.
+ 
+ Monitor-only parameters:
+              rem/lcl      switch setting, rem or lcl.
+            LOlock     LO lock/unlock staus, lock or unlock.
+          TP       total power reading, decimal.
+ 
+ Comments:
+ MAT module functions available. See section 1.0 of this
+ manual.
+ 
+ The total power counts returned can be related to the front
+ panel voltage using the relation that 1 volt on the front
+ panel is approximately equivalent to 32768 counts.
+ 
+ For Mark IV, the seldom used internal 0.25 and 1 MHz filters
+ were replaced with 16 and 8 MHz filters, respectively, to
+ increase the maximum bandwidth.
+ 
+ For Mark III, a power level of 32768 counts corresponds to 1
+ volt on the front panel and  0ñ1 dBm output. The detector is
+ linear to better than 2% from 5% of full scale to full scale.
+ 
+ For Mark IV, the output level is controlled by AGC at 0ñ0.5
+ dBm if the sideband power level is anywhere from approximately
+ 1638 counts (0.05 volts) above the zero offset to up to
+ saturation, with the 10 dB attenuators in. However, internal
+ noise considerations make 3300 a better lower signal level
+ limit. Mark IV VCs should always be operated with the 10 dB
+ attenuators in. The Mark IV sideband power levels reflect the
+ relative input power, i.e., before the AGC. The Mark IV
+ detector is linear to about 1% over the full range. 

@@ -1,1 +1,20 @@
-oldtape._k_
+             oldtape - unload tape to DMS (K4 drives)
+ 
+              Syntax:      oldtape=tape
+ 
+              Response:    oldtape/"Dismount this tape now"
+ 
+ 
+ Settable Parameters:
+            tape       Tape number position for the DMS to return the
+            tape to, 1-24. Default is to not use the DMS.
+ 
+ Comments:
+ If a tape number is specified, the DMS is instructed to return
+ a tape (that has already been ejected from the drive) to the
+ specified position in the DMS.
+ 
+ If no tape number is specified (i.e., if oldtape= or oldtape
+ is entered) or a DMS is not installed, the response will be
+ displayed.
+ 

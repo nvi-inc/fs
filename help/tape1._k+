@@ -1,1 +1,19 @@
-tape._k_
+       tape - tape recorder monitor and control (K4 drives)
+ 
+              Syntax:      tape=reset
+ 
+              Response:    tape/position,drum,synch_test,synch,stat1,stat2
+ 
+ 
+ Settable Parameters:
+            reset      this causes the position to be reset and a small
+            amount of tape recorded leaving the recorder at a
+            squence number of approximately 50
+ 
+ Monitor-only Parameters:
+            position   current sequence number
+          drum     on or off
+            synch_test on or off
+            synch      number lost
+            stat1      status byte 1 in hex
+            stat2      status byte 2 in hex 

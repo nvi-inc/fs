@@ -140,6 +140,7 @@ bbcman
 tpi=formbbc,formif
 tpgain=formbbc,formif
 bbcagc
+caltemp=formbbc,formif
 tsys=formbbc,formif
 onsource
 wx
@@ -323,7 +324,7 @@ tpdiff=formbbc,formif
 tpdiffgain=formbbc,formif
 bbcagc
 caloff
-caltemps
+caltemp=formbbc,formif
 tsys=formbbc,formif
 enddef
 define  tapeforma     00000000000
