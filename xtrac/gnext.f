@@ -22,6 +22,8 @@ C
       if (ichcm_ch(jbuf,1,'*').eq.0) goto 10
       if (ichcm_ch(jbuf,11,'fivpt#').eq.0) goto 100
       if (ichcm_ch(jbuf,15,'fivpt#').eq.0) goto 200
+C not Y10K compliant
+      if (ichcm_ch(jbuf,22,'fivpt#').eq.0) goto 300
 C
 C  MAKE SURE THIS IS IN LOG ENTRY FORMAT
 C
@@ -38,6 +40,11 @@ C
 C 
  200  continue
       ifc=21
+      goto 1000
+C
+ 300  continue
+C not Y10K compliant
+      ifc=28
       goto 1000
 c
 1000  continue
