@@ -376,13 +376,13 @@ block:	global_block			{$$=make_block(B_GLOBAL,$1);}
 
 /* $GLOBAL block */
 
-global_block:	B_GLOBAL ';' refs	{$$=$3}
+global_block:	B_GLOBAL ';' refs	{$$=$3;}
 		| B_GLOBAL ';'		{$$=NULL;}
 
 /* $STATION block */
 
-station_block:	B_STATION ';' station_defs	{$$=$3}
-		| B_STATION ';'			{$$=NULL};
+station_block:	B_STATION ';' station_defs	{$$=$3;}
+		| B_STATION ';'			{$$=NULL;}
 
 station_defs:	station_defs station_defx	{$$=add_list($1,$2);}
 		| station_defx			{$$=add_list(NULL,$1);}
@@ -391,16 +391,16 @@ station_defx:	station_def		{$$=make_lowl(T_DEF,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-station_def:	T_DEF T_NAME ';' refs T_ENDDEF ';'	{$$=make_def($2,$4)}
-		| T_DEF T_NAME ';' T_ENDDEF ';'		{$$=make_def($2,NULL)}
+station_def:	T_DEF T_NAME ';' refs T_ENDDEF ';'	{$$=make_def($2,$4);}
+		| T_DEF T_NAME ';' T_ENDDEF ';'		{$$=make_def($2,NULL);}
 
 /* $MODE block */
 
-mode_block:	B_MODE ';' mode_defs	{$$=$3}
+mode_block:	B_MODE ';' mode_defs	{$$=$3;}
 		| B_MODE ';' 		{$$=NULL;}
 
-mode_defs:	mode_defs mode_defx	{$$=add_list($1,$2)}
-		| mode_defx		{$$=add_list(NULL,$1)}
+mode_defs:	mode_defs mode_defx	{$$=add_list($1,$2);}
+		| mode_defx		{$$=add_list(NULL,$1);}
 
 mode_defx:	mode_def		{$$=make_lowl(T_DEF,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
@@ -412,8 +412,8 @@ mode_def:	T_DEF T_NAME ';' qrefs T_ENDDEF ';'	{$$=make_def($2,$4);}
 		
 /* refs utility rules */
 
-refs:	refs refx			{$$=add_list($1,$2)}
-	| refx				{$$=add_list(NULL,$1)}
+refs:	refs refx			{$$=add_list($1,$2);}
+	| refx				{$$=add_list(NULL,$1);}
 
 refx:	ref			{$$=make_lowl(T_REF,$1);}
 	| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
@@ -457,7 +457,7 @@ qualifiers:	qualifiers ':' T_NAME	{$$=add_list($1,$3);}
 
 /* $SCHED block */
 
-sched_block:	B_SCHED ';' sched_defs	{$$=$3}
+sched_block:	B_SCHED ';' sched_defs	{$$=$3;}
 		| B_SCHED ';'		{$$=NULL;}
 
 sched_defs:	sched_defs sched_defx	{$$=add_list($1,$2);}
@@ -511,7 +511,7 @@ drives:		/* empty */			{$$=NULL;}
 
 /* $ANTENNA block */
 
-antenna_block:	B_ANTENNA ';' antenna_defs	{$$=$3}
+antenna_block:	B_ANTENNA ';' antenna_defs	{$$=$3;}
 		| B_ANTENNA ';'			{$$=NULL;}
 
 antenna_defs:	antenna_defs antenna_defx	{$$=add_list($1,$2);}
@@ -560,7 +560,7 @@ pointing_sector:	T_POINTING_SECTOR '=' T_LINK ':'
 
 /* $BBC block */
 
-bbc_block:	B_BBC ';' bbc_defs	{$$=$3}
+bbc_block:	B_BBC ';' bbc_defs	{$$=$3;}
 		| B_BBC ';'		{$$=NULL;}
 
 bbc_defs:	bbc_defs bbc_defx	{$$=add_list($1,$2);}
@@ -587,7 +587,7 @@ bbc_assign:	T_BBC_ASSIGN '=' T_LINK ':' value ':' T_LINK ';'
 
 /* $CLOCK block */
 
-clock_block:	B_CLOCK ';' clock_defs	{$$=$3}
+clock_block:	B_CLOCK ';' clock_defs	{$$=$3;}
 		| B_CLOCK ';'		{$$=NULL;}
 
 clock_defs:	clock_defs clock_defx	{$$=add_list($1,$2);}
@@ -621,7 +621,7 @@ clock_early:	T_CLOCK_EARLY '=' ':' unit_value ';'
 
 /* $DAS block */
 
-das_block:	B_DAS ';' das_defs	{$$=$3}
+das_block:	B_DAS ';' das_defs	{$$=$3;}
 		| B_DAS ';'		{$$=NULL;}
 
 das_defs:	das_defs das_defx	{$$=add_list($1,$2);}
@@ -652,9 +652,9 @@ das_lowl:	record_transport_type {$$=make_lowl(T_RECORD_TRANSPORT_TYPE,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-record_transport_type:	T_RECORD_TRANSPORT_TYPE '=' T_NAME ';' 	{$$=$3};
+record_transport_type:	T_RECORD_TRANSPORT_TYPE '=' T_NAME ';' 	{$$=$3;}
 
-electronics_rack_type:	T_ELECTRONICS_RACK_TYPE '=' T_NAME ';' 	{$$=$3};
+electronics_rack_type:	T_ELECTRONICS_RACK_TYPE '=' T_NAME ';' 	{$$=$3;}
 
 number_drives:		T_NUMBER_DRIVES '=' value ';'		{$$=$3;}
 
@@ -683,7 +683,7 @@ tape_control:	T_TAPE_CONTROL '=' T_NAME ';' {$$=$3;}
 
 /* $EOP block */
 
-eop_block:	B_EOP ';' eop_defs	{$$=$3}
+eop_block:	B_EOP ';' eop_defs	{$$=$3;}
 		| B_EOP ';'		{$$=NULL;}
 
 eop_defs:	eop_defs eop_defx	{$$=add_list($1,$2);}
@@ -716,7 +716,7 @@ tai_utc:	T_TAI_UTC '=' unit_value ';'	{$$=$3;}
 
 a1_tai:		T_A1_TAI '=' unit_value ';'	{$$=$3;}
 
-eop_ref_epoch:	T_EOP_REF_EPOCH '=' T_NAME ';'	{$$=$3};
+eop_ref_epoch:	T_EOP_REF_EPOCH '=' T_NAME ';'	{$$=$3;}
 
 num_eop_points:	T_NUM_EOP_POINTS '=' value ';'	{$$=$3;}
 
@@ -733,7 +733,7 @@ y_wobble:	T_Y_WOBBLE '=' unit_list ';'	{$$=$3;}
 
 /* $EXPER block */
 
-exper_block:	B_EXPER ';' exper_defs	{$$=$3}
+exper_block:	B_EXPER ';' exper_defs	{$$=$3;}
 		| B_EXPER ';'		{$$=NULL;}
 
 exper_defs:	exper_defs exper_defx	{$$=add_list($1,$2);}
@@ -795,7 +795,7 @@ target_correlator:	T_TARGET_CORRELATOR '=' T_NAME ';'	{$$=$3;}
 
 /* $FREQ block */
 
-freq_block:	B_FREQ ';' freq_defs	{$$=$3}
+freq_block:	B_FREQ ';' freq_defs	{$$=$3;}
 		| B_FREQ ';'		{$$=NULL;}
 
 freq_defs:	freq_defs freq_defx	{$$=add_list($1,$2);}
@@ -853,7 +853,7 @@ chan_def:	T_CHAN_DEF '=' T_LINK		/* band_id */
 		':' T_LINK switch_states ';'	/* phase-cal ID */
 		{$$=make_chan_def(NULL,$4,$6,$8,$10,$12,$14,$15);}
 
-switch_states:	switch_states switch_state	{$$=add_list($1,$2)};
+switch_states:	switch_states switch_state	{$$=add_list($1,$2);}
 		| switch_state			{$$=add_list(NULL,$1);}
 
 switch_state:	':' value			{$$=$2;}
@@ -867,7 +867,7 @@ switching_cycle:	T_SWITCHING_CYCLE '=' T_NAME ':' unit_list ';'
 
 /* $HEAD_POS block */
 	
-head_pos_block:	B_HEAD_POS ';' head_pos_defs	{$$=$3}
+head_pos_block:	B_HEAD_POS ';' head_pos_defs	{$$=$3;}
 		| B_HEAD_POS ';'		{$$=NULL;}
 
 head_pos_defs:	head_pos_defs head_pos_defx	{$$=add_list($1,$2);}
@@ -895,7 +895,7 @@ headstack_pos:	T_HEADSTACK_POS '=' value ':' unit_list ';'
 
 /* $IF block */
 
-if_block:	B_IF ';' if_defs	{$$=$3}
+if_block:	B_IF ';' if_defs	{$$=$3;}
 		| B_IF ';'		{$$=NULL;}
 
 if_defs:	if_defs if_defx			{$$=add_list($1,$2);}
@@ -932,7 +932,7 @@ if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME '
 
 /* $PASS_ORDER block */
 
-pass_order_block:	B_PASS_ORDER ';' pass_order_defs	{$$=$3}
+pass_order_block:	B_PASS_ORDER ';' pass_order_defs	{$$=$3;}
 			| B_PASS_ORDER ';'			{$$=NULL;}
 
 pass_order_defs:	pass_order_defs pass_order_defx	{$$=add_list($1,$2);}
@@ -965,7 +965,7 @@ s2_group_order:	T_S2_GROUP_ORDER '=' value_list ';' {$$=$3;}
 
 /* $PHASE_CAL_DETECT block */
 
-phase_cal_detect_block:	B_PHASE_CAL_DETECT ';' phase_cal_detect_defs	{$$=$3}
+phase_cal_detect_block:	B_PHASE_CAL_DETECT ';' phase_cal_detect_defs	{$$=$3;}
 			| B_PHASE_CAL_DETECT ';'		{$$=NULL;}
 
 phase_cal_detect_defs:	phase_cal_detect_defs phase_cal_detect_defx
@@ -996,7 +996,7 @@ phase_cal_detect:	T_PHASE_CAL_DETECT '=' T_LINK ':' value_list ';'
 
 /* $PROCEDURES block */
 
-procedures_block:	B_PROCEDURES ';' procedures_defs	{$$=$3}
+procedures_block:	B_PROCEDURES ';' procedures_defs	{$$=$3;}
 			| B_PROCEDURES ';'			{$$=NULL;}
 
 procedures_defs:	procedures_defs procedures_defx
@@ -1072,7 +1072,7 @@ procedure_name_prefix:	T_PROCEDURE_NAME_PREFIX '=' T_NAME ';'	{$$=$3;}
 
 /* $ROLL block */
 
-roll_block:	B_ROLL ';' roll_defs	{$$=$3}
+roll_block:	B_ROLL ';' roll_defs	{$$=$3;}
 			| B_ROLL ';'		{$$=NULL;}
 
 roll_defs:	roll_defs roll_defx	{$$=add_list($1,$2);}
@@ -1109,7 +1109,7 @@ roll_def_st:	T_ROLL_DEF '=' value_list ';'	{$$=$3;}
 /* $SCHEDULING_PARAMS block */
 
  scheduling_params_block:	B_SCHEDULING_PARAMS ';' scheduling_params_defs
-								{$$=$3}
+								{$$=$3;}
 			| B_SCHEDULING_PARAMS ';'		{$$=NULL;}
 
 scheduling_params_defs:	scheduling_params_defs scheduling_params_defx
@@ -1138,7 +1138,7 @@ scheduling_params_lowl:	external_ref	{$$=make_lowl(T_REF,$1);}
 
 /* $SEFD block */
 
-sefd_block:	B_SEFD ';' sefd_defs	{$$=$3}
+sefd_block:	B_SEFD ';' sefd_defs	{$$=$3;}
 		| B_SEFD ';'		{$$=NULL;}
 
 sefd_defs:	sefd_defs sefd_defx	{$$=add_list($1,$2);}
@@ -1169,7 +1169,7 @@ sefd:		T_SEFD '=' T_LINK ':' unit_value ':' value_list ';'
 
 /* $SITE block */
 
-site_block:	B_SITE ';' site_defs	{$$=$3}
+site_block:	B_SITE ';' site_defs	{$$=$3;}
 		| B_SITE ';'		{$$=NULL;}
 
 site_defs:	site_defs site_defx	{$$=add_list($1,$2);}
@@ -1263,7 +1263,7 @@ orbit_epoch:	T_ORBIT_EPOCH '=' T_NAME ';' {$$=$3;}
 
 /* $SOURCE block */
 
-source_block:	B_SOURCE ';' source_defs	{$$=$3}
+source_block:	B_SOURCE ';' source_defs	{$$=$3;}
 		| B_SOURCE ';'			{$$=NULL;}
 
 source_defs:	source_defs source_defx	{$$=add_list($1,$2);}
@@ -1342,7 +1342,7 @@ source_model:	T_SOURCE_MODEL '=' value ':'
 
 /* $TAPELOG_OBS block */
 
-tapelog_obs_block:	B_TAPELOG_OBS ';' tapelog_obs_defs	{$$=$3}
+tapelog_obs_block:	B_TAPELOG_OBS ';' tapelog_obs_defs	{$$=$3;}
 			| B_TAPELOG_OBS ';'			{$$=NULL;}
 
 tapelog_obs_defs:	tapelog_obs_defs tapelog_obs_defx
@@ -1374,7 +1374,7 @@ vsn:		T_VSN '=' value ':' T_NAME ':' T_NAME ':' T_NAME ';'
 
 /* $TRACKS */
 
-tracks_block:	B_TRACKS ';' tracks_defs	{$$=$3}
+tracks_block:	B_TRACKS ';' tracks_defs	{$$=$3;}
 		| B_TRACKS ';'			{$$=NULL;}
 
 tracks_defs:	tracks_defs tracks_defx	{$$=add_list($1,$2);}
