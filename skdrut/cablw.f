@@ -53,7 +53,8 @@ C            right way. So allow extra time for antenna to slew to
 C            the wrong limit and then go around 360 degrees to the
 C            other wrap.
 C 970114 nrv Change amin0,amax0 to amin1,amax1 (found by Simone Magri, ATNF)
-C
+C 970506 nrv Add special section for Matera slewing algorithm.
+C            Stay on the same wrap if possible. UNDER CONSTRUCTION.
 C
 C
 C     1. We skip out of this routine if the axis type is not az-el.
