@@ -9,6 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive;
+
 m2init()
 {
 
@@ -18,9 +20,15 @@ m2init()
 
   standout();
   mvaddstr(ROW1+1,COL1+0,"MODE");
-  mvaddstr(ROW1+1,COL1+5,"RATE");
-  mvaddstr(ROW1+1,COL1+10,"SPEED");
-  mvaddstr(ROW1+1,COL1+16,"DIR");
+
+  if(kMdrive || kVdrive) {
+    mvaddstr(ROW1+1,COL1+5,"RATE");
+    mvaddstr(ROW1+1,COL1+10,"SPEED");
+    mvaddstr(ROW1+1,COL1+16,"DIR");
+  } else if(kS2drive) {
+    mvaddstr(ROW1+1,COL1+5,"GROUP");
+    mvaddstr(ROW1+1,COL1+13,"SPEED");
+  }
   standend();
   mvaddstr(ROW1+1,COL1+27,":");
   mvaddstr(ROW1+1,COL1+30,":");
@@ -41,16 +49,23 @@ m2init()
   mvaddstr(ROW1+2,COL1+75,"(    )");
 
   standout();
-  mvaddstr(ROW1+3,COL1+0,"VACUUM");
-  mvaddstr(ROW1+3,COL1+9,"TAPE");
-  mvaddstr(ROW1+3,COL1+18,"FEET");
-  mvaddstr(ROW1+3,COL1+23,"TSYS:");
-  if (MK3 == shm_addr->equip.rack || MK4 == shm_addr->equip.rack) {
+  if(kS2drive) {
+    mvaddstr(ROW1+3,COL1+0,"STATE");
+    mvaddstr(ROW1+3,COL1+11,"POS");
+    mvaddstr(ROW1+3,COL1+19,"VAR");
+  } else if(kMdrive || kVdrive) {
+    mvaddstr(ROW1+3,COL1+0,"VACUUM");
+    mvaddstr(ROW1+3,COL1+9,"TAPE");
+    mvaddstr(ROW1+3,COL1+18,"FEET");
+  }
+  if (kMrack) {
+    mvaddstr(ROW1+3,COL1+23,"TSYS:");
     mvaddstr(ROW1+3,COL1+29,"IF1");
     mvaddstr(ROW1+3,COL1+33,"IF2");
     mvaddstr(ROW1+3,COL1+37,"IF3");
 /*  mvaddstr(ROW1+3,COL1+41,"IF4"); */
-  } else {
+  } else if( kVrack) {
+    mvaddstr(ROW1+3,COL1+23,"TSYS:");
     mvaddstr(ROW1+3,COL1+29,"IFA");
     mvaddstr(ROW1+3,COL1+33,"IFB");
     mvaddstr(ROW1+3,COL1+37,"IFC");
@@ -70,6 +85,7 @@ Later feature: display x/y or ha depending on axis type
   mvaddstr(ROW1+4,COL1+44,"HA");
 */
   standend();
-  mvaddstr(ROW1+4,COL1+62,"HEAD PASS #");
+  if(kMdrive||kVdrive)
+    mvaddstr(ROW1+4,COL1+62,"HEAD PASS #");
   refresh();
 }  /* end m2init */
