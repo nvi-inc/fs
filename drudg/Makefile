@@ -34,7 +34,8 @@ $(DR)skdshft.o $(DR)snpshft.o $(DR)luff.o $(DR)cbinf.o $(DR)bcode.o \
 $(DR)snapintr.o $(DR)bbbuf.o $(DR)cazel.o $(DR)gtshft.o $(DR)bar1.o \
 $(DR)labsnp.o $(DR)port.o $(DR)lstsum.o $(DR)nhdif.o $(DR)setprint.o \
 $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
-$(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o
+$(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o \
+$(DR)isecdif.o
 
 #
 # Set compiling and linking flags
