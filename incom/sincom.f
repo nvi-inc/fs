@@ -18,6 +18,7 @@ C  Functions
       integer ichcm_ch
 C  End 600 variables
       character*80 ibc, model
+      character*4 yesno
       equivalence (ibc,ibuf)
       data ibaud  /110,300,600,1200,2400,4800,9600/
       data ibauddb/110,300,600,1200,2400,4800,9600,115200/
@@ -342,6 +343,7 @@ C
       krptp_fs=.false.
       kmvtp_fs=.false.
       kentp_fs=.false.
+      kldtp_fs=.false.
 C
       iadcst = 0
       idcalst = 1
@@ -370,6 +372,8 @@ c
       do i=1,4
         iswif3_fs(i)=1
       enddo
+C
+      ibr4tap=3
 C
 C  initialize "C" shared memory area
 C
@@ -614,6 +618,7 @@ C LINE #6 RECEIVER 20K STAGE CHECK TEMPERATURE - i20kch
 C LINE #7  TYPE OF RACK - rack
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
+      call lower(ibuf,ilen)
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
@@ -642,6 +647,7 @@ C LINE #7  TYPE OF RACK - rack
 C LINE #8  TYPE OF RECORDER - drive
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
+      call lower(ibuf,ilen)
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
@@ -833,6 +839,30 @@ C LINE #20 DS board in vlba FM ?
         ierrx = -1         
       endif
       call fs_set_vfm_xpnt(vfm_xpnt)
+C LINE #21 VACUUM MOTOR VOLTAGE - motorv
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      motorv2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',21)
+        ierrx = ierr
+      endif
+      call fs_set_motorv2(motorv2)
+C LINE #22  TAPE THICKNESS - itpthick
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      itpthick2 = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',21)
+        ierrx = ierr
+      endif
+      call fs_set_itpthick2(itpthick2)
 C
 320   continue
       call fmpclose(idcb,ierr)
@@ -952,6 +982,7 @@ C
       endif
       call readg(idcb,ierr,ibuf,ilen)
       if(ierr.lt.0) goto 920
+      call lower(ibuf,ilen)
       ich=1
       do i=1,4
         call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -975,6 +1006,7 @@ C INCHWORM PARAMETERS
 C
       call readg(idcb,ierr,ibuf,ilen)
       if(ierr.lt.0) goto 920
+      call lower(ibuf,ilen)
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if(ic1.eq.0) goto 340
@@ -1438,6 +1470,43 @@ C
       modelti_fs=model0ti_fs
       call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &   rateti_fs,spanti_fs, modelti_fs)
+      call fmpclose(idcb,ierr)
+C
+C  8.0 read sw.ctl
+C
+800   continue
+      call fmpopen
+     &   (idcb,FS_ROOT//'/control/sw.ctl',ierr,'r',idum)
+      if (ierr.lt.0) then
+        call logit7ci(0,0,0,1,-200,'bo',ierr)
+        goto 990
+      endif
+C
+C  8.1 Read and decode each line.
+C
+      ilen=0
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-209,'bo',ierr)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      call hol2char(ibuf,ic1,ic2,yesno)
+      if(yesno.ne.'yes'.and.yesno.ne.'no')
+     &  then
+        call logit7ci(0,0,0,1,-181,'bo',0)
+        goto 990
+      endif
+      if(yesno.eq.'yes') then
+         vacsw=1
+      else
+         vasw=0
+         vac4=0
+         call fs_set_vac4(vac4)
+      endif
+      call fs_set_vacsw(vacsw)
       call fmpclose(idcb,ierr)
       goto 990
 C
