@@ -1,5 +1,6 @@
 /* general header file for all fs data structure definations */
 
+#include "../rclco/rcl/rcl.h"
 #include "bbc_ds.h"
 #include "cmd_ds.h"
 #include "dist_ds.h"
@@ -14,3 +15,11 @@
 #include "mcb_ds.h"
 #include "tape_ds.h"
 #include "systracks_ds.h"
+#include "user_info_ds.h"
+#include "rclcn_req_ds.h"
+#include "rclcn_res_ds.h"
+#include "s2st_ds.h"
+#include "rec_mode_ds.h"
+#include "data_valid_ds.h"
+#include "s2label_ds.h"
+#include "s2rec_check.h"
