@@ -130,8 +130,8 @@ char *ptr;
 	      }
 	    }
 	  }
-	} else if (lcl->mode > 2) {            /* m3 mode a, b, c or d */
-	  if(shm_addr->equip.rack_type != VLBAG && lcl->mode < 6){
+	} else if (lcl->mode > 2) {            /* m3 mode a, b, or c */
+	  if(shm_addr->equip.rack_type != VLBAG && lcl->mode < 10){
 	    ierr=-300;
 	    break;
 	  }
