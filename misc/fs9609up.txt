@@ -1,4 +1,4 @@
-File: /usr2/fs-9.6.8/misc/fs9608up.txt  Version: 2.5 Date: 030910
+File: /usr2/fs-9.6.9/misc/fs9609up.txt  Version: 2.8 Date: 030915
 
 I. Introduction
 
@@ -31,7 +31,8 @@ were added after 9.5.13. Items numbered 11 and above were added after
 9.5.15. Items numbered 31 and above were added after 9.6.4. More
 detailed text follows the summary. Items number 39 and above were
 added after 9.6.5. Items numbered 47 and above were added after
-9.6.6. Items numbered 54 and above were added after 9.6.7.
+9.6.6. Items numbered 54 and above were added after 9.6.7.  Items
+numbered 55 and above were added after 9.6.8.
 
 1. The Mark 5 data_check command protects against negative read
    pointers.
@@ -92,6 +93,7 @@ added after 9.6.5. Items numbered 47 and above were added after
 52. vmk5 removed
 53. Response time of MET03 WX command improved.
 54. bank_check made more robust
+55. bank_check does not issue extraneous "change_pack" calls
 
 A more detailed discussion of these changes follows.
 
@@ -709,15 +711,21 @@ A more detailed discussion of these changes follows.
     procedure call) if the scan duration has not been set by the
     scan_name command.
 
+55. bank_check does not issue extraneous "change_pack" calls. A bug in
+    previous versions that included automatic issuing of the
+    "change_pack" procedure caused it to be issued for every scan even
+    if it was not appropriate. This has been fixed.
+
 
 			 B. Changes in DRUDG
 				   
-drudg opening message date is 082804. The following areas in DRUDG
+drudg opening message date is 030915. The following areas in DRUDG
 were modified. Items numbered 3 and above are new since 9.5.13. Items
 numbered 6 and above were added after 9.5.15. Items numbered 18 and
 above were added after 9.6.4. Items numbered 27 and above were added
 after 9.6.5. Items numbered 37 and above were added after 9.6.6. Items
-numbered 41 and above were added after 9.6.7.
+numbered 41 and above were added after 9.6.7. Items numbered 42 and
+above were added after 9.6.8.
 
 1. Mk5 disk-only recording.
 2. Geo/astro schedule recognition.
@@ -766,6 +774,7 @@ numbered 41 and above were added after 9.6.7.
 39. Set-up procedures query Mark 5A mode
 40. postob_mk5a procedure checks Mark 5A disk statistics.
 41. postob_mk5a procedure fixed. 
+42. postob_mk5a procedure fixed. 
 
 A more detailed discussion of these changes follows.
 
@@ -1397,6 +1406,8 @@ A more detailed discussion of these changes follows.
 41. postob_mk5a procedure fixed. The command now issues the correct
     command: "mk5=stats?" instead of "mk5a=stats?".
 
+42. postob_mk5a procedure fixed. The command now issues the correct
+    command: "mk5=get_stats" instead of "mk5=stats?".
 
  			    C. Known Bugs
 
@@ -1557,7 +1568,7 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
-If you are upgrading from versions 9.6.7, please follow steps
+If you are upgrading from versions 9.6.7-9.6.8, please follow steps
 (0)-(10) and (25).
 
 If you are upgrading from versions 9.6.5-9.6.6, please follow steps
@@ -1605,7 +1616,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.6.8 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.6.9 archive in your "/tmp" directory. For
 example you might do the following:
 
       cd /tmp
@@ -1613,7 +1624,7 @@ example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.6.8.tar.gz
+      get fs-9.6.9.tar.gz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1627,12 +1638,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.6.8.tar.gz
+      tar -xzpf /tmp/fs-9.6.9.tar.gz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.6.8 fs
+      ln -sfn fs-9.6.9 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -2073,19 +2084,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.6.8.tar.gz archive have been placed
+floppy, "split" files of the fs-9.6.9.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9608tg.aa
-fs9608tg.ab
+fs9609tg.aa
+fs9609tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9608tg.* >fs-9.6.8.tar.gz
+cat fs9609tg.* >fs-9.6.9.tar.gz
 
-This will create an exact image of the original fs-9.6.8.tar.gz
+This will create an exact image of the original fs-9.6.9.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.
