@@ -342,7 +342,7 @@ C                   Get the command <name>=<parm>
         ich = iscn_ch(ibuf,1,nchar,'=')
         if (ich.gt.0) then
           ncparm = nchar - ich
-          if (ncparm.le.0 .or. ncparm.gt.12) then
+          if (ncparm.lt.0 .or. ncparm.gt.12) then
             call logit7ci(0,0,0,1,-135,'bo',12)
             goto 600
           endif
