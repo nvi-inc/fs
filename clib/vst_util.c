@@ -14,24 +14,24 @@
 
 /*true speeds*/
 static char *sp1_key[ ]={
-        "4.22",  "8.44", "16.88", "33.75", "67.5", "135",    "270",
-   "0", "4.44",  "8.88", "16.66", "33.33", "66.66", "133.33", "266.66",
-        "2.5",   "5",    "10",    "20",    "40",    "80",    "160" };
+        "8.44", "16.88", "33.75", "67.5", "135",    "270",
+   "0", "8.33", "16.66", "33.33", "66.66", "133.33", "266.66",
+        "5",    "10",    "20",    "40",    "80",    "160" };
 /* nominal M3 speeds that are different */
-static char *sp2_key[ ]={"3.75",    "7.5",    "15",    "30",   "60",   "120",
+static char *sp2_key[ ]={"7.5",    "15",    "30",   "60",   "120",
 			   "240"};
 /* speeds in 0.01 ips */
 static int   sp3_key[ ]={
-       422,    844,    1688,   3375,    6750,   13500,  27000,
-  0,   444,    888,    1666,   3333,    6666,   13333,  26666,
-       250,    500,    1000,   2000,    4000,    8000,  16000};
+       844,    1688,   3375,    6750,   13500,  27000,
+  0,   833,    1666,   3333,    6666,   13333,  26666,
+       500,    1000,   2000,    4000,    8000,  16000};
 /*true M3 speeds that are different */
-static char *sp4_key[ ]={"4.21875","8.4375","16.875"};
-static char *sp5_key[ ]={"3","7"};
-static char *sp6_key[ ]={"3.38","7.88"};
-static char *sp7_key[ ]={"3.375","7.875"};
-static char *dir_key[ ]={ "rev","for"};
-static char *rec_key[ ]={ "off","on"};
+static char *sp4_key[ ]={"8.4375","16.875"};
+static char *sp5_key[ ]={"7"};
+static char *sp6_key[ ]={"7.88"};
+static char *sp7_key[ ]={"7.875"};
+static char *dir_key[ ]={"rev","for"};
+static char *rec_key[ ]={"off","on"};
 
 #define SP1_KEY sizeof(sp1_key)/sizeof( char *)
 #define SP2_KEY sizeof(sp2_key)/sizeof( char *)
