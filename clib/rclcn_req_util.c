@@ -400,6 +400,26 @@ void add_rclcn_delaym_read(struct rclcn_req_buf *buffer, char *device)
   
   return;
 }
+void add_rclcn_barrelroll_set(struct rclcn_req_buf *buffer, char *device,
+			 ibool barrelroll)
+{
+  char bytes[1+sizeof(ibool)];
+  bytes[0]=RCL_CMD_BARRELROLL_SET;
+  memcpy(bytes+1,&barrelroll,sizeof(ibool));
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_barrelroll_read(struct rclcn_req_buf *buffer, char *device)
+{
+  char bytes[1];
+  bytes[0]=RCL_CMD_BARRELROLL_READ;
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
 void add_rclcn_align(struct rclcn_req_buf *buffer, char *device,
 		     int year, int day, int hour, int min, int sec,
 		     long int nanosec)
@@ -585,6 +605,34 @@ void add_rclcn_tapetype_read(struct rclcn_req_buf *buffer, char *device)
   
   return;
 }
+void add_rclcn_mk3_form_set(struct rclcn_req_buf *buffer, char *device,
+			 ibool mk3)
+{
+  char bytes[1+sizeof(ibool)];
+  bytes[0]=RCL_CMD_MK3_FORM_SET;
+  memcpy(bytes+1,&mk3,sizeof(ibool));
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_mk3_form_read(struct rclcn_req_buf *buffer, char *device)
+{
+  char bytes[1];
+  bytes[0]=RCL_CMD_MK3_FORM_READ;
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_transport_times(struct rclcn_req_buf *buffer, char *device)
+{
+  char bytes[1];
+  bytes[0]=RCL_CMD_TRANSPORT_TIMES;
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
 void add_rclcn_station_info_read(struct rclcn_req_buf *buffer, char *device)
 {
   char bytes[1];
@@ -648,6 +696,40 @@ void add_rclcn_status_decode(struct rclcn_req_buf *buffer, char *device,
   memcpy(bytes+1,            &stat_code,sizeof(int  ));
   memcpy(bytes+1+sizeof(int),&shortt   ,sizeof(ibool));
 
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_diag(struct rclcn_req_buf *buffer, char *device,
+		    int type)
+{
+  char bytes[1+sizeof(int)];
+
+  bytes[0]=RCL_CMD_DIAG;
+  memcpy(bytes+1,&type,sizeof(int));
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_berdcb(struct rclcn_req_buf *buffer, char *device,
+		      int op_type, int chan, int meas_time)
+{
+  char bytes[1+3*sizeof(int)];
+
+  bytes[0]=RCL_CMD_BERDCB;
+  memcpy(bytes+1,              &op_type,  sizeof(int));
+  memcpy(bytes+1+sizeof(int),  &chan,     sizeof(int));
+  memcpy(bytes+1+2*sizeof(int),&meas_time,sizeof(int));
+
+  add_rclcn_request(buffer,device,bytes,sizeof(bytes));
+  
+  return;
+}
+void add_rclcn_ident(struct rclcn_req_buf *buffer, char *device)
+{
+  char bytes[1];
+  bytes[0]=RCL_CMD_IDENT;
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
   return;
