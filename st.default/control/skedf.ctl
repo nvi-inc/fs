@@ -92,6 +92,9 @@ $print
 * Label size:
 * Specify label size parameters, only valid for "postscript" type. If
 * no size is specified, drudg cannot print labels.
+* The option that has the largest product of <rows>*<cols> is a good choice
+* if you are just printing to plain paper, for example Avery 5160 prints 30
+* labels per page.
 * <ht> height of a single label, in inches
 * <wid> width of a single label, in inches
 * <rows> number of rows of labels on the page
@@ -110,7 +113,7 @@ $print
 *label_size  1.375 2.75    8     3     0.0   0.0    HP 92285L
 *label_size  1.5   3.9     7     2     0.5   0.16   Avery L7163
 *
-*$misc
+$misc
 * Enter the epoch for drudg to use on the SOURCE commands in SNAP files.
 * Default is 1950 if none is specified. Only 1950 or 2000 are valid.
 * Examples:
