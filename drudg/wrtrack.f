@@ -25,16 +25,16 @@ C   COMMON BLOCKS USED
 	include 'freqs.ftni'
 C
 C  LOCAL VARIABLES
-      integer iy,ul,ichan,iassign,ierr,ipas,iprint,nch,idum,ileft
+      integer ib,iy,ul,ichan,iassign,ierr,ipas,iprint,nch,idum,ileft
       integer ichmv_ch,ib2as ! functions
 C
 C  INITIALIZED
 C
 
 C  1. Set up tracks for forward or reverse
-C    itras(2,28,14,max_frq)  ! track assignments
-C       U,L
-C       to be recorded on forward or reverse passes
+C    itras(2,2,28,14,max_frq)  ! track assignments
+C       U,L and S,M
+C       to be recorded on forward or reverse ub-asses
 C       for each VC (1-14)
 C       frequency
 
@@ -47,11 +47,13 @@ C  ichange = 0 forward, 1 reverse
 	call ifill(ibuf,1,iblen,32)
 	call char2hol('track=',ibuf,1,6)
 	nch = 7
-	do ichan=1,nchanv(nvset)  !channels
+	do ichan=1,nvcs(istn,icod)  !channels
 	  do ul=1,2  !Upper and lower
-	    iassign = itras(ul,ipas,ivcv(nvset,ichan),icod)
+	    iassign = itras(ul,1,ipas,invcx(ichan,istn,icod),istn,icod)
 C  Note: for mode A there is no track assignment for pass 2, so
 C  no tracks are written.
+C  Note: for 2-bit sampling, the track for the magnitude is automatically
+C  recorded as the next one in the stack.
 	    if (iassign.gt.-99) then  !if number
 		iassign = iassign + 3 ! VLBA track numbers
                 nch = ichmv_ch(ibuf,nch,'(')
@@ -64,7 +66,7 @@ C  no tracks are written.
 	    end if !if number
 	  end do !Upper and lower
 	  if (iprint.eq.8) then
-	    if (iprint.eq.nchanv(nvset)) then
+	    if (iprint.eq.nvcs(istn,icod)) then
 C               nch = ichmv(ibuf,nch-1,2h  ,1,2)
                 nch = ichmv_ch(ibuf,nch-1,' !NEXT!')
 	    else

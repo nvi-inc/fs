@@ -7,6 +7,7 @@ c      DIMENSION IBUF(20)
       IDUMMY = ichmv_ch(IBUF,1,'DEFINE  ')
 	IDUMMY = ICHMV(IBUF,9,LNAMEP,1,12)
       IDUMMY = ichmv_ch(IBUF,23,'00000000000X')
+       call hol2lower(ibuf,34)
 	call writf_asc(LU,IERR,IBUF,(34)/2)
       call inc(LU,IERR)
 C

@@ -84,6 +84,7 @@ C             with the main menu
 C  940620 nrv non-interactive (batch) mode
 C  950626 nrv Case-sensitive station IDs
 C  951003 nrv Try to open ".drg" file after trying ".skd" file
+C  951213 nrv One call to PROCS with Mk3/VLBA as input flag
 C
 C
       luscn = STDOUT
@@ -92,7 +93,9 @@ C
       cdrudg = './'
       ctmpnam = './'
       cprport = 'PRINT'
-      cprttyp = 'FILE'
+      cprttyp = 'LASER'
+      cprtpor = ' '
+      cprtlan = ' '
       iwidth = 137
       klab = .false.
       ifunc = -1
@@ -128,27 +131,27 @@ C
 C     2. Next read in the schedule file name.
 C
 200   cexpna = ' '
-      nvset = 0
-      do i=1,2*max_pass
+      do i=1,4*max_pass
         do j=1,max_stn
           do k=1,max_frq
-            ihdpos(i,j,k)=0
+            ihdpos(i,j,k)=9999
             ihddir(i,j,k)=0
           enddo
         enddo
       enddo
-	do i=1,max_frq
-	  nchanv(i) = 0
-	enddo
-	do i=1,max_vlba
-	  kswitch(i) = .false.
-          nvcs(i) = 0
-	enddo
-	kbrk = .false.
-	kvlba = .false.
-	do i=1,max_frq
+      kbrk = .false.
+      kmissing = .false.
+      do i=1,max_stn
+        do j=1,max_frq
+          nvcs(i,j)=0
+        enddo
+      enddo 
+        do k=1,max_chan
 	  do j=1,max_stn
-	    ivix(i,j)=0
+	    do i=1,max_frq
+	      invcx(k,j,i)=0
+              ivix(k,j,i)=0
+	    enddo
 	  enddo
 	enddo
 
@@ -162,7 +165,7 @@ C   Check for non-interactive mode.
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
 9020    FORMAT(' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 951208)')
+     .  '(NRV 960119)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -210,7 +213,7 @@ C   Check for non-interactive mode.
 9021      format(' Enter schedule name (e.g. PPMN3): ',$)
 	  read(luusr,'(A)') cbuf
 	  l = trimlen(cbuf)
-	  cexpna = cbuf(1:l)
+	  if (l.gt.0) cexpna = cbuf(1:l)
 	  kskd = .false.
         ENDIF !got a name
       END DO !get schedule file name
@@ -260,7 +263,17 @@ C
 	  ENDIF
 C
 C     Derive number of passes for each code
-	  CALL GNPAS
+	  CALL GNPAS(ierr)
+          call setba_dr
+          if (ierr.ne.0) then ! can't continue
+            write(luscn,9999) 
+9999        format(/'DRUDG00: WARNING! Inconsistent or missing ',
+     .      'pass/track/head information.'/
+     .      ' You will NOT be able to make SNAP or procedure '
+     .      'output.'/)
+            kmissing = .true.
+C           goto 990
+          endif
 C
             WRITE(LUSCN,9490) NSOURC
 	    IF (NSATEL.GT.0) WRITE(LUSCN,9496) NCELES,NSATEL
@@ -374,7 +387,9 @@ C
      .    ' 6 = Make bar code tape labels         ',
      .    ' 12 = Make Mark III procedures (.PRC) '/,
      .    ' 0 = Done with DRUDG                   ',
-     .    ' 13 = Make VLBA procedures (.PRC)'/
+     .    ' 13 = Make VLBA procedures (.PRC)'/,
+     .    '                                       ',
+     .    ' 14 = Make hybrid procedures (.PRC)'/,
      .    ' ? ',$)
         else ! SNAP file
 	  l=trimlen(cexpna)
@@ -396,7 +411,7 @@ C
         read(command,*,err=991) ifunc
       endif
 
-	if ((ifunc.lt.0).or.(ifunc.gt.13).and..not.kbatch) GOTO 700
+	if ((ifunc.lt.0).or.(ifunc.gt.14).and..not.kbatch) GOTO 700
 	if ((ifunc.lt.0).or.(ifunc.gt.13).and.kbatch) GOTO 991
 	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
      .  .or.ifunc.eq.10.or.ifunc.eq.12.or.ifunc.eq.13)) goto 700
@@ -473,9 +488,11 @@ c            I = nstnx
 	    ELSE IF (IFUNC.EQ.4) THEN
 	      CALL CLIST(kskd)
 	    ELSE IF (IFUNC.EQ.12) THEN
-            CALL PROCS
-	    ELSE IF (IFUNC.EQ.13) THEN
-            CALL VPROCS
+              CALL PROCS(1) ! Mark III backend procedures
+            ELSE IF (IFUNC.EQ.13) THEN
+              CALL PROCS(2) ! VLBA backend procedures
+	    ELSE IF (IFUNC.EQ.14) THEN
+            CALL PROCS(3) ! VLBA backend procedures
 	    ELSE IF (IFUNC.EQ.6) THEN
 	      if (nstnx.eq.1) then ! just one station
 		pcode = 1

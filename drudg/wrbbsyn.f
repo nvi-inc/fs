@@ -1,4 +1,4 @@
-	SUBROUTINE wrbbsyn(lu,iblen,squal,imode)
+	SUBROUTINE wrbbsyn(lu,iblen,squal,imode,icod)
 C
 C  wrbbsyn creates the bbsynth lines for VLBA pointing files.
 C
@@ -10,7 +10,7 @@ C
 	INCLUDE 'skparm.ftni'
 C
 C  INPUT:
-      integer lu,iblen
+      integer lu,iblen,icod
 	real*4 squal(14)
 	integer imode  !1=qual1 2=qual2
 C
@@ -34,7 +34,7 @@ C  1. Write out bbsyn.
 	iz = 0
 	call char2hol(' bbsynth=',ibuf,1,9)
 	iy = 10
-	do ix=1,nchanv(nvset)
+	do ix=1,nvcs(istn,icod)
 	  if (squal(ix).ne.0.0) then
 	    call bbsyn(iy,ix,squal(ix))
 	    iz=iz+1

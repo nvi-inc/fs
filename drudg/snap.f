@@ -1,4 +1,4 @@
-	SUBROUTINE SNAP(cr1,cr2,cr3,cr4)!TRANSLATE SCHEDULE TO SNAP 
+        SUBROUTINE SNAP(cr1,cr2,cr3,cr4)!TRANSLATE SCHEDULE TO SNAP 
 C
 C     SNAP reads a schedule file and writes a file with SNAP commands
 C
@@ -17,27 +17,30 @@ C
 C  LOCAL:
 C     IFTOLD - foot count at end of previous observation
 C     TSPINS - time, in seconds, to spin tape
-      integer*2 IBUF2(ibuf_len)
-      integer*2 lmodep,ldirp,lspdir,lds,lfreq
+      integer*2 IBUF2(ibuf_len),ibuf_save(5)
+      integer*2 lmodep,ldirp,lspdir,lds,lfreq,lspd(4)
       integer iblen,i,ilen,iobs,iobsp,icheck,icheckp,
      .ipasp,iftold,kerr,ical,iyr,idayr,ihr,imin,isc,nstnsk,
      .mjd,mon,ida,isor,istnsk,icod,idir,id,iyr2,ierr,ix,idayr2,
      .ihr2,min2,isc2,iyr3,idayr3,ihr3,min3,isc3,iyr5,idayr5,ihr5,
-     .min5,isc5,nch,nc,irah,iram,idcd,idcm,l,idirp,
-     .idummy,ispm,isps,ic,ichk,ihd,isppl,iyr4,idayr4,ihr4,
+     .min5,isc5,nch,nc,irah,iram,idcd,idcm,l,idirp,nspd,
+     .idum,ispm,isps,ic,ichk,ihd,isppl,iyr4,idayr4,ihr4,
      .min4,isc4,itch,iyrch,idayrch,ihrch,minch,iscch,ndx,isp,il
       real*4 tspins,d,epoc,ras,dcs,spdips
       integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
      .          LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
+      integer npmode,itrk(36)
+      integer*2 lpmode(2),lfan(2)
       real*8 UT,GST
       real*8 SORRA,SORDEC
       real*4 az,el,x30,y30,x85,y85,ha1,dc
       character*4  response,cepoch
       character*3  stat
+      character*28 cpass,cvpass
       character    upper
       character*1  maxchk,allchk
-      logical*4    ex
+      logical    ex
       logical      kdone,kspin,kup
 C     LMODEP - mode of previous observation
 C     LDIRP  - direction of previous observation
@@ -51,11 +54,12 @@ C     IYR5,IHR5, etc. - start time minus early
 C     IOBSP - number of obs. this pass
       character*7 cwrap ! cable wrap from CBINF
       integer*2 lwrap(4)
-      logical*4 KNEWTP,KNEWT
+      real*4 spd
+      logical KNEWTP,KNEWT
 C      - true if a new tape needs to be mounted before
 C        beginning the current observation
 Cinteger*4 ifbrk
-      integer ichcm,jchar,trimlen,ir2as,ib2as,ichmv,iscnc,mcoma ! functions
+      integer jchar,trimlen,ir2as,ib2as,ichmv,iscnc,mcoma ! functions
       integer ichcm_ch,ichmv_ch
       real*4 tspin,speed ! functions
 C
@@ -71,8 +75,10 @@ C  INITIALIZED:
       DATA ldirc/2HF /
       DATA LREV /2HRE,2HV,/
       DATA LMODEP/2H  /, LDIRP/2H  /, IPASP/0/
+      data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
+      data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
-C     WHO DATE  CHANGES
+C History:
 C     NRV 830818 ADDED SATELLITE ORBIT COMMAND OUTPUT
 C     NRV 840501 ADDED CHECK PROCEDURE, ADDED INTRO LINE
 C     MWH 840813 FIXED ERROR CHECKING DURING SNAP FILE WRITING
@@ -101,9 +107,19 @@ C     nrv 940520 Changed output of satellite observations to write a
 C                SOURCE=AZEL,<az>,<el> line instead of ra,dec
 C     nrv 940610 Add a "D" to the az,el values
 C     nrv 940622 Use cr1,cr2,cr3 already specified non-interactively.
+C 951226 nrv New setup names for FS9/Mk4/VLBA. Remove speed from ST=.
+C 951228 nrv Add speed back to ST=.
+C 960116 nrv Select from a fixed list of speeds for the ST= command,
+C            via new SPDSTR routine.
 C
 C
       iblen = ibuf_len*2
+      if (kmissing) then
+        write(luscn,9111)
+9111    format(' SNAP00 - Missing or inconsistent head/track/pass',
+     .  ' information.'/' Can''t make SNAP file.')
+        return
+      endif
 
 C    1. Prompt for additional parameters, epoch of source positions
 C    and whether maximal checks are wanted.
@@ -118,21 +134,21 @@ C    and whether maximal checks are wanted.
           return
         endif
       else
-	do while (ierr.ne.0)
-	  write(luscn,9101)
+        do while (ierr.ne.0)
+          write(luscn,9101)
 9101    format(' Source position epoch 1950 or 2000 ? [default 1950,',
      .  ' 0 to quit] ',$)
-	  read(luusr,'(a)') response
-	  if (response(1:1).eq.'0') return
-	  if (response(1:1).eq.' ') response(1:4)='1950'
-	  if (response(1:4).ne.'1950'.and.response(1:4).ne.'2000') then
-	    write(luscn,9102) response(1:4)
+          read(luusr,'(a)') response
+          if (response(1:1).eq.'0') return
+          if (response(1:1).eq.' ') response(1:4)='1950'
+          if (response(1:4).ne.'1950'.and.response(1:4).ne.'2000') then
+            write(luscn,9102) response(1:4)
 9102      format(' Invalid epoch ',a,'.  Must be 1950 or 2000.')
-	  else
-	    cepoch = response(1:4)
-	    ierr=0
-	  endif
-	enddo
+          else
+            cepoch = response(1:4)
+            ierr=0
+          endif
+        enddo
       endif
 
       ierr=1
@@ -143,23 +159,23 @@ C    and whether maximal checks are wanted.
            return
          endif
        else
-	maxchk = ' '
-	do while (ierr.ne.0)
-	  write(luscn,9103)
+        maxchk = ' '
+        do while (ierr.ne.0)
+          write(luscn,9103)
 9103    format(' Add parity checks when there is enough time, ',
      .  'enter Y or N, 0 to quit ? [default N] ',$)
-	  read(luusr,'(a)') response
+          read(luusr,'(a)') response
           if (response(1:1).eq.'0') return
-	  response(1:1) = upper(response(1:1))
-	  if (response(1:1).eq.' ') response(1:1) = 'N'
-	  if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
-	    write(luscn,9104) response(1:1)
+          response(1:1) = upper(response(1:1))
+          if (response(1:1).eq.' ') response(1:1) = 'N'
+          if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
+            write(luscn,9104) response(1:1)
 9104      format(' Invalid parity check response ',a,'. Enter Y or N.')
-	  else
-	    maxchk = response(1:1)
-	    ierr=0
-	  endif
-	enddo
+          else
+            maxchk = response(1:1)
+            ierr=0
+          endif
+        enddo
       endif
 
       ierr=1
@@ -170,23 +186,23 @@ C    and whether maximal checks are wanted.
           return
         endif
       else
-	allchk = ' '
-	do while (ierr.ne.0)
-	  write(luscn,9105)
+        allchk = ' '
+        do while (ierr.ne.0)
+          write(luscn,9105)
 9105    format(' Force a parity check on every scan, ',
      .  'enter Y or N, 0 to quit ? [default N] ',$)
-	  read(luusr,'(a)') response
+          read(luusr,'(a)') response
           if (response(1:1).eq.'0') return
-	  response(1:1) = upper(response(1:1))
-	  if (response(1:1).eq.' ') response(1:1) = 'N'
-	  if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
-	    write(luscn,9106) response(1:1)
+          response(1:1) = upper(response(1:1))
+          if (response(1:1).eq.' ') response(1:1) = 'N'
+          if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
+            write(luscn,9106) response(1:1)
 9106        format('Invalid parity force response ',a,'. Enter Y or N.')
-	  else
-	    allchk = response(1:1)
-	    ierr=0
-	  endif
-	enddo
+          else
+            allchk = response(1:1)
+            ierr=0
+          endif
+        enddo
       endif
 
 
@@ -257,7 +273,7 @@ C
      .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      .       MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
         CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
-	  IF (ISOR.EQ.0.OR.ICOD.EQ.0) RETURN
+          IF (ISOR.EQ.0.OR.ICOD.EQ.0) RETURN
 C
         IF (IOBS.EQ.-1)   THEN
           call snapintr(1,iyr)
@@ -273,7 +289,7 @@ C                   Get stop time by adding duration to start
           CALL TMSUB(IYR,IDAYR,IHR,iMIN,ISC,ICAL,IYR3,IDAYR3,IHR3,
      .               MIN3,ISC3)
 C                   Find time ICAL sec before tape start
-	    call tmsub(iyr,idayr,ihr,imin,isc,ITEARL,iyr5,idayr5,ihr5,
+            call tmsub(iyr,idayr,ihr,imin,isc,ITEARL,iyr5,idayr5,ihr5,
      .               min5,isc5)
 C                   Find time ITEARL sec before start
 C
@@ -400,7 +416,7 @@ C         END IF
             icheck = 1 !do a check after this observation
             IOBSP = 1
             CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ichmv_ch(IBUF2,1,'MIDTP ')
+            idum = ichmv_ch(IBUF2,1,'MIDTP ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
             call inc(LU_OUTFILE,KERR)
           else
@@ -414,7 +430,7 @@ C
             IF (JCHAR(LMODEP,1).EQ.Z41.AND.MAXPAS(ISTN).EQ.1) THEN
 C              !rewind mode A tape
               CALL IFILL(IBUF2,1,iblen,32)
-              IDUMMY = ichmv_ch(IBUF2,1,'REWND  ')
+              idum = ichmv_ch(IBUF2,1,'REWND  ')
               call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
               call inc(LU_OUTFILE,KERR)
               IFTOLD=0
@@ -429,7 +445,7 @@ C              !rewind mode A tape
               TSPINS=0.0
             END IF !spin down remaining tape
             CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ichmv_ch(IBUF2,1,'UNLOD  ')
+            idum = ichmv_ch(IBUF2,1,'UNLOD  ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
             call inc(LU_OUTFILE,KERR)
 C
@@ -445,34 +461,34 @@ C
           ICHK = 0
           IF ((.NOT.KNEWTP).AND.(IOBS.GT.0)) THEN !check procedure
             ICHK = 1
-		IF (KFLG(2).and.((iobsp.eq.2.or.icheckp.eq.1)
+                IF (KFLG(2).and.((iobsp.eq.2.or.icheckp.eq.1)
      .          .or.MAXCHK.eq.'Y')) THEN !do a check
 C            Do check if flag is set, but only if there is enough time.
 C            Do check if MAXCHK and if there is enough time.
 C            Check against start-early for non-zero early,
 C            check against start-cal   for early=0.
 C              Enough time = (SOURCE+SPIN+PARITY+SETUP+TAPE+3S)
-		  IHD = 0
-		  if (ldirp.ne.ldir(istnsk)) ihd=ihdtm
-		  ISPPL = TSPINS + IPARTM+ISETTM+ISORTM+ITAPTM+3+ihd
+                  IHD = 0
+                  if (ldirp.ne.ldir(istnsk)) ihd=ihdtm
+                  ISPPL = TSPINS + IPARTM+ISETTM+ISORTM+ITAPTM+3+ihd
               CALL TMADD(IYR4,IDAYR4,IHR4,MIN4,ISC4,ISPPL,IYR4,IDAYR4,
      .           IHR4,MIN4,ISC4)
-		  if (itearl.eq.0) then
-		    itch = ICAL
-		  else
-		    itch = itearl
-		  endif
-		  call tmsub(iyr,idayr,ihr,imin,isc,itch,iyrch,idayrch,
+                  if (itearl.eq.0) then
+                    itch = ICAL
+                  else
+                    itch = itearl
+                  endif
+                  call tmsub(iyr,idayr,ihr,imin,isc,itch,iyrch,idayrch,
      .        ihrch,minch,iscch)
                   if (allchk.eq.'Y') goto 300
-		  IF (IYR4.LT.IYRch) GOTO 300
-		  IF (IYR4.GT.IYRch) GOTO 310
-		  IF (IDAYR4.LT.IDAYRch) GOTO 300
-		  IF (IDAYR4.GT.IDAYRch) GOTO 310
-		  IF (IHR4.LT.IHRch) GOTO 300
-		  IF (IHR4.GT.IHRch) GOTO 310
-		  IF (MIN4.LT.MINch) GOTO 300
-		  IF (MIN4.GT.MINch.OR.ISC4.GT.ISCch) GOTO 310
+                  IF (IYR4.LT.IYRch) GOTO 300
+                  IF (IYR4.GT.IYRch) GOTO 310
+                  IF (IDAYR4.LT.IDAYRch) GOTO 300
+                  IF (IDAYR4.GT.IDAYRch) GOTO 310
+                  IF (IHR4.LT.IHRch) GOTO 300
+                  IF (IHR4.GT.IHRch) GOTO 310
+                  IF (MIN4.LT.MINch) GOTO 300
+                  IF (MIN4.GT.MINch.OR.ISC4.GT.ISCch) GOTO 310
 300           CALL IFILL(IBUF2,1,iblen,32)
               NCH = ichmv_ch(IBUF2,1,'CHECK')
 C             NCH=ICHMV(IBUF2,NCH,LB,ISPP,1)
@@ -492,36 +508,34 @@ C
      .        .OR.ICHK.EQ.1) THEN
 C           THEN BEGIN "set-up procedure"
             CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ICHMV(IBUF2,1,LFREQ,1,2)
+            idum = ICHMV(IBUF2,1,LFREQ,1,2)
             NCH = 3
             IF (JCHAR(LFREQ,2).EQ.Z20) NCH=2
+          call trkall(itras(1,1,1,ipas(istnsk),istn,icod),
+     .    lmode(1,istn,icod),itrk,lpmode,npmode,lfan)
             CALL M3INF(ICOD,SPDIPS,ISP)
-            NCH=ICHMV(IBUF2,NCH,LB,ISP,1)
-            NCH=ICHMV(IBUF2,NCH,LMODE(ICOD),1,1)
-C NOTE: This previously only handled forward/reverse 2-pass modes! 
-C Mode A should be a 1-pass mode.
-C           if (jchar(lmode(icod),1).eq.OCAPA) then
-C             ndx=1
-C           else if (jchar(lmode(icod),1).eq.OCAPB
-C    .      .or.jchar(lmode(icod),1).eq.OCAPC) then
-C             NDX = 1
-C             IF (IDIR.EQ.-1) NDX = 2 
-C           endif
-            ndx = ihddir(ipas(istnsk),istn,icod)
-            NCH = NCH + IB2AS(NDX,IBUF2,NCH,1)
-		IF (MAXPAS(ISTN).GT.1) THEN !add pass number
-              NCH = ichmv_ch(IBUF2,NCH,'=') 
-              ic=Z8000+3
-              NCH = NCH + IB2AS(IPAS(ISTNSK),IBUF2,NCH,ic) 
-            END IF
-            CALL IFILL(IBUF2,NCH,3,Z20)
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(8)/2)
-            call inc(LU_OUTFILE,KERR)
-	    END IF
+C choices in LBNAME are D,8,4,2,1,H,Q,E
+          NCH=ICHMV(ibuf2,NCH,LBNAME,isp,1)
+          NCH=ICHMV(ibuf2,NCH,Lpmode,1,npmode)
+          ndx = ihddir(ipas(istnsk),istn,icod)
+          if (jchar(lpmode,1).eq.ocapv) then
+            NCH=ICHMV_ch(ibuf2,NCH,cvPASS(ndx:ndx))
+          else
+            NCH=ICHMV_ch(ibuf2,NCH,cPASS(ndx:ndx))
+          endif      
+          IF (MAXPAS(ISTN).GT.1) THEN !add pass number
+            NCH = ichmv_ch(IBUF2,NCH,'=') 
+            ic=Z8000+3
+            NCH = NCH + IB2AS(IPAS(ISTNSK),IBUF2,NCH,ic) 
+          END IF
+          CALL IFILL(IBUF2,NCH,3,Z20)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(8)/2)
+          call inc(LU_OUTFILE,KERR)
+        END IF
 C
           IF (KNEWTP) THEN
             CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ichmv_ch(IBUF2,1,'READY  ')
+            idum = ichmv_ch(IBUF2,1,'READY  ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
             call inc(LU_OUTFILE,KERR)
             IF (IFT(ISTNSK).GT.100) THEN !spin up
@@ -541,135 +555,143 @@ C
             kspin = .true. !Just wrote a FASTx command
             call inc(LU_OUTFILE,KERR)
             TSPINS = 0.0
-	    END IF
+            END IF
 
-	    if (itearl.gt.0) then !start tape early
+            if (itearl.gt.0) then !start tape early
 C  If FASTx preceeded, add a wait
                 if (kspin) then
                   CALL IFILL(IBUF2,1,iblen,Z20)
-                  IDUMMY = ichmv_ch(IBUF2,1,'!+5S')
-                  if (isp.gt.200) IDUMMY = ichmv_ch(IBUF2,1,'!+5S')
+                  idum = ichmv_ch(IBUF2,1,'!+5S')
+                  if (isp.gt.200) idum = ichmv_ch(IBUF2,1,'!+5S')
                   call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
                   call inc(LU_OUTFILE,KERR)
                   kspin = .false.
                 endif
 C   Wait until ITEARL before start time
-		CALL IFILL(IBUF2,1,iblen,32)
-		IDUMMY = ichmv_ch(IBUF2,1,'!')
-		IDUMMY = IB2AS(IDAYR5,IBUF2,2,Z4000+3*Z100+3)
-		IDUMMY = IB2AS(IHR5,IBUF2,5,Z4000+2*Z100+2)
-		IDUMMY = IB2AS(MIN5,IBUF2,7,Z4000+2*Z100+2)
-		IDUMMY = IB2AS(ISC5,IBUF2,9,Z4000+2*Z100+2)
-		call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
-		call inc(LU_OUTFILE,KERR)
+              CALL IFILL(IBUF2,1,iblen,32)
+              idum = ichmv_ch(IBUF2,1,'!')
+              idum = IB2AS(IDAYR5,IBUF2,2,Z4000+3*Z100+3)
+              idum = IB2AS(IHR5,IBUF2,5,Z4000+2*Z100+2)
+              idum = IB2AS(MIN5,IBUF2,7,Z4000+2*Z100+2)
+              idum = IB2AS(ISC5,IBUF2,9,Z4000+2*Z100+2)
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
+              call inc(LU_OUTFILE,KERR)
+              idum = ichmv(ibuf_save,1,ibuf2,1,10) ! save time
 C   Write out tape monitor command
-		CALL IFILL(IBUF2,1,iblen,32)
-		IDUMMY = ichmv_ch(IBUF2,1,'TAPE')
-		call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-		call inc(LU_OUTFILE,KERR)
+              CALL IFILL(IBUF2,1,iblen,32)
+              idum = ichmv_ch(IBUF2,1,'TAPE')
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+              call inc(LU_OUTFILE,KERR)
 C   Start recording
-		CALL IFILL(IBUF2,1,iblen,32)
-		IDUMMY = ichmv_ch(IBUF2,1,'ST=')
-		IF (LDIR(ISTNSK).EQ.ldirc) IDUMMY = ICHMV(IBUF2,4,LFOR,1,4)
-		IF (LDIR(ISTNSK).EQ.hrb) IDUMMY = ICHMV(IBUF2,4,LREV,1,4)
-		CALL M3INF(ICOD,SPDIPS,ISP)
-		ISP=SPDIPS
-		ic=Z8000+3
-		NCH = 7 + IB2AS(ISP,IBUF2,8,ic)
-		NCH = ichmv_ch(IBUF2,NCH+1,' ') - 1
-		call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
-		call inc(LU_OUTFILE,KERR)
-	    endif !start tape early
+              CALL IFILL(IBUF2,1,iblen,32)
+              nch = ichmv_ch(IBUF2,1,'ST=')
+              IF (LDIR(ISTNSK).EQ.ldirc) nch=ICHMV(IBUF2,nch,LFOR,1,4)
+              IF (LDIR(ISTNSK).EQ.hrb) nch=ICHMV(IBUF2,nch,LREV,1,4)
+              spd = 12.0*speed(icod,istn)
+              call spdstr(spd,lspd,nspd)
+              if (nspd.lt.0) then
+                write(luscn,9911) spd,ibuf_save
+9911            format('SNAP01 - Illegal speed ',f6.2,' after ',5a2)
+                return
+              endif
+              nch = ichmv(ibuf2,nch,lspd,1,nspd)
+C             nch = nch+ir2as(spd,IBUF2,NCH,6,2)
+              NCH = ichmv_ch(IBUF2,NCH+1,' ') - 1
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+              call inc(LU_OUTFILE,KERR)
+            endif !start tape early
 C
-	    IF (ICAL.GE.1) THEN !pre-observation calibration procedure
-		CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ichmv_ch(IBUF2,1,'!')
-            IDUMMY = IB2AS(IDAYR3,IBUF2,2,Z4000+3*Z100+3)
-            IDUMMY = IB2AS(IHR3,IBUF2,5,Z4000+2*Z100+2)
-            IDUMMY = IB2AS(MIN3,IBUF2,7,Z4000+2*Z100+2)
-            IDUMMY = IB2AS(ISC3,IBUF2,9,Z4000+2*Z100+2)
+            IF (ICAL.GE.1) THEN !pre-observation calibration procedure
+                CALL IFILL(IBUF2,1,iblen,32)
+            idum = ichmv_ch(IBUF2,1,'!')
+            idum = IB2AS(IDAYR3,IBUF2,2,Z4000+3*Z100+3)
+            idum = IB2AS(IHR3,IBUF2,5,Z4000+2*Z100+2)
+            idum = IB2AS(MIN3,IBUF2,7,Z4000+2*Z100+2)
+            idum = IB2AS(ISC3,IBUF2,9,Z4000+2*Z100+2)
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
             call inc(LU_OUTFILE,KERR)
 C                   Wait until ICAL before start time
             CALL IFILL(IBUF2,1,iblen,32)
-            IDUMMY = ICHMV(IBUF2,1,LPRE,1,6)
+            idum = ICHMV(IBUF2,1,LPRE,1,6)
 C PREOB
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
             call inc(LU_OUTFILE,KERR)
-	    ENDIF
+            ENDIF
 C
           CALL IFILL(IBUF2,1,iblen,32)
-          IDUMMY = ichmv_ch(IBUF2,1,'!')
-          IDUMMY = IB2AS(IDAYR,IBUF2,2,Z4000+3*Z100+3)
-          IDUMMY = IB2AS(IHR,IBUF2,5,Z4000+2*Z100+2)
-          IDUMMY = IB2AS(iMIN,IBUF2,7,Z4000+2*Z100+2)
-          IDUMMY = IB2AS(ISC,IBUF2,9,Z4000+2*Z100+2)
+          idum = ichmv_ch(IBUF2,1,'!')
+          idum = IB2AS(IDAYR,IBUF2,2,Z4000+3*Z100+3)
+          idum = IB2AS(IHR,IBUF2,5,Z4000+2*Z100+2)
+          idum = IB2AS(iMIN,IBUF2,7,Z4000+2*Z100+2)
+          idum = IB2AS(ISC,IBUF2,9,Z4000+2*Z100+2)
+          idum = ichmv(ibuf_save,1,ibuf2,1,10)
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
           call inc(LU_OUTFILE,KERR)
 C                   Wait until start time
           CALL IFILL(IBUF2,1,iblen,32)
-          IDUMMY = ichmv_ch(IBUF2,1,'TAPE')
+          idum = ichmv_ch(IBUF2,1,'TAPE')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
           call inc(LU_OUTFILE,KERR)
 C                     Write out tape monitor command
-	    if (itearl.eq.0) then !start tape now
-		CALL IFILL(IBUF2,1,iblen,32)
-		IDUMMY = ichmv_ch(IBUF2,1,'ST=')
-		IF (LDIR(ISTNSK).EQ.ldirc) IDUMMY = ICHMV(IBUF2,4,LFOR,1,4)
-		IF (LDIR(ISTNSK).EQ.hrb) IDUMMY = ICHMV(IBUF2,4,LREV,1,4)
-		CALL M3INF(ICOD,SPDIPS,ISP)
-		ISP=SPDIPS
-		ic=Z8000+3
-		NCH = 7 + IB2AS(ISP,IBUF2,8,ic)
-		NCH = ichmv_ch(IBUF2,NCH+1,' ') - 1
-		call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
-		call inc(LU_OUTFILE,KERR)
-C                   Start recording
-	    endif !start tape now
-	    CALL IFILL(IBUF2,1,iblen,32)
-          IDUMMY = ICHMV(IBUF2,1,LMID,1,6)
+            if (itearl.eq.0) then !start tape now
+              CALL IFILL(IBUF2,1,iblen,32)
+              nch = ichmv_ch(IBUF2,1,'ST=')
+              IF (LDIR(ISTNSK).EQ.ldirc) nch=ICHMV(IBUF2,nch,LFOR,1,4)
+              IF (LDIR(ISTNSK).EQ.hrb) nch=ICHMV(IBUF2,nch,LREV,1,4)
+              spd = 12.0*speed(icod,istn)
+              call spdstr(spd,lspd,nspd)
+              if (nspd.lt.0) then
+                write(luscn,9911) spd,ibuf_save
+                return
+              endif
+              nch = ichmv(ibuf2,nch,lspd,1,nspd)
+C             nch = nch+ir2as(spd,IBUF2,NCH,6,2)
+              NCH = ichmv_ch(IBUF2,NCH+1,' ') - 1
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+              call inc(LU_OUTFILE,KERR)
+C             Start recording
+            endif !start tape now
+            CALL IFILL(IBUF2,1,iblen,32)
+          idum = ICHMV(IBUF2,1,LMID,1,6)
 C MIDOB
           call writf_asc(LU_OUTFILE,KERR,IBUF2,6/2)
           call inc(LU_OUTFILE,KERR)
 C                   Invoke a procedure in mid-observation
           CALL IFILL(IBUF2,1,iblen,32)
-          IDUMMY = ichmv_ch(IBUF2,1,'!')
-          IDUMMY = IB2AS(IDAYR2,IBUF2,2,Z4000+3*Z100+3)
-          IDUMMY = IB2AS(IHR2,IBUF2,5,Z4000+2*Z100+2)
-          IDUMMY = IB2AS(MIN2,IBUF2,7,Z4000+2*Z100+2)
-          IDUMMY = IB2AS(ISC2,IBUF2,9,Z4000+2*Z100+2)
+          idum = ichmv_ch(IBUF2,1,'!')
+          idum = IB2AS(IDAYR2,IBUF2,2,Z4000+3*Z100+3)
+          idum = IB2AS(IHR2,IBUF2,5,Z4000+2*Z100+2)
+          idum = IB2AS(MIN2,IBUF2,7,Z4000+2*Z100+2)
+          idum = IB2AS(ISC2,IBUF2,9,Z4000+2*Z100+2)
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
           call inc(LU_OUTFILE,KERR)
 C                   Wait until stop time
           CALL IFILL(IBUF2,1,iblen,Z20)
-          IDUMMY = ichmv_ch(IBUF2,1,'ET')
+          idum = ichmv_ch(IBUF2,1,'ET')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
           call inc(LU_OUTFILE,KERR)
 C                   End recording
-          IDUMMY = ichmv_ch(IBUF2,1,'!+3S')
-          if (isp.gt.200) IDUMMY = ichmv_ch(IBUF2,1,'!+5S')
+          idum = ichmv_ch(IBUF2,1,'!+3S')
+          if (isp.gt.200) idum = ichmv_ch(IBUF2,1,'!+5S')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
           call inc(LU_OUTFILE,KERR)
           CALL IFILL(IBUF2,1,iblen,Z20)
-          IDUMMY = ichmv_ch(IBUF2,1,'TAPE')
+          idum = ichmv_ch(IBUF2,1,'TAPE')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
           call inc(LU_OUTFILE,KERR)
 C                     Wait for the tape to stop and send tape monitor command
           IOBS = IOBS + 1
-          LMODEP = LMODE(ICOD)
+          LMODEP = LMODE(1,istn,ICOD)
           IPASP = IPAS(ISTNSK)
           icheckp=icheck
-          CALL M3INF(ICOD,SPDIPS,ISP)
-c         ISPP = ISP
           LDIRP = LDIR(ISTNSK)
           IDIR=+1
           IF (LDIR(ISTNSK).EQ.hrb) IDIR=-1
           IDIRP=+1
           IF (LDIRP.EQ.hrb) IDIRP = -1
-C         speed=spdips*9.0/(8.0*12.0)
-	    IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
-     .    *speed(icod))
-          IDUMMY = ICHMV(IBUF2,1,LPST,1,6)
+            IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
+     .    *speed(icod,istn))
+          idum = ICHMV(IBUF2,1,LPST,1,6)
 C POSTOB
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
           call inc(LU_OUTFILE,KERR)
@@ -688,7 +710,7 @@ C            ENDW "Schedule file entries"
 
 C   if (ifbrk().lt.0) return
 
-	END DO !"ilen.gt.0,kerr.eq.0,not $"
+        END DO !"ilen.gt.0,kerr.eq.0,not $"
 C
 980   CONTINUE
       TSPINS = TSPIN(IFTOLD,ISPM,ISPS)
@@ -700,7 +722,7 @@ C       THEN BEGIN "spin off the last tape"
         call inc(LU_OUTFILE,KERR)
 C       ENDT "spin off the last tape"
       END IF
-      IDUMMY = ichmv_ch(IBUF2,1,'UNLOD ')
+      idum = ichmv_ch(IBUF2,1,'UNLOD ')
       call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
       call inc(LU_OUTFILE,KERR)
 C
@@ -709,4 +731,4 @@ C
       IF (KERR.NE.0) WRITE(LUSCN,9902) KERR,SNPNAME(1:ic)
 9902  FORMAT(' SNAP03 - Error ',I5,' writing SNAP output file ',A)
       RETURN
-	END
+        END

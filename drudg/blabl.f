@@ -62,10 +62,12 @@ C    .CARRIAGE CONTROL='LIST')
 C     Now write the normal ASCII information
 	JYR=MOD(IYR,100)
 	if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then !Laser jet
-	  WRITE(lu,130) (LSTNNA,JYR,ID1(I),IH1(I),IM1(I),i=1,nout),char(13)
+	  WRITE(lu,130) (LSTNNA,JYR,ID1(I),IH1(I),IM1(I),i=1,nout),
+     .    char(13)
 130       FORMAT(6X,3(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
-	  WRITE(lu,140) (LEXPER,JYR,ID2(I),IH2(I),IM2(I),I=1,NOUT),char(13)
+	  WRITE(lu,140) (LEXPER,JYR,ID2(I),IH2(I),IM2(I),I=1,NOUT),
+     .    char(13)
 140     FORMAT(6X,3(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
 	else if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then

@@ -5,6 +5,7 @@ C  open up output print file.
 
 C NRV 910306 Added IOPT to call for landscape orientation of list
 C               IOPT=0 for portrait, =1 for landscape
+C 960122 nrv Added some comments only.
 
       INCLUDE 'skparm.ftni'
       INCLUDE 'drcom.ftni'
@@ -26,12 +27,10 @@ C               IOPT=0 for portrait, =1 for landscape
         RETURN
       ENDIF
 
-	if (cprttyp.eq.'LASER') then !set up laser printer
-c        CLASER=' '//CHAR(27)//'E'   ! ISSUE A RESET
-c        l = trimlen(claser)
-c        WRITE(LUPRT,'(A)') CLASER(1:l)
-
-	  if (iwid.eq.137.and.iopt.eq.0) then
+      if (cprtpor.eq.' '.and.cprtlan.eq.' ') then ! set up printers here
+C                                                   instead of using scripts
+        if (cprttyp.eq.'LASER') then !set up laser printer
+	  if (iwid.eq.137.and.iopt.eq.0) then ! portrait
 	    CLASER=' '
      .     //CHAR(27)//'&l0O'       ! portrait orientation
      .     //CHAR(27)//'(8U'        ! primary character set
@@ -45,7 +44,7 @@ c        WRITE(LUPRT,'(A)') CLASER(1:l)
      .     //CHAR(27)//'(s10H'      ! primary pitch
      .     //CHAR(27)//'&l6D'       ! lines per inch
      .     //CHAR(27)//'&a2L'       ! left margin column number
-	  else if (iwid.eq.137.and.iopt.eq.1) then
+	  else if (iwid.eq.137.and.iopt.eq.1) then ! landscape
 	    CLASER=' '
      .     //CHAR(27)//'&l1O'       ! landscape orientation
      .     //CHAR(27)//'(8U'        ! primary character set
@@ -56,15 +55,17 @@ c        WRITE(LUPRT,'(A)') CLASER(1:l)
 
 	  l = trimlen(claser)
 	  WRITE(luprt,9104) CLASER(1:l)
-9104    FORMAT(A)
+9104      FORMAT(A)
 	else if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then
 	  if (iwid.eq.137) then
 	    claser = ' '//char(15)
 	  else
 	    claser = ' '//char(18)
 	  endif
-	write(luprt,9104) claser(1:2)
+	  write(luprt,9104) claser(1:2)
 	endif !set up printer
+      else ! use scripts provided by user
+      endif
 
       RETURN
       END
