@@ -20,14 +20,15 @@ C
 C  LOCAL:
       LOGICAL KNAEQ,KORBIT
 C      -LNFCH routine, local variable for orbit identification
-      integer*2 LIAU(4),LCOM(4),LRA(8),LDC(7),lname(4)
+      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2),LRA(8),LDC(7),
+     .lname(max_sorlen/2)
 C      - temporary variables for unpacking
       real*8 RA,RARAD,DEC,DECRAD,R,D
 C        - temporary for unpacking
       real*8 rah,decd,radh,decdd,tjd ! for APSTAR
       real*8 OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,OEDY
 C        - temporary for unpacking
-      integer*2 LORBIT(4)
+      integer*2 LORBIT(max_sorlen/2)
       integer iepy
       CHARACTER*8 LORBIT_CHAR
       EQUIVALENCE (LORBIT,LORBIT_CHAR) ! added by P. Ryan
@@ -50,6 +51,7 @@ C     nrv  930225 implicit none
 C     nrv  931124 Add arguments to UNPSO to return orbital elements
 C     nrv  940112 Keep common name internally for satellites, not ORBIT.
 C     nrv  950321 Add error message for duplicate source names.
+C 970114 nrv Change 4 to max_sorlen/2
 C
       DATA LORBIT_CHAR /'ORBIT   '/
 C
@@ -78,16 +80,18 @@ C     in the SKED environment but might as well check.
 C     For celestial sources, make sure we have 1950 or J2000 coordinates.
 C     (Until flexibility to handle others is built in.)
 C
-      KORBIT=KNAEQ(LIAU,LORBIT,4)
-      IDUMMY = ICHMV(lname,1,LIAU,1,8)
-      IF (ichcm_ch(LCOM(1),1,'$ ').ne.0) IDUMMY= ICHMV(lname,1,LCOM,1,8)
+      KORBIT=KNAEQ(LIAU,LORBIT,max_sorlen/2)
+      IDUMMY = ICHMV(lname,1,LIAU,1,max_sorlen)
+      IF (ichcm_ch(LCOM(1),1,'$ ').ne.0) 
+     .IDUMMY= ICHMV(lname,1,LCOM,1,max_sorlen)
 C
       I=1
-      DO WHILE (.NOT.KNAEQ(lname,LSORNA(1,I),4).AND.I.LE.NSOURC)
+      DO WHILE (.NOT.KNAEQ(lname,LSORNA(1,I),max_sorlen/2).AND.
+     . I.LE.NSOURC)
         I=I+1
       END DO
       IF  (I.LE.NSOURC) then ! duplicate source
-        write(lu,9101) (lsorna(j,i),j=1,4)
+        write(lu,9101) (lsorna(j,i),j=1,max_sorlen/2)
 9101    format('SOINP22 - Duplicate source name ',4a2,
      .  '. Using the position of the first one.')
         RETURN
@@ -120,7 +124,7 @@ C
       END IF  !
 C
       IF  (.NOT.KORBIT) THEN  !"nonorbit"
-        IDUMMY = ICHMV(LSORNA(1,NCELES),1,lname,1,8)
+        IDUMMY = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
           IEP = EPOCH+.01 
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
@@ -140,8 +144,8 @@ C
         SORP50(2,NCELES) = DECRAD  !J2000 position
         call ckiau(liau,lcom,rarad,decrad,lu)
       ELSE  !"satellite"
-C       IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,LIAU,1,8)
-        IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,lname,1,8)
+C       IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,LIAU,1,max_sorlen)
+        IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,lname,1,max_sorlen)
         SATP50(1,NSATEL) = OINC
         SATP50(2,NSATEL) = OECC
         SATP50(3,NSATEL) = OPER
