@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 961020 nrv New. 
+C 970128 nrv Cleanup on initialization. Add max_headstack.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -58,7 +59,7 @@ C  2. Roll def statements. "roll" statements in version 1.3
 C
       ierr = 2
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('roll'//char(0)),
+     .ptr_ch('roll_def'//char(0)),
      .ptr_ch('ROLL'//char(0)),ivexnum)
       in=0
       do while (in.lt.max_track.and.iret.eq.0) ! get all roll defs
@@ -70,9 +71,9 @@ C  2.1 Headstack. Checked but not saved.
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get headstack
         if (iret.ne.0) return
         iret = fvex_int(ptr_ch(cout),j) ! convert to binary
-        if (j.lt.0.or.j.gt.2) then
+        if (j.lt.0.or.j.gt.max_headstack) then
           ierr = -1
-          write(lu,'("VUNPROLL01 - Only 2 headstacks supported.")')
+          write(lu,'("VUNPROLL01 - Only ",i2," headstacks supported.")')
         endif
 C
 C  2.2 Home track. Checked but not saved.

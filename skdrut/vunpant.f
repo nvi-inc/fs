@@ -14,6 +14,10 @@ C
 C  History:
 C 960516 nrv New.
 C 970116 nrv Change "ant_motion" to "antenna_motion" for Vex 1.5
+C 970123 nrv Move initialization to front.
+C 970303 nrv When matching up the axis for antenna_motion, change
+C            "dec" to "dc" to keep it to the 2 letters sk/dr use.
+C 970306 nrv Handle XY axis types.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -48,13 +52,27 @@ C  LOCAL:
      .ptr_ch,fvex_field
 C
 C
+C  Initialize at start in case we have to leave early.
+
+      CALL IFILL(LNAANT,1,8,oblank)
+      CALL IFILL(LAXIS,1,4,oblank)
+      axisof = 0.d0
+      slrate(1)=0.0
+      slrate(2)=0.0
+      islcon(1)=0
+      islcon(2)=0
+      anlim1(1)=-999.9*pi/180.d0
+      anlim1(2)=+999.9*pi/180.d0
+      anlim2(1)=-999.9*pi/180.d0
+      anlim2(2)=+999.9*pi/180.d0
+      diaman=0.0
+
 C  1. The antenna name.
 C
       ierr = 1
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('ant_name'//char(0)),
      .ptr_ch('ANTENNA'//char(0)),ivexnum)
-      CALL IFILL(LNAANT,1,8,oblank)
       if (iret.eq.0) then 
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)
@@ -66,10 +84,9 @@ C
         ENDIF 
       endif
 C
-C  2. Axis type.
+C  2. Axis type. Get two fields.
 C
       ierr = 2
-      CALL IFILL(LDUM,1,4,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('axis_type'//char(0)),
      .ptr_ch('ANTENNA'//char(0)),ivexnum)
@@ -80,25 +97,27 @@ C
       iret = fvex_field(2,ptr_ch(cout2),len(cout2))
       if (iret.ne.0) return
       NCH2 = fvex_len(cout2)
-      if (cout2(1:3).eq.'dec') then ! kludg for dec -> dc
-        cout2(1:2)='dc'
-        nch2=2
+      idumy = ichmv_ch(ldum,1,cout (1:2))
+      idumy = ichmv_ch(ldum,3,cout2(1:2))
+      if (cout2(1:3).eq.'dec') then ! dec -> dc
+        idumy = ichmv_ch(ldum,3,'dc')
       endif
-      if (nch1.ne.2.or.nch2.ne.2) then
-        ierr = -2
-        write(lu,'("VUNPANT02 - Axis type must be 2 characters.")')
+      if (cout2(1:3).eq.'yns') then ! XYNS
+        idumy = ichmv_ch(ldum,3,'xy')
+        idumy = ichmv_ch(ldum,3,'ns')
+      endif
+      if (cout2(1:3).eq.'yew') then ! XYEW
+        idumy = ichmv_ch(ldum,3,'xy')
+        idumy = ichmv_ch(ldum,3,'ew')
+      endif
+      call hol2upper(ldum,4)
+      call axtyp(ldum,iax,1)
+      if (iax.eq.0) then
+        ierr=-2
+        write(lu,'("VUNPANT02 - Axis type not recognized: ",a,":",a)') 
+     .  cout(1:nch1),cout2(1:nch2)
       else
-        idumy = ichmv_ch(ldum,1,cout (1:2))
-        idumy = ichmv_ch(ldum,3,cout2(1:2))
-        call hol2upper(ldum,4)
-        call axtyp(ldum,iax,1)
-        if (iax.eq.0) then
-          ierr=-2
-          write(lu,'("VUNPANT02 - Axis type not recognized: ",2a2)') 
-     .    ldum(1),ldum(2)
-        else
-          IDUMY = ICHMV(LAXIS,1,ldum,1,4)
-        endif
+        IDUMY = ICHMV(LAXIS,1,ldum,1,4)
       endif
 C
 C  3. Axis offset.
@@ -107,7 +126,6 @@ C  3. Axis offset.
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('axis_offset'//char(0)),
      .ptr_ch('ANTENNA'//char(0)),ivexnum)
-      axisof = 0.d0
       if (iret.eq.0) then ! got one
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get axis type
         if (cout(1:2).ne.'el') then
@@ -141,6 +159,10 @@ C  4. Slewing rates and constants.
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get axis
         if (iret.ne.0) return
         cax=cout(1:2)
+        if (cax.eq.'de') then ! kludg for dec -> dc
+          cax='dc'
+        endif
+C       Match up the axis for the motion with the stored axis type
         cax(1:1)=upper(cax(1:1))
         cax(2:2)=upper(cax(2:2))
         i1=1
@@ -180,10 +202,6 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
       nl=0 ! count number of pointing sector lines
       i1=0
       i2=0
-      anlim1(1)=-999.9*pi/180.d0
-      anlim1(2)=+999.9*pi/180.d0
-      anlim2(1)=-999.9*pi/180.d0
-      anlim2(2)=+999.9*pi/180.d0
       ierr = 5
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('pointing_sector'//char(0)),

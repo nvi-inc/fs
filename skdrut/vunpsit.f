@@ -16,6 +16,7 @@ C  History:
 C 960517 nrv New.
 C 960521 nrv Revised.
 C 960605 nrv Allow 1-character site IDs, e.g. VLA=Y
+C 970123 nrv Move initialization to front.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -48,10 +49,19 @@ C               - compiled-in values of earth rad and flattening
       DATA EFLAT/0.3352891869D-2/
 C
 C
+C  First initialize everything in case we have to leave early.
+
+      CALL IFILL(LNAPOS,1,8,oblank)
+      CALL IFILL(lidpos,1,2,oblank)
+      posxyz(1) = 0.d0
+      posxyz(2) = 0.d0
+      posxyz(3) = 0.d0
+      CALL IFILL(LOCCUP,1,8,oblank)
+      nhz=0
+
 C  1. The site name.
 C
       ierr=1
-      CALL IFILL(LNAPOS,1,8,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('site_name'//char(0)),
      .ptr_ch('SITE'//char(0)),ivexnum)
@@ -69,7 +79,6 @@ C
 C  2. Site ID. Standard 2-letter code.
 
       ierr=2
-      CALL IFILL(lidpos,1,2,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),ptr_ch('site_ID'//char(0)),
      .ptr_ch('SITE'//char(0)),ivexnum)
       if (iret.ne.0) return

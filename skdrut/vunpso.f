@@ -14,6 +14,7 @@ C
 C  History:
 C 960527 nrv New.
 C 970114 nrv Change 4 to max_sorlen/2
+C 970124 nrv Move initialization to start
 C
 C  INPUT:
       character*128 sodef ! source def to get
@@ -37,13 +38,19 @@ C  LOCAL:
       integer fvex_ra,fvex_dec,fvex_len,fget_source_lowl,
      .fvex_field,ptr_ch
 C
+C  Initialize
 C
+      CALL IFILL(lname1,1,max_sorlen,oblank)
+      CALL IFILL(lname2,1,max_sorlen,oblank)
+      rarad = 0.d0
+      decrad = 0.d0
+      iep=0
+
 C  1. The IAU name.
 C
       ierr = 1
       iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('IAU_name'//char(0)),
      .ivexnum)
-      CALL IFILL(lname1,1,max_sorlen,oblank)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)
@@ -62,7 +69,6 @@ C
       iret = fget_source_lowl(ptr_ch(sodef),
      .ptr_ch('source_name'//char(0)),
      .ivexnum)
-      CALL IFILL(lname2,1,max_sorlen,oblank)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)

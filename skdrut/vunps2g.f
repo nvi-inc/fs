@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960817 nrv New.
+C 970124 nrv Move initialization to front.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -33,10 +34,15 @@ C  LOCAL:
       integer il,i
       integer fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
-C
-C  1. Pass order list
+C   Initialize
 C
       npassl=0
+      do i=1,max_pass
+        cpassl(i)=''
+      enddo
+
+C  1. Pass order list
+C
       ierr = 1
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('S2_group_order'//char(0)),

@@ -14,6 +14,7 @@ C
 C  History:
 C 960522 nrv New.
 C 961122 nrv change fget_mode_lowl to fget_all_lowl
+C 970124 nrv Move initialization to front.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -36,14 +37,22 @@ C  LOCAL:
       integer ib,i,nch
       integer fvex_int,fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
+C  Initialize.
+
+      nbbcdefs=0
+      do i=1,max_bbc
+        cbbref(i)=''
+        ivc(i)=0
+        cifref(i)=''
+      enddo
 C
 C  1. BBC assignment statements
 C
       ierr = 1
+      ib=0
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('BBC_assign'//char(0)),
      .ptr_ch('BBC'//char(0)),ivexnum)
-      ib=0
       do while (ib.lt.max_bbc.and.iret.eq.0) ! get all BBC defs
         ib=ib+1
 
@@ -63,7 +72,6 @@ C  1.1 BBC ref
 C  1.2 Physical BBC #
 
         ierr = 12
-        ivc(ib)=0
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get number
         if (iret.ne.0) return
         iret = fvex_int(ptr_ch(cout),i)
