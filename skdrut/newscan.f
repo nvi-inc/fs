@@ -10,6 +10,7 @@ C   observation.
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 
+C Called by: VOBINP, VOB1INP
 C History
 C 960527 nrv New.
 
@@ -29,11 +30,12 @@ C Output:
 C Local
       integer*2 ibuf(ibuf_len)
       integer iblen,i,ical,nch,idl
-      integer ichmv,ichmv_ch,ib2as
+      integer ichcm_ch,ichmv,ichmv_ch,ib2as
       integer numc2,numc3,numc4,numc5
+      logical kfor
       character*1 pnum ! function
 
-C Initialized
+C Initialized for leading zeros, left justified
       numc2 = 2+o'40000'+o'400'*2
       numc3 = 3+o'40000'+o'400'*3
       numc4 = 4+o'40000'+o'400'*4
@@ -73,13 +75,20 @@ C     Station code
 C   Insert blanks for other stations' codes
       nch = nch + nstatn*2
 C   Tape pass, direction, footage for each station
-      NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
-      i=ipas/2
-      if (ipas.eq.i*2) then ! even
-        NCH = ICHMV_ch(IBUF,NCH,'R')
+      if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
+        kfor=.true. ! always forward
+        nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn)(1:1)) ! group number
       else
-        NCH = ICHMV_ch(IBUF,NCH,'F')
+        NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
+        i=ipas/2
+        kfor= ipas.ne.i*2 ! odd forward, even reverse
       endif
+      if (kfor) then
+        NCH = ICHMV_ch(IBUF,NCH,'F')
+      else
+        NCH = ICHMV_ch(IBUF,NCH,'R')
+      endif
+C  Put in footage. For S2 this is in seconds.
       NCH=  NCH+IB2AS(ifeet,IBUF,NCH,numc5)
 C   Insert blanks for other stations' footages
       nch = nch + nstatn*8
