@@ -14,7 +14,8 @@
 
 int reset_vc(
 char *vc_parms_save[14][10],
-int iuse[]
+int vcnum_l[14],
+int vcnum_u[14]
 )
 {
   short int buff[MAX_BUF];
@@ -22,22 +23,30 @@ int iuse[]
   long ip[5];
   long iclass;
 
-  for (i=0;i<14;i++)
-    if(iuse[i]) {
-      iclass=0;
-      nrec=0;
-      buff[0]=0;
-      memcpy(buff+1,&vc_parms_save[i],10);
-      cls_snd(&iclass,buff,12,0,0);nrec++;
-      
-      ip[0]=iclass;
-      ip[1]=nrec;
-      
-      skd_run("matcn",'w',ip);
-      skd_par(ip);
-      
-      if(ip[2]<0) return ierr;
-      cls_clr(ip[0]);
+  for (i=0;i<14;i++) {
+    int j;
+    for(j=0;j<14;j++) {
+      if(vcnum_l[j]==i||vcnum_u[j]==i) {
+	goto get;
+      }
     }
+    continue;
+  get:
+    iclass=0;
+    nrec=0;
+    buff[0]=0;
+    memcpy(buff+1,&vc_parms_save[i],10);
+    cls_snd(&iclass,buff,12,0,0);nrec++;
+    
+    ip[0]=iclass;
+    ip[1]=nrec;
+    
+    skd_run("matcn",'w',ip);
+    skd_par(ip);
+      
+    if(ip[2]<0) return ierr;
+    cls_clr(ip[0]);
+  }
+
   return ierr;
 }
