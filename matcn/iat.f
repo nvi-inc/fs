@@ -54,6 +54,7 @@ C  NRSPN  - number of responses possible
       integer*2 dbg_buf(maxlogwd)
       integer*2 irecx(10)
       character*1 cjchar
+      logical kprompt
 C
       equivalence (ireg(1),reg)
 C
@@ -220,13 +221,25 @@ c                                ! wrong # of characters in response
          nrc=0
          ierr = -5
       else if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
+         if(nrc.ge.3) then
+            kprompt=ichcm_ch(irecv,nrc-2,'>'//char(13)//char(10)).eq.0
+         endif
+         if(nrc.lt.3.or..not.kprompt) then
+            call echoe(irecv,iebuf2,nrc,iecho2,maxech)
+            idum=ichmv_ch(dbg_buf,1,'debug: ')
+            idum=ichmv(dbg_buf,idum,iebuf2,1,iecho2)
+            call logit2(dbg_buf,idum-1)
+            if(itry.lt.3) goto 200
+            ierr=-8
+            goto 999
+         endif
          nrc=nrc-3
          if(nrc.ge.10) then
             do i=nrc,max(1,nrc-24),-1
                if(cjchar(irecv,i).eq.'?') then
                   if(ichcm_ch(irecv,i,'? ERROR').eq.0) then
                      call echoe(irecv,iebuf2,nrc,iecho2,maxech)
-                     idum=ichmv_ch(dbg_buf,1,"debug: ")
+                     idum=ichmv_ch(dbg_buf,1,'debug: ')
                      idum=ichmv(dbg_buf,idum,iebuf2,1,iecho2)
                      call logit2(dbg_buf,idum-1)
                      ierr=ias2b(irecv,i+8,1+(nrc-1)-(i+8))
