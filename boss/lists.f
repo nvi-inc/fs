@@ -59,11 +59,12 @@ C
         call logit6c(0,0,0,0,ierr,'sp')
         goto 900
       endif
+      it(6) = it1/1024+1970
       it(5) = mod(it1,1024)
       it(4) = it2/60
       it(3) = mod(it2,60)
       it(2) = it3/100
-      it(1) = 0
+      it(1) = mod(it3,100)
       idum = fmpsetpos(idcbsk,ierr,0,id)
       numln = 1
 130   ilen = fmpread(idcbsk,ierr,ib,iblen*2)
