@@ -164,10 +164,10 @@ repro=byp,8,20
 decode=a,crc
 decode
 enddef
-define  caloff        00000000000x
+define  caloff        00000000000
 rx=*,*,*,*,*,*,off
 enddef
-define  calon         00000000000x
+define  calon         00000000000
 rx=*,*,*,*,*,*,on
 enddef
 define  caltemps      00000000000
@@ -175,10 +175,10 @@ caltemp1=20.8
 caltemp2=21.4
 caltemp3=20.8
 enddef
-define  check2a1      00000000000x
+define  check2a1      00000000000
 check2c1
 enddef
-define  check2a2      00000000000x
+define  check2a2      00000000000
 check2c2
 enddef
 define  check2c1      00000000000
@@ -199,7 +199,7 @@ et
 !+3s
 check=*,tp,hd
 enddef
-define  check2c2      00000000000x
+define  check2c2      00000000000
 check=*,-tp,-hd
 enable=
 decode=a,crc,byte
@@ -217,7 +217,7 @@ et
 !+3s
 check=*,tp,hd
 enddef
-define  dat           00000000000x
+define  dat           00000000000
 form=reset
 vc15=200
 vcsx2
@@ -226,12 +226,12 @@ ifdsx
 form=c,4
 form=alarm
 enddef
-define  fastf         00000000000x
+define  fastf         00000000000
 ff
 !+$
 et
 enddef
-define  fastr         00000000000x
+define  fastr         00000000000
 rw
 !+$
 et
@@ -246,7 +246,7 @@ patch=lo1,1l,2l,3l,4h
 patch=lo2,9l,10l,11l,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
-define  ifdwb         00000000000x
+define  ifdwb         00000000000
 ifd=33,30,nor,nor
 if3=20,in,2
 lo=8080.00,2020.00,8080.0
@@ -255,11 +255,11 @@ patch=lo1,1l,2l,3h,4h
 patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
-define  initi         00000000000x
+define  initi         00000000000
 "welcome to the pc field system
 sy=run setcl &
 enddef
-define  midob         00000000000x
+define  midob         00000000000
 onsource
 wx
 cable
@@ -302,9 +302,9 @@ rxmon@!+2m30s,5m
 pcal=0,60,by,25,0,5,11
 pcal
 enddef
-define  postob        00000000000x
+define  postob        00000000000
 enddef
-define  precond       00000000000x
+define  precond       00000000000
 schedule=prepass,#1
 enddef
 define  preob         00000000000
@@ -315,7 +315,7 @@ tpical=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tpical=v9,v10,v11,v12,v13,v14,if2
 caloff
 enddef
-define  prepass       00000000000x
+define  prepass       00000000000
 wakeup
 xdisp=on
 " mount the next tape without cleaning the tape drive.
@@ -340,7 +340,7 @@ srw
 et
 !+9s
 enddef
-define  ready         00000000000x
+define  ready         00000000000
 sxcts
 rxmon
 newtape
@@ -352,7 +352,7 @@ et
 label
 check=*,tp
 enddef
-define  rxall         93231140704
+define  rxall         00000000000
 rx=00,*,*,*,*,*,*
 rx
 rx=01,*,*,*,*,*,*
@@ -416,7 +416,7 @@ rx
 rx=1e,*,*,*,*,*,*
 rx
 enddef
-define  rxmon         93231140717
+define  rxmon         00000000000
 rx=lo,*,*,*,*,*,*
 rx
 rx=dcal,*,*,*,*,*,*
@@ -430,7 +430,7 @@ rx
 rx=70k,*,*,*,*,*,*
 rx
 enddef
-define  rxx           00000000000x
+define  rxx           00000000000
 rx=$,*,*,*,*,*,*
 enddef
 define  setup         00000000000
@@ -540,7 +540,7 @@ repro=byp,9,21,,alt2
 decode=a,crc
 decode
 enddef
-define  sxcts         00000000000x
+define  sxcts         00000000000
 tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tpi=v9,v10,v11,v12,v13,v14,if2
 ifd=max,max,*,*
@@ -559,17 +559,17 @@ caltemps
 tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tsys2=v9,v10,v11,v12,v13,v14,if2
 enddef
-define  tapeforma     93231140730
+define  tapeforma     00000000000
 tapeform=1,-350,2,  0,3,-295, 4, 55, 5,-240, 6,110
 tapeform=7,-185,8,165,9,-130,10,220,11, -75,12,275
 enddef
-define  tapeformc     00000000000x
+define  tapeformc     00000000000
 tapeform=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
 tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
 tapeform=13,  0,14,  0,15, 55,16, 55,17,110,18,110
 tapeform=19,165,20,165,21,220,22,220,23,275,24,275
 enddef
-define  unlod         00000000000x
+define  unlod         00000000000
 !+5s
 enable=,
 check=*,-tp
@@ -580,7 +580,7 @@ xdisp=on
 wakeup
 xdisp=off
 enddef
-define  valarm        00000000000x
+define  valarm        00000000000
 vc01=alarm
 vc02=alarm
 vc03=alarm
@@ -596,7 +596,7 @@ vc12=alarm
 vc13=alarm
 vc14=alarm
 enddef
-define  vcsx2         00000000000x
+define  vcsx2         00000000000
 vc01=130.99,2.000
 vc02=140.99,2.000
 vc03=170.99,2.000
@@ -614,7 +614,7 @@ vc14=282.99,2.000
 !+1s
 valarm
 enddef
-define  vcsx4         00000000000x
+define  vcsx4         00000000000
 vc01=130.99,4.000
 vc02=140.99,4.000
 vc03=170.99,4.000
@@ -632,7 +632,7 @@ vc14=282.99,4.000
 !+1s
 valarm
 enddef
-define  vcwb2         00000000000x
+define  vcwb2         00000000000
 vc01=132.99,2.000
 vc02=172.99,2.000
 vc03=272.99,2.000
@@ -650,7 +650,7 @@ vc14=325.99,2.000
 !+1s
 valarm
 enddef
-define  vcwb4         00000000000x
+define  vcwb4         00000000000
 vc01=132.99,4.000
 vc02=172.99,4.000
 vc03=272.99,4.000
@@ -668,7 +668,7 @@ vc14=325.99,4.000
 !+1s
 valarm
 enddef
-define  vread         00000000000x
+define  vread         00000000000
 vc01
 vc02
 vc03
@@ -684,7 +684,7 @@ vc12
 vc13
 vc14
 enddef
-define  wb2c1         00000000000x
+define  wb2c1         00000000000
 vcwb2
 form=c,4.000
 form=reset
@@ -699,7 +699,7 @@ repro=byp,8,20
 decode=a,crc
 decode
 enddef
-define  wb2c2         00000000000x
+define  wb2c2         00000000000
 vcwb2
 form=c,4.000
 form=reset
@@ -714,7 +714,7 @@ repro=byp,9,21
 decode=a,crc
 decode
 enddef
-define  wb4c1         00000000000x
+define  wb4c1         00000000000
 vcwb4
 form=c,8.000
 form=reset
@@ -729,7 +729,7 @@ repro=byp,8,20,,alt2
 decode=a,crc
 decode
 enddef
-define  wb4c2         00000000000x
+define  wb4c2         00000000000
 vcwb4
 form=c,8.000
 form=reset
