@@ -1,7 +1,7 @@
                locate - locate head stack position
 
 Syntax:     locate=range,nsamples,step,stack
-          locate
+  locate
 
 Response:   locate/range,nsamples,step,stack,peakv,mper,vltlc
 
@@ -23,7 +23,7 @@ stack     Head stack to move: write or read. 1 and 2 may also be
 Monitor-only parameters:
 peakv     Peak measured voltage from power detector
 mper      Minimum sample voltage as a percentage of peakv
-vltlc       Location of the peak in positioner voltage
+vltlc     Location of the peak in positioner voltage
 
 Comments: 
 This command performs a coarse grid search for the largest detected

@@ -11,10 +11,10 @@ Settable parameters:
 pause     Time to pause between cycles, seconds. Default is 60
           seconds.
 repro     Type of reproduce mode:
-            fs = use current mode set up by Field System
-            by = use bypass mode
-            rw = use read after write mode
-            ab = use split mode (implies bypass mode too)
+  fs = use current mode set up by Field System
+  by = use bypass mode
+  rw = use read after write mode
+  ab = use split mode (implies bypass mode too)
           If an experiment is in progress (i.e. if a schedule file
           is active) then fs is the recommended mode. Attempts to
           force read-after-write or bypass may result in

@@ -35,9 +35,9 @@ cal       Calibration noise source temperature in degrees K. This
 beam      The full width half maximum beam size degrees. This is
           determined from the last beamx commands in conjunction
           with the patch (Mark III) or bbc (VLBA) command.
-flux        The apparent flux of the source. This is determined from
-            the last fluxx commands in conjunction with the patch
-            (Mark III) or bbc (VLBA) command.
+flux        The apparent flux of the source. This is determined
+            from the last fluxx commands in conjunction with the
+            patch (Mark III) or bbc (VLBA) command.
 
 Comments: 
 The parameters should be setup with a fivept=... command. A scan is
@@ -71,17 +71,26 @@ issued as well. If estimates of performance based on the source
 flux are desired, then the appropriate fluxx=... command must have
 been issued as well.
 
-Two procedures must be available: calonfp and calofffp, which are
-used by fivpt to turn the noise diode on and off respectively. The
-recommended form for these procedures is:
+If a negative value is specified for the noise diode temperature
+(caltempx=....), then the absolute value of the specified
+temperature is assumed to be the system temperature and the noise
+diode is not used. This allows the pointing offsets, SEFD, and the
+Shaffer number to be measured even if there is no noise diode,
+obviously the src/cal ratio in this case will be wrong and will be
+negative. 
+
+If a positive diode temperature has been specified, two procedures
+must be available: calonfp and calofffp, which are used by fivpt to
+turn the noise diode on and off respectively. The recommended form
+for these procedures is:
 
 calonfp:  calon
-          !+1s
-          sy=go fivpt &
+    !+1s
+  sy=go fivpt &
 
-calofffp: caloff
-          !+1s
-          sy=go fivpt &
+ calofffp:caloff
+  !+1s
+  sy=go fivpt &
 
 calon and caloff are local procedures that do whatever is necessary
 to turn the noise source on and off.

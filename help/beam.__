@@ -1,20 +1,20 @@
                beam - set beamsize for flux command
 
 Syntax:     beam1=angle
-          beam2=angle
-          beam3=angle
-          beama=angle
-          beamb=angle
-          beamc=angle
-          beamd=angle
+  beam2=angle
+  beam3=angle
+  beama=angle
+  beamb=angle
+  beamc=angle
+  beamd=angle
 
 Response:   beam1/angle
-          beam2/angle
-          beam3/angle
-          beama/angle
-          beamb/angle
-          beamc/angle
-          beamd/angle
+  beam2/angle
+  beam3/angle
+  beama/angle
+  beamb/angle
+  beamc/angle
+  beamd/angle
 
 
 Settable parameters:

@@ -24,37 +24,46 @@ action    A key word specifying what you want the recorder to do.
           release   Release the reel brakes. Drop the vacuum and
                     then issue this command before trying to
                     thread a tape.
-          feet        Move the tape to the specified footage.
+          feet      Move the tape to the specified footage.
           feet      Set the tape footage counter. The supply and
                     takeup reel packs in feet are read back and
                     the footage counter is set to the takeup reel
                     pack. These values are accurate to about 50
                     feet.
-          zero      Reset footage counter to zero.
+  zero      Reset footage counter to zero.
 
 Monitor-only Parameters:
 feet      The current footage counter reading.
 supply    Footage left on the supply reel.
-takeup  Footage left on the takeup reel.
+takeup    Footage left on the takeup reel.
 length    Total length of the tape, supply+takeup.
-revno   Software revision number.
+revno     Software revision number.
 
 Comments:
-The feet option of this command is analagous to the Mark III tapepos
-command. The zero option is analagous to the Mark III
+The feet option of this command is analagous to the Mark III
+tapepos command. The zero option is analagous to the Mark III
 tape=low,reset command. The other options are unique to the VLBA
 recorder.
 
 MCB functions are available. 
 
 The recorder can be re-booted manually by pressing the red button.
-After manual reset you must issue the command rec=addr to re-initialize the module.
+After manual reset you must issue the command rec=addr to re-
+initialize the module.
 
 Before the actions unload, bot, eot, or feet are taken, the ready
 state of the recorder is checked. If the recorder is not ready, an
 error is logged and the action is not taken.
 
 If the drive type specified in the equip.ctl control file is vlba2,
-the supply, takeup, and length parameters are null. In addition for the
-vlba2 drive, it is not possible change the footage with the feet or
-zero parameters.
+the supply, takeup, and length parameters are null. In addition for
+the vlba2 drive, it is not possible change the footage with the
+feet or zero parameters.
+
+If vacuum switching is enabled in the sw.ctl control file, the
+parameters sent to the recorder will depend on the tape thickness
+specified by the most recent label command. If switching is enabled
+there is an added restriction that the tape thickness be must
+specified with a new  label command before every rec=load command.
+This is intended to reduce the likelihood that the incorrect vacuum
+level will be set.

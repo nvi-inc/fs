@@ -11,6 +11,6 @@ message   message to be sent to the antenna in the exact form
           commas will be sent separately.
 
 Monitor-only parameters:
-response    response of the antenna to the message. This response is
-            either ack or an error message sent by the antenna.
+response    response of the antenna to the message. This response
+            is either ack or an error message sent by the antenna.
 

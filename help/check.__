@@ -35,7 +35,8 @@ while the check status of all other modules remain unchanged.
 If no modules are currently being checked then the word disabled is
 displayed.
 
-The displayed list of modules always consists of the standard 2-character mnemonic, i.e. the ones listed on the reference page at
+The displayed list of modules always consists of the standard 2-
+character mnemonic, i.e. the ones listed on the reference page at
 the front of this manual. Station-specific mnemonics may be used
 for station-specific modules.
 

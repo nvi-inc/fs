@@ -1,10 +1,10 @@
              parity - measure and check parity errors
 
 Syntax:     parity=pemax,syncmax,channel,aux,tracks
-          parity
+  parity
 
 Response:   parity/parity-errors
-          parity/sync-errors
+  parity/sync-errors
 
 
 Settable Parameters:
@@ -32,9 +32,9 @@ tracks      List of recorder tracks on which to measure errors.
 Monitor-only parameters:
 parity-errors For each track in the list, the corresponding parity
               errors (smallest of 4 samples).
-sync-errors   For each track in the list, the corresponding sync
-              errors (smallest observed value over the same 4 sample
-              intervals as the parity error check).
+sync-errors For each track in the list, the corresponding sync errors
+            (smallest observed value over the same 4 sample intervals
+            as the parity error check).
 
 Comments:
 Issuing this command with an equal sign without or without a list
@@ -75,3 +75,13 @@ seconds to check 14 tracks.
 Parity errors are reported as the number of errors per 1 million
 bits of data. The actual number of parity errors is scaled to
 account for the tape speed during playback.
+
+For a Mark IV drive, if vacuum switching is enabled in the sw.ctl
+control file, the vacuum level must established before the parity
+command is issued. The vacuum level can be established either by
+entering the tape label with the label command and then loading
+the tape with the rec=load command or simply turning off the
+vacuum with rec=novac. Please do not try to turn to change the
+vacuum when the tape is moving.
+
+

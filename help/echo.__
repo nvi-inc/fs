@@ -17,19 +17,19 @@ communications and, at some stations, antenna communications also.
 
 For MCB communications, each byte is displayed as
 
-    bytes sent to the MCB           [nxx]
-    bytes received from the MCB     <nxx>
+       bytes sent to the MCB [nxx]
+     bytes received from the MCB<nxx>
 
 where n is normally a blank. n is + for the first byte of the
 address when data is being written to the module. The address or
 data is xx, represented as two hex characters. MCB control bytes
 are displayed with special 3-letter mnemonics:
 
-      [SYN]     hex 16    synchronization byte
-      <ACK>     hex 06    acknowledge
-      <NAK>   hex 15    not acknowledge
-      <DC1>     hex 11    data control 1
-      <DC2>   hex 12    data control 2
+      [SYN] hex 16synchronization byte
+      <ACK> hex 06acknowledge
+      <NAK>hex 15not acknowledge
+      <DC1> hex 11data control 1
+      <DC2>hex 12data control 2
 
 For MAT communications, most of the data bytes are printable ASCII
 characters which are displayed simply as the character. The
@@ -37,16 +37,20 @@ unprintable ASCII characters are displayed as [xxx], where xxx is
 shown in the table below. The "del" character (127) is displayed as
 [del].
 
-      0   1   2   3   4   5   6   7   8   9 
-      nul soh stx etx eot enq ack bel bs  ht  
-    1 lf  vt  ff  cr  so  si  dle dc1 dc2 dc3
-    2 dc4 nak syn etb can em  sub esc fs  gs  
-    3 rs  us
+
+
+
+
+  0   1   2   3   4   5   6   7   8   9 
+  nul soh stx etx eot enq ack bel bs  ht  
+   1lf  vt  ff  cr  so  si  dle dc1 dc2 dc3
+   2dc4 nak syn etb can em  sub esc fs  gs  
+   3rs  us
 
 For RCL communications, each piece of information is displayed as
 
-    information sent to the RCL           [xxx]
-    information received from the RCL     <xxx>
+       information sent to the RCL [xxx]
+     information received from the RCL<xxx>
 
 where xxx is a representation of the data in an appropriate format.
 Information going to the RCL is always displayed in order of: the

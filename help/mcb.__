@@ -19,10 +19,10 @@ value     Value (hex) to be written into reladdr. Omit this
           parameter if you want to read reladdr.
 
 Monitor-only Parameters:
-value     Value (hex) that was read from reladdr, if a value was not
-          specified in the command. If a value was specified in the
-          command, then the response is the status of the write:
-          OK, BUSY, ERR.
+value     Value (hex) that was read from reladdr, if a value was
+          not specified in the command. If a value was specified in
+          the command, then the response is the status of the
+          write: OK, BUSY, ERR.
 
 Comments:
 This command is analgous to the Mark III mat command. This command
@@ -32,5 +32,5 @@ address.
 If the command is issued as mcb=module,reladdr then the response is
 the hex value at reladdr. 
 
-If the command is issued as mcb=module,reladdr,value then the value is
-downloaded into reladdr and the response is the status.
+If the command is issued as mcb=module,reladdr,value then the value
+is downloaded into reladdr and the response is the status.
