@@ -36,7 +36,8 @@ C LOCAL:
       character*7 cwrap ! cable wrap string returned from CBINF 
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
-      integer nlmax,nlines,ntapes,ierr,ilen,npage
+      integer nlobs,nlmax,nlines,ntapes,ierr,ilen,npage
+C NLOBS - number of observation lines written for this station
 C NLINES, Lnobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
       INTEGER IC, TRIMLEN
@@ -90,6 +91,7 @@ C 960810 nrv Change itearl to array
 C 961105 nrv Add one space to bandwidth so values >10 are correct.
 C 970114 nrv Change lsname(4) to (max_sorlen/4). Change printing of
 C            lsname to use first 8 char only.
+C 970121 nrv Add NLOBS to keep proper track of scans for this station.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -103,6 +105,7 @@ C
       NLINES = 0
       NTAPES = 0
       LNOBS = 0
+      nlobs = 0 ! number of scan line written 
       kwrap=.false.
       if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
      .kwrap=.true.
@@ -431,6 +434,7 @@ C     5. Now write out the observation line.
           endif
 C
           NLINES = NLINES + 1
+          nlobs = nlobs + 1
 	    IPASP = IPAS(ISTNSK)
 	    IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL(istn)+IDUR(ISTNSK))
      .    *speed(icod,istn))
@@ -457,7 +461,7 @@ C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
 C ENDW Loop on observations
       ENDDO
 C
-      WRITE(luprt,9900) NTAPES,LNOBS
+      WRITE(luprt,9900) NTAPES,NLOBS
 9900  FORMAT(' NUMBER OF MARK III TAPES: ',I5/
      .       ' NUMBER OF OBSERVATIONS:   ',I5/)
 900   call luff(luprt)
