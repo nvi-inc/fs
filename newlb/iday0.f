@@ -1,5 +1,5 @@
 C@IDAY0
-      integer*2 FUNCTION IDAY0 ( IYEAR , MONTH )
+      INTEGER FUNCTION IDAY0 ( IYEAR , MONTH )
 C     Get # elapsed days in year to date  TAC 760102 
 C 
 C     THIRTY DAYS HATH SEPTEMBER, APRIL, JUNE AND NO WONDER . . . . .
@@ -12,13 +12,15 @@ C
 C-----IF MONTH <=0 OR IF MONTH >=13, IDAY0 = NUMBER OF DAYS IN IYEAR. 
 C 
 C     T.A.C.                                     02 JAN 1976
+C     WEH  not qute 2000 IS a leap year          02 SEP 1998
 C 
 C-----MAXYR = MAXIMUM DAYS IN IYEAR:
       MAXYR ( IYR )   =     366 
      *     -     ( ( MOD ( IYR        ,    4 ) + 3 ) /    4 ) 
      *     -     ( ( MOD ( IYR +   99 ,  100 ) + 1 ) /  100 ) 
-     *     +     ( ( MOD ( IYR +  399 ,  400 ) + 1 ) /  400 ) 
-     *     -     ( ( MOD ( IYR + 1999 , 2000 ) + 1 ) / 2000 ) 
+     *     +     ( ( MOD ( IYR +  399 ,  400 ) + 1 ) /  400 )
+C 2000 is a leap year
+C    *     -     ( ( MOD ( IYR + 1999 , 2000 ) + 1 ) / 2000 ) 
 C                                       WHEW! 
 C 
 C-----TEST MONTH: 
