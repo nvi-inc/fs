@@ -3308,3 +3308,54 @@ Version 9.3.14 970905
 
 Version 9.3.15 970909
 
+970912 weh onoff/onoff.f
+           fivpt/fivpt.f
+           handle measurements that span the branch cut in azimuth
+
+970915 nrv drudg/snap.f
+           Always use FASTF to position a new tape to a non-zero footage.
+
+970915 nrv drudg/snap.f
+           Check error return when searching for the first scan in case
+           this station has no scans in this schedule.
+
+970929 nrv drudg/snap.f
+           Calculate ift_save only for non-S2 continuous tape motion.
+
+970929 nrv drudg/snap.f
+           Calculate slewing time only for continuous tape motion.
+
+970930 nrv skdrut/vunpant.f
+           Fix handling of XY antenna axis type and slewing.
+
+971003 nrv drudg/snap.f
+           For late stop stations, don't force a stop on the last scan 
+           because it is handled separately at the end of the routine.
+
+971003 nrv skdrut/vsoinp.f
+           skdrut/ckiau.f
+           For VEX files suppress messages from the IAU name checker. 
+
+971003 nrv drudg/lists.f
+           Add a check for S2 and use same logic as in SNAP for new tape.
+
+971003 weh quikr/sorce.f
+           fixed azel, xy
+           removed use of rad and decd variables
+           added digit to today's epoch
+           removed some debug output
+
+971003 weh quikr/rec.f
+           add 3 second delay between vacuum start and load command
+
+971003 nrv drudg/addscan.f
+           Move over one more character when adding the next footage.
+
+971003 nrv drudg/fdrudg.f
+           Remove the '=' option for all stations if this is a VEX file.
+
+971003 nrv drudg/fdrudg.f
+           If the schedule file root name is longer than 6 characters ask the
+           user to rename it.
+
+Version 9.3.16 971003
