@@ -19,8 +19,8 @@
   rx/           9             rx-9-lo           (lo)
   rx/           9             rx-9-pres         (pres)
   rx/           9             rx-9-20k          (20k)
-  tsys1/        9             tsys1-9
-  tsys2/        7             tsys2-7
+  tsys/        -1             tsys-i1           i1
+  tsys/        -1             tsys-i2           i2
   "             0             Comments
 *
 *

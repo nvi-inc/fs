@@ -25,7 +25,7 @@ int get_rxgain(file,rxgain)
 
   rxgain->lo[1]=-1;
   iread=sscanf(buff,"%10s %f %f",type,&rxgain->lo[0],&rxgain->lo[1]);
-
+  
   if(iread < 1)
     return -111;
   else if(strcmp("range",type)==0)
