@@ -25,7 +25,10 @@
 /* WHO  WHEN    WHAT                                                */
 /* weh  92????  Created                                             */
 /* gag  920922  Added code for stpgm.ctl, station control file.     */
-/*                                                                  */
+/* rdg  010521  Modified start_prog status check from <0 to !=0     */
+/*              and added statusprt() to the error condition.       */
+/* rdg  010529  Interchange of 'n' for nowait and 'w' for wait      */
+/*              status for consistency.                             */
 
 long cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
@@ -90,10 +93,7 @@ main()
     key = BRK_KEY;
     brk_ini( key);
 
-    if( -1 == (shm_addr->iclopr=cls_alc())) {
-      fprintf( stderr," iclopr allocation failed\n");
-        exit( -1);
-    }
+    shm_addr->iclopr=-1;
 
     if( -1 == (shm_addr->iclbox=cls_alc())) {
       fprintf( stderr," iclbox allocation failed\n");
@@ -121,8 +121,10 @@ main()
         if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
         if (!ampr) {
            fprintf( stderr,"running %5.5s\n",name);
-           if( (err=start_prog(argv,'n')) < 0) {
-             fprintf( stderr," error return %d\n", err);
+           if( (err=start_prog(argv,'w')) != 0) {
+	     fprintf(stderr,"%5.5s terminated",name);
+	     statusprt(err);
+	     fprintf(stderr,"\n");
              goto cleanup;
            }
         } else {
@@ -131,7 +133,7 @@ main()
              goto cleanup;
           }
           fprintf( stderr,"getting %s\n",name);
-          pids[ ipids]=start_prog(argv,'w');
+          pids[ ipids]=start_prog(argv,'n');
           if( pids[ ipids] <= 0) {
             fprintf( stderr," error starting process\n");
             goto cleanup;
@@ -170,8 +172,10 @@ main()
           if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
           if (!ampr) {
              fprintf( stderr,"running %5.5s\n",name);
-             if( (err=start_prog(argv,'n')) < 0) {
-               fprintf( stderr," error return %d\n", err);
+	     if( (err=start_prog(argv,'w')) != 0) {
+	       fprintf(stderr,"%5.5s terminated",name);
+	       statusprt(err);
+	       fprintf(stderr,"\n");
                goto cleanup;
              }
           } else {
@@ -180,7 +184,7 @@ main()
                goto cleanup;
             }
             fprintf( stderr,"getting %s\n",name);
-            pids[ ipids]=start_prog(argv,'w');
+            pids[ ipids]=start_prog(argv,'n');
             if( pids[ ipids] <= 0) {
               fprintf( stderr," error starting process\n");
               goto cleanup;
@@ -323,7 +327,7 @@ char **argv,w;
         fprintf(stderr,"exec failed on %s\n",argv[0]);
         _exit(-2);
     }
-    if (w != 'n') return chpid;
+    if (w == 'n') return chpid;
 
     while((wpid=wait(&status))!=chpid && wpid != -1) {
        for (i=0;i<=ipids;i++) {
