@@ -6,7 +6,7 @@
 
 #define ROWA  ROW+6
 #define COL0  5 
-#define COL   COL0+18
+#define COL   COL0+22
 
 void rte2secs();
 
@@ -36,15 +36,19 @@ echo ();
     "Press <return> to keep present value. Use month 0 for day of year.");
 
   kfirst = TRUE;
-  while ( kfirst || setyy > 99 || setyy < 0 ) {  /* prompt for Year */
-    setyy = tp->tm_year;
-    mvwprintw( maindisp, ROWA+2, COL0, "Year   (00-99)  ?     " );
-    mvwscanw(  maindisp, ROWA+2, COL, "%d", &setyy );
+  while ( kfirst || setyy <1970 ||setyy >2037) {  /* prompt for Year */
+    setyy = 1900+tp->tm_year;
+    mvwprintw( maindisp, ROWA+2, COL0, "Year   (1970-2037)  ?       " );
+    mvwscanw(  maindisp, ROWA+2, COL, "%d", &setyy ); 
     kfirst = FALSE;
   }
-  if(setyy % 4 == 0 && setyy != 0) {
+  /* not Y2.1K compliant */
+  if(setyy % 4 == 0) {
     month[0] = 366;
     month[2] =  29;
+  } else {
+    month[0] = 365;
+    month[2] =  28;
   }
 
   kfirst = TRUE;
@@ -98,10 +102,12 @@ echo ();
     kfirst = FALSE;
   }
 
+  /* not Y10K compliant */
   mvwprintw( maindisp, ROWA+8, COL0,
-  "Is (%02d/%02d/%02d)  %02d:%02d:%02d correct (y/n) ?     ",
+  "Is (%04d/%02d/%02d)  %02d:%02d:%02d correct (y/n) ?     ",
           setyy, setmon, setmday, sethh, setmm, setss );
-  mvwscanw(  maindisp, ROWA+8, COL0+40, "%s", answer );
+  /* not Y10K compliant */
+  mvwscanw(  maindisp, ROWA+8, COL0+42, "%s", answer );
   if ( answer[0] != 'Y' && answer[0] != 'y' )
      goto End;
 
@@ -111,7 +117,8 @@ it[1]=setss;
 it[2]=setmm;
 it[3]=sethh;
 it[4]=yday;
-it[5]=1900+setyy;
+it[5]=setyy;
+  /* not Y2038 compliant */
 rte2secs(it,&ut);
 *flag=TRUE;
 
