@@ -78,12 +78,18 @@ $print
 * the default is to use "lpr" to print the temporary file.
 * Examples:
 *labels <script name for label printing>
+*labels print2dymo
+*  This is to print to the dymo printer.
+*  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
+*  must be in your path, e.g. in /usr2/oper/bin,
+*  and executable, e.g., chmod a+x print2dymo
 *
 * Tape label printer:
 * Enter the name of the label printer. If no name is specified, drudg
 * will not attempt to print tape labels. Recognized names are postscript,
-* epson, epson24, laser+barcode_cartridge.
+* epson, epson24, laser+barcode_cartridge,dymo.
 * Examples:
+*label_printer dymo
 *label_printer postscript
 *label_printer laser+barcode_cartridge
 *label_printer epson
@@ -106,6 +112,7 @@ $print
 * Format:
 * label_size <ht> <wid> <rows> <cols> <top> <left>
 * Examples:
+*label_size   1.417 3.5     1     1    11.0   0.0    Dymo
 *label_size  1.0   2.625  10     3     0.5   0.3125 Avery 5160
 *label_size  1.333 4.0     7     2     0.5   0.25   Avery 5162
 *label_size  2.0   4.0     5     2     0.5   0.25   Avery 5163
