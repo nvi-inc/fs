@@ -1428,16 +1428,28 @@ void fs_get_drive_type__(drive_type)
 	  drive_type[1] = shm_addr->equip.drive_type[1];
 	}
 
-void fs_set_met__(wx_met)
+void fs_set_wx_met__(wx_met)
         int *wx_met;
         {
           shm_addr->equip.wx_met = *wx_met;
         }
 
-void fs_get_met__(wx_met)
+void fs_get_wx_met__(wx_met)
         int *wx_met;
         {
           *wx_met = shm_addr->equip.wx_met;
+        }
+
+void fs_set_mk4sync_dflt__(mk4sync_dflt)
+        int *mk4sync_dflt;
+        {
+          shm_addr->equip.mk4sync_dflt = *mk4sync_dflt;
+        }
+
+void fs_get_mk4sync_dflt__(mk4sync_dflt)
+        int *mk4sync_dflt;
+        {
+          *mk4sync_dflt = shm_addr->equip.mk4sync_dflt;
         }
 
 void fs_set_iskdtpsd__(iskdtpsd,i)
@@ -1604,10 +1616,11 @@ void fs_set_i20kch__(i20kch)
 	  shm_addr->i20kch = *i20kch;
 	}
 
-void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model)
+void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model,icomputer)
         long *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
+	int *icomputer;
 	{
 		int index;
 
@@ -1617,13 +1630,15 @@ void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model)
 		*offset = shm_addr->time.offset[index];
 		*rate = shm_addr->time.rate[index];
 		*span = shm_addr->time.span[index];
+		*icomputer = shm_addr->time.icomputer[index];
                 *model = shm_addr->time.model;
 	}
 
-void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model)
+void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model,icomputer)
         long *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
+	int *icomputer;
 	{
 		int index;
 
@@ -1633,6 +1648,7 @@ void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model)
 		shm_addr->time.offset[index] = *offset;
 		shm_addr->time.rate[index] = *rate;
 		shm_addr->time.span[index] = *span;
+		shm_addr->time.icomputer[index] = *icomputer;
                 shm_addr->time.model = *model;
 		shm_addr->time.index = index;
 	}
@@ -2275,3 +2291,31 @@ void fs_get_logchg__(logchg)
 	  *logchg = shm_addr->logchg;
 	}
 
+void fs_set_tacd_port__(port)
+        int *port;
+        {
+	  shm_addr->tacd.port = *port;
+        }
+
+void fs_get_tacd_port__(port)
+        int *port;
+        {
+          *port= shm_addr->tacd.port;
+        }
+
+void fs_set_tacd_hostpc__(hostpc)
+        char *hostpc;
+        {
+	  memcpy(shm_addr->tacd.hostpc,hostpc,sizeof(shm_addr->tacd.hostpc));
+	}
+void fs_get_tacd_hostpc__(hostpc)
+        char *hostpc;
+        {
+	  memcpy(hostpc,shm_addr->tacd.hostpc,80);
+        }
+
+void fs_set_abend_normal_end__(abend_normal_end)
+        int *abend_normal_end;
+        {
+	  shm_addr->abend.normal_end = *abend_normal_end;
+        }
