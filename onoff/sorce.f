@@ -46,9 +46,9 @@ C
       rut2=rut1-60.0*float(im)
       is=int(rut2+0.5)
 C 
-      iy=mod(iyr,100) 
-      icnext=icnext+ib2as(iy,lbuf,icnext,o'40000'+o'400'*2+2) 
-      icnext=ichmv_ch(lbuf,icnext,'/') 
+C not Y10K compliant
+      icnext=icnext+ib2as(iyr,lbuf,icnext,o'40000'+o'400'*4+4) 
+      icnext=ichmv_ch(lbuf,icnext,'.') 
       icnext=icnext+ib2as(idoy,lbuf,icnext,o'40000'+o'400'*3+3) 
       icnext=ichmv_ch(lbuf,icnext,'.') 
       icnext=icnext+ib2as(ih,lbuf,icnext,o'40000'+o'400'*2+2) 
