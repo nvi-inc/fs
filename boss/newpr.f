@@ -32,7 +32,7 @@ C     IBLEN - length of IBUF
       dimension istack(1),lstack(1),lparm(1)
       dimension idcbp1(1),idcbp2(1),itmlog(1)
       integer*2 ibuf(1)
-      integer*2 lproc1(10,1),lproc2(10,1)
+      integer*4 lproc1(4,1),lproc2(4,1)
 C
 C  OUTPUT:
 C
@@ -61,10 +61,10 @@ C
 C     1. Determine position information for the new procedure
 C
       if (index.gt.0) goto 100
-        irec = lproc2(8,iabs(index))
+        irec = lproc2(4,iabs(index))
         go to 200
 100   continue
-      irec = lproc1(8,index)
+      irec = lproc1(4,index)
 C
 C     2. Position to the new location in the procedure file.
 C     If there are errors, or DEFINE is not on this line, then quit.
@@ -86,28 +86,36 @@ C     the time the log file was started, then we are finished here.
 C     Otherwise, drop through to the logging of this procedure.
 C
 300   continue
-      call fc_rte_time(itime,itime(6))
-      call fc_rte2secs(itime,seconds)
-      call fc_rte2secs(itmlog,logsecs)
-      itpr(6)=ias2b(ib,23,2)+1900
-      itpr(5)=ias2b(ib,25,3)
-      itpr(4)=ias2b(ib,28,2)
-      itpr(3)=ias2b(ib,30,2)
-      itpr(2)=ias2b(ib,32,2)
-      itpr(1)=0
-      call fc_rte2secs(itpr,prsecs)
-c
 c just in case the field system time was reset so that it is earlier
 c the previous, check and band-aid around the problem This should only
 c occur when the field system first starts and the computer time
 c is fast
-c 
+c
+      call fc_rte_time(itime,itime(6))
+      call fc_rte2secs(itime,seconds)
+      call fc_rte2secs(itmlog,logsecs)
       if(seconds.lt.logsecs) then
         logsecs=seconds
         do i=1,6
            itmlog(i)=itime(i)
         enddo
       endif
+C
+      itpr(6)=ias2b(ib,23,2)
+      if(itpr(6).gt.mod(itmlog(6),100)) then
+         itpr(6)=itpr(6)+(itmlog(6)/100-1)*100
+      else
+         itpr(6)=itpr(6)+itmlog(6)-mod(itmlog(6),100)
+      endif
+c
+      itpr(5)=ias2b(ib,25,3)
+      itpr(4)=ias2b(ib,28,2)
+      itpr(3)=ias2b(ib,30,2)
+      itpr(2)=ias2b(ib,32,2)
+      itpr(1)=0
+      if(itpr(5).eq.0) goto 400 
+      call fc_rte2secs(itpr,prsecs)
+c 
       if (prsecs.gt.logsecs) goto 600
 C                   Finally check the time of day, if the dates are equal
 C
@@ -115,7 +123,8 @@ C
 C     4. This procedure needs logging.  Read/log each record.
 C     First pull off the procedure name.
 C
-400   idummy = ichmv(lprocn,1,ib,9,12)
+ 400  continue
+      idummy = ichmv(lprocn,1,ib,9,12)
 410   if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call char2low(ibc)
@@ -138,11 +147,11 @@ C
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call char2low(ibc)
       call fc_rte_time(itime,itime(6))
-      idummy = ib2as(itime(6)-1900,ib,23,2)
+      idummy = ib2as(mod(itime(6),100),ib,23,o'40000'+o'400'*2+2)
       idummy = ib2as(itime(5),ib,25,o'40000'+o'400'*3+3)
-      idummy = ib2as(itime(4),ib,28,o'40000'+o'400'*3+2)
-      idummy = ib2as(itime(3),ib,30,o'40000'+o'400'*3+2)
-      idummy = ib2as(itime(2),ib,32,o'40000'+o'400'*3+2)
+      idummy = ib2as(itime(4),ib,28,o'40000'+o'400'*2+2)
+      idummy = ib2as(itime(3),ib,30,o'40000'+o'400'*2+2)
+      idummy = ib2as(itime(2),ib,32,o'40000'+o'400'*2+2)
       ibc(34:34) = 'x'
 C                   Pad with character to fill in last byte
       if (index.gt.0) id = fmpsetpos(idcbp1,ierr,irec,-irec)
