@@ -214,11 +214,17 @@ C
 C
 C Check to see if the Field System is running.
 C
-75    if(.not.kboss()) goto 90
-      call fs_get_llog(illog)
-      call hol2char(illog,1,8,lognc)
-      call lxopn
-90    continue
+75    continue
+      call rcpar(2,lognc)
+      if(lognc.eq.' ') then
+         if(kboss()) then
+            call fs_get_llog(illog)
+            call hol2char(illog,1,8,lognc)
+            call lxopn
+        endif
+      else
+         call lxopn
+      endif
       if (nintv.eq.1) goto 150
 C
 C  ****************************************************************
@@ -237,7 +243,7 @@ C
       icode=0
       lstend=0
       call fmpclose(idcbcm,ierr)
-      iblen=50
+      iblen=256
       call ifill_ch(ibuf,1,iblen*2,' ')
       read(5,801) cbuf
 801   format(a)
