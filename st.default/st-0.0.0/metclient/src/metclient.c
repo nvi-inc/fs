@@ -30,8 +30,9 @@ int main(int argc, char *argv[])
   char log_str[MAXLEN];
   char temp_str[MAXLEN];
   char buff[MAXLEN];
-  int loopcnt;
+  int loopcnt,dwx;
   char fsloc_str[MAXLEN];
+  float twx,pwx,hwx,swx;
   struct tm *ptr;
   time_t t;
   struct hostent *he;
@@ -141,12 +142,24 @@ int main(int argc, char *argv[])
   
   if ((numbytes=recv(sockfd, buf, 29, 0)) < 0) {
     err_report("metclient recv error", NULL,0,0);
-    strcpy(buf,"0.0,0.0,0.0,0.0,0 Client Timed Out");
+    strcpy(buf,"Client Timed Out");
     numbytes=34;
   }
-    
-
     buf[numbytes]='\0';
+
+    sscanf(buf,"%f,%f,%f,%f,%d",&twx,&pwx,&hwx,&swx,&dwx);
+    buff[0]='\0';
+    if(twx >= -50.0) sprintf(&buff[0],"%.1f",twx);
+    if(swx >= 0.0 || hwx >= 0.0 || pwx >= 0.0) strcpy(&buff[strlen(buff)],",");
+    if(pwx >= 0.0) sprintf(&buff[strlen(buff)],"%.1f",pwx);
+    if(swx >= 0.0 || hwx >= 0.0) strcat(buff,",");
+    if(hwx >= 0.0) sprintf(&buff[strlen(buff)],"%.1f",hwx);
+    if(swx >= 0.0) {
+      strcat(buff,",");
+      sprintf(&buff[strlen(buff)],"%.1f",swx);
+      strncat(buff,",",1);
+      sprintf(&buff[strlen(buff)],"%d",dwx);
+    }
 
     t=time(NULL);
     if(((time_t) -1) == t) {
@@ -154,7 +167,7 @@ int main(int argc, char *argv[])
     }
 
     /* Year, Day, and UT time */
-    ptr=gmtime(&t);
+    (int *)ptr=gmtime(&t);
 
     /* HEADER */
     strftime(loc_stamp,sizeof(loc_stamp),"%Y.%j.%H:%M:%S.00",ptr);
@@ -162,7 +175,8 @@ int main(int argc, char *argv[])
 
     /* WEATHER */
     strftime(log_str,sizeof(log_str),"%Y.%j.%H:%M:%S.00/wx/",ptr);
-    strcat(log_str,buf);
+    /*strcat(log_str,buf);*/
+    strcat(log_str,buff);
 
     /* LOGGER */
     logwx(loc_stamp,log_str,sn,logfile);
@@ -173,4 +187,10 @@ int main(int argc, char *argv[])
   } while(TRUE);
   exit(0);
 }
+
+
+
+
+
+
 
