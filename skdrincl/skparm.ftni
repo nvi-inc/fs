@@ -62,7 +62,8 @@ C            Add max_roll_def = nhd*ntrk
 C 020620 nrv Add max_change_list
 C 020923 nrv Change max_rec_type to 10 to allow Mark5.
 C 2003Jul23 JMG changed to 12 params
-C 2004Jul05 JMG changed max # sources to 1000
+C 2004May14 JMGipson. Removed physical constants-->constants.ftni
+!
 C
 C********************************************************************
 C
@@ -97,7 +98,7 @@ C *** NOTE: If this value is changed, then at least one of MAX_CEL
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 1005)
+      PARAMETER (MAX_SOR = 305)
 
 C     The maximum number of CHARACTERS in a source name. Should be
 C     an even integer. Maximum size now is 26, to be cmpatible with
@@ -111,7 +112,7 @@ C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
 C *** NOTE: If this value is changed at least one of MAX_SOR
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_CEL = 1000)
+      PARAMETER (MAX_CEL = 300)
 C
 C     The maximum number of satellite (orbital element) sources which
 C     can be selected for an experiment at one time. Used in SKED
@@ -346,7 +347,7 @@ C     MAX_FRQ*MAX_STN.
 C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
       PARAMETER (MAX_RACK_TYPE= 15)
-      PARAMETER (MAX_REC_TYPE = 12)
+      PARAMETER (MAX_REC_TYPE = 13)
       PARAMETER (MAX_REC2_TYPE = 6)
 
 C     The name of the control files. These files are

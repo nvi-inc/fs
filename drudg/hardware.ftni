@@ -50,10 +50,11 @@
       logical kv4rec(2)
       logical kk41rec(2)
       logical kk42rec(2)
+      logical kk5rec(2)
 
       common /hardware/km3rec,km4rec,km5Arec,km5aPigWire
       common /hardware/km5prec,ks2rec,kvrec,kv4rec
-      common /hardware/kk41rec,kk42rec
+      common /hardware/kk41rec,kk42rec,kk5rec
 
       integer irec              !active recorder
       logical kuse(2)           !true if the recorder is in use.
@@ -61,9 +62,10 @@
 
       logical ks2
       logical kk4
+      logical kk5
       logical km5p
       logical km5A                !config info
-      common /hardware/ks2,kk4,km5A,km5p
+      common /hardware/ks2,kk4,kk5,km5A,km5p
       logical km5A_piggy,km5P_piggy
       common /hardware/km5A_piggy,km5P_piggy
 

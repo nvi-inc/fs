@@ -12,51 +12,42 @@ C 000329 nrv VLBAG rack same as VLBA
 C 020923 nrv Add Mark5 recorders.
 C 021111 jfq Add LBA racks.
 ! Based on old set_type.  Initializes a common block which contains Hardware info.
+! 2004Feb15 JMGipson  Added KK5 recorder type.
+!                     Rearranged flag setting to make it tighter.
 !
 C Input
       integer istn
 
 C Called by: PROCS, SNAP
 C  LOCAL:
+      character*8 cstrectmp(2)
+      integer i
 
       crec(1)="1"
       crec(2)="2"
 C Equipment type has been set by schedule file, Option 11, or control file.
-! S2
-      ks2rec(1)= cstrec(istn)  .eq. "S2"
-      ks2rec(2)= cstrec2(istn) .eq. "S2"
-C This is for VLBA but not for VLBA4
-      kvrec(1)=  cstrec(istn)  .eq. "VLBA"
-      kvrec(2)=  cstrec2(istn) .eq. "VLBA"
-C This is only for VLBA4
-      kv4rec(1)=  cstrec(istn)  .eq. "VLBA4"       !Note: including space differentiates between VLBA and VLBA4
-      kv4rec(2)=  cstrec2(istn) .eq. "VLBA4"
-C This is for Mark3A
-      km3rec(1)= cstrec(istn) 	.eq. "Mark3A"
-      km3rec(2)= cstrec2(istn) 	.eq. "Mark3A"
-C This is for Mark4
-      km4rec(1)  = cstrec(istn)  .eq. "Mark4"
-      km4rec(2)  = cstrec2(istn) .eq. "Mark4"
-C Mark5 recorders
-      km5Arec(1)  =cstrec(istn)   .eq. "Mark5A"
-      km5Arec(2)  =cstrec2(istn)  .eq. "Mark5A"
-! Mark5P
-      km5prec(1)  =cstrec(istn)  .eq. "Mark5P"         !note capital P
-      km5prec(2)  =cstrec2(istn) .eq. "Mark5P"
-!Mark5A piggyback wiring
-      km5APigwire(1) =cstrec(istn)  .eq. "Mk5APigW"
-      km5APigwire(2) =cstrec2(istn) .eq. "Mk5APigW"
+      cstrectmp(1)=cstrec(istn)
+      cstrectmp(2)=cstrec2(istn)
 
+! set the flags for the recorder type.
+      do i=1,2
+        km3rec(i)= cstrectmp(i)  .eq. "Mark3A"
+        kvrec(i)=  cstrectmp(i)  .eq. "VLBA"    !VLBA but not VLBA4
+        kv4rec(i)= cstrectmp(i)  .eq. "VLBA4"
+        km4rec(i)= cstrectmp(i)  .eq. "Mark4"
+        ks2rec(i)= cstrectmp(i)  .eq. "S2"      !S2
+        KK41rec(i)=cstrectmp(i)  .eq. "K4-1"
+        KK42rec(i)=cstrectmp(i)  .eq. "K4-2"
+        km5Arec(i)=cstrectmp(i)  .eq. "Mark5A"
+        Km5APigwire(i) =cstrectmp(i) .eq. "Mk5APigW"
+        Km5Prec(i)=cstrectmp(i)  .eq. "Mark5P"
+        KK5Rec(I) =cstrectmp(i) .eq. "K5"
+      end do
 
       km5A=km5Arec(1) .or. km5Arec(2) .or.
      >     Km5Apigwire(1) .or.Km5APigwire(2)
       km5p=km5prec(1) .or. km5prec(2)
 
-C K4 recorders
-      kk41rec(1)  = cstrec(istn)  .eq. "K4-1"
-      kk41rec(2)  = cstrec2(istn) .eq. "K4-1"
-      kk42rec(1)  = cstrec(istn)  .eq. "K4-2"
-      kk42rec(2)  = cstrec2(istn) .eq. "K4-2"
 C Racks
       kvrack = cstrack(istn) .eq. "VLBA" .or.
      >         cstrack(istn) .eq. "VLBA/8" .or.

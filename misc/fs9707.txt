@@ -1,13 +1,14 @@
-File: /usr2/fs-9.7.6/misc/fs9706up.txt  Version: 1.3 Date: 050125
+File: /usr2/fs-9.7.7/misc/fs9707up.txt  Version: 1.4 Date: 050216
 
 I. Introduction
 
-This memo is divided into 4 sections:
+This memo is divided into six sections:
+
    I.   Introduction.
    II.  Changes Since Version 9.6.9
    III. Installation
    IV.  Updating from 9.7.0
-   V.   Updating from 9.7.1-9.7.5
+   V.   Updating from 9.7.1-9.7.6
    VI.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
@@ -34,14 +35,14 @@ version.  S2 DAS DRUDG support is not included at this time.
 Additional significant changes are: the FS time model has been revised
 to include better support for NTP, a new method of updating the model
 rate with a new "setcl" parameter "adapt", a remaining disk pack
-capacity display, "monit5", and fsvue now operates in a client/server
-configuration to support multiple interfaces.
+capacity (available space) display, "monit5", and fsvue now operates
+in a client/server configuration to support multiple interfaces.
 
 This version is intended to installed as an update for 9.6.9.  This
 update does not require as many changes to local procedures and
 control files as some relatively recent ones have.  It should be
 fairly easy to install.  For stations that have already installed
-9.7.0 or 9.7.1-9.7.5, separate sections below provide even more
+9.7.0 or 9.7.1-9.7.6, separate sections below provide even more
 abbreviated instructions for upgrading from these versions.
 
 II. Changes Since Version 9.6.9
@@ -57,7 +58,8 @@ The following is a summary of the changes.  Items numbered 4 and above
 were added after 9.6.10. Items numbered 43 and above were added after
 9.7.0. Items numbered 51 and above were added after 9.7.1. Items
 numbered 53 and above were added after 9.7.3. Items numbered 66 and
-above were added after 9.7.4.
+above were added after 9.7.4. Items numbered 80 and above were added
+after 9.7.6.
 
 1. New USER_DEVICE command for support of station detectors in ONOFF,
    FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
@@ -69,6 +71,7 @@ above were added after 9.7.4.
 6. Improved error reporting for Mark5 errors.
 7. New Mark 5 BANK_STATUS, DISK2FILE, and IN2NET commands.
 8. New monitor display, monit5, shows Mark 5 remaining capacity
+   (available space).
 9. CHANGE_PACK procedure revised.
 10. SCAN_NAME command has new "continuous" recording time parameter.
 11. Damaged default procedure files restored.
@@ -161,6 +164,10 @@ above were added after 9.7.4.
     over-run if the "label" for a program exceeds five characters.
 79. Utility script "fix_perm" to fix ownership and permissions of
     local files.
+80. New SNAP command "scan_check" for Mark 5A.
+81. New standard procedure "checkmk5a" for Mark 5A.
+82. New standard procedures "ready_k5" and "checkk5" for K5.
+83. Extra semi-colons removed from vex.y.
 
 A more detailed discussion of these changes follows.
 
@@ -219,10 +226,10 @@ A more detailed discussion of these changes follows.
    to provide a persistent reminder that the pack needs to be changed
    (unlike the log display messages in the CHANGE_PACK procedure which
    scroll off the screen and are lost).  When the BANK_CHECK command
-   changes banks, it will check the capacity of the pack in the new
-   bank.  If it also is full, it will issue another CHANGE_PACK
-   procedure call for the other pack to be changed and then make the
-   original bank active again.
+   changes banks, it will check the remaining capacity of the pack in
+   the new bank.  If it also is full, it will issue another
+   CHANGE_PACK procedure call for the other pack to be changed and
+   then make the original bank active again.
 
 6. Improved error reporting for Mark5 errors.  The error handling for
    all Mark5A commands has been overhauled and made more consistent.
@@ -237,13 +244,13 @@ A more detailed discussion of these changes follows.
    The BANK_STATUS command is useful for checking the status of the
    disk packs in both banks.  It checks the remaining capacity time on
    the current active bank, makes the other bank active, checks its
-   capacity, and makes the original bank active again.  This command
-   produces a summary output and updates the FS internal data base of
-   the status of both banks.  The contents of which are displayed in
-   the monit5 status window.  It is useful for example before starting
-   an experiment to check on the status of the packs currently
-   installed.  This command cannot be used during recording.  It
-   should be used carefully at other times, e.g., it should not be
+   remaining capacity, and makes the original bank active again.  This
+   command produces a summary output and updates the FS internal data
+   base of the status of both banks.  The contents of which are
+   displayed in the monit5 status window.  It is useful for example
+   before starting an experiment to check on the status of the packs
+   currently installed.  This command cannot be used during recording.
+   It should be used carefully at other times, e.g., it should not be
    used just before recording is about to start since it might delay
    the start.
 
@@ -260,16 +267,17 @@ A more detailed discussion of these changes follows.
    in realtime.  It may be used automatically in experiments via the
    "data_transfer" keyword in schedules.
 
-8. New monitor display, monit5, shows Mark 5 remaining capacity.  The
-   displayed information is not updated automatically; it is updated
-   only in response to an interactively entered "bank_status" command
-   and the schedule issued "bacn_check" command that is part of the
-   set-up for each scan.  This new monitor display is available as
-   hot-key sequence Control-Shift-5 or from the menu you get with a
-   middle mouse button click on the background.  It shows the
-   currently selected bank (marked with '>'), the VSN mounted in each
-   bank, the remaining recording capacity on the pack in each bank,
-   and the last UT time the capacity was checked for each bank.  The
+8. New monitor display, monit5, shows Mark 5 remaining capacity
+   (available space).  The displayed information is not updated
+   automatically; it is updated only in response to an interactively
+   entered "bank_status" command and the schedule issued "bank_check"
+   command that is part of the set-up for each scan.  This new monitor
+   display is available as hot-key sequence Control-Shift-5 or from
+   the menu you get with a middle mouse button click on the
+   background.  It shows the currently selected bank (marked with
+   '>'), the VSN mounted in each bank, the remaining recording
+   capacity on the pack in each bank, and the last UT time the
+   remaining capacity was checked for each bank.  The remaining
    capacity is shown in three different units: recording time
    available in the current mode, Gigabytes, and percentage.  Please
    note the time remaining is the available record time not clock time
@@ -739,9 +747,25 @@ A more detailed discussion of these changes follows.
     and permissions.  The script /usr2/fs/misc/fix_perm can be
     executed as "root" to restore these values.
 
+80. New SNAP command "scan_check" for Mark 5A.  This command performs
+    a more thorough check of last scan than the old "data_check"
+    command (which is still available)..
+
+81. New station procedure "checkmk5a" for Mark 5A.  This procedure is
+    analagous to the old "check" procedures for tape.  It is used to
+    check the recording quality or the preceeeding scan after the new
+    source command is issued.  Currently, this procedure contains only
+    the "scan_check" command.
+
+82. New station procedures "ready_k5" and "checkk5" for K5.  These
+    procedures are for use with K5 recorders.
+
+83. Extra semi-colons removed from vex.y.  These caused compile
+    problems with new version of bison.
+
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 050125.  The release of DRUDG includes
+DRUDG opening message date is 050216.  The release of DRUDG includes
 limited support for eVLBI.  In addition it incorporates changes in the
 format of some Mark5 commands, several bug fixes, and support for the
 Dymo label printer.  The following is a summary of changes.  They are
@@ -749,7 +773,8 @@ described in more detail after the summary.  Items numbered 10 and
 above were added after 9.7.0.  Items numbered 18 and above were added
 after 9.7.1.  Items numbered 31 and above were added after
 9.7.1. Items numbered 34 and above were added after 9.7.3. Items
-numbered 45 and above were added after 9.7.4.
+numbered 45 and above were added after 9.7.4. Items numbered 53 and
+above were added after 9.7.6.
 
 1. Several minor K4 related bugs were fixed.
 2. If recorder configuration is "none", no tape related commands are
@@ -817,8 +842,30 @@ numbered 45 and above were added after 9.7.4.
     total disk space used.
 51. The schedule shifting option was broken.
 52. This version is Mark5 aware for VEX schedules.
+53. Restored old use of "recode" for printing.
+54. Gbyte listing in summary listing fixed.
+55. There was an error in handling the cable wrap in vex files.
+56. disk2file 'abort' delayed as long as possible.
+57. For Mark 5A, new station procedure "checkmk5a" used instead of
+    "data_check".
+58. There is a new recorder type, "K5".
+59. Fixed bug with equipment_override.
+60. No parity check prompt for recorder "none" or "unused".
+61. Fixed bug in generating fake lvex.
 
-A more detailed discussion of these changes follows.
+60. No parity check prompt for recorder "none" or "unused".  When
+    generating .snp files, DRUDG no longer asks for additional parity
+    checks if the recorder type is "none" or "unused".  Now the only
+    time snap will ask for additional parity checks is if the recorder
+    type is VLBA, VLBA4, Mark3, or Mark4.
+
+61. Fixed bug in generating fake lvex.  This is an option that is used
+    by the correlators in rare instances.  A. Mueskens (Bonn)
+    discovered that DRUDG died with a segmentation error when this
+    option was exercised for t2036.skd.  This has been fixed.  The
+    option for generating fake lvex, option (20), is no longer hidden.
+
+ A more detailed discussion of these changes follows.
 
 1. Several minor K4 related bugs were fixed.  a) If rec1=k4 and
    rec2=unused, then 1 is appended to recpatch (i.e.,
@@ -1268,6 +1315,62 @@ A more detailed discussion of these changes follows.
     has been checked on one (1) schedule.  This support should be
     considered to be in "Beta" or "Alpha" testing mode.
 
+53. Restored old use of "recode" for printing.  Printing is done in
+    DRUDG by passing a command to the operating system.  On some
+    operating systems when a file was printed, the message:
+
+      recode: Syntax is deprecated, please prefer `latin1..ibmpc'
+
+    would appear when a file was printed. Because of this, the syntax
+    of the command was changed in release 9.7.4.  Unfortunately
+    changing the syntax meant that stations with older operating
+    systens could no longer print snap files or summary listing.  The
+    syntax was restored to the 9.7.3 and earlier form.
+
+54. Gbyte listing in summary listing fixed.  This is now changed so
+    that it should accurately reflect the total disk usage.
+    Previously it reflected the space usage at the start of the last
+    scan.
+
+55. There was an error in handling the cable wrap in vex files.  The
+    upshot of the error was that cablewrap was ignored.  This is now
+    fixed in the current version.
+
+56. disk2file 'abort' delayed as long as possible.  Previously DRUDG
+    calculated how much time an ftp transfer should take, and issued a
+    "disk2file=abort" command after twice this amount of time had
+    passed.  In some cases this is not enough.  DRUDG was modified to
+    issue this abort command at the last possible moment, i.e.,
+    allowing just enough time for the setup of the next scan.
+
+57. For Mark 5A, new station procedure "checkmk5a" used instead of
+    "data_check".  This procedure is used to implement checking the
+    recording quality.  This command occurs after the next "source="
+    command is issued.  In the case of "in2net" or "disk2file"
+    options, the command is not issued.
+
+58. There is a new recorder type, "K5".  This is treated identically
+    to "none" for the recorder in .snp and .prc files with the
+    exception of issuing a "ready_k5" after the initial "source="
+    command, and issuing a "ckeckk5" where snap issued a "checkmk5a".
+
+59. Fixed bug with equipment_override.  Previously when this option
+    was turned on you could not change the equipment type using option
+    11.  Now you can.  (Actually, drudg would change the equipment
+    type, and then immediately override it!)
+
+60. No parity check prompt for recorder "none" or "unused".  When
+    generating .snp files, DRUDG no longer asks for additional parity
+    checks if the recorder type is "none" or "unused".  Now the only
+    time snap will ask for additional parity checks is if the recorder
+    type is VLBA, VLBA4, Mark3, or Mark4.
+
+61. Fixed bug in generating fake lvex.  This is an option that is used
+    by the correlators in rare instances.  A. Mueskens (Bonn)
+    discovered that DRUDG died with a segmentation error when this
+    option was exercised for t2036.skd.  This has been fixed.  The
+    option for generating fake lvex, option (20), is no longer hidden.
+
  			    C. Known FS Bugs
 
 The following is a summary list of known bugs.  They are described in
@@ -1430,8 +1533,8 @@ System Initialization" manual.
 If you are updating from 9.7.0, please follow the directions in the
 separate section below titled "IV. Updating from 9.7.0".
 
-If you are updating from 9.7.1-9.7.5, please follow the directions in
-the separate section below titled "V. Updating from 9.7.1-9.7.5".
+If you are updating from 9.7.1-9.7.6, please follow the directions in
+the separate section below titled "V. Updating from 9.7.1-9.7.6".
 
 The following instructions are for upgrading from 9.6.9 and 9.6.10.
 Please follow all the steps.
@@ -1439,7 +1542,7 @@ Please follow all the steps.
 Below is a list of "critical updates" is given.  These are updates
 that must be applied sequentially.  Please start with the next update
 with a later version number than you have and apply it and the
-remaining listed version before upgrading to 9.7.6.  You can find the
+remaining listed version before upgrading to 9.7.7.  You can find the
 installation notes for these versions on the FS FTP servers in the
 docs.old sub-directory.  The list of critical updates is:
 
@@ -1484,7 +1587,7 @@ any questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.7.7 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1492,7 +1595,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.6.tgz
+      get fs-9.7.7.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1506,12 +1609,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.6.tgz
+      tar -xzpf /tmp/fs-9.7.7.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.6 fs
+      ln -sfn fs-9.7.7 fs
 
 (7) If you wish to make sure your local files have the default
     ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
@@ -1554,15 +1657,14 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
 (12) Log in as oper
 
-(13) Modify your procedure files.  There are four required
+(13) Modify your procedure files.  There are five required
      modifications.
 
-     A. One of these is to update your CHANGE_PACK procedure.  Please
-        edit the version in your station.prc file so that it agrees
-        with the version in /usr2/fs/st.default/proc/change_pack.prc.
+     A. Update your CHANGE_PACK procedure.  Please edit the version in
+        your station.prc file so that it agrees with the version in
+        /usr2/fs/st.default/proc/change_pack.prc.
 
-     B. The second is rename your READY_DISC procedure in station.prc
-        to READY_DISK.
+     B. Rename your READY_DISC procedure in station.prc to READY_DISK.
 
      C. Update your midob procedure so that the command "sy=run setcl
         &" now reads "sy=run setcl adapt &".  This will cause the new
@@ -1573,7 +1675,19 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         the S2 DAS time to be logged; the time model will still be
         referenced to the S2 recorder in this case.
 
-     D. You should check your SNAP procedure libraries for low-level
+     D. Add default copies of the new standard Mark 5A and K5
+        procedures to your station.prc library.  Make sure the FS is
+        not running and then enter these commands (as "oper"):
+
+          cd /usr2/proc
+          cat /usr2/fs/st.default/proc/newmk5ak5.prc >> station.prc
+
+	If you have a Mark 5A system, no changes to the "checkmk5a"
+	procedure should be needed.  If you have a K5 system, you will
+	want to put appropriate contents in the "ready_k5" and
+	"checkk5" procedures.
+
+     E. You should check your SNAP procedure libraries for low-level
         "mk5=..." commands that use "informal" syntax and update these
         to formal syntax.  The primary changes that this entails are
         that commands must have equal signs, "=", between the keyword
@@ -1708,10 +1822,10 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         (usually non-FS) Linux distribution.
 
         I. If you have the FS Linux 4 or FS Linux 5 distribution
-           installed, you should diff the 9.7.6 version against the
+           installed, you should diff the 9.7.7 version against the
            9.6.9 version:
 
-             cd /usr2/fs-9.7.6/st.default/prog
+             cd /usr2/fs-9.7.7/st.default/prog
              diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
 
            and then make the corresponding changes in your local copy of
@@ -1744,20 +1858,23 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
      Abbreviated instructions for the metserver (logged in as 'prog'):
 
+          cd /usr2/st/metserver/src
+          cp -a /usr2/fs/st.default/st-0.0.0/metserver/src/metserver.c .
           cd /usr2/st/metserver
-          cp -a /usr2/fs/st.default/st-0.0.0/metserver/metserver.c .
           make
 
      Abbreviated instructions for the metclient (logged in as 'prog'):
 
+          cd /usr2/st/metclient/src
+          cp -a /usr2/fs/st.default/st-0.0.0/metclient/src/metclient.c .
           cd /usr2/st/metclient
-          cp -a /usr2/fs/st.default/st-0.0.0/metclient/metclient.c .
           make
 
      Abbreviated instructions for the tacdclient (logged in as 'prog'):
 
+          cd /usr2/st/tacdclient/src
+          cp -a /usr2/fs/st.default/st-0.0.0/tacdclient/src/tacdclient.c .
           cd /usr2/st/tacdclient
-          cp -a /usr2/fs/st.default/st-0.0.0/tacdclient/tacdclient.c .
           make
 
 (19) Check ibad.ctl contents if you have changed kernels.  If you are
@@ -1787,7 +1904,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      "FS_CHECK_NTP" at the end of these files should be copied to the
      ends of the corresponding user's files and uncommented.
 
-(21) Change the location of your "rxg" files. As of 9.7.6 the rxg
+(21) Change the location of your "rxg" files. As of 9.7.7 the rxg
      files are expected to be in the "/usr2/control/rxg_files"
      directory.  You can change the location of the files you have
      used with pervious versions of the FS by running the script:
@@ -1825,12 +1942,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 IV.  Updating from 9.7.0
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.0 and are updating to 9.7.6.
-A separate following section describes updating from 9.7.1-9.7.5.
+stations that have already installed 9.7.0 and are updating to 9.7.7.
+A separate following section describes updating from 9.7.1-9.7.6.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.7 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1838,7 +1955,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.6.tgz
+      get fs-9.7.7.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1852,12 +1969,12 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.6.tgz
+      tar -xzpf /tmp/fs-9.7.7.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.6 fs
+      ln -sfn fs-9.7.7 fs
 
 (6) If you wish to make sure your local files have the default
     ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
@@ -1929,7 +2046,19 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
              have. He will send you the correct .fvwmrc and/or .fvwm2rc
              file.
 
-(11) Set the FS_CHECK_NTP environment variable.  This variable is used
+(11) Add default copies of the new standard Mark 5A and K5 procedures
+     to your station.prc library.  Make sure the FS is not running and
+     then enter these commands (as "oper"):
+
+        cd /usr2/proc
+        cat /usr2/fs/st.default/proc/newmk5ak5.prc >> station.prc
+
+     If you have a Mark 5A system, no changes to the "checkmk5a"
+     procedure should be needed.  If you have a K5 system, you will
+     want to put appropriate contents in the "ready_k5" and "checkk5"
+     procedures.
+
+(12) Set the FS_CHECK_NTP environment variable.  This variable is used
      to tell the FS whether to check the status of NTP in "setcl" and
      "fmset".  If you do not have NTP configured or there is some
      problem that causes "fmset" to not update every second reliably
@@ -1965,7 +2094,7 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      command.  You should use "pfmed" to make the actual changes to
      the procedures.
 
-(13) Change the location of your "rxg" files. As of 9.7.6 the rxg
+(13) Change the location of your "rxg" files. As of 9.7.7 the rxg
      files are expected to be in the "/usr2/control/rxg_files"
      directory.  You can change the location of the files you have
      used with pervious versions of the FS by running the script:
@@ -1989,15 +2118,15 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (14) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
-V.  Updating from 9.7.1-9.7.5
+V.  Updating from 9.7.1-9.7.6
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.1-9.7.5 and are updating to
-9.7.6.
+stations that have already installed 9.7.1-9.7.6 and are updating to
+9.7.7.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.7 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -2005,7 +2134,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.6.tgz
+      get fs-9.7.7.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -2019,12 +2148,12 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.6.tgz
+      tar -xzpf /tmp/fs-9.7.7.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.6 fs
+      ln -sfn fs-9.7.7 fs
 
 (6) If you wish to make sure your local files have the default
     ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
@@ -2045,27 +2174,41 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
       cd /usr2/fs
       make
 
-(9) Unless you have done so already, you should check your SNAP
-    procedure libraries for low-level "mk5=..." commands that use
-    "informal" syntax and update these to formal syntax.  The primary
-    changes that this entails are that commands must have equal signs,
-    "=", between the keyword and following parameters, semi-colons,
-    ";" must be used instead of spaces to separate parameters, and
-    queries must always use question marks, "?", at the end.  A way to
-    find the commands that may need to be changed is to use the shell
-    commands:
+(9) Log in as oper
 
-      cd /usr2/proc
-      grep mk5= *.prc |less
+(10) Add default copies of the new standard Mark 5A and K5 procedures
+     to your station.prc library.  Make sure the FS is not running and
+     then enter these commands (as "oper"):
 
-    which will show you what "mk5=..." commands exist in which of your
-    .prc files.  It will not show you which individual procedures
-    contain the commands.  However, you can find those by listing the
-    relevant .prc files with "less" and searching for the command.
-    You should use "pfmed" to make the actual changes to the
-    procedures.
+        cd /usr2/proc
+        cat /usr2/fs/st.default/proc/newmk5ak5.prc >> station.prc
 
-(10) Change the location of your "rxg" files. As of 9.7.6 the rxg
+     If you have a Mark 5A system, no changes to the "checkmk5a"
+     procedure should be needed.  If you have a K5 system, you will
+     want to put appropriate contents in the "ready_k5" and "checkk5"
+     procedures.
+
+(11) Unless you have done so already, you should check your SNAP
+     procedure libraries for low-level "mk5=..." commands that use
+     "informal" syntax and update these to formal syntax.  The primary
+     changes that this entails are that commands must have equal
+     signs, "=", between the keyword and following parameters,
+     semi-colons, ";" must be used instead of spaces to separate
+     parameters, and queries must always use question marks, "?", at
+     the end.  A way to find the commands that may need to be changed
+     is to use the shell commands:
+
+       cd /usr2/proc
+       grep mk5= *.prc |less
+
+     which will show you what "mk5=..." commands exist in which of
+     your .prc files.  It will not show you which individual
+     procedures contain the commands.  However, you can find those by
+     listing the relevant .prc files with "less" and searching for the
+     command.  You should use "pfmed" to make the actual changes to
+     the procedures.
+
+(12) Change the location of your "rxg" files. As of 9.7.7 the rxg
      files are expected to be in the "/usr2/control/rxg_files"
      directory.  You can change the location of the files you have
      used with pervious versions of the FS by running the script:
@@ -2086,25 +2229,25 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      you want the FS to read.  Please see "/usr2/fs/misc/configs.txt"
      for more information.
 
-(11) Reboot the computer.  This is important for both re-initializing
+(13) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.7.6.tgz archive have been placed in
+floppy, "split" files of the fs-9.7.7.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9706tg.aa
-fs9706tg.ab
+fs9707tg.aa
+fs9707tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9706tg.* >fs-9.7.6.tgz
+cat fs9707tg.* >fs-9.7.7.tgz
 
-This will create an exact image of the original fs-9.7.6.tgz archive
+This will create an exact image of the original fs-9.7.7.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.

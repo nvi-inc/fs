@@ -6,6 +6,7 @@ C History
 C 000606 nrv Re-new. Copied from VOB1INP.
 C 001109 nrv New again. Use new vex parser routines to get
 C            observations scan by scan.
+! 2004Feb14 JMG.  When checking cable wrap, check for both "&c" and "c", etc.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -26,6 +27,7 @@ C          fvex_scan_source          (get source in this scan)
 c          newscan                   (form new scan)
 C          addscan                   (add each station to the scan)
 C
+
 ! functions
       integer fvex_scan_source,fvex_date
       integer fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len
@@ -187,6 +189,9 @@ C       Keep good data offset and duration separate
             if (cout(1:il).eq.'&n')  ccb="- "
             if (cout(1:il).eq.'&cw') ccb="C "
             if (cout(1:il).eq.'&ccw') ccb="W "
+            if (cout(1:il).eq.'n')  ccb="- "
+            if (cout(1:il).eq.'cw') ccb="C "
+            if (cout(1:il).eq.'ccw') ccb="W "
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))

@@ -29,7 +29,7 @@ C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 C
 C LOCAL
-      integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,iy,ir
+      integer ic,ix,ib,is,j,iv,i,itx,ity,itz,idef,iy,ir
 C DATA
 C     data ((roll_def(i,j,1),j=1,32),i=1,17)/ 
 C    .   02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,
@@ -99,7 +99,7 @@ C    .   31,31,29,27,25,23,21,19,33,15,13,11,09,07,05,03,17,
 C    .   33,33,31,29,27,25,23,21,19,17,15,13,11,09,07,05,03/
 
       vex_version = '' ! initialize to null
-      CALL IFILL(LEXPER,1,8,oblank)
+      cexper=" "
       cexperdes='tbd'
       cpiname='tbd'
       ccorname='tbd'
@@ -134,9 +134,9 @@ C  In statn.ftni
           bitdens(i,j)=0.0
           tape_dens(i,j)=0.0
         enddo
-        idum= ichmv_ch(LSTCOD(I),1,'  ')
-        call ifill(lterna(1,i),1,8,oblank)
-        call ifill(lantna(1,i),1,8,oblank)
+        cstcod(i)=" "
+        cterna(i)=" "
+        cantna(i)=" "
       END DO  ! Initialize current variables
 C  Number of selected sources, stations, codes
       NSOURC = 0
@@ -144,7 +144,7 @@ C  Number of selected sources, stations, codes
 C  In freqs.ftni
       NCODES = 0
       do ic=1,max_frq
-        call ifill(lmode_cat(1,ic),1,16,oblank)
+        cmode_cat(ic)=" "
         do is=1,max_stn
           do iv=1,max_chan
             ibbcx(iv,is,ic)=0
@@ -208,6 +208,7 @@ C  In freqs.ftni
         crec_type(10) = 'Mark5A'
         crec_type(11) = 'Mk5APigW'
         crec_type(12) = 'Mark5P'
+        crec_type(13) = 'K5'
 !      enddo
 
 C Initialize canned roll defs

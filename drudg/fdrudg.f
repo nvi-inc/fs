@@ -192,18 +192,19 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
 ! 2004Nov12 JMGipson.  Replace csize, iwidth (which are font size and widht
 !            by variable cpaper_size. First is orientation, second size.
+! 2005Feb16  JMGipson added menu item for fake lvex files.
 C
 C Initialize some things.
 !      iVerMajor_FS = 09
-!      iVerMinor_FS = 07
-!      iVerPatch_FS = 02
+!       iVerMinor_FS = 07
+!      iVerPatch_FS = 07
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
 
 
 C Initialize the version date.
-      cversion = '050125'
+      cversion = '050216'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -601,6 +602,8 @@ C  if it was not set by the schedule.
               cstrack(istn)=dr_rack_type
               cstrec(istn) =dr_rec1_type
               cstrec2(istn)=dr_rec2_type
+!This keeps us from only doing the override when the schedlue is read in.
+              kequip_over=.false.
               if(cstrec2(istn) .ne. 'none' .and.
      >           cstrec(istn) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
@@ -735,7 +738,8 @@ C  Write warning messages if control file and schedule do not agree.
             else ! .skd file
               write(luscn,"(' 51 = Print notes file (.TXT)')")
             endif ! .drg/.skd
-            write(luscn,'(a)') ' 0 = Done with DRUDG '
+            write(luscn,'(a)') ' 20 = Make fake lvex'
+            write(luscn,'(a)') ' 0  = Done with DRUDG '
 !            write(luscn,'(a)') '20 = Make fake lvex  '
             write(luscn,'(a, $)') ' ?'
 C         endif ! known/unknown equipment
