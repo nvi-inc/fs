@@ -31,7 +31,7 @@ C  LOCAL:
       logical kvlba,kmk3
       character*3 cs
       real*4 f1,f2,f,vb,rbbc,srate
-      integer*2 lbar(2,max_stn)
+      integer*2 lbar(2,max_stn),lfmt(2,max_stn)
       integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst 
       logical knaeq
 C
@@ -61,6 +61,8 @@ C 960709 nrv Add "B" line for barrel roll
 C 960709 nrv Initialize fanout factor to 0, for Mark III modes.
 C            It is reset to 1,2,4 if it's a VLBA mode.
 C 961020 nrv Set the BBC sideband to "U" for non-Vex input.
+C 970115 nrv Add UNPFMT for recording format by station line.
+C 970117 nrv Add IF3O and IF3I to Mk3-4 allowed values.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -71,6 +73,7 @@ C
       IF (JCHAR(IBUF,1).EQ.OCAPL) ITYPE=2 ! L LO lines
       IF (JCHAR(IBUF,1).EQ.OCAPR) ITYPE=4 ! R sample rate lines
       IF (JCHAR(IBUF,1).EQ.OCAPB) ITYPE=5 ! B barrel roll lines 
+      IF (JCHAR(IBUF,1).EQ.OCAPD) ITYPE=6 ! D recording format lines
       IF (ITYPE.EQ.1) CALL UNPCO(IBUF(2),ILEN-1,IERR,
      .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,itr2,cs,ivc)
       IF (ITYPE.EQ.2) CALL UNPLO(IBUF(2),ILEN-1,IERR,
@@ -79,6 +82,7 @@ C
      .                ns)
       IF (ITYPE.EQ.4) CALL UNPRAT(IBUF(2),ILEN-1,IERR,lc,srate)
       IF (ITYPE.EQ.5) CALL UNPBAR(IBUF(2),ILEN-1,IERR,lc,lst,ns,lbar)
+      IF (ITYPE.EQ.6) CALL UNPFMT(IBUF(2),ILEN-1,IERR,lc,lst,ns,lfmt)
       call hol2upper(lc,2) ! uppercase frequency code
 C
 C 1.5 If there are errors, handle them first.
@@ -242,7 +246,8 @@ C                                    ! this channel on this BBC
      .                ichcm_ch(lifinp(iv,istn,icode),1,'3N').eq.0.or.
      .                ichcm_ch(lifinp(iv,istn,icode),1,'1A').eq.0.or.
      .                ichcm_ch(lifinp(iv,istn,icode),1,'2A').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'3A').eq.0
+     .                ichcm_ch(lifinp(iv,istn,icode),1,'3O').eq.0.or.
+     .                ichcm_ch(lifinp(iv,istn,icode),1,'3I').eq.0
                 kvlba=ichcm_ch(lifinp(iv,istn,icode),1,'A').eq.0.or.
      .                ichcm_ch(lifinp(iv,istn,icode),1,'B').eq.0.or.
      .                ichcm_ch(lifinp(iv,istn,icode),1,'C').eq.0.or.
@@ -320,6 +325,46 @@ C 6. This section for the barrel roll line.
           enddo
         endif
       endif
+
+C 7. This section for the recording format line.
+
+      if (itype.eq.6) then ! format
+        if (ns.gt.0) then ! station names on the line
+          do is=1,ns ! for each station name found on the line
+            i=1
+            do while (i.le.nstatn.and..not.knaeq(lst(1,is),
+     .               lstnna(1,i),4))
+              i=i+1
+            enddo
+            if (i.gt.nstatn) then ! no match
+              write(lu,9402) (lst(ii,is),ii=1,4)
+9402          format('FRINP07 - Station ',4a2,' not selected. ',
+     .        'Recording format for this station ignored.')
+            else ! save it
+              if (ichcm_ch(lfmt(1,is),1,'N').eq.0) then ! force non-data replacement
+                idum = ichmv_ch(LMFMT(1,i,ICODE),1,'M') ! recording format
+              endif
+            endif
+C       RESet bit density depending on the recording format.
+C       Check once more on the bit density but this time use LMFMT.
+            if (ichcm_ch(lmfmt(1,i,icode),1,'V').eq.0) then 
+              bitden=34020 ! VLBA non-data replacement
+            else 
+              bitden=33333 ! Mark3/4 data replacement
+            endif
+C           If "56000" was specified, use higher station bit density
+            if (ibitden_save(i).eq.56000) then 
+              if (ichcm_ch(lmfmt(1,i,icode),1,'V').eq.0) then 
+                bitden=56700 ! VLBA non-data replacement
+              else 
+                bitden=56250 ! Mark3/4 data replacement
+              endif
+            endif
+C           Store the bit density by station
+            bitdens(i,icode)=bitden
+          enddo ! each station name on the line
+        endif
+      endif ! recording format line
 
       IERR = 0
       INUM = 0
