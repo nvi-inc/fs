@@ -102,7 +102,11 @@ C
       call fs_set_tpivc(tpivc)
       call fs_set_ilokvc(ilokvc)
       goto 320
-310   idumm1 = ichmv(lfr,1,lfreqv(1,ivcn),1,6)
+c
+ 310  continue
+      call fs_get_lfreqv(lfreqv)
+      idumm1 = ichmv(lfr,1,lfreqv(1,ivcn),1,6)
+      call fs_get_ibwvc(ibwvc)
       ibw = ibwvc(ivcn) 
       itp = itpivc(ivcn)
       iatu = iatuvc(ivcn) 
@@ -116,6 +120,7 @@ C                   Move in frequency
 C 
       nch = ivced(-1,ibw,ibuf2,nch,ilen2) 
 C                   Convert real number bandwidth to characters 
+      call fs_get_ibwvc(ibwvc)
       if (ibw.ne.ibwvc(ivcn)) ierr = -302 
       nch = mcoma(ibuf2,nch)
 C 
