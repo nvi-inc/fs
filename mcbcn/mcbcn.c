@@ -31,6 +31,7 @@
 /* #define DEBUG 1 */  /* define to turn on debug printout */
 
 #define SEND 0  /* message type */
+#define SENDT 20
 #define SENDB 7 /* total bytes in message */
 #define RECV 1
 #define RECVT 21
@@ -409,6 +410,7 @@ long *ip4;
 	    imode=inbuf[inptr];
             switch (inbuf[inptr]) {
                 case SEND:   /* send data to an MCB address */
+	        case SENDT:
 #ifdef DEBUG
                     printf("SEND request received\n");
 #endif
@@ -429,7 +431,12 @@ long *ip4;
                     devad += inbuf[inptr+4] + (inbuf[inptr+3]<<8);
                     devdata = inbuf[inptr+6] + (inbuf[inptr+5]<<8);
                     mcb_put (devad,devdata,&result);
-                    outmess[0] = result;
+		    if(result<0 && imode == SENDT) {
+		      result+=50;
+		      outmess[0] = result;
+		      result=1;
+		    } else
+		      outmess[0] = result;
                     putout ( outmess, 1);
                     inptr += SENDB;
                     break;
