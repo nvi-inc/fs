@@ -251,11 +251,11 @@ C           Here is where we can determine early start without the schedule
 9304        format(' Early tape start: ',i3,' seconds'/)
 C
             if (kwrap) write(luprt,9310)
+9310        format(22x,'        Start    Start    Stop',19x,
+     .      'Change/'/
+     .      ' Line#  Source   Az El Cable   Tape     Data     ',
+     .      'Tape    Dur Pass Dir Feet Check')
             if (.not.kwrap) write(luprt,9390)
-9310        format(22x,'         Start     Start     Stop',20x,
-     .      ' Change/'/
-     .      ' Line#  Source    Az El Cable   Tape      Data      ',
-     .      'Tape     Dur Pass Dir Feet Check')
 9390        format(22x,'     Start     Start     Stop',20x,
      .      ' Change/'/
      .      ' Line#  Source    Az El    Tape      Data      ',
@@ -280,9 +280,9 @@ C
             if (kwrap) then
               write(luprt,9330) nsline,csor,iaz,iel,cwrap,ih1,im1,is1,
      .        ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,cdir,ifeet,cnewtap
-9330          format(1x,i5,1x,a8,2x,i3,1x,i2,1x,a5,1x,i2.2,':',i2.2,':',
-     .        i2.2,2x,i2.2,':',i2.2,':',i2.2,2x,i2.2,':',i2.2,':',i2.2,
-     .        2x,i2.2,':',i2.2,2x,a2,1x,a3,1x,i5,1x,a3)
+9330          format(1x,i5,1x,a8,1x,i3,1x,i2,1x,a5,1x,i2.2,':',i2.2,':',
+     .        i2.2,1x,i2.2,':',i2.2,':',i2.2,1x,i2.2,':',i2.2,':',i2.2,
+     .        1x,i2.2,':',i2.2,2x,a2,1x,a3,1x,i5,1x,a3)
             else
               write(luprt,9380) nsline,csor,iaz,iel,ih1,im1,is1,ihd,imd,
      .        isd,ih2,im2,is2,idm,ids,cpass,cdir,ifeet,cnewtap
@@ -332,7 +332,8 @@ C         else if (index(cbuf,'SX').ne.0) then
      .               " Total number of tapes: ",i3)') ncount, ntapes
 
 	call luff(luprt)
-	if (cprttyp.eq.'FILE') close(LUprt)
+Cif (cprttyp.eq.'FILE') close(LUprt)
+        close(luprt)
         call prtmp
 
       RETURN
