@@ -56,14 +56,18 @@ C
 C  *****************************************************************
 C
 C
-      integer fmpread
+      integer fmpread,answer
       character*79 outbuf
       integer answer, trimlen
-      integer*2 ibuf2(50)
+      integer*2 ibuf2(512)
       integer*2 lch
-
+      character cjchar
+c
       if (ilxget.ne.0) goto 200
-      if (itl1.lt.its1.or.(itl1.eq.its1.and.itl2.lt.its2)) goto 100
+      if (itl1.lt.its1.or.
+     &     (itl1.eq.its1.and.itl2.lt.its2).or.
+     &     (itl1.eq.its1.and.itl2.eq.its2.and.itl3.lt.its3)
+     &     ) goto 100
 C
 C  Call rewind to begin at the first log entry.
 C
@@ -82,6 +86,7 @@ C
       endif
       nrec = 0
 100   continue
+      ifirstday=-1
       nlout = 0
       ilxget=1
 C
@@ -135,15 +140,126 @@ C
 C  Convert ASCII string to Binary integer to obtain day for ITL1
 C  and minutes for ITL2
 C
-400   itl1 = ias2b(ibuf,3,3)
-      itl2 = ias2b(ibuf,6,2)*60 + ias2b(ibuf,8,2)
-      it3  = ias2b(ibuf,10,2)
-      if (itl1.lt.its1.or.(itl1.eq.its1.and.itl2.lt.its2)) goto 200
+ 400  continue
+      do i=5,14
+         if(index("0123456789",cjchar(ibuf,i)).eq.0) then
+            if(i.eq.5) then
+               logformat=3
+            else if(i.eq.10) then
+               logformat=1
+               if(ichcm_ch(ibuf,10,";MARK I").eq.0) then
+                  ich=10
+                  ifirstday=ias2b(ibuf,1,3)
+                  do k=1,8
+                     call gtfld(ibuf,ich,ilen,ic1,ic2)
+                  enddo
+                  if(ic1.ne.0) then
+                     iyear=ias2b(ibuf,ic1,ic2-ic1+1)
+                     if(iyear.eq.-32768) iyear=1970
+                  else
+                     iyear=1970
+                  endif
+               else
+                  iday=ias2b(ibuf,1,3)
+                  if(ifirstday.eq.-1) then
+                     ifirstday=iday
+                     iyear=1970
+                  else if(ifirstday.gt.iday) then
+                     iyear=iyear+1
+                     ifirstday=iday
+                  endif
+               endif
+C not Y10K compliant
+            else if(i.eq.14) then
+               logformat=2
+            else
+               logformat=-1
+            endif
+            goto 110
+         endif
+      enddo
+      logformat=-1
+c
+ 110  continue
+      if(logformat.eq.-1) then
+        outbuf='LXOPN - error '
+        call ib2as(-999,answer,1,4)
+        call hol2char(answer,1,4,outbuf(15:))
+        nchar = trimlen(outbuf) + 1
+        outbuf(nchar:)=' unknown log file format '
+        nchar = trimlen(outbuf) + 1
+        call hol2char(logna,1,4,outbuf(nchar:))
+        call po_put_c(outbuf)
+        icode=-1
+        goto 1200
+      endif
+c
+      if(logformat.eq.1) then
+         idyps=1
+         ihrps=4
+         imnps=6
+         iscps=8
+         ildch=10
+         ifrst=11
+      else if(logformat.eq.2) then
+         idyps=3
+         ihrps=6
+         imnps=8
+         iscps=10
+         ihsps=12
+         ildch=14
+         ifrst=15
+      else if(logformat.eq.3) then
+C not Y10K compliant
+         idyps=6
+C not Y10K compliant
+         ihrps=10
+C not Y10K compliant
+         imnps=13
+C not Y10K compliant
+         iscps=16
+C not Y10K compliant
+         ihsps=19
+C not Y10K compliant
+         ildch=21
+C not Y10K compliant
+         ifrst=22
+      endif
+c
+      itl1 = ias2b(ibuf,idyps,3)
+      if(logformat.eq.1) then
+         itl1=itl1+(iyear-1970)*1024
+      else if(logformat.eq.2) then
+         iyr = ias2b(ibuf,1,2)
+         if(iyr.lt.70) then
+            iyr=iyr+2000
+         else
+            iyr=iyr+1900
+         endif
+         iyear=iyr
+         ifirstday=itl1
+         itl1= itl1+(iyr-1970)*1024
+      else if(logformat.eq.3) then
+         iyr=ias2b(ibuf,1,4)
+         iyear=iyr
+         ifirstday=itl1
+         itl1=itl1+(iyr-1970)*1024
+      endif
+      itl2 = ias2b(ibuf,ihrps,2)*60 + ias2b(ibuf,imnps,2)
+      itl3  = ias2b(ibuf,iscps,2)*100
+      if(logformat.ne.1) then
+         itl3=itl3+ias2b(ibuf,ihsps,2)
+      endif
+c      if (itl1.lt.its1.or.(itl1.eq.its1.and.itl2.lt.its2)) goto 200
+      if (itl1.lt.its1.or.
+     &     (itl1.eq.its1.and.itl2.lt.its2).or.
+     &     (itl1.eq.its1.and.itl2.eq.its2.and.itl3.lt.its3)
+     &     ) goto 200
       if (ikey.eq.9.or.ikey.eq.12) goto 1000
 C
 C  Find the number of characters in IBUF and store into NCHBUF
 C
-      nchbuf = iflch(ibuf(7),ilen-14)
+      nchbuf = iflch(ibuf(5),ilen-ildch)
 C
 C
 C  ************************************************************
@@ -166,7 +282,8 @@ C
       do 500 i=1,ncmd
         if (i.gt.1.and.(ikey.eq.6.or.ikey.eq.13)) goto 500
         if (nchbuf.lt.ncomnd(i)) goto 500
-        if (ichcm(ibuf2,15,lcomnd(1,i),1,ncomnd(i)).eq.0) goto 600
+        if (ichcm(ibuf2,ifrst,lcomnd(1,i),1,ncomnd(i)).eq.0)
+     &       goto 600
 500   continue
       goto 200
 C
@@ -174,10 +291,12 @@ C  Determine whether a STRING Command was specified.  Then check for a
 C  PLOT Command.  If a PLOT Command was issued, we skip the following
 C  lines of code and continue with the LISTING code.
 C
-600   if (nstr.eq.0) goto 800
+600   continue
+      if (nstr.eq.0) goto 800
       do i=1,nstr
         if (nchbuf.ge.nstrng(i))  then
-        if (iscns(ibuf2,15,nchar,lstrng(1,i),1,nstrng(i)).ne.0) goto 800
+        if (iscns(ibuf2,ifrst,nchar,lstrng(1,i),1,nstrng(i)).ne.0)
+     &          goto 800
         endif
       end do
       goto 200
@@ -190,7 +309,7 @@ C  JCHAR returns LCH as zero/character. To left justify multiply
 C  o'400' (256 decimal) and add a blank (o'40').
 C
 cxx      lch = jchar(ibuf2,10)*o'400'+' '
-      lch = jchar(ibuf2,14)
+      lch = jchar(ibuf2,ildch)
       do i=1,ntype
         if (lch.eq.ltype(i)) goto 1000
       end do
@@ -209,8 +328,12 @@ C  ************************************************************
 C
 C
 1000  continue
-      if ((nlines.gt.0.and.nlout.lt.nlines).or.(nlines.eq.0.and.
-     .(itl1.lt.ite1.or.(itl1.eq.ite1.and.(itl2.le.ite2))))) goto 1200
+      if ((nlines.gt.0.and.nlout.lt.nlines).or.
+     &     (nlines.eq.0.and.
+     &     (itl1.lt.ite1.or.
+     &     (itl1.eq.ite1.and.itl2.le.ite2).or.
+     &     (itl1.eq.ite2.and.itl2.eq.ite2.and.itl3.le.ite3)
+     & ))) goto 1200
       lstend=-1
       ilxget=0
 C
