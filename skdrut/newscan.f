@@ -13,6 +13,7 @@ C   observation.
 C Called by: VOBINP, VOB1INP
 C History
 C 960527 nrv New.
+C 970114 nrv change 8 to max_sorlen
 
 C Input:
       integer istn ! first station in this scan
@@ -44,7 +45,7 @@ C Initialized for leading zeros, left justified
 C     First clear out the entire buffer
       CALL IFILL(IBUF,1,IBUF_LEN*2,oblank)
 C     Source name is first
-      NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,8)
+      NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,max_sorlen)
 C     Cal time. Define as 10 for now
       ical = 10
       nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,3)
@@ -77,7 +78,7 @@ C   Insert blanks for other stations' codes
 C   Tape pass, direction, footage for each station
       if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
         kfor=.true. ! always forward
-        nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn)(1:1)) ! group number
+        nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn,icod)(1:1)) ! group number
       else
         NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
         i=ipas/2
