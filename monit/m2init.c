@@ -9,7 +9,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive;
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kK4drive;
 
 m2init()
 {
@@ -28,6 +28,8 @@ m2init()
   } else if(kS2drive) {
     mvaddstr(ROW1+1,COL1+5,"GROUP");
     mvaddstr(ROW1+1,COL1+13,"SPEED");
+  } else if(kK4drive) {
+    mvaddstr(ROW1+1,COL1+5,"RATE");
   }
   standend();
   mvaddstr(ROW1+1,COL1+27,":");
@@ -57,6 +59,8 @@ m2init()
     mvaddstr(ROW1+3,COL1+0,"VACUUM");
     mvaddstr(ROW1+3,COL1+9,"TAPE");
     mvaddstr(ROW1+3,COL1+18,"FEET");
+  } else if(kK4drive) {
+    mvaddstr(ROW1+3,COL1+0,"SEQUENCE");
   }
   if (kMrack) {
     mvaddstr(ROW1+3,COL1+23,"TSYS:");

@@ -35,7 +35,8 @@ static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
 #define NKEY_MODE4 sizeof(key_mode4)/sizeof( char *)
 
 extern struct fscom *shm_addr;
-extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack;
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack,
+  kK4drive,kK41drive_type,kK42drive_type;
 
 mout2(it,iyear)
 
@@ -171,6 +172,8 @@ int iyear;
       mode[i]=' ';
     mode[sizeof(mode)-1]=0;
     printw(mode);
+  } else if (kK4drive) {
+    printw(" k4 ");
   } else if (kM3rack) {
     switch (shm_addr->imodfm) {
     case 0:
@@ -215,6 +218,8 @@ int iyear;
       printw("$");
     else if(shm_addr->rec_mode.group>=0)
       printw("%1d",0x7&shm_addr->rec_mode.group);
+  } if(kK4drive && kK41drive_type) {
+    printw("4.00");
   } else if (kM3rack) {
     switch (shm_addr->iratfm) {
     case 0:
@@ -542,6 +547,11 @@ int iyear;
       printw("unknown");
     else 
       printw("%5ld  ",posvar);
+  } else if(kK4drive) {
+    move(ROW1+4,COL1+0);
+    printw("        ");
+    move(ROW1+4,COL1+0);
+    printw(shm_addr->k4tape_sqn);
   } else if(kMdrive || kVdrive) {
     if (shm_addr->ICAPTP == 0)
       printw("STOPPED");
