@@ -21,7 +21,9 @@ K4-1U   - 2 and 4 MHz BW, USB only
 
 K4-2    - 2 and 32 MHz BW
 K4-2A   - 2 and 16 MHz BW
+K4-2B   - 8 and 16 MHz BW
 K4-2BU  - 8 and 16 MHz BW, USB only
+K4-2C   - 2 and 8 MHz BW
 
 VSOP    - 16 and 32 MHz BW, 4 VCs
 
