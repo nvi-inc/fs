@@ -30,13 +30,14 @@ extern int ibser;
 
 extern int serial;
 
-int opdev_(dev,devlen,devid,error,ipcode)
+int opdev_(dev,devlen,devid,error,ipcode,tmo)
 
 int *dev;
 int *devlen;
 int *devid;
 int *error;
 long *ipcode;
+short *tmo;
 
 {
   int deviceid, ierr;
@@ -75,6 +76,21 @@ long *ipcode;
       return -1;
     }
   }
+  if(!serial) {
+#ifdef CONFIG_GPIB
+    ierr=ibtmo(*devid,*tmo);
+    if ((ibsta & (ERR|TIMO)) != 0) {
+      if(iberr==0)
+	logit(NULL,errno,"un");
+      *error = -(IBCODE  + iberr);
+      memcpy((char*)ipcode,"DT",2);
+      return -1;
+    }
+#else
+    *error = -322;
+    return -1;
+#endif
+  }
 
   if (!serial) {
 #ifdef CONFIG_GPIB
@@ -90,7 +106,7 @@ long *ipcode;
     *error = -(IBCODE + 22);
     return -1;
 #endif
-    }
+  }
 
     if (!serial) {
 #ifdef CONFIG_GPIB
