@@ -261,7 +261,7 @@ m5_2_bank_set(ptr_in,lclm,ip) /* return values:
 				    */
      long ip[5];   /* standard parameter array */
 {
-  char *new_str, *ptr, *ptr2, *ptr_save;
+  char *new_str, *ptr, *ptr2, *ptr_save, *ptrd;
   int count, ierr;
 
   ptr=strchr(ptr_in,'?');
@@ -303,6 +303,8 @@ m5_2_bank_set(ptr_in,lclm,ip) /* return values:
 	}
 	break;
       case 2:
+	if(NULL!=(ptrd=strchr(ptr,'\x1e'))) /* truncate trailing junk */
+	  *ptrd=0;
 	if(m5string_decode(ptr,lclm->active_vsn.active_vsn,
 			   sizeof(lclm->active_vsn.active_vsn),
 			   &lclm->active_vsn.state)) {
@@ -319,6 +321,8 @@ m5_2_bank_set(ptr_in,lclm,ip) /* return values:
 	}
 	break;
       case 4:
+	if(NULL!=(ptrd=strchr(ptr,'\x1e'))) /* truncate trailing junk */
+	  *ptrd=0;
 	if(m5string_decode(ptr,lclm->inactive_vsn.inactive_vsn,
 			   sizeof(lclm->inactive_vsn.inactive_vsn),
 			   &lclm->inactive_vsn.state)) {
@@ -358,7 +362,7 @@ m5_2_vsn(ptr_in,lclm,ip) /* return values:
 
      long ip[5];   /* standard parameter array */
 {
-  char *new_str, *ptr, *ptr2, *ptr_save;
+  char *new_str, *ptr, *ptr2, *ptr_save, *ptrd;
   int count, ierr;
 
   ptr=strchr(ptr_in,'?');
@@ -391,6 +395,8 @@ m5_2_vsn(ptr_in,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
+	if(NULL!=(ptrd=strchr(ptr,'\x1e'))) /* truncate trailing junk */
+	  *ptrd=0;
 	if(m5string_decode(ptr,lclm->vsn.vsn,
 			   sizeof(lclm->vsn.vsn),
 			   &lclm->vsn.state)) {
