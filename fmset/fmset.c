@@ -133,11 +133,13 @@ box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 build:
 mvwaddstr( maindisp, 2, 23, "fmset - formatter/S2-DAS/S2-RT time set" );
 if(source == S2)
-   mvwaddstr( maindisp, 4, 10, s2type ? "S2 DAS     " : "S2 RT      " );
-else
-  mvwaddstr( maindisp, 4, 10, "Formatter  " );
-mvwaddstr( maindisp, 5, 10, "Field System" );
-mvwaddstr( maindisp, 6, 10, "Computer" );
+   mvwaddstr( maindisp, 4, 10, s2type ? "S2 DAS      " : "S2 RT       " );
+ else if((rack& MK4 || rack &VLBA4))
+  mvwaddstr( maindisp, 4, 10, "Mark IV FM  " );
+ else 
+  mvwaddstr( maindisp, 4, 10, "VLBA FM     " );
+mvwaddstr( maindisp, 5, 10,   "Field System" );
+mvwaddstr( maindisp, 6, 10,   "Computer" );
 mvwaddstr( maindisp, ROW, 10,
  "Use '+'     to increment formatter time by one second." );
 mvwaddstr( maindisp, ROW+1, 10,
