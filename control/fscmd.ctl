@@ -336,6 +336,15 @@ ifadjust     qkr 7401 01 04FFFF
 tacd         qkr 7501 01 FFFFFF
 cablelong    qkr 7604 01 FFFFFF
 cablediff    qkr 7701 01 FFFFFF
+mk5          qkr 7800 01 FFFFFF
+disc_start   qkr 7801 01 FFFFFF
+disc_end     qkr 7802 01 FFFFFF
+disc_pos     qkr 7803 01 FFFFFF
+disc_serial  qkr 7804 01 FFFFFF
+disc_check   qkr 7805 01 FFFFFF
+mk5relink    qkr 7806 01 FFFFFF
+mk5close     qkr 7807 01 FFFFFF
+rollform     qkr 7901 01 54FFFF
 * boss internal
 cont         *xx 0000 02 FFFFFF
 halt         *xx 0000 03 FFFFFF
