@@ -16,7 +16,7 @@
 static char *sp1_key[ ]={
         "8.44", "16.88", "33.75", "67.5", "135",    "270",
    "0", "8.33", "16.66", "33.33", "66.66", "133.33", "266.66",
-        "5",    "10",    "20",    "40",    "80",    "160" };
+        "5",    "10",    "20",    "40",    "80",    "160",    "320"};
 /* nominal M3 speeds that are different */
 static char *sp2_key[ ]={"7.5",    "15",    "30",   "60",   "120",
 			   "240"};
@@ -24,7 +24,7 @@ static char *sp2_key[ ]={"7.5",    "15",    "30",   "60",   "120",
 static int   sp3_key[ ]={
        844,    1688,   3375,    6750,   13500,  27000,
   0,   833,    1666,   3333,    6666,   13333,  26666,
-       500,    1000,   2000,    4000,    8000,  16000};
+       500,    1000,   2000,    4000,    8000,  16000, 32000};
 /*true M3 speeds that are different */
 static char *sp4_key[ ]={"8.4375","16.875"};
 static char *sp5_key[ ]={"7"};
@@ -74,12 +74,16 @@ char *ptr;
 	if (ierr==0) {
 	  lcl->cips=sp3_key[lcl->speed];
 	  lcl->speed=-3;
-	} else if (ierr == -100 && (
-		   (shm_addr->equip.rack == VLBA && 
-		    shm_addr->bit_density > 0    &&
-		    shm_addr->vform.tape_clock > 0) ||
-				    (shm_addr->equip.rack == MK3 &&
-				     shm_addr->iratfm > 0))){
+	} else if (ierr == -100 && shm_addr->bit_density > 0 &&
+		   ((shm_addr->equip.rack == VLBA && 
+		     shm_addr->vform.tape_clock > 0) ||
+		    (shm_addr->equip.rack == MK3 &&
+		     shm_addr->iratfm >= 0) ||
+		    ((shm_addr->equip.rack == MK4 ||
+	              shm_addr->equip.rack == VLBA4) &&
+		     shm_addr->form4.rate+shm_addr->form4.fan>= 3 &&
+		     shm_addr->form4.rate+shm_addr->form4.fan<= 12)
+		    )){
 	  lcl->speed=-3;
 	  ierr = 0;
 	  if (shm_addr->equip.rack == MK3) {
@@ -96,8 +100,13 @@ char *ptr;
 	    else
 	      lcl->cips=100*((9e6/(1<<(0xf-shm_addr->vform.tape_clock)))/
 			     shm_addr->bit_density);
-	  }
-        break;
+	  else if(shm_addr->equip.rack == MK4 ||
+		  shm_addr->equip.rack == VLBA4)
+	    lcl->cips=100*((144e6/
+			    (1<<(8-shm_addr->form4.rate+shm_addr->form4.fan)))/
+			   shm_addr->bit_density);
+	}
+	break;
       case 3:
         ierr=arg_key(ptr,rec_key,REC_KEY,&lcl->rec,1,TRUE);
         break;
