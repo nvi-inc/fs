@@ -12,11 +12,20 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
                                               /* parameter keywords */
 static char *key_mode[ ]={ "read", "byp" };
-static char *key_equ[ ]={ "std", "alt1", "alt2", "1", "0.5", "0.25" };
+static char *key_equ [ ]={ "std", "alt1", "alt2"};
+static char *key_equ0[ ]={ "160", "135", "270"};
+static char *key_equ1[ ]={ "160", "80", "270"};
+static char *key_equ2[ ]={ "135", "270"};
+
+static char *key_bitsynch[ ] = { "16", "8", "4", "2", "1", "0.5"};
 
                                      /* number of elements in keyword arrays */
-#define NKEY_MODE sizeof(key_mode)/sizeof( char *)
-#define NKEY_EQU  sizeof(key_equ)/sizeof( char *)
+#define NKEY_MODE      sizeof(key_mode)/sizeof( char *)
+#define NKEY_EQU       sizeof(key_equ)/sizeof( char *)
+#define NKEY_EQU0      sizeof(key_equ0)/sizeof( char *)
+#define NKEY_EQU1      sizeof(key_equ1)/sizeof( char *)
+#define NKEY_EQU2      sizeof(key_equ2)/sizeof( char *)
+#define NKEY_BITSYNCH  sizeof(key_bitsynch)/sizeof( char *)
 
 int vrepro_dec(lcl,count,ptr)
 struct vrepro_cmd *lcl;
@@ -42,7 +51,18 @@ char *ptr;
       case 3:
         ind=(*count-1)/2;
         ierr=arg_int(ptr,&lcl->track[ind],4,TRUE);
-        if(ierr ==0 && (lcl->track[ind]>35 || lcl->track[ind]<0)) ierr=-200;
+        if(ierr ==0 && (lcl->track[ind]>35 || lcl->track[ind]<0))
+	  if (shm_addr->equip.drive == VLBA)
+	    ierr=-200;
+	  else if (shm_addr->equip.drive == VLBA4 &&
+		   (lcl->track[ind]>135 || lcl->track[ind]<100))
+	    ierr=-200;
+	if(lcl->track[ind]<100)
+	  lcl->head[ind]=1;
+	else
+	  lcl->head[ind]=2;
+
+	lcl->track[ind]%=100;
         break;
       case 5:
         idflt=1;                               /* alt1 is default */
@@ -52,17 +72,46 @@ char *ptr;
         ind=*count-5;
         if(idflt==-1) idflt=lcl->equalizer[0];      /* equB defaults to equA */
         ierr=arg_key(ptr,key_equ,NKEY_EQU,&lcl->equalizer[ind],idflt,TRUE);
+	if(ierr!=0 && shm_addr->equip.drive_type == VLBA2)
+	  ierr=arg_key(ptr,key_equ2,NKEY_EQU2,&lcl->equalizer[ind],idflt,TRUE);
+	else if(ierr !=0 && shm_addr->equip.drive_type != VLBA2) {
+	  ierr=arg_key(ptr,key_equ0,NKEY_EQU0,&lcl->equalizer[ind],idflt,TRUE);
+	  if(ierr!=0)
+	    ierr=
+	      arg_key(ptr,key_equ1,NKEY_EQU1,&lcl->equalizer[ind],idflt,TRUE);
+	}
         break;
+      case 7:
+	idflt=2; /* single speed */
+	if (shm_addr->equip.drive_type != VLBA2) {
+	  if (lcl->equalizer[0]==0 || lcl->equalizer[0]==2)
+	    idflt=1;
+	  else if(lcl->equalizer[0]==1)
+	    idflt=2;
+	} else { /* VLBA2 */
+	  if(lcl->equalizer[0]==0)
+	    idflt=2;
+	  else if (lcl->equalizer[0]==1)
+	    idflt=1;
+	}
+        ierr=arg_key(ptr,key_bitsynch,NKEY_BITSYNCH,&lcl->bitsynch,idflt,TRUE);
+	break;
       default:
 	if (shm_addr->wrhd_fs != 0) { /* fix odd of evenness of tracks */
-	  odd = lcl->track[0]%2 == 1 || lcl->track[1]%2 == 1;
-	  even= lcl->track[0]%2 == 0 || lcl->track[1]%2 == 0;
+	  odd = (lcl->track[0]%2 == 1 && lcl->head[0] == 1) || 
+	    (lcl->track[1]%2 == 1 && lcl->head[1] == 1);
+	  even= (lcl->track[0]%2 == 0 && lcl->head[0] == 1) ||
+	    (lcl->track[1]%2 == 0 && lcl->head[1] == 1);
 	  if (shm_addr->wrhd_fs == 1 && even && !odd) {
-	    lcl->track[0]++;
-	    lcl->track[1]++;
+	    if(lcl->head[0] == 1)
+	      lcl->track[0]++;
+	    if(lcl->head[1] == 1)
+	      lcl->track[1]++;
 	  } else if (shm_addr->wrhd_fs == 2 && odd && !even) {
-	    lcl->track[0]--;
-	    lcl->track[1]--;
+	    if(lcl->head[0] == 1)
+	      lcl->track[0]--;
+	    if(lcl->head[1] == 1)
+	      lcl->track[1]--;
 	  }
 	}
 	*count=-1;
@@ -77,7 +126,7 @@ char *output;
 int *count;
 struct vrepro_cmd *lcl;
 {
-    int ind, ivalue;
+    int ind, ivalue, ivalue2;
 
     output=output+strlen(output);
 
@@ -95,8 +144,9 @@ struct vrepro_cmd *lcl;
       case 3:
         ind=(*count-1)/2;
         ivalue=lcl->track[ind];
-        if(ivalue > -1 && ivalue < 36 )
-           sprintf(output,"%d",lcl->track[ind]);
+	ivalue2=lcl->head[ind]-1;
+        if(1 || ivalue > -1 && ivalue < 36 && (ivalue2 & 0x1 == ivalue2))
+           sprintf(output,"%d",ivalue2*100+ivalue);
         else
           strcpy(output,BAD_VALUE);
         break;
@@ -109,8 +159,15 @@ struct vrepro_cmd *lcl;
         else
           strcpy(output,BAD_VALUE);
         break;
+      case 7:
+	ivalue=lcl->bitsynch;
+        if(ivalue>=0 && ivalue <NKEY_BITSYNCH )
+          strcpy(output,key_bitsynch[ivalue]);
+        else
+          strcpy(output,BAD_VALUE);
+        break;
       default:
-       *count=-1;
+	*count=-1;
    }
    if(*count>0) *count++;
    return;
@@ -127,6 +184,25 @@ struct vrepro_cmd *lcl;
 }
 
 void vrepro91mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+
+   *data= bits16on(6) & lcl->track[ 1];
+
+   return;
+}
+void vrepro92mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+
+   *data= bits16on(6) & lcl->track[ 0];
+
+   return;
+}
+
+void vrepro93mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
@@ -173,6 +249,37 @@ struct vrepro_cmd *lcl;
 
      return;
 }
+void vrepro96mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+  int idflt;
+
+  if(lcl->equalizer[ 0] >= 3 ) {
+    idflt=1; /* alt.1 is default for VLBA */
+  } else
+    idflt=lcl->equalizer[ 0];
+      
+  *data= (bits16on(2) & idflt);
+  
+  return;
+}
+
+void vrepro97mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+  int idflt;
+
+  if(lcl->equalizer[ 1] >= 3 ) {
+    idflt=1; /* alt.1 is default for VLBA */
+  } else
+    idflt=lcl->equalizer[ 1];
+
+  *data= (bits16on(2) & idflt);
+
+     return;
+}
 
 void vrepro98mc(data,lcl)
 unsigned *data;
@@ -180,9 +287,26 @@ struct vrepro_cmd *lcl;
 {
 /* hardcoded reproduce channel A to formatter output channel A, for now */
 
+  if(lcl->head[0] == 1)
      *data= (bits16on(1) & lcl->mode[ 0]);
+  else
+     *data= 0x4 | (bits16on(1) & lcl->mode[ 0]);
 
      return;
+}
+
+void vrepro99mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+/* hardcoded reproduce channel B to formatter output channel B, for now */
+
+  if(lcl->head[1] == 1)
+     *data=  0x2 | (bits16on(1) & lcl->mode[ 1]); 
+  else
+     *data=  0x6 | (bits16on(1) & lcl->mode[ 1]); 
+
+  return;
 }
 
 void vrepro9cmc_vlba2(data,lcl)
@@ -196,44 +320,31 @@ struct vrepro_cmd *lcl;
      return;
 }
 
-void vrepro99mc(data,lcl)
-unsigned *data;
-struct vrepro_cmd *lcl;
-{
-/* hardcoded reproduce channel B to formatter output channel B, for now */
-
-     *data=  0x2 | (bits16on(1) & lcl->mode[ 1]); 
-
-     return;
-}
-
 void vreproa8mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-  int speed;
-
-  speed=2;
-  if(shm_addr->equip.drive_type == VLBA2) {
-/* we don't knwo what to do for "alt2" on VLBA2 drive */
-    if (lcl->equalizer[ 0] == 0 )
-        speed = 1;
-  } else {
-/* we don't knwo what to do for "std" on VLBA drive */
-    if (lcl->equalizer[ 0] == 1)
-	speed = 1;
-  }
-
-  if(lcl->equalizer[ 0]==3) {
+  switch (lcl->bitsynch) {
+  case 0:
+    *data=0x14;
+    break;
+  case 1:
+    *data=0x24;
+    break;
+  case 2:
+    *data=0x34;
+    break;
+  case 3:
     *data=0x44;
-  } else if (lcl->equalizer[ 0]==4) {
+    break;
+  case 4:
     *data=0x54;
-  } else if (lcl->equalizer[ 1]==5) {
+    break;
+  case 5:
     *data=0x64;
-  } else if (speed == 1) {
-    *data= 0x34;   /* normal speed */
-  } else {
-    *data= 0x24;  /* double speed & unknown */
+    break;
+  default:
+    *data=0x34;
   }
 
   return;
@@ -251,6 +362,25 @@ unsigned data;
 }
 
 void mc91vrepro(lcl, data)
+struct vrepro_cmd *lcl;
+unsigned data;
+{
+
+       lcl->track[ 1] =  data & bits16on(6);
+
+       return;
+}
+void mc92vrepro(lcl, data)
+struct vrepro_cmd *lcl;
+unsigned data;
+{
+
+       lcl->track[ 0] =  data & bits16on(6);
+
+       return;
+}
+
+void mc93vrepro(lcl, data)
 struct vrepro_cmd *lcl;
 unsigned data;
 {
@@ -278,14 +408,36 @@ unsigned data;
        return;
 }
 
+void mc96vrepro(lcl, data)
+struct vrepro_cmd *lcl;
+unsigned data;
+{
+       lcl->equalizer[ 0] =  data & bits16on(2);
+
+       return;
+}
+
+void mc97vrepro(lcl, data)
+struct vrepro_cmd *lcl;
+unsigned data;
+{
+       lcl->equalizer[ 1] =  data & bits16on(2);
+
+       return;
+}
+
 void mc98vrepro(lcl, data)
 struct vrepro_cmd *lcl;
 unsigned data;
 {
 /* only allow head output A to formatter output A, for now */
 
-       lcl->mode[ 0] =  data & bits16on(3);
-       if(lcl->mode[ 0] != 0 && lcl->mode[ 0] != 1) lcl->mode[ 0]=-1;
+       lcl->mode[ 0] =  data & bits16on(2);
+
+       if(lcl->mode[ 0] != 0 && lcl->mode[ 0] != 1)
+	 lcl->mode[ 0]=-1;
+
+       lcl->head[0]= 1 + ((data >> 2) & 0x1);
 
        return;
 }
@@ -296,9 +448,24 @@ unsigned data;
 {
 /* only allow head output B to formatter output B, for now */
 
-       lcl->mode[ 1] =  data & bits16on(3);
-       if(lcl->mode[ 1] != 2 && lcl->mode[ 1] != 3) lcl->mode[ 1]=-1;
-       else lcl->mode[ 1]-=2;
+       lcl->mode[ 1] =  data & bits16on(2);
+       if(lcl->mode[ 1] != 2 && lcl->mode[ 1] != 3)
+	 lcl->mode[ 1]=-1;
+       else
+	 lcl->mode[ 1]-=2;
+
+       lcl->head[1]= 1 + ((data >> 2) & 0x1);
 
        return;
+}
+void mca8vrepro(lcl,data)
+struct vrepro_cmd *lcl;
+unsigned data;
+{
+  if(0xF && data != 0x4)
+    lcl->bitsynch=-1;
+
+    lcl->bitsynch= (data >>4)-1;
+
+  return;
 }
