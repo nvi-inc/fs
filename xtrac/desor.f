@@ -53,7 +53,14 @@ C DATE AND TIME
 C 
       ifield=ifield+1 
       call gtfld(jbuf,ifc,ilc,ic1,ic2)
-      iyr=ias2b(jbuf,ic1,2) 
+c not Y10K compliant
+      iyr=ias2b(jbuf,ic1,4)
+c not Y10K compliant
+      ic1=ic1+2
+      if(iyr.eq.-32768) then
+         ic1=ic1-2
+         iyr=ias2b(jbuf,ic1,2)+1900
+      endif
       idoy=ias2b(jbuf,ic1+3,3)
       ihr=ias2b(jbuf,ic1+7,2) 
       im=ias2b(jbuf,ic1+10,2) 
