@@ -47,6 +47,7 @@ C
 C   Voltage name to remember
 C
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       ich=ieq+1
       icm=iscn_ch(ibuf,ich,nchar,',')
       if(icm.eq.0) icm=nchar
@@ -64,13 +65,13 @@ C
         indx=v15flip
       else if(ichcm_ch(ibuf,ich,'vw0').eq.0) then
         indx=vw0
-        if(VLBA.eq.and(drive,VLBA)) then
+        if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
           ip(3)=-502
           goto 990
         endif
       else if(ichcm_ch(ibuf,ich,'vw8').eq.0) then
         indx=vw8
-        if(VLBA.eq.and(drive,VLBA)) then
+        if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
           ip(3)=-502
           goto 990
         endif

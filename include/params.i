@@ -11,6 +11,7 @@ c
       integer S2            ! S2 comparison bit variable
       integer VLBAG         ! VLBA geodesy rack
       integer VLBA2         ! VLBA drive type 2
+      integer MK3B          ! Mark III 1 head
       character*5 FS_ROOT
       integer MAX_BBC
       integer CH_PRIOR      ! chekr        realtime priority
@@ -30,6 +31,7 @@ c
       parameter ( S2  = z'08'   )
       parameter ( VLBAG = z'10'  )
       parameter ( VLBA2 = z'20'  )
+      parameter ( MK3B = z'40'  )
       parameter ( FS_ROOT='/usr2')
       parameter ( MAX_BBC = 14 )
       parameter ( CH_PRIOR=-04)

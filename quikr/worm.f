@@ -44,9 +44,10 @@ C
 C   Head to move
 C
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if((ichcm_ch(parm,1,'r').eq.0.or.ichcm_ch(parm,1,'2').eq.0)
-     &   .and.VLBA.ne.and(drive,VLBA)) then
+     &   .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
         ihd = 2
       else if(ichcm_ch(parm,1,'r').eq.0 .or.
      &        ichcm_ch(parm,1,'2').eq.0) then
@@ -55,7 +56,8 @@ C
       else if(ichcm_ch(parm,1,'w').eq.0 .or.
      &        ichcm_ch(parm,1,'1').eq.0) then
         ihd = 1
-      else if (cjchar(parm,1).eq.','.and.VLBA.ne.and(drive,VLBA)) then
+      else if (cjchar(parm,1).eq.','
+     &       .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
         ihd = 2
       else if (cjchar(parm,1).eq.',') then
         ihd = 1

@@ -47,6 +47,7 @@ C
       norec = 0
 C
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       iclcm = ip(1)
       ip(3) = 0
       if (iclcm.eq.0) then                     ! zero class number
@@ -74,7 +75,8 @@ C
       ich = ieq+1
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.','.and.VLBA.ne.and(drive,VLBA)) then
+      if (cjchar(parm,1).eq.','
+     &     .and.VLBA.ne.drive.and.MK3B.ne.drive_type) then
         kmic(1)=.false.
       else if (cjchar(parm,1).eq.',') then
         ip(3)=-501
@@ -99,7 +101,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kmic(2)=.false.
-      else if(VLBA.eq.and(drive,VLBA)) then
+      else if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
@@ -137,7 +139,8 @@ C
       ipas(1)=idir
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if(VLBA.eq.and(drive,VLBA).and.cjchar(parm,1).ne.',') then
+      if((VLBA.eq.drive.or.MK3B.eq.drive_type)
+     &     .and.cjchar(parm,1).ne.',') then
         ip(3)=-506
         goto 990
       else if(ichcm_ch(parm,1,'u').eq.0) then
@@ -280,7 +283,7 @@ C  read the postions
 C
       call fs_get_ipashd(ipashd)
       ihd=3
-      if(VLBA.eq.and(drive,VLBA)) ihd=1
+      if(VLBA.eq.drive.or.MK3B.eq.drive_type) ihd=1
       call mic_read(ihd,ipashd,kautohd_fs,pnow,ip)
       if(ip(3).ne.0) goto 800
 C
@@ -306,7 +309,7 @@ C
       nch = ichmv_ch(ibuf,nch,'/')
       call fs_get_posnhd(posnhd)
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
           nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
@@ -314,7 +317,7 @@ C
 C
       call fs_get_ipashd(ipashd)
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
           if(ipashd(i).eq.0) then
             call char2hol('u,',idum,1,2)
           else if(mod(ipashd(i),2).eq.0) then
@@ -337,14 +340,14 @@ C
       nch = mcoma(ibuf,nch)
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
           nch = nch+ir2as(pnow(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
           nch = nch+ir2as(poff(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
