@@ -27,6 +27,7 @@ C  880411 NRV DE-CMPLTD
 C  930407 nrv implicit none
 C  940609 nrv Satellite names have been moved to immediately
 C             follow the celestial sources.
+C 961101 nrv Codes undefined for this station are invalid too.
 C
       ISOR = 0
       I = 1
@@ -57,6 +58,13 @@ C
         WRITE(LUSCN,9230) LCOD
 9230    FORMAT(' CKOBS02 - FREQUENCY CODE ',A2,
      .  ' NOT IN YOUR SCHEDULE. QUITTING')
+        RETURN
+      ENDIF
+      if (nchan(istn,icod).eq.0) then
+        icod=0
+        WRITE(LUSCN,9240) LCOD
+9240    FORMAT(' CKOBS03 - FREQUENCY CODE ',A2,
+     .  ' not defined for your station. QUITTING')
         RETURN
       ENDIF
 C
