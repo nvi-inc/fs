@@ -22,7 +22,7 @@ C        ICH    - character counter
       integer*2 IBUF(20)                      ! Class buffer
       integer get_buf,ichcm_ch
       character cjchar
-      logical kdef,kfirst
+      logical kdef,kfirst,kmaxold
       integer isw(4)                          ! switch settings
       dimension iparm(2)                      ! parameters from gtprm
       dimension ireg(2)                       ! registers from exec calls
@@ -76,14 +76,17 @@ C                 <pcal>:  pcal control (if available), ON or OFF, default ON
 C
 C     2.1 ATTEN PARAMETER 1
 C
+      kmaxold=.false.
       ich = 1+ieq
       ist = ich
       call gtprm2(ibuf,ich,nchar,0,parm,ierr)
       if(ichcm_ch(iparm,1,'max').eq.0) then
+         kmaxold=.true.
         call fs_set_iat3if(iat3if)
         iold=iat3if
         iat=63
       else if(ichcm_ch(iparm,1,'old').eq.0) then
+         kmaxold=.true.
         iat=iolif3_fs
       else
         ich=ist
@@ -249,11 +252,11 @@ C     8. All MATCN requests are scheduled here, and then IFDIS called.
 C
 800   call run_matcn(iclass,nrec)
       call rmpar(ip)
-      if (ichold.ne.-99) then
+       if (ichold.ne.-99) then
         icheck(23) = ichold
         call fs_set_icheck(icheck(23),23)
       endif
-      if (ichold.ge.0) then
+      if (ichold.gt.0.or.(ichold.eq.0.and..not.kmaxold)) then
         icheck(23)=mod(ichold,1000)+1
         call fs_set_icheck(icheck(23),23)
       endif
