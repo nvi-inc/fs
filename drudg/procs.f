@@ -91,6 +91,16 @@ C 970210 nrv Add bit_density back to setup procedures.
 C 970224 nrv bit_density is only for VLBA racks, not Mk4
 C 970225 nrv Add call to PROCINTR
 C 970313 nrv Allow barrel roll only for VLBA racks.
+C 970416 nrv Do only 1 command for each BBC, check if it's done yet, and
+C            remove the check for USB only!
+C 970520 nrv Clean up procs section
+C 970609 nrv Add true VC bandwidth in parentheses for cases of missing
+C            filters.
+C 970610 nrv Set VC/BBC value to invalid -1.0 if LO is missing.
+C 970718 nrv If LO frequency > 100 GHz, insert the initial digit into the
+C            LO command, then format the remainder
+C 970729 nrv Make FREQLO into double precision, convert to single before
+C            formatting.
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec, 4=S2, 5=8 BBCs
@@ -107,12 +117,12 @@ C LOCAL VARIABLES:
       integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,
      .ilen,ich,ic1,ic2,ibuflen,itrk(max_track,max_headstack),
      .ig,ig0,ig1,ig2,ig3,
-     .im0,im1,im2,im3,
+     .im0,im1,im2,im3,igotbbc(max_bbc),
      .npmode,itrk2(max_track),
      .isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs
       logical kok,km3mode,km3be,km3a
       logical kvrack,kvrec,km3rack,km3rec,ks2rec,km4rack,km4rec,k8bbc,
-     .kinclude,klast8,kfirst8,klsblo
+     .kinclude,klast8,kfirst8,klsblo,knolo
       real spdips
         CHARACTER UPPER
         CHARACTER*4 STAT
@@ -121,9 +131,9 @@ C LOCAL VARIABLES:
         logical ex
         logical kdone
       double precision DRF,DLO,DFVC
-      real fvc(14),rfvc  !VC frequencies
+      real fvc(14),fr,rfvc  !VC frequencies
       integer Z8000,Z4000,Z100
-      integer i1,i2,i3,i4,nco
+      integer igig,i1,i2,i3,i4,nco
       integer ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
       integer iflch,ichcm_ch,ichmv_ch,iaddtr
       character*28 cpass,cvpass
@@ -824,6 +834,9 @@ C
 9910        format(/'PROCS02 - WARNING! LO frequencies are missing!'/
      .      '   BBC or VC frequency procedure will ',
      .      'not be correct, nor will IFD procedure.') 
+            knolo=.true.
+          else
+            knolo=.false.
           endif
 
           kfirst8 = .false.
@@ -846,11 +859,20 @@ C
             if (response(1:1).eq.'L') klast8=.true.
           endif
 
+C         Initialize the bbc array to "not written yet"
+          do ib=1,max_bbc
+            igotbbc(ib)=0
+          enddo
           DO ichan=1,nchan(istn,icode) !loop on channels
             ic=invcx(ichan,istn,icode) ! channel number
 C           Skip the LSB channels because they are duplicates
-            if (ichcm_ch(lnetsb(ic,istn,icode),1,'U').eq.0) then ! USB only
+C           Well that's stupid. Figure out a better way to check for
+C           duplicates.
+C           if (ichcm_ch(lnetsb(ic,istn,icode),1,'U').eq.0) then ! USB only
               ib=ibbcx(ic,istn,icode) ! BBC number
+C             If we already did this BBC, then skip it.
+              if (igotbbc(ib).eq.0) then ! do this BBC command
+                igotbbc(ib)=1
 C             For 8-BBC stations use the loop index number to get 1-7
               kinclude=.true.
               if (k8bbc) then
@@ -874,6 +896,7 @@ C                   Write out a max of 8 channels for 8-BBC stations
                 DFVC = DRF-DLO   ! BBCfreq = RFfreq - LOfreq
                 rFVC = DFVC
                 rFVC = ABS(rFVC)
+                if (knolo) rFVC=-1.0 ! set to invalid value
                 fvc(ib) = rfvc
                 if (kvrack) nch = ichmv_ch(ibuf,1,'BBC')
                 if (km3rack.or.km4rack) nch = ichmv_ch(ibuf,1,'VC')
@@ -944,7 +967,9 @@ C                 This effectively disables the translation to VLBA IFs.
 C               Converter bandwidth
                 if (km4rack.and.(vcband(ic,istn,icode).eq.1.0.or.
      .                           vcband(ic,istn,icode).eq.0.25)) then ! external
-                  NCH = ichmv_ch(ibuf,nch,'0.0')
+                  NCH = ichmv_ch(ibuf,nch,'0.0(')
+                  NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,NCH,6,3)
+                  NCH = ichmv_ch(ibuf,nch,')')
                 else
                   NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,NCH,6,3)
                 endif
@@ -955,7 +980,8 @@ C               Converter bandwidth
                 call hol2lower(ibuf,nch+1)
                 CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
               endif ! include this channel
-            endif ! USB only
+              endif ! do this BBC command
+C           endif ! USB only
           ENDDO !loop on channels
           if (km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -996,6 +1022,9 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
           nprocs=nprocs+1
           WRITE(LUSCN,9112) LNAMEP
 C
+            do i=1,max_bbc
+              igotbbc(i)=0
+            enddo
 C IFD command
           if (km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -1062,15 +1091,33 @@ C LO command
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'LO=')
             if (i1.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i1,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i1,istn,icode)
+              if (freqlo(i1,istn,icode).gt.100000.d0) then
+                igig=freqlo(i1,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i1,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
             NCH = MCOMA(IBUF,NCH)
             if (i2.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i2,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i2,istn,icode)
+              if (freqlo(i2,istn,icode).gt.100000.d0) then
+                igig=freqlo(i2,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i2,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
             NCH = MCOMA(IBUF,NCH)
             if (i3.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i3,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i3,istn,icode)
+              if (freqlo(i3,istn,icode).gt.100000.d0) then
+                igig=freqlo(i3,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i3,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
             call hol2lower(ibuf,nch)
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
@@ -1084,14 +1131,16 @@ C PATCH command
                 NCH = NCH + IB2AS(I,IBUF,NCH,1)
                 DO ic = 1,nchan(istn,icode)
                   iv=invcx(ic,istn,icode) ! channel number
-                  if (ichcm_ch(lnetsb(iv,istn,icode),1,'U').eq.0) then ! USB only
-                    ib=ibbcx(iv,istn,icode) ! VC number
+C                 if (ichcm_ch(lnetsb(iv,istn,icode),1,'U').eq.0) then ! USB only
+                  ib=ibbcx(iv,istn,icode) ! VC number
+                  if (igotbbc(ib).eq.0) then! do this BBC 
                     if ((ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0.
      .                  and.i.eq.1).or.
      .                  (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0.
      .                  and.i.eq.2).or.
      .                  (ichcm_ch(lifinp(iv,istn,icode),1,'3').eq.0.
      .                  and.i.eq.3)) then ! correct LO
+                      igotbbc(ib)=1
                       NCH = MCOMA(IBUF,NCH)
                       NCH = nch+IB2AS(ib,IBUF,NCH,2+z8000) ! VC number
                       if (i.eq.3) then !IF3 always high
@@ -1104,7 +1153,8 @@ C PATCH command
                         endif
                       endif
                     endif ! correct LO
-                  endif ! USB only
+                  endif ! do this BBC
+C                 endif ! USB only
                 ENDDO
                 call hol2lower(ibuf,nch)
                 CALL writf_asc(LU_OUTFILE,IERR,IBUF,((NCH+1))/2)
@@ -1144,19 +1194,43 @@ C
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'LO=')
             if (i1.gt.0) then 
-              NCH = NCH+IR2AS(FREQLO(i1,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i1,istn,icode)
+              if (freqlo(i1,istn,icode).gt.100000.d0) then
+                igig=freqlo(i1,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i1,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
               NCH = MCOMA(IBUF,NCH)
             if (i2.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i2,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i2,istn,icode)
+              if (freqlo(i2,istn,icode).gt.100000.d0) then
+                igig=freqlo(i2,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i2,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
               NCH = MCOMA(IBUF,NCH)
             if (i3.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i3,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i3,istn,icode)
+              if (freqlo(i3,istn,icode).gt.100000.d0) then
+                igig=freqlo(i3,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i3,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
               NCH = MCOMA(IBUF,NCH)
             if (i4.gt.0) then
-              NCH = NCH+IR2AS(FREQLO(i4,ISTN,ICODE),IBUF,NCH,8,2)
+              fr=freqlo(i4,istn,icode)
+              if (freqlo(i4,istn,icode).gt.100000.d0) then
+                igig=freqlo(i4,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqlo(i4,istn,icode)-igig*100000.d0
+              endif
+              NCH = NCH+IR2AS(FR,IBUF,NCH,8,2)
             endif
             nch=nch-1
             CALL IFILL(IBUF,NCH,1,oblank)
@@ -1388,49 +1462,45 @@ C LOADER procedure
 
 C 8. Finally, write out the procedures in the $PROC section.
 C Read each line and if our station is mentioned, write out the proc.
-      IF (IRECPR.NE.0)  THEN ! "procedures"
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-       DO WHILE (IERR.GE.0.AND.ILEN.NE.-1.AND.JCHAR(IBUF,1).NE.odollar)
-C DO BEGIN "read $PROC section"
+      IF (IRECPR.NE.0)  THEN ! procedures
+        rewind(lu_infile)
+        do i=1,irecpr-1
+          CALL READF_ASC(lu_infile,iERR,IBUF,ILEN,ILen)
+        enddo
+        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+        DO WHILE (IERR.GE.0.AND.ILEN.NE.-1.AND.JCHAR(IBUF,1).NE.odollar)
+C         read $PROC section
           ICH = 1
           KUS=.FALSE.
           CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
           DO I=IC1,IC2
             IF (JCHAR(IBUF,I).EQ.JCHAR(LSTCOD(ISTN),1)) KUS=.TRUE.
-            ENDDO
-C
-            IF (KUS) THEN
-C THEN BEGIN "a proc for us"
-        	CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-        	IF (IC1.NE.0) THEN
-C THEN BEGIN "write proc file"
-        	  CALL IFILL(LNAMEP,1,12,oblank)
-        	  IDUMMY = ICHMV(LNAMEP,1,IBUF,IC1,MIN0(IC2-IC1+1,12))
-        	  CALL CRPRC(LU_OUTFILE,LNAMEP)
-        	  WRITE(LUSCN,9112) LNAMEP
-        	  CALL GTSNP(ICH,ILEN,IC1,IC2)
-C
-        	  DO WHILE (IC1.NE.0)
-C DO BEGIN "get and write commands"
-        	    NCH = ICHMV(IBUF2,1,IBUF,IC1,IC2-IC1+1)
-        	    CALL IFILL(IBUF2,NCH,1,oblank)
-        	    call writf_asc(LU_OUTFILE,IERR,IBUF2,(NCH)/2)
-        	    CALL GTSNP(ICH,ILEN,IC1,IC2)
-C ENDW "get and write commands"
-        	  ENDDO
-C
-        	  CALL writf_asc_ch(LU_OUTFILE,IERR,'ENDDEF')
-C ENDT "write proc file"
-        	ENDIF
-C ENDT "a proc for us"
-            ENDIF
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-C         ENDW "read $PROC section"
           ENDDO
-C ENDT "procedures"
-        ENDIF
-        CLOSE(LU_OUTFILE,IOSTAT=IERR)
-        call drchmod(prcname,iperm,ierr)
+C
+          IF (KUS) THEN ! a proc for us
+            CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
+            IF (IC1.NE.0) THEN ! write proc file
+              CALL IFILL(LNAMEP,1,12,oblank)
+              IDUMMY = ICHMV(LNAMEP,1,IBUF,IC1,MIN0(IC2-IC1+1,12))
+              CALL CRPRC(LU_OUTFILE,LNAMEP)
+              WRITE(LUSCN,9112) LNAMEP
+              CALL GTSNP(ICH,ILEN,IC1,IC2)
+              DO WHILE (IC1.NE.0) ! get and write commands
+                NCH = ICHMV(IBUF2,1,IBUF,IC1,IC2-IC1+1)
+                CALL IFILL(IBUF2,NCH,1,oblank)
+                call hol2lower(ibuf,(nch+1))
+                call writf_asc(LU_OUTFILE,IERR,IBUF2,(NCH)/2)
+                CALL GTSNP(ICH,ILEN,IC1,IC2)
+              ENDDO ! get and write commands
+              CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
+            ENDIF ! write proc file
+          ENDIF ! a proc for us
+          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+        ENDDO ! read $PROC section
+      ENDIF ! procedures
+
+      CLOSE(LU_OUTFILE,IOSTAT=IERR)
+      call drchmod(prcname,iperm,ierr)
       write(luscn,'()')
 C
       RETURN
