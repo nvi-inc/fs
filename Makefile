@@ -1,7 +1,7 @@
 #
 VERSION = 9
 SUBLEVEL = 3
-PATCHLEVEL = 10
+PATCHLEVEL = 13
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
@@ -10,7 +10,8 @@ poclb skdrut vex rclco/rcl
 #
 EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
-quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn
+quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
+lognm
 #
 all:	libs execs
 #
