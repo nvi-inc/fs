@@ -260,8 +260,7 @@ m5_2_disk_record(ptr_in,lclc,lclm,ip) /* return values:
 	    goto found;
 	  }
 	}
-	ierr=-501;
-	goto error2;
+	lclc->record.record=-1;
       found:
 	break;
       case 2:
