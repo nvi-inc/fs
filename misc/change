@@ -1,0 +1,11 @@
+cd /usr2
+rm fs
+rm sched
+rm proc
+rm control
+rm st
+ln -s      fs-$1 fs
+ln -s   sched-$1 sched
+ln -s    proc-$1 proc
+ln -s control-$1 control
+ln -s    st-*-$1 st
