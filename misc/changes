@@ -1903,9 +1903,71 @@ Version 9.3.3 961203
            mcbcn/Makefile
            changed to send echo to log
 
-rcl lib
- clib/rcl_util.c
- clib/rclcn_res_util.c
- quikv/rcl_dis.c
- rclcn/rclcn.c
- clib/rclcn_req_util.c
+961220 WEH rclco
+           installed latest version 3.0
+
+961220 WEH clib/rclcn_req_util.c
+           clib/rclcn_res_util.c
+           clib/rcl_util.c
+           quikv/rcl_dis.c
+           rclcn/rclcn.c
+           updated for new rcl commands
+
+961220 WEH st.default/st-0.0.0/misc/stinstall
+           fixed incorrect use of FS_VERSION
+
+961220 WEH quikv/get_s2state.c
+961220 WEH quikv/get_s2speed.c
+961220 WEH quikv/get_s2tapetype.c
+961220 WEH quikv/s2st.c
+961220 WEH quikv/s2label.c
+           corrected error handling
+
+961220 WEH st.default/proc/s2station.prc
+           st.default/proc/vs2station.prc
+           add !+10s after et in loader
+
+961220 WEH chekr/s2recstatus.c
+           filter out any error message that happens more than twice in a row
+
+961220 WEH rclcn/rclcn.c
+           improved logging of echo responses
+
+Version 9.3.4 961220
+
+961227 WEH matcn/iat.f
+           remove "echo:" from echo log entries
+           add "debug:" to mark 4 fm debug log entries
+
+961227 WEH quikr/repro4.f
+           fix misuse of loop variable i, now j
+
+961227 WEH include/fscom_quik.i
+           remove duplicate declarations of ITRAKBUS_FS and KSREAD_FS
+
+961227 WEH fslb/sun.f
+           remove extraneous comma in double precision,conv
+
+961227 WEH newlb/pname.f
+           remove extra size declaration for ibuf_cm
+
+961227 WEH clib/cls_util.c
+           clib/shm_util.c
+           clib/skd_util.c
+           clib/brk_util.c
+           add (casts) to remove compiler warnings
+
+961227 WEH bosslb/kpast.f
+	   fix it(5) to remove g77 compiler warning
+
+961227 WEH quikr/repro4.f
+	   fix ip(5) to remove g77 compiler warning
+
+961227 WEH fmpsee/fmpclose.c
+           null closed DCB so that Linux 2.0 doesn't bomb for
+           bwork.f and sincom.f mishandling of dcb
+
+961227 WEH setcl/setcl.f
+           merged 9.3.4 changes into original 9.3.3 version
+
+Version 9.3.5 961227
