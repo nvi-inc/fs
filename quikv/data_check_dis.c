@@ -1,4 +1,4 @@
-/* mk5 disk_check SNAP command display */
+/* mk5 data_check SNAP command display */
 
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +12,7 @@
 #define MAX_OUT 256
 #define BUFSIZE 2048
 
-void disk_check_dis(command,itask,ip)
+void data_check_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
 long ip[5];
