@@ -3,28 +3,30 @@
 #define MAX_LINE 256
 
 int fmpreadstr_(dcb,error,cbuf,len)
-
-  FILE **dcb;
-  char *cbuf;
-  int *error,len;
+FILE **dcb;
+char *cbuf;
+int *error,len;
 {
-  int i,c,j;
+  int clen,i;
+  char *c;
 
-  c = fgetc(*dcb);
-  i = 0;
-  while ((c !=EOF) && (c !='\n')) {
-    cbuf[i]=c;
-    ++i;
-    c = fgetc(*dcb);
+  cbuf[0]=0;
+  c = fgets(cbuf,len,*dcb);
+
+  clen=strlen(cbuf);
+  if(clen>0 && cbuf[clen-1]=='\n') {
+    cbuf[--clen]=0;
   }
 
-  for (j=i;j<len;j++)
-    cbuf[j]=' ';
-
-  if (c == EOF) {
-    cbuf[i]='\0';
-    i = -1;
+  if(c == NULL) {
+    if(clen 	== 0) {
+      for (i=clen;i<len;i++)
+	cbuf[i]=' ';
+      return -1;
+    }
   }
- 
-  return(i);
+  for (i=clen;i<len;i++)
+    cbuf[i]=' ';
+
+    return clen;
 }
