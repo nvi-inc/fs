@@ -4,7 +4,7 @@ C     KPAST determines if the time IT1,IT2,IT3 (FS format)
 C           is in the past compared to IT (HP format).
 C     If IT(1)=0 then it is assumed IT should be the current time.
 C
-      dimension it(1)
+      dimension it(5)
       double precision tnow,t1
       logical know
 C
