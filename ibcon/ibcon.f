@@ -70,9 +70,9 @@ C        ICLREC - counter for outer loop over class records
 C        NADEV  - mnemonic name of device, first word of table
 C        IMDEV  - mode of device, from table's third word
 C 
-      integer ireg,mode,ipcode
-      parameter (ibufln= 128)
-      integer*2 ibuf(ibufln),ibuf2(ibufln)
+      integer ireg,ipcode
+      parameter (ibufln= 256)
+      integer*2 ibuf(ibufln),ibuf2(ibufln),istatk4(2),irdk4,ilvk4,ilck4
 C               - buffers for reading, writing
 C        ILEN   - length of above buffers 
       logical kini, kfirst, kgpib
@@ -85,9 +85,11 @@ C        length of device file names, up to 64 characters
       parameter (imaxdev=16)
 C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
-      integer idlen
-      integer rddev, opbrd, iserial,opdev, wrdev, idum
+      integer idlen,it(6)
+      integer rddev, opbrd, iserial,opdev, wrdev, idum,statbrd,rspdev
       integer idum,fc_rte_prior, no_after
+      double precision timnow,timlst(imaxdev)
+      integer*4 oldcmd(imaxdev)
       integer*2 moddev(imaxdev,idevln)
 C               - module device name
       integer idevid(imaxdev)   
@@ -97,18 +99,21 @@ C               - module table, word 1 = mnemonic,
 C                 word 2 = 0 for talk/listen devices
 C                          1 for talk-only devices 
 C                          2 for listen-only devices
+C                         +4 if SRQ supported
 C                 word 3 time-out value
       integer tmotbl(16)
 C                        table of time-out values microseconds
 C                        =0 disabled
+      character*5 name
+      integer*4 centisec(2)
 C 
 C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
       data kini/.false./,kfirst/.true./,kgpib/.true./
-      data minmod/0/, maxmod/4/
-      data ilen/256/
+      data minmod/0/, maxmod/12/
+      data ilen/512/
       data tmotbl/0,10,30,100,300,1000,3000,10000,  30000,    100000,
      &          300000, 1000000,3000000,10000000,30000000,100000000/
 C
@@ -117,10 +122,19 @@ C     PROGRAM STRUCTURE
 C
 C     1. First get parameters and initialize if necessary.
 C
+      call rcpar(0,name)
+      call char2hol('STAT',istatk4,1,4)
+      call char2hol('LV',ilvk4,1,2)
+      call char2hol('RD',irdk4,1,2)
+      call char2hol('LC',ilck4,1,2)
+c
       call setup_fscom
       call read_fscom
       idum=fc_rte_prior(FS_PRIOR)
-1     call wait_prog('ibcon',ip)
+      call fc_putpname('ibcon')
+c
+1     continue
+      call wait_prog('ibcon',ip)
       iclass = ip(1)
       nclrec = ip(2)
       iclasr = 0
@@ -139,7 +153,6 @@ C
       icount=0
       no_after=0
       do i=1,nclrec
-         call ifill_ch(ibuf,1,ilen,' ')
          ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
          if(ichcm_ch(ibuf,1,'no_untalk/unlisten_after').eq.0) THEN
             no_after=1
@@ -191,10 +204,13 @@ C
       ingpib = iflch(idevgpib,idevln)
       iserial=opbrd(idevgpib,ingpib,ierr,ipcode)  	!! OPEN BOARD
       if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
+      call fc_rte_time(it,it(6))
       do i=1,ndev   !! OPEN DEVICES
         idlen = iflch(moddev(1,i),idevln)
         idum=opdev(moddev(1,i),idlen,idevid(i),ierr,ipcode,modtbl(3,i))
         if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
+        timlst(i)=it(1)+it(2)*100.+it(3)*60.d2+it(4)*3600.d2
+        oldcmd(i)=-1
       enddo
       kini = .true.
       goto 1090
@@ -223,7 +239,6 @@ C
          goto 910
       endif
       do 900 iclrec = 1,nclrec
-        call ifill_ch(ibuf,1,ilen,' ')
         ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
         nchar = ireg
 	imode = ibuf(1)
@@ -233,68 +248,222 @@ C
         endif
 C  CHECK DEVICE NAME (FIRST WORD)
       do i=1,ndev 
-        if (ichcm(modtbl(1,i),1,ibuf(2),1,2).eq.0) goto 221
+        if (ichcm(modtbl(1,i),1,ibuf(2),1,2).eq.0) then
+           idev = i
+           nadev = modtbl(1,i)
+           imdev = modtbl(2,i)
+           goto 221
+        endif
       end do
+      if(imode.eq.9.or.imode.eq.10.or.imode.eq.12) then
+         idev=-1
+         call char2hol('  ',nadev,1,2)
+         imdev=0
+         goto 221
+      endif
       ierr = -3 
       goto 910
-221   idev = i
-      nadev = modtbl(1,i)
-      imdev = modtbl(2,i)
+c
+ 221  continue
+      if((imode.gt.4.and.imode.lt.9).or.imode.eq.11) then
+         ilimit=ibuf(3)
+      endif
 C
-      if (imode.EQ.2 .OR. imode.EQ.4) goto 400	!! JUMP ON A WRITE REQUEST 
+      if(idev.gt.0) then
+         call fc_rte_time(it,it(6))
+         timnow=it(1)+it(2)*100.+it(3)*60.d2+it(4)*3600.d2
+         if(timnow.lt.timlst(idev)) then
+            timlst(idev)=timlst(idev)-86400.0d2
+         endif
+      endif
+      if (imode.EQ.1 .OR. imode.EQ.3 .or.
+     $     imode.eq.5.or.imode.eq.6) then
 C
 C  3. HERE WE ARE READING DATA FROM A DEVICE.
 C
-      if (imdev.NE.0 .AND. imdev.NE.2) then
-        ierr = -6   !! LISTEN-ONLY DEVICE
-        goto 910
-      endif
-
-      ireg = rddev(imode,idevid(idev),ibuf,ilen,ierr,ipcode,300,
-     &     no_after)
-      if (ierr .eq. -4) then
-        idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
-      endif
-      if (ierr .LT. 0) goto 910      		!! GPIB READ ERROR CONDITION
+         if (and(imdev,3).NE.0 .AND. and(imdev,3).NE.1) then
+            ierr = -6           !! LISTEN-ONLY DEVICE
+            goto 910
+         endif
+         if(imode.eq.1) then
+            ibin=0
+            imax=30
+         else if(imode.eq.3) then
+            ibin=1
+            imax=256
+         else if(imode.eq.5) then
+            ibin=0
+            imax=ilimit
+         else if(imode.eq.6) then
+            ibin=1
+            imax=ilimit
+         endif
+         call fs_get_kecho(kecho)
+         ireg = rddev(ibin,idevid(idev),ibuf,imax,ierr,ipcode,300,
+     &        no_after,kecho)
+         if (ierr .eq. -4) then
+            idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
+         endif
+         if (ierr .LT. 0) goto 910 !! GPIB READ ERROR CONDITION
 
 C     IREG number of characters in the buffer
 
-      if (ireg .GT. ilen) then
-        ierr = -321 
-        goto 910
-      endif
+         if (ireg .GT. ilen) then
+            ierr = -321 
+            goto 910
+         endif
 
-      nclrer = nclrer + 1
-      idum = ichmv(ibuf2,3,ibuf,1,ireg)
-      ibuf2(1) = nadev				!!MNEMONIC DEVICE NAME 
-      call put_buf(iclasr,ibuf2,-ireg-2,'  ','  ')
-      goto 900
+         nclrer = nclrer + 1
+         idum = ichmv(ibuf2,3,ibuf,1,ireg)
+         ibuf2(1) = nadev       !!MNEMONIC DEVICE NAME 
+         call put_buf(iclasr,ibuf2,-ireg-2,'  ','  ')
+      else if(imode.eq.2.or.imode.eq.4) then
 C
 C
 C  4. HERE WE ARE WRITING DATA TO THE HPIB.
 C
-400   if (imdev.NE.0 .AND. imdev.NE.2) then
-        ierr = -7  				!! TALK-ONLY DEVICE
-        goto 910
-      endif
+         if (and(imdev,3).NE.0.and.and(imdev,3).ne.2) then
+            ierr = -7           !! TALK-ONLY DEVICE
+            goto 910
+         endif
 C
-      if (nchar.le.4) then
-        ierr = -9   				!! NO DATA TO WRITE
-        goto 910
-      endif
+         if (nchar.le.4) then
+            ierr = -9           !! NO DATA TO WRITE
+            goto 910
+         endif
 C
-      idum=wrdev(imode,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300,
-     &     no_after)
-      if (ierr .eq. -4) then
-        idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
+         call find_delay(nadev,ibuf(3),nchar-4,oldcmd(idev),timnow,
+     &        timlst(idev))
+         ibin=0
+         if(imode.eq.4) ibin=1
+         call fs_get_kecho(kecho)
+         idum=wrdev(ibin,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300,
+     &        no_after,kecho,0,centisec)
+         if (ierr .eq. -4) then
+            idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
+         endif
+
+         if (ierr .LT. 0) goto 910 !! GPIB WRITE ERROR CONDITION
+      else if(imode.eq.7.or.imode.eq.8.or.imode.eq.11) then
+C
+C  5. HERE WE ARE WRITING DATA TO THE HPIB and then reading.
+C
+         if (and(imdev,3).NE.0) then
+            ierr = -13           !! not a TALK/listen DEVICE
+            goto 910
+         endif
+C
+         if (nchar.le.6) then
+            ierr = -9           !! NO DATA TO WRITE
+            goto 910
+         endif
+C
+         call find_delay(nadev,ibuf(4),nchar-6,oldcmd(idev),timnow,
+     &        timlst(idev))
+         ibin=0
+         if(imode.eq.11) then
+            itime=1
+         else
+            itime=0
+         endif
+         call fs_get_kecho(kecho)
+         idum=wrdev(ibin,idevid(idev),ibuf(4),nchar-6,ierr,ipcode,300,
+     &        no_after,kecho,itime,centisec)
+         if (ierr .eq. -4) then
+            idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
+         endif
+
+         if (ierr .LT. 0) goto 910 !! GPIB WRITE ERROR CONDITION
+C
+C  have to delay for sake of K4 devices
+C
+         isleep=10
+         if(0.ne.iscns(ibuf(4),1,nchar-6,istatk4,1,4))then
+            isleep=20
+         else if(0.ne.iscns(ibuf(4),1,nchar-6,ilvk4,1,2)) then
+            isleep=70
+         else if(0.ne.iscns(ibuf(4),1,nchar-6,ilck4,1,2).or.
+     $           0.ne.iscns(ibuf(4),1,nchar-6,irdk4,1,2)) then
+            isleep=0
+         endif
+         call fc_rte_sleep(isleep)
+C
+         if(imode.eq.7.or.imode.eq.11) then
+            ibin=0
+            imax=ilimit
+         else if(imode.eq.8) then
+            ibin=1
+            imax=ilimit
+         endif
+         call fs_get_kecho(kecho)
+         ireg = rddev(ibin,idevid(idev),ibuf,imax,ierr,ipcode,300,
+     &        no_after,kecho)
+         if (ierr .eq. -4) then
+            idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
+         endif
+         if (ierr .LT. 0) goto 910 !! GPIB READ ERROR CONDITION
+
+C     IREG number of characters in the buffer
+
+         if (ireg .GT. ilen) then
+            ierr = -321 
+            goto 910
+         endif
+
+         nclrer = nclrer + 1
+         idum = ichmv(ibuf2,3,ibuf,1,ireg)
+         ibuf2(1) = nadev       !!MNEMONIC DEVICE NAME 
+         call put_buf(iclasr,ibuf2,-ireg-2,'  ','  ')
+         if(imode.eq.11) then
+            nclrer = nclrer + 1
+            call put_buf(iclasr,centisec,-8,'  ','  ')
+         endif
+      else if(imode.eq.9) then
+         call fs_get_kecho(kecho)
+         ireg=statbrd(ibuf,ierr,ipcode,300,kecho)
+         if (ierr .eq. -4) then
+            idum=ichmv_ch(ipcode,1,'  ')
+         endif
+         if (ierr .LT. 0) goto 910 !! GPIB READ ERROR CONDITION
+         nclrer = nclrer + 1
+         idum = ichmv(ibuf2,3,ibuf,1,INT_CHARS)
+         ibuf2(1) = nadev       !!MNEMONIC DEVICE NAME 
+         call put_buf(iclasr,ibuf2,-2-INT_CHARS,'  ','  ')
+      else if(imode.eq.10) then
+         inxt=1
+         do i=1,ndev
+            if(idev.le.0.or.idev.eq.i) then
+               if(and(modtbl(2,i),4).ne.0) then
+                  call fs_get_kecho(kecho)
+                  ireg=rspdev(idevid(i),ibuf,ierr,ipcode,300,kecho)
+                  if (ierr .eq. -4) then
+                     idum=ichmv_ch(ipcode,1,'  ')
+                  endif
+                  if (ierr .LT. 0) goto 910 !! GPIB READ ERROR CONDITION
+                  inxt=ichmv(ibuf2(2),inxt,ibuf,1,INT_CHARS)
+               else
+                  inxt=ichmv(ibuf2(2),inxt,-2,1,INT_CHARS)
+               endif
+            endif
+         enddo
+         nclrer = nclrer + 1
+         ibuf2(1) = nadev       !!MNEMONIC DEVICE NAME 
+         call put_buf(iclasr,ibuf2,-1-inxt,'  ','  ')
+      else if(imode.eq.12) then
+         call fs_get_kecho(kecho)
+         ireg=iclrdev(idevid(i),ierr,ipcode,300,kecho)
+         if (ierr .eq. -4) then
+            idum=ichmv_ch(ipcode,1,'  ')
+         endif
+         if (ierr .LT. 0) goto 910 !! GPIB READ ERROR CONDITION
       endif
-
-      if (ierr .LT. 0) goto 910     		!! GPIB WRITE ERROR CONDITION
-
 C
 C  9. END OF OUTER LOOP ON CLASS RECORDS.
 C
-
+      if(idev.gt.0) then
+         call fc_rte_time(it,it(6))
+         timlst(idev)=it(1)+it(2)*100.+it(3)*60.d2+it(4)*3600.d2
+      endif
 900   continue
 
 910   call clrcl(iclass)

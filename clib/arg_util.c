@@ -35,15 +35,21 @@ struct cmd_ds *command;       /* command ds */
 
      argc=0;
      old_ptr=equal_ptr+1;
-     ptr=strchr(old_ptr,',');
-     while(ptr!=NULL&& argc < MAX_ARGS) {
-       command->argv[argc++]=old_ptr;
-       *ptr='\0';
-       old_ptr=ptr+1;
-       ptr=strchr(old_ptr,',');
+     ptr=old_ptr;
+     while(*ptr!=0) {
+       if(*ptr == '\\') {
+	 char *lptr;
+	 for (lptr=ptr;*lptr!=0;lptr++)
+	   *lptr=*(lptr+1);
+       } else if (*ptr==',') {
+	 if(argc<MAX_ARGS)
+	   command->argv[argc++]=old_ptr;
+	 *ptr=0;
+	 old_ptr=ptr+1;
+       }
+       ptr++;
      }
-
-     if(ptr==NULL && strlen(old_ptr) > 0 && argc<MAX_ARGS) /* last argument */
+     if(strlen(old_ptr) > 0 && argc<MAX_ARGS) /* last argument */
        command->argv[argc++]=old_ptr;
 
      if(argc >= MAX_ARGS) {   /* ungracefully handle too many argument */

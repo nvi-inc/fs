@@ -12,6 +12,7 @@ C 970321 nrv Re-write for more flexibility.
 C 980728 nrv Remove the HEAD command, for dynamic tape allocation.
 C 980910 nrv Remove REWIND and just STOP at the end of a pass.
 C 980924 nrv Replace the HEAD command for RDV11.
+C 981208 nrv Remove it again.
 C
 C   COMMON BLOCKS USED
       include '../skdrincl/skparm.ftni'
@@ -56,11 +57,11 @@ C         nch = ichmv_ch(ibuf,nch,'REWIND) ')
       end if
 
 C     if (.not.kdyn) then ! head commands
-        nch = ichmv_ch(ibuf,nch,' head=(')
-        nch = nch + ib2as(irec,ibuf,nch,1) ! recorder number
-        nch = ichmv_ch(ibuf,nch,',')
-        nch = nch + ib2as(IHEAD,ibuf,nch,4)
-        nch = ichmv_ch(ibuf,nch,')')
+Cdyn    nch = ichmv_ch(ibuf,nch,' head=(')
+Cdyn    nch = nch + ib2as(irec,ibuf,nch,1) ! recorder number
+Cdyn    nch = ichmv_ch(ibuf,nch,',')
+Cdyn    nch = nch + ib2as(IHEAD,ibuf,nch,4)
+Cdyn    nch = ichmv_ch(ibuf,nch,')')
 C     endif
 C
       if (ktape) nch = ichmv_ch(ibuf,nch,'  !NEXT!')

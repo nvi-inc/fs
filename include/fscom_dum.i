@@ -28,7 +28,7 @@ c
      . vform_rate, vgroup(4), capstan, stchk(4), sterp, drive_type,
      . rack_type, wrhd_fs, vfm_xpnt, vrepromode(2), ichs2,
      . IBWVC(15), IFP2VC(14), vacsw, itpthick2, thin, vac4,
-     . imixif3, vfmenablehi, vfmenablelo 
+     . imixif3, vfmenablehi, vfmenablelo, iyrctl_fs, reccpu
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3), lgen(2),
@@ -63,7 +63,7 @@ c
      . vform_rate, vgroup, capstan, stchk, sterp, drive_type,
      . rack_type, wrhd_fs, vfm_xpnt, vrepromode, ichs2,
      . IBWVC, IFP2VC, vacsw, itpthick2, thin, vac4,
-     . imixif3, vfmenablehi, vfmenablelo,
+     . imixif3, vfmenablehi, vfmenablelo, iyrctl_fs, reccpu,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 

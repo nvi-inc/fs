@@ -82,6 +82,13 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"load")) {
             request.type=0;
+	    if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ||
+	       shm_addr->equip.rack == K4MK4 ) {
+	      setMK4FMrec(0,ip);
+	      if(ip[2]<0)
+		return;
+	    }
+
 	    if (shm_addr->equip.drive_type != VLBA2) {
 	      if(shm_addr->vacsw == 1 && shm_addr->thin!= 0 &&
 		 shm_addr->thin!=1) {
@@ -176,7 +183,8 @@ long ip[5];                           /* ipc parameters */
              goto error;
            } 
 
-	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ||
+	      shm_addr->equip.rack == K4MK4 ) {
 	     setMK4FMrec(0,ip);
 	     if(ip[2]<0)
 	       return;
@@ -214,7 +222,8 @@ long ip[5];                           /* ipc parameters */
              goto error;
            } 
 
-	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4  ||
+	      shm_addr->equip.rack == K4MK4) {
 	     setMK4FMrec(0,ip);
 	     if(ip[2]<0)
 	       return;
@@ -266,7 +275,8 @@ long ip[5];                           /* ipc parameters */
              ierr = lerr;
              goto error;
            } 
-	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	   if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4  ||
+	      shm_addr->equip.rack == K4MK4) {
 	     setMK4FMrec(0,ip);
 	     if(ip[2]<0)
 	       return;
@@ -328,6 +338,13 @@ long ip[5];                           /* ipc parameters */
              ierr = rec_dec(command->argv[0],&buffer,ip);
              kmove = TRUE;
              if (ierr!=0) goto error;
+	     if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ||
+		shm_addr->equip.rack == K4MK4 ) {
+	       setMK4FMrec(0,ip);
+	       if(ip[2]<0)
+		 return;
+	     }
+
          }
 
 parse:

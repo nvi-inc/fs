@@ -17,8 +17,12 @@ C    IP - FIeld System return parameters
 C    IP(3) = 0 if no error
 C
       call fs_get_drive_type(drive_type)
-      if(drive_type.eq.vlba2) then
+      call fs_get_drive(drive)
+      call fs_get_reccpu(reccpu)
+      if(drive.eq.VLBA.and.drive_type.eq.VLBA2) then
         call fc_v2_vlt_head(ihead,volt,ip)
+      else if((drive.eq.VLBA.or.drive.eq.VLBA4).and.reccpu.eq.162) then
+         call v_vlt_head(ihead,volt,ip)
       else
         call get_atod(ihead,volt,ip)
       endif

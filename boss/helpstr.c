@@ -62,6 +62,7 @@ int rlen;
   freq = system(outbuf);
 
   idum=fopen("/tmp/LS.NUM","r");
+  unlink("/tmp/LS.NUM");
 
   if(decloc != NULL)
     equip1=*(decloc+1);
@@ -73,6 +74,10 @@ int rlen;
     equip1='v';
   else if(VLBA4==*rack)
     equip1='u';
+  else if(K4==*rack)
+    equip1='k';
+  else if(K4MK4==*rack)
+    equip1='l';
   else
     equip1='_';
 
@@ -88,6 +93,8 @@ int rlen;
     equip2='u';
   else if(S2==*drive)
     equip2='s';
+  else if(K4==*drive)
+    equip1='k';
   else
     equip1='_';
 
@@ -122,5 +129,4 @@ int rlen;
     }
   }
   fclose(idum);
-  unlink("/tmp/LS.NUM");
 }

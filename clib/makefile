@@ -17,7 +17,10 @@ systracks_util.o rclcn_req_util.o rclcn_res_util.o rcl_util.o\
 user_info_util.o s2st_util.o s2tape_util.o s2rec_util.o rec_mode_util.o\
 data_valid_util.o s2label_util.o get_s2time.o tracks4_util.o trkfrm4_util.o\
 bsfo2code.o form4_util.o mvupper.o setMK4FMrec.o rvac_util.o wvolt_util.o\
-lo_util.o pcalform_util.o pcald_util.o pcalports_util.o
+lo_util.o pcalform_util.o pcald_util.o pcalports_util.o\
+ib_util.o k4ib_util.o k4st_util.o k4tape_util.o k4rec_util.o get_k3time.o\
+k4vclo_util.o k4vc_util.o k4vcif_util.o k4vcbw_util.o k3fm_util.o set_k3aux.o\
+get_k4time.o v_vlt_head.o k4label_util.o
 #
 CFLAGS = 
 #FFLAGS = 

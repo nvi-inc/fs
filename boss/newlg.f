@@ -82,6 +82,7 @@ C
       nch=mcoma(ib,nch)
       nch = nch + ib2as(i70kch,ib,nch,o'100000'+6)
       nch=mcoma(ib,nch)
+      call fs_get_iyrctl_fs(iyrctl_fs)
       nch = nch + ib2as(iyrctl_fs,ib,nch,o'100000'+6)
       nch=nch-1
       call logit3(ib,nch,lsor)
@@ -258,6 +259,36 @@ c
         nch=ichmv_ch(ib,nch,'mk4')
       else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
+      else if(rack.eq.K4.and.rack_type.eq.K41) then
+        nch=ichmv_ch(ib,nch,'k41')
+      else if(rack.eq.K4.and.rack_type.eq.K41U) then
+        nch=ichmv_ch(ib,nch,'k41u')
+      else if(rack.eq.K4.and.rack_type.eq.K42) then
+        nch=ichmv_ch(ib,nch,'k42')
+      else if(rack.eq.K4.and.rack_type.eq.K42A) then
+        nch=ichmv_ch(ib,nch,'k42a')
+      else if(rack.eq.K4.and.rack_type.eq.K42BU) then
+        nch=ichmv_ch(ib,nch,'k42bu')
+      else if(rack.eq.K4.and.rack_type.eq.K41K3) then
+        nch=ichmv_ch(ib,nch,'k41/k3')
+      else if(rack.eq.K4.and.rack_type.eq.K41UK3) then
+        nch=ichmv_ch(ib,nch,'k41u/k3')
+      else if(rack.eq.K4.and.rack_type.eq.K42K3) then
+        nch=ichmv_ch(ib,nch,'k42/k3')
+      else if(rack.eq.K4.and.rack_type.eq.K42AK3) then
+        nch=ichmv_ch(ib,nch,'k42a/k3')
+      else if(rack.eq.K4.and.rack_type.eq.K42BUK3) then
+        nch=ichmv_ch(ib,nch,'k42bu/k3')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K41MK4) then
+        nch=ichmv_ch(ib,nch,'k41/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K41UMK4) then
+        nch=ichmv_ch(ib,nch,'k41u/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42MK4) then
+        nch=ichmv_ch(ib,nch,'k42/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42AMK4) then
+        nch=ichmv_ch(ib,nch,'k42a/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42BUMK4) then
+        nch=ichmv_ch(ib,nch,'k42bu/mk4')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -279,6 +310,10 @@ c
         nch=ichmv_ch(ib,nch,'s2')
       else if(drive.eq.VLBA4.and.drive_type.eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
+      else if(drive.eq.K4.and.drive_type.eq.K41) then
+        nch=ichmv_ch(ib,nch,'k41')
+      else if(drive.eq.K4.and.drive_type.eq.K42) then
+        nch=ichmv_ch(ib,nch,'k42')
       else if(drive.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif

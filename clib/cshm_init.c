@@ -1,4 +1,4 @@
-/* initialization fro "C" shared memory area */
+/* initialization for "C" shared memory area */
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -99,7 +99,7 @@ void cshm_init()
   shm_addr->lo.sideband[3]=0;
 
   for (i=0;i<2;i++)
-    for (j=0;j<14;j++) {
+    for (j=0;j<16;j++) {
       shm_addr->pcalform.count[i][j]=0;
       shm_addr->pcald.count[i][j]=0;
     }
@@ -112,6 +112,17 @@ void cshm_init()
     shm_addr->bbc[i].source=-1;
 
   shm_addr->imixif3=-1;
+
+  shm_addr->k4tape_sqn[0]=0;
+
+  for(i=0;i<16;i++) {
+    shm_addr->k4vclo.freq[i]=0;
+    shm_addr->k4vc.lohi[i]=0;
+    shm_addr->k4vc.att[i]=0;
+    shm_addr->k4vc.loup[i]=0;
+  }
+
+  strncpy(shm_addr->k3fm.aux,"000000000000",12);
 
   return;
 }

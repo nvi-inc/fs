@@ -163,6 +163,7 @@ C
       iclass=0
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(MK3.eq.rack) THEN
         if(ihd.eq.2) go to 500
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
@@ -191,7 +192,14 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(MK4.eq.rack.or.VLBA4.eq.rack) THEN
+      else if(K4.eq.rack.and.
+     &       (K41K3.eq.rack_type.or.K41UK3.eq.rack_type.or.
+     &       K42K3.eq.rack_type.or.K42AK3.eq.rack_type.or.
+     &       K42BUK3.eq.rack_type)) then
+        if(ihd.eq.2) go to 500
+        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call fc_set_k3aux(lauxfm,ip)
+      else if(MK4.eq.rack.or.VLBA4.eq.rack.or.K4MK4.eq.rack) THEN
         call frmaux4(lauxfm4,posnhd)
         ibuf2(1) = 9
         call char2hol('fm/AUX 0x',ibuf2(2),1,9)
@@ -203,7 +211,7 @@ C
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else !vlba
+      else if(rack.eq.VLBA) then
         if(ihd.eq.2) go to 500
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         call fc_set_vaux(lauxfm,ip)

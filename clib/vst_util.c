@@ -80,7 +80,8 @@ char *ptr;
 		    (shm_addr->equip.rack == MK3 &&
 		     shm_addr->iratfm >= 0) ||
 		    ((shm_addr->equip.rack == MK4 ||
-	              shm_addr->equip.rack == VLBA4) &&
+	              shm_addr->equip.rack == VLBA4 ||
+		      shm_addr->equip.rack == K4MK4) &&
 		     shm_addr->form4.rate+shm_addr->form4.fan>= 3 &&
 		     shm_addr->form4.rate+shm_addr->form4.fan<= 12)
 		    )){
@@ -101,7 +102,8 @@ char *ptr;
 	      lcl->cips=100*((9e6/(1<<(0xf-shm_addr->vform.tape_clock)))/
 			     shm_addr->bit_density);
 	  else if(shm_addr->equip.rack == MK4 ||
-		  shm_addr->equip.rack == VLBA4)
+		  shm_addr->equip.rack == VLBA4 ||
+		  shm_addr->equip.rack == K4MK4)
 	    lcl->cips=100*((144e6/
 			    (1<<(8-shm_addr->form4.rate+shm_addr->form4.fan)))/
 			   shm_addr->bit_density);

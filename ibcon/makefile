@@ -1,4 +1,5 @@
-OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o sib.o
+OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o sib.o statbrd.o rspdev.o\
+echo_out.o find_delay.o iclrdev.o
 #
 CFLAGS =
 #

@@ -10,10 +10,10 @@
 # 970509 nrv Add WRSOR                                                #
 # 970603 nrv Add PRCOV                                                #
 # 971211 nrv Add IADDPC                                               #
-# 980910 nrv Add TIMOUT                                               #
-# 980916 nrv Add PRTXT                                                #
-# 980916 nrv Add TIMOUT                                               #
-# 980929 nrv Add K4TYPE                                               #
+# 981001 nrv Add PRTXT                                                #
+# 981001 nrv Add K4TYPE                                               #
+# 990113 nrv Add k4proc_type, k4snap_type. Remove k4type              #
+# 990113 nrv Add TIMOUT, TIMIN                                        #
 #                                                                     #
 #######################################################################
 
@@ -48,7 +48,8 @@ $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
 $(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o \
 $(DR)lstsumo.o $(DR)isecdif.o $(DR)psbar.o $(DR)copen.o $(DR)procintr.o \
 $(DR)read_snap1.o $(DR)drset.o $(DR)wrsor.o $(DR)prcov.o $(DR)iaddpc.o \
-$(DR)timin.o $(DR)timout.o $(DR)prtxt.o $(DR)k4type.o
+$(DR)k4proc_type.o $(DR)prtxt.o $(DR)k4snap_type.o \
+$(DR)timin.o $(DR)timout.o
 
 #
 # Set compiling and linking flags

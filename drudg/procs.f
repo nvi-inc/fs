@@ -123,12 +123,13 @@ C 980929 nrv Modifications for K4 per Ed's memo and Koyama's table.
 C 981001 nrv bit_density is for VLBA recorders (not racks)
 C 981028 nrv Close and re-open schedule file to find the $PROC line.
 C 981118 nrv Had skipped writing the bandwidth for Mk4 racks VCs.
+C 990113 nrv Add option for VLBA/Mk3/4 rack with K4 recorder.
 
 C Input
       integer iin ! 1=mk3, 
 C                   2=VLBA, 
 C                   3=hybrid = Mk3 rack+VLBA rec, 
-C                   4=S2, 
+C                   4=Mk4 (rack+rec), 
 C                   5=8 BBCs, 
 C                   6=VLBA4, 
 C                   7=K4-1 rack + DFC1100 rec 
@@ -138,6 +139,10 @@ C                  10=K4-2 rack + K3 fm + DFC1100
 C                  11=K4-2 rack + K4 fm + DFC1200
 C                  12=K4-2 rack + Mk4 fm + VLBA rec [Tsukuba now]
 C                  13=K4-2 rack + Mk4 fm + VLBA4 rec [Tsukuba future]
+C                  14=VLBA rack + DFC1100 [Fbks]
+C                  15=VLBA rack + DFC2100 
+C                  16=Mk34 rack + DFC1100 [Wettzell?]
+C                  17=Mk34 rack + DFC2200 
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC
@@ -156,7 +161,7 @@ C LOCAL VARIABLES:
      .isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs
       logical kok,km3mode,km3be,km3ac,km4done
       logical kvrack,kv4rack,kv4rec,kvrec,km3rack,km3rec,ks2rec,km4rack,
-     .km4rec,k8bbc,kk41rack,kk42rack,kk4rec,km4fmk4rack,
+     .km4rec,k8bbc,kk41rack,kk42rack,kk42rec,kk41rec,km4fmk4rack,
      .kinclude,klast8,kfirst8,klsblo,knolo
       real spdips
         CHARACTER UPPER
@@ -211,7 +216,8 @@ C   for the rack type.
       kv4rec=.false.
       ks2rec=.false.
       k8bbc=.false.
-      kk4rec=.false.
+      kk41rec=.false.
+      kk42rec=.false.
       kk41rack=.false.
       kk42rack=.false.
       km4fmk4rack=.false.
@@ -255,9 +261,9 @@ C       km4fmk4rack = ichcm_ch(lstrack(1,istn),1,'K4+M4FM').eq.0
         else if (iin.eq.6) then ! VLBA4 backend
           kv4rack=.true.
           kv4rec=.true.
-        else if (iin.eq.7) then ! K4 rec, K4-1 rack
+        else if (iin.eq.7) then ! K4 DFC1100 rec, K4-1 rack
           kk41rack=.true.
-          kk4rec=.true.
+          kk41rec=.true.
         else if (iin.eq.8) then ! Mk3 rec, K4-1 rack
           kk41rack=.true.
           km3rec=.true.
@@ -266,10 +272,10 @@ C       km4fmk4rack = ichcm_ch(lstrack(1,istn),1,'K4+M4FM').eq.0
           kvrec=.true.
         else if (iin.eq.10) then ! K4 DFC1100 rec, K4-2 rack
           kk42rack=.true.
-          kk4rec=.true. 
+          kk41rec=.true. 
         else if (iin.eq.11) then ! K4 DFC2100 rec, K4-2 rack
           kk42rack=.true.
-          kk4rec=.true. 
+          kk42rec=.true. 
         else if (iin.eq.12) then ! VLBA rec, K4-2 rack+Mk4 formatter
           kk42rack=.true.
           km4fmk4rack=.true.
@@ -278,6 +284,18 @@ C       km4fmk4rack = ichcm_ch(lstrack(1,istn),1,'K4+M4FM').eq.0
           kk42rack=.true.
           km4fmk4rack=.true.
           kv4rec=.true. 
+        else if (iin.eq.14) then ! VLBA rack, DFC1100 rec
+          kvrack=.true.
+          kk41rec=.true.
+        else if (iin.eq.15) then ! VLBA rack, DFC2100 rec
+          kvrack=.true.
+          kk42rec=.true.
+        else if (iin.eq.16) then ! Mk3/4 rack, DFC1100 rec
+          km4rack=.true.
+          kk41rec=.true.
+        else if (iin.eq.17) then ! Mk3/4 rack, DFC2100 rec
+          km4rack=.true.
+          kk42rec=.true.
         endif
       endif
 
@@ -325,7 +343,8 @@ C
       if (kvrec)   write(luscn,'("   >> VLBA recorder")')
       if (kv4rec)  write(luscn,'("   >> VLBA4 recorder")')
       if (ks2rec)  write(luscn,'("   >> S2 recorder")')
-      if (kk4rec)  write(luscn,'("   >> K4 recorder")')
+      if (kk41rec)  write(luscn,'("   >> K4 DFC1100 recorder")')
+      if (kk42rec)  write(luscn,'("   >> K4 DFC2100 recorder")')
 
       open(unit=LU_OUTFILE,file=PRCNAME,status=stat,iostat=IERR)
       IF (IERR.eq.0) THEN
@@ -587,16 +606,21 @@ C           If roll is NOT blank then use it.
           endif ! ks2rec
 C REC_MODE=<mode>
 C !* to mark the time
-          if (kk4rec) then ! K4 recorder
+          if (kk42rec.or.kk41rec) then ! K4 recorder 
             call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(IBUF,1,'REC_MODE=')
-            nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
-            CALL IFILL(IBUF,NCH,1,oblank)
-            call hol2lower(ibuf,(nch+1))
-            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
-            call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(ibuf,1,'!*')
+            nch = ichmv_ch(ibuf,1,'rec=synch_on')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+            if (kk42rec) then ! type 2 rec_mode
+              call ifill(ibuf,1,ibuflen,oblank)
+              nch = ichmv_ch(IBUF,1,'REC_MODE=')
+              nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
+              CALL IFILL(IBUF,NCH,1,oblank)
+              call hol2lower(ibuf,(nch+1))
+              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
+              call ifill(ibuf,1,ibuflen,oblank)
+              nch = ichmv_ch(ibuf,1,'!*')
+              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+            endif ! type 2 rec_mode
           endif ! K4 recorder
 C  BBCffb or VCffb
           if (km3rack.or.km4rack.or.kvrack.or.kv4rack.or.
@@ -630,8 +654,9 @@ C  PCALD=
 C  FORM=m,r,fan,barrel   (m=mode,r=rate=2*b) (no barrel for Mk4)
 C  For S2, leave out command entirely
 C  For 8-BBC stations, use "M" for Mk3 modes
-          if (kvrack.or.km3rack.or.km4rack.or.kv4rack.or.
-     .         km4fmk4rack .and..not.ks2rec) then
+          if (kvrack.or.km3rack.or.km4rack.or.kv4rack
+     .          .or.km4fmk4rack) then 
+            if (.not.(ks2rec.or.kk41rec.or.kk42rec)) then 
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'FORM=')
             if (km3mode) then
@@ -715,7 +740,8 @@ C             Put in fan only if non-zero
             endif ! non-S2 only
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-          endif ! kv4rack.or.kvrack or km3rac.or.km4rack but not S2
+          endif
+          endif ! kv4rack.or.kvrack or km3rac.or.km4rack but not S2 or K4
 C  FORM=RESET
           if (km3rack) then ! form=reset
             call ifill(ibuf,1,ibuflen,oblank)
@@ -724,7 +750,8 @@ C  FORM=RESET
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C  !*
-          if (kvrack.and..not.ks2rec) then ! wait mark for formatter reset
+          if (kvrack.and..not.ks2rec.and.
+     .    .not.kk41rec.and..not.kk42rec) then ! wait mark for formatter reset
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!*')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
@@ -929,7 +956,8 @@ C REPRO=byp,itrka,itrkb
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C DECODE=a,crc
-          if (kv4rack.or.km3rack.or.km4rack) then ! decode commands
+          if (kv4rack.or.km3rack.or.km4rack.and..not.
+     .    (ks2rec.or.kk41rec.or.kk42rec)) then ! decode commands
             if (km4rec) then ! set up with st
               call ifill(ibuf,1,ibuflen,oblank)
               nch = ichmv_ch(IBUF,1,'st=for,0,on')
@@ -943,14 +971,15 @@ C DECODE=a,crc
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif ! decode commands
 C !*+8s for VLBA formatter
-          if (kvrack.and..not.ks2rec) then ! formatter wait
+          if (kvrack.and..not.ks2rec.
+     .     and..not.kk41rec.and..not.kk42rec) then ! formatter wait
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'!*+8s')
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
-C !*+20s for K4 recorder
-          if (kk4rec) then ! formatter wait
+C !*+20s for K4 type 2 recorder
+          if (kk42rec) then ! formatter wait
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'!*+20s')
             call hol2lower(ibuf,(nch+1))
@@ -1735,7 +1764,7 @@ C       call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'rec=eject ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
-      else if (kk4rec) then
+      else if (kk41rec.or.kk42rec) then
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'rec=eject ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
@@ -1778,7 +1807,7 @@ C LOADER procedure
         nch = ichmv_ch(ibuf,1,'tape=reset ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
       endif
-      if (kk4rec) then
+      if (kk41rec.or.kk42rec) then
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'tape=reset ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)

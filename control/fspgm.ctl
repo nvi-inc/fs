@@ -16,5 +16,5 @@ setcl n  setcl &
 aquir n  aquir &
 antcn n  antcn &
 rclcn n  rclcn &
-pcald n  pcald &
 oprin n xterm -name oprin -j -e oprin &
+pcald n pcald &

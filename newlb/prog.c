@@ -1800,3 +1800,27 @@ void fs_get_imixif3__(imixif3)
 	{
 	  *imixif3 = shm_addr->imixif3;
 	}
+void fs_set_iyrctl_fs__(iyrctl_fs)
+	int *iyrctl_fs;
+	{
+	  shm_addr->iyrctl_fs = *iyrctl_fs;
+	}
+
+void fs_get_iyrctl_fs__(iyrctl_fs)
+	int *iyrctl_fs;
+	{
+	  *iyrctl_fs = shm_addr->iyrctl_fs;
+	}
+
+void fs_set_reccpu__(reccpu)
+	int *reccpu;
+	{
+	  shm_addr->reccpu = *reccpu;
+	}
+
+void fs_get_reccpu__(reccpu)
+	int *reccpu;
+	{
+	  *reccpu = shm_addr->reccpu;
+	}
+

@@ -149,6 +149,10 @@ C 980916 nrv Remove the "shift the .SNP file" option
 C 980916 nrv Remove K4 for the initial Y2K version.
 C 980924 nrv Remove .skd shift for the Y2K version.
 C 980929 nrv Add K4 back in, but with a single option. Add call to "k4type".
+C 990113 nrv Add call to "k4snap_type" to determine recorder type.
+C            Change "k4type" to "k4proc_type".
+C 990115 nrv Print initial prompt on two lines.
+C 990115 nrv Remove "k4snap_type" because both types are the same.
 C
 C Initialize some things.
 
@@ -273,13 +277,13 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 981016)')
+     .  '(NRV 990117)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
           write(luscn,9920)
-9920      format(' Schedule file name (.skd or .drg assumed, ',
-     .    '<return> if none, :: to quit) ? ',$)
+9920      format(' Enter schedule file name (.skd or .drg default,'/
+     .    ' <return> if using a .snp file, :: to quit) ? ',$)
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
         else ! command line file name
           call char2hol(cfile,ibuf,1,nch)
@@ -336,7 +340,7 @@ C       Opening message
         if (ix.gt.6) then ! too many letters
           write(luscn,9022)
 9022      format(' ERROR: Schedule name is too long. Please ',
-     .    'rename the file to have 6 characters or less before the ',
+     .    'rename the file '/'to have 6 characters or less before the ',
      .    'file extension.')
           goto 990
         endif
@@ -546,11 +550,11 @@ C
      .      ' 3 = Make Mk3/Mk4/V4 SNAP file (.SNP) ',
      .      '  9 = Change output destination, format '/
      .      ' 31= Make VLBA SNAP file (.SNP)       ',
-C    .      ' 10 = Shift the .SKD file  '/,
-     .      '                           '/,
-C    .      ' 32= Make K4 SNAP file (.SNP)         ',
-C    .      ' 11 = Shift the .SNP file  '/,
+     .      ' 10 = Shift the .SKD file  '/,
 C    .      '                           '/,
+     .      ' 32= Make K4 SNAP file (.SNP)         ',
+C    .      ' 11 = Shift the .SNP file  '/,
+     .      '                           '/,
      .      ' 4 = Print complete .SNP file         ',
      .      ' 12 = Make Mark III procedures (.PRC)'/,
      .      ' 5 = Print summary of .SNP file       ',
@@ -585,8 +589,8 @@ C    .      '                           '/,
 9372        format(
      .        '                                      ',
      .        ' 17 = Make VLBA4 procedures (.PRC)'/,
-C    .        '                                      ',
-C    .        ' 18 = Make K4 procedures (.PRC)'/,
+     .        '                                      ',
+     .        ' 18 = Make K4 procedures (.PRC)'/,
 C    .        ' 0 = Done with DRUDG '/
      .        ' ? ',$)
           else ! gotem in the vex file
@@ -759,7 +763,7 @@ c            I = nstnx
           ELSE IF (IFUNC.EQ.31) THEN
             CALL SNAP(cr1,2)
           ELSE IF (IFUNC.EQ.32) THEN
-            CALL SNAP(cr1,3)
+            call snap(cr1,3)
           ELSE IF (IFUNC.EQ.4) THEN
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
@@ -775,7 +779,7 @@ c            I = nstnx
           ELSE IF (IFUNC.EQ.17) THEN
               CALL PROCS(6) ! VLBA4 backend procedures
           ELSE IF (IFUNC.EQ.18) THEN
-              call k4type(cr1,iktype)
+              call k4proc_type(cr1,iktype)
               if (iktype.gt.0) CALL PROCS(6+iktype) 
           else if (ifunc.eq.21) then
             if (kdrg_infile) then ! .drg file

@@ -213,8 +213,23 @@ C  3.1 First find locations of = and @ signs.  Check first word.
 C 
 300   ichara = iscn_ch(ias,ifc,iec,'=')
       if (ichara.eq.0) ichara=iec+1
-      icharb = iscn_ch(ias,ifc,iec,'@')
-      if (icharb.eq.0) icharb=iec+1
+      icharb=0
+      istart=ifc
+      do while(icharb.eq.0)
+         icharb = iscn_ch(ias,istart,iec,'@')
+         if(icharb.eq.0) then
+            icharb=iec+1
+         else if(icharb.gt.ifc) then
+            if(ichcm_ch(ias,icharb-1,'\\').eq.0) then
+               do i=icharb,iec
+                  call pchar(ias,i-1,jchar(ias,i))
+               enddo
+               iec=iec-1
+               istart=icharb
+               icharb=0
+            endif
+         endif
+      enddo
       ichar1 = min0(ichara,icharb,iec+1)
 C                   Use first special character position
 C

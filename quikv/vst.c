@@ -96,7 +96,8 @@ parse:
 
 /* if MK4 FM control record */
 
-      if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+      if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ||
+	 shm_addr->equip.rack == K4MK4 ) {
 	setMK4FMrec(lcl.rec,ip);
 	if(ip[2]<0)
 	  return;

@@ -63,16 +63,16 @@ C
       do 290 i=1,nnames
          if (ichcm(lnames(1,i),1,lmatch,1,12).ne.0) goto 290
          index=i
-         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.31)
+         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.127)
      &        .or.
      &        (and(lnames(12,i),drive).eq.0
-     &        .and.lnames(12,i).ne.31)) then
+     &        .and.lnames(12,i).ne.127)) then
             do j=i+1,nnames
                if(ichcm(lnames(1,j),1,lmatch,1,12).eq.0.and.
      &              (and(lnames(11,j),rack).ne.0
-     &         .or. lnames(11,j).eq.31)
+     &         .or. lnames(11,j).eq.127)
      &         .and.(and(lnames(12,j),drive).ne.0
-     &         .or. lnames(12,j).eq.31) ) then
+     &         .or. lnames(12,j).eq.127) ) then
                index=j
                goto 280
             endif

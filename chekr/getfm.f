@@ -54,6 +54,7 @@ C
       if (ipwrfm.ne.0) inerr(7)=inerr(7)+1
       if (irunfm.ne.0) inerr(8)=inerr(8)+1
 
+      call fs_get_iyrctl_fs(iyrctl_fs)
       itfm(6)=ias2b(ibuf1,4,1)+(iyrctl_fs/10)*10
       itfm(5)=ias2b(ibuf1,5,3)
       itfm(4)=ias2b(ibuf2,3,2)
