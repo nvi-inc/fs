@@ -30,6 +30,8 @@ C 960913 nrv Change logic for accumulating S2 running time and determining
 C            whether tape has truly started. 
 C 960917 nrv If we come to end of file, output what's left at that point.
 C 960920 nrv Remove line output to new routine LSTSUMO.
+C 961105 nrv Check for READY instead of UNLOD so that the final scan
+C            is correctly output.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -236,7 +238,7 @@ C       Now get the source info for the new scan
             ksat = .true.
             endif
 
-        else if (index(cbuf,'UNLOD').ne.0) then
+        else if (index(cbuf,'READY').ne.0) then
           cnewtap = 'XXX'
           ifeet = 0
 
