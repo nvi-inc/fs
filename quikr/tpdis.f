@@ -22,7 +22,7 @@ C     CALLING SUBROUTINES: SLOWP
 C     CALLED SUBROUTINES: character utilities 
 C 
 C 3.  LOCAL VARIABLES 
-      integer*2 ibufs(20),ibufd(20),ibuf2(40) 
+      integer*2 ibufs(20),ibufd(20),ibuf2(40),lgenx(2)
 C               - input class buffers, output display buffer
 C        ILEN   - length of output buffer, chars
 C        ILENM   - length of input buffers, chars
@@ -96,10 +96,7 @@ C
 230   continue
       ireg(2) = get_buf(iclass,ibufd,-ilenm,idum,idum)
 C                   Read first record into display buffer 
-      call fs_get_drive(drive)
-      if (MK3.eq.and(MK3,drive)) then
-        ireg(2) = get_buf(iclass,ibufs,-ilenm,idum,idum)
-      endif
+      ireg(2) = get_buf(iclass,ibufs,-ilenm,idum,idum)
 C                   Read next record into  settings buffer
 C 
 C 
@@ -111,15 +108,17 @@ C
       call fs_set_irdytp(irdytp)
       call fs_set_itactp(itactp)
       call fs_set_lfeet_fs(lfeet_fs)
-      if (MK3.eq.and(MK3,drive)) then
+C
+      call fs_get_drive(drive)
+      if (MK3.eq.drive) then
         call ma2rp(ibufs,iremtp,iby,ieq,ibw,ita,itb,ial)
-        call fs_set_iremtp(iremtp)
+      else
+         call ma2rp4(ibufs,iremtp,iby,ieq,ita,itb)
       endif
       goto 320
 310   ilow = ilowtp
-      call fs_get_iremtp(iremtp)
 C
-320   nch = itped(-5,ilow,ibuf2,nch,ilen)
+320   nch = itped(-5,ilow,lgenx,ibuf2,nch,ilen)
 C                   Low tape setting
 C
       if (kcom) goto 500
@@ -135,33 +134,33 @@ C     END IF
 C                   Move footage count into output
       nch = mcoma(ibuf2,nch)
 C
-      nch = itped(-6,ifastp,ibuf2,nch,ilen)
+      nch = itped(-6,ifastp,lgenx,ibuf2,nch,ilen)
 C                   Fast speed button
       nch = mcoma(ibuf2,nch)
 C
       call fs_get_icaptp(icaptp)
-      nch = itped(-9,icaptp,ibuf2,nch,ilen)
+      nch = itped(-9,icaptp,lgenx,ibuf2,nch,ilen)
 C                   Capstan status
       nch = mcoma(ibuf2,nch)
 C
       call fs_get_istptp(istptp)
 c     since -7 < 0 -- following itped decodes FROM istptp
-      nch = itped(-7,istptp,ibuf2,nch,ilen)
+      nch = itped(-7,istptp,lgenx,ibuf2,nch,ilen)
 C                   Stop command status
       nch = mcoma(ibuf2,nch)
 C 
       call fs_get_itactp(itactp)
-      nch = itped(-4,itactp,ibuf2,nch,ilen) 
+      nch = itped(-4,itactp,lgenx,ibuf2,nch,ilen) 
 C                   Tach lock status
       nch = mcoma(ibuf2,nch)
 C 
       call fs_get_irdytp(irdytp)
-      nch = itped(-8,irdytp,ibuf2,nch,ilen) 
+      nch = itped(-8,irdytp,lgenx,ibuf2,nch,ilen) 
 C                   Ready status
       nch = mcoma(ibuf2,nch)
 C 
 C                   Top bit is rem/lcl
-      nch = itped(-3,iremtp,ibuf2,nch,ilen) 
+      nch = itped(-3,iremtp,lgenx,ibuf2,nch,ilen) 
 C 
 C 
 C     4. Now send the buffer to SAM.
