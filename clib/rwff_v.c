@@ -11,8 +11,6 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static float spd[ ]={0,3.375,7.875,16.875,33.75,67.5,135.,270.};
-
 void rwff_v(ip,isub,ierr)
 long ip[5];
 int *isub;
@@ -46,6 +44,12 @@ int *ierr;
         return;
       }
 
+      if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	setMK4FMrec(0,ip);
+	if(ip[2]<0)
+	  return;
+      }
+
       ichold= -99;                    /* check vlaue holder */
 
       ini_req(&buffer);                      /* format the buffer */
@@ -75,7 +79,7 @@ int *ierr;
           } else if (shm_addr->iskdtpsd == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
-            request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+            request.data=bits16on(16) & (int)(270*100.0);
           }
           shm_addr->ispeed=-3;
 	  shm_addr->cips=request.data;
@@ -91,7 +95,7 @@ int *ierr;
           } else if (shm_addr->iskdtpsd == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
-            request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+            request.data=bits16on(16) & (int)(270*100.0);
           }
           shm_addr->ispeed=-3;
 	  shm_addr->cips=request.data;
@@ -107,7 +111,7 @@ int *ierr;
           } else if (shm_addr->imaxtpsd == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
-            request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
+            request.data=bits16on(16) & (int)(270*100.0);
           }
           shm_addr->ispeed=-3;
 	  shm_addr->cips=request.data;
@@ -123,7 +127,7 @@ int *ierr;
           } else if (shm_addr->imaxtpsd == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
-            request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
+            request.data=bits16on(16) & (int)(270*100.0);
           }
           shm_addr->ispeed=-3;
 	  shm_addr->cips=request.data;
