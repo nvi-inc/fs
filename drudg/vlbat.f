@@ -1,4 +1,4 @@
-	SUBROUTINE VLBAT(LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+	SUBROUTINE VLBAT(ksw,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .            IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
      .            MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
      .            IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
@@ -8,13 +8,14 @@
 C
 C     VLBAT makes an observing file for VLBA DAR/REC systems
 C
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'statn.ftni'
-	include 'sourc.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C  INPUT:
+      logical ksw ! true if switching
         integer*2 LSNAME(4),LSTN(MAX_STN),LMON(2),
      .LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),lfreq,
      .ldsign2
@@ -34,7 +35,7 @@ C  LOCAL
 	integer*2 isname(23),blank10(5)
 	integer ispin,irec,idir,ispinoff,idum,ierr,ihead,idx,
      .ispins,iyrs,idayrs,ihrs,mins,iscs,iras,isra,idecs,idec2d,
-     .iwr,ichange,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,
+     .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,
      .mino,isco,isp,i,nch,ispm,isps,in
       real*4 spdips
 	logical ktape,ktrack
@@ -43,7 +44,8 @@ C                       next observation
         logical kspinoff ! true if we need to spin the tape down
 C                          to the end before changing it
         logical kend ! true if tape is positioned at 0 or max
-	integer Z4000,Z100,oapostrophe
+	integer Z4000,Z100
+        integer*2 oapostrophe
 	integer*2 ldirr
 	LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
 	INTEGER ib2as,ichmv,iflch,ichmv_ch ! function
@@ -88,6 +90,7 @@ C***********************************************************
 C special version to write extra header lines for Bob's pol
 C nrv 940617
 C***********************************************************
+C 960219 nrv Add KSW to call, true if switching.
 C
 C  Initialization
 
@@ -157,8 +160,6 @@ C  ihead is the head offset position in microns
 	IHEAD=ihdpos(IPAS(ISTNSK),istn,icod)
 C  ihddir is not really "direction", it is the corresponding pass within
 C  the mode. Use it to tell the wrtrack routine which tracks to record.
-C       if (idx.eq.1.and.idir.ne.1).or.(idx.eq.2.and.idir.ne.-1) then
-C       disagreement with usage of head positions and directions
         idx = ihddir(ipas(istnsk),istn,icod)
 C  The "corresponding pass" within the mode may be 1-28 depending on the
 C  mode. It is not simply the direction, except for modes B and C. 
@@ -190,7 +191,7 @@ C                                    stop time for the "setup" block
 	  iscs=isc
 	endif
         if (iobs.eq.0.or.idayrs.gt.idayrp) call wrdate(lu,iyr,idayrs)
-	call wrdur(1,0,999,ihrs,mins,iscs,izero2,3,lu,1)
+	call wrdur(ksw,1,0,999,ihrs,mins,iscs,izero2,3,lu,1)
 
 C  Source name, ra, dec in J2000 coordinates
 
@@ -226,19 +227,9 @@ C  Set up tracks for forward or reverse
 	ktape = .false.
         ktrack = .false.
 C       ktrack=.true. !****************** always write them for pol
-        if (idx.eq.1) ichange=0  ! record odd tracks
-        if (idx.eq.2) ichange=1  ! record even tracks
 
         IF (IDIR.NE.IDIRP) THEN !change direction
           ktrack = .true.  ! always write new tracks when changing direction
-C         IF (LDIR(ISTNSK).EQ.ldirf) THEN !change to reverse tracks
-C           ichange = 0
-C         ENDIF
-C         IF (LDIR(ISTNSK).EQ.ldirr) THEN !change to forward tracks
-C           ichange = 1
-C         ENDIF
-          if (idx.eq.1) ichange=0  ! record odd tracks
-          if (idx.eq.2) ichange=1  ! record even tracks
 	else
 	  ktape = .true.
 	ENDIF !change direction
@@ -250,7 +241,6 @@ C************************************************
 C       call vlbap(lu,icod,ierr)
 C************************************************
 	if (ktrack) then ! write out new tracks
-C         call wrtrack(ichange,lu,iblen,icod)
           call wrtrack(idx,lu,iblen,icod)
 	  call ifill(ibuf,1,iblen,32)
 	end if
@@ -265,7 +255,7 @@ C  Spin tape down to the end before changing it
      .         IYR3,IDAYR3,IHR3,MIN3,ISC3)
 C         Stop time of this block is previous stop+ispinoff+isortm
           if (idayr3.ne.idayrs) call wrdate(lu,iyr3,idayr3)
-	  call wrdur(1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
+	  call wrdur(ksw,1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
 	  ktape = .true.
 	  iwr = 0
 	  ispin = 330
@@ -288,7 +278,7 @@ C               or until the start time
             isco=isc
           endif
           if (idayro.gt.idayr3) call wrdate(lu,iyro,idayro)
-	  call wrdur(1,0,888,ihro,mino,isco,izero2,3,lu,1)
+	  call wrdur(ksw,1,0,888,ihro,mino,isco,izero2,3,lu,1)
 	  ktape = .true.
 	  iwr = 0
 	  ispin=0
@@ -312,7 +302,7 @@ C           Stop time of this block is previous stop+ispin+isortm
      .      IDAYR3,IHR3,MIN3,ISC3)
             if (idayr3.gt.idayrs) call wrdate(lu,iyr3,idayr3)
           endif
-	  call wrdur(1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
+	  call wrdur(ksw,1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
 	  ktape = .true.
 	  iwr = 0
 	  ispin = 330
@@ -322,7 +312,7 @@ C           Stop time of this block is previous stop+ispin+isortm
 	  call ifill(ibuf,1,iblen,32)
 C  Wait block - wait until start time
           if (idayr.gt.idayr3) call wrdate(lu,iyr,idayr)
-	  call wrdur(1,0,888,ihr,imin,isc,izero2,3,lu,1)
+	  call wrdur(ksw,1,0,888,ihr,imin,isc,izero2,3,lu,1)
 	  ktape = .true.
 	  iwr = 0
 	  ispin=0
@@ -352,19 +342,19 @@ C  Start the tape moving
 
 C  Loop begins in this block
 
-	IF (kswitch(nvset)) THEN
+	IF (ksw) THEN
 
 C  Scan stop time = end of loop blocks
 
 C wrdur(istart,idur,iqual,ih,im,is,izero2,izero3,lu,setup)
-	  call wrdur(14,15,1,ihr2,min2,isc2,izero2,1,lu,0)
+	  call wrdur(ksw,14,15,1,ihr2,min2,isc2,izero2,1,lu,0)
 	ELSE
-	  call wrdur(1,0,1,ihr2,min2,isc2,izero2,1,lu,0)
+	  call wrdur(ksw,1,0,1,ihr2,min2,isc2,izero2,1,lu,0)
 	ENDIF
 
 C  Set up converter frequencies
 
-	IF (kswitch(nvset)) THEN !write loop
+	IF (ksw) THEN !write loop
 	  call ifill(ibuf,1,iblen,32)
 
 C       Write out set 1 of BBC frequencies

@@ -4,10 +4,10 @@ C   This subroutine writes the header lines and creates
 C   the track and bbsynth commands for the scan blocks
 C   when writing a VLBA schedule.
 C
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'statn.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C   HISTORY:
 C     WHO   WHEN   WHAT
@@ -28,6 +28,8 @@ C     nrv   941122  Different pcalxbit and xfreq for 8-channel sequences,
 C                   per Peggy
 C     nrv   950628  For mode A, make nchanv=nchanv*2
 C 951213 nrv Mods for new Mark IV/VLBA setup
+C 960219 nrv Finish modes for new setups
+C 960228 nrv Make i2bit 3-d as are other arrays passed to wrhead
 C
 C
 C  INPUT:
@@ -46,11 +48,15 @@ C  LOCAL VARIABLES
 	integer iblen  !buffer length
 	integer immax  !maximum syn number
 	integer nvc    !video converter number
-	real*4 mmaxv(14)   !synth/1000
+	real*4 mmaxv(max_chan)   !synth/1000
+        real*4 synthv(max_chan)  !BBC freqs
+        logical ksw ! true if switching is being used
+        integer isyn(max_chan) ! synthesizer numbers A=2,B=1,C=4,D=3
+        integer i2bit(max_chan,max_stn,max_frq) ! 1 or 2-bit sampling per channel
 	character*3 cs   !set character
 	logical ksx      ! true for S/X frequencies
         logical k96      ! true if 9600 synth is in use
-	real*4 squal1(14), squal2(14) ! BBC freqs. grouped by sets
+	real*4 squal1(max_chan), squal2(max_chan) ! BBC freqs. grouped by sets
         integer*2 ldum
       integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,j,k,ileft,im
       real*8 fr
@@ -64,7 +70,7 @@ C        CODE encountered in the schedule.  If the code is changed
 C        for some observations, this could be incorrect.
 C You could write out a new set of header lines whenever the code
 C changes within the schedule. Keep track as you go through the observations.
-        icod=1
+C       icod=1
 
 C * comment with station name frequency code
 
@@ -82,14 +88,17 @@ C program = experiment-name
 
 C nchanr is the number of channels to be recorded.
 C For Mode A, there will be twice as many as for any mode C.
-C Can't really derive nchan unambiguously by simply
+C Can't really derive nchan unambiguously by simply (?? why)
 C counting the tracks assigned. Check i=1,2 for U,L and
-C pass 1 only.
+C pass 1 only. 
+C itras(ul,sm,chan,pass,stn,code)
 
         nchanr = 0
         do i=1,2 ! upper,lower
           do k=1,max_chan
-            if (itras(i,1,k,istn,icod).ne.-99) nchanr=nchanr+1
+            if (itras(i,1,k,1,istn,icod).ne.-99) nchanr=nchanr+1
+            i2bit(k,istn,icod)=1
+            if (itras(i,2,k,1,istn,icod).ne.-99) i2bit(k,istn,icod)=2
           enddo
         enddo
         imode=1
@@ -103,22 +112,37 @@ C pass 1 only.
 C format = <mode>
 
         call ifill(ibuf,1,iblen,32)
-        idum = ichmv(ibuf,1,lmode(1,istn,icod),1,8)
-        call writf_asc(lu,ierr,ibuf,8)
+        if (ichcm_ch(lmode(1,istn,icod),1,'A').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'a').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'B').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'b').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'C').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'c').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'D').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'d').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'E').eq.0.or.
+     .      ichcm_ch(lmode(1,istn,icod),1,'e').eq.0) then ! Mark III
+          nch = ichmv_ch(ibuf,1,'format = MARKIII ')
+        else ! other
+          nch = ichmv_ch(ibuf,1,'format = ')
+          nch = ichmv(ibuf,nch,lmode(1,istn,icod),1,8)
+        endif
+        call writf_asc(lu,ierr,ibuf,nch/2)
 
-C bits = (n,1) ... where n=1 to nchan
+C bits = (n,1 or 2) ... where n=1,nchan and 1 or 2 bits sampling
 
         call ifill(ibuf,1,iblen,32)
-        call wrhead(lu,ierr,'bits = ',7,1,idum,ldum,1,imode,icod)
+        call wrhead(lu,ierr,'bits = ',7,idum,i2bit,ldum,3,imode,icod)
 
 C samplerate = 2*vcbandwidthM, use channel 1 only
 C ******** should write out per channel, not juse channel 1
 
         call ifill(ibuf,1,iblen,32)
-        call char2hol('samplerate =  M ',ibuf,1,16)
+        nch=ichmv_ch(ibuf,1,'samplerate = ')
         ivcb=2*vcband(1,istn,icod)
-        idum = ib2as(ivcb,ibuf,14,1)
-        call writf_asc(lu,ierr,ibuf,8)
+        nch = nch + ib2as(ivcb,ibuf,nch,2)
+        nch=ichmv_ch(ibuf,nch,'M ')
+        call writf_asc(lu,ierr,ibuf,nch/2)
 
 C period = (n,1), ...  where n=1 to nchan
 
@@ -134,8 +158,9 @@ C bbfilter = (n,vcbandwidth M), ...  where n=1 to nchan
 C ******** should write out per channel, not juse channel 1
 
         call ifill(ibuf,1,iblen,32)
-        ivcb=vcband(1)
-        call wrhead(lu,ierr,'bbfilter = ',11,ivcb,idum,ldum,2,imode,icod)
+        ivcb=vcband(1,istn,icod)
+        call wrhead(lu,ierr,'bbfilter = ',11,ivcb,idum,ldum,2,imode,
+     .     icod)
         if (ierr.ne.0) then
           write(luscn,9200)
 9200    format(' VLBAH02 - Error writing bbfilter section of header.')
@@ -155,7 +180,9 @@ C level = (n,-1), ...  where n=1 to nchan
 C baseband = (n,BBC#(n)), ... where n=1 to nchan
 
         call ifill(ibuf,1,iblen,32)
-        call wrhead(lu,ierr,'baseband = ',11,idum,ibbcv,ldum,3,imode,icod)
+C should perhaps be an indirect array instead of invcx, like ivix??
+        call wrhead(lu,ierr,'baseband = ',11,idum,invcx,ldum,3,imode,
+     .      icod)
         if (ierr.ne.0) then
           write(luscn,9400)
 9400    format(' VLBAH04 - Error writing baseband section of header.')
@@ -165,7 +192,8 @@ C baseband = (n,BBC#(n)), ... where n=1 to nchan
 C ifchan = (n,IFchan(n)), ... where n=1 to nchan
 
         call ifill(ibuf,1,iblen,32)
-        call wrhead(lu,ierr,'ifchan = ',9,idum,idum,lifchan,4,imode,icod)
+        call wrhead(lu,ierr,'ifchan = ',9,idum,idum,lifinp,4,imode,
+     .       icod)
         if (ierr.ne.0) then
           write(luscn,9500)
 9500    format(' VLBAH05 - Error writing ifchan section of header.')
@@ -175,7 +203,8 @@ C ifchan = (n,IFchan(n)), ... where n=1 to nchan
 C sideband = (n,SB(n)), ... where n=1 to nchan
 
         call ifill(ibuf,1,iblen,32)
-        call wrhead(lu,ierr,'sideband = ',11,idum,idum,lsbv,4,imode,icod)
+        call wrhead(lu,ierr,'sideband = ',11,idum,idum,losb,4,imode,
+     .         icod)
         if (ierr.ne.0) then
           write(luscn,9600)
 9600    format(' VLBAH06 - Error writing sideband section of header.')
@@ -192,17 +221,19 @@ C bbsynth = (1,612.99),(8,667.01),(9,679.01),(10,669.01),(14,554.01)
 
         do ix=1,nvcs(istn,icod) !calculate BBC frequencies
           nvc = invcx(ix,istn,icod)
-          synthv(ix) = abs(freqrf(nvc,istn,icod) - synthf(nvset,ix))
+          synthv(ix) = abs(freqrf(nvc,istn,icod)-freqlo(nvc,istn,icod))
+          ksw=cset(nvc,istn,icod).ne.'   '
         end do
 
-        if (kswitch(nvset)) then ! set up arrays with freqs by mode
-          do ix=1,nchanv(nvset)
-            cs = csetv(nvset,ix)
+        if (ksw) then ! set up arrays with freqs by mode
+          do ix=1,nvcs(istn,icod)
+            nvc = invcx(ix,istn,icod)
+            cs = cset(nvc,istn,icod)
             if (cs.eq.'1,2') then
         	squal1(ix) = 0.0
         	squal2(ix) = 0.0
             else
-        	if (cs(1:1).eq.'0') then
+        	if (cs(1:1).eq.' ') then
         	   call getqual('1',ix,icod,squal1)
         	   call getqual('2',ix,icod,squal2)
         	else if (cs(1:1).eq.'1') then
@@ -225,10 +256,11 @@ C  Now write out the unswitched frequencies in the header
         iz = 0 ! channel counter
         call char2hol('bbsynth = ',ibuf,1,10)
         iy=11 ! character counter within buffer
-        do ix=1,nchanv(nvset)
-          cs = csetv(nvset,ix)
-          if (((kswitch(nvset)).and.(cs(1:3).eq.'1,2')).or.
-     .    (.not.kswitch(nvset))) then
+        do ix=1,nvcs(istn,icod)
+          nvc=invcx(ix,istn,icod)
+          cs = cset(nvc,istn,icod)
+          if (((ksw).and.(cs(1:3).eq.'1,2')).or.
+     .    (.not.ksw)) then
            do im=1,imode
               iy = ichmv_ch(ibuf,iy,'(')
 	      iz = iz + 1
@@ -286,8 +318,9 @@ C !* Don't know what the front end is ... for others
 
         call ifill(ibuf,1,iblen,32)
         ksx = .false.
-        do ix=1,nchanv(nvset)
-          fr = freqrf(ivcv(nvset,ix),icod)
+        do ix=1,nvcs(istn,icod)
+          nvc=invcx(ix,istn,icod)
+          fr = freqrf(nvc,istn,icod)
           if ((fr.lt.9000.0.and.fr.gt.8000.0).or.
      .      (fr.lt.3000.0.and.fr.gt.2000.0)) ksx=.true.
         enddo
@@ -313,8 +346,8 @@ C PCAL = 1MHz
         call char2hol('pcal = 1MHZ ',ibuf,1,12)
         call writf_asc(lu,ierr,ibuf,6)
 C   These lines allow the use of the pcal extractors on the DS board.
-C   If nchanv(nvset)=14 use these lines.
-        if (nchanv(nvset).eq.14) then
+C   If nchan=14 use these lines.
+        if (nvcs(istn,icod).eq.14) then
           call ifill(ibuf,1,iblen,32)
           call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S9),(6
      .,S11),(7,S13),(8,S1)',ibuf,1,68)
@@ -331,8 +364,9 @@ C   If nchanv(nvset)=14 use these lines.
           call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,10),(
      .6,10),(7,10),(8,0)',ibuf,1,68)
           call writf_asc(lu,ierr,ibuf,34)
-C   If nchanv(nvset)=8 use these lines.
-        else if (nchanv(nvset).eq.8) then
+C   If nchan=8 use these lines.
+        else if (nvcs(istn,icod).eq.8) then
+          if (ivcb.eq.8) then ! 8 MHz bandwidth use 7010
           call ifill(ibuf,1,iblen,32)
           call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S1),(6
      .,S3),(7,S5),(8,S7)',ibuf,1,68)
@@ -342,30 +376,74 @@ C   If nchanv(nvset)=8 use these lines.
      .,S4),(7,S6),(8,S8)',ibuf,1,68)
           call writf_asc(lu,ierr,ibuf,34)
           call ifill(ibuf,1,iblen,32)
-          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,2010)
-     .(6,2010),(7,2010),(8,2010) ',ibuf,1,78)
+          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,7010)
+     .(6,7010),(7,7010),(8,7010) ',ibuf,1,78)
           call writf_asc(lu,ierr,ibuf,39)
           call ifill(ibuf,1,iblen,32)
-          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,2010)
-     .(6,2010),(7,2010),(8,2010) ',ibuf,1,78)
+          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,7010)
+     .(6,7010),(7,7010),(8,7010) ',ibuf,1,78)
           call writf_asc(lu,ierr,ibuf,39)
+          else if (ivcb.eq.4) then ! 4 MHz bandwidth
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S1),(6
+     .,S3),(7,S5),(8,S7)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit2=(1,S2),(2,S4),(3,S6),(4,S8),(5,S2),(6
+     .,S4),(7,S6),(8,S8)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,3010)
+     .(6,3010),(7,3010),(8,3010) ',ibuf,1,78)
+          call writf_asc(lu,ierr,ibuf,39)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,3010)
+     .(6,3010),(7,3010),(8,3010) ',ibuf,1,78)
+          call writf_asc(lu,ierr,ibuf,39)
+          else if (ivcb.eq.2) then ! 2 MHz bandwidth
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S1),(6
+     .,S3),(7,S5),(8,S7)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit2=(1,S2),(2,S4),(3,S6),(4,S8),(5,S2),(6
+     .,S4),(7,S6),(8,S8)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,1010)
+     .(6,1010),(7,1010),(8,1010) ',ibuf,1,78)
+          call writf_asc(lu,ierr,ibuf,39)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,1010)
+     .(6,1010),(7,1010),(8,1010) ',ibuf,1,78)
+          call writf_asc(lu,ierr,ibuf,39)
+          endif ! multiple bandwidth choices
         endif
 
 C synth = (m,Synth(m)/1000), ... where m=1 to nsynth and nsynth=
 C         largest value of Syn#
 
-        immax = isyn(nvset,1)
-        do ix=2,nchanv(nvset)
-          if (immax.lt.isyn(nvset,ix)) then
-            immax = isyn(nvset,ix)
+        do ix=1,nvcs(istn,icod)
+          nvc=invcx(ix,istn,icod)
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'A').eq.0) isyn(nvc)=2
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'B').eq.0) isyn(nvc)=1
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'C').eq.0) isyn(nvc)=4
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'D').eq.0) isyn(nvc)=3
+        enddo
+        immax = -1
+        do ix=1,nvcs(istn,icod)
+          nvc=invcx(ix,istn,icod)
+          if (immax.lt.isyn(nvc)) then
+            immax = isyn(nvc)
           end if
         end do
         do ix=1,immax
           iy = 1
-          do while (iy.le.nchanv(nvset))
-            if (ix.eq.isyn(nvset,iy)) then
-        	mmaxv(ix) = synthf(nvset,iy)/1000.0
-        	iy = nchanv(nvset)
+          do while (iy.le.nvcs(istn,icod))
+            nvc=invcx(iy,istn,icod)
+            if (ix.eq.isyn(nvc)) then
+        	mmaxv(ix) = freqlo(nvc,istn,icod)/1000.0
+        	iy = nvcs(istn,icod)
             end if
             iy = iy + 1
           end do
@@ -425,7 +503,6 @@ C fexfer = (2,split)  for switched sequences only
 C Change to check for the use of 9600 synthesizer to determine 
 C if transfer switch is on.
 
-C	if (kswitch(nvset)) then
         if (k96) then
           call char2hol('fexfer = (2,split)',ibuf,1,18)
           call writf_asc(lu,ierr,ibuf,9)
