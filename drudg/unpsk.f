@@ -1,7 +1,7 @@
       SUBROUTINE UNPSK(IBUF,IBLEN,lsname,ICAL,lfreq,
      .IPAS,LDIR,IFT,LPRE,IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,
      .LPST,NSTN,lstn,lcable,MJD,UT,GST,IMON,IDA,LMON,
-     .LDAY,KERR,KFLG)!UNPACK SCHEDULE ENTRY 
+     .LDAY,KERR,KFLG,ioff)
 C
 C    UNPSK unpacks the record found in IBUF and puts the data into
 C              the output variables
@@ -19,7 +19,7 @@ C  OUTPUT:
      .          lcable(max_stn),lfreq,
      .          LMON(2),LDAY(2),ldir(max_stn),lpst(3)
       integer ift(max_stn),idur(max_stn),
-     .          ipas(max_stn),
+     .          ipas(max_stn),ioff(max_stn),
      .          ical,iyr,idayr,ihr,imin,
      .          isc,nstn,mjd,imon,ida,kerr
       logical KFLG(4)
@@ -32,6 +32,7 @@ C     lcable - cable wrap
 C     LMON, LDAY - name of month, day
 C     IYR, IDA, IHR, iMIN, ISC - start time of obs
 C     IDUR - duration
+C     ioff - offset for good data
 C     LPST - post-obs proc
 C     ICAL - set-up time
 C     lfreq - frequency code
@@ -61,6 +62,7 @@ C     890505 NRV CHANGED IDUR TO AN ARRAY, READ IN DURATIONS IF PRESENT
 C 930407 nrv implicit none
 C 960228 nrv Upper-case the frequency code
 C 970114 nrv Change 8 to max_sorlen
+C 970728 nrv Add IOFF to call, decode offsets
 C
       integer*2 LPASS(56)
 C
@@ -130,7 +132,7 @@ c     IDLE = IAS2B(IBUF,IC1,IC2-IC1+1)
 110     CONTINUE
 111   NSTN= I-1
       DO 120 I=1,NSTN
-        CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
+        CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2) ! 1F12345
         ICP = JCHAR(IBUF,IC1)
         IPAS(I) = ISCNC(LPASS,1,56,ICP)
         call char2hol('  ',LDIR(I),1,2)
@@ -156,5 +158,20 @@ C   IF NO DURATIONS, SET ALL TO THE ONE READ ABOVE
           IDUR(I)=IDURS
         ENDDO
       ENDIF !read/default durations
+
+C  Now read data start times, if present
+C  If no times, set all to zero
+C     CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2) <-- already done above
+      IF (IC1.NE.0) THEN !read offsets
+        DO I=1,NSTN
+          Ioff(I) = IAS2B(IBUF,IC1,IC2-IC1+1)
+          CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
+        ENDDO
+      ELSE !set to default
+        DO I=1,NSTN
+          Ioff(I)=0
+        ENDDO
+      ENDIF !read/default durations
+
       RETURN
       END
