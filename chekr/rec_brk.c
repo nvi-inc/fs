@@ -86,9 +86,9 @@ long ip[5],ip2[5];
   rte_rawt(&time);
   kmove_time = shm_addr->check.rc_mv_tm+1000 < time;
   if (shm_addr->check.vkmove && kmove_time) {
-      if (shm_addr->ispeed !=lcls.speed)
+      if (shm_addr->cips !=lcls.cips)
         icherr[2]=1;
-      if(shm_addr->ispeed != 0) {
+      if(shm_addr->cips != 0) {
         if (shm_addr->ICAPTP ==0)
            icherr[1]=1;
         if (shm_addr->idirtp != lcls.dir)
@@ -112,13 +112,13 @@ long ip[5],ip2[5];
 */
 
   if (shm_addr->check.vkenable && shm_addr->check.vkmove) {
-      if (shm_addr->venable.general==1 && shm_addr->ispeed != 0) {
-         icherr[7]=1;
-         for (i=0;i<4;i++) {
-           if (lcle.group[i]!=0)
-               icherr[7]=0;
-         }
+    if (shm_addr->venable.general==1 &&  shm_addr->cips != 0) {
+      icherr[7]=1;
+      for (i=0;i<4;i++) {
+	if (lcle.group[i]!=0)
+	  icherr[7]=0;
       }
+    }
   }
 
   if (shm_addr->check.vklowtape)
