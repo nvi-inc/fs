@@ -45,7 +45,7 @@ C 2. Write out the ASCII label just above the bars.
 c      write(lu,'(a)') cprint(1:3)
 c      cprint = char(27)//'2'//char(9)  ! line feed?
 c      write(lu,'(a)') cprint(1:3)
-	write(lu,'(a3,5a2)') cprint(1:3),(lbuf(i),i=1,5)
+	write(lu,'(a3,5a2,a1)') cprint(1:3),(lbuf(i),i=1,5),char(13)
 
 C 3. Write out the graphics buffer 5 times
 
@@ -58,21 +58,19 @@ C 3. Write out the graphics buffer 5 times
 		idum = ichmv(ibuf,ibyte,ZCR,1,1)
 		ib=ibyte
 	    endif
-	    write(lu,9300) (ibuf(k),k=1,(ib+1)/2)
-9300      format(400a2)
+	    write(lu,9300) (ibuf(k),k=1,(ib+1)/2),char(13)
+9300      format(400a2,a1)
 	  enddo
 	enddo
 
 	if (cprttyp.eq.'EPSON') then
-	  cprint = char(27)//'3_'
+	  cprint = char(27)//'3_'//char(13)
 	else !EPSON24
-	  cprint = char(27)//'3('
+	  cprint = char(27)//'3('//char(13)
 	endif
-	write(lu,'(a)') cprint(1:3)
-c      cprint = char(27)//'3'
-c      write(lu,'(a)') cprint(1:2)
-	cprint = char(27)//'A'//char(12)
-	write(lu,'(a3)') cprint(1:3)
+	write(lu,'(a)') cprint(1:4)
+	cprint = char(27)//'A'//char(12)//char(13)
+	write(lu,'(a)') cprint(1:4)
 
 	return
 	end
