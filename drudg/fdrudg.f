@@ -35,7 +35,7 @@ C LOCAL:
       character    lower, scode
       integer ivexnum,h2c,heqb,o36
       character*256 cbuf
-      integer i,j,k,l,ncs,ix,ixp,ic,ierr,
+      integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
       real*4 val
       integer ichmv_ch,ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
@@ -106,6 +106,10 @@ C 961031 nrv Change SNAP option to either Mk3/4 or VLBA rack.
 C 961104 nrv change ISKLEN to be the same size as IBUF (why were they 
 c            different variables?)
 C 970114 nrv Change 8 to max_sorlen
+C 970121 nrv Add iret to vob1inp call
+C 970121 nrv Null terminate TMPNAME here. Add IIN to LABEL call. Add
+C            option 61 for ps labels.
+C 970123 nrv Revise option 61 description. Change date to 970123.
 C
 C Initialize some things.
 
@@ -170,6 +174,7 @@ C***********************************************************
       else
         tmpname = 'DG.tmp'
       endif
+      call null_term(tmpname)
       ncs=trimlen(csked)
       if (csked.eq.'./') ncs=0
 C
@@ -219,7 +224,7 @@ C   Check for non-interactive mode.
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 970120)')
+     .  '(NRV 970123)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -413,19 +418,19 @@ C     response(1:1) = upper(response(1:1))
         nobs=0
         if (istn.eq.0) then ! get all in a loop
           do i=1,nstatn
-            call vob1inp(ivexnum,i,luscn,ierr) ! get the station's obs
+            call vob1inp(ivexnum,i,luscn,ierr,iret) ! get the station's obs
             if (ierr.ne.0) then
               write(luscn,'("FDRUDGxx - Error from vob1inp=",
-     .        i5)') ierr
+     .        i5,", iret=",i5)') ierr,iret
             else
               write(luscn,'("  Number of obs: ",i5)') nobs
             endif
           enddo
         else ! get one station's obs
-          call vob1inp(ivexnum,istn,luscn,ierr)
+          call vob1inp(ivexnum,istn,luscn,ierr,iret)
           if (ierr.ne.0) then
             write(luscn,'("FDRUDGxx - Error from vob1inp=",
-     .      i5)') ierr
+     .      i5,", iret=",i5)') ierr,iret
           else
             write(luscn,'("  Number of obs: ",i5)') nobs
           endif
@@ -468,11 +473,11 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .      ' 11 = Shift the .SNP file  '/,
      .      ' 5 = Print summary of .SNP file        ',
      .      ' 12 = Make Mark III procedures (.PRC) '/,
-     .      ' 6 = Make bar code tape labels         ',
+     .      ' 6 = Make Epson or laser (3x10) labels ',
      .      ' 13 = Make VLBA procedures (.PRC)'/,
-     .      ' 0 = Done with DRUDG                   ',
+     .      ' 61= Make PostScript (2x6) tape labels ',
      .      ' 14 = Make hybrid procedures (.PRC)'/,
-     .      '                                       ',
+     .      ' 0 = Done with DRUDG                   ',
      .      ' 15 = Make Mark IV procedures (.PRC)'/,
      .      '                                       ',
      .      ' 16 = Make 8-BBC procedures (.PRC)'/,
@@ -490,8 +495,10 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .      ' 10 = Shift the .SKD file  '/,
      .      ' 5 = Print summary of .SNP file        ',
      .      ' 11 = Shift the .SNP file  '/,
-     .      ' 6 = Make bar code tape labels         ',
+     .      ' 6 = Make Epson or laser (3x10) labels ',
      .      ' 12 = Make procedures (.PRC) '/,
+     .      ' 61= Make PostScript (2x6) tape labels ',
+     .      ' '/,
      .      ' 0 = Done with DRUDG                   ',
      .      ' '/,
      .      ' ? ',$)
@@ -504,11 +511,12 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .    '  7 = Re-specify stations'/
      .    ' 5 = Print summary of .SNP file        ',
      .    '  8 = Get a new schedule file'/
-     .    ' 6 = Make bar code tape labels         ',
+     .    ' 6 = Make Epson or laser (3x10) labels ',
      .    '  9 = Change output destination, width'/,
-     .    ' 0 = Done with DRUDG                   ',
+     .    ' 61= Make PostScript (2x6) tape labels ',
      .    ' 11 = Shift the .SNP file'/,
-     .    ' ? ',$)
+     .    ' 0 = Done with DRUDG                   ',
+     .   /' ? ',$)
         endif
 	IFUNC = -1
 	READ(LUUSR,*,ERR=700) IFUNC
@@ -516,12 +524,13 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
         read(command,*,err=991) ifunc
       endif
 
-	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31)
+	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and..not.kbatch) GOTO 700
-	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31)
+	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and.kbatch) GOTO 991
 	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.(ifunc.ge.16.and.ifunc.ne.31))) goto 700
+     .  .or.ifunc.eq.10.or.(ifunc.ge.16.and.ifunc.ne.31.and.
+     .   ifunc.ne.61))) goto 700
 
 	IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
@@ -621,7 +630,21 @@ c            I = nstnx
 	      end if
 	      cinname = snpname
               klab = .true.
-              call label(pcode,kskd,cr1,cr2,cr3,cr4)
+              call label(pcode,kskd,cr1,cr2,cr3,cr4,1)
+              klab = .false.
+	    ELSE IF (IFUNC.EQ.61) THEN
+	      if (nstnx.eq.1) then ! just one station
+		pcode = 1
+	      else if (i.eq.1) then ! first station
+		pcode = 2
+	      else if (i.eq.nstnx) then ! last station
+		pcode = 3
+	      else
+		pcode = 0
+	      end if
+	      cinname = snpname
+              klab = .true.
+              call label(pcode,kskd,cr1,cr2,cr3,cr4,2)
               klab = .false.
 	    ELSE IF (IFUNC.EQ.11) THEN
               cinname = snpname
