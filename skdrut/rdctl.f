@@ -1,4 +1,5 @@
-      SUBROUTINE rdctl(source_cat,antenna_cat,position_cat,equip_cat,
+      SUBROUTINE rdctl(source_cat,station_cat,antenna_cat,position_cat,
+     .                 equip_cat,
      .                 mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .                 rec_cat,hdpos_cat,
      .                 tracks_cat,flux_cat,flux_comments,
@@ -27,11 +28,13 @@ C 970228 nrv Add "label_size" key word and "rlabsize" to call.
 C 970304 nrv Add "cproc" to call, change "cdrudg" to "csnap".
 C 970304 nrv Add "option1", "option4", "option5" key words and options,
 C                and add "coption" to call.
+C 970328 nrv Add "station_cat"
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
 C
-      character*128  source_cat,antenna_cat,position_cat,equip_cat,
+      character*128  source_cat,station_cat,antenna_cat,position_cat,
+     .equip_cat,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
@@ -110,6 +113,8 @@ C  $CATALOGS
                 call gtfld(ibuf,ich,ilen,ic1,ic2)
                 if (ichcm_ch(ltmpnam,1,'SOURCE').eq.0) then
                   call hol2char(ibuf,ic1,ic2,source_cat) 
+                else if (ichcm_ch(ltmpnam,1,'STATION').eq.0) then
+                  call hol2char(ibuf,ic1,ic2,station_cat) 
                 else if (ichcm_ch(ltmpnam,1,'ANTENNA').eq.0) then
                   call hol2char(ibuf,ic1,ic2,antenna_cat) 
                 else if (ichcm_ch(ltmpnam,1,'POSITION').eq.0) then
