@@ -10,7 +10,7 @@
 #position window full screen from top left corner.
 # wm geometry . $vieX\x$vieY+0+0
 if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
-    set size 2.5  ;# Multipication factor to change size of plotting area
+    set size 2.5  ;# Multiplication factor to change size of plotting area
 } else {
     set size 3    ;# Multipication factor to change size of plotting area
 }
@@ -55,6 +55,7 @@ set rightfreqlist {}     ;#a list of all right pol frequencies in the datafile
 set leftfreqLabellist {} ;#a list of the detectors corresponding to the frequencies
 set rightfreqLabellist {};#a list of the detectors corresponding to the frequencies
 set timelist {}          ;#a list of all times in the datafile
+set editedlist {}        ;#a list of the RXG files which have been updated
 set scaling Auto         ;#sets autoscaling as default
 set hasScaled -1         ;#makes the manual scaling window appear only once
 set SDmenus_is_set 0     ;#makes the source and detector menus be set only once
@@ -704,10 +705,10 @@ proc occur {value list} {
     foreach el $list {
 	if [string match $el $value] {
 	    set count 1
-	    return count
+	    return $count
 	}
     }
-    return count
+    return $count
 }
 
 proc setSDmenus {} {
@@ -1741,11 +1742,13 @@ proc updateRXG {} {
 
 proc printRXG {} {
     global currentRXG currentSource currentTime currentPol currentFreq timeinseconds leftfreqlist rightfreqlist
-    global dataMatrix number_of_datalines timelist currentTimes writeflag
+    global dataMatrix number_of_datalines timelist currentTimes writeflag editedlist
     set writeflag 1
     set tempFile [open tempRXG w]
-    exec chmod a+w tempRXG
     set fileID [open $currentRXG r]
+    if {![occur $currentRXG $editedlist]} {
+	lappend $editedlist $currentRXG
+    }
     set k 1
     set done 0
     set tc "TCal(K)"
@@ -1801,23 +1804,8 @@ proc printRXG {} {
     }
     close $fileID
     close $tempFile
-    exec cp tempRXG realRXG
-    set tempFile [open tempRXG a]
-    set fileID [open $currentRXG r]
-    while {-1 != [gets $fileID line]} {
-	if {[string index $line 0] != "\*"} {
-	    puts $tempFile "*$line"
-	} else {
-	    puts $tempFile $line
-	}
-    }
-    close $fileID
-    close $tempFile
     exec cp tempRXG $currentRXG
-    #exec cp realRXG $currentRXG
     exec rm -f tempRXG
-    exec rm -f realRXG
-    
 }    
 
 proc outputFit choice {
@@ -1970,7 +1958,10 @@ proc fitToGainCurve {} {
 	
 proc updateRXGwithfit choice {
     global currentPol currentRXG coefflist DPFU steps rchi currentOutputFile newfile_filename 
-    global avgdpfu timeinseconds number_of_datalines dataMatrix avgtcal writeflag gctype
+    global avgdpfu timeinseconds number_of_datalines dataMatrix avgtcal writeflag gctype editedlist
+    if {![occur $currentRXG $editedlist]} {
+	lappend $editedlist $currentRXG
+    }
     set writeflag 1
     switch $choice {
 	1 {
@@ -2008,15 +1999,6 @@ proc updateRXGwithfit choice {
 		} else {
 		    puts $tempFile $line
 		} 		    
-	    }
-	    close $fileID
-	    set fileID [open $currentRXG r]
-	    while {-1 != [gets $fileID line]} {
-		if {[string index $line 0] != "\*"} {
-		    puts $tempFile "*$line"
-		} else {
-		    puts $tempFile $line
-		}
 	    }
 	    close $fileID
 	    close $tempFile
@@ -2068,15 +2050,6 @@ proc updateRXGwithfit choice {
 		}
 	    }
 	    close $fileID
-	    set fileID [open $currentRXG r]
-	    while {-1 != [gets $fileID line]} {
-		if {[string index $line 0] != "\*"} {
-		    puts $tempFile "*$line"
-		} else {
-		    puts $tempFile $line
-		}
-	    }
-	    close $fileID
 	    close $tempFile
 	    exec cp tempRXG $currentRXG
 	    exec rm -f tempRXG
@@ -2107,15 +2080,6 @@ proc updateRXGwithfit choice {
 		} else {
 		    puts $tempFile $line
 		} 		    
-	    }
-	    close $fileID
-	    set fileID [open $currentRXG r]
-	    while {-1 != [gets $fileID line]} {
-		if {[string index $line 0] != "\*"} {
-		    puts $tempFile "*$line"
-		} else {
-		    puts $tempFile $line
-		}
 	    }
 	    close $fileID
 	    close $tempFile
@@ -2436,6 +2400,7 @@ proc fileselection_dialog {} {
 	set LOTypelist {}        ;#a list of the type of the LOs (range or fixed)
 	set LOFirstlist {}       ;#a list of the LO frequencies (start freq. for range)
 	set LOSecondlist {}      ;#a list of the LO frequencies (end freq. for range)
+	set editedlist {}        ;#a list of the RXG files which have been updated
 	set legendNo 1           ;#makes the source legend be set only once
 	set header ""
 	destroy .menuBar.source.menu
@@ -2498,60 +2463,42 @@ proc createOverwriteWindow {} {
 }
  
 proc copyRXG {} {
-    global LONamelist
-    foreach LO $LONamelist {
-	set workRXG "/usr2/control/$LO.rxg.work"
-	set realRXG "/usr2/control/$LO.rxg"
+    global editedlist
+    foreach rxgfile $editedlist {
+	set workRXG $rxgfile
+	set realRXG [string range $rxgfile 0 end-5]
 	set tempFile [open tempRXG w]
 	set workID [open $workRXG r]
 	set k 1
 	while {-1 != [gets $workID line]} {
-	    if {[string index $line 0] != "\*"} {
-		if {$k==2} {
-		    set t [clock seconds]
-		    set today "[clock format $t -format %Y] [clock format $t -format %m] [clock format $t -format %d]"
-		    if {$line==$today} {
-			set changed 1
-		    } else {
-			set changed 0
-		    }
-		    break
-		}
-		incr k
-	    } 
-	} 		    
-	close $workID
-	if {$changed==1} {
-	    set workID [open $workRXG r]
-	    set k 1
-	    while {-1 != [gets $workID line]} {
-		if {[string index $line 0] != "\*"} {
-		    puts $tempFile $line
-		    incr k
-		} else {
-		if {$k>7} {
-		    break
-		}
-		    puts $tempFile $line
-		} 		    
-	    }
-	    close $workID
-	    set realID [open $realRXG r]
-	    while {-1 != [gets $realID line]} {
-		if {[string index $line 0] != "\*"} {
-		    puts $tempFile "*$line"
-		} else {
-		    puts $tempFile $line
-		}
-	    }
-	    close $realID
-	    close $tempFile
-	    exec cp tempRXG $realRXG
-	    exec rm -f tempRXG
-	    exec rm -f $workRXG
+	    puts $tempFile $line
+	    #if {[string index $line 0] != "\*"} {
+	#	puts $tempFile $line
+	#	incr k
+	#    } else {
+	#	if {$k>7} {
+	#	    break
+	#	}
+	#	puts $tempFile $line
+	#    } 		    
 	}
+	close $workID
+	set realID [open $realRXG r]
+	while {-1 != [gets $realID line]} {
+	    if {[string index $line 0] != "\*"} {
+		puts $tempFile "*$line"
+	    } else {
+		puts $tempFile $line
+	    }
+	}
+	close $realID
+	close $tempFile
+	exec cp tempRXG $realRXG
+	exec rm -f tempRXG
+	exec rm -f $workRXG
     }
 }
+
 
 
 proc readData filename {
