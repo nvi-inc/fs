@@ -6,9 +6,19 @@ version 1.0: First instance of User Interface.
 version 1.17: Examine LOGS brings up the current log file when activeated.
               TNX help file was added.
               Other cosmetics was done.
+
 version 1.18: Change font addition, by starting 'fsvue F', this will save
               the font to whatever you like and store it in a file called
               '/usr2/fs/fsvue/lib/my.font' next time you start fsvue it will
               continue to user that font.
               You can use the default fonts by 'fsvue D', this will use the
               fonts defined by you system.
+
+version 2.0   Version incresed to 2.0 because of a major change in fsvue.
+              fsvue is now a server for the Field System. All functions
+              preformed by the old FS can now be done with the fsvue GUI.
+              Also it has a Client that will start when old FS or fsvue 
+              server is running. fsvue can also be started remotely using
+              ssh -X logins.
+
+version 2.0.1 
