@@ -17,8 +17,10 @@ and parity bits. The specified bit density and the formatter set-
 up determine the default speed for the st command.
 
 The bit density can be set to any positive value less than 232.
-Useful values are 33333 for Mark III data-replacement format and
-34020 for the VLBA non-data-replacement format.
+Useful values for standard density are 33333 for Mark III/IV
+data-replacement format and 34020 for the VLBA non-data-replacement
+format; for high density, 56250 Mark III/IV data-replacement format
+and 56700 for the VLBA non-data-replacement format.
 
 When calculating speeds from bit densities it is useful to
 remember that for a nominal per track bit data rate of  4
