@@ -11,8 +11,23 @@ Fan must be on of 1:1, 1:2, 1:4.
 4F -204
 Barrel-roll must be off.
 ""
+4F -205
+Synch must be off or 0, ..., 16.
+""
 4F -303
 Trackform incompatable with VLBA fan-out.
+""
+4F -500
+No corresponding canned mode to prime formatter with.
+""
+4F -501
+Formatter was failing the synch test.
+""
+4F -502
+Formatter is failing the synch test.
+""
+4F -503
+Rack ID does not have at least two zero bits.
 ""
 4M -100
 no default for trackform track number
@@ -81,7 +96,7 @@ AQ  -12
 FIVPT or ONOFF is not dormant
 ""
 AQ  -13
-FIVPT or ONOFF did not start to execute within 1 minute
+FIVPT or ONOFF did not start to execute within 10 seconds.
 ""
 AQ  -20
 Source not acquired in alloted time
@@ -335,6 +350,15 @@ Error vacuum switching field in SW.CTL
 BO -209
 Error reading SW.CTL FMP ?FFF
 ""
+BO -210
+Procedure library is too big, trailing procedures ignored.
+""
+BO -211
+Can't open a new schedule when an experiment procedure is executing
+""
+BO -212
+Can't change experiment procedure library when an experiment procedure is executing
+""
 CH   -1
 Trouble with class buffer in CHEKR
 ""
@@ -546,10 +570,10 @@ CH -332
 Tape drive is not in remote
 ""
 CH -333
-Tape should be stopped and it's still moving
+Tape should be stopped and it's moving
 ""
 CH -334
-Tape should be moving and it isn't
+Tape should be moving and it's stopped
 ""
 CH -335
 Tape direction does not check with request
@@ -576,7 +600,7 @@ CH -342
 Tape is not in ready state (vacuum not ready)
 ""
 CH -343
-Rate generator is set to other than 720 or 880
+Tape rate generator does not agree with request.
 ""
 CH -344
 Tape should be recording, but no tracks are enabled.
@@ -719,6 +743,9 @@ program error: Recorder returned individual positions, overall was expected.
 CH -518
 Barrelroll mode does not agree with request.
 ""
+ER -902
+Unable to find ":" in S2 error decode response.
+""
 FM  007
 Checksum error
 ""
@@ -811,6 +838,9 @@ Diagnostic: Unknown device
 ""
 FP  -82
 TPI overflowed too many times
+""
+FP  -83
+Error reading user device.
 ""
 FP  -90
 program error: incorrect response count from mcbcn_v.
@@ -1098,7 +1128,7 @@ MA   -7
 MAT device is /dev/null, MAT devices inaccessible.
 ""
 MA -100
-Unable to open MAT device.
+Unable to open MAT device, ?WWW
 ""
 MA -101
 Number of entries from MATAD control file exceed table limit of ?WWW
@@ -1304,6 +1334,9 @@ Diagnostic: Unknown device
 NF  -82
 TPI overflowed too many times
 ""
+NF  -83
+Error reading user device.
+""
 NF  -90
 program error: incorrect response count from mcbcn_v2.
 ""
@@ -1363,6 +1396,201 @@ Skipping track ?WWW, incorrect checksum from data buffer.
 ""
 PC -103
 No response from data buffer, skipping track ?WWW.
+""
+PD  -92
+IF3 mixer must be selected in or out.
+""
+PD  -93
+VC external filter bandwidth not specified.
+""
+PD  -94
+VC not set-up.
+""
+PD  -95
+VC patching not specified.
+""
+PD  -96
+selected tone must be between 0 and VC (bandwidth plus pcal spacing).
+""
+PD  -97
+pcal spacing must be known to determine frequency of tone.
+""
+PD  -98
+LO must be set-up to determine pcal spacing.
+""
+PD  -99
+BBC must be set-up to determine frequency of tone.
+""
+PD -201
+Continuous parameter must be yes or no.
+""
+PD -202
+Bits parameter must be auto, 0, or 1.
+""
+PD -203
+Integration time must be a positive integer.
+""
+PF -102
+No default value for 2nd argument.
+""
+PF -103
+No default value for 3rd argument.
+""
+PF -104
+No default value for 4th argument.
+""
+PF -105
+No default value for 5th argument.
+""
+PF -106
+No default value for 6th argument.
+""
+PF -107
+No default value for 7th argument.
+""
+PF -108
+No default value for 8th argument.
+""
+PF -109
+No default value for 9th argument.
+""
+PF -110
+No default value for 10th argument.
+""
+PF -111
+No default value for 11th argument.
+""
+PF -112
+No default value for 12th argument.
+""
+PF -113
+No default value for 13th argument.
+""
+PF -114
+No default value for 14th argument.
+""
+PF -115
+No default value for 15th argument.
+""
+PF -116
+No default value for 16th argument.
+""
+PF -201
+First argument must a channel specifier.
+""
+PF -202
+2nd argument must specify tone number, #n, or frequency in MHz
+""
+PF -203
+3rd argument must specify tone number, #n, or frequency in MHz
+""
+PF -204
+4th argument must specify tone number, #n, or frequency in MHz
+""
+PF -205
+5th argument must specify tone number, #n, or frequency in MHz
+""
+PF -206
+6th argument must specify tone number, #n, or frequency in MHz
+""
+PF -207
+7th argument must specify tone number, #n, or frequency in MHz
+""
+PF -208
+8th argument must specify tone number, #n, or frequency in MHz
+""
+PF -209
+9th argument must specify tone number, #n, or frequency in MHz
+""
+PF -210
+10th argument must specify tone number, #n, or frequency in MHz
+""
+PF -211
+11th argument must specify tone number, #n, or frequency in MHz
+""
+PF -212
+12th argument must specify tone number, #n, or frequency in MHz
+""
+PF -213
+13th argument must specify tone number, #n, or frequency in MHz
+""
+PF -214
+14th argument must specify tone number, #n, or frequency in MHz
+""
+PF -215
+15th argument must specify tone number, #n, or frequency in MHz
+""
+PF -216
+16th argument must specify tone number, #n, or frequency in MHz
+""
+PF -217
+17th argument must specify tone number, #n, or frequency in MHz
+""
+PF -301
+No saved value for 1st argument.
+""
+PF -302
+No saved value for 2nd argument.
+""
+PF -303
+No saved value for 3rd argument.
+""
+PF -304
+No saved value for 4th argument.
+""
+PF -305
+No saved value for 5th argument.
+""
+PF -306
+No saved value for 6th argument.
+""
+PF -307
+No saved value for 7th argument.
+""
+PF -308
+No saved value for 8th argument.
+""
+PF -309
+No saved value for 9th argument.
+""
+PF -310
+No saved value for 10th argument.
+""
+PF -311
+No saved value for 11th argument.
+""
+PF -312
+No saved value for 12th argument.
+""
+PF -313
+No saved value for 13th argument.
+""
+PF -314
+No saved value for 14th argument.
+""
+PF -315
+No saved value for 15th argument.
+""
+PF -316
+No saved value for 16th argument.
+""
+PP -101
+No default for first pcalport VC.
+""
+PP -102
+No default for second pcalport VC.
+""
+PP -201
+First pcalport VC must be one of 1,2,3,4,9,10,11, or 12.
+""
+PP -202
+Second pcalport VC must be one of 5,6,7,8,13,14,15, or 16.
+""
+PP -401
+Can't read which ports are in use.
+""
+PP -402
+Porgram error: Impossible situation in pcalports_dis.
 ""
 QA -101
 No default for tape number.
@@ -1520,6 +1748,9 @@ AUX data differs from expected value on track ?W.
 QG -306
 Command must be set up first.
 ""
+QG -307
+Parity command doesn't support your combination of rack and recorder.
+""
 QG -308
 Reproduce electronics from HEAD.CTL not set correctly.
 ""
@@ -1634,6 +1865,9 @@ Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,V1...V15,HD,RX.
 QN -301
 Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,B1...B16,RC.
 ""
+QO   -1
+No parameters permitted for track command.
+""
 QO -101
 No default for first offset.
 ""
@@ -1653,7 +1887,10 @@ QO -302
 WARNING: ANTCN not being run, antenna device is /dev/null.
 ""
 QO -401
-No default for BEAMx= until LO and IFD have been setup.
+No default for BEAMx= until LO has  been setup.
+""
+QO -400
+Midband freq and antenna diameter must both be non-zero for default BEAMx=.
 ""
 QO -402
 Error specifying beamsize.
@@ -1687,6 +1924,9 @@ First flux value must be a number.
 ""
 QO -412
 Second flux value must be a number.
+""
+QO -413
+No default for beam5 or beam6.
 ""
 QO -502
 IF3 must be set-up first.
@@ -1724,14 +1964,11 @@ PCALR not dormant
 QP -302
 PCALR not present
 ""
-QQ -101
-You cannot default the whole command
-""
 QQ -102
 No default for patching, you must give at least one
 ""
 QQ -201
-Parameter must be LO1, LO2, or LO3, no default
+LO parameter must be LO1, LO2, or LO3.
 ""
 QQ -202
 VC number must be from 1 to 14
@@ -1902,7 +2139,7 @@ QZ -201
 Axis must be HADC, AZEL, XYEW, or XYSN.
 ""
 QZ -202
-Detector device must be VC1, ..., VC14, IF1, IF2, IF3.
+Detector device must be one of the allowed detectors for your equipment or u5 or u6.
 ""
 QZ -203
 Cal noise source temp not retrievable from COMMON.
@@ -1950,7 +2187,7 @@ QZ -402
 Integration period must be between 1 and 10.
 ""
 QZ -403
-Detector device 1 must be VC1, ..., VC14, IF1, IF2, or IF3.
+Detector device 1 must be one of the allowed detectors for your equipment or u5 or u6.
 ""
 QZ -404
 Cal noise source temp for device 1 not retrievable from COMMON.
@@ -1959,7 +2196,7 @@ QZ -405
 Beam size for device 1 was not retrievable from COMMON.
 ""
 QZ -406
-Detector device 2 must be VC1, ..., VC14, IF1, IF2 or IF3.
+Detector device 1 must be one of the allowed detectors for your equipment or u5 or u6.
 ""
 QZ -407
 Cal noise source temp for device 2 not retrievable from COMMON.
@@ -2007,22 +2244,49 @@ QZ -505
 VC for device 2 was not setup.
 ""
 Q* -101
-You cannot default all the LO's
+No default for LO channel
+""
+Q* -102
+No default for LO frequency
+""
+Q* -105
+No default for LO pcal spacing
 ""
 Q* -201
-LO frequency 1 must be a positive real number
+LO channel must be loa/lob/loc/lod for VLBA/VLBA4, lo1,lo2,lo3 for MK3/MK4
 ""
 Q* -202
-LO frequency 2 must be a positive real number
+LO frequency positive real number
 ""
 Q* -203
-LO frequency 3 must be a positive real number
+LO sideband must be one of unknown, usb, or lsb.
 ""
 Q* -204
-LO frequency 4 must be a positive real number
+LO polarization must be one of unknown, rcp, or lcp.
+""
+Q* -205
+LO pcal spacing must be a positive real number or one of unknown or off.
+""
+Q* -205
+LO pcal offset must be a positive real number.
+""
+Q* -301
+Previous value not permitted for LO channel.
+""
+Q* -302
+Previous value not permitted for LO frequency.
+""
+Q* -303
+Previous value not permitted for LO sideband.
 ""
 Q* -304
-No fourth frequency for Mark III & Mark IV   
+Previous value not permitted for LO polarization.
+""
+Q* -305
+Previous value not permitted for LO pcal spacing.
+""
+Q* -301
+Previous value not permitted for LO pcal offset.
 ""
 Q# -201
 An invalid number was specified for an LU
@@ -2435,11 +2699,17 @@ Tape thickness must be set with LABEL=... before loading
 RC -401
 program error: incorrect number of responses in rec.
 ""
+RD -101
+No default for data valid flag.
+""
+RD -102
+No default for playback enable flag.
+""
 RD -201
-Data valid flag mus be "on" or "off".
+Data valid flag must be "on" or "off".
 ""
 RD -202
-Playback enable flage must be "use" or "ignore".
+Playback enable flag must be "use" or "ignore".
 ""
 RD -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -2552,6 +2822,12 @@ Unimplemented RCL command function for ?W
 RL -327
 Unknown RCL command function for ?W
 ""
+RL -328
+Ping failed (unable to open device) on device ?W
+""
+RL -329
+Device unreachable (initial ping failed) on device ?W
+""
 RM -201
 Device parameter in RCL= command must contain two characters exactly.
 ""
@@ -2593,6 +2869,39 @@ Program error: impossible command type in rcl_dis for device ?W
 ""
 RM -502
 Program error: impossible type code in rcl_dis for device ?W
+""
+RN -101
+No default for vacuum command.
+""
+RN -201
+Error in vacuum level commanded.
+""
+RN -301
+No previous "*" value available until a succesful command.
+""
+RN -401
+Command not supported for VLBA2.
+""
+RO -101
+No default for write voltage for head 1.
+""
+RO -102
+No default for write voltage for head 2.
+""
+RN -201
+Error in write voltage commanded for head 1.
+""
+RN -202
+Error in write voltage commanded for head 2.
+""
+RN -301
+No previous "*" value for head 1 available until a succesful command.
+""
+RN -302
+No previous "*" value for head 2 available until a succesful command.
+""
+RN -401
+Command not supported for VLBA2.
 ""
 RR -101
 No default for mode.
