@@ -379,7 +379,7 @@ C
      .                   ip(4),ip(5))
         else if (ichcm_ch(lnames(7,index),1,'qk').eq.0) then
           isub = lnames(9,index)/100
-          if (isub.ge.1.and.isub.le.21) then
+          if (isub.ge.1.and.isub.le.21.or.isub.eq.76) then
             call run_prog('quikr','wait',iclass,lnames(9,index),ip(3),
      .                   ip(4),ip(5))
             call read_quikr
