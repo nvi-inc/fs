@@ -114,10 +114,10 @@ define  moon          00000000000
 source=moon
 enddef
 define  cygnusa       00000000000
-source=cygnus-a,195928.4,+404402.,2000.
+source=cygnusa,195928.4,+404402.,2000.
 enddef
 define  casa          00000000000
-source=cas-a,232324.8,+584859.,2000.
+source=casa,232324.8,+584859.,2000.
 enddef
 define  3c84          00000000000
 source=3c84,031948.16,+413042.1,2000.
@@ -126,10 +126,10 @@ define  3c454d3       00000000000
 source=3c454.3,225357.75,+160853.6,2000.
 enddef
 define  taurusa       00000000000
-source=taurus-a,053432.,+220058,2000.
+source=taurusa,053432.,+220058,2000.
 enddef
 define  oriona        00000000000
-source=orion-a,053516.,-052322.,2000.
+source=oriona,053516.,-052322.,2000.
 enddef
 define  virgoa        00000000000
 source=virgoa,123049.42,+122328.0,2000.
