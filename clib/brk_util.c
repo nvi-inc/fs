@@ -13,6 +13,8 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+static long mtype();
+
 struct brk_buf {
 	long	mtype;
 } ;
@@ -83,7 +85,6 @@ char	name[5];
 {
 int	i;
 struct brk_buf brbuf;
-long mtype();
 
 brbuf.mtype=mtype(name);
 
@@ -98,7 +99,7 @@ char    name[ 5];
 {
 int	status, ret;
 struct brk_buf	brbuf;
-long    mtype(), type;
+long    type;
 
 type=mtype(name);
 
