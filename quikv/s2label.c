@@ -25,6 +25,8 @@ long ip[5];                           /* ipc parameters */
       struct s2label_cmd lcl;
       int rstate;
 
+      int iret,ierror;
+
       int user_info_dec();                 /* parsing utilities */
       char *arg_next();
 
@@ -128,16 +130,21 @@ parse:
 
       add_rclcn_tapeid_set(&buffer,device,lcl.tapeid);
       rstate=get_s2state(ip,"rb");
-      if(ip[2]!=0)
-	return;
+      if(ip[2]!=0) {
+	iret=1;
+	goto check;
+      }
       if (rstate==RCL_RSTATE_RECORD) {
 	char tapetype[RCL_MAXSTRLEN_TAPETYPE];
 	get_s2tapetype(tapetype,ip,"rb");
-	if(ip[2]!=0)
-	  return;
+	if(ip[2]!=0) {
+	  iret=1;
+	  goto check;
+	}
 	if(strcmp(tapetype,lcl.tapetype)!=0) {
+	  ierror=1;
 	  ierr=-306;
-	  goto error;
+	  goto check;
 	}
       } else
 	add_rclcn_tapetype_set(&buffer,device,lcl.tapetype);
@@ -147,7 +154,9 @@ rclcn:
       end_rclcn_req(ip,&buffer);
       skd_run("rclcn",'w',ip);
       skd_par(ip);
+      iret=ierror=0;
 
+check:
       if (ichold != -99) {
 	shm_addr->check.s2rec.tapeid=TRUE;
 	shm_addr->check.s2rec.tapetype=TRUE;
@@ -155,6 +164,12 @@ rclcn:
 	  ichold=ichold % 1000 + 1;
 	shm_addr->check.s2rec.check=ichold;
       }
+
+      if(iret)
+	return;
+      else if(ierror)
+	goto error;
+
       if(ip[2]<0) {
 	cls_clr(ip[0]);
 	ip[0]=ip[1]=0;
