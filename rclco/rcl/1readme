@@ -108,13 +108,13 @@ up to 2 retries are automatically performed for most commands.
 should not normally be changed.)
 The following commands are special and will not be retried, so their
 maximum response time is the timer duration value:
-   RCL_CMD_PING
-   RCL_CMD_TIME_SET
-   RCL_CMD_TIME_READ
-   RCL_CMD_TIME_READ_PB
-   RCL_CMD_ALIGN (absolute only)
-Users should perform retries as needed. The above list is found in 
-rcl_general_cmd().
+   rcl_ping()
+   rcl_time_set()
+   rcl_time_read()
+   rcl_time_read_pb()
+   rcl_align_abs()
+Users should perform retries for these commands as needed. The above list 
+is taken from rcl_general_cmd().
 
 
 Local ISTS note:

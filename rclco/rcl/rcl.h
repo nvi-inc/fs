@@ -41,6 +41,8 @@
                                            Should be less than RCL_PKT_MAX. */
 #define RCL_TAPEINFO_LEN   416        /* exact length of data portion of
                                            RCL_RESP_TAPEINFO packet */ 
+#define RCL_TRANSPORT_TIMES_LEN 145   /* exact length of data portion of
+                                           RCL_RESP_TRANSPORT_TIMES packet */ 
 
 #define RCL_STATBIT_ERROR  0x01       /* bit mask for error flag in status 
                                            type code & summary byte */
@@ -102,6 +104,8 @@
 #define RCL_CMD_DELAY_SET               29
 #define RCL_CMD_DELAY_READ              30
 #define RCL_CMD_DELAYM_READ             31
+#define RCL_CMD_BARRELROLL_SET          32
+#define RCL_CMD_BARRELROLL_READ         33
 #define RCL_CMD_ALIGN                   34
 #define RCL_CMD_POSITION_SET            35
 #define RCL_CMD_POSITION_READ           36
@@ -123,6 +127,7 @@
 #define RCL_CMD_STATUS_DECODE           82
 #define RCL_CMD_ERROR_DECODE            83
 #define RCL_CMD_DIAG                    90   /** not implemented **/
+#define RCL_CMD_BERDCB                  91
 #define RCL_CMD_IDENT                   97   /** not implemented **/
 #define RCL_CMD_PING                    98
 #define RCL_CMD_VERSION                 99
@@ -142,6 +147,7 @@
 #define RCL_RESP_GROUP                  127
 #define RCL_RESP_TAPEINFO               128
 #define RCL_RESP_DELAY                  130
+#define RCL_RESP_BARRELROLL             133
 #define RCL_RESP_POSITION               136
 #define RCL_RESP_ESTERR                 138
 #define RCL_RESP_PDV                    139
@@ -155,6 +161,7 @@
 #define RCL_RESP_STATUS_DETAIL          181
 #define RCL_RESP_STATUS_DECODE          182
 #define RCL_RESP_ERROR_DECODE           183
+#define RCL_RESP_BERDCB                 191
 #define RCL_RESP_IDENT                  197
 #define RCL_RESP_VERSION                199
 
@@ -214,5 +221,6 @@
 #define RCL_MAXSTRLEN_ERROR_DECODE      101
 #define RCL_MAXSTRLEN_STATUS_DECODE     400    /* must == STAT_MAX_LEN */
 #define RCL_MAXSTRLEN_VERSION            61
+#define RCL_MAXSTRLEN_IDENT              11
 
 #endif /* not RCL_DEFD */
