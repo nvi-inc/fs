@@ -17,8 +17,8 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;
 long ip[5];                           /* ipc parameters */
 {
-      int ierr, i, isign;
-      char output[MAX_OUT],*start;
+      int ierr, i;
+      char output[MAX_OUT],*start, csign;
       float diff;
       unsigned long ldiff;
 
@@ -33,16 +33,18 @@ long ip[5];                           /* ipc parameters */
       for (i=0;i<5;i++) ip[i]=0;
 
       diff=shm_addr->cablevl-shm_addr->cablev;
-      if(log(fabs(diff)+7)>9) {
+      csign=diff>0.0?'+':'-';
+      if(fabs(diff) < 0.5e-7) {
 	snprintf(output+strlen(output),sizeof(output)-strlen(output)-1,
-		 "%+e",diff);
+		 "0.0e-6,0");
+      } else if(fabs(diff)>=1.0) {
+        snprintf(output+strlen(output),sizeof(output)-strlen(output)-1,
+                 "%e,%c",fabs(diff),csign);
       } else {
 	ldiff=fabs(diff)*1e7+0.5;
-	isign=diff>0.0?1:-1;
 	snprintf(output+strlen(output),sizeof(output)-strlen(output)-1,
-		 "%+d.%de-6",(ldiff/10)*10*isign,abs(ldiff)%10);
+		 "%d.%de-6,%c",ldiff/10,abs(ldiff)%10,csign);
       }
-      if(strlen(output)>0) output[strlen(output)-1]='\0';
 
       cls_snd(&ip[0],output,strlen(output),0,0);
       ip[1]++;
