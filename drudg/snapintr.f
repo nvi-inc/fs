@@ -3,11 +3,11 @@ C
 C This routine writes out the header information for snap files and
 C vlba pointing files in the LU_OUTFILE.
 C
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'statn.ftni'
-	include 'sourc.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C  INPUT:
       integer ifunc,IYR
@@ -28,6 +28,7 @@ C     gag 901025 Added ! in front of the *.
 C     nrv 930212 implicit none
 C     nrv 940114 Write a line with EARLY.
 C                Remove EARLY (LSTSUM can figure it out)
+C 960227 nrv Change iterid to lterid
 C
 C
       iblen = 128
@@ -99,8 +100,8 @@ C
       NCH = NCH + 1 + IR2AS(DIAMAN(ISTN),IBUF2,NCH+1,5,1)
       NCH = ICHMV(IBUF2,NCH+1,LPOCOD(ISTN),1,2)
 C
-C     Terminal ID is now integer
-      nch = nch + ib2as(iterid(istn),ibuf2,nch+1,3)
+C     Terminal ID is now hollerith
+      nch = ichmv(ibuf2,nch+1,lterid(1,istn),1,4)
       call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
       call inc(LU_OUTFILE,KERR)
 C
@@ -143,11 +144,7 @@ C
 	ELSE IF (IFUNC.EQ.2) then
 	 NCH = ichmv_ch(IBUF2,1,'!* ')
       END IF
-      if (iterid(istn).lt.200) then !a number
-	  nch=nch+1+ib2as(iterid(istn),ibuf2,nch+1,3)
-      else
-        nch=ichmv(ibuf2,nch+1,iterid(istn),1,2)
-      endif
+      nch=ichmv(ibuf2,nch+1,lterid(1,istn),1,4)
       nch=ichmv(ibuf2,nch+1,lterna(1,istn),1,8)
       nch=nch+ib2as(maxpas(istn),ibuf2,nch+1,2)
 	nch=nch+1+ib2as(maxtap(istn),ibuf2,nch+1,5)

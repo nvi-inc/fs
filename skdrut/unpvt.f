@@ -1,9 +1,9 @@
-      SUBROUTINE unpvt(IBUF,ILEN,IERR,IDTER,LNATER,bitden,
+      SUBROUTINE unpvt(IBUF,ILEN,IERR,LIDTER,LNATER,bitden,
      .maxtap,nrec,lb,sefd,pcount,par,npar)
 C
 C     UNPVT unpacks a record containing Mark III terminal information.
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  History
 C  891116 nrv Added sefd
@@ -17,6 +17,7 @@ C  920520 nrv Add SEFD parameters
 C  911022 nrv add nrec parameter
 C  930225 nrv implicit none
 C 951116 nrv Change max_pas to bit density
+C 960227 nrv Change IDTER to LIDTER, up to 4 characters
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -26,10 +27,11 @@ C     ILEN  - length of IBUF in words
       integer pcount ! number of arguments, 5 for ID and name only
 C
 C  OUTPUT:
-      integer maxtap,ierr,idter,nrec
+      integer maxtap,ierr,nrec
+      integer*2 lidter(2)
+C     LIDTER - terminal ID
       real bitden
 C     IERR    - error return, 0=ok, -100-n=error in nth field
-C     IDTER - terminal ID, integer
       integer*2 LNATER(4) ! name of the terminal
 C     maxtap - maximum tape length for this station
       integer*2 lb(*)  ! bands
@@ -38,8 +40,8 @@ C     maxtap - maximum tape length for this station
 C
 C  Local:
       real*8 R,DAS2B
-      integer ich,nch,ic1,ic2,id,idumy,i,nc,ib1,ib2,ib
-      integer ichcm,ichmv,ias2b,ichcm_ch ! function
+      integer ich,nch,ic1,ic2,idumy,i,nc,ib1,ib2,ib
+      integer ichmv_ch,ichcm,ichmv,ias2b,ichcm_ch ! function
 C
 C     Start the unpacking with the first character of the buffer.
 C
@@ -47,14 +49,15 @@ C
 C
 C     1. The terminal ID. 
 C
+      idumy = ichmv_ch(lidter,1,'    ')
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      id=ias2b(ibuf,ic1,nch)
-      IF (id.lt.0) THEN
-        idumy = ichmv(idter,1,ibuf,ic1,min0(nch,2))
-      else
-        idter=id
+C     id=ias2b(ibuf,ic1,nch)
+      if (nch.gt.4) then
+        ierr=-101
+        return
       endif
+      idumy = ichmv(lidter,1,ibuf,ic1,nch)
 C
 C     2. Terminal name, 8 characters.
 C
@@ -88,7 +91,7 @@ C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       nc=ic2-ic1+1
       if (ic1.eq.0) then
-        bitden=33333
+        bitden=0
       else
         R = DAS2B(IBUF,IC1,NC,IERR)
         IF (IERR.EQ.0) THEN
