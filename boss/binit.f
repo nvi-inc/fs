@@ -11,18 +11,14 @@ C    LAR  880105  Change LNAMES to contain names instead of hash codes
 C    gag  920713  changed hex index from 1 to 3 to 1 to 7
 C
       include '../include/fscom.i'
-      include 'bosscm.i'
 C
       integer*4 ip(5)                   !  rmpar values from boss
       integer idcbsk(1)                 !  dcss for schedule
       dimension lnames(12,1)            !  list of command names
-      integer itscb(13,1)               !  time-scheduling control block
+      integer*4 itscb(13,1)             !  time-scheduling control block
       integer ibuf(50)                  !  input buffer containing command
       integer itime(9)                  !  time array returned from spars
       integer lseg(2)                   !  segment name (obsolete)
-      integer it(5)
-      integer ieqhex(7)
-      data ieqhex /z'01',z'02',z'03',z'04',z'05',z'06',z'07'/
 C
 C
 C     1. First initialize values from RMPAR parameters.
@@ -70,19 +66,19 @@ C
           idummy = ichmv(lseg,1,ibuf,14,4)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)
-          ieq2 = ia2hx(ibuf,27,1)
+          ieq1 = ia2hx(ibuf,26,1)*16+ia2hx(ibuf,27,1)
+          ieq2 = ia2hx(ibuf,28,1)*16+ia2hx(ibuf,29,1)
           idummy = ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.15)) then
+          if (ieq1.ge.1 .and. ieq1.le.31) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.15)) then
+          if (ieq2.ge.1 .and. ieq2.le.31) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
@@ -113,19 +109,19 @@ C
           idummy = ichmv(lseg,1,ibuf,14,4)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)
-          ieq2 = ia2hx(ibuf,27,1)
+          ieq1 = ia2hx(ibuf,26,1)*16+ia2hx(ibuf,27,1)
+          ieq2 = ia2hx(ibuf,28,1)*16+ia2hx(ibuf,29,1)
           idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.15)) then
+          if (ieq1.ge.1 .and. ieq1.le.31) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.15)) then
+          if (ieq2.ge.1 .and. ieq2.le.31) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
@@ -218,7 +214,6 @@ C     1.18 Start first log file
 C
       call char2hol('station ',illog,1,8)
       call fs_set_llog(illog)
-      call fc_rte_time(it,iyear)
       call char2hol('::',ldum,1,2)
       call newlg(ibuf,ldum)
 c    
