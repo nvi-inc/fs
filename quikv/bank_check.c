@@ -33,8 +33,9 @@ long ip[5];                           /* ipc parameters */
 /* if we get this far it is a set-up command so parse it */
 
 parse:
-      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	 shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS) {
+      if((shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS)||
+	 shm_addr->equip.drive[shm_addr->select] != MK5){
 	out_recs=0;
 	out_class=0;
 
