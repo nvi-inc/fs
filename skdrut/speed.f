@@ -37,7 +37,11 @@ C
 
 C 1. First account for the fan factor.
 
-      fanfac=1/real(ifan(is,icode))
+      if (ifan(is,icode).gt.0) then
+        fanfac=1/real(ifan(is,icode))
+      else
+        fanfac=1.0
+      endif
 
 C 2. Get the correct overhead factor for DR or NDR.
 
