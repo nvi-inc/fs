@@ -1,5 +1,13 @@
 #
-set path = ($path ~/bin /usr2/st/bin /usr2/fs/bin)
+if (! { (echo $PATH |fgrep /usr2/oper/bin >/dev/null) } ) then
+  setenv PATH ${PATH}:/usr2/oper/bin
+endif
+if (! { (echo $PATH |fgrep /usr2/st/bin >/dev/null) } ) then
+  setenv PATH ${PATH}:/usr2/st/bin
+endif
+if (! { (echo $PATH |fgrep /usr2/fs/bin >/dev/null) } ) then
+  setenv PATH ${PATH}:/usr2/fs/bin
+endif
 set tty=`tty`
 stty echoe kill ^X erase '^?' intr ^C
 if($?term == 1) then
@@ -13,6 +21,7 @@ umask 022
 set ignoreeof
 setenv PAGER "less -i"
 setenv EDITOR vi
+setenv LESS -X
 #
 
 
