@@ -65,6 +65,7 @@ C 961020 nrv Set the BBC sideband to "U" for non-Vex input.
 C 970115 nrv Add UNPFMT for recording format by station line.
 C 970117 nrv Add IF3O and IF3I to Mk3-4 allowed values.
 C 970206 nrv Change itra2 to itras and add headstack index
+C 971211 nrv Set sideband to "U" for all non-VEX (only done for .drg before).
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -131,7 +132,8 @@ C
           VCBAND(icx,is,ICODE) = VB
           LCODE(ICODE) = LC ! 2-letter code for the sequence
 C         All listed Mk3 frequencies are for USB recording. 
-C         LSB is specified in track assignments.
+C         Any LSB to be recorded is specified in track assignments,
+C         i.e. for mode A and mode B&E.
           idum = ichmv_ch(lnetsb(icx,is,icode),1,'U') 
           idum = ichmv(LMODE(1,is,ICODE),1,LM,1,8) ! recording mode
 C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
@@ -201,7 +203,7 @@ C
         END IF  !error
 C
         if (nvlist.ne.0) then ! physical BBC info present
-          if (nvlist.eq.1) then ! one BBC on this line
+          if (nvlist.eq.1) then ! one BBC on this line (new sked)
           do iv=1,nchan(istn,icode) ! check all frequency channels
             ic=invcx(iv,istn,icode) ! channel index from "C" line
             ib=ibbcx(ic,istn,icode) ! BBC index from "C" line
@@ -233,10 +235,12 @@ C                                    ! this channel on this BBC
      .        ,ic,(lstnna(i,istn),i=1,4)
               LIFINP(ic,istn,ICODE) = LIN ! IF input channel
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
-              losb(ic,istn,icode) = ls ! sideband
+C             there's no sideband on this line
+C             losb(ic,istn,icode) = ls ! sideband
+              call char2hol('U ',losb(ic,istn,icode),1,2)
             enddo
           endif ! one/many 
-        else ! fill physical BBC/IF/LO info assuming all channels get same
+        else ! fill physical info assuming all channels get same (old sked)
           do i=1,nchan(istn,icode)
             iv=invcx(i,istn,icode) ! channel index assumed same as BBC#
             if (lsg.eq.lsubvc(iv,istn,icode)) then ! match sub-group
@@ -261,6 +265,8 @@ C                                    ! this channel on this BBC
      .              (rbbc.gt.500.0.and.kmk3)) then
                   LIFINP(iv,istn,ICODE) = LIN 
                   FREQLO(iv,ISTN,ICODE) = F
+                  call char2hol('U ',losb(iv,istn,icode),1,2)
+                else ! what?
                 endif
               endif ! previous LO/first time
             endif ! match sub-group
