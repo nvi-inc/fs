@@ -35,9 +35,9 @@ long *hash;
 /*  get an offset to the starting point.                           */
 /*                                                                 */
 
-  *hash=((abs((*entry).buf[0])-65)/2)*100;
-  *hash+=(abs((*entry).buf[1])-65)*10;
+  *hash=((abs((*entry).buf[0]-65))/2)*100;
+  *hash+=(abs((*entry).buf[1]-65))*10;
   *hash+= abs((*entry).off);
-  if (*hash > MAXERRORS) *hash-=MAXERRORS;
+  if (*hash > MAXERRORS) *hash=1+(*hash%MAXERRORS);
 
 }
