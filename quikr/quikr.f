@@ -102,8 +102,6 @@ C
           call pe(ip)
         else if (itask.eq.3) then
           call party(ip)
-        else if (itask.eq.4) then
-          call party4(ip)
         endif
       else if (isub.eq.10) then
         if (itask.eq.1) then
@@ -126,7 +124,8 @@ C
           call track(ip)
         endif
       else if (isub.eq.12) then
-        if (itask.eq.1.or.itask.eq.2.or.itask.eq.13.or.itask.eq.14) then
+        if (itask.eq.1.or.itask.eq.2.or.
+     $        (itask.gt.12.and.itask.lt.17)) then
           call ctemp(ip,itask)
         else if (itask.eq.5.or.itask.eq.6.or.itask.eq.17.or.itask.eq.18)
      &       then
@@ -141,13 +140,13 @@ C 13 was for WVR stations only
         if (itask.eq.1) then
           call pcalc(ip)
         else if (itask.eq.2) then
-          call loset(ip)
+c          call loset(ip)
         else if (itask.eq.3) then
           call patch(ip)
         else if (itask.eq.4) then
           call pcals(ip)
         else if (itask.eq.5) then
-          call upset(ip)
+c          call upset(ip)
         endif
       else if (isub.eq.15) then
         if (itask.eq.1) then
@@ -172,9 +171,9 @@ C       endif
       else if (isub.eq.18) then
         call tpform(ip)
       else if (isub.eq.19) then
-        if (itask.ge.1.and.itask.le.4) then
+        if (itask.ge.1.and.itask.le.6) then
           call beam(ip,itask)
-        else if (itask.ge.11.and.itask.le.14) then
+        else if (itask.ge.11.and.itask.le.16) then
           call flux(ip,itask)
         endif
       else if (isub.eq.21) then
