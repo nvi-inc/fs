@@ -53,9 +53,9 @@ C Retrieve the SMAX value
 C
       call gtprm2(ibuf,ich,nchar,2,parm,id)
       if(id.eq.0) then
-        s2 = parm
+        s2v = parm
       else
-        s2=0.0
+        s2v=0.0
       endif
 C
 C Retrieve the N value
@@ -80,7 +80,7 @@ C
 C
 C  Determine whether the min is less than the max
 C
-      if (s1.le.s2) goto 830
+      if (s1.le.s2v) goto 830
 C
       call po_put_c('LXSCL40 - min greater than max.')
       icode=-1
@@ -97,7 +97,7 @@ C
       goto 1700
 850   continue 
       smin(i) = s1
-      smax(i) = s2
+      smax(i) = s2v
       llogx(i) = iparm1
       sdelta(i)=de
 C
