@@ -10,7 +10,8 @@ C
       integer get_buf
       integer*2 ibuf(20)
       real*4 btmp
-      real*4 flo,fup
+      double precision flo
+      integer sblo
       character cjchar
 C
       equivalence (ireg(1),reg),(iparm(1),parm)
@@ -45,33 +46,49 @@ C                   Pick up the size from common
       goto 300
 211   continue
       indf=indtmp 
+      if(indf.gt.4) then
+         ierr=-413
+         goto 990
+      endif
       call fs_get_freqlo(flo,indf-1)
-      fup=0
-      call fs_get_frequp(fup,indf-1)
-c     write(6,101) flo,fup,indf
-101   format(/' flo,fup,indf=',2f10.3,i5/)
-      f=flo-fup
+c      write(6,101) flo,indf
+c101   format(/' flo,indf=',f10.3,i5/)
+      f=flo
+      if(f.lt.0) then
+         ierr=-401
+         goto 990
+      endif
 C
 C use the middle of the bandpass for the appropriate rack
 C
-      if(VLBA.eq.and(rack,VLBA)) then
-        f=f+750.
+      call fs_get_sblo(sblo,indf-1)
+      if(sblo.eq.2) then
+         isg=-1
       else
-        f=f+350.
+         isg=+1
+      endif
+c      write(6,102) isg,sblo
+c 102  format(/' isign, sblo=',2i10/)
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+        f=f+isg*750.
+      else
+        f=f+isg*300.
         if(indf.eq.3) then
           call fs_get_icheck(icheck(21),21)
+          call fs_get_imixif3(imixif3)
           if(icheck(21).eq.0) then
              ierr=-502
              goto 990
-          else if(imixif3_fs.eq.1) then
-             f=f+freqif3_fs*0.01
-c            write(6,*) freqif3_fs
+          else if(imixif3.eq.1) then
+             call fs_get_freqif3(freqif3)
+             f=f+isg*freqif3*0.01
+c            write(6,*) freqif3
           endif
         endif
       endif
       call fs_get_diaman(diaman)
-100   format(/' f,diaman=',2f10.3/)
-c     write(6,100) f,diaman
+c100   format(/' f,diaman=',2f10.3/)
+c      write(6,100) f,diaman
       btmp=0.0
       if (f.gt.0.0.and.diaman.gt.0.0)
      .btmp=1.05*299792458d0/(f*1d6*diaman)
@@ -97,6 +114,10 @@ C
         flx3fx_fs=-1.0
       else if (indtmp.eq.4) then
         flx4fx_fs=-1.0
+      else if (indtmp.eq.5) then
+        flx5fx_fs=-1.0
+      else
+        flx6fx_fs=-1.0
       endif
       ierr = 0
 C
