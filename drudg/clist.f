@@ -177,7 +177,8 @@ C ADD THE COMMAND TO THE END OF THE LINE AND ADD ONE BLANK
       endif
 
 999   call luff(luprt)
-      if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+C     if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+      close(luprt)
       call prtmp
 C
       RETURN

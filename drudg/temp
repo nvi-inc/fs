@@ -1,1 +1,0 @@
-          write(lu,'(a)') char(13)

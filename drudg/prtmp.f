@@ -1,6 +1,9 @@
       Subroutine prtmp
 C  PRTMP prints the temp file
 c  NRV 910703
+C  nrv 950925 Change to simply call "printer". Landscape or
+C             portrait is handled by each listing type.
+
       include 'skparm.ftni'
       include 'drcom.ftni'
       integer ierr
@@ -11,15 +14,17 @@ c  NRV 910703
       call null_term(tmpname)
 
       if (klab) then ! labels
+        write(6,'("prtmp: labels")')
           ierr = printer(tmpname,'r')
       else ! normal prinout
-        if (iwidth.eq.80) then
-            ierr = printer(tmpname,cprtpor)
-        else if (iwidth.eq.137) then
-            ierr = printer(tmpname,cprtlan)
-        else
-            ierr = -1
-        end if
+          ierr = printer(tmpname,' ')
+C       if (iwidth.eq.80) then
+C           ierr = printer(tmpname,cprtpor)
+C       else if (iwidth.eq.137) then
+C           ierr = printer(tmpname,cprtlan)
+C       else
+C           ierr = -1
+C       end if
       endif
 
       if (ierr.ne.0) then
