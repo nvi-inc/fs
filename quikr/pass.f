@@ -178,6 +178,7 @@ C
 C  save the results in common
 C
       call fs_get_ipashd(ipashd)
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(kpas(i)) then
           posnhd(i)=microns(i)
@@ -187,6 +188,7 @@ C
         endif
       enddo
       call fs_set_ipashd(ipashd)
+      call fs_set_posnhd(posnhd)
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
@@ -261,6 +263,7 @@ C
 C
 C find the deltas
 C
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(ihd.eq.3.or.ihd.eq.1) then
           poff(i) = pnow(i) - posnhd(i)
@@ -294,6 +297,7 @@ C
       nch = nch + 4
       nch = mcoma(ibuf,nch)
 C
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)

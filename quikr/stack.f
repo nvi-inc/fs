@@ -80,6 +80,7 @@ C
         ip(3)=-501
         goto 990
       else if(cjchar(parm,1).eq.'*') then
+        call fs_get_posnhd(posnhd)
         microns(1)=posnhd(1)
         kmic(1)=.true.
       else
@@ -102,6 +103,7 @@ C
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
+        call fs_get_posnhd(posnhd)
         microns(2)=posnhd(2)
         kmic(2)=.true.
       else
@@ -193,6 +195,7 @@ C
 C  save the results in common
 C
       call fs_get_ipashd(ipashd)
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(kmic(i)) then
           posnhd(i)=microns(i)
@@ -202,6 +205,7 @@ C
         endif
       enddo
       call fs_set_ipashd(ipashd)
+      call fs_set_posnhd(posnhd)
 C
       call set_mic(ihd,ipas ,kauto,microns,ip,0.40)
       if(ip(3).ne.0) go to 800
@@ -279,6 +283,7 @@ C
 C
 C find the deltas
 C
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(ihd.eq.3.or.i.eq.ihd) then
           poff(i) = pnow(i) - posnhd(i)
@@ -296,6 +301,7 @@ C
       nch = ieq
       if (nch.eq.0) nch = nchar+1
       nch = ichmv_ch(ibuf,nch,'/')
+      call fs_get_posnhd(posnhd)
       do i=1,2
         if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)
