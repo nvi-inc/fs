@@ -1,1 +1,35 @@
-newtape._a_
+    newtape - halt schedule until tape is mounted (all drives)
+ 
+              Syntax:      newtape=tape
+ 
+              Response:    newtape/"To continue, use LABEL  command"
+          newtape/LABEL=label
+ 
+ 
+ Settable Parameters:
+            tape       Used for a K4 drive with DMS only: Tape number for
+            the DMS to load, 1-24. Default is to not use the
+            DMS.
+ 
+ Monitor-only Parameters:
+              label        Used for a K4 drive with DMS only: the label read
+              when the tape was loaded
+ 
+ Comments:
+ If  a tape number is specified, the DMS is instructed to
+ insert the tape specified from the DMS into the recorder. The
+ DMS is instructed to read the label bar-code on the tape. The
+ response shows the label read. The "To continue response does
+ not appear. If a schedule is halted, its execution continyes
+ 
+ If no tape number is specified (i.e., if newtape= , or newtape
+ is entered) for a non-K4 drive or for a K4 drive without a DMS
+ installed, the response will be displayed and the schedule
+ will be halted until a label is entered. The LABEL= response
+ does not appear.
+ 
+ For non-K4 drives or for a K4 with no DMS, this command in
+ effect is the same as the halt command. Execution will
+ continue after the label command has been successfully
+ completed. If you are in a rush, the cont command will also
+ work to continue execution of the schedule 

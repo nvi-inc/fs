@@ -1,1 +1,29 @@
-rec_mode._k_
+              rec_mode - recording mode (K4 drives)
+ 
+              Syntax:      rec_mode=bw,bits,chan,im,nm
+ 
+              Response:    rec_mode/bw,bits,chan,form,ts,im,nm,ta,pb
+ 
+ 
+ Settable Parameters:
+      bw   overall recording bandwidth in MHz, 64 (default) , 128,
+      or 256
+        bits   number of bits per sample: 1 (default), 2, 4, or 8
+      chan channels recorded: 1, 2, 4, 8, or 16 (default)
+      im   insertion mode for time stamp: FB (fixed bit) or FT
+      (fixed time). Default FB for 256 MHz bw, FT for all
+      others.
+      nm   insertion frequency for time-stamp: 0 to 30, or 99 (0 no
+      insertion, 99 for continuous). Default 15 for 128 MHz
+      bw, 30 for 256 MHz bw, 0 for all others.
+ 
+ Monitor-only parameters: 
+        form   recording format: OLD or NEW
+        ts     time stamp: ON or OFF
+        ta     TAP setting mode: 0 or 1
+      pb   pass-band setting: 0 to 16
+ 
+ Comments:
+ This command is only for DFC2100. This command sets the
+ recording mode and may require up to 17 seconds to be
+ completed due to digital filter set-up. 

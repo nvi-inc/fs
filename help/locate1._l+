@@ -1,1 +1,54 @@
-locate._l_
+    locate - locate head stack position (longitudinal drives)
+ 
+              Syntax:      locate=range,nsamples,step,stack
+ 
+              Response:    locate/range,nsamples,step,stack,peakv,mper,vltlc
+ 
+                  
+ Settable parameters:
+            range      ñ range to search over in microns. Default is 200.
+            nsamples   Number of power samples for each measurement
+            position. Default is 1.
+            step       Micron step size between measurement positions.
+            Default is 40.
+            stack      Head stack to move: 1, 2, write or read. Default is
+            2 for Mark III/IV and VLBA4, and 1 for VLBA. Only 1
+            is valid for VLBA and MK3B recorders. The value
+            write is synonymous with 1 and read is synonymous
+            with 2, even if the heads are wired differently.
+            Only the first character for write and read is
+            checked; these possibilities are provided for
+            backward compatibility only.
+ 
+ Monitor-only parameters:
+            peakv      peak measured voltage from power detector
+          mper     minimum sample voltage as a percentage of peakv
+              vltlc        location of the peak in positioner voltage
+ 
+ Comments: 
+ This command performs a coarse grid search for the largest
+ detected power over the search range.  The search is performed
+ over a range of ñrange microns about the initial head position.
+ The number of positions sampled is ((2*range)/step)+1. The actual
+ positions at which measurements are made are not exactly step
+ microns part. The head stack will be positioned within ñ5
+ microns of the nominal positions. This approximation is used
+ to reduce the time moving the head stacks by not over-refining
+ the positions of what is a coarse search anyway. In the worst
+ (too coarse) case two positions might be step+10 microns apart.
+ 
+ After sampling over the complete range, locate returns the
+ head stack to the position that gave the highest power level,
+ makes a new measurement and reports these values for the peakv,
+ mper, and vltlc parameters.
+ 
+ This command requires that the reproduce power detector be
+ hooked-up with a reasonable amount of attenuation and that the
+ head.ctl control file correctly identify which detector (odd
+ or even) is in use. This command must be issued once with
+ parameters to set it up. Issuing the command subsequently
+ without parameters will start a search. The tape must moving
+ and there must be recorded data to reproduce for this command
+ to do something useful.
+ 
+ See the Narrow Track Calibration manual. 

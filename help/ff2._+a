@@ -1,1 +1,25 @@
-ff._a_
+             ff - fast-forward the tape (all drives)
+ 
+              Syntax:      ff
+ 
+              Response:    ff/acknowledgement
+ 
+ 
+ Parameters: none
+ 
+ Comments:
+ The tape is moved forward at high speed. For Mark III, the
+ record bit is disabled and the low tape sensor is turned on.
+ For VLBA, all track groups are disabled and the low tape
+ sensor is turned on. 
+ 
+ For S2 drives, the selected transports are moved forward at
+ the transport's fast forward speed.
+ 
+ For drives other that the K4 and S2, the tape is moved at the
+ "schedule" speed value as specified in the appropriate drive
+ control file. This is the speed assumed in the SNAP schedule
+ file for positioning the tape with the fastf procedure.
+ 
+ Use the sff command and sfastf procedure for possibly faster
+ tape motion of non-K4, S2 drives. 
