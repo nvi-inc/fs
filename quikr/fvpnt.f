@@ -105,8 +105,8 @@ C     2.3 Third parm, number of points
 C 
 230   continue
       call gtprm(ibuf,ich,nchar,1,parm,ierr)
-      if (cjchar(parm,1).eq.',') npts = 3
-C                 Default is 3 points
+      if (cjchar(parm,1).eq.',') npts = 7
+C                 Default is 7 points
       if (cjchar(parm,1).eq.'*') npts = nptsfp
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',')npts=iparm(1)
       if(npts.lt.0) then
