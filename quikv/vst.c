@@ -93,6 +93,7 @@ parse:
       request.addr=0xb5;
       vstb5mc(&request.data,&lcl); add_req(&buffer,&request);
       shm_addr->ispeed=lcl.speed;
+      shm_addr->cips=lcl.cips;
 
       memcpy(&lcv,&shm_addr->venable,sizeof(lcv));
       lcv.general=lcl.rec;                  /* turn record off or on */
