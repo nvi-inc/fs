@@ -68,9 +68,19 @@ C
         nch = ichmv_ch(ibuf,nchar+1,'/')
         nch = ichmv(ibuf,nch,ltpnum,1,8)
         nch = mcoma(ibuf,nch)
-        nch = ichmv(ibuf,nch,ltpchk,1,4) - 1
+        nch = ichmv(ibuf,nch,ltpchk,1,4)
+        call fs_get_vacsw(vacsw)
+        if(vacsw.eq.1) then
+           nch = mcoma(ibuf,nch)
+           call fs_get_thin(thin)
+           if(thin.eq.1) then
+              nch=ichmv_ch(ibuf,nch,'thin')
+           else if (thin.eq.0) then
+              nch=ichmv_ch(ibuf,nch,'thick')
+           endif
+        endif
         iclass = 0
-        call put_buf(iclass,ibuf,-nch,'fs','  ')
+        call put_buf(iclass,ibuf,-nch+1,'fs','  ')
         ip(1) = iclass
         ip(2) = 1
         return
@@ -104,6 +114,7 @@ C
           ip(3) = -202
           return
         endif
+        call gtprm(ibuf,ich,nchar,0,parm,ierr) !ignore if present
       else                                  !  operator typed in tape #.
         call gtprm(ibuf,ich,nchar,0,parm,ierr)
         if (cjchar(parm,1).eq.'*'.or.cjchar(parm,1).eq.',') then
@@ -135,8 +146,55 @@ C
         return                              !  label check failed.
       endif
 C
+C  check for a thick/thin override
+C
+      call fs_get_vacsw(vacsw)
+      ist=ich
+      call gtprm(ibuf,ich,nchar,0,parm,ierr)
+      if (cjchar(parm,1).eq.',') then
+         if(vacsw.eq.1) then
+            iovthin=-1
+         endif
+      else if(vacsw.ne.1) then
+         ip(3)=-303
+      else if(ichcm_ch(ibuf,ist,'thin').eq.0) then
+         iovthin=1
+      else if(ichcm_ch(ibuf,ist,'thick').eq.0) then
+         iovthin=0
+      else
+         ip(3)=-203
+         return
+      endif
+      if(vacsw.ne.1) goto 800
+
+      if(ichcm_ch(lnum,1,'VLBA'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'NASA'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'USN01'   ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'SVLB'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'3MTHN'   ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'0VLB'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'JIVE'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'EVNT'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'GIFT00'  ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'HST'     ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'UNQU'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'SAMP'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'DSCP'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'MPIT'    ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'THNINT'  ).eq.0 .or.
+     &   ichcm_ch(lnum,1,'CMVA'    ).eq.0
+     &     ) then
+         thin=1
+      else
+         thin=0
+      endif
+C
+      if(iovthin.ne.-1) thin=iovthin
+      call fs_set_thin(thin)
+C
 C     6. Now plant the new tape number and check label in COMMON.
 C
+ 800  continue
       idumm1 = ichmv(ltpnum,1,lnum,1,8)
       idumm1 = ichmv(ltpchk,1,lchk,1,4)
 C
