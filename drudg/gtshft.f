@@ -4,8 +4,8 @@
 C  GTSHFT reads through the observations and shifts them until it finds
 C  the first shifted observation that is later than the input time ITIMN.
 
-	include 'skparm.ftni'
-	include 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 
 C  On input:
 C    ITIM - in common, holds the shifted time of the current

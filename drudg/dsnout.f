@@ -1,9 +1,9 @@
       subroutine dsnout(ldsn)
 
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
-      include 'freqs.ftni'
-      include 'statn.ftni'
+      include '../skdrincl/freqs.ftni'
+      include '../skdrincl/statn.ftni'
 
 C Input
       integer*2 ldsn ! DSN ID, e.g. 45, 15, 65

@@ -2,11 +2,11 @@
 
 C This routine lists on the printer a schedule
 C
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
-      INCLUDE 'statn.ftni'
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C INPUT: none
 C OUTPUT: none

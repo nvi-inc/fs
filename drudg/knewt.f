@@ -1,8 +1,8 @@
 	LOGICAL*4 FUNCTION KNEWT(IFT,IPAS,IPASP,IDIR,IDIRP,IFTOLD)
 C KNEWT RETURNS TRUE IF THIS RUN WOULD START A NEW TAPE
 C
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 C
 C Input:
       integer ift,ipas,ipasp,idir,idirp,iftold

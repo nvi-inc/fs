@@ -6,7 +6,7 @@ C  label to the Epson printer.
 C  It is assumed that the header lines have already
 C  been written onto the label.
 
-	include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 
 C Input:
 	integer lu ! printer unit number

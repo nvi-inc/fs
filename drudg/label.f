@@ -2,10 +2,10 @@
 
 C This routine types labels and tape lists for Mark III tapes
 
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
-      INCLUDE 'statn.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 
 C INPUT:
 C        PCODE - 1 or 2 open file

@@ -1,10 +1,10 @@
       SUBROUTINE CKOBS(LSOR,LSTN,NSTNSK,LCOD,ISOR,ISTNSK,ICOD)
 C
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
-      INCLUDE 'statn.ftni'
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C INPUT:
       integer*2 lsor(4),lstn(max_stn),lcod

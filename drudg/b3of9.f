@@ -1,7 +1,9 @@
 	SUBROUTINE B3OF9(ICHAR,IBUF,LLBUF,IBYTE,PARMS,LSPACE)
 C     Bar code on Epson MX-80/MX-100/HP82905B
 C      (original version by ARW 830812)
-C NRV 950829 for linux use iishft and and
+C NRV 950829 for linux use jishft and and
+C NRV 951015 for HP this routine is not needed (no Epson), but
+C                   use ishft and iand
 C
 C     Assemble the graphics data to print ICHAR in 3-of-9 barcode,
 C     starting at character IBYTE in IBUF and using the parameters

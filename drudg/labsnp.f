@@ -4,9 +4,9 @@ C
 C NRV 901206 New routine
 C nrv 930412 implicit none
 
-      INCLUDE 'skparm.ftni'
-	INCLUDE 'drcom.ftni'
-	include 'statn.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C Input:
 	integer iyear ! year of the SNAP file

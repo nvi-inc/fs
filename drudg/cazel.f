@@ -3,7 +3,7 @@ C
 C   CAZEL calculates az,el given a source position, station location,
 C         and time.
 C
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C     INPUT VARIABLES:
 	real*8 ra,dec  ! source position, radians

@@ -1,7 +1,7 @@
       SUBROUTINE LSPIN(LDIR,ISPM,ISPS,IBUF2,NCH)
 C LSPIN  forms a buffer with the SNAP command FASTx=nnMmmS
 C
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C Input:
       integer*2 ldir

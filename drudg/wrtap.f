@@ -11,10 +11,10 @@ C     nrv   930709 Now "ihead" is the actual head position in microns,
 C                  removed the hard-coded array.
 C
 C   COMMON BLOCKS USED
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
-      include 'statn.ftni'
-      include 'sourc.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
 C
 C  INPUT:
         integer*2 lspdir

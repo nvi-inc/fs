@@ -4,11 +4,11 @@ C  getqual gets either qual 1 or qual 2 bbsynth depending
 C  on cql.
 C
 C   COMMON BLOCKS USED
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'sourc.ftni'
-	include 'statn.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C   HISTORY:
 C  WHO   WHEN   WHAT

@@ -2,7 +2,7 @@
 C  Write a line in the VLBA output file with the new date.
 C  NRV 910705
 
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
 
 C Input:

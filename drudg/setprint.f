@@ -6,11 +6,12 @@ C  open up output print file.
 C NRV 910306 Added IOPT to call for landscape orientation of list
 C               IOPT=0 for portrait, =1 for landscape
 C 960122 nrv Added some comments only.
+C 960226 nrv Leftover I*2 !!!
 
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 
-	integer*2 l,ierr,iwid,trimlen,iopt
+	integer l,ierr,iwid,trimlen,iopt
       character*50 CLASER
         character*128 cout
 

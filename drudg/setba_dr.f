@@ -1,18 +1,11 @@
-      SUBROUTINE SETBA_DR
+      SUBROUTINE SETBA_dr
 C
-C A DRUDG version of SKEd's SETBA
-C 960119 nrv New
-
-C   SETBA looks through information in freqs.ftni and figures out
-C   which frequency bands are in use.
-C   It also counts the number of frequencies in each subgroup.
-C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C   COMMON BLOCKS USED
-      include 'sourc.ftni'
-      INCLUDE 'freqs.ftni'
-      include 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  LOCAL VARIABLES
       integer*2 lb(max_band),ls1,ls2
@@ -37,7 +30,7 @@ C
       do is=1,nstatn
         nfreq(1,is,ic)=0
         nfreq(2,is,ic)=0
-        do i=1,nvcs(is,ic)
+        do i=1,nvcs(is,ic) ! number of channels
           iv=invcx(i,is,ic)
           if (ichcm_ch(ls1,1,'  ').eq.0) then
             ls1=lsubvc(iv,is,ic)
@@ -48,31 +41,31 @@ C
           if (lsubvc(iv,is,ic).eq.ls1) isub=1
           if (lsubvc(iv,is,ic).eq.ls2) isub=2
           nfreq(isub,is,ic)=nfreq(isub,is,ic)+1 !count number of frequencies
-          if (ivix(iv,is,ic).ne.0) then ! this channel is used
+          if (iv.ne.0) then ! this channel is used
             cs=cset(iv,is,ic)
             do iul=1,2
 C             Only check pass 1 since all are consistent
 C             Full addition for sign bit
-              if (itras(iul,1,iv,1,is,ic).gt.-99) then 
-                if (cs.eq.'1,2') then
-C                  Two-thirds of the data on a switched track are used
-                   trkn(isub,is,ic)=trkn(isub,is,ic)+0.6667
-                else if (cs(1:1).eq.'1'.or.cs(1:1).eq.' ') then
+              if (itras(iul,1,iv,1,is,ic).ne.-99) then 
+                if (cs.eq.'   '.or.cs.eq.'1,2') then
 C                  All the data on un-switched tracks are used
                    trkn(isub,is,ic)=trkn(isub,is,ic)+1
+                else if (cs(1:1).eq.'1') then
+C                  Two-thirds of the data on a switched track are used
+                   trkn(isub,is,ic)=trkn(isub,is,ic)+0.6667
                 endif
               endif
 C             Add another 0.38 for magnitude bit
-              if (itras(iul,2,iv,1,is,ic).gt.-99) then 
+              if (itras(iul,2,iv,1,is,ic).ne.-99) then 
                 trkn(isub,is,ic)=trkn(isub,is,ic)+0.38
               endif
             enddo
           endif
-        enddo
+        enddo ! number of channels
       enddo
       enddo
       if (ierr.eq.1) ncodes=ncodes-1
 C
-      return
-      end
+      RETURN
+      END
 

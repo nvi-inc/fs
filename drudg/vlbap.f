@@ -4,10 +4,10 @@ C   This subroutine writes the header lines and creates
 C   the track and bbsynth commands for the scan blocks
 C   when writing a VLBA schedule.
 C
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'statn.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C   HISTORY:
 C     WHO   WHEN   WHAT

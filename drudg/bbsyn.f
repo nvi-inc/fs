@@ -4,9 +4,9 @@ C  bbsyn appends the appropriate bbysnth to the buffer
 C  for writing the bbsyn frequencies
 C
 C   COMMON BLOCKS USED
-	include 'skparm.ftni'
-	include 'drcom.ftni'
-	include 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C   HISTORY:
 C  WHO   WHEN   WHAT
