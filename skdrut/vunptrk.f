@@ -66,7 +66,7 @@ C
      .ptr_ch('TRACKS'//char(0)),ivexnum)
       in=0
       do while (in.lt.max_pass.and.iret.eq.0) ! get all fanout defs
-        in=in+1
+        in=in+1 ! number of fanout defs
 
 C  2.1 Subpass
 
@@ -128,7 +128,10 @@ C  2.4 Headstack number
 C  2.5 Track list
 
         ierr = 25
-        i=5
+        do i=1,4
+          it(i)=-99
+        enddo
+        i=5 ! fields 5 through 8 may have tracks
         do while (i.le.9.and.iret.eq.0) ! get tracks
           iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get track
           if (iret.eq.0) then ! a track
@@ -150,10 +153,8 @@ C  2.5 Track list
 
 C       Check for consistent fanout
         nn=0
-        j=1
-        do while (j.le.4.and.it(j).ne.-99)
-          nn=nn+1 ! count tracks
-          j=j+1
+        do j=1,4
+          if (it(j).ne.-99) nn=nn+1 ! count the fanned tracks
         enddo
         if (in.eq.1) then 
           ifanfac=nn ! save first fanout value

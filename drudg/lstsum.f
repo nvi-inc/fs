@@ -28,6 +28,8 @@ C            find a "data_valid" line.  "feet" is running time in seconds
 C            for S2, footage in feet for other recorders.
 C 960913 nrv Change logic for accumulating S2 running time and determining
 C            whether tape has truly started. 
+C 960917 nrv If we come to end of file, output what's left at that point.
+C 960920 nrv Remove line output to new routine LSTSUMO.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -44,7 +46,7 @@ C Local:
       integer idir,nline,ntapes,ncount,npage,maxline,iline,
      .ifeet,inewp,iyear,ix,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,ids,
-     .i,iaz,iel,idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr
+     .i,idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr
       real rs,ds,val
       real speed_snap ! speed from SNAP file
       integer ichcm_ch,isecdif,julda ! function
@@ -185,109 +187,22 @@ C     loop reads all lines.
         if (cbuf(1:1).ne.'"') then !non-comment line
         if (index(cbuf,'SOURCE=').ne.0) then ! new scan starts here
           if (csor.ne.' ') then ! output a line
-            if (iline.ge.maxline) then ! new page, write header
-              if (npage.gt.0) call luff(luprt)
-              npage = npage + 1
-              write(luprt,9300) cinname(1:ic),npage
-9300          format(' Schedule file: ',a,35x,'Page ',i3)
-              if (kskd) then
-                write(luprt,9302) (lstnna(i,istn),i=1,4),lstcod(istn),
-     .          (lexper(i),i=1,4)
-9302            format(' Station: ',4a2,' (',a1,')'/' Experiment: ',4a2)
-              else
-                write(luprt,9303) cstn,cid,cexper
-9303            format(' Station: ',a8,' (',a1,')'/' Experiment: ',a8)
+            if (npage.eq.0) then
+              if (kskd) then ! get from common
+                itearl_local=itearl(istn)
+              else ! calculate local ITEARL here
+                itearl_local = isd-is1
+                if (itearl_local.lt.0) itearl_local=itearl_local+60
               endif
+            endif
+            call lstsumo(iline,npage,cstn,cid,cexper,maxline,
+     .      idir,
+     .      speed_snap,itearl_local,kwrap,ks2,cday,kazel,ksat,kstart,
+     .      nsline,csor,cwrap,ch1,cm1,cs1,ih1,im1,is1,
+     .      ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet,cnewtap,cdir,
+     .      kskd,ncount,ntapes,
+     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
 C           Here is where we can determine early start without the schedule
-              if (npage.eq.1) then
-                if (kskd) then ! get from common
-                  itearl_local=itearl(istn)
-                else ! calculate local ITEARL here
-                  itearl_local = isd-is1
-                  if (itearl_local.lt.0) itearl_local=itearl_local+60
-                endif
-              endif
-              write(luprt,9304) itearl_local
-9304          format(' Early tape start: ',i3,' seconds'/)
-C
-              if (kwrap.and..not.ks2) write(luprt,9310)
-9310          format(22x,'        Start    Start    Stop',19x,
-     .        '  Change/'/
-     .        ' Line#  Source   Az El Cable   Tape     Data     ',
-     .        'Data    Dur Pass Dir Tape Check')
-              if (.not.kwrap.and..not.ks2) write(luprt,9390)
-9390          format(22x,'     Start     Start     Stop',20x,
-     .        ' Change/'/
-     .        ' Line#  Source    Az El    Tape      Data      ',
-     .        'Data     Dur Pass Dir Tape Check')
-              if (kwrap.and.ks2) write(luprt,9312)
-9312          format(22x,'        Start    Start    Stop',15x,
-     .        'Tape'/
-     .        ' Line#  Source   Az El Cable   Tape     Data     ',
-     .        'Data    Dur Group (sec) Change')
-              if (.not.kwrap.and.ks2) write(luprt,9391)
-9391          format(22x,'     Start     Start     Stop',16x,
-     .        'Tape'/
-     .        ' Line#  Source    Az El    Tape      Data      ',
-     .        'Data     Dur Group (sec) Change')
-              write(luprt,9311)
-9311          format('-----------------------------------------',
-     .        '-------------------------------------')
-              write(luprt,9320) cday
-              iline=0
-            endif ! new page, write header
-C         Now write the scan line
-            if (kazel.and..not.ksat) then
-              call cazel(rarad,dcrad,xpos,ypos,zpos,mjd,ut,az,el)
-              iaz = (az*180.d0/PI)+0.5
-              iel = (el*180.d0/PI)+0.5
-            else if (ksat) then ! already got az,el
-              iaz = az
-              iel = el
-            else
-              iaz = 0
-              iel = 0
-            endif
-            if (cnewtap.eq.'XXX') kstart=.true.
-            if (.not.kstart) then ! blank out start time
-              ch1='  '
-              cm1='  '
-              cs1='  '
-            endif
-            if (kwrap.and..not.ks2) then
-              write(luprt,9330) nsline,csor,iaz,iel,cwrap,ih1,im1,is1,
-     .        ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,cdir,ifeet,cnewtap
-9330          format(1x,i5,1x,a8,1x,i3,1x,i2,1x,a5,1x,i2.2,':',i2.2,':',
-     .        i2.2,1x,i2.2,':',i2.2,':',i2.2,1x,i2.2,':',i2.2,':',i2.2,
-     .        1x,i2.2,':',i2.2,2x,a2,1x,a3,1x,i5,1x,a3)
-            else if (.not.kwrap.and..not.ks2) then
-              write(luprt,9380) nsline,csor,iaz,iel,ih1,im1,is1,ihd,imd,
-     .        isd,ih2,im2,is2,idm,ids,cpass,cdir,ifeet,cnewtap
-9380          format(1x,i5,1x,a8,2x,i3,1x,i2,1x,1x,i2.2,':',i2.2,':',
-     .        i2.2,2x,i2.2,':',i2.2,':',i2.2,2x,i2.2,':',i2.2,':',i2.2,
-     .        2x,i2.2,':',i2.2,2x,a2,1x,a3,1x,i5,1x,a3)
-            else if (kwrap.and.ks2) then
-              write(luprt,9331) nsline,csor,iaz,iel,cwrap,ch1,cm1,cs1,
-     .        ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet,cnewtap
-9331          format(1x,i5,1x,a8,1x,i3,1x,i2,1x,a5,1x,a2,':',a2,':',
-     .        a2,1x,i2.2,':',i2.2,':',i2.2,1x,i2.2,':',i2.2,':',i2.2,
-     .        1x,i2.2,':',i2.2,2x,a2,1x,i5,1x,a3)
-            else if (.not.kwrap.and.ks2) then
-              write(luprt,9381) nsline,csor,iaz,iel,ch1,cm1,cs1,ihd,imd,
-     .        isd,ih2,im2,is2,idm,ids,cpass,ifeet,cnewtap
-9381          format(1x,i5,1x,a8,2x,i3,1x,i2,1x,1x,a2,':',a2,':',
-     .        a2,2x,i2.2,':',i2.2,':',i2.2,2x,i2.2,':',i2.2,':',i2.2,
-     .        2x,i2.2,':',i2.2,2x,a2,1x,i5,1x,a3)
-            endif
-            iline=iline+1
-            ncount = ncount + 1 ! count of observations
-            if (cnewtap.eq.'XXX') ntapes=ntapes+1
-            cnewtap = '   '
-C           Calculate footage at the end of the current scan
-            if (.not.ks2) then 
-              idur = 60*idm + ids
-              ifeet = ifeet + idir*(idur+itearl_local)*(speed_snap/12.0)
-            endif
           endif ! output a line
 C       Now get the source info for the new scan 
           ns = index(cbuf,',')-1
@@ -396,8 +311,6 @@ C                     or real (example: 266.66)
           idm = idur/60
           ids = idur - idm*60
 
-        else if (index(cbuf,'DATA_VALID').ne.0) then ! skip over
-
         else if (index(cbuf,'FAST').ne.0) then !add spin feet
           nm = index(cbuf,'M')
           if (nm.gt.0) then
@@ -418,6 +331,8 @@ C                     or real (example: 266.66)
         else if (index(cbuf,'CHECK').ne.0) then
           if (cnewtap.eq.'   ') cnewtap = ' * '
 
+        else if (index(cbuf,'DATA_VALID=').ne.0) then ! skip over
+
         else if (index(cbuf,'=').ne.0) then !probably setup proc
           ieq = index(cbuf,'=')
           cpassp=cpass ! previous pass
@@ -428,7 +343,16 @@ C                     or real (example: 266.66)
         endif !non-comment line
       enddo !read loop
 
-990   write(luprt,'(/" Total number of observations: ",i5/
+990   continue
+C     Output the final scan
+      call lstsumo(iline,npage,cstn,cid,cexper,maxline,
+     .      idir,
+     .speed_snap,itearl_local,kwrap,ks2,cday,kazel,ksat,kstart,
+     .nsline,csor,cwrap,ch1,cm1,cs1,ih1,im1,is1,
+     .ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet,cnewtap,cdir,
+     .kskd,ncount,ntapes,
+     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
+      write(luprt,'(/" Total number of observations: ",i5/
      .               " Total number of tapes: ",i3)') ncount, ntapes
 
       call luff(luprt)

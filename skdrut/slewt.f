@@ -83,7 +83,7 @@ C     931109  nrv    Change from itsris to tsris for real*8
 C     931112  nrv    tsris is in GST
 C     931123  nrv    corrected calculation of srise, had an extra 86400!!
 C     931124  nrv    Don't calculate time at lookahead if the value is 0
-C     950519  nrv    Add knov for specila all-observe VLBA mode
+C     950519  nrv    Add knov for special all-observe VLBA mode
 C
 C
 C     1. First we find the position of the telescope at the end of

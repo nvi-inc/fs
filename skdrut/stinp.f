@@ -64,7 +64,6 @@ C 951116 nrv Remove maxpass and replace with bit density
 C 960208 nrv Increment NSTATN after checking for MAX_STN
 C 960227 nrv Make terminal ID up to 4 characters, not integer.
 C 960409 nrv Change UNPVT call to include nheadstack, ibitden 
-C 960913 nrv Initialize rack and recorder types to "unknown"
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C

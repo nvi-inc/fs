@@ -20,6 +20,8 @@ C 960527 nrv Add cpassorderl
 C 960610 nrv Change first index on ihddir etc. to max_pass instead of 
 C            4*max_pass because max_pass is now set to max_subpass*max_index.
 C 960709 nrv Add barrel roll by station and code
+C 961031 nrv Add LMFMT for recording format. LMODE should be reserved for
+C            the mode name if any.
 C
       double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
@@ -70,10 +72,11 @@ C     nstsav,istsav - number and indices of station names found on the "F" line
 C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
 C     npassl - number of passes in the pass order list
 C
-      integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,
+      integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
      .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode
 C     LCODE - the 2-character frequency codes 
-C     LMODE - the observing mode for each code
+C     LMODE - the observing mode name for each code
+C     LMFMT - the observing mode format for each code
 C     LS2MODE - the S2 recording mode for each code
 C     LSUBVC - sub-group code for each VC, in each code
 C     lifinp - hollerith IF input, e.g. A,B,C,D,1A,1N,2A,2N,3A,3N
@@ -124,6 +127,7 @@ C
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
      .       LCODE(MAX_FRQ),LMODE(4,max_stn,MAX_FRQ),
+     .       LMFMT(4,max_stn,MAX_FRQ),
      .       LSUBVC(MAX_CHAN,max_stn,MAX_FRQ), 
      .       LIFINP(MAX_CHAN,max_stn,MAX_FRQ),
      .       LPOL(max_chan,max_stn,max_frq),

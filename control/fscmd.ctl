@@ -150,6 +150,9 @@ rec_mode     qkr 4201 01 F8
 data_valid   qkr 4301 01 F8
 label        qkr 4401 01 F8
 rec          qkr 4501 01 F8
+form         qkr 4601 01 4F
+tracks       qkr 4701 01 4F
+trackform    qkr 4801 01 4F
 cont         *xx 0000 02 FF
 halt         *xx 0000 03 FF
 log          xxx 0000 04 FF

@@ -20,6 +20,7 @@ C 951214 nrv New.
 C 960124 nrv Bad fan-out logic replaced. 
 C 960201 nrv Worse fan-out logic replaced.
 C 960531 nrv Fanout factor is input, already determined.
+C 961018 nrv Fan out the 'M' modes just like the 'V' ones.
 C
 C Called by: PROCS
 
@@ -29,7 +30,7 @@ C  INPUT:
       integer itras(2,2,max_chan)
 C             Mark III # track assignments from schedule
 C             sub-array for only this code, this station
-      integer*2 lmode ! mode from schedule
+      integer*2 lmode ! first 2 characters of mode from schedule
       integer ifan ! fanout factor
 C
 C  OUTPUT:
@@ -66,14 +67,13 @@ C    Initialize itrk to 0.
 
 C 2. Now check for fan-out and add the appropriate tracks. 
 
-C     If this is a VLBA mode, check for fan-out
-      if (ichcm_ch(lm,1,'V').eq.0) then ! VLBA mode and check for fan
-
+C     If this is a VLBA mode or Mk4 mode, check for fan-out
+      if (ichcm_ch(lm,1,'V').eq.0.or.ichcm_ch(lm,1,'M').eq.0) then 
        
       if (ifan.ne.0) then ! fan-out
-          idum = ichmv_ch(lm,1,'V1  ')
-          idum = ib2as(ifan,lm,3,1)
-          nm=3
+          idum = ichmv_ch(lm,2,'1') ! fan-out 1:
+          idum = ib2as(ifan,lm,3,1) ! fan-out   n
+          nm=3 ! 3 characters in mode name
           if (ifan.gt.1) then ! add fanout tracks
             do isb=1,2 ! u/l
               do ibit=1,2 ! s/m
