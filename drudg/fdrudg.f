@@ -199,7 +199,7 @@ C   Check for non-interactive mode.
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960610)')
+     .  '(NRV 960703)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
