@@ -27,12 +27,16 @@ int ichain1,ichain2;
 
   /* get the current attenuator settings */
 
-    ini_req(&buffer);              /* initialize structure */
-
     ia = ichain1 == 1 || ichain2 == 1;
     ib = ichain1 == 2 || ichain2 == 2;
     ic = ichain1 == 3 || ichain2 == 3;
     id = ichain1 == 4 || ichain2 == 4;
+
+    ip[2]=0;
+    if(!(ia||ib||ic||id))
+      return;
+
+    ini_req(&buffer);              /* initialize structure */
 
     request.type=1;
     request.addr=0x01;
@@ -84,6 +88,10 @@ long ip[5];
     struct res_buf buff_res;
     struct res_rec response;
     struct dist_cmd lcl;
+
+    ip[2]=0;
+    if(!(ia||ib||ic||id))
+      return;
 
     ini_req(&buffer);
     request.type=0;
@@ -143,6 +151,10 @@ long ip[5];
     struct res_buf buff_res;
     struct res_rec response;
     struct dist_cmd lcl;
+
+    ip[2]=0;
+    if(!(ia||ib||ic||id))
+      return;
 
     ini_req(&buffer);
     request.type=0;
