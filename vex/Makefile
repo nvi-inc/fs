@@ -17,6 +17,7 @@ vex.a: $(OBJECTS)
 # GNU ar (Linux) needs this, others don't
 	ar s $@
 #
+	rm -f vex.c vex.yy.c
 
 vex.yy.o:	vex.yy.l y.tab.h
 
