@@ -69,7 +69,7 @@ C
       if (kgetp(lu,idcb,idcbz,ipbuf,jbuf,il,iedit,widmin,widmax,pkrlim,
      + lpaxis,lant)) goto 10020
 C
-      call fmpopen(idcb,iibuf,ierr,'r+',id)
+      call fmpopen(idcb,iibuf,ierr,'r',id)
       if (kopn(lu,ierr,iibuf,0)) goto 10020
 C
       if (koutp(lu,idcbo,idcbos,iapp,iobuf)) goto 10010

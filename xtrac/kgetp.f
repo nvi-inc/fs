@@ -14,7 +14,7 @@ C
 C
 C   OPEN THE DATA FILE
 C
-      call fmpopen(idcb,ipbuf,ierr,'r+',id)
+      call fmpopen(idcb,ipbuf,ierr,'r',id)
       if (kopn(lut,ierr,ipbuf,0)) goto 9100
 C
       ierr=0
