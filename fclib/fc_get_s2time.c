@@ -1,12 +1,13 @@
-void fc_get_s2time__(centisec,s2_tim,nanosec,ip)
-long centisec[2];
+int fc_get_s2time__(dev,centisec,s2_tim,nanosec,ip,to,lendev)
+char dev[];
+long centisec[6];
 int s2_tim[6];
 long *nanosec;
 long ip[5];
+long *to;
+int lendev;
 {
-  void get_s2time();
 
-  get_s2time(centisec,s2_tim,nanosec,ip);
+  return get_s2time(dev,centisec,s2_tim,nanosec,ip,*to);
 
-  return;
 }
