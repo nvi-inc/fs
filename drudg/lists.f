@@ -7,6 +7,7 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 C
 C INPUT: none
 C OUTPUT: none
@@ -16,41 +17,42 @@ C LOCAL:
       integer ipas(max_stn),ift(max_stn),idur(max_stn)
       integer ipasp,iftold,idirp,idir
       integer i,j,k,id
-      real*4 wlon,alat,al11,al12,al21,al22,rt1,rt2
-      real*4 az,el,x30,y30,x85,y85,dc,ha1
-      real*4 spdips
+      real wlon,alat,al11,al12,al21,al22,rt1,rt2
+      real az,el,x30,y30,x85,y85,dc,ha1
+      real speed,spdips
       integer irah,iram,idecd,idecm
       integer*2 lhsign,ldsign
       integer irh3,irh2,irm3,irh1,irm1,irm2,ihah,iham
       integer*2 lds3,lds1,lds2
       integer idd3,idm3,idd1,idm1,idd2,idm2
-      real*4 ras,decs,ras3,ras2,ras1,dcs1,dcs2,dcs3,has,d
-      real*4 tslew,dum
+      real ras,decs,ras3,ras2,ras1,dcs1,dcs2,dcs3,has,d
+      real tslew,dum
       integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod,
      .mjdpre,ispre,iyr2,idayr2,ihr2,min2,isc2
       integer*2 lfreq,lcbpre,lcbnew
-      real*8 UT,GST,utpre ! previous value required for slewing
+      double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat,ivc
       character*7 cwrap ! cable wrap string returned from CBINF 
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
-      integer nlmax,nlines,ntapes,nobs,ierr,ilen,npage
-C NLINES, NOBS, NTAPES - number of lines on a page, observations, tapes
+      integer nlmax,nlines,ntapes,ierr,ilen,npage
+C NLINES, Lnobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
       INTEGER IC, TRIMLEN
-      LOGICAL*4 KNEWT
+      LOGICAL KNEWT
 C function to determine if a new tape has started
-      real*8 RA,DEC
-      real*8 TJD,RAH,DECD,RADH,DECDD
+      double precision RA,DEC
+      double precision TJD,RAH,DECD,RADH,DECDD
 C for precession routines
-      real*8 HA
+      double precision HA
       integer*2 LAXIS(2,7),lax1,lax2
+      integer idum,lnobs
 C names of axis types
-      LOGICAL*4 KUP ! true if source is up at station
-      logical*1 kwrap
+      LOGICAL KUP ! true if source is up at station
+      logical kwrap
 Cinteger*4 ifbrk
       integer*2 HHR
-      integer julda,jchar ! functions
+      integer iflch,ichmv,julda,jchar ! functions
       DATA HHR/2HR /
 C
 C SUBROUTINES CALLED:
@@ -95,11 +97,18 @@ C
 	end if
       NLINES = 0
       NTAPES = 0
-      NOBS = 0
+      LNOBS = 0
       kwrap=.false.
       if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
      .kwrap=.true.
-      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+      call ifill(ibuf,1,ibuf_len*2,oblank)
+      if (lnobs+1.le.nobs) then
+        idum = ichmv(ibuf,1,lskobs(1,lnobs+1),1,ibuf_len*2)
+        ilen = iflch(ibuf,ibuf_len*2)
+      else
+        ilen=-1
+      endif
       CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
      .     LFREQ,IPAS,LDIR,IFT,LPRE,
      .     IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
@@ -379,7 +388,7 @@ C     5. Now write out the observation line.
      .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
-     .      SPDIPS
+     .      12.0*speed(icod,istn)
 9510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
@@ -397,7 +406,7 @@ C     5. Now write out the observation line.
      .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
-     .      SPDIPS
+     .      12.0*speed(icod,istn)
 8510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
@@ -413,17 +422,24 @@ C     5. Now write out the observation line.
           endif
 C
           NLINES = NLINES + 1
-          NOBS = NOBS + 1
+          LNOBS = LNOBS + 1
 	    IPASP = IPAS(ISTNSK)
 	    IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
-     .    *SPDIPS/12.0)
+     .    *speed(icod,istn))
           IDIRP=IDIR
         ENDIF
 C ENDT Current station in observation
 C
 C if (ifbrk().lt.0) goto 900
 
-	  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+      call ifill(ibuf,1,ibuf_len*2,oblank)
+      if (lnobs+1.le.nobs) then
+        idum = ichmv(ibuf,1,lskobs(1,lnobs+1),1,ibuf_len*2)
+        ilen = iflch(ibuf,ibuf_len*2)
+      else
+        ilen=-1
+      endif
         IF (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.ODOLLAR) then
           CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
      .         LFREQ,IPAS,LDIR,IFT,LPRE,
@@ -434,7 +450,7 @@ C if (ifbrk().lt.0) goto 900
 C ENDW Loop on observations
       ENDDO
 C
-      WRITE(luprt,9900) NTAPES,NOBS
+      WRITE(luprt,9900) NTAPES,LNOBS
 9900  FORMAT(' NUMBER OF MARK III TAPES: ',I5/
      .       ' NUMBER OF OBSERVATIONS:   ',I5/)
 900   call luff(luprt)
