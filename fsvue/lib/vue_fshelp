@@ -223,12 +223,24 @@ menu .m.c.menu  -background blue -fg white
 menu .m.d.menu  -background blue -fg white
 .m.d.menu add command -label data_valid  \
 -font $bfont -command {exec vueinfo help data_valid &}
+.m.d.menu add command -label data_check  \
+-font $bfont -command {exec vueinfo help data_check &}
 .m.d.menu add command -label date \
 -font $bfont -command {exec vueinfo help date &}
 .m.d.menu add command -label decode \
 -font $bfont -command {exec vueinfo help decode &}
 .m.d.menu add command -label decode4 \
 -font $bfont -command {exec vueinfo help decode4 &}
+.m.d.menu add command -label diag.s\
+-font $bfont -command {exec vueinfo help diag.s &}
+.m.d.menu add command -label disk2file \
+-font $bfont -command {exec vueinfo help disk2file &}
+.m.d.menu add command -label disk_pos \
+-font $bfont -command {exec vueinfo help disk_pos &}
+.m.d.menu add command -label disk_record \
+-font $bfont -command {exec vueinfo help disk_record &}
+.m.d.menu add command -label disk_serial \
+-font $bfont -command {exec vueinfo help disk_serial &}
 .m.d.menu add command -label dqa \
 -font $bfont -command {exec vueinfo help dqa &}
 .m.d.menu add command -label ds \
@@ -340,6 +352,8 @@ menu .m.i.menu  -background blue -fg white
 -font $bfont -command {exec vueinfo help ifdab &}
 .m.i.menu add command -label ifdcd \
 -font $bfont -command {exec vueinfo help ifdcd &}
+.m.i.menu add command -label in2net \
+-font $bfont -command {exec vueinfo help in2net&}
 
 .m.i.menu add command -label ifp01  \
 -font $bfont -command {exec vueinfo help ifp01 &}
