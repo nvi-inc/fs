@@ -51,15 +51,17 @@ C
       iclass = 0
       nrec = 0
       do while (ilen.ge.0)
-        if (ichcm_ch(ibuf,1,'  ').eq.0) goto 110
-        if ((nrec+1).eq.256) then
-          call logit7ci(0,0,0,1,-170,'bo',256)
-          goto 110
-        end  if
-        nrec = nrec + 1
-        call put_buf(iclass,ibuf,-iflch(ibuf,ilen),'  ','  ')
+        if(ichcm_ch(ibuf,1,'*').ne.0) then
+           if (ichcm_ch(ibuf,1,'  ').eq.0) goto 110
+           if ((nrec+1).eq.256) then
+              call logit7ci(0,0,0,1,-170,'bo',256)
+              goto 110
+           end  if
+           nrec = nrec + 1
+           call put_buf(iclass,ibuf,-iflch(ibuf,ilen),'  ','  ')
 C                   Put record into class record
-        call ifill_ch(ibuf,1,80,' ')
+           call ifill_ch(ibuf,1,80,' ')
+        endif
         ilen = fmpread(idcb,ierr,ibuf,ibadrd)
         call lower(ibuf,ilen)
       end do
