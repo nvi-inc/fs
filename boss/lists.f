@@ -95,8 +95,9 @@ C
 C  4. Handle line # parameter here.
 C
 300   iline = ias2b(ibuf,ich+1,ilst-ich)
+      iline=iline-1
       if(iline.le.0) goto 310
-      idum = fmpsetline(idcbsk,ierr,iline-1)
+      idum = fmpsetline(idcbsk,ierr,iline)
       if(ierr.ge.0) goto 500
 cxx      if(ierr.eq.0) goto 500
 310     call logit7ci(0,0,0,1,-106,'bo',iline)
@@ -115,7 +116,7 @@ C
 C
 505   call susp(1,10)
 C         -give OPRIN time to suspend
-      do 520 i=iline+1,iline+nlines-1
+      do 520 i=iline+1,iline+nlines
             if(kbreak('boss ')) goto 900
         call ifill_ch(ib,1,106,' ')
         ilen = fmpread(idcbsk,ierr,ibuf,iblen*2)
