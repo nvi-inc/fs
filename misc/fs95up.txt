@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.2/misc/fs95up.txt  Version: 1.2  Date: 011029
+File: /usr2/fs-9.5.3/misc/fs95up.txt  Version: 1.3  Date: 011203
 
 I. Introduction
 
@@ -71,7 +71,9 @@ the summary.
 37. A new command "cablediff" has been included.
 38. New "cablelong" command. 
 39. Experimental time model "ntp".
-40. Station dependent detectors u5 and u6 may be used tsys measurments.
+40. Station dependent detectors u5 and u6 may be used for tsys measurments.
+41. Mark IV repro command now accepts 1 Mbit/sec bitrate
+42. pdplt now has an option to plot the raw pointing data
 
 A more detailed discussion of these changes follows.
 
@@ -109,7 +111,7 @@ A more detailed discussion of these changes follows.
    possible for systems with only one recorder. For these systems the
    only changes necessary are: re-arrange the equip.ctl control file,
    and modify the tape recorder mnemonics in the matad.ctl and
-   mcbcn.ctl control files, and rename the parity check
+   mcbad.ctl control files, and rename the parity check
    procedures. The only other impact is that some display parameters
    in the FS and monit will show "r1" instead of "rc" or "tp" for
    recorder one. Aspects of two tape drive operation are discussed in
@@ -597,6 +599,20 @@ A more detailed discussion of these changes follows.
     available for setting the caltemp for station dependent detector
     for fivpt and onoff in previous releases.
 
+41. Mark IV repro command now accepts 1 Mbit/sec bitrate. This feature
+    was added to assist with testing.
+
+42. pdplt now has an option to plot the raw pointing data. A menu item
+    "Data" was added to the main menu. This option provides a toggle
+    to select plotting the raw data or the solution residuals. The
+    solution residuals are plotted by default. The "Statistics" menu
+    item will display the raw data statistics when in raw data
+    mode. The data plots will respect any editing that has been
+    applied in the solution. Displaying the raw data is very useful
+    for determining whether a new model is needed or not. Previously,
+    the only way to examine the raw data was to use an option in the
+    "resid" printer plot program.
+
                          B. Changes in DRUDG
 
 This version of DRUDG has major changes in the following areas.
@@ -611,6 +627,8 @@ This version of DRUDG has major changes in the following areas.
 7. IFD and IF3 commands changed.
 8. Two head recording support
 9. sched_end procedure at the end of .snp files
+10. S2 mode changes. 
+11. Rack "none" comments added.
 
 These are discussed in more detail below.
 
@@ -767,6 +785,16 @@ changed in a future FS release.
 9. DRUDG adds a call to the SNAP procedure "sched_end" at the end of
 all .SNP files.
 
+10. S2 mode changes. If the mode for S2 changes, the tape will be
+stopped. This was already in effect if the late stop value was
+non-zero, but now the tape will be stopped even if the late stop value
+is zero.
+
+11. Rack "none" comments added. If the rack type is "none", drudg will
+write comments in the setup procedures that have the sky frequency. LO
+frequency, and BBC/VC frequency for each channel.
+
+
 			    C. Known Bugs
 
 The following is a summary list of known bugs. They are described in
@@ -785,6 +813,7 @@ more detail after the list.
 11. No extra spaces allowed in "ibad.ctl" file.
 12. ONOFF and FIVPT programs hang.
 13. FS SNAP command pages don't list tape drive suffix numbers.
+14. Tk/tcl problems
 
 A more detailed discussion of these bugs follows.
 
@@ -986,6 +1015,13 @@ used. For example, if two drives are defined, then "help=tape1" and
 "help=tape2" will work, but "help=tape" will not and vice-versa if
 only one drive is defined.
 
+14. Tk/tcl problems. Please note the following problems with Tk/tcl
+applications in the FS: (1) defining the plot limits manually in
+"logpl" does not work, i.e., only "autoscale" works, (2) the labels
+for point information in the upper right corner of "pdplt" does not
+line up with the data for all versions of Tk, (3) the windows of the
+"msg" and "logpl" utilities are too large to work with comfortably on
+some smaller resolution displays, particularly 1024x768.
 
 III. Two Tape Drive Operation
 
@@ -1149,7 +1185,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.2 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.3 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -1157,7 +1193,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.2.tar.gz
+    get fs-9.5.3.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1171,11 +1207,11 @@ section "VII. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.2.tar.gz
+    tar -xzpf /tmp/fs-9.5.3.tar.gz
 
 (6) Install the system:
 
-    cd /usr2/fs-9.5.2
+    cd /usr2/fs-9.5.3
     make install
     (answer the question "y" if it is okay to proceed)
 
@@ -1522,19 +1558,19 @@ Harro Verkouter, Joint Institute for VLBI in Europe
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.2.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.3.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs952tg.aa
-fs952tg.ab
+fs953tg.aa
+fs953tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs952tg.* >fs-9.5.2.tar.gz
+cat fs953tg.* >fs-9.5.3.tar.gz
 
-This will create an exact image of the original fs-9.5.2.tar.gz
+This will create an exact image of the original fs-9.5.3.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

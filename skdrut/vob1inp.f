@@ -20,6 +20,7 @@ C 970717 nrv Read the "drive" field as the record/norecord flag
 C 991020 nrv Fix time ordering.
 C 000611 nrv Remove time ordering to OSORT. Remove print statement.
 C 001108 nrv Initialize irec=0 before first call to findscan.
+C 011114 nrv Check wrap for 'n' etc not '&n'!
 
 
       include '../skdrincl/skparm.ftni'
@@ -137,9 +138,9 @@ C         idur = det-dst
           if (il.eq.0) then ! null wrap
             idum=ichmv_ch(lcb,1,'- ')
           else ! check it
-            if (cout(1:il).eq.'&n') idum=ichmv_ch(lcb,1,'- ')
-            if (cout(1:il).eq.'&cw') idum=ichmv_ch(lcb,1,'C ')
-            if (cout(1:il).eq.'&ccw') idum=ichmv_ch(lcb,1,'W ')
+            if (cout(1:il).eq.'n') idum=ichmv_ch(lcb,1,'- ')
+            if (cout(1:il).eq.'cw') idum=ichmv_ch(lcb,1,'C ')
+            if (cout(1:il).eq.'ccw') idum=ichmv_ch(lcb,1,'W ')
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))

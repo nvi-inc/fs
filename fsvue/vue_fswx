@@ -20,6 +20,13 @@
 #  wm geometry . +5+25
   wm title . { Weather }
 
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+  } else { 
+      set bfont {9x15}
+  }
+
 # Top frame is a menubar
 # there is more magic that you can do with this
 # build widget .m

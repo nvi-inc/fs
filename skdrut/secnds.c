@@ -1,5 +1,7 @@
 
+#include <sys/times.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 extern struct timeval   tp;

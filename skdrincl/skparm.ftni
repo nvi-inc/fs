@@ -4,6 +4,13 @@ C     SKPARM.FTNI HOLDS PARAMETERS FOR THE SKED FAMILY OF PROGRAMS.
 C     Parameters which are used by SKED and/or DRUDG are
 C     collected here.
 C
+C********************************************************************
+C NOTE: If you have FS Linux 1 you may have to change parameters
+C           max_stn from 30 to 20
+C           max_frq from 20 to 17 
+C so that drudg will compile and load.
+C********************************************************************
+C
 C  Last modified:  890623 by NRV to add windows parameters
 C 891113 NRV Add max base/flux parameter
 C 900125 NRV added max tape length parameter
@@ -48,7 +55,7 @@ C 000905 nrv Chage max_headstack to 2
 C 000914 nrv Add MAX_ROLL
 C 001003 nrv Add short_length
 C 001109 nrv Change max_obs to 3000.
-C 010711 nrv Change max_headstack to 2.
+C 010619 nrv Change short_length from 2900 to 2750.
 C
 C********************************************************************
 C
@@ -61,7 +68,7 @@ C
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
      .max_subpass,max_tone,max_roll
 
-      PARAMETER (MAX_STN = 35)
+      PARAMETER (MAX_STN = 30)
 C
 C     The maximum number of baselines.
 C
@@ -200,7 +207,7 @@ C     Lengths for thick and thin tape.
       real*4 thick_length,thin_length,short_length
       parameter (THIN_LENGTH = 17400)
       parameter (THICK_LENGTH = 8700)
-      parameter (SHORT_LENGTH = 2900)
+      parameter (SHORT_LENGTH = 2750)
 
 C     Speeds for S2.
       real*4 speed_lp, speed_slp

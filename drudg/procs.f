@@ -207,6 +207,7 @@ C 010920 nrv Add code from D. Graham to enable "S2" for 2-head.
 C 011002 nrv Change second wait in K4 LOADER to 6s per H. Osaki.
 C 011011 nrv Wrong character counting variable in user_info setup.
 C 011022 nrv Remove NEWTAPE from K4 LOADER.
+C 011130 nrv Add comments with sky frequencies if no rack.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -227,7 +228,7 @@ C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       logical kok,km3mode,km3be,km3ac,km4done,kpcal_d,kpcal
       logical kinclude,klast8,kfirst8,klsblo,knolo
       logical kvrack,kv4rack,km3rack,km4rack,kk41rack,kk42rack,
-     .km4fmk4rack,k8bbc,kk4vcab,kk3fmk4rack
+     .km4fmk4rack,k8bbc,kk4vcab,kk3fmk4rack,knorack
       logical kv4rec(2),kvrec(2),km3rec(2),ks2rec(2),
      .km4rec(2),kk42rec(2),kk41rec(2),kuse(2)
 C     real speed,spd
@@ -291,6 +292,8 @@ C  1. Create the file. Initialize
      .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
      .km3rec,km4rec,kvrec,
      .kv4rec,ks2rec,kk41rec,kk42rec)
+      knorack = ichcm_ch(lstrack(1,istn),1,'none').eq.0
+     . .or.     ichcm_ch(lstrack(1,istn),1,'NONE').eq.0
       kk4vcab=.false.
       if ((kk41rack.or.kk42rack).and..not.km4fmk4rack) then
         if (nrecst(istn).eq.2) then
@@ -813,6 +816,44 @@ C             nch = ichmv_ch(ibuf,nch,crec(irec))
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
           endif ! K4 recorder
+C  NONE rack gets comments
+          if (knorack) then ! none rack comments
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(ibuf,1,'"Channel  Sky freq  LO freq  video')
+            call hol2lower(ibuf,(nch+1))
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+            DO ichan=1,nchan(istn,icode) !loop on channels
+              call ifill(ibuf,1,ibuflen,oblank)
+              nch = ichmv_ch(ibuf,1,'"    ')
+              ic=invcx(ichan,istn,icode) ! channel number
+              nch = nch + ib2as(ic,ibuf,nch,Z4000+2*Z100+2) 
+              nch = nch + 3
+              fr = FREQRF(ic,istn,ICODE) ! sky freq
+              if (freqrf(ic,istn,icode).gt.100000.d0) then
+                igig=freqrf(ic,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqrf(ic,istn,icode)-igig*100000.d0
+              endif
+              NCH = nch + IR2AS(fr,IBUF,nch,8,2)
+              nch = nch + 3
+              fr = FREQLO(ic,istn,ICODE) ! sky freq
+              if (freqLO(ic,istn,icode).gt.100000.d0) then
+                igig=freqLO(ic,istn,icode)/100000.d0
+                nch=nch+ib2as(igig,ibuf,nch,1)
+                fr=freqLO(ic,istn,icode)-igig*100000.d0
+              endif
+              NCH = nch + IR2AS(fr,IBUF,nch,8,2)
+              nch = nch + 3
+              DLO = freqlo(ic,istn,icode) ! lo freq
+              DRF = FREQRF(ic,istn,ICODE) ! sky freq
+              rFVC = abs(DRF-DLO)   ! BBCfreq = RFfreq - LOfreq
+              NCH = nch + IR2AS(rFVC,IBUF,nch,8,2)
+              if (DRF-DLO .lt. 0.d0) nch = ichmv_ch(ibuf,nch+1,"LSB")
+              call hol2lower(ibuf,(nch+1))
+              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+            enddo ! loop on channels
+          endif ! none rack comments
+
 C  BBCffb or VCffb
           if (km3rack.or.km4rack.or.kvrack.or.kv4rack.or.
      .        kk41rack.or.kk42rack) then
