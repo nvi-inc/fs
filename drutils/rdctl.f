@@ -14,6 +14,7 @@ C   HISTORY:
 C     gag   900212 created
 C     NRV   901018 Added "printer" line in $PRINT section
 C     nrv   950329 Added flux_comments
+C     nrv   950925 Add full code for printer line in $PRINT
 C
 C   parameter file
       INCLUDE 'skparm.ftni'
@@ -180,14 +181,51 @@ C  $PRINT
                 else if (ichcm_ch(itmpnam,1,'LANDSCAPE').eq.0) then
                   call hol2char(ibuf,ic1,ilen*2-1,cprtlan)
                   call null_term(cprtlan)
-                else if (ichcm_ch(itmpnam,1,'PRINTER').eq.0) then
-                  call hol2char(ibuf,ic1,ic2-ic1+1,cprttyp)
-                  call gtfld(ibuf,ich,ilen*2,ic1,ic2)
-                  call hol2char(ibuf,ic1,ic2-ic1+1,cprport)
-                else
-                  write(luscn,9210) itmpnam
-9210              format("Unrecognizable print name ",5A2) 
-                end if 
+                else if (ichcm_ch(itmpnam,1,'PRINTER').eq.0) then ! printer line
+                   nch=ic2-ic1+1
+                   idum = ichmv(itmpnam,1,ibuf,ic1,nch) ! type
+                   call hol2upper(itmpnam,nch)
+                   call hol2char(itmpnam,1,nch,ctemp)
+                   if (ctemp.eq.'EPSON'.or.ctemp.eq.'LASER'.or.
+     .              ctemp.eq.'FILE'.or.ctemp.eq.'EPSON24') then
+                     cprttyp=ctemp
+                   else
+                     write(luscn,9211) ctemp
+9211                 format(' Unrecognized printer type ',A)
+                   endif
+C		call gtfld(ibuf,ich,ilen*2,ic1,ic2)
+C		nch = ic2-ic1+1
+C		if (nch.eq.0) then
+C		  write(luscn,9212) ctemp
+C212                      format(' Unrecognized port ',A)
+C		else 
+C		  call hol2char(ibuf,ic1,ic2,cprport) ! port
+C                       endif
+C		call gtfld(ibuf,ich,ilen*2,ic1,ic2)
+C		nch = ic2-ic1+1
+C		idummy = ichmv(itmpnam,1,ibuf,ic1,nch) ! width
+C		call hol2uppe(itmpnam,nch)
+C		call hol2char(itmpnam,1,nch,ctemp)
+C		if (ctemp.ne.'NORMAL'.and.ctemp.ne.'COMPRESS') then
+C		  write(luscn,9212) ctemp
+C212                format(' Unrecognized width ',A)
+C		else if (ctemp.eq.'NORMAL') then
+C		  iwidth = 80
+C		else if (ctemp.eq.'COMPRESS') then
+C		  iwidth = 137
+C		endif
+C	    else
+C                 write(luscn,9210) itmpnam
+C210              format(" Unrecognizable print name ",5A2)
+		    end if !printer line
+C Original code, from Unix version. Above is full PC version.
+C                 call hol2char(ibuf,ic1,ic2-ic1+1,cprttyp)
+C                 call gtfld(ibuf,ich,ilen*2,ic1,ic2)
+C                 call hol2char(ibuf,ic1,ic2-ic1+1,cprport)
+C               else
+C                 write(luscn,9210) itmpnam
+C9210              format("Unrecognized print name ",5A2) 
+C               end if 
 
                 call ifill(ibuf,1,ibuf_len*2,oblank)
                 call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
