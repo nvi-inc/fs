@@ -4,10 +4,12 @@
 #include <string.h>
 #include <limits.h>
 #include <sys/types.h>
-#include "../include/params.h"
-#include "../include/vrepro_ds.h"
 #include "../include/macro.h"
 
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"         /* shared memory definition */
+#include "../include/shm_addr.h"      /* shared memory pointer */
                                               /* parameter keywords */
 static char *key_mode[ ]={ "read", "byp" };
 static char *key_equ[ ]={ "std", "alt1", "alt2" };
@@ -44,6 +46,8 @@ char *ptr;
         break;
       case 5:
         idflt=1;                               /* alt1 is default */
+	if (shm_addr->equip.drive_type == VLBA2)
+	  idflt=0;                         /* standard is default for VLBA2 */
       case 6:
         ind=*count-5;
         if(idflt==-1) idflt=lcl->equalizer[0];      /* equB defaults to equA */
@@ -136,8 +140,21 @@ void vreproa8mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-     *data= 0x24;  /* double speed */
-     if (lcl->equalizer[ 0] == 1) 
+  int speed;
+
+  speed=2;
+  if(shm_addr->equip.drive_type == VLBA2) {
+/* we don't knwo what to do for "alt2" on VLBA2 drive */
+    if (lcl->equalizer[ 0] == 0 )
+        speed = 1;
+  } else {
+/* we don't knwo what to do for "std" on VLBA drive */
+    if (lcl->equalizer[ 0] == 1)
+	speed = 1;
+  }
+
+     *data= 0x24;  /* double speed & unknown */
+     if (speed == 1) 
           *data= 0x34;   /* normal speed */
 
      return;
@@ -159,6 +176,17 @@ struct vrepro_cmd *lcl;
 /* hardcoded reproduce channel A to formatter output channel A, for now */
 
      *data= (bits16on(1) & lcl->mode[ 0]);
+
+     return;
+}
+
+void vrepro9cmc_vlba2(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+/*VLBA2 drive requires uses 9c to select something to do with repro/raw */
+
+     *data=  (bits16on(1) & lcl->mode[ 0]); 
 
      return;
 }
