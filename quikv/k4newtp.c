@@ -79,8 +79,12 @@ long ip[5];                       /* ipc parameters */
       if(max>0) 
         ib_res_ascii(output+strlen(output),&max,ip);
 
-      strcpy(cmd,"0");
-      strcat(cmd,tape);
+      if(itape < 10) {
+	strcpy(cmd,"0");
+	strcat(cmd,tape);
+      } else {
+	strcpy(cmd,tape);
+      }
       strcat(cmd,"C");
       ptr=strstr(output,cmd);
       i=0;
@@ -124,7 +128,8 @@ long ip[5];                       /* ipc parameters */
 
 /* execute 'MOVE' command */
 
-      strcpy(cmd,"move=0");
+      strcpy(cmd,"move=");
+      if(itape < 10) strcat(cmd,"0");
       strcat(cmd,tape);
       strcat(cmd,"c,dr1");
 

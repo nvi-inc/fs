@@ -38,7 +38,8 @@ long ip[5];                       /* ipc parameters */
 
 /* This is the 'MOVE' command */
 
-      strcpy(cmd,"move=dr1,0");
+      strcpy(cmd,"move=dr1,");
+      if(tape[1] == '\0') strcat(cmd,"0");
       strcat(cmd,tape);
       strcat(cmd,"c");
 
