@@ -51,7 +51,8 @@ C   LOCAL VARIABLES
      .y85now,y85new,az1,az2,trise,elrate,tslew1,tslew2
       integer nloops
       integer*2 lwr1,lwr2,lwr2p
-      real*8 rme,srise
+      real*8 srise
+      real rme
       LOGICAL KUP ! Returned from CVPOS, TRUE if source within limits
 C        TSLEWP,TSLEWC - previous, current slew times.  For iterating.
 C        DELAZ,DELEL,DELDC,DELHA,DELX30,DELY30,DELX85,DELY85
@@ -84,6 +85,7 @@ C     931112  nrv    tsris is in GST
 C     931123  nrv    corrected calculation of srise, had an extra 86400!!
 C     931124  nrv    Don't calculate time at lookahead if the value is 0
 C     950519  nrv    Add knov for special all-observe VLBA mode
+C 970120 nrv change variable RME to single precision for AMAX1
 C
 C
 C     1. First we find the position of the telescope at the end of
