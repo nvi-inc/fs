@@ -64,7 +64,7 @@ C  Handle formatter or tape
       goto 900 
 
 150   if ((cicr.eq.'tp').or.(cicr.eq.'tape'))
-     .  call char2hol('tp',mdnam,1,2)
+     .  call char2hol('rc',mdnam,1,2)
       goto 900 
 
 C  Handle IFD's 
