@@ -1,10 +1,12 @@
-      SUBROUTINE LABSNP(nlabpr,iyear,iin,fileptr)
+      SUBROUTINE LABSNP(nlabpr,iyear,inew)
 C  Write tape labels from reading the SNAP file
 C
 C NRV 901206 New routine
 C nrv 930412 implicit none
 C 960814 nrv Allow upper/lower case in SNAP file
 C 970122 nrv Add IIN, FILEPTR to call. Call make_pslabel.
+C 970228 nrv Remove IIN and use clabtyp instead
+C 970312 nrv Update clabtyp name checking for barcode cartridge
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -13,8 +15,7 @@ C 970122 nrv Add IIN, FILEPTR to call. Call make_pslabel.
 C
 C Input:
       integer iyear ! year of the SNAP file
-      integer fileptr ! pointer for PS file
-      integer iin ! 1=laser/epson, 2=ps
+      integer inew ! 1=start new ps file
 c Output:
       integer nlabpr ! number of labels actually printed
 C Local
@@ -45,9 +46,10 @@ C 2. Loop over SNAP records
         if (cbuf(1:1).ne.'"') then !non-comment line
         if (index(cbuf,'UNLOD').ne.0) then
           if (nout.ge.nlab) then !print a row
-            if (iin.eq.1) then ! laser or Epson
+            if (clabtyp.ne.'POSTSCRIPT') then ! laser or Epson
               call blabl(luprt,nout,lexper,lstnna(1,1),lstcod(1),
-     .        iy1,id1,ih1,im1,id2,ih2,im2,ilabrow,cprttyp,cprport)
+     .        iy1,id1,ih1,im1,id2,ih2,im2,ilabrow,
+     .        cprttyp,clabtyp,cprport)
               nout = 0
               ilabrow = ilabrow + 1
               if (ilabrow.gt.8) ilabrow=ilabrow-8
@@ -61,7 +63,8 @@ C 2. Loop over SNAP records
               ipsh2=ih2(1)
               ipsm2=im2(1)
               call make_pslabel(fileptr,lstnam,lco,lexper,
-     .        iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2,ntape)
+     .        iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2,ntape,
+     .        inew,rlabsize)
               NOUT = 0
             endif ! laser/Epson/ps
           endif
@@ -89,11 +92,11 @@ C 2. Loop over SNAP records
         endif ! UNLOD
         endif !non=comment line
       enddo !read loop
-901   if (iin.eq.1) then
-        if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') 
+901   if (clabtyp.ne.'POSTSCRIPT') then
+        if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.cprttyp.eq.'FILE') 
      .  call blabl(luprt,nout,lexper,
      .  lstnna(1,1),lstcod(1),
-     .  iy1,id1,ih1,im1,id2,ih2,im2,ilabrow,cprttyp,cprport)
+     .  iy1,id1,ih1,im1,id2,ih2,im2,ilabrow,cprttyp,clabtyp,cprport)
       else
         iy1900=iy1(1)-1900
         ipsd1=id1(1)
