@@ -37,7 +37,10 @@ long ip[5];                           /* ipc parameters */
  
       indx=itask-1;
 
-      kS2drive=shm_addr->equip.drive[indx] == S2;
+      kS2drive=indx >= 0 && shm_addr->equip.drive[indx] == S2;
+
+      if(indx < 0)
+	indx=0;
 
       if(kS2drive)
 	ini_rclcn_req(&buffer);
@@ -47,14 +50,14 @@ long ip[5];                           /* ipc parameters */
 	  add_rclcn_user_dv_read(&buffer,device);
 	  goto rclcn;
 	} else {
-	  data_valid_dis(command,ip,indx);
+	  data_valid_dis(command,ip,indx,kS2drive);
 	  return;
 	}
       } else if (command->argv[0]==NULL)
 	goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
         if (*command->argv[0]=='?') {
-          data_valid_dis(command,ip,indx);
+          data_valid_dis(command,ip,indx,kS2drive);
           return;
          }
 
@@ -66,7 +69,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=data_valid_dec(&lcl,&count, ptr);
+        ierr=data_valid_dec(&lcl,&count, ptr, kS2drive);
         if(ierr !=0 ) goto error;
       }
 
@@ -83,7 +86,7 @@ parse:
       skd_run("tpicd",'w',ip);
 
       if(!kS2drive) {
-	ip[0]=ip[1]=ierr=0;
+	ip[0]=ip[1]=ip[2]=0;
 	return;
       }
 
@@ -108,7 +111,7 @@ rclcn:
 	return;
       }
 
-      data_valid_dis(command,ip,indx);
+      data_valid_dis(command,ip,indx,kS2drive);
       return;
 
 error:
