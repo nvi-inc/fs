@@ -1,0 +1,17 @@
+               s2version - version of operating system
+
+            Syntax: s2version=device 
+  
+            Response: s2version/device,version 
+
+            device : Instrument code.
+
+Settable Parameters: none
+
+Monitor-only Parameters:
+
+            version : string indicating version id and compile time.
+
+Comments:
+Intrument device code is "da" for the S2 DAS or "r1" for S2 RT.
+
