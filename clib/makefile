@@ -10,12 +10,13 @@ req_util.o res_util.o dist_util.o arg_util.o str_util.o mcbcn_v2.o\
 dtlkup.o tpi_vlba.o vrepro_util.o freq2bbc.o bbc_util.o tape_util.o\
 vform_util.o venable_util.o dqa_util.o capture_util.o et_v.o rwff_v.o\
 vst_util.o get_vaux.o set_vaux.o cchmod.o sig_ignore.o get_vtime.o\
-mcb_util.o bblv2db.o motion_done.o itrk2bbc.o mvdis_v.o vacuum.o semid_util.o\
-go_util.o get_vatod.o v2_head_vmov.o v2_motion_done.o v2_vlt_head.o
+mcb_util.o bblv2db.o motion_done.o mvdis_v.o vacuum.o semid_util.o\
+go_util.o get_vatod.o v2_head_vmov.o v2_motion_done.o v2_vlt_head.o\
+trkfrm_util.o bs2code.o cshm_init.o tracks_util.o bit_density_util.o\
+systracks_util.o
 #
 CFLAGS = 
 #FFLAGS = 
-F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The
