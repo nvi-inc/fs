@@ -86,18 +86,28 @@ parse:
 
       ichold=shm_addr->check.rec;
       shm_addr->check.rec=0;
-      
-/* format buffers for mcbcn */
-      
-      request.type=0; 
-      request.addr=0xb5;
-      vstb5mc(&request.data,&lcl); add_req(&buffer,&request);
+
       shm_addr->ispeed=lcl.speed;
       shm_addr->cips=lcl.cips;
 
       memcpy(&lcv,&shm_addr->venable,sizeof(lcv));
       lcv.general=lcl.rec;                  /* turn record off or on */
       shm_addr->venable.general=lcv.general;
+
+/* if MK4 FM control record */
+
+      if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	setMK4FMrec(lcl.rec,ip);
+	if(ip[2]<0)
+	  return;
+      }
+
+/* format buffers for mcbcn */
+      
+      request.type=0; 
+      request.addr=0xb5;
+      vstb5mc(&request.data,&lcl); add_req(&buffer,&request);
+
       venable80mc(&request.data,&lcv);
       request.addr=0x80;
       add_req(&buffer,&request);
