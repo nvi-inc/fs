@@ -175,7 +175,7 @@ C  at this time, don't know how many characters are expected 7/16/92
            ilen=ilen+1
         endif
       else if (imode.eq.9.or.imode.eq.11) then
-        maxc=100
+        maxc=178
         if(imode.eq.11) itimeout=max(210,itimeout)
         ireg(1)=portread(lumat,irecv,ilen,maxc,10,itimeout)
 c         read(5,'(39a2)') (irecv(iweh),iweh=1,39)
@@ -183,7 +183,7 @@ c         ilen=iscn_ch(irecv,1,78,'$')-1
 c         write(6,'(''got:'',39a2)') (irecv(iweh),iweh=1,(ilen+1)/2)
 c         ireg(1)=0
       else if(imode.eq.10) then
-        maxc=100
+        maxc=178
         ireg(1)=portread(lumat,irecv,ilen,maxc,ichar('$'),itimeout)
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
