@@ -15,6 +15,7 @@ C
 C  HISTORY:
 C      NRV   891110  Modified UNSKS for use by new catalog routines
 C   nrv 930225 implicit none
+C 970114 nrv Change 4 and 8 to max_sorlen/2 and max_sorlen
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -26,7 +27,8 @@ C  OUTPUT:
       integer ierr,irah,iram,idecd,idecm
       integer*2 ldsign
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
-      integer*2 LNAME1(4), LNAME2(4) ! IAU and common names
+C IAU and common names
+      integer*2 LNAME1(max_sorlen/2), LNAME2(max_sorlen/2) 
 C   Celestial Source Info:
       integer*2 LRAHMS(8)
 C          - right ascension, in form hhmmss.ssssssss
@@ -95,22 +97,22 @@ C     IAU-name, 8 characters.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8) THEN  !"too long"
+      IF  (NCH.GT.max_sorlen) THEN  !"too long"
         IERR = -101
         RETURN
       END IF  !"too long"
-      CALL IFILL(LNAME1,1,8,oblank)
+      CALL IFILL(LNAME1,1,max_sorlen,oblank)
       IDUMY = ICHMV(LNAME1,1,IBUF,IC1,NCH)
 C
 C     Common-name, 8 characters.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8) THEN  !"too many"
+      IF  (NCH.GT.max_sorlen) THEN  !"too many"
         IERR = -102
         RETURN
       END IF  !"too many"
-      CALL IFILL(LNAME2,1,8,oblank)
+      CALL IFILL(LNAME2,1,max_sorlen,oblank)
       IDUMY = ICHMV(LNAME2,1,IBUF,IC1,NCH)
 C
       if (nargs.eq.5) return
