@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 
+#include "../include/ipckeys.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -27,6 +28,10 @@ main()
     shm_addr->time.index = 0;
     shm_addr->time.offset[0] = 0;
     shm_addr->time.offset[1] = 0;
+    shm_addr->time.epoch[0] = 0;
+    shm_addr->time.epoch[1] = 0;
+    shm_addr->time.icomputer[0]=0;
+    shm_addr->time.icomputer[1]=0;
     shm_addr->time.secs_off = rte_secs();
 
     key = SEM_KEY;
