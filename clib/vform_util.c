@@ -401,10 +401,14 @@ void vform9Dmc(data, lcl)
 unsigned *data;
 struct vform_cmd *lcl;
 {
-    if(lcl->rate >=3)   /* rates below 2 MHz we can't handle */
-      *data=0x8000+ (0x19 << (lcl->rate-3));
-    else
+    if((lcl->tape_clock &0x7) == 5)
+      *data=0x8019;
+    else if((lcl->tape_clock &0x7) == 6)
       *data=0x8032;
+    else if((lcl->tape_clock &0x7) == 7)
+      *data=0x8064;
+    else
+      *data=0x8032;    /* rates below 2 MHz we can't handle */
 }
 
 void vformA6mc(data, hwid, lcl)
