@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.9/misc/fs959up.txt  Version: 1.1  Date: 020520
+File: /usr2/fs-9.5.10/misc/fs9510up.txt  Version: 1.2  Date: 020522
 
 I. Introduction
 
@@ -18,7 +18,8 @@ reproduce by DRUDG for double speed recordings with VLBA and VLBA4
 recorders.
 
 This version includes all features of 9.5.7, specifically the Mark V
-piggyback recording mode. It also includes some small patches to 9.5.8.
+piggyback recording mode. It also includes some small patches to 9.5.8
+and 9.5.9.
 
 II. Changes Since Version 9.5.3
 
@@ -665,11 +666,13 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
-If you are upgrading from 9.5.8, please follow steps (0)-(8), skip
-step (9), and complete step (10).
+If you are upgrading from 9.5.8 or 9.5.9, please follow steps (0)-(8),
+skip step (9), and complete step (10). Please also complete item M6 or
+V6, as appropriate, in step (16).
 
 If you are upgrading from 9.5.7, please follow steps (0)-(11) and then
-skip to and follow steps (15)-(19).
+skip to and follow steps (15)-(19). Please also complete item M6 or
+V6, as appropriate, in step (16).
 
 The steps in section describe how to install this version as an
 upgrade from 9.5.3. Please follow all the steps.
@@ -704,7 +707,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.9 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.10 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -712,7 +715,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.9.tar.gz
+    get fs-9.5.10.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -726,12 +729,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.9.tar.gz
+    tar -xzpf /tmp/fs-9.5.10.tar.gz
 
 (6) Set the link for the new FS vesion:
 
     cd /usr2
-    ln -sfn fs-9.5.9 fs
+    ln -sfn fs-9.5.10 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -811,6 +814,21 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
      Please note that support periodic TPI measurement, it is
      necessary that PREOB be set-up as described.
 
+     Please also note that you must set the cal temperature with the
+     "caltempX=.." command for each IFD channel 'X' you are using.
+     Prior to the reorganization of the system temperature commands,
+     it was possible to get away with only specifying "caltempX=..."
+     for the "tsysX=..." commands you were using. Now however, the
+     "tsys" command uses the actual "caltempX" value for the IF
+     channel that a device is connected. Thus for example if you had
+     been grouping IF channel C devices in your "tsysa" command, you
+     did not need to specify a "caltempc=..." if channels A and C in
+     fact had the same cal temperature values. Now a "caltempc=" is
+     needed. Likewise if you were grouping IF channel D devices in a
+     "tsysb" command, you will now need a "caltempd=..."  command. In
+     any event, you now need to specify a "caltempX=..." command for
+     IF channel that is in use.
+
      Please also note that it would be more correct to measure TPZERO
      in PREOB. If you can do this without having PREOB run over the 10
      second limit, it is recommended that you do that. In this case
@@ -884,6 +902,13 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 
            or if you have placed TPZERO measurements in PREOB, you can
            delete these lines.
+
+       M6. Please verify that you have the appropriate "caltempX=..."
+           commands in the "caltemps" procedure for all IF Channels
+           'X' that your using at your station. Each IF channel in use
+           now must have a "caltempX" defined. Previously this was not
+           always necessary, so some stations may need to update their
+           "caltemps" procedures.
 
      For VLBA/VLBA4 systems:
 
@@ -963,6 +988,13 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
            or if you have placed TPZERO measurements in PREOB, you can
            delete these lines.
 
+       V6. Please verify that you have the appropriate "caltempX=..."
+           commands in the "caltemps" procedure for all IF Channels
+           'X' that your using at your station. Each IF channel in use
+           now must have a "caltempX" defined. Previously this was not
+           always necessary, so some stations may need to update their
+           "caltemps" procedures.
+
 (17) Update your skedf.ctl file. Please add a tpicd line to the end of
      your sked.ctl control file for DRUDG. At this time, we have the
      following recommendations: (i) stations that do only geodesy or
@@ -1017,19 +1049,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.9.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.10.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs959tg.aa
-fs959tg.ab
+fs9510tg.aa
+fs9510tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs959tg.* >fs-9.5.9.tar.gz
+cat fs9510tg.* >fs-9.5.10.tar.gz
 
-This will create an exact image of the original fs-9.5.9.tar.gz
+This will create an exact image of the original fs-9.5.10.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.
