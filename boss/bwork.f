@@ -530,6 +530,11 @@ C  User requested schedule name, format response and log it.
           ich = 1+iscn_ch(ibuf,1,nchar,'=')
           ic4 = iscn_ch(ibuf,ich,nchar,',')
           if (ic4.eq.0) ic4 = nchar + 1
+          if(ic4-1-ich+1.gt.8) then
+             call logit7ci(0,0,0,0,-261,'bo',0)
+             call rn_put('pfmed')
+             goto 600
+          endif
           cnamef=' '
           if(ich.le.ic4-1) then
              cnamef = ibc(ich:ic4-1)
@@ -602,6 +607,10 @@ C  a valid schedule or all is set to zero.
           ierr = 0
           call newsk(ibuf,ich,nchar,idcbsk,iblen,ierr,icurln,ilstln)
           if (ierr.ne.0) then
+             kskblk = .true.
+             lskd = 'none'
+             call char2hol(lskd,ilskd,1,8)
+             call fs_set_lskd(ilskd)
             call rn_put('pfmed')
             goto 600
           endif
@@ -899,6 +908,10 @@ C
         else
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
+          if(ic2-1-ich+1.gt.8) then
+             call logit7ci(0,0,0,0,-260,'bo',0)
+             goto 600
+          endif
           call fs_get_lstp(ilstp)
           call hol2char(ilstp,1,8,lstp)
           if (kstak(istkop,istksk,1)) then
