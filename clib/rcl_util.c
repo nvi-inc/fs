@@ -6,9 +6,6 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-#include "../rclco/rcl/rcl.h"
-#undef TRUE
-#undef FALSE
 #include "../rclco/rcl/rcl_def.h"
 
 char *arg_next(struct cmd_ds *command,int *ilast);  /* traverse argv array */
@@ -347,6 +344,26 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     add_rclcn_delaym_read(buffer,device);
     return 0;
 
+  } else if(strcmp(ptr,"barrelroll_set")==0) {
+    ibool barrelroll;
+    *icmd=RCL_CMD_BARRELROLL_SET;
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -203;
+    else if(strcmp(ptr,"on")==0 || strcmp(ptr,"true")==0)
+      barrelroll=TRUE;
+    else if(strcmp(ptr,"off")==0 || strcmp(ptr,"false")==0)
+      barrelroll=FALSE;
+    else if(1!=sscanf(ptr,"%i",&barrelroll))
+      return -203;
+    add_rclcn_barrelroll_set(buffer,device,barrelroll);
+    return 0;
+
+  } else if(strcmp(ptr,"barrelroll_read")==0) {
+    *icmd=RCL_CMD_BARRELROLL_READ;
+    add_rclcn_barrelroll_read(buffer,device);
+    return 0;
+
   } else if(strcmp(ptr,"align")==0) {
     int idecode, type;
 
@@ -590,6 +607,31 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     add_rclcn_tapetype_read(buffer,device);
     return 0;
 
+  } else if(strcmp(ptr,"mk3_form_set")==0) {
+    ibool mk3;
+    *icmd=RCL_CMD_MK3_FORM_SET;
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -203;
+    else if(strcmp(ptr,"enable")==0 || strcmp(ptr,"true")==0)
+      mk3=TRUE;
+    else if(strcmp(ptr,"disable")==0 || strcmp(ptr,"false")==0)
+      mk3=FALSE;
+    else if(1!=sscanf(ptr,"%i",&mk3))
+      return -203;
+    add_rclcn_mk3_form_set(buffer,device,mk3);
+    return 0;
+
+  } else if(strcmp(ptr,"mk3_form_read")==0) {
+    *icmd=RCL_CMD_MK3_FORM_READ;
+    add_rclcn_mk3_form_read(buffer,device);
+    return 0;
+
+  } else if(strcmp(ptr,"transport_times")==0) {
+    *icmd=RCL_CMD_TRANSPORT_TIMES;
+    add_rclcn_transport_times(buffer,device);
+    return 0;
+
   } else if(strcmp(ptr,"station_info_read")==0) {
     *icmd=RCL_CMD_STATION_INFO_READ;
     add_rclcn_station_info_read(buffer,device);
@@ -677,6 +719,53 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
       return -204;
 
     add_rclcn_status_decode(buffer,device,stat_code,shortt);
+    return 0;
+
+  } else if(strcmp(ptr,"diag")==0) {
+    int type;
+    *icmd=RCL_CMD_DIAG;
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -203;
+    else if(1!=sscanf(ptr,"%i",&type))
+      return -203;
+    add_rclcn_diag(buffer,device,type);
+    return 0;
+
+  } else if(strcmp(ptr,"berdcb")==0) {
+    int op_type, chan, meas_time;
+
+    *icmd=RCL_CMD_BERDCB;
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -203;
+    else if(strcmp(ptr,"fmber")==0)
+      op_type=1;
+    else if(strcmp(ptr,"uiber")==0)
+      op_type=2;
+    else if(strcmp(ptr,"uidcb")==0)
+      op_type=3;
+    else if(1!=sscanf(ptr,"%i",&op_type))
+      return -203;
+
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -204;
+    else if(1!=sscanf(ptr,"%i",&chan))
+      return -204;
+
+    ptr=arg_next(command,&ilast);
+    if(ptr==NULL)
+      return -205;
+    else if(1!=sscanf(ptr,"%i",&meas_time))
+      return -205;
+
+    add_rclcn_berdcb(buffer,device,op_type,chan,meas_time);
+    return 0;
+
+  } else if(strcmp(ptr,"ident")==0) {
+    *icmd=RCL_CMD_IDENT;
+    add_rclcn_ident(buffer,device);
     return 0;
 
   } else if(strcmp(ptr,"ping")==0) {
