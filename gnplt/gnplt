@@ -46,7 +46,7 @@ set BADSTRVALUE X        ;#gndats definition of a "bad" string
 
 set pid [pid]
 
-set controlFileDir "/usr2/control"               ;#Default directory for control files   
+set controlFileDir "/usr2/control/rxg_files"     ;#Default directory for control files   
 set currentInputFitFile "/tmp/input.fit.$pid"    ;#Input file to gnfit
 set currentOutputFitFile "/tmp/output.fit.$pid"  ;#Output file from gnfit
 set current_TEMP  "/tmp/gnplt.tmp.$pid"          ;#Temporary file used by the printing procedures
