@@ -186,6 +186,9 @@ loop:
       case 67:
 	k4oldtp(&command,itask,ip);
         break;
+      case 68:
+	k4rec_mode(&command,itask,ip);
+        break;
       default:
 	ierr=-4;
 	goto error;
