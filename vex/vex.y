@@ -991,6 +991,8 @@ phase_cal_detect_lowl:	phase_cal_detect {$$=make_lowl(T_PHASE_CAL_DETECT,$1);}
 
 phase_cal_detect:	T_PHASE_CAL_DETECT '=' T_LINK ':' value_list ';'
 		{$$=make_phase_cal_detect($3,$5);}
+			| T_PHASE_CAL_DETECT '=' T_LINK ';'
+		{$$=make_phase_cal_detect($3,NULL);}
 
 /* $PROCEDURES block */
 
