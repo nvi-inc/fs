@@ -90,7 +90,7 @@ long ip[5];                           /* ipc parameters */
 		  vcf=vcf-vcbw*0.5;
 		  break;
 		case 2: /* usb */
-		  vcf=vcf-vcbw*0.5;
+		  vcf=vcf+vcbw*0.5;
 		  break;
 		default:
 		  ierr=-301;
