@@ -5,11 +5,12 @@ C 900112 PMR code extracted from SHFTR and ported to Unix
 C 930412 nrv implicit none
 C 930429 nrv removed GTPRM call, changed to read yymmdd
 C 930702 nrv Check for EOF when reading first lines.
+C 960215 nrv Change permissions on output file
 
 C Called by: DRUDG
 
-	include 'skparm.ftni'
-	include 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 
 C Output
       integer ierr
@@ -405,7 +406,6 @@ C
 C
 C Main copying loop
 1900  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-Cif (ifbrk().lt.0) return
 	call inc(LU_OUTFILE,ierr)
 	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
@@ -565,7 +565,6 @@ C
 	ENDIF
 	IF(iLEN.EQ.-1)GOTO 2007
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-Cif (ifbrk().lt.0) return
 	call inc(LU_OUTFILE,ierr)
 	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
@@ -601,6 +600,8 @@ C
 2009  IF(iLEN.EQ.-1) then
 	write(luscn,9209) coutname
 9209    format(' Shifted SNAP file completed: ',a)
+        close(lu_outfile)
+        call drchmod(coutname,iperm,ierr)
 	return ! GOTO 2010
       endif
 	IF(JCHAR(IBUF,1).NE.Z21)GOTO 2001
