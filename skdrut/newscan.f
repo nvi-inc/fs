@@ -1,8 +1,9 @@
       subroutine newscan(istn,isor,icod,istart,
-     .      idur,ifeet,ipas,lcb,ierr)
+     .      idstart,idend,ifeet,ipas,idrive,lcb,ierr)
 
 C   NEWSCAN forms the inputs into a standard sked/drudg hollerith 
-C   observation.
+C   observation. This routine and ADDSCAN determine the internal
+C   format for the observation.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
@@ -14,15 +15,20 @@ C Called by: VOBINP, VOB1INP
 C History
 C 960527 nrv New.
 C 970114 nrv change 8 to max_sorlen
+C 970721 nrv Add IDRIVE to call, if 0 set direction to 0.
+C 970721 nrv Add idstart fields following durations
+C 970721 nrv Remove footage, duration, and good data to subroutines
 
 C Input:
       integer istn ! first station in this scan
       integer isor ! source index
       integer icod ! freq code index
       integer istart(5) ! year, doy, hour, min, sec
-      integer idur ! duration of scan
+      integer idstart ! start of good data
+      integer idend ! duration of scan
       integer ifeet ! footage counter at start
-      integer ipas ! pass number, F/R from even/oddness
+      integer ipas ! pass number, calculate F/R from even/oddness
+      integer idrive ! which drive to record on, 0=no recording
       integer*2 lcb ! cable wrap
 
 C Output:
@@ -30,22 +36,20 @@ C Output:
 
 C Local
       integer*2 ibuf(ibuf_len)
-      integer iblen,i,ical,nch,idl
-      integer ichcm_ch,ichmv,ichmv_ch,ib2as
-      integer numc2,numc3,numc4,numc5
-      logical kfor
-      character*1 pnum ! function
+      integer i,ical,nch,idl
+      integer iflch,ichcm_ch,ichmv,ichmv_ch,ib2as
+      integer numc2,numc3
+      integer feetscan,gdscan,durscan
 
 C Initialized for leading zeros, left justified
       numc2 = 2+o'40000'+o'400'*2
       numc3 = 3+o'40000'+o'400'*3
-      numc4 = 4+o'40000'+o'400'*4
-      numc5 = 5+o'40000'+o'400'*5
 
 C     First clear out the entire buffer
       CALL IFILL(IBUF,1,IBUF_LEN*2,oblank)
 C     Source name is first
-      NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,max_sorlen)
+      i=iflch(lsorna(1,isor),max_sorlen)
+      NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,i)
 C     Cal time. Define as 10 for now
       ical = 10
       nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,3)
@@ -60,7 +64,7 @@ C     Start time
       NCH = NCH + IB2AS(istart(4),IBUF,NCH,numc2)
       NCH = NCH + IB2AS(istart(5),IBUF,NCH,numc2)
 C     Duration. Use first station's.
-      NCH = NCH + 1+IB2AS(idur,IBUF,NCH+1,5)
+      NCH = NCH + 1+IB2AS(idend,IBUF,NCH+1,5)
 C     Midob procedure
       NCH = ICHMV_ch(IBUF,NCH+1,'MIDOB ')
 C     Idle time
@@ -76,31 +80,35 @@ C     Station code
 C   Insert blanks for other stations' codes
       nch = nch + nstatn*2
 C   Tape pass, direction, footage for each station
-      if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
-        kfor=.true. ! always forward
-        nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn,icod)(1:1)) ! group number
-      else
-        NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
-        i=ipas/2
-        kfor= ipas.ne.i*2 ! odd forward, even reverse
-      endif
-      if (kfor) then
-        NCH = ICHMV_ch(IBUF,NCH,'F')
-      else
-        NCH = ICHMV_ch(IBUF,NCH,'R')
-      endif
+      nch = feetscan(ibuf,nch,ipas,ifeet,idrive,istn,icod)
+C     if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
+C       kfor=.true. ! always forward
+C       nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn,icod)(1:1)) ! group number
+C     else ! non-S2
+C       NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
+C       i=ipas/2
+C       kfor= ipas.ne.i*2 ! always odd forward, even reverse
+C     endif
+C     if (kfor) cdir='F'
+C     if (.not.kfor) cdir='R'
+C     if (idrive.eq.0) cdir='0'
+C     NCH = ICHMV_ch(IBUF,NCH,cdir)
 C  Put in footage. For S2 this is in seconds.
-      NCH=  NCH+IB2AS(ifeet,IBUF,NCH,numc5)
+C     NCH=  NCH+IB2AS(ifeet,IBUF,NCH,numc5)
 C   Insert blanks for other stations' footages
       nch = nch + nstatn*8
 C  Procedure flags
       nch = ichmv_ch(ibuf,nch,'YNNN')
 C  Duration
-      NCH = 1 + NCH + IB2AS(IDUR,IBUF,NCH+1,5)
+      nch = durscan(ibuf,nch,idend)
+C     NCH = 1 + NCH + IB2AS(idend,IBUF,NCH+1,5)
 C   Insert blanks for other stations' durations
       nch = nch + nstatn*6
-C  Length of buffer
-      iblen = nch/2
+C  Good data offset
+      nch = gdscan(ibuf,nch,idstart)
+C     nch = 1 + nch + ib2as(idstart,ibuf,nch+1,5)
+C   Insert blanks for other stations' good data offsets
+      nch = nch + nstatn*6
 C
 C Store the record in common
 
