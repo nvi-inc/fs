@@ -68,6 +68,8 @@ C 970206 nrv Change itra2 to itras and add headstack index
 C 971211 nrv Set sideband to "U" for all non-VEX (only done for .drg before).
 C 991122 nrv LMODE can be 16 characters to accommodate S2 modes.
 C            Store S2 mode into LMODE as well as LS2MODE.
+C 011011 nrv If S2 mode was already set up from the equip line, don't
+C            overwrite it.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -144,10 +146,13 @@ C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
 C         modify this when it gets user input on the formatter type.
 C         This is used by SPEED.
           idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,16) ! recording format
-C         Initialize S2 mode to blank. It's probably safe to put
+C         Initialize S2 mode to blank. It's probably safe to put 
 C         LMODE into LS2MODE.
-          call ifill(ls2mode(1,is,icode),1,16,oblank)
-          idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
+C         Not safe because the mode may be already there from the equip line.
+          if (ichcm_ch(ls2mode(1,is,icode),1,' ').eq.0) then ! it's blank
+            idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
+          else ! leave it alone
+          endif
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
           ix = iscn_ch(lmode(1,is,icode),1,16,'1:') 

@@ -5314,3 +5314,68 @@ Version 9.5.0 010920
            updated/created
 
 Version 9.5.1 010928
+
+011005 WEH help/
+           files regenerated
+
+011005 WEH misc/k4/k4spec.txt
+           k42b and k42c added
+
+011010 WEH help/cable.___
+           help/cablelong.___
+           stcmd.ctl explanation improved
+
+011011 WEH help/tsys5.___
+           help/tsys6.___
+           help/tsys.___
+           misc/help_tools/wpas2help
+           tsys5 and tsys6 added
+
+011022 RDG fsvue/fsvue_start
+           fsvue/vue_fsfiles
+           fsvue/vue_fshelp
+           fsvue/vue_fslog
+           change darkred - Exit buttton - to red.
+           removed lognum from Execute.
+           added Add item to Execute button - to add commands.
+
+011022 WEH help/bit_density._w_
+           add more sample values
+
+011023 WEH help/trackform.g__
+           add clarification per D.Smythe
+
+011026 WEH st.default/proc/vstation2.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/station.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/4station.prc
+           st.default/proc/vpoint.prc
+           st.default/proc/s2station.prc
+           st.default/proc/point.prc
+           deleted use and instances of "setup" procedure
+           add pcalon to all setupa/setupb procs
+           move newtape to ready from loader for K4
+           deleted some old set-up procedures
+           fixed which bbcs/vcs are sample midob
+           minor typos
+
+011026 WEH st.default/proc/k42station.prc
+           st.default/proc/k42k3vstation.prc
+           created
+
+011029 WEH ibcon/rddev.c
+           fixed REOS problem per J.Quick
+
+011029 RDG fsvue/vueinfo.c
+           log_name array incresed from 8 to 15.
+
+011029 WEH boss/bwork.f
+           fixed time schedule problem with schedule= after sched_initi
+
+Version 9.5.2 011029

@@ -8,6 +8,7 @@ C 970206 nrv Remove itra2,ihddi2,ihdpo2 and add max_headstack
 C 991119 nrv Add initialization of trkn.
 C 000126 nrv Add initialization of ntrkn.
 C 010207 nrv Add initialization of freqpcal and freqpcal_base
+C 011011 nrv Initialize LS2MODE.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -30,6 +31,7 @@ C Local
             ntrkn(k,i,j)=0
           enddo
           idum=ichmv_ch(lbarrel(1,i,j),1,'NONE')
+          call ifill(ls2mode(1,i,j),1,16,oblank)
         enddo
       enddo 
       do i=1,nco

@@ -7,6 +7,8 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
 C
+C  Called by: stinp
+C
 C  History
 C  891116 nrv Added sefd
 C  891117 nrv Removed sefd - save this for a later day
@@ -32,6 +34,8 @@ C 000319 nrv Index for checking equipment match was off by one.
 C 000531 nrv Remove 'auto' option for tape length.
 C 001017 nrv Allow single-band SEFDs followed by equipment. ** DON't
 C            implement this until a FS upgrade can be done.
+C 011011 nrv If the second recorder field doesn't match a recorder type
+C            and the first recorder is S2, then the second field is mode.
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -361,22 +365,22 @@ C Rec B field or S2 mode
      .       idum = ichmv_ch(lrecb,1,'Mark3A')
             if (ichcm_ch(lrecb,1,'MARK4').eq.0) 
      .       idum = ichmv_ch(lrecb,1,'Mark4')
-            if (ichcm_ch(lreca,1,'S2').eq.0) then ! take field as mode
-            else ! check recorder 
-              i=1
-              kmatch=.false.
-              do while (i.le.max_rec_type.and..not.kmatch) ! check rec B type
-                il=trimlen(rec_type(i))
-                kmatch = ichcm_ch(lrecb,1,rec_type(i)(1:il)).eq.0
-                i=i+1
-              enddo ! check rec B type
+C           check recorder 
+            i=1
+            kmatch=.false.
+            do while (i.le.max_rec_type.and..not.kmatch) ! check rec B type
+              il=trimlen(rec_type(i))
+              kmatch = ichcm_ch(lrecb,1,rec_type(i)(1:il)).eq.0
+              i=i+1
+            enddo ! check rec B type
+            if (ichcm_ch(lreca,1,'S2').eq.0) then ! field is S2 mode
+            else ! field is rec
               if (i.gt.max_rec_type+1) ierr=-12-2*npar(1)
-            endif ! mode/check recorder
+              nrec = 2
+            endif ! S2 mode/error
           endif ! rec B or S2 mode field
         endif ! rec A field
       endif ! rack field
-      if (ichcm_ch(lrecb,1,'    ').ne.0.and.
-     .ichcm_ch(lreca,1,'    ').ne.0) nrec=2 ! dual recorders
 C
       RETURN
       END

@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.1/misc/fs95up.txt  Version: 1.2  Date: 011001
+File: /usr2/fs-9.5.2/misc/fs95up.txt  Version: 1.2  Date: 011029
 
 I. Introduction
 
@@ -71,6 +71,7 @@ the summary.
 37. A new command "cablediff" has been included.
 38. New "cablelong" command. 
 39. Experimental time model "ntp".
+40. Station dependent detectors u5 and u6 may be used tsys measurments.
 
 A more detailed discussion of these changes follows.
 
@@ -580,6 +581,21 @@ A more detailed discussion of these changes follows.
     instead of mode names in ntpdate will make it more reliable by
     reducing dependence on namesevers. Please contact Ed if you have
     questions or suggestions.
+
+40. Station dependent detectors u5 and u6 may be used tsys
+    measurments.  The commands tpi, tpical, tpzero can all be used to
+    sample station dependent detectors u5 and u6. The commands tsys5
+    and tsys6 can be used to calculate the system temperature for
+    these channels. The use of these commands for u5 and u6 parallels
+    that for the other suppored detector devices. The tpizero
+    measurement is made with no signal present, tpi with the signal
+    level the equivalent temperature of which is to be calculated and
+    tpical with the tpi signal plus the noise cal turned on. Of course
+    the caltemp for detectors u5 and u6 must be set with the caltemp5
+    and caltemp6 commands respectively for tsys5 and tsys6 to work.
+    The caltemp5 and caltemp6 commands are not new. They have been
+    available for setting the caltemp for station dependent detector
+    for fivpt and onoff in previous releases.
 
                          B. Changes in DRUDG
 
@@ -1133,7 +1149,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.1 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.2 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -1141,7 +1157,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.1.tar.gz
+    get fs-9.5.2.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1155,11 +1171,11 @@ section "VII. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.1.tar.gz
+    tar -xzpf /tmp/fs-9.5.2.tar.gz
 
 (6) Install the system:
 
-    cd /usr2/fs-9.5.1
+    cd /usr2/fs-9.5.2
     make install
     (answer the question "y" if it is okay to proceed)
 
@@ -1383,7 +1399,8 @@ information by hand.
 
 17. Edit all your SNAP procedures files (usually just station.prc, old
     unused experiment procedure files should be deleted to reduce
-    clutter), to make the following changes:
+    clutter), to make the following changes. Please use PFMED to edit
+    the procedures.
 
     A. Rename your parity check procedures, which will include either
        all or some of: "checkf80", "checkr80", "checkf135", and
@@ -1435,7 +1452,7 @@ information by hand.
        files are:
 
         Equipment      Prefix letters  Station Library
-        Rack/drive/drive2
+        Rack/Drive1/Drive2
 
         Mk3/Mk3A                       station.prc
         VLBA/VLBA          v           vstation.prc
@@ -1447,9 +1464,23 @@ information by hand.
         K42MK4/VLBAB/VLBAB k42mk4vb    k42mk4vstation2.prc
         NONE/S2            s2          s2station.prc
         VLBA/S2            vs2         vs2station.prc
-        VLBA/VLBA/VLBA                 vstation2.prc
+        VLBA/VLBA/VLBA     v           vstation2.prc
+        K42/K42            k42         k42station.prc
+        K42K3/VLBA         k42k3v      k42k3vstation.prc
 
-       Please use PFMED to edit the procedures.
+    F. Please delete the old "setup" procedure from "station.prc" and
+       substitute use of "setupa=1" for it anywhere it occurred. The
+       most likely occurances are probably in the "initp" procedure in
+       "point.prc" or "vpoint.prc" and in "overnite" in "station.prc".
+
+    G. Please also add a call to "pcalon" in your "setupa" and
+       "setupb" procedures.
+
+    H. Please change the BBCs/VCs being sampled in "midob" to numbers
+       1, 5, and 9 (or at least add these). This is to assist scripts
+       that automatically plot monitor data from the log files. If you
+       don't have at least nine BBCs/VCs, pick another, perhaps 8,
+       instead of 9.
 
 18. If you have a VLBA or a VLBA4 (with spare VLBA formatter) system
     change the command "form=*,4" commands in your parity check
@@ -1491,19 +1522,19 @@ Harro Verkouter, Joint Institute for VLBI in Europe
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.1.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.2.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs951tg.aa
-fs951tg.ab
+fs952tg.aa
+fs952tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs951tg.* >fs-9.5.1.tar.gz
+cat fs952tg.* >fs-9.5.2.tar.gz
 
-This will create an exact image of the original fs-9.5.1.tar.gz
+This will create an exact image of the original fs-9.5.2.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.
