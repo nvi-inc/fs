@@ -1,36 +1,29 @@
-********* Equipment Control File *********
+********* equip.ctl Equipment Control File *********
 * Please refer to the Control Files Manual in Volume 1 of the 
 * Field System Documentation
 * 
-100     Tape Startup Parameter (TACC)
-330     Max tape speed, ips
-270     Schedule tape speed, ips
-8450.   RF Frequency
-60      Receiver 70K Stage Check Temperature
-20      Receiver 20K Stage Check Temperature
 *  VLBI equipment
-mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, or none)
-mk3     type of recorder (mk3, mk3b, vlba, vlba2, mk4, s2, vlba4, or none)
-101     Hardware ID for VLBA rack (assigned by GSFC)
+mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
+*                     k41, k41u, k41/k3, k41u/k3, k41/mk4, k41u/mk4,
+*                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
+*                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
+*                     k42c/mk4 or none)
+mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, mk4, mk4b,
+*                           s2, k41, k41/dms, k42, k42/dms, or none)
+mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, mk4, mk4b,
+*                           or none)
+mk3     type of decoder (mk3, dqa, mk4, or none)
 *
-10.0    vacuum level (inches) (if vacuum switching this is for thin tape ~5.0) 
-2860    vacuum current offset (counts)
-290     vacuum current scale  (counts/in)
--5.0    vacuum sensor offset  (in)
-.014    vacuum sensor scale   (in/count)
-268     tape thickness (kA)   (if vacuum switching this is for thin tape ~152) 
-14.0    write voltage (V) (stack 1 for vlba4)
-54625   capstan size constant
-*
+* Mark III/IV rack parameters
  500.10 IF3 LO Frequency
    3    hex mask indicating which IF3 switches are installed, sw N ~ 2^(N-1)
 *
+* VLBA/4 rack parameters
   a/d   VLBA formatter cross-point switch (a/d or dsm)
-* additional values for vacuum switching only
-15.0    thick tape vacuum level (inches)
-268     thick tape thickness (kA)
-14.0    thick tape write voltage (V)
-* VLBA4 parameters
-14.0    VLBA4 stack 2 write voltage (V) (thin tape if switching)
-14.0    VLBA4 stack 2 write voltage (V) (only if switching then thick)
-
+101     Hardware ID for VLBA rack (assigned by GSFC)
+*
+* CDP S/X Receiver Parameters
+60      Receiver 70K Stage Check Temperature
+20      Receiver 20K Stage Check Temperature
+* pcal control
+none    type of phase cal control (if3 or none)

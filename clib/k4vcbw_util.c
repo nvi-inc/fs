@@ -16,15 +16,19 @@ static char deviceC[]={"v4"};           /* device menemonics */
 static char deviceB[]={"vb"};           /* device menemonics */
 static char deviceA[]={"va"};           /* device menemonics */
 
+static char *bw0_key[ ]={"narrow","wide"};
 static char *bw1_key[ ]={"2","4"};
 static char *bw2_key[ ]={"2","32"};
 static char *bw2a_key[ ]={"2","16"};
 static char *bw2b_key[ ]={"8","16"};
+static char *bw2c_key[ ]={"2","8"};
 
+#define NBW0_KEY sizeof(bw0_key)/sizeof( char *)
 #define NBW1_KEY sizeof(bw1_key)/sizeof( char *)
 #define NBW2_KEY sizeof(bw2_key)/sizeof( char *)
 #define NBW2A_KEY sizeof(bw2a_key)/sizeof( char *)
 #define NBW2B_KEY sizeof(bw2b_key)/sizeof( char *)
+#define NBW2C_KEY sizeof(bw2b_key)/sizeof( char *)
 
 #define MAX_BUF 512
 
@@ -46,14 +50,19 @@ char *ptr;
     switch (*count) {
     case 1:
       type=shm_addr->equip.rack_type;
-      if(itask==3)
-	ierr=arg_key_flt(ptr,bw1_key,NBW1_KEY,&lcl->bw[ipos],0,TRUE);
-      else if(type == K42 || type == K42K3 || type == K42MK4 )
-	ierr=arg_key_flt(ptr,bw2_key,NBW2_KEY,&lcl->bw[ipos],0,TRUE);
-      else if(type == K42A || type == K42AK3 || type == K42AMK4 )
-	ierr=arg_key_flt(ptr,bw2a_key,NBW2A_KEY,&lcl->bw[ipos],0,TRUE);
-      else if(type == K42BU || type == K42BUK3 || type == K42BUMK4 )
-	ierr=arg_key_flt(ptr,bw2b_key,NBW2B_KEY,&lcl->bw[ipos],0,TRUE);
+      ierr=arg_key(ptr,bw0_key,NBW0_KEY,&lcl->bw[ipos],0,TRUE);
+      if(ierr!=0) { 
+	if(itask==3)
+	  ierr=arg_key_flt(ptr,bw1_key,NBW1_KEY,&lcl->bw[ipos],0,TRUE);
+	else if(type == K42)
+	  ierr=arg_key_flt(ptr,bw2_key,NBW2_KEY,&lcl->bw[ipos],0,TRUE);
+	else if(type == K42A)
+	  ierr=arg_key_flt(ptr,bw2a_key,NBW2A_KEY,&lcl->bw[ipos],0,TRUE);
+	else if( type == K42B || type == K42BU)
+	  ierr=arg_key_flt(ptr,bw2b_key,NBW2B_KEY,&lcl->bw[ipos],0,TRUE);
+	else if( type == K42C)
+	  ierr=arg_key_flt(ptr,bw2c_key,NBW2C_KEY,&lcl->bw[ipos],0,TRUE);
+      }
       break;
     default:
       *count=-1;
@@ -86,19 +95,24 @@ struct k4vcbw_cmd *lcl;
 	strcpy(output,bw1_key[ivalue]);
       else
 	strcpy(output,BAD_VALUE);
-    else if(type == K42 || type == K42K3 || type == K42MK4 )
+    else if(type == K42)
       if (ivalue >=0 && ivalue <NBW2_KEY)
 	strcpy(output,bw2_key[ivalue]);
       else
 	strcpy(output,BAD_VALUE);
-    else if(type == K42A || type == K42AK3 || type == K42AMK4 )
+    else if(type == K42A)
       if (ivalue >=0 && ivalue <NBW2A_KEY)
 	strcpy(output,bw2a_key[ivalue]);
       else
 	strcpy(output,BAD_VALUE);
-    else if(type == K42BU || type == K42BUK3 || type == K42BUMK4 )
+    else if(type == K42B || type == K42BU)
       if (ivalue >=0 && ivalue <NBW2B_KEY)
 	strcpy(output,bw2b_key[ivalue]);
+      else
+	strcpy(output,BAD_VALUE);
+    else if(type == K42C)
+      if (ivalue >=0 && ivalue <NBW2C_KEY)
+	strcpy(output,bw2c_key[ivalue]);
       else
 	strcpy(output,BAD_VALUE);
     break;
