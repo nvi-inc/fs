@@ -147,7 +147,7 @@ c
       nrec = 0
       if(drive(1).eq.S2.or.set.eq."s2das".or.rack.eq.S2) then
          idum=rn_take('fsctl',0)
-         if(set.ne."s2das".and.rack.ne.S2) then
+         if(set.ne."s2das".and.drive(1).eq.S2) then
             idum=fc_get_s2time("r1"//char(0),centisec,it,nanosec,ip,0)
          else
             idum=fc_get_s2time("da"//char(0),centisec,it,nanosec,ip,0)
