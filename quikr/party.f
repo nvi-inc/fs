@@ -19,7 +19,7 @@ C
       integer*2 ibuf(50)
       real perr(36)
       integer ireg(2),iparm(2),get_buf,ichcm_ch,idecpa,iserr(36)
-      integer itrk(36),iaux(28),iptr(2),ig1(4),itrkpalo(2),igv1(4)
+      integer itrk(36),iaux(36),iptr(2),ig1(4),itrkpalo(2),igv1(4)
       integer igv2(4),igv3(4)
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1))
