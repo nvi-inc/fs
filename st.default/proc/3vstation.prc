@@ -75,7 +75,7 @@ decode
 enddef
 define  ifdas         00000000000 
 ifd=33,30,nor,nor
-if3=20,out,1
+if3=20,out,1,1
 if3=alarm
 lo=8080.00,2020.00,8080.0
 upconv=0,0,0
@@ -238,7 +238,7 @@ et
 enddef
 define  ifdsx         00000000000
 ifd=33,30,nor,nor
-if3=20,out,1
+if3=20,out,1,1
 if3=alarm
 lo=8080.00,2020.00,8080.0
 upconv=0,0,0
@@ -248,7 +248,7 @@ patch=lo3,5h,6h,7h,8h
 enddef
 define  ifdwb         00000000000
 ifd=33,30,nor,nor
-if3=20,in,2
+if3=20,in,2,2
 lo=8080.00,2020.00,8080.0
 upconv=0,0,0
 patch=lo1,1l,2l,3h,4h
