@@ -2,6 +2,7 @@
 C 
       integer*2 labt(4),lchk(2),labta(4),ihash,icode
       character*1 cjchar,ch
+      logical disk
 C 
       lu = 6
       lui = 5
@@ -21,6 +22,8 @@ C
 C     Generate check label.  Change any "O" to "0" in tape number first.
 C     Check for exactly 8 characters in tape number.
 C 
+      disk=iscn_ch(labt,1,8,'-').ne.0.or.
+     &     iscn_ch(labt,1,8,'+').ne.0 
       do i=1,8
          ch=cjchar(labt,i)
          if(ch.eq.' ') then
@@ -29,7 +32,9 @@ C
      .owed.  try again.") 
             goto 200
          endif
-         if (index('Oo',ch).ne.0) call char2hol('0',labt,i,i)
+         if (index('Oo',ch).ne.0.and..not.disk) then
+            call char2hol('0',labt,i,i)
+         endif
          if(cjchar(labta,i).ne.ch) then
             write(lu,9907)
  9907       format(1x,"tape numbers disagree. try again.") 
