@@ -1,10 +1,11 @@
-	SUBROUTINE GTSNP(ICH,NCHAR,IC1,IC2)
+	SUBROUTINE GTSNP(ICH,NCHAR,IC1,IC2,kcomment)
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
 C
 C  Input:
       integer ich,nchar,ic1,ic2
+      logical kcomment
 C
 C  Local:
 	integer*4 IREC,ierr,ilen
@@ -18,6 +19,7 @@ C History:
 C nrv 930407 implicit none
 
 100   CALL GTFLD(IBUF,ICH,NCHAR,IC1,IC2)
+      kcomment=.false.
       IF (IC1.EQ.0) THEN !end of this record
 	  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
 	  IF (IERR.LT.0.OR.ILEN.LT.0) THEN
@@ -36,6 +38,7 @@ C Back up to just before the record
 	ENDIF
 C
 	IF (JCHAR(IBUF,IC1).EQ.Z22) THEN ! comment
+          kcomment = .true.
 	  IC2 = ISCNC(IBUF,IC1+1,NCHAR,Z22)
 C Find the next quote
 	  IF (IC2.EQ.0) THEN ! no closing quote

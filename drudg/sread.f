@@ -1,4 +1,7 @@
       SUBROUTINE SREAD(IERR,ivexnum)   
+C Reads schedule file. 
+C Calls VREAD for VEX files. 
+C Calls READS to read lines and sked subroutines to parse SKED format.
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'

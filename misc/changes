@@ -5729,3 +5729,30 @@ Version 9.5.9 020520
 Version 9.5.10 020522
 
 Version 9.5.11 020528
+
+020604 RDG tacd/tacd.c
+           tacd/parse_it.c
+           correct cpu hogging if not set-up
+
+020607 HO  clib/cshm_init.c
+           quikv/k4rec_mode.c
+           include/fscom.h
+           fast set-up for rec_mode for k4 type 2 recorders
+
+020621 CH  pdplt/pdplt
+           control of solution parameters added
+
+020621 RDG fsvue/vueinfo.c
+           internal improvements
+
+020625 RDG quikv/tacd_dis.c
+           control/fserr.ctl
+           add error if tacd progam not set-up
+
+020625 RDG logpl/logpl
+           allow spaces as a delimiter
+
+Version 9.5.12 020625
+
+
+
