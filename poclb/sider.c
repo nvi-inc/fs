@@ -44,6 +44,7 @@ int iday, iyear;
   if (iyear == iyr*4) 
     iyr=iyr-1;
 
+  /* not Y2.1K compliant */
   julda = (-24980 +365*iyear) + (iday+iyr);
   
   return(julda);
