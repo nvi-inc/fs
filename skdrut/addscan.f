@@ -1,21 +1,22 @@
-      subroutine addscan(irec,istn,idur,ifeet,ipas,lcb,ierr)
+      subroutine addscan(irec,istn,icod,idur,ifeet,ipas,lcb,ierr)
 
 C   ADDSCAN adds a new station to an existing scan.
 C*** ib2as accepts only character indices up to 256
-C NOTE: This has NOT been modified for S2, since S2 is only
-C used with drudg which deals with a single station at a time.
-C This routine is needed only by sked.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 
 C History
 C 960527 nrv New.
+C 970214 nrv Update the feet/pass information for S2.
+C            Add icod to call.
 
 C Input
       integer irec ! record to add to
       integer istn ! station index
+      integer icod ! frequency code index
       integer idur ! duration
       integer ifeet ! footage
       integer ipas ! pass index
@@ -29,7 +30,9 @@ C Local
       integer*2 ibufx(10) ! extended buffer
       integer nst,iblen,ich,nch,idum,i,ic1,ic2
       integer numc2,numc3,numc4,numc5
-      integer ib2as,ichmv_ch,ichmv
+      integer ichcm_ch,ib2as,ichmv_ch,ichmv
+      logical kfor
+      character*1 cgroup
       character*1 pnum ! function
 
       numc2 = 2+o'40000'+o'400'*2
@@ -57,7 +60,7 @@ C     Add station code and cable wrap
       nch=ic2+1 ! start after the end of the station field
       NCH = ICHMV(lskobs(1,iskrec(irec)),NCH,LSTCOD(ISTN),1,1)
       NCH = ICHMV(lskobs(1,iskrec(irec)),NCH,LCB,1,1)
-C     Skip each station's footage
+C     Skip previous stations' footage
       ich = nch
       do i=1,nst 
         CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
@@ -66,20 +69,30 @@ C     Skip each station's footage
         ierr=-1 ! problem skipping footages
         return
       endif
+      nch=ic2+1
 C   Tape pass, direction, footage for each station
-      nch = ic2+1 ! start at end of last footage
-      NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH+1,pnum(ipas))
-      i=ipas/2
-      if (ipas.eq.i*2) then ! even
-        NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH,'R')
+C ** why not use cpassorderl for all stations not just S2?
+C ** because FS uses pass numbers not index positions
+      if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
+        kfor=.true. ! always forward
+        cgroup=cpassorderl(ipas,istn,icod)(1:1) ! group number
+        nch=ichmv_ch(lskobs(1,iskrec(irec)),nch+1,cgroup)
       else
-        NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH,'F')
+        NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH+1,pnum(ipas))
+        i=ipas/2
+        kfor= ipas.ne.i*2 ! odd forward, even reverse = VEX standard
       endif
+      if (kfor) then
+        NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH,'F')
+      else
+        NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH,'R')
+      endif
+C  Put in footage. For S2 this is in seconds.
       NCH=  NCH+IB2AS(ifeet,lskobs(1,iskrec(irec)),NCH,numc5)
 C   Skip procedure flags
       ich = nch 
       CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
-C   Skip each station's duration
+C   Skip previous stations' duration
       do i=1,nst 
         CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
       enddo
