@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "../../vex.test/vex.h"
-#include "../../vex.test/y.tab.h"
+#include "../vex.h"
+#include "../y.tab.h"
 
 #define YES
 /* globals */
