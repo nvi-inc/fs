@@ -1,14 +1,14 @@
 Draft Specification for K4 Implementation in the FS
 
-WEH 980325
+WEH 990217
 
 RACK AND RECORDER TYPES
 
 Recorders
 
-DFC1100 - Records 16 channels at 4 Mbit/s sample rate
-DFC2100 - Records 16 channels at 4, 8, and 16 Mbit/s sample rate using
-          appropiate digital filters for all 
+K41 - DFC1100 - Records 16 channels at 4 Mbit/s sample rate
+k42 - DFC2100 - Records 16 channels at 4, 8, and 16 Mbit/s sample rate using
+                appropiate digital filters for all 
 
 Racks
 
@@ -51,7 +51,7 @@ or ERR?, or for <mode>=POLL or STATUS, the default is binary,
 otherwise it is ascii
 
 normal length depends on the command sent: if <command> is "RD" the,
-the defaul is 192, if "LV" it is 143, otherwise it is 22, meaningless
+the default is 192, if "LV" it is 143, otherwise it is 22, meaningless
 for POLL and STATUS
 
 If the device is omitted for mode=POLL, all devices are polled and
@@ -91,10 +91,12 @@ Syntax: rec_mode=<mode>
 
 Response: rec_mode/<mode>
 
-<mode>:   sampling rate in MHz,  4 (default) , 18, 16, which correspond to
-          recording rates of 64, 128, and 256 Mbit/sec respectively
+<mode>:   sampling rate in MHz,  64 (default) , 128, or 256, which are the
+          to the overall recording rates in Mbit/sec
 
-This command sets the recording mode and may require up to 20 seconds
+Only for DFC2100
+
+This command sets the recording mode and may require up to 17 seconds
 to be completed for DFC2100 due to digital filter set-up.
 ----------------------------------------------------------------------------
 FF - Fast-forward the tape
@@ -114,19 +116,17 @@ This command start the tape rewinding by issuing the DRW command.
 ----------------------------------------------------------------------------
 REC - Recorder Utility Command
 
-Syntax: REC=<action>,<aux_value>
-	REC/<position>,<aux_value>,<drum>,<synch_test>,<synch>,<stat1>,<stat2>
+Syntax: REC=<action>
+	REC/<position>,<drum>,<synch_test>,<synch>,<stat1>,<stat2>
 
 <action>:     eject (or unload) to eject the tape
 	      init (or ini) to initialize recorder
               synch to synchronize INT and EXT 1 PPS
               maximum seven digit ID point to move tape to
-	      aux is to set the aux value with the next paramter
 	      drum_on to turn on the drum
               drum_off to turm off the drum
 	      synch_on to turn on the synch test
 	      synch_off to turn off the synch test
-<aux_value>:  up to 16 hex digits
 
 Monitor-only parameters: 
 
@@ -204,46 +204,8 @@ Response: recports/<port>,<channel>,<port>,<channel>, ...
 <channel>: NS when N=1-16, and S=u or l for sideband
 
 This command specifies the wiring of the VCs to the K-4 input ports. A
-"ports=" clears any existing definition. This command has no effect on
+"recports=" clears any existing definition. This command has no effect on
 the hardware. It is an "information only" command.
-----------------------------------------------------------------------------
-VCLO - Video Converter LO set-up
-
-Syntax:   VCLO=<vc>,<freq>
-          VCLO=alarm
-          VCLO=hold_on
-          VCLO=hold_off
-
-Response: VCLO/<VC>,<freq>,<yes/no>,<lock>
-
-<vc>:     VC to set, 1-16, no default
-<freq>:   LO frequency in MHz, 99.99-511.99, no default,
-
-Monitor-only parameters: 
-<yes/no>: present, yes or no
-<lock>:   lock or unlock or missing
-
-Comments:
-The monitor response consists of 16 lines, one for each VC LO.
-----------------------------------------------------------------------------
-VC - Video Converter Set-up
-
-Syntax:   VC=<vc>,<hi/low>,<att>
-          VC=alarm
-Response: VC/<vc>,<hi/low>,<att>,<yes/no>,<u/l>,<USBp>,<LSBp>
-
-<vc>:     VC to set
-<hi/low>: IF selection high or low, default according to VCLO frequency
-          if <vc>'s LO has been set-up
-<att>:    attenuator, 0-15 dB, default 0, for K4-2/2A only
-
-Monitor only:
-
-<yes/no>: present, yes or no
-<u/l>:    upper or lower for front panel display
-<XXXp>:   power in counts, 0-99, for that sideband, 10-90 nominal range
-
-Comments:
 The monitor response consists of 16 lines, one for each VC LO.
 ----------------------------------------------------------------------------
 VxLO - Video Converter set-up
@@ -269,7 +231,7 @@ The monitor response consists of several lines, one for each VC LO.
 ----------------------------------------------------------------------------
 Vx - Video Converter Set-up
 
-Syntax:   VC=<vc>,<hi/low>.<u/l>
+Syntax:   VC=<vc>,<hi/low>,<u/l>
           VC=alarm
           Vx=<vc>,<att>,<u/l>
           Vx=alarm
@@ -473,17 +435,18 @@ Must be modified to support K4/K3 modules
 ----------------------------------------------------------------------------
 FIVEPT - five or more point source scan
 
-Must be update to support K-4 VC power detectors
-There is no way to turn off the signal?
+Cannot support K-4 power detectors: not linear, low resolution
+There is no way to turn off the signal.
 ----------------------------------------------------------------------------
 ONOFF - on-off radiometry
 
-Must be update to support K-4 VC power detectors
-There is no way to trun off the signal?
+Cannot support K-4 power detectors: not linear, low resolution
+There is no way to turn off the signal.
 ----------------------------------------------------------------------------
 TPI, TPICAL, TPZERO
 
-Need support?
+Cannot support K-4 power detectors: not linear, low resolution
+There is no way to turn off the signal.
 _________________________________________________________________________
 BOSS - main control program
 
@@ -536,9 +499,9 @@ LOADER
 tape=reset
 !+2s
 
-SET-UP PROCEDURES contain:
+SET-UP PROCEDURES contain (rec_mode=... !* and !*+17s only present for K42):
 
-rec_mode=
+rec_mode=...
 !*
 VCLO=1,...
 VC=1,...
@@ -552,7 +515,7 @@ VC=16,...
 VCIF=...
 VCBW=...
 ports=...
-!*+20s
+!*+17s
 _________________________________________________________________________
 K4 rack with K3 Formatter and VLBA recorder SCHEDULE PROCEDURES
 
@@ -607,13 +570,9 @@ POSTOB
 _________________________________________________________________________
 K4 SNAP FILE
 
-If the tape cart option is specified in DRUDG: (1) the READY
+If the tape cart option is specified while running DRUDG: (1) the READY
 procedures will be used as READY=<tape>, tape numbers should start at
 1 and run cyclically through 24; (2) the UNLOD procedure will be be
 used as UNLOD=<tape>, where <tape> is the same as was used in the
 previous READY=<tape> command.
 _________________________________________________________________________
-
-
-
-
