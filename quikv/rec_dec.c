@@ -39,8 +39,11 @@ int indx;
   if(ptr == NULL) ptr="";
 
   if (0==strcmp(ptr,"feet")) {
-    if(shm_addr->equip.drive[indx] == VLBA &&
-       shm_addr->equip.drive_type[indx] == VLBA2) {
+    if((shm_addr->equip.drive[indx] == VLBA &&
+       shm_addr->equip.drive_type[indx] == VLBA2)||
+       (shm_addr->equip.drive[indx] == VLBA4 &&
+	shm_addr->equip.drive_type[indx] == VLBA42)
+       ){
       memcpy(ip+3,"rc",2);
       return -204;
     }

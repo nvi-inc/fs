@@ -53,8 +53,10 @@ long ip[5];                           /* ipc parameters */
       if (command->equal != '=') {            /* read module */
         request.type=1;
         request.addr=0x30; add_req(&buffer,&request);
-        if (!(shm_addr->equip.drive[indx] == VLBA &&
-	    shm_addr->equip.drive_type[indx] == VLBA2)) {
+        if (!((shm_addr->equip.drive[indx] == VLBA &&
+	    shm_addr->equip.drive_type[indx] == VLBA2)||
+	    (shm_addr->equip.drive[indx] == VLBA4 &&
+	    shm_addr->equip.drive_type[indx] == VLBA42))) {
           request.addr=0x31; add_req(&buffer,&request);
           request.addr=0x32; add_req(&buffer,&request);
         }
@@ -75,8 +77,10 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],REBOOT)) {
-	    if(shm_addr->equip.drive[indx] == VLBA &&
-	       shm_addr->equip.drive_type[indx] == VLBA2) {
+	    if((shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)||
+	       (shm_addr->equip.drive[indx] == VLBA4 &&
+		shm_addr->equip.drive_type[indx] == VLBA42)){
 	      ierr= -205;
 	      goto error;
 	    }
@@ -94,8 +98,10 @@ long ip[5];                           /* ipc parameters */
 		return;
 	    }
 
-	    if (!(shm_addr->equip.drive[indx] == VLBA &&
-		shm_addr->equip.drive_type[indx] == VLBA2)) {
+	    if (!((shm_addr->equip.drive[indx] == VLBA &&
+		shm_addr->equip.drive_type[indx] == VLBA2)||
+		  (shm_addr->equip.drive[indx] == VLBA4 &&
+		shm_addr->equip.drive_type[indx] == VLBA42))) {
 	      if(shm_addr->vacsw[indx] == 1 && shm_addr->thin[indx]!= 0 &&
 		 shm_addr->thin[indx]!=1) {
 		ierr=-206;
@@ -329,8 +335,10 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"release")) {
             request.type=0;
-	    if(!(shm_addr->equip.drive[indx] == VLBA &&
-	       shm_addr->equip.drive_type[indx] == VLBA2)) {
+	    if(!((shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)||
+		 (shm_addr->equip.drive[indx] == VLBA4 &&
+	       shm_addr->equip.drive_type[indx] == VLBA42))) {
               request.addr=0xd0;
               request.data=0x00; add_req(&buffer,&request);
 	    }
@@ -339,8 +347,10 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],"zero")) {
-	    if(shm_addr->equip.drive[indx] == VLBA &&
-	       shm_addr->equip.drive_type[indx] == VLBA2) {
+	    if((shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)||
+	       (shm_addr->equip.drive[indx] == VLBA4 &&
+		shm_addr->equip.drive_type[indx] == VLBA42)){
 	      ierr= -203;
 	      goto error;
 	    }

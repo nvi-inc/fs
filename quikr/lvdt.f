@@ -278,7 +278,9 @@ C
      &        ) then
             call mic2vlt(i,ipashd(i,indxtp),kautohd_fs(indxtp),
      $           posnhd(i,indxtp), volt(i),ip,indxtp)
-            if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2
+            if((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
+     $           .or.
+     $         (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
      $           ) then
                nch = nch+ir2as(volt(i),ibuf,nch,7,0)
             else
@@ -294,7 +296,9 @@ C
      $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
      &        (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
      &        ) then
-          if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
+          if((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2).or.
+     &         (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &           ) then
             nch = nch+ir2as(volts(i),ibuf,nch,7,0)
           else
             nch = nch+ir2as(volts(i),ibuf,nch,8,3)
@@ -309,7 +313,9 @@ C
      $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
      &        (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
      &        ) then
-            if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2
+            if((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
+     &           .or.
+     &        (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
      $           ) then
                nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,7,0)
             else

@@ -44,8 +44,10 @@ long ip[5];
          get_res(&response, &buffer); mcb6tape(&lclc, response.data);
          get_res(&response, &buffer); mc30tape(&lclm, response.data);
          get_res(&response, &buffer); mc33tape(&lclm, response.data);
-	 if(!(shm_addr->equip.drive[indx] == VLBA &&
-	      shm_addr->equip.drive_type[indx] == VLBA2))
+	 if(!((shm_addr->equip.drive[indx] == VLBA &&
+	      shm_addr->equip.drive_type[indx] == VLBA2)||
+	      (shm_addr->equip.drive[indx] == VLBA4 &&
+	       shm_addr->equip.drive_type[indx] == VLBA42)))
 	   get_res(&response, &buffer); mc57tape(&lclm, response.data);
          get_res(&response, &buffer); mc72tape(&lclm, response.data);
          get_res(&response, &buffer); mc73tape(&lclm, response.data);

@@ -32,7 +32,7 @@ static char *r[] = {
   "MK3","VLBA","MK4","S2","VLBA4","K4",
   "K4MK4","K4K3","VLBAG","VLBA2","MK4B","K41",
   "K41U","K42","K42A","K42BU","VLBAB","K41DMS",
-  "K42DMS"};
+  "K42DMS","K42B","K42C","VLBA42"};
 
 
 main(int argc, char *argv[])
@@ -115,56 +115,56 @@ main(int argc, char *argv[])
   } else if (strstr(what,"rack")) {
     fs_get_rack__(&rack);
     fs_get_rack_type__(&rack_t);
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<21;i++,j=j*2) {
       if(rack==j) {
 	printf("%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=21) printf("None");
+    for(i=0,j=1;i<21;i++,j=j*2){
       if(rack_t==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=21) printf("/None");
     exit(0);
   } else if (strstr(what,"drive1")) {
     fs_get_drive__(&drive);
     fs_get_drive_type__(&drive_t);
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<21;i++,j=j*2) {
       if(drive[0]==j) {
 	printf("(1)%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("(1)None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=21) printf("(1)None");
+    for(i=0,j=1;i<21;i++,j=j*2){
       if(drive_t[0]==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=21) printf("/None");
     exit(0);
   } else if (strstr(what,"drive2")) {
     fs_get_drive__(&drive);
     fs_get_drive_type__(&drive_t);
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<21;i++,j=j*2) {
       if(drive[1]==j) {
 	printf("(2)%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("(2)None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=21) printf("(2)None");
+    for(i=0,j=1;i<21;i++,j=j*2){
       if(drive_t[1]==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=21) printf("/None");
     exit(0);
   } else if (strstr(what,"err")) {
     strcpy(buff,"Under Development NOT AVAILABLE");

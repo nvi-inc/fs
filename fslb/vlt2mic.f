@@ -38,7 +38,7 @@ C
             ipitch=rdhd_fs(indxtp)
          endif
         call fs_get_drive(drive)
-        if(drive(indxtp).eq.VLBA) then
+        if(drive(indxtp).eq.VLBA.or.drive(indxtp).eq.VLBA4) then
            if(mod(ipass,2).eq.0) then
               if(ipitch.eq.2) micron=micron-698.5
            else

@@ -97,6 +97,8 @@ c
          call fs_get_drive_type(drive_type)
          if(.not.
      $        (drive(indxtp).eq.VLBA.and.drive_type(indxtp ).eq.VLBA2)
+     &        .or.
+     $        (drive(indxtp).eq.VLBA4.and.drive_type(indxtp ).eq.VLBA42)
      $        ) then
             if(equalizer.eq.1) then
                itper=200

@@ -51,23 +51,29 @@ int indx;
         int2str(feet,response.data,-5,1); 
         memcpy(shm_addr->LFEET_FS[indx],feet,5);
 
-        if (!(shm_addr->equip.drive[indx] == VLBA &&
-	      shm_addr->equip.drive_type[indx] == VLBA2)) {
+        if (!((shm_addr->equip.drive[indx] == VLBA &&
+	      shm_addr->equip.drive_type[indx] == VLBA2)||
+	      (shm_addr->equip.drive[indx] == VLBA4 &&
+	      shm_addr->equip.drive_type[indx] == VLBA42))) {
           get_res(&response, &buffer);  /* 31 */
           totlen = response.data;
           sprintf(output+strlen(output),"%u",response.data);
 	}
         strcat(output,",");
 
-        if (!(shm_addr->equip.drive[indx] == VLBA &&
-	      shm_addr->equip.drive_type[indx] == VLBA2)) {
+        if (!((shm_addr->equip.drive[indx] == VLBA &&
+	      shm_addr->equip.drive_type[indx] == VLBA2)||
+	     (shm_addr->equip.drive[indx] == VLBA4 &&
+	      shm_addr->equip.drive_type[indx] == VLBA42))) {
           get_res(&response, &buffer);  /* 32 */
           sprintf(output+strlen(output),"%u",response.data);
         }
         strcat(output,",");
 
-        if (!(shm_addr->equip.drive[indx] == VLBA &&
-	      shm_addr->equip.drive_type[indx] == VLBA2)) {
+        if (!((shm_addr->equip.drive[indx] == VLBA &&
+	      shm_addr->equip.drive_type[indx] == VLBA2)||
+	      (shm_addr->equip.drive[indx] == VLBA4 &&
+	      shm_addr->equip.drive_type[indx] == VLBA42))) {
           totlen+=response.data;
           sprintf(output+strlen(output),"%d",totlen);
 	}

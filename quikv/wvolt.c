@@ -30,8 +30,10 @@ long ip[5];                           /* ipc parameters */
 
       indx=itask-1;                    /* index for this module */
 
-      if(shm_addr->equip.drive[indx] == VLBA &&
-	 shm_addr->equip.drive_type[indx] == VLBA2) {
+      if((shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2)||
+	 (shm_addr->equip.drive[indx] == VLBA4 &&
+	  shm_addr->equip.drive_type[indx] == VLBA42)){
 	ierr=-401;
 	goto error;
       }

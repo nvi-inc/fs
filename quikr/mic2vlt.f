@@ -34,7 +34,7 @@ C
            ipitch=rdhd_fs(indxtp)
         endif
         call fs_get_drive(drive)
-        if(drive(indxtp).eq.VLBA) then
+        if(drive(indxtp).eq.VLBA.or.drive(indxtp).eq.VLBA4) then
            if(mod(ipass,2).eq.0) then
               if(ipitch.eq.2) mic=mic+698.5
            else
@@ -56,7 +56,9 @@ C
 C
       call fs_get_drive_type(drive_type)
       if((.not.
-     $     (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2))
+     $     ((drive(indxtp).eq.VLBA .and.drive_type(indxtp).eq.VLBA2 )
+     $     .or.
+     $     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)))
      $     .and.
      &     (volt.gt.9.9940 .or. volt.lt.-9.9960)) then
         ip(3)=-410

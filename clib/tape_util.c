@@ -35,8 +35,10 @@ int indx;
       case 2:
          if (ptr==NULL || *ptr == '\0') 
            lcl->reset = -1;
-         else if (shm_addr->equip.drive[indx] == VLBA &&
-		  shm_addr->equip.drive_type[indx] == VLBA2)
+         else if ((shm_addr->equip.drive[indx] == VLBA &&
+		   shm_addr->equip.drive_type[indx] == VLBA2)||
+		  (shm_addr->equip.drive[indx] == VLBA4 &&
+		   shm_addr->equip.drive_type[indx] == VLBA42))
            ierr = -300;
          else if (0==strcmp(ptr,"reset"))
            lcl->reset = 0x00;
@@ -135,8 +137,10 @@ struct tape_mon *lcl;
         }
         break;
       case 6:
-        if (shm_addr->equip.drive[indx] == VLBA &&
-	    shm_addr->equip.drive_type[indx] == VLBA2 )
+        if ((shm_addr->equip.drive[indx] == VLBA &&
+	    shm_addr->equip.drive_type[indx] == VLBA2)||
+	    (shm_addr->equip.drive[indx] == VLBA4 &&
+	     shm_addr->equip.drive_type[indx] == VLBA42))
 	  break;
         outvac=(double)lcl->vacuum;
         outvac = outvac*shm_addr->outscsl[indx] + shm_addr->outscint[indx];

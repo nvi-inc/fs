@@ -1,35 +1,37 @@
     hdata - head positioner A/D readout (longitudinal drives)
-
-Syntax:     hdata
-
-Response:   hdata/hd0p,hd1p,hd0t,hd1t,vac,oddpwr,evpwr,ref
-
-
-Settable parameters: none
-
-Monitor-only parameters:
-hd0p        Head 0 position.
-hd1p        Head 1 position
-hd0t        Head 0 temperature
-hd1t        Head 1 temperature
-vac         Vacuum sensor
-oddpwr      Odd reproduce power
-evpwr       Even reproduce power
-ref         Reference voltage
-
-Comments: 
-MAT module functions available for Mark III/IV. No MCB functions
-available for VLBA/4.  See section 1.0 of this manual.
-
-This command reads the head positioner A/D channels, all values
-are reported in units of volts. Data from all channels are
-reported regardless of whether anything is hooked up to them or
-not. In particular, most stations do not use the temperature
-channels, the vacuum sensor, and normally only one of the
-reproduce power channels is hooked up.
-
-The position voltages (and all others) are reported with the LVDT
-off. Use the lvdt command to measure positions with the LVDT on.
-
-All parameters except oddpwr and evpwr are null if the drive type
-specified in the equip.ctl control file is vlba2.
+ 
+              Syntax:      hdata
+ 
+              Response:    hdata/hd0p,hd1p,hd0t,hd1t,vac,oddpwr,evpwr,ref
+ 
+ 
+ Settable parameters: none
+ 
+ Monitor-only parameters:
+            hd0p       Head 0 position.
+            hd1p       Head 1 position
+            hd0t       Head 0 temperature
+            hd1t       Head 1 temperature
+              vac          Vacuum sensor
+            oddpwr     Odd reproduce power
+              evpwr        Even reproduce power
+              ref          Reference voltage
+ 
+ Comments: 
+ MAT module functions available for Mark III/IV. No MCB
+ functions available for VLBA/4.  See section 1.0 of this
+ manual.
+ 
+ This command reads the head positioner A/D channels, all
+ values are reported in units of volts. Data from all channels
+ are reported regardless of whether anything is hooked up to
+ them or not. In particular, most stations do not use the
+ temperature channels, the vacuum sensor, and normally only one
+ of the reproduce power channels is hooked up.
+ 
+ The position voltages (and all others) are reported with the
+ LVDT off. Use the lvdt command to measure positions with the
+ LVDT on.
+ 
+ All parameters except oddpwr and evpwr are null if the drive
+ type specified in the equip.ctl control file is vlba2.

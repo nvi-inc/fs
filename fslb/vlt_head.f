@@ -19,7 +19,8 @@ C
       call fs_get_drive_type(drive_type)
       call fs_get_drive(drive)
       call fs_get_reccpu(reccpu,indxtp)
-      if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
+      if((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2).or.
+     *   (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)) then
         call fc_v2_vlt_head(ihead,volt,ip,indxtp)
       else if((drive(indxtp).eq.VLBA.or.drive(indxtp).eq.VLBA4).and.
      &       reccpu(indxtp).eq.162) then

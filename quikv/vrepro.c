@@ -149,8 +149,10 @@ parse:
       request.addr=0x99;
       vrepro99mc(&request.data,&lcl); add_req(&buffer,&request);
 
-      if(shm_addr->equip.drive[indx] == VLBA &&
-	 shm_addr->equip.drive_type[indx] == VLBA2) {
+      if((shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2) ||
+	 (shm_addr->equip.drive[indx] == VLBA4 &&
+	  shm_addr->equip.drive_type[indx] == VLBA42)) {
 	request.addr=0x9c;
 	vrepro9cmc_vlba2(&request.data,&lcl); add_req(&buffer,&request);
       }
