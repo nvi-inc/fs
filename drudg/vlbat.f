@@ -105,6 +105,7 @@ C 970509 nrv Output the first source of a new pass as a new scan before
 C            the setup for the new pass. Otherwise the tape will stop
 C            before it reaches EOT.
 C 970509 nrv Move code to WRSOR for writing the line with source name.
+C 971015 nrv Don't write duplicate blocks for non-continuous.
 C
 C  Initialization
 
@@ -182,7 +183,8 @@ C   Setup block
 
       call char2hol('  ',IBUF,1,2)
       CALL writf_asc(LU,IERR,IBUF,1)
-      if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then 
+C     if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then 
+      if ((kcont.and.idir.ne.idirp)) then 
         if (iobs.gt.1.and..not.knewtp) then ! run to end of tape
           call char2hol('!* New Scan *! ',ibuf(1),1,14)
           CALL writf_asc(LU,IERR,IBUF,7)

@@ -3359,3 +3359,32 @@ Version 9.3.15 970909
            user to rename it.
 
 Version 9.3.16 971003
+
+971014 nrv drudg/label.f
+           Use the same "new tape" logic for S2 as in other routines, to get
+           the correct number of tape labels printed.
+           Make a new tape start with each schedule start (first label) in case
+           the schedule does not begin at footage 0..
+
+971014 nrv drudg/psbar.c
+           Remove debug print statement.
+
+971003 nrv drudg/procs.f
+           Ask for first-8 or last-8 for mode C as well as mode A.
+
+971006 nrv skdrut/vunpdas.f
+           Add "vlba4" as a valid rack and recorder type.
+
+971027 nrv drudg/snap.f
+           Direction of FASTx is always R before an UNLOD.
+           Make a new tape start with each schedule start (READY command) in case
+           the schedule does not begin at footage 0.
+
+971027 nrv drudg/fdrudg.f
+           New date of Oct. 27 in opening line.
+           Remove comment from line that deletes PS files at end.
+
+971029 WEH quikr/party.f
+           increased iaux to dimension 36 so that 32-36 track checks will work
+
+Version 9.3.17 971029
