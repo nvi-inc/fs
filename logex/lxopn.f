@@ -38,6 +38,7 @@ C
       equivalence (logf(2),logfc)
       integer star(2)
       character*12 ibc1,ibc2
+      character cjchar
       data star/1,'*'/
 C
 C  *****************************************************************
@@ -100,6 +101,51 @@ C
       end if
 C
       ilen = fmpread(idcb,ierr,ibuf,iblen*2)
+C
+      if (ierr.lt.0) then
+        outbuf='LXOPN - error '
+        call ib2as(ierr,answer,1,4)
+        call hol2char(answer,1,4,outbuf(15:))
+        nchar = trimlen(outbuf) + 1
+        outbuf(nchar:)=' reading log file '
+        nchar = trimlen(outbuf) + 1
+        call hol2char(logna,1,4,outbuf(nchar:))
+        call po_put_c(outbuf)
+        icode=-1
+        goto 200
+      end if
+C
+      do i=1,15
+         if(index("0123456789",cjchar(ibuf,i)).eq.0) then
+            if(i.eq.5) then
+               logformat=3
+            else if(i.eq.10) then
+               logformat=1
+C not Y10K compliant
+            else if(i.eq.14) then
+               logformat=2
+            else
+               logformat=-1
+            endif
+            goto 110
+         endif
+      enddo
+      logformat=-1
+c
+ 110  continue
+      if(logformat.eq.-1) then
+        outbuf='LXOPN - error '
+        call ib2as(-999,answer,1,4)
+        call hol2char(answer,1,4,outbuf(15:))
+        nchar = trimlen(outbuf) + 1
+        outbuf(nchar:)=' unknown log file format '
+        nchar = trimlen(outbuf) + 1
+        call hol2char(logna,1,4,outbuf(nchar:))
+        call po_put_c(outbuf)
+        icode=-1
+        goto 200
+      endif
+c         
       ilen = fmpread(idcb,ierr,ibuf,iblen*2)
 C
       if (ierr.lt.0) then
@@ -114,7 +160,28 @@ C
         icode=-1
         goto 200
       end if
-      ifc=15
+      if(logformat.eq.1) then
+         ifc=10
+         ilen = fmpread(idcb,ierr,ibuf,iblen*2)
+C
+         if (ierr.lt.0) then
+            outbuf='LXOPN - error '
+            call ib2as(ierr,answer,1,4)
+            call hol2char(answer,1,4,outbuf(15:))
+            nchar = trimlen(outbuf) + 1
+            outbuf(nchar:)=' reading log file '
+            nchar = trimlen(outbuf) + 1
+            call hol2char(logna,1,4,outbuf(nchar:))
+            call po_put_c(outbuf)
+            icode=-1
+            goto 200
+         end if
+      else if(logformat.eq.2) then
+         ifc=15
+      else if(logformat.eq.3) then
+C not Y10K compliant
+         ifc=21
+      endif
 C
       ic1=iscn_ch(ibuf,ifc,ilen,',')+1
       ic2=iscn_ch(ibuf,ic1,ilen,',')-1
@@ -148,3 +215,19 @@ C
 200   continue
       return
       end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
