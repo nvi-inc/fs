@@ -11,7 +11,7 @@ C               - input character string
 C        IFC,IEC- first, end characters in input string IAS 
 C                 Word to be checked lies here. 
       dimension lnames(12,1)
-      integer*2 lproc1(10,1),lproc2(10,1) 
+      integer*4 lproc1(4,1),lproc2(4,1) 
 C               - 3 lists to be checked for the word
 C               - word to be checked is word (1,I) in each array
 C        NNAMES - number of entries in LNAMES 
@@ -63,16 +63,16 @@ C
       do 290 i=1,nnames
          if (ichcm(lnames(1,i),1,lmatch,1,12).ne.0) goto 290
          index=i
-         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.15)
+         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.31)
      &        .or.
      &        (and(lnames(12,i),drive).eq.0
-     &        .and.lnames(12,i).ne.15)) then
+     &        .and.lnames(12,i).ne.31)) then
             do j=i+1,nnames
                if(ichcm(lnames(1,j),1,lmatch,1,12).eq.0.and.
      &              (and(lnames(11,j),rack).ne.0
-     &         .or. lnames(11,j).eq.15)
+     &         .or. lnames(11,j).eq.31)
      &         .and.(and(lnames(12,j),drive).ne.0
-     &         .or. lnames(12,j).eq.15) ) then
+     &         .or. lnames(12,j).eq.31) ) then
                index=j
                goto 280
             endif
