@@ -24,15 +24,17 @@ main()
   struct onoff_cmd onoff;
   int i,it[6],isgn, ierr, ksem, kresult,j, ierr1, ierr2, nwt, kagc, koff;
   double az,el, xoff, yoff, azoff, eloff, haoff, decoff;
-  char buff[256],buff2[256],source_type[MAX_DET];
+  char buff[256],buff2[256],source_type[MAX_ONOFF_DET];
   float rut,astep,estep;
   struct sample sample,ons,onscal,ofs,ofscal,zero;
-  float gcmp[MAX_DET],tsys[MAX_DET],sefd[MAX_DET],tclj[MAX_DET];
-  float tclk[MAX_DET],calr[MAX_DET];
-  float gcmp_sig[MAX_DET],tsys_sig[MAX_DET],sefd_sig[MAX_DET];
-  float tclj_sig[MAX_DET],tclk_sig[MAX_DET],calr_sig[MAX_DET];
+  float gcmp[MAX_ONOFF_DET],tsys[MAX_ONOFF_DET],sefd[MAX_ONOFF_DET];
+  float tclj[MAX_ONOFF_DET],tclk[MAX_ONOFF_DET],calr[MAX_ONOFF_DET];
+  float gcmp_sig[MAX_ONOFF_DET],tsys_sig[MAX_ONOFF_DET];
+  float sefd_sig[MAX_ONOFF_DET],tclj_sig[MAX_ONOFF_DET];
+  float tclk_sig[MAX_ONOFF_DET],calr_sig[MAX_ONOFF_DET];
   char lsorna[sizeof(shm_addr->lsorna)+1];
   float beam;
+  int use_cal;
 
 /* connect to the FS */
 
@@ -88,8 +90,10 @@ main()
       break;
     }
 
-  for(j=0;j<MAX_DET;j++) {
+  use_cal=FALSE;
+  for(j=0;j<MAX_ONOFF_DET;j++) {
     if(onoff.itpis[j]!=0) {
+      use_cal=use_cal ||onoff.devices[j].tcal>0.0;
       source_type[j]='x';
       for(i=0;i<MAX_FLUX;i++){
 	if(shm_addr->flux[i].name[0]==0)
@@ -108,7 +112,7 @@ main()
  "    De    Center  TCal    Flux    DPFU     Gain    Product   LO    T   FWHM");
   logit(buff2,0,NULL);
 
-  for(i=0;i<MAX_DET;i++) {
+  for(i=0;i<MAX_ONOFF_DET;i++) {
     if(onoff.itpis[i]!=0) {
       /*      sprintf(buff,
 	      "APR %-10.10s %5.1f %4.1f %2.2s %d %c %9.2lf ",
@@ -131,10 +135,16 @@ main()
       strcat(buff," ");
      jr2as(onoff.devices[i].dpfu*onoff.devices[i].gain,buff,-9,6,sizeof(buff));
 
-     sprintf(buff+strlen(buff)," %.2f %c %.5f",
-	     shm_addr->lo.lo[onoff.devices[i].ifchain-1],
-	     source_type[i],
-	     onoff.devices[i].fwhm*RAD2DEG);
+     if(onoff.devices[i].ifchain <=4)
+       sprintf(buff+strlen(buff)," %.2f %c %.5f",
+	       shm_addr->lo.lo[onoff.devices[i].ifchain-1],
+	       source_type[i],
+	       onoff.devices[i].fwhm*RAD2DEG);
+     else
+       sprintf(buff+strlen(buff)," %.2f %c %.5f",
+	       shm_addr->user_device.lo[onoff.devices[i].ifchain-1],
+	       source_type[i],
+	       onoff.devices[i].fwhm*RAD2DEG);
 
       logit(buff,0,NULL);
     }
@@ -143,15 +153,16 @@ main()
   /* wait for onsource */
 
   nwt=shm_addr->onoff.wait;
-  if(1 == nsem_test("aquir"))
-    nwt=nwt*4;
+  if(1 != nsem_test("aquir"))
+    nwt=nwt*4;               /* aquir not runnig */
   if(onsor(nwt,&ierr)) 
     goto error_recover;
 
   rte_time(it,it+5);
   rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
 
-  scmds("caloffnf");
+  if(use_cal)
+    scmds("caloffnf");
 
   savoff(&xoff,&yoff,&azoff,&eloff,&haoff,&decoff);
  
@@ -182,10 +193,13 @@ main()
   }
 
   ini_accum(&onoff.itpis,&ons);
-  ini_accum(&onoff.itpis,&onscal);
   ini_accum(&onoff.itpis,&ofs);
-  ini_accum(&onoff.itpis,&ofscal);
   ini_accum(&onoff.itpis,&zero);
+
+  if(use_cal) {
+    ini_accum(&onoff.itpis,&onscal);
+    ini_accum(&onoff.itpis,&ofscal);
+  }
 
   isgn=-1;
 
@@ -203,11 +217,13 @@ main()
     wcounts("ONSO",0.0,0.0,&onoff,&sample);
     inc_accum(&onoff.itpis,&ons,&sample);
 
-    scmds("calonnf");
-    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
-      goto error_recover;
-    wcounts("ONSC",0.0,0.0,&onoff,&sample);
-    inc_accum(&onoff.itpis,&onscal,&sample);
+    if(use_cal) {
+      scmds("calonnf");
+      if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+	goto error_recover;
+      wcounts("ONSC",0.0,0.0,&onoff,&sample);
+      inc_accum(&onoff.itpis,&onscal,&sample);
+    }
 
     isgn=-isgn;
 
@@ -216,12 +232,14 @@ main()
 	     shm_addr->onoff.wait,&ierr))
       goto error_recover;
 
-    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
-      goto error_recover;
-    wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
-    inc_accum(&onoff.itpis,&ofscal,&sample);
+    if(use_cal) {
+      if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+	goto error_recover;
+      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
+      inc_accum(&onoff.itpis,&ofscal,&sample);
 
-    scmds("caloffnf");
+      scmds("caloffnf");
+    }
     if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
       goto error_recover;
     wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample);
@@ -248,21 +266,25 @@ main()
   wcounts("ONSO",0.0,0.0,&onoff,&sample);
   inc_accum(&onoff.itpis,&ons,&sample);
   
-  scmds("calonnf");
-  if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
-    goto error_recover;
-  wcounts("ONSC",0.0,0.0,&onoff,&sample);
-  inc_accum(&onoff.itpis,&onscal,&sample);
+  if(use_cal) {
+    scmds("calonnf");
+    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+      goto error_recover;
+    wcounts("ONSC",0.0,0.0,&onoff,&sample);
+    inc_accum(&onoff.itpis,&onscal,&sample);
 
-  scmds("caloffnf");
+    scmds("caloffnf");
+  }
 
   red_accum(&onoff.itpis,&ons);
-  red_accum(&onoff.itpis,&onscal);
   red_accum(&onoff.itpis,&ofs);
-  red_accum(&onoff.itpis,&ofscal);
   red_accum(&onoff.itpis,&zero);
+  if(use_cal) {
+    red_accum(&onoff.itpis,&onscal);
+    red_accum(&onoff.itpis,&ofscal);
+  }
 
-  for (i=0;i<MAX_DET;i++)
+  for (i=0;i<MAX_ONOFF_DET;i++)
     if(onoff.itpis[i]!=0) {
       double num,den;
 #if 0
@@ -273,6 +295,7 @@ main()
 	  i,  onscal.sig[i],ons.sig[i],ofscal.sig[i],ofs.sig[i],zero.sig[i]);
       logit(buff,0,NULL);
 #endif
+      if(use_cal) {
       	gcmp[i]=(onscal.avg[i]-ons.avg[i])
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(onscal.avg[i]-ons.avg[i]);
@@ -283,7 +306,12 @@ main()
 			 +pow(ofscal.sig[i]*num/(den*den),2.0)
 			 +pow(ofs.sig[i]*num/(den*den),2.0)
 			 );
+      } else {
+	gcmp[i]=1.0;
+	gcmp_sig[i]=0.0;
+      }
 	
+      if(use_cal) {
 	tsys[i]=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].tcal
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].tcal;
@@ -293,7 +321,11 @@ main()
 			     (onoff.devices[i].tcal/den+num/(den*den)),2.0)
 			 +pow(zero.sig[i]*onoff.devices[i].tcal/den,2.0)
 			 +pow(ofscal.sig[i]*num/(den*den),2.0));
-
+      } else {
+	tsys[i]=onoff.devices[i].tcal;
+	tsys_sig[i]=0.0;
+      }
+      
 	sefd[i]=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].flux
 	  /(ons.avg[i]-ofs.avg[i]);
 	num=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].flux;
@@ -304,6 +336,7 @@ main()
 			 +pow(zero.sig[i]*onoff.devices[i].flux/den,2.0)
 			 +pow(ons.sig[i]*num/(den*den),2.0));
 
+      if(use_cal) {
 	tclj[i]=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux
 	  /(ons.avg[i]-ofs.avg[i]);
 	num=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux;
@@ -319,6 +352,14 @@ main()
 
 	calr[i]=tclk[i]/onoff.devices[i].tcal;
 	calr_sig[i]=tclk_sig[i]/onoff.devices[i].tcal;
+      } else {
+	tclj[i]=0.0;
+	tclj_sig[i]=0.0;
+	tclk[i]=0.0;
+	tclk_sig[i]=0.0;
+	calr[i]=0.0;
+	calr_sig[i]=0.0;
+      }
 
     }
   kresult=TRUE;
@@ -346,7 +387,7 @@ main()
     }
 
   if(kresult) {
-    for (i=0;i<MAX_DET;i++)
+    for (i=0;i<MAX_ONOFF_DET;i++)
       if(onoff.itpis[i]!=0) {
 	sprintf(buff,
 		"SIG %-10.10s %5.5s %4.4s %2.2s %1.1s %1.1s %9.9s ",
@@ -373,7 +414,7 @@ main()
  "    source       Az   El  De I P   Center   Comp   Tsys  SEFD  Tcal(j) Tcal(r)");
     logit(buff2,0,NULL);
 
-    for (i=0;i<MAX_DET;i++)
+    for (i=0;i<MAX_ONOFF_DET;i++)
       if(onoff.itpis[i]!=0) {
 	sprintf(buff,
 		"VAL %-10.10s %5.1f %4.1f %2.2s %d %c %9.2lf ",
