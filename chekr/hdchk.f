@@ -27,6 +27,7 @@ C
         goto 1091
       endif
       call fs_get_ipashd(ipashd)
+      call fs_get_posnhd(posnhd)
       call fs_get_drive_type(drive_type)
       do ihd=1,2
         if(kposhd_fs(ihd)) then
