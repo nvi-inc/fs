@@ -26,7 +26,7 @@ C  OUTPUT:
 C
 C     LPROC - the procedure directory information
 C     NPROC - number of procedures in this file
-      integer*2 lproc(10,1)
+      integer*4 lproc(4,1)
 C
 C  LOCAL:
 C
@@ -67,13 +67,18 @@ C
           goto 990
         endif
         nproc = nproc + 1
+        idum=ichmv(lproc (1,nproc),1,ib,9,12)
         id = fmpposition(idcb,ierr,irec,ioff)
-        do j=1,6
-          lproc(j,nproc)=ib(4+j)
-        enddo
         irectmp = irec - ilen - 1
-        lproc(8,nproc) = irectmp
-        lproc(10,nproc) = ioff
+        if(nproc.gt.1) then
+           if(irectmp.lt.lproc(4,nproc-1)) then
+              call logit7ci(0,0,0,1,-210,'bo',0)
+              nproc=nproc-1
+              goto 990
+           endif
+        endif
+        lproc(4,nproc) = irectmp
+c       lproc(5,nproc) = ioff
         if (old.eq.'n') then
           irec = irectmp
           idum = fmpsetpos(idcb,ierr,irec,-irec)

@@ -23,7 +23,7 @@ C     IBLEN - length of IBUF in words
 C     ISTKOP,ISTKSK - operator and schedule procedure stacks
       dimension idcbp1(1),idcbp2(1)
       integer*2 ibuf(1)
-      integer*2 lproc1(10,1),lproc2(10,1)
+      integer*4 lproc1(4,1),lproc2(4,1)
       dimension istkop(1),istksk(1)
 C
 C
