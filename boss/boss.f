@@ -8,7 +8,7 @@ c
       integer*4 ip(5)
       dimension lnames(12,ifsnum)
       integer MAX_PROC
-      PARAMETER (MAX_PROC=128)
+      PARAMETER (MAX_PROC=256)
       integer*2 lproc1(10,MAX_PROC),lproc2(10,MAX_PROC)
       integer itscb(13,15)
       integer idcbsk(2)
