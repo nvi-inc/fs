@@ -54,22 +54,23 @@ long ip[5];
 	if(icount < 2) 
 	  logit(NULL,-503,"4f");
 
-	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
-	maSHOform4(&lclc,buff);
-
-	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
-	maSHOform4(&lclc,buff);
-
-	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
-	maSHOform4(&lclc,buff);
-
-	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
-	maSHOform4(&lclc,buff);
+	if(lclm.version != shm_addr->imk4fmv)
+	  logitn(NULL,-504,"4f",lclm.version);
 
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSSTform4(&lclc,buff);
 
-       cls_clr(iclass);
+	if(shm_addr->imk4fmv >= 40) {
+	  nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
+	  maLIMform4(&lclc,buff);
+	}
+
+	for (i=3;i<nrec;i++) {
+	  nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
+	  maSHOform4(&lclc,buff);
+	}
+
+	cls_clr(iclass);
       }
 
    /* format output buffer */
