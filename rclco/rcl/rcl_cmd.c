@@ -946,6 +946,56 @@ int rcl_delaym_read(int addr, long int* nanosec)
    return(RCL_ERR_NONE);
 }
 
+int rcl_barrelroll_set(int addr, ibool barrelroll)
+/*
+ * Turns barrel-roll on or off. When on, barrel-roll rotates user data over
+ * all active transports, and un-rotates on playback, so that the possible
+ * effect of a marginal transport is averaged over all channels.
+ * 'barrelroll' indicates barrel roll should be 'on' if TRUE, or 'off' if FALSE.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   char data[1];
+
+   data[0]=(barrelroll!=0);
+
+   err=rcl_simple_cmd(addr,RCL_CMD_BARRELROLL_SET,data,1,RCL_TIMEOUT);
+
+   return(err);
+}
+
+int rcl_barrelroll_read(int addr, ibool* barrelroll)
+/*
+ * Reads the current barrel-roll setting, as set using rcl_barrelroll_set().
+ * 'barrelroll' returns the current barrel-roll setting, TRUE meaning 'on'
+ *              and FALSE meaning 'off'.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   int resp_code;
+   int resp_length;
+   char data[1];
+
+   err=rcl_general_cmd(addr,RCL_CMD_BARRELROLL_READ,NULL,0,&resp_code,
+                       data,1/*maxlength*/,&resp_length,RCL_TIMEOUT);
+   if (err!=RCL_ERR_NONE)
+      return(err);      /* abort immediately on local or S2 errors */
+
+   /* Check if got correct response code */
+   if (resp_code!=RCL_RESP_BARRELROLL)
+      return(RCL_ERR_PKTUNEX);
+
+   /* Check if got correct response length */
+   if (resp_length!=1)
+      return(RCL_ERR_PKTLEN);
+
+   *barrelroll=data[0];
+
+   return(RCL_ERR_NONE);
+}
+
 int rcl_errmes(int addr, long int error)
 /*
  * This command is used to synchronize the S2 recorder's playback rate
@@ -1129,7 +1179,7 @@ int rcl_position_set(int addr, int code, long int position)
  * Initiates tape positioning on all currently selected transports.
  * The same position value is used for all transports. Use rcl_state_read()
  * to test completion.
- * 'code' is the type of positioning to perform,
+ * 'code' is the type of positioning to perform (normally 0),
  *        0 == absolute positioning,
  *        1 == relative positioning,
  *        2 == position preset.
@@ -1535,6 +1585,135 @@ int rcl_tapetype_read(int addr, char* tapetype)
    return(RCL_ERR_NONE);
 }
 
+int rcl_mk3_form_set(int addr, ibool mk3)
+/*
+ * Turns the S2 internal Mark III format generator on and off. When turned on,
+ * the C2a cable output switches to Mk3-compatible mode.
+ * 'mk3' indicates the Mk3 formatter should be 'on' if TRUE, or 'off' if FALSE.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   char data[1];
+
+   data[0]=(mk3!=0);
+
+   err=rcl_simple_cmd(addr,RCL_CMD_MK3_FORM_SET,data,1,5000);
+
+   return(err);
+}
+
+int rcl_mk3_form_read(int addr, ibool* mk3)
+/*
+ * Reads the current Mark III formatter enable/disable state, as set using
+ * rcl_mk3_form_set().
+ * 'mk3' returns the current Mk3 formatter setting, TRUE meaning 'on'
+ *       and FALSE meaning 'off'.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   int resp_code;
+   int resp_length;
+   char data[1];
+
+   err=rcl_general_cmd(addr,RCL_CMD_MK3_FORM_READ,NULL,0,&resp_code,
+                       data,1/*maxlength*/,&resp_length,RCL_TIMEOUT);
+   if (err!=RCL_ERR_NONE)
+      return(err);      /* abort immediately on local or S2 errors */
+
+   /* Check if got correct response code */
+   if (resp_code!=RCL_RESP_MK3_FORM)
+      return(RCL_ERR_PKTUNEX);
+
+   /* Check if got correct response length */
+   if (resp_length!=1)
+      return(RCL_ERR_PKTLEN);
+
+   *mk3=data[0];
+
+   return(RCL_ERR_NONE);
+}
+
+int rcl_transport_times(int addr, int* num_entries,
+                        unsigned short serial[],
+                        unsigned long tot_on_time[],
+                        unsigned long tot_head_time[],
+                        unsigned long head_use_time[],
+                        unsigned long in_service_time[])
+/*
+ * Reads all 8 transports' total head-use time, total
+ * power-on time, last service time and last head-change time.
+ * 'num_entries' returns the number of entries in each array, always 8.
+ * 'serial' returns each transport's serial number for identification.
+ *          A value of 0 means the transport is dead.
+ * 'tot_on_time' returns the total power-on time since manufacture for each
+ *               transport in minutes. A value of 0 means "unknown".
+ * 'tot_head_time' returns the total head-use time since manufacture for each
+ *                 transport in minutes. A value of 0 means "unknown".
+ * 'head_use_time' returns the active head use time since the last head
+ *                 replacement for each transport in minutes.
+ *                 This is to be zeroed whenever the head is replaced by 
+ *                 entering the 'transport N service lasthead' console command.
+ *                 A value of 0 means "unknown".
+ * 'in_service_time' returns the active head use time since the last service
+ *                   operation for each transport in minutes.
+ *                   This is to be zeroed whenever the transport is serviced by
+ *                   entering the 'transport N service lastserv' console
+ *                   command. A value of 0 means "unknown".
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   int tran;                /* transport loop index */
+   int resp_code;
+   int resp_length;
+   unsigned char rdata[RCL_TRANSPORT_TIMES_LEN];
+                            /* data portion of reply packet */
+   int spacing;
+
+
+   err=rcl_general_cmd(addr,RCL_CMD_TRANSPORT_TIMES,NULL,0,&resp_code,
+                       (char*)rdata,RCL_TRANSPORT_TIMES_LEN/*maxlength*/,
+                       &resp_length, RCL_TIMEOUT);
+   if (err!=RCL_ERR_NONE)
+      return(err);      /* abort immediately on local or S2 errors */
+
+   /* Check if got correct response code */
+   if (resp_code!=RCL_RESP_TRANSPORT_TIMES)
+      return(RCL_ERR_PKTUNEX);
+
+   /* Check if got right response length */
+   if (resp_length!=RCL_TRANSPORT_TIMES_LEN)
+      return(RCL_ERR_PKTLEN);
+
+   *num_entries=rdata[0];
+
+   spacing=18;
+   for (tran=0; tran<*num_entries; tran++)  {
+      serial[tran]=((unsigned short)rdata[tran*spacing+1]<<8)
+                      | (unsigned short)rdata[tran*spacing+2];
+      tot_on_time[tran]=((unsigned long)rdata[tran*spacing+3]<<24)
+                      | ((unsigned long)rdata[tran*spacing+4]<<16)
+                      | ((unsigned long)rdata[tran*spacing+5]<<8)
+                      | (unsigned long)rdata[tran*spacing+6];
+      tot_head_time[tran]=((unsigned long)rdata[tran*spacing+7]<<24)
+                      | ((unsigned long)rdata[tran*spacing+8]<<16)
+                      | ((unsigned long)rdata[tran*spacing+9]<<8)
+                      | (unsigned long)rdata[tran*spacing+10];
+      head_use_time[tran]=((unsigned long)rdata[tran*spacing+11]<<24)
+                      | ((unsigned long)rdata[tran*spacing+12]<<16)
+                      | ((unsigned long)rdata[tran*spacing+13]<<8)
+                      | (unsigned long)rdata[tran*spacing+14];
+      in_service_time[tran]=((unsigned long)rdata[tran*spacing+15]<<24)
+                      | ((unsigned long)rdata[tran*spacing+16]<<16)
+                      | ((unsigned long)rdata[tran*spacing+17]<<8)
+                      | (unsigned long)rdata[tran*spacing+18];
+   }
+
+   return(RCL_ERR_NONE);
+}
+
 int rcl_station_info_read(int addr, int* station, long int* serialnum,
                           char* nickname)
 /*
@@ -1677,10 +1856,20 @@ int rcl_status(int addr, int* summary, int* num_entries,
  * every few seconds, since status conditions accumulate in-between reads
  * and will come out all at once on the next read.
  * Status entries are returned in order of severity from most to least severe,
- * which means by increasing status code number, not in order of occurrence.
+ * which means in order of increasing status code number, not in order of 
+ * occurrence. Reading S2 status with rcl_status() causes all clear-on-read
+ * status entries to be cleared, the same as if 'status reset' was typed on
+ * the console for the console status. These entries will not appear in
+ * the next rcl_status() request unless the condition they represent has
+ * occurred again. Non-clear-on-read status entries will persist until the
+ * condition they represent has gone away. Note that RCL status is not
+ * necessarily the same as the console status window, and is not affected by
+ * console commands such as 'status reset'. Similarly, reading the RCL status
+ * will not affect the console status window.
  * 'summary' returns a summary word whose bits indicate whether there are
  *           any error conditions (RCL_STATBIT_ERROR) or any fatal error
- *           conditions (RCL_STATBIT_FATAL), etc.
+ *           conditions (RCL_STATBIT_FATAL), or any clear-on-read conditions
+ *           (RCL_STATBIT_CLEAR).
  *           Use ((summary & RCL_STATBIT_ERROR)!=0) to check whether overall
  *           system status is OK.
  * 'num_entries' returns the number of status entries in 'status_list'.
@@ -1727,28 +1916,35 @@ int rcl_status_detail(int addr, int stat_code, ibool reread,
  * Reads the S2 system status detailed report. This is typically done following
  * rcl_status() if unusual conditions are detected. This routine returns
  * additional information in the form of a 1-5 line descriptive message
- * for each status code. A shorter version of the messages can be requested 
- * by passing 'shortt' as TRUE. The short messages are the same as shown on
- * the console and are limited to 34 bytes (not incl. terminating NULL).
+ * for each status code. Only those status conditions returned for the last
+ * rcl_status() call will be included unless the 'reread' parameter is TRUE.
+ * A shorter version of the messages can be requested by passing 'shortt' as
+ * TRUE. The short messages are the same as shown on the console and are
+ * limited to 34 bytes (not incl. terminating NULL).
  * See also rcl_status_decode().
  * 'stat_code' is the specific status code to obtain detailed information for,
  *             from 1 to RCL_STATCODE_MAX. If that status condition is not
- *             active, no information will be returned ('num_entries' will be
- *             0). If 'stat_code' is specified as 0 then all active status
- *             information will be returned (up to a maximum of RCL_STATUS_MAX
- *             entries, in order of severity from most to least severe).
- * 'reread' FALSE indicates that the status conditions from the last
- *          rcl_status() command should be used. This should be the case
+ *             active, no information will be returned ('num_entries' parameter
+ *             will be 0). If 'stat_code' is specified as 0 then all active
+ *             status conditions will be returned (up to a maximum of
+ *             RCL_STATUS_MAX entries, in order of severity from most to
+ *             least severe).
+ * 'reread' FALSE indicates that only the status conditions from the last
+ *          rcl_status() command should be returned. This should be the case
  *          whenever rcl_status_detail() is used to follow up results from
  *          rcl_status(). TRUE indicates that the S2 should re-read its system
- *          status, i.e. implicitly performs rcl_status(). This should be
- *          the case when rcl_status_detail() is being used by itself.
- * 'shortt' TRUE causes the shorter version of the status messages to be
- *          used (max. 34 characters each, not incl. NULL). Note that the
- *          short messages don't have the mnemonic at the start.
+ *          status, i.e. implicitly performs rcl_status() first. Pass TRUE
+ *          when you want to use rcl_status_detail() by itself, without calling
+ *          rcl_status() first.
+ * 'shortt' should normally be passed as FALSE to obtain the regular RCL status
+ *          messages. TRUE causes a shorter version of the status messages to be
+ *          returned (max. 34 characters each, not incl. NULL). Note that the
+ *          short messages are the same as the console status messages and
+ *          don't have the mnemonic at the start.
  * 'summary' returns a summary word whose bits indicate whether there are
  *           any error conditions (RCL_STATBIT_ERROR) or any fatal error
- *           conditions (RCL_STATBIT_FATAL), etc.
+ *           conditions (RCL_STATBIT_FATAL), or any clear-on-read conditions
+ *           (RCL_STATBIT_CLEAR).
  *           Use ((summary & RCL_STATBIT_ERROR)!=0) to check whether overall
  *           system status is OK.
  * 'num_entries' returns the number of status entries in 'status_det_list'.
@@ -1804,7 +2000,7 @@ int rcl_status_decode(int addr, int stat_code, ibool shortt, char* stat_msg)
  * building a run-time translation table of status codes and mnemonics/messages.
  * For error reporting or logging purposes use rcl_status_detail() instead
  * since that routine includes occurrence-specific information such as channel
- * numbers in the messages, while this routine just fills in such variable
+ * numbers in the messages, while this routine just fills in such changeable
  * information with "xxx". 
  * 'stat_code' is the status code to translate, in the range 0 to
  *             RCL_STATCODE_MAX.
@@ -1869,6 +2065,139 @@ int rcl_error_decode(int addr, int err_code, char* err_msg)
 
    /* Check if got correct response code */
    if (resp_code!=RCL_RESP_ERROR_DECODE)
+      return(RCL_ERR_PKTUNEX);
+
+   return(RCL_ERR_NONE);
+}
+
+int rcl_diag(int addr, int type)
+/*
+ * Initiates S2 internal diagnostic sequences. Currently the
+ * only diagnostic sequence which can be run here is self-test 1 (the power-on
+ * self test). While self-test 1 is running most RCL commands which affect
+ * tape motion or system switch settings are not allowed. Users should poll
+ * S2 status to determine when the diagnostic test completes: STAT_DIAGIP
+ * indicates that the test is in progress, STAT_DIAGDONE indicates that the
+ * test completed successfully, and STAT_DIAGFAIL indicates that the test has
+ * found a system fault or aborted due to an error.
+ * 'type' is the type of diagnostic to run, must be 1 for self-test 1.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   char data[1];
+
+   data[0]=type;
+
+   err=rcl_simple_cmd(addr,RCL_CMD_DIAG,data,1,RCL_TIMEOUT);
+
+   return(err);
+}
+
+int rcl_berdcb(int addr, int op_type, int chan, int meas_time,
+               unsigned long* err_bits, unsigned long* tot_bits)
+/*
+ * Performs one of 3 types of statistical measurements on
+ * a given data channel: Formatter bit-error rate, UI bit-error rate, and
+ * UI DC-bias. All of these measurements can only be done on one channel
+ * at a time. The FORM BER measurement performs a true bit-error rate
+ * measurement on one 16 Mbit/s internal S2 data channel (0 - 7) by comparing
+ * against the Formatter test vector sequence. The UI BER measurement performs
+ * a true bit-error rate measurement on one user data channel (0 - 15) by
+ * comparing against the UI test vector sequence. Both BER measurements
+ * always count both detected and undetected errors (i.e. data validity flag are
+ * ignored). In the case of FORM BER the formatter Test Vector Generator is
+ * automatically turned on for the duration of the measurement if required.
+ *     The UI DC-bias measurement counts the number of bits with value 1
+ * in the specified user data channel (0<196>15). This is useful to determine
+ * the ratio of 1-bits to 0-bits to check if data is reasonable. Note that both
+ * the UI DC-bias and UI BER measurements are made on UI output data
+ * (similar to the data at the C2a cable port). To make measurements of
+ * UI input data (similar to the data at the C1 cable port) you should turn
+ * UI feed-through mode on. Since there is currently no RCL command to set
+ * UI feed-through, you will have to use the rcl_consolecmd() feature with the
+ * console command strings ``uic feedthru on'' or ``uic feedthru off''.
+ * 'op_type` is the desired operation type:
+ *             1 == FORM BER measurement
+ *             2 == UI BER measurement
+ *             3 == UI DC-bias measurement
+ * 'chan' is the internal data channel 0 through 7 for FORM BER, or
+ *        user data channel 0 through 15 for UI BER and UI DC-bias.
+ * 'meas_time' is the measurement time in seconds, recommended value 1 second,
+ *             recommended maximum value 10 seconds. It is important to
+ *             understand that **while the BERDCB measurement is in progress no
+ *             other RCL commands are allowed**.
+ * 'err_bits' returns the number of bits in error during the measurement
+ *            interval in the case of FORM BER and UI BER, or the number of
+ *            1-bits in the case of UI DC-bias. 
+ * 'tot_bits' returns the total number of bits measured in the time interval.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   int resp_code;
+   int resp_length;
+   char parms[3];           /* data portion of request packet */
+   unsigned char rdata[8];  /* data portion of reply packet */
+
+
+   /* basic range checks (further checking done by S2) */
+   if (op_type<0 || op_type>255 || chan<0 || chan>255
+         || meas_time<0 || meas_time>255)
+      return(RCL_ERR_BADVAL);
+
+   parms[0]=op_type;
+   parms[1]=chan;
+   parms[2]=meas_time;
+   /* note that the timeout (in ms) depends on the measurement time! */
+   err=rcl_general_cmd(addr,RCL_CMD_BERDCB,parms,3,&resp_code,
+                       (char*)rdata,8/*maxlength*/, &resp_length, 
+                       (meas_time+2)*1000);
+   if (err!=RCL_ERR_NONE)
+      return(err);      /* abort immediately on local or S2 errors */
+
+   /* Check if got correct response code */
+   if (resp_code!=RCL_RESP_BERDCB)
+      return(RCL_ERR_PKTUNEX);
+
+   /* Check if got right response length */
+   if (resp_length!=8)
+      return(RCL_ERR_PKTLEN);
+
+   *err_bits=((long int)rdata[0]<<24)
+              | ((long int)rdata[1]<<16)
+              | ((long int)rdata[2]<<8)
+              | (long int)rdata[3];
+
+   *tot_bits=  ((long int)rdata[4]<<24)
+              | ((long int)rdata[5]<<16)
+              | ((long int)rdata[6]<<8)
+              | (long int)rdata[7];
+
+   return(RCL_ERR_NONE);
+}
+
+int rcl_ident(int addr, char* devtype)
+/*
+ * Returns the RCL device type as a string, which determines what command set
+ * it responds to. All RCL devices should implement this command.
+ * 'devtype' returns the device type string, for example "S2-PT". At least
+ *           RCL_MAXSTRLEN_IDENT bytes of space must be available, including
+ *           the terminating NULL.
+ * Return value is local or remote error code.
+ */
+{
+   int err;
+   int resp_code;
+   int resp_length;
+
+   err=rcl_general_cmd(addr,RCL_CMD_IDENT,NULL,0,&resp_code,
+                       devtype,RCL_MAXSTRLEN_IDENT,&resp_length,RCL_TIMEOUT);
+   if (err!=RCL_ERR_NONE)
+      return(err);      /* abort immediately on local or S2 errors */
+
+   /* Check if got correct response code */
+   if (resp_code!=RCL_RESP_IDENT)
       return(RCL_ERR_PKTUNEX);
 
    return(RCL_ERR_NONE);

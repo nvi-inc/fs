@@ -18,8 +18,8 @@ CPPFLAGS=
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $*.c
 
 
-../bin/rclco: $(OBJS)
-	$(CC) -o ../bin/rclco $(OBJS) rcl/rcl_cmd.o rcl/rcl_pkt.o rcl/rcl_sysn.o rcl/rcl_util.o -lcurses
+rclco: $(OBJS)
+	$(CC) -o rclco $(OBJS) rcl/rcl_cmd.o rcl/rcl_pkt.o rcl/rcl_sysn.o rcl/rcl_util.o -lcurses
 
 version.c: force
 	./makever.unx >version.c

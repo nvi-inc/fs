@@ -21,7 +21,10 @@
  * Typedefs, we avoid using 'bool' because curses defines it (as a macro
  * in SunOS which is workable, but as a typedef in Solaris which is a killer)
  */
+#ifndef IBOOL_DEFD
 typedef int ibool;
+#define IBOOL_DEFD
+#endif
 
 
 /*

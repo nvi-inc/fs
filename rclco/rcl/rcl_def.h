@@ -56,8 +56,13 @@
 #ifndef TRUE
 # define TRUE   (1==1)
 # define FALSE  (1==0)
-  typedef int ibool;      /* we don't use 'bool' because curses does */
 #endif
+
+#ifndef IBOOL_DEFD
+typedef int ibool;      /* we don't use 'bool' because curses does */
+#define IBOOL_DEFD
+#endif
+
 
 
 /*

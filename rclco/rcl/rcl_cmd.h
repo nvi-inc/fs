@@ -50,6 +50,9 @@ int rcl_delay_set(int addr, ibool relative, long int nanosec);
 int rcl_delay_read(int addr, long int* nanosec);
 int rcl_delaym_read(int addr, long int* nanosec);
 
+int rcl_barrelroll_set(int addr, ibool barrelroll);
+int rcl_barrelroll_read(int addr, ibool* barrelroll);
+
 int rcl_errmes(int addr, long int error);
 
 int rcl_align_abs(int addr, int year, int day, int hour, int min, int sec,
@@ -76,6 +79,16 @@ int rcl_scpll_mode_read(int addr, int* scpll_mode);
 int rcl_tapetype_set(int addr, const char* tapetype);
 int rcl_tapetype_read(int addr, char* tapetype);
 
+int rcl_mk3_form_set(int addr, ibool mk3);
+int rcl_mk3_form_read(int addr, ibool* mk3);
+
+int rcl_transport_times(int addr, int* num_entries,
+                        unsigned short serial[],
+                        unsigned long tot_on_time[],
+                        unsigned long tot_head_time[],
+                        unsigned long head_use_time[],
+                        unsigned long in_service_time[]);
+
 int rcl_station_info_read(int addr, int* station, long int* serialnum,
                           char* nickname);
 
@@ -93,6 +106,12 @@ int rcl_status_decode(int addr, int stat_code, ibool shortt, char* stat_msg);
 
 int rcl_error_decode(int addr, int err_code, char* err_msg);
 
+int rcl_diag(int addr, int type);
+
+int rcl_berdcb(int addr, int op_type, int chan, int meas_time,
+               unsigned long* err_bits, unsigned long* tot_bits);
+
+int rcl_ident(int addr, char* devtype);
 int rcl_version(int addr, char* version);
 
 /* HIDDEN */

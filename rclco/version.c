@@ -13,7 +13,7 @@ const char* rclco_version(void)
    static char result[80];
 
    strcpy(result,RCLCO_VERSION);
-   strcat(result,"  (compiled Thu Jun 27 23:12:56 EDT 1996)");
+   strcat(result,"  (compiled Thu Dec 19 01:37:47 GMT 1996)");
 
    return(result);
 }

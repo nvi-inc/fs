@@ -30,3 +30,19 @@ Georg Feil           Jun 24, 1996
 Georg Feil           Jun 27, 1996
 -Added support for Linux and Solaris. Updated 1readme files.
 
+Georg Feil           Jul 25, 1996
+-Moved ibool typedef outside #ifndef conditional in rcl_def.h.
+
+Georg Feil           Aug  2, 1996
+-Added rcl_barrelroll_set() and rcl_barrelroll_read().
+
+Georg Feil           Sep  9, 1996
+-Changed rcl_cmd_position() comment.
+
+Georg Feil           Oct  1, 1996
+-Added rcl_ident(), rcl_berdcb(), rcl_diag(), rcl_mk3_form_set(), 
+   rcl_mk3_form_read(), and rcl_transport_times().
+
+Georg Feil           Oct 23, 1996
+-Changed parms for TRANSPORT_TIMES to match updates in ROS.
+

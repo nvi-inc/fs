@@ -3,7 +3,7 @@
 
 
 /* Set the version number here */
-#define RCLCO_VERSION   "2.5"
+#define RCLCO_VERSION   "3.0"
 
 const char* rclco_version(void);
 

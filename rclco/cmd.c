@@ -737,6 +737,37 @@ int execute(const char* command)
       return(ERR_NONE);
    }
 
+   case CMD_BARRELROLL_SET:
+   {
+      ibool barrelroll;
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+      barrelroll=streq(parm,"on");
+
+      err=rcl_barrelroll_set(S2Addr,barrelroll);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      return(ERR_NONE);
+   }
+
+   case CMD_BARRELROLL_READ:
+   {
+      ibool barrelroll;
+
+      err=rcl_barrelroll_read(S2Addr,&barrelroll);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      printf("Barrel-roll is %s\n", (barrelroll ? "ON" : "OFF"));
+
+      return(ERR_NONE);
+   }
+
    case CMD_ERRMES:
    {
       long int error;
@@ -754,7 +785,7 @@ int execute(const char* command)
       nextparm(command,parm,&pos,PARM_DELIM);
 
       if (streq(parm,"auto"))  {
-         /* send error measurements once per second based on UIC delay
+         /* send error measurements once per second based on UI delay
               measurement */
          nextparm(command,parm,&pos,PARM_DELIM);
          chanrate=(int)str_to_int(parm);
@@ -1251,6 +1282,73 @@ int execute(const char* command)
       return(ERR_NONE);
    }
 
+   case CMD_MK3_FORM_SET:
+   {
+      ibool mk3;
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+      mk3=streq(parm,"on");
+
+      err=rcl_mk3_form_set(S2Addr,mk3);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      return(ERR_NONE);
+   }
+
+   case CMD_MK3_FORM_READ:
+   {
+      ibool mk3;
+
+      err=rcl_mk3_form_read(S2Addr,&mk3);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      printf("Mark III formatter is %s\n", (mk3 ? "ON" : "OFF"));
+
+      return(ERR_NONE);
+   }
+
+   case CMD_TRANSPORT_TIMES:
+   {
+      int tran;                 /* transport loop index */
+      unsigned short serial[8]; /* serial numbers */
+      unsigned long tot_on_time[8];
+      unsigned long tot_head_time[8];
+      unsigned long head_use_time[8];
+      unsigned long in_service_time[8];
+      int time_n;               /* number of entries filled in above */
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+
+      err=rcl_transport_times(S2Addr,&time_n,serial,tot_on_time,tot_head_time,
+                              head_use_time,in_service_time);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      printf("Tran  Serial#   Tot On Time  Tot Head Time  Head-Use Time   In-Service Time\n");
+      printf("----  -------   -----------  -------------  -------------   ---------------\n");
+
+      for (tran=0; tran<time_n; tran++)  {
+         /* this doesn't work unless we do it in two pieces for some reason! */
+         printf(" %2d %7u  %7luh %02lum  %7luh %02lum",
+                tran, serial[tran],
+                tot_on_time[tran]/60, tot_on_time[tran] % 60,
+                tot_head_time[tran]/60, tot_head_time[tran] % 60);
+         printf(" %8luh %02lum  %9luh %02lum\n",
+                head_use_time[tran]/60, head_use_time[tran] % 60,
+                in_service_time[tran]/60, in_service_time[tran] % 60);
+      }
+
+      return(ERR_NONE);
+   }
+
    case CMD_STATION_INFO_READ:
    {
       int station;
@@ -1523,6 +1621,90 @@ int execute(const char* command)
       }
 
       printf("Error code %d: %s\n",err_code,err_msg);
+
+      return(ERR_NONE);
+   }
+
+   case CMD_DIAG:
+   {
+      err=rcl_diag(S2Addr,1);
+      if (err!=RCL_ERR_NONE)
+         printerr(err);
+
+      return(err);
+   }
+
+   case CMD_BERDCB:
+   {
+      int op_type;
+      int chan;
+      int meas_time;
+      unsigned long err_bits;
+      unsigned long tot_bits;
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+      if (streq(parm,"formber"))
+         op_type=1;
+      else if (streq(parm,"uiber"))
+         op_type=2;
+      else if (streq(parm,"dcbias"))
+         op_type=3;
+      else
+         return(ERR_OPFAIL);
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+      chan=(int)str_to_int(parm);
+
+      nextparm(command,parm,&pos,PARM_DELIM);
+      meas_time=(int)str_to_int(parm);
+
+      err=rcl_berdcb(S2Addr,op_type,chan,meas_time,&err_bits,&tot_bits);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      /* prevent divide-by-zero */
+      if (tot_bits==0)  {
+         printf("Null measurement?!\n");
+         return(ERR_OPFAIL);
+      }
+
+      switch (op_type)  {
+      case 1:
+         printf("Results of %d-second FORM BER measurement on channel %d:\n",
+                meas_time, chan);
+         printf("Raw error count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("     Error rate: %.2e\n",(float)err_bits/tot_bits);
+         break;
+      case 2:
+         printf("Results of %d-second UI BER measurement on user channel %d:\n",
+                meas_time, chan);
+         printf("Raw error count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("     Error rate: %.2e\n",(float)err_bits/tot_bits);
+         break;
+      case 3:
+         printf("Results of %d-second UI DC-bias measurement on user channel %d:\n",
+                meas_time, chan);
+         printf("Raw 1-bit count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("        DC bias: %4.1f%%\n",(float)err_bits*100/tot_bits);
+         break;
+      }
+
+      return(ERR_NONE);
+   }
+
+   case CMD_IDENT:
+   {
+      char ident[RCL_MAXSTRLEN_IDENT];
+
+      err=rcl_ident(S2Addr,ident);
+      if (err!=RCL_ERR_NONE)  {
+         printerr(err);
+         return(err);
+      }
+
+      printf("RCL address %d device identifier: %s\n",S2Addr,ident);
 
       return(ERR_NONE);
    }
