@@ -137,7 +137,7 @@ long ip[5];                           /* ipc parameters */
 
             request.addr=0xb4;
             request.data=0x01; add_req(&buffer,&request);
-            shm_addr->idirtp=-1;
+            shm_addr->idirtp=0;
             shm_addr->lowtp=1;
 
             kenable = TRUE;
@@ -168,14 +168,15 @@ long ip[5];                           /* ipc parameters */
             add_req(&buffer,&request);
 
             request.addr=0xb5;           /* schedule tape speed */
-            if (shm_addr->iskdtpsd == -2) {
+            if (shm_addr->imaxtpsd == -2) {
               request.data=bits16on(16) & (int)(360*100.0);
-            } else if (shm_addr->iskdtpsd == -1) {
+            } else if (shm_addr->imaxtpsd == -1) {
               request.data=bits16on(16) & (int)(330*100.0);
             } else {
-              request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+              request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
             }
-            shm_addr->ispeed=shm_addr->iskdtpsd;
+	   shm_addr->ispeed=-3;
+	   shm_addr->cips=request.data;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
@@ -184,7 +185,7 @@ long ip[5];                           /* ipc parameters */
             add_req(&buffer,&request);
 
             request.addr=0xb1; request.data=0x00; 
-            shm_addr->idirtp=-1;
+            shm_addr->idirtp=0;
             add_req(&buffer,&request);
             kenable = TRUE;
             kmove = TRUE;
@@ -213,14 +214,15 @@ long ip[5];                           /* ipc parameters */
             add_req(&buffer,&request);
 
             request.addr=0xb5;           /* schedule tape speed */
-            if (shm_addr->iskdtpsd == -2) {
+            if (shm_addr->imaxtpsd == -2) {
               request.data=bits16on(16) & (int)(360*100.0);
-            } else if (shm_addr->iskdtpsd == -1) {
+            } else if (shm_addr->imaxtpsd == -1) {
               request.data=bits16on(16) & (int)(330*100.0);
             } else {
-              request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+              request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
             }
-            shm_addr->ispeed=shm_addr->iskdtpsd;
+	   shm_addr->ispeed=-3;
+	   shm_addr->cips=request.data;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
@@ -229,7 +231,7 @@ long ip[5];                           /* ipc parameters */
             add_req(&buffer,&request);
 
             request.addr=0xb1; request.data=0x01; 
-            shm_addr->idirtp=-1;
+            shm_addr->idirtp=1;
             add_req(&buffer,&request);
             kenable = TRUE;
             kmove = TRUE;
