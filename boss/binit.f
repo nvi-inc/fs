@@ -70,20 +70,20 @@ C
           idummy = ichmv(lseg,1,ibuf,14,4)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ias2b(ibuf,26,1)
-          ieq2 = ias2b(ibuf,27,1)
+          ieq1 = ia2hx(ibuf,26,1)
+          ieq2 = ia2hx(ibuf,27,1)
           call ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.7)) then
-            lnames(11,iname) = ieqhex(ieq1)
+          if ((ieq1.ge.1) .and. (ieq1.le.15)) then
+            lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.7)) then
-            lnames(12,iname) = ieqhex(ieq2)
+          if ((ieq2.ge.1) .and. (ieq2.le.15)) then
+            lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
@@ -113,20 +113,20 @@ C
           idummy = ichmv(lseg,1,ibuf,14,4)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ias2b(ibuf,26,1)
-          ieq2 = ias2b(ibuf,27,1)
+          ieq1 = ia2hx(ibuf,26,1)
+          ieq2 = ia2hx(ibuf,27,1)
           idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.7)) then
-            lnames(11,iname) = ieqhex(ieq1)
+          if ((ieq1.ge.1) .and. (ieq1.le.15)) then
+            lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.7)) then
-            lnames(12,iname) = ieqhex(ieq2)
+          if ((ieq2.ge.1) .and. (ieq2.le.15)) then
+            lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
@@ -191,10 +191,27 @@ c
       ierr=ip(3)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-190,'bo',ierr)
+        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
         call fc_putln('mcbcn initialization failed')
         return
       else
         call fc_putln('mcbcn initialized')
+      endif
+c
+c  initialize rclcn
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('rclcn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-191,'bo',ierr)
+        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
+        call fc_putln('rclcn initialization failed')
+        return
+      else
+        call fc_putln('rclcn initialized')
       endif
 C
 C     1.18 Start first log file
