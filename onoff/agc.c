@@ -29,7 +29,7 @@ int *ierr;
     long ip[5];                                     /* ipc array */
 
     ini_req(&buffer);
-    request.type=0;
+    request.type=20;
     request.addr=0x02;
 
     for (i=0;i<MAX_BBC;i++) {
