@@ -28,6 +28,7 @@ C
       if(ipass.ne.0) then
         if(ihead.eq.1) then
           if(kauto) then
+            call fs_get_wrhd_fs(wrhd_fs)
             ipitch=wrhd_fs
           else
             ipitch=0
@@ -35,10 +36,19 @@ C
         else
           ipitch=rdhd_fs
         endif
-        if(mod(ipass,2).eq.0) then
-          if(ipitch.eq.1) micron=micron-698.5
+        call fs_get_drive(drive)
+        if(drive.eq.VLBA) then
+           if(mod(ipass,2).eq.0) then
+              if(ipitch.eq.2) micron=micron-698.5
+           else
+              if(ipitch.eq.1) micron=micron+698.5
+           endif
         else
-          if(ipitch.eq.2) micron=micron+698.5
+           if(mod(ipass,2).eq.0) then
+              if(ipitch.eq.1) micron=micron-698.5
+           else
+              if(ipitch.eq.2) micron=micron+698.5
+           endif
         endif
         micron=micron-foroff(ihead)
         if(mod(ipass,2).eq.0) micron=micron-revoff(ihead)
