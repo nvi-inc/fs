@@ -86,14 +86,20 @@ IMPORTANT NOTE: The first parameter should be the MET3 Sensor.
     Special NOTICE: Please edit the script to use your port locations,
                     before you proceed.
 
+    Modify MET= and WIND= with your own port numbers in the metserver.sh file.
+
     prompt> log in as root
     prompt> cd /etc/init.d
     prompt> cp /usr2/st/metserver/metserver.sh .
-    prompt> cd /etc/rcS.d
-    prompt> ln -sfn ../init.d/metserver.sh S91metserver.sh
+    prompt> update-rc.d metserver.sh defaults
 
     Everytime you reboot your system, the metserver will start automatically.
 
+    a.) If you wish to stop the metserver for some reason.
+        as root:
+        /etc/init.d/metserver.sh stop  (will stop the metserver)
+        /etc/init.d/metserver.sh start (will start it up again)
+        /etc/init.d/metserver.sh restart (will stop then start)
 
  ===== Read the README information. =====
 
