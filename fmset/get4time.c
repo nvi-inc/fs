@@ -37,7 +37,7 @@ int *formhs;
 		tmget[0]=-54;
 		memcpy(tmget+1,"fm",2);
 		memcpy(tmget+2,"/tim",4);
-		sync_buf[0]=10;
+		sync_buf[0]=11;
 		memcpy(sync_buf+1,"fm",2);
 		memcpy(sync_buf+2,"/syn",4);
 	}
@@ -123,10 +123,11 @@ tryagain:
 	cls_clr(outclass); /* clear class numbers just in case */
 	cls_clr(inclass);
 
+	  /*
         if(*formtime<0) 
 		if(cnt++>5) {
 		endwin();
-		printf("Error year less than 1900 for 5 tries\n");
+		printf("Error year less than 1970 for 5 tries\n");
                 logita(NULL,-3,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
@@ -134,7 +135,7 @@ tryagain:
 		exit(0);
 		} else
 			goto tryagain;
-
+			*/
         centidiff =centisec[1]-centisec[0];
         centiavg= centisec[0]+centidiff/2;
 
