@@ -137,7 +137,7 @@ C Local:
       character*128 cbuf_source         !buffer contianing source command
       character*3 cdir                  !direction
       character*2 cpass                 !Current pass
-      character*4 cnewtap               !Newtape
+      character*6 cnewtap               !Newtape
       real counter_now                  !current counter. Stored as real for greater precision.
       real counter_source               !counter when on source given.
       real counter_tape_start           !counter when tape started.
@@ -159,7 +159,7 @@ C Local:
       character*128 cbuf_source_p       !buffer contianing source command
       character*3 cdir_p                !direction
       character*2 cpass_p               !Current pass
-      character*4 cnewtap_p             !Newtape
+      character*6 cnewtap_p             !Newtape
 
       character*2 cpass_old
 
@@ -174,8 +174,7 @@ C Local:
 
       real rifdur
       real speed_snap 			! speed from SNAP file
-      double precision conv 		! speed scaling for feet-->counts
-      real speed_recorder    	        !Speed of recording. Can be feet, bytes, whatever.
+      double precision speed_recorder   ! speed of recorder in this mode.
 
       LOGICAL   kexist
       character*128 cbuf,cbuf_in
@@ -184,10 +183,10 @@ C Local:
       integer itemp
       integer i
 
-      integer ntracks_rec_mk5
-      integer nchans_obs               !Number recorded
-      integer ifan_fact                 !ifan_factor
       logical kdisk                     !mark5 or makr5p
+      integer icode                     !Read from "SETUPxx" command
+      integer icode_old                 !old version
+      integer ifan_fact                 !fan factor for current mode
 
 ! All of this is to keep track of packs. But we decided we didn't want to!
 !      integer num_packs,max_packs,ipack
@@ -302,24 +301,9 @@ C   was produced using sked with Mk/VLBA counter calculations
 C   and no fan-out or fan-in. counters were therefore already
 C   scaled by bandwidth calculations in sked.
 
-      ifan_fact=max(1,ifan(istn,1))
-      call find_num_chans_rec(itras(1,1,1,1,1,istn,1),ifan,
-     >            nchans_obs,ntracks_rec_mk5)
-
-      if(kk4) then
-         conv = 55.389387393d0 ! counts/sec
-         speed_recorder = conv*samprate(1)/4.0d0 ! 55, 110, or 220 cps
-      else if(km5) then
-        conv=(1./8.)     		!= 1byte/8bits
-        speed_recorder=(ntracks_rec_mk5/ifan_fact)*samprate(1)*conv
-      else if(km5p) then
-        conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
-        speed_recorder=nchans_obs*samprate(1)*conv
-      else if(ks2) then
-         speed_recorder=1
-      else if(km5) then
-         speed_recorder=1
-      endif
+      icode=1
+      icode_old=1
+      call find_recorder_speed(icode,speed_recorder)
 
 !      if(km5) then
 !         kgotpacks=.false.
@@ -458,7 +442,7 @@ C       Now get the source info for the new scan
 ! Data start command.
         else if(cbuf(1:10) .eq. "DISC_START") then
           idur=-1 ! make sure we calculate duration from this point
-          idir=1  ! discs always go forward.
+          if(km5 .or. km5p) idir=1  ! discs always go forward.
           do i=1,5
             itime_tape_start(i)=itime_now(i)
           end do
@@ -575,6 +559,13 @@ C the counter to zero to start the new forward pass.
 
         else if (cbuf(1:6) .eq. 'CHECK ') then
           cnewtap = ' *  '
+        else if (cbuf(1:5) .eq. "SETUP") then
+           read(cbuf(6:7),*) icode
+           if(icode .ne. icode_old) then
+             call find_recorder_speed(icode,speed_recorder)
+             write(cnewtap,"('Mode',i2)") icode
+             icode_old=icode
+           endif
         else if (index(cbuf,'=').ne.0) then !might be setup proc
           if (index(cbuf,'DATA_VALID').eq.0.and.
      .        index(cbuf,'ST1=').eq.0.and.index(cbuf,'ST2=').eq.0) then ! setup

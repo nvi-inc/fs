@@ -1,4 +1,4 @@
-File: /usr2/fs-9.6.1/misc/fs9601up.txt  Version: 1.7 Date: 030508
+File: /usr2/fs-9.6.2/misc/fs9602up.txt  Version: 1.9 Date: 030514
 
 I. Introduction
 
@@ -429,6 +429,35 @@ A more detailed discussion of these changes follows.
     that describe the correct wrring for the configuration
     requested. These issues are discussed further in the section on
     Changes in DRUDG.
+
+    Please note the following points for operations:
+
+      A) The FS will automatically log the VSN for Mark 5A systems
+
+      B) For Mark 5A systems, the next bank to be used must be filled
+      before the bank switch will be made.
+
+      C) Currently, which inserting and removing disk packs, the
+      active bank must be quiesecent. This is requirement of the Mark
+      5A itself.
+
+      D) When using piggyback mode, equip.ctl should not mention MK5A
+      or MK5A_BS, just the tape drive to be used. The correct
+      piggyback option (5A or 5P) in DRUDG must be selected when
+      generating the .snp and .prc files.
+
+      E) When using non-piggyback mode for Mark 5, equip.ctl should
+      mention MK5A_BS as the recorder.  In DRUDG, the recorder type
+      must be changed to to Mark5A or Mark 5P as appropriate in option
+      11.
+
+      F) For piggyback mode with Mark 5A, it will be necessary to set
+      the time-out to at least 200 centiseconds in mk5ad.ctl. For
+      simplicity you may choose to make it at least 200 centiseconds
+      for all cases.
+
+      G) DRUDG does not handle Mark III modes properly for use with
+      Mark 5 recorders.
  
 27. vmk5 visual Mark 5 interface added. Beppe Maccaferri at Medicina
     has written a Tcl/Tk client for the Mark 5. This should be useful
@@ -508,7 +537,7 @@ numbered 6 and above were added after 9.5.15.
 10. Polarization included in LO command for geodetic schedules.
 11. IF3 patching handled correctly.
 12. Changes to header of summary files.
-13. Mark5-piggyback in Mk3 mode.
+13. Mark5 works correctly with Mk3 modes for non piggyback.
 14. Problems with schedules run in continuous mode.
 15. Postpass for thin tapes.
 16. In Mark5 mode, drudg now displays bytes in the summary listing.
@@ -604,7 +633,8 @@ A more detailed discussion of these changes follows.
     information about tape counters only if the specify recorder is
     used in the experiment. C) Recognizing Mark5 recorders.
 
-13. Mark5 piggyback in mk3 should now work correctly.
+13. Mark5 works correctly with Mk3 modes for non piggyback. Mark III
+    modes do not however work in piggyback.
 
 14. Snap files generatd with the previous version of the Field System
     had extra FASTF and FASTR commands at the end of passes for
@@ -862,7 +892,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.6.1 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.6.2 archive in your "/tmp" directory. For
 example you might do the following:
 
       cd /tmp
@@ -870,7 +900,7 @@ example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.6.1.tar.gz
+      get fs-9.6.2.tar.gz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -884,12 +914,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.6.1.tar.gz
+      tar -xzpf /tmp/fs-9.6.2.tar.gz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.6.1 fs
+      ln -sfn fs-9.6.2 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1228,19 +1258,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.6.1.tar.gz archive have been placed
+floppy, "split" files of the fs-9.6.2.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9601tg.aa
-fs9601tg.ab
+fs9602tg.aa
+fs9602tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9601tg.* >fs-9.6.1.tar.gz
+cat fs9602tg.* >fs-9.6.2.tar.gz
 
-This will create an exact image of the original fs-9.6.1.tar.gz
+This will create an exact image of the original fs-9.6.2.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

@@ -48,7 +48,7 @@ PROGRAM = drudg
 # Set objects
 #
 DROBS=\
-$(DR)chkgrpandzero.o $(DR)counter_init.o \
+$(DR)chkgrpandwrite.o $(DR)counter_init.o \
 $(DR)find_num_chans_rec.o \
 $(DR)kcheckgrpor.o $(DR)init_hardware_common.o\
 $(DR)name_trkf.o \

@@ -1,12 +1,11 @@
-      subroutine ChkGrpAndZeroWrite(itrk,istart,iend,ihead,
-     >  lname,itrk2, kfound,ibuf,nch)
+      subroutine ChkGrpAndWrite(itrk2,istart,iend,ihead,
+     >  lname,kfound,ibuf,nch)
       implicit none
 ! fucntions
       integer mcoma
       integer ichmv_ch
 
 ! Passed variables
-      integer itrk(36,2)        !track list.
       integer istart,iend       !starting, ending location for test.
       integer ihead             !which headstack, 1 or 2?
       character*2 lname         !name of group (if found)
@@ -21,7 +20,7 @@
 ! 0. See if we find this group. All tracks must be set.
       kfound=.true.
       do i=istart,iend,2
-        if(itrk(i,ihead) .eq. 0) then
+        if(itrk2(i,ihead) .eq. 0) then
            kfound=.false.
            return
          endif

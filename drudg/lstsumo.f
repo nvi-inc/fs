@@ -61,7 +61,7 @@ C Input
       real    counter                   !tape/disc counter
 
       character*3 cdir                  !direction
-      character*4 cnewtap
+      character*6 cnewtap
       character*9 cscan
       character*2 cpass
       character*128 cbuf_source         !contains source info.
@@ -408,9 +408,8 @@ C  Footage
         write(luprt,'(i7,$)') int(counter)      !counts
       endif
 C  New tape flag
-      write(luprt,'(1x,a4,$)') cnewtap
+      write(luprt,'(1x,a)') cnewtap
 
-      write(luprt,'()')
       iline=iline+1
       num_scans = num_scans + 1 ! count of observations
       if (cnewtap(1:3).eq.'XXX'.or.

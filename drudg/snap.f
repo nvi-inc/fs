@@ -1018,8 +1018,8 @@ C         Wait until late stop time before issuing ET
           endif! ET command
           call snap_monitor()
 C Do DISC_CHECK for Mk5 in piggyback mode.
-          if (km5.or.kmk5_piggyback) then
-             call snap_disc_check()
+          if (km5 .or. km5a_piggy .or. km5p_piggy) then
+            call snap_disc_check()
           endif
 C S2 DATA_VALID 
           if (ks2.and..not.krunning) then ! need another data_valid off
