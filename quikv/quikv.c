@@ -213,6 +213,40 @@ loop:
       case 77:
         cablediff(&command,itask,ip);
         break;
+      case 78:
+	switch (itask) {
+	case 0:
+	  mk5(&command,itask,ip);
+	  break;
+	case 1:
+	  sd(&command,itask,ip);
+	  break;
+	case 2:
+	  ed(&command,itask,ip);
+	  break;
+	case 3:
+	  pd(&command,itask,ip);
+	  break;
+	case 4:
+	  disc_serial(&command,itask,ip);
+	  break;
+	case 5:
+	  disc_check(&command,itask,ip);
+	  break;
+	case 6:
+	  mk5relink(&command,itask,ip);
+	  break;
+	case 7:
+	  mk5close(&command,itask,ip);
+	  break;
+	default:
+	  ierr=-4;
+	  goto error;
+	}
+	break;
+      case 79:
+        rollform(&command,itask,ip);
+        break;
       default:
 	ierr=-4;
 	goto error;
