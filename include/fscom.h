@@ -169,15 +169,23 @@ typedef struct fscom {
         int sterp;
 	int wrhd_fs;
 	int vfm_xpnt;
-  struct {
-    struct {
-      int rstate;
-      int rstate_valid;
-      long int position;
-      long int posvar;
-      int position_valid;
-    } s2rec[2];
-    int s2rec_inuse;
-  } actual;
-  
+	struct {
+	  struct {
+	    int rstate;
+	    int rstate_valid;
+	    long int position;
+	    long int posvar;
+	    int position_valid;
+	  } s2rec[2];
+	  int s2rec_inuse;
+	} actual;
+	float freqvc[15];
+	int ibwvc[15];
+	int ifp2vc[14];  
+	char cwrap[8];
+	int vacsw;
+	int motorv2;
+	int itpthick2;
+	int thin;
+	int vac4;
 } Fscom;
