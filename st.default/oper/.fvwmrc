@@ -554,8 +554,8 @@ EndPopup
 # Menu acts like normal twm menu if you just hold the button down,
 # but if you click instead, the menu stays up, motif style
 Function "window_ops_func"
-	PopUp 	"Click"		Window Ops2
-	PopUp	"Motion"	Window Ops2
+	PopUp 	"Click"		"Window Ops2"
+	PopUp	"Motion"	"Window Ops2"
 # Motif would add
 #       Delete  "DoubleClick"  
 EndFunction
