@@ -19,3 +19,4 @@ rclcn n  rclcn &
 tacd  n  tacd  &
 oprin n xterm -name oprin -j -e oprin &
 pcald n pcald &
+mk5cn n mk5cn &
