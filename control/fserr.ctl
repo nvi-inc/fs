@@ -174,7 +174,7 @@ error retrieving class for position response
 less than 1 Megabyte of data recorded, negative play pointer not allowed
 ""
 5D -403
-error retrieving class for position response
+error retrieving class for data_check response
 ""
 5D -501
 error decoding data_check? mode parameter
@@ -198,7 +198,7 @@ error decoding data_check? bytes parameter
 error decoding data_check? missing parameter
 ""
 5D -601
-data check failed
+DATA_CHECK failed
 ""
 5D -901
 query response not received
@@ -306,6 +306,45 @@ error decoding in2net? buffered parameter
 query response not found
 ""
 5I -902
+program error: strdup() failed
+""
+5K -301
+command does not accept parameters
+""
+5K -401
+error retrieving class for scan_check response
+""
+5K -501
+error decoding data_check? scan parameter
+""
+5K -502
+error decoding scan_check? label parameter
+""
+5K -503
+error decoding scan_check? mode parameter
+""
+5K -504
+error decoding scan_check? submode parameter
+""
+5K -505
+error decoding scan_check? start parameter
+""
+5K -506
+error decoding scan_check? length parameter
+""
+5K -507
+error decoding scan_check? rate parameter
+""
+5K -508
+error decoding scan_check? missing parameter
+""
+5K -601
+SCAN_CHECK failed
+""
+5K -901
+query response not received
+""
+5K -902
 program error: strdup() failed
 ""
 5L -301
