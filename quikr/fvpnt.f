@@ -160,14 +160,18 @@ C
         idumm1 = ichmv(ldev,1,ldevfp,1,2)
         goto 300
       endif
-
+      if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
+        idumm1 = ichmv(ldev,1,iprm,1,2)
+        goto 300
+      endif
+C
       call fs_get_rack(rack)
-      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if (MK3.eq.rack.or.MK4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
 C                      Default for MK3 and MK4 is IF1
         if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 300
 
-      else if (VLBA .eq. and(rack,VLBA)) then
+      else if (VLBA .eq. rack.or.VLBA4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
 C                      Default for VLBA is IA
         if ((cjchar(ldev,1).eq.'i').or.
@@ -201,7 +205,15 @@ C
       goto 990
 C
 400   continue
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(cjchar(ldevfp,1).eq.'u') then
+         if(cjchar(ldevfp,2).eq.'5') then
+            ichain=5
+         else
+            ichain=6
+         endif
+         goto 410
+      endif
+      if(MK3.eq.rack.or.MK4.eq.rack) then
         if(cjchar(ldevfp,1).ne.'i') goto 405
         if(ichcm_ch(ldevfp,1,'i1').ne.0) goto 402
           ichain=1
@@ -265,6 +277,14 @@ C  Now check the cal and freq values.
         cal = caltmp(4)
         bm=beamsz_fs(4)
         fx=flx4fx_fs
+      else if(ichain.eq.5) then
+        cal = caltmp(5)
+        bm=beamsz_fs(5)
+        fx=flx5fx_fs
+      else if(ichain.eq.6) then
+        cal = caltmp(6)
+        bm=beamsz_fs(6)
+        fx=flx6fx_fs
       endif
       if(cal.ne.0) goto 415
         ierr = -203
@@ -277,8 +297,9 @@ C  Now check the cal and freq values.
       bmfp_fs= bm
       fxfp_fs = fx
       ichfp_fs = ichain
-      if((rack.eq.and(rack,MK3)).or.(rack.eq.and(rack,MK4))) then
-        if(cjchar(ldevfp,1).eq.'i') goto 504
+
+      if(rack.eq.MK3.or.rack.eq.MK4) then
+        if(cjchar(ldevfp,1).ne.'v') goto 504
         indvc = ia2hx(ldevfp,2)
         call fs_get_freqvc(freqvc)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 504
