@@ -35,7 +35,7 @@ static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
 #define NKEY_MODE4 sizeof(key_mode4)/sizeof( char *)
 
 extern struct fscom *shm_addr;
-extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack;
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack;
 
 mout2(it,iyear)
 
@@ -188,13 +188,13 @@ int iyear;
     default:
       printw("    ");
     }
-  } else if(kM4rack) {
+  } else if(kM4rack||kV4rack) {
     ivalue=shm_addr->form4.mode;
     if(ivalue >= 0 && ivalue <= NKEY_MODE4)
       printw("%-4s",key_mode4[ivalue]);
     else
       printw("    ");
-  } else if(kVrack) {
+  } else if(kVrack &&!kV4rack) {
     ivalue=shm_addr->vform.mode;
 /* hex value for version 290 */
     if (shm_addr->form_version < 656)
@@ -244,7 +244,7 @@ int iyear;
     default:
       printw("    ");
     }
-  } else if (kM4rack) {
+  } else if (kM4rack||kV4rack) {
     switch (shm_addr->form4.rate) {
     case 0:
       printw("0.12");
@@ -277,7 +277,7 @@ int iyear;
       printw("    ");
       break;
     }
-  } else if (kVrack) {
+  } else if (kVrack && !kV4rack) {
     switch (shm_addr->vform.rate) {
     case 0:
       printw("0.25");
@@ -337,7 +337,9 @@ int iyear;
 	printw("    5");
       break;
     case 2:
-      if(!Kthin)
+      if (strncmp((char *)shm_addr->lgen,"427",3)==0)
+	printw("    5");
+      else if(!Kthin)
         printw("8.437");
       else
 	printw("   10");
@@ -367,7 +369,9 @@ int iyear;
 	printw("  160");
       break;
     case 7:
-      if(!Kthin)
+      if (strncmp((char *)shm_addr->lgen,"880",3)==0)
+	printw("  330");
+      else if(!Kthin)
 	printw("  270");
       else
 	printw("  320");
@@ -458,10 +462,10 @@ int iyear;
   }
 
   move(ROW1+3,COL1+66);
-  preflt(outf,(float)azim*RAD2DEG,-5,1);
+  preflt(outf,(float)(azim*RAD2DEG),-5,1);
   printw("%s",outfloat);
   move(ROW1+3,COL1+76);
-  preflt(outf,(float)elev*RAD2DEG,-5,1);
+  preflt(outf,(float)(elev*RAD2DEG),-5,1);
   printw("%s",outfloat);
 
 /* ROW 5 */
@@ -562,7 +566,7 @@ int iyear;
     preint(outf,(int)(shm_addr->systmp[30]+.5),-3,0);
     printw("%s",outfloat);
     
-    if(kVrack) {
+    if(kVrack || kV4rack) {
       move(ROW1+4,COL1+41);
       preint(outf,(int)(shm_addr->systmp[31]+.5),-3,0);
       printw("%s",outfloat);
@@ -635,7 +639,7 @@ int iyear;
         }
       }
     }
-  } else if(kVrack) {                            /* VLBA */
+  } else if(kVrack ||kV4rack) {                            /* VLBA */
     for (i=0; i<17; i++) {
       if (i<=13) {
         if (shm_addr->check.bbc[i]<=0) {
@@ -661,11 +665,15 @@ int iyear;
               strcat(checkln," ic");
             break;
           case 16:
-            if (shm_addr->check.vform<=0)
+            if (shm_addr->check.vform<=0 &&!kV4rack)
               strcat(checkln," fm");
             break;
         }
       }
+    }
+    if(kV4rack) {
+      if(shm_addr->ICHK[16]<=0)
+	strcat(checkln," fm");
     }
   }
 
