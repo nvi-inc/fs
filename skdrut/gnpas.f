@@ -29,6 +29,7 @@ C            consistency between track assignments and head positions.
 C 960209 nrv Add error return by station
 C 960219 nrv Check for LOs present also.
 C 960610 nrv Change loop to nchan instead of max_chan for counting tracks.
+C 960817 nrv Skip track checks for S2
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -41,73 +42,78 @@ C
 C
       DO  Ic=1,NCODES ! codes
         do is=1,nstatn
-          iserr(is)=0
-          np=0
-          np2=0
-          DO  J=1,max_pass ! count sub-passes
-            itrk(j)=0
-            itr2(j)=0
-            IT = 0
-            it2=0
-            do k=1,nchan(is,ic) ! channels
-              do l=1,2 ! upper/lower
-                do m=1,2 ! sign/mag
-                  if (itras(l,m,k,j,is,ic).ne.-99) it=it+1
-                  if (itra2(l,m,k,j,is,ic).ne.-99) it2=it2+1 ! headstack 2
-                enddo
-              END DO ! upper/lower
-            enddo ! channels
-            if (it.gt.0) then
-              np=np+1
-              if (np.le.max_pass) itrk(np)=it
+          if (ichcm_ch(lstrec(1,is),1,'S2').eq.0) then ! S2
+            npassf(is,ic)=1
+          else ! not S2
+            iserr(is)=0
+            np=0
+            np2=0
+            DO  J=1,max_pass ! count sub-passes
+              itrk(j)=0
+              itr2(j)=0
+              IT = 0
+              it2=0
+              do k=1,nchan(is,ic) ! channels
+                do l=1,2 ! upper/lower
+                  do m=1,2 ! sign/mag
+                    if (itras(l,m,k,j,is,ic).ne.-99) it=it+1
+                    if (itra2(l,m,k,j,is,ic).ne.-99) it2=it2+1 ! headstack 2
+                  enddo
+                END DO ! upper/lower
+              enddo ! channels
+              if (it.gt.0) then
+                np=np+1
+                if (np.le.max_pass) itrk(np)=it
+              endif
+              if (it2.gt.0) then
+                np2=np2+1
+                if (np2.le.max_pass) itr2(np2)=it2
+              endif
+            END DO  ! count sub-passes
+            ipmax=0
+            ipma2=0
+            do j=1,max_pass ! check sub-passes
+              if (ihddir(j,is,ic).gt.ipmax) ipmax=ihddir(j,is,ic)
+              if (ihddi2(j,is,ic).gt.ipmax) ipma2=ihddi2(j,is,ic)
+            enddo ! check sub-passes
+            npassf(is,ic)=np ! must be the same for both headstacks 
+            ntrakf(is,ic)=itrk(1)+itr2(1)
+            if (np2.gt.0.and.np.ne.np2) then ! inconsistent between headstacks
+              write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
+9907          format('GNPAS07 - Inconsistent number of sub-passes '
+     .        'between headstacks 1 and 2 for ',a2,' at ', 4a2)
             endif
-            if (it2.gt.0) then
-              np2=np2+1
-              if (np2.le.max_pass) itr2(np2)=it2
+            if (itr2(1).gt.0.and.itrk(1).ne.itr2(1)) then ! inconsistent 
+              write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
+9908          format('GNPAS08 - Inconsistent number of tracks per pass'
+     .        ,'between headstacks 1 and 2 for ',a2,' at ', 4a2)
             endif
-          END DO  ! count sub-passes
-          ipmax=0
-          ipma2=0
-          do j=1,max_pass ! check sub-passes
-            if (ihddir(j,is,ic).gt.ipmax) ipmax=ihddir(j,is,ic)
-            if (ihddi2(j,is,ic).gt.ipmax) ipma2=ihddi2(j,is,ic)
-          enddo ! check sub-passes
-          npassf(is,ic)=np ! must be the same for both headstacks 
-          ntrakf(is,ic)=itrk(1)+itr2(1)
-          if (np2.gt.0.and.np.ne.np2) then ! inconsistent between headstacks
-            write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
-9907        format('GNPAS07 - Inconsistent number of sub-passes between'
-     .      ' headstacks 1 and 2 for ',a2,' at ', 4a2)
-          endif
-          if (itr2(1).gt.0.and.itrk(1).ne.itr2(1)) then ! inconsistent 
-            write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
-9908        format('GNPAS08 - Inconsistent number of tracks per pass ',
-     .      'between headstacks 1 and 2 for ',a2,' at ', 4a2)
-          endif
-          if (ipmax.ne.npassf(is,ic)) then ! inconsistent
-            ierr=1
-            iserr(is)=1
-            write(luscn,9904) lcode(ic),(lstnna(i,is),i=1,4)
-9904        format('GNPAS04 - Inconsistent number of sub-passes ',
-     .      'in tracks/headpos for ',a2,' at ',4a2)
-          endif
-          j=1
-          do while (j.lt.np.and.itrk(j).eq.itrk(j+1))
-            j=j+1
-          enddo
-          if (itrk(1).eq.0.or.np.eq.0.or.j.lt.np.or.np.gt.max_pass) then
-            ierr=1
-            if (itrk(1).eq.0.or.np.eq.0) then
-              write(luscn,9903) lcode(ic),(lstnna(j,is),j=1,4)
-9903          format('GNPAS03 - No passes found in track assignments '
-     .        ' for ',a2,', at ',4a2)
+            if (ipmax.ne.npassf(is,ic)) then ! inconsistent
+              ierr=1
+              iserr(is)=1
+              write(luscn,9904) lcode(ic),(lstnna(i,is),i=1,4)
+9904          format('GNPAS04 - Inconsistent number of sub-passes ',
+     .        'in tracks/headpos for ',a2,' at ',4a2)
             endif
-            if (j.lt.np.or.np.gt.max_pass) then
-              write(luscn,9901) lcode(ic),(lstnna(j,is),j=1,4)
-9901          format('GNPAS01 - Inconsistent pass/track assignments '
-     .        ' for ',a2,', at ',4a2)
+            j=1
+            do while (j.lt.np.and.itrk(j).eq.itrk(j+1))
+              j=j+1
+            enddo
+            if (itrk(1).eq.0.or.np.eq.0.or.j.lt.np.or.np.gt.max_pass) 
+     .        then
+              ierr=1
+              if (itrk(1).eq.0.or.np.eq.0) then
+                write(luscn,9903) lcode(ic),(lstnna(j,is),j=1,4)
+9903            format('GNPAS03 - No passes found in track assignments '
+     .          ' for ',a2,', at ',4a2)
+              endif
+              if (j.lt.np.or.np.gt.max_pass) then
+                write(luscn,9901) lcode(ic),(lstnna(j,is),j=1,4)
+9901            format('GNPAS01 - Inconsistent pass/track assignments '
+     .          ' for ',a2,', at ',4a2)
+              endif
             endif
-          endif
+          endif ! S2 or not
         enddo ! stations
       END DO  ! codes
 C
@@ -118,6 +124,7 @@ C     Check for different numbers of passes used in different frequency
 C     codes--this should not be attempted in a single experiment. 
 
       do is=1,nstatn ! stations
+        if (ichcm_ch(lstrec(1,is),1,'S2').ne.0) then ! not for S2
         do ic=1,ncodes ! codes
           ip=0
           ip2=0
@@ -152,6 +159,7 @@ C     codes--this should not be attempted in a single experiment.
      .    ' at ',4a2)
         endif
         maxpas(is)=maxp(1)
+        endif ! not for S2
       enddo ! stations
 C
 C 3. Check for LOs present and issue warning if not.
