@@ -39,6 +39,15 @@ while(<>) {
 	elsif (/Mark IV, VLBA rack/) {
 	    $suffix=".w_";
 	}
+	elsif (/Mark IV, VLBA4 rack/) {
+	    $suffix=".y_";
+	}
+	elsif (/Mark III, VLBA4 rack/) {
+	    $suffix=".z_";
+	}
+	elsif (/VLBA, non-VLBA4 rack/) {
+	    $suffix=".a_";
+	}
 	elsif (/VLBA rack/i) {
 	    $suffix=".v_";
 	}
