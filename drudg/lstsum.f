@@ -16,10 +16,13 @@ c nrv 940131 Read cable wrap from SOURCE line and write to output
 C nrv 940201 Write wrap only for azel mounts
 C nrv 940609 Fix output for SOURCE=AZEL for satellites
 C nrv 940610 Fix it again to avoid the trailing "D" on az,el
+C 960126 nrv Remove "9/8" multiplication on speed because SNAP files
+C            now use the actual speeds.
+C 960201 nrv Change input buffer to upper case before processing.
 
-        INCLUDE 'skparm.ftni'
-	INCLUDE 'drcom.ftni'
-	include 'statn.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C Input:
       logical kskd
@@ -35,7 +38,7 @@ C Output:
       integer julda ! function
 	LOGICAL*4   KEX
 	logical     kazel,kwrap,ksat
-	character*128 cbuf
+	character*128 cbuf,cbuf_in
 	character*8 csor,cexper,cstn
 	character*3 cdir,cnewtap,cday
 	character*9 cti,c1,c2,c3
@@ -90,7 +93,7 @@ C 4. Loop over SNAP file records
 	if (iwidth.eq.80) then
 	  maxline = 48
 	else
-	  maxline = 49
+	  maxline = 50
 	endif
 	iline = maxline
 	cday = '   '
@@ -98,7 +101,8 @@ C 4. Loop over SNAP file records
         inewp = 0
 	cnewtap = 'XXX'
 	do while (.true.) ! read loop
-	  read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
+	  read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf_in
+          call c2upper(cbuf_in,cbuf)
 	  nline = nline + 1
 
 C 5.  Read first lines of SNAP file to get year, experiment name, station.
@@ -112,14 +116,16 @@ C     loop reads all lines.
             read(cbuf,9001) cexper,iyear,cstn,cid !header line
 9001        format(2x,a8,2x,i4,1x,a8,2x,a1)
 	    if (.not.kskd) then !read station position from SNAP file header
-		read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf !A line
+		read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf_in !A line
+                call c2upper(cbuf_in,cbuf)
                 read(cbuf(2:),*) c1,c2,c3
                 if (c3.eq.'AZEL'.or.c3.eq.'SEST'.or.c3.eq.'ALGO') then
                   kwrap=.true.
                 else
                   kwrap=.false.
                 endif
-		read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf !P line
+		read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf_in !P line
+                call c2upper(cbuf_in,cbuf)
 		if (trimlen(cbuf).lt.40) then ! not there
 		  write(luscn,9002)
 9002          format(' SNAP file does not contain station position ',
@@ -143,7 +149,8 @@ C     loop reads all lines.
 	    endif !kskd/not
             rewind(lu_infile)
             nline = 1
-            read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
+            read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf_in
+            call c2upper(cbuf_in,cbuf)
             call initf(lu_infile,ierr)
 	  endif !read first lines
 
@@ -209,7 +216,8 @@ C     loop reads all lines.
 	    ut = ih1*3600.d0+im1*60.d0+is1  ! UT in seconds
 	    mjd = julda(1,id1,iyear-1900)
 	    read(cbuf(8:10),*) ival
-            speed_snap = ival*9.0/8.0
+C           speed_snap = ival*9.0/8.0
+            speed_snap = ival ! actual speeds are now used
 	    ifeet = 10*ifix(float(ifeet/10))
 	    idir = 1
 	    cdir = cbuf(4:6)
