@@ -18,7 +18,7 @@ C     TIMTOL - tolerance on comparison between formatter and HP
       logical kalarm
 C      - true for alarm ON, i.e. NAK response from MAT
       integer*2 ibuf1(40),ibuf2(5)
-      integer itfm(6)
+      integer itfm(6),it(6),iyrctl_fs
       integer*4 secs_before,secs_after,secs_fm
       integer*4 timtol,diff_before,diff_after,diff_both
       integer*4 centisec(2)
@@ -53,23 +53,36 @@ C
       if (itstfm.ne.0) inerr(6)=inerr(6)+1
       if (ipwrfm.ne.0) inerr(7)=inerr(7)+1
       if (irunfm.ne.0) inerr(8)=inerr(8)+1
-
-      call fs_get_iyrctl_fs(iyrctl_fs)
-      itfm(6)=ias2b(ibuf1,4,1)+(iyrctl_fs/10)*10
+c
       itfm(5)=ias2b(ibuf1,5,3)
       itfm(4)=ias2b(ibuf2,3,2)
       itfm(3)=ias2b(ibuf2,5,2)
       itfm(2)=ias2b(ibuf2,7,2)
       itfm(1)=ias2b(ibuf2,9,2)
+c
+      idigyr=ias2b(ibuf1,4,1)
+      call fc_rte_time(it,it(6))
+      if(mod(it(6),10).eq.0.and.idigyr.eq.9) then
+         iyrctl_fs=it(6)-10-mod(it(6),10)
+      else if(mod(it(6),10).eq.9.and.idigyr.eq.0) then
+         iyrctl_fs=it(6)+10-mod(it(6),10)
+      else
+         iyrctl_fs=it(6)-mod(it(6),10)
+      endif
+      itfm(6)=idigyr+(iyrctl_fs/10)*10
+
       call fc_rte_fixt(secs_before,centisec(1))
       call fc_rte2secs(itfm,secs_fm)
+      if(secs_fm.lt.0) call logit7ci(0,0,0,1,-601,'ch',0)
       call fc_rte_fixt(secs_after,centisec(2))
 c
       diff_before=(secs_fm-secs_before)*100+itfm(1)-centisec(1)
       diff_after=(secs_after-secs_fm)*100+centisec(2)-itfm(1)
       diff_both=diff_after+diff_before
 c
-      if(diff_both.gt.2*timtol) then
+      if(secs_fm.lt.0) then
+         inerr(10)=inerr(10)+1
+      else if(diff_both.gt.2*timtol) then
         inerr(9)=inerr(9)+icherr(15*nverr+niferr+9)+1
       else if(diff_before.lt.-timtol.or.diff_after.lt.-timtol) then
         inerr(10)=inerr(10)+1

@@ -47,7 +47,7 @@ C
       equivalence (line(1),cline)
 C        - Buffer for plot.
 C
-      integer fmpreadstr, fmpsetpos, fmppurge
+      integer fmpreadstr, fmpsetpos
       integer fmpwritexx, fmpreadxx, fmpappend
       integer fmpsetline, writestr, iflch
       integer irec
@@ -75,7 +75,7 @@ C
       dimension yy(5)
       integer*2 irec1(14)
 C          Parm value to plot.
-      double precision xx,xmin,xmax,xa,xb,xc
+      double precision xx,xmin,xmax,xa
       equivalence (xx,irec1(1)),(yy(1),irec1(5))
 C        - Log time in terms of days (& fractions of days).
 C          X-Axis minimum, maximum. Log day. Log minutes.
@@ -165,6 +165,10 @@ C
         it(2)=itl3/100
         it(1)=mod(itl3,100)
         call fc_rte2secs(it,secs)
+        if(secs.lt.0) then
+           call po_put_c(' time conversion error 1 - plot deleted.')
+           goto 1200
+        endif
         xx=secs*100.0d0+it(1)
         if (xx.lt.xmin) xmin=xx
         if (xx.gt.xmax) xmax=xx
@@ -273,6 +277,10 @@ C
       it(2)=its3/100
       it(1)=mod(its3,100)
       call fc_rte2secs(it,secs)
+        if(secs.lt.0) then
+           call po_put_c(' time conversion error 2 - plot deleted.')
+           goto 1200
+        endif
       xa=secs*100.0d0+it(1)
       if (its1.ne.1) xmin=xa
 c
@@ -283,6 +291,10 @@ c
       it(2)=ite3/100
       it(1)=mod(ite3,100)
       call fc_rte2secs(it,secs)
+        if(secs.lt.0) then
+           call po_put_c(' time conversion error 3 - plot deleted.')
+           goto 1200
+        endif
       xa=secs*100.0d0+it(1)
       if (ite1.ne.(2038-1970)*1024+1) xmax=xa
       kpass2=.false.
