@@ -94,7 +94,8 @@ int rlen;
       ch1=*(decloc+1);
       ch2=*(decloc+2);
  /* m4 defaulting to m3 works because 4 preceeds m in ls order */
-      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4'))
+      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4')
+	   || (ch1 == 'w' && (equip1 == '4' || equip1 == 'v')))
 	  && (ch2==equip2 || ch2=='_' || (ch2 =='m' && equip2 == '4')
 	      || (ch2=='x' && equip2 != 's'))   ) {
         strcpy(runstr,outbuf);
