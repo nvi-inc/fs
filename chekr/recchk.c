@@ -65,6 +65,7 @@ int *ierr,*indxtp,*stat;
 
   if (ip[2]<0) {
     cls_clr(ip[0]);
+    logita(NULL,ip[2],ip+3,ip+4);
     *ierr=-201;
     return;
   }
