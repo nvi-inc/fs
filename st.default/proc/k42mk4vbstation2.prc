@@ -2,11 +2,6 @@ define  sched_initi   00000000000
 enddef
 define  drive2        00000000000x
 enddef
-define  setup2        00000000000x
-dat
-et2
-enable2=
-enddef
 define  caloff        00000000000
 "rx=*,*,*,*,*,*,off
 enddef
@@ -60,20 +55,15 @@ wx
 cable
 gps-fmout=c2
 enddef
-define  overnite      00000000000x
+define  overnite1     00000000000x
 log=overnite
-setup
+setupa1=1
 min15@!,1m
 enddef
 define  postob        00000000000
 enddef
 define  preob         00000000000
 onsource
-enddef
-define  setup1        00000000000x
-dat
-et1
-enable1=
 enddef
 define  loader1       00000000000
 rec1=load
@@ -152,7 +142,8 @@ srw1
 !+$
 et1
 enddef
-define  sx2ca1        00000000000
+define  setupa1       00000000000
+pcalon
 select=1
 drive1
 tapefrmsxc1
@@ -165,7 +156,8 @@ tape1=low
 enable1=g0,g2
 repro1=byp,6,22
 enddef
-define  sx2cb1        00000000000
+define  setupb1       00000000000
+pcalon
 select=1
 drive1
 tapefrmsxc1
@@ -336,7 +328,8 @@ srw2
 !+$
 et2
 enddef
-define  sx2ca2        00000000000
+define  setupa2       00000000000
+pcalon
 select=2
 drive2
 tapefrmsxc2
@@ -349,7 +342,8 @@ tape2=low
 enable2=g0,g2
 repro2=byp,6,22
 enddef
-define  sx2cb2        00000000000x
+define  setupb2       00000000000x
+pcalon
 select=2
 drive2
 tapefrmsxc2

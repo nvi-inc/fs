@@ -56,9 +56,9 @@ wx
 cable
 ifd
 if3
-vc02
-vc06
-vc11
+vc01
+vc05
+vc09
 tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tpi=v9,v10,v11,v12,v13,v14,if2
 caltemps
@@ -81,11 +81,11 @@ enddef
 define  min15         00000000000
 "rxall
 wx
-sy=brk pcalr &
+"sy=brk pcalr &
 !+15s
 cable
 sxcts
-pcal
+"pcal
 enddef
 define  overnite      00000000000
 log=overnite
@@ -93,8 +93,8 @@ setupa=1
 check=*,-tp
 min15@!,15m
 "rxmon@!+2m30s,5m
-pcal=0,60,by,25,0,5,11
-pcal
+"pcal=0,60,by,25,0,5,11
+"pcal
 enddef
 define  postob        00000000000
 enddef
@@ -187,6 +187,7 @@ srw
 et
 enddef
 define  setupa        00000000000
+pcalon
 vcsx2
 form=c1,4.000
 ifdsx
@@ -199,6 +200,7 @@ st=for,0,on
 checkcrc
 enddef
 define  setupb        00000000000
+pcalon
 vcsx2
 form=c2,4.000
 ifdsx

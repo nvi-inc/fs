@@ -46,7 +46,7 @@ define  termp         00000000000
 sy=go aquir &
 enddef
 define  initp         00000000000
-setup
+setupa=1
 caloff
 caltemps
 beam1=

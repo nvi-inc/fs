@@ -32,7 +32,7 @@ cable
 enddef
 define  overnite      00000000000
 log=overnite
-setup
+setupa
 check=*,-tp
 min15@!,15m
 enddef
@@ -53,8 +53,6 @@ rw
 et
 !+10s
 tape=reset
-enddef
-define  setup         00000000000
 enddef
 define  unlod         00000000000
 check=*,-tp
