@@ -15,6 +15,7 @@ C  WHO   WHEN   WHAT
 C  gag   900806 CREATED
 C  gag   910513 Added parameter to nchanv to handle multiple vlba stations.
 C 951213 nrv Changes for new Mark IV/VLBA setup
+C 960516 nrv Use IBBCX instead of INVCX
 C
 C Called by: VLBAH
 C
@@ -24,7 +25,7 @@ C  INPUT:
         integer icod ! freq code
 C
 C  OUTPUT:
-	real*4 squal(14)
+	real*4 squal(max_chan)
 C
 C
 C   SUBROUTINES
@@ -46,11 +47,11 @@ C  video converter ix.
 
 	iy = 1
         kgot=.false.
-	do while (iy.le.nvcs(istn,icod).and..not.kgot)
+	do while (iy.le.nchan(istn,icod).and..not.kgot)
 	  cs = cset(iy,istn,icod)
 	  if ((iy.ne.ix).and.((cs(1:1).eq.cql).or.(cs.eq.'1,2')).and.
-     .      (invcx(ix,istn,icod).eq.invcx(iy,istn,icod))) then
-		  squal(ix)=freqlo(iy,istn,icod)
+     .      (ibbcx(ix,istn,icod).eq.ibbcx(iy,istn,icod))) then
+		  squal(ix)=abs(freqrf(iy,istn,icod)-freqlo(iy,istn,icod))
             kgot=.true.
 	  end if
 	  iy = iy + 1

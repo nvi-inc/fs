@@ -1,16 +1,17 @@
-      real*4 FUNCTION SPEED(ICODE,is)
+      real FUNCTION SPEED(ICODE,is)
 
 C   SPEED returns the actual tape speed in feet per second
 C   Restrictions: 
-C    - Single digit for fan/in factor, from the mode name. 
 C    - Channel bandwidth for BBC 1 is used.
-C    - Speed is scaled via channel bandwidth and
-c      bit density from 135.00 ips and 333333 bpi.
 C    - VLBA/MkIII mode factor is 9.072/9.0
 C
 C History
 C 951213 nrv Modified to use bit density and other factors.
 C 960126 nrv Modified to use mode to determine if VLBA type
+C 960304 nrv Return -1 if icode=0.
+C 960319 nrv Use sample rate not bandwidth. Change calculation to
+C            use correct factor for DR or NDR.
+C 960531 nrv Fanout factor already in common.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -24,30 +25,33 @@ C  OUTPUT:
 C     SPEED - tape speed, fps
 C
 C  LOCAL:
-      integer n,ix,iy
-      logical kvlba
-      real fac
-      integer iscn_ch,ias2b
+      double precision sp,ohfac,fanfac
+      integer ichcm_ch
 C
 C
-      fac=1.0
-      kvlba=.false.
-      ix = iscn_ch(lmode(1,is,icode),1,8,'1:') 
-      iy = iscn_ch(lmode(1,is,icode),1,8,':1') 
-      if (ix.ne.0) then ! possible fan-out
-        kvlba=.true.
-        n=ias2b(lmode(1,is,icode),ix+2,1)
-        if (n.gt.0) fac=1/real(n)
-      else if (iy.ne.0) then ! possible fan-in
-        kvlba=.true.
-        n=ias2b(lmode(1,is,icode),iy+2,1)
-        if (n.gt.0) fac=n
+      if (is.le.0.or.is.gt.nstatn.or.
+     .    icode.le.0.or.icode.gt.ncodes) then ! illegal
+        speed=-1.0
+        return
       endif
-      SPEED = 135.0 * (vcband(1,is,icode)/2.0)
-     .              * 33333.0/bitdens(is,icode)
-     .              * fac
-      speed=speed/12.0 ! convert to fps
-      if (kvlba) speed=speed*9.072/9.0
+
+C 1. First account for the fan factor.
+
+      fanfac=1/real(ifan(is,icode))
+
+C 2. Get the correct overhead factor for DR or NDR.
+
+      ohfac = 1.125    ! factor is 8/9 for Mk3/4
+      if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then
+        ohfac = 1.134  ! factor is 9.072/8 for VLBA
+      endif
+
+C 3. Calculate the tape speed. Sample rate is in Mb/s.
+
+      SP = ohfac * fanfac * samprate(icode)*1.d6
+     .              / bitdens(is,icode) ! ips
+      sp=sp/12.0 ! convert to fps
 C
+      speed=sp
       RETURN
       END

@@ -1,4 +1,5 @@
-      SUBROUTINE unpvt(IBUF,ILEN,IERR,LIDTER,LNATER,bitden,
+      SUBROUTINE unpvt(IBUF,ILEN,IERR,LIDTER,LNATER,ibitden,
+     .nheadstack,
      .maxtap,nrec,lb,sefd,pcount,par,npar)
 C
 C     UNPVT unpacks a record containing Mark III terminal information.
@@ -18,6 +19,7 @@ C  911022 nrv add nrec parameter
 C  930225 nrv implicit none
 C 951116 nrv Change max_pas to bit density
 C 960227 nrv Change IDTER to LIDTER, up to 4 characters
+C 960409 nrv Add headstack, ibitden
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -30,7 +32,8 @@ C  OUTPUT:
       integer maxtap,ierr,nrec
       integer*2 lidter(2)
 C     LIDTER - terminal ID
-      real bitden
+      integer nheadstack ! number of headstacks
+      integer ibitden
 C     IERR    - error return, 0=ok, -100-n=error in nth field
       integer*2 LNATER(4) ! name of the terminal
 C     maxtap - maximum tape length for this station
@@ -40,7 +43,7 @@ C     maxtap - maximum tape length for this station
 C
 C  Local:
       real*8 R,DAS2B
-      integer ich,nch,ic1,ic2,idumy,i,nc,ib1,ib2,ib
+      integer ich,nch,ic1,ic2,idumy,i,ib1,ib2,ib
       integer ichmv_ch,ichcm,ichmv,ias2b,ichcm_ch ! function
 C
 C     Start the unpacking with the first character of the buffer.
@@ -86,21 +89,32 @@ C       IERR = -103
 C       RETURN
 C     END IF  !
 
-C  3. Bit density that is normal for this station.
+C  3. Number of headstacks at this station.
+C     Bit density capability at this station.
+C     Format:  <heads>x<bitden> where heads is required,
+C     and ibitden is optional.
 C
+      nheadstack=0
+      ibitden=0
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-      nc=ic2-ic1+1
-      if (ic1.eq.0) then
-        bitden=0
-      else
-        R = DAS2B(IBUF,IC1,NC,IERR)
-        IF (IERR.EQ.0) THEN
-          bitden = R
+      if (ic1.eq.0) return
+      i = IAS2B(IBUF,IC1,1) ! number of headstacks
+      if (i.lt.0) then
+        ierr=-104
+        return
+      endif
+      nheadstack = i
+      if (ichcm_ch(ibuf,ic1+1,'x').eq.0) then ! bit density follows
+        ic1 = ic1+2
+        NCH = IC2-IC1+1
+        i = IAS2B(IBUF,IC1,NCH)
+        if (i.gt.0) then
+          ibitden = i
         else
           ierr=-104
           return
         endif
-      endif
+      endif ! bit density follows
 
 C  4. Maximum tape length. If not present, set to default.
 C
@@ -117,7 +131,7 @@ C
         NCH = IC2-IC1+1
         MAXTAP = IAS2B(IBUF,IC1,NCH)
       ENDIF
-      IF  (MAXTAP.EQ.-32768) THEN  !
+      IF  (MAXTAP.le.0) THEN  !
         IERR = -104
         RETURN
       END IF  !
@@ -144,8 +158,8 @@ C       SEFD.  If not present, set to zero.
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         sefd(i)=0.0
         if (ic1.ne.0) then
-          NC = IC2-IC1+1
-          R = DAS2B(IBUF,IC1,NC,IERR)
+          NCH = IC2-IC1+1
+          R = DAS2B(IBUF,IC1,NCH,IERR)
           IF (IERR.EQ.0) THEN
             sefd(i) = R
           else

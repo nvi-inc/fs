@@ -1,23 +1,24 @@
-      SUBROUTINE SREAD(IERR,NOBS)   
+      SUBROUTINE SREAD(IERR,ivexnum)   
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 
-C  Input:
-      integer ierr,nobs
+C  Output:
+      integer ierr,ivexnum
 
 C  Local:
       integer m,ilen,i,j,k,ltype,ich,ic1,ic2,idummy,ic,
-     .icx,nch
+     .icx,nch,iret
       integer htype ! section 2-letter code
-      logical*4 kcod ! set to ksta when $CODES is found
-      logical*4 ksta ! set to true when $STATIONS is found
-      logical*4 kvlb ! set to true when $VLBA is found
-      logical*4 khed ! set to ksta when $HEAD is found
-      integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd
+      logical kcod ! set to ksta when $CODES is found
+      logical ksta ! set to true when $STATIONS is found
+      logical kvlb ! set to true when $VLBA is found
+      logical khed ! set to ksta when $HEAD is found
+      integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd,idum
       integer iscnc,iscn_CH,ias2b,jchar,ichcm,ichmv ! functions
       integer ichcm_ch,trimlen
       real rdum,reio
@@ -34,6 +35,8 @@ C  930407 nrv implicit none
 C  930708 nrv Add reading $HEAD section
 C 951213 nrv Mods for new Mark IV/VLBA setups.
 C 951214 nrv Add BARREL
+C 960409 nrv Initialize ITRA2
+C 960522 nrv Add call to READV, store observations in memory.
 C
 C
       close(unit=LU_INFILE)
@@ -48,12 +51,23 @@ C
         RETURN
       ENDIF
 C
-      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+C  Initialize variables
+
       NOBS = 0
       NCELES = 0
       NSATEL = 0
       NSOURC = 0
       NCODES = 0
+          ISETTM=0
+          IPARTM=0
+          ITAPTM=0
+            ISORTM=0
+            IHDTM=0
+            ITEARL=0
+        ncodes=0
+        do i=1,max_frq
+          lcode(i)=0
+        enddo
       call ichmv_ch(lbarrel,1,'NONE')
       do i=1,max_frq
         lcode(i)=0
@@ -64,6 +78,10 @@ C
                 ITRAS(2,1,K,J,m,I)=-99
                 ITRAS(1,2,K,J,m,I)=-99
                 ITRAS(2,2,K,J,m,I)=-99
+                ITRA2(1,1,K,J,m,I)=-99
+                ITRA2(2,1,K,J,m,I)=-99
+                ITRA2(1,2,K,J,m,I)=-99
+                ITRA2(2,2,K,J,m,I)=-99
             END DO
           END DO
         END DO
@@ -75,6 +93,25 @@ C
         kvlb = .false.
         khed = .false.
 C
+      kvex=.false.
+      read(lu_infile,'(a)') cbuf
+      if (cbuf(1:3).eq.'VEX') then ! read VEX file
+        kvex=.true.
+        close(lu_infile)
+        call readv(lskdfi,luscn,iret,ivexnum,ierr) ! read stations, codes, sources
+        if (iret.ne.0.or.ierr.ne.0) then
+          write(luscn,9009) iret,ierr
+9009      format(' from READV iret=',i5,' ierr=',i5)
+        endif
+        call vglinp(ivexnum,luscn,ierr)
+        if (ierr.ne.0) then
+          write(luscn,9010) ierr
+9010      format(' from VEXINP ierr=',i5)
+        endif
+      else ! skd file
+        rewind(lu_infile)
+        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+
       DO WHILE (ILEN.GT.0) !read schedule file
         IF (IERR.NE.0)  THEN
           WRITE(LUSCN,9210) IERR
@@ -124,18 +161,10 @@ C         Get the next line
           END DO
 C
         ELSE IF(ichcm(htype,1,hpa,1,2).eq.0) THEN !parameter section
-          ISETTM=0
-          IPARTM=0
-          ITAPTM=0
-            ISORTM=0
-            IHDTM=0
-            ITEARL=0
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
             IF (ichcm_ch(IBUF,1,'ELEVATION').EQ.0) THEN !el line
-              IF (IRECEL.EQ.-1.0) call locf(LU_INFILE,IRECEL) ! were STELV
-C             IF (IRECEL.EQ.-1.0) ID = FmpPosition(LU_INFILE,IERR,
-C    .        STELV(1),STELV(2))
+              IF (IRECEL.EQ.-1.0) call locf(LU_INFILE,IRECEL) 
             ELSE
               IC = ISCN_CH(IBUF,1,ILEN*2,'PARITY')
               IF (IC.NE.0) THEN !parity time
@@ -226,6 +255,9 @@ C         Read the first line of the schedule
               RETURN
             END IF
             NOBS = NOBS + 1
+C           Store in memory
+            call ifill(lskobs(1,nobs),1,ibuf_len*2,z20)
+            idum = ichmv(lskobs(1,nobs),1,ibuf,1,ilen)
 C
 C           Read the next schedule entry
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -288,5 +320,6 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         enddo 
       endif
 C
+      endif ! VEX/skd
       RETURN
       END

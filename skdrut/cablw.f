@@ -62,11 +62,11 @@ C
 100   continue
       IF (AZNOW.LT.STNLIM(1,1,ISTN)) AZNOW=AZNOW+2.0*PI
       IF (AZNEW.LT.STNLIM(1,1,ISTN)) AZNEW=AZNEW+2.0*PI
-      IF (ichcm_ch(LWRCUR,1,'HC').eq.0) AZNOW=AZNOW+2.0*PI
+      IF (ichcm_ch(LWRCUR,1,'C ').eq.0) AZNOW=AZNOW+2.0*PI
 C
       if (ichcm_ch(lwrnew,1,'V ').eq.0) goto 500 !special section for VLBA slewing 
-      IF (ichcm_ch(LWRNEW,1,'HC').eq.0 .or.
-     &    ichcm_ch(LWRNEW,1,'HW').eq.0 ) GOTO 300
+      IF (ichcm_ch(LWRNEW,1,'C ').eq.0 .or.
+     &    ichcm_ch(LWRNEW,1,'W ').eq.0 ) GOTO 300
 C
 C     2.  This is the minimum slewing time section.  Compute both
 C     possible moves, and choose the smaller.  If we end up on the
@@ -94,7 +94,7 @@ C
 C     3.  If the user specified "W" then we want to end up on the
 C     counter-clockwise wrap, i.e. the inner overlapped portion.
 C
-300   IF (ichcm_ch(LWRNEW,1,'HW').ne.0) GOTO 400
+300   IF (ichcm_ch(LWRNEW,1,'W ').ne.0) GOTO 400
       CABLW = ABS(AZNOW-AZNEW)
       call char2hol ('  ',LWRNEW,1,2)
       IF (AZNEW.LT.(STNLIM(2,1,ISTN)-2.0*PI))

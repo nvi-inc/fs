@@ -1,6 +1,6 @@
       SUBROUTINE rdctl(source_cat,antenna_cat,position_cat,equip_cat,
      .                 mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
-     .                 hdpos_cat,
+     .                 rec_cat,hdpos_cat,
      .                 tracks_cat,flux_cat,flux_comments,
      .                 csked,cdrudg,
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
@@ -19,6 +19,7 @@ C     nrv   950329 Added flux_comments
 C     nrv   950925 Add full code for printer line in $PRINT
 c 951124 nrv Change calling sequence for new catalog names
 C 960226 nrv Add "cprtlab" for script to print labels
+C 960403 nrv Add "rec_cat" to call
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -27,7 +28,7 @@ C  INPUT:
       character*128  source_cat,antenna_cat,position_cat,equip_cat,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
-     .               csked,cdrudg,ctmpnam,cprtlab,
+     .               rec_cat,csked,cdrudg,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport
       integer luscn
 C
@@ -42,7 +43,6 @@ C  LOCAL VARIABLES
       integer lu          !open lu
       integer j,ilen,ierr,ich,ic1,ic2,nch,idum,ichmv
       integer*2 ibuf(ibuf_len)
-      integer ii
 C
 C
 C  1. Open the default control file if it exists.
@@ -116,6 +116,8 @@ C  $CATALOGS
                   call hol2char(ibuf,ic1,ic2,loif_cat) 
                 else if (ichcm_ch(itmpnam,1,'MODES').eq.0) then
                   call hol2char(ibuf,ic1,ic2,modes_cat) 
+                else if (ichcm_ch(itmpnam,1,'REC').eq.0) then
+                  call hol2char(ibuf,ic1,ic2,rec_cat) 
                 else if (ichcm_ch(itmpnam,1,'HDPOS').eq.0) then
                   call hol2char(ibuf,ic1,ic2,hdpos_cat) 
                 else if (ichcm_ch(itmpnam,1,'TRACKS').eq.0) then

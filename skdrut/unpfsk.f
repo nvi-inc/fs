@@ -1,5 +1,5 @@
       SUBROUTINE unpfsk(IBUF,ILEN,IERR,
-     .lfr,lc,lsub,lst,ns)
+     .lfr,lc,lst,ns)
 C
 C     UNPFR unpacks the "F" lines in the $CODES section.
 C
@@ -17,6 +17,7 @@ C 951213 nrv For backward compatibility, do not blow up if the
 C            sub-code and station names are missing!
 C 960117 nrv For compatibility with PC-SCHED, do not blow up if
 C            the fields after the code are different, just ignore.
+C 960405 nrv Remove "lsub" from reading
 C
 C  INPUT:
       integer*2 IBUF(*) ! buffer having the record
@@ -25,7 +26,6 @@ C
 C  OUTPUT
       integer ierr ! 0=OK, -100-n=error reading nth field in the record
       integer*2 LFR(4)      ! name of frequency sequence
-      integer*2 lsub(4)      ! name of sub-frequency sequence
       integer*2 LC          ! frequency code - 2 characters
       integer*2 lst(4,max_stn) ! list of stations for this code
       integer ns ! number of station names found
@@ -69,25 +69,6 @@ C
 C     Initialize output variables in case we return early.
 
       ns=0
-      CALL IFILL(lsub,1,8,oblank)
-
-C     Sub-code Name - 8 characters
-C
-      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-      CALL IFILL(lsub,1,8,oblank)
-      if (ic1.gt.0) then
-        n = ias2b(ibuf,ic1,ic2-ic1+1)
-        if (n.gt.0) then ! numeric, so ignore the rest
-          return
-        else
-          NCH = IC2-IC1+1
-          IF  (NCH.GT.8) THEN 
-            IERR = -103
-            RETURN
-          END IF
-          IDUMY = ICHMV(lsub,1,IBUF,IC1,NCH)
-        endif
-      endif
 
 C     List of station names, 8 characters each
 C
@@ -96,13 +77,18 @@ C
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         if (ic1.gt.0) then
           NCH = IC2-IC1+1
-          IF  (NCH.GT.8) THEN 
-            IERR = -104-ns
-            RETURN
-          END IF
-          ns=ns+1
-          CALL IFILL(lst(1,ns),1,8,oblank)
-          IDUMY = ICHMV(lst(1,ns),1,IBUF,IC1,NCH)
+          n = ias2b(ibuf,ic1,ic2-ic1+1)
+          if (n.gt.0) then ! numeric, so ignore the rest
+            return
+          else
+            IF  (NCH.GT.8) THEN 
+              IERR = -104-ns
+              RETURN
+            END IF
+            ns=ns+1
+            CALL IFILL(lst(1,ns),1,8,oblank)
+            IDUMY = ICHMV(lst(1,ns),1,IBUF,IC1,NCH)
+          endif
         endif
       enddo
 C

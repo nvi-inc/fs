@@ -1,23 +1,26 @@
 C     STATION INFORMATION COMMON BLOCK
 C 
-      real*8 stnxyz,baselen,axisof,bitden_save,
+      double precision stnxyz,baselen,axisof,
      .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ    
 C
       real stnpos,stnlim,stnrat,stnelv,azhorz,elhorz,co1mask,
      .co2mask,sefdst,diaman,sefdpar,sefdstel
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
-     .ncord,maxtap,nsefdpar,nrecst
+     .ncord,maxtap,nsefdpar,nrecst,nheads,ibitden_save
 C
       integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
      .lhccod,lterna,lbsefd,lterid
+
+      logical klineseg
+
+      character*128 stndefnames
 C
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
      .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
      .       R1(MAX_STN),R2(MAX_STN),
      .       BX(MAX_BASELINE),
      .       BY(MAX_BASELINE),BZ(MAX_BASELINE),
-     .       bitden_save(max_stn),
      .       STNPOS(2,MAX_STN), 
      .       STNLIM(2,2,MAX_STN),STNRAT(2,MAX_STN),
      .       STNELV(MAX_STN),AZHORZ(MAX_HOR,MAX_STN),
@@ -33,13 +36,17 @@ C
      .       NHORZ(MAX_STN),
      .       NCORD(MAX_STN),maxtap(max_stn),
      .       nsefdpar(max_band,max_stn),
-     .       nrecst(max_stn),
+     .       nrecst(max_stn),nheads(max_stn),
+     .       ibitden_save(max_stn),
      .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN), 
      .       LPOCOD(MAX_STN),LPOSID(MAX_STN),
      .       lantna(4,max_stn),lterid(2,max_stn),
      .       loccup(4,max_stn),
      .       lhccod(max_stn),lterna(4,max_stn),
-     .       lbsefd(max_band,max_stn)
+     .       lbsefd(max_band,max_stn),
+     .       klineseg(max_stn)
+
+      COMMON/STATN_CH/stndefnames(max_stn)
 C 
 C  NSTN   - number of stations
 C  LSTNNA - position names, up to 8 chars
@@ -71,3 +78,5 @@ C  LPOCOD - position codes
 C  maxtap - maximum tape length for each station
 C  lterna - terminal name
 C  lbsefd - band names for sefds, storage until frequencies are known
+C  klineseg - true if this station's horizon mask is line segments,
+C             false if it's step functions

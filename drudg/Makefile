@@ -1,8 +1,8 @@
 #######################################################################
 #                                                                     #
 #                         makefile for DRUDG                          #
-#                            HP 9000/7xx                              #
-#                     NRV      950824                                 #
+# 960201 nrv for Linux                                                #
+# 960602 nrv with vex libraries                                       #
 #                                                                     #
 #                                                                     #
 #######################################################################
@@ -39,22 +39,20 @@ $(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o
 #
 # Set compiling and linking flags
 #
-# -I2 makes 2 bytes the default size for INTEGER and LOGICAL types.
-# -g is for debugging
 # -C checks for out of bounds during execution and aborts if found
-#FFLAGS=-C -c -g -I2 
 FFLAGS= -C -c 
 CFLAGS= -c  
 #
 
 #
-LDFLAGS=../skdrut/skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
-../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a
+LIBS=../skdrut/skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
+../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
+../vex/vex.a -lf2c -lfl
 #
 ../bin/$(PROGRAM): $(DROBS) 
 	rm -f ./core
 	@echo Linking $(PROGRAM)...
-	@f77 -o ../bin/$(PROGRAM) $(DROBS) $(LDFLAGS)
+	@f77 -o ../bin/$(PROGRAM) $(DROBS) $(LIBS)
 	@strip ../bin/$(PROGRAM)
 	@echo done.
 

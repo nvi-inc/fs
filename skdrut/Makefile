@@ -8,6 +8,7 @@
 #                                                                       #
 # 951017 nrv Initial version                                            #
 # 951019 nrv Changes for VLBA modes and LO per channel                  #
+# 960602 nrv Changes for VEX file reading                               #
 #                                                                       #
 #########################################################################
  
@@ -23,8 +24,12 @@ raded.o ras2b.o rdctl.o readf_asc.o reads.o reio.o sbit.o secnds.o\
 sidtm.o slewo.o slewt.o soinp.o speed.o stinp.o sunarc.o sunazel.o\
 sunpo.o trimlen.o tspin.o unpco.o unpfl.o unpfsk.o unpfcat.o unphd.o \
 unplo.o unpso.o unpva.o unpvh.o unpvp.o unpvt.o unpwc.o\
-unpwo.o upper.o writf_asc.o writf_asc_ch.o xat.o\
-ydjul.o ymday.o printer.o 
+unpwo.o upper.o writf_asc.o writf_asc_ch.o xat.o idchk.o\
+ydjul.o ymday.o printer.o unprat.o \
+vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
+vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
+vsoinp.o vglinp.o vob1inp.o vobinp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
+readv.o addscan.o findscan.o newscan.o pnum.o
 #
 FFLAGS=-C -c -g 
 CFLAGS= -c -g

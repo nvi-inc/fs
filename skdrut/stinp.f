@@ -18,7 +18,7 @@ C
       include '../skdrincl/statn.ftni'
 C
 C  LOCAL:
-      logical knaeq
+      logical knaeq,kline
       integer*2 LNAME(4),LAXIS(2)
       real*4 SLRATE(2),ANLIM1(2),ANLIM2(2)
       integer*2 LD(7),LOCC(4)
@@ -32,7 +32,9 @@ C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band),
      .idummy,ib,ii,nco,nhz,i,idum
       integer*2 lidt(2),lid,lidpos,lidhor
-      real*4 poslat,poslon,bitden
+      real*4 poslat,poslon
+      integer ibitden
+      integer nheadstack
       integer ichcm,igtba,ichcm_ch,ichmv,jchar ! functions
 C
 C
@@ -61,6 +63,7 @@ C             it needs to be set up correctly and this is the place to do it.
 C 951116 nrv Remove maxpass and replace with bit density
 C 960208 nrv Increment NSTATN after checking for MAX_STN
 C 960227 nrv Make terminal ID up to 4 characters, not integer.
+C 960409 nrv Change UNPVT call to include nheadstack, ibitden 
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
@@ -88,8 +91,8 @@ C
      .    POSXYZ,LD,LD,LD,POSLAT,POSLON,LOCC)
       ELSE IF (ITYPE.EQ.3) THEN
         j=8
-        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,bitden,maxt,nr,
-     .  lb,sefd,j,par,npar)
+        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
+     .  nheadstack,maxt,nr,lb,sefd,j,par,npar)
       ELSE IF (ITYPE.EQ.4) THEN
         J = 8
         CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NCO,CO1,CO2)
@@ -215,15 +218,8 @@ C
           RETURN
         END IF  !matching entry not found
         IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
-C       MAXPAS(I) = MAXP
-C       For compatibility, force bit density=333333 if not specified
-C       if (bitden.lt.1000) then
-C         bitden=33333
-C         write(lu,'("STINP27 - Note: Bit density ",
-C    .    "for ",4a2," set to 33,333.")') 
-C    .      (lstnna(j,i),j=1,4)
-C       endif
-        bitden_save(i)=bitden
+        ibitden_save(i)=ibitden
+        nheads(i)=nheadstack
         maxtap(i) = maxt
         nrecst(i) = nr
         do ib=1,2
@@ -248,6 +244,7 @@ C
 C 2.5 Here we handle the horizon mask
 C
       ELSE IF (ITYPE.EQ.5) THEN  !horizon mask
+        kline=.true.
         IF (IERR.NE.0) THEN
           if (ierr.lt.-200) then
             write(lu,'("STINP252 - Horizon mask azimuths are out ",
@@ -264,8 +261,9 @@ C
           if (ierr.eq.-103) then
 C           write(lu,'("STINP251 - No matching el for last azimuth,",
 C    .      " wraparound value used.")')
-            elh(nhz)=elh(1)
 C           write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+            elh(nhz)=elh(1)
+            kline=.false.
           endif
         END IF   !
         I =1
@@ -284,6 +282,15 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
           write(lu,'("STINP25 - Pointer not found.  Horizon mask ",
      .    "ignored:"/120a2)') (ibufx(i),i=2,ilen)
         ELSE  ! keep it
+          if (kline) then
+            klineseg(i)=.true.
+            write(lu,'("STINP255 - Line segment horizon mask being ",
+     .      "used for ",4a2)') (lstnna(j,i),j=1,4)
+          else
+            klineseg(i)=.false.
+            write(lu,'("STINP255 - Step function horizon mask being ",
+     .      "used for ",4a2)') (lstnna(j,i),j=1,4)
+          endif
           NHORZ(I) = NHZ
           DO J=1,NHORZ(I)
             AZHORZ(J,I) = AZH(J)*PI/180.0
@@ -296,11 +303,15 @@ C 2.6 Here we handle the coordinate mask
 C
       ELSE IF (ITYPE.EQ.4) THEN ! coordinate mask
         IF (IERR.NE.0) THEN
-          if (ierr.eq.-99)
-     .      write(lu,'("STINP260 - Too many coordinate mask pairs. ",
+          if (ierr.eq.-99) then
+            write(lu,'("STINP260 - Too many coordinate mask pairs. ",
      .      "Max is ",i5)') max_cor 
-          write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          RETURN
+            write(lu,9105) ierr,(ibufx(i),i=2,ilen)
+            return
+          endif
+          if (ierr.eq.-103) then
+C           error for no matching value, which is ok
+          endif
         END IF  !
         I = 1
         DO WHILE (LID.NE.LhcCOD(I).AND.I.LE.NSTATN)

@@ -22,8 +22,8 @@ C LOCAL:
      .irec,idum,ntap,itape,ilrec,isrec,icol
       integer idshft,ihshft,imshft,isshft,lsd,lsh
       integer idoyr,iyr,indoyr,isd,ish,inday,inhr,inmin,insec
-	logical*4 KEARL,KNEWP
-	logical*4 kex ! true if file exists
+	logical KEARL,KNEWP
+	logical kex ! true if file exists
 	logical kdone
 Cinteger*4 ifbrk
 	integer*2 LM7(23)

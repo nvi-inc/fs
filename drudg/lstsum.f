@@ -23,6 +23,7 @@ C 960201 nrv Change input buffer to upper case before processing.
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/skobs.ftni'
 C
 C Input:
       logical kskd
@@ -36,7 +37,7 @@ C Output:
       real*4 rs,ds
       real*4 speed_snap ! speed from SNAP file
       integer julda ! function
-	LOGICAL*4   KEX
+	LOGICAL   KEX
 	logical     kazel,kwrap,ksat
 	character*128 cbuf,cbuf_in
 	character*8 csor,cexper,cstn

@@ -15,8 +15,9 @@ C  Output
       integer iserr(max_stn) ! error by station
 
 C  LOCAL VARIABLES:
-      integer ip,is,it,np,j,k,i,l,itrk(max_pass),maxp(max_frq)
-      integer ix,iprr,ipmax,ic,m,nvc,ichcm_ch
+      integer ip,ip2,is,it,it2,np,np2,j,k,i,l,itrk(max_pass),
+     .maxp(max_frq),itr2(max_pass)
+      integer ix,iprr,ipmax,ipma2,ic,m,nvc,ichcm_ch
       logical kmiss
 C
 C     880310 NRV DE-COMPC'D
@@ -41,12 +42,17 @@ C
         do is=1,nstatn
           iserr(is)=0
           np=0
+          np2=0
           DO  J=1,max_pass ! count sub-passes
+            itrk(j)=0
+            itr2(j)=0
             IT = 0
+            it2=0
             do k=1,max_chan ! channels
               do l=1,2 ! upper/lower
                 do m=1,2 ! sign/mag
                   if (itras(l,m,k,j,is,ic).ne.-99) it=it+1
+                  if (itra2(l,m,k,j,is,ic).ne.-99) it2=it2+1 ! headstack 2
                 enddo
               END DO ! upper/lower
             enddo ! channels
@@ -54,13 +60,29 @@ C
               np=np+1
               if (np.le.max_pass) itrk(np)=it
             endif
+            if (it2.gt.0) then
+              np2=np2+1
+              if (np2.le.max_pass) itr2(np2)=it2
+            endif
           END DO  ! count sub-passes
           ipmax=0
+          ipma2=0
           do j=1,4*max_pass ! check sub-passes
             if (ihddir(j,is,ic).gt.ipmax) ipmax=ihddir(j,is,ic)
+            if (ihddi2(j,is,ic).gt.ipmax) ipma2=ihddi2(j,is,ic)
           enddo ! check sub-passes
-          npassf(is,ic)=np
-          ntrakf(is,ic)=itrk(1)
+          npassf(is,ic)=np ! must be the same for both headstacks 
+          ntrakf(is,ic)=itrk(1)+itr2(1)
+          if (np2.gt.0.and.np.ne.np2) then ! inconsistent between headstacks
+            write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
+9907        format('GNPAS07 - Inconsistent number of sub-passes between'
+     .      ' headstacks 1 and 2 for ',a2,' at ', 4a2)
+          endif
+          if (itr2(1).gt.0.and.itrk(1).ne.itr2(1)) then ! inconsistent 
+            write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
+9908        format('GNPAS08 - Inconsistent number of tracks per pass ',
+     .      'between headstacks 1 and 2 for ',a2,' at ', 4a2)
+          endif
           if (ipmax.ne.npassf(is,ic)) then ! inconsistent
             ierr=1
             iserr(is)=1
@@ -92,13 +114,15 @@ C  2. Now count up the number of passes, i.e. different head positions.
 C     Look in ihddir and count the non-zero entries. Do this only for
 C     frequency code 1 because "maxpas" is only dimensioned by station.
 C     Check for different numbers of passes used in different frequency
-C     codes. Should not be attempted in a single experiment. 
+C     codes--this should not be attempted in a single experiment. 
 
       do is=1,nstatn ! stations
         do ic=1,ncodes ! codes
           ip=0
+          ip2=0
           do j=1,4*max_pass
             if (ihddir(j,is,ic).eq.1) ip=ip+1
+            if (ihddi2(j,is,ic).eq.1) ip2=ip2+1
           enddo
           if (ip.eq.0) then
             ierr=1
@@ -108,6 +132,11 @@ C     codes. Should not be attempted in a single experiment.
      .      'for ',a2,' at ',4a2)
           endif
           maxp(ic)=ip
+          if (ip2.ne.0.and.ip.ne.ip2) then
+            write(luscn,9909) lcode(ic),(lstnna(i,is),i=1,4)
+9909        format('GNPAS09 - Inconsistent number of passes in $HEAD',
+     .      ' between headstacks 1 and 2 for ',a2,' at ',4a2)
+          endif
         enddo ! codes
         iprr=0
         do ic=1,ncodes
@@ -129,7 +158,7 @@ C 3. Check for LOs present and issue warning if not.
       do ic=1,ncodes
         do is=1,nstatn
           kmiss=.false.
-          do ix=1,nvcs(is,ic)
+          do ix=1,nchan(is,ic)
             nvc=invcx(ix,is,ic)
             if (freqlo(nvc,is,ic).eq.0.0.or.
      .      ichcm_ch(lifinp(nvc,is,ic),1,'  ').eq.0) kmiss=.true.

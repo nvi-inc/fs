@@ -12,42 +12,60 @@ C 951018 nrv Remove special VLBA arrays and add LO per channel and 8-letter
 C            recording modes. Change "14" to MAX_CHAN. Change "2" to MAX_BAND.
 C 951020 nrv Remove lsb and isyn -- not needed
 C 951115 nrv Make frequency sequences indexed by station. Add SB.
+C 960321 nrv Add SAMPRATE
+C 960409 nrv Add IHDPO2 and IHDDI2 for headstack 2
+C 960510 nrv Add IFAN for fan-out factor
+C 960517 nrv Add def names
+C 960527 nrv Add cpassorderl
 C
-      real*8 effreq,ffact,bitdens
+      double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
-C     effreq  - effective frequency for each band, for S/X ionosphere corrections
+C     effreq  - effective frequency for each band, for S/X ionosphere 
+C               corrections
 C     bitdens - bit density by station and code
 C
-      real*4 vcband,freqrf,freqlo,wavei,bwrms,trkn
+      real vcband,freqrf,freqlo,wavei,bwrms,trkn,samprate
 C     VCBAND - final video bandwidth, MHz 
-C     FREQRF - observing frequency for each VC, in each code
-C     FREQLO - LO frequencies, for each channel, by station, for each code
+C     FREQRF - observing frequency for each VC, in each code, MHz
+C     FREQLO - LO frequencies, for each channel, by station, for each code, MHz
 C     wavei   - constant to convert baseline length to wavelengths
 C     bwrms - rms bandwidth
-C     trkn    - number of tracks recorded per band, per station (may be non-integer
-C               in the case of switching)
+C     trkn    - total number of tracks recorded per band, per station 
+C               (may be non-integer in the case of switching), used
+C               for calculating SNR. Each track is assumed to be recorded
+C               at the sample rate.
+C     samprate - sample rate, per frequency code, Mb/s.
  
-      integer ncodes,nfreq,npassf,nband,nvcs,invcx,
-     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx
+      integer ncodes,nfreq,npassf,nband,nchan,invcx,itra2,ifan,
+     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,ihdpo2,ihddi2,
+     .npassl
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
 C     NPASSF - number of passes per head position for this code 
-C     nvcs   - total number of frequency channels per station and code
+C     nchan  - total number of frequency channels per station and code
+C              (not this is NOT the number of VCs but the number of channels)
 C     invcx  - index number of each frequency channel, if zero then
 C              this channel is not recorded at this station
 C     ibbcx - physical BBC number of each channel
-C     itras  - track assignments(s,b,p,c,f)
-C          s = U/L 
-C          b = sign/magnitude bit
-C          p = corresponding passes, forward/reverse (1-max_pass, e.g.
-C              1 for mode A, 2 for B and C, 28 for D, 4 for E)
-C          c = channels (1 to max_chan)
-C          f = code
+C     itras  - track assignments (s,b,p,c,f), i.e. track number on
+C              which the following signals are recorded:
+C          s = sideband, U/L 
+C          b = bit, sign/magnitude 
+C          p = corresponding pass, forward/reverse (1 to max_pass, 
+C              e.g. 1 for mode A, 1 or 2 for B and C, 1 to 28 for D, 
+C              1 to 4 for E)
+C          c = channel (1 to max_chan)
+C          f = frequency code (1 to max_frq)
+C     itra2 - same as itras but for headstack 2
 C     ihdpos - head position offsets
+C     ihdpo2 - head position offsets for headstack 2
 C     ihddir - corresponding pass number
+C     ihddi2 - corresponding pass number for headstack 2
 C     ntrakf - number of tracks recorded per pass for this code
 C     nstsav,istsav - number and indices of station names found on the "F" line
+C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
+C     npassl - number of passes in the pass order list
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,
      .lband,lpol,lnetsb,losb,lnafrsub
@@ -57,13 +75,19 @@ C     LSUBVC - sub-group code for each VC, in each code
 C     lifinp - hollerith IF input, e.g. A,B,C,D,1A,1N,2A,2N,3A,3N
 C     LNAFRQ - 8-char name for this code
 C     LNAFRSUB - 8-char name for this sub-code (subset of frequencies)
+C       lnafrq      lnafrsub (can be a different subcode name for each station)
+C       ------      ----------------------
+C       code1       stn1  stn2  stn3 ...
+C       code2       stn1  stn2  stn3 ...
+C        etc.
 C     lband  - all bands in all codes
 C     lpol - polarization per channel
 C     lnetsb - net sideband for each channel
 C     losb - net sideband for each station's lo
 C
-      character*3 cset
-C     cset   - switch set per channel
+      character*3 cset ! switch set per channel
+      character*128 modedefnames ! def names from the vex file
+      character*3 cpassorderl ! pass order list
 C
       COMMON/FREQS/
      .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
@@ -75,18 +99,23 @@ C
      .       wavei(max_band,max_stn,max_frq),
      .       bwrms(max_band,max_stn,max_frq),
      .       trkn(max_band,max_stn,max_frq),
+     .       samprate(max_frq),
      .
      .       NCODES,nband,
      .       NFREQ(MAX_BAND,max_stn,MAX_FRQ), 
      .       NPASSF(max_stn,MAX_FRQ),
      .       ntrakf(max_stn,MAX_FRQ),
-     .       nvcs(max_stn,max_frq),
+     .       nchan(max_stn,max_frq),
      .       invcx(max_chan,max_stn,max_frq),
      .       ibbcx(max_chan,max_stn,max_frq),
      .       itras(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
+     .       itra2(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
      .       ihdpos(4*max_pass,max_stn,max_frq),
      .       ihddir(4*max_pass,max_stn,max_frq),
+     .       ihdpo2(4*max_pass,max_stn,max_frq),
+     .       ihddi2(4*max_pass,max_stn,max_frq),
      .       nstsav,istsav(max_stn),
+     .       ifan(max_stn,max_frq),npassl,
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
      .       LCODE(MAX_FRQ),LMODE(4,max_stn,MAX_FRQ),
@@ -96,4 +125,5 @@ C
      .       LNETSB(max_chan,max_stn,max_frq),
      .       losb(max_chan,max_stn,max_frq),lband(max_band)
 C
-      COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq)
+      COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
+     .       modedefnames(max_frq),cpassorderl(max_pass,max_stn)

@@ -8,6 +8,7 @@ C  Common blocks:
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 
 C Subroutine interface:
 C     Called by: drudg (C routine)
@@ -32,9 +33,9 @@ C LOCAL:
       integer nch
       character*2  response
       character    lower, scode
-      integer h2c,heqb,o36
+      integer ivexnum,h2c,heqb,o36
       character*256 cbuf
-      integer i,j,k,l,ncs,ix,ixp,ic,ierr,nobs,
+      integer i,j,k,l,ncs,ix,ixp,ic,ierr,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
       real*4 val
       integer ichmv_ch,ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
@@ -89,6 +90,9 @@ C 960208 nrv If inconsistent tracks/heads from GNPAS, set flag
 C 960209 nrv GNPAS errors by station
 C 960226 nrv Add cprtlab to RDCTL call
 C 960307 nrv Move block data initializations to here.
+C 960403 nrv Add another dum to RDCTL call for rec_cat
+C 960513 nrv New release date.
+C 960531 nrv Add vex.
 C
 C Initialize some things.
 
@@ -144,7 +148,7 @@ C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
       call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
-     .           cdum,cdum,cdum,cdum,cdum,csked,cdrudg,ctmpnam,
+     .           cdum,cdum,cdum,cdum,cdum,cdum,csked,cdrudg,ctmpnam,
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,luscn)
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
@@ -159,19 +163,23 @@ C
 C     2. Next read in the schedule file name.
 C
 200   cexpna = ' '
+      do i=1,max_frq
+        samprate(i)=0.0
+      enddo
       do i=1,4*max_pass
         do j=1,max_stn
           do k=1,max_frq
             ihdpos(i,j,k)=9999
             ihddir(i,j,k)=0
+            ihdpo2(i,j,k)=9999
+            ihddi2(i,j,k)=0
           enddo
         enddo
       enddo
-      kbrk = .false.
       kmissing = .false.
       do i=1,max_stn
         do j=1,max_frq
-          nvcs(i,j)=0
+          nchan(i,j)=0
         enddo
       enddo 
         do k=1,max_chan
@@ -193,7 +201,7 @@ C   Check for non-interactive mode.
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
 9020    FORMAT(' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960313)')
+     .  '(NRV 960603)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -201,8 +209,6 @@ C   Check for non-interactive mode.
 9920      format(' Schedule file name (.skd or .drg assumed, ',
      .    '<return> if none, :: to quit) ? ',$)
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
-C              write(6,'("isklen=",i5," luusr=",i5," nch=",i5)') 
-C    .       isklen,luusr,nch
         else ! command line file name
           call char2hol(cfile,ibuf,1,nch)
         endif 
@@ -256,7 +262,7 @@ C
 	  IC=TRIMLEN(LSKDFI)
 	  WRITE(LUSCN,9300) LSKDFI(1:IC),cexpna(1:ix)
 9300    FORMAT(' Opening file ',A,' for schedule ',A)
-	  CALL SREAD(IERR,NOBS)
+	  CALL SREAD(IERR,ivexnum)
 	  if (itearl.gt.0) then
 	    write(luscn,9301) itearl
 9301      format(' NOTE: This schedule was created using early '
@@ -330,7 +336,7 @@ C  Now change J2000 coordinates to 1950 and save for later use
 	  END DO
 C
 C  Check for sufficient information
-	  IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.NOBS.GT.0) GOTO 500
+	  IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.ncodes.GT.0) GOTO 500
 	  WRITE(LUSCN,9491)
 9491    FORMAT(' Insufficient information in file.'/)
           ierr=-1
@@ -363,7 +369,7 @@ C
 C     response(1:1) = upper(response(1:1))
       call char2hol(response(1:1),lstn,1,2)
       ISTN = 0
-      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 700 ! all stations
+      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 699 ! all stations
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
           IF (LSTCOD(I).EQ.LSTN) ISTN = I
@@ -384,19 +390,35 @@ C     response(1:1) = upper(response(1:1))
       endif !check for validID
       kmissing=.true.
       if (iserr(istn).ne.0) kmissing=.true.
+699   continue
+      if (kvex) then !get the statin's input now
+      if (istn.eq.0) then ! get all in a loop
+        do i=1,nstatn
+          call vob1inp(ivexnum,i,luscn,ierr) ! get the station's obs
+          if (ierr.ne.0) then
+            write(luscn,'("FDRUDGxx - Error from vob1inp=",
+     .      i5)') ierr
+          else
+            write(luscn,'("  Number of obs: ",i5)') nobs
+          endif
+        enddo
+      else
+        call vob1inp(ivexnum,istn,luscn,ierr) ! get the station's obs
+        if (ierr.ne.0) then
+          write(luscn,'("FDRUDGxx - Error from vob1inp=",
+     .    i5)') ierr
+        else
+          write(luscn,'("  Number of obs: ",i5)') nobs
+        endif
+      endif
+      endif
 C
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
 C        on stations and schedules, respectively.  Within the loop,
 C        schedule the appropriate segment.
 C
- 700  if (kbrk) then
-	  write(luscn,9069)
-9069      format(/' *+*+*+*+ WARNING: After a break, your output may '
-     .    'not be complete. *+*+*+*+*'/)
-	  kbrk = .false.
-      endif
-      if (.not.kbatch) then
+700   if (.not.kbatch) then
 	if (kskd) then !schedule file
 	  l=trimlen(lskdfi)
           if (istn.gt.0) then !one station

@@ -21,20 +21,19 @@ C 960226 nrv Add cprtlab
 C
 	real*8 RA50,DEC50
 c
-	logical*4 KSPINT,KFLG,kbatch,kmissing
+	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing
 c
 	INTEGER IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
      .  nlab,nllab,lulasr,ludesk,
      .  irecpr,irbpr,ioffpr,luflop,iwidth,icrty6,
-     .  ipartm,isettm,isortm,itaptm,itpos,
-     .  ibout,luscn,ilabrow,itearl,ihdtm,
+     .  itpos,
+     .  ibout,luscn,ilabrow,
      .  ibbclen,nbbcbuf,nchanr,iperm
 C
-        integer*2 ld,itim,itims,lexper,ibbcbuf,ibuf,lbarrel,
+        integer*2 ld,itim,itims,ibbcbuf,ibuf,lbarrel,
      .  lbname
 C
-	logical*1 kbrk,klab
 C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
@@ -43,7 +42,7 @@ c
 	character*6 cpid
 C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),
-     .       KSPINT,KFLG(4),kbatch,kmissing,
+     .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
      .       LUPRT,LUOUT,LULAB,ISTN,
@@ -51,16 +50,13 @@ C
      .       IRECSK,IRECST,IRECEL,
      .       IRECPR,IRBPR,IOFFPR,LUFLOP,
      .       IWIDTH,ICRTY6,
-     .       IPARTM,ISETTM,
-     .       ISORTM,ITAPTM,
      .       ITPOS(500),
      .       IBOUT(40),luscn,
-     .       ilabrow,itearl,ihdtm,
+     .       ilabrow,
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,
-     .       LD(500),ITIM(6),ITIMS(6),LEXPER(4),
+     .       LD(500),ITIM(6),ITIMS(6),
      .       IBUF(ibuf_len),lbarrel(2),lbname(4),
-     .       ibbcbuf(40,2,3),
-     .       kbrk,klab
+     .       ibbcbuf(40,2,3)
 
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,

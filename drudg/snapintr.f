@@ -8,6 +8,7 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 C
 C  INPUT:
       integer ifunc,IYR

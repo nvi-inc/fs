@@ -30,7 +30,7 @@ C
       do is=1,nstatn
         nfreq(1,is,ic)=0
         nfreq(2,is,ic)=0
-        do i=1,nvcs(is,ic) ! number of channels
+        do i=1,nchan(is,ic) ! number of channels
           iv=invcx(i,is,ic)
           if (ichcm_ch(ls1,1,'  ').eq.0) then
             ls1=lsubvc(iv,is,ic)
@@ -66,6 +66,10 @@ C             Add another 0.38 for magnitude bit
       enddo
       if (ierr.eq.1) ncodes=ncodes-1
 C
+      do ic=1,ncodes
+        if (samprate(ic).eq.0) samprate(ic)=2.0*vcband(1,1,ic)
+      enddo
+
       RETURN
       END
 

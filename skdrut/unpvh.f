@@ -30,6 +30,9 @@ C  880707  NRV  Created
 C  881101  NRV  ADDED CATALOG INFO
 C  891215  NRV  Removed catalog info call, including PCOUNT
 C  930225  nrv  implicit none
+C 960201 nrv Check range of az,el
+C 960404 nrv Remove checks for range because this same routine is
+C            used for coordinate masks also.
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -59,10 +62,10 @@ C
         IERR = -101-NHOR*2
         RETURN
       ENDIF
-      if (r.lt.0.or.r.gt.360.0) then ! out of range
-        ierr=-101-nhor*2
-        return
-      endif
+C     if (r.lt.0.or.r.gt.360.0) then ! out of range
+C       ierr=-101-nhor*2
+C       return
+C     endif
       if (nhor.eq.max_hor) then ! too many
         ierr=-99
         return
@@ -86,10 +89,10 @@ C  If az entries are not in ascending order, error
         IERR = -102-NHOR*2
         RETURN
       ENDIF
-      if (r.lt.0.or.r.gt.90.0) then ! out of range
-        ierr=-102-nhor*2
-        return
-      endif
+C     if (r.lt.0.or.r.gt.90.0) then ! out of range
+C       ierr=-102-nhor*2
+C       return
+C     endif
 C     ELH(NHOR) = R*PI/180.0
       ELH(NHOR) = R
       GOTO 1

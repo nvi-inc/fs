@@ -819,8 +819,22 @@ Version 9.1.1 960308
 960313 NRV drudg/fdrudg.f
            change date in opening message to "960313"
 
-960314 WEH quikr/party.f
-           fix parentheses for group and track number parameter if's
+Version 9.1.2 960313
 
-Version 9.1.2 960314
+960603 NRV drudg/snap.f, point.f, lists.f
+           change from reading observations from the input file directly 
+           to getting observations stored in common
 
+960603 NRV drudg/procs.f, trkall.f
+           Get the fanout factor from common instead of determining it
+           every time. 
+
+960603 NRV skdrincl/skobs.ftni
+           New. Holds a copy of the scans and other scheduling parameters.
+
+960603 NRV skdrut/v*.f, readv.f
+           New. Utilities to read VEX file.
+
+960603 NRV drudg/snap.f
+           Change logic so that the flag on the scan line for parity checks 
+           is not required for the user options to be valid.
