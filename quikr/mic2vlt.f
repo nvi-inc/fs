@@ -24,6 +24,7 @@ C
         if(mod(ipass,2).eq.0) mic=mic+revoff(ihead)
         if(ihead.eq.1) then
           if(kauto) then
+             call fs_get_wrhd_fs(wrhd_fs)
              ipitch=wrhd_fs
            else
              ipitch=0
@@ -31,10 +32,19 @@ C
         else 
            ipitch=rdhd_fs
         endif
-        if(mod(ipass,2).eq.0) then
-          if(ipitch.eq.1) mic=mic+698.5
+        call fs_get_drive(drive)
+        if(drive.eq.VLBA) then
+           if(mod(ipass,2).eq.0) then
+              if(ipitch.eq.2) mic=mic+698.5
+           else
+              if(ipitch.eq.1) mic=mic-698.5
+           endif
         else
-          if(ipitch.eq.2) mic=mic-698.5
+           if(mod(ipass,2).eq.0) then
+              if(ipitch.eq.1) mic=mic+698.5
+           else
+              if(ipitch.eq.2) mic=mic-698.5
+           endif
         endif
       endif
       if(mic.ge.0.0) then
