@@ -215,22 +215,24 @@ C  1. Headers.
            endif
         endif
 
-        do icode=1,ncodes
-          do irec=1,num_recs ! loop on number of recorders
-            num_sub_pass=npassf(istn,icode)
-            if(kdisk)  num_sub_pass=1
-            write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
-            do ipass=1,num_sub_pass
-              cnamep=" "
-              call setup_name(itype,icode,ipass,lnamep,nch)
-              call c2lower(cnamep,cnamep)
-              write(luprt,'(a,1x,$)') cnamep
+        if(npage .eq. 1) then
+          do icode=1,ncodes
+            do irec=1,num_recs ! loop on number of recorders
+              num_sub_pass=npassf(istn,icode)
+              if(kdisk)  num_sub_pass=1
+              write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
+              do ipass=1,num_sub_pass
+                cnamep=" "
+                call setup_name(itype,icode,ipass,lnamep,nch)
+                call c2lower(cnamep,cnamep)
+                write(luprt,'(a,1x,$)') cnamep
+              end do
+              lcodeTmp=lcode(icode)
+              call c2lower(ccodetmp,ccodetmp)
+              write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
             end do
-            lcodeTmp=lcode(icode)
-            call c2lower(ccodetmp,ccodetmp)
-            write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
           end do
-        end do
+        endif
 ! End of put out procedure names.
 
         write(luprt,'()')

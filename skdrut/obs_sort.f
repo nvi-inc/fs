@@ -21,7 +21,7 @@ C Local
 
       integer j,i,irec
       double precision jday(Max_obs)
-      integer iyear,iday
+      integer iyear,iday,ihr,imin,is
       double precision rhr,rmin,rs
 
       integer iptr,iptr_old
@@ -35,12 +35,15 @@ C Local
 
       do i=1,nobs
         call sktime(lskobs(1,iskrec(i)),itim1)
-        read(ctim1,'(i2,i3,3(i2))') iyear,iday,rhr,rmin,rs
+        read(ctim1,'(i2,i3,3(i2))') iyear,iday,ihr,imin,is
         if(iyear .lt. 50) then
            iyear=iyear+2000
         else
            iyear=iyear+1900
         endif
+	rhr=ihr
+	rmin=imin
+	rs=is
         jday(i)=julda(1,iday,iyear)+(rs+rmin*60.d0+rhr*3600.)/86400.d0
       end do
 

@@ -98,6 +98,8 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 ! 011503 JMG Completely rewritten.
 ! 2003Nov13  JMgipson Logic which calculats tape footage for spin commands
 !            changed after change in tspin,fspin
+! 2004Nov21  JMGipson Added "PREOB" as a condition for start time.
+!            This is because some of D.Graham's schedules did not have tape or disks!
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -121,7 +123,7 @@ C Local:
       integer iwid,itlate_local,itearl_local
       INTEGER IC
       integer nline,num_tapes,npage,maxline,iline,
-     >  inewp,ne,nm,l,ifdur,id,ieq,idif
+     >  inewp,ne,nm,l,ifdur,id,ieq
       real dif
 
       logical kvalidtime                !valid time read?
@@ -189,17 +191,9 @@ C Local:
       logical kdisk                     !mark5 or makr5p
       integer icode                     !Read from "SETUPxx" command
       integer icode_old                 !old version
-      integer ifan_fact                 !fan factor for current mode
       character*2 ccode_tmp
       integer iSpinDelay
 
-! All of this is to keep track of packs. But we decided we didn't want to!
-!      integer num_packs,max_packs,ipack
-!      parameter (max_packs=10)
-!      integer ipack_size(max_packs),ipack_use(max_packs)
-!      integer ipack_size_tot,ipack_use_tot
-!      logical kgotpacks                 !Have got the diskpacks
-!      character*1 lchar                 !response for "y" or "Y"
 
 C 1.0  Check existence of SNAP file.
       IC = TRIMLEN(CINNAME)
@@ -273,6 +267,7 @@ C 3. Initialize local variables
 
       do i=1,5
         itime_tape_stop(i)=0
+        itime_tape_start(i)=0
       end do
 
 ! for mark3 or mark4, takes a second to get the tapes moving.
@@ -318,22 +313,6 @@ C   scaled by bandwidth calculations in sked.
       icode_old=1
       call find_recorder_speed(icode,speed_recorder,kskd)
 
-!      if(km5) then
-!         kgotpacks=.false.
-!         do while(.not.kgotpacks)
-!           write(*,*) "Enter in number of disk packs: "
-!           read(*,*)  num_packs
-!           do ipack=1,num_packs
-!             Write(*,*) "Enter in size of pack #", ipack, " in Gbytes."
-!             read(*,*)  ipack_size(ipack)
-!           end do
-!           write(*,*) "You entered in: ", (ipack_size(i),i=1,num_packs)
-!           write(*,*) "If correct enter in 'y' or 'Y': "
-!           read(*,*) lchar
-!           kgotpacks=lchar .eq. "y" .or. lchar .eq. "Y"
-!         end do
-!         ipack=1
-!      endif
 
 ! Initialize count counter.
       counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
@@ -371,36 +350,21 @@ C           Here is where we determine early start without the schedule
      >          = abs(itimedifsec(itime_tape_stop,itime_stop))
             endif
           endif
+
 ! get ready to output a scan (Actually output previous scan.)
           idur_p        =idur
           do i=1,5
-            itime_start_p(i) 	=itime_start(i)
-            itime_stop_p(i)  	=itime_stop(i)
-            itime_source_p(i)	=itime_source(i)
+            itime_start_p(i)     =itime_start(i)
+            itime_stop_p(i)  	 =itime_stop(i)
+            itime_source_p(i)	 =itime_source(i)
             itime_tape_start_p(i)=itime_tape_start(i)
-            itime_source(i)	=itime_now(i)
+            itime_source(i)	 =itime_now(i)
           end do
 
           ctmp_source_p	=ctmp_source
           cnewtap_p	=cnewtap             !save old
           cdir_p        =cdir
           cpass_p       =cpass
-! adjust for next pack.
-!          if(km5) then
-!           if(counter_data_valid_on/1024. .gt. ipack_size(ipack)) then
-!               if(ipack .gt. Num_packs) then
-!                  write(luprt,
-!     >             '(10x,"******  Out of space in diskpacks ****")')
-!               else
-!                 write(luprt,
-!     >          '(10x,"******* Swap out diskpack ",i4," ******")') ipack
-!                 counter_now=counter_now-counter_prev
-!                 ipack_use(ipack)=ipack_size(ipack)-counter_now/1024.
-!                counter_data_valid_on=counter_data_valid_on-counter_prev
-!                 ipack=ipack+1
-!               endif
-!!             endif
-!          endif
 
           if(tape_motion_type(istn) .eq. "CONTINUOUS" .or.
      >       tape_motion_type(istn) .eq. "ADAPTIVE") then
@@ -496,15 +460,22 @@ C       Now get the source info for the new scan
           endif
           krunning=.true.
           counter_tape_start  =counter_now
-! Data start command.
-        else if( index(ctmp(1:11),'"DATA START').ne.0.or.
-     >           index(ctmp(1:13),'DATA_VALID=ON').ne.0.or.
-     >           index(ctmp(1:14),'DATA_VALID1=ON').ne.0.or.
-     >           index(ctmp(1:14),'DATA_VALID2=ON').ne.0) then ! tape start time
+! Data start command.          123456789x123
+        else if(ctmp(1:10).eq.'DATA START'   .or.
+     >          ctmp(1:13).eq.'DATA_VALID=ON' .or.
+     >          ctmp(1:14).eq.'DATA_VALID1=ON'.or.
+     >          ctmp(1:14).eq.'DATA_VALID2=ON'.or.
+     >          ctmp(1:5) .eq.'PREOB') then
 
            do i=1,5
              itime_start(i)=itime_now(i)
            end do
+           if(itime_tape_start(1) .eq. 0) then
+             do i=1,5
+               itime_tape_start(i)=itime_start(i)
+             end do
+           endif
+
            kdata_start=.true.
            counter_prev=counter_data_valid_on           !previous start of data.
            counter_data_valid_on=counter_now
