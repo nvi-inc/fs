@@ -62,6 +62,7 @@ main()
     setup_ids();
     sig_ignore();
     lnamef[0]=0;
+    umask(0);
 
 /* SECTION 2 */
 
