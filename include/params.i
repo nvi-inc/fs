@@ -9,6 +9,7 @@ c
       integer VLBA          ! VLBA comparison bit variable
       integer MK4           ! Mark IV comparison bit variable
       integer S2            ! S2 comparison bit variable
+      integer VLBA4         ! VLBA4 comparison bit variable
       integer VLBAG         ! VLBA geodesy rack
       integer VLBA2         ! VLBA drive type 2
       integer MK3B          ! Mark III 1 head
@@ -25,13 +26,17 @@ c
       parameter ( INT_CHARS=  4 )
       parameter ( INT_ALIGN=  2 )
       parameter ( MAXNRX_FS= 30 )
+C rack/drive
       parameter ( MK3 = z'01'   )
       parameter ( VLBA = z'02'  )
       parameter ( MK4 = z'04'   )
       parameter ( S2  = z'08'   )
-      parameter ( VLBAG = z'10'  )
-      parameter ( VLBA2 = z'20'  )
-      parameter ( MK3B = z'40'  )
+      parameter ( VLBA4 = z'10' )
+C rack/drive _types
+      parameter ( VLBAG = z'100' )
+      parameter ( VLBA2 = z'200' )
+      parameter ( MK3B = z'400'  )
+C
       parameter ( FS_ROOT='/usr2')
       parameter ( MAX_BBC = 14 )
       parameter ( CH_PRIOR=-04)
