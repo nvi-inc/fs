@@ -32,29 +32,29 @@ typedef struct {
       
 COMMAND commands[] = {
 
-  { "::",com_thru,"End pfmed"},
-  { "dl",com_thru,"Display procedures in active library"},
-  { "ds",com_thru,"Display procedures, sorted"},
-  { "ed",com_thru,"Edit procedure"},
-  { "edit",com_thru,"Same as ed"},
-  { "emacs",com_thru,"emacs editor"},
-  { "ex",com_thru,"End pfmed"},
-  { "exit",com_thru,"End pfmed"},
-  { "help", com_help, "Display this text" },
-  { "li",com_thru,"List a procedure"},    
+  { "::",com_thru,   "::                  End pfmed"},
+  { "dl",com_thru,   "dl                  Display procedures in active library"},
+  { "ds",com_thru,   "ds                  Display procedures, sorted"},
+  { "ed",com_thru,   "ed[,proc]           Edit proc with program in EDITOR variable"},
+  { "edit",com_thru, "edit,[,proc]        Same as ed"},
+  { "emacs",com_thru,"emacs[,proc]        emacs editor"},
+  { "ex",com_thru,   "ex                  End pfmed"},
+  { "exit",com_thru, "exit                End pfmed"},
+  { "help",com_help, "help                Display this text" },
+  { "li",com_thru,   "li,proc             List a procedure"},    
 
-  { "pf",com_thru,"Set active procedure library"},
-  { "pfcr",com_thru,"Create procedure library"},
-  { "pfdl",com_thru,"Display procedure libraries "}, 
-  { "pfpu",com_thru,"Delete procedure library"},
-  { "pfrn",com_thru,"Rename procedure library"},
-  { "pfst",com_thru,"Create procedure library"},
-  { "pu", com_thru, "Delete a procedure"},
-  { "qu",com_thru,"End pfmed"},
-  { "quit",com_thru,"End pfmed"},
-  { "rn", com_thru, "Rename a procedure"},
-  { "st",com_thru, "Copy a procedure"},  
-  { "vi",com_thru,"vi editor"},
+  { "pf",com_thru,   "pf,lib              Set active procedure library"},
+  { "pfcr",com_thru, "pfcr,lib            Create procedure library"},
+  { "pfdl",com_thru, "pfdl                Display procedure libraries "}, 
+  { "pfpu",com_thru, "pfpu,lib            Delete procedure library"},
+  { "pfrn",com_thru, "pfrn,old,new        Rename procedure library"},
+  { "pfst",com_thru, "pfst,old,new        Create procedure library"},
+  { "pu", com_thru,  "pu,proc             Delete a procedure"},
+  { "qu",com_thru,   "qu                  End pfmed"},
+  { "quit",com_thru, "quit                End pfmed"},
+  { "rn", com_thru,  "rn,old,new          Rename a procedure"},
+  { "st",com_thru,   "st,old[::lib],new   Copy a procedure"},  
+  { "vi",com_thru,   "vi[,proc]           vi editor"},
   
   { (char *)NULL, (Function *)NULL, (char *)NULL}
 
@@ -443,7 +443,7 @@ com_help (arg)
     {
       if (!*arg || (strcmp (arg, commands[i].name) == 0))
         {
-          printf ("%s\t\t%s.\n", commands[i].name, commands[i].doc);
+          printf ("%s.\n", commands[i].doc);
           printed++;
         }
     }
