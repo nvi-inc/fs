@@ -72,6 +72,10 @@ void cshm_init()
   for(i=0; i<64; i++)
     shm_addr->form4.codes[i]=-1;
 
+  shm_addr->thin=-1;
+  shm_addr->vacsw=0;
+
+  shm_addr->vac4=-1;
   return;
 }
 
