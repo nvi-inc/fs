@@ -113,11 +113,11 @@ C
       if (MK4.eq.and(MK4,drive)) then
         ncx=nch
         if (z1.eq.and(ia2hx(ibuf,10),z1)) then
-          nch = ichmv_ch(ibuf2,nch,'stack1')
+          nch = ichmv_ch(ibuf2,nch,'s1')
           nch = mcoma(ibuf2,nch)
         endif
         if (z1.eq.and(ia2hx(ibuf,8),z1)) then
-          nch = ichmv_ch(ibuf2,nch,'stack2')
+          nch = ichmv_ch(ibuf2,nch,'s2')
           nch = mcoma(ibuf2,nch)
         endif
         if (nch.eq.ncx) then
@@ -136,11 +136,11 @@ C
       if (MK4.eq.and(MK4,drive)) then
         call fs_get_kena(kenastk)
         if (kenastk(1)) then
-          nch = ichmv_ch(ibuf2,nch,'stack1')
+          nch = ichmv_ch(ibuf2,nch,'s1')
           nch = mcoma(ibuf2,nch)
         endif
         if (kenastk(2)) then
-          nch = ichmv_ch(ibuf2,nch,'stack2')
+          nch = ichmv_ch(ibuf2,nch,'s2')
           nch = mcoma(ibuf2,nch)
         endif
         if ((.not.kenastk(1)).and.(.not.kenastk(2))) then
