@@ -20,6 +20,11 @@ static int
 get_station_field(Station *station,int n,int *link, int * name,
 		  char **value, char **units);
 static int
+get_data_transfer_field(Data_transfer *data_transfer,int n,int *link, 
+			int * name,
+			char **value,
+			char **units);
+static int
 get_axis_type_field(Axis_type *axis_type,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -173,6 +178,7 @@ static  struct {
   {"source", T_SOURCE},
   {"mode", T_MODE},
   {"station", T_STATION},
+  {"data_transfer", T_DATA_TRANSFER},
     
   {"antenna_diam", T_ANTENNA_DIAM},
   {"axis_type", T_AXIS_TYPE},
@@ -436,6 +442,23 @@ struct station  *make_station(char *key, struct dvalue *start,
   new->pass=pass;
   new->sector=sector;
   new->drives=drives;
+  return new;
+}
+
+struct data_transfer  *make_data_transfer(char *key, char *method, 
+					  char *destination,
+					  struct dvalue *start,
+					  struct dvalue *stop, 
+					  char *options)
+{
+  NEWSTRUCT(new,data_transfer);
+
+  new->key=key;
+  new->method=method;
+  new->destination=destination;
+  new->start=start;
+  new->stop=stop;
+  new->options=options;
   return new;
 }
 
@@ -923,6 +946,9 @@ char **units)
   case T_STATION:
     ierr=get_station_field(ptr,n,link,name,value,units);
     break;
+  case T_DATA_TRANSFER:
+    ierr=get_data_transfer_field(ptr,n,link,name,value,units);
+    break;
   case T_AXIS_TYPE:
     ierr=get_axis_type_field(ptr,n,link,name,value,units);
     break;
@@ -1172,6 +1198,54 @@ get_station_field(Station *station,int n,int *link,int *name,char **value,
       fprintf(stderr,"unknown error in get_station_field %d\n",ierr);
       exit(1);
     }
+  }
+  return 0;
+}
+static int
+get_data_transfer_field(Data_transfer *data_transfer,int n,int *link,
+			int *name,char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=data_transfer->key;
+    break;
+  case 2:
+    *value=data_transfer->method;
+    break;
+  case 3:
+    *value=data_transfer->destination;
+    break;
+  case 4:
+    *value=data_transfer->start->value;
+    *units=data_transfer->start->units;
+    *name=0;
+    break;
+  case 5:
+    *value=data_transfer->stop->value;
+    *units=data_transfer->stop->units;
+    *name=0;
+    break;
+  case 6:
+    *value=data_transfer->options;
+    break;
+  default:
+      return -1;
+    /*    if(n < 1 )
+      return -1;
+    ierr=get_dvalue_list_field(station->drives,n-6,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_data_transfer_field %d\n",ierr);
+      exit(1);
+      }*/
   }
   return 0;
 }

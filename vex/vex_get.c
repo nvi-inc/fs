@@ -1126,5 +1126,115 @@ get_all_literals(struct llist *literals, char *array[])
     literals = get_literal_lowl_next();
   }
 }
+/*---------------------------------------------------------------------------*/
+void *
+get_scan_data_transfer_next(Llist **lowls_scan, char **scanid)
+{
+  return get_scan_data_transfer(lowls_scan, scanid, NULL,NULL);
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_scan_data_transfer(Llist **lowls_scan, char **scanid, 
+		       char *data_transfer_in, struct vex *vex_in)
+{
+
+  static Llist *lowls;
+  static Llist *defs;
+
+  Llist *blocks;
+  Llist *lowls_this;
+
+  static char *data_transfer;
+  static struct vex *vex;
+
+  static int state=FALSE;
+  static char *save_scanid;
+
+  if(data_transfer_in==NULL && !state)
+     return NULL;
+
+  if(data_transfer_in!=NULL) {
+    data_transfer=data_transfer_in;
+    vex=vex_in;
+    state=FALSE;
+  }
+
+  if(state)
+    goto lstate;
+ 
+  /* find $SCHED block */
+
+  blocks=find_block(B_SCHED, vex);
+  if(blocks==NULL)
+    goto ldone;
+
+  defs=((struct block *)blocks->ptr)->items; 
+
+lstart:
+  /* find a def */
+
+  defs=find_next_scan(defs);
+
+  if (defs==NULL)
+    goto ldone;
+
+  *lowls_scan=((Def *)((Lowl *)defs->ptr)->item)->refs;
+  save_scanid=((Def *)((Lowl *)defs->ptr)->item)->name;
+
+  lowls=*lowls_scan;
+
+lstate:
+  lowls=find_lowl(lowls,T_DATA_TRANSFER);
+  if(lowls==NULL)
+    goto lend;
+
+  if(0!=strcmp(((struct data_transfer *)((Lowl *)lowls->ptr)->item)->key,
+	       data_transfer)) {
+    lowls=lowls->next;
+    goto lstate;
+  }
+
+  state=TRUE;
+
+  *scanid=save_scanid;
+  lowls_this=lowls;
+  lowls=lowls->next;
+  return ((Lowl *)lowls_this->ptr)->item;
+
+lend:
+  defs=defs->next;
+    goto lstart;
+
+ldone:
+    state=FALSE;
+    return NULL;
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_data_transfer_scan_next()
+{
+  return get_data_transfer_scan(NULL);
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_data_transfer_scan(Llist *lowls_in)
+{
+  Llist *lowls_this;
+  static Llist *lowls;
+
+  if(lowls_in!=NULL)
+    lowls=lowls_in;
+
+  lowls=find_lowl(lowls,T_DATA_TRANSFER);
+  if(lowls==NULL)
+    goto ldone;
+
+  lowls_this=lowls;
+  lowls=lowls->next;
+  return ((Lowl *)lowls_this->ptr)->item;
+
+ldone:
+    return NULL;
+}
 
 
