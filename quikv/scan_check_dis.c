@@ -46,7 +46,7 @@ long ip[5];
 	  ip[3] = -401;
 	  goto error;
 	}
-	if(i==1)
+	if(i==0)
 	  if(0!=m5_2_scan_check(inbuf,&lclm,ip)) {
 	    cls_clr(class);
 	    return;
