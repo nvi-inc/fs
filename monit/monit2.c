@@ -15,12 +15,13 @@
 #include "../include/fscom.h"
 
 extern struct fscom *shm_addr;
-int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack;
+int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack,
+  kK4drive,kK41drive_type,kK42drive_type;
 
 main()
 {
   int it[6], iyear, isleep;
-  int rack,drive;
+  int rack,drive,drive_type;
 
   int m2init();
   int mout2();
@@ -44,9 +45,15 @@ main()
   kV4rack=rack==VLBA4;
 
   drive=shm_addr->equip.drive;
+  drive_type=shm_addr->equip.drive_type;
   kMdrive=drive==MK3 || drive==MK4;
   kVdrive=drive==VLBA;
   kS2drive=drive==S2;
+  kK4drive=drive==K4;
+  if(kK4drive) {
+    kK41drive_type=drive_type=K41;
+    kK42drive_type=drive_type=K42;
+  }
 
   initscr();
   signal(SIGINT, die);
