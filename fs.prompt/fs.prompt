@@ -5,16 +5,16 @@
 # as it allows commands to be typed in in the oprin window while fs.prompt
 # is running. The first parameter is the string to display in the window.
 # Usage for not blocking operator input into oprin: 
-#	sy=fs.prompt "Please do xxxx" 1 &
-#	halt
+#       sy=fs.prompt "Please do xxxx" 1 &
+#       halt
 # Usage where blocking is required:
-#	fs.prompt "Please do xxxx" 
+#	sy=fs.prompt "Please do xxxx"
 # note that the "&" causes the program to be run in the background so that no
 # blocking occurs. The parameter "1" causes a "cont" to be sent to the Field
 # system to continue after the "halt" in a schedule has been made.
 #
 # Paul Harbison Canberra Deep Space Communications Complex February 1998
-# weh removed some DSN specifices, renamed fs.prompt Feb 2001
+# weh removed some DSN specifics, renamed fs.prompt Feb 2001
 #
 set prompt [lindex $argv 0]
 set cont [lindex $argv 1]
