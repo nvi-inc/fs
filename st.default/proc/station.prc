@@ -46,7 +46,7 @@ tapeformc
 pass=$,same
 enable=g2,g4
 tape=low
-repro=byp,6,18,2
+repro=byp,6,18
 decode=a,crc
 decode
 enddef
@@ -59,7 +59,7 @@ tapeformc
 pass=$,same
 enable=g1,g3
 tape=low
-repro=byp,5,17,2
+repro=byp,5,17
 decode=a,crc
 decode
 enddef
@@ -173,7 +173,7 @@ parity=,,ab,on,g1,g3
 fastr=15s
 !+6s
 !*
-st=for,120,off
+st=for,135,off
 !+4s
 repro=raw,1,3
 parity
@@ -187,11 +187,11 @@ define  check2c2      00000000000x
 check=*,-tp,-hd
 enable=
 decode=a,crc,byte
-parity=,,ab,on,g1,g3
+parity=,,ab,on,g2,g4
 fastf=15s
 !+6s
 !*
-st=rev,120,off
+st=rev,135,off
 !+4s
 repro=raw,2,4
 parity
@@ -328,7 +328,7 @@ define  ready         00000000000x
 sxcts
 rxmon
 newtape
-st=for,120,off
+st=for,135,off
 !+11s
 et
 !+3s
@@ -455,7 +455,7 @@ tapeformc
 pass=$,same
 enable=g1,g3
 tape=low
-repro=byp,5,17,2
+repro=byp,5,17
 decode=a,crc
 decode
 enddef
@@ -468,7 +468,7 @@ tapeformc
 pass=$,same
 enable=g2,g4
 tape=low
-repro=byp,6,18,2
+repro=byp,6,18
 decode=a,crc
 decode
 enddef
@@ -545,7 +545,7 @@ define  unlod         00000000000x
 enable=,
 check=*,-tp
 tape=off
-st=rev,120,off
+st=rev,135,off
 xdisp=on
 "**************dismount this tape now************"
 wakeup
@@ -664,7 +664,7 @@ tapeformc
 pass=$,same
 enable=g1,g3
 tape=low
-repro=byp,5,17,2
+repro=byp,5,17
 decode=a,crc
 decode
 enddef
@@ -677,7 +677,7 @@ tapeformc
 pass=$,same
 enable=g2,g4
 tape=low
-repro=byp,6,18,2
+repro=byp,6,18
 decode=a,crc
 decode
 enddef
