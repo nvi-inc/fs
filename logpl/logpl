@@ -2033,7 +2033,7 @@ label .labelStatusMsg -textvariable statusMsg
 
 frame .plotwindowframe
 
-focus default .
+focus .
 
 menu .mbar.file.menu
 menu .mbar.edit.menu
