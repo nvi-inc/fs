@@ -10,6 +10,7 @@ C
 C History:
 C 960527 nrv New.
 C 970114 nrv Change 8 to max_sorlen
+C 971003 nrv Suppress messages from the IAU name checker
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -22,6 +23,7 @@ C LOCAL:
       integer iret ! return from vex routines
       double precision rah,decd,radh,decdd,tjd ! for APSTAR
       integer isor,ierr1,i,iep,j,il,idum
+      integer luiau ! set to -1 for IAU name messages
       character*128 cout
       integer julda,ichcm_ch,ichmv ! functions
       integer ptr_ch,fget_source_def,fvex_len
@@ -120,7 +122,9 @@ C
         END IF  !"convert to J2000"
         SORP50(1,NCELES) = RARAD   !J2000 position
         SORP50(2,NCELES) = DECRAD  !J2000 position
-        call ckiau(liau,lcom,rarad,decrad,lu)
+C       Suppress messages from the IAU name checker
+        luiau=-1
+        call ckiau(liau,lcom,rarad,decrad,luiau)
         endif ! continue
 C
       enddo ! get each source information
