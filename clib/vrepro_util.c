@@ -12,7 +12,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
                                               /* parameter keywords */
 static char *key_mode[ ]={ "read", "byp" };
-static char *key_equ[ ]={ "std", "alt1", "alt2" };
+static char *key_equ[ ]={ "std", "alt1", "alt2", "1", "0.5", "0.25" };
 
                                      /* number of elements in keyword arrays */
 #define NKEY_MODE sizeof(key_mode)/sizeof( char *)
@@ -140,40 +140,36 @@ void vrepro94mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-     *data= (bits16on(2) & lcl->equalizer[ 0]);
+  int idflt;
 
-     return;
-}
-
-void vreproa8mc(data,lcl)
-unsigned *data;
-struct vrepro_cmd *lcl;
-{
-  int speed;
-
-  speed=2;
-  if(shm_addr->equip.drive_type == VLBA2) {
-/* we don't knwo what to do for "alt2" on VLBA2 drive */
-    if (lcl->equalizer[ 0] == 0 )
-        speed = 1;
-  } else {
-/* we don't knwo what to do for "std" on VLBA drive */
-    if (lcl->equalizer[ 0] == 1)
-	speed = 1;
-  }
-
-     *data= 0x24;  /* double speed & unknown */
-     if (speed == 1) 
-          *data= 0x34;   /* normal speed */
-
-     return;
+  if(lcl->equalizer[ 0] >= 3 ) {
+    if (shm_addr->equip.drive_type == VLBA2)
+      idflt=0;  /* standard is default for VLBA2 */
+    else
+      idflt=1; /* alt.1 is default for VLBA */
+  } else
+    idflt=lcl->equalizer[ 0];
+      
+  *data= (bits16on(2) & idflt);
+  
+  return;
 }
 
 void vrepro95mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-     *data= (bits16on(2) & lcl->equalizer[ 1]);
+  int idflt;
+
+  if(lcl->equalizer[ 1] >= 3 ) {
+    if (shm_addr->equip.drive_type == VLBA2)
+      idflt=0;  /* standard is default for VLBA2 */
+    else
+      idflt=1; /* alt.1 is default for VLBA */
+  } else
+    idflt=lcl->equalizer[ 1];
+
+  *data= (bits16on(2) & idflt);
 
      return;
 }
@@ -210,6 +206,39 @@ struct vrepro_cmd *lcl;
 
      return;
 }
+
+void vreproa8mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+  int speed;
+
+  speed=2;
+  if(shm_addr->equip.drive_type == VLBA2) {
+/* we don't knwo what to do for "alt2" on VLBA2 drive */
+    if (lcl->equalizer[ 0] == 0 )
+        speed = 1;
+  } else {
+/* we don't knwo what to do for "std" on VLBA drive */
+    if (lcl->equalizer[ 0] == 1)
+	speed = 1;
+  }
+
+  if(lcl->equalizer[ 0]==3) {
+    *data=0x44;
+  } else if (lcl->equalizer[ 0]==4) {
+    *data=0x54;
+  } else if (lcl->equalizer[ 1]==5) {
+    *data=0x64;
+  } else if (speed == 1) {
+    *data= 0x34;   /* normal speed */
+  } else {
+    *data= 0x24;  /* double speed & unknown */
+  }
+
+  return;
+}
+
 
 void mc90vrepro(lcl, data)
 struct vrepro_cmd *lcl;
