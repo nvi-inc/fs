@@ -5,6 +5,6 @@ int it[6];
 time_t *seconds;
 {
  
-  rte2secs(seconds,it);
+  secs2rte(seconds,it);
 
 }
