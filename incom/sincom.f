@@ -155,7 +155,7 @@ C                   Initialize previous segment name for LINKP
         idummy = ichmv_ch(lfreqv(1,i),1,'000.00')
       enddo
       call fs_set_lfreqv(lfreqv)
-      iratfm = 0
+      iratfm = -1
       call fs_set_iratfm(iratfm)
       imodfm = 1
       call fs_set_imodfm(imodfm)
@@ -189,6 +189,8 @@ C                   Initialize previous segment name for LINKP
       call fs_set_ichvkrepro(ichvkrepro)
       ichvkenable=.false.
       call fs_set_ichvkenable(ichvkenable)
+      ichsystracks=.false.
+      call fs_set_ichsystracks(ichsystracks)
       ichvkmove=.false.
       call fs_set_ichvkmove(ichvkmove)
       ichvklowtape=.false.
@@ -367,6 +369,10 @@ c
       do i=1,4
         iswif3_fs(i)=1
       enddo
+C
+C  initialize "C" shared memory area
+C
+      call fc_cshm_init
 C
 C  3. Open the file which contains the station-dependent
 C     information: LOCATION.CTL
@@ -612,16 +618,23 @@ C LINE #7  TYPE OF RACK - rack
       if (ic1.eq.0) goto 320
       if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
         rack = MK3
+        rack_type = MK3
+      else if (ichcm_ch(ibuf,ic1,'vlbag').eq.0) then
+        rack = VLBA
+        rack_type = VLBAG
       else if (ichcm_ch(ibuf,ic1,'vlba').eq.0) then
         rack = VLBA
+        rack_type = VLBA
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         rack = MK4
+        rack_type = MK4
       else
         call logit7ci(0,0,0,1,-140,'bo',7)
         ierrx = -1
         goto 990
       endif
       call fs_set_rack(rack)
+      call fs_set_rack_type(rack_type)
 C LINE #8  TYPE OF RECORDER - drive
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
@@ -790,6 +803,23 @@ C LINE #19  if3 switches
         call logit7ci(0,0,0,1,-140,'bo',19)
         ierrx = ierr
       endif
+C LINE #20 DS board in vlba FM ?
+      vfm_xpnt=0
+      call fs_set_vfm_xpnt(vfm_xpnt)
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      if (ichcm_ch(ibuf,ic1,'a/d').eq.0) then
+         vfm_xpnt=0
+      else if(ichcm_ch(ibuf,ic1,'dsm').eq.0) then
+         vfm_xpnt=1
+      else
+        call logit7ci(0,0,0,1,-140,'bo',20)
+        ierrx = -1         
+      endif
+      call fs_set_vfm_xpnt(vfm_xpnt)
 C
 320   continue
       call fmpclose(idcb,ierr)
@@ -926,6 +956,7 @@ C
         if(i.eq.3) rpro_fs=idum
         if(i.eq.4) rpdt_fs=idum
       enddo
+      call fs_set_wrhd_fs(wrhd_fs)
 C
 C INCHWORM PARAMETERS
 C
