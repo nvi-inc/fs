@@ -46,3 +46,16 @@ $print
 * Recognized names: laser, epson, epson24, file. 
 *
 printer      laser
+*
+* Printer scripts: enter name of script to be executed 
+* for different types of output. Recognized key words
+* are: portrait, landscape, labels. If no label script
+* is specified, drudg defaults to using "lpr". If no
+* portrait or landscape scripts are specified, drudg
+* defaults to embedding escape sequences for the
+* appropriate output and uses "recode latin1:ibmpc"
+* piped to lpr to print the output file. 
+* Formats: 
+* portrait <script name for portrait output>
+* landscape <script name for landscape output>
+* labels <script name for bar code label output>
