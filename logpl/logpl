@@ -997,7 +997,8 @@ proc Replot {} {
 		set channelpos($counter) 1
 	    }
 	}	
-	if {$noactive != $oldactive} {
+# Also, if not in interactive mode, all channels must be replotted.
+	if {[expr {$noactive != $oldactive}] || [expr {$global_startmode != 0}]} {
 	    set xchangeFlag 1
 	    set oldactive $noactive
 	    .c delete coordsys
