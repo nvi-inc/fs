@@ -38,3 +38,4 @@
 #include "k4vcbw_ds.h"
 #include "k3fm_ds.h"
 #include "k4label_ds.h"
+#include "k4rec_mode_ds.h"
