@@ -23,7 +23,7 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       if (command->equal == '=' ) {
-	ierr=-201;
+	ierr=-301;
 	goto error;
       }
 
@@ -42,6 +42,6 @@ error:
       ip[0]=0;
       ip[1]=0;
       ip[2]=ierr;
-      memcpy(ip+3,"5o",2);
+      memcpy(ip+3,"5c",2);
       return;
 }
