@@ -25,8 +25,17 @@ static char *key_mode[ ]={ "prn", "v"  , "m"  , "a"  , "b"  , "c"  ,
                            "d22", "d23", "d24", "d25", "d26", "d27", "d28"};
 #define NKEY_MODE sizeof(key_mode)/sizeof( char *)
 
+static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
+                           "e1" , "e2" , "e3" , "e4" ,
+                           "d1" , "d2" , "d3" , "d4" , "d5" , "d6" , "d7" ,
+                           "d8" , "d9" , "d10", "d11", "d12", "d13", "d14",
+                           "d15", "d16", "d17", "d18", "d19", "d20", "d21",
+                           "d22", "d23", "d24", "d25", "d26", "d27", "d28"};
+
+#define NKEY_MODE4 sizeof(key_mode4)/sizeof( char *)
+
 extern struct fscom *shm_addr;
-extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive;
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack;
 
 mout2(it,iyear)
 
@@ -162,7 +171,7 @@ int iyear;
       mode[i]=' ';
     mode[sizeof(mode)-1]=0;
     printw(mode);
-  } else if (kMrack) {
+  } else if (kM3rack) {
     switch (shm_addr->imodfm) {
     case 0:
       printw("  a ");
@@ -179,6 +188,12 @@ int iyear;
     default:
       printw("    ");
     }
+  } else if(kM4rack) {
+    ivalue=shm_addr->form4.mode;
+    if(ivalue >= 0 && ivalue <= NKEY_MODE4)
+      printw("%-4s",key_mode4[ivalue]);
+    else
+      printw("    ");
   } else if(kVrack) {
     ivalue=shm_addr->vform.mode;
 /* hex value for version 290 */
@@ -200,7 +215,7 @@ int iyear;
       printw("$");
     else if(shm_addr->rec_mode.group>=0)
       printw("%1d",0x7&shm_addr->rec_mode.group);
-  } else if (kMrack) {
+  } else if (kM3rack) {
     switch (shm_addr->iratfm) {
     case 0:
       printw("8.000");
@@ -228,6 +243,39 @@ int iyear;
       break;
     default:
       printw("     ");
+    }
+  } else if (kM4rack) {
+    switch (shm_addr->form4.rate) {
+    case 0:
+      printw("0.125");
+      break;
+    case 1:
+      printw("0.250");
+      break;
+    case 2:
+      printw("0.500");
+      break;
+    case 3:
+      printw("1.000");
+      break;
+    case 4:
+      printw("2.000");
+      break;
+    case 5:
+      printw("4.000");
+      break;
+    case 6:
+      printw("8.000");
+      break;
+    case 7:
+      printw("16.00");
+      break;
+    case 8:
+      printw("32.00");
+      break;
+    default:
+      printw("     ");
+      break;
     }
   } else if (kVrack) {
     switch (shm_addr->vform.rate) {
