@@ -231,6 +231,25 @@ c
       else
         call fc_putln('rclcn initialized')
       endif
+c
+c  initialize mk5cn
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('mk5cn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-192,'bo',ierr)
+        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call fc_putln('mk5cn initialization failed')
+        if(ip(5).eq.0) then
+           ip(3)=0
+           ierr=0
+        endif
+      else
+        call fc_putln('mk5cn initialized')
+      endif
 C
 C     1.18 Start first log file
 C
