@@ -100,7 +100,7 @@ int *no_after;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"RC");
+	logita(NULL,-(540 + ibser),"ib","RC");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"RC",2);
       return -1;
@@ -134,7 +134,7 @@ int *no_after;
 	return -1;
       } else if(ibsta&(S_ERR|S_TIMO)) {
 	if(ibser!=0)
-	  logit(NULL,-(540 + ibser),"RS");
+	  logita(NULL,-(540 + ibser),"ib","RS");
 	*error = -(IBSCODE + iberr);
 	memcpy((char *)ipcode,"RS",2);
 	return -1;
@@ -167,7 +167,7 @@ int *no_after;
 	return -1;
       } else if(ibsta&(S_ERR|S_TIMO)) {
 	if(ibser!=0)
-	  logit(NULL,-(540 + ibser),"RT");
+	  logita(NULL,-(540 + ibser),"ib","RT");
 	*error = -(IBSCODE + iberr);
 	memcpy((char *)ipcode,"RT",2);
 	return -1;
@@ -210,7 +210,7 @@ int *no_after;
       return(-1);
     } else if ((ibsta & S_ERR) != 0) { /* if not, some other type of error */
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"RE");
+	logita(NULL,-(540 + ibser),"ib","RE");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"RE",2);
       return(-1);
@@ -244,7 +244,7 @@ int *no_after;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"RD");
+	logita(NULL,-(540 + ibser),"ib","RD");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"RD",2);
       return -1;

@@ -164,7 +164,7 @@ Repeat:
     ierr=get_rclcn_error_decode(&res_buf,err_msg);
     first=strchr(err_msg,':');
     if(first == NULL) {
-      logit(NULL,0,-902,"er");
+      logit(NULL,-902,"er");
       goto none;
     }
     first+=2;
