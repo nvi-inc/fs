@@ -101,7 +101,12 @@ C
 C  VC bandwidth choices.
 C 
 301   continue
-      val = das2b(ias,ic1,ic2-ic1+1,ierr) 
+      ilp=iscn_ch(ias,ic1,ic2,'(')
+      if(ilp.ne.0) then
+         val = das2b(ias,ic1,ilp-ic1,ierr) 
+      else
+         val = das2b(ias,ic1,ic2-ic1+1,ierr) 
+      endif
       if (ierr.ne.0) return 
       call fs_get_rack(rack)
       if (rack.eq.and(MK4,rack)) then
