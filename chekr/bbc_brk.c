@@ -42,7 +42,7 @@ int *ierr;
     shm_addr->bbc_tpi[ind][0]=65536;
     shm_addr->bbc_tpi[ind][1]=65536;
      clr_res(&buffer);
-     *ierr=-201;
+     *ierr=-200;
      return;
   }
   clr_res(&buffer);
