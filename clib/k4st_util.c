@@ -113,7 +113,8 @@ long ip[5];
     lclc->record=0;
   else if(strcmp(buffer,"DRC=REC")==0)
     lclc->record=1;
-  else if(strcmp(buffer,"DRC=STP")==0)
+  else if((strcmp(buffer,"DRC=STP")==0 && shm_addr->equip.drive_type == K41) ||
+	  (strcmp(buffer,"DRC=STOP")==0 && shm_addr->equip.drive_type == K42))
     lclc->record=2;
   else if(strcmp(buffer,"DRC=EJC")==0)
     lclc->record=3;
