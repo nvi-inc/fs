@@ -1,0 +1,41 @@
+To install rc.fs to allocate fs and st resources at boot time.
+
+    log in as root
+    prompt> cd /etc/init.d
+    prompt> cp -a /usr2/fs/misc/rc.fs fs
+    prompt> update-rc.d fs start 90 S
+
+To add other station specific daemons using scripts
+
+    log in as root
+    prompt> cd /etc/init.d
+    prompt> cp -a <path to script>/<script> <script>
+    prompt> update-rc.d <script> default
+
+where you supply the correct <path to script> and <script> name.
+
+For more information, the following suggestions were supplied by
+Jonathan Quick (HartRAO):
+
+ First of all you need to read the documentation in
+
+	/etc/init.d/README
+	/usr/share/doc/sysvinit/README.runlevels.gz
+
+which I read to say that you shouldn't be starting the daemons in rcS.d
+anyway but rather via symlinks in rc2.d, rc3.d, rc4.d and rc5.d.
+
+The easiest way to setup all the required links is to use 'update-rc.d'
+so try
+
+	man update-rc.d
+
+for more information, then 
+
+	update-rc.d <scriptname> defaults
+
+to actually do the job on /etc/init.d/<scriptname>.  Apparently the file
+
+	/etc/init.d/skeleton
+
+is an example to base your init.d script on.

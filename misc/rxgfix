@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+# Usage: rxgfix [files]
+
+if ($#ARGV < 0) {
+    print "Usage: rxgfix [files]\n";
+    print "\n";
+    print "Fixes a pre-opacity .rxg to include Trec and TspillA\n";
+    print "\n";
+    print "files are the files to be fixed\n";
+
+    exit -1;
+}
+
+
+FILE: foreach $file (@ARGV) {
+    open(IN,"<$file") 
+	|| do {warn "can't open $file: $! for reading\n";next;};
+    open(OUT,">>$file")
+	|| do {warn "can't open $file: $! for appending\n";next;};
+
+    while(<IN>) {
+	if (/end_tcal_table/) {
+	    next FILE;
+	}
+    }
+    print OUT "*\n";
+    print OUT "*tcal table ends with end_tcal_table record\n";
+    print OUT "*\n";
+    print OUT "end_tcal_table\n";
+    print OUT "*\n";
+    print OUT "* Trec - receiver temperature, degrees K\n";
+    print OUT "*\n";
+    print OUT "* if value is zero, no opacity corrections are used\n";
+    print OUT "*\n";
+    print OUT " 0.0\n";
+    print OUT "*\n";
+    print OUT "* Spillover table\n";
+    print OUT "*\n";
+    print OUT "* format:\n";
+    print OUT "* elevation temperature\n";
+    print OUT "* where:\n";
+    print OUT "*  elevation is angular degrees above horizon\n";
+    print OUT "*  temperature is Kelvin degrees of spillover noise\n";
+    print OUT "*\n";
+    print OUT "*spillover table ends with end_spillover_table record\n";
+    print OUT "*\n";
+    print OUT "end_spillover_table\n";
+    close IN
+	|| do {warn "can't close $file: $! for reading\n";next;}
+}
+
