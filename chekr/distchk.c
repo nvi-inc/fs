@@ -9,7 +9,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-void distchk_(imod,ierr,icherr)
+void distchk_(imod,icherr,ierr)
 int *imod;
 int *ierr;
 int icherr[5];
