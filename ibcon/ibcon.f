@@ -86,7 +86,7 @@ C        length of device file names, up to 64 characters
 C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen
-      integer rddev
+      integer rddev, opbrd, iserial,opdev, wrdev, idum
       integer idum,fc_rte_prior
       integer*2 moddev(imaxdev,idevln)
 C               - module device name
@@ -162,11 +162,11 @@ C
          goto 1090
       endif
       ingpib = iflch(idevgpib,idevln)
-      call opbrd(idevgpib,ingpib,ierr,ipcode)  	!! OPEN BOARD
+      iserial=opbrd(idevgpib,ingpib,ierr,ipcode)  	!! OPEN BOARD
       if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
       do i=1,ndev   !! OPEN DEVICES
         idlen = iflch(moddev(1,i),idevln)
-        call opdev(moddev(1,i),idlen,idevid(i),ierr,ipcode)
+        idum=opdev(moddev(1,i),idlen,idevid(i),ierr,ipcode)
         if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
       enddo
       kini = .true.
@@ -219,7 +219,7 @@ C
         goto 910
       endif
 
-      ireg = rddev(imode,idevid(idev),ibuf,ilen,ierr,ipcode)
+      ireg = rddev(imode,idevid(idev),ibuf,ilen,ierr,ipcode,300)
       if (ierr .eq. -4) then
         idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
       endif
@@ -251,7 +251,7 @@ C
         goto 910
       endif
 C
-      call wrdev(imode,idevid(idev),ibuf(3),nchar-4,ierr,ipcode)
+      idum=wrdev(imode,idevid(idev),ibuf(3),nchar-4,ierr,ipcode,300)
       if (ierr .eq. -4) then
         idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
       endif
@@ -290,21 +290,9 @@ C     CLEAR INTERFACE IF AN ERROR OCCURED
       ip(3) = ierr
       ip(5) = ipcode
       call char2hol('ib',ip(4),1,2)
-
+C
 C*************************** SUSPEND HERE **********************
-
-
-      if (ierr .EQ. -4) then
-	call ifclr(ierr,ipcode) 
-	if (ierr .LT. 0) call logit7ci(0,0,0,1,ierr,'ib',ipcode)
-        if (ierr .EQ. -300) then
-          call get_ibcnt(ibcnt)
-          call logit7ci(0,0,0,1,-9,'ib',ibcnt)
-        endif
-      else if (ierr .EQ. -300) then
-        call get_ibcnt(ibcnt)
-        call logit7ci(0,0,0,1,-9,'ib',ibcnt)
-      endif
+C
       if(ierr.eq.-322) kgpib=.false.
 c
       goto 1
