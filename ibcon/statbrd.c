@@ -76,7 +76,7 @@ int *kecho;
 #endif
   } else {
     sprintf(buf,"wa 0\r");
-    ierr=sib(ID_hpib,buf,0,0,*timeout,0,centisec);
+    ierr=sib(ID_hpib,buf,-1,0,*timeout,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
