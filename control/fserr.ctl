@@ -1106,9 +1106,6 @@ Error in 4th track specified.  Must be G1,G2,G3,G4,1,...28.
 QE -205
 Error in 5th track specified.  Must be G1,G2,G3,G4,1,...28.
 ""
-QE -206
-Request for odd and even tracks with odd or even write electronics.
-""
 QE -207
 Write electronics variable from HEAD.CTL incorrectly set.
 ""
@@ -1150,6 +1147,15 @@ Track must be between 1 and 28.
 ""
 QG -208
 Track assignment must be between 0 and 35 and/or ALL.
+""
+QG -215
+Track assignment must be gX, mX, vX (x=0,...3) or 0, ..., 35.
+""
+QG -216
+Number with G, M, or V for track assignment must be between 0 and 3.
+""
+QG -217
+Track must be between 0 and 35.
 ""
 QG -302
 No class number available.
@@ -1218,34 +1224,34 @@ QK -101
 No default for the list of TPIs to be read.
 ""
 QK -201
-1st TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+1st TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -202
-2nd TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+2nd TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -203
-3rd TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+3rd TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -204
-4th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+4th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -205
-5th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+5th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -206
-6th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+6th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -207
-7th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+7th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -208
-8th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+8th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -209
-9th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+9th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -210
-10th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+10th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QL -101
 No default for the MAT address.
@@ -1581,7 +1587,7 @@ QZ -304
 Parameters were not successfully set up for FIVPT.
 ""
 QZ -401
-Number of repetitions must be between 1 and 10.
+Number of repetitions must be between 1 and 99.
 ""
 QZ -402
 Integration period must be between 1 and 10.
@@ -2144,11 +2150,17 @@ LSB gain value must be between -18.0 and 12.0.
 VB -401
 program error: incorrect number of responses in bbc.
 ""
-VE - 100
+VD -101
+No default for bit density.
+""
+VD -201
+Bit density must be a positive value.
+""
+VE -100
 No default for the tracks/groups to be enabled.
 ""
 VE -200
-List elements must be one of: g1, g2, g3, g4, d1, ..., d28.
+List elements must be one of: g0, g1, g2, g3, d1, ..., d28.
 ""
 VE -300
 Redundant list entries.
@@ -2165,8 +2177,14 @@ Mode must be one of: prn, a, b, c, d1, ..., d28.
 VF -202
 Rate must be one of: 0.25, 0.5, 1, 2, 4, 8, 16, 32.
 ""
+VF -203
+Fan must be on of 1:1, 1:2, 1:4, 4:1, 2:1, X0, X1, or X7.
+""
 VF -204
-Channel must be one of: at1, at2, at3, aaux, bt1, bt2, bt3, baux.
+Barrel-roll must be one of: off, 8:1, 8:2, 8:4, 16:1, 16:2, 16:4, off4.
+""
+VF -303
+Rate and fan ratio combination is not supported
 ""
 VF -401
 program error: incorrect number of responses in vform_dis.
@@ -2195,17 +2213,35 @@ IF averaging period must be one of: 0, 1, 2, 4, 10, 20, 40, or 60.
 VI -401
 program error: incorrect number of responses in dist_dec.
 ""
-V@   -1
-program error: missing class number in quikv.
+VM -100
+no default for trackform track number
 ""
-V@   -2
-Command too long for quikv to handle.
+VM -200
+trackform track must be 2-33.
 ""
-V@   -3
-Too many parameters in command for quikv to parse.
+VM -300
+trackform internal error, unknown rack_type
 ""
-V@   -4
-program error: unknown command in quikv.
+VM -301
+trackform internal error, bs2code type=NULL
+""
+VM -302
+trackform internal error, bs2code bs=NULL
+""
+VM -303
+trackform internal error, bs2code unknown rack_type
+""
+VM -304
+no default for trackform bitstream
+""
+VM -305
+unknown trackform bit-stream or not available for this rack
+""
+VN -100
+no default for tracks track number
+""
+VN -200
+tracks track must be an v0, v1, v2, v3, or 2-33.
 ""
 VR -201
 modeA must be read (raw), or byp.
@@ -2246,8 +2282,11 @@ No default for tape speed.
 VS -201
 Tape direction must be for or rev.
 ""
+VS -102
+No default for tape speed unless bit density and format are defined.
+""
 VS -202
-Tape speed must be one of: 3, 7, 15, 30, 60, 120, or 240.
+Tape speed must be one of actual or nominal values listed in manual.
 ""
 VS -203
 Record parameter must be on or off.
@@ -2264,5 +2303,29 @@ footage parameter must be either reset or >0 and <65536
 VT -302
 Can't set footage for a VLBA2 drive.
 ""
-VT -401
-program error: incorrect number of responses in tape.
+VT -201
+system tracks must be in the range 0-35
+""
+VT -202
+system tracks must be in the range 0-35
+""
+VT -203
+system tracks must be in the range 0-35
+""
+VT -204
+system tracks must be in the range 0-35
+""
+VX -401
+program error: incorrect number of responses in systracks.
+""
+V@   -1
+program error: missing class number in quikv.
+""
+V@   -2
+Command too long for quikv to handle.
+""
+V@   -3
+Too many parameters in command for quikv to parse.
+""
+V@   -4
+program error: unknown command in quikv.
