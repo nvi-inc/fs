@@ -17,6 +17,9 @@ C 961020 nrv Add call to VUNPROLL and store the roll def in LBARREL
 C 961022 nrv Change MARK to Mark for checking rack/rec types.
 C 961101 nrv Don't complain if things are missing from the modes for 
 C            some stations. Just set nchan to 0 as a flag.
+C 970110 nrv Save the pass order list by code number.
+C 970114 nrv Call VUNPPRC to read $PROCEDURES. Store prefix. 
+C 970114 nrv Add polarization to VUNPIF call. Save LPOL per channel.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -34,6 +37,7 @@ C          frinit
 C          vunpfrq
 C          vunpbbc
 C          vunpif
+C          vunpprc
 C          vunptrk
 C          vunphead
 C
@@ -49,7 +53,7 @@ C  LOCAL:
       integer nsubpass
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhdpos,npl
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
-     .ls(max_ifd),ls2m(8)
+     .ls(max_ifd),ls2m(8),lpre(4),lp(max_ifd)
       double precision bitden
       character*4 croll
       character*3 cs(max_chan)
@@ -62,6 +66,8 @@ C  LOCAL:
       integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
       integer ptr_ch,fvex_len,fget_mode_def
       logical km3rack,km4rack,kvrack,km4rec,km3rec,kvrec,ks2rec 
+      integer z4000,z100
+      DATA Z4000/Z'4000'/,Z100/Z'100'/
  
  
 C 1. First get all the mode def names. Station names have already
@@ -128,13 +134,25 @@ C         station, then skip the other sections.
             ierr1=1
           endif
 
+C         Get $PROCEDURES statements.
+C         (Get other procedure timing info later.)
+          call vunpprc(modedefnames(icode),stndefnames(istn),
+     .    ivexnum,iret,ierr,lu,lpre)
+          if (ierr.ne.0) then
+            write(lu,'("VMOINP03 - Error getting $PROCEDURES",
+     .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
+     .      iret,ierr
+            ierr1=1
+          endif
+
           if (nchdefs.gt.0) then ! continue getting other info
 C         Get $BBC statements.
           call vunpbbc(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,
      .    cbbcref,ivc,cbbifdref,nbbcdefs)
           if (ierr.ne.0) then 
-            write(lu,'("VMOINP03 - Error getting $BBC information",
+            write(lu,'("VMOINP04 - Error getting $BBC information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
@@ -144,9 +162,9 @@ C         Get $BBC statements.
 C         Get $IF statements.
           call vunpif(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,
-     .    cifdref,flo,ls,LIN,nifdefs)
+     .    cifdref,flo,ls,LIN,lp,nifdefs)
           if (ierr.ne.0) then 
-            write(lu,'("VMOINP04 - Error getting $IF information",
+            write(lu,'("VMOINP05 - Error getting $IF information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
@@ -164,7 +182,7 @@ C         Get $TRACKS statements (i.e. fanout).
      .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihd,ifanfac)
           endif
           if (ierr.ne.0) then 
-            write(lu,'("VMOINP05 - Error getting $TRACKS information",
+            write(lu,'("VMOINP06 - Error getting $TRACKS information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
@@ -181,7 +199,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
      .      indexp,pos1,pos2,nhdpos,cpassl,indexl,csubpassl,npl)
           endif
           if (ierr.ne.0) then 
-            write(lu,'("VMOINP06 - Error getting $HEAD_POS and",
+            write(lu,'("VMOINP07 - Error getting $HEAD_POS and",
      .      "$PASS_ORDER information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
@@ -193,7 +211,7 @@ C         Get $ROLL statements.
           call vunproll(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,croll)
           if (ierr.ne.0) then 
-            write(lu,'("VMOINP07 - Error getting $ROLL information",
+            write(lu,'("VMOINP08 - Error getting $ROLL information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
@@ -243,7 +261,7 @@ C    Save the chan_def info and its links.
             if (ib.le.nbbcdefs) then
               ibbcx(i,istn,icode) = ivc(ib) ! BBC number
             else
-              write(lu,'("VMOINPxx - BBC link missing for channel ",i3,
+              write(lu,'("VMOINP09 - BBC link missing for channel ",i3,
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
@@ -255,9 +273,10 @@ C           do while (ic.le.nifdefs.and.cbbifdref(i).ne.cifdref(ic))
             if (ic.le.nifdefs) then 
               lifinp(i,istn,icode) = lin(ic) ! IF input channel
               freqlo(i,istn,icode) = flo(ic) ! LO frequency
-              losb(i,istn,icode) = ls(ic)
+              losb(i,istn,icode) = ls(ic) ! LO sideband
+              lpol(i,istn,icode) = lp(ic) ! polarization
             else
-              write(lu,'("VMOINPxx - IFD link missing for channel ",i3,
+              write(lu,'("VMOINP10 - IFD link missing for channel ",i3,
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
@@ -270,7 +289,7 @@ C          Track assignments
                   ip=ip+1
                 enddo
                 if (ip.gt.nsubpass) then
-                  write(lu,'("VMOINPxx - Subpass not found for "
+                  write(lu,'("VMOINP11 - Subpass not found for "
      .            "channel ",i3,
      .            " for mode ",a," station ",a)') i,
      .            modedefnames(icode)(1:il),stndefnames(istn)(1:im)
@@ -320,7 +339,7 @@ C           If "56000" was specified, for this station, use higher bit density
               endif
             endif
             if (bitden_das.ne.bitden) then 
-              write(lu,'("VMOINPxx - Bit density ",f6.0," for ",a," ",a,
+              write(lu,'("VMOINP12 - Bit density ",f6.0," for ",a," ",a,
      .        " changed to ",f6.0)') bitden_das,
      .        modedefnames(icode)(1:il),
      .        stndefnames(istn)(1:im),bitden
@@ -328,7 +347,7 @@ C           If "56000" was specified, for this station, use higher bit density
             bitdens(istn,icode)=bitden
 C       Check number of passes and pass order indices
             if (npl.ne.nhdpos*nsubpass) then
-              write(lu,'("VMOINPxx - Inconsistent pass order list")')
+              write(lu,'("VMOINP13 - Inconsistent pass order list")')
             endif
             do ip=1,npl
               ix=1
@@ -336,7 +355,7 @@ C       Check number of passes and pass order indices
                 ix=ix+1
               enddo
               if (ix.gt.nhdpos) then
-                write(lu,'("VMOINPxx - Index ",i3," in $PASS_ORDER not ",
+                write(lu,'("VMOINP14 - Index ",i3," in $PASS_ORDER not ",
      .          "found in $HEAD_POS for ",a," ",a)') i,
      .          modedefnames(icode)(1:il),stndefnames(istn)(1:im)
               endif
@@ -344,7 +363,7 @@ C       Check number of passes and pass order indices
           endif ! m3/4 or v rec
 C    Store head positions and subpases
           do ip=1,npl
-            cpassorderl(ip,istn) = cpassl(ip)
+            cpassorderl(ip,istn,icode) = cpassl(ip)
           enddo
           if (km4rec.or.km3rec.or.kvrec) then
             do ip=1,npl
@@ -363,6 +382,16 @@ C    Store head positions and subpases
           else ! set nchan=0 as a flag
             nchan(istn,icode) = 0
           endif ! nchdefs>0 or =0
+
+C       Store the procedure prefix by station and code.
+        if (ichcm_ch(lpre,1,'      ').eq.0) then ! missing 
+C         Make up the mode name as "01_"
+          call ifill(lpre,1,8,oblank)
+          idum = ib2as(icode,lpre,1,z4000+2*z100+2)
+          idum = ichmv_ch(lpre,3,'_')
+        endif ! missing
+        idum = ichmv(lprefix(1,istn,icode),1,lpre,1,8)
+
         enddo ! for one station at a time
       enddo ! get all mode information
 
