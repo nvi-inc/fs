@@ -145,9 +145,9 @@ Messenger:
 /* SECTION 4 */
 
     strcpy(buf2,buf);
-    kack = (buf[9] == '/');
+    kack = (buf[13] == '/');
     if(kack) {
-      ich = memchr(buf+10, '/', bufl-11);
+      ich = memchr(buf+14, '/', bufl-14);
       /* ich now points to spot '/' */
       kack = (ich != NULLPTR);
       ich++;
