@@ -1,12 +1,12 @@
 #
 VERSION = 9
-SUBLEVEL = 6
-PATCHLEVEL = 9
+SUBLEVEL = 7
+PATCHLEVEL = 0
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrut vex rclco/rcl
+poclb skdrut vex rclco/rcl s2das
 #
 EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
@@ -17,7 +17,7 @@ gnfit gndat gnplt dscon
 all:	libs execs
 #
 dist:
-	rm -rf /tmp/fs-$(FS_VERSION).tar.gz /tmp/fsdist-exclude
+	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'core'     -print >  /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '#*#'      -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '*~'       -print >> /tmp/fsdist-exclude
@@ -27,7 +27,8 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                 >> /tmp/fsdist-exclude
-	cd /; tar -czf /tmp/fs-$(FS_VERSION).tar.gz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
+	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
+	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
 #
 clean:
 	rm -f `find . -name 'core' -print`
@@ -36,7 +37,7 @@ clean:
 	rm -f `find . -name '.*~' -print`
 #
 rmexe:
-	rm -f bin/*
+	rm -fr bin/*
 #
 rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
