@@ -55,9 +55,9 @@ C
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
 
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(MK3.eq.rack.or.MK4.eq.rack) then
         call tplis(ip,itpis)
-      else if (VLBA .eq. and(rack,VLBA)) then
+      else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
       endif
       
@@ -75,7 +75,7 @@ C
 C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(MK3.eq.rack.or.MK4.eq.rack) then
          do i=1,17 
             if (itpis(i).ne.0) then
                j = i+14

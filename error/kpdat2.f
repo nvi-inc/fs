@@ -12,9 +12,9 @@ C
       inext=1
       if (.not.kuse) inext=ichmv_ch(ibuf,inext,' 0  ')
       if (kuse) inext=ichmv_ch(ibuf,inext,' 1  ')
-      inext=inext+jr2as(sngl(ar1*rad2deg),ibuf,inext,-10,5,il)
+      inext=inext+jd2as(ar1*rad2deg,ibuf,inext,-10,5,il)
       inext=ichmv_ch(ibuf,inext,' ')
-      inext=inext+jr2as(sngl(ar2*rad2deg),ibuf,inext,-10,5,il)
+      inext=inext+jd2as(ar2*rad2deg,ibuf,inext,-10,5,il)
       inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(sngl(ar3*rad2deg),ibuf,inext,-10,5,il)
       inext=ichmv_ch(ibuf,inext,' ')

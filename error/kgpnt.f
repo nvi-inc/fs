@@ -5,10 +5,11 @@ C
 C
       character*(*) iibuf
       logical kuse
-      real lonr,lnofr,latr,ltofr
+      real lnofr,ltofr
       dimension idcb(1)
       integer*2 jbuf(il)
       integer ichcm_ch
+      double precision gtdbl,lonr,latr
 C
       logical kfild,kglin,kfound,kfmp
 C
@@ -48,8 +49,8 @@ C
       ilc=len*2
 C
       kuse=igtbn(jbuf,ifc,ilc,ifield,iferr).eq.1
-      lonr=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad
-      latr=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad
+      lonr=gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
+      latr=gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
       lnofr=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad
       ltofr=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad
       wlnr=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad

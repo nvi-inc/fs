@@ -97,7 +97,7 @@ c
 c lock the bbcs we are using to MAN gain mode
 c
       call fs_get_rack(rack)
-      if(VLBA.eq.and(rack,VLBA)) then
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call fc_mcbcn_d2(ldv1nf,ldv2nf,ierr,ip)
         if(ierr.ne.0) then
           ierr=-81
@@ -341,7 +341,7 @@ C
 C CLEAN UP AND EXIT 
 C 
 90000 continue
-      if(VLBA.eq.and(rack,VLBA)) then
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call fc_mcbcn_r2(ip)
         if(ip(3).lt.0) then
           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
