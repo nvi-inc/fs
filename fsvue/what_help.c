@@ -25,7 +25,7 @@ int clen;
 int rlen;
 {
   char string[MAX_STRING+1],*s1;
-  char *decloc;
+  char *decloc, *declocstr;
   int inum;
   FILE *idum;
   int freq,system();
@@ -42,8 +42,8 @@ int rlen;
   s1=strncpy(string,cnam,clength);
   string[clength]='\0';
 
-  decloc = strchr(string,'.');
-  if(decloc==NULL)
+  declocstr = strchr(string,'.');
+  if(declocstr==NULL)
     strcat(string,".*");
 
   strcpy(outbuf,"ls ");
@@ -68,7 +68,11 @@ int rlen;
   ierr = -3;
   while(-1!=fscanf(idum,"%s",outbuf)){
     decloc = strchr(outbuf,'.');
-    if(decloc != NULL) {
+    if(declocstr != NULL) {
+      strcpy(runstr ,outbuf);
+      ierr = 0;
+      break;
+    } else if(decloc != NULL) {
       ch1=*(decloc+1);
       ch2=*(decloc+2);
       ch3=*(decloc+3);
