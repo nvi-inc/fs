@@ -120,6 +120,15 @@ loop:
       case 45:
 	s2rec(&command,itask,ip);
 	break;
+      case 46:
+	form4(&command,itask,ip);
+	break;
+      case 47:
+	tracks4(&command,itask,ip);
+	break;
+      case 48:
+	trkfrm4(&command,itask,ip);
+	break;
       default:
 	ierr=-4;
 	goto error;
