@@ -187,17 +187,9 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
-	if(m5string_decode(ptr,lclc->destination.destination,
-			   sizeof(lclc->destination.destination),
-			   &lclc->destination.state)) {
-	  ierr=-501;
-	  goto error2;
-	}
-	break;
-      case 2:
 	if(m5string_decode(ptr,&string,sizeof(string),
 			   &lclc->control.state)) {
-	  ierr=-502;
+	  ierr=-501;
 	  goto error2;
 	}
 	for (i=0;i<NCONTROL_DISPLAY_KEY;i++)
@@ -205,9 +197,16 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
 	    lclc->control.control=i;
 	    goto found;
 	  }
-	ierr=-502;
-	goto error2;
+	lclc->control.control=-1;
       found:
+	break;
+      case 2:
+	if(m5string_decode(ptr,lclc->destination.destination,
+			   sizeof(lclc->destination.destination),
+			   &lclc->destination.state)) {
+	  ierr=-502;
+	  goto error2;
+	}
 	break;
       case 3:
 	if(m5sscanf(ptr,"%Ld",&lclm->received.received,
