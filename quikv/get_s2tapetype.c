@@ -7,8 +7,6 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-#undef TRUE
-#undef FALSE
 #include "../rclco/rcl/rcl_def.h"
 
 void get_s2tapetype(char *tapetype, long ip[], char *lwho)
@@ -31,8 +29,11 @@ void get_s2tapetype(char *tapetype, long ip[], char *lwho)
 
   skd_par(ip);
 
-  if (ip[2]<0)
+  if (ip[2]<0) {
+    ip[1]=0;
+    cls_clr(ip[0]);
     return;
+  }
 
   opn_rclcn_res(&res_buf,ip);
 
