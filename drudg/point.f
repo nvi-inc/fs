@@ -32,8 +32,8 @@ C LOCAL:
       real*4 dut,eeq
 	character*128 cbuf
         integer ih
-	integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
-     .          LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
+	integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
+     .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
         integer IPAS(MAX_STN),
      .          IFT(MAX_STN),IDUR(MAX_STN)
 	CHARACTER   UPPER
@@ -82,6 +82,7 @@ c 940701 nrv Change VLBA output file names
 C 951012 nrv Remove DSN output to separate subroutine
 C 960223 nrv Call chmod to change permissions.
 C 960810 nrv Change ITEARL to an array
+C 970114 nrv Write out first 8 char of source name only.
 
 	kintr = .false.
       if (kbatch) then
@@ -270,7 +271,7 @@ C*** Removed Haystack
      .                  'VLBI'/'EPOCH  1950.0'/'TIME=UT')
 		 kintr=.true.
 	       endif
-	       write(lu_outfile,9302) lsname,irah,
+	       write(lu_outfile,9302) (lsname(i),i=1,4),irah,
      .            iram,ras,ldsign,idecd,idecm,decs,ihr2,min2,isc2
 9302              format(2x,4a2,2x,i2.2,':',i2.2,':',f4.1,1x,a1,i2.2,
      .            ':',i2.2,':',f4.1,1x,i2.2,':',i2.2,':',i2.2,
@@ -282,7 +283,8 @@ C
 		IRAS = RAS
 		ISRA = (RAS-IRAS)*10.0
 		IDECS = IFIX(DECS)
-		WRITE(CBUF,9420) LSNAME,IRAH,IRAM,IRAS,ISRA,LDSIGN,
+		WRITE(CBUF,9420) (LSNAME(i),i=1,4),
+     .            IRAH,IRAM,IRAS,ISRA,LDSIGN,
      .            IDECD,IDECM,IDECS,IHR2,MIN2,ISC2,LPROC
 9420        FORMAT('S ',4A2,5X,'2 ',3i2.2,'.',I1,1X,A1,3i2.2,14X,
      .             'GMT ',3i2.2,'    1',10X,4A2)
@@ -336,7 +338,8 @@ C          For each observation, write out command line
               lc='   '
               if (ichcm_ch(lcable(istnsk),1,'C').eq.0) lc='CCW'
               if (ichcm_ch(lcable(istnsk),1,'W').eq.0) lc='CW '
-	      write(lu_outfile,9100) lsname,irah2,iram2,ras2,ldsign2,
+	      write(lu_outfile,9100) (lsname(i),i=1,4),
+     .        irah2,iram2,ras2,ldsign2,
      .        idecd2,
      .        idecm2,decs2,ihrp,minp,iscp,ihr2,min2,isc2,ihr,imin,isc,
      .        ihr2,min2,isc2,lc,itype
@@ -358,7 +361,7 @@ C Also write out a line in the summary file
 	      if (idir.eq.+1) idum=ichmv_ch(ldirword,1,'FORWARD ')
 	      if (idir.eq.-1) idum=ichmv_ch(ldirword,1,'REVERSE ')
 	      write(lu_outfil2,9408) ihr,imin,isc,ihr2,min2,isc2,
-     .        lsname,ldirword
+     .        (lsname(i),i=1,4),ldirword
 9408          format(1x,i2,':',i2,':',i2,' - ',i2,':',i2,':',i2,3x,
      .        4a2,4x,'Press ',4a2,'& RECORD  -  Press STOP')
 
@@ -366,7 +369,8 @@ C Also write out a line in the summary file
 		IRAS = RAS
 		ISRA = (RAS-IRAS)*10.0
 		IDECS = IFIX(DECS)
-		WRITE(CBUF,9440) LSNAME,IRAH,IRAM,IRAS,ISRA,LDSIGN,
+		WRITE(CBUF,9440) (LSNAME(i),i=1,4),
+     .            IRAH,IRAM,IRAS,ISRA,LDSIGN,
      .            IDECD,IDECM,IDECS,IHR2,MIN2,ISC2
 9440        FORMAT('SNAM ',4A2,4X,' SLAM',3(1X,i2.2),'.',I1,'S  SBET ',
      .        A1,2(i2.2,1X),i2.2,'  ANGL',3(1X,i2.2),'S  STOP')
