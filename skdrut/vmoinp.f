@@ -10,6 +10,11 @@ C 960522 nrv Revised.
 C 960610 nrv Move initialization of freqs.ftni arrays here
 C 960817 nrv Add S2 record mode
 C 961003 nrv Keep getting modes even if there are too many.
+C 961018 nrv Change the index on the BBC link to be the index found when
+C            the BBC list was searched, instead of the channel index.
+C            Check "lnetsb" and not "lsubvc" (subgroup!) for sideband.
+C 961020 nrv Add call to VUNPROLL and store the roll def in LBARREL
+C 961022 nrv Change MARK to Mark for checking rack/rec types.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -44,6 +49,7 @@ C  LOCAL:
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
      .ls(max_ifd),ls2m(8)
       double precision bitden
+      character*4 croll
       character*3 cs(max_chan)
       character*6 cfrbbref(max_chan),cbbcref(max_bbc),
      .cbbifdref(max_chan),cifdref(max_ifd)
@@ -79,7 +85,8 @@ C 1.5 Now initialize arrays using nstatn and ncodes.
       call frinit(nstatn,ncodes)
 
 C 2. Call routines to retrieve and store all the mode/station 
-C    information, one mode/station at a time.
+C    information, one mode/station at a time. Not all modes are
+C    defined for all stations. 
 
       ierr1=0
       do icode=1,ncodes ! get all mode information
@@ -103,10 +110,11 @@ C         Recognized rack types
      .    .or.ichcm_ch(lstrack(1,istn),1,'VLBAG').eq.0
           km3rack=ichcm_ch(lstrack(1,istn),1,'Mark3').eq.0
           km4rack=ichcm_ch(lstrack(1,istn),1,'Mark4').eq.0
-C         Initialize roll to unknown
-          idum = ichmv_ch(lbarrel(1,istn,icode),1,'<un>')
+C         Initialize roll to blank
+          idum = ichmv_ch(lbarrel(1,istn,icode),1,'    ')
 
-C         Get $FREQ statements.
+C         Get $FREQ statements. If there are no chan_defs for this
+C         station, then skip the other sections.
           CALL vunpfrq(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,bitden_das,
      .    srate,LSG,Frf,lsb,cchanidref,VBw,cs,cfrbbref,nchdefs)
@@ -118,6 +126,7 @@ C         Get $FREQ statements.
             ierr1=1
           endif
 
+          if (nchdefs.gt.0) then ! continue getting other info
 C         Get $BBC statements.
           call vunpbbc(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,
@@ -177,6 +186,17 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
      .      iret,ierr
             ierr1=5
           endif
+
+C         Get $ROLL statements.
+          call vunproll(modedefnames(icode),stndefnames(istn),
+     .    ivexnum,iret,ierr,lu,croll)
+          if (ierr.ne.0) then 
+            write(lu,'("VMOINP07 - Error getting $ROLL information",
+     .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
+     .      iret,ierr
+            ierr1=6
+          endif
 C
 C 3. Now decide what to do with this information. If we got to this
 C    point there were no reading or content errors for this station/mode
@@ -226,7 +246,8 @@ C    Save the chan_def info and its links.
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
             ic=1
-            do while (ic.le.nifdefs.and.cbbifdref(i).ne.cifdref(ic))
+C           do while (ic.le.nifdefs.and.cbbifdref(i).ne.cifdref(ic))
+            do while (ic.le.nifdefs.and.cbbifdref(ib).ne.cifdref(ic))
               ic=ic+1
             enddo
             if (ic.le.nifdefs) then 
@@ -255,7 +276,7 @@ C          Track assignments
                   ism=1 ! sign
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
-                  if (ichcm_ch(lsubvc(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
+                  if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
                   if (ihd(ix).eq.1) 
      .            itras(iul,ism,i,ip,istn,icode)=itrk(ix)-3 ! store as Mk3 numbers
                   if (ihd(ix).eq.2) 
@@ -267,14 +288,22 @@ C          Track assignments
           enddo ! each chan_def line
           endif ! m3/4 or v rack
 C
-C    3.2 Save the non-channel specific info.
-C         Recording format, "Mark3", "Mark4", "VLBA"
+C    3.2 Save the non-channel specific info for this mode.
+C         Recording format, "Mark3", "Mark4", "VLBA".
+C         Make these identical for now in VEX files. When there is a
+C         mode name available, put that in LMODE. SPEED checks LMFMT
+C         to determine DR/NDR. drudg modifies LMFMT from user input
+C         for non-VEX.
           idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
+          idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
+C         Sample rate.
           samprate(icode)=srate ! sample rate
           if (ks2rec) then
             idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
-          else
-C           Set bit density depending on the mode
+          else ! m3/m4/vrec
+C         Store barrel roll
+            idum = ichmv_ch(lbarrel(1,istn,icode),1,croll)
+C         Set bit density depending on the mode and rack type
             if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then 
               bitden=34020 ! VLBA non-data replacement
             else 
@@ -330,6 +359,7 @@ C    Store head positions and subpases
           endif ! m3/4 or v rec
           npassl = npl
 
+          endif ! nchdefs>0
         enddo ! for one station at a time
       enddo ! get all mode information
 
