@@ -32,6 +32,8 @@ C 960917 nrv If we come to end of file, output what's left at that point.
 C 960920 nrv Remove line output to new routine LSTSUMO.
 C 961105 nrv Check for READY instead of UNLOD so that the final scan
 C            is correctly output.
+C 961108 nrv Undo the final FASTR to spin down the tape so the last
+C            footage is correct.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -48,7 +50,7 @@ C Local:
       integer idir,nline,ntapes,ncount,npage,maxline,iline,
      .ifeet,inewp,iyear,ix,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,ids,
-     .i,idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr
+     .i,idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save
       real rs,ds,val
       real speed_snap ! speed from SNAP file
       integer ichcm_ch,isecdif,julda ! function
@@ -106,6 +108,7 @@ C 4. Loop over SNAP file records
       krunning=.false.
       csor=' '
       idir = 0
+      ifdur_save=0
       nline = 0
       ntapes = 0
       ncount = 0
@@ -204,6 +207,7 @@ C     loop reads all lines.
      .      ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet,cnewtap,cdir,
      .      kskd,ncount,ntapes,
      .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
+            ifdur_save=0
 C           Here is where we can determine early start without the schedule
           endif ! output a line
 C       Now get the source info for the new scan 
@@ -329,6 +333,7 @@ C                     or real (example: 266.66)
           id=+1
           if (cbuf(5:5).eq.'R') id=-1
           if (inewp.eq.0.or.ifeet.gt.0) ifeet=ifeet+ifdur*id
+          ifdur_save = ifdur*id ! save in case we have to undo it
 
         else if (index(cbuf,'CHECK').ne.0) then
           if (cnewtap.eq.'   ') cnewtap = ' * '
@@ -347,6 +352,7 @@ C                     or real (example: 266.66)
 
 990   continue
 C     Output the final scan
+      if (ifdur_save.ne.0) ifeet=ifeet-ifdur_save ! undo the final fastr
       call lstsumo(iline,npage,cstn,cid,cexper,maxline,
      .      idir,
      .speed_snap,itearl_local,kwrap,ks2,cday,kazel,ksat,kstart,
