@@ -57,13 +57,15 @@ C               - line and record buffer
 C
 C 4.  CONSTANTS USED
 C
-      character ccol
+      character*7 ccol
       character*34 ldef
       character*54 lmdisp
-      character*102 cib,cib1
-  
+      character*102 cib 
+      character*102 cibin
+      character*12 ibsrt(MAX_PROC2) ! 010812 
+      integer*4 nprc            ! 010815 
 C
-      data ccol   /':'/
+      data ccol   /'pfmed: '/
 C               - FMGR-like prompt with reverse video
 C               - ending message - PFMED ENDED
       data ldef   /'define  nnnnnnnnnnnn  00000000000 '/
@@ -85,6 +87,8 @@ C  GAG  910104  Changed KBOSS call back to IPGST call before scheduling
 C               BOSS
 C  gag  920910  Added error check after the second rn_take call if BOSS is 
 C               running.
+C  PB   010810  TEST VERSION FOR GNU 'readline'.
+C  PB   010831  'edit' test; nproc fix.
 C
 C     PROGRAM STRUCTURE
 C
@@ -95,6 +99,7 @@ C     Set input and output LU's.
       idcb2=22
       idcb1=21
       lui = 6
+      ccol(7:7)=char(0)
       if (lui.eq.0) lui=1
       luo=0
       if(luo.eq.0) luo=lui
@@ -166,38 +171,49 @@ C
 C     Copy current procedure file to scratch file 3.
       knewpf = .false.
       call pfcop(lproc,lui,id)
+c
+C     Initialize readline and the proc name buffer.
 C     Prompt and read input line with echo.
-100   write(lui,2106) ccol
-2106  format(a,$)
+
+      call initrdln 
+
+100   continue
       call ifill_ch(ib,1,40,' ')
-      cib1 = ' '
+cc      cib1 = ' '
       cib = ' '
-      read(5,2928) cib1
-2928  format(a)
-cxx      write(6,2929) cib1
-cxx2929  format(1x,a) ! last two lines only repeat message on the screen
+
+      call ldsrt(ibsrt,nprc,idcb3,ierr)
+      call readpl(cibin,ccol,ibsrt,nprc)
+cc      write(6,'("CIBIN: ",a20," NP: ",i3)') cibin,nprc
+c
       ichi = 0
       ipos = 1
-      ipos = fnblnk(cib1,ipos)
-      nch = trimlen(cib1)
+      ipos = fnblnk(cibin,ipos)
+      nch = trimlen(cibin)
       if (nch.gt.0) then
-        cib = cib1(ipos:nch)
+        cib = cibin(ipos:nch)
       end if
       ichi = trimlen(cib)
+c
 C     If nothing entered, re-prompt.
       if (ichi.gt.0) then
 C       call char2low(cib)
 C     If EX or ::, exit.
-        if (cib(1:2).eq.'ex'.or.cib(1:2).eq.'::') go to 900
+        if (cib.eq.'ex'.or.cib.eq.'::'.or.cib.eq.'exit'.or.
+     &        cib.eq.'quit'.or.cib.eq.'qu') go to 900
 C     Check mode.
-        if (cib(1:2).eq.'ed'.or.cib(1:2).eq.'vi'.or.cib(1:5).eq.'emacs')
-     &    then
+        if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
+     &       cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
+     &       cib.eq.'emacs'.or.cib(1:6).eq.'emacs,'.or.
+     &       cib.eq.'edit'.or.cib(1:5).eq. 'edit,'
+     &    ) then
           ierr = 0
           call fed(lui,luo,cib,ichi,lproc,ldef)
+          call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
           call ffm(lui,luo,cib,ichi,lproc,lprc,lstp,lnewsk,lnewpr)
         else
-          call ffmp(lui,luo,cib,ichi,lproc,ldef)
+          call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
       end if
       goto 100
@@ -213,6 +229,7 @@ C     Exit.
         call hol2char(ilnewpr,1,8,lnewpr)
         if (lnewpr.ne.' ') call reprc(lnewpr)
       endif
+
 C      ABOUT TO UNLOCK: RESETTING VARS
       call char2hol(lprc,ilprc,1,8)
       call fs_set_lprc(ilprc)
