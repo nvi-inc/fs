@@ -9,9 +9,12 @@ Rate must be one of: 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32.
 Fan must be on of 1:1, 1:2, 1:4.
 ""
 4F -204
-Barrel-roll must be off.
+Barrel-roll must be off, 8, 16, or m.
 ""
 4F -205
+Data modulation must be "off" or "on".
+""
+4F -206
 Synch must be off or 0, ..., 16.
 ""
 4F -303
@@ -25,6 +28,18 @@ Formatter was failing the synch test.
 ""
 4F -503
 Rack ID does not have at least two zero bits.
+""
+4F -504
+Formatter and equip.ctl firmware versions disagree, formatter reports ?W
+""
+4F -505
+Can't use 1:4 fan-out with magnitude bits from VCs 9-14.
+""
+4F -506
+Formatter firmware version in equip.ctl doesn't support barrel rolling.
+""
+4F -507
+Formatter firmware version in equip.ctl doesn't support data modulation.
 ""
 4M -100
 no default for trackform track number
@@ -46,6 +61,126 @@ no default for tracks track number
 ""
 4N -200
 tracks track must be an v(0-7), m(0-7), 2-33, or 102-133. 
+""
+4R -101
+No default for headstack.
+""
+4R -102
+No default for home track.
+""
+4R -201
+Rollform headstack must be 1 or 2.
+""
+4R -202
+Rollform home tracks, must be 2-33.
+""
+4R -203
+Rollform output tracks must be null, -1, or 2-23.
+""
+4R -301
+Rollform can not have more than 16 output tracks.
+""
+5C -201
+command does not accept parameters
+""
+5C -301
+did not find return code
+""
+5C -303
+did not find query return values
+""
+5C -304
+mark5 error, see associated error m5 -9xx
+""
+5C -401
+error retrieving class
+""
+5D -401
+error retrieving class for position response
+""
+5D -402
+did not find = in position reponse
+""
+5D -403
+did not decode return code in position response
+""
+5D -404
+did not find : separator
+""
+5D -405
+did not decode position
+""
+5D -406
+did not find position parameter
+""
+5D -407
+error retrieving class for play response
+""
+5D -408
+did not find = in play reponse
+""
+5D -409
+did not decode return code in play response
+""
+5D -410
+mark5 error getting position, see associated error m5 -9xx
+""
+5D -411
+mark5 error setting play position, see associated error m5 -9xx
+""
+5E -201
+command does not accept parameters
+""
+5E -301
+did not find return code
+""
+5E -304
+mark5 error, see associated error m5 -9xx
+""
+5E -401
+error retrieving class
+""
+5L -201
+command does not accept parameters
+""
+5M -301
+must specify at least 1 argument for mk5 command
+""
+5M -401
+error retrieving class
+""
+5O -201
+command does not accept parameters
+""
+5R -201
+command only accepts "on" parameter
+""
+5R -301
+did not find return code
+""
+5R -303
+did not find query return values
+""
+5R -304
+mark5 error, see associated error m5 -9xx
+""
+5R -401
+error retrieving class
+""
+5S -201
+command does not accept parameters
+""
+5S -301
+did not find return code
+""
+5S -303
+did not find query return values
+""
+5S -304
+mark5 error, see associated error m5 -9xx
+""
+5S -401
+error retrieving class
 ""
 AN   -1
 Illegal mode
@@ -332,6 +467,9 @@ Error initiliazing mcbcn, internal error ?WWW
 BO -191
 Error initiliazing rclcn, internal error ?WWW
 ""
+BO -192
+Error initiliazing mk5cn, internal error ?WWW
+""
 BO -200
 Error opening SW.CTL FMP ?FFF
 ""
@@ -467,6 +605,21 @@ Verify error from MATCN
 CH   -7
 MATCN reports MAT device is /dev/null, MAT devices inaccessible.
 ""
+CH -196
+?W communication trouble, turning off lvdt
+""
+CH -197
+?W communication trouble, convertig voltage to microns
+""
+CH -198
+?W communication trouble, reading head voltage
+""
+CH -199
+?W communication trouble, turning on lvdt
+""
+CH -200
+?W wrong number of buffers in respone
+""
 CH -201
 ?W communication trouble
 ""
@@ -558,7 +711,7 @@ CH -288
 Head is moving.
 ""
 CH -289
-Command head position out-of-range (VLBA2).
+Command head position out-of-range (VLBA2/VLBA42 drive).
 ""
 CH -290
 Head motion timed-out.
@@ -1332,13 +1485,19 @@ KL -202
 Frequency must be 99.99-511.99 for K-4 type 1 VCs and 499.99-999.99 for type 2.
 ""
 KM -201
-Record mode bandwidth must be one of 64, 128, or 256.
+Record mode bandwidth must be one of 16, 32, 64, 128, or 256.
 ""
 KM -202
 Number of sample bits must be one of 1, 2, 4, or 8.
 ""
 KM -203
 Number of channels must be one of 1, 2, 4, 8, or 16.
+""
+KM -204
+Time stamp mode is either FB or FT.
+""
+KM -205
+Time stamp insertion time must be 0 to 30 or 99.
 ""
 KM -301
 Record mode bandwidth can only be set for K4 type 2 recorder (DFC2100).
@@ -1369,6 +1528,9 @@ Aux data must be 16 hex digits.
 ""
 KS -201
 ST parameter must be one of play or record.
+""
+KS -301
+rec_mode must be set-up first
 ""
 KT -101
 No default for tape parameter.
@@ -1612,6 +1774,96 @@ Write request to mcb device failed.
 ""
 MC -122
 MCB device is /dev/null, MCB devices inaccessible.
+""
+M5   -1
+mk5cn: error opening mk5ad.ctl
+""
+M5   -2
+mk5cn: error pushing back on mk5ad.ctl
+""
+M5   -3
+mk5cn: first non-comment line in mk5ad.ctl did not contain three tokens
+""
+M5  -11
+mk5cn: error opening socket
+""
+M5  -13
+mk5cn: error from gethostbyname()
+""
+M5  -14
+mk5cn: host had NULL IP address
+""
+M5  -15
+mk5cn: error connecting to host
+""
+M5  -16
+mk5cn: error opening stream
+""
+M5  -17
+mk5cn: error gethostbyname(): HOST_NOT_FOUND
+""
+M5  -18
+mk5cn: error gethostbyname(): TRY_AGAIN
+""
+M5  -19
+mk5cn: error gethostbyname(): NO_RECOVERY
+""
+M5  -20
+mk5cn: error gethostbyname(): NO_ADDRESS
+""
+M5  -21
+mk5cn: error connect(): mk5 device connection open timed-out
+""
+M5  -22
+mk5cn: error from getsockopt()
+""
+M5  -23
+mk5cn: socket open error from getsockopt()
+""
+M5  -24
+mk5cn: select for connect() returned error
+""
+M5  -25
+mk5cn: error gethostbyname(): DNS timed-out
+""
+M5  -98
+mk5cn: no mk5 device defined
+""
+M5  -99
+mk5cn: illegal mode
+""
+M5 -101
+mk5cn: error getting class buffer
+""
+M5 -102
+mk5cn: error sending data, connection closed
+""
+M5 -103
+mk5cn: error reading data, connection closed
+""
+M5 -104
+mk5cn: time-out on mk5 device, connection closed
+""
+M5 -105
+mk5cn: select for fgets() returned error, connection closed
+""
+M5 -901
+MARK5 device error: action initiated or enabled, but not completed
+""
+M5 -902
+MARK5 device error: command not implemented or not relevant to this DTS
+""
+M5 -903
+MARK5 device error: syntax or parameter error
+""
+M5 -904
+MARK5 device error: error encountered
+""
+M5 -905
+MARK5 device error: currently too busy to service request; try again later
+""
+M5 -906
+MARK5 device error: inconsistent ot conflicting request
 ""
 NF   -1
 Break Detected in ONOFF
@@ -2841,7 +3093,7 @@ Q@ -272
 Scale calibration must be O(ld) or N(ew).
 ""
 Q@ -273
-Not supported for VLBA2 tape drives.
+Not supported for VLBA2/VLBA42 tape drives.
 ""
 Q@ -281
 No parameters allowed except MAT functions.
@@ -2868,7 +3120,7 @@ Q@ -288
 VLBA recorder head stack still moving.
 ""
 Q@ -289
-VLBA2 recorder head positioning timed-out.
+VLBA2/VLBA42 recorder head positioning timed-out.
 ""
 Q@ -291
 Echo control must be ON or OFF.
@@ -3060,13 +3312,13 @@ RC -202
 No vacuum on recorder or problem reading recorder.
 ""
 RC -203
-Can't zero footage of a VLBA2 drive.
+Can't zero footage of a VLBA2/VLBA42 drive.
 ""
 RC -204
-Can't set footage of a VLBA2 drive.
+Can't set footage of a VLBA2/VLBA42 drive.
 ""
 RC -205
-Can't reboot a VLBA2 drive.
+Can't reboot a VLBA2/VLBA42 drive.
 ""
 RC -206
 Tape thickness must be set with LABEL=... before loading
@@ -3114,7 +3366,7 @@ RL -131
 Operation failed (non-specific error) on device ?W
 ""
 RL -132
-"I/O error on device ?W.
+I/O error on device ?W.
 ""
 RL -133
 Communications timeout, RCL device probably dead on device ?W
@@ -3255,7 +3507,7 @@ RN -301
 No previous "*" value available until a succesful command.
 ""
 RN -401
-Command not supported for VLBA2.
+Command not supported for VLBA2/VLBA42.
 ""
 RO -101
 No default for write voltage for head 1.
@@ -3276,7 +3528,7 @@ RN -302
 No previous "*" value for head 2 available until a succesful command.
 ""
 RN -401
-Command not supported for VLBA2.
+Command not supported for VLBA2/VLBA42.
 ""
 RR -101
 No default for mode.
@@ -3585,16 +3837,16 @@ TA   -2
 tacd.ctl control file is empty or just has comments.
 ""
 TA   -3
-Can't open the socket or someone else is using it.
+TACD: Can't open the socket or someone else is using it.
 ""
 TA   -4
-Can't connect to socket.
+TACD: Can't connect to socket.
 ""
 TA   -5
-Can't read from socket.
+TACD: Can't read from socket.
 ""
 TA   -6
-Can't write to socket.
+TACD: Can't write to socket.
 ""
 TA   -7
 ,,
@@ -3840,7 +4092,7 @@ VT -202
 footage parameter must be either reset or >0 and <65536
 ""
 VT -302
-Can't set footage for a VLBA2 drive.
+Can't set footage for a VLBA2/VLBA42 drive.
 ""
 VT -201
 system tracks must be in the range 0-35
@@ -3853,6 +4105,18 @@ system tracks must be in the range 0-35
 ""
 VT -204
 system tracks must be in the range 0-35
+""
+VV -102
+address argument must not be empty
+""
+VV -202
+trouble decoding address
+""
+VV -203
+trouble decoding data
+""
+VV -301
+must specify at least 2 arguments for mcb command and not more than 3
 ""
 VX -401
 program error: incorrect number of responses in systracks_dis.
