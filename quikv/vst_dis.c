@@ -31,6 +31,7 @@ long ip[5];
       } else if (kcom){
          lclc.dir = shm_addr->idirtp;
          lclc.speed = shm_addr->ispeed;
+	 lclc.cips = shm_addr->cips;
          lclc.rec = shm_addr->venable.general;
       } else {
          opn_res(&buffer,ip);
