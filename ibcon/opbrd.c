@@ -39,6 +39,7 @@ long *ipcode;
   char device[65];
   char *nameend;
   int ierr;
+  long centisec[2];
 
   *error=0;
   *ipcode = 0;
@@ -114,8 +115,8 @@ long *ipcode;
     return -1;
 #endif
   } else {
-    ierr=sib(ID_hpib,"\ro 1\r",0,0,0);
-    if(ierr>=-2) {
+    ierr=sib(ID_hpib,"\ro 1\r",-1,0,0,0,centisec);
+    if(ierr==-2||ierr==-1 || ierr==-5) {
       *error = -520+ierr;
       memcpy((char *)ipcode,"BO",2);
       return -1;
@@ -123,7 +124,7 @@ long *ipcode;
   }
 
   if (serial) {
-    ierr=sib(ID_hpib,"st c n\r",0,0,100);
+    ierr=sib(ID_hpib,"st c n\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -139,7 +140,7 @@ long *ipcode;
     }
   }
   if (serial) {
-    ierr=sib(ID_hpib,"spi 0\r",0,0,100);
+    ierr=sib(ID_hpib,"spi 0\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -173,7 +174,7 @@ long *ipcode;
 #endif
   } else {
 /* some devices don't like this
-    ierr=sib(ID_hpib,"si\r",0,0,200);
+    ierr=sib(ID_hpib,"si\r",-1,0,200,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -192,7 +193,7 @@ long *ipcode;
   }
 
   if(serial) {
-    ierr=sib(ID_hpib,"eot 1\r",0,0,100);
+    ierr=sib(ID_hpib,"eot 1\r",-1,0,100,0,centisec);
       if(ierr<0) {
 	if(ierr==-1 || ierr==-2 || ierr==-5)
 	  logit(NULL,errno,"un");
@@ -209,7 +210,7 @@ long *ipcode;
   }
 
   if (serial) {
-    ierr=sib(ID_hpib,"eos D\r",0,0,100);
+    ierr=sib(ID_hpib,"eos D\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -224,17 +225,18 @@ long *ipcode;
       return -1;
     }
   }
+
   if (serial) {
-    ierr=sib(ID_hpib,"tmo 3\r",0,0,100);
+    ierr=sib(ID_hpib,"tmo 3\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
-	logit(NULL,errno,"un");
+        logit(NULL,errno,"un");
       *error = -520+ierr;
       memcpy((char *)ipcode,"BU",2);
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logita(NULL,-(540 + ibser),"ib","BT");
+        logita(NULL,-(540 + ibser),"ib","BU");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BU",2);
       return -1;
@@ -243,9 +245,3 @@ long *ipcode;
 
   return serial;
 }
-
-
-
-
-
-
