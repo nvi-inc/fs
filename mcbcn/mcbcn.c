@@ -11,7 +11,11 @@
 #include <math.h>
 #include <errno.h>
 #include <linux/serial.h>
+
+#ifdef DIGI
 #include "/usr/src/linux/drivers/char/digi.h"
+#endif
+
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -832,6 +836,7 @@ int parity;
 void isdigiboard()
 {
     struct serial_struct allSerialSettings;
+#ifdef DIGI
     if(ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)==-1) {/*digi! */
        digi_t di;
        digiboard = TRUE;
@@ -845,6 +850,7 @@ void isdigiboard()
          exit(-1);
        }
     } else
+#endif
       digiboard=FALSE;
 
     return;
