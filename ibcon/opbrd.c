@@ -99,8 +99,9 @@ long *ipcode;
 #ifdef REV_2
 /* this causes some problem for rev 1 */
     ierr=ibonl(ID_hpib,1);
-#endif
+#else
     ierr=0;
+#endif
     if (ierr&ERR) {
       if(iberr==0)
 	logit(NULL,errno,"un");
@@ -131,7 +132,7 @@ long *ipcode;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"BN");
+	logita(NULL,-(540 + ibser),"ib","BN");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BN",2);
       return -1;
@@ -147,7 +148,7 @@ long *ipcode;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"BN");
+	logita(NULL,-(540 + ibser),"ib","BN");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BN",2);
       return -1;
@@ -182,7 +183,7 @@ long *ipcode;
     } else if(ibsta&S_ERR) {
       if(iberr==0)
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"BS");
+	logita(NULL,-(540 + ibser),"ib","BS");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BS",2);
       return -1;
@@ -200,7 +201,7 @@ long *ipcode;
 	return -1;
       } else if(ibsta&(S_ERR|S_TIMO)) {
 	if(ibser!=0)
-	  logit(NULL,-(540 + ibser),"BE");
+	  logita(NULL,-(540 + ibser),"ib","BE");
 	*error = -(IBSCODE + iberr);
 	memcpy((char *)ipcode,"BE",2);
 	return -1;
@@ -217,7 +218,7 @@ long *ipcode;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"BT");
+	logita(NULL,-(540 + ibser),"ib","BT");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BT",2);
       return -1;
@@ -233,7 +234,7 @@ long *ipcode;
       return -1;
     } else if(ibsta&(S_ERR|S_TIMO)) {
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"BT");
+	logita(NULL,-(540 + ibser),"ib","BT");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"BU",2);
       return -1;
