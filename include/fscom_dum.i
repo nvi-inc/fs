@@ -2,7 +2,8 @@ c fscom_dum.i
 c
 c See fscom.i for information on the structure
 c
-      double precision ra50, dec50, radat, decdat, alat, wlong
+      double precision ra50, dec50, radat, decdat, alat, wlong,
+     . user_dev1_value, user_dev2_value
 
       REAL AZOFF, DECOFF, ELOFF, ISTPTP, ITACTP, RAOFF,
      . XOFF, YOFF, ep1950, tempwx, preswx, humiwx,
@@ -10,10 +11,10 @@ c
      . lolim1, lolim2, uplim1, uplim2,
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv, inscint, inscsl, 
      . outscint, outscsl, wrvolt, rateti_fs, POSNHD(2),
-     . FREQVC(15), motorv2
+     . FREQVC(15), motorv2, wrvolt2, wrvolt4, wrvolt42, extbwvc(15)
 
       integer*4 iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
-     . secsoffti_fs,ichfm_cn_tm, cips
+     . secsoffti_fs,ichfm_cn_tm, cips, freqif3, fm4enable(2)
 
       logical khalt, kecho, kenastk(2), klvdt_fs,
      . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro, ichvkload,
@@ -26,25 +27,28 @@ c
      . rack, drive, imaxtpsd, ichvlba(18), iskdtpsd, itpthick,
      . vform_rate, vgroup(4), capstan, stchk(4), sterp, drive_type,
      . rack_type, wrhd_fs, vfm_xpnt, vrepromode(2), ichs2,
-     . IBWVC(15), IFP2VC(14), vacsw, itpthick2, thin, vac4
+     . IBWVC(15), IFP2VC(14), vacsw, itpthick2, thin, vac4,
+     . imixif3, vfmenablehi, vfmenablelo 
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3), lgen(2),
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
      . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4),
-     . cwrap(4)
+     . cwrap(4), user_dev1_name(2), user_dev2_name(2)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
+     . user_dev1_value, user_dev2_value,
      . AZOFF, DECOFF, ELOFF, ISTPTP, ITACTP, RAOFF,
      . XOFF, YOFF, ep1950, tempwx, preswx, humiwx,
      . cablev, systmp, epoch, height, diaman, slew1, slew2,
      . lolim1, lolim2, uplim1, uplim2,
      . HORAZ, HOREL, motorv, inscint, inscsl, outscint,
-     . outscsl, wrvolt, rateti_fs, POSNHD(2),  FREQVC, motorv2,
+     . outscsl, wrvolt, rateti_fs, POSNHD(2),  FREQVC, motorv2, wrvolt2,
+     . wrvolt4,wrvolt42,extbwvc,
 c
      . iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
-     . secsoffti_fs,ichfm_cn_tm, cips,
+     . secsoffti_fs,ichfm_cn_tm, cips, freqif3, fm4enable,
 c
      . khalt, kecho, kenastk, klvdt_fs,
      . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro, ichvkload,
@@ -59,11 +63,12 @@ c
      . vform_rate, vgroup, capstan, stchk, sterp, drive_type,
      . rack_type, wrhd_fs, vfm_xpnt, vrepromode, ichs2,
      . IBWVC, IFP2VC, vacsw, itpthick2, thin, vac4,
+     . imixif3, vfmenablehi, vfmenablelo,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
-     . modelti_fs, stcnm, cwrap
+     . modelti_fs, stcnm, cwrap, user_dev1_name, user_dev2_name
 
 
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
