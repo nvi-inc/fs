@@ -33,7 +33,7 @@ long ip[5];                           /* ipc parameters */
 	return;
       } else if (command->argv[0]==NULL) {
 	ierr=-101;
-	printf(" in no arg\n");	goto error;
+	goto error;
       } else if (strcmp(command->argv[0],"*")==0) {
 	ierr=-301;
 	goto error;
