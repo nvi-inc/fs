@@ -221,11 +221,11 @@ c not Y10K compliant
  540  continue
       if (nscan.ne.iec-ifc+1) goto 590
       ihr = ifld(1) 
-      ifrac = int(frac(1)*60.0) 
+      ifrac = int(frac(1)*60.0+8.33333e-5) 
 C                   Minutes in the fractional part of hour
       imin = ifld(2) + ifrac
       frac(2) = frac(2) + (frac(1)*60.0 - ifrac)
-      ifrac = int(frac(2)*60.0) 
+      ifrac = int(frac(2)*60.0+0.005) 
 C                   Seconds in the fractional part of minutes 
       isec = ifld(3) + ifrac
       frac(3) = frac(3) + (frac(2)*60.0 - ifrac)
