@@ -86,6 +86,7 @@ C nrv 940107 Change SLEWT to SLEWO (old version)
 C nrv 940131 Add types 6 and 7 to LAXIS
 C            Write cable wrap on output line
 C 960810 nrv Change itearl to array
+C 961105 nrv Add one to the format of bandwidth to print values > 10.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -393,7 +394,7 @@ C     5. Now write out the observation line.
 9510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
-     .      ' ',a5,' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F3.1,' ',I3,
+     .      ' ',a5,' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',I2,
      .      A1,' ',I5,' ',F4.0,
      .      ' ____________________________________________________'/)
           IF (IWIDTH.EQ. 80) WRITE(luprt,9518) IHR,iMIN,ISC,IHR2,MIN2,
@@ -411,7 +412,7 @@ C     5. Now write out the observation line.
 8510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
-     .      ' ',' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F3.1,' ',I3,
+     .      ' ',' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',I2,
      .      A1,' ',I5,' ',F4.0,
      .      ' ____________________________________________________'/)
           IF (IWIDTH.EQ. 80) WRITE(luprt,8518) IHR,iMIN,ISC,IHR2,MIN2,
