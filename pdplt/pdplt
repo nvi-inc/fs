@@ -1021,8 +1021,12 @@ proc newfile_OK {} {
     set correct [newfile_checkfile $newfile_filename]
     if {$correct == 1} {
 	set fileID [open $newfile_filename r]
-	set day [read $fileID 5]
+	set day [read $fileID 8]
 	close $fileID
+	set dot [string range $day 4 4]
+	if {[string compare $dot "."] != 0} {
+	    set day [string range $day 0 4]
+	}
 	set current_XSAVE [format "%s/xtr%s" $current_DefaultDir $day]
 	set current_ESAVE [format "%s/err%s" $current_DefaultDir $day]
 	.c delete point
