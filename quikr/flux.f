@@ -52,8 +52,12 @@ C
         imdl=imdl2fx_fs
       else if(indtmp.eq.3) then
         imdl=imdl3fx_fs
-      else
+      else if(indtmp.eq.4) then
         imdl=imdl4fx_fs
+      else if(indtmp.eq.5) then
+        imdl=imdl5fx_fs
+      else
+        imdl=imdl6fx_fs
       endif
 C                   Pick up the model from common
       goto 229
@@ -89,8 +93,12 @@ C
         arr(1)=arr2fx_fs(1)
       else if(indtmp.eq.3) then
         arr(1)=arr3fx_fs(1)
-      else
+      else if(indtmp.eq.4) then
         arr(1)=arr4fx_fs(1)
+      else if(indtmp.eq.5) then
+        arr(1)=arr5fx_fs(1)
+      else
+        arr(1)=arr6fx_fs(1)
       endif
 C                   Pick up the flux from common
       goto 240
@@ -115,8 +123,12 @@ C
         arr(2)=arr2fx_fs(2)
       else if(indtmp.eq.3) then
         arr(2)=arr3fx_fs(2)
-      else
+      else if(indtmp.eq.4) then
         arr(2)=arr4fx_fs(2)
+      else if(indtmp.eq.5) then
+        arr(2)=arr5fx_fs(2)
+      else
+        arr(2)=arr6fx_fs(2)
       endif
 C                   Pick up the angle from common
       goto 250
@@ -143,8 +155,12 @@ C
         arr(3)=arr2fx_fs(3)
       else if (indtmp.eq.3) then
         arr(3)=arr3fx_fs(3)
-      else
+      else if (indtmp.eq.4) then
         arr(3)=arr4fx_fs(3)
+      else if (indtmp.eq.5) then
+        arr(3)=arr5fx_fs(3)
+      else
+        arr(3)=arr6fx_fs(3)
       endif
 C                   Pick up the value from common
       goto 260
@@ -178,8 +194,12 @@ C
         arr(4)=arr2fx_fs(4)
       else if(indtmp.eq.3) then
         arr(4)=arr3fx_fs(4)
-      else
+      else if(indtmp.eq.4) then
         arr(4)=arr4fx_fs(4)
+      else if(indtmp.eq.5) then
+        arr(4)=arr5fx_fs(4)
+      else
+        arr(4)=arr6fx_fs(4)
       endif
 C                   Pick up the value from common
       goto 270
@@ -204,8 +224,12 @@ C
         arr(5)=arr2fx_fs(5)
       else if(indtmp.eq.3) then
         arr(5)=arr3fx_fs(5)
-      else
+      else if(indtmp.eq.4) then
         arr(5)=arr4fx_fs(5)
+      else if(indtmp.eq.5) then
+        arr(5)=arr5fx_fs(5)
+      else
+        arr(5)=arr6fx_fs(5)
       endif
 C                   Pick up the angle from common
       goto 280
@@ -232,8 +256,12 @@ C
         arr(6)=arr2fx_fs(6)
       else if(indtmp.eq.3) then
         arr(6)=arr3fx_fs(6)
-      else
+      else if(indtmp.eq.4) then
         arr(6)=arr4fx_fs(6)
+      else if(indtmp.eq.5) then
+        arr(6)=arr5fx_fs(6)
+      else
+        arr(6)=arr6fx_fs(6)
       endif
 C                   Pick up the angle from common
       goto 300
@@ -281,13 +309,27 @@ C
         enddo
         cor3fx_fs=corr
         flx3fx_fs=fx
-      else
+      else if(indtmp.eq.4) then
         imdl4fx_fs=imdl
         do i=1,6
           arr4fx_fs(i)=arr(i)
         enddo
         cor4fx_fs=corr
         flx4fx_fs=fx
+      else if(indtmp.eq.5) then
+        imdl5fx_fs=imdl
+        do i=1,6
+          arr5fx_fs(i)=arr(i)
+        enddo
+        cor5fx_fs=corr
+        flx5fx_fs=fx
+      else
+        imdl6fx_fs=imdl
+        do i=1,6
+          arr6fx_fs(i)=arr(i)
+        enddo
+        cor6fx_fs=corr
+        flx6fx_fs=fx
       endif
       ierr = 0
 C
@@ -321,13 +363,27 @@ C
         enddo
         corr=cor3fx_fs
         fx=flx3fx_fs
-      else
+      else if(indtmp.eq.4) then
         imdl=imdl4fx_fs
         do i=1,6
           arr(i)=arr4fx_fs(i)
         enddo
         corr=cor4fx_fs
         fx=flx4fx_fs
+      else if(indtmp.eq.5) then
+        imdl=imdl5fx_fs
+        do i=1,6
+          arr(i)=arr5fx_fs(i)
+        enddo
+        corr=cor5fx_fs
+        fx=flx5fx_fs
+      else
+        imdl=imdl6fx_fs
+        do i=1,6
+          arr(i)=arr6fx_fs(i)
+        enddo
+        corr=cor6fx_fs
+        fx=flx6fx_fs
       endif
 C
       if(imdl.eq.1) then
