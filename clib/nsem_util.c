@@ -4,9 +4,9 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 
-#include "../../fs/include/params.h"
-#include "../../fs/include/fs_types.h"
-#include "../../fs/include/fscom.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
 
 extern struct fscom *shm_addr;
 

@@ -11,7 +11,7 @@ c  e for end), where 'x' again is the name of the section.
 c
 c  See fscom_init.i for an example.
 c
-      include '/usr2/fs/include/params.i'
-      include '/usr2/fs/include/fscom_init.i'
-      include '/usr2/fs/include/fscom_quik.i'
-      include '/usr2/fs/include/fscom_dum.i'
+      include 'params.i'
+      include 'fscom_init.i'
+      include 'fscom_quik.i'
+      include 'fscom_dum.i'
