@@ -49,9 +49,9 @@ PROGRAM = drudg
 #
 DROBS=\
 $(DR)chkgrpandzero.o $(DR)counter_init.o \
+$(DR)find_num_chans_rec.o \
 $(DR)kcheckgrpor.o $(DR)init_hardware_common.o\
 $(DR)name_trkf.o \
-$(DR)num_tracks_rec.o \
 $(DR)proc_exper_initi.o $(DR)proc_mk5_init1.o $(DR)proc_mk5_init2.o\
 $(DR)proc_write_define.o $(DR)purge_file.o \
 $(DR)squeezeleft.o $(DR)squeezewrite.o \
@@ -68,6 +68,7 @@ $(DR)snap_s2_unloader.o $(DR)snap_s2_loader.o \
 $(DR)snap_tapef.o $(DR)snap_tpicd.o \
 $(DR)snap_unload_tape.o $(DR)snap_unlod.o \
 $(DR)snap_wait_sec.o $(DR)snap_wait_time.o \
+$(DR)strip_path.o \
 $(DR)crprc.o \
 $(DR)ckobs.o $(DR)clist.o $(DR)drudg.o $(DR)gtsnp.o \
 $(DR)lists.o $(DR)lspin.o $(DR)m3inf.o $(DR)point.o \
@@ -89,6 +90,7 @@ $(DR)wrday.o $(DR)equip_type.o $(DR)snap_info.o \
 $(DR)setup_name.o $(DR)read_snap6.o $(DR)lstsum_info.o \
 $(DR)fakesum.o $(DR)lv_open.o  $(DR)prcov_vex.o $(DR)drprrd.o \
 $(DR)fspin.o
+
 
 
 

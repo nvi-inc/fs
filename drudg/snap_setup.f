@@ -27,7 +27,7 @@
       character*80 ldum
 
 ! start of code
-      if (km5.or.ks2.or.kk4) then ! setup proc names
+      if (km5.or. km5p .or.ks2.or.kk4) then ! setup proc names
         itype=1
       else ! mnemonic proc names
         itype=2

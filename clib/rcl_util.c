@@ -154,7 +154,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
   } else if(strcmp(ptr,"tapeid_set")==0) {
     *icmd=RCL_CMD_TAPEID_SET;
     ptr=arg_next(command,&ilast);
-    if(ptr=NULL)  /* empty okay */
+    if(ptr==NULL)  /* empty okay */
       ptr="";
     add_rclcn_tapeid_set(buffer,device,ptr);
     return 0;

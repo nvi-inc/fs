@@ -1,4 +1,4 @@
-File: /usr2/fs-9.6.0/misc/fs9600up.txt  Version: 1.4 Date: 030505
+File: /usr2/fs-9.6.1/misc/fs9601up.txt  Version: 1.7 Date: 030508
 
 I. Introduction
 
@@ -10,11 +10,10 @@ This memo is divided into 4 sections:
 
 Please print this notice and read it carefully before installing the
 new version. This version contains a preliminary version of several
-new tools for antenna gain and system temperature calibration. It is
-being released about 5 weeks before the May EVN session in order to
-allow EVN stations to test it. It is not intended for general usage at
-this time. In particular many of the new features do not yet work for
-station defined detectors.
+new tools for antenna gain and system temperature calibration. This
+version is intended for all stations except those using stations
+detectors and/or special S2 DAS version of the FS. If you have any
+questions about whether is applies to you, please contact Ed.
 
 This version is intended to installed as an update for 9.5.12 and is
 relatively easy to do in this case.
@@ -370,6 +369,21 @@ A more detailed discussion of these changes follows.
     A lot of bugs in the earlier version have been fixed. Especially
     the editing and the scaling works a lot better now.
 
+    Some preliminary documentation is provided in the
+    /usr2/fs/gnplt/almost_uptdate_docs directory. The manual.txt files
+    is written by Carl Holmstrom and the gnplt.tex/.ps files by John
+    Conway. The gnplt.ps file covers basic usage of the program for
+    calibrating your antenna. The most significant thing that it is
+    missing is the new "shortcut" selections on the main "Edit" menu
+    drop-down box. These shortcuts can significantly reduce the work
+    of setting up the plots. The resulting display can be then be
+    customised with the other options in the "Edit", "X-axis", and
+    "Y-axis" drop-down boxes. You might want to change the display
+    mode to replot automatically. The gnplt.ps file did not display
+    properly with the ghostscript included with FS Linux Kernel 4, but
+    it did for a different version running under Windows. You may need
+    to use a different computer to display this file.
+
 26. Support for Mark 5A systems has been added. This support is
     preliminary. To enable this support, please select either "mk5a"
     or "mk5a_bs" for drive 1 in equip.ctl according to your
@@ -379,8 +393,8 @@ A more detailed discussion of these changes follows.
     switching" so that it can change banks on its own when the
     currently in use bank becomes full. If "mk5a_bs" is selected, the
     FS will monitor how full the bank is and will automatically
-    request the Mark 5A to change to the other bank. The "mk5a_bs"
-    bank switching works only with DRUDG produced schedules.
+    request the Mark 5A to change to the other bank bwteen scans. The
+    "mk5a_bs" bank switching works only with DRUDG produced schedules.
 
     A new command had been added: "bank_check". This command will log
     the VSN of the disk pack in the bank currently being recorded if
@@ -391,8 +405,8 @@ A more detailed discussion of these changes follows.
     for the next scan will force a bank change before checking the
     VSN. The command used to force bank_changes "bank_set=inc" takes
     longer than one second to complete. If the time-out specified for
-    the Mark 5 device is less than 2 seconds, it will be increased to
-    2 seconds.
+    the Mark 5 device is less than 2 seconds, it will automatically be
+    increased to 2 seconds.
 
     The scan length is communicated to the FS as one of the new
     parameters in the scan_name command. The session code has also
@@ -406,12 +420,23 @@ A more detailed discussion of these changes follows.
     Regardless of which method of bank switching is used, it is
     necessary to have disk pack installed in the bank that is not
     being used before a bank change will be needed.
+
+    Currently use of Mark 5 is selected when DRUDG is run to generate
+    the .snp and .prc files for schedules that were originally
+    designed for tape. There are no exclusively Mark 5 schedule files
+    yet. Connection of a Mark 5 system to a formatter requires
+    particular wiring. DRUDG outputs comments in the set-up procedures
+    that describe the correct wrring for the configuration
+    requested. These issues are discussed further in the section on
+    Changes in DRUDG.
  
 27. vmk5 visual Mark 5 interface added. Beppe Maccaferri at Medicina
     has written a Tcl/Tk client for the Mark 5. This should be useful
     for among other things monitoring how full the bank is. Please see
     "/usr2/fs/vmk5/Notes_about_visual_Mark5_interface.txt" for more
-    information.
+    information. Please be careful using this program since you can
+    interfer with FS operation of the Mark 5 when you enter commands
+    or queries.
 
 28. New "exper_initi" experiment specific start-up procedure
     added. This is a new standard procedure, which is invoked in place
@@ -467,7 +492,7 @@ A more detailed discussion of these changes follows.
 
 			 B. Changes in DRUDG
 				   
-drudg opening message date is 030501. The following areas in DRUDG
+drudg opening message date is 030507. The following areas in DRUDG
 were modified. Items numbered 3 and above are new since 9.5.13. Items
 numbered 6 and above were added after 9.5.15.
 
@@ -491,15 +516,15 @@ numbered 6 and above were added after 9.5.15.
 
 A more detailed discussion of these changes follows.
 
-1. Mk5 disk-only recording. drudg now recognizes "Mark5" as a recorder
-   type in Option 11. If your station is doing Mk5-only and NOT
-   piggyback, you should use Option 11 to change your recorder type to
-   "Mark5" which is type 10. The SNAP and procedure files generated by
-   drudg will have appropriate disk control commands and no tape
-   commands. For stations with Mk4 formatters, the Mk5 is assumed to
-   be connected to the second headstack, so tracks and trackform
-   commands are generated for both headstacks, same as for piggyback
-   mode.
+1. Mk5 disk-only recording. drudg now recognizes Mark5A or Mark5P as
+   recorder types in Option 11. If your station is doing Mk5-only and
+   NOT piggyback, you should use Option 11 to change your recorder
+   type to "Mark5A" which is type 10. The SNAP and procedure files
+   generated by drudg will have appropriate disk control commands and
+   no tape commands. For stations with Mk4 formatters, the Mk5P is
+   assumed to be connected to the second headstack, so tracks and
+   trackform commands are generated for both headstacks, same as for
+   piggyback mode.  Mk5A is handled differently. See item 17 below.
 
    If you are recording piggy-back, you need to use Option 13 so that
    both tape and disk commands are generated. In this case do not use
@@ -508,11 +533,10 @@ A more detailed discussion of these changes follows.
 2. Geo/astro schedule recognition. drudg recognizes the type of
    schedule and prints messages indicating whether the schedule is for
    geodesy or astronomy, and whether it's a VEX or standard format
-   file. This feature is not used yet, but it is hoped to be
-   reliable. The geo/astro decision is made, for a VEX file, based on
-   inclusion of the SCHEDULING_PARAMS block.  This block is written
-   for geo VEX output files but is not included in SCHED-generated VEX
-   files.
+   file. This feature is not used yet, but it is hoped to be reliable.
+   The geo/astro decision is made, for a VEX file, based on inclusion
+   of the SCHEDULING_PARAMS block.  This block is written for geo VEX
+   output files but is not included in SCHED-generated VEX files.
 
    If you notice an incorrect comment, please let me know so that we
    can make sure this feature works for future needs.
@@ -545,45 +569,55 @@ A more detailed discussion of these changes follows.
    when only one sideband is required and re-use of flipped sidebands
    as necessary - see /usr2/fs/misc/lba/readme.txt for more detail)
    and a slightly modified "if_def" which accepts IFs '1' through '4'.
+   This drudg upgrade was provided by Jonathan Quick of HARTRAO.
 
 7. S2 support extended to support new LBA rack.  The S2 recorder type
    was extended with the addition of VEX inputs "S2_data_source"
    specifying the required 2-bit encoding type (either AT or VLBA) and
-   "fanout_def" analogous to that for MkIV/VLBA recorders.
+   "fanout_def" analogous to that for MkIV/VLBA recorders.  This drudg
+   upgrade was provided by Jonathan Quick of HARTRAO.
 
 8. Loader procedure changed for long thin tapes.  The "loader"
    procedure for Mark III / Mark IV and VLBA recorders now winds on
-   approximately 200ft if the tape length is longer than 17000ft
-   ie. to the approximate low tape sensor trigger point for thin
-   tapes.
+   approximately 200ft for thin tapes (tape length longer than
+   17000ft) and 100ftfor thick tapes, i.e., to approximately the low
+   elow tape sensor trigger point.  This is done by running the tapes
+   for 22 seconds (11 seconds for thick tapes) at 135 ips.
 
 9. Loopholes in headstack and track number closed.  A error in the VEX
    input code which incorrectly allowed through headstack 0 and track
    0 was fixed.
 
+10. The LO commands for geodetic schedules will now include the
+    polarization, e.g., lo=la,7600.10,usb,rcp,1.
 
-10. The LO commands for geodetic schedules will now include the polarization,
-    e.g., lo=la,7600.10,usb,rcp,1.
+11. Patching of IF3 is handled correctly for stations that have
+    IF3. If LO3=L01 then IF3 is patched out. Else it is patched
+    in. IF3 commands are issued if, and only if, IF3 is specified in
+    the schedule. This is a change from previous versions of drudg
+    where IF3 commands were generated regardless of whether it was in
+    use or not.
 
-11. Patching of IF3 is handled correctly for stations that have IF3. If LO3=L01
-    then IF3 is patched out. Else it is patched in. 
+12. Many changes were made to the header of snap summary file. These
+    include: A) Showing the names of the setup proceudres the
+    different modes, and the IFD procedures.  B) Including descriptive
+    information about tape counters only if the specify recorder is
+    used in the experiment. C) Recognizing Mark5 recorders.
 
-12. Many changes were made to the header of snap summary file. These include:
-    A) Showing the names of the setup proceudres the different modes, and the 
-    IFD procedures.  B) Including descriptive information about tape counters 
-    only if the specify recorder is used in the experiment. C) Regnozing Mark5
-    recorders. 
+13. Mark5 piggyback in mk3 should now work correctly.
 
-13. Mark5 piggyback in mk3 should now work correctly. 
+14. Snap files generatd with the previous version of the Field System
+    had extra FASTF and FASTR commands at the end of passes for
+    continuous recording mode. This caused problems with RDV36.  This
+    bug has been fixed.
 
-14. Snap files generatd with the previous version of the field system had 
-    extra FASTF and FASTR commands at the end of passes. This caused problems 
-    with RDV36.  This bug has been fixed. 
+15. Drudg now does a post-pass for all thin tapes if the postpass flag
+    is true.  This flag is set to true for astro VEX schedules by
+    default, and set to false for geo schedules. The postpass is done
+    if the last reverse pass on the tape was not continous.
 
-15. Drudg now does a post-pass for all thin tapes if the postpass flag is true. 
-    This flag is set to true for astro VEX schedules by default.
-
-16. The summary listing for Mark5 stations now calculates the byte count.
+16. The summary listing for Mark5A and Mark5P stations now calculates
+    the byte count and displays it instead of footages.
 
 17. Drudg has preliminary support for Mark 5A.
 
@@ -597,9 +631,9 @@ A more detailed discussion of these changes follows.
     you need to change the equipment type using option 11.
 
       1. Summary listings.  For both Mark5P and Mark5A the summary
-         listing of the snap file gives the total recording space used
-         in Gbytes. This should make it easy to figure out the time
-         window for switching banks.
+         listing of the snap file (Option 5) gives the total recording
+         space used in Gbytes. This should make it easy to figure out
+         the time window for switching banks.
 
       2. Number of tracks recorded. In Mark5A mode the number of
          tracks recorded must be 8, 16, 32, or 64.  Drudg determines
@@ -614,12 +648,21 @@ A more detailed discussion of these changes follows.
                this. The first two data channels would be duplicated.
 
       3. Special Mark5 commands. Drudg puts in special Mark5 commands
-         in the prc files.
-
+         in the prc files. Comments are also added explaining the
+         wiring requirement for connecting the Mark 5 to the
+         formatter. In summary there are four wiring cases: (1) for a
+         Mark IV formatter, a Mark 5A is connected to both head
+         outputs of the formatter; (2) for a VLBA formatter, a Mark 5A
+         is connected to the second recorder output of the formatter
+         and can record at most 32 tracks; (3) for a Mark IV
+         formatter, a Mark 5P is connected only to the second head
+         output, as was done before for piggyback mode; for a VLBA
+         formatter, (4) a Mark 5P is connected to the second recorder
+         output of the formatter, as was done before for piggyback
+         mode.
 
     If you notice any bugs in drudg, please contact
     jmg@lyra.gsfc.nasa.gov.
-
 
  			    C. Known Bugs
 
@@ -630,14 +673,13 @@ more detail after the list.
 2. "odd" and "even" head types not supported for Mark IV & VLBA4.
 3. "odd"/"even" head types not supported for VLBA style tapeforms.
 4. CHEKR does not check the status of the Mark IV formatter.
-5. DRUDG almost always generates IF3 commands for Mark III/IV racks.
-6. Extraneous errors when tape is stopped by low tape sensor.
-7. "Comm=" command in logex extracts only the first command.
-8. S2 error scheme clumsy.
-9. No extra spaces allowed in "ibad.ctl" file.
-10. ONOFF and FIVPT programs hang.
-11. FS SNAP command pages don't list tape drive suffix numbers.
-12. LBA rack TPI detector is not useable.
+5. Extraneous errors when tape is stopped by low tape sensor.
+6. "Comm=" command in logex extracts only the first command.
+7. S2 error scheme clumsy.
+8. No extra spaces allowed in "ibad.ctl" file.
+9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not useable.
 
 A more detailed discussion of these bugs follows.
 
@@ -685,12 +727,7 @@ this limitation.
 Implementation of this has been deferred until the formatter
 communication problems have been resolved.
 
-5. DRUDG almost always generates IF3 commands for Mark III/IV racks.
-This always occurs for experiments run from .DRG and non-VEX .SKD
-files regardless of whether they are needed or not.  This occurs
-because it is impossible to know whether IF3 is needed or not.
-
-6. Extraneous errors when tape is stopped by low tape sensor. When a
+5. Extraneous errors when tape is stopped by low tape sensor. When a
 tape drive has been commanded to move the tape and then stops because
 it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
 "CHEKR" will complain periodically that the tape drive is not in the
@@ -705,12 +742,12 @@ manually.  In this case, issuing an "ET" command will convince the FS
 that the tape drive should be stopped and the error message will
 cease.
 
-7. "Comm=" command in logex extracts only the first command. The
+6. "Comm=" command in logex extracts only the first command. The
 "comm=" command in "logex" extracts only the first command commanded
 and displayed.  This problem was noted by Giuseppe Maccaferri
 (Medicina).
 
-8. S2 error scheme clumsy. The error and status response number
+7. S2 error scheme clumsy. The error and status response number
 reporting scheme for S2 recorders is clumsy.  FS errors that have
 mnemonic "rl" are mostly error responses from the recorder or the RCL
 interface library that is used to communicate with the recorder.  If
@@ -724,7 +761,7 @@ numeric value is the negative of the status response code.  In all
 cases an appropriate error or status message is displayed.  These
 messages are retained in the log.
 
-9. No extra spaces allowed in "ibad.ctl" file. The format of the
+8. No extra spaces allowed in "ibad.ctl" file. The format of the
 "ibad.ctl" must not contain any leading or embedded spaces.  In system
 that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
 "no_untalk/unlisten_after" is misspelled or an incorrect device name
@@ -733,7 +770,7 @@ initialized and the FS will terminate.  Unfortunately there is no way
 to prevent this problem in a general way; it reflects a limitation in
 the driver.
 
-10. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
+9. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
 been known to "hang" mysteriously.  This seems to be caused by some
 problem with the "go" mechanism that is used to restart the program
 when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
@@ -760,7 +797,7 @@ sy=go onoff &
 If you see other situations where FIVPT or ONOFF hang, please let Ed
 know.
 
-11. FS SNAP command pages don't list tape drive suffix numbers. The FS
+10. FS SNAP command pages don't list tape drive suffix numbers. The FS
 SNAP manual pages and the help pages available through the "help="
 command do not reflect when multiple versions are available with
 different suffixes depending on the number of drive specified in the
@@ -771,7 +808,7 @@ used. For example, if two drives are defined, then "help=tape1" and
 "help=tape2" will work, but "help=tape" will not and vice-versa if
 only one drive is defined.
 
-12. LBA rack TPI detector is not useable.  The Australian LBA Data
+11. LBA rack TPI detector is not useable.  The Australian LBA Data
 Acquisition System currently lacks a functional total power detector
 though support has been included.  To allow approximate system temperature
 calibration, all the setup commands and the TPI detectors of the modules
@@ -825,7 +862,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.6.0 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.6.1 archive in your "/tmp" directory. For
 example you might do the following:
 
       cd /tmp
@@ -833,7 +870,7 @@ example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.6.0.tar.gz
+      get fs-9.6.1.tar.gz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -847,12 +884,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.6.0.tar.gz
+      tar -xzpf /tmp/fs-9.6.1.tar.gz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.6.0 fs
+      ln -sfn fs-9.6.1 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1129,7 +1166,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
      the correct patching. If they do, the "ifadjust" command should
      work well for these set-ups.
 
-(19) Update your stcmd.ctl file for the new format. The commands:
+(19) Please check that all lo=... commands in the IFDxx (for example,
+     xx=SX) in your procedures libraries specify the LO side-band and
+     polarization as well as the LO value. The new CALTEMP and TSYS
+     commands will not work unless this information is supplied.
+
+(20) Update your stcmd.ctl file for the new format. The commands:
 
         cd /usr2/control
         /usr2/fs/misc/cmdctlfix4 stcmd.ctl
@@ -1163,7 +1205,7 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
      "cmdctlfix3", and "cmdctlfix4" will do the best they can and
      print a warning.
 
-(20) Test the FS.  Generally speaking a fairly thorough test is to run
+(21) Test the FS.  Generally speaking a fairly thorough test is to run
      a test experiment: start with DRUDG-ing a schedule, executing
      part of it (preferably at least a tape change and a parity check
      in each direction), do any normal post-experiment plotting and
@@ -1172,22 +1214,33 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
      this upgrade you should also test the CALTSYS, PREOB, and MIDOB
      procedures and also verify that ONOFF and FIVPT work as expected.
 
+     If your CALTEMP and TSYS commands return zero values, check the
+     following: (1) you have set-up the rack with FS, in particular
+     that the correct LO=... commands (and patch=... commands for Mark
+     III/IV) have been executed, (2) that the LO=... commands specify
+     the LO side-band and polarization parameters, and (3) that you
+     have an .rxg file that specifies the calibration data for each of
+     the LO settings in use (no specific LO value should be occur in
+     more than on .rxg file.), in particular that you specified the
+     correct LO settings and have made entries in the tcal table for
+     the polarizations in use.
+
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.6.0.tar.gz archive have been placed
+floppy, "split" files of the fs-9.6.1.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9600tg.aa
-fs9600tg.ab
+fs9601tg.aa
+fs9601tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9600tg.* >fs-9.6.0.tar.gz
+cat fs9601tg.* >fs-9.6.1.tar.gz
 
-This will create an exact image of the original fs-9.6.0.tar.gz
+This will create an exact image of the original fs-9.6.1.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

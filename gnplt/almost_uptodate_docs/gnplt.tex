@@ -1,0 +1,315 @@
+\documentstyle[titlepage,psfig,11pt]{article}
+\topmargin 0in
+\textheight 8.5in
+\oddsidemargin 0in
+\textwidth 6.1in
+
+\input psfig.sty
+
+\begin{document}
+
+\centerline{\large \bf NOTES ON USING GNPLT (Ver 1)}
+\vskip 0.4cm
+\centerline{ John Conway, Onsala Space Observatory}.
+\noindent
+\vskip 2cm
+
+\noindent {\bf 1) Introduction} 
+\vskip 0.5cm
+
+  The Tcl/Tk program GNPLT is provided with the FS release 
+  tool to help examine the performance 
+  of your telescope, check the accuracy of the 
+  calibration parameters stored in the control .rxg file 
+  and to  update  this information if needed. The general 
+  philosophy of the FS calibration is described in a separate 
+  document.
+
+  GNPLT takes two sets of sources inputs. First is information 
+  collected in a log file containing  runs of  ONOFF usually 
+  taken as part of an AQUIRE run.
+  Specifically from this log the information on the ONOFF VAL line 
+  including the  cal source name and  measurements of SEFD(Jy), Tcal(Jy) etc. 
+  are used. The second source of inputs  are the 
+  calibration parameters   from the relevant .rxg file 
+  for the particular observing band  (that is the Tcal(K) versus freq, dpfu,
+   gain curve polynomial). When GNPLT is started 
+   these cal parameters are  copied from the relevant .rxg file into an  
+   internal 'working file'. As calibration parameters are fitted the 
+   values of Tcal vs freq, DPFU and gain curves within the working 
+   file can be  updated. When the programme is finally 
+   exited the user can choose to update the .rxg file stored on disk 
+   with  the cal parameters currently in the working file. 
+
+   Within GNPLT many different quantities  can be plotted.
+   It is useful to be aware of three separate types of quantities.  
+   Quantities like SEFD(JY), Tcal(Jy) are the MEASUREMENT QUANTITIES   
+   taken direct from the input log file, these never change. 
+   Other quantities like  Tcal(K) are CAL QUANTITIES,  these always 
+   take their value from what is stored  in the current working file. 
+   Finally  are the DERIVED QUANTITIES like gain(K/Jy) which are derived from
+   a combination of a MEASURED quantity (in this case Tcal(Jy) and a 
+   CAL QUANTITY (e,g Tcal(K)). 
+
+   The following sections indicate give step by step instructions on 
+  how calibration parameters 
+   can be checked and updated if needed. 
+
+% First the pointing performance
+%   of the telescope should be investigated (see Section 2). Next GNPLT 
+%   is started, data read in and edited (section 3). Within GNPLT we 
+%   should next   plot antenna gain versus elevation to check the 
+%   overall amplitude scale and shape of the gain curve: both 
+%   of which can be updated if needed. Next (see Section 4) we 
+%   should plot the Tcal(K)  versus frequency and update the Tcal(K) 
+%   table if needed. Finally when  we have good fits between data and 
+%   model in both gain versus elevation and Tcal(K) versus Frequency we can exit GNPLT and update  the .rxg file on disk. This .rxg will be used to 
+%   form calibration data for each VLBI experiment to be  sent to the 
+%    astronomer. If the steps of running GNPLT below are followed this 
+%    calibration should be accurate.
+
+\vskip 1cm
+
+\noindent {\bf 2) Check Pointing} 
+\vskip 0.5cm
+
+  Calibration data will only worth plotting in GNPLT if the pointing 
+  performance of your telescope is good. If as part of your ACQUIRE  
+  FIVEPT data was collected the FS Tcl/Tk program 
+  PDPLT can be used to check pointing. If the pointing offsets
+  are large but are consistent you can go ahead and analyse the ONOFF
+  data, but in this case you will have to update the pointing model for
+  your telescope to ensure good calibration in the VLBI runs.
+
+\vfill
+\eject
+
+\noindent {\bf 3) Starting GNPLT and loading a Logfile} 
+\vskip 0.5cm
+
+   Start the program by typing 'gnplt'. The log file can be 
+   including on the command line or inside GNPLT you can 
+   click on FILE-NEW, select input file from menu and then click
+   to load the log file containing ONOFF data.
+
+\vskip 0.5cm
+
+\noindent {\bf 4) Selecting data and plotting quantities.}
+
+\vskip 0.5cm
+
+   Click EDIT and then select which combination of LCP, RCP 
+   and frequency channels to plot.
+ 
+   Choose a x-axis type from ITEMS(X-AXIS), e.g elevation. 
+   Then choose a y-axis type from ITEMS(Y-AXIS). 
+   In this drop down menu are listed a set of 
+   data that can be plotted such as  azimuth, elevation, gain 
+   compression, tsys, SEFD, Tcal(Jy) Tcal(K), Tcal(ratio) - all of these 
+   are the measurements quantities in the log file {\it except Tcal(K) 
+   which is a derived quantity  calculated from the   measured Tcal(K) 
+   and the current DPFU and Gaincurve}.  It may be useful when 
+   examining your antenna performance  to plot quantities like SEFD vs 
+   elevation. 
+
+
+   The Y-AXIS drop down menu  also contains an  'assumed items' 
+   button which plots the currently assumed calibration quantities like 
+   DPFU etc. The final button on the Y-AXIS menu is 'Gain'. The 
+   Gain is the antenna gain (K/Jy), calculated from the
+   Tcal(Jy) measured in the log and other inputs. When selecting 
+   this input you are further prompted to choose one of three options
+   for determining how exactly the Gain is calculated. These three 
+   options are
+
+\vskip 0.5cm
+ 
+
+\noindent (A) Assume the Tcal(K) for each point given from the 
+   input .rxg file. This is the normal mode of operation.
+   The plotted  Gain (K/Jy)  = Tcal(K)/Tcal(Jy).
+   If we think the Tcal(K) in the .rxg is approximately correct 
+   then this option should be selected.
+
+\vskip 0.5cm
+
+\noindent   (B) Tcal(K)  from user input. If you have an improved 
+    value Tcal(K) from hot/cold load measurements  you can enter 
+    it here. The programme then uses this Tcal(K) together 
+    with Tcal(Jy) measurements in the log to compute the gain for each point.
+    Use this option if you are sure of the new Tcal(K) measurement 
+    and wish to change the other cal parameter to be consistent with this 
+    and the  ONOFF measurements.
+
+\vskip 0.5cm
+
+\noindent   (C) Specify gain for elevation range. This calculates the 
+    gain using the stored Tcal(K) in the working file but 
+    then a scaling factor is found such that the resulting gains 
+    match a specified value over an elevation range. The 
+    Tcal(K) in the current parameters are all multiplied 
+    by this scaling factor. Use this option if you are sure of the 
+    your new gain  measurement  and wish to change the other cal 
+    parameter to be consistent with this  and the  ONOFF measurements.
+
+\vskip 0.5cm
+ 
+    We are also given the option to apply atmosphere 
+    opacity corrections before plotting the gain. This 
+    option is not yet implemented. The use of the Y-axis 
+    'gain' option is described in more detail 
+    in Section ?  below.
+
+\vskip 1cm
+
+\noindent {\bf 5) Editing out bad data.}
+
+\vskip 0.5cm
+
+    Before we can test whether the gain parameters in 
+    the .rxg file are valid we must delete 
+    bad data. 
+
+    Selecting as the 'Y-axis' type  gain compression is a 
+    good way to select out good data.  All measurements should have a 
+    gain compression of around 
+    1  (gain compression is the change in counts firing the noise
+    cal on source divided by the change in counts firing the cal off
+    sources). If there is no intermittent RFI, there are no 
+    slewing problems and the electronics is linear then all the 
+   measurements should be around 1.
+ 
+  To edit out bad data, press on left mouse button to mark the bottom left 
+  corner of rectangle    then drag the cursor and release to form top-right 
+  corner. The plot axes changes and  all points outside this rectangle are 
+  flagged (marked red) and not used in future fits. The axis scaling also 
+  ignores flagged points. The status of any point can be changed from flagged
+  to un flagged or vice-versa by clicking on the point. You can plot other 
+  quantities on the y-axis and do further editing.
+
+
+\vskip 1cm
+
+\noindent {\bf 6) Checking Gain Curve and overall cal scale.}
+
+\vskip 0.5cm
+
+\noindent {\bf 6.1) Plot First polarisation.}
+
+\vskip 0.5cm
+
+   The next steps include determining whether the model gain curve
+   and overall amplitude scale are correct. If not we must update 
+   the calibration parameters.  
+
+   Use EDIT to select one polarisation (LCP), it might 
+   also be useful to select one frequency channel in the 
+   middle of the band. Now  select X-AXIS - elevation, for Y-AXIS 
+   select  GAIN. For plotting the gain curve and testing whether it 
+   fits the measurements choose the option of 'Tcal(K) 
+   from input control file'. Click on TOOLS and then GAIN CURVE to 
+   plot  the current gain curve. This model gain is calculated  from 
+   the present value of DPFU and the gain polynomial in  the 'working file'. 
+   The gain curve is plotted as a dotted line on top of the measurements.
+   Check whether the overall shape and height of the  curve are correct.
+   If the shape of the gain curve is correct but not the height
+   this suggests an overall scale error in  the amplitude  calibration (see
+   section 6.1). If the shape is incorrect this implies an inaccurate gain curve
+   polynomial (see Section 6.2).
+
+\vskip 0.5cm
+
+\noindent {\bf 6.2) Updating Amplitude cal scale.}
+ 
+\vskip 0.5cm
+
+   If the amplitudes of the model gain and the masurements are 
+   inconsistent this means that the Tcal(Jy) 
+   predicted from the .rxg file and that measured from sources
+   of known flux density using ONOFF are not consistent.
+   In order to get accurate calibration for VLBI  you will  
+   need to change either the DPFU or scale the  Tcal(K) vs freq table. 
+   To update one of these click on TOOLS - FIT-TO and then select  
+   'DPFU' or  'scale the Tcal(K)'. 
+
+\vskip 0.5cm
+
+   {\bf Updating DPFU} You should select to update 
+   DPFU if you believe your Tcal(K) is correct but that 
+   your effective telescope gain stored in the .rxg 
+   file may be in error.  You would choose this 
+   option if for instance the Tcal(K) has recently been 
+   measured absolutely by hot/cold measurements. You might 
+   also prefer this option if  the  plotted points are close to 
+   what you expect for the antennas gain given 
+   the diameter and efficiency  (dpfu  = efficency*geometrical area 
+   (m$^2$)/2760). Using this  option a better fit between data and model 
+   is obtained  by rescaling the gain curve to better fit the measured 
+   points. After re-fitting for DPFU  a new solid curve is plotted over 
+   the measured points and the  value of DPFU is updated in 
+   the 'working file'. 
+   
+\vskip 0.5cm
+
+   {\bf Updating Tcal(K)}  You should choose this  option if you
+   suspect the effective noise cal has changed (for instance 
+   the  noise tube has been re-installed with a new cross 
+   coupler or attenuation in the path). You might 
+   also consider choosing  this option if you think the gain given by 
+   the model is closer to what you expect for your telescope than  
+   the measured points.  This option produces a better fit between 
+   data and model by rescaling the data to fit the model gain curve. 
+   After fitting for 'scale Tcal(K)' the Tcal(K) versus
+   frequency table stored in the 'working file' version of the 
+   cal parameters are all rescaled. Note that even though the scale 
+   correction might  have been found using data from a single frequency 
+   channel the same rescaling is applied to the Tcal(K) values 
+   at all frequencies. New values of the antenna gain for each measurement 
+   are calculated using the updated Tcal versus frequency table
+   and are re-plotted. If the model gain curve is plotted it should 
+   fit the re-plotted points.
+
+
+\vskip 0.5cm
+\noindent {\bf 6.3) Updating Gain Polynomial and DPFU.}
+\vskip 0.5cm
+
+    If the shape of 
+    model gaincurve versus elevation does not fit  the data, then 
+    under TOOLS-FIT TO you should select option 'GAIN CURVE and DPFU'.
+    After fitting  a solid line representing the new 
+    model gain is plotted, this should now fit the data. 
+    After running this option both the gain curve polynomial and the 
+    DPFU for this polarisation are updated in the 'working file'.
+
+
+\vskip 0.5cm
+\noindent {\bf 6.4) Fitting second polarisation.}
+\vskip 0.5cm
+
+    After having fitted the data for LCP then go back to the  EDIT 
+    menu and plot the data (for one frequency channel) now selecting  RCP.
+    Again using TOOLS-GAIN CURVE plot the current model gain versus elevation
+    If the amplitude of this model and the data are different select 
+    TOOLS-FIT TO. selecting 'fit DPFU' or 'Scale Tcal(K)'. The Field
+    System assumes the same gain curve polynomial for both RCP and LCP.
+    If as expected the same polynomial applies to both polarisations
+    there should be no need to choose the option to update  gain curve. 
+    Note that if  you do choose to update the gaincurve, the gaincurve
+    polynomial is updated for both RCP and LCP.  
+
+\vskip 1cm
+
+\noindent {\bf 7) Check and update Tcal(K) versus frequency}.
+
+ 
+     
+\end{document}
+
+
+
+
+
+
+
+

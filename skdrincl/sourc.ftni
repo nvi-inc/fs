@@ -19,6 +19,8 @@ c
      .       nsorlen(max_sor),
      .       LSORNA(MAX_SORLEN/2,MAX_SOR),
      .       LIAUNA(MAX_SORLEN/2,MAX_SOR)
+             character*(Max_sorlen) csorna(Max_sor)
+             equivalence (csorna,lsorna)
 c
       COMMON/SOURC_CH/
      .       cfltype(max_band,max_sor),

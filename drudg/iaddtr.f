@@ -23,7 +23,8 @@ C Local:
       data csb(1)/'u'/,csb(2)/'l'/,cbit(1)/'s'/,cbit(2)/'m'/
       data z8000/z'8000'/
 
-      izero2 = 2+Z8000 
+!      izero2 = 2+Z8000
+      izero2=3+z8000
       nch = nc1
       nch = nch + ib2as(it,ibuf,nch,izero2)
       nch = mcoma(ibuf,nch)

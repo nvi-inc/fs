@@ -1,7 +1,4 @@
       SUBROUTINE PROCINTR
-C    .(km3rack,km4rack,kvrack,kv4rack,
-C    .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,km3rec,km4rec,kvrec,
-C    .kv4rec,ks2rec,kk41rec,kk42rec)
 C
 C This routine writes out the header information for proc files.
 C into lu_outfile.
@@ -24,13 +21,9 @@ C 991210 nrv Write equipment name from common.
 C 991214 nrv Remove calling parameters, not nneeded.
 
 C Input
-      logical km3rack,km4rack,kvrack,kv4rack,
-     .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,
-     .km3rec(2),km4rec(2),kvrec(2),
-     .kv4rec(2),ks2rec(2),kk41rec(2),kk42rec(2)
 C  LOCAL:
       integer*2 IBUF2(80),lnamep(6)
-	integer iblen
+      integer iblen
       integer idummy,nch,kerr
       integer ichcm_ch,ichmv,ichmv_ch,ib2as
 C
