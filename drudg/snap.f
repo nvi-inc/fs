@@ -14,6 +14,7 @@ C          1) epoch 1950 or 2000 <<<<<<< moved to control file
 C          2) add checks Y or N <<<< not for S2
 C          3) force checks Y or N <<<<<<< removed
       integer iin ! 1=Mk3/4 back end, 2=VLBA back end. This is ignored
+C                   3=hybrid, 5=Mk4, 6=VLBA4
 C                   for VEX files which already have this information.
 C
 C  LOCAL:
@@ -197,6 +198,15 @@ C 970730 nrv Don't write extra !time and TAPE for continuous scans.
 C 970731 nrv Add IOBSST to count number of obs recorded on tape
 C 970909 nrv Do PREOB if it's not a VEX file, only skip it if the
 C            tape is continuously running.
+C 970915 nrv When spinning a new tape forward to start on a non-zero
+C            footage, always do a FASTF instead of using the direction
+C            of the first scan which may be in the reverse direction.
+C 970915 nrv In the loop searching for the first scan, check the error
+C            return in case there are no scans on this station.
+C 970915 nrv Add VLBA4 option.
+C 970929 nrv Calculate ift_save only for non-S2. 
+C 970929 nrv Calculate slewing time only for continuous motion.
+C 971003 nrv For the last scan, don't stop if there's late stop.
 C
 C
       iblen = ibuf_len*2
@@ -365,7 +375,7 @@ C
       krunning = .false.
       ilatestop=0
       istnsk=0
-      do while (istnsk.eq.0) ! Get first scan for this station into IBUF
+      do while (istnsk.eq.0.and.ilen.ge.0) ! Get first scan for this station into IBUF
         call ifill(ibuf,1,ibuf_len*2,oblank)
         IOBS = IOBS + 1
         if (iobs+1.le.nobs) then
@@ -423,7 +433,9 @@ C       Calculate slewing time from the previous source at the end of
 C       the scan to the current source, so that we know when the good
 C       data starts on this source. UTPRE has the previous scan
 C       duration already included.
-        if (iobss.gt.0) then ! got a previous scan
+        tslew=0.0
+        if (iobss.gt.0.and.tape_motion_type(istn).eq.'CONTINUOUS') then 
+C                                             ! got a previous scan
           lcb_new=lcable(istnsk)
           call slewo(isorp,mjdpre,utpre,isor,istn,lcbpre,
      .    lcb_new,tslew,0,dum)
@@ -568,8 +580,8 @@ C  **** here, idayr5_save is not defined, if it's not an early start schedule
         else ! start& stop OR new direction
           ket = .true.
         endif
-C         always stop on the last scan.
-        if (istnsk_next.eq.999) ket=.true.
+C         always stop on the last scan but not for late stop.
+        if (istnsk_next.eq.999.and.itlate(istn).eq.0) ket=.true.
 
 C <<<previous>>>>  <<<<<<<<<<current>>>>>>>>>>>>>>>>>>>>>>  <<<next>>>>>>>>>
 C time4=   time6=  time5=        time= time2=               time5_next=
@@ -871,7 +883,8 @@ C Prepass new tape
           END IF !prepass
           IF (.not.ks2.and.IFT(ISTNSK).GT.100) THEN !spin up
             TSPINS=TSPIN(IFT(ISTNSK),ISPM,ISPS)
-            CALL LSPIN(idir,ISPM,ISPS,IBUF2,NCH)
+            idirsp=+1
+            CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
             call hol2lower(ibuf2,(nch+1))
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
             kspin = .true. !Just wrote a FASTx command
@@ -1137,7 +1150,8 @@ C?? how to calculate this? see lstsum?
 C leave it out for now
 C         if (.not.ket) iftold=itlate(istn)+iftold+itearl(istn)
           endif
-          ift_save=ift(istnsk)+IFIX(IDIR*(ituse*ITEARL(istn)+
+          if (kcont.and..not.ks2) ift_save=ift(istnsk)+IFIX(IDIR*
+     .            (ituse*ITEARL(istn)+
      .            IDUR(ISTNSK))*speed(icod,istn))
         endif ! update direction and footage
 C POSTOB
