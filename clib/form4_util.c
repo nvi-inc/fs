@@ -60,12 +60,13 @@ static int   key_irate[]={   125,250,500,1000,2000,4000,8000,16000,32000};
 static char *key_fan[ ]={ "4:1","2:1","1:1","1:2","1:4"};
 static int   key_ifan[]={  41,   21,   11,   12,   14};
 static char *key_brl[ ]={ "off"};
-
+static char *key_syn[ ]={ "off"};
                                           /* number of elem. keyword arrays */
 #define NKEY_MODE sizeof(key_mode)/sizeof( char *)
 #define NKEY_RATE sizeof(key_rate)/sizeof( char *)
 #define NKEY_FAN  sizeof(key_fan )/sizeof( char *)
 #define NKEY_BRL  sizeof(key_brl )/sizeof( char *)
+#define NKEY_SYN  sizeof(key_syn )/sizeof( char *)
 
 int form4_dec(lcl,count,ptr)
 struct form4_cmd *lcl;
@@ -186,6 +187,15 @@ char *ptr;
   case 4:
     ierr=arg_key(ptr,key_brl,NKEY_BRL,&lcl->barrel,0,TRUE);
     break;
+  case 5:
+    ierr=arg_key(ptr,key_brl,NKEY_SYN,&lcl->synch, 0,FALSE);
+    if(ierr!=0) {
+      ierr=arg_int(ptr,&lcl->synch      ,1,TRUE);
+      if(ierr==0 & (lcl->synch < 0 || lcl->synch > 16))
+	ierr=-200;
+    } else
+      lcl->synch=-1;
+    break;
   default:
     *count=-1;
   }
@@ -242,6 +252,19 @@ struct form4_cmd *lcl;
       else
 	strcpy(output,BAD_VALUE);
       break;
+    case 5:
+      ivalue=lcl->synch;
+      if(ivalue==-1)
+	strcpy(output,"off");
+      else if(ivalue==-2)
+	strcpy(output,"pass");
+      else if(ivalue==-3)
+	strcpy(output,"fail");
+      else if(0 <= ivalue && ivalue <= 16)
+	sprintf(output+strlen(output),"%d",ivalue);
+      else
+	strcpy(output,BAD_VALUE);
+      break;
     default:
       *count=-1;
       break;
@@ -264,7 +287,7 @@ struct form4_mon *lcl;
         sprintf(output,"%d",lcl->version);
         break;
       case 2:
-        sprintf(output,"0x%x",lcl->rack_ids&0xFF);
+        sprintf(output,"0x%02x",lcl->rack_ids&0xFF);
         break;
       case 3:
 	if(0==(lcl->status&(1<<15)))
@@ -351,6 +374,19 @@ struct form4_cmd *lcl;
   buff+=4;
 
   sprintf(buff,"/RAT %d",key_irate[lcl->rate]);
+}
+void form4LIMma(buff, lcl)
+char *buff;
+struct form4_cmd *lcl;
+{
+  buff+=4;
+
+  if(lcl->synch>=0 && lcl->synch <= 16)
+    sprintf(buff,"/LIM %d",lcl->synch);
+  else if(lcl->synch==-1)
+    sprintf(buff,"/LIM");
+  else
+    sprintf(buff,"/LIM 1");
 }
 int form4ASSma(buff,lcl,start)
 char *buff;
@@ -441,7 +477,12 @@ char *buff;
     lclc->barrel=0;
   else
     lclc->barrel=-1;
-  
+
+  if(lclm->error & (1<<15))
+    lclc->synch=-3;
+  else
+    lclc->synch=-2;
+
 }
 void maSHOform4(lclc,buff)
 struct form4_cmd *lclc;
