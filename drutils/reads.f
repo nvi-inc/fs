@@ -31,6 +31,7 @@ C               added char2hol calls
 C    900205 NRV Added check for zero-length records, if found read 
 C               another record.
 C    930225 nrv implicit none
+C    951002 nrv Add mode 3 = read next line of any type
 
 C
 C     0. INITIALIZE
@@ -66,6 +67,15 @@ C
         END DO  !
       END IF  !
 C
+C     3. This section handles mode 3: get next line 
+
+      if (imode.eq.3) then
+          CALL IFILL(IBUF,1,IBLEN*2,oblank)
+          CALL READF_ASC(IUNIT,KERR,IBUF,IBLEN,IL)
+          call inc(IUNIT,KERR)
+          if (il.eq.0) call char2hol('  ',ibuf,1,2)
+      END IF  !
+
 C     Convert to number of characters
       IF (IL.NE.-1) IL = IL*2
       RETURN
