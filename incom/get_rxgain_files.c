@@ -11,13 +11,13 @@ int get_rxgain();
 get_rxgain_files(ierr)
      int *ierr;
 {
-  char outbuf[80];
+  char outbuf[513];
   int freq, icount, i;
   FILE *idum;
 
   strcpy(outbuf,"ls ");
   strcat(outbuf,FS_ROOT);
-  strcat(outbuf,"/control/*.rxg");
+  strcat(outbuf,"/control/rxg_files/*.rxg");
 
   strcat(outbuf," > /tmp/LS.NUM 2> /dev/null");
 
