@@ -22,8 +22,10 @@ long *seconds;
   if ((it[5]< 1970) || it[5]>2038 || (it[5] == 2038 && it[4]> 1)) {
     /* overflow long (32-bit) int */
     *seconds=-1;
+/* don't abort for now, mark IV formatter problems
     fprintf(stderr,"rte2secs: date outside range %d %d\n",it[5],it[4]);
       exit(-1);
+*/
     return;
   }
   
