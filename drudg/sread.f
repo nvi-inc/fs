@@ -19,8 +19,9 @@ C  Local:
       logical*4 khed ! set to ksta when $HEAD is found
       integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hvl,hhd
       integer iscnc,iscn_CH,ias2b,jchar,ichcm,ichmv ! functions
-      integer ichcm_ch
+      integer ichcm_ch,trimlen
       real rdum,reio
+      character*128 cbuf
 C Initialized:
       data    Z24/Z'24'/, hbb/2h  /, hex/2hEX/, hpa/2hPA/, hso/2hSO/
       data    hvl/2HVL/, hhd/2hHD/
@@ -111,8 +112,13 @@ C
           IF (IC1.GT.0) IDUMMY = ICHMV(LEXPER,1,IBUF,IC1,IC2-IC1+1)
           rdum= reio(2,LUSCN,IBUF,-ILEN)
 C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
-C         Get the next $ type entry
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+C         Get the next line
+          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
+          DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1) ! read all lines
+            call hol2char(ibuf,1,ilen*2,cbuf)
+            write(luscn,'(a)') cbuf(1:trimlen(cbuf))
+            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
+          END DO
 C
         ELSE IF(ichcm(htype,1,hpa,1,2).eq.0) THEN !parameter section
           ISETTM=0
