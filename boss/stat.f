@@ -11,7 +11,7 @@ C         - time-blocked status of operator stream
 C         - time-blocked status of schedule stream
 C         - HALT status of current schedule
 C     ICURLN - line # of current line of schedule
-      character*12 lskd
+      character*8 lskd
 C          - 2-character name of current schedule
       dimension idcbsk(1),itscb(13,1)
 C         - DCB of current schedule file
@@ -42,7 +42,7 @@ C  CONSTANTS:
       integer*2 lm1(40)
       character*32 lm2
 C
-      data lm2 /' active schedule is:            '/
+      data lm2 /'active schedule is:             '/
 C          - messages for display on terminal
 C
 C   DATE   WHO  CHANGES
@@ -58,7 +58,7 @@ C
       call susp(2,2)
 C
 C    Print display heading.
-      lm2(21:32) = lskd(1:12)
+      lm2(21:32) = lskd(1:8)
       call char2hol(lm2,lm1,1,32)
       call put_cons(lm1,32)
       call ifill_ch(ibuf,1,100,' ')
