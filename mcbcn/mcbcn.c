@@ -7,7 +7,7 @@
 #include <sys/times.h>
 #include <time.h>
 #include <fcntl.h>
-#include <termios.h>
+#include <termio.h>
 #include <math.h>
 #include <errno.h>
 #include <linux/serial.h>
