@@ -28,6 +28,8 @@ C            Change call to VUNPHP to add number of headstacks found.
 C 970206 nrv Change size of arrays to VUNPTRK for fandefs to max_track.
 C 970213 nrv Remove the test for a rack before setting NCHAN. It should be
 C            set even for rack=none
+C 971208 nrv Add fpcal, fpcal_base to vunpif call. Add cpcalref to vunpfrq.
+C 971208 nrv Add call to VUNPPCAL.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -51,14 +53,15 @@ C          vunphead
 C
 C  LOCAL:
       integer ix,idum,ib,ic,i,icode,istn
-      integer il,im,iret,ierr1,iul,ism,ip
+      integer il,im,iret,ierr1,iul,ism,ip,ipc,itone
+      integer ipct(max_chan,max_tone),ntones(max_chan)
       integer ifanfac,itrk(max_track),ivc(max_bbc)
       double precision posh(max_index,max_headstack)
       integer ih,ihdn(max_track),indexp(max_index),indexl(max_pass)
       character*1 csubpassl(max_pass),csubpass(max_subpass)
       character*3 cpassl(max_pass)
       double precision bitden_das
-      integer nsubpass
+      integer nsubpass,npcaldefs
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
      .ls(max_ifd),ls2m(8),lpre(4),lp(max_ifd)
@@ -66,10 +69,12 @@ C  LOCAL:
       character*4 croll
       character*3 cs(max_chan)
       character*6 cfrbbref(max_chan),cbbcref(max_bbc),
-     .cbbifdref(max_chan),cifdref(max_ifd)
+     .cbbifdref(max_chan),cifdref(max_ifd),cfrpcalref(max_chan),
+     .cpcalref(max_chan)
       character*6 cchanidref(max_chan),ctrchanref(max_track)
       character*1 cp(max_track),csm(max_track)
       double precision frf(max_chan),flo(max_chan),vbw(max_chan),srate
+      double precision fpcal(max_chan),fpcal_base(max_chan)
       character*128 cout
       integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
       integer ptr_ch,fvex_len,fget_mode_def
@@ -132,8 +137,8 @@ C         Initialize roll to blank
 C         Get $FREQ statements. If there are no chan_defs for this
 C         station, then skip the other sections.
           CALL vunpfrq(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,bitden_das,
-     .    srate,LSG,Frf,lsb,cchanidref,VBw,cs,cfrbbref,nchdefs)
+     .    ivexnum,iret,ierr,lu,bitden_das,srate,LSG,Frf,lsb,
+     .    cchanidref,VBw,cs,cfrbbref,cfrpcalref,nchdefs)
           if (ierr.ne.0) then 
             write(lu,'("VMOINP02 - Error getting $FREQ information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
@@ -173,7 +178,7 @@ C         Get $BBC statements.
 C         Get $IF statements.
           call vunpif(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,
-     .    cifdref,flo,ls,LIN,lp,nifdefs)
+     .    cifdref,flo,ls,LIN,lp,fpcal,fpcal_base,nifdefs)
           if (ierr.ne.0) then 
             write(lu,'("VMOINP05 - Error getting $IF information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
@@ -240,6 +245,10 @@ C         Get $ROLL statements.
             call errormsg(iret,ierr,'ROLL',lu)
             ierr1=6
           endif
+
+C         Get $PHASE_CAL_DETECT statements.
+          call vunppcal(modedefnames(icode),stndefnames(istn),
+     .    ivexnum,iret,ierr,lu,cpcalref,ipct,ntones,npcaldefs)
 C
 C 3. Now decide what to do with this information. If we got to this
 C    point there were no reading or content errors for this station/mode
@@ -284,6 +293,7 @@ C         if (km3rack.or.km4rack.or.kvrack) then
             VCBAND(i,istn,ICODE) = VBw(i) ! video bandwidth
             ifan(istn,icode)=ifanfac ! fanout factor
             cset(i,istn,icode) = cs(i) ! switching 
+C           BBC refs
             ib=1
             do while (ib.le.nbbcdefs.and.cbbcref(ib).ne.cfrbbref(i))
               ib=ib+1
@@ -295,14 +305,16 @@ C         if (km3rack.or.km4rack.or.kvrack) then
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
+C           IFD refs
             ic=1
-C           do while (ic.le.nifdefs.and.cbbifdref(i).ne.cifdref(ic))
             do while (ic.le.nifdefs.and.cbbifdref(ib).ne.cifdref(ic))
               ic=ic+1
             enddo
             if (ic.le.nifdefs) then 
               lifinp(i,istn,icode) = lin(ic) ! IF input channel
               freqlo(i,istn,icode) = flo(ic) ! LO frequency
+              freqpcal(i,istn,icode) = fpcal(ic) ! pcal frequency
+              freqpcal_base(i,istn,icode) = fpcal_base(ic) ! pcal_base frequency
               losb(i,istn,icode) = ls(ic) ! LO sideband
               lpol(i,istn,icode) = lp(ic) ! polarization
             else
@@ -310,7 +322,23 @@ C           do while (ic.le.nifdefs.and.cbbifdref(i).ne.cifdref(ic))
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
-C          Track assignments
+C           Phase cal refs
+            ipc=1
+            do while (ipc.le.npcaldefs.and.cpcalref(ipc).ne.
+     .            cfrpcalref(i))
+              ipc=ipc+1
+            enddo
+            if (ipc.le.npcaldefs) then
+              do itone=1,ntones(ipc)
+                ipctone(itone,i,istn,icode)=ipct(ipc,itone)
+                npctone(i,istn,icode)=ntones(ipc)
+              enddo
+            else
+              write(lu,'("VMOINP15 - PCAL link missing for channel ",i3,
+     .        " for mode ",a," station ",a)') i,
+     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+            endif
+C           Track assignments
             if (km3rec.or.km4rec.or.kvrec) then
             do ix=1,nfandefs ! check each fandef
               if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link
