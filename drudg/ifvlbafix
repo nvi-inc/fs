@@ -150,7 +150,7 @@ while(<BAK>) {
 	print OUT;
     }
     if (/^\$([^ ]*).*/) {
-	($secton=$1) =~ tr/A-Z/a-z/;
+	($section=$1) =~ tr/A-Z/a-z/;
 	next;
     }
     if ($section == "codes" && /^L[ ]*$letter.*/) {
@@ -198,9 +198,9 @@ if (!$some) {
 	   print ".\n No pairs matches, so no changes were made.\n";
 	   if(unlink($bak)==1) {
 	       print "I deleted back-up file $bak for you.\n";
-	       die "Please fix the problem and delete it yourself\n";
 	   } else {
 	       die "Deleting back-up file $bak failed: $!\n";
+	       die "Please fix the problem and delete it yourself\n";
 	   }
        }
    }
