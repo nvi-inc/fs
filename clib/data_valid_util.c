@@ -31,10 +31,14 @@ char *ptr;
 
     switch (*count) {
     case 1:
-      ierr=arg_key(ptr,dv_key,DV_KEY,&lcl->user_dv,1,TRUE);
+      ierr=arg_key(ptr,dv_key,DV_KEY,&lcl->user_dv,0,FALSE);
       break;      
     case 2:
-      ierr=arg_key(ptr,pb_key,PB_KEY,&lcl->pb_enable,1,TRUE);
+      if(shm_addr->equip.drive != S2) {
+	*count=-1;
+	break;
+      }
+      ierr=arg_key(ptr,pb_key,PB_KEY,&lcl->pb_enable,0,FALSE);
       break;
     default:
       *count=-1;
@@ -63,6 +67,10 @@ struct data_valid_cmd *lcl;
       sprintf(output,"0x%x",ivalue);
     break;
   case 2:
+    if(shm_addr->equip.drive != S2) {
+      *count=-1;
+      break;
+    }
     ivalue = lcl->pb_enable;
     if (ivalue >=0 && ivalue <PB_KEY)
       strcpy(output,pb_key[ivalue]);
