@@ -292,17 +292,17 @@ m5_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
-	if(m5string_decode(ptr,lclc->destination.destination,
-			   sizeof(lclc->destination.destination),
-			   &lclc->destination.state)) {
+	if(m5string_decode(ptr,lclm->status.status,
+			   sizeof(lclm->status.status),
+			   &lclm->status.state)) {
 	  ierr=-501;
 	  goto error2;
 	}
 	break;
       case 2:
-	if(m5string_decode(ptr,lclm->status.status,
-			   sizeof(lclm->status.status),
-			   &lclm->status.state)) {
+	if(m5string_decode(ptr,lclc->destination.destination,
+			   sizeof(lclc->destination.destination),
+			   &lclc->destination.state)) {
 	  ierr=-502;
 	  goto error2;
 	}
