@@ -118,9 +118,11 @@ C  5.  Find peak
 C
 500   continue
       call fs_get_ispeed(ispeed)
+      call fs_get_cips(cips)
       call fs_get_idirtp(idirtp)
       call fs_get_ienatp(ienatp)
-      if(ispeed.eq.0) then ! if tape isn't moving, don't go any further
+      if(ispeed.eq.0.or. ! if tape isn't moving, don't go any further
+     &   (ispeed.eq.-3.and.cips.eq.0)) then
         ip(3)=-331
         goto 990
       else if (idirtp.ne.1.and.ienatp.ne.0) then ! not rec in rev
@@ -177,7 +179,12 @@ C
       if(ieq.eq.0) nch=nch+ir2as(mper,ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
-      if(ieq.eq.0) nch=nch+ir2as(vltlc,ibuf,nch,8,3)
+      call fs_get_drive_type(drive_type)
+      if (drive_type.eq.VLBA2) then
+         if(ieq.eq.0) nch=nch+ir2as(vltlc,ibuf,nch,8,1)
+      else
+         if(ieq.eq.0) nch=nch+ir2as(vltlc,ibuf,nch,8,3)
+      endif
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')
