@@ -93,6 +93,9 @@ C 960307 nrv Move block data initializations to here.
 C 960403 nrv Add another dum to RDCTL call for rec_cat
 C 960513 nrv New release date.
 C 960531 nrv Add vex.
+C 960604 nrv Initialize NOBS before calling vob1inp.
+C 960607 nrv Move initializations here from SREAD
+C 960610 nrv Remove freqs.ftni initialization to SREAD and VREAD
 C
 C Initialize some things.
 
@@ -162,46 +165,41 @@ C***********************************************************
 C
 C     2. Next read in the schedule file name.
 C
-200   cexpna = ' '
-      do i=1,max_frq
-        samprate(i)=0.0
-      enddo
-      do i=1,4*max_pass
-        do j=1,max_stn
-          do k=1,max_frq
-            ihdpos(i,j,k)=9999
-            ihddir(i,j,k)=0
-            ihdpo2(i,j,k)=9999
-            ihddi2(i,j,k)=0
-          enddo
-        enddo
-      enddo
+200   continue
+C     write(luscn,'("Initializing ...")')
+C  Initialize variables.   Moved here from SREAD
+C  In drcom.ftni
       kmissing = .false.
-      do i=1,max_stn
-        do j=1,max_frq
-          nchan(i,j)=0
-        enddo
-      enddo 
-        do k=1,max_chan
-	  do j=1,max_stn
-	    do i=1,max_frq
-	      invcx(k,j,i)=0
-              idummy=ichmv_ch(lifinp(k,j,i),1,'  ')
-	    enddo
-	  enddo
-	enddo
+      idummy= ichmv_ch(lbarrel,1,'NONE')
+C  In skobs.ftni
+      NOBS = 0
+      ISETTM=0
+      IPARTM=0
+      ITAPTM=0
+      ISORTM=0
+      IHDTM=0
+      ITEARL=0
+C  In sourc.ftni
+      NCELES = 0
+      NSATEL = 0
+      NSOURC = 0
+C  In statn.ftni
+      NSTATN = 0
+C  In freqs.ftni
+      NCODES = 0
 
 C   Check for non-interactive mode.
-        nch1=trimlen(cfile)
+201     nch1=trimlen(cfile)
         nch2=trimlen(cstn)
         nch3=trimlen(command)
+        cexpna = ' '
         if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
-9020    FORMAT(' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960603)')
+9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
+     .  '(NRV 960610)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -268,7 +266,7 @@ C
 9301      format(' NOTE: This schedule was created using early '
      .    ,'start with EARLY = ',i3,' seconds.')
 	  endif
-	  IF (IERR.NE.0) GOTO 200
+	  IF (IERR.NE.0) GOTO 201
           kskdfile = .false.
           kdrgfile = .false.
 C
@@ -392,6 +390,7 @@ C     response(1:1) = upper(response(1:1))
       if (iserr(istn).ne.0) kmissing=.true.
 699   continue
       if (kvex) then !get the statin's input now
+      nobs=0
       if (istn.eq.0) then ! get all in a loop
         do i=1,nstatn
           call vob1inp(ivexnum,i,luscn,ierr) ! get the station's obs
@@ -402,8 +401,8 @@ C     response(1:1) = upper(response(1:1))
             write(luscn,'("  Number of obs: ",i5)') nobs
           endif
         enddo
-      else
-        call vob1inp(ivexnum,istn,luscn,ierr) ! get the station's obs
+      else ! get one station's obs
+        call vob1inp(ivexnum,istn,luscn,ierr)
         if (ierr.ne.0) then
           write(luscn,'("FDRUDGxx - Error from vob1inp=",
      .    i5)') ierr
