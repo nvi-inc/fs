@@ -26,6 +26,7 @@ long ip[5];                           /* ipc parameters */
 
       int user_info_dec();                 /* parsing utilities */
       char *arg_next();
+      int ierror,iret;
 
       void s2st_dis();
       void ini_rclcn_req(), end_rclcn_req();
@@ -77,15 +78,20 @@ parse:
 /* format buffers for rclcn */
       if(lcl.speed >= 0) {
 	int rstate=get_s2state(ip,"rs");
-	if(ip[2]!=0)
-	  return;
+	if(ip[2]!=0){
+          iret=1;
+	  goto check;
+	}
 	if(rstate==RCL_RSTATE_RECORD) {
 	  int speed=get_s2speed(ip,"rs");
-	  if(ip[2]!=0)
-	    return;
+	  if(ip[2]!=0) {
+	    iret=1;
+	    goto check;
+	  }
 	  if(speed!=lcl.speed) {
+	    ierror=1;
 	    ierr=-301;
-	    goto error;
+	    goto check;
 	  }
 	} else
 	  add_rclcn_speed_set(&buffer,device,lcl.speed);
@@ -99,7 +105,8 @@ rclcn:
       end_rclcn_req(ip,&buffer);
       skd_run("rclcn",'w',ip);
       skd_par(ip);
-
+      iret=ierror=0;
+check:
       if (ichold != -99) {
 	if(lcl.speed >= 0)
 	  shm_addr->check.s2rec.speed=TRUE;
@@ -108,6 +115,11 @@ rclcn:
 	  ichold=ichold % 1000 + 1;
 	shm_addr->check.s2rec.check=ichold;
       }
+      if(iret)
+	return;
+      else if(ierror)
+	goto error;
+
       if(ip[2]<0) {
 	cls_clr(ip[0]);
 	ip[0]=ip[1]=0;
