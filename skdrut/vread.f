@@ -99,6 +99,8 @@ C     Early start, late stop, and time gape were read in.
       ihdtm = 6
 
 C 3. Read the $SCHEDULING_PARAMS section to get parameters.
+C    If there is a def for SKED_PARAMS then mark this as a
+C    sked-produced schedule by setting ksked true.
 C     iret = fget_literal(ibuf)
 
       return

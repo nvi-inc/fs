@@ -222,6 +222,10 @@ C 020515 nrv Correct the placement of TPI daemon commands.
 C 020522 nrv Correct the reading of prompt for TPI.
 C 020524 nrv Move statement initializing itpid_period_use out of
 C            prompt block.
+C 020606 nrv Initialize IBUF2 for writing out procedures. Add kcomment
+C            to GTSNP call.
+C 020618 nrv Inconsistent use of itype in setup_name for K4 between
+C            procs and snap. Use itype=2 for both K4 and S2.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -231,7 +235,7 @@ C LOCAL VARIABLES:
       integer*2 lpmode(2) ! mode for procedure names
       integer*2 linp(max_chan) ! IF input local variable
       LOGICAL KUS ! true if our station is listed for a procedure
-      logical ku,kl,kul,kux,klx
+      logical ku,kl,kul,kux,klx,kcomment
       integer ichanx,ibx,icx
       logical krec_2rec ! true to append '1' or '2' to rec commands
 C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
@@ -458,7 +462,7 @@ C    for procedure names.
             if (kuse(irec)) then ! procs for this recorder
           CALL IFILL(LNAMEP,1,12,oblank)
           itype=2
-          if (ks2rec(irec)) itype=1
+          if (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec)) itype=1
           call setup_name(itype,icode,ipass,lnamep,nch)
               
           call trkall(itras(1,1,1,1,ipass,istn,icode),
@@ -2690,13 +2694,13 @@ C
               IDUMMY = ICHMV(LNAMEP,1,IBUF,IC1,MIN0(IC2-IC1+1,12))
               CALL CRPRC(LU_OUTFILE,LNAMEP)
               WRITE(LUSCN,9112) LNAMEP
-              CALL GTSNP(ICH,ILEN,IC1,IC2)
+              CALL GTSNP(ICH,ILEN,IC1,IC2,kcomment)
               DO WHILE (IC1.NE.0) ! get and write commands
+                call ifill(ibuf2,1,ibuflen,oblank)
                 NCH = ICHMV(IBUF2,1,IBUF,IC1,IC2-IC1+1)
-                CALL IFILL(IBUF2,NCH,1,oblank)
-                call hol2lower(ibuf,(nch+1))
-                call writf_asc(LU_OUTFILE,IERR,IBUF2,(NCH+1)/2)
-                CALL GTSNP(ICH,ILEN,IC1,IC2)
+                if (.not.kcomment) call hol2lower(ibuf2,nch)
+                call writf_asc(LU_OUTFILE,IERR,IBUF2,NCH/2)
+                CALL GTSNP(ICH,ILEN,IC1,IC2,kcomment)
               ENDDO ! get and write commands
               CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
             ENDIF ! write proc file

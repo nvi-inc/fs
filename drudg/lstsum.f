@@ -85,6 +85,10 @@ C 000611 nrv Add KSCAN to call.
 C 000622 nrv Don't try to decode a time command without a valid format.
 C 000614 nrv Save the line number of the SCAN_NAME command, not SOURCE.
 C 001114 nrv Don't upper-case SCAN_NAME command.
+C 020531 nrv Don't reset footage to zero at the start of the next
+C            forward pass. The schedule doesn't always return the tape
+C            to zero footage but may leave it positioned to start the
+C            next pass at that point.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -359,8 +363,12 @@ C         kend=.false.
         else if (index(cbuf,'MIDTP').ne.0) then
           inewp = 1
           idur=-1 ! reset duration so it gets calculated again
-          if (idir.eq.1) inewp = 0
-          if (inewp.eq.1) ifeet = 0
+C Don't reset footage to zero for a new forward pass. This probably 
+C fixed C an earlier problem, but it's not the right thing to do. 
+C The schedule might have left the footage at the place where the
+C tape stopped on the previous pass.
+C         if (idir.eq.1) inewp = 0
+C         if (inewp.eq.1) ifeet = 0
           if (ifeet.lt.0) ifeet=0
 
         else if (index(cbuf,'MIDOB').ne.0) then ! data start time

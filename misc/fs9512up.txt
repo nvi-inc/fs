@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.11/misc/fs9511up.txt  Version: 1.2  Date: 020522
+File: /usr2/fs-9.5.12/misc/fs9512up.txt  Version: 1.3  Date: 020624
 
 I. Introduction
 
@@ -19,7 +19,7 @@ recorders.
 
 This version includes all features of 9.5.7, specifically the Mark V
 piggyback recording mode. It also includes some small patches to
-9.5.8, 9.5.9, and 9.5.10.
+9.5.8, 9.5.9, 9.5.10, and 9.5.11.
 
 II. Changes Since Version 9.5.3
 
@@ -30,7 +30,8 @@ summary of the items covered followed by a more detailed description.
 			 A. Changes in the FS
 
 The following is a summary of the changes. More detailed text follows
-the summary. New features since 9.5.7 start at number 18.
+the summary. New features since 9.5.7 start at number 18. New features
+since 9.5.11 start at 22.
 
 1. VLBA42 recorder support
 2. Improved error reporting in chekr
@@ -53,6 +54,10 @@ the summary. New features since 9.5.7 start at number 18.
 19. Periodic TPI measurements
 20. Antenna onsource flagging
 21. "inject_snap" returns command results
+22. "pdplt" can manipulate solution parameters
+23. "tacd" is now more robust
+24. "logpl" can plot entries delimited by spaces
+25. K4 "rec_mode" command now has fast set-up
 
 A more detailed discussion of these changes follows.
 
@@ -340,10 +345,59 @@ A more detailed discussion of these changes follows.
     "fs_state", to return the status of some programs such as "fivpt"
     and "onoff" or information that is stored in shared memory.
 
+22. "pdplt" can manipulate solution parameters. Calle Holmstrom, who
+    is visiting from Chalmers in Sweden has added a "Modify
+    Parameters" item in the "Edit" menu. When this item is selected it
+    presents a pop-up menu with radio buttons to control which
+    parameters are solved for. A button on this page gives a brief
+    description of the parameters when pushed. If the user modifies
+    the parameters, a temporary version of the model file is created
+    on /tmp to hold the modifications and then is used in the
+    processing. The original mdlpo.ctl is not modified. If the
+    mdlpo.ctl is subsequently updated using the "update" script, the
+    new model (with whatever the final parameter configuration was)
+    will be appended to the mdlpo.ctl file as usual.
+
+23. "tacd" is now more robust. There was a bug, discovered by Hayo
+    Hase (TIGO) and John Conway (Onsala), that caused "tacd" to use up
+    a lot of CPU time unecessarily when the tacd.ctl file did not
+    contain any non-comment lines. This was fixed. If you had
+    installed the patch that was suggested for previous versions, it
+    should no longer be necessary. No action on your part, other than
+    installing 9.5.12, is necessary to undo the patch. In addition,
+    the "tacd" command will print an error message if it is used and
+    the "tacd" program is not set-up or set-up incorrectly.
+    
+24. "logpl" can plot entries delimited by spaces. "logpl" was enhanced
+    to allow it to count parameters separated by spaces as well as
+    commas. This is slightly different than using commas because each
+    comma delimits a parameter, whereas multiple spaces count as a
+    single delimiter. Spaces (or groups of spaces) adjacent to commas
+    are ignored. The resulting behavior is backward compatible with
+    previous behavior unless a parameter had an embedded space in
+    which case it will count the space as delimiting an additional
+    parameter. An extensive search of the log file from geodesy
+    experiments suggests that this doesn't happen in any significant
+    cases. If this does cause a problem for anyone please us know and
+    we will make it possible to select the old or new behavior. The
+    new behavior makes it possible to plot space delimited quantities
+    such as the output of FIVPT and the decode4 command. We expect to
+    introduce in the next version the capability to plot one channel
+    against another.
+
+25. K4 "rec_mode" command now has fast set-up. Osaki-san (Kashima34)
+    has modified the K4 type 2 recorder set-up command to skip the
+    time-consuming set-up commands if the set-up is the same as the
+    old one and the old has been successfully set-up. This speeds up
+    the execution of the schedule and reduces the number of times the
+    display of the recorder might confuse the operator because the
+    time is not updating properly.
+
                          B. Changes in DRUDG
 
-drudg opening message date is 020515. The following areas in DRUDG were
-modified. Changes since version 9.5.7 start with item 6.
+drudg opening message date is 020515. The following areas in DRUDG
+were modified. Changes since version 9.5.7 start with item 6. Changes
+since 9.5.11 start at item 11.
 
 1. S2 experiment corrections
 2. REPRO command additional parameter.
@@ -355,6 +409,9 @@ modified. Changes since version 9.5.7 start with item 6.
 8. VC command changes.
 9. REPRO command changes.
 10. Option 11 fix.
+11. Procedure names in .snp and .prc made consistent for K4.
+12. $PROCEDURES section fix.
+13. Footage printout in Option 5 fixed.
 
 A more detailed discussion of these changes follows.
 
@@ -451,6 +508,21 @@ parameter was moved to the 7th command parameter.
 10. Option 11 fix. In Option 11 the rack and recorder names for VLBA
 and VLBA4 were being confused. Now drudg checks both the name and the
 length of the name.
+
+11. Procedure names in .snp and .prc made consistent for K4. There
+was an inconsistency in generating procedure names between the
+SNAP file and procedure library for K4 recorders. This was fixed
+so that both files now have the "setupxx" style procedure names.
+
+12. $PROCEDURES section fix. Writing out SNAP commands from the
+optional $PROCEDURES section of the schedule file was fixed. A
+buffer was not being initialized.
+
+13. Footage printout in Option 5 fixed. The footage count is no
+longer reset to zero internally at the start of the next forward 
+pass for the Option 5 listing. If the schedule doesn't return the 
+tape to zero footage but leaves it positioned to start the next pass 
+at that point, the drudg listing now honors that.
 
 			    C. Known Bugs
 
@@ -666,6 +738,9 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
+If you are upgrading from 9.5.11, please follow steps (0)-(8), skip
+step (9), and complete step (10).
+
 If you are upgrading from 9.5.8, 9.5.9, or 9.5.10, please follow steps
 (0)-(8), skip step (9), and complete step (10). Please also complete
 item M6 or V6, as appropriate, in step (16).
@@ -707,7 +782,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.11 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.12 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -715,7 +790,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.11.tar.gz
+    get fs-9.5.12.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -729,12 +804,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.11.tar.gz
+    tar -xzpf /tmp/fs-9.5.12.tar.gz
 
 (6) Set the link for the new FS vesion:
 
     cd /usr2
-    ln -sfn fs-9.5.11 fs
+    ln -sfn fs-9.5.12 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1049,18 +1124,18 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.11.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.12.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9511tg.aa
-fs9511tg.ab
+fs9512tg.aa
+fs9512tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9511tg.* >fs-9.5.11.tar.gz
+cat fs9512tg.* >fs-9.5.12.tar.gz
 
 This will create an exact image of the original fs-9.5.11.tar.gz
 archive on your computer.  Please be sure to use binary transfer when

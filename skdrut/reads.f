@@ -1,6 +1,6 @@
       SUBROUTINE READS(IUNIT,KERR,IBUF,IBLEN,IL,IMODE)
 C
-C  READS reads the schedule file
+C  READS reads the schedule file lines.
 C
       include '../skdrincl/skparm.ftni'
 C
