@@ -125,6 +125,7 @@ typedef struct fscom {
 	   int drive_type[2];
 	   int rack_type;
 	   int wx_met;
+	  int mk4sync_dflt;
         } equip; 
 
         int klvdt_fs[2];
@@ -157,6 +158,7 @@ typedef struct fscom {
           long span[2];
           long secs_off;
           int index;
+	  int icomputer[2];
           char model;
         } time;
 	float posnhd[2][2];
@@ -266,7 +268,33 @@ typedef struct fscom {
   char mk5vsn[33];
   long mk5vsn_logchg;
   long logchg;
+  struct user_device_cmd user_device;
+  struct disk_record_cmd disk_record;
+  struct {
+    int pong;
+    struct monit5_ping {
+      int active;
+      struct {
+	char vsn[33];
+	double seconds;
+	double gb;
+	double percent;
+	int itime[6];
+      } bank[2];
+    } ping[2];
+  } monit5;
+
+  struct disk2file_cmd disk2file;
+  struct in2net_cmd in2net;
+
+  struct {
+    int normal_end;
+    int other_error;
+  } abend;
+
+  struct s2bbc_data  s2bbc[4];
+  struct s2das_check s2das;
+
+  int ntp_synch_unknown;
+
 } Fscom;
-
-
-
