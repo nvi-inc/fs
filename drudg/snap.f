@@ -1,4 +1,4 @@
-        SUBROUTINE SNAP(cr1,cr2,cr3,cr4)!TRANSLATE SCHEDULE TO SNAP 
+        SUBROUTINE SNAP(cr1,cr2,cr3,cr4,iin)
 C
 C     SNAP reads a schedule file and writes a file with SNAP commands
 C
@@ -14,6 +14,8 @@ C          1) epoch 1950 or 2000
 C          2) add checks Y or N
 C          3) force checks Y or N
 C          4) OK to delete existing file Y or N
+      integer iin ! 1=Mk3/4 back end, 2=VLBA back end. This is ignored
+C                   for VEX files which already have this information.
 C
 C  LOCAL:
 C     IFTOLD - foot count at end of previous observation
@@ -32,6 +34,7 @@ C     TSPINS - time, in seconds, to spin tape
       real*4 tspins,d,epoc,ras,dcs,spdips
       integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
      .          LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
+      integer*2 lcable2(max_stn)
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
       integer npmode,itrk(36),nco,idt
       integer*2 lpmode(2)
@@ -45,7 +48,7 @@ C     TSPINS - time, in seconds, to spin tape
       character*1  maxchk,allchk
       logical    ex
       logical      kdone,kspin,kup
-      logical ks2 ! true for an S2 recorder
+      logical ks2 ! true for S2 recorder
       logical ket ! true if the tape is going to be stopped for this scan
       logical krunning ! true when the tape is running
 C     LMODEP - mode of previous observation
@@ -130,6 +133,12 @@ C 960912 nrv Add LOADER if S2 group changes, other changes per Ed's
 C            memo about SNAP for S2.
 C 960913 nrv Don't try to calculate late stop on first obs.
 C 960913 nrv Put TAPE commands at all ST's for S2 too.
+C 961003 nrv Take a look at the second observation's cable wrap to
+C            see if the first wrap needs to be corrected. *NOT FINISHED*
+C 961031 nrv Add "iin" to calling sequence. iin=1 is Mk3/4 SNAP file
+C            with speeds 135/270, iin=2 is VLBA back end with NDR
+C            densities possible. Modify bit density in common based
+C            on this input.
 C
 C
       iblen = ibuf_len*2
@@ -272,11 +281,47 @@ C
         return
       END IF
 C
+C 2. Check the type of equipment so that bit density is correct.
+C   For VEX files the rack and recorder info is taken from the schedule. 
+C   For non-VEX, the user specified either Mk3/4 or VLBA back end.
+C   For S2, since this must be a VEX file, we will rely on the schedule 
+C   for the rack type.
+      ks2=.false.
+      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
+     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
+        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      else ! take user input 
+C     Modify bit density and recording format according to formatter type.
+        if (iin.eq.1) then ! Mark III/IV formatter and DR format
+          do i=1,ncodes
+C           Force the format to "M" as the only way this formatter can go.
+            idum = ichmv_ch(lmfmt(1,istn,i),1,'M')
+            if (bitdens(istn,i).lt.40000.d0) then
+              bitdens(istn,i) = 33333.0
+            else
+              bitdens(istn,i) = 56250.0 
+            endif
+          enddo
+        else if (iin.eq.2) then ! VLBA formatter
+C         do i=1,ncodes
+C           Use the format taken from the mode name. Leave the bit
+C           density alone too.
+C           if (bitdens(istn,i).lt.40000.d0) then
+C             bitdens(istn,i) = 34020.0
+C           else
+C             bitdens(istn,i) = 56700.0 
+C           endif
+C         enddo
+        endif
+      endif
+
 C     2. Initialize counts.  Begin loop on schedule file records.
 C
-C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
       call ifill(ibuf,1,ibuf_len*2,oblank)
+C     Load first observation into IBUF
       idum = ichmv(ibuf,1,lskobs(1,1),1,ibuf_len*2)
+C     Load second observation into IBUF2
+      idum = ichmv(ibuf2,1,lskobs(1,2),1,ibuf_len*2)
       ilen = iflch(ibuf,ibuf_len*2)
       IOBS = -1
       iobss=-1
@@ -288,13 +333,20 @@ C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
       IFTOLD = 0
       kerr=0
       kspin = .false.
-      ks2 = ichcm_ch(lstrec(1,istn),1,"S2").eq.0
       ket = .false.
       krunning = .false.
 C
       DO WHILE (ILEN.GT.0.AND.KERR.EQ.0.and.ierr.eq.0
      ..AND.JCHAR(IBUF,1).NE.Z24)
 C
+C       Check the cable on the second scan to find out what it
+C       really should have been on the first scan.
+        if (iobs.eq.-1) then ! unpack the second scan
+C         CALL UNPSK(IBUF2,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+C    .    IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE2,
+C    .    MJDpre,UTpre,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+C         CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ispre,ISTNSK,ICOD)
+        endif
         CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      .       MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
@@ -428,6 +480,11 @@ C         Add cable wrap indicator for azel stations.
           if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
      .      then
             NCH = MCOMA(IBUF2,NCH)
+C           
+C           if (iobs.eq.0) then ! check cable for first scan
+C             CALL SLEWo(ispre,MJDPRE,UTPRE,ISOR,ISTN,
+C    .        lcable(istnsk),lcable2(istnsk),TSLEW,0,dum)
+C           endif
             call cbinf(lcable(istnsk),cwrap)
             il=trimlen(cwrap)
             call char2hol(cwrap,lwrap,1,il)
@@ -763,7 +820,6 @@ C Start tape, if not started earlier and if not already running
             return
           endif
           nch = ichmv(ibuf2,nch,lspd,1,nspd)
-C         nch = nch+ir2as(spd,IBUF2,NCH,6,2)
           NCH = ichmv_ch(IBUF2,NCH+1,' ') - 1
           krunning = .true.
           call hol2lower(ibuf2,(nch+1))
