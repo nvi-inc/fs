@@ -4,6 +4,7 @@ C
       integer*2 lcmd(1)
 c      integer*4 ip(5)
       logical kbreak,rn_test
+      double precision tim, tim2
 C
       if (kbreak('aquir')) goto 200
       if (iwcmd.le.-2) goto 100
@@ -26,7 +27,7 @@ C
       call fc_rte_time(it,idum)
       tim2=float(it(4))*3600.+float(it(3))*60.+float(it(2)) 
       if (tim2.lt.tim) tim2=tim2+86400.
-      if (tim2.ge.tim+iwcmd) goto 100
+      if (tim2.ge.tim+iwcmd*60.) goto 100
       call susp(2,2)
       goto 10
 C
