@@ -218,9 +218,10 @@ C
 C
       call local(az2,el2,'azel',ierr)
       if(ierr.ne.0) goto 80010
-      if(az2.gt.RPI*1.5.and.az .lt.RPI*.5) az2=az2-2.*RPI
-      if(az .gt.RPI*1.5.and.az2.lt.RPI*.5) az =az -2.*RPI
+      if(az2.gt.RPI*1.5.and.az .lt.RPI*.5) az =az +DTWOPI
+      if(az .gt.RPI*1.5.and.az2.lt.RPI*.5) az =az -DTWOPI
       az=(az+az2)*.5
+      az=mod(az+DTWOPI,DTWOPI)
       el=(el+el2)*.5
 C
       if(nrepnf.gt.1) goto 50
