@@ -1,29 +1,31 @@
-caltemp - set noise cal temperatures
-Syntax:         caltemp1=temp
-                caltemp2=temp
-                caltemp3=temp
-                caltempa=temp
-                caltempb=temp
-                caltempc=temp
-                caltempd=temp
+               caltemp - set noise cal temperatures
 
-Response:       caltemp1/temp
-                caltemp2/temp
-                caltemp3/temp
-                caltempa/temp
-                caltempb/temp
-                caltempc/temp
-                caltempd/temp
+Syntax:     caltemp1=temp
+            caltemp2=temp
+            caltemp3=temp
+            caltempa=temp
+            caltempb=temp
+            caltempc=temp
+            caltempd=temp
+
+Response:   caltemp1/temp
+            caltemp2/temp
+            caltemp3/temp
+            caltempa/temp
+            caltempb/temp
+            caltempc/temp
+            caltempd/temp
 
 
 Settable parameters:
-temp            temperature of cal signal, in degrees K.
+temp      temperature of cal signal, in degrees K.
 
 Monitor-only parameters: none
 
 Comments: 
-Calibration temperatures, for either Mark III or VLBA systems, may be specified
-with the caltemp1/2/3 and caltempa/b/c/d commands, respectively. The
-commands tsys1/2/3 and tsysa/b/c/d use the temperatures specified as
-caltemp1/2/3 and caltempa/b/c/d respectively. The command pairs,
-caltemp1/a, caltemp2/b, and caltemp3/c are synonomous.
+Calibration temperatures, for either Mark III or VLBA systems, may
+be specified with the caltemp1/2/3 and caltempa/b/c/d commands,
+respectively. The commands tsys1/2/3 and tsysa/b/c/d use the
+temperatures specified as caltemp1/2/3 and caltempa/b/c/d
+respectively. The command pairs caltemp1/a, caltemp2/b, and
+caltemp3/c are synonomous.

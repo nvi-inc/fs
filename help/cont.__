@@ -1,13 +1,14 @@
-cont - continue schedule execution after a halt
-Syntax:         cont
+         cont - continue schedule execution after a halt
 
-Response:       none
+Syntax:     cont
+
+Response:   none
 
 
 Parameters: none
 
 Comments: 
-This command must be issued after a halt to get the schedule going again. It has
-no effect if no halt was actually issued. This is an immediate execution
-operator command.
+This command must be issued after a halt to get the schedule going
+again. It has no effect if no halt was actually issued. This is an
+immediate execution operator command.
 

@@ -1,30 +1,33 @@
-vcnn - video converter (Mark III rack)
-Syntax:         vcnn=freq,bandwidth,TPIsel,attenU,attenl
+              vcnn - video converter (Mark III rack)
 
-Response:       vcnn/freq,bandwidth,TPIsel,attenU,attenl,
-                rem/lcl,LOlock,TP
+Syntax:     vcnn=freq,bandwidth,TPIsel,attenU,attenl
+
+Response:   vcnn/freq,bandwidth,TPIsel,attenU,attenl,
+            rem/lcl,LOlock,TP
 
 
 Settable parameters:
-freq            synthesizer frequency in MHz, value must be less than 500.00
-                MHz. No default.
-bandwidth       final filter bandwidth in MHz, default 2. Choices for Mark III
-                are:
-                   0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0 (external filter).
-                Choices for Mark IV are:
-                   0.125, 0.5, 2.0, 4.0, 8.0, 16.0, 0 (external filter).
-                Value may be integer for bandwidths of 1, 2, 4, 8, or 16 MHz.
-TPIsel          total power integrator selection. Choices are ul, l, u, if,
-                lo, gr (ground). Default u.
-attenU          USB attenuator, 0 (default) or 10 db only. 
-attenL          LSB attenuator, 0 (default) or 10 db only.
+freq      Synthesizer frequency in MHz, value must be less than
+          500.00 MHz. No default.
+bandwidth Final filter bandwidth in MHz, default 2. Choices for
+          Mark III are:
+              0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0 (external filter).
+          Choices for Mark IV are:
+              0.125, 0.5, 2.0, 4.0, 8.0, 16.0, 0 (external filter).
+          Value may be integer for bandwidths of 1, 2, 4, 8, or 16
+          MHz.
+TPIsel    Total power integrator selection. Choices are ul, l, u,
+          if, lo, gr (ground). Default u.
+attenU    USB attenuator, 0 (default) or 10 db only. 
+attenL    LSB attenuator, 0 (default) or 10 db only.
 
 Monitor-only parameters:
-rem/lcl         switch setting, rem or lcl.
-LOlock          LO lock/unlock staus, lock or unlock.
-TP              total power reading, decimal.
+rem/lcl   switch setting, rem or lcl.
+LOlock    LO lock/unlock staus, lock or unlock.
+TP        total power reading, decimal.
 
 Comments: MAT module functions available.
 
-For Mark IV, the seldom used internal 0.25 and 1 MHz filters were replaced with
-16 and 8 MHz filters, respectively, to increase the maximum bandwidth.
+For Mark IV, the seldom used internal 0.25 and 1 MHz filters were
+replaced with 16 and 8 MHz filters, respectively, to increase the
+maximum bandwidth.

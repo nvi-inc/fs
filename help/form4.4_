@@ -1,36 +1,41 @@
-form4 - formatter control and monitor (Mark IV rack)
-Syntax:         form4=command
+       form4 - formatter control and monitor (Mark IV rack)
 
-Response:       form/response
+Syntax:     form4=command
+
+Response:   form/response
 
 
 
 Settable parameters:
-command            any legal command sentence as described in the Mark IV
-                   Formatter Vocabulary manual. The characters \r\n (carriage-
-                   return, line-feed) are appended before sending the command.
+command any legal command sentence as described in the Mark IV
+        Formatter Vocabulary manual. The characters \r\n
+        (carriage-return, line-feed) are appended before sending
+        the command.
 
 Monitor-only parameters:
-response           response to command. The >\r\n at the end of the response is
-                   not included in the Field System log. For accepted commands,
-                   which have only >\r\n as the response, the Field System logs
-                   ack.
+response    response to command. The >\r\n at the end of the
+            response is not included in the Field System log. For
+            accepted commands, which have only >\r\n as the response,
+            the Field System logs ack.
 
 Comments: 
 
-Refer to the Mark IV Formatter Vocabulary manual for a description of all valid
-commands and their syntax.
+Refer to the Mark IV Formatter Vocabulary manual for a description
+of all valid commands and their syntax.
 
-This command is a simple feed-through to the Mark IV formatter. No checking is
-done on the command, no action is taken for any response. This form of the
-command is temporary while it is determined what standard parameters are desired.
+This command is a simple feed-through to the Mark IV formatter. No
+checking is done on the command, no action is taken for any
+response. This form of the command is temporary while it is
+determined what standard parameters are desired.
 
-The command is sent to the MAT bus just as if the operator had used the mat
-command. No modifications are made before the command is sent on the bus.
+The command is sent to the MAT bus just as if the operator had used
+the mat command. No modifications are made before the command is
+sent on the bus.
 
-Use this command to set the formatter clock, with the /TI, /TR, /TA commands.
-After setting the formatter time, issue a sy=setcl offset command to reset the
-Field System time. The fmset program may also be used to set the formatter time.
+Use this command to set the formatter clock, with the /TI, /TR, /TA
+commands. After setting the formatter time, issue a sy=run setcl
+offset command to reset the Field System time. The fmset program
+may also be used to set the formatter time.
 
 Examples:
-form4=/ass 0 1:2 3:4                 #92/ass 0 1:2 3:4\r\n
+form4=/ass 0 1:2 3:4        #92/ass 0 1:2 3:4\r\n

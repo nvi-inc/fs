@@ -1,42 +1,53 @@
-lvdt - head stack positioning by LVDT voltage
-Syntax:         lvdt=cmdVw,cmdVr
+          lvdt - head stack positioning by LVDT voltage
 
-Response:       lvdt/cmdVw,cmdVr,actVw,actVr,deltaVw,deltaVr
+Syntax:     lvdt=cmdVw,cmdVr
+
+Response:   lvdt/cmdVw,cmdVr,actVw,actVr,deltaVw,deltaVr
 
 
 Settable parameters:
-cmdVw           command position voltage for the write head stack, default is
-                don't move. This parameter refers to Mark IV head stack 1.
-cmdVr           command position voltage for read head stack, default is don't
-                move. This parameter is not valid for VLBA recorders. This
-                parameter refers to Mark IV head stack 2.
+cmdVw   Command position voltage for the write head stack,
+        default is don't move. For Mark IV this parameter refers
+        to head stack 1.
+cmdVr   Command position voltage for read head stack, default is
+        don't move. This parameter is not valid for VLBA
+        recorders. For Mark IV this parameter refers to head stack 2.
 
 Monitor-only parameters:
-actVw           actual position voltage for write head stack (Mark IV stack 1)
-actVr           actual position voltage for read head stack (Mark IV stack 2),
-                null for VLBA
-deltaVw         voltage difference between actual and commanded write head stack
-                position (Mark IV stack 1).
-deltaVr         voltage difference between actual and commanded read head stack
-                position (Mark IV stack 2), null for VLBA
+actVw     Actual position voltage for write head stack (Mark IV
+          stack 1)
+actVr     Actual position voltage for read head stack (Mark IV
+          stack 2), null for VLBA
+deltaVw   Voltage difference between actual and commanded write
+          head stack position (Mark IV stack 1).
+deltaVr   Voltage difference between actual and commanded read head
+          stack position (Mark IV stack 2), null for VLBA
 
 Comments: 
-This command is used to position the head stacks in voltage units. An individual
-stack may be moved by not specifying a command voltage for the other stack. The
-commanded positions are uncalibrated.
+This command is used to position the head stacks in voltage units.
+An individual stack may be moved by not specifying a command
+voltage for the other stack. The commanded positions are
+uncalibrated.
 
-VLBA recorders have only one head stack. Its positioning is specified by using
-the first (write) stack parameter. Monitor parameters for the read head stack are
-reported as null.
+VLBA recorders have only one head stack. Its positioning is
+specified by using the first (write) stack parameter. Monitor
+parameters for the read head stack are reported as null.
 
-For Mark IV recorders, the write head stack parameters correspond to head stack
-1, the read head stack parameters to head stack 2.
+For Mark IV recorders, the write head stack parameters correspond
+to head stack 1, the read head stack parameters to head stack 2.
 
-The deltaVx parameters are reported with the sign of actual minus commanded.
+The deltaVx parameters are reported with the sign of actual minus
+commanded.
 
-The command positions reported by the lvdt, pass, and stack commands are
-consistent. See the description of the pass command for more information.
+The command positions reported by the lvdt, pass, and stack
+commands are consistent. See the description of the pass command
+for more information.
 
-If the write head stack position is commanded, the auxiliary data field is set
-to reflect the commanded position, see the pass command for more information.
-(Not yet implemented for VLBA.)
+If the write head stack position is commanded, the auxiliary data
+field is set to reflect the commanded position, see the pass
+command for more information. (Not yet implemented for VLBA.)
+
+For VLBA2 drives, the voltage units are actually in kè (0.1
+microns) of head position. This implies that the scale is expanded
+by a factor of about 1500 over the LVDT voltage scale of other
+drives.

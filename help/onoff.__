@@ -1,76 +1,84 @@
-onoff - on-off radiometry
-Syntax:         onoff=rep,intp,dev1,dev2,cutoff,stp
+                    onoff - on-off radiometry
 
-Response:       onoff/rep,intp,dev1,dev2,cutoff,stp,cal1,cal2,
-                beam1,beam2,flux1,flux2
+Syntax:     onoff=rep,intp,dev1,dev2,cutoff,stp
+
+Response:   onoff/rep,intp,dev1,dev2,cutoff,stp,cal1,cal2,
+            beam1,beam2,flux1,flux2
 
 
 Settable parameters:
-rep             number of repetitions, 1 to 99. Default is 2. 
-intp            integration period, 1 to 10 seconds. Default is 1. 
-dev1            device to be used as detector 1. Standard detector mnemonics are
-                allowed. Default is i1 for Mark III, ia for VLBA.
-dev2            device to be used as detector 2. Standard detector mnemonics are
-                allowed. Default is i1 for Mark III, ib for VLBA.
-cutoff          elevation above which to step in elevation rather than azimuth,
-                in degrees, default 60.
-stp             distance off source for off source and calibration points, in
-                multiples of a beamwidth. Default is 5.0.
+rep       Number of repetitions, 1 to 99. Default is 2. 
+intp      Integration period, 1 to 10 seconds. Default is 1. 
+dev1      Device to be used as detector 1. Standard detector
+          mnemonics are allowed. Default is i1 for Mark III, ia for
+          VLBA.
+dev2      Device to be used as detector 2. Standard detector
+          mnemonics are allowed. Default is i1 for Mark III, ib for
+          VLBA.
+cutoff    elevation above which to step in elevation rather than
+          azimuth, in degrees, default 60.
+stp       Distance off source for off source and calibration
+          points, in multiples of a beamwidth. Default is 5.0.
 
 Monitor-only parameters:
-cal1            calibration noise source temperature in degrees K for detector 1.
-                This is determined from the last caltempx command in conjunction
-                with the patch (Mark III) or bbc command.
-cal2            calibration noise source temperature in degrees K for detector 2.
-                This is determined from the last caltempx command in conjunction
-                with the patch (Mark III) or bbd command.
-beam1           The full width half maximum beam size (degrees) for device 1. It
-                is determined from the beamx command and the patch (Mark III)
-                or bbc (VLBA) command.
-beam2           The full width half maximum beam size (degrees) for device 2. It
-                is determined from the beamx command and the patch (Mark III)
-                or bbc (VLBA) command.
-flux1           The apparent source flux for device 1, based on the fluxx command
-                and the patch (Mark III) or bbc (VLBA) command.
-flux2           The apparent source flux for device 2, based on the fluxx command
-                and the  patch (Mark III) or bbc (VLBA) command.
+cal1      Calibration noise source temperature in degrees K for
+          detector 1. This is determined from the last caltempx
+          command in conjunction with the patch (Mark III) or bbc
+          command.
+cal2      Calibration noise source temperature in degrees K for
+          detector 2. This is determined from the last caltempx
+          command in conjunction with the patch (Mark III) or bbd
+          command.
+beam1     The full width half maximum beam size (degrees) for
+          device 1. It is determined from the beamx command and the
+          patch (Mark III) or bbc (VLBA) command.
+beam2     The full width half maximum beam size (degrees) for
+          device 2. It is determined from the beamx command and the
+          patch (Mark III) or bbc (VLBA) command.
+flux1     The apparent source flux for device 1, based on the fluxx
+          command and the patch (Mark III) or bbc (VLBA) command.
+flux2     The apparent source flux for device 2, based on the fluxx
+          command and the  patch (Mark III) or bbc (VLBA) command.
 
 
 Comments: 
-The parameters should be setup by issuing a onoff=... command. A measurement
-is started by issuing a simple onoff. This will recover the current values for
-the display only parameters and schedule an external program onoff. onoff should
-be placed in fspgm.ctl, so that it is initialized automatically when the Field
-System is started. See the onoff manual in Volume 2.
+The parameters should be setup by issuing a onoff=... command. A
+measurement is started by issuing a simple onoff. This will recover
+the current values for the display only parameters and schedule an
+external program onoff. onoff should be placed in fspgm.ctl, so
+that it is initialized automatically when the Field System is
+started. See the onoff manual in Volume 2.
 
-The current command antenna position including offsets is assumed to be
-'onsource.'
+The current command antenna position including offsets is assumed
+to be 'onsource.'
 
-It is recommended that nothing else be done, e.g. running a schedule, while this
-command is executing. Since this command may run for an extended period of time,
-a mechanism has been supplied for aborting: enter sy=brk onoff in response to
-a system prompt. After aborting, the offsets will be returned to their original
+It is recommended that nothing else be done, e.g. running a
+schedule, while this command is executing. Since this command may
+run for an extended period of time, a mechanism has been supplied
+for aborting: enter sy=brk onoff in response to a system prompt.
+After aborting, the offsets will be returned to their original
 values.
 
-In order for this command to work, the following conditions must be met: (1) the
-detector devices have been set up by the Field System, (2) the lo and upconv
-commands have been issued, (3) the IF distributor has been set up by the Field
-System and it must be in remote (Mark III only), and (4) the appropriate beamx
-command has been issued. Additionally, if a video converter is used as a
-detector, the patch command must have been issued. If system performance is to
-be estimated based on the source's apparent flux, then the appropriate fluxx
-command must have been issued.
+In order for this command to work, the following conditions must be
+met: (1) the detector devices have been set up by the Field System,
+(2) the lo and upconv commands have been issued, (3) the IF
+distributor has been set up by the Field System and it must be in
+remote (Mark III only), and (4) the appropriate beamx command has
+been issued. Additionally, if a video converter is used as a
+detector, the patch command must have been issued. If system
+performance is to be estimated based on the source's apparent flux,
+then the appropriate fluxx command must have been issued.
 
-Two procedures must be available: calonnf and caloffnf, which are used to turn
-the noise diode on and off respectively. The recommended form for these
-procedures is:
+Two procedures must be available: calonnf and caloffnf, which are
+used to turn the noise diode on and off respectively. The
+recommended form for these procedures is:
 
-CALONNF:     CALON
-             !+1S 
+calonnf:  calon
+          !+1s 
 
-CALOFFNF:    CALOFF
-             !+1S 
+caloffnf: caloff
+          !+1s 
 
-calon and caloff are local procedures that do whatever is necessary to turn the
-noise source on and off.
+calon and caloff are local procedures that do whatever is necessary
+to turn the noise source on and off.
 

@@ -1,14 +1,15 @@
-enable - enable record tracks (Mark IV drive)
-Syntax:         enable=stack1,stack2
+          enable - enable record tracks (Mark IV drive)
 
-Response:       enable/stack1,stack2
+Syntax:     enable=stack1,stack2
+
+Response:   enable/stack1,stack2
 
 
 Settable parameters:
-stack1,stack2        Stack to be enabled. May be stack1, stack2, or null. 
+stack1,stack2   Stack to be enabled. May be stack1, stack2, or null. 
 
 Monitor-only parameters: none
 
 Comments: 
-MAT module functions available. The use of * as a parameter is not supported by
-this command.
+MAT module functions available. The use of * as a parameter is not
+supported by this command.
