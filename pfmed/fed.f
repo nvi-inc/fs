@@ -135,7 +135,7 @@ cxx        read(lui,'(a)') lnam2
       end if
       lnam1 = lnam2(ipos:nch)
       call lower(lnam1,nch-ipos+1)
-      if (lnam1.eq.'::') goto 390
+      if (lnam1.eq.'::') goto 900
 C     Initialize flags and counters.
       knew = .false.
       call fopen(idcb1,ls1,ierr) !  open 1st scratch fi
