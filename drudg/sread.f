@@ -16,18 +16,17 @@ C  Local:
       integer*2 ibufq(ibuf_len)
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN),
-     .          lfreq,itim1(6),itim2(6)
+     .          lfreq
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
-      integer irec,ipnt,ilen,ltype,ich,ic1,ic2,idummy,
+      integer ilen,ltype,ich,ic1,ic2,idummy,
      .nch,iret,i
       integer htype ! section 2-letter code
-      logical kearl
       logical kcod ! set to ksta when $CODES is found
       logical ksta ! set to true when $STATIONS is found
       logical kvlb ! set to true when $VLBA is found
       logical khed ! set to ksta when $HEAD is found
       integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd,idum
-      integer iscn_ch,iscnc,jchar,ichcm,ichmv ! functions
+      integer iflch,iscn_ch,iscnc,jchar,ichcm,ichmv ! functions
       integer ichcm_ch,trimlen
       real rdum,reio
       character*128 cbuf
@@ -62,6 +61,11 @@ C 970401 nrv Set all parameter values to defaults at the start, then if
 c            the key words are found in the $PARAM section they get set.
 C 970603 nrv Find the start of the cover letter in .drg files.
 C 980217 nrv Remove the time-ordering code and call LSKORDER instead.
+C 990629 nrv Add late_stop command
+C 000517 nrv Find line where $EXPER starts in VEX file and save it.
+C 000611 nrv Add call to OBS_SORT for sked files. VEX files already in order.
+C 000614 nrv Add call to ATAPE.
+C 010102 nrv Add LUSCN to obs_sort call.
 C
 C
       close(unit=LU_INFILE)
@@ -84,8 +88,24 @@ C
 C
       kvex=.false.
       read(lu_infile,'(a)') cbuf
+C*********************************************************
+C vex file section
+C*********************************************************
       if (cbuf(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
+C       Read up to the $EXPER section to find the line number
+        rewind(lu_infile)
+        call initf(lu_infile,ierr)
+        ireccv=0
+        CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
+        call inc(lu_infile,ierr)
+        DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
+          IF (ichcm_ch(IBUF,1,'$EXPER').eq.0) THEN
+            call locf(LU_INFILE,IRECCV)
+          endif
+          CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
+          call inc(lu_infile,ierr)
+        enddo !read schedule file
         close(lu_infile)
 C       read stations, codes, sources
         i=index(cbuf,';')
@@ -103,7 +123,17 @@ C       Write out experiment information now.
         if (i.gt.0) write(luscn,'("PI name: ",a)') cpiname(1:i)
         i=trimlen(ccorname)
         if (i.gt.0) write(luscn,'("Correlator: ",a)') ccorname(1:i)
-      else ! skd file
+
+C Find the length of each source name and store it for use by vob1inp.
+        do i=1,nsourc
+          nsorlen(i)=iflch(lsorna(1,i),max_sorlen) 
+        enddo
+
+
+C*********************************************************
+C sked file section
+C*********************************************************
+      else ! sked file
         rewind(lu_infile)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
 
@@ -275,6 +305,7 @@ C Go back to parameter section and read it now.
         do i=1,nstatn
           tape_motion_type(i)='START&STOP'
           itearl(i)=0
+          itlate(i)=0
           itgap(i)=0
           itlate(i)=0
         enddo
@@ -297,6 +328,14 @@ C           write(luscn,'(40a2)') (ibuf(i),i=1,(ilen+1)/2)
                 ibufq(1)=nch
                 idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
                 call selev(ibufq,luscn,luscn)
+              ELSE IF (ICHCM_ch(IBUF,IC1,'TAPE_TYPE ').EQ.0) THEN
+                ibufq(1)=nch
+                IDUM = ICHMV(ibufq(2),1,IBUF,ic2+1,nch)
+                CALL TTAPE(IBUFQ,luscn,luscn)
+              else if (ichcm_ch(ibuf,ic1,'TAPE_ALLOCATION').eq.0) then
+                ibufq(1)=nch
+                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
+                call atape(ibufq,luscn,luscn)
               else if (ichcm_ch(ibuf,ic1,'TAPE_MOTION').eq.0) then
                 ibufq(1)=nch
                 idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
@@ -305,6 +344,10 @@ C           write(luscn,'(40a2)') (ibuf(i),i=1,(ilen+1)/2)
                 ibufq(1)=nch
                 idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
                 call searl(ibufq,luscn,luscn)
+              else if (ichcm_ch(ibuf,ic1,'LATE_STOP ').eq.0) then
+                ibufq(1)=nch
+                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
+                call slate(ibufq,luscn,luscn)
               else if (ichcm_ch(ibuf,ic1,'SNR  ').eq.0) then
               else if (ichcm_ch(ibuf,ic1,'SCAN  ').eq.0) then
               else if (ichcm_ch(ibuf,ic1,'SUBNET  ').eq.0) then
@@ -319,7 +362,7 @@ C           write(luscn,'(40a2)') (ibuf(i),i=1,(ilen+1)/2)
           endif
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         enddo !read schedule file
-C       Look for the string "Cover Letter"
+C       Look for the string "Cover Letter" in .drg file
         ireccv=0
         if (kdrg_infile) then ! .drg file
           rewind(lu_infile)
@@ -344,11 +387,11 @@ C Order the observations, in case they were not so in the $SKED section.
         write(luscn,9901)
 9901    format('SREAD02 - No observations found in the schedule')
       else
-C Comment this out until it's fixed.
-C       call lskorder(2) ! order the whole thing
+        call obs_sort(luscn)   ! order the whole thing
       endif
 C
-      endif ! VEX/skd
+      endif ! VEX/sked
+
 C
       RETURN
       END

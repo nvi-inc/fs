@@ -16,6 +16,7 @@ C            Add icod to call.
 C 970721 nrv Add idrive to call
 C 970721 nrv Remove footage, duration, and idstart to subroutines.
 C 971003 nrv Move over one more character after finding the last footage.
+C 001027 nrv Only leave 1 space between footages.
 
 C Input
       integer irec ! record to add to
@@ -67,7 +68,9 @@ C     Skip previous stations' footage
         ierr=-1 ! problem skipping footages
         return
       endif
-      nch=ic2+2
+C     nch=ic2+2
+C     Only leave 1 space between footages.
+      nch=ic2+1
 C   Tape pass, direction, footage for each station
 C ** why not use cpassorderl for all stations not just S2?
 C ** because FS uses pass numbers not index positions
@@ -99,7 +102,8 @@ C   Skip previous stations' duration
         ierr=-2 ! problem skipping durations
         return
       endif
-      nch=ich+2 !?
+C     Only leave 1 space between durations
+      nch=ich+1
 C  Duration
       nch = durscan(lskobs(1,iskrec(irec)),nch,idend)
 C     i = ib2as(idend,ibufx,1,5) ! convert into a buffer

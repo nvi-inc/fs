@@ -3,46 +3,106 @@ C
 C  HEADP WRITES THE RESULT OF THE LAST HDCALC AND WORM COMMANDS
 C  TO FILE /CONTROL/HEAD.NEW
 C
+      character*1 hd(2)
       character*3 slow
       character*4 type(0:2)
       character*8 posit
       character*20 tbuff
       character*63 name
-      logical kspd,kcal,kexist
-      integer it(6),trimlen
+      character*80 prog
+      logical kspd,kcal,kexist,k2heads
+      integer it(6),trimlen,nch
 C
       include '../include/fscom.i'
 C
-      data type/' all',' odd','even'/
+      data type/' all',' odd','even'/,hd/'1','2'/
 C
       call setup_fscom
       call read_fscom
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
 c
+      prog=' '
+      call rcpar(0,prog)
+      nch=trimlen(prog)
+      itp=0
+      if(nch.gt.5) then
+         if(prog(nch-5:nch).eq.'headp1') then
+            itp=1
+         else if(prog(nch-5:nch).eq.'headp2') then
+            itp=2
+         endif
+      endif
+      if(nch.gt.4) then
+         if(prog(nch-4:nch).eq.'headp') then
+            if(drive(1).ne.0.and.drive(2).eq.0) then
+               itp=1
+            else if(drive(1).eq.0.and.drive(2).ne.0) then
+               itp=2
+            else
+               itp=-1
+            endif
+         endif
+      endif
+c
+      if(itp.eq.1.and.drive(1).eq.0) then
+         write(6,*)
+     $        'recorder 1 not in use'
+         goto 99999
+      else if(itp.eq.2.and.drive(2).eq.0) then
+         write(6,*)
+     $        'recorder 2 not in use'
+         goto 99999
+      else if(itp.eq.0) then
+         write(6,*)
+     $        'incorrect command name, must end in headp1 or headp2'
+         goto 99999
+      else if(itp.eq.-1) then
+         write(6,*)
+     $        'more than one recorder or no recorder active'
+         goto 99999
+      endif
+c
       name=' '
       call rcpar(1,name)
+      k2heads=MK3.eq.drive(itp).or.VLBA4.eq.drive(itp).or.
+     $       (MK4.eq.drive(itp).and.MK4B.ne.drive_type(itp)).or.
+     $       (VLBA.eq.drive(itp).and.VLBAB.eq.drive_type(itp))
 C
-      kcal=kswrite_fs.and.kbdwrite_fs.and.ksdwrite_fs
-      if(VLBA.ne.and(drive,VLBA)) then
-         kcal=kcal.and.ksread_fs.and.ksdread_fs.and.kbdread_fs
+      kcal=kswrite_fs(itp).and.kbdwrite_fs(itp).and.ksdwrite_fs(itp)
+      if(k2heads) then
+         kcal=kcal.and.ksread_fs(itp).and.ksdread_fs(itp).and.
+     $        kbdread_fs(itp)
       endif
       if(.not.kcal) write(6,*)
-     &  'head calibration has not been completed successfully.'
+     &  'drive ',hd(itp),
+     $     ' head calibration has not been completed successfully.'
 C
-      kspd=kwrwo_fs
-      if(VLBA.ne.and(drive,VLBA)) then
-         kspd=kspd.and.krdwo_fs
+      kspd=kwrwo_fs(itp)
+      if(k2heads) then
+         kspd=kspd.and.krdwo_fs(itp)
        endif
-      if(.not.kspd.and.VLBA2.ne.drive_type) write(6,*)
-     &  'inch worm speeds have not been successfully calibrated.'
+      if(.not.kspd.and..not.
+     & (drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)))
+     & write(6,*)
+     &  'drive ',hd(itp),
+     $      ' inch worm speeds have not been successfully calibrated.'
 C
-      if((.not.kcal).or.(.not.kspd.and.VLBA2.ne.drive_type)) then
+      if((.not.kcal).or.
+     &     (.not.kspd.and..not.(
+     &     drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)))
+     &     ) then
         write(6,*) 'no output file generated.'
         goto 99999
       endif
 C
-      if(name.eq.' ') name=FS_ROOT//'/control/head.new'
+      if(name.eq.' ') then
+         if(itp.eq.1) then
+            name=FS_ROOT//'/control/head1.new'
+         else
+            name=FS_ROOT//'/control/head2.new'
+         endif
+      endif
       inquire(file=name,exist=kexist,err=99)
       if(kexist) then
         write(6,'(1x,a,a)')  name(:max(1,trimlen(name))),
@@ -62,7 +122,7 @@ C
         if(tbuff(i:i).eq.' ') tbuff(i:i)='0'
       enddo
 C
-      write(16,9010)
+      write(16,9010) hd(itp)
       write(16,9020)
       write(16,9025) tbuff
       write(16,9020)
@@ -71,76 +131,79 @@ C
       write(16,9027) tbuff(1:8),lnaant
       write(16,9020)
       write(16,9030)
-      call fs_get_wrhd_fs(wrhd_fs)
-      write(16,9040)
-     &        type(wrhd_fs),type(rdhd_fs),type(rpro_fs),type(rpdt_fs)
+      call fs_get_wrhd_fs(wrhd_fs,itp)
+      call fs_get_rdhd_fs(rdhd_fs,itp)
+      write(16,9040) type(wrhd_fs(itp)),
+     $     type(rdhd_fs(itp)),type(rpro_fs(itp)),type(rpdt_fs(itp))
       write(16,9020)
-      if(kadapt_fs) then
+      if(kadapt_fs(itp)) then
         posit='adaptive'
       else
         posit='fixed  '
       endif
-      if(kiwslw_fs) then
+      if(kiwslw_fs(itp)) then
         slow='yes'
       else
         slow='no'
       endif
-      if(VLBA2.ne.drive_type) then
+      if(.not.(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp))) then
          write(16,9044)
       else
          write(16,9144)
       endif
-      write(16,9045) posit,slow,lvbosc_fs,ilvtl_fs
+      write(16,9045) posit,slow,lvbosc_fs(itp),ilvtl_fs(itp)
       write(16,9020)
 C
       write(16,9050)
-      if(VLBA2.eq.drive_type) then
+      if(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)) then
         write(16,9060) 0.0,0.0
         write(16,9070) 0.0,0.0
-      else if(VLBA.ne.and(drive,VLBA)) then
-        write(16,9060) fowo_fs
-        write(16,9070) sowo_fs
+      else if(k2heads) then
+        write(16,9060) fowo_fs(1,itp),fowo_fs(2,itp)
+        write(16,9070) sowo_fs(1,itp),sowo_fs(2,itp)
       else
-        write(16,9060) fowo_fs(1),0.0
-        write(16,9070) sowo_fs(1),0.0
+        write(16,9060) fowo_fs(1,itp),0.0
+        write(16,9070) sowo_fs(1,itp),0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
-        write(16,9080) rbdwrite_fs,rbdread_fs
+      if(k2heads) then
+        write(16,9080) rbdwrite_fs(itp),rbdread_fs(itp)
       else
-        write(16,9080) rbdread_fs,0.0
+        write(16,9080) rbdread_fs(itp),0.0
       endif
 C
       write(16,9020)
-      if(VLBA2.eq.drive_type) then
+      if(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)) then
         write(16,9090) 0.0,0.0
         write(16,9100) 0.0,0.0
-      else if(VLBA.ne.and(drive,VLBA)) then
-        write(16,9090) fiwo_fs
-        write(16,9100) siwo_fs
+      else if(k2heads) then
+        write(16,9090) fiwo_fs(1,itp),fiwo_fs(2,itp)
+        write(16,9100) siwo_fs(1,itp),siwo_fs(2,itp)
       else
-        write(16,9090) fiwo_fs(1),0.0
-        write(16,9100) siwo_fs(1),0.0
+        write(16,9090) fiwo_fs(1,itp),0.0
+        write(16,9100) siwo_fs(1,itp),0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
-        write(16,9110) rsdwrite_fs,rsdread_fs
+      if(k2heads) then
+        write(16,9110) rsdwrite_fs(itp),rsdread_fs(itp)
       else
-        write(16,9110) rsdread_fs,0.0
+        write(16,9110) rsdread_fs(itp),0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
-        write(16,9120) rswrite_fs,rsread_fs
-        write(16,9130) rswrite_fs,rsread_fs
-      else if(drive_type.ne.VLBA2) then
-        write(16,9120) rsread_fs,0.0
-        write(16,9130) rsread_fs,0.0
+      if(k2heads) then
+        write(16,9120) rswrite_fs(itp),rsread_fs(itp)
+        write(16,9130) rswrite_fs(itp),rsread_fs(itp)
+      else if(.not.
+     &       (drive(itp).eq.VLBA.and.drive_type(itp).eq.VLBA2)
+     &       ) then
+        write(16,9120) rsread_fs(itp),0.0
+        write(16,9130) rsread_fs(itp),0.0
       else
-        write(16,9121) rsread_fs,0.0
-        write(16,9131) rsread_fs,0.0
+        write(16,9121) rsread_fs(itp),0.0
+        write(16,9131) rsread_fs(itp),0.0
       endif
 C
       write(6,'(1x,a)') 'output in file: '//name(:max(1,trimlen(name)))
@@ -152,7 +215,7 @@ C
 991   format(' error ',i6,' creating ',a,'.')
       goto 99999
 C
-9010  format("* /control/head.ctl - head parameter control file")
+9010  format("* /control/head",a1,".ctl - head parameter control file")
 9020  format("*")
 9025  format("* history:                 last edited: <",a,">")
 9026  format("* who  when   what")

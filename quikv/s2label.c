@@ -11,7 +11,7 @@
 
 #include "../rclco/rcl/rcl.h"
 
-static char device[]={"rc"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void s2label(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */

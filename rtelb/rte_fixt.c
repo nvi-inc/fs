@@ -13,7 +13,8 @@ void rte_fixt( poClock, plCentiSec)
 time_t *poClock;
 long *plCentiSec;
 {
-     if(shm_addr->time.model != 'n') {
+    
+     if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c') {
      	int iIndex;
      	long lEpoch, lAddHs;
 
@@ -30,7 +31,7 @@ long *plCentiSec;
 
      }
 
-    if (*plCentiSec >= 0) { 
+     if (*plCentiSec >= 0) { 
       *poClock = (*plCentiSec/100) + shm_addr->time.secs_off;
       *plCentiSec %= 100;
     } else {

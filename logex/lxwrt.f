@@ -38,7 +38,6 @@ C LOCAL VARIABLES:
 C
       integer fmpwrite2, trimlen
       integer nchar, answer
-      character*80 wrtbuf
       character*79 outbuf
 C        - Output buffer to write out
 C

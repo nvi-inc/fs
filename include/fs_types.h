@@ -39,3 +39,7 @@
 #include "k3fm_ds.h"
 #include "k4label_ds.h"
 #include "k4rec_mode_ds.h"
+#include "k4recpatch_ds.h"
+#include "k4pcalports_ds.h"
+#include "tacd_shm.h"
+#include "ifatt_shm.h"

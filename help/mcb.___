@@ -1,0 +1,36 @@
+                     mcb - MCB Communications
+
+Syntax:     mcb=module,reladdr,value
+
+Response:   mcb/value
+
+
+Settable Parameters:
+module    Module mnemonic indicating which module is to be
+          addressed. Only standard module mnemonics allowed. Use
+          null to indicate that the following address is an
+          absolute address.
+reladdr   Relative MCB address (hex), i.e. the offset from the
+          module's base address. This is the address to be read
+          if a value is not given. This is the address to write
+          to if a value is given. If module is null, then this is
+          an absolute address.
+value     Value (hex) to be written into reladdr. Omit this
+          parameter if you want to read reladdr.
+
+Monitor-only Parameters:
+value     Value (hex) that was read from reladdr, if a value was
+          not specified in the command. If a value was specified
+          in the command, then the response is the status of the
+          write: OK, BUSY, ERR.
+
+Comments:
+This command is analgous to the Mark III mat command. This
+command is used to read values from or write values to a specific
+MCB address. 
+
+If the command is issued as mcb=module,reladdr then the response
+is the hex value at reladdr. 
+
+If the command is issued as mcb=module,reladdr,value then the
+value is downloaded into reladdr and the response is the status.

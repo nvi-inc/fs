@@ -39,11 +39,12 @@ C
       call read_quikr
       isub = ip(2)/100
       itask = ip(2) - 100*isub
+c
       if (isub.eq.1) then
         if (itask.eq.1) then
           call fm(ip)
-        else if (itask.eq.2) then
-          call form4(ip)
+        else if (itask.eq.2.or.itask.eq.3) then
+          call form4(ip,itask)
         endif
       else if (isub.eq.2) then
         call vc(ip,itask)
@@ -68,46 +69,48 @@ C
           call cal(ip)
         endif
       else if (isub.eq.5) then
-        if (itask.eq.1) then
-          call tp(ip)
-        else if (itask.eq.2) then
-          call tppos(ip)
+        if (itask.eq.1.or.itask.eq.11) then
+          call tp(ip,itask)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call tppos(ip,itask)
         endif
       else if (isub.eq.6) then
-        if (itask.eq.1) then
-          call st(ip)
-        else if (itask.eq.2) then
-          call et(ip)
-        else if (itask.ge.3.and.itask.le.6) then
+        if (itask.eq.1.or.itask.eq.11) then
+          call st(ip,itask)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call et(ip,itask)
+        else if ((itask.ge.3.and.itask.le.6).or.
+     &        (itask.ge.13.and.itask.le.16)) then
           call rwff(ip,itask)
-        else if (itask.eq.7) then
-          call rec(ip)
+        else if (itask.eq.7.or.itask.eq.17) then
+          call rec(ip,itask)
         endif
       else if (isub.eq.7) then
         if (itask.eq.1) then
           call reset(ip)
-        else if (itask.eq.2) then
-          call newtp(ip)
-        else if (itask.eq.3) then
-          call label(ip)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call newtp(ip,itask)
+        else if (itask.eq.3.or.itask.eq.13.or.
+     $         itask.eq.5.or.itask.eq.15) then
+          call label(ip,itask)
         else if (itask.eq.4) then
           call matld(ip)
         end if
       else if (isub.eq.8) then
-        call ena(ip)
+        call ena(ip,itask)
       else if (isub.eq.9) then
         if (itask.eq.1) then
           call de(ip)
-        else if (itask.eq.2) then
-          call pe(ip)
-        else if (itask.eq.3) then
-          call party(ip)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call pe(ip,itask)
+        else if (itask.eq.3.or.itask.eq.13) then
+          call party(ip,itask)
         endif
       else if (isub.eq.10) then
-        if (itask.eq.1) then
-          call repro(ip)
-        else if (itask.eq.2) then
-          call repro4(ip)
+        if (itask.eq.1.or.itask.eq.11) then
+          call repro(ip,itask)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call repro4(ip,itask)
         endif
       else if (isub.eq.11) then
         if (itask.eq.1) then
@@ -127,15 +130,15 @@ C
         if (itask.eq.1.or.itask.eq.2.or.
      $        (itask.gt.12.and.itask.lt.17)) then
           call ctemp(ip,itask)
-        else if (itask.eq.5.or.itask.eq.6.or.itask.eq.17.or.itask.eq.18)
-     &       then
+        else if (itask.eq.5.or.itask.eq.6.or.
+     &         (itask.ge.17.and.itask.le.20)) then
           call tsys(ip,itask)
         else
           call tpi(ip,itask)
         endif
 C 13 was for WVR stations only
       else if (isub.eq.13) then
-          call cable(ip,itask)
+          call cable(ip,itask,0)
       else if (isub.eq.14) then
         if (itask.eq.1) then
           call pcalc(ip)
@@ -169,7 +172,7 @@ C       if (itask.eq.1) then
 C         call head(ip)
 C       endif
       else if (isub.eq.18) then
-        call tpform(ip)
+        call tpform(ip,itask)
       else if (isub.eq.19) then
         if (itask.ge.1.and.itask.le.6) then
           call beam(ip,itask)
@@ -177,27 +180,29 @@ C       endif
           call flux(ip,itask)
         endif
       else if (isub.eq.21) then
-        if (itask.eq.1) then
-          call pass(ip)
-        else if (itask.eq.2) then
-          call stack(ip)
-        else if (itask.eq.3) then
+        if (itask.eq.1.or.itask.eq.11) then
+          call pass(ip,itask)
+        else if (itask.eq.2.or.itask.eq.12) then
+          call stack(ip,itask)
+        else if (itask.eq.3.or.itask.eq.13) then
           call lvdt(ip,itask)
-        else if (itask.eq.4) then
-          call peak(ip)
-        else if (itask.eq.5) then
-          call savev(ip)
-        else if (itask.eq.6) then
-          call hdcalc(ip)
+        else if (itask.eq.4.or.itask.eq.14) then
+          call peak(ip,itask)
+        else if (itask.eq.5.or.itask.eq.15) then
+          call savev(ip,itask)
+        else if (itask.eq.6.or.itask.eq.16) then
+          call hdcalc(ip,itask)
         else if (itask.eq.7) then
           call hecho(ip)
-        else if (itask.eq.8) then
-          call locate(ip)
-        else if (itask.eq.9) then
-          call worm(ip)
-        else if (itask.eq.10) then
-          call hdata(ip)
+        else if (itask.eq.8.or.itask.eq.18) then
+          call locate(ip,itask)
+        else if (itask.eq.9.or.itask.eq.19) then
+          call worm(ip,itask)
+        else if (itask.eq.10.or.itask.eq.20) then
+          call hdata(ip,itask)
         endif
+      else if (isub.eq.76) then
+          call cable(ip,itask,1)
       endif
 
       call write_quikr

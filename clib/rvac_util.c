@@ -59,9 +59,9 @@ struct rvac_cmd *lcl;
     return;
 }
 
-void rvac_mon(output,count,lcl)
+void rvac_mon(output,count,lcl,indx)
 char *output;
-int *count;
+int *count,indx;
 struct rvac_mon *lcl;
 {
     int ind;
@@ -72,7 +72,7 @@ struct rvac_mon *lcl;
     switch (*count) {
       case 1:
         outvac=(double)lcl->volts;
-        outvac = outvac*shm_addr->outscsl + shm_addr->outscint;
+        outvac = outvac*shm_addr->outscsl[indx] + shm_addr->outscint[indx];
         flt2str(output,outvac,32,1);
         break;
       default:
@@ -82,28 +82,30 @@ struct rvac_mon *lcl;
    return;
 }
 
-void rvacD0mc(data,lcl)
+void rvacD0mc(data,lcl,indx)
 unsigned *data;
 struct rvac_cmd *lcl;
+int indx;
 {
   double fvacuum;
 
-  fvacuum=(lcl->inches*shm_addr->inscsl) + shm_addr->inscint;
+  fvacuum=(lcl->inches*shm_addr->inscsl[indx]) + shm_addr->inscint[indx];
   *data = bits16on(14) & (int)(fvacuum);
 
   return;
 
 }
 
-void mcD0rvac(lcl, data)
+void mcD0rvac(lcl, data,indx)
 struct rvac_cmd *lcl;
 unsigned data;
+int indx;
 {
   double volts;
 
   volts= bits16on(14) & data;
-  if(fabs(shm_addr->inscsl) > 1e-12)
-    lcl->inches=(volts - shm_addr->inscint)/shm_addr->inscsl;
+  if(fabs(shm_addr->inscsl[indx]) > 1e-12)
+    lcl->inches=(volts - shm_addr->inscint[indx])/shm_addr->inscsl[indx];
   else
     lcl->inches=-99;
   lcl->set=TRUE;

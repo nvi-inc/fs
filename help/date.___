@@ -1,0 +1,17 @@
+               date - display year and day-of-year
+
+Syntax:     date
+
+Response:   date/year,doy
+
+
+Settable Parmeters: None
+
+Monitor-only Parameters:
+year        4 digit year
+doy       Day of year, 1-366
+
+Comments:
+This command is implemented by a special logging function assure
+that the year and day-of-year are consistent, i.e., that they
+both come from the same year.

@@ -1,4 +1,4 @@
-      logical function kinit(icbuf)
+      logical function kinit(icbuf,stsrc)
 C
 C
 C  WHO  WHEN    DESCRIPTION
@@ -7,7 +7,7 @@ C
 C
       logical kif
 C
-      character*(*) icbuf
+      character*(*) icbuf,stsrc
 c     character*63 icdbuf
 C
       integer*2 lfs(16),lfs2(16),lfp(16),lnf(16)
@@ -40,6 +40,9 @@ C
       icbuf=' '
       call get_arg(1,icbuf)
       if (icbuf.eq.' ') goto 8000
+c
+      stsrc=' '
+      call get_arg(2,stsrc)
 C
 C CHECK FOR FIELD SYSTEM
 C

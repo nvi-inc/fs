@@ -1,4 +1,4 @@
-      subroutine stack(ip)
+      subroutine stack(ip,itask)
 C  tape head control by micron position
 C
 C  STACK controls the position of the tape recorder head blocks
@@ -42,6 +42,12 @@ C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
 C
+      if( itask.eq.2) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       ichold = -99
       ioclas = 0
       norec = 0
@@ -77,14 +83,19 @@ C
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.','
-     &     .and.VLBA.ne.drive.and.MK3B.ne.drive_type) then
+     &     .and.(
+     $     (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $     .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $     )
+     &     ) then
         kmic(1)=.false.
       else if (cjchar(parm,1).eq.',') then
         ip(3)=-501
         goto 990
       else if(cjchar(parm,1).eq.'*') then
-        call fs_get_posnhd(posnhd)
-        microns(1)=posnhd(1)
+        call fs_get_posnhd(posnhd,indxtp)
+        microns(1)=posnhd(1,indxtp)
         kmic(1)=.true.
       else
         call gtprm(ibuf,ics,nchar,2,parm,ierr)
@@ -102,12 +113,16 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kmic(2)=.false.
-      else if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
+      else if(
+     $       (VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp))
+     $       .or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))
+     $       ) then
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
-        call fs_get_posnhd(posnhd)
-        microns(2)=posnhd(2)
+        call fs_get_posnhd(posnhd,indxtp)
+        microns(2)=posnhd(2,indxtp)
         kmic(2)=.true.
       else
         call gtprm(ibuf,ics,nchar,2,parm,ierr)
@@ -129,8 +144,8 @@ C
       else if(ichcm_ch(parm,1,'r').eq.0) then
         idir=-2
       else if (cjchar(parm,1).eq.'*') then
-        call fs_get_ipashd(ipashd)
-        idir=ipashd(1)
+        call fs_get_ipashd(ipashd,indxtp)
+        idir=ipashd(1,indxtp)
       else if (cjchar(parm,1).eq.',') then
         idir=0
       else if(kmic(1)) then
@@ -140,7 +155,8 @@ C
       ipas(1)=idir
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if((VLBA.eq.drive.or.MK3B.eq.drive_type)
+      if(((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp)).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp)))
      &     .and.cjchar(parm,1).ne.',') then
         ip(3)=-506
         goto 990
@@ -151,8 +167,8 @@ C
       else if(ichcm_ch(parm,1,'r').eq.0) then
         idir=-2
       else if (cjchar(parm,1).eq.'*') then
-        call fs_get_ipashd(ipashd)
-        idir=ipashd(2)
+        call fs_get_ipashd(ipashd,indxtp)
+        idir=ipashd(2,indxtp)
       else if (cjchar(parm,1).eq.',') then
         idir=0
       else if(kmic(2)) then
@@ -176,7 +192,7 @@ C
       if (cjchar(parm,1).eq.',') then
         kauto=.true.
       else if (cjchar(parm,1).eq.'*') then
-        kauto=kautohd_fs
+        kauto=kautohd_fs(indxtp)
       else if (ichcm_ch(ibuf,ichs,'none').eq.0) then
         kauto=.false.
       else if (ichcm_ch(ibuf,ichs,'auto').eq.0) then
@@ -188,30 +204,30 @@ C
 C
 C  3. Now handle head positioning
 C
-      call fs_get_icheck(icheck(20),20)
-      ichold = icheck(20)
-      icheck(20) = 0
-      call fs_set_icheck(icheck(20),20)
+      call fs_get_icheck(icheck(20+indxtp-1),20+indxtp-1)
+      ichold = icheck(20+indxtp-1)
+      icheck(20+indxtp-1) = 0
+      call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
 C
 C  save the results in common
 C
-      call fs_get_ipashd(ipashd)
-      call fs_get_posnhd(posnhd)
+      call fs_get_ipashd(ipashd,indxtp)
+      call fs_get_posnhd(posnhd,indxtp)
       do i=1,2
         if(kmic(i)) then
-          posnhd(i)=microns(i)
-          ipashd(i)=ipas(i)
-          kposhd_fs(i)=.true.
-          if(i.eq.1) kautohd_fs=kauto
+          posnhd(i,indxtp)=microns(i)
+          ipashd(i,indxtp)=ipas(i)
+          kposhd_fs(i,indxtp)=.true.
+          if(i.eq.1) kautohd_fs(indxtp)=kauto
         endif
       enddo
-      call fs_set_ipashd(ipashd)
-      call fs_set_posnhd(posnhd)
+      call fs_set_ipashd(ipashd,indxtp)
+      call fs_set_posnhd(posnhd,indxtp)
 C
-      call lvdonn('lock',ip)
+      call lvdonn('lock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call set_mic(ihd,ipas ,kauto,microns,ip1,0.40)
+      call set_mic(ihd,ipas ,kauto,microns,ip1,0.40,indxtp)
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
@@ -220,9 +236,11 @@ C
 C
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
+      call fs_get_select(select)
+      if(select+1.ne.indxtp) goto 500
       if(MK3.eq.rack) THEN
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,1,8)
@@ -248,15 +266,12 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(K4.eq.rack.and.
-     &       (K41K3.eq.rack_type.or.K41UK3.eq.rack_type.or.
-     &       K42K3.eq.rack_type.or.K42AK3.eq.rack_type.or.
-     &       K42BUK3.eq.rack_type)) then
+      else if(K4K3.eq.rack) then
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         call fc_set_k3aux(lauxfm,ip)
       else if(MK4.eq.rack.or.VLBA4.eq.rack.or.K4MK4.eq.rack) THEN
-        call frmaux4(lauxfm4,posnhd)
+        call frmaux4(lauxfm4,posnhd(1,indxtp))
         ibuf2(1) = 9
         call char2hol('fm/AUX 0x',ibuf2(2),1,9)
         idumm1 = ichmv(ibuf2,12,lauxfm4,1,4)
@@ -269,7 +284,7 @@ C
         call rmpar(ip)
       else if(rack.eq.VLBA) then
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
@@ -286,30 +301,32 @@ C
 C turn on LVDT if we didn't earlier
 C
       if(ieq.eq.0) then
-        call lvdonn('lock',ip)
+        call lvdonn('lock',ip,indxtp)
         if(ip(3).ne.0) go to 800
       endif
 C
 C  read the postions
 C
-      call fs_get_ipashd(ipashd)
+      call fs_get_ipashd(ipashd,indxtp)
       ihd=3
-      if(VLBA.eq.drive.or.MK3B.eq.drive_type) ihd=1
-      call mic_read(ihd,ipashd,kautohd_fs,pnow,ip)
+      if((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp)).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))) ihd=1
+      call mic_read(ihd,ipashd(1,indxtp),kautohd_fs(indxtp),pnow,ip,
+     $     indxtp)
       if(ip(3).ne.0) goto 800
 C
 C find the deltas
 C
-      call fs_get_posnhd(posnhd)
+      call fs_get_posnhd(posnhd,indxtp)
       do i=1,2
         if(ihd.eq.3.or.i.eq.ihd) then
-          poff(i) = pnow(i) - posnhd(i)
+          poff(i) = pnow(i) - posnhd(i,indxtp)
         endif
       enddo
 C
 C  Turn off LVDT Osillator
 C
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       if(ip(3).ne.0) go to 990
 C
 C  6. Now we must prepare a response.
@@ -318,31 +335,39 @@ C
       nch = ieq
       if (nch.eq.0) nch = nchar+1
       nch = ichmv_ch(ibuf,nch,'/')
-      call fs_get_posnhd(posnhd)
+      call fs_get_posnhd(posnhd,indxtp)
       do i=1,2
-        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-          nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)
-        endif
-        nch = mcoma(ibuf,nch)
+        if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.drive_type(indxtp).ne.MK4B)
+     &        ) then
+            nch = nch+ir2as(posnhd(i,indxtp),ibuf,nch,8,1)
+         endif
+         nch = mcoma(ibuf,nch)
+      enddo
+C     
+      call fs_get_ipashd(ipashd,indxtp)
+      do i=1,2
+        if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.drive_type(indxtp).ne.MK4B)
+     &        ) then
+            if(ipashd(i,indxtp).eq.0) then
+               call char2hol('u,',idum,1,2)
+            else if(mod(ipashd(i,indxtp),2).eq.0) then
+               call char2hol('r,',idum,1,2)
+            else
+               call char2hol('f,',idum,1,2)
+            endif
+            nch = ichmv(ibuf,nch,idum,1,2)
+         else
+            nch = mcoma(ibuf,nch)
+         endif
       enddo
 C
-      call fs_get_ipashd(ipashd)
-      do i=1,2
-        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-          if(ipashd(i).eq.0) then
-            call char2hol('u,',idum,1,2)
-          else if(mod(ipashd(i),2).eq.0) then
-            call char2hol('r,',idum,1,2)
-          else
-            call char2hol('f,',idum,1,2)
-          endif
-          nch = ichmv(ibuf,nch,idum,1,2)
-        else
-          nch = mcoma(ibuf,nch)
-        endif
-      enddo
-C
-      if (kautohd_fs) then
+      if (kautohd_fs(indxtp)) then
         call char2hol('auto',ibuf,nch,nch+3)
       else
         call char2hol('none',ibuf,nch,nch+3)
@@ -351,17 +376,25 @@ C
       nch = mcoma(ibuf,nch)
 C
       do i=1,2
-        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-          nch = nch+ir2as(pnow(i),ibuf,nch,8,1)
-        endif
-        nch = mcoma(ibuf,nch)
+        if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.drive_type(indxtp).ne.MK4B)
+     &        ) then
+            nch = nch+ir2as(pnow(i),ibuf,nch,8,1)
+         endif
+         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-          nch = nch+ir2as(poff(i),ibuf,nch,8,1)
-        endif
-        nch = mcoma(ibuf,nch)
+        if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.drive_type(indxtp).ne.MK4B)
+     &        ) then
+            nch = nch+ir2as(poff(i),ibuf,nch,8,1)
+         endif
+         nch = mcoma(ibuf,nch)
       enddo
 C
       nch = nch-2
@@ -372,7 +405,11 @@ C
 C  7. Reset alarm or Test/Reset
 C
 700   continue
-      call char2hol('hd',ibuf2(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('h1',ibuf2(2),1,2)
+      else
+         call char2hol('h2',ibuf2(2),1,2)
+      endif
       iclass = 0
       nrec=0
       call add_class(ibuf2,-4,iclass,nrec)
@@ -384,7 +421,7 @@ C
 C   turn off LVDT, for an error
 C
 800   continue
-      call lvdofn('unlock',ip2)
+      call lvdofn('unlock',ip2,indxtp)
       if(ip2(3).ne.0) then
         call logit7(0,0,0,0,ip2(3),ip2(4),ip2(5))
         call clrcl(ip(1))
@@ -404,12 +441,12 @@ C
       call char2hol('q@',ip(4),1,2)
 999   continue
       if (ichold.ne.-99) then
-        icheck(20) = ichold
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1) = ichold
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       if (ichold.ge.0) then
-        icheck(20) = mod(ichold,1000)+1
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1) = mod(ichold,1000)+1
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       return
       end

@@ -12,7 +12,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"d4"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 static char *state_key[ ]={"play","record","stop","ejecting","ff","rewind",
                            "loading","no_tape" };
@@ -86,14 +86,31 @@ long ip[5];
 {
  ib_req7(ip,device,10,"DRC?");
 }
-
-k4st_req_c(ip,lclc)
+k4st_reqs_q(ip)
 long ip[5];
-struct k4st_cmd *lclc;
 {
-  if(lclc->record==1)
-    ib_req2(ip,device,"REC");
-  else
+ ib_req7(ip,device,20,"SQN?");
+}
+
+k4st_req_c(ip,lclc,tcoff,sqn)
+long ip[5],sqn;
+struct k4st_cmd *lclc;
+int tcoff;
+{
+  char buffer[80];
+
+  if(lclc->record==1 && sqn < 0)
+    if(tcoff) {
+      ib_req2(ip,device,"REC;TSM=ON,FB,30");
+    } else {
+      ib_req2(ip,device,"REC");
+    }
+  else if(lclc->record==1) {
+    sprintf(buffer,"REC=%ld",sqn);
+    if(tcoff)
+      strcat(buffer,";TSM=ON,FB,30");
+    ib_req2(ip,device,buffer);
+  } else
     ib_req2(ip,device,"PLY");
 }
 
@@ -113,8 +130,14 @@ long ip[5];
     lclc->record=0;
   else if(strcmp(buffer,"DRC=REC")==0)
     lclc->record=1;
-  else if((strcmp(buffer,"DRC=STP")==0 && shm_addr->equip.drive_type == K41) ||
-	  (strcmp(buffer,"DRC=STOP")==0 && shm_addr->equip.drive_type == K42))
+  else if((strcmp(buffer,"DRC=STP")==0 &&
+	   shm_addr->equip.drive[0] == K4 &&
+	   (shm_addr->equip.drive_type[0] == K41 ||
+	    shm_addr->equip.drive_type[0] == K41DMS) ) ||
+	  (strcmp(buffer,"DRC=STOP")==0 &&
+	   shm_addr->equip.drive[0] == K4 &&
+	   (shm_addr->equip.drive_type[0] == K42 ||
+	    shm_addr->equip.drive_type[0] == K42DMS) ))
     lclc->record=2;
   else if(strcmp(buffer,"DRC=EJC")==0)
     lclc->record=3;
@@ -129,4 +152,18 @@ long ip[5];
   else
     lclc->record=-1;
    
+}
+k4st_ress_q(ip,sqn)
+long *sqn;
+long ip[5];
+{
+  char buffer[MAX_BUF];
+  int max;
+
+  max=sizeof(buffer);
+  ib_res_ascii(buffer,&max,ip);
+  if(max < 0)
+    *sqn=-1;
+  else if(1!=sscanf(buffer,"SQN=%ld",sqn))
+    *sqn=-1;
 }

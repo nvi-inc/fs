@@ -28,12 +28,15 @@ C 970827 nrv Add ilabcol to remember the position on the page between
 C            schedules, and inewpage 
 C 971209 nrv Add kprepass
 C 980916 nrv Add ctextname
+C 990326 nrv Add cversion
+C 990401 nrv Add iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+C 991102 nrv Add kdr_type
 C
 	double precision RA50,DEC50
         real rlabsize
 c
 	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
-     .          kprepass
+     .          kprepass,kdr_type
 c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
@@ -44,12 +47,12 @@ c
      .  ibbclen,nbbcbuf,nchanr,iperm,fileptr
 C
         integer*2 ld,itim,itims,ibbcbuf,ibuf,
-     .  lbname
+     .  lbname, iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 C
 C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname
+     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
 c
         character*1 csize
         character*2 coption
@@ -58,7 +61,7 @@ c
 C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
-     .       kdrg_infile,kprepass,
+     .       kdrg_infile,kprepass,kdr_type,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
      .       LUPRT,LUOUT,LULAB,ISTN,
@@ -71,12 +74,13 @@ C
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,fileptr,
      .       LD(500),ITIM(6),ITIMS(6),
      .       IBUF(ibuf_len),lbname(4),
-     .       ibbcbuf(40,2,3)
+     .       ibbcbuf(40,2,3),
+     .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .       cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,csize,
-     .       coption(3),ctextname
+     .       coption(3),ctextname,cversion
 C
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records

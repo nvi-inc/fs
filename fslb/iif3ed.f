@@ -31,13 +31,14 @@ C
 C 
 C  LOCAL: 
 C 
-      integer*2 lrem(3),lin(6),lpres(7),llck(4)
-      integer nrem(2),nin(4),npres(2),nlck(2)
+      integer*2 lrem(3),lin(6),lpres(7),llck(4),lpcl(3)
+      integer nrem(2),nin(4),npres(2),nlck(2),npcl(2)
       data lrem/2hlo,2hcr,2hem/
       data lin/2H00,2H i,2Hn ,2Hou,2Ht1,2H1 /
       data lpres/2Hmi,2Hss,2Hin,2Hgp,2Hre,2Hse,2Hnt/
       data llck/2Hun,2Hlk,2Hlo,2Hck/
-      data nrem/3,3/,nin/2,2,3,2/,npres/7,7/,nlck/4,4/
+      data nrem/3,3/,nin/2,2,3,2/,npres/7,7/,nlck/4,4/,npcl/3,2/
+      data lpcl/2hof,2hfo,2hn /
 C 
 C 
 C     1. Initialize returned parameter in case we have to quit early. 
@@ -45,7 +46,7 @@ C
       iif3ed = ic1 
       if (iwhat.gt.0) index = -1
 C 
-      goto (204,203,202,201,990,301) iwhat+5
+      goto (205,204,203,202,201,990,301,302) iwhat+6
 C 
 C     2.01 Code -1, mixer state
 C 
@@ -75,6 +76,13 @@ C
       if (ic1-1+nlck(index+1).gt.ic2) return
       iif3ed = ichmv(ias,ic1,llck,index*4+1,nlck(index+1))
       return
+C  
+C     2.03 Code -5 pcal on/off
+C 
+205   continue
+      if (ic1-1+npcl(index+1).gt.ic2) return
+      iif3ed = ichmv(ias,ic1,lpcl,index*3+1,npcl(index+1))
+      return
 C 
 C     3. Initialize for the DECODE case.
 C 
@@ -84,6 +92,12 @@ C
       do 3010 i=2,3
         if (ichcm(ias,ic1,lin,(i-1)*3+1,nin(i)).eq.0) index = i-1
 3010    continue
+      return
+
+ 302  continue
+      do i=1,2
+        if (ichcm(ias,ic1,lpcl,(i-1)*3+1,npcl(i)).eq.0) index = i-1
+      enddo
       return
 
 990   return

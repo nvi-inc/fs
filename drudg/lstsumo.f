@@ -4,7 +4,8 @@
      .      ihd,imd,isd,ih2,im2,is2,ch3,cm3,cs3,
      .      idm,ids,cpass,ifeet,cnewtap,cdir,
      .      kskd,ncount,ntapes,
-     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut,iyear)
+     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut,iyear,
+     .      crack,creca,crecb,cscan)
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -31,6 +32,10 @@ C 971210 nrv Print ifeet to nearest 1 min for S2. Change some headers.
 C 980914 nrv Print full date. Add IYEAR to call.
 C 990117 nrv Add KK4 to call. Add S2 or K4 to header. Change output
 C            for K4 types.
+C 991103 nrv Add crack,creca,crecb to call and print in header.
+C 991115 nrv If ifeet=-1 then there's no scan to print.
+C 000107 nrv If tape_motion_type is null, don't write it.
+C 000529 nrv Add scan name.
 
 C Input
       double precision rarad,dcrad,xpos,ypos,zpos,ut
@@ -42,10 +47,13 @@ C** temporary
       integer ihd,imd,isd,ih2,im2,is2,
      .idm,ids,ifeet
       character*8 csor,cexper,cstn
-      character*3 cdir,cnewtap,cday
+      character*3 cdir,cday
+      character*4 cnewtap
+      character*9 cscan
       character*2 cpass,ch1,cm1,cs1,ch3,cm3,cs3
       character*2 cid
       character*7 cwrap
+      character*8 crack,creca,crecb
       logical kskd,kend,kstart,kk4,ks2,kmv
       logical kwrap, kazel,ksat
 
@@ -57,8 +65,10 @@ C Local
       double precision az,el
       integer trimlen
       logical kcont,kearl
+      character lower
       character*128 cbuf
 
+      if (ifeet.eq.-1) return ! nothing to do
 
       kmv=.not.ks2.and..not.kk4 ! kmv=Mk3/4 or VLBA
       kcont=.true. ! if we don't know, include the column
@@ -82,10 +92,11 @@ C  1. Headers.
 9200    format(' Schedule file: ',a,35x,'Page ',i3)
         if (kskd) then
           write(luprt,9201) (lstnna(i,istn),i=1,4),lpocod(istn),
-     .    (lexper(i),i=1,4)
-9201      format(' Station: ',4a2,' (',a2,')'/' Experiment: ',4a2)
+     .    lstcod(istn),(lexper(i),i=1,4)
+9201      format(' Station: ',4a2,' (',a2,')' '(',a1,')'/
+     .           ' Experiment: ',4a2)
           i=trimlen(tape_motion_type(istn))
-          write(luprt,9203) tape_motion_type(istn)(1:i)
+          if (i.gt.0) write(luprt,9203) tape_motion_type(istn)(1:i)
 9203      format(' Tape motion type: ',a,$)
           if (tape_motion_type(istn).eq.'ADAPTIVE') then
             write(luprt,'(5x,"gap: ",i3," seconds",$)') itgap(istn)
@@ -106,10 +117,13 @@ C  1. Headers.
         write(luprt,9205) itearl_local,itlate_local
 9205    format(' Early tape start: ',i3,' seconds',
      .      '    Late tape stop: ',i3,' seconds')
+        write(luprt,9206) crack,creca,crecb
+9206    format(' Rack: ',a8,'  Recorder 1: ',a8,'  Recorder 2: ',a8)
         write(luprt,'()')
         write(luprt,9207)
 9207    format(
-     .  ' Line#=line number in .snp file'/
+     .  ' Scan=scan_name command in .snp file'/
+     .  ' Line#=line number in .snp file where this scan starts'/
      .  ' Dur=time interval of on-source data (Start Data to',
      .  ' Stop Data) in mmm:ss'/
      .  ' Data and tape times are in the format hh:mm:ss'/
@@ -117,15 +131,17 @@ C  1. Headers.
      .         'to nearest 10 feet (Mk3/4/VLBA)'/
      .  ' Counts = tape counts at start of scan (K4)'/
      .  ' Group (min) = group number and nearest minute on tape (S2)'/
-     .  ' Key for Tape Usage:  XXX=tape change, *=parity',
-     .  ' check, @=no tape motion'/
-     .  )
+     .  ' Tape Usage:  XXX or Rec1=start recorder 1,',
+     .  ' Rec2=start recorder 2'/
+     .  '              *=parity check, @=no tape motion'/  )
         write(luprt,'()')
 C
 C  2. Column heads.
 
-        if (.not.kwrap) cbuf='                         Start'
-        if (     kwrap) cbuf='                               Start'
+        if (.not.kwrap) cbuf='                            '//
+     .    '       Start'
+        if (     kwrap) cbuf='                            '//
+     .    '             Start'
         il=trimlen(cbuf)
         if (kearl.or.kcont) cbuf=cbuf(1:il)//'     Start'
         il=trimlen(cbuf)
@@ -137,7 +153,7 @@ C  2. Column heads.
         if (ks2) cbuf=cbuf(1:il)//'               Tape' ! no stops
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
-        cbuf=' Line#  Source   Az El'
+        cbuf=' Scan      Line#  Source   Az El'
         il=trimlen(cbuf)
         if (kwrap) cbuf=cbuf(1:il)//' Cable'
         il=trimlen(cbuf)
@@ -157,7 +173,7 @@ C  2. Column heads.
 C       write(luprt,9320) cday
 C9320   format('  Day ',a)
         read(cday,'(i3)') iday
-        call wrdate(luprt,iyear,iday)
+        call wrday(luprt,iyear,iday)
         iline=0
       endif ! new page, write header
 
@@ -186,8 +202,9 @@ C  3.  Now write the scan line
       endif
 
 C  Source info
-      write(luprt,'(1x,i5,1x,a8,1x,i3,1x,i2,$)') nsline,csor,
-     .iaz,iel
+      cscan(9:9) = lower(cscan(9:9))
+      write(luprt,'(1x,a9,1x,i5,1x,a8,1x,i3,1x,i2,$)') 
+     .cscan,nsline,csor,iaz,iel
 C  Cable wrap field
       if (kwrap) write(luprt,'(1x,a5,$)') cwrap
 C  Early start, "Tape Start" field
@@ -203,7 +220,7 @@ C  Duration
       write(luprt,'(2x,i3,":",i2.2,$)') idm,ids
 C  Pass
       if (.not.kk4) then ! pass or S2 group
-        if (cnewtap.eq.'@  ') then
+        if (cnewtap.eq.'@   ') then
           write(luprt,'(1x,"--",$)') 
         else
           write(luprt,'(1x,a2,$)') cpass
@@ -211,7 +228,7 @@ C  Pass
       endif ! pass or S2 group
 C  Footage
       if (kmv) then
-        if (cnewtap.eq.'@  ') then
+        if (cnewtap.eq.'@   ') then
           write(luprt,'("-",1x,i5,$)') ifeet_print
         else
           write(luprt,'(a1,1x,i5,$)') cdir(1:1),ifeet_print
@@ -220,7 +237,7 @@ C  Footage
       if (ks2) write(luprt,'(i5,$)') ifeet_print
       if (kk4) write(luprt,'(i8,$)') ifeet_print
 C  New tape flag
-      write(luprt,'(1x,a3,$)') cnewtap
+      write(luprt,'(1x,a4,$)') cnewtap
  
 C***** temporary check
       if (kcont.and.kend) then ! check stop time
@@ -235,7 +252,8 @@ C    .       '("time dif=",i2,":",i2,$)') itm,its
       write(luprt,'()')
       iline=iline+1
       ncount = ncount + 1 ! count of observations
-      if (cnewtap.eq.'XXX') ntapes=ntapes+1
+      if (cnewtap(1:3).eq.'XXX'.or.
+     .    cnewtap(1:3).eq.'Rec') ntapes=ntapes+1
 
       return
       end

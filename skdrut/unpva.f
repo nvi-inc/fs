@@ -25,7 +25,7 @@ C        16 (or anything >5) gets all values
 C
 C  OUTPUT:
       integer ierr
-      integer lidter(2)
+      integer*2 lidter(2)
       integer*2 lidhor
 C     IERR    - error return, 0=ok, -100-n=error in nth field
 C     LIDANT - antenna ID, 1 character in upper byte, lower byte is blank

@@ -27,9 +27,8 @@ C LOCAL:
      .iras,isra,idecs
       integer*2 ldsign,lhsign,ldsign2,lhsign2,ldsn
 	integer*2 LPROC(4) !  The procedure name for NRAO
-	integer*2 ldirr,ldirf !REV,FOR
-      integer ilennr,nchar,j,idum,itnum,ilenef,ilenwe,
-     .ilenha,ilenon
+	integer*2 ldirr !REV,FOR
+      integer ilennr,nchar,j,idum,itnum,ilenef
       real dut,eeq
 	character*128 cbuf
         integer ih
@@ -47,16 +46,16 @@ C LOCAL:
 	integer IC
 	LOGICAL EX
 Cinteger*4 ifbrk
-	integer Z20,Z24
+	integer Z24
       integer ias2b,trimlen,jchar,iflch,ichmv,ib2as ! functions
       integer ichmv_ch,ichcm_ch
       real speed ! function
-	DATA Z20/Z'20'/, Z24/Z'24'/
+	DATA Z24/Z'24'/
 
 C Initialized:
-	DATA ILENNR/40/, ILENHA/9/, ILENON/40/, ILENEF/40/, ILENWE/39/
+	DATA ILENNR/40/, ILENEF/40/
 C record word lengths
-	data ldirr/2hR /,ldirf/2hF /
+	data ldirr/2hR /
         data lu_outfil2/42/
 
 C LAST MODIFIED:
@@ -95,6 +94,7 @@ C 970509 nrv Add _save variables to VLBAT call.
 C 970512 nrv Increment IOBSS for VLBAT after the call, because many
 C            tests in VLBAT are done for iobs=0.
 C 970714 nrv Add "crd" to VLBA file names per J. Wrobel request.
+C 000815 nrv Remove all but VLBA option.
 
 	kintr = .false.
       if (kbatch) then
@@ -108,8 +108,8 @@ C 970714 nrv Add "crd" to VLBA file names per J. Wrobel request.
  1    WRITE(LUSCN,9019) (lantna(I,ISTN),I=1,4)
 9019  FORMAT(' Select type of pointing output for: ',4a2/
 C    .       ' 1 - NRAO 85-3 '/
-     .       ' 2 - NRAO 140 '/
-     .       ' 3 - DSN stations '/
+C    .       ' 2 - NRAO 140 '/
+C    .       ' 3 - DSN stations '/
      .       ' 6 - VLBA antenna'/
      .       ' 0 - QUIT '/' ? ',$)
 C    .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
@@ -401,7 +401,7 @@ C Also write out a line in the summary file
 C
 	  else IF (ISTIN.EQ.5.or.istin.eq.6) THEN !VLBA observe files
 	    if (.not.kintr) then
-		call snapintr(2,iyr)
+		call snapintr(2,iyr,.false.,.false.)
                 call vlbah(istin,icod,lu_outfile,ierr)
 		idayp = 0
 		kintr = .true.

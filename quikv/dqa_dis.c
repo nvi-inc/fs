@@ -25,9 +25,9 @@ long ip[5];
       void get_res();
       char output[MAX_OUT];
       float rate;
-      int ivalue, ifm;
+      int ivalue, ifm, qadrive;
 
-      ind=itask-1;
+      qadrive=shm_addr->vform.qa.drive;
 
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
@@ -42,39 +42,55 @@ long ip[5];
 /* command parameters are stored in memory for this command */
 
          memcpy(&lclc,&shm_addr->dqa,sizeof(lclc)); 
-	 ivalue=shm_addr->vrepro.track[0];
+	 ivalue=shm_addr->vrepro[qadrive].track[0];
 	 lclm.a.track=ivalue;
 	 if(-1 < ivalue && ivalue <2)
-	   ivalue=shm_addr->systracks.track[ivalue];
+	   ivalue=shm_addr->systracks[qadrive].track[ivalue];
 	 else if (33 < ivalue && ivalue < 36 )
-	   ivalue=shm_addr->systracks.track[ivalue-32];
-	 if(ivalue < 2 || 33 < ivalue)
-	   ifm=-1;
-	 else if(ivalue%2==0)
-	   ifm=15+ivalue/2;
-	 else
-	   ifm=(ivalue-3)/2;
-	 if(ifm>=0)
-	   lclm.a.bbc=shm_addr->vform.codes[ifm];
-	 else
-	   lclm.a.bbc=-1;
+	   ivalue=shm_addr->systracks[qadrive].track[ivalue-32];
+	 if(shm_addr->equip.rack==VLBA) {
+	   if(ivalue < 2 || 33 < ivalue)
+	     ifm=-1;
+	   else if(ivalue%2==0)
+	     ifm=15+ivalue/2;
+	   else
+	     ifm=(ivalue-3)/2;
+	   if(ifm>=0)
+	     lclm.a.bbc=shm_addr->vform.codes[ifm];
+	   else
+	     lclm.a.bbc=-1;
+	 } else { /* MK4 or VLBA4 */ 
+	   ivalue=ivalue-2;
+	   if (0 <= ivalue && ivalue <= 63)
+	     lclm.a.bbc=shm_addr->form4.codes[ivalue];
+	   else
+	     lclm.a.bbc=-1;
+	 }
 
-	 ivalue=shm_addr->vrepro.track[1];
+	 ivalue=shm_addr->vrepro[qadrive].track[1];
 	 lclm.b.track=ivalue;
 	 if(-1 < ivalue && ivalue < 2)
-	   ivalue=shm_addr->systracks.track[ivalue];
+	   ivalue=shm_addr->systracks[qadrive].track[ivalue];
 	 else if (33 < ivalue && ivalue < 36)
-	   ivalue=shm_addr->systracks.track[ivalue-32];
-	 if(ivalue < 2 || 33 < ivalue)
-	   ifm=-1;
-	 else if(ivalue%2==0)
-	   ifm=15+ivalue/2;
-	 else
-	   ifm=(ivalue-3)/2;
-	 if(ifm>=0)
-	   lclm.b.bbc=shm_addr->vform.codes[ifm];
-	 else
-	   lclm.b.bbc=-1;
+	   ivalue=shm_addr->systracks[qadrive].track[ivalue-32];
+	 if(shm_addr->equip.rack==VLBA) {
+	   if(ivalue < 2 || 33 < ivalue)
+	     ifm=-1;
+	   else if(ivalue%2==0)
+	     ifm=15+ivalue/2;
+	   else
+	     ifm=(ivalue-3)/2;
+	   if(ifm>=0)
+	     lclm.b.bbc=shm_addr->vform.codes[ifm];
+	   else
+	     lclm.b.bbc=-1;
+	 } else { /* MK4 or VLBA4 */ 
+	   ivalue=ivalue-2;
+	   if (0 <= ivalue && ivalue <= 63)
+	     lclm.b.bbc=shm_addr->form4.codes[ivalue];
+	   else
+	     lclm.b.bbc=-1;
+	 }
 
          opn_res(&buffer,ip);
          get_res(&response, &buffer);

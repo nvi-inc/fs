@@ -12,7 +12,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"d4"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 static char *bw_key[ ]={"8","16","32","64","128","256"};
 static char *bt_key[ ]={"1","2","4","8"};
@@ -43,7 +43,7 @@ char *ptr;
 
     switch (*count) {
     case 1:
-      ierr=arg_key(ptr,bw_key,BW_KEY,&lcl->bw,1,TRUE);
+      ierr=arg_key_flt(ptr,bw_key,BW_KEY,&lcl->bw,4,TRUE);
       break;
     case 2:
       ierr=arg_key(ptr,bt_key,BT_KEY,&lcl->bt,0,TRUE);
@@ -185,7 +185,7 @@ struct k4rec_mode_cmd *lclc;
 
   ib_req2(ip,device,"FMT=OLD");
   ib_req2(ip,device,"TSM=ON,FB,0");
-  ib_req2(ip,device,"DTS=1,0");
+  ib_req2(ip,device,"DTS=0,0");
 
 }
 

@@ -1,4 +1,4 @@
-      subroutine fshelp(ibuf,istart,nchar)
+      subroutine fshelp(ibuf,istart,nchar,ierr)
 C
       include '../include/fscom.i'
 C  INPUT VARIABLES:
@@ -14,21 +14,26 @@ C
 
       if (istart.ne.0) then
         length = nchar+1-istart
+        if(length.gt.100) then
+           nchar=istart+100-1
+           length=100
+        endif
         call hol2char(ibuf,istart,nchar,cstring)
       else
-        cstring='help.__'
+        cstring='help.___'
         length=7
       endif
 c
       call fs_get_drive(drive)
       call fs_get_rack(rack)
       ierr = 0
-      call helpstr(cstring,length,rstring,rack,drive,ierr)
-      if(ierr.ne.-3) then
+      call helpstr(cstring,length,rstring,rack,drive(1),drive(2),ierr)
+      if(ierr.eq.0) then
         runstr= 'helpsh '//rstring
         call ftn_runprog(runstr,idum)
-      else
-       call putcon_ch('No help for '//cstring(:length))
+c       else
+c       call putcon_ch('No help for '//cstring(:length)//
+c     &        ', maybe your equipment type is wrong')
       endif
 c
 9999  continue

@@ -148,46 +148,70 @@ loop:
 	pcalports(&command,itask,ip);
 	break;
       case 55:
-	k4ib(&command,itask,ip);
+        save_file(&command,itask,ip);
         break;
       case 56:
-        k4et(&command,itask,ip);
+	k4ib(&command,itask,ip);
         break;
       case 57:
-        k4st(&command,itask,ip);
+        k4et(&command,itask,ip);
         break;
       case 58:
-        k4tape(&command,itask,ip);
+        k4st(&command,itask,ip);
         break;
       case 59:
-        k4rec(&command,itask,ip);
+        k4tape(&command,itask,ip);
         break;
       case 60:
-	k4vclo(&command,itask,ip);
+        k4rec(&command,itask,ip);
         break;
       case 61:
-	k4vc(&command,itask,ip);
+	k4vclo(&command,itask,ip);
         break;
       case 62:
-	k4vcif(&command,itask,ip);
+	k4vc(&command,itask,ip);
         break;
       case 63:
-	k4vcbw(&command,itask,ip);
+	k4vcif(&command,itask,ip);
         break;
       case 64:
-	k3fm(&command,itask,ip);
+	k4vcbw(&command,itask,ip);
         break;
       case 65:
-	k4newtp(&command,itask,ip);
+	k3fm(&command,itask,ip);
         break;
       case 66:
-	k4label(&command,itask,ip);
+	k4newtp(&command,itask,ip);
         break;
       case 67:
-	k4oldtp(&command,itask,ip);
+	k4label(&command,itask,ip);
         break;
       case 68:
+	k4oldtp(&command,itask,ip);
+        break;
+      case 69:
 	k4rec_mode(&command,itask,ip);
+        break;
+      case 70:
+	k4recpatch(&command,itask,ip);
+        break;
+      case 71:
+	k4pcalports(&command,itask,ip);
+        break;
+      case 72:
+	selectcmd(&command,itask,ip);
+	break;
+      case 73:
+	scan_name(&command,itask,ip);
+	break;
+      case 74:
+        ifadjust(&command,itask,ip);
+        break;
+      case 75:
+        tacd(&command,itask,ip);
+        break;
+      case 77:
+        cablediff(&command,itask,ip);
         break;
       default:
 	ierr=-4;

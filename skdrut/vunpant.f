@@ -21,6 +21,10 @@ C 970306 nrv Handle XY axis types.
 C 970718 nrv Incorrect error returns for axis limits fixed.
 C 970930 nrv For XY axis types check the matching axis names as they
 C            appear in the VEX file, not as sk/dr keeps them.
+C 990630 nrv Axis offset has only 1 parameter. This is an error in 
+C            the VEX parameter tables, but correct in VEX example
+C            document.
+C 990913 nrv Change spelling from "ant_diam" to "antenna_diam"
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -64,10 +68,10 @@ C  Initialize at start in case we have to leave early.
       slrate(2)=0.0
       islcon(1)=0
       islcon(2)=0
-      anlim1(1)=-999.9*pi/180.d0
-      anlim1(2)=+999.9*pi/180.d0
-      anlim2(1)=-999.9*pi/180.d0
-      anlim2(2)=+999.9*pi/180.d0
+      anlim1(1)=+999.9*pi/180.d0
+      anlim1(2)=-999.9*pi/180.d0
+      anlim2(1)=+999.9*pi/180.d0
+      anlim2(2)=-999.9*pi/180.d0
       diaman=0.0
 
 C  1. The antenna name.
@@ -132,12 +136,12 @@ C  3. Axis offset.
      .ptr_ch('axis_offset'//char(0)),
      .ptr_ch('ANTENNA'//char(0)),ivexnum)
       if (iret.eq.0) then ! got one
-        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get axis type
-        if (cout(1:2).ne.'el') then
-          ierr=-3
-          write(lu,'("VUNPANT03 - Only elevation axis offsets.")')
-        else
-          iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get offset value
+C       iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get axis type
+C       if (cout(1:2).ne.'el') then
+C         ierr=-3
+C         write(lu,'("VUNPANT03 - Only elevation axis offsets.")')
+C       else
+          iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get offset value
           if (iret.ne.0) return
           iret = fvex_units(ptr_ch(cunit),len(cunit))  ! offset units
           if (iret.ne.0) return
@@ -148,7 +152,7 @@ C  3. Axis offset.
           else
             AXISOF = R
           endif
-        endif
+C       endif
       endif
 
 C  4. Slewing rates and constants.
@@ -209,7 +213,7 @@ C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
       enddo ! two slewing rates
 
 C  5. Antenna limits
-C   cout field#    1   2   3   4   5   6  7   8  9   10  11
+C   cout field#    1   2   3       4      5   6      7      
 C       sample   &ccw:az:-90 deg: 90 deg:el: 0 deg: 88 deg;
 C       sample   &n  :az: 90 deg:270 deg:el: 0 deg: 88 deg;
 C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
@@ -226,11 +230,12 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get axis type
         if (iret.ne.0) return
         cax=cout(1:2)
-        if (ichcm_ch(laxis,1,cax).eq.0) then
+        cax(1:1)=upper(cax(1:1))
+        if (ichcm_ch(laxis,1,cax(1:1)).eq.0) then ! first axis is first
           i1=3
-          i2=8
-        else
-          i1=8
+          i2=6
+        else ! second axis is first
+          i1=6
           i2=3
         endif
         iret = fvex_field(i1,ptr_ch(cout),len(cout)) ! get lower limit first axis
@@ -245,13 +250,13 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
 9909      format("VUNPANT09 - Invalid antenna limit on line",
      .    i3,", field ",i3)
         endif
-        iret = fvex_field(i1+2,ptr_ch(cout),len(cout)) ! get upper limit first axis
+        iret = fvex_field(i1+1,ptr_ch(cout),len(cout)) ! get upper limit first axis
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         almax1 = r
-        if (ierr.ne.0) then
+        if (iret.ne.0) then
           ierr=-5
           write(lu,9909) nl,i1
         endif
@@ -261,25 +266,25 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         almin2 = r
-        if (ierr.ne.0) then
+        if (iret.ne.0) then
           ierr=-5
           write(lu,9909) nl,i1
         endif
-        iret = fvex_field(i2+2,ptr_ch(cout),len(cout)) ! get lower limit second axis
+        iret = fvex_field(i2+1,ptr_ch(cout),len(cout)) ! get lower limit second axis
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)
         almax2 = r 
-        if (ierr.ne.0) then
+        if (iret.ne.0) then
           ierr=-5
           write(lu,9909) nl,i1
         endif
 C         Select the max and min of all sectors for now.
         if (almin1.lt.anlim1(1)) anlim1(1)=almin1
-        if (almax1.lt.anlim1(2)) anlim1(2)=almax1
+        if (almax1.gt.anlim1(2)) anlim1(2)=almax1
         if (almin2.lt.anlim2(1)) anlim2(1)=almin2
-        if (almax2.lt.anlim2(2)) anlim2(2)=almax2
+        if (almax2.gt.anlim2(2)) anlim2(2)=almax2
         iv=0
         iret = fget_station_lowl(ptr_ch(stdef),
      .  ptr_ch('pointing_sector'//char(0)),
@@ -290,7 +295,7 @@ C  6. Antenna diameter
 
       ierr = 6
       iret = fget_station_lowl(ptr_ch(stdef),
-     .ptr_ch('ant_diam'//char(0)),
+     .ptr_ch('antenna_diam'//char(0)),
      .ptr_ch('ANTENNA'//char(0)),ivexnum)
       if (iret.eq.0) then ! got one
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get diameter

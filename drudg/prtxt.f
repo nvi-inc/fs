@@ -4,20 +4,22 @@ C Print .txt file (if any)
 C 980916 nrv Copy from prcov
 C 990117 nrv Simply call 'printer' to print the file instead of
 C            reading then writing each line.
+C 991211 nrv Print file name in error message.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
 
 C Local
       integer i,ierr,ilen
-      integer printer ! function
+      integer printer,trimlen ! function
       character*20 ccmd
       logical kex
 
       INQUIRE(FILE=ctextname,EXIST=KEX)
       if (.not.kex) then ! none found
-        write(luscn,9100)
-9100    format('PRTXT00 -- No notes file was found.')
+        i=trimlen(ctextname)
+        write(luscn,9100) ctextname(1:i)
+9100    format('PRTXT00 -- The notes file ',a,' was not found.')
         return
       endif ! none found
 

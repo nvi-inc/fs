@@ -24,15 +24,32 @@ long ip[5];                       /* ipc parameters */
       void skd_run(), skd_par();  /* program scheduling utilities */
       struct k4label_cmd lcl;
 
-      if(command->equal != '=' ) {
+      if(shm_addr->equip.drive[0]!=0 && shm_addr->equip.drive[1]!=0)
+	if(shm_addr->knewtape[0]!=0) {
+	  shm_addr->knewtape[0]=0;
+	  ip[0]=ip[1]=0;
+	  return;
+	}
+      
+      if(command->equal != '=' ||
+	 (shm_addr->equip.drive[0]==K4 &&
+	  (shm_addr->equip.drive_type[0]==K41 ||
+	   shm_addr->equip.drive_type[0]==K42))) {
 	strcpy(output,command->name);
-	strcat(output,"/to continue, use LABEL command");
+	if(shm_addr->equip.drive[0]!=0 && shm_addr->equip.drive[1]!=0) {
+	  if(shm_addr->select==0) {
+	    strcat(output,"/to continue, use LABEL1 command");
+	  }
+	} else
+	  strcat(output,"/to continue, use LABEL  command");
         shm_addr->KHALT=1;
 	ip[0]=0;
 	cls_snd(&ip[0],output,strlen(output),0,0);
 	ip[1]=1;
         return;
       }
+
+/* else have a DMS */
 
       i=0;
       itape=0;
@@ -56,22 +73,11 @@ long ip[5];                       /* ipc parameters */
 
       for (i=0;i<5;i++) ip[i]=0;
 
-      ib_req7(ip,"tc",200,cmd);
+      ib_req7(ip,"t1",200,cmd);
 
       skd_run("ibcon",'w',ip);
       skd_par(ip);
-      if(ip[2]<0){
-	if(ip[2] == -3){
-	  strcpy(output,command->name);
-	  strcat(output,"/to continue, use LABEL command");
-	  shm_addr->KHALT=1;
-	  ip[0]=0;
-	  cls_snd(&ip[0],output,strlen(output),0,0);
-	  ip[1]=1;
-	  return;
-	}
-	goto error2;
-      }
+      if(ip[2]<0) goto error2;
 
       strcpy(output,command->name);
       strcat(output,"/");
@@ -119,7 +125,12 @@ long ip[5];                       /* ipc parameters */
       strcpy(lcl.label,lab);
       memcpy(&shm_addr->k4label,&lcl,sizeof(lcl));
       strcpy(output,command->name);
-      strcat(output,"/LABEL=");
+      if(shm_addr->equip.drive[0]!=0 && shm_addr->equip.drive[1]!=0) {
+	if(shm_addr->select==0) {
+	strcat(output,"/LABEL1=");
+	}
+      } else
+	strcat(output,"/LABEL=");
       strcat(output,lab);
 
 /* allow schedule to continue */
@@ -135,7 +146,7 @@ long ip[5];                       /* ipc parameters */
 
       for (i=0;i<5;i++) ip[i]=0;
 
-      ib_req2(ip,"tc",cmd);
+      ib_req2(ip,"t1",cmd);
 
       skd_run("ibcon",'w',ip);
       skd_par(ip);

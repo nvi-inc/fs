@@ -1,4 +1,4 @@
-      subroutine i32ma(ibuf,iat,imix,isw1,isw2,isw3,isw4)
+      subroutine i32ma(ibuf,iat,imix,isw1,isw2,isw3,isw4,ipcal)
 C 
 C     I32MA converts data for the IF3 distributor to an MAT buffer.
 C 
@@ -9,17 +9,21 @@ C     IAT - attenuator setting
       integer*2 ibuf(1) 
 C 
 C     The buffer is set up as follows:
-C                       00000sab
+C                       0000csab
 C     where each letter represents a character (half word). 
 C                   0  = these bits unused
+C                   c  = bit 1 (bit 0 is LSB) pcal on=0,off=1
 C                   s  = switch setting
 C                   a  = mixer, and high bits of atten.
 C                   b  = remaining atten. bits
 C 
 C  Fill unused fields with zeros 
 C
-      call ifill_ch(ibuf,1,5,'0') 
-C 
+      call ifill_ch(ibuf,1,4,'0') 
+C
+      ipch=(1-ipcal)*2
+      call ichmv(ibuf,5,ihx2a(ipch),2,1) 
+C      
       iswh=(2-isw1)+(2-isw2)*2+(2-isw3)*4+(2-isw4)*8
       call ichmv(ibuf,6,ihx2a(iswh),2,1) 
 c

@@ -8,7 +8,7 @@ LIBES = ../bosslb/bosslb.a ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a \
 OBJECTS = boss.o binit.o bwork.o cants.o helpstr.o fshelp.o\
 getcm.o getts.o lists.o newpf.o newpr.o \
 newsk.o opnpf.o putts.o rdtib.o rdtma.o \
-spars.o stat.o newlg.o
+spars.o stat.o newlg.o ldrivev.o ldrivem.o ldriveall.o lhead.o
 #
 ../bin/boss: $(OBJECTS)
 	$(FC)  -o ../bin/boss $(OBJECTS) $(LIBES)

@@ -5,6 +5,7 @@ C  puts them into the scan buffer.
 
 C History
 C 970722 nrv New. Removed form newscan and addscan.
+C 001101 nrv Put footage field at nch+1 for S2 (as for non-S2).
 
 C Common blocks
       include '../skdrincl/skparm.ftni'
@@ -32,7 +33,7 @@ C  If it's a non-recording scan, set the pass to '0'.
 
       if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
         kfor=.true. ! always forward
-        nch=ichmv_ch(ibuf,nch,cpassorderl(ipas,istn,icod)(1:1)) ! group number
+        nch=ichmv_ch(ibuf,nch+1,cpassorderl(ipas,istn,icod)(1:1)) ! group number
       else ! non-S2
         NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
         i=ipas/2
@@ -44,6 +45,7 @@ C  If it's a non-recording scan, set the pass to '0'.
 C  Insert the direction
       NCH = ICHMV_ch(IBUF,NCH,cdir)
 C  Put in footage. For S2 this is in seconds.
+C  Max length is 5 characters, as set up in newscan.
       nchx=ib2as(ifeet,ibufx,1,5+o'40000'+o'400'*5)
       nch=ichmv(ibuf,nch,ibufx,1,5)
       feetscan=nch

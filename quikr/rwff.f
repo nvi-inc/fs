@@ -21,6 +21,11 @@ C
       equivalence (ireg(1),reg)
       data ilen/20/
 C
+      if( isub.lt.10) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
       iclcm = ip(1)
       if (iclcm.ne.0) goto 110
 100   ierr = -1
@@ -31,7 +36,7 @@ C
       if (ieq.ne.0) goto 100
 C                   If parameters, error
       call fs_get_drive(drive)
-      if (VLBA .eq.drive.or.VLBA4.eq.drive) goto 500
+      if (VLBA .eq.drive(indxtp).or.VLBA4.eq.drive(indxtp)) goto 500
 C
 C
 C     1. Set up buffer for rewinding or fast forwarding tape:
@@ -50,37 +55,42 @@ C     and set up bypass mode.
 C
 C     Also, reset all of the appropriate common variables
 C
-      call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18)
-      icheck(18) = 0
-      call fs_set_icheck(icheck(18),18)
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1) 
+      icheck(18+indxtp-1) = 0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       ibuf(1) = -3
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if(ip(3).lt.0) go to 415
       ireg(2) = get_buf(ip(1),ibuf,-ilen,idum,idum)
-      call ma2tp(ibuf,ilow,lfeet_fs,ifastp,icaptp,istptp,itactp,irdytp)
-      call fs_set_icaptp(icaptp)
-      call fs_set_istptp(istptp)
-      call fs_set_irdytp(irdytp)
-      call fs_set_itactp(itactp)
-      call fs_set_lfeet_fs(lfeet_fs)
-      if (irdytp.eq.0) goto 410
+      call ma2tp(ibuf,ilow,lfeet_fs(1,indxtp),ifastp,icaptp(indxtp),
+     &     istptp(indxtp),itactp(indxtp),irdytp(indxtp))
+      call fs_set_icaptp(icaptp,indxtp)
+      call fs_set_istptp(istptp,indxtp)
+      call fs_set_irdytp(irdytp,indxtp)
+      call fs_set_itactp(itactp,indxtp)
+      call fs_set_lfeet_fs(lfeet_fs,indxtp)
+      if (irdytp(indxtp).eq.0) goto 410
         ierr = -301
 C          if vacuum not ready, forget it
         goto 990
 C
 410   continue
-      ienatp = 0
-      call fs_set_ienatp(ienatp)
-      ispeed = 7
-      call fs_set_ispeed(ispeed)
-      idirtp = mod(isub-3,2)
-      call fs_set_idirtp(idirtp)
-      ilowtp = 1
+      ienatp(indxtp) = 0
+      call fs_set_ienatp(ienatp,indxtp)
+      ispeed(indxtp) = 7
+      call fs_set_ispeed(ispeed,indxtp)
+      idirtp(indxtp) = mod(mod(isub,10)-3,2)
+      call fs_set_idirtp(idirtp,indxtp)
+      ilowtp(indxtp) = 1
 C
       nrec=0
       iclass = 0
@@ -93,53 +103,57 @@ C
       endif
 c
       ibuf(1) = 0
-      call char2hol('tp',ibuf(2),1,2)
-      if(drive.eq.MK4) then
-        call fs_get_kenastk(kenastk)
-        call en2ma4(ibuf(3),ienatp,kenastk)
-      else if(drive.eq.MK3) then
-         call en2ma(ibuf(3),ienatp,-1,ltrken)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
+      if(drive(indxtp).eq.MK4) then
+        call fs_get_kenastk(kenastk,indxtp)
+        call en2ma4(ibuf(3),ienatp(indxtp),kenastk(1,indxtp))
+      else if(drive(indxtp).eq.MK3) then
+         call en2ma(ibuf(3),ienatp(indxtp),-1,ltrken)
       endif
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      call tp2ma(ibuf(3),ilowtp,0)
+      call tp2ma(ibuf(3),ilowtp(indxtp),0)
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      if(isub.lt.5) then
-         call fs_get_iskdtpsd(iskdtpsd)
-         if (iskdtpsd.eq.-2) then
-            call ichmv_ch(lgen,1,'960')
-         else if (iskdtpsd.eq.-1) then
-            call ichmv_ch(lgen,1,'880')
+      if(mod(isub,10).lt.5) then
+         call fs_get_iskdtpsd(iskdtpsd,indxtp)
+         if (iskdtpsd(indxtp).eq.-2) then
+            call ichmv_ch(lgen(1,indxtp),1,'960')
+         else if (iskdtpsd(indxtp).eq.-1) then
+            call ichmv_ch(lgen(1,indxtp),1,'880')
          else
-            call ichmv_ch(lgen,1,'720')
+            call ichmv_ch(lgen(1,indxtp),1,'720')
          endif
       else
-         call fs_get_imaxtpsd(imaxtpsd)
-         if (imaxtpsd.eq.-2) then
-            call ichmv_ch(lgen,1,'960')
-         else if (imaxtpsd.eq.-1) then
-            call ichmv_ch(lgen,1,'880')
+         call fs_get_imaxtpsd(imaxtpsd,indxtp)
+         if (imaxtpsd(indxtp).eq.-2) then
+            call ichmv_ch(lgen(1,indxtp),1,'960')
+         else if (imaxtpsd(indxtp).eq.-1) then
+            call ichmv_ch(lgen(1,indxtp),1,'880')
          else
-            call ichmv_ch(lgen,1,'720')
+            call ichmv_ch(lgen(1,indxtp),1,'720')
          endif
       endif
-      call mv2ma(ibuf(3),idirtp,ispeed,lgen)
-      call fs_set_lgen(lgen)
+      call mv2ma(ibuf(3),idirtp(indxtp),ispeed(indxtp),lgen(1,indxtp))
+      call fs_set_lgen(lgen,indxtp)
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec=nrec+3
 C
       call run_matcn(iclass,nrec)
       call rmpar(ip)
-      call mvdis(ip,iclcm)
+      call mvdis(ip,iclcm,indxtp)
 C
 415   continue
-      icheck(18) =ichold
-      call fs_set_icheck(icheck(18),18)
+      icheck(18+indxtp-1) =ichold
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       if(ichold.ge.0) then
-        icheck(18)=mod(ichold,1000)+1
-        call fs_set_icheck(icheck(18),18)
-        kmvtp_fs=.true.
+        icheck(18+indxtp-1)=mod(ichold,1000)+1
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+        kmvtp_fs(indxtp)=.true.
       endif
       return
 C        vlba recorder movement commands
@@ -147,7 +161,7 @@ C        vlba recorder movement commands
       ierr = 0
       call fc_rwff_v(ip,isub,ierr)
       if (ierr.ne.0) goto 990
-      call mvdis(ip,iclcm)
+      call mvdis(ip,iclcm,indxtp)
       return
 C
 990   ip(1) = 0

@@ -1,0 +1,35 @@
+#!/usr/bin/wish -f
+
+set read 1
+set logfile_name [lindex $argv 0]
+
+ if {[file exists /usr2/log/$logfile_name]} {
+  set file [open /usr2/log/$logfile_name r]
+ } else {
+  puts "Error, can't find file /usr2/log/$logfile_name"
+   while {$read==1} {
+    # Do nothing.
+   }
+ }
+
+puts "Starts processing $logfile_name until EOF.."
+
+while {[eof $file] != 1} {
+  set line [gets $file]
+  puts $line 
+  after 2   
+}
+
+puts "Finished processing $logfile_name until EOF, Waiting for new input."
+
+
+while {$read==1} {
+ if {[gets $file line] >= 0} {
+  puts $line 
+  after 2   
+ }
+}
+close $file
+
+
+

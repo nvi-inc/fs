@@ -74,9 +74,9 @@ c 102  format(/' isign, sblo=',2i10/)
       else
         f=f+isg*300.
         if(indf.eq.3) then
-          call fs_get_icheck(icheck(21),21)
+          call fs_get_icheck(icheck(23),23)
           call fs_get_imixif3(imixif3)
-          if(icheck(21).eq.0) then
+          if(icheck(23).eq.0) then
              ierr=-502
              goto 990
           else if(imixif3.eq.1) then

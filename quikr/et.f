@@ -1,4 +1,4 @@
-      subroutine et(ip)
+      subroutine et(ip,itask)
 C  stop tape
 
       include '../include/fscom.i'
@@ -29,36 +29,47 @@ C
       ieq = iscn_ch(ibuf,1,nchar,'=') 
       if (ieq.ne.0) goto 100
 C                   If parameters, error
+      if( itask.eq.2) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
       call fs_get_drive(drive)
-      if (VLBA .eq. drive.or.VLBA4.eq.drive) goto 200
+      if (VLBA .eq. drive(indxtp).or.VLBA4.eq.drive(indxtp)) goto 200
 C 
 C     1. Set up buffer for ending tape, i.e. send zero speed: 
 C                   mmTP)=07200000
 C     Then turn off enable bit: 
 C                   mmTP%=0xxxxxxx
 C     and set up bypass mode. 
-C 
-      call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18) 
-      icheck(18) = 0
-      call fs_set_icheck(icheck(18),18)
-      ispeed = 0
-      call fs_set_ispeed(ispeed)
-C                   Put stopped indicator in common
+C
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1) 
+      icheck(18+indxtp-1) = 0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+c
+      ispeed(indxtp) = 0
+      call fs_set_ispeed(ispeed,indxtp)
+C         Put stopped indicator in common
       ibuf(1) = -3
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if(ip(3).lt.0) go to 155
       ireg(2) = get_buf(ip(1),ibuf,-ilen,idum,idum)
-      call ma2tp(ibuf,ilow,lfeet_fs,ifastp,icaptp,istptp,itactp,irdytp)
-      call fs_set_icaptp(icaptp)
-      call fs_set_istptp(istptp)
-      call fs_set_itactp(itactp)
-      call fs_set_irdytp(irdytp)
-      call fs_set_lfeet_fs(lfeet_fs)
+      call ma2tp(ibuf,ilow,lfeet_fs(1,indxtp),ifastp,icaptp(indxtp),
+     &     istptp(indxtp),itactp(indxtp),irdytp(indxtp))
+      call fs_set_icaptp(icaptp,indxtp)
+      call fs_set_istptp(istptp,indxtp)
+      call fs_set_itactp(itactp,indxtp)
+      call fs_set_irdytp(irdytp,indxtp)
+      call fs_set_lfeet_fs(lfeet_fs,indxtp)
 C
       iclass = 0
       nrec = 0
@@ -74,32 +85,38 @@ C
       endif
 C
       ibuf(1) = 0
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
 C
 C  DISABLE RECORD ENABLE ON MARK III DRIVE
 C
-      ienatp = 0
-      call fs_set_ienatp(ienatp)
-      call fs_get_kenastk(kenastk)
+      ienatp(indxtp) = 0
+      call fs_set_ienatp(ienatp,indxtp)
+      call fs_get_kenastk(kenastk,indxtp)
 C                   Indicate disabled in common
-      if (MK3.eq.drive) then
-        call en2ma(ibuf(3),ienatp,-1,ltrken)
-      else if (MK4.eq.drive) then
-        call en2ma4(ibuf(3),ienatp,kenastk)
+      if (MK3.eq.drive(indxtp)) then
+         call en2ma(ibuf(3),ienatp(indxtp),-1,ltrken)
+      else if (MK4.eq.drive(indxtp)) then
+         call en2ma4(ibuf(3),ienatp(indxtp),kenastk(1,indxtp))
       endif
+
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = nrec + 1
 
 C
 C  VACUUM MUST BE UP
 C
-      call fs_get_irdytp(irdytp)
-      if (irdytp.ne.0) then
+      call fs_get_irdytp(irdytp,indxtp)
+      if (irdytp(indxtp).ne.0) then
         goto 150
       endif
-      call fs_get_idirtp(idirtp)
-      call fs_get_lgen(lgen) ! get the rate generator
-      call mv2ma(ibuf(3),idirtp,ispeed,lgen)
+      call fs_get_idirtp(idirtp,indxtp)
+      call fs_get_lgen(lgen,indxtp) ! get the rate generator
+      call mv2ma(ibuf(3),idirtp(indxtp),ispeed(indxtp),
+     &     lgen(1,indxtp))
 C                     Send the stop message
 C
       call put_buf(iclass,ibuf,-13,'fs','  ')
@@ -107,25 +124,25 @@ C
 C
 150   call run_matcn(iclass,nrec)
       call rmpar(ip)
-      call mvdis(ip,iclcm)
+      call mvdis(ip,iclcm,indxtp)
 C
 155   continue
       if (ichold.ne.-99) then
-        icheck(18) = ichold
-        call fs_set_icheck(icheck(18),18)
+        icheck(18+indxtp-1) = ichold
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       endif
       if (ichold.ge.0) then
-        icheck(18) = mod(ichold,1000)+1
-        call fs_set_icheck(icheck(18),18)
-        kmvtp_fs=.true.
+        icheck(18+indxtp-1) = mod(ichold,1000)+1
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+        kmvtp_fs(indxtp)=.true.
       endif
       return
 C
 C             if VLBA recorder, then this section
 200   continue
 c
-      call fc_et_v(ip)
-      call mvdis(ip,iclcm)
+      call fc_et_v(ip,indxtp)
+      call mvdis(ip,iclcm,indxtp)
       return
 
 990   ip(1) = 0

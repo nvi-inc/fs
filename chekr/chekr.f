@@ -30,15 +30,15 @@ C  LOCAL VARIABLES:
       parameter (ifastr=2 )      ! repeat period for tape footage
 C 
 C     IDAREF - reference day number, from HP, re-set every loop 
-      integer drive, rack
+      integer rack
       dimension ip(5)             ! - for RMPAR
       integer itbuf1(5)
 C      - the buffers from MATCN
-      integer*2 lmodna(18)
+      integer*2 lmodna(19)
 C      - MODule NAmes, 2-char codes
 C      - Number of BUFfers for each module
 C      - Integer CODES for MATCN for each buffer
-      dimension icherr(169),ichecks(21)
+      dimension icherr(169),ichecks(23)
 C      - Arrays for recording identified error conditions
       integer*2 lwho       ! - mnemonic for CHEKR
       integer fc_dad_pid, fc_rte_prior
@@ -49,9 +49,9 @@ C  INITIALIZED:
 C
       data lwho /2Hch/
       data lmodna /2Hv1,2Hv2,2Hv3,2Hv4,2Hv5,2Hv6,2Hv7,2Hv8,2Hv9,2Hva,
-     /             2Hvb,2Hvc,2Hvd,2Hve,2Hvf,2Hif,2Hfm,2Htp/
+     /             2Hvb,2Hvc,2Hvd,2Hve,2Hvf,2Hif,2Hfm,2Ht1,2Ht2/
       data nverr,niferr,nfmerr,ntperr /9,8,11,15/
-      data ichecks/21*0/
+      data ichecks/23*0/
       data icherr/169*0/
       data kpapa/.false./
 C
@@ -93,12 +93,12 @@ C
       else if (VLBA.eq.rack)  then
         call vlbarack(lwho)
       endif
-      if (MK3.eq.drive.or.MK4.eq.drive) then
+      if (MK3.eq.drive(1).or.MK4.eq.drive(1)) then
         call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
-     .                ichecks)
-      else if (VLBA.eq.drive) then
-        call vlbadrive(lwho)
-      else if(S2.eq.drive) then
+     .                ichecks,1)
+      else if (VLBA.eq.drive(1).or.VLBA4.eq.drive(1)) then
+        call vlbadrive(lwho,1)
+      else if(S2.eq.drive(1)) then
          call s2drive(lwho,ichecks)
       endif
 C
@@ -106,33 +106,54 @@ C  This is the error-reporting section.  The array ICHERR is
 C  examined to determine which error messages, if any, should
 C  be logged and displayed.
 C
-      if (MK3.eq.drive.or.MK4.eq.drive.or.
+      if (MK3.eq.drive(1).or.MK4.eq.drive(1).or.
      &    MK3.eq.rack .or.MK4.eq.rack ) then
         call err_rep(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
-     .               ntperr)
+     .               ntperr,1)
+      endif
+c
+      if (MK3.eq.drive(2).or.MK4.eq.drive(2)) then
+        call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
+     .                ichecks,2)
+      else if (VLBA.eq.drive(2).or.VLBA4.eq.drive(2)) then
+        call vlbadrive(lwho,2)
+      endif
+      if (MK3.eq.drive(2).or.MK4.eq.drive(2)) then
+        call err_rep(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
+     .               ntperr,2)
       endif
 C
 C  Now we're going to check out the receiver.
 C
 800    continue
-       call fs_get_icheck(icheck(19),19)
-       if(icheck(19).le.0.or.ichecks(19).ne.icheck(19)) goto 900
+       call fs_get_icheck(icheck(22),22)
+       if(icheck(22).le.0.or.ichecks(22).ne.icheck(22)) goto 900
        call rxchk(ichecks,lwho)
 C
 C 9. Check tape head positioning.
 C
 900   continue
-      if(MK3.eq.drive.or.MK4.eq.drive.or.VLBA.eq.drive.or.
-     &     VLBA4.eq.drive) then
+      if(MK3.eq.drive(1).or.MK4.eq.drive(1).or.VLBA.eq.drive(1).or.
+     &     VLBA4.eq.drive(1)) then
          call fs_get_icheck(icheck(20),20)
          if (icheck(20).le.0.or.ichecks(20).ne.icheck(20)) goto 910
-         call hdchk(ichecks,lwho)
+         call hdchk(ichecks,lwho,1)
+      endif
+      if(MK3.eq.drive(2).or.MK4.eq.drive(2).or.VLBA.eq.drive(2).or.
+     &     VLBA4.eq.drive(2)) then
+         call fs_get_icheck(icheck(21),21)
+         if (icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 910
+         call hdchk(ichecks,lwho,2)
       endif
 C
 910    continue
        if(MK3.eq.rack.or.MK4.eq.rack) then
-         call fs_get_icheck(icheck(21),21)
-         if (icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 1000
+         call fs_get_icheck(icheck(23),23)
+         if (icheck(23).le.0.or.ichecks(23).ne.icheck(23)) then
+            mifd_tpi(3)=65536
+            call fs_set_mifd_tpi(mifd_tpi,3)
+            goto 1000
+         endif
          call i3chk(ichecks,lwho)
        endif
 C
@@ -156,17 +177,22 @@ C
             call fs_get_icheck(icheck(i),i)
          endif
       enddo
-      if(drive.eq.VLBA.or.drive.eq.VLBA4) then
+      if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
          call fs_get_ichvlba(icheck(18),18)
-      else if(drive.eq.MK3.or.drive.eq.MK4) then
+      else if(drive(1).eq.MK3.or.drive(1).eq.MK4) then
          call fs_get_icheck(icheck(18),18)
-      else if(drive.eq.S2) then
+      else if(drive(1).eq.S2) then
          call fs_get_ichs2(icheck(18))
       endif
-      do i=19,21
+      if(drive(2).eq.VLBA.or.drive(2).eq.VLBA4) then
+         call fs_get_ichvlba(icheck(19),19)
+      else if(drive(2).eq.MK3.or.drive(2).eq.MK4) then
+         call fs_get_icheck(icheck(19),19)
+      endif
+      do i=20,23
          call fs_get_icheck(icheck(i),i)
       enddo
-      do i=1,21
+      do i=1,23
          ichecks(i)=icheck(i)
       enddo
       call fc_rte_rawt(before)
@@ -176,10 +202,27 @@ C
          call wait_relt('chekr',ip,2,1)
          call fc_rte_rawt(after)
          kpapa=fc_dad_pid().ne.0
-         if (drive.eq.s2) then
+         call fs_get_select(select)
+         if (drive(1).eq.s2.and.select.eq.0) then
             call fs_get_ichs2(icheck(18))
             if(icheck(18).gt.0) then
                call s2recstatus(lwho)
+            endif
+         else if(select.eq.0.and.
+     $           (drive(1).eq.VLBA.or.drive(1).eq.VLBA4)) then
+            call fs_get_ichvlba(ichvlba(18),18)
+            if(ichvlba(18).gt.0) then
+               ierr=0
+               call recchk(idum,ierr,1,1)
+               if (ierr.ne.0) call logit7ic(0,0,0,0,ierr,lwho,'r1')
+            endif
+         else if(select.eq.1.and.
+     $           (drive(2).eq.VLBA.or.drive(2).eq.VLBA4)) then
+            call fs_get_ichvlba(ichvlba(19),19)
+            if(ichvlba(19).gt.0) then
+               ierr=0
+               call recchk(idum,ierr,2,1)
+               if (ierr.ne.0) call logit7ic(0,0,0,0,ierr,lwho,'r2')
             endif
          endif
       enddo
@@ -192,17 +235,22 @@ C
                call fs_get_icheck(icheck(i),i)
             endif
          enddo
-         if(drive.eq.VLBA.or.drive.eq.VLBA4) then
+         if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
             call fs_get_ichvlba(icheck(18),18)
-         else if(drive.eq.MK3.or.drive.eq.MK4) then
+         else if(drive(1).eq.MK3.or.drive(1).eq.MK4) then
             call fs_get_icheck(icheck(18),18)
-         else if(drive.eq.S2) then
+         else if(drive(1).eq.S2) then
             call fs_get_ichs2(icheck(18))
          endif
-         do i=19,21
+         if(drive(2).eq.VLBA.or.drive(2).eq.VLBA4) then
+            call fs_get_ichvlba(icheck(19),19)
+         else if(drive(2).eq.MK3.or.drive(2).eq.MK4) then
+            call fs_get_icheck(icheck(19),19)
+         endif
+         do i=20,23
             call fs_get_icheck(icheck(i),i)
          enddo
-         do i=1,21
+         do i=1,23
             ichecks(i)=icheck(i)
          enddo
       endif

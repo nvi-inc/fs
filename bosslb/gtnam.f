@@ -10,7 +10,7 @@ C
 C               - input character string
 C        IFC,IEC- first, end characters in input string IAS 
 C                 Word to be checked lies here. 
-      dimension lnames(12,1)
+      dimension lnames(13,1)
       integer*4 lproc1(4,1),lproc2(4,1) 
 C               - 3 lists to be checked for the word
 C               - word to be checked is word (1,I) in each array
@@ -31,7 +31,7 @@ C   LOCAL VARIABLES
 C
 C        NCHAR  - number of characters in word
 C        LMATCH - copy of input character string
-      integer ichcm, ichmv, rack, drive
+      integer ichcm, ichmv, rack, drive(2)
       integer*2 lmatch(6)
 C
 C  HISTORY:
@@ -60,30 +60,35 @@ c  don't have that equipment.
 C
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      do 290 i=1,nnames
-         if (ichcm(lnames(1,i),1,lmatch,1,12).ne.0) goto 290
-         index=i
-         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.127)
-     &        .or.
-     &        (and(lnames(12,i),drive).eq.0
-     &        .and.lnames(12,i).ne.127)) then
-            do j=i+1,nnames
-               if(ichcm(lnames(1,j),1,lmatch,1,12).eq.0.and.
-     &              (and(lnames(11,j),rack).ne.0
-     &         .or. lnames(11,j).eq.127)
-     &         .and.(and(lnames(12,j),drive).ne.0
-     &         .or. lnames(12,j).eq.127) ) then
-               index=j
-               goto 280
+      index=-1
+      do i=1,nnames
+         if (ichcm(lnames(1,i),1,lmatch,1,12).eq.0.) then
+            if((and(rack,lnames(11,i)).ne.0.or.255.eq.lnames(11,i))
+     $           .and.
+     $           (and(drive(1),lnames(12,i)).ne.0.or.
+     $           255.eq.lnames(12,i))
+     $           .and.
+     $           (and(drive(2),lnames(13,i)).ne.0.or.
+     $           255.eq.lnames(13,i))
+     $           .and.
+     $           (lnames(8,i).eq.0.or.
+     $           (lnames(8,i).eq.1.and.drive(1).ne.0.and.drive(2).eq.0)
+     $           .or.
+     $           (lnames(8,i).eq.2.and.drive(1).eq.0.and.drive(2).ne.0)
+     $           .or.
+     $           (lnames(8,i).eq.3.and.drive(1).ne.0.and.drive(2).ne.0)
+     $           ))then
+               index=i
+               call char2hol('F',itype,2,2)
+               return
             endif
-         enddo
+            index=0
+         endif
+      enddo
+      if(index.eq.0) then
          ierr=-13
          return
       endif
- 280  continue
-      call char2hol('F',itype,2,2)
-      return
- 290  continue
 C
 C     3.  No match found in first list.
 C         Search the first procedure list.

@@ -89,7 +89,7 @@ C
       call orign(xosav,yosav,azosav,elosav,haosav,dcosav,lbuf,isbuf)
 C 
       nwt=nwait 
-      if(rn_test('aquir')) nwt=300
+      if(.not.rn_test('aquir')) nwt=450
       call onsor(nwt,ierr)
       if(ierr.ne.0) goto 80010 
       kon=.true.

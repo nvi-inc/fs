@@ -30,6 +30,7 @@ C 970213 nrv Remove the test for a rack before setting NCHAN. It should be
 C            set even for rack=none
 C 971208 nrv Add fpcal, fpcal_base to vunpif call. Add cpcalref to vunpfrq.
 C 971208 nrv Add call to VUNPPCAL.
+C 991110 nrv Save modedefname as catalog name.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -97,6 +98,13 @@ C
         else
           ncodes=ncodes+1
           modedefnames(ncodes)=cout
+          if (il.gt.16) then
+            write(lu,'("VMOINP02 - Mode name ",a," too long for ",
+     .      " matching in sked catalogs. Only the ",
+     .      "first 16 characters were kept.")') cout(1:il)
+            il=16
+          endif
+          call char2hol(cout,lmode_cat(1,ncodes),1,il)
         END IF 
         iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
       enddo

@@ -4971,3 +4971,326 @@ Version 9.3.113 990217
            updated for additional rec_mode command and monitor parameters
 
 Version 9.3.114 990218
+
+Lost the thread, starting over 000108
+
+000108 WEH fmset/get4time.c
+           fmset/fmset.c
+           don't abort for formatter year out of range
+
+000109 WEH control/fserr.ctl
+           delete FV -3 for time out of range in fmset
+
+010199 WEH boss/newsk.f
+           only skip initial comments for starting on line 1 AND
+              executing at least enough lines to get past initial comments
+
+010109 WEH rtelb/rte2secs.c
+           no error print-out for out of range
+
+010109 WEH fmset/asktime.c
+           ignore input out of range time
+
+010109 WEH logex/lxplt.f
+           boss/getts.f
+           boss/newpr.f
+           bosslb/kpast.f
+           chekr/getfm.f
+           boss/bwork.f
+           control/fserr.ctl
+           add errors for time out of range
+
+010111 RDG tacd/tacd.c
+           tacd/tacd_srv.c 
+           tacd/parse_it.c
+           quikv/tacd.c
+           quikv/tacd_dis.c
+           control/fserr.ctl
+           control/fscmd.ctl
+           control/fspgm.ctl
+           created and modified for reading the TAC.
+
+010111 RDG quikv/ifadjust.c
+           newlb/prog.c
+	   quikr/ifd.f
+	   quikr/ifdis.f
+           quikr/if3.f
+           quikr/if3dis.f
+           chekr/getif.f
+           chekr/i3chk.f
+           control/fserr.ctl
+           control/fscmd.ctl
+           control/fspgm.ctl
+           include/fscom_quik.i
+           include/fscom_dum.i
+           created and modified to automatically adjusting attenuators.
+
+010111 RDG include/params.h
+           expanded memory for Fscom by 4096.
+
+010111 RDG Makefile
+           arts/arts
+           arts/arts_fshelp
+           arts/arts_fslog
+           arts/arts.icon
+           created for viewing logging and help informations using Tcl/Tk.
+
+010116 RDG /usr2/st/erchk/Makefile
+           /usr2/st/erchk/erchk.c
+           /usr2/st/erchk/err_get.c
+           ddout/ddout.c
+           newlb/prog.c
+           incom/sincom.f
+           include/fscom.h
+           include/fscom_dum.h
+           created for running color errors.
+
+010123 WEH quikv/tacd_dis.c
+           tacd/tacd_dis.c
+           tacd/parse_it.c
+           tacd/tacd_srv.c
+           tacd/tacd.c
+           took ../fs out of include paths
+
+010123 WEH st.default/control/tacd.ctl
+           added
+
+010124 WEH boss/getts.f
+           fix precision with very large time list offsets
+
+010124 WEH bosslb/gttim.f
+           control/fserr.ctl
+           catch dates more than one date in past if year is defaulted
+
+010124 WEH quikv/vst.c
+           add explicit for speeds less than 5 ips for VLBA2
+
+010124 WEH clib/vst_util.c
+           for VLBA2, any speed slower than 5 ips is changed to zero
+
+010124 WEH ibcon/wrdev.c
+           add J. Quick's REN control 
+
+010124 WEH ibcon/ibcom.f
+           ibcon/wrdev.c
+           control use REN control with no_write_ren keyword
+
+010124 WEH fivpt.visual/
+           added Osaki-san's visual plot, but not as standard version
+
+010124 WEH incom/sincom.f
+           boss/newlg.f
+           rtelb/rte_rawt.c
+           rtelg/rte_fixt.c
+           fmset/fmset.c
+           setcl/setcl.c
+           add NTP time option
+
+010124 WEH rtelb/rte_cmpt.c
+           make computer time really computer time for fmset
+
+010126 WEH ddout/ddout.c
+           ddout/Makefile
+           control/fserr.ctl
+           control/fscmd.ctl
+           boss/bwork.f
+           implement TNX command
+
+010201 WEH boss/bwork.f
+           prevent TNX from procs, scheds, and time-list
+
+010201 WEH inject_snap/
+           msg/msg
+           rename of old prgin to inject_snap
+
+010201 WEH fs.prompt/
+           created from P. Harbison's tk.prompt
+
+010201 WEH include/fscom.h
+           quikr/get_att.f
+           quikr/ifdis.f
+010202 WEH newlb/prog.c
+           quikr/if3dis.f
+           control/fserr.ctl
+           quikr/ifd.f
+           quikr/Makefile
+           quikr/get_at3.f
+           include/fscom_dum.i
+           quikr/if3.f
+           default if attenuators
+
+010202 WEH incom/sincom.f
+           check(22...23) i3 and rx initialized properloy now
+
+010206 WEH fmset/fmset.c
+           M4 synch also causes an auto "setcl offset"
+
+010206 WEH ddout/ddout.c
+           TNX also effects sterp and erchk
+
+010206 WEH quikv/s2rec.c
+           eject only ejects selected drive
+           added eject,all to eject all
+
+010209 WEH fmset/fmset.c
+           don't run setcl for "none" model either
+
+010504 RDG Makefile
+           fsvue/fsvue
+           fsvue/fsvue_start
+           fsvue/vue_fshelp
+           fsvue/vue_fslog
+           fsvue/info.icon
+           fsvue/vlb.icon
+           fsvue/fsvue_logo.gif
+           name changed from arts 010111to fsvue.
+
+010529 RDG fs/fs.c
+           incom/incom.f
+           incom/sincom.f
+           control/fspgm.ctl
+           modified return conditions.
+           error returns from control file are returned and handled
+           properly.
+           ddout and fserr were pushed to the top of execute list. 
+
+010801 WEH incom/sincom.f
+           don't set log to station until opened
+
+010801 RDG tacd/tacd.c
+           don't report start-up config until station.log is opened
+
+010803 JQ  chekr/s2recstatus.c
+           fix chekr seg fault when tape stopped and shouldn't be
+
+010803 WEH quikr/party.f
+           control/fserr.ctl
+           add error for attempt to use second stack (3 digit track numbers)
+
+010803 HO  fivpt.visual/fivptplt.f
+           fivpt.visual/fivpt.f
+           remove old plots when fivpt begins new scans
+
+010809 WEH fivpt.visual/fivpt.f
+           remove error when closing plots on first run
+
+010816 WEH quikv/rec.c
+           quikv/rec_dec.c
+           fixed rec=feet and pass though error code proporly
+
+Version 9.4.122 010816
+
+010820 WEH include/params.h
+           include/params.i
+           boss/newlg.f
+           incom/equip.f
+           clib/k4pcalports_util.c
+           clib/k4repatch_util.c
+           clib/k4vcbw_util.c
+           st.default/control/equip.ctl
+           add k42b & k42c rack types
+
+010821 WEH include/params.i
+           fix k42b & k42c rack types
+
+010820 WEH ibcon/opbrd.c
+           ibcon/ibcon.f
+           add set_remote_enable option
+           add no_interface_clear_board option
+           add interface_clear_converter option
+
+010821 WEH ibcon/opbrd.c
+           ibcon/opdev.c
+           ibcon/wrdev.c
+           ibcon/rddev.c
+           ibcon/statbrd.c
+           ibcon/rspdev.c
+           ibcon/iclrdev.c
+           ibcon/sib.c
+           ibcon/ifclr.c
+           ibcon/Makefile
+           fix to compile under FS Linux 4
+
+010822 WEH tacd/Makefile
+           fsvue/Makefile
+           erchk/erchk.c
+           remove extra /fs/ in include and library paths
+
+010822 PB  pfmed/matchl.f
+           pfmed/cmdcp.c
+           pfmed/Makefile
+           pfmed/scanp.f
+           pfmed/ldsrt.f
+           pfmed/ffmp.f
+           pfmed/fed.f
+           pfmed/readpl.c
+           pfmed/pfmed.f
+           add readline capability
+
+010823 PB  pfmed/Makefile
+           pfmed/scanp.f
+           pfmed/ldsrt.f
+           pfmed/ffmp.f
+           pfmed/fed.f
+           pfmed/readpl.c
+           pfmed/pfmed.f
+           clean-up, fix control-D
+
+010823 WEH st.default/control/ibad.ctl
+           add example keywords
+
+010824 WEH pfmed/readpl.c
+           pfmed/pfmed.f
+           fix free-ing cmdstr and use of edit and edit,
+
+Version 9.4.123 010826
+
+010827 WEH ibcon/opbrd.c
+
+Version 9.4.124 010827
+
+010828 WEH st.default/control/ibad.ctl
+           add example keywords as comments
+
+010830 WEH st.default/proc/vstation.prc
+           st.default/proc/v2station.prc
+           correct use of form=* for check procedures & initi
+
+010831 PB  pfmed/ffmp.f
+           pfmed/sortp.f
+           pfmed/ldsrt.f
+           pfmed/readpl.c
+           pfmed/sortq.f
+           pfmed/pfmed.f
+           clean-up
+
+010903 PB  pfmed/pfmed.f
+           pfmed/ffmp.f
+           more clean-up
+
+010904 PB  pfmed/Makefile
+           pfmed/ffm.f
+
+010913 RG  fsvue/vue_fsmail
+           vue_fsmail is a tcl/tk function for sending mail.
+
+010914 JQ  pfmed/readpl.c
+           final fix for tab completion
+
+010914 RG  fsvue/fsvue_start
+           fsvue_start has added the vue_fsmail item under
+           [Execute] button.
+
+010917 PB  pfmed/readpl.c
+           add help function
+
+010918 WEH control/fscmd.ctl
+           make ifadjsut work for only Mark III and Mark IV racks
+
+010918 WEH fivpt.visual/README
+           created with usage tips
+
+010920 WEH control/fscmd.ctl
+           make ifadjsut work for only Mark III and Mark IV racks
+
+Version 9.5.0 010920

@@ -11,16 +11,16 @@
 
 #define MAX_OUT 256
 
-void bit_density_dis(command,itask,ip)
+void bit_density_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       int lclc;
       int count, i;
       char output[MAX_OUT];
 
-      lclc=shm_addr->bit_density;
+      lclc=shm_addr->bit_density[indx];
 
    /* format output buffer */
 

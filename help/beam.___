@@ -1,0 +1,61 @@
+               beam - set beamsize for flux command
+
+Syntax:     beam1=angle
+          beam2=angle
+          beam3=angle
+          beama=angle
+          beamb=angle
+          beamc=angle
+          beamd=angle
+          beam5=angle
+          beam6=angle
+
+Response:   beam1/angle
+          beam2/angle
+          beam3/angle
+          beama/angle
+          beamb/angle
+          beamc/angle
+          beamd/angle
+          beam5/angle
+          beam6/angle
+
+
+Settable parameters:
+angle     full-width half maximum beam size, displayed in decimal
+          degrees of arc.
+
+Monitor-only parameters: none
+
+Comments:
+The beam1/2/3 and beama/b/c/d commands are applicable for Mark
+III (and Mark IV)  and VLBA (and VLBA4) systems, respectively.
+The command pairs beam1/a, beam2/b, and beam3/c are synonymous.
+
+The beam size for the sky frequency for each IF channel may be
+specified with these commands. The commands flux1/2/3 and
+fluxa/b/c/d use the sizes specified as beam1/2/3 and beama/b/c/d,
+respectively, to calculate the apparent flux.
+
+There is no default for the beam size unless the appropriate IF
+distributor command (ifd or if3 for Mark III (and Mark IV)
+systems, ifab or ifcd for VLBA (and VLBA4) systems) and the lo
+commands have been issued.  There is no default for beam5/6, see
+below for more detail. If these commands have been issued, then
+the beam size will default to the beam size calculated from the
+appropriate LO frequencies and the antenna diameter found in the
+antenna.ctl control file. The formula is:
+
+            beam size (radians) = 1.05*c/(freq*diaman)
+
+Issuing a beamx=... command will change the calculated values of
+the fluxx command to invalid quantities. Reissue a correct
+fluxx=... command to recalculate fluxes.
+
+The beam5/6 commands are used for station specific detectors u5
+and u6. They do not correspond to a standard IF channel, but
+instead to whatever IF is being supplied to the corresponding
+station detector.
+
+
+

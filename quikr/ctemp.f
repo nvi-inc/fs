@@ -52,7 +52,7 @@ C
 990   ip(1) = 0 
       ip(2) = 0 
       ip(3) = ierr
-      call char2hol('qc',ip(4),1,2)
+      call char2hol('qh',ip(4),1,2)
       return
 C 
 C     5. Return the cal temp for display

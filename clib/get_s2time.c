@@ -22,8 +22,8 @@ long ip[5];                          /* ipc array */
   ibool validated;
 
   ini_rclcn_req(&reqbuf);
-  add_rclcn_delaym_read(&reqbuf,"rc");
-  add_rclcn_time_read(&reqbuf,"rc");
+  add_rclcn_delaym_read(&reqbuf,"r1");
+  add_rclcn_time_read(&reqbuf,"r1");
   end_rclcn_req(ip,&reqbuf);
 
   skd_run("rclcn",'w',ip);

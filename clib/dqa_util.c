@@ -79,7 +79,10 @@ float rate;
 
     switch (*count) {
       case 1:
-	sprintf(output,"%4s",code2bs(lcl->a.bbc,type));
+	if(shm_addr->equip.rack==VLBA)
+	  sprintf(output,"%4s",code2bs(lcl->a.bbc,type));
+	else /*VLBA4*/
+	  sprintf(output,"%6s",code2bsfo(lcl->a.bbc));
         break;
       case 2:
         sprintf(output,"%2.2d",lcl->a.track);
@@ -103,7 +106,10 @@ float rate;
         output[strlen(output)-1]='\0';
         break;
       case 8:
-	sprintf(output,"%4s",code2bs(lcl->b.bbc,type));
+	if(shm_addr->equip.rack==VLBA)
+	  sprintf(output,"%4s",code2bs(lcl->b.bbc,type));
+	else /*VLBA4*/
+	  sprintf(output,"%6s",code2bsfo(lcl->b.bbc));
         break;
       case 9:
         sprintf(output,"%2.2d",lcl->b.track);

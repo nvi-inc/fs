@@ -1,2 +1,2 @@
-*device(2 chars) address (IP or host.domain)
-*rc               0.0.0.0
+*device(2 chars) address (IP not host.domain)
+*r1               0.0.0.0

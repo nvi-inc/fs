@@ -11,6 +11,7 @@ C History:
 C 960527 nrv New.
 C 970114 nrv Change 8 to max_sorlen
 C 971003 nrv Suppress messages from the IAU name checker
+C 990606 nrv Store IAU name.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -106,6 +107,7 @@ C
         ENDIF
 C
         IDUM = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
+        IDUM = ICHMV(LIAUNA(1,NCELES),1,liau,1,max_sorlen)
         IF  (iep.NE.2000) THEN  !"convert to J2000"
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
             call prefr(rarad,decrad,1950,r,d)

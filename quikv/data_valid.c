@@ -9,14 +9,14 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void data_valid(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ichold, i, count;
+      int ilast, ierr, ichold, i, count, indx;
       int verr;
       char *ptr;
       struct rclcn_req_buf buffer;        /* rclcn request buffer */
@@ -34,8 +34,10 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       ichold= -99;                    /* check vlaue holder */
+ 
+      indx=itask-1;
 
-      kS2drive=shm_addr->equip.drive == S2;
+      kS2drive=shm_addr->equip.drive[indx] == S2;
 
       if(kS2drive)
 	ini_rclcn_req(&buffer);
@@ -45,14 +47,14 @@ long ip[5];                           /* ipc parameters */
 	  add_rclcn_user_dv_read(&buffer,device);
 	  goto rclcn;
 	} else {
-	  data_valid_dis(command,ip);
+	  data_valid_dis(command,ip,indx);
 	  return;
 	}
       } else if (command->argv[0]==NULL)
 	goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
         if (*command->argv[0]=='?') {
-          data_valid_dis(command,ip);
+          data_valid_dis(command,ip,indx);
           return;
          }
 
@@ -75,7 +77,7 @@ parse:
 	shm_addr->check.s2rec.check=0;
       }
       
-      memcpy(&shm_addr->data_valid,&lcl,sizeof(lcl));
+      memcpy(&shm_addr->data_valid[indx],&lcl,sizeof(lcl));
 
       skd_run("pcald",'w',ip);
 
@@ -105,7 +107,7 @@ rclcn:
 	return;
       }
 
-      data_valid_dis(command,ip);
+      data_valid_dis(command,ip,indx);
       return;
 
 error:

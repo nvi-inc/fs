@@ -2,6 +2,7 @@ C@IDAY0
 
       INTEGER FUNCTION IDAY0 ( IYEAR , MONTH )
       implicit none ! nrv 930225
+C 990325 nrv Year 2000 IS a leap year. Remove the test for mod 2000.
       integer iyear,month
 C     Get # elapsed days in year to date  TAC 760102 
 C 
@@ -22,7 +23,7 @@ C-----MAXYR = MAXIMUM DAYS IN IYEAR:
      *     -     ( ( MOD ( IYR        ,    4 ) + 3 ) /    4 ) 
      *     -     ( ( MOD ( IYR +   99 ,  100 ) + 1 ) /  100 ) 
      *     +     ( ( MOD ( IYR +  399 ,  400 ) + 1 ) /  400 ) 
-     *     -     ( ( MOD ( IYR + 1999 , 2000 ) + 1 ) / 2000 ) 
+C    *     -     ( ( MOD ( IYR + 1999 , 2000 ) + 1 ) / 2000 ) 
 C                                       WHEW! 
 C 
 C-----TEST MONTH: 

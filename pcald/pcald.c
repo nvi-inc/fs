@@ -24,7 +24,7 @@ main()
 {
   long ip[5];
   struct pcald_cmd pcald;
-  struct data_valid_cmd data_valid;
+  struct data_valid_cmd data_valid[2];
   int i,j,k,l,idata;
   char buff[120];
 
@@ -56,11 +56,13 @@ main()
 #ifdef TESTX
   printf(" not stopped\n");
 #endif
-  if(pcald.continuous==0 && data_valid.user_dv ==0)
+  if(pcald.continuous==0 &&
+     (data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0))
     goto loop;
 
 #ifdef TESTX
-  printf(" continuous %d data_valid %d\n",pcald.continuous,data_valid.user_dv);
+  printf(" continuous %d data_valid[0] %d data_valid[1] %d\n",
+	 pcald.continuous,data_valid[0].user_dv,data_valid[1].user_dv);
 #endif
 
   idata=0;
@@ -128,7 +130,9 @@ main()
 		  pcald.integration,pcald.bits,pcald.freqs[i/16][i%16][j],
 		  0.0,0.0,0.0,0.0); /* amp, phase, rms amp, rms phase */
 	}
+#ifdef TESTY
 	logit(buff,0,NULL);
+#endif
       }
     }
   }

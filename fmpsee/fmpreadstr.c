@@ -7,7 +7,7 @@ FILE **dcb;
 char *cbuf;
 int *error,len;
 {
-  int clen,i;
+  int clen,i,s;
   char *c;
 
   cbuf[0]=0;
@@ -16,9 +16,20 @@ int *error,len;
   clen=strlen(cbuf);
   if(clen>0 && cbuf[clen-1]=='\n') {
     cbuf[--clen]=0;
+  } else if(clen>0) {
+    while('\n' !=(s = fgetc(*dcb)))
+      if(s==EOF) {
+	c=NULL;
+	break;
+      }
   }
 
   if(c == NULL) {
+    if(feof(*dcb)) {
+      *error = 0;
+    } else {
+      *error=-1;
+    }
     if(clen 	== 0) {
       for (i=clen;i<len;i++)
 	cbuf[i]=' ';

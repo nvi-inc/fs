@@ -1,0 +1,113 @@
+               form - formatter setup (VLBA racks)
+
+Syntax:     form=mode,rate,fan,barrel,dqa
+          vform=mode,rate,fan,barrel,dqa
+
+Response:   form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat
+            ,sfwstat,intstat
+          vform/mode,rate,fan,barrel,rev,genstat,mcbstat,
+          hdwstat,sfwstat,intstat
+
+
+Settable Parameters:
+mode      The recording mode, reboot (see below) to reboot the
+          CPU, or configure to cause the formatter to perform a
+          hardware configuration. Choices for the mode are prn,
+          v, m, a, b, b1, b2, c, c1, c2, and dn, where n=1 to 28.
+          No default. Modes prn, m, a, b, b1, b2, c, c1, c2, and
+          dn imply Mark III data replacement format. prn selects
+          pseudo random noise to be sent to all tracks including
+          system tracks. Modes a, b, and c correspond to the
+          traditional Mark III modes. Mode dn is the same as
+          Mark III mode D, where n corresponds to which Mark III
+          track that would be written. Mode v implies VLBA non-
+          data replacement format. Modes b1 and c1 are the same
+          as the forward passes (even VLBA recorder heads) of
+          modes b and c respectively; b2 and c2 for reverse
+          passes (odd VLBA recorder heads). Modes m and v use the
+          sampler track assignments and formatter track enables
+          specified by the trackform and tracks commands. The
+          system tracks are disabled except in prn mode.
+rate      Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2,
+          4, 8, 16, and 32. Default 4. For Nyquist sampling this
+          selection must be twice the bandwidth set-up used in
+          the bbc commands
+fan       The fan-in or fan-out ratio. Choices are 1:4, 1:2, 1:1,
+          2:1, and 4:1, where on a per channel or track basis,
+          the number before the colon is the number of sampled
+          channels and the number after is the number of tracks.
+          Other, not commonly used, choices are available: x0,
+          x1, and  x7. Default 1:1.
+barrel    Barrel-roll mode. Choices are: off, 8:1, and 16:1,
+          where the number before the colon is the number of
+          tracks to roll-over and the number after is the number
+          of tracks to step per frame. Other, not commonly used,
+          choices are available: 8:2, 8:4, off4, 16:2, and 16:4.
+          Default off.
+dqa       DQA module recorder input select: 1 or 2. Default is
+          the recorder specified by the select command or
+          whichever recorder is installed if there is only or
+          recorder 1 if select command hasn't been used to
+          specify a recorder yet.
+
+Monitor-only Parameters:
+rev       Formatter firmware revision number, displayed as x.xx.
+genstat   General status, ok or the hex value of hex address 20.
+mcbstat   Communications status, ok or the hex value of hex
+          address 21.
+hdwstat   Hardware status, ok or the hex value of hex address 22.
+sfwstat   Software status, ok or the hex value of hex address 23.
+intstat   Internal status, ok or the hex value of hex address 24.
+
+Comments:
+MCB functions are available. See section 1.0 of this manual.
+
+The formatter CPU can be reset manually. After manual reset you
+must issue the command form=addr to re-initialize the module.
+
+CAUTION: Issuing this command with an equals, =, causes a
+formatter reconfiguration which will put the formatter into a
+busy state for up to 8 seconds.
+
+ rate and fan combinations that imply more than 8 Mbits/sec of
+data per tape track or less than 0.25 Mbits/second of data per
+tape track are not permitted. The tape clock rate is set to be
+9/8 of the implied data bit rate per track for Mark III modes,
+and 9.072/8 of the impled bit-rate per track in VLBA mode.
+
+The VLBA formatter clock  is set with the fmset program. If the
+formatter time is set or re-synched, the fmset program will
+automatically reset the FS time if the time model in time.ctl is
+offset or rate. If you change the time in some other way and the
+time model in time.ctl is offset or rate,  issue the command
+
+                      sy=run setcl offset &
+
+to reset the Field System time.
+
+In VLBA mode the serial status register is loaded with the
+hardware ID (from equip.ctl) in the most significant byte and the
+micron position of the head is stored in BCD in the two least
+significant bytes; negative values are indicated by the highest
+order bit of these two bytes being turned on. In Mark III modes
+the hardware ID is placed in the second most significant byte of
+the serial status register.
+
+If the requested sampler track assignments and formatter track
+enables would imply use of only odd or even recorder tracks only
+and the head.ctl control files indicates that only even or odd
+tracks are to be used, the sampler assignments and enables are
+automatically mapped to the corresponding even or odd tracks. If
+both odd and even tracks are used and/or the head.ctl specifies
+all heads are to be used, no mapping takes place. The Mark III
+modes prn, a, b, c, dn assign samplers to and enable all the odd
+and even tracks required, so no mapping is required for these
+modes.
+
+The vform command is provided for use with all types of racks
+that use a VLBA DQA module for a decoder. The vform=... works
+with all racks types, including VLBA and VLBA4. The vform= 
+command must be used to specify the formatter tape clock if the
+rack type is not VLBA. The vdqa and vform comands are particular
+useful for writting rack independent procedures for stations that
+switch between VLBA and VLBA4 rack types.

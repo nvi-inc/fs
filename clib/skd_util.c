@@ -68,6 +68,7 @@ void skd_ini( key)
 key_t key;
 {
 struct skd_buf sched;
+int status;
 
 msqid = msgget( key, 0);
 
@@ -76,14 +77,20 @@ if ( msqid == -1 ) {
     exit( -1);
 }
 
-while ( -1 !=
-msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
-       -LONG_MAX,IPC_NOWAIT|MSG_NOERROR));
-if( errno != ENOMSG){
-    perror("skd_ini: error cleaning skd queue\n");
-    exit(-1);
-}
+waitr:
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+                -LONG_MAX,IPC_NOWAIT|MSG_NOERROR);
 
+if (status != -1)
+  goto waitr;
+else {
+  if (errno == EINTR)
+    goto waitr;
+  else if (errno != ENOMSG) {
+    perror("skd_ini: error cleaning skd queue\n");
+    exit( -1);
+  }
+}
 }
 
 void skd_att( key)
@@ -111,7 +118,7 @@ void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
 long	ip[5];
 {
-int	i, n;
+int	status, i, n;
 struct skd_buf sched;
 
 sched.mtype=mtype(name);
@@ -128,20 +135,33 @@ n=strlen(arg)+1;
 n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
 strncpy(sched.messg.arg,arg,n);
 
-if ( -1 == msgsnd(msqid, (struct msgbuf *) &sched,
-		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1),
-		  0 ) ) {
-       fprintf( stderr,"skd_run: msqid %d,",msqid);
-        perror(" sending schedule message");
-        exit( -1);
+waits:
+status = msgsnd(msqid, (struct msgbuf *) &sched,
+		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1), 0 );
+
+if (status == -1) {
+  if(errno == EINTR)
+    goto waits;
+  else {
+    fprintf( stderr,"skd_run: msqid %d,",msqid);
+    perror(" sending schedule message");
+    exit( -1);
+  }
 }
 
 if(w != 'w') return;
 
-if(-1== msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
-	       sched.messg.rtype, 0)){
-        perror("skd_run: receiving return message");
-        exit( -1);
+waitr:
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
+		 sched.messg.rtype, 0);
+
+if(status == -1) {
+  if(errno == EINTR)
+    goto waitr;
+  else {
+    perror("skd_run: receiving return message");
+    exit( -1);
+  }
 }
 
 for (i=0;i<5;i++)
@@ -198,14 +218,19 @@ skd_end(ip);
 type=mtype(name);
 s1=memcpy(prog_name,name,5);
 
+waitr:
 status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		type, IPC_NOWAIT);
-   
-if (status == -1 && errno == ENOMSG) {
-  return 0;
-} else if ( status == -1 ) {
-  perror("skd_wait: receiving message");
-  exit( -1);
+
+if(status == -1) {
+  if(errno == EINTR)
+    goto waitr;
+  else if (errno == ENOMSG)
+    return 0;
+  else {
+    perror("skd_chk: receiving message");
+    exit( -1);
+  }
 }
 
 for (i=0;i<5;i++)
@@ -251,20 +276,23 @@ if(centisec !=0) {
 waitr:
 status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		type, 0);
+
 if (centisec !=0) {
    rte_alarm((unsigned) 0);
    if(signal(SIGALRM,SIG_DFL) == SIG_ERR){
      fprintf( stderr,"skd_wait: setting default signals\n");
      exit(-1);
    }
+  centisec=0;
 }
-   
-if (status == -1 && centisec!=0 && errno == EINTR) {
-    centisec=0;
+
+if (status == -1) {
+  if(errno == EINTR)
     goto waitr;
-} else if ( status == -1 ) {
-        perror("skd_wait: receiving message");
-	exit( -1);
+  else {
+    perror("skd_wait: receiving message");
+    exit( -1);
+  }
 }
 
 for (i=0;i<5;i++)
@@ -284,7 +312,7 @@ argc=-1;
 void skd_end(ip)
 long ip[5];
 {
-  int i;
+  int i, status;
   struct skd_buf sched;
 
   if( rtype != 0) {
@@ -292,10 +320,16 @@ long ip[5];
       sched.messg.ip[i]=ip[i];
     }
     sched.mtype=rtype;
-    if ( -1 == msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
-		      0 )) {
-      perror("skd_wait: sending termination message");
-      exit( -1);
+  waits:
+    status = msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		      0 );
+    if (status == -1) {
+      if(errno == EINTR)
+	goto waits;
+      else {
+	perror("skd_end: sending termination message");
+	exit( -1);
+      }
     }
     rtype = 0;
   }
@@ -313,13 +347,15 @@ type=mtype(name);
 waitr:
 status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		type, IPC_NOWAIT);
-   
-if (status == -1 && errno == EINTR) goto waitr;
-else if ( status == -1 && errno != ENOMSG) {
-        perror("skd_wait: receiving message");
-	exit( -1);
-} else if (status != -1) goto waitr;
 
+if(status!=-1)
+  goto waitr;
+else if(errno == EINTR)
+  goto waitr;
+else if (errno != ENOMSG) {
+  perror("skd_clr: receiving message");
+  exit( -1);
+}
 }
 
 int skd_rel( )

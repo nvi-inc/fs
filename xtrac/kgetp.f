@@ -1,10 +1,9 @@
       logical function kgetp(lut,idcb,idcbs,ipbuf,jbuf,il,
      +   iedit,widmin,widmax,pkrlim,laxis,lant)
 C
-      double precision das2b
       integer idcb(1)
       integer*2 jbuf(1),laxis(2),lant(4)
-      logical kfmp,kfild,kreof,kopn
+      logical kfild,kreof,kopn
       character*(*) ipbuf
       integer fmpread, ichcm_ch
 C

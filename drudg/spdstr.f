@@ -22,10 +22,10 @@ C OUTPUT:
       integer nspd ! number of characters in lspd, -1 if no match
 
 C Local
-      integer i,maxspd
+      integer i,maxspd,il
       real sp(23)
       character*8 csp(23)
-      integer ichmv_ch
+      integer ichmv_ch,trimlen
 
 C INITIALIZED:
 C     Organized according to types:
@@ -62,7 +62,8 @@ C       320
       enddo
       if (i.le.maxspd) then ! match
         call ifill(lspd,1,8,oblank)
-        nspd = ichmv_ch(lspd,1,csp(i))-1
+        il=trimlen(csp(i))
+        nspd = ichmv_ch(lspd,1,csp(i)(1:il))-1
       else ! error
         nspd=-1
       endif

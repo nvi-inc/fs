@@ -9,14 +9,12 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
-
 void tape(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, indx, ichold, i, count;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
@@ -34,16 +32,20 @@ long ip[5];                           /* ipc parameters */
 
       ini_req(&buffer);
 
-      ind=itask-1;                    /* index for this module */
+      indx=itask-1;                    /* index for this module */
 
-      memcpy(request.device,device,2);    /* device mnemonic */
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       if (command->equal != '=') {            /* read module */
          request.type=1;
          request.addr=0xb6; add_req(&buffer,&request);
          request.addr=0x30; add_req(&buffer,&request);
          request.addr=0x33; add_req(&buffer,&request);
- 	 if (shm_addr->equip.drive_type != VLBA2) {
+ 	 if (!(shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)) {
 	   request.addr=0x57; add_req(&buffer,&request);
 	 }
          request.addr=0x72; add_req(&buffer,&request);
@@ -54,7 +56,7 @@ long ip[5];                           /* ipc parameters */
       else if (command->argv[0]==NULL) goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
         if (*command->argv[0]=='?') {
-          tape_dis(command,itask,ip);
+          tape_dis(command,itask,ip,indx);
           return;
          }
 
@@ -66,15 +68,15 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=tape_dec(&lcl,&count, ptr);
+        ierr=tape_dec(&lcl,&count, ptr,indx);
         if(ierr !=0 ) goto error;
       }
 
 /* all parameters parsed okay, update common */
 
-      memcpy(&shm_addr->lowtp,&lcl,sizeof(lcl));
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
+      memcpy(&shm_addr->lowtp[indx],&lcl,sizeof(lcl));
+      ichold=shm_addr->check.rec[indx];
+      shm_addr->check.rec[indx]=0;
       
 /* format buffers for mcbcn */
       
@@ -94,14 +96,14 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-         shm_addr->check.vklowtape = TRUE;
+         shm_addr->check.vklowtape[indx] = TRUE;
          if (ichold >= 0)
             ichold=ichold % 1000 + 1;
-         shm_addr->check.rec=ichold;
+         shm_addr->check.rec[indx]=ichold;
       }
 
       if(ip[2]<0) return;
-      tape_dis(command,itask,ip);
+      tape_dis(command,itask,ip,indx);
       return;
 
 error:

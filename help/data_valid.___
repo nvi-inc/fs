@@ -1,0 +1,28 @@
+               data_valid - data valid flag control
+
+
+Syntax:     data_valid=record,playback
+
+Response:   data_valid/record,playback
+
+
+Settable parameters:
+record      Flag is on (default) or off.
+playback    Playback enable is use (default) or ignore. S2
+            recorders only.
+
+Monitor-only parameters: None.
+
+Comments:
+For S2 recorders, this command can be used to set and monitor the
+value of the data valid and playback enable flags written to the
+tape.
+
+For non-S2 recorders, this command just sets an internal software
+flag in the FS indicating that data is valid. Depending on how
+the pcald has been set-up this may turn automatic phase-cal
+extraction on or off.
+
+For all equipment types, this command is used to indicate in the
+log when the data is expected to valid based on the slewing
+algorithms of the scheduling program.

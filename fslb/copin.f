@@ -30,13 +30,10 @@ C  SUBROUTINE INTERFACE:
 C     CALLING SUBROUTINES: this is a Field System utility
 C     CALLED SUBROUTINES: IPGST, IGID, EXEC
 C
-      logical kboss
 C
 C  PROGRAM STRUCTURE
 C
 C     1. Check that BOSS is active.  If not, just terminate.
-C
-cxx      if (.not.kboss()) return
 C
 C     3. The Field System is probably running.  Send the message into
 C     the OPRIN input class.

@@ -1,0 +1,15 @@
+          label - enter Volume Serial Number (K4 drives)
+
+Syntax:     label=vsn
+
+Response:   label/vsn
+
+
+Settable Parameters:
+vsn     8 character tape Volume Serial Number (VSN), no default
+
+Comments:
+No check is made to ensure assure label accuracy.
+
+If a schedule is halted when the label is entered, its execution
+will continue.

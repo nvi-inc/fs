@@ -43,6 +43,18 @@ long ip[5];                           /* ipc parameters */
 	  skd_run("pcald",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
           return;
+	} else if(0==strcmp(command->argv[0],"display_on")) {
+	  int val;
+	  memcpy(&val,"pn",2);
+	  cls_snd(&shm_addr->iclbox,0,0,0,val);
+	  ip[0]=ip[1]=ip[2]=0;
+	  return;
+	} else if(0==strcmp(command->argv[0],"display_off")) {
+	  int val;
+	  memcpy(&val,"pf",2);
+	  cls_snd(&shm_addr->iclbox,0,0,0,val);
+	  ip[0]=ip[1]=ip[2]=0;
+	  return;
 	}
       }
 /* if we get this far it is a set-up command so parse it */

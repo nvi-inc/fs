@@ -10,7 +10,7 @@ C
       real latpos,lonpos,ltrchi,lnrchi
       real ltpar,lnpar,ltliof,lnliof
       external fgaus
-      logical kbreak,kon
+      logical kbreak,kon,rn_test
 C
       dimension tim(31), temp(31), off(31), tmplin(4), timlin(4)
       dimension ltpar(5), eltpar(5), lnpar(5), elnpar(5),it(6)
@@ -28,7 +28,7 @@ C       LAXFP, CALFP, LDEVFP, NREPFP, FREQFP, INTPFP, STEPFP, ANGLFP
 C 
 C       ADDITONALLY, CHECK THE CALLED SUBROUTINES 
 C 
-      data ftry/20/,tol/1e-3/,nwait/60/,lwho/2hfp/
+      data ftry/20/,tol/1e-3/,nwait/120/,lwho/2hfp/
       data nmb/5/,ierr/0/,vfivpt/1.00/,isbuf/80/,ntsys/5/ 
 C
       call putpname('fivpt')
@@ -89,7 +89,7 @@ C
 C     WAIT TO ACQUIRE SOURCE
 C 
       nwt=nwait 
-cxx      if (ipgst(6Haquir ).le.0) nwt=300  
+      if(.not.rn_test('aquir')) nwt=450
       call onsor(nwt,ierr)
       if (ierr.ne.0) goto 80010 
       kon=.true.
@@ -114,19 +114,26 @@ C
 C 
 C   1. Get System Temperature OFF source
 C 
-      call offco(5.0*bw,azof,elof,azt,elt,ierr) 
-      if (ierr.ne.0) goto 80010 
+      if(nptsfp.gt.0) then
+         call offco(5.0*bw,azof,elof,azt,elt,ierr) 
+         if (ierr.ne.0) goto 80010 
+C     
+         call gooff(azosav+azof,elosav+elof,'azel',nwait*2,ierr)
+         if (ierr.ne.0) goto 80010
+C     
+         call tsys(temps,sigts,tpia,tima,vbase,vslope,ntsys,rut,ierr)
+         if (ierr.ne.0) goto 80010
 C
-      call gooff(azosav+azof,elosav+elof,'azel',nwait*2,ierr)
-      if (ierr.ne.0) goto 80010
+         call wtsys(temps,sigts,azt,elt,ntsys,lbuf,isbuf)
 C
-      call tsys(temps,sigts,tpia,tima,vbase,vslope,ntsys,rut,ierr)
-      if (ierr.ne.0) goto 80010
-C
-      call wtsys(temps,sigts,azt,elt,ntsys,lbuf,isbuf)
-C
-      call gooff(azosav,elosav,'azel',-1,ierr)
-      if (ierr.ne.0) goto 80010
+         call gooff(azosav,elosav,'azel',-1,ierr)
+         if (ierr.ne.0) goto 80010
+      else
+         vslope=1.0
+         vbase=0.0
+         temps=0.0
+         sigts=0.0
+      endif
 C
 C    MAIN LOOP
 C
@@ -146,14 +153,14 @@ C   2.Latitude Scan
 C 
       bstep=stepfp*bw
       steplt=bstep
-      start= latosv-float((nptsfp/2))*bstep
+      start= latosv-float((abs(nptsfp)/2))*bstep
       lonoff=lonosv
 C
-      if (nptsfp.ge.5) goto 90
+      if (abs(nptsfp).ge.5) goto 90
 C
 C  GET FIRST LINEARITY POINT
 C
-      ltliof=float(3+(nptsfp/2))*bstep
+      ltliof=float(3+(abs(nptsfp)/2))*bstep
       call gooff(lonoff,latosv-ltliof,caxfp,nwait*2,ierr)
       if (ierr.ne.0) goto 80010
 C
@@ -170,9 +177,9 @@ C
 C
 C DO SCAN
 C
-      do i=1,nptsfp
+      do i=1,abs(nptsfp)
         latoff=start+float(i-1)*bstep
-        if (i.eq.1.and.nptsfp.gt.3) then
+        if (i.eq.1.and.abs(nptsfp).gt.3) then
           call gooff(lonoff,latoff,caxfp,nwait*2,ierr)
         else
           call gooff(lonoff,latoff,caxfp,nwait,ierr)
@@ -191,7 +198,7 @@ C
 C 
 C   SECOND LINEARITY POINT
 C 
-      if (nptsfp.ge.5) goto 140 
+      if (abs(nptsfp).ge.5) goto 140 
       call gooff(lonoff,latosv+ltliof,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
       call volts(tpia,sig,tima,nmb,rut,ierr)    
@@ -205,24 +212,24 @@ C
 C 
 C    REMOVE LINEAR DRIFT
 C 
-      call unslp(tmplin,timlin,temp,tim,nptsfp,slope,const)  
+      call unslp(tmplin,timlin,temp,tim,abs(nptsfp),slope,const)  
 C 
 140   continue 
 C 
 C   3. FIT TO A GAUSSIAN
 C 
-      tmid=tim((nptsfp+1)/2) 
-      ltpar(5) = (temp(nptsfp)-temp(1))/(tim(nptsfp)-tim(1))
+      tmid=tim((abs(nptsfp)+1)/2) 
+      ltpar(5) = (temp(abs(nptsfp))-temp(1))/(tim(abs(nptsfp))-tim(1))
       ltpar(4) = temp(1)+ltpar(5)*(tmid-tim(1)) 
-      if (nptsfp.lt.5) ltpar(4)=0.0
-      if (nptsfp.lt.5) ltpar(5)=0.0
+      if (abs(nptsfp).lt.5) ltpar(4)=0.0
+      if (abs(nptsfp).lt.5) ltpar(5)=0.0
       eltpar(4)=0.0 
       eltpar(5)=0.0 
 C 
       tim(1)=tim(1)-tmid 
       tmax=temp(1)-(ltpar(4)+ltpar(5)*tim(1))
       imax=1 
-      do 150 i=2,nptsfp
+      do 150 i=2,abs(nptsfp)
         tim(i)=tim(i)-tmid
         ti=temp(i)-(ltpar(4)+ltpar(5)*tim(i)) 
         if (tmax.ge.ti) goto 150  
@@ -235,17 +242,17 @@ C
       ltpar(3) = bw 
 C 
       npar=3
-      if (nptsfp.ge.5) npar=5
-      call fit2(off,temp,tim,ltpar,eltpar,nptsfp,npar,tol,ftry,fgaus, 
-     +          ltrchi,ierr)
+      if (abs(nptsfp).ge.5) npar=5
+      call fit2(off,temp,tim,ltpar,eltpar,abs(nptsfp),npar,tol,ftry,
+     +     fgaus,ltrchi,ierr)
 C 
-      if (nptsfp.lt.5) ltpar(4)=const
-      if (nptsfp.lt.5) ltpar(5)=slope
+      if (abs(nptsfp).lt.5) ltpar(4)=const
+      if (abs(nptsfp).lt.5) ltpar(5)=slope
 C 
       call fitot('latfit',ltpar,ierr,lbuf,isbuf)
       call errot('laterr',eltpar,ltrchi,lbuf,isbuf) 
 C 
-      if (ltpar(2).gt.off(1).and.ltpar(2).lt.off(nptsfp).and.    
+      if (ltpar(2).gt.off(1).and.ltpar(2).lt.off(abs(nptsfp)).and.    
      + ierr.gt.0 ) ilat=1   
       difflt=abs(ltpar(2)-latosv) 
       if (ilat.eq.1) latosv = ltpar(2)   
@@ -256,14 +263,14 @@ C   4. SCAN IN LONGITUDE
 C 
       bstep=stepfp*bw/coslat
       stepln=bstep  
-      start= lonosv-float((nptsfp/2))*bstep 
+      start= lonosv-float((abs(nptsfp)/2))*bstep 
       latoff=latosv 
 C 
-      if (nptsfp.ge.5) goto 190 
+      if (abs(nptsfp).ge.5) goto 190 
 C 
 C   GET THIRD LINEARITY POINT 
 C 
-      lnliof=float(3+(nptsfp/2))*bstep
+      lnliof=float(3+(abs(nptsfp)/2))*bstep
       call gooff(lonosv-lnliof,latoff,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
       call volts(tpia,sig,tima,nmb,rut,ierr)    
@@ -278,9 +285,9 @@ C
 C 
 C  DO SCAN
 C 
-      do i=1,nptsfp 
+      do i=1,abs(nptsfp) 
         lonoff=start+float(i-1)*bstep
-        if (i.eq.1.and.nptsfp.gt.3) then
+        if (i.eq.1.and.abs(nptsfp).gt.3) then
           call gooff(lonoff,latoff,caxfp,nwait*2,ierr) 
         else
           call gooff(lonoff,latoff,caxfp,nwait,ierr) 
@@ -297,7 +304,7 @@ C
      +             lbuf,isbuf)   
       enddo
 C 
-      if (nptsfp.ge.5) goto 240 
+      if (abs(nptsfp).ge.5) goto 240 
 C 
 C   FOURTH LINEARITY POINT
 C 
@@ -314,7 +321,7 @@ C
 C 
 C    REMOVE LINEAR DRIFT
 C 
-      call unslp(tmplin(3),timlin(3),temp,tim,nptsfp,slope,const) 
+      call unslp(tmplin(3),timlin(3),temp,tim,abs(nptsfp),slope,const)
 C 
 240   continue 
 C 
@@ -338,18 +345,18 @@ C
 C 
 C   5. FIT TO A GAUSSIAN
 C 
-      tmid=tim((nptsfp+1)/2) 
-      lnpar(5) = (temp(nptsfp)-temp(1))/(tim(nptsfp)-tim(1))
+      tmid=tim((abs(nptsfp)+1)/2) 
+      lnpar(5) = (temp(abs(nptsfp))-temp(1))/(tim(abs(nptsfp))-tim(1))
       lnpar(4) = temp(1)+lnpar(5)*(tmid-tim(1)) 
-      if (nptsfp.lt.5) lnpar(4)=0.0
-      if (nptsfp.lt.5) lnpar(5)=0.0
+      if (abs(nptsfp).lt.5) lnpar(4)=0.0
+      if (abs(nptsfp).lt.5) lnpar(5)=0.0
       elnpar(4)=0.0 
       elnpar(5)=0.0 
 C 
       tim(1)=tim(1)-tmid 
       tmax=temp(1)-(lnpar(4)+lnpar(5)*tim(1))
       imax=1 
-      do 250 i=2,nptsfp
+      do 250 i=2,abs(nptsfp)
         tim(i)=tim(i)-tmid
         ti=temp(i)-(lnpar(4)+lnpar(5)*tim(i)) 
         if (tmax.ge.ti) goto 250  
@@ -362,12 +369,12 @@ C
       lnpar(3) = bw/coslat
 C 
       npar=3
-      if (nptsfp.ge.5) npar=5
-      call fit2(off,temp,tim,lnpar,elnpar,nptsfp,npar,tol,ftry,fgaus, 
-     +          lnrchi,ierr)
+      if (abs(nptsfp).ge.5) npar=5
+      call fit2(off,temp,tim,lnpar,elnpar,abs(nptsfp),npar,tol,ftry,
+     +     fgaus,lnrchi,ierr)
 C 
-      if (nptsfp.lt.5) lnpar(4)=const
-      if (nptsfp.lt.5) lnpar(5)=slope
+      if (abs(nptsfp).lt.5) lnpar(4)=const
+      if (abs(nptsfp).lt.5) lnpar(5)=slope
 C 
 C   CORRECT LON PARAMETERS AND ERRORS 
 C 
@@ -377,7 +384,7 @@ C
       call fitot('lonfit',lnpar,ierr,lbuf,isbuf)
       call errot('lonerr',elnpar,lnrchi,lbuf,isbuf)
 C
-      if (lnpar(2).gt.off(1).and.lnpar(2).lt.off(nptsfp).and.
+      if (lnpar(2).gt.off(1).and.lnpar(2).lt.off(abs(nptsfp)).and.
      + ierr.gt.0) ilon=1
       diffln=abs(lnpar(2)-lonosv)
       if (ilon.eq.1)  lonosv = lnpar(2)
@@ -389,13 +396,19 @@ C
       stoc=0.0
       aedts=0.0
       if (ilat.eq.1.and.ilon.eq.1.and.lnpar(1).gt.1e-6) then
-        stoc=lnpar(1)/calfp
-        if (fxfp_fs.gt.0.0) then
-          sefd=temps*(fxfp_fs/lnpar(1))
-          call fs_get_diaman(diaman)
-          ae=lnpar(1)*2.0*1.380662e0/(fxfp_fs*1e-3*DPI*(diaman/2.0)**2)
-          aedts=1000.*ae/temps
-        endif
+         if(nptsfp.lt.0) then
+            stoc=0.0
+         else
+            stoc=lnpar(1)/calfp
+         endif
+         if (fxfp_fs.gt.0.0) then
+            if(nptsfp.lt.0) temps=lnpar(4)
+            sefd=temps*(fxfp_fs/lnpar(1))
+            call fs_get_diaman(diaman)
+            ae=lnpar(1)*2.0*1.380662e0/
+     &           (fxfp_fs*1e-3*DPI*(diaman/2.0)**2)
+            aedts=1000.*ae/temps
+         endif
       endif
       call prfot(stoc,sefd,ae,aedts,lbuf,isbuf)
 C
@@ -411,6 +424,8 @@ C
       if (ilon.eq.1) savln2=lonosv
       call gooff(savln2,savlt2,caxfp,nwait*2,ierr)
       call offot(lonpos,latpos,lonosv,latosv,ilon,ilat,lbuf,isbuf)
+      call xoffot(lonpos,latpos,lonosv,latosv,ilon,ilat,
+     &     elnpar(2),eltpar(2),lbuf,isbuf)
       if (ierr.ne.0) call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
       goto 90000
 C

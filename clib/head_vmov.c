@@ -7,13 +7,14 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void head_vmov(ihead,idir,ispdhd,jm,ip)
+void head_vmov(ihead,idir,ispdhd,jm,ip,indxtp)
 int ihead;                     /* head 1-4 */
 int idir;                      /* direction (0|1 = SLOW|FAST) */
 int ispdhd;                    /* speed (0|1 = IN|OUT) */
 long jm;                       /* duration in units of 40 microseconds */
                                /* already limited to 16 bits by caller */
 long ip[5];                    /* ipc array */
+int indxtp;
 {
       struct req_buf buffer;           /* request buffer */
       struct req_rec request;          /* reqeust record */
@@ -21,15 +22,29 @@ long ip[5];                    /* ipc array */
       struct res_rec response;         /* respones record */
       struct tms tms_buff;
       long end;
+      int indx;
+
+      if(indxtp == 1) {
+	indx=0;
+      } else if(indxtp == 2) {
+	indx=1;
+      } else {
+	ip[2]=-505;
+	memcpy("q<",ip+4,2);
+	return;
+      }
 
       ini_req(&buffer);                /* initialize */
-      memcpy(request.device,DEV_VRC,2);
+      if(indx == 0)
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
       request.type=0;
 
       request.addr=0xC3; request.data=ihead & 0x3;   /* head */
       add_req(&buffer, &request);
 
-                                                          /* motion primitive */
+                                                         /* motion primitive */
       request.addr=0xCC; request.data=(idir & 0x1)<< 1 | (ispdhd & 0x1);
       add_req(&buffer, &request);
 
@@ -61,9 +76,10 @@ long ip[5];                    /* ipc array */
        rte_sleep( jm/250+2);    /* sleep at least as long at it might take */
 
        end=times(&tms_buff)+200;    /* give it 2 more seconds to complete*/
-       while(end>times(&tms_buff) && !motion_done(ip))
-           rte_sleep(10);
+       while(end>times(&tms_buff) && !motion_done(ip,indx))
+	;
        if(ip[2]<0) return;        /* error or still moving */
 
+       rte_sleep(3);
        return;                    /* okay */
 }

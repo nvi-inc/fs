@@ -1,4 +1,4 @@
-      subroutine repro4(ip)
+      subroutine repro4(ip,itask)
 C  set up reproduce for Mark IV
 C
 C   REPRO controls the reproduce tracks in the tape controller
@@ -54,6 +54,11 @@ C
 C  1. If we have parameters, then we are to set the TP.
 C     If no parameters, we have been requested to read the TP.
 C
+      if( itask.eq.2) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
       ichold = -99
       iclcm = ip(1)
       if (iclcm.eq.0) then
@@ -69,7 +74,7 @@ C                   If no parameters, go read device
       if (ieq.eq.nchar.or.cjchar(ibuf,ieq+1).ne.'?') goto 140
       ip(1) = 0
       ip(4) = o'77'
-      call repds4(ip,iclcm)
+      call repds4(ip,iclcm,indxtp)
       return
 C
 140   if (ichcm(ibuf,ieq+1,ltsrs,1,ilents).eq.0) goto 600
@@ -93,9 +98,10 @@ C                                     8 -> 160, 270
 C
 C  2.1 MODE, PARAMETER 1
 C
-      call fs_get_vacsw(vacsw)
-      call fs_get_vac4(vac4)
-      if(vacsw.eq.1.and.(vac4.lt.0.or.vac4.gt.2)) then
+      call fs_get_vacsw(vacsw,indxtp)
+      call fs_get_vac4(vac4,indxtp)
+      if(vacsw(indxtp).eq.1.and.
+     $     (vac4(indxtp).lt.0.or.vac4(indxtp).gt.2)) then
          ierr=-307
          goto 990
       endif
@@ -103,7 +109,7 @@ c
       ich = 1+ieq
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(iparm,1).ne.','.and.cjchar(iparm,1).ne.'*') goto 211
-      if (cjchar(iparm,1).eq.'*') iby = ibypas
+      if (cjchar(iparm,1).eq.'*') iby = ibypas(indxtp)
       if (cjchar(iparm,1).eq.',') iby = 1
 C                   Default to bypass.
       goto 220
@@ -119,7 +125,7 @@ C  2.2 TRACK A, PARAMETER 2
 C
 220   call gtprm(ibuf,ich,nchar,1,parm,ierr)
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 221
-      if (cjchar(parm,1).eq.'*') ita = itrakaus_fs
+      if (cjchar(parm,1).eq.'*') ita = itrakaus_fs(indxtp)
       if (cjchar(parm,1).eq.',') ita = 2
 C                   Default track is 1 for A
       goto 230
@@ -139,7 +145,7 @@ C  2.3 TRACK B, PARAMETER 3
 C
       call gtprm(ibuf,ich,nchar,1,parm,ierr)
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 231
-      if (cjchar(parm,1).eq.'*') itb = itrakbus_fs
+      if (cjchar(parm,1).eq.'*') itb = itrakbus_fs(indxtp)
       if (cjchar(parm,1).eq.',') itb = 3
 C                   Default for track B is 3
       goto 240
@@ -169,7 +175,7 @@ C
       ich = ichs
       call gtprm(ibuf,ich,nchar,2,parm,ierr)
       if (cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*') goto 242
-      if (cjchar(parm,1).eq.'*') ieq = ieq4tap
+      if (cjchar(parm,1).eq.'*') ieq = ieq4tap(indxtp)+1
 C  DEFAULT EQUALIZER IS 2 IF MODE IS READ OR DISABLE.
       if (cjchar(parm,1).eq.',') then
         if (iby.eq.1) then
@@ -205,7 +211,7 @@ C  2.5 BITRATE, PARAMETER 5
 C
       call gtprm(ibuf,ich,nchar,2,parm,ierr)
       if (cjchar(iparm,1).ne.','.and.cjchar(iparm,1).ne.'*') goto 251
-      if (cjchar(iparm,1).eq.'*') ibr = ibr4tap
+      if (cjchar(iparm,1).eq.'*') ibr = ibr4tap(indxtp)
       if (cjchar(iparm,1).eq.',') then
         if (ieq.eq.0) ibr = 3    !!! 4 Mb/s
         if (ieq.eq.1) ibr = 3    !!! 4 Mb/s
@@ -224,33 +230,37 @@ C
 C
 C  3. Now plant these values into COMMON.
 C
-300   call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18)
-      icheck(18) = 0
-      call fs_set_icheck(icheck(18),18)
-      itrakaus_fs=ita
-      itraka = ita
-      call fs_set_itraka(itraka)
+300   call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1)
+      icheck(18+indxtp-1) = 0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      itrakaus_fs(indxtp)=ita
+      itraka(indxtp) = ita
+      call fs_set_itraka(itraka,indxtp)
 C
-      itrakbus_fs=itb
-      itrakb = itb
-      call fs_set_itrakb(itrakb)
+      itrakbus_fs(indxtp)=itb
+      itrakb(indxtp) = itb
+      call fs_set_itrakb(itrakb,indxtp)
 C
-      ibypas = iby
-      ieq4tap = ieq
-      ibr4tap = ibr
+      ibypas(indxtp) = iby
+      ieq4tap(indxtp) = ieq
+      ibr4tap(indxtp) = ibr
 C
 C  4. Set up buffer for tape drive.  Send to MATCN.
 C
       ibuf(1) = 0
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       call rp2ma4(ibuf(3),iby,ieq,ita,itb)
 C
       iclass = 0
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      call fs_get_vac4(vac4)
-      call rpbr2ma4(ibuf(3),ibr,vac4)
+      call fs_get_vac4(vac4,indxtp)
+      call rpbr2ma4(ibuf(3),ibr,vac4(indxtp))
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 2
       goto 800
@@ -260,7 +270,12 @@ C  5. This is the read device section.
 C     Fill up three class buffers, one requesting ( data (mode -3),
 C     one  ) (mode -4), one ! (mode -1).
 C
-500   call char2hol('tp',ibuf(2),1,2)
+500   continue
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       ibuf(1) = -5
       call put_buf(iclass,ibuf,-4,'fs','  ')
@@ -274,7 +289,11 @@ C
 C  6. This is the test/reset device section.
 C
 600   ibuf(1) = 6
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
@@ -284,7 +303,11 @@ C
 C  7. This is the alarm query and reset request.
 C
 700   ibuf(1) = 7
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
@@ -296,15 +319,15 @@ C
 800   call run_matcn(iclass,nrec)
       call rmpar(ip)
       if(ichold.ne.-99) then
-        icheck(18) = ichold
-        call fs_set_icheck(icheck(18),18)
+        icheck(18+indxtp-1) = ichold
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       endif
       if (ichold.ge.0) then
-         icheck(18) = mod(ichold,1000)+1
-         call fs_set_icheck(icheck(18),18)
-         krptp_fs=.true.
+         icheck(18+indxtp-1) = mod(ichold,1000)+1
+         call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+         krptp_fs(indxtp)=.true.
       endif
-      call repds4(ip,iclcm)
+      call repds4(ip,iclcm,indxtp)
       return
 C
 C

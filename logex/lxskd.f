@@ -19,11 +19,6 @@ C
 C 
       equivalence (parm,iparm(1))
 C 
-C  INITIALIZED VARIABLES:
-C
-      data n/1/ 
-C 
-C 
       if (iscn_ch(ibuf,1,nchar,'=').ne.0) goto 1410
       if (isked.eq.0) call po_put_c(' none specified')
       if (isked.eq.1) then

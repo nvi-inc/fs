@@ -1,0 +1,192 @@
+File: /usr2/fs-9.3.213/misc/stndet.txt       Version 0.1
+
+WEH 990713
+ 
+I. Introduction
+
+The documentation describes the station detector features of the FS.
+This includes information on how to implement these detectors.
+
+The purpose of the "station detectors" is to give some way for making
+pointing measurements using detectors other than the "standard
+detectors": video (base-band) converters and IF distributors of the
+Mark III, Mark IV, VLBA, and VLBA4 racks.
+
+II. Use
+
+Two station detectors can be used.  They are called "u5" and "u6".
+Either or both (in the case of "onoff") may be specified as the
+detector device for "fivpt" and "onoff".  In addition the commands
+"caltempX", "beamX", and "fluxX", where "X" is "5" or "6" are used to
+define the calibration diode temperature, beam size, and source flux
+model for detectors "u5" and "u6".  The operation of these commands is
+analogous to the commands for defining these quantities for "standard
+detectors" supported by the FS.  Normally these commands need to be
+used to correctly specify the function of the "fivpt" and "onoff".
+
+Please note at this time, the "tpi", "tpical", "tpzero", and "tsysX"
+commands do not support station detectors.
+
+As an example for Cas-A being observed by a 26 meter AZ-EL antenna
+with "u5" at X-band and "u6" at S-band and noise diode equivalent
+temperatures of 15 and 16 degrees Kelvin at X and S respectively, the
+following set-up commands might be appropriate:
+
+fivept=azel,-2,9,.4,1,u5
+onoff=2,4,u5,u6,60,3
+caltemp5=15
+caltemp6=16
+beam5=0.085d
+beam6=0.360d
+flux5=disk,480,4m
+flux6=disk,1338,4m
+
+
+III. Implementation
+  
+Station detectors are implemented through mode 8 of "antcn".  The
+following discussion describes the implementation in terms of a "C"
+language "antcn".  The essential points are the same whether "antcn"
+is implemented in "C" or FORTRAN.  A short discussion of what is
+different for FORTRAN is included at the end of this section.
+
+When mode 8 of antcn executes it should inspect two variables in
+shared memory: shm_addr->user_dev1_name and shm_addr->user_dev2_name.
+They are both char arrays containing two characters.  Each array
+should contain one of "u5", "u6", or two blanks.  Note that there is
+no space for a terminating null byte in these arrays, they are not
+strings.  It is expected that when antcn returns it will place the
+power measurement associated with the specified detectors in
+shm_addr->user_dev1_value and shm_addr->user_dev2_value as
+appropriate.  These variables are declared as "double"s.
+
+The values returned for the power measurements should be in the range
+0 to 65535.  The values of approximately 65534.5 and above are
+reserved to indicate overflow.  The values of approximately 0.5 and
+less should be avoided except to indicate underflow.  Staying with the
+approximately 50 dB of dynamic range provided by the integer part of
+the data range will make the values compatible with the existing
+formatting.
+
+In "fivpt" when a station detector is used, the fivpt program provides
+no pacing of the measurements.  In other words "antcn" must provide
+all the pacing.  When antcn is scheduled in mode 8, it can assume that
+the antenna has just reached the commanded position.  Any integration
+of data to measure the power level should start at that time.
+Likewise if multiple measurements are being made use the "integration
+time" parameter of "fivpt", then mode 8 of "antcn" should provide the
+pacing necessary to assure that sequential measurements are
+independent.  This is conveniently implemented by just assuming a
+complete integration is needed each time mode 8 of "antcn" executes.
+
+The situation in "onoff" is somewhat more complicated because two
+detectors are used.  If both "u5" and "u6" are used then "antcn" is
+again expected to provide all the pacing for the measurements.  If
+however only one of the devices is a station detector, then "onoff"
+will provide a one second delay between the arrival of antenna at
+commanded orientation and the schedule of "antcn" in mode 8.  Also in
+the this case there will be a one second delay between when "antcn"
+returns and when it is schedule for next sequential measurement for a
+longer integration.
+
+Currently no provision is made to allow the different cases of pacing
+to be detected by "antcn".  Therefore "antcn" should always be coded
+to provide the pacing of the measurements itself.  If station
+detectors and standard detector are never mixed there will be no extra
+inefficiency.  If they are at most one extra second will be spent idle
+for each integration point.
+
+The following fragment shows how this might all be done.  The comments
+need to be replaced with appropriate code to provide the indicated
+bookkeeping and operations.
+
+  case 8:
+    if(strncmp(shm_addr->user_dev1_name,"  ",2)!=0) {
+      if(strncmp(shm_addr->user_dev1_name,"u5",2)==0) {
+	/* then device 1 uses "u5" */
+      } else if(strncmp(shm_addr->user_dev1_name,"u6",2)==0) {
+	/* then device 1 uses "u6" */
+      }
+    }
+    if(strncmp(shm_addr->user_dev2_name,"  ",2)!=0) {
+      if(strncmp(shm_addr->user_dev2_name,"u5",2)==0) {
+	/* then device 2 uses "u5" */
+      } else if(strncmp(shm_addr->user_dev2_name,"u6",2)==0) {
+	/* then device 2 uses "u6" */
+      }
+    }
+
+/* provide appropriate pacing to insure a one full and independent integration
+ * since execution started for each device is use 
+ */
+
+/* sample detector(s) as appropriate */
+
+    if(strncmp(shm_addr->user_dev1_name,"  ",2)!=0) {
+      if(strncmp(shm_addr->user_dev1_name,"u5",2)==0) {
+	/* store value for "u5" in
+         * shm_addr->user_dev1_value  (double)
+         * range 1-65534, 0=underflow, 65535= overflow
+         */
+      } else if(strncmp(shm_addr->user_dev1_name,"u6",2)==0) {
+	/* store value for "u6" in
+         * shm_addr->user_dev1_value  (double)
+         * range 1-65534, 0=underflow, 65535= overflow
+         */
+      }
+    }
+    if(strncmp(shm_addr->user_dev2_name,"  ",2)!=0) {
+      if(strncmp(shm_addr->user_dev2_name,"u5",2)==0) {
+	/* store value for "u5" in
+         * shm_addr->user_dev2_value  (double)
+         * range 1-65534, 0=underflow, 65535= overflow
+         */
+      } else if(strncmp(shm_addr->user_dev2_name,"u6",2)==0) {
+	/* store value for "u6" in
+         * shm_addr->user_dev2_value  (double)
+         * range 1-65534, 0=underflow, 65535= overflow
+         */
+      }
+    }
+    break;
+
+Please note for efficiency this example is set-up to handle the pacing
+for two detectors in parallel.  If this is not practical they can of
+course be handled sequentially.
+
+If more than two station detectors are desired, station specific
+commands cane used to change the meaning of "u5" and "u6".  However at
+most there can be two detector defined at one time.
+
+The only differences for implementing station detectors in FORTRAN is
+that since "C" shared memory is not directly accessible from FORTRAN,
+utilities must be used to set and get the values of the required
+variables.  The following routines are provided in newlb/newlb.a for
+this purpose:
+
+
+      include "/usr2/fs/include/fscom_dum.i"
+c
+      subroutine fs_get_user_dev1_name(user_dev1_name)
+c get the two character device 1 name
+
+      subroutine fs_set_user_dev1_name(user_dev1_name)
+c set the two character device 1 name
+
+      subroutine fs_get_user_dev1_value(user_dev1_value)
+c get the double precision device 1 value
+
+      subroutine fs_set_user_dev1_value(user_dev1_value)
+c set the double precision device 1 value
+
+      subroutine fs_get_user_dev2_name(user_dev2_name)
+c get the two character device 2 name
+
+      subroutine fs_set_user_dev2_name(user_dev2_name)
+c set the two character device 2 name
+
+      subroutine fs_get_user_dev2_value(user_dev2_value)
+c get the double precision device 2 value
+
+      subroutine fs_set_user_dev2_value(user_dev2_value)
+c set the double precision device 2 value

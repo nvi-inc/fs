@@ -1,8 +1,22 @@
+
 #include <stdio.h>
 #include <errno.h>      /* error code definition header file */
 #include <sys/types.h>
 #include <sys/ipc.h>    /* interprocess communications header file */
 #include <sys/sem.h>    /* shared memory header file */
+
+#if defined(__GNU_LIBRARY__) && !defined(_SEM_SEMUN_UNDEFINED)
+/* union semun is defined by including <sys/sem.h> */
+#else
+/* according to X/OPEN we have to define it ourselves */
+   union semun
+   {
+     int val;                           /* value for SETVAL */
+     struct semid_ds *buf;              /* buffer for IPC_STAT & IPC_SET */
+     unsigned short int *array;         /* array for GETALL & SETALL */
+     struct seminfo *__buf;             /* buffer for IPC_INFO */
+   };
+#endif
 
 int semid_get( key, nsems, semid)
 key_t   key;

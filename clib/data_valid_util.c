@@ -34,11 +34,11 @@ char *ptr;
       ierr=arg_key(ptr,dv_key,DV_KEY,&lcl->user_dv,0,FALSE);
       break;      
     case 2:
-      if(shm_addr->equip.drive != S2) {
+      if(shm_addr->equip.drive[0] != S2) {
 	*count=-1;
 	break;
       }
-      ierr=arg_key(ptr,pb_key,PB_KEY,&lcl->pb_enable,0,FALSE);
+      ierr=arg_key(ptr,pb_key,PB_KEY,&lcl->pb_enable,1,TRUE);
       break;
     default:
       *count=-1;
@@ -67,7 +67,7 @@ struct data_valid_cmd *lcl;
       sprintf(output,"0x%x",ivalue);
     break;
   case 2:
-    if(shm_addr->equip.drive != S2) {
+    if(shm_addr->equip.drive[0] != S2) {
       *count=-1;
       break;
     }

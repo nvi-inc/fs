@@ -43,7 +43,7 @@ long ip[5];
 	if(! (lclm.rack_ids & 1<<i))
 	  icount++;
       if(icount < 2) 
-	logit(NULL,-502,"4f");
+	logit(NULL,-503,"4f");
     }
 
     if(memcmp(buff+2,"ack",3)!=0 ) {

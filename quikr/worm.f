@@ -1,4 +1,4 @@
-      subroutine worm(ip)
+      subroutine worm(ip,itask)
 C
 C  Estimate velocities
 C
@@ -10,6 +10,12 @@ C
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1))
       data ilen/100/
+C
+      if( itask.eq.9) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
 C
       ichold=-99
 C
@@ -25,8 +31,9 @@ C
       call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar=min0(ilen,ireg(2))
+      call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(drive_type.eq.VLBA2) then
+      if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
         ip(3)=-273
         goto 990
       endif
@@ -47,7 +54,12 @@ C
       call fs_get_drive_type(drive_type)
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if((ichcm_ch(parm,1,'r').eq.0.or.ichcm_ch(parm,1,'2').eq.0)
-     &   .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+     &   .and.(
+     $     (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $     .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $     )
+     &     ) then
         ihd = 2
       else if(ichcm_ch(parm,1,'r').eq.0 .or.
      &        ichcm_ch(parm,1,'2').eq.0) then
@@ -56,13 +68,17 @@ C
       else if(ichcm_ch(parm,1,'w').eq.0 .or.
      &        ichcm_ch(parm,1,'1').eq.0) then
         ihd = 1
-      else if (cjchar(parm,1).eq.','
-     &       .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+      else if (cjchar(parm,1).eq.','.and.(
+     &       (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp)).or.
+     $       VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $       )
+     $       ) then
         ihd = 2
       else if (cjchar(parm,1).eq.',') then
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
-        ihd=ihdwo_fs
+        ihd=ihdwo_fs(indxtp)
       else
         ip(3) = -271
         goto 990
@@ -80,7 +96,7 @@ C
       else if (cjchar(parm,1).eq.',') then
         icl = 1
       else if(cjchar(parm,1).eq.'*') then
-        icl=iclwo_fs
+        icl=iclwo_fs(indxtp)
       else
         ip(3) = -272
         goto 990
@@ -89,52 +105,53 @@ C
 C  3. Plant values in COMMON
 C
 300   continue
-      ihdwo_fs=ihd
-      iclwo_fs=icl
+      ihdwo_fs(indxtp)=ihd
+      iclwo_fs(indxtp)=icl
       goto 990
 C
 C  5.  Measure speeds, check first if new that the calibrations have been
 C                      determined.
 C
 500   continue
-      if(iclwo_fs.eq.2)then
-        if(ihdwo_fs.eq.1.and..not.kswrite_fs) then
+      if(iclwo_fs(indxtp).eq.2)then
+        if(ihdwo_fs(indxtp).eq.1.and..not.kswrite_fs(indxtp)) then
           ip(3)=-372
           goto 990
-        else if(ihdwo_fs.eq.2.and..not.ksread_fs) then
+        else if(ihdwo_fs(indxtp).eq.2.and..not.ksread_fs(indxtp)) then
           ip(3)=-372
           goto 990
         endif
-      else if(ihdwo_fs.eq.0) then
+      else if(ihdwo_fs(indxtp).eq.0) then
         ip(3)=-371
         goto 990
       endif
 C
-      call fs_get_icheck(icheck(20),20)
-      ichold=icheck(20)
-      icheck(20) = 0
-      call fs_set_icheck(icheck(20),20)
+      call fs_get_icheck(icheck(20+indxtp-1),20+indxtp-1)
+      ichold=icheck(20+indxtp-1)
+      icheck(20+indxtp-1) = 0
+      call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
 C
-      call lvdonn('lock',ip)
+      call lvdonn('lock',ip,indxtp)
       if(ip(3).ne.0) goto 800
-      call wohd(ihdwo_fs,fowo_fs,sowo_fs,fiwo_fs,siwo_fs,ip,khecho_fs,
-     &          lu,iclwo_fs)
+      call wohd(ihdwo_fs(indxtp),fowo_fs(1,indxtp),sowo_fs(1,indxtp),
+     $     fiwo_fs(1,indxtp),siwo_fs(1,indxtp),ip,
+     $     khecho_fs, lu,iclwo_fs(indxtp),indxtp)
       if(ip(3).ne.0) goto 800
 C
 C  set the approrpiate flag, note: KxxWO_FS=IHDWO_FS.EQ.x will not work here
 C  we don't want to change old value of other parameter
 C
-      if(iclwo_fs.eq.2) then
-        if(ihdwo_fs.eq.1) kwrwo_fs=.true.
-        if(ihdwo_fs.eq.2) krdwo_fs=.true.
-      else if(iclwo_fs.eq.3) then !update current values
-        fastfw(ihdwo_fs)=fowo_fs(ihdwo_fs)
-        fastrv(ihdwo_fs)=fiwo_fs(ihdwo_fs)
-        slowfw(ihdwo_fs)=sowo_fs(ihdwo_fs)
-        slowrv(ihdwo_fs)=siwo_fs(ihdwo_fs)
+      if(iclwo_fs(indxtp).eq.2) then
+        if(ihdwo_fs(indxtp).eq.1) kwrwo_fs(indxtp)=.true.
+        if(ihdwo_fs(indxtp).eq.2) krdwo_fs(indxtp)=.true.
+      else if(iclwo_fs(indxtp).eq.3) then !update current values
+        fastfw(ihdwo_fs(indxtp),indxtp)=fowo_fs(ihdwo_fs(indxtp),indxtp)
+        fastrv(ihdwo_fs(indxtp),indxtp)=fiwo_fs(ihdwo_fs(indxtp),indxtp)
+        slowfw(ihdwo_fs(indxtp),indxtp)=sowo_fs(ihdwo_fs(indxtp),indxtp)
+        slowrv(ihdwo_fs(indxtp),indxtp)=siwo_fs(ihdwo_fs(indxtp),indxtp)
       endif
 C
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
 C  6.  Set up response
@@ -143,29 +160,29 @@ C
       nch=ieq
       if(ieq.eq.0) nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
-      if(ihdwo_fs.eq.1) then
-        nch=ichmv_ch(ibuf,nch,'write')
-      else if(ihdwo_fs.eq.2) then
-        nch=ichmv_ch(ibuf,nch,'read')
+      if(ihdwo_fs(indxtp).eq.1) then
+        nch=ichmv_ch(ibuf,nch,'1')
+      else if(ihdwo_fs(indxtp).eq.2) then
+        nch=ichmv_ch(ibuf,nch,'2')
       endif
       nch=mcoma(ibuf,nch)
 C
-      if(iclwo_fs.eq.1) then
+      if(iclwo_fs(indxtp).eq.1) then
         nch=ichmv_ch(ibuf,nch,'old')
-      else if(iclwo_fs.eq.2) then
+      else if(iclwo_fs(indxtp).eq.2) then
         nch=ichmv_ch(ibuf,nch,'new')
-      else if(iclwo_fs.eq.3) then
+      else if(iclwo_fs(indxtp).eq.3) then
         nch=ichmv_ch(ibuf,nch,'update')
       endif
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(fowo_fs(ihdwo_fs),ibuf,nch,8,1)
+      nch=nch+ir2as(fowo_fs(ihdwo_fs(indxtp),indxtp),ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
-      nch=nch+ir2as(sowo_fs(ihdwo_fs),ibuf,nch,8,1)
+      nch=nch+ir2as(sowo_fs(ihdwo_fs(indxtp),indxtp),ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
-      nch=nch+ir2as(fiwo_fs(ihdwo_fs),ibuf,nch,8,1)
+      nch=nch+ir2as(fiwo_fs(ihdwo_fs(indxtp),indxtp),ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
-      nch=nch+ir2as(siwo_fs(ihdwo_fs),ibuf,nch,8,1)
+      nch=nch+ir2as(siwo_fs(ihdwo_fs(indxtp),indxtp),ibuf,nch,8,1)
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')
@@ -176,7 +193,7 @@ C
       if(ip(2).ne.0) call clrcl(ip(1))
       ip(2)=0
       call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
 C
 C  That's all
 C
@@ -185,8 +202,8 @@ C
       ip(1)=iclass
       ip(2)=nrec
       if(ichold.ne.-99) then
-        icheck(20)=ichold
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1)=ichold
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       return
       end

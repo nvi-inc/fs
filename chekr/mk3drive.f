@@ -1,5 +1,5 @@
       subroutine mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,
-     .                    icherr,ichecks)
+     .                    icherr,ichecks,indxtp)
 C
       include '../include/fscom.i'
 C
@@ -7,7 +7,7 @@ C  INPUT PARAMETERS
 C
       integer*2 lmodna(1), lwho
       integer nverr,niferr,nfmerr,ntperr,icherr(1)
-      integer ichecks(1)
+      integer ichecks(1),indxtp
 C
 C LOCAL VARIABLES
 C
@@ -18,15 +18,16 @@ C
       data  icodes /-1,-2,-3,-4/
 
       call fs_get_drive(drive)
-      call fs_get_icheck(icheck(18),18)
-      if(icheck(18).le.0.or.ichecks(18).ne.icheck(18)) goto 699
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      if(icheck(18+indxtp-1).le.0.or.
+     $     ichecks(18+indxtp-1).ne.icheck(18+indxtp-1)) goto 699
       do jj=1,2
-        ibuf1(2) = lmodna(18)
+        ibuf1(2) = lmodna(18+indxtp-1)
         iclass = 0
         do j=1,4
 C  For the Mark IV tape drive, do not want to send ! strobe, which
 C  is mode -1 to matcn. Replace with -5 which is the + strobe.
-          if (MK4.eq.drive.and.j.eq.1) then
+          if (MK4.eq.drive(indxtp).and.j.eq.1) then
             ibuf1(1) = -5
           else
             ibuf1(1) = icodes(j)
@@ -50,12 +51,12 @@ C
         if (ierr.ge.0) goto 300
         call clrcl(iclass)
       enddo
-      call logit7(0,0,0,0,ierr,lwho,lmodna(18))
+      call logit7(0,0,0,0,ierr,lwho,lmodna(18+indxtp-1))
       goto 699
 C
 300   continue
 C
-      call gettp(iclass,nverr,niferr,nfmerr,ntperr,icherr)
+      call gettp(iclass,nverr,niferr,nfmerr,ntperr,icherr,indxtp)
 C
 699   continue
       return

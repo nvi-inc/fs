@@ -1,7 +1,5 @@
       logical function kinit(lu,iibuf,iobuf,iapp,imbuf,lst)
 C
-      logical kif,kerr
-C
       character*(*) iibuf,iobuf,imbuf
       character append
       character*2 luout

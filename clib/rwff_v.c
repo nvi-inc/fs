@@ -22,7 +22,7 @@ int *ierr;
       int ichold;
       int vacuum();
 
-      int i;
+      int i,indx;
 
       struct req_buf buffer;
       struct req_rec request;
@@ -30,9 +30,14 @@ int *ierr;
  
       void venable81mc();
 
+      if(*isub<10) 
+	indx=0;
+      else
+	indx=1;
+
       *ierr = 0;
       lerr = 0;
-      verr = vacuum(&lerr);
+      verr = vacuum(&lerr,indx);
       if (verr<0) { 
         /* vacuum not ready or other error trying to read recorder */
         if (verr==-1) *ierr = -301;
@@ -54,88 +59,91 @@ int *ierr;
       ichold= -99;                    /* check vlaue holder */
 
       ini_req(&buffer);                      /* format the buffer */
-      memcpy(request.device,"rc",2);
+      if(indx==0) 
+	memcpy(request.device,"r1",2);
+      else
+	memcpy(request.device,"r2",2);
 
       request.type=0;
-      memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
+      memcpy(&lcl,&shm_addr->venable[indx],sizeof(lcl));
       lcl.general=0;                  /* turn off record */
-      shm_addr->venable.general=0;
+      shm_addr->venable[indx].general=0;
       venable81mc(&request.data,&lcl);
       request.addr=0x81;
       add_req(&buffer,&request);
 
       request.addr=0xb6;  /* enable low tape */
-      shm_addr->lowtp=1;
+      shm_addr->lowtp[indx]=1;
       request.data=0x01; 
       add_req(&buffer,&request);
  
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
+      ichold=shm_addr->check.rec[indx];
+      shm_addr->check.rec[indx]=0;
       
-      switch (*isub) {
+      switch (*isub%10) {
         case 3:            /* rw */
           request.addr=0xb5; 
-          if (shm_addr->iskdtpsd == -2) {
+          if (shm_addr->iskdtpsd[indx] == -2) {
             request.data=bits16on(16) & (int)(360*100.0);
-          } else if (shm_addr->iskdtpsd == -1) {
+          } else if (shm_addr->iskdtpsd[indx] == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
             request.data=bits16on(16) & (int)(270*100.0);
           }
-          shm_addr->ispeed=-3;
-	  shm_addr->cips=request.data;
+          shm_addr->ispeed[indx]=-3;
+	  shm_addr->cips[indx]=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x00; 
           add_req(&buffer,&request);
-          shm_addr->idirtp=0;
+          shm_addr->idirtp[indx]=0;
           break;
         case 4:            /* ff */
           request.addr=0xb5; 
-          if (shm_addr->iskdtpsd == -2) {
+          if (shm_addr->iskdtpsd[indx] == -2) {
             request.data=bits16on(16) & (int)(360*100.0);
-          } else if (shm_addr->iskdtpsd == -1) {
+          } else if (shm_addr->iskdtpsd[indx] == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
             request.data=bits16on(16) & (int)(270*100.0);
           }
-          shm_addr->ispeed=-3;
-	  shm_addr->cips=request.data;
+          shm_addr->ispeed[indx]=-3;
+	  shm_addr->cips[indx]=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x01; 
           add_req(&buffer,&request);
-          shm_addr->idirtp=1;
+          shm_addr->idirtp[indx]=1;
           break;
         case 5:            /* srw */
           request.addr=0xb5; 
-          if (shm_addr->imaxtpsd == -2) {
+          if (shm_addr->imaxtpsd[indx] == -2) {
             request.data=bits16on(16) & (int)(360*100.0);
-          } else if (shm_addr->imaxtpsd == -1) {
+          } else if (shm_addr->imaxtpsd[indx] == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
             request.data=bits16on(16) & (int)(270*100.0);
           }
-          shm_addr->ispeed=-3;
-	  shm_addr->cips=request.data;
+          shm_addr->ispeed[indx]=-3;
+	  shm_addr->cips[indx]=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x00; 
           add_req(&buffer,&request);
-          shm_addr->idirtp=0;
+          shm_addr->idirtp[indx]=0;
           break;
         case 6:            /* sff */
           request.addr=0xb5; 
-          if (shm_addr->imaxtpsd == -2) {
+          if (shm_addr->imaxtpsd[indx] == -2) {
             request.data=bits16on(16) & (int)(360*100.0);
-          } else if (shm_addr->imaxtpsd == -1) {
+          } else if (shm_addr->imaxtpsd[indx] == -1) {
             request.data=bits16on(16) & (int)(330*100.0);
           } else {
             request.data=bits16on(16) & (int)(270*100.0);
           }
-          shm_addr->ispeed=-3;
-	  shm_addr->cips=request.data;
+          shm_addr->ispeed[indx]=-3;
+	  shm_addr->cips[indx]=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x01; 
           add_req(&buffer,&request);
-          shm_addr->idirtp=1;
+          shm_addr->idirtp[indx]=1;
           break;
         default:
           return;
@@ -147,11 +155,11 @@ int *ierr;
       skd_par(ip);
 
       if (ichold != -99) {
-         shm_addr->check.vkmove = TRUE;
-         rte_rawt(&shm_addr->check.rc_mv_tm);
+         shm_addr->check.vkmove[indx] = TRUE;
+         rte_rawt(shm_addr->check.rc_mv_tm+indx);
          if (ichold >= 0)
             ichold=ichold % 1000 + 1;
-         shm_addr->check.rec=ichold;
+         shm_addr->check.rec[indx]=ichold;
       }
 
       return;

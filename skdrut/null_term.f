@@ -1,11 +1,9 @@
-C@NULL_TERM
-
       subroutine null_term(cstr)
-
 c
 c   'null_term' will null-terminate a character string.  This
 c   is necessary when string must be passed to C routines.
 c
+C 990916 nrv Uncommented the warning message if the string is too short.
 
       character*(*) cstr
       integer     i,j,len
@@ -18,12 +16,12 @@ c
         i = i - 1
       end do
       i = i + 1
-C     if (i .le. j) then
-        cstr(i:i) = char(0)
-C     else
-C no trailing blanks or nulls
-C       print*, 'Warning from NULL_TERM'
-C     end if
+      if (i .gt. j) then ! no trailing blanks or nulls
+C       print *, 'NULL_TERM: string too short, last char replaced ',
+C    .  'with NULL'//cstr
+        i=i-1
+      end if
+      cstr(i:i) = char(0)
 
       return
       end

@@ -76,8 +76,8 @@ C Now compare values with acceptable limits
       if(t70k.gt.i70kch) inerr(2) = inerr(2)+1
       if(t20k.gt.i20kch) inerr(3) = inerr(3)+1
 C
-      call fs_get_icheck(icheck(19),19)
-      if(icheck(19).le.0.or.ichecks(19).ne.icheck(19)) goto 880
+      call fs_get_icheck(icheck(22),22)
+      if(icheck(22).le.0.or.ichecks(22).ne.icheck(22)) goto 880
       do i=1,3
         if(i.eq.1) item=0
         if(i.eq.2) item=i70kch

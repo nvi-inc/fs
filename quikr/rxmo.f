@@ -220,10 +220,10 @@ C     4. Now plant these values into COMMON.
 C     Finally schedule BOSS to request that MATCON gets the data. 
 C 
 400   continue
-      call fs_get_icheck(icheck(19),19)
-      ichold = icheck(19)   
-      icheck(19) = 0
-      call fs_set_icheck(icheck(19),19)
+      call fs_get_icheck(icheck(22),22)
+      ichold = icheck(22)   
+      icheck(22) = 0
+      call fs_set_icheck(icheck(22),22)
       idum=ichmv(iadcrx,1,la,1,2)
       lswcal = ical 
       idchrx = idcal
@@ -271,12 +271,12 @@ C
 800   call run_matcn(iclass,nrec)
       call rmpar(ip)
       if (ichold.ne.-99) then
-        icheck(19) = ichold
-        call fs_set_icheck(icheck(19),19)
+        icheck(22) = ichold
+        call fs_set_icheck(icheck(22),22)
       endif
       if (ichold.ge.0) then
-        icheck(19) = mod(ichold,1000)+1
-        call fs_set_icheck(icheck(19),19)
+        icheck(22) = mod(ichold,1000)+1
+        call fs_set_icheck(icheck(22),22)
       endif
       call rxdmo(ip,iclcm)
       return

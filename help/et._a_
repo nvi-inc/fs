@@ -1,0 +1,19 @@
+          et - end recording on tape drive (all drives)
+
+Syntax:     et
+
+Response:   et/acknowledgement
+
+
+Parameters: none
+
+Comments:
+Tape motion is stopped when this command is issued.
+
+For Mark III/IV drives the record bit is disabled. For VLBA and
+VLBA4 drives the groups are disabled. For Mark IV and VLBA4 racks
+the formatter output is disabled.
+
+For S2, the selected transports are stopped.
+
+

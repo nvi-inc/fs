@@ -10,7 +10,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-int wvolt_dec(lcl,count,ptr)
+int wvolt_dec(lcl,count,ptr,indx)
 struct wvolt_cmd *lcl;
 int *count;
 char *ptr;
@@ -31,7 +31,9 @@ char *ptr;
       }
       break;
     case 2:
-      if(shm_addr->equip.drive == VLBA4) {
+      if(shm_addr->equip.drive[indx] == VLBA4||
+	 (shm_addr->equip.drive[indx]==VLBA &&
+	  shm_addr->equip.drive_type[indx]==VLBAB)) {
 	if(0==strcmp(ptr,"*") && !lcl->set[1])
 	  ierr=-300;
 	else {
@@ -49,7 +51,7 @@ char *ptr;
    return ierr;
 }
 
-void wvolt_enc(output,count,lcl)
+void wvolt_enc(output,count,lcl,indx)
 char *output;
 int *count;
 struct wvolt_cmd *lcl;
@@ -64,7 +66,9 @@ struct wvolt_cmd *lcl;
 	flt2str(output,lcl->volts[0],32,1);
       break;
     case 2:
-      if(shm_addr->equip.drive == VLBA4) {
+      if(shm_addr->equip.drive[indx] == VLBA4||
+	 (shm_addr->equip.drive[indx]==VLBA &&
+	  shm_addr->equip.drive_type[indx]==VLBAB)) {
 	if(lcl->set[1])
 	  flt2str(output,lcl->volts[1],32,1);
 	break;

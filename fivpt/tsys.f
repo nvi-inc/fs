@@ -60,7 +60,8 @@ c9954 format(' nin',i10,' indata "',6a2,'"')
             else
                call char2hol('95',isav,2,3)
                call fs_get_imixif3(imixif3)
-               call i32ma(isav(3),iatif3_fs,imixif3,iswif3_fs(1),
+               call fs_get_iat3if(iat3if)
+               call i32ma(isav(3),iat3if,imixif3,iswif3_fs(1),
      &              iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
             endif
          else

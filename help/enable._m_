@@ -1,0 +1,31 @@
+        enable - enable recording heads (Mark III drives)
+
+Syntax:     enable=track1,track2, ... trackn
+
+Response:   enable/track1,track2, ... trackn
+
+
+Settable parameters:
+track1, ... n   List of tracks to be enabled/disabled. Mark III
+                track numbers between 1 and 28, and by group.
+                Groups specified by gn, n=1 to 4:
+                g1 includes tracks 1,3,5,7,11,13.
+                g2 includes tracks 2,4,6,8,10,12,14.
+                g3 includes tracks 15,17,19,21,23,25,27.
+                g4 includes tracks 16,18,20,22,24,26,28.
+                A null list (i.e. enable=) disables all tracks.
+
+Monitor-only parameters: none
+
+Comments: 
+MAT module functions available. See section 1.0 of this manual.
+
+The use of * as a parameter is not supported by this command.
+
+Note that a VLBA or Mark IV track number equals the Mark III
+track number plus 3. Consequently, odd Mark III tracks are even
+VLBA or Mark IV track numbers and vice-versa. See the Track
+Assignment Tables in the System Setup manual. Also VLBA group
+numbers equal Mark III group numbers minus one, but the VLBA
+groups include additional tracks. Note that this command uses
+Mark III track and group numbers.

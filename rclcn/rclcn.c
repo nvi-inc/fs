@@ -198,7 +198,7 @@ int get_addr(char *inbuf, int *inpos_ptr)
 int init(long ip[5])
 {
   FILE *fp;   /* general purpose file pointer */
-  char *errmsg; 
+  char errmsg[80]; 
   int ierr;
   struct rclad *ptr;
 
@@ -231,7 +231,7 @@ int init(long ip[5])
   for (ptr=rclad_base;ptr!=NULL;ptr=ptr->next) {
     if(getenv("S2_PING")!=NULL) {
       char buf[128];
-      snprintf(buf,sizeof(buf),"fping -a -t 1000 -r 0 %s >/dev/null 2>&1",
+      snprintf(buf,sizeof(buf),"fping -a -t 1000 -r 1 %s >/dev/null 2>&1",
 	       ptr->hostname);
       ptr->okay=system(buf)==0;
     } else
@@ -249,9 +249,10 @@ int init(long ip[5])
       if(ierr!=RCL_ERR_NONE) {
 	fprintf(stderr,"rclcn error opening '%.2s' as '%s': "
 		,ptr->name,ptr->hostname);
-	fprintf(stderr,"%s",errmsg);
+	fprintf(stderr,"%s\n",errmsg);
 	if(ierr>0) {
 	  ierr=-130-ierr;
+	  ptr->okay=0;
 	}
 	
 	return ierr;

@@ -29,13 +29,23 @@ C 970206 nrv Remove ihdpo2,itra2,ihddi2 and add an index to
 C            ihdpos,itras,ihddir
 C 970718 nrv Change FREQLO and FREQRF to double precision
 C 971208 nrv Add FPCAL, FPCAL_BASE, IPCTONE, NPCTONE
+C 990524 nrv Add tape_dens
+C 990611 nrv Add lnahdpos
+C 991110 nrv Add LMODE_CAT
+C 000126 nrv Add NTRKN to count integer tracks. TRKN is used to count
+C            effective tracks for sensitivity calculations.
+C 000517 nrv Make LMODE have 16 characters, consistent with frinp.
+C 000905 nrv Add NHSTACK per station and code
+C 000905 nrv LMFMT must have 16 characters!
+C 000913 nrv Add roll tables here.
 C
       double precision effreq,ffact,bitdens,freqlo,freqrf,
-     .freqpcal,freqpcal_base
+     .freqpcal,freqpcal_base,tape_dens
 C     ffact   - frequency factor, for S/X ionosphere corrections
 C     effreq  - effective frequency for each band, for S/X ionosphere 
 C               corrections
 C     bitdens - bit density by station and code
+C     tape_dens - bit density by station and code, specified by user
 C
       real vcband,wavei,bwrms,trkn,samprate
 C     VCBAND - final video bandwidth, MHz 
@@ -55,7 +65,8 @@ C     samprate - sample rate, per frequency code, Mb/s.
  
       integer ncodes,nfreq,npassf,nband,nchan,invcx,ifan,
      .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,npassl,ipctone,
-     .npctone
+     .npctone,ntrkn,nhstack,roll_inc_period,roll_reinit_period,
+     .nrolldefs,nrollsteps,roll_def
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
@@ -65,14 +76,16 @@ C              (not this is NOT the number of VCs but the number of channels)
 C     invcx  - index number of each frequency channel, if zero then
 C              this channel is not recorded at this station
 C     ibbcx - physical BBC number of each channel
-C     itras  - track assignments (s,b,p,c,f), i.e. track number on
+C     itras  - track assignments (s,b,h,c,p,a,f), i.e. track number on
 C              which the following signals are recorded:
 C          s = sideband, U/L 
 C          b = bit, sign/magnitude 
+C          h = headstack
+C          c = channel (1 to max_chan)
 C          p = corresponding pass, forward/reverse (1 to max_subpass, 
 C              e.g. 1 for mode A, 1 or 2 for B and C, 1 to 28 for D, 
 C              1 to 4 for E)
-C          c = channel (1 to max_chan)
+C          a = station index
 C          f = frequency code (1 to max_frq)
 C     ihdpos - head position offsets
 C     ihddir - corresponding pass number
@@ -82,9 +95,17 @@ C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
 C     npassl - number of passes in the pass order list
 C     ipctone - list of pcal tone numbers for each channel, station, code
 C     npctone - number in the above list
+C     ntrkn - integer number of tracks recorded per band. Same as trkn
+C             except it's not reduced for switched or magnitude bits.
+C     nhstack - number of headstacks per code and station
+C     roll_inc_period, roll_reinit_period - roll info per table
+C     nrolldefs - number of roll_def statements per table
+C     nrollsteps - roll steps per def statement + 1 for home track, per table
+C     roll_def - roll tables
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
-     .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix
+     .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix,
+     .lnahdpos,lmode_cat
 C     LCODE - the 2-character frequency codes 
 C     LMODE - the observing mode name for each code
 C     LMFMT - the observing mode format for each code
@@ -92,6 +113,7 @@ C     LS2MODE - the S2 recording mode for each code
 C     LSUBVC - sub-group code for each VC, in each code
 C     lifinp - hollerith IF input, e.g. A,B,C,D,1A,1N,2A,2N,3A,3N
 C     LNAFRQ - 8-char name for this code
+C     lnahdpos - 8-char name of the head position set
 C     LNAFRSUB - 8-char name for this sub-code (subset of frequencies)
 C       lnafrq      lnafrsub (can be a different subcode name for each station)
 C       ------      ----------------------
@@ -104,10 +126,13 @@ C     lnetsb - net sideband for each channel
 C     losb - net sideband for each station's lo
 C     lbarrel - barrel roll for each station
 C     lprefix - procedure name prefix
+C     lmode_cat - full descriptive mode name from modes.cat catalog
 C
       character*3 cset ! switch set per channel
       character*128 modedefnames ! def names from the vex file
+      character*128 modedef_name ! created names for VEX output
       character*3 cpassorderl ! pass order list
+      character*128 roll_name ! name of each roll table
 C
       COMMON/FREQS/
      .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
@@ -116,6 +141,7 @@ C
      .       FREQPCAL(MAX_CHAN,MAX_STN,MAX_FRQ),
      .       FREQPCAL_BASE(MAX_CHAN,MAX_STN,MAX_FRQ),
      .       bitdens(max_stn,max_frq),
+     .       tape_dens(max_stn,max_frq),
      .
      .       VCBAND(MAX_CHAN,max_stn,MAX_FRQ),
      .       wavei(max_band,max_stn,max_frq),
@@ -138,17 +164,27 @@ C
      .       ihddir(max_headstack,max_pass,max_stn,max_frq),
      .       nstsav,istsav(max_stn),
      .       ifan(max_stn,max_frq),npassl(max_stn,max_frq),
+     .       ntrkn(max_band,max_stn,max_frq),
+     .       nhstack(max_stn,max_frq),
+     .       roll_def(17,32,max_roll),
+     .       roll_inc_period(max_roll),roll_reinit_period(max_roll),
+     .       nrolldefs(max_roll),nrollsteps(max_roll),
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
-     .       LCODE(MAX_FRQ),LMODE(4,max_stn,MAX_FRQ),
-     .       LMFMT(4,max_stn,MAX_FRQ),
+     .       lmode_cat(8,max_frq),
+     .       LCODE(MAX_FRQ),LMODE(8,max_stn,MAX_FRQ),
+     .       LMFMT(8,max_stn,MAX_FRQ),
      .       LSUBVC(MAX_CHAN,max_stn,MAX_FRQ), 
      .       LIFINP(MAX_CHAN,max_stn,MAX_FRQ),
      .       LPOL(max_chan,max_stn,max_frq),
      .       LNETSB(max_chan,max_stn,max_frq),
      .       losb(max_chan,max_stn,max_frq),lband(max_band),
      .       lbarrel(2,max_stn,max_frq),ls2mode(8,max_stn,max_frq),
-     .       lprefix(4,max_stn,max_frq)
+     .       lprefix(4,max_stn,max_frq),
+     .       lnahdpos(4,max_stn,max_frq)
 C
       COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
-     .       modedefnames(max_frq),cpassorderl(max_pass,max_stn,max_frq)
+     .       modedefnames(max_frq),
+     .       cpassorderl(max_pass,max_stn,max_frq),
+     .       modedef_name(max_frq),
+     .       roll_name(max_roll)

@@ -132,15 +132,16 @@ C     2. Print error messages by group.
           if (ierr.eq.5) cmsg='5 = epoch'
         else if (cgroup(1:5).eq.'SCHED') then
           if (ierr.eq.1) cmsg='1 = station'
-          if (ierr.eq.2) cmsg='2 = start date/time'
-          if (ierr.eq.3) cmsg='3 = source name'
-          if (ierr.eq.4) cmsg='4 = source index not found'
-          if (ierr.eq.5) cmsg='5 = code index'
-          if (ierr.eq.6) cmsg='6 = data start time'
-          if (ierr.eq.7) cmsg='7 = data end time'
-          if (ierr.eq.8) cmsg='8 = footage'
-          if (ierr.eq.9) cmsg='9 = pass number'
-          if (ierr.eq.10) cmsg='10 = pointing sector'
+          if (ierr.eq.8) cmsg='8 = start date/time'
+          if (ierr.eq.9) cmsg='9 = source name'
+          if (ierr.eq.10) cmsg='10 = source index not found'
+          if (ierr.eq.11) cmsg='11 = code index'
+          if (ierr.eq.2) cmsg='2 = data start time'
+          if (ierr.eq.3) cmsg='3 = data end time'
+          if (ierr.eq.4) cmsg='4 = footage'
+          if (ierr.eq.5) cmsg='5 = pass number'
+          if (ierr.eq.6) cmsg='6 = pointing sector'
+          if (ierr.eq.7) cmsg='7 = druve number'
         endif ! group name
         write(luscn,9200) cmsg(1:trimlen(cmsg))
 9200    format('ERRORMSG02 'a)

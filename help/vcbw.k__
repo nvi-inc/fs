@@ -1,0 +1,18 @@
+         vcbw - video converter bandwidth (all K4 racks)
+
+Syntax:     vcbw=bw
+
+Response:   vcbw/bw
+
+
+Settable Parameters:
+bw        either alarm or VC bandwidth in MHz, possible values
+          for different VC types:
+            for K4-1A either 2 (default) or 4
+            for K4-2  either 2 (default) or 32
+            for K4-2A either 2 (default) or 16
+            for K4-2B either 8 or 16 (default)
+
+Comments:
+This bandwidth is not settable for K4-1 racks, but is displayed
+as 2.

@@ -11,9 +11,9 @@
 
 #define MAX_OUT 256
 
-void wvolt_dis(command,itask,ip)
+void wvolt_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       struct wvolt_cmd lclc;
@@ -32,11 +32,13 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if(kcom)
-         memcpy(&lclc,&shm_addr->wvolt,sizeof(lclc));
+         memcpy(&lclc,&shm_addr->wvolt[indx],sizeof(lclc));
       else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mcD3wvolt(&lclc, response.data);
-	 if(shm_addr->equip.drive == VLBA4) {
+	 if(shm_addr->equip.drive[indx] == VLBA4||
+	    (shm_addr->equip.drive[indx]==VLBA &&
+	     shm_addr->equip.drive_type[indx]==VLBAB)) {
 	   get_res(&response, &buffer); mcD2wvolt(&lclc, response.data);
 	 }
          if(response.state == -1) {
@@ -56,7 +58,7 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        wvolt_enc(output,&count,&lclc);
+        wvolt_enc(output,&count,&lclc,indx);
       }
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';

@@ -1,6 +1,6 @@
       logical function kpout_ch(lut,idcb,cbuf,iobuf,lst)
 C
-      integer idcb(1),lut,ierr
+      integer idcb(1),lut
       character*(*) iobuf,cbuf
       integer*2 iarr(128)
       logical kpout

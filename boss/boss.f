@@ -4,11 +4,9 @@ c
       include '../include/fscom.i'
 c
       integer ifsnum
-      parameter (ifsnum=256)
+      parameter (ifsnum=512)
       integer*4 ip(5)
-      dimension lnames(12,ifsnum)
-      integer MAX_PROC1, MAX_PROC2
-      PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
+      dimension lnames(13,ifsnum)
       integer*4 lproc1(10,MAX_PROC1),lproc2(10,MAX_PROC2)
       integer*4 itscb(13,15)
       integer idcbsk(2)

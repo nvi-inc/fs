@@ -11,9 +11,9 @@
 
 #define MAX_OUT 256
 
-void systracks_dis(command,itask,ip)
+void systracks_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       struct systracks_cmd lclc;
@@ -32,7 +32,7 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if(kcom)
-         memcpy(&lclc,&shm_addr->systracks,sizeof(lclc));
+         memcpy(&lclc,&shm_addr->systracks[indx],sizeof(lclc));
       else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mc82systracks(&lclc, response.data);

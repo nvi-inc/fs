@@ -3,25 +3,35 @@ C
 C 960517 nrv New. Holds internal representation of observations.
 C 960603 nrv Add parameters.
 C 960810 nrv Move itearl to station block
+C 990921 nrv Add vex_version
+C 991118 nrv Add nominal start,end.
+C 000616 nrv Add scan names.
+C 001109 nrv Change scan names to character.
 
       integer nobs,iskrec
-C nobs - number of observations in this schedule
+C nobs - number of observations in this schedule (really: scans)
 C iskrec - time-ordered index of observation records 
       integer isettm,ipartm,ihdtm,itaptm,imtptm,isortm
+      integer iyr_start,ida_start,ihr_start,imin_start,isc_start,
+     .iyr_end,ida_end,ihr_end,imin_end,isc_end
       integer*2 lskobs,lexper
 C lskobs - Hollerith observation record, use iskrec to enter
 C          this array
 C lexper - Experiment name
-      character*128 cexperdes,cpiname,ccorname
+      character*128 cexperdes,cpiname,ccorname,vex_version,scan_name
 C cexperdes - experiment description
 C cpiname - PI name
 C ccorname - correlator
+C *_start - nominal start time
+C *_end - nominal end time
  
       COMMON/SKOBS/
      .nobs,
      .isettm,ipartm,ihdtm,itaptm,imtptm,isortm,
+     .iyr_start,ida_start,ihr_start,imin_start,isc_start,
+     .iyr_end,ida_end,ihr_end,imin_end,isc_end,
      .ISKREC(MAX_OBS),
      .LSKOBS(IBUF_LEN,MAX_OBS),lexper(4)
 
       COMMON/SKOBS_CH/
-     .cexperdes,cpiname,ccorname
+     .cexperdes,cpiname,ccorname,vex_version,scan_name(max_obs)

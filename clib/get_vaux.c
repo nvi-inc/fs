@@ -8,26 +8,39 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void set_vrptrk(itrk, ip) /* set vlba reproduce tracks */
+void set_vrptrk(itrk, ip,indxtp) /* set vlba reproduce tracks */
 int itrk[2];              /* Mark III tracks requested */
 long ip[5];               /* ipc array */
+int indxtp;
 {
   struct req_buf buffer;
   struct req_rec request;
+  int indx;
    
-  shm_addr->vrepro.track[0]=itrk[0];     /* update shared memory */
-  shm_addr->vrepro.track[1]=itrk[1];
-
   ini_req(&buffer);              /* build a request to set tracks */
 
-  memcpy(request.device,DEV_VRC,2);
+  indx=indxtp-1;
+
+  if(indx == 0) {
+    memcpy(request.device,"r1",2);
+    
+  } else if(indx == 1) {
+    memcpy(request.device,"r2",2);
+  } else {
+    ip[2]=-505;
+    memcpy("q<",ip+4,2);
+    return;
+  }
+
+  shm_addr->vrepro[indx].track[0]=itrk[0];     /* update shared memory */
+  shm_addr->vrepro[indx].track[1]=itrk[1];
 
   request.type=0; 
   request.addr=0x90;
-  vrepro90mc(&request.data,&shm_addr->vrepro); add_req(&buffer,&request);
+  vrepro90mc(&request.data,shm_addr->vrepro+indx); add_req(&buffer,&request);
 
   request.addr=0x91;
-  vrepro91mc(&request.data,&shm_addr->vrepro); add_req(&buffer,&request);
+  vrepro91mc(&request.data,shm_addr->vrepro+indx); add_req(&buffer,&request);
 
   end_req(ip,&buffer);            /* send it */
   skd_run("mcbcn",'w',ip);
@@ -36,9 +49,11 @@ long ip[5];               /* ipc array */
   if(ip[0] !=0) cls_clr(ip[0]);
   return;
 }
-void get_verate(jperr,jsync,itrk,itper,ip) /* retrieve vlba error counts */
+void get_verate(jperr,jsync,jbits,itrk,itper,ip)
+/* retrieve vlba error counts */
 long jperr[2];            /* returned parity errors */
 long jsync[2];            /* returned re-sync counts */
+long jbits[2];            /* returned bits processed */
 int itrk[2];              /* Mark III tracks that are set-up */
 int itper;                /* time period to sample for, 10s milliseconds */
 long ip[5];
@@ -99,6 +114,17 @@ long ip[5];
   for (i=0;i<4;i++)
      add_req(&buffer, &request);
 
+  request.type=0;
+  request.data=0;                                   /* set array index */
+  request.addr=0xC8; add_req(&buffer,&request);
+  request.data=28;                                   /* set array index */
+  request.addr=0xC9; add_req(&buffer,&request);
+
+  request.type=1;                                   /* fetch array */
+  request.addr=0xCA;
+  for (i=0;i<8;i++)
+     add_req(&buffer, &request);
+
   end_req(ip,&buffer);
   skd_run("mcbcn",'w',ip);
   skd_par(ip);
@@ -116,6 +142,14 @@ long ip[5];
   for (i=12;i<16;i++) {                /* array contents */
      get_res(&response, &buffer); iarray[ i]=response.data;
   }
+
+  get_res(&response, &buffer);        /* fetch index set responses */
+  get_res(&response, &buffer);
+  for (i=28;i<36;i++) {              /* array contents */
+    long unsigned tx;
+    get_res(&response, &buffer); iarray[i]=response.data;
+  }
+
   mcCAdqa(&lclm,iarray);
   if(response.state == -1) {
      clr_res(&buffer);
@@ -129,7 +163,8 @@ long ip[5];
   jperr[1]=lclm.b.parity;
   jsync[0]=lclm.a.resync;
   jsync[1]=lclm.b.resync;
-  
+  jbits[0]=lclm.a.num_bits;
+  jbits[1]=lclm.b.num_bits;
   ip[2]=0;
   return;
 }

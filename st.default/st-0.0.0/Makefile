@@ -9,7 +9,7 @@ LIB_DIR =
 #LIB_DIR = stlib
 #
 EXEC_DIR =
-#EXEC_DIR = antcn cheks stalloc sterp stqkr
+#EXEC_DIR = antcn cheks pcald stalloc sterp stqkr
 #
 ifdef LIB_DIR
 all:    libs execs

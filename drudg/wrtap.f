@@ -26,7 +26,7 @@ C
 C     CALLED BY: vlbat
 C
 C  LOCAL VARIABLES
-      integer nch,idum,iln,ierr
+      integer nch,ierr
       integer ib2as,ichmv,ichmv_ch ! functions
 
       call ifill(ibuf,1,ibuf_len,oblank)

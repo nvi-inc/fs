@@ -1,3 +1,7 @@
+define  sched_initi   00000000000
+enddef
+define  sched_end     00000000000
+enddef
 define  fastf         00000000000
 ff
 !+$
@@ -16,6 +20,8 @@ define  midob         00000000000
 onsource
 wx
 cable
+"add your station command to measure the gps to fm output clock offset
+"gps-fmout=c2
 sy=run setcl &
 enddef
 define  midtp         00000000000
@@ -59,7 +65,17 @@ wakeup
 xdisp=off
 enddef
 define  unloader      00000000000
-rec_mode=16x8-1,0
+et
 rec=eject
 enddef
-
+define  pcalon        00000000000
+"no phase cal control is implemented here
+enddef
+define  pcaloff       00000000000 
+"no phase cal control is implemented here
+enddef
+define  checkcrc      00000000000 
+"comment out the following lines if you do _not_ have a mark iii decoder
+"decode=a,crc
+"decode
+enddef

@@ -1,0 +1,92 @@
+             flux - set flux parameters for a source
+
+Syntax:     flux1=model,flux1,angle1,angle2,flux2,angle3,angle4
+          flux2=model,flux1,angle1,angle2,flux2,angle3,angle4
+          flux3=model,flux1,angle1,angle2,flux2,angle3,angle4
+          fluxa=model,flux1,angle1,angle2,flux2,angle3,angle4
+          fluxb=model,flux1,angle1,angle2,flux2,angle3,angle4
+          fluxc=model,flux1,angle1,angle2,flux2,angle3,angle4
+          fluxd=model,flux1,angle1,angle2,flux2,angle3,angle4
+          flux5=model,flux1,angle1,angle2,flux2,angle3,angle4
+          flux6=model,flux1,angle1,angle2,flux2,angle3,angle4
+
+Response:   flux1/model,flux1,angle1,angle2,flux2,angle3,angle4,c
+            orr,aflux
+  flux2/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  flux3/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  fluxa/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  fluxb/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  fluxc/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  fluxd/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  flux5/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+  flux6/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+
+
+Settable parameters:
+model     source model, one of gaussian, disk, twopoints
+flux1     flux density of the first source component, Janskys
+angle1    first angular dimension of the first component
+angel2    second angular dimension of the first component
+flux2     flux density of the second source component, Janskys
+angle3    first angular dimension of the second component
+angle4    second angular dimension of the second component
+
+Monitor-only parameters:
+corr      correction divisor
+aflux     apparent flux density 
+
+
+Comments: 
+Source models, for either Mark III (and Mark IV) or VLBA (and
+VLBA4) systems, may be specified with the flux1/2/3 and
+fluxa/b/c/d commands, respectively. The pairs of commands
+flux1/a, flux2/b, and flux3/c are synonymous.
+
+The commands fluxx use the source model and the beam size
+specified by the corresponding beamx to calculate the apparent
+flux density. The parameter model determines which model is used
+and which parameters have meaning. Parameters which have no
+meaning for a given model will not be displayed before the corr
+parameter.
+
+The flux5/6 commands are used to specify flux models for station
+dependent detectors u5 and u6.
+
+If model is gaussian, then the source is assumed to consist of up
+to two, possibly elliptical, Gaussian brightness distributions.
+flux1 gives the flux density value for the first component.
+angle1 and angle2 specify the diameters along the two principal
+axes. angle2 defaults to angel1. flux2 gives the flux density
+value for a second concentric optional Gaussian distribution,
+default value 0. angle3 and angle4 give the principal axes of the
+second component. angle4 defaults to angle3.
+
+If model is twopoints, then the source is assumed to consist of
+two equally bright points. flux1 is the total flux density of the
+two points.  angel1 is their angular separation.
+
+If model is disk, then the source is assumed to consist of a
+uniform circular disk brightness distribution.  flux1 is the
+total flux density. angel1 is the diameter of the disk.
+
+Once the model is specified, the fluxx command will use the
+appropriate beam size to calculate the apparent flux density of
+the source when the beam is centered on the brightness
+distribution. The approximations given in Dave Shaffer's antenna
+check-out memo (see the Antenna Performance manual) are used to
+compensate for the finite size of the sources relative to the
+beam. Note that these are only approximations and become very
+poor as the correction divisor approaches a value of two. Further
+note that very few sources are correctly represented by one of
+these three models. This command gives a crude approximation to
+the true apparent flux density.
+
+Issuing a source=... or a beamx=... command will automatically
+change the value of the aflux parameters to be a negative,
+invalid, number until a correct fluxx=... command is issued
+again. It is recommended that procedures that include the
+source=... command and the appropriate fluxx=... commands be used
+to command sources when doing flux density measurements.
+
+See the description of the fivept and onoff commands for more
+details on the use of the apparent flux density values.

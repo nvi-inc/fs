@@ -1,6 +1,6 @@
-      subroutine set_mic(ihead,ipass,kauto,micron,ip,tol)
+      subroutine set_mic(ihead,ipass,kauto,micron,ip,tol,indxtp)
       implicit none
-      integer ihead,ip(5),ipass(2)
+      integer ihead,ip(5),ipass(2),indxtp
       real*4 micron(2),tol
       logical kauto
 C
@@ -22,11 +22,11 @@ C
 C
       do i=1,2
         if(ihead.eq.i.or.ihead.eq.3) then
-          call mic2vlt(i,ipass(i),kauto,micron(i),volt(i),ip)
+          call mic2vlt(i,ipass(i),kauto,micron(i),volt(i),ip,indxtp)
           if(ip(3).ne.0) return
         endif
       enddo
 C
-      call set_vlt(ihead,volt,ip,tol)
+      call set_vlt(ihead,volt,ip,tol,indxtp)
       return
       end

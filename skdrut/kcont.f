@@ -12,7 +12,7 @@ C  INPUT:
       integer isor,ist,mjd
       integer*2 lcabl
 C     UT - Start time for the observation
-C     DUR - Stop time for the observation
+C     DUR - Duration of the observation
 C     ISOR - Source number
 C     IST - Station number
 C     LCABL - Cable wrap for this observation (=2HC ,2HW ,2H  )
@@ -33,6 +33,8 @@ C    DATE   WHO    CHANGES
 C    830524 WEH    ADD DEC TO CVPOS CALLS
 C    880315 NRV    DE-COMPD'C
 C    930225 nrv implicit none
+C 001226 nrv Changed  comment on definition of DUR: it is the
+C            duration not the stop time of the observation.
 C
 C
 C     First work out the source position at UT and the position at UT+DUR.

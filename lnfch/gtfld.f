@@ -29,12 +29,13 @@ C
 C     SCAN FOR THE FIRST NON-BLANK
 C 
       do 100 i=ic1,ic2
-        if (cjchar(ias,i).ne.' ') goto 101 
+        ix=i
+        if (char(jchar(ias,i)).ne.' ') goto 101 
 100     continue
       return
 C                   THERE ARE ONLY BLANKS 
-101   ifc = i 
-      iec = i 
+101   ifc = ix 
+      iec = ix 
       if (iec.lt.ic2) goto 190
       ic1 = ic2 + 1 
       return
@@ -42,14 +43,15 @@ C
 C     NOW SCAN FOR THE NEXT BLANK 
 C 
 190   do 200 i=ifc+1,ic2
-        if (cjchar(ias,i).eq.' ') goto 201 
+        ix=i
+        if (char(jchar(ias,i)).eq.' ') goto 201 
 200   continue
       iec = ic2 
 C                   STRING ENDS WITH NON-BLANK
       ic1 = ic2 + 1 
       return
-201   iec = i-1 
-      ic1 = i 
+201   iec = ix-1 
+      ic1 = ix 
 C                   UPDATE FIRST CHARACTER NUMBER IN STRING 
       return
       end 

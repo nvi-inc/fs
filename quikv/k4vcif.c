@@ -28,13 +28,8 @@ long ip[5];                           /* ipc parameters */
 
       ip[0]=ip[1]=0;
 
-      rack=shm_addr->equip.rack;
       type=shm_addr->equip.rack_type;
-      if( ( (rack == K4) &&
-         (type == K42 || type == K42A || type == K42BU ||
-	 type == K42K3 || type == K42AK3 || type == K42BUK3 )) ||
-	  ( (rack == K4MK4) &&
-         (type == K42MK4 || type == K42AMK4 || type == K42BUMK4))) {
+      if( type!=K41 && type!=K41U) {
 	ierr=-301;
 	goto error;
       }

@@ -11,7 +11,8 @@ C
       include '../skdrincl/skobs.ftni'
 C
 C  INPUT:
-      integer ifunc,IYR
+      integer ifunc,IYR ! ifunc=1 for " comments, ifunc=2 for !* comments
+      logical kk4,ks2
 C
 C  LOCAL:
       integer*2 IBUF2(80)
@@ -32,6 +33,13 @@ C                Remove EARLY (LSTSUM can figure it out)
 C 960227 nrv Change iterid to lterid
 C 970214 nrv Write 2-letter code on first line
 C 970311 nrv Write both codes on first line.
+C 990325 nrv Add a drudg ID comment.
+C 990401 nrv Add a FS ID comment.
+C 990404 nrv Don't add FS ID for VLBA output files.
+C 990628 nrv Add K4 or S2 equipment type as a comment.
+C 990730 nrv Add any equipment type as a comment.
+C 990803 nrv Merge drudg and FS lines and reformat.
+C 991102 nrv Add recorder B.
 C
 C
       iblen = 128
@@ -41,7 +49,7 @@ C
       CALL IFILL(IBUF2,1,iblen,32)
       nch = 0
       IF (IFUNC.EQ.1) THEN
-      NCH = ichmv_ch(IBUF2,1,'" ')
+        NCH = ichmv_ch(IBUF2,1,'" ')
       ELSE IF (IFUNC.EQ.2) THEN
 	NCH = ichmv_ch(IBUF2,1,'!* ')
       END IF
@@ -156,6 +164,38 @@ C
       call inc(LU_OUTFILE,KERR)
 C
 C     end PAKVT
+
+C  Write drudg version
+      CALL IFILL(IBUF2,1,iblen,32)
+      IF (IFUNC.EQ.1) THEN
+        NCH = ichmv_ch(IBUF2,1,'" ')
+      ELSE IF (IFUNC.EQ.2) THEN
+	NCH = ichmv_ch(IBUF2,1,'!* ')
+      END IF
+      nch=ichmv_ch(ibuf2,nch,' drudg version ')
+      nch=ichmv_ch(ibuf2,nch,cversion(1:6))
+C     Write FS version
+      nch=ichmv_ch(ibuf2,nch,' compiled under FS ')
+      idummy=iVerMajor_FS
+      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf2,nch,'.')
+      idummy=iVerMinor_FS
+      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf2,nch,'.')
+      idummy=iVerPatch_FS
+      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
+      call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+      IF (IFUNC.EQ.1) THEN ! only for non-VLBA
+C       Write equipment line
+        CALL IFILL(IBUF2,1,iblen,32)
+        nch = ichmv_ch(ibuf2,1,'" Rack=')
+        nch = ichmv(ibuf2,nch,lstrack(1,istn),1,8)
+        nch = ichmv_ch(ibuf2,nch,'  Recorder 1=')
+        nch = ichmv(ibuf2,nch,lstrec(1,istn),1,8)
+        nch = ichmv_ch(ibuf2,nch,'  Recorder 2=')
+        nch = ichmv(ibuf2,nch,lstrec2(1,istn),1,8)
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+      endif
 
       RETURN
       END

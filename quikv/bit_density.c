@@ -14,16 +14,18 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, indx, ichold, i, count;
       char *ptr;
       int lcl;        /* local instance of bit_density command struc */
 
       int bit_density_dec();                 /* parsing utilities */
       char *arg_next();
 
+      indx=itask-1;                    /* index for this module */
+
       ierr = 0;
       if (command->equal != '=') {            /* read module */
-        bit_density_dis(command,itask,ip);
+        bit_density_dis(command,itask,ip,indx);
 	return;
       } 
 
@@ -31,7 +33,7 @@ long ip[5];                           /* ipc parameters */
 
 parse:
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->bit_density,sizeof(lcl));
+      memcpy(&lcl,&shm_addr->bit_density[indx],sizeof(lcl));
 
       count=1;
       while( count>= 0) {
@@ -40,7 +42,7 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
-      memcpy(&shm_addr->bit_density,&lcl,sizeof(lcl));
+      memcpy(&shm_addr->bit_density[indx],&lcl,sizeof(lcl));
       
 error:
       ip[0]=0;

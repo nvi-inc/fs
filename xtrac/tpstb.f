@@ -4,7 +4,7 @@ C
       integer*2 ibuf(1)
       integer*2 idcb(1)
       integer lut,inp,igp,lst,il
-      integer ichmv
+      integer ichmv_ch
       integer jr2as,ib2as
       real avglon,avglat,rmslon,rmslat,dirms
       character*(*) iobuf

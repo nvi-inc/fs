@@ -20,7 +20,6 @@ C     NCINT - NUMBER OF CHARACTERS IN INTEGER PART
 C     ISIGN - +1 OR -1
       character cjchar
       double precision val
-      double precision dum
 C                   VALUE BUILT UP DURING SCAN OF CHARACTERS
 C     IEXP - EXPONENT FOR SCALING 
 C 

@@ -11,9 +11,9 @@
 
 #define MAX_OUT 256
 
-void venable_dis(command,itask,ip)
+void venable_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       struct venable_cmd lclc;
@@ -32,7 +32,7 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if(kcom) {
-         memcpy(&lclc,&shm_addr->venable,sizeof(lclc));
+         memcpy(&lclc,&shm_addr->venable[indx],sizeof(lclc));
          lclc.general=1;
        } else {
          opn_res(&buffer,ip);
@@ -55,7 +55,7 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        venable_enc(output,&count,&lclc);
+        venable_enc(output,&count,&lclc,indx);
       }
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';

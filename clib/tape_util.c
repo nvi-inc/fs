@@ -16,10 +16,11 @@ static char *key_set[ ]={ "off", "low" };
                                      /* number of elements in keyword arrays */
 #define NKEY_SET sizeof(key_set)/sizeof( char *)
 
-int tape_dec(lcl,count,ptr)
+int tape_dec(lcl,count,ptr,indx)
 struct tape_cmd *lcl;
 int *count;
 char *ptr;
+int indx;
 {
     int ierr, arg_key();
     int feet;
@@ -34,7 +35,8 @@ char *ptr;
       case 2:
          if (ptr==NULL || *ptr == '\0') 
            lcl->reset = -1;
-         else if (shm_addr->equip.drive_type == VLBA2)
+         else if (shm_addr->equip.drive[indx] == VLBA &&
+		  shm_addr->equip.drive_type[indx] == VLBA2)
            ierr = -300;
          else if (0==strcmp(ptr,"reset"))
            lcl->reset = 0x00;
@@ -79,9 +81,9 @@ struct tape_cmd *lcl;
    return;
 }
 
-void tape_mon(output,count,lcl)
+void tape_mon(output,count,lcl,indx)
 char *output;
-int *count;
+int *count,indx;
 struct tape_mon *lcl;
 {
     int ind;
@@ -98,7 +100,7 @@ struct tape_mon *lcl;
         int2str(output,lcl->foot,-5,1); 
         feet[0]='\0';
         int2str(feet,lcl->foot,-5,1); 
-        memcpy(shm_addr->LFEET_FS,feet,5);
+        memcpy(shm_addr->LFEET_FS[indx],feet,5);
         break;
       case 2:
         if (lcl->sense==0x01) 
@@ -109,11 +111,11 @@ struct tape_mon *lcl;
       case 3: /* tape moving: capstan */
         if ((lcl->stat & 0x2) == 0) {
           sprintf(output,"stopped"); 
-          shm_addr->ICAPTP = 0;
+          shm_addr->ICAPTP[indx] = 0;
         }
         else {
           sprintf(output,"moving");
-          shm_addr->ICAPTP = 1;
+          shm_addr->ICAPTP[indx] = 1;
         }
         break;
       case 4: /* tape moving and not ramping: tach */
@@ -125,18 +127,19 @@ struct tape_mon *lcl;
       case 5:  /* vacuum ok? */
         if ((lcl->stat & 0x40) == 0) {
           sprintf(output,"notready");
-          shm_addr->IRDYTP = 1;
+          shm_addr->IRDYTP[indx] = 1;
         }
         else {
           sprintf(output,"ready");
-          shm_addr->IRDYTP = 0;
+          shm_addr->IRDYTP[indx] = 0;
         }
         break;
       case 6:
-        if (shm_addr->equip.drive_type == VLBA2 )
+        if (shm_addr->equip.drive[indx] == VLBA &&
+	    shm_addr->equip.drive_type[indx] == VLBA2 )
 	  break;
         outvac=(double)lcl->vacuum;
-        outvac = outvac*shm_addr->outscsl + shm_addr->outscint;
+        outvac = outvac*shm_addr->outscsl[indx] + shm_addr->outscint[indx];
         flt2str(output,outvac,4,1);
         break;
       case 7:

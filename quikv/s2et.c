@@ -13,7 +13,7 @@
 
 #define MAX_OUT 256
 
-static char device[]={"rc"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void s2et(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
@@ -82,6 +82,7 @@ long ip[5];                           /* ipc parameters */
       }
 
       logrclmsg(output,command,ip);
+      return;
 
 error:
       ip[0]=0;

@@ -19,7 +19,7 @@ char *lwho;
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_res_buf res_buf;
   struct s2rec_check s2rec;
-  char device[]= "rc";
+  char device[]= "r1";
 
   void ini_rclcn_req(), end_rclcn_req(); /*rclcn request utilities */
   void skd_run(), skd_par();      /* program scheduling utilities */
@@ -211,11 +211,11 @@ char *lwho;
     if(ierr!=0)
       goto error;
     
-    icherr[12]=user_dv && !shm_addr->data_valid.user_dv
-      || !user_dv && shm_addr->data_valid.user_dv;
+    icherr[12]=user_dv && !shm_addr->data_valid[0].user_dv
+      || !user_dv && shm_addr->data_valid[0].user_dv;
 
-    icherr[13]=pb_enable && !shm_addr->data_valid.pb_enable
-      || !pb_enable && shm_addr->data_valid.pb_enable;
+    icherr[13]=pb_enable && !shm_addr->data_valid[0].pb_enable
+      || !pb_enable && shm_addr->data_valid[0].pb_enable;
 
   }
   if(s2rec.tapeid) {

@@ -1,0 +1,29 @@
+       status - display current schedule status information
+
+Syntax:     status
+
+Response:   display of information
+
+
+Settable parameters: none
+
+Comments: 
+A self-explanatory display of information concerning the status
+of the current active schedule is listed on the terminal, in the
+following format:
+
+Active schedule is: name (name of current schedule)
+TIME                  EVENT
+-------               ---------
+yyyy.ddd.hh:mm:ss.ss  Now
+yyyy.ddd.hh:mm:ss.ss  Start of next observation
+yyyy.ddd.hh:mm:ss.ss  End of next observation
+yyyy.ddd.hh:mm:ss.ss  End of current tape
+yyyy.ddd.hh:mm:ss.ss  Start of next tape
+Schedule is (not) HALTed
+Schedule stream is (not) time-blocked(until yyyy.ddd.hh:mm:ss.ss)
+Operator stream is (not) time-blocked (until
+yyyy.ddd.hh:mm:ss.ss)
+Current line of schedule is:
+#nnn   copy of current schedule line
+

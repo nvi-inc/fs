@@ -132,7 +132,7 @@ C     6. Step through buffer getting each parameter and decoding it.
 C     Command from user has these parameters:
 C                   FM=<output>,<rate>,<input>,<synch>,<aux>,<MATmode>
 C     Choices are <input>: NOR, EXT, CRC.  Default NOR.
-C                <output>: A, B, C, D.  Default mode B.
+C                <output>: A, B, C, D.  No default.
 C                  <rate>: 0.125,0.25,0.5,1,2,4,8.  Default 4.
 C                 <synch>: ON or OFF.  Default ON.
 C                   <aux>: auxilliary data, up to 12 hex characters.
@@ -143,11 +143,11 @@ C
         ich = 1+ieq
         ic1 = ich
         call gtprm(ibuf,ich,nchar,0,parm,ierr)
-C                   Get the mode, ASCII.  The default mode is B.
+C                   Get the mode, ASCII.  No default.
         if (cjchar(parm,1).eq.'*') then
           imode = imodfm
         else if (cjchar(parm,1).eq.',') then
-          imode = 1
+          ierr=-101
         else
           call ifmed(1,imode,ibuf,ic1,ich-2)
           if (imode.lt.0) then

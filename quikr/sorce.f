@@ -73,6 +73,8 @@ C                   in the name from the command
      &   ichcm_ch(ls,1,'service   ').eq.0 .or.
      &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
      &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'setup     ').eq.0 .or.
+     &   ichcm_ch(ls,1,'track     ').eq.0 .or.
      &   ichcm_ch(ls,1,'hold      ').eq.0 ) then
         ra = ra50
         dec = dec50
@@ -285,6 +287,8 @@ C
      &   ichcm_ch(ls,1,'service   ').eq.0 .or.
      &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
      &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'setup     ').eq.0 .or.
+     &   ichcm_ch(ls,1,'track     ').eq.0 .or.
      &   ichcm_ch(ls,1,'hold      ').eq.0 ) then
         goto 530
       endif

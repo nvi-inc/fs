@@ -1,10 +1,11 @@
-void fc_get_vatod__(ichan, volt, ip)
+void fc_get_vatod__(ichan, volt, ip, indxtp)
 int *ichan;
 float *volt;
 long ip[5];
+int *indxtp;
 {
     void get_vatod();
 
-    get_vatod(*ichan, volt, ip);
+    get_vatod(*ichan, volt, ip, *indxtp);
     return;
 }

@@ -1,0 +1,70 @@
+         if3 - IF3 distributor (Mark III, Mark IV racks)
+
+
+Syntax:     if3=atten,mixer,sw1,sw2,sw3,sw4,pcal
+
+Response:   if3/atten,mixer,sw1,sw2,sw3,sw4,pcl,switch,cntrl,freq
+            ,rem/lcl,LOlock,TPI
+
+
+Settable parameters:
+atten     Attenuation in dB, range 0-63, default 0. Enter an
+          integer value preceded by + or - to indicate a relative
+          change. Other options are: max, or old to restore the
+          previous value after max.
+mixer     Downconverter in or out of the signal path, default
+          out. In response only: 11 or 00.
+sw1       Switch 1 state: output to port 1 (default) or port 2.
+sw2       Switch 1 state: output to port 1 (default) or port 2.
+sw3       Switch 1 state: output to port 1 (default) or port 2.
+sw4       Switch 1 state: output to port 1 (default) or port 2.
+pcl       Phase-cal control setting on (default) or off.
+
+Monitor-only parameters:
+switch    external switch, present or missing.
+cntrl     phase-cal control modification, present or missing.
+freq      Synthesizer frequency in MHz.
+rem/lcl   Switch setting, rem or lcl
+LOlock    LO lock/unlock status, lock or unlock
+TPI       Total power integrator reading, decimal, 0-65535.
+
+Comments:
+MAT module functions are available. See section 1.0 of this
+manual.
+
+The max and old values for atten can be used to switch in the
+maximum attenuation and then restore the previous (old)
+attenuation. This is primarily useful for system temperature
+measurements. See the sxcts procedure in the Standard Procedure
+manual for an example.
+
+The mixer state commanded by this command and the down converter
+frequency specified in the equip.ctl control file are used by the
+pcal command to calculate the frequencies of the phase-cal tones
+for the video converters that are specified as connected to IF3
+with the patch command. The beam3 command also uses this
+information to calculate the default beam size.
+
+If the switch for the mixer is an undefined state, the mixer
+response is 11 or 00 depending on which incorrect state the mixer
+is in, see the MAT Protocol manual for details.
+
+The monitor values of the switch settings sw1-sw4 are null
+(empty) if the equip.ctl file shows the switch as not connected.
+Only switches that have been identified as connected can be
+commanded. The switch monitor-only parameter indicates whether
+the switch box itself is installed.
+
+The external switch settings sw1-sw4 commanded are not used to
+calculate the patching. The effect of the switch settings, i.e.,
+which video converters are connected to which inputs, must be
+specified in the appropriate patch command.
+
+Unless low-pass filters have been installed in some of the output
+channels, the IF3 module should only be used to distribute "high"
+170-500 MHz IF frequencies to the video converters.
+
+The cntrl parameter is only displayed if if3 is set as the phase-
+cal control type in equip.ctl.
+
+Some racks may not have the IF3 module installed.

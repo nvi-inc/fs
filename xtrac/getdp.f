@@ -103,7 +103,7 @@ C
       integer*2 llterr(5)
       integer*2 llnfit(5)
       integer*2 llnerr(5)
-      integer*2 lofset(5)
+      integer*2 lofset(5),lxofset(5)
       integer*2 llin(3)
       integer*2 llat(3)
       integer*2 llon(3)
@@ -120,6 +120,7 @@ C
       data llnfit/7,2hlo,2hnf,2hit,2h  /        ! lonfit
       data llnerr/7,2hlo,2hne,2hrr,2h  /        ! lonerr
       data lofset/7,2hof,2hfs,2het,2h  /        ! offset
+      data lxofset/8,2hxo,2hof,2hse,2ht /        ! offset
       data llin/4,2hli,2hn /                    ! lin
       data llat/4,2hla,2ht /                    ! lat
       data llon/4,2hlo,2hn /                    ! lon
@@ -171,6 +172,8 @@ C
       if (ichcm(jbuf,ifc,llnerr,3,ilen).eq.0) ir= 11
       ilen = lofset(1) 
       if (ichcm(jbuf,ifc,lofset,3,ilen).eq.0) ir= 12
+      ilen = lxofset(1) 
+      if (ichcm(jbuf,ifc,lxofset,3,ilen).eq.0) ir= 13
       ilen = llin(1) 
       if (ichcm(jbuf,ifc,llin  ,3,ilen).eq.0) ir= 30
       ilen = llat(1) 
@@ -199,7 +202,8 @@ C
      +   (ipr.eq. 1 .and. ir.ne. 2                              ) .or.
      +   (ipr.eq. 2 .and. ir.ne. 3                              ) .or.
      +   (ipr.eq. 3 .and. ir.ne. 4                              ) .or.
-     +   (ipr.eq. 4 .and. ir.ne. 5                              ) .or.
+     +   (ipr.eq. 4 .and.(ir.ne. 5 .and. ir.ne. 6 .and. ir.ne.30 .and.
+     +                    ir.ne.31)                              ).or.
      +   (ipr.eq. 5 .and.(ir.ne. 6 .and. ir.ne.30 .and. ir.ne.31)).or.
      +   (ipr.eq. 6 .and. ir.ne. 7                              ) .or.
      +   (ipr.eq. 7 .and.(ir.ne. 8 .and. ir.ne.30 .and. ir.ne.31)).or.
@@ -207,6 +211,7 @@ C
      +   (ipr.eq. 9 .and.(ir.ne.10 .and. ir.ne.30 .and. ir.ne.32)).or.
      +   (ipr.eq.10 .and. ir.ne.11                              ) .or.
      +   (ipr.eq.11 .and. ir.ne.12                              ) .or.
+     +   (ipr.eq.13 .and. ir.ne.1                               ) .or.
      +   (ipr.eq.30 .and.(ir.ne.31 .and. ir.ne.32 .and. ir.ne. 8
      +              .and. ir.ne.10)                             ) .or.
      +   (ipr.eq.31 .and.(ir.ne.30 .and. ir.ne.31 .and. ir.ne. 8)).or.
@@ -218,7 +223,7 @@ C
       getdp=1 
 C 
       if (ir.lt.30) goto (1000,2000,3000,4000,5000,6000,7000,8000,9000, 
-     +   10000,11000,12000),ir
+     +   10000,11000,12000,13000),ir
       if (ir.ge.30) goto (30000,31000,32000),ir-29
 C 
 C  SHOULD BE IMPOSSIBLE 
@@ -317,10 +322,15 @@ C
 12000 continue
       ifc=ifc+lofset(1) 
       call deoff(jbuf,ifc,ilc,loncor,latcor,lonoff,latoff,iqlon,iqlat,
-     +           irrec(12)) 
-      inm=0 
+     +           irrec(12))
+      inm=0
       ir=0
       return
+C
+C  XOFFSET RECORD - IGNORE
+C
+13000 continue
+      goto 100
 C 
 C   LIN    RECORD 
 C 

@@ -1,5 +1,5 @@
-      subroutine ma2i3(ibuf1,ibuf2,iat,imix,is1,is2,is3,is4,iswp,freq,
-     &                 irem,lck,tpi)
+      subroutine ma2i3(ibuf1,ibuf2,iat,imix,is1,is2,is3,is4,ipcalp,
+     &     iswp,freq,irem,ipcal,lck,tpi)
 c
 C  convert mat buffer to i3 data
 C 
@@ -21,6 +21,7 @@ C     is1 - switch 1
 C     is2 - switch 2
 C     is3 - switch 3
 C     is4 - switch 4
+c     ipcalp - pcal control present
 C     iswp - ext switch present
       integer*4 freq
 C          - long frequency
@@ -32,11 +33,12 @@ C     Buffers from MATCN look like:
 C      ! data:      i3fffff0ps
 C     where
 C                   fffff - is the lo frequency in BBC freqeuncy style
-C                   p     - upper bit is one if the ext switch is present
+C                   p     - upper bit is zeroif the ext switch is present
+C                         - least bit is one if pcal control   is present
 C                   s     - four bits representing switch states
 C      % data:      IFttttf0at
 C     where 
-C                   f = lo lock, alarm, 0, lcl/remote bits
+C                   f = lo lock, alarm, pcal on=0/off=1, lcl/remote bits
 C                   0 = a fixed zero
 C                   a = mixer sw. state (2 bits), upper 2 bits of atten.
 C                   t = lower 4 bits of atten.
@@ -52,6 +54,7 @@ C
       is2  = 2-(and(iswh,2)/2)
       is3  = 2-(and(iswh,4)/4)
       is4  = 2-(and(iswh,8)/8)
+      ipcalp = and(ia2hx(ibuf1,9),1)
       iswp = 1-(and(ia2hx(ibuf1,9),8)/8)
 c
 c lo freq
@@ -61,6 +64,7 @@ c
       freq=fc_bbc2freq(bits)
 c
       irem = 1-and(ia2hx(ibuf2,7),1)
+      ipcal = 1-and(ia2hx(ibuf2,7),2)
       lck = 1-(and(ia2hx(ibuf2,7),8)/8)
 C
 C  Pick up four bits from each character for TP

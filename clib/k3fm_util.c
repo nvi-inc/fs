@@ -43,7 +43,7 @@ char *ptr;
 
     switch (*count) {
     case 1:
-      ierr=arg_key(ptr,key_mode,NKEY_MODE,&lcl->mode,1,TRUE);
+      ierr=arg_key(ptr,key_mode,NKEY_MODE,&lcl->mode,0,FALSE);
       break;
     case 2:
       ierr=arg_key_flt(ptr,key_rate,NKEY_RATE,&lcl->rate,4,TRUE);

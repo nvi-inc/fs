@@ -1,0 +1,63 @@
+                source - source name and position
+
+Syntax:     source=name,ra,dec,epoch
+
+Response:   source/name,ra,dec,epoch,ranow,decnow,today
+
+
+Settable parameters:
+name    Source name, up to 10 characters. No default. Special
+        source names are recognized by many antenna interface
+        programs. Some names and their meaning are:
+            azel      true corrected coordinates
+            azeluncr  encoder units
+            xy        encoder units
+        Other specialized names are described in the comments
+        below. If name is sun or moon, no position is required,
+        and if given it will be ignored.
+ra      Right ascension, in numeric angle/hours format. No
+        default. If name is azel or azeluncr, this parameter is
+        interpreted as an azimuth. If name is xy, this parameter
+        is interpreted as an X position.
+dec     Declination, in numeric angle/degrees format. No default.
+        If name is azel or azeluncr, this parameter is
+        interpreted as an elevation. If name is xy, this
+        parameter is interpreted as an Y position.
+epoch   Epoch in years. Default 1950.0. This field is checked
+        only if the specified angles are right ascension and
+        declination. A value of -1 inhibits precession.
+
+Monitor-only parameters:
+ranow   Right ascension precessed to today's date.
+decnow  Declination precessed to today's date.
+today   Epoch of precession.
+
+Comments: 
+The antenna will begin moving to the new source when this command
+is issued. At some antennas, if the source name is given as azel
+or azeluncr, then the ra and dec are recognized as azimuth and
+elevation in degrees; if the source name is xy, then the next two
+fields are recognized as x and y in degrees. If the source name
+is sun or moon, the appropriate coordinates will be calculated by
+the Field System based on the current time and the site position
+as specified in the location.ctl file.
+
+Issuing a source=... command will invalidate the calculated
+values for the fluxn= commands. To indicate this their values are
+set to negative numbers.
+
+Typical interpretations of special names may or may not be
+supported at any given station. These are typical meanings:
+
+    stow      Pre-defined stow position.
+    service   Pre-defined service position.
+    disable   Stops antenna communications. This is useful to
+              stop error messages when here is a problem.
+    idle      Monitor the antenna position, but do not command
+              it. This is the normal start-up state for the Field
+              System.
+    hold      Maintain the current antenna position.
+    setup     Prepare antenna for track
+    track     Re-enable antenna tracking
+
+    

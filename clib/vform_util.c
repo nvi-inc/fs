@@ -38,6 +38,7 @@ static char *key_rate[ ]={ "0.25", "0.5", "1", "2", "4", "8", "16", "32"};
 static char *key_fan[ ]={ "X0","X1","4:1","2:1","1:1","1:2","1:4", "X7"};
 static char *key_brl[ ]={ "off", "8:1", "8:2", "8:4",
                          "off4","16:1","16:2","16:4"};
+static char *key_dqa[ ]={"1", "2"};
 
 static int tape_clock[][8]={
                /* X0   X1  4:1  2:1  1:1  1:2  1:4   X7 */
@@ -56,6 +57,7 @@ static int tape_clock[][8]={
 #define NKEY_RATE sizeof(key_rate)/sizeof( char *)
 #define NKEY_FAN  sizeof(key_fan )/sizeof( char *)
 #define NKEY_BRL sizeof(key_brl )/sizeof( char *)
+#define NKEY_DQA sizeof(key_dqa )/sizeof( char *)
 
 
 int vform_dec(lcl,count,ptr)
@@ -73,12 +75,11 @@ char *ptr;
     switch (*count) {
     case 1:
       lcl->last=1;
-      ierr=arg_key(ptr,key_mode,NKEY_MODE,&lcl->mode,4,TRUE);
+      ierr=arg_key(ptr,key_mode,NKEY_MODE,&lcl->mode,0,FALSE);
 
 /* for now we set qa here in case there are any pre 2.92 systems out there
  * that need to have this set before configuring
  */
-        lcl->qa.drive=1;
 	lcl->qa.chan=3;
 
         if(lcl->mode == 0){   /* prn */
@@ -104,8 +105,9 @@ char *ptr;
  * anything if there are both odd and even recorder tracks in use since
  * the user can do this
  */
-	if ((lcl->mode == 1 || lcl->mode == 2) && shm_addr->wrhd_fs!=0) {
-	  if(shm_addr->wrhd_fs==1) {
+	if ((lcl->mode == 1 || lcl->mode == 2) &&
+	    shm_addr->wrhd_fs[shm_addr->select]!=0) {
+	  if(shm_addr->wrhd_fs[shm_addr->select]==1) {
 	    ioff=TRUE;
 	    for (i=0;i<16;i++)
 	      ioff &= (lcl->codes[i] == -1);
@@ -117,7 +119,7 @@ char *ptr;
 		lcl->codes[i+16]= -1;
 	      }
 	    }
-	  } else if(shm_addr->wrhd_fs==2) {
+	  } else if(shm_addr->wrhd_fs[shm_addr->select]==2) {
 	    ioff=TRUE;
 	    for (i=16;i<32;i++)
 	      ioff &= (lcl->codes[i] == -1);
@@ -131,7 +133,9 @@ char *ptr;
 	    }
 	  }
 	} else if (lcl->mode > 2) {            /* m3 mode a, b, or c */
-	  if(shm_addr->equip.rack_type != VLBAG && lcl->mode < 10){
+	  if(shm_addr->equip.rack_type != VLBAG &&
+	     shm_addr->equip.rack_type != VLBA4 &&
+	     lcl->mode < 10){
 	    ierr=-300;
 	    break;
 	  }
@@ -149,9 +153,11 @@ char *ptr;
 	  case 7:
 	  case 8:
 	  case 9:
-	    if (shm_addr->wrhd_fs == 1 && (lcl->mode ==6 || lcl->mode == 8))
+	    if (shm_addr->wrhd_fs[shm_addr->select] == 1 &&
+		(lcl->mode ==6 || lcl->mode == 8))
 	      lcl->mode++;
-	    else if(shm_addr->wrhd_fs == 2 && (lcl->mode ==7 || lcl->mode == 9))
+	    else if(shm_addr->wrhd_fs[shm_addr->select] == 2 &&
+		    (lcl->mode ==7 || lcl->mode == 9))
 	      lcl->mode--;
 	    
 	    if(lcl->mode%2==1)
@@ -214,10 +220,12 @@ char *ptr;
 	  lcl->codes[i+1]=lcl->codes[i];
       break;
     case 4:
-        ierr=arg_key(ptr,key_brl,NKEY_BRL,&lcl->barrel,0,TRUE);
-	break;
-      default:
-       *count=-1;
+      ierr=arg_key(ptr,key_brl,NKEY_BRL,&lcl->barrel,0,TRUE);
+      break;
+    case 5:
+      ierr=arg_key(ptr,key_dqa,NKEY_DQA,&lcl->qa.drive,shm_addr->select,TRUE);
+    default:
+      *count=-1;
    }
    if(ierr!=0) ierr-=*count;
    if(*count>0) (*count)++;
@@ -273,6 +281,13 @@ struct vform_cmd *lcl;
       ivalue=lcl->barrel;
       if(ivalue>=0 && ivalue <NKEY_BRL)
 	strcpy(output,key_brl[ivalue]);
+      else
+	strcpy(output,BAD_VALUE);
+      break;
+    case 5:
+      ivalue=lcl->qa.drive;
+      if(ivalue>=0 && ivalue <NKEY_DQA)
+	strcpy(output,key_dqa[ivalue]);
       else
 	strcpy(output,BAD_VALUE);
       break;
@@ -387,7 +402,7 @@ void vform99mc(data, lcl)
 unsigned *data;
 struct vform_cmd *lcl;
 {
-    *data= 0x8000 | (bits16on(2) & lcl->qa.drive);
+    *data= 0x8000 | (bits16on(2) & (lcl->qa.drive+1));
 }
 
 void vform9Amc(data, lcl) 
@@ -576,7 +591,7 @@ void mc99vform(lclc,data)
 struct vform_cmd *lclc;
 unsigned data;
 {
-      lclc->qa.drive=bits16on(2) & data;
+      lclc->qa.drive=(bits16on(2) & data)-1;
       if((data & 0x8000)==0) lclc->qa.drive=-1;
 }
 

@@ -1,591 +1,96 @@
-Draft Specification for K4 Implementation in the FS
+For testing the K4 version of the FS.
+
+File: /usr2/fs-9.3.115/misc/k4/k4.txt
+
+WEH 990303
+
+I. Introduction
+
+The document describes how to set-up a test system for the K4
+release of the FS. The K4 version co-exists with the operational
+version. The procedures, control files, logs, and station software are
+maintained in separate parallel tracks. Changes made to procedures,
+control files, logs, and station software for the K4 version do not
+effect the operational version and vice-versa. One consequence of this
+is that if want to make a change in both versions you must enter it
+twice. Section II describes the set-up which only needs to be done
+once. Sections III and IV describe how to change back and forth
+between versions with a simple command.
+
+The scripts that make the changes between versions will not overwrite
+anything if an error occurs. For example, if you try to change to
+CURRENT twice in a row you will get an error message stating that
+"/usr2/CURRENT already contains some version". If the change is
+successful, the machine will automatically reboot, so be sure this is
+safe to do before executing one of the scripts in III or IV.
+
+II. Set-up
+   1. Place the archive gemini.gsfc.nasa.gov/pub/misc/weh/fs-9.3.115.tar.gz
+        in /tmp
+   2. Log-in as root and execute:
+        cd /
+        tar -xzf /tmp/fs-9.3.115.tar.gz
+        cd /usr2
+        mkdir CURRENT
+        mkdir K4
+        cp -a control proc sched log st-1.0.0 CURRENT    
+                                        (replace 1.0.0 with your local version)
+        ln -sfn fs-9.3.115 fs
+   3. Log-out as root
+   4. Log-in as prog
+        cd /usr2/control
+        /usr2/fs/misc/cmdctlfix2 stcmd.ctl
+        rm stcmd.bak
+        /usr2/fs/misc/cmdctlfix3 stcmd.ctl
+        rm stcmd.bak
+        Edit sw.ctl and append a second non-comment line with
+          one field (without quotes): "mvme117"
+        Edit your SNAP procedures, changing your lo= commands to
+          (VLBAi/VLBA4):
+            lo=loa,7600.1
+            lo=lob,1540.1
+            lo=loc,8080.0
+          or (Mark III/IV):
+            lo=lo1,7600.1
+            lo=lo2,1540.1
+            lo=lo3,8080.0
+          with appropriate channels and freqencies. Please not the total
+          effective first LO should be used. The "upconv" command has been
+          deleted. Please remove any "upconv" commands in your procedures.
+        cd /usr2/log
+        rm *                     (delete all the old logs in this directory)
+        cd /usr2/fs
+        make
+        cd /usr2/st
+        make rmdoto rmexe all
+        cd /usr2/prog
+        mkdir versions
+        cp -a /usr2/fs/misc/k4/* versions
+        cd versions
+        Edit K4_TO_CURRENT and change the reference "stfile=st-1.0.0" near the
+          top to use your local software version number instead of "1.0.0",
+          if it is different. Also change "fsfile=fs-9.3.25" near the top to
+          use the version number of the FS you are using instead
+          of "9.3.25", if it is different.
+        Edit CURRENT_TO_K4 and change the reference "stfile=st-1.0.0" near the
+          top to use your local software version number instead of "1.0.0",
+          if it is different.
+    5. Reboot
+       You will now be running the K4 version
+
+III. To change from the K4 version back to your current operational version:
+    1. Make sure the FS isn't running.
+    2. Log-in as root and execute:
+          /usr2/prog/versions/K4_TO_CURRENT
+    3. This will automatically reboot
+
+IV. To change from your current operational version back to the K4 version:
+    1. Make sure the FS isn't running.
+    2. Log-in as root and execute:
+          /usr2/prog/versions/CURRENT_TO_K4
+    3. This will automatically reboot
+
+VI. If you also have a BETA version installed you cannot switch directly
+    between the BETA and K4 versions. You must switch back to the CURRENT
+    version and then to the other test version. Sorry for this.
 
-WEH 990217
-
-RACK AND RECORDER TYPES
-
-Recorders
-
-K41 - DFC1100 - Records 16 channels at 4 Mbit/s sample rate
-k42 - DFC2100 - Records 16 channels at 4, 8, and 16 Mbit/s sample rate using
-                appropiate digital filters for all 
-
-Racks
-
-(K4-1* have 4 IFs, IF1 -> VC1-4, IF2->VC5-8, IF3->VC9-12, IF4->VC13-16)
-
-K4-1    - 2 and 4 MHz BW
-K4-1U   - 2 and 4 MHz BW, USB only
-
-(K4-2* can have arbitray IF patching and either 8 or 16 VCs)
-
-K4-2    - 2 and 32 MHz BW
-K4-2A   - 2 and 16 MHz BW
-K4-2BU  - 8 and 16 MHz BW, USB only
-
-VSOP    - 16 and 32 MHz BW, 4 VCs
-
-x/K3    - with K3 formatter (and possibly K-3 decoder)
-x/M4    - with M4 formatter (and possibly M-4 decoder)
-x/M4K3  - with M4 formatter and K3 decoder
-___________________________________________________________________________
-K4IB - Low-level K4/K3 interface bus command
-
-Syntax: K4IB=<device>,<command>,<mode>,<format>,<length>
-
-Response: K4IB/<data>
-
-<device>:  device on K-4 bus to send data to,
-           may be null if <mode>=POLL and must be for STATUS
-<command>: data to send, null if <mode>=POLL or STATUS or read
-<mode>:    normal (default), read, write, write/read, or "POLL", "STATUS"
-<format>:  response format, normal (default), ascii, binary
-<length>:  response length normal (default), decimal value
-
-normal mode depends on the command sent: if <command> contains a "? or
-is "STAT", "RD", "LC", or "LV" it defaults to write/read, otherwise if
-command is null it defaults to read, non-null write.
-
-normal format depends on the command sent: if <command> contains STAT
-or ERR?, or for <mode>=POLL or STATUS, the default is binary,
-otherwise it is ascii
-
-normal length depends on the command sent: if <command> is "RD" the,
-the default is 192, if "LV" it is 143, otherwise it is 22, meaningless
-for POLL and STATUS
-
-If the device is omitted for mode=POLL, all devices are polled and
-their status bytes are returned in the order of ascending IB
-addresses. If a device times-out on a poll operation, a "-1" is
-reported for its status byte.
-
-"STATUS" returns the bus status.
-
-Do not mix <command>s that require different modes or more than one
-response
-----------------------------------------------------------------------------
-ET - Stop tape
-
-Syntax: ET
-
-Response: none
-
-This command stops tape motion by issuing a STP command
-----------------------------------------------------------------------------
-ST - Start tape for recording or playback
-
-Syntax: ST=<record>
-
-Response: ST/<record>
-
-<record>: record (or on) (default) or play (or off). Additional response
-          only values are: ejecting, ff, rewind, ejecting, loading, stop,
-          and NULL
-
-This command starts he tape motion with a "REC" command if recording
-was requested or "PLY" if was not.
-----------------------------------------------------------------------------
-REC_MODE - Set recording mode
-
-Syntax: rec_mode=<bw>,<bits>,<chan>
-
-Response: rec_mode/<bw>,<bits>,<chan>,<form>,<ts>,<im>,<nm>,<ta>,<pb>
-
-<bw>:   overall recording bandwidth in MHz, 64 (default) , 128, or 256
-<bits>: number of bits per sample: 1 (default), 2, 4, or 8
-<chan>: channels recorded: 1, 2, 4, 8, or 16 (default)
-
-Monitor-only parameters: 
-
-<form>: recording format: OLD or NEW
-<ts>:   time stamp: ON or OFF 
-<im>:   insertion mode for time stamp: FB (fixed bit) or FT (fixed time)
-<nm>:   insertion number: 0 to 30
-<ta>:   TAP setting mode: 0 or 1
-<pb>:   pass-band setting: 0 to 16
-
-Only for DFC2100
-
-This command sets the recording mode and may require up to 17 seconds
-to be completed for DFC2100 due to digital filter set-up.
-----------------------------------------------------------------------------
-FF - Fast-forward the tape
-
-Syntax: FF
-Monitor-only paramaters: none
-
-This command start the tape moving fast-forward by issuing the DFF command.
-----------------------------------------------------------------------------
-RW - Rewind the tape
-
-Syntax: RW
-
-Monitor-only paramaters: none
-
-This command start the tape rewinding by issuing the DRW command.
-----------------------------------------------------------------------------
-REC - Recorder Utility Command
-
-Syntax: REC=<action>
-	REC/<position>,<drum>,<synch_test>,<synch>,<stat1>,<stat2>
-
-<action>:     eject (or unload) to eject the tape
-	      init (or ini) to initialize recorder
-              synch to synchronize INT and EXT 1 PPS
-              maximum seven digit ID point to move tape to
-	      drum_on to turn on the drum
-              drum_off to turm off the drum
-	      synch_on to turn on the synch test
-	      synch_off to turn off the synch test
-
-Monitor-only parameters: 
-
-<drum>:       on or off
-<synch_test>: on or off
-<synch>:      number lost?
-<stat1>:      status byte 1 in hex
-<stat2>:      status byte 2 in hex
-
-For eject (or unload), a UNL command is issued.
-
-For init a INI command is issued.
-
-For synch, a XSY command is issued
-
-For a positon, the tape is moved using PRL=positon command. A SRQ will
-be generated and logged when the tape reaches the desired point.
-
-For drum_on a "DRM=ON" command is issued; for drum_off, DRM=OFF.
-
-For synch_on a "SYT=ON" command is issued; for synch_off, SYT=OFF.
-----------------------------------------------------------------------------
-TAPE - Tape position
-
-Syntax:   tape=reset
-
-Response: tape/<position>,<drum>,<synch_test>,<synch>,<stat1>,<stat2>
-
-Monitor-only parameters: 
-
-<positionn>:  current sequence number
-<drum>:       on or off
-<synch_test>: on or off
-<synch>:      number lost?
-<stat1>:      status byte 1 in hex
-<stat2>:      status byte 2 in hex
-
-A reset is caused by issuing a REC=0,50 command, which resets
-position and records a small amount of tape.
-----------------------------------------------------------------------------
-PCALPORTS - Set PCAL extraction ports
-
-Syntax:   pcalports=<pca>,<pcb>
-Response: pcalports/<pca>,<pcb>,<ampa>,<ampb>,<phasea>,<phaseb>
-
-<pcX>:    1-16 input port number, or NS, where N=1-16 VC and
-          S= u or l for sideband
-
-Monitor-only parameters: 
-<ampX>:   is the amplitude in voltage percent, uncorrected for digital
-          sampling
-<phaseX>: phase in degrees relative to ?
-
-The phase-cal extraction port may be specified as the port number or
-as the VC and sideband to be used. The VC and sideband to be used can
-only be specified if the RECPORTS command has been used to specify which
-port that VC sideband has been connected to. If the PORTS command has
-specified a VC sideband for the requested port, this will be shown in
-the response rather than the port number.
-----------------------------------------------------------------------------
-BER - Bit error rate montior
-
-Syntax:   BER
-
-Response: BER/<D-2>,...,<D-11>
-
-This command issues the ERR? command and displays the returned error
-rates in decimal.
-----------------------------------------------------------------------------
-RECPORTS - Specify K-4 recorder inputs
-
-Syntax:   recports=<port>,<channel>,<port>,<channel>, ...
-	  recports=
-
-Response: recports/<port>,<channel>,<port>,<channel>, ...
-
-<port>:    K4 input port
-<channel>: NS when N=1-16, and S=u or l for sideband
-
-This command specifies the wiring of the VCs to the K-4 input ports. A
-"recports=" clears any existing definition. This command has no effect on
-the hardware. It is an "information only" command.
-The monitor response consists of 16 lines, one for each VC LO.
-----------------------------------------------------------------------------
-VxLO - Video Converter set-up
-
-Syntax:   VxLO=<vc>,<freq>
-          VxLO=alarm
-          VxLO=hold_on
-          VxLO=hold_off
-
-Response: VxLO/<VC>,<freq>,<yes/no>,<lock>
-
-x:        "C" for K4-1 systems, "A" or "B" for K4-2
-<vc>:     VC channel to set, 1-16 for K4-1, 1-8 for K4-2, no default
-<freq>:   LO frequency in MHz, 99.99-511.99 for K4-1, 499.99-999.99 for K4-2,
-          no default.
-
-Monitor-only parameters: 
-<yes/no>: present, yes or no
-<lock>:   lock or unlock or missing
-
-Comments:
-The monitor response consists of several lines, one for each VC LO.
-----------------------------------------------------------------------------
-Vx - Video Converter Set-up
-
-Syntax:   VC=<vc>,<hi/low>,<u/l>
-          VC=alarm
-          Vx=<vc>,<att>,<u/l>
-          Vx=alarm
-Response: VC/<vc>,<hi/low>,<u/l>,<yes/no>,<USBp>,<LSBp>
-          Vx/<vc>,<att>,<u/l>,<yes/no>,<USBp>,<LSBp>
-
-x:        "A" or "B" for K4-2
-<vc>:     VC channel to set
-<hi/low>: IF selection high or low, default according to VCLO frequency
-          if <vc>'s LO has been set-up, for K4-1 only
-<att>:    attenuator, 0-15 dB, default 0, for K4-2 only
-
-Monitor only:
-
-<yes/no>: present, yes or no
-<u/l>:    upper or lower for front panel display
-<XXXp>:   power in counts, 0-99, for that sideband, 10-90 nominal range
-
-Comments:
-The monitor response consists of several lines, one for each VC LO.
-----------------------------------------------------------------------------
-VCBW - VC BW Set-up
-
-Syntax:   VCBW=<bw>
-          VCIF=alarm
-Response: VCIF/<bw>
-
-
-<bw>:   VC bandwidth in MHz, not settable for K4-1 rack, but displayed as 2
-        for K4-1A either 2 (default) or 4
-        for K4-2  either 2 (default) or 32
-        for K4-2A either 2 (default) or 16
-        for K4-2B either 8 or  16 (default)
-----------------------------------------------------------------------------
-VCIF - VC IF Attenuator Set-up
-
-Syntax:   VCIF=<att1>,...,<att4>
-          VCIF=alarm
-Response: VCIF/<att1>,...,<att4>
-
-<attX>: attenuation value in dB, 0-15, default 0
-
-Comments:
-This command is only used for K4-1/1A racks
-
-Attenuator 1 is for VC 1-4
-Attenuator 2 is for VC 5-8
-Attenuator 3 is for VC 9-12
-Attenuator 4 is for VC 13-16
-----------------------------------------------------------------------------
-FORM - K3 formatter control and monitor
-
-Syntax:   form=mode,rate,input,aux,synch,aux_start,output
-          form=alarm
-
-Preliminary
-Response: form/mode,rate,input,aux,synch,aux_start,output,daytime,st1,st2,st3
-
-Final 
-Response: form/mode,rate,input,aux,synch,aux_start,output,test,sign,run/set,
-          rem/lcl,pwr,daytime,threshold,pend,1pps,frame,data,tape,plo,srq
-
-mode:     A, B (default), C D
-rate:     0.25,0.50,1.00,2.00,4.00 (default), 8.00 Mbit/sec
-input:    nor (default), ext, crc, low, high
-aux:      up to 12 hex digits, default is no change
-synch:    synch test on (default) or off
-aux_start:start new aux on next frm (default) or 1 PPS
-output:   nor (default), low, or high
-
-Monitor only parameters:
-
-stX:      status byte X,
-
-test:     fail or ok
-sign:     synch polarity: + or -
-run/set:  time set switch: run or set
-rem/lcl:  remote/local switch: rem or lcl
-pwr:      power interrupted: ok or pwr
-daytime:  date and time in format yydddhhmmss.sss
-threshold: synch test threshold: nanseconds (13.9x1,2,4,8,16,32)
-pend:     sample rate update: pend or ok
-1pps:     external 1 PPS: 1pps or ok
-frame:    clock: frame or ok
-data:     clock: data or ok
-tape:     clock: slip or ok
-plo:      lock or unlocked
-srq:      srq or ok
-----------------------------------------------------------------------------
-PATCH - K4 IF patching
-
-Syntax:   patch=loX,list
-Response: patch/loX,list
-
-lox:      LO being specified, X=1 or 2
-list:     for K4-1, one or more of 1-4, 5-8, 9-12, 13-16
-          for K4-2, one of more of A1,...,A8,B1,...,B8
-
-Comments:
-The command patch= clears the settings.
-
-The response prints one line per LO.
-----------------------------------------------------------------------------
-FMPATCH - K3 Formatter patching
-
-Syntax:   fmpatch=chx-y,zs,....
-Response: fmpatch/chx-y,zs,....
-
-Pairs of formatter input and VC outputs:
-chx-y:    formatter input, where x = 1-7 and y=1-4
-zs:       VC channel, z=1-16 for K4-1, z=A1,...,A8,B1,...,B8, s=U or L
-
-Comments:
-The command fmpatch= clears the settings.
-
-A table for K3 inputs and their mark III equivalents
-
-K3 input          mark III equivalent
-
-Ch1-1 to Ch7-1   VC1-7 USB
-Ch1-2 to Ch7-2   VC1-7 LSB
-Ch1-3 to Ch7-3   VC8-14 USB
-Ch1-4 to Ch7-4   VC8-14 LSB
-
-The response may span multiple lines, but the parameters are always printed
-in pairs.
-----------------------------------------------------------------------------
-FMPATCH - Mark IV Formatter patching
-
-Syntax:   fmpatch=fmxs,zs,....
-Response: fmpatch/fmxs,zs,....
-
-Pairs of formatter input and VC outputs:
-fmxs:     formatter input, where x = 1-16 and s=u or l
-zs:       VC channel, z=1-16 for K4-1,
-          z=A1,...,A8,B1,...,B8, s=U or L for K4-2
-
-Comments:
-The command fmpatch= clears the settings.
-
-The response may span multiple lines, but the parameters are always printed
-in pairs.
-----------------------------------------------------------------------------
-LO - K4 LO set-up command
-
-same as Mark 3, but accepts LO1-LO4 for K4-1 and LO1-16 for K4-2
-----------------------------------------------------------------------------
-LABEL - enter VSN
-
-Syntax:   label=vsn
-Response: label/vsn
-
-<vsn>:  8 digit VSN
-
-No checking is done (can any be done?) when a label is entered. If a
-schedule is halted when the label is entered, its execution will
-continue.
-----------------------------------------------------------------------------
-NEWTAPE - halt schedule until new tape is mounted
-
-
-Syntax:   newtape=<tape>
-          newtape=
-          newtape
-
-Response: newtape/"To continue, use LABEL command"
-
-<tape>:   tape number for the tape cart to load, 1-24, default is don't
-          use tape cart
-
-If a tape number is specified, the tape cart is instructed to insert
-the tape specified from the tape cart in the recorder. The cart is
-instructed to read the bar-code from the tape. A label= command is
-issued automatically. There is no response in this case.
-
-If no tape number is specified (i.e., newtape=), the response will be
-displayed and the schedule will be halted until a label is entered,
-just as for "newtape".
-----------------------------------------------------------------------------
-OLDTAPE - display dismount message
-
-Syntax:   oldtape=<tape>
-          oldtape=
-          oldtape
-
-Response: oldtape/"Dismount this tape now"
-
-
-<tape>:   tape number for the tape cart to load, 1-24, default is don't
-          use tape cart
-
-If a tape number is specified, the tape cart is instructed to return
-an ejected tape to the specified position in the tape cart.
-
-If no tape number is specified (i.e., oldtape=), this reponse will be
-displayed, just as for "oldtape".
-----------------------------------------------------------------------------
-CHECK - control module checking
-
-Must be modified to support K4/K3 modules
-----------------------------------------------------------------------------
-FIVEPT - five or more point source scan
-
-Cannot support K-4 power detectors: not linear, low resolution
-There is no way to turn off the signal.
-----------------------------------------------------------------------------
-ONOFF - on-off radiometry
-
-Cannot support K-4 power detectors: not linear, low resolution
-There is no way to turn off the signal.
-----------------------------------------------------------------------------
-TPI, TPICAL, TPZERO
-
-Cannot support K-4 power detectors: not linear, low resolution
-There is no way to turn off the signal.
-_________________________________________________________________________
-BOSS - main control program
-
-will be modified to execute the special procedure "preexp" from the
-experiment library (or from the station library if there is none in
-the experiment library) when a schedule is started.
-_________________________________________________________________________
-K4CON - K-4 Control program
-
-k4con is modeled on ibcon. It will only use the GPIB/RS232
-converter. There will be the following modes:
-
-2 - write ASCII
-5 - read ASCII, the upper limit on number of bytes is in ibuf[2]
-6 - read binary, the upper limit on number of bytes is in ibuf[2]
-7 - write ASCII, read ASCII, the upper limit on number of bytes is in ibuf[2]
-8 - write ASCII, read binary, the upper limit on number of bytes is in ibuf[2]
-9 - check status of bus
-10 - serial poll device specified (or all if deivce = '  '
-11 - write ASCII, read ASCII, the upper limit on number of bytes is in ibuf[2]
-    return time data for clock modeling
-_________________________________________________________________________
-CHEKR - Periodic Checking
-
-Every 20(?) seconds, for each module being checked CHEKR will check
-that all checkable parameters agree with set values.
-
-When there is no other activity chekr will check once per second for
-tape position (if the recorder is being checked) and for an SRQ.  If a
-SRQ is detected, the defined modules (being checked) will be polled
-and the state of the requesting modules reported.
-_________________________________________________________________________
-Monit
-
-Monit2: Will be updated to display K4 set-up parameters and tape position.
-MONIT3: system temperature data?
-_________________________________________________________________________
-Setcl
-
-Setcl: will be modified to support K3 formatter & K4 recorder time checks
-_________________________________________________________________________
-K4 rack and K4 recorder SCHEDULE PROCEDURES
-
-UNLOADER
-
-rec=eject
-
-LOADER
-
-tape=reset
-!+2s
-
-SET-UP PROCEDURES contain (rec_mode=... !* and !*+17s only present for K42):
-
-rec_mode=...
-!*
-VCLO=1,...
-VC=1,...
-VCLO=2,...
-VC=2,...
-.
-.
-.
-VCLO=16,...
-VC=16,...
-VCIF=...
-VCBW=...
-ports=...
-!*+17s
-_________________________________________________________________________
-K4 rack with K3 Formatter and VLBA recorder SCHEDULE PROCEDURES
-
-UNLOADER
-
-like hybrid MK3/VLBA
-
-LOADER
-
-like hybrid MK3/VLBA
-
-SET-UP PROCEDURES contain:
-
-VCLO=1,...
-VC=1,...
-VCLO=2,...
-VC=2,...
-.
-.
-.
-VCLO=16,...
-VC=16,...
-VCIF=at1,at2,at3,at4
-VCBW=...
-
-otherwise like hybrid MK3/VLBA (VC set-up as above, No IFD procedure, but
-tapeform, pass etc as for MK3/VLBA)
-_________________________________________________________________________
-K4 rack and K4 recorder STATION PROCEDURES
-
-UNLOD
-
-check=*,-tp
-unloader
-xdisp=on
-oldtape=$
-wakeup
-xdisp=off
-
-READY
-
-newtape=$
-loader
-label
-check=*,tp
-
-PREOB
-
-MIDOB
-
-POSTOB
-_________________________________________________________________________
-K4 SNAP FILE
-
-If the tape cart option is specified while running DRUDG: (1) the READY
-procedures will be used as READY=<tape>, tape numbers should start at
-1 and run cyclically through 24; (2) the UNLOD procedure will be be
-used as UNLOD=<tape>, where <tape> is the same as was used in the
-previous READY=<tape> command.
-_________________________________________________________________________

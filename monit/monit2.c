@@ -15,13 +15,13 @@
 #include "../include/fscom.h"
 
 extern struct fscom *shm_addr;
-int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack,
-  kK4drive,kK41drive_type,kK42drive_type;
+int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kM3rack,kM4rack,kV4rack,
+  kK4drive[2],kK41drive_type[2],kK42drive_type[2], selectm;
 
 main()
 {
   int it[6], iyear, isleep;
-  int rack,drive,drive_type;
+  int rack,drive,drive_type,i,select_old;
 
   int m2init();
   int mout2();
@@ -44,15 +44,17 @@ main()
   kVrack=rack==VLBA;
   kV4rack=rack==VLBA4;
 
-  drive=shm_addr->equip.drive;
-  drive_type=shm_addr->equip.drive_type;
-  kMdrive=drive==MK3 || drive==MK4;
-  kVdrive=drive==VLBA;
-  kS2drive=drive==S2;
-  kK4drive=drive==K4;
-  if(kK4drive) {
-    kK41drive_type=drive_type=K41;
-    kK42drive_type=drive_type=K42;
+  for (i=0;i<2;i++) {
+    drive=shm_addr->equip.drive[i];
+    drive_type=shm_addr->equip.drive_type[i];
+    kMdrive[i]=drive==MK3 || drive==MK4;
+    kVdrive[i]=drive==VLBA || drive==VLBA4;
+    kS2drive[i]=drive==S2;
+    kK4drive[i]=drive==K4;
+    if(kK4drive[i]) {
+      kK41drive_type[i]=drive_type=K41||drive_type==K41DMS;
+      kK42drive_type[i]=drive_type=K42||drive_type==K42DMS;
+    }
   }
 
   initscr();
@@ -66,13 +68,22 @@ main()
   curs_set(0);
   refresh();
 
+  selectm=shm_addr->select;
+  m2init();
+  select_old=selectm;
+
 /*  Initialize the display window */
 
-  m2init();
-
   while(1) {
+
     while(ERR!=getch())
       ;
+    selectm=shm_addr->select;
+    if(select_old!=selectm) {
+      m2init();
+      select_old=selectm;
+    }
+
     rte_time(it,&iyear);
     mout2(it,iyear);
     move(ROW1,COL1+16);

@@ -1,6 +1,6 @@
       subroutine pkhd(hd,icount,nsamp,odev,vltpos,peakv,mper,ip,echo,lu,
-     &                kpeak,pmin)
-      integer hd,icount,nsamp,odev,ip(5),lu
+     &                kpeak,pmin,indxtp)
+      integer hd,icount,nsamp,odev,ip(5),lu,indxtp
       real*4 vltpos,peakv,mper,pmin
       logical echo,kpeak
 C
@@ -33,10 +33,10 @@ C
 C
 C  get power and current location
 C
-      call mic_read(hd,ipass,kauto,micnow,ip)
+      call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       if(ip(3).ne.0) return
 C
-      call get_power(odev,nsamp,volts,minper,ip)
+      call get_power(odev,nsamp,volts,minper,ip,indxtp)
       if(ip(3).ne.0) return
 C
       pos(2)=0.0
@@ -68,13 +68,13 @@ C
           pos(2)=temp
         endif
 C
-        call set_mic(hd,ipass,kauto,micnow,ip,2.7)
+        call set_mic(hd,ipass,kauto,micnow,ip,2.7,indxtp)
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
         if(ip(3).ne.0) return
 C
-        call get_power(odev,nsamp,volts,minper,ip)
+        call get_power(odev,nsamp,volts,minper,ip,indxtp)
         if(ip(3).ne.0) return
 C
         pos(2*(i-1)+1)=micnow(hd)-micold
@@ -95,13 +95,13 @@ C
         pos(2)=pos(3)
         micnow(hd)=micold+(2+i)*step
 C
-        call set_mic(hd,ipass,kauto,micnow,ip,2.7)
+        call set_mic(hd,ipass,kauto,micnow,ip,2.7,indxtp)
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
         if(ip(3).ne.0) return
 C
-        call get_power(odev,nsamp,volts,minper,ip)
+        call get_power(odev,nsamp,volts,minper,ip,indxtp)
         if(ip(3).ne.0) return
 C
         pos(3)=micnow(hd)-micold
@@ -166,13 +166,13 @@ C
 C
 C Get the voltage position and power at the estimated peak slope
 C
-      call set_mic(hd,ipass,kauto,micnow,ip,0.40)
+      call set_mic(hd,ipass,kauto,micnow,ip,0.40,indxtp)
       if(ip(3).ne.0) return
       if(echo.or.j.eq.icount) then
-        call vlt_head(hd,vltpos,ip)
+        call vlt_head(hd,vltpos,ip,indxtp)
         if(ip(3).ne.0) return
 C
-        call get_power(odev,nsamp,peakv,mper,ip)
+        call get_power(odev,nsamp,peakv,mper,ip,indxtp)
         if(ip(3).ne.0) return
 C
         kpeak=abs(micpk-(pos(2)+micold)).lt.5.4.and.peakv.ge.pmin

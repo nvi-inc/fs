@@ -1,166 +1,19 @@
-define  as4c2         00000000000
-vcas4
-form=c2,8.000
-ifdas
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,9,21,3
-st=for,0,on
-decode=a,crc
-decode
+define  sched_initi   00000000000
 enddef
-define  as4c1         00000000000
-vcas4
-form=c1,8.000
-ifdas
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  as4a1         00000000000
-vcas4
-form=a,8.000
-ifdas
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  as2c2         00000000000
-vcas2
-form=c2,4.000
-ifdas
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,9,21
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  as2c1         00000000000
-vcas2
-form=c1,4.000
-ifdas
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,8,20
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  ifdas         00000000000 
-ifd=33,30,nor,nor
-if3=20,out,1,1
-if3=alarm
-lo=
-lo=lo1,8080.00,usb,rcp,1
-lo=lo2,2020.00,usb,rcp,1
-lo=lo3,8080.00,usb,rcp,1
-patch=
-patch=lo1,1l,2l,3l,4h
-patch=lo2,9l,10l,11h,12h,13h,14h
-patch=lo3,5h,6h,7h,8h
-enddef
-define  vcas4         00000000000
-vc01=130.99,4.000
-vc02=140.99,4.000
-vc03=170.99,4.000
-vc04=220.99,4.000
-vc05=340.99,4.000
-vc06=460.99,4.000
-vc07=470.99,4.000
-vc08=490.99,4.000
-vc09=200.99,4.000
-vc10=210.99,4.000
-vc11=230.99,4.000
-vc12=290.99,4.000
-vc13=320.99,4.000
-vc14=325.99,4.000
-!+1s
-valarm
-enddef
-define  vcas2         00000000000
-vc01=130.99,2.000
-vc02=140.99,2.000
-vc03=170.99,2.000
-vc04=220.99,2.000
-vc05=340.99,2.000
-vc06=460.99,2.000
-vc07=470.99,2.000
-vc08=490.99,2.000
-vc09=200.99,2.000
-vc10=210.99,2.000
-vc11=230.99,2.000
-vc12=290.99,2.000
-vc13=320.99,2.000
-vc14=325.99,2.000
-!+1s
-valarm
-enddef
-define  as2a1         00000000000
-vcas2
-form=a,4.000
-ifdas
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  wb4a1         00000000000
-vcwb4
-form=a,8.000
-ifdwb
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  wb2a1         00000000000
-vcwb2
-form=a,4.000
-ifdwb
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20
-st=for,0,on
-decode=a,crc
-decode
+define  sched_end     00000000000
 enddef
 define  caloff        00000000000
-rx=*,*,*,*,*,*,off
+"turn cal off
+"rx=*,*,*,*,*,*,off
 enddef
 define  calon         00000000000
-rx=*,*,*,*,*,*,on
+"turn cal on
+"rx=*,*,*,*,*,*,on
 enddef
 define  caltemps      00000000000
-caltemp1=20.8
-caltemp2=21.4
-caltemp3=20.8
+caltemp1=x
+caltemp2=x
+caltemp3=x
 enddef
 define  dat           00000000000
 vc15=200
@@ -181,7 +34,7 @@ rw
 et
 enddef
 define  ifdsx         00000000000
-ifd=33,30,nor,nor
+ifd=x,x,nor,nor
 if3=20,out,1,1
 if3=alarm
 lo=
@@ -191,18 +44,6 @@ lo=lo3,8080.00,usb,rcp,1
 patch=
 patch=lo1,1l,2l,3l,4h
 patch=lo2,9l,10l,11l,12h,13h,14h
-patch=lo3,5h,6h,7h,8h
-enddef
-define  ifdwb         00000000000
-ifd=33,30,nor,nor
-if3=20,in,2,2
-lo=
-lo=lo1,8080.00,usb,rcp,1
-lo=lo2,2020.00,usb,rcp,1
-lo=lo3,8080.00,usb,rcp,1
-patch=
-patch=lo1,1l,2l,3h,4h
-patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
 define  initi         00000000000
@@ -223,6 +64,9 @@ tpi=v9,v10,v11,v12,v13,v14,if2
 caltemps
 tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tsys2=v9,v10,v11,v12,v13,v14,if2
+"add your station command to measure the gps to fm output clock offset
+"gps-fmout=c2
+sy=run setcl &
 enddef
 define  midtp         00000000000
 ifd=max,max,*,*
@@ -232,10 +76,10 @@ tpzero=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tpzero=v9,v10,v11,v12,v13,v14,if2
 ifd=old,old,*,*
 if3=old,*,*,*,*,*
-rxmon
+"rxmon
 enddef
 define  min15         00000000000
-rxall
+"rxall
 wx
 sy=brk pcalr &
 !+15s
@@ -245,10 +89,10 @@ pcal
 enddef
 define  overnite      00000000000
 log=overnite
-setup
+setupa=1
 check=*,-tp
 min15@!,15m
-rxmon@!+2m30s,5m
+"rxmon@!+2m30s,5m
 pcal=0,60,by,25,0,5,11
 pcal
 enddef
@@ -320,7 +164,7 @@ et
 enddef
 define  ready         00000000000
 sxcts
-rxmon
+"rxmon
 newtape
 loader
 label
@@ -332,94 +176,6 @@ st=for,135,off
 et
 !+3s
 enddef
-define  rxall         00000000000
-rx=00,*,*,*,*,*,*
-rx
-rx=01,*,*,*,*,*,*
-rx
-rx=02,*,*,*,*,*,*
-rx
-rx=03,*,*,*,*,*,*
-rx
-rx=04,*,*,*,*,*,*
-rx
-rx=05,*,*,*,*,*,*
-rx
-rx=06,*,*,*,*,*,*
-rx
-rx=07,*,*,*,*,*,*
-rx
-rx=08,*,*,*,*,*,*
-rx
-rx=09,*,*,*,*,*,*
-rx
-rx=0a,*,*,*,*,*,*
-rx
-rx=0b,*,*,*,*,*,*
-rx
-rx=0c,*,*,*,*,*,*
-rx
-rx=0d,*,*,*,*,*,*
-rx
-rx=0e,*,*,*,*,*,*
-rx
-rx=0f,*,*,*,*,*,*
-rx
-rx=10,*,*,*,*,*,*
-rx
-rx=11,*,*,*,*,*,*
-rx
-rx=12,*,*,*,*,*,*
-rx
-rx=13,*,*,*,*,*,*
-rx
-rx=14,*,*,*,*,*,*
-rx
-rx=15,*,*,*,*,*,*
-rx
-rx=16,*,*,*,*,*,*
-rx
-rx=17,*,*,*,*,*,*
-rx
-rx=18,*,*,*,*,*,*
-rx
-rx=19,*,*,*,*,*,*
-rx
-rx=1a,*,*,*,*,*,*
-rx
-rx=1b,*,*,*,*,*,*
-rx
-rx=1c,*,*,*,*,*,*
-rx
-rx=1d,*,*,*,*,*,*
-rx
-rx=1e,*,*,*,*,*,*
-rx
-enddef
-define  rxmon         00000000000
-rx=lo,*,*,*,*,*,*
-rx
-rx=dcal,*,*,*,*,*,*
-rx
-rx=lo5mhz,*,*,*,*,*,*
-rx
-rx=pres,*,*,*,*,*,*
-rx
-rx=20k,*,*,*,*,*,*
-rx
-rx=70k,*,*,*,*,*,*
-rx
-enddef
-define  rxx           00000000000
-rx=$,*,*,*,*,*,*
-enddef
-define  setup         00000000000
-dat
-et
-enable=
-tape=alarm
-repro=byp,4,6
-enddef
 define  sfastf        00000000000
 sff
 !+$
@@ -430,20 +186,7 @@ srw
 !+$
 et
 enddef
-define  sx2a1         00000000000
-vcsx2
-form=a,4.000
-ifdsx
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  sx2c1         00000000000
+define  setupa        00000000000
 vcsx2
 form=c1,4.000
 ifdsx
@@ -453,10 +196,9 @@ enable=s1
 tape=low
 repro=byp,8,20
 st=for,0,on
-decode=a,crc
-decode
+checkcrc
 enddef
-define  sx2c2         00000000000
+define  setupb        00000000000
 vcsx2
 form=c2,4.000
 ifdsx
@@ -466,47 +208,7 @@ enable=s1
 tape=low
 repro=byp,9,21
 st=for,0,on
-decode=a,crc
-decode
-enddef
-define  sx4a1         00000000000
-vcsx4
-form=a,8.000
-ifdsx
-tapeforma
-pass=$,same,none
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  sx4c1         00000000000
-vcsx4
-form=c1,8.000
-ifdsx
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  sx4c2         00000000000
-vcsx4
-form=c2,8.000
-ifdsx
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,9,21,3
-st=for,0,on
-decode=a,crc
-decode
+checkcrc
 enddef
 define  sxcts         00000000000
 tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
@@ -585,60 +287,6 @@ vc14=282.99,2.000
 !+1s
 valarm
 enddef
-define  vcsx4         00000000000
-vc01=130.99,4.000
-vc02=140.99,4.000
-vc03=170.99,4.000
-vc04=230.99,4.000
-vc05=340.99,4.000
-vc06=420.99,4.000
-vc07=470.99,4.000
-vc08=490.99,4.000
-vc09=197.99,4.000
-vc10=202.99,4.000
-vc11=217.99,4.000
-vc12=247.99,4.000
-vc13=272.99,4.000
-vc14=282.99,4.000
-!+1s
-valarm
-enddef
-define  vcwb2         00000000000
-vc01=132.99,2.000
-vc02=172.99,2.000
-vc03=272.99,2.000
-vc04=432.99,2.000
-vc05=152.89,2.000
-vc06=272.89,2.000
-vc07=332.89,2.000
-vc08=352.89,2.000
-vc09=200.99,2.000
-vc10=210.99,2.000
-vc11=230.99,2.000
-vc12=285.99,2.000
-vc13=320.99,2.000
-vc14=325.99,2.000
-!+1s
-valarm
-enddef
-define  vcwb4         00000000000
-vc01=132.99,4.000
-vc02=172.99,4.000
-vc03=272.99,4.000
-vc04=432.99,4.000
-vc05=152.89,4.000
-vc06=272.89,4.000
-vc07=332.89,4.000
-vc08=352.89,4.000
-vc09=200.99,4.000
-vc10=210.99,4.000
-vc11=230.99,4.000
-vc12=285.99,4.000
-vc13=320.99,4.000
-vc14=325.99,4.000
-!+1s
-valarm
-enddef
 define  vread         00000000000
 vc01
 vc02
@@ -655,124 +303,84 @@ vc12
 vc13
 vc14
 enddef
-define  wb2c1         00000000000
-vcwb2
-form=c1,4.000
-ifdwb
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,8,20
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  wb2c2         00000000000
-vcwb2
-form=c2,4.000
-ifdwb
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,9,21
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  wb4c1         00000000000
-vcwb4
-form=c1,8.000
-ifdwb
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,8,20,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  wb4c2         00000000000
-vcwb4
-form=c2,8.000
-ifdwb
-tapeformc
-pass=$,same
-enable=s1
-tape=low
-repro=byp,9,21,3
-st=for,0,on
-decode=a,crc
-decode
-enddef
-define  checkr80      00000000000x
-check=*,-tp,-hd
+define  check80r      00000000000x
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
 parity=,,ab,on
-sfastf=9.33s
+sfastf=13.61s
 !+6s
 repro=raw,5,7
 !*
 st=rev,80,off
 !+3s
 parity
-!*+38.5s
+!*+53s
 et
-!+3s
+!+2s
 repro=byp,5,7
-check=*,tp,hd
 enddef
-define  checkf80      00000000000
-check=*,-tp,-hd
+define  check80f      00000000000
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
 parity=,,ab,on
-sfastr=9.33s
+sfastr=13.61s
 !+6s
 repro=raw,6,8
 !*
 st=for,80,off
 !+3s
 parity
-!*+38.5s
+!*+53s
 et
-!+3s
+!+2s
 repro=byp,6,8
-check=*,tp,hd
 enddef
-define  checkr135     00000000000
-check=*,-tp,-hd
+define  check135r     00000000000
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
 parity=,,ab,on
-sfastf=16.77s
+sfastf=22.68s
 !+6s
 repro=raw,5,7
 !*
 st=rev,135,off
-!+3s
+!+4s
 parity
-!*+41s
+!*+54s
 et
 !+3s
 repro=byp,5,7
-check=*,tp,hd
 enddef
-define  checkf135     97355220523
-check=*,-tp,-hd
+define  check135f     97355220523
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
 parity=,,ab,on
-sfastr=16.77s
+sfastr=22.68s
 !+6s
 repro=raw,6,8
 !*
 st=for,135,off
-!+3s
+!+4s
 parity
-!*+41s
+!*+54s
 et
 !+3s
 repro=byp,6,8
-check=*,tp,hd
 enddef
 define  tapeformv     98222124704x
 tapeform=  1,-319,  2,  31,  3,-271,  4,  79,  5,-223,  6, 127
 tapeform=  7,-175,  8, 175,  9,-127, 10, 223, 11, -79, 12, 271
 tapeform= 13, -31, 14, 319
+enddef
+define  pcalon        00000000000
+"no phase cal control is implemented here
+enddef
+define  pcaloff       00000000000 
+"no phase cal control is implemented here
+enddef
+define  checkcrc      00000000000 
+"comment out the following lines if you do _not_ have a mark iii decoder
+st=*,*,on
+decode=a,crc
+decode
 enddef

@@ -34,6 +34,7 @@ C  891113 NRV Created, copied from UNPVH
 C  910924 NRV Add option for model components
 C  930225 nrv implicit none
 C 970114 nrv Change 4 to max_sorlen/2
+C 000907 nrv Check NCH and IC1 before doing ICHMV.
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -44,7 +45,7 @@ C     The source name.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.gt.max_sorlen) THEN
+      IF  (ic1.eq.0.or.nch.le.0.or.NCH.gt.max_sorlen) THEN
         IERR = -101
         RETURN
       END IF  !
@@ -55,7 +56,7 @@ C     The band ID.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.gt.1) THEN
+      IF  (ic1.eq.0.or.nch.le.0.or.NCH.gt.1) THEN
         IERR = -102
         RETURN
       END IF  !

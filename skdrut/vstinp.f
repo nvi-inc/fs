@@ -11,6 +11,10 @@ C 960517 nrv New.
 C 960810 nrv Add tape motion to VUNPDAS call. Store LSTREC.
 C 960817 nrv Add tape speed and number of tapes to VUNPDAS.
 c 970123 nrv Add calls to ERRORMSG.
+C 991103 nrv Initialize LSTREC2 to 'none', LFIRSTREC to 'A'.
+C 991123 nrv Recorder 1 and 2, not a and b.
+C 001114 nrv For two recorders save second type same as first.
+C 010615 nrv Initialize lstrec2 to blanks.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -33,10 +37,10 @@ C LOCAL:
       double precision POSXYZ(3),AOFF
       INTEGER J,nr,maxt,npar(max_band),
      .idummy,ib,ii,nco,nhz,i,idum
-      integer*2 lidt(2),lid
+      integer*2 lidt(2),lid,ltlc
       character cstid(max_stn)
       real poslat,poslon
-      integer nheadstack
+      integer nstack
       integer il,ite,itl,itg
       integer iret ! return from vex routines
       character*128 cout,ctapemo
@@ -84,8 +88,9 @@ C     2. Now call routines to retrieve all the station information.
           ierr1=2
         endif
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
-     .    LIDT,lter,nheadstack,maxt,nr,lb,sefd,par,npar,
-     .    lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tp)
+     .    LIDT,lter,nstack,maxt,nr,lb,sefd,par,npar,
+     .    lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tp,
+     .    ltlc)
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'("VSTINP03 - Error getting $DAS information",
      .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
@@ -138,9 +143,15 @@ C
         else
           IDUMMY = ICHMV(LTERNA(1,I),1,lter,1,8)
         endif
-        idummy = ichmv(lstrec(1,i),1,lrec,1,8) ! recorder type
         idummy = ichmv(lstrack(1,i),1,lrack,1,8) ! rack type
-        nheads(i)=nheadstack ! number of headstacks
+        idummy = ichmv(lstrec(1,i),1,lrec,1,8) ! recorder 1
+        call ifill(lstrec2(1,i),1,8,oblank)
+        idummy = ichmv_ch(lstrec2(1,i),1,'none') ! default recorder 2
+        if (nr.eq.2) then 
+          idummy = ichmv(lstrec2(1,i),1,lrec,1,8) ! recorder 2 same as 1
+        endif 
+        idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! first recorder
+        nheadstack(i)=nstack ! number of headstacks
         maxtap(i) = maxt     ! tape length
         nrecst(i) = nr       ! number of recorders
         ns2tapes(i) = ns2tp  ! number of S2 tapes

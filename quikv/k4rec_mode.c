@@ -29,7 +29,9 @@ long ip[5];                           /* ipc parameters */
 
       ip[0]=ip[1]=0;
 
-      if(shm_addr->equip.drive == K4 && shm_addr->equip.drive_type != K42) {
+      if(!(shm_addr->equip.drive[0] == K4 &&
+	   (shm_addr->equip.drive_type[0] == K42 ||
+	    shm_addr->equip.drive_type[0] == K42DMS) )) {
 	ierr=-301;
 	goto error;
       }

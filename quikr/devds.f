@@ -23,7 +23,7 @@ C
 C  LOCAL VARIABLES
 C     NSUB - subroutine number in segment 
 C            8 = ANTENNA
-      integer*2 ibuf(40),ibuf2(70),icr,ilf
+      integer*2 ibuf(50),ibuf2(70),icr,ilf
 C               - input class buffer, output display buffer 
 C        ILEN   - length of buffers, chars
 C        NCH    - character counter 
@@ -33,7 +33,7 @@ C               - registers from EXEC
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
-      data ilen/80/,ilen2/140/
+      data ilen/100/,ilen2/140/
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED: 800831 

@@ -11,9 +11,10 @@
 
 #define MAX_OUT 256
 
-void vst_dis(command,ip)
+void vst_dis(command,ip,indx)
 struct cmd_ds *command;
 long ip[5];
+int indx;
 {
       struct vst_cmd lclc;
       int kcom, i, ierr, count;
@@ -29,14 +30,14 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if (kcom){
-         lclc.dir = shm_addr->idirtp;
-         lclc.speed = shm_addr->ispeed;
-	 lclc.cips = shm_addr->cips;
-         lclc.rec = shm_addr->venable.general;
+         lclc.dir = shm_addr->idirtp[indx];
+         lclc.speed = shm_addr->ispeed[indx];
+	 lclc.cips = shm_addr->cips[indx];
+         lclc.rec = shm_addr->venable[indx].general;
       } else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mcb5vst(&lclc, response.data);
-         lclc.rec = shm_addr->venable.general;
+         lclc.rec = shm_addr->venable[indx].general;
          get_res(&response, &buffer); mcb1vst(&lclc, response.data);
          if(response.state == -1) {
             clr_res(&buffer);

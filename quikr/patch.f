@@ -20,7 +20,7 @@ C
 C   LOCAL VARIABLES 
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
-      dimension ifp(14) 
+      dimension ifp(16) 
 C               - temporary holder for decoded Patching.
 C        ICHNL  - channel number
 C        IVC    - VC number 
@@ -83,7 +83,7 @@ C
       ich = 1+ieq
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
       if (cjchar(parm,1).eq.',') then
-         do i=1,14
+         do i=1,16
             ifp2vc(i) = 0
          enddo
         call fs_set_ifp2vc(ifp2vc)
@@ -92,11 +92,7 @@ C
         ip(3) = -201
       else
         ichnl = ias2b(parm,3,1)
-        if(MK3.eq.rack.or.MK4.eq.rack) then
-           if (ichnl.lt.1 .or. ichnl.gt.3) ip(3)= -201
-        else if(K4.eq.rack) then
-           if (ichnl.lt.1 .or. ichnl.gt.2) ip(3)= -301
-        endif
+        if (ichnl.lt.1 .or. ichnl.gt.3) ip(3)= -201
       endif
       if (ip(3).eq.-201) return
 C 
@@ -104,7 +100,7 @@ C     2.2  2nd and subsequent parms, VC#, H or L.
 C 
       ifc = 0
       call fs_get_ifp2vc(ifp2vc)
-      do i=1,14 
+      do i=1,16 
         ifp(i) = ifp2vc(i)
       enddo
 C
@@ -117,7 +113,7 @@ C
         if (ifc.le.0) then
           ip(3) = -102
         else                          !  set up the common array now
-          do i=1,14
+          do i=1,16
             ifp2vc(i) = ifp(i)
           enddo
         endif
@@ -135,20 +131,37 @@ C
          ivl = 1
          if (cjchar(parm,nch+1).eq.'l') ivl = -1 
          ifp(ivc) = ivl*ichnl
-      else if(K4.eq.rack) then
+      else if(K4.eq.rack.or.K4MK4.eq.rack.or.K4K3.eq.rack) then
          call gtfld(ibuf,isave,ich-2,ic1,ic2)
          il=ic2-ic1+1
-         if (ichcm_ch(ibuf,ic1,'1-4').eq.0.and.il.eq.3) then
-            ifp(1)=ichnl
-         else if (ichcm_ch(ibuf,ic1,'5-8').eq.0.and.il.eq.3) then
-            ifp(5)=ichnl
-          else if (ichcm_ch(ibuf,ic1,'9-12').eq.0.and.il.eq.4) then
-            ifp(9)=ichnl
-         else if (ichcm_ch(ibuf,ic1,'13-16').eq.0.and.il.eq.5) then
-            ifp(13)=ichnl
+         call fs_get_rack_type(rack_type)
+         if(rack_type.eq.K41.or.rack_type.eq.K41U) then
+            if (ichcm_ch(ibuf,ic1,'1-4').eq.0.and.il.eq.3) then
+               ifp(1)=ichnl
+            else if (ichcm_ch(ibuf,ic1,'5-8').eq.0.and.il.eq.3) then
+               ifp(5)=ichnl
+            else if (ichcm_ch(ibuf,ic1,'9-12').eq.0.and.il.eq.4) then
+               ifp(9)=ichnl
+            else if (ichcm_ch(ibuf,ic1,'13-16').eq.0.and.il.eq.5) then
+               ifp(13)=ichnl
+            else
+               ip(3) = -204
+               if (ip(3).lt.0) return
+            endif
          else
-            ip(3) = -204
-            if (ip(3).lt.0) return
+            ipos=-1
+            if (ichcm_ch(ibuf,ic1,'a').eq.0.and.il.eq.2) then
+               ipos=0
+            else if (ichcm_ch(ibuf,ic1,'b').eq.0.and.il.eq.2) then
+               ipos=8
+            endif
+            ivc = ias2b(ibuf,ic1+1,1)
+            if(ipos.ne.-1.and.ivc.gt.0.and.ivc.lt.9) then
+               ifp(ipos+ivc)=ichnl
+            else
+               ip(3) = -205
+               if (ip(3).lt.0) return
+            endif
          endif
       endif
       ifc = ifc+1 

@@ -54,7 +54,7 @@ main(){
   int cls_rcv();
   long class, ip[5];
   int rtn1, rtn2;
-  char inbuf[81];
+  char inbuf[120];
   int i;
   int len;
   int hash;

@@ -41,6 +41,8 @@ int *ierr;
 /*  request.addr=0x05; add_req(&buffer,&request);
   not implemented yet
 */
+  request.addr=0x06; add_req(&buffer,&request);
+  request.addr=0x07; add_req(&buffer,&request);
 
   end_req(ip,&buffer);
   nsem_take("fsctl",0);
@@ -49,6 +51,8 @@ int *ierr;
   skd_par(ip);
 
   if (ip[2]<0) {  
+    shm_addr->bbc_tpi[ind][0]=65536;
+    shm_addr->bbc_tpi[ind][1]=65536;
     *ierr=-201;
     return;
   }

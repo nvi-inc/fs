@@ -72,6 +72,7 @@ main(int argc, char **argv)
   char *input;
   char *previous_input;
   int length;
+  int kfirst=1;
 
   setup_ids();
   sig_ignore();
@@ -118,6 +119,10 @@ main(int argc, char **argv)
       add_history(input);
 
       /* Execute this SNAP command via "boss". */
+      /* wait for iclopr to be defined on the first time through */
+      while (kfirst && shm_addr->iclopr==-1)
+	rte_sleep(2);
+      kfirst=0;
       cls_snd( &(shm_addr->iclopr), input, length, 0, 0);
       skd_run("boss ",'n',ipr);
 

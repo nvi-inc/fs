@@ -5,6 +5,9 @@ C  FRINIT initializes arrays in freqs.ftni before reading from a schedule file.
 C 960610 nrv New.
 C 960709 nrv Add barrel initialization.
 C 970206 nrv Remove itra2,ihddi2,ihdpo2 and add max_headstack
+C 991119 nrv Add initialization of trkn.
+C 000126 nrv Add initialization of ntrkn.
+C 010207 nrv Add initialization of freqpcal and freqpcal_base
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -22,6 +25,10 @@ C Local
       do j=1,nco
         do i=1,nst
           nchan(i,j)=0
+          do k=1,max_band
+            trkn(k,i,j)=0.0
+            ntrkn(k,i,j)=0
+          enddo
           idum=ichmv_ch(lbarrel(1,i,j),1,'NONE')
         enddo
       enddo 
@@ -62,6 +69,8 @@ C Local
       do i=1,nco
         do j=1,nst
           do k=1,max_chan
+            freqpcal(k,j,i) = -1.d0
+            freqpcal_base(k,j,i) = -1.d0
             idum=ichmv_ch(lifinp(k,j,i),1,'  ')
           enddo
         enddo

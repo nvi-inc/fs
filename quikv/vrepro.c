@@ -14,7 +14,7 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, indx, ichold, i, count;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
@@ -32,9 +32,12 @@ long ip[5];                           /* ipc parameters */
 
       ini_req(&buffer);
 
-      ind=itask-1;                    /* index for this module */
+      indx=itask-1;                    /* index for this module */
 
-      memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       if (command->equal != '=') {            /* read module */
          request.type=1;
@@ -45,7 +48,9 @@ long ip[5];                           /* ipc parameters */
          request.addr=0x90; add_req(&buffer,&request);
          request.addr=0x91; add_req(&buffer,&request);
 
-	 if(shm_addr->equip.drive == VLBA4) {
+	 if(shm_addr->equip.drive[indx] == VLBA4||
+	    (shm_addr->equip.drive[indx]==VLBA &&
+	     shm_addr->equip.drive_type[indx]==VLBAB)) {
 	   request.addr=0x92; add_req(&buffer,&request);
 	   request.addr=0x93; add_req(&buffer,&request);
 	 }
@@ -53,7 +58,9 @@ long ip[5];                           /* ipc parameters */
          request.addr=0x94; add_req(&buffer,&request);
          request.addr=0x95; add_req(&buffer,&request);
 
-	 if(shm_addr->equip.drive == VLBA4) {
+	 if(shm_addr->equip.drive[indx] == VLBA4||
+	 (shm_addr->equip.drive[indx]==VLBA &&
+	  shm_addr->equip.drive_type[indx]==VLBAB)) {
 	   request.addr=0x96; add_req(&buffer,&request);
 	   request.addr=0x97; add_req(&buffer,&request);
 	 }
@@ -63,7 +70,7 @@ long ip[5];                           /* ipc parameters */
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
         else if (command->argv[1]==NULL) /* special cases */
          if (*command->argv[0]=='?') {
-            vrepro_dis(command,itask,ip);
+            vrepro_dis(command,itask,ip,indx);
             return;
          } else if(0==strcmp(command->argv[0],ADDR_ST)) {
             ierr=-301;
@@ -77,20 +84,20 @@ long ip[5];                           /* ipc parameters */
 
 parse:
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->vrepro,sizeof(lcl));
+      memcpy(&lcl,shm_addr->vrepro+indx,sizeof(lcl));
 
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=vrepro_dec(&lcl,&count, ptr);
+        ierr=vrepro_dec(&lcl,&count, ptr,indx);
         if(ierr !=0 ) goto error;
       }
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
-      memcpy(&shm_addr->vrepro,&lcl,sizeof(lcl));
+      ichold=shm_addr->check.rec[indx];
+      shm_addr->check.rec[indx]=0;
+      memcpy(shm_addr->vrepro+indx,&lcl,sizeof(lcl));
       
 /* format buffers for mcbcn */
       
@@ -101,7 +108,7 @@ parse:
 	vrepro90mc(&request.data,&lcl); add_req(&buffer,&request);
       }
 
-      if(lcl.head[0]==1) {
+      if(lcl.head[1]==1) {
 	request.addr=0x91;
 	vrepro91mc(&request.data,&lcl); add_req(&buffer,&request);
       }
@@ -111,29 +118,29 @@ parse:
 	vrepro90mc(&request.data,&lcl); add_req(&buffer,&request);
       }
 	
-      if(lcl.head[0]==2) {
+      if(lcl.head[1]==2) {
 	request.addr=0x93;
 	vrepro91mc(&request.data,&lcl); add_req(&buffer,&request);
       }
 
       if(lcl.head[0]==1) {
 	request.addr=0x94;
-	vrepro94mc(&request.data,&lcl); add_req(&buffer,&request);
+	vrepro94mc(&request.data,&lcl,indx); add_req(&buffer,&request);
       }
       
-      if(lcl.head[0]==1) {
+      if(lcl.head[1]==1) {
 	request.addr=0x95;
-	vrepro95mc(&request.data,&lcl); add_req(&buffer,&request);
+	vrepro95mc(&request.data,&lcl,indx); add_req(&buffer,&request);
       }
 
       if(lcl.head[0]==2) {
 	request.addr=0x96;
-	vrepro94mc(&request.data,&lcl); add_req(&buffer,&request);
+	vrepro94mc(&request.data,&lcl,indx); add_req(&buffer,&request);
       }
       
-      if(lcl.head[0]==2) {
+      if(lcl.head[1]==2) {
 	request.addr=0x97;
-	vrepro95mc(&request.data,&lcl); add_req(&buffer,&request);
+	vrepro95mc(&request.data,&lcl,indx); add_req(&buffer,&request);
       }
 
       request.addr=0x98;
@@ -142,7 +149,8 @@ parse:
       request.addr=0x99;
       vrepro99mc(&request.data,&lcl); add_req(&buffer,&request);
 
-      if(shm_addr->equip.drive_type == VLBA2) {
+      if(shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2) {
 	request.addr=0x9c;
 	vrepro9cmc_vlba2(&request.data,&lcl); add_req(&buffer,&request);
       }
@@ -156,14 +164,14 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-        shm_addr->check.vkrepro = TRUE;
+        shm_addr->check.vkrepro[indx] = TRUE;
         if (ichold >= 0)
           ichold=ichold % 1000 + 1;
-        shm_addr->check.rec=ichold;
+        shm_addr->check.rec[indx]=ichold;
       }
 
       if(ip[2]<0) return;
-      vrepro_dis(command,itask,ip);
+      vrepro_dis(command,itask,ip,indx);
       return;
 
 error:

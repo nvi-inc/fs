@@ -1,0 +1,19 @@
+                xyoff - x-y source position offset
+
+Syntax:     xyoff=xoff,yoff
+
+Response:   xyoff/xoff,yoff
+
+
+Settable parameters:
+x         offset in X coordinate, in numeric angle/degrees
+          format. Response is in degrees.
+y         offset in Y coordinate, in numeric angle/degrees
+          format. Response is in degrees.
+
+Monitor-only parameters: none
+
+Comments: 
+The antenna will move to the offset position when this command is
+issued. To return to the on-source position, issue this command
+with zero offsets.

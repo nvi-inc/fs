@@ -768,10 +768,14 @@ int parity;
      } else
       mcb.c_cflag &= ~ PARENB;
 
+#ifdef USE_OLD_SPECIAL_FLAGS
     if(digiboard)
         mcb.c_cflag |= B50;
     else
       mcb.c_cflag |= B38400;
+#else
+    mcb.c_cflag |= B57600;
+#endif
 
     mcb.c_iflag &= ~( INPCK   |IGNPAR  |PARMRK  |ISTRIP  |BRKINT  |IGNCR   |ICRNL   |INLCR   
                      |IXOFF   |IXON    |IMAXBEL |IUCLC   );
@@ -807,6 +811,7 @@ int parity;
        exit(-1);
     }
 
+#ifdef USE_OLD_SPECIAL_FLAGS
     if(!digiboard) {
       if(-1 == ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)) {
         perror("set_mcb:getting serial");
@@ -829,6 +834,7 @@ int parity;
           exit(-1);
         }
     }
+#endif
 
 }
 

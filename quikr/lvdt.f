@@ -8,7 +8,6 @@ C
       dimension ip(1),ip1(5),ip2(5)
 C        IP(1) - class # of input parameter buffer
 C        ITASK - 3 for LVDT voltage position/reading
-C        ITASK - 4 for voltage reading with LVDT turned off
 C
 C  OUTPUT VARIABLES:
 C
@@ -21,7 +20,7 @@ C
 C
       real*4 microns(2),volts(2),volt(2)
       logical kvolts(2)
-      dimension iparm(2),ireg(2),ipas(2)
+      dimension iparm(2),ireg(2)
       integer*2 ibuf(40),ibuf2(40)
       integer get_buf
       character cjchar
@@ -37,6 +36,12 @@ C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
 C
+      if( itask.eq.3) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       ichold = -99
       ioclas = 0
       norec = 0
@@ -56,9 +61,6 @@ C
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) then
         goto 500
-      else if (itask.eq.4) then
-        ip(3)=-321
-        goto 990
       else if (cjchar(ibuf,ieq+1).eq.'?') then
         goto 600
       else if (ichcm(ibuf,ieq+1,lalrm,1,ilenal).eq.0) then
@@ -74,16 +76,22 @@ C
       ich = ieq+1
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
-        kvolts(1)=.false.
-      else if(cjchar(parm,1).eq.','
-     &       .and.(VLBA.eq.drive.or.MK3B.eq.drive_type)) then
-        ip(3)=-501
+      if(cjchar(parm,1).eq.','
+     &       .and.(
+     $       (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $       .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $       )
+     &       ) then
+         kvolts(1)=.false.
+      else if (cjchar(parm,1).eq.',') then
+         ip(3)=-501
         goto 990
       else if(cjchar(parm,1).eq.'*') then
-        call fs_get_ipashd(ipashd)
-        call fs_get_posnhd(posnhd)
-        call mic2vlt(1,ipashd(1),kautohd_fs,posnhd(1),volts(1),ip)
+        call fs_get_ipashd(ipashd,indxtp)
+        call fs_get_posnhd(posnhd,indxtp)
+        call mic2vlt(1,ipashd(1,indxtp),kautohd_fs(indxtp),
+     $       posnhd(1,indxtp), volts(1),ip,indxtp)
         if(ip(3).ne.0) goto 990
         kvolts(1)=.true.
       else
@@ -102,13 +110,17 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kvolts(2)=.false.
-      else if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
+      else if((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp))
+     $       .or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))
+     $       ) then
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
-        call fs_get_ipashd(ipashd)
-        call fs_get_posnhd(posnhd)
-        call mic2vlt(2,ipashd(2),kautohd_fs,posnhd(2),volts(2),ip)
+        call fs_get_ipashd(ipashd,indxtp)
+        call fs_get_posnhd(posnhd,indxtp)
+        call mic2vlt(2,ipashd(2,indxtp),kautohd_fs(indxtp),
+     $       posnhd(2,indxtp),volts(2),ip,indxtp)
         if(ip(3).ne.0) goto 990
         kvolts(2)=.true.
       else
@@ -131,31 +143,31 @@ C
 C
 C  3. Now handle head positioning
 C
-      call fs_get_icheck(icheck(20),20)
-      ichold = icheck(20)
-      icheck(20) = 0
-      call fs_set_icheck(icheck(20),20)
+      call fs_get_icheck(icheck(20+indxtp-1),20+indxtp-1)
+      ichold = icheck(20+indxtp-1)
+      icheck(20+indxtp-1) = 0
+      call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
 C
 C  save the results in common
 C
-      call fs_get_ipashd(ipashd)
-      call fs_get_posnhd(posnhd)
+      call fs_get_ipashd(ipashd,indxtp)
+      call fs_get_posnhd(posnhd,indxtp)
       do i=1,2
         if(kvolts(i)) then
-          call vlt2mic(i,0,.false.,volts(i),microns(i),ip)
-          posnhd(i)=microns(i)
-          ipashd(i)=0
-          kposhd_fs(i)=.true.
-          if(i.eq.1) kautohd_fs=.false.
+          call vlt2mic(i,0,.false.,volts(i),microns(i),ip,indxtp)
+          posnhd(i,indxtp)=microns(i)
+          ipashd(i,indxtp)=0
+          kposhd_fs(i,indxtp)=.true.
+          if(i.eq.1) kautohd_fs(indxtp)=.false.
         endif
       enddo
-      call fs_set_ipashd(ipashd)
-      call fs_set_posnhd(posnhd)
+      call fs_set_ipashd(ipashd,indxtp)
+      call fs_set_posnhd(posnhd,indxtp)
 C
-      call lvdonn('lock',ip)
+      call lvdonn('lock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call set_vlt(ihd,volts,ip1,0.40)
+      call set_vlt(ihd,volts,ip1,0.40,indxtp)
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
@@ -164,9 +176,11 @@ C
 C
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
+      call fs_get_select(select)
+      if(select+1.ne.indxtp) goto 500
       if(MK3.eq.rack) THEN
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,1,8)
@@ -192,15 +206,12 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(K4.eq.rack.and.
-     &       (K41K3.eq.rack_type.or.K41UK3.eq.rack_type.or.
-     &       K42K3.eq.rack_type.or.K42AK3.eq.rack_type.or.
-     &       K42BUK3.eq.rack_type)) then
+      else if(K4K3.eq.rack) then
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         call fc_set_k3aux(lauxfm,ip)
       else if(MK4.eq.rack.or.VLBA4.eq.rack.or.K4MK4.eq.rack) THEN
-        call frmaux4(lauxfm4,posnhd)
+        call frmaux4(lauxfm4,posnhd(1,indxtp))
         ibuf2(1) = 9
         call char2hol('fm/AUX 0x',ibuf2(2),1,9)
         idumm1 = ichmv(ibuf2,12,lauxfm4,1,4)
@@ -213,7 +224,7 @@ C
         call rmpar(ip)
       else if(rack.eq.VLBA) then
         if(ihd.eq.2) go to 500
-        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+        call frmaux(lauxfm,nint(posnhd(1,indxtp)),ipashd(1,indxtp))
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
@@ -230,23 +241,22 @@ C
 C turn on LVDT if we didn't earlier
 C
       ip(3)=0
-      if(ieq.eq.0.and.itask.eq.3) then
-        call lvdonn('lock',ip)
-      else if(itask.eq.4) then
-        call lvdofn('lock',ip)
+      if(ieq.eq.0) then
+        call lvdonn('lock',ip,indxtp)
       endif
       if(ip(3).ne.0) go to 800
 C
 C  read the postions
 C
       ihd=3
-      if(VLBA.eq.drive.or.MK3B.eq.drive_type) ihd=1
-      call vlt_read(ihd,volts,ip)
+      if((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp)).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))) ihd=1
+      call vlt_read(ihd,volts,ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
 C  Turn off LVDT Osillator
 C
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       if(ip(3).ne.0) go to 990
 C
 C  6. Now we must prepare a response.
@@ -256,46 +266,58 @@ C
       if (nch.eq.0) nch = nchar+1
       nch = ichmv_ch(ibuf,nch,'/')
 C
-      if(itask.eq.3) then
-      call fs_get_ipashd(ipashd)
-      call fs_get_posnhd(posnhd)
+      call fs_get_ipashd(ipashd,indxtp)
+      call fs_get_posnhd(posnhd,indxtp)
+      call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-        do i=1,2
-          if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-            call mic2vlt(i,ipashd(i),kautohd_fs,posnhd(i),volt(i),ip)
-            if(drive_type.ne.VLBA2) then
-               nch = nch+ir2as(volt(i),ibuf,nch,8,3)
-            else
+      do i=1,2
+         if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     &        ) then
+            call mic2vlt(i,ipashd(i,indxtp),kautohd_fs(indxtp),
+     $           posnhd(i,indxtp), volt(i),ip,indxtp)
+            if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2
+     $           ) then
                nch = nch+ir2as(volt(i),ibuf,nch,7,0)
+            else
+               nch = nch+ir2as(volt(i),ibuf,nch,8,3)
             endif 
-          endif
-          nch = mcoma(ibuf,nch)
-        enddo
-      endif
+         endif
+         nch = mcoma(ibuf,nch)
+      enddo
 C
       do i=1,2
-        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-          if(drive_type.ne.VLBA2) then
-            nch = nch+ir2as(volts(i),ibuf,nch,8,3)
-          else
+         if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     &        ) then
+          if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
             nch = nch+ir2as(volts(i),ibuf,nch,7,0)
+          else
+            nch = nch+ir2as(volts(i),ibuf,nch,8,3)
           endif
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
-      if(itask.eq.3) then
-        do i=1,2
-          if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
-            if(drive_type.ne.VLBA2) then
-              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
+      do i=1,2
+         if(i.eq.1.or.
+     $        (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &        (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     &        ) then
+            if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2
+     $           ) then
+               nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,7,0)
             else
-              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,7,0)
+               nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
             endif
-          endif
-          nch = mcoma(ibuf,nch)
-        enddo
-      endif
+         endif
+         nch = mcoma(ibuf,nch)
+      enddo
 C
       nch = nch-2
       call add_class(ibuf,-nch,ioclas,norec)
@@ -305,7 +327,11 @@ C
 C  7. Reset alarm or Test/Reset
 C
 700   continue
-      call char2hol('hd',ibuf2(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('h1',ibuf2(2),1,2)
+      else
+         call char2hol('h2',ibuf2(2),1,2)
+      endif
       iclass = 0
       nrec=0
       call add_class(ibuf2,-4,iclass,nrec)
@@ -317,10 +343,8 @@ C
 C   turn off LVDT, for an error
 C
 800   continue
-      if(itask.eq.3) then
-        call lvdofn('unlock',ip2)
-        if(ip2(3).ne.0) call logit7(0,0,0,0,ip2(3),ip2(4),ip2(5))
-      endif
+      call lvdofn('unlock',ip2,indxtp)
+      if(ip2(3).ne.0) call logit7(0,0,0,0,ip2(3),ip2(4),ip2(5))
       call clrcl(ip(1))
       ip(1)=0
       ip(2)=0
@@ -337,12 +361,12 @@ C
       call char2hol('q@',ip(4),1,2)
 999   continue
       if (ichold.ne.-99) then
-        icheck(20) = ichold
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1) = ichold
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       if (ichold.ge.0) then
-        icheck(20) = mod(ichold,1000)+1
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1) = mod(ichold,1000)+1
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       return
       end

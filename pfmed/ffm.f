@@ -88,6 +88,8 @@ C 5.  INITIALIZED VARIABLES: none
 C
 C 6.  PROGRAMMER: C. Ma
 C     LAST MODIFIED: <910323.2042>
+c
+C PB 010904 Mod. from J. Quick for .prc fix.   
 C
 C     PROGRAM STRUCTURE
 C
@@ -109,20 +111,28 @@ C     Move first name to buffer with initialized prefix.
           write(lui,1101)
 1101      format(" no filename given")
           return
-        else if (nch1.gt.8) then
-          write(lui,9100)
-9100      format(" file names must be 8 characters or less")
-          return
-        end if
-        lnam1 = ib(ic1+1:ic2-1)
+        else 
+          if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
+            nch1 = nch1-4
+          end if
+          if (nch1.gt.8) then
+            write(lui,9100)
+9100        format(" file names must be 8 characters or less")
+            return
+          end if
+         end if
+        lnam1 = ib(ic1+1:ic1+nch1)
 C     Move second name if present.
         if (ichi.gt.ic2) then
           nch2 = ichi-ic2
-          if ((nch2.le.0).or.(nch2.gt.8)) then
+          if ((nch2.gt.4).and.(ib(ic2+nch2-3:ic2+nch2).eq.'.prc')) then
+            nch2 = nch2-4
+          end if
+          if (nch2.gt.8) then
             write(lui,9100)
             return
-          end if
-          lnam2 = ib(ic2+1:ichi)
+           end if
+          lnam2 = ib(ic2+1:ic2+nch2)
         end if
       endif
   

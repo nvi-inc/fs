@@ -1,5 +1,5 @@
-      subroutine vlt2mic(ihead,ipass,kauto,volt,micron,ip)
-      integer ihead,ip(5),ipass
+      subroutine vlt2mic(ihead,ipass,kauto,volt,micron,ip,indxtp)
+      integer ihead,ip(5),ipass,indxtp
       real*4 micron,volt
       logical kauto
 C
@@ -21,23 +21,24 @@ C
       include '../include/fscom.i'
 C
       if(volt.ge.0.0) then
-        micron=volt*pslope(ihead)
+        micron=volt*pslope(ihead,indxtp)
       else
-        micron=volt*rslope(ihead)
+        micron=volt*rslope(ihead,indxtp)
       endif
       if(ipass.ne.0) then
-        if(ihead.eq.1) then
-          if(kauto) then
-            call fs_get_wrhd_fs(wrhd_fs)
-            ipitch=wrhd_fs
-          else
-            ipitch=0
-          endif
-        else
-          ipitch=rdhd_fs
-        endif
+         if(ihead.eq.1) then
+            if(kauto) then
+               call fs_get_wrhd_fs(wrhd_fs,indxtp)
+               ipitch=wrhd_fs(indxtp)
+            else
+               ipitch=0
+            endif
+         else
+            call fs_get_rdhd_fs(rdhd_fs,indxtp)
+            ipitch=rdhd_fs(indxtp)
+         endif
         call fs_get_drive(drive)
-        if(drive.eq.VLBA) then
+        if(drive(indxtp).eq.VLBA) then
            if(mod(ipass,2).eq.0) then
               if(ipitch.eq.2) micron=micron-698.5
            else
@@ -50,8 +51,8 @@ C
               if(ipitch.eq.2) micron=micron+698.5
            endif
         endif
-        micron=micron-foroff(ihead)
-        if(mod(ipass,2).eq.0) micron=micron-revoff(ihead)
+        micron=micron-foroff(ihead,indxtp)
+        if(mod(ipass,2).eq.0) micron=micron-revoff(ihead,indxtp)
       endif
 C
       return

@@ -1,0 +1,28 @@
+     bit_density - recording bit density (VLBA, VLBA4 drives)
+
+Syntax:     bit_density=bpi
+
+Response:   bit_density/bpi
+
+
+Settable parameters:
+bpi       Bit density in bits per inch.
+
+Monitor-only parameters: none
+
+Comments: 
+
+This command specifies the total bit density including all header
+and parity bits. The specified bit density and the formatter set-
+up determine the default speed for the st command.
+
+The bit density can be set to any positive value less than 232.
+Useful values are 33333 for Mark III data-replacement format and
+34020 for the VLBA non-data-replacement format.
+
+When calculating speeds from bit densities it is useful to
+remember that for a nominal per track bit data rate of  4
+MBit/sec, the Mark III data-replacement format actually generates
+4.5 MBit/sec and the VLBA non-data-replacement format generates
+4.536 MBit/sec.
+

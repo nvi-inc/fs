@@ -11,7 +11,7 @@
 
 #define MAX_OUT 256
 
-void rvac_dis(command,itask,ip)
+void rvac_dis(command,itask,ip,indx)
 struct cmd_ds *command;
 int itask;
 long ip[5];
@@ -33,10 +33,10 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if(kcom)
-         memcpy(&lclc,&shm_addr->rvac,sizeof(lclc));
+         memcpy(&lclc,&shm_addr->rvac[indx],sizeof(lclc));
       else {
          opn_res(&buffer,ip);
-         get_res(&response, &buffer); mcD0rvac(&lclc, response.data);
+         get_res(&response, &buffer); mcD0rvac(&lclc, response.data,indx);
          get_res(&response, &buffer); mc57rvac(&lclm, response.data);
          if(response.state == -1) {
             clr_res(&buffer);
@@ -63,7 +63,7 @@ long ip[5];
         while( count>= 0) {
         if (count > 0) strcat(output,",");
           count++;
-          rvac_mon(output,&count,&lclm);
+          rvac_mon(output,&count,&lclm,indx);
         }
       }
       if(strlen(output)>0) output[strlen(output)-1]='\0';

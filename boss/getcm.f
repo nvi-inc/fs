@@ -16,7 +16,7 @@ C  INPUT VARIABLES:
 C     Stacks for procedure names and parameters
       dimension idcbp1(1),idcbp2(1),idcbsk(1)
 C     DCB'S for procedure files, schedule
-      dimension lnames(12,1)
+      dimension lnames(13,1)
       integer*4 lproc1(4,1),lproc2(4,1)
 C     Arrays with command names
       logical kblksk,kblkop

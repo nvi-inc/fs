@@ -35,8 +35,18 @@ C
 C
       do iloop=1,nmod
         call fs_get_icheck(icheck(iloop),iloop)
-        if(icheck(iloop).le.0.or.ichecks(iloop).ne.icheck(iloop))
-     .     goto 699
+        if(icheck(iloop).le.0.or.ichecks(iloop).ne.icheck(iloop)) then
+           if(iloop.le.15) then
+              tpivc(iloop)=65536
+              call fs_set_tpivc(tpivc,iloop)
+           else if(iloop.eq.16) then
+              mifd_tpi(1)=65536
+              call fs_set_mifd_tpi(mifd_tpi,1)
+              mifd_tpi(2)=65536
+              call fs_set_mifd_tpi(mifd_tpi,2)
+           endif
+           goto 699
+        endif
         do jj=1,2
           ibuf1(2) = lmodna(iloop)
           iclass = 0
@@ -62,6 +72,15 @@ C
           call clrcl(iclass)
         enddo
         call logit7(0,0,0,0,ierr,lwho,lmodna(iloop))
+        if(iloop.le.15) then
+           tpivc(iloop)=65536
+           call fs_set_tpivc(tpivc,iloop)
+        else if(iloop.eq.16) then
+           mifd_tpi(1)=65536
+           call fs_set_mifd_tpi(mifd_tpi,1)
+           mifd_tpi(2)=65536
+           call fs_set_mifd_tpi(mifd_tpi,2)
+        endif
         goto 699
 C There was an error in MATCN.  Log it and go on to the next module.
 C

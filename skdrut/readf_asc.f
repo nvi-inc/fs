@@ -4,6 +4,8 @@ C@READF_ASC
 C
 C  ASCII only version of READF
       implicit none
+C 000907 nrv Call IFILL with IBL instead of 80
+
 C  Input:
        integer iunit
 C        -iunit : logical unit for reading
@@ -43,7 +45,7 @@ C
          il = -1
          return
        else
-         call ifill(ibuf,1,80,oblank)
+         call ifill(ibuf,1,ibl,oblank)
          call char2hol (ch,ibuf,1,il)
          il = (il+1)/2  ! changes to number of memory words
          return

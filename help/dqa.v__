@@ -1,0 +1,89 @@
+             dqa - data quality analyzer (VLBA racks)
+
+Syntax:     dqa=duration
+          vdqa=duration
+                                                        
+Response:   dqa/duration,Asampler,Atrack,Aparity,Aresync,Anosync,
+            Acalamp,Acalphs,Bsampler,Btrack,Bparity,Bresync,
+            Bnosync,Bcalamp,Bcalphs
+            vdqa/duration,Asampler,Atrack,Aparity,Aresync,
+            Anosync,Acalamp,Acalphs,Bsampler,Btrack,Bparity,
+            Bresync,Bnosync,Bcalamp,Bcalphs
+
+
+Settable Parameters:
+duration    The duration of the analysis in seconds. Default 1
+            sec, max 5 seconds. Set up the command with
+            dqa=duration. Subsequent commands dqa will make a
+            measurement. For each measurement, the DQA module is
+            started, allowed to run for duration and then
+            stopped. The accumulated counters are then read out.
+
+Monitor-only Parameters:
+Asampler    Sampler for the A channel signal, 0 if unknown or in
+            the form nnsd, nn=baseband converter number,
+            s=sideband u or l, d=data sample bit m  or s.
+Atrack      Track with the A channel signal on it, as set up in
+            the repro command.
+Aparity     Measured parity error rate for A channel, per Mbyte.
+Aresync     Measured resync rate for A channel, per Mbyte.
+Anosync     Measured nosync rate for A channel, per Mbyte.
+Acalamp     Measured phase calibrator amplitude for A channel, in
+            units of voltage percentage.
+Acalphs     Measured phase calibrator phase for A channel,
+            degrees.
+Bsampler    Sampler of the B channel signal, 0 if unknown or in
+            the form nnsd, nn=baseband converter number,
+            s=sideband u or l, d=data sample bit m  or s.
+Btrack      Track with the B channel signal on it, as set up in
+            the repro command.
+Bparity     Measured parity error rate for B channel, per Mbyte.
+Bresync     Measured resync rate for B channel, per Mbyte.
+Bnosync     Measured nosync rate for B channel, per Mbyte.
+Bcalamp     Measured phase calibrator amplitude for B channel, in
+            units of voltage percentage.
+Bcalphs     Measured phase calibrator phase for B channel,
+            degrees.
+
+Comments:
+The data quality analyzer (DQA) is a formatter sub-module. It
+measures parity, re-synch, and no-synch errors and extracts phase
+cal (Mark III/IV format only). The dqa command is comparable to
+the Mark III decode command plus the capabilities of program
+pcalr. For readback parity checks, you would normally use the
+check(80|135)(f|r) procedures.
+
+Channels A and B are the recorded tracks as specified in the
+repro command. To measure parity errors, the tape should be
+moving (use the st command) with record disabled. The phase cal
+can be measured in bypass or reproduce mode. For bypass
+measurements, the group enables must be turned on with the enable
+command, and the general record enable must be turned on with the
+st command.
+
+The formatter tape clock (a combination of the sample rate, fan-
+out or fan-in, and format) must be specified with the form=...
+and agree with reproduce rate before the DQA command will work.
+
+The sampler reported for a track is determined from the set-up of
+the cross-point switch by the form command. If barrel-rolling
+and/or fan-in or -out are enabled, the displayed source will be
+the nominal source for that track, but may not actually
+correspond to the data analyzed. If fan-out is being used in a
+system with an analog cross-point switch, the reported source
+will be zero for tracks beyond the first in a fan-out group.
+
+Phase-cal results will be meaningless for the following cases:
+fan-out, fan-in, barrel-rolling enabled, VLBA format, tracks that
+contain magnitude bits.
+                                    
+Normally, this command is used only with VLBA racks. However if
+the DQA module is connected it can be used as the vdqa command
+with any type of rack, including VLBA and VLBA4. The vform=...
+command must be used to specify the formatter tape clock if the
+rack type is not VLBA4. The vdqa and vform comands are particular
+useful for writting rack independent procedures for stations that
+switch between VLBA and VLBA4 rack types.
+
+The output from this command is organized in columns for easy
+reading when there are no errors, i.e., in bypass mode.

@@ -1,4 +1,4 @@
-/* move vlba2 head stack */
+/* vlba reccpu 162 head volts */
 
 #include <sys/types.h>
 #include <sys/times.h>
@@ -7,10 +7,11 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void v_vlt_head__(ihead,volt,ip)
+void v_vlt_head__(ihead,volt,ip,indxtp)
 int *ihead;                     /* head 1-4 */
 float *volt;                   /* voltage of head */
 long ip[5];                    /* ipc array */
+int *indxtp;
 {
       struct req_buf buffer;           /* request buffer */
       struct req_rec request;          /* reqeust record */
@@ -19,9 +20,23 @@ long ip[5];                    /* ipc array */
       struct tms tms_buff;
       int motion, time_out, counts;
       long end;
+      int indx;
+
+      if(*indxtp == 1) {
+	indx=0;
+      } else if(*indxtp == 2) {
+	indx=1;
+      } else {
+	ip[2]=-505;
+	memcpy("q<",ip+4,2);
+	return;
+      }
 
       ini_req(&buffer);                /* initialize */
-      memcpy(request.device,DEV_VRC,2);
+      if(indx == 0)
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       request.type=0;
       request.addr=0xC3; request.data=*ihead & 0x3;   /* head */

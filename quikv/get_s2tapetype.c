@@ -13,7 +13,7 @@ void get_s2tapetype(char *tapetype, long ip[], char *lwho)
 {
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_res_buf res_buf;
-  char device[]= "rc";
+  char device[]= "r1";
 
   void ini_rclcn_req(), end_rclcn_req(); /*rclcn request utilities */
   void skd_run(), skd_par();      /* program scheduling utilities */

@@ -1,0 +1,26 @@
+          tpical - read total power integrators, cal on
+
+Syntax:     tpical=list
+
+Response:   tpical/readings
+
+
+Settable parameters:
+list        List of total power integrators to be read back.
+            Standard detector mnemonics allowed.
+
+Monitor-only parameters:
+readings    List of readings, counts. These values are stored for
+            use by the tsys1/2/3 and tsysa/b/c/d commands.
+
+Comments: 
+For Mark III/IV racks, only USB or LSB total power readings are
+accepted; if another total power selection has been set up with
+the vc command, the reading is returned as -1. It is assumed the
+noise calibration signal is on.
+
+For Mark III/IV racks, the readings are listed from the selected
+detectors in the order: VC01-VC14, IF1, IF2, IF3. For VLBA racks,
+the readings are listed from the selected detectors in the order:
+Lower Side Band: BBC01-BBC14, Upper Side Band: BBC01-BBC14, IFA,
+IFB, IFC, IFD.

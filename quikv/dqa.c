@@ -72,6 +72,11 @@ parse:
       
 /* format buffers for mcbcn */
 dqa:
+      if(shm_addr->vform.qa.drive!=0&&shm_addr->vform.qa.drive!=1) {
+	ierr=-502;
+	goto error;
+      }
+
       request.type=0;                  /*start analysis */
       request.addr=0x88;
       request.data=0x8001;

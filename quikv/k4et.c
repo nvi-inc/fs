@@ -11,7 +11,7 @@
 
 #define MAX_OUT 256
 
-static char device[]={"d4"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void k4et(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */

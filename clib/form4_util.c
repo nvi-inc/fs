@@ -188,9 +188,9 @@ char *ptr;
     ierr=arg_key(ptr,key_brl,NKEY_BRL,&lcl->barrel,0,TRUE);
     break;
   case 5:
-    ierr=arg_key(ptr,key_brl,NKEY_SYN,&lcl->synch, 0,FALSE);
+    ierr=arg_key(ptr,key_syn,NKEY_SYN,&lcl->synch, 0,FALSE);
     if(ierr!=0) {
-      ierr=arg_int(ptr,&lcl->synch      ,1,TRUE);
+      ierr=arg_int(ptr,&lcl->synch      ,3,TRUE);
       if(ierr==0 & (lcl->synch < 0 || lcl->synch > 16))
 	ierr=-200;
     } else
@@ -357,7 +357,7 @@ struct form4_cmd *lcl;
 	can=204;
       else if((!twobits) && lcl->fan==3)
 	can=206;
-      else if(twobits && lcl->fan==2)
+      else if(lcl->fan==2)
 	can=207;
       else
 	return -1;

@@ -34,7 +34,7 @@ C     PCAL -  Phase cal. freq.
 C      - DCB for the test data file.
 C
 C  LOCAL:
-      logical ksa,kboss
+      logical ksa
       integer*2 itemp(32)
 C      - buffer for responses.
       integer*2 ldfil(32)

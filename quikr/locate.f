@@ -1,4 +1,4 @@
-      subroutine locate(ip)
+      subroutine locate(ip,itask)
 C
 C  Locate track position roughly
 C
@@ -11,6 +11,12 @@ C
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1))
       data ilen/100/
+C
+      if( itask.eq.8) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
 C
       ichold=-99
       iclass=0
@@ -44,7 +50,7 @@ C
       if(cjchar(parm,1).eq.',') then
         rng=200
       else if(cjchar(parm,1).eq.'*') then
-        rng=rnglc_fs
+        rng=rnglc_fs(indxtp)
       else if(ierr.eq.0) then
         rng=parm
       else
@@ -58,7 +64,7 @@ C
       if(cjchar(parm,1).eq.',') then
         nsamp=1
       else if(cjchar(parm,1).eq.'*') then
-        nsamp=nsamplc_fs
+        nsamp=nsamplc_fs(indxtp)
       else if(ierr.eq.0) then
         nsamp=iparm(1)
       else
@@ -72,7 +78,7 @@ C
       if(cjchar(parm,1).eq.',') then
         step=40
       else if(cjchar(parm,1).eq.'*') then
-        step=steplc_fs
+        step=steplc_fs(indxtp)
       else if(ierr.eq.0) then
         step=parm
       else
@@ -86,7 +92,12 @@ C
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
       if((ichcm_ch(parm,1,'r').eq.0.or.ichcm_ch(parm,1,'2').eq.0)
-     &   .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+     &     .and.(
+     $     (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $     .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &     (drive(indxtp).eq.MK4.and.MK4B.ne.drive_type(indxtp))
+     $     )
+     &     ) then
         ihd = 2
       else if(ichcm_ch(parm,1,'r').eq.0.or.
      &        ichcm_ch(parm,1,'2').eq.0) then
@@ -96,9 +107,14 @@ C
      &        ichcm_ch(parm,1,'1').eq.0) then
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
-        ihd=ihdlc_fs
-      else if (cjchar(parm,1).eq.','
-     &       .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+        ihd=ihdlc_fs(indxtp)
+      else if (cjchar(parm,1).eq.','.and.(
+     $       VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &       (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $       .or.
+     &       (drive(indxtp).eq.MK4.and.MK4B.ne.drive_type(indxtp))
+     $       )
+     &       ) then
         ihd = 2
       else if (cjchar(parm,1).eq.',') then
         ihd=1
@@ -110,46 +126,48 @@ C
 C  3. Plant values in COMMON
 C
 300   continue
-      ihdlc_fs=ihd
-      steplc_fs=step
-      nsamplc_fs=nsamp
-      rnglc_fs=rng
+      ihdlc_fs(indxtp)=ihd
+      steplc_fs(indxtp)=step
+      nsamplc_fs(indxtp)=nsamp
+      rnglc_fs(indxtp)=rng
       goto 990
 C
 C  5.  Find peak
 C
 500   continue
-      call fs_get_ispeed(ispeed)
-      call fs_get_cips(cips)
-      call fs_get_idirtp(idirtp)
-      call fs_get_ienatp(ienatp)
-      if(ispeed.eq.0.or. ! if tape isn't moving, don't go any further
-     &   (ispeed.eq.-3.and.cips.eq.0)) then
+      call fs_get_ispeed(ispeed,indxtp)
+      call fs_get_cips(cips,indxtp)
+      call fs_get_idirtp(idirtp,indxtp)
+      call fs_get_ienatp(ienatp,indxtp)
+      if(ispeed(indxtp).eq.0.or. ! if tape isn't moving, don't go any further
+     &   (ispeed(indxtp).eq.-3.and.cips(indxtp).eq.0)) then
         ip(3)=-331
         goto 990
-      else if (idirtp.ne.1.and.ienatp.ne.0) then ! not rec in rev
+      else if (idirtp(indxtp).ne.1.and.ienatp(indxtp).ne.0) then
+c ! not rec in rev
         ip(3)= -332
         goto 990
-      else if(ihdlc_fs.eq.0) then ! command must be set up
+      else if(ihdlc_fs(indxtp).eq.0) then ! command must be set up
         ip(3)=-333
         goto 990
       endif
 C
 C   do a coarse search for a track
 C
-      call fs_get_icheck(icheck(20),20)
-      ichold=icheck(20)
-      icheck(20) = 0
-      call fs_set_icheck(icheck(20),20)
+      call fs_get_icheck(icheck(20+indxtp-1),20+indxtp-1)
+      ichold=icheck(20+indxtp-1)
+      icheck(20+indxtp-1) = 0
+      call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
 C
-      call lvdonn('lock',ip)
+      call lvdonn('lock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call lchd(ihdlc_fs,steplc_fs,nsamplc_fs,rnglc_fs,rpdt_fs,vltlc,
-     &          peakv,mper,ip,khecho_fs,lu)
+      call lchd(ihdlc_fs(indxtp),steplc_fs(indxtp),nsamplc_fs(indxtp),
+     $     rnglc_fs(indxtp),rpdt_fs(indxtp),vltlc,peakv,mper,ip,
+     $     khecho_fs,lu,indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
 C  6.  Set up response
@@ -159,19 +177,19 @@ C
       if(ieq.eq.0) nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
 C
-      nch=nch+ir2as(rnglc_fs,ibuf,nch,8,1)
+      nch=nch+ir2as(rnglc_fs(indxtp),ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ib2as(nsamplc_fs,ibuf,nch,o'100000'+2)
+      nch=nch+ib2as(nsamplc_fs(indxtp),ibuf,nch,o'100000'+2)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(steplc_fs,ibuf,nch,8,1)
+      nch=nch+ir2as(steplc_fs(indxtp),ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
-      if(ihdlc_fs.eq.1) then
-        nch=ichmv_ch(ibuf,nch,'write')
-      else if(ihdlc_fs.eq.2) then
-        nch=ichmv_ch(ibuf,nch,'read')
+      if(ihdlc_fs(indxtp).eq.1) then
+        nch=ichmv_ch(ibuf,nch,'1')
+      else if(ihdlc_fs(indxtp).eq.2) then
+        nch=ichmv_ch(ibuf,nch,'2')
       endif
       nch=mcoma(ibuf,nch)
 C
@@ -181,8 +199,9 @@ C
       if(ieq.eq.0) nch=nch+ir2as(mper,ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
+      call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if (drive_type.eq.VLBA2) then
+      if (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
          if(ieq.eq.0) nch=nch+ir2as(vltlc,ibuf,nch,8,1)
       else
          if(ieq.eq.0) nch=nch+ir2as(vltlc,ibuf,nch,8,3)
@@ -199,7 +218,7 @@ C
       if(ip(2).ne.0) call clrcl(ip(1))
       ip(2)=0
       call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       goto 999
 C
 C  That's all
@@ -210,8 +229,8 @@ C
       call char2hol('q@',ip(4),1,2)
 999   continue
       if(ichold.ne.-99) then
-        icheck(20)=ichold
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1)=ichold
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       return
       end

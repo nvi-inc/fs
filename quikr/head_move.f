@@ -1,5 +1,5 @@
-      subroutine head_move(ihead,idir,ispdhd,tmove,ip)
-      integer ihead,idir,ispdhd
+      subroutine head_move(ihead,idir,ispdhd,tmove,ip,indxtp)
+      integer ihead,idir,ispdhd,indxtp
       integer*4 ip(5)
       real tmove
 C
@@ -23,20 +23,24 @@ C
       integer*4 jm
 C
       tmove=min(tmove,1.0)                 !limit motion to 1 second
-      jm=tmove*25000.*(lvbosc_fs/5.0)      !calculate counts
+      jm=tmove*25000.*(lvbosc_fs(indxtp)/5.0)      !calculate counts
       jm=max(min(65535,jm),0)              !limit counts
-      tmove=jm*(5.0/lvbosc_fs)*40e-6       !calculate actual time
+      tmove=jm*(5.0/lvbosc_fs(indxtp))*40e-6       !calculate actual time
 c
       call fs_get_drive(drive)
-      if(VLBA.eq.drive.or.VLBA4.eq.drive) then
-         call fc_head_vmov(ihead,idir,ispdhd,jm,ip)
+      if(VLBA.eq.drive(indxtp).or.VLBA4.eq.drive(indxtp)) then
+         call fc_head_vmov(ihead,idir,ispdhd,jm,ip,indxtp)
       else
 c
         nrec=0
         iclass=0
 C
         ibuf(1)=0
-        call char2hol('hd',ibuf(2),1,2)
+        if(indxtp.eq.1) then
+           call char2hol('h1',ibuf(2),1,2)
+        else
+           call char2hol('h2',ibuf(2),1,2)
+        endif
 c
         call iw2ma(ibuf(3),ispdhd,idir,ihead,jm)
         call add_class(ibuf,-12,iclass,nrec)
@@ -51,7 +55,7 @@ C
 C
         call clrcl(ip(1))
         ip(2)=0
-        iw=(5.0/lvbosc_fs)*jm/250+2
+        iw=(5.0/lvbosc_fs(indxtp))*jm/250+2
         call susp(1,iw)
       endif
 C

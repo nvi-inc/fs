@@ -144,6 +144,9 @@ Continue:
         cls_snd(&clasr,buf,3,dum,dum);
         nrecr += 1;
       }
+      /* OR:
+         cls_clr(class);
+         */
       break;
 
     case 5:    /* onsource command with no error logging */

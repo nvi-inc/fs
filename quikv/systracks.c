@@ -14,7 +14,7 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, indx, ichold, i, count;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
@@ -23,8 +23,8 @@ long ip[5];                           /* ipc parameters */
       int systracks_dec();                 /* parsing utilities */
       char *arg_next();
 
-      void systracks82mc(), systrcaks83mc();    /* systrack utilities */
-      void systracks84mc(), systrcaks85mc();
+      void systracks82mc(), systracks83mc();    /* systrack utilities */
+      void systracks84mc(), systracks85mc();
       void systracks_dis();
 
       void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
@@ -34,9 +34,12 @@ long ip[5];                           /* ipc parameters */
 
       ini_req(&buffer);
 
-      ind=itask-1;                    /* index for this module */
+      indx=itask-1;                    /* index for this module */
 
-      memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       if (command->equal != '=') {            /* read module */
          request.type=1;
@@ -49,7 +52,7 @@ long ip[5];                           /* ipc parameters */
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
         else if (command->argv[1]==NULL) /* special cases */
          if (*command->argv[0]=='?') {
-            systracks_dis(command,itask,ip);
+            systracks_dis(command,itask,ip,indx);
             return;
          } else if(0==strcmp(command->argv[0],ADDR_ST)) {
             ierr=-301;
@@ -63,7 +66,7 @@ long ip[5];                           /* ipc parameters */
 
 parse:
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->systracks,sizeof(lcl));
+      memcpy(&lcl,&shm_addr->systracks[indx],sizeof(lcl));
 
       count=1;
       while( count>= 0) {
@@ -74,9 +77,9 @@ parse:
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
-      memcpy(&shm_addr->systracks,&lcl,sizeof(lcl));
+      ichold=shm_addr->check.rec[0];
+      shm_addr->check.rec[0]=0;
+      memcpy(&shm_addr->systracks[0],&lcl,sizeof(lcl));
       
 /* format buffers for mcbcn */
       
@@ -99,14 +102,14 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-        shm_addr->check.systracks = TRUE;
+        shm_addr->check.systracks[indx] = TRUE;
         if (ichold >= 0)
           ichold=ichold % 1000 + 1;
-        shm_addr->check.rec=ichold;
+        shm_addr->check.rec[0]=ichold;
       }
 
       if(ip[2]<0) return;
-      systracks_dis(command,itask,ip);
+      systracks_dis(command,itask,ip,indx);
       return;
 
 error:
