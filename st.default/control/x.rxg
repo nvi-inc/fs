@@ -33,11 +33,13 @@ rcp
   0.00120
 *
 * 6th line: gain curve (only one) for ALL polarizations in 4th line
-* TYPE FORM COEFFICENTS ...
+* TYPE FORM COEFFICENTS ... [opacity_corrected]
 *
 * FORM = POLY only for now
 * TYPE - ELEV and ALTAZ only for now
 * COEFFICENTS - variable number of number values
+* opacity_corrected - optional final field, if present it indicates that
+*                     the curve is opacity corrected
 *
 * maximum coefficents 10
 *
@@ -50,7 +52,28 @@ ELEV POLY 1.0
 *            FREQ   frequency (MHz)
 *            TCAL   degrees K
 *
-*     MAXIMUM ENTRIES 100, group by polarization
+*     ends with a line containing end_tcal_table
+*
+*     MAXIMUM ENTRIES 400, group by polarization
 *                          then sorted by increasing freq
 *
 rcp 8080.0   9.8 
+end_tcal_table
+*
+* Trec: receiver temperature
+*
+0.0
+*
+* Spill over table
+*
+* 9th and following lines: Spillover versus frequency
+*     Format: Elevation Tspill
+*     where:
+*            POL    polarization rcp or lcp
+*            FREQ   frequency (MHz)
+*            TCAL   degrees K
+*
+*     ends with a line containing end_spillover_table
+*
+*     MAXIMUM ENTRIES 20
+end_spillover_table
