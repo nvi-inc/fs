@@ -5,9 +5,9 @@ C
       dimension ip(1) 
       dimension ireg(2) 
       integer get_buf
-      integer*2 ibuf(20),ibuf2(50)
+      integer*2 ibuf(20),ibuf2(50), lgenx(2)
       integer it(28)
-      logical kdata,kcom
+      logical kdata,kcom,kena(2)
       equivalence (ireg(1),reg) 
       data ilen/40/,ilen2/100/
 C 
@@ -48,13 +48,11 @@ C
 C 
 230   ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
 C                   Get response to query of ST 
-      call ma2mv(ibuf,idir,isp,lgen)
-      call fs_set_lgen(lgen)
+      call ma2mv(ibuf,idir,isp,lgenx)
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
       call fs_get_drive(drive)
-      if (MK4.eq.and(MK4,drive)) then
-        ia = ia2hx(ibuf,3)
-        iena = and(ia,8)/8
+      if (MK4.eq.drive) then
+         call ma2en4(ibuf,iena,kena)
       else
         call ma2en(ibuf,iena,it,nt) 
       endif
@@ -62,13 +60,15 @@ C                   Get response to query of ST
 320   isp = ispeed
       idir = idirtp 
       iena = ienatp 
+      call fs_get_lgen(lgen)
+      idum=ichmv(lgenx,1,lgen,1,3)
 C                   Get speed and direction and record status from common 
 C 
-350   nch = itped(-2,idir,ibuf2,nch,ilen2)  
+350   nch = itped(-2,idir,lgenx,ibuf2,nch,ilen2)  
       nch = mcoma(ibuf2,nch)
-      nch = itped(-1,isp,ibuf2,nch,ilen2) 
+      nch = itped(-1,isp,lgenx,ibuf2,nch,ilen2) 
       nch = mcoma(ibuf2,nch)
-      nch = itped(-10,iena,ibuf2,nch,ilen2) 
+      nch = itped(-10,iena,lgenx,ibuf2,nch,ilen2) 
 C                   Encode speed and direction into response
 C 
 500   iclass = 0
