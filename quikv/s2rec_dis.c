@@ -9,8 +9,6 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#undef TRUE
-#undef FALSE
 #include "../rclco/rcl/rcl_def.h"
 
 #define MAX_OUT 256
