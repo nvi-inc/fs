@@ -54,6 +54,7 @@ int *ierr;
   skd_par(ip);
 
   if(ip[2]<0) {
+    logita(NULL,ip[2],ip+3,ip+4);
     *ierr=-201;
     return;
   }

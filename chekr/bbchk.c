@@ -53,6 +53,7 @@ int *ierr;
   if (ip[2]<0) {  
     shm_addr->bbc_tpi[ind][0]=65536;
     shm_addr->bbc_tpi[ind][1]=65536;
+    logita(NULL,ip[2],ip+3,ip+4);
     *ierr=-201;
     return;
   }
