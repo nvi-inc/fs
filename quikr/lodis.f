@@ -63,7 +63,7 @@ C
       if(VLBA.eq.and(VLBA,rack)) iend=4
       do 310 i = 1,iend
         call fs_get_freqlo(flo,i-1)
-        if (flo.gt.0.0) nch = nch+ir2as(flo,ibuf2,nch,8,3)
+        if (flo.gt.0.0) nch = nch+ir2as(flo,ibuf2,nch,9,3)
         nch = mcoma(ibuf2,nch)
 310   continue
 C 
