@@ -1,4 +1,4 @@
-      subroutine rpbr2ma4(ibuf,ibr)
+      subroutine rpbr2ma4(ibuf,ibr,ivac)
 C     convert repro's bitrate data to mat buffer for Mark IV drive.
 C 
 C  INPUT: 
@@ -14,6 +14,7 @@ C                   The strobe character for this control word
       call ichmv_ch(ibuf,2,'00000004') 
 C                   Fill buffer with zeros to start except
 C                   final position is always 4.
+      call ichmv(ibuf,6,ihx2a(ivac*4),2,1)
       call ichmv(ibuf,8,ihx2a(ibr),2,1)
 C
       return
