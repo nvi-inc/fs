@@ -257,8 +257,10 @@ c
         nch=ichmv_ch(ib,nch,'vlbag')
       else if(rack.eq.VLBA.and.rack_type.eq.VLBA) then
         nch=ichmv_ch(ib,nch,'vlba')
-      else if(rack.eq.MK3) then
+      else if(rack.eq.MK4) then
         nch=ichmv_ch(ib,nch,'mk4')
+      else if(rack.eq.0) then
+        nch=ichmv_ch(ib,nch,'none')
       endif
 c
       nch=mcoma(ib,nch)
@@ -270,8 +272,12 @@ c
         nch=ichmv_ch(ib,nch,'vlba')
       else if(drive.eq.VLBA.and.drive_type.eq.VLBA2) then
         nch=ichmv_ch(ib,nch,'vlba2')
-      else if(drive.eq.MK3) then
+      else if(drive.eq.MK4) then
         nch=ichmv_ch(ib,nch,'mk4')
+      else if(drive.eq.S2) then
+        nch=ichmv_ch(ib,nch,'s2')
+      else if(drive.eq.0) then
+        nch=ichmv_ch(ib,nch,'none')
       endif
 c
       nch=mcoma(ib,nch)
