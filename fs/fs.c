@@ -169,6 +169,7 @@ main()
             goto cleanup;
           }
           s1=strncpy( p_names[ ipids], name, 6);
+          p_names[ ipids][5]=0;
           if (les >0) {
             if (lesm < 0) lesm=ipids;
              else {
@@ -220,6 +221,7 @@ main()
               goto cleanup;
             }
             s1=strncpy( p_names[ ipids], name, 6);
+	    p_names[ ipids][5]=0;
             npids++;
           }
         }
