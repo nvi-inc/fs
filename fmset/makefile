@@ -1,4 +1,4 @@
-OBJECTS = fmset.o asktime.o clear_scrn.o get4time.o getfmtime.o getvtime.o\
+OBJECTS = fmset.o asktime.o get4time.o getfmtime.o getvtime.o\
 initvstr.o set4time.o setfmtime.o setvtime.o gets2time.o sets2time.o
 #
 CFLAGS =  -I/usr/include/ncurses

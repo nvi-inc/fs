@@ -3,6 +3,7 @@ C
 C     GNPAS derives the number of sub-passes in each frequency code
 C and checks for compatibility between track assignments and head
 C subpasses.
+C     GNPAS also counts the number of total passes per tape MAXPAS. 
 C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
@@ -39,6 +40,7 @@ C            not for the first code.
 C 961115 nrv If there is only 1 mode, IC1 would remain at zero!
 C 970206 nrv Remove itra2, ihddi2 and add headstack index to all.
 C 970206 nrv Change max_pass to max_subpass
+C 980907 nrv Change max_subpass as an index into inddir to max_pass.
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -140,7 +142,7 @@ C     codes--this should not be attempted in a single experiment.
           if (ic1.eq.0) ic1=ic ! first ic for this station
           do ih=1,max_headstack ! each headstack
             ip(ih)=0
-            do j=1,max_subpass
+            do j=1,max_pass
               if (ihddir(ih,j,is,ic).eq.1) ip(ih)=ip(ih)+1
             enddo
             if (ip(ih).eq.0) then

@@ -1,0 +1,70 @@
+
+971006 nrv skdrut/vunpdas.f
+           Add "vlba4" as rack and rec type.
+971014 nrv drudg/psbar.c
+           Remove a debug statement left in.
+971014 nrv drudg/label.f
+           Add same "new tape" logic for S2 as in other routines.
+           Make a new schedule always start a new tape.
+971015 nrv drudg/vlbat.f
+           Too many source blocks were written out for non-continuous
+           tape motion.
+971027 nrv drudg/snap.f
+           The direction of FASTx is always R before the UNLOD.
+           Make a new schedule always start a new tape.
+971111 nrv drudg/procs.f
+           Add ",same" for VLBA4 in the "pass" command.
+           Change 135 to 80 in UNLOADER for Mk3/4/VLBA.
+971205 nrv drudg/snap.f
+           Change the "data start" and "data stop" comments to the
+           commands "data_valid=on" and "data_valid=off".
+971205 nrv drudg/procs.f
+           Remove "rec=mode..." from S2 unloader procedure.
+           Add DECODE commands for Mk4, VLBA4, Mk3.
+971205 nrv drudg/fdrudg.f
+           Add VLBA4 procedures and SNAP to options list for non-VEX.
+971205 nrv drudg/snap.f
+           Change CHECK2C1/2 to CHECKF80/R80 and F135/R135 for high and
+           low density recording.
+971208 nrv skdrut/vmoinp.f
+           Save phase cal info.
+971208 nrv skdrincl/freqs.ftni
+           Add storage for phase cal info.
+971208 nrv drudg/procs.f
+           Add SIDEBAND (all) and POLARIZATION (vex only) commands.
+           Add PCALFREQ (vex only) commands. Add PCALFRMff procedure.
+971208 nrv skdrut/vunppcal.f
+           New. Reads the PHASE_CAL_DETECT section of the VEX file.
+971208 nrv skdrut/vunpif.f
+           Add reading the phase cal spacing and base frequencies.
+971208 nrv skdrut/vunpfrq.f
+           Add reading the phase cal ref.
+971209 nrv skdrut/frinp.f
+           Set net sideband to 'U' for all non-VEX files. Set LO sideband
+           to 'U' for .drg files, get from "L" lines for extended .skd files.
+971209 nrv drudg/sread.f
+           Check for prepasses in the schedule.
+971209 nrv drudg/snap.f
+           If prepasses are scheduled, confirm that user wants them.
+971210 nrv skdrut/newscan.f
+           Put a space after the YNNN before starting the durations.
+971210 nrv skdrut/durscan.f
+           Left justify the durations on the scan line.
+971211 nrv drudg/snap.f
+           Change some logic for adaptive. test this!
+971211 nrv drudg/lstsumo.f
+           Expand the explanatory headers. Add another digit to the minutes
+           for long S2 scans.
+971211 nrv drudg/lstsum.f
+           Set idur=-1 to reset the duration calculation when "data_valid=on"
+           is encountered.
+971211 nrv drudg/procs.f
+           Add "et" to UNLOADER procedure for S2.
+971216 nrv drudg/procs.f
+           Revised LO command that includes name, frequency, sideband,
+           polarization, phase cal spacing, phase cal offset
+971216 nrv skdrut/vunpif.f
+           Default phase cal spacing to -1.0 meaning off.
+971216 nrv drudg/procs.f
+           Add pcald=off, pcald=, pcald to setup procedures.
+

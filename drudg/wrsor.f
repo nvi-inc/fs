@@ -2,6 +2,8 @@
      .decs2,lu)
 C Write the line in the VLBA flies with the source name
 C 970509 nrv New. Extracted from VLBAT.
+C 980409 nrv Get rid of data statement to clean up output.
+
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/sourc.ftni'
@@ -12,13 +14,10 @@ C Input
       integer*2 ldsign2,lsname(4)
 
 C Local
-      integer*2 isname(23),blank10(5),oapostrophe
-      integer iras,isra,idecs,izero2,z4000,z100,idum,lu,ierr
-      integer ichmv,iflch,ib2as
-      DATA isname/'sn','am','e=',''' ','  ','  ','  ','  ',
-     . ' r','a=','00',
-     . 'h0','0m','00','.0','s ','de','c=',' 0','0d','00','''0','0"'/
-      DATA Z4000/Z'4000'/, Z100/Z'100'/, oapostrophe/2h' /
+      integer*2 isname(30)
+      integer iras,isra,idecs,izero2,z4000,z100,idum,lu,ierr,ich
+      integer ichmv,iflch,ib2as,ichmv_ch
+      DATA Z4000/Z'4000'/, Z100/Z'100'/
 
       izero2=2+z4000+z100*2
       IRAS = RAS2+.05
@@ -32,19 +31,27 @@ C Local
         idecm2=idecm2-60
         idecd2=idec2d+1
       endif
-        in=iflch(lsname,max_sorlen)
-        idum = ichmv(isname,8,blank10,1,9)
-      idum = ichmv(isname,8,lsname,1,in)
-        idum = ichmv(isname,8+in,oapostrophe,1,1)
-      idum = ib2as(irah2,isname,21,izero2)
-      idum = ib2as(iram2,isname,24,izero2)
-      idum = ib2as(iras,isname,27,izero2)
-      idum = ib2as(isra,isname,30,1)
-      idum = ichmv(isname,37,ldsign2,1,1)
-      idum = ib2as(idecd2,isname,38,izero2)
-      idum = ib2as(idecm2,isname,41,izero2)
-      idum = ib2as(idecs,isname,44,izero2)
-      CALL writf_asc(LU,IERR,isname,23)
+       call ifill(isname,1,60,oblank)
+       ich = ichmv_ch(isname,1,'sname=''')
+       in=iflch(lsname,max_sorlen)
+       ich = ichmv(isname,ich,lsname,1,in)
+       ich = ichmv_ch(isname,ich,'''  ra=')
+      ich = ich + ib2as(irah2,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'h')
+      ich = ich + ib2as(iram2,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'m')
+      ich = ich + ib2as(iras,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'.')
+      ich = ich + ib2as(isra,isname,ich,1)
+       ich = ichmv_ch(isname,ich,'s dec=')
+      ich = ichmv(isname,ich,ldsign2,1,1)
+      ich = ich + ib2as(idecd2,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'d')
+      ich = ich + ib2as(idecm2,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'''')
+      ich = ich + ib2as(idecs,isname,ich,izero2)
+       ich = ichmv_ch(isname,ich,'"')
+      CALL writf_asc(LU,IERR,isname,(ich+1)/2)
 
       return
       end

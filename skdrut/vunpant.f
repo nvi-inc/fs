@@ -19,7 +19,8 @@ C 970303 nrv When matching up the axis for antenna_motion, change
 C            "dec" to "dc" to keep it to the 2 letters sk/dr use.
 C 970306 nrv Handle XY axis types.
 C 970718 nrv Incorrect error returns for axis limits fixed.
-C 970930 nrv For XY axis types 
+C 970930 nrv For XY axis types check the matching axis names as they
+C            appear in the VEX file, not as sk/dr keeps them.
 C
 C  INPUT:
       character*128 stdef ! station def to get

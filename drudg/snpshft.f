@@ -6,6 +6,8 @@ C 930412 nrv implicit none
 C 930429 nrv removed GTPRM call, changed to read yymmdd
 C 930702 nrv Check for EOF when reading first lines.
 C 960215 nrv Change permissions on output file
+C 980831 nrv Mods for Y2000. Use IY2 for 2-digit year, all other
+C            year variables are fully specified.
 
 C Called by: DRUDG
 
@@ -22,6 +24,7 @@ C LOCAL:
      .irec,idum,ntap,itape,ilrec,isrec,icol
       integer idshft,ihshft,imshft,isshft,lsd,lsh
       integer idoyr,iyr,indoyr,isd,ish,inday,inhr,inmin,insec
+      integer iy2 ! 2-digit year, iyr is fully specified
 	logical KEARL,KNEWP
 	logical kex ! true if file exists
 	logical kdone
@@ -114,16 +117,17 @@ C
 	  CALL GTRSP(IBUF,ISKLEN,LUUSR,NC)
 	  IF(ichcm(IBUF(1),1,H2C,1,2).eq.0) RETURN !"if two colons"
 	  kdone = .true.
-          iy = ias2b(ibuf,1,2)
+          iy2 = ias2b(ibuf,1,2)
           im = ias2b(ibuf,3,2)
           id = ias2b(ibuf,5,2)
-	  IF(iy.le.0) then
+	  IF(iy2.lt.0) then
 	    WRITE(LUSCN,'(" INVALID NUMBER FOR YEAR.")')
 	    kdone = .false.
 	  end if
 C
 	  if (kdone) then
-	    IF(IY.LT.100) IY=IY+1900
+	    IF(IY2.Le.99.and.iy2.ge.50) IY=IY2+1900
+	    IF(IY2.Lt.50.and.iy2.ge. 0) IY=IY2+2000
 	    IF(IM.le.0.or.IM.gt.12) then
 		WRITE(LUSCN,'(" MONTH MUST BE 1 TO 12.")')
 		kdone = .false.
@@ -186,7 +190,14 @@ C
 1511  CONTINUE
 	IF(IYR.LT.0) GOTO 1510
 	IF(IYR.EQ.0)  return ! GOTO 1301
-	IF(IYR.LT.100)IYR = IYR+1900
+        if (iyr.lt.100) then ! 2-digit year specified
+          iy2=iyr
+	  IF(IY2.Le.99.and.iy2.ge.50)IYR = IY2+1900
+          IF(IY2.Lt.50.and.iy2.ge. 0)IYR = IY2+2000
+        else ! 4-digi year
+          iy2=iyr-2000
+          if (iy2.lt.0) iy2=iyr-1900
+        endif
 C
 1512  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
         if (ilen.lt.0) then !eof
@@ -272,8 +283,7 @@ C
 	  call inc(LU_INFILE,ierr)
 	ENDIF
 C
-	IDUMMY = IB2AS(IYR-1900,IYT,1,Z4202)
-C     NC = IB2AS(IYR-1900,IYT,1,Z4202)
+	IDUMMY = IB2AS(IY2,IYT,1,Z4202)
 	IDUM = ICHMV(ITIM,1,IYT,1,2)
 	IDUM = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
@@ -398,7 +408,7 @@ C
 C
 	IF (ichcm_ch(IBUF,1,'READY').EQ.0) GOTO 1905
 	IF (ichcm_ch(IBUF,1,'FAST').EQ.0) GOTO 1905
-	IDUMMY = IB2AS(IY-1900,ITIM,1,Z4202)
+	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUMMY = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)
@@ -425,7 +435,7 @@ C
 	IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 1900
 C
 C Shift times appropriately.
-	IDUMMY = IB2AS(IYR-1900,ITIM,1,Z4202)
+	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUM = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)
@@ -513,7 +523,7 @@ C
 	  IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 2003
 C
 C Decode time and compare with last time in current schedule.
-	  IDUMMY = IB2AS(IYR-1900,ITIM,1,Z4202)
+	  IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	  IDUMMY = ICHMV(ITIM,3,IBUF,2,9)
 	  CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .             ISSHFT,IMSHFT,IHSHFT,IDSHFT)
@@ -607,7 +617,7 @@ C
 	IF(JCHAR(IBUF,1).NE.Z21)GOTO 2001
 	ICH = JCHAR(IBUF,2)
 	IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 2001
-	IDUMMY = IB2AS(IY-1900,ITIM,1,Z4202)
+	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUMMY = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)

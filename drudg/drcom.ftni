@@ -26,11 +26,14 @@ C 970304 nrv Add coption
 C 970603 nrv Add IRECCV for coverletter rec# and kdrg_infile
 C 970827 nrv Add ilabcol to remember the position on the page between
 C            schedules, and inewpage 
+C 971209 nrv Add kprepass
+C 980916 nrv Add ctextname
 C
 	double precision RA50,DEC50
         real rlabsize
 c
-	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile
+	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
+     .          kprepass
 c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
@@ -46,7 +49,7 @@ C
 C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .cprttyp,cprport,cprtlab,clabtyp,labname
+     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname
 c
         character*1 csize
         character*2 coption
@@ -55,7 +58,7 @@ c
 C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
-     .       kdrg_infile,
+     .       kdrg_infile,kprepass,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
      .       LUPRT,LUOUT,LULAB,ISTN,
@@ -73,7 +76,7 @@ C
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .       cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,csize,
-     .       coption(3)
+     .       coption(3),ctextname
 C
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records

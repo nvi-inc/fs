@@ -37,6 +37,8 @@ C 960628 nrv Allow more modes in catalog.
 C 970114 nrv Add MAX_SORLEN, length of source names.
 C 970204 nrv Change max_subpass to 36, max_frq to 20
 C 970206 nrv Chage max_headstack to 1
+C 971030 nrv Increase max_flux to 120 to allow 20 clean components.
+C 971208 nrv Add max_tone for phase cal tones
 C
 C********************************************************************
 C
@@ -47,7 +49,7 @@ C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass
+     .max_subpass,max_tone
 
 C     PARAMETER (MAX_STN = 16)
       PARAMETER (MAX_STN = 35)
@@ -101,6 +103,11 @@ C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
       PARAMETER (MAX_FRQ = 20)
 C
+C     The maximum number of phase cal tones that can be detected
+C     for each channe.
+
+      PARAMETER (MAX_TONE = 17)
+
 C     The maximum number of frequency bands within a schedule.
 C       **NOTE** This is restricted to be no more than 2!
 C       There are places in SKED that may appear to handle more
@@ -121,7 +128,8 @@ C     maximum number of entries in the profile. The value of 18 allows
 C     for 9 baselines and 8 fluxes, more than generous to describe a
 C     source.
 C
-      PARAMETER (MAX_FLUX = 18)
+C     PARAMETER (MAX_FLUX = 18)
+      PARAMETER (MAX_FLUX = 120)
 C 
 C     Maximum number of VLBA entries. 
 

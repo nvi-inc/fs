@@ -16,7 +16,8 @@ trkfrm_util.o bs2code.o cshm_init.o tracks_util.o bit_density_util.o\
 systracks_util.o rclcn_req_util.o rclcn_res_util.o rcl_util.o\
 user_info_util.o s2st_util.o s2tape_util.o s2rec_util.o rec_mode_util.o\
 data_valid_util.o s2label_util.o get_s2time.o tracks4_util.o trkfrm4_util.o\
-bsfo2code.o form4_util.o mvupper.o
+bsfo2code.o form4_util.o mvupper.o setMK4FMrec.o rvac_util.o wvolt_util.o\
+lo_util.o pcalform_util.o pcald_util.o pcalports_util.o
 #
 CFLAGS = 
 #FFLAGS = 

@@ -34,6 +34,10 @@ TERMLIB = -lncurses
 ifeq (/usr/lib/libtermcap.a,$(wildcard /usr/lib/libtermcap.a))
 TERMLIB = -ltermcap
 endif
+NOTSETUTC := $(shell patch --set-utc -v >/dev/null 2>&1;echo $$?)
+ifeq (${NOTSETUTC},0)
+SETUTC=--set-utc
+endif
 
 # The main target, 'oprin'.  Both new/updated object files and libraries
 # cause relinking; if libraries are missing, this makefile cannot
@@ -58,7 +62,7 @@ readline-2.0/libreadline.a: readline-2.0.tar.gz patch-rl-2.0
 	# Unpack the original GNU Readline 2.0 archive.
 	tar xzf readline-2.0.tar.gz
 	# Patch, configure and make the library.
-	patch -s <patch-rl-2.0
+	cd readline-2.0; patch -s -p1 ${SETUTC} <../patch-rl-2.0
 	# Establish '#include <readline/readline.h>'.
 	(cd readline-2.0; rm -f readline; ln -s . readline)
 	# Configure and make.

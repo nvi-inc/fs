@@ -38,6 +38,8 @@ C            and 3 if we're switching.
 C 961031 nrv Clean up the wordy "synth=" code.
 C 961031 nrv Write out "nchanr" for the NCHAN command.
 C 961101 nrv New set of pcalx commands from Craig.
+C 980729 nrv Add "autoallocate" and "autoreverse" per Craig.
+C 980924 nrv Remove "auto" for RDV11.
 C
 C
 C  INPUT:
@@ -319,6 +321,13 @@ C logging = special
           call char2hol('logging = special ',ibuf,1,18)
           call writf_asc(lu,ierr,ibuf,9)
         endif
+
+C autoallocate=on
+C autoreverse=on
+C       n = ichmv_ch(ibuf,1,'autoallocate=on ')
+C       call writf_asc(lu,ierr,ibuf,n/2)
+C       n = ichmv_ch(ibuf,1,'autoreverse=on ')
+C       call writf_asc(lu,ierr,ibuf,n/2)
 
 C  Following lines are written out only for VLBA antennas
 

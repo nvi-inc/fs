@@ -1,12 +1,6 @@
 /* LABEL.C -- Schedule bar code functions for PC-Sched.
  * David A. Schultz and Alan E. E. Rogers
  *
- * modified by NRV and WEH for use in DRUDG
- * 970122 NRV Remove numlaser and use tape_number instead.
- * 970228 nrv Make label size, barcode size into variables.
- * 970228 nrv Keep counting up labels every time we're called.
- * 970827 nrv Remove nlaser, add icol, irow to call. 
- *
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
  *
@@ -21,6 +15,7 @@ static unsigned char *barptr;
 static unsigned int barcnt;
 static unsigned int bitcnt;
 static unsigned int printcnt;           /* number bytes to print to printer */
+static unsigned int numlaser;          /* number laser bar codes */
 
 struct code {
   char init[20];                      /* graphics initialization code */
@@ -60,11 +55,9 @@ struct code codes[] = {
 typedef int Boolean;
 typedef unsigned char byte;
 #define DOTS 2
-/* #define NULL 0L << shouldn't do this */
+#define NULL 0L
 #define FALSE 0
 #define PRINTERS 4
-/* Hard-code printer number to 4: this version supports postscript ONLY */
-#define printer_number 4
   
 int bar_code(char *, char *, char *, unsigned, unsigned, unsigned,
 Boolean, int);
@@ -86,133 +79,74 @@ int barsize(char *,char *,unsigned,unsigned,unsigned,Boolean,int);
   
 void bar_code_labels(void);
 
-void make_pslabel(FILE **,char *,char *,char *,
-int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,float[],int*,int*,int*);
+void make_label(FILE *,int,int,char *,char,char *,
+int,int,int,int,int,int,int,int);
+
+void make_pslabel(FILE *,char *,char,char *,
+int,int,int,int,int,int,int,int);
 
 
 /* Make one label */
-void 
-#ifdef F2C
-make_pslabel__
-#else
-make_pslabel
-#endif
-(FILE **fp, char * station_name, char * station_code, char * expt_name,
-int *start_year, int *start_day, int *start_hour, int *start_min,
-int *end_year, int *end_day,   int *end_hour,   int *end_min, int *tape_number,
-int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
+void make_pslabel(FILE *fp, char * station_name, char station_code, char * expt_name,
+int year, int start_day, int start_hour, int start_min,
+int end_day,   int end_hour,   int end_min, int tape_number)
 {
   char string[11];
   unsigned char *ptr,temp;
   int chksum = 1; /* 1 = Yes, include checksum character */
   int i,x,y,z,bit;
-  double x1,y1,x2,y2,line_width,line_spacing;
-  float lab_ht,lab_wid,lab_topoff,lab_leftoff;
-  int lab_nrows,lab_ncols,rightoff,ifont;
+  double x1,y1,x2,y2;
 
-/* If we are starting a new file, set *new_file back to zero. */
-  if (*new_file == 1) {
-    *new_file=0;
-  }
-
-/* Copy the input array to meaningful names. */
-  lab_ht=lab_info[0];
-  lab_wid=lab_info[1];
-  lab_nrows=lab_info[2];
-  lab_ncols=lab_info[3];
-  lab_topoff=lab_info[4];
-  lab_leftoff=lab_info[5];
-
-/* Set up variables depending on the size of the label */
-   line_width=1.0; /* Width of the finest line in the bar code */
-   line_spacing=1.0; /* Spacing between adjacent lines in the bar code */
-/* The 1/1 combination gives a bar code 2.8 inches wide */
-/* Other valid combinations: width 0.5, spacing 0.7, code is 2 inches wide */
-   if (lab_wid < 4.0) { line_width=0.5; line_spacing = 0.7; }
-   if (lab_wid < 4.0) ifont=8; else ifont=10;
-
-/* Write file header once */
-  if(*new_file==0){ /* write file header */
-    fprintf(*fp,"%%!PS-Adobe-\n");
-/*    fprintf(*fp,"%%%BoundingBox:  0 0 612 792\n"); */
-    fprintf(*fp,"%%EndProlog\n");
-    if (ifont == 8) {
-     fprintf(*fp,"/Courier findfont\n 8 scalefont\n setfont\n");
-     }
-   else {
-     fprintf(*fp,"/Courier findfont\n 10 scalefont\n setfont\n");
-     }
-   fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
+  if(numlaser==0){
+   fprintf(fp,"%%!PS-Adobe-\n%%%BoundingBox:  0 0 612 792\n%%EndProlog\n");
+   fprintf(fp,"/Times-Roman findfont\n 10 scalefont\n setfont\n");
+   fprintf(fp,"0 setgray\n1 setlinewidth\n");
    }
-
-/* Write showpage if this label will start a new page */
-  if(*new_page==1){
-   fprintf(*fp,"showpage\n%%%Trailer\n");
-   fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
-   *new_page=0;
-  }
+    numlaser++;
 
   /* Print the station code, day, hour/min into string like this:
      K123-1234, with a space on the end.
   */
-  station_code[0] = toupper(station_code[0]); 
-  sprintf(string,"%c%3.3d-%2.2d%2.2d ", station_code[0], *start_day,
-  *start_hour, *start_min);
+  station_code = toupper(station_code);
+  sprintf(string,"%c%3.3d-%2.2d%2.2d ", station_code, start_day,
+  start_hour, start_min);
+  x=50; y=705-(numlaser-1)*108;  /* units 1/72 inch */
+  if(numlaser>6){ x+=280; y=705-(numlaser-7)*108; }
+  fprintf(fp,"%d %d moveto\n",x,y);
+  fprintf(fp,"(%-8.8s) show\n",station_name);
+  fprintf(fp,"%d %d moveto\n",x+100,y);
+  fprintf(fp,"(Start: %2.2d/%3.3d-%2.2d%2.2d) show\n",
+  year, start_day, start_hour, start_min);
+  y-=12;
+  fprintf(fp,"%d %d moveto\n",x,y);
+  fprintf(fp,"(%-8.8s) show\n",  expt_name);
+  fprintf(fp,"%d %d moveto\n",x+100,y);
+  fprintf(fp,"(End:    %3.3d-%2.2d%2.2d) show\n",end_day, end_hour, end_min);
+  y-=12;
+  fprintf(fp,"%d %d moveto\n",x,y);
+  fprintf(fp,"(Tape %d) show\n",tape_number);
 
-/* Calculate the x,y position on the page for this label, depending on
-   the row and column.
-   All label values are in inches, convert to units of 1/72 inch. 
-*/
-/*
-  irow=*start_lab%lab_nrows;
-  if (irow==0) irow=lab_nrows;
-  icol=1+*start_lab/lab_nrows;
-  if (*start_lab%lab_nrows == 0) icol-=1;
-  if (icol > lab_ncols) icol=icol%lab_ncols;
-  if (icol==0) icol=lab_ncols;
-*/
-  x=36+lab_leftoff*72 + (*icol-1)*lab_wid*72; /* start 0.5" from edge of label */
-  y=792-36-lab_topoff*72-(*irow-1)*lab_ht*72;
-
-/* Print the text above the barcode. */
-  rightoff=100;
-  if (lab_wid < 4.0) rightoff=60;
-  fprintf(*fp,"%d %d moveto\n",x,y);
-  fprintf(*fp,"(%-8.8s) show\n",station_name);
-  fprintf(*fp,"%d %d moveto\n",x+rightoff,y);
-  fprintf(*fp,"(Start: %2.2d/%3.3d-%2.2d%2.2d) show\n",
-  *start_year, *start_day, *start_hour, *start_min);
-  if (ifont == 10) y-=12;
-  if (ifont ==  8) y-=8;
-  fprintf(*fp,"%d %d moveto\n",x,y);
-  fprintf(*fp,"(%-8.8s) show\n",  expt_name);
-  fprintf(*fp,"%d %d moveto\n",x+rightoff,y);
-  fprintf(*fp,"(End:   %2.2d/%3.3d-%2.2d%2.2d) show\n",
-  *end_year, *end_day, *end_hour, *end_min);
-  if (ifont == 10) y-=12;
-  if (ifont ==  8) y-=8;
-  fprintf(*fp,"%d %d moveto\n",x,y);
-  fprintf(*fp,"(Tape %d) show\n",*tape_number);
-  fprintf(*fp,"%d %d moveto\n",x+rightoff,y);
-  fprintf(*fp,"(%c%3.3d-%2.2d%2.2d ) show\n", station_code[0], *start_day,
-  *start_hour, *start_min);
-
-/* Print the barcode. */
   three_9(string,chksum);
   for(i=z=0,ptr=barcode; i<barcnt; i++,z++){
-  x1=x2=x+i*line_spacing; 
-  y1=y-8; /* start barcode just below tape number */
-  y2=y1-36.0; /* always 0.5 inch high */
+  x1=x2=x+i*1.0; y1=y-10; y2=y1-36.0;
   if(z==8) z=0;
   if(!z) temp=*ptr++;
   bit=temp&1;
   if(bit){
-   fprintf(*fp,"newpath\n %5.1f %5.1f moveto \n %5.1f %5.1f lineto\nstroke\n",
+   fprintf(fp,"newpath\n %5.1f %5.1f moveto \n %5.1f %5.1f lineto\nstroke\n",
    x1,y1,x2,y2);
       }
    temp >>= 1;
       }
+  x+=60; y-=60;
+  fprintf(fp,"%d %d moveto\n",x,y);
+  fprintf(fp,"(%c%3.3d-%2.2d%2.2d ) show\n", station_code, start_day,
+  start_hour, start_min);
 
+  if(numlaser>11){
+   fprintf(fp,"showpage\n%%%Trailer\n");
+   numlaser=0;
+  }
 }
 
 
@@ -494,7 +428,7 @@ char chksum;      /* logical 1 or 0 to print checksum */
     0406, 0106, 0026, 0601, 0301, 0700, 0221, 0620, 0320,
   0205, 0604, 0304, 0250, 0242, 0212, 0052          };
   
-  static unsigned char letter[] = {
+  static char letter[] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8',
     '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
@@ -760,5 +694,56 @@ int passes;
   COUNTBYTE = 0;                      /* generate the bytes */
   
   return((int)printcnt);
+}
+
+int get_exp_name(void) {
+  int j,i,k,nchars,kk;
+
+  save_the_screen();
+
+ for(k=0;k<3;k++){ /* cycle through 3 times to get exp_,pi_,corr_name */
+ /* Get an experiment name for the labels/schedule. */
+  kk=k*5;
+  if(k==0) nchars=8; else nchars=20;
+  draw_box(24, 9+kk, 54+nchars-8, 13+kk, SINGLE, attr[clrset].menuw_border,
+  attr[clrset].menuw_main,
+  "",
+  attr[clrset].menuw_title,
+  (helpfp != NULL ? "F1 for help, Esc to cancel" : "Esc to cancel"), RIGHT);
+
+  gotoxy_ds(26, 11+kk); textattr(attr[clrset].menuw_main);
+  if(k==0)cputs("Experiment name:");
+  if(k==1)cputs("P.I. name:");
+  if(k==2)cputs("Correlator:");
+
+  draw_box(43, 10+kk, 52+nchars-8, 12+kk, SINGLE, attr[clrset].menuw_input,
+  attr[clrset].menuw_input, DUM_STR, DUM_CHAR, DUM_STR, RIGHT);
+
+  if(k==0 && (j = strlen(exp_name)) != 0) sprintf(buffer,"%-8.8s",exp_name);
+  if(k==1 && (j = strlen(pi_name)) != 0) sprintf(buffer,"%-20.20s",pi_name);
+  if(k==2 && (j = strlen(corr_name)) !=0)sprintf(buffer,"%-20.20s",corr_name);
+
+  new_cgets(&j, 44, 11+kk, nchars, "exptname");
+
+  if(k==2 || j==-1)rewrite_the_screen();
+  if (j >= 0){i=0;
+     while(buffer[i]!=0 && i<nchars && (buffer[i]!=' ' || k>0)){
+      if(buffer[i]=='.' && k==0 ) buffer[i]='_'; /* change period to underscore */
+     i++;}
+    if(k==0){strncpy(exp_name,buffer,i);exp_name[i]=0;}
+    if(k==1){strncpy(pi_name,buffer,i);pi_name[i]=0;}
+    if(k==2){strncpy(corr_name,buffer,i);corr_name[i]=0;}
+       }
+  if(j < 0) return 0;
+}
+  return (j < 0) ? 0 : 1; /* j will be -1 if Esc was pressed in new_cgets() */
+}
+
+void bar_canceled_message(void) {
+  
+  prompt("\"Bar Code Labels\" canceled.  Press a key.",
+  NO_BEEP, WAIT_RESP, SAVE_VID, MSG, attr[clrset].msg_main,
+  attr[clrset].msg_border, attr[clrset].msg_title,
+  "canbar");
 }
 

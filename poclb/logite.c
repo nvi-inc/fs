@@ -28,11 +28,16 @@ char *who;           /* 2-char string identifying the error  */
 */
   rte_time(it,&it[5]);
   buf[0]='\0';
-  int2str(buf,it[5]%100,-2,1);
+  int2str(buf,it[5],-4,1);
+  strcat(buf,".");
   int2str(buf,it[4],-3,1);
+  strcat(buf,".");
   int2str(buf,it[3],-2,1);
+  strcat(buf,":");
   int2str(buf,it[2],-2,1);
+  strcat(buf,":");
   int2str(buf,it[1],-2,1);
+  strcat(buf,".");
   int2str(buf,it[0],-2,1);
 
 /* For error messages, put ?ERROR xx msg into the log entry.

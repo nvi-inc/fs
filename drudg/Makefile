@@ -9,6 +9,11 @@
 # 970406 nrv Move c2upper to skdrut                                   #
 # 970509 nrv Add WRSOR                                                #
 # 970603 nrv Add PRCOV                                                #
+# 971211 nrv Add IADDPC                                               #
+# 980910 nrv Add TIMOUT                                               #
+# 980916 nrv Add PRTXT                                                #
+# 980916 nrv Add TIMOUT                                               #
+# 980929 nrv Add K4TYPE                                               #
 #                                                                     #
 #######################################################################
 
@@ -42,7 +47,8 @@ $(DR)labsnp.o $(DR)port.o $(DR)lstsum.o $(DR)nhdif.o $(DR)setprint.o \
 $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
 $(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o \
 $(DR)lstsumo.o $(DR)isecdif.o $(DR)psbar.o $(DR)copen.o $(DR)procintr.o \
-$(DR)read_snap1.o $(DR)drset.o $(DR)wrsor.o $(DR)prcov.o
+$(DR)read_snap1.o $(DR)drset.o $(DR)wrsor.o $(DR)prcov.o $(DR)iaddpc.o \
+$(DR)timin.o $(DR)timout.o $(DR)prtxt.o $(DR)k4type.o
 
 #
 # Set compiling and linking flags

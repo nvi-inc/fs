@@ -35,12 +35,12 @@ C NSTNSK - number of stations in current observation
 C NLAB - number of labels across a page
       integer mjd,ida,iyr2,iyear,iyr,idayr,ihr,imin,isc,
      .idayr2,ihr2,min2,isc2,mon
-      integer iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2
+      integer ipsy1,ipsy2,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2
       integer istnsk,isor,icod,i,iftold,nout,nlabpr,l,ilen,ical,
      .nstnsk,idir,idirp,ipasp,ierr,ntape
       integer*2 lfreq
         integer IY1(5),ID1(5),IH1(5),IM1(5),
-     .          ID2(5),IH2(5),IM2(5) ! holders for row of labels
+     .          iy2(5),ID2(5),IH2(5),IM2(5) ! holders for row of labels
         LOGICAL KNEWT
       LOGICAL KNEW
         CHARACTER*50 CLASER,cbuf
@@ -100,6 +100,7 @@ C            starting position of label.
 C 971014 nrv Add better S2 logic.
 C 971028 nrv Force new tape when starting a schedule (this was needed for
 C            S2 in case it starts in middle of tape).
+C 980916 nrv Add IY2 to hold the year of the stop times.
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -395,21 +396,22 @@ C
             IF (NOUT.GE.NLAB.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) then !type a row
               if (clabtyp.ne.'POSTSCRIPT') then ! laser or Epson
                 CALL BLABL(LUprt,NOUT,LEXPER,LSTNNA(1,ISTN),
-     .          LSTCOD(ISTN),IY1,ID1,IH1,IM1,ID2,IH2,IM2,ILABROW,
+     .          LSTCOD(ISTN),IY1,ID1,IH1,IM1,iy2,ID2,IH2,IM2,ILABROW,
      .          cprttyp,clabtyp,cprport)
                 NOUT = 0
                 ILABROW=ILABROW+1            !increment vertical label position
                 IF (ILABROW.GT.8) ILABROW=ILABROW-8  !reset to top of page
               else ! postscript
-                iy1900=iy1(1)-1900
+                ipsy1=mod(iy1(1),100)
                 ipsd1=id1(1)
                 ipsh1=ih1(1)
                 ipsm1=im1(1)
+                ipsy2=mod(iy2(1),100)
                 ipsd2=id2(1)
                 ipsh2=ih2(1)
                 ipsm2=im2(1)
                 call make_pslabel(fileptr,lstnam,lco,lexper,
-     .          iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2,ntape,
+     .          ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
      .          inew,rlabsize,ilabrow,ilabcol,inewpage)
                 ilabcol=ilabcol+1
                 if (ilabcol.gt.rlabsize(4)) then
@@ -427,7 +429,7 @@ C
             IF (ILEN.LT.0 .OR. JCHAR(IBUF,1).EQ.Z24) GOTO 900
             NOUT = NOUT + 1
             NLABPR = NLABPR + 1
-            IY1(NOUT) = IYR
+            IY1(NOUT) = mod(IYR,100)
             ID1(NOUT) = IDAYR
             IH1(NOUT) = IHR
             IM1(NOUT) = iMIN
@@ -435,7 +437,7 @@ c         IS1(NOUT) = ISC
 C         NOB(NOUT) = 0
           END IF !new tape
 C
-c       IY2(NOUT) = IYR2
+       IY2(NOUT) = mod(IYR2,100)
           IH2(NOUT) = IHR2
           IM2(NOUT) = MIN2
 c       IS2(NOUT) = ISC2

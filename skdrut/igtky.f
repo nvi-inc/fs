@@ -85,6 +85,7 @@ C for TAPE motion type command
 C 14         AD - ADAPTIVE tape motion type
 C 14         CO - CONTINUOUS tape motion type
 C 14         SS - START&STOP tape motion type
+C 14         DY - DYNAMIC tape motion type
 C These for SUM are also for SITEVIS
 C 15         LI = LINE display for SUM
 C 15         XY = azel plot for SUM
@@ -134,17 +135,18 @@ C 970317 nrv Add "A2" for azelha in XLIST
 C 970317 nrv Add continuous, adaptive, and start&stop for TAPE motion type.
 C 970326 nrv Add keywords for XNEW command
 C 970423 nrv Add back in "on" and "off" for XLIST
+C 980629 nrv Add dynamic tape motion type.
 C
 C   LOCAL VARIABLES
       integer numcmd,ic,ifunc1,ifunc,nccmd
 C
       character*20 ckeyin ! input keyword
-      character*20 ckey(113) ! keywords to match
-      character*2 ccode(113)  ! corresponding 2-letter code
-      integer ivalid(113) ! type for which it is valid
+      character*20 ckey(114) ! keywords to match
+      character*2 ccode(114)  ! corresponding 2-letter code
+      integer ivalid(114) ! type for which it is valid
 C
 C  Initialized
-      data numcmd/113/
+      data numcmd/114/
       data ckey/'START','CABLE','SUBNET','DURATION','IDLE',
      .'CALIBRATION','FREQUENCY','PREOB','MIDOB','POSTOB',
      .
@@ -167,7 +169,7 @@ C  Initialized
      .'PRINT','SCREEN','APPEND','OVERWRITE',
      .'FEET','AZEL','DUR','SNR','MAX','FLUX','HA','ON','OFF',
      .
-     .'CONTINUOUS','ADAPTIVE','START&STOP',
+     .'CONTINUOUS','ADAPTIVE','START&STOP','DYNAMIC',
      .
      .'LINE','XYAZEL','POLAZEL','COVERAGE','DISTANCE','EL','AZ',
      .'FILE','BASELINE','STATS','HIST','SNR',
@@ -197,7 +199,7 @@ C
      .'EX',
      .'PR','SC','AP','OV',
      .'FT','AZ','DU','SX','MX','FL','A2','ON','OF',
-     .'CO','AD','SS',
+     .'CO','AD','SS','DY',
      .'LI','XY','PO','CO','DI','EL','AZ','FI','BA','ST','HI','HS',
      .'SN','PR','GE','AL',
      .'MR',
@@ -208,7 +210,7 @@ C
      .'ON','OF','FL','SN','SE','BA'/
 
       DATA ivalid/10*1,35*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
-     .3*14,12*15,4*16,17,8*18,3*19,3*20,3*21,6*22/
+     .4*14,12*15,4*16,17,8*18,3*19,3*20,3*21,6*22/
 C
 C
 C  1. Find the command in the list of commands with minimum matching.

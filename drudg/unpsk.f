@@ -63,6 +63,8 @@ C 930407 nrv implicit none
 C 960228 nrv Upper-case the frequency code
 C 970114 nrv Change 8 to max_sorlen
 C 970728 nrv Add IOFF to call, decode offsets
+C 980910 nrv Move JULDA call to after CLNDR so that the year
+C            is the full 4-digit value.
 C
       integer*2 LPASS(56)
 C
@@ -106,13 +108,14 @@ c added 900628
       IHR = IAS2B(IBUF,IC1+5,2)
       iMIN = IAS2B(IBUF,IC1+7,2)
       ISC = IAS2B(IBUF,IC1+9,2)
-      MJD = JULDA(1,IDAYR,IYR)
-      UT = IHR*3600.D0+iMIN*60.D0+ISC
-      CALL SIDTM(MJD,ST0,FRAC)
-      GST = DMOD(ST0 + UT*FRAC, 2.0d0*PI)
       IMON = 0
       IDA = IDAYR
       CALL CLNDR(IYR,IMON,IDA,LMON,LDAY)
+C     After CLNDR, IYR is now a 4-digit year
+      MJD = JULDA(1,IDAYR,IYR-1900)
+      UT = IHR*3600.D0+iMIN*60.D0+ISC
+      CALL SIDTM(MJD,ST0,FRAC)
+      GST = DMOD(ST0 + UT*FRAC, 2.0d0*PI)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
       IDURS= IAS2B(IBUF,IC1,IC2-IC1+1)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
