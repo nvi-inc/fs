@@ -81,6 +81,9 @@ main()
       case 2:  /* terminate */
 	rcl_close();
 	exit(0);
+      case 3:  /* process DAS communication request buffers */
+        ierr=process_s2das(ip);
+        break;
       default: /* error */
 	ierr=-300;
 	break;
@@ -194,6 +197,18 @@ int get_addr(char *inbuf, int *inpos_ptr)
 }
 
 /* ********************************************************************* */
+/* ********************************************************************* */
+int get_da_addr(char *inbuf )
+{
+ struct rclad *rptr;
+  
+ for( rptr = rclad_base ; rptr != NULL ; rptr = rptr->next )
+    if( !strncmp( inbuf , rptr->name , 2 ) )
+       return rptr->addr;
+
+ return -1;
+}
+/* ********************************************************************* */
 
 int init(long ip[5])
 {
@@ -255,7 +270,7 @@ int init(long ip[5])
 	  ptr->okay=0;
 	}
 	
-	return ierr;
+	/*	return ierr;**/
       }
     }
   }
@@ -694,14 +709,16 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     {
       int year,day,hour,min,sec;
       ibool validated;
-      long centisec[2];
+      long centisec[6];
       
       if(iecho)
 	strcpy(echobuf,"[time_read]");
 
-      rte_rawt(centisec);
+      rte_cmpt(centisec+2,centisec+4);
+      rte_ticks(centisec);
       ierr=rcl_time_read(addr,&year,&day,&hour,&min,&sec,&validated);
-      rte_rawt(centisec+1);
+      rte_ticks(centisec+1);
+      rte_cmpt(centisec+3,centisec+5);
 
       if(iecho)
 	echo_add_error(echobuf,ierr);
@@ -716,8 +733,9 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	  strcat(echobuf,"<valid>");
 	else
 	  strcat(echobuf,"<not-valid>");
-	sprintf(echobuf+strlen(echobuf),"{%ld}{%ld}",
-		centisec[0],centisec[1]);
+	sprintf(echobuf+strlen(echobuf),"{%ld}{%ld}{%ld}{%ld}{%ld}{%ld}",
+		centisec[0],centisec[2],centisec[4],
+		centisec[1],centisec[3],centisec[5]);
       }
       
       memcpy(outbuf+outpos,&year,sizeof(year)); outpos+=sizeof(year);
