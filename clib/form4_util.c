@@ -303,8 +303,8 @@ char *ptr;
   case 6:
     ierr=arg_key(ptr,key_syn,NKEY_SYN,&lcl->synch, 0,FALSE);
     if(ierr!=0) {
-      ierr=arg_int(ptr,&lcl->synch      ,3,TRUE);
-      if(ierr==0 & (lcl->synch < 0 || lcl->synch > 16))
+      ierr=arg_int(ptr,&lcl->synch      ,shm_addr->equip.mk4sync_dflt,TRUE);
+      if(ierr==0 & (lcl->synch < -1 || lcl->synch > 16))
 	ierr=-200;
     } else
       lcl->synch=-1;
@@ -668,7 +668,8 @@ char *buff;
 {
 
   sscanf(buff+2,"%i",&lclc->synch);
-
+  if(lclc->synch==99)
+	lclc->synch=-1;
 }
 
 void maSTAform4(lclc,lclm,buff)
