@@ -9,7 +9,7 @@ C     VREAD calls the routines to read a VEX file.
 C History
 C 960522 nrv New.
 C 970114 nrv Stop if the supported VEX version is not found.
-C 970114 nrv Add a call to VGLINP
+C 970124 nrv Add a call to VGLINP, and a call to errormsg
 
 C Input
       character*(*) cfile ! VEX file path name
@@ -45,9 +45,10 @@ C  2. Read the sections
       cbuf='$EXPER'
       call null_term(cbuf)
       write(lu,'(a)') cbuf
-      call vglinp(ivexnum,lu,ierr) ! stations
+      call vglinp(ivexnum,lu,ierr,iret) ! global info
       if (ierr.ne.0) then
         write(lu,'("VREAD00 - Error reading experiment info.")')
+        call errormsg(iret,ierr,'EXPER',lu)
       endif
       cbuf='$STATIONS'
       call null_term(cbuf)
