@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define MAX_NAME 64
+#define MAX_NAME 65
 
 ftn_purge__(name,ierr,len)
 char *name;
