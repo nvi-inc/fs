@@ -7,8 +7,8 @@
 #
 if ($#ARGV <0) {
     print "Usage: wpas2help xxx\n";
-    print "where xxx are the files to WP ASCII file to generate help files from\n";
-    print "requires fiddling afterwards to put `Standard.__' in `rx.__';
+    print "where xxx are the files in WP ASCII format to generate help files from\n";
+    print "requires fiddling afterwards to put `Standard.__' in `rx.__'\n";
     exit -1;
 }
 
