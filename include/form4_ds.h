@@ -9,6 +9,7 @@ struct form4_cmd {
   int fan;           /* fan-in, fan-out mode */
   int barrel;        /* barrel-rolling mode */
   int last;         /* =1 if form4 was last, 0 if trackform */
+  int synch;        /* synch on 0...16 or off=-1, pass=-2 fail=-3 */
 };
 
 struct form4_mon {
