@@ -108,7 +108,6 @@ C
 C                  ! data in IBUF:   TPrdebtbta
 C
       call ma2rp(ibuf,iremtp,iby,ieq,ibw,ita,itb,ial)
-      call fs_set_iremtp(iremtp)
       goto 320
 310   ita = itrakaus_fs
       itb = itrakbus_fs
