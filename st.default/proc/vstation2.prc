@@ -72,11 +72,6 @@ define  calon         00000000000
 "turn the cal on
 "rx=*,*,*,*,*,*,on
 enddef
-define  caltemps      00000000000
-caltempa=x
-caltempb=x
-caltempc=x
-enddef
 define  dat           00000000000
 bbcsx2
 ifdsx
@@ -97,7 +92,7 @@ enddef
 define  midob         00000000000
 tpi=formbbc,formif
 bbcagc
-caltemps
+caltemp=formbbc,formif
 tsys=formbbc,formif
 onsource
 wx
@@ -163,7 +158,7 @@ tpical=formbbc,formif
 tpgain=formbbc,formif
 bbcagc
 caloff
-caltemps
+caltemp=formbbc,formif
 tsys=formbbc,formif
 enddef
 define  vlbainit      00000000000

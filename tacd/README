@@ -1,16 +1,22 @@
-tacd - TAC Field System server.
+tacd - TAC Field System daemon.
 
- This is more like a server that a daemon; it has no forks or such.
- It is executed at Field System startup, and continues in an infinite
-loop until the Field System terminates.
+ This is a daemon; which calls a client 'tacd_srv'. The client contacts the 
+server on the TAC PC.
 
- It calls on the TAC host and opens a socket. This information is kept
-in a file named "tacd.ctl" in the "/usr2/control" directory.
- After it's initial contact it askes for status,time, and averages and
-places them in the Field System Shared Memory "/usr2/fs/include/fscom.h".
-It repeats this at whatever has been determined.
+ It is executed at Field System startup, and continues in an infinite loop 
+until the Field System terminates.
 
- Functions that use this server are:
+ 'tacd_srv' calls on the TAC host by opening a known IP address, and PORT. This
+information is kept in a file named "tacd.ctl" (/usr2/control/tacd.ctl).
+ 
+ When 'tacd_srv' is called by the 'tacd' daemon it stores the infomation 
+received from the TAC PC server (status,time, and averages) in the Field 
+System Shared Memory "/usr2/fs/include/fscom.h".
+ 
+ It repeats this at whatever the second parameter in the tacd.ctl file
+indicates.
+
+ Functions that use this information are:
  /usr2/fs/quikv/tacd.c	/* This function displays and logs, using the function
                            tacd_dis.c. */ 
 
@@ -35,4 +41,3 @@ It repeats this at whatever has been determined.
 >tacd=average	
 18:24:44;tacd=average
 18:24:44/tacd/average,OLD,36647.765625,300,0.016172,11.063171,11.093600,11.028600
-

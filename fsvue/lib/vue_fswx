@@ -56,17 +56,17 @@ label .label4 -text "UT Time" -font $bfont -bg blue -fg white
 label .result4 -width 16 -relief sunken -font $bfont -textvariable result4
 label .label1 -text "Temperature" -font $bfont -bg blue -fg white
 label .result1 -width 8 -relief sunken -font $bfont -textvariable result1
-label .label2 -text "Humidity" -font $bfont -bg blue -fg white
+label .label2 -text "Pressure" -font $bfont -bg blue -fg white
 label .result2 -width 8 -relief sunken -font $bfont -textvariable result2
-label .label3 -text "Pressure" -font $bfont -bg blue -fg white
+label .label3 -text "Humidity" -font $bfont -bg blue -fg white
 label .result3 -width 8 -relief sunken -font $bfont -textvariable result3
 
 while {1} {
 
 set result4 [exec vueinfo time]
 set result1 [exec vueinfo wxt]
-set result2 [exec vueinfo wxh]
-set result3 [exec vueinfo wxp]
+set result2 [exec vueinfo wxp]
+set result3 [exec vueinfo wxh]
 
 pack .label4 .result4 -fill x 
 pack .label1 .result1 -fill x 

@@ -87,20 +87,6 @@ repro=byp,9,21
 decode=a,crc
 decode
 enddef
-define  sxcts         00000000000
-tpi=formvc,formif
-ifd=max,max,*,*
-if3=max,*,*,*,*,*
-!+2s
-tpzero=formvc,formif
-ifd=old,old,*,*
-if3=old,*,*,*,*,*
-calon
-!+2s
-tpical=formvc,formif
-caloff
-tsys=formvc,formif
-enddef
 define  tapeforma     00000000000
 tapeform=1,-350,2,  0,3,-295, 4, 55, 5,-240, 6,110
 tapeform=7,-185,8,165,9,-130,10,220,11, -75,12,275
@@ -272,6 +258,7 @@ vc01
 vc05
 vc09
 tpi=formvc,formif
+caltemp=formvc,formif
 tsys=formvc,formif
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
@@ -389,5 +376,6 @@ calon
 tpical=formvc,formif
 tpdiff=formvc,formif
 caloff
+caltemp=formvc,formif
 tsys=formvc,formif
 enddef
