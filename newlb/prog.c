@@ -359,6 +359,12 @@ void fs_get_ispeed__(ispeed)
 	  *ispeed = shm_addr->ispeed;
 	}
 
+void fs_get_cips__(cips)
+	long *cips;
+	{
+	  *cips = shm_addr->cips;
+	}
+
 void fs_set_ienatp__(ienatp)
 	int *ienatp;
 	{
@@ -439,6 +445,20 @@ void fs_get_ipashd__(ipashd)
 	{
           ipashd[0]=shm_addr->ipashd[0];
           ipashd[1]=shm_addr->ipashd[1];
+	}
+
+void fs_set_posnhd__(posnhd)
+	float posnhd[2];
+	{
+          shm_addr->posnhd[0]=posnhd[0];
+          shm_addr->posnhd[1]=posnhd[1];
+	}
+
+void fs_get_posnhd__(posnhd)
+	float posnhd[2];
+	{
+          posnhd[0]=shm_addr->posnhd[0];
+          posnhd[1]=shm_addr->posnhd[1];
 	}
 
 void fs_set_lfreqv__(lfreqv)
@@ -781,6 +801,18 @@ void fs_get_ichvkenable__(ichvkenable)
 	int *ichvkenable;
 	{
 	  *ichvkenable = shm_addr->check.vkenable;
+	}
+
+void fs_set_ichsystracks__(ichsystracks)
+	int *ichsystracks;
+	{
+	  shm_addr->check.systracks = *ichsystracks;
+	}
+
+void fs_get_ichsystracks__(ichsystracks)
+	int *ichsystracks;
+	{
+	  *ichsystracks = shm_addr->check.systracks;
 	}
 
 void fs_set_ichvkrepro__(ichvkrepro)
@@ -1155,6 +1187,18 @@ void fs_get_rack__(rack)
 	  *rack = shm_addr->equip.rack;
 	}
 
+void fs_set_rack_type__(rack_type)
+	int *rack_type;
+	{
+	  shm_addr->equip.rack_type = *rack_type;
+	}
+
+void fs_get_rack_type__(rack_type)
+	int *rack_type;
+	{
+	  *rack_type = shm_addr->equip.rack_type;
+	}
+
 void fs_set_drive__(drive)
 	int *drive;
 	{
@@ -1449,3 +1493,35 @@ void fs_get_bbc_source__(source,n)
 	{
           *source=shm_addr->bbc[*n-1].source;
 	}
+
+void fs_get_wrhd_fs__(wrhd_fs)
+        int *wrhd_fs;
+        {
+          *wrhd_fs = shm_addr->wrhd_fs;
+        }
+
+void fs_set_wrhd_fs__(wrhd_fs)
+        int *wrhd_fs;
+	{
+	  shm_addr->wrhd_fs = *wrhd_fs;
+	}
+
+void fs_get_vfm_xpnt__(vfm_xpnt)
+        int *vfm_xpnt;
+        {
+          *vfm_xpnt = shm_addr->vfm_xpnt;
+        }
+
+void fs_set_vfm_xpnt__(vfm_xpnt)
+        int *vfm_xpnt;
+	{
+	  shm_addr->vfm_xpnt = *vfm_xpnt;
+	}
+
+void fs_get_vrepromode__(vrepromode)
+	int *vrepromode;
+	{
+          vrepromode[0]=shm_addr->vrepro.mode[0];
+          vrepromode[1]=shm_addr->vrepro.mode[1];
+	}
+
