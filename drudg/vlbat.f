@@ -17,7 +17,7 @@ C
 C
 C  INPUT:
       logical ksw ! true if switching
-        integer*2 LSNAME(4),LSTN(MAX_STN),LMON(2),
+        integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LMON(2),
      .LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),lfreq,
      .ldsign2
         integer IPAS(MAX_STN),
@@ -94,6 +94,8 @@ C nrv 940617
 C***********************************************************
 C 960219 nrv Add KSW to call, true if switching.
 C 960810 nrv Change itearl to an array
+C 970114 nrv Change 8 to max_sorlen. May need to check out the fixed
+C            array used for the 'sname' line.
 C
 C  Initialization
 
@@ -213,7 +215,7 @@ C  Source name, ra, dec in J2000 coordinates
 	  idecm2=idecm2-60
 	  idecd2=idec2d+1
 	endif
-        in=iflch(lsname,8)
+        in=iflch(lsname,max_sorlen)
         idum = ichmv(isname,8,blank10,1,9)
 	idum = ichmv(isname,8,lsname,1,in)
         idum = ichmv(isname,8+in,oapostrophe,1,1)
