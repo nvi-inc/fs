@@ -256,6 +256,9 @@ loop:
 	case 10:
 	  in2net(&command,itask,ip);
 	  break;
+	case 11:
+	  scan_check(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  goto error;
