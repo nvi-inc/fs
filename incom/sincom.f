@@ -629,6 +629,9 @@ C LINE #7  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         rack = MK4
         rack_type = MK4
+      else if (ichcm_ch(ibuf,ic1,'none').eq.0) then
+        rack = 0
+        rack_type = 0
       else
         call logit7ci(0,0,0,1,-140,'bo',7)
         ierrx = -1
@@ -654,6 +657,12 @@ C LINE #8  TYPE OF RECORDER - drive
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         drive = MK4
         drive_type = MK4
+      else if (ichcm_ch(ibuf,ic1,'s2').eq.0) then
+        drive = S2
+        drive_type = S2
+      else if (ichcm_ch(ibuf,ic1,'none').eq.0) then
+        drive = 0
+        drive_type = 0
       else
         call logit7ci(0,0,0,1,-140,'bo',8)
         ierrx = -1
