@@ -7,8 +7,6 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-#undef TRUE
-#undef FALSE
 #include "../rclco/rcl/rcl_def.h"
 
 int get_s2speed(long ip[], char *lwho)
@@ -32,8 +30,11 @@ int get_s2speed(long ip[], char *lwho)
 
   skd_par(ip);
 
-  if (ip[2]<0)
+  if (ip[2]<0){
+    ip[1]=0;
+    cls_clr(ip[0]);
     return 0;
+  }
 
   opn_rclcn_res(&res_buf,ip);
 
