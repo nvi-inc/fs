@@ -1,0 +1,83 @@
+#!/usr/bin/wish -f
+# vue source
+# Basic font for button and labels
+# Product of Raymond Gonzalez for NVI,Inc./GSFC (2000)
+# To be incorporated into the VLBI Field System.
+
+# Window manager configurations
+  set bfont {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
+  set bfont2 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
+  set bfont3 {-*-lucida-bold-r-*-sans-24-*-*-*-*-*-*-*}
+
+  set icondir /usr2/fs/fsvue
+  set const 3
+  set vieX [expr [winfo screenwidth .]/$const]
+  set vieY [expr [winfo screenheight .]/$const] 
+
+  global tkVersion
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 410 280
+  wm iconposition . 1200 500
+  wm iconbitmap . @$icondir/vlb.icon
+  wm iconname . {fsvue}
+  wm geometry . +$vieX+$vieY
+  wm title . {FS VLBI User Environment}
+  set w .
+
+  if {$argc != 0} {
+      set newfile_filename [lindex $argv 0]
+  } else { 
+      set newfile_filename "station.log"
+  }
+
+# Bottom frame is a menubar
+# build widget .m
+frame .m \
+	-bg {black} \
+	-borderwidth {2} \
+	-relief {groove}
+
+$w config -cursor {top_left_arror black white}
+
+# two buttons in the menu giving dropdown menus
+button .m.info -bitmap @$icondir/info.icon -relief {raise} -font $bfont2 -background navy -fg white -command AboutVUE
+
+button .m.vier -text "START" -relief {raise} -font $bfont2 -background navy -fg white -command {exec $icondir/vue_start $newfile_filename &; exit}
+
+button .m.q -text "EXIT" -relief {raise} -font $bfont2 -background red -fg black -command exit
+
+# create an image
+canvas .c -height 240 -width 410
+image create photo my_image -file [file join /usr2/fs fsvue fsvue_logo.gif]
+.c create image 0 0 -anchor nw -image my_image
+
+# Main command entry area is under that
+pack .m.info .m.vier .m.q -side left -fill both -expand 1
+pack .c .m  -side top -fill x
+
+proc AboutVUE {} {
+  set icondir /usr2/fs/fsvue
+  catch {destroy .helpOnBasics}
+  toplevel .helpOnBasics
+  wm title .helpOnBasics "fsvue Basics"
+  wm iconbitmap . @$icondir/vlb.icon
+  wm iconname . {fsvue}
+  message .helpOnBasics.text -text "field system VLBI User Environment (fsvue):
+
+Pronounced: 'f' 's' 'view' or just 'view'.
+
+  fsvue was developed principally to be used by the VLBI Field System. It may also be used on other Radio Telescopes. 
+  It is written in Tcl/Tk. This will make fsvue easy to modify, and easy to port to other systems.
+
+  Click on START to start the process or EXIT.
+"
+
+  button .helpOnBasics.ok -text Dismiss -command {destroy .helpOnBasics}
+  pack .helpOnBasics.text
+  pack .helpOnBasics.ok -fill x -padx 5 -pady 5
+}
+
+
+
+
