@@ -219,7 +219,6 @@ int *timeout;
 
   iret = ibcnt;
 
-#if 0
   if (!serial) {
 #ifdef CONFIG_GPIB
     ibcmd(ID_hpib,"_?",2);  	/* unaddress all listeners and talkers */
@@ -234,6 +233,7 @@ int *timeout;
     *error = -(IBCODE + 22);
     return -1;
 #endif
+#if 0
   } else {
     ierr=sib(ID_hpib,"cm \n_?\r",0,0,100);
     if(ierr<0) {
@@ -249,8 +249,8 @@ int *timeout;
       memcpy((char *)ipcode,"RD",2);
       return -1;
     }
-  }
 #endif
+  }
 
   if (*mode == 1) {  
     if (iret <= 0)
