@@ -228,10 +228,10 @@ Error retrieving class for response to commands.
 Error retrieving class for response to query.
 ""
 5F -501
-error decoding disk2file? destination file name parameter
+error decoding disk2file? status parameter
 ""
 5F -502
-error decoding disk2file? status parameter
+error decoding disk2file? destination file name parameter
 ""
 5F -503
 error decoding disk2file? start byte parameter
@@ -288,10 +288,10 @@ Error retrieving class for response to commands.
 error retrieving class
 ""
 5I -501
-error decoding in2net? destination parameter
+error decoding in2net? status parameter
 ""
 5I -502
-error decoding in2net? status parameter
+error decoding in2net? destination parameter
 ""
 5I -503
 error decoding in2net? received parameter
