@@ -28,11 +28,16 @@ C        ICH    - character counter
 C     NCHAR  - character count
       integer*2 ibuf(156)               ! class buffer, holding command
       dimension ireg(2)                   !  registers from exec calls
+      character*1 cjchar
+      integer*2 lwho,lwhat(17)
       integer get_buf
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
-      data ilen/120/                          !  length of ibuf, characters
+      data ilen/312/                          !  length of ibuf, characters
+      data lwho/2hqk/
+      data lwhat/2hv1,2hv2,2hv3,2hv4,2hv5,2hv6,2hv7,2hv8,2hv9,
+     &           2hva,2hvb,2hvc,2hvd,2hve,2hi1,2hi2,2hi3/
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED:  810423
@@ -71,29 +76,37 @@ C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
       if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
-        do i=1,17 
-          if (itpis(i).ne.0) then
-            j = i+14
-            if (i.le.14) j=i+(itpivc(i)-1)*14
-            if (j.lt.1 .or. j.gt.31) then
-              t = -1.0
-            else if (abs(tpspc(j)-tpsor(j)).lt.0.5 .or. tpzero(j).lt.0.5 
-     &        .or. tpspc(j).gt.65534.5.or.tpsor(j).gt.65534.5  ) then
-              t= 1d9
-              systmp(j) = t
-            else
-             t = (tpsor(j)-tpzero(j))*caltmp(indtmp)/(tpspc(j)-tpsor(j))
-              systmp(j) = t
+         do i=1,17 
+            if (itpis(i).ne.0) then
+               j = i+14
+               if (i.le.14) j=i+(itpivc(i)-1)*14
+               if (j.lt.1 .or. j.gt.31) then
+                  t = -1.0
+               else if (abs(tpspc(j)-tpsor(j)).lt.0.5.or.
+     &                 tpzero(j).lt.0.5.or. 
+     &                 tpspc(j).gt.65534.5.or.
+     &                 tpsor(j).gt.65534.5  ) then
+                  t= 1d9
+                  systmp(j) = t
+               else
+                  t = (tpsor(j)-tpzero(j))*caltmp(indtmp)/
+     &                 (tpspc(j)-tpsor(j))
+                  systmp(j) = t
+               endif
+               if (nch+5.le.ilen) then
+C     Make sure we don't overstep our buffer
+                  inextc=nch
+                  nch = nch+ir2as(t,ibuf,nch,8,1)
+                  nch = mcoma(ibuf,nch)
+                  if(cjchar(ibuf,inextc).eq.'$'.or.
+     &                 cjchar(ibuf,inextc).eq.'-') then
+                     call logit7(idum,idum,idum,-1,-211,lwho,lwhat(i)) 
+                  endif
+               endif
             endif
-            if (nch+5.le.ilen) then
-C                   Make sure we don't overstep our buffer
-              nch = nch+ir2as(t,ibuf,nch,8,1)
-              nch = mcoma(ibuf,nch)
-            endif
-          endif
-        enddo
-        call fs_set_systmp(systmp)
-        nch = nch - 2 
+         enddo
+         call fs_set_systmp(systmp)
+         nch = nch - 2 
 C 
       else
         call fc_tsys_vlba(itpis_vlba,ibuf,nch, caltmp(indtmp))

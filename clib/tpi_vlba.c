@@ -13,11 +13,15 @@
 #include "../include/shm_addr.h"
 
 static char ch[ ]={"123456789abcde"};
+static char *lwhat[ ]={
+"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
+"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
+"ia","ib","ic","id"};
 
 void tpi_vlba(ip,itpis_vlba)                    /* sample tpi(s) */
 long ip[5];                                     /* ipc array */
 int itpis_vlba[MAX_DET]; /* detector selection array */
-                      /* in order: bbc1(U), bbc1(L), ..., bbc14(U), bbc14(L), */
+                      /* in order: L: bbc1...bbc14, U: bbc1...bbc14(U)       */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
 {
     struct req_buf buffer;
@@ -113,7 +117,7 @@ int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
 float caltmp;
 {
-       int i;
+       int i, inext;
        float tpi,tpic,tpiz;
 
        ibuf[*nch-1]='\0';                 /* null terminate so a STRING */
@@ -127,7 +131,10 @@ float caltmp;
              shm_addr->systmp[ i]=1e9;
            else
              shm_addr->systmp[ i]=(tpi-tpiz)*caltmp/(tpic-tpi);
+	   inext=strlen(ibuf);
            flt2str(ibuf,shm_addr->systmp[ i],8,1);
+	   if(ibuf[inext]=='$' || ibuf[inext]=='-')
+	     logita(NULL,-211,"qk",lwhat[i]);
            strcat(ibuf,",");
          }
        }
