@@ -102,7 +102,7 @@ C 1. Get scans for one station.
           il = fvex_len(cout)
           ip=1
           do while (ip.le.npassl.and.cout(1:il).ne.
-     .              cpassorderl(ip,istn)(1:il))
+     .              cpassorderl(ip,istn,icod)(1:il))
             ip=ip+1
           enddo
           if (ip.gt.npassl) return ! pass not found
