@@ -15,10 +15,11 @@ C LOCAL:
       LOGICAL KINTR,knewtp,knewt,ksw
       integer*2 ldirword(4)
       integer nch,i,ierr,ilen,iblk,ical,nstnsk,lu_outfil2
-      integer idirp,ipasp,iobs,iftold,idir,ix,icodp
+      integer idirp,ipasp,iobs,iftold,idir,ix,icodp,iobss
       integer*2 lfreq
       integer mon,ida,mjd,iyr,idayr,ihr,imin,isc,iyr2,idayr2,
-     .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp
+     .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp,
+     .idayr_save,ihr_save,min_save,isc_save
       integer isor,istnsk,icod,idummy,istin,itype
       real decs,has,ras,ras2,decs2,has2
       integer irah,iram,idecd,idecm,ihah,iham,
@@ -35,7 +36,7 @@ C LOCAL:
 	integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
         integer IPAS(MAX_STN),
-     .          IFT(MAX_STN),IDUR(MAX_STN)
+     .          IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
 	CHARACTER   UPPER
 	CHARACTER*3 STAT,lc
 	character*128 dsnname
@@ -88,6 +89,12 @@ C            Code was not changed except to limit these options.
 C 970303 nrv Put back on 140. change next to last field to 0 instead of 1.
 C 970304 nrv Back up 6 characters in PNTNAME for VLBA file name.
 C 970307 nrv Use ISKREC pointer array to insure time order!
+C 970324 nrv Use IOBSS to keep track of observations for this station.
+C 970403 nrv Remove 85-3 pointing option per F. Ghigo.
+C 970509 nrv Add _save variables to VLBAT call.
+C 970512 nrv Increment IOBSS for VLBAT after the call, because many
+C            tests in VLBAT are done for iobs=0.
+C 970714 nrv Add "crd" to VLBA file names per J. Wrobel request.
 
 	kintr = .false.
       if (kbatch) then
@@ -100,7 +107,7 @@ C 970307 nrv Use ISKREC pointer array to insure time order!
       else
  1    WRITE(LUSCN,9019) (lantna(I,ISTN),I=1,4)
 9019  FORMAT(' Select type of pointing output for: ',4a2/
-     .       ' 1 - NRAO 85-3 '/
+C    .       ' 1 - NRAO 85-3 '/
      .       ' 2 - NRAO 140 '/
      .       ' 3 - DSN stations '/
      .       ' 6 - VLBA antenna'/
@@ -114,7 +121,7 @@ C    .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
 	istin= ias2b(ibuf(1),1,1)
 	IF (ISTIN.EQ.0) RETURN
 CIF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
-        if (istin.ne.1.and.istin.ne.2.and.istin.ne.3.and.istin.ne.6) 
+        if (istin.ne.2.and.istin.ne.3.and.istin.ne.6) 
      .  goto 1
       endif
 C
@@ -154,7 +161,7 @@ C check to see if the file exists first
           endif
           call hol2lower(lna,8)
           call hol2char(lna,1,2,scode)
-	  pntname = pntname(1:ic-6)//'.'//scode
+	  pntname = pntname(1:ic-6)//'crd.'//scode
 	endif
 	INQUIRE(FILE=PNTNAME,EXIST=EX,IOSTAT=IERR)
 	IF (EX) THEN
@@ -226,6 +233,7 @@ C
 C 3. Begin loop on schedule file records.  Check out the entry.
 C
        iobs=0
+       iobss=0
 C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
        call ifill(ibuf,1,ibuf_len*2,oblank)
        if (iobs+1.le.nobs) then
@@ -237,17 +245,16 @@ C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
 	IBLK=0
 	IPASP=-1
 	IDIRP=0
+        idayrp=0
 	IFTOLD=0
 	DO WHILE (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.Z24)
 C DO BEGIN "Schedule file entries"
-
-C  if (ifbrk().lt.0) goto 990
 
 	  CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
      .       LFREQ,IPAS,LDIR,IFT,LPRE,
      .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .       NSTNSK,LSTN,LCABLE,
-     .       MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+     .       MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
 	  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
 	  IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 990
 C
@@ -413,7 +420,9 @@ C
      .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
      .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
-     .       idayrp,ihrp,minp,iscp,iobs,irecp)
+     .       idayrp,ihrp,minp,iscp,iobss,irecp,
+     .            idayr_save,ihr_save,min_save,isc_save)
+            iobss=iobss+1 ! increment this station's obs
             icodp=icod
 C
 	    END IF !if istin
