@@ -11,11 +11,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-#undef TRUE
-#undef FALSE
-
 #include "../rclco/rcl/rcl_def.h"
-#include "../rclco/rcl/rcl.h"
 #include "../rclco/rcl/rcl_cmd.h"
 
 #define MAX_NAME 65
@@ -59,6 +55,7 @@ main()
 
     /* loop forever for message received */
 
+    putpname("rclcn");
     setup_ids();    /* attach to the shared memory */
     rte_prior(FS_PRIOR);
 
@@ -1074,7 +1071,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       outpos+=sizeof(group);
       memcpy(outbuf+outpos,&num_groups,sizeof(num_groups));
       outpos+=sizeof(num_groups);
-      
+     
       break;
     }
   case RCL_CMD_TAPEINFO_READ_PB:
@@ -1190,6 +1187,55 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       
       memcpy(outbuf+outpos,&nanosec,sizeof(nanosec));
       outpos+=sizeof(nanosec);
+      
+      break;
+    }
+  case RCL_CMD_BARRELROLL_SET:
+    {
+      ibool barrelroll;
+      
+      memcpy(&barrelroll,inbuf+inpos,sizeof(barrelroll));
+      inpos+=sizeof(barrelroll);
+      
+      if(iecho) {
+	strcpy(echobuf,"[barrelroll_set]");
+	if(barrelroll)
+	  strcat(echobuf,"[on]");
+	else
+	  strcat(echobuf,"[off]");
+      }
+
+      ierr=rcl_barrelroll_set(addr,barrelroll);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+      
+      break;
+    }
+  case RCL_CMD_BARRELROLL_READ:
+    {
+      ibool barrelroll;
+      
+      if(iecho)
+	strcpy(echobuf,"[barrelroll_read]");
+
+      ierr=rcl_barrelroll_read(addr,&barrelroll);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+
+      if(ierr!=0)
+	break;
+
+      if(iecho) {
+	if(barrelroll)
+	  strcat(echobuf,"<on>");
+	else
+	  strcat(echobuf,"<off>");
+      }
+      
+      memcpy(outbuf+outpos,&barrelroll,sizeof(barrelroll));
+      outpos+=sizeof(barrelroll);
       
       break;
     }
@@ -1717,14 +1763,106 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       break;
     }
   case RCL_CMD_MK3_FORM_SET:
-    ierr=-326;
-    break;
+    {
+      ibool mk3;
+      
+      memcpy(&mk3,inbuf+inpos,sizeof(mk3));
+      inpos+=sizeof(mk3);
+      
+      if(iecho) {
+	strcpy(echobuf,"[mk3_form_set]");
+	if(mk3)
+	  strcat(echobuf,"[enable]");
+	else
+	  strcat(echobuf,"[disable]");
+      }
+
+      ierr=rcl_mk3_form_set(addr,mk3);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+      
+      break;
+    }
   case RCL_CMD_MK3_FORM_READ:
-    ierr=-326;
-    break;
+    {
+      ibool mk3;
+      
+      if(iecho)
+	strcpy(echobuf,"[mk3_form_read]");
+
+      ierr=rcl_mk3_form_read(addr,&mk3);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+
+      if(ierr!=0)
+	break;
+
+      if(iecho) {
+	if(mk3)
+	  strcat(echobuf,"<enabled>");
+	else
+	  strcat(echobuf,"<disabled>");
+      }
+      
+      memcpy(outbuf+outpos,&mk3,sizeof(mk3));
+      outpos+=sizeof(mk3);
+      
+      break;
+    }
   case RCL_CMD_TRANSPORT_TIMES:
-    ierr=-326;
-    break;
+    {
+      int num_entries;
+      unsigned short serial[8];
+      unsigned long tot_on_time[8];
+      unsigned long tot_head_time[8];
+      unsigned long head_use_time[8];
+      unsigned long in_service_time[8];
+      
+      if(iecho)
+	strcpy(echobuf,"[transport_times]");
+
+      ierr=rcl_transport_times(addr,&num_entries, serial,
+			       tot_on_time,tot_head_time,
+			       head_use_time,in_service_time);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+
+      if(ierr!=0)
+	break;
+
+      if(iecho) {
+	int i;
+
+	sprintf(echobuf+strlen(echobuf),"<%d>",num_entries);
+	for(i=0;i<num_entries;i++) {
+	  sprintf(echobuf+strlen(echobuf),"\\\n<%hu><%lu><%lu><%lu><%lu>",
+		  serial[i],tot_on_time[i],tot_head_time[i],
+		  head_use_time[i],in_service_time[i]);
+	}
+      }
+      memcpy(outbuf+outpos,&num_entries,sizeof(num_entries));
+      outpos+=sizeof(num_entries);
+      
+      memcpy(outbuf+outpos,&serial,sizeof(serial));
+      outpos+=sizeof(serial);
+      
+      memcpy(outbuf+outpos,&tot_on_time,sizeof(tot_on_time));
+      outpos+=sizeof(tot_on_time);
+      
+      memcpy(outbuf+outpos,&tot_head_time,sizeof(tot_head_time));
+      outpos+=sizeof(tot_head_time);
+      
+      memcpy(outbuf+outpos,&head_use_time,sizeof(head_use_time));
+      outpos+=sizeof(head_use_time);
+      
+      memcpy(outbuf+outpos,&in_service_time,sizeof(in_service_time));
+      outpos+=sizeof(in_service_time);
+      
+      break;
+    }
   case RCL_CMD_STATION_INFO_READ:
     {
       int station;
@@ -1945,6 +2083,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	    if(status_det_list[j]!=0)
 	      strcat(start,"\n");
 	  }
+	  j++;
 	  strcat(start,">");
 	}
       }
@@ -2007,9 +2146,12 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	    if(newln!=NULL)
 	      *newln=0;
 	    strcat(start,stat_msg+j);
-	    j+=strlen(stat_msg+j)+1;
-	    if(newln!=NULL)
+	    j+=strlen(stat_msg+j);
+	    if(newln!=NULL) {
+	      *newln='\n';
+	      j++;
 	      strcat(start,"\\n");
+	    }
 	    if(stat_msg[j]!=0)
 	      strcat(start,"\n");
 	  }
@@ -2083,11 +2225,82 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       break;
     }
   case RCL_CMD_DIAG:
-    ierr=-326;
-    break;
+    {
+      int type;
+      
+      memcpy(&type,inbuf+inpos,sizeof(type));
+      inpos+=sizeof(type);
+      
+      if(iecho){
+	strcpy(echobuf,"[diag]");
+	sprintf(echobuf+strlen(echobuf),"[%d]",type);
+      }
+      ierr=rcl_diag(addr, type);
+      
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+	
+      break;
+    }
+  case RCL_CMD_BERDCB:
+    {
+      int op_type, chan, meas_time;
+      unsigned long err_bits, tot_bits;
+
+      memcpy(&op_type,inbuf+inpos,sizeof(op_type));
+      inpos+=sizeof(op_type);
+
+      memcpy(&chan,inbuf+inpos,sizeof(chan));
+      inpos+=sizeof(chan);
+
+      memcpy(&meas_time,inbuf+inpos,sizeof(meas_time));
+      inpos+=sizeof(meas_time);
+      
+      
+      if(iecho) {
+	strcpy(echobuf,"[berdcb]");
+	sprintf(echobuf+strlen(echobuf),"[%i][%i][%i]",op_type,chan,meas_time);
+      }
+
+      ierr=rcl_berdcb(addr,op_type,chan,meas_time,&err_bits,&tot_bits);
+
+      if(iecho) {
+	echo_add_error(echobuf,ierr);
+	sprintf(echobuf+strlen(echobuf),"<%lu><%lu>",err_bits,tot_bits);
+      }
+      
+      memcpy(outbuf+outpos,&err_bits,sizeof(err_bits));
+      outpos+=sizeof(err_bits);
+
+      memcpy(outbuf+outpos,&tot_bits,sizeof(tot_bits));
+      outpos+=sizeof(tot_bits);
+
+      
+      break;
+    }
   case RCL_CMD_IDENT:
-    ierr=-326;
-    break;
+    {
+      char devtype[RCL_MAXSTRLEN_IDENT];
+      
+      if(iecho)
+	strcpy(echobuf,"[ident]");
+
+      ierr=rcl_ident(addr, devtype);
+
+      if(iecho)
+	echo_add_error(echobuf,ierr);
+
+      if(ierr!=0)
+	break;
+
+      if(iecho)
+	sprintf(echobuf+strlen(echobuf),"<%s>",devtype);
+
+      memcpy(outbuf+outpos,devtype ,strlen(devtype)+1);
+      outpos+=strlen(devtype)+1;
+      
+      break;
+    }
   case RCL_CMD_PING:
     {
       int timeout;
@@ -2141,11 +2354,13 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     nl=strchr(start,'\n');
     while (nl!=NULL) {
       *nl=0;
-      cls_snd(&shm_addr->iclbox,start,strlen(start),0,iparm);
+      logit(start,0,NULL);
+/*      cls_snd(&shm_addr->iclbox,start,strlen(start),0,iparm); */
       start=nl+1;
       nl=strchr(start,'\n');
     }
-    cls_snd(&shm_addr->iclbox,start,strlen(start),0,iparm);
+      logit(start,0,NULL);
+/*    cls_snd(&shm_addr->iclbox,start,strlen(start),0,iparm); */
       
   }
 
