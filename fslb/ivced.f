@@ -1,4 +1,4 @@
-      function ivced(iwhat,index,ias,ic1,ic2)
+      function ivced(iwhat,index,extbw,ias,ic1,ic2)
 
 C  This routine encodes or decodes information relating
 C  to MAT communications for video converters
@@ -38,6 +38,7 @@ C
       double precision das2b
       dimension bw(7),nchtp(8),nrem(2),nlok(2) 
       dimension bw4(7)
+      real extbw
       integer*2 ltp(8)
       integer*2 lrem(4),llok(4)
       data bw/0.0,0.125,0.250,0.50,1.0,2.0,4.0/ 
@@ -67,10 +68,15 @@ C
 201   continue
       if (ic1+5.gt.ic2) return
       call fs_get_rack(rack)
-      if (rack.eq.and(MK4,rack)) then
+      if (rack.eq.MK4) then
         ivced = ic1 + ir2as(bw4(index+1),ias,ic1,6,3)
       else
         ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
+      endif
+      if(index.eq.0.and.extbw.ge.0.0) then
+         ivced=ichmv_ch(ias,ivced,"(")
+         ivced = ivced + ir2as(extbw,ias,ivced,6,3)
+         ivced=ichmv_ch(ias,ivced,")")
       endif
       return
 C 
@@ -101,6 +107,7 @@ C
 C  VC bandwidth choices.
 C 
 301   continue
+      extbw=-1.
       ilp=iscn_ch(ias,ic1,ic2,'(')
       if(ilp.ne.0) then
          val = das2b(ias,ic1,ilp-ic1,ierr) 
@@ -109,7 +116,7 @@ C
       endif
       if (ierr.ne.0) return 
       call fs_get_rack(rack)
-      if (rack.eq.and(MK4,rack)) then
+      if (rack.eq.MK4) then
         do 3010 i=1,nbw 
           if (val.eq.bw4(i)) index = i-1 
 3010      continue
@@ -117,6 +124,19 @@ C
         do 3011 i=1,nbw 
           if (val.eq.bw(i)) index = i-1 
 3011      continue
+      endif
+      if(index.eq.0.and.ilp.ne.0) then
+         irp=iscn_ch(ias,ic1,ic2,')')
+         if(irp.ne.0) then
+            extbw = das2b(ias,ilp+1,irp-ilp-1,ierr) 
+         else
+            extbw = das2b(ias,ilp,ic2-ilp,ierr) 
+         endif
+         if(ierr.ne.0) return
+         if(extbw.lt.0.0) then
+            ierr=-1
+            return
+         endif
       endif
       return
 C 
