@@ -1,3 +1,4 @@
+#!/bin/tcsh
 cd /usr2/control
 rm -f mdlpo.new
 sed 's/^ /*/' mdlpo.ctl >mdlpo.new
