@@ -7,7 +7,7 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
 *                     k41, k41u, k41/k3, k41u/k3, k41/mk4, k41u/mk4,
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
-*                     k42c/mk4, lba, lba4, or none)
+*                     k42c/mk4, lba, lba4, s2, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		            mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a,
 *                           mk5a_bs, or none)
@@ -37,3 +37,5 @@ none    type of phase cal control (if3 or none)
   8bit	Digital input setting (8bit internal sampler or 4bit external at ATCA)
 * met sensor type
 cdp     cdp or met3, use cdp if you don't have either
+* default mk4 form command synch test value
+  3
