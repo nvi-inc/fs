@@ -378,7 +378,7 @@ long *ip4;
     unsigned char outmess[100]; /* output message holder */
     int numbuf;       /* number of buffers */
     int iscmd;        /* is RAW request a command? */
-    int centisec[2];             /* arguments of rte_rawt */
+    int centisec[6];             /* arguments of rte_tick rte_cmpt */
     unsigned short devdatap;      /* temporary for TIMEW command */
     int done;                    /* TIMEW has completed */
     struct tms tms_buff;
@@ -618,9 +618,11 @@ long *ip4;
                     end=times(&tms_buff)+110;  /* calculate ending time */
                     while(end>times(&tms_buff)) {
                         done = FALSE;
-			rte_rawt (centisec);
+			rte_cmpt(centisec+2,centisec+4);
+			rte_ticks (centisec);
                         mcb_get (devad, &devdata, &result);
-                        rte_rawt (centisec+1);
+                        rte_ticks (centisec+1);
+			rte_cmpt(centisec+3,centisec+5);
                         if(result < 0){
                             outmess[0]=result;
                             putout(outmess,1);
@@ -632,10 +634,10 @@ long *ip4;
                             {
                             outmess[1] = (devdata>>8) & 0xff;
                             outmess[2] = devdata & 0xff;
-                            memcpy( outmess+ 3, (char*) centisec, 8);
+                            memcpy( outmess+ 3, (char*) centisec, 24);
                             if (result >= 0) 
                                 {
-                                putout(outmess, 11);
+                                putout(outmess, 27);
                                 result = 1;
                                 } 
                             else  
