@@ -3,7 +3,8 @@
      .                 hdpos_cat,
      .                 tracks_cat,flux_cat,flux_comments,
      .                 csked,cdrudg,
-     .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,luscn)
+     .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
+     .                 cprtlab,luscn)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -17,15 +18,16 @@ C     NRV   901018 Added "printer" line in $PRINT section
 C     nrv   950329 Added flux_comments
 C     nrv   950925 Add full code for printer line in $PRINT
 c 951124 nrv Change calling sequence for new catalog names
+C 960226 nrv Add "cprtlab" for script to print labels
 C
 C   parameter file
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       character*128  source_cat,antenna_cat,position_cat,equip_cat,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
-     .               csked,cdrudg,ctmpnam,
+     .               csked,cdrudg,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport
       integer luscn
 C
@@ -177,7 +179,10 @@ C  $PRINT
                 idum= ichmv(itmpnam,1,ibuf,ic1,nch)
                 call hol2upper(itmpnam,nch)
                 call gtfld(ibuf,ich,ilen*2,ic1,ic2)
-                if (ichcm_ch(itmpnam,1,'PORTRAIT').eq.0) then
+                if (ichcm_ch(itmpnam,1,'LABELS').eq.0) then
+                  call hol2char(ibuf,ic1,ilen*2-1,cprtlab)
+                  call null_term(cprtlab)
+                else if (ichcm_ch(itmpnam,1,'PORTRAIT').eq.0) then
                   call hol2char(ibuf,ic1,ilen*2-1,cprtpor)
                   call null_term(cprtpor)
                 else if (ichcm_ch(itmpnam,1,'LANDSCAPE').eq.0) then
