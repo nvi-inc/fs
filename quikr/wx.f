@@ -63,7 +63,7 @@ C
         ip(3) = -1              !  it is an error to specify parameters
         return
       endif
-      call fs_get_met(wx_met)
+      call fs_get_wx_met(wx_met)
 C Call the metserver server for MET3 information.
       if(MET3.eq.wx_met) then
          istate = fsmetc()
