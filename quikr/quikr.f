@@ -127,13 +127,10 @@ c
           call track(ip)
         endif
       else if (isub.eq.12) then
-        if (itask.eq.1.or.itask.eq.2.or.
-     $        (itask.gt.14.and.itask.lt.17)) then
-          call ctemp(ip,itask)
-        else if (itask.eq.5.or.itask.eq.6.or.itask.eq.10.or.
-     &         (itask.ge.19.and.itask.le.20)) then
+        if (itask.eq.5.or.itask.eq.6.or.itask.eq.10) then
           call tsys(ip,itask)
-        else
+        else if(itask.eq.3.or.itask.eq.4.or.itask.eq.7.or.
+     &         itask.eq.8.or.itask.eq.9) then
           call tpi(ip,itask)
         endif
 C 13 was for WVR stations only
@@ -171,12 +168,6 @@ C         call head(ip)
 C       endif
       else if (isub.eq.18) then
         call tpform(ip,itask)
-      else if (isub.eq.19) then
-        if (itask.ge.5.and.itask.le.6) then
-          call beam(ip,itask)
-        else if (itask.ge.15.and.itask.le.16) then
-          call flux(ip,itask)
-        endif
       else if (isub.eq.21) then
         if (itask.eq.1.or.itask.eq.11) then
           call pass(ip,itask)
