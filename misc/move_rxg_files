@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+# Usage: move_rxg_files [-h]
+
+if ($#ARGV >= 0) {
+    print "  Usage: move_rxg_files [-h]\n";
+    print "\n";
+    print "  Creates rxg_files/ sub-directory of /usr2/control and moves all\n";
+    print "    *.rxg files in /usr2/control into the sub-directory\n";
+    print "\n";
+    print "  Command line option '-h' (or any other argument) displays this message\n";
+
+    exit -1;
+}
+
+chdir "/usr2/control" ||die "Can't cd to /usr2/control: $!\n";
+
+#it is probably unnecessary to give-up if the directory already exists
+#however, this may be some indication that something is wrong and will
+#prevent blind repetition until it is sorted out
+ 
+!chdir "rxg_files" ||die "/usr2/control/rxg_files already exists\n";
+
+umask 0;
+
+mkdir "rxg_files", 0777 ||die "Can't make directory /usr2/control/rxg_files: $!\n";
+
+$found=0;
+while (<*.rxg>) {
+    $found=1;
+    rename $_, "rxg_files/$_" || die "couldn't move $_ to /usr2/control/rxg_files/: $!\n";
+}
+if(!$found) {
+  print "no /usr2/control/*.rxg files were found to move\n:"
+}
