@@ -7,7 +7,7 @@
 *
 no      vacuum switching control
 *
-mvme117 VLBA recorder CPU: mvme117 or mvme162
+mvme117 VLBA recorder CPU: mvme117 or mvme162; for VLBA2 use mvme117
 0       head motion delay (centiseconds)
 *
 10.0    vacuum level (inches) (if vacuum switching this is for thin tape ~5.0) 
