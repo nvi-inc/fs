@@ -105,6 +105,7 @@ C 961022 nrv Add Mark IV as a procedures option
 C 961031 nrv Change SNAP option to either Mk3/4 or VLBA rack.
 C 961104 nrv change ISKLEN to be the same size as IBUF (why were they 
 c            different variables?)
+C 961129 nrv Add option 16 for 8-BBC stations.
 C
 C Initialize some things.
 
@@ -218,7 +219,7 @@ C   Check for non-interactive mode.
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 961104)')
+     .  '(NRV 961201)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -467,12 +468,14 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .      ' 11 = Shift the .SNP file  '/,
      .      ' 5 = Print summary of .SNP file        ',
      .      ' 12 = Make Mark III procedures (.PRC) '/,
-     .      ' 0 = Done with DRUDG                   ',
-     .      ' 13 = Make VLBA procedures (.PRC)'/,
      .      ' 6 = Make bar code tape labels         ',
+     .      ' 13 = Make VLBA procedures (.PRC)'/,
+     .      '                                       ',
      .      ' 14 = Make hybrid procedures (.PRC)'/,
      .      '                                       ',
      .      ' 15 = Make Mark IV procedures (.PRC)'/,
+     .      ' 0 = Done with DRUDG                   ',
+     .      ' 16 = Make 8-BBC procedures (.PRC)'/,
      .      ' ? ',$)
           else ! gotem in the vex file
             write(luscn,9073)
@@ -513,12 +516,12 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
         read(command,*,err=991) ifunc
       endif
 
-	if ((ifunc.lt.0).or.(ifunc.gt.15.and.ifunc.ne.31)
+	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31)
      .  .and..not.kbatch) GOTO 700
-	if ((ifunc.lt.0).or.(ifunc.gt.15.and.ifunc.ne.31)
+	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31)
      .  .and.kbatch) GOTO 991
 	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.(ifunc.ge.15.and.ifunc.ne.31))) goto 700
+     .  .or.ifunc.eq.10.or.(ifunc.ge.16.and.ifunc.ne.31))) goto 700
 
 	IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
@@ -604,6 +607,8 @@ c            I = nstnx
               CALL PROCS(3) ! hybrid backend procedures
 	    ELSE IF (IFUNC.EQ.15) THEN
               CALL PROCS(4) ! Mark IV backend procedures
+	    ELSE IF (IFUNC.EQ.16) THEN
+              CALL PROCS(5) ! 8-BBC VLBA backend procedures
 	    ELSE IF (IFUNC.EQ.6) THEN
 	      if (nstnx.eq.1) then ! just one station
 		pcode = 1
