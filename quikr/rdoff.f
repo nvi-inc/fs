@@ -93,11 +93,12 @@ C
 500   nch = ichmv_ch(ibuf,nchar+1,'/')
       call fs_get_decoff(decoff)
       call fs_get_raoff(raoff)
-      call radec(dble(raoff),dble(decoff),0.0,irah,iram,ras,
+      call radec(dble(abs(raoff)),dble(decoff),0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d)
 C     is=ras*1000
 C     ras=is/1000.
 C     nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,10,3)
+      if(raoff.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
       nch = nch + ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
       nch = nch + ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
 C     iras = ifix(ras)
