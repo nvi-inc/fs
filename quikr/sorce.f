@@ -10,9 +10,6 @@ C
       integer*2 ibuf(40),ibufi(18),ibufo( 8),ls(5),lds,lhs,cwp(4)
       double precision rad,decd,alati,elong,gheig,ra,dec
 C      - double precision versions of ra and dec for MOVE
-      double precision dra,ddec
-C      - returned by MOVE: changes in ra and dec to be added
-C        to the old values
       logical kd,kprec,ksun,kmoon      
 C      - true if we have azel or xy degrees specified 
 C      - true if we precess these coordinates
@@ -31,8 +28,8 @@ C
 C
 C  FROM MOON BUFFER 8 WORDS
 C
-      equivalence (ibufo(1),rad),
-     +            (ibufo(5),decd)
+      equivalence (ibufo(1),ra),
+     +            (ibufo(5),dec)
 C
       data ilen/80/
 C 
@@ -166,20 +163,17 @@ C
 C     3. Precess the positions to today's date from the epoch 
 C     given as input.  Store the variables away in COMMON.
 C 
-300   idumm1 = ichmv(lsorna,1,ls,1,10)
+ 300  continue
+      idumm1 = ichmv(lsorna,1,ls,1,10)
       call fs_set_lsorna(lsorna)
       idumm1 = ichmv(cwrap,1,cwp,1,8)
       call fs_set_cwrap(cwrap)
 C                   Make sure the proper dates are in common
       rad = ra
       decd = dec
-C                   Initialize apparent deltas
-      dra = 0 
-      ddec = 0
 C                   Pick out today's day-of-year for precession 
       call fc_rte_time(it,it(6))
       kprec = (ep.gt.0.0) .and. .not.(kd.or.ksun.or.kmoon)         
-c     if(kprec) call move(ifix(ep),it(6),1,it(5),rad,decd,dra,ddec,dc)
       if(kprec) then
          call fs_get_wlong(wlong)
          call fs_get_alat(alat)
@@ -220,9 +214,10 @@ C
         go to 990
       endif
       call fc_rte_time(it,it(6))
-      call sunpo(rad,decd,it) 
-      ra = rad
-      dec = decd
+      call sunpo(ra,dec,it) 
+      idumm1 = ichmv_ch(cwp,1,'        ')
+      radat = ra
+      decdat = dec
       go to 300 
 C
 C  Handle MOON position here.
@@ -248,8 +243,9 @@ C
       call run_prog('moon ','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call rmpar(ip)
       nwords=get_buf(ip(1),ibufo,-16,irtn1,irtn2)
-      ra = rad
-      dec = decd
+      radat = ra
+      decdat = dec
+      idumm1 = ichmv_ch(cwp,1,'        ')
 C
 390   continue
       go to 300 
@@ -331,6 +327,7 @@ C                   Adjust next char to be first blank in source name.
          nch=ichmv(ibuf,nch,cwrap,1,ilc)
       endif
       nch = mcoma(ibuf,nch)
+      write(6,*) 'kd ',kd, ' nch ', nch
       if(.not.kd) then
          call radec(radat,decdat,0.0,irah,iram,ras,
      .        lds,idcd,idcm,dcs,lhs,i,i,d) 
@@ -344,6 +341,7 @@ C                   Adjust next char to be first blank in source name.
          nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
          nch = mcoma(ibuf,nch)
          nch = nch + ir2as(epoch,ibuf,nch,8,3)
+      write(6,*) 'kd ',kd, ' nch ', nch
       endif
 530   iclass = 0
       nch = nch - 1 
