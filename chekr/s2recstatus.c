@@ -23,7 +23,7 @@ char *lwho;
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_req_buf res_buf;        /* rclcn respnse buffer */
   int ierr=0;
-  char device[]= "rc";
+  char device[]= "r1";
   int icount=0;
   static int stat_now[RCL_STATCODE_MAX];
   char outbuf[512];
@@ -124,7 +124,7 @@ end_update:
   for (i=0;i<RCL_STATCODE_MAX;i++)
     stat_now[i]=0;
 
-  clr_rclcn_res(&res_buf);
+  if (pos_err==0) clr_rclcn_res(&res_buf);
   ini_rclcn_req(&req_buf);
   add_rclcn_status(&req_buf,device);
   end_rclcn_req(ip,&req_buf);
@@ -168,7 +168,7 @@ end_update:
 
 	if(icount++==0)
 	  ini_rclcn_req(&req_buf);
-	add_rclcn_status_detail(&req_buf,"rc",istat,FALSE,FALSE);
+	add_rclcn_status_detail(&req_buf,"r1",istat,FALSE,FALSE);
       }
 
       if((!first))
