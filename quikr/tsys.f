@@ -32,6 +32,7 @@ C     NCHAR  - character count
       character*1 cjchar
       integer*2 lwho,lwhat(17)
       integer get_buf
+      logical kskip
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
@@ -82,37 +83,87 @@ C
          do i=1,17 
             if (itpis(i).ne.0) then
                j = i+14
-               if (i.le.14) j=i+(itpivc(i)-1)*14
-               if (j.lt.1 .or. j.gt.31) then
+               kskip=.false.
+               if(i.le.14) then
+                  kskip=iabs(ifp2vc(i)).lt.1.or.iabs(ifp2vc(i)).gt.3
+               endif
+               if (kskip) then
                   t = -1.0
                else if (abs(tpspc(j)-tpsor(j)).lt.0.5.or.
      &                 tpzero(j).lt.0.5.or. 
      &                 tpspc(j).gt.65534.5.or.
      &                 tpsor(j).gt.65534.5  ) then
                   t= 1d9
-                  systmp(j) = t
                else
-                  t = (tpsor(j)-tpzero(j))*caltmp(indtmp)/
-     &                 (tpspc(j)-tpsor(j))
-                  systmp(j) = t
-               endif
-               if (nch+5.le.ilen) then
-C     Make sure we don't overstep our buffer
-                  inextc=nch
-                  nch = nch+ir2as(t,ibuf,nch,8,1)
-                  nch = mcoma(ibuf,nch)
-                  if(cjchar(ibuf,inextc).eq.'$'.or.
-     &                 cjchar(ibuf,inextc).eq.'-') then
-                     call logit7(idum,idum,idum,-1,-211,lwho,lwhat(i)) 
+                  if(i.le.14) then
+                     ind=iabs(ifp2vc(i))
+                  else
+                     ind=i-14
                   endif
+                  t = (tpsor(j)-tpzero(j))*caltmp(ind)/
+     &                 (tpspc(j)-tpsor(j))
+               endif
+               systmp(j) = t
+               if((t.ge.999999.95.or.t.lt.0).and..not.kskip) then
+                  call logit7(idum,idum,idum,-1,-211,lwho,lwhat(i)) 
                endif
             endif
          enddo
          call fs_set_systmp(systmp)
-         nch = nch - 2 
-C 
+         call fs_get_itpivc(itpivc)
+         nchstart=nch
+         iclass=0
+         nrec=0
+         do j=0,3
+            do i=1,14
+               if (itpis(i).ne.0.and.iabs(ifp2vc(i)).eq.j) then
+                  if(nch.ge.60) then
+                     call put_buf(iclass,ibuf,2-nch,'fs','  ')
+                     nrec=nrec+1
+                     nch=nchstart
+                  endif
+                  nch=ichmv(ibuf,nch,ih22a(i),2,1)
+                  if(itpivc(i).eq.-1) then
+                     nch=ichmv_ch(ibuf,nch,'x')
+                  elseif(itpivc(i).eq.0) then
+                     nch=ichmv_ch(ibuf,nch,'d')
+                  elseif(itpivc(i).eq.1) then
+                     nch=ichmv_ch(ibuf,nch,'l')
+                  elseif(itpivc(i).eq.2) then
+                     nch=ichmv_ch(ibuf,nch,'u')
+                  else
+                     nch=nch+ib2as(iand(itpivc(i),7),ibuf,nch,1)
+                  endif
+                  nch = mcoma(ibuf,nch)
+                  nch = nch+ir2as(systmp(i+14),ibuf,nch,8,1)
+                  nch = mcoma(ibuf,nch)
+               endif
+            enddo
+            if(j.gt.0) then
+               if(itpis(j+14).ne.0) then
+                  if(nch.ge.60) then
+                     call put_buf(iclass,ibuf,2-nch,'fs','  ')
+                     nrec=nrec+1
+                     nch=nchstart
+                  endif
+                  nch=ichmv_ch(ibuf,nch,'i')
+                  nch=nch+ib2as(j,ibuf,nch,1)
+                  nch = mcoma(ibuf,nch)
+                  nch = nch+ir2as(systmp(j+28),ibuf,nch,8,1)
+                  nch = mcoma(ibuf,nch)
+               endif
+            endif
+            if(nch.gt.nchstart) then
+               call put_buf(iclass,ibuf,2-nch,'fs','  ')
+               nrec=nrec+1
+               nch=nchstart
+            endif
+         enddo
+         goto 990
+C     
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
-        call fc_tsys_vlba(itpis_vlba,ibuf,nch, caltmp(indtmp))
+        call fc_tsys_vlba(ip,itpis_vlba,ibuf,nch,caltmp)
+        return
       else
         call fc_tsys_norack(itpis_norack,ibuf,nch, caltmp(indtmp))
       endif

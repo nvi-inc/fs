@@ -11,7 +11,7 @@
             sending the command.
  
  Monitor-only parameters:
-          data     response to command.
+            data       response to command.
  
  Comments: 
  This command is a simple feed-through to the Mark IV decoder.

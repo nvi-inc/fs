@@ -10,19 +10,19 @@
  Settable Parameters:
           vc       VC channel to set parameters for, 1-16 for K4 type
           1, 1-8 for K4 type 2, or alarm, no default 
-          high/low IF selection high or low, default according to VCLO
-          frequency if vc's LO has been set-up, for K4 type 1
-          only
+            high/low   IF selection high or low, default according to VCLO
+            frequency if vc's LO has been set-up, for K4 type 1
+            only
             att        attenuator, 0-15 dB, default 0, for K4 type 2 only
             det        front panel power detector display upper or lower
             sideband, default upper
  
  Monitor-only:
-          yes/no   VC is present, yes or no
+            yes/no     VC is present, yes or no
           upwr     upper sideband power in counts, 0-99, the nominal
           range is 10-90
-          lpwr     lower sideband power in counts, 0-99, the nominal
-          range is 10-90
+            lpwr       lower sideband power in counts, 0-99, the nominal
+            range is 10-90
  
  Comments:
  The vcform is used for K4 type 1 VCs. For K4 type 2 VCs the

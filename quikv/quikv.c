@@ -247,6 +247,9 @@ loop:
       case 79:
         rollform(&command,itask,ip);
         break;
+      case 80:
+	tpicd(&command,itask,ip);
+	break;
       default:
 	ierr=-4;
 	goto error;

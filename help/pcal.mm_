@@ -6,8 +6,8 @@
  
  
  Settable parameters:
-            #cycles    Number of times to cycle through tracks. 0 = run
-            continuously (default).
+              #cycles      Number of times to cycle through tracks. 0 = run
+              continuously (default).
             pause      Time to pause between cycles, seconds. Default is 60
             seconds.
             repro      Type of reproduce mode:
@@ -27,14 +27,14 @@
             detailed status information. The values -1 and -2
             will simply test communications with the data buffer
             and then quit.
-          tracks   Tape recorder track(s) to use. 0 = use all tracks
-          for current mode (default). A list of track numbers
-          may be given. A list of video converters may be
-          specified by preceding each number with v. The words
-          all, even, odd referring to tracks and vall, veven,
-          vodd referring to VCs may be used. Split mode will
-          be set up for the outer channels in the frequency
-          sequence, if bypass mode is set up.
+            tracks     Tape recorder track(s) to use. 0 = use all tracks
+            for current mode (default). A list of track numbers
+            may be given. A list of video converters may be
+            specified by preceding each number with v. The words
+            all, even, odd referring to tracks and vall, veven,
+            vodd referring to VCs may be used. Split mode will
+            be set up for the outer channels in the frequency
+            sequence, if bypass mode is set up.
  
  Comments: 
  Invoking this command with no parameters activates pcalr. To

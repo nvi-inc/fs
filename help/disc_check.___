@@ -11,12 +11,12 @@
             sending the command.
  
  Monitor-only parameters:
-          format   Data format: mark4, vlba, test, or ?
-          tracks   Track mode: 8, 16, 32, 64
-          time     Data time tag read from first encountered header
+            format     Data format: mark4, vlba, test, or ?
+            tracks     Track mode: 8, 16, 32, 64
+            time       Data time tag read from first encountered header
             pos        Byte position of header
-          period   Track frame period (seconds)
-          ??       unknown
+            period     Track frame period (seconds)
+            ??         unknown
  
  Comments: 
  If format is ?, the remaining fields are not valid.

@@ -3,8 +3,8 @@
               Syntax:      form=mode,rate,fan,barrel,dqa
           vform=mode,rate,fan,barrel,dqa
  
-              Response:    form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdws
-              tat,sfwstat,intstat
+              Response:    form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat,sfwstat,ints
+              tat
           vform/mode,rate,fan,barrel,rev,genstat,mcbstat,
           hdwstat,sfwstat,intstat
  
@@ -29,39 +29,41 @@
           assignments and formatter track enables specified by
           the trackform and tracks commands. The system tracks
           are disabled except in prn mode.
-          rate     Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1,
-          2, 4, 8, 16, and 32. Default 4. For Nyquist sampling
-          this selection must be twice the bandwidth set-up
-          used in the bbc commands
+            rate       Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1,
+            2, 4, 8, 16, and 32. Default 4. For Nyquist sampling
+            this selection must be twice the bandwidth set-up
+            used in the bbc commands
             fan        The fan-in or fan-out ratio. Choices are 1:4, 1:2,
             1:1, 2:1, and 4:1, where on a per channel or track
             basis, the number before the colon is the number of
             sampled channels and the number after is the number
             of tracks. Other, not commonly used, choices are
             available: x0, x1, and  x7. Default 1:1.
-          barrel   Barrel-roll mode. Choices are: off, 8:1, and 16:1,
-          where the number before the colon is the number of
-          tracks to roll-over and the number after is the
-          number of tracks to step per frame. Other, not
-          commonly used, choices are available: 8:2, 8:4,
-          off4, 16:2, and 16:4. Default off.
-          dqa      DQA module recorder input select: 1 or 2. Default is
-          the recorder specified by the select command or
-          whichever recorder is installed if there is only or
-          recorder 1 if select command hasn't been used to
-          specify a recorder yet.
+            barrel     Barrel-roll mode. Choices are: off, 8:1, and 16:1,
+            where the number before the colon is the number of
+            tracks to roll-over and the number after is the
+            number of tracks to step per frame. Other, not
+            commonly used, choices are available: 8:2, 8:4,
+            off4, 16:2, and 16:4. Default off.
+            dqa        DQA module recorder input select: 1 or 2. Default is
+            the recorder specified by the select command or
+            whichever recorder is installed if there is only or
+            recorder 1 if select command hasn't been used to
+            specify a recorder yet.
  
  Monitor-only Parameters:
- rev      Formatter firmware revision number, displayed as x.xx.
-          genstat  General status, ok or the hex value of hex address 20.
-          mcbstat  Communications status, ok or the hex value of hex
-          address 21.
-          hdwstat  Hardware status, ok or the hex value of hex address
-          22.
-          sfwstat  Software status, ok or the hex value of hex address
-          23.
-          intstat  Internal status, ok or the hex value of hex address
-          24.
+ rev        Formatter firmware revision number, displayed as
+ x.xx.
+              genstat      General status, ok or the hex value of hex address
+              20.
+            mcbstat    Communications status, ok or the hex value of hex
+            address 21.
+            hdwstat    Hardware status, ok or the hex value of hex address
+            22.
+              sfwstat      Software status, ok or the hex value of hex
+              address 23.
+              intstat      Internal status, ok or the hex value of hex address
+              24.
  
  Comments:
  MCB functions are available. See section 1.0 of this manual.

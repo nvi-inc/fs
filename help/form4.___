@@ -6,16 +6,16 @@
  
  
  Settable parameters:
-            command    any legal command sentence as described in the Mark
-            IV Formatter Vocabulary manual. The characters \r\n
-            (carriage-return, line-feed) are appended before
-            sending the command.
+            command    any legal command sentence as described in the
+            Mark IV Formatter Vocabulary manual. The
+            characters \r\n (carriage-return, line-feed) are
+            appended before sending the command.
  
  Monitor-only parameters:
-          response response to command. The >\r\n at the end of the
-          response is not included in the Field System log.
-          For accepted commands, which have only >\r\n as the
-          response, the Field System logs ack.
+            response   response to command. The >\r\n at the end of the
+            response is not included in the Field System log.
+            For accepted commands, which have only >\r\n as the
+            response, the Field System logs ack.
  
  Comments: 
  Refer to the Mark IV Formatter Vocabulary manual for a

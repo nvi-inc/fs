@@ -15,12 +15,12 @@
               be read if a value is not given. This is the
               address to write to if a value is given. If module
               is null, then this is an absolute address.
-              value        Value (hex) to be written into reladdr. Omit this
-              parameter if you want to read reladdr.
+            value      Value (hex) to be written into reladdr. Omit this
+            parameter if you want to read reladdr.
  
  Monitor-only Parameters:
-            value      Value (hex) that was read from reladdr, if a value
-            was not specified in the command. If a value was
+            value      Value (hex) that was read from reladdr, if a value was
+            not specified in the command. If a value was
             specified in the command, then the response is the
             status of the write: OK, BUSY, ERR.
  
@@ -29,9 +29,8 @@
  command is used to read values from or write values to a
  specific MCB address. 
  
- If the command is issued as mcb=module,reladdr then the
- response is the hex value at reladdr. 
+ If the command is issued as mcb=module,reladdr then the response
+ is the hex value at reladdr. 
  
  If the command is issued as mcb=module,reladdr,value then the
- value is downloaded into reladdr and the response is the
- status. 
+ value is downloaded into reladdr and the response is the status. 

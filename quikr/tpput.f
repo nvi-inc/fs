@@ -1,4 +1,4 @@
-      subroutine tpput(ip,itpis,isub,ibufr,nch,ilenr) 
+      subroutine tpput(ip,itpis,isub,ibufr,nch) 
 C 
 C     TPPUT gets data from the TPIs and puts it into COMMON 
 C     Also, formats response with these values. 
@@ -8,7 +8,7 @@ C     810913 NRV ADDED FORMATTING OF RESPONSE VALUES
 C 
 C     INPUT VARIABLES:
 C 
-      dimension ip(1) 
+      integer*4 ip(5)
 C        IP(1)  - class number of buffer from MATCN 
 C        IP(2)  - # records in class
 C        IP(3)  - error return from MATCN 
@@ -46,7 +46,7 @@ C      - temporary TP variables
 C               - input class buffers with MATCN responses
 C               - registers from EXEC 
       dimension ireg(2) 
-      integer get_buf
+      integer get_buf,ierr
       equivalence (reg,ireg(1)) 
 C 
 C 4.  CONSTANTS USED
@@ -63,64 +63,122 @@ C     to the responses from MATCN.  Put the TPs into COMMON.
 C
       ncrec = ip(2)
       iclass = ip(1)
+      nclasr = 0
+      iclasr =0
       nr = 0
-      it = 0
-      ierr = 0
       do 190 i=1,17
         if (itpis(i).eq.0) goto 190
-        if (nr.gt.ncrec) goto 190
-        if (nr.eq.ncrec) goto 120
+        if (i.eq.16.and.itpis(15).ne.0) goto 120
 C                     This is the case when both IFs were asked for
-        nr = nr + 1
-        call ifill_ch(ibuf,1,ibufln*2,' ')
+        if (nr.ge.ncrec) goto 190
+        nr = nr + 2
+        ireg(2) = get_buf(iclass,ierr, -4,idum,idum)
         ireg(2) = get_buf(iclass,ibuf,-10,idum,idum)
         if (i.gt.14) goto 120
-        call ma2vc(ibuf,ibuf,ld,id,itp,id,id,id,id,tret,id)
-        if (itp.ne.1.and.itp.ne.2) tret(1)=-1.0
-C                     If not a valid TPI, set reading to -1
-        if (tret(1).eq.65535.) tret(1)=1.d9
-C                     If overflow, indicate by $$$$
-        nch = nch + ir2as(tret,ibufr,nch,6,0)-1
-        nch = mcoma(ibufr,nch)
-C                     Put the value into the response 
-        ii = i+(itp-1)*14 
+        if(ierr.ge.0) then
+           call ma2vc(ibuf,ibuf,ld,id,itp,id,id,id,id,tret,id)
+        else
+           tret(1)=ierr
+        endif
+        if (tret(1).ge.65534.5) tret(1)=1.d9
+C     If overflow, indicate by $$$$
+c       ii = i+(itp-1)*14 
+        ii = i+(2-1)*14 
         if (ii.le.0.or.ii.gt.28) goto 190 
         if (isub.eq.3) tpsor(ii) = tret(1)
         if (isub.eq.4) tpspc(ii) = tret(1)
         if (isub.eq.7) tpzero(ii) = tret(1) 
-        it = 1
         goto 190
 120     continue
         if (i.gt.16) goto 130
-        call ma2if(ibufd,ibuf,id,id,id,id,tret(1),tret(2),id)
+        if(ierr.ge.0) then
+           call ma2if(ibufd,ibuf,id,id,id,id,tret(1),tret(2),id)
+        else
+           tret(1)=ierr
+           tret(2)=ierr
+        endif
         if (i.eq.16) tret(1) = tret(2)
-        if (tret(1).eq.65535.) tret(1)=1.d9
-C                     For IF2, pick up second value 
+        if (tret(1).ge.65534.5) tret(1)=1.d9
+C     For IF2, pick up second value 
         if (isub.eq.3) tpsor(i+14)=tret(1)
         if (isub.eq.4) tpspc(i+14)=tret(1)
         if (isub.eq.7) tpzero(i+14)=tret(1) 
-        it = 1
-        nch = nch + ir2as(tret,ibufr,nch,6,0)-1
-        nch = mcoma(ibufr,nch)
         goto 190
 c
 130     continue
-        call ma2i3(ibufd,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
-     &                ipcalp,iswp,freq,irem,ipcal,ilo,tret(1))
+        if(ierr.ge.0) then
+           call ma2i3(ibufd,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
+     &          ipcalp,iswp,freq,irem,ipcal,ilo,tret(1))
+        else
+           tret(1)=ierr
+        endif
         if (isub.eq.3) tpsor(i+14)=tret(1)
         if (isub.eq.4) tpspc(i+14)=tret(1)
         if (isub.eq.7) tpzero(i+14)=tret(1) 
-        it = 1
-        nch = nch + ir2as(tret,ibufr,nch,6,0)-1
-        nch = mcoma(ibufr,nch)
 190     continue
-C 
-      if (it.eq.0) ierr = -1
-C 
-      nch = nch-2 
-980   ip(1) = 0 
-      ip(2) = 0 
-      ip(3) = ierr
+C
+C  format response
+C
+      nchstart=nch
+      call fs_get_ifp2vc(ifp2vc)
+      call fs_get_itpivc(itpivc)
+      do j=0,3
+         do i=1,14
+            if (itpis(i).ne.0.and.iabs(ifp2vc(i)).eq.j) then
+               if(nch.ge.60) then
+                  call put_buf(iclasr,ibufr,2-nch,'fs','  ')
+                  nclasr=nclasr+1
+                  nch=nchstart
+               endif
+               nch=ichmv(ibufr,nch,ih22a(i),2,1)
+               if(itpivc(i).eq.-1) then
+                  nch=ichmv_ch(ibufr,nch,'x')
+               elseif(itpivc(i).eq.0) then
+                  nch=ichmv_ch(ibufr,nch,'d')
+               elseif(itpivc(i).eq.1) then
+                  nch=ichmv_ch(ibufr,nch,'l')
+               elseif(itpivc(i).eq.2) then
+                  nch=ichmv_ch(ibufr,nch,'u')
+               else
+                  nch=nch+ib2as(iand(itpivc(i),7),ibufr,nch,1)
+               endif
+               nch = mcoma(ibufr,nch)
+               if (isub.eq.3) t=tpsor(i+14)
+               if (isub.eq.4) t=tpspc(i+14)
+               if (isub.eq.7) t=tpzero(i+14)
+               nch = nch + ir2as(t,ibufr,nch,6,0)-1
+               nch = mcoma(ibufr,nch)
+            endif
+         enddo
+         if(j.gt.0) then
+            if(itpis(j+14).ne.0) then
+               if(nch.ge.60) then
+                  call put_buf(iclasr,ibufr,2-nch,'fs','  ')
+                  nclasr=nclasr+1
+                  nch=nchstart
+               endif
+               nch=ichmv_ch(ibufr,nch,'i')
+               nch=nch+ib2as(j,ibufr,nch,1)
+               nch = mcoma(ibufr,nch)
+               if (isub.eq.3) t=tpsor(j+28)
+               if (isub.eq.4) t=tpspc(j+28)
+               if (isub.eq.7) t=tpzero(j+28)
+               nch = nch + ir2as(t,ibufr,nch,6,0)-1
+               nch = mcoma(ibufr,nch)
+            endif
+         endif
+         if(nch.gt.nchstart) then
+            call put_buf(iclasr,ibufr,2-nch,'fs','  ')
+            nclasr=nclasr+1
+            nch=nchstart
+         endif
+      enddo
+C                     Put the value into the response 
+C
+
+980   ip(1) = iclasr
+      ip(2) = nclasr
+      ip(3) = 0
       call char2hol('qk',ip(4),1,2)
       ip(5) = 0 
       return

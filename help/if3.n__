@@ -3,8 +3,8 @@
  
               Syntax:      if3=atten,mixer,sw1,sw2,sw3,sw4,pcal
  
-              Response:    if3/atten,mixer,sw1,sw2,sw3,sw4,pcl,switch,cntrl,f
-              req,rem/lcl,LOlock,TPI
+              Response:    if3/atten,mixer,sw1,sw2,sw3,sw4,pcl,switch,cntrl,freq,rem/lcl,LOlo
+              ck,TPI
  
  
  Settable parameters:
@@ -25,11 +25,12 @@
             pcl        Phase-cal control setting on (default) or off.
  
  Monitor-only parameters:
-          switch   external switch, present or missing.
-            cntrl      phase-cal control modification, present or missing.
-          freq     Synthesizer frequency in MHz.
-            rem/lcl    Switch setting, rem or lcl
-          LOlock   LO lock/unlock status, lock or unlock
+            switch     external switch, present or missing.
+              cntrl        phase-cal control modification, present or
+              missing.
+            freq       Synthesizer frequency in MHz.
+              rem/lcl      Switch setting, rem or lcl
+            LOlock     LO lock/unlock status, lock or unlock
             TPI        Total power integrator reading, decimal, 0-65535.
  
  Comments:

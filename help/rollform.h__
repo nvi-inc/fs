@@ -10,11 +10,11 @@
           head     Headstack of home track, 1 or 2.
           home     Home track. The trackform track number to assign
           output roll map to, 2-33 inclusive.
-          output   A list of up to 16 output tracks for this home
-          track. Values -1, 2-33 inclusive. A null value
-          indicates that this map is not used. A value of -1
-          indicates that this map is used, but the entry is
-          empty.
+            output     A list of up to 16 output tracks for this home
+            track. Values -1, 2-33 inclusive. A null value
+            indicates that this map is not used. A value of -1
+            indicates that this map is used, but the entry is
+            empty.
  
  Comments: 
  Each rollform command defines the roll map for one home track

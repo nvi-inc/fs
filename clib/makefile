@@ -22,7 +22,7 @@ ib_util.o k4ib_util.o k4st_util.o k4tape_util.o k4rec_util.o get_k3time.o\
 k4vclo_util.o k4vc_util.o k4vcif_util.o k4vcbw_util.o k3fm_util.o set_k3aux.o\
 get_k4time.o v_vlt_head.o k4label_util.o k4rec_mode_util.o k4recpatch_util.o\
 rp2code.o k4pcalports_util.o rp2codek41.o rp2codek42.o tpi_norack.o\
-selectcmd_util.o rollform_util.o
+selectcmd_util.o rollform_util.o mk4vcd.o vlbabbcd.o mk4bbcd.o tpicd_util.o
 #
 CFLAGS = 
 #FFLAGS = 

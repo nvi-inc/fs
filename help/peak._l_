@@ -7,10 +7,10 @@
  
  
  Settable parameters:
-            nsamp      Number of samples to take at each position. Default
-            is 3.
-          iter     Number of times to iterate peak finding. Default is
-          1.
+            nsamp      Number of samples to take at each position.
+            Default is 3.
+            iter       Number of times to iterate peak finding. Default is
+            1.
             stack      Head stack to move for peaking: 1, 2, write or read.
             Default is 2 for Mark III/IV and VLBA4, and 1 for
             VLBA. Only 1 is valid for VLBA and MK3B recorders.
@@ -19,19 +19,20 @@
             differently. Only the first character for write and
             read is checked; they are provided only for backward
             compatibility.
-          vmin     The minimum peak voltage that is required before the
-          peak is considered "real". Default is 0.2 volts.
+            vmin       The minimum peak voltage that is required before
+            the peak is considered "real". Default is 0.2
+            volts.
  
  Monitor-only parameters:
             peakv      The voltage measured at the calculated peak
             position.
           mper     The minimum voltage measured at the peak as a
           percentage of peakv.
-            t/f        t (true) if the peak is strong enough to be
-            considered a real peak and the middle of the last
-            three measured positions is within 5.4 microns of
-            the calculated peak, f (false) otherwise.
-            vltlc      voltage position of the calculated peak response
+              t/f          t (true) if the peak is strong enough to be
+              considered a real peak and the middle of the last
+              three measured positions is within 5.4 microns of
+              the calculated peak, f (false) otherwise.
+              vltlc        voltage position of the calculated peak response
  
  Comments: 
  This command attempts to find the head stack position that

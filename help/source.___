@@ -15,10 +15,10 @@
                Other specialized names are described in the comments
         below. If name is sun or moon, no position is
         required, and if given it will be ignored.
-        ra     Right ascension, in numeric angle/hours format. No
-        default. If name is azel or azeluncr, this parameter
-        is interpreted as an azimuth. If name is xy, this
-        parameter is interpreted as an X position.
+          ra       Right ascension, in numeric angle/hours format. No
+          default. If name is azel or azeluncr, this parameter
+          is interpreted as an azimuth. If name is xy, this
+          parameter is interpreted as an X position.
           dec      Declination, in numeric angle/degrees format. No
           default. If name is azel or azeluncr, this parameter
           is interpreted as an elevation. If name is xy, this

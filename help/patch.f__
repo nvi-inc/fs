@@ -7,12 +7,12 @@
  
  Settable Parameters:
             lon        First LO. One of lo1, lo2, or lo3. No default.
-            vc#horl    Video converter. For Mark III or Mark IV, Video
-            converter number with the character h or l appended,
-            e.g. 1h or 3l. h indicates the high band of the
-            channel, and l the low. For K4 type 1: 1-4, 5-8, 9-
-            12, or 13-16 for K4 type 2: a1,  , a8, b1,  , b8. No
-            default.
+              vc#horl      Video converter. For Mark III or Mark IV, Video
+              converter number with the character h or l
+              appended, e.g. 1h or 3l. h indicates the high band
+              of the channel, and l the low. For K4 type 1: 1-4,
+              5-8, 9-12, or 13-16 for K4 type 2: a1,  , a8, b1,
+               , b8. No default.
  
  Comments: 
  For Mark III and Mark IV, this command stores the patching

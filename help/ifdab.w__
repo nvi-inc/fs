@@ -2,21 +2,20 @@
  
               Syntax:      ifdab=attenA,attenB,inputA,inputB,avper
  
-              Response:    ifdab/attenA,attenB,inputA,inputB,avper,TPA,TPB,se
-              rno,err
+              Response:    ifdab/attenA,attenB,inputA,inputB,avper,TPA,TPB,serno,err
  
  
  Settable Parameters:
-          attenA   Attenuator setting for IF channel A. 0 (default) or
-          20 db. Normally this attenuator should be set to 0
-          so that the 20 db can be used for radiometry.
-          attenB   Attenuator setting for IF channel B. 0 (default) or
-          20 db. Normally this attenuator should be set to 0
-          so that the 20 db can be used for radiometry.
-          inputA   Input source for IF channel A. nor (default) for
-          normal input, ext for front panel IF input.
-          inputB   Input source for IF channel B. nor (default) for
-          normal input, ext for front panel IF input.
+            attenA     Attenuator setting for IF channel A. 0 (default) or
+            20 db. Normally this attenuator should be set to 0
+            so that the 20 db can be used for radiometry.
+            attenB     Attenuator setting for IF channel B. 0 (default) or
+            20 db. Normally this attenuator should be set to 0
+            so that the 20 db can be used for radiometry.
+            inputA     Input source for IF channel A. nor (default) for
+            normal input, ext for front panel IF input.
+            inputB     Input source for IF channel B. nor (default) for
+            normal input, ext for front panel IF input.
             avper      Averaging period in seconds for the total power
             integrator. May be 0, 1, 2, 4, 10, 20, 40, or 60
             seconds. A value of 0 results in 1/80 sec averaging

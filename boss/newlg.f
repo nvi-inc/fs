@@ -343,6 +343,13 @@ c
       endif
       call logit3(ib,nch-1,lsor)
 C
+c
+      nch = 1
+      nch = ichmv_ch(ib,nch,'flagr,')
+      call fs_get_iapdflg(iapdflg)
+      nch = nch + ib2as(iapdflg,ib,nch,z'8005')
+      call logit3(ib,nch-1,lsor)
+C
       return
       end
 

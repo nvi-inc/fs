@@ -244,7 +244,8 @@ Ack:    ich = strtok(NULL, ",");
 /*  error recognition and message expansion */
 
     kp = (buf[FIRST_CHAR-1] == '$');
-    kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0;
+    kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
+      strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0;
     if(((!kpcald) && (kxd || (rtn2 == -1) || (!kp && !kack &&!kdebug))) ||
        (kpcald && kpd)){
       ierrnum=0;

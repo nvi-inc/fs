@@ -22,7 +22,27 @@
 #                                                                                                  #
 # 990621 kar Created version                                                                       #
 #**************************************************************************************************#
+global tkVersion
+# Screen layout constants
 
+# Determine the resolution. 
+  set win_sizeX [winfo screenwidth .]
+  set win_sizeY [winfo screenheight .]  
+
+#position window full screen from top left corner.
+  if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
+      set size 0  ;# Multipication factor to change size
+      set fontsize 10
+  } else {
+      set size 0    ;# Multipication factor to change size
+      set fontsize 14
+  }
+
+  wm geometry . +0+0
+
+
+canvas .c -width [expr 180*$size] \
+	  -height [expr 90*$size]
 
 #*************************************** Variables *********************************************#
 set current_form ""
@@ -142,24 +162,28 @@ proc run_lognm {} {
 #***********************************************************************************************#
 proc create_menubar {} {
 global read 
+
 frame .menubar -relief raised -bd 1 -bg CadetBlue
 pack .menubar -side top -fill x
-menubutton .menubar.file -text File -relief flat -bg CadetBlue -underline 0 -menu .menubar.file.options
-menubutton .menubar.setup -text Setup -relief flat -bg CadetBlue -underline 0 -menu .menubar.setup.options
-pack .menubar.file .menubar.setup -side left
-menu .menubar.file.options -bg CadetBlue -tearoff 0
-menu .menubar.setup.options -bg CadetBlue -tearoff 0
-.menubar.file.options  add command -label "Ready" -command {form_controler 3}
-.menubar.file.options  add command -label "Start" -command {form_controler 1}
-.menubar.file.options  add command -label "Stop" -command {form_controler 4}
-.menubar.file.options  add separator
-.menubar.file.options  add command -label "Exit" -command {configure_setup_file; kill_process_logfile; exit}
+
+menubutton .menubar.setup -text Setup -relief flat -fg white -bg CadetBlue -underline 0 -menu .menubar.setup.options
+
+button .menubar.ready -text Ready -relief raised -bg CadetBlue -fg white -command {form_controler 3}
+button .menubar.start -text Start -relief raised -bg CadetBlue -fg white -command {form_controler 1}
+button .menubar.stop -text Stop -relief raised -bg CadetBlue -fg white -command {form_controler 4}
+button .menubar.exit -text Exit -relief raised -bg red -fg white -command {configure_setup_file; kill_process_logfile; exit}
+
+menu .menubar.setup.options -bg SteelBlue3 -fg white -tearoff 0
 .menubar.setup.options add command -label "Send to.." -command configure_email_adresses
 .menubar.setup.options add command -label "Station.." -command configure_station_name
 .menubar.setup.options add command -label "Dynamic entries.." -command configure_dynamic_entries
 .menubar.setup.options add checkbutton -label "Auto start" -variable auto_start
 .menubar.setup.options add checkbutton -label "Put message into log" -variable put_into_log
 .menubar.setup.options add checkbutton -label "Get session from log" -variable get_exp_name
+
+pack .menubar.setup .menubar.ready .menubar.start .menubar.stop .menubar.exit -side left -fill both
+pack .menubar.exit -side right -fill both
+
 }
 #************************************ End of subroutine ****************************************#
 
@@ -368,12 +392,18 @@ frame  .internal5 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal6 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7 -width 21c -height 7m -relief flat -bg SteelBlue3
 
+pack .c -in .internal1
+pack .c -in .internal2
+pack .c -in .internal3
+pack .c -in .internal4
+pack .c -in .internal5
+pack .c -in .internal6
+pack .c -in .internal7
 
 if {$form==0} {
 pack   .internal1 .internal2 .internal3 .internal6 .internal7 -in .start_form -side top -fill both -expand 1
 } elseif {$form==1} {
 pack   .internal1 .internal2 .internal4 .internal5 .internal6 .internal7 -in .start_form \
--side top -fill both -expand 1
 }
 # the start frame should expand to it't set size.
 pack propagate .start_form 0
@@ -383,10 +413,10 @@ pack propagate .start_form 0
 #**********************************************************************************************#
 if {$form==0} {
 label  .start_form_label -text "Manual Start Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
-pack   .start_form_label -in .internal1 -side top -pady 4m
+pack   .start_form_label -in .internal1 -side top -pady 1m
 } elseif {$form==1} {
 label  .auto_start_label -text "Auto start form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
-pack   .auto_start_label -in .internal1 -side top -pady 4m
+pack   .auto_start_label -in .internal1 -side top -pady 1m
 }
 
 
@@ -402,7 +432,7 @@ label  .time_ready_label -text "at: " -font -*-fixed-light-*-*-*-14 -bg SteelBlu
 label  .source_time -text "$source_time" -font -*-courier-light-*-*-*-16 -bg SteelBlue3 -fg white -width 10
 label  .ut_time_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
 pack   .ready_data_label .session_label .session_name .source_ready_label .source_name .time_ready_label \
-.source_time .ut_time_label -in .internal2 -side left -pady 2m
+.source_time .ut_time_label -in .internal2 -side left -pady 1m
 
 
 #**********************************************************************************************#
@@ -418,7 +448,7 @@ label  .at_label -text " at:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg w
 entry  .ut_entry -width 9 -relief sunken -textvariable start_time
 label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 5
  pack   .session_label2 .session_entry .start_recording_label .start_recording_entry .at_label .ut_entry \
-.ut_label -in .internal3 -side left -pady 2m 
+.ut_label -in .internal3 -side left -pady 0m 
 
 
 #**********************************************************************************************#
@@ -430,7 +460,7 @@ label     .source_box_label -text "Log processing:" -font -*-fixed-light-*-*-*-1
 text      .source_box_text -width 90 -height 3 -font -*-fixed-light-*-*-*-14 -wrap none -relief raised -bd 2 \
            -yscrollcommand ".source_box_scroll set"
 scrollbar .source_box_scroll -command ".source_box_text yview"
-pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -side left -pady 2m -fill both
+pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -side left -pady 1m -fill both
 }
 
 #**********************************************************************************************#
@@ -441,8 +471,8 @@ frame     .waiting_frame -width 70 -bg SteelBlue3 -relief flat
 label     .current_source_label -text "Current source is: $first_source" -font -*-fixed-light-*-*-*-14 \
 -bg SteelBlue3 -fg white -width 30
 label     .waiting_label -text "Waiting for start tape" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
-pack      .waiting_frame -in .internal5 -side top -pady 2m
-pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 2m -fill both
+pack      .waiting_frame -in .internal5 -side top -pady 1m
+pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 1m -fill both
 
 
 #**********************************************************************************************#
@@ -456,9 +486,9 @@ button .send_button -text "Send" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -f
 -relief raised -command {send_mail; .send_button config -text "Go to stop" -width 12 -command {form_controler 4}} 
 
  if {$form==0} {
-  pack   .send_button -in .internal6 -side top -pady 5m
+  pack   .send_button -in .internal6 -side top -pady 1m
  } elseif {$form==1} {
-  pack   .abort_button -in .internal6 -side top -pady 3m
+  pack   .abort_button -in .internal6 -side top -pady 1m
  }
 
  #*************** If auto start mode then call the routine start_auto_start_mode *************#
@@ -609,10 +639,29 @@ frame  .internal14 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal15 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal16 -width 21c -height 3c -relief flat -bg SteelBlue3
 
+pack .c -in .internal1
+pack .c -in .internal2
+pack .c -in .internal3
+pack .c -in .internal4
+pack .c -in .internal5
+pack .c -in .internal6
+pack .c -in .internal7
+pack .c -in .internal8
+pack .c -in .internal9
+pack .c -in .internal10
+pack .c -in .internal11
+pack .c -in .internal12
+pack .c -in .internal13
+pack .c -in .internal14
+pack .c -in .internal15
+pack .c -in .internal16
+
  if {$form==0} {
-  frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     pack .c -in .internal17
  } else {
-  frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     pack .c -in .internal17
  } 
 
 #**********************************************************************************************#
@@ -631,10 +680,10 @@ pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .intern
 #**********************************************************************************************#
 if {$form==0} {
 label  .ready_form_label -text "Ready Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
-pack   .ready_form_label -in .internal1 -side top -pady 4m
+pack   .ready_form_label -in .internal1 -side top -pady 1m
 } elseif {$form==1} {
 label  .stop_form_label -text "Stop Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
-pack   .stop_form_label -in .internal1 -side top -pady 4m
+pack   .stop_form_label -in .internal1 -side top -pady 1m
 }
 
 
@@ -643,7 +692,7 @@ pack   .stop_form_label -in .internal1 -side top -pady 4m
 #**********************************************************************************************#
 label  .session_label -text "Session name:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
 entry  .session_entry -width 15 -relief sunken -textvariable session
-pack   .session_label .session_entry -in .internal2 -side left -pady 2m    
+pack   .session_label .session_entry -in .internal2 -side left -pady 1m    
 
 #**********************************************************************************************#
 # This part builds the internal3 frame with one internal frame containing a label, one textarea#
@@ -653,7 +702,7 @@ frame     .comment_label_frame -width 25 -bg SteelBlue3 -relief flat
 label     .comment_label -text "Comments:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
 text      .comment_text -width 55 -height 5 -relief sunken -bd 2 -yscrollcommand ".comment_scroll set"
 scrollbar .comment_scroll -command ".comment_text yview" 
-pack      .comment_label_frame .comment_text .comment_scroll -in .internal3 -side left -pady 3m -fill both
+pack      .comment_label_frame .comment_text .comment_scroll -in .internal3 -side left -pady 1m -fill both
 pack      .comment_label -in .comment_label_frame -side top
 
 
@@ -667,10 +716,10 @@ entry  .firts_source_entry -width 12 -relief sunken -textvariable first_source
 label  .at_label -text "at" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
 label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
 entry  .time_entry -width 10 -relief sunken -textvariable source_time
-pack   .first_source_label .firts_source_entry .at_label .time_entry .ut_label -in .internal4 -side left -pady 3m
+pack   .first_source_label .firts_source_entry .at_label .time_entry .ut_label -in .internal4 -side left -pady 1m
 } elseif {$form==1} {
 label  .problem_scan_label -text "Problem scan(s):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
-pack   .problem_scan_label -in .internal4 -side left -pady 3m
+pack   .problem_scan_label -in .internal4 -side left -pady 1m
 }
 
 
@@ -687,10 +736,10 @@ button .remove_scan_button -text "Remove" -font -*-fixed-light-*-*-*-14 -bg Stee
 label  .scan_source_label -text "Source" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 8
 label  .scan_start_label -text "Scan start" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 14
 label  .explanation_label -text "Explanation of problem" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 21
-pack   .problem_scan_frame -in .internal5 -side left -fill both -pady 2m
+pack   .problem_scan_frame -in .internal5 -side left -fill both -pady 1m
 pack   .add_scan_button -in .problem_scan_frame -side left -padx 7m
 pack   .remove_scan_button -in .problem_scan_frame -side left -padx 3m
-pack   .scan_source_label .scan_start_label .explanation_label -in .internal5 -side left -pady 2m -padx 1m
+pack   .scan_source_label .scan_start_label .explanation_label -in .internal5 -side left -pady 1m -padx 1m
 pack   propagate .problem_scan_frame 0
 }
 
@@ -711,9 +760,9 @@ set problem_scans_id [expr $problem_scans_id+1]
 if {$form==0} {
 label  .gps_frame -width 25 -height 3 -bg SteelBlue3 -relief flat
 radiobutton .gps_fmout -text " GPS-FMOUT " -bg SteelBlue3 -fg white -relief flat -variable gps \
--font -*-fixed-light-*-*-*-12 -value 1
+-font -*-fixed-light-*-*-*-14 -value 1
 radiobutton .fmout_gps -text " FMOUT-GPS " -bg SteelBlue3 -fg white -variable gps \
--font -*-fixed-light-*-*-*-12 -value 0
+-font -*-fixed-light-*-*-*-14 -value 0
 entry  .gps-fmout_entry -width 12 -relief sunken -textvariable gps_fmout
 label  .gps_unit_label -text "microseconds" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 15
 pack   .gps_fmout .fmout_gps -in .gps_frame -side top
@@ -725,7 +774,7 @@ entry  .thin_entry -width 10 -relief sunken -textvariable thin
 label  .thin_label -text "thin" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
 entry  .thick_entry -width 10 -relief sunken -textvariable thick
 label  .thick_label -text "thick" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
-pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -in .internal7 -side left -pady 3m
+pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -in .internal7 -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -743,12 +792,12 @@ label  .humidity_label -text "Humidity (%):" -font -*-fixed-light-*-*-*-14 -bg S
 entry  .humidity_entry -width 7 -relief sunken -textvariable humidity
 pack   .wx_label .wx_frame -in .internal8 -side left
 pack   .temperature_label .temperature_entry .pressure_label .pressure_entry \
-.humidity_label .humidity_entry -in .wx_frame -side left -pady 4m
+.humidity_label .humidity_entry -in .wx_frame -side left -pady 1m
 } else {
 label  .finished_label -text "Observation finished at:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
 entry  .finished_entry -width 10 -relief sunken -textvariable finished 
 label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
-pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady 3m
+pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -758,7 +807,7 @@ pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady
 if {$form==0} {
 label  .skycondition_label -text "Sky conditions:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
 entry  .skycondition_entry -width 55 -relief sunken -textvariable sky_conditions
-pack   .skycondition_label .skycondition_entry -in .internal9 -side left -pady 3m
+pack   .skycondition_label .skycondition_entry -in .internal9 -side left -pady 1m
 }
 
 
@@ -786,7 +835,7 @@ label  .nominal_label -text "nominal" -font -*-fixed-light-*-*-*-14 -bg SteelBlu
 pack   .plus  .minus -in .larger_frame -side top
 pack   .is .is_not -in .is_frame -side top
 pack   .cable_label .longer_cable_label .larger_frame .cable_border .cable_entry .unit_label .is_frame .nominal_label \
--in .internal10 -side left -pady 3m
+-in .internal10 -side left -pady 1m
 }
 
 
@@ -817,7 +866,7 @@ label  .az_label -text "Az" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg whi
 label  .el_label -text "El" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
 label  .offset1_label -text "Offset1" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
 label  .offset2_label -text "Offset2" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
-pack   .pointing_frame -in .internal12 -side left -fill both -pady 2m
+pack   .pointing_frame -in .internal12 -side left -fill both -pady 1m
 pack   .add_button -in .pointing_frame -side left -padx 7m
 pack   .remove_button -in .pointing_frame -side left -padx 3m  
 pack   .x-sefd_label .s-sefd_label .source_label .az_label .el_label .offset1_label \
@@ -844,7 +893,7 @@ entry  .tsys_value2_entry -width 7 -relief sunken -textvariable tsys2
 label  .tsys_value3_label -text "Tsys(x2):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 13
 entry  .tsys_value3_entry -width 7 -relief sunken -textvariable tsys3
 pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsys_value2_entry \
-.tsys_value3_label .tsys_value3_entry -in .internal14 -side left -pady 4m
+.tsys_value3_label .tsys_value3_entry -in .internal14 -side left -pady 1m
 
 
 
@@ -853,7 +902,7 @@ pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsy
 #**********************************************************************************************#
 label  .rec-humidity_label -text "Recorder humidity (%):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
 entry  .rec-humidity_entry -width 10 -relief sunken -textvariable rec_humidity
-pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 3m
+pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -865,11 +914,11 @@ frame  .send_button_frame -width 25 -bg SteelBlue3 -relief flat
 button .send_button -text "Send" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command send_mail
 pack   .send_button_frame -in .internal16 -side top
-pack   .send_button -in .send_button_frame -side left -pady 4m
+pack   .send_button -in .send_button_frame -side left -pady 1m
 
  if {$form==0} {
   checkbutton .auto -text "Auto start" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -variable auto_start
-  pack   .auto -in .send_button_frame -side left -pady 4m -padx 2m
+  pack   .auto -in .send_button_frame -side left -pady 1m -padx 2m
  }
 
 }
@@ -957,14 +1006,14 @@ pack     propagate .send-to 0
 #**********************************************************************************************#
 label  .send-to.frame1.send_to_label -text "Send to:" -bg CadetBlue -fg white -width 13
 entry  .send-to.frame1.send_to_entry -width 35 -relief sunken -textvariable send_to
-pack   .send-to.frame1.send_to_label .send-to.frame1.send_to_entry -side left -pady 3m
+pack   .send-to.frame1.send_to_label .send-to.frame1.send_to_entry -side left -pady 1m
 
 #**********************************************************************************************#
 # This part builds frame2 with one label and one entry.                                        #
 #**********************************************************************************************#
 label  .send-to.frame2.cc_label -text "Cc:" -bg CadetBlue -fg white -width 13
 entry  .send-to.frame2.cc_entry -width 35 -relief sunken -textvariable cc
-pack   .send-to.frame2.cc_label .send-to.frame2.cc_entry -side left -pady 3m
+pack   .send-to.frame2.cc_label .send-to.frame2.cc_entry -side left -pady 1m
 
 #**********************************************************************************************#
 # This part builds frame3 with one internal frame containing two buttons.                      #
@@ -975,7 +1024,7 @@ button .send-to.frame3.buttonframe.ok -text "Ok" -bg CadetBlue -fg white -width 
 -command write_email_adresses
 button .send-to.frame3.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
 -relief raised -command destroy_send_window
-pack   .send-to.frame3.buttonframe.ok .send-to.frame3.buttonframe.cancel -side left -pady 3m -padx 2m
+pack   .send-to.frame3.buttonframe.ok .send-to.frame3.buttonframe.cancel -side left -pady 1m -padx 2m
 
 }
 #*********************************** End of subroutine ****************************************#
@@ -1014,7 +1063,7 @@ pack     propagate .station 0
 #**********************************************************************************************#
 label  .station.frame1.station_label -text "Station name:" -bg CadetBlue -fg white -width 13
 entry  .station.frame1.name_entry -width 25 -relief sunken -textvariable station
-pack   .station.frame1.station_label .station.frame1.name_entry -side left -pady 3m -padx 3m
+pack   .station.frame1.station_label .station.frame1.name_entry -side left -pady 1m -padx 3m
 
 #**********************************************************************************************#
 # This part builds frame2 with one internal frame containing two buttons.                      #
@@ -1025,7 +1074,7 @@ button .station.frame2.buttonframe.ok -text "Ok" -bg CadetBlue -fg white -width 
 -command write_station_name
 button .station.frame2.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
 -relief raised -command destroy_station_window
-pack   .station.frame2.buttonframe.ok .station.frame2.buttonframe.cancel -side left -pady 3m -padx 2m
+pack   .station.frame2.buttonframe.ok .station.frame2.buttonframe.cancel -side left -pady 1m -padx 2m
 
 }
 #*********************************** End of subroutine ****************************************#
@@ -1081,7 +1130,7 @@ button .dynamic-entries.frame3.buttonframe.ok -text "Ok" -bg CadetBlue -fg white
 -command write_to_setup
 button .dynamic-entries.frame3.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
 -relief raised -command destroy_window
-pack   .dynamic-entries.frame3.buttonframe.ok .dynamic-entries.frame3.buttonframe.cancel -side left -pady 3m -padx 2m
+pack   .dynamic-entries.frame3.buttonframe.ok .dynamic-entries.frame3.buttonframe.cancel -side left -pady 1m -padx 2m
 
 }
 #*********************************** End of subroutine ****************************************#
@@ -1639,7 +1688,7 @@ grab     .error
   label .error.error-label -text "Error: You have to push\n one of the Is or\n Is not nominal buttons!" -bg CadetBlue -fg white -width 27
  }
 button   .error.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised -command release_error_msg
-pack     .error.error-label .error.ok -side top -pady 4m
+pack     .error.error-label .error.ok -side top -pady 1m
 pack     propagate .error 0
 
 }

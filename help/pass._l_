@@ -21,17 +21,18 @@
             mk4, then stack 2 is positioned to 100 plus the pass
             number for stack 1. Default is to not move the read
             head stack.
-            woffset    Type of offset for the write head. auto (default) or
-            none. Only the first character is checked. For auto,
-            the head stack position is automatically adjusted
-            according to the write head type parameter in the
-            head.ctl control file. For none, no adjustments are
-            made. Use none for Mark IV recording and for all
-            mode A recording. The read head is always adjusted.
+              woffset      Type of offset for the write head. auto (default)
+              or none. Only the first character is checked. For
+              auto, the head stack position is automatically
+              adjusted according to the write head type
+              parameter in the head.ctl control file. For none,
+              no adjustments are made. Use none for Mark IV
+              recording and for all mode A recording. The read
+              head is always adjusted.
  
  Monitor-only parameters:
-            cmdMw      Microns corresponding to command write head pass
-            number.
+          cmdMw    Microns corresponding to command write head pass
+          number.
             cmdMr      Microns corresponding to command read head pass
             number, null for VLBA.
             actMw      Microns corresponding to actual write head pass
@@ -40,8 +41,8 @@
             number, null for VLBA.
             deltaMw    Micron error between actual and commanded write head
             position.
-            deltaMr    Micron error between actual and commanded read head
-            position, null for VLBA.
+            deltaMr      Micron error between actual and commanded read
+            head position, null for VLBA.
  
  Comments: 
  This command moves the read and/or write head stacks to the
@@ -62,10 +63,9 @@
  position = tapeform offset + absolute offset         (forward pass)
  position = tapeform offset + absolute offset + for/rev offset(reverse pass)
  
- where tapeform offset is the a priori offset as specified with
- the tapeform command, and the absolute offset and
- forward/reverse offset are specified in the head.ctl control
- file.
+ where tapeform offset is the a priori offset as specified with the
+ tapeform command, and the absolute offset and forward/reverse offset are
+ specified in the head.ctl control file.
  
  If woffset is auto, and the commanded pass is a reverse pass,
  and the write head stack is defined as odd in the head.ctl

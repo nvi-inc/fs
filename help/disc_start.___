@@ -1,7 +1,7 @@
                disc_start - Start Mark V recording
  
               Syntax:      disc_start=on,scan_name
-            disc_start
+          disc_start
  
               Response:    disc_start/on/off
  
@@ -12,7 +12,7 @@
             scan name defined by the scan_name SNAP command
  
  Monitor-only parameters:
-            on/off`    on (recording) or off (nor recording)
+              on/off`      on (recording) or off (nor recording)
  
  Comments:
  This command may be given only with either one parameter on to

@@ -180,14 +180,14 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '020327'
+      cversion = '020510'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
 C     iVerMajor_FS = 9
 C     iVerMinor_FS = 5
-C     iVerPatch_FS = 4
+C     iVerPatch_FS = 8
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -239,6 +239,9 @@ c Initialize no. entries in lband (freqs.ftni)
       dr_rack_type = 'unknown'
       dr_rec1_type = 'unknown'
       dr_rec2_type = 'none'
+      tpid_prompt = 'no'
+      itpid_period = 0
+      tpid_parm = ''
 C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
@@ -247,7 +250,8 @@ C***********************************************************
      .           ctmpnam,
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
      .           rlabsize,cepoch,coption,luscn,
-     .           dr_rack_type,dr_rec1_type,dr_rec2_type)
+     .           dr_rack_type,dr_rec1_type,dr_rec2_type,
+     .           tpid_prompt,itpid_period,tpid_parm)
       kdr_type = .not.
      .   (dr_rack_type.eq.'unknown'.and.
      .    dr_rec1_type.eq.'unknown'.and.
@@ -685,7 +689,7 @@ C  Write warning messages if control file and schedule do not agree.
 9373        format(
 C    .      ' 0 = Done with DRUDG                   ',
      .      ' 0 = Done with DRUDG '/
-     .      '20 = Make fake lvex '/
+C    .      '20 = Make fake lvex '/
      .      ' ? ',$)
 C         endif ! known/unknown equipment
         else ! SNAP file

@@ -19,7 +19,7 @@ C     920922 gag Consolidated quikr routines back into one program.
 C
       include '../include/fscom.i'
 C
-      dimension ip(5)          !  array for rmpar parameters
+      integer*4 ip(5),ipinsnp(5)        !  array for rmpar parameters
       dimension iparm(2)                      ! parameters from gtprm
       equivalence (parm,iparm(1))
       dimension lnames(13,1)
@@ -45,7 +45,7 @@ C                         Ref times for operator and schedule streams
       dimension lnamef(10),tmpchr(10) !  file name, general use
       equivalence (lnamef,cnamef),(tmpchr,tmpstr)
       character*28 pathname
-      integer idcbp1(2),idcbp2(2),fc_system
+      integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp
       save idcbp1,idcbp2
 C                         DCB's for procedures from lists 1 and 2
       dimension istksk(42),istkop(42)        !  stacks for nested procedures
@@ -106,12 +106,26 @@ C
       call fs_set_lstp(ilstp)
       call opnpf(lstp,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,'n')
       if (ierr.lt.0) call logit7ci(0,0,0,1,-133,'bo',ierr)
+      iwait=0
+      ipinsnp(1)=0
+      ipinsnp(3)=0
 C
 C     2. First and always, check the time list for something to do.
 C     This is the highest priority.  Get next job, or next time to awaken.
 C     Check for any newly edited proc files sent by PFMED.
 C
 200   continue
+c      write(6,*) 'iwait',iwait
+      if(iwait.ne.0) then
+         iret=fc_skd_end_insnp('boss ',ipinsnp)
+         if(iret.ne.0) then
+            call clrcl(ipinsnp(1))
+         endif
+      endif
+      iwait=0
+      ipinsnp(1)=0
+      ipinsnp(2)=0
+      ipinsnp(3)=0
       call newpf(idcbp1,idcbp2,lproc1,maxpr1,nproc1,lproc2,maxpr2,
      .nproc2,ibuf,iblen,istkop,istksk)
       call getts(itscb,ntscb,itime,itype,index,iclass,lsor,indts,klast,
@@ -153,6 +167,11 @@ C
               call logit7ci(0,0,0,0,ierr,'sp',0)
               call cants(itscb,ntscb,5,indexold,indts)
               call clrcl(iclass)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=ierr
+                 call char2hol('sp',ipinsnp(4),1,2)
+                 ipinsnp(5)=0
+              endif
               goto 200
            endif
         endif
@@ -168,7 +187,7 @@ C
      .    kskblk,kopblk,khalt,kbreak,iclopr,iclop2,iblen,ibuf,
      .    nchar,lsor,lprocs,lproco,lpparm,ncparm,
      .    lnames,nnames,lproc1,nproc1,lproc2,nproc2,
-     .    maxpr1,maxpr2,ierr,icurln,ilstln)
+     .    maxpr1,maxpr2,ierr,icurln,ilstln,iwait)
       if (ierr.eq.-1) ierr=0
       chsor = cjchar(lsor,2)
       if (chsor.eq.';') idummy = ichmv(lprocn,1,lproco,1,12)
@@ -268,6 +287,11 @@ C
       if (ierr.ne.0) then
         call logit7ci(0,0,0,0,ierr,'sp',0)
         call clrcl(iclass)
+        if(iwait.ne.0) then
+           ipinsnp(3)=ierr
+           call char2hol('sp',ipinsnp(4),1,2)
+           ipinsnp(5)=0
+        endif
         goto 200
       endif
 C
@@ -334,6 +358,11 @@ C                   Indicate the second list by <0
      &       (chsor.ne.':' .or. krcur(istksk,indexp)) ) then
 C                   Recursion is not allowed
           call logit6c(0,0,0,0,-103,'bo')
+          if(iwait.ne.0) then
+             ipinsnp(3)=-103
+             call char2hol('bo',ipinsnp(4),1,2)
+             ipinsnp(5)=0
+          endif
           goto 600
         endif
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
@@ -344,6 +373,11 @@ C                   Get the command <name>=<parm>
           ncparm = nchar - ich
           if (ncparm.lt.0 .or. ncparm.gt.12) then
             call logit7ci(0,0,0,1,-135,'bo',12)
+            if(iwait.ne.0) then
+               ipinsnp(3)=-135
+               call char2hol('bo',ipinsnp(4),1,2)
+               ipinsnp(5)=0
+            endif
             goto 600
           endif
           idummy = ichmv(lpparm,1,ibuf,ich+1,ncparm)
@@ -394,6 +428,11 @@ C
 C                   If we got ICLASS from time-scheduling, don't kill
 C                   it here, wait until CANTS
           call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+          if(iwait.ne.0) then
+             ipinsnp(3)=ip(3)
+             ipinsnp(4)=ip(4)
+             ipinsnp(5)=ip(5)
+          endif
           call clrcl(iclass)
           if(kts) call cants(itscb,ntscb,5,index,indts)
           if (ip(1).eq.0) goto 200
@@ -406,6 +445,10 @@ C                   message in spite of our error.
             nchar = min0(ireg(2),iblen*2)
             call char2hol('/ ',ldum,1,2)
             call logit4(ibuf,nchar,ldum,lprocn)
+            if(iwait.ne.0) then
+               call put_buf(ipinsnp(1),ibuf,-nchar,'  ','  ')
+               ipinsnp(2)=ipinsnp(2)+1
+            endif
           enddo
         endif
         if (kts) iclass = 0
@@ -440,6 +483,10 @@ C
           call fs_get_llog(illog)
           nch = nch + ichmv(ibuf,nch,illog,1,8)
           call logit4(ibuf,nch-1,lsor2,lprocn)
+          if(iwait.ne.0) then
+             call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
+             ipinsnp(2)=ipinsnp(2)+1
+          endif
         else
 C                   User requested log name, format response and log it.
           ic2 = iscn_ch(ibuf,ich,nchar,',')
@@ -457,14 +504,9 @@ C
 C     5.5 SCHEDULE command section.
 C
       else if (mbranch.eq.5) then
-        irnprc = rn_take('pfmed',1)
-        if (irnprc.eq.0) then
-          call ifill_ch(ibuf,1,iblen*2,' ')
-          ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
-          nchar = min0(ireg(2),iblen*2)
-          ich = 1+iscn_ch(ibuf,1,nchar,'=')
+         ich = 1+iscn_ch(ibuf,1,nchar,'=')
 C  User requested schedule name, format response and log it.
-          if (ich.eq.1) then
+         if (ich.eq.1) then
             nch = ichmv_ch(ibuf,nchar+1,'/')
             call fs_get_lskd(ilskd)
             call hol2char(ilskd,1,8,lskd)
@@ -474,9 +516,18 @@ C  User requested schedule name, format response and log it.
             if (ierr.lt.0) icurln=0
             nch = nch+ib2as(icurln,ibuf,nch,o'100000'+5)
             call logit4(ibuf,nch-1,lsor2,lprocn)
-            call rn_put('pfmed')
+            if(iwait.ne.0) then
+               call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
+               ipinsnp(2)=ipinsnp(2)+1
+            endif
             goto 600
           endif
+        irnprc = rn_take('pfmed',1)
+        if (irnprc.eq.0) then
+          call ifill_ch(ibuf,1,iblen*2,' ')
+          ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+          nchar = min0(ireg(2),iblen*2)
+          ich = 1+iscn_ch(ibuf,1,nchar,'=')
           ic4 = iscn_ch(ibuf,ich,nchar,',')
           if (ic4.eq.0) ic4 = nchar + 1
           cnamef=' '
@@ -485,6 +536,11 @@ C  User requested schedule name, format response and log it.
           endif
           if(kstak(istkop,istksk,1)) then
              call logit7ci(0,0,0,0,-211,'bo',0)
+             if(iwait.ne.0) then
+                ipinsnp(3)=-211
+                call char2hol('bo',ipinsnp(4),1,2)
+                ipinsnp(5)=0
+             endif
              call rn_put('pfmed')
              goto 600
           endif           
@@ -530,6 +586,11 @@ C  a valid schedule or all is set to zero.
           call fmpopen(idcbsk,pathname,ierr,'r',id)
           if (ierr.lt.0) then
              call logit7ci(0,0,0,1,-105,'bo',ierr)
+             if(iwait.ne.0) then
+                ipinsnp(3)=-105
+                call char2hol('bo',ipinsnp(4),1,2)
+                ipinsnp(5)=0
+             endif
              kskblk = .true.
              lskd = 'none'
              call char2hol(lskd,ilskd,1,8)
@@ -558,6 +619,11 @@ C  a valid schedule or all is set to zero.
               call char2hol(lprc,ilprc,1,8)
               call fs_set_lprc(ilprc)
               call logit7ci(0,0,0,1,-158,'bo',ierr)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=-158
+                 call char2hol('bo',ipinsnp(4),1,2)
+                 ipinsnp(5)=0
+              endif
               call rn_put('pfmed')
               goto 600
             end if
@@ -569,8 +635,18 @@ C  a valid schedule or all is set to zero.
           if (ierr.lt.0) then
             if(ierr.ne.-6) then
               call logit7ci(0,0,0,1,-133,'bo',ierr)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=-133
+                 call char2hol('bo',ipinsnp(4),1,2)
+                 ipinsnp(5)=ierr
+              endif
             else
               call logit7ci(0,0,0,1,-139,'bo',ierr)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=-139
+                 call char2hol('bo',ipinsnp(4),1,2)
+                 ipinsnp(5)=ierr
+                 endif
             endif
             lprc='none'
             call char2hol(lprc,ilprc,1,8)
@@ -620,6 +696,16 @@ c
         if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
         ierr = 0
 c
+        if(iwait.ne.0) then
+           iret=fc_skd_end_insnp('boss ',ipinsnp)
+           if(iret.ne.0) then
+              call clrcl(ipinsnp(1))
+           endif
+        endif
+        iwait=0
+        ipinsnp(1)=0
+        ipinsnp(2)=0
+        ipinsnp(3)=0
         goto 320
 C
 C     5.6 Commands which set switches (XLOG,ECHO,XDISP)
@@ -630,10 +716,20 @@ C
         ich = 1+iscn_ch(ibuf,1,nchar,'=')
         if (ich.eq.1) then
           call logit7ci(0,0,0,0,-107,'bo',0)
+          if(iwait.ne.0) then
+             ipinsnp(3)=-107
+             call char2hol('bo',ipinsnp(4),1,2)
+             ipinsnp(5)=0
+          endif
         else
           kon = (ichcm_ch(ibuf,ich,'on').eq.0)
           if (.not.kon .and. ichcm_ch(ibuf,ich,'off').ne.0) then
             call logit7ci(0,0,0,0,-108,'bo',0)
+            if(iwait.ne.0) then
+               ipinsnp(3)=-108
+               call char2hol('bo',ipinsnp(4),1,2)
+               ipinsnp(5)=0
+            endif
           else
             if (mbranch.eq.6) then
               kxlog = kon
@@ -657,6 +753,11 @@ C
          ierr=0
         if (rn_test('pfmed')) then
           call logit7ci(0,0,0,0,-171,'bo',0)
+          if(iwait.ne.0) then
+             ipinsnp(3)=-171
+             call char2hol('bo',ipinsnp(4),1,2)
+             ipinsnp(5)=0
+          endif
           goto 600
         endif
         do i=1,20
@@ -671,6 +772,12 @@ C
         call clrcl(iclop2)
         call char2hol('::',ldum,1,2)
         call logit4_ch('*boss terminated',ldum,lprocn)
+        if(iwait.ne.0) then
+           iret=fc_skd_end_insnp('boss ',ipinsnp)
+           if(iret.ne.0) then
+              call clrcl(ipinsnp(1))
+           endif
+        endif
         call fc_rte_sleep( 10)
         return
 C
@@ -738,6 +845,10 @@ C                     The time next scheduled
 C                     Get the buffer in the class
             endif
             call logit4(ibuf,min0(30+nch,iblen*2),lsor2,lprocn)
+            if(iwait.ne.0) then
+           call put_buf(ipinsnp(1),ibuf,-min0(30+nch,iblen*2),'  ','  ')
+           ipinsnp(2)=ipinsnp(2)+1
+            endif
           endif
         enddo
 C
@@ -766,6 +877,11 @@ C
             call rn_put('pfmed')
           else
             call logit7ci(0,0,0,0,-157,'bo',0)
+            if(iwait.ne.0) then
+               ipinsnp(3)=-157
+               call char2hol('bo',ipinsnp(4),1,2)
+               ipinsnp(5)=0
+             endif
           end if
           goto 600
         endif
@@ -776,6 +892,10 @@ C
           ibc(nch:nch+7) = lprc(1:8)
           nch = nch+8
           call logit4(ibuf,nch-1,lsor2,lprocn)
+          if(iwait.ne.0) then
+             call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
+             ipinsnp(2)=ipinsnp(2)+1
+          endif
         else
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
@@ -824,8 +944,13 @@ C
         call hol2char(ilskd,1,8,lskd)
         if (lskd(1:4).eq.'none') then
           call putcon_ch('no schedule currently active')
+          if(iwait.ne.0) then
+          idum=ichmv_ch(ibuf,1,'no schedule currently active')-1
+             call put_buf(ipinsnp(1),idum,-nchar,'  ','  ')
+             ipinsnp(2)=ipinsnp(2)+1
+          endif
         else
-          call lists(idcbsk,ibuf,nchar,icurln)
+          call lists(idcbsk,ibuf,nchar,icurln,iwait,ipinsnp)
         endif
 C
 C     5.17  STATUS Command.
@@ -835,12 +960,17 @@ C
         call hol2char(ilskd,1,8,lskd)
         if (lskd(1:4).eq.'none') then
           call putcon_ch('no schedule currently active')
+          if(iwait.ne.0) then
+          idum=ichmv_ch(ibuf,1,'no schedule currently active')-1
+             call put_buf(ipinsnp(1),ibuf,-idum,'  ','  ')
+             ipinsnp(2)=ipinsnp(2)+1
+          endif
         else
           call fs_get_khalt(khalt)
           call fs_get_lskd(ilskd)
           call hol2char(ilskd,1,8,lskd)
           call stat(ibuf,khalt,kopblk,kskblk,icurln,idcbsk,
-     .         itscb,ntscb,lskd)
+     .         itscb,ntscb,lskd,iwait,ipinsnp)
         endif
 C
 C     5.18  HELP command

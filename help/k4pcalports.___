@@ -14,8 +14,8 @@
           for digital sampling
           ampb     Channel B amplitude in voltage percent, uncorrected
           for digital sampling
-          phasea   Channel A phase in degrees
-          phaseb   Channel B phase in degrees
+            phasea     Channel A phase in degrees
+            phaseb     Channel B phase in degrees
  
  Comments:
  This command is available even if a K4 recorder is not being

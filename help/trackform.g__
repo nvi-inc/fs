@@ -23,12 +23,12 @@
  Comments: 
  The tracks and samplers must appear in pairs. Multiple
  commands are allowed because all of the pairs may not fit on a
- single line. The first trackform command after a form=...
- command resets all the unspecified tracks to 0. This command
- specifies the how the samplers will be assigned in the next
- form=... command that uses either mode m or v. Please note that
- although tracks are specified as recorder tracks, this command
- assigns the samplers to tracks in the formatter.
+ single line. The first trackform command after a form=... command
+ resets all the unspecified tracks to 0. This command specifies
+ the how the samplers will be assigned in the next form=...
+ command that uses either mode m or v. Please note that although
+ tracks are specified as recorder tracks, this command assigns
+ the samplers to tracks in the formatter.
  
  The samplers that can be selected are determined by the rack
  type specified in the equip.ctl control file. For rack type

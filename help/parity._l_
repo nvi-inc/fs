@@ -16,25 +16,24 @@
             channel    Decoder channel. Can be a, b, or ab (default).
             aux        Aux data check, on (default) or off. Not supported
             for VLBA DQA decoder.
-          tracks   List of recorder tracks on which to measure errors.
-          Default is the currently enabled tracks. For Mark
-          III drives, tracks and must be between 1 and 28,
-          and/or may be specified by groups (g1, g2, g3, g4)
-          as in the enable command. For Mark IV, and VLBA/4
-          drives, tracks must be between 0 and 35, or
-          specified by groups (g0, g1, g2, g3) as in the
-          enable command, or specified as non-system tracks in
-          the VLBA groups (v0, v1, v2, v3),or specified as the
-          Mark III  tracks in the VLBA groups (m0, m1, m2,
-          m3).
+            tracks     List of recorder tracks on which to measure errors.
+            Default is the currently enabled tracks. For Mark
+            III drives, tracks and must be between 1 and 28,
+            and/or may be specified by groups (g1, g2, g3, g4)
+            as in the enable command. For Mark IV, and VLBA/4
+            drives, tracks must be between 0 and 35, or
+            specified by groups (g0, g1, g2, g3) as in the
+            enable command, or specified as non-system tracks in
+            the VLBA groups (v0, v1, v2, v3),or specified as the
+            Mark III  tracks in the VLBA groups (m0, m1, m2,
+            m3).
  
  Monitor-only parameters:
                   parity-errors    For each track in the list, the corresponding
                   parity error rates per megabyte of data per
                   track.
-                re-sync-errors For each track in the list, the corresponding
-                re-sync error rates per megabyte of data per
-                track.
+                re-sync-errors For each track in the list, the corresponding re-
+                sync error rates per megabyte of data per track.
  
  Comments:
  Issuing this command with an equal sign without or without a
@@ -95,3 +94,5 @@
  VLBA groups include additional tracks. Note that this command
  uses VLBA, Mark IV, or Mark III track and VLBA or Mark III
  group numbers depending on the type of drive in use.
+ 
+ 

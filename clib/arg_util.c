@@ -104,7 +104,7 @@ int flag;                            /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%d",iptr)) ierr=-200;
-    for(i=strlen(ptr)-1;i>=-1;i--)
+    for(i=strlen(ptr)-1;i>-1;i--)
       if(NULL==strchr("+-0123456789 \t\n",ptr[i])) {
 	ierr=-200;
 	goto end;
@@ -141,7 +141,7 @@ int flag;                          /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%f",fptr)) ierr=-200;
-    for(i=strlen(ptr)-1;i>=-1;i--)
+    for(i=strlen(ptr)-1;i>-1;i--)
       if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
 	ierr=-200;
 	goto end;
@@ -178,7 +178,7 @@ int flag;                          /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%lf",dptr)) ierr=-200;
-    for(i=strlen(ptr)-1;i>=-1;i--)
+    for(i=strlen(ptr)-1;i>-1;i--)
       if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
 	ierr=-200;
 	goto end;
@@ -263,7 +263,7 @@ int flag;                            /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     sscanf(ptr,"%f",&fltarg);
-    for(i=strlen(ptr)-1;i>=-1;i--)
+    for(i=strlen(ptr)-1;i>-1;i--)
       if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
 	goto end;
       }

@@ -7,25 +7,25 @@
  
  
  Settable parameters:
-          freq     Synthesizer frequency in MHz, value must be less
-          than 500.00 MHz. No default.
-            bandwidth  Final filter bandwidth in MHz, default 2. Choices
+            freq       Synthesizer frequency in MHz, value must be less
+            than 500.00 MHz. No default.
+            bandwidth    Final filter bandwidth in MHz, default 2. Choices
             for Mark III are:
-                       0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0 (external
-            filter).
+              0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0 (external
+ filter).
                    Choices for Mark IV are:
-                       0.125, 0.5, 2.0, 4.0, 8.0, 16.0, 0 (external
-            filter).
+              0.125, 0.5, 2.0, 4.0, 8.0, 16.0, 0 (external
+ filter).
                    Value may be integer for bandwidths of 1, 2, 4, 8,
           or 16 MHz.
-          TPIsel   Total power integrator selection. Choices are ul, l,
-          u, if, lo, gr (ground). Default u.
-          attenU   USB attenuator, 0 or 10 db (default) only. 
-          attenL   LSB attenuator, 0 or 10 db (default) only.
+            TPIsel     Total power integrator selection. Choices are ul, l,
+            u, if, lo, gr (ground). Default u.
+            attenU     USB attenuator, 0 or 10 db (default) only. 
+            attenL     LSB attenuator, 0 or 10 db (default) only.
  
  Monitor-only parameters:
-            rem/lcl    switch setting, rem or lcl.
-          LOlock   LO lock/unlock staus, lock or unlock.
+              rem/lcl      switch setting, rem or lcl.
+            LOlock     LO lock/unlock staus, lock or unlock.
           TP       total power reading, decimal.
  
  Comments:

@@ -10,8 +10,8 @@
  Settable parameters:
           mode     Matrix output mode to tape. Choices are a, b, c, d.
           No default.
-          rate     Sample rate in Mbits/sec. Choices are 0.125, 0.25,
-          0.5, 1.0, 2.0, 4.0, 8.0. Default 4.0.
+            rate       Sample rate in Mbits/sec. Choices are 0.125, 0.25,
+            0.5, 1.0, 2.0, 4.0, 8.0. Default 4.0.
             input      Source of data. Choices are nor (default), ext, crc. 
             aux        Auxiliary data, up to 12 hex characters. Default is
             no change. If more than 12 characters are given,
@@ -22,10 +22,10 @@
             synch      Synch test on (default) or off.
  
  Monitor-only parameters:
-          test     synch test fail or ok 
-          sign     synch voltage + or -
-            run/set    switch setting run or set
-            rem/lcl    switch setting, rem or lcl 
+            test       synch test fail or ok 
+            sign       synch voltage + or -
+              run/set      switch setting run or set
+              rem/lcl      switch setting, rem or lcl 
             pwr        power interrupt detected, ok or pwr
             daytime    clock reading in format: ydddhhmmss.ss
  

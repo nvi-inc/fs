@@ -32,6 +32,7 @@ C 990326 nrv Add cversion
 C 990401 nrv Add iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 C 991102 nrv Add kdr_type
 C 020304 nrv Add kmk5_piggyback
+C 020508 nrv Add tpid_prompt,itpid_period,tpid_parm
 C
 	double precision RA50,DEC50
         real rlabsize
@@ -45,7 +46,7 @@ c
      .  irecpr,irbpr,ioffpr,luflop,iwidth,icrty6,
      .  itpos,ilabrow,ilabcol,inewpage,
      .  ibout,luscn,
-     .  ibbclen,nbbcbuf,nchanr,iperm,fileptr
+     .  ibbclen,nbbcbuf,nchanr,iperm,fileptr,itpid_period
 C
         integer*2 ld,itim,itims,ibbcbuf,ibuf,
      .  lbname, iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
@@ -53,7 +54,8 @@ C
 C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
+     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
+     .tpid_prompt,tpid_parm
 c
         character*1 csize
         character*2 coption
@@ -71,7 +73,7 @@ C
      .       IRECPR,IRBPR,IOFFPR,LUFLOP,
      .       IWIDTH,ICRTY6,
      .       ITPOS(500),ilabrow,ilabcol,inewpage,
-     .       IBOUT(40),luscn,
+     .       IBOUT(40),luscn,itpid_period,
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,fileptr,
      .       LD(500),ITIM(6),ITIMS(6),
      .       IBUF(ibuf_len),lbname(4),
@@ -81,7 +83,7 @@ C
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .       cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,csize,
-     .       coption(3),ctextname,cversion
+     .       coption(3),ctextname,cversion,tpid_prompt,tpid_parm
 C
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records

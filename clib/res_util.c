@@ -48,6 +48,11 @@ struct res_buf *buffer;        /* response buffer */
         adv+=2;
         break;
       default:
+	if(response->code >=10) {
+	  response->data=(0xff00 & (*++ptr<<8)) | (0xff & (*++ptr) );
+	  adv+=2;
+	  response->code-=50;	
+	}
         break;
     }
     buffer->ifc+=adv;

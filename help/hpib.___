@@ -8,9 +8,9 @@
  Settable parameters:
           mn       2-character mnemonic of the module to be addressed,
           as found in the ibad.ctl control file.
-          data     complete message to be sent to module, if any.
-          Talk-only modules do not accept data.
+            data       complete message to be sent to module, if any.
+            Talk-only modules do not accept data.
  
  Monitor-only parameters:
-          data     response of module, if any. Listen-only modules do
-          not generate any response. 
+            data       response of module, if any. Listen-only modules do
+            not generate any response. 

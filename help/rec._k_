@@ -6,7 +6,7 @@
  
  
  Settable parameters:
-          action   eject (or unload) to eject the tape
+            action     eject (or unload) to eject the tape
           init (or ini) to initialize recorder
           synch to synchronize INT and EXT 1 PPS
           id maximum seven digit ID point to move tape to
@@ -16,9 +16,9 @@
           synch_off to turn off the synch test
  
  Monitor-only parameters:
-          position sequence number id of the current position
+            position   sequence number id of the current position
           drum     drum status, on or off
- synch_testsynch test status, on or off
+            synch_test synch test status, on or off
             synch      number of times synch was lost
             stat1      status byte 1 in hex
             stat2      status byte 2 in hex

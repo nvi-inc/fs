@@ -7,7 +7,7 @@
  
  Settable parameters:
             channel    Hex value or code word (next page). No default.
-          dcal     Delay cal heater, on (default) or off.
+            dcal       Delay cal heater, on (default) or off.
             box        Box heaters. Turn on with A (default) or B (for the
             A or B controller), or off.
             S,X,K      IF amplifier controls, on (default) or off. 
@@ -16,7 +16,7 @@
             modulation.
  
  Monitor-only parameters:
-          lostat   Status of LO, locked or unlocked.
+            lostat     Status of LO, locked or unlocked.
             value      Reading in A/D channel shown in first parameter.
             Units are appropriate for channel in use.
  
@@ -33,6 +33,7 @@
  
  The mnemonic RX and the receiver's address must be specified
  in matad.ctl control file.
+
              Standard Receiver A/D converter channels
  
  channel  code  Voltage         Description

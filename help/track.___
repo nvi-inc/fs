@@ -18,23 +18,23 @@
           angle
           cmd2     second antenna command angle, y, elevation, or
           declination
-          delta1   tracking error for first command angle
-          delta2   tracking error for second command angle
+            delta1     tracking error for first command angle
+            delta2     tracking error for second command angle
  
  The pr line contains predicted command angles based on time in
  tr line (all angles are in degrees):
-          prd1     predicted first command angle
-          prd2     predicted second command angle
-          praz     predicted azimuth
-          prel     predicted elevation
+            prd1       predicted first command angle
+            prd2       predicted second command angle
+            praz       predicted azimuth
+            prel       predicted elevation
  
  The co line contains calculated correction information (all
  angles are in degrees):
-          cor1     pointing correction for first command angle
-          cor2     pointing correction for second command angle
+            cor1       pointing correction for first command angle
+            cor2       pointing correction for second command angle
           eqeq     approximate Equation of the Equinoxes, seconds of
           time
-          refr     refraction correction
+            refr       refraction correction
  
  Comments: 
  This command is implemented as a special mode of antcn, which

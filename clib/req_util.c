@@ -29,9 +29,10 @@ struct req_rec *request;
                                 /* getting out of control here */
 
      type=request->type;
-     if( type<0 || ( type> (sizeof(tbytes)/sizeof(int)) ) ) type=0;
+     if(type!=21 &&
+	( type<0 || ( type> (sizeof(tbytes)/sizeof(int)) ) )) type=0;
 
-     if(buffer->nchars+tbytes[ type]>REQ_BUF_MAX) {
+     if(buffer->nchars+tbytes[ type%20]>REQ_BUF_MAX) {
        cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
@@ -39,8 +40,8 @@ struct req_rec *request;
 
      ptr=&buffer->buf[buffer->nchars];
 
-     if(type!=6) 
-       switch (tbytes[ type]) {
+     if((type%20)!=6) 
+       switch (tbytes[ type%20]) {
          case 7:
             ptr[6]=0xff & request->data;      /* CDL */
             ptr[5]=0xff & (request->data>>8); /* CDH */
@@ -60,7 +61,7 @@ struct req_rec *request;
      ptr[0]=0xff & request->type;            /* request type */
                                              /* (possibly bad type) */
      
-     buffer->nchars+=tbytes[ type];
+     buffer->nchars+=tbytes[ type%20];
 
      return;
 }

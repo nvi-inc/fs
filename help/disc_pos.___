@@ -2,7 +2,7 @@
  
               Syntax:      disc_pos
  
-              Response:    disc_pos/write_pointer,read_pointer
+              Response:    disc_pos/write_pointer, read_pointer
  
  
  Monitor-only parameters:

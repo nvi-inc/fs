@@ -6,19 +6,20 @@
  
  
  Settable parameters:
-          bypass   byp (default) for bypass, raw for read-after-write.
-          trackA   Track for decoder channel A, default 1; 0-28
-          allowed.
-          trackB   Track for decoder channel B, default 1; 0-28
-          allowed.
+            bypass     byp (default) for bypass, raw for
+            read-after-write.
+            trackA     Track for decoder channel A, default 1; 0-28
+            allowed.
+            trackB     Track for decoder channel B, default 1; 0-28
+            allowed.
             bandwidth  Bandwidth for decoding , MHz, default 2; 0.0625,
             0.125, 0.25, 0.5, 1, 2, and 4 MHz allowed or actual
             tape speed 4.21875, 8.4375, 16.875, 33.75, 67.5,
             135, and 270 ips allowed
-            equalizer  Equalizer for reproduce, MHz, defaults to bandwidth;
-            0.0625, 0.125, 0.25, 0.5, 1, 2, and 4 MHz allowed or
-            actual tape speed 4.21875, 8.4375, 16.875, 33.75,
-            67.5, 135, and 270 ips allowed 
+              equalizer    Equalizer for reproduce, MHz, defaults to bandwidth;
+              0.0625, 0.125, 0.25, 0.5, 1, 2, and 4 MHz allowed or
+              actual tape speed 4.21875, 8.4375, 16.875, 33.75,
+              67.5, 135, and 270 ips allowed 
  
  Monitor-only parameters: none
  

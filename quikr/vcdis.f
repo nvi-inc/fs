@@ -113,6 +113,7 @@ c
          call fs_get_extbwvc(extbwvc)
          extbw=extbwvc(ivcn)
       endif
+      call fs_get_itpivc(itpivc)
       itp = itpivc(ivcn)
       iatu = iatuvc(ivcn) 
       iatl = iatlvc(ivcn) 

@@ -6,18 +6,17 @@
  
  
  Settable parameters:
-            list       list of VLBA or Mark IV recorder tracks for which
-            to enable the corresponding formatter tracks. The
-            tracks may specified as values of 2 33, as the
-            VLBA "groups" of tracks not including the system
-            tracks, v0, v1, v2, v3, or as the Mark III tracks
-            in with the corresponding VLBA "groups", m0, m1,
-            m2, m3. For Mark IV stack 2  tracks add 100 to the
-            track number and use groups v4, v5, v6, v7 and m4,
-            m5, m6, m7.  For Mark IV/VLBA4/K4MK4 racks only
-            (i.e., all except VLBA), the first parameter may
-            be an asterisk, "*", to add to previously enabled
-            tracks.
+            list       list of VLBA or Mark IV recorder tracks for which to
+            enable the corresponding formatter tracks. The
+            tracks may specified as values of 2 33, as the VLBA
+            "groups" of tracks not including the system tracks,
+            v0, v1, v2, v3, or as the Mark III tracks in with the
+            corresponding VLBA "groups", m0, m1, m2, m3. For
+            Mark IV stack 2  tracks add 100 to the track number
+            and use groups v4, v5, v6, v7 and m4, m5, m6, m7. 
+            For Mark IV/VLBA4/K4MK4 racks only (i.e., all except
+            VLBA), the first parameter may be an asterisk, "*",
+            to add to previously enabled tracks.
  
  Comments: 
  This command specifies which formatter tracks will be enabled

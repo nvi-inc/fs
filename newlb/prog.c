@@ -2077,3 +2077,30 @@ void fs_get_imk4fmv__(imk4fmv)
         {
           *imk4fmv = shm_addr->imk4fmv;
         }
+void fs_set_itpivc__(itpivc)
+	int *itpivc;
+	{
+          size_t N;
+	  N = sizeof(shm_addr->ITPIVC);
+	  memcpy(shm_addr->ITPIVC,itpivc,N);
+	}
+
+void fs_get_itpivc__(itpivc)
+	int *itpivc;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->ITPIVC);
+	  memcpy(itpivc,shm_addr->ITPIVC,N);
+	}
+
+void fs_set_iapdflg__(iapdflg)
+	int *iapdflg;
+	{
+	  shm_addr->iapdflg = *iapdflg;
+	}
+
+void fs_get_iapdflg__(iapdflg)
+        int *iapdflg;
+        {
+          *iapdflg = shm_addr->iapdflg;
+        }

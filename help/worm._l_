@@ -20,10 +20,10 @@
             speed in use.
  
  Monitor-only parameters:
-          fo       Fast out speed.
+            fo         Fast out speed.
           so       Slow out speed.
-          fi       Fast in  speed.
-          si       Slow in  speed.
+            fi         Fast in  speed.
+            si         Slow in  speed.
  
  Comments: 
  This command measures the inchworm speeds. It must be issued

@@ -7,7 +7,8 @@
      .                 csked,csnap,cproc,
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
      .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
-     .                 dr_rack_type,dr_reca_type,dr_recb_type)
+     .                 dr_rack_type,dr_reca_type,dr_recb_type,
+     .                 tpid_prompt,itpid_period,tpid_parm)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -35,6 +36,7 @@ C 991101 nrv Add EQUIPMENT line
 C 991117 nrv Add cat_program_path
 C 991211 nrv Add check against max_rec2_type.
 C 000326 nrv Add par_program_path.
+C 020508 nrv Add TPI daemon controls for drudg.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -46,12 +48,13 @@ C
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
-     .               cprtlan,cprtpor,cprttyp,cprport,clabtyp
+     .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
+     .               tpid_prompt,tpid_parm
       character*4 cepoch
       character*8 dr_rack_type,dr_reca_type,dr_recb_type
       real rlabsize(6)
       character*2 coption(3)
-      integer luscn
+      integer luscn,itpid_period
 C
 C  LOCAL VARIABLES
       integer itmplen     !variable for filename length
@@ -382,10 +385,35 @@ C         EQUIPMENT
                   enddo
                   if (i.le.max_rec_type) dr_recb_type = ctemp
                 endif ! equipment line
+
+C         TPICD
+                if (ichcm_ch(ltmpnam,1,'TPICD').eq.0) then ! TPICD line
+                  call hol2char(ibuf,ic1,ic2,ctemp) ! prompt yes/no
+                  call c2upper(ctemp,ctmp2)
+                  if (ctmp2.eq."YES".or.ctmp2.eq."NO") then
+                    tpid_prompt = ctmp2
+                  else
+                    write(luscn,'("RDCTL10 ERROR: TPI prompt ",
+     .              "must be YES or NO")')
+                  endif
+                  call gtfld(ibuf,ich,ilen,ic1,ic2)
+                  ic = ias2b(ibuf,ic1,ic2-ic1+1)
+                  if (ic.ge.0) then 
+                    itpid_period = ic
+                  else
+                    write(luscn,'("RDCTL11 ERROR: Invalid TPI period "
+     .              )')
+                  endif 
+C Temporarily remove reading parameter from the control file.
+C                 call gtfld(ibuf,ich,ilen,ic1,ic2)
+C                 if (ic1.gt.0) then
+C                   call hol2char(ibuf,ic1,ic2,ctemp) ! param
+C                   tpid_parm = ctemp
+C                 endif
+                endif ! TPICD line
                 call ifill(ibuf,1,ibuf_len*2,oblank)
                 call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
               enddo
-
             else ! unrecognized
               write(luscn,9220) isecname
 9220          format("RDCTL07 ERROR: Unrecognized section name ",5A2)

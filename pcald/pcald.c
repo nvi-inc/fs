@@ -90,7 +90,7 @@ main()
     for(i=0;i<32;i++) {
       for (j=0;j<pcald.count[i/16][i%16];j++) {
 
-/* if I have to wait for anything I always use skd_wait
+/* if I have to wait for anything I always use skd_wait()
  * the last argument is the number of centiseconds to wait 
  * the wait can be longer than 1 second, because skd_wait() will return
  * immediately if something happens
@@ -108,18 +108,16 @@ main()
 	}
 
 /* an alternative way to check for something to do is to skd_chk()
- * this good when you are doing a lot of processing and need to
+ * this is good when you are doing a lot of processing and need to
  * surface for air, remember never more than 1 second of clock time
  * without checking
  */
 
-	for (l;l<50000;l++){
-	  if(skd_chk("pcald",ip)) {
+	if(skd_chk("pcald",ip)) {
 #ifdef TESTX
-	    printf("some one woke me 2 l=%d\n",l);
+	  printf("some one woke me 2 l=%d\n",l);
 #endif
-	    goto wakeup_block;
-	  }
+	  goto wakeup_block;
 	}
 	if(pcald.freqs[i/16][i%16][j]<0.0) {
 	  sprintf(buff,"states/%s,%d,%d,0,0",chd_key[i],pcald.integration,

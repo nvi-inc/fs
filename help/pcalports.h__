@@ -8,8 +8,8 @@
  Settable parameters:
             PORTx      VC for the first pcal output port, one of 1, 2, 3,
             4, 9, 10, 11, or 12. No default.
-            PORTy      VC for the second pcal output port, one of 5, 6, 7,
-            8, 13, 14, 15, or 16. No default.
+            PORTy      VC for the second pcal output port, one of 5, 6,
+            7, 8, 13, 14, 15, or 16. No default.
  
  Comments: 
  This command selects which VCs have their output placed on the

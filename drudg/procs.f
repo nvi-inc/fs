@@ -215,6 +215,8 @@ C 020304 nrv Mk5 piggyback mode.
 C 020320 nrv Add "*" in front of second TRACKS line for piggyback.
 C 020327 nrv Add ":1" for roll on VLBA racks if it's not there.
 C 020327 nrv Check data modulation and insert "ON" if on.
+C 020508 nrv Add TPI daemon commands.
+C 020510 nrv Add tpi sideband to VC commands.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -224,11 +226,13 @@ C LOCAL VARIABLES:
       integer*2 lpmode(2) ! mode for procedure names
       integer*2 linp(max_chan) ! IF input local variable
       LOGICAL KUS ! true if our station is listed for a procedure
+      logical ku,kl,kul,kux,klx
+      integer ichanx,ibx,icx
       logical krec_2rec ! true to append '1' or '2' to rec commands
 C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,nchx,
      .ilen,ich,ic1,ic2,ibuflen,itrk(max_track,max_headstack),
-     .ig,ig0,ig1,ig2,ig3,irecbw,irec,ir,idef,
+     .ig,ig0,ig1,ig2,ig3,irecbw,irec,ir,idef,ival,
      .im0,im1,im2,im3,igotbbc(max_bbc),itrkrate,
      .npmode,itrk2(max_track,max_headstack),itype,ipig,
      .isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs,vc3_patch,vc10_patch
@@ -336,6 +340,22 @@ C
         close(lu_outfile,status='delete')
       end if
 C
+      if (tpid_prompt.eq."YES") then ! get TPID period
+9932    kdone = .false.
+        do while (.not.kdone)
+          write(luscn,9132) itpid_period
+9132      format(' Enter TPI daemon period in centiseconds (default is',
+     .    i5,'):  ',$)
+          read(luusr,'(i10)',ERR=9932) ival
+          if (ival.ge.0) then
+            itpid_period = ival
+            kdone = .true.
+          else 
+            write(luscn,'("Invalid period, must be >0.")')
+          endif
+        enddo
+      endif ! get TPID period
+
       WRITE(LUSCN,9113) PRCNAME(1:IC), (LSTNNA(I,ISTN),I=1,4)
 9113  FORMAT(' PROCEDURE LIBRARY FILE ',A,' FOR ',4A2)
       write(luscn,9114) 
@@ -508,6 +528,10 @@ C  PCALD=STOP
               nch = ichmv_ch(IBUF,1,'pcald=stop')
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
+C  TPICD=STOP
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(IBUF,1,'tpicd=stop')
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  TAPEFffm
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'TAPEF')
@@ -920,6 +944,10 @@ C  IFDff
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif ! kvrack or km3rac.or.km4rackk
+C  TPICD=
+          call ifill(ibuf,1,ibuflen,oblank)
+          nch = ichmv_ch(IBUF,1,'tpicd=')
+          CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  PCALD=
           if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -1062,6 +1090,19 @@ C  !*
      .    .not.kk41rec(irec).and..not.kk42rec(irec)) then ! wait mark for formatter reset
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!*')
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+          endif
+C  TPICD=
+          if (km3rack.or.km4rack.or.kvrack.or.kv4rack) then
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(IBUF,1,'tpicd=no,')
+            nch = nch + ib2as(itpid_period,ibuf,nch,Z8000+10)
+C temporarily remove reading and writing out parameter.
+C           ic = trimlen(tpid_parm)
+C           if (ic.gt.0) then
+C             nch = MCOMA(IBUF,nch)
+C             nch = ichmv_ch(ibuf,nch,tpid_parm(1:ic))
+C           endif
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C  BIT_DENSITY=
@@ -1278,7 +1319,8 @@ c... end 2-head
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
           endif
-C REPRO=byp,itrka,itrkb,equalizer,bitrate
+C REPRO=byp,itrka,itrkb,equalizer,bitrate   Mk3/4
+C REPRO=byp,itrka,itrkb,equalizer,,,bitrate   VLBA,VLBA4
           if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
      .      km4rec(irec).and..not.ks2rec(irec)) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -1288,16 +1330,21 @@ C REPRO=byp,itrka,itrkb,equalizer,bitrate
             nch = nch+ib2as(itrka,ibuf,nch,Z8000+2)
             nch = MCOMA(IBUF,nch)
             nch = nch+ib2as(itrkb,ibuf,nch,Z8000+2)
-            if (km4rec(irec).or.kv4rec(irec).and.
-     .             samprate(icode).gt.2.0) then ! add bitrate
-              nch = MCOMA(IBUF,nch)
-              nch = MCOMA(IBUF,nch) ! default equalizer
+            if (km4rec(irec).or.kv4rec(irec).or.kvrec(irec)) then ! bitrate
               if (ifan(istn,icode).gt.0) then
                 itrkrate = samprate(icode)/ifan(istn,icode)
               else
                 itrkrate = samprate(icode)
               endif
-              nch = nch+ib2as(itrkrate,ibuf,nch,Z8000+2)
+              if (itrkrate.ne.4) then 
+                nch = MCOMA(IBUF,nch)
+                nch = MCOMA(IBUF,nch) 
+                if (kv4rec(irec).or.kvrec(irec)) then ! 7th parameter
+                  nch = MCOMA(IBUF,nch)
+                  nch = MCOMA(IBUF,nch) 
+                endif
+                nch = nch+ib2as(itrkrate,ibuf,nch,Z8000+2)
+              endif 
             endif ! add bitrate
 C           spd = 12.0*speed(icode,istn)
 C           call spdstr(spd,lspd,nspd)
@@ -1391,7 +1438,7 @@ C Now continue with procedures that are code-based only.
 
 C 3. Write out the baseband converter frequency procedure.
 C Name is VCffb or BBCffb      (ff=code,b=bandwidth)
-C Contents: VCnn=freq,bw or BBCnn=freq,if,bw,bw
+C Contents: VCnn=freq,bw,tpisel or BBCnn=freq,if,bw,bw
 C For K4 VCs the content of this procedure will vary depending
 C on the type of recorder, so two procedures may be necessary
 C if the two recorders are different.
@@ -1613,6 +1660,26 @@ C               Converter bandwidth
                     NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,
      .                  NCH,6,3)
                   endif
+                endif
+C               TPI selection
+                if (km3rack.or.km4rack) then 
+                  NCH = MCOMA(IBUF,NCH)
+C                 itras(sideband,bit,head,channel,subpass,station,code)
+                  ku = itras(1,1,1,ic,1,istn,icode).ne.-99
+                  kl = itras(2,1,1,ic,1,istn,icode).ne.-99
+C                 Find other channels that this BBC goes to.
+                  DO ichanx=ic,nchan(istn,icode) !remaining channels
+                    icx=invcx(ichanx,istn,icode) ! channel number
+                    ibx=ibbcx(icx,istn,icode) ! BBC number
+                    if (ibx.eq.ib) then ! same BBC
+                      kux = itras(1,1,1,icx,1,istn,icode).ne.-99
+                      klx = itras(2,1,1,icx,1,istn,icode).ne.-99
+                      kul = ku.and.klx .or. kux.and.kl
+                    endif
+                  enddo
+                  if (ku.and..not.kul) nch = ichmv_ch(ibuf,nch,'u')
+                  if (kl.and..not.kul) nch = ichmv_ch(ibuf,nch,'l')
+                  if (kul) nch = ichmv_ch(ibuf,nch,'ul')
                 endif
                 if (kvrack.or.kv4rack) then
                   NCH = MCOMA(IBUF,NCH)
