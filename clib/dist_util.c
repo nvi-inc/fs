@@ -9,11 +9,13 @@
                                              /* parameter keywords */
 static char *key_att[ ]={ "0", "20" };
 static char *key_inp[ ]={ "nor", "ext" };
+static char *key_inp1[ ]={ "nor", "alt" };
 static char *key_avg[ ]={ "0","1","2","4","10","20","40","60"};
 
                                             /* number of elem. keyword arrays */
 #define NKEY_ATT sizeof(key_att)/sizeof( char *)
 #define NKEY_INP sizeof(key_inp)/sizeof( char *)
+#define NKEY_INP1 sizeof(key_inp1)/sizeof( char *)
 #define NKEY_AVG sizeof(key_avg)/sizeof( char *)
 
 int dist_dec(lcl,count,ptr)
@@ -41,6 +43,8 @@ char *ptr;
       case 4:
         ind=*count-3;
         ierr=arg_key(ptr,key_inp,NKEY_INP,&lcl->input[ind],0,TRUE);
+	if(ierr!=0)
+	  ierr=arg_key(ptr,key_inp1,NKEY_INP1,&lcl->input[ind],0,TRUE);
         break;
       case 5:
         ierr=arg_key(ptr,key_avg,NKEY_AVG,&lcl->avper,1,TRUE);
