@@ -18,8 +18,8 @@ struct onoff_cmd {
     float tcal;        /* cal temperature */
     float dpfu;         /* degrees per flux unit (gain) */
     float gain;        /* gain curve, maximum=1.0 */
-  } devices[32];
-  int itpis[32];        /* control array for which devices */
+  } devices[38];
+  int itpis[38];        /* control array for which devices */
   float fwhm;        /* FWHM for detector with the widest beam */
   int stop_request;     /* stop request issued? */
   int setup;            /* have we been set-up */

@@ -20,7 +20,7 @@ void wcounts(label,azoff,eloff,onoff,accum)
 
   kfirst=TRUE;
 
-  for(i=0;i<MAX_DET;i++) {
+  for(i=0;i<MAX_ONOFF_DET;i++) {
     if(onoff->itpis[i]==0)
       continue;
 

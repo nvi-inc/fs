@@ -24,15 +24,16 @@ int *ilen;
     return;
 }
 
-void fc_tsys_norack__(itpis_norack,ibuf,nch,caltmp)
+void fc_tsys_norack__(ip,itpis_norack,ibuf,nch,itask)
+long ip[5];
 int itpis_norack[2];
 char *ibuf;
 int *nch;
-float *caltmp;
+int *itask;
 {
     void tsys_norack();
 
-    tsys_norack(itpis_norack,ibuf,nch,*caltmp);
+    tsys_norack(ip,itpis_norack,ibuf,nch,*itask);
 
     return;
 }

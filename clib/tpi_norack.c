@@ -46,7 +46,7 @@ int *nch;                /* next available char index in ibuf on entry */
 int ilen;                /* number of characters ibuf can hold, ignored */
 {
     long *ptr;
-    int i;
+    int i, iclass, nrec, lenstart;
 
     switch (isub) {                        /* set the pointer for the type */
        case 3: ptr=shm_addr->tpi; break;
@@ -57,68 +57,130 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 
     ibuf[*nch-1]='\0';              /* NULL terminate to make STRING */
 
+    ibuf[*nch-1]='\0';              /* NULL terminate to make STRING */
+    lenstart=strlen(ibuf);
+    iclass=0;
+    nrec=0;
     if(itpis_norack[0]==1) {
-      ptr[0]=shm_addr->user_dev1_value;
+      ptr[0]=shm_addr->user_dev1_value+0.5;
+      strcat(ibuf,"u5,");
       if(ptr[0] > 65534 ) {
 	strcat(ibuf,"$$$$$,");
       } else {
 	uns2str(ibuf,ptr[0],5);
 	strcat(ibuf,",");
       }
+      cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
+      nrec=nrec+1;
+      ibuf[lenstart]=0;
+
       if(itpis_norack[1]==1) {
-	ptr[1]=shm_addr->user_dev2_value;
+	ptr[1]=shm_addr->user_dev2_value+0.5;
+	strcat(ibuf,"u6,");
 	if(ptr[1] > 65534 ) {
 	  strcat(ibuf,"$$$$$,");
 	} else {
 	  uns2str(ibuf,ptr[1],5);
 	  strcat(ibuf,",");
 	}
+      cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
+      nrec=nrec+1;
+      ibuf[lenstart]=0;  
       }
     } else if(itpis_norack[1]==1) {
-      ptr[1]=shm_addr->user_dev1_value;
+      ptr[1]=shm_addr->user_dev1_value+0.5;
+      strcat(ibuf,"u6,");
       if(ptr[1] > 65534 ) {
 	strcat(ibuf,"$$$$$,");
       } else {
 	uns2str(ibuf,ptr[1],5);
 	strcat(ibuf,",");
       }
+      cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
+      nrec=nrec+1;
+      ibuf[lenstart]=0;
     }
 
-    *nch=strlen(ibuf)-1;         /* update nch counting from 1 */
-                                 /* but delete the last comma */
-         
+    ip[0]=iclass;
+    ip[1]=nrec;
     ip[2]=0;
     return;
+
 }
 
-void tsys_norack(itpis_norack,ibuf,nch,caltmp)
+void tsys_norack(ip,itpis_norack,ibuf,nch,itask)
+long ip[5];
 int itpis_norack[2]; /* device selection array, see tpi_norack for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
-float caltmp;
+int itask;
 {
-       int i, inext;
-       float tpi,tpic,tpiz;
-
+       int i, inext, lenstart, iclass,nrec;
+       float tpi,tpic,tpiz,tpid;
        ibuf[*nch-1]='\0';                 /* null terminate so a STRING */
        for (i=0;i<2;i++) {
          if(itpis_norack[ i] == 1) {
-           tpi=shm_addr->tpi[ i];             /* various pieces */
-           tpic=shm_addr->tpical[ i];
-           tpiz=shm_addr->tpizero[ i];        /* avoid overflow | div-by-0 */
-           if(fabs((double)(tpic-tpi))<0.5 || tpic > 65534 || tpi > 65534)
-             shm_addr->systmp[ i]=1e9;
-           else
-             shm_addr->systmp[ i]=(tpi-tpiz)*caltmp/(tpic-tpi);
-	   inext=strlen(ibuf);
-           flt2str(ibuf,shm_addr->systmp[ i],8,1);
-	   if(ibuf[inext]=='$' || ibuf[inext]=='-')
-	     logita(NULL,-211,"qk",lwhat[i]);
-           strcat(ibuf,",");
-         }
+	   if(itask==5) {
+	     tpi=shm_addr->tpi[ i];             /* various pieces */
+	     tpic=shm_addr->tpical[ i];
+	     tpiz=shm_addr->tpizero[ i];
+	     tpid=shm_addr->tpidiff[ i];
+	     /* avoid overflow | div-by-0 */
+	     if(tpid<0.5 || tpid > 65534.5 || tpi > 65534.5 || tpi < 0.5)
+	       shm_addr->systmp[ i]=1e9;
+	     else
+	       shm_addr->systmp[ i]=(tpi-tpiz)*shm_addr->caltemps[ i]/tpid;
+	     if(shm_addr->systmp[ i]>999999.95 || shm_addr->systmp[ i] <0.0)
+	       logita(NULL,-211,"qk",lwhat[i]);
+	   } else if(itask==6) {
+	     shm_addr->tpidiff[i]=shm_addr->tpical[i]-shm_addr->tpi[i];
+	     if(shm_addr->tpical[i]>65534.5||
+		shm_addr->tpical[i]<0.5||
+		shm_addr->tpi[i]>65534.5||
+		shm_addr->tpi[i]<0.5)
+	       shm_addr->tpidiff[i]=65535;
+	   } else if(itask==10) {
+	     int ierr;
+	     float fwhm, epoch, dum;
+	     epoch=-1.0;
+	     get_tcal_fwhm(lwhat[i],&shm_addr->caltemps[i],&fwhm,
+			   epoch,&dum, &dum,&dum,&ierr);
+	   }
+	 }
        }
 
-       *nch=strlen(ibuf)-1;                   /* delete final comma */
+       ibuf[*nch-1]='\0';              /* NULL terminate to make STRING */
+       lenstart=strlen(ibuf);
+       iclass=0;
+       nrec=0;
+       for(i=0;i<2;i++) {
+	 if(itpis_norack[i]!=0) {
+	   if(strlen(ibuf)>60) {
+	     cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
+	     nrec=nrec+1;
+	     ibuf[lenstart]=0;
+	   }
+	   strcat(ibuf,lwhat[i]);
+	   strcat(ibuf,",");
+	   if(itask==5) 
+	     flt2str(ibuf,shm_addr->systmp[ i],8,1);
+	   else if(itask==6) {
+	     int2str(ibuf,shm_addr->tpidiff[i],5);
+	   } else if(itask==10) 
+	     flt2str(ibuf,shm_addr->caltemps[ i],8,3);
+	   strcat(ibuf,",");
+	 }
+	 if(ibuf[lenstart]!=0) {
+	   cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
+	   nrec=nrec+1;
+	   ibuf[lenstart]=0;
+	 }
+       }
+
+       ip[0]=iclass;
+       ip[1]=nrec;
+       ip[2]=0;
        return;
+
 }

@@ -139,7 +139,7 @@ C                     Get the command part of the response set up
         return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)
-        if(ip(3).lt.0) return
+        return
       endif
       call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec = 1

@@ -10,20 +10,33 @@ extern struct fscom *shm_addr;
 
 int get_samples(ip,itpis,intg,rut,accum,ierr)
      long ip[5];
-     int itpis[MAX_DET], intg, *ierr;
+     int itpis[MAX_ONOFF_DET], intg, *ierr;
      float rut;
      struct sample *accum;
 {
   float tpi[MAX_DET],stm;
      struct sample sample;
-  int i,j,it[6], iti[6], itim;
+  int i,j,it[6], iti[6], itim,non_station,kst1,kst2,station;
 
   if(brk_chk("onoff")!=0) {
     *ierr=-1;
     return -1;
   }
 
-  rte_sleep(101);
+  non_station=FALSE;
+  for(i=0;i<MAX_DET;i++)
+    if(itpis[i]!=0) {
+      non_station=TRUE;
+      break;
+    }
+
+  kst1=itpis[MAX_DET+4];
+  kst2=itpis[MAX_DET+5];
+  station=kst1||kst2;
+  
+  if(non_station) {
+    rte_sleep(101);
+  }
   rte_time(iti,iti+5);
 
   ini_accum(itpis,accum);
@@ -32,12 +45,14 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
       *ierr=-1;
       return -1;
     }
-    rte_time(it,it+5);
-    itim=(it[1]-iti[1])*100+it[0]-iti[0]+101;
-    if (itim<0)
-      itim=itim+6000;
-    if(itim>0)
-      rte_sleep(itim);
+    if(non_station) {
+      rte_time(it,it+5);
+      itim=(it[1]-iti[1])*100+it[0]-iti[0]+101;
+      if (itim<0)
+	itim=itim+6000;
+      if(itim>0)
+	rte_sleep(itim);
+    }
 
     if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
       if(tpi_mark(ip,itpis,ierr))
@@ -60,6 +75,19 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
 	*ierr=-16;
 	return -1;
       }
+    }
+    if(station) {
+      if(kst1)
+	memcpy(shm_addr->user_dev1_name,"u5",2);
+      else
+	memcpy(shm_addr->user_dev1_name,"  ",2);
+      if(kst2)
+	memcpy(shm_addr->user_dev2_name,"u6",2);
+      else
+	memcpy(shm_addr->user_dev2_name,"  ",2);
+
+      if(antcn(8,ierr))
+	return -1;
     }
 
     rte_time(iti,iti+5);
@@ -88,7 +116,14 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
 	  sample.avg[j]=tpi[j];
 	}
     }
-      sample.stm=stm-rut;
+    if(station) {
+      if(kst1)
+	sample.avg[MAX_DET+4]=shm_addr->user_dev1_value;
+      if(kst2)
+	sample.avg[MAX_DET+5]=shm_addr->user_dev2_value;
+    }
+
+    sample.stm=stm-rut;
 
     inc_accum(itpis,accum,&sample);
   }

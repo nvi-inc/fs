@@ -53,7 +53,7 @@ long ip[5];                           /* ipc parameters */
 	  goto error;
 	}
 	set=FALSE;
-	for (i=0;i<MAX_DET;i++) {
+	for (i=0;i<MAX_ONOFF_DET;i++) {
 	  set= set ||(lcl.itpis[i]!=0);
 	}
 	if(!set) {
@@ -282,6 +282,35 @@ long ip[5];                           /* ipc parameters */
 	    }
 	  }
 	}
+	/* user devices */
+	for (i=MAX_DET;i<MAX_ONOFF_DET;i++)
+	    if(lcl.itpis[i]!=0) {
+	      lcl.devices[i].ifchain=i-MAX_DET+1;
+	      lcl.devices[i].lwhat[0]='u';
+	      lcl.devices[i].lwhat[1]=hex[i-MAX_DET+1];
+	      lcl.devices[i].center=
+		shm_addr->user_device.center[lcl.devices[i].ifchain-1];
+	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-1]) {
+	      case 1:
+		lcl.devices[i].center=
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  +lcl.devices[i].center;
+		break;
+	      case 2:
+		lcl.devices[i].center=
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  -lcl.devices[i].center;
+		break;
+	      default:
+		printf(" user device sideband %d ifchain %d \n",
+		      shm_addr->user_device.sideband[lcl.devices[i].ifchain-1],
+		       lcl.devices[i].ifchain);
+		ierr=-302;
+		goto error;
+		break;
+	      }
+	    }
+
 	memcpy(lsorna,shm_addr->lsorna,sizeof(lsorna)-1);
 	lsorna[sizeof(lsorna)-1]=0;
 	for(j=0;j<sizeof(lsorna)-1;j++)
@@ -292,9 +321,16 @@ long ip[5];                           /* ipc parameters */
 	rte_time(it,it+5);
 	epoch=((float) it[5])+((float) it[4])/366.;
 	lcl.ssize=0.0;
-	for(i=0;i<MAX_DET;i++) {
+	for(i=0;i<MAX_ONOFF_DET;i++) {
 	  if(lcl.itpis[i]!=0) {
-	    switch(shm_addr->lo.pol[lcl.devices[i].ifchain-1]) {
+	    int pol,ifchain;
+	    ifchain=lcl.devices[i].ifchain;
+	    if(1 <= ifchain && ifchain <= 4) {
+	      pol=shm_addr->lo.pol[ifchain-1];
+	    } else if (5 <= ifchain && ifchain <= 6) {
+	      pol=shm_addr->user_device.pol[ifchain-1];
+	    } 
+	    switch(pol) {
 	    case 1:
 	      lcl.devices[i].pol='r';
 	      break;
