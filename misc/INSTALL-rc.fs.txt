@@ -1,3 +1,5 @@
+NOTE: For Debian "woody" distributions ONLY.
+
 To install rc.fs to allocate fs and st resources at boot time.
 
     log in as root
