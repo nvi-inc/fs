@@ -612,6 +612,14 @@ C
         idum=ichmv_ch(ibuf,1,"sched_initi")
         nchar=idum-1
         idum=ichmv_ch(lsor,1,"::")
+c
+c this code after the loop termination had to be added to keep things okay
+c
+        mbranch = 0
+        if (.not.kts) call clrcl(iclass)
+        if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
+        ierr = 0
+c
         goto 320
 C
 C     5.6 Commands which set switches (XLOG,ECHO,XDISP)
@@ -905,6 +913,8 @@ C     now, unless this is a time-scheduled command (KTS TRUE).
 C     Cancel this time-scheduled command if it is the last time for it
 C     (KTS TRUE and KLAST TRUE).
 C     Return to time-scheduling check before suspending.
+C
+C if something is change here you must do it parallel for sched_init
 C
 600   continue
       if (.not.kts) call clrcl(iclass)
