@@ -42,6 +42,7 @@ C 970304 nrv Add COPTION for defaults
 C 970312 nrv Add call to READ_SNAP1 to read first line in freefield
 C 970313 nrv Compute itearl_local with full d/h/m/s instead of just seconds
 C 970313 nrv Revise footage counts to correctly handle adaptive early start.
+C 970402 nrv Add a check so that IDUR is not re-calculated upon POSTOB.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -153,6 +154,7 @@ C 4. Loop over SNAP file records
       npage = 0
       iline = maxline
       cday = '   '
+      idur=-1
       ifeet = 0
       inewp = 0
       cnewtap = 'XXX'
@@ -268,6 +270,7 @@ C             isr=is2
 C             ket = .false.
 C           endif
             ifdur_save=0
+            idur=-1
           endif ! output a line
 C       Now get the source info for the new scan 
           ns = index(cbuf,',')-1
@@ -385,35 +388,36 @@ C           Restart the running time clock
      .           index(cbuf(1:6),'POSTOB').ne.0) then ! data stop time
           read(cti,'(i3,3i2)') id2,ih2,im2,is2
           if (index(cbuf(1:2),'ET').ne.0) krunning = .false. 
-C           ket=.true.
-          idur = isecdif(id2,ih2,im2,is2,idr,ihr,imr,isr)
-          idm = idur/60
-          ids = idur - idm*60
-C         Update running time
-          idr=id2
-          ihr=ih2
-          imr=im2
-          isr=is2
-C         Update footage with timing
-          if (ks2) then
-            ifeet = ifeet + idur ! seconds
-          else
-            ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
+          if (idur.eq.-1) then ! no dur computed yet for this scan
+            idur = isecdif(id2,ih2,im2,is2,idr,ihr,imr,isr)
+            idm = idur/60
+            ids = idur - idm*60
+C           Update running time
+            idr=id2
+            ihr=ih2
+            imr=im2
+            isr=is2
+C           Update footage with timing
+            if (ks2) then
+              ifeet = ifeet + idur ! seconds
+            else
+              ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
+            endif
           endif
 
         else if (index(cbuf,'FAST').ne.0) then !add spin feet
           nm = index(cbuf,'M')
           if (nm.gt.0) then
             read(cbuf(7:nm-1),*) ival
-            idur = 60*ival
+            ifdur = 60*ival
           else
             nm=6
-            idur=0
+            ifdur=0
           endif
           l=trimlen(cbuf)
           read(cbuf(nm+1:l-1),*) ival
-          idur = idur + ival 
-          ifdur = 160 + (idur-10)*(270.0/12.0) ! footage of fastf/r
+          ifdur = ifdur + ival 
+          ifdur = 160 + (ifdur-10)*(270.0/12.0) ! footage of fastf/r
           id=+1
           if (cbuf(5:5).eq.'R') id=-1
           if (inewp.eq.0.or.ifeet.gt.0) ifeet=ifeet+ifdur*id
