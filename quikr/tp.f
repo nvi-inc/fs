@@ -28,7 +28,7 @@ C   LOCAL VARIABLES
 C 
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
-      integer*2 ibuf(20)
+      integer*2 ibuf(20),lgenx(2)
 C               - class buffer
 C        ILEN   - length of IBUF, chars 
       dimension iparm(2)
@@ -92,7 +92,7 @@ C
       else if (cjchar(iparm,1).eq.',') then
         ilow = 1         ! default value is "on"
       else
-        call itped(3,ilow,ibuf,ic1,ich-2)
+        call itped(3,ilow,lgenx,ibuf,ic1,ich-2)
         if (ilow.lt.0) then
           ierr = -201
           goto 990
@@ -109,7 +109,7 @@ C
       else if (cjchar(iparm,1).eq.',') then
         irst = 0         !  default value is leave alone
       else
-        call itped(4,irst,ibuf,ic1,ich-2)
+        call itped(4,irst,lgenx,ibuf,ic1,ich-2)
         if (irst.lt.0) then
           ierr = -202
           goto 990
@@ -153,11 +153,13 @@ C
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = nrec + 1
       call fs_get_drive(drive)
-      if (MK3.eq.and(MK3,drive)) then
-        ibuf(1) = -1
-        call put_buf(iclass,ibuf,-4,'fs','  ')
-        nrec = nrec + 1
+      if (MK3.eq.drive) then
+         ibuf(1) = -1
+      else
+         ibuf(1) = -5
       endif
+      call put_buf(iclass,ibuf,-4,'fs','  ')
+      nrec = nrec + 1
 C 
       goto 800
 C 
