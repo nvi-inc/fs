@@ -232,4 +232,5 @@ typedef struct fscom {
         unsigned long mifd_tpi[3];
 	float cablevl;
         float cablediff;
+  int imk4fmv;
 } Fscom;

@@ -1,14 +1,14 @@
               wakeup - ring bells to alert operator
-
-Syntax:     wakeup
-
-Response:   none
-
-
-Settable Parameters: none
-
-Comments: 
-This command rings the internal bell on the terminal to alert the
-operator. At Haystack and Westford, *ERROR* appears on the video
-screen.
-
+ 
+              Syntax:      wakeup
+ 
+              Response:    none
+ 
+ 
+ Settable Parameters: none
+ 
+ Comments: 
+ This command rings the internal bell on the terminal to alert
+ the operator. At Haystack and Westford, *ERROR* appears on the
+ video screen.
+ 

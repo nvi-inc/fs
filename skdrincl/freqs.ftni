@@ -38,6 +38,8 @@ C 000517 nrv Make LMODE have 16 characters, consistent with frinp.
 C 000905 nrv Add NHSTACK per station and code
 C 000905 nrv LMFMT must have 16 characters!
 C 000913 nrv Add roll tables here.
+C 020112 nrv All roll variables by station and code. Add canned rolls.
+C 020327 nrv Add CMODULATION for data modulation value.
 C
       double precision effreq,ffact,bitdens,freqlo,freqrf,
      .freqpcal,freqpcal_base,tape_dens
@@ -65,8 +67,9 @@ C     samprate - sample rate, per frequency code, Mb/s.
  
       integer ncodes,nfreq,npassf,nband,nchan,invcx,ifan,
      .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,npassl,ipctone,
-     .npctone,ntrkn,nhstack,roll_inc_period,roll_reinit_period,
-     .nrolldefs,nrollsteps,roll_def
+     .npctone,ntrkn,nhstack,iroll_inc_period,iroll_reinit_period,
+     .nrolldefs,nrollsteps,iroll_def,icantrk,ircan_reinit,ircan_inc,
+     .nrcan_defs,nrcan_steps
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
@@ -98,10 +101,14 @@ C     npctone - number in the above list
 C     ntrkn - integer number of tracks recorded per band. Same as trkn
 C             except it's not reduced for switched or magnitude bits.
 C     nhstack - number of headstacks per code and station
-C     roll_inc_period, roll_reinit_period - roll info per table
-C     nrolldefs - number of roll_def statements per table
-C     nrollsteps - roll steps per def statement + 1 for home track, per table
-C     roll_def - roll tables
+C     roll_inc_period, roll_reinit_period - info per table
+C     nrolldefs - number of roll_def statements per table (max 64)
+C     nrollsteps - roll steps per def + head + home (max 34)
+C     iroll_def - roll tables
+C     ircan_reinit,ircan_inc  - canned roll periods
+C     icantrk - canned track lists
+C     nrcan_defs - number of defs in each canned roll
+C     nrcan_steps - number of steps in each canned roll
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
      .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix,
@@ -124,7 +131,7 @@ C     lband  - all bands in all codes
 C     lpol - polarization per channel
 C     lnetsb - net sideband for each channel
 C     losb - net sideband for each station's lo
-C     lbarrel - barrel roll for each station
+C     lbarrel - barrel roll code namefor each station
 C     lprefix - procedure name prefix
 C     lmode_cat - full descriptive mode name from modes.cat catalog
 C
@@ -132,7 +139,7 @@ C
       character*128 modedefnames ! def names from the vex file
       character*128 modedef_name ! created names for VEX output
       character*3 cpassorderl ! pass order list
-      character*128 roll_name ! name of each roll table
+      character*3 cmodulation ! data modulation, on or off
 C
       COMMON/FREQS/
      .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
@@ -166,9 +173,14 @@ C
      .       ifan(max_stn,max_frq),npassl(max_stn,max_frq),
      .       ntrkn(max_band,max_stn,max_frq),
      .       nhstack(max_stn,max_frq),
-     .       roll_inc_period(max_roll),roll_reinit_period(max_roll),
-     .       nrolldefs(max_roll),nrollsteps(max_roll),
-     .       roll_def(17,32,max_roll),
+     .       iroll_inc_period(max_stn,max_frq),
+     .       iroll_reinit_period(max_stn,max_frq),
+     .       nrolldefs(max_stn,max_frq),
+     .       nrollsteps(max_stn,max_frq),
+     .       iroll_def(2+max_track,max_track*max_headstack,
+     .                      max_stn,max_frq),
+     .       icantrk(18,32,2),ircan_reinit(2),ircan_inc(2),
+     .       nrcan_defs(2),nrcan_steps(2),
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
      .       lmode_cat(8,max_frq),
@@ -186,5 +198,4 @@ C
       COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
      .       modedefnames(max_frq),
      .       cpassorderl(max_pass,max_stn,max_frq),
-     .       modedef_name(max_frq),
-     .       roll_name(max_roll)
+     .       modedef_name(max_frq),cmodulation(max_stn,max_frq)

@@ -1,47 +1,49 @@
                  lo - LO frequencies (all racks)
-
-Syntax:     lo=chan,freq,sb,pol,pcspace,pcoff
-
-Response:   lo/chan,freq,sb,pol,pcspace,pcoff
-
-
-Settable parameters:
-chan    loX, where X is one of 1, 2, or 3 for Mark III/IV and K-
-        4 or a, b, c, or d for VLBA/4. No default.
-freq      LO frequency for this channel, MHz. No default. No
-          previous value available.
-sb      Net sideband for this channel, unknown, usb or lsb.
+ 
+              Syntax:      lo=chan,freq,sb,pol,pcspace,pcoff
+ 
+              Response:    lo/chan,freq,sb,pol,pcspace,pcoff
+ 
+ 
+ Settable parameters:
+        chan   loX, where X is one of 1, 2, or 3 for Mark III/IV and
+        K-4 or a, b, c, or d for VLBA/4. No default.
+        freq   LO frequency for this channel, MHz. No default. No
+        previous value available.
+        sb     Net sideband for this channel, unknown, usb or lsb.
         Default is unknown..
-pol     Polarization for this channel, unknown, rcp, or lcp.
-        Default is unknown.
-pcspace Spacing of phase-cal rails for this channel, MHz,
-        unknown, or off. Default is unknown.
-pcoff   First phase-cal rail frequency for this IF if not equal
-        to the spacing, MHz. Default 0.0. This offset is
-        specified relative to DC in the IF.
-
-Monitor-only Parameters: none
-
-Comments: 
-This command specifies the characteristics of each IF channel. It
-is an information only command in its standard implementation,
-but may be implemented as a station command to provide hardware
-control.
-
-The values should represent the net of effect of all stages of
-conversion before the signal enters the rack. In other words any
-upconverter should be included. The values for the Mark III/IV
-IF3 channel should not include the effect of the internal IF3
-mixer, but instead should specify the input to the IF3 module.
-
-The LO frequencies are used by the pcalr and pcald programs to
-calculate the frequencies of the phase calibrator tones. Pcalr
-has not been tested with spacings other than 1 MHz. The beamx
-commands use the LO frequencies to calculate default beamwidths.
-
-An lo= with no parameters clears all LO values.
-
-The monitor form of lo shows all defined LO values.
-
-In the future, for K4 type 1, the range of LO values should be 1-
-4, for K4 type 2, 1-16.
+          pol      Polarization for this channel, unknown, rcp, or lcp.
+          Default is unknown.
+          pcspace  Spacing of phase-cal rails for this channel, MHz,
+          unknown, or off. Default is unknown.
+          pcoff    First phase-cal rail frequency for this IF if not
+          equal to the spacing, MHz. Default 0.0. This offset is
+          specified relative to DC in the IF.
+ 
+ Monitor-only Parameters: none
+ 
+ Comments: 
+ This command specifies the characteristics of each IF channel.
+ It is an information only command in its standard
+ implementation, but may be implemented as a station command to
+ provide hardware control.
+ 
+ The values should represent the net of effect of all stages of
+ conversion before the signal enters the rack. In other words
+ any upconverter should be included. The values for the Mark
+ III/IV IF3 channel should not include the effect of the
+ internal IF3 mixer, but instead should specify the input to
+ the IF3 module.
+ 
+ The LO frequencies are used by the pcalr and pcald programs to
+ calculate the frequencies of the phase calibrator tones. Pcalr
+ has not been tested with spacings other than 1 MHz. The beamx
+ commands use the LO frequencies to calculate default
+ beamwidths.
+ 
+ An lo= with no parameters clears all LO values.
+ 
+ The monitor form of lo shows all defined LO values.
+ 
+ In the future, for K4 type 1, the range of LO values should be
+ 1-4, for K4 type 2, 1-16. 

@@ -26,6 +26,7 @@
 # 000620 nrv Add SNAME, M3MODE, ATAPE.                                  #
 # 000929 nrv Add TMADD, TMSUB                                           #
 # 001109 nrv Add IVGTST, replace VOB1INP with VOBINP                    #
+# 020214 nrv Add CKROLL
 #                                                                       #
 #########################################################################
  
@@ -51,7 +52,7 @@ frinit.o vunps2m.o vunps2g.o vunproll.o vunpprc.o errormsg.o \
 fc_gwinsz.o fc_gwinw.o igtky.o selev.o stape.o searl.o i2long.o \
 feetscan.o durscan.o gdscan.o vunppcal.o ttape.o \
 slate.o skdrini.o isecdif.o m3mode.o sname.o atape.o obs_sort.o \
-tmadd.o tmsub.o ivgtst.o
+tmadd.o tmsub.o ivgtst.o ckroll.o
 #
 FFLAGS=-C -c
 # f2c needs this others don't

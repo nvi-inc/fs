@@ -36,6 +36,7 @@ C 991103 nrv Add crack,creca,crecb to call and print in header.
 C 991115 nrv If ifeet=-1 then there's no scan to print.
 C 000107 nrv If tape_motion_type is null, don't write it.
 C 000529 nrv Add scan name.
+C 021011 nrv Another digit for printing gap time.
 
 C Input
       double precision rarad,dcrad,xpos,ypos,zpos,ut
@@ -99,7 +100,7 @@ C  1. Headers.
           if (i.gt.0) write(luprt,9203) tape_motion_type(istn)(1:i)
 9203      format(' Tape motion type: ',a,$)
           if (tape_motion_type(istn).eq.'ADAPTIVE') then
-            write(luprt,'(5x,"gap: ",i3," seconds",$)') itgap(istn)
+            write(luprt,'(5x,"gap: ",i4," seconds",$)') itgap(istn)
           else
             write(luprt,'($)')
           endif

@@ -1,54 +1,55 @@
            mount - pre-mount tape (longitudinal drives)
-
-Syntax:     mount=vsn,check,type
-
-Response:   mount/vsn,check,type
-
-
-Settable parameters:
-vsn     8 or 10-character tape Volume Serial Number (VSN), e.g.
-        HS001234.
-check   4-character check-label corresponding to VSN, e.g. 8E45.
-        If no check label appears on the tape, run program labck
-        to generate it.
-type    thick or thin, defaults to type implied by VSN. For
-        monitor, this value only appears until the tape is loaded
-        with a rec=load command. This parameter is not available
-        unless vacuum switching is enabled in sw.ctl control
-        file.
-
-Comments:
-This command is similar to the label command, except that it does
-not release a schedule that is halted and in addition it issues a
-command to cause the SNAP procedure  mounter to execute.
-
-The mounter SNAP procedure is included in experiment procedure
-files. For all drive types except VLBA  and VLBA4 the procedure
-is empty. For VLBA and VLBA4 the procedure contains only
-rec=load.
-
-This command only comes in the dual recorder forms, mount1 (with
-mounter1) or mount2 (with mounter2). It is not available for
-single recorder systems, hence the generic form mount (with
-mounter) does not exist.
-
-Thiscommand is used to pre-mount a tape in advance of a tape
-change in a two recorder system. Only the currently un-selected
-drive (see the select command) may have its tape pre-mounted. The
-intent is that this command can be use to inform the FS about the
-tape will be used next on the drive that is not in use thus
-freeing the operator from having to be physically present at the
-tape change. When the FS is ready to load a new tape at the next
-tape change it will remember the presence of the new tape and not
-halt the schedule with the newtape commmand is encountered.  If a
-tape has not been pre-mounted, newtape will stop the schedule as
-usual.
-
-After issuing this command the operator should take whatever
-steps are necessary to load the tape. For the VLBA and VLBA this
-is automated through the mounter SNAP procedure. For other
-recorders there is no standardized way to automatically load the
-tape, so the operator must take appropriate action.
-
-All other details of this command are the same as those of the
-label, please refer to thatcommand for further information.
+ 
+              Syntax:      mount=vsn,check,type
+ 
+              Response:    mount/vsn,check,type
+ 
+ 
+ Settable parameters:
+        vsn    8 or 10-character tape Volume Serial Number (VSN),
+        e.g. HS001234.
+          check    4-character check-label corresponding to VSN, e.g.
+          8E45. If no check label appears on the tape, run
+          program labck to generate it.
+        type   thick or thin, defaults to type implied by VSN. For
+        monitor, this value only appears until the tape is
+        loaded with a rec=load command. This parameter is not
+        available unless vacuum switching is enabled in sw.ctl
+        control file.
+ 
+ Comments:
+ This command is similar to the label command, except that it
+ does not release a schedule that is halted and in addition it
+ issues a command to cause the SNAP procedure  mounter to
+ execute.
+ 
+ The mounter SNAP procedure is included in experiment procedure
+ files. For all drive types except VLBA  and VLBA4 the
+ procedure is empty. For VLBA and VLBA4 the procedure contains
+ only rec=load.
+ 
+ This command only comes in the dual recorder forms, mount1
+ (with mounter1) or mount2 (with mounter2). It is not available
+ for single recorder systems, hence the generic form mount
+ (with mounter) does not exist.
+ 
+ Thiscommand is used to pre-mount a tape in advance of a tape
+ change in a two recorder system. Only the currently un-
+ selected drive (see the select command) may have its tape pre-
+ mounted. The intent is that this command can be use to inform
+ the FS about the tape will be used next on the drive that is
+ not in use thus freeing the operator from having to be
+ physically present at the tape change. When the FS is ready to
+ load a new tape at the next tape change it will remember the
+ presence of the new tape and not halt the schedule with the
+ newtape commmand is encountered.  If a tape has not been pre-
+ mounted, newtape will stop the schedule as usual.
+ 
+ After issuing this command the operator should take whatever
+ steps are necessary to load the tape. For the VLBA and VLBA
+ this is automated through the mounter SNAP procedure. For
+ other recorders there is no standardized way to automatically
+ load the tape, so the operator must take appropriate action.
+ 
+ All other details of this command are the same as those of the
+ label, please refer to thatcommand for further information. 

@@ -1,17 +1,17 @@
          wvolt - head write voltage (VLBA, VLBA4 drives)
-
-Syntax:     wvolt=volt1,volt2
-
-Response:   wvolt/volt1,volt2
-
-
-Settable parameters:
-volt1     Write voltage for stack 1. No default.
-volt2       Write voltage for stack 2. No default. For VLBA4 drives
-            only.
-
-Comments: 
-This command sets and reads the write voltage for heads. However
-it is only for testing purposes. The next rec=load will return
-the write voltage to the values set in the vdrive1.ctl or
-vdrive2.ctl control file.
+ 
+              Syntax:      wvolt=volt1,volt2
+ 
+              Response:    wvolt/volt1,volt2
+ 
+ 
+ Settable parameters:
+              volt1        Write voltage for stack 1. No default.
+              volt2        Write voltage for stack 2. No default. For VLBA4
+              drives only.
+ 
+ Comments: 
+ This command sets and reads the write voltage for heads.
+ However it is only for testing purposes. The next rec=load
+ will return the write voltage to the values set in the
+ vdrive1.ctl or vdrive2.ctl control file. 

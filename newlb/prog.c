@@ -2065,3 +2065,15 @@ void fs_set_cablevl__(cablevl)
 	{
 	  shm_addr->cablevl = *cablevl;
 	}
+
+void fs_set_imk4fmv__(imk4fmv)
+	int *imk4fmv;
+	{
+	  shm_addr->imk4fmv = *imk4fmv;
+	}
+
+void fs_get_imk4fmv__(imk4fmv)
+        int *imk4fmv;
+        {
+          *imk4fmv = shm_addr->imk4fmv;
+        }

@@ -1,47 +1,47 @@
             vx - video converter set-up (all K4 racks)
-
-Syntax:     vc=vc,high/low,det
+ 
+              Syntax:      vc=vc,high/low,det
           vx=vc,att,det
-
-Response:   vc/vc,high/low,det,yes/no,upwr,lpwr
+ 
+              Response:    vc/vc,high/low,det,yes/no,upwr,lpwr
           vx/vc,att,det,yes/no,upwr,lpwr
-
-
-Settable Parameters:
-vc        VC channel to set parameters for, 1-16 for K4 type 1,
-          1-8 for K4 type 2, or alarm, no default 
-high/low    IF selection high or low, default according to VCLO
-            frequency if vc's LO has been set-up, for K4 type 1
-            only
-att       attenuator, 0-15 dB, default 0, for K4 type 2 only
-det       front panel power detector display upper or lower
-          sideband, default upper
-
-Monitor-only:
-yes/no      VC is present, yes or no
-upwr      upper sideband power in counts, 0-99, the nominal range
-          is 10-90
-lpwr      lower sideband power in counts, 0-99, the nominal range
-          is 10-90
-
-Comments:
-The vcform is used for K4 type 1 VCs. For K4 type 2 VCs the "x"
-in the command is replaced with "a" or "b" for the first and
-second bank of VCs respectively. The form of the command is
-different for type 1 and type 2 VCs.
-
-Only one channel in each bank of VCs can be commanded at a time,
-but the monitor response consists of several lines, one for each
-channel in the bank.
-
-The power levels for type 1 VCs are:
-
-|OUTPUT LEVEL(dBm)|+3|+2|+1| 0|-1|-2|-3|-4|-5|
-----------------------------------------------
-|LEVEL MONITOR    |78|68|59|50|43|37|32|27|23|
-
-For type 2 VCs, (7631A):
-
-|OUTPUT LEVEL(dBm)|+3|+2|+1| 0|-1|-2|-3|-6|-10|
+ 
+ 
+ Settable Parameters:
+          vc       VC channel to set parameters for, 1-16 for K4 type
+          1, 1-8 for K4 type 2, or alarm, no default 
+          high/low IF selection high or low, default according to VCLO
+          frequency if vc's LO has been set-up, for K4 type 1
+          only
+            att        attenuator, 0-15 dB, default 0, for K4 type 2 only
+            det        front panel power detector display upper or lower
+            sideband, default upper
+ 
+ Monitor-only:
+          yes/no   VC is present, yes or no
+          upwr     upper sideband power in counts, 0-99, the nominal
+          range is 10-90
+          lpwr     lower sideband power in counts, 0-99, the nominal
+          range is 10-90
+ 
+ Comments:
+ The vcform is used for K4 type 1 VCs. For K4 type 2 VCs the
+ "x" in the command is replaced with "a" or "b" for the first
+ and second bank of VCs respectively. The form of the command
+ is different for type 1 and type 2 VCs.
+ 
+ Only one channel in each bank of VCs can be commanded at a
+ time, but the monitor response consists of several lines, one
+ for each channel in the bank.
+ 
+ The power levels for type 1 VCs are:
+ 
+ |OUTPUT LEVEL(dBm)|+3|+2|+1| 0|-1|-2|-3|-4|-5|
  ----------------------------------------------
-|LEVEL MONITOR    |90|75|60|50|40|32|24|10|  4|
+ |LEVEL MONITOR    |78|68|59|50|43|37|32|27|23|
+ 
+ For type 2 VCs, (7631A):
+ 
+ |OUTPUT LEVEL(dBm)|+3|+2|+1| 0|-1|-2|-3|-6|-10|
+  ----------------------------------------------
+ |LEVEL MONITOR    |90|75|60|50|40|32|24|10|  4| 

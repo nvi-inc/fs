@@ -1,0 +1,32 @@
+             disc_check - check Mark V recorded data
+ 
+              Syntax:      disc_check
+ 
+              Response:    disc_check/format,tracks,time,pos,period,??,
+ 
+ 
+ Settable parameters:
+            command    any legal command for Mark IV decoder. The
+            terminating "$" character is  appended before
+            sending the command.
+ 
+ Monitor-only parameters:
+          format   Data format: mark4, vlba, test, or ?
+          tracks   Track mode: 8, 16, 32, 64
+          time     Data time tag read from first encountered header
+            pos        Byte position of header
+          period   Track frame period (seconds)
+          ??       unknown
+ 
+ Comments: 
+ If format is ?, the remaining fields are not valid.
+ 
+ This command sets the read pointer 1 mega-byte before the
+ current write pointer location and attempts to the use the 
+ low-level Mark 5 data_check command. The displayed parameters
+ are the output of is command. A future version will allow the
+ position of the read pointer to be set explicitly, but this
+ can be done with a mk5 SNAP command. To check at positon
+ "pos", use:
+ 
+ mk5=play off pos,data_check? 

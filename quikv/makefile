@@ -21,7 +21,10 @@ k4vcbw.o k4vcbw_dis.o k3fm.o k3fm_dis.o k4label.o k4label_dis.o k4newtp.o\
 k4oldtp.o k4rec_mode.o k4rec_mode_dis.o logmatmsgfm.o k4recpatch.o\
 k4recpatch_dis.o k4pcalports.o k4pcalports_dis.o selectcmd.o\
 selectcmd_dis.o scan_name.o ifadjust.o get_att.o set_vc_sb.o get_itp.o\
-reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o
+reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o mk5.o mk5_dis.o sd.o\
+sd_dis.o ed.o ed_dis.o pd.o pd_dis.o disc_serial.o disc_serial_dis.o\
+disc_check.o disc_check_dis.o data_check_pos.o mk5relink.o mk5close.o\
+rollform.o rollform_dis.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
@@ -30,3 +33,4 @@ reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o
 quikv:
 	rm -f ../bin/quikv
 	make
+

@@ -1,30 +1,30 @@
            rvac - recorder vacuum (VLBA, VLBA4 drives)
-
-Syntax:     rvac=cmd
-
-Response:   rvac/cmd,mon
-
-
-Settable Parameters:
-cmd       vacuum level to command, inches. No default
-
-Monitor-only Parameters:
-mon       vacuum level measured, inches.
-
-Comments:
-This command sets the vacuum level of the recorder. However it is
-only for test purposes. A vacuum level set by the rvac command
-will replaced by the default vacuum level from the control file
-the next time a rec=load is executed.
-
-The cmd and mon values are converted to and from the voltages
-used by the tape drive using the conversion coefficients in the
-tape recorder control file, vdrive1.ctl or vdrive2.ctl.  In
-particular this means that the cmd value uses the same
-conversion as the specified default vacuum level in the control
-file.
-
-
-There is no previous value (selected by using * as the parameter)
-for cmd until it has been commanded at least once since the last
-time the FS was started.
+ 
+              Syntax:      rvac=cmd
+ 
+              Response:    rvac/cmd,mon
+ 
+ 
+ Settable Parameters:
+            cmd        vacuum level to command, inches. No default
+ 
+ Monitor-only Parameters:
+            mon        vacuum level measured, inches.
+ 
+ Comments:
+ This command sets the vacuum level of the recorder. However it
+ is only for test purposes. A vacuum level set by the rvac
+ command will replaced by the default vacuum level from the
+ control file the next time a rec=load is executed.
+ 
+ The cmd and mon values are converted to and from the voltages
+ used by the tape drive using the conversion coefficients in
+ the tape recorder control file, vdrive1.ctl or vdrive2.ctl. 
+ In particular this means that the cmd value uses the same
+ conversion as the specified default vacuum level in the
+ control file.
+ 
+ 
+ There is no previous value (selected by using * as the
+ parameter) for cmd until it has been commanded at least once
+ since the last time the FS was started. 

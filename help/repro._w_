@@ -1,61 +1,67 @@
        repro - set up reproduce tracks (VLBA, VLBA4 drives)
-
-Syntax:     repro=modeA,trackA,trackB,modeB,equA,equB,bitrate
-
-Response:   repro/modeA,trackA,trackB,modeB,equA,equB,bitrate
-
-
-Settable parameters:
-modeA     Reproduce mode for channel A. byp (default) for
-          bypass, raw or read for read (playback).
-trackA        Track for decoder channel A, default 4. 0-35 allowed
-              for VLBA, in addition 100-135 are allowed for VLBA4.
-trackB        Track for decoder channel B, default 4. 0-35 allowed
-              for VLBA, in addition 100-135 are allowed for VLBA4.
-modeB     Reproduce mode for channel B. byp for bypass, raw or
-          read for read (playback). Default is modeA.
-equA        Equalizer to use for decoding channel A: std, alt1,
-            alt2, dis (disable) or reproduce speed 80, 135, 160,
-            270 ips or 0, 1, 2, or 3 equalizer number.  For VLBA
-            recorders: alt1 (default) for normal speed (135 or 80
-            ips), alt2 for double speed (270 ips), and std for
-            thin tape double speed (160 ips). For VLBA2
-            recorders: std (default) for normal speed (135 ips),
-            alt1 for double speed (270 ips), alt2 unspecified. 
-            For VLBA2 recorders, thin tape speeds 80 and 160 ips
+ 
+              Syntax:      repro=modeA,trackA,trackB,modeB,equA,equB,bitrate
+ 
+              Response:    repro/modeA,trackA,trackB,modeB,equA,equB,bitrate
+ 
+ 
+ Settable parameters:
+              modeA        Reproduce mode for channel A. byp (default) for
+              bypass, raw or read for read (playback).
+            trackA     Track for decoder channel A, default 4. 0-35
+            allowed for VLBA, in addition 100-135 are allowed
+            for VLBA4.
+            trackB     Track for decoder channel B, default 4. 0-35
+            allowed for VLBA, in addition 100-135 are allowed
+            for VLBA4.
+              modeB        Reproduce mode for channel B. byp for bypass, raw
+              or read for read (playback). Default is modeA.
+            equA       Equalizer to use for decoding channel A: std,
+            alt1, alt2, dis (disable) or reproduce speed 80,
+            135, 160, 270 ips or 0, 1, 2, or 3 equalizer
+            number.  For VLBA recorders: alt1 (default) for
+            normal speed (135 or 80 ips), alt2 for double
+            speed (270 ips), and std for thin tape double
+            speed (160 ips). For VLBA2 recorders: std
+            (default) for normal speed (135 ips), alt1 for
+            double speed (270 ips), alt2 unspecified.  For
+            VLBA2 recorders, thin tape speeds 80 and 160 ips
             are not accepted.
-equB        Equalizer to use for decoding channel B: std, alt1,
-            alt2, dis (disable) or reproduce speed 80, 135, 160,
-            or 270 ips or 0, 1, 2, or 3 equalizer number. For
-            VLBA recorders: alt1 (default) for normal speed (135
-            or 80 ips), alt2 for double speed (270 ips), and std
-            for thin tape double speed (160 ips). For VLBA2
-            recorders: std (default) for normal speed (135 ips),
-            alt1 for double speed (270 ips), alt2 unspecified. 
-            For VLBA2 recorders, thin tape speeds 80 and 160 ips
+            equB       Equalizer to use for decoding channel B: std,
+            alt1, alt2, dis (disable) or reproduce speed 80,
+            135, 160, or 270 ips or 0, 1, 2, or 3 equalizer
+            number. For VLBA recorders: alt1 (default) for
+            normal speed (135 or 80 ips), alt2 for double
+            speed (270 ips), and std for thin tape double
+            speed (160 ips). For VLBA2 recorders: std
+            (default) for normal speed (135 ips), alt1 for
+            double speed (270 ips), alt2 unspecified.  For
+            VLBA2 recorders, thin tape speeds 80 and 160 ips
             are not accepted.
-bitrate       Nominal bit rate per track in Mbits/second: 16, 8, 4,
-              2, 1, or 0.5. The default corresponds to the nominal
-              bitrate for the equA setting.
-
-Monitor-only parameters: none
-
-Comments: 
-The raw or read mode normally is used only when checking parity
-errors on the tape. This is also known as "playback" mode.
-
-This bitrate parameter determines the set-up of the clock recovery
-chip. The nominal bit rate for the 135/80 ips (VLBA) or 135 ips
-(VLBA2) equalizer is 4 Mb/sec (2 MHz track bandwidth) set-up. The
-nominal bit rate for the 270 and 160  ips equalizers is 8 Mb/sec
-(4 MHz track bandwidth) set-up. The other bit rates have no
-corresponding equalizer and are useful only in byp mode. The
-other bit rates have not been tested with the VLBA2 drive.
-
-Note that a VLBA or Mark IV track number equals the Mark III
-track number plus three. Consequently, odd Mark III tracks are
-even VLBA or Mark IV track numbers and vice-versa. See the Track
-Assignment Tables in the System Set-up manual. Also VLBA group
-numbers equal Mark III group numbers minus one, but the VLBA
-groups include additional tracks. Note that this command uses
-VLBA track numbers. 
+              bitrate      Nominal bit rate per track in Mbits/second: 16, 8,
+              4, 2, 1, or 0.5. The default corresponds to the
+              nominal bitrate for the equA setting.
+ 
+ Monitor-only parameters: none
+ 
+ Comments: 
+ The raw or read mode normally is used only when checking
+ parity errors on the tape. This is also known as "playback"
+ mode.
+ 
+ This bitrate parameter determines the set-up of the clock
+ recovery chip. The nominal bit rate for the 135/80 ips (VLBA)
+ or 135 ips (VLBA2) equalizer is 4 Mb/sec (2 MHz track
+ bandwidth) set-up. The nominal bit rate for the 270 and 160 
+ ips equalizers is 8 Mb/sec (4 MHz track bandwidth) set-up. The
+ other bit rates have no corresponding equalizer and are useful
+ only in byp mode. The other bit rates have not been tested
+ with the VLBA2 drive.
+ 
+ Note that a VLBA or Mark IV track number equals the Mark III
+ track number plus three. Consequently, odd Mark III tracks are
+ even VLBA or Mark IV track numbers and vice-versa. See the
+ Track Assignment Tables in the System Set-up manual. Also VLBA
+ group numbers equal Mark III group numbers minus one, but the
+ VLBA groups include additional tracks. Note that this command
+ uses VLBA track numbers. 

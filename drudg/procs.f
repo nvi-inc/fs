@@ -208,6 +208,13 @@ C 011002 nrv Change second wait in K4 LOADER to 6s per H. Osaki.
 C 011011 nrv Wrong character counting variable in user_info setup.
 C 011022 nrv Remove NEWTAPE from K4 LOADER.
 C 011130 nrv Add comments with sky frequencies if no rack.
+C 020111 nrv Change REPRO command to add the track bitrate parameter.
+C 020111 nrv Barrell roll parameter OK for Mk4 formatters.
+C 020114 nrv ROLLFORM commands.
+C 020304 nrv Mk5 piggyback mode.
+C 020320 nrv Add "*" in front of second TRACKS line for piggyback.
+C 020327 nrv Add ":1" for roll on VLBA racks if it's not there.
+C 020327 nrv Check data modulation and insert "ON" if on.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -221,12 +228,12 @@ C LOCAL VARIABLES:
 C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,nchx,
      .ilen,ich,ic1,ic2,ibuflen,itrk(max_track,max_headstack),
-     .ig,ig0,ig1,ig2,ig3,irecbw,irec,ir,
-     .im0,im1,im2,im3,igotbbc(max_bbc),
-     .npmode,itrk2(max_track,max_headstack),itype,
+     .ig,ig0,ig1,ig2,ig3,irecbw,irec,ir,idef,
+     .im0,im1,im2,im3,igotbbc(max_bbc),itrkrate,
+     .npmode,itrk2(max_track,max_headstack),itype,ipig,
      .isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs,vc3_patch,vc10_patch
-      logical kok,km3mode,km3be,km3ac,km4done,kpcal_d,kpcal
-      logical kinclude,klast8,kfirst8,klsblo,knolo
+      logical kok,km3mode,km3be,km3ac,km4done,kpcal_d,kpcal,kroll,kcan
+      logical kinclude,klast8,kfirst8,klsblo,knolo,kmodu
       logical kvrack,kv4rack,km3rack,km4rack,kk41rack,kk42rack,
      .km4fmk4rack,k8bbc,kk4vcab,kk3fmk4rack,knorack
       logical kv4rec(2),kvrec(2),km3rec(2),ks2rec(2),
@@ -401,6 +408,16 @@ C    for procedure names.
           enddo
         endif ! check for pcal on this code
 
+        kmodu =  .not.kvrack.and.cmodulation(istn,icode).eq.'on'
+
+        kroll = .false.
+        if ((ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
+     .    ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
+     .    ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! a roll mode
+          kroll = .true.
+          kcan = .true.
+          if (ichcm_ch(lbarrel(1,istn,icode),1,"M").eq.0) kcan = .false.
+        endif ! a roll mode
 
         DO IPASS=1,NPASSF(istn,ICODE) !loop on number of sub passes
 
@@ -540,13 +557,27 @@ C  PCALFff
               call hol2lower(ibuf,(nch+1))
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
+C  ROLLFORMff
+            if (kroll.and..not.kcan) then ! non-canned roll
+              if (km4rack.or.kvrack.or.kv4rack.or.km4fmk4rack) then
+                call ifill(ibuf,1,ibuflen,oblank)
+                nch = ichmv_ch(IBUF,1,'ROLLFORM')
+                nch = ICHMV(ibuf,nch,LCODE(ICODE),1,nco) ! code
+                call hol2lower(ibuf,(nch+1))
+                CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+              endif
+            endif ! non-canned roll
 C  TRACKS=tracks   
 C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
             if ((kvrack.or.km4rack.or.kv4rack.or.km4fmk4rack).and.
      .        (.not.km3mode.or.klsblo.or.
      .         ((km3ac.or.km3be).and.k8bbc))) then
+          do ipig=1,2 ! twice for piggyback
+           if (ipig.eq.1.or.(ipig.eq.2.and.
+     .      kmk5_piggyback.and.km4rack)) then ! second time for piggyback
               call ifill(ibuf,1,ibuflen,oblank)
-              NCH = ichmv_ch(IBUF,1,'TRACKS=')
+              if (ipig.eq.1) NCH = ichmv_ch(IBUF,1,'TRACKS=')
+              if (ipig.eq.2) NCH = ichmv_ch(IBUF,1,'TRACKS=*,')
               ig0=0
               ig1=0
               ig2=0
@@ -605,25 +636,29 @@ C         tracks still left in the table.
                 itrk2(i,1)=itrk(i,1)
               enddo
               if (ig0.eq.1) then
-                nch = ichmv_ch(ibuf,nch,'V0,')
+                if (ipig.eq.1) nch = ichmv_ch(ibuf,nch,'V0,')
+                if (ipig.eq.2) nch = ichmv_ch(ibuf,nch,'V4,')
                 do i=2,16,2
                   itrk2(i,1)=0
                 enddo
               endif
               if (ig1.eq.1) then
-                nch = ichmv_ch(ibuf,nch,'V1,')
+                if (ipig.eq.1) nch = ichmv_ch(ibuf,nch,'V1,')
+                if (ipig.eq.2) nch = ichmv_ch(ibuf,nch,'V5,')
                 do i=3,17,2
                   itrk2(i,1)=0
                 enddo
               endif
               if (ig2.eq.1) then
-                nch = ichmv_ch(ibuf,nch,'V2,')
+                if (ipig.eq.1) nch = ichmv_ch(ibuf,nch,'V2,')
+                if (ipig.eq.2) nch = ichmv_ch(ibuf,nch,'V6,')
                 do i=18,32,2
                   itrk2(i,1)=0
                 enddo
               endif
               if (ig3.eq.1) then
-                nch = ichmv_ch(ibuf,nch,'V3,')
+                if (ipig.eq.1) nch = ichmv_ch(ibuf,nch,'V3,')
+                if (ipig.eq.2) nch = ichmv_ch(ibuf,nch,'V7,')
                 do i=19,33,2
                   itrk2(i,1)=0
                 enddo
@@ -711,14 +746,18 @@ C  Now pick up leftover tracks that didn't appear in a whole group
 C  and list each one separately.
               do i=2,33 
                 if (itrk2(i,1).eq.1) then
-                  nch = nch + ib2as(i,ibuf,nch,Z8000+2)
+                  if (ipig.eq.1) nch = nch + ib2as(i,ibuf,nch,Z8000+2)
+                  if (ipig.eq.2) nch = nch + ib2as(i+100,ibuf,nch,
+     .                                     Z8000+3)
                   nch = MCOMA(IBUF,nch)
                 endif
               enddo 
 C  Leftovers for the second headstack.
               do i=2,33 
                 if (itrk2(i,2).eq.1) then
-                  nch = nch + ib2as(i,ibuf,nch,Z8000+2)
+                  if (ipig.eq.1) nch = nch + ib2as(i,ibuf,nch,Z8000+2)
+                  if (ipig.eq.2) nch = nch + ib2as(i+100,ibuf,nch,
+     .                                     Z8000+3)
                   nch = MCOMA(IBUF,nch)
                 endif
               enddo 
@@ -726,6 +765,8 @@ C  Leftovers for the second headstack.
               CALL IFILL(IBUF,NCH,1,oblank)
               call hol2lower(ibuf,(nch+1))
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
+            endif ! second time for piggyback
+            enddo ! twice for piggyback
             endif ! kvrack.or.km4rack.or.kv4rack and .not. km3mode
           endif ! km3rec .or.km4rec or kvrec or kv4rec
 C  REC_MODE=<mode>,$,<roll>
@@ -885,7 +926,7 @@ C  PCALD=
             nch = ichmv_ch(IBUF,1,'pcald=')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
-C  FORM=m,r,fan,barrel   (m=mode,r=rate=2*b) (no barrel for Mk4)
+C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b) 
 C  For S2, leave out command entirely
 C  For 8-BBC stations, use "M" for Mk3 modes
           if (kvrack.or.km3rack.or.km4rack.or.kv4rack
@@ -962,30 +1003,48 @@ C           Add sample rate
             nch = MCOMA(IBUF,nch)
             nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
             if (.not.ks2rec(irec)) then ! non-S2 only
-C           If no fan, or if fan is 1:1, skip it unless we have roll.
+C           If no fan, or if fan is 1:1, skip it unless we have roll
+C           or modulation.
             if ((ifan(istn,icode).ne.0.and.ifan(istn,icode).ne.1) .or.
-     .        (ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! barrel or fan
+     .         kroll.or.kmodu) then ! barrel or fan or modulation
               nch = MCOMA(IBUF,nch)
 C             Put in fan only if non-zero
               if (ifan(istn,icode).ne.0) then ! fan
                 nch = ichmv_ch(ibuf,nch,'1:')
                 nch = nch+ib2as(ifan(istn,icode),ibuf,nch,1)
               endif
-              if ((ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! a roll mode
-                if (kvrack) then ! only for VLBA racks
+C             Roll parameter
+              if (kroll) then
+C               if (kvrack) then ! only for VLBA racks
+C               Now ok for Mk4 formatters too
+                if (kvrack.or.kv4rack.or.km4rack.or.km4fmk4rack) then
                   nch = MCOMA(IBUF,nch)
                   nch = ichmv(ibuf,nch,lbarrel(1,istn,icode),1,4)
-                else if (kv4rack.or.km4rack.or.km4fmk4rack) then
-                  write(luscn,9137) 
-9137              format(/'PROCS05 - WARNING! Barrel roll is not',
-     .            ' supported for Mark IV formatters.')
+                  if (kvrack.and.
+     .                ichcm_ch(lbarrel(1,istn,icode),1,"M").ne.0) then
+                    if (ichcm_ch(lbarrel(1,istn,icode),1,"8:1").eq.0.or.
+     .                  ichcm_ch(lbarrel(1,istn,icode),1,"16:1").eq.0) 
+     .                  then ! already there
+                     else ! add the :1 for VLBA racks
+                       nchx = iflch(ibuf,nch)
+                       nch = ichmv_ch(ibuf,nchx+1,":1")
+                     endif ! already there/add
+                   endif
+C                else if (kv4rack.or.km4rack.or.km4fmk4rack) then
+C                  write(luscn,9137) 
+C9137              format(/'PROCS05 - WARNING! Barrel roll is not',
+C     .            ' supported for Mark IV formatters.')
                 endif
-              endif
-            endif ! barrel or fan
+              endif ! roll
+              if (kmodu) then ! modulation
+                nch = iflch(ibuf,nch)+1
+                if (.not.kroll) then ! insert comma
+                  nch = MCOMA(IBUF,nch)
+                endif ! insert comma
+                nch = MCOMA(IBUF,nch)
+                nch = ichmv_ch(ibuf,nch,'on')
+              endif ! modulation
+            endif ! barrel or fan or modulation
             endif ! non-S2 only
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
@@ -1219,7 +1278,7 @@ c... end 2-head
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
           endif
-C REPRO=byp,itrka,itrkb
+C REPRO=byp,itrka,itrkb,equalizer,bitrate
           if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
      .      km4rec(irec).and..not.ks2rec(irec)) then
             call ifill(ibuf,1,ibuflen,oblank)
@@ -1229,6 +1288,17 @@ C REPRO=byp,itrka,itrkb
             nch = nch+ib2as(itrka,ibuf,nch,Z8000+2)
             nch = MCOMA(IBUF,nch)
             nch = nch+ib2as(itrkb,ibuf,nch,Z8000+2)
+            if (km4rec(irec).or.kv4rec(irec).and.
+     .             samprate(icode).gt.2.0) then ! add bitrate
+              nch = MCOMA(IBUF,nch)
+              nch = MCOMA(IBUF,nch) ! default equalizer
+              if (ifan(istn,icode).gt.0) then
+                itrkrate = samprate(icode)/ifan(istn,icode)
+              else
+                itrkrate = samprate(icode)
+              endif
+              nch = nch+ib2as(itrkrate,ibuf,nch,Z8000+2)
+            endif ! add bitrate
 C           spd = 12.0*speed(icode,istn)
 C           call spdstr(spd,lspd,nspd)
 C           if (km4rec.or.kv4rec) then ! repro=byp,a,b,speed
@@ -2103,6 +2173,15 @@ C             endif
             endif
             call hol2lower(ibuf,nch)
             call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
+         do ipig=1,2 ! twice through for piggyback mode
+            if (ipig.eq.1.or.(ipig.eq.2.and.
+     .          kmk5_piggyback.and.km4rack)) then ! second time for piggyback
+                if (ipig.eq.2) then ! initialize buffer
+                    call ifill(ibuf,1,ibuflen,oblank)
+C                   if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
+C    .                km4rec(ir)) then
+                      nch = ichmv_ch(ibuf,1,'TRACKFORM=')
+                 endif ! initialize buffer
             ib=0
             DO ichan=1,nchan(istn,icode) !loop on channels
               ic=invcx(ichan,istn,icode) ! channel number
@@ -2139,7 +2218,7 @@ C                         Write out a max of 8 channels for 8-BBC stations
                       endif ! reverse sidebands
                       if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
      .                  km4rec(ir)) then
-                         if (mhead .eq. 2)then               !debug
+                         if (mhead .eq. 2.or.ipig.eq.2)then               !debug
                            if((it+3) .lt.10)nch=ichmv_ch(ibuf,nch,'10') !debug
                            if((it+3) .ge.10)nch=ichmv_ch(ibuf,nch,'1') !debug
                          endif               !debug
@@ -2158,6 +2237,14 @@ C                         Write out a max of 8 channels for 8-BBC stations
                     CALL IFILL(IBUF,NCH,1,oblank)
                     call hol2lower(ibuf,nch)
                     call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
+C In Mk5 piggybackmode write the same line again with 100 added to
+C the track number.
+C These lines
+C trackform=2,1us,6,2us,10,3us,14,4us,18,5us,22,6us,26,7us,3,8us
+C trackform=7,9us,11,10us,15,11us,19,12us,23,13us,27,14us
+C become 
+C trackform=102,1us,106,2us,110,3us,114,4us,118,5us,122,6us,126,7us,103,8us
+C trackform=107,9us,111,10us,115,11us,119,12us,123,13us,127,14us
                     call ifill(ibuf,1,ibuflen,oblank)
                     if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
      .                km4rec(ir)) then
@@ -2170,14 +2257,16 @@ C                         Write out a max of 8 channels for 8-BBC stations
                   endif
                 enddo ! bits
               enddo ! sidebands
-            enddo ! loop on channels
       enddo !debug loop on hedzz
+            enddo ! loop on channels
             if (ib.ne.0) then ! final line
               nch=nch-1
               CALL IFILL(IBUF,NCH,1,oblank)
               call hol2lower(ibuf,nch)
               call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
             endif
+            endif ! second time for piggyback mode
+         enddo ! twice through for piggyback mode
             CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
           enddo ! loop on sub-passes
         endif ! km4rack.or.kvrack.or.kv4rack
@@ -2253,11 +2342,53 @@ C                 Write out a max of 8 channels for 8-BBC stations
       endif ! kvrec.or.kv4rec.or.km3rec.or.km4rec
       endif ! only vex knows pcal
 
-      endif ! code is defined
+
+C 8. Write ROLLFORM procedures, one per pass.
+C    rollform=head,home,<list of tracks>
+C These procedures do not depend on the type of recorder.
+C Therefore, use the index of the recorder in use for all the tests 
+C in this section.
+C If barrel roll is "M" then write these procedures. Not needed for
+C the canned "8" or "16" roll tables.
+C    
+      if (km4rack.or.kvrack.or.kv4rack.or.km4fmk4rack) then
+        if (ichcm_ch(lbarrel(1,istn,icode),1,"M").eq.0) then ! manual roll
+          CALL IFILL(LNAMEP,1,12,oblank)
+          nch = ichmv_ch(LNAMEP,1,'ROLLFORM')
+          nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco) ! code
+          CALL CRPRC(LU_OUTFILE,LNAMEP)
+          if (nprocs.eq.6) then
+            write(luscn,'()')
+            nprocs=0
+          endif
+          nprocs=nprocs+1
+          WRITE(LUSCN,9112) LNAMEP
+C ROLLFORM=
+          call ifill(ibuf,1,ibuflen,oblank)
+          nch = ichmv_ch(ibuf,1,'rollform=')
+          call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
+C ROLLFORM commands
+          DO idef = 1,nrolldefs(istn,icode) ! loop on roll defs
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(ibuf,1,'ROLLFORM=') 
+            do it=1,2+nrollsteps(istn,icode)
+              nch = nch + ib2as(iroll_def(it,idef,istn,icode),ibuf,
+     .              nch,Z4000+2*Z100+2) ! tracks
+              if (it.ne.2+nrollsteps(istn,icode)) nch = mcoma(ibuf,nch)
+            enddo
+            call hol2lower(ibuf,nch)
+            call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
+          enddo ! loop on roll defs
+          CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
+        endif ! manual roll
+      endif ! km4rack.or.kvrack.or.kv4rack.or.km4fmk4rack
+
+C  End of major loop for each code
+      endif ! this mode defined
       write(luscn,'()')
       ENDDO ! loop on codes
 
-C 8. Write out standard tape loading and unloading procedures
+C 9. Write out standard tape loading and unloading procedures
 
 C UNLOADER procedure
       do irec=1,nrecst(istn) ! loop on recorders

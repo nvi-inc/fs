@@ -67,8 +67,11 @@ C        idir=list of subpasses,
 C        ihd=list of head positions
 C        n = number of entries in the lists
 C
-      ks2 = ichcm_ch(lterna(1,istn),1,'S2').eq.0
-      kk4 = ichcm_ch(lterna(1,istn),1,'K4').eq.0
+C     ks2 = ichcm_ch(lterna(1,istn),1,'S2').eq.0
+C     kk4 = ichcm_ch(lterna(1,istn),1,'K4').eq.0
+C     Check recorder type, not the terminal name
+      ks2 = ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      kk4 = ichcm_ch(lstrec(1,istn),1,'K4').eq.0
       if (.not.ks2.and..not.kk4) then ! save offsets and subpasses
         do i=1,n
           if (ip(i).lt.100) then ! headstack 1

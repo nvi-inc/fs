@@ -1,14 +1,14 @@
          cont - continue schedule execution after a halt
-
-Syntax:     cont
-
-Response:   none
-
-
-Parameters: none
-
-Comments: 
-This command must be issued after a halt to get the schedule
-going again. It has no effect if no halt was actually issued.
-This is an immediate execution operator command.
-
+ 
+              Syntax:      cont
+ 
+              Response:    none
+ 
+ 
+ Parameters: none
+ 
+ Comments: 
+ This command must be issued after a halt to get the schedule
+ going again. It has no effect if no halt was actually issued.
+ This is an immediate execution operator command.
+ 

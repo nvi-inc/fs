@@ -1,49 +1,51 @@
            label - enter tape VSN and type (S2 drives)
-
-Syntax:     label=vsn,type,code
-
-Response:   label=vsn,type,code
-
-
-Settable parameters:
-vsn     up to 20 character Volume Serial Number (VSN), e.g. CA-1-
-        0012305.
-type    one or six character tape type, e.g. 1, or 010020. This
-        field may be omitted if code is csa. If not omitted and
-        code is csa, it must agree with the type specified in the
-        vsn.
-code    tape label format, an arbitrary string up to 32
+ 
+              Syntax:      label=vsn,type,code
+ 
+              Response:    label=vsn,type,code
+ 
+ 
+ Settable parameters:
+          vsn      up to 20 character Volume Serial Number (VSN), e.g.
+          CA-1-0012305.
+        type   one or six character tape type, e.g. 1, or 010020.
+        This field may be omitted if code is csa. If not
+        omitted and code is csa, it must agree with the type
+        specified in the vsn.
+        code   tape label format, an arbitrary string up to 32
         characters, default is csa.
-
-Comments:
-Normally used after newtape command has halted the schedule.
-
-If code is casa, vsn is interpreted as a CSA format, "XX-T-
-YYYYYZZ-N" label. The "XX-T-YYYYZZ" part of the label uniquely
-identifies this as a set of eight tapes. The check-sum is
-checked. If type is specified it must agree with the "T" type
-from the vsn, unless six characters are specified for type. If type
-is not specified, the single character "T" from the vsn is used
-as the typ. The suffix "-N" must be omitted if all eight tapes in
-a set are loaded, even if they will not all be recorded as one
-group. If fewer than eight tapes are loaded, which tapes are
-inserted and the order of their insertion in the transports
-should be specified in the suffix. For example if the first four
-tapes in a set are inserted in order the suffix "-0123" should be
-used. When fewer than eight tapes are inserted they should be
-inserted in ascending order and must go into consecutive
-transports in ascending order starting with transport 0. Loading
-the tapes in this way and using the suffix as described is
-necessary in order for the correlator to load the tapes for
-playback based only on information available in the log. In
-addition, if the tapes are not inserted in consecutive transports
-beginning with transport 0, the schedule will probably fail.
-
-For all other values of code, vsn may be an arbitrary string up
-to 20 characters long, but type must be specified in this case.
-
-If the recorder is already recording and a tape type different
-than what is in use is requested, no change will be made and an
-error will be reported.
-
-
+ 
+ Comments:
+ Normally used after newtape command has halted the schedule.
+ 
+ If code is casa, vsn is interpreted as a CSA format, "XX-T-
+ YYYYYZZ-N" label. The "XX-T-YYYYZZ" part of the label uniquely
+ identifies this as a set of eight tapes. The check-sum is
+ checked. If type is specified it must agree with the "T" type
+ from the vsn, unless six characters are specified for type. If
+ type is not specified, the single character "T" from the vsn
+ is used as the typ. The suffix "-N" must be omitted if all
+ eight tapes in a set are loaded, even if they will not all be
+ recorded as one group. If fewer than eight tapes are loaded,
+ which tapes are inserted and the order of their insertion in
+ the transports should be specified in the suffix. For example
+ if the first four tapes in a set are inserted in order the
+ suffix "-0123" should be used. When fewer than eight tapes are
+ inserted they should be inserted in ascending order and must
+ go into consecutive transports in ascending order starting
+ with transport 0. Loading the tapes in this way and using the
+ suffix as described is necessary in order for the correlator
+ to load the tapes for playback based only on information
+ available in the log. In addition, if the tapes are not
+ inserted in consecutive transports beginning with transport 0,
+ the schedule will probably fail.
+ 
+ For all other values of code, vsn may be an arbitrary string
+ up to 20 characters long, but type must be specified in this
+ case.
+ 
+ If the recorder is already recording and a tape type different
+ than what is in use is requested, no change will be made and
+ an error will be reported.
+ 
+ 

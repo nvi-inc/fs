@@ -1,0 +1,36 @@
+             rollform - (Mark IV, VLBA4, K4MK4 racks)
+ 
+              Syntax:      rollform=head,home,output,...
+          rollform=
+ 
+              Response:    rollform/head,home,output, ...
+ 
+ 
+ Settable parameters:
+          head     Headstack of home track, 1 or 2.
+          home     Home track. The trackform track number to assign
+          output roll map to, 2-33 inclusive.
+          output   A list of up to 16 output tracks for this home
+          track. Values -1, 2-33 inclusive. A null value
+          indicates that this map is not used. A value of -1
+          indicates that this map is used, but the entry is
+          empty.
+ 
+ Comments: 
+ Each rollform command defines the roll map for one home track
+ as defined in trackform. There are 16 maps. Each home track
+ has an entry in each map. To leave a home track empty in a
+ map, use -1 as the output track. If a value of output  is null
+ (blank), that map entry is undefined for that home track. All
+ maps after the last supplied output track are undefined for
+ that home track. The smallest contiguous subset of maps that
+ include at least empty or non-empty (but not undefined) map
+ entry is used.Thus by use of nulls, any contiguous subset of
+ maps can be used for rolling.
+ 
+ The rollform= command clears the rolling definition. Further
+ rollform=... commands increment the definition of the roll
+ maps. When the form=... command is entered with m for the roll
+ parameter, the currently defined roll will be used. If the
+ rolling definition is cleared at that time, no roll will be
+ used. 

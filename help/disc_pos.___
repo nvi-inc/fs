@@ -1,0 +1,25 @@
+             disc_pos - Mark V byte position pointers
+ 
+              Syntax:      disc_pos
+ 
+              Response:    disc_pos/write_pointer,read_pointer
+ 
+ 
+ Monitor-only parameters:
+                  write_pointer    Current write pointer byte position
+                read_pointer   Current read pointer byte position
+ 
+ Comments:
+ This command reports the current position of the write and
+ read pointers.
+ 
+ 
+ This command sets the read pointer 1 mega-byte before the
+ current write pointer location and attempts to the use the 
+ low-level Mark 5 data_check command. The displayed parameters
+ are the output of is command. A future version will allow the
+ position of the read pointer to be set explicitly, but this
+ can be done with a mk5 SNAP command. To check at positon
+ "pos", use:
+ 
+ mk5=play off pos,data_check? 

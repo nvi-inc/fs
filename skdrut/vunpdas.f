@@ -30,6 +30,7 @@ C 991108 nrv Remove hard-coded rack and recorder names and use the
 C            list initialized in skdrini.
 C 000907 nrv Get second headstack statement. If there are two of
 C            them, set NSTACK=2.
+C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -55,7 +56,7 @@ C                    section had vex error, <0 is invalid value
       integer*2 ltlc ! two_letter_code, if none use LIDTER
 C
 C  LOCAL:
-      character*128 cout,cunit
+      character*128 cout,cunit,ctemp
       double precision d
       integer i,nch,idumy
       logical ks2 ! true for an S2 recorder
@@ -246,7 +247,14 @@ C
             write(lu,'("VUNPDAS17 - Tape motion speed too long")')
             ierr=-17
           else
-            IDUMY = ICHMV_ch(ls2sp,1,cout(1:NCH))
+            call c2upper(cout(1:nch),ctemp)
+            if (ctemp(1:2).ne.'LP'.and.ctemp(1:3).ne.'SLP') then ! check S2 speed
+              write(lu,'("VUNPDAS17 - Invalid S2 speed, must be LP",
+     .                  " or SLP")')
+              ierr=-19
+            else
+              IDUMY = ICHMV_ch(ls2sp,1,ctemp(1:NCH))
+            endif ! check S2 speed
           endif
           iret = fvex_field(3,ptr_ch(cout),len(cout)) ! number of tapes
           if (iret.ne.0) return

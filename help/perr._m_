@@ -1,34 +1,34 @@
           perr - sample parity errors (Mark III drives)
-
-Syntax:     perr=track,chan,#samples,period,mode
-
-Response:   perr/track,chan,#samples,period,mode,error,synerr
-
-
-Settable parameters:
-track     Track to be decoded. No default.
-chan      Decoder channel A (default) or B.
-#samples  Number of samples to average, maximum 10, default 2.
-period      Time between samples in seconds, maximum 2, default
-            0.5.
-mode      rec or play, default rec.
-
-Monitor-only parameters:
-error     Average number of parity errors.
-synerr      Total number of sync errors.
-
-Comments: 
-This command sets up the appropriate track for reproduce, and
-then reads the decoder one more than the specified number of
-times with the specified amount of time between samples.
-Differences between successive readings are averaged to calculate
-error. The difference between the first and last synch error
-readings is synerr. In rec mode, track must be enabled, the tape
-must be moving forward, record must be enabled, and reproduce
-must be in read-after-write mode. In play mode, only
-read-after-write and moving tape are checked. In either mode, if
-the measurement of parity errors is precluded by the tape status,
-then nothing is done and no error message appears. (See also
-parity command.)
-
-This command requires a Mark III decoder.
+ 
+              Syntax:      perr=track,chan,#samples,period,mode
+ 
+              Response:    perr/track,chan,#samples,period,mode,error,synerr
+ 
+ 
+ Settable parameters:
+            track      Track to be decoded. No default.
+          chan     Decoder channel A (default) or B.
+          #samples Number of samples to average, maximum 10, default 2.
+          period   Time between samples in seconds, maximum 2, default
+          0.5.
+          mode     rec or play, default rec.
+ 
+ Monitor-only parameters:
+            error      Average number of parity errors.
+          synerr   Total number of sync errors.
+ 
+ Comments: 
+ This command sets up the appropriate track for reproduce, and
+ then reads the decoder one more than the specified number of
+ times with the specified amount of time between samples.
+ Differences between successive readings are averaged to
+ calculate error. The difference between the first and last
+ synch error readings is synerr. In rec mode, track must be
+ enabled, the tape must be moving forward, record must be
+ enabled, and reproduce must be in read-after-write mode. In
+ play mode, only read-after-write and moving tape are checked.
+ In either mode, if the measurement of parity errors is
+ precluded by the tape status, then nothing is done and no
+ error message appears. (See also parity command.)
+ 
+ This command requires a Mark III decoder.

@@ -1,10 +1,10 @@
                    op - operator identification
-
-Syntax:     op=name
-
-Response:   none
-
-
-Settable Parameters:
-name        Operator name or initials, maximum of 12 characters.
-            Embedded blanks are allowed.
+ 
+              Syntax:      op=name
+ 
+              Response:    none
+ 
+ 
+ Settable Parameters:
+            name       Operator name or initials, maximum of 12
+            characters. Embedded blanks are allowed.

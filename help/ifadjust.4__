@@ -1,86 +1,90 @@
          ifadjust - adjust IF attenuators (Mark IV racks)
-
-Syntax:     ifadjust=target
+ 
+              Syntax:      ifadjust=target
           ifadjust
-
-Response:   ifadjust/target,att1,att2,att3
-
-
-Settable Parameters:
-target      Settable target levels for TPI counts. 3300 counts
+ 
+              Response:    ifadjust/target,att1,att2,att3
+ 
+ 
+ Settable Parameters:
+            target     Settable target levels for TPI counts. 3300 counts
             (default).
-
-Monitor-only Parameter.
-att1        IF1 attenuator settings.
-att2        IF2 attenuator settings.
-att3        IF3 attenuator settings.
-
-Comments: 
-This command will attempt to automatically adjust the IF
-attenuators in a Mark IV rack. It may be useful for determining
-the correct IF attenuator settings for each mode before an
-experiment begins. The resulting values can be edited into the IF
-set-up procedure for the corresponding mode.  It should however
-not be used during an experiment because: (1) the length of time
-require to execute the command may disrupt the schedule and (2)
-it may change the attenuator settings between scans which will
-introduce unnecessary delay jumps in the data.
-
-In order to run ifadjust, set the rack up with the set-up
-procedure to be used for recording, e.g., sx2ca=1, then the
-adjustment process can be started by specifying a target level
-with ifadjust=  or just typing ifadjust to reuse the last target.
-If there has not been measurement made since the last FS start,
-the default target value is used.
-
-The ifadjust command attempts to optimize the IF attenuator
-settings for all data channels that are specified as being
-recorded by the current formatter set-up as specified by the
-trackform command. A data channel is a USB or LSB channel of an
-individual VC, i.e., each VC has two possible data channels. The
-patching of the VCs as specified by the patch command is used to
-determine which VCs are connected to which IF channels. Only IF
-channels that are specified as being patched are adjusted. The
-patch command must accurately reflect the patching or this
-command will not work well. Data channels may be deleted by
-removing them from the formatter set-up.
-
-The ifadjust command makes one adjustment pass for each VC side-
-band in use. Any mode that uses at least one LSB and at least one
-USB channel will require two passes. The LSB channels are handled
-in the first pass; the USB, in the second. The ifadjust command
-starts with the currently commanded attenuator settings and then
-attempts a binary search over the remaining range of the possible
-attenuator values, 0-63 dB, to locate the optimal value. This is
-done in parallel for each IF channel in use. In the worst case,
-it may take up to 16 seconds per pass. If the command
-successfully converges to an optimal value for all sidebands in
-use, the monitor response above is printed with the final values.
-Logged output messages are printed as progress reports at each
-step. The attenuators are left set to the final values and these
-become the default (null) and previous "*" values for these
-parameters.
-
-The optimal setting for each IF attenuator is defined as the
-maximum amount of attenuation that keeps all TPI levels for data
-channels connected to that IF at least target counts above the
-TPZERO level.
-
-If the adjustment process fails to converge, possible causes
-include: an inconsistency between the patching specified by the
-patch command and the actual patching, variable RFI that makes
-the readings unstable, and IF bandpass signal roll-off or stable
-RFI that causes the TPI levels to exceed the available dynamic
-range, about 12 dB. If the range of TPI levels in the active
-sidebands for a given IF channel exceeds 6 dB a warning message
-will printed even if the adjustment process converges. Likewise
-if any channel's TPI level exceeds 20000 counts at the final
-settings a warning message will be printed. These warning
-messages do not necessarily mean that there is a problem, but it
-would prudent to examine your system more closely if you get them
-as there could well be a potential problem.
-
-Please note that for Mark IV VCs the 10 dB pads in each sideband
-of the converter should be on, i.e., in the signal path, at all
-times. The automatic level setting and correct data recording
-depends on this.                    
+ 
+ Monitor-only Parameter.
+            att1       IF1 attenuator settings.
+            att2       IF2 attenuator settings.
+            att3       IF3 attenuator settings.
+ 
+ Comments: 
+ This command will attempt to automatically adjust the IF
+ attenuators in a Mark IV rack. It may be useful for
+ determining the correct IF attenuator settings for each mode
+ before an experiment begins. The resulting values can be
+ edited into the IF set-up procedure for the corresponding
+ mode.  It should however not be used during an experiment
+ because: (1) the length of time require to execute the command
+ may disrupt the schedule and (2) it may change the attenuator
+ settings between scans which will introduce unnecessary delay
+ jumps in the data.
+ 
+ In order to run ifadjust, set the rack up with the set-up
+ procedure to be used for recording, e.g., sx2ca=1, then the
+ adjustment process can be started by specifying a target level
+ with ifadjust=  or just typing ifadjust to reuse the last
+ target. If there has not been measurement made since the last
+ FS start, the default target value is used.
+ 
+ The ifadjust command attempts to optimize the IF attenuator
+ settings for all data channels that are specified as being
+ recorded by the current formatter set-up as specified by the
+ trackform command. A data channel is a USB or LSB channel of
+ an individual VC, i.e., each VC has two possible data
+ channels. The patching of the VCs as specified by the patch
+ command is used to determine which VCs are connected to which
+ IF channels. Only IF channels that are specified as being
+ patched are adjusted. The patch command must accurately
+ reflect the patching or this command will not work well. Data
+ channels may be deleted by removing them from the formatter
+ set-up.
+ 
+ The ifadjust command makes one adjustment pass for each VC
+ side-band in use. Any mode that uses at least one LSB and at
+ least one USB channel will require two passes. The LSB
+ channels are handled in the first pass; the USB, in the
+ second. The ifadjust command starts with the currently
+ commanded attenuator settings and then attempts a binary
+ search over the remaining range of the possible attenuator
+ values, 0-63 dB, to locate the optimal value. This is done in
+ parallel for each IF channel in use. In the worst case, it may
+ take up to 16 seconds per pass. If the command successfully
+ converges to an optimal value for all sidebands in use, the
+ monitor response above is printed with the final values.
+ Logged output messages are printed as progress reports at each
+ step. The attenuators are left set to the final values and
+ these become the default (null) and previous "*" values for
+ these parameters.
+ 
+ The optimal setting for each IF attenuator is defined as the
+ maximum amount of attenuation that keeps all TPI levels for
+ data channels connected to that IF at least target counts
+ above the TPZERO level.
+ 
+ If the adjustment process fails to converge, possible causes
+ include: an inconsistency between the patching specified by
+ the patch command and the actual patching, variable RFI that
+ makes the readings unstable, and IF bandpass signal roll-off
+ or stable RFI that causes the TPI levels to exceed the
+ available dynamic range, about 12 dB. If the range of TPI
+ levels in the active sidebands for a given IF channel exceeds
+ 6 dB a warning message will printed even if the adjustment
+ process converges. Likewise if any channel's TPI level exceeds
+ 20000 counts at the final settings a warning message will be
+ printed. These warning messages do not necessarily mean that
+ there is a problem, but it would prudent to examine your
+ system more closely if you get them as there could well be a
+ potential problem.
+ 
+ Please note that for Mark IV VCs the 10 dB pads in each
+ sideband of the converter should be on, i.e., in the signal
+ path, at all times. The automatic level setting and correct
+ data recording depends on this.                     

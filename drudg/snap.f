@@ -273,6 +273,9 @@ C 010820 nrv Don't append to rec commands if one of the recorders is none.
 C 010831 nrv Send krec_append to LSPIN.
 C 010927 nrv Initialize kk4_old and ks2_old, even if there are not two recs.
 C 011130 nrv Force S2 tape stop if mode change.
+C 020111 nrv Don't use early start time if tape is already running (JQ).
+C 020304 nrv Add for Mk5 piggyback mode: READY_DISC, DISC_POS, DISC_START,
+C            DISC_END,DISC_CHECK.
 C
 C
       iblen = ibuf_len*2
@@ -995,7 +998,7 @@ C READY
         IF (KNEWTP.and.idir.ne.0.and.krec) THEN ! new tape
           if (iobss.eq.0) then ! do a SETUP first
             ic=Z8000+3
-            if (ks2) then ! setup proc names
+            if (ks2.or.kk4) then ! setup proc names
               itype=1 
             else ! mnemonic proc names
               itype=2
@@ -1050,6 +1053,12 @@ C Prepass new tape
 C Set TSPINS zero here so that no other spin is done
 C (move out from previous if test)
           TSPINS=0.0
+C Do READY_DISC for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'ready_disc')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
         END IF ! new tape
 
 C UNLOADER 
@@ -1074,7 +1083,7 @@ C do it every scan for S2.
           if (iobss.eq.0.and.ks2) then ! don't do second setup at start for S2
           else ! do it
             ic=Z8000+3
-            if (ks2) then ! setup proc name
+            if (ks2.or.kk4) then ! setup proc name
               itype=1
             else ! mnemonic proc name
               itype=2
@@ -1137,7 +1146,7 @@ C         If FASTx preceeded, add a wait for tape to slow down
             kspin = .false.
           endif
 C  Wait until ITEARL before start time
-          ituse=1
+          if (.not.krunning) ituse=1 ! Don't use early start if already running
           call timout(ibuf2,itlen,iyr5,idayr5,ihr5,min5,isc5)
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
 C***** temporary, save for continuous
@@ -1249,6 +1258,12 @@ C TAPE monitor command
           nch = ichmv_ch(IBUF2,1,'tape')
           if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C Do DISC_POS for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'disc_pos')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
         endif ! don't/do write
 C Start tape if not already running.
         if (.not.krunning) then !start tape command
@@ -1303,6 +1318,12 @@ C Good data flag -- AFTER the ST command or good-data time
             if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
             nch = ichmv_ch(IBUF2,nch,'=on')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C Do DISC_START for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'disc_start=on')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
           endif ! non-S2 data valid
         endif ! some valid data
         endif ! non-zero recording scan
@@ -1322,6 +1343,12 @@ C Stop data flag
         if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
         nch = ichmv_ch(IBUF2,nch,'=off')
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C Do DISC_END for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'disc_end')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
 C ET command
         if ((.not.ks2.and..not.kcont.and.
      .      (ket.or.ipas_next(istnsk).ne.ipas(istnsk)))
@@ -1352,6 +1379,18 @@ C Tape monitor command
         nch = ichmv_ch(IBUF2,1,'tape')
         if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C Do DISC_POS for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'disc_pos')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
+C Do DISC_CHECK for Mk5 in piggyback mode.
+          if (kmk5_piggyback) then
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'disc_check')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif
 C S2 DATA_VALID 
         if (ks2.and..not.krunning) then ! need another data_valid off
           CALL IFILL(IBUF2,1,iblen,32)
