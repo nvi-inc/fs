@@ -109,6 +109,7 @@ char *ptr;
 	  }
 
       } 
+
       /*
       for(i=0;i<MAX_DET;i++)
 	if(lcl->itpis[i]!=0)
@@ -145,7 +146,7 @@ struct tpicd_cmd *lcl;
     goto end;
   }
     
-  if(*count >= 2 && *count <=6 ) {
+  if(*count >= 2 && *count <=7 ) {
     for(j=*count-2;j<5;j++) {
       *count=j+2;
       if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
@@ -182,7 +183,5 @@ struct tpicd_cmd *lcl;
   }
 
  end:
-  if(*count>0)
-    *count++;
   return;
 }

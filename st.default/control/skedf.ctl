@@ -173,15 +173,16 @@ $misc
 *--------------------------------------------------------------
 * TPI daemon setup
 *   prompt? 
-*     NO:  never prompt, use the specified period for all schedules
-*     YES: prompt for the period for all schedules and use 
-*          the period specified as the default
+*     NO:  Default. Never prompt, use the specified period for all schedules
+*     YES: Prompt for the period for all schedules and use the period 
+*     specified as the default
 *   period 
-*     <value>: specify the TPI sampling period in centiseconds, 0=off
+*     <value>: specify the TPI sampling period in centiseconds, 0=off,
+*              default is 0.
 * 
 * examples:
 *       prompt? period 
-* tpicd  NO       0    <<<<<<< don't use the TPI daemon
+* tpicd  NO       0    <<<<<<< don't use the TPI daemon (default values)
 * tpicd  NO      100   <<<<<<< always use 1 sec period
 * tpicd  YES      0    <<<<<<< prompt for period, default is OFF
 * tpicd  YES     500   <<<<<<< prompt for period, default is 5 sec
