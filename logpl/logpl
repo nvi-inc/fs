@@ -11,7 +11,18 @@
 
 # Screen layout constants
 
-set size 3          ;# Multipication factor to change size of plotting area
+# Determine the resolution. 
+  set win_sizeX [winfo screenwidth .]
+  set win_sizeY [winfo screenheight .]  
+  wm geometry . +0+0
+
+#position window full screen from top left corner.
+# wm geometry . $vieX\x$vieY+0+0
+  if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
+      set size 2.5  ;# Multipication factor to change size of plotting area
+  } else {
+      set size 3    ;# Multipication factor to change size of plotting area
+  }
 set aspect 1.1      ;# Factor of (X-axis size)/(Y-axis size)
 set xoffset 85      ;# Distance between window edge and plotting area vert-axis
 set yoffset 65      ;# Distance between window edge and plotting area upper limit
@@ -891,12 +902,14 @@ proc updateChandata {} {
     }
     set correct [string length $global_ymin(0)]
     if {$correct > 0} {
-	set global_ymin($currentChan) $global_ymin(0)
+# commented out to be able to set range.
+#	set global_ymin($currentChan) $global_ymin(0)
 	set global_ymin(0) [format "%13.8g" $global_ymin($newChan)]
     }
     set correct [string length $global_ymax(0)]
     if {$correct > 0} {
-	set global_ymax($currentChan) $global_ymax(0)
+# commented out to be able to set range.
+#	set global_ymax($currentChan) $global_ymax(0)
 	set global_ymax(0) [format "%13.8g" $global_ymax($newChan)]
     }
     set currentChan $newChan
@@ -925,6 +938,7 @@ proc changeXdata {} {
     set timestart [time2str [expr $global_xmin+$timebase] 3]
     set timestop [time2str [expr $global_xmax+$timebase] 3]
     set timepoints(0) $timepoints($currentChan)
+
 }
 
 # Procedure to update Y-axis data from memory to screen
@@ -994,6 +1008,7 @@ proc undoproc {} {
 proc Replot {} {
     global current_filename statusMsg text_no_logfile
     global global_xmin global_xmax text_outOfRange global_startmode
+    global global_ymin global_ymax currentChan
     set validname [newfile_checkfile $current_filename 2]
     set validrange [catch {if {$global_xmax > $global_xmin} {}}]
     if {[expr {$validname == 1}] && [expr {$validrange == 0}]} {
@@ -1010,9 +1025,8 @@ proc Replot {} {
 	} else {
 	    updateTimedata
 	}
-	
+
 	# Delete old points and lines
-	
 	.c delete point($currentChan)
 	.c delete lines($currentChan)
 
@@ -1095,6 +1109,9 @@ proc Replot {} {
 	    if {$validrange == 1} {puts $text_outOfRange}
 	}
     }
+#RDG change to make sure axis lines dividers stay present on the graph.
+#    they were disapearing when data was plotted.
+    createSystem $noactive
 }
 
 # Procedure to replot screen with reset X-axis
@@ -1143,9 +1160,10 @@ proc SetYauto {} {
 
 proc mkNode {dataset nodeNo channel} {
     global scrNodeNo scrSetNo dotsize polysize colorArray nodeDataMatrix
+    global offplot_ymin offplot_ymax offplot_xmin offplot_xmax
     if {$nodeDataMatrix($dataset,$nodeNo,1) == 1} {
 	switch $channel {
-	    1 {
+	    1 { 
 		set new [.c create oval \
 			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
@@ -1154,7 +1172,7 @@ proc mkNode {dataset nodeNo channel} {
 			-fill $colorArray($channel) -outline $colorArray($channel) \
 			-tags point($channel)]
 	    }
-	    2 {
+	    2 { 
 		set new [.c create rectangle \
 			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
@@ -1163,7 +1181,7 @@ proc mkNode {dataset nodeNo channel} {
 			-fill $colorArray($channel) -outline $colorArray($channel) \
 			-tags point($channel)]
 	    }
-	    3 {
+	    3 { 
 		set new [.c create poly \
 			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$polysize] \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$polysize] \
@@ -1173,7 +1191,7 @@ proc mkNode {dataset nodeNo channel} {
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$polysize] \
 			-fill $colorArray($channel) -tags point($channel)]
 	    }
-	    4 {
+	    4 { 
 		set new [.c create poly \
 			$nodeDataMatrix($dataset,$nodeNo,4) \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$polysize] \
@@ -1196,7 +1214,7 @@ proc mkNode {dataset nodeNo channel} {
 			-fill white -outline $colorArray($channel) \
 			-tags point($channel)]
 	    }
-	    2 {
+	    2 { 
 		set new [.c create rectangle \
 			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
@@ -1205,7 +1223,7 @@ proc mkNode {dataset nodeNo channel} {
 			-fill white -outline $colorArray($channel) \
 			-tags point($channel)]
 	    }
-	    3 {
+	    3 { 
 		set new [.c create line \
 			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
@@ -1217,7 +1235,7 @@ proc mkNode {dataset nodeNo channel} {
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
 			-fill $colorArray($channel) -tags point($channel)]
 	    }
-	    4 {
+	    4 { 
 		set new [.c create line \
 			$nodeDataMatrix($dataset,$nodeNo,4) \
 			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
@@ -1296,7 +1314,7 @@ proc calcCoord {dataset channel noactive screenpos} {
     global optionLog timepoints statusMsg
     global sizelimit xsizelimit xoffset yoffset aspect nodeDataMatrix
     global plotlimit_xmin plotlimit_xmax offplot_xmin offplot_xmax
-    global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax 
+    global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax
     set xmin $global_xmin; set xmax $global_xmax
     if {$optionInvert($channel)} {
 	set ymin $global_ymin($channel); set ymax $global_ymax($channel)
@@ -1789,7 +1807,7 @@ proc newfile_OK {output} {
     global global_xmin global_xmax timebase global_xmaxoffset global_xdefmax
     global selectMatrix noOfSelects noOfChannels global_antennaname
     global timestart timestop currentSet oldyear firstday
-    global timepoints global_ymin global_ymax tk_version
+    global timepoints global_ymin global_ymax
     if [newfile_checkfile $newfile_filename $output] {
 	set current_filename $newfile_filename
 	set fileID [open $current_filename r]
@@ -1831,9 +1849,7 @@ proc newfile_OK {output} {
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
 	    set selectMatrix($counter,4) 0
 	}
-	if {$tk_version < 4.2} {
-	    if {$output == 0} {destroy .newfile}
-	}
+	if {$output == 0} {destroy .newfile}
 	SetXreset
 	changeXdata
 	Replot
@@ -2203,10 +2219,10 @@ label .labelParm -anchor w -width 4 -text "Chan"
 label .labelYmin -anchor w -width 4 -text "Ymin"
 label .labelYmax -anchor w -width 4 -text "Ymax"
 
-label .labelTformat -anchor w -text yyyy.ddd.hh:mm:ss.ss
-entry .entryTimestart -width 18 -relief sunken -textvariable timestart
-entry .entryTimestop -width 18 -relief sunken -textvariable timestop
-entry .entryTimepoints -width 18 -relief sunken -textvariable timepoints(0)
+label .labelTformat -anchor w -text YYYY.DDD.HH:MM:SS.SS
+entry .entryTimestart -width 20 -relief sunken -textvariable timestart
+entry .entryTimestop -width 20 -relief sunken -textvariable timestop
+entry .entryTimepoints -width 20 -relief sunken -textvariable timepoints(0)
 radiobutton .radiobuttonData1 -width 1 \
 	-activeforeground $colorArray(1) -foreground $colorArray(1) -text "1" \
 	-variable newChan -value 1 -command updateChandata
@@ -2219,9 +2235,11 @@ radiobutton .radiobuttonData3 -width 1 \
 radiobutton .radiobuttonData4 -width 1 \
 	-activeforeground $colorArray(4) -foreground $colorArray(4) -text "4" \
 	-variable newChan -value 4 -command updateChandata
-entry .entryYmin -width 18 -relief sunken -textvariable global_ymin(0)
-entry .entryYmax -width 18 -relief sunken -textvariable global_ymax(0)
 
+entry .entryYmin -width 20 -relief sunken -textvariable global_ymin(0)
+entry .entryYmax -width 20 -relief sunken -textvariable global_ymax(0)
+
+# X-axis bindings
 bind .entryTimestart <Return> {focus .; Replot}
 bind .entryTimestart <Left> {.entryTimestart icursor [expr insert-1]}
 bind .entryTimestart <Right> {.entryTimestart icursor insert}
@@ -2230,8 +2248,10 @@ bind .entryTimepoints <Return> {focus .; set global_xmode 1; Replot}
 bind .entryTimestart <FocusIn> {set xchangeFlag 1}
 bind .entryTimestop <FocusIn> {set xchangeFlag 1}
 bind .entryTimepoints <FocusIn> {set xchangeFlag 1}
-bind .entryYmin <Return> {focus .;Replot}
-bind .entryYmax <Return> {focus .;Replot}
+
+# Y-axis bindings
+bind .entryYmin <Return> {focus .;set global_ymin($currentChan) $global_ymin(0);Replot}
+bind .entryYmax <Return> {focus .;set global_ymax($currentChan) $global_ymax(0);Replot}
 
 canvas .c -width [expr $xsizelimit+$xoffset+$xrightoffset] \
 	-height [expr $ysizelimit+$yoffset+$yrightoffset]
@@ -2611,10 +2631,6 @@ proc create_sourceWindow {mode} {
 #                           MAIN PROGRAM SECTION
 #
 # ==========================================================================
-
-
-
-
 
 # Main initilizing program
 # ------------------------
