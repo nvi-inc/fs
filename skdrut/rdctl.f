@@ -38,6 +38,9 @@ C 991211 nrv Add check against max_rec2_type.
 C 000326 nrv Add par_program_path.
 C 020508 nrv Add TPI daemon controls for drudg.
 C 020524 nrv Set TPICD defaults.
+C 021010 nrv Remove check for rack and recorder names because these
+C            names are not known until skdrini is called later. Just
+C            send the names back.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -363,28 +366,33 @@ C         EPOCH
 C         EQUIPMENT
                 if (ichcm_ch(ltmpnam,1,'EQUIPMENT').eq.0) then
                   call hol2char(ibuf,ic1,ic2,ctemp) ! rack
-                  i=1
-                  do while (i.le.max_rack_type.and.
-     .              rack_type(i).ne.ctemp)
-                    i=i+1
-                  enddo
-                  if (i.le.max_rack_type) dr_rack_type = ctemp
+C skdrini has not yet been read, so the rack and recorder types
+C are not known yet.
+C                 i=1
+C                 do while (i.le.max_rack_type.and.
+C    .              rack_type(i).ne.ctemp)
+C                   i=i+1
+C                 enddo
+C                 if (i.le.max_rack_type) dr_rack_type = ctemp
+                  dr_rack_type = ctemp
                   call gtfld(ibuf,ich,ilen,ic1,ic2)
                   call hol2char(ibuf,ic1,ic2,ctemp) ! rec A
-                  i=1
-                  do while (i.le.max_rec_type.and.
-     .              rec_type(i).ne.ctemp)
-                    i=i+1
-                  enddo
-                  if (i.le.max_rec_type) dr_reca_type = ctemp
+C                 i=1
+C                 do while (i.le.max_rec_type.and.
+C    .              rec_type(i).ne.ctemp)
+C                   i=i+1
+C                 enddo
+C                 if (i.le.max_rec_type) dr_reca_type = ctemp
+                  dr_reca_type = ctemp
                   call gtfld(ibuf,ich,ilen,ic1,ic2)
                   call hol2char(ibuf,ic1,ic2,ctemp) ! rec B
-                  i=1
-                  do while (i.le.max_rec2_type.and.
-     .              rec_type(i).ne.ctemp)
-                    i=i+1
-                  enddo
-                  if (i.le.max_rec_type) dr_recb_type = ctemp
+C                 i=1
+C                 do while (i.le.max_rec2_type.and.
+C    .              rec_type(i).ne.ctemp)
+C                   i=i+1
+C                 enddo
+C                 if (i.le.max_rec_type) dr_recb_type = ctemp
+                  dr_recb_type = ctemp
                 endif ! equipment line
 
 C         TPICD

@@ -182,14 +182,14 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '021002'
+      cversion = '021018'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
 C     iVerMajor_FS = 02
 C     iVerMinor_FS = 02
-C     iVerPatch_FS = 07
+C     iVerPatch_FS = 13
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -387,6 +387,7 @@ C     3. Read the schedule file sections.
 C
       kvex = .false. 
       kgeo = .true.
+      kpostpass = .false.
       if (.not.kskd) goto 500
         ix=trimlen(cexpna)
         IC=TRIMLEN(LSKDFI)
@@ -402,8 +403,8 @@ C
         if (kvex)
      .  write(luscn,"(' This is a VEX format schedule file.')")
         if (.not.kvex)
-     .  write(luscn,"(' This is a standard format (non-VEX) ',
-     .  'schedule file.')")
+     .  write(luscn,"(' This is a standard format (non-VEX) schedule ',
+     .  'file.')")
         if (kdrgfile)
      .  write(luscn,"(' This is a .drg schedule file.')")
         if (itearl(1).gt.0) then

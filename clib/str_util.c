@@ -2,6 +2,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/params.h"
+
 void uns2str(output,uvalue,width)
 char *output;
 unsigned uvalue;
@@ -39,7 +41,7 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
       char string[256];/* must be big enough to hold largest possible float */
 
       char *ptr, zero[2], sign[2];
-      int i,decpt, ndigit, wide, decd;
+      int i,decpt, ndigit, wide, decd ,isnum;
 
       output=output+strlen(output);     /* locate where to start filling */
 
@@ -68,7 +70,15 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
 
       if(deci==0 && strlen(string)>0) string[strlen(string)-1]='\0';
 
-      if(strlen(string)>wide) {     /* too wide, $ fill */
+      isnum=TRUE;
+      for(i=0;i<strlen(string);i++) {
+	if(NULL==strchr(" +-0123456789.",string[i])) {
+	  isnum=FALSE;
+	  break;
+	}
+      }
+
+      if(strlen(string)>wide || !isnum) {     /* too wide or nan/inf, $ fill */
         for (i=0; i< wide; i++) 
           output[i]='$';
         output[wide]='\0';
@@ -94,7 +104,7 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
       char string[256];/* must be big enough to hold largest possible float */
 
       char *ptr, zero[2], sign[2];
-      int i,decpt, ndigit, wide, decd;
+      int i,decpt, ndigit, wide, decd, isnum;
 
       output=output+strlen(output);     /* locate where to start filling */
 
@@ -123,7 +133,15 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
 
       if(deci==0 && strlen(string)>0) string[strlen(string)-1]='\0';
 
-      if(strlen(string)>wide) {     /* too wide, $ fill */
+      isnum=TRUE;
+      for(i=0;i<strlen(string);i++) {
+	if(NULL==strchr(" +-0123456789.",string[i])) {
+	  isnum=FALSE;
+	  break;
+	}
+      }
+
+      if(strlen(string)>wide || !isnum) {     /* too wide or nan/inf, $ fill */
         for (i=0; i< wide; i++) 
           output[i]='$';
         output[wide]='\0';

@@ -72,6 +72,7 @@ C Now compare values with acceptable limits
       call fs_get_imixif3(imixif3)
       if(imix.ne.imixif3) inerr(3)=inerr(3)+1
       iswc=0
+      call fs_get_iswif3_fs(iswif3_fs)
       do i=1,4
          if(kbit(iswavif3_fs,i)) then
            iswc=iswc+1
@@ -92,6 +93,7 @@ c
 c
       if(pcalcntrl.eq.3.and.ipcalp.ne.1) inerr(12)=inerr(12)+1
 c
+      call fs_get_ipcalif3(ipcalif3)
       if(pcalcntrl.eq.3) then
          if(ipcal.ne.ipcalif3) inerr(13)=inerr(13)+1
       endif

@@ -25,16 +25,16 @@ int *ilen;
     return;
 }
 
-void fc_tsys_vlba__(ip,itpis_vlba,ibuf,nch,caltmp)
+void fc_tsys_vlba__(ip,itpis_vlba,ibuf,nch,itask)
 long ip[5];
 int itpis_vlba[34];
 char *ibuf;
 int *nch;
-float caltmp[4];
+int *itask;
 {
     void tsys_vlba();
 
-    tsys_vlba(ip,itpis_vlba,ibuf,nch,caltmp);
+    tsys_vlba(ip,itpis_vlba,ibuf,nch,*itask);
 
     return;
 }

@@ -36,7 +36,7 @@ C               - registers from EXEC calls
       logical rn_test
       dimension lax(2)
       character cjchar
-      integer source
+      integer source,it(6)
       equivalence (reg,ireg(1)),(parm,iparm(1))
 C
 C  INITIALIZED VARIABLES
@@ -151,6 +151,7 @@ C     2.6 Sixth parm, detector device.
 C 
 260   continue
       call fdfld(ibuf,ich,nchar,ic1,ic2)
+      ich=ich+1
       if (ic1.eq.0) then
         ierr = -202
         goto 990 
@@ -163,18 +164,18 @@ C
      .  ldev=dtnam(iprm,1,inumb)
       if (cjchar(iprm,1).eq.'*') then
         idumm1 = ichmv(ldev,1,ldevfp,1,2)
-        goto 300
+        goto 270
       endif
       if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
         idumm1 = ichmv(ldev,1,iprm,1,2)
-        goto 300
+        goto 270
       endif
 C
       call fs_get_rack(rack)
       if (MK3.eq.rack.or.MK4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
 C                      Default for MK3 and MK4 is IF1
-        if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 300
+        if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 270
 
       else if (VLBA .eq. rack.or.VLBA4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
@@ -182,11 +183,23 @@ C                      Default for VLBA is IA
         if ((cjchar(ldev,1).eq.'i').or.
      .      ((cjchar(ldev,1).ge.'1').and.(cjchar(ldev,1).le.'9')).or.
      .      ((cjchar(ldev,1).ge.'a').and.(cjchar(ldev,1).le.'f')))
-     .    goto 300
+     .    goto 270
       endif
 C
       ierr = -202
       goto 990
+C
+C 7th parameter: wait time
+C
+ 270  continue
+      call gtprm(ibuf,ich,nchar,1,parm,ierr) 
+      if(cjchar(parm,1).eq.',') iwait = 120 
+      if(cjchar(parm,1).eq.'*') iwait = IWTFP
+      if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
+     .   iwait = iparm(1)
+      if(intp.ge.1.and.intp.le.1200) goto 300
+        ierr = -212 
+        goto 990
 C           Illegal value entered
 C
 C  3.0  Set common variables to their new values
@@ -198,6 +211,7 @@ C
       nptsfp = npts
       intpfp = intp
       stepfp = step
+      iwtfp = iwait
       goto 990
 C
 C  4.0  Schedule FIVPT to start working
@@ -266,23 +280,10 @@ c
 C
 C  Now check the cal and freq values.
 410   continue
-      if(ichain.eq.1) then
-        cal = caltmp(1)
-        bm=beamsz_fs(1)
-        fx=flx1fx_fs
-      else if(ichain.eq.2) then
-        cal = caltmp(2)
-        bm=beamsz_fs(2)
-        fx=flx2fx_fs
-      else if(ichain.eq.3) then
-        cal = caltmp(3)
-        bm=beamsz_fs(3)
-        fx=flx3fx_fs
-      else if(ichain.eq.4) then
-        cal = caltmp(4)
-        bm=beamsz_fs(4)
-        fx=flx4fx_fs
-      else if(ichain.eq.5) then
+      call fc_rte_time(it,it(6))
+      epoch=it(6)+it(5)/366.
+      call fc_get_tcal_fwhm(ldevfp,cal,bm,epoch,fx,corr,ssize,ierr)
+      if(ichain.eq.5) then
         cal = caltmp(5)
         bm=beamsz_fs(5)
         fx=flx5fx_fs
@@ -301,8 +302,9 @@ C  Now check the cal and freq values.
       calfp = cal
       bmfp_fs= bm
       fxfp_fs = fx
+      ssizfp= ssize
       ichfp_fs = ichain
-
+c
       if(rack.eq.MK3.or.rack.eq.MK4) then
         if(cjchar(ldevfp,1).ne.'v') goto 504
         indvc = ia2hx(ldevfp,2)

@@ -24,7 +24,8 @@ c
      $     STEPFP, STEPLC_FS(2), STEPNF, TP1IFD, TP2IFD,
      . TPERER(2), TPSOR(31), TPSPC(31), TPZERO(31), VADCRX,
      . VADCST, VLTPK_FS(2), VMINPK_FS(2),
-     . SLOWFW(2,2),SLOWRV(2,2)
+     . SLOWFW(2,2),SLOWRV(2,2),
+     . tpidiff(32),caltemps(32),SSIZFP
 
       INTEGER IADCRX, IADCST, IATLVC(15),
      . IATUVC(15), IBUGPC, IBWTAP(2), IBXHRX,
@@ -47,8 +48,8 @@ c
      . NBLKPC, NCYCPC, NPTSFP, NREPFP, NREPNF, 
      . NSAMPLC_FS(2), NSAMPPK_FS(2),
      . ICHFP_FS, ICH1NF_FS, ICH2NF_FS,
-     . iswif3_fs(4), iolif3_fs,
-     . itapof(200,2),ipcalif3,
+     . iolif3_fs,
+     . itapof(200,2),IWTFP,
      . b_quikr(INT_ALIGN),e_quikr
 
       LOGICAL KVrevW_FS(2), KV15rev_FS(2), KV15for_FS(2),
@@ -84,6 +85,7 @@ c
      . TPERER, TPSOR, TPSPC, TPZERO, VADCRX,
      . VADCST, VLTPK_FS, VMINPK_FS,
      . SLOWFW,SLOWRV,
+     . tpidiff,caltemps,SSIZFP,
      . IADCRX, IADCST, IATLVC,
      . IATUVC, IBUGPC, IBWTAP, IBXHRX,
      . IBXHST, IBYPAS, IBR4TAP, IBYPPC, ICHAND, 
@@ -105,7 +107,7 @@ c
      . NBLKPC, NCYCPC, NPTSFP, NREPFP,
      . NREPNF, NSAMPLC_FS, NSAMPPK_FS,
      . ICHFP_FS, ICH1NF_FS, ICH2NF_FS,
-     . iswif3_fs, iolif3_fs, itapof, ipcalif3,
+     . iolif3_fs, itapof,IWTFP,
      . KVrevW_FS, KV15rev_FS, KV15for_FS, KV15scale_FS,
      . KV13_FS, KV15flip_FS, KVw0_FS, KVw8_FS,
      . KSread_FS, KSwrite_FS, Ksdread_FS, Ksdwrite_FS,

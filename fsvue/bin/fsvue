@@ -9,6 +9,7 @@
   set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
   set ICONDIR /usr2/fs/fsvue/images
+  set FSDIR /usr2/fs
   set BINDIR /usr2/fs/bin
   set LIBDIR /usr2/fs/fsvue/lib
   set LOGDIR /usr2/log
@@ -44,15 +45,17 @@
   }
 
   # Use an associative array to store keys and commands
+  set cmd(Field_System) "xterm -geom 60x10+0+0 -sb -sl 1000 -e $BINDIR/fs"
+  set cmd(FS_Console) "xterm -geom 60x5+0+650 -e $BINDIR/oprin"
   set cmd(Send_mail) "$LIBDIR/vue_fsmail $fontsize"
   set cmd(Netscape_mail) "netscape -mail"
-  set cmd(Field_System) "/usr2/fs/bin/fs"
-  set cmd(FS_Console) "xterm -geom 60x5+0+650 -e /usr2/fs/bin/oprin"
-  set cmd(FS_Ready_Form) "/usr2/fs/msg/msg"
-  set cmd(logpl) "/usr2/fs/bin/logpl"      
-  set cmd(pdplt) "/usr2/fs/bin/pdplt"
-  set cmd(quit) quit
-  set cmd(xterm) "xterm -sb -bg black -fg white -cr yellow -geometry +10+120 -fn 10x20"
+  set cmd(FS_Ready_Form) "$FSDIR/msg/msg"
+  set cmd(lognm) "xterm -bg black -fg white -sb -sl 1000 -e $BINDIR/lognm"
+  set cmd(pfmed) "xterm -bg black -fg white -sb -sl 1000 -e $BINDIR/pfmed"
+  set cmd(setcl) "xterm -bg black -fg white -sb -sl 1000 -e $BINDIR/setcl"
+  set cmd(logpl) "$BINDIR/logpl"      
+  set cmd(pdplt) "xterm -bg black -fg white -sb -sl 1000 -e $BINDIR/pdplt"
+  set cmd(xterm) "xterm -bg black -fg white -cr yellow -geometry +10+120 -fn 10x20"
   
   # File storage
   set xfsfile "~/.xfscmds"

@@ -39,8 +39,8 @@ C  LOCAL
       integer ispin,irec,idir,ispinoff,idum,ierr,ihead,idx,
      .ispins,iyrs,idayrs,ihrs,mins,iscs,iras,isra,idecs,idec2d,
      .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,iftrem,
-     .mino,isco,isp,i,nch,ispm,isps,in,itu,idayrt,iyrt,ihrt,mint,isct
-      real spdips
+     .mino,isco,isp,i,nch,ispm,in,itu,idayrt,iyrt,ihrt,mint,isct
+      real spdips,sps
       logical ktape,ktrack,kcont,kauto
         logical kspin ! true if we need to spin tape to get to the
 C                       next observation
@@ -119,6 +119,7 @@ C 000614 nrv Don't do the block that runs the tape to the end of a pass
 C            if tape has auto allocation.
 C 011011 nrv New variable KAUTO used to set up for autoallocate.
 C 011011 nrv Add KAUTO to wrtap call.
+C 021014 nrv Change "seconds" argument in TSPIN to real.
 C
 C  Initialization
 
@@ -146,7 +147,7 @@ Cdyn
       IF (KNEWTP) THEN ! new tape
         idirp=-1
           if (nrecst(istn).eq.1.and.iftold.gt.10) then !spin down the tape to the end
-            ispinoff = ifix((270.0/330.0)*tspin(iftold,ispm,isps))
+            ispinoff = ifix((270.0/330.0)*tspin(iftold,ispm,sps))
             kspinoff = .true.
             if (kcont) kspinoff=.false.
             iftold=0
@@ -253,7 +254,7 @@ C  mode. It is not simply the direction, except for modes B and C.
 C  Calculate tape spin time and block stop time
 
       ispins = ifix((270.0/330.0)*TSPIN(
-     .             IABS(IFT(ISTNSK)-IFTOLD),ISPM,ISPS))
+     .             IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS))
       kend = ift(istnsk).eq.0.or.ift(istnsk).eq.maxtap(istn)
       kspin = ispins.gt.10 .and. .not.kend .and. .not.kcont
       ispin=0

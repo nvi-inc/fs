@@ -33,9 +33,9 @@ c     integer itrax(2,2,max_chan) ! fanned-out version of itras
      .iyr6,idayr6,ihr6,min6,isc6,idirn,ift_save,iftrem,ilatestop,
      .iyr7,idayr7,ihr7,min7,isc7,
      .iyr1,idayr1,ihr1,iimin1,isc1,
-     .idum,ispm,isps,ic,ichk,iset,ihd,isppl,iyr4,idayr4,ihr4,
+     .idum,ispm,ic,ichk,iset,ihd,isppl,iyr4,idayr4,ihr4,
      .min4,isc4,iyrch,idayrch,ihrch,minch,iscch,ndx,il,mjdpre
-      real tspins,d,epoc,ras,dcs,tslew,dum
+      real tspins,sps,d,epoc,ras,dcs,tslew,dum
       integer*2 lsname_next(max_sorlen/2),lfreq_next,lpre_next(3),
      .lmid_next(3),lpst_next(3),ldir_next(max_stn),lstn_next(max_stn),
      .lcable_next(max_stn),lmon_next(2),lday_next(2),lcb_new,lcbpre
@@ -95,7 +95,7 @@ C      - true if a new tape needs to be mounted before
 C        beginning the current observation
       integer jchar,trimlen,ir2as,ib2as,ichmv,iscnc,mcoma ! functions
       integer julda,iflch,ichcm,ichcm_ch,ichmv_ch,isecdif
-      real tspin,speed ! functions
+      real fspin,tspin,speed ! functions
       character*1 crec_use ! recorder in use, 1 or 2
       character*1 crec_use_old
       logical krec ! true if the recorder is NOT "none"
@@ -277,8 +277,13 @@ C 011130 nrv Force S2 tape stop if mode change.
 C 020111 nrv Don't use early start time if tape is already running (JQ).
 C 020304 nrv Add for Mk5 piggyback mode: READY_DISC, DISC_POS, DISC_START,
 C            DISC_END,DISC_CHECK.
-C 020923 nrv Recognize km5rec and don't put in tape commands for Mk5-only.
+C 020923 nrv Recognize km5rec and don't put in any tape commands for Mk5-only.
 C            Do early start for Mk5 if it's in the schedule.
+C 021010 nrv Do post-pass for all thin tapes if the postpass flag is true. 
+C            Postpass flag is set true for astro VEX schedules as default.
+C 021011 nrv Add one more digit to output of RA seconds.
+C 021014 nrv Change LSPIN and TSPIN "seconds" argument to real.
+C 021017 nrv Use FSPIN for superfast tape spinning.
 C
 C
       iblen = ibuf_len*2
@@ -765,7 +770,7 @@ C               SOURCE=name,ra,dec,epoch
 C         Right ascension, hhhmmss.s
           nch = nch + ib2as(irah,ibuf2,nch,Z4000+2*Z100+2)
           nch = nch + ib2as(iram,ibuf2,nch,Z4000+2*Z100+2)
-          nch = nch + ir2as(ras,ibuf2,nch,-4,-1)
+          nch = nch + ir2as(ras,ibuf2,nch,-5,-2)
           NCH = MCOMA(IBUF2,NCH)
 C         Declination, sddmmss.s
           IF (ichcm_ch(LDS,1,'-').eq.0) NCH = ICHMV(IBUF2,NCH,LDS,1,1)
@@ -885,7 +890,7 @@ C Note this will never be called for S2 because it only records forward.
 
 C Calculate tape spin time
           if (.not.ks2.and..not.kk4.and..not.km5.or..not.kcont) then
-            TSPINS = TSPIN(IABS(IFT(ISTNSK)-IFTOLD),ISPM,ISPS)
+            TSPINS = TSPIN(IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS)
             IF (IFT(ISTNSK).LT.IFTOLD) idirsp=-1
             IF (IFT(ISTNSK).gT.IFTOLD) idirsp=+1
           endif
@@ -893,19 +898,39 @@ C
 C Unload old tape
           IF (.not.km5.and.(KNEWTP.AND.IOBSst.NE.0)) THEN !get rid of old tape
             IF (.not.ks2_old.and..not.kk4_old.and.
-     .        .not.kcont.and.
-     .        IFTOLD.GT.50 ) THEN ! spin down remaining tape
-              CALL IFILL(IBUF2,1,iblen,32)
-              TSPINS=TSPIN(IFTOLD,ISPM,ISPS)
-              idirsp=-1
-              CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use_old,
-     .        nrecst(istn),  krec_append)
-              call hol2lower(ibuf2,(nch+1))
-              call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
-              kspin = .true. !Just wrote a FASTx command
-              TSPINS=0.0
-            END IF !spin down remaining tape
-            if (krunning) then ! stop it!
+     .        .not.kcont) THEN ! 
+              if (maxtap(istn).lt.10000.or.(maxtap(istn).gt.10000.and.
+     .          .not.kpostpass)) then ! spin down thick tape or if not postpass
+                if (iftold.gt.50) then ! enough to spin
+                  CALL IFILL(IBUF2,1,iblen,32)
+                  TSPINS=TSPIN(IFTOLD,ISPM,SPS)
+                  CALL LSPIN(-1,ISPM,SPS,IBUF2,NCH,crec_use_old,
+     .            nrecst(istn),  krec_append)
+                  call hol2lower(ibuf2,(nch+1))
+                  call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+                  kspin = .true. !Just wrote a FASTx command
+                  TSPINS=0.0
+                endif ! enough to spin
+              else ! postpass thin tape
+                CALL IFILL(IBUF2,1,iblen,32)
+                TSPINS=FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
+                CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use_old,
+     .          nrecst(istn),  krec_append)
+                call hol2lower(ibuf2,(nch+1))
+                call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+                CALL IFILL(IBUF2,1,iblen,32)
+                nch = ichmv_ch(IBUF2,1,'!+5s ')
+                call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+                TSPINS=FSPIN(maxtap(istn),ISPM,SPS)
+                CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use_old,
+     .          nrecst(istn),  krec_append)
+                call hol2lower(ibuf2,(nch+1))
+                call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+                kspin = .true. !Just wrote a FASTx command
+                TSPINS=0.0
+              endif ! spin down/postpass
+            END IF 
+            if (krunning) then ! stop continuous tape
               CALL IFILL(IBUF2,1,iblen,32)
               nch = ichmv_ch(IBUF2,1,'et')
               if (krec_append      ) nch = ichmv_ch(ibuf2,nch,
@@ -920,7 +945,7 @@ C Unload old tape
                 call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
                 CALL IFILL(IBUF2,1,iblen,32)
               endif  ! wait for stop
-            endif
+            endif ! stop continuous tape
             CALL IFILL(IBUF2,1,iblen,32)
             nch = ichmv_ch(IBUF2,1,'unlod')
             if (krec_append      ) nch = ichmv_ch(ibuf2,nch,
@@ -1060,9 +1085,8 @@ C Prepass new tape
           END IF !prepass
           IF (.not.km5.and..not.ks2.and..not.kk4.and.
      .      IFT(ISTNSK).GT.100) THEN !spin up
-            TSPINS=TSPIN(IFT(ISTNSK),ISPM,ISPS)
-            idirsp=+1
-            CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use,
+            TSPINS=TSPIN(IFT(ISTNSK),ISPM,SPS)
+            CALL LSPIN(+1,ISPM,SPS,IBUF2,NCH,crec_use,
      .      nrecst(istn), krec_append)
             call hol2lower(ibuf2,nch)
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
@@ -1139,7 +1163,7 @@ C Don't spin if we're already running. (? shouldn't happen?)
         IF (idir.ne.0.and..not.krunning.and..not.ks2.and..not.kk4
      .     .and..not.km5.and.TSPINS.GT.5.0.and.krec) THEN
           CALL IFILL(IBUF2,1,iblen,32)
-          CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
+          CALL LSPIN(idirsp,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
      .  krec_append)
           call hol2lower(ibuf2,(nch+1))
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
@@ -1488,10 +1512,7 @@ C       idum = ichmv(scan_name,1,scan_name_next,1,16)
       END DO ! ilen.gt.0,kerr.eq.0,ierr.eq.0
 C
       CONTINUE
-      if (.not.ks2.and..not.kk4.and..not.km5)
-     .TSPINS = TSPIN(IFTOLD,ISPM,ISPS)
-      IF (.not.km5.and..not.ks2.and..not.kk4.and.TSPINS.GT.5.) THEN
-C       THEN BEGIN "spin off the last tape"
+      IF (.not.km5.and..not.ks2.and..not.kk4) then ! postpass/spin off
         if (krunning) then ! stop it first
           CALL IFILL(IBUF2,1,iblen,32)
           nch = ichmv_ch(IBUF2,1,'et')
@@ -1502,13 +1523,46 @@ C       THEN BEGIN "spin off the last tape"
           if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif ! stop it first
-        CALL LSPIN(-1,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
-     .  krec_append)
-        call hol2lower(ibuf2,(nch+1))
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
-        kspin = .true. !Just wrote a FASTx command
-C       ENDT "spin off the last tape"
-      END IF
+        if (maxtap(istn).gt.10000.and.kpostpass) THEN ! postpass last thin tape
+          TSPINS = FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
+          CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .    krec_append)
+          call hol2lower(ibuf2,(nch+1))
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(IBUF2,1,'!+5s ')
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+          TSPINS = FSPIN(maxtap(istn),ISPM,SPS)
+          CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .    krec_append)
+          call hol2lower(ibuf2,(nch+1))
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+        else if (iftold.gt.50) then! spin off last tape
+          TSPINS = TSPIN(IFTOLD,ISPM,SPS)
+          CALL LSPIN(-1,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .    krec_append)
+          call hol2lower(ibuf2,(nch+1))
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+        endif ! thin/thick
+      endif ! postpass/spinoff
+        
+C     IF (.not.km5.and..not.ks2.and..not.kk4.and.TSPINS.GT.5.) THEN
+C       spin off the last tape
+C       if (krunning) then ! stop it first
+C         CALL IFILL(IBUF2,1,iblen,32)
+C         nch = ichmv_ch(IBUF2,1,'et')
+C         if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+C         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C         CALL IFILL(IBUF2,1,iblen,32)
+C         nch = ichmv_ch(IBUF2,1,'!+3S')
+C         if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s')
+C         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C       endif ! stop it first
+C       CALL LSPIN(-1,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
+C    .  krec_append)
+C       call hol2lower(ibuf2,(nch+1))
+C       call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+C     END IF ! spin off the last tape
       if (ks2.and.krunning) then ! shut it down
         CALL TMADD(IYR4,IDAYR4,IHR4,MIN4,ISC4,itlate(istn),
      .    IYR6,IDAYR6,IHR6,MIN6,ISC6)

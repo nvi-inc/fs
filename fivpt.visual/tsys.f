@@ -61,8 +61,10 @@ c9954 format(' nin',i10,' indata "',6a2,'"')
                call char2hol('95',isav,2,3)
                call fs_get_imixif3(imixif3)
                call fs_get_iat3if(iat3if)
+               call fs_get_iswif3_fs(iswif3_fs)
+               call fs_get_ipcalif3(ipcalif3)
                call i32ma(isav(3),iat3if,imixif3,iswif3_fs(1),
-     &              iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+     &              iswif3_fs(2),iswif3_fs(3),iswif3_fs(4),ipcalif3)
             endif
          else
             call get_vatt(name,lwho,ierr,ichfp_fs,0)
@@ -87,8 +89,10 @@ C
          else
             call char2hol('95',izero,2,3)
             call fs_get_imixif3(imixif3)
+            call fs_get_iswif3_fs(iswif3_fs)
+            call fs_get_ipcalif3(ipcalif3)
             call i32ma(izero(3),63,imixif3,iswif3_fs(1),
-     &           iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+     &           iswif3_fs(2),iswif3_fs(3),iswif3_fs(4),ipcalif3)
          endif
          call matcn(izero,-13,idolr,indata,nin,2,ierr)
       else

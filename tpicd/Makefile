@@ -1,7 +1,7 @@
 LIBES = ../clib/clib.a ../poclb/poclb.a ../rtelb/rtelb.a
 #
 ../bin/tpicd: tpicd.o $(OBJECTS)
-	cc  -o ../bin/tpicd tpicd.o $(OBJECTS) $(LIBES)
+	cc  -o ../bin/tpicd tpicd.o $(OBJECTS) $(LIBES) -lm
 	strip ../bin/tpicd
 
 tpicd:

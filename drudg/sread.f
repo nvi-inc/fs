@@ -72,7 +72,8 @@ C 010102 nrv Add LUSCN to obs_sort call.
 C 011011 nrv Move FRINIT call to start.
 C 020713 nrv Move reading of $PARAM to DRPRRD.
 C 020713 nrv Set kgeo=.true. for sked file, false for VEX. Will be
-C            set to .true. if sked_params block is found later.
+C            set to .true. if sked_params block is found later in the VEX file.
+C 021014 nrv Set kpostpass=.true. for astro (.not.geo) schedules.
 C
 C
       close(unit=LU_INFILE)
@@ -100,7 +101,7 @@ C vex file section
 C*********************************************************
       if (cbuf(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
-        kgeo=.false. ! will be set to true if SKED_PARAMS is found
+        kgeo=.false. ! will be set to true if SKED_PARAMS is found later
 C       Read up to the $EXPER section to find the line number
         rewind(lu_infile)
         call initf(lu_infile,ierr)
@@ -351,6 +352,8 @@ C     Read parameters needed by drudg
         isortm = 5
         ihdtm = 6
       call drprrd(ivexnum)
+C     if (.not.kgeo) kpostpass=.true.
+      if (.not.kgeo) kpostpass=.false.
 C
 C Close the schedule file.
       close(lu_infile)

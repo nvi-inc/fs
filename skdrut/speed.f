@@ -27,6 +27,8 @@ C 010817 nrv Change K4 speeds per Takashima.
 C 020111 nrv Check LSTREC not LTERNA for recorder type.
 C 020713 nrv Add third K4 speed for 128 Mbps.
 C 020926 nrv Change K4 sample rate logic to get correct speed (per S. Kurihara)
+C 021003 nrv Calculate K4 speed in dm/s not m/s. This will make the
+C            footages in the schedule be in dm not meters, for more precision.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -78,7 +80,7 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
         else 
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
-        sp=sp/1000.0 ! convert to mps
+        sp=sp/100.0 ! convert to dm/s
 
 C 1. First account for the fan factor.
 

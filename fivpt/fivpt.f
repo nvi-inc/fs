@@ -52,7 +52,8 @@ C   0. Set-up and do preliminary work
 C
 C        Beamwidth Calculation
 C
-      bw = bmfp_fs
+      bw = sqrt(bmfp_fs*bmfp_fs+ssizfp*ssizfp)
+      nwait=iwtfp
       nmb=intpfp
       ntsys=intpfp
       call hol2char(laxfp,1,4,caxfp)
@@ -89,7 +90,7 @@ C
 C     WAIT TO ACQUIRE SOURCE
 C 
       nwt=nwait 
-      if(.not.rn_test('aquir')) nwt=450
+      if(.not.rn_test('aquir')) nwt=nwait*2
       call onsor(nwt,ierr)
       if (ierr.ne.0) goto 80010 
       kon=.true.

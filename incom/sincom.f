@@ -472,6 +472,7 @@ c
       do i=1,4
         iswif3_fs(i)=1
       enddo
+      call fs_set_iswif3_fs(iswif3_fs)
 C
       ibr4tap(1)=-1
       ibr4tap(2)=-1
@@ -1067,6 +1068,22 @@ C
       endif
       call fs_set_iapdflg(iapdflg)
       call fmpclose(idcb,ierr)
+c
+c section 9: rx gain files
+c
+ 810  continue
+      call fc_get_rxgain_files(ierr)
+      if(ierr.lt.0) then
+        call logit7ci(0,0,0,1,-403,'bo',ierr)
+        goto 990
+      endif
+c
+ 820  continue
+      call fc_get_flux_file(ierr)
+      if(ierr.lt.0) then
+        call logit7ci(0,0,0,1,-404,'bo',ierr)
+        goto 990
+      endif
       goto 995
 C
 C  This is the error return section

@@ -29,7 +29,7 @@ C
       call fc_rte_time(it,idum)
       tim2=it(3)*60.0+float(it(2))+it(1)*0.01
       if (tim2.lt.tim) tim2=tim2+3600.
-      if (tim2.gt.tim+10.0) goto 600
+      if (tim2.gt.tim+30.0) goto 600
       call susp(1,10)
       goto 5
 C
