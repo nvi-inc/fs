@@ -22,7 +22,7 @@ C          3) force checks Y or N <<<<<<< removed
       integer iTimeDifSec               !difference in seconds between two times
       real   tspin,speed ! functions
       integer trimlen ! functions
-      integer julda,ichcm
+      integer julda
 
 C  LOCAL:
 C     IFTOLD - foot count at end of previous observation
@@ -166,8 +166,6 @@ C     iobsst - number of obs for this station that are recorded on tape
 
       character*7 cwrap ! cable wrap from CBINF
       character*8 cwrap2
-      integer*2 lwrap(4)
-      equivalence (lwrap,cwrap)
       logical KNEWTP,KNEWT
 C      - true if a new tape needs to be mounted before
 C        beginning the current observation
@@ -409,6 +407,9 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2004Sep13 JMGipson.  Add midtape command for Mark5.
 ! 2004Nov17 JMGipson.  added data_valid=on,off if recorder is "none".
 !   "                  For in2net, changed postob_mk5a to postob
+! 2004Nov22-23 JMG    Fixed bug in S2 adaptive schedules. Drudg issued stop commands
+!                     when it shouldn't have.
+!
 
 
       icod_old=-1
@@ -714,8 +715,11 @@ C     tape stop and the next tape start is longer than the specified
 C     time gap. For "continuous" tape is nominally never stopped.
 C
 ! Default value for end of a pass. May change below.
-        call TimeAdd(itime_scan_end_prev,itlate(istn),
+        if (iobsst.eq.0) then
+        else
+          call TimeAdd(itime_scan_end_prev,itlate(istn),
      >             itime_pass_end)
+        endif
 
         if(kadap) then
           if(ks2) then          !s2
@@ -781,8 +785,9 @@ C Use this section only for continuous
 C       always stop on the last scan but not for late stop.
         if (istnsk_next.eq.999.and.itlate(istn).eq.0) ket=.true.
 C         always stop if S2 mode changes for the next scan.
-        if (ks2.and.ichcm(lmode(1,istn,icod_next),1,
-     .    lmode(1,istn,icod),1,8).ne.0) ket=.true.
+        if(ks2.and.cmode(istn,icod_next) .ne. cmode(istn,icod)) then
+           ket=.true.
+        endif
 
 C <<<previous>>>>  <<<<<<<<<<current>>>>>>>>>>>>>>>>>>>>>>  <<<next>>>>>>>>>
 C data     tape    tape           data   data         tape    tape
@@ -1098,7 +1103,10 @@ C  Wait until ITEARL before start time
           call snap_wait_time(lu_outfile,itime_tape_start)
 C   Write out tape monitor command at early start
           call snap_monitor(kin2net)
+! Always issue the "Start recording command" for ks2. This is done so that if the
+! tape is stopped for some reason, the schedule can be restarted.
           if(.not. krunning.or. ks2) then
+!          if(.not.krunning) then
              call snap_start_recording(kin2net)
           endif
         endif ! continuous

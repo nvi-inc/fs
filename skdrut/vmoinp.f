@@ -66,8 +66,14 @@ C  LOCAL:
       double precision bitden_das
       integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
-      integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
-     .ls(max_ifd),ls2m(8),ls2d(4),lpre(4),lp(max_ifd)
+      integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd)
+      integer*2 ls(max_ifd)
+!,ls2m(8),ls2d(4)
+      integer*2 lpre(4),lp(max_ifd)
+      character*16 cs2m
+      character*16 cm
+      character*8 cs2d
+
       double precision bitden
       character*4 cmodu, croll ! ON or OFF
       character*3 cs(max_chan)
@@ -208,12 +214,12 @@ C         Get $IF statements.
 C         Get $TRACKS statements (i.e. fanout).
           if (ks2rec) then
             call vunps2m(modedefnames(icode),stndefnames(istn),
-     .      ivexnum,iret,ierr,lu,ls2m,
-     .      ls2d,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
+     .      ivexnum,iret,ierr,lu,cs2m,
+     .      cs2d,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
           else
             call vunptrk(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
-     .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac,cmodu)
+     .      cm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac,cmodu)
           endif
           if (ierr.ne.0) then 
             write(lu,'("VMOINP06 - Error getting $TRACKS information",
@@ -398,24 +404,31 @@ C         mode name available, put that in LMODE. SPEED checks LMFMT
 C         to determine DR/NDR. drudg modifies LMFMT from user input
 C         for non-VEX.
           if (.not.ks2rec) then
-            idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
-            idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
+!            idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
+!            idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
+            cmode(istn,icode)=cm
+            cmfmt(istn,icode)=cm
           endif
 C         Sample rate.
           samprate(icode)=srate ! sample rate
           if (ks2rec) then
-            idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
-            idum = ichmv(ls2data(1,istn,icode),1,ls2d,1,8)
+ !           idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
+!            idum = ichmv(ls2data(1,istn,icode),1,ls2d,1,8)
+            cs2mode(istn,icode)=cs2m
+            cs2data(istn,icode)=cs2d
+            cmode(istn,icode)=cs2m
           else ! m3/m4/vrec
 C         Set bit density depending on the mode and rack type
-            if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then 
+            if(cmode(istn,icode)(1:1) .eq. "V") then
+!            if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then
               bitden=34020 ! VLBA non-data replacement
             else 
               bitden=33333 ! Mark3/4 data replacement
             endif
 C           If "56000" was specified, for this station, use higher bit density
             if (bitden_das.gt.55000.d0) then 
-              if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then 
+              if(cmode(istn,icode)(1:1) .eq. "V") then
+!              if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then
                 bitden=56700 ! VLBA non-data replacement
               else 
                 bitden=56250 ! Mark3/4 data replacement

@@ -1,5 +1,5 @@
       SUBROUTINE vunps2m(modef,stdef,ivexnum,iret,ierr,lu,
-     .ls2m,ls2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
+     .cs2m,cs2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
 C
 C     VUNPS2M gets the S2 mode from the $TRACKS section 
 C     for station STDEF and mode MODEF. 
@@ -18,6 +18,7 @@ C 970117 nrv Remove "track_frame_format", irrelevant for S2.
 C 970124 nrv Remove "lsm" from call.
 C 021111 jfq Add ls2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac
 C            - supporting S2_data_source and fanout_def
+! 2004JMG modified ls2m,ls2d to be ASCII, not hollerrith.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -30,8 +31,10 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-      integer*2 ls2m(8) ! recording format
-      integer*2 ls2d(4) ! data source
+!      integer*2 ls2m(8) ! recording format
+!      integer*2 ls2d(4) ! data source
+      character*16 cs2m
+      character*8 cs2d
       character*1 cp(max_track) ! subpass
       character*6 cchref(max_track) ! channel ID ref
       character*1 csm(max_track) ! sign/mag
@@ -42,13 +45,12 @@ C                    <0 indicates invalid value for a field
 C
 C  LOCAL:
       character*128 cout
-      integer it(4),j,nn,in,i,nch,idumy
-      integer ichmv_ch ! function
+      integer it(4),j,nn,in,i,nch
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
 C    Initialize.
-      CALL IFILL(Ls2M,1,16,oblank)
-      CALL IFILL(Ls2D,1,8,oblank)
+!      CALL IFILL(Ls2M,1,16,oblank)
+!      CALL IFILL(Ls2D,1,8,oblank)
       do in=1,max_track
         cp(in)=' '
         cchref(in)=''
@@ -72,7 +74,8 @@ C
         write(lu,'("VUNPS2M01 - Record mode name too long")')
         iret=-1
       else
-        IDUMY = ICHMV_ch(LS2M,1,cout(1:NCH))
+!        IDUMY = ICHMV_ch(LS2M,1,cout(1:NCH))
+        cs2m=cout(1:nch)
       END IF  !
 C
 C  1a. The S2 data source
@@ -87,7 +90,8 @@ C
         write(lu,'("VUNPS2M01 - data source name too long")')
         iret=-1
       else
-        IDUMY = ICHMV_ch(LS2D,1,cout(1:NCH))
+!        IDUMY = ICHMV_ch(LS2D,1,cout(1:NCH))
+        cs2d=cout(1:nch)
       END IF  !
 C
 C  2. Fanout def statements

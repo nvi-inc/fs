@@ -3,7 +3,7 @@
 OBJECTS = \
 pfmed.o fed.o ffm.o ffmp.o fnblnk.o kerr.o pfblk.o \
 pfcop.o pfmbd.o purn.o reprc.o ftn_edit.o sortp.o\
-scanp.o sortq.o readpl.o ldsrt.o\
+scanp.o sortq.o readpl.o ldsrt.o follow_link.o
 #
 CFLAGS = -I../oprin/readline-2.0
 LIBES = ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a ../flib/flib.a\

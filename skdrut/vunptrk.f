@@ -1,5 +1,5 @@
       SUBROUTINE vunptrk(modef,stdef,ivexnum,iret,ierr,lu,
-     .lm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
+     .cm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
 C
 C     VUNPTRK gets the track assignments and fanout information
 C     for station STDEF and mode MODEF and converts it.
@@ -18,6 +18,7 @@ C 970124 nrv Move initialization to start.
 C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
 C 020327 nrv Get data_modulation.
 C 021111 jfq Don't allow track 0 or headstack 0
+! 2004Dec8. Changed lm from holerrith to ASCII
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -30,7 +31,8 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-      integer*2 lm(4) ! recording format
+!      integer*2 lm(4) ! recording format
+      character*8 cm
       character*1 cp(max_track) ! subpass
       character*6 cchref(max_track) ! channel ID ref
       character*1 csm(max_track) ! sign/mag
@@ -42,13 +44,12 @@ C                    <0 indicates invalid value for a field
 C
 C  LOCAL:
       character*128 cout
-      integer it(4),j,nn,in,i,nch,idumy
-      integer ichmv_ch ! function
+      integer it(4),j,nn,in,i,nch
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
 C  Initialize
 C
-      CALL IFILL(LM,1,8,oblank)
+!      CALL IFILL(LM,1,8,oblank)
       do in=1,max_track
         cp(in)=' '
         cchref(in)=''
@@ -72,7 +73,8 @@ C
         write(lu,'("VUNPTRK01 - Track format name too long")')
         iret=-1
       else
-        IDUMY = ICHMV_ch(LM,1,cout(1:NCH))
+!        IDUMY = ICHMV_ch(LM,1,cout(1:NCH))
+         cm=cout(1:nch)
       END IF  !
 
 C  1.5 Data modulation
