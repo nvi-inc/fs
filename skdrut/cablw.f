@@ -29,11 +29,11 @@ C
 C     CALLING SUBROUTINES: SLEWT
 C
 C  LOCAL VARIABLES
-      real*4 daz1,daz2
-C        DAZ1,DAZ2  - two choices of az moving
-      real*4 aznew1,aznew2 
-C        trial values for VLBA algorithm
+      real daz1,daz2 ! DAZ1,DAZ2  - two choices of az moving
+      real aznew1,aznew2 ! trial values for VLBA and Noto algorithms
       integer ichcm_ch
+      real aznow_orig,aznew_orig ! non-wrapped values
+      logical kq31,kq24 ! for Noto logic
 C
 C HISTORY
 C    LAST MODIFIED: created 780424
@@ -44,6 +44,14 @@ C    940513 nrv Special section added for VLBA slewing algorithm
 C               which says: don't go through south unless necessary.
 C               Invoke this algorithm with a "V" in the cable wrap
 C               variable LWRNEW.
+C 961016 nrv Add special section for Noto slewing algorithm. 1) If
+C            going from one quadrant to the opposite one, must go
+C            through south. 2) If going to az=270 to 290, antenna
+C            thinks it can get there in CCW, but this range is
+C            "prohibited" and operator must catch it and send it the
+C            right way. So allow extra time for antenna to slew to
+C            the wrong limit and then go around 360 degrees to the
+C            other wrap.
 C
 C
 C
@@ -60,6 +68,8 @@ C     If we don't have an azel mount, delta-az=0 and return.
       GOTO 990
 C
 100   continue
+      aznow_orig = aznow
+      aznew_orig = aznew
       IF (AZNOW.LT.STNLIM(1,1,ISTN)) AZNOW=AZNOW+2.0*PI
       IF (AZNEW.LT.STNLIM(1,1,ISTN)) AZNEW=AZNEW+2.0*PI
       IF (ichcm_ch(LWRCUR,1,'C ').eq.0) AZNOW=AZNOW+2.0*PI
@@ -88,6 +98,9 @@ C     We are in the outer overlapped portion
 120   CABLW = DAZ2
       call char2hol ('C ',LWRNEW,1,2)
       AZNEW = AZNEW+2.0*PI
+C     if (ichcm_ch(lwrnew,1,'N ').eq.0) goto 600 !special section for NOTO slewing 
+      if (ichcm_ch(lstnna(1,istn),1,'Noto    ').eq.0.or.
+     .    ichcm_ch(lstnna(1,istn),1,'NOTO    ').eq.0) goto 600
       GOTO 990
 C
 C
@@ -142,6 +155,32 @@ C     and spring of 1994.
      .  call char2hol ('W ',LWRNEW,1,2)
       goto 990
 
+C 6. Special NOTO slewing logic. 
+
+C     True if moving from quadrant 3 to 1
+600   kq31 = aznow_orig.gt.0.5*pi.and.aznow_orig.le.    pi.and.
+     .       aznew_orig.gt.1.5*pi.and.aznew_orig.le.2.0*pi
+C     True if moving from quadrant 2 to 4
+      kq24 = aznow_orig.gt.    pi.and.aznow_orig.le.1.5*pi.and.
+     .       aznew_orig.gt.0.0   .and.aznew_orig.le.0.5*pi
+      if (kq31.or.kq24) then
+        aznew2 = -1.0
+        aznew1 = aznew
+        if (aznew+2.0*pi .lt. stnlim(2,1,istn))
+     .    aznew2 = aznew1+2.0*pi
+        if (aznew-2.0*pi .gt. stnlim(1,1,istn)) 
+     .    aznew2 = aznew1-2.0*pi
+        if (kq31) aznew=amin0(aznew1,aznew2)
+        if (kq24) aznew=amax0(aznew1,aznew2)
+        cablw = abs(aznew-aznow)
+      else
+C       Allow extra time for the antenna to slew the wrong way to the
+c       CCW limit and then start slewing from there around 360 degrees.
+        if (ichcm_ch(lwrcur,1,'W ').eq.0.and.aznow.lt.2.5*pi.and.
+     .  aznew.gt.3.5*pi.and.aznew.lt.(stnlim(1,1,istn)+2.0*pi) )
+     .  cablw = cablw + (aznow-stnlim(1,1,istn)) 
+      endif
+      goto 990
 C
 990   RETURN
       END
