@@ -78,6 +78,11 @@ long ip[5];
 
   pos-=1e6;
 
+  if(pos<0) {
+    ierr=-412;
+    goto error;
+  }
+
   out_recs=0;
   out_class=0;
     
@@ -123,5 +128,3 @@ long ip[5];
     memcpy(ip+3,"5d",2);
     return ierr;
 }
-
-
