@@ -47,7 +47,7 @@ long ip[5];
 	  if(1!=sscanf(ptr+1,"%d",&ierr)){
 	    ierr=-311;
 	    goto error;
-	  } else if(ierr != 0) {
+	  } else if(ierr != 0 && ierr != 1) {
 	    logita(NULL,-900-ierr,"m5","  ");
 	    ierr=-314;
 	    goto error;

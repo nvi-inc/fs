@@ -73,18 +73,23 @@ long ip[5];
 	    ptr=strtok(ptr+1," ");
 	    while (ptr!=NULL && strcmp(ptr,";")!=0) {
 	      if (strcmp(ptr,":")!=0) {
-		len=sizeof(shm_addr->mk5vsn)-1;
-		if(strncmp(ptr,shm_addr->mk5vsn,len)!=0 ||
-		   shm_addr->mk5vsn_logchg != shm_addr->logchg) {
+		if(i==0) {
+		  len=sizeof(shm_addr->mk5vsn)-1;
+		  if(!(strncmp(ptr,shm_addr->mk5vsn,len)!=0 ||
+		       shm_addr->mk5vsn_logchg != shm_addr->logchg)) {
+		    cls_clr(ip[0]);
+		    goto done;
+		  }
 		  len=strlen(ptr);
 		  strncat(output,ptr,len);
-		  cls_snd(&out_class,output,strlen(output),0,0);
-		  out_recs++;
 		  strncpy(shm_addr->mk5vsn,ptr,sizeof(shm_addr->mk5vsn));
 		  shm_addr->mk5vsn_logchg = shm_addr->logchg;
 		  if(len>sizeof(shm_addr->mk5vsn)-1)
 		    shm_addr->mk5vsn[sizeof(shm_addr->mk5vsn)-1]=0;
-		  goto done;
+		} else {
+		  strcat(output,",");
+		  len=strlen(ptr);
+		  strncat(output,ptr,len);
 		}
 	      }
 	      ptr=strtok(NULL," ");
@@ -92,6 +97,9 @@ long ip[5];
 	  }
 	}
       }
+      cls_snd(&out_class,output,strlen(output),0,0);
+      out_recs++;
+
  done:
       ip[0]=out_class;
       ip[1]=out_recs;
