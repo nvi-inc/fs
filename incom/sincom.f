@@ -5,7 +5,6 @@ C
 C
 C     INITIALIZE FIELD SYSTEM COMMON
 C
-      integer itsp(8)
       integer idcb(2)
       integer*4 ip(5)
       integer*2 ibuf(50)
@@ -23,7 +22,7 @@ C  End 600 variables
       data ibaud  /110,300,600,1200,2400,4800,9600/
       data ibauddb/110,300,600,1200,2400,4800,9600,115200/
       data kasct,kascp,kdesp,kdest/4*.false./
-      data itsp/0,3,7,15,30,60,120,240/
+
 C
 C  HISTORY:
 C  WHO  WHEN    WHAT
@@ -62,7 +61,6 @@ C
         systmp(i)= 0.0
       enddo
       call fs_set_systmp(systmp)
-      ipcflg=0
       itrkpa(1)=0
       itrkpa(2)=0
       ierr = 0
@@ -90,9 +88,10 @@ C
       enddo
       iadcrx =  0
       lswcal = 0
-      ldv1nf = 0
-      ldevfp = 0
       call char2hol(' ',laxfp,1,4)
+      call char2hol(' ',ldevfp,1,2)
+      call char2hol(' ',ldv1nf,1,2)
+      call char2hol(' ',ldv2nf,1,2)
       do i=1,2
         fastfw(i)=0.
         slowfw(i)=0.
@@ -102,10 +101,11 @@ C
         revoff(i)=0.
         pslope(i)=0.
         rslope(i)=0.
-        posnhd(i)=0.
+        posnhd(i)=-3999.
         ipashd(i)=0
       enddo
       call fs_set_ipashd(ipashd)
+      call fs_set_posnhd(posnhd)
       i70kch=0
       i20kch=0
       nrx_fs=0
@@ -115,6 +115,12 @@ C
       end do
       tierr = 0
       pierr = 0
+C
+      do i=1,14
+         ifp2vc(i) = 0
+      enddo
+      call fs_set_ifp2vc(ifp2vc)
+      
 c
 c station check arrays
 c
@@ -155,8 +161,12 @@ C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
         idummy = ichmv_ch(lfreqv(1,i),1,'000.00')
+        freqvc(i)=0.0
+        extbwvc(i)=-1.0
       enddo
       call fs_set_lfreqv(lfreqv)
+      call fs_set_freqvc(freqvc)
+      call fs_set_extbwvc(extbwvc)
       iratfm = -1
       call fs_set_iratfm(iratfm)
       imodfm = 1
@@ -321,7 +331,7 @@ C
       kadapt_fs=.false.
       kenastk(1)=.false.
       kenastk(2)=.false.
-      call fs_set_kena(kenastk)
+      call fs_set_kenastk(kenastk)
       kiwslw_fs=.false.
       lvbosc_fs=5.0
       ilvtl_fs=0
@@ -352,15 +362,6 @@ C
       ifamst(1) = 1
       ifamst(2) = 1
       ifamst(3) = 1
-C
-      call fs_set_freqlo(0.0,0)
-      call fs_set_freqlo(0.0,1)
-      call fs_set_freqlo(0.0,2)
-      call fs_set_freqlo(0.0,3)
-      call fs_set_frequp(0.0,0)
-      call fs_set_frequp(0.0,1)
-      call fs_set_frequp(0.0,2)
-      call fs_set_frequp(0.0,3)
 C
       llog='station '
       call char2hol(llog,illog,1,8)
@@ -524,26 +525,19 @@ C LINE #2 MAX TAPE SPEED - imaxtpsd
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
       imaxtpsd = ias2b(ibuf,ic1,ic2-ic1+1)
+C
       if (imaxtpsd.eq.360) then
         index = -2
         goto 3002
-      endif
-      if (imaxtpsd.eq.330) then
+      else if (imaxtpsd.eq.330) then
         index = -1
         goto 3002
-      endif
-      if (imaxtpsd.eq.270) then
+      else if (imaxtpsd.eq.270.or.imaxtpsd.eq.240) then
         index = 7
         goto 3002
       endif
-      do i=1,8
-        if (imaxtpsd.eq.itsp(i)) then
-          index=i-1
-          goto 3002
-        endif
-      enddo
-        call logit7ci(0,0,0,1,-140,'bo',2) ! invalid speed given
-        ierrx = -1
+      call logit7ci(0,0,0,1,-140,'bo',2) ! invalid speed given
+      ierrx = -1
 3002  continue
       imaxtpsd = index ! invalid speed given
       call fs_set_imaxtpsd(imaxtpsd)
@@ -555,25 +549,17 @@ C LINE #3 SCHEDULE TAPE SPEED - iskdtpsd
       if (ic1.eq.0) goto 320
       iskdtpsd = ias2b(ibuf,ic1,ic2-ic1+1)
       if (iskdtpsd.eq.360) then
-        index = -2
-        goto 3003
+         index = -2
+         goto 3003
+      else if (iskdtpsd.eq.330) then
+         index = -1
+         goto 3003
+      else if (iskdtpsd.eq.270.or.iskdtpsd.eq.240) then
+         index = 7
+         goto 3003
       endif
-      if (iskdtpsd.eq.330) then
-        index = -1
-        goto 3003
-      endif
-      if (iskdtpsd.eq.270) then
-        index = 7
-        goto 3003
-      endif
-      do i=1,8
-        if (iskdtpsd.eq.itsp(i)) then
-          index=i-1
-          goto 3003
-        endif
-      enddo
-        call logit7ci(0,0,0,1,-140,'bo',3) ! invalid speed given
-        ierrx = -1
+      call logit7ci(0,0,0,1,-140,'bo',3) ! invalid speed given
+      ierrx = -1
 3003  continue
       iskdtpsd = index 
       call fs_set_iskdtpsd(iskdtpsd)
@@ -622,19 +608,23 @@ C LINE #7  TYPE OF RACK - rack
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
-      if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
+      il=ic2-ic1+1
+      if (ichcm_ch(ibuf,ic1,'mk3').eq.0.and.il.eq.3) then
         rack = MK3
         rack_type = MK3
-      else if (ichcm_ch(ibuf,ic1,'vlbag').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlbag').eq.0.and.il.eq.5) then
         rack = VLBA
         rack_type = VLBAG
-      else if (ichcm_ch(ibuf,ic1,'vlba').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlba').eq.0.and.il.eq.4) then
         rack = VLBA
         rack_type = VLBA
-      else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'mk4').eq.0.and.il.eq.3) then
         rack = MK4
         rack_type = MK4
-      else if (ichcm_ch(ibuf,ic1,'none').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
+        rack = VLBA4
+        rack_type = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
       else
@@ -651,25 +641,29 @@ C LINE #8  TYPE OF RECORDER - drive
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
-      if (ichcm_ch(ibuf,ic1,'mk3b').eq.0) then
+      il=ic2-ic1+1
+      if (ichcm_ch(ibuf,ic1,'mk3b').eq.0.and.il.eq.4) then
         drive = MK3
         drive_type = MK3B
-      else if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'mk3').eq.0.and.il.eq.3) then
         drive = MK3
         drive_type = MK3
-      else if (ichcm_ch(ibuf,ic1,'vlba2').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlba2').eq.0.and.il.eq.5) then
         drive = VLBA
         drive_type = VLBA2
-      else if (ichcm_ch(ibuf,ic1,'vlba').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlba').eq.0.and.il.eq.4) then
         drive = VLBA
         drive_type = VLBA
-      else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'mk4').eq.0.and.il.eq.3) then
         drive = MK4
         drive_type = MK4
-      else if (ichcm_ch(ibuf,ic1,'s2').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'s2').eq.0.and.il.eq.2) then
         drive = S2
         drive_type = S2
-      else if (ichcm_ch(ibuf,ic1,'none').eq.0) then
+      else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
+        drive = VLBA4
+        drive_type = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive = 0
         drive_type = 0
       else
@@ -804,13 +798,14 @@ C LINE #18  if3 lo freq.
           ifrqd=ias2b(ibuf,idec+1,ic2-idec)
         endif
       endif
-      freqif3_fs=ifrqu
-      freqif3_fs=100*freqif3_fs+ifrqd
+      freqif3=ifrqu
+      freqif3=100*freqif3+ifrqd
       if (ifrqu.lt.0.or.ifrqd.lt.0.or.
-     &    freqif3_fs.lt.50000.or.freqif3_fs.gt.100000) then
+     &    freqif3.lt.50000.or.freqif3.gt.100000) then
         call logit7ci(0,0,0,1,-140,'bo',18)
         ierrx = ierr
       endif
+      call fs_set_freqif3(freqif3)
 C LINE #19  if3 switches
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
@@ -839,7 +834,7 @@ C LINE #20 DS board in vlba FM ?
         ierrx = -1         
       endif
       call fs_set_vfm_xpnt(vfm_xpnt)
-C LINE #21 VACUUM MOTOR VOLTAGE - motorv
+C LINE #21 VACUUM MOTOR VOLTAGE THICK TAPE FOR VACUUM SWITHCING - motorv2
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
       ich = 1
@@ -851,7 +846,7 @@ C LINE #21 VACUUM MOTOR VOLTAGE - motorv
         ierrx = ierr
       endif
       call fs_set_motorv2(motorv2)
-C LINE #22  TAPE THICKNESS - itpthick
+C LINE #22  TAPE THICKNESS FOR VACUUM SWITCHING - itpthick2
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
       ich = 1
@@ -859,10 +854,46 @@ C LINE #22  TAPE THICKNESS - itpthick
       if (ic1.eq.0) goto 320
       itpthick2 = ias2b(ibuf,ic1,ic2-ic1+1)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-140,'bo',21)
+        call logit7ci(0,0,0,1,-140,'bo',22)
         ierrx = ierr
       endif
       call fs_set_itpthick2(itpthick2)
+C LINE #23 thick tape WRITE VOLTAGE FOR switching - wrvolt2
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      wrvolt2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        ierrx = ierr
+      endif
+      call fs_set_wrvolt2(wrvolt2)
+C LINE #24 HEAD WRITE VOLTAGE FOR VLBA HEAD4 - wrvolt4
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      wrvolt4 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        ierrx = ierr
+      endif
+      call fs_set_wrvolt4(wrvolt4)
+C LINE #25 WRITE VOLTAGE FOR VLBA HEAD4 for thick if switching - wrvolt42
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 900
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 320
+      wrvolt42 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        ierrx = ierr
+      endif
+      call fs_set_wrvolt42(wrvolt42)
 C
 320   continue
       call fmpclose(idcb,ierr)
