@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+# Usage: cmdctlfix file
+
+if ($#ARGV < 0) {
+    print "Usage: cmdctlfix file\n";
+    print "\n";
+    print "Fixes a pre-K4 {st|fs}cmd.ctl file for use with a FS version that supposts K4\n";
+    print "\n";
+    print "file  is the control file to be fixed\n";
+    print "\n";
+    print "the original file is renamed with a '.bak' extension\n";
+
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try 'cmdctlfix' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$name=$ARGV[0];
+
+if ($name =~ /(.*)\.ctl$/ ) {
+    $bak = $1 . ".bak";
+    $out = $name;
+    if (!-e $out) {
+	die "Can't find $out. Quitting.\n";
+    }
+}
+
+# rename the original if we can and open the files
+
+if (-e $bak) {
+    die "Backup-file $bak already exists, giving up.\n";
+}
+
+rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+if(!open(BAK,$bak)) {
+    print "Failed to open $bak: $!\n";
+    if(!rename($bak,$out)) {
+	print "Unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open $out: $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) { 
+	print "Unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+
+#okay now process the file
+
+$not=0;
+
+while(<BAK>) {
+    if (/^\*/) {
+	print OUT;
+	next;
+    }
+    $rack=substr($_,25,2);
+    $drive=substr($_,27,2);
+
+    $not = $not || $rack  !~ /[123456789ABCDEF]/;
+    $not = $not || $drive !~ /[123456789ABCDEF]/;
+
+    if (substr($rack,0,1) == '1' && substr($rack,1,1) == 'F') {
+	$rack="7F";
+    }
+    substr($_,25,2)=$rack;
+
+    if (substr($drive,0,1) == '1' && substr($drive,1,1) == 'F') {
+	$drive="7F";
+    }
+    substr($_,27,2)=$drive;
+    substr($_,29,1)="\n";
+    print OUT;
+}
+
+if ($not) {
+    print "Warning: Some non-comments lines had rack or drive designators outside 0-F.\n";
+    print "There is probably something wrong, like $out wasn't a command list file\n";
+    print "or $out had already been fixed.\n";
+    print "In order to recover you will probably want to rename $bak to $out,\n";
+    print "using: \"mv $bak $out\"\n";
+}
