@@ -520,7 +520,7 @@ Popup "Operator Menu"
 	Exec	"Monit: status  C-S-2"	exec xterm -name monit2 -e monit2 &
 	Exec	"Monit: Tsys    C-S-3"	exec xterm -name monit3 -e monit3 &
 	Exec	"Monit: LBA     C-S-4"	exec xterm -name monit4 -e monit4 &
-	Exec	"Monit: Mark 5  C-S-4"	exec xterm -name monit5 -e monit5 &
+	Exec	"Monit: Mark 5  C-S-5"	exec xterm -name monit5 -e monit5 &
 	Exec	"Chekr          C-S-C"	exec run -w chekr &
 	Exec	"Emacs          C-S-E"	exec emacs &
 	Exec	"Logex          C-S-L"	exec xterm -name logex -e logex &
@@ -555,8 +555,8 @@ EndPopup
 # Menu acts like normal twm menu if you just hold the button down,
 # but if you click instead, the menu stays up, motif style
 Function "window_ops_func"
-	PopUp 	"Click"		"Window Ops2"
-	PopUp	"Motion"	"Window Ops2"
+	PopUp 	"Click"		Window Ops2
+	PopUp	"Motion"	Window Ops2
 # Motif would add
 #       Delete  "DoubleClick"  
 EndFunction
