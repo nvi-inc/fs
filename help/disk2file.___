@@ -14,10 +14,12 @@ Settable Parameters:
                       transfer
           destination Filename to store the transfer data to, maximum 64
                       characters, no default
-          start       Number of seconds into the scan to start the transfer
-                      at, must be non-negative.
-          end         Number of seconds into the scan to end the transfer
-                      at, must be greater than start
+          start       String to be passed to Mark5A scan_set command to define
+                      start of data transfer, see comments below, maximum 32
+                      characters
+          end         String to be passed to Mark5A scan_set command to define
+                      end of data transfer, see comments below. maximum 32
+                      characters
           options     Curently ignored, maximum 32 characters
 
 Monitor-only parameters:
@@ -52,6 +54,17 @@ file. See the monitor only parameter "option" for the details.
 The use of "abort" as the first parameter will cause any active
 transfer to be stopped. No error will be returned if there is no
 transfer active or any other Mark 5 error occurs.
+
+The start and end parameters are fully defined under the "scan_set
+command at "http://web.haystack.mit.edu/mark5/command5a.pdf". For
+typical use start and stop are UT epochs of the form
+"####y###d##h##m##s" are used. The seconds field can include a decimal
+point and fractional part. If fields are omitted the first occuring
+instance in the scan that matches the specified fields is implied. As
+of this writing (Nov 2004), Mark5A programs in the field will refuse
+to accept times outside the actual recording available on disk. An
+update is planned that will use any data within the specified start
+and stop times. This will be more robust.
 
 The "options" settable parameter is currently ignored, but is included
 for future expansion.
