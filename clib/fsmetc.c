@@ -26,6 +26,7 @@
 
 #define MAXDATASIZE 90 /* max number of bytes we can get at once */
 #define MAXLEN 90
+long begin, end;
 
 int fsmetc_()
 {
@@ -39,72 +40,40 @@ int fsmetc_()
   float temp,pres,humi,wsp;
   int wdir, status, once=0;
 
-  if ((he=gethostbyname("localhost")) == NULL) {  /* get the host info */
-    return (-8);
-  }
-
-  /* Is the Field System running? status = 0 for yes 
-  status = system("ps -e | grep metserver > /dev/null");
-
-  if (!status) {*/
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-      return (-1);
+  rte_rawt(&begin);
+  /* Give me the most recent weather data. 
+   * Weather can not be older then 4secs.
+   */
+  if(begin >= end+400) {
+    if ((he=gethostbyname("localhost")) == NULL) {  /* get the host info */
+      return (-8);
     }
-  
-      their_addr.sin_family = AF_INET;    /* host byte order */
-      their_addr.sin_port = htons(PORT);  /* short, network byte order */
-      their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-      memset(&(their_addr.sin_zero), '\0', 8);  /* zero the rest of the struct */
-      
-      if (connect(sockfd, (struct sockaddr *)&their_addr, 
-		  sizeof(struct sockaddr)) == -1) {
-	/*logit(NULL,-307,"wx");*/
-	return (-2);
-      }
-      
-      /* Set socket nonblocking  */
-      if ((flags = fcntl (sockfd, F_GETFL, 0)) < 0) {
-	return (-3);
-      }
 
-      flags |= O_NONBLOCK; 
-      
-      if (( fcntl (sockfd, F_SETFL, flags )) < 0) {
-	return (-4);
-      }
-      
-      to.tv_sec = 4;
-      
-      FD_ZERO(&ready);
-      FD_SET(sockfd, &ready);
-      
-      if (select(sockfd+1, &ready, (fd_set *)0, (fd_set *)0, &to) < 0) {
-	return (-5);
-      }
-      bzero(buf, sizeof buf);
-      if (FD_ISSET(sockfd, &ready)) {
-	if ((numbytes=recv(sockfd, buf, 29, 0)) == -1) {
-	  return (-6);
-	}
-	buf[numbytes]='\0';
-	sscanf(buf,"%f,%f,%f,%f,%d",
-	       &shm_addr->tempwx,
-	       &shm_addr->preswx,
-	       &shm_addr->humiwx,
-	       &shm_addr->speedwx,
-	       &shm_addr->directionwx);
-      }
-      /*close(sockfd);
-	} else {
-	return (-312);
-	}*/
-  close(sockfd);
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+       return (-1);
+    }
+    
+    their_addr.sin_family = AF_INET;    /* host byte order */
+    their_addr.sin_port = htons(PORT);  /* short, network byte order */
+    their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+    memset(&(their_addr.sin_zero), '\0', 8);  /* zero the rest of the struct */
+    if (connect(sockfd, (struct sockaddr *)&their_addr, 
+		sizeof(struct sockaddr)) == -1) {
+      return (-2);
+    }
+    
+    if ((numbytes=recv(sockfd, buf, 29, 0)) == -1) {
+      return (-6);
+    }
+    buf[numbytes]='\0';
+    sscanf(buf,"%f,%f,%f,%f,%d",
+	   &shm_addr->tempwx,
+	   &shm_addr->preswx,
+	   &shm_addr->humiwx,
+	   &shm_addr->speedwx,
+	   &shm_addr->directionwx);
+    rte_rawt(&end);
+    close(sockfd);
+  }
   return (0);
 }
-
-
-
-
-
-
-
