@@ -11,6 +11,8 @@ C
 C  HISTORY:
 C    NRV  891110  Modified UNPWC for new catalog routines
 C    nrv  930225  implicit none
+
+C Called by: UNPSO
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -27,29 +29,29 @@ C   Celestial Source Info:
       integer*2 LRAHMS(8)
 C          - right ascension, in form hhmmss.ssssssss
 C     IRAH,IRAM - right ascension hours&minutes, in binary
-      real*8 RAS
+      double precision RAS
 C           - seconds field of right ascension
-      real*8 RARAD
+      double precision RARAD
 C           - right ascension, in radians
 C     LDSIGN - sign of the declination, + or -
       integer*2 LDCDMS(7)
 C           - declination, in form ddmmss.sssssss
 C     IDECD,IDECM - declination degrees&minutes, in binary
-      real*8 DECS
+      double precision DECS
 C           - declination seconds field
-      real*8 DECRAD
+      double precision DECRAD
 C           - declination, in radians
 C     EPOCH - epoch of RA and DEC
-      real*4 epoch
+      real epoch
 C
 C  SUBROUTINES CALLED: LNFCH UTILITIES
 C
 C  LOCAL:
 C
-      real*8 DAS2B
+      double precision DAS2B
       integer ic1,ic2,id,idumy,isign,numc2
       integer iscnc,ias2b,ichmv,jchar ! functions
-      real*4 r
+      real r
 C
 C  INITIALIZED:
 C
@@ -151,7 +153,7 @@ C     The epoch of position.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
-      IF  (IERR.LT.0.OR.R.LT.1800.0.OR.R.GT.2500.0) THEN  !
+      IF  (R.LE.0.0.OR.R.LT.1800.0.OR.R.GT.3500.0) THEN  !
         IERR = -109
         RETURN
       END IF  !

@@ -35,7 +35,7 @@ C 960516 nrv Add MAX_FLD, set to 20
 C 960522 nrv Add lots of max's, change max_pass to index*subpasses
 C 960628 nrv Allow more modes in catalog.
 C 970114 nrv Add MAX_SORLEN, length of source names.
-C 970204 nrv Change max_subpass to 8
+C 970204 nrv Change max_subpass to 36, max_frq to 20
 C 970206 nrv Chage max_headstack to 1
 C
 C********************************************************************
@@ -74,7 +74,10 @@ C
       integer max_sor,max_cel,max_sat,max_frq
       PARAMETER (MAX_SOR = 305)
 
-C     The maximum number of CHARACTERS in a source name.
+C     The maximum number of CHARACTERS in a source name. Should be
+C     an even integer. Maximum size now is 26, to be cmpatible with
+C     the multiple-use arrays in skcom. Increase the LNASEx arrays if
+C     you need longer source names.
       integer max_sorlen
       PARAMETER (MAX_SORLEN = 16)
 C

@@ -1,14 +1,10 @@
 C     SOURCE INFORMATION COMMON BLOCK 
 C 970114 nrv Change dimension of LSORNA to use MAX_SORLEN
 C 
-      real*8 SORP50,SORPDA,SATP50,SATDY 
-c
-      real*4 flux
-c 
+      double precision SORP50,SORPDA,SATP50,SATDY 
+      real flux
       integer nsourc,nsatel,nceles,nflux,isaty
-c
       integer*2 lsorna
-c
       character*1 cfltype
       character*128 sordefnames
 c

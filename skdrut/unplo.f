@@ -31,7 +31,7 @@ C
 C  OUTPUT:
       integer ierr,iv(max_chan),nv
       integer*2 lidstn,lcode,lsubgr,lifinp,ls
-      real*4 freqlo
+      double precision freqlo
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
 C     LIDSTN - 1-char station ID
 C     LCODE - frequency code, 2 char
@@ -40,8 +40,7 @@ C     LIFINP - IF distributor input, 1 or 2 or 3, N or A, or A,B,C,D
 C     FREQLO - sum of LO frequencies, MHz
 C
 C  LOCAL:
-      real*8 DAS2B
-      real*4 d
+      double precision das2b,d
       integer ivv,ich,nch,ic1,ic2,i,l,idumy
       integer ichcm_ch,jchar,ichmv,ias2b
 C

@@ -83,17 +83,38 @@ long ip[5];                           /* ipc parameters */
          } else if(0==strcmp(command->argv[0],"load")) {
             request.type=0;
 	    if (shm_addr->equip.drive_type != VLBA2) {
+	      if(shm_addr->vacsw == 1 && shm_addr->thin!= 0 &&
+		 shm_addr->thin!=1) {
+		ierr=-206;
+		goto error;
+	      }
 	      request.addr=0xb9;                 /* capstan size */
 	      request.data= bits16on(16) & (shm_addr->capstan); 
 	      add_req(&buffer,&request);
 
               request.addr=0xbd;                 /* tape thickness */
-              request.data= bits16on(16) & shm_addr->itpthick;
+	      if(shm_addr->vacsw == 1 )
+		if(shm_addr->thin)
+		  request.data= bits16on(16) & shm_addr->itpthick;
+		else
+		  request.data= bits16on(16) & shm_addr->itpthick2;
+	      else 
+		request.data= bits16on(16) & shm_addr->itpthick;
+
               add_req(&buffer,&request);
 
-              fvacuum= 0.0;
               request.addr=0xd0;               /* vacuum motor voltage (mV) */
-              fvacuum=(shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+	      if(shm_addr->vacsw == 1 )
+		if(shm_addr->thin)
+		  fvacuum=
+		    (shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+		else
+		  fvacuum=
+		    (shm_addr->motorv2*shm_addr->inscsl) + shm_addr->inscint;
+	      else
+		  fvacuum=
+		    (shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+
               request.data = bits16on(14) & (int)(fvacuum);
               add_req(&buffer,&request);
 
@@ -101,6 +122,8 @@ long ip[5];                           /* ipc parameters */
 /* the write voltage (millivolts) to send to record is a factor of 2 */
               request.data= bits16on(14) & (int)((shm_addr->wrvolt/2)*1000);
               add_req(&buffer,&request);
+
+	      shm_addr->thin=-1;
 	    } else {
 
              request.addr=0xd3;                 /* head write voltage */

@@ -1,4 +1,4 @@
-      SUBROUTINE wrdur(ksw,istart,idur,iqual,ih,im,is,
+      SUBROUTINE wrdur(kx,ksw,istart,idur,iqual,ih,im,is,
      .  iz2,iz3,lu,isetup)
 C
 C  WRDUR writes the dur lines for the VLBA
@@ -15,7 +15,7 @@ C   COMMON BLOCKS USED
       include 'drcom.ftni'
 C
 C  INPUT:
-        logical ksw
+        logical ksw,kx
       integer ih,im,is,idur,iqual,lu
       integer iz2,iz3
         integer istart,isetup
@@ -24,32 +24,16 @@ C     CALLED BY: vlbat
 C
 C  LOCAL VARIABLES
       character*32 cdur
-      integer iput,nch,idum,ierr
-        integer ichmv_ch,ib2as ! functions
+      integer iput,idum,ierr
+        integer ib2as ! functions
 C
 C  INITIALIZED:
       DATA cdur/'dur=00s qual=    stop=00h00m00s '/
 C
 C
-      call ifill(ibuf,1,ibuf_len,oblank)
-
-      if (idur.eq.0) then ! don't use dur= command
-        nch=ichmv_ch(ibuf,1,'qual=')
-        nch=nch+ib2as(iqual,ibuf,nch,iz3)
-        nch=ichmv_ch(ibuf,nch,'  stop=')
-        nch=nch+ib2as(ih,ibuf,nch,iz2)
-        nch=ichmv_ch(ibuf,nch,'h')
-        nch=nch+ib2as(im,ibuf,nch,iz2)
-        nch=ichmv_ch(ibuf,nch,'m')
-        nch=nch+ib2as(is,ibuf,nch,iz2)
-        nch=ichmv_ch(ibuf,nch,'s  ')
-        if (isetup.eq.0) nch=ichmv_ch(ibuf,nch,' !NEXT!  ')
-        CALL writf_asc(LU,IERR,ibuf,(nch+1)/2)
-
 C  Set dur=0 so that stop time is used
 C  The stop time for the setup block is the start time of the scan
 
-      else ! non-zero dur
       iput = 16
       if ((ksw).and.(isetup.eq.0)) then
         call char2hol('!BEGIN LOOP! ',ibuf,1,13)
@@ -69,8 +53,9 @@ C  The stop time for the setup block is the start time of the scan
       Idum = ib2as(ih,ibuf,istart+22,iz2)
       Idum = ib2as(im,ibuf,istart+25,iz2)
       Idum = ib2as(is,ibuf,istart+28,iz2)
+      if (.not.kx) iput=8
       CALL writf_asc(LU,IERR,ibuf,iput)
-      endif
+
       RETURN
       END
 

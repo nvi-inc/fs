@@ -27,14 +27,15 @@ C 970114 nrv Add LPREFIX.
 C 970121 nrv Add station and code indices to npassl
 C 970206 nrv Remove ihdpo2,itra2,ihddi2 and add an index to
 C            ihdpos,itras,ihddir
+C 970718 nrv Change FREQLO and FREQRF to double precision
 C
-      double precision effreq,ffact,bitdens
+      double precision effreq,ffact,bitdens,freqlo,freqrf
 C     ffact   - frequency factor, for S/X ionosphere corrections
 C     effreq  - effective frequency for each band, for S/X ionosphere 
 C               corrections
 C     bitdens - bit density by station and code
 C
-      real vcband,freqrf,freqlo,wavei,bwrms,trkn,samprate
+      real vcband,wavei,bwrms,trkn,samprate
 C     VCBAND - final video bandwidth, MHz 
 C     FREQRF - observing frequency for each VC, in each code, MHz
 C     FREQLO - LO frequencies, for each channel, by station, for each code, MHz
@@ -101,11 +102,11 @@ C
 C
       COMMON/FREQS/
      .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
+     .       FREQRF(MAX_CHAN,max_stn,MAX_FRQ),
+     .       FREQLO(MAX_CHAN,MAX_STN,MAX_FRQ),
      .       bitdens(max_stn,max_frq),
      .
      .       VCBAND(MAX_CHAN,max_stn,MAX_FRQ),
-     .       FREQRF(MAX_CHAN,max_stn,MAX_FRQ),
-     .       FREQLO(MAX_CHAN,MAX_STN,MAX_FRQ),
      .       wavei(max_band,max_stn,max_frq),
      .       bwrms(max_band,max_stn,max_frq),
      .       trkn(max_band,max_stn,max_frq),

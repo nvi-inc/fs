@@ -1,6 +1,9 @@
       subroutine VREAD(cbuf,cfile,lu,iret,ivexnum,ierr)
 
 C     VREAD calls the routines to read a VEX file.
+C  Called by sked and drudg. Reads sections for experiment,
+C  sources, stations, and modes. Observations are read in
+C  a VOP1INP.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'

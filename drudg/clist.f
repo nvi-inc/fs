@@ -165,10 +165,10 @@ C END OF FILE DETECTED
 C
 C WE HAVE A COMMAND IN THE BUFFER
 
-125   IF ((cbuf(1:6).NE.'SOURCE').and.(cbuf(1:6).ne.'source')
-     ..AND.(cbuf(1:1).NE.CHAR(34)))
+125   IF ((cbuf(1:6).NE.'SOURCE'.and.cbuf(1:6).ne.'source') 
+     ..and. ((cbuf(1:1).eq.CHAR(34).and.il.lt.40) 
+     ..or. (cbuf(1:1).ne.char(34))))goto 130
 C                             "
-     .    GOTO 130
       IF (NREC.EQ.1.OR.NCHAR.LE.1) GOTO 126
 C
 C SOURCE COMMAND OR COMMENT IS IN THE BUFFER

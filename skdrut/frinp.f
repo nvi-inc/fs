@@ -30,7 +30,8 @@ C  LOCAL:
       real*8 bitden
       logical kvlba,kmk3
       character*3 cs
-      real*4 f1,f2,f,vb,rbbc,srate
+      real f2,vb,rbbc,srate
+      double precision f1,f
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
       integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst 
       logical knaeq

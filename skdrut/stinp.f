@@ -287,12 +287,12 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
         ELSE  ! keep it
           if (kline) then
             klineseg(i)=.true.
-            write(lu,'("STINP255 - Line segment horizon mask being ",
-     .      "used for ",4a2)') (lstnna(j,i),j=1,4)
+C           write(lu,'("STINP255 - Line segment horizon mask being ",
+C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
           else
             klineseg(i)=.false.
-            write(lu,'("STINP255 - Step function horizon mask being ",
-     .      "used for ",4a2)') (lstnna(j,i),j=1,4)
+C           write(lu,'("STINP255 - Step function horizon mask being ",
+C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
           endif
           NHORZ(I) = NHZ
           DO J=1,NHORZ(I)

@@ -22,17 +22,15 @@ C Output
 
 C Local
       integer nch,is,iob,idum,ich,ic,ic1,ic2,iyr,ida,ihr,imin,isc
-      integer ir,numc3,numc2
-      integer*2 ibuf(ibuf_len),lsn(max_sorlen/2),lfrq,lstart(6)
-      integer ib2as,ichcm,ias2b,ichmv,igtso,igtfr
+      integer icsor,ir,numc3,numc2
+      integer*2 ibuf(ibuf_len),lstart(6)
+      integer iflch,ib2as,ichcm,ias2b,ichmv,igtso,igtfr
 
 C 1. Find source name and frequency code.
 C    Convert start time to Hollerith .
 
       numc2 = 2+o'40000'+o'400'*2
       numc3 = 3+o'40000'+o'400'*3
-      idum = ichmv(lsn,1,lsorna(1,isor),1,max_sorlen)
-      lfrq = lcode(icod)
       nch=1
       NCH = NCH + IB2AS(istart(1)-1900,lstart,nch,2)
       NCH = NCH + IB2AS(istart(2),lstart,NCH,numc3)
@@ -53,13 +51,15 @@ C       idum = ichmv(ibuf,1,lskobs(1,iskrec(iob)),1,ibuf_len*2)
         ir=iskrec(iob)
         ICH = 1
 C  Source name
-        CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2)
-        if (ichcm(lsn,1,lskobs(1,ir),ic1,max_sorlen).eq.0) then ! continue
+        icsor=iflch(lsorna(1,isor),max_sorlen) ! new source name
+        CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2) ! scan source name
+        if (ichcm(lsorna(1,isor),1,lskobs(1,ir),ic1,ic2-ic1+1).eq.0
+     .     .and.ic2-ic1+1.eq.icsor) then ! continue
 C  Skip cal time
           CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2)
 C  Freq code
           CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2)
-          if (ichcm(lfrq,1,lskobs(1,ir),ic1,2).eq.0) then ! continue
+          if (ichcm(lcode(icod),1,lskobs(1,ir),ic1,2).eq.0) then ! continue
 C  Skip preob
             CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2)
 C  Start time
