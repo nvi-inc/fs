@@ -56,7 +56,7 @@ C
 C  *****************************************************************
 C
 C
-      integer fmpread, ichmv
+      integer fmpread
       character*79 outbuf
       integer answer, trimlen
       integer*2 ibuf2(50)
@@ -94,15 +94,9 @@ C  *************************************************************
 C
 C
 200   continue
-      call ifill_ch(ibuf,1,iblen*2,' ')
-      call ifill_ch(ibuf2,1,iblen*2,' ')
       ilen = fmpread(idcb,ierr,ibuf,iblen*2)
 C
-      if (ilen.ge.0) then
-        idum = ichmv(ibuf2,1,ibuf,1,ilen)
-        ilen = iflch(ibuf,iblen*2)
-        nchar = 15 + iflch(ibuf(7),ilen-15)
-      end if
+      nchar=ilen
 C
       if (ierr.lt.0) then
         outbuf='LXGET10 - error '
@@ -168,11 +162,11 @@ C  If a COMMAND command was specified, check to see if a PLOT command
 C  was issued. If a PLOT command was specified, the first command in
 C  the COMMAND command is only used.
 C
-      call upper(ibuf,1,50)
+      call mvupper(ibuf2,1,ibuf,1,nchar)
       do 500 i=1,ncmd
         if (i.gt.1.and.(ikey.eq.6.or.ikey.eq.13)) goto 500
         if (nchbuf.lt.ncomnd(i)) goto 500
-        if (ichcm(ibuf,15,lcomnd(1,i),1,ncomnd(i)).eq.0) goto 600
+        if (ichcm(ibuf2,15,lcomnd(1,i),1,ncomnd(i)).eq.0) goto 600
 500   continue
       goto 200
 C
@@ -183,7 +177,7 @@ C
 600   if (nstr.eq.0) goto 800
       do i=1,nstr
         if (nchbuf.ge.nstrng(i))  then
-        if (iscns(ibuf,15,nchar,lstrng(1,i),1,nstrng(i)).ne.0) goto 800
+        if (iscns(ibuf2,15,nchar,lstrng(1,i),1,nstrng(i)).ne.0) goto 800
         endif
       end do
       goto 200
@@ -195,8 +189,8 @@ C
 C  JCHAR returns LCH as zero/character. To left justify multiply
 C  o'400' (256 decimal) and add a blank (o'40').
 C
-cxx      lch = jchar(ibuf,10)*o'400'+' '
-      lch = jchar(ibuf,14)
+cxx      lch = jchar(ibuf2,10)*o'400'+' '
+      lch = jchar(ibuf2,14)
       do i=1,ntype
         if (lch.eq.ltype(i)) goto 1000
       end do
@@ -215,7 +209,6 @@ C  ************************************************************
 C
 C
 1000  continue
-      idum = ichmv(ibuf,1,ibuf2,1,50)
       if ((nlines.gt.0.and.nlout.lt.nlines).or.(nlines.eq.0.and.
      .(itl1.lt.ite1.or.(itl1.eq.ite1.and.(itl2.le.ite2))))) goto 1200
       lstend=-1
