@@ -35,6 +35,8 @@ C 960516 nrv Add MAX_FLD, set to 20
 C 960522 nrv Add lots of max's, change max_pass to index*subpasses
 C 960628 nrv Allow more modes in catalog.
 C 970114 nrv Add MAX_SORLEN, length of source names.
+C 970204 nrv Change max_subpass to 8
+C 970206 nrv Chage max_headstack to 1
 C
 C********************************************************************
 C
@@ -94,7 +96,7 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 10)
+      PARAMETER (MAX_FRQ = 20)
 C
 C     The maximum number of frequency bands within a schedule.
 C       **NOTE** This is restricted to be no more than 2!
@@ -132,9 +134,9 @@ C     elevation-dependent SEFDs.
       parameter (MAX_SEFDPAR = 5)
 C
 C     Maximum number of headstacks. Limited to 2 within sked/drudg
-C     for now.
+C     for now. Change to 1 to save space.
 
-      parameter (max_headstack = 2)
+      parameter (max_headstack = 1)
 
 C     Maximum number of tracks on a headstack.
 
@@ -145,9 +147,9 @@ C     Maximum number of index positions for the headstacks.
       parameter (max_index = 14)
 
 C     Maximum number of subpasses per index position. Set to
-C     4 for now, to save array space.
+C     4 for now, to save array space. Increase to 8.
 
-      parameter (max_subpass = 4)
+      parameter (max_subpass = 36)
 C
 C     Maximum number of passes that are possible.
 
@@ -323,6 +325,10 @@ C     directory of the user when running SKED if it is
 C     to be used.
 C
       character*128 cctfil,cownctl
+C this path is for Goddard's HPUX
+C     parameter(cctfil = '/usr/local/bin/skedf.ctl')
+C this path is for Linux FS
       parameter(cctfil = '/usr2/control/skedf.ctl')
       parameter(cownctl = 'skedf.ctl')
 
+C
