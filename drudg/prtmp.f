@@ -5,8 +5,9 @@ C  nrv 950925 Change to simply call "printer". Landscape or
 C             portrait is handled by each listing type.
 C  nrv 951015 Revert to using cprtpor and cprtlan , and if blank
 C             then "printer" will handle them.
+C 960226 nrv Send "cprtlab" as script name for labels
 
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       integer ierr
       integer printer ! function
@@ -16,12 +17,13 @@ C             then "printer" will handle them.
       call null_term(tmpname)
 
       if (klab) then ! labels
-        ierr = printer(tmpname,'r')
+C       ierr = printer(tmpname,'r')
+        ierr = printer(tmpname,'l',cprtlab)
       else ! normal prinout
         if (iwidth.eq.80) then
-          ierr = printer(tmpname,cprtpor)
+          ierr = printer(tmpname,'t',cprtpor)
         else if (iwidth.eq.137) then
-          ierr = printer(tmpname,cprtlan)
+          ierr = printer(tmpname,'t',cprtlan)
         else
           ierr = -1
         end if

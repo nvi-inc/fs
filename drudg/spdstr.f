@@ -3,8 +3,8 @@
 C SPDSTR returns a Hollerith "lspd" with the appropriate speed for
 C the value of "spd". "nspd" is the number of characters in lspd.
 
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/freqs.ftni'
 
 C History
 C 960116 nrv New.
@@ -31,7 +31,7 @@ C INITIALIZED:
 
       i=1
       do while (i.le.maxspd.and.
-     .   .not.(spd+.0005.gt.sp(i).and.spd-.0005.le.sp(i)))
+     .   .not.(spd+.005.gt.sp(i).and.spd-.005.le.sp(i)))
         i=i+1
       enddo
       if (i.le.maxspd) then ! match

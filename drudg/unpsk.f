@@ -6,7 +6,7 @@ C
 C    UNPSK unpacks the record found in IBUF and puts the data into
 C              the output variables
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 ibuf(128)
@@ -46,8 +46,8 @@ C     GST - GST of start
 C        KERR   - Error returned non-zero if problems.
 C
 C   COMMON BLOCKS USED
-      include 'sourc.ftni'
-      include 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  LOCAL VARIABLES
       real*8 ST0,FRAC
@@ -59,6 +59,7 @@ C  History
 C     880411 NRV DE-COMPC'D
 C     890505 NRV CHANGED IDUR TO AN ARRAY, READ IN DURATIONS IF PRESENT
 C 930407 nrv implicit none
+C 960228 nrv Upper-case the frequency code
 C
       integer*2 LPASS(56)
 C
@@ -92,6 +93,7 @@ c added 900628
       ICAL = IAS2B(IBUF,IC1,IC2-IC1+1)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
       IDUMMY = ICHMV(lfreq,1,IBUF,IC1,2)
+      call hol2upper(lfreq,2)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
       CALL IFILL(LPRE,1,6,Z20)
       IDUMMY = ICHMV(LPRE,1,IBUF,IC1,IC2-IC1+1)

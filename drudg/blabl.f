@@ -3,7 +3,7 @@
 C Print barcode Mark III field labels  ARW 830920
 C Print barcode field labels for Mark III tapes on laser printer.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       integer lu,nout,iyr,id1(*),ih1(*),im1(*),id2(*),ih2(*),im2(*),
      .        ilabrow
       integer*2 lexper(4),lstnna(4),lstcod

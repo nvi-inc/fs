@@ -1,10 +1,10 @@
       SUBROUTINE SREAD(IERR,NOBS)   
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
-      include 'statn.ftni'
-      include 'sourc.ftni'
-      include 'freqs.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 
 C  Input:
       integer ierr,nobs

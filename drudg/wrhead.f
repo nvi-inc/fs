@@ -4,11 +4,11 @@ C   wrhead writes the header lines period, bbfilter, level,
 C   baseband, ifchan, and sideband for a VLBA schedule pointing
 C   file.
 C
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C   COMMON BLOCKS USED
-	include 'freqs.ftni'
-	include 'drcom.ftni'
+      include '../skdrincl/freqs.ftni'
+      include 'drcom.ftni'
 C
 C   HISTORY:
 C     WHO   WHEN   WHAT

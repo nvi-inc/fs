@@ -646,4 +646,181 @@ Version 9.0.9 951213
 
 Version 9.1.0 960122
 
+960202 APM port/portopen.c
+           support 19200-115200 baud rates on Digiboard
+
+960208 NRV skdrut/stinp.f
+           Don't increment number of stations if more than max
+
+960213 NRV skdrincl
+           New subdirectory for sked/drudg include files
+
+960213 NRV drudg/lstsum.f
+           Remove 9/8 factor when computing footages since tape speeds
+           are actual now.
+
+960213 NRV drudg/trkall.f
+           Fix fanout logic, mode name has 8 characters.
+
+960213 NRV drudg/drcom.ftni
+           barrel variable is dimensioned (2)
+
+960213 NRV drudg/procs.f
+           More digits in bandwidth, add checks for IF/LO consistent with
+           VLBA or Mark III backend.
+
+960213 NRV drudg/fdrudg.f
+           Allow SNAP and procedure files to be made even if track/head
+           information is inconsistent.
+
+960213 NRV skdrut/gnpas.f
+           Check that head positions and consistent with track assignments,
+           i.e. same number of passes in each.
+
+960213 NRV drudg/snap.f
+           Remove low-density option.
+
+960213 NRV skdrut/speed.f
+           Correct calculation for VLBA mode by factor 9.072/9.0.
+
+960213 NRV skdrut/unpco.f
+           Allow null track assignment within ().
+
+960213 NRV skdrut/frinp.f, unplo.f
+           Missing argument for sideband in call to unplo. Format of
+           "L" line was missing the channel assignment.
+
+960213 NRV drudg/iaddtr.f
+           New. Called by procs, to add a track to trackform command.
+
+960213 NRV drudg/c2upper.f
+           New. Convert a hollerith array to upper case.
+
+960216 NRV skdrincl/*.ftni
+           New subdirectory to hold Fortran include files for sked/drudg.
+
+960216 NRV skdrut/<many>
+           many changes to support frequency switching, VLBA modes, etc.
+
+960214 WEH st.default/st-0.0.0/stqkr/stqkr.f
+           remove remnants
+
+960214 WEH st.default/proc/vstation.prc, v2station.prc, 3vstation.prc
+           add "tape=low,reset" to "ready"
+
+960215 NRV drudg/procs.f, snap.f, point.f, skdshft.f, snpshft.f
+           Add call to fc_chmod after closing file to change permissions.
+
+960219 NRV drudg/procs.f
+           Change TAPEFORMm to TAPEFRMffm to distinguish different
+           tape formats for different frequency sequences.
+
+960221 F G st.default/st-0.0.0/stlib/stm_util.c
+           remove compiler warning with (char *) cast
+
+960226 WEH incom/sincom.f
+           Support 115200 BAUD for data buffer
+
+960226 WEH port/portopen.c
+           add support for 50 and 75 BAUD
+
+960226 WEH boss/getts.f
+           fixed incorrect wrap of next time if more than 1 minute
+           or more than 1 hour in the future
+
+960226 WEH monit/monit2.c
+           add noecho() call
+
+960227 WEH clib/vform_util.c
+           change to exclude modes b1, b2, c1, c2 as well as a,b,c for
+           vlba rack type
+
+960227 WEH control/fserr.ctl
+           add vf -301 error message
+
+960227 WEH quikr/pass.f
+           fix abend if VLBA recorder times-out, error in class number handling
+
+960227 WEH quikr/stack.f
+           fix abend if VLBA recorder times-out, error in class number handling
+
+960227 WEH quikr/pass.f
+           fix abend if VLBA recorder times-out, error in class number handling
+
+960227 WEH monit/monit1.c
+           monit/monit2.c
+           monit/monit3.c
+           turn off echoing, turn on nodelay and eat any input in the main
+           loop, this solves the monit "dying" problem.
+
+960227 WEH monit/monit3.c
+           re-enable the "die()" interrupt handler for proper termination with
+           Control-C
+
+960229 WEH quikr/pass.f
+           quikr/stack.f
+           quikr/lvdt.f
+           fixed to set common values before attempting communiation in case
+           there is a problem
+
+960304 WEH quikr/party.f
+           fixed some 1:35 loops to 1:36
+
+960304 NRV st.default/control/skedf.ctl
+           updated comments for printer scripts
+
+960306 WEH control/fscmd.ctl
+           made form4 available with any recorder
+
+960306 NRV skdrut/rdctl.f
+           add "labels" key word for labels script
+
+960306 NRV skdrut/printer.c
+           use labels script if present to print barcode labels
+
+960306 NRV drudg/vlbah.f, vlbat.f, point.f
+           changes to have VLBA control files output correctly using extensions
+           to file format (was not supported in previous version)
+
+960306 NRV drudg/procs.f
+           add frequency code to name of TRACKFORM procedure, add frequency
+           code to name of TAPEFORM procedure. 
+
+960306 NRV drudg/snapintr.f, skdrut/unpvt.f, skdrincl/statn.ftni
+           station's terminal ID changed to hollerith
+
+960306 WEH drudg/ifvlbafix
+           created
+
+960306 WEH drudg/Makefile
+           updated to include ifvlbafix
+
+960307 NRV drudg/fdrudg.f, drcom.f, Makefile
+           move initialization statements from block data to fdrudg,
+           and delete drcom.f
+
+960307 WEH fivpt/antcn.f
+           remove clrcl call and change break ierr from 1 to -1
+
+960307 WEH change
+           deleted
+
+960308 WEH clib/arg_util.c
+           squeeze out leading and trailing spaces for C commands
+
+Version 9.1.1 960308
+
+960313 WEH clib/arg_util.c
+           removing squeezing out of leading and trailing blanks
+
+960313 NRV drudg/iaddtr.f
+           remove blanks from TRACKFORM command
+
+960313 NRV drudg/fdrudg.f
+           change date in opening message to "960313"
+
+960314 WEH quikr/party.f
+           fix parentheses for group and track number parameter if's
+
+Version 9.1.2 960314
 

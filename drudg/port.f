@@ -4,8 +4,8 @@ C   This routine will change the printer output destination and
 C   the printer type and the output width.
 
 C  COMMON BLOCKS:
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 C
 C  History:
 C  901018 NRV Changed variable name, changed logic to leave port

@@ -21,10 +21,11 @@ C NRV 901206 Changed maxwidth and maxlines
 C            Added call to SETPRINT
 C NRV 910703 Added call to PRTMP at end.
 C nrv 930407 implicit none
+c 960201 nrv check for 'source' as well as 'SOURCE'
 
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'drcom.ftni'
-	INCLUDE 'statn.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/../skdrincl/statn.ftni'
 C
 C Input:
 	logical kskd
@@ -132,7 +133,9 @@ C END OF FILE DETECTED
 C
 C WE HAVE A COMMAND IN THE BUFFER
 
-125   IF ((BUF(1:6).NE.'SOURCE').AND.(BUF(1:1).NE.CHAR(34)))
+125   IF ((BUF(1:6).NE.'SOURCE').and.(buf(1:6).ne.'source')
+     ..AND.(BUF(1:1).NE.CHAR(34)))
+C                             "
      .    GOTO 130
       IF (NREC.EQ.1.OR.NCHAR.LE.1) GOTO 126
 C

@@ -1,4 +1,4 @@
-	SUBROUTINE wrtrack(ichange,lu,iblen,icod)
+	SUBROUTINE wrtrack(idx,lu,iblen,icod)
 C
 C  wrtrack writes the track lines for VLBA pointing files.
 C
@@ -11,21 +11,21 @@ C   nrv   930412  implicit none
 C   nrv   930709  Fixed to write correct mode A tracks
 C   nrv   950406  fixed to write correct mode E tracks
 C
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
-	integer ichange,lu,iblen,icod
+	integer idx,lu,iblen,icod
 C
 C     CALLED BY: VLBAT
 C
 C   COMMON BLOCKS USED
-	include 'drcom.ftni'
-	include 'sourc.ftni'
-	include 'statn.ftni'
-	include 'freqs.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C  LOCAL VARIABLES
-      integer ib,iy,ul,ichan,iassign,ierr,ipas,iprint,nch,idum,ileft
+      integer ib,iy,ul,ichan,iassign,ierr,iprint,nch,idum,ileft
       integer ichmv_ch,ib2as ! functions
 C
 C  INITIALIZED
@@ -39,21 +39,20 @@ C       for each VC (1-14)
 C       frequency
 
         ileft = o'100000'
-C       ipas = ichange + 1
-        ipas = ichange 
         iy=0
-C  ichange = 0 forward, 1 reverse
 	iprint = 0
 	call ifill(ibuf,1,iblen,32)
 	call char2hol('track=',ibuf,1,6)
 	nch = 7
 	do ichan=1,nvcs(istn,icod)  !channels
 	  do ul=1,2  !Upper and lower
-	    iassign = itras(ul,1,ipas,invcx(ichan,istn,icod),istn,icod)
+	    iassign = itras(ul,1,invcx(ichan,istn,icod),idx,istn,icod)
 C  Note: for mode A there is no track assignment for pass 2, so
-C  no tracks are written.
+C  no tracks are written. But both u/l are assigned.
 C  Note: for 2-bit sampling, the track for the magnitude is automatically
 C  recorded as the next one in the stack.
+C  Note: for fan-out, the next track(s) are automatically recorded on
+C  the next one on the stack.
 	    if (iassign.gt.-99) then  !if number
 		iassign = iassign + 3 ! VLBA track numbers
                 nch = ichmv_ch(ibuf,nch,'(')

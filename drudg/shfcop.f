@@ -6,8 +6,8 @@ C 910911 NRV Changed .gt. to .ge. test for number of hours
 C 930412 nrv implicit none
 
 C  Common:
-	include 'skparm.ftni'
-	include 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 
 C  Input:
       integer id1,ih1,im1,isshft,imshft,ihshft,idshft,ilen,

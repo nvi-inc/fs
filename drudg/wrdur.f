@@ -1,4 +1,4 @@
-	SUBROUTINE wrdur(istart,idur,iqual,ih,im,is,iz2,iz3,lu,isetup)
+	SUBROUTINE wrdur(ksw,istart,idur,iqual,ih,im,is,iz2,iz3,lu,isetup)
 C
 C  WRDUR writes the dur lines for the VLBA
 C  pointing schedules.
@@ -9,11 +9,12 @@ C     gag   900726 CREATED
 C     nrv   910524 Added subscript to kswitch
 C
 C   COMMON BLOCKS USED
-	include 'skparm.ftni'
-	include 'freqs.ftni'
-	include 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/freqs.ftni'
+      include 'drcom.ftni'
 C
 C  INPUT:
+        logical ksw
 	integer ih,im,is,idur,iqual,lu
 	integer iz2,iz3
         integer istart,isetup
@@ -32,15 +33,14 @@ C
 C  Set dur=0 so that stop time is used
 C  The stop time for the setup block is the start time of the scan
 
-C***************** Commented out until figure out switching *****
-Ciput = 16
-Cif ((kswitch(nvset)).and.(isetup.eq.0)) then
-C  call char2hol('!BEGIN LOOP! ',ibuf,1,13)
-C  iput = 22
-Celse if ((.not.kswitch(nvset)).and.(isetup.eq.0)) then
-C  call char2hol(' !NEXT!',ibuf,33,40)
-C  iput = 20
-Cendif
+      iput = 16
+      if ((ksw).and.(isetup.eq.0)) then
+        call char2hol('!BEGIN LOOP! ',ibuf,1,13)
+        iput = 22
+      else if ((.not.ksw).and.(isetup.eq.0)) then
+        call char2hol(' !NEXT!',ibuf,33,40)
+        iput = 20
+      endif
 	call char2hol(cdur,ibuf,istart,istart+31)
 	idum = ib2as(idur,ibuf,istart+4,iz2)
 	if (idur.eq.0) then

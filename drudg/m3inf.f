@@ -6,8 +6,8 @@ C array), based on the VC bandwidth.  DO NOT USE THE
 C SPEED RETURNED FROM THIS ROUTINE. USE "SPEED" INSTEAD.
 C
 C COMMON BLOCKS:
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/freqs.ftni'
 C INPUT:
       integer icode
 C   ICODE - code index in common

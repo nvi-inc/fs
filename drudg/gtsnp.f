@@ -1,7 +1,7 @@
 	SUBROUTINE GTSNP(ICH,NCHAR,IC1,IC2)
 C
-	INCLUDE 'skparm.ftni'
-	INCLUDE 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 C
 C  Input:
       integer ich,nchar,ic1,ic2

@@ -7,7 +7,7 @@ C     gag   900727 CREATED
 C     gag   910513 Added parameter to nchanv.
 C     nrv   930412 Implicit none
 C
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer lu,iblen,icod
@@ -19,9 +19,9 @@ C
 C     CALLED BY: VLBAT, VLBAH
 C
 C   COMMON BLOCKS USED
-	include 'freqs.ftni'
-	include 'drcom.ftni'
-	include 'statn.ftni'
+      include '../skdrincl/freqs.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  LOCAL VARIABLES
       integer ix,iy,iz,ierr
