@@ -26,6 +26,7 @@ C
 C                   Command names list, and procedure lists
       dimension itscb(13,1)          !  time scheduling control block
       integer*2 ibuf(50)         !  input buffer containing command
+      integer*2 ibuf2(50)
       character*100 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
@@ -92,6 +93,7 @@ C
       iotref(3) = it(2)*100
       istref(1) = iotref(1)
       istref(2) = iotref(2)
+      call char2hol('/',lsor2,1,1)
       lstp = 'station'
       call char2hol(lstp,ilstp,1,8)
       call fs_set_lstp(ilstp)
@@ -794,7 +796,13 @@ C
         call fshelp(ibuf,istart,nchar)
       else if (mbranch.eq.19) then
          nch = ichmv_ch(ibuf,nchar+1,'/')
-         call logit4d(ibuf,nch-1,lsor,lprocn)
+         call logit4d(ibuf,nch-1,lsor2,lprocn)
+      else if(mbranch.eq.20) then
+        istart = iscn_ch(ibuf,1,nchar,'=')
+        if(istart.ne.0.and.istart.lt.nchar) then
+           nch = ichmv(ibuf2,1,ibuf,istart+1,nchar-istart)
+           call copin(ibuf2,nch-1)
+        endif
       endif
       mbranch = 0
 C
