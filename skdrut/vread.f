@@ -1,4 +1,4 @@
-      subroutine VREAD(cfile,lu,iret,ivexnum,ierr)
+      subroutine VREAD(cbuf,cfile,lu,iret,ivexnum,ierr)
 
 C     VREAD calls the routines to read a VEX file.
 
@@ -8,10 +8,13 @@ C     VREAD calls the routines to read a VEX file.
 
 C History
 C 960522 nrv New.
+C 970114 nrv Stop if the supported VEX version is not found.
+C 970114 nrv Add a call to VGLINP
 
 C Input
       character*(*) cfile ! VEX file path name
       integer lu
+      character*(*) cbuf ! buffer with first line of VEX file in it
 
 C Output
       integer iret ! error return from VEX routines
@@ -19,12 +22,17 @@ C Output
       integer ivexnum
 
 C Local
-      character*20 cbuf
       integer fvex_open,ptr_ch
-      integer i
+      integer i,trimlen
 
-      write(lu,'("VREAD01 -- Got a VEX file to read.")')
-
+      i=trimlen(cbuf)
+      write(lu,'("VREAD01 -- Got a VEX file to read, ",a".")') 
+     .cbuf(1:i)
+      if (cbuf(i-3:i).ne.'1.5;') then
+        write(lu,'("VREAD02 -- Only version 1.5 is supported, sorry.")')
+        stop
+      endif
+      
 C  1. Open the file
 
       ierr=1
@@ -34,6 +42,13 @@ C  1. Open the file
 
 C  2. Read the sections
 
+      cbuf='$EXPER'
+      call null_term(cbuf)
+      write(lu,'(a)') cbuf
+      call vglinp(ivexnum,lu,ierr) ! stations
+      if (ierr.ne.0) then
+        write(lu,'("VREAD00 - Error reading experiment info.")')
+      endif
       cbuf='$STATIONS'
       call null_term(cbuf)
       write(lu,'(a)') cbuf
