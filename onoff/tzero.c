@@ -21,14 +21,20 @@ int tzero(ip,onoff,rut,accum,ierr)
   struct req_rec request;
   struct res_buf buff_res;
   struct res_rec response;
-  int atten[4];
+  int atten[4], kst1, kst2;
 
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
+  kst1=onoff->itpis[MAX_DET+4];
+  kst2=onoff->itpis[MAX_DET+5];
+
   for(i=0;i<MAX_DET;i++)
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
+
+  if(kst1||kst2)
+    scmds("sigoffnf");
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
      shm_addr->equip.rack==LBA4) {
@@ -48,7 +54,7 @@ int tzero(ip,onoff,rut,accum,ierr)
 	memcpy(((char *)(buf2+2))+4,temp,2);
       }
       if(!ifc[0]) {
-	sprintf(temp,sizeof(temp),"%2.2X",(shm_addr->iat1if)&0x3F);
+	snprintf(temp,sizeof(temp),"%2.2X",(shm_addr->iat1if)&0x3F);
 	memcpy(((char *)(buf2+2))+6,temp,2);
       }
       cls_snd(&iclass,buf2,12,0,0); nrec++;
@@ -135,7 +141,8 @@ int tzero(ip,onoff,rut,accum,ierr)
   }
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4||
-     shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+     shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4||
+     onoff->itpis[MAX_DET+4]!=0||onoff->itpis[MAX_DET+5]!=0) {
 
     get_samples(ip,onoff->itpis,onoff->intp,rut,accum,&ierr2);
 
@@ -152,6 +159,9 @@ int tzero(ip,onoff,rut,accum,ierr)
   }
 
  restore:
+  if(kst1||kst2)
+    scmds("sigonnf");
+
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
     iclass=0;
     nrec=0;

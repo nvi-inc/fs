@@ -288,15 +288,6 @@ C  Now check the cal and freq values.
       call fc_rte_time(it,it(6))
       epoch=it(6)+it(5)/366.
       call fc_get_tcal_fwhm(ldevfp,cal,bm,epoch,fx,corr,ssize,ierr)
-      if(ichain.eq.5) then
-        cal = caltmp(5)
-        bm=beamsz_fs(5)
-        fx=flx5fx_fs
-      else if(ichain.eq.6) then
-        cal = caltmp(6)
-        bm=beamsz_fs(6)
-        fx=flx6fx_fs
-      endif
       if(cal.ne.0.0) goto 415
         ierr = -203
         goto 990

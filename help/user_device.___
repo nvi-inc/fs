@@ -1,0 +1,45 @@
+                 user_dev - define User Detector Device (all racks)
+
+            Syntax:     user_dev=chan,freq,sb,pol,ifcenter
+
+            Response:   user_dev/chan,freq,sb,pol,ifcenter
+
+
+Settable parameters:
+        chan     uX, where X is one of 5 or 6, for user devices 1 and 2
+	         respectively, No default. No previous value available.
+        freq     LO frequency for this channel, MHz. No default. No
+                 previous value available.
+        sb       Net sideband for this channel, unknown, usb or lsb.
+                 Default is unknown.
+        pol      Polarization for this channel, unknown, rcp, or lcp.
+                 Default is unknown.
+        ifcenter Center frequency for this detector, MHz. No default.
+
+Monitor-only Parameters: none
+
+Comments:
+
+This command specifies the characteristics for user (station)
+detectors 1 and 2 for use with Tsys, Fivept, and Onoff commands.
+
+User detectors 1 and 2 are know as "u5" and "u6" respectively
+because they are associated with fictitious IF channels 5 and 6. The
+user_device command defines the charateristics of the IF for these
+channels and also the center frequency of the detectors in each IF
+channel. Please note this is the IF center frequency of the detector,
+not the sky center frequency.
+
+This command is roughly equivalent to the LO command but covers the
+fictitious IF channels 5 and 6.  It provides the necessary information
+for the station detectors to be used with normal Tsys and pointing and
+gain calibration tools in the FS. However, please note that "u5" and
+"u6" cannot be used for Tsys measurements if the rack type is Mark 3,
+Mark IV, VLBA, VLBA4, LBA, or LBA4. They can however be used for
+Fivept and Onoff regardless of the rack type. There may be issues with
+the implementation for LBA racks, but they are not supported at this
+time anyway.
+
+An user_device= with no parameters clears all user_device values.
+
+The monitor form of user_device shows all defined user_device values.

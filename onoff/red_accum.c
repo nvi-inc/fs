@@ -5,7 +5,7 @@
 #include "sample_ds.h"
 
 void red_accum(itpis,accum)
-int itpis[MAX_DET];
+int itpis[MAX_ONOFF_DET];
 struct sample *accum;
 {
   int j;
@@ -13,7 +13,7 @@ struct sample *accum;
 
   if(accum->count>1) {
     drdrm1=((double) accum->count)/((double) (accum->count-1));
-    for(j=0;j<MAX_DET;j++) {
+    for(j=0;j<MAX_ONOFF_DET;j++) {
       if(itpis[j]!=0) {
 	double num;
 	num=accum->sig[j]-accum->avg[j]*accum->avg[j];
@@ -26,7 +26,7 @@ struct sample *accum;
       }
     }
   } else {
-    for(j=0;j<MAX_DET;j++) {
+    for(j=0;j<MAX_ONOFF_DET;j++) {
       if(itpis[j]!=0)
 	accum->sig[j]=0.33;
     }

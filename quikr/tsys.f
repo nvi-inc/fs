@@ -189,7 +189,8 @@ C
         call fc_tsys_lba(ip,itpis_lba,ibuf,nch,nsub)
         return
       else
-        call fc_tsys_norack(itpis_norack,ibuf,nch, caltmp(indtmp))
+        call fc_tsys_norack(ip,itpis_norack,ibuf,nch,nsub)
+        return
       endif
 C
       iclass = 0

@@ -13,8 +13,8 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
      double center;
      float *fwhm, *tcal, *dpfu, *gain;
 {
-  int i, ir, it[6], ifirst, ilast;
-  double az,el, arg;
+  int i, ir, it[6], ifirst, ilast, pol;
+  double az,el, arg, lo;
 
   *fwhm=0.0;
   *dpfu=0.0;
@@ -22,16 +22,22 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
   if(gain!=NULL)
     *gain=0.0;
 
-  if(ifchain <1 || 4 < ifchain)
+  if(1 <= ifchain && ifchain <= 4) {
+    lo=shm_addr->lo.lo[ifchain-1];
+    pol=shm_addr->lo.pol[ifchain-1];
+  } else if (5 <= ifchain && ifchain <= 6) {
+    lo=shm_addr->user_device.lo[ifchain-1];
+    pol=shm_addr->user_device.pol[ifchain-1];
+  } else
     return;
 
   ir=-1;
   for(i=0;i<MAX_RXGAIN;i++) {
     if(shm_addr->rxgain[i].type=='f'
-       && ((fabs(shm_addr->lo.lo[ifchain-1]-shm_addr->rxgain[i].lo[0])
+       && ((fabs(lo-shm_addr->rxgain[i].lo[0])
 	    < 0.001)
 	   ||(shm_addr->rxgain[i].lo[1] > 0.0
-	      && fabs(shm_addr->lo.lo[ifchain-1]-shm_addr->rxgain[i].lo[1])
+	      && fabs(lo-shm_addr->rxgain[i].lo[1])
 	      < 0.001))
        ) {
       ir=i;
@@ -40,8 +46,8 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
   if(ir==-1)
     for(i=0;i<MAX_RXGAIN;i++) {
       if(shm_addr->rxgain[i].type=='r'
-	 && shm_addr->lo.lo[ifchain-1]>shm_addr->rxgain[i].lo[0]-0.001
-	 && shm_addr->lo.lo[ifchain-1]<shm_addr->rxgain[i].lo[1]+0.001) {
+	 && lo>shm_addr->rxgain[i].lo[0]-0.001
+	 && lo<shm_addr->rxgain[i].lo[1]+0.001) {
 	ir=i;
       }
     }
@@ -72,7 +78,7 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
   }
 
 
-  switch(shm_addr->lo.pol[ifchain-1]) {
+  switch(pol) {
   case 1:
     /* ifchain is r */
     if(shm_addr->rxgain[ir].pol[0]=='r') {

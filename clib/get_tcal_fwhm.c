@@ -42,7 +42,27 @@ int *ierr;
   ifchain=0;
   *ierr=0;
 
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
+  if(strncmp(device,"u",1) == 0) {
+    if(strncmp(device,"u5",2) == 0)
+      ifchain=5;
+    else
+      ifchain=6;
+
+    center=shm_addr->user_device.center[ifchain-1];
+    switch(shm_addr->user_device.sideband[ifchain-1]) {
+    case 1:
+      center=shm_addr->user_device.lo[ifchain-1]+center;
+      break;
+    case 2:
+      center=shm_addr->user_device.lo[ifchain-1]-center;
+      break;
+    default:
+      *ierr=-302;
+      goto error;
+      break;
+    }
+  } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4
+	    ||shm_addr->equip.rack==LBA4) {
     for(i=0;i<sizeof(lwhatm)/sizeof(char *);i++) {
       if(strncmp(device,lwhatm[i],2)==0) {
 	if(i<14) {
@@ -65,7 +85,7 @@ int *ierr;
 	      vcf=vcf-vcbw*0.5;
 	      break;
 	    case 2: /* usb */
-	      vcf=vcf-vcbw*0.5;
+	      vcf=vcf+vcbw*0.5;
 	      break;
 	    default:
 	      *ierr=-301;
