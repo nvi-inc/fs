@@ -61,12 +61,12 @@ C  1.1 Subgroup
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
         if (iret.ne.0) return
-        idum = ichmv_ch(lsg(ic),1,'  ')
+        idum = ichmv_ch(lsg(ic),1,'- ') ! initialize
         NCH = fvex_len(cout)
         if (nch.gt.1) then
           ierr = -1
           write(lu,'("VUNPFRQ02 - Band ID must be 1 character.")')
-        else
+        else if (nch.eq.1) then
           idum = ichmv_ch(lsg(ic),1,cout(1:1))
         endif
 C
