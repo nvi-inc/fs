@@ -23,7 +23,7 @@ struct vrepro_cmd *lcl;
 int *count;
 char *ptr;
 {
-    int ierr, ind, arg_key(), idflt;
+    int ierr, ind, arg_key(), idflt, odd, even;
 
     ierr=0;
     if(ptr == NULL) ptr="";
@@ -41,8 +41,8 @@ char *ptr;
       case 2:
       case 3:
         ind=(*count-1)/2;
-        ierr=arg_int(ptr,&lcl->track[ind],1,TRUE);
-        if(ierr ==0 && (lcl->track[ind]>28 || lcl->track[ind]<1)) ierr=-200;
+        ierr=arg_int(ptr,&lcl->track[ind],4,TRUE);
+        if(ierr ==0 && (lcl->track[ind]>35 || lcl->track[ind]<0)) ierr=-200;
         break;
       case 5:
         idflt=1;                               /* alt1 is default */
@@ -54,11 +54,22 @@ char *ptr;
         ierr=arg_key(ptr,key_equ,NKEY_EQU,&lcl->equalizer[ind],idflt,TRUE);
         break;
       default:
-       *count=-1;
-   }
-   if(ierr!=0) ierr-=*count;
-   if(*count>0) (*count)++;
-   return ierr;
+	if (shm_addr->wrhd_fs != 0) { /* fix odd of evenness of tracks */
+	  odd = lcl->track[0]%2 == 1 || lcl->track[1]%2 == 1;
+	  even= lcl->track[0]%2 == 0 || lcl->track[1]%2 == 0;
+	  if (shm_addr->wrhd_fs == 1 && even && !odd) {
+	    lcl->track[0]++;
+	    lcl->track[1]++;
+	  } else if (shm_addr->wrhd_fs == 2 && odd && !even) {
+	    lcl->track[0]--;
+	    lcl->track[1]--;
+	  }
+	}
+	*count=-1;
+      }
+    if(ierr!=0) ierr-=*count;
+    if(*count>0) (*count)++;
+    return ierr;
 }
 
 void vrepro_enc(output,count,lcl)
@@ -84,7 +95,7 @@ struct vrepro_cmd *lcl;
       case 3:
         ind=(*count-1)/2;
         ivalue=lcl->track[ind];
-        if(ivalue > 0 && ivalue < 29 )
+        if(ivalue > -1 && ivalue < 36 )
            sprintf(output,"%d",lcl->track[ind]);
         else
           strcpy(output,BAD_VALUE);
@@ -109,9 +120,8 @@ void vrepro90mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-/* VLBA rec track number = Mk3 track number + 3 */
 
-   *data= bits16on(6) & (lcl->track[ 0]+3);
+   *data= bits16on(6) & lcl->track[ 0];
 
    return;
 }
@@ -120,9 +130,8 @@ void vrepro91mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;
 {
-/* VLBA rec track number = Mk3 track number + 3 */
 
-   *data= bits16on(6) & (lcl->track[ 1]+3);
+   *data= bits16on(6) & lcl->track[ 1];
 
    return;
 }
@@ -206,9 +215,8 @@ void mc90vrepro(lcl, data)
 struct vrepro_cmd *lcl;
 unsigned data;
 {
-/* Mk3 track number = VLBA rec track number - 3 */
 
-       lcl->track[ 0] =  (data & bits16on(6))-3;
+       lcl->track[ 0] =  data & bits16on(6);
 
        return;
 }
@@ -217,9 +225,8 @@ void mc91vrepro(lcl, data)
 struct vrepro_cmd *lcl;
 unsigned data;
 {
-/* Mk3 track number = VLBA rec track number - 3 */
 
-       lcl->track[ 1] =  (data & bits16on(6))-3;
+       lcl->track[ 1] =  data & bits16on(6);
 
        return;
 }
