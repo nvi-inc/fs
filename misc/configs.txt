@@ -1,0 +1,100 @@
+File: /usr2/fs/misc/configs.txt  Version: 0.1  Date: 050125
+
+      Support for Different Equipment Configurations with the FS
+
+			      Ed Himwich
+
+INTRODUCTION
+
+The FS uses a simple, but in many cases sufficient, mechanism for
+supporting different equipment configurations.  The basic idea is that
+the various control files and SNAP procedure files that are used by
+the FS can be set-up to be accessed through symbolic links.  The links
+can be changed to point to the versions of the files that correspond
+to the equipment and/or antenna and/or location in use.  Typically,
+you would use this facility for the "*.ctl" control files and the
+"rxg_files" subdirectory in "/usr2/control" and for the "*.prc" SNAP
+procedure libraries in "/usr2/proc".
+
+RECOMMENDATIONS AND REQUIREMENTS
+
+It is recommended that multiple versions of a file be named with the
+usual name, but with an additional ".type" suffix appended to the
+name.  Obviously, it will probably be helpful if the additional
+".type" suffix is mnemonic in some-way for the configuration it is
+intended for.  As an example you might have "equip.ctl.s2" and
+"equip.ctl.vlba" for different equip.ctl files for S2 and VLBA
+equipment.  It is also recommended that you keep the different
+versions of the files in the directory they would normally occupy,
+e.g. "/usr2/control" for "*.ctl.*" files.
+
+There is one exception to these recommendations.  This is for "rxg"
+files because they are kept in a different sub-directory.  As of FS
+9.7.6, they are nominally grouped together in the "rxg_files"
+sub-directory of "/usr2/control".  This arrangement was designed to
+complement the other features of changing configurations and to keep
+multiple sets of "rxg" files from interferring with each other.  It is
+recommended that each set of "rxg" files is placed in its own
+sub-directory of "/usr2/control" and that each sub-directory is named
+"rxg_files" with an additional ".type" appended, for example:
+"rxg_files.lovell".  This approach also makes it fairly
+straightforward to analyze data for different sets of "rxg" files with
+changing which ones the FS is reading since GNPLT will allow the user
+to select the directory for the "rxg" files.
+
+These points are only recommendations except in the case of "*.prc"
+SNAP procedure libraries.  For "*.prc", files, the recommendations
+must be followed. The files MUST be named as normal procedure files
+with an additional ".type" suffix after the ".prc".  In addition,
+these files MUST be located in the "/usr2/proc" directory.
+
+One general requirement is that for files that when you have multiple
+versions of a file, you must not have a file with the actual
+name. e.g. you mustn't have an "equip.ctl" if you intend to link to
+different version of "equip.ctl" since "equip.ctl" itself must be the
+symbolic link to the target version.
+
+SCRIPTING
+
+Eventually, the FS will include a utility to allow you to select which
+files you want to use.  In the meantime, you can create scripts that
+set-up the links for the files you want to use for different
+configurations.  It is recommended that these scripts be placed in
+"/usr2/oper/bin" (they must be made executable with "chmod a+x
+..."). Here is an example of a script, called "s2_mode", Fairbanks
+uses to select their S2 configuration.
+
+  #!/bin/tcsh
+  if (! -e /usr2/fs/bin/lognm) then
+  echo "Can't find lognm program, is FS loaded?"
+  exit -1
+  endif
+  lognm >& /dev/null
+  if(! $status) then
+  echo "Can't change mode when FS is running"
+  exit -1
+  endif
+  cd /usr2/control
+  ln -sfn equip.ctl.s2 equip.ctl
+  ln -sfn rclad.ctl.s2 rclad.ctl
+  cd /usr2/proc
+  ln -sfn station.prc.s2 station.prc
+  echo 'Now in S2 mode when FS is started'
+
+This sample script includes a simple check to make sure that the FS is
+not running when the change is attempt (this is done to reduce
+possible confusion about which control files are actually in use).
+
+It could include an additional safety feature: a check that the links
+that are about to be over-written are in fact links, not normal files,
+so that nothing will be lost when symbolic links are set-up.  However,
+since this example script was set up by hand, it assumes that the
+person who wrote the script knew what he was doing.
+
+If a link were needed for an S2 version of the "rxg_files" directory,
+the script would have a line:
+
+  ln -sfn rxg_files.s2 rxg_files
+
+ just before the "cd /usr2/proc" line. In this case, there must not
+ already be a sub-directory "rxg_files" in "/usr2/control".
