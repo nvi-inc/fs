@@ -4937,3 +4937,29 @@ Version 9.3.111 990212
 
 Version 9.3.112 990216
 
+990217 YK  quikv/k4oldtp.c
+           quikv/k4newtp.c
+           handle positions greater or equal to 10
+
+990217 WEH include/k4rec_mode_ds.h
+           include/fs_types.h
+           include/fscom.h
+           add k4rec_mode_cmd to fscom.h
+
+990217 WEH quikv/Makefile
+           quikv/quikv.c
+           quikv/k4rec_mode.c
+           quikv/k4rec_mode_dis.c
+           clib/Makefile
+           clib/k4rec_mode_util.c
+           control/fscmd.ctl
+           control/fserr.ctl
+           create k4 rec_mode command
+
+990217 WEH st.default/control/sw.ctl
+           updated to include default CPU
+
+990217 WEH misc/k4/k4.txt
+           latest version
+
+Version 9.3.113 990217
