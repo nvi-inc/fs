@@ -1,78 +1,90 @@
-peak - peak up tape reproduce power
-Syntax:         peak=nsamp,iter,stack,vmin
-                peak
+               peak - peak up tape reproduce power
 
-Response:       peak/nsamp,iter,stack,vmin,peakv,mper,t/f,vltlc
+Syntax:     peak=nsamp,iter,stack,vmin
+            peak
+
+Response:   peak/nsamp,iter,stack,vmin,peakv,mper,t/f,vltlc
 
 
 Settable parameters:
-nsamp           Number of samples to take at each position. Default is 3.
-iter            Number of times to iterate peak finding. Default is 1.
-stack           Head stack to move for peaking: write (default) or read. Only the
-                first character is checked. Only write is valid for VLBA
-                recorders. For Mark IV recorders, use write for the head stack 1,
-                read for head stack 2.
-vmin            The minimum peak voltage that is required before the peak is
-                considered "real". Default is 0.2 volts.
+nsamp     Number of samples to take at each position. Default is 3.
+iter      Number of times to iterate peak finding. Default is 1.
+stack     Head stack to move for peaking: write (default) or read.
+          Only the first character is checked. Only write is valid
+          for VLBA recorders. For Mark IV recorders, use write for
+          the head stack 1, read for head stack 2.
+vmin      The minimum peak voltage that is required before the peak
+          is considered "real". Default is 0.2 volts.
 
 Monitor-only parameters:
-peakv           The voltage measured at the calculated peak position.
-mper            The minimum voltage measured at the peak as a percentage of peakv.
-t/f             t (true) if the peak is strong enough to be considered a real
-                peak and the middle of the last three measured positions is within
-                5.4 microns of the calculated peak, f (false) otherwise.
-vltlc           voltage position of the calculated peak response
+peakv     The voltage measured at the calculated peak position.
+mper      The minimum voltage measured at the peak as a percentage
+          of peakv.
+t/f       t (true) if the peak is strong enough to be considered a
+          real peak and the middle of the last three measured
+          positions is within 5.4 microns of the calculated peak,
+          f (false) otherwise.
+vltlc     voltage position of the calculated peak response
 
 Comments: 
-This command attempts to find the head stack position that gives the peak
-response from a track. This should work if the head stack is already positioned
-so that there is some reproduce power coming from the track. The algorithm is:
+This command attempts to find the head stack position that gives
+the peak response from a track. This should work if the head stack
+is already positioned so that there is some reproduce power coming
+from the track. The algorithm is:
 
-(1)  Measure the reproduce power at the current position.
-(2)  Move 8 microns toward the plate (in) and measure the power again.
-(3)  If the power at position two is greater than that at position one, move
-     another 8 microns in and measure the power again. If the power at position
-     two is lower than the power at position one, go out from position one 8
-     microns and measure the power again.
-(4)  Continue moving the stack 8 microns at a time in the direction that
-     increases the power until there are three measurement with the highest power
-     in the middle position. No more than 5 additional measurements are made.
-(5)  Fit the final three positions to a triangular model for the response.
-(6)  Move the stack to the calculated peak position. Measure the final power
-     level.
+(1) Measure the reproduce power at the current position.
+(2) Move 8 microns toward the plate (in) and measure the power
+    again.
+(3) If the power at position two is greater than that at position
+    one, move another 8 microns in and measure the power again. If
+    the power at position two is lower than the power at position
+    one, go out from position one 8 microns and measure the power
+    again.
+(4) Continue moving the stack 8 microns at a time in the direction
+    that increases the power until there are three measurement with
+    the highest power in the middle position. No more than 5
+    additional measurements are made.
+(5) Fit the final three positions to a triangular model for the
+    response.
+(6) Move the stack to the calculated peak position. Measure the
+    final power level.
 
-When positioning the 8 micron step size is only approximate. The positioning is
-done with 2.7 micron tolerance to avoid spending too much time refining the
-position.
+When positioning the 8 micron step size is only approximate. The
+positioning is done with 2.7 micron tolerance to avoid spending too
+much time refining the position.
 
-This command requires that the reproduce power detector be hooked-up with a
-reasonable amount of attenuation and that the head.ctl configuration file
-correctly identify which detector (odd or even) is in use.
+This command requires that the reproduce power detector be
+hooked-up with a reasonable amount of attenuation and that the
+head.ctl configuration file correctly identify which detector (odd
+or even) is in use.
 
-A reproduce track must be selected with the repro command in order to peak the
-power. Depending on the cabling, either channel A or B should be used. Setting
-both channels to the same track is sure to work unless the detector isn't
-connected.
+A reproduce track must be selected with the repro command in order
+to peak the power. Depending on the cabling, either channel A or B
+should be used. Setting both channels to the same track is sure to
+work unless the detector isn't connected.
 
-In order to identify possibly false peaks, peak requires two conditions be met
-before a peak is accepted: (1) the voltage read-out of the power level must
-exceed the set minimum and (2) the calculated peak position must be within ñ5.4
-microns of the middle position of the last three sample values. The first attempt
-to peak on a track may fail because of the second criteria. A second attempt
-should succeed if that was the problem.
+In order to identify possibly false peaks, peak requires two
+conditions be met before a peak is accepted: (1) the voltage
+read-out of the power level must exceed the set minimum and (2) the
+calculated peak position must be within +/-5.4 microns of the middle
+position of the last three sample values. The first attempt to peak
+on a track may fail because of the second criteria. A second
+attempt should succeed if that was the problem.
 
-It may be necessary to raise or lower the minimum voltage if the noise level is
-higher than normal or the peak response is lower than normal.
+It may be necessary to raise or lower the minimum voltage if the
+noise level is higher than normal or the peak response is lower
+than normal.
 
-This command must be issued once with parameters to set it up. Issuing the
-command subsequently without parameters will start a peaking operation. The tape
-must moving and there must be recorded data to reproduce for this command to do
-something useful.
+This command must be issued once with parameters to set it up.
+Issuing the command subsequently without parameters will start a
+peaking operation. The tape must moving and there must be recorded
+data to reproduce for this command to do something useful.
 
-This command differs from the locate command in two ways. The first is that
-locate is intended to do a coarse search only. peak searches with smaller and
-more precise steps. Secondly, locate will return the head to the position of
-the largest measured voltage. peak will make measurements until it has straddled
-the peak and then will move to an interpolated peak position.
+This command differs from the locate command in two ways. The first
+is that locate is intended to do a coarse search only. peak
+searches with smaller and more precise steps. Secondly, locate will
+return the head to the position of the largest measured voltage.
+peak will make measurements until it has straddled the peak and
+then will move to an interpolated peak position.
 
 See the Narrow Track Calibration manual.

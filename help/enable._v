@@ -1,29 +1,33 @@
-enable - enable record tracks (VLBA drive)
-Syntax:         enable=list-of-groups
+            enable - enable record tracks (VLBA drive)
 
-Response:       enable/list-of-groups
+Syntax:     enable=list-of-groups
+
+Response:   enable/list-of-groups
 
 
 Settable parameters:
-list-of-groups       List of track groups to be enabled/disabled. Groups are
-                     specified by gn, n=1 to 4:
-                     g1 includes Mark III tracks 1,3,5,7,11,13.
-                     g2 includes Mark III tracks 2,4,6,8,10,12,14.
-                     g3 includes Mark III tracks 15,17,19,21,23,25,27.
-                     g4 includes Mark III tracks 16,18,20,22,24,26,28.
-                     A null list (i.e. enable=) disables all tracks.
-                     For mode D, a single track to be recorded may be indicated
-                     by setting list-of-groups to dn, n = 1 to 28. The group
-                     within which Mark III track n occurs will be enabled.
+list-of-groups  List of track groups to be enabled/disabled. Groups are
+                specified by gn, n=0 to 3. A null list (i.e. enable=)
+                disables all tracks. For mode D, a single track to be
+                recorded may be indicated by setting list-of-groups to dn,
+                n = 1 to 28. The group within which Mark III track n
+                occurs will be enabled.
 
 Monitor-only parameters: none
 
 Comments: 
 The use of * as a parameter is not supported by this command.
 
-This command enables groups of tracks in the VLBA recorder. Tracks may not be
-individually enabled. The form command sets up the track assignments with the
-cross-point switch. In mode D, an entire group of tracks is enabled. The VLBA
-form command must be used to specify which track so that only that track has
-data going to it. It is not possible to record in mode D for a Mark III rack/VLBA
-drive combination.
+This command enables groups of tracks in the VLBA recorder. Tracks
+may not be individually enabled. The form command sets up the track
+assignments with the cross-point switch. In mode D, an entire group
+of tracks is enabled. The VLBA form command must be used to specify
+which track so that only that track has data going to it. It is not
+possible to record in mode D for a Mark III rack/VLBA drive
+combination.
+
+        g0 includes Mark III tracks 1,3,5,7,11,13.
+        g1 includes Mark III tracks 2,4,6,8,10,12,14.
+        g2 includes Mark III tracks 15,17,19,21,23,25,27.
+        g3 includes Mark III tracks 16,18,20,22,24,26,28.
+  

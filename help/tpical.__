@@ -1,18 +1,19 @@
-tpical - read total power integrators, cal on
-Syntax:         tpical=list
+          tpical - read total power integrators, cal on
 
-Response:       tpical/readings
+Syntax:     tpical=list
+
+Response:   tpical/readings
 
 
 Settable parameters:
-list            list of total power integrators to be read back. Standard detector
-                mnemonics allowed.
+list        List of total power integrators to be read back. Standard
+            detector mnemonics allowed.
 
 Monitor-only parameters:
-readings        list of readings, counts. These values are stored for use by the
-                tsys1/2/3 and tsysa/b/c/d commands.
+readings    List of readings, counts. These values are stored for use
+            by the tsys1/2/3 and tsysa/b/c/d commands.
 
 Comments: 
-Only USB or LSB total power readings are accepted; if another total power
-selection has been set up with the vc command, the reading is returned as -1.
-It is assumed the noise calibration signal is on.
+Only USB or LSB total power readings are accepted; if another total
+power selection has been set up with the vc command, the reading is
+returned as -1. It is assumed the noise calibration signal is on.

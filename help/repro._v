@@ -1,28 +1,33 @@
-repro - set up reproduce tracks (VLBA drive)
-Syntax:         repro=modeA,trackA,trackB,modeB,equA,equB
+           repro - set up reproduce tracks (VLBA drive)
 
-Response:       repro/modeA,trackA,trackB,modeB,equA,equB
+Syntax:     repro=modeA,trackA,trackB,modeB,equA,equB
+
+Response:   repro/modeA,trackA,trackB,modeB,equA,equB
 
 
 Settable parameters:
-modeA           reproduce mode for channel A. byp (default) for bypass, raw or
-                read for read (playback).
-trackA          track for decoder channel A, default 1, 1-28 allowed.
-trackB          track for decoder channel B, default 1, 1-28 allowed.
-modeB           reproduce mode for channel B. byp for bypass, raw or read for
-                read (playback). Default is modeA.
-equA            equalizer to use for decoding channel A. alt1 (default) for
-                normal speed (135 ips), alt2 for double speed (270 ips), std
-                unspecified.
-equB            equalizer to use for decoding channel B. alt1 for normal speed
-                (135 ips), alt2 for double speed (270 ips), std unspecified.
-                Default is equA.
+modeA   Reproduce mode for channel A. byp (default) for bypass, raw
+        or read for read (playback).
+trackA  Track for decoder channel A, default 1, 0-35 allowed.
+trackB  Track for decoder channel B, default 1, 0-35 allowed.
+modeB   Reproduce mode for channel B. byp for bypass, raw or read
+        for read (playback). Default is modeA.
+equA    Equalizer to use for decoding channel A. For VLBA
+        recorders: alt1 (default) for normal speed (135 ips), alt2
+        for double speed (270 ips), std unspecified. For VLBA2
+        recorders: std (default) for normal speed (135 ips), alt1
+        for double speed (270 ips), std unspecified.
+equB    Equalizer to use for decoding channel B.For VLBA recorders:
+        alt1 (default) for normal speed (135 ips), alt2 for double
+        speed (270 ips), std unspecified. For VLBA2 recorders: std
+        (default) for normal speed (135 ips), alt1 for double speed
+        (270 ips), std unspecified.
 
 Monitor-only parameters: none
 
 Comments: 
-The raw or read mode normally is used only when checking parity errors on the
-tape. This is also known as "playback" mode.
+The raw or read mode normally is used only when checking parity
+errors on the tape. This is also known as "playback" mode.
 
-This command also sets up the AT&T bit synchronizer chip. The value that is set
-depends on the choice of the equA equalizer.
+This command also sets up the AT&T bit synchronizer chip. The value
+that is set depends on the choice of the equA equalizer.

@@ -1,13 +1,15 @@
-halt - halt execution of a schedule
-Syntax:         halt
+               halt - halt execution of a schedule
 
-Response:       none
+Syntax:     halt
+
+Response:   none
 
 
 Comments: 
-This command halts execution of the schedule until a cont command is issued by
-the operator. Once the current schedule command is finished, no further commands
-of any kind will be read from the schedule command stream while the halt is in
-effect. Interactive commands from the operator command stream will still be
-processed. This is an immediate execution operator command.
+This command halts execution of the schedule until a cont command
+is issued by the operator. Once the current schedule command is
+finished, no further commands of any kind will be read from the
+schedule command stream while the halt is in effect. Interactive
+commands from the operator command stream will still be processed.
+This is an immediate execution operator command.
 

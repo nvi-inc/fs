@@ -1,16 +1,19 @@
-mat - general communications with ASCII Transceivers
-Syntax:         mat=data,data,...
+       mat - general communications with ASCII Transceivers
 
-Response:       mat/data,data,...
+Syntax:     mat=data,data,...
+
+Response:   mat/data,data,...
 
 
 Settable parameters:
-data            complete message to be sent to MAT system, including actual hex
-                address and all other protocol. No checking is done. Each message
-                between commas is sent separately. All special non-printing
-                characters, such as escape, should be typed directly on the
-                keyboard or they will be sent as typed. EXCEPTION: The character
-                enq will be substituted for any TAB encountered in the message.
+data        complete message to be sent to MAT system, including
+            actual hex address and all other protocol. No checking
+            is done. Each message between commas is sent
+            separately. All special non-printing characters, such
+            as escape, should be typed directly on the keyboard or
+            they will be sent as typed. EXCEPTION: The character
+            enq will be substituted for any TAB encountered in the
+            message.
 
 Monitor-only parameters:
-data            response of MAT system, if any, to each message.
+data        response of MAT system, if any, to each message.

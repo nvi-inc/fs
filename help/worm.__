@@ -1,36 +1,38 @@
-worm - estimate narrow-track inchworm velocities
-Syntax:         worm=stack,scale
-                worm
+         worm - estimate narrow-track inchworm velocities
 
-Response:       worm/stack,scale,fo,so,fi,si
+Syntax:   worm=stack,scale
+          worm
+
+Response: worm/stack,scale,fo,so,fi,si
 
 
 Settable parameters:
-stack           Head stack to measure the speed of, read or 2 (default), or write
-                or 1. Only the first character is checked. Only write is valid
-                for VLBA. 
-scale           Scale to use for speed measurement, update (default) or new. Only
-                the first character is checked. The default uses the old scale and
-                updates the speed in use.
+stack     Head stack to measure the speed of, read or 2 (default),
+          or write or 1. Only the first character is checked. Only
+          write is valid for VLBA. 
+scale     Scale to use for speed measurement, update (default) or
+          new. Only the first character is checked. The default
+          uses the old scale and updates the speed in use.
 
 Monitor-only parameters:
-fo              Fast out speed.
-so              Slow out speed.
-fi              Fast in  speed.
-si              Slow in  speed.
+fo        Fast out speed.
+so        Slow out speed.
+fi        Fast in  speed.
+si        Slow in  speed.
 
 Comments: 
-This command measures the inchworm speeds. It must be issued once with parameters
-to set it up. Issuing the command without parameters will start a measurement. 
+This command measures the inchworm speeds. It must be issued once
+with parameters to set it up. Issuing the command without
+parameters will start a measurement. 
 
-Measurements are made by moving the head stack for 1 second at slow speeds and
-0.1 seconds at fast speeds in each direction. The before and after voltages are
-compared and the voltage scale for that head stack is used to calculate the
-speed. This scheme works best if the inchworm starts well away from the limits
-of its motion.
+Measurements are made by moving the head stack for 1 second at slow
+speeds and 0.1 seconds at fast speeds in each direction. The before
+and after voltages are compared and the voltage scale for that head
+stack is used to calculate the speed. This scheme works best if the
+inchworm starts well away from the limits of its motion.
 
-Either the current (old) or the new voltage scales can be used. The old scale is
-the one most recently read on Field System start-up from the head.ctl control
-file. The new scale is the most recently determined scale factor calculated by
-the hdcalc command. 
+Either the current (old) or the new voltage scales can be used. The
+old scale is the one most recently read on Field System start-up
+from the head.ctl control file. The new scale is the most recently
+determined scale factor calculated by the hdcalc command. 
 
