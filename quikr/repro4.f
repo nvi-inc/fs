@@ -8,7 +8,7 @@ C  gag  920727  Created: copied from repro.f
 C
 C     INPUT VARIABLES:
 C
-      dimension ip(1)
+      dimension ip(5)
 C        IP(1)  - class number of input parameter buffer.
 C
 C     OUTPUT VARIABLES:
@@ -177,12 +177,13 @@ C
       do i=1,4   !! selects one of 0,1,2,3
         if (parm.eq.ibws1(i)) goto 246
       enddo
-      do i=1,4   !! or selects one of 80,135,160,270
-        if (parm.eq.ibws2(i)) then
-          if ((i.eq.1).or.(i.eq.2)) i=2 
-          if ((i.eq.3).or.(i.eq.4)) i=3 
-          goto 246
-        endif
+      do j=1,4   !! or selects one of 80,135,160,270
+         i=j
+         if (parm.eq.ibws2(i)) then
+            if (i.eq.1.or.i.eq.2) i=2 
+            if (i.eq.3.or.i.eq.4) i=3 
+            goto 246
+         endif
       enddo
       ierr = -209
       goto 990
