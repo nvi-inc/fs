@@ -76,6 +76,12 @@ void wait_mcb(); /* wait a fraction of a second */
 int rte_prior();
 void isdigiboard();
 
+struct prob {
+  char name[3];
+  unsigned short start;
+  unsigned short stop;
+} prob[2] ={ "  ",0,0,"  ",0,0};
+
 /* global variables */
 static struct MCBAD
 {
@@ -201,6 +207,21 @@ FILE *fp; /* file pointer to mcb address block file */
     int tbase; /* temp storage for base address */
     int tlen;  /* temp storage for block length */
     struct MCBAD *ptr; /* pointer to memory obtained */
+    char check;
+
+    check=fgetc(fp);
+    while(check == '*' && check != EOF) {
+      check=fgetc(fp);
+      while(check != '\n' && check != EOF)
+	check=fgetc(fp);
+      if(check != EOF) 
+	check=fgetc(fp);
+    }
+    if (check == EOF)
+      /* ended in comment */
+      return( (struct MCBAD*) NULL);
+    else if(ungetc(check, fp)==EOF)
+      return( (struct MCBAD*) NULL);
 
     if ( fscanf(fp,"%s %x %x %x",temp,&tid,&tbase,&tlen) != 4) /* read a line */
     {
@@ -226,6 +247,23 @@ FILE *fp; /* file pointer to mcb address block file */
     ptr->id = tid;
     ptr->base = tbase;
     ptr->len = tlen;
+
+    if(strcmp(tname,"r1")==0) {
+      if(shm_addr->equip.drive[0]==VLBA4 &&
+         shm_addr->equip.drive_type[0]==VLBA42) {
+	strcpy(prob[0].name,tname);
+	prob[0].start=tbase;
+	prob[0].stop=tbase+tlen-1;
+      }
+    } else if(strcmp(tname,"r2")==0) {
+      if(shm_addr->equip.drive[1]==VLBA4 &&
+         shm_addr->equip.drive_type[1]==VLBA42) {
+	strcpy(prob[1].name,tname);
+	prob[1].start=tbase;
+	prob[1].stop=tbase+tlen-1;
+      }
+    }
+
     return(ptr);
 }
 
@@ -978,15 +1016,27 @@ int *result;         /* return code */
         goto done;
     } 
 
-    if ( ch[0] != ACK) {  /* an ACK is required */
-        *result = -2;
-        goto done;
-    } else if ( ch[1] == DC1 ) { 
-        *result = 0;
+    if (ch[0] != ACK) {
+      int i;
+      for (i=0;i<2;i++)
+	if(strcmp(prob[i].name,"  ")!=0 &&
+	   prob[i].start <= addr &&
+	   addr <= prob[i].stop) {
+	  logita(NULL,-2,"mc",prob[i].name);
+	  goto check_next;
+	}
+      /* an ACK is required */
+      *result = -2;
+      goto done;
+    }
+
+ check_next:
+    if ( ch[1] == DC1 ) { 
+      *result = 0;
     } else if ( ch[1] == NAK ) {
-        *result = -5;
+      *result = -5;
     } else if ( ch[1] == DC2 ) {
-        *result = -4;
+      *result = -4;
     }
 done:
     send_echo();
