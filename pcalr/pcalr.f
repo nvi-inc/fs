@@ -125,8 +125,10 @@ C
         call logit7ci(idum,idum,idum,0,ierr,'pc',0)
         goto 999
       endif
-      if (ibugpc.gt.1) write(luop,9110) itrack,lblk,nblkpc,ibyppc,
-     .   ibwvc(1),ibdb
+      if (ibugpc.gt.1) then
+         call fs_get_ibwvc(ibwvc)
+         write(luop,9110) itrack,lblk,nblkpc,ibyppc,ibwvc(1),ibdb
+      endif
 9110  format(1x,"parameters for phase cal extraction using data buffer"/
      ."track# "i5" block# "a2" #blks "i3" bypass mode "i2" bandwidth "
      .i2," baud rate "i5)
@@ -158,8 +160,11 @@ C     PHCAL calculates the phase cal freq in the VC corresponding
 C     to ITRK.  Data from this track is not processed if PCAL>50kHz
 C
       if (kfield) call phcal(pcal,itrk,ivc)
-      if (ibugpc.gt.0) write(luop,9205) pcal,itrk,ivc,freqvc(ivc)
-9205  format(1x,"pcal (hz)="d9.2" track="i2" vc#="i2" vcfrq="f7.2)
+      if (ibugpc.gt.0) then
+         call fs_get_freqvc(freqvc)
+         write(luop,9205) pcal,itrk,ivc,freqvc(ivc)         
+ 9205    format(1x,"pcal (hz)="d9.2" track="i2" vc#="i2" vcfrq="f7.2)
+      endif
       if (pcal.gt.50000.) goto 900
 C
       if (ibugpc.gt.0) write(luop,9210) itrk
@@ -171,9 +176,13 @@ C           Skip MATCN call if the Field System is not running
 C
 C      - Check phase cal in partner track if in split mode
 C
-      if (ksplit) call phcal(pcala,itrkpc(itrk),ivc2)
-      if (ibugpc.gt.0.and.ksplit) write(luop,9205) pcala,itrkpc(itrk),
-     . ivc2,freqvc(ivc2)
+      if (ksplit) then 
+         call phcal(pcala,itrkpc(itrk),ivc2)
+         if (ibugpc.gt.0) then
+            call fs_get_freqvc(freqvc)
+            write(luop,9205) pcala,itrkpc(itrk),ivc2,freqvc(ivc2)
+         endif
+      endif
       if (pcala.gt.50000.) ksplit = .false.
 C
       if(kbreak('pcalr')) goto 999

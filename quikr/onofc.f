@@ -233,6 +233,7 @@ C
           ichain=3
         else if(ichcm_ch(ldv1nf,1,'v').eq.0) then
           indvc = ia2hx(ldv1nf,2)
+          call fs_get_ifp2vc(ifp2vc)
           ichain=iabs(ifp2vc(indvc))
           if(ichain.lt.1.or.ichain.gt.3) then
             ierr=-411
@@ -309,6 +310,7 @@ C
           ichain=3
         else if(ichcm_ch(ldv2nf,1,'v').eq.0) then
           indvc = ia2hx(ldv2nf,2)
+          call fs_get_ifp2vc(ifp2vc)
           ichain=iabs(ifp2vc(indvc))
           if(ichain.lt.1.or.ichain.gt.3) then
             ierr=-412
@@ -378,6 +380,7 @@ C
       ich1nf_fs=ichain1
       ich2nf_fs=ichain2
       if((rack.eq.and(MK3,rack)).or.(rack.eq.and(MK4,rack))) then
+        call fs_get_freqvc(freqvc)
         if(cjchar(ldv1nf,1).eq.'i') goto 602
         indvc = ia2hx(ldv1nf,2)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 602

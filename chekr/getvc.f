@@ -44,6 +44,7 @@ C
       if(iremvc(iloop).ne.0) inerr(1) = inerr(1) + 1
       call fs_get_lfreqv(lfreqv)
       if (ichcm(lfr,1,lfreqv(1,iloop),1,6).ne.0) inerr(2)=inerr(2)+1
+      call fs_get_ibwvc(ibwvc)
       if (ibw.ne.ibwvc(iloop)) inerr(3)=inerr(3)+1
       if (itp.ne.itpivc(iloop)) inerr(4)=inerr(4)+1
       if (ia1.ne.iatuvc(iloop)) inerr(5)=inerr(5)+1

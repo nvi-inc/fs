@@ -97,6 +97,7 @@ C
 C     2.2  2nd and subsequent parms, VC#, H or L. 
 C 
       ifc = 0
+      call fs_get_ifp2vc(ifp2vc)
       do i=1,14 
         ifp(i) = ifp2vc(i)
       enddo
@@ -112,6 +113,7 @@ C
             ifp2vc(i) = ifp(i)
           enddo
         endif
+        call fs_set_ifp2vc(ifp2vc)
         return
       endif
       nch = 2 
