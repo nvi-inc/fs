@@ -17,6 +17,8 @@
 #define EQ_KEY          '.'
 #define TOGGLE_KEY      't'
 #define TOGGLE2_KEY     'T'
+#define SYNCH_KEY       's'
+#define SYNCH2_KEY      'S'
 
 /* externals */
 void initvstr();
@@ -35,6 +37,7 @@ long ip[5];           /* parameters for fs communications */
 long inclass;         /* input class number */
 long outclass;        /* output class number */
 int rtn1, rtn2, msgflg, save; /* unused cls_get args */
+int synch=0;
 
 main()  
 {
@@ -54,7 +57,7 @@ char   inc;
  int    flag;
 struct tm *disptm;
 int toggle= FALSE;
-int other,temp;
+int other,temp, irow;
 
 
 setup_ids();         /* connect to shared memory segment */
@@ -117,13 +120,17 @@ mvwaddstr( maindisp,  ROW+2, 10,
  "    '='   to be prompted for a new formatter time." );
 mvwaddstr( maindisp, ROW+3, 10, 
  "    '.'   to set formatter time to Field System time.");
-if(!toggle)
-  mvwaddstr( maindisp, ROW+4, 10,
+irow=4;
+if(rack& MK4)
+  mvwaddstr( maindisp, ROW+irow++, 10,
+	     "    's' or 'S' to SYNCH formatter (rarely needed)");
+if(!toggle) {
+  mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    <esc> to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
-else {
-  mvwaddstr( maindisp, ROW+4, 10,
+} else {
+  mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    't' or 'T' to toggle between S2 recorder and formatter.");
-  mvwaddstr( maindisp, ROW+5, 10,
+  mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    <esc> to quit.");
 }  
 
@@ -203,6 +210,10 @@ do 	{
 	    other=temp;
 	    goto build;
 	  }
+	case SYNCH_KEY:
+	case SYNCH2_KEY:
+	  synch=1;
+	  break;
 	default     :
 			running = TRUE;
 	}
