@@ -39,7 +39,7 @@ int *error;
 
 #ifdef CONFIG_GPIB
 
-  ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
+  ibcmd(ID_hpib,"_?",2);  	/* unaddress all listeners and talkers */
   if ((ibsta & (ERR|TIMO)) != 0)
   {
     *error = -(IBCODE + iberr); 
@@ -114,7 +114,7 @@ int *error;
     memcpy((char *)ipcode,"W4",2);
   }
 
-  ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
+  ibcmd(ID_hpib,"_?",2);  	/* unaddress all listeners and talkers */
   if ((ibsta & (ERR|TIMO)) != 0)
   {
     *error = -(IBCODE + iberr); 
