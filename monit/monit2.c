@@ -15,7 +15,7 @@
 #include "../include/fscom.h"
 
 extern struct fscom *shm_addr;
-int kMrack, kMdrive, kS2drive,kVrack,kVdrive;
+int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack;
 
 main()
 {
@@ -38,6 +38,8 @@ main()
 
   rack=shm_addr->equip.rack;
   kMrack=rack==MK3 || rack==MK4;
+  kM3rack=rack==MK3;
+  kM4rack=rack==MK4;
   kVrack=rack==VLBA;
 
   drive=shm_addr->equip.drive;
