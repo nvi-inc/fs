@@ -63,13 +63,13 @@ C
       index=-1
       do i=1,nnames
          if (ichcm(lnames(1,i),1,lmatch,1,12).eq.0.) then
-            if((and(rack,lnames(11,i)).ne.0.or.255.eq.lnames(11,i))
+            if((and(rack,lnames(11,i)).eq.rack.or.4095.eq.lnames(11,i))
      $           .and.
-     $           (and(drive(1),lnames(12,i)).ne.0.or.
-     $           255.eq.lnames(12,i))
+     $           (and(drive(1),lnames(12,i)).eq.drive(1).or.
+     $           4095.eq.lnames(12,i))
      $           .and.
-     $           (and(drive(2),lnames(13,i)).ne.0.or.
-     $           255.eq.lnames(13,i))
+     $           (and(drive(2),lnames(13,i)).eq.drive(2).or.
+     $           4095.eq.lnames(13,i))
      $           .and.
      $           (lnames(8,i).eq.0.or.
      $           (lnames(8,i).eq.1.and.drive(1).ne.0.and.drive(2).eq.0)

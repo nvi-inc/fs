@@ -117,7 +117,7 @@ C
            elseif(imodfm.eq.3) then
               itpis(1)=1
            endif
-        elseif(rack.eq.MK4) then
+        elseif(rack.eq.MK4.or.rack.eq.LBA4) then
            call fc_mk4vcd(itpis)
         endif
         goto 289
@@ -137,7 +137,7 @@ C
            elseif(imodfm.eq.3) then
               itpis_test(1)=1
            endif
-        elseif(rack.eq.MK4) then
+        elseif(rack.eq.MK4.or.rack.eq.LBA4) then
            call fc_mk4vcd(itpis_test)
         endif
         call fs_get_ifp2vc(ifp2vc)
@@ -202,7 +202,7 @@ C
 c
 c nothing selected
 c
-        ierr = -203
+        ierr = -204
         goto 990
 C 
 C 

@@ -80,7 +80,7 @@ c
           jc = 0
 C 
           call fs_get_ifp2vc(ifp2vc)
-          if(rack.eq.MK3.or.rack.eq.MK4) then
+          if(rack.eq.MK3.or.rack.eq.MK4.or.rack.eq.LBA4) then
              do  i = 1,14
                 if (iabs(ifp2vc(i)).eq.j) then
                    nch = mcoma(ibuf2,nch)

@@ -21,6 +21,7 @@ static char *bits_key[ ]={"auto","1","2"};
 
 static char chanm[] = "0123";
 static char chanv[] = "0abcd";
+static char chanl[] = "01234";
 static char hex[]= "0123456789abcdef";
 static char det[] = "dlu34567";
 static char *lwhat[ ]={
@@ -63,15 +64,17 @@ char *ptr;
 	} else if(shm_addr->imodfm==3) {
 		lcl->itpis[1]=1;
 	}
-      } else if(shm_addr->equip.rack==MK4) {
+      } else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	mk4vcd(lcl->itpis);
       } else if(shm_addr->equip.rack==VLBA) {
 	vlbabbcd(lcl->itpis);
       } else if(shm_addr->equip.rack==VLBA4) {
 	mk4bbcd(lcl->itpis);
+      } else if(shm_addr->equip.rack==LBA) {
+	lbaifpd(lcl->itpis);
       }
 
-      if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+      if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	for (i=0;i<14;i++)
 	  if(lcl->itpis[i]!=0){
 	    lcl->ifc[i]=abs(shm_addr->ifp2vc[i]);
@@ -107,7 +110,15 @@ char *ptr;
 	    lcl->lwhat[i][0]='i';
 	    lcl->lwhat[i][1]=hex[i-(2*MAX_BBC)+10];
 	  }
-
+      }else if (shm_addr->equip.rack==LBA) {
+        for (i=0;i<2*shm_addr->n_das;i++)
+	  if(lcl->itpis[i]!=0){
+	    lcl->ifc[i]=shm_addr->das[i/2].ifp[i%2].source+1;
+	    if(lcl->ifc[i]<0||lcl->ifc[i]>4)
+	      lcl->ifc[i]=0;
+	    strncpy(lcl->lwhat[i],lwhat[i+MAX_BBC],2);
+	    lcl->lwhat[i][1]=det[0];
+	  }
       } 
 
       /*
@@ -149,22 +160,27 @@ struct tpicd_cmd *lcl;
   if(*count >= 2 && *count <=7 ) {
     for(j=*count-2;j<5;j++) {
       *count=j+2;
-      if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+      if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	sprintf(output+strlen(output),"%c",chanm[j]);
 	limit=17;
       }else if (shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
 	sprintf(output+strlen(output),"%c",chanv[j]);
 	limit=MAX_DET;
+      }else if (shm_addr->equip.rack==LBA) {
+	sprintf(output+strlen(output),"%c",chanl[j]);
+	limit=2*shm_addr->n_das;
       }
       lenstart=strlen(output);
       for (k=0;k<limit;k++) {
-	if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+	if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	  i=k;
 	}else if (shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
 	  if(k<2*MAX_BBC)
 	    i=14*(k%2)+k/2;
 	  else
 	    i=k;
+	}else if (shm_addr->equip.rack==LBA) {
+	  i=k;
 	}
 	if(lcl->itpis[i]!=0 && lcl->ifc[i]==j) {
 	  int len;

@@ -1,28 +1,28 @@
                disc_start - Start Mark V recording
- 
-              Syntax:      disc_start=on,scan_name
+
+            Syntax:     disc_start=on,scan_name
           disc_start
- 
-              Response:    disc_start/on/off
- 
- 
- Settable Parameters:
-          on       Turn recording on, only on is allowed
-            scan_name  String of up to 16 characters, default is current
-            scan name defined by the scan_name SNAP command
- 
- Monitor-only parameters:
-              on/off`      on (recording) or off (nor recording)
- 
- Comments:
- This command may be given only with either one parameter on to
- start recording or with no parameter to monitor whether
- recording is on or off. To stop recording use the disc_end
- SNAP command.
- 
- Normally scan_name is taken by default as the scan name
- defined by the most recent scan_name=... command. The
- scan_name parameter allows the value used for this recording
- to over-riddden. It does not change the actual scan name. The
- scan is sent to the Mark 5 to identify the scan being
- recorded.
+
+            Response:   disc_start/on/off
+
+
+Settable Parameters:
+          on        Turn recording on, only on is allowed
+          scan_name String of up to 16 characters, default is current
+          scan name defined by the scan_name SNAP command
+
+Monitor-only parameters:
+            on/off`     on (recording) or off (nor recording)
+
+Comments:
+This command may be given only with either one parameter on to
+start recording or with no parameter to monitor whether
+recording is on or off. To stop recording use the disc_end
+SNAP command.
+
+Normally scan_name is taken by default as the scan name
+defined by the most recent scan_name=... command. The
+scan_name parameter allows the value used for this recording
+to over-riddden. It does not change the actual scan name. The
+scan is sent to the Mark 5 to identify the scan being
+recorded.

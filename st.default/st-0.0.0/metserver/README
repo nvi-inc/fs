@@ -1,0 +1,56 @@
+Field System 'metserver' software.
+
+INFORMATION: 
+-----------
+
+Field System Homepage:  http://lupus.gsfc.nasa.gov/fs
+
+The metserver gets Paroscientific, Inc. MET3 (Meteorological 
+Measurement System) and Handar TSI Company (Ultrasonic Wind Sensors) 
+information and stores it in its own buffers.
+
+Read the INSTALL for installation instructions.
+
+THE SERVER:
+-------------
+
+metserver will call on metget to retrive information from MET3 and Wind 
+Sensor by using the ports that you have designated. 
+example: /dev/ttySx /dev/ttySx
+
+Information will be read continuously from the named /dev/ports and placed 
+on the servers buffer. The server will listen for requests from client(s) on 
+socket 30384, and send the information.
+
+ERRORS:
+-------
+
+Errors from metserver will go to /tmp/metserver.error file, /var/log/syslog, 
+and an email will be sent to the operator. metserver WILL NOT exit on errors.
+
+PROBLEMS:
+--------
+
+If you get an error regarding the metserver and/or the metclient, that you 
+can't correct and you want to stop either or both of the programs you will
+need to kill the metserver and/or the metclient manually. They will not exit
+on errors.
+
+ (This will give you the PID's for both the metserver and/or the metclient, 
+  whichever is running at the time:)
+
+   prompt> log in as root
+   prompt> ps -ef | grep met
+   prompt> kill PID
+
+example:
+   prompt> ps -ef | grep met
+
+   prog     13526     1  0 16:39 ?        00:00:00 /usr2/st/metserver/metserver/dev/ttyS19 /dev/ttyS18
+   root     13630     1  0 16:53 pts/3    00:00:00 /usr2/st/metclient/metclient/usr2/st/metclient/metlog.ctl
+   prog     13815 13533  0 17:43 pts/3    00:00:00 grep met
+
+   prompt> kill 13526 13630
+
+
+If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.

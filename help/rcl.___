@@ -1,98 +1,98 @@
                      rcl - RCL communications
- 
-              Syntax:      rcl=device,command,parameters,...
- 
-              Response:    rcl=response
- 
- 
- Settable Parameters:
-            device     The two character module mnemonic for the device to
+
+            Syntax:     rcl=device,command,parameters,...
+
+            Response:   rcl=response
+
+
+Settable Parameters:
+            device      The two character module mnemonic for the device to
             communicate with as defined in the rclad.ctl control
             file, e.g. rc for the S2 recorder.
- 
-          command  Name of RCL command function.
- 
-              parameters   Command delimited additional parameters required
-              for this RCL command function.
- 
- Monitor-only Parameters: 
-              response     Result of communication, may displayed on multiple
-              lines for ease of reading. 
- 
- Comments: 
- This command implements access to all the low-level functions
- of the RCL interface. Check ISTS's S2-RT User's Manual, Appendix A
- for detailed information about the command names, their
- parameters, and the responses. The following table lists very
- briefly the commands and the parameters, if any, that the rcl
- command expects for each. For parameters that have values that
- consist of choice among fixed items, it is possible to enter a
- numeric value as well, in which case it is passed directly to
- RCL interface without checking. 
- 
-                      Command              Parameters                            
-                      align                absolute,year,day,hour,min,sec,nanosec 
-                                       relative, + or -, hour,min,sec,nanosec 
-                                       re-align or self-align 
- barrel_roll_read 
-                      barrel_roll_set      on or off 
-                      bercd                fmber or uiber or uidcb, chan,
-                      measurement time 
-                      consolecmd           command string 
- delay_read 
-                      delay_set            absolute or relative, nanoseconds 
- delaym_read 
-                      diag                 value 
- eject 
-                      errmess              samples 
-                      esterr_read          transport or channel 
- ff 
- group_read 
- 
-                      group_set            group number 
- ident 
- mk3_form_read 
-                      mk3_form_set         enable or disable 
- mode_read 
-                      mode_set             mode string 
- pause 
-                      pdv_read             transport or channel 
-                      ping                 time-out 
- play 
-                      position_read        overall or individual 
-                      position_set         absolute or relative or preset,1,position 
-                                       absolute or relative or preset,8,8-comma-
+
+          command   Name of RCL command function.
+
+            parameters  Command delimited additional parameters required
+            for this RCL command function.
+
+Monitor-only Parameters: 
+            response    Result of communication, may displayed on multiple
+            lines for ease of reading. 
+
+Comments: 
+This command implements access to all the low-level functions
+of the RCL interface. Check ISTS's S2-RT User's Manual, Appendix A
+for detailed information about the command names, their
+parameters, and the responses. The following table lists very
+briefly the commands and the parameters, if any, that the rcl
+command expects for each. For parameters that have values that
+consist of choice among fixed items, it is possible to enter a
+numeric value as well, in which case it is passed directly to
+RCL interface without checking. 
+
+                      Command               Parameters                            
+                      align                 absolute,year,day,hour,min,sec,nanosec 
+                                        relative, + or -, hour,min,sec,nanosec 
+                                        re-align or self-align 
+barrel_roll_read 
+                      barrel_roll_set       on or off 
+                      bercd                 fmber or uiber or uidcb, chan, measurement
+                      time 
+                    consolecmd          command string 
+delay_read 
+                      delay_set             absolute or relative, nanoseconds 
+delaym_read 
+                    diag                value 
+eject 
+                      errmess               samples 
+                      esterr_read           transport or channel 
+ff 
+group_read 
+
+                      group_set             group number 
+ident 
+mk3_form_read 
+                    mk3_form_set        enable or disable 
+mode_read 
+                    mode_set            mode string 
+pause 
+                    pdv_read            transport or channel 
+                    ping                time-out 
+play 
+                      position_read         overall or individual 
+                    position_set        absolute or relative or preset,1,position 
+                                        absolute or relative or preset,8,8-comma-
                     separated positions 
-                                       re-establish 
-                      postime_read         transport 
- record 
- rewind 
- speed_read 
- speed_read_pb 
-                      speed_set            lp or slp 
- state_read 
- station_info_read 
- stop 
- tapeid_read 
- tapeid_read_pb 
-                      tapeid_set           tapeid string 
- tapeinfo_read_pb 
- tapetype_read 
-                      tapetype_set         tape type character or string 
- time_read 
- time_read_pb 
-                      time_set             year,day,hours,minutes,seconds 
- transport_times 
- unpause 
- user_dv_read 
- user_dv_read_pb 
-                      user_dv_set          true or false, ignore or use 
-                      user_info_read       field number, field or label 
-                      user_info_read_pb    field number, field or label 
-                      user_info_set        field number, field or label,string 
-                      spcll_mode_set       xtal or manual or refclk or 1hz or errmes 
- status 
-                      status_decode        status code, true or false 
-                      status_detail        status code, true or false, true or false 
- version 
- 
+                                        re-establish 
+                    postime_read        transport 
+record 
+rewind 
+speed_read 
+speed_read_pb 
+                      speed_set             lp or slp 
+state_read 
+station_info_read 
+stop 
+tapeid_read 
+tapeid_read_pb 
+                    tapeid_set          tapeid string 
+tapeinfo_read_pb 
+tapetype_read 
+                    tapetype_set        tape type character or string 
+time_read 
+time_read_pb 
+                    time_set            year,day,hours,minutes,seconds 
+transport_times 
+unpause 
+user_dv_read 
+user_dv_read_pb 
+                      user_dv_set           true or false, ignore or use 
+                    user_info_read      field number, field or label 
+                      user_info_read_pb     field number, field or label 
+                    user_info_set       field number, field or label,string 
+                    spcll_mode_set      xtal or manual or refclk or 1hz or errmes 
+status 
+                      status_decode         status code, true or false 
+                      status_detail         status code, true or false, true or false 
+version 
+

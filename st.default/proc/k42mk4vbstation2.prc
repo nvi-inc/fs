@@ -1,3 +1,6 @@
+define  exper_initi   00000000000
+sched_initi
+enddef
 define  sched_initi   00000000000
 enddef
 define  drive2        00000000000x

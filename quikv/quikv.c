@@ -239,6 +239,9 @@ loop:
 	case 7:
 	  mk5close(&command,itask,ip);
 	  break;
+	case 8:
+	  bank_check(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  goto error;
@@ -256,6 +259,24 @@ loop:
       case 82:
 	calrx(&command,itask,ip);
 	break;
+      case 83:
+        ds(&command,itask,ip);
+        break;
+      case 84:
+        lba_ifp(&command,itask,ip);
+        break;
+      case 85:
+        lba_cor(&command,itask,ip);
+        break;
+      case 86:
+        lba_mon(&command,itask,ip);
+        break;
+      case 87:
+        lba_ft(&command,itask,ip);
+        break;
+      case 88:
+        lba_trkfrm(&command,itask,ip);
+        break;
       default:
 	ierr=-4;
 	goto error;

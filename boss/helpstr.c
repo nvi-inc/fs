@@ -79,21 +79,27 @@ int rlen;
       if((ch1== '_' ||
 	  (ch1 == '3' &&  K4K3  == *rack) ||
 	  (ch1 == 'm' &&  MK3   == *rack) ||
-	  (ch1 == 'n' && (MK3   == *rack || MK4   == *rack)) ||
+	  (ch1 == 'n' && (MK3   == *rack || MK4   == *rack ||
+	                  LBA4  == *rack)) ||
 	  (ch1 == 'e' && (MK3   == *rack || MK4   == *rack ||
-			  VLBA  == *rack || VLBA4 == *rack )) ||
+			  VLBA  == *rack || VLBA4 == *rack ||
+	                  LBA4  == *rack )) ||
 	  (ch1 == 'f' && (MK3   == *rack || MK4   == *rack ||
 			  K4K3  == *rack || K4MK4 == *rack ||
-			  K4    == *rack)) ||
+			  K4    == *rack || LBA4  == *rack)) ||
 	  (ch1 == '4' &&  MK4   == *rack) ||
 	  (ch1 == 'g' && (MK4   == *rack || VLBA  == *rack ||
-			  VLBA4 == *rack || K4MK4 == *rack)) ||
+			  VLBA4 == *rack || K4MK4 == *rack ||
+			  LBA4  == *rack)) ||
 	  (ch1 == 'h' && (MK4   == *rack || VLBA4 == *rack ||
-			  K4MK4 == *rack)) ||
+			  K4MK4 == *rack || LBA4  == *rack)) ||
+	  (ch1 == 'i' && (MK4   == *rack || VLBA  == *rack ||
+			  VLBA4 == *rack || K4MK4 == *rack)) ||
 	  (ch1 == 'v' && (VLBA  == *rack)) ||
 	  (ch1 == 'w' && (VLBA  == *rack || VLBA4 == *rack)) ||
 	  (ch1 == 'k' && (K4K3  == *rack || K4MK4 == *rack ||
 			  K4    == *rack)) ||
+	  (ch1 == 'l' && (LBA   == *rack || LBA4 == *rack)) ||
 	  (ch1 == 'a' &&  0     != *rack)) &&
 	 (ch2 == '_' || ch2 == '+' ||
 	  (ch2 == 'k' &&  K4    == *drive1) ||

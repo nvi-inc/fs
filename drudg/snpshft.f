@@ -32,8 +32,7 @@ Cinteger*4 ifbrk
 	integer*2 LM7(23)
 	CHARACTER*80 CHT
 	character*3 stat
-	character RESP,UPPER
-        integer*2 HBB
+             integer*2 HBB
 	INTEGER Z21,Z20,Z46,Z39,Z30,H2C,HQUB,z4202
       integer iday0,ias2b,jchar,ib2as,ichcm,ichmv ! functions
       integer ichmv_ch, ichcm_ch
@@ -82,23 +81,7 @@ C
 	    kdone = .true.
 	  ENDIF
 C
-	  if (kdone) then
-	    inquire(file=coutname,exist=kex)
-	    if (kex) then
-		write(luscn,'(" File exists; OK to purge?(Y or N): ",$)')
-		read(5,'(a)') RESP
-		RESP(1:1)=UPPER(RESP(1:1))
-		IF(RESP(1:1).eq.'Y') then
-		  open(lu_outfile,file=coutname)
-		  close(lu_outfile,status='delete')
-		  stat = 'new'
-		else
-		  kdone = .false.
-		endif
-	    else
-		stat='new'
-	    endif
-	  end if !"kdone"
+          call purge_file(coutname,luscn,luusr,.false.,ierr)
 	end do !"kdone"
 
 	OPEN(LU_OUTFILE,file=coutname,status=stat,iostat=IERR)

@@ -217,7 +217,7 @@ C
 c
 c nothing selected
 c
-        ierr = -203
+        ierr = -204
         goto 990
 C 
 C 

@@ -40,6 +40,7 @@ C 000905 nrv LMFMT must have 16 characters!
 C 000913 nrv Add roll tables here.
 C 020112 nrv All roll variables by station and code. Add canned rolls.
 C 020327 nrv Add CMODULATION for data modulation value.
+C 021111 jfq Add S2 data source for LBA rack.
 C
       double precision effreq,ffact,bitdens,freqlo,freqrf,
      .freqpcal,freqpcal_base,tape_dens
@@ -112,7 +113,7 @@ C     nrcan_steps - number of steps in each canned roll
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
      .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix,
-     .lnahdpos,lmode_cat
+     .lnahdpos,lmode_cat, ls2data
 C     LCODE - the 2-character frequency codes 
 C     LMODE - the observing mode name for each code
 C     LMFMT - the observing mode format for each code
@@ -134,6 +135,7 @@ C     losb - net sideband for each station's lo
 C     lbarrel - barrel roll code namefor each station
 C     lprefix - procedure name prefix
 C     lmode_cat - full descriptive mode name from modes.cat catalog
+C     LS2DATA - the S2 data source for each code
 C
       character*3 cset ! switch set per channel
       character*128 modedefnames ! def names from the vex file
@@ -193,7 +195,20 @@ C
      .       losb(max_chan,max_stn,max_frq),lband(max_band),
      .       lbarrel(2,max_stn,max_frq),ls2mode(8,max_stn,max_frq),
      .       lprefix(4,max_stn,max_frq),
-     .       lnahdpos(4,max_stn,max_frq)
+     .       lnahdpos(4,max_stn,max_frq),
+     .       ls2data(4,max_stn,max_frq)
+      character*4 cbarrel(max_stn,max_frq)
+      equivalence (cbarrel,lbarrel)
+      character*2 cifinp(max_chan,max_stn,max_frq)
+      equivalence (cifinp,lifinp)
+      character*2 cpol(max_chan,max_stn,max_frq)
+      equivalence (cpol,lpol)
+      character*2 csubvc(max_chan,max_stn,max_frq)
+      equivalence (csubvc,lsubvc)
+
+      character*16 cmode(max_stn,max_frq)
+      equivalence (cmode,lmode)
+
 C
       COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
      .       modedefnames(max_frq),

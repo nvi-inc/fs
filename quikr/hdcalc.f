@@ -200,7 +200,7 @@ C
      &     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
      &     )) then
          nch=nch+ir2as(rsread_fs(indxtp),ibuf,nch,8,2)
-      else
+      else if(ksread_fs(indxtp)) then
          nch=nch+ir2as(rsread_fs(indxtp),ibuf,nch,8,5)
       endif
 C

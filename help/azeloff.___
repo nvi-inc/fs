@@ -1,19 +1,19 @@
               azeloff - az-el source position offset
- 
-              Syntax:      azeloff=az,el
- 
-              Response:    azeloff/az,el
- 
- 
- Settable parameters:
-          az       Offset in azimuth, in numeric angle/degrees format.
+
+            Syntax:     azeloff=az,el
+
+            Response:   azeloff/az,el
+
+
+Settable parameters:
+          az        Offset in azimuth, in numeric angle/degrees format.
           Response is in decimal degrees.
-            el         Offset in elevation, in numeric angle/degrees
+            el          Offset in elevation, in numeric angle/degrees
             format. Response is in decimal degrees.
- 
- Monitor-only parameters: none
- 
- Comments: 
- The antenna will move to the offset position when this command
- is issued. To return to the on-source position,  issue this
- command with zero offsets.
+
+Monitor-only parameters: none
+
+Comments: 
+The antenna will move to the offset position when this command
+is issued. To return to the on-source position,  issue this
+command with zero offsets.

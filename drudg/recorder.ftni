@@ -1,0 +1,65 @@
+! This file contains all of the info about the recorder.
+      real   speed_inches
+      common /recorder/speed_inches  	!tape speed in inches. Changes with mode.\
+      integer luFile  			!where we write to.
+      integer iftold            	!Tape footage after last command.
+      integer MaxTapeLen                !Tape length
+      integer itime2stop                !how long does it take to stop?
+      integer idir                      !Tape direction.
+      Common /recorder/luFile,iftold,MaxTapeLen,itime2stop,idir
+! character version of speed.
+      character*8 lspeed
+      integer*2 ispeed(4)
+      integer nspdCh                    !number of characters
+      equivalence(lspeed,ispeed)
+      common /recorder/lspeed,nspdCh
+
+! recorder state
+      logical kdrum 		!drum_on command was written
+      logical ket 		!stop tape for this scan
+      logical krunning 		!tape is running
+      logical kspin    		!tape is spinning
+      common /recorder/kdrum,ket,krunning,kspin
+
+!     logical kstop_pre,kstop !           !Don't need these???
+!     common /recorder/kstop_pre,kstop
+
+! kinds of equipment
+      logical km3rack, km3rec(2)
+      logical km4rack, km4rec(2)
+      logical km5,     km5rec(2)
+      logical km5_piggyback
+      logical ks2,     ks2rec(2)
+
+      common /recorder/km3rack,km3rec,km4rack,km4rec,km5,km5rec
+      common /recorder/km5_piggyback
+      common /recorder/ks2,ks2rec
+
+      logical kvrack,  kvrec(2)
+      logical kv4rack, kv4rec(2)
+      common /recorder/kvrack,kvrec, kv4rack,kv4rec
+
+      logical kk4
+      logical kk41rack, kk41rec(2)
+      logical kk42rack, kk42rec(2)
+      common /recorder/kk4,kk41rack,kk41rec,kk42rack,kk42rec
+
+      logical km4fmk4rack
+      logical kk3fmk4rack
+      logical k8bbc
+      common /recorder/km4fmk4rack,kk3fmk4rack,k8bbc
+
+      logical klrack
+      common /recorder/klrack
+
+      logical krec_append               !Append characters
+      common /recorder/krec_append
+
+      character*1 crecorder             !1-character description of recorder. "A","B", etc.
+      common /recorder/crecorder
+
+
+      integer isupfstfor,ifstfor,ifstrev,isupfstrev             !Fast Forward, reverse settings.
+      parameter (isupfstfor=2,ifstfor=1,ifstrev=-1,isupfstrev=-2)
+
+

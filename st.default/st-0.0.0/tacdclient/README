@@ -1,0 +1,122 @@
+Standalone 'tacdclient' software.
+
+INFORMATION: 
+-----------
+Field System Homepage:  http://lupus.gsfc.nasa.gov/fs
+
+The tacdclient will download Tac32+ information from the TAC32 PC and send
+it to the log file that was specified by the user in the tacdlog.ctl file.
+
+Read the INSTALL for installation instructions.
+
+LOG FILE NAME:
+-------------
+The log file name will look like this:
+
+   filename example: tacd02301GG.log
+
+      tacd: indicates weather type log.
+        02: Year
+       301: day
+        GG: Station
+      .log: log extension. 
+
+
+Each day will have it's own log file, where the Day number will be the 
+only change to the file name.
+
+exceptions:
+1.) The Year will change in the file name if you've crossed into another year.
+2.) If you rename you Station ID in the tacdlog.ctl control file.
+
+HEADER:
+------
+
+At the start of each new day, a new log file will be generated. The log will 
+have a header as the beginning line (each new log will begin with a header). 
+All times are UT time.
+
+2002.301.00:12:46.00:location,GGAO7108,76.8265,39.0219,14.99:host.x.x,port
+
+       2002: Year
+        301: day
+         00: hour
+         12: minutes
+      46.00: seconds
+   location: indicator
+   GGAO7108: Station Name
+    76.8265: Longitude
+    39.0219: Latitude
+      14.99: Station Elevation
+   host.x.x: Host name or IP address
+       port: Port number you are reading from
+
+
+TAC INFORMATION FORMAT:
+--------------------------
+2003.063.16:06:47.00/tacd/time,d.f,ss,aa,g.ggg,t.tttt,c.cccc	
+or
+2003.063.16:06:47.00/tacd/average,d.f,sec,rms,max,min,average
+
+       2002: Year
+        301: day
+         00: hour
+         12: minutes
+      46.00: seconds
+     /tacd/: tacd indicator
+       time: time or average indicator
+        d.f: Epoch of value reported in time or average response. 
+             The integer d portion is either yyddd or MJD or Excel date 
+             (days since 1900.0), depending on how the software in host 
+             is set-up. The fractional f portion is the fraction of a day,
+             in steps of 0.000001 days.
+     t.tttt: Raw reading on the counter in microseconds.
+         ss: ONCORE receiver's +/- 52 nanoseconds sawtooth correction to the
+             raw GPS 1PPS in nanoseconds.
+         aa: An estimate of the accuracy of the raw GPS tick in nanoseconds.
+      g.ggg: Amount by which the GPS receiver's 1PPS output has been 
+             intentionally biased in microseconds.
+      c.ccc: Corrected (cooked) counter reading after applying the ss and
+             g.ggg corrections.
+        sec: Number of seconds (samples) of data going into average.
+        rms: RMS scatter of the sec data points about the average in 
+             microseconds.
+    average: The sec point average of the sec cooked counter readings in 
+             microseconds.
+        max: The extreme readings of the sec points.
+        min: The extreme readings of the sec points.
+ 
+OTHER CLIENTS:
+-------------
+Any client can receive tacd data from the TAC32 PC server by using PORT 32325.
+
+ERRORS:
+-------
+Errors from standalone tacd logging client will go to /tmp/tacdclient.error
+file, /var/log/syslog, and an email will be sent to the operator. tacdclient
+WILL NOT exit on any errors.
+
+For the Field System. All errors are handle by the Field System and logged 
+like any other observing error.
+
+PROBLEMS:
+--------
+If you get an error with regards the tacdclient that you can't correct and
+you want to stop the program, you will need to kill the tacdclient manually.
+It will not exit on errors.
+
+This will give you the PID's for the tacdclient that is running at the time:
+
+   prompt> log in as root
+   prompt> ps -ef | grep tacdclient
+   prompt> kill PID
+
+example:
+   prompt> ps -ef | grep tacdclient
+
+   prog     31850 29135  0 17:33 pts/5    00:00:00 tacdclient /usr2/fs/st.default/st-0.0.0/tacdclient/tacdlog.ctl
+
+   prompt> kill 31850
+
+If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.
+

@@ -1,0 +1,61 @@
+         ftnn - IF processor Fine Tuner (LBA, LBA4 racks)
+
+
+            Syntax:     ftnn=source,freq,bandwidth,mode,offset,phase,test
+
+            Response:   ftnn/source,freq,bandwidth,mode,offset,phase,test
+
+
+Settable parameters:
+            source      The source of the signal to be connected to the
+            Fine  input.  Required value is one of:
+                        USB - the upper sideband output of the Band
+            Splitter
+                        LSB - the lower sideband output of the Band
+            Splitter
+                    Default is USB.
+            freq        Frequency in MHz, value allowed is up to the
+            bandwidth  selected in the Band Splitter. Default is
+            Band Splitter (selected bandwidth)/2.
+          bandwidth Required filter bandwidth in MHz.  Allowed values
+          are: 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0,
+          16.0 MHz. Value may not be larger than the Band
+          Splitter selected bandwidth or less than 1/16 of it.
+          Default is the Band Splitter selected bandwidth.
+          mode      Filter mode, one of:
+                        NONE - bypass mode, output is a copy of input
+            (bandwidth must be equal to Band Splitter).
+                        DSB - double sideband response about frequency
+            (bandwidth up to half of Band Splitter).
+                        SCB - single response centred on frequency
+            (equivalent to upper sideband at frequency, i.e.,
+            bandwidth/2).
+                        ACB - alternative single response centred on
+            frequency, slightly wider than SCB but at the
+            expense of additional ripple.
+                    Default is NONE.
+            offset      Frequency offset in MHz, value is added to the
+            centre value above, but via a different hardware
+            register. Allowed values are such that frequency
+            plus offset lies in the range 0 to the Band Splitter
+            selected bandwidth. Default is 0.0 MHz.
+          phase     Phase offset to be added to the local oscillator,
+          value between 0 and 360 degrees, used mainly for
+          test purposes.  Default is 0.0 degrees.
+            test        Used to turn on a test mode where the Fine Tuner
+            output is the phase of the oscillator. Required
+            value is either ON or OFF.  Default is OFF.
+
+Monitor-only parameters: None.
+
+Comments: This command is intended to be used for test
+purposes only.  For VLBI recording etc. standard DSB or SCB
+mode should be used via the ifpnn command instead.
+
+This command is only active when the corresponding ifpnn
+command has selected a band splitter only mode eg. SC1, AC1,
+DS2, DS4 or DS6. The maximum Fine Tuner input bandwidth is
+16MHz ie. aliasing will occur if the Band Splitter mode has
+bandwidth of 32 or 64MHz.
+
+See also: cornn, ifpnn, monnn.

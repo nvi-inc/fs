@@ -412,10 +412,10 @@ pack propagate .start_form 0
 # This part builds up the internal1 frame with one label that tells the name of the form.      #
 #**********************************************************************************************#
 if {$form==0} {
-label  .start_form_label -text "Manual Start Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
+label  .start_form_label -text "Manual Start Form" -bg SteelBlue3 -fg white -width 20
 pack   .start_form_label -in .internal1 -side top -pady 1m
 } elseif {$form==1} {
-label  .auto_start_label -text "Auto start form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
+label  .auto_start_label -text "Auto start form" -bg SteelBlue3 -fg white -width 20
 pack   .auto_start_label -in .internal1 -side top -pady 1m
 }
 
@@ -423,14 +423,14 @@ pack   .auto_start_label -in .internal1 -side top -pady 1m
 #**********************************************************************************************#
 # This part builds up the internal2 frame with five static labels and three dynamic labels.    #
 #**********************************************************************************************#
-label  .ready_data_label -text "Ready Data:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 22
-label  .session_label -text "Session: " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 11
-label  .session_name  -text "$session" -font -*-courier-light-*-*-*-16 -bg SteelBlue3 -fg white -width 9
-label  .source_ready_label -text "First source is: " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 18
-label  .source_name -text "$first_source" -font -*-courier-light-*-*-*-16 -bg SteelBlue3 -fg white -width 10
-label  .time_ready_label -text "at: " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 5
-label  .source_time -text "$source_time" -font -*-courier-light-*-*-*-16 -bg SteelBlue3 -fg white -width 10
-label  .ut_time_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
+label  .ready_data_label -text "Ready Data:" -bg SteelBlue3 -fg white -width 22
+label  .session_label -text "Session: " -bg SteelBlue3 -fg white -width 11
+label  .session_name  -text "$session" -bg SteelBlue3 -fg white -width 9
+label  .source_ready_label -text "First source is: " -bg SteelBlue3 -fg white -width 18
+label  .source_name -text "$first_source" -bg SteelBlue3 -fg white -width 10
+label  .time_ready_label -text "at: " -bg SteelBlue3 -fg white -width 5
+label  .source_time -text "$source_time" -bg SteelBlue3 -fg white -width 10
+label  .ut_time_label -text "UT" -bg SteelBlue3 -fg white -width 4
 pack   .ready_data_label .session_label .session_name .source_ready_label .source_name .time_ready_label \
 .source_time .ut_time_label -in .internal2 -side left -pady 1m
 
@@ -439,14 +439,14 @@ pack   .ready_data_label .session_label .session_name .source_ready_label .sourc
 # This part builds up the internal3 frame with three labels and three entries for the manual   #
 # start form.                                                                                  #
 #**********************************************************************************************#
-label  .session_label2 -text "session name:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 22
+label  .session_label2 -text "session name:" -bg SteelBlue3 -fg white -width 22
 entry  .session_entry -width 9 -relief sunken -textvariable session
-label  .start_recording_label -text "Started recording with source:" -font -*-fixed-light-*-*-*-14 \
+label  .start_recording_label -text "Started recording with source:" \
 -bg SteelBlue3 -fg white -width 33
 entry  .start_recording_entry -width 10 -relief sunken -textvariable ut_on_source
-label  .at_label -text " at:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 6
+label  .at_label -text " at:" -bg SteelBlue3 -fg white -width 6
 entry  .ut_entry -width 9 -relief sunken -textvariable start_time
-label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 5
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 5
  pack   .session_label2 .session_entry .start_recording_label .start_recording_entry .at_label .ut_entry \
 .ut_label -in .internal3 -side left -pady 0m 
 
@@ -456,8 +456,8 @@ label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg whi
 # form.                                                                                        #
 #**********************************************************************************************#
 if {$form==1} {
-label     .source_box_label -text "Log processing:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 22
-text      .source_box_text -width 90 -height 3 -font -*-fixed-light-*-*-*-14 -wrap none -relief raised -bd 2 \
+label     .source_box_label -text "Log processing:" -bg SteelBlue3 -fg white -width 22
+text      .source_box_text -width 90 -height 3 -wrap none -relief raised -bd 2 \
            -yscrollcommand ".source_box_scroll set"
 scrollbar .source_box_scroll -command ".source_box_text yview"
 pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -side left -pady 1m -fill both
@@ -468,9 +468,9 @@ pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -
 # auto start form.                                                                             #
 #**********************************************************************************************#
 frame     .waiting_frame -width 70 -bg SteelBlue3 -relief flat
-label     .current_source_label -text "Current source is: $first_source" -font -*-fixed-light-*-*-*-14 \
+label     .current_source_label -text "Current source is: $first_source" \
 -bg SteelBlue3 -fg white -width 30
-label     .waiting_label -text "Waiting for start tape" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label     .waiting_label -text "Waiting for start tape" -bg SteelBlue3 -fg white -width 25
 pack      .waiting_frame -in .internal5 -side top -pady 1m
 pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 1m -fill both
 
@@ -480,9 +480,9 @@ pack      .current_source_label .waiting_label -in .waiting_frame -side left -pa
 # or an Abort button is created. The Send button calls the routine send_mail while the abort   #
 # button calls the routine stop_auto_start_mode.                                               #
 #**********************************************************************************************#
-button .abort_button -text "Abort" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 6 \
+button .abort_button -text "Abort" -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command {stop_auto_start_mode 1}
-button .send_button -text "Send" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 6 \
+button .send_button -text "Send" -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command {send_mail; .send_button config -text "Go to stop" -width 12 -command {form_controler 4}} 
 
  if {$form==0} {
@@ -679,10 +679,10 @@ pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .intern
 # This part builds up the internal1 frame with a label that tells the name of the form.        #
 #**********************************************************************************************#
 if {$form==0} {
-label  .ready_form_label -text "Ready Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
+label  .ready_form_label -text "Ready Form" -bg SteelBlue3 -fg white -width 20
 pack   .ready_form_label -in .internal1 -side top -pady 1m
 } elseif {$form==1} {
-label  .stop_form_label -text "Stop Form" -font -*-lucida-light-*-*-*-17 -bg SteelBlue3 -fg white -width 20
+label  .stop_form_label -text "Stop Form" -bg SteelBlue3 -fg white -width 20
 pack   .stop_form_label -in .internal1 -side top -pady 1m
 }
 
@@ -690,7 +690,7 @@ pack   .stop_form_label -in .internal1 -side top -pady 1m
 #**********************************************************************************************#
 # This part builds up the internal2 frame with one labels and one entry.                       #
 #**********************************************************************************************#
-label  .session_label -text "Session name:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .session_label -text "Session name:" -bg SteelBlue3 -fg white -width 25
 entry  .session_entry -width 15 -relief sunken -textvariable session
 pack   .session_label .session_entry -in .internal2 -side left -pady 1m    
 
@@ -699,7 +699,7 @@ pack   .session_label .session_entry -in .internal2 -side left -pady 1m
 # and one scrollbar attached to the textarea.                                                  #
 #**********************************************************************************************#
 frame     .comment_label_frame -width 25 -bg SteelBlue3 -relief flat
-label     .comment_label -text "Comments:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label     .comment_label -text "Comments:" -bg SteelBlue3 -fg white -width 25
 text      .comment_text -width 55 -height 5 -relief sunken -bd 2 -yscrollcommand ".comment_scroll set"
 scrollbar .comment_scroll -command ".comment_text yview" 
 pack      .comment_label_frame .comment_text .comment_scroll -in .internal3 -side left -pady 1m -fill both
@@ -711,14 +711,14 @@ pack      .comment_label -in .comment_label_frame -side top
 # composition of widgets are used.                                                             #
 #**********************************************************************************************#
 if {$form==0} {
-label  .first_source_label -text "First source:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .first_source_label -text "First source:" -bg SteelBlue3 -fg white -width 25
 entry  .firts_source_entry -width 12 -relief sunken -textvariable first_source
-label  .at_label -text "at" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
-label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4
+label  .at_label -text "at" -bg SteelBlue3 -fg white -width 4
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 4
 entry  .time_entry -width 10 -relief sunken -textvariable source_time
 pack   .first_source_label .firts_source_entry .at_label .time_entry .ut_label -in .internal4 -side left -pady 1m
 } elseif {$form==1} {
-label  .problem_scan_label -text "Problem scan(s):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .problem_scan_label -text "Problem scan(s):" -bg SteelBlue3 -fg white -width 25
 pack   .problem_scan_label -in .internal4 -side left -pady 1m
 }
 
@@ -729,13 +729,13 @@ pack   .problem_scan_label -in .internal4 -side left -pady 1m
 #**********************************************************************************************#
 if {$form==1} {
 label  .problem_scan_frame -width 25 -height 2 -bg SteelBlue3 -relief flat 
-button .add_scan_button -text "Add" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4 \
+button .add_scan_button -text "Add" -bg SteelBlue3 -fg white -width 4 \
 -relief raised -command {check_id "add" "problem_scans"}
-button .remove_scan_button -text "Remove" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4 \
+button .remove_scan_button -text "Remove" -bg SteelBlue3 -fg white -width 4 \
 -relief raised -command {check_id "remove" "problem_scans"}
-label  .scan_source_label -text "Source" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 8
-label  .scan_start_label -text "Scan start" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 14
-label  .explanation_label -text "Explanation of problem" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 21
+label  .scan_source_label -text "Source" -bg SteelBlue3 -fg white -width 8
+label  .scan_start_label -text "Scan start" -bg SteelBlue3 -fg white -width 14
+label  .explanation_label -text "Explanation of problem" -bg SteelBlue3 -fg white -width 21
 pack   .problem_scan_frame -in .internal5 -side left -fill both -pady 1m
 pack   .add_scan_button -in .problem_scan_frame -side left -padx 7m
 pack   .remove_scan_button -in .problem_scan_frame -side left -padx 3m
@@ -760,20 +760,20 @@ set problem_scans_id [expr $problem_scans_id+1]
 if {$form==0} {
 label  .gps_frame -width 25 -height 3 -bg SteelBlue3 -relief flat
 radiobutton .gps_fmout -text " GPS-FMOUT " -bg SteelBlue3 -fg white -relief flat -variable gps \
--font -*-fixed-light-*-*-*-14 -value 1
+-value 1
 radiobutton .fmout_gps -text " FMOUT-GPS " -bg SteelBlue3 -fg white -variable gps \
--font -*-fixed-light-*-*-*-14 -value 0
+-value 0
 entry  .gps-fmout_entry -width 12 -relief sunken -textvariable gps_fmout
-label  .gps_unit_label -text "microseconds" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 15
+label  .gps_unit_label -text "microseconds" -bg SteelBlue3 -fg white -width 15
 pack   .gps_fmout .fmout_gps -in .gps_frame -side top
 pack   .gps_frame .gps-fmout_entry .gps_unit_label -in .internal7 -side left -pady 1m
 pack   propagate .gps_frame 0 
 } else {
-label  .tape_inventory_label -text "Tape Inventory:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .tape_inventory_label -text "Tape Inventory:" -bg SteelBlue3 -fg white -width 25
 entry  .thin_entry -width 10 -relief sunken -textvariable thin
-label  .thin_label -text "thin" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
+label  .thin_label -text "thin" -bg SteelBlue3 -fg white -width 7
 entry  .thick_entry -width 10 -relief sunken -textvariable thick
-label  .thick_label -text "thick" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
+label  .thick_label -text "thick" -bg SteelBlue3 -fg white -width 7
 pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -in .internal7 -side left -pady 1m
 }
 
@@ -783,20 +783,20 @@ pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -
 #**********************************************************************************************#
 if {$form==0} {
 frame  .wx_frame -width 23c -height 3c -relief flat -bg SteelBlue3
-label  .wx_label -text "Wx:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
-label  .temperature_label -text "Temperature (C):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 17
+label  .wx_label -text "Wx:" -bg SteelBlue3 -fg white -width 25
+label  .temperature_label -text "Temperature (C):" -bg SteelBlue3 -fg white -width 17
 entry  .temperature_entry -width 7 -relief sunken -textvariable temperature
-label  .pressure_label -text "Pressure (mBar):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 18
+label  .pressure_label -text "Pressure (mBar):" -bg SteelBlue3 -fg white -width 18
 entry  .pressure_entry -width 7 -relief sunken -textvariable pressure
-label  .humidity_label -text "Humidity (%):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 15
+label  .humidity_label -text "Humidity (%):" -bg SteelBlue3 -fg white -width 15
 entry  .humidity_entry -width 7 -relief sunken -textvariable humidity
 pack   .wx_label .wx_frame -in .internal8 -side left
 pack   .temperature_label .temperature_entry .pressure_label .pressure_entry \
 .humidity_label .humidity_entry -in .wx_frame -side left -pady 1m
 } else {
-label  .finished_label -text "Observation finished at:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .finished_label -text "Observation finished at:" -bg SteelBlue3 -fg white -width 25
 entry  .finished_entry -width 10 -relief sunken -textvariable finished 
-label  .ut_label -text "UT" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 7
 pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady 1m
 }
 
@@ -805,7 +805,7 @@ pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady
 # composition of widgets are used.                                                             #
 #**********************************************************************************************#
 if {$form==0} {
-label  .skycondition_label -text "Sky conditions:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .skycondition_label -text "Sky conditions:" -bg SteelBlue3 -fg white -width 25
 entry  .skycondition_entry -width 55 -relief sunken -textvariable sky_conditions
 pack   .skycondition_label .skycondition_entry -in .internal9 -side left -pady 1m
 }
@@ -818,20 +818,20 @@ pack   .skycondition_label .skycondition_entry -in .internal9 -side left -pady 1
 if {$form==0} {
 frame  .larger_frame -width 2c -height 1c -relief flat -bg SteelBlue3
 frame  .is_frame -width 2c -height 1c -relief flat -bg SteelBlue3
-label  .cable_label -text "Cable difference is:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
-label  .longer_cable_label -text "longer cable makes the reading" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 31
+label  .cable_label -text "Cable difference is:" -bg SteelBlue3 -fg white -width 25
+label  .longer_cable_label -text "longer cable makes the reading" -bg SteelBlue3 -fg white -width 31
 radiobutton .plus -text "larger " -bg SteelBlue3 -fg white -relief flat -variable cabel_sign \
--font -*-fixed-light-*-*-*-14 -value 1
+-value 1
 radiobutton .minus -text "smaller" -bg SteelBlue3 -fg white -variable cabel_sign \
--font -*-fixed-light-*-*-*-14 -value 0
+-value 0
 label  .cable_border -text "" -bg SteelBlue3 -width 1
 entry  .cable_entry -width 7 -relief sunken -textvariable cable_differens
-label  .unit_label -text " microseconds " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 15
+label  .unit_label -text " microseconds " -bg SteelBlue3 -fg white -width 15
 radiobutton .is -text "Is    " -bg SteelBlue3 -fg white -relief flat -variable nominal \
--font -*-fixed-light-*-*-*-14 -value 1
+-value 1
 radiobutton .is_not -text "Is not" -bg SteelBlue3 -fg white -variable nominal \
--font -*-fixed-light-*-*-*-14 -value 0
-label  .nominal_label -text "nominal" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 10
+-value 0
+label  .nominal_label -text "nominal" -bg SteelBlue3 -fg white -width 10
 pack   .plus  .minus -in .larger_frame -side top
 pack   .is .is_not -in .is_frame -side top
 pack   .cable_label .longer_cable_label .larger_frame .cable_border .cable_entry .unit_label .is_frame .nominal_label \
@@ -844,7 +844,7 @@ pack   .cable_label .longer_cable_label .larger_frame .cable_border .cable_entry
 # the ready form.                                                                              #
 #**********************************************************************************************#
 if {$form==0} {
-label  .pointing_label -text "Pointing values:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .pointing_label -text "Pointing values:" -bg SteelBlue3 -fg white -width 25
 pack   .pointing_label -in .internal11 -side left -pady 1m
 }
 
@@ -855,17 +855,17 @@ pack   .pointing_label -in .internal11 -side left -pady 1m
 #**********************************************************************************************#
 if {$form==0} {
 label  .pointing_frame -width 25 -height 2 -bg SteelBlue3 -relief flat 
-button .add_button -text "Add" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4 \
+button .add_button -text "Add" -bg SteelBlue3 -fg white -width 4 \
 -relief raised -command {check_id "add" "pointing"}
-button .remove_button -text "Remove" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 4 \
+button .remove_button -text "Remove" -bg SteelBlue3 -fg white -width 4 \
 -relief raised -command {check_id "remove" "pointing"}
-label  .x-sefd_label -text "X-sefd" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 7 
-label  .s-sefd_label -text "S-sefd" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 10
-label  .source_label -text "Source" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 11
-label  .az_label -text "Az" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 10
-label  .el_label -text "El" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
-label  .offset1_label -text "Offset1" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
-label  .offset2_label -text "Offset2" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 9
+label  .x-sefd_label -text "X-sefd" -bg SteelBlue3 -fg white -width 7 
+label  .s-sefd_label -text "S-sefd" -bg SteelBlue3 -fg white -width 10
+label  .source_label -text "Source" -bg SteelBlue3 -fg white -width 11
+label  .az_label -text "Az" -bg SteelBlue3 -fg white -width 10
+label  .el_label -text "El" -bg SteelBlue3 -fg white -width 9
+label  .offset1_label -text "Offset1" -bg SteelBlue3 -fg white -width 9
+label  .offset2_label -text "Offset2" -bg SteelBlue3 -fg white -width 9
 pack   .pointing_frame -in .internal12 -side left -fill both -pady 1m
 pack   .add_button -in .pointing_frame -side left -padx 7m
 pack   .remove_button -in .pointing_frame -side left -padx 3m  
@@ -885,12 +885,12 @@ set pointing_id [expr $pointing_id+1]
 #**********************************************************************************************#
 # This part builds the internal14 frame with one label and one entry.                          #
 #**********************************************************************************************#
-label  .tsys_label -text "Tsys values:" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
-label  .tsys_value1_label -text "Tsys(x1): " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 13
+label  .tsys_label -text "Tsys values:" -bg SteelBlue3 -fg white -width 25
+label  .tsys_value1_label -text "Tsys(x1): " -bg SteelBlue3 -fg white -width 13
 entry  .tsys_value1_entry -width 7 -relief sunken -textvariable tsys1
-label  .tsys_value2_label -text "Tsys(s): " -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 13
+label  .tsys_value2_label -text "Tsys(s): " -bg SteelBlue3 -fg white -width 13
 entry  .tsys_value2_entry -width 7 -relief sunken -textvariable tsys2 
-label  .tsys_value3_label -text "Tsys(x2):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 13
+label  .tsys_value3_label -text "Tsys(x2):" -bg SteelBlue3 -fg white -width 13
 entry  .tsys_value3_entry -width 7 -relief sunken -textvariable tsys3
 pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsys_value2_entry \
 .tsys_value3_label .tsys_value3_entry -in .internal14 -side left -pady 1m
@@ -900,7 +900,7 @@ pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsy
 #**********************************************************************************************#
 # This part builds the internal15 frame with one label and one entry.                          #
 #**********************************************************************************************#
-label  .rec-humidity_label -text "Recorder humidity (%):" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 25
+label  .rec-humidity_label -text "Recorder humidity (%):" -bg SteelBlue3 -fg white -width 25
 entry  .rec-humidity_entry -width 10 -relief sunken -textvariable rec_humidity
 pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 1m
 }
@@ -911,13 +911,13 @@ pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 
 # checkbutton auto start is added next to the send button.                                     #
 #**********************************************************************************************#
 frame  .send_button_frame -width 25 -bg SteelBlue3 -relief flat
-button .send_button -text "Send" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -width 6 \
+button .send_button -text "Send" -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command send_mail
 pack   .send_button_frame -in .internal16 -side top
 pack   .send_button -in .send_button_frame -side left -pady 1m
 
  if {$form==0} {
-  checkbutton .auto -text "Auto start" -font -*-fixed-light-*-*-*-14 -bg SteelBlue3 -fg white -variable auto_start
+  checkbutton .auto -text "Auto start" -bg SteelBlue3 -fg white -variable auto_start
   pack   .auto -in .send_button_frame -side left -pady 1m -padx 2m
  }
 

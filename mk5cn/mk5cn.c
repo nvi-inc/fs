@@ -156,6 +156,11 @@ int doinit()
     if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
       return -3;
 
+    if(shm_addr->equip.drive[0] == MK5 &&
+       shm_addr->equip.drive_type[0] == MK5A_BS) {
+      if(time_out <200)
+	time_out= 200;
+    }
 #ifdef DEBUG
     printf ("Host %s port %d time_out %d\n",host,port,time_out);
 #endif

@@ -102,6 +102,14 @@ C LINE #1  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'k42c/mk4').eq.0.and.il.eq.8) then
         rack = K4MK4
         rack_type = K42C
+C **** Modified jfq
+      else if (ichcm_ch(ibuf,ic1,'lba').eq.0.and.il.eq.3) then
+        rack = LBA
+        rack_type = LBA
+      else if (ichcm_ch(ibuf,ic1,'lba4').eq.0.and.il.eq.4) then
+        rack = LBA4
+        rack_type = LBA
+C **** end modify jfq
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -166,6 +174,12 @@ C LINE #2  TYPE OF RECORDER - drive 1
       else if (ichcm_ch(ibuf,ic1,'k42/dms').eq.0.and.il.eq.7) then
         drive(1) = K4
         drive_type(1) = K42DMS
+      else if (ichcm_ch(ibuf,ic1,'mk5a').eq.0.and.il.eq.4) then
+        drive(1) = MK5
+        drive_type(1) = MK5A
+      else if (ichcm_ch(ibuf,ic1,'mk5a_bs').eq.0.and.il.eq.7) then
+        drive(1) = MK5
+        drive_type(1) = MK5A_BS
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive(1) = 0
         drive_type(1) = 0
@@ -424,6 +438,94 @@ C ** Mk4 formatter firmware
         go to 990
       endif
       call fs_set_imk4fmv(imk4fmv)
+C **** end modify rdg
+C **** Modified jfq
+C LINE #13 NO Of INSTALLED DAS - ndas
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',13)
+        goto 990
+      endif
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',13)
+        goto 990
+      endif
+      ndas = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (ndas.gt.MAX_DAS) then
+        call logit7ci(0,0,0,1,-140,'bo',13)
+        goto 990
+      endif
+      call fs_set_ndas(ndas)
+C LINE #14 DAS IMAGE REJECT FILTERS - idasfilt
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',14)
+        goto 990
+      endif
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',14)
+        goto 990
+      endif
+      if (ichcm_ch(ibuf,ic1,'out').eq.0) then
+         idasfilt=0
+      else if(ichcm_ch(ibuf,ic1,'in').eq.0) then
+         idasfilt=1
+      else
+        call logit7ci(0,0,0,1,-140,'bo',14)
+        goto 990
+      endif
+      call fs_set_idasfilt(idasfilt)
+C LINE #15 DAS DIGITAL INPUT FORMAT - idasbits
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',15)
+        goto 990
+      endif
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',15)
+        goto 990
+      endif
+      if (ichcm_ch(ibuf,ic1,'8bit').eq.0) then
+         idasbits=0
+      else if(ichcm_ch(ibuf,ic1,'4bit').eq.0) then
+         idasbits=1
+      else
+        call logit7ci(0,0,0,1,-140,'bo',15)
+        goto 990
+      endif
+      call fs_set_idasbits(idasbits)
+C **** end modify jfq
+C **** Modified rdg
+C **** MET3 Sensor line 16
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) then
+         call logit7ci(0,0,0,1,-140,'bo',16)
+         goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',16)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      if (ichcm_ch(ibuf,ic1,'met3').eq.0.and.il.eq.4) then
+        wx_met = MET3
+      else if (ichcm_ch(ibuf,ic1,'cdp').eq.0.and.il.eq.3) then
+        wx_met = 0
+      else
+        call logit7ci(0,0,0,1,-140,'bo',16)
+        goto 990
+      endif
+      call fs_set_met(wx_met)
 C **** end modify rdg
       return
 

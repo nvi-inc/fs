@@ -1,12 +1,12 @@
-       tracks - enables (Mark IV, VLBA, VLBA4, K4MK4 racks)
- 
-              Syntax:      tracks=list
- 
-              Response:    tracks/list
- 
- 
- Settable parameters:
-            list       list of VLBA or Mark IV recorder tracks for which to
+       tracks - enable (LBA4, Mark IV, VLBA/4, K4MK4 racks)
+
+            Syntax:     tracks=list
+
+            Response:   tracks/list
+
+
+Settable parameters:
+            list        list of VLBA or Mark IV recorder tracks for which to
             enable the corresponding formatter tracks. The
             tracks may specified as values of 2 33, as the VLBA
             "groups" of tracks not including the system tracks,
@@ -17,25 +17,30 @@
             For Mark IV/VLBA4/K4MK4 racks only (i.e., all except
             VLBA), the first parameter may be an asterisk, "*",
             to add to previously enabled tracks.
- 
- Comments: 
- This command specifies which formatter tracks will be enabled
- in the next form=... command that uses either mode m or v.
- Please note that although tracks are specified as recorder
- tracks, this command actually enables the corresponding tracks
- in formatter. Recorder enables (enable command) must also be
- turned on for data to be recorded.
- 
- Note that a VLBA or Mark IV track number equals the Mark III
- track number plus three. Consequently, odd Mark III tracks are
- even VLBA or Mark IV track numbers and vice-versa. See the
- Track Assignment Tables in the System Set-up Manual. Also VLBA
- group numbers equal Mark III group numbers minus one, but the
- VLBA groups include additional tracks. Note that this command
- uses VLBA or Mark IV track and group numbers.
- 
- For Mark IV/VLBA4/K4MK4 racks only (i.e., all except VLBA), if
- the first parameter is asterisk, "*", the groups and/or tracks
- provided as subsequent parameters will be enabled in addition
- to those already enabled.
- 
+
+Comments: 
+This command specifies which formatter tracks will be enabled
+in the next form=... command that uses either mode m or v.
+Please note that although tracks are specified as recorder
+tracks, this command actually enables the corresponding tracks
+in formatter. Recorder enables (enable command) must also be
+turned on for data to be recorded.
+
+Note that a VLBA or Mark IV track number equals the Mark III
+track number plus three. Consequently, odd Mark III tracks are
+even VLBA or Mark IV track numbers and vice-versa. See the
+Track Assignment Tables in the System Set-up Manual. Also VLBA
+group numbers equal Mark III group numbers minus one, but the
+VLBA groups include additional tracks. Note that this command
+uses VLBA or Mark IV track and group numbers.
+
+For Mark IV/VLBA4/K4MK4 racks only (i.e., all except VLBA), if
+the first parameter is asterisk, "*", the groups and/or tracks
+provided as subsequent parameters will be enabled in addition
+to those already enabled.
+
+The 4tracks command is provided to permit access to a Mark IV
+formatter when a different rack type is in use. See also 4form
+and 4trackform in the form (LBA4, Mark IV, VLBA/4, K4MK4
+racks) and trackform (Mark IV, VLBA/4, K4MK4 racks) command 
+manual pages respectively.

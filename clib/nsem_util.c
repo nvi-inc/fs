@@ -12,7 +12,7 @@ extern struct fscom *shm_addr;
 
 static int semid = 0;
 
-static int nsem_find();
+int nsem_find();
 
 int nsem_get( key, nsems)
 key_t   key;
@@ -89,7 +89,7 @@ char name[5];
 
     return (iret);
 }    
-static int nsem_find( name)
+int nsem_find( name)
 char name[5];
 {
     void sem_take(), sem_put();

@@ -27,6 +27,12 @@ c
       integer K41DMS        ! K41DMS comparison bit variable
       integer K42DMS        ! K42DMS comparison bit variable
       integer VLBA42        ! VLBA42 comparison bit variable
+      integer LBA           ! LBA comparison bit variable
+      integer LBA4          ! LBA4 comparison bit variable
+      integer MK5           ! MK5 comparison bit variable
+      integer MK5A          ! MK5A comparison bit variable
+      integer MK5A_BS       ! MK5A_BS comparison bit variable
+      integer MAX_DAS       ! Max number of LBA DAS allowed
       character*5 FS_ROOT
       integer MAX_BBC
       integer CH_PRIOR      ! chekr        realtime priority
@@ -35,6 +41,8 @@ c
       integer AN_PRIOR      ! Antenna      realtime priority
       integer MAX_RXCODES   ! Max number of entries in rxdef.ctl
       integer MAX_HOR      ! Max number of horizon mask entries
+      integer MET3          ! MET Sensor with/without wind sensor
+
 c
       integer MAX_PROC1, MAX_PROC2
       PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
@@ -44,30 +52,40 @@ c
       parameter ( INT_ALIGN=  2 )
       parameter ( MAXNRX_FS= 30 )
 C rack/drive
-      parameter ( MK3 = z'01'   )
-      parameter ( VLBA = z'02'  )
-      parameter ( MK4 = z'04'   )
-      parameter ( S2  = z'08'   )
-      parameter ( VLBA4 = z'10' )
-      parameter ( K4 = z'20' )
-      parameter ( K4MK4 = z'40' )
-      parameter ( K4K3 = z'80' )
+      parameter ( MK3 = z'001'   )
+      parameter ( VLBA = z'002'  )
+      parameter ( MK4 = z'004'   )
+      parameter ( S2  = z'008'   )
+      parameter ( VLBA4 = z'010' )
+      parameter ( K4 = z'020' )
+      parameter ( K4MK4 = z'040' )
+      parameter ( K4K3 = z'080' )
+      parameter ( LBA = z'100'   )
+      parameter ( LBA4 = z'200'   )
+      parameter ( MK5 = z'400'   )
 C rack/drive _types
-      parameter ( VLBAG    = z'100' )
-      parameter ( VLBA2    = z'200' )
-      parameter ( MK4B     = z'400'  )
-      parameter ( K41      = z'800'  )
-      parameter ( K41U     = z'1000'  )
-      parameter ( K42      = z'2000'  )
-      parameter ( K42A     = z'4000'  )
-      parameter ( K42BU    = z'8000'  )
-      parameter ( VLBAB    = z'10000' )
-      parameter ( K41DMS   = z'20000' )
-      parameter ( K42DMS   = z'40000' )
-      parameter ( K42B     = z'80000'  )
-      parameter ( K42C     = z'100000'  )
-      parameter ( VLBA42   = z'200000'  )
+      parameter ( VLBAG    = z'1000' )
+      parameter ( VLBA2    = z'2000' )
+      parameter ( MK4B     = z'4000'  )
+      parameter ( K41      = z'8000'  )
+      parameter ( K41U     = z'10000'  )
+      parameter ( K42      = z'20000'  )
+      parameter ( K42A     = z'40000'  )
+      parameter ( K42BU    = z'80000'  )
+      parameter ( VLBAB    = z'100000' )
+      parameter ( K41DMS   = z'200000' )
+      parameter ( K42DMS   = z'400000' )
+      parameter ( K42B     = z'800000'  )
+      parameter ( K42C     = z'1000000'  )
+      parameter ( VLBA42   = z'2000000'  )
+      parameter ( MK5A     = z'4000000'  )
+      parameter ( MK5A_BS  = z'8000000'  )
+
 C
+C wx_met
+      parameter ( MET3     = z'1' )
+C
+      parameter ( MAX_DAS = 2 )
       parameter ( FS_ROOT='/usr2')
       parameter ( MAX_BBC = 14 )
       parameter ( CH_PRIOR=-04)

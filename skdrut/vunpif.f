@@ -19,6 +19,7 @@ C 970124 nrv Move initialization to front.
 C 971208 nrv Add phase cal spacing and base frequency. 
 C 990910 nrv Change default LO value to -1.0 meaning none.
 C 991110 nrv Allow IF type 3N to be valid.
+C 021111 jfq Allow IF types 1 through 4 to be valid.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -100,6 +101,8 @@ C  1.2 IF input
      .        cout(1:nch).eq.'2N'.or.cout(1:nch).eq.'2A'.or.
      .        cout(1:nch).eq.'3O'.or.cout(1:nch).eq.'3I'.or.
      .        cout(1:nch).eq.'3N'.or.
+     .        cout(1:nch).eq.'1'.or.cout(1:nch).eq.'2'.or.
+     .        cout(1:nch).eq.'3'.or.cout(1:nch).eq.'4'.or.
      .        cout(1:nch).eq.'A'.or.cout(1:nch).eq.'B'.or.
      .        cout(1:nch).eq.'C'.or.cout(1:nch).eq.'D') then
             idum = ichmv_ch(lin(id),1,cout(1:nch))

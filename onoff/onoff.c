@@ -22,7 +22,7 @@ main()
 {
   long ip[5],ip1[5],ip2[5];
   struct onoff_cmd onoff;
-  int i,it[6],isgn, ierr, ksem, kresult,j, ierr1, ierr2;
+  int i,it[6],isgn, ierr, ksem, kresult,j, ierr1, ierr2, nwt, kagc, koff;
   double az,el, xoff, yoff, azoff, eloff, haoff, decoff;
   char buff[256],buff2[256],source_type[MAX_DET];
   float rut,astep,estep;
@@ -51,14 +51,27 @@ main()
     logita(NULL,ip[2],ip+3,ip+4);
     goto loop;
   }
+
+  /* save offsets immediately, so error_recovery won't misbehave */
+
+  savoff(&xoff,&yoff,&azoff,&eloff,&haoff,&decoff);
+
+  /* remove breaks that are hanging around */
+
+  (void) brk_chk("onoff");
+
   kresult=FALSE;
+  kagc=FALSE;
+  koff=FALSE;
   memcpy(&onoff,&shm_addr->onoff,sizeof(onoff));
 
   ierr=0;
 
-  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4)
+  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+    kagc=TRUE;
     if(agc(onoff.itpis,0,&ierr))
       goto error_recover;
+  }
 
   if(local(&az,&el,"azel",&ierr))
     goto error_recover;
@@ -129,8 +142,10 @@ main()
 
   /* wait for onsource */
 
-  printf(" wait %d\n",shm_addr->onoff.wait);
-  if(onsor(2*shm_addr->onoff.wait,&ierr)) 
+  nwt=shm_addr->onoff.wait;
+  if(1 == nsem_test("aquir"))
+    nwt=nwt*4;
+  if(onsor(nwt,&ierr)) 
     goto error_recover;
 
   rte_time(it,it+5);
@@ -176,9 +191,11 @@ main()
 
   for(i=0;i<shm_addr->onoff.rep;i++) {
 
-    if(i!=0) { 
+    if(i!=0) {
       if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
 	goto error_recover;
+      else
+	koff=FALSE;
     }
 
     if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
@@ -194,7 +211,9 @@ main()
 
     isgn=-isgn;
 
-    if(gooff(azoff+isgn*astep,eloff+isgn*estep,"azel",shm_addr->onoff.wait,&ierr))
+    koff=TRUE;
+    if(gooff(azoff+isgn*astep,eloff+isgn*estep,"azel",
+	     shm_addr->onoff.wait,&ierr))
       goto error_recover;
 
     if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
@@ -221,6 +240,8 @@ main()
   /*last point onsource */
   if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
     goto error_recover;
+  else
+    koff=FALSE;
 
   if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
     goto error_recover;
@@ -276,7 +297,7 @@ main()
 	sefd[i]=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].flux
 	  /(ons.avg[i]-ofs.avg[i]);
 	num=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].flux;
-	den=onscal.avg[i]-ofs.avg[i];
+	den=ons.avg[i]-ofs.avg[i];
 	sefd_sig[i]=sqrt(
 			 pow(ofs.sig[i]*
 			     (onoff.devices[i].flux/den+num/(den*den)),2.0)
@@ -305,7 +326,7 @@ main()
  error_recover:
  
   ip1[2]=0;
-  if(!kresult)
+  if(koff)
     if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr1)) {
       ip1[0]=0;
       ip1[1]=0;
@@ -315,7 +336,7 @@ main()
     }
 
   ip2[2]=0;
-  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4)
+  if(kagc)
     if(agc(onoff.itpis,1,&ierr2)) {
       ip2[0]=0;
       ip2[1]=0;

@@ -15,7 +15,7 @@ if ($#ARGV < 0) {
 
 if  ($#ARGV < 0 || $#ARGV >0) {
     print "incorrect number of arguments\n";
-    print "Try 'cmdctlfix' for more information.\n";
+    print "Try 'cmdctlfix3' for more information.\n";
     exit -1;
 }
 
@@ -78,12 +78,12 @@ while(<BAK>) {
     $not = $not || $rack  !~ /[123456789ABCDEF]/;
     $not = $not || $drive !~ /[123456789ABCDEF]/;
 
-    if (substr($rack,0,1) == '1' && substr($rack,1,1) == 'F') {
+    if (substr($rack,0,1) eq '1' && substr($rack,1,1) eq 'F') {
 	$rack="FF";
     }
     substr($_,25,2)=$rack;
 
-    if (substr($drive,0,1) == '1' && substr($drive,1,1) == 'F') {
+    if (substr($drive,0,1) eq '1' && substr($drive,1,1) eq 'F') {
 	$drive="FF";
     }
     substr($_,27,2)=$drive;

@@ -66,7 +66,7 @@ $misc
 * Format:
 * epoch <epoch>
 * Example:
-* epoch 2000
+epoch 2000
 *
 * Station equipment may be specified here. 
 * Valid types are listed by drudg when Option 11 is used.

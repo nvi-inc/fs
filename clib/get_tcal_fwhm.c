@@ -13,6 +13,7 @@ float flux_val();
 static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0}; 
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0};
+static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
 static char *lwhat[ ]={
 "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
 "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
@@ -20,6 +21,8 @@ static char *lwhat[ ]={
 static char *lwhatm[ ]={
 "v1","v2","v3","v4","v5","v6","v7","v8","v9","va","vb","vc","vd","ve",
 "i1","i2","i3"};
+static char *lwhatl[ ]={
+"p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe","pf"};
 
 void get_tcal_fwhm(device,tcal,fwhm,epoch,flux,corr,ssize,ierr)
 char device[2];
@@ -39,7 +42,7 @@ int *ierr;
   ifchain=0;
   *ierr=0;
 
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
     for(i=0;i<sizeof(lwhatm)/sizeof(char *);i++) {
       if(strncmp(device,lwhatm[i],2)==0) {
 	if(i<14) {
@@ -169,6 +172,70 @@ int *ierr;
 	    goto error;
 	    break;
 	  }
+	}
+	break;
+      }
+    }
+  } else if(shm_addr->equip.rack==LBA) {
+    for(i=0;i<sizeof(lwhatl)/sizeof(char *);i++) {
+      if(strncmp(device,lwhatl[i],2)==0 && i<2*shm_addr->n_das) {
+	ifchain=shm_addr->das[i/2].ifp[i%2].source+1;
+	if(ifchain<1||ifchain>4)
+	  ifchain=0;
+	if(ifchain!=0) {
+	  float ifpf, ifpbw;
+	    
+	  ifpf=shm_addr->das[i/2].ifp[i%2].frequency;
+	  ifpbw=bw_lba[shm_addr->das[i/2].ifp[i%2].bandwidth];
+	  switch(shm_addr->das[i/2].ifp[i%2].filter_mode) {
+	  case _SCB:
+	  case _ACB:
+	  case _SC1:
+	  case _AC1:
+	    /* Centre band - centred on IFP frequency */
+	    break;
+	  case _DSB:
+	  case _DS2:
+	    /* Standard double sideband - LSB or DSB, depends on setting */
+	    if(shm_addr->das[i/2].ifp[i%2].ft.digout.setting)
+	      ifpf-=ifpbw*.5;
+	    else
+	      ifpf+=ifpbw*.5;
+	    break;
+	  case _DS4:
+	    /* Outer double sideband - LSB or DSB, depends on setting */
+	    if(shm_addr->das[i/2].ifp[i%2].ft.digout.setting)
+	      ifpf-=ifpbw*1.5;	/* Valid only for 8MHz BW */
+	    else
+	      ifpf+=ifpbw*1.5;	/* Valid only for 8MHz BW */
+	    break;
+	  case _DS6:
+	    /* Extreme outer double sideband - LSB or DSB, depends on setting */
+	    if(shm_addr->das[i/2].ifp[i%2].ft.digout.setting)
+	      ifpf-=ifpbw*2.5;	/* Valid only for 8MHz BW */
+	    else
+	      ifpf+=ifpbw*2.5;	/* Valid only for 8MHz BW */
+	    break;
+	  default:
+	    *ierr=-301;
+	    goto error;
+	    break;
+	  }
+	  switch(shm_addr->lo.sideband[ifchain-1]) {
+	  case 1:
+	    center=shm_addr->lo.lo[ifchain-1]+ifpf;
+	    break;
+	  case 2:
+	    center=shm_addr->lo.lo[ifchain-1]-ifpf;
+	    break;
+	  default:
+	    *ierr=-302;
+	    goto error;
+	    break;
+	  }
+	} else {
+	  *ierr=-306;
+	  goto error;
 	}
 	break;
       }

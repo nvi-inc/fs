@@ -41,6 +41,9 @@ Formatter firmware version in equip.ctl doesn't support barrel rolling.
 4F -507
 Formatter firmware version in equip.ctl doesn't support data modulation.
 ""
+4F -508
+Rack ID is odd and Mark 5 record is in use, formatter reports rack ID ?W
+""
 4M -100
 no default for trackform track number
 ""
@@ -79,6 +82,36 @@ Rollform output tracks must be null, -1, or 2-23.
 ""
 4R -301
 Rollform can not have more than 16 output tracks.
+""
+5B -201
+command does not accept parameters
+""
+5B -301
+did not find return code
+""
+5B -303
+did not find query return values
+""
+5B -304
+mark5 error, see associated error m5 -9xx
+""
+5B -311
+did not find return code
+""
+5B -312
+could not parse return string
+""
+5B -313
+did not find query return values
+""
+5B -314
+mark5 error, see associated error m5 -9xx
+""
+5B -401
+error retrieving class
+""
+5B -411
+error retrieving class, rtime
 ""
 5C -201
 command does not accept parameters
@@ -473,6 +506,9 @@ Error initiliazing rclcn, internal error ?WWW
 BO -192
 Error initiliazing mk5cn, internal error ?WWW
 ""
+BO -193
+Error initiliazing dscon, internal error ?WWW
+""
 BO -201
 Error vacuum switching field (line 1) in SW.CTL
 ""
@@ -665,7 +701,7 @@ CH -209
 CH -210
 ?W LSB gain value does not check with requested value
 ""
-CH -221
+CH -211
 ?W averaging period does not check with requested setting
 ""
 CH -222
@@ -1010,14 +1046,179 @@ Barrelroll mode does not agree with request.
 CH -601
 Internal error: time for secs_fm invalid
 ""
+CH -700
+if?W: communication trouble.
+""
+CH -701
+if?W: High Res Sampler Module N2 missing.
+""
+CH -702
+if?W: Digital Filter Module N3 missing.
+""
+CH -703
+if?W: Digital Filter Module is not processing.
+""
+CH -704
+if?W: Band Splitter input level is too high for servo loop.
+""
+CH -705
+if?W: Band Splitter input level is too low for servo loop.
+""
+CH -706
+if?W: Band Splitter input offset is out of servo range.
+""
+CH -707
+if?W: Band Splitter USB level is out of servo range.
+""
+CH -708
+if?W: Band Splitter LSB level is out of servo range.
+""
+CH -709
+if?W: Fine Tuner USB level is out of servo range.
+""
+CH -710
+if?W: Fine Tuner LSB level is out of servo range.
+""
+CH -711
+if?W: Digital Filter clock error detected.
+""
+CH -712
+if?W: High Res Sampler 5 MHz reference signal has failed.
+""
+CH -713
+if?W: High Res Sampler 1 PPS synchronisation signal has failed.
+""
+CH -714
+if?W: High Res Sampler Module N2 is overheating - please check cooling fan.
+""
+CH -715
+if?W: Digital Filter Module N3 is overheating - please check cooling fan.
+""
+CH -720
+da?W: communication trouble.
+""
+CH -721
+da?W: +5 Volt supply for first IFP is out of tolerance.
+""
+CH -722
+da?W: +5 Volt supply for second IFP is out of tolerance.
+""
+CH -723
+da?W: -5.2 Volt supply for both IFPs is out of tolerance.
+""
+CH -724
+da?W: +9 Volt supply for both IFPs is out of tolerance.
+""
+CH -725
+da?W: -9 Volt supply for both IFPs is out of tolerance.
+""
+CH -726
+da?W: +15 Volt supply for both IFPs is out of tolerance.
+""
+CH -727
+da?W: -15 Volt supply for both IFPs is out of tolerance.
+""
+DS   -1
+Unable to open dsad.ctl file.
+""
+DS   -2
+Too many devices in dsad.ctl file.
+""
+DS   -3
+Trouble with class buffers in DSCON.
+""
+DS   -4
+Dataset interface not initialised.
+""
+DS   -5
+Unrecognised Dataset mnemonic ?W.
+""
+DS   -6
+Error in Dataset ?W request buffer format.
+""
+DS   -7
+Unable to open Dataset device.
+""
+DS  -11
+Time-out or error on reading from Dataset ?W.
+""
+DS  -12
+Dataset ?W response was corrupted.
+""
+DS  -21
+Dataset ?W request write failed.
+""
+DS  -22
+Dataset device name is /dev/null, All datasets inaccessible.
+""
 DS -101
-No default for recorder selection.
+No default for Dataset mnemonic.
+""
+DS -102
+No default for Dataset function.
 ""
 DS -201
-Recorder selected must be 1 or 2.
+Dataset mnemonic must be 2 characters.
+""
+DS -202
+Dataset function must be between 0 and 511.
+""
+DS -203
+Dataset function data must be a hexadecimal value.
 ""
 DS -301
-Recorder selection can be set/changed unless two recorders are in use.
+Must have 2 or 3 parameters, see help file.
+""
+DS -401
+Trouble with class buffer from DSCON.
+""
+DS -801
+Dataset ?W WARNING: a non-terminating subtask loop has been detected.
+""
+DS -802
+Dataset ?W WARNING: an abnormal condition occured during initialisation.
+""
+DS -803
+Dataset ?W WARNING: a subroutine has returned an unknown error flag.
+""
+DS -804
+Dataset ?W WARNING: the internal NVRAM battery is getting low.
+""
+DS -805
+Dataset ?W WARNING: the previous request packet contained too few frames.
+""
+DS -806
+Dataset ?W WARNING: the serial port output buffer has overflowed.
+""
+DS -807
+Dataset ?W WARNING: the previous response packet contained too few frames.
+""
+DS -808
+Dataset ?W WARNING: the dataset program has been restarted by power on or reset.
+""
+DS -901
+Dataset ?W ERROR: the serial port input buffer has overflowed.
+""
+DS -902
+Dataset ?W ERROR: a request frame has been found with a parity error.
+""
+DS -903
+Dataset ?W ERROR: the previous request frame was truncated.
+""
+DS -904
+Dataset ?W ERROR: a packet syntax error (unknow escape sequence) was seen.
+""
+DS -905
+Dataset ?W ERROR: the requested function is not implemented in this dataset.
+""
+DS -906
+Dataset ?W ERROR: an internal program error has been detected (xprogerr).
+""
+DS -907
+Dataset ?W ERROR: the previous function is still executing, request ignored.
+""
+DS -908
+Dataset ?W ERROR: an internal program error has been detected (xpaderr).
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
@@ -1579,6 +1780,168 @@ Length must be normal or a positive integer.
 ""
 K4 -301
 k4ib must have equals.
+""
+LC -201
+Correlator type must be AT (4 level) or MB (3 level).
+""
+LC -202
+Primary source must be one of USB, LSB, BSU, BSL, FTU, FTL, 32 or 64.
+""
+LC -203
+Secondary source must be one of USB, LSB, BSU, BSL, FTU, FTL, 32 or 64.
+""
+LC -204
+AT correlator output clock delay must be between 0 and 3.
+""
+LC -301
+Command only takes 4 parameters.
+""
+LC -901
+Error detected while writing to DAS through AT Dataset driver DSCON.
+""
+LC -902
+Error detected while reading from DAS through AT Dataset driver DSCON.
+""
+LC -903
+Required DAS hardware not available, check equip.ctl.
+""
+LF -201
+Band Splitter digital output (Fine Tuner input) setting must be LSB or USB.
+""
+LF -202
+Frequency specified lies outside range of current Band Splitter bandwidth.
+""
+LF -203
+Filter bandwidth must be between 1 and 1/16th of current Band Splitter bandwidth.
+""
+LF -204
+Filter mode must be NONE, DSB, SCB or ACB (first two only at specific bandwidths).
+""
+LF -205
+Frequency offset specified lies outside range of current Band Splitter bandwidth.
+""
+LF -206
+Phase offset must be between 0 and 360 degrees.
+""
+LF -207
+Fine Tuner NCO test mode must be OFF or ON.
+""
+LF -301
+Command only takes 7 parameters.
+""
+LF -901
+Error detected while writing to DAS through AT Dataset driver DSCON.
+""
+LF -902
+Error detected while reading from DAS through AT Dataset driver DSCON.
+""
+LF -903
+Required DAS hardware not available, check equip.ctl.
+""
+LF -904
+Fine Tuner is currently not available - see IFPnn settings.
+""
+LI -101
+No default for frequency.
+""
+LI -201
+Frequency specified lies outside tuning range for given filter settings.
+""
+LI -202
+Bandwidth must be one of 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32 or 64 MHz.
+""
+LI -203
+Filter mode must be one of SCB, ACB, DSB, SC1, AC1, DS2 (and DS4, DS6 at 8MHz).
+""
+LI -204
+Upper sideband/Centre band spectrum inverter must be NAT or FLIP.
+""
+LI -205
+Lower sideband spectrum inverter must be NAT or FLIP.
+""
+LI -206
+Recorder 2-bit output format must be AT (true sign & magnitude) or VLBA.
+""
+LI -207
+Internal 2-bit sampler statistics must be either 4LVL or 3LVL.
+""
+LI -301
+Command only takes 7 parameters.
+""
+LI -901
+Error detected while writing to DAS through AT Dataset driver DSCON.
+""
+LI -902
+Error detected while reading from DAS through AT Dataset driver DSCON.
+""
+LI -903
+Required DAS hardware not available, check equip.ctl.
+""
+LM -201
+Band Splitter analog monitor setting must be LSB or USB.
+""
+LM -202
+Fine Tuner analog monitor setting must be USB or LSB.
+""
+LM -203
+Fine Tuner digital output setting must be USB or LSB.
+""
+LM -301
+Command only takes 3 parameters.
+""
+LM -901
+Error detected while writing to DAS through AT Dataset driver DSCON.
+""
+LM -902
+Error detected while reading from DAS through AT Dataset driver DSCON.
+""
+LM -903
+Required DAS hardware not available, check equip.ctl.
+""
+LT -100
+No default for trackform track number.
+""
+LT -200
+Trackform track number must be in the range 0-15.
+""
+LT -201
+Trackform track already in use.
+""
+LT -301
+Trackform internal error, bsfo2vars bs=NULL.
+""
+LT -302
+No default for trackform bit-stream.
+""
+LT -303
+Unknown trackform bit-stream.
+""
+LT -304
+Trackform bit-stream comes from uninitialized IFP.
+""
+LT -305
+No LSB bit-stream available at 32 or 64 MHz bandwidth.
+""
+LT -306
+No magnitude bit-stream available at 64 MHz bandwidth.
+""
+LT -307
+Requested fan-out does not exist at this bandwidth.
+""
+LT -308
+Sign bit-streams must go to even tracks, magnitude to odd.
+""
+LT -309
+Sign & magnitude bit-streams must be assigned in pairs.
+""
+LT -901
+Error detected while writing to DAS through AT Dataset driver DSCON.
+""
+LT -902
+Error detected while reading from DAS through AT Dataset driver DSCON.
+""
+LT -903
+Required DAS hardware not available, check equip.ctl.
 ""
 MA   -1
 Trouble with class buffer
@@ -2222,7 +2585,7 @@ Cut-off must be between 0.0 and 90.0.
 Q1 -204
 Step must be between 0.0 and 90.0.
 ""
-Q1 -204
+Q1 -205
 Wait must be 1-1200.
 ""
 Q1 -206
@@ -2511,10 +2874,13 @@ QK -202
 TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...14u,14l,FORMBBC,FORMIF.
 ""
 QK -203
+TPIs must be one of ALL,EVEN,ODD,P1,...Pn,FORMIFP.
+""
+QK -204
 No detectors selected
 ""
 QK -211
-Tsys value for device ?W overflowed or were less than zero.
+Tsys value for device ?W overflowed or was less than zero.
 ""
 QK -212
 No default for detector devices
@@ -3845,6 +4211,15 @@ Program error: less than zero length data object request for device ?W
 SC -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
 ""
+SE -101
+No default for recorder selection.
+""
+SE -201
+Recorder selected must be 1 or 2.
+""
+SE -301
+Recorder selection can be set/changed unless two recorders are in use.
+""
 SF -301
 Error opening save file for reading.
 ""
@@ -3939,7 +4314,7 @@ TA   -9
 TACD: "Wrong IP address, or TAC32 PC not setup properly.
 ""
 TA -201
-commands are tacd={,status,time,average,cont,stop,start} only.
+commands are tacd={,status,time,average} only.
 ""
 TC -102
 cycle period has no default.
@@ -4236,4 +4611,40 @@ WS -201
 Scan name must be less than 17 characters. 
 ""
 WS -301
-No previous value for scan name
+No previous value allowed for scan name
+""
+WS -202
+Session name must be less than 17 characters. 
+""
+WS -302
+No previous value allowed for session name
+""
+WS -203
+Error decoding scan length.
+""
+WS -303
+No previous value allowed for scan length.
+""
+WX   -1
+MET: Can not open the socket or someone else is using it.
+""
+WX   -2
+MET: Can not connect to server.
+""
+WX   -3
+MET: fcntl f_getfl set error.
+""
+WX   -4
+MET: fcntl f_getfl set error.
+""
+WX   -5
+MET: Can not select on socket.
+""
+WX   -6
+MET: Can not receive data from socket.
+""
+WX   -7
+MET: Server not running.
+""
+WX   -8
+MET: Can not get localhost information.

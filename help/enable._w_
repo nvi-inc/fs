@@ -1,56 +1,56 @@
        enable - enable recording heads (VLBA, VLBA4 drives)
- 
-              Syntax:      enable=list-of-groups
- 
-              Response:    enable/list-of-groups
- 
- 
- Settable parameters:
-                list-of-groups List of head groups to be enabled/disabled. Groups
+
+            Syntax:     enable=list-of-groups
+
+            Response:   enable/list-of-groups
+
+
+Settable parameters:
+                list-of-groups  List of head groups to be enabled/disabled. Groups
                 are specified by gn, n=0 to 3. In addition, for
-                VLBAB or VLBA4 drives,  groups in headstack two can specified
-                by gn, n=4 to 7. A null list (i.e. enable=)
-                disables all heads. For mode D, the group
-                containing a single track to be recorded may be
-                indicated by setting list-of-groups to dn, n = 1 to
-                28. The group within which Mark III track n occurs
-                will be enabled. In addition, for VLBAB and VLBA4
-                drives, the group in headstack two containing a
+                VLBAB or VLBA4 drives,  groups in headstack two can specified by
+                gn, n=4 to 7. A null list (i.e. enable=) disables
+                all heads. For mode D, the group containing a
                 single track to be recorded may be indicated by
-                setting list-of-groups to dn, n = 101 to 128.
- 
- Monitor-only parameters: none
- 
- Comments: 
- The use of * as a parameter is not supported by this command.
- 
- This command enables groups of heads in the VLBA recorder.
- Heads may not be individually enabled. The form command sets
- up which data goes to which head with the cross-point switch. 
- 
- In mode D, an entire group of heads is enabled. The VLBA rack 
- form (and trackform and tracks) command must be used to send
- data to a specific head so that only it has data going to it.
- It is not possible to record in mode D for a Mark III (or IV)
- rack/VLBA (or VLBAB or VLBA4) drive combination.
- 
-               g0 includes Mark III heads 1,3,5,7,11,13.
-               g1 includes Mark III heads 2,4,6,8,10,12,14.
-               g2 includes Mark III heads 15,17,19,21,23,25,27.
-               g3 includes Mark III heads 16,18,20,22,24,26,28.
-   
- Note that a VLBA or Mark IV track number equals the Mark III
- track number plus 3. Consequently, odd Mark III tracks are
- even VLBA or Mark IV track numbers and vice-versa. See the
- Track Assignment Tables in the System Setup manual. Also VLBA
- group numbers equal Mark III group numbers minus one, but the
- VLBA groups include additional tracks. Note that this command
- uses VLBA track and group numbers.
- 
- The groups g4, g5, g6, and g7 correspond to groups 0, 1, 2,
- and 3 on head 2. The parameters, dn, n = 101 to 128,
- correspond to the Mark III heads in headstack two given by n-
- 100. The command accepts these parameters, but normally a
- VLBA4 drive is not wired so that this has will have any
- practical effect. However for a VLBAB these parameters may be
- useful. 
+                setting list-of-groups to dn, n = 1 to 28. The group
+                within which Mark III track n occurs will be
+                enabled. In addition, for VLBAB and VLBA4 drives,
+                the group in headstack two containing a single
+                track to be recorded may be indicated by setting
+                list-of-groups to dn, n = 101 to 128.
+
+Monitor-only parameters: none
+
+Comments: 
+The use of * as a parameter is not supported by this command.
+
+This command enables groups of heads in the VLBA recorder.
+Heads may not be individually enabled. The form command sets
+up which data goes to which head with the cross-point switch. 
+
+In mode D, an entire group of heads is enabled. The VLBA rack 
+form (and trackform and tracks) command must be used to send
+data to a specific head so that only it has data going to it.
+It is not possible to record in mode D for a Mark III (or IV)
+rack/VLBA (or VLBAB or VLBA4) drive combination.
+
+                g0 includes Mark III heads 1,3,5,7,11,13.
+                g1 includes Mark III heads 2,4,6,8,10,12,14.
+                g2 includes Mark III heads 15,17,19,21,23,25,27.
+                g3 includes Mark III heads 16,18,20,22,24,26,28.
+    
+Note that a VLBA or Mark IV track number equals the Mark III
+track number plus 3. Consequently, odd Mark III tracks are
+even VLBA or Mark IV track numbers and vice-versa. See the
+Track Assignment Tables in the System Setup manual. Also VLBA
+group numbers equal Mark III group numbers minus one, but the
+VLBA groups include additional tracks. Note that this command
+uses VLBA track and group numbers.
+
+The groups g4, g5, g6, and g7 correspond to groups 0, 1, 2,
+and 3 on head 2. The parameters, dn, n = 101 to 128,
+correspond to the Mark III heads in headstack two given by n-
+100. The command accepts these parameters, but normally a
+VLBA4 drive is not wired so that this has will have any
+practical effect. However for a VLBAB these parameters may be
+useful.

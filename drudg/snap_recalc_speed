@@ -1,0 +1,28 @@
+       subroutine snap_recalculate_speeds(kvex,speed_ft,ls2speed)
+
+    
+! Since the mod can change at tape change, recalculate these speeds.
+       if(ks2) then
+         itime2stop=0
+       else if(speed(icod,istn) .gt. 15.0) then
+         itime2stop=5
+       else
+         itime2stop=3
+       endif
+       if(.not.km5) then
+         if(ks2) then
+           if(kvex) then
+             ispeed=ls2speed(1,istn)
+           else
+             lspeed="slp"
+           endif
+         else
+           speed_inches = 12.0*speed(icod,istn)
+           call spdstr(speed_inches,ispeed,nspd)   !return speed as holerith in ispeed.
+           if (nspd.le.0) then
+             write(luscn,9911) speed_inches, ibuf(1:40)
+9911         format('SNAP01 - Illegal speed ',f6.2,' after ',20a2)
+             return
+           endif
+         endif
+       endif

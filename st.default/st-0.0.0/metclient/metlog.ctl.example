@@ -1,0 +1,10 @@
+*metget.ctl
+GG            station two-letter code
+0             reserved for wind period?
+1200           logging period for all data (seconds)
+/usr2/log     directory for logging data
+GGAO7108      Station Name
+76.8265       Longitude
+39.0219       Latitude
+14.99         Station Elevation
+*

@@ -4,7 +4,6 @@
  *  calls: 
  *  vueinfo - get information for fsvue 
  *********************************************************************/
-#include <ncurses.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -53,9 +52,11 @@ void get_err();
 
 static char *r[] = {
   "MK3","VLBA","MK4","S2","VLBA4","K4",
-  "K4MK4","K4K3","VLBAG","VLBA2","MK4B","K41",
+  "K4MK4","K4K3","LBA","LBA4","","",
+  "VLBAG","VLBA2","MK4B","K41",
   "K41U","K42","K42A","K42BU","VLBAB","K41DMS",
   "K42DMS"};
+static int nr = sizeof(r)/sizeof(char *);
 
 
 main(int argc, char *argv[])
@@ -225,56 +226,56 @@ main(int argc, char *argv[])
   } else if (strstr(what,"rack")) {
     rack=shm_addr->equip.rack;
     rack_t=shm_addr->equip.rack_type;
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<nr;i++,j=j*2) {
       if(rack==j) {
 	printf("%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=nr) printf("None");
+    for(i=0,j=1;i<nr;i++,j=j*2){
       if(rack_t==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=nr) printf("/None");
     exit(0);
   } else if (strstr(what,"drive1")) {
     drive[0]=shm_addr->equip.drive[0];
     drive_t[0]=shm_addr->equip.drive_type[0];
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<nr;i++,j=j*2) {
       if(drive[0]==j) {
 	printf("(1)%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("(1)None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=nr) printf("(1)None");
+    for(i=0,j=1;i<nr;i++,j=j*2){
       if(drive_t[0]==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=nr) printf("/None");
     exit(0);
   } else if (strstr(what,"drive2")) {
     drive[1]=shm_addr->equip.drive[1];
     drive_t[1]=shm_addr->equip.drive_type[1];
-    for(i=0,j=1;i<18;i++,j=j*2) {
+    for(i=0,j=1;i<nr;i++,j=j*2) {
       if(drive[1]==j) {
 	printf("(2)%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("(2)None");
-    for(i=0,j=1;i<18;i++,j=j*2){
+    if(i>=nr) printf("(2)None");
+    for(i=0,j=1;i<nr;i++,j=j*2){
       if(drive_t[1]==j)	{
 	printf("/%s",r[i]);
 	break;
       }
     }
-    if(i>=18) printf("/None");
+    if(i>=nr) printf("/None");
     exit(0);
   } else if (strstr(what,"err")) {
     strcpy(buff,"Under Development NOT AVAILABLE");

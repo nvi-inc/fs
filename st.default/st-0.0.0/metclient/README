@@ -1,0 +1,122 @@
+Field System 'metclient' software.
+
+INFORMATION: 
+-----------
+
+Field System Homepage:  http://lupus.gsfc.nasa.gov/fs
+
+The metclient will download Paroscientific, Inc. MET3 (Meteorological 
+Measurement System) and Handar TSI Company (Ultrasonic Wind Sensors) 
+information from metserver and parse it into the log file that was 
+specified by the user in the metlog.ctl file.
+
+Read the INSTALL for installation instructions.
+
+LOG FILE NAME:
+-------------
+
+The log file name will look like this:
+
+   filename example: wx02301GG.log
+
+	wx: indicates weather type log.
+        02: Year
+       301: day
+        GG: Station
+      .log: log extension. 
+
+
+Each day will have it's own log file, where the Day number will be the 
+only change to the file name.
+
+exceptions:
+1.) The Year will change in the file name if you've crossed into another year.
+2.) If you rename you Station ID in the metlog.ctl control file.
+
+HEADER:
+------
+
+At the start of each new day, a new log file will be generated. The log will 
+have a header as the beginning line (each new log will begin with a header). 
+All times are UT time.
+
+2002.301.00:12:46.00:location,GGAO7108,76.8265,39.0219,14.99
+
+       2002: Year
+        301: day
+         00: hour
+         12: minutes
+      46.00: seconds
+   location: indicator
+   GGAO7108: Station Name
+    76.8265: Longitude
+    39.0219: Latitude
+      14.99: Station Elevation
+
+
+WEATHER INFORMATION FORMAT:
+--------------------------
+
+2002.301.00:12:46.00/wx/7.5,1014.3,93.6,0.2,240
+
+       2002: Year
+        301: day
+         00: hour
+         12: minutes
+      46.00: seconds
+       /wx/: weather indicator
+        7.5: Tempreture in Celcius
+     1014.3: Pressure in millbars.
+       93.6: Humidity in percent
+        0.2: Wind Speed in meters per second
+        240: Wind Direction in degrees (360) 
+ 
+
+OTHER CLIENTS:
+-------------
+
+Any client can receive weather and wind sensor data from this server by 
+using PORT 30384.
+
+Clients data format: 
+
+   Temperature,Pressure,Humidity,windSpeed,windDirection
+
+   4.9,1015.0,90.6,1.2,301
+
+
+ERRORS:
+-------
+
+Errors from standalone weather logging client will go to /tmp/metclient.error
+file, /var/log/syslog, and an email will be sent to the operator. metclient
+WILL NOT exit on any errors.
+
+For the Field System. All errors are handle by the Field System and logged 
+like any other observing error.
+
+PROBLEMS:
+--------
+
+If you get an error regarding the metserver and/or the metclient, that you 
+can't correct and you want to stop either or both of the programs you will
+need to kill the metserver and/or the metclient manually. They will not exit
+on errors.
+
+ (This will give you the PID's for both the metserver and/or the metclient, 
+  whichever is running at the time:)
+
+   prompt> log in as root
+   prompt> ps -ef | grep met
+   prompt> kill PID
+
+example:
+   prompt> ps -ef | grep met
+
+   prog     13526     1  0 16:39 ?        00:00:00 /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18
+   root     13630     1  0 16:53 pts/3    00:00:00 /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl
+   prog     13815 13533  0 17:43 pts/3    00:00:00 grep met
+
+   prompt> kill 13526 13630
+
+If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.

@@ -772,7 +772,7 @@ int mode;            /* command or monitor */
 
 #ifdef DEBUG
     for(i = 0; i < nch; i++) {
-        printf("[%2.2x]",messo2[i]);
+        printf("[%2.2x]",messo1[i]);
     }
     printf("\n");
 #endif

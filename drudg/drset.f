@@ -45,7 +45,7 @@ C  Character values
           write(luscn,'("DRSET03 - Missing parameter value.")')
           return
         endif
-        CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+!        CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
         IF (ckey.eq.'PS') THEN
           nc = ic2-ic1+1
           idummy = ichmv(lkeywd,3,linstq(2),ic1,nc)

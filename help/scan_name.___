@@ -1,12 +1,12 @@
                     scan_name - set scan name
- 
-              Syntax:      scan_name=name
- 
-              Response:    scan_name/name
- 
- 
- Settable Parameters:
-          name     The scan name, any string up to 16 characters in
+
+            Syntax:     scan_name=name,session,length
+
+            Response:   scan_name/name,session,length
+
+
+Settable Parameters:
+          name      The scan name, any string up to 16 characters in
           length. Typically ddd hhmm, which encodes the day of
           year (ddd), hour (hh), and minute (mm) of the scan.
           If there is more than one subnet in a schedule that
@@ -15,14 +15,18 @@
           character. All stations in a given subnet use the
           same scan name, which is distinct from that from all
           other subnets.
+          session   The session code, any string up to 16 characters
+          in length. May be empty.
+          length    The number of seconds in the scan, greater than zero.
+          May be empty. 
+
+Comments:
+The scan name is used by the correlator to help organize the
+processing of the data. It is the most useful way to refer to
+scans in e-mail messages and log entries about problems.
  
- Comments:
- The scan name is used by the correlator to help organize the
- processing of the data. It is the most useful way to refer to
- scans in e-mail messages and log entries about problems.
-  
- The scan name is supplied by drudg which places the
- scan_name=  command in the schedule before the source= 
- command. The scan_name=  command defines the start of each
- scan. If a schedule is started in the middle it should be
- started at this command for that scan.  
+The scan name is supplied by drudg which places the
+scan_name=  command in the schedule before the source= 
+command. The scan_name=  command defines the start of each
+scan. If a schedule is started in the middle it should be
+started at this command for that scan. 

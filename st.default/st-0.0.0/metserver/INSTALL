@@ -1,0 +1,127 @@
+Paroscientific, Inc.
+MET3
+Meteorological Measurement System
+
+and 
+
+Handar TSI Company.
+Ultrasonic Wind Sensors.
+
+PRICE and SUPPORT:
+------------------
+As of 01/29/03: MET-3 meteorology sensor system   $4175.00
+                (less powersupplies and cables)
+support: support@paroscientific.com
++
+As of 01/29/03: Ultrasonic Wind Sensor            $1545.00
+                (less powersupplies and cables)
+support: www.vaisala.com
+
+
+HARDWARE INSTALLATION DIAGRAMS:
+-------------------------------
+Visit URL: http://lupus.gsfc.nasa.gov/fs
+
+
+GENERAL INSTALLATION INSTRUCTIONS
+---------------------------------
+Installation is fairly simple. This software can also be run without any
+Field System software.
+
+1.) Make sure all requirements are met. 
+
+   metserver
+     |-- Makefile    - The make file for compiling Library, Server and Client.
+     |-- INSTALL     - Installation instructions for server and client(s).
+     |-- README      - Information.
+     |-- metserver.sh - bootup script.
+     |-- metserver   - executable.
+     |-- lib         - Source directory for opening and closing selected ports.
+     |   |-- Makefile - The make file for making port.a library archive.
+     |   |-- port.a
+     |   |-- portbaud.c
+     |   |-- portclose.c
+     |   |-- portdelay.c
+     |   |-- portflush.c
+     |   |-- portopen.c
+     |   |-- portoutdrain.c
+     |   |-- portread.c
+     |   `-- portwrite.c
+     `-- src           - Source directory for Server.
+         |-- Makefile  - The make file for compiling Server.
+         |-- err_report.c  - Generate error for logging.
+         |-- metget.c  - This is the workhorse that talks to the hardware.
+         `-- metserver.c  - Weather Server source.
+
+
+2.) Getting the metserver and producing an executable.
+   
+   prompt> log in as prog
+   prompt> cd /usr2/fs/st.default/st-0.0.0
+   prompt> cp -a metserver /usr2/st
+   prompt> cd /usr2/st/metserver
+   prompt> make
+
+   NOTE: Since this doesn't need to be remade with each Field System
+         update, please do not include the metserver directory in the 
+         global /usr2/st/Makefile.
+
+
+STARTING MET SERVER:
+--------------------
+
+1.) Running the metserver. The ports mentioned here might not be the ports 
+    you are connected to, so make sure you have the right ports.
+
+IMPORTANT NOTE: The first parameter should be the MET3 Sensor.
+                The second parameter should be the WIND Sensor.
+                (if you don't have the wind sensor simply use '/dev/null' 
+                 or leave blank.)
+
+    prompt> log in as root
+    prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 &
+                                         (metsensor) (windsensor)
+
+2.) If you would like metserver to startup at boot time.
+    Special NOTICE: Please edit the script to use your port locations,
+                    before you proceed.
+
+    prompt> log in as root
+    prompt> cd /etc/init.d
+    prompt> cp /usr2/st/metserver/metserver.sh .
+    prompt> cd /etc/rcS.d
+    prompt> ln -sfn ../init.d/metserver.sh S91metserver.sh
+
+    Everytime you reboot your system, the metserver will start automatically.
+
+
+ ===== Read the README information. =====
+
+You're done!
+
+NOTES:
+------
+
+Because this is hardware that may or may not exist for your system. You
+must make sure to include the cdp(default) or met3 to your existing 
+/usr2/control/equip.ctl file.
+
+- add the line to the end of the equip.ctl file.
+Example:
+
+* Please refer to the Control Files Manual in Volume 1 of the 
+* Field System Documentation
+* 
+*  VLBI equipment
+mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
+.
+.
+.   
+* met sensor type
+cdp	cdp or met3, use cdp if you don't have either
+
+
+NOTE: NOTE: NOTE: If you don't have a equip.ctl file in /usr2/control.
+
+   prompt> cd /usr2/control/
+   prompt> cp /usr2/fs/st.default/control/equip.ctl .

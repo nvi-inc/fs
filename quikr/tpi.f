@@ -30,6 +30,7 @@ C
 C 3.  LOCAL VARIABLES
       integer itpis(17)
       integer itpis_vlba(32)
+      integer itpis_lba(2*MAX_DAS)
       integer itpis_norack(2)
 C      - which TPIs to read back
 C        ICH    - character counter
@@ -62,10 +63,12 @@ C
 C                     Retain class for later response
       call fs_get_rack(rack)
 
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tplis(ip,itpis)
       else if (VLBA .eq. rack .or. VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
+      else if (LBA.eq.rack) then
+        call tplisl(ip,itpis_lba)
       else
          call tplisn(ip,itpis_norack)
       endif
@@ -81,7 +84,7 @@ C
       nrec = 0
       iclass = 0
 
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         do i=1,17
          if(itpis(i).ne.0.and.
      &      (i.ne.16.or.(i.eq.16.and.itpis(15).eq.0)) ) then
@@ -107,6 +110,9 @@ C
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpi_vlba(ip,itpis_vlba,isub)
         if(ip(3).lt.0) return
+      else if (LBA.eq.rack) then
+        call fc_tpi_lba(ip,itpis_lba)
+        if(ip(3).lt.0) return
       else
          call fc_tpi_norack(ip,itpis_norack)
          if(ip(3).lt.0) return
@@ -122,11 +128,14 @@ C
       if (ieq.eq.0) ieq=nchar+1
       nch = ichmv_ch(ibuf,ieq,'/')
 C                     Get the command part of the response set up
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tpput(ip,itpis,isub,ibuf,nch)
         return
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)
+        return
+      else if (LBA.eq.rack) then
+        call fc_tpput_lba(ip,itpis_lba,isub,ibuf,nch,ilen)
         return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)

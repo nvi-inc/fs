@@ -17,6 +17,7 @@ C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C 970124 nrv Move initialization to start.
 C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
 C 020327 nrv Get data_modulation.
+C 021111 jfq Don't allow track 0 or headstack 0
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -148,7 +149,7 @@ C  2.4 Headstack number
         iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get headstack number
         if (iret.ne.0) return
         iret = fvex_int(ptr_ch(cout),i) ! convert to binary
-        if (i.lt.0.or.i.gt.max_headstack) then
+        if (i.le.0.or.i.gt.max_headstack) then
           ierr = -5
           write(lu,'("VUNPTRK05 - Invalid headstack number, must be",
      .    "between 1 and ",i3)') max_headstack
@@ -167,7 +168,7 @@ C  2.5 Track list
           iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get track
           if (iret.eq.0) then ! a track
             iret = fvex_int(ptr_ch(cout),j) ! convert to binary
-            if (j.lt.0.or.j.gt.max_track) then
+            if (j.le.0.or.j.gt.max_track) then
               ierr = -6
               write(lu,'("VUNPTRK06 - Invalid track number ",i3,
      .        "must be between 1 and ",i3)') j,max_track

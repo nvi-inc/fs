@@ -1,0 +1,77 @@
+! This file contains all of the info about the hardware.
+      real   speed_inches
+      common /hardware/speed_inches  	!tape speed in inches. Changes with mode.\
+      integer luFile  			!where we write to.
+      integer iftold            	!Tape footage after last command.
+      integer MaxTapeLen                !Tape length
+      integer itime2stop                !how long does it take to stop?
+      integer idir                      !Tape direction.
+      Common /hardware/luFile,iftold,MaxTapeLen,itime2stop,idir
+! character version of speed.
+      character*8 lspeed
+      integer*2 ispeed(4)
+      integer nspdCh                    !number of characters
+      equivalence(lspeed,ispeed)
+      common /hardware/lspeed,nspdCh
+
+! Recorder state.
+      logical kdrum 		!drum_on command was written
+      logical ket 		!stop tape for this scan
+      logical krunning 		!tape is running
+      logical kspin    		!tape is spinning
+      common /hardware/kdrum,ket,krunning,kspin
+
+! Racks
+      logical km3rack
+      logical km4rack
+      logical kvrack
+      logical kv4rack
+      logical klrack
+      logical kk41rack
+      logical kk42rack
+      logical km4fmk4rack
+      logical kk3fmk4rack
+      logical k8bbc
+
+      common /hardware/km3rack,km4rack,kvrack,kv4rack,klrack
+      common /hardware/kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc
+! Mark4 formatter.
+      logical km4form
+      common /hardware/km4form
+
+! Kinds of recorders.
+      logical km3rec(2)
+      logical km4rec(2)
+      logical km5rec(2)
+      logical km5prec(2)
+      logical ks2rec(2)
+      logical kvrec(2)
+      logical kv4rec(2)
+      logical kk41rec(2)
+      logical kk42rec(2)
+
+      common /hardware/km3rec,km4rec,km5rec,km5prec,ks2rec,kvrec,kv4rec
+      common /hardware/kk41rec,kk42rec
+
+      integer irec              !active recorder
+      logical kuse(2)           !true if the recorder is in use.
+      common /hardware/kuse,irec
+
+      logical ks2
+      logical kk4
+      logical km5p
+      logical km5                 !config info
+      logical km5_piggyback
+      common /hardware/ks2,kk4,km5,km5p,km5_piggyback
+
+! end of hardware.
+      logical krec_append               !Append characters to output
+      common /hardware/krec_append
+
+      character*1 crec(2)               !1-character description of hardware. "1","2", etc.
+      common /hardware/crec
+
+      integer isupfstfor,ifstfor,ifstrev,isupfstrev             !Fast Forward, reverse settings.
+      parameter (isupfstfor=2,ifstfor=1,ifstrev=-1,isupfstrev=-2)
+
+

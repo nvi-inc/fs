@@ -1,52 +1,52 @@
                 tnx - thanks for the error report
- 
-              Syntax:      tnx=mnemonic,number,off/on
- 
-              Response:    tnx/list
- 
- 
- Settable parameters:
-          mnemonic Two character error code, e.g., sp.
-        number   Error message number, e.g., -999.
-            off/on     Display status on or off (default).
- 
- Monitor-only parameters:
-            list       List of error messages for which display is turned
+
+            Syntax:     tnx=mnemonic,number,off/on
+
+            Response:   tnx/list
+
+
+Settable parameters:
+          mnemonic  Two character error code, e.g., sp.
+        number    Error message number, e.g., -999.
+            off/on      Display status on or off (default).
+
+Monitor-only parameters:
+            list        List of error messages for which display is turned
             off, in format: mnemonic,number, one log entry per
             error.
- 
- Comments: 
- This command can be used to suppress the display of an error
- message on the FS display. Even if the error message is
- suppressed for display, it is still written to the log.
- 
- This command is intended to provide a way to turn off display
- of specific error messages if the operator determines that
- nothing can be done to correct the problem. For example if one
- parameter of a module's set-up is being reported incorrectly
- by the hardware, but has been checked and is known to be
- correct, the operator can suppress that one error message
- rather than unchecking the  entire module.
- 
- If the off/on parameter is on display of the message can be
- reenabled.
- 
- This command must be used with great care. If misused it may
- turn off important error messages that the operator needs to
- know about. Consequently, its use is block if it is executed
- from a procedure, schedule, or time-list. This command must be
- entered interactively. The list of suppressed error messages
- is cleared every time the FS is started. Turning off an error
- message is not the same as correcting the underlying problem,
- which is the preferred method of dealing with a problem.
- 
- If the command is given with no arguments a list of the error
- messages that are suppressed from display is given. Each error
- is listed in a separate log entry.
- 
- This command can't distinguish between the different error
- messages with the same mnemonic and number, but different
- additional information, such as which VC or BBC is causing the
- error. If a message like that is suppressed, it will be
- suppressed in all cases. This may be corrected in a future
- version.  
+
+Comments: 
+This command can be used to suppress the display of an error
+message on the FS display. Even if the error message is
+suppressed for display, it is still written to the log.
+
+This command is intended to provide a way to turn off display
+of specific error messages if the operator determines that
+nothing can be done to correct the problem. For example if one
+parameter of a module's set-up is being reported incorrectly
+by the hardware, but has been checked and is known to be
+correct, the operator can suppress that one error message
+rather than unchecking the  entire module.
+
+If the off/on parameter is on display of the message can be
+reenabled.
+
+This command must be used with great care. If misused it may
+turn off important error messages that the operator needs to
+know about. Consequently, its use is block if it is executed
+from a procedure, schedule, or time-list. This command must be
+entered interactively. The list of suppressed error messages
+is cleared every time the FS is started. Turning off an error
+message is not the same as correcting the underlying problem,
+which is the preferred method of dealing with a problem.
+
+If the command is given with no arguments a list of the error
+messages that are suppressed from display is given. Each error
+is listed in a separate log entry.
+
+This command can't distinguish between the different error
+messages with the same mnemonic and number, but different
+additional information, such as which VC or BBC is causing the
+error. If a message like that is suppressed, it will be
+suppressed in all cases. This may be corrected in a future
+version.

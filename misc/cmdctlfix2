@@ -15,7 +15,7 @@ if ($#ARGV < 0) {
 
 if  ($#ARGV < 0 || $#ARGV >0) {
     print "incorrect number of arguments\n";
-    print "Try 'cmdctlfix' for more information.\n";
+    print "Try 'cmdctlfix2' for more information.\n";
     exit -1;
 }
 
@@ -77,24 +77,24 @@ while(<BAK>) {
     $not = $not || $rack  !~ /[123456789ABCDEF]/;
     $not = $not || $drive !~ /[123456789ABCDEF]/;
 
-    if ($rack == 'F') {
+    if ($rack eq 'F') {
 	$rack="1F";
-    } elsif ($rack == '7') {
+    } elsif ($rack eq '7') {
 	$rack="17";
-    } elsif ($rack == '2') {
+    } elsif ($rack eq '2') {
 	$rack="12";
-    } elsif ($rack == '4') {
+    } elsif ($rack eq '4') {
 	$rack="14";
     } else {
 	$rack="0" . $rack;
     }
     substr($_,25,2)=$rack;
 
-    if ($drive == 'F') {
+    if ($drive eq 'F') {
 	$drive="1F";
-    } elsif ($drive == '7') {
+    } elsif ($drive eq '7') {
 	$drive="17";
-    } elsif ($drive == '2') {
+    } elsif ($drive eq '2') {
 	$drive="12";
     } else {
 	$drive='0' . $drive;

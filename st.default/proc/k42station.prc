@@ -1,3 +1,6 @@
+define  exper_initi   00000000000
+sched_initi
+enddef
 define  setupa        00000000000x
 pcalon  
 rec=synch_on  

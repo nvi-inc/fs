@@ -1,17 +1,17 @@
                      xlog - extended logging
- 
-              Syntax:      xlog=on/off
- 
-              Response:    none
- 
- 
- Settable parameters:
-            on/off     on to turn on extended logging, off (default) to
+
+            Syntax:     xlog=on/off
+
+            Response:   none
+
+
+Settable parameters:
+            on/off      on to turn on extended logging, off (default) to
             turn off. When off, commands issued from within
             procedures are not logged and ack responses from
             modules are not logged. All responses are always
             logged. When on, all commands and responses are
             logged.
- 
- Comments: 
- Immediate execution operator command.
+
+Comments: 
+Immediate execution operator command.

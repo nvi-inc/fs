@@ -25,13 +25,14 @@ C   LOCAL VARIABLES
       logical kminus
 C               - true if parameter is preceded by a minus sign 
       logical kMrack, kMdrive1,kMdrive2,kS2drive,kVrack
-      logical kVdrive1,kVdrive2
+      logical kVdrive1,kVdrive2,kLrack
 C               - true for MK3 rack and drive, respectively
 C               - if false, then VLBA rack or drive, respectively
       integer ick(23) 
       integer ickv(19)
       integer icks2
       integer icks(4)
+      integer ickl(2*MAX_DAS)
 C        ICH    - character counter 
 C     NCHAR  - character count
       integer*2 ibuf(50)
@@ -79,11 +80,13 @@ C
       call fs_get_drive(drive)
       kMrack= MK3.eq.rack.or.MK4.eq.rack
       kVrack= VLBA.eq.rack.or.VLBA4.eq.rack
+      kLrack= LBA.eq.rack.or.LBA4.eq.rack
       kMdrive1= MK3.eq.drive(1).or.MK4.eq.drive(1)
       kMdrive2= MK3.eq.drive(2).or.MK4.eq.drive(2)
       kVdrive1= VLBA.eq.drive(1).or.VLBA4.eq.drive(1)
       kVdrive2= VLBA.eq.drive(2).or.VLBA4.eq.drive(2)
       kS2drive=S2.eq.drive(1)
+      call fs_get_ndas(ndas)
       if (ieq.eq.0) goto 500
 C                   If no parameters, go report current list
 C 
@@ -103,6 +106,8 @@ C                   IA - IF distributor, channels A & B
 C                   IC - IF distributor, channels C & D
 C                   FM - formatter
 C                   TP or RC - tape recorder
+C     LBA parameters:
+C                   P1 to P16 - IF processors
 C     S2 parameters:
 C                   TP or RC - tape recorder
 C     Other modules:
@@ -122,6 +127,9 @@ C Turn off all of the parameters to start
       do i=1,19
         ickv(i) = 0
       enddo
+      do i=1,2*ndas
+        ickl(i) = 0
+      enddo
       icks2=0
       do i=1,4
         icks(i) = 0
@@ -137,6 +145,10 @@ C  Handle * if present
         do i=1,19
           call fs_get_ichvlba(ichvlba(i),i)
           if (ichvlba(i).gt.0) ickv(i)=1
+        enddo
+        do i=1,2*ndas
+          call fs_get_ichlba(ichlba(i),i)
+          if (ichlba(i).gt.0) ickl(i)=1
         enddo
         call fs_get_ichs2(ichs2)
         if (ichs2.gt.0) icks2=1
@@ -198,13 +210,20 @@ C
                 ick(i) = iset
              enddo
              ick(23) = iset
+             ick(22) = iset
+             ick(20) = iset
           else if(kVrack) then
              do i=1,17
                 ickv(i) = iset
              enddo
+             ick(22) = iset
+             ick(20) = iset
+          else if(kLrack) then
+             if (stchk(i).gt.0) icks(i)=1
+             do i=1,2*ndas
+                ickl(i) = iset
+             enddo
           endif
-          ick(22) = iset
-          ick(20) = iset
           if (kMdrive1) then
              ick(18) = iset
           else if(kS2drive) then
@@ -233,6 +252,11 @@ C
               ickv(i) = iset
             endif
           enddo
+          if (kLrack) then
+            do i=2,2*ndas,2
+               ickl(i) = iset
+            enddo
+          endif
 C 
 C  2.4 Might be ODD. 
 C 
@@ -245,6 +269,11 @@ C
             endif
           enddo
           if (kMrack) ick(15) = iset
+          if (kLrack) then
+            do i=1,2*ndas-1,2
+               ickl(i) = iset
+            enddo
+          endif
 C
 C  2.5 Now check for HD
 C
@@ -280,6 +309,17 @@ C
             return
           endif
           ickv(ii) = iset
+C
+C  2.7a One of the IF processors.
+C
+        else if (cjchar(lprm,1).eq.'p'.and.kLrack) then
+          ii=jchar(lprm,2)-z'30'
+          if (ii.gt.9) ii=ii-7-z'20'
+          if (ii.le.0 .or. ii.gt.2*ndas) then
+            ip(3) = -201
+            return
+          endif
+          ickl(ii) = iset
 C 
 C  2.8 IF distributor
 C 
@@ -362,6 +402,14 @@ C             If the module was set up, don't check it now
 C             If the module was previously ignored, check it now
           call fs_set_ichvlba(ichvlba(i),i)
         enddo
+        do i=1,2*ndas
+          call fs_get_ichlba(ichlba(i),i)
+          if (ickl(i).eq.0.and.ichlba(i).gt.0) ichlba(i) = -1
+C             If the module was set up, don't check it now
+          if (ickl(i).eq.1.and.ichlba(i).lt.0) ichlba(i) = +1
+C             If the module was previously ignored, check it now
+          call fs_set_ichlba(ichlba(i),i)
+        enddo
         call fs_get_ichs2(ichs2)
         if (icks2.eq.0.and.ichs2.gt.0) ichs2 = -1
 C     If the module was set up, don't check it now
@@ -416,6 +464,15 @@ C
               if (i.eq.16) nch = ichmv_ch(ibuf,nch,'ic')
               if (i.eq.17) nch = ichmv_ch(ibuf,nch,'fm')
             endif
+            nch = mcoma(ibuf,nch)
+          endif
+        enddo
+      else if(kLrack) then       !! if LBA rack
+        do i=1,2*ndas
+          call fs_get_ichlba(ichlba(i),i)
+          if (ichlba(i).ge.1) then
+            nch = ichmv_ch(ibuf,nch,'p')
+            nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
             nch = mcoma(ibuf,nch)
           endif
         enddo

@@ -35,6 +35,7 @@ C 011119 nrv Clean up logic so that information isn't saved if there
 C            aren't any chan_defs.
 C 020112 nrv Add roll parameters to VUNPROLL call. Add call to CKROLL.
 C 020327 nrv Add data modulation paramter to VUNPTRK.
+C 021111 jfq Extend S2 mode to support LBA rack
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -53,7 +54,7 @@ C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
 C          vunroll,ckroll
 C
 C  LOCAL:
-      integer ix,idum,ib,ic,i,icode,istn
+      integer ix,idum,ib,ic,i,ia,icode,istn
       integer il,im,iret,ierr1,iul,ism,ip,ipc,itone
       integer ipct(max_chan,max_tone),ntones(max_chan)
       integer ifanfac,itrk(max_track),ivc(max_bbc)
@@ -66,7 +67,7 @@ C  LOCAL:
       integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
-     .ls(max_ifd),ls2m(8),lpre(4),lp(max_ifd)
+     .ls(max_ifd),ls2m(8),ls2d(4),lpre(4),lp(max_ifd)
       double precision bitden
       character*4 cmodu, croll ! ON or OFF
       character*3 cs(max_chan)
@@ -80,7 +81,7 @@ C  LOCAL:
       character*128 cout
       integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
       integer ptr_ch,fvex_len,fget_mode_def
-      logical km3rack,km4rack,kvrack,km4rec,km3rec,kvrec,ks2rec 
+      logical km3rack,km4rack,kvrack,klrack,km4rec,km3rec,kvrec,ks2rec 
       integer z4000,z100
       DATA Z4000/Z'4000'/,Z100/Z'100'/
  
@@ -136,6 +137,7 @@ C         Recognized recorder types
           km4rec=ichcm_ch(lstrec(1,istn),1,'Mark4').eq.0
           ks2rec=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
 C         Recognized rack types
+          klrack=ichcm_ch(lstrack(1,istn),1,'LBA').eq.0
           kvrack=ichcm_ch(lstrack(1,istn),1,'VLBA').eq.0
      .    .or.ichcm_ch(lstrack(1,istn),1,'VLBAG').eq.0
           km3rack=ichcm_ch(lstrack(1,istn),1,'Mark3').eq.0
@@ -201,8 +203,8 @@ C         Get $IF statements.
 C         Get $TRACKS statements (i.e. fanout).
           if (ks2rec) then
             call vunps2m(modedefnames(icode),stndefnames(istn),
-     .      ivexnum,iret,ierr,lu,ls2m)
-            ifanfac=0
+     .      ivexnum,iret,ierr,lu,ls2m,
+     .      ls2d,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
           else
             call vunptrk(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
@@ -265,9 +267,9 @@ C    point there were no reading or content errors for this station/mode
 C    combination. Some consistency checks are done here.
 C
 C    Count subpasses and store subpass names found in the fanout defs.
-C    Not necessary for S2 recorders.
-          if (ks2rec) then
-          else ! non-S2
+C    Now IS necessary for S2 recorders.
+C         if (ks2rec) then
+C         else ! non-S2
             do i=1,max_subpass
               csubpass(i)=' '
             enddo
@@ -290,7 +292,7 @@ C    Not necessary for S2 recorders.
                 endif
               endif
             enddo ! each fandef
-          endif ! S2/not
+C         endif ! S2/not
 
 C    Save the chan_def info and its links.
           do i=1,nchdefs ! each chan_def line
@@ -347,7 +349,7 @@ C           Phase cal refs
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
 C           Track assignments
-            if (km3rec.or.km4rec.or.kvrec) then
+            if (km3rec.or.km4rec.or.kvrec.or.ks2rec) then
             do ix=1,nfandefs ! check each fandef
               if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link
                 ip=1 ! find subpass index
@@ -364,6 +366,17 @@ C           Track assignments
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
                   if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
+                  if (klrack) then	! allow for U being flipped L etc.
+                    ia=1
+                    do while (ia.le.nchdefs.and.
+     .                        (cfrbbref(ia).ne.cfrbbref(i).or.ia.eq.i))
+                      ia=ia+1
+                    enddo
+                    if (ia.le.nchdefs) then
+                       if (Frf(i).lt.Frf(ia)) iul=2 ! IFP LSB channel
+                       if (Frf(i).gt.Frf(ia)) iul=1 ! IFP USB channel
+                    endif
+                  endif
                   itras(iul,ism,ihdn(ix),i,ip,istn,icode)=itrk(ix)-3 
 C                                               ! store as Mk3 numbers
                 endif
@@ -386,6 +399,7 @@ C         Sample rate.
           samprate(icode)=srate ! sample rate
           if (ks2rec) then
             idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
+            idum = ichmv(ls2data(1,istn,icode),1,ls2d,1,8)
           else ! m3/m4/vrec
 C         Set bit density depending on the mode and rack type
             if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then 

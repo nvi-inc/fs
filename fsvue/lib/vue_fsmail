@@ -5,9 +5,9 @@
 # to be incorporated into the VLBI Field System.
 
 # Window manager configurations
-  set hfont {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
-  set bfont {-*-lucida-normal-r-*-sans-16-*-*-*-*-*-*-*}
   set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
+
 
   global tkVersion
   wm positionfrom . user
@@ -22,11 +22,13 @@
   $w config -cursor {top_left_arrow black white}
 
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-  } else { 
-      set bfont {9x15}
-  }
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+  }  
 
 option add *Entry.background linen startupFile
 option add *Text.background linen startupFile

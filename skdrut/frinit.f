@@ -9,6 +9,7 @@ C 991119 nrv Add initialization of trkn.
 C 000126 nrv Add initialization of ntrkn.
 C 010207 nrv Add initialization of freqpcal and freqpcal_base
 C 011011 nrv Initialize LS2MODE.
+C 021111 jfq Add initialization of LS2DATA.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -32,6 +33,7 @@ C Local
           enddo
           idum=ichmv_ch(lbarrel(1,i,j),1,'NONE')
           call ifill(ls2mode(1,i,j),1,16,oblank)
+          call ifill(ls2data(1,i,j),1,8,oblank)
         enddo
       enddo 
       do i=1,nco

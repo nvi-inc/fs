@@ -45,6 +45,10 @@ long ip[5];
 	  icount++;
       if(icount < 2) 
 	logit(NULL,-503,"4f");
+
+      if(lclm.rack_ids & 1 && shm_addr->equip.drive[shm_addr->select] == MK5)
+	logitn(NULL,-508,"4f",lclm.rack_ids);
+
       if(lclm.version != shm_addr->imk4fmv)
 	logitn(NULL,-504,"4f",lclm.version);
       continue;

@@ -51,10 +51,15 @@ char *ptr;
     int ierr, arg_key();
     int arg_key_flt();
     int i;
+    static int kfirst=TRUE;
 
     ierr=0;
     if(ptr == NULL) ptr="";
 
+    if(kfirst && strcmp(ptr,"*") ==0) {
+      ierr=-300;
+      goto error;
+    }
     switch (*count) {
       case 1:
         ierr=arg_key(ptr,dir_key,DIR_KEY,&lcl->dir,0,FALSE);
@@ -72,8 +77,10 @@ char *ptr;
         if (ierr !=0)
           ierr=arg_key_flt(ptr,sp7_key,SP7_KEY,&lcl->speed,0,FALSE);
 	if (ierr==0) {
-	  lcl->cips=sp3_key[lcl->speed];
-	  lcl->speed=-3;
+	  if(lcl->speed>=0 && lcl->speed<SP3_KEY) {
+	    lcl->cips=sp3_key[lcl->speed];
+	    lcl->speed=-3;
+	  }
 	} else if (ierr == -100 && shm_addr->bit_density[indx] > 0 &&
 		   ((shm_addr->equip.rack == VLBA && 
 		     shm_addr->vform.tape_clock > 0) ||
@@ -119,8 +126,10 @@ char *ptr;
         break;
       default:
        *count=-1;
+       kfirst=FALSE;
       }
 
+error:
     if(ierr!=0) ierr-=*count;
     if(*count>0) (*count)++;
     return ierr;

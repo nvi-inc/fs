@@ -1,0 +1,62 @@
+        trackform - sampler assignments (LBA, LBA4 racks)
+
+            Syntax:     trackform=track,sampler,track,sampler, ...
+
+            Response:   trackform/track,sampler,track,sampler, ...
+
+
+Settable parameters:
+          track     S2 recorder track number whose sampler assignment
+          will follow, must be between 0 and 15. Currently
+          only 0 through 7 are implemented.
+          sampler   The sampler that will be mapped to the preceding
+          track, 0, or in the form nnsd,  where nn=ifp number
+          (1 through 16), s=sideband (u or l),  the data bit (s
+          or m). A +m can be appended, where m is the lag (0,
+          1, 2, or 3) when fan out is being used.
+Comments: 
+The tracks and samplers must appear in pairs.  Multiple
+commands are allowed  because all of the pairs may not fit on
+a single line. Currently this version of trackform is mainly
+advisory and any combination that does not match a valid cable
+combination will be rejected.  This command has been
+implemented mainly to allow the scheduling software to be
+generalized and will need some further hardware to implement
+all possible combinations.  The track numbers correspond
+directly to in00 through in15 on the S2 C1 input cable as
+expected. Recognized cabling combinations are:
+            S2 recorder connected directly to DAS 1
+ 
+                                            Bandwidth         IFP1                      IFP2
+MHz
+
+                                        <32   0,1us,1,1um,2,1ls,3,1lm           4,2us,5,2um,6,2ls,7,2lm
+                                        <32   0,1ls,1,1lm,2,1us,3,1um           4,2ls,5,2lm,6,2us,7,2um
+                                        32    0,1us+0,1,1um+0,2,1us+1,3,1um+1   4,2us+0,5,2um+0,6,2us+1,7,2um+1
+                                          64      0,1us+0,1,1us+1,2,1us+2,3,1us+3   4,2us+0,5,2us+1,6,2us+2,7,2us+3
+
+        S2 recorder connected through "kludge" to DAS 1
+ 
+                                          Bandwidth         IFP1                    IFP2
+MHz
+
+                                    <32         0,1us,1,1um             2,2us,3,2um
+                                    <32         0,1ls,1,1lm             2,2ls,3,2lm
+
+The "kludge" is a short section of cable that interchanges
+tracks 2 and 3 with tracks 4 and 5 respectively when inserted. 
+The only hardware in use to implement the above scheme is
+usb/lsb choosers on each ifp s2 output pair i.e., 0 and 1, 2
+and 3 for ifp1 etc.
+ 
+In addition to the above, the current version of trackform
+will also accept combinations where the S2 recorder is
+connected to DAS N i.e., output is from IFP 2N-1 and 2N
+instead of 1 and 2.
+ 
+Note: The trackform command does not check for viability of
+the requested track layout in terms of actual hardware
+support, but informative messages/ warnings are printed as and
+when the DAS is setup. !! CAVEAT EMPTOR !! The current
+intention is to add a digital cross-point switch in due course
+which will support all reasonable combinations.

@@ -1,0 +1,124 @@
+CNS Clock
+Tac32Plus (Totally accurate clock - TAC)
+
+PRICE and SUPPORT:
+------------------
+As of 03/04/03: Tac32+  $789.00
+
+support: http://www.cnssys.com
+
+HARDWARE INSTALLATION DIAGRAMS:
+-------------------------------
+Visit URL: http://lupus.gsfc.nasa.gov/fs
+
+
+GENERAL INSTALLATION INSTRUCTIONS
+---------------------------------
+Installation is fairly simple. This software can also be run without any
+Field System software.
+
+1.) The server already exits on the Tac32 PC.
+    
+    To activate the remote on the Tac32 PC.
+	a.) type: Control T on the TAC PC.
+        b.) Select remote. (leave port as default 32325).
+
+2.) Make sure all requirements listed above are done. 
+
+    tacdclient/
+	|-- INSTALL
+	|-- Makefile
+	|-- README
+	|-- src
+	|   |-- Makefile
+	|   |-- err_report.c
+	|   |-- logtacd.c
+	|   `-- tacdclient.c
+	|-- tacdclient
+	|-- tacdclient.sh
+	`-- tacdlog.ctl
+
+3.) If you would like to startup a client for logging data.
+    NOTE: The client is only needed if you would like to create a log file
+          with only TAC data. The Field System (FS) does not need this
+          client to log data in your station observing file. The FS has it's
+          own client that works with your existing 'tacd' SNAP command. 
+
+    prompt> log in as prog
+    prompt> cd /usr2/fs/st.default/st-0.0.0
+    prompt> cp -a tacdclient /usr2/st
+    prompt> cd /usr2/st/tacdclient
+    prompt> make
+
+    NOTE2: Since this doesn't need to be remade with each Field System
+           update please do not include the tacdclient directory in the 
+           global /usr2/st/Makefile.
+
+4.) If you are going to run a client to create a TAC data log.
+    Using your favorite editor create a control file for the client. 
+    For completeness sake you should call it tacdlog.ctl and put it in 
+    /usr2/st/tacdclient directory. Remember that this is an example and 
+    you must create the file to match your environment.
+
+    WARNING-WARNING-WARNING-WARNING-WARNING-WARNING:
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    ----------------------------------------------------------------------
+    If you name the control file by any other name, other then 'tacdlog.ctl'
+    and/or you don't put it the '/usr2/st/tacdclient' directory you MUST 
+    change the tacdclient.sh script mentioned at Item 2.) STARTING CLIENT. 
+    ---------------------------------------------------------------------
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    An example exists in your tacdclient directory.
+
+    example tacdlog.ctl.example file:
+	* tacdlog.ctl - tacd client log control file
+	*	
+	* NO commas allowed as delimiters - just spaces.
+	*
+	tacggao.gsfc.nasa.gov   IP or hostname
+	32325                   PORT number
+	average         log time or average.
+	GG              station two-letter code
+	600             logging period for all data (seconds)
+	/usr2/log       directory for tacd logging data.
+	GGAO7108        station Name
+	76.8265         longitude
+	39.0219         latitude
+	14.99           station Elevation
+	*
+
+STARTING CLIENT:
+----------------
+
+1.) Running the tacdclient. Please run tacdclient from root.
+
+    NOTE: Only one parameter is needed for tacdclient; the control file 
+          which was created by you in the /usr2/st/tacdclient directory.
+
+   prompt> log in as root.
+   prompt> /usr2/st/tacdclient/tacdclient /usr2/st/tacdclient/tacdlog.ctl&
+
+2.) If you would like tacdclient to startup at boot time.
+
+    2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING:
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    ----------------------------------------------------------------------
+    If you name the control file by any other name, other then 'tacdlog.ctl'
+    and/or you don't put it the '/usr2/st/tacdclient' directory you MUST 
+    MUST change the tacdclient.sh script. 
+    ----------------------------------------------------------------------
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    prompt> log in as root
+    prompt> cd /etc/init.d
+    prompt> cp /usr2/st/tacdclient/tacdclient.sh .
+    prompt> cd /etc/rcS.d
+    prompt> ln -sfn ../init.d/tacdclient.sh S93tacdclient.sh
+
+    Every time you reboot your system, the tacdclient will start logging 
+    automatically.
+
+ ===== Read the README file for logfile names and log file information. =====
+
+You're done!

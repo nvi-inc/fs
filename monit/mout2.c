@@ -36,7 +36,7 @@ static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
 
 extern struct fscom *shm_addr;
 extern int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kM3rack,kM4rack,
-  kV4rack, kK4drive[2],kK41drive_type[2],kK42drive_type[2], selectm;
+  kV4rack, kLrack, kK4drive[2],kK41drive_type[2],kK42drive_type[2], selectm;
 
 mout2(it,iyear)
 
@@ -218,7 +218,7 @@ int iyear;
       printw("$");
     else if(shm_addr->rec_mode.group>=0)
       printw("%1d",0x7&shm_addr->rec_mode.group);
-  } if(kK4drive[selectm] && kK41drive_type[selectm]) {
+  } else if(kK4drive[selectm] && kK41drive_type[selectm]) {
     printw("4.00");
   } else if (kM3rack) {
     switch (shm_addr->iratfm) {
@@ -697,6 +697,21 @@ int iyear;
     if(kV4rack) {
       if(shm_addr->ICHK[16]<=0)
 	strcat(checkln," fm");
+    }
+  } else if(kLrack) {                            /* LBA */
+    for (i=0; i<2*shm_addr->n_das; i++) {
+      if (shm_addr->check.ifp[i]<=0) {
+        strcat(checkln," p");
+        if (((i+1)/10) == 0) {
+          dig[0]=((i+1)%10) + '0';
+          dig[1]= '\0';
+        } else {
+          dig[0]=((i+1)/10) + '0';
+          dig[1]=((i+1)%10) + '0';
+          dig[2]= '\0';
+        }
+        strcat(checkln,dig);
+      }
     }
   }
 

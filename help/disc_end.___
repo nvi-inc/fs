@@ -1,9 +1,13 @@
                  disc_end - end Mark V recording
- 
-              Syntax:      disc_end
- 
-              Response:    none
- 
- 
- Comments:
- Stops recording. 
+
+            Syntax:     disc_end
+
+            Response:   none
+
+
+Comments:
+Stops recording.
+
+If the active drive type in use is "mk5a", this command will check the
+VSN after stopping the recording. If it has changed or hasn't been
+logged since the current log file was last opened, it will be logged.

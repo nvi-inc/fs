@@ -1,12 +1,12 @@
               mk5close - Close the Mark V connection
- 
-              Syntax:      mk5close
- 
-              Response:    none
- 
- 
- Comments:
- This command can be used to close the connection to a Mark V5
- recorder. It is recommended that this be done prior to
- shutting down the Mark V control program for a disc swap. The
- connection can be re-opened with the mk5relink command. 
+
+            Syntax:     mk5close
+
+            Response:   none
+
+
+Comments:
+This command can be used to close the connection to a Mark V5
+recorder. It is recommended that this be done prior to
+shutting down the Mark V control program for a disc swap. The
+connection can be re-opened with the mk5relink command.

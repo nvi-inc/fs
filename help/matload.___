@@ -1,22 +1,22 @@
                matload - download 8080 code to MAT
- 
-              Syntax:      matload=unit addr,mem addr,data
- 
-              Response:    matload/acknowledgement
- 
- 
- Settable parameters:
-              unit addr    the hex address of the MAT to receive the code.
-            mem addr   the hex location for the start of the load, 4
+
+            Syntax:     matload=unit addr,mem addr,data
+
+            Response:   matload/acknowledgement
+
+
+Settable parameters:
+            unit addr   the hex address of the MAT to receive the code.
+            mem addr    the hex location for the start of the load, 4
             characters.
-            data       the hex data bytes to be transmitted, must be an
+            data        the hex data bytes to be transmitted, must be an
             even number of them.
- 
- Comments: 
- The message to the unit that is sent:
- 
+
+Comments: 
+The message to the unit that is sent:
+
                   #unit addr:nnmem addr00datacc
- 
- where nn=number of data bytes, cc=check sum. Remember that
- 2-byte data values are sent least significant, most
- significant. 
+
+where nn=number of data bytes, cc=check sum. Remember that
+2-byte data values are sent least significant, most
+significant.

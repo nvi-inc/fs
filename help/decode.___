@@ -1,42 +1,42 @@
           decode - Mark III decoder control and monitor
- 
-              Syntax:      decode=channel,mode,counter
- 
-              Response:    decode/channel,mode,data
- 
- 
- Settable parameters:
-            channel    Channel a (default) or b to be decoded.
-          mode     Type of data to be read. Choices are auxilliary
+
+            Syntax:     decode=channel,mode,counter
+
+            Response:   decode/channel,mode,data
+
+
+Settable parameters:
+          channel   Channel a (default) or b to be decoded.
+          mode      Type of data to be read. Choices are auxilliary
           data, synch, crc word, time, data bits, or error
           counts (default). 
-              counter      Error counter control: byte (default), frame,
-              reset.
- 
- Monitor-only parameters:
-            data       Data returned according to mode specified in
+            counter     Error counter control: byte (default), frame,
+            reset.
+
+Monitor-only parameters:
+            data        Data returned according to mode specified in
             control command.
-                             err   sspppppp (s=synch errors, p=parity errors)
+                              err   sspppppp (s=synch errors, p=parity errors)
                   Note that monitored error values are error
                   counts, not rates.
-                             syn   8 - character synch word
-                               time    two words: ydddhhmm and sssssccc, where
-                    ccc = checksum
-                             data    three sets of 32 data bits
-                           aux   two sets of 8 characters of auxiliary data
-                             crc   pass/fail for CRC check
- 
- Comments: 
- MAT module functions available.  See section 1.0 of this
- manual.
- 
- CRC check is reliable only in bypass reproduce mode.
- 
- This command is for the old style Mark III decoder which may
- be installed in any of the Mark III, Mark IV, or VLBA4 rack
- types, but this command will work decoder if it is installed
- with other rack types as well.
- 
- Most Mark III drives cannot decode in double speed, so this
- command will probably fail in this mode. Old VLBA drives that
- use the Mark III bit synchronizer may have this problem also. 
+                              syn   8 - character synch word
+                                time    two words: ydddhhmm and sssssccc, where ccc
+                    = checksum
+                              data    three sets of 32 data bits
+                            aux   two sets of 8 characters of auxiliary data
+                              crc   pass/fail for CRC check
+
+Comments: 
+MAT module functions available.  See section 1.0 of this
+manual.
+
+CRC check is reliable only in bypass reproduce mode.
+
+This command is for the old style Mark III decoder which may
+be installed in any of the Mark III, Mark IV, or VLBA4 rack
+types, but this command will work decoder if it is installed
+with other rack types as well.
+
+Most Mark III drives cannot decode in double speed, so this
+command will probably fail in this mode. Old VLBA drives that
+use the Mark III bit synchronizer may have this problem also.

@@ -1,22 +1,22 @@
               rec_mode - recording mode (S2 drives)
- 
-              Syntax:      rec_mode=mode,group,roll 
- 
-              Response:    rec_mode/mode,group,roll,numgroups
- 
- 
- Settable Parameters: 
-            mode       The string that identifies the mode, 20 characters
-            maximum, a null value is not permitted. No
-            default. 
-            group      The group to be recorded, nominally 0-7, but many
+
+            Syntax:     rec_mode=mode,group,roll 
+
+            Response:   rec_mode/mode,group,roll,numgroups
+
+
+Settable Parameters: 
+          mode      The string that identifies the mode, 20 characters
+          maximum, a null value is not permitted. No
+          default. 
+            group       The group to be recorded, nominally 0-7, but many
             modes have fewer groups. 
-              roll         Roll configuration: on or off. Default on.
- 
- Monitor-only Parameters: 
-            numgroups  The number of groups in mode display as the
+            roll        Roll configuration: on or off. Default on.
+
+Monitor-only Parameters: 
+            numgroups   The number of groups in mode display as the
             monitor value. 
- 
- Comments: 
- This command selects the recording mode and groups to be used
- for an S2 recorder.  
+
+Comments: 
+This command selects the recording mode and groups to be used
+for an S2 recorder. 

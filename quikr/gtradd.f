@@ -14,7 +14,7 @@ C        IMODE  - mode allowed for input characters
 C                 1 = RA
 C                 2 = DEC with limits +/-90 
 C                 3 = RA offsets (can be negative)
-C                 4 = degrees, limits +/-360
+C                 4 = degrees, limits +/- 10000 (non-inclusive)
 C 
 C     OUTPUT VARIABLES: 
 C 
@@ -104,7 +104,7 @@ C                    Scan for decimal point
       if (icd.eq.0) icd = iec + 1 
       nfpc = iec - icd + 1
 C                   Number of digits past decimal point, INCL . 
-      if (icd-6.ge.ifc) goto 300
+      if (icd-6.ge.ifc.and.icd-8.le.ifc) goto 300
       ierr = -1 
       goto 999
 C                   Must use suffixes if not completely specified 
@@ -115,7 +115,12 @@ C     proceed to the left.
 C 
 300   fld(3)= das2b(ias,icd-2,nfpc+2,ierr)
       imin = ias2b(ias,icd-4,2) 
-      ihr  = ias2b(ias,icd-6,2) 
+      if(imode.eq.4) then
+         ich=icd-ifc-4
+         ihr  = ias2b(ias,ifc,ich) 
+      else
+         ihr  = ias2b(ias,icd-6,2) 
+      endif
       if (ierr.ne.0.or.imin.eq.-32768.or.ihr.eq.-32768) goto 390
       fld(1) = ihr
       fld(2) = imin 
@@ -149,7 +154,7 @@ C     If all is OK, compute value in radians.
 C 
 600   if (imode.eq.1.and.(fld(1).lt.0.0.or.fld(1).gt.24.0)) goto 650
       if (imode.eq.2.and.(fld(1).lt.0.0.or.fld(1).gt.90.0)) goto 650
-      if (imode.eq.4.and.(fld(1).lt.0.0.or.fld(1).gt.360.0)) goto 650 
+      if (imode.eq.4.and.(fld(1).lt.0.0.or.fld(1).gt.9999.0)) goto 650 
       if (fld(2).lt.0.0.or.fld(2).gt.60.0) goto 650 
       if (fld(3).lt.0.0.or.fld(3).gt.60.0) goto 650 
 C 

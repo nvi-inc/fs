@@ -50,8 +50,27 @@ mk5cn:
 
       if(ip[2]<0) return;
       ed_dis(command,itask,ip);
-      return;
+      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 shm_addr->equip.drive_type[shm_addr->select]== MK5A) {
+	cls_clr(ip[0]);
 
+	out_recs=0;
+	out_class=0;
+
+	strcpy(outbuf,"vsn?\n");
+	cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	out_recs++;
+	
+	ip[0]=1;
+	ip[1]=out_class;
+	ip[2]=out_recs;
+	skd_run("mk5cn",'w',ip);
+	skd_par(ip);
+	
+	if(ip[2]<0) return;
+	bank_check_dis(command,itask,ip);
+	return;
+      }
 error:
       ip[0]=0;
       ip[1]=0;

@@ -1,12 +1,14 @@
-       form - formatter setup (Mark IV, VLBA4, K4MK4 racks)
- 
-              Syntax:      form=mode,rate,fan,barrel,modulate,synch
- 
-              Response:    form/mode,rate,fan,barrel,modulate,synch,test,rev,rack,error
- 
- 
- Settable Parameters:
-        mode   The recording mode. Choices for the mode are m, a, b1,
+         form - setup (LBA4, Mark IV, VLBA4, K4MK4 racks)
+
+            Syntax:     form=mode,rate,fan,barrel,modulate,synch
+          4form=mode,rate,fan,barrel,modulate,synch
+
+            Response:   form/mode,rate,fan,barrel,modulate,synch,test,rev,rack,error
+          4form/mode,rate,fan,barrel,modulate,synch,test,rev,rack,error
+
+
+Settable Parameters:
+        mode    The recording mode. Choices for the mode are m, a, b1,
         b2, c1, c2, e1, e2, e3, e4, and dn, where n=1 to 28.
         No default. Modes a, b, b1, b2, c1, c2, e1, e2, e3,
         e4, and dn correspond to the traditional Mark III
@@ -18,86 +20,92 @@
         number recorded. Mode m uses the sampler track
         assignments and formatter track enables specified by
         the trackform and tracks commands.
-          rate     Sample rate in Mbits/sec. Choices are 0.125, 0.25,
+          rate      Sample rate in Mbits/sec. Choices are 0.125, 0.25,
           0.5, 1, 2, 4, 8, 16, and 32. Default 4. For Nyquist
           sampling this selection must be twice the bandwidth
           set-up used in the bbc commands
-          fan      The fan-in or fan-out ratio. Choices are 1:4, 1:2,
-          2:1, where on a per channel or track basis, the number
-          before the colon is the number of sampled channels and
-          the number after is the number of tracks. Default 1:1.
-          barrel   Barrel-roll mode: off (default), 8, 16, or m. Old
+        fan     The fan-in or fan-out ratio. Choices are 1:4, 1:2,
+        2:1, where on a per channel or track basis, the number
+        before the colon is the number of sampled channels and
+        the number after is the number of tracks. Default 1:1.
+          barrel    Barrel-roll mode: off (default), 8, 16, or m. Old
           firmware does not support anything but off. Barrel m
           uses the roll maps defined by the rollform command.
-          modulate Data modulation: on or off (default). Old firmware
-          does not support anything but off. Monitor display is
-          null because it cannot be read back.
-          synch    Synch test tolerance. Choices are 0-16 ( multiples of
-          62.5 nanoseconds) or off.  Default is 3. The meaning
-          of 0 is unknown, but may be the same as 1. Monitor
-          displayed is null for formatters with old firmware
-          revision because it cannot be read back.
- 
- Monitor-only Parameters:
-          test     Synch test result: pass or fail.
- rev      Formatter firmware revision number, displayed as an
- integer.
-          rack     Rack ID, reported as a hex value. 
-            error      Error status, okay or the hex value.
- 
- Comments:
- The Mark IV formatter clock is set with the fmset program. If
- the formatter time is set or re-synched, the fmset program
- will automatically reset the FS time if the time model in
- time.ctl is offset or rate. If you change the time in some
- other way and the time model in time.ctl is offset or rate, 
- issue the command
- 
+          modulate  Data modulation: on or off (default). Old firmware
+          does not support anything but off. Monitor display
+          is null because it cannot be read back.
+        synch   Synch test tolerance. Choices are 0-16 ( multiples of
+        62.5 nanoseconds) or off.  Default is 3. The meaning
+        of 0 is unknown, but may be the same as 1. Monitor
+        displayed is null for formatters with old firmware
+        revision because it cannot be read back.
+
+Monitor-only Parameters:
+          test      Synch test result: pass or fail.
+rev     Formatter firmware revision number, displayed as an
+integer.
+          rack      Rack ID, reported as a hex value. 
+          error     Error status, okay or the hex value.
+
+Comments:
+The Mark IV formatter clock is set with the fmset program. If
+the formatter time is set or re-synched, the fmset program
+will automatically reset the FS time if the time model in
+time.ctl is offset or rate. If you change the time in some
+other way and the time model in time.ctl is offset or rate, 
+issue the command
+
                       sy=run setcl offset &
+
+to reset the Field System time.
+
+Since the Mark IV recorder does not include group enables,
+some of the traditional Mark III mode names used in mode have
+numbers appended to them to distinguish which sub-pass, group,
+or track is being recorded.
+
+Some combinations of rate and fan cannot be accommodated by the
+formatter. No output that would require more than 16 MHz
+nominal data rate per track is supported. Specifically a rate
+of 32 and a fan of 1:1 is impossible. Some combinations of fan
+and rate cannot be accommodated by the recorder. Any
+combination of rate and fan that would imply a nominal data rate
+per track of 0.125 Mbit/sec or less for is not supported.
+
+For a fan of 1:4, the magnitude bits of VC9-14 are not
+available.
  
- to reset the Field System time.
- 
- Since the Mark IV recorder does not include group enables,
- some of the traditional Mark III mode names used in mode have
- numbers appended to them to distinguish which sub-pass, group,
- or track is being recorded.
- 
- Some combinations of rate and fan cannot be accommodated by the
- formatter. No output that would require more than 16 MHz
- nominal data rate per track is supported. Specifically a rate
- of 32 and a fan of 1:1 is impossible. Some combinations of fan
- and rate cannot be accommodated by the recorder. Any
- combination of rate and fan that would imply a nominal data rate
- per track of 0.125 Mbit/sec or less for is not supported.
- 
- For a fan of 1:4, the magnitude bits of VC9-14 are not
- available.
-  
- The rate of 0.25 Mbit/sec is supported by the formatter, but
- for this rate to generate correct time tags, the formatter
- requires the "/con 0" configuration command that sets it up to
- be issued during an odd second of the time of day, e.g.
- 00:00:01 and 09:23:35, but not 09:23:36. No provision is made
- by the form command to meet this timing requirement.
- 
- For longitudinal drives, the correlators can not reproduce
- recordings made at speeds below 40 ips, but this limitation is
- subject to change in the future. This limitation is
- functionally equivalent to a minimum per track data rate of 2
- Mbit/sec.
- 
- Chekr does not currently support checking of the formatter.
- However, the setup of the formatter can be monitored by
- entering a form command. If any of the displayed values do not
- agree with the last value commanded, then the formatter is not
- in the last commanded state. In particular the BAD_VALUE
- response indicates that the formatter state does agree with
- what was commanded.
- 
- The default value of 3 for synch  is the most lenient value,
- 3*62.5=187.5 nanoseconds, that will catch a slip of 5 MHz. The
- formatter on power-on itself defaults to 8.
- 
- Old formatter firmware versions are less than 40, newer
- versions are greater than 40. The value returned by the
- formatter must agree with what is in the equip.ctl file. 
+The rate of 0.25 Mbit/sec is supported by the formatter, but
+for this rate to generate correct time tags, the formatter
+requires the "/con 0" configuration command that sets it up to
+be issued during an odd second of the time of day, e.g.
+00:00:01 and 09:23:35, but not 09:23:36. No provision is made
+by the form command to meet this timing requirement.
+
+For longitudinal drives, the correlators can not reproduce
+recordings made at speeds below 40 ips, but this limitation is
+subject to change in the future. This limitation is
+functionally equivalent to a minimum per track data rate of 2
+Mbit/sec.
+
+Chekr does not currently support checking of the formatter.
+However, the setup of the formatter can be monitored by
+entering a form command. If any of the displayed values do not
+agree with the last value commanded, then the formatter is not
+in the last commanded state. In particular the BAD_VALUE
+response indicates that the formatter state does agree with
+what was commanded.
+
+The default value of 3 for synch  is the most lenient value,
+3*62.5=187.5 nanoseconds, that will catch a slip of 5 MHz. The
+formatter on power-on itself defaults to 8.
+
+Old formatter firmware versions are less than 40, newer
+versions are greater than 40. The value returned by the
+formatter must agree with what is in the equip.ctl file.
+
+The 4form command is provided to permit access to a Mark IV
+formatter when a different rack type is in use. See also
+4tracks and 4trackform in the  tracks (LBA4, Mark IV, VLBA/4,
+K4MK4 racks) and trackform (Mark IV, VLBA/4, K4MK4 racks)
+command manual pages respectively.

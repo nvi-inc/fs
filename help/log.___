@@ -1,22 +1,22 @@
                     log - start a new log file
- 
-              Syntax:      log=name
- 
-              Response:    log/name
- 
- 
- Settable parameters:
-            name       name of log file to be opened. If no directory
+
+            Syntax:     log=name
+
+            Response:   log/name
+
+
+Settable parameters:
+            name        name of log file to be opened. If no directory
             path is specified, /log is assumed. If no
             extension is specified, .log is assumed.
- 
- Monitor-only parameters: none
- 
- Comments: 
- When the Field System is initialized, log file station.log was
- opened or created in directory /usr2/log. If the log file
- requested by this command cannot be opened or created, the
- Field System returns to using the log file previously in use.
- If no log file can be successfully opened, execution of the
- schedule continues, but an error message is displayed on the
- screen every time an attempt is made to write into the log.
+
+Monitor-only parameters: none
+
+Comments: 
+When the Field System is initialized, log file station.log was
+opened or created in directory /usr2/log. If the log file
+requested by this command cannot be opened or created, the
+Field System returns to using the log file previously in use.
+If no log file can be successfully opened, execution of the
+schedule continues, but an error message is displayed on the
+screen every time an attempt is made to write into the log.

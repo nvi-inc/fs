@@ -1,22 +1,22 @@
                      select - select recorder
- 
-              Syntax:      select=drive
- 
-              Response:    select/drive
- 
- 
- Settable Parameters:
-            drive      The drive to use: 1 or 2. No default.
- 
- Comments:
- This command is used to select which recorder is active in a
- two recorder system. Most commands that refer to a recorder
- explicitly refer to the recorder in the command name, but some
- commands that refer primarily to the rack need to know
- implicit which recorder is in use. These commands depend on
- this command to specify which drive is in use. In particular
- the pass command needs to know which head position to encode
- in the AUX data field and the VLBA form command needs to know
- which recorder to use for DQA input. In addition, the chekr
- and monit programs need to know which recorder is in use to
- check and display the status of. 
+
+            Syntax:     select=drive
+
+            Response:   select/drive
+
+
+Settable Parameters:
+          drive     The drive to use: 1 or 2. No default.
+
+Comments:
+This command is used to select which recorder is active in a
+two recorder system. Most commands that refer to a recorder
+explicitly refer to the recorder in the command name, but some
+commands that refer primarily to the rack need to know
+implicit which recorder is in use. These commands depend on
+this command to specify which drive is in use. In particular
+the pass command needs to know which head position to encode
+in the AUX data field and the VLBA form command needs to know
+which recorder to use for DQA input. In addition, the chekr
+and monit programs need to know which recorder is in use to
+check and display the status of.

@@ -108,35 +108,113 @@ void ifadjust(command,itask,ip)
     goto error;
   }
 
-  /* Get trackform information. vcnum=vc#, sb_ul=sideband */
-  for(i=0,j=0,k=0;i<64;i++) {
-    if(shm_addr->form4.codes[i]!=-1) {
-      if(((1<<4)&shm_addr->form4.codes[i]) && 
-	 !(shm_addr->form4.codes[i]>>6 & 0x3)) {
-	vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
-	/* Look for the patch */
-	if(!iuse[vcnum_l[j]]) {
-	  ierr=-511;
-	  goto error;
-	}
-	l=patch_id[vcnum_l[j]];
-	lp[l-1]=l;
-	/* */
-	lu[0]=1;
-	j++;
-      } else if(!((1<<4)&shm_addr->form4.codes[i]) && 
-		!(shm_addr->form4.codes[i]>>6 & 0x3)) {
-	vcnum_u[k]=shm_addr->form4.codes[i]&0xF;
-	/* Look for the patch */
-	if(!iuse[vcnum_u[k]]) {
-	  ierr=-511;
-	  goto error;
-	}
-	l=patch_id[vcnum_u[k]];
-	up[l-1]=l;
-	/* */
-	lu[1]=1;
-	k++;
+  if(shm_addr->equip.rack == MK4) {
+    /* Get trackform information. vcnum=vc#, sb_ul=sideband */
+    for(i=0,j=0,k=0;i<64;i++) {
+      if(shm_addr->form4.codes[i]!=-1) {
+        if(((1<<4)&shm_addr->form4.codes[i]) && 
+           !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+          vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
+          /* Look for the patch */
+          if(!iuse[vcnum_l[j]]) {
+            ierr=-511;
+            goto error;
+          }
+          l=patch_id[vcnum_l[j]];
+          lp[l-1]=l;
+          /* */
+          lu[0]=1;
+          j++;
+        } else if(!((1<<4)&shm_addr->form4.codes[i]) && 
+                  !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+          vcnum_u[k]=shm_addr->form4.codes[i]&0xF;
+          /* Look for the patch */
+          if(!iuse[vcnum_u[k]]) {
+            ierr=-511;
+            goto error;
+          }
+          l=patch_id[vcnum_u[k]];
+          up[l-1]=l;
+          /* */
+          lu[1]=1;
+          k++;
+        }
+      }
+    }
+  } else /* Mark III */ {
+    if(shm_addr->imodfm == 0 ) { /* mode A */
+      for(i=0;i<14;i++) {
+        vcnum_l[i]=i;
+        /* Look for the patch */
+        if(!iuse[vcnum_l[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_l[i]];
+        lp[l-1]=l;
+        /* */
+        lu[0]=1;
+
+        vcnum_u[i]=i;
+        /* Look for the patch */
+        if(!iuse[vcnum_u[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_u[i]];
+        up[l-1]=l;
+        /* */
+        lu[1]=1;
+      }
+    } else if(shm_addr->imodfm == 1 ) { /* mode B */
+      for(i=0;i<7;i++) {
+        vcnum_l[i]=2*i;
+        /* Look for the patch */
+        if(!iuse[vcnum_l[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_l[i]];
+        lp[l-1]=l;
+        /* */
+        lu[0]=1;
+
+        vcnum_u[i]=2*i;
+        /* Look for the patch */
+        if(!iuse[vcnum_u[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_u[i]];
+        up[l-1]=l;
+        /* */
+        lu[1]=1;
+      }
+    } else if(shm_addr->imodfm == 2 ) { /* mode C */
+      for(i=0;i<14;i++) {
+        vcnum_u[i]=i;
+        /* Look for the patch */
+        if(!iuse[vcnum_u[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_u[i]];
+        up[l-1]=l;
+        /* */
+        lu[1]=1;
+      }
+    } else if(shm_addr->imodfm == 3 ) { /* mode D */
+      for(i=0;i<1;i++) {
+        vcnum_u[i]=i;
+        /* Look for the patch */
+        if(!iuse[vcnum_u[i]]) {
+          ierr=-511;
+          goto error;
+        }
+        l=patch_id[vcnum_u[i]];
+        up[l-1]=l;
+        /* */
+        lu[1]=1;
       }
     }
   }
@@ -287,7 +365,6 @@ sample:
 	ip[4]=i;
 	goto error;
       }
-
       /* Start polling for Total Power 
       if(abs(shm_addr->ifp2vc[vcnum[i]])==1) {	
 	below[0]|=(itp-itpz[i])<itp_ref;
@@ -356,10 +433,9 @@ sample:
     itry++;
     goto sample;
   }
-    inew[0]=icur[0];
-    inew[1]=icur[1];
-    inew[2]=icur[2];
-
+  inew[0]=imin[0];
+  inew[1]=imin[1];
+  inew[2]=imin[2];
   if(!sb_flag) {
     sprintf(msg,"ifadjust/%d,%02d,%02d,%02d,LSB Converged",
 	    itp_ref,inew[0],inew[1],inew[2]);
@@ -404,9 +480,9 @@ sample2:
 	if(up[i] && lp[i])
 	  if(saveatt[i]<inew[i]) inew[i]=saveatt[i];
       }
-      if(ierr=set_att(inew[0],inew[1],inew[2],patched_ifs,&iat,isave,&isave3))
-	return;
     }
+    if(ierr=set_att(inew[0],inew[1],inew[2],patched_ifs,&iat,isave,&isave3))
+      return;
     if(ierr=reset_vc(vc_parms_save,iuse)) return;
 
     if(lu[0] || lu[1]) {

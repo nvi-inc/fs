@@ -1,6 +1,4 @@
-      subroutine lstsum_info(kskd,cexper,iyear,cstn,cid1,cid,
-     .xpos,ypos,zpos,kazel,kwrap,kk4,ks2,
-     .crack,creca,crecb,ierr,kscan)
+      subroutine lstsum_info(kskd)
 
 C LSTSUM_INFO gets the information for the lstsum routine.
 C Information is retrieved from common or by reading the
@@ -10,33 +8,26 @@ C
       include '../skdrincl/statn.ftni'
       include 'drcom.ftni'
 
+      include 'lstsum.ftni'
+      include 'hardware.ftni'
+
 C History
 C 991103 nrv New. Removed from LSTSUM.
 C 000611 nrv Add KSCAN to call.
 C 020923 nrv Add kmk5 to set_type call.
+C 021111 jfq Add klrack to set_type call.
+C 032002 JMGipson. Let reading from snap file override sked file reading.
 
 C Calls: READ_SNAP1, READ_SNAP6, SET_TYPE
 
 C Input
       logical kskd
 C Output
-      character*(*) cexper
-      integer iyear
-      character*(*) cstn
-      character*(*) cid1
-      character*(*) cid 
-      double precision xpos,ypos,zpos
-      logical kazel,kwrap,kk4,ks2,kscan
-      character*(*) crack,creca,crecb
       integer ierr ! non-zero means some failure
 C Local
       integer nline,ix
       character*128 cbuf_in,cbuf
       character*20 c1,c2,c3
-      logical km3rack,km4rack,kvrack,kv4rack,
-     .  kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
-     .  km3rec(2),km4rec(2),kvrec(2),km5rec(2),
-     .  kv4rec(2),ks2rec(2),kk41rec(2),kk42rec(2)
       integer trimlen,ichcm_ch
 
 C 4.1 Whether we have a .skd file or not, read line 1 of SNAP file
@@ -106,15 +97,17 @@ C 4.3  Find out the equipment.
         call hol2char(lstrack(1,istn),1,8,crack)
         call hol2char(lstrec(1,istn),1,8,creca)
         call hol2char(lstrec2(1,istn),1,8,crecb)
-        call set_type(istn,km3rack,km4rack,kvrack,kv4rack,
-     .  kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
-     .  km3rec,km4rec,kvrec,km5rec,
-     .  kv4rec,ks2rec,kk41rec,kk42rec)
+
+        call init_hardware_common(istn)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
 C       because the "kk4" or "ks2" flag gets set.
         kk4 = kk41rec(1).or.kk42rec(1).or.kk41rec(2).or.kk42rec(2)
         ks2 = ks2rec(1).or.ks2rec(2)
-      else ! read .snp file
+        km5 = km5rec(1) .or. km5rec(2)
+        km5p = km5prec(1) .or. km5prec(2)
+      endif
+! Got defaults from Sked file. Now readwhat snap file says, and overwrite defaults.
+!      else ! read .snp file
         do while (nline.lt.3)
           nline=nline+1
           read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
@@ -130,24 +123,31 @@ C       Read line 6 (equipment)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
           kk4 = creca(1:2).eq.'K4'.or.crecb(1:2).eq.'K4'
           ks2 = creca(1:2).eq.'S2'.or.crecb(1:2).eq.'S2'
+          km5 =  creca(1:6) .eq. 'Mark5 ' .or. crecb(1:6) .eq. 'Mark5 '
+          km5p = creca(1:6) .eq. 'Mark5P' .or. crecb(1:6) .eq. 'Mark5P'       !note the capital P
+
+!          km4 = creca(1:5) .eq. 'Mark3' .or. crecb(1:5) .eq. 'Mark3'
+!          km3 = creca(1:5) .eq. 'Mark3' .or. crecb(1:5) .eq. 'Mark3'
         else
 C    Couldn't figure out the equipment from the .snp file header,
 C    so look at the actual commands.
           nline=0
           ks2=.false.
           kk4=.false.
-          do while (nline.lt.50.and..not.kk4.and..not.ks2)
+          km5=.false.
+          do while (nline.lt.50.and..not.(kk4.or. ks2 .or. km5))
             read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
             nline=nline+1
             call c2upper(cbuf_in,cbuf)
+            km5 = cbuf(1:4) .eq. "DISC"
             kk4 = index(cbuf,'STA=RECORD').ne.0.or.
      .            index(cbuf,'STB=RECORD').ne.0
             ks2 = index(cbuf,'FOR,SLP').ne.0.or.
      .            index(cbuf,'FOR,LP').ne.0 
-            kscan = index(cbuf,'SCAN_NAME').ne.0
+!            kscan = index(cbuf,'SCAN_NAME').ne.0
           enddo
         endif ! decode header line 6/read .snp
-      endif ! common/read .snp
+ !     endif ! common/read .snp
 
 990   continue
 991   continue

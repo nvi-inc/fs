@@ -24,6 +24,8 @@ C            needs them to read and check roll_defs from VEX files.
 C            But remove the DATA statement which seems to balloon the
 C            program size.
 C 020713 nrv Add Mk5 recorder type
+C 021111 jfq Add LBA rack type
+C 2003Apr17  JMG   Added Mark5p
 C
 C LOCAL
       integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,
@@ -176,7 +178,7 @@ C  In freqs.ftni
         enddo
       enddo
 
-      do i=1,max_rack_type
+!      do i=1,max_rack_type
         rack_type(1) = 'none'
         rack_type(2) = 'Mark3A'
         rack_type(3) = 'VLBA'
@@ -191,8 +193,9 @@ C  In freqs.ftni
         rack_type(12) = 'K4-2/K3'
         rack_type(13) = 'K4-1/M4'
         rack_type(14) = 'K4-2/M4'
-      enddo
-      do i=1,max_rec_type
+        rack_type(15) = 'LBA'
+!      enddo
+!      do i=1,max_rec_type
         rec_type(1) = 'none'
         rec_type(2) = 'unused'
         rec_type(3) = 'Mark3A'
@@ -202,8 +205,9 @@ C  In freqs.ftni
         rec_type(7) = 'S2'
         rec_type(8) = 'K4-1'
         rec_type(9) = 'K4-2'
-        rec_type(10) = 'Mark5'
-      enddo
+        rec_type(10) = 'Mark5A'
+        rec_type(11) = 'Mark5P'
+!      enddo
 
 C Initialize canned roll defs
 C

@@ -121,7 +121,7 @@ C
         return
       endif
       nch = 2 
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          if (cjchar(parm,3).eq.' ') nch = 1 
          ivc = ias2b(parm,1,nch) 
          if (ivc.lt.1 .or. ivc.gt.14) ip(3)= -202

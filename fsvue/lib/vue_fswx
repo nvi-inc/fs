@@ -6,8 +6,7 @@
   # Window manager configurations
 
   set ICONDIR /usr2/fs/fsvue/images
-  set bfont {-*-lucida-normal-r-*-sans-18-*-*-*-*-*-*-*}
-  set bfont2 {-*-ariel-normal-r-*-sans-24-*-*-*-*-*-*-*}
+  set LIBDIR /usr2/fs/fsvue/lib
 
   global tkVersion
 
@@ -20,12 +19,15 @@
 #  wm geometry . +5+25
   wm title . { Weather }
 
+
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-  } else { 
-      set bfont {9x15}
-  }
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+  }  
 
 # Top frame is a menubar
 # there is more magic that you can do with this

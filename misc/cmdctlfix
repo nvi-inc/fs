@@ -77,12 +77,12 @@ while(<BAK>) {
     $not = $not || $rack  !~ /[1234567]/;
     $not = $not || $drive !~ /[1234567]/;
 
-    if($rack == 7||$drive==7) {
-	if ($rack == 7) {
+    if($rack eq '7'||$drive eq '7') {
+	if ($rack eq '7') {
 	    $rack='F';
 	    substr($_,25,1)=$rack;
 	}
-	if ($drive == 7) {
+	if ($drive eq '7') {
 	    $drive='F';
 	    substr($_,26,1)=$drive;
 	}

@@ -55,7 +55,20 @@ parse:
       if(ptr!=NULL && strlen(ptr)!=0)
 	strcat(outbuf,ptr);
       else
-	strcat(outbuf,shm_addr->scan_name);
+	strcat(outbuf,shm_addr->scan_name.name);
+
+      ptr=arg_next(command,&ilast);
+      if(ptr!=NULL && strlen(ptr)>16) {
+	ierr=-202;
+	goto error;
+      }
+
+      if(ptr!=NULL && strlen(ptr)!=0)
+	strcat(outbuf,ptr);
+      else {
+	strcat(outbuf," ");
+	strcat(outbuf,shm_addr->scan_name.session);
+      }
       strcat(outbuf,"\n");
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;

@@ -685,7 +685,7 @@ C
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
         end if
-        idum=ichmv_ch(ibuf,1,"sched_initi")
+        idum=ichmv_ch(ibuf,1,"exper_initi")
         nchar=idum-1
         idum=ichmv_ch(lsor,1,"::")
 c

@@ -1,3 +1,6 @@
+define  exper_initi   00000000000
+sched_initi
+enddef
 define  sched_initi   00000000000
 enddef
 define  sched_end     00000000000
@@ -181,7 +184,7 @@ if3=old,*,*,*,*,*
 calon
 !+2s
 tpical=formvc,formif
-tpidiff=formvc,formif
+tpdiff=formvc,formif
 caloff
 caltemp=formvc,formif
 tsys=formvc,formif

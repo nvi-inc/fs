@@ -65,6 +65,14 @@ C
      .       ls2speed(2,max_stn),two_letter_code(max_stn),
      .       klineseg(max_stn)
 
+! This allows easily manipulation of what are, really, character arrays.
+      character*8 cstnna(max_stn)
+      equivalence (lstnna,cstnna)
+      character*8 cstrec(max_stn),cstrack(max_stn),cstrec2(max_stn)
+      equivalence (lstrec,cstrec)
+      equivalence (lstrack,cstrack)
+      equivalence (lstrec2,cstrec2)
+
       COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
      .rack_type(max_rack_type),rec_type(max_rec_type),
      .tape_allocation(max_stn),tape_motion_save(max_stn)

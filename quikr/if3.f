@@ -39,6 +39,7 @@ C     1. If we have a class buffer, then we are to set the IFD.
 C     If no class buffer, we have been requested to read the IFD. 
 C 
       kfirst=.true.
+      kdef=.false.
       ichold = -99
       iclcm = ip(1) 
       if (iclcm.eq.0) then
@@ -75,7 +76,6 @@ C                 <pcal>:  pcal control (if available), ON or OFF, default ON
 C
 C     2.1 ATTEN PARAMETER 1
 C
-      kdef=.false.
       ich = 1+ieq
       ist = ich
       call gtprm2(ibuf,ich,nchar,0,parm,ierr)

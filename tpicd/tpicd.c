@@ -40,9 +40,13 @@ main()
   if(shm_addr->equip.rack==VLBA || shm_addr->equip.rack==VLBA4) {
     strcpy(buff,"tpgain/");
     nchstart=nch=strlen(buff)+1;
-  } else if(shm_addr->equip.rack==MK3 || shm_addr->equip.rack==MK4) {
+  } else if(shm_addr->equip.rack==MK3 || shm_addr->equip.rack==MK4 ||
+            shm_addr->equip.rack==LBA4) {
     strcpy(buff,"tpi/");
     nchstart=nch=strlen(buff);
+  } else if(shm_addr->equip.rack==LBA) {
+    strcpy(buff,"tpi/");
+    nchstart=nch=strlen(buff)+1;
   }
 
  loop:
@@ -107,7 +111,8 @@ main()
     if(shm_addr->equip.rack==VLBA || shm_addr->equip.rack==VLBA4) {
       tpi_vlba(ip,tpicd.itpis,8);   /* sample tpgain(s) */
       tpput_vlba(ip,tpicd.itpis,-8,buff,&nch,ilen); /* put results of tpi */
-    } else if(shm_addr->equip.rack==MK3 || shm_addr->equip.rack==MK4) {
+    } else if(shm_addr->equip.rack==MK3 || shm_addr->equip.rack==MK4 ||
+              shm_addr->equip.rack==LBA4) {
       iclass=0;
       nrec=0;
       for(i=0;i<17;i++) {
@@ -185,6 +190,9 @@ main()
 	  buff[nchstart]=0;
 	}
       }
+    } else if(shm_addr->equip.rack==LBA) {
+      tpi_lba(ip,tpicd.itpis);   /* sample tpi(s) */
+      tpput_lba(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
     }
     
 

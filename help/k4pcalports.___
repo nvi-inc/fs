@@ -1,32 +1,32 @@
              k4pcalports - phase cal extraction ports
- 
-              Syntax:      pcalports=pca,pcb
- 
-              Response:    pcalports/pca,pcb,ampa,ampb,phasea,phaseb
- 
- 
- Settable Parameters:
-            pca        Channel A input port number: 1-4 or 9-12
-            pcb        Channel B  input port number 5-8 or 13-16
- 
- Monitor-only parameters: 
-          ampa     Channel A amplitude in voltage percent, uncorrected
+
+            Syntax:     pcalports=pca,pcb
+
+            Response:   pcalports/pca,pcb,ampa,ampb,phasea,phaseb
+
+
+Settable Parameters:
+          pca       Channel A input port number: 1-4 or 9-12
+          pcb       Channel B  input port number 5-8 or 13-16
+
+Monitor-only parameters: 
+          ampa      Channel A amplitude in voltage percent, uncorrected
           for digital sampling
-          ampb     Channel B amplitude in voltage percent, uncorrected
+          ampb      Channel B amplitude in voltage percent, uncorrected
           for digital sampling
-            phasea     Channel A phase in degrees
-            phaseb     Channel B phase in degrees
- 
- Comments:
- This command is available even if a K4 recorder is not being
- used for recording. This allows the phase-cal extraction
- features of the K4, if present, to be utilized at all times.
- 
- Some day it will possible to specify the phase-cal extraction
- port may be specified as the port number or as the VC and
- sideband to be used. At that time, the VC and sideband will
- only be displayed if the recpatch command has been used to
- specify which port that VC sideband has been connected to. If
- recpatch command will have specified a VC sideband for the
- requested port, this will be shown in the response rather than
- the port number.
+            phasea      Channel A phase in degrees
+            phaseb      Channel B phase in degrees
+
+Comments:
+This command is available even if a K4 recorder is not being
+used for recording. This allows the phase-cal extraction
+features of the K4, if present, to be utilized at all times.
+
+Some day it will possible to specify the phase-cal extraction
+port may be specified as the port number or as the VC and
+sideband to be used. At that time, the VC and sideband will
+only be displayed if the recpatch command has been used to
+specify which port that VC sideband has been connected to. If
+recpatch command will have specified a VC sideband for the
+requested port, this will be shown in the response rather than
+the port number.
