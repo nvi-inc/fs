@@ -137,9 +137,19 @@ struct data_source {
 
 typedef struct data_source Data_Source;
 
+struct tape_length {
+  struct dvalue *duration;
+  char *speed;
+  struct dvalue *tapes;
+};
+
+typedef struct tape_length Tape_Length;
+
 struct tape_motion {
   char *type;
   struct dvalue *early;
+  struct dvalue *late;
+  struct dvalue *gap;
 };
 
 typedef struct tape_motion Tape_Motion;
@@ -301,6 +311,14 @@ struct s2_data_def {
 
 typedef struct s2_data_def S2_data_def;
 
+struct s2_record_mode {
+  char *mode;
+  struct dvalue *groups;
+  struct llist *inputs;
+};
+
+typedef struct s2_record_mode S2_record_mode;
+  
 /* prototypes */
 
 struct llist     *add_list(struct llist *start,void *ptr);
@@ -337,7 +355,10 @@ struct headstack *make_headstack(struct dvalue *stack,char *type,
 struct data_source *make_data_source(char *source,char *input1, char *input2,
 				     char *input3, char *input4, char *input5,
 				     char *input6, char *input7, char *input8);
-struct tape_motion *make_tape_motion(char *type, struct dvalue *early);
+struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
+				     struct dvalue *tapes);
+struct tape_motion *make_tape_motion(char *type, struct dvalue *early,
+				     struct dvalue *late, struct dvalue *gap);
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
 struct if_def *make_if_def(char *if_id, struct dvalue *lo, char *sb);
@@ -380,6 +401,9 @@ struct vlba_frmtr_sys_trk *make_vlba_frmtr_sys_trk(struct dvalue *output,
 						   struct dvalue *start,
 						   struct dvalue *stop);
 struct s2_data_def *make_s2_data_def(struct llist *bitstream,char *input);
+
+struct s2_record_mode *make_s2_record_mode(char *mode, struct dvalue *groups,
+					   struct llist *inputs);
 
 int
 lowl2int(char *lowl);
