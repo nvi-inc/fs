@@ -81,6 +81,18 @@ loop:
          case 32:
             mcb(&command,itask,ip);
             break;
+	  case 33:
+	    trkfrm(&command,itask,ip);
+	    break;
+	  case 34:
+	    tracks(&command,itask,ip);
+	    break;
+ 	  case 35:
+	    bit_density(&command,itask,ip);
+	    break;
+ 	  case 36:
+	    systracks(&command,itask,ip);
+	    break;
          default:
             ierr=-4;
             goto error;
