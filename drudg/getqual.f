@@ -25,7 +25,7 @@ C  INPUT:
         integer icod ! freq code
 C
 C  OUTPUT:
-	real*4 squal(max_chan)
+	real squal(max_chan)
 C
 C
 C   SUBROUTINES

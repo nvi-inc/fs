@@ -66,15 +66,14 @@ C
       IDUMY = ICHMV(lcod,1,IBUF,IC1,nch)
 C
 C    Lines with head positions are in the form
-C      pass-subpass(headpos)
-C    Example: 11(-350) is pass 1, subpass 1, offset -350 microns
-C             42(55) is pass 4, subpass 2, offset 55 microns
+C      index-subpass(headpos)
+C    Example: 11(-350) is index 1, subpass 1, offset -350 microns
+C             42(55) is index 4, subpass 2, offset 55 microns
 C            142(55) is same as above but for headstack 2
 C    The subpass goes from 1 to the number of passes in the
 C    mode that are required to get all tracks recorded. 
-C    For example, mode A is a one-pass mode so the number
-C    is always 1; mode C is a two-pass mode so the number is
-C    1 or 2.
+C    For example, mode A is a one-pass mode so the number is always 1; 
+C    mode C is a two-pass mode so the number is always 1 or 2.
 C
       nent = 0
       do while (ic1.gt.0)

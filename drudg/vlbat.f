@@ -26,8 +26,8 @@ C  INPUT:
      .ipasp,iblk,idirp,iftold,nchar,irah2,iram2,idecd2,
      .idecm2,iyr2,idayr2,ihr2,min2,isc2,lu,idayp,idayrp,ihrp,minp,
      .iscp,iobs,irecp
-      real*8 gst,ut
-      real*4 ras2,decs2
+      double precision gst,ut
+      real ras2,decs2
 C
 C  LOCAL
         integer itemp
@@ -39,7 +39,7 @@ C  LOCAL
      .ispins,iyrs,idayrs,ihrs,mins,iscs,iras,isra,idecs,idec2d,
      .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,
      .mino,isco,isp,i,nch,ispm,isps,in
-      real*4 spdips
+      real spdips
 	logical ktape,ktrack
         logical kspin ! true if we need to spin tape to get to the
 C                       next observation
@@ -51,7 +51,7 @@ C                          to the end before changing it
 	integer*2 ldirr
 	LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
 	INTEGER ib2as,ichmv,iflch,ichmv_ch ! function
-        real*4 tspin,speed ! functions
+        real tspin,speed ! functions
 
 C  INITIALIZED:
 	DATA ldirr/2HR /
@@ -162,10 +162,10 @@ C  Set up tape parameters
 	if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp)
      .  call char2hol('+',LSPDIR,1,1)
 C  ihead is the head offset position in microns
-	IHEAD=ihdpos(IPAS(ISTNSK),istn,icod)
+	IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
 C  ihddir is not really "direction", it is the corresponding pass within
 C  the mode. Use it to tell the wrtrack routine which tracks to record.
-        idx = ihddir(ipas(istnsk),istn,icod)
+        idx = ihddir(1,ipas(istnsk),istn,icod)
         if (idx.eq.0) then
 C         pause here
           itemp=1

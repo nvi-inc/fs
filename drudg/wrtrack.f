@@ -34,11 +34,8 @@ C  INITIALIZED
 C
 
 C  1. Set up tracks for forward or reverse
-C    itras(2,2,28,14,max_frq)  ! track assignments
+C    itras(2,2,head,chan,subpass,station,max_frq)  ! track assignments
 C       U,L and S,M
-C       to be recorded on forward or reverse ub-asses
-C       for each VC (1-14)
-C       frequency
 
         ileft = o'100000'
         iy=0
@@ -49,7 +46,7 @@ C       frequency
         iul=1
       do ichan=1,nchan(istn,icod)  !channels
         do ul=1,2  !Upper and lower
-          iassign = itras(ul,1,invcx(ichan,istn,icod),idx,istn,icod)
+          iassign = itras(ul,1,1,invcx(ichan,istn,icod),idx,istn,icod)
 C  Note: for mode A there is no track assignment for pass 2, so
 C  no tracks are written. But both u/l are assigned.
 C  Note: for 2-bit sampling, the track for the magnitude is automatically

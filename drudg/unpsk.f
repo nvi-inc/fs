@@ -50,7 +50,7 @@ C   COMMON BLOCKS USED
       include '../skdrincl/statn.ftni'
 C
 C  LOCAL VARIABLES
-      real*8 ST0,FRAC
+      double precision ST0,FRAC
 C                    - for GST and SIDTM calculations
       integer ich,ic1,ic2,idummy,idurs,i,icp
       integer iscnc,ichmv,julda,ias2b,jchar ! functions

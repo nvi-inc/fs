@@ -6,27 +6,27 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C     INPUT VARIABLES:
-	real*8 ra,dec  ! source position, radians
-	real*8 xpos,ypos,zpos   ! station location, meters
-	real*8 ut           ! UT in seconds
+	double precision ra,dec  ! source position, radians
+	double precision xpos,ypos,zpos   ! station location, meters
+	double precision ut           ! UT in seconds
 	integer mjd       ! modified julian date
 C
 C     OUTPUT VARIABLES:
-	real*8 az,el   ! local az,el of the source, radians
+	double precision az,el   ! local az,el of the source, radians
 C
 C     LOCAL VARIABLES:
-         real*4 SDEC,CDEC,SLAT,CLAT,SHA,CHA
+         real SDEC,CDEC,SLAT,CLAT,SHA,CHA
 C               - SIN,COS of DEC,LAT,HA
-         real*4 ARG
+         real ARG
 C               - temporary holders for trig calculations
-	real*8 HAD
+	double precision HAD
 C                   - double for internal use
-	real*8 ST0,FRAC
+	double precision ST0,FRAC
 C               - sidereal time at 0h UT, UT/ST ratio, SIDEREAL TIME AT G
-      real*4 cel,sel,ha,stnlat,stnlon,azx
+      real cel,sel,ha,stnlat,stnlon,azx
 
 C  INITIALIZED:
-	real*8 ERAD,EFLAT
+	double precision ERAD,EFLAT
 C               - compiled-in values of earth rad and flattening
 	DATA ERAD/0.6378145D07/
 	DATA EFLAT/0.3352891869D-2/

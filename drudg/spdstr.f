@@ -15,7 +15,7 @@ C 970103 nrv Add 40 speed
 C 970118 nrv Add the rest of the valid speeds.
 
 C INPUT:
-      real*4 spd ! speed in inches per second, e.g. 133.33
+      real spd ! speed in inches per second, e.g. 133.33
 
 C OUTPUT:
       integer*2 lspd(4) ! speed for the ST= command
@@ -23,7 +23,7 @@ C OUTPUT:
 
 C Local
       integer i,maxspd
-      real*4 sp(23)
+      real sp(23)
       character*8 csp(23)
       integer ichmv_ch
 

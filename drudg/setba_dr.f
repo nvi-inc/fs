@@ -9,16 +9,16 @@ C   COMMON BLOCKS USED
 C
 C  LOCAL VARIABLES
       integer*2 lb(max_band),ls1,ls2
-      integer ierr,ic,i,iv,nb,nmatch,nx,
+      integer ierr,ip,ic,i,iv,nb,nmatch,nx,
      .nfr,if1,ib,is,j,ifr,idum,ichmv_ch,ichmv,isub,iul,ii
       character*3 cs
       character*1 chband
       integer ichcm,ichcm_ch
       integer ixband,isband
-      real*8 reffreq,frim,fovref,sum_del_f,sum_del_f2,
+      double precision reffreq,frim,fovref,sum_del_f,sum_del_f2,
      .sum_del_fovf,del_f
-      real*8 frsum,frsqsum,s
-      real*4 speed ! function
+      double precision frsum,frsqsum,s
+      real speed ! function
 C
 C  1. Count number of frequencies and the number of tracks being
 C     recorded at each station on each frequency.
@@ -43,23 +43,24 @@ C
           nfreq(isub,is,ic)=nfreq(isub,is,ic)+1 !count number of frequencies
           if (iv.ne.0) then ! this channel is used
             cs=cset(iv,is,ic)
-            do iul=1,2
-C             Only check pass 1 since all are consistent
-C             Full addition for sign bit
-              if (itras(iul,1,iv,1,is,ic).ne.-99) then 
-                if (cs.eq.'   '.or.cs.eq.'1,2') then
+            do iul=1,2 ! upper/lower
+              do ip=1,npassf(is,ic) ! all subpasses
+C               Full addition for sign bit
+                if (itras(iul,1,1,iv,ip,is,ic).ne.-99) then 
+                  if (cs.eq.'   '.or.cs.eq.'1,2') then
 C                  All the data on un-switched tracks are used
                    trkn(isub,is,ic)=trkn(isub,is,ic)+1
-                else if (cs(1:1).eq.'1') then
+                  else if (cs(1:1).eq.'1') then
 C                  Two-thirds of the data on a switched track are used
                    trkn(isub,is,ic)=trkn(isub,is,ic)+0.6667
+                  endif
                 endif
-              endif
 C             Add another 0.38 for magnitude bit
-              if (itras(iul,2,iv,1,is,ic).ne.-99) then 
-                trkn(isub,is,ic)=trkn(isub,is,ic)+0.38
-              endif
-            enddo
+                if (itras(iul,2,1,iv,ip,is,ic).ne.-99) then 
+                  trkn(isub,is,ic)=trkn(isub,is,ic)+0.38
+                endif
+              enddo ! all subpasses
+            enddo ! upper/lower
           endif
         enddo ! number of channels
       enddo

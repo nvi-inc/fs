@@ -6,7 +6,7 @@ C minutes and seconds (to the nearest IMODP seconds).
 C CALLING PROGRAM: SHFTR
 C 931123 NRV Modified JULDA call to subtract 1900 from year
 C
-      real*8 DSHFT,DSSHFT,DMSHFT,DHSHFT
+      double precision DSHFT,DSSHFT,DMSHFT,DHSHFT
 C
       MJDT = JULDA(1,INDOYR,IY-1900)
       MJDS = JULDA(1,IDOYR,IYR-1900)

@@ -56,18 +56,18 @@ C  LOCAL VARIABLES
 	integer iblen  !buffer length
 	integer immax  !maximum syn number
 	integer nvc    !video converter number
-	real*4 mmaxv(max_chan)   !synth/1000
-        real*4 synthv(max_chan)  !BBC freqs
+	real mmaxv(max_chan)   !synth/1000
+        real synthv(max_chan)  !BBC freqs
         logical ksw ! true if switching is being used
         integer isyn(max_chan) ! synthesizer numbers A=2,B=1,C=4,D=3
         integer i2bit(max_chan,max_stn,max_frq) ! 1 or 2-bit sampling per channel
 	character*3 cs   !set character
 	logical ksx      ! true for S/X frequencies
         logical k96      ! true if 9600 synth is in use
-	real*4 squal1(max_chan), squal2(max_chan) ! BBC freqs. grouped by sets
+	real squal1(max_chan), squal2(max_chan) ! BBC freqs. grouped by sets
         integer*2 ldum
       integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,k,ileft,im,iysave
-      real*8 fr
+      double precision fr
       integer ib2as,ichcm_ch,ir2as,ichmv,ichmv_ch ! functions
 C
 
@@ -99,18 +99,18 @@ C For Mode A, there will be twice as many as for any mode C.
 C Can't really derive nchan unambiguously by simply (?? why)
 C counting the tracks assigned. Check i=1,2 for U,L and
 C pass 1 only. 
-C itras(ul,sm,chan,pass,stn,code)
+C itras(ul,sm,head,chan,,pass,stn,code)
 
         nchanr = 0
         imode=1
         do i=1,2 ! upper,lower
           do k=1,max_chan
-            if (itras(i,1,k,1,istn,icod).ne.-99) then
+            if (itras(i,1,1,k,1,istn,icod).ne.-99) then
               nchanr=nchanr+1
               if (i.eq.2) imode=2 ! BOTH u/l in this mode
             endif
             i2bit(k,istn,icod)=1
-            if (itras(i,2,k,1,istn,icod).ne.-99) i2bit(k,istn,icod)=2
+            if (itras(i,2,1,k,1,istn,icod).ne.-99) i2bit(k,istn,icod)=2
           enddo
         enddo
 C       if (nchanr.eq.28) imode=2 ! for mode A

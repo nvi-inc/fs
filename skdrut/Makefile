@@ -9,7 +9,8 @@
 # 951017 nrv Initial version                                            #
 # 951019 nrv Changes for VLBA modes and LO per channel                  #
 # 960602 nrv Changes for VEX file reading                               #
-# 970118 nrv Add vunpprc and unpfmt.                                     #
+# 970118 nrv Add vunpprc and unpfmt.                                    #
+# 970124 nrv Add errormsg.                                              #
 #                                                                       #
 #########################################################################
  
@@ -31,9 +32,11 @@ vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
 vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
 vsoinp.o vglinp.o vob1inp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
 vread.o addscan.o findscan.o newscan.o pnum.o frinit.o vunps2g.o \
-vunps2m.o vunproll.o vunpprc.o unpfmt.o
+vunps2m.o vunproll.o vunpprc.o unpfmt.o errormsg.o
 #
 FFLAGS=-C -c
+# f2c needs this others don't
+CFLAGS= -DF2C
 CFLAGS= -c -DF2C
 #
 $(ARC).a: $(OBJECTS)

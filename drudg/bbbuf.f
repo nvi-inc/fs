@@ -8,7 +8,7 @@ C     This routine is called only for switched sequences
 C INPUT:
         integer icod    ! frequency code index
 	integer imode   ! group 1 or 2 of the switched frequencies
-	real*4 fr(14)   ! the frequencies to write, should be filled
+	real fr(14)   ! the frequencies to write, should be filled
 C                       with appropriate frequencies for the mode
 
 C COMMON

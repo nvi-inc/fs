@@ -11,7 +11,7 @@ C
 C
 C  INPUT:
       integer lu,iblen,icod
-	real*4 squal(14)
+	real squal(14)
 	integer imode  !1=qual1 2=qual2
 C
 C  OUTPUT: none

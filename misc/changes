@@ -2274,3 +2274,320 @@ Version 9.3.6 970119
            "s2" not "S2" in recorder type comment
 
 Version 9.3.7 970123
+
+970124 NRV drudg/procs.f
+           Set KLSBLO initially if RF<LO for ANY channel, then 
+           check KLSBLO for EACH channel in TRACKFORM command
+
+970124 NRV skdrut/errmsg.f
+           New. Prints error messages during Vex file checking.
+
+970124 NRV skdrut/v*inp.f
+           Add calls to ERRMSG.
+
+970124 NRV skdrut/vunp*.f
+           Move initialization to front of routines in case an error
+           causes an early return.
+
+970124 NRV skdrut/vmoinp.f, vumps2m.f
+           Remove recording format from S2 routine.
+
+970124 NRV drudg/fdrudg.f
+           Change date to 970124.
+
+970128 WEH help/label._s
+           CSA format should have 5 "Y"s
+
+970129 NRV skdrut/errormsg.f
+           Compare 'SCHED' to a string 5 characters long, not 4.
+
+970124 nrv skdrut/vread.f
+           Add a call to VGLINP, and a call to errormsg
+
+970124 nrv skdrut/vglinp.f
+           Add iret to call.
+
+970124 nrv skdrut/vmoinp.f, vumps2m.f
+           Remove recording format from S2 routine.
+
+970124 nrv drudg/fdrudg.f
+           Add calls to ERRMSG. change date to 970124.
+
+970129 nrv drudg/fdrudg.f
+           Don't reset NOBS between getting VEX obs for all stations.
+
+970129 nrv drudg/snap.f
+           Allow "adaptive" tape motion for non-S2 stations also.
+
+970129 nrv drudg/sread.f
+           Read "TAPE_MOTION" and "GAP" from $PARAM.
+
+970129 nrv drudg/fdrudg.f
+           Add number of obs to return call from VOB1INP.
+
+970129 nrv skdrut/vob1inp.f
+           drudg/fdrudg.f
+           Add nobs_stn to call
+
+970131 nrv skdrut/findscan.f
+           Don't check using exact columns, but get fields.
+
+970131 nrv drudg/lstsum.f, lstsumo.f
+           Put updating of IFEET back in here, after call to LSTSUMO.
+           Remove some checks for KS2 and replace with others.
+           Add KET to lstsumo call. Change tape start into a string.
+
+970204 nrv drudg/point.f
+           Remove all options except VLBA and DSN in prompt.
+
+970204 nrv drudg/snap.f
+           Remove the +3 sec in calculating enough time for parity to
+           be consistent with sked.
+
+970205 nrv drudg/fdrudg.f
+           Print tape_motion_type as information at start.
+
+970206 nrv skdrut/frinit.f, frinp.f, gnpas.f, hdinp.f, unpco.f,
+                  vunphp.f, vmoinp.f
+           skdrincl/freqs.ftni
+           drudg/trkall.f, vlbat.f, point.f, wrtrack.f, vlbah.f,
+                 procs.f
+           Change itra2 to itras, ihddi2 to ihddi2, ihdpo2 to ihdpos,
+           and add headstack index instead
+
+970206 nrv skdrincl/skparm.ftni
+           Change parameters to allow 20 codes, 36 subpasses, 1 headstack.
+
+970206 nrv skdrut/vmoinp.f, vunptrk.f
+           Change size of arrays sent to VUNPTRK for fandefs from 36 
+           to to max_track.
+
+970207 nrv drudg/snap.f
+           Remove query about 1950/2000 and put into control file.
+           Remove query about forcing parity checks.
+
+970207 nrv skdrut/rdctl.f
+           drudg/fdrudg.f
+           Add cepoch to call. Add to $MISC section.
+
+970207 nrv drudg/fdrudg.f, snap.f
+           Remove all but cr1 from call to SNAP.
+
+970207 nrv drudg/sread.f
+           Unpack each scan and check the parity flag
+
+970207 nrv drudg/snap.f
+           Write a message about what parity checks will be done.
+
+970207 nrv drudg/fdrudg.f
+           Change date to 970207.
+
+970210 WEH ibcon/wrdev.c
+           ibcon/rddev.c
+           untalk and unlisten bus when done for AT-GPIB only
+
+970213 NRV drudg/snap.f
+           Check for "adaptive" in either upper or lower case.
+
+970213 NRV skdrut/vmoinp.f
+           Remove the test for the rack type before setting NCHAN.
+
+970218 WEH boss/boss.f
+           allow 256 procedures
+
+970312 WEH boss/newsk.f
+           boss/bwork.f
+           always log leading comments from a new schedule
+
+970312 NRV st.default/control/skedf.ctl
+           updated
+
+970312 WEH st.default/proc/station.prc
+           add comments to READY about drives that don't reset footage
+           on brake release
+
+970313 WEH quikr/lvdt.f
+           fixed to always report the position after setting it
+
+970313 WEH boss/rdtib.f
+           boss/rdtma.f
+           changed to allow comments in "matad.ctl" and "ibad.ctl"
+
+970214 NRV drudg/snap.f
+           Don't tell or ask about parity checks for S2.
+
+970214 NRV drudg/fdrudg.f
+           Use 2-letter codes for station selection and file names.
+
+970214 NRV drudg/snapintr.f,lstsum.f,lstsumo.f
+           First line of SNAP file has 2-letter code.
+
+970214 NRV skdrut/addscan.f
+           Update for correct S2 group numbers. Add icode to call.
+
+970214 NRV skdrut/vob1inp.f
+           Add icode to the call to addscan.f
+
+970213 NRV drudg/fdrudg.f 
+           List 2-letter codes for selection, read 2-letter codes from
+           user input, make file names with 2-letter codes.
+
+970218 NRV drudg/fdrudg.f 
+           Change sample prompt for SNAP file from PPMN3 to ca036.
+
+970214 NRV drudg/lstsum.f 
+           change id to 2 letters
+
+970210 NRV drudg/procs.f 
+           Add bit_density back to setup procedures, but only for VLBA.
+
+970213 NRV drudg/snap.f 
+           Check for "adaptive" in both upper and lower case.
+
+970213 NRV drudg/snap.f 
+           Add a wait until data-stop+late-stop before ET for S2.
+
+970214 NRV drudg/snap.f 
+           Find out equipment type at start, before prompts.
+
+970214 NRV drudg/snapintr.f 
+           Write 2-letter code on first line
+
+970219 NRV drudg/sread.f 
+           If parameter values are not in schedule file, set to defaults
+
+970221 NRV drudg/fdrudg.f 
+           Remove "(VLBA)" from description of option 2, "width" from 9.
+
+970221 NRV drudg/snap.f 
+           When checking for enough time for parity, don't add in 
+           settm if setup will not be done.
+
+970224 NRV drudg/snap.f 
+           Move PREPASS to after READY (it had been after UNLOD)
+
+970225 NRV drudg/procs.f
+           Add a call to PROCINTR.
+
+970225 NRV drudg/procintr.f
+           New. Writes a procedure called "proc_library" to identify the
+           station and experiment for the procedure file.
+
+970226 NRV sked/autot.f
+           Allow 10 sec extra in checking adequate time.
+           Add 5 sec more if there was a tape spin when calculating start time.
+           This is consistent with drudg's SNAP file production.
+
+970226 NRV sked/lscur.f, lshed.f, xlcmd.f, skini.f, skcom.ftni
+           Add second variable for az,el (no ha) listing option.
+
+970228 NRV drudg/blabl.f 
+           Add clabtyp to call
+
+970228 NRV drudg/fdrudg.f 
+           Add clabtyp and rlabsize to RDCTL call.
+
+970228 NRV drudg/fdrudg.f 
+           Change prompts to replace opt 61 with "print labels"
+
+970228 NRV drudg/label.f 
+           Remove IIN and use CLABTYP to determine what type of output.
+
+970228 NRV drudg/label.f 
+           Use labname for output file.
+
+970228 NRV drudg/labsnp.f 
+           Remove IIN and use clabtyp instead
+
+970301 NRV drudg/clist.f 
+           Implement font size logic and calls to setprint.
+
+970301 NRV drudg/port.f 
+           Add font size prompt.
+
+970301 NRV drudg/setprint.f 
+           Add IOPT=2 and 3.
+
+970301 NRV drudg/fdrudg.f 
+           Initialize CSIZE.
+
+970303 NRV drudg/fdrudg.f 
+           Different prompts depending on label printer type.
+
+970303 NRV drudg/fdrudg.f 
+           Prompt at end of label temp file exists.
+
+970303 NRV drudg/lists.f 
+           For S2, don't try to print the Mk3 configuration. 
+
+970303 NRV drudg/point.f 
+           Put back 140 otion. Change next to last field to 0 instead of 1.
+
+970304 NRV drudg/fdrudg.f 
+           Add "cproc" to RDCTL call, change "cdrudg" to "csnap"
+
+970304 NRV drudg/clist.f 
+           Add COPTION for default formatting.
+
+970304 NRV drudg/fdrudg.f 
+           Add "coption" to RDCTL call.
+
+970304 NRV drudg/point.f 
+           Back up 6 characters in PNTNAME for VLBA file name.
+
+970304 NRV drudg/lists.f 
+           Add COPTION for default formatting.
+
+970304 NRV drudg/lstsum.f 
+           Add COPTION for default formatting.
+
+970306 NRV drudg/lstsumo.f 
+           Change S2 to print minutes, not seconds. Add ".and..not.ks2" 
+
+970307 NRV drudg/lists.f 
+           Use pointer array ISKREC to insure time order of obs.
+
+970307 NRV drudg/point.f 
+           Use ISKREC pointer array to insure time order!
+
+970307 NRV drudg/sread.f 
+           Initialize ISKREC for SKED files, and time order it. 
+
+970307 NRV drudg/snap.f 
+           For S2, don't issue two ET commands!
+
+970307 NRV drudg/snap.f 
+           Use the ISKREC pointer array to insure time order. 
+
+970310 NRV drudg/fdrudg.f 
+           Check for length of path and station id when forming file names.
+
+970311 NRV drudg/fdrudg.f 
+           Allow "./" to preceed schedule names.
+
+970311 NRV drudg/snap.f 
+           Always issue ST at either early start or good data start time.
+
+970311 NRV drudg/snapintr.f 
+           Write both 1-letter and 2-letter station codes on first line.
+
+970312 NRV drudg/read_snap1.f 
+           New. Created to remove formatted reads of first SNAP file line.
+
+970312 NRV drudg/clist.f 
+           Add call to READ_SNAP1 to read the first line.
+
+970312 NRV drudg/lstsum.f 
+           Add call to READ_SNAP1 to read first line in freefield
+
+970312 NRV drudg/label.f 
+           Add call to READ_SNAP1 to read first line in freefield
+
+970313 NRV drudg/fdrudg.f 
+           Date 970315.
+
+970313 NRV drudg/lstsum.f 
+           Completely revise footage tracking to handle all cases.
+
+970313 nrv drudg/procs.f
+           Do not write barrel roll for Mk4 racks, and issue warning message.

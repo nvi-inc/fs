@@ -1,3 +1,0 @@
-C 961202 nrv No special handling for 8-BBCs for modes A or C.
-C            Use "mx" groups for tracks instead of listing them all.
-C            Edit trackform section to use indices instead of max_chan.
