@@ -39,7 +39,7 @@ C               - parameters returned from GTPRM
       integer get_buf,ichcm_ch
 C        ITA,ITB,IEQ,IBY,IBR
 C               - variables for tracks, equalizer, bypass, bitrate
-      dimension ibws1(4), ibws2(4), ibws3(4)
+      dimension ibws1(4), ibws2(4), ibws3(5)
 C               - lists for comparisons
       character cjchar
 C
@@ -49,7 +49,7 @@ C     INITIALIZED
       data ilen/40/
       data ibws1/0,1,2,3/
       data ibws2/80,135,160,270/
-      data ibws3/16,8,4,2/
+      data ibws3/16,8,4,2,1/
 C
 C  1. If we have parameters, then we are to set the TP.
 C     If no parameters, we have been requested to read the TP.
@@ -219,7 +219,7 @@ C
         if (ieq.eq.3) ibr = 3    !!! 4 Mb/s
       endif
       goto 300
-251   do i=1,4          !!! ibws3/16,8,4,2/
+251   do i=1,5          !!! ibws3/16,8,4,2,1/
         if (parm.eq.ibws3(i)) goto 255
       enddo
       ierr = -210
