@@ -29,3 +29,6 @@ while it is determined what standard parameters are desired.
 The command is sent to the MAT bus just as if the operator had
 used the mat command. No modifications are made before the
 command is sent on the bus.
+
+The Mark IV Formatter Vocabulary manual can be found at
+ftp://web.haystack.mit.edu/pub/mark4/formater/general/mk4vocab.txt

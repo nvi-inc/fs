@@ -27,3 +27,11 @@ This command is for the new  Mark IV decoder which may be
 installed in any of the Mark III, Mark IV, or VLBA4 rack
 types, but this command will work decoder if it is installed
 with other rack types as well.
+
+Documentation for the Mark 4 Decoder commands can be found in Mark IV Memo #279.  Mark IV Memos can be found at
+ftp://web.haystack.mit.edu/pub/mark4/memos/memoindex.html
+
+[This Memo Index does not yet have a link to the latest version,
+ftp://web.haystack.mit.edu/pub/mark4/memos/279.1.pdf
+which applies to the new Decoder firmware,
+which has not yet been widely distributed.]
