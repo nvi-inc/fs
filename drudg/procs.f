@@ -83,6 +83,7 @@ C            trackform commands are written.
 C 970119 nrv If we have a VEX file as input, then the IF3 command can
 C            be safely omitted if it does not appear. Otherwise, write
 C            out IF3 for all Mk3 and Mk4 racks.
+C 970123 nrv Fix wrong 0.5 for VC filter check, change to 0.25.
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec, 4=S2, 5=8 BBCs
@@ -211,8 +212,7 @@ C
 9113  FORMAT(' PROCEDURE LIBRARY FILE ',A,' FOR ',4A2)
       write(luscn,9114) 
 9114  format(' **NOTE** These procedures are for stations using '/
-     .' the following software and backend equipment:'/
-     .'   >> PC Field System version 9.2 or above')
+     .' the following software and backend equipment:')
       if (km3rack) write(luscn,'("   >> Mark III rack")')
       if (km4rack) write(luscn,'("   >> Mark IV rack")')
       if (kvrack)  write(luscn,'("   >> VLBA rack")')
@@ -881,7 +881,7 @@ C                 This effectively disables the translation to VLBA IFs.
                 NCH = MCOMA(IBUF,NCH)
 C               Converter bandwidth
                 if (km4rack.and.(vcband(ic,istn,icode).eq.1.0.or.
-     .                           vcband(ic,istn,icode).eq.0.5)) then ! external
+     .                           vcband(ic,istn,icode).eq.0.25)) then ! external
                   NCH = ichmv_ch(ibuf,nch,'0.0')
                 else
                   NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,NCH,6,3)
