@@ -13,7 +13,7 @@ C             set if user types <return>.
 C  901205 NRV Moved width option in here from main program.
 C  911127 NRV Added EPSON24 option
 C  940725 nrv Add dos/ux option
-C  950929 nrv linux version, copied from PC-DRUDG
+C  950829 nrv linux version, copied from PC-DRUDG
 C
 C  Local:
 	character*128 ctemp,ctemp2
@@ -32,7 +32,7 @@ C  1.0  Read the input from user and set port appropriatly.
 	write(luscn,9100) cprport(1:l)
 9100  format(' Printer output set to ',A,'.  Just enter ',
      .       'return if you do not wish to change,'/' else type new ',
-     .       'output or file name, e.g. com1  ? ')
+     .       'file name or PRINT  ? ')
 
 	call gtrsp(ibuf,25,luusr,nch)
 
@@ -71,14 +71,14 @@ C  2.0  Now get printer type.
 C  3. Now get printer output width.
 
 	ierr=1
-	ctemp2 = 'COMPRESS'
-	if (iwidth.eq.80) ctemp2='NORMAL'
+	ctemp2 = 'FULL'
+	if (iwidth.eq.80) ctemp2='NARROW'
 	l=trimlen(ctemp2)
 	do while (ierr.ne.0)
 	  write(luscn,9300) ctemp2(1:l)
-9300    format(' Output set to ',a,'.  Just enter return ',
-     .  'if you do not wish to change,'/' else enter NORMAL '
-     .  'or COMPRESS : ')
+9300    format(' Output format set to ',a,'.  Just enter return ',
+     .  'if you do not wish to change,'/' else enter FULL (full width',
+     .  ' listing) or NARROW (less info, narrower format):  ')
 
 	  call gtrsp(ibuf,15,luusr,nch)
 
@@ -86,15 +86,15 @@ C  3. Now get printer output width.
 	    idummy = ichmv(itemp,1,ibuf,1,nch)
 	    call hol2upper(itemp,nch)
 	    call hol2char(itemp,1,nch,ctemp)
-	    if (ctemp.eq.'COMPRESS') then
+	    if (ctemp.eq.'FULL') then
 		iwidth = 137
 		ierr=0
-	    else if (ctemp.eq.'NORMAL') then
+	    else if (ctemp.eq.'NARROW') then
 		iwidth = 80
 		ierr=0
 	    else
 		write(luscn,9310)
-9310        format(' Invalid output width.  Only COMPRESS or NORMAL'
+9310        format(' Invalid output width.  Only FULL or NARROW'
      .      ' allowed.  Try again.')
 	    endif
 	  else
