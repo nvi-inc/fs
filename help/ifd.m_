@@ -19,8 +19,8 @@ input2      IF2 input, nor (default) or alt.
 
 Monitor-only parameters:
 rem/lcl     switch setting, remote or local
-TP1         IF1 total power reading
-TP2         IF2 total power reading
+TP1     IF1 total power reading
+TP2     IF2 total power reading
 
 Comments: 
 MAT module functions available.

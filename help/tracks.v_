@@ -13,8 +13,8 @@ list        list of VLBA recorder tracks for which to enable the
 
 Comments: 
 This command specifies which formatter tracks will be enabled in
-the next form= command that uses either mode m or v. Please note
-that although tracks are specified as recorder tracks, this command
+the next form= command that uses either mode m or v. Please note that
+although tracks are specified as recorder tracks, this command
 actually enables the corresponding tracks in formatter. Recorder
 enables (enable command) must also be turned on for data to be
-recorded.
+recorded

@@ -13,9 +13,13 @@ record bit is disabled and the low tape sensor is turned on. For
 VLBA, all track groups are disabled and the low tape sensor is
 turned on.
 
-The tape is moved at the "schedule" value as specified in the
-equip.ctl control file. This is the speed assumed in the SNAP
-schedule file for positioning the tape with the fastr procedure.
+For S2 drives, the selected transports are moved in reverse at the
+transport's rewind speed.
+
+For drives other that the S2, the tape is moved at the "schedule"
+value as specified in the equip.ctl control file. This is the speed
+assumed in the SNAP schedule file for positioning the tape with the
+fastr procedure.
 
 Use the srw command and sfastr procedure for possibly faster tape
 motion.

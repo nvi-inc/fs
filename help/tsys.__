@@ -1,6 +1,6 @@
              tsys - compute and display system temps
 
-Syntax:   tsys1=list
+Syntax:     tsys1=list
           tsys2=list
           tsys3=list
           tsysa=list
@@ -8,7 +8,7 @@ Syntax:   tsys1=list
           tsysc=list
           tsysd=list
 
-Response: tsys1/systemps
+Response:   tsys1/systemps
           tsys2/systemps
           tsys3/systemps
           tsysa/systemps
@@ -37,9 +37,9 @@ on the last-measured values for the total power. The formula is:
 
           tsys = (tpi - tpzero) * (caltemp/(tpical-tpi))
 
-tsys          system temperature, as reported in tsys command
-tpi           cal-off reading, from tpi command
-tpzero        zero-level reading, from tpzero command
-tpical        cal-on reading, from tpical command
-caltemp       noise calibration source temperature, from caltemp
-              command.
+tsys        system temperature, as reported in tsys command
+tpi         cal-off reading, from tpi command
+tpzero      zero-level reading, from tpzero command
+tpical      cal-on reading, from tpical command
+caltemp     noise calibration source temperature, from caltemp
+            command.

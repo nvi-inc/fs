@@ -9,7 +9,6 @@ C
 C
 C History:
 C 960527 nrv New.
-C 960610 nrv change index on loop checking for duplicate names.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -75,12 +74,12 @@ C
 C
 C     Then check for a duplicate name.  This should not happen
 C     in the SKED environment but might as well check.
-C     Check those source names found so far (isor).
+C     Check up to those source names found so far (isor-1).
         j=1
         DO WHILE (j.le.isor-1.and..NOT.KNAEQ(lname,LSORNA(1,j),4))
           j=j+1
         END DO
-        IF  (j.LE.isor-1) then ! duplicate source
+        IF  (j.Lt.isor) then ! duplicate source
           write(lu,9101) (lsorna(j,isor),j=1,4)
 9101      format('SOINP22 - Duplicate source name ',4a2,
      .    '. Using the position of the first one.')

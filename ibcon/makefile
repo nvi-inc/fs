@@ -1,10 +1,10 @@
 OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o sib.o
 #
-CFLAGS = -I/usr/include/gpib
+CFLAGS =
 #
 ifeq (/usr/include/gpib,$(wildcard /usr/include/gpib))
 GPIB_LIBS=-lf2c -lgpib -lfl
-CFLAGS := $(CFLAGS) -DCONFIG_GPIB
+CFLAGS := -I/usr/include/gpib -DCONFIG_GPIB
 endif
 #
 LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../flib/flib.a ../fclib/fclib.a \

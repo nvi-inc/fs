@@ -1,0 +1,126 @@
+                 RCL Interface Library Routines
+                 ------------------------------
+
+These routines are for use by software which controls the S2 recorder using
+its RCL (Recorder Control Link) interface. This software runs on an external
+computer, such as the station control computer at a radio-telescope
+installation or the correlator control computer at a data processing center.
+Connection to the S2 RCL can be via serial cables or via Ethernet using
+internet sockets.
+The main (top-level) command interface to the S2 is given by the functions
+in rcl_cmd.c, *not* including the general message formatting routines at the
+bottom (rcl_general_cmd and rcl_simple_cmd).
+
+The current version of these routines works on IBM PC compatibles under DOS
+compiled with Borland C++, or under Unix compiled with GNU C (tested
+under SunOS 4.1.3, Solaris 2.5, and Linux 1.2.12). The DOS version works 
+only with serial ports, and the Unix version works only with network 
+connections. The main difference is that the DOS version uses the 
+rcl_syss.c module, while the Unix version uses rcl_sysn.c. Other small 
+differences are handled with #ifdef DOS or #ifdef UNIX in the code. 
+For Linux systems the macro LINUX is #defined in addition to UNIX. Some 
+effort may be needed to port this library, but most changes should be 
+isolated to the rcl_sys*.c routines. 
+
+Compiling
+---------
+Makefiles are provided to compile the source files as follows:
+To compile under SunOS 4.x:  make -f makefile.sun
+To compile under Solaris:    make -f makefile.sol
+To compile under Linux:      make -f makefile.lnx
+To compile under DOS:        make -f makefile.dos
+
+Or copy the appropriate file to 'makefile' and then just type 'make'.
+You will probably get some warnings, this is OK.
+
+
+Source files
+------------
+rcl_cmd.c    -RCL command interface routines
+rcl_pkt.c    -low-level RCL packet assembly/disassembly
+rcl_syss.c   -system-dependent serial port interface routines
+rcl_sysn.c   -system-dependent network interface routines
+rcl_util.c   -misc utility routines that may be useful for user software.
+
+
+User software communicates with the RCL interface library by calling the
+functions listed in rcl_cmd.h, not including the general message formatting
+routines at the bottom (rcl_general_cmd() and rcl_simple_cmd()). Each function
+corresponds to an RCL command. Before starting, the rcl_init() procedure
+from rcl_pkt.c must be called, and after finishing, the rcl_shutdown()
+procedure should be called. When using network RCL connections, the rcl_open()
+and rcl_close() routines in rcl_sysn.c should be called to open and close
+connections. The "reference address" returned from rcl_open() is used in
+place of the RCL address to refer to a particular network connection.
+
+An example program that uses the RCL interface library is called RCLCO. It
+can be used to exercise and test the RCL functions of the S2 recorder 
+both under DOS (serial ports) and Unix/Linux (network sockets). The rcl_sys*.c
+files as supplied are ready for use with the RCLCO program, which is located
+one directory level up.
+
+For more information refer to the S2 User's Manual, Appendix A, "S2 Recorder
+Control Link Serial Communications Protocol".
+If you have any problems or questions please contact ISTS/SGL S2 support by
+Internet email to:  s2support@sgl.ists.ca
+For information on the World Wide Web:  http://www.sgl.ists.ca/
+
+Good Luck,
+
+Georg Feil
+Last updated 96/06/27
+
+-----------------------------------
+User Notes:
+
+A) Error Messages
+The rcl_error_decode() function of the RCL Interface Library can be used
+to decode negative numeric S2 error codes returned by the functions in
+rcl_cmd.c, giving a text message for display or logging purposes.
+Note that "local" errors which arise before commands even reach the S2
+have positive numeric codes and cannot be decoded in this way
+(these local errors are defined in rcl_def.h).
+
+B) Status Messages
+A similar issue (converting numeric codes to text) exists for status requests
+made by rcl_status(). The preferred command to "decode" the numeric codes
+from rcl_status() is rcl_status_detail(). Although rcl_status_decode()
+also exists, the rcl_status_detail() command is preferred because the
+text for status codes can contain occurrence-specific information.
+The text obtained by rcl_status_decode() only includes the "generic" part
+of the status message. In contrast error messages are simpler because
+their text never changes (i.e. is alwas generic).
+Note that two versions of the status command (rcl_status() and
+rcl_status_detail()) are provided only for efficiency so that you
+can use the "fast" one for polling and the slower one (rcl_status_detail())
+after problems are found if you need the text messages. If you always
+ask for the text messages regardless, you can skip calling rcl_status() and
+call rcl_status_detail() directly with the 'reread' parameter TRUE.
+See comments in rcl_cmd.c for more info.
+
+C) Command Response Times
+The _typical_ response time when calling functions in rcl_cmd.c 
+varies depending on the command, but will be less than the "timer
+duration" value given in the RCL spec (S2 User's Manual appendix A).
+The _maximum_ response time is 3 times the timer duration value since
+up to 2 retries are automatically performed for most commands.
+(Note: The number of retries is given by the RCL_RETRIES macro but this
+should not normally be changed.)
+The following commands are special and will not be retried, so their
+maximum response time is the timer duration value:
+   RCL_CMD_PING
+   RCL_CMD_TIME_SET
+   RCL_CMD_TIME_READ
+   RCL_CMD_TIME_READ_PB
+   RCL_CMD_ALIGN (absolute only)
+Users should perform retries as needed. The above list is found in 
+rcl_general_cmd().
+
+
+Local ISTS note:
+
+-The file rcl.h is a hard link to the same file in /home/s2/ros/src/ros.
+ Don't edit it with the PC version of vi, as it seems to delete first, which
+ ends up creating a distinct file.
+
+

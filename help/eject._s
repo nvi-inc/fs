@@ -1,0 +1,11 @@
+                  eject - eject tapes (S2 drive)
+
+Syntax:     eject
+
+Response:   eject/acknowledgement
+
+
+Parameters: None.
+
+Comments: 
+Ejects the tapes from the currently selected transports.

@@ -16,7 +16,7 @@ Format:
 nn          command or procedure index
 t           type
 s           : for schedule or ; for operator stream
-dddhhmmss time the command will be executed
-command   the time-scheduled command. 
+dddhhmmss   time the command will be executed
+command     the time-scheduled command. 
 
 This is a display-only command for debugging purposes.

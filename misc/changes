@@ -926,15 +926,452 @@ Version 9.1.5 960703
 
 Version 9.1.6 960819
 
-
 960827 WEH quikr/party.f
            fixed systrack and VLBA group number problem
 
-961007 NRV drudg/fdrudg.f
-           drudg/spdstr.f
-           fix number of elements in speed string array
+Version 9.1.7 960830
 
-961007 WEH quikr/party.f
-           second try on systrack number problem
+960709 nrv skdrut/frinp.f
+           Initialize ifan to 0 instead of 1. This caused the fanout to 
+           appear as "1:1" even for Mark III modes, whereas a 0 would
+           have suppressed the fanout.
 
-Version 9.1.7 961007
+960709 nrv drudg/procs.f
+           Use "samprate" instead of "vcband*2", and get barrel roll
+           from the schedule instead of the sked parameters.
+
+960709 nrv drudg/vlbah.f
+           Fix correct number of entries in "synth=" command. 
+
+960709 nrv skdrut/unpbar.f
+           New. Unpacks "B" lines with barrel roll info.
+
+960709 nrv skdrut/frinp.f
+           Add call to unpbar and storing barrel roll. Fix logic for
+           sample rate.
+
+960709 nrv drudg/drcom.ftni, skdrincl/freqs.ftni
+           Add catalog barrel roll and selected sample rate, remove
+           barrel roll and move to freqs.ftni.
+
+960711 WEH port/portopen.c
+           port/Makefile
+           mcbcn/mcbcn.c
+	   mcbcn/Makefile
+           corrected to compile correctly if Digi driver not available
+
+960711 WEH ibcon/sib.c
+           ibcon/Makefile
+           corrected errors in handling absence of GPIB driver
+
+960711 WEH control/fspgm.ctl
+           add rclcn
+
+960712 WEH fs/statusprt.c
+	   correct misspelling in "core dumped"
+
+960715 nrv skdrut/speed.f
+           If fan-out is 0, i.e. none, don't divide by zero.
+
+960717 WEH error/error.c
+           flib/run_prog.c
+           rwand/bsort.c
+           xtrac/tpstb.c
+           deleted accidently retained intermediate C versions
+
+960717 WEH fserr/Makefile
+	   fserr/fserr.c
+           modified for S2 support
+
+960719 WEH include/rclcn_req_ds.h
+           created
+
+960721 WEH include/rclcn_res_ds.h
+           created
+
+960723 WEH include/params.h
+           include/params.i
+           add S2 parameter
+
+960723 WEH rclcn/Makefile
+           misc/cmdctlfix
+           created
+
+960724 WEH boss/binit.f
+           add "hex" equipment type fields
+           run rclcn to initialize it
+
+960726 WEH include/user_info_ds.h
+           created
+
+960726 WEH quikv/rcl.c
+           created
+
+960729 WEH quikv/logrclmsg.c
+           clib/rclcn_req_util.c
+           created
+
+960803 WEH clib/user_info_util.c
+           include/s2st_ds.h
+           clib/s2st_util.c
+	   created
+
+960804 WEH clib/rcl_util.c
+           quikv/user_info_dis.c
+           quikv/s2st_dis.c
+           quikv/s2tape_dis.c
+           quikv/s2tape.c
+           clib/s2tape_util.c
+           include/rec_mode_ds.h
+           clib/rec_mode_util.c
+           quikv/rec_mode_dis.c
+           quikv/data_valid_dis.c
+           include/data_valid_ds.h
+           clib/data_valid_util.c
+           include/s2label_ds.h
+           quikv/s2label_dis.c
+           created
+
+960804 WEH quikv/quikv.c
+           add new S2 commands
+
+960804 WEH quikv/Makefile
+           add modules for new S2 commands
+
+960805 WEH logex/lxscl.f
+           renamed local variable "s2" to "s2v" to avoid parameter conflict
+
+960805 WEH fmset/getfmtime.c
+           add call for S2 time get
+
+960806 WEH fmset/setfmtime.c
+           fmset/sets2time.c
+           add support for S2 time set
+
+960806 WEH fmset/Makefile
+           add modules for S2 support
+
+960810 nrv skdrut/vstinp.f
+           Add tape motion to VUNPDAS call. Store LSTREC.
+           Add tape speed and number of tapes to VUNPDAS for S2.
+
+960810 nrv skdrut/vunpdas.f
+           Read tape motion type statement and return it.
+
+960810 nrv drudg/fdrudg.f
+           Change ITEARL to an array by station. Add S2 option for
+           procedure output. New date 960901.
+
+960810 nrv drudg/isecdef.f
+           New. Differences two time fields, returns seconds.
+
+960810 nrv drudg/label.f
+           Change ITEARL to an array by station.
+
+960810 nrv drudg/lists.f
+           Change ITEARL to an array by station.
+
+960810 nrv drudg/point.f
+           Change ITEARL to an array by station.
+
+960810 nrv drudg/vlbat.f
+           Change ITEARL to an array by station.
+
+960810 nrv drudg/sread.f
+           Initialize tape_motion_type.
+
+960813 WEH vex/vex.h
+           updated for new S2 structures
+
+960814 nrv drudg/labsnp.f
+           Change SNAP commands to upper case before processing.
+
+960814 nrv drudg/blabl.f
+           Comment out debug line that was left in and could cause abort.
+
+960817 nrv skdrut/gnpas.f
+           Skip track checks for S2.
+
+960817 nrv skdrut/vunps2g.f
+           New. Read S2 group_order statement.
+
+960817 nrv skdrut/vunps2m.f
+           New. Read S2 record mode statement.
+
+960817 nrv skdrut/vmoinp.f
+           Add S2 record mode routine. Add S2 group_order routine.
+
+960817 nrv skdrut/vob1inp.f
+           start_pos is in seconds for S2. 
+
+960817 nrv skdrut/newscan.f
+           Make S2 direction always forward, take pass number directly
+           from group order array. Put in start_pos as footage.
+
+960818 WEH vex/vex.y
+           vex/vex.c
+           vex/vex.yy.l
+           updated for S2 statements
+
+960818 WEH include/fscom_dum.i
+           add ichs2 variable for S2 checking
+
+960818 WEH newlb/prog.c
+           add set/get for check.s2rec.check
+
+960818 WEH quikv/s2et.c
+           quikv/s2st.c
+           quikv/user_info.c
+           quikv/data_valid.c
+           quikv/rec_mode.c
+           created
+
+960818 WEH poclb/logita.c
+           increased buffer length
+           corrected error in in fractional seconds formatting
+ 
+960818 WEH poclb/Makefile
+           add logite.o reference
+
+960818 WEH incom/sincom.f
+           accept equipment types none
+           accept recorder type S2
+
+960818 WEH fclib/fc_get_s2time.c
+           created
+
+960818 WEH fclib/Makefile
+           updated for fc_get_s2time
+
+960818 WEH boss/newlg.f
+           handle "none" and S2
+
+960818 WEH bosslb/gtnam.f
+           accept "F" as a match for anything, even none
+
+960818 WEH fmset/fmset.c
+           add S2 menu option and selection
+
+960818 WEH clib/get_s2time.c
+           created
+
+960818 WEH clib/Makefile
+           add get_s2time
+
+960818 WEH fmset/gets2time.c
+           created
+
+960818 WEH setcl/Makefile
+           modified to support S2
+
+960818 WEH control/fscmd.ctl
+           add S2 commands
+
+960819 WEH vex/vex_util.c
+           corrected case error in S2_group_order
+
+960819 WEH include/s2rec_check.h
+           created
+
+960819 WEH include/fs_types.h
+           added new s2 recorder structures
+
+960819 WEH chekr/Makefile
+           modified for new S2 modules
+
+960819 nrv drudg/snap.f
+           Change ITEARL to an array by station. Add S2 output commands.
+           Issue ET only when needed for S2. If "continuous", no ET.
+           Re-arrange comments to clean up appearance.
+
+960819 nrv drudg/lstsum.f
+           Change ITEARL to itearl_local. Allow non-numeric speed in
+           ST command. Determine S2 recorder by presence of DATA_VALID
+           command in SNAP file. Write an output line when a new SOURCE
+           command is encountered. Keep track of S2 running time and
+           print it instead of feet.
+
+960819 nrv drudg/knewt.f
+           Change final check for previous pass to .LT. 0 because 0 is
+           a valid pass number for S2.
+
+960820 NRV drudg/Makefile
+           skdrut/Makefile
+           updated
+
+960820 nrv drudg/label.f
+           Don't try to use SPEED for an S2 calculation.
+
+960821 WEH chekr/s2drive.f
+           created
+
+960821 WEH fserr/fserr.c
+           remeber S2 errors and don't ask for them again
+
+960821 WEH ddout/ddout.c
+           increase buffer size to 512
+           simplify writing
+           write text of error message to log file
+
+960821 WEH clib/rclcn_res_util.c
+           created
+
+960822 WEH setcl/setcl.f
+           modified to support S2
+
+960822 WEH rclcn/rclcn.c
+           quikv/rcl_dis.c
+           quikv/s2label.c
+           clib/s2label_util.c
+           chekr/s2recstatus.c
+           poclb/logite.c
+           created
+
+960822 WEH monit/monit2.c
+           modified for S2 support and "none" equipment
+
+960822 WEH include/fscom.h
+           add S2 items
+
+960822 WEH chekr/chekr.f
+           modified for S2 and "none" equipment
+
+960822 WEH clib/cshm_init.c
+           initialize S2 items
+
+960822 WEH monit/m2init.c
+           modified for S2 support and "none" equipment
+
+960822 WEH control/fserr.ctl
+           add S2 error messages
+
+960823 WEH vex/v
+           deleted empty directory
+
+960823 WEH chekr/s2recchk.c
+           created
+
+960823 WEH monit/mout2.c
+           modified for S2 support and "none" equipment
+
+960823 WEH quikr/chk.f
+           modified for S2 support and "non" equipment
+           made "tp" the menmonic for recorders, "rc" still works for VLBA
+
+960823 WEH st.default/proc/s2station.prc
+           st.default/proc/vs2station.prc
+           created
+
+960823 WEH st.default/proc/vstation.prc
+           st.default/proc/station.prc
+           st.default/proc/3vstation.prc
+           st.default/proc/v2station.prc
+           st.default/proc/vpoint.prc
+           st.default/proc/point.prc
+           cleaned-up "def" line time fields
+           
+960823 WEH st.default/control/rclad.ctl
+           created
+
+960826 WEH ibcon/opbrd.c.orig
+           ibcon/wrdev.c.orig
+           deleted
+
+960826 WEH fmset/fmset.c
+           make S2 primary if it is present
+
+960826 WEH setcl/setcl
+           use S2 for time if it is present
+
+960828 WEH port/Makefile
+           mcbcn/Makefile
+           corrected typos that prevent DIGI flag being set
+
+960828 WEH clib/rcl_util.c
+           correct minor errors and brought into agreement with manaul
+
+960828 WEH fslb/mdnam.f
+           make "rc" the standard recorder mnemonic and rec, tape and
+           tp synonyms
+
+960829 WEH st.default/proc/s2station.prc
+           remove reference to vlbainit
+
+
+960829 WEH quikv/s2st.c
+           clib/s2st_util.c
+           control/fserr.ctl
+           properly handle default speed for "st=,,off"
+
+960830 WEH control/fserr.ctl
+           corrected SP -2 error message
+
+960830 WEH monit/mout2.c
+           removed leading zeros on tape pos and var fields
+
+960830 WEH poclb/logita.c
+           poclb/logite.c
+           poclb/logit.c
+           did strncat of who for robustnuss with FORTRAN hollerith
+
+960904 WEH vex/Makefile
+           delete generated *.c files
+
+960904 WEH Makefile
+           don't include y.tab.h in distribution
+
+960904 WEH usr2/fs-9.2.0/fslb/makefile.tc
+           usr2/fs-9.2.0/port/portread.org
+           usr2/fs-9.2.0/port/portread.new
+           usr2/fs-9.2.0/rtelb/testusl
+	   usr2/fs-9.2.0/class/class4
+           usr2/fs-9.2.0/class/data
+           usr2/fs-9.2.0/class/data1
+           usr2/fs-9.2.0/class/data2
+           usr2/fs-9.2.0/quikv/less
+           usr2/fs-9.2.0/clib/mv
+           usr2/fs-9.2.0/newlb/prog.811
+           usr2/fs-9.2.0/quikr/list
+           deleted - all junk
+
+960904 WEH control/fserr.ctl
+           fixed sc -11 message
+
+960904 WEH misc/wpas2help
+           made part of FS distribution
+           updated for S2 support
+
+960904 WEH control/fscmd.ctl
+           fixed tsys4's rack type to 2
+
+960905 NRV drudg/procs.f
+           Minor changes for S2 procedures and command names.
+
+960905 WEH st.default/control/equip.ctl
+           fixed rack and recorder comment for s2 and none options
+
+960912 NRV drudg/procs.f
+           Change EJECT to REC=EJECT, add group to REC_MODE. Add RW and
+           wait to S2 LOADER. Don't put in roll if it's unknown. Use only
+           mode and rate in FORM command for S2.
+
+960912 NRV drudg/snap.f
+           Call LOADER if group changes. Make logic changes per Ed's
+           outline for S2. Don't try to calculate late stop for first
+           scan.
+
+960912 NRV skdrut/vunpdas.f
+           Recognize "none" and "NONE" as valid rack types.
+
+960912 NRV skdrut/stinp.f, vstinp.f
+           Initialize rack and recorder types to "unknown" or blank.
+
+960913 NRV drudg/fdrudg.f
+           If recorder and rack type are known from VEX file, show only
+           one "make procedure" option in menu.
+
+960913 NRV drudg/procs.f
+           Handle "no rack" case by checking recorder or rack type 
+           before writing each command. Add TAPE commands before ST for S2.
+
+Version 9.2.0 9609??

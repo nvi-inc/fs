@@ -26,7 +26,7 @@ first parameter, followed by the list of modules to be added or
 deleted from the existing list. Deletion is indicated by a leading
 minus sign. For example,
 
-                         check=*,ifd,-tp
+                         check=*,ifd,-rc
 
 will cause the IF distributor to be added to the list of modules
 being checked and the tape transport to be removed from the list,

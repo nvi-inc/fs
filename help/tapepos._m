@@ -19,11 +19,11 @@ off, then nothing is done. The model used is:
                    dt = tacc*0.01 + dfeet/22.5
 
 where 
-dt        time between the ff or rw command and the et command
-dfeet     number of feet to move
-tacc      a parameter which accounts for acceleration and
-          deceleration. The nominal value for tacc is 100, and is
-          taken from the location.ctl file.
+dt      time between the ff or rw command and the et command
+dfeet   number of feet to move
+tacc    a parameter which accounts for acceleration and
+        deceleration. The nominal value for tacc is 100, and is
+        taken from the location.ctl file.
 
 The correct value of tacc can be measured on an unloaded computer
 by issuing a tapepos=... command to position the tape. If the drive

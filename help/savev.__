@@ -1,7 +1,7 @@
      savev - save the voltage position of narrow track heads
 
 Syntax:     savev=parm1,volts
-            savev
+          savev
 
 Response:   savev/VrevW,V15rev,V15for,V15scale,V13,V15flip,Vw0,Vw8
 
@@ -28,12 +28,12 @@ tracks are written with head 15 with the tape in the normal
 orientation. (All track numbers are Mark III track numbers.)
 
                   Reproduce
-        Reproduce   Tape        Read      Write   Write
+          Reproduce Tape        Read      Write   Write
             Track Orientation Direction Direction Position
-    VrevW     15  Normal      Forward   Reverse   Vw0
+    VrevW   15  Normal      Forward   Reverse   Vw0
     V15rev    15  Normal      Reverse   Forward   Vw0
-    V15for    15  Normal      Forward   Forward   Vw0
-    V15scale  15  Normal      Forward   Forward   Vw8
+    V15for      15  Normal      Forward   Forward   Vw0
+    V15scale    15  Normal      Forward   Forward   Vw8
     V13       13  Normal      Forward   Forward   Vw0
     V15flip   15  Flipped     Forward   Forward   Vw0
 

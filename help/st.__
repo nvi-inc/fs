@@ -6,32 +6,44 @@ Response:   st/direction,speed,record
 
 
 Settable parameters:
-direction   for  to move tape forward, rev to move in reverse. No
-            default. When the tape is stopped, this parameter is
-            displayed in the response as rev for Mark III and IV.
-speed       Tape speed in inches per second, either nominal or
-            actual, no default except for VLBA (and VLBA2).
-            Choices for Mark III are:
-              Nominal:  3   7     15      30    60    120   240
-              Actual: 3.375 7.875 16.875  33.75 67.5  135   270
-            For VLBA recorders the same choices are available, but
-            133.33 and 266.66 may also be specified as actual speeds.
-            Also since the VLBA recorder only has speed resolution of
-            0.01 ips, the actual speeds 3.38, 7.88, and 16.88 are
-            used instead of 3.375, 7.875, and 16.875, respectively,
-            but either may be entered in the command. A default speed
-            can be used if the bit density has been specified and the
-            formatter has been set-up, see the comments below.
-            For Mark IV recording, additional choices are: 0, 5, 10,
-            20, 40, 80, 160, 320. No default except for the VLBA or
-            VLBA2 drives when the bit_density and form commands have
-            been issued. When the tape is stopped, this parameter is
-            reported as 0. For Mark IV recorders, a requested tape
-            speed of 0 and record on will enable the write heads but
-            will not move the tape.
-record      on to record; off to disable recording. Default is on.
+direction for  to move tape forward, rev to move in reverse. rev is
+          not permitted for S2 drives. No default, except for S2,
+          which defaults to for. When the tape is stopped, this
+          parameter is displayed in the response as rev for Mark III
+          and IV.
+speed   Tape speed in inches per second, either nominal or actual,
+        no default except for VLBA (and VLBA2). Choices for Mark
+        III are:
+        Nominal:  3     7     15     30    60   120  240
+        Actual: 3.375 7.875 16.875 33.75 67.5   135  270
+        For VLBA drives the same choices are available, but 80,
+        133.33, 160, and 266.66 may also be specified as actual
+        speeds. Also since the VLBA drives only have speed
+        resolution of 0.01 ips, the actual speeds are 3.38, 7.88, and
+        16.88 instead of 3.375, 7.875, and 16.875, respectively, but
+        either may be entered in the command. A default speed can
+        be used if the bit density has been specified and the
+        formatter has been set-up, see the comments below.
+        For Mark IV drives, additional choices are: 0, 5, 10, 20,
+        40, 80, 160, 320.
+        For S2 drives, the only choices are slp and lp. Also for S2
+        drives there are additional monitor only values of: sp,
+        unknown, or a reported hex value that doesn't correspond to
+        a known speed. 
+        No default except for the VLBA or VLBA2 drives when the
+        bit_density and form commands have been issued. When the
+        tape is stopped, this parameter is reported as 0. For Mark
+        IV recorders, a requested tape speed of 0 and record on
+        will enable the write heads but will not move the tape.
+record    on to record; off to disable recording. Default is on. For
+          S2 recorders, record and play are synonymous with on and
+          off, respectively. Also for S2 recorders there are
+          additional monitor only values of rewind, ff, stop, ppause,
+          rpause, cue, review, notape, and position.
 
 Monitor-only parameters: none
+
+
 
 Comments: 
 The tape is started moving. For Mark III, the record bit is enabled
@@ -43,16 +55,16 @@ changed and the state of the low tape sensor is not changed. For
 Mark III speeds, the rate generator is set to 720, for Mark IV
 speeds it is set to 853.
 
-For all recorders, the vacuum (drive ready for VLBA2 drives) is
-checked before the command is issued to the recorder. If the vacuum
-state (drive state for VLBA2 drives) is not ready, no further
-commands are sent. Vacuum (drive ready for VLBA2 drives) is not
-checked if speed is 0.
+For all drives except S2, the vacuum (drive ready for VLBA2 drives)
+is checked before the command is issued to the recorder. If the
+vacuum state (drive state for VLBA2 drives) is not ready, no
+further commands are sent. Vacuum (drive ready for VLBA2 drives) is
+not checked if speed is 0.
 
-For Mark III and IV recorders there is no default speed. For VLBA (and
-VLBA2) systems, a default speed can be used if the formatter has been
-set-up and the bit density has been specified with the "bit_density"
-command. See the "bit_density" command for more details. 
+For Mark III and IV recorders there is no default speed. For VLBA
+(and VLBA2) systems, a default speed can be used if the formatter
+has been set-up and the bit density has been specified with the
+bit_density command. See the bit_density command for more details.
 
 A given tape speed of 0 does not move tape but does enable write
 heads, thus making bypass mode useful. To see the time displayed on
@@ -61,18 +73,18 @@ desired reproduce tracks with the repro command and then issue the
 command st=for,0,on.
 
 Examples:
-st=for,320              #94(>
-                        #94=%80000001$
-                        #94=)F8530000$
-st=for,135              #94(>
-                        #94=%80000000$
-                        #94=)E7200000$
-st=rev,160              #94(>
-                        #94=%80000001$
-                        #94=)68530000$
-st=rev,80,off           #94(>
-                        #94=%00000001$
-                        #94=)58530000$
+st=for,320        #94(>
+                  #94=%80000001$
+                  #94=)F8530000$
 
+st=for,135        #94(>
+                  #94=%80000000$
+                  #94=)E7200000$
 
- 
+st=rev,160        #94(>
+                  #94=%80000001$
+                  #94=)68530000$
+
+st=rev,80,off       #94(>
+                  #94=%00000001$
+                  #94=)58530000$

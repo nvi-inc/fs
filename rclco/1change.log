@@ -1,0 +1,24 @@
+ RCLCO Modification History 
+ ------------------------------------------
+
+Georg Feil           Sep 23, 1994
+-Started this modification history.
+-Misc fixes to compile with gcc version 2.4.5.
+
+Georg Feil           Nov 11, 1994
+-added "broadcast" capability in networked (UNIX) operation to send same
+   command to all currently open connections.
+-added ability to specify multiple host names to open on command line.
+
+Georg Feil           Mar 16, 1995
+-added commands CMD_TAPEINFO_READ_PB and CMD_VERSION. Renamed local version
+   command to versionl (CMD_VERSIONL).
+
+Georg Feil           Sep 13, 1995
+-Fixed logic error causing assert() in input.c.
+
+Georg Feil           Jun 24, 1996
+-Added support for rcl_tapetype_set() and rcl_tapetype_read().
+
+Georg Feil           Jun 27, 1996
+-Added support for Linux and Solaris. Updated 1readme files.

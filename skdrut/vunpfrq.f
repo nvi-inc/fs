@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960520 nrv New.
+C 960607 nrv Initialize band ID to '-', not blank.
 C
 C  INPUT:
       character*128 stdef ! station def to get

@@ -1,14 +1,14 @@
                peak - peak up tape reproduce power
 
 Syntax:     peak=nsamp,iter,stack,vmin
-            peak
+          peak
 
 Response:   peak/nsamp,iter,stack,vmin,peakv,mper,t/f,vltlc
 
 
 Settable parameters:
-nsamp     Number of samples to take at each position. Default is 3.
-iter      Number of times to iterate peak finding. Default is 1.
+nsamp   Number of samples to take at each position. Default is 3.
+iter        Number of times to iterate peak finding. Default is 1.
 stack     Head stack to move for peaking: write (default) or read.
           Only the first character is checked. Only write is valid
           for VLBA recorders. For Mark IV recorders, use write for
@@ -24,7 +24,7 @@ t/f       t (true) if the peak is strong enough to be considered a
           real peak and the middle of the last three measured
           positions is within 5.4 microns of the calculated peak,
           f (false) otherwise.
-vltlc     voltage position of the calculated peak response
+vltlc       voltage position of the calculated peak response
 
 Comments: 
 This command attempts to find the head stack position that gives
@@ -66,7 +66,7 @@ work unless the detector isn't connected.
 In order to identify possibly false peaks, peak requires two
 conditions be met before a peak is accepted: (1) the voltage
 read-out of the power level must exceed the set minimum and (2) the
-calculated peak position must be within +/-5.4 microns of the middle
+calculated peak position must be within ñ5.4 microns of the middle
 position of the last three sample values. The first attempt to peak
 on a track may fail because of the second criteria. A second
 attempt should succeed if that was the problem.

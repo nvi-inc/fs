@@ -1,0 +1,45 @@
+# Makefile for rclco, compiler: Borland C++  (we use only ANSI C features).
+# Borland C include directory path may need to be updated in first $(CC) line
+# below, as well as library directory path in second $(CC) line.
+# *Add .obj file to file list.lnk for each source file added below*
+#
+SRCS = main.c cmd.c input.c softkey.c lib.c comio.c version.c
+OBJS = $(SRCS:.c=.obj)
+
+CC = bcc
+
+.c.obj:
+	$(CC) -Ircl -Ip:\bc\include -DDOS -w -c $*.c
+
+# (For some reason it doesn't always rebuild the version file unless
+#  we erase version.c. Oh well.)
+rclco.exe: $(OBJS)
+	$(CC) -Lp:\bc\lib -w -erclco.exe @list.lnk
+	erase version.c
+
+version.c: force
+	.\makever
+
+# There's no 'makedepend' for DOS, so we do 'make depend' on Unix and 
+# then edit the dependencies. Must get rid of /usr/include/... and any
+# Borland system headers.
+depend: force
+	makedepend -o.obj $(SRCS)
+
+
+# dummy target to force execution of a rule (do not create a file of this name)
+force:
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+main.obj:  main.h ext_init.h
+main.obj: rcl\rcl_def.h rcl\rcl.h rcl\rcl_cmd.h rcl\rcl_pkt.h rcl\rcl_sys.h comio.h cmd.h softkey.h
+main.obj: input.h version.h
+cmd.obj:   main.h ext_init.h rcl\rcl_def.h
+cmd.obj: rcl\rcl.h lib.h softkey.h cmd.h input.h version.h rcl\rcl_cmd.h
+input.obj:   main.h ext_init.h lib.h
+input.obj: input.h softkey.h cmd.h
+softkey.obj:   main.h ext_init.h lib.h
+softkey.obj: softkey.h cmd.h
+comio.obj: ext_init.h
+lib.obj:   main.h ext_init.h lib.h

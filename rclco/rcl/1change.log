@@ -1,0 +1,32 @@
+ RCL Interface Library Modification History 
+ ------------------------------------------
+
+
+Georg Feil           Sep 23, 1994
+-Started this modification history.
+-Added support for POSTIME_READ command and response, needed by Bryan
+   to do automated positioning testing and calibration.
+
+Georg Feil           Nov  1, 1994
+-removed spurious gethostbyname() call in rcl_sysn.c.
+
+Georg Feil           Nov 11, 1994
+-changed rcl_open_show() to rcl_open_list(), now uses array return.
+-added rcl_hostname[] and rcl_addr_to_hostname() in rcl_sysn.c.
+
+Georg Feil           Mar 16, 1995
+-added rcl_tapeinfo_read_pb() and rcl_version() commands to rcl_cmd.c.
+
+Georg Feil           Jun 17, 1996
+-Improved comments regarding error codes at top of rcl_cmd.c file.
+
+Georg Feil           Jun 21, 1996
+-Added RCL_STATCODE_MAX to rcl.h (main ROS code too, since hard link!).
+-Improved comments for status*() commands in rcl_cmd.c.
+
+Georg Feil           Jun 24, 1996
+-Added rcl_tapetype_set() and rcl_tapetype_read().
+
+Georg Feil           Jun 27, 1996
+-Added support for Linux and Solaris. Updated 1readme files.
+

@@ -1,0 +1,11 @@
+main.obj 
+cmd.obj 
+input.obj 
+softkey.obj 
+comio.obj 
+lib.obj 
+version.obj
+rcl\rcl_cmd.obj 
+rcl\rcl_pkt.obj 
+rcl\rcl_syss.obj 
+rcl\rcl_util.obj 

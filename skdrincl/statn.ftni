@@ -1,5 +1,7 @@
 C     STATION INFORMATION COMMON BLOCK
 C 
+C 960817 nrv Add S2 variables
+
       double precision stnxyz,baselen,axisof,
      .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ    
 C
@@ -7,14 +9,15 @@ C
      .co2mask,sefdst,diaman,sefdpar,sefdstel
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
-     .ncord,maxtap,nsefdpar,nrecst,nheads,ibitden_save
+     .ncord,maxtap,nsefdpar,nrecst,nheads,ibitden_save,
+     .itearl,itlate,itgap,ns2tapes
 C
       integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
-     .lhccod,lterna,lbsefd,lterid
+     .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed
 
       logical klineseg
 
-      character*128 stndefnames
+      character*128 stndefnames,tape_motion_type
 C
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
      .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
@@ -38,15 +41,19 @@ C
      .       nsefdpar(max_band,max_stn),
      .       nrecst(max_stn),nheads(max_stn),
      .       ibitden_save(max_stn),
+     .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
+     .       ns2tapes(max_stn),
      .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN), 
      .       LPOCOD(MAX_STN),LPOSID(MAX_STN),
      .       lantna(4,max_stn),lterid(2,max_stn),
+     .       lstrec(4,max_stn),lstrack(4,max_stn),
      .       loccup(4,max_stn),
      .       lhccod(max_stn),lterna(4,max_stn),
      .       lbsefd(max_band,max_stn),
+     .       ls2speed(2,max_stn),
      .       klineseg(max_stn)
 
-      COMMON/STATN_CH/stndefnames(max_stn)
+      COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn)
 C 
 C  NSTN   - number of stations
 C  LSTNNA - position names, up to 8 chars
@@ -59,6 +66,8 @@ C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute)
 C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
 C  LSTCOD - station codes, 2 characters 
 C  LITERID - terminal ID, up to 4 characters
+C  LSTREC - recorder type
+C  LSTRACK - rack type
 C  STNELV - station elevation limit, assigned in SKED 
 C  ISTCON - slew overhead time, seconds
 C  NHORZ - number of az, el pairs in horizon mask

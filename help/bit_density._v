@@ -16,7 +16,7 @@ This command specifies the total bit density including all header
 and parity bits. The specified bit density and the formatter set-up
 determine the default speed for the st command.
 
-The bit density can be set to any positive value less than 2**32.
+The bit density can be set to any positive value less than 232.
 Useful values are 33333 for Mark III data-replacement format and
 34020 for the VLBA non-data-replacement format.
 

@@ -3,8 +3,8 @@
 Syntax:     track
 
 Response:   tr  yy/ddd.hh:mm:ss cmd1  cmd2  delta1  delta2
-            pr                prd1    prd2    praz    prel
-            co                cor1    cor2    eqeq  refr
+          pr                prd1    prd2    praz    prel
+          co                cor1    cor2    eqeq  refr
 
 
 Settable Parameters:  none
@@ -14,27 +14,25 @@ Monitor-only parameters:
 The tr line contains information from the tracking computer (all
 angles are in degrees):
 yy/ddd.hh:m:ss  year day and time of tracking computer
-cmd1          first antenna command angle, x, azimuth, or hour
-              angle
-cmd2          second antenna command angle, y, elevation, or
-              declination
-delta1        tracking error for first command angle
-delta2        tracking error for second command angle
+cmd1      first antenna command angle, x, azimuth, or hour angle
+cmd2      second antenna command angle, y, elevation, or
+          declination
+delta1      tracking error for first command angle
+delta2      tracking error for second command angle
 
 The pr line contains predicted command angles based on time in tr
 line (all angles are in degrees):
-prd1          predicted first command angle
-prd2          predicted second command angle
-praz          predicted azimuth
-prel          predicted elevation
+prd1      predicted first command angle
+prd2      predicted second command angle
+praz      predicted azimuth
+prel        predicted elevation
 
 The co line contains calculated correction information (all angles
 are in degrees):
-cor1          pointing correction for first command angle
-cor2          pointing correction for second command angle
-eqeq          approximate Equation of the Equinoxes, seconds of
-              time
-refr          refraction correction
+cor1      pointing correction for first command angle
+cor2      pointing correction for second command angle
+eqeq      approximate Equation of the Equinoxes, seconds of time
+refr        refraction correction
 
 Comments: 
 This command is implemented as a special mode of antcn, which may

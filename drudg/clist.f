@@ -47,7 +47,7 @@ C  First set up for proper width/length.
 C  MAXLIN = 64
 C  maxwid = 110
           maxlin = 52
-          maxwid = 140
+          maxwid = 120
       ENDIF
 C
 C   Check for existence of SNAP file.

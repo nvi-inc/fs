@@ -1,13 +1,13 @@
                locate - locate head stack position
 
 Syntax:     locate=range,nsamples,step,stack
-            locate
+          locate
 
 Response:   locate/range,nsamples,step,stack,peakv,mper,vltlc
 
 
 Settable parameters:
-range     +/-range to search over in microns. Default is 200.
+range     ñ range to search over in microns. Default is 200.
 nsamples  Number of power samples for each measurement position.
           Default is 1.
 step      Micron step size between measurement positions. Default
@@ -23,16 +23,16 @@ stack     Head stack to move: write or read. 1 and 2 may also be
 Monitor-only parameters:
 peakv     Peak measured voltage from power detector
 mper      Minimum sample voltage as a percentage of peakv
-vltlc     Location of the peak in positioner voltage
+vltlc       Location of the peak in positioner voltage
 
 Comments: 
 This command performs a coarse grid search for the largest detected
 power over the search range.  The search is performed over a range
-of +/-range microns about the initial head position. The number of
+of ñrange microns about the initial head position. The number of
 positions sampled is ((2*range)/step)+1.
 
 The actual positions at which measurements are made are not exactly
-step microns part. The head stack will be positioned within +/-5
+step microns part. The head stack will be positioned within ñ5
 microns of the nominal positions. This approximation is used to
 reduce the time moving the head stacks by not over-refining the
 positions of what is a coarse search anyway. In the worst (too

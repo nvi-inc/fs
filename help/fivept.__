@@ -6,11 +6,11 @@ Response:   fivept/axis,rep,pts,stp,intp,dev,cal,beam,flux
 
 
 Settable parameters:
-axis      Axis system for scan. 
-            hadc = Hour Angle/Declination (default)
-            azel = Azimuth/Elevation
-            xyns = X/Y, +X East
-            xyew = X/Y, +X South  (unimplemented)
+axis        Axis system for scan. 
+              hadc = Hour Angle/Declination (default)
+              azel = Azimuth/Elevation
+              xyns = X/Y, +X East
+              xyew = X/Y, +X South  (unimplemented)
 rep       Number of repetitions: -10 to -1 and 1 to 10 allowed.
           Default is -2. Negative repetition counts are described
           in the fivpt manual.
@@ -18,7 +18,7 @@ pts       Number of points on each axis, if even, it is increased
           by 1. pts must be between 3 and 31. Default is 7. 
 stp       Step size for distance between points, in multiples of a
           beamwidth. Default is 0.5. 
-intp      Integration period, 1 to 10 seconds.
+intp        Integration period, 1 to 10 seconds.
 dev       Mnemonic for the device to be used as the detector.
           Standard devices are allowed. Note that for Mark III
           equipment, the video converter USB or LSB was set up with
@@ -35,9 +35,9 @@ cal       Calibration noise source temperature in degrees K. This
 beam      The full width half maximum beam size degrees. This is
           determined from the last beamx commands in conjunction
           with the patch (Mark III) or bbc (VLBA) command.
-flux      The apparent flux of the source. This is determined from
-          the last fluxx commands in conjunction with the patch
-          (Mark III) or bbc (VLBA) command.
+flux        The apparent flux of the source. This is determined from
+            the last fluxx commands in conjunction with the patch
+            (Mark III) or bbc (VLBA) command.
 
 Comments: 
 The parameters should be setup with a fivept=... command. A scan is
