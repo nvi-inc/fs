@@ -1429,7 +1429,7 @@ label .labelNumberNodes -anchor e -textvariable NumberNodes
 
 frame .plotwindowframe
 
-focus default .
+focus .
 
 # Pack Tk widgets on the top level
 # --------------------------------
