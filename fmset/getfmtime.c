@@ -42,15 +42,13 @@ int    *formhs;
       getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
     else {
       rte_sleep(10);
-      rte_rawt(&raw);
-      raw%=100;
-      sleep=100-(raw+phase+6)%100;
-      if(phase >=0 && sleep>0) {
+      rte_ticks(&raw);
+      sleep=102-(raw%100+phase)%100;
+      if(phase >=0) {
 	rte_sleep(sleep); 
       }
       get4time(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
-      if(*formhs > -1 || *formhs < 100) {
-	rte_rawt(&rawch);
+      if(*formhs > -1 && *formhs < 100) {
 	phase=(100+*formhs-rawch%100)%100;
       }
     }
