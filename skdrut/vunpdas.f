@@ -18,6 +18,7 @@ C 960521 nrv Revised.
 C 960810 nrv Add tape motion fields
 C 960817 nrv Add S2 tape length and tape motion fields
 C 961022 nrv Change MARK to Mark if found in rack and recorder names.
+C 970114 nrv Add "_type" to rack and recorder Vex names.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -55,7 +56,7 @@ C  1. The recorder type
 C
       ierr=1
       iret = fget_station_lowl(ptr_ch(stdef),
-     .ptr_ch('record_transport'//char(0)),
+     .ptr_ch('record_transport_type'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
       CALL IFILL(lrec,1,8,oblank)
       if (iret.eq.0) then
@@ -87,7 +88,7 @@ C
       ierr = 2
       CALL IFILL(lrack,1,8,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
-     .ptr_ch('electronics_rack'//char(0)),
+     .ptr_ch('electronics_rack_type'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get rack name
@@ -294,7 +295,7 @@ C  8. Tape motion, early start, late stop, gap time.
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
           if (iret.ne.0) return
-          if (i.le.0) then
+          if (d.le.0.0) then
             write(lu,'("VUNPDAS12 - Invalid gap time value")')
             ierr=-12
           else
