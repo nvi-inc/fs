@@ -150,7 +150,6 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
    fprintf(*fp,"showpage\n%%%Trailer\n");
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
    *new_page=0;
-printf ("trailer written\n");
   }
 
   /* Print the station code, day, hour/min into string like this:
