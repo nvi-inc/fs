@@ -1,0 +1,46 @@
+#!/bin/sh
+# K4 switches from the CURRENT to the K4 version
+#
+#stfile is name of the local software source tree on /usr2
+stfile=st-1.0.0
+#fs is name of the source tree for the K4 FS version on /usr2
+fsfile=fs-9.3.111
+#
+# make sure the storage directories are there
+fileo=CURRENT
+fileop=/usr2/${fileo}
+if [ ! -d ${fileop} ]
+then
+echo "No such directory ${fileop}."
+exit
+fi
+#
+filen=K4
+filenp=/usr2/${filen}
+if [ ! -d ${filenp} ]
+then
+echo "No such directory ${filenp}."
+exit
+fi
+#
+# don't accidentally overwrite the directory contents by mistake
+file1=${fileop}/control
+file2=${fileop}/log
+file3=${fileop}/proc
+file4=${fileop}/sched
+file5=${fileop}/${stfile}
+if [ -d ${file1} -o -d ${file2} -o -d ${file3} -o -d ${file4} -o -d ${file5} ]
+then
+echo "${fileop} already contains some version, call Ed"
+exit
+fi
+#
+cd /usr2
+mv control log proc sched ${stfile} ${fileo}
+#
+cd /usr2
+ln -sfn ${fsfile} fs
+cd ${filenp}
+mv control log proc sched ${stfile} ..
+#
+reboot
