@@ -6,12 +6,13 @@ Response:   enable/list-of-groups
 
 
 Settable parameters:
-list-of-groups  List of track groups to be enabled/disabled. Groups are
-                specified by gn, n=0 to 3. A null list (i.e. enable=)
-                disables all tracks. For mode D, a single track to be
-                recorded may be indicated by setting list-of-groups to dn,
-                n = 1 to 28. The group within which Mark III track n
-                occurs will be enabled.
+list-of-groups  List of track groups to be enabled/disabled.
+                Groups are specified by gn, n=0 to 3. A null list
+                (i.e. enable=) disables all tracks. For mode D, a
+                single track to be recorded may be indicated by
+                setting list-of-groups to dn, n = 1 to 28. The
+                group within which Mark III track n occurs will be
+                enabled.
 
 Monitor-only parameters: none
 

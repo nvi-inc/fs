@@ -5,7 +5,7 @@
 
 
 Syntax:     logout=file,mode,bits,parity,stop
-          logout=*,file,mode,bits,parity,stop
+  logout=*,file,mode,bits,parity,stop
 
 Response:   logout/file,file, 
 
@@ -21,10 +21,10 @@ mode      Open mode for file, one of append, write, or a valid BAUD
           If a BAUD rate is specified it implies that the file
           being opened is serial device. The remaining parameters
           may be used to define the line protocol.
-bits        The number of bits per character transmitted, one of 5,
-            6, 7, or 8. The default is 8.
-parity      How parity generation is handled: none, odd, or even. The
-            default is none.
+bits      The number of bits per character transmitted, one of 5,
+          6, 7, or 8. The default is 8.
+parity    How parity generation is handled: none, odd, or even. The
+          default is none.
 stop      The number of stop bits, one of 1 or 2. The default is 1.
 
 Comments: 
@@ -45,8 +45,8 @@ used, any files currently in use will be closed and the specified
 file will be opened. The command logout= with no parameters will
 close any files current receiving output.
 
-The line protocol parameters bits, parity, and stop are useful only if
-the mode was specified as a valid BAUD rate. The default mode,
+The line protocol parameters bits, parity, and stop are useful only
+if the mode was specified as a valid BAUD rate. The default mode,
 write, will cause the specified file to be overwritten if it
 already exists.
 

@@ -2,19 +2,19 @@
 
 Syntax:     caltemp1=temp
           caltemp2=temp
-          caltemp3=temp
+  caltemp3=temp
           caltempa=temp
           caltempb=temp
-          caltempc=temp
-          caltempd=temp
+  caltempc=temp
+  caltempd=temp
 
 Response:   caltemp1/temp
           caltemp2/temp
-          caltemp3/temp
+  caltemp3/temp
           caltempa/temp
           caltempb/temp
-          caltempc/temp
-          caltempd/temp
+  caltempc/temp
+  caltempd/temp
 
 
 Settable parameters:

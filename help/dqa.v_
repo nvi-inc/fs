@@ -3,37 +3,37 @@
 Syntax:     dqa=duration
 
 Response:   dqa/duration,Asampler,Atrack,Aparity,Aresync,Anosync,Acalamp,
-          Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bcalamp,Bcalphs
+  Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bcalamp,Bcalphs
 
 
 Settable Parameters:
-duration    The duration of the analysis in seconds. Default 1 sec,
-            max 5 seconds. Set up the command with dqa=duration.
-            Subsequent commands dqa will make a measurement. For each
-            measurement, the DQA module is started, allowed to run
-            for duration and then stopped. The accumulated counters are
-            then read out.
+duration  The duration of the analysis in seconds. Default 1 sec,
+          max 5 seconds. Set up the command with dqa=duration.
+          Subsequent commands dqa will make a measurement. For each
+          measurement, the DQA module is started, allowed to run
+          for duration and then stopped. The accumulated counters
+          are then read out.
 
 Monitor-only Parameters:
 Asampler  Sampler for the A channel signal, 0 if unknown or in the
           form nnsd, nn=baseband converter number, s=sideband u or
           l, d=data sample bit m  or s.
-Atrack      Track with the A channel signal on it, as set up in the
-            repro command.
-Aparity   Measured parity error rate for A channel, per Mbyte.
-Aresync   Measured resync rate for A channel, per Mbyte.
-Anoesync  Measured nosync rate for A channel, per Mbyte.
+Atrack    Track with the A channel signal on it, as set up in the
+          repro command.
+  AparityMeasured parity error rate for A channel, per Mbyte.
+  AresyncMeasured resync rate for A channel, per Mbyte.
+  AnosyncMeasured nosync rate for A channel, per Mbyte.
 Acalamp   Measured phase calibrator amplitude for A channel, in
           units of voltage percentage.
 Acalphs   Measured phase calibrator phase for A channel, degrees.
 Bsampler  Sampler of the B channel signal, 0 if unknown or in the
           form nnsd, nn=baseband converter number, s=sideband u or
           l, d=data sample bit m  or s.
-Btrack      Track with the B channel signal on it, as set up in the
-            repro command.
-Bparity   Measured parity error rate for B channel, per Mbyte.
-Bresync   Measured resync rate for B channel, per Mbyte.
-Bnosync   Measured nosync rate for B channel, per Mbyte.
+Btrack    Track with the B channel signal on it, as set up in the
+          repro command.
+  BparityMeasured parity error rate for B channel, per Mbyte.
+  BresyncMeasured resync rate for B channel, per Mbyte.
+  BnosyncMeasured nosync rate for B channel, per Mbyte.
 Bcalamp   Measured phase calibrator amplitude for B channel, in
           units of voltage percentage.
 Bcalphs   Measured phase calibrator phase for B channel, degrees.
@@ -60,7 +60,8 @@ the data analyzed. If fan-out is being used in a system with an
 analog cross-point switch, the reported source will be zero for
 tracks beyond the first in a fan-out group.
 
-Phase-cal results will be meaningless for the following cases: fan-out, fan-in, barrel-rolling enabled, VLBA format, tracks that
+Phase-cal results will be meaningless for the following cases: fan-
+out, fan-in, barrel-rolling enabled, VLBA format, tracks that
 contain magnitude bits.
 
 The output from this command is columized for easy reading when

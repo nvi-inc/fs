@@ -10,7 +10,7 @@ mode      The string that identifies the mode, 20 characters
           maximum, a null value is not permitted.  No default.
 group     The group to be recorded, nominally 0-7, but many modes
           have fewer groups.
-roll        Roll configuration: on or off. Default on.
+roll      Roll configuration: on or off. Default on.
 
 Monitor-only Parameters:
 numgroups The number of groups in mode display as the monitor

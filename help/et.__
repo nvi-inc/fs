@@ -21,12 +21,12 @@ Examples:
 For Mark III, when et is issued the following MAT commands are
 sent.
 
-#94=%0xxxxxxx$    turn general enable bit off, same enabled tracks
-#94=)07200000$    send stop command, with standard rate generator
+  #94=%0xxxxxxx$turn general enable bit off, same enabled tracks
+  #94=)07200000$send stop command, with standard rate generator
 
 For Mark IV, when et is issued the following MAT commands are sent.
 
-#94=%0xxxxxxx$    turn general enable bit off, same enabled tracks
-#94=)08530000$    send stop command, with standard rate generator
+  #94=%0xxxxxxx$turn general enable bit off, same enabled tracks
+  #94=)08530000$send stop command, with standard rate generator
 
 

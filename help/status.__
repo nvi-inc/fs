@@ -12,19 +12,19 @@ A self-explanatory display of information concerning the status of
 the current active schedule is listed on the terminal, in the
 following format:
 
-    Active schedule is: name (name of current schedule)
-    TIME          EVENT
-    -------       ---------
-    ddd-hh:mm:ss  Now
-    ddd-hh:mm:ss  Start of next observation
-    ddd-hh:mm:ss  End of next observation
-    ddd-hh:mm:ss  End of current tape
-    ddd-hh:mm:ss  Start of next tape
-    Schedule is (not) HALTed
-    Schedule stream is (not) time-blocked
-      (until ddd-hh:mm:ss)
-    Operator stream is (not) time-blocked
-      (until ddd-hh:mm:ss)
-    Current line of schedule is:
-      #nnn   copy of current schedule line
+  Active schedule is: name (name of current schedule)
+  TIME      EVENT
+  -------   ---------
+  ddd-hh:mm:ss  Now
+  ddd-hh:mm:ss  Start of next observation
+  ddd-hh:mm:ss  End of next observation
+  ddd-hh:mm:ss  End of current tape
+  ddd-hh:mm:ss  Start of next tape
+  Schedule is (not) HALTed
+  Schedule stream is (not) time-blocked
+  (until ddd-hh:mm:ss)
+  Operator stream is (not) time-blocked
+  (until ddd-hh:mm:ss)
+  Current line of schedule is:
+  #nnn   copy of current schedule line
 

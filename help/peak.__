@@ -1,13 +1,13 @@
                peak - peak up tape reproduce power
 
 Syntax:     peak=nsamp,iter,stack,vmin
-          peak
+  peak
 
 Response:   peak/nsamp,iter,stack,vmin,peakv,mper,t/f,vltlc
 
 
 Settable parameters:
-nsamp   Number of samples to take at each position. Default is 3.
+nsamp     Number of samples to take at each position. Default is 3.
 iter        Number of times to iterate peak finding. Default is 1.
 stack     Head stack to move for peaking: write (default) or read.
           Only the first character is checked. Only write is valid

@@ -3,20 +3,20 @@
 Syntax:     onoff=rep,intp,dev1,dev2,cutoff,stp
 
 Response:   onoff/rep,intp,dev1,dev2,cutoff,stp,cal1,cal2,
-          beam1,beam2,flux1,flux2
+  beam1,beam2,flux1,flux2
 
 
 Settable parameters:
 rep       Number of repetitions, 1 to 99. Default is 2. 
-intp        Integration period, 1 to 10 seconds. Default is 1. 
+intp      Integration period, 1 to 10 seconds. Default is 1. 
 dev1      Device to be used as detector 1. Standard detector
           mnemonics are allowed. Default is i1 for Mark III, ia for
           VLBA.
 dev2      Device to be used as detector 2. Standard detector
           mnemonics are allowed. Default is i1 for Mark III, ib for
           VLBA.
-cutoff      elevation above which to step in elevation rather than
-            azimuth, in degrees, default 60.
+cutoff    elevation above which to step in elevation rather than
+          azimuth, in degrees, default 60.
 stp       Distance off source for off source and calibration
           points, in multiples of a beamwidth. Default is 5.0.
 
@@ -29,12 +29,12 @@ cal2      Calibration noise source temperature in degrees K for
           detector 2. This is determined from the last caltempx
           command in conjunction with the patch (Mark III) or bbd
           command.
-beam1   The full width half maximum beam size (degrees) for
-        device 1. It is determined from the beamx command and the
-        patch (Mark III) or bbc (VLBA) command.
-beam2   The full width half maximum beam size (degrees) for
-        device 2. It is determined from the beamx command and the
-        patch (Mark III) or bbc (VLBA) command.
+beam1     The full width half maximum beam size (degrees) for
+          device 1. It is determined from the beamx command and the
+          patch (Mark III) or bbc (VLBA) command.
+beam2     The full width half maximum beam size (degrees) for
+          device 2. It is determined from the beamx command and the
+          patch (Mark III) or bbc (VLBA) command.
 flux1     The apparent source flux for device 1, based on the fluxx
           command and the patch (Mark III) or bbc (VLBA) command.
 flux2     The apparent source flux for device 2, based on the fluxx
@@ -69,17 +69,28 @@ detector, the patch command must have been issued. If system
 performance is to be estimated based on the source's apparent flux,
 then the appropriate fluxx command must have been issued.
 
-Two procedures must be available: calonnf and caloffnf, which are
-used to turn the noise diode on and off respectively. The
+If a negative value is specified for the noise diode temperature
+(caltempx=....) for either detector, then the absolute value of the
+specified temperature is assumed to be the system temperature for
+that detector and the signal level with the noise diode on is not
+used. The noise temperature for either one or both channels can be
+specified as negative. If both are negative, the noise diode won't
+be turned on. This allows the SEFD and Shaffer number to be
+measured even if there is no noise diode; the source/cal ratio in
+this case will be wrong and will be negative.
+
+If a positive diode temperature has been specified for either
+detector, two procedures must be available: calonnf and caloffnf,
+which are used to turn the noise diode on and off respectively. The
 recommended form for these procedures is:
 
 calonnf:  calon
-          !+1s 
-          sy=go onoff &
+  !+1s 
+  sy=go onoff &
 
 caloffnf: caloff
-          !+1s
-          sy=go onoff &
+    !+1s
+  sy=go onoff &
 
 calon and caloff are local procedures that do whatever is necessary
 to turn the noise source on and off.

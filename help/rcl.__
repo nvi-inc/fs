@@ -9,13 +9,13 @@ Settable Parameters:
 device      The two character module mnemonic for the device to
             communicate with as defined in the rclad.ctl control
             file, e.g. rc for the S2
-command name of RCL command function
-parameters  command delimited additional parameters required for this
-            RCL command function
+command     name of RCL command function
+parameters  command delimited additional parameters required for
+            this RCL command function
  
 Monitor-only Parameters:
-response    Result of communication, may displayed on multiple lines
-            for ease of reading.
+response    Result of communication, may displayed on multiple
+            lines for ease of reading.
 
 Comments:
 This command implements access to all the low-level functions of
@@ -32,13 +32,13 @@ align             absolute,year,day,hour,min,sec,nanosec
                   relative, + or -,hour,min,sec,nanosec
                   re-align or self-align
 barrel_roll_read
-barrel_roll_set   on or off
-bercd             fmber or uiber or uidcb, chan, measurement time
+  barrel_roll_seton or off
+       bercdfmber or uiber or uidcb, chan, measurement time
 consolecmd        command string
 delay_read
 delay_set         absolute or relative,nanoseconds
 delaym_read
-diag              value
+       diagvalue
 eject
 errmess           samples
 esterr_read       transport or channel
@@ -47,17 +47,17 @@ group_read
 group_set         group number
 ident
 mk3_form_read
-mk3_form_set      enable or disable
+   mk3_form_setenable or disable
 mode_read
-mode_set          mode string
+ mode_set        mode string
 pause
 pdv_read          transport or channel
 ping              time-out
 play
 position_read     overall or individual
 position_set      absolute or relative or preset,1,position
-                  absolute or relative or preset,8,8 comma seperated
-                  positions
+                absolute or relative or preset,8,8 comma seperated
+                positions
                   re-establish
 postime_read      transport
 record

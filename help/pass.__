@@ -3,7 +3,7 @@
 Syntax:     pass=cmdPw,cmdPr,woffset
 
 Response:   pass/cmdPw,cmdPr,woffset,cmdMw,cmdMr,actMw,actMr,
-          deltaMw,deltaMr
+  deltaMw,deltaMr
 
 
 Settable parameters:
@@ -32,7 +32,7 @@ cmdMw   Microns corresponding to command write head pass number.
 cmdMr   Microns corresponding to command read head pass number,
         null for VLBA.
 actMw     Microns corresponding to actual write head pass number.
-actMr     Microns corresponging to actual read head pass number,
+actMr     Microns corresponding to actual read head pass number,
           null for VLBA.
 deltaMw   Micron error between actual and commanded write head
           position.
@@ -54,7 +54,7 @@ stack 1, the read head stack parameters refer to the head stack 2.
 
 The head stack position in microns is determined by
 
-position = tapeform offset + absolute offset          (forward pass)
+     position = tapeform offset + absolute offset  (forward pass)
 position = tapeform offset + absolute offset + for/rev offset (reverse pass)
 
 where tapeform offset is the a priori offset as specified with the
@@ -113,12 +113,12 @@ auxiliary data field are set as:
 
                            xxwxwxyzyzff
 
-xx        ff for forward calibration (odd passes)
+ xx      ff for forward calibration (odd passes)
           fe for reverse calibration (even passes)
           fd for uncalibrated positions.
 wxyz      0000-3999 for positive micron positions
           4000-7999 for negative micron positions
-ff          hex characters ff
+ ff        hex characters ff
 
 The positions occupied by wxyz are the four digits of the commanded
 micron write head position. In the auxiliary data field the digits
@@ -135,15 +135,15 @@ auxiliary data. They are set as:
 
                              abcdwxyz
 
-abcd      head stack 0 position in microns
+   abcdhead stack 0 position in microns
 wxyz      head stack 1 position in microns
 
 Characters a and w have the following bit structure:
 
 
-bit 0     thousands digit for the micron position, usually 0
-bit 1     0 for forward calibration (odd passes), 1 for
-          uncalibrated
-bit 2     0 for reverse calibration (even passes), 1 for
-          uncalibrated
-bit 3     sign of the position, 0 for positive, 1 for negative
+   bit 0thousands digit for the micron position, usually 0
+  bit 1 0 for forward calibration (odd passes), 1 for
+        uncalibrated
+  bit 2 0 for reverse calibration (even passes), 1 for
+        uncalibrated
+   bit 3sign of the position, 0 for positive, 1 for negative

@@ -1,36 +1,42 @@
                 source - source name and position
 
-Syntax:     source=name,ra,dec,epoch
+Syntax:     source=name,ra,dec,epoch,wrap
 
-Response:   source/name,ra,dec,epoch,ranow,decnow,today
+Response:   source/name,ra,dec,epoch,wrap,ranow,decnow,now
 
 
 Settable parameters:
 name    Source name, up to 10 characters. No default. Special
         source names are recognized by many antenna interface
         programs. Some names and their meaning are:
-            azel      true corrected coordinates
-            azeluncr  encoder units
-            xy        encoder units
-        Other specialized names are described in the comments
-        below. If name is sun or moon, no position is required, and
-        if given it will be ignored.
-ra        Right ascension, in numeric angle/hours format. No
-          default. If name is azel or azeluncr, this parameter is
-          interpreted as an azimuth. If name is xy, this parameter
-          is interpreted as an X position.
+     azeltrue corrected coordinates
+   azeluncrencoder units
+      xyencoder units
+    Other specialized names are described in the comments
+    below. If name is sun or moon, no position or epoch is
+    required, and if given it will be ignored.
+ra      Right ascension, in numeric angle/hours format. No default.
+        If name is azel or azeluncr, this parameter is interpreted
+        as an azimuth. If name is xy, this parameter is interpreted
+        as an X position.
 dec     Declination, in numeric angle/degrees format. No default.
         If name is azel or azeluncr, this parameter is interpreted
         as an elevation. If name is xy, this parameter is
         interpreted as an Y position.
 epoch   Epoch in years. Default 1950.0. This field is checked only
         if the specified angles are right ascension and
-        declination. A value of -1 inhibits precession.
+        declination. A value of -1 inhibits reduction of
+        coordinates, i.e., they are assumed to be topocentric.
+wrap    neutral, ccw (counter-clockwise), cw (clockwise), or null
+        to indicate which wrap (or no specific one) the antenna
+        should be on for this source. The local antenna may or may
+        not respect this parameter.
 
 Monitor-only parameters:
-ranow   Right ascension precessed to today's date.
-decnow  Declination precessed to today's date.
-today   Epoch of precession.
+ranow   Topocentric right ascension for when the source was
+        commanded
+decnow  Topocentric declination for when the source was commanded
+now     Approximate epoch of these coordinates
 
 Comments: 
 The antenna will begin moving to the new source when this command
@@ -49,13 +55,45 @@ negative numbers.
 Typical interpretations of special names may or may not be
 supported at any given station. These are typical meanings:
 
-    stow      Pre-defined stow position.
-    service   Pre-defined service position.
-    disable   Stops antenna communications. This is useful to stop
-              error messages when here is a problem.
-    idle      Monitor the antenna position, but do not command it.
-              This is the normal start-up state for the Field
-              System.
-    hold      Maintain the current antenna position.
+  stow      Pre-defined stow position.
+  service   Pre-defined service position.
+  disable   Stops antenna communications. This is useful to stop
+            error messages when here is a problem.
+  idle      Monitor the antenna position, but do not command it.
+            This is the normal start-up state for the Field
+            System.
+  hold      Maintain the current antenna position.
 
-    
+The wrap parameter is usually provided by drudg in SNAP schedules
+for AZEL antennas for the information of the operator in selecting
+the correct wrap for a source when a schedule is started or has to
+be re-started. Most antenna interfaces do enforce this.
+
+The topocentric place for sources other than the Sun and Moon is
+calculated using USNO's NOVAS routines. As used here, the results
+should be accurate to better than 10 milli-arc-seconds for the time
+that the source is commanded. The effects of light bending and
+diurnal aberration are included. For the effect of diurnal
+aberration (typically less than about 0.3 arc-seconds in magnitude)
+to be calculated accurately the position of the antenna in
+location.ctl must be fairly accurate.
+
+If the input epoch is 2000.0, the input coordinates are reduced
+using standard IAU precession and nutation models, plus light
+bending and aberration (annual and diurnal) to yield topocentric
+coordinates. If the input epoch is 1950.0, then the input
+coordinates are rotated to 2000.0 using the  inverse of the
+rotation used by drudg to rotate from 2000.0 to 1950.0, then they
+are reduced to topocentric. In schedules, this has the effect of
+making the calculated topocentric place of a source that has mean
+coordinates of J2000 in the .drg or .skd schedule file independent
+of whether drudg puts 2000.0 or 1950.0 coordinates in the .snp file
+(to the precision used by drudg in the .snp) file. For coordinates
+of other epochs, the coordinates are assumed to be apparent (no
+diurnal aberration) and are reduced back to 2000.0 using the full
+theory and then reduced to topocentric.
+
+For the Sun and Moon, the topocentric place is calculated to lower
+precision than other sources since these are large sources and are
+generally only used for calibrating small antennas with large
+beams.
