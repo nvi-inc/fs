@@ -4,7 +4,10 @@
 #include <termio.h>
 #include <linux/serial.h>
 #include <sys/errno.h>
+
+#ifdef DIGI
 #include "/usr/src/linux/drivers/char/digi.h"  /* yechh, abs. path... */
+#endif
 
 int portopen_(port, name, len, baud, parity, bits, stop)
 int *port;
@@ -192,6 +195,7 @@ int *stop;
       }
     } else {  /* couldn't use 'serial.c'-style SPD_[V]HI */
       if (errno == EINVAL) {
+#ifdef DIGI
         /* 'TIOCGSERIAL' didn't work, perhaps a Digiboard special will? */
         digi_t digiSettings;
         digi_t oldDigiSettings;
@@ -242,6 +246,9 @@ int *stop;
 	    return -8;
 	  }
 	}
+#else
+	return -9;
+#endif
       } else {
 	/* Getting Linux-specific serial settings failed */
 	/* in other way than EINVAL... */
