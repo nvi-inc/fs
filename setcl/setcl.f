@@ -28,7 +28,7 @@ C
       integer ilen,trimlen
       integer it(6),get_buf, ireg(2), fc_rte_sett
       integer*4 centisec(2),centiavg,secs_fm,secs_fs,centifs
-      integer*4 centidiff,diff
+      integer*4 centidiff,diff,nanosec
       character*63 name
       character*6 model
       character*10 set
@@ -107,7 +107,7 @@ c
       nrec = 0
       if(drive.eq.S2) then
          idum=rn_take('fsctl',0)
-         call fc_get_s2time(centisec,it,ip)
+         call fc_get_s2time(centisec,it,nanosec,ip)
          call rn_put('fsctl')
          centisec(1)=centisec(2)
          if(ip(3).lt.0) then
@@ -226,34 +226,16 @@ C   1992 198 16:17:34.777
         ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
         ich=3
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
-        if(ic1.ge.ic2) then
-           call logit7ci(idum,idum,idum,-1,-5,'sc',0)
-           nerr=nerr+1
-           if(nerr.gt.2) goto 998
-           goto 50
-        endif
         nch = ic2-ic1+1
         iyr = ias2b(ibuf4,ic1,nch)
 C                   The year
         ich = ic2+1
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
-        if(ic1.ge.ic2) then
-           call logit7ci(idum,idum,idum,-1,-5,'sc',0)
-           nerr=nerr+1
-           if(nerr.gt.2) goto 998
-           goto 50
-        endif
         nch=ic2-ic1+1
         idoy = ias2b(ibuf4,ic1,nch)
 C              The Day Of the Year      
         ich = ic2+1
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
-        if(ic1.ge.ic2) then
-           call logit7ci(idum,idum,idum,-1,-5,'sc',0)
-           nerr=nerr+1
-           if(nerr.gt.2) goto 998
-           goto 50
-        endif
         nch=ic2-ic1+1
         ic3=iscn_ch(ibuf4,ic1,ic2,':')
         nch = ic3-ic1
