@@ -24,7 +24,7 @@ main()
 {
     int i;
     int cls_rcv();
-    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1;
+    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE;
     int iwl, iw1, iwm;
     char *llogndx;
     int irga;
@@ -47,6 +47,16 @@ main()
     void dxpm();
     int kdebug;
     char *st;
+    int kpcald;
+    char ierrch[2];
+    int ierrnum;
+    struct list {
+      char ch[2];
+      int num;
+      struct list *next;
+    } *base = NULL;
+    struct list *ptr, *ptr2, **pptr;
+    int display;
 
 /* SECTION 1 */
     
@@ -92,6 +102,65 @@ Messenger:
     }
     if (memcmp(cp2,"tr",2)==0){
       printf("%s", buf);
+      goto Messenger;
+    }
+    if (memcmp(cp2,"pn",2)==0) {
+      kpd = TRUE;
+      goto Messenger;
+    }
+    if (memcmp(cp2,"pf",2)==0) {
+      kpd = FALSE;
+      goto Messenger;
+    }
+    if (memcmp(cp2,"tn",2)==0) {
+      short ix;
+      memcpy(&ix,buf+2,2);
+      ptr= (struct list *)malloc(sizeof(struct list));
+      if(ptr!=NULL) {
+	if(base==NULL)
+	  base=ptr;
+	else {
+	  for (ptr2=base;ptr2->next!=NULL;ptr2=ptr2->next)
+	    if(ptr2->num == ix && memcmp(ptr2->ch,buf,2)==0) {
+	      logit(NULL,-304,"bo");
+	      goto Messenger;
+	    }
+	  if(ptr2->num == ix && memcmp(ptr2->ch,buf,2)==0) {
+	    logit(NULL,-304,"bo");
+	    goto Messenger;
+	  }
+	  ptr2->next=ptr;
+	}
+	memcpy(ptr->ch,buf,2);
+	ptr->num=ix;
+	ptr->next=NULL;
+      } else
+	perror("getting tnx structure");
+      goto Messenger;
+    }
+    if (memcmp(cp2,"tf",2)==0) {
+      short ix;
+      int found=0;
+      memcpy(&ix,buf+2,2);
+      for(pptr=&base,ptr=base;ptr!=NULL;pptr=&ptr->next,ptr=ptr->next)
+	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+	  *pptr=ptr->next;
+	  free(ptr);
+	  found=1;
+	  break;
+	}
+      if(!found)
+	logit(NULL,-303,"bo");
+      goto Messenger;
+    }
+    if (memcmp(cp2,"tl",2)==0) {
+      if(base==NULL)
+	logitf("tnx/disabled");
+      else
+	for(ptr=base;ptr!=NULL;ptr=ptr->next) {
+	  sprintf(buf,"tnx/%2.2s,%d",ptr->ch,ptr->num);
+	  logitf(buf);
+	}
       goto Messenger;
     }
     if(rtn2 == -1) goto Bye;
@@ -175,7 +244,10 @@ Ack:    ich = strtok(NULL, ",");
 /*  error recognition and message expansion */
 
     kp = (buf[FIRST_CHAR-1] == '$');
-    if(kxd || (rtn2 == -1) || (!kp && !kack &&!kdebug)){
+    kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0;
+    if(((!kpcald) && (kxd || (rtn2 == -1) || (!kp && !kack &&!kdebug))) ||
+       (kpcald && kpd)){
+      ierrnum=0;
       if (*cp2 != 'b') goto Append;
       iwhe = NULL;
       iwhs = NULL;
@@ -190,6 +262,10 @@ Ack:    ich = strtok(NULL, ",");
       }
       else iwhs = buf + bufl + 1;
 
+      strncpy(ibur,buf+FIRST_CHAR+8,5);
+      ibur[5]='\0';
+      sscanf(ibur,"%d",&ierrnum);
+      memcpy(&ierrch,buf+FIRST_CHAR+6,2);
       if(strncmp(buf+FIRST_CHAR+6,"un",2)==0) {
 	int ierr;
         strncpy(ibur,buf+FIRST_CHAR+8,5);
@@ -236,19 +312,37 @@ Move:
 /* append bell if an error */
 
 Append:           /* send message to station error program */
-      if(*cp2 == 'b' && shm_addr->sterp !=0) {
+
+      display=1;
+      if(ierrnum!=0) 
+	for(ptr=base;ptr!=NULL;ptr=ptr->next)
+	  if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
+	    display=0;
+	    break;
+	  }
+      if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
         class=0;
         cls_snd(&class, buf, strlen(buf), 0, 0);
         ip[0]=class;
         skd_run("sterp", 'n', ip); 
       }
+      /* send message to station erchk program */
+      if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
+        class=0;
+        cls_snd(&class, buf, strlen(buf), 0, 0);
+        ip[0]=class;
+        skd_run("erchk", 'n', ip); 
+      }
+
+      if(display) {
 /* not Y10K compliant */
-      printf("%.8s",buf+9);
+	printf("%.8s",buf+9);
 /* not Y10K compliant */
-      printf("%s",buf+20);
-      if (*cp2 == 'b')
-	printf("\007");
-      printf("\n");
+	printf("%s",buf+20);
+	if (*cp2 == 'b')
+	  printf("\007");
+	printf("\n");
+      }
     }
 
 /* SECTION 6 */
