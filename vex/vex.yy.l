@@ -183,6 +183,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>if_def			{BEGIN(INITIAL);return T_IF_DEF;}
 
 <LINE>pass_order		{BEGIN(INITIAL);return T_PASS_ORDER;}
+<LINE>S2_group_order		{BEGIN(INITIAL);return T_S2_GROUP_ORDER;}
 
 <LINE>pcal_freq		{BEGIN(INITIAL);return T_PCAL_FREQ;}
 
@@ -244,6 +245,8 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>VLBA_frmtr_sys_trk	{BEGIN(INITIAL);return T_VLBA_FRMTR_SYS_TRK;}
 <LINE>VLBA_trnsprt_sys_trak	{BEGIN(INITIAL);return T_VLBA_TRNSPRT_SYS_TRAK;}
 <LINE>S2_data_def		{BEGIN(INITIAL);return T_S2_DATA_DEF;}
+<LINE>S2_record_mode		{BEGIN(INITIAL);return T_S2_RECORD_MODE;}
+<LINE>S2_data_source		{BEGIN(INITIAL);return T_S2_DATA_SOURCE;}
 
 <LINE>start_literal\(		{BEGIN(INITIAL); yylval.llptr=lit(); return T_LITERAL;}
 	

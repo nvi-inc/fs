@@ -39,6 +39,7 @@ struct bbc_assign      *baptr;
 struct headstack       *hsptr;
 
 struct data_source     *dsptr;
+struct tape_length     *tlptr;
 struct tape_motion     *tmptr;
 
 struct headstack_pos   *hpptr;
@@ -68,6 +69,7 @@ struct fanin_def	*fiptr;
 struct fanout_def	*foptr;
 struct vlba_frmtr_sys_trk	*fsptr;
 struct s2_data_def		*sdptr;
+struct s2_record_mode		*srptr;
 
 }
 
@@ -101,6 +103,7 @@ struct s2_data_def		*sdptr;
 %token <ival>   T_IF_DEF
 
 %token <ival>   T_PASS_ORDER
+%token <ival>   T_S2_GROUP_ORDER
 
 %token <ival>   T_PCAL_FREQ
 
@@ -126,6 +129,7 @@ struct s2_data_def		*sdptr;
 
 %token <ival>   T_FANIN_DEF T_FANOUT_DEF T_TRACK_FRAME_FORMAT T_DATA_MODULATE
 %token <ival>   T_VLBA_FRMTR_SYS_TRK T_VLBA_TRNSPRT_SYS_TRAK T_S2_DATA_DEF
+%token <ival>   T_S2_RECORD_MODE T_S2_DATA_SOURCE
 
 %token <ival>	B_GLOBAL B_STATION B_MODE B_SCHED
 %token <ival>	B_EXPER B_SCHEDULING_PARMS B_PROC_TIMING B_EOP B_FREQ B_CLOCK
@@ -196,9 +200,10 @@ struct s2_data_def		*sdptr;
 %type  <lwptr>  das_lowl das_defx
 %type  <sval>	record_transport electronics_rack tape_control
 %type  <dvptr>  number_drives
-%type  <dvptr>  record_density tape_length recording_system_id early_start
+%type  <dvptr>  record_density recording_system_id
 %type  <hsptr>  headstack
 %type  <dsptr>  data_source
+%type  <tlptr>  tape_length
 %type  <tmptr>  tape_motion
 
 %type  <llptr>  eop_block eop_defs eop_lowls 
@@ -238,7 +243,7 @@ struct s2_data_def		*sdptr;
 %type  <llptr>  pass_order_block pass_order_defs pass_order_lowls 
 %type  <dfptr>  pass_order_def
 %type  <lwptr>  pass_order_lowl pass_order_defx
-%type  <llptr>  pass_order
+%type  <llptr>  pass_order s2_group_order
 
 %type  <llptr>  phase_cal_block phase_cal_defs phase_cal_lowls 
 %type  <dfptr>  phase_cal_def
@@ -305,7 +310,9 @@ struct s2_data_def		*sdptr;
 %type  <sval>   track_frame_format data_modulate
 %type  <fsptr>  vlba_frmtr_sys_trk
 %type  <sdptr>  s2_data_def
+%type  <srptr>  s2_record_mode
 %type  <llptr>  bit_stream_list bit_stream vlba_trnsprt_sys_trak
+%type  <llptr>	s2_data_source
 
 %type  <exptr>  external_ref
 %type  <llptr>  literal
@@ -494,9 +501,11 @@ station:	T_STATION '=' T_NAME ':'	/* name */
 
 start_position:	/* empty */			{$$=NULL;}
 		| length_value			{$$=$1;}
+		| time_value			{$$=$1;}
 
 pass:		/* empty */			{$$=NULL;}
 		| T_NAME			{$$=$1;}
+		| T_DOUBLE			{$$=$1;}
 
 sector:		/* empty */			{$$=NULL;}
 		| T_LINK			{$$=$1;}
@@ -664,15 +673,20 @@ data_source:	T_DATA_SOURCE '=' T_NAME ':' T_NAME ':' T_NAME ':' T_NAME ':'
 
 record_density:	T_RECORD_DENSITY '=' value ';' {$$=$3;}
 
-tape_length:	T_TAPE_LENGTH '=' length_value ';'		{$$=$3;}
+tape_length:	T_TAPE_LENGTH '=' length_value ';'
+				{$$=make_tape_length($3,NULL,NULL);}
+		| T_TAPE_LENGTH '=' time_value ':' T_NAME ':' value ';'
+				{$$=make_tape_length($3,$5,$7);}
 
 recording_system_id:	T_RECORDING_SYSTEM_ID '=' value ';' 	{$$=$3;}
 
-tape_motion:	T_TAPE_MOTION '=' T_NAME early_start ';'
-					{$$=make_tape_motion($3,$4);}
-
-early_start:	/* empty */			{$$=NULL;}
-		| ':' time_value		{$$=$2;}
+tape_motion:	T_TAPE_MOTION '=' T_NAME ';'
+				{$$=make_tape_motion($3,NULL,NULL,NULL);}
+		| T_TAPE_MOTION '=' T_NAME ':' time_value ';'
+				{$$=make_tape_motion($3,$5,NULL,NULL);}
+		| T_TAPE_MOTION '=' T_NAME ':' time_value
+					':' time_value ':' time_value ';'
+				{$$=make_tape_motion($3,$5,$7,$9);}
 
 tape_control:	T_TAPE_CONTROL '=' T_NAME ';' {$$=$3;}
 
@@ -939,11 +953,15 @@ pass_order_lowls:	pass_order_lowls pass_order_lowl
 			| pass_order_lowl	{$$=add_list(NULL,$1);}
 
 pass_order_lowl:	pass_order	{$$=make_lowl(T_PASS_ORDER,$1);}
+			| s2_group_order
+					{$$=make_lowl(T_S2_GROUP_ORDER,$1);}
 			| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
 pass_order:	T_PASS_ORDER '=' name_list ';' {$$=$3;}
+
+s2_group_order:	T_S2_GROUP_ORDER '=' value_list ';' {$$=$3;}
 
 /* $PHASE_CAL block */
 
@@ -1362,6 +1380,8 @@ tracks_lowl:	fanin_def	{$$=make_lowl(T_FANIN_DEF,$1);}
 		| vlba_trnsprt_sys_trak
 				{$$=make_lowl(T_VLBA_TRNSPRT_SYS_TRAK,$1);}
 		| s2_data_def	{$$=make_lowl(T_S2_DATA_DEF,$1);}
+		| s2_record_mode	{$$=make_lowl(T_S2_RECORD_MODE,$1);}
+		| s2_data_source	{$$=make_lowl(T_S2_DATA_SOURCE,$1);}
 		| external_ref	{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT     {$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING {$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -1389,6 +1409,11 @@ vlba_trnsprt_sys_trak:	T_VLBA_TRNSPRT_SYS_TRAK '=' value ':' value ';'
 
 s2_data_def:	T_S2_DATA_DEF '=' bit_stream ':' T_NAME ';'
 		{$$=make_s2_data_def($3,$5);}
+
+s2_record_mode:	T_S2_RECORD_MODE '=' T_NAME ':' value ':' name_list ';'
+		{$$=make_s2_record_mode($3,$5,$7);}
+
+s2_data_source:	T_S2_DATA_SOURCE '=' name_list ';' {$$=$3;}
 
 bit_stream_list:	bit_stream_list ':' T_LINK ':' T_NAME 
 					{$$=add_list(add_list($1,$3),$5);}
