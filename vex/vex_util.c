@@ -38,6 +38,9 @@ static int
 get_data_source_field(Data_Source *data_source,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_tape_length_field(Tape_Length *tape_length,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -100,6 +103,11 @@ get_vlba_frmtr_sys_trk_field(Vlba_frmtr_sys_trk *vlba_frmtr_sys_trk,int n,
 static int
 get_s2_data_def_field(S2_data_def *s2_data_def,int n,int *link,
 	      int *name, char **value, char **units);
+
+static int
+get_s2_record_mode_field(S2_record_mode *s2_record_mode,int n,int *link,
+	      int *name, char **value, char **units);
+
 static int
 get_dvalue_field(Dvalue *dvalue,int n,int *link,int *name, char **value,
 		 char **units);
@@ -217,6 +225,7 @@ static  struct {
   {"if_def", T_IF_DEF},
   
   {"pass_order", T_PASS_ORDER},
+  {"S2_group_order", T_S2_GROUP_ORDER},
   
   {"pcal_freq", T_PCAL_FREQ},
   
@@ -278,6 +287,8 @@ static  struct {
   {"VLBA_frmtr_sys_trk", T_VLBA_FRMTR_SYS_TRK},
   {"VLBA_trnsprt_sys_trak", T_VLBA_TRNSPRT_SYS_TRAK},
   {"S2_data_def", T_S2_DATA_DEF},
+  {"S2_record_mode", T_S2_RECORD_MODE},
+  {"S2_data_source", T_S2_DATA_SOURCE},
   {NULL, 0}
 };
 
@@ -508,12 +519,27 @@ struct data_source *make_data_source(char *source,char *input1, char *input2,
   return new;
 }
     
-struct tape_motion *make_tape_motion(char *type, struct dvalue *early)
+struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
+				     struct dvalue *tapes)
+{
+  NEWSTRUCT(new,tape_length);
+ 
+  new->duration=duration;
+  new->speed=speed;
+  new->tapes=tapes;
+
+  return new;
+}
+    
+struct tape_motion *make_tape_motion(char *type, struct dvalue *early,
+				     struct dvalue *late, struct dvalue *gap)
 {
   NEWSTRUCT(new,tape_motion);
  
   new->type=type;
   new->early=early;
+  new->late=late;
+  new->gap=gap;
 
   return new;
 }
@@ -737,6 +763,17 @@ struct s2_data_def *make_s2_data_def(struct llist *bitstream,char *input)
 
   return new;
 }
+struct s2_record_mode *make_s2_record_mode(char *mode, struct dvalue *groups,
+					   struct llist *inputs)
+{
+  NEWSTRUCT(new,s2_record_mode);
+
+  new->mode=mode;
+  new->groups=groups;
+  new->inputs=inputs;
+
+  return new;
+}
 
 int
 lowl2int(char *lowl)
@@ -814,7 +851,6 @@ char **units)
   case T_CLOCK_RATE:
   case T_NUMBER_DRIVES:
   case T_RECORD_DENSITY:
-  case T_TAPE_LENGTH:
   case T_RECORDING_SYSTEM_ID:
   case T_TAI_UTC:
   case T_A1_TAI:
@@ -898,12 +934,16 @@ char **units)
   case T_DATA_SOURCE:
     ierr=get_data_source_field(ptr,n,link,name,value,units);
     break;
+  case T_TAPE_LENGTH:
+    ierr=get_tape_length_field(ptr,n,link,name,value,units);
+    break;
   case T_TAPE_MOTION:
     ierr=get_tape_motion_field(ptr,n,link,name,value,units);
     break;
   case T_UT1_UTC:
   case T_X_WOBBLE:
   case T_Y_WOBBLE:
+  case T_S2_GROUP_ORDER:
   case T_ROLL:
   case T_HORIZON_MAP_AZ:
   case T_HORIZON_MAP_EL:
@@ -918,6 +958,7 @@ char **units)
     break;
   case T_PASS_ORDER:
   case T_SOURCE_TYPE:
+  case T_S2_DATA_SOURCE:
     ierr=get_svalue_list_field(ptr,n,link,name,value,units);
     break;
   case T_PCAL_FREQ:
@@ -976,6 +1017,9 @@ char **units)
     break;
   case T_S2_DATA_DEF:
     ierr=get_s2_data_def_field(ptr,n,link,name,value,units);
+    break;
+  case T_S2_RECORD_MODE:
+    ierr=get_s2_record_mode_field(ptr,n,link,name,value,units);
     break;
   default:
     fprintf(stderr,"can't get here in get_field %d\n",statement);
@@ -1318,6 +1362,38 @@ get_data_source_field(Data_Source *data_source,int n,int *link,
   return 0;
 }
 static int
+get_tape_length_field(Tape_Length *tape_length,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=tape_length->duration->value;
+    *units=tape_length->duration->units;
+    *name=0;
+    break;
+  case 2:
+    if(tape_length->speed==NULL)
+      return -1;
+    *value=tape_length->speed;
+    break;
+  case 3:
+    *value=tape_length->tapes->value;
+    *units=tape_length->tapes->units;
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
 get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
 			  int *name, char **value, char **units)
 {
@@ -1337,6 +1413,18 @@ get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
       return -1;
     *value=tape_motion->early->value;
     *units=tape_motion->early->units;
+    *name=0;
+    break;
+  case 3:
+    if(tape_motion->late==NULL)
+      return -1;
+    *value=tape_motion->late->value;
+    *units=tape_motion->late->units;
+    *name=0;
+    break;
+  case 4:
+    *value=tape_motion->gap->value;
+    *units=tape_motion->gap->units;
     *name=0;
     break;
   default:
@@ -2021,6 +2109,40 @@ get_s2_data_def_field(S2_data_def *s2_data_def,int n,int *link,
     break;
   default:
     return -1;
+  }
+  return 0;
+}
+static int
+get_s2_record_mode_field(S2_record_mode *s2_record_mode,int n,int *link,
+	      int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=s2_record_mode->mode;
+    break;
+  case 2:
+    *value=s2_record_mode->groups->value;
+    *units=s2_record_mode->groups->units;
+    *name=0;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_svalue_list_field(s2_record_mode->inputs,n-2,link,name,value,
+			       units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_record_mode_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }
