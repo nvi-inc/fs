@@ -94,8 +94,11 @@ C 960403 nrv Add another dum to RDCTL call for rec_cat
 C 960513 nrv New release date.
 C 960531 nrv Add vex.
 C 960604 nrv Initialize NOBS before calling vob1inp.
-C 960607 nrv Move initializations here from SREAD
 C 960610 nrv Remove freqs.ftni initialization to SREAD and VREAD
+C 960810 nrv Change ITEARL to an array by station
+C 960817 nrv Add S2 option for procedures
+C 960912 nrv Remove the procedure options from the menu if the
+C            rack and recorder types are known from the VEX file.
 C
 C Initialize some things.
 
@@ -178,13 +181,18 @@ C  In skobs.ftni
       ITAPTM=0
       ISORTM=0
       IHDTM=0
-      ITEARL=0
 C  In sourc.ftni
       NCELES = 0
       NSATEL = 0
       NSOURC = 0
 C  In statn.ftni
       NSTATN = 0
+      do i=1,max_stn
+        ITEARL(i)=0
+        itlate(i)=0
+        itgap(i)=0
+        tape_motion_type(i)=''
+      enddo
 C  In freqs.ftni
       NCODES = 0
 
@@ -197,13 +205,9 @@ C   Check for non-interactive mode.
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
-          if (kskdfile.and.kdrgfile) then ! reinitialize
-            kskdfile=.false.
-            kdrgfile=.false.
-           endif
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960815)')
+     .  '(NRV 960905)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -265,8 +269,8 @@ C
 	  WRITE(LUSCN,9300) LSKDFI(1:IC),cexpna(1:ix)
 9300    FORMAT(' Opening file ',A,' for schedule ',A)
 	  CALL SREAD(IERR,ivexnum)
-	  if (itearl.gt.0) then
-	    write(luscn,9301) itearl
+	  if (itearl(1).gt.0) then
+	    write(luscn,9301) itearl(1)
 9301      format(' NOTE: This schedule was created using early '
      .    ,'start with EARLY = ',i3,' seconds.')
 	  endif
@@ -432,25 +436,48 @@ C
 9068      FORMAT(/' Select DRUDG option for schedule ',A,' at ',4A2/)
 9067      FORMAT(/' Select DRUDG option for schedule ',A,' (all ',
      .    'stations)'/)
-          write(luscn,9070)
-9070      FORMAT(
-     .    ' 1 = Print the schedule                ',
-     .    '  7 = Re-specify stations'/
-     .    ' 2 = Make antenna pointing file (VLBA) ',
-     .    '  8 = Get a new schedule file'/
-     .    ' 3 = Create SNAP command file (.SNP)   ',
-     .    '  9 = Change output destination, width '/
-     .    ' 4 = Print complete .SNP file          ',
-     .    ' 10 = Shift the .SKD file  '/,
-     .    ' 5 = Print summary of .SNP file        ',
-     .    ' 11 = Shift the .SNP file  '/,
-     .    ' 6 = Make bar code tape labels         ',
-     .    ' 12 = Make Mark III procedures (.PRC) '/,
-     .    ' 0 = Done with DRUDG                   ',
-     .    ' 13 = Make VLBA procedures (.PRC)'/,
-     .    '                                       ',
-     .    ' 14 = Make hybrid procedures (.PRC)'/,
-     .    ' ? ',$)
+          if (ichcm_ch(lstrack(1,istn),1,'unknown ').eq.0.or.
+     .        ichcm_ch(lstrec (1,istn),1,'unknown ').eq.0.or.
+     .        ichcm_ch(lstrack(1,istn),1,'        ').eq.0.or.
+     .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
+            write(luscn,9070)
+9070        FORMAT(
+     .      ' 1 = Print the schedule                ',
+     .      '  7 = Re-specify stations'/
+     .      ' 2 = Make antenna pointing file (VLBA) ',
+     .      '  8 = Get a new schedule file'/
+     .      ' 3 = Create SNAP command file (.SNP)   ',
+     .      '  9 = Change output destination, width '/
+     .      ' 4 = Print complete .SNP file          ',
+     .      ' 10 = Shift the .SKD file  '/,
+     .      ' 5 = Print summary of .SNP file        ',
+     .      ' 11 = Shift the .SNP file  '/,
+     .      ' 6 = Make bar code tape labels         ',
+     .      ' 12 = Make Mark III procedures (.PRC) '/,
+     .      ' 0 = Done with DRUDG                   ',
+     .      ' 13 = Make VLBA procedures (.PRC)'/,
+     .      '                                       ',
+     .      ' 14 = Make hybrid procedures (.PRC)'/,
+     .      ' ? ',$)
+          else ! gotem
+            write(luscn,9073)
+9073        FORMAT(
+     .      ' 1 = Print the schedule                ',
+     .      '  7 = Re-specify stations'/
+     .      ' 2 = Make antenna pointing file (VLBA) ',
+     .      '  8 = Get a new schedule file'/
+     .      ' 3 = Create SNAP command file (.SNP)   ',
+     .      '  9 = Change output destination, width '/
+     .      ' 4 = Print complete .SNP file          ',
+     .      ' 10 = Shift the .SKD file  '/,
+     .      ' 5 = Print summary of .SNP file        ',
+     .      ' 11 = Shift the .SNP file  '/,
+     .      ' 6 = Make bar code tape labels         ',
+     .      ' 12 = Make procedures (.PRC) '/,
+     .      ' 0 = Done with DRUDG                   ',
+     .      ' '/,
+     .      ' ? ',$)
+          endif
         else ! SNAP file
 	  l=trimlen(cexpna)
 	  WRITE(LUSCN,9071) cexpna(1:l),lstcod(1)
@@ -472,9 +499,9 @@ C
       endif
 
 	if ((ifunc.lt.0).or.(ifunc.gt.14).and..not.kbatch) GOTO 700
-	if ((ifunc.lt.0).or.(ifunc.gt.13).and.kbatch) GOTO 991
+	if ((ifunc.lt.0).or.(ifunc.gt.14).and.kbatch) GOTO 991
 	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.ifunc.eq.12.or.ifunc.eq.13)) goto 700
+     .  .or.ifunc.eq.10.or.ifunc.ge.14)) goto 700
 
 	IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
@@ -530,15 +557,16 @@ C
             PNTNAME = cexpna(1:ix)//scode//'.pnt'
           endif
         ierr=0
-	  IF (kskd) THEN
-          open(unit=LU_INFILE,file=LSKDFI,iostat=IERR)
-          rewind(LU_INFILE)
-          call initf(LU_INFILE,IERR)
-	    IF (IFUNC.NE.12.and.ifunc.ne.13) 
-     .        call aposn(LU_INFILE,IERR,irecsk)
-	    IF ((IFUNC.EQ.12.or.ifunc.eq.13).AND.IRECPR.NE.0)
-     .        call aposn(LU_INFILE,IERR,irecpr)
-        END IF
+C No longer need this because the schedule is stored in memory.
+C  IF (kskd) THEN
+C         open(unit=LU_INFILE,file=LSKDFI,iostat=IERR)
+C         rewind(LU_INFILE)
+C         call initf(LU_INFILE,IERR)
+C    IF (IFUNC.NE.12.and.ifunc.ne.13) 
+C    .        call aposn(LU_INFILE,IERR,irecsk)
+C    IF ((IFUNC.EQ.12.or.ifunc.eq.13).AND.IRECPR.NE.0)
+C    .        call aposn(LU_INFILE,IERR,irecpr)
+C       END IF
         IF (IERR.EQ.0)  THEN
           IF (IFUNC.EQ.1) THEN
             CALL LISTS
@@ -554,7 +582,7 @@ c            I = nstnx
             ELSE IF (IFUNC.EQ.13) THEN
               CALL PROCS(2) ! VLBA backend procedures
 	    ELSE IF (IFUNC.EQ.14) THEN
-            CALL PROCS(3) ! VLBA backend procedures
+              CALL PROCS(3) ! hybrid backend procedures
 	    ELSE IF (IFUNC.EQ.6) THEN
 	      if (nstnx.eq.1) then ! just one station
 		pcode = 1
