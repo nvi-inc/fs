@@ -1,5 +1,5 @@
 #
-LIBS=../../vex.test/vex.a -lfl
+LIBS=../vex.a -lfl
 OBJECTS=main.o
 CC=gcc
 
