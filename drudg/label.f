@@ -21,8 +21,8 @@ C LOCAL:
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),
      .          lstnam(4),lco
-      integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN)
-      integer iob,idum
+      integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
+      integer iob,idum,ilabrowin,ilabcolin
         LOGICAL   KEX,ks2
 C IYR, MON, IDA, IHR, iMIN, IDUR, ICAL, IDLE,
 C LFREQ, ISP, LMODE,
@@ -48,10 +48,12 @@ C NLAB - number of labels across a page
         character*1 cid1
          character*2 cid2
       INTEGER IC, TRIMLEN,jchar,ichmv,iflch
+      character*20 response
       real speed ! function
         integer Z24
         integer*2 hhr
          integer ichcm_ch,copen,cclose
+       character upper
 
 C INITIALIZED:
         DATA IPASP/-1/, IFTOLD/0/
@@ -93,6 +95,8 @@ C            C routines.
 C 970228 nrv Remove IIN and use CLABTYP to determine what type of output.
 C 970228 nrv Use labname for output file.
 C 970312 nrv Add call to READ_SNAP1 to read first line freeform.
+C 970827 nrv Add startlab to make_pslabel call. Add prompts for 
+C            starting position of label.
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -165,8 +169,8 @@ C                            !set up laser printer
             if (kbatch) then
               read(cr1,*,err=991) ilabrow
 991           if (ilabrow.lt.1.or.ilabrow.gt.8) then
-                write(luscn,9991)
-9991            format(' Invalid label position.')
+                write(luscn,9991) ilabrow
+9991            format(' Invalid label position ',2i4)
                 return
               endif
             else
@@ -229,7 +233,90 @@ C                                 plus <esc> A 12 for 24-pin
             return
           endif
           nlab=1
-        endif
+        endif ! start a new file
+        if (kbatch) then ! get starting row/col
+          if (len(cr1).eq.0) then ! default
+            if (inew.eq.1) then
+              ilabrowin=1
+              ilabcolin=1
+            else
+              ilabrowin=ilabrow
+              ilabcolin=ilabcol
+            endif
+          else ! read them
+            read(cr1,*,err=992) ilabrowin
+992         read(cr2,*,err=993) ilabcolin
+993         continue
+          endif ! default/read them
+          if (ilabrowin.lt.1.or.ilabrowin.gt.rlabsize(3).or.
+     .        ilabcolin.lt.1.or.ilabcolin.gt.rlabsize(4)) then
+            write(luscn,9991) ilabrowin,ilabcolin
+            return
+          endif
+          if (inew.eq.0.and.
+     .       ilabrowin.lt.ilabrow.or.(ilabrowin.eq.ilabrow.and.
+     .       ilabcolin.lt.ilabcol)) inewpage=1
+          ilabrow=ilabrowin
+          ilabcol=ilabcolin
+        else ! interactive
+910       write(luscn,'(" Enter row and column of first label, ",
+     .    "0 to quit,")')
+          if (inew.eq.1) then
+            write(luscn,'(" default is 1,1 ? ",$)')
+          else
+            write(luscn,'(" default is row ",i2," column ",i2," ? ",$)')
+     .      ilabrow,ilabcol
+          endif
+          read(luusr,'(a)') response
+          if (response(1:1).eq.'0') return
+          if (response(1:1).eq.' ') then ! default
+            if (inew.eq.1) then
+              ilabrow=1
+              ilabcol=1
+            else
+C             leave it alone
+            endif
+          else ! read values
+            read (response,*,err=994) ilabrowin,ilabcolin
+994         if (ilabrowin.lt.1.or.ilabrowin.gt.rlabsize(3).or.
+     .          ilabcolin.lt.1.or.ilabcolin.gt.rlabsize(4)) then ! invalid
+              write(luscn,9991) ilabrowin,ilabcolin
+              goto 910
+            else ! valid
+              if (inew.eq.1) then ! new file starting
+                ilabrow=ilabrowin
+                ilabcol=ilabcolin
+                inewpage=0
+              else ! continuing
+                if (ilabrowin.lt.ilabrow.or.(ilabrowin.eq.ilabrow.and.
+     .              ilabcolin.lt.ilabcol)) then ! check
+                  if (kbatch) then ! force new page
+                    inewpage=1
+                    ilabrow=ilabrowin
+                    ilabcol=ilabcolin
+                  else ! ask
+                    write(luscn,'(" Next available row would be ",i2,
+     .              ". Row ",i2," will force a new page of labels."/
+     .              " Is this correct ",
+     .              " (Y,N default Y) ? ",$)') ilabrow,ilabrowin
+                    read(luusr,'(a)') response
+                    response(1:1) = upper(response(1:1))
+                    if (response(1:1).eq.'Y') then ! take it
+                      inewpage=1
+                      ilabrow=ilabrowin
+                      ilabcol=ilabcolin
+                    else ! try again
+                      goto 910
+                    endif ! take it/try again 
+                  endif ! force/ask
+                else ! take it
+                  ilabrow=ilabrowin
+                  ilabcol=ilabcolin
+                endif ! check/take it
+              endif ! new/continue
+            endif ! invalid/valid
+          endif ! default/read
+        endif ! batch/get starting row/col
       endif ! laser-epson/ps
 
 C 1. First initialize counters.  Read the first observation,
@@ -265,7 +352,7 @@ C
      .         LFREQ,IPAS,LDIR,IFT,LPRE,
      .         IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .         NSTNSK,LSTN,LCABLE,
-     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
           ENDIF
 C
 C Preset ISTNSK = 0 in case of EOF, this simplifies the
@@ -307,7 +394,16 @@ C
                 ipsm2=im2(1)
                 call make_pslabel(fileptr,lstnam,lco,lexper,
      .          iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2,ntape,
-     .          inew,rlabsize)
+     .          inew,rlabsize,ilabrow,ilabcol,inewpage)
+                ilabcol=ilabcol+1
+                if (ilabcol.gt.rlabsize(4)) then
+                  ilabcol=1
+                  ilabrow=ilabrow+1
+                  if (ilabrow.gt.rlabsize(3)) then
+                    ilabrow=1
+                    inewpage=1
+                  endif
+                endif
                 NOUT = 0
               endif
             END IF !type a row
