@@ -2,7 +2,7 @@
 C 
       include '../include/dpi.i'
 C
-      double precision,conv,utc,utfrac,ra,dec,days,slon,
+      double precision conv,utc,utfrac,ra,dec,days,slon,
      .sanom,ecllon,dasin,quad,obliq,x 
 C 
       dimension it(6) 
