@@ -649,7 +649,7 @@ C         If FASTx preceeded, add a wait for tape to slow down
           if (kspin) then
             CALL IFILL(IBUF2,1,iblen,Z20)
             nch = ichmv_ch(IBUF2,1,'!+5s ')
-            if (isp.gt.200) nch = ichmv_ch(IBUF2,1,'!+5s ')
+            if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
             call inc(LU_OUTFILE,KERR)
             kspin = .false.
@@ -737,11 +737,6 @@ C Wait until data start time
         call hol2lower(ibuf2,(10+1))
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(10)/2)
         call inc(LU_OUTFILE,KERR)
-C TAPE monitor command
-        CALL IFILL(IBUF2,1,iblen,32)
-        idum = ichmv_ch(IBUF2,1,'tape')
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-        call inc(LU_OUTFILE,KERR)
 C S2 DATA_VALID 
         if (ks2) then
           CALL IFILL(IBUF2,1,iblen,32)
@@ -749,6 +744,11 @@ C S2 DATA_VALID
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
           call inc(LU_OUTFILE,KERR)
         endif
+C TAPE monitor command
+        CALL IFILL(IBUF2,1,iblen,32)
+        idum = ichmv_ch(IBUF2,1,'tape')
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+        call inc(LU_OUTFILE,KERR)
 C Start tape, if not started earlier and if not already running
         if (itearl(istn).eq.0.and..not.krunning) then !start tape now
           CALL IFILL(IBUF2,1,iblen,32)
@@ -796,12 +796,16 @@ C ET command
 C Wait for tape to stop
           if (.not.ks2) then
             idum = ichmv_ch(IBUF2,1,'!+3S')
-            if (isp.gt.200) idum = ichmv_ch(IBUF2,1,'!+5s')
+            if (spd.gt.200.0) idum = ichmv_ch(IBUF2,1,'!+5s')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
             call inc(LU_OUTFILE,KERR)
             CALL IFILL(IBUF2,1,iblen,Z20)
           endif
         endif
+C Tape monitor command
+        idum = ichmv_ch(IBUF2,1,'tape')
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+        call inc(LU_OUTFILE,KERR)
 C S2 DATA_VALID 
         if (ks2) then
           CALL IFILL(IBUF2,1,iblen,32)
@@ -809,10 +813,6 @@ C S2 DATA_VALID
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
           call inc(LU_OUTFILE,KERR)
         endif
-C Tape monitor command
-        idum = ichmv_ch(IBUF2,1,'tape')
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-        call inc(LU_OUTFILE,KERR)
 
 C Save information about this scan before going on to the next one
         idum = ichmv(lmodep,1,LMODE(1,istn,ICOD),1,8)
