@@ -9,9 +9,13 @@ Settable Parameters:
 mode    The recording mode,choices for the mode are m, a, b1, b2,
         c1, c2, e1, e2, e3, e4, and dn, where n=1 to 28. No
         default. Modes a, b, b1, b2, c1, c2, e1, e2, e3, e4 and dn
-        correspond to the traditional Mark III modes and sub-passes. Mode m uses the sampler track assignments and
-        formatter track enables specified by the trackform and
-        tracks commands.
+        correspond to the traditional Mark III modes. For bx and cx modes,
+        x corresponds to the sub-pass recorded (odd Mark III tracks for b1
+        and c1, even Mark III tracks for b2 and c2). For the dn modes, n
+        corresponds to the Mark III track number recorded. For the ex modes,
+        x corresponds to the Mark III group number recorded. Mode m uses the
+        sampler track assignments and formatter track enables specified by
+        the trackform and tracks commands.
 rate      Sample rate in Mbits/sec. Choices are 0.125, 0.25, 0.5, 1,
           2, 4, 8, 16, and 32. Default 4. For Nyquist sampling this
           selection must be twice the bandwidth set-up used in the
@@ -31,15 +35,12 @@ error   Error status, okay or the hex value.
 
 Comments:
 The Mark IV formatter clock is set with the fmset program. After
-setting or resetting the formatter time, issue a sy=run setcl
-offset command to reset the Field System time.
+setting or resetting the formatter time, issue a
+sy=run setcl offset & command to reset the Field System time.
 
-Mode names that end with numbers correspond to that subpass of the
-Mark III mode. Note that since the Mark IV recorder does not
-include group enables, the traditional Mark III mode names B and C
-are not useful for mode. For the same reason the subpasses of Mark
-III mode E must be specified explicitly rather than as instances of
-subsets of modes B and C.
+Since the Mark IV recorder does not include group enables, some of the
+traditional Mark III mode names used in mode have numbers appended to
+them to distinguish which sub-pass, group, or track is being recorded.
 
 Some combinations of rate and fan cannot be accommodated by the
 formatter. No output that would require more than 16 MHz nominal
@@ -52,12 +53,11 @@ combination of rate and fan that would imply a nominal date rate per
 track of less than 0.125 MHz for low density recording (thick tape)
 is not supported.
 
-For the interim, in order to help facilitate debugging of the
-formatter in the field, the status of the setable parameters is
-logged when the formatter set-up is changed. This information is
-logged in the form of the output of the low-level MAT commands that
-return this information. This feature will be removed in a
-subsequent version.
+For the time-being, in order to help facilitate debugging of the
+formatter in the field, the status of the setable parameters is logged
+when the formatter set-up is changed. This information is logged in
+the form of the output of the low-level MAT commands that return this
+information. This feature will be removed in a subsequent version.
 
 chekr does not currently support checking of the formatter.
 However, the set-up of the formatter can be monitored by entering
