@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <memory.h>
 #include <stdio.h>
@@ -45,7 +46,7 @@ char terminal2[]) /* connection for get wind parameters. */
   int buffsize;       /* read and write buffer size. */
   
   /* Local variables. */
-  int metcnt; /* counters */
+  int metcnt,i; /* counters */
   int termch, err, count, to;
   int open_err;         /* terminal error on open.  */
   int open2_err;        /* terminal2 error on open. */
@@ -60,11 +61,11 @@ char terminal2[]) /* connection for get wind parameters. */
   FILE *fp;
 
   /* Initialize parameters */
-  temp=0.0;
-  pres=0.0;
-  humi=0.0;
-  wsp=0.0;
-  wdir=0;
+  temp=-51.0;
+  pres=-1.0;
+  humi=-1.0;
+  wsp=-1.0;
+  wdir=-1;
 
   /* ttynum = MET, ttynum2 = Wind Sensor */
   met_baud_rate = 9600;
@@ -117,31 +118,46 @@ char terminal2[]) /* connection for get wind parameters. */
     buff[strlen(buff)]='\0';
     printf("[%d]%s\n",err,buff);
   */
+  i=0;
   if (!strstr(terminal,"/dev/null")) {
     buff[0]='\0';
     for (metcnt=0;metcnt<=2;metcnt++) {
       len = strlen(metcmd[metcnt]);
       /* read from a port */
       err = portwrite(&ttynum, metcmd[metcnt], &len);
-      if(err==-2) printf("write error\n");
+      /*if(err==-2) printf("write error\n");*/
+      if(err==-2) {
+	strcpy(log_str,",,,");
+	break;
+      }
       len = 20;
       err = portread(&ttynum, buff, &count, &len, &termch, &to);
-      /* DEBUG
-	 if(err==-1) printf("wrong number of chars. read\n");
-	 if(err==-2) printf("timed out\n");
-	 if(err==-3) printf("read error\n");
-      */
-      switch (metcnt) {
-      case 0:
-	if(metcnt==0)sscanf(&buff[5],"%f", &temp);
+      if(err!=-2) {
+	/* DEBUG 
+	   if(err==-1) printf("wrong number of chars. read\n");
+	   if(err==-2) printf("timed out\n");
+	   if(err==-3) printf("read error\n");
+	*/
+	switch (metcnt) {
+	case 0:
+	  if(err!=0) temp=(float)err*51.0;
+	  else  sscanf(&buff[5],"%f", &temp);
+	  break;
+	case 1:
+	  if(err!=0) pres=(float)err;
+	  else sscanf(&buff[5],"%f", &pres);
+	  break;
+	case 2:
+	  if(err!=0) humi=(float)err;
+	  else sscanf(&buff[5],"%f", &humi);
+	  break;
+	default:
+	}
+      } else {
+	temp=(float)err*50.0;
+	pres=(float)err;
+	humi=(float)err;
 	break;
-      case 1:
-	if(metcnt==1) sscanf(&buff[5],"%f", &pres);
-	break;
-      case 2:
-	if(metcnt==2) sscanf(&buff[5],"%f", &humi);
-	break;
-      default:
       }
     }
   }
@@ -150,22 +166,36 @@ char terminal2[]) /* connection for get wind parameters. */
     err = portwrite(&ttynum2, windcmd[4], &len);
     len = 80;
     err = portread(&ttynum2, buff, &count, &len, &termch, &to);
-    /* DEBUG
-       if(err==-1) printf("wrong number of chars. read\n");
-       if(err==-2) printf("timed out\n");
-       if(err==-3) printf("read error\n");
-    */
-    len = strlen(buff);
-    buff[len]='\0';
-    sscanf(&buff[4],"%3d", &wdir);
-    sscanf(&buff[7],"%6f", &wsp);
+    if(err!=-2) {
+      /* DEBUG 
+	 if(err==-1) printf("wind:wrong number of chars. read\n");
+	 if(err==-2) printf("wind:timed out\n");
+	 if(err==-3) printf("wind:read error\n");
+      */
+      if(err!=0) { 
+	wdir=err; 
+	wsp=(float)err;
+      } else {
+	len = strlen(buff);
+	buff[len]='\0';
+	sscanf(&buff[4],"%3d", &wdir);
+	sscanf(&buff[7],"%6f", &wsp);
+      }
+    } else {
+      wdir=err;
+      wsp=(float)err;
+    }
   }
 
-  sprintf(log_str,"%.1f,%.1f,%.1f,%.1f,%d",temp,pres,humi,wsp,wdir);
   log_str[strlen(log_str)]='\0';
+  sprintf(log_str,"%.1f,%.1f,%.1f,%.1f,%d",temp,pres,humi,wsp,wdir);
   p=log_str;
   portclose(&ttynum);
   portclose(&ttynum2);
   
   return(p);
 }
+
+
+
+
