@@ -2,8 +2,8 @@
 
 C  This routine gets all the observations for one station
 C  from the vex file.
-C  Call after vmoinp, vstinp, and vsoinp.
-C  Call in a loop to get all stations, or use VOBINP.
+C  Call after VREAD which reads exper, sources, stations, modes.
+C  Call in a loop to get all stations.
 C
 C History
 C 960531 nrv New.
@@ -15,6 +15,8 @@ C 970121 nrv Add station and code index to npassl
 C 970129 nrv Add nobs_stn to call
 C 970307 nrv Find the time field by skipping fields, not using absolute
 C            character counts. 
+C 970523 nrv TEMPORARY fix -- remove time ordering!
+C 970717 nrv Read the "drive" field as the record/norecord flag
 
 
       include '../skdrincl/skparm.ftni'
@@ -38,17 +40,18 @@ C          addscan                   (add a station to a scan)
 C          findscan                  (find a matching scan)
 C
 C  LOCAL:
-      integer isor,icod,il,ip,idur,ifeet,i
+      integer isor,icod,il,ip,ifeet,i,idrive
       integer idum,irec,ipnt
       integer*2 itim1(6),itim2(6)
       integer*2 lcb
       character*128 cmo,cstart,csor,cout,cunit
-      integer ic1,ic2,ich,istart(5)
-      double precision d,start_sec,dst,det
+      integer ic1,ic2,ic11,ic12,ich,istart(5)
+      double precision d,start_sec
+      integer idstart,idend
       logical knew,kearl,ks2
       integer ichmv,ichmv_ch,ivgtso,ivgtmo
       integer ichcm_ch,fget_scan_station,fvex_scan_source,fvex_date,
-     .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len
+     .fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len
 
 C 1. Get scans for one station. 
 
@@ -90,15 +93,16 @@ C 1. Get scans for one station.
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0) return
-          dst = d
+          idstart = d
           ierr = 7 ! data end
           iret = fvex_field(3,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0) return
-          det = d
-          idur = det-dst
+          idend = d
+C         Keep good data offset and duration separate
+C         idur = det-dst
           ierr = 8 ! footage
           iret = fvex_field(4,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -130,6 +134,12 @@ C 1. Get scans for one station.
             if (cout(1:il).eq.'&cw') idum=ichmv_ch(lcb,1,'C ')
             if (cout(1:il).eq.'&ccw') idum=ichmv_ch(lcb,1,'W ')
           endif
+          ierr = 11 ! drive number
+          iret = fvex_field(7,ptr_ch(cout),len(cout))
+          if (iret.ne.0) return
+          iret = fvex_int(ptr_ch(cout),i) ! convert to binary
+          if (i.lt.0.or.iret.ne.0) return
+          idrive=i
 
 C 3. Try to find a matching time, source
 C    and mode. If there is one, add this station to the observation.
@@ -137,7 +147,8 @@ C    If there is not one, make a new observation.
      
             call findscan(isor,icod,istart,irec)
             if (irec.ne.0) then ! add this station
-              call addscan(irec,istn,icod,idur,ifeet,ip,lcb,ierr)
+              call addscan(irec,istn,icod,idstart,idend,
+     .        ifeet,ip,idrive,lcb,ierr)
               knew=.false.
               if (ierr.ne.0) then
                 write(lu,9103) ierr,irec,istn,istart
@@ -145,8 +156,8 @@ C    If there is not one, make a new observation.
      .          'istart=',5i5)
               endif
             else ! new scan
-              call newscan(istn,isor,icod,istart,
-     .        idur,ifeet,ip,lcb,ierr)
+              call newscan(istn,isor,icod,istart,idstart,
+     .        idend,ifeet,ip,idrive,lcb,ierr)
               knew=.true.
               if (ierr.ne.0) write (lu,9108) ierr
 9108          format('vob1inpxx - Error ',i5,' from newscan')
@@ -161,19 +172,27 @@ C
 C       Find the time field by skipping over 4 fields
         ich=1
         do i=1,5 ! want the 5th field 
-          CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
+          CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC11,IC2)
         enddo
-        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
-        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
+        ich=1
+        do i=1,5 ! want the 5th field 
+          CALL GTFLD(lskobs(1,iskrec(irec-1)),ICH,IBUF_LEN*2,IC12,IC2)
+        enddo
+        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic11,11)
+        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic12,11)
         do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
 C         Swap pointers
           ipnt = iskrec(irec-1)
           iskrec(irec-1) = iskrec(irec)
           iskrec(irec) = ipnt
-C         Get new time fields -- starting in ic1
-          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
+C         Get new time fields 
+          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic12,11)
           irec = irec-1
-          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
+          ich=1
+          do i=1,5 ! want the 5th field 
+            CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC12,IC2)
+          enddo
+          idum= ichmv(itim2,1,lskobs(1,iskrec(irec)),ic12,11)
         end do  !out of order
       endif
 
@@ -184,6 +203,7 @@ C 5. Get the next station record.
      .           ptr_ch(stndefnames(istn)),0)
         enddo ! get all obs for this station
       if (ierr.gt.0) ierr=0
+      if (ierr.eq.0) iret=0
 
       return
       end
