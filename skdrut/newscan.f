@@ -100,6 +100,7 @@ C   Insert blanks for other stations' footages
 C  Procedure flags
       nch = ichmv_ch(ibuf,nch,'YNNN')
 C  Duration
+      nch=nch+1
       nch = durscan(ibuf,nch,idend)
 C     NCH = 1 + NCH + IB2AS(idend,IBUF,NCH+1,5)
 C   Insert blanks for other stations' durations
