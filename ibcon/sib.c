@@ -4,9 +4,9 @@
 #include <ib.h>
 #include <ibP.h>
 #else
-extern int ibsta;
-extern int iberr;
-extern int ibcnt;
+int ibsta;
+int iberr;
+int ibcnt;
 #endif
 
 #define BSIZE    256
