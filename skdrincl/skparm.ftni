@@ -34,6 +34,7 @@ C 960412 nrv Test 300 sources
 C 960516 nrv Add MAX_FLD, set to 20
 C 960522 nrv Add lots of max's, change max_pass to index*subpasses
 C 960628 nrv Allow more modes in catalog.
+C 970114 nrv Add MAX_SORLEN, length of source names.
 C
 C********************************************************************
 C
@@ -70,6 +71,10 @@ C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
       PARAMETER (MAX_SOR = 305)
+
+C     The maximum number of CHARACTERS in a source name.
+      integer max_sorlen
+      PARAMETER (MAX_SORLEN = 16)
 C
 C     The maximum number of celestial (RA,DEC) sources which can
 C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
@@ -242,13 +247,15 @@ C     Definitions for octal constants.
      .OSLASH = O'57', OAND = O'46', OBAR = O'140')
       integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
      .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
-     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,OCAPR
+     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,OCAPR,
+     .ocapi,ocapo
       parameter (OCAPA = O'101', OCAPB = O'102',
      .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
      .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
      .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
      .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
-     .OCAPH = O'110', OCAPP = O'120', OCAPZ = O'132',
+     .OCAPH = O'110', ocapi = o'111', ocapo = o'117', 
+     .OCAPP = O'120', OCAPZ = O'132',
      .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141',
      .OCAPU = O'125', OCAPV = O'126', OCAPR = O'122')
 
