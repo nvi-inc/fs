@@ -34,7 +34,15 @@ C     1. Display current FS version.
 C
       nch = ichmv_ch(ibuf,1,'fsversion/')
 C                   Put / to indicate a response
-      nch = nch + ir2as(fsver,ibuf,nch,4,2)-1
+      idum=sVerMajor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerMinor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerPatch_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch-1
 C
       iclass = 0
       call put_buf(iclass,ibuf,-nch,'fs','  ')
