@@ -166,7 +166,7 @@ parse:
 	increment=TRUE;
 	out_recs=0;
 	out_class=0;
-	strcpy(outbuf,"bank_set=inc\n");
+	strcpy(outbuf,"bank_set=inc;\n");
 	cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	out_recs++;
 
