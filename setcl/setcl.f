@@ -25,16 +25,19 @@ C
 C  LOCAL:
 C
       integer*2 ibuf(40),ibuft(10),ibuf2(10),ibuf4(40)
-      integer ilen,trimlen
+      integer ilen,trimlen,fc_get_vtime,fc_get_s2time
       integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
-      integer*4 centisec(2),centiavg,secs_fm,secs_fs,centifs
+      integer*4 centiavg,secs_fm,secs_fs,centifs
       integer*4 centidiff,diff,nanosec
+      integer*4 diffunix,unixdiff,difffs2unix
       character*63 name
       character*6 model
       character*10 set
       character*1  cjchar
-      logical rn_test
-      integer idum,fc_rte_prior,rn_take
+      logical rn_test,kfm
+      integer idum,fc_rte_prior,rn_take,fc_ntp_synch,ntp_synch
+c
+      include '../include/time_arrays.i'
 C
 C  ROUTINES CALLED:
 C
@@ -53,42 +56,45 @@ C
       equivalence (idoy,it(5)),(it(6),iyr)
       data luop/6/
       data ilen/40/
+      data ibase/0/,ibaseold/0/,ierrors/1/
 C
       call putpname('setcl')
       call setup_fscom
+      if(0.ne.rn_take('setcl',1)) then
+        call logit7ci(idum,idum,idum,-1,-18,'sc',0)
+        return
+      endif
 c
  1    continue
       call wait_prog('setcl',ip)
       call read_fscom
 c
+      kfm=.true.
       set=' '
       call get_arg(1,set)
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &     rateti_fs,spanti_fs,modelti_fs)
+     &     rateti_fs,spanti_fs,modelti_fs,icomputer)
       if(set.eq.'cpu') then
           call logit7ci(idum,idum,idum,-1,-3,'sc',0)
           goto 999
-      else if((set.eq.'offset'.or.set.eq.'rate')
-     &     .and.cjchar(modelti_fs,1).eq.'c') then
-         call logit7ci(idum,idum,idum,-1,-12,'sc',0)
-         goto 999
       endif
       if(set.eq.'save') then
         name=FS_ROOT//'/control/time.new'
         call fopen(9,name,ierr)
         if(ierr.ne.0) then
-          write(6,91) name
-91        format(' Error opening ',A/)
+           call put_stderr('Error opening  '//char(0))
+           call put_stderr(name//char(0))
+           call put_stderr('\n'//char(0))
           call fc_exit(-1)
         endif
         call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &                       rateti_fs,spanti_fs,modelti_fs)
+     &       rateti_fs,spanti_fs,modelti_fs,icomputer)
         if(cjchar(modelti_fs,1).eq.'r') then
           model='rate'
         else if(cjchar(modelti_fs,1).eq.'o') then
           model='offset'
         else if(cjchar(modelti_fs,1).eq.'c') then
-           model='ntp'
+           model='computer'
         else
           model='none'
         endif
@@ -108,6 +114,28 @@ c
 911     format(' fs not running ')
         goto 999
       endif
+      
+      if(index("+-0123456789",set(1:1)).eq.0) goto 49
+      if(((set(2:2).eq.'0'.and.index("+-",set(1:1)).ne.0)
+     &     .or.set(1:1).eq.'0').and.set(1:2).ne.'0 ') then
+         call logit7ci(idum,idum,idum,-1,-16,'sc',0)
+         goto 999
+      endif
+      do i=2,trimlen(set)
+         if(index("0123456789",set(i:i)).eq.0) goto 49
+      enddo
+      read(set,*) ibase
+      ibase=100*((ibase+sign(50,ibase))/100)
+      set=' '
+
+ 49   continue
+      if(set.ne." ".and.set.ne."offset".and.set.ne."rate"
+     &     .and.set.ne."adapt".and.set.ne."computer"
+     &     .and.set.ne."fs".and.set.ne."s2das") then
+         call logit7ci(idum,idum,idum,-1,-17,'sc',0)
+         goto 999
+      endif
+
       idum=fc_rte_prior(CL_PRIOR)
       nerr = 0
       call fs_get_rack(rack)
@@ -117,11 +145,17 @@ c
 50    continue
       iclasm = 0
       nrec = 0
-      if(drive(1).eq.S2) then
+      if(drive(1).eq.S2.or.set.eq."s2das".or.rack.eq.S2) then
          idum=rn_take('fsctl',0)
-         call fc_get_s2time(centisec,it,nanosec,ip)
+         if(set.ne."s2das".and.rack.ne.S2) then
+            idum=fc_get_s2time("r1"//char(0),centisec,it,nanosec,ip,0)
+         else
+            idum=fc_get_s2time("da"//char(0),centisec,it,nanosec,ip,0)
+         endif
          call rn_put('fsctl')
          centisec(1)=centisec(2)
+         unixsec(1)=unixsec(2)
+         unixhs(1)=unixhs(2)
          if(ip(3).lt.0) then
             if(ip(3).lt.-400.and.ip(3).gt.-404) then
                call char2hol('sc',ip(4),1,2)
@@ -134,9 +168,13 @@ c
          goto 200
       else if(K4.eq.drive(1) ) then
         idum=rn_take('fsctl',0)
+        call fc_rte_cmpt(unixsec(1),unixhs(1))
         call fc_get_k4time(centisec,it,ip)
-        centisec(2)=centisec(1)
+        call fc_rte_cmpt(unixsec(2),unixhs(2))
         call rn_put('fsctl')
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
         if(ip(3).lt.0) then
            call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
            nerr=nerr+1
@@ -146,8 +184,11 @@ c
         goto 200
       else if (VLBA.eq.rack) then
         idum=rn_take('fsctl',0)
-        call fc_get_vtime(centisec,it,ip)
+        idum=fc_get_vtime(centisec,it,ip,0)
         call rn_put('fsctl')
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
         if(ip(3).lt.0) then
            call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
            nerr=nerr+1
@@ -176,9 +217,13 @@ C             two return buffers with imode = -53
         call put_buf(iclasm,ibuf,-4,'fs','  ')
       else if(K4K3.eq.rack) then
         idum=rn_take('fsctl',0)
+        call fc_rte_cmpt(unixsec(1),unixhs(1))
         call fc_get_k3time(centisec,it,ip)
-        centisec(2)=centisec(1)
+        call fc_rte_cmpt(unixsec(2),unixhs(2))
         call rn_put('fsctl')
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
         if(ip(3).lt.0) then
            call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
            nerr=nerr+1
@@ -228,7 +273,7 @@ C
         call ifill_ch(ibuft,1,20,' ')
         call ifill_ch(ibuf ,1,20,' ')
         ireg(2) = get_buf(iclass,ibuft,-20,idum,idum)
-        ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
+        ireg(2) = get_buf(iclass,centisec,-24,idum,idum)
         ireg(2) = get_buf(iclass,ibuf,-20,idum,idum)
 c
         nch = ichmv_ch(ibuf2,1,'tm,')
@@ -270,7 +315,10 @@ C   1992 198 16:17:34.777
         call ifill_ch(ibuf4,1,ilen,' ')
         ireg(2) = get_buf(iclass,ibuf4,-ilen,idum,idum)
         nchar=min0(ireg(2),ilen)
-        ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
+        ireg(2) = get_buf(iclass,centisec,-24,idum,idum)
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
         ich=3
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
         if(ic1.ge.ic2) then
@@ -338,14 +386,30 @@ C
 c
       centifs=centiavg
       call fc_rte_fixt(secs_fs,centifs)
-      if (abs(secs_fs-secs_fm).gt.86400*14) then
+      diff=(secs_fm-secs_fs)*100+it(1)-centifs
+
+      if (abs(secs_fs-secs_fm).gt.86400*248) then
          call logit7ci(idum,idum,idum,-1,-4,'sc',0)
         goto 999
       endif
-      diff=(secs_fm-secs_fs)*100+it(1)-centifs
+c
+ 201  continue
+      unixdiff=unixsec(2)-unixsec(1)
+      unixdiff=unixdiff*100+unixhs(2)-unixhs(1)
+      unixhs(1)=unixhs(1)+unixdiff/2
+      unixsec(1)=unixsec(1)+unixhs(1)/100
+      unixhs(1)=mod(unixhs,100)
+c
+      diffunix=(secs_fm-unixsec(1))*100+it(1)-unixhs(1)
+      difffs2unix=(secs_fs-unixsec(1))*100+centifs-unixhs(1)
+      if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &     .or.icomputer.ne.0) then
+         diff=diffunix
+         difffs2unix=0
+      endif
 c
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &                       rateti_fs,spanti_fs,modelti_fs)
+     &     rateti_fs,spanti_fs,modelti_fs,icomputer)
 c
       inxtc=ichmv_ch(ibuf,1,'time/')
       inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,o'100000'+12)
@@ -364,14 +428,14 @@ c
       inxtc=ichmv_ch(ibuf,inxtc,'.')
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      if (cjchar(modelti_fs,1).ne.'c'
-     &     .and.(epochti_fs.eq.0.or.set.eq.'offset')) then
+      if ((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0) then
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
       else
         inxtc=inxtc+ir2as(
-     & (float((secs_fm-secsoffti_fs)*100+it(1)-centiavg-offsetti_fs)
+     & (float((secs_fm-secsoffti_fs)*100+it(1)-centiavg-offsetti_fs
+     &        -ibase)
      &     /(centiavg-epochti_fs))*86400.
 c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
      &     ,ibuf,inxtc,10,3)
@@ -379,66 +443,155 @@ c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
         inxtc=inxtc+ir2as((centiavg-epochti_fs)/3600e2,ibuf,inxtc,8,3)
       endif
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(diff,ibuf,inxtc,o'100000'+12)
+      if(kfm) then
+         inxtc=inxtc+ib2as(diff,ibuf,inxtc,o'100000'+12)
+      else
+         inxtc=ichmv_ch(ibuf,inxtc,'$$$$$$$$$$$$')
+      endif
       call logit2(ibuf,inxtc-1)
 c
+      ntp_synch=fc_ntp_synch(ierrors)
+      if(ntp_synch.lt.0) ierrors=0
       inxtc=ichmv_ch(ibuf,1,'model/old,')
       inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+      if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &     .or.icomputer.ne.0) then
+         inxtc=inxtc+ib2as(0,ibuf,inxtc,o'100000'+12)
+      else
+         inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+      endif
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ir2as(rateti_fs*86400.,ibuf,inxtc,8,3)
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ir2as(spanti_fs/3600e2,ibuf,inxtc,8,3)
       inxtc = mcoma(ibuf,inxtc)
-      if(cjchar(modelti_fs,1).eq.'r') then
-        inxtc = ichmv_ch(ibuf,inxtc,'rate')
+      if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &     .or.icomputer.ne.0) then
+        inxtc = ichmv_ch(ibuf,inxtc,'computer,')
+      else if(cjchar(modelti_fs,1).eq.'r') then
+        inxtc = ichmv_ch(ibuf,inxtc,'rate,')
       else if(cjchar(modelti_fs,1).eq.'o') then
-        inxtc = ichmv_ch(ibuf,inxtc,'offset')
-      else if(cjchar(modelti_fs,1).eq.'c') then
-        inxtc = ichmv_ch(ibuf,inxtc,'ntp')
+        inxtc = ichmv_ch(ibuf,inxtc,'offset,')
       else
-        inxtc = ichmv_ch(ibuf,inxtc,'none')
+         inxtc = ichmv_ch(ibuf,inxtc,'none,')
+      endif
+      inxtc=inxtc+ib2as(ibaseold,ibuf,inxtc,o'100000'+12)
+      inxtc = mcoma(ibuf,inxtc)
+      if(ntp_synch.eq.1) then
+         inxtc = ichmv_ch(ibuf,inxtc,'sync,')
+      else if(ntp_synch.eq.0) then
+         inxtc = ichmv_ch(ibuf,inxtc,'no_sync,')
+      else
+         inxtc = ichmv_ch(ibuf,inxtc,'unknown,')
+      endif
+      inxtc=inxtc+ib2as(difffs2unix,ibuf,inxtc,o'100000'+12)
+      inxtc = mcoma(ibuf,inxtc)
+      if(kfm) then
+         inxtc=inxtc+ib2as(diffunix,ibuf,inxtc,o'100000'+12)
+      else
+         inxtc=ichmv_ch(ibuf,inxtc,'$$$$$$$$$$$$')
       endif
       call logit2(ibuf,inxtc-1)
 c
-      if(cjchar(modelti_fs,1).ne.'c'.and.(set.eq.'offset'
-     &       .or.(set.eq.'rate'.and.spanti_fs.le.centiavg-epochtifs)
-     &       .or.(set.eq.' '.and.epochti_fs.eq.0))) then!update model
+      if(set.eq.'fs'.or.ibaseold.ne.ibase.or.set.eq.'computer'
+     &     .or.(kfm
+     &     .and.((set.eq.'offset'.and.icomputer.eq.0)
+     &     .or.(set.eq.'rate'.and.spanti_fs.le.centiavg-epochti_fs
+     &          .and.epochti_fs.ne.0.and.icomputer.eq.0
+     &          .and.cjchar(modelti_fs,1).eq.'r')
+     &     .or.(set.eq.'adapt'.and.cjchar(modelti_fs,1).eq.'r'
+     &          .and.abs(diff-ibase).le.50.and.epochti_fs.ne.0
+     &          .and.(centiavg-epochti_fs.gt.360000
+     &                .or.spanti_fs.le.centiavg-epochti_fs))
+     &       .or.(set.eq.' '.and.epochti_fs.eq.0
+     &     .and.icomputer.eq.0)))) then            !update model
         if(set.eq.' ') set='offset'
-	ierr=fc_rte_sett(secs_fm,it(1),centiavg,
-     &                   set(:max(trimlen(set),1))//char(0))
-        call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &                       rateti_fs,spanti_fs,modelti_fs)
+        if(ibase.ne.ibaseold) then
+           ibaseold=ibase
+        else if(set.eq.'fs') then
+           call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &          rateti_fs,spanti_fs,modelti_fs,icomputer)
+           if(icomputer.eq.0) goto 999
+           icomputer=0
+           call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &          rateti_fs,spanti_fs,modelti_fs,icomputer)
+        else if(set.eq."computer") then
+           call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &          rateti_fs,spanti_fs,modelti_fs,icomputer)
+           if(icomputer.ne.0) goto 999
+           icomputer=1
+           call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &          rateti_fs,spanti_fs,modelti_fs,icomputer)
+        else
+           if(set.ne."offset") then
+              it(1)=it(1)-ibase
+              if(it(1).gt.0) then
+                 secs_fm=secs_fm+it(1)/100
+                 it(1)=mod(it(1),100)
+              else if(it(1).lt.0) then
+                 secs_fm=secs_fm+(it(1)-99)/100
+                 it(1)=mod(100+mod(it(1),100),100)
+              endif
+           else
+              ibase=0
+              ibaseold=ibase
+           endif
+           ierr=fc_rte_sett(secs_fm,it(1),centiavg,
+     &          set(:max(trimlen(set),1))//char(0))
+           call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &          rateti_fs,spanti_fs,modelti_fs,icomputer)
+        endif
         inxtc=ichmv_ch(ibuf,1,'model/new,')
         inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
         inxtc = mcoma(ibuf,inxtc)
-        inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+        if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &       .or.icomputer.ne.0) then
+           inxtc=inxtc+ib2as(0,ibuf,inxtc,o'100000'+12)
+        else
+           inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+        endif
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(rateti_fs*86400.,ibuf,inxtc,8,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(spanti_fs/3600e2,ibuf,inxtc,8,3)
         inxtc = mcoma(ibuf,inxtc)
-        if(cjchar(modelti_fs,1).eq.'r') then
+        if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &       .or.icomputer.ne.0) then
+           inxtc = ichmv_ch(ibuf,inxtc,'computer')
+        else if(cjchar(modelti_fs,1).eq.'r') then
           inxtc = ichmv_ch(ibuf,inxtc,'rate')
         else if(cjchar(modelti_fs,1).eq.'o') then
-          inxtc = ichmv_ch(ibuf,inxtc,'offset')
+           inxtc = ichmv_ch(ibuf,inxtc,'offset')
         else
-          inxtc = ichmv_ch(ibuf,inxtc,'none')
+           inxtc = ichmv_ch(ibuf,inxtc,'none')
         endif
+        inxtc = mcoma(ibuf,inxtc)
+        inxtc=inxtc+ib2as(ibase,ibuf,inxtc,o'100000'+12)
         call logit2(ibuf,inxtc-1)
 c
-      else if(abs(diff).gt.49) then
+      else if(kfm.and.abs(diff-ibase).gt.50) then
          call logit7ci(idum,idum,idum,-1,-13,'sc',0)
+      else if(.not.kfm) then
+         call logit7ci(idum,idum,idum,-1,-10,'sc',0)
+         if(abs(difffs2unix).gt.50) then
+            call logit7ci(idum,idum,idum,-1,-12,'sc',0)
+         endif
+         if(ntp_synch.eq.0) then
+            call logit7ci(idum,idum,idum,-1,-14,'sc',0)
+         else if(ntp_synch.ne.1) then
+            call logit7ci(idum,idum,idum,-1,-15,'sc',0)
+         endif
       endif
       goto 999
 C
 998   continue
-      call logit7ci(idum,idum,idum,-1,-10,'sc',0)
+      kfm=.false.
+      goto 201
 999   continue
       goto 1
       end
