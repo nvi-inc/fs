@@ -2610,3 +2610,668 @@ Version 9.3.8 970313
 
 Version 9.3.9 970403
 
+970716 WEH include/params.i
+           boss/newlg.f
+           incom/sincom.f
+           quikr/pass.f
+           quikr/lvdt.f
+           quikr/stack.f
+970717 WEH quikr/peak.f
+           quikr/locate.f
+           quikr/worm.f
+           quikr/savev.f
+           quikr/hdcalc.f
+           headp/headp.f
+           quikr/repro.f
+           quikr/party.f
+           add Mk3B recorder type
+
+970717 WEH st.default/sched/1hdcal.snp
+           created for MK3B recorder
+
+Version 9.3.10 970417
+
+970314 NRV skdrut/searl.f
+           New. Copied from SELEV.
+
+970314 nrv skdrut/igtky.f
+           New, replaces old version.
+
+970317 nrv skdrut/searl.f
+           Early must be > CAL.
+
+970317 NRV skdrut/stape.f
+           New. Copied from SEARL.
+
+970317 nrv skdrut/igtky.f
+           Add "A2" for azelha in XLIST
+
+970317 nrv skdrut/igtky.f
+           Add continuous, adaptive, and start&stop for TAPE motion type.
+
+970317 nrv drudg/fdrudg.f
+           Remove reading ELEVATION lines, done in SREAD now.
+
+970317 nrv drudg/sread.f
+           Remove TAPE_MOTION and BARREL. Read $PARAM using sked's routines.
+
+970320 nrv drudg/snap.f
+           Calculate adjusted times for continuous recording.
+
+970320 nrv drudg/snap.f
+           Precess the sources so we can calculate slewing.
+
+970320 WEH boss/boss.f
+           allow 1500 procedures in experiment library to keep DRUDG
+           happy
+
+970321 nrv drudg/snap.f
+           No extra ST commands, no setup, for continuous.
+
+970321 nrv drudg/lstsum.f
+           For continuous motion use "data comments.
+
+970321 nrv drudg/vlbat.f
+           Only call wrdur when changing direction for CONTINUOUS
+
+970321 nrv drudg/wrtap.f
+           Re-write for more flexibility.
+
+970321 nrv drudg/lstsumo.f
+           Remove KET from call.
+
+970321 nrv skdrut/searl.f
+           Add warning that this works only for non-Mk3 correlators.
+
+970324 nrv drudg/point.f
+           Use IOBSS to keep track of observations for this station.
+
+970325 WEH st.default/control/skedf.ctl
+           uncomment $misc
+
+970325 WEH quikv/s2label.c
+           fixed to always send tape id, even if recording
+
+970326 nrv skdrut/igtky.f
+           Add keywords for XNEW command
+
+970328 nrv drudg/fdrudg.f
+           Add station_cat to RDCTL
+
+970328 nrv skdrut/rdctl.f
+           Add "station_cat"
+
+970328 nrv skdrut/stape.f
+           Parse/list GAP time for ADAPTIVE type.
+
+970328 WEH newlb/prog.c
+           add fs_get_systmp
+
+970331 WEH include/fscom_dum.i
+           include/fscom_quik.i
+           include/fscom.h
+           pcalr/nrmlz.f
+           pcalr/pccor.f
+           quikr/vc.f
+           quikr/vcdis.f
+           chekr/getvc.f
+           pcalr/pcalr.f
+           fslb/phcal.f
+           quikr/fvpnt.f
+           quikr/onofc.f
+           quikr/padis.f
+           quikr/patch.f
+           quikr/pcalc.f
+           quikr/pcals.f
+           include/fscom.h
+           newlb/prog.c
+           move freqvc, ibwvc, and ifp2vc from fscom_quik to fscom_dum
+           provide fs_set/get routines and fix up all accesses
+
+970401 WEH control/fscmd.ctl
+           move cable to sub 13 task 4
+
+970401 WEH quikr/quikr.f
+           quikr/cable.f
+           quikr/cadis.f
+           move cable sub 13, pass task through to cadis to indicate
+           which character to start parse at, =0 means look for first
+           numeric or +-. character
+
+970401 nrv drudg/drset.f
+           New. Copied from sked's PRSET, leaving only those
+
+970401 nrv drudg/lstsum.f
+           Save variables for LSTSUMO and print them after the next
+
+970401 nrv drudg/lstsum.f
+           Add itlate_local to LSTSUMO call.
+
+970401 nrv drudg/lstsumo.f
+           Remove other extras from call. 
+
+970401 nrv drudg/lstsumo.f
+           Change output to include Tape Stop column for 
+
+970401 nrv drudg/lstsumo.f
+           Adaptive output. Don't include tape start or tape stop if
+
+970401 nrv drudg/lstsumo.f
+           Add itlate_local to call.
+
+970401 nrv drudg/sread.f
+           Set all parameter values to defaults at the start, then if
+
+970401 nrv drudg/trkall.f
+           Remove itrax -- not used
+
+970402 nrv drudg/vlbat.f
+           Add !NEXT! between stopping tape and postpass.
+
+970403 nrv drudg/point.f
+           Remove 85-3 pointing option per F. Ghigo.
+
+970404 WEH ibcon/ibcon.f
+           moved -1 error beyond initialization so that an empty "ibad.ctl"
+           file isn't a priori an error
+           clear additional class records if too many devices are defined
+
+970406 nrv skdrut/igtso.f
+           Minimum matching
+
+970406 nrv skdrut/vunpdas.f
+           Make ctapemo always upper case
+
+970409 WEH matcn/matcn.f
+           moved -1 error beyond initialization so that an empty "matcn.ctl"
+           file isn't a priori an error
+
+970416 nrv drudg/procs.f
+           Do only 1 command for each BBC, check if it's done yet, and
+           remove the check for USB only!
+
+970423 nrv skdrut/igtky.f
+           Add back in "on" and "off" for XLIST
+
+970423 nrv drudg/Makefile
+           Makes the drudg main with gcc. Thanks to Arno Mueskens.
+
+970423 nrv skdrut/igtky
+           Add "on" and "off" to the valid key words for XLIST.
+
+970505 nrv drudg/vlbat.f
+           Calculate IFTOLD with ITU=whether to use ITEARL or not.
+
+970506 nrv skdrut/cablw.f
+           Add special section for Matera slewing algorithm.
+
+970508 nrv drudg/snap.f
+           Temporary change to calculate final tape stop for continuous
+
+970509 nrv drudg/wrsor.f
+           New, extracted from VLBAT. Writes the line in the VLBA
+           control files that has the source name on it.
+
+970509 nrv drudg/vlbat.f, point.f
+           Modified for continuous tape motion control.
+
+970509 nrv drudg/point.f
+           Add _save variables to VLBAT call.
+
+970509 nrv drudg/vlbat.f
+           Save tape start time to calculate end time for continuous.
+
+970509 nrv drudg/vlbat.f
+           Output the first source of a new pass as a new scan before
+
+970509 nrv drudg/vlbat.f
+           Move code to WRSOR for writing the line with source name.
+
+970509 nrv Newdrudg/wrsor.f
+           Extracted from VLBAT.
+
+970512 nrv drudg/point.f
+           Increment IOBSS for VLBAT after the call, because many
+
+970513 nrv drudg/snap.f
+           Set up new cable wrap from schedule before calling slewo.
+
+970514 nrv skdrut/idchk.f
+           Don't print the "changing ID code" message.
+
+970520 nrv drudg/procs.f
+           Clean up procs section
+
+970523 nrv skdrut/pnum.f
+           Passes "d" and "e" (39 and 40) were reversed in data statement.
+
+970520 nrv drudg/sread.f
+           Save the location of the $PROCS section.
+
+970527 WEH port/portclose.c
+           added Pablo de Vicente's function
+
+970529 WEH st.default/proc/vstation.prc
+           st.default/proc/v2station.prc
+           st.default/proc/3vstation.prc
+           use vprepass for precond procedure
+
+970529 WEH st.default/sched/prepass.snp
+           st.default/proc/vprepass.snp
+           add head positioning command and created vprepass
+
+970529 WEH quikr/ctemp.f
+           add two digits to display
+
+970529 WEH fivpt/tsys.f
+           use negative cal values to define system temperature
+
+970530 WEH fslb/ivced.f
+           parse trailing "(bw)" in bw parameter
+
+970530 WEH quikr/vc.f
+           quikr/vcdis.f
+           set and get floating point frequency as appropriate
+
+970530 WEH include/fscom_dum.i
+           include/fscom.h
+           newlb/prog.c
+           add cwrap
+
+970530 WEH fslb/sunpo.f
+           aquir/knup.f
+           quikr/sorce.f
+           change "sun" to "sunpo"
+
+970602 WEH onoff/onoff.f
+           use negative cal temperatures to define tsys values
+
+970602 WEH fslb/radec.f
+           fix formating of radec for greater precision
+
+970602 WEH fslb/move2.f
+           new apparent place calculation
+
+970602 WEH quikr/sorce.f
+           use move2 and extend precision of formatting
+
+970603 WEH boss/lists.f
+           fixed listing one more time
+
+970603 nrv drudg/fdrudg.f
+           Add option for printing cover leter in .drg files.
+
+970603 nrv drudg/sread.f
+           Find the start of the cover letter in .drg files.
+
+970605 nrv drudg/drcom.ftni
+           Add variable to indicate if this is a .drg file.
+
+970609 nrv drudg/fdrudg.f
+           Set the kdrg flag if the input file is a .drg file.
+
+970609 nrv drudg/prcov.f
+           New. Print out the .drg PI cover letter.
+
+970609 nrv drudg/procs.f
+           Add actual bandwidth to VC command for external filters.
+
+970609 nrv skdrut/vob1inp.f
+           Scan to find the start of the time field in each observation
+           before checking for time ordering.
+
+970610 nrv drudg/fdrudg.f
+           Always print out postscript file in non-interactive mode.
+
+970610 nrv drudg/procs.f
+           Set VC/BBC value to invalid -1.0 if LO is missing.
+
+970610 WEH drudg/ifvlbafix
+           made this work for two character station codes as well as one
+           corrected several small and apparently benign bugs
+
+970612 WEH logex/lxtim.f
+           corrected comment
+
+970613 WEH quikr/gtradd.f
+           changed internal array to double for more precision
+
+970613 WEH newlb/Makefile
+           fmpsee/Makefile
+           fmpsee/fmpread.c
+           moved fmpread from newlb to fmpsee
+
+970613 WEH fslb/upper.f
+           don't update if character is not lower
+
+970613 WEH clib/mvupper.c
+           clib/Makefile
+           created mvupper.c to speed logex
+
+970613 WEH logex/lxplt.f
+           fixed dimension of imin and imax
+
+970613 WEH logex/lxget.f
+           removed extraneous calls to speed up
+
+970616 WEH polb/kgant.f
+           improved comparions by removing extra trailing space
+
+970616 WEH fmpsee/fmpreadstr.c
+           speed-up and simplified
+
+970616 WEH bosslb/readg.f
+           reduce size of internal character variable for compatibility
+           with callers
+
+970616 WEH boss/binit.f
+           fix logit calls
+
+970616 WEH fslb/Makefile
+           add novas.f prefr.f move2.f
+
+970616 WEH fslb/novas.f
+           added with "save" statement
+
+970616 WEH polb/equn2.f
+           created
+
+970617 WEH fslb/move2.f
+           created
+
+970617 WEH polb/Makefile
+           added equn2.f move2.f and sider2.f
+
+970619 WEH error/indx.f
+           created
+
+970619 WEH error/Makefile
+           add indx.o and kpdat2.o
+
+970619 WEH error/kpdat2.f
+           created
+
+970619 WEH error/error.f
+           added logic to save errors to output file
+
+970619 WEH error/apost.f
+           created
+
+970620 WEH polb/cnvrt.f
+           cnvrt2.f entry added
+
+970620 WEH poclb/novascon.h
+           poclb/novascon.c
+           poclb/novas.c
+           poclb/solsys3.c
+           added
+
+970620 WEH poclb/sider2.c
+           created
+
+970620 WEH polb/sider2.f
+           created
+
+970620 WEH poclb/cnvrt.c
+           add cnvrt2 entry
+
+970620 WEH poclb/Makefile
+           added novas.o novascon.o sider2.o solsys3.o equn2.o
+
+970620 WEH poclb/equn2.c
+           created
+
+970620 WEH quikr/sorce.f
+           updated for novas routines
+
+970714 nrv drudg/point.f
+           Add "crd" to VLBA file names per J. Wrobel request.
+
+970717 nrv skdrut/vob1inp.f
+           Read the "drive" field as the record/norecord flag
+
+970718 nrv skdrut/vunpant.f
+           Incorrect error returns for axis limits fixed.
+
+970718 nrv drudg/procs.f
+           Handle LO frequencies > 1 GHz in LO command.
+
+970718 nrv skdrut/errormsg.f
+           Correct some of the error numbers to be consistent
+
+970721 nrv drudg/lspin.f
+           Replace LDIR in call with idir
+
+970721 nrv drudg/snap.f
+           Remove holleriths for FOR/REV/F/R and replace with strings.
+
+970721 nrv drudg/snap.f
+           Change first parameter in LSPIN to IDIR.
+
+970721 nrv drudg/snap.f
+           If scan has zero direction, don't do any tape motion commands.
+
+970721 nrv skdrut/addscan.f
+           Add idrive to call
+
+970721 nrv skdrut/addscan.f
+           Remove footage, duration, and idstart to subroutines.
+
+970721 nrv skdrut/newscan.f
+           Add IDRIVE to call, if 0 set direction to 0.
+
+970721 nrv skdrut/newscan.f
+           Add idstart fields following durations
+
+970721 nrv skdrut/newscan.f
+           Remove footage, duration, and good data to subroutines
+
+970722 nrv skdrut/durscan.f
+           New. Removed from addscan and newscan
+
+970722 nrv skdrut/feetscan.f
+           New. Removed form newscan and addscan.
+
+970722 nrv skdrut/gdscan.f
+           New. Removed from addscan and newscan
+
+970724 WEH fslb/lower.f
+           fslb/Makefile
+           add lower.f
+
+970724 WEH incom/sincom.f
+           handle upper case rack/drive and head.ctl parameters
+
+970725 WEH st.default/control/equip.ctl
+           add mk3b to comment for recorder type
+
+970725 WEH fslb/gtprm.f
+           fslb/gtprm2.f
+           deleting leading spaces in parameters,
+           especially for logex, but in general too
+
+970725 WEH logex/lxplt.f
+           plot 1 point
+
+970728 WEH st.default/control/skedf.ctl
+           add comment about plain paper labels
+
+970728 nrv drudg/lstsum.f
+           Set ifeet_print=ifeet if ifeet_print=-1 when the previous 
+           scan is printed.
+
+970728 nrv drudg/lstsumo.f
+           Add more explanatory header lines for the last column.
+
+970728 nrv drudg/lstsumo.f
+           If no tape motion, print "--" in pass field.
+
+970728 nrv drudg/snap.f
+           No setup or preob for adaptive if the tape is running.
+
+970728 nrv drudg/unpsk.f
+           Add IOFF to call, decode offsets
+
+970729 nrv skdrut/stape.f
+           Handle the old format (for ADAPTIVE only) without the 
+
+970729 nrv drudg/procs.f
+           Make FREQLO into double precision, convert to single before printing
+
+970729 nrv drudg/snap.f
+           Compute good data start using offsets in VEX file
+
+970730 nrv drudg/lstsum.f
+           Don't set ifeet=0 at midtp because it might not be.
+
+970730 nrv drudg/snap.f
+           Don't write extra !time and TAPE for continuous scans.
+
+970730 WEH drudg/Makefile
+           use symbolic link for ifvlbafix
+
+970730 WEH fslb/lower.f
+           fslb/Makefile
+           remove this lower
+
+970730 WEH incom/sincom.f
+           use newlb lower.f
+
+970730 WEH newlb/lower.f
+           made more efficent
+
+970730 WEH sigma/sigma.f
+           resid/resid.f
+           increase buffer size
+
+970730 WEH sigma/sigma.f
+           xtrac/xtrac.f
+           xtrac/kgetp.f
+           open files only for reading if that is all we need
+
+970731 WEH lognm/
+           created
+
+970731 nrv drudg/snap.f
+           Add IOBSST to count number of obs recorded on tape
+
+970801 nrv drudg/lstsum.f
+           For non-tape scans set cnewtap='@  '
+
+970801 FML pdplt/
+           logpl/
+           st.default/control/logpl.ctl
+           created
+
+970801 WEH Makefile  
+           pdplt and logpl added
+
+970812 WEH st.default/control/equip.ctl
+           correct vaccum levels and thin tape thickness
+
+970812 WEH chekr/gettp.f
+           accept speed 3.75 as stopped
+
+970812 WEH clib/cshm_init.c
+           initialize vac4 to -1
+
+970812 WEH include/fscom.h
+           add vac4
+
+970812 WEH newlb/prog.c
+           add vac4
+
+970812 WEH quikr/repro4.f
+           require vac4 to be set
+
+970812 WEH incom/sincom.f
+           set vac4 to 0 if non-vacuum switching
+
+970812 WEH quikr/recds.f
+           remove old stdis stuff
+
+970812 WEH include/fscom_dum.i
+           add vac4
+
+970812 WEH control/fserr.ctl
+           add rec, repro, and parity error messages
+
+970812 WEH fslb/rpbr2ma4.f
+           add vac bits
+
+970812 WEH quikr/party4.f
+           require vac4 to be set
+
+970812 WEH quikr/mezhr.f
+           use corrected rpbr2ma4 call
+
+970812 WEH fmpsee/fmpread.c
+           replace \n and NULL with spaces
+
+970812 WEH quikr/rec.f
+           add novac option and vacuum setting for load
+
+970812 WEH drudg/ifvlbafix
+           logpl/logpl
+           pdplt/pdplt
+           make executable
+
+970812 nrv drudg/lstsumo.f
+           Print footages to nearest 10 feet.
+
+970812 nrv drudg/lstsum.f
+           Keep exact footages in this routine.
+
+970813 WEH quikr/vc.f
+           get and set bw properly in memory
+
+970813 WEH st.default/control/sw.ctl
+           improved switching comment
+
+970825 WEH quikr/label.f
+           add thin prefixes DSCP, MPIT, THNINT
+           changing "O"s to "0"s in thin tape table
+
+970826 WEH onoff/onoff.f
+           fix no cal case to work for either channel does have a cal
+
+970826 WEH quikr/label.f
+           add CMVA thin prefix
+
+970826 WEH ibcon/ibcon.f
+           ibcon/wrdev.c
+           ibcon/rddev.c
+           added NO_UNTALK/UNLISTEN_AFTER option
+
+970826 WEH ibcon/wrdev.c
+           ibcon/rddev.c
+           removed debug output
+
+970827 nrv drudg/label.f
+           Add icol,irow,inewpage to make_pslabel call. Add prompts for 
+           starting label position.
+
+970827 nrv drudg/drcom.ftni
+           Add ilabcol, inewpage to common.
+
+970827 nrv drudg/labsnp.f
+           Add icol,irow,inewpage to make_pslabel call.
+
+970827 nrv drudg/psbar.c
+           Add icol,irow,inewp to make_pslabel call. Remove nlaser as
+           internal counter and no need to calculate row,col any more.
+           Print showpage trailer if this label starts a new page.
+
+970827 nrv drudg/fdrudg.f
+           Slight change to the final prompt to delete the ps file. 
+
+970828 WEH quikr/rec.f
+           removed debug output
+
+970828 WEH quikr/sorce.f
+           add another digit to epoch for now
+
+970828 WEH help/
+           updated help files
+
+Version 9.3.13 970828

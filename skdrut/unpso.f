@@ -33,40 +33,40 @@ C   Celestial Source Info:
       integer*2 LRAHMS(8)
 C          - right ascension, in form hhmmss.ssssssss
 C     IRAH,IRAM - right ascension hours&minutes, in binary
-      real*8 RAS
+      double precision RAS
 C           - seconds field of right ascension
-      real*8 RARAD
+      double precision RARAD
 C           - right ascension, in radians
 C     LDSIGN - sign of the declination, + or -
       integer*2 LDCDMS(7)
 C           - declination, in form ddmmss.sssssss
 C     IDECD,IDECM - declination degrees&minutes, in binary
-      real*8 DECS
+      double precision DECS
 C           - declination seconds field
-      real*8 DECRAD
+      double precision DECRAD
 C           - declination, in radians
 C     EPOCH - epoch of RA and DEC
-      real*4 epoch
+      real epoch
 C
 C   Satellite orbit info:
 C
-      real*8 OINC
+      double precision OINC
 C           - orbit inclination
-      real*8 OECC
+      double precision OECC
 C           - orbit eccentricity
-      real*8 OPER
+      double precision OPER
 C           - orbit arguement of the perigee
-      real*8 ONOD
+      double precision ONOD
 C           - orbit right ascending node
-      real*8 OANM
+      double precision OANM
 C           - orbit anomaly
-      real*8 OAXS
+      double precision OAXS
 C           - orbit semi-major axis
-      real*8 OMOT
+      double precision OMOT
 C           - orbit motion
 C     IEPY - orbit epoch year
       integer iepy
-      real*8 OEDY
+      double precision OEDY
 C           - orbit epoch day
 C
 C  SUBROUTINES CALLED: LNFCH UTILITIES
@@ -75,7 +75,7 @@ C                      UNPWO - to get satellite orbit specific info
 C
 C  LOCAL:
 C
-C     real*8 DAS2B
+C     double precision DAS2B
       INTEGER        PCOUNT,nargs,nch,ic1,ic2,ich,jerr,idumy
       integer ichcm_ch,ichmv ! function
 C

@@ -21,7 +21,7 @@ set_vlt.o setsp.o sorce.o st.o stack.o stdis.o\
 tp.o tpdis.o tpform.o tpi.o tplis.o tplisv.o tppos.o\
 tpput.o track.o tsys.o\
 updis.o upset.o vc.o vcdis.o vlt_read.o wakop.o wohd.o\
-worm.o wx.o xyoff.o gtradd.o
+worm.o wx.o xyoff.o gtradd.o rec.o recds.o
 #
 ../bin/quikr: $(OBJECTS)
 	$(FC) -o ../bin/quikr $(OBJECTS) $(LIBES)

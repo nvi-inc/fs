@@ -53,6 +53,14 @@ C
       ierx = 0
 C 
       parm = 0.0
+C
+C       skipping leading spaces
+C
+      do while(ifc.lt.iec)
+        if(ichcm_ch(ibuf,ifc,' ').ne.0) goto 90
+        ifc=ifc+1
+      enddo
+ 90   continue
       if (ifc.le.iec) goto 100
       nch = 0 
       icom = ifc-1

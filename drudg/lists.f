@@ -15,7 +15,8 @@ C LOCAL:
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .LMON(2),
      . LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
-      integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn)
+      integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn),
+     .ioff(max_stn)
       character*1 cs
       integer ipasp,iftold,idirp,idir
       integer i,j,k,id
@@ -154,7 +155,7 @@ C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
      .     LFREQ,IPAS,LDIR,IFT,LPRE,
      .     IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .     NSTNSK,LSTN,LCABLE,
-     .     MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+     .     MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
       CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
 C
       IF (ISOR.EQ.0.OR.ICOD.EQ.0) THEN
@@ -513,7 +514,7 @@ C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
      .         LFREQ,IPAS,LDIR,IFT,LPRE,
      .         IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .         NSTNSK,LSTN,LCABLE,
-     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
         ENDIF
 C ENDW Loop on observations
       ENDDO

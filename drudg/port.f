@@ -37,6 +37,7 @@ C  1.0  Read the input from user and set port appropriatly.
       call gtrsp(ibuf,25,luusr,nch)
 
       if (nch.gt.0) call hol2char(ibuf,1,nch,cprport)
+      if (cprport(1:5).eq.'print') cprport='PRINT'
 
 C  2.0  Now get printer type.
 
@@ -56,7 +57,7 @@ C  2.0  Now get printer type.
           call hol2char(itemp,1,nch,ctemp)
           if (ctemp.eq.'EPSON'.or.ctemp.eq.'LASER'
      .      .or.ctemp.eq.'EPSON24') then
-            cprttyp = ctemp
+            call c2upper(ctemp,cprttyp)
             ierr=0
           else
             write(luscn,9210)

@@ -319,7 +319,7 @@ c
       nch=mcoma(ib,nch)
       nch=nch+ib2as(freqif3_fs/100,ib,nch,z'8000'+10)
 c
-      nch=mcoma(ib,nch)
+      nch=ichmv_ch(ib,nch,'.')
       nch=nch+ib2as(mod(freqif3_fs,100),ib,nch,z'C100'+2)
 c
       nch=mcoma(ib,nch)
@@ -332,6 +332,14 @@ c
       else if (vfm_xpnt.eq.1) then
          nch=ichmv_ch(ib,nch,'dsm')
       endif
+
+      nch=mcoma(ib,nch)
+      call fs_get_motorv2(motorv2)
+      nch=nch+ir2as(motorv2,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_itpthick2(itpthick2)
+      nch=nch+ib2as(itpthick2,ib,nch,z'8000'+10)
 c
       call logit3(ib,nch-1,lsor)
 c
@@ -351,5 +359,18 @@ c
          nch=ichmv_ch(ib,nch,'rate')
       endif
       call logit3(ib,nch-1,lsor)
+C
+      call ifill_ch(ib,1,120,' ')
+      nch = 1
+      nch = ichmv_ch(ib,nch,'sw,')
+      call fs_get_vacsw(vacsw)
+      if (vacsw.eq.1) then
+         nch=ichmv_ch(ib,nch,'yes')
+      else if (vacsw.eq.0) then
+         nch=ichmv_ch(ib,nch,'no')
+      endif
+      call logit3(ib,nch-1,lsor)
       return
       end
+
+

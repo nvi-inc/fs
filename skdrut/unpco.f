@@ -29,7 +29,8 @@ C
 C  OUTPUT:
       integer ierr,ichan
       integer*2 lcode,lsubgr,lmode(4)
-      real*4 freqrf,freqpc,vcband
+      real freqpc,vcband
+      double precision freqrf
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
 C     LCODE - frequency code, 2-char
 C     LSUBGR - subgroup within the code, 1-char in upper byte
@@ -44,9 +45,10 @@ C     VCBAND - final video bandwidth, MHz
 C
 C  LOCAL:
       integer ic2save,IPARM(2),j,idumy,i,ipas
-      real*4 parm,d
+      real parm
+      double precision d
       EQUIVALENCE (IPARM(1),PARM)
-      real*8 DAS2B
+      double precision DAS2B
 C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found

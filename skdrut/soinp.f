@@ -1,8 +1,10 @@
       SUBROUTINE SOINP(IBUF,ILEN,lu,IERR)
 C
 C     This routine reads and decodes a source entry
+C     and puts the variables into the source common.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/sourc.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -15,18 +17,16 @@ C  OUTPUT:
 C     IERR - error number
 C     INUM - number of error message
 C
-      include '../skdrincl/sourc.ftni'
-C
 C  LOCAL:
       LOGICAL KNAEQ,KORBIT
 C      -LNFCH routine, local variable for orbit identification
       integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2),LRA(8),LDC(7),
      .lname(max_sorlen/2)
 C      - temporary variables for unpacking
-      real*8 RA,RARAD,DEC,DECRAD,R,D
+      double precision RA,RARAD,DEC,DECRAD,R,D
 C        - temporary for unpacking
-      real*8 rah,decd,radh,decdd,tjd ! for APSTAR
-      real*8 OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,OEDY
+      double precision rah,decd,radh,decdd,tjd ! for APSTAR
+      double precision OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,OEDY
 C        - temporary for unpacking
       integer*2 LORBIT(max_sorlen/2)
       integer iepy
@@ -35,7 +35,7 @@ C        - temporary for unpacking
 C        - HOLDS THE ASCII VALUE 8HORBIT   /
       INTEGER   i,iep,J,irah,iram,idecd,idecm,idummy
       integer*2 lds
-      real*4 epoch
+      real epoch
       integer ichmv,julda,ichcm_ch
 C
 C  History:
@@ -66,7 +66,7 @@ C
 C
       IF  (IERR.NE.0) THEN  !
         write(lu,9100) ierr,(ibuf(i),i=1,ilen)
-9100    format('SOINP01 - Error in field 'i3' of:'/40a2)
+9100    format('SOINP01 - Error in field 'i5' of:'/40a2)
         RETURN
       END IF 
 

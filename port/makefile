@@ -4,7 +4,7 @@
 #
 OBJECTS=\
 portopen.o portread.o portwrite.o portbaud.o portflush.o portoutdrain.o\
-portdelay.o
+portdelay.o portclose.o
 #
 #CFLAGS =
 #FFLAGS = 

@@ -1,4 +1,4 @@
-      REAL*4 FUNCTION TSPIN(IFEET,ISPM,ISPS)
+      REAL FUNCTION TSPIN(IFEET,ISPM,ISPS)
 C
 C     TSPIN computes the time required to spin the tape at high speed
 C     IFEET is the number of feet to move
