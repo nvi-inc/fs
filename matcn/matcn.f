@@ -96,7 +96,7 @@ C        NCLREC - # class records
 C        ICLREC - counter for outer loop over class records
       dimension ireg(2)
 C               - registers from EXEC
-      integer*2 ibuf(180),ibuf2(80),ibuf3
+      integer*2 ibuf(180),ibuf2(180),ibuf3
 C               - buffers for input, output
 C        ILEN,ILEN2   - length of above buffers
       integer*2 lstrob(8)
@@ -123,7 +123,7 @@ C   INITIALIZED VARIABLES
 C
       data kini/.false./
       data minmod/-8/, maxmod/11/,  maxdev/30/, nalarm/18/
-      data ilen/360/
+      data ilen/360/,ilen2/360/
       data lstrob/2h!>,2h%>,2h(>,2h)>,2h+>,2h->,2h.>,2h;>/
       data ibaud/110,300,600,1200,2400,4800,9600/
 C effective read character rates from Blue Books
