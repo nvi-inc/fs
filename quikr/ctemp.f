@@ -58,7 +58,7 @@ C
 C     5. Return the cal temp for display
 C 
 500   nch = ichmv_ch(ibuf,nchar+1,'/')
-      nch = nch + ir2as(caltmp(indtmp),ibuf,nch,5,1)
+      nch = nch + ir2as(caltmp(indtmp),ibuf,nch,7,1)
 C 
       iclass = 0
       nch = nch - 1 
