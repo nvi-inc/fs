@@ -33,6 +33,17 @@ C 960912 nrv If the rack and recorder types are known, use them
 C 960913 nrv Handle no-rack case by testing for either VLBA rack or
 C            Mk3 rack for all commands. Change test for recorder from
 C            .not.ks2rec to kvrec.or.km3rec
+C 961018 nrv Add M4 rack and M4 rec. 
+C 961018 nrv When writing BBC commands, loop on the number of channels 
+C            but skip over any LSB channels because assume that these 
+C            will be duplicates of the USB.
+C 961020 nrv Mark4 ENABLE command. 
+C 961018 nrv Change REPRO command to pick up tracks from enabled tracks list.
+C 961022 nrv Change MARK to Mark in rack/rec type names.
+C 961022 nrv Add Mark IV as a procedures option
+C 961024 nrv No FORM=RESET for Mk4. 
+C 961030 nrv Add subpass index to Mk3 mode for Mk4 formatter.
+C 961031 nrv Use LMFMT for non-Mk3 modes in FORM= command.
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec, 4=S2
@@ -45,11 +56,11 @@ C LOCAL VARIABLES:
       integer*2 lpmode(2) ! mode for procedure names
       LOGICAL KUS ! true if our station is listed for a procedure
       integer itrax(2,2,max_chan) ! fanned-out version
-      integer IC,ierr,i,idummy,nch,ipass,icode,it,ivcn,iv,
+      integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,
      .ict,ilen,ich,ic1,ic2,ibuflen,itrk(36),ig0,ig1,ig2,ig3,
-     .npmode,itrk2(36),isb,ibit,ichan,ib
+     .npmode,itrk2(36),isb,ibit,ichan,ib,itrka,itrkb
       logical kok,km3mode
-      logical kvrack,kvrec,km3rack,km3rec,ks2rec
+      logical kvrack,kvrec,km3rack,km3rec,ks2rec,km4rack,km4rec
       real spdips
         CHARACTER UPPER
         CHARACTER*4 STAT
@@ -59,7 +70,7 @@ C LOCAL VARIABLES:
         logical kdone
       double precision DRF,DLO,DFVC
       real fvc(14),rfvc  !VC frequencies
-      integer Z4000,Z100
+      integer Z8000,Z4000,Z100
       integer i1,i2,i3,i4,nco
       integer ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
       integer iflch,ichcm_ch,ichmv_ch,iaddtr
@@ -68,7 +79,7 @@ C LOCAL VARIABLES:
 C
 C INITIALIZED VARIABLES:
         data ibuflen/80/
-      data Z4000/Z'4000'/,Z100/Z'100'/
+      data Z4000/Z'4000'/,Z100/Z'100'/,Z8000/Z'8000'/
       data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
       data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
@@ -88,8 +99,10 @@ C   for the rack type.
 C   We make no distinction between Mk3 and Mk4 racks or recorders,
 C   but call them both "m3".
       km3rack=.false.
+      km4rack=.false.
       kvrack=.false.
       km3rec=.false.
+      km4rec=.false.
       kvrec=.false.
       ks2rec=.false.
       if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
@@ -97,10 +110,11 @@ C   but call them both "m3".
         ks2rec=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
         kvrec=    ichcm_ch(lstrec(1,istn),1,'VLBA').eq.0
         km3rec=   ichcm_ch(lstrec(1,istn),1,'Mark3').eq.0
-     .       .or. ichcm_ch(lstrec(1,istn),1,'Mark4').eq.0 
+        km4rec  = ichcm_ch(lstrec(1,istn),1,'Mark4').eq.0 
         kvrack =  ichcm_ch(lstrack(1,istn),1,'VLBA').eq.0 
      .       .or. ichcm_ch(lstrack(1,istn),1,'VLBAG').eq.0 
         km3rack = ichcm_ch(lstrack(1,istn),1,'Mark3').eq.0 
+        km4rack = ichcm_ch(lstrack(1,istn),1,'Mark4').eq.0 
       else ! take user input
         if (iin.eq.1) then ! Mark III backend
           km3rack=.true.
@@ -111,6 +125,12 @@ C   but call them both "m3".
         else if (iin.eq.3) then ! Mk3 rack, VLBA recorder
           km3rack=.true.
           kvrec=.true.
+        else if (iin.eq.4) then ! Mk4 backend
+          km4rack=.true.
+          km4rec=.true.
+          do i=1,ncodes
+            idummy=ichmv_ch(lmfmt(1,istn,i),1,'M') ! only Mk3/4 format
+          enddo
         endif
       endif
 
@@ -146,10 +166,12 @@ C
       write(luscn,9114) 
 9114  format(' **NOTE** These procedures are for stations using '/
      .' the following software and backend equipment:'/
-     .'   >> PC Field System version 9.1 or above')
+     .'   >> PC Field System version 9.2 or above')
       if (km3rack) write(luscn,'("   >> Mark III rack")')
+      if (km4rack) write(luscn,'("   >> Mark IV rack")')
       if (kvrack)  write(luscn,'("   >> VLBA rack")')
       if (km3rec)  write(luscn,'("   >> Mark III recorder")')
+      if (km4rec)  write(luscn,'("   >> Mark IV recorder")')
       if (kvrec)   write(luscn,'("   >> VLBA recorder")')
       if (ks2rec)  write(luscn,'("   >> S2 recorder")')
 
@@ -205,7 +227,7 @@ C Convert pass index to integer or alpha
 9112      FORMAT(' PROCEDURE ',6A2)
 C
 C 3. Write out the following lines in the setup procedure:
-          if (kvrec.or.km3rec) then 
+          if (kvrec.or.km3rec.or.km4rec) then 
 C  TAPEFRMffm
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'TAPEFRM')
@@ -216,11 +238,11 @@ C  TAPEFRMffm
 C  PASS=$
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'PASS=$')
-            if (km3rec) nch = ichmv_ch(ibuf,nch,',SAME') ! 2 heads on Mk3 
+            if (km3rec.or.km4rec) nch = ichmv_ch(ibuf,nch,',SAME') ! 2 heads on Mk3 
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  TRKFRMffmp
-            if (kvrack.and..not.km3mode) then
+            if ((km4rack.or.kvrack).and..not.km3mode) then
               call ifill(ibuf,1,ibuflen,oblank)
               nch = ichmv_ch(IBUF,1,'TRKFRM')
               nch = ICHMV(ibuf,nch,LCODE(ICODE),1,nco)
@@ -230,7 +252,7 @@ C  TRKFRMffmp
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
 C  TRACKS=tracks   
-            if (kvrack.and..not.km3mode) then
+            if ((kvrack.or.km4rack).and..not.km3mode) then
               call ifill(ibuf,1,ibuflen,oblank)
               NCH = ichmv_ch(IBUF,1,'TRACKS=')
               ig0=0
@@ -281,7 +303,7 @@ C         tracks still left in the table.
               endif
               do i=2,33 ! pick up leftover tracks not in a whole group
                 if (itrk2(i).eq.1) then
-                  nch = nch + ib2as(i,ibuf,nch,Z100+2)
+                  nch = nch + ib2as(i,ibuf,nch,Z8000+2)
                   nch = MCOMA(IBUF,nch)
                 endif
               enddo ! pick up leftover tracks
@@ -289,8 +311,8 @@ C         tracks still left in the table.
               CALL IFILL(IBUF,NCH,1,oblank)
               call hol2lower(ibuf,(nch+1))
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
-            endif ! kvrack and .not. km3mode
-          endif ! km3rec or kvrec
+            endif ! kvrack.or.km4rack and .not. km3mode
+          endif ! km3rec .or.km4recor kvrec
 C  REC_MODE=<mode>,$,<roll>
 C  USER_INFO=1,field,,auto
 C  USER_INFO=2,field,,auto
@@ -301,8 +323,8 @@ C  DATA_VALID=OFF
             nch = ichmv(ibuf,nch,ls2mode(1,istn,icode),1,
      .      iflch(ls2mode(1,istn,icode),16))
             nch = ichmv_ch(ibuf,nch,',$')
-C           If roll is NOT "unknown" then use it.
-            if (ichcm_ch(lbarrel(1,istn,icode),1,'<un>').ne.0) then 
+C           If roll is NOT blank then use it.
+            if (ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0) then 
               nch = MCOMA(IBUF,nch)
               nch = ichmv(ibuf,nch,lbarrel(1,istn,icode),1,4)
             endif
@@ -318,26 +340,36 @@ C           If roll is NOT "unknown" then use it.
           endif ! ks2rec
 C  FORM=m,r,fan,barrel   (m=mode,r=rate=2*b)
 C  For S2, leave out fan and barrel
-          if (kvrack.or.km3rack) then
+          if (kvrack.or.km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'FORM=')
-            IF (ichcm_ch(lmode(1,istn,icode),1,'E').eq.0) THEN 
-C                  !MODE E = B ON ODD, C ON EVEN PASSES
-              IF (MOD(IPASS,2).EQ.0) THEN
-                nch = ichmv_ch(ibuf,nch,'C')
-              ELSE
-                nch = ichmv_ch(ibuf,nch,'B')
+            if (km3mode) then
+              IF ((kvrack.or.km3rack).and.
+     .          ichcm_ch(lmode(1,istn,icode),1,'E').eq.0) THEN 
+C                    !MODE E = B ON ODD, C ON EVEN PASSES
+                IF (MOD(IPASS,2).EQ.0) THEN
+                  nch = ichmv_ch(ibuf,nch,'C')
+                ELSE
+                  nch = ichmv_ch(ibuf,nch,'B')
+                ENDIF
+              else ! not mode E or else Mk4 formatter
+                nch = ICHMV(IBUF,nch,lmode(1,istn,icode),1,1)
               ENDIF
-            else ! not mode E
-              nch = ICHMV(IBUF,nch,lmode(1,istn,icode),1,1)
-            ENDIF
+            else ! not Mk3 mode
+              nch = ICHMV(IBUF,nch,lmFMT(1,istn,icode),1,1)
+            endif
+C           Add sub-pass index for Mk4 formatter
+            if (km4rack.and.km3mode.and.
+     .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then 
+              nch = nch+ib2as(ipass,ibuf,nch,1)
+            endif
             nch = MCOMA(IBUF,nch)
             nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
             if (.not.ks2rec) then ! non-S2 only
             if (ifan(istn,icode).ne.0 .or.
      .        (ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'OFF ').ne.0)) then ! barrel or fan
+     .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! barrel or fan
               nch = MCOMA(IBUF,nch)
               if (ifan(istn,icode).ne.0) then ! a fan mode
                 nch = ichmv_ch(ibuf,nch,'1:')
@@ -345,7 +377,7 @@ C                  !MODE E = B ON ODD, C ON EVEN PASSES
               endif
               if ((ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
-     .          ichcm_ch(lbarrel(1,istn,icode),1,'OFF ').ne.0)) then ! a roll mode
+     .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! a roll mode
                 nch = MCOMA(IBUF,nch)
                 nch = ichmv(ibuf,nch,lbarrel(1,istn,icode),1,4)
               endif
@@ -353,7 +385,7 @@ C                  !MODE E = B ON ODD, C ON EVEN PASSES
             endif ! non-S2 only
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-          endif ! kvrack or km3rack
+          endif ! kvrack or km3rac.or.km4rackk
 C  FORM=RESET
           if (km3rack) then ! form=reset
             call ifill(ibuf,1,ibuflen,oblank)
@@ -376,10 +408,10 @@ C  SYSTRACKS=0,1,34,35
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C  BBCffb   
-          if (km3rack.or.kvrack) then
+          if (km3rack.or.km4rack.or.kvrack) then
             call ifill(ibuf,1,ibuflen,oblank)
             if (kvrack) nch = ichmv_ch(IBUF,1,'BBC')
-            if (km3rack) nch = ichmv_ch(IBUF,1,'VC')
+            if (km3rack.or.km4rack) nch = ichmv_ch(IBUF,1,'VC')
             nch = ichmv(ibuf,nch,lcode(icode),1,nco)
             CALL M3INF(ICODE,SPDIPS,IB)
             NCH=ICHMV(ibuf,NCH,LBNAME,IB,1)
@@ -391,16 +423,19 @@ C  IFDff
             nch = ICHMV(IBUF,nch,LCODE(ICODE),1,nco)
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-          endif ! kvrack or km3rack
+          endif ! kvrack or km3rac.or.km4rackk
 C  TAPE=LOW
-          if (kvrec.or.km3rec) then
+          if (kvrec.or.km3rec.or.km4rec) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'TAPE=LOW')
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C  ENABLE=tracks 
-          if (kvrec.or.km3rec) then
+C  Remember that tracks are VLBA track numbers in itrk.
+          itrka=0
+          itrkb=0
+          if (kvrec.or.km3rec.or.km4rec) then
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'ENABLE=')
             if (kvrec) then ! group-only enables for VLBA recorders
@@ -408,6 +443,8 @@ C  ENABLE=tracks
      .          itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
      .          itrk(14).eq.1.or.itrk(16).eq.1) then
                 ig0=1
+                itrka=6
+                itrkb=8
                 nch = ichmv_ch(ibuf,nch,'G0')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -415,13 +452,25 @@ C  ENABLE=tracks
      .            itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
      .            itrk(15).eq.1.or.itrk(17).eq.1) then
                 ig1=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=7
+                  itrkb=9
+                else
+                  itrkb=9
+                endif
                 nch = ichmv_ch(ibuf,nch,'G1')
                 nch = MCOMA(IBUF,nch)
               endif
               if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
      .            itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
      .            itrk(30).eq.1.or.itrk(32).eq.1) then
-                  ig2=1
+                ig2=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=20
+                  itrkb=22
+                else
+                  itrkb=22
+                endif
                 nch = ichmv_ch(ibuf,nch,'G2')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -429,6 +478,12 @@ C  ENABLE=tracks
      .            itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
      .            itrk(31).eq.1.or.itrk(33).eq.1) then
                 ig3=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=21
+                  itrkb=23
+                else
+                  itrkb=23
+                endif
                 nch = ichmv_ch(ibuf,nch,'G3')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -437,6 +492,10 @@ C  ENABLE=tracks
      .            itrk(10).eq.1.and.itrk(12).eq.1.and.
      .            itrk(14).eq.1.and.itrk(16).eq.1) then
                 ig0=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=3 ! Mk3 track number
+                  itrkb=5
+                endif
                 nch = ichmv_ch(ibuf,nch,'G1')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -444,6 +503,12 @@ C  ENABLE=tracks
      .            itrk(9).eq.1.and.itrk(11).eq.1.and.itrk(13).eq.1.and.
      .            itrk(15).eq.1.and.itrk(17).eq.1) then
                 ig1=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=4
+                  itrkb=6
+                else
+                  itrkb=6
+                endif
                 nch = ichmv_ch(ibuf,nch,'G2')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -451,6 +516,12 @@ C  ENABLE=tracks
      .            itrk(24).eq.1.and.itrk(26).eq.1.and.itrk(28).eq.1.and.
      .            itrk(30).eq.1) then
                 ig2=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=17
+                  itrkb=19
+                else
+                  itrkb=19
+                endif
                 nch = ichmv_ch(ibuf,nch,'G3')
                 nch = MCOMA(IBUF,nch)
               endif
@@ -458,10 +529,16 @@ C  ENABLE=tracks
      .            itrk(25).eq.1.and.itrk(27).eq.1.and.itrk(29).eq.1.and.
      .            itrk(31).eq.1) then
                 ig3=1
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=18
+                  itrkb=20
+                else
+                  itrkb=20
+                endif
                 nch = ichmv_ch(ibuf,nch,'G4')
                 nch = MCOMA(IBUF,nch)
               endif
-C         Write out the group names we have found. Zero out these
+C         Write out the Mk3 group names we have found. Zero out these
 C         track names in a copy of the track table. Then list any
 C         tracks still left in the table.
               do i=1,36
@@ -487,32 +564,38 @@ C         tracks still left in the table.
                   itrk2(i)=0
                 enddo
               endif
-              do i=4,31 ! pick up leftover tracks not in a whole group
+              do i=4,31 ! pick up leftover Mk3 tracks not in a whole group
                 if (itrk2(i).eq.1) then ! Mark3 numbering
-                  nch = nch + ib2as(i-3,ibuf,nch,Z4000+2*Z100+2)
+                  nch = nch + ib2as(i-3,ibuf,nch,Z8000+2)
                   nch = MCOMA(IBUF,nch)
                 endif
               enddo ! pick up leftover tracks
+            else if (km4rec) then ! stack enables 
+              kok=.false.
+              do i=2,33 ! if any tracks are on, enable the stack
+                if (itrk(i).eq.1) then
+                  kok=.true.
+                  if (itrka.ne.0.and.itrkb.eq.0) itrkb=i
+                  if (itrka.eq.0) itrka=i
+                endif
+              enddo
+              nch = ichmv_ch(ibuf,nch,'S1')
+              nch = MCOMA(IBUF,nch)
             endif
             NCH = NCH-1
             CALL IFILL(IBUF,NCH,1,oblank)
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
           endif
-C REPRO=byp,3,5
-          if (kvrec.or.km3rec) then
-            IF ((kvrec.and.MOD(IPASS,2).EQ.0) .or.
-     .          (km3rec.and.MOD(IPASS,2).EQ.1)) THEN ! even pass
-              call ifill(ibuf,1,ibuflen,oblank)
-              nch = ichmv_ch(IBUF,1,'repro=byp,7,9')
-              call hol2lower(ibuf,(nch+1))
-              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-            else ! odd pass
-              call ifill(ibuf,1,ibuflen,oblank)
-              nch = ichmv_ch(IBUF,1,'repro=byp,6,8')
-              call hol2lower(ibuf,(nch+1))
-              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-            endif
+C Fix this to list tracks actually being recorded in this mode!
+C REPRO=byp,itrka,itrkb
+          if (kvrec.or.km3rec.or.km4rec) then
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(IBUF,1,'repro=byp,')
+            nch = nch+ib2as(itrka,ibuf,nch,Z8000+2)
+            nch = MCOMA(IBUF,nch)
+            nch = nch+ib2as(itrkb,ibuf,nch,Z8000+2)
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C !*+8s
           if (kvrack) then ! formatter wait
@@ -531,10 +614,10 @@ C Now continue with procedures that are code-based
 C 3. Write out the baseband converter frequency procedure.
 C Name is VCffb or BBCffb      (ff=code,b=bandwidth)
 C Contents: VCnn=freq,bw or BBCnn=freq,if,bw,bw
-        if (kvrack.or.km3rack) then
+        if (kvrack.or.km3rack.or.km4rack) then
           CALL IFILL(LNAMEP,1,12,oblank)
           if (kvrack) nch = ichmv_ch(LNAMEP,1,'BBC')
-          if (km3rack) nch = ichmv_ch(LNAMEP,1,'VC')
+          if (km3rack.or.km4rack) nch = ichmv_ch(LNAMEP,1,'VC')
           nch = ICHMV(LNAMEP,nch,LCODE(ICODE),1,nco)
           CALL M3INF(ICODE,SPDIPS,IB)
           NCH=ICHMV(LNAMEP,NCH,LBNAME,IB,1)
@@ -547,69 +630,74 @@ C
      .      '   BBC or VC frequency procedure will ',
      .      'not be correct, nor will IFD procedure.') 
           endif
-          DO IVCN=1,nchan(istn,icode) !loop on channels
-            iv=invcx(ivcn,istn,icode) ! channel number
-            call ifill(ibuf,1,ibuflen,oblank)
-                  DRF = FREQRF(IV,istn,ICODE)
-            DLO = FREQLO(iv,ISTN,ICODE)
-            DFVC = DRF-DLO   ! BBCfreq = RFfreq - LOfreq
-            rFVC = DFVC
-            rFVC = ABS(rFVC)
-            fvc(iv) = rfvc
-            if (kvrack) nch = ichmv_ch(ibuf,1,'BBC')
-            if (km3rack) nch = ichmv_ch(ibuf,1,'VC')
-            nch = nch + ib2as(iv,ibuf,nch,Z4000+2*Z100+2)
-            nch = ichmv_ch(IBUF,nch,'=')
-            NCH = nch + IR2AS(rFVC,IBUF,nch,6,2)
-            kok=.false.
-            if (km3rack) then
-              if(ichcm_ch(lifinp(iv,istn,icode),1,'1N').eq.0 .or.
-     .           ichcm_ch(lifinp(iv,istn,icode),1,'2N').eq.0.or.
-     .           ichcm_ch(lifinp(iv,istn,icode),1,'3N').eq.0.or.
-     .           ichcm_ch(lifinp(iv,istn,icode),1,'1A').eq.0.or.
-     .           ichcm_ch(lifinp(iv,istn,icode),1,'2A').eq.0.or.
-     .           ichcm_ch(lifinp(iv,istn,icode),1,'3A').eq.0) kok=.true.
+          DO ichan=1,nchan(istn,icode) !loop on channels
+            ic=invcx(ichan,istn,icode) ! channel number
+C           Skip the LSB channels because they are duplicates
+            if (ichcm_ch(lnetsb(ic,istn,icode),1,'U').eq.0) then ! USB only
+              ib=ibbcx(ic,istn,icode) ! BBC number
+              call ifill(ibuf,1,ibuflen,oblank)
+              DRF = FREQRF(ic,istn,ICODE)
+              DLO = FREQLO(ic,ISTN,ICODE)
+              DFVC = DRF-DLO   ! BBCfreq = RFfreq - LOfreq
+              rFVC = DFVC
+              rFVC = ABS(rFVC)
+              fvc(ib) = rfvc
+              if (kvrack) nch = ichmv_ch(ibuf,1,'BBC')
+              if (km3rack.or.km4rack) nch = ichmv_ch(ibuf,1,'VC')
+              nch = nch + ib2as(ib,ibuf,nch,Z4000+2*Z100+2)
+              nch = ichmv_ch(IBUF,nch,'=')
+              NCH = nch + IR2AS(rFVC,IBUF,nch,6,2)
+              kok=.false.
+              if (km3rack.or.km4rack) then
+                if(ichcm_ch(lifinp(ic,istn,icode),1,'1N').eq.0 .or.
+     .             ichcm_ch(lifinp(ic,istn,icode),1,'2N').eq.0.or.
+     .             ichcm_ch(lifinp(ic,istn,icode),1,'3N').eq.0.or.
+     .             ichcm_ch(lifinp(ic,istn,icode),1,'1A').eq.0.or.
+     .             ichcm_ch(lifinp(ic,istn,icode),1,'2A').eq.0.or.
+     .             ichcm_ch(lifinp(ic,istn,icode),1,'3A').eq.0) 
+     .             kok=.true.
+                endif
+              if (kvrack) then
+                if (ichcm_ch(lifinp(ic,istn,icode),1,'A').eq.0.or.
+     .          ichcm_ch(lifinp(ic,istn,icode),1,'B').eq.0.or.
+     .          ichcm_ch(lifinp(ic,istn,icode),1,'C').eq.0.or.
+     .          ichcm_ch(lifinp(ic,istn,icode),1,'D').eq.0) kok=.true.
               endif
-            if (kvrack) then
-              if (ichcm_ch(lifinp(iv,istn,icode),1,'A').eq.0.or.
-     .        ichcm_ch(lifinp(iv,istn,icode),1,'B').eq.0.or.
-     .        ichcm_ch(lifinp(iv,istn,icode),1,'C').eq.0.or.
-     .        ichcm_ch(lifinp(iv,istn,icode),1,'D').eq.0) kok=.true.
-            endif
-            if (km3rack.and..not.kok) write(luscn,9919) 
-     .        lifinp(iv,istn,icode)
-9919          format(' PROC04 - WARNING! IF input ',a2,' not',
-     .        ' consistent with Mark III rack.')
-            if (kvrack.and..not.kok) write(luscn,9909) 
-     .        lifinp(iv,istn,icode)
-9909          format(' PROC04 - WARNING! IF input ',a2,' not',
-     .        ' consistent with VLBA rack.')
-            if (kvrack.and.(rfvc.lt.500.0.or.rfvc.gt.1000.0)) then
-              write(luscn,9911) iv,rfvc
-9911          format(' PROC03 - WARNING! BBC ',i2,' frequency '
-     .        f7.2,' is out of range.'/
-     .        21x,' Check LO and IF in schedule.')
-            else if ((km3rack).and.(rfvc.lt.0.0.or.rfvc.gt.500.0))
-     .        then
-              write(luscn,9912) iv,rfvc
-9912          format(' PROC03 - WARNING! VC ',i2,' frequency '
-     .        f7.2,' is out of range.'/
-     .        21x,' Check LO and IF in schedule.')
-            endif
-            if (kvrack) then
+              if ((km3rack.or.km4rack).and..not.kok) write(luscn,9919) 
+     .          lifinp(ic,istn,icode)
+9919            format(' PROC04 - WARNING! IF input ',a2,' not',
+     .          ' consistent with Mark III/IV rack.')
+              if (kvrack.and..not.kok) write(luscn,9909) 
+     .          lifinp(ic,istn,icode)
+9909            format(' PROC04 - WARNING! IF input ',a2,' not',
+     .          ' consistent with VLBA rack.')
+              if (kvrack.and.(rfvc.lt.500.0.or.rfvc.gt.1000.0)) then
+                write(luscn,9911) ib,rfvc
+9911            format(' PROC03 - WARNING! BBC ',i2,' frequency '
+     .          f7.2,' is out of range.'/
+     .          21x,' Check LO and IF in schedule.')
+              else if ((km3rack.or.km4rack).and.
+     .          (rfvc.lt.0.0.or.rfvc.gt.500.0)) then
+                write(luscn,9912) ib,rfvc
+9912            format(' PROC03 - WARNING! VC ',i2,' frequency '
+     .          f7.2,' is out of range.'/
+     .          21x,' Check LO and IF in schedule.')
+              endif
+              if (kvrack) then
+                NCH = MCOMA(IBUF,NCH)
+                nch = ichmv(ibuf,nch,lifinp(ic,istn,icode),1,1)
+              endif
               NCH = MCOMA(IBUF,NCH)
-              nch = ichmv(ibuf,nch,lifinp(iv,istn,icode),1,1)
-            endif
-            NCH = MCOMA(IBUF,NCH)
-            NCH = NCH + IR2AS(VCBAND(iv,istn,ICODE),IBUF,NCH,6,3)
-            if (kvrack) then
-              NCH = MCOMA(IBUF,NCH)
-              NCH = NCH + IR2AS(VCBAND(iv,istn,ICODE),IBUF,NCH,6,3)
-            endif
-            call hol2lower(ibuf,nch+1)
-            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
+              NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,NCH,6,3)
+              if (kvrack) then
+                NCH = MCOMA(IBUF,NCH)
+                NCH = NCH + IR2AS(VCBAND(ic,istn,ICODE),IBUF,NCH,6,3)
+              endif
+              call hol2lower(ibuf,nch+1)
+              CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
+            endif ! USB only
           ENDDO !loop on channels
-          if (km3rack) then
+          if (km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!+1s')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
@@ -627,14 +715,14 @@ C    for Mk3:   ifd=atn1,atn2,nor/alt,nor/alt
 C               if3=atn3,out,1 (in for WB)
 C               lo=lo1,lo2,lo3
 C               patch=...
-        if (km3rack.or.kvrack) then
+        if (km3rack.or.km4rack.or.kvrack) then
           CALL IFILL(LNAMEP,1,12,oblank)
           IDUMMY = ichmv_ch(LNAMEP,1,'IFD')
           IDUMMY = ICHMV(LNAMEP,4,LCODE(ICODE),1,nco)
           CALL CRPRC(LU_OUTFILE,LNAMEP)
           WRITE(LUSCN,9112) LNAMEP
 C
-          if (km3rack) then
+          if (km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'IFD=')
             i1=0
@@ -699,8 +787,8 @@ C
               call ifill(ibuf,1,ibuflen,oblank)
               NCH = ichmv_ch(IBUF,1,'PATCH=LO')
               NCH = NCH + IB2AS(I,IBUF,NCH,1)
-              DO IVcn = 1,nchan(istn,icode)
-                iv=invcx(ivcn,istn,icode) ! channel number
+              DO ichan = 1,nchan(istn,icode)
+                iv=invcx(ichan,istn,icode) ! channel number
                 if ((ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0.
      .                and.i.eq.1).or.
      .                (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0.
@@ -769,12 +857,12 @@ C
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
           endif ! vlba
         CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
-      endif ! km3rack or kvrack
+      endif ! km3rack .or.km4rackor kvrack
 C
 C 5. Write TAPEFRMffm procedure.
 C    command format: TAPEFORM=index,offset lists
 
-      if (kvrec.or.km3rec) then
+      if (kvrec.or.km3rec.or.km4rec) then
         CALL IFILL(LNAMEP,1,12,oblank)
         nch = ichmv_ch(LNAMEP,1,'TAPEFRM')
         nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)
@@ -814,8 +902,8 @@ C
 C 6. Write TRKFRM procedures, one per pass.
 C    trkform=track,BBC#-sb-bit
 
-      if (kvrec.or.km3rec) then
-        if (kvrack.and..not.km3mode) then
+      if (kvrec.or.km3rec.or.km4rec) then
+        if ((km4rack.or.kvrack).and..not.km3mode) then
           DO IPASS=1,NPASSF(istn,ICODE) !loop on sub passes
             call trkall(itras(1,1,1,ipass,istn,icode),
      .      lmode(1,istn,icode),
@@ -840,7 +928,9 @@ C    trkform=track,BBC#-sb-bit
                 do ibit=1,2
                   it=itras(isb,ibit,ichan,ipass,istn,icode)
                   if (it.ne.-99) then ! assigned
-                    nch = iaddtr(ibuf,nch,it+3,ichan,isb,ibit)
+C                   Use BBC number, not channel number
+                    ib=ibbcx(ichan,istn,icode) ! BBC number
+                    nch = iaddtr(ibuf,nch,it+3,ib,isb,ibit)
                     ib=1
                   endif ! assigned
                   if (ib.ne.0.and.nch.gt.60) then ! write a line
@@ -882,7 +972,7 @@ C UNLOADER procedure
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'rec=eject ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
-      else if (kvrec.or.km3rec) then
+      else if (kvrec.or.km3rec.or.km4rec) then
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'!+5s ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
@@ -894,7 +984,7 @@ C UNLOADER procedure
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
         call ifill(ibuf,1,ibuflen,oblank)
         if (kvrec) nch = ichmv_ch(ibuf,1,'rec=unload ')
-        if (km3rec) nch = ichmv_ch(ibuf,1,'st=rev,135,off ')
+        if (km3rec.or.km4rec) nch = ichmv_ch(ibuf,1,'st=rev,135,off ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
       endif
       CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
@@ -929,7 +1019,7 @@ C LOADER procedure
         nch = ichmv_ch(ibuf,1,'tape=low,reset ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
       endif
-      if (kvrec.or.km3rec) then
+      if (kvrec.or.km3rec.or.km4rec) then
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'st=for,135,off ')
         call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
