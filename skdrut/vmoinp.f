@@ -31,6 +31,8 @@ C            set even for rack=none
 C 971208 nrv Add fpcal, fpcal_base to vunpif call. Add cpcalref to vunpfrq.
 C 971208 nrv Add call to VUNPPCAL.
 C 991110 nrv Save modedefname as catalog name.
+C 011119 nrv Clean up logic so that information isn't saved if there
+C            aren't any chan_defs.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -169,7 +171,8 @@ C         (Get other procedure timing info later.)
             ierr1=1
           endif
 
-          if (nchdefs.gt.0) then ! continue getting other info
+        nchan(istn,icode) = nchdefs
+        if (nchdefs.gt.0) then ! chandefs > 0
 C         Get $BBC statements.
           call vunpbbc(modedefnames(icode),stndefnames(istn),
      .    ivexnum,iret,ierr,lu,
@@ -265,12 +268,12 @@ C
 C    Count subpasses and store subpass names found in the fanout defs.
 C    Not necessary for S2 recorders.
           if (ks2rec) then
-          else
+          else ! non-S2
             do i=1,max_subpass
               csubpass(i)=' '
             enddo
             nsubpass=0
-            do i=1,nfandefs ! go through them all
+            do i=1,nfandefs ! each fandef
               ix=1 
               do while (ix.le.nsubpass.and.cp(i)(1:1).ne.
      .                   csubpass(ix))
@@ -287,12 +290,10 @@ C    Not necessary for S2 recorders.
                   csubpass(nsubpass)=cp(i)(1:1)
                 endif
               endif
-            enddo
-          endif
+            enddo ! each fandef
+          endif ! S2/not
 
 C    Save the chan_def info and its links.
-C         if (km3rack.or.km4rack.or.kvrack) then
-          nchan(istn,icode) = nchdefs
           do i=1,nchdefs ! each chan_def line
             invcx(i,istn,icode)=i ! save channel index number 
             LSUBVC(i,istn,ICODE) = LSG(i) ! sub-group, i.e. S or X
@@ -371,7 +372,6 @@ C                                               ! store as Mk3 numbers
             enddo ! check each fandef
             endif ! m3/4 or v rec
           enddo ! each chan_def line
-          endif ! m3/4 or v rack
 C
 C    3.2 Save the non-channel specific info for this mode.
 C         Recording format, "Mark3", "Mark4", "VLBA".
@@ -445,9 +445,7 @@ C    Store head positions and subpases
             enddo  ! number of passes in list
           endif ! m3/4 or v rec
           npassl(istn,icode) = npl
-C         else ! set nchan=0 as a flag
-C           nchan(istn,icode) = 0
-C         endif ! nchdefs>0 or =0
+        endif ! chandefs > 0
 
 C       Store the procedure prefix by station and code.
         if (ichcm_ch(lpre,1,'      ').eq.0) then ! missing 

@@ -166,9 +166,9 @@ C
      .       ifan(max_stn,max_frq),npassl(max_stn,max_frq),
      .       ntrkn(max_band,max_stn,max_frq),
      .       nhstack(max_stn,max_frq),
-     .       roll_def(17,32,max_roll),
      .       roll_inc_period(max_roll),roll_reinit_period(max_roll),
      .       nrolldefs(max_roll),nrollsteps(max_roll),
+     .       roll_def(17,32,max_roll),
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
      .       lmode_cat(8,max_frq),

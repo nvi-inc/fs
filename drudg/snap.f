@@ -55,7 +55,7 @@ c     integer itrax(2,2,max_chan) ! fanned-out version of itras
       character*3  stat
 C     character*28 cpass,cvpass
       character    upper
-      character*1  maxchk,dopre
+      character*1  maxchk,dopre,cx
       logical    ex
       logical kintr ! false until intro lines have been written
       logical kflg_next(4)
@@ -271,7 +271,8 @@ C            events to be issued at incorrect times for the next scan.
 C 010726 nrv Add SCHED_END at the end of the file.
 C 010820 nrv Don't append to rec commands if one of the recorders is none.
 C 010831 nrv Send krec_append to LSPIN.
-C 010927 nrv Initialize _old variables, even if there are not two recs.
+C 010927 nrv Initialize kk4_old and ks2_old, even if there are not two recs.
+C 011130 nrv Force S2 tape stop if mode change.
 C
 C
       iblen = ibuf_len*2
@@ -695,6 +696,9 @@ C  **** here, idayr5_save is not defined, if it's not an early start schedule
         endif
 C         always stop on the last scan but not for late stop.
         if (istnsk_next.eq.999.and.itlate(istn).eq.0) ket=.true.
+C         always stop if S2 mode changes for the next scan.
+        if (ks2.and.ichcm(lmode(1,istn,icod_next),1,
+     .    lmode(1,istn,icod),1,8).ne.0) ket=.true.
 
 C <<<previous>>>>  <<<<<<<<<<current>>>>>>>>>>>>>>>>>>>>>>  <<<next>>>>>>>>>
 C time4=   time6=  time5=        time= time2=       time6=  time5_next=
@@ -831,13 +835,15 @@ C  For S2 or continuous, stop tape if needed after the SOURCE command
           endif
 
 C Switch recorders if it's a new tape.
-          crec_use_old = crec_use ! save the old one for the UNLOD command
-          ks2_old = ks2
           kk4_old = kk4
+          ks2_old = ks2
           if (knewtp.and.iobsst.gt.0.and.nrecst(istn).eq.2) then ! switch 
             if (ichcm_ch(lstrec(1,istn),1,'unused').eq.0.or.
      .          ichcm_ch(lstrec2(1,istn),1,'unused').eq.0) then ! don't switch
             else ! switch
+            crec_use_old = crec_use ! save the old one for the UNLOD command
+            ks2_old = ks2
+            kk4_old = kk4
             if (crec_use.eq.'1') then
               crec_use = '2'
               kk4 = kk41rec(2).or.kk42rec(2)

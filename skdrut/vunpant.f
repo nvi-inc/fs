@@ -25,6 +25,7 @@ C 990630 nrv Axis offset has only 1 parameter. This is an error in
 C            the VEX parameter tables, but correct in VEX example
 C            document.
 C 990913 nrv Change spelling from "ant_diam" to "antenna_diam"
+C 011107 nrv Set antenna limits to wide values if none are found.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -290,6 +291,12 @@ C         Select the max and min of all sectors for now.
      .  ptr_ch('pointing_sector'//char(0)),
      .  ptr_ch('ANTENNA'//char(0)),iv)
       enddo
+      if (nl.eq.0) then ! no sectors found
+        anlim1(1)=-999.9*pi/180.d0
+        anlim1(2)=+999.9*pi/180.d0
+        anlim2(1)=-999.9*pi/180.d0
+        anlim2(2)=+999.9*pi/180.d0
+      endif ! no sectors found
 
 C  6. Antenna diameter
 

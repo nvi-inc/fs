@@ -5379,3 +5379,47 @@ Version 9.5.1 010928
            fixed time schedule problem with schedule= after sched_initi
 
 Version 9.5.2 011029
+
+011115 WEH st.default/proc/k42station.prc
+           created
+
+011115 WEH pdplt/pdplt
+           add raw data option
+           fixed file dialogue problems with pre 4.2 Tk
+           fixed file dialogue with window destroy for 4.2 and greater Tk
+           improved formatting of statistics window
+
+011121 WEH logpl/logpl
+           fixed file dialogue with window destroy for 4.2 and greater Tk
+           narrowed label on time range box
+
+011128 RDG st.default/control/tacd.ctl
+           fixed typo in comments
+
+011128 DLS st.default/sched/4bhdcal.snp
+           fixed for MK4 drive, not VLBA
+           use less tape
+
+011129 WEH quikr/repro4.f
+           quikr/repds4.f
+           control/fserr.ctl
+           add 1 Mbit/sec bit rate
+
+011130 RDG fsvue/fsvue
+           fsvue/fsvue_start
+           fsvue/vue_fshelp
+           fsvue/vue_fslog
+           fsvue/vue_fsmail
+           fsvue/fsfiles
+           fswx/fsfiles
+           added two sizes of fonts and cleaned up.
+
+011203 WEH st.default/control/drivev1.ctl
+           st.default/control/drivev2.ctl
+           add CPU comment for VLBA2
+
+011203 WEH help/
+           help files remade
+
+Version 9.5.3 011203
+
