@@ -156,11 +156,9 @@ int doinit()
     if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
       return -3;
 
-    if(shm_addr->equip.drive[0] == MK5 &&
-       shm_addr->equip.drive_type[0] == MK5A_BS) {
-      if(time_out <200)
-	time_out= 200;
-    }
+    if(time_out <200)
+      time_out= 200;
+    
 #ifdef DEBUG
     printf ("Host %s port %d time_out %d\n",host,port,time_out);
 #endif
@@ -458,12 +456,32 @@ long ip[5];
   long out_class=0;
   int in_recs;
   int out_recs=0;
-  int i, nchars;
+  int i, j, nchars;
 
   fd_set rfds;
   struct timeval tv;
   int retval;
   int error;
+  int flags;
+
+  int time_out_local;
+  static struct {
+    char string[80];
+    int to;
+  } list[ ] = {
+    "record on",      26,
+    "record=on",      26,
+    "record off",    400,
+    "record=off",    400,
+    "play on",        93,
+    "play=on",        93,
+    "data_check?",   189,
+    "track_check?",  189,
+    "scan_check?",   327,
+    "bank_set inc",  395,
+    "bank_set=inc",  395,
+    "",                0
+  };
 
   secho[0]=0;
   in_class=ip[1];
@@ -483,13 +501,14 @@ long ip[5];
 
   msgflg = save = 0;
   for (i=0;i<in_recs;i++) {
-    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 #ifdef DEBUG
       printf ("mk5cn failed to get a request buffer\n");
 #endif
       ip[2] = -101;
       goto error;
     }
+    inbuf[nchars]=0;  /* terminate in case not string */
 #ifdef DEBUG
     { int j;
       (void) fprintf(stderr, /* Yes */ 
@@ -513,7 +532,14 @@ long ip[5];
       strcat(secho,"]");
     }
     /* * Send command * */ 
-    if (send(sock, inbuf, nchars, 0) < nchars) { /* Send to socket, OK? */ 
+    flags=0;
+#ifdef MSG_NOSIGNAL
+    flags|=MSG_NOSIGNAL;
+#endif
+#ifdef MSG_DONTWAIT
+    flags|=MSG_DONTWAIT;
+#endif
+    if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
 #ifdef DEBUG
       (void) fprintf(stderr, /* Nope */ 
 		     "%s ERROR: \007 send() on socket returned ",me); 
@@ -533,9 +559,19 @@ long ip[5];
 
     FD_ZERO(&rfds);
     FD_SET(fileno(fsock), &rfds);
+
+    /* determine time-out */
+
+    time_out_local=time_out;
+    for (j=0;list[j].string[0]!=0;j++) {
+      if(NULL!=strstr(inbuf,list[j].string)) {
+	time_out_local+=list[j].to;
+      }
+    }
+	 
     /* Wait up to time_out centiseconds. */
-    tv.tv_sec = time_out/100;
-    tv.tv_usec = (time_out%100)*10000;
+    tv.tv_sec = time_out_local/100;
+    tv.tv_usec = (time_out_local%100)*10000;
 
 #ifdef DEBUG
     { int itb[6],ita[6];
