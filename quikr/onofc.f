@@ -85,7 +85,7 @@ C
 C                 Default is 1 repetition
       if (cjchar(parm,1).eq.'*') nrep = nrepnf
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') nrep=iparm(1)
-      if (nrep.ge.1.and.nrep.le.10) goto 250
+      if (nrep.ge.1.and.nrep.le.99) goto 250
         ierr = -401
         goto 990
 C
