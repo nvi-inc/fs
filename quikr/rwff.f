@@ -31,7 +31,7 @@ C
       if (ieq.ne.0) goto 100
 C                   If parameters, error
       call fs_get_drive(drive)
-      if (VLBA .eq. and(drive,VLBA)) goto 500
+      if (VLBA .eq.drive.or.VLBA4.eq.drive) goto 500
 C
 C
 C     1. Set up buffer for rewinding or fast forwarding tape:
@@ -82,31 +82,49 @@ C
       call fs_set_idirtp(idirtp)
       ilowtp = 1
 C
+      nrec=0
+      iclass = 0
+      call fs_get_rack(rack)
+      if(rack.eq.MK4) then
+         ibuf(1)=9
+         call char2hol('fm/rec 0',ibuf(2),1,8)
+         call put_buf(iclass,ibuf,-10,'fs','  ')
+         nrec = nrec+1
+      endif
+c
       ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
       call en2ma(ibuf(3),ienatp,-1,ltrken)
-      iclass = 0
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call tp2ma(ibuf(3),ilowtp,0)
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      call ichmv_ch(lgen,1,'720')
       if(isub.lt.5) then
-        call mv2ma(ibuf(3),idirtp,ispeed,lgen)
+         call fs_get_iskdtpsd(iskdtpsd)
+         if (iskdtpsd.eq.-2) then
+            call ichmv_ch(lgen,1,'960')
+         else if (iskdtpsd.eq.-1) then
+            call ichmv_ch(lgen,1,'880')
+         else
+            call ichmv_ch(lgen,1,'720')
+         endif
       else
-        call fs_get_imaxtpsd(imaxtpsd)
-        if (imaxtpsd.eq.-1) then
-          call ichmv_ch(lgen,1,'880')
-          call mv2ma(ibuf(3),idirtp,ispeed,lgen)
-        else
-          call mv2ma(ibuf(3),idirtp,imaxtpsd,lgen)
-        endif
+         call fs_get_imaxtpsd(imaxtpsd)
+         if (imaxtpsd.eq.-2) then
+            call ichmv_ch(lgen,1,'960')
+         else if (imaxtpsd.eq.-1) then
+            call ichmv_ch(lgen,1,'880')
+         else
+            call ichmv_ch(lgen,1,'720')
+         endif
       endif
+      call mv2ma(ibuf(3),idirtp,ispeed,lgen)
       call fs_set_lgen(lgen)
       call put_buf(iclass,ibuf,-13,'fs','  ')
+      nrec=nrec+3
 C
-      call run_matcn(iclass,3)
+      call run_matcn(iclass,nrec)
       call rmpar(ip)
       call mvdis(ip,iclcm)
 C
