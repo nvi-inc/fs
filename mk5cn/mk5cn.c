@@ -87,6 +87,7 @@ int main(int argc, char * argv[])
       ip[4]=fail;
       break;
     case 1:
+    case 5:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -111,6 +112,8 @@ int main(int argc, char * argv[])
 	result = doclose(ip);
       break;
     default:
+      cls_clr(ip[1]);
+      ip[0]=ip[1]=0;
       result = -99;
       break;
     }
@@ -480,13 +483,19 @@ long ip[5];
     "scan_check?",   327,
     "bank_set inc",  395,
     "bank_set=inc",  395,
+    "bank_set = inc",  395,
     "",                0
   };
+  char *ptr,*ptrcolon;
+  int ierr, mode;
 
   secho[0]=0;
+  mode=ip[0];
   in_class=ip[1];
   in_recs=ip[2];
 
+  secho[0]=0;
+    
   if(!is_open) {
     if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
 #ifdef DEBUG
@@ -632,6 +641,7 @@ long ip[5];
       secho[out]=0;
       strcat(secho,">");
       logit(secho,0,NULL);
+      secho[0]=0;
     }
 #ifdef DEBUG
       /* * Print reply * */ 
@@ -641,6 +651,50 @@ long ip[5];
     cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
     out_recs++;
 
+    /* check errors */
+
+    if(mode==5)   /* no error report here */
+      continue;
+
+    ptrcolon=strchr(outbuf,':');
+    ptr=strchr(outbuf,'=');
+    if(ptr==NULL || (ptrcolon!=NULL && ptr >ptrcolon))
+      ptr=strchr(outbuf,'?');
+    if(ptr==NULL || (ptrcolon!=NULL && ptr >ptrcolon))
+      ptr=strchr(outbuf,' ');
+    if(ptr==NULL || (ptrcolon!=NULL && ptr >ptrcolon) ||
+       1!=sscanf(ptr+1,"%d",&ierr)){
+      ip[2]=-899;
+      goto error;
+    } else if(ierr != 0 && ierr != 1) {
+      /* is there a trailing parameter that could contain an error message */
+      ptr=strchr(outbuf,':');
+      if(ptr!=NULL) {
+	char *save, *ptr2;
+
+	ptr2=strchr(ptr+1,';'); /* terminate the string at the ; */
+	if(ptr2!=NULL)
+	  *ptr2=0;
+
+	save=NULL;              /* initialize, nothing yet */
+
+	ptr=strtok(ptr+1,":");  /* find the last paramter */
+	while (ptr!=NULL) {
+	  save=ptr;
+	  ptr=strtok(NULL,":");
+	}
+	if(save!=NULL) {         /* if there was soemthing there */
+	  while(*save!=0 && *save==' ')
+	    save++;
+	  if(*save!=0)
+	    logite(save,-900,"m5");
+	}
+      }
+      ip[2]=-900-ierr;
+      goto error;
+    }
+      
+
   } /* End of for loop  */ 
 
   ip[0]=out_class;
@@ -648,10 +702,11 @@ long ip[5];
   ip[2]=0;
   return 0;
 
- error:
-  if(iecho) {
+error:
+  if(iecho && strlen(secho)> 0) {
     logit(secho,0,NULL);
   }
+error2:
   cls_clr(in_class);
   ip[0]=out_class;
   ip[1]=out_recs;
