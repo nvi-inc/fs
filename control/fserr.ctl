@@ -285,7 +285,10 @@ BO -189
 Error reading TIME.CTL FMP ?FFF
 ""
 BO -190
-Error initilaizing mcbcn, internal error ?WWW
+Error initiliazing mcbcn, internal error ?WWW
+""
+BO -191
+Error initiliazing rclcn, internal error ?WWW
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -605,6 +608,69 @@ Error locking LVDT Resource Number.
 CH -409
 Error unlocking LVDT Resource Number.
 ""
+CH -421
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+CH -422
+Program error: less than zero length data object request for device ?W
+""
+CH -423
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+CH -500
+Previous error prevented checking S2 recorder measured delay.
+""
+CH -501
+User Info Field 1 Label does not agree with request.
+""
+CH -502
+User Info Field 2 Label does not agree with request.
+""
+CH -503
+User Info Field 3 Label does not agree with request.
+""
+CH -504
+User Info Field 4 Label does not agree with request.
+""
+CH -505
+User Info Field 1 Field does not agree with request.
+""
+CH -506
+User Info Field 2 Field does not agree with request.
+""
+CH -507
+User Info Field 3 Field does not agree with request.
+""
+CH -508
+User Info Field 4 Field does not agree with request.
+""
+CH -509
+Record speed does not agree with request.
+""
+CH -510
+Recorder state does not agree with request.
+""
+CH -511
+Record mode does not agree with request.
+""
+CH -512
+Record group does not agree with request.
+""
+CH -513
+Record data valid flag does not agree with request.
+""
+CH -514
+Record data valid playback enable flag does not agree with request.
+""
+CH -515
+Tapeid (label) does not agree with request.
+""
+CH -516
+Tapetype does not agree with request.
+""
+CH -517
+program error: Recorder returned individual positions, overall was expected.
+""
 FM  007
 Checksum error
 ""
@@ -745,6 +811,15 @@ fmset: Error receiving message from mcbcn
 ""
 FV   -5
 fmset: Bad completion code from mcbcn
+""
+FV -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+FV -402
+Program error: less than zero length data object request for device ?W
+""
+FV -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
 ""
 IB   -1
 Trouble with GPIB class buffer
@@ -1141,9 +1216,6 @@ Tape number must be 8 charaters.
 ""
 QA -202
 Check label doesn't match.  Check it and try again.
-""
-QA -203
-Third parameter must be "thick" or "thin" if specified.
 ""
 QA -301
 Error RP'ing program PRLAB
@@ -2111,6 +2183,42 @@ if3 switch 3 not available, check equip.ctl.
 Q+ -306
 if3 switch 4 not available, check equip.ctl.
 ""
+RB -101
+No default for label.
+""
+RB -201
+Label too long.
+""
+RB -202
+Type must be one or six charaters.
+""
+RB -203
+Format can be at most 32 characters long.
+""
+RB -301
+Label is not in CSA format as specifed.
+""
+RB -302
+Non-CSA tape type must be 1 or 6 characters.
+""
+RB -303
+Check-sum incorrect.
+""
+RB -305
+Tape type must agree with label for CSA format
+""
+RB -306
+Can't change tape type while recording
+""
+RB -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RB -402
+Program error: less than zero length data object request for device ?W
+""
+RB -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
 RC -1
 Tape drive has no vacuum.
 "
@@ -2132,11 +2240,356 @@ Can't set footage of a VLBA2 drive.
 RC -205
 Can't reboot a VLBA2 drive.
 ""
-RC -206
-Can't load VLBA drive until a label is entered.
-""
 RC -401
 program error: incorrect number of responses in rec.
+""
+RD -201
+Data valid flag mus be "on" or "off".
+""
+RD -202
+Playback enable flage must be "use" or "ignore".
+""
+RD -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RD -402
+Program error: less than zero length data object request for device ?W
+""
+RD -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RE -301
+No parameters allowed for ET, RW, and FF.
+""
+RE -302
+Internal error in s2et.c
+""
+RE -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RE -402
+Program error: less than zero length data object request for device ?W
+""
+RE -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RL -131
+Operation failed (non-specific error) on device ?W
+""
+RL -132
+"I/O error on device ?W.
+""
+RL -133
+Communications timeout, RCL device probably dead on device ?W
+""
+RL -134
+Parameter value is illegal or out of range on device ?W
+""
+RL -135
+String parameter is too long/short on device ?W
+""
+RL -136
+Network I/O error on device ?W
+""
+RL -137
+Unknown host name on device ?W
+""
+RL -138
+No connection open for that reference address on device ?W
+""
+RL -139
+No more network connections can be opened on device ?W
+""
+RL -140
+Network connection closed by remote host on device ?W
+""
+RL -141
+Unexpected response packet from RCL device on device ?W
+""
+RL -142
+Wrong packet length returned by RCL device on device ?W
+""
+RL -143
+Bad format in packet returned by RCL device on device ?W
+""
+RL -300
+Unknown mode request in rclcn.
+""
+RL -301
+There must two fields on each non-comment line rclcn.ctl.
+""
+RL -302
+The device field on a rclcn.ctl did not have two characters.
+""
+RL -303
+An address field in rclcn.ctl was longer than 64 characters.
+""
+RL -304
+Ran out of memory initializing rclcn.
+""
+RL -305
+Error reading file, see previous error message.
+""
+RL -306
+Line in rclcn.ctl greater than 131 characters or last line without new-line.
+""
+RL -319
+Error opening rclad.ctl, see previous error message.
+""
+RL -320
+Received a buffer with no data in rclcn.
+""
+RL -321
+Unknown rcl device ?W
+""
+RL -322
+Program error: impossible code for RCL_CMD_ALIGN in rclcn for ?W
+""
+RL -323
+Program error: impossible num for RCL_CMD_POSITION_SET in rclcn for ?W
+""
+RL -324
+Program error: impossible code for RCL_CMD_POSITION_SET in rclcn for ?W
+""
+RL -325
+Program error: impossible num for RCL_CMD_POSITION_READ in rclcn for ?W
+""
+RL -326
+Unimplemented RCL command function for ?W
+""
+RL -327
+Unknown RCL command function for ?W
+""
+RM -201
+Device parameter in RCL= command must contain two characters exactly.
+""
+RM -202
+Error in rcl command parameter in RCL= command.
+""
+RM -203
+Error in rcl command specific parameter in RCL= command.
+""
+RM -204
+Error in rcl command specific parameter in RCL= command.
+""
+RM -205
+Error in rcl command specific parameter in RCL= command.
+""
+RM -206
+Error in rcl command specific parameter in RCL= command.
+""
+RM -207
+Error in rcl command specific parameter in RCL= command.
+""
+RM -208
+Error in rcl command specific parameter in RCL= command.
+""
+RM -209
+Error in rcl command specific parameter in RCL= command.
+""
+RM -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RM -402
+Program error: less than zero length data object request for device ?W
+""
+RM -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RM -501
+Program error: impossible command type in rcl_dis for device ?W
+""
+RM -502
+Program error: impossible type code in rcl_dis for device ?W
+""
+RR -101
+No default for mode.
+""
+RR -102
+No default for group.
+""
+RR -201
+Mode string too long.
+""
+RR -202
+Group must be an integer.
+""
+RR -203
+Roll must be "on" or "off".
+""
+RR -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RR -402
+Program error: less than zero length data object request for device ?W
+""
+RR -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RS -103
+No default for speed if record state is on.
+""
+RS -201
+Direction must be "for".
+""
+RS -202
+Speed must be "lp" or "slp".
+""
+RS -203
+State must be "on" ("record") or "off" ("play").
+""
+RS -301
+Can't change speeds while recording
+""
+RS -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RS -402
+Program error: less than zero length data object request for device ?W
+""
+RS -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RT -101
+First parameter must be "reset", a position, "unk", or "uns".
+""
+RT -102
+No default for second parameter.
+""
+RT -103
+No default for third parameter.
+""
+RT -104
+No default for fourth parameter.
+""
+RT -105
+No default for fifth parameter.
+""
+RT -106
+No default for sixth parameter.
+""
+RT -107
+No default for seventh parameter.
+""
+RT -108
+No default for eighth parameter.
+""
+RT -201
+Position must be a number, "reset", "unk" or "uns".
+""
+RT -202
+Position must be a number, "unk" or "uns".
+""
+RT -203
+Position must be a number, "unk" or "uns".
+""
+RT -204
+Position must be a number, "unk" or "uns".
+""
+RT -205
+Position must be a number, "unk" or "uns".
+""
+RT -206
+Position must be a number, "unk" or "uns".
+""
+RT -207
+Position must be a number, "unk" or "uns".
+""
+RT -208
+Position must be a number, "unk" or "uns".
+""
+RT -301
+One or eight positions must be specified.
+""
+RT -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RT -402
+Program error: less than zero length data object request for device ?W
+""
+RT -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RU -101
+No default for field number.
+""
+RU -201
+Field number must be 1-4.
+""
+RU -202
+Label or field entry must label or field.
+""
+RU -204
+Auto must be auto and field={1,2}, label=field, and string empty.
+""
+RU -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RU -402
+Program error: less than zero length data object request for device ?W
+""
+RU -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RV -101
+First parameter must be "eject" ("unload"), "re-establish", "uns", or a position.
+""
+RV -102
+No default for second parameter.
+""
+RV -103
+No default for third parameter.
+""
+RV -104
+No default for fourth parameter.
+""
+RV -105
+No default for fifth parameter.
+""
+RV -106
+No default for sixth parameter.
+""
+RV -107
+No default for seventh parameter.
+""
+RV -108
+No default for eighth parameter.
+""
+RV -201
+First parameter must be "eject" ("unload"), "re-establish" or a position.
+""
+RV -202
+Second parameter must be a position or "uns".
+""
+RV -203
+Third parameter must be a position or "uns".
+""
+RV -204
+Fourth parameter must be a position or "uns".
+""
+RV -205
+Fifth parameter must be a position or "uns".
+""
+RV -206
+Sixth parameter must be a position or "uns".
+""
+RV -207
+Seventh parameter must be a position or "uns".
+""
+RV -208
+Eight parameter must be a position or "uns".
+""
+RV -301
+One or eight positions must be specified.
+""
+RV -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+RV -402
+Program error: less than zero length data object request for device ?W
+""
+RV -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
 ""
 RW   -1
 No signal from bar code reader.
@@ -2159,11 +2612,23 @@ setcl: formatter to cpu time difference greater than two weeks
 SC  -10
 setcl: failed too many times, time information not updated.
 ""
+SC  -11
+setcl: cannot set fs time without Mark 3/4/VLBA rack or S2 recorder
+""
+SC -401
+Program error: prematurely out of rclcn response_buffer for device ?W
+""
+SC -402
+Program error: less than zero length data object request for device ?W
+""
+SC -403
+Program error: impossible type code for rclcn_res_position_read for device ?W
+""
 SP   -1
 Error in characters following a !
 ""
 SP   -2
-More than 40 characters in parameter list.
+More than 80 characters in command including parameters.
 ""
 SP   -3
 More than 12 characters in function or procedure name.
