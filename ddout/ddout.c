@@ -181,26 +181,41 @@ Ack:    ich = strtok(NULL, ",");
       }
       else iwhs = buf + bufl + 1;
 
-      class=0;
-      cls_snd(&class, buf, 80, 0, 0);
-      ip[0]=class;
-      skd_run("fserr", 'w', ip); 
-      skd_par(ip);
-      iburl=cls_rcv(ip[0], ibur, 80, &rtn1f, &rtn2f, 0,0);
-/*      iburl=0;
-*/
-      ibur[iburl]='\0';
-      if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) { ibur[0]='X';
-         goto Append;}
-      if(iwl != 0){
-        dxpm(ibur, "?W", &ptrs, &irgb); 
-        if(ptrs != NULL) {
-          iwm= irgb < iwl? irgb: iwl;
-          memcpy(ptrs,iwhat,iwm);
-        }
-      }
-      memcpy(iwhs,"  ",2);
+      if(strncmp(buf+20,"un",2)==0) {
+	int ierr;
+        strncpy(ibur,buf+22,5);
+	ibur[5]='\0';
+	if(1==sscanf(ibur,"%d",&ierr) && ((sys_nerr>=ierr) && (ierr >=0))) {
+	  strncpy(ibur,sys_errlist[ierr],80);
+	  if(strlen(sys_errlist[ierr])>(80-1))
+	    ibur[79]='\0';
+	} else {
+	  ibur[0]='\0';
+	}
+      } else {
+	class=0;
+	cls_snd(&class, buf, 80, 0, 0);
+	ip[0]=class;
+	skd_run("fserr", 'w', ip); 
+	skd_par(ip);
+	iburl=cls_rcv(ip[0], ibur, 80, &rtn1f, &rtn2f, 0,0);
+	/*      iburl=0;
+	 */
+	ibur[iburl]='\0';
+	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
+	  ibur[0]='X';
+	  goto Append;
+	}
 
+	if(iwl != 0){
+	  dxpm(ibur, "?W", &ptrs, &irgb); 
+	  if(ptrs != NULL) {
+	    iwm= irgb < iwl? irgb: iwl;
+	    memcpy(ptrs,iwhat,iwm);
+	  }
+	}
+	memcpy(iwhs,"  ",2);
+      }
 /* move returned info into output message for display */
 Move:
 /*      memcpy(&buf[(int) iwhs+1], ibur, iburl); */
