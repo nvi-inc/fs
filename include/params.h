@@ -8,27 +8,19 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define SHM_KEY     ftok("/usr2/fs",1)
 #define C_RES       35*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
-#define CLS_KEY     ftok("/usr2/fs",2)
 #define CLS_SIZE    20480
 #define MAX_CLS     40
 
-#define SKD_KEY     ftok("/usr2/fs",3)
 #define SKD_SIZE    4096
 
-#define BRK_KEY     ftok("/usr2/fs",4)
 #define BRK_SIZE    1024
 
 #define SEM_GO       0
 #define SEM_SEM      1
 #define SEM_CLS      2
-
-#define SEM_KEY     ftok("/usr2/fs",5)
-#define NSEM_KEY    ftok("/usr2/fs",6)
-#define GO_KEY      ftok("/usr2/fs",7)
 
 #define SEM_NUM     32
 
@@ -53,6 +45,8 @@
 #define MAX_BBC    14
 #define MAX_DIST   2
 #define MAX_DET    32
+#define MAX_USER_DEV  6
+#define MAX_ONOFF_DET MAX_DET+MAX_USER_DEV
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
