@@ -32,3 +32,5 @@ EDITOR=vi
 export EDITOR
 LESS=-X
 export LESS
+#FS_CHECK_NTP=
+#export FS_CHECK_NTP

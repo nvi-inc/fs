@@ -52,11 +52,5 @@ if (-X fort77) then
 else
  setenv FC f77
 endif
+#setenv FS_CHECK_NTP
 #
-
-
-
-
-
-
-

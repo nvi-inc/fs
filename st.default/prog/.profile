@@ -42,3 +42,5 @@ else
  FC=fort77
 fi
 export FC
+#FS_CHECK_NTP=
+#export FS_CHECK_NTP
