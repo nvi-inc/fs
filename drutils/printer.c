@@ -18,24 +18,33 @@ char   *fname, *orien;
               name from calling parameters.
    910312 NRV Added "-obar" to lp command for raw mode.  This is
               to make bar code file printer OK on HPUX machines.
+   951002 nrv Use "recode latin1:ibmpc < file | lpr" for
+              the Linux magic filter.
 
 */
 
 {
       char    command[80];
+      int     iret;
 
 /* Form the command by attaching the file name to the command */
 
       if (strncmp(orien,"r",1) == 0) {    /* 'raw' mode      */
-          strcpy(command,"lpr ");
-      } else {
-          strcpy(command,orien);
+        strcpy(command,"lpr ");
+        strcat(command,fname);
+      } 
+      else {
+/*        strcpy(command,orien);
           strcat(command," ");
+*/
+        strcpy(command,"recode latin1:ibmpc < ");
+        strcat(command,fname);
+        strcat(command," | lpr");
       }
-      strcat(command,fname);
 
 /* call system with command line */
 
-      return(system(command));
+/*      printf("printer command string: %s\n",command); */
+      return(system(command)); 
 
 }
