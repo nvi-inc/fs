@@ -199,12 +199,12 @@ C
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
-      if(ihd.eq.2) go to 500
       nrec=0
       iclass=0
 C
       call fs_get_rack(rack)
       if(MK3.eq.and(rack,MK3)) THEN
+        if(ihd.eq.2) go to 500
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
@@ -232,22 +232,25 @@ C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
       else if(MK4.eq.and(rack,MK4)) THEN
-        call frmaux4(lauxfm4,posnhd,ipashd,kautohd_fs)
-        ibuf2(1) = 8
-        call char2hol('fm /AUX ',ibuf2(2),1,8)
-        idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
-        nch=18
+        call frmaux4(lauxfm4,posnhd)
+        ibuf2(1) = 9
+        call char2hol('fm/AUX 0x',ibuf2(2),1,9)
+        idumm1 = ichmv(ibuf2,12,lauxfm4,1,4)
+        call char2hol(' 0x',ibuf2,16,18)
+        idumm1 = ichmv(ibuf2,19,lauxfm4,5,4)
+        nch=22
         call put_buf(iclass,ibuf2,-nch,'fs','  ')
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
       else !vlba
+        if(ihd.eq.2) go to 500
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
       ip(2)=0
-      if(ip(3).ne.0)  go to 800
+      if(ip(3).lt.0)  go to 800
 C
 C  5. Here we read the device to get current head positions.
 C
