@@ -1,0 +1,79 @@
+#!/usr/bin/wish -f
+# This program displays an X-window prompt and a "OK" and "continue" button
+# The second parameter decides on whether to send a "cont" to the Field System 
+# when the continue button is pressed and is either "0" or "1". This useful
+# as it allows commands to be typed in in the oprin window while fs.prompt
+# is running. The first parameter is the string to display in the window.
+# Usage for not blocking operator input into oprin: 
+#	sy=fs.prompt "Please do xxxx" 1 &
+#	halt
+# Usage where blocking is required:
+#	fs.prompt "Please do xxxx" 
+# note that the "&" causes the program to be run in the background so that no
+# blocking occurs. The parameter "1" causes a "cont" to be sent to the Field
+# system to continue after the "halt" in a schedule has been made.
+#
+# Paul Harbison Canberra Deep Space Communications Complex February 1998
+# weh removed some DSN specifices, renamed fs.prompt Feb 2001
+#
+set prompt [lindex $argv 0]
+set cont [lindex $argv 1]
+
+set f1 [open {| /bin/uname -n} r+]
+gets $f1 PCFS_NAME
+close $f1
+ set do_blink 1 
+
+frame .prompt -relief raised -bd 2 -background black 
+	message  .prompt_label -width 800 -text $prompt \
+		-background black -fg white\
+		-font 10x20 
+		
+pack .prompt_label -in  .prompt
+
+frame .buttons -relief raised -bd 2 -background black
+button .buttons_button -text "Continue" \
+                      -background black \
+                      -foreground green -command {
+			# this inject snap is not needed if no "&" is used
+			# when this program is called.
+				if { $cont == 1 } {
+					exec inject_snap cont 
+				}
+			destroy .}
+
+checkbutton .buttons_button2 -text "Stop Flashing " \
+                      -background black \
+                      -foreground green  -variable do_blink 
+			
+pack .buttons_button  -in .buttons -side left
+pack .buttons_button2 -in .buttons -side right
+
+
+wm title . "Field System Prompt ($PCFS_NAME)"
+wm geometry . +100+30
+#wm colormapwindows
+. configure -background black
+pack .prompt .buttons -in . -side top
+
+proc blink { w option value1 value2 interval} {
+	global do_blink
+	$w config $option $value1
+#	update idletasks
+	if { $do_blink } {
+		after $interval [list blink $w $option $value2 $value1 $interval]
+		.buttons_button2 configure -text "Stop Flashing "
+	} else {
+		after $interval [list blink $w $option black green $interval]
+		.buttons_button2 configure -text "Start Flashing"
+	}
+}
+puts -nonewline ""
+after 250
+puts -nonewline ""
+after 250
+puts -nonewline ""
+after 250
+puts -nonewline ""
+blink .prompt_label -background green black 500
+#end
