@@ -9,7 +9,7 @@ C
       integer idcb(2)
       integer*4 ip(5)
       integer*2 ibuf(50)
-      integer ist(9),nchar(9),ibaud(7)
+      integer ist(9),nchar(9),ibaud(7), ibauddb(8)
 C  Local variables used in the 600 section.
       integer tierr,pierr
       logical kasct,kascp,kdesp,kdest
@@ -19,7 +19,8 @@ C  Functions
 C  End 600 variables
       character*80 ibc, model
       equivalence (ibc,ibuf)
-      data ibaud/110,300,600,1200,2400,4800,9600/
+      data ibaud  /110,300,600,1200,2400,4800,9600/
+      data ibauddb/110,300,600,1200,2400,4800,9600,115200/
       data kasct,kascp,kdesp,kdest/4*.false./
       data itsp/0,3,7,15,30,60,120,240/
 C
@@ -884,8 +885,8 @@ C  DATA BUFFER BAUD RATE
         ierrx = -1
       endif
       ibx = -1
-      do i=1,7
-        if (ibdb .eq.ibaud(i)) ibx = i
+      do i=1,8
+        if (ibdb .eq.ibauddb(i)) ibx = i
       enddo
 C                   Check that a legal value was specified
       if (ibx.le.0) then
