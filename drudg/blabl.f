@@ -26,7 +26,7 @@ C NRV 881021 Created
 C NRV 901026 Modified to include Epson
 C NRV 910306 Modified laser control to spread out bar codes
 C nrv 950829 PC-DRUDG version converted to linux
-C 960814 nrv Fix index in print command
+C 960814 nrv Comment out debug line that was left in.
 C
       integer*2 jbuf(80),lbuf(80),label(6),jch
       integer l,jyr,i,ichek,j,ic,idummy,ip,il,i1,idum
