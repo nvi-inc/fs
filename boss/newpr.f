@@ -93,7 +93,9 @@ c is fast
 c
       call fc_rte_time(itime,itime(6))
       call fc_rte2secs(itime,seconds)
+      if(seconds.lt.0) call logit7ci(0,0,0,1,-255,'bo',0)
       call fc_rte2secs(itmlog,logsecs)
+      if(logsecs.lt.0) call logit7ci(0,0,0,1,-256,'bo',0)
       if(seconds.lt.logsecs) then
         logsecs=seconds
         do i=1,6
@@ -115,6 +117,7 @@ c
       itpr(1)=0
       if(itpr(5).eq.0) goto 400 
       call fc_rte2secs(itpr,prsecs)
+      if(prsecs.lt.0) call logit7ci(0,0,0,1,-257,'bo',0)
 c 
       if (prsecs.gt.logsecs) goto 600
 C                   Finally check the time of day, if the dates are equal

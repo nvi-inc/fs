@@ -15,6 +15,7 @@ C
 C         Get the current time
 c not Y2038 compliant
       call fc_rte2secs(it,secsnow)
+      if(secsnow.lt.0) call logit7ci(0,0,0,1,-258,'bo',0)
       ihsnow=it(1)
 c
       itt(6)=it1/1024+1970
@@ -25,6 +26,7 @@ c
       itt(1)=mod(it3,100)
 c not Y2038 compliant
       call fc_rte2secs(itt,secst)
+      if(secst.lt.0) call logit7ci(0,0,0,1,-259,'bo',0)
       ihst=itt(1)
 c
 c not Y2038 compliant
