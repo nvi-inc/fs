@@ -4,12 +4,14 @@
 #include <string.h>
 #include <limits.h>
 #include <sys/types.h>
-#include "../include/params.h"
-#include "../include/venable_ds.h"
-#include "../include/macro.h"
 
+#include "../include/macro.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"         /* shared memory definition */
+#include "../include/shm_addr.h"      /* shared memory pointer */
                                               /* parameter keywords */
-static char *key_group[ ]={ "g1" ,"g2" ,"g3" ,"g4" };
+static char *key_group[ ]={ "g0" ,"g1" ,"g2" ,"g3" };
 static char *key_d[ ]=     {"d1" ,"d2" ,"d3" ,"d4" ,"d5" ,"d6" ,"d7" ,
                             "d8" ,"d9" ,"d10","d11","d12","d13","d14",
                             "d15","d16","d17","d18","d19","d20","d21",
@@ -25,6 +27,7 @@ int *count;
 char *ptr;
 {
     int ierr, ind, arg_key(), ivalue;
+    int odd, even;
 
     ierr=0;
     if(*count == 1) {
@@ -47,8 +50,22 @@ char *ptr;
            lcl->group[ivalue]=1; /* okay */
         else if (ierr==0)
            ierr=-300;
-    } else
-       *count=-1;
+    } else {
+      if (shm_addr->wrhd_fs != 0) { /* fix odd of evenness of groups */
+	odd = lcl->group[1] || lcl->group[3];
+	even = lcl->group[0] || lcl->group[2];
+	if (shm_addr->wrhd_fs == 1 && even && !odd) {
+	  lcl->group[1]=lcl->group[0];
+	  lcl->group[3]=lcl->group[2];
+	  lcl->group[0]=lcl->group[2]=0;
+	} else if (shm_addr->wrhd_fs == 2 && odd && !even) {
+	  lcl->group[0]=lcl->group[1];
+	  lcl->group[2]=lcl->group[3];
+	  lcl->group[1]=lcl->group[3]=0;
+	}
+      }
+      *count=-1;
+    }
 
 End:
    if(*count>0) (*count)++;
@@ -126,3 +143,4 @@ unsigned data;
 
        return;
 }
+
