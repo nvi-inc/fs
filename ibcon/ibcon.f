@@ -92,11 +92,15 @@ C        maximum number of devices on IEEE board
 C               - module device name
       integer idevid(imaxdev)   
 C               - device ids when opened
-      integer*2 modtbl(2,imaxdev)  
+      integer*2 modtbl(3,imaxdev)  
 C               - module table, word 1 = mnemonic, 
 C                 word 2 = 0 for talk/listen devices
 C                          1 for talk-only devices 
 C                          2 for listen-only devices
+C                 word 3 time-out value
+      integer tmotbl(16)
+C                        table of time-out values microseconds
+C                        =0 disabled
 C 
 C 4.  CONSTANTS USED
 C 
@@ -105,6 +109,8 @@ C
       data kini/.false./,kfirst/.true./,kgpib/.true./
       data minmod/0/, maxmod/4/
       data ilen/256/
+      data tmotbl/0,10,30,100,300,1000,3000,10000,  30000,    100000,
+     &          300000, 1000000,3000000,10000000,30000000,100000000/
 C
 C
 C     PROGRAM STRUCTURE
@@ -150,13 +156,27 @@ C !! FIND COMMA AND MOVE DEVICE NAME INTO VARIABLE
 C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE 
          icomma = iscn_ch(ibuf,4,ireg,',') 
          if (icomma.eq.0) then
-            iend=ireg+1 
+            iend=ireg
             modtbl(2,icount) = 0
          else
-            iend = icomma
+            iend = icomma-1
             modtbl(2,icount) = ias2b(ibuf,icomma+1,1)
          endif
-         idum = ichmv(moddev(1,icount),1,ibuf,4,iend-4)
+         idum = ichmv(moddev(1,icount),1,ibuf,4,iend-3)
+         icomma = iscn_ch(ibuf,icomma+2,icomma+2,',') 
+         if (icomma.eq.0) then
+            modtbl(3,icount) = 12
+         else
+            idum = ias2b(ibuf,icomma+1,ireg-icomma)
+            do j=1,16
+               if(idum.le.tmotbl(j)) then
+                  modtbl(3,icount) = j-1
+                  goto 148
+               endif
+            enddo
+            modtbl(3,icount) = 15
+ 148        continue
+         endif
  150     continue
       enddo
  151  continue
@@ -173,7 +193,7 @@ C
       if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
       do i=1,ndev   !! OPEN DEVICES
         idlen = iflch(moddev(1,i),idevln)
-        idum=opdev(moddev(1,i),idlen,idevid(i),ierr,ipcode)
+        idum=opdev(moddev(1,i),idlen,idevid(i),ierr,ipcode,modtbl(3,i))
         if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
       enddo
       kini = .true.
