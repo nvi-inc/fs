@@ -321,7 +321,13 @@ C
       call local(lonps2,latps2,caxfp,ierr)
       if (ierr.ne.0) goto 80010 
 C 
-      lonpos=(lonps1+lonps2)*.5 
+      if(lonps1.gt.1.5*RPI.and.lonps2.lt.0.5*RPI) then
+         lonps1=lonps1-DTWOPI
+      else if(lonps1.lt.0.5*RPI.and.lonps2.gt.1.5*RPI) then
+         lonps1=lonps1+DTWOPI
+      endif
+      lonpos=(lonps1+lonps2)*.5
+      lonpos=mod(lonpos+DTWOPI,DTWOPI)
       latpos=(latps1+latps2)*.5 
 C 
 C   5. FIT TO A GAUSSIAN
