@@ -128,6 +128,9 @@ mark5 error getting position, see associated error m5 -9xx
 5D -411
 mark5 error setting play position, see associated error m5 -9xx
 ""
+5D -412
+less than 1 Megabyte of data recorded, negative read pointer not allowed
+""
 5E -201
 command does not accept parameters
 ""
