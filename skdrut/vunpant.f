@@ -19,6 +19,7 @@ C 970303 nrv When matching up the axis for antenna_motion, change
 C            "dec" to "dc" to keep it to the 2 letters sk/dr use.
 C 970306 nrv Handle XY axis types.
 C 970718 nrv Incorrect error returns for axis limits fixed.
+C 970930 nrv For XY axis types 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -42,7 +43,7 @@ C     DIAMAN - diameter of antenna, in m
 C
 C  LOCAL:
       character*128 cout,cout2,cunit
-      character*2 cax
+      character*2 cax,cax1,cax2
       double precision R
       real almin1,almax1,almin2,almax2
       integer*2 ldum(64)
@@ -104,21 +105,23 @@ C
         idumy = ichmv_ch(ldum,3,'dc')
       endif
       if (cout2(1:3).eq.'yns') then ! XYNS
-        idumy = ichmv_ch(ldum,3,'xy')
+        idumy = ichmv_ch(ldum,1,'xy')
         idumy = ichmv_ch(ldum,3,'ns')
       endif
       if (cout2(1:3).eq.'yew') then ! XYEW
-        idumy = ichmv_ch(ldum,3,'xy')
+        idumy = ichmv_ch(ldum,1,'xy')
         idumy = ichmv_ch(ldum,3,'ew')
       endif
       call hol2upper(ldum,4)
-      call axtyp(ldum,iax,1)
+      call axtyp(ldum,iax,1) ! check for legal sked axis type
       if (iax.eq.0) then
         ierr=-2
         write(lu,'("VUNPANT02 - Axis type not recognized: ",a,":",a)') 
      .  cout(1:nch1),cout2(1:nch2)
       else
         IDUMY = ICHMV(LAXIS,1,ldum,1,4)
+        cax1(1:2)=upper(cout(1:2))
+        cax2(1:2)=upper(cout2(1:2))
       endif
 C
 C  3. Axis offset.
@@ -164,10 +167,19 @@ C  4. Slewing rates and constants.
           cax='dc'
         endif
 C       Match up the axis for the motion with the stored axis type
+C       Compare the first letter only.
         cax(1:1)=upper(cax(1:1))
         cax(2:2)=upper(cax(2:2))
-        i1=1
-        if (ichcm_ch(laxis,3,cax).eq.0) i1=2
+C       i1=1
+C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
+        i1=0
+        if (cax(1:1).eq.cax1(1:1)) i1=1
+        if (cax(1:1).eq.cax2(1:1)) i1=2
+        if (i1.eq.0) then
+          ierr=-4
+          write(lu,'("VUNPANT05 - Unmatched axis types ",a," and ",a,
+     .    " or ",a)') cax,cax1,cax2
+        else
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get slewing rate
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit)) ! slewing rate units
@@ -179,6 +191,7 @@ C       Match up the axis for the motion with the stored axis type
      .    i2)') i
         else
           SLRATE(i1) = R
+        endif
         endif
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get slewing constant
         if (iret.ne.0) return
