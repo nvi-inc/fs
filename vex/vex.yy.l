@@ -9,9 +9,10 @@
 
 #define  ALLOC_SIZE 32
 
-#define NEWSTR(ptr,from)	{ if (NULL == (ptr = strdup(from)) ) { \
- 					fprintf(stderr,"out of memory\n");\
-					exit(1);} }
+#define NEWSTR(ptr,from)	{ if(strlen(from) > 128) {\
+				    yyerror("string too long"); }\
+				  if (NULL == (ptr = strdup(from)) ) { \
+ 				    yyerror("out of memory");} }
 
 #define isodigit(x) ((x) >= '0' && (x) <= '7')
 #define hextoint(x) (isdigit((x)) ? (x) - '0'\
@@ -26,67 +27,33 @@ static trailing=0;
 int lines=1;
 %}
 
-%x DOUBLE VERSION DEF LINE REF
+%x VERSION DEF LINE REF
 
-NAME		[^ \t\n;:=&*$"]{1,32}
+NAME		[^ \t\n;:=&*$"]*
+WHITE		[ \t]
 MANTISSA        [+-]?([0-9]+"."[0-9]+|[0-9]+|[0-9]+"."[0-9]*|[0-9]*"."[0-9]+)
 EXPONENT	[eE][+-]?[0-9]+
 DOUBLE		{MANTISSA}{EXPONENT}?
-FREQ_UNITS	mHz|Hz|kHz|MHz|GHz
-SAMPLE_RATE_UNITS	ks\/sec|Ms\/sec
-TIME_UNITS      psec|nsec|usec|msec|sec|min|hr|yr
-LENGTH_UNITS	um|mm|cm|m|km|in|ft
-VELOCITY_UNITS 	{LENGTH_UNITS}\/{TIME_UNITS}
-ANGLE_UNITS     mdeg|deg|amin|asec|rad
-ANGLE_RATE_UNITS {ANGLE_UNITS}\/{TIME_UNITS}
-FLUX_UNITS	mJy|Jy
-WHITE		[ \t]
-YEAR		([0-9][0-9]){1,2}
-DOY		[0-9]{1,3}
-HOUR            [0-9]{1,2}
-MINUTE		[0-9]{1,2}
 SEC		[0-9]{1,2}|{DOUBLE}
-DATE		{YEAR}y{DOY}d({HOUR}h({MINUTE}m({SEC}s)?)?)?
-TIME		{HOUR}h{MINUTE}m{SEC}s
 ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 %%
 		{ static int version=1;if(version)BEGIN(VERSION);version=0;}
 
 <VERSION>"*"     	{yyerror("Comment not allowed before end of VEX_REV statement\n");}
-<VERSION>{DOUBLE}	{NEWSTR(yylval.sval,yytext); return T_DOUBLE;}
+<VERSION>VEX_rev	{return T_VEX_REV;}
+<VERSION>{NAME}		{NEWSTR(yylval.sval,yytext); return T_NAME;}
 <VERSION>{WHITE}*		/* skip white space */
 <VERSION>;              {trailing=1;BEGIN(LINE); return yytext[0];}
-<VERSION>VEX_rev	{return T_VEX_REV;}
-<VERSION>.		{return(yytext[0]);}
-
-<DOUBLE>{FREQ_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_FREQ_UNITS; }
-<DOUBLE>{SAMPLE_RATE_UNITS}	{ BEGIN(INITIAL);
-				NEWSTR(yylval.sval,yytext);
-				return T_SAMPLE_RATE_UNITS; }
-<DOUBLE>{TIME_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_TIME_UNITS; }
-<DOUBLE>{LENGTH_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_LENGTH_UNITS; }
-<DOUBLE>{VELOCITY_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_VELOCITY_UNITS; }
-<DOUBLE>{ANGLE_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_ANGLE_UNITS; }
-<DOUBLE>{ANGLE_RATE_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_ANGLE_RATE_UNITS;}
-<DOUBLE>{FLUX_UNITS}	{ BEGIN(INITIAL);
-			NEWSTR(yylval.sval,yytext); return T_FLUX_UNITS; }
-<DOUBLE>\n		{lines++;}
-<DOUBLE>{WHITE}*	/* skip white space */
-<DOUBLE>;		{trailing=1;BEGIN(LINE); return yytext[0];}
-<DOUBLE>.		{BEGIN(INITIAL);return(yytext[0]);}
+<VERSION>=		{return(yytext[0]);}
+<VERSION>.		{yyerror("lexical analysis error 1");}
 
 <DEF>\n			{lines++;}
 <DEF>{WHITE}*		/* skip white space */
 <DEF>;			{trailing=1;BEGIN(LINE); return yytext[0];}
 <DEF>{NAME}*		{NEWSTR(yylval.sval,yytext); return T_NAME;}
 <DEF>\"			{ yylval.sval=quote(); return T_NAME;}
-<DEF>.			{return(yytext[0]);}
+<DEF>:			{ return(yytext[0]);}
+<DEF>.			{ yyerror("lexical analysis error 2");}
 
 <LINE>"*"[^\n]*		{NEWSTR(yylval.sval,yytext);	 /* comment */
 			if(trailing)
@@ -97,8 +64,8 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>"$"GLOBAL	{BEGIN(INITIAL);return B_GLOBAL;}
 <LINE>"$"STATION	{BEGIN(INITIAL);return B_STATION;}
 <LINE,REF>"$"EXPER	{BEGIN(INITIAL);return B_EXPER;}
-<LINE,REF>"$"SCHEDULING_PARMS	{BEGIN(INITIAL);return B_SCHEDULING_PARMS;}
-<LINE,REF>"$"PROC_TIMING	{BEGIN(INITIAL);return B_PROC_TIMING;}
+<LINE,REF>"$"SCHEDULING_PARAMS	{BEGIN(INITIAL);return B_SCHEDULING_PARAMS;}
+<LINE,REF>"$"PROCEDURES	{BEGIN(INITIAL);return B_PROCEDURES;}
 <LINE,REF>"$"EOP		{BEGIN(INITIAL);return B_EOP;}
 <LINE>"$"MODE		{BEGIN(INITIAL);return B_MODE;}
 <LINE,REF>"$"FREQ		{BEGIN(INITIAL);return B_FREQ;}
@@ -109,7 +76,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE,REF>"$"DAS		{BEGIN(INITIAL);return B_DAS;}
 <LINE,REF>"$"HEAD_POS	{BEGIN(INITIAL);return B_HEAD_POS;}
 <LINE,REF>"$"PASS_ORDER	{BEGIN(INITIAL);return B_PASS_ORDER;}
-<LINE,REF>"$"PHASE_CAL	{BEGIN(INITIAL);return B_PHASE_CAL;}
+<LINE,REF>"$"PHASE_CAL_DETECT	{BEGIN(INITIAL);return B_PHASE_CAL_DETECT;}
 <LINE,REF>"$"ROLL		{BEGIN(INITIAL);return B_ROLL;}
 <LINE,REF>"$"IF		{BEGIN(INITIAL);return B_IF;}
 <LINE,REF>"$"SEFD		{BEGIN(INITIAL);return B_SEFD;}
@@ -123,6 +90,8 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>ref		{BEGIN(REF);ref=1;return T_REF;}
 <LINE>def		{BEGIN(DEF);return T_DEF;}
 <LINE>enddef		{BEGIN(INITIAL);return T_ENDDEF;}
+<LINE>scan		{BEGIN(DEF);return T_SCAN;}
+<LINE>endscan		{BEGIN(INITIAL);return T_ENDSCAN;}
 
 <LINE>chan_def	{BEGIN(INITIAL);return T_CHAN_DEF;}
 <LINE>sample_rate	{BEGIN(INITIAL);return T_SAMPLE_RATE;}
@@ -134,23 +103,20 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>mode		{BEGIN(INITIAL);return T_MODE;}
 <LINE>station		{BEGIN(INITIAL);return T_STATION;}
 
-<LINE>ant_diam	{BEGIN(INITIAL);return T_ANT_DIAM;}
+<LINE>antenna_diam	{BEGIN(INITIAL);return T_ANTENNA_DIAM;}
 <LINE>axis_type	{BEGIN(INITIAL);return T_AXIS_TYPE;}
 <LINE>axis_offset	{BEGIN(INITIAL);return T_AXIS_OFFSET;}
-<LINE>ant_motion	{BEGIN(INITIAL);return T_ANT_MOTION;}
+<LINE>antenna_motion	{BEGIN(INITIAL);return T_ANTENNA_MOTION;}
 <LINE>pointing_sector	{BEGIN(INITIAL);return T_POINTING_SECTOR;}
 
 <LINE>BBC_assign	{BEGIN(INITIAL);return T_BBC_ASSIGN;}
 
 <LINE>clock_early	{BEGIN(INITIAL);return T_CLOCK_EARLY;}
-<LINE>clock_early_epoch	{BEGIN(INITIAL);return T_CLOCK_EARLY_EPOCH;}
-<LINE>clock_rate	{BEGIN(INITIAL);return T_CLOCK_RATE;}
 
-<LINE>record_transport	{BEGIN(INITIAL);return T_RECORD_TRANSPORT;}
-<LINE>electronics_rack	{BEGIN(INITIAL);return T_ELECTRONICS_RACK;}
+<LINE>record_transport_type {BEGIN(INITIAL);return T_RECORD_TRANSPORT_TYPE;}
+<LINE>electronics_rack_type {BEGIN(INITIAL);return T_ELECTRONICS_RACK_TYPE;}
 <LINE>number_drives		{BEGIN(INITIAL);return T_NUMBER_DRIVES;}
 <LINE>headstack		{BEGIN(INITIAL);return T_HEADSTACK;}
-<LINE>data_source		{BEGIN(INITIAL);return T_DATA_SOURCE;}
 <LINE>record_density		{BEGIN(INITIAL);return T_RECORD_DENSITY;}
 <LINE>tape_length		{BEGIN(INITIAL);return T_TAPE_LENGTH;}
 <LINE>recording_system_ID	{BEGIN(INITIAL);return T_RECORDING_SYSTEM_ID;}
@@ -168,10 +134,11 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 
 <LINE>exper_num		{BEGIN(INITIAL);return T_EXPER_NUM;}
 <LINE>exper_name		{BEGIN(INITIAL);return T_EXPER_NAME;}
+<LINE>exper_description		{BEGIN(INITIAL);return T_EXPER_DESCRIPTION;}
 <LINE>exper_nominal_start	{BEGIN(INITIAL);return T_EXPER_NOMINAL_START;}
 <LINE>exper_nominal_stop	{BEGIN(INITIAL);return T_EXPER_NOMINAL_STOP;}
-<LINE>pi_name			{BEGIN(INITIAL);return T_PI_NAME;}
-<LINE>pi_email		{BEGIN(INITIAL);return T_PI_EMAIL;}
+<LINE>PI_name			{BEGIN(INITIAL);return T_PI_NAME;}
+<LINE>PI_email		{BEGIN(INITIAL);return T_PI_EMAIL;}
 <LINE>contact_name		{BEGIN(INITIAL);return T_CONTACT_NAME;}
 <LINE>contact_email		{BEGIN(INITIAL);return T_CONTACT_EMAIL;}
 <LINE>scheduler_name		{BEGIN(INITIAL);return T_SCHEDULER_NAME;}
@@ -185,10 +152,10 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>pass_order		{BEGIN(INITIAL);return T_PASS_ORDER;}
 <LINE>S2_group_order		{BEGIN(INITIAL);return T_S2_GROUP_ORDER;}
 
-<LINE>pcal_freq		{BEGIN(INITIAL);return T_PCAL_FREQ;}
+<LINE>phase_cal_detect		{BEGIN(INITIAL);return T_PHASE_CAL_DETECT;}
 
 <LINE>tape_change		{BEGIN(INITIAL);return T_TAPE_CHANGE;}
-<LINE>headstk_motion		{BEGIN(INITIAL);return T_HEADSTK_MOTION;}
+<LINE>headstack_motion		{BEGIN(INITIAL);return T_HEADSTACK_MOTION;}
 <LINE>new_source_command	{BEGIN(INITIAL);return T_NEW_SOURCE_COMMAND;}
 <LINE>new_tape_setup		{BEGIN(INITIAL);return T_NEW_TAPE_SETUP;}
 <LINE>setup_always		{BEGIN(INITIAL);return T_SETUP_ALWAYS;}
@@ -197,10 +164,12 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>preob_cal		{BEGIN(INITIAL);return T_PREOB_CAL;}
 <LINE>midob_cal		{BEGIN(INITIAL);return T_MIDOB_CAL;}
 <LINE>postob_cal		{BEGIN(INITIAL);return T_POSTOB_CAL;}
+<LINE>procedure_name_prefix {BEGIN(INITIAL);return T_PROCEDURE_NAME_PREFIX;}
 
-<LINE>reinit_period		{BEGIN(INITIAL);return T_REINIT_PERIOD;}
-<LINE>inc_period		{BEGIN(INITIAL);return T_INC_PERIOD;}
+<LINE>roll_reinit_period	{BEGIN(INITIAL);return T_ROLL_REINIT_PERIOD;}
+<LINE>roll_inc_period		{BEGIN(INITIAL);return T_ROLL_INC_PERIOD;}
 <LINE>roll			{BEGIN(INITIAL);return T_ROLL;}
+<LINE>roll_def			{BEGIN(INITIAL);return T_ROLL_DEF;}
 
 <LINE>sefd_model		{BEGIN(INITIAL);return T_SEFD_MODEL;}
 <LINE>sefd			{BEGIN(INITIAL);return T_SEFD;}
@@ -209,6 +178,9 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>site_name		{BEGIN(INITIAL);return T_SITE_NAME;}
 <LINE>site_ID			{BEGIN(INITIAL);return T_SITE_ID;}
 <LINE>site_position		{BEGIN(INITIAL);return T_SITE_POSITION;}
+<LINE>site_position_epoch	{BEGIN(INITIAL);return T_SITE_POSITION_EPOCH;}
+<LINE>site_position_ref		{BEGIN(INITIAL);return T_SITE_POSITION_REF;}
+<LINE>site_velocity		{BEGIN(INITIAL);return T_SITE_VELOCITY;}
 <LINE>horizon_map_az		{BEGIN(INITIAL);return T_HORIZON_MAP_AZ;}
 <LINE>horizon_map_el		{BEGIN(INITIAL);return T_HORIZON_MAP_EL;}
 <LINE>zen_atmos		{BEGIN(INITIAL);return T_ZEN_ATMOS;}
@@ -229,10 +201,11 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>IAU_name		{BEGIN(INITIAL);return T_IAU_NAME;}
 <LINE>ra			{BEGIN(INITIAL);return T_RA;}
 <LINE>dec			{BEGIN(INITIAL);return T_DEC;}
-<LINE>epoch			{BEGIN(INITIAL);return T_EPOCH;}
-<LINE>source_pos_ref		{BEGIN(INITIAL);return T_SOURCE_POS_REF;}
+<LINE>ref_coord_frame		{BEGIN(INITIAL);return T_REF_COORD_FRAME;}
+<LINE>source_position_ref	{BEGIN(INITIAL);return T_SOURCE_POSITION_REF;}
 <LINE>ra_rate			{BEGIN(INITIAL);return T_RA_RATE;}
 <LINE>dec_rate		{BEGIN(INITIAL);return T_DEC_RATE;}
+<LINE>source_position_epoch    {BEGIN(INITIAL);return T_SOURCE_POSITION_EPOCH;}
 <LINE>velocity_wrt_LSR	{BEGIN(INITIAL);return T_VELOCITY_WRT_LSR;}
 <LINE>source_model		{BEGIN(INITIAL);return T_SOURCE_MODEL;}
 
@@ -241,26 +214,22 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>fanin_def		{BEGIN(INITIAL);return T_FANIN_DEF;}
 <LINE>fanout_def		{BEGIN(INITIAL);return T_FANOUT_DEF;}
 <LINE>track_frame_format	{BEGIN(INITIAL);return T_TRACK_FRAME_FORMAT;}
-<LINE>data_modulate		{BEGIN(INITIAL);return T_DATA_MODULATE;}
+<LINE>data_modulation		{BEGIN(INITIAL);return T_DATA_MODULATION;}
 <LINE>VLBA_frmtr_sys_trk	{BEGIN(INITIAL);return T_VLBA_FRMTR_SYS_TRK;}
-<LINE>VLBA_trnsprt_sys_trak	{BEGIN(INITIAL);return T_VLBA_TRNSPRT_SYS_TRAK;}
-<LINE>S2_data_def		{BEGIN(INITIAL);return T_S2_DATA_DEF;}
-<LINE>S2_record_mode		{BEGIN(INITIAL);return T_S2_RECORD_MODE;}
+<LINE>VLBA_trnsprt_sys_trk	{BEGIN(INITIAL);return T_VLBA_TRNSPRT_SYS_TRK;}
+<LINE>S2_recording_mode		{BEGIN(INITIAL);return T_S2_RECORDING_MODE;}
 <LINE>S2_data_source		{BEGIN(INITIAL);return T_S2_DATA_SOURCE;}
 
 <LINE>start_literal\(		{BEGIN(INITIAL); yylval.llptr=lit(); return T_LITERAL;}
 	
 <LINE,REF>\n		{trailing=0;lines++;}
 <LINE,REF>{WHITE}*	/* skip white space */
-<REF>{NAME}		{ NEWSTR(yylval.sval,yytext); return T_NAME; }
-<REF>.			{return(yytext[0]);}
+<REF>{NAME}		{ NEWSTR(yylval.sval,yytext);return T_NAME; }
+<REF>:			{return(yytext[0]);}
+<REF>.			{yyerror("lexical analysis error 3");}
 
-{DATE}		{ NEWSTR(yylval.sval,yytext); return T_DATE; }
-{TIME}		{ NEWSTR(yylval.sval,yytext); return T_TIME; }
 {ANGLE}		{ NEWSTR(yylval.sval,yytext); return T_ANGLE; }
 
-{DOUBLE}	{ BEGIN(DOUBLE);
-		  NEWSTR(yylval.sval,yytext); return T_DOUBLE;}
 \"		{ yylval.sval=quote(); return T_NAME;}
 {NAME}		{ NEWSTR(yylval.sval,yytext); return T_NAME; }
 \&{NAME}	{ NEWSTR(yylval.sval,yytext+1); return T_LINK; }
@@ -270,7 +239,8 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 {WHITE}*	/* skip white space */
 
 ;		{trailing=1;BEGIN(LINE);return(yytext[0]);}
-.		{return(yytext[0]);}
+:		{return(yytext[0]);}
+.		{yyerror("lexical analysis error 4");}
 
 %%
 static struct llist *lit()
@@ -280,10 +250,8 @@ static struct llist *lit()
   struct llist *llist;
 
   buffer = malloc(ALLOC_SIZE);
-  if(buffer == NULL) {
-    fprintf(stderr,"out of memory in literal 1\n");
-    exit(1);
-  }
+  if(buffer == NULL)
+    yyerror("out of memory in literal 1");
 
 /* find text inside start_literal() */
 
@@ -294,10 +262,8 @@ static struct llist *lit()
     buffer[count++]=inch;
     if(count >= max_size) {
       buffer=realloc(buffer,max_size+ALLOC_SIZE);
-      if(buffer == NULL) {
-	fprintf(stderr,"out of memory in literal 2\n");
-	exit(1);
-      }
+      if(buffer == NULL)
+	yyerror("out of memory in literal 2");
       max_size += ALLOC_SIZE;
     }
     inch=input();
@@ -311,10 +277,8 @@ static struct llist *lit()
 
   buffer[count++]='\0';
   buffer=realloc(buffer,count);
-  if(buffer == NULL) {
-    fprintf(stderr,"out of memory in literal 3\n");
-	exit(1);
-      }
+  if(buffer == NULL)
+    yyerror("out of memory in literal 3");
 
   text=buffer;
   llist=add_list(NULL,buffer);
@@ -352,10 +316,8 @@ static struct llist *lit()
   /* read lines */
   
   buffer = malloc(ALLOC_SIZE);
-  if(buffer == NULL) {
-    fprintf(stderr,"out of memory in literal 4\n");
-    exit(1);
-  }
+  if(buffer == NULL)
+    yyerror("out of memory in literal 4");
 
   max_size = ALLOC_SIZE;
   count=0;
@@ -365,10 +327,8 @@ static struct llist *lit()
       buffer[count++]=inch;
       if(count >= max_size) {
 	buffer=realloc(buffer,max_size+ALLOC_SIZE);
-	if(buffer == NULL) {
-	  fprintf(stderr,"out of memory in literal 8\n");
-	  exit(1);
-	}
+	if(buffer == NULL)
+	  yyerror("out of memory in literal 8");
 	max_size += ALLOC_SIZE;
       }
     } else {
@@ -378,16 +338,12 @@ static struct llist *lit()
 	goto done;
       lines++;
       buffer=realloc(buffer,count);
-      if(buffer == NULL) {
-	fprintf(stderr,"out of memory in literal 6\n");
-	exit(1);
-      }
+      if(buffer == NULL)
+	yyerror("out of memory in literal 6");
       llist=add_list(llist,buffer);
       buffer = malloc(ALLOC_SIZE);
-      if(buffer == NULL) {
-	fprintf(stderr,"out of memory in literal 7\n");
-	exit(1);
-      }
+      if(buffer == NULL)
+	yyerror("out of memory in literal 7");
       max_size = ALLOC_SIZE;
       count=0;
     }
@@ -524,6 +480,9 @@ static char *quote()
     yyerror("Unterminated string at line %d\n",lines);
   }
   buffer[count]='\0';
+  if(strlen(buffer) > 128) {
+    yyerror("quoted string too long");
+  }
   return buffer;
 }
 

@@ -23,7 +23,7 @@ static int
 get_axis_type_field(Axis_type *axis_type,int n,int *link,
 			  int *name, char **value, char **units);
 static int
-get_ant_motion_field(Ant_motion *ant_motion,int n,int *link,
+get_antenna_motion_field(Antenna_motion *antenna_motion,int n,int *link,
 			  int *name, char **value, char **units);
 static int
 get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
@@ -32,10 +32,10 @@ static int
 get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
 			  int *name, char **value, char **units);
 static int
-get_headstack_field(Headstack *headstack,int n,int *link,
+get_clock_early_field(Clock_early *clock_early,int n,int *link,
 			  int *name, char **value, char **units);
 static int
-get_data_source_field(Data_Source *data_source,int n,int *link,
+get_headstack_field(Headstack *headstack,int n,int *link,
 			  int *name, char **value, char **units);
 static int
 get_tape_length_field(Tape_Length *tape_length,int n,int *link,
@@ -50,7 +50,7 @@ static int
 get_if_def_field(If_def *if_def,int n,int *link,
 		 int *name, char **value, char **units);
 static int
-get_pcal_freq_field(Pcal_freq *pcal_freq,int n,int *link,
+get_phase_cal_detect_field(Phase_cal_detect *phase_cal_detect,int n,int *link,
 		 int *name, char **value, char **units);
 static int
 get_setup_always_field(Setup_always *setup_always,int n,int *link,
@@ -77,6 +77,9 @@ static int
 get_site_position_field(Site_position *site_position,int n,int *link,
 		 int *name, char **value, char **units);
 static int
+get_site_velocity_field(Site_velocity *site_velocity,int n,int *link,
+		 int *name, char **value, char **units);
+static int
 get_ocean_load_vert_field(Ocean_load_vert *ocean_load_vert,int n,int *link,
 		 int *name, char **value, char **units);
 static int
@@ -101,13 +104,8 @@ static int
 get_vlba_frmtr_sys_trk_field(Vlba_frmtr_sys_trk *vlba_frmtr_sys_trk,int n,
 			     int *link, int *name, char **value, char **units);
 static int
-get_s2_data_def_field(S2_data_def *s2_data_def,int n,int *link,
-	      int *name, char **value, char **units);
-
-static int
-get_s2_record_mode_field(S2_record_mode *s2_record_mode,int n,int *link,
-	      int *name, char **value, char **units);
-
+get_s2_data_source_field(S2_data_source *s2_data_source,int n,int *link,
+			  int *name, char **value, char **units);
 static int
 get_dvalue_field(Dvalue *dvalue,int n,int *link,int *name, char **value,
 		 char **units);
@@ -139,8 +137,8 @@ static struct {
   {"MODE", B_MODE},
   {"SCHED", B_SCHED},
   {"EXPER", B_EXPER},
-  {"SCHEDULING_PARMS", B_SCHEDULING_PARMS},
-  {"PROC_TIMING", B_PROC_TIMING},
+  {"SCHEDULING_PARAMS", B_SCHEDULING_PARAMS},
+  {"PROCEDURES", B_PROCEDURES},
   {"EOP", B_EOP},
   {"FREQ", B_FREQ},
   {"CLOCK", B_CLOCK},
@@ -150,7 +148,7 @@ static struct {
   {"DAS", B_DAS},
   {"HEAD_POS", B_HEAD_POS},
   {"PASS_ORDER", B_PASS_ORDER},
-  {"PHASE_CAL", B_PHASE_CAL},
+  {"PHASE_CAL_DETECT", B_PHASE_CAL_DETECT},
   {"ROLL", B_ROLL},
   {"IF", B_IF},
   {"SEFD", B_SEFD},
@@ -176,23 +174,20 @@ static  struct {
   {"mode", T_MODE},
   {"station", T_STATION},
     
-  {"ant_diam", T_ANT_DIAM},
+  {"antenna_diam", T_ANTENNA_DIAM},
   {"axis_type", T_AXIS_TYPE},
   {"axis_offset", T_AXIS_OFFSET},
-  {"ant_motion", T_ANT_MOTION},
+  {"antenna_motion", T_ANTENNA_MOTION},
   {"pointing_sector", T_POINTING_SECTOR},
   
   {"BBC_assign", T_BBC_ASSIGN},
   
   {"clock_early", T_CLOCK_EARLY},
-  {"clock_early_epoch", T_CLOCK_EARLY_EPOCH},
-  {"clock_rate", T_CLOCK_RATE},
     
-  {"record_transport", T_RECORD_TRANSPORT},
-  {"electronics_rack", T_ELECTRONICS_RACK},
+  {"record_transport_type", T_RECORD_TRANSPORT_TYPE},
+  {"electronics_rack_type", T_ELECTRONICS_RACK_TYPE},
   {"number_drives", T_NUMBER_DRIVES},
   {"headstack", T_HEADSTACK},
-  {"data_source", T_DATA_SOURCE},
   {"record_density", T_RECORD_DENSITY},
   {"tape_length", T_TAPE_LENGTH},
   {"recording_system_ID", T_RECORDING_SYSTEM_ID},
@@ -210,10 +205,11 @@ static  struct {
   
   {"exper_num", T_EXPER_NUM},
   {"exper_name", T_EXPER_NAME},
+  {"exper_description", T_EXPER_DESCRIPTION},
   {"exper_nominal_start", T_EXPER_NOMINAL_START},
   {"exper_nominal_stop", T_EXPER_NOMINAL_STOP},
-  {"pi_name", T_PI_NAME},
-  {"pi_email", T_PI_EMAIL},
+  {"PI_name", T_PI_NAME},
+  {"PI_email", T_PI_EMAIL},
   {"contact_name", T_CONTACT_NAME},
   {"contact_email", T_CONTACT_EMAIL},
   {"scheduler_name", T_SCHEDULER_NAME},
@@ -227,10 +223,10 @@ static  struct {
   {"pass_order", T_PASS_ORDER},
   {"S2_group_order", T_S2_GROUP_ORDER},
   
-  {"pcal_freq", T_PCAL_FREQ},
+  {"phase_cal_detect", T_PHASE_CAL_DETECT},
   
   {"tape_change", T_TAPE_CHANGE},
-  {"headstk_motion", T_HEADSTK_MOTION},
+  {"headstack_motion", T_HEADSTACK_MOTION},
   {"new_source_command", T_NEW_SOURCE_COMMAND},
   {"new_tape_setup", T_NEW_TAPE_SETUP},
   {"setup_always", T_SETUP_ALWAYS},
@@ -239,10 +235,12 @@ static  struct {
   {"preob_cal", T_PREOB_CAL},
   {"midob_cal", T_MIDOB_CAL},
   {"postob_cal", T_POSTOB_CAL},
+  {"procedure_name_prefix", T_PROCEDURE_NAME_PREFIX},
     
-  {"reinit_period", T_REINIT_PERIOD},
-  {"inc_period", T_INC_PERIOD},
+  {"roll_reinit_period", T_ROLL_REINIT_PERIOD},
+  {"roll_inc_period", T_ROLL_INC_PERIOD},
   {"roll", T_ROLL},
+  {"roll_def", T_ROLL_DEF},
   
   {"sefd_model", T_SEFD_MODEL},
   {"sefd", T_SEFD},
@@ -251,6 +249,9 @@ static  struct {
   {"site_name", T_SITE_NAME},
   {"site_ID", T_SITE_ID},
   {"site_position", T_SITE_POSITION},
+  {"site_position_epoch", T_SITE_POSITION_EPOCH},
+  {"site_position_ref", T_SITE_POSITION_REF},
+  {"site_velocity", T_SITE_VELOCITY},
   {"horizon_map_az", T_HORIZON_MAP_AZ},
   {"horizon_map_el", T_HORIZON_MAP_EL},
   {"zen_atmos", T_ZEN_ATMOS},
@@ -271,8 +272,9 @@ static  struct {
   {"IAU_name", T_IAU_NAME},
   {"ra", T_RA},
   {"dec", T_DEC},
-  {"epoch", T_EPOCH},
-  {"source_pos_ref", T_SOURCE_POS_REF},
+  {"ref_coord_frame", T_REF_COORD_FRAME},
+  {"source_position_ref", T_SOURCE_POSITION_REF},
+  {"source_position_epoch", T_SOURCE_POSITION_EPOCH},
   {"ra_rate", T_RA_RATE},
   {"dec_rate", T_DEC_RATE},
   {"velocity_wrt_LSR", T_VELOCITY_WRT_LSR},
@@ -283,11 +285,10 @@ static  struct {
   {"fanin_def", T_FANIN_DEF},
   {"fanout_def", T_FANOUT_DEF},
   {"track_frame_format", T_TRACK_FRAME_FORMAT},
-  {"data_modulate", T_DATA_MODULATE},
+  {"data_modulation", T_DATA_MODULATION},
   {"VLBA_frmtr_sys_trk", T_VLBA_FRMTR_SYS_TRK},
-  {"VLBA_trnsprt_sys_trak", T_VLBA_TRNSPRT_SYS_TRAK},
-  {"S2_data_def", T_S2_DATA_DEF},
-  {"S2_record_mode", T_S2_RECORD_MODE},
+  {"VLBA_trnsprt_sys_trk", T_VLBA_TRNSPRT_SYS_TRK},
+  {"S2_recording_mode", T_S2_RECORDING_MODE},
   {"S2_data_source", T_S2_DATA_SOURCE},
   {NULL, 0}
 };
@@ -371,15 +372,14 @@ struct lowl *make_lowl(int statement,void *item)
   return new;
 }
 
-struct chan_def  *make_chan_def(char *band_id, char *polar,
-				struct dvalue *sky_freq, char *net_sb,
-				struct dvalue *bw, char *chan_id, char *bbc_id,
-				char *pcal_id, struct llist *states)
+struct chan_def  *make_chan_def(char *band_id, struct dvalue *sky_freq,
+				char *net_sb, struct dvalue *bw,
+				char *chan_id, char *bbc_id, char *pcal_id,
+				struct llist *states)
 {
   NEWSTRUCT(new,chan_def);
 
   new->band_id=band_id;
-  new->polar=polar;
   new->sky_freq=sky_freq;
   new->net_sb=net_sb;
   new->bw=bw;
@@ -447,10 +447,10 @@ struct axis_type *make_axis_type(char *axis1, char *axis2)
   return new;
 }
 
-struct ant_motion *make_ant_motion(char *axis,struct dvalue *rate,
-				   struct dvalue *offset)
+struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
+					   struct dvalue *offset)
 {
-  NEWSTRUCT(new,ant_motion);
+  NEWSTRUCT(new,antenna_motion);
 
   new->axis=axis;
   new->rate=rate;
@@ -489,36 +489,29 @@ struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
 
   return new;
 }
+struct clock_early *make_clock_early(char *start,struct dvalue *offset,
+				     char *origin, struct dvalue *rate)
+{
+  NEWSTRUCT(new,clock_early);
+
+  new->start=start;
+  new->offset=offset;
+  new->origin=origin;
+  new->rate=rate;
+
+  return new;
+}
 struct headstack *make_headstack(struct dvalue *stack,char *type,
-				 char *drive_id)
+				 struct dvalue *offset)
 {
   NEWSTRUCT(new,headstack);
 
   new->stack=stack;
   new->type=type;
-  new->drive_id=drive_id;
+  new->offset=offset;
 
   return new;
 }
-struct data_source *make_data_source(char *source,char *input1, char *input2,
-				     char *input3, char *input4, char *input5,
-				     char *input6, char *input7, char *input8)
-{
-  NEWSTRUCT(new,data_source);
- 
-  new->source=source;
-  new->input[0]=input1;
-  new->input[1]=input2;
-  new->input[2]=input3;
-  new->input[3]=input4;
-  new->input[4]=input5;
-  new->input[5]=input6;
-  new->input[6]=input7;
-  new->input[7]=input8;
-
-  return new;
-}
-    
 struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
 				     struct dvalue *tapes)
 {
@@ -554,26 +547,30 @@ struct headstack_pos *make_headstack_pos(struct dvalue *index,
   return new;
 }
 
-struct if_def *make_if_def(char *if_id, struct dvalue *lo, char *sb)
+struct if_def *make_if_def(char *if_id, char *physical, char *polar,
+			   struct dvalue *lo, char *sb,
+			   struct dvalue *pcal_spacing,
+			   struct dvalue *pcal_base)
 {
   NEWSTRUCT(new,if_def);
 
   new->if_id=if_id;
+  new->physical=physical;
+  new->polar=polar;
   new->lo=lo;
   new->sb=sb;
+  new->pcal_spacing=pcal_spacing;
+  new->pcal_base=pcal_base;
 
   return new;
 }
-struct pcal_freq *make_pcal_freq(char *pcal_id,char *state,
-				 struct dvalue *primary,
-				 struct dvalue *increment)
+struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
+					       struct llist *tones)
 {
-  NEWSTRUCT(new,pcal_freq);
+  NEWSTRUCT(new,phase_cal_detect);
 
   new->pcal_id=pcal_id;
-  new->state=state;
-  new->primary=primary;
-  new->increment=increment;
+  new->tones=tones;
 
   return new;
 }
@@ -649,16 +646,24 @@ struct sefd *make_sefd(char *if_id, struct dvalue *flux, struct llist *params)
 }
 
 struct site_position *make_site_position(struct dvalue *x, struct dvalue *y,
-					 struct dvalue *z,
-					 struct dvalue *epoch, char *ref)
+					 struct dvalue *z)
 {
   NEWSTRUCT(new,site_position);
 
   new->x=x;
   new->y=y;
   new->z=z;
-  new->epoch=epoch;
-  new->ref=ref;
+
+  return new;
+}
+struct site_velocity *make_site_velocity(struct dvalue *x, struct dvalue *y,
+					 struct dvalue *z)
+{
+  NEWSTRUCT(new,site_velocity);
+
+  new->x=x;
+  new->y=y;
+  new->z=z;
 
   return new;
 }
@@ -754,26 +759,18 @@ struct vlba_frmtr_sys_trk *make_vlba_frmtr_sys_trk(struct dvalue *output,
 
   return new;
 }
-struct s2_data_def *make_s2_data_def(struct llist *bitstream,char *input)
+struct s2_data_source *make_s2_data_source(char *source,char *bbcx_id,
+					   char *bbcy_id)
 {
-  NEWSTRUCT(new,s2_data_def);
-
-  new->bitstream=bitstream;
-  new->input=input;
+  NEWSTRUCT(new,s2_data_source);
+ 
+  new->source=source;
+  new->bbcx_id=bbcx_id;
+  new->bbcy_id=bbcy_id;
 
   return new;
 }
-struct s2_record_mode *make_s2_record_mode(char *mode, struct dvalue *groups,
-					   struct llist *inputs)
-{
-  NEWSTRUCT(new,s2_record_mode);
-
-  new->mode=mode;
-  new->groups=groups;
-  new->inputs=inputs;
-
-  return new;
-}
+    
 
 int
 lowl2int(char *lowl)
@@ -845,10 +842,8 @@ char **units)
   case T_VEX_REV:
   case T_SAMPLE_RATE:
   case T_BITS_PER_SAMPLE:
-  case T_ANT_DIAM:
+  case T_ANTENNA_DIAM:
   case T_AXIS_OFFSET:
-  case T_CLOCK_EARLY:
-  case T_CLOCK_RATE:
   case T_NUMBER_DRIVES:
   case T_RECORD_DENSITY:
   case T_RECORDING_SYSTEM_ID:
@@ -858,11 +853,11 @@ char **units)
   case T_EOP_INTERVAL:
   case T_EXPER_NUM:
   case T_TAPE_CHANGE:
-  case T_HEADSTK_MOTION:
+  case T_HEADSTACK_MOTION:
   case T_NEW_SOURCE_COMMAND:
   case T_NEW_TAPE_SETUP:
-  case T_REINIT_PERIOD:
-  case T_INC_PERIOD:
+  case T_ROLL_REINIT_PERIOD:
+  case T_ROLL_INC_PERIOD:
   case T_ZEN_ATMOS:
   case T_INCLINATION:
   case T_ECCENTRICITY:
@@ -876,11 +871,13 @@ char **units)
   case T_VELOCITY_WRT_LSR:
     ierr=get_dvalue_field(ptr,n,link,name,value,units);
     break;
+  case T_CLOCK_EARLY:
+    ierr=get_clock_early_field(ptr,n,link,name,value,units);
+    break;
   case T_SWITCHING_CYCLE:
     ierr=get_switching_cycle_field(ptr,n,link,name,value,units);
     break;
   case T_START:
-  case T_CLOCK_EARLY_EPOCH:
   case T_EOP_REF_EPOCH:
   case T_EXPER_NOMINAL_START:
   case T_EXPER_NOMINAL_STOP:
@@ -889,10 +886,11 @@ char **units)
     break;
   case T_MODE:
   case T_SOURCE:
-  case T_RECORD_TRANSPORT:
-  case T_ELECTRONICS_RACK:
+  case T_RECORD_TRANSPORT_TYPE:
+  case T_ELECTRONICS_RACK_TYPE:
   case T_TAPE_CONTROL:
   case T_EXPER_NAME:
+  case T_EXPER_DESCRIPTION:
   case T_PI_NAME:
   case T_PI_EMAIL:
   case T_CONTACT_NAME:
@@ -900,17 +898,23 @@ char **units)
   case T_SCHEDULER_NAME:
   case T_SCHEDULER_EMAIL:
   case T_TARGET_CORRELATOR:
+  case T_PROCEDURE_NAME_PREFIX:
+  case T_ROLL:
   case T_SEFD_MODEL:
   case T_SITE_TYPE:
   case T_SITE_NAME:
   case T_SITE_ID:
+  case T_SITE_POSITION_EPOCH:
+  case T_SITE_POSITION_REF:
   case T_OCCUPATION_CODE:
   case T_SOURCE_NAME:
   case T_IAU_NAME:
-  case T_EPOCH:
-  case T_SOURCE_POS_REF:
+  case T_REF_COORD_FRAME:
+  case T_SOURCE_POSITION_REF:
+  case T_SOURCE_POSITION_EPOCH:
   case T_TRACK_FRAME_FORMAT:
-  case T_DATA_MODULATE:
+  case T_DATA_MODULATION:
+  case T_S2_RECORDING_MODE:
     ierr=get_svalue_field(ptr,n,link,name,value,units);
     break;
   case T_STATION:
@@ -919,8 +923,8 @@ char **units)
   case T_AXIS_TYPE:
     ierr=get_axis_type_field(ptr,n,link,name,value,units);
     break;
-  case T_ANT_MOTION:
-    ierr=get_ant_motion_field(ptr,n,link,name,value,units);
+  case T_ANTENNA_MOTION:
+    ierr=get_antenna_motion_field(ptr,n,link,name,value,units);
     break;
   case T_POINTING_SECTOR:
     ierr=get_pointing_sector_field(ptr,n,link,name,value,units);
@@ -930,9 +934,6 @@ char **units)
     break;
   case T_HEADSTACK:
     ierr=get_headstack_field(ptr,n,link,name,value,units);
-    break;
-  case T_DATA_SOURCE:
-    ierr=get_data_source_field(ptr,n,link,name,value,units);
     break;
   case T_TAPE_LENGTH:
     ierr=get_tape_length_field(ptr,n,link,name,value,units);
@@ -944,10 +945,10 @@ char **units)
   case T_X_WOBBLE:
   case T_Y_WOBBLE:
   case T_S2_GROUP_ORDER:
-  case T_ROLL:
+  case T_ROLL_DEF:
   case T_HORIZON_MAP_AZ:
   case T_HORIZON_MAP_EL:
-  case T_VLBA_TRNSPRT_SYS_TRAK:
+  case T_VLBA_TRNSPRT_SYS_TRK:
     ierr=get_dvalue_list_field(ptr,n,link,name,value,units);
     break;
   case T_HEADSTACK_POS:
@@ -958,11 +959,10 @@ char **units)
     break;
   case T_PASS_ORDER:
   case T_SOURCE_TYPE:
-  case T_S2_DATA_SOURCE:
     ierr=get_svalue_list_field(ptr,n,link,name,value,units);
     break;
-  case T_PCAL_FREQ:
-    ierr=get_pcal_freq_field(ptr,n,link,name,value,units);
+  case T_PHASE_CAL_DETECT:
+    ierr=get_phase_cal_detect_field(ptr,n,link,name,value,units);
     break;
   case T_SETUP_ALWAYS:
     ierr=get_setup_always_field(ptr,n,link,name,value,units);
@@ -987,6 +987,9 @@ char **units)
     break;
   case T_SITE_POSITION:
     ierr=get_site_position_field(ptr,n,link,name,value,units);
+    break;
+  case T_SITE_VELOCITY:
+    ierr=get_site_velocity_field(ptr,n,link,name,value,units);
     break;
   case T_OCEAN_LOAD_VERT:
     ierr=get_ocean_load_vert_field(ptr,n,link,name,value,units);
@@ -1015,11 +1018,8 @@ char **units)
   case T_VLBA_FRMTR_SYS_TRK:
     ierr=get_vlba_frmtr_sys_trk_field(ptr,n,link,name,value,units);
     break;
-  case T_S2_DATA_DEF:
-    ierr=get_s2_data_def_field(ptr,n,link,name,value,units);
-    break;
-  case T_S2_RECORD_MODE:
-    ierr=get_s2_record_mode_field(ptr,n,link,name,value,units);
+  case T_S2_DATA_SOURCE:
+    ierr=get_s2_data_source_field(ptr,n,link,name,value,units);
     break;
   default:
     fprintf(stderr,"can't get here in get_field %d\n",statement);
@@ -1051,37 +1051,34 @@ get_chan_def_field(Chan_def *chan_def,int n,int *link, int *name,
     *link=1;
     break;
   case 2:
-    *value=chan_def->polar;
-    break;
-  case 3:
     *value=chan_def->sky_freq->value;
     *units=chan_def->sky_freq->units;
     *name=0;
     break;
-  case 4:
+  case 3:
     *value=chan_def->net_sb;
     break;
-  case 5:
+  case 4:
     *value=chan_def->bw->value;
     *units=chan_def->bw->units;
     *name=0;
     break;
-  case 6:
+  case 5:
     *value=chan_def->chan_id;
     *link=1;
     break;
-  case 7:
+  case 6:
     *value=chan_def->bbc_id;
     *link=1;
     break;
-  case 8:
+  case 7:
     *value=chan_def->pcal_id;
     *link=1;
     break;
   default:
     if(n < 1 )
       return -1;
-    ierr=get_dvalue_list_field(chan_def->states,n-8,link,name,value,units);
+    ierr=get_dvalue_list_field(chan_def->states,n-7,link,name,value,units);
     if(ierr==-1)
       return -1;
     else if (ierr!=0) {
@@ -1146,10 +1143,7 @@ get_station_field(Station *station,int n,int *link,int *name,char **value,
     *name=0;
     break;
   case 4:
-    if(station->start_pos == NULL) {
-      *value=NULL;
-      *units=NULL;
-    } else {
+    if(station->start_pos != NULL) {
       *value=station->start_pos->value;
       *units=station->start_pos->units;
     }
@@ -1199,7 +1193,7 @@ get_axis_type_field(Axis_type *axis_type,int n,int *link,
   return 0;
 }
 static int
-get_ant_motion_field(Ant_motion *ant_motion,int n,int *link,
+get_antenna_motion_field(Antenna_motion *antenna_motion,int n,int *link,
 			  int *name, char **value, char **units)
 {
   int ierr;
@@ -1211,16 +1205,16 @@ get_ant_motion_field(Ant_motion *ant_motion,int n,int *link,
 
   switch(n) {
   case 1:
-    *value=ant_motion->axis;
+    *value=antenna_motion->axis;
     break;
   case 2:
-    *value=ant_motion->rate->value;
-    *units=ant_motion->rate->units;
+    *value=antenna_motion->rate->value;
+    *units=antenna_motion->rate->units;
     *name=0;
     break;
   case 3:
-    *value=ant_motion->offset->value;
-    *units=ant_motion->offset->units;
+    *value=antenna_motion->offset->value;
+    *units=antenna_motion->offset->units;
     *name=0;
     break;
   default:
@@ -1308,6 +1302,45 @@ get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
   return 0;
 }
 static int
+get_clock_early_field(Clock_early *clock_early,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=clock_early->start;
+    break;
+  case 2:
+    *value=clock_early->offset->value;
+    *units=clock_early->offset->units;
+    *name=0;
+    break;
+  case 3:
+    if(clock_early->origin == NULL)
+      return -1;
+    *value=clock_early->origin;
+    break;
+  case 4:
+    if(clock_early->origin == NULL)
+      return -1;
+    if(clock_early->rate!=NULL) {
+      *value=clock_early->rate->value;
+      *units=clock_early->rate->units;
+    }
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
 get_headstack_field(Headstack *headstack,int n,int *link,
 			  int *name, char **value, char **units)
 {
@@ -1328,38 +1361,8 @@ get_headstack_field(Headstack *headstack,int n,int *link,
     *value=headstack->type;
     break;
   case 3:
-    *value=headstack->drive_id;
-    *link=1;
-    break;
-  default:
-    return -1;
-  }
-  return 0;
-}
-static int
-get_data_source_field(Data_Source *data_source,int n,int *link,
-			  int *name, char **value, char **units)
-{
-  int ierr;
-
-  *link=0;
-  *name=1;
-  *units=NULL;
-  *value=NULL;
-
-  switch(n) {
-  case 1:
-    *value=data_source->source;
-    break;
-  case 2:
-  case 3:
-  case 4:
-  case 5:
-  case 6:
-  case 7:
-  case 8:
-  case 9:
-    *value=data_source->input[n-2];
+    *value=headstack->offset->value;
+    *name=0;
     break;
   default:
     return -1;
@@ -1389,6 +1392,8 @@ get_tape_length_field(Tape_Length *tape_length,int n,int *link,
     *value=tape_length->speed;
     break;
   case 3:
+    if(tape_length->speed==NULL)
+      return -1;
     *value=tape_length->tapes->value;
     *units=tape_length->tapes->units;
     *name=0;
@@ -1428,6 +1433,8 @@ get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
     *name=0;
     break;
   case 4:
+    if(tape_motion->late==NULL || tape_motion->early==NULL)
+      return -1;
     *value=tape_motion->gap->value;
     *units=tape_motion->gap->units;
     *name=0;
@@ -1485,12 +1492,32 @@ get_if_def_field(If_def *if_def,int n,int *link,
     *link=1;
     break;
   case 2:
+    *value=if_def->physical;
+    break;
+  case 3:
+    *value=if_def->polar;
+    break;
+  case 4:
     *value=if_def->lo->value;
     *units=if_def->lo->units;
     *name=0;
     break;
-  case 3:
+  case 5:
     *value=if_def->sb;
+    break;
+  case 6:
+    if(if_def->pcal_spacing == NULL)
+      return -1;
+    *value=if_def->pcal_spacing->value;
+    *units=if_def->pcal_spacing->units;
+    *name=0;
+    break;
+  case 7:
+    if(if_def->pcal_base == NULL)
+      return -1;
+    *value=if_def->pcal_base->value;
+    *units=if_def->pcal_base->units;
+    *name=0;
     break;
   default:
     return -1;
@@ -1498,8 +1525,8 @@ get_if_def_field(If_def *if_def,int n,int *link,
   return 0;
 }
 static int
-get_pcal_freq_field(Pcal_freq *pcal_freq,int n,int *link,
-		 int *name, char **value, char **units)
+get_phase_cal_detect_field(Phase_cal_detect *phase_cal_detect,int n,int *link,
+			   int *name, char **value, char **units)
 {
   int ierr;
 
@@ -1510,28 +1537,20 @@ get_pcal_freq_field(Pcal_freq *pcal_freq,int n,int *link,
 
   switch(n) {
   case 1:
-    *value=pcal_freq->pcal_id;
+    *value=phase_cal_detect->pcal_id;
     *link=1;
     break;
-  case 2:
-    *value=pcal_freq->state;
-    break;
-  case 3:
-    if(pcal_freq->primary==NULL)
-      return -1;
-    *value=pcal_freq->primary->value;
-    *units=pcal_freq->primary->units;
-    *name=0;
-    break;
-  case 4:
-    if(pcal_freq->increment==NULL)
-      return -1;
-    *value=pcal_freq->increment->value;
-    *units=pcal_freq->increment->units;
-    *name=0;
-    break;
   default:
-    return -1;
+    if(n < 1 )
+      return -1;
+    ierr=get_dvalue_list_field(phase_cal_detect->tones,n-1,link,name,value,
+			       units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_phase_cal_detect_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }
@@ -1755,13 +1774,36 @@ get_site_position_field(Site_position *site_position,int n,int *link,
     *units=site_position->z->units;
     *name=0;
     break;
-  case 4:
-    *value=site_position->epoch->value;
-    *units=site_position->epoch->units;
+  default:
+    return -1;
+  }
+  return 0;
+}
+get_site_velocity_field(Site_velocity *site_velocity,int n,int *link,
+		 int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=site_velocity->x->value;
+    *units=site_velocity->x->units;
     *name=0;
     break;
-  case 5:
-    *value=site_position->ref;
+  case 2:
+    *value=site_velocity->y->value;
+    *units=site_velocity->y->units;
+    *name=0;
+    break;
+  case 3:
+    *value=site_velocity->z->value;
+    *units=site_velocity->z->units;
+    *name=0;
     break;
   default:
     return -1;
@@ -2078,8 +2120,8 @@ get_vlba_frmtr_sys_trk_field(Vlba_frmtr_sys_trk *vlba_frmtr_sys_trk,int n,
   return 0;
 }
 static int
-get_s2_data_def_field(S2_data_def *s2_data_def,int n,int *link,
-	      int *name, char **value, char **units)
+get_s2_data_source_field(S2_data_source *s2_data_source,int n,int *link,
+			  int *name, char **value, char **units)
 {
   int ierr;
 
@@ -2090,64 +2132,22 @@ get_s2_data_def_field(S2_data_def *s2_data_def,int n,int *link,
 
   switch(n) {
   case 1:
+    *value=s2_data_source->source;
+    break;
   case 2:
-    ierr=get_bitstream_list_field(s2_data_def->bitstream,n,link,name,
-				  value, units);
-    if(ierr==-1)
+    if(s2_data_source->bbcx_id==NULL)
       return -1;
-    else if (ierr!=0) {
-      fprintf(stderr,"unknown error 1 in get_s2_data_def_field %d\n",ierr);
-      exit(1);
-    }
+    *value=s2_data_source->bbcx_id;
+    *link=1;
     break;
   case 3:
-    ierr=get_bitstream_list_field(s2_data_def->bitstream,n,link,name,
-			       value, units);
-    if(ierr!=-1) {
-      fprintf(stderr,"too many bitstreams in get_s2_data_def_field\n");
-      exit(1);
-    } else if (ierr!=0 &ierr!=-1) {
-      fprintf(stderr,"unknown error 2 in get_s2_data_def_field %d\n",ierr);
-      exit(1);
-    }
-    *value=s2_data_def->input;
+    if(s2_data_source->bbcx_id==NULL)
+      return -1;
+    *value=s2_data_source->bbcy_id;
+    *link=1;
     break;
   default:
     return -1;
-  }
-  return 0;
-}
-static int
-get_s2_record_mode_field(S2_record_mode *s2_record_mode,int n,int *link,
-	      int *name, char **value, char **units)
-{
-  int ierr;
-
-  *link=0;
-  *name=1;
-  *units=NULL;
-  *value=NULL;
-
-  switch(n) {
-  case 1:
-    *value=s2_record_mode->mode;
-    break;
-  case 2:
-    *value=s2_record_mode->groups->value;
-    *units=s2_record_mode->groups->units;
-    *name=0;
-    break;
-  default:
-    if(n < 1 )
-      return -1;
-    ierr=get_svalue_list_field(s2_record_mode->inputs,n-2,link,name,value,
-			       units);
-    if(ierr==-1)
-      return -1;
-    else if (ierr!=0) {
-      fprintf(stderr,"unknown error in get_record_mode_field %d\n",ierr);
-      exit(1);
-    }
   }
   return 0;
 }

@@ -31,14 +31,15 @@ struct switching_cycle *scptr;
 struct station         *snptr;
 
 struct axis_type       *atptr;
-struct ant_motion      *amptr;
+struct antenna_motion  *amptr;
 struct pointing_sector *psptr;
 
 struct bbc_assign      *baptr;
 
 struct headstack       *hsptr;
 
-struct data_source     *dsptr;
+struct clock_early     *ceptr;
+
 struct tape_length     *tlptr;
 struct tape_motion     *tmptr;
 
@@ -46,7 +47,7 @@ struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
 
-struct pcal_freq       *pfptr;
+struct phase_cal_detect *pdptr;
 
 struct setup_always    *saptr;
 struct parity_check    *pcptr;
@@ -58,6 +59,7 @@ struct postob_cal      *poptr;
 struct sefd            *septr;
 
 struct site_position   *spptr;
+struct site_velocity   *svptr;
 struct ocean_load_vert *ovptr;
 struct ocean_load_horiz *ohptr;
 
@@ -68,26 +70,25 @@ struct vsn             *vsptr;
 struct fanin_def	*fiptr;
 struct fanout_def	*foptr;
 struct vlba_frmtr_sys_trk	*fsptr;
-struct s2_data_def		*sdptr;
-struct s2_record_mode		*srptr;
+struct s2_data_source  *dsptr;
 
 }
 
-%token <ival>	T_VEX_REV T_REF T_DEF T_ENDDEF
+%token <ival>	T_VEX_REV T_REF T_DEF T_ENDDEF T_SCAN T_ENDSCAN
 
 %token <ival>	T_CHAN_DEF T_SAMPLE_RATE T_BITS_PER_SAMPLE T_SWITCHING_CYCLE
 
 %token <ival>	T_START T_SOURCE T_MODE T_STATION
 
-%token <ival>	T_ANT_DIAM T_AXIS_OFFSET T_ANT_MOTION T_POINTING_SECTOR
+%token <ival>	T_ANTENNA_DIAM T_AXIS_OFFSET T_ANTENNA_MOTION T_POINTING_SECTOR
 %token <ival>   T_AXIS_TYPE
 
 %token <ival>   T_BBC_ASSIGN
 
-%token <ival>	T_CLOCK_EARLY T_CLOCK_EARLY_EPOCH T_CLOCK_RATE
+%token <ival>	T_CLOCK_EARLY
 
-%token <ival>   T_RECORD_TRANSPORT T_ELECTRONICS_RACK T_NUMBER_DRIVES
-%token <ival>   T_HEADSTACK T_DATA_SOURCE T_RECORD_DENSITY T_TAPE_LENGTH
+%token <ival>   T_RECORD_TRANSPORT_TYPE T_ELECTRONICS_RACK_TYPE T_NUMBER_DRIVES
+%token <ival>   T_HEADSTACK T_RECORD_DENSITY T_TAPE_LENGTH
 %token <ival>   T_RECORDING_SYSTEM_ID T_TAPE_MOTION T_TAPE_CONTROL
 
 %token <ival>   T_TAI_UTC T_A1_TAI T_EOP_REF_EPOCH T_NUM_EOP_POINTS
@@ -96,7 +97,7 @@ struct s2_record_mode		*srptr;
 %token <ival>   T_EXPER_NUM T_EXPER_NAME T_EXPER_NOMINAL_START 
 %token <ival>   T_EXPER_NOMINAL_STOP T_PI_NAME T_PI_EMAIL T_CONTACT_NAME 
 %token <ival>   T_CONTACT_EMAIL T_SCHEDULER_NAME T_SCHEDULER_EMAIL 
-%token <ival>   T_TARGET_CORRELATOR
+%token <ival>   T_TARGET_CORRELATOR T_EXPER_DESCRIPTION
 
 %token <ival>   T_HEADSTACK_POS
 
@@ -105,45 +106,45 @@ struct s2_record_mode		*srptr;
 %token <ival>   T_PASS_ORDER
 %token <ival>   T_S2_GROUP_ORDER
 
-%token <ival>   T_PCAL_FREQ
+%token <ival>   T_PHASE_CAL_DETECT
 
 %token <ival>   T_TAPE_CHANGE T_NEW_SOURCE_COMMAND T_NEW_TAPE_SETUP 
 %token <ival>   T_SETUP_ALWAYS T_PARITY_CHECK T_TAPE_PREPASS T_PREOB_CAL
-%token <ival>	T_MIDOB_CAL T_POSTOB_CAL T_HEADSTK_MOTION
+%token <ival>	T_MIDOB_CAL T_POSTOB_CAL T_HEADSTACK_MOTION
+%token <ival>   T_PROCEDURE_NAME_PREFIX
 
-%token <ival>	T_REINIT_PERIOD T_INC_PERIOD T_ROLL
+%token <ival>	T_ROLL_REINIT_PERIOD T_ROLL_INC_PERIOD T_ROLL T_ROLL_DEF
 
 %token <ival>   T_SEFD_MODEL T_SEFD
 
 %token <ival>   T_SITE_TYPE T_SITE_NAME T_SITE_ID T_SITE_POSITION
+%token <ival>	T_SITE_POSITION_EPOCH T_SITE_POSITION_REF T_SITE_VELOCITY
 %token <ival>   T_HORIZON_MAP_AZ T_HORIZON_MAP_EL T_ZEN_ATMOS
 %token <ival>   T_OCEAN_LOAD_VERT T_OCEAN_LOAD_HORIZ T_OCCUPATION_CODE
 %token <ival>   T_INCLINATION T_ECCENTRICITY T_ARG_PERIGEE T_ASCENDING_NODE
 %token <ival>   T_MEAN_ANOMALY T_SEMI_MAJOR_AXIS T_MEAN_MOTION T_ORBIT_EPOCH
 
-%token <ival>   T_SOURCE_TYPE T_SOURCE_NAME T_IAU_NAME T_RA T_DEC T_EPOCH
-%token <ival>   T_SOURCE_POS_REF T_RA_RATE T_DEC_RATE
+%token <ival>   T_SOURCE_TYPE T_SOURCE_NAME T_IAU_NAME T_RA T_DEC
+%token <ival>   T_SOURCE_POSITION_REF T_RA_RATE T_DEC_RATE
+%token <ival>   T_SOURCE_POSITION_EPOCH T_REF_COORD_FRAME
 %token <ival>   T_VELOCITY_WRT_LSR T_SOURCE_MODEL
 
 %token <ival>	T_VSN
 
-%token <ival>   T_FANIN_DEF T_FANOUT_DEF T_TRACK_FRAME_FORMAT T_DATA_MODULATE
-%token <ival>   T_VLBA_FRMTR_SYS_TRK T_VLBA_TRNSPRT_SYS_TRAK T_S2_DATA_DEF
-%token <ival>   T_S2_RECORD_MODE T_S2_DATA_SOURCE
+%token <ival>   T_FANIN_DEF T_FANOUT_DEF T_TRACK_FRAME_FORMAT T_DATA_MODULATION
+%token <ival>   T_VLBA_FRMTR_SYS_TRK T_VLBA_TRNSPRT_SYS_TRK
+%token <ival>   T_S2_RECORDING_MODE T_S2_DATA_SOURCE
 
 %token <ival>	B_GLOBAL B_STATION B_MODE B_SCHED
-%token <ival>	B_EXPER B_SCHEDULING_PARMS B_PROC_TIMING B_EOP B_FREQ B_CLOCK
+%token <ival>	B_EXPER B_SCHEDULING_PARAMS B_PROCEDURES B_EOP B_FREQ B_CLOCK
 %token <ival>	B_ANTENNA B_BBC B_CORR B_DAS B_HEAD_POS B_PASS_ORDER
-%token <ival>	B_PHASE_CAL B_ROLL B_IF B_SEFD B_SITE B_SOURCE B_TRACKS
+%token <ival>	B_PHASE_CAL_DETECT B_ROLL B_IF B_SEFD B_SITE B_SOURCE B_TRACKS
 %token <ival>   B_TAPELOG_OBS
 
 %token <llptr>	T_LITERAL
 
-%token <sval>	T_NAME T_LINK T_DATE T_DOUBLE T_TIME T_ANGLE
+%token <sval>	T_NAME T_LINK T_ANGLE
 %token <sval>   T_COMMENT T_COMMENT_TRAILING
-
-%token <sval>   T_FREQ_UNITS T_SAMPLE_RATE_UNITS T_TIME_UNITS T_LENGTH_UNITS
-%token <sval>   T_VELOCITY_UNITS T_ANGLE_RATE_UNITS T_ANGLE_UNITS T_FLUX_UNITS
 
 %type  <dvptr>  version
 %type  <llptr>  version_lowls
@@ -162,9 +163,9 @@ struct s2_record_mode		*srptr;
 %type  <dfptr>	mode_def
 %type  <lwptr>  mode_defx
 
-%type  <llptr>  qrefs refs qualifiers date
+%type  <llptr>  qrefs refs qualifiers
 %type  <ival>	primitive
-%type  <qrptr>	qref ref cref
+%type  <qrptr>	qref ref
 %type  <lwptr>  refx qrefx
 
 %type  <llptr>  sched_block sched_defs sched_lowls
@@ -179,9 +180,9 @@ struct s2_record_mode		*srptr;
 %type  <llptr>  antenna_block antenna_defs antenna_lowls 
 %type  <dfptr>	antenna_def
 %type  <lwptr>  antenna_lowl antenna_defx
-%type  <dvptr>  ant_diam axis_offset
+%type  <dvptr>  antenna_diam axis_offset
 %type  <atptr>  axis_type
-%type  <amptr>  ant_motion
+%type  <amptr>  antenna_motion
 %type  <psptr>  pointing_sector
 
 %type  <llptr>  bbc_block bbc_defs bbc_lowls 
@@ -192,17 +193,15 @@ struct s2_record_mode		*srptr;
 %type  <llptr>  clock_block clock_defs clock_lowls 
 %type  <dfptr>	clock_def
 %type  <lwptr>  clock_lowl clock_defx
-%type  <dvptr>  clock_early clock_rate
-%type  <sval>   clock_early_epoch
+%type  <ceptr>  clock_early
 
 %type  <llptr>  das_block das_defs das_lowls 
 %type  <dfptr>	das_def
 %type  <lwptr>  das_lowl das_defx
-%type  <sval>	record_transport electronics_rack tape_control
+%type  <sval>	record_transport_type electronics_rack_type tape_control
 %type  <dvptr>  number_drives
 %type  <dvptr>  record_density recording_system_id
 %type  <hsptr>  headstack
-%type  <dsptr>  data_source
 %type  <tlptr>  tape_length
 %type  <tmptr>  tape_motion
 
@@ -217,7 +216,7 @@ struct s2_record_mode		*srptr;
 %type  <dfptr>  exper_def
 %type  <lwptr>  exper_lowl exper_defx
 %type  <dvptr>  exper_num
-%type  <sval>   exper_name exper_nominal_start 
+%type  <sval>   exper_name exper_nominal_start exper_description
 %type  <sval>   exper_nominal_stop pi_name pi_email contact_name 
 %type  <sval>   contact_email scheduler_name scheduler_email 
 %type  <sval>   target_correlator
@@ -245,32 +244,35 @@ struct s2_record_mode		*srptr;
 %type  <lwptr>  pass_order_lowl pass_order_defx
 %type  <llptr>  pass_order s2_group_order
 
-%type  <llptr>  phase_cal_block phase_cal_defs phase_cal_lowls 
-%type  <dfptr>  phase_cal_def
-%type  <lwptr>  phase_cal_lowl phase_cal_defx
-%type  <pfptr>  pcal_freq
+%type  <llptr>  phase_cal_detect_block phase_cal_detect_defs
+%type  <llptr>  phase_cal_detect_lowls 
+%type  <dfptr>  phase_cal_detect_def
+%type  <lwptr>  phase_cal_detect_lowl phase_cal_detect_defx
+%type  <pdptr>  phase_cal_detect
 
-%type  <llptr>  proc_timing_block proc_timing_defs proc_timing_lowls 
-%type  <dfptr>  proc_timing_def
-%type  <lwptr>  proc_timing_lowl proc_timing_defx
-%type  <dvptr>  tape_change headstk_motion new_source_command new_tape_setup
+%type  <llptr>  procedures_block procedures_defs procedures_lowls 
+%type  <dfptr>  procedures_def
+%type  <lwptr>  procedures_lowl procedures_defx
+%type  <dvptr>  tape_change headstack_motion new_source_command new_tape_setup
 %type  <saptr>  setup_always
 %type  <pcptr>  parity_check
 %type  <tpptr>  tape_prepass
 %type  <prptr>  preob_cal
 %type  <miptr>  midob_cal
 %type  <poptr>  postob_cal
+%type  <sval>   procedure_name_prefix
 
 %type  <llptr>  roll_block roll_defs roll_lowls 
 %type  <dfptr>  roll_def
 %type  <lwptr>  roll_lowl roll_defx
-%type  <dvptr>  reinit_period inc_period
-%type  <llptr>  roll
+%type  <dvptr>  roll_reinit_period roll_inc_period
+%type  <sval>	roll
+%type  <llptr>  roll_def_st
 
-%type  <llptr>  scheduling_parms_block scheduling_parms_defs
-%type  <llptr>  scheduling_parms_lowls 
-%type  <dfptr>  scheduling_parms_def
-%type  <lwptr>  scheduling_parms_lowl scheduling_parms_defx
+%type  <llptr>  scheduling_params_block scheduling_params_defs
+%type  <llptr>  scheduling_params_lowls 
+%type  <dfptr>  scheduling_params_def
+%type  <lwptr>  scheduling_params_lowl scheduling_params_defx
 
 %type  <llptr>  sefd_block sefd_defs sefd_lowls 
 %type  <dfptr>  sefd_def
@@ -282,7 +284,9 @@ struct s2_record_mode		*srptr;
 %type  <dfptr>  site_def
 %type  <lwptr>  site_lowl site_defx
 %type  <sval>   site_type site_name site_id occupation_code orbit_epoch
+%type  <sval>	site_position_epoch site_position_ref
 %type  <spptr>  site_position
+%type  <svptr>  site_velocity
 %type  <llptr>  horizon_map_az horizon_map_el
 %type  <ovptr>  ocean_load_vert
 %type  <ohptr>  ocean_load_horiz
@@ -293,7 +297,8 @@ struct s2_record_mode		*srptr;
 %type  <dfptr>  source_def
 %type  <lwptr>  source_lowl source_defx
 %type  <llptr>  source_type
-%type  <sval>   source_name iau_name ra dec source_pos_ref epoch
+%type  <sval>   source_name iau_name ra dec source_position_ref ref_coord_frame
+%type  <sval>	source_position_epoch
 %type  <dvptr>  ra_rate dec_rate velocity_wrt_lsr
 %type  <smptr>  source_model
 
@@ -307,20 +312,17 @@ struct s2_record_mode		*srptr;
 %type  <lwptr>  tracks_lowl tracks_defx
 %type  <fiptr>  fanin_def
 %type  <foptr>  fanout_def
-%type  <sval>   track_frame_format data_modulate
+%type  <sval>   track_frame_format data_modulation s2_recording_mode
 %type  <fsptr>  vlba_frmtr_sys_trk
-%type  <sdptr>  s2_data_def
-%type  <srptr>  s2_record_mode
-%type  <llptr>  bit_stream_list bit_stream vlba_trnsprt_sys_trak
-%type  <llptr>	s2_data_source
+%type  <llptr>  bit_stream_list vlba_trnsprt_sys_trk
+%type  <dsptr>  s2_data_source
 
 %type  <exptr>  external_ref
 %type  <llptr>  literal
-%type  <llptr>  time_list angle_list length_list name_list value_list
-%type  <llptr>  angle_more time_more length_more
-%type  <dvptr>  time_value angle_value length_value freq_value value
-%type  <dvptr>  flux_value angle_rate_value sample_rate_value
-%type  <dvptr>  angle_option time_option length_option velocity_value
+%type  <llptr>  unit_list name_list value_list
+%type  <llptr>  unit_more
+%type  <dvptr>  unit_value value
+%type  <dvptr>  unit_option
 %type  <sval>   name_value
 
 %%
@@ -361,11 +363,11 @@ block:	global_block			{$$=make_block(B_GLOBAL,$1);}
  	| head_pos_block		{$$=make_block(B_HEAD_POS,$1);}
  	| if_block			{$$=make_block(B_IF,$1);}
  	| pass_order_block		{$$=make_block(B_PASS_ORDER,$1);}
- 	| phase_cal_block		{$$=make_block(B_PHASE_CAL,$1);}
- 	| proc_timing_block		{$$=make_block(B_PROC_TIMING,$1);}
+ 	| phase_cal_detect_block	{$$=make_block(B_PHASE_CAL_DETECT,$1);}
+ 	| procedures_block		{$$=make_block(B_PROCEDURES,$1);}
  	| roll_block			{$$=make_block(B_ROLL,$1);}
- 	| scheduling_parms_block
-				{$$=make_block(B_SCHEDULING_PARMS,$1);}
+ 	| scheduling_params_block
+				{$$=make_block(B_SCHEDULING_PARAMS,$1);}
  	| sefd_block			{$$=make_block(B_SEFD,$1);}
  	| site_block			{$$=make_block(B_SITE,$1);}
  	| source_block			{$$=make_block(B_SOURCE,$1);}
@@ -418,20 +420,20 @@ refx:	ref			{$$=make_lowl(T_REF,$1);}
 	| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
 ref:	T_REF primitive '=' T_NAME ';'	{$$=make_qref($2,$4,NULL);}
-	| cref				{$$=$1;}
 
 primitive:	B_EXPER			{$$=B_EXPER;}
-		| B_SCHEDULING_PARMS	{$$=B_SCHEDULING_PARMS;}
-		| B_PROC_TIMING		{$$=B_PROC_TIMING;}
+		| B_SCHEDULING_PARAMS	{$$=B_SCHEDULING_PARAMS;}
+		| B_PROCEDURES		{$$=B_PROCEDURES;}
 		| B_EOP			{$$=B_EOP;}
 		| B_FREQ		{$$=B_FREQ;}
 		| B_ANTENNA		{$$=B_ANTENNA;}
 		| B_BBC			{$$=B_BBC;}
+		| B_CLOCK		{$$=B_CLOCK;}
 		| B_CORR		{$$=B_CORR;}
 		| B_DAS			{$$=B_DAS;}
 		| B_HEAD_POS		{$$=B_HEAD_POS;}
 		| B_PASS_ORDER		{$$=B_PASS_ORDER;}
-		| B_PHASE_CAL		{$$=B_PHASE_CAL;}
+		| B_PHASE_CAL_DETECT	{$$=B_PHASE_CAL_DETECT;}
 		| B_ROLL		{$$=B_ROLL;}
 		| B_IF			{$$=B_IF;}
 		| B_SEFD		{$$=B_SEFD;}
@@ -439,11 +441,6 @@ primitive:	B_EXPER			{$$=B_EXPER;}
 		| B_SOURCE		{$$=B_SOURCE;}
 		| B_TRACKS		{$$=B_TRACKS;}
 		| B_TAPELOG_OBS		{$$=B_TAPELOG_OBS;}
-
-cref:	T_REF B_CLOCK '=' T_NAME date ';'	{$$=make_qref(B_CLOCK,$4,$5);}
-
-date:	/* empty */			{$$=NULL;}
-	| ':' T_NAME			{$$=add_list(NULL,$2);}
 
 qrefs:	qrefs qrefx			{$$=add_list($1,$2);}
 	| qrefx				{$$=add_list(NULL,$1);}
@@ -466,13 +463,13 @@ sched_block:	B_SCHED ';' sched_defs	{$$=$3}
 sched_defs:	sched_defs sched_defx	{$$=add_list($1,$2);}
 		| sched_defx		{$$=add_list(NULL,$1);}
 
-sched_defx:	sched_def		{$$=make_lowl(T_DEF,$1);}
+sched_defx:	sched_def		{$$=make_lowl(T_SCAN,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-sched_def:	T_DEF T_NAME ';' sched_lowls T_ENDDEF ';'
+sched_def:	T_SCAN T_NAME ';' sched_lowls T_ENDSCAN ';'
 						{$$=make_def($2,$4);}
-		| T_DEF T_NAME ';' T_ENDDEF ';'	{$$=make_def($2,NULL);}
+		| T_SCAN T_NAME ';' T_ENDSCAN ';'	{$$=make_def($2,NULL);}
 
 sched_lowls:	sched_lowls sched_lowl	{$$=add_list($1,$2);}
 		| sched_lowl		{$$=add_list(NULL,$1);}
@@ -484,15 +481,15 @@ sched_lowl:	start			{$$=make_lowl(T_START,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-start:		T_START '=' T_DATE ';'	{$$=$3;}
+start:		T_START '=' T_NAME ';'	{$$=$3;}
 
 mode:		T_MODE '=' T_NAME ';'	{$$=$3;}
 
 source:		T_SOURCE '=' T_NAME ';'	{$$=$3;}
 
 station:	T_STATION '=' T_NAME ':'	/* name */
-		time_value ':'			/* data start */
-		time_value ':'			/* data stop */
+		unit_value ':'			/* data start */
+		unit_value ':'			/* data stop */
 		start_position ':'
 		pass ':'		
 		sector ':'				/* pointing sector */
@@ -500,12 +497,10 @@ station:	T_STATION '=' T_NAME ':'	/* name */
 		{$$=make_station($3,$5,$7,$9,$11,$13,$15);}
 
 start_position:	/* empty */			{$$=NULL;}
-		| length_value			{$$=$1;}
-		| time_value			{$$=$1;}
+		| unit_value			{$$=$1;}
 
 pass:		/* empty */			{$$=NULL;}
 		| T_NAME			{$$=$1;}
-		| T_DOUBLE			{$$=$1;}
 
 sector:		/* empty */			{$$=NULL;}
 		| T_LINK			{$$=$1;}
@@ -533,34 +528,34 @@ antenna_def:	T_DEF T_NAME ';' antenna_lowls T_ENDDEF ';'
 antenna_lowls:	antenna_lowls antenna_lowl	{$$=add_list($1,$2);}
 		| antenna_lowl		{$$=add_list(NULL,$1);}
 
-antenna_lowl:	ant_diam		{$$=make_lowl(T_ANT_DIAM,$1);}
+antenna_lowl:	antenna_diam		{$$=make_lowl(T_ANTENNA_DIAM,$1);}
 		| axis_type		{$$=make_lowl(T_AXIS_TYPE,$1);}
 		| axis_offset		{$$=make_lowl(T_AXIS_OFFSET,$1);}
-		| ant_motion		{$$=make_lowl(T_ANT_MOTION,$1);}
+		| antenna_motion	{$$=make_lowl(T_ANTENNA_MOTION,$1);}
 		| pointing_sector	{$$=make_lowl(T_POINTING_SECTOR,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-ant_diam:	T_ANT_DIAM '=' length_value ';'		{$$=$3;}
+antenna_diam:	T_ANTENNA_DIAM '=' unit_value ';'		{$$=$3;}
 
 axis_type:	T_AXIS_TYPE '=' T_NAME ':' T_NAME ';'
 		{$$=make_axis_type($3,$5);}
 
-axis_offset:	T_AXIS_OFFSET '=' length_value ';'	{$$=$3;}
+axis_offset:	T_AXIS_OFFSET '=' unit_value ';'	{$$=$3;}
 
-ant_motion:	T_ANT_MOTION '=' T_NAME ':'
-		angle_rate_value ':'
-		time_value ';'
-		{$$=make_ant_motion($3,$5,$7);}
+antenna_motion:	T_ANTENNA_MOTION '=' T_NAME ':'
+		unit_value ':'
+		unit_value ';'
+		{$$=make_antenna_motion($3,$5,$7);}
 
 pointing_sector:	T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
-			angle_value ':'
-			angle_value ':'
+			unit_value ':'
+			unit_value ':'
 			T_NAME ':'
-			angle_value ':'
-			angle_value ';'
+			unit_value ':'
+			unit_value ';'
 			{$$=make_pointing_sector($3,$5,$7,$9,$11,$13,$15);}
 
 /* $BBC block */
@@ -611,18 +606,18 @@ clock_lowls:	clock_lowls clock_lowl	{$$=add_list($1,$2);}
 		| clock_lowl		{$$=add_list(NULL,$1);}
 
 clock_lowl:	clock_early		{$$=make_lowl(T_CLOCK_EARLY,$1);}
- 		| clock_early_epoch
-				{$$=make_lowl(T_CLOCK_EARLY_EPOCH,$1);}
-		| clock_rate		{$$=make_lowl(T_CLOCK_RATE,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-clock_early:	T_CLOCK_EARLY '=' time_value ';'	{$$=$3;}
-
-clock_early_epoch:	T_CLOCK_EARLY_EPOCH '=' T_DATE ';'	{$$=$3;}
-
-clock_rate:	T_CLOCK_RATE '=' value ';'	{$$=$3;}
+clock_early:	T_CLOCK_EARLY '=' ':' unit_value ';'
+				{$$=make_clock_early(NULL,$4,NULL,NULL);}
+		| T_CLOCK_EARLY '=' T_NAME ':' unit_value ';'
+				{$$=make_clock_early($3,$5,NULL,NULL);}
+	| T_CLOCK_EARLY '=' T_NAME ':' unit_value ':' T_NAME ':' value ';'
+				{$$=make_clock_early($3,$5,$7,$9);}
+	| T_CLOCK_EARLY '=' ':' unit_value ':' T_NAME ':' value ';'
+				{$$=make_clock_early(NULL,$4,$6,$8);}
 
 /* $DAS block */
 
@@ -643,11 +638,10 @@ das_def:	T_DEF T_NAME ';' das_lowls T_ENDDEF ';' {$$=make_def($2,$4);}
 das_lowls:	das_lowls das_lowl	{$$=add_list($1,$2);}
 		| das_lowl		{$$=add_list(NULL,$1);}
 
-das_lowl:	record_transport	{$$=make_lowl(T_RECORD_TRANSPORT,$1);}
- 		| electronics_rack	{$$=make_lowl(T_ELECTRONICS_RACK,$1);}
+das_lowl:	record_transport_type {$$=make_lowl(T_RECORD_TRANSPORT_TYPE,$1);}
+ 		| electronics_rack_type {$$=make_lowl(T_ELECTRONICS_RACK_TYPE,$1);}
 		| number_drives		{$$=make_lowl(T_NUMBER_DRIVES,$1);}
 		| headstack		{$$=make_lowl(T_HEADSTACK,$1);}
-		| data_source		{$$=make_lowl(T_DATA_SOURCE,$1);}
 		| record_density	{$$=make_lowl(T_RECORD_DENSITY,$1);}
 		| tape_length		{$$=make_lowl(T_TAPE_LENGTH,$1);}
 		| recording_system_id
@@ -658,34 +652,31 @@ das_lowl:	record_transport	{$$=make_lowl(T_RECORD_TRANSPORT,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-record_transport:	T_RECORD_TRANSPORT '=' T_NAME ';' 	{$$=$3};
+record_transport_type:	T_RECORD_TRANSPORT_TYPE '=' T_NAME ';' 	{$$=$3};
 
-electronics_rack:	T_ELECTRONICS_RACK '=' T_NAME ';' 	{$$=$3};
+electronics_rack_type:	T_ELECTRONICS_RACK_TYPE '=' T_NAME ';' 	{$$=$3};
 
 number_drives:		T_NUMBER_DRIVES '=' value ';'		{$$=$3;}
 
-headstack:	T_HEADSTACK '=' value ':' T_NAME ':' T_LINK ';'
+headstack:	T_HEADSTACK '=' value ':' T_NAME ':' value ';'
 					{$$=make_headstack($3,$5,$7);}
 
-data_source:	T_DATA_SOURCE '=' T_NAME ':' T_NAME ':' T_NAME ':' T_NAME ':'
-		T_NAME ':' T_NAME ':' T_NAME ':' T_NAME ':' T_NAME ';'
-		{$$=make_data_source($3,$5,$7,$9,$11,$13,$15,$17,$19);}
+record_density:	T_RECORD_DENSITY '=' T_NAME T_NAME ';'
+						{$$=make_dvalue($3,$4);}
 
-record_density:	T_RECORD_DENSITY '=' value ';' {$$=$3;}
-
-tape_length:	T_TAPE_LENGTH '=' length_value ';'
+tape_length:	T_TAPE_LENGTH '=' unit_value ';'
 				{$$=make_tape_length($3,NULL,NULL);}
-		| T_TAPE_LENGTH '=' time_value ':' T_NAME ':' value ';'
+		| T_TAPE_LENGTH '=' unit_value ':' T_NAME ':' value ';'
 				{$$=make_tape_length($3,$5,$7);}
 
 recording_system_id:	T_RECORDING_SYSTEM_ID '=' value ';' 	{$$=$3;}
 
 tape_motion:	T_TAPE_MOTION '=' T_NAME ';'
 				{$$=make_tape_motion($3,NULL,NULL,NULL);}
-		| T_TAPE_MOTION '=' T_NAME ':' time_value ';'
+		| T_TAPE_MOTION '=' T_NAME ':' unit_value ';'
 				{$$=make_tape_motion($3,$5,NULL,NULL);}
-		| T_TAPE_MOTION '=' T_NAME ':' time_value
-					':' time_value ':' time_value ';'
+		| T_TAPE_MOTION '=' T_NAME ':' unit_value
+					':' unit_value ':' unit_value ';'
 				{$$=make_tape_motion($3,$5,$7,$9);}
 
 tape_control:	T_TAPE_CONTROL '=' T_NAME ';' {$$=$3;}
@@ -721,23 +712,23 @@ eop_lowl:	tai_utc			{$$=make_lowl(T_TAI_UTC,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-tai_utc:	T_TAI_UTC '=' time_value ';'	{$$=$3;}
+tai_utc:	T_TAI_UTC '=' unit_value ';'	{$$=$3;}
 
-a1_tai:		T_A1_TAI '=' time_value ';'	{$$=$3;}
+a1_tai:		T_A1_TAI '=' unit_value ';'	{$$=$3;}
 
-eop_ref_epoch:	T_EOP_REF_EPOCH '=' T_DATE ';'	{$$=$3};
+eop_ref_epoch:	T_EOP_REF_EPOCH '=' T_NAME ';'	{$$=$3};
 
 num_eop_points:	T_NUM_EOP_POINTS '=' value ';'	{$$=$3;}
 
-eop_interval:	T_EOP_INTERVAL '=' time_value ';'	{$$=$3;}
+eop_interval:	T_EOP_INTERVAL '=' unit_value ';'	{$$=$3;}
 
-ut1_utc:	T_UT1_UTC '=' time_list ';'	{$$=$3;}
+ut1_utc:	T_UT1_UTC '=' unit_list ';'	{$$=$3;}
 		| T_UT1_UTC '=' ';'		{$$=NULL;}
 
-x_wobble:	T_X_WOBBLE '=' angle_list ';'	{$$=$3;}
+x_wobble:	T_X_WOBBLE '=' unit_list ';'	{$$=$3;}
 		| T_X_WOBBLE '=' ';'		{$$=NULL;}
 
-y_wobble:	T_Y_WOBBLE '=' angle_list ';'	{$$=$3;}
+y_wobble:	T_Y_WOBBLE '=' unit_list ';'	{$$=$3;}
 		| T_Y_WOBBLE '=' ';'		{$$=NULL;}
 
 /* $EXPER block */
@@ -761,6 +752,7 @@ exper_lowls:	exper_lowls exper_lowl	{$$=add_list($1,$2);}
 
 exper_lowl:	exper_num		{$$=make_lowl(T_EXPER_NUM,$1);}
    		| exper_name		{$$=make_lowl(T_EXPER_NAME,$1);}
+   		| exper_description	{$$=make_lowl(T_EXPER_DESCRIPTION,$1);}
    		| exper_nominal_start
 				{$$=make_lowl(T_EXPER_NOMINAL_START,$1);}
    		| exper_nominal_stop
@@ -781,9 +773,11 @@ exper_num:	T_EXPER_NUM '=' value ';' {$$=$3;}
 
 exper_name:	T_EXPER_NAME '=' T_NAME ';'	{$$=$3;}
 
-exper_nominal_start:	T_EXPER_NOMINAL_START '=' T_DATE ';'	{$$=$3;}
+exper_description:	T_EXPER_DESCRIPTION '=' T_NAME ';'	{$$=$3;}
 
-exper_nominal_stop:	T_EXPER_NOMINAL_STOP '=' T_DATE ';'	{$$=$3;}
+exper_nominal_start:	T_EXPER_NOMINAL_START '=' T_NAME ';'	{$$=$3;}
+
+exper_nominal_stop:	T_EXPER_NOMINAL_STOP '=' T_NAME ';'	{$$=$3;}
 
 pi_name:	T_PI_NAME '=' T_NAME ';'	{$$=$3;}
 
@@ -827,52 +821,48 @@ freq_lowl:	chan_def		{$$=make_lowl(T_CHAN_DEF,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
 chan_def:	T_CHAN_DEF '=' T_LINK		/* band_id */
-		':' T_NAME			/* polarization */
-		':' freq_value			/* sky frequency */
+		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
-		':' freq_value			/* channel BW */
+		':' unit_value			/* channel BW */
 		':' T_LINK			/* chan ID */
 		':' T_LINK			/* BBC ID */
 		':' T_LINK ';'	/* phase-cal ID */
-		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,$17,NULL);}
+		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,NULL);}
 		| T_CHAN_DEF '=' T_LINK		/* band_id */
-		':' T_NAME			/* polarization */
-		':' freq_value			/* sky frequency */
+		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
-		':' freq_value			/* channel BW */
+		':' unit_value			/* channel BW */
 		':' T_LINK			/* chan ID */
 		':' T_LINK			/* BBC ID */
 		':' T_LINK switch_states ';'	/* phase-cal ID */
-		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,$17,$18);}
+		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,$16);}
 		| T_CHAN_DEF '='		/* band_id */
-		':' T_NAME			/* polarization */
-		':' freq_value			/* sky frequency */
+		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
-		':' freq_value			/* channel BW */
+		':' unit_value			/* channel BW */
 		':' T_LINK			/* chan ID */
 		':' T_LINK			/* BBC ID */
 		':' T_LINK ';'	/* phase-cal ID */
-		{$$=make_chan_def(NULL,$4,$6,$8,$10,$12,$14,$16,NULL);}
+		{$$=make_chan_def(NULL,$4,$6,$8,$10,$12,$14,NULL);}
 		| T_CHAN_DEF '='		/* band_id */
-		':' T_NAME			/* polarization */
-		':' freq_value			/* sky frequency */
+		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
-		':' freq_value			/* channel BW */
+		':' unit_value			/* channel BW */
 		':' T_LINK			/* chan ID */
 		':' T_LINK			/* BBC ID */
 		':' T_LINK switch_states ';'	/* phase-cal ID */
-		{$$=make_chan_def(NULL,$4,$6,$8,$10,$12,$14,$16,$17);}
+		{$$=make_chan_def(NULL,$4,$6,$8,$10,$12,$14,$15);}
 
 switch_states:	switch_states switch_state	{$$=add_list($1,$2)};
 		| switch_state			{$$=add_list(NULL,$1);}
 
 switch_state:	':' value			{$$=$2;}
 
-sample_rate:	T_SAMPLE_RATE '=' sample_rate_value ';'		{$$=$3;}
+sample_rate:	T_SAMPLE_RATE '=' unit_value ';'		{$$=$3;}
 
 bits_per_sample:	T_BITS_PER_SAMPLE '=' value ';'		{$$=$3;}
 
-switching_cycle:	T_SWITCHING_CYCLE '=' T_NAME ':' time_list ';' 
+switching_cycle:	T_SWITCHING_CYCLE '=' T_NAME ':' unit_list ';' 
 				{$$=make_switching_cycle($3,$5);}
 
 /* $HEAD_POS block */
@@ -900,7 +890,7 @@ head_pos_lowl:	headstack_pos		{$$=make_lowl(T_HEADSTACK_POS,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-headstack_pos:	T_HEADSTACK_POS '=' value ':' length_list ';'
+headstack_pos:	T_HEADSTACK_POS '=' value ':' unit_list ';'
 					{$$=make_headstack_pos($3,$5);}
 
 /* $IF block */
@@ -927,8 +917,18 @@ if_lowl:	if_def_st		{$$=make_lowl(T_IF_DEF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-if_def_st:	T_IF_DEF '=' T_LINK ':' freq_value ':' T_NAME ';'
-					{$$=make_if_def($3,$5,$7);}
+if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' unit_value ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,$13,$15);}
+		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,NULL,NULL);}
+		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' ':' ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,NULL,NULL);}
+		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,NULL,NULL);}
+		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,$13,NULL);}
+		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' ';'
+			{$$=make_if_def($3,$5,$7,$9,$11,$13,NULL);}
 
 /* $PASS_ORDER block */
 
@@ -963,62 +963,61 @@ pass_order:	T_PASS_ORDER '=' name_list ';' {$$=$3;}
 
 s2_group_order:	T_S2_GROUP_ORDER '=' value_list ';' {$$=$3;}
 
-/* $PHASE_CAL block */
+/* $PHASE_CAL_DETECT block */
 
-phase_cal_block:	B_PHASE_CAL ';' phase_cal_defs	{$$=$3}
-			| B_PHASE_CAL ';'		{$$=NULL;}
+phase_cal_detect_block:	B_PHASE_CAL_DETECT ';' phase_cal_detect_defs	{$$=$3}
+			| B_PHASE_CAL_DETECT ';'		{$$=NULL;}
 
-phase_cal_defs:	phase_cal_defs phase_cal_defx	{$$=add_list($1,$2);}
-			| phase_cal_defx	{$$=add_list(NULL,$1);}
+phase_cal_detect_defs:	phase_cal_detect_defs phase_cal_detect_defx
+						{$$=add_list($1,$2);}
+			| phase_cal_detect_defx	{$$=add_list(NULL,$1);}
 
-phase_cal_defx:	phase_cal_def		{$$=make_lowl(T_DEF,$1);}
+phase_cal_detect_defx:	phase_cal_detect_def	{$$=make_lowl(T_DEF,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-phase_cal_def:	T_DEF T_NAME ';' phase_cal_lowls T_ENDDEF ';'
+phase_cal_detect_def:	T_DEF T_NAME ';' phase_cal_detect_lowls T_ENDDEF ';'
 							{$$=make_def($2,$4);}
 		| T_DEF T_NAME ';' T_ENDDEF ';'	{$$=make_def($2,NULL);}
 
-phase_cal_lowls:	phase_cal_lowls phase_cal_lowl	{$$=add_list($1,$2);}
-			| phase_cal_lowl	{$$=add_list(NULL,$1);}
+phase_cal_detect_lowls:	phase_cal_detect_lowls phase_cal_detect_lowl
+						{$$=add_list($1,$2);}
+			| phase_cal_detect_lowl	{$$=add_list(NULL,$1);}
 
-phase_cal_lowl:	pcal_freq	{$$=make_lowl(T_PCAL_FREQ,$1);}
+phase_cal_detect_lowl:	phase_cal_detect {$$=make_lowl(T_PHASE_CAL_DETECT,$1);}
 		| external_ref	{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-pcal_freq:	T_PCAL_FREQ '=' T_LINK ':' T_NAME ':' freq_value
-		':' freq_value ';'
-		{$$=make_pcal_freq($3,$5,$7,$9);}
-		| T_PCAL_FREQ '=' T_LINK ':' T_NAME ';'
-		{$$=make_pcal_freq($3,$5,NULL,NULL);}
+phase_cal_detect:	T_PHASE_CAL_DETECT '=' T_LINK ':' value_list ';'
+		{$$=make_phase_cal_detect($3,$5);}
 
-/* $PROC_TIMING block */
+/* $PROCEDURES block */
 
-proc_timing_block:	B_PROC_TIMING ';' proc_timing_defs	{$$=$3}
-			| B_PROC_TIMING ';'			{$$=NULL;}
+procedures_block:	B_PROCEDURES ';' procedures_defs	{$$=$3}
+			| B_PROCEDURES ';'			{$$=NULL;}
 
-proc_timing_defs:	proc_timing_defs proc_timing_defx
+procedures_defs:	procedures_defs procedures_defx
 							{$$=add_list($1,$2);}
-			| proc_timing_defx	{$$=add_list(NULL,$1);}
+			| procedures_defx	{$$=add_list(NULL,$1);}
 
-proc_timing_defx:	proc_timing_def		{$$=make_lowl(T_DEF,$1);}
+procedures_defx:	procedures_def		{$$=make_lowl(T_DEF,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-proc_timing_def:	T_DEF T_NAME ';' proc_timing_lowls T_ENDDEF ';'
+procedures_def:	T_DEF T_NAME ';' procedures_lowls T_ENDDEF ';'
 							{$$=make_def($2,$4);}
 			| T_DEF T_NAME ';' T_ENDDEF ';'
 						{$$=make_def($2,NULL);}
 
-proc_timing_lowls:	proc_timing_lowls proc_timing_lowl
+procedures_lowls:	procedures_lowls procedures_lowl
 							{$$=add_list($1,$2);}
-			| proc_timing_lowl	{$$=add_list(NULL,$1);}
+			| procedures_lowl	{$$=add_list(NULL,$1);}
 
-proc_timing_lowl:	tape_change
+procedures_lowl:	tape_change
 				 {$$=make_lowl(T_TAPE_CHANGE,$1);}
-			| headstk_motion
-				{$$=make_lowl(T_HEADSTK_MOTION,$1);}
+			| headstack_motion
+				{$$=make_lowl(T_HEADSTACK_MOTION,$1);}
 			| new_source_command
 				{$$=make_lowl(T_NEW_SOURCE_COMMAND,$1);}
 			| new_tape_setup
@@ -1035,35 +1034,39 @@ proc_timing_lowl:	tape_change
 				{$$=make_lowl(T_MIDOB_CAL,$1);}
 			| postob_cal
 				{$$=make_lowl(T_POSTOB_CAL,$1);}
+	   		| procedure_name_prefix
+				 {$$=make_lowl(T_PROCEDURE_NAME_PREFIX,$1);}
 			| external_ref	{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-tape_change:	T_TAPE_CHANGE '=' time_value ';'	{$$=$3;}
+tape_change:	T_TAPE_CHANGE '=' unit_value ';'	{$$=$3;}
 
-headstk_motion:	T_HEADSTK_MOTION '=' time_value ';'	{$$=$3;}
+headstack_motion:	T_HEADSTACK_MOTION '=' unit_value ';'	{$$=$3;}
 
-new_source_command:	T_NEW_SOURCE_COMMAND '=' time_value ';'	{$$=$3;}
+new_source_command:	T_NEW_SOURCE_COMMAND '=' unit_value ';'	{$$=$3;}
 
-new_tape_setup:	T_NEW_TAPE_SETUP '=' time_value ';'	{$$=$3;}
+new_tape_setup:	T_NEW_TAPE_SETUP '=' unit_value ';'	{$$=$3;}
 
-setup_always:	T_SETUP_ALWAYS '=' name_value ':' time_value ';'
+setup_always:	T_SETUP_ALWAYS '=' name_value ':' unit_value ';'
 		{$$=make_setup_always($3,$5);}
 
-parity_check:	T_PARITY_CHECK '=' name_value ':' time_value ';'
+parity_check:	T_PARITY_CHECK '=' name_value ':' unit_value ';'
 		{$$=make_parity_check($3,$5);}
 
-tape_prepass:	T_TAPE_PREPASS '=' name_value ':' time_value ';'
+tape_prepass:	T_TAPE_PREPASS '=' name_value ':' unit_value ';'
 		{$$=make_tape_prepass($3,$5);}
 
-preob_cal:	T_PREOB_CAL '=' name_value ':' time_value ':' name_value ';'
+preob_cal:	T_PREOB_CAL '=' name_value ':' unit_value ':' name_value ';'
 		{$$=make_preob_cal($3,$5,$7);}
 
-midob_cal:	T_MIDOB_CAL '=' name_value ':' time_value ':' name_value ';'
+midob_cal:	T_MIDOB_CAL '=' name_value ':' unit_value ':' name_value ';'
 		{$$=make_midob_cal($3,$5,$7);}
 
-postob_cal:	T_POSTOB_CAL '=' name_value ':' time_value ':' name_value ';'
+postob_cal:	T_POSTOB_CAL '=' name_value ':' unit_value ':' name_value ';'
 		{$$=make_postob_cal($3,$5,$7);}
+
+procedure_name_prefix:	T_PROCEDURE_NAME_PREFIX '=' T_NAME ';'	{$$=$3;}
 
 /* $ROLL block */
 
@@ -1085,45 +1088,48 @@ roll_def:	T_DEF T_NAME ';' roll_lowls T_ENDDEF ';'
 roll_lowls:	roll_lowls roll_lowl	{$$=add_list($1,$2);}
 			| roll_lowl		{$$=add_list(NULL,$1);}
 
-roll_lowl:	reinit_period	{$$=make_lowl(T_REINIT_PERIOD,$1);}
-		| inc_period	{$$=make_lowl(T_INC_PERIOD,$1);}
+roll_lowl:	roll_reinit_period {$$=make_lowl(T_ROLL_REINIT_PERIOD,$1);}
+		| roll_inc_period	{$$=make_lowl(T_ROLL_INC_PERIOD,$1);}
 		| roll		{$$=make_lowl(T_ROLL,$1);}
+		| roll_def_st	{$$=make_lowl(T_ROLL_DEF,$1);}
 		| external_ref	{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-reinit_period:	T_REINIT_PERIOD '=' time_value ';' {$$=$3;}
+roll_reinit_period:	T_ROLL_REINIT_PERIOD '=' unit_value ';' {$$=$3;}
 
-inc_period:	T_INC_PERIOD '=' value ';'	{$$=$3;}
+roll_inc_period:	T_ROLL_INC_PERIOD '=' value ';'	{$$=$3;}
 
-roll:		T_ROLL '=' value_list ';'	{$$=$3;}
+roll:		T_ROLL '=' T_NAME ';'		{$$=$3;}
 
-/* $SCHEDULING_PARMS block */
+roll_def_st:	T_ROLL_DEF '=' value_list ';'	{$$=$3;}
 
-scheduling_parms_block:	B_SCHEDULING_PARMS ';' scheduling_parms_defs
+/* $SCHEDULING_PARAMS block */
+
+ scheduling_params_block:	B_SCHEDULING_PARAMS ';' scheduling_params_defs
 								{$$=$3}
-			| B_SCHEDULING_PARMS ';'		{$$=NULL;}
+			| B_SCHEDULING_PARAMS ';'		{$$=NULL;}
 
-scheduling_parms_defs:	scheduling_parms_defs scheduling_parms_defx
+scheduling_params_defs:	scheduling_params_defs scheduling_params_defx
 							{$$=add_list($1,$2);}
-			| scheduling_parms_defx
+			| scheduling_params_defx
 						{$$=add_list(NULL,$1);}
 
-scheduling_parms_defx:	scheduling_parms_def	{$$=make_lowl(T_DEF,$1);}
+scheduling_params_defx:	scheduling_params_def	{$$=make_lowl(T_DEF,$1);}
 		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-scheduling_parms_def:	T_DEF T_NAME ';' scheduling_parms_lowls T_ENDDEF ';'
+scheduling_params_def:	T_DEF T_NAME ';' scheduling_params_lowls T_ENDDEF ';'
 							{$$=make_def($2,$4);}
 		| T_DEF T_NAME ';' T_ENDDEF ';'
 						{$$=make_def($2,NULL);}
 
-scheduling_parms_lowls:	scheduling_parms_lowls scheduling_parms_lowl
+scheduling_params_lowls:	scheduling_params_lowls scheduling_params_lowl
 							{$$=add_list($1,$2);}
-			| scheduling_parms_lowl
+			| scheduling_params_lowl
 						{$$=add_list(NULL,$1);}
 
-scheduling_parms_lowl:	external_ref	{$$=make_lowl(T_REF,$1);}
+scheduling_params_lowl:	external_ref	{$$=make_lowl(T_REF,$1);}
 			|literal	{$$=make_lowl(T_LITERAL,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -1156,7 +1162,7 @@ sefd_lowl:	sefd_model	{$$=make_lowl(T_SEFD_MODEL,$1);}
 
 sefd_model:	T_SEFD_MODEL '=' T_NAME ';' {$$=$3;}
 
-sefd:		T_SEFD '=' T_LINK ':' flux_value ':' value_list ';'
+sefd:		T_SEFD '=' T_LINK ':' unit_value ':' value_list ';'
 						{$$=make_sefd($3,$5,$7);}
 
 /* $SITE block */
@@ -1182,6 +1188,9 @@ site_lowl:	site_type	{$$=make_lowl(T_SITE_TYPE,$1);}
 		| site_name	{$$=make_lowl(T_SITE_NAME,$1);}
 		| site_id	{$$=make_lowl(T_SITE_ID,$1);}
 		| site_position	{$$=make_lowl(T_SITE_POSITION,$1);}
+		| site_position_epoch {$$=make_lowl(T_SITE_POSITION_EPOCH,$1);}
+		| site_position_ref   {$$=make_lowl(T_SITE_POSITION_REF,$1);}
+		| site_velocity	      {$$=make_lowl(T_SITE_VELOCITY,$1);}
 		| horizon_map_az {$$=make_lowl(T_HORIZON_MAP_AZ,$1);}
 		| horizon_map_el {$$=make_lowl(T_HORIZON_MAP_EL,$1);}
 		| zen_atmos	{$$=make_lowl(T_ZEN_ATMOS,$1);}
@@ -1206,41 +1215,49 @@ site_name:	T_SITE_NAME '=' T_NAME ';' {$$=$3;}
 
 site_id:	T_SITE_ID '=' T_NAME ';' {$$=$3;}
 
-site_position:	T_SITE_POSITION '=' length_value ':' length_value ':'
-		length_value ':' value  ':' T_NAME ';'
-		{$$=make_site_position($3,$5,$7,$9,$11);}		
+site_position:	T_SITE_POSITION '=' unit_value ':' unit_value ':'
+		unit_value ';'
+		{$$=make_site_position($3,$5,$7);}		
 
-horizon_map_az:	T_HORIZON_MAP_AZ '=' angle_list ';'	{$$=$3;}
+site_position_epoch:	T_SITE_POSITION_EPOCH '=' T_NAME ';' {$$=$3;}
 
-horizon_map_el:	T_HORIZON_MAP_EL '=' angle_list ';'	{$$=$3;}
+site_position_ref:	T_SITE_POSITION_REF '=' T_NAME ';' {$$=$3;}
 
-zen_atmos:	T_ZEN_ATMOS '=' time_value ';'		{$$=$3;}
+site_velocity:	T_SITE_VELOCITY '=' unit_value ':' unit_value ':'
+		unit_value ';'
+		{$$=make_site_velocity($3,$5,$7);}		
 
-ocean_load_vert:	T_OCEAN_LOAD_VERT '=' length_value ':'
-			angle_value ';'
+horizon_map_az:	T_HORIZON_MAP_AZ '=' unit_list ';'	{$$=$3;}
+
+horizon_map_el:	T_HORIZON_MAP_EL '=' unit_list ';'	{$$=$3;}
+
+zen_atmos:	T_ZEN_ATMOS '=' unit_value ';'		{$$=$3;}
+
+ocean_load_vert:	T_OCEAN_LOAD_VERT '=' unit_value ':'
+			unit_value ';'
 				{$$=make_ocean_load_vert($3,$5);}
 
-ocean_load_horiz:	T_OCEAN_LOAD_HORIZ '=' length_value ':'
-			angle_value ';'
+ocean_load_horiz:	T_OCEAN_LOAD_HORIZ '=' unit_value ':'
+			unit_value ';'
 				{$$=make_ocean_load_horiz($3,$5);}
 
 occupation_code:	T_OCCUPATION_CODE '=' name_value ';' {$$=$3;}
 
-inclination:	T_INCLINATION '=' angle_value ';'	{$$=$3;}
+inclination:	T_INCLINATION '=' unit_value ';'	{$$=$3;}
 
 eccentricity:	T_ECCENTRICITY '=' value ';'		{$$=$3;}
 
-arg_perigee:	T_ARG_PERIGEE '=' angle_value ';'	{$$=$3;}
+arg_perigee:	T_ARG_PERIGEE '=' unit_value ';'	{$$=$3;}
 
-ascending_node:	T_ASCENDING_NODE '=' angle_value ';'	{$$=$3;}
+ascending_node:	T_ASCENDING_NODE '=' unit_value ';'	{$$=$3;}
 
-mean_anomaly:	T_MEAN_ANOMALY '=' angle_value ';'	{$$=$3;}
+mean_anomaly:	T_MEAN_ANOMALY '=' unit_value ';'	{$$=$3;}
 
-semi_major_axis:	T_SEMI_MAJOR_AXIS '=' length_value ';' {$$=$3;}
+semi_major_axis:	T_SEMI_MAJOR_AXIS '=' unit_value ';' {$$=$3;}
 
 mean_motion:	T_MEAN_MOTION '=' value ';'	{$$=$3;}
 
-orbit_epoch:	T_ORBIT_EPOCH '=' T_DATE ';' {$$=$3;}
+orbit_epoch:	T_ORBIT_EPOCH '=' T_NAME ';' {$$=$3;}
 
 /* $SOURCE block */
 
@@ -1267,8 +1284,9 @@ source_lowl:	source_type		{$$=make_lowl(T_SOURCE_TYPE,$1);}
 		| iau_name		{$$=make_lowl(T_IAU_NAME,$1);}
 		| ra			{$$=make_lowl(T_RA,$1);}
 		| dec			{$$=make_lowl(T_DEC,$1);}
-		| epoch			{$$=make_lowl(T_EPOCH,$1);}
-		| source_pos_ref	{$$=make_lowl(T_SOURCE_POS_REF,$1);}
+		| ref_coord_frame	{$$=make_lowl(T_REF_COORD_FRAME,$1);}
+		| source_position_ref {$$=make_lowl(T_SOURCE_POSITION_REF,$1);}
+	| source_position_epoch {$$=make_lowl(T_SOURCE_POSITION_EPOCH,$1);}
 		| ra_rate		{$$=make_lowl(T_RA_RATE,$1);}
 		| dec_rate		{$$=make_lowl(T_DEC_RATE,$1);}
 		| velocity_wrt_lsr	{$$=make_lowl(T_VELOCITY_WRT_LSR,$1);}
@@ -1293,29 +1311,31 @@ source_name:	T_SOURCE_NAME '=' T_NAME ';'	{$$=$3;}
 
 iau_name:	T_IAU_NAME '=' T_NAME ';'	{$$=$3;}
 
-ra:		T_RA '=' T_TIME ';'		{$$=$3;}
+ra:		T_RA '=' T_NAME ';'		{$$=$3;}
 
 dec:		T_DEC '=' T_ANGLE ';'		{$$=$3;}
 
-epoch:		T_EPOCH '=' T_NAME ';'		{$$=$3;}
+ref_coord_frame:	T_REF_COORD_FRAME '=' T_NAME ';'	{$$=$3;}
 
-source_pos_ref:	T_SOURCE_POS_REF '=' T_NAME ';'	{$$=$3;}
+source_position_ref:	T_SOURCE_POSITION_REF '=' T_NAME ';'	{$$=$3;}
 
-ra_rate:	T_RA_RATE '=' angle_rate_value ';'	{$$=$3;}
+source_position_epoch:	T_SOURCE_POSITION_EPOCH '=' T_NAME ';'	{$$=$3;}
 
-dec_rate:	T_DEC_RATE '=' angle_rate_value ';'	{$$=$3;}
+ra_rate:	T_RA_RATE '=' unit_value ';'	{$$=$3;}
 
-velocity_wrt_lsr:	T_VELOCITY_WRT_LSR '=' velocity_value ';'
+dec_rate:	T_DEC_RATE '=' unit_value ';'	{$$=$3;}
+
+velocity_wrt_lsr:	T_VELOCITY_WRT_LSR '=' unit_value ';'
 								{$$=$3;}
 
 source_model:	T_SOURCE_MODEL '=' value ':'
 		T_LINK ':'
-		flux_value ':'
-		angle_value ':'
+		unit_value ':'
+		unit_value ':'
 		value ':'
-		angle_value ':'
-		angle_value ':'
-		angle_value ';'
+		unit_value ':'
+		unit_value ':'
+		unit_value ';'
 		{$$=make_source_model($3,$5,$7,$9,$11,$13,$15,$17);}
 
 /* $TAPELOG_OBS block */
@@ -1347,7 +1367,7 @@ tapelog_obs_lowl:	vsn		{$$=make_lowl(T_VSN,$1);}
 			| T_COMMENT_TRAILING
 				 {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 
-vsn:		T_VSN '=' value ':' T_NAME ':' T_DATE ':' T_DATE ';'
+vsn:		T_VSN '=' value ':' T_NAME ':' T_NAME ':' T_NAME ';'
 		{$$=make_vsn($3,$5,$7,$9);}
 
 /* $TRACKS */
@@ -1374,13 +1394,12 @@ tracks_lowl:	fanin_def	{$$=make_lowl(T_FANIN_DEF,$1);}
 		| fanout_def	{$$=make_lowl(T_FANOUT_DEF,$1);}
 		| track_frame_format
 				{$$=make_lowl(T_TRACK_FRAME_FORMAT,$1);}
-		| data_modulate	{$$=make_lowl(T_DATA_MODULATE,$1);}
+		| data_modulation	{$$=make_lowl(T_DATA_MODULATION,$1);}
 		| vlba_frmtr_sys_trk
 				{$$=make_lowl(T_VLBA_FRMTR_SYS_TRK,$1);}
-		| vlba_trnsprt_sys_trak
-				{$$=make_lowl(T_VLBA_TRNSPRT_SYS_TRAK,$1);}
-		| s2_data_def	{$$=make_lowl(T_S2_DATA_DEF,$1);}
-		| s2_record_mode	{$$=make_lowl(T_S2_RECORD_MODE,$1);}
+		| vlba_trnsprt_sys_trk
+				{$$=make_lowl(T_VLBA_TRNSPRT_SYS_TRK,$1);}
+		| s2_recording_mode	{$$=make_lowl(T_S2_RECORDING_MODE,$1);}
 		| s2_data_source	{$$=make_lowl(T_S2_DATA_SOURCE,$1);}
 		| external_ref	{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT     {$$=make_lowl(T_COMMENT,$1);}
@@ -1395,7 +1414,7 @@ fanout_def:	T_FANOUT_DEF '=' T_NAME ':' bit_stream_list ':'
 
 track_frame_format:	T_TRACK_FRAME_FORMAT '=' T_NAME ';' {$$=$3;}
 
-data_modulate:		T_DATA_MODULATE '=' T_NAME ';' {$$=$3;}
+data_modulation:	T_DATA_MODULATION '=' T_NAME ';' {$$=$3;}
 
 vlba_frmtr_sys_trk:	T_VLBA_FRMTR_SYS_TRK '=' value ':' T_NAME ':'
 			value ':' value ';'
@@ -1404,88 +1423,48 @@ vlba_frmtr_sys_trk:	T_VLBA_FRMTR_SYS_TRK '=' value ':' T_NAME ':'
 			value ';'
 		{$$=make_vlba_frmtr_sys_trk($3,$5,$7,NULL);}
 
-vlba_trnsprt_sys_trak:	T_VLBA_TRNSPRT_SYS_TRAK '=' value ':' value ';'
+vlba_trnsprt_sys_trk:	T_VLBA_TRNSPRT_SYS_TRK '=' value ':' value ';'
 		{$$=add_list(add_list(NULL,$3),$5);}
 
-s2_data_def:	T_S2_DATA_DEF '=' bit_stream ':' T_NAME ';'
-		{$$=make_s2_data_def($3,$5);}
+s2_recording_mode:	T_S2_RECORDING_MODE '=' T_NAME ';' {$$=$3;}
 
-s2_record_mode:	T_S2_RECORD_MODE '=' T_NAME ':' value ':' name_list ';'
-		{$$=make_s2_record_mode($3,$5,$7);}
-
-s2_data_source:	T_S2_DATA_SOURCE '=' name_list ';' {$$=$3;}
+s2_data_source:	T_S2_DATA_SOURCE '=' T_NAME ':' T_LINK ':' T_LINK ';'
+		{$$=make_s2_data_source($3,$5,$7);}
+		| T_S2_DATA_SOURCE '=' T_NAME ';'
+		{$$=make_s2_data_source($3,NULL,NULL);}
 
 bit_stream_list:	bit_stream_list ':' T_LINK ':' T_NAME 
 					{$$=add_list(add_list($1,$3),$5);}
 			| T_LINK ':' T_NAME	
 					{$$=add_list(add_list(NULL,$1),$3);}
 
-bit_stream:	T_LINK ':' T_NAME	{$$=add_list(add_list(NULL,$1),$3);}
-
 /* utility rules */
 
 external_ref:	T_REF T_NAME ':' primitive '=' T_NAME ';'
 						{$$=make_external($2,$4,$6);}
-		| T_REF T_NAME ':' B_CLOCK '=' T_NAME ';'
-					{$$=make_external($2,B_CLOCK,$6);}
 
 literal:	T_LITERAL ';'		{$$=$1;}
 
-time_list:	time_value ':' time_more	{$$=ins_list($1,$3);}
-		| time_value			{$$=add_list(NULL,$1);}
+unit_list:	unit_value ':' unit_more	{$$=ins_list($1,$3);}
+		| unit_value			{$$=add_list(NULL,$1);}
 
-time_more:	time_more ':' time_option	{$$=add_list($1,$3);}
-		| time_option			{$$=add_list(NULL,$1);}
+unit_more:	unit_more ':' unit_option	{$$=add_list($1,$3);}
+		| unit_option			{$$=add_list(NULL,$1);}
 
-time_option:	time_value			{$$=$1;}
-		| value				{$$=$1;}
+unit_option:	unit_value			{$$=$1;}
+		| value				
 
-time_value:	T_DOUBLE T_TIME_UNITS		{$$=make_dvalue($1,$2);}
-
-angle_list:	angle_value ':' angle_more 	{$$=ins_list($1,$3);}
-		| angle_value			{$$=add_list(NULL,$1);}
-
-angle_more:	angle_more ':' angle_option	{$$=add_list($1,$3);}
-		| angle_option			{$$=add_list(NULL,$1);}
-
-angle_option:	angle_value			{$$=$1;}
-		| value				{$$=$1;}
-
-angle_value:	T_DOUBLE T_ANGLE_UNITS		{$$=make_dvalue($1,$2);}
-
-
-length_list:	length_value ':' length_more	{$$=ins_list($1,$3);}
-		| length_value			{$$=add_list(NULL,$1);}
-
-length_more:	length_more ':' length_option	{$$=add_list($1,$3);}
-		| length_option			{$$=add_list(NULL,$1);}
-
-length_option:	length_value			{$$=$1;}
-		| value				{$$=$1;}
-
-length_value:	T_DOUBLE T_LENGTH_UNITS		{$$=make_dvalue($1,$2);}
+unit_value:	T_NAME T_NAME		{$$=make_dvalue($1,$2);}
 
 name_list:	name_list ':' name_value	{$$=add_list($1,$3);}
 		| name_value			{$$=add_list(NULL,$1);}
 
-name_value:	T_NAME				{$$=$1;}
-
-freq_value:	T_DOUBLE T_FREQ_UNITS 		{$$=make_dvalue($1,$2);}
+name_value:	T_NAME				
 
 value_list:	value_list ':' value		{$$=add_list($1,$3);}
 		| value				{$$=add_list(NULL,$1);}
 
-value:		T_DOUBLE			{$$=make_dvalue($1,NULL);}
-
-flux_value:	T_DOUBLE T_FLUX_UNITS		{$$=make_dvalue($1,$2);}
-
-angle_rate_value:	T_DOUBLE T_ANGLE_RATE_UNITS
-						{$$=make_dvalue($1,$2);}
-
-sample_rate_value:	T_DOUBLE T_SAMPLE_RATE_UNITS
-						{$$=make_dvalue($1,$2);}
-velocity_value:		T_DOUBLE T_VELOCITY_UNITS
-						{$$=make_dvalue($1,$2);}
+value:		T_NAME			{$$=make_dvalue($1,NULL);}
 
 %%
 

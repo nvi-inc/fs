@@ -914,6 +914,15 @@ doublereal *double__;
     { NULL  , 0.0 },
   };
 
+  static struct {
+    char *str;
+    double factor;
+  } bit_density[] = {
+    {  "bpi", 1.0 },
+    { "kbpi", 1e3 },
+    { NULL  , 0.0 },
+  };
+  
   if(1!=sscanf(*field,"%lf",double__))
     return -7;
 
@@ -924,6 +933,7 @@ doublereal *double__;
   LOOKUP(found,*units,length,factor);
   LOOKUP(found,*units,angle,factor);
   LOOKUP(found,*units,flux,factor);
+  LOOKUP(found,*units,bit_density,factor);
   if(found) {
     *double__*=factor;
     return 0;

@@ -130,7 +130,7 @@ get_scan_station(Llist **lowls_scan, char *station_in,
 lstart:
   /* find a def */
 
-  defs=find_next_def(defs);
+  defs=find_next_scan(defs);
 
   if (defs==NULL)
     goto ldone;
@@ -848,6 +848,21 @@ find_next_def(Llist *defs)
 
   if(defs!=NULL && defs->ptr==NULL) {
     fprintf(stderr,"mislinkage in find_next_def\n");
+    exit(1);
+  }
+
+   return defs;
+}
+/*---------------------------------------------------------------------------*/
+Llist *
+find_next_scan(Llist *defs)
+{
+  while(defs!=NULL && defs->ptr!=NULL
+	&& ((Lowl *)defs->ptr)->statement != T_SCAN)
+    defs=defs->next;
+
+  if(defs!=NULL && defs->ptr==NULL) {
+    fprintf(stderr,"mislinkage in find_next_scan\n");
     exit(1);
   }
 
