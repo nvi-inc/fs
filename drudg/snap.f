@@ -7,6 +7,7 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 C INPUT
       character*(*) cr1,cr2,cr3,cr4  ! Responses to three prompts for
 C          1) epoch 1950 or 2000
@@ -20,7 +21,7 @@ C     TSPINS - time, in seconds, to spin tape
       integer*2 IBUF2(ibuf_len),ibuf_save(5)
       integer*2 lmodep,ldirp,lspdir,lds,lfreq,lspd(4)
       integer itrax(2,2,max_chan) ! fanned-out version of itras
-      integer iblen,i,ilen,iobs,iobsp,icheck,icheckp,
+      integer iblen,i,ilen,iobss,iobs,iobsp,icheck,icheckp,
      .ipasp,iftold,kerr,ical,iyr,idayr,ihr,imin,isc,nstnsk,
      .mjd,mon,ida,isor,istnsk,icod,idir,id,iyr2,ierr,ix,idayr2,
      .ihr2,min2,isc2,iyr3,idayr3,ihr3,min3,isc3,iyr5,idayr5,ihr5,
@@ -32,7 +33,7 @@ C     TSPINS - time, in seconds, to spin tape
      .          LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
       integer npmode,itrk(36),nco
-      integer*2 lpmode(2),lfan(2)
+      integer*2 lpmode(2)
       real*8 UT,GST
       real*8 SORRA,SORDEC
       real*4 az,el,x30,y30,x85,y85,ha1,dc
@@ -53,6 +54,8 @@ C     IYR3,IHR3, etc. - start time minus cal time
 C     IYR4,IHR4, etc. - previous stop time + spin + check
 C     IYR5,IHR5, etc. - start time minus early
 C     IOBSP - number of obs. this pass
+C     IOBS - number of obs in the schedule
+C     iobss - number of obs for this station
       character*7 cwrap ! cable wrap from CBINF
       integer*2 lwrap(4)
       real*4 spd
@@ -260,8 +263,12 @@ C
 C
 C     2. Initialize counts.  Begin loop on schedule file records.
 C
-      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+      call ifill(ibuf,1,ibuf_len*2,oblank)
+      idum = ichmv(ibuf,1,lskobs(1,1),1,ibuf_len*2)
+      ilen = iflch(ibuf,ibuf_len*2)
       IOBS = -1
+      iobss=-1
       IOBSP = 0
       icheck=0
       icheckp=0
@@ -283,6 +290,7 @@ C
         IF (IOBS.EQ.-1)   THEN
           call snapintr(1,iyr)
           IOBS = 0
+          iobss=0
         END IF
         IF (ISTNSK.NE.0)  THEN
           IDIR = +1
@@ -432,7 +440,7 @@ C         END IF
           call char2hol('F',LSPDIR,1,1)
           IF (IFT(ISTNSK).LT.IFTOLD) call char2hol('R',LSPDIR,1,1)
 C
-          IF (KNEWTP.AND.IOBS.NE.0) THEN !get rid of old tape
+          IF (KNEWTP.AND.IOBSs.NE.0) THEN !get rid of old tape
             IF (JCHAR(LMODEP,1).EQ.Z41.AND.MAXPAS(ISTN).EQ.1) THEN
 C              !rewind mode A tape
               CALL IFILL(IBUF2,1,iblen,32)
@@ -466,10 +474,11 @@ C
           END IF !get rid of old tape
 C
           ICHK = 0
-          IF ((.NOT.KNEWTP).AND.(IOBS.GT.0)) THEN !check procedure
+          IF ((.NOT.KNEWTP).AND.(IOBSs.GT.0)) THEN !check procedure
             ICHK = 1
-                IF (KFLG(2).and.((iobsp.eq.2.or.icheckp.eq.1)
-     .          .or.MAXCHK.eq.'Y')) THEN !do a check
+                IF ((KFLG(2).and.(iobsp.eq.2.or.icheckp.eq.1))
+     .          .or.ALLCHK.eq.'Y'
+     .          .or.MAXCHK.eq.'Y') THEN !do a check
 C            Do check if flag is set, but only if there is enough time.
 C            Do check if MAXCHK and if there is enough time.
 C            Check against start-early for non-zero early,
@@ -512,14 +521,14 @@ C             Always check at 120 speed
             ENDIF !do the check
           END IF !check procedure
 C
-310       IF (IOBS.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
+310       IF (IOBSs.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
      .        .OR.ICHK.EQ.1) THEN
 C           THEN BEGIN "set-up procedure"
             CALL IFILL(IBUF2,1,iblen,32)
             nco=iflch(lfreq,2)
             nch = ICHMV(IBUF2,1,LFREQ,1,nco)
           call trkall(itras(1,1,1,ipas(istnsk),istn,icod),
-     .    lmode(1,istn,icod),itrk,lpmode,npmode,lfan,itrax)
+     .    lmode(1,istn,icod),itrk,lpmode,npmode,ifan(istn,icod),itrax)
             CALL M3INF(ICOD,SPDIPS,ISP)
 C choices in LBNAME are D,8,4,2,1,H,Q,E
           NCH=ICHMV(ibuf2,NCH,LBNAME,isp,1)
@@ -696,10 +705,10 @@ C                   End recording
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
           call inc(LU_OUTFILE,KERR)
 C                     Wait for the tape to stop and send tape monitor command
-          IOBS = IOBS + 1
           LMODEP = LMODE(1,istn,ICOD)
           IPASP = IPAS(ISTNSK)
           icheckp=icheck
+          IOBSs = IOBSs + 1
           LDIRP = LDIR(ISTNSK)
           IDIR=+1
           IF (LDIR(ISTNSK).EQ.hrb) IDIR=-1
@@ -720,7 +729,15 @@ C POSTOB
 C         ENDT "process this observation"
         END IF  !"istnsk.ne.0"
 C
-801     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C801     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+801   call ifill(ibuf,1,ibuf_len*2,oblank)
+          IOBS = IOBS + 1
+      if (iobs+1.le.nobs) then
+        idum = ichmv(ibuf,1,lskobs(1,iobs+1),1,ibuf_len*2)
+        ilen = iflch(ibuf,ibuf_len*2) 
+      else
+        ilen=-1
+      endif
         IF (ichcm_ch(LPRE,1,'MARK2').EQ.0) GOTO 801
 C            Skip this one if it's a MARK II run
 C            ENDW "Schedule file entries"
