@@ -105,7 +105,8 @@ C
       if (ierr.eq.2) then
         imix = 2             !default out
       else if (ierr.eq.1) then
-        imix = imixif3_fs
+         call fs_get_imixif3(imixif3)
+        imix = imixif3
       else
         call iif3ed(1,imix,ibuf,ic1,ich-2)
         if (imix.lt.0) then
@@ -148,7 +149,8 @@ C
       icheck(21)=0
       call fs_set_icheck(icheck(21),21)
       iatif3_fs = iat
-      imixif3_fs = imix
+      imixif3 = imix
+      call fs_set_imixif3(imixif3)
       do i=1,4
         iswif3_fs(i)=isw(i)
       enddo
