@@ -66,6 +66,12 @@ void cshm_init()
   shm_addr->actual.s2rec[0].position_valid=FALSE;
   shm_addr->actual.s2rec_inuse=0;
 
+  shm_addr->form4.enable[0]=0;
+  shm_addr->form4.enable[1]=0;
+
+  for(i=0; i<64; i++)
+    shm_addr->form4.codes[i]=-1;
+
   return;
 }
 
