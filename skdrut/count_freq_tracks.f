@@ -6,6 +6,11 @@ C   COMMON BLOCKS USED
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
 
+! History
+!  V1.00  2004Sep22, first version.
+!  V1.01  2004Oct04, modified to include effect of fanout.
+!
+
 ! functions
       integer itras
       integer iwhere_in_string_list
@@ -14,7 +19,6 @@ C   COMMON BLOCKS USED
       character*2 cbnd(2)
       integer nbnd
       integer luscn
-
 C
 C  LOCAL VARIABLES
       integer ierr,ip,ic,i,iv,is,isub,iul
@@ -77,10 +81,11 @@ C                 Add another 0.978 for magnitude bit
             endif
           enddo
 ! Issue warning.
-          itrk_tot=ntrkn(1,is,ic)+ntrkn(2,is,ic)
+          itrk_tot=(ntrkn(1,is,ic)+ntrkn(2,is,ic))*ifan(is,ic)
           if(itrk_tot .ne. 0) then
             if(cbarrel(is,ic) .ne. "NONE") then
-              if(itrk_tot .ne. 8 .and. itrk_tot .ne. 16) then
+              if(itrk_tot .ne. 8 .and. itrk_tot .ne. 16 .and.
+     >           itrk_tot .ne. 32) then
                 write(*,*)
      >             " Warning!!!  Barrel roll ",cbarrel(is,ic),
      >             " is not allowed for ", cstnna(is)

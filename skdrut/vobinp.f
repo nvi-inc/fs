@@ -47,19 +47,24 @@ C  LOCAL:
 
       character*128 ldata_transfer_method
       integer ixfer_cnt
+      integer istat
 
       integer itemp
       integer nch
 ! 0. Initialize data transfer info.
       ixfer_cnt=0
-      do istn=1,max_stn
-        kxfer_stat(istn)=.false.        !set all stations to no data-transfer.
-      end do
 
       Kin2Net_2_Disk2File=.false.
       kDisk2File_2_in2net=.false.
-      knodatatransfer=.false.
+      kno_data_xfer=.false.
       ldestin_in2net=" "
+      lglobal_in2net =" "
+
+      do i=1,max_stn
+        lstat_first_in2net(i)=" "
+        kstat_in2net(i)=.false.
+        kstat_disk2file(i)=.false.
+      end do
 
 C 1. Get scans one by one.
 
@@ -217,13 +222,13 @@ C  Make the new scan if this is the first source.
 ! Check to see if a valid station.
 ! Should check to see if this station is in this scan?
           il = fvex_len(cout)
-          ixfer_stat(ixfer_cnt)=ivgtst(cout,istn)
-          kxfer_stat(ixfer_stat(ixfer_cnt))=.true.       !indicate at least one datatransfer
+          istat= ivgtst(cout,istn)
 
-          if(ixfer_stat(ixfer_cnt) .le. 0) then
+          if(istat .le. 0) then
             write(lu,*) "VOBINP14 - Station ",cout(1:il)," not found!"
             return
           endif
+          ixfer_stat(ixfer_cnt)=istat
 !
           iret = fvex_field(2,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -231,8 +236,10 @@ C  Make the new scan if this is the first source.
           call capitalize(ldata_transfer_method)
           if(ldata_transfer_method.eq."IN2NET") then
             ixfer_method(ixfer_cnt)=ixfer_in2net
+            kstat_in2net(istat)=.true.
           else if(ldata_transfer_method.eq."DISK2FILE") then
             ixfer_method(ixfer_cnt)=ixfer_disk2file
+            kstat_disk2file(istat)=.true.
           else
             write(lu,*) "VOBINP: Unknown data transfer type!"
             return
@@ -245,6 +252,10 @@ C  Make the new scan if this is the first source.
             lxfer_destination(ixfer_cnt)=" "
           else
             lxfer_destination(ixfer_cnt)=cout(1:nch)
+            if(ixfer_method(ixfer_cnt) .eq. ixfer_in2net .and.
+     >         lstat_first_in2net(istn) .eq. " ") then
+               lstat_first_in2net(istn)= lxfer_destination(ixfer_cnt)
+            endif
           endif
 
           iret = fvex_field(4,ptr_ch(cout),len(cout))
@@ -254,16 +265,16 @@ C  Make the new scan if this is the first source.
           if(iret .eq. 0) then
              xfer_beg_time(ixfer_cnt)=d
           else
-             xfer_beg_time(ixfer_cnt)=0.
+             xfer_beg_time(ixfer_cnt)=idend
           endif
 
           iret = fvex_field(5,ptr_ch(cout),len(cout))
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if(iret .eq. 0) then
-             xfer_end_time(ixfer_cnt)=d 
+             xfer_end_time(ixfer_cnt)=d
           else
-             xfer_end_time(ixfer_cnt)=idend
+             xfer_end_time(ixfer_cnt)=0.0
           endif
 
           iret = fvex_field(6,ptr_ch(cout),len(cout))

@@ -116,7 +116,11 @@ C            ITEARL always. KNEWT was modified to allow more buffer,
 C            but this will not always work. Calculation of IFTOLD is not
 C            correct.
 C 000705 nrv Use standard KNEWT for S2 also.
-C
+! 2004Sep??  JMGipson Added support for dymo printer.
+! 2004Oct19  JMGipson.  Fixed problem if you were printing out several experiments in a row.
+!
+!
+!
 
 C 1. First get set up with schedule or SNAP file.
 
@@ -483,7 +487,7 @@ C         NOB(NOUT) = NOB(NOUT)+1
 
 900   continue
       if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
-        ierr=cclose(fileptr)
+!        ierr=cclose(fileptr)
       else
         IF (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
      .        .or.cprttyp.eq.'FILE') THEN !close laser printer

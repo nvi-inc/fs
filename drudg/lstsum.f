@@ -122,6 +122,7 @@ C Local:
       INTEGER IC
       integer nline,num_tapes,npage,maxline,iline,
      >  inewp,ne,nm,l,ifdur,id,ieq,idif
+      real dif
 
       logical kvalidtime                !valid time read?
 
@@ -447,8 +448,11 @@ C       Now get the source info for the new scan
           call snap_readTime(ctmp,itime_temp,kvalidtime)
           if(kvalidtime) then
             if(krunning) then   !if recorder is going, update count.
-              idif = itimedifsec(itime_temp,itime_now)
-              counter_now=counter_now+idif*idir*speed_recorder
+              dif = itimedifsec(itime_temp,itime_now)
+! if mark5, should subtract 0.9 seconds from idif.
+!              counter_now=counter_now+(dif-0.9)*idir*speed_recorder
+              counter_now=counter_now+dif*idir*speed_recorder
+
             endif
             if (counter_now.lt.0) then
               counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))

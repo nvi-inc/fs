@@ -1,9 +1,17 @@
 ! Common array that holds different track assignments.
-      integer max_val,num_val
-      parameter(max_val=40000)   !way big.
-      integer*4 iroll_Def_indvec(Max_val)
-      integer*2 iroll_defvec(max_val)  !last is value
+! This is modified to make things faster (presumably)
+!
+      include "../skdrincl/skparm.ftni"  !need for max_frq,max_stn
 
-      common /iroll_def_cmn/num_val,iroll_def_indvec,iroll_defvec
+      integer max_rolls,num_rolls
+      parameter (max_rolls=64)          !how many distinct barrell rolls?
+      integer nbrl_steps(max_rolls)
+      integer nbrl_defs(max_rolls)
+      integer iroll_type(max_stn,max_frq)
+
+      integer ibrl_roll(18,32,max_rolls)  !
+
+      common /iroll_def_cmn/num_rolls,nbrl_steps,nbrl_defs,iroll_type,
+     >  ibrl_roll
 
       

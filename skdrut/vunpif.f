@@ -19,7 +19,7 @@ C 970124 nrv Move initialization to front.
 C 971208 nrv Add phase cal spacing and base frequency. 
 C 990910 nrv Change default LO value to -1.0 meaning none.
 C 991110 nrv Allow IF type 3N to be valid.
-C 021111 jfq Allow IF types 1 through 4 to be valid.
+! 2004Oct19 JMGipson.  Removed warning message if LO was negative.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -67,8 +67,7 @@ C
       ierr = 1
 C ** this should work with fget_mode_lowl but doesn't seem to
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('if_def'//char(0)),
-     .ptr_ch('IF'//char(0)),ivexnum)
+     >  ptr_ch('if_def'//char(0)),ptr_ch('IF'//char(0)),ivexnum)
       id=0
       do while (id.lt.max_ifd.and.iret.eq.0) ! get all IF defs
         id=id+1
@@ -94,15 +93,13 @@ C  1.2 IF input
         nch = fvex_len(cout)
         if (nch.ne.1.and.nch.ne.2) then
           ierr=-2
-          write(lu,'("VUNPIFD04 - IF input must be 1 or 2 ",
-     .    "characters")')
+          write(lu,'(a)')
+     >       "VUNPIFD04 - IF input must be 1 or 2 characters"
         else
           if (cout(1:nch).eq.'1N'.or.cout(1:nch).eq.'1A'.or.
      .        cout(1:nch).eq.'2N'.or.cout(1:nch).eq.'2A'.or.
      .        cout(1:nch).eq.'3O'.or.cout(1:nch).eq.'3I'.or.
      .        cout(1:nch).eq.'3N'.or.
-     .        cout(1:nch).eq.'1'.or.cout(1:nch).eq.'2'.or.
-     .        cout(1:nch).eq.'3'.or.cout(1:nch).eq.'4'.or.
      .        cout(1:nch).eq.'A'.or.cout(1:nch).eq.'B'.or.
      .        cout(1:nch).eq.'C'.or.cout(1:nch).eq.'D') then
             idum = ichmv_ch(lin(id),1,cout(1:nch))
@@ -146,8 +143,8 @@ C  1.4 LO frequency
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
         if (iret.ne.0.or.d.lt.0.d0) then
-          ierr=-4
-          write(lu,'("VUNPIFD02 - Invalid LO frequency",d10.2)') d
+!          ierr=-4
+!          write(lu,'("VUNPIFD02 - Invalid LO frequency",d10.2)') d
         else
           flo(id) = d/1.d6
         endif

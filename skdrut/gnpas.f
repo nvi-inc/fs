@@ -222,12 +222,11 @@ C 3. Check for LOs present and issue warning if not.
           kmiss=.false.
           do ix=1,nchan(is,ic)
             nvc=invcx(ix,is,ic)
-            if (freqlo(nvc,is,ic).lt.0.0.or.
-     .      ichcm_ch(lifinp(nvc,is,ic),1,'  ').eq.0) kmiss=.true.
+            if ( cifinp(nvc,is,ic) .eq. "  ") kmiss=.true.
+!            freqlo(nvc,is,ic).lt.0.0.or.
           enddo
-          if (kmiss) write(luscn,9906) lcode(ic),cstnna(is)
-9906      format('GNPAS06 - Warning: ',a2,' LO information missing ',
-     .    'for ',a)
+          if (kmiss) write(luscn,9906) ccode(ic),cstnna(is)
+9906     format('GNPAS06: Warning: ',a,' LO information missing for ',a)
           endif ! defined
         enddo
       enddo

@@ -28,7 +28,7 @@ long ip[5];                       /* ipc parameters */
 	   shm_addr->equip.drive_type[0]==K42)){
 	ip[0]=ip[1]=0;
 	return;
-      } else if(command->equal != '=' ) {
+      } else if(command->equal != '=' ||command->argv[0]==NULL) {
         ierr=-301;
         goto error1;
       }
@@ -36,10 +36,11 @@ long ip[5];                       /* ipc parameters */
       i=0;
       tpnum=command->argv[0];
 
-      while(*tpnum != '\0'){
-        tape[i] = *tpnum;
-        i++; tpnum++;
-      }
+      if(tpnum!=NULL)
+	while(*tpnum != '\0'){
+	  tape[i] = *tpnum;
+	  i++; tpnum++;
+	}
       tape[i] = '\0';
 
 /* This is the 'MOVE' command */

@@ -36,7 +36,8 @@ OBJECTS=\
 lyes_no.o istringminmatch.o itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
 capitalize.o lowercase.o  ifill4.o xyz2latlon.o iwhere_in_string_list.o mpstar_rad.o \
 count_freq_tracks.o \
-readline.o iroll_def.o itras.o getiauname.o ckiau.o extractnexttoken.o  \
+readline.o iroll_def.o itras.o getiauname.o ckiau.o \
+splitntokens.o  extractnexttoken.o  \
 sktime.o \
 aposn.o axtyp.o backward.o cablw.o ckiau.o clear_array.o clndr.o\
 cvpos.o flinp.o forward.o frinp.o gnpas.o hdinp.o hol2lower.o\

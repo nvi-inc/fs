@@ -371,13 +371,10 @@ C 6. This section for the barrel roll line.
               if (ir.eq.1.or.ir.eq.2) then ! fill roll table
                 iroll_inc_period(i,icode) = ircan_inc(ir)
                 iroll_reinit_period(i,icode) = ircan_reinit(ir)
-                nrolldefs(i,icode) = nrcan_defs(ir)
+                nrolldefs(i,icode)  = nrcan_defs(ir)
                 nrollsteps(i,icode) = nrcan_steps(ir)
-                do iu=1,nrcan_defs(ir)
-                  do it=1,2+nrcan_steps(ir)
-                    call set_iroll_def(it,iu,i,icode,icantrk(it,iu,ir))
-                  enddo
-                enddo
+                call init_roll_type(is,icode,nrcan_defs(ir),
+     >              nrcan_steps(ir),icantrk(1,1,ir))
               endif ! fill roll table
             endif ! save it
           enddo ! each station name found on the line

@@ -1,8 +1,6 @@
       integer function iroll_def(istep,idef,istn,icode)
 
       include '../skdrincl/iroll_def_cmn.ftni'
-! function
-      integer*4 ind_iroll_def
 
 ! passed variables.
       integer istep
@@ -11,87 +9,76 @@
       integer istn
 
 ! local
-      integer i
-      integer*4 ind
+      if(iroll_type(istn,icode) .eq. 0) then
+        iroll_def=-99
+      else
+        iroll_def=ibrl_roll(istep,idef,iroll_type(istn,icode))
+      endif
 
-      ind=iroll_def_ind(istep,idef,istn,icode)
-
-      do i=1,num_val
-        if(ind .eq. iroll_def_indvec(i)) then
-            iroll_def=iroll_defvec(i)
-            return
-         endif
-      end do
-      iroll_def=-99
       return
       end
-! ***********************************************************************
-      integer function iroll_def_size()
-      include '../skdrincl/iroll_def_cmn.ftni'
-      iroll_def_size=num_val
-      return
-      end
-! **********************************************************************
-      integer*4 function iroll_def_ind(istep,idef,istn,icode)
-
-      include '../skdrincl/skparm.ftni'
-! dimensions of array are (2+max_track)*(max_track*max_head)*(max_stn)*max_frq
-
-      integer istep,idef,istn,icode
-      iroll_def_ind =              istep-1  +
-     >               (2+max_track)*(idef-1  +
-     >   (max_track*max_headstack)*(istn-1  +
-     >              max_stn       *(icode-1)))
-      return
-      end
-
 ! *********************************************************
       subroutine init_iroll_def()
       include '../skdrincl/iroll_def_cmn.ftni'
+      integer istn,icode
+      num_rolls=0
 
-      num_val=0
+      do istn=1,max_stn
+      do icode=1,max_frq
+         iroll_type(istn,icode)=0
+      end do
+      end do
+
       return
       end
-
-! *********************************************************
-      subroutine set_iroll_def(istep,idef,istn,icode,ivalue)
-
+! ************************************************************
+      subroutine init_roll_type(istn,icode,ndefs,nsteps,irtrk)
       include '../skdrincl/iroll_def_cmn.ftni'
-! function
-      integer*4 ind_iroll_def
-! passed variables.
-      integer istep
-      integer idef
-      integer icode
-      integer istn
-      integer ivalue
+
+! passed
+      integer istn,icode,ndefs,nsteps
+      integer irtrk(2+max_track,max_roll_def)
 
 ! local
-      integer i
-      integer*4 ind
+      integer iroll
+      integer i,j
 
-      ind=iroll_def_ind(istep,idef,istn,icode)
-
-      do i=1,num_val
-        if(ind .eq. iroll_def_indvec(i)) then
-           goto 100
+! see if matches any of the previous rolls.
+      do iroll=1,num_rolls
+        if(ndefs  .eq. nbrl_defs(iroll) .and.
+     >     nsteps .eq. nbrl_steps(iroll)) then
+! Possible match. See if all the entries match!
+          do i=1,ndefs
+            do j=1,2+nsteps
+              if (irtrk(j,i).ne.ibrl_roll(j,i,iroll)) goto 100
+            end do
+          end do
+          iroll_type(istn,icode)=iroll
+          return
         endif
+100     continue                   !no match for this roll type.
       end do
-! Not found. Add a new entry.
-      if(num_val .eq. Max_val) then
-        write(*,*) "************WARNING********************"
-        write(*,*) "Tried to allocate more than ",max_val
-        write(*,*) "Change Max_val in iroll_def_cmn.ftni and recompile."
-        stop
-      endif
 
-! didn't find a match. update table.
-      num_val=num_val+1
-100   continue
-      iroll_def_indvec(i)=ind
-      iroll_defvec(i) =ivalue
-      if(mod(i,100) .eq. 1) then
-!      write(*,*) "iroll_def num_val: ",num_val
-      endif
+! No match for any of the roll types. Must be a new type.
+500   continue
+      if(num_rolls .eq. max_rolls) then
+        write(*,*)
+     >    "Init_roll_type: Exhausted number of allowed barrel rolls!"
+        write(*,*) "Current maximum is: ", max_rolls
+        write(*,*)
+     >    "Change max_rolls in skdrincl/iroll_def_cmn.ftni"
+        stop
+       endif
+
+      num_rolls=num_rolls+1
+      iroll_type(istn,icode)=num_rolls
+
+      nbrl_defs(num_rolls)=ndefs
+      nbrl_steps(num_rolls)=nsteps
+      do i=1,ndefs
+        do j=1,2+nsteps
+            ibrl_roll(j,i,num_rolls)=irtrk(j,i)
+        end do
+      end do
       return
       end
