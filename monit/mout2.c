@@ -16,11 +16,14 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-static char *key_mode[ ]={ "prn", "a"  , "b"  , "c"  ,
-                          "d1" , "d2" , "d3" , "d4" , "d5" , "d6" , "d7" ,
-                          "d8" , "d9" , "d10", "d11", "d12", "d13", "d14",
-                          "d15", "d16", "d17", "d18", "d19", "d20", "d21",
-                          "d22", "d23", "d24", "d25", "d26", "d27", "d28" };
+                                             /* parameter keywords */
+static char *key_mode[ ]={ "prn", "v"  , "m"  , "a"  , "b"  , "c"  ,
+			   "b1" , "b2" , "c1" , "c2" ,
+                           "d1" , "d2" , "d3" , "d4" , "d5" , "d6" , "d7" ,
+                           "d8" , "d9" , "d10", "d11", "d12", "d13", "d14",
+                           "d15", "d16", "d17", "d18", "d19", "d20", "d21",
+                           "d22", "d23", "d24", "d25", "d26", "d27", "d28"};
+#define NKEY_MODE sizeof(key_mode)/sizeof( char *)
 
 extern struct fscom *shm_addr;
 
@@ -159,19 +162,19 @@ int iyear;
   if (kMrack) {
     switch (shm_addr->imodfm) {
     case 0:
-      printw(" a");
+      printw(" a ");
       break;
     case 1:
-      printw(" b");
+      printw(" b ");
       break;
     case 2:
-      printw(" c");
+      printw(" c ");
       break;
     case 3:
-      printw(" d");
+      printw("d  ");
       break;
     default:
-      printw("  ");
+      printw("   ");
     }
   }
   else {
@@ -179,16 +182,8 @@ int iyear;
 /* hex value for version 290 */
     if (shm_addr->form_version < 656) iversion = 0x7000;
     else iversion = 0x0002;
-    if(ivalue<=0 && shm_addr->vform.format == 0x0003 &&
-          shm_addr->vform.enable.low    == 0xFFFF &&
-          shm_addr->vform.enable.high   == 0xFFFF &&
-          shm_addr->vform.enable.system == 0x000F)
-      printw("%s",key_mode[0]);
-    else if (ivalue  > 0 && shm_addr->vform.format == iversion &&
-          shm_addr->vform.enable.low    == 0x7FFE &&
-          shm_addr->vform.enable.high   == 0x7FFE &&
-          shm_addr->vform.enable.system == 0x0000 )
-      printw("%s",key_mode[ivalue]);
+    if(ivalue >= 0 && ivalue <= NKEY_MODE)
+      printw("%-3s",key_mode[ivalue]);
     else
       printw("  ");
   }
@@ -245,6 +240,12 @@ int iyear;
     case 5:
       printw("8.000");
       break;
+    case 6:
+      printw("16.00");
+      break;
+    case 7:
+      printw("32.00");
+      break;
     default:
       printw("     ");
       break;
@@ -259,23 +260,25 @@ int iyear;
     printw("  3");
     break;
   case 2:
-    printw("  7");
+    printw("  8");
     break;
   case 3:
-    printw(" 15");
+    printw(" 17");
     break;
   case 4:
-    printw(" 30");
+    printw(" 34");
     break;
   case 5:
-    printw(" 60");
+    printw(" 68");
     break;
   case 6:
-    printw("120");
+    printw("135");
     break;
   case 7:
-    printw("240");
+    printw("270");
     break;
+  case -3:
+    printw("%3d",shm_addr->cips/100);
   default:
     printw("  0");
   }
