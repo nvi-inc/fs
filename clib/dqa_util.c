@@ -92,29 +92,37 @@ float rate;
         output[strlen(output)-1]='\0';
         break;
       case 5:
-        flt2str(output,lcl->a.amp,-4,1);
+        flt2str(output,(lcl->a.nosync*8e6)/(dur*rate),7,0);
+        output[strlen(output)-1]='\0';
         break;
       case 6:
+        flt2str(output,lcl->a.amp,-4,1);
+        break;
+      case 7:
         flt2str(output,lcl->a.phase*180.0/M_PI,-6,0);
         output[strlen(output)-1]='\0';
         break;
-      case 7:
+      case 8:
 	sprintf(output,"%4s",code2bs(lcl->b.bbc,type));
         break;
-      case 8:
+      case 9:
         sprintf(output,"%2.2d",lcl->b.track);
         break;
-      case 9:
+      case 10:
         flt2str(output,(lcl->b.parity*8e6)/(dur*rate),7,0);
         break;
-      case 10:
+      case 11:
         flt2str(output,(lcl->b.resync*8e6)/(dur*rate),7,0);
         output[strlen(output)-1]='\0';
         break;
-      case 11:
+      case 12:
+        flt2str(output,(lcl->b.nosync*8e6)/(dur*rate),7,0);
+        output[strlen(output)-1]='\0';
+        break;
+      case 13:
         flt2str(output,lcl->b.amp,-4,1);
         break;
-      case 12:
+      case 14:
         flt2str(output,lcl->b.phase*180.0/M_PI,-6,0);
         output[strlen(output)-1]='\0';
         break;
