@@ -18,19 +18,19 @@ C
       call scmd(ibuf,0,ic/2,ierr)
       if (ierr.ne.0) return
 C
-C  GIVE THE FIELD SYSTEM UPTO 1 MINUTE TO GET THE PROGRAM GOING
+C  GIVE THE FIELD SYSTEM UPTO 10 seconds TO GET THE PROGRAM GOING
 C
       call fc_rte_time(it,idum)
-      tim=float(it(4))*60.0+float(it(3))+float(it(2))/60.0
+      tim=it(3)*60.0+float(it(2))+it(1)*0.01
 C
 5     continue
       if(kbreak('aquir')) goto 100
-      call susp(2,2)
       if(rn_test(prog(1:5))) goto 9
       call fc_rte_time(it,idum)
-      tim2=float(it(4))*60.0+float(it(3))+float(it(2))/60.0
-      if (tim2.lt.tim) tim2=tim2+1440.
-      if (tim2.gt.tim+1.0) goto 600
+      tim2=it(3)*60.0+float(it(2))+it(1)*0.01
+      if (tim2.lt.tim) tim2=tim2+3600.
+      if (tim2.gt.tim+10.0) goto 600
+      call susp(1,10)
       goto 5
 C
 C  GIVE THE PROGRAM IWAIT MINUTES TO COMPLETE
