@@ -23,6 +23,8 @@ long ip[5];
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
+      kcom=kcom||shm_addr->equip.drive !=S2;
+
       if ((!kcom) && command->equal == '=') {
          logrclmsg(output,command,ip);
          return;
