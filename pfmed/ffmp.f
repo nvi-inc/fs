@@ -1,4 +1,4 @@
-      subroutine ffmp(lui,luo,ib,ichi,lproc,ldef)
+      subroutine ffmp(lui,luo,ib,ichi,lproc,ldef,ibsrt,nprc)
      
 C
 C 1.  FFMP PROGRAM SPECIFICATION
@@ -65,6 +65,9 @@ C               - file names
       integer trimlen, fnblnk
       character*40 cmessage
       logical kerr
+
+      character*12 ibsrt(1)  ! 010816 pb 
+      integer nprc,scanp,npx 
 C
 C 4.  CONSTANTS USED
 C
@@ -72,6 +75,9 @@ C 5.  INITIALIZED VARIABLES: none
 C
 C 6.  PROGRAMMER: C. Ma
 C     LAST MODIFIED: <910320.0157>
+C     010705 pb Add sorted directory list.
+C     010819 pb Mods to pass sort array. 
+c
 C# LAST COMPC'ED  870115:05:41 #
 C
 C     PROGRAM STRUCTURE
@@ -83,7 +89,7 @@ C     Exit if no procedure file active.
 1101    format(1x,"no procedure file active")
         return
       end if
-  
+ 
 C     Initialize and parse names.
       lnam1= ' '
       lnam2= ' '
@@ -118,12 +124,15 @@ C     Move second name if present.
   
 C     DL - list procedures in active procedure file.
   
-      if(ib(1:2).eq.'dl') then
+      if((ib(1:2).eq.'dl').or.(ib(1:2).eq.'ds')) then
         ix=1
+        npx = nprc
+        nprc = 1
         call f_rewind(idcb3,ierr)
         if (ierr.ne.0) goto 990
         ibcd = ' '
         len = 0
+
         do while (len.ge.0)
           call f_readstring(idcb3,ierr,ibc2,len)
           call char2low(ibc2)
@@ -136,18 +145,35 @@ C     Move name to print buffer.
             if(ix.lt.79) go to 120
 C         Print buffer and reset pointer.
             nch = trimlen(ibcd)
-            if (nch.gt.0) write(luo,2101) ibcd(:nch)
-2101                      format(1x,a)
+            if ((nch.gt.0).and.(ib(1:2).eq.'dl')) then 
+               write(luo,2101) ibcd(:nch)
+2101        format(1x,a)
+            else if ((nch.gt.0).and.(ib(1:2).eq.'ds')) then
+               nprc = scanp(ibcd,ibsrt,nprc)
+            endif
             ibcd = ' '
             ix=1
           end if
 120     end do
+
 C       Write last line.
 130     if(ix.gt.1) then
           nch = trimlen(ibcd)
-          if (nch.gt.0) write(luo,2102) ibcd(:nch)
-2102                    format(1x,a)
+          if ((nch.gt.0).and.(ib(1:2).eq.'dl')) then  
+               write(luo,2102) ibcd(:nch)
+2102           format(1x,a)
+          else if ((nch.gt.0).and.(ib(1:2).eq.'ds')) then 
+               nprc = scanp(ibcd,ibsrt,nprc)
+          endif 
         end if
+
+        if(ib(1:2).eq.'ds') then
+         call sortp(ibsrt,nprc)
+         write (luo,'("Pfmed: Displayed ",i3," procedures in ", 
+     &        "file ",a12)') nprc,lproc 
+        endif
+
+        nprc = npx
         go to 900
       end if
  
@@ -183,8 +209,8 @@ C     Output body of procedure.
 2103                    format(1x,a)
         end do
         goto 230
-226     write(lui,1105)
-1105    format(1x,"procedure cannot be found")
+226     write(lui,1105) lnam1(1:12)
+1105    format(1x,"Procedure ",a12," cannot be found")
 C     Rewind scratch file.
 230     call f_rewind(idcb3,ierr)
         if (ierr.ne.0) goto 990
@@ -245,6 +271,7 @@ C     Replace procedure file.
         call pfblk(3,lproc,lfr)
 C     Copy new version.
         call pfcop(lproc,lui,id)
+C     Reload the name buffer 
         go to 900
       end if
   
@@ -341,6 +368,7 @@ C     Replace procedure file.
           call pfblk(3,lproc,lfr)
 C     Copy new version.
           call pfcop(lproc,lui,id)
+C     Reload name buffer
           go to 900
         else
           goto 389
@@ -453,6 +481,7 @@ C     Replace file.
         call pfblk(3,lproc,lfr)
 C     Copy new version.
         call pfcop(lproc,lui,id)
+C     Reload name buffer 
         go to 900
 C     Various errors and messages.
 685     write(lui,1121)
@@ -467,8 +496,8 @@ C     Various errors and messages.
   
 C     Bad command
   
-      write(lui,1123)
-1123  format(1x,"error, bad command")
+cc      write(lui,1123)
+cc1123  format(1x,"error, bad command")
       go to 900
   
 C     FMP error condition.
