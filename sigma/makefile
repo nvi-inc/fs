@@ -8,7 +8,7 @@ LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/sigma: $(OBJECTS)
-	f77  -o ../bin/sigma $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/sigma $(OBJECTS) $(LIBES)
 	strip ../bin/sigma
 #
 sigma:

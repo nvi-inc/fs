@@ -7,7 +7,7 @@ LIBES = ../port/port.a ../fslb/fslb.a ../lnfch/lnfch.a  \
 ../rtelb/rtelb.a
 #
 ../bin/matcn: $(OBJECTS)
-	f77  -o ../bin/matcn $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/matcn $(OBJECTS) $(LIBES)
 	strip ../bin/matcn
 #
 matcn:

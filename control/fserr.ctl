@@ -788,8 +788,14 @@ Number of entries from IBAD control file exceed table limit of ?WWW
 IB -201
 GPIB error condition ?WWW
 ""
+IB -202
+Internal error, board name length invalid in opbrd, ?W
+""
+IB -203
+Internal error, device name length invalid in opdev, ?W
+""
 IB -300
-GPIB(edvr) unix error, see above message, ?W
+GPIB(edvr) unix error, see message above, ?W
 ""
 IB -301
 GPIB(ecic) function requires GPIB board to be CIC, ?W
@@ -841,6 +847,108 @@ GPIB(ibufln) the returned data string is longer then expected.
 ""
 IB -322
 GPIB driver not installed
+""
+IB -400
+GPIB/232 converter serial error, see message above, ?W
+""
+IB -401
+GPIB(ecic) function requires GPIB board to be CIC, ?W
+""
+IB -402
+GPIB(enol) write handshake error, CHECK instrument and cable, ?W
+""
+IB -403
+GPIB(eadr) GPIB board not addressed correctly, ?W
+""
+IB -404
+GPIB(earg) invalid argument to function call, ?W
+""
+IB -405
+GPIB(esac) GPIB board not system controller as required, ?W
+""
+IB -406
+GPIB(eabo) I/O operation aborted, ?W
+""
+IB -411
+GPIB(ecap) no capability for type of operation, ?W
+""
+IB -414
+GPIB(ebus) GPIB bus error, ?W
+""
+IB -415
+GPIB(ecmd) unrecognized command, ?W
+""
+IB -420
+Error decoding device ID in opdev. Check ibad.ctl.
+""
+IB -501
+Internal error in portopen, device name length illegal, ?W
+""
+IB -502
+Internal error in portopen, open failed, see message above, ?W
+""
+IB -503
+Internal error in portopen, TCGETA failed, see message above, ?W
+""
+IB -504
+Internal error in portopen, invalid stop bits, ?W
+""
+IB -505
+Internal error in portopen, invalid data bits, ?W
+""
+IB -506
+Internal error in portopen, invalid parity, ?W
+""
+IB -507
+Internal error in portopen, invalid BAUD, ?W
+""
+IB -508
+Internal error in portopen, TCSETA or DIGI_SETAW failed, see message above,?W
+""
+IB -509
+Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+""
+IB -510
+Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+""
+IB -521
+Internal error in sib, portflush failed, see message above, ?W
+""
+IB -522
+Internal error in sib, portwrite failed, see message above, ?W
+""
+IB -523
+Internal error in sib, portread buffer had no extent, ?W
+""
+IB -524
+GPIB/232 converter timed out, ?W
+""
+IB -525
+Error reading GPIB/232 converter, see message above ?W
+""
+IB -526
+Error decoding GPIB/232 ibsta, ?W
+""
+IB -527
+Error decoding GPIB/232 iberr, ?W
+""
+IB -528
+Error decoding GPIB/232 ibser, ?W
+""
+IB -529
+Error decoding GPIB/232 ibcnt, ?W
+""
+IB -541
+GPIB/232 (EPAR) serial parity error detected by converter, ?W
+""
+IB -542
+GPIB/232 (EORN) serial over-run error detected by converter, ?W
+""
+IB -543
+GPIB/232 (EOFL) serial buffer overflow detected by converter, ?W
+""
+IB -544
+GPIB/232 (EFRM) serial data framing error detected by converter, ?W
 ""
 MA   -1
 Trouble with class buffer

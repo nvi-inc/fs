@@ -13,7 +13,7 @@ LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../rtelb/rtelb.a
 #
 ../bin/incom: $(OBJECTS)
-	f77  -o ../bin/incom $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/incom $(OBJECTS) $(LIBES)
 	strip ../bin/incom
 incom:
 	rm -f ../bin/incom

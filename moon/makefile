@@ -7,5 +7,5 @@ LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../flib/flib.a\
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/moon: $(OBJECTS)
-	f77  -o ../bin/moon $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/moon $(OBJECTS) $(LIBES)
 	strip ../bin/moon

@@ -13,5 +13,5 @@ LIBES = ../fslb/fslb.a\
 
 #
 ../bin/headp: $(OBJECTS)
-	f77  -o ../bin/headp $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/headp $(OBJECTS) $(LIBES)
 	strip ../bin/headp

@@ -10,7 +10,7 @@ LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/error: $(OBJECTS)
-	f77  -o ../bin/error $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/error $(OBJECTS) $(LIBES)
 	strip ../bin/error
 #
 error:

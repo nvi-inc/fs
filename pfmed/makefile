@@ -7,7 +7,7 @@ LIBES = ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a ../flib/flib.a\
  ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/pfmed: $(OBJECTS)
-	f77  -o ../bin/pfmed $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/pfmed $(OBJECTS) $(LIBES)
 	strip ../bin/pfmed
 #
 pfmed:

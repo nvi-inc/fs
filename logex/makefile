@@ -12,7 +12,7 @@ LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../polb/polb.a ../lnfch/lnfch.a\
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/logex: logex.o $(OBJECTS)
-	f77  -o ../bin/logex $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/logex $(OBJECTS) $(LIBES)
 	strip ../bin/logex
 logex:
 	rm -f ../bin/logex

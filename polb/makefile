@@ -12,7 +12,6 @@ sider.o po_put_i.o po_put_c.o fmpwrite2.o
 #
 #CFLAGS = 
 #FFLAGS = 
-F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The

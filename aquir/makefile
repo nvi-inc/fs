@@ -8,7 +8,7 @@ LIBES = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../rtelb/rtelb.a
 #
 ../bin/aquir: $(OBJECTS)
-	f77  -o ../bin/aquir $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/aquir $(OBJECTS) $(LIBES)
 	strip ../bin/aquir
 #
 aquir:

@@ -10,7 +10,7 @@ LIBES = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a \
 ../port/port.a ../rtelb/rtelb.a
 #
 ../bin/fivpt: $(OBJECTS)
-	f77  -o ../bin/fivpt $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/fivpt $(OBJECTS) $(LIBES)
 	strip ../bin/fivpt
 #
 fivpt:

@@ -7,5 +7,5 @@ LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a ../port/port.a\
 ../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 ../bin/rwand: $(OBJECTS)
-	f77  -o ../bin/rwand $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/rwand $(OBJECTS) $(LIBES)
 	strip ../bin/rwand

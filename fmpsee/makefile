@@ -8,7 +8,6 @@ fmpreadstr.o fmprewind.o fmpsetline.o fmpsetpos.o fmpwritestr.o
 #
 #CFLAGS = 
 #FFLAGS = 
-F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The

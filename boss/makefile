@@ -11,7 +11,7 @@ newsk.o opnpf.o putts.o rdtib.o rdtma.o \
 spars.o stat.o newlg.o
 #
 ../bin/boss: $(OBJECTS)
-	f77  -o ../bin/boss $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/boss $(OBJECTS) $(LIBES)
 	strip ../bin/boss
 #
 ../bin/helpsh: helpsh

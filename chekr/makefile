@@ -9,7 +9,7 @@ LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../flib/flib.a ../fclib/fclib.a \
 ../clib/clib.a ../newlb/newlb.a ../rtelb/rtelb.a
 #
 ../bin/chekr: $(OBJECTS)
-	f77  -o ../bin/chekr $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/chekr $(OBJECTS) $(LIBES)
 	strip ../bin/chekr
 #
 chekr:

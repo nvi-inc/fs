@@ -10,7 +10,7 @@ LIBES = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a \
 ../port/port.a ../rtelb/rtelb.a
 #
 ../bin/onoff: $(OBJECTS)
-	f77  -o ../bin/onoff $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/onoff $(OBJECTS) $(LIBES)
 	strip ../bin/onoff
 #
 onoff:

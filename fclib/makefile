@@ -20,7 +20,6 @@ fc_go_put.o fc_v2_vlt_head.o fc_v2_head_vmov.o fc_cshm_init.o
 #
 #CFLAGS = 
 #FFLAGS = 
-F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The

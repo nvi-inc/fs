@@ -1,4 +1,4 @@
-OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o ifclr.o get_ibcnt.o
+OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o sib.o
 #
 CFLAGS = -I/usr/include/gpib
 #
@@ -8,11 +8,11 @@ CFLAGS := $(CFLAGS) -DCONFIG_GPIB
 endif
 #
 LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../flib/flib.a ../fclib/fclib.a \
-../clib/clib.a ../newlb/newlb.a ../rtelb/rtelb.a
+../poclb/poclb.a ../clib/clib.a ../port/port.a ../newlb/newlb.a ../rtelb/rtelb.a
 #-lf2c -lgpib -lfl
 #
 ../bin/ibcon: $(OBJECTS)
-	f77  -o ../bin/ibcon $(OBJECTS) $(LIBES) $(GPIB_LIBS)
+	$(FC)  -o ../bin/ibcon $(OBJECTS) $(LIBES) $(GPIB_LIBS)
 	strip ../bin/ibcon
 #
 ibcon:
