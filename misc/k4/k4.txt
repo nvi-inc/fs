@@ -87,12 +87,22 @@ was requested or "PLY" if was not.
 ----------------------------------------------------------------------------
 REC_MODE - Set recording mode
 
-Syntax: rec_mode=<mode>
+Syntax: rec_mode=<bw>,<bits>,<chan>
 
-Response: rec_mode/<mode>
+Response: rec_mode/<bw>,<bits>,<chan>,<form>,<ts>,<im>,<nm>,<ta>,<pb>
 
-<mode>:   sampling rate in MHz,  64 (default) , 128, or 256, which are the
-          to the overall recording rates in Mbit/sec
+<bw>:   overall recording bandwidth in MHz, 64 (default) , 128, or 256
+<bits>: number of bits per sample: 1 (default), 2, 4, or 8
+<chan>: channels recorded: 1, 2, 4, 8, or 16 (default)
+
+Monitor-only parameters: 
+
+<form>: recording format: OLD or NEW
+<ts>:   time stamp: ON or OFF 
+<im>:   insertion mode for time stamp: FB (fixed bit) or FT (fixed time)
+<nm>:   insertion number: 0 to 30
+<ta>:   TAP setting mode: 0 or 1
+<pb>:   pass-band setting: 0 to 16
 
 Only for DFC2100
 
@@ -155,6 +165,9 @@ Syntax:   tape=reset
 
 Response: tape/<position>,<drum>,<synch_test>,<synch>,<stat1>,<stat2>
 
+Monitor-only parameters: 
+
+<positionn>:  current sequence number
 <drum>:       on or off
 <synch_test>: on or off
 <synch>:      number lost?

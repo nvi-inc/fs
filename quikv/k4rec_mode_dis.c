@@ -17,6 +17,7 @@ int itask;
 long ip[5];
 {
   struct k4rec_mode_cmd lclc;
+  struct k4rec_mode_mon lclm;
   int kcom, i, ierr, count, start;
   char output[MAX_OUT];
 
@@ -33,7 +34,7 @@ long ip[5];
   } else if (kcom){
     memcpy(&lclc,&shm_addr->k4rec_mode,sizeof(lclc));
   } else {
-    k4rec_mode_res_q(&lclc,ip,itask);
+    k4rec_mode_res_q(&lclc,&lclm,ip);
     if(ip[1]!=0) {
       cls_clr(ip[0]);
       ip[0]=ip[1]=0;
@@ -60,6 +61,16 @@ long ip[5];
     count++;
     k4rec_mode_enc(output,&count,&lclc);
   }
+
+  if(!kcom) {
+    count=0;
+    while( count>= 0) {
+      if (count > 0) strcat(output,",");
+      count++;
+      k4rec_mode_mon(output,&count,&lclm);
+    }
+  }
+
   if(strlen(output)>0) output[strlen(output)-1]='\0';
   
   cls_snd(&ip[0],output,strlen(output),0,0);
