@@ -1,11 +1,20 @@
 /* check to make sure motion is done and voltage is updated */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/times.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
+
+static chekr=0;
+
+void set_chekr_v2_motion_done__()
+{
+  
+  chekr=1;
+}
 
 int v2_motion_done(ip,indx)
 long ip[5];                          /* ipc array */
@@ -41,6 +50,14 @@ int indx;
 
       get_res(&response, &buffer_out);
       motion=(0x10&response.data) != 0;     /* still moving */
+
+      /* kludge for VLBA42 */
+      if (chekr && motion !=0 &&
+	  (shm_addr->equip.drive[indx] == VLBA4 &&
+	   shm_addr->equip.drive_type[indx] == VLBA42)) {
+	motion=0;
+	logita(NULL,-288,"q@","  ");
+      }
 
       ip[0]=ip[1]=ip[4]=ip[2]=0;
       memcpy(ip+3,"q@",2);
