@@ -1,0 +1,132 @@
+      SUBROUTINE vunpso(sodef,ivexnum,iret,ierr,lu,
+     .lname1,lname2,rarad,decrad,iep)
+C
+C     VUNPSO gets the source information for source sodef.
+C     **NOTE** Satellites as sources not supported yet.
+C     All statements are gotten and checked before returning.
+C     Any invalid values are not loaded into the returned
+C     parameters.
+C     Only generic error messages are written. The calling
+C     routine should list the station name for clarity.
+C
+      include '../skdrincl/skparm.ftni'
+C
+C  History:
+C 960527 nrv New.
+C
+C  INPUT:
+      character*128 sodef ! source def to get
+      integer ivexnum ! vex file ref
+      integer lu ! unit for writing error messages
+C
+C  OUTPUT:
+      integer iret ! error return from vex routines, !=0 is error
+      integer ierr ! error from this routine, >0 indicates the
+C                    statement to which the VEX error refers,
+C                    <0 indicates invalid value for a field
+      integer*2 lname1(4),lname2(4)
+      integer iep ! epoch, 1950 or 2000
+      double precision rarad,decrad
+C
+C  LOCAL:
+      character*128 cout
+      double precision R
+      integer idum,nch
+      integer ichmv_ch ! function
+      integer fvex_ra,fvex_dec,fvex_len,fget_source_lowl,
+     .fvex_field,ptr_ch
+C
+C
+C  1. The IAU name.
+C
+      ierr = 1
+      iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('IAU_name'//char(0)),
+     .ivexnum)
+      CALL IFILL(lname1,1,8,oblank)
+      if (iret.eq.0) then
+        iret = fvex_field(1,ptr_ch(cout),len(cout))
+        NCH = fvex_len(cout)
+        IF  (NCH.GT.8.or.NCH.le.0) THEN 
+          write(lu,'("VUNPSO01 - IAU name too long, using first 8 ",
+     .    "characters")')
+          ierr=-1
+          nch=8
+        ENDIF
+        IDUM = ICHMV_ch(lname1,1,cout(1:NCH))
+      endif
+C
+C  2. The common name.
+C
+      ierr = 2
+      iret = fget_source_lowl(ptr_ch(sodef),
+     .ptr_ch('source_name'//char(0)),
+     .ivexnum)
+      CALL IFILL(lname2,1,8,oblank)
+      if (iret.eq.0) then
+        iret = fvex_field(1,ptr_ch(cout),len(cout))
+        NCH = fvex_len(cout)
+        IF  (NCH.GT.8.or.NCH.le.0) THEN
+          write(lu,'("VUNPSO02 - Comon name too long, using first 8",
+     .    "characters")')
+          ierr=-2
+          nch=8
+        ENDIF
+        IDUM = ICHMV_ch(lname2,1,cout(1:NCH))
+      else
+        ierr=-21
+        write(lu,'("VUNPSO21 - Comon name missing")')
+      endif
+C
+C  3.  RA
+C
+      ierr = 3
+      iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('ra'//char(0)),
+     .ivexnum)
+      if (iret.ne.0) return
+      iret = fvex_field(1,ptr_ch(cout),len(cout))
+      if (iret.ne.0) return
+      iret = fvex_ra(ptr_ch(cout),r) ! convert to radians
+      IF  (Iret.ne.0) THEN
+        Ierr = -3
+        write(lu,'("VUNPSO03 - Invalid RA.")')
+      else
+        rarad = R
+      endif
+
+C  4.  Dec
+C
+      ierr = 4
+      iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('dec'//char(0)),
+     .ivexnum)
+      if (iret.ne.0) return
+      iret = fvex_field(1,ptr_ch(cout),len(cout))
+      if (iret.ne.0) return
+      iret = fvex_dec(ptr_ch(cout),r) ! convert to radians
+      IF  (Iret.ne.0) THEN
+        Ierr = -4
+        write(lu,'("VUNPSO04 - Invalid Dec.")')
+      else
+        decrad = R
+      endif
+
+C  5.  Epoch
+C
+      ierr = 5
+      iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('epoch'//char(0)),
+     .ivexnum)
+      if (iret.ne.0) return
+      iret = fvex_field(1,ptr_ch(cout),len(cout))
+      if (iret.ne.0) return
+      nch=fvex_len(cout)
+      if (cout(1:nch).eq.'J2000') then
+        iep=2000
+      else if (cout(1:nch).eq.'B1950') then
+        iep=1950
+      else 
+        Ierr = -5
+        write(lu,'("VUNPSO05 - Invalid epoch, only J2000 or B1950")')
+      endif
+
+      if (ierr.gt.0) ierr=0
+      return
+      end
