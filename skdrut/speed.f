@@ -12,6 +12,10 @@ C 960304 nrv Return -1 if icode=0.
 C 960319 nrv Use sample rate not bandwidth. Change calculation to
 C            use correct factor for DR or NDR.
 C 960531 nrv Fanout factor already in common.
+C 961031 nrv Check LMFMT for the recording format instead of LMODE
+C            because LMODE is used for a mode name in the non-VEX file.
+C            In the non-VEX file, LMFMT will be modified by user input
+C            to DRUDG to be either "M" or "V".
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -45,9 +49,9 @@ C 1. First account for the fan factor.
 
 C 2. Get the correct overhead factor for DR or NDR.
 
-      ohfac = 1.125    ! factor is 8/9 for Mk3/4
-      if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then
-        ohfac = 1.134  ! factor is 9.072/8 for VLBA
+      ohfac = 1.125    ! factor is 8/9 for Mk3/4 DR format
+      if (ichcm_ch(lmfmt(1,is,icode),1,'V').eq.0) then
+        ohfac = 1.134  ! factor is 9.072/8 for VLBA NDR format
       endif
 
 C 3. Calculate the tape speed. Sample rate is in Mb/s.
