@@ -13,6 +13,8 @@ C
 C
 C  History:
 C 960817 nrv New.
+C 961122 nrv Change fget_mode_lowl to fget_all_lowl
+C 970117 nrv Remove "track_frame_format", irrelevant for S2.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -31,15 +33,15 @@ C
 C  LOCAL:
       character*128 cout
       integer nch,idumy
-      integer ichmv_ch,fvex_len,fvex_field,fget_mode_lowl,ptr_ch
+      integer ichmv_ch,fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
 C
 C  1. The S2 record mode
 C
       ierr = 1
       CALL IFILL(Ls2M,1,16,oblank)
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('S2_record_mode'//char(0)),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
+     .ptr_ch('S2_recording_mode'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
@@ -51,23 +53,6 @@ C
         IDUMY = ICHMV_ch(LS2M,1,cout(1:NCH))
       END IF  !
 C
-C  2. The track frame format
-C
-      ierr = 1
-      CALL IFILL(LM,1,8,oblank)
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('track_frame_format'//char(0)),
-     .ptr_ch('TRACKS'//char(0)),ivexnum)
-      if (iret.ne.0) return
-      iret = fvex_field(1,ptr_ch(cout),len(cout))
-      NCH = fvex_len(cout)
-      IF  (NCH.GT.8.or.NCH.le.0) THEN  !
-        write(lu,'("VUNPTRK01 - Track format name too long")')
-        iret=-1
-      else
-        IDUMY = ICHMV_ch(LM,1,cout(1:NCH))
-      END IF  !
-
       if (ierr.gt.0) ierr=0
       return
       end
