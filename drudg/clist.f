@@ -40,12 +40,12 @@ C
 C  First set up for proper width/length.
 
       IF (IWIDTH.EQ.80) THEN
-	  MAXLIN = 47
+	  MAXLIN = 46
 	  maxwid = 70
       ELSE
 C  MAXLIN = 64
 C  maxwid = 110
-          maxlin = 53
+          maxlin = 52
           maxwid = 140
       ENDIF
 C

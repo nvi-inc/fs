@@ -377,8 +377,9 @@ C     5. Now write out the observation line.
           if (kwrap) then ! print cable wrap
           IF (IWIDTH.EQ.137) WRITE(LUPRT,9510) IHR,iMIN,ISC,IHR2,MIN2,
      .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
-     .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(ICOD),
-     .      VCBAND(ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),SPDIPS
+     .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
+     .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
+     .      SPDIPS
 9510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
@@ -394,8 +395,9 @@ C     5. Now write out the observation line.
           else ! no cable wrap
           IF (IWIDTH.EQ.137) WRITE(LUPRT,8510) IHR,iMIN,ISC,IHR2,MIN2,
      .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
-     .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(ICOD),
-     .      VCBAND(ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),SPDIPS
+     .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
+     .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
+     .      SPDIPS
 8510      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,

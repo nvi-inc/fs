@@ -1,4 +1,4 @@
-	subroutine bbbuf(imode,fr)
+	subroutine bbbuf(imode,icod,fr)
 
 C     BBBUF creates buffers that hold the lines with bbsynth commands
 C     This routine is called only for switched sequences
@@ -6,6 +6,7 @@ C     This routine is called only for switched sequences
 	include 'skparm.ftni'
 
 C INPUT:
+        integer icod    ! frequency code index
 	integer imode   ! group 1 or 2 of the switched frequencies
 	real*4 fr(14)   ! the frequencies to write, should be filled
 C                       with appropriate frequencies for the mode
@@ -33,7 +34,7 @@ C LOCAL
 	call ifill(ibuf,1,iblen,32)
 	call char2hol(' bbsynth=',ibuf,1,9)
 	iy = 10
-	do ix=1,nchanv(nvset)
+	do ix=1,nvcs(istn,icod)
 	  if (fr(ix).ne.0.0) then
 	    call bbsyn(iy,ix,fr(ix))
 	    iz=iz+1

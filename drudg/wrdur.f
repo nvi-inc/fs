@@ -32,14 +32,15 @@ C
 C  Set dur=0 so that stop time is used
 C  The stop time for the setup block is the start time of the scan
 
-	iput = 16
-	if ((kswitch(nvset)).and.(isetup.eq.0)) then
-	  call char2hol('!BEGIN LOOP! ',ibuf,1,13)
-	  iput = 22
-	else if ((.not.kswitch(nvset)).and.(isetup.eq.0)) then
-	  call char2hol(' !NEXT!',ibuf,33,40)
-	  iput = 20
-	endif
+C***************** Commented out until figure out switching *****
+Ciput = 16
+Cif ((kswitch(nvset)).and.(isetup.eq.0)) then
+C  call char2hol('!BEGIN LOOP! ',ibuf,1,13)
+C  iput = 22
+Celse if ((.not.kswitch(nvset)).and.(isetup.eq.0)) then
+C  call char2hol(' !NEXT!',ibuf,33,40)
+C  iput = 20
+Cendif
 	call char2hol(cdur,ibuf,istart,istart+31)
 	idum = ib2as(idur,ibuf,istart+4,iz2)
 	if (idur.eq.0) then

@@ -267,7 +267,7 @@ c       IS2(NOUT) = ISC2
 C       NOB(NOUT) = NOB(NOUT)+1
 	  IPASP = IPAS(ISTNSK)
 	  IFTOLD = IFT(ISTNSK) + IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
-     .     *speed(icod)*135.0/1440.0)
+     .     *speed(icod,istn)*135.0/1440.0)
 	  IDIRP = IDIR
 	ENDIF !process this observation
 C

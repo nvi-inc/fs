@@ -395,7 +395,8 @@ C  (save the last write for the end of outer loop)
 C  Save tape info for checking on next pass
 
 	IPASP=IPAS(ISTNSK)
-        IFTOLD=IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))*SPEED(ICOD))
+        IFTOLD=IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))*
+     .              SPEED(ICOD,istn))
 	IDIRP=IDIR
 	IDAYP=IDAYR
 	idayrp=idayr2

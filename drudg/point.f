@@ -1,4 +1,5 @@
-	SUBROUTINE POINT(cr1,cr2,cr3,cr4)   !MAKE FILES FOR TELESCOPE POINTING
+	SUBROUTINE POINT(cr1,cr2,cr3,cr4)
+
 C Write a file or a tape with pointing controls
 C
 	INCLUDE 'skparm.ftni'
@@ -11,14 +12,11 @@ C INPUT
 C
 C LOCAL:
       LOGICAL KINTR,kmatch,knewtp,knewt
-      real*8 dvc(14) !VC frequencies
-      integer*4 idvc(14)
-      integer*2 lif1(2),lif2(2),lalt(2),lnor(2)
       integer*2 ldirword(4)
       integer nch,i,ierr,ilen,iblk,ical,nstnsk,lu_outfil2
       integer idirp,ipasp,iobs,iftold,idir,icode,
-     .idrate,i2lo,i2hi,i1lo,i1hi
-      integer*2 lfreq,lsga
+     .idrate
+      integer*2 lfreq
       integer mon,ida,mjd,iyr,idayr,ihr,imin,isc,iyr2,idayr2,
      .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp
       integer isor,istnsk,icod,idummy,istin,itype
@@ -58,8 +56,7 @@ Cinteger*4 ifbrk
 C Initialized:
 	DATA ILENNR/40/, ILENHA/9/, ILENON/40/, ILENEF/40/, ILENWE/39/
 C record word lengths
-	data ldirr/2hR /,ldirf/2hF /, lsga/2hA /
-	data lalt/2hAL,2hT /,lnor/2hNO,2hR /
+	data ldirr/2hR /,ldirf/2hF /
         data lu_outfil2/42/
 
 C LAST MODIFIED:
@@ -97,33 +94,19 @@ c 940701 nrv Change VLBA output file names
 9019  FORMAT(' Select type of pointing output for: ',4a2/
      .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
      .       ' 3 - DSN stations         4 - Bonn     '/
-     .       ' 5 - VLBA terminal only   6 - VLBA antenna'/
      .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
 
 	call gtrsp(ibuf,80,luusr,nch)
 	istin= ias2b(ibuf(1),1,1)
 	IF (ISTIN.EQ.0) RETURN
 	IF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
+        if (istin.eq.5.or.istin.eq.6) goto 1
       endif
 C
 C 2. First get output file or LU for pointing commands.
 C If problems, quit.
 
 	if (istin.eq.5.or.istin.eq.6) then
-	  if (.not.kvlba) then
-	   write(luscn,9200)
-9200       format(/' POINT01 - No $VLBA section in schedule file'/)
-	   return
-	  end if
-	  kmatch = .false.
-	  do i=1,ncodes
-	    if (ivix(i,istn).ne.0) kmatch = .true.
-	  enddo
-	  if (.not.kmatch) then
-	    write(luscn,9210) (lantna(I,ISTN),I=1,4)
-9210      format(/'POINT03 - No VLBA information for station ',4a2/)
-	    return
-	  end if
           ih=0
           do i=1,2*max_pass
             if (ihdpos(i,istn,1).ne.0) ih=ih+1
@@ -297,15 +280,6 @@ C
 		NCHAR = ILENNR*2
 		CALL writf_asc(LU_OUTFILE,IERR,IBUF,NCHAR/2)
 C
-C********** Removed Onsala output
-C           else IF (ISTIN.EQ.3) THEN !Onsala pointing
-C               WRITE(CBUF,9430) LSNAME,IHR2,MIN2,ISC2
-c9430       FORMAT('$TRACK /',4A2,4X,'/',19X,'$CONTINUE ',3(i2.2,1X),
-C    .             '                     ')
-C               CALL CHAR2HOL(CBUF,IBUF,1,80)
-C               NCHAR = ILENON*2
-C********** Removed Onsala output
-C
 	    else if (istin.eq.3) then !DSN output
 	      if (.not.kintr) then
 		write(lu_outfile,9503)
@@ -361,7 +335,7 @@ C          For each observation, write out command line
 	      ipasp = ipas(istnsk)
 	      idirp = idir
 	      IFTOLD=IFT(ISTNSK)+IFIX(IDIR*
-     .        (ITEARL+IDUR(ISTNSK))*SPEED(ICOD))
+     .        (ITEARL+IDUR(ISTNSK))*SPEED(ICOD,istn))
 	      ihrp = ihr2
 	      minp = min2
 	      iscp = isc2
@@ -393,31 +367,20 @@ C
 	  else IF (ISTIN.EQ.5.or.istin.eq.6) THEN !VLBA observe files
 	    if (.not.kintr) then
 		call snapintr(2,iyr)
-		call vlbah(istin,icod,lu_outfile,ierr)
+C********* Comment out until SNAP procs are worked out first
+C	call vlbah(istin,icod,lu_outfile,ierr)
 		idayp = 0
 		kintr = .true.
 	    end if
 	    if (itearl.gt.0) call tmsub(iyr,idayr,ihr,imin,isc,itearl,
      .      iyr,idayr,ihr,imin,isc)
-	    CALL VLBAT(LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
-     .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
-     .       MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
-     .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
-     .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
-     .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
-     .       idayrp,ihrp,minp,iscp,iobs,irecp)
-C
-	    else IF (ISTIN.EQ.7) THEN !Westerbork pointing
-		I = IR2AS(RAS2,LRAS,1,-6,-3)
-		CALL IFILL(LDEC,1,6,Z20)
-		I = IR2AS(DECS2,LDEC,1,-5,-2)
-		WRITE(CBUF,9450) LSNAME,IRAH,IRAM,LRAS,LDSIGN2,IDECD,
-     .            IDECM,LDEC,IDAYR,IHR,iMIN,ISC,IHR2,MIN2,ISC2
-9450        FORMAT(4A2,5X,2i2.2,3A2,1X,A1,2i2.2,3A2,'2000.0',
-     .             1X,I3,1X,3i2.2,1X,3i2.2,18X,' ')
-		CALL CHAR2HOL(CBUF,IBUF,1,80)
-		NCHAR = ILENWE*2
-		CALL writf_asc(LU_OUTFILE,IERR,IBUF,NCHAR/2)
+C    CALL VLBAT(LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+C    .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
+C    .       MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
+C    .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
+C    .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
+C    .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
+C    .       idayrp,ihrp,minp,iscp,iobs,irecp)
 C
 	    END IF !if istin
 C
@@ -445,85 +408,7 @@ C         Turn off recording on the current tape
 C When finished with the DSN output file, write the other commands
 C at the end.  **NOTE: this outputs for first freq. code ONLY.
 	if (istin.eq.3) then !DSN file
-	  icode=1
-	  nfreq(1,icode)=8
-	  nfreq(2,icode)=6
-	  write(lu_outfile,"('*END'/' $FREQUENCIES')")
-	  write(lu_outfile,9601) nfreq(1,icode),nfreq(2,icode)
-9601      format(' BAND    = ',i1,'*2, ',i1,'*1,')
-	  write(lu_outfile,9602) nfreq(1,icode),freqlo(1,istn,icode)
-     .    ,nfreq(2,icode),freqlo(2,istn,icode)
-9602      format(' BIAS    =',2(1x,i1,'*',f17.12,4x,','))
-	  write(lu_outfile,9603)
-9603      format(' DWELL   = 14*0.0000000000000000E+00,')
-	  do i=1,nfreq(1,icode)
-	    dvc(i) = (freqrf(i,icode)-freqlo(1,istn,icode))
-	  enddo
-	  do i=nfreq(1,icode)+1,nfreq(1,icode)+nfreq(2,icode)
-	    dvc(i) = (freqrf(i,icode)-freqlo(2,istn,icode))
-	  enddo
-	  do i=1,14
-	    idvc(i)=(dvc(i)+.001)*100.d0
-	  enddo
-	  write(lu_outfile,9604) (idvc(i),i=1,14)
-9604      format(' ONEWAYFREQ      =',2(3x,i5,'0000.0000000',4x,',')
-     .    4(/3x,i5,'0000.0000000',4x,','2x,i5,'0000.0000000',4x,',',
-     .    2x,i5,'0000.0000000',4x,','))
-	  write(lu_outfile,9605) ldsn
-9605      format(' STATIONID       = ',6x,a2/' $END')
-	  write(lu_outfile,9606)
-9606      format(' $CONFIGDATA'/
-     .           ' AMPNUMBER1      =          1,'/
-     .           ' AMPNUMBER2      =          2,'/
-     .           ' AMPSELECT1      = ''MAS'','/
-     .           ' AMPSELECT2      = ''MAS'','/
-     .           ' BANDCOMB        = ''OFF'','/
-     .           ' DRIFT1  =  0.1494000    ,'/
-     .           ' DRIFT2  =  0.2968000    ,'/
-     .           ' JITTERTHRESH1   =         10,'/
-     .           ' JITTERTHRESH2   =         20,'/
-     .           ' MAGTOLER1       =  7.0000000000000000E-03,'/
-     .           ' MAGTOLER2       =  7.0000000000000000E-03,'/
-     .           ' PCGCOMBDIV1     =          5,'/
-     .           ' PCGCOMBDIV2     =          5,'/
-     .           ' PCGPOWER1       =   6.000000    ,'/
-     .           ' PCGPOWER2       =   6.000000    ,'/
-     .           ' POLARIZ1        = ''RCP'','/
-     .           ' POLARIZ2        = ''RCP'',')
-	  idrate = 2.d0*vcband(icode)
-	  idum=ichmv_ch(lif1,1,'NOR ')
-	  idum=ichmv_ch(lif2,1,'NOR ')
-	  if (lsginp(1,icode).eq.lsga) idum=ichmv_ch(lif1,1,'ALT ')
-	  if (lsginp(2,icode).eq.lsga) idum=ichmv_ch(lif2,1,'ALT ')
-	  i2lo=0
-	  i2hi=0
-	  do i=1,nfreq(1,icode)
-	    if (dvc(i).lt.220.0) i2lo=i2lo+1
-	    if (dvc(i).gt.220.0) i2hi=i2hi+1
-	  enddo
-	  i1lo=0
-	  i1hi=0
-	  do i=nfreq(1,icode)+1,nfreq(1,icode)+nfreq(2,icode)
-	    if (dvc(i).lt.220.0) i1lo=i1lo+1
-	    if (dvc(i).gt.220.0) i1hi=i1hi+1
-	  enddo
-	  write(lu_outfile,9607) lmode(icode),idrate,ldsn,lif1,lif2,
-     .    i2lo,i2hi,i1lo,i1hi,vcband(icode)
-9607      format(' RECORDERMODE    = ''',a1,''','/
-     .           ' SAMPLERATE      =     ',i1,'000000,'/
-     .           ' TESTWORD        =        12,        34,',
-     .                                '    56,      78,'/
-     .           ' WCBINSRC1N      =         2,'/
-     .           ' WCBINSRC2N      =         3,'/
-     .           ' SESSIONTYPE     = ''WBRADIOASTRY'','/
-     .           ' STATIONID       =        ',a2,','/
-     .           ' WCBIF1SEL       = ''',a2,a1,''','/
-     .           ' WCBIF2SEL       = ''',a2,a1,''','/
-     .           ' WCBVCINP        = ',i1,'*''2LO'', ',i1,'*''2HI'', ',
-     .                                 i1,'*''1LO'', ',i1,'*''1HI'','/
-     .           ' WCBVCBW =   ',f8.6,'    ,'/
-     .           ' WCBAUXDAT       = ''WCBAUXDAT   '','/
-     .           ' WCBFRQ15        =   110990000.0000000'/' $END')
+          call dsnout(ldsn)
 	endif !DSN file
 C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR

@@ -20,9 +20,7 @@ C      DATA IWIDTH/80/
 C Initialize the $PROC section location
       DATA IRECPR/0/, IRBPR/0/, IOFFPR/0/
 C Codes for passes and bandwidths
-      DATA LPASS /2H12,2H34,2H56,2H78,2H9A,2HBC,2HDE,2HFG,2HHI,2HJK,
-     .            2HLM,2HNO,2HPQ,2HRS/
-      DATA LB    /2H42,2H1H,2HQE/
+      DATA LBNAME/2hD8,2H42,2H1H,2HQE/
 c Initialize no. entries in lband (freqs.ftni)
       DATA NBAND /2/
       END

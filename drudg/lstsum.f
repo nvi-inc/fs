@@ -31,12 +31,11 @@ C Output:
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,ids,
      .i,iaz,iel,idur,nm,l,ifdur,id,ieq
       real*4 rs,ds
-      real*4 speed ! function
+      real*4 speed_snap ! speed from SNAP file
       integer julda ! function
 	LOGICAL*4   KEX
 	logical     kazel,kwrap,ksat
 	character*128 cbuf
-Cinteger*4 ifbrk
 	character*8 csor,cexper,cstn
 	character*3 cdir,cnewtap,cday
 	character*9 cti,c1,c2,c3
@@ -91,7 +90,7 @@ C 4. Loop over SNAP file records
 	if (iwidth.eq.80) then
 	  maxline = 48
 	else
-	  maxline = 50
+	  maxline = 49
 	endif
 	iline = maxline
 	cday = '   '
@@ -99,7 +98,6 @@ C 4. Loop over SNAP file records
         inewp = 0
 	cnewtap = 'XXX'
 	do while (.true.) ! read loop
-C  if (ifbrk().lt.0) goto 990
 	  read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
 	  nline = nline + 1
 
@@ -211,7 +209,7 @@ C     loop reads all lines.
 	    ut = ih1*3600.d0+im1*60.d0+is1  ! UT in seconds
 	    mjd = julda(1,id1,iyear-1900)
 	    read(cbuf(8:10),*) ival
-	    speed = ival*9.0/8.0
+            speed_snap = ival*9.0/8.0
 	    ifeet = 10*ifix(float(ifeet/10))
 	    idir = 1
 	    cdir = cbuf(4:6)
@@ -297,7 +295,7 @@ C
             cpass = '  '
 	    idur = 60*idm + ids
 C           Calculate footage at the end of the current scan
-            ifeet = ifeet + idir*(idur+itearl)*(speed/12.0)
+            ifeet = ifeet + idir*(idur+itearl)*(speed_snap/12.0)
 
 	  else if (index(cbuf,'FAST').ne.0) then !add spin feet
 	    nm = index(cbuf,'M')

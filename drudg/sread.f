@@ -1,4 +1,4 @@
-      SUBROUTINE SREAD(IERR,NOBS)   !READ SCHEDULE FILE 
+      SUBROUTINE SREAD(IERR,NOBS)   
 C
       include 'skparm.ftni'
       include 'drcom.ftni'
@@ -10,21 +10,21 @@ C  Input:
       integer ierr,nobs
 
 C  Local:
-      integer ilen,i,j,k,ltype,ich,ic1,ic2,idummy,ic,
+      integer m,ilen,i,j,k,ltype,ich,ic1,ic2,idummy,ic,
      .icx,nch
       integer htype ! section 2-letter code
       logical*4 kcod ! set to ksta when $CODES is found
       logical*4 ksta ! set to true when $STATIONS is found
       logical*4 kvlb ! set to true when $VLBA is found
       logical*4 khed ! set to ksta when $HEAD is found
-      integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hvl,hhd
+      integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd
       integer iscnc,iscn_CH,ias2b,jchar,ichcm,ichmv ! functions
       integer ichcm_ch,trimlen
       real rdum,reio
       character*128 cbuf
 C Initialized:
       data    Z24/Z'24'/, hbb/2h  /, hex/2hEX/, hpa/2hPA/, hso/2hSO/
-      data    hvl/2HVL/, hhd/2hHD/
+      data    hhd/2hHD/
       data    hst/2hST/, hfr/2hFR/, hsk/2hSK/, hpr/2hPR/,Z20/Z'20'/
 C
 C  History
@@ -32,6 +32,8 @@ C  900413 NRV Added re-reading of $CODES section
 C  910306 NRV Added reading new parameters: HEAD, EARLY
 C  930407 nrv implicit none
 C  930708 nrv Add reading $HEAD section
+C 951213 nrv Mods for new Mark IV/VLBA setups.
+C 951214 nrv Add BARREL
 C
 C
       close(unit=LU_INFILE)
@@ -52,20 +54,25 @@ C
       NSATEL = 0
       NSOURC = 0
       NCODES = 0
+      call ichmv_ch(lbarrel,1,'NONE')
       do i=1,max_frq
         lcode(i)=0
-        DO K=1,28
-          DO J=1,14
-            ITRAS(1,K,J,I)=-99
-            ITRAS(2,K,J,I)=-99
+        DO K=1,max_chan
+          DO J=1,max_pass
+            do m=1,max_stn
+                ITRAS(1,1,K,J,m,I)=-99
+                ITRAS(2,1,K,J,m,I)=-99
+                ITRAS(1,2,K,J,m,I)=-99
+                ITRAS(2,2,K,J,m,I)=-99
+            END DO
           END DO
         END DO
       end do
       NSTATN = 0
       IRECEL = -1.0
       ksta = .false.
-	kcod = .false.
-	kvlb = .false.
+        kcod = .false.
+        kvlb = .false.
         khed = .false.
 C
       DO WHILE (ILEN.GT.0) !read schedule file
@@ -94,10 +101,6 @@ C
           khed = kcod
         ELSE IF (ichcm_ch(IBUF,1,'$PROCE').EQ.0) THEN
           call char2hol('PR',LTYPE,1,2)
-        else if (ichcm_ch(ibuf,1,'$VLBA').eq.0) then
-	    kvlba = .true.
-	    call char2hol('VL',LTYPE,1,2)
-	    kvlb = kcod
         END IF
 C
         htype= (LTYPE)
@@ -124,9 +127,9 @@ C
           ISETTM=0
           IPARTM=0
           ITAPTM=0
-	    ISORTM=0
-	    IHDTM=0
-	    ITEARL=0
+            ISORTM=0
+            IHDTM=0
+            ITEARL=0
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
             IF (ichcm_ch(IBUF,1,'ELEVATION').EQ.0) THEN !el line
@@ -143,23 +146,28 @@ C    .        STELV(1),STELV(2))
               IF (IC.NE.0) THEN !setup time
                 CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
                 ISETTM=IAS2B(IBUF,IC1,IC2-IC1+1)
-                ENDIF !setup time
-		  IC = ISCN_CH(IBUF,1,ILEN*2,'SOURCE')
+              ENDIF !setup time
+              IC = ISCN_CH(IBUF,1,ILEN*2,'BARREL')
+              IF (IC.NE.0) THEN !barrel roll
+                CALL GTFLD(IBUF,IC+7,ILEN*2,IC1,IC2)
+              if (ic1.ne.0) idummy = ichmv(lbarrel,1,ibuf,ic1,ic2-ic1+1)
+                  ENDIF !barrel roll
+              IC = ISCN_CH(IBUF,1,ILEN*2,'SOURCE')
               IF (IC.NE.0) THEN !source time
                 CALL GTFLD(IBUF,IC+6,ILEN*2,IC1,IC2)
                 ISORTM=IAS2B(IBUF,IC1,IC2-IC1+1)
-		  ENDIF !source time
-		  IC = ISCN_CH(IBUF,1,ILEN*2,'HEAD')
-		  IF (IC.NE.0) THEN !head time
-		    CALL GTFLD(IBUF,IC+4,ILEN*2,IC1,IC2)
-		    IHDTM=IAS2B(IBUF,IC1,IC2-IC1+1)
-		  ENDIF !head time
-		  IC = ISCN_CH(IBUF,1,ILEN*2,'EARLY')
-		  IF (IC.NE.0) THEN !early time
-		    CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
-		    ITEARL=IAS2B(IBUF,IC1,IC2-IC1+1)
-		  ENDIF !early time
-		  IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE')
+                  ENDIF !source time
+                  IC = ISCN_CH(IBUF,1,ILEN*2,'HEAD')
+                  IF (IC.NE.0) THEN !head time
+                    CALL GTFLD(IBUF,IC+4,ILEN*2,IC1,IC2)
+                    IHDTM=IAS2B(IBUF,IC1,IC2-IC1+1)
+                  ENDIF !head time
+                  IC = ISCN_CH(IBUF,1,ILEN*2,'EARLY')
+                  IF (IC.NE.0) THEN !early time
+                    CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
+                    ITEARL=IAS2B(IBUF,IC1,IC2-IC1+1)
+                  ENDIF !early time
+                  IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE')
               ICX= ISCN_CH(IBUF,1,ILEN*2,'TAPETM')
               IF (IC.NE.0.OR.ICX.NE.0) THEN !tape time
                 IF (IC.EQ.0) ICH=ICX+6
@@ -176,8 +184,7 @@ C
         ELSE IF(ichcm(htype,1,hso,1,2).eq.0 
      .  .or.    ichcm(htype,1,hst,1,2).eq.0 
      .  .or.    ichcm(htype,1,hfr,1,2).eq.0 
-     .  .or.    ichcm(htype,1,hhd,1,2).eq.0 
-     .  .or.    ichcm(htype,1,hvl,1,2).eq.0) 
+     .  .or.    ichcm(htype,1,hhd,1,2).eq.0 )
      .  THEN !parameter section
           rdum= reio(2,LUSCN,IBUF,-ILEN)
 C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
@@ -199,9 +206,6 @@ C         Get the first line of this section
               CALL FRINP(IBUF,ILEN,LUSCN,IERR)
             else IF(ichcm(ltype,1,hhd,1,2).eq.0.and.kcod) then
               CALL HDINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ichcm(ltype,1,hvl,1,2).eq.0.and.kcod) then
-              kvlba=.true.
-              call vbinp(ibuf,ilen,luscn,ierr)
             END IF
 C           Do not return on error.  Information messages from
 C           xxINP routines provide sufficient warnings.
@@ -283,30 +287,6 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         enddo 
       endif
-C  Now re-read $VLBA section if needed.
-      if ((.not.kvlb).and.(kvlba)) then
-	  write(luscn,'(" Re-reading ... ",$)')
-        rewind(LU_INFILE)
-        call initf(LU_INFILE,IERR)
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        DO WHILE (ILEN.GT.0) !read schedule file
-          IF (ichcm_ch(IBUF,1,'$VLBA').EQ.0) THEN
-            rdum= reio(2,LUSCN,IBUF,-ILEN)
-C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
-            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (JCHAR(IBUF,1).NE.36.AND.ILEN.NE.-1)
-              IF (IERR.LT.0)  THEN
-                WRITE(LUSCN,9220) IERR
-                RETURN
-              END IF
-              ILEN=(ILEN+1)/2
-              CALL VBINP(IBUF,ILEN,LUSCN,IERR)
-              CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            end do
-          end if
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        end do
-      end if
 C
       RETURN
       END
