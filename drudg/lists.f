@@ -64,7 +64,7 @@ C  RADED - returns integers for hms
 C  SLEWT - calculates slewing time
 C
 C INITIALIZED:
-      DATA IPASP/0/, IFTOLD/0/, IDIRP/0/
+      DATA IPASP/-1/, IFTOLD/0/, IDIRP/0/
       DATA LAXIS /2HHA,2HDC,2HXY,2HEW,2HAZ,2HEL,2HXY,2HNS,2HRI,2HCH,
      .2hSE,2hST,2hAL,2hGO/
 C
@@ -85,6 +85,7 @@ C            sked common. Need to make another version for drudg.
 C nrv 940107 Change SLEWT to SLEWO (old version)
 C nrv 940131 Add types 6 and 7 to LAXIS
 C            Write cable wrap on output line
+C 960810 nrv Change itearl to array
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -119,7 +120,7 @@ C
       IF (ISOR.EQ.0.OR.ICOD.EQ.0) THEN
         RETURN
       ENDIF
-      IPASP=0
+      IPASP=-1
       IDIRP=0
       MJDPRE = MJD
       UTPRE = UT
@@ -257,9 +258,9 @@ C
 101   FORMAT(' ',//' SCHEDULE FOR ',4A2,' EXPERIMENT ',4A2,
      .       'ON ',2A2,', ',2A2,' ',I2.2,', ',
      .       I4,' (DAY ',I3,')',10X,'Page ',I3//)
-	if (itearl.gt.0) then
+	if (itearl(istn).gt.0) then
 	  write(luprt,'(" ***** NOTE: Tape will start moving ",i3,
-     .  " seconds before start time. *****"/)') itearl
+     .  " seconds before start time. *****"/)') itearl(istn)
 	else
 	  write(luprt,'(/)')
 	 endif
@@ -306,9 +307,9 @@ C THEN BEGIN new page
             call luff(luprt)
 		WRITE(luprt,101) (LSTNNA(I,ISTN),I=1,4),LEXPER,
      .            LDAY,LMON,IDA,IYR,IDAYR,NPAGE
-		if (itearl.gt.0) then
+		if (itearl(istn).gt.0) then
 		  write(luprt,'(" ***** NOTE: Tape will start moving ",i3,
-     .        " seconds before start time. *****"/)') itearl
+     .        " seconds before start time. *****"/)') itearl(istn)
 		else
 		  write(luprt,'(/)')
 		 endif
@@ -422,17 +423,15 @@ C     5. Now write out the observation line.
           endif
 C
           NLINES = NLINES + 1
-          LNOBS = LNOBS + 1
 	    IPASP = IPAS(ISTNSK)
-	    IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
+	    IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL(istn)+IDUR(ISTNSK))
      .    *speed(icod,istn))
           IDIRP=IDIR
         ENDIF
 C ENDT Current station in observation
 C
-C if (ifbrk().lt.0) goto 900
-
 C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+          LNOBS = LNOBS + 1
       call ifill(ibuf,1,ibuf_len*2,oblank)
       if (lnobs+1.le.nobs) then
         idum = ichmv(ibuf,1,lskobs(1,lnobs+1),1,ibuf_len*2)

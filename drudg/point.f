@@ -81,6 +81,7 @@ C 940623 nrv Add batch mode
 c 940701 nrv Change VLBA output file names
 C 951012 nrv Remove DSN output to separate subroutine
 C 960223 nrv Call chmod to change permissions.
+C 960810 nrv Change ITEARL to an array
 
 	kintr = .false.
       if (kbatch) then
@@ -221,7 +222,7 @@ C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
          ilen=-1
        endif
 	IBLK=0
-	IPASP=0
+	IPASP=-1
 	IDIRP=0
 	IFTOLD=0
 	DO WHILE (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.Z24)
@@ -319,8 +320,8 @@ C
 		kintr = .true.
 	      end if
 C          For each observation, write out command line
-	      if (itearl.gt.0) call tmsub(iyr,idayr,ihr,imin,isc,
-     .        itearl,iyr,idayr,ihr,imin,isc)
+	      if (itearl(istn).gt.0) call tmsub(iyr,idayr,ihr,
+     .        imin,isc,itearl(istn),iyr,idayr,ihr,imin,isc)
 	      CALL RADED(SORP50(1,ISOR),SORP50(2,ISOR),HA2,
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
@@ -344,7 +345,7 @@ C          For each observation, write out command line
 	      ipasp = ipas(istnsk)
 	      idirp = idir
 	      IFTOLD=IFT(ISTNSK)+IFIX(IDIR*
-     .        (ITEARL+IDUR(ISTNSK))*SPEED(ICOD,istn))
+     .        (ITEARL(istn)+IDUR(ISTNSK))*SPEED(ICOD,istn))
 	      ihrp = ihr2
 	      minp = min2
 	      iscp = isc2
@@ -383,8 +384,8 @@ C
             if (icodp.ne.0.and.icod.ne.icodp) then ! write header again
               call vlbah(istin,icod,lu_outfile,ierr)
             endif
-	    if (itearl.gt.0) call tmsub(iyr,idayr,ihr,imin,isc,itearl,
-     .      iyr,idayr,ihr,imin,isc)
+	    if (itearl(istn).gt.0) call tmsub(iyr,idayr,ihr,imin,
+     .      isc,itearl(istn),iyr,idayr,ihr,imin,isc)
             do ix=1,nchan(istn,icod) ! find out if switched
               ksw=cset(invcx(ix,istn,icod),istn,icod).ne.'   '
             end do
