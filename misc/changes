@@ -4963,3 +4963,11 @@ Version 9.3.112 990216
            latest version
 
 Version 9.3.113 990217
+
+990218 WEH quikv/k4rec_mode_dis.c
+           clib/k4rec_mode_util.c
+           include/k4rec_mode_ds.h
+           misc/k4/k4.txt
+           updated for additional rec_mode command and monitor parameters
+
+Version 9.3.114 990218
