@@ -129,6 +129,24 @@ loop:
       case 48:
 	trkfrm4(&command,itask,ip);
 	break;
+      case 49:
+	rvac(&command,itask,ip);
+	break;
+      case 50:
+	wvolt(&command,itask,ip);
+	break;
+      case 51:
+	lo(&command,itask,ip);
+	break;
+      case 52:
+	pcalform(&command,itask,ip);
+	break;
+      case 53:
+	pcald(&command,itask,ip);
+	break;
+      case 54:
+	pcalports(&command,itask,ip);
+	break;
       default:
 	ierr=-4;
 	goto error;
