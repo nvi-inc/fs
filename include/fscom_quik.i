@@ -36,7 +36,7 @@ c
      . IOL2IF_FS, IPAUPC, IPCFLG,
      . IREMIF, IREMVC(15), IREPPC, IRSTTP, ISETHR,
      . ISYNFM, ITERPK_FS, ITPIVC(15), ITRAKAUS_FS,
-     . ITRAKBUS_FS, ITRAKBUS_FS, ITRKEN(28),
+     . ITRAKBUS_FS, ITRKEN(28),
      . ITRKENUS_FS(28), ITRKPA(2), ITRKPAR4(36), 
      . ITRKPC(28), ITRPER, LOSTRX, LOSTST, LSWCAL,
      . LTRKEN(4),
@@ -49,7 +49,7 @@ c
 
       LOGICAL KVrevW_FS, KV15rev_FS, KV15for_FS, KV15scale_FS,
      . KV13_FS, KV15flip_FS, KVw0_FS, KVw8_FS, KSREAD_FS,
-     . KSread_FS, KSwrite_FS, Ksdread_FS, Ksdwrite_FS,
+     . KSwrite_FS, Ksdread_FS, Ksdwrite_FS,
      . KBDwrite_FS, KBDread_FS, KHECHO_FS, KPEAKV_FS, KPOSHD_FS(2),
      . KRDWO_FS, KWRWO_FS, KDOAUX_FS, KRPTP_FS, KMVTP_FS,
      . KENTP_FS, KAUTOHD_FS
