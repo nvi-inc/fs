@@ -6,11 +6,11 @@ Response:   check/list
 
 
 Settable parameters:
-list  The list of mnemonics for modules to be checked. Only mnemonics
-      for the equipment identified in the equip.ctl control file are
-      valid in this command. Standard module mnemonics are allowed.
-      If the list of modules to be checked is empty, then chekr will
-      not check any modules.
+list    The list of mnemonics for modules to be checked. Only
+        mnemonics for the equipment identified in the equip.ctl
+        control file are valid in this command. Standard module
+        mnemonics are allowed. If the list of modules to be checked
+        is empty, then chekr will not check any modules.
 
 Monitor-only parameters: none
 

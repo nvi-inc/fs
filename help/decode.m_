@@ -15,15 +15,15 @@ counter   Error counter control: byte (default), frame, reset.
 Monitor-only parameters:
 data      Data returned according to mode specified in control
           command.
-          err   sspppppp (s=synch errors, p=parity errors) Note
-                that monitored error values are error counts, not
-                rates.
-          syn   8 - character synch word
-          time    two words: ydddhhmm and sssssccc, where ccc =
+            err   sspppppp (s=synch errors, p=parity errors) Note
+                  that monitored error values are error counts,
+                  not rates.
+            syn   8 - character synch word
+            time  two words: ydddhhmm and sssssccc, where ccc =
                   checksum
-          data    three sets of 32 data bits
-          aux   two sets of 8 characters of auxiliary data
-          crc   pass/fail for CRC check
+            data  three sets of 32 data bits
+            aux   two sets of 8 characters of auxiliary data
+            crc   pass/fail for CRC check
 
 Comments: 
 MAT module functions available. CRC check is reliable only in

@@ -2,8 +2,8 @@
 
 Syntax:     dqa=duration
 
-Response:   dqa/duration,Asampler,Atrack,Aparity,Aresync,Acalamp,
-          Acalphs,Bsampler,Btrack,Bparity,Bresync,Bcalamp,Bcalphs
+Response:   dqa/duration,Asampler,Atrack,Aparity,Aresync,Anosync,Acalamp,
+          Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bcalamp,Bcalphs
 
 
 Settable Parameters:
@@ -22,16 +22,18 @@ Atrack      Track with the A channel signal on it, as set up in the
             repro command.
 Aparity   Measured parity error rate for A channel, per Mbyte.
 Aresync   Measured resync rate for A channel, per Mbyte.
+Anoesync  Measured nosync rate for A channel, per Mbyte.
 Acalamp   Measured phase calibrator amplitude for A channel, in
           units of voltage percentage.
 Acalphs   Measured phase calibrator phase for A channel, degrees.
-Bsampler  Sampler of the B channel signal, 0 if unknown or in the form nnsd,
-          nn=baseband converter number, s=sideband u or l, d=data sample bit
-          m  or s.
+Bsampler  Sampler of the B channel signal, 0 if unknown or in the
+          form nnsd, nn=baseband converter number, s=sideband u or
+          l, d=data sample bit m  or s.
 Btrack      Track with the B channel signal on it, as set up in the
             repro command.
 Bparity   Measured parity error rate for B channel, per Mbyte.
 Bresync   Measured resync rate for B channel, per Mbyte.
+Bnosync   Measured nosync rate for B channel, per Mbyte.
 Bcalamp   Measured phase calibrator amplitude for B channel, in
           units of voltage percentage.
 Bcalphs   Measured phase calibrator phase for B channel, degrees.
