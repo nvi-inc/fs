@@ -238,10 +238,15 @@ C
 C
       if(itask.eq.3) then
       call fs_get_ipashd(ipashd)
+      call fs_get_drive_type(drive_type)
         do i=1,2
           if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
             call mic2vlt(i,ipashd(i),kautohd_fs,posnhd(i),volt(i),ip)
-            nch = nch+ir2as(volt(i),ibuf,nch,8,3)
+            if(drive_type.ne.VLBA2) then
+               nch = nch+ir2as(volt(i),ibuf,nch,8,3)
+            else
+               nch = nch+ir2as(volt(i),ibuf,nch,6,0)
+            endif 
           endif
           nch = mcoma(ibuf,nch)
         enddo
@@ -249,7 +254,11 @@ C
 C
       do i=1,2
         if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
-          nch = nch+ir2as(volts(i),ibuf,nch,8,3)
+          if(drive_type.ne.VLBA2) then
+            nch = nch+ir2as(volts(i),ibuf,nch,8,3)
+          else
+            nch = nch+ir2as(volts(i),ibuf,nch,6,0)
+          endif
         endif
         nch = mcoma(ibuf,nch)
       enddo
@@ -257,7 +266,11 @@ C
       if(itask.eq.3) then
         do i=1,2
           if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
-            nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
+            if(drive_type.ne.VLBA2) then
+              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
+            else
+              nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,6,0)
+            endif
           endif
           nch = mcoma(ibuf,nch)
         enddo

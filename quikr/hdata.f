@@ -67,10 +67,13 @@ C  5. Here we read the device to get current head positions.
 C
 500   continue
 C
+      call fs_get_drive_type(drive_type)
       nchan=8
       do i=1,nchan
-        call get_atod(i,volts(i),ip)
-        if(ip(3).ne.0) goto 800
+        if(drive_type.ne.VLBA2.or.i.eq.5.or.i.eq.6) then
+          call get_atod(i,volts(i),ip)
+          if(ip(3).ne.0) goto 800
+        endif
       enddo
 C
 C  6. Now we must prepare a response.
@@ -81,7 +84,9 @@ C
       nch = ichmv_ch(ibuf,nch,'/')
 C
       do i=1,nchan
-        nch = nch+ir2as(volts(i),ibuf,nch,8,3)
+        if(drive_type.ne.VLBA2.or.i.eq.5.or.i.eq.6) then
+          nch = nch+ir2as(volts(i),ibuf,nch,8,3)
+        endif
         nch = mcoma(ibuf,nch)
       enddo
 C

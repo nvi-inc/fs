@@ -109,7 +109,12 @@ C
       if(ksdread_fs) nch=nch+ir2as(rsdread_fs,ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
-      if(kswrite_fs) nch=nch+ir2as(rswrite_fs,ibuf,nch,8,2)
+      call fs_get_drive_type(drive_type)
+      if(kswrite_fs.and.drive_type.NE.VLBA2) then
+        nch=nch+ir2as(rswrite_fs,ibuf,nch,8,2)
+      else if(kswrite_fs) then
+        nch=nch+ir2as(rswrite_fs,ibuf,nch,10,4)
+      endif
       nch=mcoma(ibuf,nch)
 C
       if(ksread_fs) nch=nch+ir2as(rsread_fs,ibuf,nch,8,2)

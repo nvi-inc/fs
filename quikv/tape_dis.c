@@ -44,7 +44,8 @@ long ip[5];
          get_res(&response, &buffer); mcb6tape(&lclc, response.data);
          get_res(&response, &buffer); mc30tape(&lclm, response.data);
          get_res(&response, &buffer); mc33tape(&lclm, response.data);
-         get_res(&response, &buffer); mc57tape(&lclm, response.data);
+	 if(shm_addr->equip.drive_type != VLBA2)
+	   get_res(&response, &buffer); mc57tape(&lclm, response.data);
          get_res(&response, &buffer); mc72tape(&lclm, response.data);
          get_res(&response, &buffer); mc73tape(&lclm, response.data);
          get_res(&response, &buffer); mc74tape(&lclm, response.data);

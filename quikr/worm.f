@@ -25,6 +25,11 @@ C
       call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar=min0(ilen,ireg(2))
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+        ip(3)=-273
+        goto 990
+      endif
       ieq=iscn_ch(ibuf,1,nchar,'=')
       if(ieq.eq.0) then
         goto 500

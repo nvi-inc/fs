@@ -18,6 +18,12 @@ C
       integer*2 ibuf(6)
       integer iclass, nrec, rn_take
 C
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+        ip(3)=0
+        return
+      endif
+c
       if(lock.eq.'lock') then
         istat = rn_take('lvdt ',0)
         if (istat.eq.1) then

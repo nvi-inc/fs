@@ -21,6 +21,16 @@ C
       real*4 micdst,micnow,micoff,vltnow,miclst,vltlst,vltoth
       real*4 spdnew,spdraw,spdold,vltlim,scale,mictol
 C
+C vlba2 drive
+C
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+        call fc_v2_head_vmov(ihead,volt,ip)
+        return
+      endif
+C
+C all others
+C
       if(volt.lt.-0.010) then
        scale=rslope(ihead)
       else if(volt.gt.0.010) then

@@ -252,10 +252,13 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       if(drive.eq.MK3) then
         nch=ichmv_ch(ib,nch,'mk3')
-      else if(drive.eq.VLBA) then
+      else if(drive.eq.VLBA.and.drive_type.eq.VLBA) then
         nch=ichmv_ch(ib,nch,'vlba')
+      else if(drive.eq.VLBA.and.drive_type.eq.VLBA2) then
+        nch=ichmv_ch(ib,nch,'vlba2')
       else if(drive.eq.MK3) then
         nch=ichmv_ch(ib,nch,'mk4')
       endif

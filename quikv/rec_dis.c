@@ -50,16 +50,23 @@ long ip[5];
         int2str(feet,response.data,-5,1); 
         memcpy(shm_addr->LFEET_FS,feet,5);
 
-        get_res(&response, &buffer);  /* 31 */
-        totlen = response.data;
-        sprintf(output+strlen(output),"%u",response.data);
+        if (shm_addr->equip.drive_type != VLBA2) {
+          get_res(&response, &buffer);  /* 31 */
+          totlen = response.data;
+          sprintf(output+strlen(output),"%u",response.data);
+	}
         strcat(output,",");
 
-        get_res(&response, &buffer);  /* 32 */
-        sprintf(output+strlen(output),"%u",response.data);
+        if (shm_addr->equip.drive_type != VLBA2) {
+          get_res(&response, &buffer);  /* 32 */
+          sprintf(output+strlen(output),"%u",response.data);
+        }
         strcat(output,",");
-        totlen+=response.data;
-        sprintf(output+strlen(output),"%d",totlen);
+
+        if (shm_addr->equip.drive_type != VLBA2) {
+          totlen+=response.data;
+          sprintf(output+strlen(output),"%d",totlen);
+	}
         strcat(output,",");
 
         get_res(&response, &buffer);  /* 71 */

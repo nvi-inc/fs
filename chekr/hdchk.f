@@ -27,6 +27,7 @@ C
         goto 1091
       endif
       call fs_get_ipashd(ipashd)
+      call fs_get_drive_type(drive_type)
       do ihd=1,2
         if(kposhd_fs(ihd)) then
           inerr = 0
@@ -48,8 +49,12 @@ C
           else
             scale=max(pslope(ihd),rslope(ihd))
           endif
+          if(drive_type.NE.VLBA2) then
           if (abs(poffx(ihd)).gt.((ilvtl_fs+2)*0.0049+0.0026)*scale)
      &        inerr = inerr+1
+          else
+              if(abs(poffx(ihd)).gt.(ilvtl_fs)) inerr=inerr+1
+          endif
           call fs_get_icheck(icheck(20),20)
           if(icheck(20).gt.0.and.ichecks(20).eq.icheck(20)) then
             if (inerr.ge.1) call logit7ic(0,0,0,0,-350-ihd,lwho,'hd')

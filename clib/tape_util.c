@@ -34,6 +34,8 @@ char *ptr;
       case 2:
          if (ptr==NULL || *ptr == '\0') 
            lcl->reset = -1;
+         else if (shm_addr->equip.drive_type == VLBA2)
+           ierr = -300;
          else if (0==strcmp(ptr,"reset"))
            lcl->reset = 0x00;
          else {
@@ -121,6 +123,7 @@ struct tape_mon *lcl;
           sprintf(output,"unlocked");
         break;
       case 5:  /* vacuum ok? */
+        printf("lcl->stat %x\n",lcl->stat);
         if ((lcl->stat & 0x40) == 0) {
           sprintf(output,"notready");
           shm_addr->IRDYTP = 1;
@@ -131,6 +134,8 @@ struct tape_mon *lcl;
         }
         break;
       case 6:
+        if (shm_addr->equip.drive_type == VLBA2 )
+	  break;
         outvac=(double)lcl->vacuum;
         outvac = outvac*shm_addr->outscsl + shm_addr->outscint;
         flt2str(output,outvac,4,1);
