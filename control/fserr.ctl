@@ -2582,6 +2582,9 @@ Eight parameter must be a position or "uns".
 RV -301
 One or eight positions must be specified.
 ""
+RV -302
+Incorrect number of positions returned (internal error).
+""
 RV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
 ""
