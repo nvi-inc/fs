@@ -89,7 +89,7 @@ C
 C BREAK DETECTED
 C 
 80010 continue
-      ierr=1 
+      ierr=-1 
       goto 90000 
 C 
 C CLEAN UP AND EXIT 
