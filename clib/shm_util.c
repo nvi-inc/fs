@@ -48,6 +48,13 @@ key_t key;
 {
    char  *shmat();
 
+
+   if (C_RES < sizeof(struct fscom)) {
+     printf("shm_map: fscom C area too large: %d bytes \n",
+	    sizeof(struct fscom));
+     exit(-1);
+   }
+
    shmid = shmget (key, 0, 0 );
    if ( shmid == -1 ) {
         perror("shm_att: translating key failed");
@@ -60,6 +67,7 @@ key_t key;
 	perror("shm_att: attaching memory segment failed");
 	exit( -1);
    }
+
 }
 
 int shm_det( )
