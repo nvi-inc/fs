@@ -5,8 +5,7 @@ C
       dimension par(1)
 C 
       if(abs(par(3)).lt.abs((x-par(2)))*1.d-30) then
-        write(6,991)
-991     format(' fp error gaus 1'/) 
+         call put_stderr(' fp error gauss 1\n'//char(0))
         e=0.0
       else
         e=(x-par(2))/par(3) 

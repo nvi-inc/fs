@@ -19,9 +19,12 @@ C Warning:
 C         Negative and zero values of IFC are not support
 C
       INTEGER NCHAR
+      character*72 string
 C
       IF(IFC.LE.0) THEN
-	  WRITE(6,*) ' ICHMV: Illegal argument',IFC
+	  WRITE(string,*) ' ICHMV: Illegal argument',IFC
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C

@@ -21,9 +21,12 @@ C         NCHAR must be non-negative
 C         IC+NCHAR.LE.32767
 C
       INTEGER I,IEND
+      character*72 string
 C
       IF(IC.LE.0.OR.NC.LT.0) THEN
-	  WRITE(6,*) ' IFILL: Illegal arguments',IC,NC
+	  WRITE(string,*) ' IFILL: Illegal arguments',IC,NC
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C
@@ -32,7 +35,9 @@ C
       IEND=32767-NC+1
 C
       IF(IC.GT.IEND) THEN
-	  WRITE(6,*) ' IFILL: Illegal combination',IC,NC
+	  WRITE(string,*) ' IFILL: Illegal combination',IC,NC
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C

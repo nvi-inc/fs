@@ -24,9 +24,12 @@ C         IFC+NCHAR.LT.32767
 C         ICL+NCHAR.LE.32767
 C
       INTEGER I,JCHAR,IEND
+      character*72 string
 C
       IF(ICL.LE.0.OR.IFC.LE.0.OR.NCHAR.LT.0) THEN
-	  WRITE(6,*) ' ICHMV: Illegal arguments',IFC,ICL,NCHAR
+	  WRITE(string,*) ' ICHMV: Illegal arguments',IFC,ICL,NCHAR
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C
@@ -38,7 +41,9 @@ C
       IEND=32767-NCHAR+1
 C
       IF(IFC.GE.IEND.OR.ICL.GT.IEND) THEN
-	  WRITE(6,*) ' ICHMV: Illegal combination',IFC,ICL,NCHAR
+	  WRITE(string,*) ' ICHMV: Illegal combination',IFC,ICL,NCHAR
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C
