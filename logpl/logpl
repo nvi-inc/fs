@@ -549,7 +549,14 @@ proc readData {inx} {
 			set datapos [expr $datapos+[string length $selectMatrix($inx,5)]]
 			set dataline [string range $readline $datapos [string length $readline]]
 		    }
+
+                    # First remove all blanks, and leave only the commas.
+                    regsub -all {[ ]*,[ ]*} $dataline , dataline
+                    regsub -all {^[ ]+} $dataline {} dataline
+                    regsub -all {[ ]+} $dataline , dataline
+                    # Split it into parameters.
 		    set datalist [split $dataline ,]
+
 		    if { $selectMatrix($inx,2) > 0 } {
 			set value [lindex $datalist [expr $selectMatrix($inx,2)-1]]
 		    } else {
