@@ -30,7 +30,12 @@ void fmpopen_(dcb,filename,error,options,dcbb,len,leno)
   so=strchr(iopt,' ');
   if(so != NULL) *so='\0';
   if ((*dcb = fopen(iname, iopt)) == NULL) {
-    perror("fmpopen");
+    if(errno < sys_nerr && errno > 0)
+      fprintf(stderr,"fmpopen: %s, %s\n",iname,sys_errlist[errno]);
+    else {
+      fprintf(stderr,"%s",iname);
+      perror(", fmpopen");
+    }
     *error=-1;
   }
   return;
