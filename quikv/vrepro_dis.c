@@ -35,12 +35,47 @@ long ip[5];
          memcpy(&lclc,&shm_addr->vrepro,sizeof(lclc));
       else {
          opn_res(&buffer,ip);
-         get_res(&response, &buffer); mc90vrepro(&lclc, response.data);
-         get_res(&response, &buffer); mc91vrepro(&lclc, response.data);
-         get_res(&response, &buffer); mc94vrepro(&lclc, response.data);
-         get_res(&response, &buffer); mc95vrepro(&lclc, response.data);
          get_res(&response, &buffer); mc98vrepro(&lclc, response.data);
          get_res(&response, &buffer); mc99vrepro(&lclc, response.data);
+
+         get_res(&response, &buffer); 
+	 if(lclc.head[0]==1) 
+	   mc90vrepro(&lclc, response.data);
+
+         get_res(&response, &buffer);
+	 if(lclc.head[0]==1) 
+	   mc91vrepro(&lclc, response.data);
+
+	 if(shm_addr->equip.drive == VLBA4) {
+	   get_res(&response, &buffer); 
+	   if(lclc.head[0]==2) 
+	     mc92vrepro(&lclc, response.data);
+
+	   get_res(&response, &buffer);
+	   if(lclc.head[0]==2) 
+	     mc93vrepro(&lclc, response.data);
+	 }
+
+         get_res(&response, &buffer);
+	 if(lclc.head[0]==1) 
+	   mc94vrepro(&lclc, response.data);
+
+         get_res(&response, &buffer);
+	 if(lclc.head[0]==1) 
+	   mc95vrepro(&lclc, response.data);
+
+	 if(shm_addr->equip.drive == VLBA4) {
+	   get_res(&response, &buffer);
+	   if(lclc.head[0]==2) 
+	     mc96vrepro(&lclc, response.data);
+
+	   get_res(&response, &buffer);
+	   if(lclc.head[0]==2) 
+	     mc97vrepro(&lclc, response.data);
+	 }
+
+         get_res(&response, &buffer); mca8vrepro(&lclc, response.data);
+
          if(response.state == -1) {
             clr_res(&buffer);
             ierr=-401;
