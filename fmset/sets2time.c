@@ -8,14 +8,12 @@
 
 #include "../include/fs_types.h"
 
-#undef TRUE
-#undef FALSE
-
 #include "../rclco/rcl/rcl_def.h"
 
 #include "fmset.h"
 
 extern long ip[5];           /* parameters for fs communications */
+long nanosec;
 
 void skd_run();
 void skd_par();
@@ -32,13 +30,25 @@ time_t formtime;
   struct rclcn_res_buf resbuf;
   int year, day, hour, min, sec;
   ibool relative;
-  long int nanosec;
+  long int dnanosec;
 
+  time_t unixtime; /* computer time */
+  int    unixhs;
+  time_t fstime; /* field system time */
+  int    fshs;
+  time_t formtime2; /* formatter time received from mcbcn */
+  int    formhs;
+  long before,after;
+
+  if(nanosec==0)
+    goto set;
+
+  rte_rawt(&before);
   ini_rclcn_req(&reqbuf);
 
   relative=FALSE;
-  nanosec=0;
-  add_rclcn_delay_set(&reqbuf,"rc",relative,nanosec);
+  dnanosec=0;
+  add_rclcn_delay_set(&reqbuf,"rc",relative,dnanosec);
 
   end_rclcn_req(ip,&reqbuf);
 
@@ -70,7 +80,13 @@ time_t formtime;
   }
 
   clr_rclcn_res(&resbuf);
-  
+
+  gets2time(&unixtime,&unixhs,&fstime,&fshs,&formtime2,&formhs);
+
+  rte_rawt(&after);
+
+  formtime+=(after-before+50)/100;
+
 set:
   ini_rclcn_req(&reqbuf);
   
