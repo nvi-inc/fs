@@ -72,7 +72,7 @@ C
           ity = ias2b(ibuf,23,2)
           ieq1 = ia2hx(ibuf,26,1)
           ieq2 = ia2hx(ibuf,27,1)
-          call ichmv(lnames(1,iname),1,ibuf,1,12)
+          idummy = ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
@@ -155,7 +155,7 @@ C
       ierr=0
       call rdtib(idcbsk,ip)
       if (ip(3).ne.0) then
-        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
         call logit7ci(0,0,0,1,-115,'bo',ip(3))
         call fc_putln('ibcon initialization failed')
       else
@@ -191,7 +191,7 @@ c
       ierr=ip(3)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-190,'bo',ierr)
-        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
         call fc_putln('mcbcn initialization failed')
         return
       else
@@ -207,7 +207,7 @@ c
       ierr=ip(3)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-191,'bo',ierr)
-        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
         call fc_putln('rclcn initialization failed')
         return
       else
