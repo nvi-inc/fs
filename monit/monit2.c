@@ -36,6 +36,9 @@ main()
 
   initscr();
   signal(SIGINT, die);
+  noecho ();
+  nodelay(stdscr, TRUE);
+
   curs_set(0);
   clear();
   curs_set(0);
@@ -46,6 +49,8 @@ main()
   m2init();
 
   while(1) {
+    while(ERR!=getch())
+      ;
     rte_time(it,&iyear);
     mout2(it,iyear);
     move(ROW1,COL1+16);
