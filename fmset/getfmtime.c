@@ -8,6 +8,7 @@
 void getvtime();
 void get4time();
 extern int rack;
+extern int source;
 
 void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs)
 time_t *unixtime; /* computer time */
@@ -23,14 +24,18 @@ int    *formhs;
     exit(0);
   }
 
-   if(rack&VLBA)
-	getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
-   else {
+  if (source == S2) {
+    gets2time(unixtime,unixhs,fstime,fshs,formtime,formhs);
+  } else {
+    if(rack&VLBA)
+      getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
+    else {
+      get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
+      if(*formhs > 4 || *formhs < 95) {
+	if( *formhs < 92)
+	  rte_sleep((long) (92-*formhs));
 	get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
-        if(*formhs > 4 || *formhs < 95) {
-           if( *formhs < 92)
-             rte_sleep((long) (92-*formhs));
-	   get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
-        }
-   }
+      }
+    }
+  }
 }
