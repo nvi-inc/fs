@@ -862,7 +862,7 @@ doublereal *double__;
     char *str;
     double factor;
   } freq[] = {
-    { "mHz", 1e-6 },
+    { "mHz", 1e-3 },
     { "Hz" , 1.0 },
     { "kHz", 1e3 },
     { "MHz", 1e6 },
