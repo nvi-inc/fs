@@ -9,6 +9,8 @@ void fmpclose_(dcb,error)
 
   *error=0;
 
+  if(*dcb == NULL)
+	return;
   if (EOF == fclose(*dcb) && errno != EBADF) {
     *error=-1;
   }
