@@ -2,7 +2,8 @@
 
 #include <sys/types.h>
 #include <sys/times.h>
-#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -13,10 +14,24 @@ void rte_cmpt( poClock, plCentiSec)
 time_t *poClock;
 long *plCentiSec;
 {
+     struct timeval tv;
+     long lRawTime;
 
-    *poClock = (*plCentiSec/100) + shm_addr->time.secs_off;
+     rte_rawt(&lRawTime);
+     if(0!= gettimeofday(&tv, NULL)) {
+       perror("getting timeofday, fatal\n");
+       exit(-1);
+     }
+     *poClock=tv.tv_sec;
+     *plCentiSec=tv.tv_usec/10000+lRawTime-*plCentiSec;
 
-    *plCentiSec %= 100;
+    if (*plCentiSec >= 0) { 
+      *poClock += (*plCentiSec/100);
+      *plCentiSec %= 100;
+    } else {
+      *poClock += ((*plCentiSec-99)/100);
+      *plCentiSec = (100 + (*plCentiSec % 100)) %100;
+    }
 
     return;
 }
