@@ -1,69 +1,35 @@
-      subroutine frmaux4(ibuf,posn,ipas,koffset)
+      subroutine frmaux4(ibuf,posn)
       implicit none
       integer*2 ibuf(1)
-      real posn(1)
-      integer ipas(1)
-      logical koffset
+      real*4 posn(2)
 C
-C FRMAUX4: FORMAT AUX DATA INTO BUFFER FOR MARK IV FORMATTER
+C FRMAUX: FORMAT AUX DATA INTO BUFFER
 C
 C INPUT:
-C   POSN: position of write head in microns
+C   IPOSN: position of write head in microns
 C   IPAS: pass number of write head
 C         odd, implies forward pass (-1 is odd)
 C         even, implies reverse pass (-2 is even)
-C   KOFFSET: false implies no calibration, not dependent on ipas.
+C         0, implies no calibration
 C
 C OUTPUT:
-C   IBUF: output hollerith aux data field, 8 characters
-C         <abdcwxyz>
-C         abcd head stack 0 position in microns
-C         wxyz head stack 1 position in microns
-C         a & w have the following bit structure:
-C           bit 0  thousands digit for the micron position, usually 0
-C           bit 1  0 for forward calibration (odd passes), 1 for uncalibrated 
-C           bit 2  0 for reverse calibration (even passes), 1 for uncalibrated 
-C           bit 3  sign of the position, 0 for positive, 1 for negative
+C   IBUF: output hollerith aux data field, 12 characters
+C         <abcdwxyz>
+C         abcd encodes the micron position head 1
+C         wxyz encodes the micron position head 2
+C           0000-3999 are positive positions
+C           4000-7999 are negative positions as 4000+abs(position)
 C
-      integer ipos1, ipos, ihunds, itens, iones, itemp
-      integer ibit0,ibit1,ibit2,ibit3,ibits
-      integer index, iloop, ichmv, idum, ihx2a, iposn
+      integer iof1,iof2,idumm1,ib2as,iposn(2)
 C
-      call ichmv_ch(ibuf,1,'00000000')
-      do iloop = 1,2
-        ibit0=z'00'
-        ibit1=z'00'
-        ibit2=z'00'
-        ibit3=z'00'
-        ibits=z'00'
-        iposn = posn(iloop)+SIGN(0.5,posn(iloop))
-        ipos1 = ABS(iposn)
-        if (ipos1.ge.1000) then
-          ibit0=z'01' 
-          ipos = MOD(ipos1,1000)
-          ihunds = ipos/100
-          itemp = MOD(ipos,100)
-        else
-          ihunds = ipos1/100
-          itemp = MOD(ipos1,100)
-        endif
-        itens = itemp/10
-        iones = MOD(itemp,10)
-        if ((MOD(ipas(iloop),2).ne.0).and.(.not.koffset)) ibit1=z'02'
-        if ((MOD(ipas(iloop),2).eq.0).and.(.not.koffset)) ibit2=z'04'
-        if (iposn.lt.0) ibit3=z'08'
-        ibits = ibit0 + ibit1 + ibit2 + ibit3
-
-        index=iloop*2-1
-
-        if (ipas(iloop).ne.0) then
-          idum = ichmv(ibuf(index),1,ihx2a(ibits),2,1)
-          idum = ichmv(ibuf(index),2,ihx2a(ihunds),2,1)
-          idum = ichmv(ibuf(index+1),1,ihx2a(itens),2,1)
-          idum = ichmv(ibuf(index+1),2,ihx2a(iones),2,1)
-        endif
-
-      enddo
+      iposn(1)=nint(posn(1))
+      iposn(2)=nint(posn(2))
+      iof1=min(abs(iposn(1)),3999)    !limit offset to 3999
+      iof2=min(abs(iposn(2)),3999)    !limit offset to 3999
+      if(iposn(1).lt.0) iof1=iof1+4000
+      if(iposn(2).lt.0) iof2=iof2+4000
+      idumm1 = ib2as(iof1,ibuf,1,o'40000'+o'400'*4+4)
+      idumm1 = ib2as(iof2,ibuf,5,o'40000'+o'400'*4+4)
 C
       return
       end
