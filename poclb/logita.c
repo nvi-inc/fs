@@ -30,9 +30,11 @@ char *what;          /* 2-char string with more info         */
 */
   rte_time(it,&it[5]);
   buf[0]='\0';
+  int2str(buf,it[5]%100,-2,1);
   int2str(buf,it[4],-3,1);
   int2str(buf,it[3],-2,1);
   int2str(buf,it[2],-2,1);
+  int2str(buf,it[1],-2,1);
   int2str(buf,it[1],-2,1);
 
 /* For error messages, put ?ERROR xx (nn) into the log entry.

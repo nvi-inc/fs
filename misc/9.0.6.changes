@@ -1,0 +1,17 @@
+950920 WEH rtelb/rte_fixt.c
+           No longer gives a negative centiseconds if the computer clock was
+           fast compared to UT and the  amount it was fast was less than the
+           time since the last boot.
+
+950920 WEH ddout/ddout.c
+           Now detects "ack" only responses correctly for the new log
+           format.
+
+950920 WEH poclb/logit.c
+           Corrected for the new log format. 
+
+950920 WEH poclb/logita.c
+           Corrected for the new log format. 
+
+950920 WEH quikr/fsvrs.f
+           Corrected for new version number format.
