@@ -127,7 +127,7 @@ enddef
 define  ready         00000000000
 sxcts
 "rxmon
-newtape
+newtape=$
 loader
 label
 rec
@@ -135,7 +135,7 @@ rec
 enddef
 define  unlod         00000000000
 check=*,-tp
-unloader
+unloader=$
 xdisp=on
 "**dismount this tape now**"
 wakeup
