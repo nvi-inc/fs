@@ -63,6 +63,8 @@ typedef struct fscom {
 	int iratfm;
 	int ispeed;
 	int idirtp;
+	long cips;
+        int bit_density;
 	int ienatp;
 	int inp1if;
 	int inp2if;
@@ -95,6 +97,7 @@ typedef struct fscom {
            int vkrepro;
            int vkenable;
            int vkmove;
+	   int systracks;
            long rc_mv_tm;
            int vklowtape;
            int vkload;
@@ -115,12 +118,14 @@ typedef struct fscom {
            int rack;
            int drive;
 	   int drive_type;
+	   int rack_type;
         } equip; 
 
         int klvdt_fs;
         struct vrepro_cmd vrepro;
         struct vform_cmd vform;
         struct venable_cmd venable;
+	struct systracks_cmd systracks;
         struct dqa_cmd dqa;
         float freqlo[4];
         float frequp[4];
@@ -144,6 +149,7 @@ typedef struct fscom {
           int index;
           char model;
         } time;
+	float posnhd[2];
         int class_count;
         float horaz[MAX_HOR];
         float horel[MAX_HOR];
@@ -153,4 +159,6 @@ typedef struct fscom {
         int lowtp;
         int form_version;
         int sterp;
+	int wrhd_fs;
+	int vfm_xpnt;
 } Fscom;
