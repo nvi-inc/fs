@@ -4,8 +4,11 @@
 #include <string.h>
 #include <math.h>
 #include <sys/types.h>
+
 #include "../include/params.h"
-#include "../include/dqa_ds.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 int dqa_dec(lcl,count,ptr)
 struct dqa_cmd *lcl;
@@ -58,13 +61,25 @@ int dur;
 float rate;
 {
     int ind;
+    static int kfirst = TRUE;
+    static char *type;
+    char *code2bs();
+
+    if (kfirst) {
+      if(shm_addr->equip.rack_type == VLBA)
+	type="vlba";
+      else if(shm_addr->equip.rack_type == VLBAG)
+	type="vlbag";
+      else
+	type="";
+      kfirst=FALSE;
+    }  
 
     output=output+strlen(output);
 
     switch (*count) {
       case 1:
-        sprintf(output,"b%02d%c",lcl->a.bbc>=0?lcl->a.bbc:-lcl->a.bbc,
-                lcl->a.bbc>0 ? 'u' : (lcl->a.bbc<0 ? 'l' : 'x' ) );
+	sprintf(output,"%4s",code2bs(lcl->a.bbc,type));
         break;
       case 2:
         sprintf(output,"%2.2d",lcl->a.track);
@@ -84,9 +99,7 @@ float rate;
         output[strlen(output)-1]='\0';
         break;
       case 7:
-        sprintf(output,"b%02d",lcl->b.bbc);
-        sprintf(output,"b%02d%c",lcl->b.bbc>=0?lcl->b.bbc:-lcl->b.bbc,
-                lcl->b.bbc>0 ? 'u' : (lcl->b.bbc<0 ? 'l' : 'x' ) );
+	sprintf(output,"%4s",code2bs(lcl->b.bbc,type));
         break;
       case 8:
         sprintf(output,"%2.2d",lcl->b.track);
