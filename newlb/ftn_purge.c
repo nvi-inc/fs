@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <errno.h>
 
 #define MAX_NAME 64
 
@@ -27,7 +28,7 @@ int *ierr,len;
    *ierr=unlink(iname);    /* do it */
    return;
 }
-ftn_rename__(old,erro,new,errn,leno,lenn)
+void ftn_rename__(old,erro,new,errn,leno,lenn)
 char *old,*new;
 int *erro,*errn,leno,lenn;
 {
@@ -66,14 +67,20 @@ int *erro,*errn,leno,lenn;
    if(s1 != NULL) *s1='\0';
 
    *errn=link( oname, nname); /* make the new link */
-/* perror(""); */
-   if(*errn != 0) return;
+
+   if(*errn != 0) {
+     perror("ftn_rename:link");
+     fflush(NULL);
+     return;
+   }
 
    *erro=unlink(oname);    /* unlink the old name */
-   if(*erro != 0) return;
+   if(*erro != 0) {
+     perror("ftn_rename:unlink");
+     fflush(NULL);
+     return;
+   }
 
-/* perror(""); */
-   *errn=chmod(nname,0666);
    return;
 }
 #define MAX_STRING  256
