@@ -16,7 +16,7 @@ c
      . ILENTS, ILVTL_FS, IMONDS, INTAMP, INTPHA, IRDCL_FS,
      . ITR2VC(28,4), IWRCL_FS, 
      . IYRCTL_FS, LVSENS, MODSA, NHORWV, rxncodes,
-     . NPRSET, NRX_FS, RPDT_FS, RPRO_FS,
+     . NPRSET, NRX_FS, RPDT_FS, RPRO_FS, RDHD_FS,
      . iswavif3_fs,
      . b_init(INT_ALIGN),e_init
 
@@ -42,7 +42,7 @@ c
      . IRDCL_FS, ITR2VC, IWRCL_FS, 
      . IYRCTL_FS, LVSENS,
      . MODSA, NHORWV, rxncodes,
-     . NPRSET, NRX_FS, RPDT_FS, RPRO_FS,
+     . NPRSET, NRX_FS, RPDT_FS, RPRO_FS, RDHD_FS,
      . iswavif3_fs,
      . KCHECK, KADAPT_FS, KIWSLW_FS,
      . idevmat, idevdb, idevwand,
