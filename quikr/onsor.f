@@ -37,6 +37,7 @@ C
       if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
         call run_prog('antcn','wait',3,idum,idum,idum,idum)
         call rmpar(ip)
+        call run_prog('flagr','nowait',0,0,0,0,0)
       else
         ierr= -302
         goto 990

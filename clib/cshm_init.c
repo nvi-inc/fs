@@ -224,6 +224,12 @@ void cshm_init()
 
   shm_addr->vifd_tpi[3]=65536;
 
+  shm_addr->tpicd.continuous=0;
+  shm_addr->tpicd.cycle=0;
+  for(i=0;i<16*2+4;i++)
+     shm_addr->tpicd.itpis[i]=0;
+
+
   return;
 }
 

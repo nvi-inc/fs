@@ -170,3 +170,19 @@ $misc
 * Examples:
 * equipment Mark4  Mark4  none
 * equipment VLBA   VLBA  VLBA   
+*--------------------------------------------------------------
+* TPI daemon setup
+*   prompt? 
+*     NO:  never prompt, use the specified period for all schedules
+*     YES: prompt for the period for all schedules and use 
+*          the period specified as the default
+*   period 
+*     <value>: specify the TPI sampling period in centiseconds, 0=off
+* 
+* examples:
+*       prompt? period 
+* tpicd  NO       0    <<<<<<< don't use the TPI daemon
+* tpicd  NO      100   <<<<<<< always use 1 sec period
+* tpicd  YES      0    <<<<<<< prompt for period, default is OFF
+* tpicd  YES     500   <<<<<<< prompt for period, default is 5 sec
+*--------------------------------------------------------------
