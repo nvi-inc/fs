@@ -7,8 +7,8 @@
 
 #define INEXT_N 3
 #define KENASTK_N 2
-#define LFEET_N 5
-#define LGEN_N 4
+#define LFEET_N 6
+#define LGEN_N 2
 #define LNEWPR_N 8
 #define LNEWSK_N 8
 #define LPRC_N 8
@@ -55,100 +55,128 @@ void fs_get_ibmcb__(ibmcb)
 	  *ibmcb = shm_addr->ibmcb;
 	}
 
-void fs_set_wrvolt__(wrvolt)
+void fs_set_wrvolt__(wrvolt,i)
 	float *wrvolt;
+	int *i;
 	{
-	  shm_addr->wrvolt = *wrvolt;
+	  if(*i==1||*i==2)
+	    shm_addr->wrvolt[*i-1] = wrvolt[*i-1];
 	}
 
-void fs_get_wrvolt__(wrvolt)
+void fs_get_wrvolt__(wrvolt,i)
 	float *wrvolt;
+	int *i;
 	{
-	  *wrvolt = shm_addr->wrvolt;
+	  if(*i==1||*i==2)
+	    wrvolt[*i-1] = shm_addr->wrvolt[*i-1];
 	}
 
-void fs_set_itpthick__(itpthick)
-	int *itpthick;
+void fs_set_itpthick__(itpthick,i)
+	int *itpthick,*i;
 	{
-	  shm_addr->itpthick = *itpthick;
+	  if(*i==1||*i==2)
+	    shm_addr->itpthick[*i-1] = itpthick[*i-1];
 	}
 
-void fs_get_itpthick__(itpthick)
-	int *itpthick;
+void fs_get_itpthick__(itpthick,i)
+	int *itpthick,*i;
 	{
-	  *itpthick = shm_addr->itpthick;
+	  if(*i==1||*i==2)
+	    itpthick[*i-1] = shm_addr->itpthick[*i-1];
 	}
 
-void fs_set_capstan__(capstan)
-	int *capstan;
+void fs_set_capstan__(capstan,i)
+	int *capstan,*i;
 	{
-	  shm_addr->capstan = *capstan;
+	  if(*i==1||*i==2)
+	    shm_addr->capstan[*i-1] = capstan[*i-1];
 	}
 
-void fs_get_capstan__(capstan)
-	int *capstan;
+void fs_get_capstan__(capstan,i)
+	int *capstan,*i;
 	{
-	  *capstan = shm_addr->capstan;
+	  if(*i==1||*i==2)
+	    capstan[*i-1] = shm_addr->capstan[*i-1];
 	}
 
-void fs_set_outscsl__(outscsl)
+void fs_set_outscsl__(outscsl,i)
 	float *outscsl;
+	int *i;
 	{
-	  shm_addr->outscsl = *outscsl;
+	  if(*i==1||*i==2)
+	    shm_addr->outscsl[*i-1] = outscsl[*i-1];
 	}
 
-void fs_get_outscsl__(outscsl)
+void fs_get_outscsl__(outscsl,i)
 	float *outscsl;
+	int *i;
 	{
-	  *outscsl = shm_addr->outscsl;
+	  if(*i==1||*i==2)
+	    outscsl[*i-1] = shm_addr->outscsl[*i-1];
 	}
 
-void fs_set_inscsl__(inscsl)
+void fs_set_inscsl__(inscsl,i)
 	float *inscsl;
+	int *i;
 	{
-	  shm_addr->inscsl = *inscsl;
+	  if(*i==1||*i==2)
+	    shm_addr->inscsl[*i-1] = inscsl[*i-1];
 	}
 
-void fs_get_inscsl__(inscsl)
+void fs_get_inscsl__(inscsl,i)
 	float *inscsl;
+	int *i;
 	{
-	  *inscsl = shm_addr->inscsl;
+	  if(*i==1||*i==2)
+	    inscsl[*i-1] = shm_addr->inscsl[*i-1];
 	}
 
-void fs_set_outscint__(outscint)
+void fs_set_outscint__(outscint,i)
 	float *outscint;
+	int *i;
 	{
-	  shm_addr->outscint = *outscint;
+	  if(*i==1||*i==2)
+	    shm_addr->outscint[*i-1] = outscint[*i-1];
 	}
 
-void fs_get_outscint__(outscint)
+void fs_get_outscint__(outscint,i)
 	float *outscint;
+	int *i;
 	{
-	  *outscint = shm_addr->outscint;
+	  if(*i==1||*i==2)
+	    outscint[*i-1] = shm_addr->outscint[*i-1];
 	}
 
-void fs_set_inscint__(inscint)
+void fs_set_inscint__(inscint,i)
 	float *inscint;
+	int *i;
 	{
-	  shm_addr->inscint = *inscint;
+	  if(*i==1||*i==2) 
+	    shm_addr->inscint[*i-1] = inscint[*i-1];
 	}
 
-void fs_get_inscint__(inscint)
+void fs_get_inscint__(inscint,i)
 	float *inscint;
+	int *i;
 	{
-	  *inscint = shm_addr->inscint;
+	  if(*i==1||*i==2) 
+	    inscint[*i-1] = shm_addr->inscint[*i-1];
 	}
 
-void fs_set_motorv__(motorv)
+void fs_set_motorv__(motorv,i)
 	float *motorv;
+	int *i;
 	{
-	  shm_addr->motorv = *motorv;
+	  if(*i==1||*i==2) 
+	    shm_addr->motorv[*i-1] = motorv[*i-1];
 	}
 
-void fs_get_motorv__(motorv)
+void fs_get_motorv__(motorv,i)
 	float *motorv;
+	int *i;
 	{
-	  *motorv = shm_addr->motorv;
+	  if(*i==1||*i==2) 
+	    motorv[*i-1] = shm_addr->motorv[*i-1];
 	}
 
 void fs_set_tempwx__(tempwx)
@@ -349,46 +377,67 @@ void fs_get_iratfm__(iratfm)
 	  *iratfm = shm_addr->iratfm;
 	}
 
-void fs_set_ispeed__(ispeed)
-	int *ispeed;
+void fs_set_ispeed__(ispeed,i)
+	int *ispeed,*i;
 	{
-	  shm_addr->ispeed = *ispeed;
+	  if(*i==1)
+	    shm_addr->ispeed[0] = ispeed[0];
+	  else if(*i==2)
+	    shm_addr->ispeed[1] = ispeed[1];
 	}
 
-void fs_get_ispeed__(ispeed)
-	int *ispeed;
+void fs_get_ispeed__(ispeed,i)
+	int *ispeed,*i;
 	{
-	  *ispeed = shm_addr->ispeed;
+	  if(*i==1)
+	    ispeed[0] = shm_addr->ispeed[0];
+	  else if(*i==2)
+	    ispeed[1] = shm_addr->ispeed[1];
 	}
 
-void fs_get_cips__(cips)
-	long *cips;
+void fs_get_cips__(cips,i)
+	long *cips,*i;
 	{
-	  *cips = shm_addr->cips;
+	  if(*i==1)
+	    cips[0] = shm_addr->cips[0];
+	  else if(*i==2)
+	    cips[1] = shm_addr->cips[1];
 	}
 
-void fs_set_ienatp__(ienatp)
-	int *ienatp;
+void fs_set_ienatp__(ienatp,i)
+	int *ienatp,*i;
 	{
-	  shm_addr->ienatp = *ienatp;
+	  if(*i==1)
+	    shm_addr->ienatp[0] = ienatp[0];
+	  else if (*i==2)
+	    shm_addr->ienatp[1] = ienatp[1];
 	}
 
-void fs_get_ienatp__(ienatp)
-	int *ienatp;
+void fs_get_ienatp__(ienatp,i)
+	int *ienatp,*i;
 	{
-	  *ienatp = shm_addr->ienatp;
+	  if(*i==1)
+	    ienatp[0] = shm_addr->ienatp[0];
+	  else if (*i==2)
+	    ienatp[1] = shm_addr->ienatp[1];
 	}
 
-void fs_set_idirtp__(idirtp)
-	int *idirtp;
+void fs_set_idirtp__(idirtp,i)
+ 	int *idirtp,*i;
 	{
-	  shm_addr->idirtp = *idirtp;
+	  if(*i==1)
+	    shm_addr->idirtp[0] = idirtp[0];
+	  else if (*i==2)
+	    shm_addr->idirtp[1] = idirtp[1];
 	}
 
-void fs_get_idirtp__(idirtp)
-	int *idirtp;
+void fs_get_idirtp__(idirtp,i)
+	int *idirtp,*i;
 	{
-	  *idirtp = shm_addr->idirtp;
+	  if(*i==1)
+	    idirtp[0] = shm_addr->idirtp[0];
+	  else if (*i==2)
+	    idirtp[1] = shm_addr->idirtp[1];
 	}
 
 void fs_set_inp1if__(inp1if)
@@ -441,32 +490,42 @@ void fs_get_systmp__(systmp)
           memcpy(systmp,shm_addr->systmp,sizeof(shm_addr->systmp));
         }         
 
-void fs_set_ipashd__(ipashd)
-	int ipashd[2];
+void fs_set_ipashd__(ipashd,i)
+	int ipashd[2][2],*i;
 	{
-          shm_addr->ipashd[0]=ipashd[0];
-          shm_addr->ipashd[1]=ipashd[1];
+	  if(*i==1||*i==2) {
+	    shm_addr->ipashd[*i-1][0]=ipashd[*i-1][0];
+	    shm_addr->ipashd[*i-1][1]=ipashd[*i-1][1];
+	  }
 	}
 
-void fs_get_ipashd__(ipashd)
-	int ipashd[2];
+void fs_get_ipashd__(ipashd,i)
+	int ipashd[2][2],*i;
 	{
-          ipashd[0]=shm_addr->ipashd[0];
-          ipashd[1]=shm_addr->ipashd[1];
+	  if(*i==1||*i==2) {
+	    ipashd[*i-1][0]=shm_addr->ipashd[*i-1][0];
+	    ipashd[*i-1][1]=shm_addr->ipashd[*i-1][1];
+	  }
 	}
 
-void fs_set_posnhd__(posnhd)
-	float posnhd[2];
+void fs_set_posnhd__(posnhd,i)
+	float posnhd[2][2];
+	int *i;
 	{
-          shm_addr->posnhd[0]=posnhd[0];
-          shm_addr->posnhd[1]=posnhd[1];
+	  if(*i==1||*i==2) {
+	    shm_addr->posnhd[*i-1][0]=posnhd[*i-1][0];
+	    shm_addr->posnhd[*i-1][1]=posnhd[*i-1][1];
+	  }
 	}
 
-void fs_get_posnhd__(posnhd)
-	float posnhd[2];
+void fs_get_posnhd__(posnhd,i)
+	float posnhd[2][2];
+	int *i;
 	{
-          posnhd[0]=shm_addr->posnhd[0];
-          posnhd[1]=shm_addr->posnhd[1];
+	  if(*i==1||*i==2) {
+	    posnhd[*i-1][0]=shm_addr->posnhd[*i-1][0];
+	    posnhd[*i-1][1]=shm_addr->posnhd[*i-1][1];
+	  }
 	}
 
 void fs_set_lfreqv__(lfreqv)
@@ -702,57 +761,79 @@ void fs_get_inext__(INEXT)
 	    *(INEXT++)=shm_addr->INEXT[i];
 	}
 
-void fs_set_kenastk__(KENASTK)
+void fs_set_kenastk__(KENASTK,j)
 	int *KENASTK;
+	int *j;
         
 	{
           int i;
-          for(i=0;i<KENASTK_N;i++)
-	    shm_addr->KENASTK[i]=*(KENASTK++);
+	  if(*j==1||*j==2) 
+	    for(i=0;i<KENASTK_N;i++)
+	      shm_addr->KENASTK[*j-1][i]=KENASTK[(*j-1)*KENASTK_N+i];
 	}
 
-void fs_get_kenastk__(KENASTK)
+void fs_get_kenastk__(KENASTK,j)
 	int *KENASTK;
+	int *j;
 	{
           int i;
-	  for(i=0;i<KENASTK_N;i++)
-	    *(KENASTK++)=shm_addr->KENASTK[i];
+	  if(*j==1||*j==2) 
+	    for(i=0;i<KENASTK_N;i++)
+	      KENASTK[(*j-1)*KENASTK_N+i]=shm_addr->KENASTK[*j-1][i];
 	}
 
-void fs_set_irdytp__(IRDYTP)
-	int *IRDYTP;
+void fs_set_irdytp__(IRDYTP,i)
+	int *IRDYTP,*i;
 	{
-	  shm_addr->IRDYTP = *IRDYTP;
+	  if(*i==1)
+	    shm_addr->IRDYTP[0] = IRDYTP[0];
+	  else if(*i==2)
+	    shm_addr->IRDYTP[1] = IRDYTP[1];
 	}
 
-void fs_get_irdytp__(IRDYTP)
-	int *IRDYTP;
+void fs_get_irdytp__(IRDYTP,i)
+	int *IRDYTP,*i;
 	{
-	  *IRDYTP = shm_addr->IRDYTP;
+	  if(*i==1)
+	    IRDYTP[0] = shm_addr->IRDYTP[0];
+	  else if(*i==2)
+	    IRDYTP[1] = shm_addr->IRDYTP[1];
 	}
 
-void fs_set_itraka__(ITRAKA)
-	int *ITRAKA;
+void fs_set_itraka__(ITRAKA,i)
+	int *ITRAKA,*i;
 	{
-	  shm_addr->ITRAKA = *ITRAKA;
+	  if(*i==1)
+	    shm_addr->ITRAKA[0] = ITRAKA[0];
+	  else if(*i==2)
+	    shm_addr->ITRAKA[1] = ITRAKA[1];
 	}
 
-void fs_get_itraka__(ITRAKA)
-	int *ITRAKA;
+void fs_get_itraka__(ITRAKA,i)
+	int *ITRAKA,*i;
 	{
-	  *ITRAKA = shm_addr->ITRAKA;
+	  if(*i==1)
+	    ITRAKA[0] = shm_addr->ITRAKA[0];
+	  else if(*i==2)
+	    ITRAKA[1] = shm_addr->ITRAKA[1];
 	}
 
-void fs_set_itrakb__(ITRAKB)
-	int *ITRAKB;
+void fs_set_itrakb__(ITRAKB,i)
+	int *ITRAKB,*i;
 	{
-	  shm_addr->ITRAKB = *ITRAKB;
+	  if(*i==1)
+	    shm_addr->ITRAKB[0] = ITRAKB[0];
+	  else if(*i==2)
+	    shm_addr->ITRAKB[1] = ITRAKB[1];
 	}
 
-void fs_get_itrakb__(ITRAKB)
-	int *ITRAKB;
+void fs_get_itrakb__(ITRAKB,i)
+	int *ITRAKB,*i;
 	{
-	  *ITRAKB = shm_addr->ITRAKB;
+	  if(*i==1)
+	    ITRAKB[0] = shm_addr->ITRAKB[0];
+	  else if(*i==2)
+	    ITRAKB[1] = shm_addr->ITRAKB[1];
 	}
 
 void fs_set_decoff__(DECOFF)
@@ -779,52 +860,72 @@ void fs_get_eloff__(ELOFF)
 	  *ELOFF = shm_addr->ELOFF;
 	}
 
-void fs_set_icaptp__(ICAPTP)
-	int *ICAPTP;
+void fs_set_icaptp__(ICAPTP,i)
+	int *ICAPTP,*i;
 	{
-	  shm_addr->ICAPTP = *ICAPTP;
+	  if (*i==1)
+	    shm_addr->ICAPTP[0] = ICAPTP[0];
+	  else if (*i==2)
+	    shm_addr->ICAPTP[1] = ICAPTP[1];
 	}
 
-void fs_get_icaptp__(ICAPTP)
-	int *ICAPTP;
+void fs_get_icaptp__(ICAPTP,i)
+	int *ICAPTP,*i;
 	{
-          *ICAPTP = shm_addr->ICAPTP;
+	  if (*i==1)
+	    ICAPTP[0] = shm_addr->ICAPTP[0];
+	  else if (*i==2)
+	    ICAPTP[1] = shm_addr->ICAPTP[1];
         }
 
-void fs_set_istptp__(ISTPTP)
-	int *ISTPTP;
+void fs_set_istptp__(ISTPTP,i)
+	int *ISTPTP,*i;
 	{
-	  shm_addr->ISTPTP= *ISTPTP;
+	  if (*i==1)
+	    shm_addr->ISTPTP[0] = ISTPTP[0];
+	  else if (*i==2)
+	    shm_addr->ISTPTP[1] = ISTPTP[1];
 	}
 
-void fs_get_istptp__(ISTPTP)
-	int *ISTPTP;
+void fs_get_istptp__(ISTPTP,i)
+	int *ISTPTP,*i;
 	{
-          *ISTPTP = shm_addr->ISTPTP; 
+	  if (*i==1)
+	    ISTPTP[0] = shm_addr->ISTPTP[0]; 
+	  else if (*i==2)
+	    ISTPTP[1] = shm_addr->ISTPTP[1]; 
         }
 
-void fs_set_itactp__(ITACTP)
-	int *ITACTP;
+void fs_set_itactp__(ITACTP,i)
+	int *ITACTP,*i;
 	{
-	  shm_addr->ITACTP= *ITACTP;
+	  if (*i==1)
+	    shm_addr->ITACTP[0] = ITACTP[0];
+	  else if (*i==2)
+	    shm_addr->ITACTP[1] = ITACTP[1];
 	}
 
-void fs_get_itactp__(ITACTP)
-	int *ITACTP;
+void fs_get_itactp__(ITACTP,i)
+	int *ITACTP,*i;
 	{
-          *ITACTP = shm_addr->ITACTP; 
+	  if (*i==1)
+	    ITACTP[0] = shm_addr->ITACTP[0]; 
+	  else if (*i==2)
+	    ITACTP[1] = shm_addr->ITACTP[1]; 
         }
 
-void fs_set_klvdt_fs__(KLVDT_FS)
-	int *KLVDT_FS;
+void fs_set_klvdt_fs__(KLVDT_FS,i)
+	int *KLVDT_FS,*i;
 	{
-	  shm_addr->klvdt_fs = *KLVDT_FS;
+	  if(*i==1||*i==2)
+	    shm_addr->klvdt_fs[*i-1] = KLVDT_FS[*i-1];
 	}
 
-void fs_get_klvdt_fs__(KLVDT_FS)
-	int *KLVDT_FS;
+void fs_get_klvdt_fs__(KLVDT_FS,i)
+	int *KLVDT_FS,*i;
 	{
-	  *KLVDT_FS = shm_addr->klvdt_fs;
+	  if(*i==1||*i==2)
+	    KLVDT_FS[*i-1] = shm_addr->klvdt_fs[*i-1];
 	}
 
 void fs_set_kecho__(KECHO)
@@ -849,78 +950,6 @@ void fs_get_khalt__(KHALT)
 	int *KHALT;
 	{
 	  *KHALT = shm_addr->KHALT;
-	}
-
-void fs_set_ichvkenable__(ichvkenable)
-	int *ichvkenable;
-	{
-	  shm_addr->check.vkenable = *ichvkenable;
-	}
-
-void fs_get_ichvkenable__(ichvkenable)
-	int *ichvkenable;
-	{
-	  *ichvkenable = shm_addr->check.vkenable;
-	}
-
-void fs_set_ichsystracks__(ichsystracks)
-	int *ichsystracks;
-	{
-	  shm_addr->check.systracks = *ichsystracks;
-	}
-
-void fs_get_ichsystracks__(ichsystracks)
-	int *ichsystracks;
-	{
-	  *ichsystracks = shm_addr->check.systracks;
-	}
-
-void fs_set_ichvkrepro__(ichvkrepro)
-	int *ichvkrepro;
-	{
-	  shm_addr->check.vkrepro = *ichvkrepro;
-	}
-
-void fs_get_ichvkrepro__(ichvkrepro)
-	int *ichvkrepro;
-	{
-	  *ichvkrepro = shm_addr->check.vkrepro;
-	}
-
-void fs_set_ichvkmove__(ichvkmove)
-	int *ichvkmove;
-	{
-	  shm_addr->check.vkmove = *ichvkmove;
-	}
-
-void fs_get_ichvkmove__(ichvkmove)
-	int *ichvkmove;
-	{
-	  *ichvkmove = shm_addr->check.vkmove;
-	}
-
-void fs_set_ichvklowtape__(ichvklowtape)
-	int *ichvklowtape;
-	{
-	  shm_addr->check.vklowtape = *ichvklowtape;
-	}
-
-void fs_get_ichvklowtape__(ichvklowtape)
-	int *ichvklowtape;
-	{
-	  *ichvklowtape = shm_addr->check.vklowtape;
-	}
-
-void fs_set_ichvkload__(ichvkload)
-	int *ichvkload;
-	{
-	  shm_addr->check.vkload = *ichvkload;
-	}
-
-void fs_get_ichvkload__(ichvkload)
-	int *ichvkload;
-	{
-	  *ichvkload = shm_addr->check.vkload;
 	}
 
 void fs_set_ichfm_cn_tm__(ichfm_cn_tm)
@@ -999,7 +1028,10 @@ void fs_set_ichvlba__(ichvlba,N)
 	   shm_addr->check.vform = *ichvlba;
            break;
          case 18 :
-	   shm_addr->check.rec = *ichvlba;
+	   shm_addr->check.rec[0] = *ichvlba;
+           break;
+         case 19 :
+	   shm_addr->check.rec[1] = *ichvlba;
            break;
          }
 	}
@@ -1020,7 +1052,10 @@ void fs_get_ichvlba__(ichvlba,N)
 	   *ichvlba = shm_addr->check.vform;
            break;
          case 18 :
-	   *ichvlba = shm_addr->check.rec;
+	   *ichvlba = shm_addr->check.rec[0];
+           break;
+         case 19 :
+	   *ichvlba = shm_addr->check.rec[1];
            break;
          default:
            *ichvlba = 0;
@@ -1056,6 +1091,12 @@ void fs_set_sterp__(sterp)
 int *sterp;
 {
       shm_addr->sterp=*sterp;
+}
+
+void fs_set_erchk__(erchk)
+int *erchk;
+{
+      shm_addr->erchk=*erchk;
 }
 
 void fs_set_stcnm__(lhol,n)
@@ -1096,16 +1137,69 @@ void fs_get_ilokvc__(ILOKVC)
 	  *ILOKVC = shm_addr->ILOKVC;
 	}
 
-void fs_set_tpivc__(TPIVC)
-	int *TPIVC;
+void fs_set_tpivc__(TPIVC,i)
+	unsigned long *TPIVC;
+	int *i;
 	{
-	  shm_addr->TPIVC = *TPIVC;
+	  if(*i >0 && *i < 16)
+	    shm_addr->TPIVC[*i-1] = TPIVC[*i-1];
 	}
 
-void fs_get_tpivc__(TPIVC)
-	int *TPIVC;
+void fs_get_tpivc__(TPIVC,i)
+	unsigned long *TPIVC;
+	int *i;
 	{
-	  *TPIVC = shm_addr->TPIVC;
+	  if(*i >0 && *i < 16)
+	    TPIVC[*i-1] = shm_addr->TPIVC[*i-1];
+	}
+void fs_set_mifd_tpi__(MIFD_TPI,i)
+	unsigned long *MIFD_TPI;
+	int *i;
+	{
+	  if(*i >0 && *i < 4)
+	    shm_addr->mifd_tpi[*i-1] = MIFD_TPI[*i-1];
+	}
+
+void fs_get_mifd_tpi__(MIFD_TPI,i)
+	long *MIFD_TPI;
+	int *i;
+	{
+	  if(*i >0 && *i < 4)
+	    MIFD_TPI[*i-1] = shm_addr->mifd_tpi[*i-1];
+	}
+void fs_set_bbc_tpi__(bbc_tpi,i)
+	unsigned long bbc_tpi[2];
+	int *i;
+	{
+	  if(*i >0 && *i < 15) {
+	    shm_addr->bbc_tpi[*i-1][0] = bbc_tpi[0];
+	    shm_addr->bbc_tpi[*i-1][1] = bbc_tpi[1];
+	  }
+	}
+
+void fs_get_bbc_tpi__(bbc_tpi,i)
+	unsigned long bbc_tpi[2];
+	int *i;
+	{
+	  if(*i >0 && *i < 15) {
+	    bbc_tpi[0] = shm_addr->bbc_tpi[*i-1][0];
+	    bbc_tpi[1] = shm_addr->bbc_tpi[*i-1][1];
+	  }
+	}
+void fs_set_vifd_tpi__(VIFD_TPI,i)
+	unsigned long *VIFD_TPI;
+	int *i;
+	{
+	  if(*i >0 && *i < 5)
+	    shm_addr->vifd_tpi[*i-1] = VIFD_TPI[*i-1];
+	}
+
+void fs_get_vifd_tpi__(VIFD_TPI,i)
+	long *VIFD_TPI;
+	int *i;
+	{
+	  if(*i >0 && *i < 5)
+	    VIFD_TPI[*i-1] = shm_addr->vifd_tpi[*i-1];
 	}
 
 void fs_set_llog__(LLOG)
@@ -1124,36 +1218,45 @@ void fs_get_llog__(LLOG)
 	  memcpy(LLOG,shm_addr->LLOG,N);
 	}
 
-void fs_set_lfeet_fs__(LFEET_FS)
-	int *LFEET_FS;
+void fs_set_lfeet_fs__(LFEET_FS,i)
+	char *LFEET_FS;
+	int *i;
 	{
           size_t N;
 	  N = LFEET_N;
-	  memcpy(shm_addr->LFEET_FS,LFEET_FS,N);
+	  if(*i==1 || *i==2) 
+	    memcpy(shm_addr->LFEET_FS[*i-1],LFEET_FS+(*i-1)*N,N);
 	}
 
-void fs_get_lfeet_fs__(LFEET_FS)
-	int *LFEET_FS;
+void fs_get_lfeet_fs__(LFEET_FS,i)
+	char *LFEET_FS;
+	int *i;
 	{
           size_t N;
 	  N = LFEET_N;
-	  memcpy(LFEET_FS,shm_addr->LFEET_FS,N);
+	  if(*i==1 || *i==2) 
+	    memcpy(LFEET_FS+(*i-1)*N,shm_addr->LFEET_FS[*i-1],N);
 	}
 
-void fs_set_lgen__(lgen)
-	int *lgen;
+void fs_set_lgen__(lgen,j)
+	short *lgen;
+	int *j;
 	{
-          size_t N;
-	  N = LGEN_N;
-	  memcpy(shm_addr->lgen,lgen,N);
+	  int i;
+
+	  if(*j==1|| *j==2)
+	    for (i=0;i<LGEN_N;i++)
+	      shm_addr->lgen[*j-1][i]=lgen[(*j-1)*LGEN_N+i];
 	}
 
-void fs_get_lgen__(lgen)
-	int *lgen;
+void fs_get_lgen__(lgen,j)
+	short *lgen;
+	int *j;
 	{
-          size_t N;
-	  N = LGEN_N;
-	  memcpy(lgen,shm_addr->lgen,N);
+	  int i;
+	  if(*j==1|| *j==2)
+	    for (i=0;i<LGEN_N;i++)
+	      lgen[(*j-1)*LGEN_N+i]=shm_addr->lgen[*j-1][i];
 	}
 
 void fs_set_lnewpr__(LNEWPR)
@@ -1275,49 +1378,57 @@ void fs_get_rack_type__(rack_type)
 void fs_set_drive__(drive)
 	int *drive;
 	{
-	  shm_addr->equip.drive = *drive;
+	  shm_addr->equip.drive[0] = drive[0];
+	  shm_addr->equip.drive[1] = drive[1];
 	}
 
 void fs_get_drive__(drive)
 	int *drive;
 	{
-	  *drive = shm_addr->equip.drive;
+	  drive[0] = shm_addr->equip.drive[0];
+	  drive[1] = shm_addr->equip.drive[1];
 	}
 
 void fs_set_drive_type__(drive_type)
 	int *drive_type;
 	{
-	  shm_addr->equip.drive_type = *drive_type;
+	  shm_addr->equip.drive_type[0] = drive_type[0];
+	  shm_addr->equip.drive_type[1] = drive_type[1];
 	}
 
 void fs_get_drive_type__(drive_type)
 	int *drive_type;
 	{
-	  *drive_type = shm_addr->equip.drive_type;
+	  drive_type[0] = shm_addr->equip.drive_type[0];
+	  drive_type[1] = shm_addr->equip.drive_type[1];
 	}
 
-void fs_set_iskdtpsd__(iskdtpsd)
-	int *iskdtpsd;
+void fs_set_iskdtpsd__(iskdtpsd,i)
+	int *iskdtpsd,*i;
 	{
-	  shm_addr->iskdtpsd = *iskdtpsd;
+	  if(*i==1||*i==2)
+	    shm_addr->iskdtpsd[*i-1] = iskdtpsd[*i-1];
 	}
 
-void fs_get_iskdtpsd__(iskdtpsd)
-	int *iskdtpsd;
+void fs_get_iskdtpsd__(iskdtpsd,i)
+	int *iskdtpsd,*i;
 	{
-	  *iskdtpsd = shm_addr->iskdtpsd;
+	  if(*i==1||*i==2)
+	    iskdtpsd[*i-1] = shm_addr->iskdtpsd[*i-1];
 	}
 
-void fs_set_imaxtpsd__(imaxtpsd)
-	int *imaxtpsd;
+void fs_set_imaxtpsd__(imaxtpsd,i)
+	int *imaxtpsd,*i;
 	{
-	  shm_addr->imaxtpsd = *imaxtpsd;
+	  if(*i==1||*i==2)
+	    shm_addr->imaxtpsd[*i-1] = imaxtpsd[*i-1];
 	}
 
-void fs_get_imaxtpsd__(imaxtpsd)
-	int *imaxtpsd;
+void fs_get_imaxtpsd__(imaxtpsd,i)
+	int *imaxtpsd,*i;
 	{
-	  *imaxtpsd = shm_addr->imaxtpsd;
+	  if(*i==1||*i==2)
+	    imaxtpsd[*i-1] = shm_addr->imaxtpsd[*i-1];
 	}
 
 void fs_set_freqlo__(freqlo,N)
@@ -1432,18 +1543,6 @@ void fs_set_lolim2__(lolim2)
 	  shm_addr->lolim2 = *lolim2;
 	}
 
-void fs_get_iacttp__(iacttp)
-	int *iacttp;
-	{
-	  *iacttp = shm_addr->iacttp;
-	}
-
-void fs_set_iacttp__(iacttp)
-        int *iacttp;
-        {
-          shm_addr->iacttp = *iacttp;
-        }
-
 void fs_get_i70kch__(i70kch)
         int *i70kch;
         {
@@ -1466,18 +1565,6 @@ void fs_set_i20kch__(i20kch)
         int *i20kch;
 	{
 	  shm_addr->i20kch = *i20kch;
-	}
-
-void fs_get_refreq__(refreq)
-        float *refreq;
-        {
-          *refreq = shm_addr->refreq;
-        }
-
-void fs_set_refreq__(refreq)
-        float *refreq;
-	{
-	  shm_addr->refreq = *refreq;
 	}
 
 void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model)
@@ -1513,14 +1600,20 @@ void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model)
 		shm_addr->time.index = index;
 	}
 
-void fs_get_vgroup__(vgroup)
-        int *vgroup;
-	{
-	  vgroup[0] = shm_addr->venable.group[0];
-	  vgroup[1] = shm_addr->venable.group[1];
-	  vgroup[2] = shm_addr->venable.group[2];
-	  vgroup[3] = shm_addr->venable.group[3];
-	}
+void fs_get_vgroup__(vgroup,i)
+     int *vgroup,*i;
+{
+  if(*i==1 || *i==2) {
+    vgroup[0] = shm_addr->venable[*i-1].group[0];
+    vgroup[1] = shm_addr->venable[*i-1].group[1];
+    vgroup[2] = shm_addr->venable[*i-1].group[2];
+    vgroup[3] = shm_addr->venable[*i-1].group[3];
+    vgroup[4] = shm_addr->venable[*i-1].group[4];
+    vgroup[5] = shm_addr->venable[*i-1].group[5];
+    vgroup[6] = shm_addr->venable[*i-1].group[6];
+    vgroup[7] = shm_addr->venable[*i-1].group[7];
+  }
+}
 
 void fs_get_vfmenablehi__(vfmenablehi)
         int *vfmenablehi;
@@ -1541,10 +1634,11 @@ void fs_get_fm4enable__(fm4enable)
 	  fm4enable[1] = shm_addr->form4.enable[1];
 	}
 
-void fs_get_vrepro_equalizer__(equalizer,n)
-        int *equalizer,*n;
+void fs_get_vrepro_equalizer__(equalizer,n,i)
+        int *equalizer,*n,*i;
 	{
-	  *equalizer = shm_addr->vrepro.equalizer[*n-1];
+	  if(*i==1||*i==2)
+	    *equalizer = shm_addr->vrepro[*i-1].equalizer[*n-1];
 	}
 
 void fs_set_horaz__(HORAZ)
@@ -1586,16 +1680,40 @@ void fs_get_bbc_source__(source,n)
           *source=shm_addr->bbc[*n-1].source;
 	}
 
-void fs_get_wrhd_fs__(wrhd_fs)
-        int *wrhd_fs;
+void fs_get_wrhd_fs__(wrhd_fs,i)
+        int *wrhd_fs,*i;
         {
-          *wrhd_fs = shm_addr->wrhd_fs;
+	  if(*i==1)
+	    wrhd_fs[0] = shm_addr->wrhd_fs[0];
+	  else if (*i==2)
+	    wrhd_fs[1] = shm_addr->wrhd_fs[1];
         }
 
-void fs_set_wrhd_fs__(wrhd_fs)
-        int *wrhd_fs;
+void fs_set_wrhd_fs__(wrhd_fs,i)
+        int *wrhd_fs,*i;
 	{
-	  shm_addr->wrhd_fs = *wrhd_fs;
+	  if(*i==1)
+	    shm_addr->wrhd_fs[0] = wrhd_fs[0];
+	  else if (*i==2)
+	    shm_addr->wrhd_fs[1] = wrhd_fs[1];
+	}
+
+void fs_get_rdhd_fs__(rdhd_fs,i)
+        int *rdhd_fs,*i;
+        {
+	  if(*i==1)
+	    rdhd_fs[0] = shm_addr->rdhd_fs[0];
+	  else if (*i==2)
+	    rdhd_fs[1] = shm_addr->rdhd_fs[1];
+        }
+
+void fs_set_rdhd_fs__(rdhd_fs,i)
+        int *rdhd_fs,*i;
+	{
+	  if(*i==1)
+	    shm_addr->rdhd_fs[0] = rdhd_fs[0];
+	  else if (*i==2)
+	    shm_addr->rdhd_fs[1] = rdhd_fs[1];
 	}
 
 void fs_get_vfm_xpnt__(vfm_xpnt)
@@ -1608,13 +1726,6 @@ void fs_set_vfm_xpnt__(vfm_xpnt)
         int *vfm_xpnt;
 	{
 	  shm_addr->vfm_xpnt = *vfm_xpnt;
-	}
-
-void fs_get_vrepromode__(vrepromode)
-	int *vrepromode;
-	{
-          vrepromode[0]=shm_addr->vrepro.mode[0];
-          vrepromode[1]=shm_addr->vrepro.mode[1];
 	}
 
 void fs_set_cwrap__(cwrap)
@@ -1633,100 +1744,136 @@ void fs_get_cwrap__(cwrap)
 	  memcpy(cwrap,shm_addr->cwrap,N);
 	}
 
-void fs_set_vacsw__(vacsw)
-	int *vacsw;
+void fs_set_vacsw__(vacsw,i)
+	int *vacsw,*i;
 	{
-	  shm_addr->vacsw = *vacsw;
+	  if(*i==1)
+	    shm_addr->vacsw[0] = vacsw[0];
+	  else if (*i==2)
+	    shm_addr->vacsw[1] = vacsw[1];
 	}
 
-void fs_get_vacsw__(vacsw)
-	int *vacsw;
+void fs_get_vacsw__(vacsw,i)
+	int *vacsw,*i;
 	{
-	  *vacsw = shm_addr->vacsw;
+	  if(*i==1)
+	    vacsw[0] = shm_addr->vacsw[0];
+	  else if (*i==2)
+	    vacsw[1] = shm_addr->vacsw[1];
 	}
 
-void fs_set_motorv2__(motorv2)
+void fs_set_motorv2__(motorv2,i)
 	float *motorv2;
+	int *i;
 	{
-	  shm_addr->motorv2 = *motorv2;
+	  if(*i==1||*i==2) 
+	    shm_addr->motorv2[*i-1] = motorv2[*i-1];
 	}
 
-void fs_get_motorv2__(motorv2)
+void fs_get_motorv2__(motorv2,i)
 	float *motorv2;
+	int *i;
 	{
-	  *motorv2 = shm_addr->motorv2;
+	  if(*i==1||*i==2) 
+	    motorv2[*i-1] = shm_addr->motorv2[*i-1];
 	}
 
-void fs_set_itpthick2__(itpthick2)
-	int *itpthick2;
+void fs_set_itpthick2__(itpthick2,i)
+	int *itpthick2,*i;
 	{
-	  shm_addr->itpthick2 = *itpthick2;
+	  if(*i==1||*i==2)
+	    shm_addr->itpthick2[*i-1] = itpthick2[*i-1];
 	}
 
-void fs_get_itpthick2__(itpthick2)
-	int *itpthick2;
+void fs_get_itpthick2__(itpthick2,i)
+	int *itpthick2,*i;
 	{
-	  *itpthick2 = shm_addr->itpthick2;
+	  if(*i==1||*i==2)
+	    itpthick2[*i-1] = shm_addr->itpthick2[*i-1];
 	}
 
-void fs_set_thin__(thin)
-	int *thin;
+void fs_set_thin__(thin,i)
+	int *thin,*i;
 	{
-	  shm_addr->thin = *thin;
+	  if(*i==1)
+	    shm_addr->thin[0] = thin[0];
+	  else if (*i==2)
+	    shm_addr->thin[1] = thin[1];
 	}
 
-void fs_get_thin__(thin)
-	int *thin;
+void fs_get_thin__(thin,i)
+	int *thin,*i;
 	{
-	  *thin = shm_addr->thin;
+	  if(*i==1)
+	    thin[0] = shm_addr->thin[0];
+	  else if (*i==2)
+	    thin[1] = shm_addr->thin[1];
 	}
 
-void fs_set_vac4__(vac4)
-	int *vac4;
+void fs_set_vac4__(vac4,i)
+	int *vac4,*i;
 	{
-	  shm_addr->vac4 = *vac4;
+	  if(*i==1)
+	    shm_addr->vac4[0] = vac4[0];
+	  else if (*i==2)
+	    shm_addr->vac4[1] = vac4[1];
 	}
 
-void fs_get_vac4__(vac4)
-	int *vac4;
+void fs_get_vac4__(vac4,i)
+	int *vac4,*i;
 	{
-	  *vac4 = shm_addr->vac4;
+	  if(*i==1)
+	    vac4[0] = shm_addr->vac4[0];
+	  else if (*i==2)
+	    vac4[1] = shm_addr->vac4[1];
 	}
 
-void fs_set_wrvolt2__(wrvolt2)
+void fs_set_wrvolt2__(wrvolt2,i)
 	float *wrvolt2;
+	int *i;
 	{
-	  shm_addr->wrvolt2 = *wrvolt2;
+	  if(*i==1||*i==2)
+	    shm_addr->wrvolt2[*i-1] = wrvolt2[*i-1];
 	}
 
-void fs_get_wrvolt2__(wrvolt2)
+void fs_get_wrvolt2__(wrvolt2,i)
 	float *wrvolt2;
+	int *i;
 	{
-	  *wrvolt2 = shm_addr->wrvolt2;
+	  if(*i==1||*i==2)
+	    wrvolt2[*i-1] = shm_addr->wrvolt2[*i-1];
 	}
 
-void fs_set_wrvolt4__(wrvolt4)
+void fs_set_wrvolt4__(wrvolt4,i)
 	float *wrvolt4;
+	int *i;
 	{
-	  shm_addr->wrvolt4 = *wrvolt4;
+	  if(*i==1||*i==2)
+	    shm_addr->wrvolt4[*i-1] = wrvolt4[*i-1];
 	}
 
-void fs_get_wrvolt4__(wrvolt4)
+void fs_get_wrvolt4__(wrvolt4,i)
 	float *wrvolt4;
+	int *i;
 	{
-	  *wrvolt4 = shm_addr->wrvolt4;
+	  if(*i==1||*i==2)
+	    wrvolt4[*i-1] = shm_addr->wrvolt4[*i-1];
 	}
 
-void fs_set_wrvolt42__(wrvolt42)
+void fs_set_wrvolt42__(wrvolt42,i)
 	float *wrvolt42;
+	int *i;
 	{
-	  shm_addr->wrvolt42 = *wrvolt42;
+	  if(*i==1||*i==2)
+	    shm_addr->wrvolt42[*i-1] = wrvolt42[*i-1];
 	}
 
-void fs_get_wrvolt42__(wrvolt42)
+void fs_get_wrvolt42__(wrvolt42,i)
 	float *wrvolt42;
+	int *i;
 	{
-	  *wrvolt42 = shm_addr->wrvolt42;
+	  if(*i==1||*i==2)
+	    wrvolt42[*i-1] = shm_addr->wrvolt42[*i-1];
 	}
 
 void fs_set_user_dev1_name__(user_dev1_name)
@@ -1800,27 +1947,121 @@ void fs_get_imixif3__(imixif3)
 	{
 	  *imixif3 = shm_addr->imixif3;
 	}
-void fs_set_iyrctl_fs__(iyrctl_fs)
-	int *iyrctl_fs;
+
+void fs_set_reccpu__(reccpu,i)
+	int *reccpu,*i;
 	{
-	  shm_addr->iyrctl_fs = *iyrctl_fs;
+	  if(*i==1||*i==2)
+	    shm_addr->reccpu[*i-1] = reccpu[*i-1];
 	}
 
-void fs_get_iyrctl_fs__(iyrctl_fs)
-	int *iyrctl_fs;
+void fs_get_reccpu__(reccpu,i)
+	int *reccpu,*i;
 	{
-	  *iyrctl_fs = shm_addr->iyrctl_fs;
+	  if(*i==1||*i==2)
+	    reccpu[*i-1] = shm_addr->reccpu[*i-1];
 	}
 
-void fs_set_reccpu__(reccpu)
-	int *reccpu;
+void fs_get_select__(select)
+     int *select;
+{
+  *select=shm_addr->select;
+}
+void fs_set_select__(select)
+     int *select;
+{
+  shm_addr->select=*select;
+}
+void fs_set_knewtape__(knewtape,i)
+	int *knewtape,*i;
 	{
-	  shm_addr->reccpu = *reccpu;
+	  if(*i==1||*i==2)
+	    shm_addr->knewtape[*i-1] = knewtape[*i-1];
 	}
 
-void fs_get_reccpu__(reccpu)
-	int *reccpu;
+void fs_get_knewtape__(knewtape,i)
+	int *knewtape,*i;
 	{
-	  *reccpu = shm_addr->reccpu;
+	  if(*i==1||*i==2)
+	    knewtape[*i-1] = shm_addr->knewtape[*i-1];
 	}
 
+void fs_get_ihdmndel__(ihdmndel,i)
+	int *ihdmndel,*i;
+	{
+	  if(*i==1||*i==2)
+	    ihdmndel[*i-1] = shm_addr->ihdmndel[*i-1];
+	}
+
+void fs_set_ihdmndel__(ihdmndel,i)
+        int *ihdmndel,*i;
+        {
+	  if(*i==1||*i==2)
+	    shm_addr->ihdmndel[*i-1] = ihdmndel[*i-1];
+        }
+
+
+void fs_set_iat1if__(iat1if)
+        int *iat1if;
+        {
+          shm_addr->iat1if = *iat1if;
+        }
+
+void fs_get_iat1if__(iat1if)
+        int *iat1if;
+        {
+          *iat1if = shm_addr->iat1if;
+
+        }
+void fs_set_iat2if__(iat2if)
+        int *iat2if;
+        {
+          shm_addr->iat2if = *iat2if;
+        }
+
+void fs_get_iat2if__(iat2if)
+        int *iat2if;
+        {
+          *iat2if = shm_addr->iat2if;
+        }
+
+void fs_set_iat3if__(iat3if)
+        int *iat3if;
+        {
+          shm_addr->iat3if= *iat3if;
+        }
+
+void fs_get_iat3if__(iat3if)
+        int *iat3if;
+        {
+          *iat3if = shm_addr->iat3if;
+        }
+
+void fs_set_ifd_set__(ifd_set)
+        int *ifd_set;
+        {
+          shm_addr->ifd_set= *ifd_set;
+        }
+
+void fs_get_ifd_set__(ifd_set)
+        int *ifd_set;
+        {
+          *ifd_set = shm_addr->ifd_set;
+        }
+void fs_set_if3_set__(if3_set)
+        int *if3_set;
+        {
+          shm_addr->if3_set= *if3_set;
+        }
+
+void fs_get_if3_set__(if3_set)
+        int *if3_set;
+        {
+          *if3_set = shm_addr->if3_set;
+        }
+
+void fs_set_cablevl__(cablevl)
+	float *cablevl;
+	{
+	  shm_addr->cablevl = *cablevl;
+	}
