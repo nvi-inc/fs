@@ -69,7 +69,9 @@ C     2.02 Code -2, SAMPLE RATE
 C 
 202   continue
       if (ic1-1+5.gt.ic2) return
-      ifmed = ic1 + ir2as(rates(index+1),ias,ic1,5,3) 
+      ifmed = ic1
+      if (index.ge.0.and.index.le.7)
+     & ifmed = ic1 + ir2as(rates(index+1),ias,ic1,5,3) 
       return
 C 
 C     2.03 Code -3, General LOCAL/REMOTE. 
