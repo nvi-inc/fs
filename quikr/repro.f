@@ -43,7 +43,7 @@ C               - parameters returned from GTPRM
 C               - registers from EXEC calls 
 C        ITA,ITB,IBW,IEQ,IBY
 C               - variables for tracks, bandwidths, bypass
-      dimension bws(7)
+      dimension bws(7),tsp3(7)
 C               - lists for comparisons
       character cjchar
 C
@@ -51,7 +51,9 @@ C
 C
 C     INITIALIZED
       data ilen/40/
-      data bws/0.0625,0.125,0.25,0.5,1.0,2.0,4.0/
+      data bws /0.0625 ,0.125 , 0.25 , 0.5 , 1.0,  2.0,  4.0/
+      data tsp3/4.21875,8.4375,16.875,33.75,67.5,135.0,270.0/
+
 C
 C
 C  1. If we have parameters, then we are to set the TP.
@@ -156,9 +158,12 @@ C
       if (cjchar(parm,1).eq.',') ibw = 6
 C                   Use 2 MHz bandwidth as default
       goto 250
-242   do 245 i=1,7
+ 242  do 245 i=1,7
         if (parm.eq.bws(i)) goto 246
-245     continue
+ 245  continue
+      do i=1,7
+         if(parm.eq.tsp3(i)) goto 246
+      enddo
       ierr = -204
       goto 990
 246   ibw = i
@@ -172,9 +177,12 @@ C
       if (cjchar(iparm,1).eq.',') ieq = ibw - 1
 C                   Default is for BW=EQ
       goto 300
-251   do 255 i=1,7
+ 251  do 255 i=1,7
         if (parm.eq.bws(i)) goto 256
-255     continue
+ 255  continue
+      do i=1,7
+         if(parm.eq.tsp3(i)) goto 256
+      enddo
       ierr = -205
       goto 990
 256   ieq = i-1
