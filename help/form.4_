@@ -1,0 +1,66 @@
+              form - formatter setup (Mark IV rack)
+
+Syntax:     form=mode,rate,fan,barrel
+
+Response:   form/mode,rate,fan,barrel,rev,rack,error
+
+
+Settable Parameters:
+mode    The recording mode,choices for the mode are m, a, b1, b2,
+        c1, c2, e1, e2, e3, e4, and dn, where n=1 to 28. No
+        default. Modes a, b, b1, b2, c1, c2, e1, e2, e3, e4 and dn
+        correspond to the traditional Mark III modes and sub-passes. Mode m uses the sampler track assignments and
+        formatter track enables specified by the trackform and
+        tracks commands.
+rate      Sample rate in Mbits/sec. Choices are 0.125, 0.25, 0.5, 1,
+          2, 4, 8, 16, and 32. Default 4. For Nyquist sampling this
+          selection must be twice the bandwidth set-up used in the
+          bbc commands
+fan     The fan-in or fan-out ratio. Currently, the only choices
+        are 1:4, 1:2, and 1:1, where on a per channel or track
+        basis, the number before the colon is the number of sampled
+        channels and the number after is the number of tracks.
+        Default 1:1.
+barrel    Barrel-roll mode. Currently the only choice is off, which
+          is the default.
+
+Monitor-only Parameters:
+rev     Formatter firmware revision number as an integer.
+rack    Rack ID, reported as a hex value.
+error   Error status, okay or the hex value.
+
+Comments:
+The Mark IV formatter clock is set with the fmset program. After
+setting or resetting the formatter time, issue a sy=run setcl
+offset command to reset the Field System time.
+
+Mode names that end with numbers correspond to that subpass of the
+Mark III mode. Note that since the Mark IV recorder does not
+include group enables, the traditional Mark III mode names B and C
+are not useful for mode. For the same reason the subpasses of Mark
+III mode E must be specified explicitly rather than as instances of
+subsets of modes B and C.
+
+Some combinations of rate and fan cannot be accommodated by the
+formatter. No output that would require more than 16 MHz nominal
+data rate per track is supported. Specifically a rate of 32 and a fan
+of 1:1 is impossible. Some combinations of fan and rate cannot be
+accommodated by the recorder. Any combination of rate and fan that
+would imply a nominal data rate per track of 0.125 MHz or less for
+high density recording (thin tape) is not supported. Any
+combination of rate and fan that would imply a nominal date rate per
+track of less than 0.125 MHz for low density recording (thick tape)
+is not supported.
+
+For the interim, in order to help facilitate debugging of the
+formatter in the field, the status of the setable parameters is
+logged when the formatter set-up is changed. This information is
+logged in the form of the output of the low-level MAT commands that
+return this information. This feature will be removed in a
+subsequent version.
+
+chekr does not currently support checking of the formatter.
+However, the set-up of the formatter can be monitored by entering
+a form command. If any of the displayed values do not agree with
+the last value commanded, then the formatter is not in the last
+commanded state.

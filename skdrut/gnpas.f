@@ -30,6 +30,7 @@ C 960209 nrv Add error return by station
 C 960219 nrv Check for LOs present also.
 C 960610 nrv Change loop to nchan instead of max_chan for counting tracks.
 C 960817 nrv Skip track checks for S2
+C 961101 nrv Skip checks if the mode is not defined for this station.
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -42,6 +43,7 @@ C
 C
       DO  Ic=1,NCODES ! codes
         do is=1,nstatn
+          if (nchan(is,ic).gt.0) then ! this station has this mode defined
           if (ichcm_ch(lstrec(1,is),1,'S2').eq.0) then ! S2
             npassf(is,ic)=1
           else ! not S2
@@ -114,6 +116,7 @@ C
               endif
             endif
           endif ! S2 or not
+          endif ! defined
         enddo ! stations
       END DO  ! codes
 C
