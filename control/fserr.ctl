@@ -33,7 +33,7 @@ unknown trackform bit-stream
 no default for tracks track number
 ""
 4N -200
-tracks track must be an v0, v1, v2, v3, 2-33, or 102-133. 
+tracks track must be an v(0-7), m(0-7), 2-33, or 102-133. 
 ""
 AN   -1
 Illegal mode
@@ -2759,6 +2759,9 @@ setcl: reseting system clock failed.
 SC   -4
 setcl: formatter to cpu time difference greater than two weeks
 ""
+SC   -5
+setcl: formatter time garbled
+""
 SC  -10
 setcl: failed too many times, time information not updated.
 ""
@@ -2973,7 +2976,7 @@ VN -100
 no default for tracks track number
 ""
 VN -200
-tracks track must be an v0, v1, v2, v3, or 2-33.
+tracks track must be v(0-3), m(0-3), or 2-33.
 ""
 VR -201
 modeA must be read (raw), or byp.
