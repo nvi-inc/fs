@@ -25,6 +25,8 @@ C
 C  LOCAL:
       integer ix,n,ITRK(4,max_subpass,max_headstack)
       integer*2 LNA(4)
+      character*8 cna
+      equivalence (lna,cna)
       integer idum,ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan),ir
       integer*2 lc,lsg,lm(8),lid,lin,ls
@@ -39,7 +41,10 @@ C  LOCAL:
       real f2,vb,rbbc,srate
       double precision f1,f
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
-      integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,ichmv,igtfr,igtst
+      integer ichmv_ch,ias2b,ichcm_ch,ichmv,igtfr,igtst
+
+      integer isb,ibit,ipass,ihd,ival
+      integer iptr
 
       character*1 lchar
       integer*2   itemp
@@ -174,16 +179,19 @@ C         Initialize S2 mode to blank. It's probably safe to put
 C         LMODE into LS2MODE.
 C         Not safe because the mode may be already there from the equip line.
           if(cs2mode(is,icode) .eq. " ") then
-              cs2mode(is,icode)=cm
+             cs2mode(is,icode) = cm
+             cmode(is,icode) = " "
           endif
 !          if (ichcm_ch(ls2mode(1,is,icode),1,' ').eq.0) then ! it's blank
 !            idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
+!            cmode(is,icode)=" "
 !          else ! leave it alone
 !          endif
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
-          ix = iscn_ch(lmode(1,is,icode),1,16,'1:')
-C         iy = iscn_ch(lmode(1,is,icode),1,16,':1')
+!          ix = iscn_ch(lmode(1,is,icode),1,16,'1:')
+          ix=index(cmode(is,icode), "1:")
+C         iy = iscn_ch(lmode(1,is,icode),1,16,':1') 
           if (ix.ne.0) then ! possible fan-out
             n=ias2b(lmode(1,is,icode),ix+2,1)
             if (n.gt.0) ifan(is,icode)=n
@@ -192,15 +200,14 @@ C           n=ias2b(lmode(1,is,icode),iy+2,1)
 C           if (n.gt.0) ifan(is,icode)=n
           endif
 C         Set bit density depending on the mode
-          if(cmode(is,icode)(1:1) .eq. "V") then
+          if(cmode(is,icode)(1:1) .eq. 'V') then
             bitden=34020 ! VLBA non-data replacement
           else 
             bitden=33333 ! Mark3/4 data replacement
           endif
 C         If "56000" was specified, use higher station bit density
           if (ibitden_save(is).eq.56000) then
-            if(cmode(is,icode)(1:1) .eq. "V") then
-!            if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then
+            if(cmode(is,icode)(1:1) .eq. 'V') then
               bitden=56700 ! VLBA non-data replacement
             else 
               bitden=56250 ! Mark3/4 data replacement
@@ -208,17 +215,26 @@ C         If "56000" was specified, use higher station bit density
           endif
 C         Store the bit density by station
           bitdens(is,icode)=bitden
-C         Store the track assignments. 
-          DO  I=1,max_subpass
-            do ix=1,max_headstack
-              IF (ITRK(1,I,ix).NE.-99) 
-     .        call set_itras(1,1,ix,icx,i,is,icode,itrk(1,i,ix))
-              IF (ITRK(2,I,ix).NE.-99) 
-     .        call set_itras(2,1,ix,icx,i,is,icode,itrk(2,i,ix))
-              IF (ITRK(3,I,ix).NE.-99) 
-     .        call set_itras(1,2,ix,icx,i,is,icode,itrk(3,i,ix))
-              IF (ITRK(4,I,ix).NE.-99) 
-     .        call set_itras(2,2,ix,icx,i,is,icode,itrk(4,i,ix))
+C         Store the track assignments.
+          DO  Ipass=1,max_subpass
+            do ihd=1,max_headstack
+              do isb=1,2
+                do ibit=1,2
+                  iptr=(ibit-1)*2+isb
+                  ival=itrk(iptr,ipass,ihd)
+                  if(ival .ne. -99) then
+                    call set_itras(isb,ibit,ihd,icx,ipass,is,icode,ival)
+                  endif
+                end do
+              end do
+!              IF (ITRK(1,I,ix).NE.-99)
+!     .        call set_itras(1,1,ix,icx,i,is,icode,itrk(1,i,ix))
+!              IF (ITRK(2,I,ix).NE.-99)
+!     .        call set_itras(2,1,ix,icx,i,is,icode,itrk(2,i,ix))
+!              IF (ITRK(3,I,ix).NE.-99)
+!     .        call set_itras(1,2,ix,icx,i,is,icode,itrk(3,i,ix))
+!              IF (ITRK(4,I,ix).NE.-99)
+!     .        call set_itras(2,2,ix,icx,i,is,icode,itrk(4,i,ix))
             enddo
           END DO 
           cset(icx,is,icode) = cs
@@ -310,7 +326,7 @@ C             losb(ic,istn,icode) = ls ! sideband
 
                 kvlba=
      >               cifinptmp(1:1).eq."A" .or.cifinptmp(1:1).eq."B".or.
-     >              cifinptmp(1:1).eq."C" .or.cifinptmp(1:1).eq."D"
+     >               cifinptmp(1:1).eq."C" .or.cifinptmp(1:1).eq."D"
 
                 if ((rbbc.gt.1000.0.and.kvlba).or.
      .              (rbbc.gt.500.0.and.kmk3)) then
@@ -353,7 +369,8 @@ C            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
           enddo
         endif
-        idum= ICHMV(LNAFRQ(1,ICODE),1,LNA,1,8)
+!        idum= ICHMV(LNAFRQ(1,ICODE),1,LNA,1,8)
+        cnafrq(icode)=cna
         LCODE(ICODE) = LC
       END IF  !name entry
 C

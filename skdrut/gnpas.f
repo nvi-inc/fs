@@ -25,11 +25,10 @@ C  Output
       integer iserr(max_stn) ! error by station
 
 C  LOCAL VARIABLES:
-      integer ih,ip(max_headstack),is,it(max_headstack),
-     .np(max_headstack),
-     .j,k,l,itrk(max_subpass,max_headstack),
-     .ic1,maxp(max_frq)
-      integer ix,iprr,ipmax(max_headstack),ic,m,nvc,ichcm_ch
+      integer ih,ip(max_headstack),is
+      integer it(max_headstack),np(max_headstack)
+      integer j,k,l,itrk(max_subpass,max_headstack),ic1,maxp(max_frq)
+      integer ix,iprr,ipmax(max_headstack),ic,m,nvc
       logical kmiss
 C
 C     880310 NRV DE-COMPC'D
@@ -68,9 +67,9 @@ C
       DO  Ic=1,NCODES ! codes
         do is=1,nstatn
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
-          if (ichcm_ch(lstrec(1,is),1,'S2').eq.0) then ! S2
-            npassf(is,ic)=1
-          else if (ichcm_ch(lstrec(1,is),1,'K4').eq.0) then ! K4
+          if(cstrec(is)(1:2) .eq. "S2" .or.
+     >        cstrec(is)(1:2) .eq. "K4" .or.
+     >       cstrec(is)(1:5) .eq. "Mark5") then
             npassf(is,ic)=1
           else ! not S2 or K4
             iserr(is)=0
@@ -165,7 +164,8 @@ C     Check for different numbers of passes used in different frequency
 C     codes--this should not be attempted in a single experiment. 
 
       do is=1,nstatn ! stations
-        if (cstrec(is) .ne. 'S2' .and. cstrec(is)(1:2) .ne. 'K4') then
+        if (cstrec(is) .ne. 'S2' .and. cstrec(is)(1:2) .ne. 'K4' .and.
+     >      cstrec(is)(1:5) .ne. "Mark5") then
         ic1=0
         do ic=1,ncodes ! codes
           if (nchan(is,ic).gt.0) then ! this station has this mode defined

@@ -48,7 +48,7 @@ C
       il=trimlen(cstnna(istn))
       write(lu_outfile,9100) cstnna(istn)(1:il),cpocod(istn)
 9100  format("*FAKE Summary for ",a". Station ID ",a2,".")
-      write(lu_outfile,9101) cpocod(istn),cstn(istn)(1:il)
+      write(lu_outfile,9101) cpocod(istn),cstnna(istn)(1:il)
 9101  format("*"/
      .       "  def ",a2,";    * ",a)
 

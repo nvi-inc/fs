@@ -52,9 +52,11 @@ C  CALLS:  fget_mode_def
 C          frinit
 C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
 C          vunroll,ckroll
+! function
+      integer iwhere_in_string_list
 C
 C  LOCAL:
-      integer ix,idum,ib,ic,i,ia,icode,istn
+      integer ix,ib,ic,i,ia,icode,istn
       integer il,im,iret,ierr1,iul,ism,ip,ipc,itone
       integer ipct(max_chan,max_tone),ntones(max_chan)
       integer ifanfac,itrk(max_track),ivc(max_bbc)
@@ -66,10 +68,11 @@ C  LOCAL:
       double precision bitden_das
       integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
-      integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd)
+      integer*2 lsb(max_chan),lsg(max_chan),lin(max_ifd)
       integer*2 ls(max_ifd)
-!,ls2m(8),ls2d(4)
       integer*2 lpre(4),lp(max_ifd)
+      character*8 cpre
+      equivalence(lpre,cpre)
       character*16 cs2m
       character*16 cm
       character*8 cs2d
@@ -85,18 +88,14 @@ C  LOCAL:
       double precision frf(max_chan),flo(max_chan),vbw(max_chan),srate
       double precision fpcal(max_chan),fpcal_base(max_chan)
       character*128 cout
-      integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
       integer ptr_ch,fvex_len,fget_mode_def
-      logical km3rack,km4rack,kvrack,klrack,km4rec,km3rec,kvrec,ks2rec
+      logical km3rack,km4rack,kvrack,klrack
+      logical km5rec,km4rec,km3rec,kvrec,ks2rec
 
-      integer z4000,z100
-      DATA Z4000/Z'4000'/,Z100/Z'100'/
- 
  
 C 1. First get all the mode def names. Station names have already
 C    been gotten and saved.
 C
-      numc2=2+o'40000'+o'400'*2
       ncodes=0
       iret = fget_mode_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
       do while (iret.eq.0.and.fvex_len(cout).gt.0)
@@ -115,8 +114,8 @@ C
      >      "Only keeping 16 chars: "//cout(1:16)
             il=16
           endif
-          call char2hol(cout,lmode_cat(1,ncodes),1,il)
-        END IF 
+          cmode_cat(ncodes)=cout(1:il)
+        END IF
         iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
       enddo
 
@@ -132,9 +131,8 @@ C    defined for all stations.
       do icode=1,ncodes ! get all mode information
 
 C    Assign a code to the mode and the same to the name
-        idum = ib2as(icode,lcode(icode),1,numc2)
-        idum = ichmv_ch(lnafrq(1,icode),1,'        ')
-        lnafrq(1,icode) = lcode(icode)
+        writE(ccode(icode)(1:2),'(i2.2)') icode
+        cnafrq(icode)=ccode(icode)
 
         do istn=1,nstatn ! for one station at a time
 
@@ -145,6 +143,7 @@ C    Assign a code to the mode and the same to the name
           km3rec=cstrec(istn).eq.'Mark3'
           km4rec=cstrec(istn).eq.'Mark4'
           ks2rec=cstrec(istn).eq.'S2'
+          km5rec=cstrec(istn)(1:5).eq. 'Mark5'
 C         Recognized rack types
           klrack=cstrack(istn).eq.'LBA'
           kvrack=cstrack(istn).eq.'VLBA'.or.cstrack(istn).eq.'VLBAG'.or.
@@ -217,7 +216,7 @@ C         Get $TRACKS statements (i.e. fanout).
      .      ivexnum,iret,ierr,lu,cs2m,
      .      cs2d,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
           else
-            call vunptrk(modedefnames(icode),stndefnames(istn),
+            call vunptrk(modedefnames(icode),stndefnames(istn),km5rec,
      .      ivexnum,iret,ierr,lu,
      .      cm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac,cmodu)
           endif
@@ -238,6 +237,11 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
           if (ks2rec) then
             call vunps2g(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,cpassl,npl)
+          else if(km5rec) then
+            npl=1
+            nhdpos=1
+            cpassl(1)="1A"
+            csubpassl(1)="A"
           else
             call vunphp(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
@@ -286,12 +290,8 @@ C         else ! non-S2
             enddo
             nsubpass=0
             do i=1,nfandefs ! each fandef
-              ix=1 
-              do while (ix.le.nsubpass.and.cp(i)(1:1).ne.
-     .                   csubpass(ix))
-                ix=ix+1
-              enddo
-              if (ix.gt.nsubpass) then ! a new one
+              ix=iwhere_in_string_list(csubpass,nsubpass,cp(i))
+              if(ix .eq. 0) then  !not found. A new pass.
                 if (nsubpass.gt.max_subpass) then
                   write(lu,'("VMOINP15 - Too many subpasses for mode",
      .            a," station ",a,". Max is ",i5,".")') 
@@ -299,7 +299,7 @@ C         else ! non-S2
      .            max_subpass
                 else
                   nsubpass=nsubpass+1
-                  csubpass(nsubpass)=cp(i)(1:1)
+                  csubpass(nsubpass)=cp(i)
                 endif
               endif
             enddo ! each fandef
@@ -315,59 +315,55 @@ C    Save the chan_def info and its links.
             ifan(istn,icode)=ifanfac ! fanout factor
             cset(i,istn,icode) = cs(i) ! switching 
 C           BBC refs
-            ib=1
-            do while (ib.le.nbbcdefs.and.cbbcref(ib).ne.cfrbbref(i))
-              ib=ib+1
-            enddo
-            if (ib.le.nbbcdefs) then
-              ibbcx(i,istn,icode) = ivc(ib) ! BBC number
-            else
+            ib=iwhere_in_string_list(cbbcref,nbbcdefs,cfrbbref(i))
+            if(ib .eq. 0) then
               write(lu,'("VMOINP09 - BBC link missing for channel ",i3,
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+            else
+              ibbcx(i,istn,icode) = ivc(ib) ! BBC number
             endif
 C           IFD refs
-            ic=1
-            do while (ic.le.nifdefs.and.cbbifdref(ib).ne.cifdref(ic))
-              ic=ic+1
-            enddo
-            if (ic.le.nifdefs) then 
+!            ic=1
+!            do while (ic.le.nifdefs.and.cbbifdref(ib).ne.cifdref(ic))
+!              ic=ic+1
+!            enddo
+            ic=iwhere_in_string_list(cifdref,nifdefs,cbbifdref(ib))
+            if (ic.eq.0) then
+              write(lu,'("VMOINP10 - IFD link missing for channel ",i3,
+     .        " for mode ",a," station ",a)') i,
+     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+            else
               lifinp(i,istn,icode) = lin(ic) ! IF input channel
               freqlo(i,istn,icode) = flo(ic) ! LO frequency
               freqpcal(i,istn,icode) = fpcal(ic) ! pcal frequency
               freqpcal_base(i,istn,icode) = fpcal_base(ic) ! pcal_base frequency
               losb(i,istn,icode) = ls(ic) ! LO sideband
               lpol(i,istn,icode) = lp(ic) ! polarization
-            else
-              write(lu,'("VMOINP10 - IFD link missing for channel ",i3,
-     .        " for mode ",a," station ",a)') i,
-     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
 C           Phase cal refs
-            ipc=1
-            do while (ipc.le.npcaldefs.and.cpcalref(ipc).ne.
-     .            cfrpcalref(i))
-              ipc=ipc+1
-            enddo
-            if (ipc.le.npcaldefs) then
+!            ipc=1
+!            do while (ipc.le.npcaldefs.and.cpcalref(ipc).ne.
+!     .            cfrpcalref(i))
+!              ipc=ipc+1
+!            enddo
+            ipc=iwhere_in_string_list(cpcalref,npcaldefs,cfrpcalref(i))
+            if (ipc.eq. 0) then
+              write(lu,'("VMOINP15 - PCAL link missing for channel ",i3,
+     .        " for mode ",a," station ",a)') i,
+     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+            else
               do itone=1,ntones(ipc)
                 ipctone(itone,i,istn,icode)=ipct(ipc,itone)
                 npctone(i,istn,icode)=ntones(ipc)
               enddo
-            else
-              write(lu,'("VMOINP15 - PCAL link missing for channel ",i3,
-     .        " for mode ",a," station ",a)') i,
-     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             endif
 C           Track assignments
-            if (km3rec.or.km4rec.or.kvrec.or.ks2rec) then
+            if (km3rec.or.km4rec.or.km5rec.or.kvrec.or.ks2rec) then
             do ix=1,nfandefs ! check each fandef
               if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link
-                ip=1 ! find subpass index
-                do while (ip.le.nsubpass.and.cp(ix).ne.csubpass(ip))
-                  ip=ip+1
-                enddo
-                if (ip.gt.nsubpass) then
+                ip=iwhere_in_String_list(csubpass,nsubpass,cp(ix))
+                if (ip.eq.0) then
                   write(lu,'("VMOINP11 - Subpass not found for "
      .            "chandef ",i3,", fanden ",i3,
      .            " for mode ",a," station ",a)') i,ix,
@@ -376,7 +372,8 @@ C           Track assignments
                   ism=1 ! sign
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
-                  if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
+!                  if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
+                  if(cnetsb(i,istn,icode)(1:1) .eq. "L") iul=2
                   if (klrack) then	! allow for U being flipped L etc.
                     ia=1
                     do while (ia.le.nchdefs.and.
@@ -412,15 +409,12 @@ C         for non-VEX.
 C         Sample rate.
           samprate(icode)=srate ! sample rate
           if (ks2rec) then
- !           idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
-!            idum = ichmv(ls2data(1,istn,icode),1,ls2d,1,8)
             cs2mode(istn,icode)=cs2m
             cs2data(istn,icode)=cs2d
             cmode(istn,icode)=cs2m
           else ! m3/m4/vrec
 C         Set bit density depending on the mode and rack type
             if(cmode(istn,icode)(1:1) .eq. "V") then
-!            if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then
               bitden=34020 ! VLBA non-data replacement
             else 
               bitden=33333 ! Mark3/4 data replacement
@@ -428,17 +422,15 @@ C         Set bit density depending on the mode and rack type
 C           If "56000" was specified, for this station, use higher bit density
             if (bitden_das.gt.55000.d0) then 
               if(cmode(istn,icode)(1:1) .eq. "V") then
-!              if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then
                 bitden=56700 ! VLBA non-data replacement
               else 
                 bitden=56250 ! Mark3/4 data replacement
               endif
             endif
-            if (bitden_das.ne.bitden) then 
+            if (bitden_das.ne.bitden .and. .not. km5rec) then
               write(lu,'("VMOINP12 - Bit density ",f6.0," for ",a," ",a,
      .        " changed to ",f6.0)') bitden_das,
-     .        modedefnames(icode)(1:il),
-     .        stndefnames(istn)(1:im),bitden
+     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im),bitden
             endif
             bitdens(istn,icode)=bitden
 C       Check number of passes and pass order indices
@@ -463,11 +455,7 @@ C    Store head positions and subpases
           enddo
           if (km4rec.or.km3rec.or.kvrec) then
             do ip=1,npl ! number of passes in list
-              ix=1 ! find subpass number
-              do while (ix.le.nsubpass.and.
-     .                  csubpass(ix).ne.csubpassl(ip))
-                ix=ix+1
-              enddo
+              ix=iwhere_in_string_list(csubpass,nsubpass,csubpassl(ip))
               do ih=1,nhd ! store the head offsets
                 ihdpos(ih,ip,istn,icode)=posh(indexl(ip),ih)
                 ihddir(ih,ip,istn,icode)=ix
@@ -490,14 +478,10 @@ C       Store data modulation
         cmodulation(istn,icode) = cmodu
 
 C       Store the procedure prefix by station and code.
-        if (ichcm_ch(lpre,1,'      ').eq.0) then ! missing 
-C         Make up the mode name as "01_"
-          call ifill(lpre,1,8,oblank)
-          idum = ib2as(icode,lpre,1,z4000+2*z100+2)
-          idum = ichmv_ch(lpre,3,'_')
+        if(cpre.eq. " ") then
+           cpre="01_"
         endif ! missing
-        idum = ichmv(lprefix(1,istn,icode),1,lpre,1,8)
-
+        cprefix(istn,icode)=cpre
         enddo ! for one station at a time
       enddo ! get all mode information
 

@@ -1,4 +1,4 @@
-      SUBROUTINE vunptrk(modef,stdef,ivexnum,iret,ierr,lu,
+      SUBROUTINE vunptrk(modef,stdef,km5rec,ivexnum,iret,ierr,lu,
      .cm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
 C
 C     VUNPTRK gets the track assignments and fanout information
@@ -22,6 +22,7 @@ C 021111 jfq Don't allow track 0 or headstack 0
 C
 C  INPUT:
       character*128 stdef ! station def to get
+      logical km5rec      ! Mark5 recorder?
       character*128 modef ! mode def to get
       integer ivexnum ! vex file ref
       integer lu ! unit for writing error messages
@@ -49,7 +50,6 @@ C  LOCAL:
 C
 C  Initialize
 C
-!      CALL IFILL(LM,1,8,oblank)
       do in=1,max_track
         cp(in)=' '
         cchref(in)=''
@@ -73,7 +73,6 @@ C
         write(lu,'("VUNPTRK01 - Track format name too long")')
         iret=-1
       else
-!        IDUMY = ICHMV_ch(LM,1,cout(1:NCH))
          cm=cout(1:nch)
       END IF  !
 
@@ -105,16 +104,18 @@ C
       in=0
       do while (in.lt.max_pass.and.iret.eq.0) ! get all fanout defs
         in=in+1 ! number of fanout defs
-
 C  2.1 Subpass
-
         ierr = 21
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subpass
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         if (nch.ne.1) then
-          ierr = -2
-          write(lu,'("VUNPTRK02 - Subpass must be 1 character.")')
+          if(km5rec) then
+             cp(in)='A'
+          else
+            ierr = -2
+            write(lu,'("VUNPTRK02 - Subpass must be 1 character.")')
+          endif
         else
           cp(in) = cout(1:1)
         endif

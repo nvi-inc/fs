@@ -196,8 +196,15 @@ C
      .       lnahdpos(4,max_stn,max_frq),
      .       ls2data(4,max_stn,max_frq)
 
+      character*8 cprefix(max_Stn,max_frq)
+      equivalence (cprefix,lprefix)
+      character*2 cnetsb(max_chan,max_stn,max_frq)
+      character*2 cosb(max_chan,max_stn,max_frq)
+      equivalence (cnetsb,lnetsb),(cosb,losb)
       character*8 cnafrq(max_frq),cnafrsub(max_stn,max_frq)
       equivalence (cnafrq,lnafrq),(cnafrsub,lnafrsub)
+      character*16 cmode_cat(max_frq)
+      equivalence (cmode_cat,lmode_cat)
       character*16 cmfmt(max_stn,max_frq)
       equivalence (cmfmt,lmfmt)
       character*4 cbarrel(max_stn,max_frq)

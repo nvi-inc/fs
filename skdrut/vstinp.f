@@ -25,24 +25,30 @@ C OUTPUT:
       integer ierr ! error number, non-zero is bad
 
 ! functions
-      integer ichmv_ch,ichcm_ch,ichmv ! functions
       integer ptr_ch,fget_station_def,fvex_len
 
 C
 C LOCAL:
       logical kline
       integer ierr1
-      integer*2 lant(4),LAXIS(2),lter(4),lsit(4)
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
+      integer*2 lant(4),LAXIS(2),lter(4),lsit(4)
       integer*2 LOCC(4),lrec(4),lrack(4),ls2sp(2)
+      character*8 cocc,crec,crack,cs2sp
+      character*8 cant,cter,csit
+      equivalence (cant,lant),(cter,lter),(csit,lsit)
+      equivalence (locc,cocc),(crec,lrec),(crack,lrack),(cs2sp,ls2sp)
+
       integer islcon(2),ns2tp
       real AZH(MAX_HOR),ELH(MAX_HOR)
       real DIAM
       real sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
       double precision POSXYZ(3),AOFF
-      INTEGER J,nr,maxt,npar(max_band),idummy,nhz,i,idum
+      INTEGER J,nr,maxt,npar(max_band),nhz,i
       integer*2 lidt(2),lid,ltlc
+      character*4 cidt
+      equivalence (lidt,cidt)
       character cstid(max_stn)
       double precision poslat,poslon
       integer nstack
@@ -121,46 +127,56 @@ C       2.1 Antenna information
         STNLIM(2,2,I) = ANLIM2(2)
         AXISOF(I)=AOFF
         DIAMAN(I)=DIAM
-        idummy = ichmv(LTERID(1,I),1,LIDT,1,4)
+        cterid(i)=cidt
         NHORZ(I) = 0
 C       For VEX 1.3, antenna name is not there, so use site name
-        if (ichcm_ch(lant,1,'        ').eq.0) then
-          IDUMMY = ICHMV(LANTNA(1,I),1,lsit,1,8)
-        else
-          IDUMMY = ICHMV(LANTNA(1,I),1,lant,1,8)
-        endif
+
+       if(cant .eq. ' ') then
+          cantna(i)=csit
+       else
+          cantna(i)=cant
+       endif
 C
 C       2.2 Here we handle the position information.
 C     It is not an error to have the occ. code or lat,lon missing.
 C
-        IDUMMY = ICHMV(LSTNNA(1,I),1,lsit,1,8)
+!        IDUMMY = ICHMV(LSTNNA(1,I),1,lsit,1,8)
+        cstnna(i)=csit
         STNPOS(1,I) = POSLON*deg2rad
         STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
-        idum=ichmv(loccup(1,i),1,locc,1,8)
+!        idum=ichmv(loccup(1,i),1,locc,1,8)
+        coccup(i)=cocc
 C
 C     2.4 Here we handle terminal information
 C
-        if (ichcm_ch(lter,1,'        ').eq.0) then
-          IDUMMY = ICHMV(LTERNA(1,I),1,lsit,1,8)
+!        if (ichcm_ch(lter,1,'        ').eq.0) then
+!          IDUMMY = ICHMV(LTERNA(1,I),1,lsit,1,8)
+!        else
+!          IDUMMY = ICHMV(LTERNA(1,I),1,lter,1,8)
+!        endif
+        if(cter .eq. ' ') then
+           cterna(i)=csit
         else
-          IDUMMY = ICHMV(LTERNA(1,I),1,lter,1,8)
+           cterna(i)=cter
         endif
-        idummy = ichmv(lstrack(1,i),1,lrack,1,8) ! rack type
-        idummy = ichmv(lstrec(1,i),1,lrec,1,8) ! recorder 1
-        call ifill(lstrec2(1,i),1,8,oblank)
-        idummy = ichmv_ch(lstrec2(1,i),1,'none') ! default recorder 2
-        if (nr.eq.2) then 
-          idummy = ichmv(lstrec2(1,i),1,lrec,1,8) ! recorder 2 same as 1
-        endif 
-        idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! first recorder
+
+        cstrack(i)=crack
+        cstrec(i)=crec
+        if (nr.eq.1) then
+          cstrec2(i)='none'
+        else
+          cstrec2(i)=crec
+        endif
+        cfirstrec(i)='1'
         nheadstack(i)=nstack ! number of headstacks
         maxtap(i) = maxt     ! tape length
         nrecst(i) = nr       ! number of recorders
         ns2tapes(i) = ns2tp  ! number of S2 tapes
-        idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4) ! rack type
+!        idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4) ! rack type
+        cs2speed(i)=cs2sp(1:4)
         tape_motion_type(i)=ctapemo   ! tape motion
         itearl(i)=ite                 ! early start time
         itlate(i)=itl                 ! late stop time
@@ -215,14 +231,13 @@ C
 C Check for duplicate 1-letter codes and change any necessary.
 
       do i=1,nstatn
-        call hol2char(lstcod(i),1,1,cstid(i))
+        cstid(i)=cstcod(i)(1:1)
       enddo
       do i=2,nstatn
         call idchk(i,cstid,lu)
       enddo
       do i=1,nstatn
-        idum=ichmv_ch(lstcod(i),1,'  ') ! blank it out
-        idum=ichmv_ch(lstcod(i),1,cstid(i)) ! move in one char
+        cstcod(i)=cstid(i)//' '
       enddo
 
       ierr=ierr1

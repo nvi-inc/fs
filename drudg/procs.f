@@ -945,6 +945,7 @@ C  NONE rack gets comments
               DLO = freqlo(ic,istn,icode) ! lo freq
               DRF = FREQRF(ic,istn,ICODE) ! sky freq
               rFVC = abs(DRF-DLO)   ! BBCfreq = RFfreq - LOfreq
+              write(*,*) dlo,drf,rfvc
               NCH = nch + IR2AS(rFVC,IBUF,nch,8,2)
               if (DRF-DLO .lt. 0.d0) nch = ichmv_ch(ibuf,nch+1,"LSB")
               call hol2lower(ibuf,(nch+1))
@@ -1525,6 +1526,7 @@ C  The warning messages.
 9911              format(/'PROCS03 - WARNING! BBC ',i2,' frequency '
      .            f7.2,' is out of range.'/
      .            21x,' Check LO and IF in schedule.')
+                write(*,*) rfvc,dlo,drf
                 if ((km3rack.or.km4rack).and.
      .            (rfvc.lt.0.0.or.rfvc.gt.499.9)) 
      .            write(luscn,9912) ib,rfvc
@@ -2318,6 +2320,8 @@ C                             Write out a max of 8 channels for 8-BBC stations
                       isbx=isb
                       klsblo=freqrf(ic,istn,icode).lt.
      >                       freqlo(ic,istn,icode)
+                      write(*,*) klsblo,
+     >                 freqrf(ic,istn,icode),freqlo(ic,istn,icode)
                       if (klsblo) then ! reverse sidebands
                         if (isb.eq.1) isbx=2
                         if (isb.eq.2) isbx=1

@@ -7197,3 +7197,91 @@ Version 9.7.3 041021
            increase scan_set time-out to 5 seconds
 
 Version 9.7.4 041119
+
+041129 weh quikv/bank_check.c
+           added missing ";" to bank_set=inc command
+
+041130 weh quikv/data_check_dis.c
+           control/fserr.ctl
+           error if data_check returns "?"
+
+041201 weh ddout/ddout.c
+           set umask to 0 for all permission to work
+
+041201 weh quikr/if3.f
+           don't add module to check list if only operation was "old" or "max"
+           this avoids chekr error for modes were if3 is not set-up
+
+041201 weh quikv/ifadjust.c
+           only overwrite final att value in shared memory if channel was
+           patched, avoid causing chekr error when if3 is not used
+ 
+041202 weh help/disk_record.___
+           Added explanation of how to use Mark5A "Recover" program
+
+041207 weh fclib/Makefile
+           fclib/fc_readlink.c
+           add access to libc readlink() function
+
+7041207 weh newlb/ftn_purge.c
+           increased maximum fine name length to 64 characters for PFMED
+           and boss/newpf.f
+
+041207 weh pfmed/Makefile
+041208 weh control/fserr.ctl
+           boss/Makefile
+           boss/newpf.f
+           boss/follow_link.f
+           pfmed/follow_link.f
+           pfmed/pfblk.f
+           pfmed/pfcop.f
+           pfmed/ffmp.f
+           pfmed/ffm.f
+           pfmed/reprc.f
+           follow links with /usr2/proc for .prc files
+
+041210 weh chooser/chooser
+           created
+
+041215 weh fmset/fmset.c
+           show formatter type VLBA or Mark IV
+
+Version 9.7.5 041215
+
+041220 rdg fsvue/Makefile
+           st.default/st-0.0.0/metserver/src/metwind.c
+041221 rdg st.default/st-0.0.0/metserver/src/metwind.c
+           st.default/st-0.0.0/metserver/src/Makefile
+           st.default/st-0.0.0/metserver/src/MakeDiag
+           st.default/st-0.0.0/metserver/met.ctl
+           st.default/st-0.0.0/metserver/vue_metdisp
+           st.default/st-0.0.0/metserver/README_mw
+	   New MET3 diagnostic tools. Compiled when metserver
+           directories are compiled.
+
+041220 rdg fsvue/lib/vue_metdisp
+041221 rdg st.default/st-0.0.0/metserver/vue_metwind
+           A tcl/TK widget for MET3 diagnostics. 
+
+041221 rdg logpl/logpl
+	   Corrected error in indexing to allow 4 item display graphs. 
+
+050106 weh incom/get_rxgain_files.c
+           gnplt/gnplt
+           use /usr2/control/rxg_files for rxg files
+
+050113 weh /clib/cls_util.c
+           improve error messages
+
+050114 weh setcl/setcl.f
+           fixed so that S2RT is preferred over S2DAS
+
+050119 weh fs/fs.c
+           fixed so that a program's "label" is limited to 5 characters
+
+050125 weh misc/configs.txt
+           misc/move_rxg_files
+           misc/fix_perm
+           Created
+
+Version 9.7.6 050126

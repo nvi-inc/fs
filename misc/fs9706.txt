@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.4/misc/fs9704up.txt  Version: 1.2 Date: 041119
+File: /usr2/fs-9.7.6/misc/fs9706up.txt  Version: 1.3 Date: 050125
 
 I. Introduction
 
@@ -7,7 +7,7 @@ This memo is divided into 4 sections:
    II.  Changes Since Version 9.6.9
    III. Installation
    IV.  Updating from 9.7.0
-   V.   Updating from 9.7.1, 9.7.2, or 9.7.4
+   V.   Updating from 9.7.1-9.7.5
    VI.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
@@ -31,7 +31,7 @@ S2 DAS support was provided Mario Bérubé.  This version has S2 DAS
 SNAP command, "setcl", and "fmset" support are included in this
 version.  S2 DAS DRUDG support is not included at this time.
 
-Additional significant change are: the FS time model has been revised
+Additional significant changes are: the FS time model has been revised
 to include better support for NTP, a new method of updating the model
 rate with a new "setcl" parameter "adapt", a remaining disk pack
 capacity display, "monit5", and fsvue now operates in a client/server
@@ -41,7 +41,7 @@ This version is intended to installed as an update for 9.6.9.  This
 update does not require as many changes to local procedures and
 control files as some relatively recent ones have.  It should be
 fairly easy to install.  For stations that have already installed
-9.7.0 or 9.7.1/9.7.2/9.7.3, separate sections below provide even more
+9.7.0 or 9.7.1-9.7.5, separate sections below provide even more
 abbreviated instructions for upgrading from these versions.
 
 II. Changes Since Version 9.6.9
@@ -56,7 +56,8 @@ description.
 The following is a summary of the changes.  Items numbered 4 and above
 were added after 9.6.10. Items numbered 43 and above were added after
 9.7.0. Items numbered 51 and above were added after 9.7.1. Items
-numbered 53 and above were added after 9.7.3.
+numbered 53 and above were added after 9.7.3. Items numbered 66 and
+above were added after 9.7.4.
 
 1. New USER_DEVICE command for support of station detectors in ONOFF,
    FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
@@ -140,6 +141,26 @@ numbered 53 and above were added after 9.7.3.
     increased.
 65. Fixed erroneous errors from "data_valid=..." commands for non-S2
     drives.
+66. The "data_check" command for Mark5A returns an error if the device
+    responds with "?" for the data mode.
+67. Logs are now created with "rw-rw-rw-" permissions.
+68. The "if3" command does not add the if3 module to the "chekr" list
+    unless it has been set-up
+69. The "ifadjust" command does not store the wrong attenuator value
+    for if3 when the module isn't in use.
+70. FS modified to allow symbolic links for .prc files.
+71. Description of Mark5A "Recover" program added to "disk_record"
+    help.
+72. FMSET shows which formatter, Mark IV or VLBA, is being used.
+73. There are new diagnostic tools for MET3 meteorological sensors.
+74. LOGPL was fixed so the fourth channel works on the first try
+75. RXG files are now moved to /usr2/control/rxg_files sub-directory.
+76. Error messages for class number errors were improved.
+77. SETCL was fixed to prefer the S2-RT over the S2-DAS.
+78. The "killed/terminated" messages were improved so there is no
+    over-run if the "label" for a program exceeds five characters.
+79. Utility script "fix_perm" to fix ownership and permissions of
+    local files.
 
 A more detailed discussion of these changes follows.
 
@@ -595,7 +616,7 @@ A more detailed discussion of these changes follows.
 
 59. VEX parser extended to handle de facto Mark 5 VEX standard. The
     parser can now read in schedules written as "native" Mark 5
-    schedules.  However, DRUDG does not support this mode yet.
+    schedules.
 
 60. VEX parser allows "options" field in "data_transfer" statement to
     be optional.  This is a backward compatible extension to the
@@ -626,17 +647,109 @@ A more detailed discussion of these changes follows.
     drives.  This bug caused data_valid=... commads for non-S2 drives
     to retun the error (if any) of the previous SNAP command.
 
+66. The "data_check" command for Mark5A returns an error if the device
+    responds with "?" for the data mode.  This is intended to help get
+    the operator's attention if there is an recording error.
+
+67. Logs are now created with "rw-rw-rw-" permissions.  Previously,
+    the user's umask was not properly overridden, prevented this.  All
+    new logs are now created with the correct permissions.
+
+68. The "if3" command does not add the if3 module to the "chekr" list
+    unless it has been set-up.  This caused spurious "chekr" errors
+    for schedules that did not use the if3 module after "caltsys" was
+    run. This bug was reported by Jonathan Quick (HartRAO) and is
+    fixed.
+
+69. The "ifadjust" command does not store the wrong attenuator value
+    for the if3 module when the module isn't in use.  This bug was
+    reported by Jonathan Quick (HartRAO) and is fixed.
+
+70. FS modified to allow symbolic links for .prc files.  It is now
+    possible to use .prc files that are merely links to other files.
+    There are however, two restrictions.  First, the file linked to
+    must also be in /usr2/proc directory.  Secondly, the form of the
+    file-name linked to must be like a normal .prc file except an
+    additional ".type" suffix can be appended to the end, e.g.,
+    "station.prc.s2 or station.prc.vlba.  This change is intended to
+    make it easy for stations to switch which .prc files are used for
+    different equipment configurations.  This sort of flexibility is
+    covered in more details in the "configs.txt" file in the
+    /usr2/fs/misc" directory.
+
+71. Description of Mark5A "Recover" program added to "disk_record"
+    help.  The "Recover" program is useful for correcting the write
+    pointer and disk directory structure on a Mark5A disk if the
+    "record=off" ("disk_record=off") command did not get sent properly
+    to the recorder for some reason, such as a power failure, before
+    the end of a scan.  In many such cases, the "Recover" program will
+    save already recorded data from being overwritten by the
+    subsequent scans.
+
+72. FMSET shows which formatter, Mark IV or VLBA, is being used.  This
+    is intended to help stations that switch between VLBA and Mark IV
+    formatters so that they can tell more easily what configuration
+    they are using.
+
+73. There are new diagnostic tools for MET3 meteorological sensors.
+    These tools can help with testing and initializing a MET3 sensor,
+    particularly when it is first installed.
+
+74. LOGPL was fixed so the fourth channel works on the first try.  It
+    worked on subsequent tries.  In any event the bug has been fixed.
+
+75. RXG files are now moved to /usr2/control/rxg_files sub-directory.
+    This change is made in order to make it easier for stations to
+    switch between different configurations.  If a station has more
+    than one set of RXG files, they can be kept in separate
+    sub-directories and /usr2/control/rxg_files can be set as a
+    symbolic link pointing to the one the FS should use.  With
+    different sub-directories holding different sets of RXG files,
+    analysis of the gain calibration data can be carried out with
+    GNPLT using RXG files that either are or are not in use by the FS.
+    GNPLT allows the user to select the directory containing the RXG
+    files to use.
+
+76. Error messages for class number errors were improved.  In order to
+    help debug when there is a class number error, the error messages
+    are more complete.  In a future release, the error handling
+    mechanism for class numbers will be enhanced to allow the top
+    level code that initiates a class I/O call to report more
+    information about the context of the error.
+
+77. SETCL was fixed to prefer the S2-RT over the S2-DAS.  This bug
+    caused the FS time to be set to the S2-DAS time rather than the
+    S2-RT time if both were in use.  While the S2-DAS and the S2-RT
+    should be set to the same time, it caused confusion if they
+    weren't and the FS's behavior was incorrect.
+
+78. The "killed/terminated" messages were improved so there is no
+    over-run if the "label" for a program exceeds five characters.
+    This cosmetic bug caused the killed/terminated messages to be
+    confusing if the STPGM.CTL file contained a line with more than
+    five characters in the first field.
+
+79. Utility script "fix_perm" to fix ownership and permissions of
+    local files.  For various reasons, the file permissions and
+    ownerships of the local files and directories used by the FS
+    (/usr2/control/, /usr2/proc/, /usr2/sched/, /usr2/log/, and their
+    contents) amay have changed from the defaults.  Normally the
+    ownership should be "oper.rtx" and permissions "rw-rw-rw".  Some
+    FS errors are caused by files not having the correct ownerships
+    and permissions.  The script /usr2/fs/misc/fix_perm can be
+    executed as "root" to restore these values.
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 041117.  The release of DRUDG includes
+DRUDG opening message date is 050125.  The release of DRUDG includes
 limited support for eVLBI.  In addition it incorporates changes in the
 format of some Mark5 commands, several bug fixes, and support for the
 Dymo label printer.  The following is a summary of changes.  They are
 described in more detail after the summary.  Items numbered 10 and
 above were added after 9.7.0.  Items numbered 18 and above were added
 after 9.7.1.  Items numbered 31 and above were added after
-9.7.1. Items numbered 34 and above were added after 9.7.3.
+9.7.1. Items numbered 34 and above were added after 9.7.3. Items
+numbered 45 and above were added after 9.7.4.
 
 1. Several minor K4 related bugs were fixed.
 2. If recorder configuration is "none", no tape related commands are
@@ -695,6 +808,15 @@ after 9.7.1.  Items numbered 31 and above were added after
     and "data_valid=off" commands.
 44. After an "in2net" scan, a "postob" command is used instead of
     "postob_mk5a".
+45. Fixed erronuous stop commands in S2 adaptive schedules.
+46. Fixed uninitialized variable in frinp.f  and vmoinp.f.
+47. Converted Hollerith to ASCII strings.
+48. Fixed extra "," line in write statement which caused stinp.
+49. Bug fixed in fakesum, used to generate in fake lvex files.
+50. In the summary listing, the final storage value differed from the
+    total disk space used.
+51. The schedule shifting option was broken.
+52. This version is Mark5 aware for VEX schedules.
 
 A more detailed discussion of these changes follows.
 
@@ -829,11 +951,11 @@ A more detailed discussion of these changes follows.
    files.
 
 10. A bug was fixed in S2 recorder support.  This bug was noticed by
-    Jonathan Quick, and arose because the dimension of the string that
-    held the second recorder type was reduced from 16 characters to 8
-    characters.  This was done for consistency with the first
-    recorder.  Unfortunately, this lead to an error in initiailizing
-    another string.
+    Jonathan Quick (HartRAO), and arose because the dimension of the
+    string that held the second recorder type was reduced from 16
+    characters to 8 characters.  This was done for consistency with
+    the first recorder.  Unfortunately, this lead to an error in
+    initiailizing another string.
 
 11. The midtp command was added in Mark5 recording mode. This command
     will now be generated where the original schedule (which used
@@ -1113,6 +1235,39 @@ A more detailed discussion of these changes follows.
     "postob_mk5a".  This is because in2net does not entail recording
     to disk and "postob_mk5a" checks disk recording statistics.
 
+45. Fixed erronuous stop commands in S2 adaptive schedules. DRUDG
+    issued stop commands when it shouldn't have.  This was traced to
+    doing a test on cmode(istn,icod) which is not initialized for S2.
+
+46. Fixed uninitialized variable in frinp.f and vmoinp.f.  Initialize
+    cmode to " " in S2 case. Previously unitialized.
+
+47. Converted Hollerith to ASCII strings. Changed in vunps2m.f
+    vunptrk.f: ls2mode, ls2data, lm and also in vmoinp.f.
+
+48. Fixed extra "," line in write statement which caused stinp. This
+    caused a failure to compile under some Linux versions.
+
+49. Bug fixed in fakesum, used to generate in fake lvex files.  Out of
+    bounds error fixed on array holding station names.  Bug noticed by
+    Arno Mueskens (Bonn Correlator) in processing in t2036.
+
+50. In the summary listing, the final storage value differed from the
+    total disk space used.  This was tracked to converting from Mbytes
+    to Gbytes by dividing by 1000 in one case and 1024 in the other.
+    DRUDG now uniformly converts by dividing by 1000.
+
+51. The schedule shifting option was broken.  This is now fixed.  This
+    version of DRUDG gives results that are the same as previous
+    versions.  This may not be what you want, use this feature with
+    caution.  Never shift a schedule for a real experiment with this
+    option with explicit instructions from the scheduler (PI) or
+    coordinator..
+
+52. This version is Mark5 aware for VEX schedules.  The Mark5 support
+    has been checked on one (1) schedule.  This support should be
+    considered to be in "Beta" or "Alpha" testing mode.
+
  			    C. Known FS Bugs
 
 The following is a summary list of known bugs.  They are described in
@@ -1275,9 +1430,8 @@ System Initialization" manual.
 If you are updating from 9.7.0, please follow the directions in the
 separate section below titled "IV. Updating from 9.7.0".
 
-If you are updating from 9.7.1, 9.7.2, or 9.7.3, please follow the
-directions in the separate section below titled "V. Updating from
-9.7.1, 9.7.2, or 9.7.3".
+If you are updating from 9.7.1-9.7.5, please follow the directions in
+the separate section below titled "V. Updating from 9.7.1-9.7.5".
 
 The following instructions are for upgrading from 9.6.9 and 9.6.10.
 Please follow all the steps.
@@ -1285,7 +1439,7 @@ Please follow all the steps.
 Below is a list of "critical updates" is given.  These are updates
 that must be applied sequentially.  Please start with the next update
 with a later version number than you have and apply it and the
-remaining listed version before upgrading to 9.7.4.  You can find the
+remaining listed version before upgrading to 9.7.6.  You can find the
 installation notes for these versions on the FS FTP servers in the
 docs.old sub-directory.  The list of critical updates is:
 
@@ -1330,7 +1484,7 @@ any questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1338,7 +1492,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.4.tgz
+      get fs-9.7.6.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1352,43 +1506,55 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.4.tgz
+      tar -xzpf /tmp/fs-9.7.6.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.4 fs
+      ln -sfn fs-9.7.6 fs
 
-(7) VERY IMPORTANT: Log-out as root, and log-in prog.
+(7) If you wish to make sure your local files have the default
+    ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
+    execute the script:
 
-(8) Make the FS:
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults , answer "n".  That is the last chance to abort the
+    execution of the script.
+
+(8) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(9) Make the FS:
 
       cd /usr2/fs
       make
 
-(9) Remake your station software (this is necessary whether or not the
-    following discussion of ftok() applies to your station).  Before
-    doing this, if your station software uses ftok() to generate IPC
-    keys, you should probably update it so that the value of the
-    second argument of ftok() is unique within the FS, your station
-    software and any other applications you have that use ftok().  If
-    you are not the developer of station software for your station,
-    please ask the person who is to take care of this for you.  If you
-    have any questions about this please contact us.
+(10) Remake your station software (this is necessary whether or not
+     the following discussion of ftok() applies to your station).
+     Before doing this, if your station software uses ftok() to
+     generate IPC keys, you should probably update it so that the
+     value of the second argument of ftok() is unique within the FS,
+     your station software and any other applications you have that
+     use ftok().  If you are not the developer of station software for
+     your station, please ask the person who is to take care of this
+     for you.  If you have any questions about this please contact us.
 
-    Once the calls to ftok() are updated (or even if they aren't).
-    The following steps should do the trick to reload your station
-    software if you have the "standard" configuration for station
-    software:
+     Once the calls to ftok() are updated (or even if they aren't).
+     The following steps should do the trick to reload your station
+     software if you have the "standard" configuration for station
+     software:
 
-      cd /usr2/st
-      make rmdoto rmexe all
+       cd /usr2/st
+       make rmdoto rmexe all
 
-(10) Reboot your computer.
+(11) Reboot your computer.
 
-(11) Log in as oper
+(12) Log in as oper
 
-(12) Modify your procedure files.  There are four required
+(13) Modify your procedure files.  There are four required
      modifications.
 
      A. One of these is to update your CHANGE_PACK procedure.  Please
@@ -1437,7 +1603,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      hardship for you otherwise.  Eliminating the old names as soon as
      possible will be beneficial.
 
-(13) Skip this step if you have 9.6.10 or later installed or if you
+(14) Skip this step if you have 9.6.10 or later installed or if you
      don't use station detectors.  If you use station detectors you
      will need to update your procedures.  Please delete all uses of
      CALTEMPx, FLUXx, TSYSx, and BEAMx, where x=5 or 6 from your
@@ -1452,7 +1618,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      use u5 and u6 for system temperature measurements if your rack
      device type is Mark III/IV or VLBA/4.
 
-(14) Update your control files.  There are two required modifications.
+(15) Update your control files.  There are two required modifications.
 
      A. Add the lines for the default synch tolerance for the Mark IV
         formatter to the equip.ctl file.  As oper:
@@ -1477,7 +1643,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         updated since the last kernel and/or computer change at your
         station.
 
-(15) Update the X-server set-up for the new Monit5 display, including
+(16) Update the X-server set-up for the new Monit5 display, including
      having Control-Shift-5 be a hot key for starting Monit5. The
      instructions for this are presented twice, as (A) for stations that
      have not customized their local copies of the relevant files
@@ -1542,10 +1708,10 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         (usually non-FS) Linux distribution.
 
         I. If you have the FS Linux 4 or FS Linux 5 distribution
-           installed, you should diff the 9.7.4 version against the
+           installed, you should diff the 9.7.6 version against the
            9.6.9 version:
 
-             cd /usr2/fs-9.7.4/st.default/prog
+             cd /usr2/fs-9.7.6/st.default/prog
              diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
 
            and then make the corresponding changes in your local copy of
@@ -1564,12 +1730,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
             distribution and X window manage you have. He will send
             you the correct files for comparison.
 
-(16) Update your .cshrc files to set "noclobber".  Edit the file
+(17) Update your .cshrc files to set "noclobber".  Edit the file
      ~oper/.cshrc and add the line "set noclobber" if it is not
      already included.  You can check /usr2/fs/st.default/oper/.cshrc
      for an example.  Please make the same change to ~prog/.cshrc.
 
-(17) If you use the MET03 server or the TACD or MET03 off-line
+(18) If you use the MET03 server or the TACD or MET03 off-line
      clients, you will need to update the ones you use.  If you are
      using the standard configuration, you can re-installing the
      appropriate programs according to the directions from the
@@ -1594,7 +1760,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
           cp -a /usr2/fs/st.default/st-0.0.0/tacdclient/tacdclient.c .
           make
 
-(18) Check ibad.ctl contents if you have changed kernels.  If you are
+(19) Check ibad.ctl contents if you have changed kernels.  If you are
      changing from a system that use the Linux Lab Project (LLP)
      driver to an installation that uses the National Instruments (NI)
      you will need to change the device names to remove any leading
@@ -1606,7 +1772,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      in "/usr/src/" (if you have the LLP driver, the sub-directory
      would be of the form "linux-gpib-*").
 
-(19) Set the FS_CHECK_NTP environment variable.  This variable is used
+(20) Set the FS_CHECK_NTP environment variable.  This variable is used
      to tell the FS whether to check the status of NTP in "setcl" and
      "fmset".  If you do not have NTP configured or there is some
      problem that causes "fmset" to not update every second reliably,
@@ -1621,12 +1787,33 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      "FS_CHECK_NTP" at the end of these files should be copied to the
      ends of the corresponding user's files and uncommented.
 
-(20) Reboot the computer.  This is important for both re-initializing
+(21) Change the location of your "rxg" files. As of 9.7.6 the rxg
+     files are expected to be in the "/usr2/control/rxg_files"
+     directory.  You can change the location of the files you have
+     used with pervious versions of the FS by running the script:
+
+       /usr2/fs/misc/move_rxg_files
+
+     This script creates a sub-directory rxg_files/ in /usr2/control/
+     and moves all the *.rxg files in /usr2/control/ into the
+     sub-directory.  If the rxg_files/ sub-directory already exists
+     when this script runs, the script will give up on the assumption
+     that something must be wrong somewhere.  Assuming the script
+     succeeds (there will be no output, "no news is good news"), the
+     new FS will find the same "rxg" files as the old one did.
+
+     If you maintain more than one set of "rxg" files you can maintain
+     more one sub-directory of rxg files /usr2/control and use
+     /usr2/control/rxg_files as a pointer to sub-directory of the set
+     you want the FS to read.  Please see "/usr2/fs/misc/configs.txt"
+     for more information.
+
+(22) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment, but also for a clean
      unified restart of the various TACD and MET03 client and server
      programs.
 
-(21) Test the FS.  Generally speaking a fairly thorough test is to run
+(23) Test the FS.  Generally speaking a fairly thorough test is to run
      a test experiment: start with DRUDG-ing a schedule, executing
      part of it (preferably at least a tape change and a parity check
      in each direction), and perform any normal post-experiment
@@ -1638,13 +1825,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 IV.  Updating from 9.7.0
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.0 and are updating to 9.7.4.
-A separate following section describes updating from 9.7.1, 9.7.2, or
-9.7.3.
+stations that have already installed 9.7.0 and are updating to 9.7.6.
+A separate following section describes updating from 9.7.1-9.7.5.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1652,7 +1838,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.4.tgz
+      get fs-9.7.6.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1666,72 +1852,84 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.4.tgz
+      tar -xzpf /tmp/fs-9.7.6.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.4 fs
+      ln -sfn fs-9.7.6 fs
 
-(6) VERY IMPORTANT: Log-out as root, and log-in prog.
+(6) If you wish to make sure your local files have the default
+    ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
+    execute the script:
 
-(7) Make the FS:
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults , answer "n".  That is the last chance to abort the
+    execution of the script.
+
+(7) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(8) Make the FS:
 
       cd /usr2/fs
       make
 
-(8) Log in as oper
+(9) Log in as oper
 
-(9)  If you have already fixed the X files installed with 9.7.0 or
-     used the modified installation procedure sent in a subsequent
-     e-mail, you should skip this step.  Otherwise these are the
-     instructions for correcting the results of the erronous 9.7.0
-     installation instructiond for these files.  If you have FS Linux
-     4 or FS Linux 5, please follow instructions (I). If you have FS
-     Linux 2 of FS Linux 3 or some other (usuall non-FS) Linux
-     distribution, please follow instuctions (II).
+(10) If you have already fixed the X files installed with 9.7.0 or
+      used the modified installation procedure sent in a subsequent
+      e-mail, you should skip this step.  Otherwise these are the
+      instructions for correcting the results of the erronous 9.7.0
+      installation instructiond for these files.  If you have FS Linux
+      4 or FS Linux 5, please follow instructions (I). If you have FS
+      Linux 2 of FS Linux 3 or some other (usuall non-FS) Linux
+      distribution, please follow instuctions (II).
 
-     I. If you have the FS Linux 4 or FS Linux 5 distribution
-        installed, please do the following:
-
-        1. login to "oper"
-        2. cp /usr2/fs/st.default/oper/.Xresources ~/
-        3. cp /usr2/fs/st.default/oper/.fvwm2rc ~/
-        4. If when you are performing step (3), you get the error:
-
-             "cp: cannot create regular file '/home/oper/.fvwm2rc':
-             Permission denied"
-
-           then switch to being "root" user and enter the commands:
-
-             cd /usr2/oper
-             chown oper.rtx .fvwm2rc
-
-           then go back and re-execute steps 1 and 3.
-
-        5. If you received the error cited above when you tried to
-           copy .fvwm2rc for "prog" for the original update, then a
-           similar fix is required. Switch to being "root" user and
-           enter the commands:
-
-             cd /usr2/prog
-             chown prog.rtx .fvwm2rc
-
-           then switch to "prog" and re-copy the .fvwm2rc file.
-
-             cp /usr2/fs/st.default/prog/.fvwm2rc ~/
-
-     II. If you have the FS Linux 2 or FS Linux 3 or some other (usually
-         non-FS) Linux distribution installed, please do the following:
+      I. If you have the FS Linux 4 or FS Linux 5 distribution
+         installed, please do the following:
 
          1. login to "oper"
          2. cp /usr2/fs/st.default/oper/.Xresources ~/
-         3. Please email Ray (rgonzale@gemini.gsfc.nasa.gov) and tell
-            him what Linux distribution and X window manager you
-            have. He will send you the correct .fvwmrc and/or .fvwm2rc
-            file.
+         3. cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+         4. If when you are performing step (3), you get the error:
 
-(10) Set the FS_CHECK_NTP environment variable.  This variable is used
+              "cp: cannot create regular file '/home/oper/.fvwm2rc':
+              Permission denied"
+
+            then switch to being "root" user and enter the commands:
+
+              cd /usr2/oper
+              chown oper.rtx .fvwm2rc
+
+            then go back and re-execute steps 1 and 3.
+
+         5. If you received the error cited above when you tried to
+            copy .fvwm2rc for "prog" for the original update, then a
+            similar fix is required. Switch to being "root" user and
+            enter the commands:
+
+              cd /usr2/prog
+              chown prog.rtx .fvwm2rc
+
+            then switch to "prog" and re-copy the .fvwm2rc file.
+
+              cp /usr2/fs/st.default/prog/.fvwm2rc ~/
+
+      II. If you have the FS Linux 2 or FS Linux 3 or some other (usually
+          non-FS) Linux distribution installed, please do the following:
+
+          1. login to "oper"
+          2. cp /usr2/fs/st.default/oper/.Xresources ~/
+          3. Please email Ray (rgonzale@gemini.gsfc.nasa.gov) and tell
+             him what Linux distribution and X window manager you
+             have. He will send you the correct .fvwmrc and/or .fvwm2rc
+             file.
+
+(11) Set the FS_CHECK_NTP environment variable.  This variable is used
      to tell the FS whether to check the status of NTP in "setcl" and
      "fmset".  If you do not have NTP configured or there is some
      problem that causes "fmset" to not update every second reliably
@@ -1747,7 +1945,7 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      "FS_CHECK_NTP" at the end of these files should be copied to the
      ends of the corresponding user's files and uncommented.
 
-(11) Unless you have done so already, you should check your SNAP
+(12) Unless you have done so already, you should check your SNAP
      procedure libraries for low-level "mk5=..." commands that use
      "informal" syntax and update these to formal syntax.  The primary
      changes that this entails are that commands must have equal
@@ -1767,18 +1965,39 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      command.  You should use "pfmed" to make the actual changes to
      the procedures.
 
-(12) Reboot the computer.  This is important for both re-initializing
+(13) Change the location of your "rxg" files. As of 9.7.6 the rxg
+     files are expected to be in the "/usr2/control/rxg_files"
+     directory.  You can change the location of the files you have
+     used with pervious versions of the FS by running the script:
+
+       /usr2/fs/misc/move_rxg_files
+
+     This script creates a sub-directory rxg_files/ in /usr2/control/
+     and moves all the *.rxg files in /usr2/control/ into the
+     sub-directory.  If the rxg_files/ sub-directory already exists
+     when this script runs, the script will give up on the assumption
+     that something must be wrong somewhere.  Assuming the script
+     succeeds (there will be no output, "no news is good news"), the
+     new FS will find the same "rxg" files as the old one did.
+
+     If you maintain more than one set of "rxg" files you can maintain
+     more one sub-directory of rxg files /usr2/control and use
+     /usr2/control/rxg_files as a pointer to sub-directory of the set
+     you want the FS to read.  Please see "/usr2/fs/misc/configs.txt"
+     for more information.
+
+(14) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
-V.  Updating from 9.7.1, 9.7.2, or 9.7.3
+V.  Updating from 9.7.1-9.7.5
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.1, 9.7.2, or 9.7.3 and are
-updating to 9.7.4.
+stations that have already installed 9.7.1-9.7.5 and are updating to
+9.7.6.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.6 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1786,7 +2005,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.4.tgz
+      get fs-9.7.6.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1800,16 +2019,28 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.4.tgz
+      tar -xzpf /tmp/fs-9.7.6.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.4 fs
+      ln -sfn fs-9.7.6 fs
 
-(6) VERY IMPORTANT: Log-out as root, and log-in prog.
+(6) If you wish to make sure your local files have the default
+    ownership ("oper.rtx") and permissions ('rw-rw-rw'), please
+    execute the script:
 
-(7) Make the FS:
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults , answer "n".  That is the last chance to abort the
+    execution of the script.
+
+(7) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(8) Make the FS:
 
       cd /usr2/fs
       make
@@ -1834,25 +2065,46 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
     You should use "pfmed" to make the actual changes to the
     procedures.
 
-(10) Reboot the computer.  This is important for both re-initializing
+(10) Change the location of your "rxg" files. As of 9.7.6 the rxg
+     files are expected to be in the "/usr2/control/rxg_files"
+     directory.  You can change the location of the files you have
+     used with pervious versions of the FS by running the script:
+
+       /usr2/fs/misc/move_rxg_files
+
+     This script creates a sub-directory rxg_files/ in /usr2/control/
+     and moves all the *.rxg files in /usr2/control/ into the
+     sub-directory.  If the rxg_files/ sub-directory already exists
+     when this script runs, the script will give up on the assumption
+     that something must be wrong somewhere.  Assuming the script
+     succeeds (there will be no output, "no news is good news"), the
+     new FS will find the same "rxg" files as the old one did.
+
+     If you maintain more than one set of "rxg" files you can maintain
+     more one sub-directory of rxg files /usr2/control and use
+     /usr2/control/rxg_files as a pointer to sub-directory of the set
+     you want the FS to read.  Please see "/usr2/fs/misc/configs.txt"
+     for more information.
+
+(11) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.7.4.tgz archive have been placed in
+floppy, "split" files of the fs-9.7.6.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9704tg.aa
-fs9704tg.ab
+fs9706tg.aa
+fs9706tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9704tg.* >fs-9.7.4.tgz
+cat fs9706tg.* >fs-9.7.6.tgz
 
-This will create an exact image of the original fs-9.7.4.tgz archive
+This will create an exact image of the original fs-9.7.6.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.
