@@ -967,6 +967,19 @@ void fs_get_ichvlba__(ichvlba,N)
          }
 	}
 
+void fs_set_ichs2__(ichs2)
+	int *ichs2;
+	{
+	  shm_addr->check.s2rec.check = *ichs2;
+	}
+
+void fs_get_ichs2__(ichs2)
+	int *ichs2;
+	{
+	  *ichs2 = shm_addr->check.s2rec.check;
+	}
+
+
 void fs_set_stchk__(ichk,n)
 int *ichk,*n;
 {
@@ -1524,4 +1537,5 @@ void fs_get_vrepromode__(vrepromode)
           vrepromode[0]=shm_addr->vrepro.mode[0];
           vrepromode[1]=shm_addr->vrepro.mode[1];
 	}
+
 
