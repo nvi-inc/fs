@@ -39,6 +39,10 @@ long ip[5];
 	iclass=ip[0];
 	nrec=ip[1];
 	
+	for (i=0;i<sizeof(lclc.codes)/sizeof(int);i++) {
+	  lclc.codes[i]==-1;
+	}
+
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSTAform4(&lclc,&lclm,buff);
 
