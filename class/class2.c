@@ -7,6 +7,7 @@
 #include <sys/msg.h>	/* message IPC header file */
 #include <memory.h>    /* shared memory IPC header file */
 
+#include "../include/ipckeys.h"
 #include "../include/params.h"
 #include "../include/fscom.h"
 
