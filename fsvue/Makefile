@@ -2,13 +2,11 @@
 # initial rdg
 #
 all: ../bin/vueinfo ../bin/fsvue
-
-#LIBES = ../../stlib/stlib.a ../../fs/poclb/poclb.a ../../fs/clib/clib.a\
-../../fs/rtelb/rtelb.a -lm
+#
 LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a ../newlb/newlb.a -lm
 #
 OBJECTS = \
-vueinfo.o what_help.o
+vueinfo.o what_help.o vuecalq.o
 #
 ../bin/fsvue: fsvue
 	rm -f ../bin/fsvue
@@ -21,4 +19,3 @@ vueinfo.o what_help.o
 vueinfo:
 	rm -f ../bin/vueinfo
 	make
-
