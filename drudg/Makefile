@@ -3,6 +3,7 @@
 #                         makefile for DRUDG                          #
 # 960201 nrv for Linux                                                #
 # 960602 nrv with vex libraries                                       #
+# 970312 nrv Add read_snap1                                           #
 #                                                                     #
 #                                                                     #
 #######################################################################
@@ -23,7 +24,8 @@ PROGRAM = drudg
 # Set objects
 #
 DROBS=\
-$(DR)ckobs.o $(DR)clist.o $(DR)crprc.o $(DR)drudg.o $(DR)gtsnp.o \
+$(DR)drudg.o \
+$(DR)ckobs.o $(DR)clist.o $(DR)crprc.o  $(DR)gtsnp.o \
 $(DR)knewt.o $(DR)lists.o $(DR)lspin.o $(DR)m3inf.o $(DR)point.o \
 $(DR)procs.o $(DR)snap.o  $(DR)sread.o $(DR)tmadd.o $(DR)tmsub.o \
 $(DR)unpsk.o $(DR)fdrudg.o $(DR)trkall.o $(DR)spdstr.o \
@@ -35,13 +37,15 @@ $(DR)snapintr.o $(DR)bbbuf.o $(DR)cazel.o $(DR)gtshft.o $(DR)bar1.o \
 $(DR)labsnp.o $(DR)port.o $(DR)lstsum.o $(DR)nhdif.o $(DR)setprint.o \
 $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
 $(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o \
-$(DR)lstsumo.o $(DR)isecdif.o $(DR)psbar.o $(DR)copen.o
+$(DR)lstsumo.o $(DR)isecdif.o $(DR)psbar.o $(DR)copen.o $(DR)procintr.o \
+$(DR)read_snap1.o
 
 #
 # Set compiling and linking flags
 #
 # -C checks for out of bounds during execution and aborts if found
 FFLAGS= -C -c 
+# f2c needs this others don't
 CFLAGS= -c  -DF2C
 #
 

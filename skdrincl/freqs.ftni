@@ -25,6 +25,8 @@ C            the mode name if any.
 C 970110 nrv Add icode index to cpassorderl
 C 970114 nrv Add LPREFIX.
 C 970121 nrv Add station and code indices to npassl
+C 970206 nrv Remove ihdpo2,itra2,ihddi2 and add an index to
+C            ihdpos,itras,ihddir
 C
       double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
@@ -44,9 +46,8 @@ C               for calculating SNR. Each track is assumed to be recorded
 C               at the sample rate.
 C     samprate - sample rate, per frequency code, Mb/s.
  
-      integer ncodes,nfreq,npassf,nband,nchan,invcx,itra2,ifan,
-     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,ihdpo2,ihddi2,
-     .npassl
+      integer ncodes,nfreq,npassf,nband,nchan,invcx,ifan,
+     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,npassl
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
@@ -60,16 +61,13 @@ C     itras  - track assignments (s,b,p,c,f), i.e. track number on
 C              which the following signals are recorded:
 C          s = sideband, U/L 
 C          b = bit, sign/magnitude 
-C          p = corresponding pass, forward/reverse (1 to max_pass, 
+C          p = corresponding pass, forward/reverse (1 to max_subpass, 
 C              e.g. 1 for mode A, 1 or 2 for B and C, 1 to 28 for D, 
 C              1 to 4 for E)
 C          c = channel (1 to max_chan)
 C          f = frequency code (1 to max_frq)
-C     itra2 - same as itras but for headstack 2
 C     ihdpos - head position offsets
-C     ihdpo2 - head position offsets for headstack 2
 C     ihddir - corresponding pass number
-C     ihddi2 - corresponding pass number for headstack 2
 C     ntrakf - number of tracks recorded per pass for this code
 C     nstsav,istsav - number and indices of station names found on the "F" line
 C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
@@ -120,12 +118,10 @@ C
      .       nchan(max_stn,max_frq),
      .       invcx(max_chan,max_stn,max_frq),
      .       ibbcx(max_chan,max_stn,max_frq),
-     .       itras(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
-     .       itra2(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
-     .       ihdpos(max_pass,max_stn,max_frq),
-     .       ihddir(max_pass,max_stn,max_frq),
-     .       ihdpo2(max_pass,max_stn,max_frq),
-     .       ihddi2(max_pass,max_stn,max_frq),
+     .       itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,
+     .               max_stn,max_frq),
+     .       ihdpos(max_headstack,max_pass,max_stn,max_frq),
+     .       ihddir(max_headstack,max_pass,max_stn,max_frq),
      .       nstsav,istsav(max_stn),
      .       ifan(max_stn,max_frq),npassl(max_stn,max_frq),
      .

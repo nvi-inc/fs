@@ -12,15 +12,15 @@ C INPUT:
       integer icode
 C   ICODE - code index in common
 C OUTPUT:
-      real*4 speex
+      real speex
       integer ivcind
 C   SPEEX - nominal tape speed, in ips
 C   IVCIND - index for bandwidth and speed, 1 to 6
 
 C Local
       integer i
-      real*4 BANDW(8)
-      real*4 TAPIPS(8)
+      real BANDW(8)
+      real TAPIPS(8)
 
 C INITIALIZED:
       DATA BANDW/16.0,8.0,4.0,2.0,1.0,0.5,0.25,0.125/

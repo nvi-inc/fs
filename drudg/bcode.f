@@ -1,5 +1,5 @@
 C BCODE
-	subroutine bcode(lu,jbuf,lbuf,cprttyp)
+	subroutine bcode(lu,jbuf,lbuf,clabtyp)
 
 C  BCODE writes out the ASCII label and the bar code
 C  label to the Epson printer.
@@ -12,7 +12,7 @@ C Input:
 	integer lu ! printer unit number
 	integer*2 jbuf(7) ! holds text for bar code
 	integer*2 lbuf(6) ! holds text for ASCII label
-	character*128 cprttyp ! EPSON or EPSON24
+	character*128 clabtyp ! EPSON or EPSON24
 
 C Local:
 	integer parms(4) ! parameters for bars
@@ -63,7 +63,7 @@ C 3. Write out the graphics buffer 5 times
 	  enddo
 	enddo
 
-	if (cprttyp.eq.'EPSON') then
+	if (clabtyp.eq.'EPSON') then
 	  cprint = char(27)//'3_'//char(13)
 	else !EPSON24
 	  cprint = char(27)//'3('//char(13)

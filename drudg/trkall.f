@@ -21,27 +21,28 @@ C 960124 nrv Bad fan-out logic replaced.
 C 960201 nrv Worse fan-out logic replaced.
 C 960531 nrv Fanout factor is input, already determined.
 C 961018 nrv Fan out the 'M' modes just like the 'V' ones.
+C 970206 nrv Add headstack index
 C
 C Called by: PROCS
 
       include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
-      integer itras(2,2,max_chan)
+      integer itras(2,2,max_headstack,max_chan)
 C             Mark III # track assignments from schedule
 C             sub-array for only this code, this station
       integer*2 lmode ! first 2 characters of mode from schedule
       integer ifan ! fanout factor
 C
 C  OUTPUT:
-      integer itrk(36) ! tracks to be recorded/enabled
+      integer itrk(max_track,max_headstack) ! tracks to be recorded/enabled
 C           VLBA track # assignments
       integer*2 lm(2) ! 3-character mode for procedure names
       integer nm ! number of characters in lm, 1 or 3
-      integer itrax(2,2,max_chan) ! a fanned-out version of itras
+      integer itrax(2,2,max_headstack,max_chan) ! a fanned-out version of itras
 C
 C  LOCAL:
-      integer idum,it,i,n,iy,ibit,ichan,isb
+      integer ihd,idum,it,i,n,iy,ibit,ichan,isb
       integer ichcm_ch,ib2as,ichmv,ichmv_ch,iscn_ch,ias2b
 C
 C
@@ -52,15 +53,19 @@ C
 C 1. Initialize the itrax array to itras values.
 C    Initialize itrk to 0.
 
-      do i=1,36
-        itrk(i)=0
+      do i=1,max_track
+        do ihd=1,max_headstack
+          itrk(i,ihd)=0
+        enddo
       enddo
       do isb=1,2
         do ibit=1,2
-          do ichan=1,max_chan
-            itrax(isb,ibit,ichan)=itras(isb,ibit,ichan)
-            it = itrax(isb,ibit,ichan)
-            if (it.ne.-99) itrk(it+3)=1
+          do ihd=1,max_headstack
+            do ichan=1,max_chan
+              itrax(isb,ibit,ihd,ichan)=itras(isb,ibit,ihd,ichan)
+              it = itrax(isb,ibit,ihd,ichan)
+              if (it.ne.-99) itrk(it+3,ihd)=1
+            enddo
           enddo
         enddo
       enddo
@@ -77,21 +82,23 @@ C     If this is a VLBA mode or Mk4 mode, check for fan-out
           if (ifan.gt.1) then ! add fanout tracks
             do isb=1,2 ! u/l
               do ibit=1,2 ! s/m
-                do ichan=1,max_chan ! channels
-                  it = itras(isb,ibit,ichan)
-                  if (it.ne.-99) then ! fan it out
-                    if (ifan.eq.2.or.ifan.eq.4) then ! 1:2
-                      itrax(isb,ibit,ichan+2)=it+2
-                      itrk(it+2+3)=1
-                    endif
-                    if (ifan.eq.4) then ! 1:4
-                      itrax(isb,ibit,ichan+4)=it+4
-                      itrk(it+4+3)=1
-                      itrax(isb,ibit,ichan+6)=it+6
-                      itrk(it+6+3)=1
-                    endif
-                  endif ! fan it out
-                enddo ! channels
+                do ihd=1,max_headstack ! headstacks
+                  do ichan=1,max_chan ! channels
+                    it = itras(isb,ibit,ihd,ichan)
+                    if (it.ne.-99) then ! fan it out
+                      if (ifan.eq.2.or.ifan.eq.4) then ! 1:2
+                        itrax(isb,ibit,ihd,ichan+2)=it+2
+                        itrk(it+2+3,ihd)=1
+                      endif
+                      if (ifan.eq.4) then ! 1:4
+                        itrax(isb,ibit,ihd,ichan+4)=it+4
+                        itrk(it+4+3,ihd)=1
+                        itrax(isb,ibit,ihd,ichan+6)=it+6
+                        itrk(it+6+3,ihd)=1
+                      endif
+                    endif ! fan it out
+                  enddo ! channels
+                enddo ! headstacks
               enddo ! s/m
             enddo ! u/l
           endif ! add fanout tracks
@@ -111,17 +118,6 @@ C       No fan-in track handling at this time
       endif
 C
       endif ! VLBA mode and check for fan
-
-C 4. Fill in the itrk array. Already done above.
-
-C     do isb=1,2 ! u/l
-C       do ibit=1,2 ! s/m
-C         do ichan=1,max_chan ! channels
-C           it = itrax(isb,ibit,ichan)
-C           if (it.ne.-99) itrk(it+3)=1
-C         enddo ! channels
-C       enddo ! s/m
-C     enddo ! u/l
 
       RETURN
       END

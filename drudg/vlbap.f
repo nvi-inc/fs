@@ -40,13 +40,13 @@ C  LOCAL VARIABLES
 	integer iblen  !buffer length
 	integer immax  !maximum syn number
 	integer nvc    !video converter number
-	real*4 mmaxv(14)   !synth/1000
+	real mmaxv(14)   !synth/1000
 	character*3 cs   !set character
 	logical ksx      ! true for S/X frequencies
         logical k96      ! true if 9600 synth is in use
-	real*4 squal1(14), squal2(14) ! BBC freqs. grouped by sets
+	real squal1(14), squal2(14) ! BBC freqs. grouped by sets
       integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,j,k,ileft,im
-      real*8 fr
+      double precision fr
       integer ib2as,ichcm_ch,ir2as,ichmv_ch ! functions
 C
 

@@ -1,0 +1,3 @@
+cp b3of9-linux.f b3of9.f
+rm drudg.*
+cp drudg-linux.f drudg.f

@@ -17,7 +17,7 @@ C
 C  INPUT:
 	integer iy  ! location in buffer ibuf
 	integer ix  ! video converter number
-	real*4 fr     ! BBC frequency
+	real fr     ! BBC frequency
 C
 C  OUTPUT:
 C
