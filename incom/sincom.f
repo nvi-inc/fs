@@ -5,7 +5,7 @@ C
 C
 C     INITIALIZE FIELD SYSTEM COMMON
 C
-      integer idcb(2)
+      integer idcb(2),port
       integer*4 ip(5)
       integer*2 ibuf(50)
       integer ist(9),nchar(9),ibaud(7), ibauddb(8)
@@ -15,6 +15,7 @@ C  Local variables used in the 600 section.
       double precision das2b
 C  End 600 variables
       character*80 ibc, model
+      character*40 hostpc
       equivalence (ibc,ibuf)
       data ibaud  /110,300,600,1200,2400,4800,9600/
       data ibauddb/110,300,600,1200,2400,4800,9600,115200/
@@ -1062,20 +1063,19 @@ C
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       call hol2char(ibuf,ic1,ic2,model)
       if(model.ne.'none'.and.model.ne.'offset'.and.model.ne.'rate'.and.
-     &   model.ne.'ntp')
+     &   model.ne.'computer')
      &  then
         call logit7ci(0,0,0,1,-183,'bo',0)
         goto 990
       endif
       call char2hol(model(1:1),model0ti_fs,1,2)
-      if(model.eq.'ntp') call char2hol('c',model0ti_fs,1,2)
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &   rateti_fs,spanti_fs, modelti_fs)
+     &   rateti_fs,spanti_fs, modelti_fs,icomputer)
       rateti_fs=rate0ti_fs
       spanti_fs=span0ti_fs
       modelti_fs=model0ti_fs
       call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &   rateti_fs,spanti_fs, modelti_fs)
+     &   rateti_fs,spanti_fs, modelti_fs,icomputer)
       call fmpclose(idcb,ierr)
 C
 C 8.0 flagr.ctl control file
@@ -1121,6 +1121,44 @@ c
         call logit7ci(0,0,0,1,-404,'bo',ierr)
         goto 990
       endif
+c      goto 995
+C
+C tacd.ctl control file
+C
+830   continue
+      call fmpopen
+     &   (idcb,FS_ROOT//'/control/tacd.ctl',ierr,'r',idum)
+      if (ierr.lt.0) then
+        call logit7ci(0,0,0,1,-405,'bo',ierr)
+        goto 990
+      endif
+C **** TACD line 
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) then
+         call logit7ci(0,0,0,1,-406,'bo',1)
+         goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      call hol2char(ibuf,ic1,ic2,hostpc)
+      hostpc(ic2+1:ic2+2)=char(0)
+      call char2hol(hostpc,hostpc_fs,1,64)
+      if (ic1.eq.0) then
+         call pchar(hostpc_fs,1,0)
+         port = 0
+      else
+         ic1=ic2+1
+         ic2=ic2+6
+         call gtprm(ibuf,ic1,ic2,1,port,ierr)
+         if (ic1.eq.0) then
+            call logit7ci(0,0,0,1,-407,'bo',1)
+            goto 990
+         endif
+      endif
+      call fs_set_tacd_hostpc(hostpc_fs)
+      call fs_set_tacd_port(port)
+      call fmpclose(idcb,ierr)
       goto 995
 C
 C  This is the error return section
@@ -1141,3 +1179,4 @@ C
  995  continue
       return
       end
+
