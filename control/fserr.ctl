@@ -347,6 +347,9 @@ Error opening SW.CTL FMP ?FFF
 BO -201
 Error vacuum switching field in SW.CTL
 ""
+BO -202
+Error in recorder CPU field in SW.CTL
+""
 BO -209
 Error reading SW.CTL FMP ?FFF
 ""
@@ -1105,6 +1108,90 @@ GPIB/232 (EOFL) serial buffer overflow detected by converter, ?W
 ""
 IB -544
 GPIB/232 (EFRM) serial data framing error detected by converter, ?W
+""
+KA -201
+K4 tape label must have 8 characters or be a "#".
+""
+KB -201
+Bandwith must be one of 2, 4, 8, 16, 32 depending on VC type.
+""
+KE -301
+No equals for ET command.
+""
+KI -201
+IF attenuator 1 must be 0-15.
+""
+KI -202
+IF attenuator 2 must be 0-15.
+""
+KI -203
+IF attenuator 3 must be 0-15.
+""
+KI -204
+IF attenuator 4 must be 0-15.
+""
+KI -301
+VCIF only supported for K-4 type 1 VCs.
+""
+KL -101
+No default for channel number.
+""
+KL -102
+No default for frequency.
+""
+KL -201
+Channel must be 1-16 for K-4 type 1 VCs and 1-8 for type 2 VCs.
+""
+KL -202
+Frequency must be 99.99-511.99 for K-4 type 1 VCs and 499.99-999.99 for type 2.
+""
+KR -101
+No default for action.
+""
+KR -102
+No default for aux data.
+""
+KR -201
+Action must be one of: eject, init, synch, drum_on drum_off, synch_on, synch_off, aux or 7 digit position to move to.
+""
+KR -202
+Aux data must be 16 hex digits.
+""
+KS -201
+ST parameter must be one of play or record.
+""
+KT -101
+No default for tape parameter.
+""
+KT -201
+Parameter must be reset.
+""
+KV -101
+No default for channel number.
+""
+KV -201
+Channel must be 1-16 for type 1 VC and 1-8 for type 2 VC.
+""
+KV -202
+Attenuator must 0-15 (type 1 VC) or range must be low or high (type 2 VC).
+""
+KV -203
+Sideband musb usb or lsb.
+""
+K4 -201
+Device mnemonic must have 2 characters.
+""
+K4 -203
+Mode must be one of read, read/write, poll, status, and clear.
+""
+K4 -204
+Format must be normal, binary, or ascii.
+""
+K4 -205
+Length must be normal or a positive integer.
+""
+K4 -301
+k4ib must have equals.
 ""
 MA   -1
 Trouble with class buffer
@@ -1975,6 +2062,12 @@ VC number must be from 1 to 14
 ""
 QQ -203
 Patching must be L(ow) or H(igh)
+""
+QQ -204
+Patching must be 1-4, 5-8, 9-12, or 13-16.
+""
+QQ -301
+LO parameter must be LO1 or LO2.
 ""
 QR -1
 No class number available.
@@ -3120,7 +3213,7 @@ SC  -10
 setcl: failed too many times, time information not updated.
 ""
 SC  -11
-setcl: cannot set fs time without Mark 3/4/VLBA rack or S2 recorder
+setcl: cannot set fs time without Mark 3/4/VLBA, K4*/MK4 rack or S2, K4 recorder
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
