@@ -204,17 +204,13 @@ C  CHECK FOR EVEN AND ODD TRACKS WITH EVEN OR ODD ELECTRONICS
  
       keven=.false.
       kodd=.false.
+      call fs_get_wrhd_fs(wrhd_fs)
       do i=1,28
         if (itrk(i).eq.1) then
           if (mod(i,2).eq.0) keven=.true.
           if (mod(i,2).ne.0) kodd=.true.
         end if
       end do
-      if (((wrhd_fs.eq.1).or.(wrhd_fs.eq.2)).and.
-     .    ((keven).and.(kodd))) then
-        ierr = -206
-        goto 990
-      end if
 C
       do i=1,28
         itrkenus_fs(i)=itrk(i)
@@ -227,7 +223,9 @@ C
       do i=1,28
         if(itrkenus_fs(i).ne.0) then
           ia=i
-          if (wrhd_fs.eq.2) then           !even
+          if (kodd.and.keven) then  !we can't map in this case
+             continue                    
+          else if (wrhd_fs.eq.2) then           !even
             if (mod(i,2).ne.0) ia=ia+1
           else if (wrhd_fs.eq.1) then      !odd
             if (mod(i,2).eq.0) ia=ia-1
