@@ -192,16 +192,16 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
 C
 C Initialize some things.
-      iVerMajor_FS = 09
-      iVerMinor_FS = 07
-      iVerPatch_FS = 02
-!      iVerMajor_FS = VERSION
-!      iVerMinor_FS = SUBLEVEL
-!      iVerPatch_FS = PATCHLEVEL
+!      iVerMajor_FS = 09
+!      iVerMinor_FS = 07
+!      iVerPatch_FS = 02
+      iVerMajor_FS = VERSION
+      iVerMinor_FS = SUBLEVEL
+      iVerPatch_FS = PATCHLEVEL
 
 
 C Initialize the version date.
-      cversion = '041019'
+      cversion = '041021'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -326,6 +326,8 @@ C 3. Get the schedule file name
          endif
 C       Opening message
         WRITE(LUSCN,9020) cversion
+	write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
+     >   iverMinor_fs,iverpatch_fs
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
      .  '(NRV & JMGipson ',a6,')')
         nch = trimlen(cfile)
