@@ -19,6 +19,7 @@ long ip[5];                       /* ipc parameters */
       int i;
       char *tpnum, tape[10];
       char cmd[MAX_BUF], output[MAX_BUF];
+      char lampcmd[MAX_BUF];
       int ierr, max;
       void skd_run(), skd_par();  /* program scheduling utilities */
 
@@ -51,6 +52,22 @@ long ip[5];                       /* ipc parameters */
       for (i=0;i<5;i++) ip[i]=0;
 
       ib_req2(ip,"t1",cmd);
+
+      skd_run("ibcon",'w',ip);
+      skd_par(ip);
+      if(ip[2]<0) goto error2;
+
+/* This is the 'BINLAMP' command */
+/* Kurihara added following 12 lines */
+
+      strcpy(lampcmd,"binlamp=");
+      if(tape[1] == '\0') strcat(lampcmd,"0");
+      strcat(lampcmd,tape);
+      strcat(lampcmd,"c,1");
+
+      for (i=0;i<5;i++) ip[i]=0;
+
+      ib_req2(ip,"t1",lampcmd);
 
       skd_run("ibcon",'w',ip);
       skd_par(ip);
