@@ -67,8 +67,11 @@ define  ifdas         00000000000
 ifd=33,30,nor,nor
 if3=20,out,1,1
 if3=alarm
-lo=8080.00,2020.00,8080.0
-upconv=0,0,0
+lo=
+lo=lo1,8080.00,usb,rcp,1
+lo=lo2,2020.00,usb,rcp,1
+lo=lo3,8080.00,usb,rcp,1
+patch=
 patch=lo1,1l,2l,3l,4h
 patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
@@ -159,48 +162,6 @@ caltemp1=20.8
 caltemp2=21.4
 caltemp3=20.8
 enddef
-define  check2a1      00000000000
-check2c1
-enddef
-define  check2a2      00000000000
-check2c2
-enddef
-define  check2c1      00000000000
-check=*,-tp,-hd
-enable=
-decode=a,crc,byte
-parity=,,ab,on,g1,g3
-fastr=15s
-!+6s
-!*
-st=for,135,off
-!+4s
-repro=raw,1,3
-parity
-repro=byp,0,0
-!*+29.20s
-et
-!+3s
-check=*,tp,hd
-enddef
-define  check2c2      00000000000
-check=*,-tp,-hd
-enable=
-decode=a,crc,byte
-parity=,,ab,on,g2,g4
-fastf=15s
-!+6s
-!*
-st=rev,135,off
-!+4s
-repro=raw,2,4
-parity
-repro=byp,0,0
-!*+29.20s
-et
-!+3s
-check=*,tp,hd
-enddef
 define  dat           00000000000
 form=reset
 vc15=200
@@ -224,8 +185,11 @@ define  ifdsx         00000000000
 ifd=33,30,nor,nor
 if3=20,out,1,1
 if3=alarm
-lo=8080.00,2020.00,8080.0
-upconv=0,0,0
+lo=
+lo=lo1,8080.00,usb,rcp,1
+lo=lo2,2020.00,usb,rcp,1
+lo=lo3,8080.00,usb,rcp,1
+patch=
 patch=lo1,1l,2l,3l,4h
 patch=lo2,9l,10l,11l,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
@@ -233,8 +197,11 @@ enddef
 define  ifdwb         00000000000
 ifd=33,30,nor,nor
 if3=20,in,2,2
-lo=8080.00,2020.00,8080.0
-upconv=0,0,0
+lo=
+lo=lo1,8080.00,usb,rcp,1
+lo=lo2,2020.00,usb,rcp,1
+lo=lo3,8080.00,usb,rcp,1
+patch=
 patch=lo1,1l,2l,3h,4h
 patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
@@ -279,7 +246,6 @@ pcal
 enddef
 define  overnite      00000000000
 log=overnite
-setup
 check=*,-tp
 min15@!,15m
 rxmon@!+2m30s,5m
@@ -303,7 +269,7 @@ define  prepass       00000000000
 wakeup
 xdisp=on
 " mount the next tape without cleaning the tape drive.
-" use the cont command when finished.
+" use the label=... command when finished.
 halt
 xdisp=off
 check=*,-tp,-hd
@@ -316,7 +282,7 @@ wakeup
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape, establish vacuum.
-"type cont when finished.
+"use the cont command when finished.
 halt
 xdisp=off
 srw
@@ -558,7 +524,7 @@ define  unloader      00000000000
 !+5s
 enable=,
 tape=off
-st=rev,135,off
+st=rev,80,off
 enddef
 define  valarm        00000000000
 vc01=alarm
@@ -715,4 +681,41 @@ tape=low
 repro=byp,6,18,4
 decode=a,crc
 decode
+enddef
+define  checkr135     00000000000
+check=*,-tp,-hd
+parity=,,ab,on
+sfastf=9.41s
+!+6s
+repro=raw,6,8
+!*
+st=rev,135,off
+!+3s
+parity
+!*+23s
+et
+!+3s
+repro=byp,6,8
+check=*,tp,hd
+enddef
+define  checkf135     97355220411
+check=*,-tp,-hd
+parity=,,ab,on
+sfastr=9.41s
+!+6s
+repro=raw,5,7
+!*
+st=for,135,off
+!+3s
+parity
+!*+23s
+et
+!+3s
+repro=byp,5,7
+check=*,tp,hd
+enddef
+define  tapeformv     98222124704x
+tapeform=  1,-319,  2,  31,  3,-271,  4,  79,  5,-223,  6, 127
+tapeform=  7,-175,  8, 175,  9,-127, 10, 223, 11, -79, 12, 271
+tapeform= 13, -31, 14, 319
 enddef
