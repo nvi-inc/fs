@@ -7,6 +7,7 @@
 #include "fmset.h"
 
 extern long ip[5];           /* parameters for fs communications */
+extern long nanosec;
 
 void rte2secs();
 
@@ -24,7 +25,7 @@ int    *formhs;
   icount=0;
 try:	
   nsem_take("fsctl",0);
-  get_s2time(centisec,it,ip);
+  get_s2time(centisec,it,&nanosec,ip);
   nsem_put("fsctl");
   if( ip[2] < 0) {
     if(ip[2]< -400 && ip[2] > -404)
