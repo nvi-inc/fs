@@ -1917,11 +1917,11 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 
 	  if(((~0x7)&status_det_list[j+1]) == 0) {
 	    strcpy(st,"---");
-	    if(0x1&status_det_list[j+1] == 0x1)
+	    if((0x1&status_det_list[j+1]) == 0x1)
 	      st[0]='E';
-	    if(0x2&status_det_list[j+1] == 0x2)
+	    if((0x2&status_det_list[j+1]) == 0x2)
 	      st[1]='F';
-	    if(0x4&status_det_list[j+1] == 0x4)
+	    if((0x4&status_det_list[j+1]) == 0x4)
 	      st[2]='C';
 	  } else
 	    sprintf(st,"0x%x",status_det_list[j+1]);
