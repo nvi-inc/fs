@@ -32,7 +32,7 @@ C  LOCAL:
       character*3 cs
       real*4 f1,f2,f,vb,rbbc,srate
       integer*2 lbar(2,max_stn)
-      integer ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst ! functions
+      integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst 
       logical knaeq
 C
 C  History
@@ -60,6 +60,7 @@ C            channel numbers not BBC numbers
 C 960709 nrv Add "B" line for barrel roll
 C 960709 nrv Initialize fanout factor to 0, for Mark III modes.
 C            It is reset to 1,2,4 if it's a VLBA mode.
+C 961020 nrv Set the BBC sideband to "U" for non-Vex input.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -123,7 +124,14 @@ C
           FREQRF(icx,is,ICODE) = F1
           VCBAND(icx,is,ICODE) = VB
           LCODE(ICODE) = LC ! 2-letter code for the sequence
+C         All listed Mk3 frequencies are for USB recording. 
+C         LSB is specified in track assignments.
+          idum = ichmv_ch(lnetsb(icx,is,icode),1,'U') 
           idum = ichmv(LMODE(1,is,ICODE),1,LM,1,8) ! recording mode
+C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
+C         modify this when it gets user input on the formatter type.
+C         This is used by SPEED.
+          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,8) ! recording format
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
           ix = iscn_ch(lmode(1,is,icode),1,8,'1:') 
