@@ -1,6 +1,6 @@
 /* bs2code.c determine sampler codes for each VLBA rack type */
 
-#include <sys/types.h>
+#include <stdio.h>
 
 static char *vlba[ 32]= {
   "1lm",  "1ls",  "1um",  "1us",
