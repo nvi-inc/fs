@@ -11,7 +11,7 @@ dtlkup.o tpi_vlba.o vrepro_util.o freq2bbc.o bbc_util.o tape_util.o\
 vform_util.o venable_util.o dqa_util.o capture_util.o et_v.o rwff_v.o\
 vst_util.o get_vaux.o set_vaux.o cchmod.o sig_ignore.o get_vtime.o\
 mcb_util.o bblv2db.o motion_done.o itrk2bbc.o mvdis_v.o vacuum.o semid_util.o\
-go_util.o
+go_util.o get_vatod.o v2_head_vmov.o v2_motion_done.o v2_vlt_head.o
 #
 CFLAGS = 
 #FFLAGS = 

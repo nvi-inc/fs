@@ -40,6 +40,8 @@ long ip[5];
   memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
 
   if (0==strcmp(ptr,"feet")) {
+    if(shm_addr->equip.drive_type == VLBA2) 
+      return -204;
     request.type=1;
     request.addr=0x32; add_req(buffer,&request);
     end_req(ip,buffer);

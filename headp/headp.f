@@ -18,6 +18,7 @@ C
       call setup_fscom
       call read_fscom
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
 c
       name=' '
       call rcpar(1,name)
@@ -33,10 +34,10 @@ C
       if(VLBA.ne.and(drive,VLBA)) then
          kspd=kspd.and.krdwo_fs
        endif
-      if(.not.kspd) write(16,*)
+      if(.not.kspd.and.VLBA2.ne.drive_type) write(16,*)
      &  'inch worm speeds have not been successfully calibrated.'
 C
-      if((.not.kcal).or.(.not.kspd)) then
+      if((.not.kcal).or.(.not.kspd.and.VLBA2.ne.drive_type)) then
         write(16,*) 'no output file generated.'
         goto 99999
       endif
@@ -88,7 +89,10 @@ C
       write(16,9020)
 C
       write(16,9050)
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA2.eq.drive_type) then
+        write(16,9060) 0.0,0.0
+        write(16,9070) 0.0,0.0
+      else if(VLBA.ne.and(drive,VLBA)) then
         write(16,9060) fowo_fs
         write(16,9070) sowo_fs
       else
@@ -104,7 +108,10 @@ C
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA2.eq.drive_type) then
+        write(16,9090) 0.0,0.0
+        write(16,9100) 0.0,0.0
+      else if(VLBA.ne.and(drive,VLBA)) then
         write(16,9090) fiwo_fs
         write(16,9100) siwo_fs
       else
@@ -123,9 +130,12 @@ C
       if(VLBA.ne.and(drive,VLBA)) then
         write(16,9120) rswrite_fs,rsread_fs
         write(16,9130) rswrite_fs,rsread_fs
-      else
+      else if(drive_type.ne.VLBA2) then
         write(16,9120) rsread_fs,0.0
         write(16,9130) rsread_fs,0.0
+      else
+        write(16,9121) rsread_fs,0.0
+        write(16,9131) rsread_fs,0.0
       endif
 C
       write(6,'(1x,a)') 'output in file: '//name(:max(1,trimlen(name)))
@@ -156,7 +166,9 @@ C
 9110  format(2(f7.1,1x),
      & "  (reverse)-(forward) relative offset (microns)")
 9120  format(2f8.2,     "  positive voltage scale (microns/volt)")
+9121  format(2f8.4,     "  positive voltage scale (microns/volt)")
 9130  format(2f8.2,     "  negative voltage scale (microns/volt)")
+9131  format(2f8.4,     "  negative voltage scale (microns/volt)")
 C
 99999 continue
       end

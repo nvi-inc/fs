@@ -630,16 +630,23 @@ C LINE #8  TYPE OF RECORDER - drive
       if (ic1.eq.0) goto 320
       if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
         drive = MK3
+        drive_type = MK3
+      else if (ichcm_ch(ibuf,ic1,'vlba2').eq.0) then
+        drive = VLBA
+        drive_type = VLBA2
       else if (ichcm_ch(ibuf,ic1,'vlba').eq.0) then
         drive = VLBA
+        drive_type = VLBA
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         drive = MK4
+        drive_type = MK4
       else
         call logit7ci(0,0,0,1,-140,'bo',8)
         ierrx = -1
         goto 990
       endif
       call fs_set_drive(drive)
+      call fs_set_drive_type(drive_type)
 C LINE #9 HARDWARE ID - hwid
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900

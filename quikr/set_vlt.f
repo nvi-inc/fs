@@ -1,5 +1,8 @@
       subroutine set_vlt(ihead,volt,ip,tol)
       implicit none
+c
+      include '../include/fscom.i'
+c
       integer ihead,ip(5)
       real*4 volt(2),tol
 C
@@ -13,7 +16,8 @@ C  OUTPUT:
 C     IP: Field System return parameters
 C       IP(3) = 0 if no error
 C
-      if(ihead.eq.3) then
+      call fs_get_drive_type(drive_type)
+      if(ihead.eq.3 .and. drive_type.ne.VLBA2) then
         call head_vlt(2,0.0,ip,1498.5) !1498.5 ~= 9.9902*150
         if(ip(3).ne.0) return
         call head_vlt(1,0.0,ip,1498.5) !1498.5 ~= 9.9902*150

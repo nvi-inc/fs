@@ -1167,6 +1167,18 @@ void fs_get_drive__(drive)
 	  *drive = shm_addr->equip.drive;
 	}
 
+void fs_set_drive_type__(drive_type)
+	int *drive_type;
+	{
+	  shm_addr->equip.drive_type = *drive_type;
+	}
+
+void fs_get_drive_type__(drive_type)
+	int *drive_type;
+	{
+	  *drive_type = shm_addr->equip.drive_type;
+	}
+
 void fs_set_iskdtpsd__(iskdtpsd)
 	int *iskdtpsd;
 	{

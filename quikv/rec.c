@@ -50,8 +50,10 @@ long ip[5];                           /* ipc parameters */
       if (command->equal != '=') {            /* read module */
         request.type=1;
         request.addr=0x30; add_req(&buffer,&request);
-        request.addr=0x31; add_req(&buffer,&request);
-        request.addr=0x32; add_req(&buffer,&request);
+        if (shm_addr->equip.drive_type != VLBA2) {
+          request.addr=0x31; add_req(&buffer,&request);
+          request.addr=0x32; add_req(&buffer,&request);
+        }
         request.addr=0x71; add_req(&buffer,&request);
         goto mcbcn;
       }
@@ -69,6 +71,10 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],REBOOT)) {
+	    if(shm_addr->equip.drive_type == VLBA2) {
+	      ierr= -205;
+	      goto error;
+	    }
             request.type=0;
             request.addr=0xe5;
             request.data=0xae51; add_req(&buffer,&request);
@@ -76,24 +82,32 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"load")) {
             request.type=0;
-            request.addr=0xb9;                 /* capstan size */
-            request.data= bits16on(16) & (shm_addr->capstan); 
-            add_req(&buffer,&request);
+	    if (shm_addr->equip.drive_type != VLBA2) {
+	      request.addr=0xb9;                 /* capstan size */
+	      request.data= bits16on(16) & (shm_addr->capstan); 
+	      add_req(&buffer,&request);
 
-            request.addr=0xbd;                 /* tape thickness */
-            request.data= bits16on(16) & shm_addr->itpthick;
-            add_req(&buffer,&request);
+              request.addr=0xbd;                 /* tape thickness */
+              request.data= bits16on(16) & shm_addr->itpthick;
+              add_req(&buffer,&request);
 
-            fvacuum= 0.0;
-            request.addr=0xd0;                 /* vacuum motor voltage (mV) */
-            fvacuum=(shm_addr->motorv * shm_addr->inscsl) + shm_addr->inscint;
-            request.data = bits16on(14) & (int)(fvacuum);
-            add_req(&buffer,&request);
+              fvacuum= 0.0;
+              request.addr=0xd0;               /* vacuum motor voltage (mV) */
+              fvacuum=(shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+              request.data = bits16on(14) & (int)(fvacuum);
+              add_req(&buffer,&request);
 
-            request.addr=0xd3;                 /* head write voltage */
+              request.addr=0xd3;                 /* head write voltage */
 /* the write voltage (millivolts) to send to record is a factor of 2 */
-            request.data= bits16on(14) & (int)((shm_addr->wrvolt/2)*1000);
-            add_req(&buffer,&request);
+              request.data= bits16on(14) & (int)((shm_addr->wrvolt/2)*1000);
+              add_req(&buffer,&request);
+	    } else {
+
+             request.addr=0xd3;                 /* head write voltage */
+/* the write current (milliampers) in unitx of 0.2128 mA/count */
+             request.data= bits16on(14) & (int)((shm_addr->wrvolt/0.2128)+0.5);
+             add_req(&buffer,&request);
+	   }
 
             request.addr=0xb3; /* load tape into vacuum */
             request.data=0x01; add_req(&buffer,&request);
@@ -223,13 +237,19 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"release")) {
             request.type=0;
-            request.addr=0xd0;
-            request.data=0x00; add_req(&buffer,&request);
+	    if(shm_addr->equip.drive_type != VLBA2) {
+              request.addr=0xd0;
+              request.data=0x00; add_req(&buffer,&request);
+	    }
             request.addr=0xba;
             request.data=0x01; add_req(&buffer,&request);
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],"zero")) {
+	    if(shm_addr->equip.drive_type == VLBA2) {
+	      ierr= -203;
+	      goto error;
+	    }
             request.type=0;
             request.addr=0xb8;
             request.data=0x00; add_req(&buffer,&request);

@@ -43,7 +43,9 @@ long ip[5];                           /* ipc parameters */
          request.addr=0xb6; add_req(&buffer,&request);
          request.addr=0x30; add_req(&buffer,&request);
          request.addr=0x33; add_req(&buffer,&request);
-         request.addr=0x57; add_req(&buffer,&request);
+ 	 if (shm_addr->equip.drive_type != VLBA2) {
+	   request.addr=0x57; add_req(&buffer,&request);
+	 }
          request.addr=0x72; add_req(&buffer,&request);
          request.addr=0x73; add_req(&buffer,&request);
          request.addr=0x74; add_req(&buffer,&request);

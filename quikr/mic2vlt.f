@@ -43,10 +43,16 @@ C
         volt=mic/rslope(ihead)
       endif
 C
-      if(volt.gt.9.9940.or.volt.lt.-9.9960) then
+      call fs_get_drive_type(drive_type)
+      if(drive_type.ne.VLBA2.and.
+     &    (volt.gt.9.9940 .or. volt.lt.-9.9960)) then
         ip(3)=-410
         call char2hol('q@',ip(4),1,2)
       endif
 C
       return
       end
+
+
+
+

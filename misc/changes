@@ -95,3 +95,169 @@ Version 9.0.7  951004
 
 Version 9.0.8  951208
 
+951018 WEH sigma/kgpnt.f
+           fix nstrn from i*2 to i
+
+951018 WEH st.default/oper/bin/uncor
+           new pointing analysis script
+
+951019 WEH st.default/oper/bin/uncor
+           fix mismatch record condition test and message
+
+951102 WEH onoff/onoff.f
+           changed i10blnks to array of 5 elements rather than
+           a simple variable
+
+951110 WEH quikr/ib.f
+           increased buffers to allow 100 character commands and prevent
+           buffer overflow
+
+951110 WEH include/fscom_dum.i
+           fixed sterp location in common
+
+951207 WEH lnfch/iscn_ch.f
+           corrected character position to "i+j-1"
+
+951102 WEH quikr/hdata.f
+           for vlba2 recorder support
+
+951102 WEH incom/sincom.f
+           for vlba2 recorder support
+
+951102 WEH quikv/rec_dis.c
+           for vlba2 recorder support
+
+951102 WEH quikr/worm.f
+           for vlba2 recorder support
+
+951102 WEH onoff/onoff.f
+           for vlba2 recorder support
+
+951110 WEH quikr/ib.f
+           for vlba2 recorder support
+
+951110 WEH quikr/head_vlt.f
+           for vlba2 recorder support
+
+951110 WEH include/fscom_dum.i
+           for vlba2 recorder support
+
+951110 WEH quikr/set_vlt.f
+           for vlba2 recorder support
+
+951110 WEH fslb/lvdonn.f
+           for vlba2 recorder support
+
+951110 WEH fslb/lvdofn.f
+           for vlba2 recorder support
+
+951110 WEH fclib/Makefile
+           for vlba2 recorder support
+
+951110 WEH clib/get_vatod.c
+           for vlba2 recorder support
+
+951113 WEH Makefile*
+           for vlba2 recorder support
+
+951113 WEH clib/Makefile
+           for vlba2 recorder support
+
+951114 WEH control/fserr.ctl
+           add error message vt -202
+
+951114 WEH boss/newlg.f
+           for vlba2 recorder support
+
+951114 WEH fclib/fc_v2_vlt_head.c
+           for vlba2 recorder support
+
+951114 WEH quikv/tape_dis.c
+           for vlba2 recorder support
+
+951114 WEH misc/changes
+           for vlba2 recorder support
+
+951114 WEH quikv/rec_dec.c
+           for vlba2 recorder support
+
+951114 WEH quikr/lvdt.f
+           for vlba2 recorder support
+
+951114 WEH fclib/fc_v2_head_vmov.c
+           for vlba2 recorder support
+
+951116 WEH newlb/prog.c
+           for vlba2 recorder support
+
+951116 WEH st.default/sched/v2hdcal.snp
+           for vlba2 recorder support
+
+951127 WEH clib/tape_util.c
+           for vlba2 recorder support
+
+951127 WEH quikv/tape.c
+           for vlba2 recorder support
+
+951127 WEH clib/v2_head_vmov.c
+           for vlba2 recorder support
+
+951127 WEH clib/v2_vlt_head.c
+           for vlba2 recorder support
+
+951127 WEH quikr/hdcalc.f
+           for vlba2 recorder support
+
+951127 WEH headp/headp.f
+           for vlba2 recorder support
+
+951127 WEH clib/v2_motion_done.c
+           for vlba2 recorder support
+
+951127 WEH quikr/mic2vlt.f
+           for vlba2 recorder support
+
+951127 WEH fslb/vlt_head.f
+           for vlba2 recorder support
+
+951127 WEH control/fserr.ctl
+           for vlba2 recorder support
+
+951127 WEH quikv/rec.c
+           for vlba2 recorder support
+
+951127 WEH chekr/hdchk.f
+           for vlba2 recorder support
+
+951205 WEH clib/v2_motion_done.c
+           correct faulty 74/9 bit logic
+
+951205 WEH clib/v2_vlt_head.c
+           correct faulty 74/9 bit logic
+
+951205 WEH clib/v2_head_vmov.c
+           add delay of 2 centiseconds before checking for done
+
+951207 WEH /clib/vrepro_util.c
+           adjust for VLBA2
+
+951207 WEH /quikv/vrepro.c
+           adjust for VLBA2
+
+951207 WEH /clib/v2_head_vmov.c
+           increase delay to 12 centiseconds
+
+951207 WEH st.default/sched/v2hdcal.snp
+           adjust timings for slow start of rec= command
+
+951213 WEH clib/get_vatod.c
+           change VLBA2 conversion factor to .4mv/bit
+
+951213 WEH quikr/pkhd.f
+           use vlt_read to get position, not get_atod
+
+951213 WEH st.default/sched/v2hdcal.snp
+           add rec=load at start in case of manual loading
+           increase peak threshold to .25 volts to be safer
+
+Version 9.0.9 951213 
