@@ -82,7 +82,7 @@ enddef
 define  dat           00000000000
 bbcsx2
 ifdsx
-form=c,4
+form=c1,4
 enddef
 define  dqaeven       00000000000
 dqa=1
@@ -137,8 +137,7 @@ lo=lob,1540.10,usb,rcp,1
 enddef
 define  initi         00000000000
 "welcome to the pc field system
-vlbainit
-vform=c,4
+vlba4init
 sy=run setcl &
 enddef
 define  midob         00000000000
@@ -181,7 +180,7 @@ enddef
 define  overnite      00000000000
 log=overnite
 setupa=1
-check=*,-rc
+check=*,-tp
 min15@!,15m
 "rxmon@!+2m30s,5m
 repro=byp,8,14
@@ -191,13 +190,12 @@ enddef
 define  postob        00000000000
 enddef
 define  precond       00000000000
-schedule=vprepass,#1
+schedule=prepass,#1
 enddef
 define  precondthin   00000000000
-schedule=vprethin,#1
+schedule=prethin,#1
 enddef
 define  preob         00000000000
-rec=load
 onsource
 bbcman
 calon
@@ -213,7 +211,7 @@ xdisp=on
 " use the label=... command when finished.
 halt
 xdisp=off
-check=*,-rc
+check=*,-tp
 rec=load
 !+10s
 tape=low,reset
@@ -227,8 +225,8 @@ rec=release
 rec=release
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
-"re-thread the tape
-"use the label=... command when finished.
+"re-thread the tape.
+"use the cont command when finished.
 halt
 xdisp=off
 rec=load
@@ -243,10 +241,10 @@ define  prepassthin   00000000000
 wakeup
 xdisp=on
 " mount the next tape without cleaning the tape drive.
-" use the label=... command when finished.
+" use the label=... command when finished
 halt
 xdisp=off
-check=*,-rc
+check=*,-tp
 rec=load
 !+10s
 tape=low,reset
@@ -261,7 +259,7 @@ rec=release
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape
-"use the cont command when finished.
+"use the cont command when finished
 halt
 xdisp=off
 rec=load
@@ -285,7 +283,7 @@ et
 !+3s
 label
 rec
-check=*,rc
+check=*,tp
 enddef
 define  sfastf        00000000000
 sff
@@ -301,7 +299,7 @@ define  setupa        00000000000
 pcalon
 tapeformc
 pass=$
-form=c,4.000
+form=c1,4.000
 !*
 systracks=
 bbcsx2
@@ -315,7 +313,7 @@ define  setupb        00000000000
 pcalon
 tapeformc
 pass=$
-form=c,4.000
+form=c2,4.000
 !*
 systracks=
 bbcsx2
@@ -361,13 +359,12 @@ define  unlod         00000000000
 enable=,
 check=*,-rc
 tape=off
-rec=unload
 xdisp=on
 "**dismount this tape now**"
 wakeup
 xdisp=off
 enddef
-define  vlbainit      00000000000
+define  vlba4init     00000000000
 bbc01=addr
 bbc02=addr
 bbc03=addr
@@ -382,7 +379,6 @@ bbc11=addr
 bbc12=addr
 bbc13=addr
 bbc14=addr
-form=addr
 rec=addr
 ifdab=addr
 ifdcd=addr
@@ -392,65 +388,69 @@ rec=release
 !+3s
 rec=release
 enddef
-define  check135r     000000000000
-vform=*,4
-parity=,,ab,off
-sfastf=18.41s
+define  check80r      00000000000x
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
+parity=,,ab,on 
+sfastf=12.85s
 !+6s
-repro=read,4,6
-!*
-st=rev,135,off
-!+3s
-parity
-!*+45s
-et
-!+3s
-repro=byp,4,6
-enddef
-define  check135f     00000000000 
-vform=*,4
-parity=,,ab,off
-sfastr=18.41s
-!+6s
-repro=read,4,6
-!*
-st=for,135,off
-!+3s
-parity
-!*+45s
-et
-!+3s
-repro=byp,4,6
-enddef
-define  check80r      00000000000
-vform=*,4
-parity=,,ab,off
-sfastf=10.66s
-!+6s
-repro=read,4,6
+repro=read,5,7
 !*
 st=rev,80,off
-!+2s
+!+3s
 parity
-!*+44s
+!*+53s
 et
 !+2s
-repro=byp,4,6
+repro=byp,5,7
 enddef
 define  check80f      00000000000
-vform=*,4
-parity=,,ab,off
-sfastr=10.66s
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
+parity=,,ab,on
+sfastr=12.85s
 !+6s
-repro=read,4,6
+repro=read,6,8
 !*
 st=for,80,off
-!+2s
+!+3s
 parity
-!*+44s
+!*+53s
 et
 !+2s
-repro=byp,4,6
+repro=byp,6,8
+enddef
+define  check135r     00000000000
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
+parity=,,ab,on
+sfastf=22.09s
+!+6s
+repro=read,5,7
+!*
+st=rev,135,off
+!+4s
+parity
+!*+54s
+et
+!+3s
+repro=byp,5,7
+enddef
+define  check135f     97355220523
+"Comment out the following line if you do _not_ have a mark III decoder
+decode=a,err,byte
+parity=,,ab,on
+sfastr=22.09s
+!+6s
+repro=read,6,8
+!*
+st=for,135,off
+!+4s
+parity
+!*+54s
+et
+!+3s
+repro=byp,6,8
 enddef
 define  tapeformv     98222124704x
 tapeform=  1,-319,  2,  31,  3,-271,  4,  79,  5,-223,  6, 127

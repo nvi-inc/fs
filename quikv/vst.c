@@ -127,8 +127,11 @@ parse:
       vstb1mc(&request.data,&lcl); add_req(&buffer,&request);
       shm_addr->idirtp[indx]=lcl.dir;
 
-      if(lcl.cips <500 && shm_addr->equip.drive[indx] == VLBA &&
-	 shm_addr->equip.drive_type[indx] == VLBA2) {
+      if(lcl.cips <500 &&
+	 ((shm_addr->equip.drive[indx] == VLBA &&
+	  shm_addr->equip.drive_type[indx] == VLBA2)||
+	  (shm_addr->equip.drive[indx] == VLBA4 &&
+	   shm_addr->equip.drive_type[indx] == VLBA42))) {
 	request.addr=0xb0;
 	request.data=0x01;
 	add_req(&buffer,&request);

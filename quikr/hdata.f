@@ -76,9 +76,11 @@ C
       call fs_get_drive_type(drive_type)
       nchan=8
       do i=1,nchan
-        if(i.eq.5.or.i.eq.6.or..not.
+        if(i.eq.5.or.i.eq.6.or..not.(
      &        (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
-     &        ) then
+     &         .or.
+     &        (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &        )) then
           call get_atod(i,volts(i),ip,indxtp)
           if(ip(3).ne.0) goto 800
         endif
@@ -92,9 +94,11 @@ C
       nch = ichmv_ch(ibuf,nch,'/')
 C
       do i=1,nchan
-        if(i.eq.5.or.i.eq.6.or..not.
+        if(i.eq.5.or.i.eq.6.or..not.(
      &        (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
-     &        ) then
+     &        .or.
+     &        (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &        )) then
           nch = nch+ir2as(volts(i),ibuf,nch,8,3)
         endif
         nch = mcoma(ibuf,nch)

@@ -82,16 +82,18 @@ C
       if(k2heads) then
          kspd=kspd.and.krdwo_fs(itp)
        endif
-      if(.not.kspd.and..not.
-     & (drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)))
+      if(.not.kspd.and..not.(
+     & (drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)).or.
+     &      (drive(itp).eq.VLBA4.and.VLBA42.eq.drive_type(itp)) ))
      & write(6,*)
      &  'drive ',hd(itp),
      $      ' inch worm speeds have not been successfully calibrated.'
 C
       if((.not.kcal).or.
      &     (.not.kspd.and..not.(
-     &     drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)))
-     &     ) then
+     &     (drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)).or.
+     &     (drive(itp).eq.VLBA4.and.VLBA42.eq.drive_type(itp))
+     &     ))) then
         write(6,*) 'no output file generated.'
         goto 99999
       endif
@@ -146,7 +148,10 @@ C
       else
         slow='no'
       endif
-      if(.not.(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp))) then
+      if(.not.(
+     $     (drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)).or.
+     $     (drive(itp).eq.VLBA4.and.VLBA42.eq.drive_type(itp))
+     $     )) then
          write(16,9044)
       else
          write(16,9144)
@@ -155,7 +160,9 @@ C
       write(16,9020)
 C
       write(16,9050)
-      if(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)) then
+      if((drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)).or.
+     &     (drive(itp).eq.VLBA4.and.VLBA42.eq.drive_type(itp))
+     &     ) then
         write(16,9060) 0.0,0.0
         write(16,9070) 0.0,0.0
       else if(k2heads) then
@@ -174,7 +181,9 @@ C
       endif
 C
       write(16,9020)
-      if(drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)) then
+      if((drive(itp).eq.VLBA.and.VLBA2.eq.drive_type(itp)).or.
+     &     (drive(itp).eq.VLBA4.and.VLBA42.eq.drive_type(itp))
+     &     ) then
         write(16,9090) 0.0,0.0
         write(16,9100) 0.0,0.0
       else if(k2heads) then
@@ -196,9 +205,10 @@ C
       if(k2heads) then
         write(16,9120) rswrite_fs(itp),rsread_fs(itp)
         write(16,9130) rswrite_fs(itp),rsread_fs(itp)
-      else if(.not.
-     &       (drive(itp).eq.VLBA.and.drive_type(itp).eq.VLBA2)
-     &       ) then
+      else if(.not.(
+     &       (drive(itp).eq.VLBA.and.drive_type(itp).eq.VLBA2).or.
+     &       (drive(itp).eq.VLBA4.and.drive_type(itp).eq.VLBA42)
+     &       )) then
         write(16,9120) rsread_fs(itp),0.0
         write(16,9130) rsread_fs(itp),0.0
       else

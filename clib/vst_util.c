@@ -108,8 +108,11 @@ char *ptr;
 			    (1<<(8-shm_addr->form4.rate+shm_addr->form4.fan)))/
 			   shm_addr->bit_density[indx]);
 	}
-	if(lcl->cips <500 && shm_addr->equip.drive[indx] == VLBA &&
-	   shm_addr->equip.drive_type[indx] == VLBA2) lcl->cips=0;
+	if(lcl->cips <500 && ((shm_addr->equip.drive[indx] == VLBA &&
+			       shm_addr->equip.drive_type[indx] == VLBA2)||
+			      (shm_addr->equip.drive[indx] == VLBA4 &&
+			       shm_addr->equip.drive_type[indx] == VLBA42)
+			      ))lcl->cips=0;
 	break;
       case 3:
         ierr=arg_key(ptr,rec_key,REC_KEY,&lcl->rec,1,TRUE);

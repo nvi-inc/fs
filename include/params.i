@@ -26,6 +26,7 @@ c
       integer K42C          ! K42C comparison bit variable
       integer K41DMS        ! K41DMS comparison bit variable
       integer K42DMS        ! K42DMS comparison bit variable
+      integer VLBA42        ! VLBA42 comparison bit variable
       character*5 FS_ROOT
       integer MAX_BBC
       integer CH_PRIOR      ! chekr        realtime priority
@@ -65,6 +66,7 @@ C rack/drive _types
       parameter ( K42DMS   = z'40000' )
       parameter ( K42B     = z'80000'  )
       parameter ( K42C     = z'100000'  )
+      parameter ( VLBA42   = z'200000'  )
 C
       parameter ( FS_ROOT='/usr2')
       parameter ( MAX_BBC = 14 )

@@ -44,8 +44,10 @@ long ip[5];                           /* ipc parameters */
          request.addr=0xb6; add_req(&buffer,&request);
          request.addr=0x30; add_req(&buffer,&request);
          request.addr=0x33; add_req(&buffer,&request);
- 	 if (!(shm_addr->equip.drive[indx] == VLBA &&
-	       shm_addr->equip.drive_type[indx] == VLBA2)) {
+ 	 if (!((shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)||
+	       (shm_addr->equip.drive[indx] == VLBA4 &&
+	       shm_addr->equip.drive_type[indx] == VLBA42))) {
 	   request.addr=0x57; add_req(&buffer,&request);
 	 }
          request.addr=0x72; add_req(&buffer,&request);

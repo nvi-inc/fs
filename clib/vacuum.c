@@ -28,6 +28,16 @@ int *ierr, indx;
   void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
   void skd_run(), skd_par();      /* program scheduling utilities */
 
+  if ((shm_addr->equip.drive[indx] == VLBA &&
+       shm_addr->equip.drive_type[indx] == VLBA2)||
+      (shm_addr->equip.drive[indx] == VLBA4 &&
+       shm_addr->equip.drive_type[indx] == VLBA42)) {
+    /* ignore for VLBA2 and VLBA42 */
+    lierr = 0;
+    shm_addr->IRDYTP[indx] = 0;
+    return lierr;
+  }
+
 
 /* tape ready does not seem to be reliable in RECON 4 */
 

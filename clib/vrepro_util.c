@@ -74,8 +74,10 @@ char *ptr;
         idflt=1;                               /* alt1 is default */
 	if(lcl->mode[0]==1)
 	  idflt=3;
-	else if (shm_addr->equip.drive[indx] == VLBA &&
-		 shm_addr->equip.drive_type[indx] == VLBA2)
+	else if ((shm_addr->equip.drive[indx] == VLBA &&
+		  shm_addr->equip.drive_type[indx] == VLBA2)||
+		 (shm_addr->equip.drive[indx] == VLBA4 &&
+		  shm_addr->equip.drive_type[indx] == VLBA42))
 	  idflt=0;                         /* standard is default for VLBA2 */
       case 6:
         ind=*count-5;
@@ -83,13 +85,15 @@ char *ptr;
         ierr=arg_key(ptr,key_equ3,NKEY_EQU3,&lcl->equalizer[ind],idflt,FALSE);
 	if(ierr!=0) {
 	  ierr=arg_key(ptr,key_equ,NKEY_EQU,&lcl->equalizer[ind],idflt,TRUE);
-	  if(ierr!=0 && 
-	     shm_addr->equip.drive[indx] == VLBA &&
-	     shm_addr->equip.drive_type[indx] == VLBA2)
+	  if(ierr!=0 && ((shm_addr->equip.drive[indx] == VLBA &&
+			  shm_addr->equip.drive_type[indx] == VLBA2)||
+			 (shm_addr->equip.drive[indx] == VLBA4 &&
+			  shm_addr->equip.drive_type[indx] == VLBA42)))
 	    ierr=arg_key(ptr,key_equ2,NKEY_EQU2,&lcl->equalizer[ind],idflt,TRUE);
-	  else if(ierr !=0 &&!(
-			       shm_addr->equip.drive[indx] == VLBA &&
-			       shm_addr->equip.drive_type[indx] == VLBA2)) {
+	  else if(ierr !=0 &&!((shm_addr->equip.drive[indx] == VLBA &&
+			       shm_addr->equip.drive_type[indx] == VLBA2)||
+			       (shm_addr->equip.drive[indx] == VLBA4 &&
+				shm_addr->equip.drive_type[indx] == VLBA42))) {
 	    ierr=arg_key(ptr,key_equ0,NKEY_EQU0,&lcl->equalizer[ind],idflt,TRUE);
 	    if(ierr!=0)
 	      ierr=
@@ -99,8 +103,10 @@ char *ptr;
         break;
       case 7:
 	idflt=2; /* single speed */
-	if (!(shm_addr->equip.drive[indx] == VLBA &&
-	    shm_addr->equip.drive_type[indx] == VLBA2)) {
+	if (!((shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)||
+	      (shm_addr->equip.drive[indx] == VLBA4 &&
+	       shm_addr->equip.drive_type[indx] == VLBA42))) {
 	  if (lcl->equalizer[0]==0 || lcl->equalizer[0]==2 ||
 	      lcl->equalizer[1]==0 || lcl->equalizer[1]==2)
 	    idflt=1;
@@ -238,8 +244,10 @@ int indx;
   int idflt;
 
   if(lcl->equalizer[ 0] >= 4 ) {
-    if (shm_addr->equip.drive[indx] == VLBA &&
-	shm_addr->equip.drive_type[indx] == VLBA2)
+    if ((shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2)||
+	(shm_addr->equip.drive[indx] == VLBA4 &&
+	 shm_addr->equip.drive_type[indx] == VLBA42))
       idflt=0;  /* standard is default for VLBA2 */
     else
       idflt=1; /* alt.1 is default for VLBA */
@@ -259,8 +267,10 @@ int indx;
   int idflt;
 
   if(lcl->equalizer[ 1] >= 4 ) {
-    if (shm_addr->equip.drive[indx] == VLBA &&
-	shm_addr->equip.drive_type[indx] == VLBA2)
+    if ((shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2)||
+	(shm_addr->equip.drive[indx] == VLBA4 &&
+	 shm_addr->equip.drive_type[indx] == VLBA42))
       idflt=0;  /* standard is default for VLBA2 */
     else
       idflt=1; /* alt.1 is default for VLBA */

@@ -186,16 +186,23 @@ C
 C
       call fs_get_drive_type(drive_type)
       if(kswrite_fs(indxtp).and..not.
-     &     (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
-     &     ) then
+     &     ((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2).or.
+     &     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &     )) then
         nch=nch+ir2as(rswrite_fs(indxtp),ibuf,nch,8,2)
       else if(kswrite_fs(indxtp)) then
         nch=nch+ir2as(rswrite_fs(indxtp),ibuf,nch,8,5)
       endif
       nch=mcoma(ibuf,nch)
 C
-      if(ksread_fs(indxtp))
-     $     nch=nch+ir2as(rsread_fs(indxtp),ibuf,nch,8,2)
+      if(ksread_fs(indxtp).and..not.
+     &     ((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2).or.
+     &     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &     )) then
+         nch=nch+ir2as(rsread_fs(indxtp),ibuf,nch,8,2)
+      else
+         nch=nch+ir2as(rsread_fs(indxtp),ibuf,nch,8,5)
+      endif
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')

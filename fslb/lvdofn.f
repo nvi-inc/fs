@@ -20,7 +20,9 @@ C
 C
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
+      if((drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2).or.
+     &     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
+     &     )then
         ip(3)=0
         return
       endif

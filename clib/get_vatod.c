@@ -40,9 +40,11 @@ int indxtp;
       }
 
       if(ichan<1 || ichan >(sizeof(rel_addr)/sizeof(int)) ||
-        (shm_addr->equip.drive[indx]==VLBA &&
-	 shm_addr->equip.drive_type[indx] == VLBA2
-	 && rel_addr[ichan-1] == 0) ) {
+        (((shm_addr->equip.drive[indx]==VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2)||
+	 (shm_addr->equip.drive[indx]==VLBA4 &&
+	  shm_addr->equip.drive_type[indx] == VLBA42))
+	 && rel_addr_v2[ichan-1] == 0) ) {
           ip[0]=ip[1]=0;
           ip[2]=-283;
           memcpy(ip+3,"q@",2);
@@ -63,8 +65,10 @@ int indxtp;
         rte_sleep( 5);
       } 
 
-      if (shm_addr->equip.drive[indx] == VLBA &&
-	  shm_addr->equip.drive_type[indx] == VLBA2)
+      if ((shm_addr->equip.drive[indx] == VLBA &&
+	  shm_addr->equip.drive_type[indx] == VLBA2)||
+	  (shm_addr->equip.drive[indx] == VLBA4 &&
+	   shm_addr->equip.drive_type[indx] == VLBA42))
         request.addr=rel_addr_v2[ichan-1];
       else
         request.addr=rel_addr[ichan-1];
@@ -80,8 +84,10 @@ int indxtp;
       get_res(&response, &buffer_out);
       counts=0xFFF & response.data;
       if((counts & 0x800)!=0) counts|=~0xFFF;   /*sign extend */
-      if (shm_addr->equip.drive[indx] == VLBA &&
-	  shm_addr->equip.drive_type[indx] == VLBA2)
+      if ((shm_addr->equip.drive[indx] == VLBA &&
+	  shm_addr->equip.drive_type[indx] == VLBA2)||
+	  (shm_addr->equip.drive[indx] == VLBA4 &&
+	   shm_addr->equip.drive_type[indx] == VLBA42))
 	*volts=counts*0.4e-3;
       else
 	*volts=counts*4.8828125e-3;

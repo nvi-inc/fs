@@ -21,7 +21,7 @@ c
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
       if(ihead.eq.3 .and. .not.
-     &     (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
+     &     (drive(indxtp).eq.VLBA4.and.drive_type(indxtp).eq.VLBA42)
      &     ) then
         call head_vlt(2,0.0,ip,1498.5,indxtp) !1498.5 ~= 9.9902*150
         if(ip(3).ne.0) then
