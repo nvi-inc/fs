@@ -189,9 +189,6 @@ C
       icheck(20) = 0
       call fs_set_icheck(icheck(20),20)
 C
-      call lvdonn('lock',ip)
-      if(ip(3).ne.0) goto 800
-C
 C  save the results in common
 C
       call fs_get_ipashd(ipashd)
@@ -206,6 +203,9 @@ C
       enddo
       call fs_set_ipashd(ipashd)
       call fs_set_posnhd(posnhd)
+C
+      call lvdonn('lock',ip)
+      if(ip(3).ne.0) goto 800
 C
       call set_mic(ihd,ipas ,kauto,microns,ip,0.40)
       if(ip(3).ne.0) go to 800
@@ -370,6 +370,9 @@ C
       call lvdofn('unlock',ip2)
       if(ip2(3).ne.0) then
         call logit7(0,0,0,0,ip2(3),ip2(4),ip2(5))
+        call clrcl(ip(1))
+        ip(1)=0
+        ip(2)=0
         goto 999
       endif
 C
