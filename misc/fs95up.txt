@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.0/misc/fs95up.txt  Version: 1.0  Date: 010920
+File: /usr2/fs-9.5.1/misc/fs95up.txt  Version: 1.2  Date: 011001
 
 I. Introduction
 
@@ -33,7 +33,7 @@ the summary.
 
 1. K4 rack and recorder support.
 2. Two tape drive support.
-3. SETCL time model changes.
+3. SETCL time checking.
 4. Default IFD and IF3 attenuator settings.
 5. Automatic IFD attenuator adjustment for Mark IV Racks.
 6. IF3 command phase-cal control for Mark III and Mark IV racks.
@@ -70,6 +70,7 @@ the summary.
 36. FS compiles under FS Linux 4.
 37. A new command "cablediff" has been included.
 38. New "cablelong" command. 
+39. Experimental time model "ntp".
 
 A more detailed discussion of these changes follows.
 
@@ -113,13 +114,8 @@ A more detailed discussion of these changes follows.
    recorder one. Aspects of two tape drive operation are discussed in
    more detail in section "III. Two tape drive operation" below.
 
-3. SETCL time model changes. The FS time model has been modified to
-   accept "ntp" as a model type in the time.ctl file. In this case,
-   the FS will assume that the computer time is set by NTP and is
-   therefore correct. Regardless of the time model being used, if the
-   formatter and the FS time disagree by 0.5 seconds or more, setcl
-   will now issue an error message. Some changes were made in the
-   fmset display to support the NTP model type.
+3. SETCL time checking. If the formatter and the FS time disagree
+   by 0.5 seconds or more, setcl will now issue an error message.
 
 4. Default IFD and IF3 attenuator settings. The IFD and IF3 commands
    now accept default attentuator settings. The value used for the
@@ -347,10 +343,10 @@ A more detailed discussion of these changes follows.
     order to keep the messages to a minimum. Knowledgeable users can
     try "erchk" at their own risk. It is used by running it in an
     xterm from stpgm.ctl. An example line for starting it is included
-    as a comment in /usr2/fs/st.default/stpgm.ctl. You can copy this
-    line to /usr2/control/stpgm.ctl, "uncomment" it, and restart the
-    FS to try it.  Color may not work correctly in the xterms of some
-    of the earlier FS Linux kernels.
+    as a comment in /usr2/fs/st.default/control/stpgm.ctl. You can
+    copy this line to /usr2/control/stpgm.ctl, "uncomment" it, and
+    restart the FS to try it.  Color may not work correctly in the
+    xterms of some of the earlier FS Linux kernels.
 
 23. "inject_snap" SNAP command entry program available. "inject_snap"
     is a C program that can be run from a shell to send a SNAP command
@@ -428,7 +424,7 @@ A more detailed discussion of these changes follows.
     station.  Experiment specific version could be placed in the
     experiment procedure libraries.
 
-29. Experimental visual FIVPT. Hiro Osaka-san at CRL has a developed a
+29. Experimental visual FIVPT. Hiro Osaki-san at CRL has a developed a
     version of fivpt that automatic makes a plot of the scans. This is
     an experimental version that needs some improvements before it
     used for normal operations. Knowledgeable users can try it, at
@@ -546,6 +542,44 @@ A more detailed discussion of these changes follows.
     when it is long, the "cablediff" command can be used to
     automatically calculate the cable sign and difference and record
     them in a standard format.
+
+39. Experimental time model "ntp". As an experimental feature, the FS
+    time model has been modified to accept "ntp" as a model type in
+    the "time.ctl" file. In this case, the FS will assume that the
+    computer time is set by NTP and is therefore correct. It is
+    recommended that users NOT use this feature for normal
+    operations. In particular problems will occur if the computer
+    loses contact with the server. Use of this feature is at your own
+    risk (please see the following three paragraphs) until it is
+    better understood. Some changes were made in the fmset display to
+    support the NTP model type.
+
+    Please note that using NTP as the time model does not remove the
+    requirement to check the formatter time against GPS. This check is
+    extremely important because currently the FS cannot tell if the
+    computer time is correct. Once the formatter has been set to agree
+    with GPS, it should be possible to use it to verify the FS time
+    (unless there is a formatter time jump).
+
+    When using ntpd, it make take several minutes for the computer to
+    approach NTP time after a boot.  If a quick restart is needed
+    (recoverying from a power failure for example) or if there is a
+    network problems that prevents NTP from working, you may need to
+    revert to a formatter based time model, probably using the "rate"
+    model type in "time.ctl". For this reason if you switch to using
+    NTP as the time, please retain the drift and span information in
+    your "time.ctl" model so that the formatter based model will work
+    well if you need to use it.
+
+    It may be possible to speed the convergence of computer time to
+    the correct value under NTP by using the ntpdate program to step
+    the system time to the approximate correct time at boot-up. Care
+    is required in the set-up of ntpdate so that the time is stepped
+    instead of slewed and an overly long network time-out doesn't
+    delay booting up if there is a network problem. Using IP addresses
+    instead of mode names in ntpdate will make it more reliable by
+    reducing dependence on namesevers. Please contact Ed if you have
+    questions or suggestions.
 
                          B. Changes in DRUDG
 
@@ -1099,7 +1133,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.0 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.1 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -1107,7 +1141,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.0.tar.gz
+    get fs-9.5.1.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1121,15 +1155,15 @@ section "VII. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.0.tar.gz
+    tar -xzpf /tmp/fs-9.5.1.tar.gz
 
 (6) Install the system:
 
-    cd /usr2/fs-9.5.0
+    cd /usr2/fs-9.5.1
     make install
     (answer the question "y" if it is okay to proceed)
 
-(8) Log-out as root, and log-in prog.
+(8) VERY IMPORTANT: Log-out as root, and log-in prog.
 
 (9) Make the FS:
 
@@ -1257,6 +1291,11 @@ information by hand.
      cd /usr2/control
      mv head.ctl head1.ctl
 
+   Be sure to NOT leave an old file around with the name head.ctl. If
+   you accidently start making changes to that file instead of
+   head1.ctl, it will be very confusing until you realize why the
+   changes aren't having any effect.
+
 9. Please make sure you aren't already using any of following new K4
    mnemonics in "ibad.ctl": "R1", "VA", "LA", "VB", "LB", "V4", and
    "T1". If you are, you should changed them. This may require changes
@@ -1264,18 +1303,18 @@ information by hand.
    problem, please contact Ed.
 
 10. Copy the default tacd.ctl control file from
-    /usr2/fs-9.4.124/st.default/control/tacd.ctl to /usr2/control.
+    /usr2/fs/st.default/control/tacd.ctl to /usr2/control.
     Optionally, if you have a TAC supported by the Tac32plus software
     available on your local network you can set the control file to
     point to the IP address of that computer.
 
       cd /usr2/control
-      cp -a /usr2/fs-9.4.124/st.default/control/tacd.ctl tacd.ctl
+      cp -a /usr2/fs/st.default/control/tacd.ctl tacd.ctl
 
 11. Update your stcmd.ctl file for the new format. The commands:
 
       cd /usr2/control
-      /usr2/fs-9.4.124/misc/cmdctlfix3 stcmd.ctl
+      /usr2/fs/misc/cmdctlfix3 stcmd.ctl
 
     should do it automatically (a bug in previous versions that caused
     it to fail if there was a blank line in the file has been fixed).
@@ -1311,8 +1350,9 @@ information by hand.
     Please delete this line.
 
 13. Edit your location.ctl file and remove the three lines:
-    "Occupation Code", "Current decade", and "Station ID" (NOT station
-    name). These are three consecutive lines in the old file.
+    "Occupation Code", "Current decade" (or it mya be labeled "Past
+    Decade", and "Station ID" (NOT station name). These are three
+    consecutive lines in the old file.
 
 14. In the skedf.ctl file in the $MISC section, add a line with the
     key word "EQUIPMENT" followed by the rack and recorder
@@ -1348,7 +1388,15 @@ information by hand.
     A. Rename your parity check procedures, which will include either
        all or some of: "checkf80", "checkr80", "checkf135", and
        "checkr135". The new names are "check80f", "check80r",
-       "check135f", and "check135r". The rename command is "rn". 
+       "check135f", and "check135r". The rename command is
+       "rn". Please note that it is NOT necessary to change references
+       to "rc" and "hd" in "check=..." commands to "r1" and "h1". If
+       only one tape drive is defined, "rc" and "hd" will refer to the
+       recorder and head in that drive regardless of whether it is
+       drive 1 or drive 2. You can change these references to "r1" and
+       "h1", but if you have two drives, you will lose some of the
+       drive independence of the current set-up. The old mnemonic "tp"
+       continues to be a supported alias for "rc".
 
     B. If you use a VLBA DQA for parity checks, please make sure that
        the AUX data check parameter in the parity command set-up in
@@ -1443,19 +1491,19 @@ Harro Verkouter, Joint Institute for VLBI in Europe
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.0.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.1.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs950tg.aa
-fs950tg.ab
+fs951tg.aa
+fs951tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs950tg.* >fs-9.5.0.tar.gz
+cat fs951tg.* >fs-9.5.1.tar.gz
 
-This will create an exact image of the original fs-9.5.0.tar.gz
+This will create an exact image of the original fs-9.5.1.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

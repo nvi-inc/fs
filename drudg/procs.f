@@ -204,6 +204,7 @@ C 010820 nrv For 'none' don't put out procs, same as for 'unused'.
 C            Set up krec_2rec and
 C            check that for whether to append suffix to rec commands.
 C 010920 nrv Add code from D. Graham to enable "S2" for 2-head.
+C 011002 nrv Change second wait in K4 LOADER to 6s per H. Osaki.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -2333,7 +2334,7 @@ C LOADER procedure
             call hol2lower(ibuf,nch)
             call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
             call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(ibuf,1,'!+5s ')
+            nch = ichmv_ch(ibuf,1,'!+6s ')
             call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
           endif
           if (kvrec(irec).or.kv4rec(irec)) then

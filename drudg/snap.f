@@ -55,7 +55,7 @@ c     integer itrax(2,2,max_chan) ! fanned-out version of itras
       character*3  stat
 C     character*28 cpass,cvpass
       character    upper
-      character*1  maxchk,dopre,cx
+      character*1  maxchk,dopre
       logical    ex
       logical kintr ! false until intro lines have been written
       logical kflg_next(4)
@@ -271,6 +271,7 @@ C            events to be issued at incorrect times for the next scan.
 C 010726 nrv Add SCHED_END at the end of the file.
 C 010820 nrv Don't append to rec commands if one of the recorders is none.
 C 010831 nrv Send krec_append to LSPIN.
+C 010927 nrv Initialize _old variables, even if there are not two recs.
 C
 C
       iblen = ibuf_len*2
@@ -830,13 +831,13 @@ C  For S2 or continuous, stop tape if needed after the SOURCE command
           endif
 
 C Switch recorders if it's a new tape.
+          crec_use_old = crec_use ! save the old one for the UNLOD command
+          ks2_old = ks2
+          kk4_old = kk4
           if (knewtp.and.iobsst.gt.0.and.nrecst(istn).eq.2) then ! switch 
             if (ichcm_ch(lstrec(1,istn),1,'unused').eq.0.or.
      .          ichcm_ch(lstrec2(1,istn),1,'unused').eq.0) then ! don't switch
             else ! switch
-            crec_use_old = crec_use ! save the old one for the UNLOD command
-            ks2_old = ks2
-            kk4_old = kk4
             if (crec_use.eq.'1') then
               crec_use = '2'
               kk4 = kk41rec(2).or.kk42rec(2)

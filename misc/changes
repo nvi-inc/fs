@@ -5294,3 +5294,23 @@ Version 9.4.124 010827
            make ifadjsut work for only Mark III and Mark IV racks
 
 Version 9.5.0 010920
+
+010926 WEH boss/bwork.f
+           send 76 (cablelong) to quikr
+
+010926 WEH fslb/ma2i3.f
+           fixed decoding of pcal state
+
+010926 WEH quikr/fvpnt.f
+           fixed number of points default 3->7
+
+010927 WEH quikv/cablediff.c
+           fix format
+
+010928 WEH help/cable.___
+           help/cablelong.___
+           help/cablediff.___
+           help/tnx.___
+           updated/created
+
+Version 9.5.1 010928
