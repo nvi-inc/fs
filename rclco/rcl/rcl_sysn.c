@@ -295,7 +295,8 @@ int rcl_getch(int addr, unsigned char* c)
       else  {
          result = fgetc(rcl_infile[addr]);
       }
-      if (result == EOF)  {
+
+	if (result == EOF) {
          rcl_close(addr);
          return(RCL_ERR_NETREMCLS);
       }
@@ -375,7 +376,7 @@ ibool rcl_checkch(int addr)
          perror("rcl_checkch(): Error from fcntl(,,0)");
       }
 
-      if (result == -1)  {
+      if (result <= 0)  {
          /* Error occurred, return FALSE if EWOULDBLOCK (the error we expected)
               and TRUE if some other error that should get caught by the 
               next real read attempt. Thus we can take proper local action
