@@ -14,6 +14,8 @@ C
 C  History:
 C 960520 nrv New.
 C 961122 nrv Change fget_mode_lowl to fget_all_lowl
+C 970124 nrv Move initialization to start.
+C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -27,11 +29,11 @@ C  OUTPUT:
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       integer*2 lm(4) ! recording format
-      character*1 cp(max_pass) ! subpass
-      character*6 cchref(max_pass) ! channel ID ref
-      character*1 csm(max_pass) ! sign/mag
-      integer ihdn(max_pass) ! headstack number
-      integer itrk(max_pass) ! first track of the fanout assignment
+      character*1 cp(max_track) ! subpass
+      character*6 cchref(max_track) ! channel ID ref
+      character*1 csm(max_track) ! sign/mag
+      integer ihdn(max_track) ! headstack number
+      integer itrk(max_track) ! first track of the fanout assignment
       integer nfandefs ! number of def statements
       integer ifanfac ! fanout factor determined from list of tracks
 C
@@ -41,11 +43,22 @@ C  LOCAL:
       integer ichmv_ch ! function
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
+C  Initialize
 C
+      CALL IFILL(LM,1,8,oblank)
+      do in=1,max_track
+        cp(in)=' '
+        cchref(in)=''
+        csm(in)=' '
+        itrk(in)=0
+        ihdn(in)=0
+      enddo
+      nfandefs=0
+      ifanfac=0
+
 C  1. The recording format
 C
       ierr = 1
-      CALL IFILL(LM,1,8,oblank)
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('track_frame_format'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
@@ -74,7 +87,6 @@ C  2.1 Subpass
         ierr = 21
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subpass
         if (iret.ne.0) return
-        cp(in)=' '
         NCH = fvex_len(cout)
         if (nch.ne.1) then
           ierr = -2
@@ -86,7 +98,6 @@ C
 C  2.2 Chan ref
 
         ierr = 22
-        cchref(in)=''
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get channel ref
         if (iret.ne.0) return
         NCH = fvex_len(cout)
@@ -102,7 +113,6 @@ C  2.3 Sign/magnitude
         ierr = 23
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get sign/mag
         if (iret.ne.0) return
-        csm(in)=' '
         NCH = fvex_len(cout)
         if (cout(1:1).ne.'s'.and.cout(1:1).ne.'m') then
           ierr = -4
@@ -116,7 +126,6 @@ C  2.4 Headstack number
         ierr = 24
         iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get headstack number
         if (iret.ne.0) return
-        ihdn(in)=0
         iret = fvex_int(ptr_ch(cout),i) ! convert to binary
         if (i.lt.0.or.i.gt.max_headstack) then
           ierr = -5
