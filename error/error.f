@@ -3,7 +3,7 @@ C
       include '../include/dpi.i'
 C
       logical kinit,kgpnt,kopn,koutp,kpst,kplin,kpdat,kpout_ch,kpfit
-      logical kif,kgetm,kptri,kpant,kgant,kbit,kpcon,kfixed
+      logical kif,kgetm,kptri,kpant,kgant,kbit,kpcon,kfixed,kpdat2
 C
       double precision lonsum,lonrms,latsum,latrms,dirms
       double precision wlnsum,wltsum,wdisum
@@ -19,13 +19,13 @@ C
 C
       character*64 iibuf,iobuf,imbuf
       dimension ireg(2),ldum(3)
-      integer*2 jbuf(50),lant(4),laxis(2)
+      integer*2 jbuf(60),lant(4),laxis(2)
       dimension lon(600),lat(600),wln(600),wlt(600)
       dimension lonoff(600),latoff(600),luse(32)
       dimension latres(600),lonres(600)
       dimension idcbo(2),it(6),ipar(20),ito(6),ispar(20)
       double precision pcof(20),pcofer(20),phi,spcof(20)
-      double precision a(210),b(20),aux(20),scale(20),ddum
+      double precision a(210),b(20),aux(20),scale(20),ddum, c(210)
 C
       equivalence (ireg,reg)
 C
@@ -193,8 +193,8 @@ C
         call fecon(feclnn,fecltn,lonres,wln,latres,wlt,inp,luse,
      &           emnln,emnlt)
 C
-        if (abs(feclnn-feclon).le.0.01*feclnn.and.
-     +     abs(fecltn-feclat).le.0.01*fecltn) goto 211
+        if (abs(feclnn-feclon).le.0.01*abs(feclnn).and.
+     +     abs(fecltn-feclat).le.0.01*abs(fecltn)) goto 211
 C
         feclon=feclnn
         feclat=fecltn
@@ -247,13 +247,13 @@ C
       nxpnt=0
       do i=1,npar
         do j=1,i
-          a(nxpnt+j)=a(nxpnt+j)*aux(i)*aux(j)
+          c(nxpnt+j)=a(nxpnt+j)*aux(i)*aux(j)
         enddo
         nxpnt=nxpnt+i
       enddo
   
       if (kpout_ch(lu,idcbo,'$correlation',iobuf,lst)) goto 10000
-      if (kptri(lu,idcbo,a,npar,iobuf,lst,jbuf,il)) goto 10000
+      if (kptri(lu,idcbo,c,npar,iobuf,lst,jbuf,il)) goto 10000
 C
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
      &           wdisum,igp)
@@ -269,8 +269,12 @@ C
      +           i,igp,feclon,feclat,coslt)
 C
         kuse=kbit(luse,i)
-        if (kpdat(lu,idcbo,kuse,lon(i),lat(i),lonres(i),latres(i),
-     +     distr,mc,iobuf,lst,jbuf,il)) goto 10000
+        wln1=rchi*sqrt(wln(i)*wln(i)+sign(feclon*feclon,feclon))
+        wlt1=rchi*sqrt(wlt(i)*wlt(i)+sign(feclat*feclat,feclat))
+        call apost(lon(i),lat(i),aux,wln(i),wlt(i),par,ipar,phi,a,npar,
+     +       fln,flt0,feclon,feclat,rchi,apos1,apos2)
+        if (kpdat2(lu,idcbo,kuse,lon(i),lat(i),lonres(i),latres(i),
+     +     distr,wln1,wlt1,apos1,apos2,mc,iobuf,lst,jbuf,il)) goto 10000
       enddo
 C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
