@@ -12,7 +12,8 @@ C
 C INPUT: none
 C OUTPUT: none
 C LOCAL:
-      integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
+     .LMON(2),
      . LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
       integer ipas(max_stn),ift(max_stn),idur(max_stn)
       integer ipasp,iftold,idirp,idir
@@ -86,7 +87,9 @@ C nrv 940107 Change SLEWT to SLEWO (old version)
 C nrv 940131 Add types 6 and 7 to LAXIS
 C            Write cable wrap on output line
 C 960810 nrv Change itearl to array
-C 961105 nrv Add one to the format of bandwidth to print values > 10.
+C 961105 nrv Add one space to bandwidth so values >10 are correct.
+C 970114 nrv Change lsname(4) to (max_sorlen/4). Change printing of
+C            lsname to use first 8 char only.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -387,7 +390,8 @@ C     5. Now write out the observation line.
           call cbinf(lcable(istnsk),cwrap)
           if (kwrap) then ! print cable wrap
           IF (IWIDTH.EQ.137) WRITE(LUPRT,9510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
+     .      ISC2,(LSNAME(i),i=1,4),
+     .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
      .      12.0*speed(icod,istn)
@@ -398,14 +402,16 @@ C     5. Now write out the observation line.
      .      A1,' ',I5,' ',F4.0,
      .      ' ____________________________________________________'/)
           IF (IWIDTH.EQ. 80) WRITE(luprt,9518) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,LSNAME,LHSIGN,IHAH,IHAM,AZ,EL,cwrap,TSLEW,
+     .      ISC2,(LSNAME(i),i=1,4),
+     .      LHSIGN,IHAH,IHAM,AZ,EL,cwrap,TSLEW,
      .      IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 9518      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
      .      a5,' ',F4.1,I3,A1,' ',I5,' ',' ________________'/)
           else ! no cable wrap
           IF (IWIDTH.EQ.137) WRITE(LUPRT,8510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,LSNAME,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
+     .      ISC2,(LSNAME(i),i=1,4),
+     .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD),IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
      .      12.0*speed(icod,istn)
@@ -416,7 +422,8 @@ C     5. Now write out the observation line.
      .      A1,' ',I5,' ',F4.0,
      .      ' ____________________________________________________'/)
           IF (IWIDTH.EQ. 80) WRITE(luprt,8518) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,LSNAME,LHSIGN,IHAH,IHAM,AZ,EL,TSLEW,
+     .      ISC2,(LSNAME(i),i=1,4),
+     .      LHSIGN,IHAH,IHAM,AZ,EL,TSLEW,
      .      IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 8518      FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
