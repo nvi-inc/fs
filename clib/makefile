@@ -1,3 +1,11 @@
+# set environment variable NO_FTOK_FS non-empty if ftok() is not available
+# if you use csh/tcsh add this to your .login file:
+#   setenv NO_FTOK_FS TRUE
+# and log-out and back in
+#
+ifdef NO_FTOK_FS
+CFLAGS :=  -DNO_FTOK_FS
+endif
 #
 #  Note that the backslash character has been used at the end of each line
 #  to indicate continuation.
@@ -26,9 +34,10 @@ selectcmd_util.o rollform_util.o mk4vcd.o vlbabbcd.o mk4bbcd.o tpicd_util.o\
 onoff_util.o flux_val.o find_next_noncomment.o get_tcal_fwhm.o get_gain_par.o\
 calrx_util.o ds_util.o dscon_util.o bsfo2vars.o lbaifpd.o lba_cor_util.o \
 lba_ft_util.o lba_ifp_util.o lba_mon_util.o lba_trkfrm_util.o tpi_lba.o \
-dscon_v.o fsmetc.o get_rxgain.o lower.o
+dscon_v.o fsmetc.o get_rxgain.o lower.o disk_serial_util.o disk_pos_util.o\
+m5_utils.o data_check_util.o disk_record_util.o bank_check_util.o\
+disk2file_util.o in2net_util.o user_device_util.o ntp_synch.o
 #
-CFLAGS = 
 #FFLAGS = 
 #
 #  The following line that has a ":" in it is a "dependency line".
