@@ -177,7 +177,7 @@ int flag;                            /* TRUE if default is okay */
     icount=0;
     while (icount < nkey) {
        sscanf(key[icount++],"%f",&fltkey);
-       if(fabs( (double)(fltkey-fltarg))<1e-5*fabs((double)fltarg)) {
+       if(fabs( (double)(fltkey-fltarg))<=1e-5*fabs((double)fltarg)) {
           *iptr=icount-1;
           return 0;
        }
