@@ -117,33 +117,76 @@ C
 C  2.5  List of tracks
 C
       do i=1,36
-        itrk4(i)=0
+         itrk4(i)=0
       end do
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
-        do i=1,36
-          itrk4(i)=itrkpar4(i)
-        end do
+      if (cjchar(parm,1).eq.'*') then
+         do i=1,36
+            itrk4(i)=itrkpar4(i)
+         end do
       else
-        do j=1,36
-          if (ichcm_ch(parm,1,'all').eq.0) then
-            do i=2,33
-              itrk4(i+1)=1
-            end do
-            goto 250
-          endif
-          nc=1
-          if(cjchar(iparm,2).ne.' ') nc=2
-          it=ias2b(iparm,1,nc)
-        if ((it.ge.0).and.(it.le.35)) then
-            itrk4(it+1)=1
-          else
-            ierr = -208
-            goto 990
-          endif
-250       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-          if(cjchar(parm,1).eq.',') goto 295
-        end do
+         do j=1,36
+            if (ichcm_ch(parm,1,'all').eq.0) then
+               do i=2,33
+                  itrk4(i+1)=1
+               end do
+            else if(ichcm_ch(parm,1,'g').eq.0
+     &              .or.ichcm_ch(parm,1,'m').eq.0
+     &              .or.ichcm_ch(parm,1,'v').eq.0) then
+               if(ichcm_ch(parm,1,'g').eq.0) then
+                  istart=0
+               else if(ichcm_ch(parm,1,'m').eq.0) then
+                  istart=4
+               else if(ichcm_ch(parm,1,'v').eq.0) then
+                  istart=2
+               else
+                  ierr=-208
+                  goto 990
+               endif
+               if(ichcm_ch(parm,2,'0').eq.0) then
+                  iend=16
+               else if(ichcm_ch(parm,2,'1').eq.0) then
+                  istart=istart+1
+                  iend=17
+               else if(ichcm_ch(parm,2,'2').eq.0) then
+                  if(istart.eq.0) then
+                     iend=34
+                  else if(istart.eq.4) then
+                     iend=30
+                  else if (istart.eq.2) then
+                     iend=32 
+                  endif
+                  istart=18
+               else if(ichcm_ch(parm,2,'3').eq.0) then
+                  if(istart.eq.0) then
+                     iend=35
+                  else if(istart.eq.4) then
+                     iend=31
+                  else if (istart.eq.2) then
+                     iend=33 
+                  endif
+                  istart=19
+               else
+                  ierr=-208
+                  goto 990
+               endif
+               do i=istart,iend,2
+                  itrk4(i+1)=1
+               enddo
+            else
+               nc=1
+               if(cjchar(iparm,2).ne.' ') nc=2
+               it=ias2b(iparm,1,nc)
+               if (it.ge.0.and.it.le.35) then
+                  itrk4(it+1)=1
+               else
+                  ierr = -208
+                  goto 990
+               endif
+            endif
+            call gtprm(ibuf,ich,nchar,0,parm,ierr)
+            if(cjchar(parm,1).eq.',') goto 295
+         enddo
       endif
   
 295   continue
@@ -208,8 +251,8 @@ c
           endif
         enddo
         if (j.eq.0) goto 600
-        itrkmez(1)=itrk(1) -1   !!! tracks for MK4 are 0-35
-        itrkmez(2)=itrk(2) -1
+        itrkmez(1)=itrk(1)
+        itrkmez(2)=itrk(2)
         call mezhr(avpea,avpeb,iserra,iserrb,ip,iauxa,iauxb,itrkmez)
         if(ip(3).lt.0) goto 998
         if(itrk(1).ne.0) then
@@ -240,7 +283,7 @@ C
       do i=1,36
         if (itrk4(i).eq.1) then
           if(i.le.ilast) then        !only report as far as we got
-            nc=ib2as(i,lwhat,1,2)     !report requested, not actual track
+            nc=ib2as(i-1,lwhat,1,2)     !report actual
             if (perr(i).gt.pethr) then
               call logit7ci(0,0,0,0,-303,'qg',lwhat)
             end if
@@ -272,7 +315,7 @@ C
         if (itrk4(i).eq.1) then
           if(i.le.ilast) then            !report only as far as we got
             if (iserr(i).gt.isethr) then
-              nc=ib2as(i,lwhat,1,2)        !report requested, not actual track
+              nc=ib2as(i-1,lwhat,1,2)       !report actual track
               call logit7ci(0,0,0,0,-304,'qg',lwhat)
             end if
             nch=nch+ib2as(iserr(i),ibuf,nch,o'100003')
@@ -326,16 +369,19 @@ C
           ntrk=ntrk+1
         endif
         if (nch.gt.68) then
-          call put_buf(iclass,ibuf,1-nch,'fs','  ')
+          call put_buf(iclass,ibuf,2-nch,'fs','  ')
           nch = 1
           nch = ichmv_ch(ibuf,nchar,'parity/')
+          nchsave=nch
           nrec = nrec + 1
         endif
       enddo
       if(ntrk.eq.0) nch=ichmv_ch(ibuf,nch,'none ')
       nch=nch-2
-      call put_buf(iclass,ibuf,-nch,'fs','  ')
-      nrec=nrec+1
+      if(nch.ne.nchsave-2) then
+         call put_buf(iclass,ibuf,-nch,'fs','  ')
+         nrec=nrec+1
+      endif
 C
 C
 C  That's all
