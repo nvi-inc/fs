@@ -331,7 +331,7 @@ global session first_source source_time
    # If the beginning of the file is checked then start looking for the pattern :st= #
    if {$look_for_st==1} {  
     # if the line matches :st= then the time is set and a text message is sent, auto start mode is done.
-    if {[regexp {:st=} $line] || [regexp {:st1=} $line] || [regexp {:st2=} $line]} {
+    if {[regexp {:st=} $line] || [regexp {:st1=} $line] || [regexp {:st2=} $line] || [regexp {:disc_start=on} $line]} {
      stop_auto_start_mode 0
      set st_time [string range [lindex [split $line s] 0] 5 16]
      send_mail 
