@@ -9,6 +9,7 @@ void setvtime();
 void set4time();
 
 extern int rack;
+extern int source;
 
 void setfmtime(formtime,delta)
 time_t formtime;
@@ -21,9 +22,12 @@ if (nsem_test(NSEM_NAME) != 1) {
   exit(0);
 }
 
-if (rack & VLBA)
-	setvtime((time_t) (formtime + delta));
-else
-	set4time(formtime,delta);
+  if (source == S2)
+    sets2time(formtime+delta);
+  else
+    if (rack & VLBA)
+      setvtime((time_t) (formtime + delta));
+    else
+      set4time(formtime,delta);
 
 }
