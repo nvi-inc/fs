@@ -22,6 +22,7 @@ C 960201 nrv Worse fan-out logic replaced.
 C 960531 nrv Fanout factor is input, already determined.
 C 961018 nrv Fan out the 'M' modes just like the 'V' ones.
 C 970206 nrv Add headstack index
+C 970401 nrv Remove itrax -- not used
 C
 C Called by: PROCS
 
@@ -62,8 +63,8 @@ C    Initialize itrk to 0.
         do ibit=1,2
           do ihd=1,max_headstack
             do ichan=1,max_chan
-              itrax(isb,ibit,ihd,ichan)=itras(isb,ibit,ihd,ichan)
-              it = itrax(isb,ibit,ihd,ichan)
+C             itrax(isb,ibit,ihd,ichan)=itras(isb,ibit,ihd,ichan)
+              it = itras(isb,ibit,ihd,ichan)
               if (it.ne.-99) itrk(it+3,ihd)=1
             enddo
           enddo
@@ -87,13 +88,13 @@ C     If this is a VLBA mode or Mk4 mode, check for fan-out
                     it = itras(isb,ibit,ihd,ichan)
                     if (it.ne.-99) then ! fan it out
                       if (ifan.eq.2.or.ifan.eq.4) then ! 1:2
-                        itrax(isb,ibit,ihd,ichan+2)=it+2
+C                       itrax(isb,ibit,ihd,ichan+2)=it+2
                         itrk(it+2+3,ihd)=1
                       endif
                       if (ifan.eq.4) then ! 1:4
-                        itrax(isb,ibit,ihd,ichan+4)=it+4
+C                       itrax(isb,ibit,ihd,ichan+4)=it+4
                         itrk(it+4+3,ihd)=1
-                        itrax(isb,ibit,ihd,ichan+6)=it+6
+C                       itrax(isb,ibit,ihd,ichan+6)=it+6
                         itrk(it+6+3,ihd)=1
                       endif
                     endif ! fan it out
