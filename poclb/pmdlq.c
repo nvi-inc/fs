@@ -34,6 +34,7 @@ struct pmdl *pmodel;
   strcat(buf,"PM 1 ");
   int2str(buf,pmodel->imdl,-5,1);
   strcat(buf," ");
+  /* not Y10K compliant */
   int2str(buf,pmodel->t[5],4,0);         /* year    */
   strcat(buf," ");
   int2str(buf,pmodel->t[4],-3,1);        /* day     */
@@ -49,7 +50,7 @@ struct pmdl *pmodel;
 
   buf[0]='\0';
   strcat(buf,"PM 2 ");
-  flt2str(buf,pmodel->phi*RAD2DEG,-9,4);
+  flt2str(buf,(float)(pmodel->phi*RAD2DEG),-9,4);
   strcat(buf," ");
   for (i=0; i<MAX_MODEL_PARAM; i++) {
     int2str(buf,pmodel->ipar[i],1,0);
@@ -65,7 +66,7 @@ struct pmdl *pmodel;
     for (j=0; j<NLINE; j++) {
       if (i+j>MAX_MODEL_PARAM)
         break;
-      flt2str(buf,pmodel->pcof[i+j]*RAD2DEG,-10,7);
+      flt2str(buf,(float)(pmodel->pcof[i+j]*RAD2DEG),-10,7);
       strcat(buf," ");
     }
   logit(buf,0,'\0');
