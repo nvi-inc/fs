@@ -44,7 +44,7 @@ long ip[5];                           /* ipc parameters */
       else if (command->argv[1]==NULL)     /* special cases */
         if (strcmp(command->argv[0],"eject")==0
 	    || strcmp(command->argv[0],"unload")==0) {
-	  add_rclcn_eject(&buffer,device);
+	  add_rclcn_consolecmd(&buffer,device,"transport all eject");
 	  goto rclcn;
 	} else if (strcmp(command->argv[0],"re-establish")==0) {
 	  add_rclcn_position_reestablish(&buffer,device);
