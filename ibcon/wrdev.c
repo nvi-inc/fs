@@ -134,10 +134,10 @@ int *no_write_ren;
       if(*kecho)
 	echo_out('w',*mode,*devid,locbuf,*buflen+2);
       if(*itime)
-	rte_rawt(centisec);
+	rte_ticks(centisec);
       ibwrt(*devid,locbuf,*buflen+2);
       if(*itime)
-	rte_rawt(centisec+1);
+	rte_ticks(centisec+1);
       if ((ibsta & TIMO) != 0) {
 	*error = TIMEOUT;
 	memcpy((char *)ipcode,"W1",2);
