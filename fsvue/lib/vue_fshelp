@@ -1,0 +1,660 @@
+#!/usr/bin/wish -f
+# vue_fshelp source
+# Basic font for button, menus and labels for FS Help
+# Product NVI,Inc./GSFC (2000)
+# to be incorporated into the VLBI Field System.
+
+# Window manager configurations for directories
+  set ICONDIR /usr2/fs/fsvue/images
+  set BINDIR /usr2/fs/bin
+  set HELPDIR /usr2/fs/help/
+
+  global tkVersion
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900
+  wm iconposition . 1200 0
+  wm iconbitmap . @$ICONDIR/vlb.icon
+  wm iconname . {fsvue}
+  wm geometry . +5+25
+  wm title . {Help Files}
+  set w .
+  $w config -cursor {top_left_arrow black white}
+
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+  } else { 
+      set bfont {9x15}
+  }
+  
+# Top frame is a menubar
+# there is more magic that you can do with this
+# build widget .m
+frame .m \
+	-bg {linen} \
+	-borderwidth {4} \
+	-relief {groove} 
+
+menubutton .m.a -text "A" -relief {raise} -font $bfont -menu .m.a.menu -background navy -fg white
+
+menubutton .m.b -text "B" -relief {raise} -font $bfont -menu .m.b.menu -background navy -fg white
+
+menubutton .m.c -text "C" -relief {raise} -font $bfont -menu .m.c.menu -background navy -fg white
+
+menubutton .m.d -text "D" -relief {raise} -font $bfont -menu .m.d.menu -background navy -fg white
+
+menubutton .m.e -text "E" -relief {raise} -font $bfont -menu .m.e.menu -background navy -fg white
+
+menubutton .m.f -text "F" -relief {raise} -font $bfont -menu .m.f.menu -background navy -fg white
+
+menubutton .m.g -text "G" -relief {raise} -font $bfont -menu .m.g.menu -background navy -fg white
+
+menubutton .m.h -text "H" -relief {raise} -font $bfont -menu .m.h.menu -background navy -fg white
+
+menubutton .m.i -text "I" -relief {raise} -font $bfont -menu .m.i.menu -background navy -fg white
+
+menubutton .m.j -text "J" -relief {raise} -font $bfont -menu .m.j.menu -background navy -fg white
+
+menubutton .m.k -text "K" -relief {raise} -font $bfont -menu .m.k.menu -background navy -fg white
+
+menubutton .m.l -text "L" -relief {raise} -font $bfont -menu .m.l.menu -background navy -fg white
+
+menubutton .m.lm -text "M" -relief {raise} -font $bfont -menu .m.lm.menu -background navy -fg white
+
+menubutton .m.n -text "N" -relief {raise} -font $bfont -menu .m.n.menu -background navy -fg white
+
+menubutton .m.o -text "O" -relief {raise} -font $bfont -menu .m.o.menu -background navy -fg white
+
+menubutton .m.p -text "P" -relief {raise} -font $bfont -menu .m.p.menu -background navy -fg white
+
+menubutton .m.lq -text "Q" -relief {raise} -font $bfont -menu .m.lq.menu -background navy -fg white
+
+menubutton .m.r -text "R" -relief {raise} -font $bfont -menu .m.r.menu -background navy -fg white
+
+menubutton .m.s -text "S" -relief {raise} -font $bfont -menu .m.s.menu -background navy -fg white
+
+menubutton .m.t -text "T" -relief {raise} -font $bfont -menu .m.t.menu -background navy -fg white
+
+menubutton .m.u -text "U" -relief {raise} -font $bfont -menu .m.u.menu -background navy -fg white
+
+menubutton .m.v -text "V" -relief {raise} -font $bfont -menu .m.v.menu -background navy -fg white
+
+menubutton .m.w -text "W" -relief {raise} -font $bfont -menu .m.w.menu -background navy -fg white
+
+menubutton .m.x -text "X" -relief {raise} -font $bfont -menu .m.x.menu -background navy -fg white
+
+menubutton .m.y -text "Y" -relief {raise} -font $bfont -menu .m.y.menu -background navy -fg white
+
+menubutton .m.z -text "Z" -relief {raise} -font $bfont -menu .m.z.menu -background navy -fg white
+
+
+button .m.q -text Exit -relief {raise} -font $bfont -background red -fg black -command exit 
+
+# Main command entry area is under that
+entry .m.ent -relief {sunken} -bg linen -fg black
+pack .m.a .m.b .m.c .m.d .m.e .m.f .m.g .m.h .m.i \
+.m.j .m.k .m.l .m.lm .m.n .m.o .m.p .m.lq .m.r \
+.m.s .m.t .m.u .m.v .m.w .m.x .m.y .m.z .m.q \
+ -side left -fill both -expand 1
+
+pack .m -side top -fill x -expand 1
+
+# Build a text frame to display the log file.
+
+#bind .m.ent <Return> {Tools}
+# Put the focus into the box
+
+#focus .m.ent
+
+menu .m.a.menu  -background blue -fg white
+.m.a.menu add command -label antenna \
+-font $bfont -command {exec vueinfo help antenna &}
+.m.a.menu add command -label azeloff \
+-font $bfont -command {exec vueinfo help azeloff &}
+
+menu .m.b.menu  -background blue -fg white
+.m.b.menu add command -label bbc01  \
+-font $bfont -command {exec vueinfo help bbc01 &}
+.m.b.menu add command -label bbc02  \
+-font $bfont -command {exec vueinfo help bbc02 &}
+.m.b.menu add command -label bbc03  \
+-font $bfont -command {exec vueinfo help bbc03 &}
+.m.b.menu add command -label bbc04  \
+-font $bfont -command {exec vueinfo help bbc04 &}
+.m.b.menu add command -label bbc05  \
+-font $bfont -command {exec vueinfo help bbc05 &}
+.m.b.menu add command -label bbc06  \
+-font $bfont -command {exec vueinfo help bbc06 &}
+.m.b.menu add command -label bbc07  \
+-font $bfont -command {exec vueinfo help bbc07 &}
+.m.b.menu add command -label bbc08  \
+-font $bfont -command {exec vueinfo help bbc08 &}
+.m.b.menu add command -label bbc09  \
+-font $bfont -command {exec vueinfo help bbc09 &}
+.m.b.menu add command -label bbc10  \
+-font $bfont -command {exec vueinfo help bbc10 &}
+.m.b.menu add command -label bbc11  \
+-font $bfont -command {exec vueinfo help bbc11 &}
+.m.b.menu add command -label bbc12  \
+-font $bfont -command {exec vueinfo help bbc12 &}
+.m.b.menu add command -label bbc13  \
+-font $bfont -command {exec vueinfo help bbc13 &}
+.m.b.menu add command -label bbc14  \
+-font $bfont -command {exec vueinfo help bbc14 &}
+.m.b.menu add command -label bbcnn  \
+-font $bfont -command {exec vueinfo help bbcnn &}
+# beam
+.m.b.menu add command -label beam1  \
+-font $bfont -command {exec vueinfo help beam1 &}
+.m.b.menu add command -label beam2  \
+-font $bfont -command {exec vueinfo help beam2 &}
+.m.b.menu add command -label beam3  \
+-font $bfont -command {exec vueinfo help beam3 &}
+.m.b.menu add command -label beam5  \
+-font $bfont -command {exec vueinfo help beam5 &}
+.m.b.menu add command -label beam6  \
+-font $bfont -command {exec vueinfo help beam6 &}
+.m.b.menu add command -label beama  \
+-font $bfont -command {exec vueinfo help beama &}
+.m.b.menu add command -label beamb  \
+-font $bfont -command {exec vueinfo help beamb &}
+.m.b.menu add command -label beamc  \
+-font $bfont -command {exec vueinfo help beamc &}
+.m.b.menu add command -label beamd  \
+-font $bfont -command {exec vueinfo help beamd &}
+
+# bit_density
+.m.b.menu add command -label bit_density  \
+-font $bfont -command {exec vueinfo help bit_density &}
+.m.b.menu add command -label bit_density1  \
+-font $bfont -command {exec vueinfo help bit_density1 &}
+.m.b.menu add command -label bit_density2  \
+-font $bfont -command {exec vueinfo help bit_density2 &}
+.m.b.menu add command -label break  \
+-font $bfont -command {exec vueinfo help break &}
+
+
+menu .m.c.menu  -background blue -fg white
+.m.c.menu add command -label cable  \
+-font $bfont -command {exec vueinfo help cable &}
+.m.c.menu add command -label cal  \
+-font $bfont -command {exec vueinfo help cal &}
+.m.c.menu add command -label caltemp  \
+-font $bfont -command {exec vueinfo help caltemp &}
+.m.c.menu add command -label caltemp1  \
+-font $bfont -command {exec vueinfo help caltemp1 &}
+.m.c.menu add command -label caltemp2  \
+-font $bfont -command {exec vueinfo help caltemp2 &}
+.m.c.menu add command -label caltemp3  \
+-font $bfont -command {exec vueinfo help caltemp3 &}
+.m.c.menu add command -label caltemp5  \
+-font $bfont -command {exec vueinfo help caltemp5 &}
+.m.c.menu add command -label caltemp6  \
+-font $bfont -command {exec vueinfo help caltemp6 &}
+.m.c.menu add command -label caltempa  \
+-font $bfont -command {exec vueinfo help caltempa &}
+.m.c.menu add command -label caltempb  \
+-font $bfont -command {exec vueinfo help caltempb &}
+.m.c.menu add command -label caltempc  \
+-font $bfont -command {exec vueinfo help caltempc &}
+.m.c.menu add command -label caltempd  \
+-font $bfont -command {exec vueinfo help caltempd &}
+
+.m.c.menu add command -label check  \
+-font $bfont -command {exec vueinfo help check &}
+.m.c.menu add command -label cont  \
+-font $bfont -command {exec vueinfo help cont &}
+
+menu .m.d.menu  -background blue -fg white
+.m.d.menu add command -label data_valid  \
+-font $bfont -command {exec vueinfo help data_valid &}
+.m.d.menu add command -label date \
+-font $bfont -command {exec vueinfo help date &}
+.m.d.menu add command -label decode \
+-font $bfont -command {exec vueinfo help decode &}
+.m.d.menu add command -label decode4 \
+-font $bfont -command {exec vueinfo help decode4 &}
+.m.d.menu add command -label dqa \
+-font $bfont -command {exec vueinfo help dqa &}
+
+menu .m.e.menu  -background blue -fg white
+.m.e.menu add command -label echo \
+-font $bfont -command {exec vueinfo help echo &}
+.m.e.menu add command -label enable \
+-font $bfont -command {exec vueinfo help enable &}
+.m.e.menu add command -label enable1 \
+-font $bfont -command {exec vueinfo help enable1 &}
+.m.e.menu add command -label enable2 \
+-font $bfont -command {exec vueinfo help enable2 &}
+.m.e.menu add command -label enable2 \
+-font $bfont -command {exec vueinfo help enable2 &}
+.m.e.menu add command -label et \
+-font $bfont -command {exec vueinfo help et &}
+.m.e.menu add command -label et1 \
+-font $bfont -command {exec vueinfo help et1 &}
+.m.e.menu add command -label et2 \
+-font $bfont -command {exec vueinfo help et2 &}
+
+menu .m.f.menu  -background blue -fg white
+.m.f.menu add command -label ff \
+-font $bfont -command {exec vueinfo help ff &}
+.m.f.menu add command -label ff1 \
+-font $bfont -command {exec vueinfo help ff1 &}
+.m.f.menu add command -label ff2 \
+-font $bfont -command {exec vueinfo help ff2 &}
+.m.f.menu add command -label fivept \
+-font $bfont -command {exec vueinfo help fivept &}
+.m.f.menu add command -label flush \
+-font $bfont -command {exec vueinfo help flush &}
+.m.f.menu add command -label flux \
+-font $bfont -command {exec vueinfo help flux &}
+.m.f.menu add command -label flux1 \
+-font $bfont -command {exec vueinfo help flux1 &}
+.m.f.menu add command -label flux2 \
+-font $bfont -command {exec vueinfo help flux2 &}
+.m.f.menu add command -label flux3 \
+-font $bfont -command {exec vueinfo help flux3 &}
+.m.f.menu add command -label flux5 \
+-font $bfont -command {exec vueinfo help flux5 &}
+.m.f.menu add command -label flux6 \
+-font $bfont -command {exec vueinfo help flux6 &}
+.m.f.menu add command -label fluxa \
+-font $bfont -command {exec vueinfo help fluxa &}
+.m.f.menu add command -label fluxb \
+-font $bfont -command {exec vueinfo help fluxb &}
+.m.f.menu add command -label fluxc \
+-font $bfont -command {exec vueinfo help fluxc &}
+.m.f.menu add command -label fluxd \
+-font $bfont -command {exec vueinfo help fluxd &}
+.m.f.menu add command -label form \
+-font $bfont -command {exec vueinfo help form &}
+.m.f.menu add command -label form4 \
+-font $bfont -command {exec vueinfo help form4 &}
+.m.f.menu add command -label fsversion \
+-font $bfont -command {exec vueinfo help fsversion &}
+
+menu .m.g.menu  -background blue -fg white
+.m.g.menu add command -label "No G's" \
+-font $bfont -command {}
+
+menu .m.h.menu  -background blue -fg white
+.m.h.menu add command -label halt \
+-font $bfont -command {exec vueinfo help halt &}
+.m.h.menu add command -label hdata \
+-font $bfont -command {exec vueinfo help hdata &}
+.m.h.menu add command -label hdata1 \
+-font $bfont -command {exec vueinfo help hdata1 &}
+.m.h.menu add command -label hdcalc \
+-font $bfont -command {exec vueinfo help hdcalc &}
+.m.h.menu add command -label hdcalc1 \
+-font $bfont -command {exec vueinfo help hdcalc1 &}
+.m.h.menu add command -label hdcalc2 \
+-font $bfont -command {exec vueinfo help hdcalc2 &}
+.m.h.menu add command -label hecho \
+-font $bfont -command {exec vueinfo help hecho &}
+.m.h.menu add command -label hecho1 \
+-font $bfont -command {exec vueinfo help hecho1 &}
+.m.h.menu add command -label hecho2 \
+-font $bfont -command {exec vueinfo help hecho2 &}
+.m.h.menu add command -label help \
+-font $bfont -command {exec vueinfo help help &}
+.m.h.menu add command -label hpib \
+-font $bfont -command {exec vueinfo help hpib &}
+
+menu .m.i.menu  -background blue -fg white
+.m.i.menu add command -label if3 \
+-font $bfont -command {exec vueinfo help if3 &}
+.m.i.menu add command -label ifadjust \
+-font $bfont -command {exec vueinfo help ifadjust &}
+.m.i.menu add command -label ifd \
+-font $bfont -command {exec vueinfo help ifd &}
+.m.i.menu add command -label ifdab \
+-font $bfont -command {exec vueinfo help ifdab &}
+.m.i.menu add command -label ifdcd \
+-font $bfont -command {exec vueinfo help ifdcd &}
+
+menu .m.j.menu  -background blue -fg white
+.m.j.menu add command -label "No J's" \
+-font $bfont -command {}
+
+menu .m.k.menu  -background blue -fg white
+.m.k.menu add command -label k4ib \
+-font $bfont -command {exec vueinfo help k4ib &}
+.m.k.menu add command -label k4pcalports \
+-font $bfont -command {exec vueinfo help k4pcalports &}
+
+menu .m.l.menu  -background blue -fg white
+.m.l.menu add command -label label \
+-font $bfont -command {exec vueinfo help label &}
+.m.l.menu add command -label label1 \
+-font $bfont -command {exec vueinfo help label1 &}
+.m.l.menu add command -label label2 \
+-font $bfont -command {exec vueinfo help label2 &}
+.m.l.menu add command -label list \
+-font $bfont -command {exec vueinfo help list &}
+.m.l.menu add command -label lo \
+-font $bfont -command {exec vueinfo help lo &}
+.m.l.menu add command -label locate \
+-font $bfont -command {exec vueinfo help locate &}
+.m.l.menu add command -label locate1 \
+-font $bfont -command {exec vueinfo help locate1 &}
+.m.l.menu add command -label locate2 \
+-font $bfont -command {exec vueinfo help locate2 &}
+.m.l.menu add command -label log \
+-font $bfont -command {exec vueinfo help log &}
+.m.l.menu add command -label logout \
+-font $bfont -command {exec vueinfo help logout &}
+.m.l.menu add command -label lvdt \
+-font $bfont -command {exec vueinfo help lvdt &}
+.m.l.menu add command -label lvdt1 \
+-font $bfont -command {exec vueinfo help lvdt1 &}
+.m.l.menu add command -label lvdt2 \
+-font $bfont -command {exec vueinfo help lvdt2 &}
+
+menu .m.lm.menu  -background blue -fg white
+.m.lm.menu add command -label mat \
+-font $bfont -command {exec vueinfo help mat &}
+.m.lm.menu add command -label matLOAD \
+-font $bfont -command {exec vueinfo help matLOAD &}
+.m.lm.menu add command -label mcb \
+-font $bfont -command {exec vueinfo help mcb &}
+.m.lm.menu add command -label mount \
+-font $bfont -command {exec vueinfo help mount &}
+.m.lm.menu add command -label mount1 \
+-font $bfont -command {exec vueinfo help mount1 &}
+.m.lm.menu add command -label mount2 \
+-font $bfont -command {exec vueinfo help mount2 &}
+
+menu .m.n.menu  -background blue -fg white
+.m.n.menu add command -label newtape \
+-font $bfont -command {exec vueinfo help newtape &}
+.m.n.menu add command -label newtape1 \
+-font $bfont -command {exec vueinfo help newtape1 &}
+.m.n.menu add command -label newtape2 \
+-font $bfont -command {exec vueinfo help newtape2 &}
+
+menu .m.o.menu  -background blue -fg white
+.m.o.menu add command -label oldtape \
+-font $bfont -command {exec vueinfo help oldtape &}
+.m.o.menu add command -label oldtape1 \
+-font $bfont -command {exec vueinfo help oldtape1 &}
+.m.o.menu add command -label onoff \
+-font $bfont -command {exec vueinfo help onoff &}
+.m.o.menu add command -label onsource \
+-font $bfont -command {exec vueinfo help onsource &}
+.m.o.menu add command -label op \
+-font $bfont -command {exec vueinfo help op &}
+.m.o.menu add command -label op_stream \
+-font $bfont -command {exec vueinfo help op_stream &}
+
+menu .m.p.menu  -background blue -fg white
+.m.p.menu add command -label parity \
+-font $bfont -command {exec vueinfo help parity &}
+.m.p.menu add command -label parity1 \
+-font $bfont -command {exec vueinfo help parity1 &}
+.m.p.menu add command -label parity2 \
+-font $bfont -command {exec vueinfo help parity2 &}
+.m.p.menu add command -label pass \
+-font $bfont -command {exec vueinfo help pass &}
+.m.p.menu add command -label pass1 \
+-font $bfont -command {exec vueinfo help pass1 &}
+.m.p.menu add command -label pass2 \
+-font $bfont -command {exec vueinfo help pass2 &}
+.m.p.menu add command -label patch \
+-font $bfont -command {exec vueinfo help patch &}
+.m.p.menu add command -label pcal \
+-font $bfont -command {exec vueinfo help pcal &}
+.m.p.menu add command -label pcal1 \
+-font $bfont -command {exec vueinfo help pcal1 &}
+.m.p.menu add command -label pcal2 \
+-font $bfont -command {exec vueinfo help pcal2 &}
+.m.p.menu add command -label pcald \
+-font $bfont -command {exec vueinfo help pcald &}
+.m.p.menu add command -label pcalform \
+-font $bfont -command {exec vueinfo help pcalform &}
+.m.p.menu add command -label pcalports \
+-font $bfont -command {exec vueinfo help pcalports &}
+.m.p.menu add command -label peak \
+-font $bfont -command {exec vueinfo help peak &}
+.m.p.menu add command -label peak1 \
+-font $bfont -command {exec vueinfo help peak1 &}
+.m.p.menu add command -label peak2 \
+-font $bfont -command {exec vueinfo help peak2 &}
+.m.p.menu add command -label perr \
+-font $bfont -command {exec vueinfo help perr &}
+.m.p.menu add command -label perr1 \
+-font $bfont -command {exec vueinfo help perr1 &}
+.m.p.menu add command -label perr2 \
+-font $bfont -command {exec vueinfo help perr2 &}
+.m.p.menu add command -label proc \
+-font $bfont -command {exec vueinfo help proc &}
+
+menu .m.lq.menu  -background blue -fg white
+.m.lq.menu add command -label "No Q's" \
+-font $bfont -command {}
+
+menu .m.r.menu  -background blue -fg white
+.m.r.menu add command -label radecoff \
+-font $bfont -command {exec vueinfo help radecoff &}
+.m.r.menu add command -label rcl \
+-font $bfont -command {exec vueinfo help rcl &}
+.m.r.menu add command -label rec \
+-font $bfont -command {exec vueinfo help rec &}
+.m.r.menu add command -label rec1 \
+-font $bfont -command {exec vueinfo help rec1 &}
+.m.r.menu add command -label rec2 \
+-font $bfont -command {exec vueinfo help rec2 &}
+.m.r.menu add command -label rec_mode \
+-font $bfont -command {exec vueinfo help rec_mode &}
+.m.r.menu add command -label rec_mode1 \
+-font $bfont -command {exec vueinfo help rec_mode1 &}
+.m.r.menu add command -label recpatch \
+-font $bfont -command {exec vueinfo help recpatch &}
+.m.r.menu add command -label recpatch1 \
+-font $bfont -command {exec vueinfo help recpatch1 &}
+.m.r.menu add command -label recpro \
+-font $bfont -command {exec vueinfo help recpro &}
+.m.r.menu add command -label recpro1 \
+-font $bfont -command {exec vueinfo help recpro1 &}
+.m.r.menu add command -label recpro2 \
+-font $bfont -command {exec vueinfo help recpro2 &}
+.m.r.menu add command -label reset \
+-font $bfont -command {exec vueinfo help reset &}
+.m.r.menu add command -label revac \
+-font $bfont -command {exec vueinfo help revac &}
+.m.r.menu add command -label revac1 \
+-font $bfont -command {exec vueinfo help revac1 &}
+.m.r.menu add command -label revac2 \
+-font $bfont -command {exec vueinfo help revac2 &}
+.m.r.menu add command -label rew \
+-font $bfont -command {exec vueinfo help rew &}
+.m.r.menu add command -label rew1 \
+-font $bfont -command {exec vueinfo help rew1 &}
+.m.r.menu add command -label rew2 \
+-font $bfont -command {exec vueinfo help rew2 &}
+.m.r.menu add command -label rx \
+-font $bfont -command {exec vueinfo help rx &}
+
+menu .m.s.menu  -background blue -fg white
+.m.s.menu add command -label savev \
+-font $bfont -command {exec vueinfo help savev &}
+.m.s.menu add command -label savev1 \
+-font $bfont -command {exec vueinfo help savev1 &}
+.m.s.menu add command -label savev2 \
+-font $bfont -command {exec vueinfo help savev2 &}
+.m.s.menu add command -label scan_name \
+-font $bfont -command {exec vueinfo help scan_name &}
+.m.s.menu add command -label schedule \
+-font $bfont -command {exec vueinfo help schedule &}
+.m.s.menu add command -label select \
+-font $bfont -command {exec vueinfo help select &}
+.m.s.menu add command -label sff \
+-font $bfont -command {exec vueinfo help sff &}
+.m.s.menu add command -label sff1 \
+-font $bfont -command {exec vueinfo help sff1 &}
+.m.s.menu add command -label sff2 \
+-font $bfont -command {exec vueinfo help sff2 &}
+.m.s.menu add command -label source \
+-font $bfont -command {exec vueinfo help source &}
+.m.s.menu add command -label sw \
+-font $bfont -command {exec vueinfo help sw &}
+.m.s.menu add command -label sw1 \
+-font $bfont -command {exec vueinfo help sw1 &}
+.m.s.menu add command -label sw2 \
+-font $bfont -command {exec vueinfo help sw2 &}
+.m.s.menu add command -label st \
+-font $bfont -command {exec vueinfo help st &}
+.m.s.menu add command -label st1 \
+-font $bfont -command {exec vueinfo help st1 &}
+.m.s.menu add command -label st2 \
+-font $bfont -command {exec vueinfo help st2 &}
+.m.s.menu add command -label stack \
+-font $bfont -command {exec vueinfo help stack &}
+.m.s.menu add command -label stack1 \
+-font $bfont -command {exec vueinfo help stack1 &}
+.m.s.menu add command -label stack2 \
+-font $bfont -command {exec vueinfo help stack2 &}
+.m.s.menu add command -label status \
+-font $bfont -command {exec vueinfo help status &}
+.m.s.menu add command -label sy \
+-font $bfont -command {exec vueinfo help sy &}
+.m.s.menu add command -label systracks \
+-font $bfont -command {exec vueinfo help systracks &}
+.m.s.menu add command -label systracks1 \
+-font $bfont -command {exec vueinfo help systracks1 &}
+.m.s.menu add command -label systracks2 \
+-font $bfont -command {exec vueinfo help systracks2 &}
+
+menu .m.t.menu  -background blue -fg white
+.m.t.menu add command -label tacd \
+-font $bfont -command {exec vueinfo help tacd &}
+.m.t.menu add command -label tape \
+-font $bfont -command {exec vueinfo help tape1 &}
+.m.t.menu add command -label tape1 \
+-font $bfont -command {exec vueinfo help tape1 &}
+.m.t.menu add command -label tape2 \
+-font $bfont -command {exec vueinfo help tape2 &}
+.m.t.menu add command -label tapeform \
+-font $bfont -command {exec vueinfo help tapeform &}
+.m.t.menu add command -label tapeform1 \
+-font $bfont -command {exec vueinfo help tapeform1 &}
+.m.t.menu add command -label tapeform2 \
+-font $bfont -command {exec vueinfo help tapeform2 &}
+.m.t.menu add command -label tapepos \
+-font $bfont -command {exec vueinfo help tapepos &}
+.m.t.menu add command -label tapepos1 \
+-font $bfont -command {exec vueinfo help tapepos1 &}
+.m.t.menu add command -label tapepos2 \
+-font $bfont -command {exec vueinfo help tapepos2 &}
+.m.t.menu add command -label terminate \
+-font $bfont -command {exec vueinfo help terminate &}
+.m.t.menu add command -label ti \
+-font $bfont -command {exec vueinfo help ti &}
+.m.t.menu add command -label tnx \
+-font $bfont -command {exec vueinfo help tnx &}
+.m.t.menu add command -label tpi \
+-font $bfont -command {exec vueinfo help tpi &}
+.m.t.menu add command -label tpical \
+-font $bfont -command {exec vueinfo help tpical &}
+.m.t.menu add command -label tpzero \
+-font $bfont -command {exec vueinfo help tpzero &}
+.m.t.menu add command -label track \
+-font $bfont -command {exec vueinfo help track &}
+.m.t.menu add command -label trackform \
+-font $bfont -command {exec vueinfo help trackform &}
+.m.t.menu add command -label tracks \
+-font $bfont -command {exec vueinfo help tracks &}
+.m.t.menu add command -label tsys \
+-font $bfont -command {exec vueinfo help tsys &}
+.m.t.menu add command -label tsys1 \
+-font $bfont -command {exec vueinfo help tsys1 &}
+.m.t.menu add command -label tsys2 \
+-font $bfont -command {exec vueinfo help tsys2 &}
+.m.t.menu add command -label tsys3 \
+-font $bfont -command {exec vueinfo help tsys3 &}
+.m.t.menu add command -label tsysa \
+-font $bfont -command {exec vueinfo help tsysa &}
+.m.t.menu add command -label tsysb \
+-font $bfont -command {exec vueinfo help tsysb &}
+.m.t.menu add command -label tsysc \
+-font $bfont -command {exec vueinfo help tsysc &}
+.m.t.menu add command -label tsysd \
+-font $bfont -command {exec vueinfo help tsysd &}
+
+menu .m.u.menu  -background blue -fg white
+.m.u.menu add command -label user_info \
+-font $bfont -command {exec vueinfo help user_info &}
+.m.u.menu add command -label user_info1 \
+-font $bfont -command {exec vueinfo help user_info1 &}
+
+menu .m.v.menu  -background blue -fg white
+.m.v.menu add command -label vc01 \
+-font $bfont -command {exec vueinfo help vc01 &}
+.m.v.menu add command -label vc02 \
+-font $bfont -command {exec vueinfo help vc02 &}
+.m.v.menu add command -label vc03 \
+-font $bfont -command {exec vueinfo help vc03 &}
+.m.v.menu add command -label vc04 \
+-font $bfont -command {exec vueinfo help vc04 &}
+.m.v.menu add command -label vc05 \
+-font $bfont -command {exec vueinfo help vc05 &}
+.m.v.menu add command -label vc06 \
+-font $bfont -command {exec vueinfo help vc06 &}
+.m.v.menu add command -label vc07 \
+-font $bfont -command {exec vueinfo help vc07 &}
+.m.v.menu add command -label vc08 \
+-font $bfont -command {exec vueinfo help vc08 &}
+.m.v.menu add command -label vc09 \
+-font $bfont -command {exec vueinfo help vc09 &}
+.m.v.menu add command -label vc10 \
+-font $bfont -command {exec vueinfo help vc10 &}
+.m.v.menu add command -label vc11 \
+-font $bfont -command {exec vueinfo help vc11 &}
+.m.v.menu add command -label vc12 \
+-font $bfont -command {exec vueinfo help vc12 &}
+.m.v.menu add command -label vc13 \
+-font $bfont -command {exec vueinfo help vc13 &}
+.m.v.menu add command -label vc14 \
+-font $bfont -command {exec vueinfo help vc14 &}
+.m.v.menu add command -label vcnn \
+-font $bfont -command {exec vueinfo help vcnn &}
+.m.v.menu add command -label vx \
+-font $bfont -command {exec vueinfo help vx &}
+.m.v.menu add command -label vxlo \
+-font $bfont -command {exec vueinfo help vxlo &}
+
+menu .m.w.menu  -background blue -fg white
+.m.w.menu add command -label wakeup \
+-font $bfont -command {exec vueinfo help wakeup &}
+.m.w.menu add command -label worm \
+-font $bfont -command {exec vueinfo help worm &}
+.m.w.menu add command -label worm1 \
+-font $bfont -command {exec vueinfo help worm1 &}
+.m.w.menu add command -label worm2 \
+-font $bfont -command {exec vueinfo help worm2 &}
+.m.w.menu add command -label wvolt \
+-font $bfont -command {exec vueinfo help wvolt &}
+.m.w.menu add command -label wvolt1 \
+-font $bfont -command {exec vueinfo help wvolt1 &}
+.m.w.menu add command -label wvolt2 \
+-font $bfont -command {exec vueinfo help wvolt2 &}
+.m.w.menu add command -label wx \
+-font $bfont -command {exec vueinfo help wx &}
+
+menu .m.x.menu  -background blue -fg white
+.m.x.menu add command -label xdisp \
+-font $bfont -command {exec vueinfo help xdisp &}
+.m.x.menu add command -label xlog \
+-font $bfont -command {exec vueinfo help xlog &}
+.m.x.menu add command -label xyoff \
+-font $bfont -command {exec vueinfo help xyoff &}
+
+menu .m.y.menu  -background blue -fg white
+.m.y.menu add command -label "No Y's" \
+-font $bfont -command {}
+
+menu .m.z.menu  -background blue -fg white
+.m.z.menu add command -label "No Z's" \
+-font $bfont -command {}
+

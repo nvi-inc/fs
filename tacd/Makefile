@@ -5,7 +5,7 @@
 LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a -lm
 #
 OBJECTS = \
-tacd.o tacd_srv.o parse_it.o
+tacd.o tacd_srv.o
 #
 ../bin/tacd: $(OBJECTS)
 	$(CC)  -o ../bin/tacd $(OBJECTS) $(LIBES) $(GPIB_LIBS)
