@@ -17,6 +17,7 @@ struct skd_buf {
 	    long    ip[5];
 	    long    rtype;
 	    int     dad;
+	    int timed_out;
 	    char arg[MAX_BUF+1];
         } messg;
 
@@ -30,11 +31,15 @@ static long save_ip[5];
 static char arg[MAX_BUF+1];
 static char *argv[(MAX_BUF+1)/2];
 static int  argc = -1;
+static long wait_rtype=0;
+static long ipr[5] = { 0, 0, 0, 0, 0};
 
 static long mtype();
 static void nullfcn();
+static void skd_end_to();
 void skd_end();
-void skd_run_arg_cls( char *name, char w, long ip[5], char *arg, char nsem[6]);
+static skd_run_arg_cls_to(char *name, char w, long ip[5], char *arg,
+		       char nsem[6],unsigned to);
 
 int skd_get( key, size)
 key_t key;
@@ -109,9 +114,7 @@ long    *iclass;
 char	*buffer;	/* contains message for process */
 int	length;	/* length of buffer in bytes */
 {
-  char arg[]= "";
   char insnp[]="insnp";
-  static long ipr[5] = { 0, 0, 0, 0, 0};
 
   if(*iclass==0)
     return;
@@ -121,7 +124,7 @@ int	length;	/* length of buffer in bytes */
   /* Execute this SNAP command via "boss". */
   
   cls_snd( iclass, buffer, length, 0, 1);
-  skd_run_arg_cls("boss ",'w',ipr,arg,insnp);
+  skd_run_arg_cls_to("boss ",'w',ipr,(char *) NULL,insnp,(unsigned) 0);
 
 
 }
@@ -129,59 +132,80 @@ void skd_run( name, w, ip)
 char    name[5], w;
 long    ip[5];
 {
-	    void skd_run_arg();
-	    char arg[]= "";
-	    
-	    skd_run_arg_cls( name, w, ip, arg, (char *) NULL);
+  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL, (unsigned) 0);
 }
+
 void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
 long	ip[5];
-
 {
-	    skd_run_arg_cls( name, w, ip, arg, NULL);
-
+  skd_run_arg_cls_to( name, w, ip, arg, NULL,(unsigned) 0);
 }
 
-void skd_run_arg_cls( name, w, ip, arg, nsem)
+int skd_run_to( name, w, ip, to)
+char    name[5], w;
+long    ip[5];
+unsigned to;
+{  
+  return skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL, to);
+}
+
+static skd_run_arg_cls_to( name, w, ip, arg, nsem,to)
 char	name[5], w, *arg;	
 long	ip[5];
 char nsem[6];
+unsigned to;
 {
 int	status, i, n;
 struct skd_buf sched;
 
-sched.mtype=mtype(name);
+ if( w == 'w') sched.messg.rtype=(1<<30)|getpid();
+ else          sched.messg.rtype=0;
+ 
+if(name!=NULL) {
+   sched.mtype=mtype(name);
+   
+   for (i=0;i<5;i++) {
+     sched.messg.ip[i]=ip[i];
+   }
+   
+   sched.messg.dad=getpid();
 
-for (i=0;i<5;i++) {
-   sched.messg.ip[i]=ip[i];
-}
-if( w == 'w') sched.messg.rtype=(1<<30)|getpid();
-else          sched.messg.rtype=0;
+   if(arg==NULL)
+     arg="";
 
-sched.messg.dad=getpid();
-
-n=strlen(arg)+1;
-n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
-strncpy(sched.messg.arg,arg,n);
-
-waits:
-status = msgsnd(msqid, (struct msgbuf *) &sched,
+   n=strlen(arg)+1;
+   n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
+   strncpy(sched.messg.arg,arg,n);
+   
+ waits:
+   status = msgsnd(msqid, (struct msgbuf *) &sched,
 		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1), 0 );
 
-if (status == -1) {
-  if(errno == EINTR)
-    goto waits;
-  else {
-    fprintf( stderr,"skd_run: msqid %d,",msqid);
-    perror(" sending schedule message");
-    exit( -1);
-  }
-}
+   if (status == -1) {
+     if(errno == EINTR)
+       goto waits;
+     else {
+       fprintf( stderr,"skd_run: msqid %d,",msqid);
+       perror(" sending schedule message");
+       exit( -1);
+     }
+   }
+ }
+
 if(nsem!=NULL && nsem[0]!=0)
   nsem_put(nsem);
 
 if(w != 'w') return;
+
+ if(to !=0) {
+   if(signal(SIGALRM,nullfcn) == SIG_ERR){
+     fprintf( stderr,"skd_wait: setting up signals\n");
+     exit(-1);
+   }
+   wait_rtype=sched.messg.rtype;
+   rte_alarm( to);
+ }
 
 waitr:
 status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
@@ -196,9 +220,20 @@ if(status == -1) {
   }
 }
 
-for (i=0;i<5;i++)
-    save_ip[i]=sched.messg.ip[i];
+ if (to !=0) {
+   rte_alarm((unsigned) 0);
+   if(signal(SIGALRM,SIG_DFL) == SIG_ERR){
+     fprintf( stderr,"skd_wait: setting default signals\n");
+     exit(-1);
+   }
+   to=0;
+   }
 
+ for (i=0;i<5;i++)
+   save_ip[i]=sched.messg.ip[i];
+
+ return sched.messg.timed_out;
+ 
 }
 void skd_par( ip)
 long ip[5];
@@ -427,17 +462,27 @@ strcpy(arg,sched.messg.arg);
 argc=-1;
 
 }
+
 void skd_end(ip)
 long ip[5];
+{
+  skd_end_to(ip,&rtype,0);
+}
+
+static void skd_end_to(ip,rtype_in,timed_out)
+long ip[5];
+long *rtype_in;
+int timed_out;
 {
   int i, status;
   struct skd_buf sched;
 
-  if( rtype != 0) {
+  if( *rtype_in != 0) {
     for (i=0;i<5;i++) {
       sched.messg.ip[i]=ip[i];
     }
-    sched.mtype=rtype;
+    sched.messg.timed_out=timed_out;
+    sched.mtype=*rtype_in;
   waits:
     status = msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		      0 );
@@ -445,11 +490,11 @@ long ip[5];
       if(errno == EINTR)
 	goto waits;
       else {
-	perror("skd_end: sending termination message");
+	perror("skd_end_to: sending termination message");
 	exit( -1);
       }
     }
-    rtype = 0;
+    *rtype_in = 0;
   }
 }
 void skd_clr( name)
@@ -504,7 +549,6 @@ char name[5];
 static void nullfcn(sig)
 int sig;
 {
-    long ip[5];
     int i;
     void skd_run();
 
@@ -512,9 +556,11 @@ int sig;
       perror("nullfcn: error ignoring signal");
       exit(-1);
     }
-    for (i=0;i<5;i++) ip[i]=0;
 
-    skd_run(prog_name,'n',ip);
+    if(wait_rtype==0)
+      skd_run(prog_name,'n',ipr);
+    else
+      skd_end_to(ipr,&wait_rtype,1);
 
     return;
 }
