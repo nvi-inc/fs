@@ -1,13 +1,3 @@
-define  check2a1      00000000000
-check2c1
-enddef
-define  check2a2      00000000000
-check2c2
-enddef
-define  check2c1      00000000000
-enddef
-define  check2c2      00000000000
-enddef
 define  fastf         00000000000
 ff
 !+$
