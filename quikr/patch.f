@@ -65,10 +65,6 @@ C
         call padis(ip,iclcm)
         return
       endif
-      if (ieq.eq.nchar) then
-        ip(3) = -101
-        return
-      endif
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
         ip(4) = o'77'
@@ -86,7 +82,13 @@ C     2.1 FIRST PARM, LO NUMBER
 C
       ich = 1+ieq
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
-      if (cjchar(parm,1).eq.',' .or. ichcm_ch(parm,1,'lo').ne.0) then
+      if (cjchar(parm,1).eq.',') then
+         do i=1,14
+            ifp2vc(i) = 0
+         enddo
+        call fs_set_ifp2vc(ifp2vc)
+        return
+      else if(ichcm_ch(parm,1,'lo').ne.0) then
         ip(3) = -201
       else
         ichnl = ias2b(parm,3,1)
