@@ -9,15 +9,13 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
-
 void vst(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
 long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
-      int verr;
+      int verr, indx;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
@@ -37,7 +35,13 @@ long ip[5];                           /* ipc parameters */
 
       ini_req(&buffer);
 
-      memcpy(request.device,device,2);    /* device mnemonic */
+      indx=itask-1;                    /* index for this module */
+
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
+
 
       if (command->equal != '=') {            /* read module */
          request.type=1;
@@ -48,7 +52,7 @@ long ip[5];                           /* ipc parameters */
       else if (command->argv[0]==NULL) goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
         if (*command->argv[0]=='?') {
-          vst_dis(command,ip);
+          vst_dis(command,ip,indx);
           return;
          }
 
@@ -60,39 +64,41 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=vst_dec(&lcl,&count, ptr);
+        ierr=vst_dec(&lcl,&count, ptr,indx);
         if(ierr !=0 ) goto error;
       }
 
 /*  check for vacuum */
 
       end_req(ip,&buffer); 
-      verr=0;
-      lerr=0;
-      verr = vacuum(&lerr);
-      if (verr<0) {
-        /* vacuum not ready (-1) or other error (-2) */
-        ierr = verr;
-        goto error;
-      } else if (lerr!=0) { 
-        /* error trying to read recorder */
-        ierr = lerr;
-        goto error;
+      if(lcl.speed!=-3 && lcl.cips !=0) {
+	verr=0;
+	lerr=0;
+	verr = vacuum(&lerr,indx);
+	if (verr<0) {
+	  /* vacuum not ready (-1) or other error (-2) */
+	  ierr = verr;
+	  goto error;
+	} else if (lerr!=0) { 
+	  /* error trying to read recorder */
+	  ierr = lerr;
+	  goto error;
+	}
       }
 
       ini_req(&buffer);
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
+      ichold=shm_addr->check.rec[indx];
+      shm_addr->check.rec[indx]=0;
 
-      shm_addr->ispeed=lcl.speed;
-      shm_addr->cips=lcl.cips;
+      shm_addr->ispeed[indx]=lcl.speed;
+      shm_addr->cips[indx]=lcl.cips;
 
-      memcpy(&lcv,&shm_addr->venable,sizeof(lcv));
+      memcpy(&lcv,&shm_addr->venable[indx],sizeof(lcv));
       lcv.general=lcl.rec;                  /* turn record off or on */
-      shm_addr->venable.general=lcv.general;
+      shm_addr->venable[indx].general=lcv.general;
 
 /* if MK4 FM control record */
 
@@ -119,7 +125,14 @@ parse:
 
       request.addr=0xb1;
       vstb1mc(&request.data,&lcl); add_req(&buffer,&request);
-      shm_addr->idirtp=lcl.dir;
+      shm_addr->idirtp[indx]=lcl.dir;
+
+      if(lcl.cips <500 && shm_addr->equip.drive[indx] == VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2) {
+	request.addr=0xb0;
+	request.data=0x01;
+	add_req(&buffer,&request);
+      }
 
 mcbcn:
       end_req(ip,&buffer);
@@ -127,15 +140,15 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-         shm_addr->check.vkmove = TRUE;
-         rte_rawt(&shm_addr->check.rc_mv_tm);
+         shm_addr->check.vkmove[indx] = TRUE;
+         rte_rawt(shm_addr->check.rc_mv_tm+indx);
          if (ichold >= 0)
             ichold=ichold % 1000 + 1;
-         shm_addr->check.rec=ichold;
+         shm_addr->check.rec[indx]=ichold;
       }
 
       if(ip[2]<0) return;
-      vst_dis(command,ip);
+      vst_dis(command,ip,indx);
       return;
 
 error:
