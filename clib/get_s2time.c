@@ -3,18 +3,16 @@
 #include <stdio.h>
 #include <sys/types.h>   /* data type definition header file */
 
-#undef TRUE
-#undef FALSE
-
 #include "../rclco/rcl/rcl_def.h"
 #include "../include/fs_types.h"
 
 void skd_run();
 void skd_par();
 
-void get_s2time(centisec,it,ip)
+void get_s2time(centisec,it,nanosec,ip)
 long centisec[2];
 int it[6];
+long *nanosec;
 long ip[5];                          /* ipc array */
 {
   int ierr;
@@ -24,6 +22,7 @@ long ip[5];                          /* ipc array */
   ibool validated;
 
   ini_rclcn_req(&reqbuf);
+  add_rclcn_delaym_read(&reqbuf,"rc");
   add_rclcn_time_read(&reqbuf,"rc");
   end_rclcn_req(ip,&reqbuf);
 
@@ -37,7 +36,15 @@ long ip[5];                          /* ipc array */
   }
   opn_rclcn_res(&resbuf,ip);
 
-  ierr=get_rclcn_time_read(&resbuf,&year,&day,&hour,&min,&sec,
+  ierr=get_rclcn_delaym_read(&resbuf,nanosec);
+
+  if(ierr!=0) {
+    clr_rclcn_res(&resbuf);
+    ip[2]=ierr;
+    return;
+  }
+
+ ierr=get_rclcn_time_read(&resbuf,&year,&day,&hour,&min,&sec,
 			   &validated,centisec);
   clr_rclcn_res(&resbuf);
   if(ierr!=0) {
