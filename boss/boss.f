@@ -31,5 +31,6 @@ C
 
 C  HARI-KIRI
 
+      call fs_set_abend_normal_end(1)
       call fc_exit( 0)
       end
