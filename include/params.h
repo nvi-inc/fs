@@ -9,7 +9,7 @@
 #define PAGE_SIZE   4096
 
 #define SHM_KEY     1
-#define C_RES       7*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       8*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_KEY     1
@@ -87,6 +87,7 @@
 #define K42DMS      0x40000
 #define K42B        0x80000
 #define K42C        0x100000
+#define VLBA42      0x200000
 
 #define FS_ROOT     "/usr2"
 
