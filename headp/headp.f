@@ -27,18 +27,18 @@ C
       if(VLBA.ne.and(drive,VLBA)) then
          kcal=kcal.and.ksread_fs.and.ksdread_fs.and.kbdread_fs
       endif
-      if(.not.kcal) write(16,*)
+      if(.not.kcal) write(6,*)
      &  'head calibration has not been completed successfully.'
 C
       kspd=kwrwo_fs
       if(VLBA.ne.and(drive,VLBA)) then
          kspd=kspd.and.krdwo_fs
        endif
-      if(.not.kspd.and.VLBA2.ne.drive_type) write(16,*)
+      if(.not.kspd.and.VLBA2.ne.drive_type) write(6,*)
      &  'inch worm speeds have not been successfully calibrated.'
 C
       if((.not.kcal).or.(.not.kspd.and.VLBA2.ne.drive_type)) then
-        write(16,*) 'no output file generated.'
+        write(6,*) 'no output file generated.'
         goto 99999
       endif
 C
