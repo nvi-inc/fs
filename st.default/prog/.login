@@ -13,6 +13,7 @@ umask 022
 set ignoreeof
 setenv PAGER "less -i"
 setenv EDITOR emacs
+setenv FC fort77
 #
 
 
