@@ -41,6 +41,9 @@ C 960607 nrv Move initializations into FDRUDG
 C 960610 nrv Initialize in call to FRINIT
 C 960810 nrv Initialize tape motion values
 C 961023 nrv Check for 'TAPE ' along with 'TAPETM' parameter values.
+C 970114 nrv Pass CBUF to VREAD so it can check the VEX version
+C 970114 nrv Remove the call to VGLINP (put it into VREAD). Write out
+C            experiment name, description, PI.
 C
 C
       close(unit=LU_INFILE)
@@ -66,16 +69,27 @@ C
       if (cbuf(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
         close(lu_infile)
-        call VREAD(lskdfi,luscn,iret,ivexnum,ierr) ! read stations, codes, sources
+C       read stations, codes, sources
+        i=index(cbuf,';')
+        call VREAD(cbuf(1:i),lskdfi,luscn,iret,ivexnum,ierr) 
         if (iret.ne.0.or.ierr.ne.0) then
           write(luscn,9009) iret,ierr
 9009      format(' from VREAD iret=',i5,' ierr=',i5)
         endif
-        call vglinp(ivexnum,luscn,ierr)
-        if (ierr.ne.0) then
-          write(luscn,9010) ierr
-9010      format(' from VEXINP ierr=',i5)
-        endif
+C       call vglinp(ivexnum,luscn,ierr)
+C       if (ierr.ne.0) then
+C         write(luscn,9010) ierr
+C9010      format(' from VEXINP ierr=',i5)
+C       endif
+C       Write out experiment information now.
+        write(luscn,'(/"Experiment name: ",4a2)') lexper
+        i=trimlen(cexperdes)
+        if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
+     .  cexperdes(1:i)
+        i=trimlen(cpiname)
+        if (i.gt.0) write(luscn,'("PI name: ",a)') cpiname(1:i)
+        i=trimlen(ccorname)
+        if (i.gt.0) write(luscn,'("Correlator: ",a)') ccorname(1:i)
       else ! skd file
         rewind(lu_infile)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
@@ -287,7 +301,8 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         enddo 
       endif
 C
-C Initialize early start for all stations and set other S2 values to zero.
+C For SKED file, enitialize early start for all stations and set 
+C other S2 values to zero.
       do i=1,max_stn
         itearl(i)=itearl(1)
         itlate(i)=0
