@@ -20,6 +20,7 @@ C            some stations. Just set nchan to 0 as a flag.
 C 970110 nrv Save the pass order list by code number.
 C 970114 nrv Call VUNPPRC to read $PROCEDURES. Store prefix. 
 C 970114 nrv Add polarization to VUNPIF call. Save LPOL per channel.
+C 970121 nrv Save npassl by code and station!
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -378,7 +379,7 @@ C    Store head positions and subpases
               ihddi2(ip,istn,icode)=ix
             enddo 
           endif ! m3/4 or v rec
-          npassl = npl
+          npassl(istn,icode) = npl
           else ! set nchan=0 as a flag
             nchan(istn,icode) = 0
           endif ! nchdefs>0 or =0
