@@ -11,7 +11,7 @@ C
       integer rn_take
       integer*4 ip(5)
       integer*2 lbuf(40)
-      integer*2 lwho,i10blnks
+      integer*2 lwho,i10blnks(5)
       dimension it(6)
 C 
       include '../include/fscom.i'
