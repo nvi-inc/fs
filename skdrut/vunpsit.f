@@ -15,6 +15,7 @@ C
 C  History:
 C 960517 nrv New.
 C 960521 nrv Revised.
+C 960605 nrv Allow 1-character site IDs, e.g. VLA=Y
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -75,11 +76,11 @@ C  2. Site ID. Standard 2-letter code.
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       if (iret.ne.0) return
       NCH = fvex_len(cout)
-      IF  (NCH.ne.2) THEN 
+      IF  (NCH.gt.2) THEN 
         write(lu,'("VUNPSIT02 - Site code must be 2 characters")')
         ierr=-2
       else
-        IDUMY = ICHMV_ch(LIDPOS,1,cout(1:2))
+        IDUMY = ICHMV_ch(LIDPOS,1,cout(1:nch))
       endif
 
 C  3. Site position
