@@ -1,58 +1,70 @@
 	SUBROUTINE SETPRINT(ierr,iwid,iopt)
 
 C  Set up printer with proper escape sequences or
-C  open up output print file, with unit LUPRT.
+C  open up output print file.
 
 C NRV 910306 Added IOPT to call for landscape orientation of list
-C NRV 910703 NEW version for UX version: open "luprt"
+C               IOPT=0 for portrait, =1 for landscape
 
       INCLUDE 'skparm.ftni'
       INCLUDE 'drcom.ftni'
 
-      integer ic,ierr,iwid,trimlen,iopt
-      character*50 cout
-      character*4 response
-      character upper
-      logical*4 kdone,ex
-      character*4 stat
+	integer*2 l,ierr,iwid,trimlen,iopt
+      character*50 CLASER
+        character*128 cout
 
-       if (cprport.eq.'PRINT') then
-        cout = tmpname
-       else
+       if (cprport.eq.'PRINT') then ! temp file name
+        cout = tmpname 
+       else ! specified file name
         cout = cprport
        endif
 
-C     check to see if the file exists first
-
-      ic=trimlen(cout)
-      stat='unknown'
-      inquire(file=cout,exist=ex,iostat=ierr)
-C     if (ex) then
-C       kdone = .false.
-C       do while (.not.kdone)
-C         write(luscn,9130) cout(1:ic)
-C9130      format(' OK to purge existing file ',A,' (Y/N) ? ',$)
-C         read(luusr,'(A)') response
-C         response(1:1) = upper(response(1:1))
-C         if (response(1:1).eq.'N') then
-C           ierr=-1
-C           return
-C         else if (response(1:1).eq.'Y') then
-C           open(lu_outfile,file=cout)
-C           close(lu_outfile,status='delete')
-C           kdone = .true.
-C           stat='new'
-C         end if
-C       end do
-C     end if
-C
-	open(unit=luprt,status=stat,file=cout,iostat=ierr)
+	open(unit=luprt,file=cout,iostat=ierr)
       IF (IERR.NE.0) THEN
         WRITE(LUSCN,9061) IERR,cout
-9061    FORMAT(' SETPRINT01 - ERROR ',I5,' ACCESSING output device ',
-     .  A,'.')
+9061    FORMAT(' SETPRINT01 - ERROR ',I5,' trying to open ',a,'. ')
         RETURN
       ENDIF
+
+	if (cprttyp.eq.'LASER') then !set up laser printer
+c        CLASER=' '//CHAR(27)//'E'   ! ISSUE A RESET
+c        l = trimlen(claser)
+c        WRITE(LUPRT,'(A)') CLASER(1:l)
+
+	  if (iwid.eq.137.and.iopt.eq.0) then
+	    CLASER=' '
+     .     //CHAR(27)//'&l0O'       ! portrait orientation
+     .     //CHAR(27)//'(8U'        ! primary character set
+     .     //CHAR(27)//'(s16.66H'   ! primary pitch
+     .     //CHAR(27)//'&l8.5D'     ! lines per inch
+     .     //CHAR(27)//'&a8L'       ! left margin column number
+	  else if (iwid.eq.80) then
+	    CLASER=   ' '
+     .     //CHAR(27)//'&l0O'    ! portrait orientation
+     .     //CHAR(27)//'(8U'        ! primary character set
+     .     //CHAR(27)//'(s10H'      ! primary pitch
+     .     //CHAR(27)//'&l6D'       ! lines per inch
+     .     //CHAR(27)//'&a2L'       ! left margin column number
+	  else if (iwid.eq.137.and.iopt.eq.1) then
+	    CLASER=' '
+     .     //CHAR(27)//'&l1O'       ! landscape orientation
+     .     //CHAR(27)//'(8U'        ! primary character set
+     .     //CHAR(27)//'(s16.66H'   ! primary pitch
+     .     //CHAR(27)//'&l8.5D'     ! lines per inch
+     .     //CHAR(27)//'&a8L'       ! left margin column number
+	  end if
+
+	  l = trimlen(claser)
+	  WRITE(luprt,9104) CLASER(1:l)
+9104    FORMAT(A)
+	else if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then
+	  if (iwid.eq.137) then
+	    claser = ' '//char(15)
+	  else
+	    claser = ' '//char(18)
+	  endif
+	write(luprt,9104) claser(1:2)
+	endif !set up printer
 
       RETURN
       END
