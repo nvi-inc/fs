@@ -340,10 +340,10 @@ void cshm_init()
   shm_addr->disk2file.destination.destination[0]=0;
   m5state_init(&shm_addr->disk2file.destination.state);
 
-  shm_addr->disk2file.start.start=-1.0;
+  shm_addr->disk2file.start.start[0]=0;
   m5state_init(&shm_addr->disk2file.start.state);
 
-  shm_addr->disk2file.end.end=-1.0;
+  shm_addr->disk2file.end.end[0]=0;
   m5state_init(&shm_addr->disk2file.end.state);
 
   shm_addr->disk2file.options.options[0]=0;
