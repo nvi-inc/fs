@@ -35,8 +35,8 @@ static int version=1;
 %n 2000
 %a 8000
 
-NAME		[^ \t\n;:=&*$"]*
-WHITE		[ \t]
+NAME		[^ \t\n\r;:=&*$"]*
+WHITE		[ \t\r]
 MANTISSA        [+-]?([0-9]+"."[0-9]+|[0-9]+|[0-9]+"."[0-9]*|[0-9]*"."[0-9]+)
 EXPONENT	[eE][+-]?[0-9]+
 DOUBLE		{MANTISSA}{EXPONENT}?
@@ -108,6 +108,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>source		{BEGIN(INITIAL);return T_SOURCE;}
 <LINE>mode		{BEGIN(INITIAL);return T_MODE;}
 <LINE>station		{BEGIN(INITIAL);return T_STATION;}
+<LINE>data_transfer	{BEGIN(INITIAL);return T_DATA_TRANSFER;}
 
 <LINE>antenna_diam	{BEGIN(INITIAL);return T_ANTENNA_DIAM;}
 <LINE>axis_type	{BEGIN(INITIAL);return T_AXIS_TYPE;}
@@ -297,7 +298,7 @@ static struct llist *lit()
   while(inch !=EOF & inch != ';' && inch != '\0') {
     if(inch == '\n')
       lines++;
-    else if(NULL == strchr(" \t",inch))
+    else if(NULL == strchr(" \t\r",inch))
       yyerror("Illegal character after start_literal()");
     inch=input();
   }
@@ -310,8 +311,8 @@ static struct llist *lit()
 
   inch=input();
   while(inch !=EOF && inch != '\n' && inch != '\0') {
-    if(NULL == strchr(" \t",inch))
-      yyerror("Illegal character after start_literal();");
+    if(NULL == strchr(" \t\r",inch))
+      yyerror("Illegal Xcharacter after start_literal();");
     inch=input();
   }
   if(inch == EOF)
@@ -389,7 +390,7 @@ static char *find_end(char *buffer, char *text)
 	if(0==strncmp(ptr+sizeof(end)-1+textlen,")",1)) {
 	  *ptr='\0';
 	  for(;*start!=0;start++)
-	    if(NULL == strchr(" \t",*start))
+	    if(NULL == strchr(" \t\r",*start))
 	      yyerror("Illegal character between '\\n' and end_literal(...)");
 	  return ptr+sizeof(end)+textlen;
 	}
