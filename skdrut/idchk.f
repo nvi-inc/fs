@@ -9,6 +9,8 @@ C
 C     WHO   WHEN   WHAT
 C     gag   900104 created
 C 960206 nrv Variable holding station id must be i*2
+C 970513 nrv Remove printout because it's confusing and not
+C            really needed with 2-letter code usage.
 C
 C   COMMON BLOCKS USED
       include '../skdrincl/skparm.ftni'
@@ -49,7 +51,8 @@ C
         j = j + 1
       end do
       if (lchange) then
-        write(luscn,9100) xch,istnid(inum)
+C*** Commented out 970514
+C       write(luscn,9100) xch,istnid(inum)
 9100    format(' Changing id code from ',A,' to ',A,' ') 
       end if
 
