@@ -34,7 +34,7 @@ extern int serial;
 
 /*----------------------------------------------------------------------*/
 
-int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout)
+int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout, no_after)
 
 int *mode,*devid;
 long *ipcode;
@@ -42,6 +42,7 @@ unsigned char *buffer;
 int *buflen;  		/* length of the message in buffer, characters */
 int *error;
 int *timeout;
+int *no_after;
 {
   int val;
   char locbuf[BSIZE];
@@ -161,7 +162,7 @@ int *timeout;
       }
     }
   }
-  if(!serial) {
+  if((!serial) && (!*no_after)) {
 #ifdef CONFIG_GPIB
     ibcmd(ID_hpib,"_?",2);  	/* unaddress all listeners and talkers */
     if ((ibsta & (ERR|TIMO)) != 0) {
