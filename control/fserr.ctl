@@ -197,6 +197,9 @@ error decoding data_check? bytes parameter
 5D -507
 error decoding data_check? missing parameter
 ""
+5D -601
+data check failed
+""
 5D -901
 query response not received
 ""
@@ -832,6 +835,24 @@ Error reading TACD.CTL FMP ?FFF
 ""
 BO -407
 Error decoding TACD.CTL line ?WWW
+""
+BO -501
+Error following experiment procedure file name link.
+""
+BO -502
+Procedure library link was empty.
+""
+BO -503
+Final procedure library link does contain '.prc'.
+""
+BO -506
+Error following experiment procedure file name link.
+""
+BO -507
+Procedure library link was empty.
+""
+BO -508
+Final procedure library link does contain '.prc'.
 ""
 BO -999
 WARNING: Log file just opened is already larger than 10 MB.
