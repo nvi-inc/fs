@@ -207,6 +207,9 @@ C 970915 nrv Add VLBA4 option.
 C 970929 nrv Calculate ift_save only for non-S2. 
 C 970929 nrv Calculate slewing time only for continuous motion.
 C 971003 nrv For the last scan, don't stop if there's late stop.
+C 971027 nrv Force direction to REV for FASTx command before UNLOD.
+C 971028 nrv Force new tape for first scan of a schedule (this was
+C            needed for S2 in case it starts in the middle of a tape).
 C
 C
       iblen = ibuf_len*2
@@ -688,6 +691,8 @@ C  New tape?
           else
             knewtp = .false.
           endif
+C         Force new tape on the first scan cn tape.
+          if (iobsst.eq.0) knewtp=.true.
 C
 C  For S2 or continuous, stop tape if needed after the SOURCE command
           if ((idir.ne.0.and.ks2.and.itlate(istn).gt.0.and.iobsst.ne.0
@@ -745,7 +750,8 @@ C Unload old tape
             IF (.not.ks2.and.IFTOLD.GT.50 ) THEN !spin down remaining tape
               CALL IFILL(IBUF2,1,iblen,32)
               TSPINS=TSPIN(IFTOLD,ISPM,ISPS)
-              CALL LSPIN(idir,ISPM,ISPS,IBUF2,NCH)
+              idirsp=-1
+              CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
               call hol2lower(ibuf2,(nch+1))
               call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
               kspin = .true. !Just wrote a FASTx command
@@ -871,7 +877,7 @@ C           Append the subpass code
         endif
 C
 C READY
-        IF (KNEWTP.and.idir.ne.0) THEN
+        IF (KNEWTP.and.idir.ne.0) THEN ! new tape
           CALL IFILL(IBUF2,1,iblen,32)
           nch = ichmv_ch(IBUF2,1,'ready  ')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
@@ -892,7 +898,7 @@ C Prepass new tape
 C Set TSPINS zero here so that no other spin is done
 C (move out from previous if test)
           TSPINS=0.0
-        END IF
+        END IF ! new tape
 
 C LOADER 
 C Called for S2 if the group changed since the last pass
@@ -902,7 +908,7 @@ C Called for S2 if the group changed since the last pass
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
         endif
 C
-C Spin forward if necessary
+C Spin new tape if necessary to reach footage
 C Don't spin if we're already running. (? shouldn't happen?)
         IF (idir.ne.0.and..not.krunning.and..not.ks2.and.TSPINS.GT.5.0) 
      .    THEN
