@@ -51,23 +51,6 @@ long ip[5];                           /* ipc parameters */
 	k4rec_req_synch_on(ip);
       } else if(0==strcmp(command->argv[0],"synch_off")) {
 	k4rec_req_synch_off(ip);
-      } else if(0==strcmp(command->argv[0],"aux")) {
-	char *ptr=command->argv[1];
-	int i,iend;
-	if(ptr==NULL) {
-	  ierr=-102;
-	  goto error;
-	} else if(strlen(ptr)>16) {
-	  ierr=-202;
-	  goto error;
-	}
-	iend=strlen(ptr);
-	for (i=0;i<iend;i++)
-	  if(NULL==index("0123456789abcdef",ptr[i])) {
-	    ierr=-202;
-	    goto error;
-	  }
-	k4rec_req_aux(ip,ptr);
       } else {
 	char *ptr=command->argv[0];
 	int i,iend;
