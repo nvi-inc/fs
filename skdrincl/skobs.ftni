@@ -2,11 +2,12 @@ C     Scheduled Observations Common Block
 C 
 C 960517 nrv New. Holds internal representation of observations.
 C 960603 nrv Add parameters.
+C 960810 nrv Move itearl to station block
 
       integer nobs,iskrec
 C nobs - number of observations in this schedule
 C iskrec - time-ordered index of observation records 
-      integer isettm,ipartm,ihdtm,itaptm,imtptm,isortm,itearl
+      integer isettm,ipartm,ihdtm,itaptm,imtptm,isortm
       integer*2 lskobs,lexper
 C lskobs - Hollerith observation record, use iskrec to enter
 C          this array
@@ -14,7 +15,7 @@ C lexper - Experiment name
  
       COMMON/SKOBS/
      .nobs,
-     .isettm,ipartm,ihdtm,itaptm,imtptm,isortm,itearl,
+     .isettm,ipartm,ihdtm,itaptm,imtptm,isortm,
      .ISKREC(MAX_OBS),
      .LSKOBS(IBUF_LEN,MAX_OBS),lexper(4)
 

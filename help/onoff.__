@@ -3,42 +3,44 @@
 Syntax:     onoff=rep,intp,dev1,dev2,cutoff,stp
 
 Response:   onoff/rep,intp,dev1,dev2,cutoff,stp,cal1,cal2,
-            beam1,beam2,flux1,flux2
+          beam1,beam2,flux1,flux2
 
 
 Settable parameters:
 rep       Number of repetitions, 1 to 99. Default is 2. 
-intp      Integration period, 1 to 10 seconds. Default is 1. 
+intp        Integration period, 1 to 10 seconds. Default is 1. 
 dev1      Device to be used as detector 1. Standard detector
           mnemonics are allowed. Default is i1 for Mark III, ia for
           VLBA.
 dev2      Device to be used as detector 2. Standard detector
           mnemonics are allowed. Default is i1 for Mark III, ib for
           VLBA.
-cutoff    elevation above which to step in elevation rather than
-          azimuth, in degrees, default 60.
+cutoff      elevation above which to step in elevation rather than
+            azimuth, in degrees, default 60.
 stp       Distance off source for off source and calibration
           points, in multiples of a beamwidth. Default is 5.0.
 
 Monitor-only parameters:
-cal1      Calibration noise source temperature in degrees K for
-          detector 1. This is determined from the last caltempx
-          command in conjunction with the patch (Mark III) or bbc
-          command.
-cal2      Calibration noise source temperature in degrees K for
-          detector 2. This is determined from the last caltempx
-          command in conjunction with the patch (Mark III) or bbd
-          command.
+cal1        Calibration noise source temperature in degrees K for
+            detector 1. This is determined from the last caltempx
+            command in conjunction with the patch (Mark III) or bbc
+            command.
+cal2        Calibration noise source temperature in degrees K for
+            detector 2. This is determined from the last caltempx
+            command in conjunction with the patch (Mark III) or bbd
+            command.
 beam1     The full width half maximum beam size (degrees) for
-          device 1. It is determined from the beamx command and the
-          patch (Mark III) or bbc (VLBA) command.
+          device 1. It is determined from the beamx command and
+          the patch (Mark III) or bbc (VLBA) command.
 beam2     The full width half maximum beam size (degrees) for
-          device 2. It is determined from the beamx command and the
-          patch (Mark III) or bbc (VLBA) command.
-flux1     The apparent source flux for device 1, based on the fluxx
-          command and the patch (Mark III) or bbc (VLBA) command.
-flux2     The apparent source flux for device 2, based on the fluxx
-          command and the  patch (Mark III) or bbc (VLBA) command.
+          device 2. It is determined from the beamx command and
+          the patch (Mark III) or bbc (VLBA) command.
+flux1       The apparent source flux for device 1, based on the
+            fluxx command and the patch (Mark III) or bbc (VLBA)
+            command.
+flux2       The apparent source flux for device 2, based on the
+            fluxx command and the  patch (Mark III) or bbc (VLBA)
+            command.
 
 
 Comments: 
@@ -50,7 +52,7 @@ that it is initialized automatically when the Field System is
 started. See the onoff manual in Volume 2.
 
 The current command antenna position including offsets is assumed
-to be 'onsource.'
+to be "onsource."
 
 It is recommended that nothing else be done, e.g. running a
 schedule, while this command is executing. Since this command may

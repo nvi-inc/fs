@@ -1,4 +1,4 @@
-            label - enter tape number and check-label
+     label - enter tape number and check-label (non-S2 drive)
 
 Syntax:     label=number,check
 

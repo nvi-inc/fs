@@ -32,7 +32,8 @@ c 951019 nrv Add MAX_CHAN to replace hard-coded "14"'s
 C 960226 nrv Increase MAX_HOR to 40
 C 960412 nrv Test 300 sources
 C 960516 nrv Add MAX_FLD, set to 20
-C 960522 nrv Add lots of max's
+C 960522 nrv Add lots of max's, change max_pass to index*subpasses
+C 960628 nrv Allow more modes in catalog.
 C
 C********************************************************************
 C
@@ -297,7 +298,7 @@ C     The maximum number of entries in the modes catalog that
 C     will be read for selection.
 
       integer max_ent_modes
-      PARAMETER (MAX_ENT_MODES = 20)
+      PARAMETER (MAX_ENT_MODES = 50)
 
 C     The maximum size of the selection array, for all types of
 C     selection. This must be the larger of MAX_ENT_SOR, and

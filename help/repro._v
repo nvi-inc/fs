@@ -6,12 +6,12 @@ Response:   repro/modeA,trackA,trackB,modeB,equA,equB
 
 
 Settable parameters:
-modeA   Reproduce mode for channel A. byp (default) for bypass, raw
-        or read for read (playback).
-trackA  Track for decoder channel A, default 1, 0-35 allowed.
-trackB  Track for decoder channel B, default 1, 0-35 allowed.
-modeB   Reproduce mode for channel B. byp for bypass, raw or read
-        for read (playback). Default is modeA.
+modeA Reproduce mode for channel A. byp (default) for bypass, raw
+      or read for read (playback).
+trackA    Track for decoder channel A, default 1, 0-35 allowed.
+trackB    Track for decoder channel B, default 1, 0-35 allowed.
+modeB Reproduce mode for channel B. byp for bypass, raw or read
+      for read (playback). Default is modeA.
 equA    Equalizer to use for decoding channel A. For VLBA
         recorders: alt1 (default) for normal speed (135 ips), alt2
         for double speed (270 ips), std unspecified. For VLBA2

@@ -1,7 +1,7 @@
            help or ? - display on-line help information
 
 Syntax:     help=command
-            ?=command
+          ?=command
 
 Response:   displays information on the screen
 

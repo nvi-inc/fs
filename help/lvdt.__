@@ -9,9 +9,10 @@ Settable parameters:
 cmdVw   Command position voltage for the write head stack,
         default is don't move. For Mark IV this parameter refers
         to head stack 1.
-cmdVr   Command position voltage for read head stack, default is
-        don't move. This parameter is not valid for VLBA
-        recorders. For Mark IV this parameter refers to head stack 2.
+cmdVr     Command position voltage for read head stack, default is
+          don't move. This parameter is not valid for VLBA
+          recorders. For Mark IV this parameter refers to head
+          stack 2.
 
 Monitor-only parameters:
 actVw     Actual position voltage for write head stack (Mark IV

@@ -6,8 +6,9 @@ Response:   matload/acknowledgement
 
 
 Settable parameters:
-unit addr   the hex address of the MAT to receive the code.
-mem addr    the hex location for the start of the load, 4 characters.
+unit addr     the hex address of the MAT to receive the code.
+mem addr    the hex location for the start of the load, 4
+            characters.
 data        the hex data bytes to be transmitted, must be an even
             number of them.
 

@@ -3,14 +3,14 @@
 Syntax:     stack=cmdMw,cmdMr,calW,calR,woffset
 
 Response:   stack/cmdMw,cmdMr,calW,calR,woffset,actMw,actMr,
-            deltaMw,deltaMr
+          deltaMw,deltaMr
 
 
 Settable parameters:
-cmdMw     Write head stack (stack 1) command position in microns.
-          Default is not to move.
-cmdMr     Read head stack (stack 2) command position in microns.
-          Default is not to move. May not be specified for VLBA.
+cmdMw   Write head stack (stack 1) command position in microns.
+        Default is not to move.
+cmdMr   Read head stack (stack 2) command position in microns.
+        Default is not to move. May not be specified for VLBA.
 calW      Write head stack (stack 1) calibration to use: Forward,
           Reverse, or Uncalibrated. Only the first letter is
           checked. Default is Uncalibrated.

@@ -10,8 +10,7 @@ track     VLBA recorder track number whose sampler assignment will
           follow, must be between 2 and 33.
 sampler   The sampler that will be mapped to the preceding track,
           0, or in the form nnsd, where nn=bbc number (0 through
-          14), s=sideband ( u or l), d is the data bit (s or m)
-
+          14), s=sideband ( u or l), d is the data bit (s or m).
 Comments: 
 The tracks and samplers must appear in pairs. Multiple commands are
 allowed because all of the pairs may not fit on a single line.The

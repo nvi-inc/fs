@@ -3,15 +3,15 @@
 Syntax:     pass=cmdPw,cmdPr,woffset
 
 Response:   pass/cmdPw,cmdPr,woffset,cmdMw,cmdMr,actMw,actMr,
-            deltaMw,deltaMr
+          deltaMw,deltaMr
 
 
 Settable parameters:
-cmdPw     Command pass number for write head stack (Mark IV stack
-          1), range 1-100 for Mark III and VLBA, 1-112 for Mark IV.
-          Default is to not move the write head stack. For Mark IV
-          recorders, if the parameter is stack2, then stack 1 is
-          moved to the most recently commanded stack 2 position.
+cmdPw   Command pass number for write head stack (Mark IV stack
+        1), range 1-100 for Mark III and VLBA, 1-112 for Mark IV.
+        Default is to not move the write head stack. For Mark IV
+        recorders, if the parameter is stack2, then stack 1 is
+        moved to the most recently commanded stack 2 position.
 cmdPr     Command pass number for read head stack (Mark IV stack
           2), same range as for write head stack. This parameter
           may not be specified for VLBA recorders. If the parameter
@@ -28,9 +28,9 @@ woffset   Type of offset for the write head. auto (default) or
           head is always adjusted.
 
 Monitor-only parameters:
-cmdMw     Microns corresponding to command write head pass number.
-cmdMr     Microns corresponding to command read head pass number,
-          null for VLBA.
+cmdMw   Microns corresponding to command write head pass number.
+cmdMr   Microns corresponding to command read head pass number,
+        null for VLBA.
 actMw     Microns corresponding to actual write head pass number.
 actMr     Microns corresponging to actual read head pass number,
           null for VLBA.
@@ -118,7 +118,7 @@ xx        ff for forward calibration (odd passes)
           fd for uncalibrated positions.
 wxyz      0000-3999 for positive micron positions
           4000-7999 for negative micron positions
-ff        hex characters ff
+ff          hex characters ff
 
 The positions occupied by wxyz are the four digits of the commanded
 micron write head position. In the auxiliary data field the digits
@@ -147,4 +147,3 @@ bit 1     0 for forward calibration (odd passes), 1 for
 bit 2     0 for reverse calibration (even passes), 1 for
           uncalibrated
 bit 3     sign of the position, 0 for positive, 1 for negative
-

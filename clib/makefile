@@ -13,7 +13,9 @@ vst_util.o get_vaux.o set_vaux.o cchmod.o sig_ignore.o get_vtime.o\
 mcb_util.o bblv2db.o motion_done.o mvdis_v.o vacuum.o semid_util.o\
 go_util.o get_vatod.o v2_head_vmov.o v2_motion_done.o v2_vlt_head.o\
 trkfrm_util.o bs2code.o cshm_init.o tracks_util.o bit_density_util.o\
-systracks_util.o
+systracks_util.o rclcn_req_util.o rclcn_res_util.o rcl_util.o\
+user_info_util.o s2st_util.o s2tape_util.o s2rec_util.o rec_mode_util.o\
+data_valid_util.o s2label_util.o get_s2time.o
 #
 CFLAGS = 
 #FFLAGS = 

@@ -1,0 +1,75 @@
+                            RCLCO
+                            -----
+
+This is the RCL communication test program, called RCLCO. It provides an
+interactive interface for exercising and testing the S2 Recorder Control Link.
+RCLCO uses the RCL interface library routines in the directory rcl, and
+provides a good example of how to use those routines. Connection to the S2
+RCL can be via serial cables or via ethernet using internet sockets.
+
+The RCLCO test program works on IBM PCs and compatibles under DOS compiled
+with Borland C++, or under Unix compiled with GNU C (tested under SunOS 4.1.3,
+Solaris 2.5, and Linux 1.2.12). The DOS version works only with serial ports,
+and the Unix version works only with network connections. The differences
+are mostly minor, and are handled with #ifdef DOS or #ifdef UNIX in the code.
+Included for the DOS version is a set of interrupt-driven serial I/O routines,
+comio.c. Makefiles are provided to automatically compile the source files.
+Pre-compiled executables are also supplied as follows:
+DOS: rclco.exe
+SunOS 4.x: rclco.sun
+Solaris: rclco.sol
+Linux: rclco.lnx
+
+Most of the commands accepted by RCLCO correspond to RCL command names.
+A few exceptions are for local configuration, etc:
+  help     -brief help on commands
+  debug    -set local debug level 0-2 (normally 1)
+  addr     -Set RCL address of S2 system to talk to (0-253), or set
+              reference address in case of network operation. In the case of
+              network operation, selecting 'addr broadcast' will repeat the
+              command for all currently open network connections, allowing
+              simultaneous control of multiple S2 systems.
+  baud     -set the serial port baud rate (DOS serial port operation only)
+  port     -select serial port 1 or 2 (DOS serial port operation only)
+  open     -open a new network connection (first connection can also be opened
+              by giving a host name as the command line argument)
+              (Unix network operation only)
+  close    -close a network connection (Unix network operation only)
+  versionl -print RCLCO local software version information
+  quit     -quit the program
+
+For the remaining commands refer to the S2 User's Manual, Appendix A,
+"S2 Recorder Control Link Serial Communications Protocol".
+
+Compiling
+---------
+Before compiling the RCLCO program, you must compile the RCL library. 
+cd to the rcl directory and follow the instructions in the 1readme file
+there. Then return to this directory and compile as follows:
+
+To compile under SunOS 4.x:  make -f makefile.sun
+To compile under Solaris:    make -f makefile.sol
+To compile under Linux:      make -f makefile.lnx
+To compile under DOS:        make -f makefile.dos
+
+Or you can copy the appropriate file to 'makefile' and then just type 'make'.
+This second method is recommended if you need to edit the makefile to work 
+on your system. You will probably get some warnings, this is OK.
+
+Under DOS a batch file called makever.bat is used to automatically generate the
+version.c file with compilation time and date. This batch file relies on some
+special features of 4DOS, an enhanced version of the DOS shell. If you are
+using regular DOS, you will have to generate the version.c file manually
+(beware that the make procedure deletes version.c when it is done).
+Under Unix the equivalent is a Bourne shell script called makever.unx.
+
+If you have any problems or questions please contact ISTS/SGL S2 support by
+Internet email to:  s2support@sgl.ists.ca
+For information on the World Wide Web:  http://www.sgl.ists.ca/
+
+Good Luck,
+
+Georg Feil
+Last updated 96/06/27
+
+

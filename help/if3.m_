@@ -1,10 +1,9 @@
               if3 - IF3 distributor (Mark III rack)
 
-
 Syntax:     if3=atten,mixer,sw1,sw2,sw3,sw4
 
 Response:   if3/atten,mixer,sw1,sw2,sw3,sw4,switch,freq,rem/lcl,
-            LOlock,TPI
+          LOlock,TPI
 
 
 Settable parameters:
@@ -20,9 +19,9 @@ sw3       Switch 1 state: output to port 1 (default) or port 2.
 sw4       Switch 1 state: output to port 1 (default) or port 2.
 
 Monitor-only parameters:
-switch    present or missing.
-freq      Synthesizer frequency in MHz.
-rem/lcl   Switch setting, rem or lcl
+switch      present or missing.
+freq        Synthesizer frequency in MHz.
+rem/lcl     Switch setting, rem or lcl
 LOlock    LO lock/unlock status, lock or unlock
 TPI       Total power integrator reading, decimal, 0-65535.
 

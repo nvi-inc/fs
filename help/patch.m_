@@ -7,9 +7,9 @@ Response:   none
 
 Settable Parameters:
 lon       One of lo1, lo2, or lo3. No default.
-vc#horl   Video converter number with the character h or l
-          appended, e.g. 1h or 3l. h indicates the high band of the
-          channel, and l the low. No default.
+vc#horl Video converter number with the character h or l appended,
+        e.g. 1h or 3l. h indicates the high band of the channel,
+        and l the low. No default.
 
 Comments: 
 This command stores the patching information for access by program

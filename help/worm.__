@@ -1,9 +1,9 @@
          worm - estimate narrow-track inchworm velocities
 
-Syntax:   worm=stack,scale
+Syntax:     worm=stack,scale
           worm
 
-Response: worm/stack,scale,fo,so,fi,si
+Response:   worm/stack,scale,fo,so,fi,si
 
 
 Settable parameters:
@@ -17,7 +17,7 @@ scale     Scale to use for speed measurement, update (default) or
 Monitor-only parameters:
 fo        Fast out speed.
 so        Slow out speed.
-fi        Fast in  speed.
+fi          Fast in  speed.
 si        Slow in  speed.
 
 Comments: 

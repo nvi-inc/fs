@@ -1,0 +1,26 @@
+# Makefile for RCL interface library, compiler: Borland C++
+# We use only ANSI C features. Borland C include directory path may need
+# to be updated in $(CC) line below.
+# *Add .obj file to file list.lnk for each source file added below*
+#
+SRCS = rcl_cmd.c rcl_pkt.c rcl_syss.c rcl_util.c
+OBJS = $(SRCS:.c=.obj)
+
+CC = bcc
+
+.c.obj:
+	$(CC) -I.. -Ip:\bc\include -DDOS -w -c $*.c
+
+$(OBJS):
+
+
+# dummy target to force execution of a rule (do not create a file of this name)
+force:
+
+
+rcl_cmd.obj:  rcl_def.h
+rcl_cmd.obj: ext_ircl.h rcl.h rcl_pkt.h rcl_cmd.h
+rcl_pkt.obj:  rcl_def.h ext_ircl.h rcl.h rcl_sys.h
+rcl_pkt.obj: rcl_pkt.h
+rcl_syss.obj:  rcl_def.h ext_ircl.h rcl.h
+rcl_syss.obj: ..\comio.h rcl_sys.h

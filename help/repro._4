@@ -6,8 +6,8 @@ Response:   repro/mode,trackA,trackB,equalizer,bitrate
 
 
 Settable parameters:
-mode      Reproduce mode, byp (default) for bypass, read or raw for
-          playback.
+mode    Reproduce mode, byp (default) for bypass, read or raw for
+        playback.
 trackA    Track for decoder channel A, between 0 and 35, default 2.
           For tracks on head stack 2, add 100 to the desired track
           number. If mode is read, only tracks from head stack 1 may
@@ -23,9 +23,9 @@ equalizer 0, 1, 2 (default if mode is read), 3 or dis (default if
           following table:
             Location 0    test/special
             Location 1    135 or 80 ips (normally used for 4 MHz
-            playback)
+                          playback)
             Location 2    160/270 ips (normally used for 8 MHz
-            playback)
+                          playback)
             Location 3    disable reproduce (used for bypass mode)
 bitrate   Clock recovery bit rate, Mb/s. Choices are 16, 8, 4, 2.
           Default is the bit rate that corresponds to the selected

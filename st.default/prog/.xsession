@@ -23,7 +23,8 @@ fi
 if [ -f $usermodmap ]; then
     xmodmap $usermodmap
 fi
-
+#set blanking time to 1 hour
+xset s 3600
 # start some nice programs
 xsetroot -solid SlateGrey
 fvwm &

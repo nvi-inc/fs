@@ -1,10 +1,10 @@
              parity - measure and check parity errors
 
 Syntax:     parity=pemax,syncmax,channel,aux,tracks
-            parity
+          parity
 
 Response:   parity/parity-errors
-            parity/sync-errors
+          parity/sync-errors
 
 
 Settable Parameters:
@@ -16,25 +16,25 @@ syncmax   Default is 12. Otherwise handled the same as parity error
 channel   Decoder channel. Can be a, b, or ab (default).
 aux       Aux data check, on (default) or off. Not supported for
           VLBA.
-tracks    List of recorder tracks on which to measure errors.
-          Default is the currently enabled tracks. For Mark III
-          drives, tracks and must be between 1 and 28, and/or may
-          be specified by groups (g1, g2, g3, g4) as in the enable
-          command. For VLBA drives, tracks must be between 0 and
-          35, or specified by groups (g0, g1, g2, g3) as in the
-          enable command, or specified as non-system tracks in the
-          VLBA groups (v0, v1, v2, v3),or specified as the Mark III 
-          tracks in the VLBA groups (m0, m1, m2, m3). For Mark IV,
-          values are Mark IV/VLBA tracks and must be between 0 and
-          35, and/or may be specified by all which means tracks 2
-          through 33.
+tracks      List of recorder tracks on which to measure errors.
+            Default is the currently enabled tracks. For Mark III
+            drives, tracks and must be between 1 and 28, and/or may
+            be specified by groups (g1, g2, g3, g4) as in the enable
+            command. For VLBA drives, tracks must be between 0 and
+            35, or specified by groups (g0, g1, g2, g3) as in the
+            enable command, or specified as non-system tracks in the
+            VLBA groups (v0, v1, v2, v3),or specified as the Mark III 
+            tracks in the VLBA groups (m0, m1, m2, m3). For Mark IV,
+            values are Mark IV/VLBA tracks and must be between 0 and
+            35, and/or may be specified by all which means tracks 2
+            through 33.
 
 Monitor-only parameters:
 parity-errors For each track in the list, the corresponding parity
               errors (smallest of 4 samples).
-sync-errors   For each track in the list, the corresponding sync errors
-              (smallest observed value over the same 4 sample intervals
-              as the parity error check).
+sync-errors   For each track in the list, the corresponding sync
+              errors (smallest observed value over the same 4 sample
+              intervals as the parity error check).
 
 Comments:
 Issuing this command with an equal sign without or without a list

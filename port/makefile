@@ -6,8 +6,13 @@ OBJECTS=\
 portopen.o portread.o portwrite.o portbaud.o portflush.o portoutdrain.o\
 portdelay.o
 #
-#CFLAGS = 
+#CFLAGS =
 #FFLAGS = 
+#
+ifeq (/usr/src/linux/drivers/char/digi.h,\
+$(wildcard /usr/src/linux/drivers/char/digi.h ))
+CFLAGS := $(CFLAGS) -DDIGI
+endif
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The

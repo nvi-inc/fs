@@ -2,6 +2,9 @@
 
 C   ADDSCAN adds a new station to an existing scan.
 C*** ib2as accepts only character indices up to 256
+C NOTE: This has NOT been modified for S2, since S2 is only
+C used with drudg which deals with a single station at a time.
+C This routine is needed only by sked.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'

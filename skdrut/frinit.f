@@ -4,6 +4,7 @@ C  FRINIT initializes arrays in freqs.ftni before
 C  reading from a schedule file.
 
 C 960610 nrv New.
+C 960709 nrv Add barrel initialization.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -21,6 +22,7 @@ C Local
       do j=1,nco
         do i=1,nst
           nchan(i,j)=0
+          idum=ichmv_ch(lbarrel(1,i,j),1,'NONE')
         enddo
       enddo 
       do i=1,nco

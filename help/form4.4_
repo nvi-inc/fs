@@ -1,16 +1,11 @@
        form4 - formatter control and monitor (Mark IV rack)
 
-Syntax:     form4=command
-
-Response:   form/response
-
-
-
+form4=commandform/response
 Settable parameters:
-command any legal command sentence as described in the Mark IV
-        Formatter Vocabulary manual. The characters \r\n
-        (carriage-return, line-feed) are appended before sending
-        the command.
+command   any legal command sentence as described in the Mark IV
+          Formatter Vocabulary manual. The characters \r\n
+          (carriage-return, line-feed) are appended before
+          sending the command.
 
 Monitor-only parameters:
 response    response to command. The >\r\n at the end of the

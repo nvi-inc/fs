@@ -21,12 +21,12 @@ mode      The recording mode, reboot (see below) to reboot the CPU,
           tracks of modes b and c respectively; b2 and c2 are for
           odd VLBA recorder tracks. Modes m and v use the sampler
           track assignments and formatter track enables specified
-          by the trackform and tracks commands. The system tracks are
-          disabled except in prn mode.
-rate      Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2, 4,
-          8, 16, and 32. Default 4. For Nyquist sampling this
-          selection must be twice the bandwidth set-up used in the
-          bbc commands
+          by the trackform and tracks commands. The system tracks
+          are disabled except in prn mode.
+rate        Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2, 4,
+            8, 16, and 32. Default 4. For Nyquist sampling this
+            selection must be twice the bandwidth set-up used in the
+            bbc commands
 fan       The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1,
           and 4:1, where on a per channel or track basis, the
           number before the colon is the number of sampled channels
@@ -37,9 +37,9 @@ fan       The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1,
           The tape clock rate is set to be 9/8 of the implied data
           bit rate per track for Mark III modes, and 9.072/8 of the
           impled bit-rate per track in VLBA mode.
-barrel    Barrel-roll mode. Choices are: off, 8:1, and 16:1, where
-          the number before the colon is the number of tracks to
-          roll-over. Default off.
+barrel      Barrel-roll mode. Choices are: off, 8:1, and 16:1, where
+            the number before the colon is the number of tracks to
+            roll-over. Default off.
 
 Monitor-only Parameters:
 rev       Formatter firmware revision number, displayed as x.xx.
@@ -48,7 +48,7 @@ mcbstat   Communications status, ok or the hex value of hex address
           21.
 hdwstat   Hardware status, ok or the hex value of hex address 22.
 sfwstat   Software status, ok or the hex value of hex address 23.
-intstat   Internal status, ok or the hex value of hex address 24.
+intstat     Internal status, ok or the hex value of hex address 24.
 
 Comments:
 This command syntax applies to VLBA formatters only.  The many
