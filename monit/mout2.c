@@ -728,14 +728,14 @@ int iyear;
 	if(kMdrive[1]||kVdrive[1])
 	  strcat(checkln," h2");
 	break;
-      case 22:
+      case 21:
 	strcat(checkln," rx");
 	break;
       case 19:
 	if(kMdrive[0]||kVdrive[0])
 	  strcat(checkln," h1");
 	break;
-      case 23:
+      case 22:
 	if(kMrack) strcat(checkln," i3");
 	break;
       }
