@@ -14,6 +14,8 @@ C
 C  History:
 C 960520 nrv New.
 C 960607 nrv Initialize band ID to '-', not blank.
+C 970114 nrv Remove polarization, shift up all subsequent field numbers.
+C            (pol was not read or stored anyway)
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -43,14 +45,14 @@ C  LOCAL:
       character upper
       integer j,idum,ic,nch
       integer ichmv_ch ! function
-      integer fvex_double,fvex_len,fvex_int,fvex_field,fget_mode_lowl,
+      integer fvex_double,fvex_len,fvex_int,fvex_field,
      .fvex_units,ptr_ch,fget_all_lowl
 C
 C
 C  1. Channel def statements
 C
       ierr = 1
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('chan_def'//char(0)),
      .ptr_ch('FREQ'//char(0)),ivexnum)
       ic=0
@@ -72,86 +74,87 @@ C  1.1 Subgroup
         endif
 C
 C  1.2 Polarization -- skip this for now
+C  Removed in Vex 1.5. Shift up all field numbers.
 
-C  1.3 RF frequency
+C  1.2 RF frequency
 
-        ierr = 13
+        ierr = 12
         frf(ic)=0.d0
-        iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get frequency
+        iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get frequency
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
         IF  (d.lt.0.d0) then
           write(lu,'("VUNPFRQ03 - Invalid RF frequency < 0")')
-          ierr=-3
+          ierr=-2
         else
           frf(ic) = d/1.d6
         ENDIF 
 
-C  1.4 Net SB
+C  1.3 Net SB
 
-        ierr = 14
-        iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get sideband
+        ierr = 13
+        iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get sideband
         if (iret.ne.0) return
         idum = ichmv_ch(lsb(ic),1,'  ')
         cout(1:1) = upper(cout(1:1))
         if (cout(1:1).ne.'U'.and.cout(1:1).ne.'L') then
-          ierr = -4
+          ierr = -3
           write(lu,'("VUNPFRQ04 - Invalid sideband field.")')
         else
           idum = ichmv_ch(lsb(ic),1,cout(1:1))
         endif
 
-C  1.5 Bandwidth
+C  1.4 Bandwidth
 
-        ierr = 15
-        iret = fvex_field(5,ptr_ch(cout),len(cout)) ! get bandwidth
+        ierr = 14
+        iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get bandwidth
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
         vbw(ic)=0.d0
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
         if (iret.ne.0.or.d.lt.0.d0) then
-          ierr = -5
+          ierr = -4
           write(lu,'("VUNPFRQ05 - Invalid  bandwidth")')
         else
           vbw(ic) = d/1.d6
         endif
 
-C  1.6 Channel ID
+C  1.5 Channel ID
 
-        ierr = 16
-        iret = fvex_field(6,ptr_ch(cout),len(cout)) ! get channel ID
+        ierr = 15
+        iret = fvex_field(5,ptr_ch(cout),len(cout)) ! get channel ID
         if (iret.ne.0) return
         nch = fvex_len(cout)
         if (nch.gt.len(cchref(ic)).or.nch.le.0) then
-          ierr=-6
+          ierr=-5
           write(lu,'("VUNPFRQ06 - Channel ID too long")')
         else
           cchref(ic)=cout(1:nch)
         endif
 
-C  1.7 BBC ref
+C  1.6 BBC ref
 
-        ierr = 17
-        iret = fvex_field(7,ptr_ch(cout),len(cout)) ! get BBC ref
+        ierr = 16
+        iret = fvex_field(6,ptr_ch(cout),len(cout)) ! get BBC ref
         if (iret.ne.0) return
         nch = fvex_len(cout)
         if (nch.gt.len(cbbref(ic)).or.nch.le.0) then
-          ierr=-7
+          ierr=-6
           write(lu,'("VUNPFRQ07 - BBC ref too long")')
         else
           cbbref(ic)=cout(1:nch)
         endif
 
-C  1.8 Phase cal -- skip
+C  1.7 Phase cal -- skip
 
-C  1.9 Switching
+C  1.8 Switching
 
-        ierr = 19
+        ierr = 18
         csw(ic)='   ' ! initialize to blank
-        iret = fvex_field(9,ptr_ch(cout),len(cout)) ! get switch
+        iret = fvex_field(8,ptr_ch(cout),len(cout)) ! get switch
         if (iret.eq.0) then ! some switching, 1st switch
           iret = fvex_int(ptr_ch(cout),j)
           if (iret.ne.0.or.j.ne.1.or.j.ne.2) then
@@ -177,7 +180,7 @@ C  1.9 Switching
         endif ! some switching
 
 C       Get next channel def statement
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('chan_def'//char(0)),
      .  ptr_ch('FREQ'//char(0)),0)
       enddo ! get all channel defs
@@ -205,7 +208,7 @@ C 2. Bit density
 C 3. Sample rate
 
         ierr = 3
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('sample_rate'//char(0)),
      .  ptr_ch('FREQ'//char(0)),ivexnum)
         srate=0.d0
