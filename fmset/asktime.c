@@ -32,7 +32,7 @@ echo ();
 
   *flag = FALSE;
   tp = gmtime( &ut);
-  mvwprintw( maindisp, ROWA+0, COL0,
+  mvwprintw( maindisp, ROWA+1, COL0,
     "Press <return> to keep present value. Use month 0 for day of year.");
 
   kfirst = TRUE;
