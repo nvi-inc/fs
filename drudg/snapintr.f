@@ -30,6 +30,8 @@ C     nrv 930212 implicit none
 C     nrv 940114 Write a line with EARLY.
 C                Remove EARLY (LSTSUM can figure it out)
 C 960227 nrv Change iterid to lterid
+C 970214 nrv Write 2-letter code on first line
+C 970311 nrv Write both codes on first line.
 C
 C
       iblen = 128
@@ -43,10 +45,11 @@ C
       ELSE IF (IFUNC.EQ.2) THEN
 	NCH = ichmv_ch(IBUF2,1,'!* ')
       END IF
-      NCH = ICHMV(IBUF2,NCH,LEXPER,1,8)
-      NCH = NCH + IB2AS(IYR,IBUF2,NCH+2,4)
-      NCH = ICHMV(IBUF2,NCH+3,LSTNNA(1,ISTN),1,8)
-      NCH = ICHMV(IBUF2,NCH+2,LSTCOD(ISTN),1,1)
+      NCH = ICHMV(IBUF2,NCH,LEXPER,1,8)   ! experiment name
+      NCH = NCH + IB2AS(IYR,IBUF2,NCH+2,4)  ! current year
+      NCH = ICHMV(IBUF2,NCH+3,LSTNNA(1,ISTN),1,8)  ! station name
+      NCH = ICHMV(IBUF2,NCH+2,LstCOD(ISTN),1,2)  ! 1-letter code
+      NCH = ICHMV(IBUF2,NCH+2,LPOCOD(ISTN),1,2)  ! 2-letter code
       NCH = ichmv_ch(IBUF2,NCH,' ')
       call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
       call inc(LU_OUTFILE,KERR)
