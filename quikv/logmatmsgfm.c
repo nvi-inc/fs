@@ -15,18 +15,20 @@ long ip[5];
 {
   char buff[MAX_BUF];
 
-  int i, nchar, ilen, idum, icopy, nrec, cls_rcv();
+  int i, nchar, ilen, idum, icopy, nrec, cls_rcv(), iend, iack;
   long iclass;
   void cls_clr();
 
   strcpy(output,command->name);
   strcat(output,"/");
+  iend=strlen(output);
   
   iclass=ip[0];
   nrec=ip[1];
 
   ip[0]=ip[1]=0;
 
+  iack=0;
   for (i=0;i<nrec;i++) {
     nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
     if(i == 0) {
@@ -43,19 +45,36 @@ long ip[5];
       if(icount < 2) 
 	logit(NULL,-502,"4f");
     }
-    strcpy(output,command->name);
-    if(memcmp(buff+2,"ack",3)!=0 )
-      strcat(output,"/debug:");
+
+    if(memcmp(buff+2,"ack",3)!=0 ) {
+      if(iack) {
+	 cls_snd(ip,output,strlen(output),0,0);
+	 ip[1]++;
+      }
+      strcpy(output+iend,"debug:");
+      ilen=strlen(output);
+      icopy=MAX_OUT-(ilen+1);
+      icopy= icopy < (nchar-2) ? icopy : (nchar-2);
+      strncat(output,buff+2,icopy);
+      output[ilen+icopy]=0;
+      cls_snd(ip,output,strlen(output),0,0);
+      ip[1]++;
+      iack=0;
+    } else {
+      if(iack)
+	strcat(output,",");
+      else
+	output[iend]=0;
+      strcat(output,"ack");
+      iack=1;
+    }
     
-    ilen=strlen(output);
-    icopy=MAX_OUT-(ilen+1);
-    icopy= icopy < (nchar-2) ? icopy : (nchar-2);
-    output[ilen+icopy]=0;
-    cls_snd(ip,output,strlen(output),0,0);
-    ip[1]++;
-            
   }
 
+  if(iack) {
+    cls_snd(ip,output,strlen(output),0,0);
+    ip[1]++;
+  }
 
   cls_clr(iclass);
   
