@@ -24,7 +24,6 @@ extern int ibser;
 #define TIMEOUT		-4
 #define BUS_ERROR	-8
 #define HPIBERR		-20
-#define BSIZE           256   /* this size for DMA */
 #define IBCODE		300
 #define IBSCODE		300
 #define ASCII		  0
@@ -34,7 +33,6 @@ extern int ID_hpib;
 extern int serial;
 
 static int ascii_last=-1;
-static int read_size;
 
 /*-------------------------------------------------------------------------*/
 
@@ -160,7 +158,6 @@ int *kecho;
       }
     }
     ascii_last=1;
-    read_size=30;
   } else if (*mode != 0 && ascii_last != 0) {
     if (!serial) {
 #ifdef CONFIG_GPIB
@@ -193,7 +190,6 @@ int *kecho;
       }
     }
     ascii_last=0;
-    read_size=BSIZE;
   }
 
   if (!serial) {
@@ -215,8 +211,8 @@ int *kecho;
     return -1;
 #endif
   } else {
-    sprintf(buf,"rd #%d %d\r",read_size,*devid);
-    ierr=sib(ID_hpib,buf,-1,read_size,*timeout,0,centisec);
+    sprintf(buf,"rd #%d %d\r",*buflen,*devid);
+    ierr=sib(ID_hpib,buf,-1,*buflen,*timeout,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
