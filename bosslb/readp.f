@@ -20,7 +20,7 @@ C     IBUF - buffer for reading the command
 C     IBLEN  - length of IBUF in words
       dimension idcbp1(1),idcbp2(1)
       dimension istack(1),lstack(1)
-      integer*2 lproc1(10,1),lproc2(10,1)
+      integer*4 lproc1(4,1),lproc2(4,1)
       integer*2 ibuf(1)
       logical kbreak
 C
@@ -114,7 +114,7 @@ C     If the next procedure is used up too, continue to pop up
 C     the stacked names until we find one with more records.
 C
       call prget(istack,indexp,1,ierr)
-      irecl = lproc1(8,indexp)
+      irecl = lproc1(4,indexp)
       if (indexp.lt.0) goto 320
       id = fmpsetpos(idcbp1,ierr,irecl,-irecl)
       if (ierr.lt.0) goto 800
@@ -125,7 +125,7 @@ C
       goto 100
 C
 320   indexq = iabs(indexp)
-      irecl = lproc2(8,indexq)
+      irecl = lproc2(4,indexq)
       id = fmpsetpos(idcbp2,ierr,irecl,-irecl)
       if (ierr.lt.0) goto 800
       ilen = fmpreadstr(idcbp2,ierr,ibc)

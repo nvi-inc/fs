@@ -17,7 +17,7 @@ C     Stacks for procedure names and parameters
       dimension idcbp1(1),idcbp2(1),idcbsk(1)
 C     DCB'S for procedure files, schedule
       dimension lnames(12,1)
-      integer*2 lproc1(10,1),lproc2(10,1)
+      integer*4 lproc1(4,1),lproc2(4,1)
 C     Arrays with command names
       logical kblksk,kblkop
 C     True when schedule/operator stream is blocked
