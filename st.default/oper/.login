@@ -44,11 +44,5 @@ set ignoreeof
 setenv PAGER "less -i"
 setenv EDITOR vi
 setenv LESS -X
+#setenv FS_CHECK_NTP
 #
-
-
-
-
-
-
-
