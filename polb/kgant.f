@@ -33,7 +33,7 @@ C          field  in record  in $antenna section could not be decoded_
       kgant=kglin(lu,idcb,ierr,jbuf,il,len,iibuf)
       if (kgant) return
       if (len.lt.0) goto  8015
-      if (ichcm_ch(jbuf,1,'$antenna ').ne.0) goto 50
+      if (ichcm_ch(jbuf,1,'$antenna').ne.0) goto 50
 C
       irec=0
 90    continue
