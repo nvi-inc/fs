@@ -87,6 +87,7 @@ C
       if (ieq.eq.0) goto 500
 C                   If no parameters, go read VC
       call fs_get_lfreqv(lfreqv)
+      call fs_get_freqvc(freqvc)
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(4) = o'77'
 C       IP(5) = ICLCM
@@ -126,6 +127,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
 C                   Get the bandwidth as characters 
       if (cjchar(parm,1).eq.'*') then
+        call fs_get_ibwvc(ibwvc)
         ibw = ibwvc(ivcn)
       else if (cjchar(parm,1).eq.',') then
         ibw = 5       !  default is 2 mhz
@@ -192,7 +194,9 @@ C
       call fs_set_lfreqv(lfreqv)
 C     FREQVC(IVCN) = DAS2B(LFREQV(1,IVCN),1,6,IERR) 
       freqvc(ivcn) = freq - amod(freq+.001,.01) 
+      call fs_set_freqvc(freqvc)
       ibwvc(ivcn) = ibw 
+      call fs_set_ibwvc(ibwvc)
       itpivc(ivcn) = itp
       iatuvc(ivcn) = ia(1)
       iatlvc(ivcn) = ia(2)
