@@ -19,7 +19,8 @@ endif
 #
 backup:
 	rm -rf /tmp/st-$(ST_VERSION).tar.gz /tmp/stbackup-exclude /tmp/stbackup-include
-	cd /; find usr2/st-$(ST_VERSION) -name 'core'     -print >  /tmp/stbackup-exclude
+	cp misc/stbackup-exclude      /tmp/stbackup-exclude
+	cd /; find usr2/st-$(ST_VERSION) -name 'core'     -print >> /tmp/stbackup-exclude
 	cd /; find usr2/st-$(ST_VERSION) -name '#*#'      -print >> /tmp/stbackup-exclude
 	cd /; find usr2/st-$(ST_VERSION) -name '*~'       -print >> /tmp/stbackup-exclude
 	cd /; find usr2/st-$(ST_VERSION) -name '*.[oas]'  -print >> /tmp/stbackup-exclude
@@ -42,9 +43,9 @@ rmdoto:
 #
 ifdef LIB_DIR
 libs:
-        for dir in $(LIB_DIR); do\
-                make -C $$dir ;\
-        done
+	for dir in $(LIB_DIR); do\
+		make -C $$dir ;\
+	done
 endif
 #
 execs:
