@@ -37,7 +37,7 @@ int    *formhs;
       rte_sleep(sleep);
       rte_rawt(&raw);
       raw%=100;
-      sleep=(100+off-raw)%100;
+      sleep=(110+off-raw)%100;
       if(sleep!=0)
 	rte_sleep(sleep); 
       get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
