@@ -1257,7 +1257,8 @@ proc Replot {} {
 	# Plot active channel
 	
 	if {$dataset != 0} {
-	    if {$selectMatrix($dataset,4) != 1 && $c1_c2 <= 2} {
+#puts ">>>>> chans: $c1_c2, dataset: $dataset"
+	    if {$selectMatrix($dataset,4) != 1 && $c1_c2 <= 3} {
 		readData $dataset
 		set statusMsg $text_plot_wait
 		update
