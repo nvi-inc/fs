@@ -29,6 +29,11 @@ int lines=1;
 
 %x VERSION DEF LINE REF
 
+%e 5000
+%p 10000
+%n 2000
+%a 8000
+
 NAME		[^ \t\n;:=&*$"]*
 WHITE		[ \t]
 MANTISSA        [+-]?([0-9]+"."[0-9]+|[0-9]+|[0-9]+"."[0-9]*|[0-9]*"."[0-9]+)
@@ -42,13 +47,13 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <VERSION>"*"     	{yyerror("Comment not allowed before end of VEX_REV statement\n");}
 <VERSION>VEX_rev	{return T_VEX_REV;}
 <VERSION>{NAME}		{NEWSTR(yylval.sval,yytext); return T_NAME;}
-<VERSION>{WHITE}*		/* skip white space */
+<VERSION>{WHITE}*		{ /* skip white space */ }
 <VERSION>;              {trailing=1;BEGIN(LINE); return yytext[0];}
 <VERSION>=		{return(yytext[0]);}
 <VERSION>.		{yyerror("lexical analysis error 1");}
 
 <DEF>\n			{lines++;}
-<DEF>{WHITE}*		/* skip white space */
+<DEF>{WHITE}*		{ /* skip white space */ }
 <DEF>;			{trailing=1;BEGIN(LINE); return yytext[0];}
 <DEF>{NAME}*		{NEWSTR(yylval.sval,yytext); return T_NAME;}
 <DEF>\"			{ yylval.sval=quote(); return T_NAME;}
@@ -223,7 +228,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>start_literal\(		{BEGIN(INITIAL); yylval.llptr=lit(); return T_LITERAL;}
 	
 <LINE,REF>\n		{trailing=0;lines++;}
-<LINE,REF>{WHITE}*	/* skip white space */
+<LINE,REF>{WHITE}*	{/* skip white space */}
 <REF>{NAME}		{ NEWSTR(yylval.sval,yytext);return T_NAME; }
 <REF>:			{return(yytext[0]);}
 <REF>.			{yyerror("lexical analysis error 3");}
@@ -236,7 +241,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 \&\"		{ yylval.sval=quote(); return T_LINK;}
 
 \n		{trailing=0;lines++;}
-{WHITE}*	/* skip white space */
+{WHITE}*	{/* skip white space */}
 
 ;		{trailing=1;BEGIN(LINE);return(yytext[0]);}
 :		{return(yytext[0]);}
