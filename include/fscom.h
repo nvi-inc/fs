@@ -88,20 +88,21 @@ typedef struct fscom {
             char name[SEM_NUM][5];
         } sem;
         struct {
-           int bbc[ MAX_BBC];
-           long bbc_time[ MAX_BBC];
-           int dist[ MAX_DIST];
-           int vform;
-           long fm_cn_tm;
-           int rec;
-           int vkrepro;
-           int vkenable;
-           int vkmove;
-	   int systracks;
-           long rc_mv_tm;
-           int vklowtape;
-           int vkload;
-           long rc_ld_tm;
+	  int bbc[ MAX_BBC];
+	  long bbc_time[ MAX_BBC];
+	  int dist[ MAX_DIST];
+	  int vform;
+	  long fm_cn_tm;
+	  int rec;
+	  int vkrepro;
+	  int vkenable;
+	  int vkmove;
+	  int systracks;
+	  long rc_mv_tm;
+	  int vklowtape;
+	  int vkload;
+	  long rc_ld_tm;
+	  struct s2rec_check s2rec;
         } check;
         char stcnm[4][2];
         int  stchk[4];
@@ -127,6 +128,12 @@ typedef struct fscom {
         struct venable_cmd venable;
 	struct systracks_cmd systracks;
         struct dqa_cmd dqa;
+        struct user_info_cmd user_info;
+        struct s2st_cmd s2st;
+        int s2_rec_state;
+        struct rec_mode_cmd rec_mode;
+        struct data_valid_cmd data_valid;
+        struct s2label_cmd s2label;
         float freqlo[4];
         float frequp[4];
         float diaman;
@@ -161,4 +168,15 @@ typedef struct fscom {
         int sterp;
 	int wrhd_fs;
 	int vfm_xpnt;
+  struct {
+    struct {
+      int rstate;
+      int rstate_valid;
+      long int position;
+      long int posvar;
+      int position_valid;
+    } s2rec[2];
+    int s2rec_inuse;
+  } actual;
+  
 } Fscom;
