@@ -135,6 +135,10 @@ tape         qkr 2901 01 72
 st           qkr 3001 01 72
 rec          qkr 3101 01 72
 mcb          qkr 3201 01 77
+trackform    qkr 3301 01 27
+tracks       qkr 3401 01 27
+bit_density  qkr 3501 01 72
+systracks    qkr 3601 01 72
 cont         *xx 0000 02 77
 halt         *xx 0000 03 77
 log          xxx 0000 04 77
