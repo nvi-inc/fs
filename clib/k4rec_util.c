@@ -36,29 +36,26 @@ struct k4rec_mon *lcl;
     strcpy(output,lcl->pos);
     break;
   case 2:
-    strcpy(output,lcl->aux);
-    break;
-  case 3:
     ivalue = lcl->drum;
     if (ivalue >=0 && ivalue <STATE_KEY)
       strcpy(output,state_key[ivalue]);
     else
       sprintf(output,"BAD_VALUE",ivalue);
     break;
-  case 4:
+  case 3:
     ivalue = lcl->synch;
     if (ivalue >=0 && ivalue <STATE_KEY)
       strcpy(output,state_key[ivalue]);
     else
       sprintf(output,"BAD_VALUE",ivalue);
     break;
-  case 5:
+  case 4:
     strcpy(output,lcl->lost);
     break;
-  case 6:
+  case 5:
     sprintf(output,"0x%x",lcl->stat1);
     break;
-  case 7:
+  case 6:
     sprintf(output,"0x%x",lcl->stat2);
     break;
   default:
@@ -74,7 +71,6 @@ k4rec_req_q(ip)
 long ip[5];
 {
   ib_req7(ip,device,20,"SQN?");
-  ib_req7(ip,device,25,"AUX?");
   ib_req7(ip,device,20,"DRM?");
   ib_req7(ip,device,20,"SYT?");
   ib_req7(ip,device,20,"SYN?");
@@ -123,23 +119,6 @@ long ip[5];
   ib_req2(ip,device,"SYT=OFF");
 }
 
-k4rec_req_aux(ip,ptr)
-long ip[5];
-char *ptr;
-{
-  char buff[21];
-
-  strcpy(buff,"AUX=");
-  if(strlen(ptr) < 17)
-    strcat(buff,ptr);
-  else {
-    strncpy(buff+4,ptr,16);
-    buff[21]=0;
-  }
-
-  ib_req2(ip,device,buff);
-}
-
 k4rec_req_prl(ip,ptr)
 long ip[5];
 char *ptr;
@@ -171,12 +150,6 @@ long ip[5];
   if(1!=sscanf(buffer,"SQN=%8s",lcl->pos))
     if(strcmp(buffer,"NULL")==0)
       strcpy(lcl->pos,"NULL");
-
-  max=sizeof(buffer);
-  ib_res_ascii(buffer,&max,ip);
-  if(max < 0)
-    return -1;
-  sscanf(buffer,"AUX=%16s",lcl->aux);
 
   max=sizeof(buffer);
   ib_res_ascii(buffer,&max,ip);
