@@ -29,6 +29,7 @@ struct  rclad {
   char name[3];
   char hostname[MAX_NAME];
   int addr;
+  int okay;
   struct rclad *next;
 };
 
@@ -180,10 +181,13 @@ int get_addr(char *inbuf, int *inpos_ptr)
       printf(" found address %d\n",rptr->addr);
 #endif
       *inpos_ptr+=2;
-      return rptr->addr;
+      if(rptr->okay)
+	return rptr->addr;
+      else
+	return -2;
     }
 #ifdef DEBUG
-      printf(" not found\n");
+  printf(" not found\n");
 #endif
 
   return -1;
@@ -225,20 +229,33 @@ int init(long ip[5])
   }
 
   for (ptr=rclad_base;ptr!=NULL;ptr=ptr->next) {
-    ierr=rcl_open(ptr->hostname,&ptr->addr, errmsg);
+    if(getenv("S2_PING")!=NULL) {
+      char buf[128];
+      snprintf(buf,sizeof(buf),"fping -a -t 1000 -r 0 %s >/dev/null 2>&1",
+	       ptr->hostname);
+      ptr->okay=system(buf)==0;
+    } else
+      ptr->okay=1;
+
+    if(!ptr->okay)
+      logita(NULL,-328,"rl",ptr->name);
+    else {
+      ierr=rcl_open(ptr->hostname,&ptr->addr, errmsg);
+
 #ifdef DEBUG
-  printf(" opened device %s addr: %d errmsg %s\n",
-	 ptr->hostname,ptr->addr, errmsg);
+      printf(" opened device %s addr: %d errmsg %s\n",
+	     ptr->hostname,ptr->addr, errmsg);
 #endif
-    if(ierr!=RCL_ERR_NONE) {
-      fprintf(stderr,"rclcn error opening '%.2s' as '%s': "
-	      ,ptr->name,ptr->hostname);
-      fprintf(stderr,"%s",errmsg);
-      if(ierr>0) {
-	ierr=-130-ierr;
+      if(ierr!=RCL_ERR_NONE) {
+	fprintf(stderr,"rclcn error opening '%.2s' as '%s': "
+		,ptr->name,ptr->hostname);
+	fprintf(stderr,"%s",errmsg);
+	if(ierr>0) {
+	  ierr=-130-ierr;
+	}
+	
+	return ierr;
       }
-    
-      return ierr;
     }
   }
 
@@ -309,6 +326,9 @@ long ip[5];
 	  }
 	  outpos=0;
 	}
+      } else if(addr==-2) {
+	ierr=-329;
+	outbuf[outpos++]=ierr;
       } else {
 	ierr=-321;
 	outbuf[outpos++]=ierr;
