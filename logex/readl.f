@@ -131,12 +131,12 @@ C  characters.
 C
       if (ichcm_ch(lnewsn,1,'$$').ne.0) goto 310
       if (ich-23.le.0) goto 100
-      call ichmv(lnewso,1,ibuf,18,min0(8,ich-23))
-      call ichmv(lsourn,1,ibuf,18,min0(8,ich-23))
+      call ichmv(lnewso,1,ibuf,22,min0(8,ich-23))
+      call ichmv(lsourn,1,ibuf,22,min0(8,ich-23))
       call char2hol('  ',lnewsn,1,2)
       goto 100
 310   call ifill_ch(lnewso,1,8,' ')
-      if (ich-23.gt.0) call ichmv(lnewso,1,ibuf,12,min0(8,ich-23))
+      if (ich-23.gt.0) call ichmv(lnewso,1,ibuf,22,min0(8,ich-23))
       goto 1200
 C
 350   if (ichcm_ch(lsourn,1,'        ').eq.0) goto 100
