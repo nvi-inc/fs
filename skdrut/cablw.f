@@ -52,6 +52,7 @@ C            "prohibited" and operator must catch it and send it the
 C            right way. So allow extra time for antenna to slew to
 C            the wrong limit and then go around 360 degrees to the
 C            other wrap.
+C 970114 nrv Change amin0,amax0 to amin1,amax1 (found by Simone Magri, ATNF)
 C
 C
 C
@@ -142,9 +143,9 @@ C     and spring of 1994.
      .  aznew2 = aznew1-2.0*pi
       if (aznew2 .gt. 0.0) then
         if (aznow .lt. 3.0*pi) then
-          aznew = amin0(aznew1,aznew2)
+          aznew = amin1(aznew1,aznew2)
         else
-          aznew = amax0(aznew1,aznew2)
+          aznew = amax1(aznew1,aznew2)
         endif
       endif
       cablw = abs(aznew-aznow)
@@ -170,8 +171,8 @@ C     True if moving from quadrant 1 to 3
      .    aznew2 = aznew1+2.0*pi
         if (aznew-2.0*pi .gt. stnlim(1,1,istn)) 
      .    aznew2 = aznew1-2.0*pi
-        if (kq31) aznew=amin0(aznew1,aznew2)
-        if (kq24) aznew=amax0(aznew1,aznew2)
+        if (kq31) aznew=amin1(aznew1,aznew2)
+        if (kq24) aznew=amax1(aznew1,aznew2)
         cablw = abs(aznew-aznow)
         call char2hol ('  ',LWRNEW,1,2)
         if (aznew .gt. 3.5*pi)
