@@ -9,7 +9,7 @@ C
       integer idcbi(2)
       character*63 iobuf,iibuf,imbuf
       dimension ireg(2),ldum(3),ip(5)
-      integer*2 jbuf(50)
+      integer*2 jbuf(100)
       dimension lonoff(500),latoff(500)
       integer idcbo(2),ichcm_ch
 C
@@ -40,7 +40,7 @@ C          too few input points
      /             2Hs),2H a,2Hdd,2Hed/
       data qnchar /46/
 C          edit:     point(s) removed,     point(s) added
-      data il/50/,mpts/500/,idcbos/784/
+      data il/100/,mpts/500/,idcbos/784/
       data ip/5*0/
 C
       ic=ib2as(mpts,ldum,1,o'100000'+6)
