@@ -48,6 +48,9 @@ long ip[5];                           /* ipc parameters */
 	  shm_addr->tacd.display=0;
           tacd_dis(command,itask,ip);
 	  return;
+	} else if(!strcmp(command->argv[0],"version")){
+          tacd_dis(command,itask,ip);
+	  return;
 	} else if(!strcmp(command->argv[0],"cont")){
 	  shm_addr->tacd.continuous=1;
 	  skd_run("tacd",'n',ip);
