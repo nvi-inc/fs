@@ -11,7 +11,10 @@
 
 #include "../rclco/rcl/rcl.h"
 
+#define strchk(string,ptr)  strncmp(string,ptr,strlen(string))
+
 static int stat_count[RCL_STATCODE_MAX];
+static int first=1;
 
 void s2recstatus_(lwho)
 char *lwho;
@@ -131,9 +134,13 @@ end_update:
       int istat=status_list[i*2];
       int itype=status_list[i*2+1];
 
-      if(0==(itype&0x4))
+      if((0==(itype&0x4))&&!first)
 	stat_now[istat]++;
-      if(itype&0x4 || 0==stat_count[istat]++%20) {
+
+      if(itype&0x4 || 0==stat_count[istat]%20|| first) {
+	if((!first) && (itype&0x4)==0)
+	  stat_count[istat]++;
+
 	if(icount++==0)
 	  ini_rclcn_req(&req_buf);
 	add_rclcn_status_detail(&req_buf,"rc",istat,FALSE,FALSE);
@@ -171,6 +178,7 @@ end_update:
       for (k=0;k<num_entries_detail;k++) {      
 	char *newln;
 	char st[11];
+	int save;
 	
 	if(((~0x7)&status_det_list[j+1]) == 0) {
 	  strcpy(st,"---");
@@ -186,6 +194,12 @@ end_update:
 	ierr=-status_det_list[j];
 	sprintf(outbuf,"%s ",st);
 	j+=2;
+
+	if(first)
+	  save=strchk("STAT_DIAGDONE:",status_det_list+j)==0
+	    ||strchk("STAT_DIAGFAIL:",status_det_list+j)==0
+	    ||strchk("STAT_ERRLOG:",status_det_list+j)==0;
+
 	while(status_det_list[j]!=0) {
 	  newln=strchr(status_det_list+j,'\n');
 	  if(newln!=NULL)
@@ -197,12 +211,16 @@ end_update:
 	    strcat(outbuf,"\\n");
 	  }
 	}
-	logite(outbuf,ierr,"rz");
+	if((!first) || save)
+	  logite(outbuf,ierr,"rz");
       }
     }
     
   }
 clean_up:
+  if(first)
+    first=0;
+
   for (i=0;i<RCL_STATCODE_MAX;i++)
     if(stat_count[i]>0 && stat_now[i]==0) {
       sprintf(outbuf,"occurred a total of %d times, but has now stopped",
