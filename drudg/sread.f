@@ -11,7 +11,7 @@ C  Output:
       integer ierr,ivexnum
 
 C  Local:
-      integer m,ilen,i,j,k,ltype,ich,ic1,ic2,idummy,ic,
+      integer ilen,ltype,ich,ic1,ic2,idummy,ic,
      .icx,nch,iret
       integer htype ! section 2-letter code
       logical kcod ! set to ksta when $CODES is found
@@ -36,7 +36,8 @@ C  930708 nrv Add reading $HEAD section
 C 951213 nrv Mods for new Mark IV/VLBA setups.
 C 951214 nrv Add BARREL
 C 960409 nrv Initialize ITRA2
-C 960522 nrv Add call to READV, store observations in memory.
+C 960522 nrv Add call to VREAD, store observations in memory.
+C 960607 nrv Move initializations into FDRUDG
 C
 C
       close(unit=LU_INFILE)
@@ -51,42 +52,6 @@ C
         RETURN
       ENDIF
 C
-C  Initialize variables
-
-      NOBS = 0
-      NCELES = 0
-      NSATEL = 0
-      NSOURC = 0
-      NCODES = 0
-          ISETTM=0
-          IPARTM=0
-          ITAPTM=0
-            ISORTM=0
-            IHDTM=0
-            ITEARL=0
-        ncodes=0
-        do i=1,max_frq
-          lcode(i)=0
-        enddo
-      call ichmv_ch(lbarrel,1,'NONE')
-      do i=1,max_frq
-        lcode(i)=0
-        DO K=1,max_chan
-          DO J=1,max_pass
-            do m=1,max_stn
-                ITRAS(1,1,K,J,m,I)=-99
-                ITRAS(2,1,K,J,m,I)=-99
-                ITRAS(1,2,K,J,m,I)=-99
-                ITRAS(2,2,K,J,m,I)=-99
-                ITRA2(1,1,K,J,m,I)=-99
-                ITRA2(2,1,K,J,m,I)=-99
-                ITRA2(1,2,K,J,m,I)=-99
-                ITRA2(2,2,K,J,m,I)=-99
-            END DO
-          END DO
-        END DO
-      end do
-      NSTATN = 0
       IRECEL = -1.0
       ksta = .false.
         kcod = .false.
@@ -98,10 +63,10 @@ C
       if (cbuf(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
         close(lu_infile)
-        call readv(lskdfi,luscn,iret,ivexnum,ierr) ! read stations, codes, sources
+        call VREAD(lskdfi,luscn,iret,ivexnum,ierr) ! read stations, codes, sources
         if (iret.ne.0.or.ierr.ne.0) then
           write(luscn,9009) iret,ierr
-9009      format(' from READV iret=',i5,' ierr=',i5)
+9009      format(' from VREAD iret=',i5,' ierr=',i5)
         endif
         call vglinp(ivexnum,luscn,ierr)
         if (ierr.ne.0) then
@@ -133,6 +98,7 @@ C
         ELSE IF (ichcm_ch(IBUF,1,'$CODES').EQ.0) THEN
           call char2hol('FR',LTYPE,1,2)
           kcod = ksta
+          if (ksta) call frinit(nstatn,max_frq)
         ELSE IF (ichcm_ch(IBUF,1,'$HEAD').EQ.0) THEN
           call char2hol('HD',LTYPE,1,2)
           khed = kcod
@@ -279,9 +245,7 @@ C  needed, because it was checked before.
       if (.not.kcod) then
         write(luscn,'(" Re-reading ... ",$)')
         ncodes=0
-        do i=1,max_frq
-          lcode(i)=0
-        enddo
+        if (ksta) call frinit(nstatn,max_frq)
         rewind(LU_INFILE)
         call initf(LU_INFILE,IERR)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
