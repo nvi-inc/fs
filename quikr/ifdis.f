@@ -1,4 +1,4 @@
-      subroutine ifdis(ip,iclcm)
+      subroutine ifdis(ip,iclcm,kfirst)
 C  if distributor display <880922.1239>
 C 
 C 1.1.   IFDIS gets data from the IF distributor and displays it
@@ -23,6 +23,9 @@ C 2.2.   COMMON BLOCKS USED
       include '../include/fscom.i'
 C 
 C 2.5.   SUBROUTINE INTERFACE:
+C
+      logical kfirst
+c
 C     CALLING SUBROUTINES: IFD
 C     CALLED SUBROUTINES: character utilities 
 C 
@@ -65,7 +68,7 @@ C
 C 
       nchar = ireg(2) 
       nch = iscn_ch(ibuf2,1,nchar,'=')
-      kdata = (nch.eq.0)
+      kdata = (nch.eq.0).or..not.kfirst
 C                   If our command was only "device" we are waiting for 
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
@@ -82,7 +85,9 @@ C                   Move buffer contents into output list
         enddo
       else
         if (kcom) then
+          call fs_get_iat1if(iat1if)
           ia1 = iat1if
+          call fs_get_iat2if(iat2if)
           ia2 = iat2if
           in1 = inp1if
           in2 = inp2if
@@ -97,9 +102,11 @@ C
 C 
         ierr = 0
         nch = nch + ib2as(ia1,ibuf2,nch,o'100000'+2)   ! 1st attenuator setting
+        call fs_get_iat1if(iat1if)
         if (ia1.ne.iat1if) ierr = -301
         nch = mcoma(ibuf2,nch)
         nch = nch + ib2as(ia2,ibuf2,nch,o'100000'+2)   ! 2nd attenuator setting
+        call fs_get_iat2if(iat2if)
         if (ia2.ne.iat2if) ierr = -302
         nch = mcoma(ibuf2,nch)
         nch = iifed(-1,in1,ibuf2,nch,ilen)           ! encode if1 input
