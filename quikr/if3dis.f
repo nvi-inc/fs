@@ -83,51 +83,56 @@ C
 C                   Move buffer contents into output list 
         enddo
       else
-        if (kcom) then
-          iat = iatif3_fs
-          imix = imixif3_fs
-          do i=1,4
-            isw(i)=iswif3_fs(i)
-          enddo
-        else
-          ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
-          ireg(2) = get_buf(iclass,ibuf,-10,idum,idum)
+         if (kcom) then
+            iat = iatif3_fs
+            call fs_get_imixif3(imixif3)
+            imix = imixif3
+            do i=1,4
+               isw(i)=iswif3_fs(i)
+            enddo
+            call fs_get_freqif3(freqif3)
+            freq=freqif3
+         else
+            ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
+            ireg(2) = get_buf(iclass,ibuf,-10,idum,idum)
 C 
 C     3. Now the buffer contains: IFD=, and we want to add the data.
 C 
-          call ma2i3(ibuf1,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
-     &                iswp,freq,irem,ilo,tpi)
-        endif
-C 
-        ierr = 0
-        nch = nch + ib2as(iat,ibuf2,nch,o'100000'+2)   ! attenuator setting
-        nch = mcoma(ibuf2,nch)
-        nch = iif3ed(-1,imix,ibuf2,nch,ilen)           ! encode mixer state
-        do i=1,4
-          nch = mcoma(ibuf2,nch)
-          if(kbit(iswavif3_fs,i))then
-            nch = nch + ib2as(isw(i),ibuf2,nch,1)    ! encode switches
-          endif
-        enddo
+            call ma2i3(ibuf1,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
+     &           iswp,freq,irem,ilo,tpi)
+         endif
+C     
+         ierr = 0
+         nch = nch + ib2as(iat,ibuf2,nch,o'100000'+2) ! attenuator setting
+         nch = mcoma(ibuf2,nch)
+         nch = iif3ed(-1,imix,ibuf2,nch,ilen) ! encode mixer state
+         do i=1,4
+            nch = mcoma(ibuf2,nch)
+            if(kbit(iswavif3_fs,i))then
+               nch = nch + ib2as(isw(i),ibuf2,nch,1) ! encode switches
+            endif
+         enddo
+c     
+         nch = mcoma(ibuf2,nch)
+         if (.not.kcom) then
+            nch = iif3ed(-2,iswp,ibuf2,nch,ilen) ! switch box present
+         endif
+         nch = mcoma(ibuf2,nch)
 c
-        if (.not.kcom) then
-          nch = mcoma(ibuf2,nch)
-          nch = iif3ed(-2,iswp,ibuf2,nch,ilen)           ! switch box present
-          nch = mcoma(ibuf2,nch)
+         inf=freq/100
+         nch=nch+ib2as(inf,ibuf2,nch,z'8000'+4)
+         nch=ichmv_ch(ibuf2,nch,'.')
+         inf=freq-inf*100
+         nch=nch+ib2as(inf,ibuf2,nch,z'8000'+2)
+         nch = mcoma(ibuf2,nch)
 c
-          inf=freq/100
-          nch=nch+ib2as(inf,ibuf2,nch,z'8000'+4)
-          nch=ichmv_ch(ibuf2,nch,'.')
-          inf=freq-inf*100
-          nch=nch+ib2as(inf,ibuf2,nch,z'8000'+2)
-          nch = mcoma(ibuf2,nch)
-c
-          nch = iif3ed(-3,irem,ibuf2,nch,ilen)      ! encode remote/local
-          nch = mcoma(ibuf2,nch)
-          nch = iif3ed(-4,ilo,ibuf2,nch,ilen)      ! encode remote/local
-          nch = mcoma(ibuf2,nch)
-          nch = nch + ir2as(tpi,ibuf2,nch,6,0) - 1
-        endif
+         if (.not.kcom) then
+            nch = iif3ed(-3,irem,ibuf2,nch,ilen) ! encode remote/local
+            nch = mcoma(ibuf2,nch)
+            nch = iif3ed(-4,ilo,ibuf2,nch,ilen) ! encode remote/local
+            nch = mcoma(ibuf2,nch)
+            nch = nch + ir2as(tpi,ibuf2,nch,6,0) - 1
+         endif
       endif
 C 
 C     5. Now send the buffer to SAM and schedule PPT. 
