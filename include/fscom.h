@@ -103,6 +103,7 @@ typedef struct fscom {
 	  int vkload;
 	  long rc_ld_tm;
 	  struct s2rec_check s2rec;
+	  struct k4rec_check k4rec;
         } check;
         char stcnm[4][2];
         int  stchk[4];
@@ -202,4 +203,15 @@ typedef struct fscom {
         long freqif3;
         int imixif3;
 	struct pcalports_cmd pcalports;
+	int k4_rec_state;
+	struct k4st_cmd k4st;
+	char k4tape_sqn[9];
+        struct k4vclo_cmd k4vclo;
+        int iyrctl_fs;
+        struct k4vc_cmd k4vc;
+        struct k4vcif_cmd k4vcif;
+        struct k4vcbw_cmd k4vcbw;
+        struct k3fm_cmd k3fm;
+        int reccpu;
+        struct k4label_cmd k4label;
 } Fscom;
