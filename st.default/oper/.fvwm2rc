@@ -514,6 +514,7 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Monit: status C-S-2" Exec exec xterm -name monit2 -e monit2
 +              "Monit: Tsys C-S-3" Exec exec xterm -name monit3 -e monit3
 +              "Monit: LBA C-S-4" Exec exec xterm -name monit4 -e monit4
++              "Monit: Mark 5 C-S-5" Exec exec xterm -name monit5 -e monit5
 +              "Chekr C-S-C" Exec exec run -w chekr
 +              "Emacs C-S-E" Exec exec emacs
 +              "Logex C-S-L" Exec exec xterm -name logex -e logex
@@ -611,6 +612,7 @@ Key 1 A CS Exec exec xterm -name monit1 -e monit1
 Key 2 A CS Exec exec xterm -name monit2 -e monit2
 Key 3 A CS Exec exec xterm -name monit3 -e monit3
 Key 4 A CS Exec exec xterm -name monit4 -e monit4
+Key 5 A CS Exec exec xterm -name monit5 -e monit5
 Key c A CS Exec exec run -w chekr
 Key e A CS Exec exec emacs
 Key l A CS Exec exec xterm -name logex -e logex
@@ -618,8 +620,10 @@ Key p A CS Exec exec xterm -name pfmed -e pfmed
 Key s A CS Exec exec run -w setcl
 Key t A CS Exec exec xterm -name fmset -e fmset
 Key w A CS Exec exec xterm -ls -g 80x24+75+75 -rw
-Key Escape	A	SC	CirculateDown
-Key Escape	A	C	CirculateUp
+#Key Escape	A	SC	CirculateDown
+#Key Escape	A	C	CirculateUp
+Key Escape      A       C       Prev Focus
+Key Escape      A       SC      Next Focus
 # Arrow Keys
 # press arrow + control anywhere, and scroll by 1 page
 Key Left	A	C	Scroll -100 0
