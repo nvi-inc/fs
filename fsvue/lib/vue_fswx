@@ -5,7 +5,7 @@
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
 
-  set icondir /usr2/fs/fsvue
+  set ICONDIR /usr2/fs/fsvue/images
   set bfont {-*-lucida-normal-r-*-sans-18-*-*-*-*-*-*-*}
   set bfont2 {-*-ariel-normal-r-*-sans-24-*-*-*-*-*-*-*}
 
@@ -14,7 +14,7 @@
   wm positionfrom . user
   wm sizefrom . ""
   wm maxsize . 1152 900  
-  wm iconbitmap . @$icondir/vlb.icon
+  wm iconbitmap . @$ICONDIR/vlb.icon
   wm iconposition . 1200 0
   wm iconname . {fsvue}
 #  wm geometry . +5+25

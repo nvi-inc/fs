@@ -4,7 +4,7 @@
 # Product of Raymond Gonzalez for NVI,Inc./GSFC (2000)
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
-  set icondir /usr2/fs/fsvue
+  set ICONDIR /usr2/fs/fsvue/images
 # Use this size of fonts for the information icon, or help.
   set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
@@ -12,7 +12,7 @@
   wm positionfrom . user
   wm sizefrom . ""
   wm maxsize . 1152 900  
-  wm iconbitmap . @$icondir/vlb.icon
+  wm iconbitmap . @$ICONDIR/vlb.icon
   wm iconposition . 1200 0
   wm iconname . {fsvue}
 #  wm geometry . +5+25
@@ -30,13 +30,14 @@ set newfile_filename ""
 set current_filename ""               ;# The selected log file
 set current_DefaultDir /usr2/log      ;# Default directory for FS log files
 
+set newfile_filename [lindex $argv 1]
 
 # Decide on font size.
   if {$argv=="L"} {
       set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
   } else { 
       set bfont {9x15}
-  }
+  }  
 
 # Top frame is a menubar
 # there is more magic that you can do with this
@@ -61,7 +62,7 @@ DSPlog }
 
 button .m.logl -text "log directory" -relief {raise} -font $bfont -background navy -fg white -command { fileselection_dialog }
 
-button .m.help -bitmap @$icondir/info.icon -relief {raise} -font $bfont -background navy -fg white -command {Help logs}
+button .m.help -bitmap @$ICONDIR/info.icon -relief {raise} -font $bfont -background navy -fg white -command {Help logs}
 
 button .m.ef -text "Format_help" -relief {raise} -font $bfont -background navy -fg white -command {Help format}
 
@@ -94,7 +95,6 @@ proc forAllMatches { w pattern script} {
 	}
     }
 
-
 # setup display area( text and scrollbar) to monitor Field System.
 # This will be pipeing information from the station.log file.
 # 
@@ -106,6 +106,32 @@ text .t2 -height 1 -font $bfont -bg white -fg Red
 
 pack .sb -side right -fill y
 pack .t .t2 -side top -fill both -expand 1
+
+#text: read the log file from fsvue into the text widget
+proc loadcalling file {
+    global newfile_filename
+    .t delete end 1.0
+    set f [open $file r]
+    while { ![eof $f] } {
+#        .t insert end [read $f 10240]
+        .t insert end [read $f 10000000]
+        .t see end; 
+        .t yview end
+    }
+
+    # Mark error messages.
+    #forAllMatches .t "ERROR" {
+    #    .t tag add big first last
+    #}
+    #.t tag configure big -background Red -foreground white -borderwidth 2 \
+    #        -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+    #        -relief sunken
+    close $f
+    .t2 delete 1.0 end
+    .t2 insert end "You are now viewing $newfile_filename"
+}
+
+loadcalling $newfile_filename
 
 # Update display area with line of text
 proc line {text} {
@@ -151,7 +177,8 @@ proc loadFile file {
     .t delete end 1.0
     set f [open $file r]
     while { ![eof $f] } {
-	.t insert end [read $f 10240]
+#	.t insert end [read $f 10240]
+	.t insert end [read $f 10000000]
 	.t see end; 
 	.t yview end
     }
@@ -367,14 +394,14 @@ data: The error or entry field.
 proc tk_dialog {w title text bitmap default args} {
     global tk_priv bfont2
 
-    set icondir /usr2/fs/fsvue
+    set ICONDIR /usr2/fs/fsvue/images
     # 1. Create the top-level window and divide it into top
     # and bottom parts.
 
     catch {destroy $w}
     toplevel $w -class Dialog
     wm title $w $title
-    wm iconbitmap $w @$icondir/vlb.icon
+    wm iconbitmap $w @$ICONDIR/vlb.icon
     wm iconname $w {VLBIIE}
 
     frame $w.top -relief raised -bd 1 -bg blue

@@ -4,13 +4,13 @@
 # Product NVI,Inc./GSFC (2000)
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
-  set icondir /usr2/fs/fsvue
+  set ICONDIR /usr2/fs/fsvue/images
 
   global tkVersion
   wm positionfrom . user
   wm sizefrom . ""
   wm maxsize . 1152 900  
-  wm iconbitmap . @$icondir/vlb.icon
+  wm iconbitmap . @$ICONDIR/vlb.icon
   wm iconposition . 1200 0
   wm iconname . {fsvue}
 #  wm geometry . +5+25
@@ -57,7 +57,7 @@ button .m.fsprc -text "Procedures" -relief {raise} -font $bfont -background navy
 
 button .m.fssnp -text "skd/SNAP" -relief {raise} -font $bfont -background navy -fg white -command { fileselection_dialog $snap_DefaultDir }
 
-button .m.help -bitmap @$icondir/info.icon -relief {raise} -font $bfont -background navy -fg white -command {Help files}
+button .m.help -bitmap @$ICONDIR/info.icon -relief {raise} -font $bfont -background navy -fg white -command {Help files}
 
 button .m.q -text "Exit" -relief {raise} -font $bfont -background red -fg white -command exit 
 
@@ -309,14 +309,14 @@ of the items mentioned by following the path.
 proc tk_dialog {w title text bitmap default args} {
     global tk_priv bfont
 
-    set icondir /usr2/fs/fsvue
+    set ICONDIR /usr2/fs/fsvue/images
     # 1. Create the top-level window and divide it into top
     # and bottom parts.
 
     catch {destroy $w}
     toplevel $w -class Dialog
     wm title $w $title
-    wm iconbitmap $w @$icondir/vlb.icon
+    wm iconbitmap $w @$ICONDIR/vlb.icon
     wm iconname $w {VLBIIE}
 
     frame $w.top -relief raised -bd 1 -bg blue
