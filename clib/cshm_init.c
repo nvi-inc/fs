@@ -80,10 +80,17 @@ void cshm_init()
 
   shm_addr->form4.enable[0]=0;
   shm_addr->form4.enable[1]=0;
+  shm_addr->form4.barrel=0;
 
   for(i=0; i<64; i++)
     shm_addr->form4.codes[i]=-1;
 
+  for(j=0;j<16;j++)
+    for(i=0; i<64; i++) {
+      shm_addr->form4.roll[j][i]=-2;
+      shm_addr->form4.a2d[j][i]=-2;
+    }
+  
   shm_addr->thin[0]=-1;
   shm_addr->thin[1]=-1;
 
@@ -150,6 +157,8 @@ void cshm_init()
   shm_addr->k4pcalports.ports[0]=0;
   shm_addr->k4pcalports.ports[1]=0;
 
+  shm_addr->k4rec_mode.im=-1;
+  shm_addr->k4rec_mode.nm=-1;
 
   shm_addr->check.vkenable[0]=0;
   shm_addr->check.vkenable[1]=0;
