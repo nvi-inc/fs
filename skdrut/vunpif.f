@@ -15,6 +15,7 @@ C  History:
 C 960522 nrv New.
 C 970114 nrv For Vex 1.5 get IF name from def directly instead of ref name, 
 C            and add polarization to call.
+C 970124 nrv Move initialization to front.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -43,6 +44,15 @@ C  LOCAL:
       integer fvex_len,fvex_field,ptr_ch,
      .fvex_double,fvex_units,fget_all_lowl
 C
+C  Initialize
+      nifdefs=0
+      do id=1,max_ifd
+        cifref(id)=''
+        flo(id)=0.d0
+        idum = ichmv_ch(ls(id),1,'  ')
+        idum = ichmv_ch(lin(id),1,'  ')
+        idum = ichmv_ch(lp(id),1,'  ')
+      enddo
 C
 C  1. IFD def statements
 C
@@ -71,7 +81,6 @@ C  1.1 IF def
 C  1.2 IF input
   
         ierr = 12
-        idum = ichmv_ch(lin(id),1,'  ')
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get input
         if (iret.ne.0) return
         nch = fvex_len(cout)
@@ -88,7 +97,7 @@ C  1.2 IF input
             idum = ichmv_ch(lin(id),1,cout(1:nch))
           else
             ierr=-2
-            write(lu,'("VUNPIFD05 - Invalid IF input")')
+            write(lu,'("VUNPIFD05 - Invalid IF input ",a)') cout(1:nch)
           endif
         endif
 C       else ! not there, use last 2 char of ref <<<<<<<<<<< kludge
@@ -106,7 +115,6 @@ C       endif
 C  1.3 Polarization 
 
         ierr = 13
-        idum = ichmv_ch(lp(id),1,'  ')
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get IFD ref
         if (iret.ne.0) return
         nch = fvex_len(cout)
@@ -121,7 +129,6 @@ C  1.3 Polarization
 C  1.4 LO frequency
 
         ierr = 14
-        flo(id)=0.d0
         iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get number
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
@@ -129,7 +136,7 @@ C  1.4 LO frequency
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
         if (iret.ne.0.or.d.lt.0.d0) then
           ierr=-4
-          write(lu,'("VUNPIFD02 - Invalid LO frequency")')
+          write(lu,'("VUNPIFD02 - Invalid LO frequency",d10.2)') d
         else
           flo(id) = d/1.d6
         endif
@@ -137,7 +144,6 @@ C  1.4 LO frequency
 C  1.5 Sideband
 
         ierr = 15
-        idum = ichmv_ch(ls(id),1,'  ')
         iret = fvex_field(5,ptr_ch(cout),len(cout)) ! get IFD ref
         if (iret.ne.0) return
         nch = fvex_len(cout)

@@ -1,5 +1,5 @@
       SUBROUTINE vunps2m(modef,stdef,ivexnum,iret,ierr,lu,
-     .ls2m,lm)
+     .ls2m)
 C
 C     VUNPS2M gets the S2 mode from the $TRACKS section 
 C     for station STDEF and mode MODEF. 
@@ -15,6 +15,7 @@ C  History:
 C 960817 nrv New.
 C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C 970117 nrv Remove "track_frame_format", irrelevant for S2.
+C 970124 nrv Remove "lsm" from call.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -28,18 +29,18 @@ C  OUTPUT:
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       integer*2 ls2m(8) ! recording format
-      integer*2 lm(4) ! formatter mode 
 C
 C  LOCAL:
       character*128 cout
       integer nch,idumy
       integer ichmv_ch,fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
+C    Initialize.
+      CALL IFILL(Ls2M,1,16,oblank)
 C
 C  1. The S2 record mode
 C
       ierr = 1
-      CALL IFILL(Ls2M,1,16,oblank)
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('S2_recording_mode'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)

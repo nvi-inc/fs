@@ -19,6 +19,7 @@ C 960810 nrv Add tape motion fields
 C 960817 nrv Add S2 tape length and tape motion fields
 C 961022 nrv Change MARK to Mark if found in rack and recorder names.
 C 970114 nrv Add "_type" to rack and recorder Vex names.
+C 970123 nrv Move initialization to start.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -52,13 +53,28 @@ C  LOCAL:
      .ptr_ch,fvex_len,ichcm_ch,ichmv_ch ! function
 C
 C
+C  Initialize in case we have to leave early.
+
+      CALL IFILL(lrec,1,8,oblank)
+      CALL IFILL(lrack,1,8,oblank)
+      idumy = ichmv_ch(lidter,1,'    ')
+      CALL IFILL(lnater,1,8,oblank)
+      nheadstack=1 ! default
+      maxtap = MAX_TAPE
+      CALL IFILL(ls2sp,1,8,oblank)
+      ns2tap=0
+      nrec = 1 ! default
+      ite=0
+      itl=0
+      itg=0 
+      ctapemo=''
+
 C  1. The recorder type
 C
       ierr=1
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('record_transport_type'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
-      CALL IFILL(lrec,1,8,oblank)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get recorder name
         if (iret.ne.0) return
@@ -86,7 +102,6 @@ C
 C  2. The rack type
 C
       ierr = 2
-      CALL IFILL(lrack,1,8,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('electronics_rack_type'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -118,7 +133,6 @@ C
 C  3. The terminal ID. 
 C
       ierr = 3
-      idumy = ichmv_ch(lidter,1,'    ')
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('recording_system_ID'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -137,7 +151,6 @@ C
 C  4. Terminal name, 8 characters.
 C
       ierr = 4
-      CALL IFILL(lnater,1,8,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('recording_system_name'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -155,7 +168,6 @@ C
 C  5. Number of headstacks at this station.
 
       ierr = 5
-      nheadstack=1 ! default
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('headstack'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -177,9 +189,6 @@ C     and speed will follow.
 C *** how to handle this?
 C
       ierr = 6
-      maxtap = MAX_TAPE
-      CALL IFILL(ls2sp,1,8,oblank)
-      ns2tap=0
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('tape_length'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -226,7 +235,6 @@ C
 C  7. Number of recorders
 
       ierr = 7
-      nrec = 1
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('number_drives'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
@@ -246,10 +254,6 @@ C  7. Number of recorders
 C  8. Tape motion, early start, late stop, gap time. 
 
       ierr = 8
-      ite=0
-      itl=0
-      itg=0 
-      ctapemo=''
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('tape_motion'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)

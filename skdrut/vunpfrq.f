@@ -16,6 +16,7 @@ C 960520 nrv New.
 C 960607 nrv Initialize band ID to '-', not blank.
 C 970114 nrv Remove polarization, shift up all subsequent field numbers.
 C            (pol was not read or stored anyway)
+C 970124 nrv Move initialization to start.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -48,7 +49,20 @@ C  LOCAL:
       integer fvex_double,fvex_len,fvex_int,fvex_field,
      .fvex_units,ptr_ch,fget_all_lowl
 C
+C  Initialize.
 C
+      nchandefs=0
+      do ic=1,max_chan
+        idum = ichmv_ch(lsg(ic),1,'- ') ! initialize
+        frf(ic)=0.d0
+        idum = ichmv_ch(lsb(ic),1,'  ')
+        cchref(ic)=''
+        vbw(ic)=0.d0
+        csw(ic)='   ' ! initialize to blank
+        cbbref(ic)=''
+      enddo
+      bitden=0.d0
+      srate=0.d0
 C  1. Channel def statements
 C
       ierr = 1
@@ -64,7 +78,6 @@ C  1.1 Subgroup
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
         if (iret.ne.0) return
-        idum = ichmv_ch(lsg(ic),1,'- ') ! initialize
         NCH = fvex_len(cout)
         if (nch.gt.1) then
           ierr = -1
@@ -79,7 +92,6 @@ C  Removed in Vex 1.5. Shift up all field numbers.
 C  1.2 RF frequency
 
         ierr = 12
-        frf(ic)=0.d0
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get frequency
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
@@ -97,7 +109,6 @@ C  1.3 Net SB
         ierr = 13
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get sideband
         if (iret.ne.0) return
-        idum = ichmv_ch(lsb(ic),1,'  ')
         cout(1:1) = upper(cout(1:1))
         if (cout(1:1).ne.'U'.and.cout(1:1).ne.'L') then
           ierr = -3
@@ -113,7 +124,6 @@ C  1.4 Bandwidth
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
-        vbw(ic)=0.d0
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
         if (iret.ne.0.or.d.lt.0.d0) then
           ierr = -4
@@ -153,7 +163,6 @@ C  1.7 Phase cal -- skip
 C  1.8 Switching
 
         ierr = 18
-        csw(ic)='   ' ! initialize to blank
         iret = fvex_field(8,ptr_ch(cout),len(cout)) ! get switch
         if (iret.eq.0) then ! some switching, 1st switch
           iret = fvex_int(ptr_ch(cout),j)
@@ -192,7 +201,6 @@ C 2. Bit density
         iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('record_density'//char(0)),
      .  ptr_ch('DAS'//char(0)),ivexnum)
-        bitden=0.d0
         if (iret.eq.0) then
           iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get number
           if (iret.ne.0) return
@@ -213,7 +221,6 @@ C 3. Sample rate
         iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('sample_rate'//char(0)),
      .  ptr_ch('FREQ'//char(0)),ivexnum)
-        srate=0.d0
         if (iret.eq.0) then
           iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get number
           if (iret.ne.0) return
