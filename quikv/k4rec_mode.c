@@ -18,6 +18,7 @@ long ip[5];                           /* ipc parameters */
       char *ptr;
       struct k4rec_mode_cmd lclc;
       int ivc;
+      int isetup;
 
       char *arg_next();
 
@@ -28,6 +29,8 @@ long ip[5];                           /* ipc parameters */
       ichold= -99;                    /* check vlaue holder */
 
       ip[0]=ip[1]=0;
+
+      isetup=-1;          /* 1 for DFC2100 reset; -1 for no reset */
 
       if(!(shm_addr->equip.drive[0] == K4 &&
 	   (shm_addr->equip.drive_type[0] == K42 ||
@@ -46,11 +49,12 @@ long ip[5];                           /* ipc parameters */
         if (*command->argv[0]=='?') {
           k4rec_mode_dis(command,itask,ip);
           return;
-         }
+        }
 
 /* if we get this far it is a set-up command so parse it */
 
 parse:
+      isetup=1;               /* This is a set-up command for DFC2100 */
       ilast=0;                                      /* last argv examined */
       memcpy(&lclc,&shm_addr->k4rec_mode,sizeof(lclc));
 
@@ -61,11 +65,19 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
-      /* removed for now WEH 020417
-      if (!memcmp(&shm_addr->k4rec_mode,&lclc,sizeof(lclc))) {
-        return;
+/*  If command parameters are the same as those on shared memory &&    */
+/*  previous execution has succeeded, terminate this set-up and        */
+/*  emulate read module.                                               */
+
+      if (memcmp(&shm_addr->k4rec_mode,&lclc,sizeof(lclc))==0
+        && shm_addr->k4rec_mode_stat==1) {
+        ip[0]=ip[1]=0;
+        k4rec_mode_req_q(ip);
+        command->equal=0;
+	command->argv[0]=command->argv[1]=NULL;
+        goto k4con;
       }
-      */
+
 /* all parameters parsed okay, update common */
 
       ichold=shm_addr->check.k4rec.check;
@@ -80,7 +92,13 @@ parse:
 k4con:
       skd_run("ibcon",'w',ip);
       skd_par(ip);
-
+      if (isetup==1) {
+        if (ip[2]==0) {
+          shm_addr->k4rec_mode_stat=1; /* Succeed */
+        } else {
+          shm_addr->k4rec_mode_stat=-1; /* Failure */
+        }
+      }
       if (ichold != -99) {
 	shm_addr->check.k4rec.state=TRUE;
 	if (ichold >= 0)
