@@ -6,5 +6,5 @@ int *is1,*is2,*nc;
 {
   int i;
   for(i=0;i<*nc;i++)
-    ibuf1[*is1+i]=toupper(ibuf2[*is2+i]);
+    ibuf1[*is1+i-1]=toupper(ibuf2[*is2+i-1]);
 }
