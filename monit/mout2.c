@@ -218,97 +218,97 @@ int iyear;
   } else if (kM3rack) {
     switch (shm_addr->iratfm) {
     case 0:
-      printw("8.000");
+      printw("8.00");
       break;
     case 1:
-      printw("0.000");
+      printw("0.00");
       break;
     case 2:
-      printw("0.125");
+      printw("0.12");
       break;
     case 3:
-      printw("0.250");
+      printw("0.25");
       break;
     case 4:
-      printw("0.500");
+      printw("0.50");
       break;
     case 5:
-      printw("1.000");
+      printw("1.00");
       break;
     case 6:
-      printw("2.000");
+      printw("2.00");
       break;
     case 7:
-      printw("4.000");
+      printw("4.00");
       break;
     default:
-      printw("     ");
+      printw("    ");
     }
   } else if (kM4rack) {
     switch (shm_addr->form4.rate) {
     case 0:
-      printw("0.125");
+      printw("0.12");
       break;
     case 1:
-      printw("0.250");
+      printw("0.25");
       break;
     case 2:
-      printw("0.500");
+      printw("0.50");
       break;
     case 3:
-      printw("1.000");
+      printw("1.00");
       break;
     case 4:
-      printw("2.000");
+      printw("2.00");
       break;
     case 5:
-      printw("4.000");
+      printw("4.00");
       break;
     case 6:
-      printw("8.000");
+      printw("8.00");
       break;
     case 7:
-      printw("16.00");
+      printw("16.0");
       break;
     case 8:
-      printw("32.00");
+      printw("32.0");
       break;
     default:
-      printw("     ");
+      printw("    ");
       break;
     }
   } else if (kVrack) {
     switch (shm_addr->vform.rate) {
     case 0:
-      printw("0.250");
+      printw("0.25");
       break;
     case 1:
-      printw("0.500");
+      printw("0.50");
       break;
     case 2:
-      printw("1.000");
+      printw("1.00");
       break;
     case 3:
-      printw("2.000");
+      printw("2.00");
       break;
     case 4:
-      printw("4.000");
+      printw("4.00");
       break;
     case 5:
-      printw("8.000");
+      printw("8.00");
       break;
     case 6:
-      printw("16.00");
+      printw("16.0");
       break;
     case 7:
-      printw("32.00");
+      printw("32.0");
       break;
     default:
-      printw("     ");
+      printw("    ");
       break;
     }
   }
-  move(ROW1+2,COL1+11);
+  move(ROW1+2,COL1+10);
   if(kS2drive) {
     move(ROW1+1,COL1+19);
     switch (shm_addr->s2st.speed) {
@@ -324,37 +324,60 @@ int iyear;
       else
 	printw("$$$");
     }
-  } else if(kMdrive || kVdrive)
+  } else if(kMdrive || kVdrive) {
+    int Kthin= strncmp((char *)shm_addr->lgen,"853",3)==0; 
     switch (shm_addr->ispeed) {
     case 0:
-      printw("  0");
+	printw("    0");
       break;
     case 1:
-      printw("  3");
+      if(!Kthin)
+        printw("4.218");
+      else
+	printw("    5");
       break;
     case 2:
-      printw("  8");
+      if(!Kthin)
+        printw("8.437");
+      else
+	printw("   10");
       break;
     case 3:
-      printw(" 17");
+      if(!Kthin)
+	printw("16.87");
+      else
+	printw("   20");
       break;
     case 4:
-      printw(" 34");
+      if(!Kthin)
+	printw("33.37");
+      else
+	printw("   40");
       break;
     case 5:
-      printw(" 68");
+      if(!Kthin)
+	printw(" 67.5");
+      else
+	printw("   80");
       break;
     case 6:
-      printw("135");
+      if(!Kthin)
+	printw("  135");
+      else
+	printw("  160");
       break;
     case 7:
-      printw("270");
+      if(!Kthin)
+	printw("  270");
+      else
+	printw("  320");
       break;
     case -3:
-      printw("%3d",shm_addr->cips/100);
+      printw("%3d.%1d",shm_addr->cips/100,(shm_addr->cips%100)/10);
     default:
-      printw("  0");
+      printw("   ");
     }
+  }
 
   move(ROW1+2,COL1+16);
   if(kMdrive || kVdrive)
