@@ -1,36 +1,35 @@
                 cable - get the cable cal reading
- 
- Syntax:      cable=message
- 
- Response:    cable/value
- 
- 
- Settable parameters:
- message      ASCII character to be sent to counter.
- 
- Monitor-only parameters:
- value        cable cal reading
- 
- Comments: 
- When issued with no parameters this command sends a request for
- a reading to the HPIB counter which is connected to the phase
- cal cable measurement system.
- 
- The ibad.ctl control file must contain an entry with mnemonic CA
- and the device name.
- 
- If your counter returns a non-standard response, you can control
- the parsing of the response by placing the uncommented line
- below in your stcmd.ctl file:
- 
- *command     seg sbpa bo eq
- cable        qkr 13xx 01 FFFFFF
- 
- where xx is the number of the character position to begin
- decoding at. The first character position is counted as position
- 1. If the value of xx is 00 decoding will begin after the
- rightmost non-numeric character (including "E" for exponent in
- scientific notation). The FS uses a value of 04 for xx by
- default.
- 
- Please see also the cablediff and cablelong commands. 
+
+Syntax:     cable=message
+
+Response:   cable/value
+
+
+Settable parameters:
+message     ASCII character to be sent to counter.
+
+Monitor-only parameters:
+value       cable cal reading
+
+Comments: 
+When issued with no parameters this command sends a request for a
+reading to the HPIB counter which is connected to the phase cal
+cable measurement system.
+
+The ibad.ctl control file must contain an entry with mnemonic CA
+and the device name.
+
+If your counter returns a non-standard response, you can control
+the parsing of the response by placing the uncommented line below
+in your stcmd.ctl file:
+
+*command     seg sbpa bo eq
+cable        qkr 13xx 01 FFFFFF
+
+where xx is the number of the character position to begin decoding
+at. The first character position is counted as position 1. If the
+value of xx is 00 decoding will begin at the first character from
+the left that could be part of a number in scientific notation
+("0123456789.+-Ee").   The FS uses a value of 04 for xx by default.
+
+Please see also the cablediff and cablelong commands.
