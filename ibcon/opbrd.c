@@ -10,8 +10,12 @@
 #include <errno.h>
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #else
 extern int ibsta;
 extern int iberr;
@@ -28,12 +32,17 @@ extern int ibser;
 int ID_hpib;
 int serial;
 
-int opbrd_(dev,devlen,error,ipcode)
+int opbrd_(dev,devlen,error,ipcode, no_online,set_remote_enable,
+	   no_interface_clear_board,interface_clear_converter)
 
 int *dev;
 int *devlen;
 int *error;
 long *ipcode;
+int *no_online;
+int *set_remote_enable;
+int *no_interface_clear_board;
+int *interface_clear_converter;
 
 {
   char device[65];
@@ -58,8 +67,11 @@ long *ipcode;
     *(device + *devlen) = '\0';
 
 /* find the device and assign a file descriptor */
-
+#ifdef NI_DRIVER
+  if(strcmp(device,"gpib0")==0) {
+#else
   if(strcmp(device,"board")==0) {
+#endif
 #ifdef CONFIG_GPIB
     ID_hpib = ibfind(device);
     if(ID_hpib < 0 ) {
@@ -97,9 +109,12 @@ long *ipcode;
 
   if(!serial) {
 #ifdef CONFIG_GPIB
-#ifdef REV_2
+#if defined( REV_2) || defined(NI_DRIVER)
 /* this causes some problem for rev 1 */
-    ierr=ibonl(ID_hpib,1);
+    if(!*no_online)
+      ierr=ibonl(ID_hpib,1);
+    else
+      ierr=0;
 #else
     ierr=0;
 #endif
@@ -114,14 +129,15 @@ long *ipcode;
     *error = -(IBCODE + 22);
     return -1;
 #endif
-  } else {
+  } else if(!*no_online) {
     ierr=sib(ID_hpib,"\ro 1\r",-1,0,0,0,centisec);
     if(ierr==-2||ierr==-1 || ierr==-5) {
       *error = -520+ierr;
       memcpy((char *)ipcode,"BO",2);
       return -1;
     }
-  }
+  } else
+    ierr=0;
 
   if (serial) {
     ierr=sib(ID_hpib,"st c n\r",-1,0,100,0,centisec);
@@ -158,7 +174,7 @@ long *ipcode;
 
 /* send an interface clear, making the hpib controller-in-chage */
 
-  if (!serial) {
+  if (!serial && (!*no_interface_clear_board)) {
 #ifdef CONFIG_GPIB
 /* this is the only way to become CIC */
     if (ibsic(ID_hpib)&ERR) {
@@ -172,8 +188,8 @@ long *ipcode;
     *error = -(IBCODE + 22);
     return -1;
 #endif
-  } else {
-/* some devices don't like this
+  } else if (*interface_clear_converter){
+  /* some devices don't like this */
     ierr=sib(ID_hpib,"si\r",-1,0,200,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
@@ -189,8 +205,24 @@ long *ipcode;
       memcpy((char *)ipcode,"BS",2);
       return -1;
     }
-*/
   }
+
+  if((!serial) && (*set_remote_enable)) {
+#ifdef CONFIG_GPIB
+    ibsre(ID_hpib,1);  	/* must turn REN on before addressing device */
+    if ((ibsta & ERR) != 0) {
+      if(iberr==0)
+	logit(NULL,errno,"un");
+      *error = -(IBCODE + iberr); 
+      memcpy((char *)ipcode,"BR",2);
+      return -1;
+    } 
+#else
+    *error = -(IBCODE + 22);
+    return -1;
+#endif
+  }
+
 
   if(serial) {
     ierr=sib(ID_hpib,"eot 1\r",-1,0,100,0,centisec);
