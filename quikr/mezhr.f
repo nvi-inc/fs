@@ -60,7 +60,8 @@ c
           call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
           call put_buf(iclass,ibuf2,-13,'fs','  ')
           nrec = nrec+1
-          call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
+          call fs_get_vac4(vac4)
+          call rpbr2ma4(ibuf2(3),ibr4tap,vac4)!! bitrate has a different strobe
         endif
         call put_buf(iclass,ibuf2,-13,'fs','  ')
         nrec = nrec+1
@@ -324,7 +325,8 @@ C !mk3 or mk4 drive (&VLBA rack), not likely
                   call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
                   call put_buf(iclass,ibuf2,-13,'fs','  ')
                   nrec = nrec+1
-                  call rpbr2ma4(ibuf2(3),ibr4tap) !! bitrate has a different strobe
+                  call fs_get_vac4(vac4)
+                  call rpbr2ma4(ibuf2(3),ibr4tap,vac4) !! bitrate has a different strobe
                endif
                call put_buf(iclass,ibuf2,-13,'fs','  ')
                nrec=nrec+1
