@@ -27,11 +27,10 @@ long ip[5];
   strcat(output,"/");
 
 
-  if(shm_addr->tacd.day_frac == 0.0 &&
-     shm_addr->tacd.day_frac_old == 0.0 &&
-     !strstr(shm_addr->tacd.oldnew,"time,OLD")) {
-    ierr=-9;
-  }
+  if((shm_addr->tacd.day == 0 ||
+     shm_addr->tacd.day_frac == 0) &&
+     (shm_addr->tacd.day_a == 0 ||
+     shm_addr->tacd.day_frac_a == 0)) ierr=-9;
 
   if(!strcmp(command->argv[0],"status") ||
      !strcmp(command->argv[0],"?")) {
@@ -42,6 +41,10 @@ long ip[5];
 	    shm_addr->tacd.port,
 	    shm_addr->tacd.file,
 	    shm_addr->tacd.status);
+  } else if(!strcmp(command->argv[0],"version")) {
+    if (ierr==-9) goto error;
+    sprintf(output+strlen(output),"version,%s",
+	    shm_addr->tacd.tac_ver);
   } else if(!strcmp(command->argv[0],"stop")) {
     if (ierr==-9) goto error;
     sprintf(output+strlen(output),
@@ -55,32 +58,33 @@ long ip[5];
     if (ierr==-9) goto error;
     if(shm_addr->tacd.day_frac!=shm_addr->tacd.day_frac_old) {
       shm_addr->tacd.day_frac_old = shm_addr->tacd.day_frac;
-      strcpy(shm_addr->tacd.oldnew,"time,NEW\0");
+      strcpy(shm_addr->tacd.oldnew,"time,NEW");
     } else {
-      strcpy(shm_addr->tacd.oldnew,"time,OLD\0");
+      strcpy(shm_addr->tacd.oldnew,"time,OLD");
     }
     sprintf(output+strlen(output),
-	    "%s,%lf,%lf,%lf,%d,%lf,%lf",
+	    "%s,%d.%d,%f,%05.2f,%d,%f,%f",
 	    shm_addr->tacd.oldnew,
+	    shm_addr->tacd.day,
 	    shm_addr->tacd.day_frac,
 	    shm_addr->tacd.msec_counter,
 	    shm_addr->tacd.usec_correction,
 	    shm_addr->tacd.nsec_accuracy,
 	    shm_addr->tacd.usec_bias,
-	    shm_addr->tacd.cooked_correction,
-	    shm_addr->tacd.msec_counter);
+	    shm_addr->tacd.cooked_correction);
   } else if(!strcmp(command->argv[0],"average")) {
     if (ierr==-9) goto error;
-    if(shm_addr->tacd.day_frac!=shm_addr->tacd.day_frac_old) {
-      shm_addr->tacd.day_frac_old = shm_addr->tacd.day_frac;
-      strcpy(shm_addr->tacd.oldnew,"average,NEW\0");
+    if(shm_addr->tacd.day_frac_a!=shm_addr->tacd.day_frac_old_a) {
+      shm_addr->tacd.day_frac_old_a = shm_addr->tacd.day_frac_a;
+      strcpy(shm_addr->tacd.oldnew_a,"average,NEW");
     } else {
-      strcpy(shm_addr->tacd.oldnew,"average,OLD\0");
+      strcpy(shm_addr->tacd.oldnew_a,"average,OLD");
     }
     sprintf(output+strlen(output),
-	    "%s,%lf,%d,%lf,%lf,%lf,%lf",
-	    shm_addr->tacd.oldnew,
-	    shm_addr->tacd.day_frac,
+	    "%s,%d.%d,%d,%f,%f,%f,%f",
+	    shm_addr->tacd.oldnew_a,
+	    shm_addr->tacd.day_a,
+	    shm_addr->tacd.day_frac_a,
 	    shm_addr->tacd.sec_average,
 	    shm_addr->tacd.rms,
 	    shm_addr->tacd.max,
