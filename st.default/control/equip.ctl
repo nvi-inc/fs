@@ -10,15 +10,15 @@
 20      Receiver 20K Stage Check Temperature
 *  VLBI equipment
 mk3     type of rack (mk3, vlba, vlbag, mk4, or none)
-mk3     type of recorder (mk3, vlba, vlba2, mk4, s2, or none)
+mk3     type of recorder (mk3, mk3b, vlba, vlba2, mk4, s2, or none)
 101     Hardware ID for VLBA rack (assigned by GSFC)
 *
-10.0    vacuum level (inches)
+10.0    vacuum level (inches) (if vacuum switching this is for thin tape ~5.0) 
 0       vacuum current offset (counts)
 0       vacuum current scale  (counts/in)
 0       vacuum sensor offset  (in)
 0       vacuum sensor scale   (in/count)
-268     tape thickness (kA)
+268     tape thickness (kA)   (if vacuum switching this is for thin tape ~152) 
 14.0    head write voltage (V)
 54625   capstan size constant
 *
@@ -26,3 +26,6 @@ mk3     type of recorder (mk3, vlba, vlba2, mk4, s2, or none)
    3    hex mask indicating which IF3 switches are installed, sw N ~ 2^(N-1)
 *
   a/d   VLBA formatter cross-point switch (a/d or dsm)
+* additional values for vacuum switching
+15.0    thick tape vacuum level (inches)
+268     thick tape thickness (kA)
