@@ -2,29 +2,44 @@
 C
 C     KPAST determines if the time IT1,IT2,IT3 (FS format)
 C           is in the past compared to IT (HP format).
-C     If IT(1)=0 then it is assumed IT should be the current time.
+C     If IT(5)=0 then it is assumed IT should be the current time.
 C
-      dimension it(5)
-      double precision tnow,t1
+      integer it(6)
+      integer itt(6)
+      integer*4 secst,secsnow,delta
       logical know
 C
       know=it(5).eq.0
 1     continue
-      if (know) call fc_rte_time(it,idum)
+      if (know) call fc_rte_time(it,it(6))
 C         Get the current time
-      tnow = 86400.d0*it(5)+it(4)*3600.d0+it(3)*60.d0
-     .       +it(2) + it(1)/100.d0
-      t1 = 86400.d0*mod(it1,1024) + it2*60.d0 + it3/100.d0
-C
+c not Y2038 compliant
+      call fc_rte2secs(it,secsnow)
+      ihsnow=it(1)
+c
+      itt(6)=it1/1024+1970
+      itt(5)=mod(it1,1024)
+      itt(4)=it2/60
+      itt(3)=mod(it2,60)
+      itt(2)=it3/100
+      itt(1)=mod(it3,100)
+c not Y2038 compliant
+      call fc_rte2secs(itt,secst)
+      ihst=itt(1)
+c
+c not Y2038 compliant
+      delta=(secst-secsnow)*100+ihs1-ihsnow
+c
       if(know) then
-        kpast = t1 .lt. tnow+0.025d0
-        if(kpast.and.t1.gt.tnow+.005d0) then
+        kpast = delta.le.2 
+        if(kpast.and.delta.gt.0) then
           call susp(1,1)
           go to 1
         endif
       else
-        kpast = t1 .lt. tnow
+        kpast = delta .le. 0
       endif
 C
       return
       end
+
