@@ -61,6 +61,7 @@ C 970317 nrv Read $PARAM using sked's routines.
 C 970401 nrv Set all parameter values to defaults at the start, then if
 c            the key words are found in the $PARAM section they get set.
 C 970603 nrv Find the start of the cover letter in .drg files.
+C 980217 nrv Remove the time-ordering code and call LSKORDER instead.
 C
 C
       close(unit=LU_INFILE)
@@ -208,6 +209,8 @@ C         Unpack the scan just to get kflg
      .    MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
 C           If any scans have flag2 set, remember this.
             if (kflg(2)) kparity = .true.
+C           If any scans have flag3 set, remember this.
+            if (kflg(3)) kprepass = .true.
 C
 C           Read the next schedule entry
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -215,7 +218,7 @@ C           Read the next schedule entry
 C
         ELSE IF(ichcm(htype,1,hpr,1,2).eq.0) THEN !procedures
           rdum= reio(2,LUSCN,IBUF,-ILEN)
-          write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
+C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C         Get the position of this section
           call locf(LU_INFILE,IRECPR)
 C         And read the first line
@@ -341,23 +344,8 @@ C Order the observations, in case they were not so in the $SKED section.
         write(luscn,9901)
 9901    format('SREAD02 - No observations found in the schedule')
       else
-        irec=nobs ! start at the end
-        ich=1
-        do i=1,5 ! want the 5th field 
-          CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
-        enddo
-        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
-        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
-        do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
-C         Swap pointers
-          ipnt = iskrec(irec-1)
-          iskrec(irec-1) = iskrec(irec)
-          iskrec(irec) = ipnt
-C         Get new time fields -- starting in ic1
-          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
-          irec = irec-1
-          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
-        end do  !out of order
+C Comment this out until it's fixed.
+C       call lskorder(2) ! order the whole thing
       endif
 C
       endif ! VEX/skd
