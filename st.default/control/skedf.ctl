@@ -1,6 +1,8 @@
 ***********************************************************************
 * skedf.ctl - sked/drudg program control file
 *
+* This is the default version for drudg in the Field System.
+*
 * This file is free-field except for section names which must begin
 * in column 1 with a $. Either upper or lower case is OK for section
 * names. Remember that path and file names in Unix are case-sensitive.
@@ -16,32 +18,6 @@
 *
 $catalogs 
 * Note: The $catalogs section is used by sked but not by drudg.
-* Please do not edit the first word on the line because these are key words.
-*
-* Catalog program path:
-* Enter here the absolute path where the java catalog class files reside.
-* Example:
-program    /box3/skedv/catalogues
-*
-* Catalog files:
-* Enter on the next lines the paths for sked's catalog files. 
-* Examples:
-source     /home/ftp/pub/sked/catalogs/source.cat.geodetic.good
-*source     /home/ftp/pub/sked/catalogs/source.cat
-hdpos      /home/ftp/pub/sked/catalogs/hdpos.cat
-flux       /home/ftp/pub/sked/catalogs/flux.cat
-comments   /home/ftp/pub/sked/catalogs/flux.cat.comments
-antenna    /home/ftp/pub/sked/catalogs/antenna.cat
-position   /home/ftp/pub/sked/catalogs/position.cat
-equip      /home/ftp/pub/sked/catalogs/equip.cat
-mask       /home/ftp/pub/sked/catalogs/mask.cat
-freq       /home/ftp/pub/sked/catalogs/freq.cat
-rx         /home/ftp/pub/sked/catalogs/rx.cat
-loif       /home/ftp/pub/sked/catalogs/loif.cat
-modes      /home/ftp/pub/sked/catalogs/modes.cat
-modes_description /home/ftp/pub/sked/catalogs/modes_description.cat
-tracks     /home/ftp/pub/sked/catalogs/tracks.cat
-rec        /home/ftp/pub/sked/catalogs/rec.cat
 *
 $schedules 
 * Enter the path name for schedule (.skd) files. If not specified, 
@@ -76,7 +52,7 @@ $print
 * Recognized names: laser, epson, epson24.
 * This can be changed interactively with option 9.
 * Examples:
- printer laser
+* printer laser
 * printer epson
 * printer epson24
 *
@@ -109,21 +85,25 @@ $print
 * font. If none are specified, the defaults are as listed below:
 *option1 ls (landscape, small font)
 *option4 ps (portrait, small font)
-*option5 ls (portrait, small font)
-option4 ls 
-option5 ls
+*option5 ps (portrait, small font)
 *
 * Tape label script:
 * Enter a script for printing tape labels. If no script is specified,
 * the default is to use "lpr" to print the temporary file.
 * Examples:
 *labels <script name for label printing>
+*labels print2dymo
+*  This is to print to the dymo printer.
+*  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
+*  must be in your path, e.g. in /usr2/oper/bin,
+*  and executable, e.g., chmod a+x print2dymo
 *
 * Tape label printer:
 * Enter the name of the label printer. If no name is specified, drudg
 * will not attempt to print tape labels. Recognized names are postscript,
 * epson, epson24, laser+barcode_cartridge.
 * Examples:
+*label_printer dymo
 *label_printer postscript
 *label_printer laser+barcode_cartridge
 *label_printer epson
@@ -146,7 +126,8 @@ option5 ls
 * Format:
 * label_size <ht> <wid> <rows> <cols> <top> <left>
 * Examples:
-label_size  1.0   2.625  10     3     0.5   0.3125 Avery 5160
+*label_size   1.417 3.5     1     1    11.0   0.0    Dymo
+*label_size  1.0   2.625  10     3     0.5   0.3125 Avery 5160
 *label_size  1.333 4.0     7     2     0.5   0.25   Avery 5162
 *label_size  2.0   4.0     5     2     0.5   0.25   Avery 5163
 *label_size  1.5   4.0     6     2     0.75  0.25   Avery 5197
@@ -160,7 +141,7 @@ $misc
 * Default is 1950 if none is specified. Only 1950 or 2000 are valid.
 * Examples:
 *epoch 2000
-epoch 1950
+*epoch 1950
 *
 * Station equipment:
 * Station equipment may be specified in drudg. Equipment names are 
@@ -190,7 +171,7 @@ epoch 1950
 *   (and VEX files)
 *   ---------------  --------------------------------------
 *   Mark3A           mk3 mk3b
-*   VLBA             vlba vlbag
+*   VLBA             vlba vlbag 
 *   VLBA/8           vlba vlbag   (8 BBCs only)
 *   VLBA4/8          vlba4        (8 BBCs only)
 *   Mark4            mk4
@@ -202,6 +183,7 @@ epoch 1950
 *   K4-1             k41 k41/dms
 *   K4-2             k42 k42/dms
 *   S2               s2
+*   LBA              lba
 *
 * If the schedule file does not have equipment specified, then the 
 * equipment in the control file will be used.
@@ -213,6 +195,24 @@ epoch 1950
 *  equipment Mark4  Mark5A  none
 * equipment VLBA   VLBA  VLBA   
 * If equipment_override is specified (uncommented below) then the
-* equipment in the control file is used. This is a useful way of 
+* equipment in the control file is used. This then becomes your default
+* equipment regardless of what is in the schedule. This is a useful way of 
 * forcing the recorder to be Mark5A during the transition from tape to disk.
 *  equipment_override 
+*--------------------------------------------------------------
+* TPI daemon setup
+*   prompt? 
+*     NO:  Default. Never prompt, use the specified period for all schedules
+*     YES: Prompt for the period for all schedules and use the period 
+*     specified as the default
+*   period 
+*     <value>: specify the TPI sampling period in centiseconds, 0=off,
+*              default is 0.
+* 
+* examples:
+*       prompt? period 
+* tpicd  NO       0    <<<<<<< don't use the TPI daemon (default values)
+* tpicd  NO      100   <<<<<<< always use 1 sec period
+* tpicd  YES      0    <<<<<<< prompt for period, default is OFF
+* tpicd  YES     500   <<<<<<< prompt for period, default is 5 sec
+*--------------------------------------------------------------
