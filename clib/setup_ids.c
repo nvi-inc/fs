@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <signal.h>
 #include <unistd.h>
 
+#include "../include/ipckeys.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -10,6 +12,9 @@
 void setup_ids()
 {
     void sem_att(), skd_att(), shm_att(), cls_att(), brk_att();
+
+    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+    setvbuf(stderr, NULL, _IONBF, BUFSIZ);
 
     if (sizeof(Fscom) > C_RES ) {
        printf(" setup_ids: Fscom C structure too large: %d bytes \n",
