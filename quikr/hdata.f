@@ -49,7 +49,7 @@ C
       call fs_get_drive(drive)
       if (ieq.eq.0) then
         goto 500
-      else if (VLBA.eq.and(drive,VLBA)) then
+      else if (VLBA.eq.drive.or.VLBA4.eq.drive) then
         ip(3)=-282
         goto 990
       else if (ichcm(ibuf,ieq+1,lalrm,1,ilenal).eq.0) then

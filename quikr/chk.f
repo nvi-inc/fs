@@ -77,9 +77,9 @@ C
       call fs_get_rack(rack)
       call fs_get_drive(drive)
       kMrack= MK3.eq.rack.or.MK4.eq.rack
-      kVrack= VLBA.eq.rack
+      kVrack= VLBA.eq.rack.or.VLBA4.eq.rack
       kMdrive= MK3.eq.drive.or.MK4.eq.drive
-      kVdrive= VLBA.eq.drive
+      kVdrive= VLBA.eq.drive.or.VLBA4.eq.rack
       kS2drive=S2.eq.drive
       if (ieq.eq.0) goto 500
 C                   If no parameters, go report current list
