@@ -3,11 +3,11 @@ C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
 C  Common blocks:
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
-      include 'statn.ftni'
-      include 'sourc.ftni'
-      include 'freqs.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 
 C Subroutine interface:
 C     Called by: drudg (C routine)
@@ -37,8 +37,8 @@ C LOCAL:
       integer i,j,k,l,ncs,ix,ixp,ic,ierr,nobs,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
       real*4 val
-      integer ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
-      integer nch1,nch2,nch3
+      integer ichmv_ch,ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
+      integer nch1,nch2,nch3,iserr(max_stn)
       data h2c/2h::/, heqb/2h= /, o36/o'36'/
 C
 C  DATE   WHO CHANGES
@@ -85,8 +85,35 @@ C  940620 nrv non-interactive (batch) mode
 C  950626 nrv Case-sensitive station IDs
 C  951003 nrv Try to open ".drg" file after trying ".skd" file
 C  951213 nrv One call to PROCS with Mk3/VLBA as input flag
+C 960208 nrv If inconsistent tracks/heads from GNPAS, set flag
+C 960209 nrv GNPAS errors by station
+C 960226 nrv Add cprtlab to RDCTL call
+C 960307 nrv Move block data initializations to here.
 C
-C
+C Initialize some things.
+
+C Permissions on output files
+      iperm=o'0666'
+C Initialize LU's
+      LU_INFILE = 20
+      LU_OUTFILE =21
+      LUPRT =     22
+C The length of a schedule file record
+      ISKLEN=128
+C Initialize the number of labels and lines/label
+      NLAB=1
+      NLLAB=9
+C Initialize printer width
+      IWIDTH=137
+C Initialize the $PROC section location
+      IRECPR=0
+      IRBPR=0
+      IOFFPR=0
+C Codes for passes and bandwidths
+      idummy=ichmv_ch(lbname,1,'D8421HQE')
+c Initialize no. entries in lband (freqs.ftni)
+      NBAND= 2
+
       luscn = STDOUT
       luusr = STDIN
       csked = './'
@@ -96,6 +123,7 @@ C
       cprttyp = 'LASER'
       cprtpor = ' '
       cprtlan = ' '
+      cprtlab = ' '
       iwidth = 137
       klab = .false.
       ifunc = -1
@@ -117,7 +145,7 @@ C     1. Make up temporary file name, read control file.
 C***********************************************************
       call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
      .           cdum,cdum,cdum,cdum,cdum,csked,cdrudg,ctmpnam,
-     .           cprtlan,cprtpor,cprttyp,cprport,luscn)
+     .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,luscn)
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
       if (nch.gt.0) then
@@ -150,7 +178,7 @@ C
 	  do j=1,max_stn
 	    do i=1,max_frq
 	      invcx(k,j,i)=0
-              ivix(k,j,i)=0
+              idummy=ichmv_ch(lifinp(k,j,i),1,'  ')
 	    enddo
 	  enddo
 	enddo
@@ -165,7 +193,7 @@ C   Check for non-interactive mode.
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
         WRITE(LUSCN,9020)
 9020    FORMAT(' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960119)')
+     .  '(NRV 960313)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -173,6 +201,8 @@ C   Check for non-interactive mode.
 9920      format(' Schedule file name (.skd or .drg assumed, ',
      .    '<return> if none, :: to quit) ? ',$)
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
+C              write(6,'("isklen=",i5," luusr=",i5," nch=",i5)') 
+C    .       isklen,luusr,nch
         else ! command line file name
           call char2hol(cfile,ibuf,1,nch)
         endif 
@@ -263,16 +293,19 @@ C
 	  ENDIF
 C
 C     Derive number of passes for each code
-	  CALL GNPAS(ierr)
+	  CALL GNPAS(luscn,ierr,iserr)
           call setba_dr
           if (ierr.ne.0) then ! can't continue
             write(luscn,9999) 
 9999        format(/'DRUDG00: WARNING! Inconsistent or missing ',
      .      'pass/track/head information.'/
-     .      ' You will NOT be able to make SNAP or procedure '
-     .      'output.'/)
-            kmissing = .true.
-C           goto 990
+     .      ' SNAP or procedure output may be incorrect',
+     .      ' or may cause a program abort for:'/)
+            do i=1,nstatn
+              if (iserr(i).ne.0) write(luscn,9998) (lstnna(j,i),j=1,4)
+9998          format(1x,4a2,1x,$)
+            enddo
+            write(luscn,'()')
           endif
 C
             WRITE(LUSCN,9490) NSOURC
@@ -330,7 +363,7 @@ C
 C     response(1:1) = upper(response(1:1))
       call char2hol(response(1:1),lstn,1,2)
       ISTN = 0
-      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 700
+      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 700 ! all stations
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
           IF (LSTCOD(I).EQ.LSTN) ISTN = I
@@ -349,6 +382,8 @@ C     response(1:1) = upper(response(1:1))
 	nstatn=1
 	lstcod(1)=lstn
       endif !check for validID
+      kmissing=.true.
+      if (iserr(istn).ne.0) kmissing=.true.
 C
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
@@ -445,6 +480,8 @@ C
       I = 1
       do while (I.le.nstnx)  !loop over stations
         IF (ichcm(LSTN,1,HEQB,1,1).eq.0) ISTN = I
+        kmissing=.false.
+        if (iserr(istn).ne.0) kmissing=.true.
         IX = INDEX(cexpna,'.')-1
 	  if (ix.lt.0) ix=trimlen(cexpna)
         call char2hol('  ',lc,1,2)
