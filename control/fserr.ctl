@@ -177,7 +177,7 @@ BO -123
 Error positioning in schedule.  FMP ?FFF
 ""
 BO -124
-No future times found during auto-positioning in schedule.
+No (source=...) observation starting at a future time found in schedule.
 ""
 BO -125
 Reading procedure file, error FMP ?FFF
@@ -1148,11 +1148,8 @@ Frequency must be 99.99-511.99 for K-4 type 1 VCs and 499.99-999.99 for type 2.
 KR -101
 No default for action.
 ""
-KR -102
-No default for aux data.
-""
 KR -201
-Action must be one of: eject, init, synch, drum_on drum_off, synch_on, synch_off, aux or 7 digit position to move to.
+Action must be one of: eject, init, synch, drum_on drum_off, synch_on, synch_off, or 7 digit position to move to.
 ""
 KR -202
 Aux data must be 16 hex digits.
