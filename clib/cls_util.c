@@ -25,7 +25,7 @@ struct  cls_buf {
 static int msqid;
 
 static long cls_alc_s();
-static void cls_chk();
+static int cls_chk();
 
 int cls_get( key, size)
 key_t key;
@@ -113,9 +113,16 @@ void sem_take(), sem_put();
     length=0;
 
    *class &= ~ 0160000;
-sem_take( SEM_CLS);
-if(*class == 0) *class = cls_alc_s();
-cls_chk( *class, 1,0);
+   sem_take( SEM_CLS);
+   if(*class == 0)
+     if( 0 > (*class = cls_alc_s())){
+       fprintf(stderr,"cls_alc_s error in cls_snd()\n");
+       exit (-1);
+     }
+   if(cls_chk( *class, 1,0)) {
+     fprintf(stderr,"cls_chk error in cls_snd()\n");
+     exit(-1);
+   }
 sem_put( SEM_CLS);
 
 msg.mtype = *class;
@@ -158,8 +165,8 @@ int    imod;
   }
 
   if(class == 0) {
-     fprintf( stderr,"cls_alc: out of class numbers\n");
-     exit( -1);
+     fprintf( stderr,"cls_alc_s: out of class numbers\n");
+     return -1;
   }
   return( class);
 }
@@ -193,7 +200,10 @@ void sem_take(), sem_put();
    }
 
    if(msgflg==0) {
-      cls_chk( class, 1, 0);
+     if(cls_chk( class, 1, 0)) {
+	fprintf(stderr,"cls_chk error 1 in cls_rcv()\n");
+	exit(-1);
+     }
       sem_put(SEM_CLS);
    }
 
@@ -209,7 +219,10 @@ void sem_take(), sem_put();
    }
    if(msgflg==0) {
      sem_take( SEM_CLS);
-     cls_chk( class, -1, save);
+     if(cls_chk( class, -1, save)) {
+       fprintf(stderr,"cls_chk error 2 in cls_rcv()\n");
+       exit(-1);
+     }
    }
 copy:
    if( sb ) {
@@ -218,7 +231,12 @@ copy:
          perror("cls_rcv: sending saved message");
          exit(-1);
       }
-   } else  cls_chk( class, -1, save);
+   } else 
+     if( cls_chk( class, -1, save)) {
+	fprintf(stderr,"cls_chk error 3 in cls_rcv()\n");
+	exit(-1);
+     }
+
    sem_put( SEM_CLS);
 
    *rtn1=msg.messg.parm[0];
@@ -272,7 +290,7 @@ if(-1==msgctl( msqid, IPC_RMID, NULL )) {
  return (0);
 }
 
-static void cls_chk( class, action, save)
+static int cls_chk( class, action, save)
 long class;
 int action, save;
 {
@@ -284,7 +302,7 @@ int action, save;
       fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
       */
     fprintf( stderr,"cls_chk: illegal class number %d pid %d\n",class,getpid());
-     exit( -1);
+     return -1;
   }
 
   if (shm_addr->nums[ class-1] == 0) {
@@ -294,7 +312,7 @@ int action, save;
       fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
       */
     fprintf( stderr,"cls_chk: class %d not allocated\n",class);
-    exit(-1);
+    return -1;
   }
    shm_addr->nums[class-1]+= action;
   if(shm_addr->nums[class-1] < 1) {
@@ -304,9 +322,10 @@ int action, save;
       fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
     */
     fprintf( stderr,"cls_chk: class %d decremented too far\n",class);
-    exit(-1);
+    return -1;
   } else if ( shm_addr->nums[class-1] == 1 && save == 0) {
     shm_addr->nums[class-1]=0;
   }
 
+  return 0;
 }
