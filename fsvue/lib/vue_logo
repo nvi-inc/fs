@@ -18,7 +18,7 @@ image create photo fsvue -file "$IMGPATH/fsvue_logo.gif"
 
 button .m.q -text "Exit" \
 -relief {raise} -background red -font $bfont -fg white -command exit 
-label .m.ver -font $bfont -bg black -fg white -relief {raise} -text "Version 1.18"
+label .m.ver -font $bfont -bg black -fg white -relief {raise} -text "Version 2.0"
 label .image -image fsvue
 
 pack .image 
