@@ -143,9 +143,6 @@ c     call fc_rte_lock(1)        ! lock into memory
       iclasr = 0
       nclrer = 0
       ierr = 0
-      if (iclass.ne.0) goto 100
-      ierr = -1
-      goto 1090
 C
 100   if (kini) goto 200
       call fs_get_ibmat(ibmat)
@@ -201,6 +198,10 @@ C     Search the module table for a match.
 C     Set up the output buffer with the hex address.
 C
 200   continue
+      if (iclass.eq.0) then
+         ierr = -1
+         goto 1090
+      endif
       if(knull) then
         ierr=-7
         goto 1090
