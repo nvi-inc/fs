@@ -107,7 +107,7 @@ echo ();
   "Is (%04d/%02d/%02d)  %02d:%02d:%02d correct (y/n) ?     ",
           setyy, setmon, setmday, sethh, setmm, setss );
   /* not Y10K compliant */
-  mvwscanw(  maindisp, ROWA+8, COL0+42, "%s", answer );
+  mvwscanw(  maindisp, ROWA+8, COL0+42, "%1s", answer );
   if ( answer[0] != 'Y' && answer[0] != 'y' )
      goto End;
 
@@ -120,7 +120,8 @@ it[4]=yday;
 it[5]=setyy;
   /* not Y2038 compliant */
 rte2secs(it,&ut);
-*flag=TRUE;
+if(ut >= 0)
+  *flag=TRUE;
 
 End:
 nodelay ( maindisp, TRUE );
