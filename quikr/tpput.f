@@ -140,7 +140,7 @@ C
                elseif(itpivc(i).eq.2) then
                   nch=ichmv_ch(ibufr,nch,'u')
                else
-                  nch=nch+ib2as(iand(itpivc(i),7),ibufr,nch,1)
+                  nch=nch+ib2as(and(itpivc(i),7),ibufr,nch,1)
                endif
                nch = mcoma(ibufr,nch)
                if (isub.eq.3) t=tpsor(i+14)

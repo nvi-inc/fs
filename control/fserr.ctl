@@ -2418,10 +2418,10 @@ QK -102
 Previous detectors not remembered between uses.
 ""
 QK -201
-TPIs requested must be one of FORM,ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+TPIs must be one of ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14,FORMVC,FORMIF.
 ""
 QK -202
-TPIs must be one of FORM,ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...14u,14l.
+TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...14u,14l,FORMBBC,FORMIF.
 ""
 QK -203
 No detectors selected
@@ -3845,8 +3845,17 @@ TA   -7
 TA   -8
 Syntax ERROR in tacd.ctl - no commas allowed as delimeters.
 ""
-TA   -201
+TA -201
 commands are tacd={,status,time,average,cont,stop,start} only.
+""
+TC -102
+cycle period has no default.
+""
+TC -201
+continuous parameter must be "no" or "yes".
+""
+TC -202
+cycle period must be a non-negative integer.
 ""
 TE   -9
 Video converter frequency has not been set

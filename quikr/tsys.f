@@ -132,7 +132,7 @@ C
                   elseif(itpivc(i).eq.2) then
                      nch=ichmv_ch(ibuf,nch,'u')
                   else
-                     nch=nch+ib2as(iand(itpivc(i),7),ibuf,nch,1)
+                     nch=nch+ib2as(and(itpivc(i),7),ibuf,nch,1)
                   endif
                   nch = mcoma(ibuf,nch)
                   nch = nch+ir2as(systmp(i+14),ibuf,nch,8,1)
