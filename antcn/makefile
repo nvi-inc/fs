@@ -1,7 +1,6 @@
 #
 CFLAGS= 
-LIBES = ../../fs/poclb/poclb.a ../../fs/clib/clib.a\
-../../fs/rtelb/rtelb.a -lm
+LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a -lm
 #
 OBJECTS = antcn.o 
 #
