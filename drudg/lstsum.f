@@ -114,7 +114,6 @@ C Output:
       real counter_init        !Initialize counter
       integer itimedifsec       !function
       INTEGER TRIMLEN           !length of string excluding blanks.
-      integer num_tracks_rec    !number of tracks recorded
 
 C Local:
       integer iwid,itlate_local,itearl_local
@@ -185,8 +184,10 @@ C Local:
       integer itemp
       integer i
 
-      integer ntrks_rec_mk5             !Number recorded mark5 mode.
-      integer ntrks_rec                 !Number recorded
+      integer ntracks_rec_mk5
+      integer nchans_obs               !Number recorded
+      integer ifan_fact                 !ifan_factor
+      logical kdisk                     !mark5 or makr5p
 
 ! All of this is to keep track of packs. But we decided we didn't want to!
 !      integer num_packs,max_packs,ipack
@@ -285,12 +286,14 @@ C 3. Initialize local variables
 
       inewp = 0
       cnewtap = '    '
-      cscan = '     '
+      cscan   = '     '
 
 C 4. Set other variables by reading the .snp file or getting
 C    information from common.
 ! This initializes a common block.
       call lstsum_info(kskd)
+
+      kdisk=km5.or.km5p
 C
 C Calculate different kinds of scaling.
 
@@ -299,25 +302,19 @@ C   was produced using sked with Mk/VLBA counter calculations
 C   and no fan-out or fan-in. counters were therefore already
 C   scaled by bandwidth calculations in sked.
 
-
-      ntrks_rec=num_tracks_rec(itras(1,1,1,1,1,istn,1))
+      ifan_fact=max(1,ifan(istn,1))
+      call find_num_chans_rec(itras(1,1,1,1,1,istn,1),ifan,
+     >            nchans_obs,ntracks_rec_mk5)
 
       if(kk4) then
          conv = 55.389387393d0 ! counts/sec
          speed_recorder = conv*samprate(1)/4.0d0 ! 55, 110, or 220 cps
       else if(km5) then
         conv=(1./8.)     		!= 1byte/8bits
-        ntrks_rec_mk5=8                 !can only record in units of 8,16, 32,64
-        do i=1,4
-          if(ntrks_rec_mk5 .le.ntrks_rec) goto 5
-          ntrks_rec_mk5=ntrks_rec_mk5*2
-        end do
-5       continue
-        speed_recorder=ntrks_rec_mk5*samprate(1)*conv
+        speed_recorder=(ntracks_rec_mk5/ifan_fact)*samprate(1)*conv
       else if(km5p) then
-       conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
-       ntrks_rec=trkn(1,istn,1)+trkn(2,istn,1)
-       speed_recorder=ntrks_rec*samprate(1)*conv
+        conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
+        speed_recorder=nchans_obs*samprate(1)*conv
       else if(ks2) then
          speed_recorder=1
       else if(km5) then
@@ -342,7 +339,7 @@ C   scaled by bandwidth calculations in sked.
 !      endif
 
 ! Initialize count counter.
-      counter_now=counter_init(km5,kk4,ks2,MaxTap(istn))
+      counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
 C 5. Main loop to read .snp file and print summary of observations.
 
 441   rewind(lu_infile)
@@ -407,7 +404,8 @@ C           Here is where we determine early start without the schedule
 !!             endif
 !          endif
 
-          counter_print_p=counter_data_valid_on
+!          counter_print_p=counter_data_valid_on
+          counter_print_p=counter_tape_start
           counter_source=counter_now
 
           idur=-1                               !recalculate for next scan.
@@ -422,7 +420,7 @@ C       Now get the source info for the new scan
           elseif (index(cbuf,'READY2').ne.0) then ! rec 2
             cnewtap = 'Rec2'
           endif
-          counter_now=counter_init(km5,kk4,ks2,MaxTap(istn))
+          counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
         else if (index(cbuf,'MIDTP').ne.0) then
           inewp = 1
           idur=-1 ! reset duration so it gets calculated again
@@ -451,7 +449,7 @@ C       Now get the source info for the new scan
               counter_now=counter_now+idif*idir*speed_recorder
             endif
             if (counter_now.lt.0) then
-              counter_now=counter_init(km5,kk4,ks2,MaxTap(istn))
+              counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
              endif
              do i=1,5
                itime_now(i)=itime_temp(i)       !update running time.
@@ -465,6 +463,7 @@ C       Now get the source info for the new scan
             itime_tape_start(i)=itime_now(i)
           end do
           krunning=.true.
+          counter_tape_start=counter_now
         else if (cbuf(1:2) .eq. "ST") then
           idur=-1 ! make sure we calculate duration from this point
           do i=1,5
@@ -554,7 +553,7 @@ C         examples: fastf=3m42.34s   fastr=2.35m   fastf=34.56s
           if (cbuf(5:5).eq.'R') id=-1
           if (counter_now.gt.0) counter_now=counter_now+ifdur*id
           if (counter_now.lt.0) then          !if spins us off, then reset tape to 0.
-            counter_now=counter_init(km5,kk4,ks2,MaxTap(istn))
+            counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
           endif
 
 ! If the last source command was within 5 minutes, command is probably meant to position tape to start of scan.
@@ -588,7 +587,7 @@ C the counter to zero to start the new forward pass.
               cpass(1:1)=' '
             endif ! shift right
             if (ks2.and.cpass.ne.cpass_old) then
-              counter_now=counter_init(km5,kk4,ks2,MaxTap(istn))
+              counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
             endif
           endif ! setup
         endif ! might be setup proc
@@ -598,7 +597,8 @@ C the counter to zero to start the new forward pass.
 990   continue
       ierr=0
 
-      counter_print=counter_data_valid_on
+      counter_print=counter_tape_start
+!      counter_print=counter_data_valid_on
 
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
      >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
@@ -608,23 +608,13 @@ C the counter to zero to start the new forward pass.
      >        iDur,counter_print,cpass,cnewtap,cdir,
      >        cscan,cbuf_source)
 
-      if(km5) then
-!         ipack_use(ipack)=counter_print/1024
-!         ipack_use_tot=0
-!         ipack_size_tot=0
-!         write(luprt, *) " "
-!         do i=1,ipack
-!           ipack_use_tot=ipack_use_tot+ipack_use(i)
-!           ipack_size_tot=ipack_size_tot+ipack_size(i)
-!!           write(luprt,'("Diskpack ",i4," Used/Capacity", i5,"/",i5)')
-!!     >                       ipack_use(i), ipack_size(i)
-!         end do
-         write(luprt,  '("Total  ",i6, "Gbytes")') counter_print/1024
+      write(luprt, "()") ! skip line
+      if(km5 .or. km5p) then
+         write(luprt,'("   Total",f8.1, " Gbytes")') counter_print/1024.
       else
-
-      write(luprt,'(" Total number of scans: ",i5)')num_scans
-      write(luprt,'(" Total number of tapes: ",i3)')num_tapes
+        write(luprt, '("   Total number of tapes: ",i3)')num_tapes
       endif
+      write(luprt,   '("   Total number of scans: ",i5)')num_scans
 
       call luff(luprt)
       close(luprt)

@@ -5718,15 +5718,53 @@ Version 9.5.7 020417
            added ability.
 	   logpl can now plot: /cmd/str,para,str,para
 
-0205xx WEH numerous, to be updated
+020509 WEH flagr/Makefile
+020510 WEH st.default/proc/station.prc
+020510 WEH st.default/flagr.ctl
+020510 WEH st.default/control/skedf.ctl
+020510 WEH quikr/tpi.f
+020510 WEH flagr/flagr.c
+020510 WEH quikr/onsor.f
+020510 WEH quikr/sorce.f
+020510 WEH control/fspgm.ctl
+020510 WEH incom/sincom.f
+020510 WEH include/fscom_dum.i
+020513 WEH st.default/control/flagr.ctl
+020513 WEH tpicd/tpicd.c
+020513 WEH clib/cshm_init.c
+020513 WEH misc/help_tools/wpas2help
+020513 WEH st.default/proc/vstation2.prc
+020513 WEH st.default/proc/vs2station.prc
+020513 WEH st.default/proc/v42station.prc
+020513 WEH st.default/proc/k42k3vstation.prc
+020513 WEH st.default/proc/4station.prc
+020513 WEH st.default/proc/4v4station.prc
+020513 WEH st.default/proc/k42mk4vbstation2.prc
+020513 WEH st.default/proc/k42mk4vstation.prc
+020513 WEH st.default/proc/v4station.prc
+020513 WEH st.default/proc/k42station.prc
+020513 WEH st.default/proc/v2station.prc
+020513 WEH st.default/oper/cover
+020513 WEH st.default/oper/cexper
+020513 WEH st.default/proc/vstation.prc
+020513 WEH inject_snap/inject_snap.c
+020513 WEH clib/tpicd_util.c
 
 Version 9.5.8 020513
 
-0205xx WEH numerous, to be updated
+020520 WEH control/fserr.ctl
+020520 WEH mk5cn/mk5cn.c
+020520 WEH quikr/tsys.f
+020520 WEH quikr/tpput.f
+020520 WEH flagr/flagr.c
 
 Version 9.5.9 020520
 
 Version 9.5.10 020522
+
+020524 WEH st.default/control/skedf.ctl
+020528 WEH clib/tpicd_util.c
+020528 WEH clib/tpi_vlba.c
 
 Version 9.5.11 020528
 
@@ -5758,9 +5796,38 @@ Version 9.5.12 020625
            control/fserr.ctl
            don't allow negative read pointers at Dan Smythe's request
 
+020627 RDG pdplt/pdplt
+020628 WEH help/form.v__
+020709 WEH st.default/prog/.cshrc
+
 020730 RDG logpl/logpl
            logpl can now plot chan1 verses chan2. It can also switch
            channels.
+
+020819 RDG fsvue/Makefile
+020819 RDG fsvue/lib/vue_fsmail
+020819 RDG fsvue/lib/vue_fswx
+020819 RDG fsvue/lib/vue_fsfiles
+020819 RDG fsvue/images/info.icon
+020819 RDG fsvue/images/fsvue_logo.gif
+
+020819 RDG fsvue/
+           fsvue/fsvue
+           fsvue/fsvue_start
+           fsvue/vue_fslog
+           fsvue/vue_fshelp
+           restructured the fsvue directory for better bookkeeping.
+           introduced code for reading current log file when examining logs.
+           introduced code for reading tnx help file.
+
+020827 RDG fsvue/lib/vue_fshelp
+020828 RDG control/fserr.ctl
+020829 RDG logpl/logpl
+020829 RDG fsvue/bin/fsvue
+
+020912 RDG tacd/Makefile
+
+020913 RDG include/tacd_shm.h
 
 020916 RDG tacd/parse_it.c 
            tacd/tacd_srv.c	
@@ -5774,22 +5841,99 @@ Version 9.5.12 020625
            allowed for changes in ../tacd/tacd_srv.c
            introduced code for reading TAC PC code version.
 
-021003 RDG vex/all 
+020918 RDG fsvue/lib/vue_fslog
+
+021003 RDG vex/*   
            introduced the changes for writing vex files. There were changes
            that were made 001114 which were introduced by Ed Himwich
            for reading the (scanid).
 
-020819 RDG fsvue/
-           fsvue/fsvue
-           fsvue/fsvue_start
-           fsvue/vue_fslog
-           fsvue/vue_fshelp
-           restructured the fsvue directory for better bookkeeping.
-           introduced code for reading current log file when examining logs.
-           introduced code for reading tnx help file.
-
 Version 9.5.13 021004
+
+Version 9.5.14 021018
+
+021018 WEH help/tsys.___
+021018 WEH help/onoff.___
+021018 WEH help/fivept.___
+021018 WEH help/tpdiff.___
+021018 WEH help/tpdiffgain.w__
+021018 WEH help/tpgain.w__
+021018 WEH gnfit/gnfit.c
+021018 WEH clib/tpi_vlba.c
+021018 WEH clib/cshm_init.c
+021018 CMH gndat/gndat.c
+021018 CMH gndat/get_gain_par2.c
+021021 CMH gnplt/gnplt
+021021 WEH help/calrx.___
+021021 WEH st.default/control/x.rxg
+021021 WEH st.default/proc/point.prc
+021021 WEH st.default/control/s.rxg
+021021 WEH st.default/proc/vs2station.prc
+021021 WEH st.default/proc/v42station.prc
+021021 WEH st.default/proc/4v4station.prc
+021021 WEH st.default/proc/v2station.prc
+021021 WEH st.default/proc/v4station.prc
+021021 WEH st.default/proc/vstation.prc
+021021 WEH st.default/proc/4station.prc
+021021 WEH st.default/proc/station.prc
+
+Other files TBD
+
+Version 9.5.15 021021
+
+021022 CMH gnplt/gnplt
+
+Other files TBD
+
+Version 9.5.16 021022
+
+021025 CMH gndat/gndat.c
+021030 RDG tacd/README
+021024 RDG fsvue/Makefile
+021024 RDG fsvue/fsvue
+021024 RDG fsvue/Makefile.orig
+021024 RDG fsvue/bin/fsvue_start
+021024 RDG fsvue/lib/vue_logo
+021101 RDG fsvue/lib/vue_fswx
+021101 WEH control/fserr.ctl
+021101 WEH control/fscmd.ctl
+021101 WEH quikv/Makefile
+021101 WEH quikv/quikv.c
+021101 CMH gnplt/gnplt
+021101 WEH onoff/onoff.c
+021101 WEH st.default/proc/4v4station.prc
+021101 WEH st.default/proc/vstation2.prc
+021101 WEH st.default/proc/vstation.prc
+021101 WEH st.default/proc/vs2station.prc
+021101 WEH st.default/proc/v42station.prc
+021101 WEH st.default/proc/v2station.prc
+021101 WEH st.default/proc/station.prc
+021101 WEH st.default/proc/4station.prc
+021101 WEH st.default/proc/v4station.prc
+
+Other files TBD
+
+Version 9.5.17 021101
 
 TBD
 
+Version 9.5.18 030425
+
+030429 CMH gndat/get_rxgain_files.c
+030429 WEH incom/get_rxgain.c
+030501 CMH gndat/gndat.c
+030501 CMH gnfit/gnfit.c
+030502 CMH gnplt/manual.txt
+030502 WEH st.default/control/logpl.ctl
+030502 CMH gnplt/gnplt
+
+Version 9.5.19 030502
+
+030505 CMH gnplt/gnplt
+
 Version 9.6.0 030506
+
+030507 RDG clib/fsmetc.c
+           remove use of "ps"
+
+Version 9.6.1 030508

@@ -123,7 +123,7 @@ C       Read line 6 (equipment)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
           kk4 = creca(1:2).eq.'K4'.or.crecb(1:2).eq.'K4'
           ks2 = creca(1:2).eq.'S2'.or.crecb(1:2).eq.'S2'
-          km5 =  creca(1:6) .eq. 'Mark5 ' .or. crecb(1:6) .eq. 'Mark5 '
+          km5 =  creca(1:6) .eq. 'Mark5A' .or. crecb(1:6) .eq. 'Mark5A'
           km5p = creca(1:6) .eq. 'Mark5P' .or. crecb(1:6) .eq. 'Mark5P'       !note the capital P
 
 !          km4 = creca(1:5) .eq. 'Mark3' .or. crecb(1:5) .eq. 'Mark3'

@@ -246,7 +246,6 @@ C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
       character upper     
       integer ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
       logical kCheckGrpOr
-      integer num_tracks_rec
 
 C LOCAL VARIABLES:
       integer*2 IBUF2(40) ! secondary buffer for writing files
@@ -296,24 +295,28 @@ C     integer nspd
 ! JMG
       character*2 ccode
       integer*2   iccode
-      equivalence (ccode,iccode)    !cheap trick to convert form Holerith to ascii
+      equivalence (ccode,iccode)     	!cheap trick to convert form Holerith to ascii
       character*4 cpmode
-      integer*2 lpmode(2),lpmode2(2) ! mode for procedure names
+      integer*2 lpmode(2),lpmode2(2)  	!mode for procedure names
       equivalence (cpmode,lpmode2(1))
-      integer ntrack_rec         !number of tracks observed
-      integer ntrack_rec_mk5
-      integer im5trk_dup
-      integer im5trk
-      integer im5trk_vec(64)
+      integer num_chans_obs         	!number of channels observer
+      integer num_tracks_rec_mk5        !number we record=num obs * ifan
+      integer im5chn_dup
+      integer im5chn
+      integer im5chn_vec(64)
       character*80 ldum
+      integer ifan_fact                 !identical to ifan(,) unless ifan(,)=0, in which case this is 1.
+      character*80 cbuf
+      equivalence (cbuf,ibuf)
+      integer itemp                     !Short lived variable.
+      integer num_sub_pass                !number of passes we loop on.
+                                        !For mark5 mode this is 1. For other recorders is npassf
 
-      data im5trk_vec/
+      data im5chn_vec/
      >2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,
      >3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,
-     >2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,
-     >3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33/
-!     >102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,
-!     >103,105,107,109,111,113,115,117,119,121,123,125,127,129,131,133/
+     >102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,
+     >103,105,107,109,111,113,115,117,119,121,123,125,127,129,131,133/
 
 C
 C INITIALIZED VARIABLES:
@@ -325,7 +328,6 @@ C INITIALIZED VARIABLES:
       data cvc2k42/'1','2','3','4','5','6','7','8',
      .             '1','2','3','4','5','6','7','8'/
       data cvchan /8*'A',8*'B'/
-      data crec/'1','2'/
 
       if (kmissing) then
         write(luscn,9101)
@@ -452,8 +454,11 @@ C    for procedure names.
          if(km5p .or. km5) kroll=.false.
         endif ! a roll mode
 
-        DO IPASS=1,NPASSF(istn,ICODE) !loop on number of sub passes
+! don't have sub-passes for mk5-mode
+        num_sub_pass=npassf(istn,icode)
+        if(num_sub_pass .gt. 1 .and. km5) num_sub_pass=1
 
+        DO IPASS=1,num_sub_pass !loop on number of sub passes
           do irec=1,nrecst(istn) ! loop on number of recorders
             if (kuse(irec)) then ! procs for this recorder
             itype=2
@@ -494,8 +499,18 @@ C Find out if any channel is LSB, to decide what procedures are needed.
             enddo
 
           if(km5 .or. km5p) then
-             ntrack_rec=num_tracks_rec(itras(1,1,1,1,ipass,istn,icode))
-             call proc_mk5_init1(ntrack_rec,ntrack_rec_mk5,luscn,ierr)
+             ifan_fact=max(1,ifan(istn,icode))
+             call find_num_chans_rec(itras(1,1,1,1,ipass,istn,icode),
+     >            ifan_fact,num_chans_obs,num_tracks_rec_mk5)
+             if(km5p .and. num_chans_obs*ifan_fact .gt. 32) then
+                write(luscn,'(/,a,i3)')
+     >          "PROCS10 - Can only record 32 tracks in MK5P mode. "//
+     >          "Tried to record: ",num_chans_obs*ifan_fact
+                 return
+             endif
+
+             call proc_mk5_init1(num_chans_obs,num_tracks_rec_mk5,
+     >            luscn,ierr)
              if(ierr .ne. 0) return
           endif
 
@@ -569,7 +584,8 @@ c..2hd..if piggy make sure mk3 modes are written
             if ((km4rack.or.kvrack.or.kv4rack.or.kk41rack.or.kk42rack)
      .          .and.(.not.kpiggy_km3mode.or.
      .          klsblo.or.((km3ac.or.km3be).and.k8bbc))) then
-              call name_trkf(cnamep,ccode,cpmode,cvpass(ipass:ipass))
+              call name_trkf(itype,ccode,cpmode,cvpass(ipass:ipass),
+     >                cnamep)
               write(lufile,'(a)') cnamep
             endif
 C  PCALFff
@@ -586,15 +602,14 @@ C  ROLLFORMff
 C  TRACKS=tracks   
 C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
           if (km5) then
-            if(ntrack_rec_mk5 .eq. 8) then
+            if(num_tracks_rec_mk5 .eq. 8) then
                write(lu_outfile,'(a)') "tracks=v0"
-            else if(ntrack_rec_mk5 .eq. 16) then
+            else if(num_tracks_rec_mk5 .eq. 16) then
                write(lu_outfile,'(a)') "tracks=v0,v2"
-            else if(ntrack_rec_mk5 .eq. 32) then
+            else if(num_tracks_rec_mk5 .eq. 32) then
                write(lu_outfile,'(a)') "tracks=v0,v1,v2,v3"
-            else if(ntrack_rec_mk5 .eq. 64) then
-               write(lu_outfile,'(a)')
-     >           "tracks=v0,v1,v2,v3,v4,v5,v6,v7,v82"
+            else if(num_tracks_rec_mk5 .eq. 64) then
+               write(lu_outfile,'(a)') "tracks=v0,v1,v2,v3,v4,v5,v6,v7"
             endif
           else if(kvrack.or.km4form.and.
      .           (.not.kpiggy_km3mode.or.klsblo.or.
@@ -824,7 +839,8 @@ C  BBCffb, IFPffb  or VCffb
           endif ! kvrack or km3rac.or.km4rackk .or. any k4rack
 C  TRKFffmp for LBA rack +s2 recorder
           if (klrack.and.ks2rec(irec)) then
-            call name_trkf(cnamep,ccode,cpmode,cvpass(ipass:ipass))
+            call name_trkf(itype,ccode,cpmode,cvpass(ipass:ipass),
+     >        cnamep)
             write(lufile,'(a)') cnamep
           endif ! klrack.and.ks2rec
 C  IFDff
@@ -867,13 +883,13 @@ C                   MODE E = B ON ODD, C ON EVEN PASSES
                 endif
               else ! not Mk3 mode
 C             Use format from schedule, 'v' or 'm'
-C              nch = ICHMV(IBUF,nch,lmFMT(1,istn,icode),1,1)
+              nch = ICHMV(IBUF,nch,lmFMT(1,istn,icode),1,1)
 C             Don't use the format from the schedule but use the one
 C             appropriate for the type of equipment, m or v.
                 if (kvrack) then ! add format to FORM command
-                  nch = ICHMV_ch(IBUF,nch,'v')
+c                 nch = ICHMV_ch(IBUF,nch,'v')
                 else if (kv4rack.or.km4rack.or.km4fmk4rack) then
-                  nch = ICHMV_ch(IBUF,nch,'m')
+c                 nch = ICHMV_ch(IBUF,nch,'m')
                 else
                   write(luscn,9138)
 9138              format(/'PROCS08 - WARNING! Non-Mk3 modes are not',
@@ -954,7 +970,7 @@ C     .            ' supported for Mark IV formatters.')
           if(km5) then
 !             write(lu_outfile,'(!+2s)')
              call proc_mk5_init2(ifan(istn,icode),
-     >             samprate(1),ntrack_rec_mk5,luscn,ierr)
+     >             samprate(1),num_tracks_rec_mk5,luscn,ierr)
               if(ierr .ne. 0) return
           endif
 
@@ -2039,15 +2055,25 @@ C
      .       (.not.kpiggy_km3mode.or.klsblo
      >             .or.((km3be.or.km3ac).and.k8bbc))).or.
      .      (klrack.and.ks2rec(ir))) then
-          DO IPASS=1,NPASSF(istn,ICODE) !loop on subpasses
+
+          num_sub_pass=npassf(istn,icode)
+          if(num_sub_pass .gt. 1 .and. km5) num_sub_pass=1
+
+          DO IPASS=1,num_sub_pass !loop on subpasses
             call trkall(itras(1,1,1,1,ipass,istn,icode),
      >      lmode(1,istn,icode),  itrk,lpmode,npmode,ifan(istn,icode))
-            im5trk_dup=ntrack_rec_mk5-ntrack_rec            !This is the number of passes to duplicate.
-            im5trk=0
+
+            ifan_fact=max(1,ifan(istn,icode))
+            call find_num_chans_rec(itras(1,1,1,1,ipass,istn,icode),
+     >                ifan_fact, num_chans_obs,num_tracks_rec_mk5)
+            im5chn_dup=num_tracks_rec_mk5/ifan_fact-num_chans_obs       !This is the number of channels to duplicate
+            im5chn=0
+
             if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
      .        .or.km5prec(ir).or.km5rec(ir).or.ks2rec(ir)) then
 !              goto 9000
-              call name_trkf(cnamep,ccode,cpmode,cvpass(ipass:ipass))
+              call name_trkf(itype,ccode,cpmode,cvpass(ipass:ipass),
+     >            cnamep)
             else if (kk41rec(ir).or.kk42rec(ir)) then
               write(cnamep,"('recp',A)") lcode(icode)
             endif
@@ -2108,23 +2134,26 @@ C                          Write out a max of 8 channels for 8-BBC stations
                         if (isb.eq.2) isbx=1
                       endif ! reverse sidebands
                       if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
-     .                   km4rec(ir).or.km5prec(ir).or.km5rec(ir)) then
-                         if (mhead .eq. 2.or.ipig.eq.2)then               !2hd
-                           if((it+3) .lt.10)nch=ichmv_ch(ibuf,nch,'10') !2hd
-                           if((it+3) .ge.10)nch=ichmv_ch(ibuf,nch,'1') !2hd
-                         endif               !2hd
+     .                   km4rec(ir).or.km5prec(ir) .or. km5rec(ir)) then
                          if(km5) then
-                           im5trk=im5trk+1
+                           im5chn=im5chn+1
+                           itemp=(im5chn-1)*ifan_fact+1
                            nch = iaddtr(ibuf,nch,
-     >                        im5trk_vec(im5trk), ib,isbx,ibit)
-                           if(im5trk_dup .gt. 0) then
-                              im5trk_dup =im5trk_dup-1
-                              im5trk=im5trk+1
+     >                        im5chn_vec(itemp),ib,isbx,ibit)
+! this duplicates some of the early channels to round up to 8,16,32, or 64.
+                           if(im5chn_dup .gt. 0) then
+                              im5chn_dup =im5chn_dup-1
+                              im5chn=im5chn+1
+                              itemp=(im5chn-1)*ifan_fact+1
                               nch = iaddtr(ibuf,nch,
-     >                          im5trk_vec(im5trk), ib,isbx,ibit)
+     >                          im5chn_vec(itemp), ib,isbx,ibit)
                            endif
                          else
-                           nch = iaddtr(ibuf,nch,it+3,ib,isbx,ibit)
+                           if (mhead.eq.2.or.ipig.eq.2) then
+                             nch=iaddtr(ibuf,nch,it+3+100,ib,isbx,ibit)  !2hd
+                           else
+                             nch=iaddtr(ibuf,nch,it+3,ib,isbx,ibit)      !first headstack
+                           endif
                          endif
                       else if (ks2rec(ir)) then
                          nch = iaddtr(ibuf,nch,it+2,ib,isbx,ibit)

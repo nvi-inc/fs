@@ -16,13 +16,11 @@ C  Output:
 C  Local:
       integer ical,iyr,idayr,ihr,imin,isc,nstnsk,mjd,mon,ida
       double precision ut,gst
-      integer*2 ibufq(ibuf_len)
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN),
      .          lfreq
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
-      integer ilen,ltype,ich,ic1,ic2,idummy,
-     .nch,iret,i
+      integer ilen,ltype,ich,ic1,ic2,idummy,iret,i
       integer htype ! section 2-letter code
       logical kcod ! set to ksta when $CODES is found
       logical ksta ! set to true when $STATIONS is found
@@ -354,8 +352,8 @@ C       enddo
         isortm = 5
         ihdtm = 6
       call drprrd(ivexnum)
-C     if (.not.kgeo) kpostpass=.true.
-      if (.not.kgeo) kpostpass=.false.
+      if (.not.kgeo) kpostpass=.true.
+C      if (.not.kgeo) kpostpass=.false.
 C
 C Close the schedule file.
       close(lu_infile)

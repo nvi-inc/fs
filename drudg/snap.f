@@ -111,9 +111,9 @@ C        beginning the current observation
       logical knewpass  	! true if this obs on new pass.
 !
       character*1 crecorder     ! temporary characer
-      integer isess_code_len    !length of session code
+      integer isession_len      !length of session code
       character*80 ldum
-
+      character*12 lsession      !filename
 
 ! counter
       integer i
@@ -325,12 +325,13 @@ C
       endif
 
 
-      isess_code_len=index(lskdfi,".")-1
+      call strip_path(lskdfi,lsession)
+      isession_len=index(lsession,".")
+      lsession(isession_len:12)=" "
 
       call init_hardware_common(istn)
       MaxTapeLen=MaxTap(istn)
-      krec_append = nrecst(istn).gt.1            .and.
-     >              ichcm_ch(lstrec(1,istn),1,'none').ne.0
+      krec_append = nrecst(istn).gt.1 .and. cstrec(istn)(1:4).ne."none"
 
 C 2. Check the type of equipment so that bit density is correct.
 C   For VEX files the rack and recorder info is taken from the schedule. 
@@ -446,16 +447,15 @@ C Initialize recorder information.
         irec=1
         kk4 = kk41rec(1).or.kk42rec(1)
         ks2 = ks2rec(1)
-        krec = ichcm_ch(lstrec(1,istn),1,'none').ne.0
+        krec= cstrec(istn) .ne. 'none'
         km5 = km5rec(1) .or. km5prec(1)
       else ! second recorder
         irec=2
         kk4 = kk41rec(2).or.kk42rec(2)
         ks2 = ks2rec(2)
         km5 = km5rec(2) .or. km5prec(2)
-        krec = ichcm_ch(lstrec2(1,istn),1,'none').ne.0
+        krec= cstrec2(istn) .ne. 'none'
       endif
-
 
       iobs=0
       do while (istnsk.eq.0.and.ilen.ge.0) ! Get first scan for this station into IBUF
@@ -522,7 +522,6 @@ C           idum = ichmv(scan_namep,1,scan_name_next,1,16)
             istnsk_next=999
           endif
         enddo ! get NEXT scan for this station into ibuf_next
-
 
         if(istnsk_next .ne. 999) ifeet_next=ift(istnsk_next)
 C
@@ -608,7 +607,7 @@ C This is restricted to "adaptive" coming from VEX files.
                 if (ket) kcontpass = .false. ! this pass not continuous
 C               Use the offsets instead of slewing to determine good data time
 C               time5 = data start = tape start + offset
-                call TimeAdd(itime_scan_beg,ioff(istn),itime_off)
+                call TimeAdd(itime_scan_beg,ioff(istnsk),itime_off)
                 do i=1,5
                   itime_tape_start(i)=itime_off(i)
                 end do
@@ -678,8 +677,7 @@ C     3. Output the SNAP commands. Refer to drudg documentation.
 C scan_name command. 
         nch=trimlen(scan_name(iobs_now))
         write(ldum,'("scan_name=",a,",",a,",",i4)')
-     >    scan_name(iobs_now)(1:nch),lskdfi(1:isess_code_len),
-     >    idur(istnsk)
+     >    scan_name(iobs_now)(1:nch),lsession,idur(istnsk)
         call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
 
 C SOURCE command
@@ -806,20 +804,19 @@ C Unload tape.
             iobsst=0
 C Switch recorders if we have two of them, and they are both used.
             if(nrecst(istn) .eq. 2 .and. .not.
-     >          ((ichcm_ch(lstrec(1,istn),1,'unused') .eq.0 .or.   !If either recorder is not used
-     >            ichcm_ch(lstrec2(1,istn),1,'unused').eq.0 .or.   !  dont switch.
-     >            ichcm_ch(lstrec(1,istn),1,'none')   .eq.0 .or.   !
-     >            ichcm_ch(lstrec2(1,istn),1,'none')  .eq.0)   )) then
+     >        (cstrec(istn) .eq."unused".or.cstrec(istn).eq."none" .or.
+     >         cstrec2(istn).eq."unused".or.cstrec2(istn).eq."none"))
+     >                                                             then
               if (irec.eq.1) then
                 irec=2
                 kk4 = kk41rec(2).or.kk42rec(2)
                 ks2 = ks2rec(2)
-                krec = ichcm_ch(lstrec2(1,istn),1,'none').ne.0
+                krec=cstrec(istn) .ne. "none"
               else
                 irec=1
                 kk4 = kk41rec(1).or.kk42rec(1)
                 ks2 = ks2rec(2)
-                krec = ichcm_ch(lstrec(1,istn),1,'none').ne.0
+                krec=cstrec2(istn) .ne. "none"
               endif
             endif ! don't/switch
 ! do end of tape housework

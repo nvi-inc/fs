@@ -101,13 +101,21 @@ C Local
 ! Used to output proc names
       integer icode,ipass
       integer*2 lnamep(6)
+      character*12 cnamep
+      equivalence (lnamep,cnamep)
+
       integer*2 lcodeTmp
-      character*12 cname
+      character*2 ccodetmp
+      equivalence (ccodetmp,lcodetmp)
       integer nch
       integer itype
+      integer num_sub_pass
+      character*12 lfilnam
+! tape type
+      character*6 cTapeType     !THICK,THIN SHORT
+      character*4 cTapeDens     !HIGH, LOW
 
 ! Initialize
-      itype=2
       if(npage .eq. 0 .and. iline .eq. maxline) then
         do i=1,5
          itime_tape_start_old(i)=0
@@ -126,27 +134,29 @@ C  1. Headers.
       if (iline.ge.maxline) then ! new page, write header
         if (npage.gt.0) call luff(luprt)
         npage = npage + 1
-        write(luprt,9200) cinname(1:12),npage
-9200      format(' Schedule file: ',2x,a12,55x,'Page ',i3)
+        call strip_path(cinname,lfilnam)
+
+        write(luprt,9200) lfilnam,npage
+9200      format(' Schedule file: ',2x,a12,50x,'Page ',i3)
         if (kskd) then
           write(luprt,9201) cstnna(istn),lpocod(istn),
      .    lstcod(istn),(lexper(i),i=1,4)
 9201      format(' Station:    ',5x,a8,' (',a2,') (',a1,')',4x,
-     .           ' Experiment: ',5x,4a2)
+     .           ' Session:    ',5x,4a2)
         else
           write(luprt,9203) cstn,cid,cexper
-9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Experiment: ',a8)
+9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
         endif
 
         if(kskd) then
           i=trimlen(tape_motion_type(istn))
           if(i .ne. 0) then
             if(tape_motion_type(istn) .eq. "ADAPTIVE") then
-               write(luprt,9204) itgap(istn)
-9204         format(" Recording type:  ADAPTIVE (gap=",i4,")",6x,$)
+              write(luprt,9204) itgap(istn)
+9204          format(" Tape motion:     ADAPTIVE (gap=",i3,")",3x,$)
             else
               write(luprt,9205) tape_motion_type(istn)(1:10)
-9205          format(" Recording type:  ",a,11x,$)
+9205          format(" Tape motion:     ",a,11x,$)
             endif
           endif
 
@@ -157,11 +167,20 @@ C  1. Headers.
           else if(km5 .or. km5p) then
             write(luprt,  '(" Recorder type:   DISK")')
           else if(.not. (km5 .or. km5p)) then
-            if(MaxTap(istn) .ge. 17000) then
-              write(luprt,'(" Tape type:       THIN")')
+            if (bitdens(istn,1).gt.56000.0) then
+               cTapeDens='High'
             else
-              write(luprt,'(" Tape type:       THICK")')
+               cTapeDens='Low'
             endif
+            if(maxtap(istn) .lt. 5000) then
+               cTapeType="Short"
+            else if(maxtap(istn) .lt. 10000) then
+               cTapeType="Thick"
+            else
+               cTapeType="Thin"
+            endif
+            write(luprt,'(" Tape type:       ",a6,2x,a4)')
+     >           cTapeType,cTapeDens
           endif
         endif
 
@@ -172,25 +191,29 @@ C  1. Headers.
         write(luprt, 9212)    crecb,itlate_local
 9212    format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
 
-
-!JMG Start  2002Dec23
+! Put out procedure names
+        if (km5.or. km5p .or.ks2.or.kk4) then ! setup proc names
+          itype=1
+        else
+          itype=2
+        endif
         do icode=1,ncodes
-          write(luprt, '(" Mode",i2,4x,": Setup Proc ",$)') icode
-          do i=1,6
-            lnamep(i)=32*256+32     		  !set it to spaces.
-          end do
-          do ipass=1,npassf(istn,icode)
-            call setup_name(itype,icode,ipass,lnamep,nch)
-            call hol2lower(lnamep,(nch+1))
-            write(cname,'(6a2)') lnamep
-            write(luprt,'(a,1x,$)') cname
-          end do
-          lcodeTmp=lcode(icode)
-          call hol2lower(lcodeTmp,2)
-          write(luprt,'("   IFD Proc ifd",a2)') LcodeTmp
+          num_sub_pass=npassf(istn,icode)
+          if(num_sub_pass .ge. 1) then
+            if(km5)  num_sub_pass=1
+            write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
+            do ipass=1,num_sub_pass
+              cnamep=" "
+              call setup_name(itype,icode,ipass,lnamep,nch)
+              call c2lower(cnamep,cnamep)
+              write(luprt,'(a,1x,$)') cnamep
+            end do
+            lcodeTmp=lcode(icode)
+            call c2lower(ccodetmp,ccodetmp)
+            write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
+          endif
         end do
-! JMG End 2002Dec23
-
+! End of put out procedure names.
 
         write(luprt,'()')
         write(luprt,'(a)')
@@ -234,8 +257,11 @@ C  2. Column heads.
         il=trimlen(cbuf)
         if (kcont) cbuf=cbuf(1:il)//'     Stop'
         il=trimlen(cbuf)
-        if (.not.ks2) cbuf=cbuf(1:il)//'                   Record '
-        if (ks2) cbuf=cbuf(1:il)//'             Record' ! no stops
+        if (ks2) then
+            cbuf=cbuf(1:il)//'             Record' ! no stops
+        else
+            cbuf=cbuf(1:il)//'                      Record '
+        endif
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
         cbuf=' Scan      Line#  Source   Az El'

@@ -69,11 +69,16 @@ C
       character*8 cstnna(max_stn)
       equivalence (lstnna,cstnna)
       character*8 cstrec(max_stn),cstrack(max_stn),cstrec2(max_stn)
-      equivalence (lstrec,cstrec)
-      equivalence (lstrack,cstrack)
-      equivalence (lstrec2,cstrec2)
+      equivalence (lstrec,cstrec),(lstrack,cstrack),(lstrec2,cstrec2)
+      character*2 cpocod(max_stn),cstcod(max_stn)
+      equivalence (cpocod,lpocod),(cstcod,lstcod)
 
-      COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
+!      character*6 cTapeType(max_stn)
+!      character*4 cTapeDens(max_stn)
+!      common /statn_ch/cTapeType,cTapeDens
+
+
+      COMMON /STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
      .rack_type(max_rack_type),rec_type(max_rec_type),
      .tape_allocation(max_stn),tape_motion_save(max_stn)
 C 
@@ -87,7 +92,7 @@ C                        (1,2) lower limit, axis 2
 C                        (2,2) upper limit, axis 2
 C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute) 
 C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
-C  LSTCOD - station codes, 2 characters 
+C  LSTCOD - station codes, 2 characters
 C  LITERID - terminal ID, up to 4 characters
 C  LSTREC - recorder type
 C  LSTRACK - rack type

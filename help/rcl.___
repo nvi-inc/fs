@@ -90,7 +90,7 @@ user_dv_read_pb
                     user_info_read      field number, field or label 
                       user_info_read_pb     field number, field or label 
                     user_info_set       field number, field or label,string 
-                    spcll_mode_set      xtal or manual or refclk or 1hz or errmes 
+                    scpll_mode_set      xtal or manual or refclk or 1hz or errmes 
 status 
                       status_decode         status code, true or false 
                       status_detail         status code, true or false, true or false 
