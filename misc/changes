@@ -926,3 +926,15 @@ Version 9.1.5 960703
 
 Version 9.1.6 960819
 
+
+960827 WEH quikr/party.f
+           fixed systrack and VLBA group number problem
+
+961007 NRV drudg/fdrudg.f
+           drudg/spdstr.f
+           fix number of elements in speed string array
+
+961007 WEH quikr/party.f
+           second try on systrack number problem
+
+Version 9.1.7 961007
