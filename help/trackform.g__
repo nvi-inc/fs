@@ -11,7 +11,8 @@ track     VLBA or Mark IV recorder track number whose sampler
           Mark IV add 100 to the track number for stack 2.
 sampler   For VLBA racks , the sampler that will be mapped to the
           preceding track, 0, or in the form nnsd, where nn=bbc number
-          (1 through 16), s=sideband ( u or l), d is the data bit (s or m).
+          (1 through 14), s=sideband (u for upper or l for lower),
+          d is the data bit (s for sign bit or m for magnitude bit).
           For Mark IV racks, the same syntax can be used as for
           VLBA racks. In addition the nnsd sampler code can have
           nn values of 15 and 16, and also a +m can be appended,
