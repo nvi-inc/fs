@@ -5,6 +5,7 @@
  * 970122 NRV Remove numlaser and use tape_number instead.
  * 970228 nrv Make label size, barcode size into variables.
  * 970228 nrv Keep counting up labels every time we're called.
+ * 970827 nrv Remove nlaser, add icol, irow to call. 
  *
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
@@ -86,7 +87,7 @@ int barsize(char *,char *,unsigned,unsigned,unsigned,Boolean,int);
 void bar_code_labels(void);
 
 void make_pslabel(FILE **,char *,char *,char *,
-int*,int*,int*,int*,int*,int*,int*,int*,int*,float[]);
+int*,int*,int*,int*,int*,int*,int*,int*,int*,float[],int*,int*,int*);
 
 
 /* Make one label */
@@ -99,8 +100,7 @@ make_pslabel
 (FILE **fp, char * station_name, char * station_code, char * expt_name,
 int *year, int *start_day, int *start_hour, int *start_min,
 int *end_day,   int *end_hour,   int *end_min, int *tape_number,
-int *new_file,
-float lab_info[])
+int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
 {
   char string[11];
   unsigned char *ptr,temp;
@@ -108,12 +108,10 @@ float lab_info[])
   int i,x,y,z,bit;
   double x1,y1,x2,y2,line_width,line_spacing;
   float lab_ht,lab_wid,lab_topoff,lab_leftoff;
-  int lab_nrows,lab_ncols,icol,irow,rightoff,ifont;
-  static int nlaser;
+  int lab_nrows,lab_ncols,rightoff,ifont;
 
-/* If we are starting a new file, set nlaser back to zero. */
+/* If we are starting a new file, set *new_file back to zero. */
   if (*new_file == 1) {
-    nlaser=0;
     *new_file=0;
   }
 
@@ -134,7 +132,7 @@ float lab_info[])
    if (lab_wid < 4.0) ifont=8; else ifont=10;
 
 /* Write file header once */
-  if(nlaser==0){ /* write file header */
+  if(*new_file==0){ /* write file header */
     fprintf(*fp,"%%!PS-Adobe-\n");
 /*    fprintf(*fp,"%%%BoundingBox:  0 0 612 792\n"); */
     fprintf(*fp,"%%EndProlog\n");
@@ -146,7 +144,14 @@ float lab_info[])
      }
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
    }
-  nlaser++; /* increment total number of labels */
+
+/* Write showpage if this label will start a new page */
+  if(*new_page==1){
+   fprintf(*fp,"showpage\n%%%Trailer\n");
+   fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
+   *new_page=0;
+printf ("trailer written\n");
+  }
 
   /* Print the station code, day, hour/min into string like this:
      K123-1234, with a space on the end.
@@ -156,17 +161,19 @@ float lab_info[])
   *start_hour, *start_min);
 
 /* Calculate the x,y position on the page for this label, depending on
-   the total number of labels printed, nlaser.
+   the row and column.
    All label values are in inches, convert to units of 1/72 inch. 
 */
-  irow=nlaser%lab_nrows;
+/*
+  irow=*start_lab%lab_nrows;
   if (irow==0) irow=lab_nrows;
-  icol=1+nlaser/lab_nrows;
-  if (nlaser%lab_nrows == 0) icol-=1;
+  icol=1+*start_lab/lab_nrows;
+  if (*start_lab%lab_nrows == 0) icol-=1;
   if (icol > lab_ncols) icol=icol%lab_ncols;
   if (icol==0) icol=lab_ncols;
-  x=36+lab_leftoff*72 + (icol-1)*lab_wid*72; /* start 0.5" from edge of label */
-  y=792-36-lab_topoff*72-(irow-1)*lab_ht*72;
+*/
+  x=36+lab_leftoff*72 + (*icol-1)*lab_wid*72; /* start 0.5" from edge of label */
+  y=792-36-lab_topoff*72-(*irow-1)*lab_ht*72;
 
 /* Print the text above the barcode. */
   rightoff=100;
@@ -207,10 +214,6 @@ float lab_info[])
    temp >>= 1;
       }
 
-  if(nlaser%(lab_nrows*lab_ncols) == 0){
-   fprintf(*fp,"showpage\n%%%Trailer\n");
-   fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
-  }
 }
 
 
