@@ -230,7 +230,20 @@ void cshm_init()
   for(i=0;i<16*2+4;i++)
      shm_addr->tpicd.itpis[i]=0;
 
+  for(i=0;i<MAX_DET;i++)
+    shm_addr->onoff.itpis[i]=0;
+  shm_addr->onoff.setup=FALSE;
 
+  for (i=0;i<MAX_RXGAIN;i++)
+    shm_addr->rxgain[i].type=0;
+
+  for(i=0;i<MAX_FLUX;i++)
+    shm_addr->flux[i].name[0]=0;
+
+  for(i=0;i<2*MAX_DET;i++) {
+    shm_addr->tpigain[i]=128;
+    shm_addr->tpidiffgain[i]=128;
+  }
   return;
 }
 

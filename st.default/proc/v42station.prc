@@ -74,11 +74,6 @@ define  calon         00000000000
 "turn cal on
 "rx=*,*,*,*,*,*,on
 enddef
-define  caltemps      00000000000
-caltempa=x
-caltempb=x
-caltempc=x
-enddef
 define  dat           00000000000
 bbcsx2
 ifdsx
@@ -141,9 +136,10 @@ vlba4init
 sy=run setcl &
 enddef
 define  midob         00000000000
+bbcman
 tpi=formbbc,formif
+tpgain=formbbc,formif
 bbcagc
-caltemps
 tsys=formbbc,formif
 onsource
 wx
@@ -158,14 +154,6 @@ bbc09
 sy=run setcl &
 enddef
 define  midtp         00000000000
-bbcman
-ifdab=20,20,*,*
-ifdcd=20,20,*,*
-!+2s
-tpzero=formbbc,formif
-bbcagc
-ifdab=0,0,*,*
-ifdcd=0,0,*,*
 "rxmon
 enddef
 define  min15         00000000000
@@ -194,12 +182,7 @@ schedule=prethin,#1
 enddef
 define  preob         00000000000
 onsource
-bbcman
-calon
-!+2s
-tpical=formbbc,formif
-tpgain=formbbc,formif
-caloff
+caltsys
 enddef
 define  prepass       00000000000
 wakeup
@@ -323,6 +306,7 @@ enddef
 define  caltsys       00000000000
 bbcman
 tpi=formbbc,formif
+tpgain=formbbc,formif
 ifdab=20,20,*,*
 ifdcd=20,20,*,*
 !+2s
@@ -332,10 +316,10 @@ ifdcd=0,0,*,*
 calon
 !+2s
 tpical=formbbc,formif
-tpgain=formbbc,formif
+tpdiff=formbbc,formif
+tpdiffgain=formbbc,formif
 bbcagc
 caloff
-caltemps
 tsys=formbbc,formif
 enddef
 define  tapeforma     00000000000

@@ -32,7 +32,7 @@ int isub;
     ini_req(&buffer);
     request.type=21;
 
-    if(isub!=8) {
+    if(isub!=8 && isub !=9) {
       for (i=0;i<MAX_DET;i++) {
 	if(1==itpis_vlba[i]) {
 	  if(i<(2*MAX_BBC)) {                   /* bbc(s): */
@@ -99,6 +99,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
     struct res_rec response;
     long *ptr;
     int i,j,iclass,nrec,lenstart,isub;
+    long tpigainlocal[MAX_DET];
 
     isub=abs(isubin);
 
@@ -108,12 +109,23 @@ int ilen;                /* number of characters ibuf can hold, ignored */
        case 3: ptr=shm_addr->tpi; break;
        case 4: ptr=shm_addr->tpical; break;
        case 7: ptr=shm_addr->tpizero; break;
-       case 8: ptr=shm_addr->tpigain; break;
-       default: ptr=shm_addr->tpi; break;    /* just being defensive */
+       case 8:
+	 if(isubin>0)
+	   ptr=shm_addr->tpigain;
+	 else
+	   ptr=tpigainlocal;
+	 break;
+       case 9:
+	 if(isubin>0)
+	   ptr=shm_addr->tpidiffgain;
+	 else
+	   ptr=tpigainlocal;
+	 break;
+       default: ptr=tpigainlocal; break;  /* just being defensive */
     };
 
 
-    if(isub!=8) {
+    if(isub!=8 && isub!=9) {
       for (i=0;i<MAX_DET;i++) {
 	if(itpis_vlba[ i] == 1) {
 	  get_res(&response,&buffer_out);
@@ -181,8 +193,6 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	  strcat(ibuf,",");
 	  if(ptr[i] >65534) {
 	    strcat(ibuf,"$$$$$,");
-	  } else if (isub==8 && ptr[i] >0xFE) {
-	    strcat(ibuf,"$$$,");
 	  } else {
 	    int2str(ibuf,ptr[i],5);
 	    strcat(ibuf,",");
@@ -229,40 +239,64 @@ int ilen;                /* number of characters ibuf can hold, ignored */
     return;
 }
 
-void tsys_vlba(ip,itpis_vlba,ibuf,nch,caltmp)
+void tsys_vlba(ip,itpis_vlba,ibuf,nch,itask)
 long ip[5];                                    /* ipc array */
 int itpis_vlba[MAX_DET]; /* device selection array, see tpi_vlba for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
-float caltmp[4];
+int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 {
-  int i,j, inext,iclass,nrec, ind,lenstart;
-  float tpi,tpic,tpiz;
+  int i,j, inext,iclass,nrec, lenstart;
+  float tpi,tpic,tpiz,tpid;
 
   for (i=0;i<MAX_DET;i++) {
     if(itpis_vlba[ i] == 1) {
-      int kskip;
-      kskip=i<2*MAX_BBC&&
-	(shm_addr->bbc[i%14].source<0||shm_addr->bbc[i%14].source>3);
-      tpi=shm_addr->tpi[ i];             /* various pieces */
-      tpic=shm_addr->tpical[ i];
-      tpiz=shm_addr->tpizero[ i];        /* avoid overflow | div-by-0 */
-      if(kskip)
-	shm_addr->systmp[ i]=-1.0;
-      else if(fabs((double)(tpic-tpi))<0.5 || tpic > 65534 || tpi > 65534
-	     || tpiz < 1 )
-	shm_addr->systmp[ i]=1e9;
-      else {
-	int ind;
-	if(i<2*MAX_BBC)
-	  ind=shm_addr->bbc[i%14].source;
-	else 
-	  ind=i-2*MAX_BBC;
-	shm_addr->systmp[ i]=(tpi-tpiz)*caltmp[ind]/(tpic-tpi);
+      if(itask==5) {
+	int kskip;
+	kskip=i<2*MAX_BBC&&
+	  (shm_addr->bbc[i%14].source<0||shm_addr->bbc[i%14].source>3);
+	tpi=shm_addr->tpi[ i];             /* various pieces */
+	tpic=shm_addr->tpical[ i];
+	tpiz=shm_addr->tpizero[ i];
+	tpid=shm_addr->tpidiff[ i];
+
+	if(kskip)         /* avoid overflow | div-by-0 */
+	  shm_addr->systmp[ i]=-1.0;
+	else if(tpid<0.5 || tpid > 65534.5 || tpi > 65534.5 || tpi < 0.5 ||
+		tpiz < 0.5 || (i < 2*MAX_BBC && (
+		shm_addr->tpidiffgain[i]==0||shm_addr->tpigain[i]==0)))
+	  shm_addr->systmp[ i]=1e9;
+	else {
+	  float vgdiff,vgtpi;
+
+	  if(i<2*MAX_BBC) {
+	    vgdiff=shm_addr->tpidiffgain[i];
+	    vgtpi=shm_addr->tpigain[i];
+	  } else {
+	    vgdiff=1.0;
+	    vgtpi=1.0;
+	  }
+
+	  shm_addr->systmp[ i]=(tpi/(vgtpi*vgtpi)-tpiz/(vgdiff*vgdiff))*
+	    shm_addr->caltemps[ i]/(tpid/(vgdiff*vgdiff));
+	}
+	if(shm_addr->systmp[ i]>999999.95 || shm_addr->systmp[ i] <0.0)
+	  logita(NULL,-211,"qk",lwhat[i]);
+      } else if(itask==6) {
+	shm_addr->tpidiff[i]=shm_addr->tpical[i]-shm_addr->tpi[i];
+	if(shm_addr->tpical[i]>65534.5||
+	   shm_addr->tpical[i]<0.5||
+	   shm_addr->tpi[i]>65534.5||
+	   shm_addr->tpi[i]<0.5)
+	  shm_addr->tpidiff[i]=65535;
+      } else if(itask==10) {
+	int ierr;
+	float fwhm, epoch, dum;
+	epoch=-1.0;
+	get_tcal_fwhm(lwhat[i],&shm_addr->caltemps[i],&fwhm,
+		      epoch,&dum, &dum,&dum,&ierr);
       }
-      if(shm_addr->systmp[ i]>999999.95 || shm_addr->systmp[ i] <0.0)
-	logita(NULL,-211,"qk",lwhat[i]);
     }
   }
 
@@ -285,7 +319,13 @@ float caltmp[4];
 	}
 	strcat(ibuf,lwhat[i]);
 	strcat(ibuf,",");
-	flt2str(ibuf,shm_addr->systmp[ i],8,1);
+	if(itask==5) 
+	  flt2str(ibuf,shm_addr->systmp[ i],8,1);
+	else if(itask==6) {
+	  int2str(ibuf,shm_addr->tpidiff[i],5);
+	} else if(itask==10) 
+	  flt2str(ibuf,shm_addr->caltemps[ i],8,3);
+
 	strcat(ibuf,",");
       }
     }
@@ -300,7 +340,12 @@ float caltmp[4];
       }
       strcat(ibuf,lwhat[i]);
       strcat(ibuf,",");
-      flt2str(ibuf,shm_addr->systmp[ i],8,1);
+      if(itask==5) 
+	flt2str(ibuf,shm_addr->systmp[ i],8,1);
+      else if(itask==6) {
+	int2str(ibuf,shm_addr->tpidiff[i],5);
+      } else if(itask==10) 
+	flt2str(ibuf,shm_addr->caltemps[ i],8,3);
       strcat(ibuf,",");
     }
     if(ibuf[lenstart]!=0) {

@@ -1,0 +1,56 @@
+* x.rx - x band receiver parameter definition
+*
+* first line: LO values and ranges, format:
+*  type   frequencies
+* if type is range, the two values: lower and upper frequencies
+* if type is fixed, then one or two fixed value
+* frequencies in MHz
+*
+fixed 8080 8580.1
+*
+* 2nd line: creation date
+* format:  yyyy ddd or yyyy mm dd (0 is valid for all for intial set-up)
+*
+2002 07 18
+*
+* 3rd line: FWHM beamwidthm format:
+*   model value
+*
+* if type is frequncy, then fwhm=value*1.22*c/(freq*diameter)
+*                      value is 1.0 if omitted
+* if type is constant, then fwhm=value (degrees)
+*
+frequency 1.0
+*
+* 4th line polarizations available
+*
+* one of both of lcp and rcp
+*
+rcp
+*
+* 5th line: DPFU (degrees/Jansky) for polarizations in previous line in order
+*
+  0.00120
+*
+* 6th line: gain curve (only one) for ALL polarizations in 4th line
+* TYPE FORM COEFFICENTS ...
+*
+* FORM = POLY only for now
+* TYPE - ELEV and ALTAZ only for now
+* COEFFICENTS - variable number of number values
+*
+* maximum coefficents 10
+*
+ELEV POLY 1.0
+*
+* 7th and following lines: tcal versus frequency
+*     Format: POL FREQ TCAL
+*     where:
+*            POL    polarization rcp or lcp
+*            FREQ   frequency (MHz)
+*            TCAL   degrees K
+*
+*     MAXIMUM ENTRIES 100, group by polarization
+*                          then sorted by increasing freq
+*
+rcp 8080.0   9.8 

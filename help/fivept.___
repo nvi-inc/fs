@@ -1,8 +1,8 @@
              fivept - five or more point source scan
  
-              Syntax:      fivept=axis,rep,pts,stp,intp,dev
+              Syntax:      fivept=axis,rep,pts,stp,intp,dev,wait
  
-              Response:    fivept/axis,rep,pts,stp,intp,dev,cal,beam,flux,chain
+              Response:    fivept/axis,rep,pts,stp,intp,dev,wait,cal,beam,flux,chain
  
  
  Settable parameters:
@@ -27,6 +27,8 @@
             of a beamwidth. Default is 0.5. 
             intp       Integration period, 1 to 32 seconds.
             dev        Mnemonic for the device to be used as the detector.
+            wait       seconds to wait for onsource for each point,
+            1-1200 seconds allowed, default 120.
             Standard devices are allowed. Note that for Mark III
             equipment, the whether the video converter USB or
             LSB detector is used is determined by the vc
@@ -150,3 +152,10 @@
  unit and offset of zero is assumed in converting from detector
  counts to displayed antenna temperature, i.e., measurements
  are reported in detector units with an assumed zero offset. 
+
+ The default wait time for of 120 seconds is generous, but can be adjusted
+ if necessary. Slower antennas may need a longer time. Shorter times
+ are only useful to make fivept give-up sooner if there is a problem
+ getting on-source.
+
+

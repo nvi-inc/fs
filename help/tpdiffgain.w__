@@ -1,8 +1,8 @@
-         tpgain - measure TPI gain levels (VLBA, VLBA4 racks)
+       tpdiffgain - measure TPIDIFF gain levels (VLBA, VLBA4 racks)
  
-              Syntax:      tpgain=list
+              Syntax:      tpdiffgain=list
  
-              Response:    tpgain/gain levels
+              Response:    tpdiffgain/gain levels
  
  
  Settable parameters: 

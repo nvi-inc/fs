@@ -10,11 +10,6 @@ define  calon         00000000000
 "turn cal on
 "rx=*,*,*,*,*,*,on
 enddef
-define  caltemps      00000000000
-caltemp1=x
-caltemp2=x
-caltemp3=x
-enddef
 define  dat           00000000000
 vc15=200
 vcsx2
@@ -60,19 +55,12 @@ vc01
 vc05
 vc09
 tpi=formvc,formif
-caltemps
 tsys=formvc,formif
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
 sy=run setcl &
 enddef
 define  midtp         00000000000
-ifd=max,max,*,*
-if3=max,*,*,*,*,*
-!+2s
-tpzero=formvc,formif
-ifd=old,old,*,*
-if3=old,*,*,*,*,*
 "rxmon
 enddef
 define  min15         00000000000
@@ -103,10 +91,7 @@ schedule=prethin,#1
 enddef
 define  preob         00000000000
 onsource
-calon
-!+2s
-tpical=formvc,formif
-caloff
+caltsys
 enddef
 define  prepass       00000000000
 wakeup
@@ -219,8 +204,8 @@ if3=old,*,*,*,*,*
 calon
 !+2s
 tpical=formvc,formif
+tpdiff=formvc,formif
 caloff
-caltemps
 tsys=formvc,formif
 enddef
 define  tapeforma     00000000000

@@ -1,0 +1,233 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_PNTS 1000
+#define MAX_PAR 10
+
+extern double fpoly();
+int fit();
+
+int
+main(int argc, char **argv)
+{
+  FILE *fp,*fpw;
+  char buff[100],type[11];
+  int ierr,iread, ipoints;
+  double gain[MAX_PNTS],elev[MAX_PNTS];
+
+  int ntry, npar, i,ifit,npts;
+  double par[MAX_PAR],epar[MAX_PAR],yavg,yrms,rchi,randx;
+
+  int icount;
+  double start, stop, step, xmax, ymax, best_ymax, dpfu, x, val, old_ymax;
+
+  double a[MAX_PAR*(MAX_PAR+1)/2],b[MAX_PAR],scale[MAX_PAR],aux[MAX_PAR];
+  int nfree,zero;
+  float rcond, tol;
+
+  zero=0;
+  if(argc < 3) {
+    fprintf(stderr," not enough arguments\n");
+    exit(-1);
+  }
+  
+  ipoints=0;
+
+  if( (fp= fopen(argv[1],"r"))==NULL ) {
+    perror(argv[1]);
+    exit(-1);
+  }
+
+  if( (fpw= fopen(argv[2],"w"))==NULL ) {
+    perror(argv[2]);
+    exit(-1);
+  }
+
+  ierr=find_next_noncomment(fp,buff,sizeof(buff));
+  if(ierr!=0 && ierr!=-1)
+    goto read_error;
+
+  iread=sscanf(buff,"%d %10s",&npar, &type);
+  if(iread!=2) {
+    fprintf(stderr,
+	    "didn't get number of parameters in (non-comment) line %d",
+	   1);
+    fprintf(fpw," steps -10\n");
+    exit(-1);
+  }
+
+  if(npar <= 0 || npar > MAX_PAR) {
+    fprintf(fpw," steps -16\n");
+    exit(-1);
+  }
+
+  if(strcmp(type,"ALTAZ")!=0 && strcmp(type,"ELEV")!=0) {
+    fprintf(fpw," steps -17\n");
+    exit(-1);
+  }
+
+  ierr=find_next_noncomment(fp,buff,sizeof(buff));
+  if(ierr!=0 && ierr!=-1)
+    goto read_error;
+  while(!feof(fp)) {
+
+    if(++ipoints > MAX_PNTS) {
+      fprintf(stderr,"exceeding maximum number of points %d\n",MAX_PNTS);
+      fprintf(fpw," steps -11\n");
+      exit(-1);
+    }
+    iread=sscanf(buff,"%lf %lf",gain+ipoints-1,elev+ipoints-1);
+
+    if(strcmp(type,"ALTAZ")== 0) {
+      elev[ipoints-1]=90.0-elev[ipoints-1];
+      /*      printf(" elev[ipoints-1] %lf\n",elev[ipoints-1]); */
+    }
+    if(iread!=2) {
+      fprintf(stderr,
+	      "didn't get enough data fields on (non-comment) line %d",
+	      ipoints+1);
+      fprintf(fpw," steps -12\n");
+      exit(-1);
+    }
+    
+    ierr=find_next_noncomment(fp,buff,sizeof(buff));
+    if(ierr!=0 && ierr!=-1)
+      goto read_error;
+  }
+#if 0
+  printf(" at end of file\n");
+  printf(" generate data\n");
+  ipoints=20;
+
+  for(i=0;i<ipoints;i++) {
+    elev[i]=90.0*(((double) i)/((double) ipoints));
+    gain[i]=1.0+elev[i]*-0.01+elev[i]*elev[i]*-0.002;
+    randx=0.0*(.5-((double)rand())/RAND_MAX);
+    gain[i]+=randx;
+    printf(" i %d elev %lf gain %lf randx %lf \n",i,elev[i],gain[i],randx);
+    fprintf(fpw," %lf %lf\n",gain[i],elev[i]);
+  }
+  npar=3;
+
+#endif
+
+  /*now fit data */
+
+  npts=ipoints;
+  tol=1e-4;
+  ntry=20;
+  for(i=0;i<10;i++) {
+    par[i]=0;
+    epar[i]=0.0;
+  }
+  if(npts <npar) {
+    fprintf(fpw," steps -15\n");
+    exit(-1);
+  }
+
+  ifit=fit2_(elev, gain, fpoly, &npts, par, epar, aux, scale, a, b,
+	    &npar, &tol, &ntry, &rchi, &nfree, &ierr, &rcond);
+
+  /*
+  for(i=0;i<10;i++) {
+    printf(" par %lf epar %lf\n",par[i],epar[i]);
+  }
+  printf(" rchi %f nfree %d\n",rchi,nfree);
+  */
+  /* find maximum */
+
+  best_ymax=-2.0;
+  ymax=-2.0;
+  start=0.0;
+  stop=90.0;
+  icount=0;
+
+  while(++icount<4
+	|| best_ymax<=1e-16 || fabs(best_ymax-old_ymax)/best_ymax >0.0001) {
+    step=(stop-start)/99;
+    xmax=-1.0;
+    ymax=-1.0;
+    for(i=0;i<100;i++) {
+      x=start+i*step;
+      val=fpoly(&zero,&x,par,&npar);
+      if(val >ymax) {
+	xmax=x;
+	ymax=val;
+      }
+    }
+    if(ymax <1e-16) {
+      fprintf(fpw," steps -13\n");
+      exit(-1);
+    }
+
+    start=xmax-step*1.05;
+    stop=xmax+step*1.05;
+    if(start<0.0)
+      start=0.0+step*0.01;
+    if(stop>90.0)
+      stop=90.0-step*0.01;
+    old_ymax=best_ymax;
+    if(ymax>=best_ymax) {
+      best_ymax=ymax;
+    }
+  }
+
+  if(best_ymax <= 1e-16) {
+    fprintf(fpw," steps -14\n");
+    exit(-1);
+  }
+
+  dpfu=best_ymax;
+
+  if(ierr>0 && ierr <ntry) {
+    fprintf(fpw," steps %d rchi*dpfu %.6lf dpfu %lf coeff",ierr, rchi,dpfu);
+    for(i=0;i<npar;i++)
+      fprintf(fpw," %.8lg",par[i]/dpfu);
+    fprintf(fpw,"\n");
+    close(fpw);
+    exit(0);
+  } else {
+    fprintf(fpw," steps -1\n");
+    close(fpw);
+    exit(-1);
+  }
+
+  fprintf(stderr," can't get here\n");
+  exit(-1);
+
+ read_error:
+  switch(ierr) {
+  case 0: /* all right now */
+    break;
+  case -1: /* ended in comment, is okay */
+    break;
+  case -2: /* error ungetting */
+    perror("reading ungetting input file character");
+    fprintf(fpw," steps -20\n");
+    exit(-1);
+    break;
+  case -3: /* error  reading */
+    perror("reading input file");
+    fprintf(fpw," steps -21\n");
+    exit(-1);
+    break;
+  case -4:
+    perror("input file line too long");
+    fprintf(fpw," steps -22\n");
+    exit(-1);
+    break;
+  default:
+    fprintf(stderr,"unknown error %d from find_next_noncomment()\n",ierr);
+    fprintf(fpw," steps -23\n");
+    exit(-1);
+    break;
+  }
+  fprintf(stderr," can't get here\n");
+  fprintf(fpw," steps -24\n");
+  exit(-1);
+}
+
+
+
+
