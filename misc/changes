@@ -4901,3 +4901,39 @@ Version 9.3.204 981202
 
 Version 9.3.110 990122
 
+990212 WEH clib/get_k4time.c
+           handle k42 and k41 differently
+
+990212 WEH clib/k4st_util.c
+           accept DRC=STOP also for stopped state
+
+990212 WEH misc/k4
+           created version switching instructions
+
+990212 WEH control/fserr.ctl
+           improve bo -124 error message
+
+Version 9.3.111 990212
+
+990216 WEH ibcon/rddev.c
+           remove 30/256 character restriction for ascii/binary reads
+
+990216 WEH ibcon/ibcon.f
+           allow 512 characters reads for binary/ascii for non-serial converter
+           set 32 characters for ascii and 256 for serial converter
+           explicit lengths can override up to 512 characters
+
+990216 WEH clib/k4st_util.c
+           distinguish between K42 STOP and K41 STP
+
+990216 WEH ibcon/statbrd.c
+           ibcon/rspdev.c
+           erronous len_in call to sib, should have been -1 not 0
+
+990216 WEH clib/k4rec_util.c
+           quikv/k4rec.c
+           control/fserr.ctl
+           expunge any references to K4 AUX value in rec command.
+
+Version 9.3.112 990216
+
