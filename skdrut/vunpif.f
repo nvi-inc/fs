@@ -1,5 +1,5 @@
       SUBROUTINE vunpif(modef,stdef,ivexnum,iret,ierr,lu,
-     .cifref,flo,ls,lin,lp,nifdefs)
+     .cifref,flo,ls,lin,lp,fpcal,fpcal_base,nifdefs)
 C
 C     VUNPIF gets the IFD def statements 
 C     for station STDEF and mode MODEF and converts it.
@@ -16,6 +16,7 @@ C 960522 nrv New.
 C 970114 nrv For Vex 1.5 get IF name from def directly instead of ref name, 
 C            and add polarization to call.
 C 970124 nrv Move initialization to front.
+C 971208 nrv Add phase cal spacing and base frequency. 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -30,6 +31,8 @@ C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       character*6 cifref(max_ifd) ! IFD refs
       double precision flo(max_ifd) ! LO frequencies
+      double precision fpcal(max_ifd) ! pcal frequencies
+      double precision fpcal_base(max_ifd) ! pcal_base frequencies
       integer*2 ls(max_ifd) ! sideband of the LO
       integer*2 lin(max_ifd) ! IF input channel
       integer*2 lp(max_ifd) ! polarization
@@ -49,6 +52,8 @@ C  Initialize
       do id=1,max_ifd
         cifref(id)=''
         flo(id)=0.d0
+        fpcal(id)=-1.d0 ! defaults to off
+        fpcal_base(id)=0.d0
         idum = ichmv_ch(ls(id),1,'  ')
         idum = ichmv_ch(lin(id),1,'  ')
         idum = ichmv_ch(lp(id),1,'  ')
@@ -155,6 +160,39 @@ C  1.5 Sideband
           idum = ichmv_ch(ls(id),1,cout(1:1))
         endif
 
+C  1.6 Phase cal spacing
+
+        ierr = 16
+        iret = fvex_field(6,ptr_ch(cout),len(cout)) ! get pcal spacing
+        if (iret.eq.0) then ! got one
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
+          if (iret.ne.0.or.d.lt.0.d0) then
+            ierr=-6
+            write(lu,'("VUNPIFD04 - Invalid phase cal frequency",
+     .          d10.2)') d
+          else
+            fpcal(id) = d/1.d6 ! convert to MHz
+          endif
+        endif ! got one
+
+C  1.7 Phase cal base
+
+        ierr = 17
+        iret = fvex_field(7,ptr_ch(cout),len(cout)) ! get pcal base
+        if (iret.eq.0) then ! got one
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
+          if (iret.ne.0.or.d.lt.0.d0) then
+            ierr=-7
+            write(lu,'("VUNPIFD05 - Invalid phase cal base frequency",
+     .          d10.2)') d
+          else
+            fpcal_base(id) = d/1.d6 ! convert to MHz
+          endif
+        endif ! got one
 
 C       Get next IFD def statement
         iret = fget_all_lowl(ptr_ch(stdef),
