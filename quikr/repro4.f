@@ -168,7 +168,7 @@ C  DEFAULT EQUALIZER IS 2 IF MODE IS READ OR DISABLE.
         if (iby.eq.1) then
           ieq = 4
         else
-          ieq = 3
+          ieq = 2
         endif
       endif
 C
