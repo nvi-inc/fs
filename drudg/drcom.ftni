@@ -33,12 +33,13 @@ C 990401 nrv Add iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 C 991102 nrv Add kdr_type
 C 020304 nrv Add kmk5_piggyback
 C 020508 nrv Add tpid_prompt,itpid_period,tpid_parm
+C 020713 nrv Add kgeo
 C
 	double precision RA50,DEC50
         real rlabsize
 c
 	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
-     .          kprepass,kdr_type,kmk5_piggyback
+     .          kprepass,kdr_type,kmk5_piggyback,kgeo
 c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
@@ -64,7 +65,7 @@ c
 C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
-     .       kdrg_infile,kprepass,kdr_type,kmk5_piggyback,
+     .       kdrg_infile,kprepass,kdr_type,kmk5_piggyback,kgeo,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
      .       LUPRT,LUOUT,LULAB,ISTN,

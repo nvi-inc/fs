@@ -38,6 +38,8 @@ C 000125 nrv Add S2 length and speed. Add K4 length.
 C 000319 nrv Add K4 specification and output.
 C 001003 nrv Add SHORT tape option.
 C 020111 nrv Check LSTREC not LTERNA to determine S2 and K4 types.
+C 020705 nrv Check NCODES not ICODE for KK4.
+C 020815 nrv Add number of passes to listing.
 C
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
@@ -57,10 +59,10 @@ C
           if (ks2) then
             if (ichcm_ch(ls2speed(1,i),1,'LP').eq.0) s2sp=SPEED_LP
             if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
-            ival = idint(0.001 + maxtap(i)/(s2sp*5.d0)) ! feet/(ips*5) = min
+            ival = idint(0.1 + maxtap(i)/(s2sp*5.d0)) ! feet/(ips*5) = min
           elseif (kk4) then
-            k4sp = speed(1,i) ! speed for code 1
-            ival = idint(0.001 + maxtap(i)/(60.d0*k4sp)) ! meters
+            k4sp = speed(1,i) ! speed for code 1 in m/s
+            ival = idint(0.1 + maxtap(i)/(60.d0*k4sp)) ! min=m/(60*m/s)
           else 
             cdens(i)='Low'
             if (bitdens(i,1).gt.56000.0) cdens(i)='High'
@@ -70,7 +72,8 @@ C
             if (maxtap(i).lt.5000) ctype(i)='Short'
           endif
           if (i.eq.1.and.(.not.ks2.and..not.kk4)) WRITE(LUDSP,9910)
-9910        FORMAT(' ID  Station   Tape length        Density ')
+9910        FORMAT(' ID  Station   Tape length        Density   ',
+     .      '    Passes')
           if (i.eq.1.and.ks2) WRITE(LUDSP,9911)
 9911        FORMAT(' ID  Station   Tape length            Speed ')
           if (i.eq.1.and.kk4) WRITE(LUDSP,9912)
@@ -83,8 +86,9 @@ C         Write bit density for freq code 1 only.
           WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4)
 9111      FORMAT(1X,A2,2X,4A2,$)
           if (.not.ks2.and..not.kk4) then
-            WRITE(LUDSP,9112) maxtap(i),ctype(i),bitdens(i,1),cdens(i)
-9112        FORMAT(i6,'feet (',a,')',3x,f6.0,' (',a,')')
+            WRITE(LUDSP,9112) maxtap(i),ctype(i),bitdens(i,1),cdens(i),
+     .      maxpas(i)
+9112        FORMAT(i6,'feet (',a,')',3x,f6.0,' (',a,')',3x,i3)
           else if (ks2) then
             if (ichcm_ch(ls2speed(1,i),1,'LP').eq.0) s2sp=SPEED_LP
             if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
@@ -143,7 +147,7 @@ C       Station ID is valid. Check tape type now.
             endif
           enddo
         endif ! one/all stations
-        if (kk4.and.icode.eq.0) then ! need speed
+        if (kk4.and.ncodes.eq.0) then ! need speed
           write(luscn,9993)
 9993      format('TTAPE93 - Select K4 recording mode first.')
           return

@@ -12,11 +12,31 @@ C INPUT
 C OUTPUT
 C     LMODE in common is modified with the Mk3 mode.
 c LOCAL
-      integer idum
+      integer idum,ntra,i,j,k,l,m
       integer ichmv_ch
+C History
+C 020909 nrv If a station has all the tracks of a standard mode
+C            plus some others, it should not be classified as a
+C            standard mode.  Count tracks in itras and compare 
+C            to 28.
 
-C     itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
+C     itras(bit,sb,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
 
+C  Count the tracks
+      ntra = 0
+      do i=1,2 ! nbits
+        do j=1,2 ! sideband
+          do k=1,max_headstack
+            do l=1,max_chan
+              do m=1,max_subpass
+                if (itras(i,j,k,l,m,istn,icode).ne.-99) ntra=ntra+1
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+
+C  Check the tracks
       if ( itras(1,1,1, 1,1,istn,icode).eq.15 .and.
      .     itras(1,1,1, 2,1,istn,icode).eq. 1 .and.
      .     itras(1,1,1, 3,1,istn,icode).eq.17 .and.
@@ -46,6 +66,7 @@ C     itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
      .     itras(1,1,1,13,2,istn,icode).eq.28 .and.
      .     itras(1,1,1,14,2,istn,icode).eq.14 .and.
      .     nchan(istn,icode).eq.14 .and.
+     .     ntra.eq.28 .and.
      .     npassf(istn,icode).eq.2 ) then ! mode C 
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'C') 
@@ -80,6 +101,7 @@ C     itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
      .     itras(2,1,1,13,1,istn,icode).eq.27 .and.
      .     itras(2,1,1,14,1,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.28 .and.
+     .     ntra.eq.28 .and.
      .     npassf(istn,icode).eq.1 ) then ! mode A 
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'A') 
@@ -114,6 +136,7 @@ C     itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
      .     itras(2,1,1,13,2,istn,icode).eq.26 .and.
      .     itras(2,1,1,14,2,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.14 .and.
+     .     ntra.eq.28 .and.
      .     npassf(istn,icode).eq.2 ) then ! mode B 
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'B') 
@@ -148,6 +171,7 @@ C     itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
      .     itras(1,1,1, 6,4,istn,icode).eq.26 .and.
      .     itras(1,1,1, 7,4,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq. 7 .and.
+     .     ntra.eq.28 .and.
      .     npassf(istn,icode).eq.4 ) then ! mode E 
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'E') 

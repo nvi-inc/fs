@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.12/misc/fs9512up.txt  Version: 1.3  Date: 020624
+File: /usr2/fs-9.5.12/misc/fs9512up.txt  Version: 1.5  Date: 021004
 
 I. Introduction
 
@@ -789,7 +789,7 @@ example you might do the following:
     ncftp -u atri.gsfc.nasa.gov
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
-    cd /home/ftp/fs/test
+    cd /fs/dist
     get fs-9.5.12.tar.gz
     quit
 
@@ -1137,6 +1137,6 @@ computer and then execute the command:
 
 cat fs9512tg.* >fs-9.5.12.tar.gz
 
-This will create an exact image of the original fs-9.5.11.tar.gz
+This will create an exact image of the original fs-9.5.12.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

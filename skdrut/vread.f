@@ -13,6 +13,7 @@ C 960522 nrv New.
 C 970114 nrv Stop if the supported VEX version is not found.
 C 970124 nrv Add a call to VGLINP, and a call to errormsg
 C 990921 nrv Save the VEX version number.
+C 020619 nrv Add call to VPRINP to read scheduling parameters
 
 C Input
       character*(*) cfile ! VEX file path name
@@ -89,8 +90,8 @@ C    .i5)') nobs
 C -------------------------------------------
 
 C  3. Initialize parameters to standard values. These
-C     are parameters not read in from the vex file.
-C     Early start, late stop, and time gape were read in.
+C     are parameters not read in from the astro vex file.
+C     Early start, late stop, and time gap were read in.
 
       isettm = 20
       ipartm = 70
@@ -101,7 +102,10 @@ C     Early start, late stop, and time gape were read in.
 C 3. Read the $SCHEDULING_PARAMS section to get parameters.
 C    If there is a def for SKED_PARAMS then mark this as a
 C    sked-produced schedule by setting ksked true.
-C     iret = fget_literal(ibuf)
+C     call vprinp(ivexnum,lu,ierr) ! params
+C     if (ierr.ne.0) then
+C       write(lu,'("VREAD05 - Error reading parameters by vprinp.")')
+C     endif
 
       return
       end

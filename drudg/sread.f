@@ -70,6 +70,9 @@ C 000611 nrv Add call to OBS_SORT for sked files. VEX files already in order.
 C 000614 nrv Add call to ATAPE.
 C 010102 nrv Add LUSCN to obs_sort call.
 C 011011 nrv Move FRINIT call to start.
+C 020713 nrv Move reading of $PARAM to DRPRRD.
+C 020713 nrv Set kgeo=.true. for sked file, false for VEX. Will be
+C            set to .true. if sked_params block is found later.
 C
 C
       close(unit=LU_INFILE)
@@ -91,13 +94,13 @@ C
       khed = .false.
       call frinit(max_stn,max_frq)
 C
-      kvex=.false.
       read(lu_infile,'(a)') cbuf
 C*********************************************************
 C vex file section
 C*********************************************************
       if (cbuf(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
+        kgeo=.false. ! will be set to true if SKED_PARAMS is found
 C       Read up to the $EXPER section to find the line number
         rewind(lu_infile)
         call initf(lu_infile,ierr)
@@ -139,6 +142,8 @@ C*********************************************************
 C sked file section
 C*********************************************************
       else ! sked file
+        kvex=.false.
+        kgeo=.true.
         rewind(lu_infile)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
 
@@ -303,69 +308,6 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         enddo 
       endif
-C Go back to parameter section and read it now.
-        write(luscn,'(" Re-reading ... ",$)')
-        rewind(LU_INFILE)
-        do i=1,nstatn
-          tape_motion_type(i)='START&STOP'
-          itearl(i)=0
-          itlate(i)=0
-          itgap(i)=0
-          itlate(i)=0
-        enddo
-        isettm = 20
-        ipartm = 70
-        itaptm = 1
-        isortm = 5
-        ihdtm = 6
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        DO WHILE (ILEN.GT.0) !read schedule file
-          IF (ichcm_ch(IBUF,1,'$PARAM').EQ.0) THEN
-            rdum= reio(2,LUSCN,IBUF,-ILEN)
-C           write(luscn,'(40a2)') (ibuf(i),i=1,(ilen+1)/2)
-            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
-              ich=1
-              CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-              nch=ilen-ic2+1
-              if (ichcm_ch(ibuf,ic1,'ELEVATION ').eq.0) then
-                ibufq(1)=nch
-                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-                call selev(ibufq,luscn,luscn)
-              ELSE IF (ICHCM_ch(IBUF,IC1,'TAPE_TYPE ').EQ.0) THEN
-                ibufq(1)=nch
-                IDUM = ICHMV(ibufq(2),1,IBUF,ic2+1,nch)
-                CALL TTAPE(IBUFQ,luscn,luscn)
-              else if (ichcm_ch(ibuf,ic1,'TAPE_ALLOCATION').eq.0) then
-                ibufq(1)=nch
-                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-                call atape(ibufq,luscn,luscn)
-              else if (ichcm_ch(ibuf,ic1,'TAPE_MOTION').eq.0) then
-                ibufq(1)=nch
-                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-                call stape(ibufq,luscn,luscn)
-              else if (ichcm_ch(ibuf,ic1,'EARLY_START ').eq.0) then
-                ibufq(1)=nch
-                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-                call searl(ibufq,luscn,luscn)
-              else if (ichcm_ch(ibuf,ic1,'LATE_STOP ').eq.0) then
-                ibufq(1)=nch
-                idum=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-                call slate(ibufq,luscn,luscn)
-              else if (ichcm_ch(ibuf,ic1,'SNR  ').eq.0) then
-              else if (ichcm_ch(ibuf,ic1,'SCAN  ').eq.0) then
-              else if (ichcm_ch(ibuf,ic1,'SUBNET  ').eq.0) then
-              else if (ichcm_ch(ibuf,ic1,'WEIGHT  ').eq.0) then
-              else
-                ibufq(1)=ilen
-                idum=ichmv(ibufq(2),1,ibuf,1,ilen)
-                call drset(ibufq)
-              endif
-              CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            enddo !read $PARAM section
-          endif
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        enddo !read schedule file
 C       Look for the string "Cover Letter" in .drg file
         ireccv=0
         if (kdrg_infile) then ! .drg file
@@ -383,10 +325,9 @@ C       Look for the string "Cover Letter" in .drg file
           enddo !read schedule file
           write(luscn,'()')
         endif ! .drg file
-C Close the schedule file.
-      close(lu_infile)
 C
 C Order the observations, in case they were not so in the $SKED section.
+C Not needed for VEX because they are read in when station is selected.
       if (nobs.le.0) then
         write(luscn,9901)
 9901    format('SREAD02 - No observations found in the schedule')
@@ -396,6 +337,23 @@ C Order the observations, in case they were not so in the $SKED section.
 C
       endif ! VEX/sked
 
+C     Read parameters needed by drudg
+        do i=1,nstatn
+          tape_motion_type(i)='START&STOP'
+          itearl(i)=0
+          itlate(i)=0
+          itgap(i)=0
+          itlate(i)=0
+        enddo
+        isettm = 20
+        ipartm = 70
+        itaptm = 1
+        isortm = 5
+        ihdtm = 6
+      call drprrd(ivexnum)
 C
+C Close the schedule file.
+      close(lu_infile)
+
       RETURN
       END
