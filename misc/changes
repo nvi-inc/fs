@@ -3388,3 +3388,37 @@ Version 9.3.16 971003
            increased iaux to dimension 36 so that 32-36 track checks will work
 
 Version 9.3.17 971029
+
+980128 WEH oprin/Makefile
+           add TERMLIB logic to handle different curses
+
+980129 WEH monit/monit1.c
+           monit/monit2.c
+           monit/monit3.c
+           add cbreak to make it work with new curses
+
+980203 WEH misc/rc.fs
+           add !/bin/sh and made executable for Linux 2
+
+980203 WEH rtelb/rte_prior.c
+           don't print error message if not permitted
+
+980203 WEH st.default/prog/.xsession
+           st.default/oper/.xsession
+           add "source .profile"
+
+980203 WEH st.default/prog/.profile
+           st.default/prog/.login
+           set FC to fort77
+
+980204 WEH st.default/prog/.xsession
+           st.default/oper/.xsession
+           new cleaner version
+
+980204 WEH st.default/prog/.xsession.old
+           st.default/oper/.xsession.old
+           st.default/prog/.profile.old
+           st.default/prog/.login.old
+           versions for old kernel
+
+Version 9.3.21 980204

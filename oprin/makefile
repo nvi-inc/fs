@@ -1,8 +1,8 @@
 # fs/oprin/Makefile  --  of UFS 'oprin'
 # $Id$
 
-# Copyright (C) 1992 NASA GSFC, Ed Himwich. (weh@vega.gsfc.nasa.gov)
 # Copyright (C) 1995 Ari Mujunen. (amn@nfra.nl, Ari.Mujunen@hut.fi)
+# modifications to original NASA FS code
 
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License.
@@ -29,11 +29,17 @@ LIBS := $(LIBS) readline-2.0/libreadline.a
 #        "=" stores the '$(xxx)' var references and evaluates them again
 #            whenever the left-hand-side variable is used.)
 
+TERMLIB = -lncurses
+#
+ifeq (/usr/lib/libtermcap.a,$(wildcard /usr/lib/libtermcap.a))
+TERMLIB = -ltermcap
+endif
+
 # The main target, 'oprin'.  Both new/updated object files and libraries
 # cause relinking; if libraries are missing, this makefile cannot
 # create them on its own, it says "don't know how to make $(LIBS)".
 ../bin/oprin : $(OBJECTS) $(LIBS)
-	gcc -o ../bin/oprin $(OBJECTS) $(LIBS) -ltermcap
+	gcc -o ../bin/oprin $(OBJECTS) $(LIBS) $(TERMLIB)
 	strip ../bin/oprin
 
 # Actually 'oprin.c' is not dependent on the lib archive file
@@ -50,9 +56,9 @@ readline-2.0/libreadline.a: readline-2.0.tar.gz patch-rl-2.0
 	# Make sure we recreate Readline library again.
 	rm -rf readline-2.0
 	# Unpack the original GNU Readline 2.0 archive.
-	tar xvzf readline-2.0.tar.gz
+	tar xzf readline-2.0.tar.gz
 	# Patch, configure and make the library.
-	patch <patch-rl-2.0
+	patch -s <patch-rl-2.0
 	# Establish '#include <readline/readline.h>'.
 	(cd readline-2.0; rm -f readline; ln -s . readline)
 	# Configure and make.
