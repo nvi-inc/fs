@@ -26,13 +26,6 @@ C                   Fill buffer with zeros to start
       ib = 0
       if (kena(1)) call ichmv(ibuf,9,ihx2a(z'01'),2,1)
       if (kena(2)) call ichmv(ibuf,7,ihx2a(z'01'),2,1)
-
-cxx      if (kena(2)) ia = z'01'
-cxx      if (kena(2)) ib = z'02'
-cxx      if (kena(1).or.kena(2)) then
-cxx        ic = or(ia,ib)
-cxx        call ichmv(ibuf,9,ihx2a(ic),2,1)
-cxx      endif
 C
       return
       end 
