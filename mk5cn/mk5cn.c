@@ -473,12 +473,17 @@ long ip[5];
     char string[80];
     int to;
   } list[ ] = {
+    "scan_set=",     500,
+    "scan_set =",    500,
     "record on",      26,
     "record=on",      26,
+    "record = on",      26,
     "record off",    400,
     "record=off",    400,
-    "play on",        93,
-    "play=on",        93,
+    "record = off",    400,
+    "play on",       300,
+    "play=on",       300,
+    "play = on",     300,
     "data_check?",   189,
     "track_check?",  189,
     "scan_check?",   327,
