@@ -68,7 +68,7 @@ C
       if (ic1+5.gt.ic2) return
       call fs_get_rack(rack)
       if (rack.eq.and(MK4,rack)) then
-        ivced = ic1 + ir2as(bw4(index+1),ias,ic1,5,3)
+        ivced = ic1 + ir2as(bw4(index+1),ias,ic1,6,3)
       else
         ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
       endif
