@@ -1,0 +1,28 @@
+               disk_record - Start/stop Mark 5 recording
+
+            Syntax:     disk_record=on/off,scan,session,source
+
+            Response:   disk_record/status,scan,session,souvce
+
+
+Settable Parameters:
+          on/off    Turn recording on/off, no default
+          scan      String of up to 16 characters, default is current
+                    scan name
+          session   String of up to 16 characters, default is current
+                    session name
+          source    String of up to 16 characters, default is current
+                    source name
+
+Monitor-only parameters:
+          status    one of:  on (recording), off (not recording),
+                    halted, throttled, overflow, and waiting
+
+Comments:
+The defaults for the scan and session name come from scan_name
+command. Values for scan, session, and source supplied to disk_record
+are sent to the Mark 5, but do not alter the stored values for these
+quantities.
+
+The status parameter values of halted, throttled, overflow, and
+waiting all indicate errors.

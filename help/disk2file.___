@@ -1,0 +1,57 @@
+               disk2file - Transfer from Mark 5 to a file
+
+            Syntax:     disk2file=scan,destination,start,end,options
+
+            Response:   disk2file/scan,destination,start,end,options,
+                                  scan_number,option,start_byte,end_byte,
+                                  status,current
+
+
+Settable Parameters:
+          scan        Mark 5 scan name or number to transfer,
+                      maximum 16 characters, blank for the most
+                      recent recording, "abort" to stop current
+                      transfer
+          destination Filename to store the transfer data to, maximum 64
+                      characters, no default
+          start       Number of seconds into the scan to start the transfer
+                      at, must be non-negative.
+          end         Number of seconds into the scan to end the transfer
+                      at, must be greater than start
+          options     Curently ignored, maximum 32 characters
+
+Monitor-only parameters:
+          scan_number Mark 5 scan number
+          option      Mark 5 disk2file transfer option:
+                        n create file; error if existing file
+                        w erase existing file, if any; create new file
+                        a create file if necessary, or append to existing file
+          start_byte  Mark 5 start byte for transfer
+          end_byte    Mark 5 end byte for transfer
+          status      active or inactive
+          current     current Mark 5 byte of transfer
+
+Comments:
+The dis2file command can be used to transfer some or all of a recorded
+scan from a Mark 5 disk to the Mark 5 Linux file system. This transfer
+can not be done while the system is recording or performing some other
+type of Mark 5 data operation, such as recording. The data transfer
+can not be interrupted by other data operations or configuration
+changes.
+
+The transfer takes place at approximatelty 2.2e8 to 2.8e8 baud. Linux
+disk contention issues may reduce the transfer speed. The expected
+transfer time can be calculated approximately as:
+
+((seconds of data being transferred)*tracks*(track bit rate))/2.2e8
+
+The transfer is always made using the "w" option of the Mark 5
+disk2file command, which erases any pre-existing version of the same
+file. See the monitor only parameter "option" for the details.
+
+The use of "abort" as the first parameter will cause any active
+transfer to be stopped. No error will be returned if there is no
+transfer active or any other Mark 5 error occurs.
+
+The "options" settable parameter is currently ignored, but is included
+for future expansion.
