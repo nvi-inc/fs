@@ -240,9 +240,9 @@ C
       ichx=ifc-1
       icln=iscn_ch(ias,ifc,iec,':')
       ich =iscn_ch(ias,ifc,iec,'.')
-c not Y2.1K compliant
+c not Y10K compliant
       if(ich.eq.ifc+4) then
-c not Y2.1K compliant
+c not Y10K compliant
          iyr = ias2b(ias,ifc,4)
          nscan = nscan + ich - ichx
          ichx = ich
@@ -269,7 +269,7 @@ C
          else
             ich=iec+1
          endif
-         if (ich.ne.ichx+1) then
+         if (ich.gt.ichx+1) then
             ifld(i) = numsc(ias,ichx+1,ich-1,frac(i))
             if(i.eq.3) ich=ich-1
          endif
@@ -289,8 +289,9 @@ C     month if not specified.  Check range for Y,M,D.
 C     If all is OK, set up IT fields. 
 C 
 600   continue
+      if (iyr.eq.0.and.iday.ne.0.and.iday+1.lt.idacur) goto 660
       if (iyr.eq.0) iyr = iyrcur
-      if (iyr.lt.iyrcur) goto 650 
+      if (iyr.lt.1970.or.iyr.gt.2038) goto 650 
       if (iday.eq.0) iday = idacur
       if (imon.lt.0.or.imon.gt.12) goto 650 
       if (iday.lt.0.or.iday.gt.366) goto 650
@@ -314,6 +315,10 @@ C
       goto 999
 C 
 650   ierr = -7 
+      goto 999
+C
+ 660  continue
+      ierr= -14
       goto 999
 C 
 999   return
