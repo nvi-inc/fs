@@ -129,7 +129,7 @@ int *kecho;
   }
 #endif
 
-  if (*mode == 0 && ascii_last!=1) {
+  if (*mode == 0 && (ascii_last!=1 || !serial)) {
     if (!serial) {
 #ifdef CONFIG_GPIB
 #ifdef NI_DRIVER
@@ -166,7 +166,7 @@ int *kecho;
       }
     }
     ascii_last=1;
-  } else if (*mode != 0 && ascii_last != 0) {
+  } else if (*mode != 0 && (ascii_last != 0 || !serial)) {
     if (!serial) {
 #ifdef CONFIG_GPIB
       ibeos(*devid,0);		/* turn off all EOS detection */
