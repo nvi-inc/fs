@@ -1,0 +1,66 @@
+1.0 Introduction
+
+1.1 Purpose
+
+Gnplt is a tool for displaying gain data. Gnplt uses a parsing program, 
+gndat, to parse the log file and you can then select a number of 
+different items to plot. The gain data, especially the gain curve and
+the tcal vs. frequency table, can be updated in the control files. You
+can also print the current plot.
+
+1.2 Defintions
+
+
+
+
+2.0 User guide
+
+2.1 Getting started - opening a log file
+
+To start gnplt, simply type gnplt at the command prompt. There are two
+ways of opening a log file. One is to give the lgofile as a command line
+parameter when starting gnplt. To do this type
+
+gnplt yourlogdirectory/yourlogfile.log
+
+at the command prompt. Another way to open a log file is to select the 
+"New" menu item in the "File" menu. A window will open, labeled "Open
+new FS log file". The default log file directory will be /usr2/log/ and
+this is where your log file should be. If you want another directory,
+you will have to select it in the window, or type in the directory 
+explicitly.
+
+If you have selected a valid log file, gnplt will now parse the log file
+by running gndat. After this is done, all the menus will be set up and
+the statusbar should say "Ready.". On lsower machines this might take 
+some time.
+
+Now it will be possible to select the two axes. Please select both axes
+before plotting. To actually display teh data on the screen, you need
+to press the "Replot" button under the "Edit" menu. There is also a 
+keyboard shortcut for replotting, just press 'r' and the screen replots
+automatically.
+
+2.2 Selecting sources and frequencies - the Edit menu
+
+Very rarely will you want to see all the observations at the same time.
+To select specific sources and frequencies, please use the "Edit" menu.
+
+2.2.1 Source selection
+
+On the "Source" submenu of the "Edit" menu there are a lot of different
+options you can use to plot exactly what you want. There are three 
+command buttons, "All", "All Calibrators", "All Calibrators & Pointing".
+By pressing one of these buttons you will automatically select all 
+sources, just the calibrators and just the calibraotrs and the pointing
+sources respectively.
+
+If you want a more specific selection, all sources are listed as well as
+all the times that source was observed. To make individual source 
+selection faster, there is also "All" and "None" buttons for each source.
+
+When you are done with your selection, you have to replot again, either
+using the button on the "Edit" menu or pressing 'r'.
+
+
+
