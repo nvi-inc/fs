@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960527 nrv New.
+C 970114 nrv Change 4 to max_sorlen/2
 C
 C  INPUT:
       character*128 sodef ! source def to get
@@ -24,7 +25,7 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-      integer*2 lname1(4),lname2(4)
+      integer*2 lname1(max_sorlen/2),lname2(max_sorlen/2)
       integer iep ! epoch, 1950 or 2000
       double precision rarad,decrad
 C
@@ -42,13 +43,13 @@ C
       ierr = 1
       iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('IAU_name'//char(0)),
      .ivexnum)
-      CALL IFILL(lname1,1,8,oblank)
+      CALL IFILL(lname1,1,max_sorlen,oblank)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)
-        IF  (NCH.GT.8.or.NCH.le.0) THEN 
-          write(lu,'("VUNPSO01 - IAU name too long, using first 8 ",
-     .    "characters")')
+        IF  (NCH.GT.max_sorlen.or.NCH.le.0) THEN 
+          write(lu,'("VUNPSO01 - IAU name too long, using first ",i3,
+     .    " characters")') max_sorlen
           ierr=-1
           nch=8
         ENDIF
@@ -61,20 +62,20 @@ C
       iret = fget_source_lowl(ptr_ch(sodef),
      .ptr_ch('source_name'//char(0)),
      .ivexnum)
-      CALL IFILL(lname2,1,8,oblank)
+      CALL IFILL(lname2,1,max_sorlen,oblank)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)
-        IF  (NCH.GT.8.or.NCH.le.0) THEN
-          write(lu,'("VUNPSO02 - Comon name too long, using first 8",
-     .    "characters")')
+        IF  (NCH.GT.max_sorlen.or.NCH.le.0) THEN
+          write(lu,'("VUNPSO02 - Comon name too long, using first ",
+     .    i3," characters")') max_sorlen
           ierr=-2
           nch=8
         ENDIF
         IDUM = ICHMV_ch(lname2,1,cout(1:NCH))
       else
         ierr=-21
-        write(lu,'("VUNPSO21 - Comon name missing")')
+        write(lu,'("VUNPSO21 - Source comon name missing")')
       endif
 C
 C  3.  RA
@@ -112,7 +113,8 @@ C
 C  5.  Epoch
 C
       ierr = 5
-      iret = fget_source_lowl(ptr_ch(sodef),ptr_ch('epoch'//char(0)),
+      iret = fget_source_lowl(ptr_ch(sodef),
+     .ptr_ch('ref_coord_frame'//char(0)),
      .ivexnum)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))

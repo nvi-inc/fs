@@ -14,7 +14,7 @@ C  OUTPUT:
       integer ierr,nfl
       integer*2 lb
 C     IERR    - error return, 0=ok, -100-n=error in nth field
-      integer*2 LNAME(4) !source name on this line
+      integer*2 LNAME(max_sorlen/2) !source name on this line
 C     lb - 1-character band designator
 C     nfl - number of baseline/flux pairs or component number
       REAL*4 fl(max_flux)
@@ -25,7 +25,7 @@ C
 C  LOCAL:
       real*8 R,DAS2B
       integer ich,ic1,ic2,nc,nch,icsave,idumy
-      integer ichmv,ichmv_ch ! function
+      integer ichmv,ifill ! function
 C
 C  INITIALIZED:
 C
@@ -33,6 +33,7 @@ C  Modifications:
 C  891113 NRV Created, copied from UNPVH
 C  910924 NRV Add option for model components
 C  930225 nrv implicit none
+C 970114 nrv Change 4 to max_sorlen/2
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -43,11 +44,11 @@ C     The source name.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.gt.8) THEN
+      IF  (NCH.gt.max_sorlen) THEN
         IERR = -101
         RETURN
       END IF  !
-      IDUMY = ichmv_ch(LNAME,1,'        ')
+      IDUMY = ifill(LNAME,1,max_sorlen,oblank)
       IDUMY = ICHMV(LNAME,1,IBUF,ic1,nch)
 C
 C     The band ID.
