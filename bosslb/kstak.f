@@ -29,7 +29,7 @@ C     Stacks have pointers in words 6,10,etc.
 C 
       if (istkop(2).eq.2) goto 300
 C                     If stack is empty, try the next one 
-      do 210 i=6,istkop(2),4
+      do 210 i=4,istkop(2),2
         if (nlist.eq.1.and.istkop(i).gt.0) goto 900 
         if (nlist.eq.2.and.istkop(i).lt.0) goto 900 
 210     continue
@@ -38,7 +38,7 @@ C
 C     3. Now check the schedule stack.
 C 
 300   if (istksk(2).eq.2) goto 400
-      do 310 i=6,istksk(2),4
+      do 310 i=4,istksk(2),2
         if (nlist.eq.1.and.istksk(i).gt.0) goto 900 
         if (nlist.eq.2.and.istksk(i).lt.0) goto 900 
 310     continue
