@@ -70,10 +70,10 @@ C     Now write the normal ASCII information
      .    ,a1)
 	else if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then
 	  JYR=MOD(IYR,100)
-	  WRITE(lu,1301) LSTNNA,JYR,ID1(1),IH1(1),IM1(1)
-1301    FORMAT(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2)
-	  WRITE(lu,1401) LEXPER,JYR,ID2(1),IH2(1),IM2(1)
-1401    FORMAT(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2)
+	  WRITE(lu,1301) LSTNNA,JYR,ID1(1),IH1(1),IM1(1),char(13)
+1301    FORMAT(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
+	  WRITE(lu,1401) LEXPER,JYR,ID2(1),IH2(1),IM2(1),char(13)
+1401    FORMAT(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
 	endif
 
 C
