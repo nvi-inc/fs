@@ -707,6 +707,9 @@ Tapetype does not agree with request.
 CH -517
 program error: Recorder returned individual positions, overall was expected.
 ""
+CH -518
+Barrelroll mode does not agree with request.
+""
 FM  007
 Checksum error
 ""
@@ -1827,7 +1830,7 @@ QV -201
 Video converter frequency must be between 100 and 500 MHz.
 ""
 QV -202
-Video converter bandwidth must be 4, 2, 1 (8 for MK4), 0.5, 0.25, 0.125.
+VC BW must be 4, 2, (8, 16 for MK4), 0.5, 0.125 (1, 0.250 for MK3).
 ""
 QV -203
 TPI must be U, L, UL, IF, LO, or GR.
