@@ -1146,8 +1146,13 @@ get_station_field(Station *station,int n,int *link,int *name,char **value,
     *name=0;
     break;
   case 4:
-    *value=station->start_pos->value;
-    *units=station->start_pos->units;
+    if(station->start_pos == NULL) {
+      *value=NULL;
+      *units=NULL;
+    } else {
+      *value=station->start_pos->value;
+      *units=station->start_pos->units;
+    }
     *name=0;
     break;
   case 5:
