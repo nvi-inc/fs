@@ -763,7 +763,104 @@ integer *vex;
 
   return 0;
 }
+/* ----------------------------------------------------------------------- */
+integer
+#ifdef F2C
+fget_literal__
+#else
+fget_literal
+#endif
+(string)
+char *string;
+/*<       integer function fget_literal(string) > */
 
+/*<       implicit none >*/
+/*<       I*2 string >*/
+
+/* get a low-level statement associated with a scheduling parameters */
+
+/* This routine is used to retrieve the $SCHEDULING_PARAMS low-level */
+/*   statements associated with a given global,mode, or station ref. */
+
+/* input: */
+/*   none */
+
+/* output: */
+/*   I*2 string                - string text */
+/*   integer (return value)    - number of characters or error  */
+/*                               -3 = no more statements to return */
+
+{
+  char *string2;
+  int ierr,count;
+
+  /* first read in a string of literal text, and return the */
+  /* pointer to the next literal string. */
+  save_ptr=get_a_literal(save_ptr,&string2);
+  
+  /* How many characters do we have. */
+  count = strlen(string2);
+  if(count!=0)
+    ierr=field_copy(string,count+1,string2);
+
+  /* Evaluate the next pointer 'save_ptr' for end of a literal block */
+  /* There could be several literal sub-blocks. */
+  if(save_ptr==NULL)
+    {
+      save_ptr=get_all_lowl_next();
+      /* check again to see if we've reached the end */
+      /* of all literal sub-blocks. */
+      if(save_ptr==NULL) 
+	{
+	  return -3;
+	}
+      return count;
+    }
+  return count;
+}
+/* ----------------------------------------------------------------------- */
+integer
+#ifdef F2C
+fget_literal_st__
+#else
+fget_literal_st
+#endif
+(string)
+char **string;
+/*<       integer function fget_literal(ptr_chr(string) >*/
+/*<       implicit none >*/
+/*<       character*(*) string >*/
+
+/* get a low-level statement associated with a scheduling parameters */
+
+/* This routine is used to retrieve the $SCHEDULING_PARAMS low-level */
+/*   statements associated with a given global,mode, or station ref. */
+
+/* input: */
+/*   none */
+
+/* output: */
+/*   character*(*) string      - string name, null terminated */
+/*   integer (return value)    - count or error  -3 last statement */
+{
+  char *string2;
+  int ierr,count;
+  void *ptr;
+
+  save_ptr=get_a_literal(save_ptr,&string2);
+  count = strlen(string2);
+  string2[count]='\0';
+  if(count!=0)
+    ierr=field_copy(*string,count+1,string2);
+
+  if(save_ptr==NULL)
+    {
+      save_ptr=get_all_lowl_next();
+      if(save_ptr==NULL) return -3;
+      return count;
+    }
+  return count;
+}
 /* ----------------------------------------------------------------------- */
 integer 
 #ifdef F2C
@@ -1317,3 +1414,11 @@ field_copy(char *field,int field_len,char *ptr)
 
   return 0;
 }
+
+
+
+
+
+
+
+

@@ -290,6 +290,8 @@ static  struct {
   {"VLBA_trnsprt_sys_trk", T_VLBA_TRNSPRT_SYS_TRK},
   {"S2_recording_mode", T_S2_RECORDING_MODE},
   {"S2_data_source", T_S2_DATA_SOURCE},
+  {"literals", T_LITERAL},
+  {"comment", T_COMMENT},
   {NULL, 0}
 };
 
@@ -915,6 +917,7 @@ char **units)
   case T_TRACK_FRAME_FORMAT:
   case T_DATA_MODULATION:
   case T_S2_RECORDING_MODE:
+  case T_COMMENT:
     ierr=get_svalue_field(ptr,n,link,name,value,units);
     break;
   case T_STATION:
@@ -1020,6 +1023,9 @@ char **units)
     break;
   case T_S2_DATA_SOURCE:
     ierr=get_s2_data_source_field(ptr,n,link,name,value,units);
+    break;
+  case T_LITERAL:
+    ierr=get_svalue_list_field(ptr,n,link,name,value,units);
     break;
   default:
     fprintf(stderr,"can't get here in get_field %d\n",statement);

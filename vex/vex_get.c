@@ -956,3 +956,175 @@ find_next_scan(Llist *defs)
 
    return defs;
 }
+/*---------------------------------------------------------------------------*/
+char *
+get_literal_def_next()
+{
+  return get_literal_def(NULL);
+}
+/*---------------------------------------------------------------------------*/
+char *
+get_literal_def(struct vex *vex_in)
+{
+  static Llist *defs;
+
+  Llist *blocks, *defs_this;
+  
+  static struct vex *vex;
+  static int state=0;
+
+  if(vex_in==NULL && !state)
+     return NULL;
+
+  if(vex_in!=NULL) {
+    vex=vex_in;
+    state=0;
+  }
+  if(state)
+    goto lstate;
+
+  /* find $SCHEDULING_PARAMS block */
+
+  blocks=find_block(B_SCHEDULING_PARAMS, vex);
+  if(blocks==NULL)
+    return NULL;
+
+  defs=((struct block *)blocks->ptr)->items;
+ 
+  /* find a station */
+
+  state=TRUE;
+
+lstate:
+  defs=find_next_def(defs);
+
+  if(defs==NULL) {
+    state=FALSE;
+    return NULL;
+  }
+
+  defs_this=defs;
+  defs=defs->next;
+
+  return ((Def *)((Lowl *)defs_this->ptr)->item)->name;  
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_literal_lowl_next()
+{
+  return get_literal_lowl(NULL,NULL);
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_literal_lowl(char *source_in, struct vex *vex_in)
+{
+
+  static Llist *blocks;
+  static Llist *lowls;
+
+  Llist *lowls_this;
+  Llist *defs;
+  char *def;
+
+  static char *source;
+  static struct vex *vex;
+  static int statement;
+
+  static int state=FALSE;
+
+  if(source_in==NULL && !state)
+     return NULL;
+
+  if(source_in!=NULL) {
+    source=source_in;
+    vex=vex_in;
+    state=FALSE;
+  }
+
+  if(state)
+    goto lstate;
+
+  /* find $SCHEDULING_PARAMS block */
+
+  blocks=find_block(B_SCHEDULING_PARAMS, vex);
+  if(blocks==NULL)
+    goto ldone;
+
+  defs=((struct block *)blocks->ptr)->items;
+ 
+  /* find this def */
+
+  defs=find_def(defs,source);
+  if (defs==NULL)
+    goto ldone;
+
+  /*new will be used when labels are assoc. with literals
+  if(((Lowl *)defs->ptr)->statement != T_DEF)
+    goto ldone;*/
+
+  lowls=((Def *)((Lowl *)defs->ptr)->item)->refs;
+
+lstart:
+
+lstate:
+  lowls=find_lowl(lowls,T_LITERAL);
+  if(lowls==NULL){
+    goto lend;}
+
+  state=TRUE;
+
+  lowls_this=lowls;
+  lowls=lowls->next;
+  return ((Lowl *)lowls_this->ptr)->item;
+
+lend:
+
+ldone:
+  state=FALSE;
+  return NULL;
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_next_literal(struct llist *lowls)
+{
+  lowls=find_lowl(lowls,T_LITERAL);
+  if(lowls==NULL){
+    return 0;}
+  return lowls;
+}
+/*---------------------------------------------------------------------------*/
+/* get_a_literal() returns a pointer to the next literal                     */
+/*                 and returns a literal string in 'text'                    */
+/*---------------------------------------------------------------------------*/
+void *
+get_a_literal(struct llist *literals, char **text)
+{
+
+  *text=(char *) literals->ptr;
+  return literals->next;
+}
+/*---------------------------------------------------------------------------*/
+char *
+get_all_literals(struct llist *literals, char *array[])
+{
+  int i=0;
+  char *literal_header="start_literal";
+  char *literal_tail="end_literal";
+  
+  array[i]=literal_header;
+  i++;
+  literals=literals->next;
+  while (literals!=NULL) {
+    while (literals) {
+      array[i]=(char *) literals->ptr;
+      if(array[i][0]==0) array[i]=literal_header;
+      i++;
+      literals=literals->next;
+    }
+    array[i]=literal_tail;
+    i++;
+    literals = get_literal_lowl_next();
+  }
+}
+
+
