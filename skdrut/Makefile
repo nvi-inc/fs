@@ -18,6 +18,8 @@
 # 970329 nrv Remove SLEWT to sked because only sked calls it.           #
 # 970406 nrv Move c2upper here from drudg                               #
 # 970722 nrv Add feetscan, durscan, gdscan                              #
+# 971211 nrv Add VUNPPCAL.                                              #
+# 990217 nrv Add LSKORDER.                                              #
 #                                                                       #
 #########################################################################
  
@@ -41,7 +43,7 @@ vsoinp.o vglinp.o vob1inp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
 vread.o addscan.o findscan.o newscan.o pnum.o frinit.o vunps2g.o \
 vunps2m.o vunproll.o vunpprc.o unpfmt.o errormsg.o \
 fc_gwinsz.o fc_gwinw.o igtky.o selev.o stape.o searl.o i2long.o \
-feetscan.o durscan.o gdscan.o c2upper.o
+feetscan.o durscan.o gdscan.o c2upper.o vunppcal.o lskorder.o
 #
 FFLAGS=-C -c
 # f2c needs this others don't

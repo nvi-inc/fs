@@ -20,6 +20,8 @@ C  930225 nrv implicit none
 C 951116 nrv Change max_pas to bit density
 C 960227 nrv Change IDTER to LIDTER, up to 4 characters
 C 960409 nrv Add headstack, ibitden
+C 980625 nrv Allow maxtape to be "auto" instead of a value and set
+C            maxtap=-1 as the flag for this configuration
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -124,14 +126,20 @@ C
         nrec = 1
       else
         nrec = 1
-        if (ichcm_ch(ibuf,ic1,'2x').eq.0) then !dual
+        if (ichcm_ch(ibuf,ic1,'2x').eq.0) then !dual recs
           nrec = 2
           ic1 = ic1+2
         endif
-        NCH = IC2-IC1+1
-        MAXTAP = IAS2B(IBUF,IC1,NCH)
+        if (ichcm_ch(ibuf,ic1,'auto').eq.0.or.
+     .      ichcm_ch(ibuf,ic1,'AUTO').eq.0) then ! auto alloc
+          MAXTAP = -1
+          nrec = 2
+        else
+          NCH = IC2-IC1+1
+          MAXTAP = IAS2B(IBUF,IC1,NCH)
+        endif
       ENDIF
-      IF  (MAXTAP.le.0) THEN  !
+      IF  (MAXTAP.le.0.and.maxtap.ne.-1) THEN  !
         IERR = -104
         RETURN
       END IF  !

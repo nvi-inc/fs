@@ -100,6 +100,7 @@ C            footage with duration only (assumes no stops).
 C 970304 nrv Add COPTION for defaults.
 C 970307 nrv Use pointer array ISKREC to insure time order of obs.
 C 971003 nrv Add a check for S2 and determine tape changes for it separately.
+C 980916 nrv Change date header on source page to yyyy.ddd
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -225,9 +226,9 @@ Cif (ifbrk().lt.0) goto 900
      . )
 C
       CALL LUFF(LUPRT)
-      WRITE(luprt,97) IYR,MON,IDA
+      WRITE(luprt,97) IYR,idayr
 97    FORMAT(' ',////'     SOURCES IN THIS SCHEDULE',10X,
-     .    '(DATE=',I4,2I2.2,')'///)
+     .    '(DATE=',I4,'.',I3.3,')'///)
 C     IF (iwid.EQ.137.OR.iwid.EQ.106) THEN
       IF (cs.EQ.'S') THEN
         WRITE(LUPRT,98)

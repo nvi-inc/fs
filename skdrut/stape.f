@@ -27,10 +27,13 @@ C 970317 NRV New. Copied from SEARL.
 C 970328 nrv Parse/list GAP time for ADAPTIVE type.
 C 970729 nrv Handle the old format (for ADAPTIVE only) without the 
 C            station list and with the GAP key word.
+C 980629 nrv Add tape length to listing.
+C 980629 nrv Allow DYNAMIC type.
 C
 
 C     1. Check for some input.  If none, write out current.
 C
+      kold=.false.
       ICH = 1
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
@@ -39,16 +42,21 @@ C
           RETURN
         END IF  !no stations selected
         WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  TAPE_MOTION   GAP(sec)')
+9110    FORMAT(' ID  STATION  TAPE_MOTION(gap) Tape length(feet)')
         DO  I=1,NSTATN
           il=trimlen(tape_motion_type(i))
           WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4),
      .    tape_motion_type(i)(1:il)
 9111      FORMAT(1X,A2,2X,4A2,3X,a,$)
           if (tape_motion_type(i).eq.'ADAPTIVE') then
-            write(ludsp,'(3x,i5)') itgap(i)
+            write(ludsp,'(3x,i5,$)') itgap(i)
           else
-            write(ludsp,'()')
+            write(ludsp,'(8x,$)')
+          endif
+          if (tape_motion_type(i).eq.'DYNAMIC') then
+            write(ludsp,'(3x,"auto-allocate")') 
+          else
+            write(ludsp,'(3x,i5)') maxtap(i)
           endif
         END DO  
         RETURN
@@ -105,6 +113,8 @@ C         For old format, skip the 'gap' key word
               tape_motion_type(i)='CONTINUOUS'
             else if (ichcm_ch(lkey,1,'SS').eq.0) then
               tape_motion_type(i)='START&STOP'
+            else if (ichcm_ch(lkey,1,'DY').eq.0) then
+              tape_motion_type(i)='DYNAMIC'
             endif
           endif
         END DO

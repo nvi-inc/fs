@@ -21,6 +21,7 @@ C 960228 nrv Change iv to an array, add nv as count. Decode patching
 C            from PC-SCHED lines and use as BBC/VC assignments
 C 970117 nrv Allow IF3O and IF3I (out and in). If "N" is encountered,
 C            assume it's I, i.e. "in".
+C 981001 nrv Allow "1", "2", and "3" for K4 systems.
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -86,7 +87,8 @@ C
 C
 C     IF distributor channel and input
 C     May be: IFA,IFB,IFC,IFD or IF1N,IF2N,IF1A,IF2A,IF3O,IF3I
-C         or A,B,C,D or 1N,2N,1A,2A,3O,3I
+C         or A,B,C,D or 1N,2N,1A,2A,3O,3I 
+C         or 1,2,3 (i.e. allow blank after the digit)
 C         Interpret 3N as 3I 
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
@@ -114,7 +116,8 @@ C
       else if (i.ge.1.and.i.le.3) then ! 1,2,3
         l=jchar(ibuf,ic1+1)
         IF  ((I.NE.1.AND.I.NE.2.and.i.ne.3).OR.
-     .  (L.NE.OCAPA.AND.L.NE.OCAPN.and.l.ne.ocapi.and.l.ne.ocapo)) THEN
+     .  (L.NE.OCAPA.AND.L.NE.OCAPN.and.l.ne.ocapi.and.l.ne.ocapo
+     .   .and.l.ne.oblank)) THEN
           IERR = -104
           RETURN
         END IF  !

@@ -1,4 +1,6 @@
 C@CLNDR
+C 980804 nrv Change check for IYEAR to use +1900 for years 50-99
+C            and +2000 for years 0-49
 
       SUBROUTINE CLNDR ( IYEAR , MONTH , IDAY , IPMON , IPDAY ) 
 C     Convert YMD to printable month, day-of-week TAC 760911 
@@ -41,7 +43,9 @@ C
 C 
 C-----IF IYEAR < 100 , ASSUME THAT 1900+IYEAR IS DESIRED: 
 C*********** THIS FEATURE IS AN ADDITION AS OF 11 SEPT 76      TAC ******** 
-      IF ( IYEAR .LT. 100 ) IYEAR = IYEAR + 1900
+C*NRV*If IYEAR is between 0 and 50, assume that 2000+IYEAR is desired.
+      IF ( IYEAR .LE. 99 .and. IYEAR .GE. 50 ) IYEAR = IYEAR + 1900
+      IF ( IYEAR .LE. 49 .and. IYEAR .GE. 0  ) IYEAR = IYEAR + 2000
 C 
 C-----WHICH FORMAT IS THE ENTRY IN? 
 C     I.E. YEAR AND DAY-OF-YEAR OR YEAR-MONTH-DAY ? 

@@ -201,6 +201,8 @@ c
       flx2fx_fs = -2.0
       flx3fx_fs = -2.0
       flx4fx_fs = -2.0
+      flx5fx_fs = -2.0
+      flx6fx_fs = -2.0
 C                   Call again to fix up az and el
       ierr = 0
       goto 400

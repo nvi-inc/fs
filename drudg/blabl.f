@@ -1,11 +1,11 @@
-      SUBROUTINE BLABL(LU,NOUT,LEXPER,LSTNNA,LSTCOD,IYR,ID1,IH1,IM1,
-     .                 ID2,IH2,IM2,ILABROW,cprttyp,clabtyp,cprport)
+      SUBROUTINE BLABL(LU,NOUT,LEXPER,LSTNNA,LSTCOD,IY1,ID1,IH1,IM1,
+     .           iy2,  ID2,IH2,IM2,ILABROW,cprttyp,clabtyp,cprport)
 C Print barcode Mark III field labels  ARW 830920
 C Print barcode field labels for Mark III tapes on laser printer.
 C
       include '../skdrincl/skparm.ftni'
-      integer lu,nout,iyr,id1(*),ih1(*),im1(*),id2(*),ih2(*),im2(*),
-     .        ilabrow
+      integer lu,nout,iy1(*),id1(*),ih1(*),im1(*),id2(*),ih2(*),im2(*),
+     .        ilabrow,iy2(*)
       integer*2 lexper(4),lstnna(4),lstcod
       character*128 cprttyp,cprport,clabtyp
 C
@@ -15,9 +15,8 @@ C   NOUT,   #labels across page (3 max for laser, 1 for Epson)
 C   LEXPER, 8-character experiment name (4A2)
 C   LSTNNA, 8-character station name (4A2)
 C   LSTCOD, 1-character station code (A1)
-C   IYR,    year of observation (i.e. 83 or 1983)
-C   ID1,IH1,IM1,  day,hour,minute tape start times
-C   ID2,IH2,IM2,  day,hour,minute tape stop times
+C   iy1,ID1,IH1,IM1,  year,day,hour,minute tape start times
+C   iy2,ID2,IH2,IM2,  year,day,hour,minute tape stop times
 C   ILABROW,     location of label on page
 C   cprttyp,    printer type
 C   cprport,    printer port
@@ -30,7 +29,7 @@ C 960814 nrv Comment out debug line that was left in.
 C 970228 nrv Add clabtyp to call
 C
       integer*2 jbuf(80),lbuf(80),label(6),jch
-      integer l,jyr,i,ichek,j,ic,idummy,ip,il,i1,idum
+      integer l,i,ichek,j,ic,idummy,ip,il,i1,idum
       character*43 cCHAR
       CHARACTER*1 CESC                     !<esc>
       CHARACTER*12 CLABEL
@@ -63,22 +62,20 @@ COPEN(UNIT=LU,FILE=cprport,STATUS='UNKNOWN',IOSTAT=IERR,
 C    .CARRIAGE CONTROL='LIST')
 
 C     Now write the normal ASCII information
-	JYR=MOD(IYR,100)
 	if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
      .     .or.cprttyp.eq.'FILE') then !Laser jet
-	  WRITE(lu,130) (LSTNNA,JYR,ID1(I),IH1(I),IM1(I),i=1,nout),
+	  WRITE(lu,130) (LSTNNA,iY1(i),ID1(I),IH1(I),IM1(I),i=1,nout),
      .    char(13)
 130       FORMAT(6X,3(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
-	  WRITE(lu,140) (LEXPER,JYR,ID2(I),IH2(I),IM2(I),I=1,NOUT),
+	  WRITE(lu,140) (LEXPER,iY2(i),ID2(I),IH2(I),IM2(I),I=1,NOUT),
      .    char(13)
 140     FORMAT(6X,3(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
 	else if (clabtyp.eq.'EPSON'.or.clabtyp.eq.'EPSON24') then
-	  JYR=MOD(IYR,100)
-	  WRITE(lu,1301) LSTNNA,JYR,ID1(1),IH1(1),IM1(1),char(13)
+	  WRITE(lu,1301) LSTNNA,iY1(1),ID1(1),IH1(1),IM1(1),char(13)
 1301    FORMAT(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
-	  WRITE(lu,1401) LEXPER,JYR,ID2(1),IH2(1),IM2(1),char(13)
+	  WRITE(lu,1401) LEXPER,iY2(1),ID2(1),IH2(1),IM2(1),char(13)
 1401    FORMAT(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
 	endif
 

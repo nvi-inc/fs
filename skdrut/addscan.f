@@ -99,7 +99,7 @@ C   Skip previous stations' duration
         ierr=-2 ! problem skipping durations
         return
       endif
-      nch=ich+2
+      nch=ich+2 !?
 C  Duration
       nch = durscan(lskobs(1,iskrec(irec)),nch,idend)
 C     i = ib2as(idend,ibufx,1,5) ! convert into a buffer

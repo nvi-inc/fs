@@ -1,8 +1,10 @@
       SUBROUTINE vunpfrq(modef,stdef,ivexnum,iret,ierr,lu,
-     .bitden,srate,lsg,frf,lsb,cchref,vbw,csw,cbbref,nchandefs)
+     .bitden,srate,lsg,frf,lsb,cchref,vbw,csw,cbbref,
+     .cpcalref,nchandefs)
 C
 C     VUNPFRQ gets the channel def statements 
 C     for station STDEF and mode MODEF and converts it.
+C     It also gets bit density and sample rate.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
 C     parameters.
@@ -17,6 +19,7 @@ C 960607 nrv Initialize band ID to '-', not blank.
 C 970114 nrv Remove polarization, shift up all subsequent field numbers.
 C            (pol was not read or stored anyway)
 C 970124 nrv Move initialization to start.
+C 971208 nrv Add phase cal ref.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -36,6 +39,7 @@ C                    <0 indicates invalid value for a field
       integer*2 lsb(max_chan) ! net SB
       character*6 cchref(max_chan) ! channel ID
       character*6 cbbref(max_chan) ! BBC ref 
+      character*6 cpcalref(max_chan) ! pcal ref 
       double precision vbw(max_chan) ! video bandwidth
       character*3 csw(max_chan) ! switching
       integer nchandefs ! number of channel defs found
@@ -160,6 +164,18 @@ C  1.6 BBC ref
 
 C  1.7 Phase cal -- skip
 
+        ierr = 17
+        iret = fvex_field(7,ptr_ch(cout),len(cout)) ! get pcal ref
+        if (iret.eq.0) then ! some phase cal ref
+          nch = fvex_len(cout)
+          if (nch.gt.len(cpcalref(ic)).or.nch.le.0) then
+            ierr=-7
+            write(lu,'("VUNPFRQ08 - Pcal ref too long")')
+          else
+            cpcalref(ic)=cout(1:nch)
+          endif
+        endif ! some phase cal ref
+
 C  1.8 Switching
 
         ierr = 18
@@ -168,7 +184,7 @@ C  1.8 Switching
           iret = fvex_int(ptr_ch(cout),j)
           if (iret.ne.0.or.j.ne.1.or.j.ne.2) then
             ierr=-8
-            write(lu,'("VUNPFRQ08 - Switching cycle must be 0,1,2")')
+            write(lu,'("VUNPFRQ09 - Switching cycle must be 0,1,2")')
           else
             csw(ic)(1:1)=cout(1:1)
           endif
@@ -177,7 +193,7 @@ C  1.8 Switching
             iret = fvex_int(ptr_ch(cout),j)
             if (iret.ne.0.or.j.ne.1.or.j.ne.2) then
               ierr=-8
-              write(lu,'("VUNPFRQ08 - Switching cycle must be 0,1,2")')
+              write(lu,'("VUNPFRQ10 - Switching cycle must be 0,1,2")')
             else
               csw(ic)(2:2)=','
               csw(ic)(3:3)=cout(1:1)
@@ -185,7 +201,8 @@ C  1.8 Switching
           endif ! second cycle
           iret = fvex_field(11,ptr_ch(cout),len(cout)) ! get switch
           if (iret.eq.0)
-     .    write(lu,'("VUNPFR09 - Too many switching cycles, 2 is max")')
+     .    write(lu,'("VUNPFRQ11 - Too many switching cycles, ",
+     .    "2 is max")')
         endif ! some switching
 
 C       Get next channel def statement
@@ -209,7 +226,7 @@ C 2. Bit density
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0.or.d.lt.0.d0) then
             ierr=-9
-            write(lu,'("VUNPFRQ09 - Invalid bit density")')
+            write(lu,'("VUNPFRQ12 - Invalid bit density")')
           else
             bitden = d
           endif
@@ -229,7 +246,7 @@ C 3. Sample rate
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0.or.d.lt.0.d0) then
             ierr=-10
-            write(lu,'("VUNPFRQ10 - Invalid sample rate")')
+            write(lu,'("VUNPFRQ13 - Invalid sample rate")')
           else
             srate = d/1.d6
           endif

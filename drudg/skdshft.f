@@ -9,6 +9,8 @@ C 901109 NRV Removed display of start times, added request for a time.
 C 910826 NRV Always wrap by 1 day
 c 930412 nrv implicit none
 C 960223 nrv change permissions on output file
+C 980831 nrv Mods for Y2000. Use IYR2 for 2-digit year, all other
+C            year variables are fully specified.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -22,7 +24,8 @@ C LOCAL:
 	INTEGER  IY,IM,IC,ICX,TRIMLEN
 	LOGICAL KFNDMD,KFNDCH,kfndpr
 	LOGICAL KEX ! TRUE IF FILE EXISTS
-	integer iyr,idoyr       ! original first date
+	integer iyr,idoyr       ! original first date, fully specified
+        integer iyr2 ! 2-digit year
 	integer*2 itim1(6)        ! first shifted obs time
 	integer*2 itim0(6)        ! original first obs time
 	integer*2 itimn(6)        ! user's target time
@@ -120,13 +123,20 @@ C
      .  ,$)')
 	  read(luusr,*,err=201) iy,im,id
 	  if (iy.eq.0.and.im.eq.0.and.id.eq.0) return
-201     if ((iy.le.0).or.(im.le.0.or.im.gt.12).or.(id.le.0.or.
+201     if ((iy.lt.0).or.(im.le.0.or.im.gt.12).or.(id.le.0.or.
      .  id.gt.31)) then
 	    write(luscn,'(" Invalid number for year, month, or day.")')
 	    iy=-1
 	  endif
 	enddo
-	if (iy.lt.100) iy=iy+1900
+	if (iy.lt.100) then ! 2-digit year
+          iyr2=iy
+          if (iyr2.le.99.and.iyr2.ge.50) iy=iyr2+1900
+          if (iyr2.le.49.and.iyr2.ge. 0) iy=iyr2+2000
+        else ! 4-digit year
+          if (iy.lt.2000) iyr2=iy-1900
+          if (iy.ge.2000) iyr2=iy-2000
+        endif
 	INDOYR = IDAY0(IY,IM) + ID
 	inyr = iy
 
@@ -146,12 +156,12 @@ C
 	  endif
 	enddo
 
-	idum = ib2as(inyr-1900,itimn,1,z4202)
+	idum = ib2as(iyr2,itimn,1,z4202)
 	idum = ib2as(indoyr,itimn,3,z4203)
 	idum = ib2as(ihn,itimn,6,z4202)
 	idum = ib2as(imn,itimn,8,z4202)
 	idum = ib2as(isn,itimn,10,z4202)
-	write(luscn,9202) inyr-1900,indoyr,ihn,imn,isn
+	write(luscn,9202) iyr2,indoyr,ihn,imn,isn
 9202  format(' Requested start time of shifted schedule: ',i2,1x,i3,
      .'-',i2.2,':',i2.2,':',i2.2)
 C
@@ -333,14 +343,16 @@ C
 	end do
 C
 	IDUM = ICHMV(ITIM,1,IBUF,IC1,11)
-	IYR = IAS2B(ITIM,1,2)+1900
+        IYR2 = IAS2B(ITIM,1,2) ! 2-digit year
+        if (IYR2.gt.50.and.iyr2.le.99) iyr=iyr2+1900 
+        if (IYR2.ge. 0.and.iyr2.le.50) iyr=iyr2+2000 
 	IDOYR = IAS2B(ITIM,3,3)
 	ih0=ias2b(itim,6,2)
 	im0=ias2b(itim,8,2)
 	is=ias2b(itim,10,2)
 	idum = ichmv(itim0,1,itim,1,11)
 C   ITIM0 holds the original time of the first observation.
-	write(luscn,9631) iyr-1900,idoyr,ih0,im0,is
+	write(luscn,9631) iyr2,idoyr,ih0,im0,is
 9631  format(' Original time of first observation   ',i2,1x,i3,'-',
      .i2.2,':',i2.2,':',i2.2)
 
@@ -427,20 +439,20 @@ C       ITIM and ITIM1 holds the first observation time.
 	if (ierr.eq.-1) return
 C        We are now positioned with the first shifted observation
 C        in IBUF, ITIM.
-	IY = IAS2B(ITIM,1,2)+1900
+	IY = IAS2B(ITIM,1,2)
 	ID1 = IAS2B(ITIM,3,3)
 	ih1=ias2b(itim,6,2)
 	im1=ias2b(itim,8,2)
 	is=ias2b(itim,10,2)
-	write(luscn,9790) iy-1900,id1,ih1,im1,is
+	write(luscn,9790) iy,id1,ih1,im1,is
 9790  format(' First observation of the shifted schedule   ',i2,1x,
      .i3,'-',i2.2,':',i2.2,':',i2.2)
-	IYx = IAS2B(ITIMo,1,2)+1900
+	IYx = IAS2B(ITIMo,1,2)
 	IDx = IAS2B(ITIMo,3,3)
 	ihx=ias2b(itimo,6,2)
 	imx=ias2b(itimo,8,2)
 	isx=ias2b(itimo,10,2)
-        write(luscn,9791) iyx-1900,idx,ihx,imx,isx
+        write(luscn,9791) iyx,idx,ihx,imx,isx
 9791    format(' (shifted from original time   ',i2,1x,i3,'-',i2.2,
      .  ':',i2.2,':',i2.2,')')
 
@@ -449,12 +461,12 @@ C
 	call shfcop(isshft,imshft,ihshft,idshft,ilen,
      .id1,ih1,im1,nhshft,ierr)
 	if (ierr.eq.-1) return
-	IY = IAS2B(ITIM,1,2)+1900
+	IY = IAS2B(ITIM,1,2)
 	IDnow = IAS2B(ITIM,3,3)
 	ihnow=ias2b(itim,6,2)
 	imnow=ias2b(itim,8,2)
 	is=ias2b(itim,10,2)
-	write(luscn,9890) iy-1900,idnow,ihnow,imnow,is
+	write(luscn,9890) iy,idnow,ihnow,imnow,is
 9890  format(' Last shifted observation from original schedule   ',
      .i2,1x,i3,'-',i2.2,':',i2.2,':',i2.2)
 C
@@ -529,12 +541,14 @@ C    if (ifbrk().lt.0) return
 	  if (ierr.eq.-1) return
 C        We are now positioned with the first shifted observation
 C        in IBUF, ITIM.
-	  IYr = IAS2B(ITIM,1,2)+1900
+	  IYr2 = IAS2B(ITIM,1,2)
+          if (iyr2.ge.50.and.iyr2.le.99) iyr=iyr2+1900
+          if (iyr2.ge. 0.and.iyr2.lt.50) iyr=iyr2+2000
 	  ID = IAS2B(ITIM,3,3)
 	  ih=ias2b(itim,6,2)
 	  im=ias2b(itim,8,2)
 	  is=ias2b(itim,10,2)
-	  write(luscn,9920) iyr-1900,id,ih,im,is
+	  write(luscn,9920) iyr2,id,ih,im,is
 9920    format(' First observation of the wrapped schedule   ',i2,1x,
      .  i3,'-',i2.2,':',i2.2,':',i2.2)
 
@@ -547,12 +561,12 @@ C        in IBUF, ITIM.
 	  nh = nhshft - nhdif(idnow,ihnow,imnow,id1,ih1,im1)
 	enddo !need more
 
-	IY = IAS2B(ITIM,1,2)+1900
+	IY = IAS2B(ITIM,1,2)
 	ID = IAS2B(ITIM,3,3)
 	ih=ias2b(itim,6,2)
 	im=ias2b(itim,8,2)
 	is=ias2b(itim,10,2)
-	write(luscn,9990) iy-1900,id,ih,im,is
+	write(luscn,9990) iy,id,ih,im,is
 9990  format(' Last observation of the shifted schedule   ',i2,1x,
      .i3,'-',i2.2,':',i2.2,':',i2.2)
 C

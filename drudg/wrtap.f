@@ -9,6 +9,9 @@ c     gag   901025 added ktape logical for NEXT writing
 C     nrv   930709 Now "ihead" is the actual head position in microns,
 C                  removed the hard-coded array.
 C 970321 nrv Re-write for more flexibility.
+C 980728 nrv Remove the HEAD command, for dynamic tape allocation.
+C 980910 nrv Remove REWIND and just STOP at the end of a pass.
+C 980924 nrv Replace the HEAD command for RDV11.
 C
 C   COMMON BLOCKS USED
       include '../skdrincl/skparm.ftni'
@@ -31,10 +34,12 @@ C  LOCAL VARIABLES
       nch = nch + ib2as(irec,ibuf,nch,1) ! recorder number
       nch = ichmv_ch(ibuf,nch,',')
       if (ispin.ne.0) then
-        nch=ichmv(ibuf,nch,LSPDIR,1,1)
         if (ispin.eq.330) then
-          nch = ichmv_ch(ibuf,nch,'REWIND) ')
+C         nch=ichmv(ibuf,nch,LSPDIR,1,1)
+C         nch = ichmv_ch(ibuf,nch,'REWIND) ')
+          nch = ichmv_ch(ibuf,nch,'STOP) ')
         else
+          nch=ichmv(ibuf,nch,LSPDIR,1,1)
           nch = ichmv_ch(ibuf,nch,'RUN) ')
         endif
       else
@@ -50,12 +55,14 @@ C  LOCAL VARIABLES
         nch = ichmv_ch(ibuf,nch,'on) ')
       end if
 
-      nch = ichmv_ch(ibuf,nch,' head=(')
-      nch = nch + ib2as(irec,ibuf,nch,1) ! recorder number
-      nch = ichmv_ch(ibuf,nch,',')
-      nch = nch + ib2as(IHEAD,ibuf,nch,4)
-      nch = ichmv_ch(ibuf,nch,')')
-
+C     if (.not.kdyn) then ! head commands
+        nch = ichmv_ch(ibuf,nch,' head=(')
+        nch = nch + ib2as(irec,ibuf,nch,1) ! recorder number
+        nch = ichmv_ch(ibuf,nch,',')
+        nch = nch + ib2as(IHEAD,ibuf,nch,4)
+        nch = ichmv_ch(ibuf,nch,')')
+C     endif
+C
       if (ktape) nch = ichmv_ch(ibuf,nch,'  !NEXT!')
 
       CALL writf_asc(LU,IERR,ibuf,(nch+1)/2)
