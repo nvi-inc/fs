@@ -118,9 +118,10 @@ C
 500   continue
       kpeakv_fs=.false.
       call fs_get_ispeed(ispeed)
+      call fs_get_cips(cips)
       call fs_get_idirtp(idirtp)
       call fs_get_ienatp(ienatp)
-      if(ispeed.eq.0) then ! tape must be moving
+      if(ispeed.eq.0.or.(ispeed.eq.-3.and.cips.eq.0)) then !tape must be moving
         ip(3)=-341
         goto 990
       else if(idirtp.ne.1..and.ienatp.ne.0) then ! not rec in rev
@@ -166,7 +167,7 @@ C
       endif
       nch=mcoma(ibuf,nch)
 C
-      if(ieq.eq.0) nch=nch+ir2as(vminpk_fs,ibuf,nch,8,3)
+      nch=nch+ir2as(vminpk_fs,ibuf,nch,8,3)
       nch=mcoma(ibuf,nch)
 C
       if(ieq.eq.0) nch=nch+ir2as(peakv,ibuf,nch,8,3)
@@ -182,7 +183,12 @@ C
       endif
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(vltpk_fs,ibuf,nch,8,3)
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+         nch=nch+ir2as(vltpk_fs,ibuf,nch,8,1)
+      else
+         nch=nch+ir2as(vltpk_fs,ibuf,nch,8,3)
+      endif
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')
