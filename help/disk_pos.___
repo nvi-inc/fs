@@ -1,0 +1,14 @@
+             disk_pos - Mark 5 byte position pointers
+
+            Syntax:     disk_pos
+
+            Response:   disk_pos/write_pointer, read_pointer
+
+
+Monitor-only parameters:
+                write_pointer   Current write pointer byte position
+                read_pointer    Current read pointer byte position
+
+Comments:
+This command reports the current position of the write and
+read pointers.

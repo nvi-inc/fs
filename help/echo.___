@@ -78,6 +78,6 @@ displayed in curly braces {} immediately after the returned
 data. The Field System's raw time is the number of
 centiseconds since the last boot.
 
-For GPIB and Mark V communications, commands sent to the
+For GPIB and Mark 5 communications, commands sent to the
 device are placed in square brackets "[]" and responses are
 displayed in angle brackets "<>".

@@ -1,0 +1,14 @@
+           disk_serial - Mark 5 disk serial numbers
+
+            Syntax:     disk_serial
+
+            Response:   disk_serial/serial1,serial2,...,serial16,
+
+
+Monitor-only parameters:
+            serialX     Serial number of disk X, null if no disk is
+                        installed in that slot
+
+Comments:
+This command reports the serial numbers of the installed
+disks.
