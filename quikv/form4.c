@@ -14,7 +14,7 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ichold, i, count, nrec, start;
+      int ilast, ierr, ichold, i, count, nrec, start, end, start_map, j, k;
       long iclass;
       short int buff[80];
       char *ptr;
@@ -40,18 +40,41 @@ long ip[5];                           /* ipc parameters */
 
       if (command->equal != '=') {            /* read module */
 
-	 strcpy((char *) (buff+2),"/STA");
+	strcpy((char *) (buff+2),"/STA");
 	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-	 strcpy((char *) (buff+2),"/SHO 0 0");
+	 strcpy((char *) (buff+2),"/SST");
 	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-	 strcpy((char *) (buff+2),"/SHO 0 16");
-	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
- 	 strcpy((char *) (buff+2),"/SHO 0 32");
-	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
- 	 strcpy((char *) (buff+2),"/SHO 0 48");
-	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
- 	 strcpy((char *) (buff+2),"/SST");
-	 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+	 if(shm_addr->imk4fmv >= 40) {
+	   strcpy((char *) (buff+2),"/LIM");
+	   cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+	 }
+
+	 if(shm_addr->form4.start_map==-1)
+	   start=0;
+	 else
+	   start=shm_addr->form4.start_map;
+
+	 if(shm_addr->form4.end_map==-1)
+	   end=0;
+	 else
+	   end=shm_addr->form4.end_map;
+
+	 for (j=start;j<end+1;j++) {
+	   for (k=0;k<64;k+=16)
+	     for (i=k;i<k+16;i++) {
+	       int on;
+	       if (i <32)
+		 on=shm_addr->form4.enable[0] & 1 << i;
+	       else
+		 on=shm_addr->form4.enable[1] & 1 << (i-32);
+	       if(on && shm_addr->form4.a2d[j][i]!=-2) {
+		 sprintf((char *) (buff+2),"/SHO %d %d",j, k);
+		 cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0);
+		 nrec++;
+		 break;
+	       }
+	     }
+	 }
          goto matcn;
 
       } else if (command->argv[0]==NULL)
@@ -83,26 +106,37 @@ parse:
 
       memcpy(&shm_addr->form4,&lcl,sizeof(lcl));
 
-      if(form4CONma(buff,&lcl) < 0) {
-	ierr=-500;
-	goto error;
+      if(shm_addr->imk4fmv < 40) {
+	if(form4CONma(buff,&lcl) < 0) {
+	  ierr=-500;
+	  goto error;
+	}
       }
-
       strcpy((char *) (buff+2),"/STA");
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 
       form4RATma(buff,&lcl);
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+      
+      if(shm_addr->imk4fmv < 40) {
+	form4CONma(buff,&lcl);
+	cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+      } else {
+	strcpy((char *) (buff+2),"/FRE");
+	cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+      }
 
-      form4CONma(buff,&lcl);
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-
-      start=0;
+      start=start_map=0;
       while(start >= 0) {
-	start=form4ASSma(buff,&lcl,start);
+	start=form4ASSma(buff,&lcl,start, &start_map);
 	if(strlen((char *) (buff+2)) >0) {
 	  cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 	}
+      }
+
+      if(shm_addr->imk4fmv >= 40) {
+	form4ROLma(buff,&lcl);
+	cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
       }
 
       strcpy((char *) (buff+2),"/DIS");
@@ -115,24 +149,19 @@ parse:
 	  cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 	}
       }
+      
+      if(shm_addr->imk4fmv >= 40) {
+	form4MUXma(buff,&lcl);
+	cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+
+	form4MODma(buff,&lcl);
+	cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+      }
 
       form4LIMma(buff,&lcl);
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 
       strcpy((char *) (buff+2),"/CON 0");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-
-      strcpy((char *) (buff+2),"/STA");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-      strcpy((char *) (buff+2),"/SHO 0 0");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-      strcpy((char *) (buff+2),"/SHO 0 16");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-      strcpy((char *) (buff+2),"/SHO 0 32");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-      strcpy((char *) (buff+2),"/SHO 0 48");
-      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
-      strcpy((char *) (buff+2),"/SST");
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 
 matcn:
