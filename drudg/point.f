@@ -7,15 +7,15 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 C INPUT
       character*(*) cr1,cr2,cr3,cr4
 C
 C LOCAL:
-      LOGICAL KINTR,kmatch,knewtp,knewt,ksw
+      LOGICAL KINTR,knewtp,knewt,ksw
       integer*2 ldirword(4)
       integer nch,i,ierr,ilen,iblk,ical,nstnsk,lu_outfil2
-      integer idirp,ipasp,iobs,iftold,idir,icode,ix,
-     .idrate,icodp
+      integer idirp,ipasp,iobs,iftold,idir,ix,icodp
       integer*2 lfreq
       integer mon,ida,mjd,iyr,idayr,ihr,imin,isc,iyr2,idayr2,
      .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp
@@ -31,13 +31,12 @@ C LOCAL:
      .ilenha,ilenon
       real*4 dut,eeq
 	character*128 cbuf
-	integer*2 LRAS(3),LDEC(3)
         integer ih
 	integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
      .          LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
         integer IPAS(MAX_STN),
      .          IFT(MAX_STN),IDUR(MAX_STN)
-	CHARACTER   UPPER,lower
+	CHARACTER   UPPER
 	CHARACTER*3 STAT,lc
 	character*128 dsnname
 	CHARACTER*4 RESPONSE
@@ -45,10 +44,10 @@ C LOCAL:
         integer*2 lna(4)
 	real*8 GST,UT,HA,HA2
 	integer IC
-	LOGICAL*4 EX
+	LOGICAL EX
 Cinteger*4 ifbrk
 	integer Z20,Z24
-      integer ias2b,ichcm,trimlen,jchar,ichmv,ir2as,ib2as ! functions
+      integer ias2b,trimlen,jchar,iflch,ichmv,ib2as ! functions
       integer ichmv_ch,ichcm_ch
       real*4 speed ! function
 	DATA Z20/Z'20'/, Z24/Z'24'/
@@ -212,11 +211,18 @@ C
 
 C 3. Begin loop on schedule file records.  Check out the entry.
 C
-300   CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+       iobs=0
+C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+       call ifill(ibuf,1,ibuf_len*2,oblank)
+       if (iobs+1.le.nobs) then
+         idum = ichmv(ibuf,1,lskobs(1,iobs+1),1,ibuf_len*2)
+         ilen = iflch(ibuf,ibuf_len*2)
+       else
+         ilen=-1
+       endif
 	IBLK=0
 	IPASP=0
 	IDIRP=0
-	iobs=0
 	IFTOLD=0
 	DO WHILE (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.Z24)
 C DO BEGIN "Schedule file entries"
@@ -379,7 +385,7 @@ C
             endif
 	    if (itearl.gt.0) call tmsub(iyr,idayr,ihr,imin,isc,itearl,
      .      iyr,idayr,ihr,imin,isc)
-            do ix=1,nvcs(istn,icod) ! find out if switched
+            do ix=1,nchan(istn,icod) ! find out if switched
               ksw=cset(invcx(ix,istn,icod),istn,icod).ne.'   '
             end do
 	    CALL VLBAT(ksw,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
@@ -397,9 +403,16 @@ C  Write out the formatted line.  Not needed for VLBA or DSN routine.
 C  ***REMOVED: write the line in each section above
 C           IF (ISTIN.ne.5.and.istin.ne.6.and.istin.ne.3.and.istin.ne.1)
 C    .      CALL writf_asc(LU_OUTFILE,IERR,IBUF,NCHAR/2)
-	    iobs=iobs+1
 	  END IF ! istnsk
-	  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+	    iobs=iobs+1
+          call ifill(ibuf,1,ibuf_len*2,oblank)
+          if (iobs+1.le.nobs) then
+            idum = ichmv(ibuf,1,lskobs(1,iobs+1),1,ibuf_len*2)
+            ilen=iflch(ibuf,ibuf_len*2)
+          else
+            ilen=-1
+          endif
 	ENDDO
 C
 C  When finished with vlba point file, write the quit statement
