@@ -118,11 +118,16 @@ STARTING CLIENT:
     prompt> log in as root
     prompt> cd /etc/init.d
     prompt> cp /usr2/st/metclient/metclient.sh .
-    prompt> cd /etc/rcS.d
-    prompt> ln -sfn ../init.d/metclient.sh S92metclient.sh
+    prompt> update-rc.d metclient.sh defaults
 
     Everytime you reboot your system, the metclient will start logging 
     automatically.
+
+    a.) If you wish to stop the metclient for some reason.
+	as root:
+	/etc/init.d/metclient.sh stop  (will stop the metclient)
+	/etc/init.d/metclient.sh start (will start it up again)
+	/etc/init.d/metclient.sh restart (will stop then start)
 
  ===== Read the README file for logfile names and log file information. =====
 

@@ -113,11 +113,16 @@ STARTING CLIENT:
     prompt> log in as root
     prompt> cd /etc/init.d
     prompt> cp /usr2/st/tacdclient/tacdclient.sh .
-    prompt> cd /etc/rcS.d
-    prompt> ln -sfn ../init.d/tacdclient.sh S93tacdclient.sh
+    prompt> update-rc.d tacdclient.sh defaults
 
     Every time you reboot your system, the tacdclient will start logging 
     automatically.
+
+    a.) If you wish to stop the metclient for some reason.
+        as root:
+        /etc/init.d/tacdclient.sh stop  (will stop the tacdclient)
+        /etc/init.d/tacdclient.sh start (will start it up again)
+        /etc/init.d/tacdclient.sh restart (will stop then start)
 
  ===== Read the README file for logfile names and log file information. =====
 
