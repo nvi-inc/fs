@@ -366,8 +366,14 @@ C              The Minutes
 C            The Seconds
         ic1=ic3+1
         nch = ic2-ic1+1
-        ihs = ias2b(ibuf4,ic1,nch)/10
+        ihs = (ias2b(ibuf4,ic1,nch)+5)/10
 C             The mille seconds
+        if(ihs.gt.99) then
+           ihs=ihs-100
+           call fc_rte2secs(it,secs_fm)
+           secs_fm=secs_fm+1
+           call fc_secs2rte(secs_fm,it)
+        endif
       endif
 C
 200   continue

@@ -130,7 +130,11 @@ tryagain:
 	sscanf(inbuf+2,"%d %d %d:%d:%d.%d",it+5,it+4,it+3,it+2,it+1,&ms);
         it[0]=ms/10;
         rte2secs(it,formtime);
-        *formhs = it[0];
+        *formhs = (ms+5)/10;
+	if(*formhs>99) {
+	  *formhs-=100;
+	  formtime++;
+	}
 
 	cls_clr(outclass); /* clear class numbers just in case */
 	cls_clr(inclass);

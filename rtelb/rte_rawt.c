@@ -28,7 +28,8 @@ long *lRawTime;
 	 perror("getting timeofday, fatal\n");
 	 exit(-1);
        }
-       *lRawTime=(tv.tv_sec-shm_addr->time.secs_off)*100+tv.tv_usec/10000;
+       *lRawTime=(tv.tv_sec-shm_addr->time.secs_off)*100
+	 +(tv.tv_usec+5000)/10000;
      }
 
      return;
