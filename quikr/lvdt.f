@@ -217,6 +217,7 @@ C
 C
 C turn on LVDT if we didn't earlier
 C
+      ip(3)=0
       if(ieq.eq.0.and.itask.eq.3) then
         call lvdonn('lock',ip)
       else if(itask.eq.4) then
