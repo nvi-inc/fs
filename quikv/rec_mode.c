@@ -9,7 +9,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#include "../rclco/rcl/rcl.h"
+#include "../rclco/rcl/rcl_def.h"
 
 static char device[]={"rc"};           /* device menemonics */
 
@@ -21,6 +21,7 @@ long ip[5];                           /* ipc parameters */
       int ilast, ierr, ichold, i, count;
       int verr;
       char *ptr;
+      ibool barrelroll;
       struct rclcn_req_buf buffer;        /* rclcn request buffer */
       struct rec_mode_cmd lcl;
 
@@ -44,6 +45,7 @@ long ip[5];                           /* ipc parameters */
       if (command->equal != '=') {            /* read module */
 	add_rclcn_mode_read(&buffer,device);
 	add_rclcn_group_read(&buffer,device);
+	add_rclcn_barrelroll_read(&buffer,device);
 	goto rclcn;
       } 
       else if (command->argv[0]==NULL) goto parse;  /* simple equals */
@@ -77,14 +79,16 @@ parse:
 
       add_rclcn_mode_set(&buffer,device,lcl.mode);
       add_rclcn_group_set(&buffer,device,lcl.group);
+      
       if(lcl.roll == 1)
-	add_rclcn_consolecmd(&buffer,device,"barrelroll on");
+	barrelroll=TRUE;
       else if (lcl.roll == 0)
-	add_rclcn_consolecmd(&buffer,device,"barrelroll off");
+	barrelroll=FALSE;
       else {
 	ierr=-301;
 	goto error;
       }
+      add_rclcn_barrelroll_set(&buffer,device,barrelroll);
 
 rclcn:
       end_rclcn_req(ip,&buffer);

@@ -9,6 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+#include "../rclco/rcl/rcl_def.h"
+
 #define MAX_OUT 256
 
 void rec_mode_dis(command,ip)
@@ -19,6 +21,7 @@ long ip[5];
       int kcom, i, ierr, count, start;
       struct rclcn_res_buf buffer;
       char output[MAX_OUT];
+      ibool barrelroll;
 
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
@@ -35,9 +38,16 @@ long ip[5];
 	if(ierr!=0)
 	  goto error;
 
-	lclc.roll=-1;
-
 	ierr=get_rclcn_group_read(&buffer,&lclc.group,&lclc.num_groups);
+	if(ierr!=0)
+	  goto error;
+
+	ierr=get_rclcn_barrelroll_read(&buffer,&barrelroll);
+	if(barrelroll)
+	  lclc.roll=1;
+	else
+	  lclc.roll=0;
+	   
 	if(ierr!=0)
 	  goto error;
 
