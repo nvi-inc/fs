@@ -64,13 +64,13 @@ C        IDAY   - day
       character clec,cjchar
       dimension ndays(12) 
 C               - number of days in year at beginning of each month 
-      integer*2 isuf(6) 
+      integer*2 isuf(6)
 C               - suffixes to be scanned for
       dimension ifld(3) 
 C               - H,M,S fields
       dimension frac(3) 
 C               - possible fractional part of H,M,S 
-      dimension ict(6)
+      integer ict(6),idacur,iyrcur
 C                   -CURRENT TIME (FROM EXEC(11)) 
 C 
       equivalence (ict(5),idacur),(ict(6),iyrcur) 
@@ -115,14 +115,15 @@ C
 C                   We have a ! so indicate NOW
       goto 999
 C
-190   if (clec.lt.'0'.or.clec.gt.'9') goto 500
+190   if (index('0123456789',clec).eq.0) goto 500
+      if(iscn_ch(ias,ifc,iec,':').ne.0) goto 560
 C
 C     2. Fully numeric format.  Locate the
 C     decimal point, if any, and pull off seconds, minutes, then
 C     hours from the right.
 C     General format is:
-C                   yymmddhhmmss.sss
-C                   \----/\----/\--/
+C                 yyyymmddhhmmss.sss
+C                 \------/\----/\--/
 C                    date  time  fraction 
 C # chars each:      NDATC   6   NFPC 
 C 
@@ -156,8 +157,8 @@ C                   Hundredths of sec = (fraction/10^nfp-1)*10^2
 C 
 C 
 C     4. Date field section.  Handle according to:
-C     NDATC = 6 implies we have    yymmdd 
-C             5                    yyddd
+C     NDATC = 8 implies we have    yyyymmdd 
+C             7                    yyyyddd
 C             4                    mmdd (assume current year) 
 C           <=3                    ddd, dd or d (day number, assume 
 C                                               current year) 
@@ -168,10 +169,14 @@ C
 C 
 C     4.1 Here we have the year specified.
 C 
-      iyr = ias2b(ias,ifc,2)
-      if (ndatc.eq.6) imon = ias2b(ias,ifc+2,2) 
-      if (ndatc.eq.6) iday = ias2b(ias,ifc+4,2) 
-      if (ndatc.eq.5) iday = ias2b(ias,ifc+2,3) 
+c not Y10K compliant
+      iyr = ias2b(ias,ifc,4)
+c not Y10K compliant
+      if (ndatc.eq.8) imon = ias2b(ias,ifc+4,2) 
+c not Y10K compliant
+      if (ndatc.eq.8) iday = ias2b(ias,ifc+6,2) 
+c not Y10K compliant
+      if (ndatc.eq.7) iday = ias2b(ias,ifc+4,3) 
       goto 600
 C 
 C     4.2 Here we have no year. 
@@ -181,16 +186,16 @@ C
       if (ndatc.le.3) iday = ias2b(ias,ifc,ndatc) 
       goto 600
 C 
-C 
 C     5. Alternate format time, with suffixes.
 C 
 500   nscan = 0 
       ichx = ifc-1
       ich = iscnc(ias,ifc,iec,jchar(isuf(1),2))
       if (ich.eq.0) goto 510
-      if (ich.ne.ifc+2) goto 590
-C                   The "Y" must be the third character (first field) 
-      iyr = ias2b(ias,ifc,2)
+      if (ich.ne.ifc+4) goto 590
+C                   The "Y" must be the fifth character (first field) 
+c not Y10K compliant
+      iyr = ias2b(ias,ifc,4)
       nscan = nscan + ich - ichx
       ichx = ich
 510   ichd = iscnc(ias,ichx+1,iec,jchar(isuf(3),2))
@@ -206,15 +211,16 @@ C                   The "Y" must be the third character (first field)
       nscan = nscan + ichd - ichx 
 519   ichx = ichd 
 520   do 530 i=1,3
-        ich = iscnc(ias,ichx+1,iec,jchar(isuf(i+3),2)) 
-        if (ich.eq.0) goto 530
-        ifld(i) = numsc(ias,ichx+1,ich-1,frac(i)) 
-        nscan = nscan + ich - ichx
-        ichx = ich
-        if (frac(i).ne.0.or.ichx.eq.iec) goto 540 
-530     continue
-540   if (nscan.ne.iec-ifc+1) goto 590
-550   ihr = ifld(1) 
+         ich = iscnc(ias,ichx+1,iec,jchar(isuf(i+3),2)) 
+         if (ich.eq.0) goto 530
+         ifld(i) = numsc(ias,ichx+1,ich-1,frac(i)) 
+         nscan = nscan + ich - ichx
+         ichx = ich
+         if (frac(i).ne.0.or.ichx.eq.iec) goto 540 
+ 530  continue
+ 540  continue
+      if (nscan.ne.iec-ifc+1) goto 590
+      ihr = ifld(1) 
       ifrac = int(frac(1)*60.0) 
 C                   Minutes in the fractional part of hour
       imin = ifld(2) + ifrac
@@ -223,10 +229,57 @@ C                   Minutes in the fractional part of hour
 C                   Seconds in the fractional part of minutes 
       isec = ifld(3) + ifrac
       frac(3) = frac(3) + (frac(2)*60.0 - ifrac)
-      ihsec = frac(3)*100.0 
+      ihsec = frac(3)*100.0+0.5 
 C 
       goto 600
-C 
+C
+C  alternate format with separators
+C
+ 560  continue
+      nscan = 0
+      ichx=ifc-1
+      icln=iscn_ch(ias,ifc,iec,':')
+      ich =iscn_ch(ias,ifc,iec,'.')
+c not Y2.1K compliant
+      if(ich.eq.ifc+4) then
+c not Y2.1K compliant
+         iyr = ias2b(ias,ifc,4)
+         nscan = nscan + ich - ichx
+         ichx = ich
+      endif
+C
+      ichm=iscn_ch(ias,ichx+1,icln,'.')
+      if(ichm.eq.0) go to 570
+      ichd=iscn_ch(ias,ichm+1,icln,'.')
+      if(ichd.eq.0) then
+         ichd = ichm
+         iday = ias2b(ias,ichx+1,ichd-ichx-1)
+         nscan = nscan + ichd - ichx 
+      else
+         imon = ias2b(ias,ichx+1,ichm-ichx-1)
+         nscan = nscan + ichm - ichx 
+         iday = ias2b(ias,ichm+1,ichd-ichm-1)
+         nscan = nscan + ichd - ichm 
+      endif
+      ichx=ichd
+ 570  continue
+      do i=1,3
+         if(i.lt.3) then
+            ich = iscn_ch(ias,ichx+1,iec,':') 
+         else
+            ich=iec+1
+         endif
+         if (ich.ne.ichx+1) then
+            ifld(i) = numsc(ias,ichx+1,ich-1,frac(i))
+            if(i.eq.3) ich=ich-1
+         endif
+         nscan = nscan + ich - ichx
+         ichx = ich
+         if (frac(i).ne.0.or.ichx.eq.iec) goto 575 
+      enddo
+ 575  continue
+      goto 540
+
 590   ierr = -8 
       goto 999
 C 
@@ -245,10 +298,12 @@ C
       if (ihr.lt.0.or.ihr.gt.23) goto 650 
       if (imin.lt.0.or.imin.gt.59) goto 650 
       if (isec.lt.0.or.isec.gt.59) goto 650 
+      if (ihsec.lt.0.or.ihsec.gt.99) goto 650 
 C 
       if (imon.eq.0) goto 610 
       iday = iday + ndays(imon) 
 C                   If month was specified, change to day of year 
+c not Y2.1K compliant
       if (mod(iyr,4).eq.0.and.iday.gt.59) iday = iday+1 
 C                   Leap year 
 C 
