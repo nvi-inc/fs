@@ -40,6 +40,7 @@ C 960522 nrv Add call to VREAD, store observations in memory.
 C 960607 nrv Move initializations into FDRUDG
 C 960610 nrv Initialize in call to FRINIT
 C 960810 nrv Initialize tape motion values
+C 961023 nrv Check for 'TAPE ' along with 'TAPETM' parameter values.
 C
 C
       close(unit=LU_INFILE)
@@ -164,7 +165,7 @@ C
                     CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
                     ITEARL(1)=IAS2B(IBUF,IC1,IC2-IC1+1) ! save one value
                   ENDIF !early time
-                  IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE')
+                  IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE ')
               ICX= ISCN_CH(IBUF,1,ILEN*2,'TAPETM')
               IF (IC.NE.0.OR.ICX.NE.0) THEN !tape time
                 IF (IC.EQ.0) ICH=ICX+6
