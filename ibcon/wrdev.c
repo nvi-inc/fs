@@ -8,8 +8,12 @@
 #include <errno.h>
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #else
 extern int ibsta;
 extern int iberr;
@@ -35,7 +39,7 @@ extern int serial;
 /*----------------------------------------------------------------------*/
 
 int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout, no_after, kecho,
-	   itime, centisec)
+	   itime, centisec,no_write_ren)
 
 int *mode,*devid;
 long *ipcode;
@@ -47,6 +51,7 @@ int *no_after;
 int *kecho;
 int *itime;
 long centisec[2];
+int *no_write_ren;
 {
   int val;
   char locbuf[BSIZE];
@@ -105,6 +110,21 @@ long centisec[2];
     }
   }
 #endif
+  if((!serial) && (!*no_write_ren)) {
+#ifdef CONFIG_GPIB
+    ibsre(ID_hpib,1);  	/* must turn REN on before addressing device */
+    if ((ibsta & ERR) != 0) {
+      if(iberr==0)
+	logit(NULL,errno,"un");
+      *error = -(IBCODE + iberr); 
+      memcpy((char *)ipcode,"WS",2);
+      return -1;
+    } 
+#else
+    *error = -(IBCODE + 22);
+    return -1;
+#endif
+  }
 
   if (*mode == 0){
     if(!serial) {
@@ -199,6 +219,21 @@ long centisec[2];
 	memcpy((char *)ipcode,"W2",2);
       }
     }
+  }
+  if((!serial) && (!*no_write_ren)) {
+#ifdef CONFIG_GPIB
+    ibsre(ID_hpib,0);  	/* must turn REN off again */
+    if ((ibsta & ERR) != 0) {
+      if(iberr==0)
+	logit(NULL,errno,"un");
+      *error = -(IBCODE + iberr); 
+      memcpy((char *)ipcode,"WR",2);
+      return -1;
+    } 
+#else
+    *error = -(IBCODE + 22);
+    return -1;
+#endif
   }
   if((!serial) && (!*no_after)) {
 #ifdef CONFIG_GPIB
