@@ -1,13 +1,13 @@
               terminate - end field system operation
-
-Syntax:     terminate
-
-Response:   none
-
-
-Settabel Parameters: none
-
-Comments: 
-This is the graceful way to end operation of the Field System.
-Schedule execution is ended, log and schedule files are closed,
-all programs are removed from the system by oprin.
+ 
+              Syntax:      terminate
+ 
+              Response:    none
+ 
+ 
+ Settabel Parameters: none
+ 
+ Comments: 
+ This is the graceful way to end operation of the Field System.
+ Schedule execution is ended, log and schedule files are
+ closed, all programs are removed from the system by oprin.

@@ -234,8 +234,9 @@ C
         END IF  !matching entry not found
 C  Got a match. Initialize names.
         IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
-        ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
-        kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
+C       It used to be that the recorder type was encoded in the DAT name.
+C       ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
+C       kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
         idummy = ichmv_ch(lstrack(1,i),1,'unknown ')
         idummy = ichmv_ch(lstrec(1,i),1,'unknown ')
         idummy = ichmv_ch(lstrec2(1,i),1,'none    ')
@@ -247,6 +248,8 @@ C  Store equipment names.
         if (ichcm_ch(lrec1,1,' ').ne.0) then
           idummy = ichmv(lstrec(1,i),1,lrec1,1,8) ! recorder 1 type
         endif
+C       If second recorder is specified and the first recorder was S2
+C       then save the second recorder field as the S2 mode.
         if (ichcm_ch(lrec2,1,' ').ne.0) then
           if (ichcm_ch(lrec1,1,'S2').eq.0) then 
             idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
@@ -255,6 +258,9 @@ C  Store equipment names.
           endif
         endif
         idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! starting recorder default
+C       Now set the S2 and K4 switches depending on the recorder type.
+        ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
+        kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
 C    Store other info depending on the type.
         nrecst(i) = nr
         if (ks2) then ! set S2 variables

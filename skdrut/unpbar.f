@@ -7,6 +7,7 @@ C
 
 C  History:
 C 960709 nrv New. Copied from UNPRAT.
+C 020115 nrv Allow "8" and "16".
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -72,6 +73,8 @@ C
           END IF
           if (ichcm_ch(ibuf,ic1,'16:1').ne.0.and.
      .        ichcm_ch(ibuf,ic1,'8:1') .ne.0.and.
+     .        ichcm_ch(ibuf,ic1,'8') .ne.0.and.
+     .        ichcm_ch(ibuf,ic1,'16') .ne.0.and.
      .        ichcm_ch(ibuf,ic1,'on') .ne.0.and.
      .        ichcm_ch(ibuf,ic1,'ON') .ne.0.and.
      .        ichcm_ch(ibuf,ic1,'none').ne.0.and.

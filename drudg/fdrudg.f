@@ -175,18 +175,19 @@ C 000516 nrv Add option for printing VEX cover info
 C 001101 nrv Write out $SKED section generated from VEX input for
 C            testing (commented out).
 C 001114 nrv Remove call to VOB1INP because VOBINP is called in VREAD.
+C 020304 nrv Add option 13 for Mk5 piggyback mode.
 C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '011201'
+      cversion = '020327'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-C     iVerMajor_FS = 5
-C     iVerMinor_FS = 0
-C     iVerPatch_FS = 0
+C     iVerMajor_FS = 9
+C     iVerMinor_FS = 5
+C     iVerPatch_FS = 4
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -238,7 +239,6 @@ c Initialize no. entries in lband (freqs.ftni)
       dr_rack_type = 'unknown'
       dr_rec1_type = 'unknown'
       dr_rec2_type = 'none'
-      call skdrini
 C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
@@ -273,6 +273,7 @@ C
       kdrgfile = .false.
       kparity = .false.
       kprepass = .false.
+      kmk5_piggyback = .false.
 C  In drcom.ftni
       kmissing = .false.
       idummy= ichmv_ch(lbarrel,1,'NONE')
@@ -662,12 +663,16 @@ C  Write warning messages if control file and schedule do not agree.
 9173          FORMAT(
      .        ' 6 = Make PostScript label file       ',
      .        ' 12 = Make procedures (.PRC) '/,
-     .        ' 61= Print PostScript label file   ')
+     .        ' 61= Print PostScript label file      '
+     .        ' 13 = Toggle Mk5 piggyback mode ',
+     .      )
             else
               write(luscn,9273)
 9273          FORMAT(
      .        ' 6 = Make tape labels                 ',
-     .        ' 12 = Make procedures (.PRC) ')
+     .        ' 12 = Make procedures (.PRC) '/
+     .        '                                      ',
+     .        ' 13 = Toggle Mk5 piggyback mode ')
             endif
             if (kdrg_infile.or.kvex) then 
               write(luscn,9274)
@@ -680,7 +685,7 @@ C  Write warning messages if control file and schedule do not agree.
 9373        format(
 C    .      ' 0 = Done with DRUDG                   ',
      .      ' 0 = Done with DRUDG '/
-C    .      '20 = Make fake lvex '/
+     .      '20 = Make fake lvex '/
      .      ' ? ',$)
 C         endif ! known/unknown equipment
         else ! SNAP file
@@ -837,6 +842,14 @@ C           call snap(cr1,4)
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
               call procs
+          ELSE IF (IFUNC.EQ.13) THEN
+              if (kmk5_piggyback) then
+                write(luscn,"('Mark5 piggyback mode turned OFF')")
+                kmk5_piggyback = .false.
+              else
+                write(luscn,"('Mark5 piggyback mode turned ON')")
+                kmk5_piggyback = .true.
+              endif
 C             CALL PROCS(1) ! Mark III backend procedures OR known equipment
 C         ELSE IF (IFUNC.EQ.13) THEN
 C             CALL PROCS(2) ! VLBA backend procedures

@@ -19,11 +19,17 @@ C 000607 nrv Initialize tape_allocation to SCHEDULED.
 C 000913 nrv Initialize roll tables here.
 C 010622 nrv Move roll table initialization to skini because only
 C            sked needs these to write VEX files.
+C 020111 nrv Move roll table initialization back here because drudg
+C            needs them to read and check roll_defs from VEX files.
+C            But remove the DATA statement which seems to balloon the
+C            program size.
 C
 C LOCAL
-      integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch
+      integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,
+     .iy,ir,ity2,k,l
 C DATA
-C     data roll_def/ 02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,
+C     data ((roll_def(i,j,1),j=1,32),i=1,17)/ 
+C    .   02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,
 C    .   04,04,02,16,14,12,10,08,06,0,0,0,0,0,0,0,0,
 C    .   06,06,04,02,16,14,12,10,08,0,0,0,0,0,0,0,0,
 C    .   08,08,06,04,02,16,14,12,10,0,0,0,0,0,0,0,0,
@@ -54,7 +60,8 @@ C    .   25,25,23,21,19,33,31,29,27,0,0,0,0,0,0,0,0,
 C    .   27,27,25,23,21,19,33,31,29,0,0,0,0,0,0,0,0,
 C    .   29,29,27,25,23,21,19,33,31,0,0,0,0,0,0,0,0,
 C    .   31,31,29,27,25,23,21,19,33,0,0,0,0,0,0,0,0,
-C    .   33,33,31,29,27,25,23,21,19,0,0,0,0,0,0,0,0,
+C    .   33,33,31,29,27,25,23,21,19,0,0,0,0,0,0,0,0/
+C     data ((roll_def(i,j,2),j=1,32),i=1,17)/ 
 C    .   02,02,16,14,12,10,08,06,04,18,32,30,28,26,24,22,20,
 C    .   04,04,02,16,14,12,10,08,06,20,18,32,30,28,26,24,22,
 C    .   06,06,04,02,16,14,12,10,08,22,20,18,32,30,28,26,24,
@@ -196,19 +203,93 @@ C  In freqs.ftni
         rec_type(9) = 'K4-2'
       enddo
 
+C Initialize canned roll defs
 C
 C def VLBA/8;    *standard 8-track 8-position VLBA barrel-roll
-      roll_name(1) = 'ROLL8'
-      roll_reinit_period(1) = 2   
-      roll_inc_period(1) = 1
-      nrolldefs(1) = 32
-      nrollsteps(1) = 9 ! 8 plus home track
+      ircan_reinit(1) = 2   
+      ircan_inc(1) = 1
+      nrcan_defs(1) = 32
+      nrcan_steps(1) = 8
 C def VLBA/16'   *standard 16-track 16-position VLBA barrel-roll
-      roll_name(2) = 'ROLL16'
-      roll_reinit_period(2) = 2 
-      roll_inc_period(2) = 1       
-      nrolldefs(2) = 32
-      nrollsteps(2) = 17 ! 16 plus home track
+      ircan_reinit(2) = 2 
+      ircan_inc(2) = 1       
+      nrcan_defs(2) = 32
+      nrcan_steps(2) = 16
+C Initialize to zero
+      do ix=1,2
+        do iy=1,32
+          do ib=1,18
+            icantrk(ib,iy,ix)=0
+          enddo
+        enddo
+      enddo
   
-      RETURN
-      END
+      do ir=1,2 ! two canned patterns for 8 and 16
+        idef = 0
+        do ity=2,32,2 ! each roll_def line, first set
+          idef = idef + 1
+          icantrk(1,idef,ir) = 1 ! headstack 1
+          icantrk(2,idef,ir) = ity ! home track
+          icantrk(3,idef,ir) = ity
+          itz=ity
+          do itx=1,7 ! next 7 tracks
+            itz = itz-2
+            if (itz.le. 0) itz=itz+16
+            if (ity.gt.16.and.itz.le.16) itz=itz+16
+            icantrk(3+itx,idef,ir) = itz
+          enddo ! first 8 tracks
+          if (ir.eq.2) then ! next 8 tracks
+            itz=itz+16
+            do itx=1,8 ! next 8 tracks
+              itz=itz-2
+              if (itz.le. 0) itz=itz+16
+              if (itz.gt.32) itz=itz-32
+              if (itz.eq.16.and.ity.le.16) itz=32
+              if (itz.eq.32.and.ity.eq.32) itz=16
+              icantrk(10+itx,idef,ir) = itz
+            enddo 
+          endif ! next 8 tracks
+        enddo ! each roll_def line, first set
+        do ity=3,33,2 ! each roll_def line, second set
+          idef = idef + 1
+          icantrk(1,idef,ir) = 1 ! headstack 1
+          icantrk(2,idef,ir) = ity ! home track
+          icantrk(3,idef,ir) = ity
+          itz=ity
+          do itx=1,7 
+            itz=itz-2
+            if (itz.le.1) itz=itz+16
+            if (ity.gt.17.and.itz.le.17) itz=itz+16
+            icantrk(itx+3,idef,ir) = itz
+          enddo 
+          if (ir.eq.2) then ! second half of line for '16:1'
+            itz=itz+16
+            do itx=1,8 
+              itz=itz-2
+              if (itz.le. 1) itz=itz+16
+              if (itz.gt.32) itz=itz-32
+              if (itz.eq.17.and.ity.le.17) itz=33
+              if (itz.eq.1.and.ity.eq.33) itz=17
+              icantrk(itx+10,idef,ir) = itz
+            enddo 
+          endif ! second half of line for '16:1'
+        enddo ! each roll_def line, second set
+      enddo ! two canned patterns for 8 and 16
+
+C Initialize non-standard roll tables to -99.
+      do i=1,max_frq
+        do j=1,max_stn
+          iroll_inc_period(j,i) = 0
+          iroll_reinit_period(j,i) = 0
+          nrolldefs(j,i) = 0
+          nrollsteps(j,i) = 0
+          do k=1,max_track*max_headstack
+            do l=1,max_track+2
+              iroll_def(l,k,j,i) = -99
+            enddo
+          enddo
+        enddo
+      enddo
+
+      return
+      end

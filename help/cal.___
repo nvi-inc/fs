@@ -1,16 +1,16 @@
                  cal - turn cal signal on or off
-
-Syntax:     cal=on/off
-
-Response:   none
-
-
-Settable parameters:
-on/off      on to turn cal on, off to turn off. No default.
-
-Monitor-only parameters: none
-
-Comments: This command sets a VHF switch on the HPIB. The ASCII
-message is A1 to turn cal on, A2 to turn cal off. The ibad.ctl
-control file must contain an entry with the mnemonic CL and the
-device name.
+ 
+              Syntax:      cal=on/off
+ 
+              Response:    none
+ 
+ 
+ Settable parameters:
+            on/off     on to turn cal on, off to turn off. No default.
+ 
+ Monitor-only parameters: none
+ 
+ Comments: This command sets a VHF switch on the HPIB. The
+ ASCII message is A1 to turn cal on, A2 to turn cal off. The
+ ibad.ctl control file must contain an entry with the mnemonic
+ CL and the device name.

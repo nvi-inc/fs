@@ -31,7 +31,7 @@ c
      . IBWVC(15), IFP2VC(16), vacsw(2), itpthick2(2), thin(2), vac4(2),
      . imixif3, vfmenablehi, vfmenablelo, ihdmndel(2),
      . iat1if, iat2if, iat3if,
-     $ reccpu(2), select, rdhd_fs(2), ifd_set, if3_set
+     $ reccpu(2), select, rdhd_fs(2), ifd_set, if3_set, imk4fmv
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -68,7 +68,7 @@ c
      . IBWVC, IFP2VC, vacsw, itpthick2, thin, vac4,
      . imixif3, vfmenablehi, vfmenablelo, ihdmndel,
      . iat1if, iat2if, iat3if,
-     $ reccpu, select, rdhd_fs, ifd_set, if3_set,
+     $ reccpu, select, rdhd_fs, ifd_set, if3_set, imk4fmv,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 

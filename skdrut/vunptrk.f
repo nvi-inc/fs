@@ -1,5 +1,5 @@
       SUBROUTINE vunptrk(modef,stdef,ivexnum,iret,ierr,lu,
-     .lm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
+     .lm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
 C
 C     VUNPTRK gets the track assignments and fanout information
 C     for station STDEF and mode MODEF and converts it.
@@ -16,6 +16,7 @@ C 960520 nrv New.
 C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C 970124 nrv Move initialization to start.
 C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
+C 020327 nrv Get data_modulation.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -36,6 +37,7 @@ C                    <0 indicates invalid value for a field
       integer itrk(max_track) ! first track of the fanout assignment
       integer nfandefs ! number of def statements
       integer ifanfac ! fanout factor determined from list of tracks
+      character*3 modu ! data modulation, on or off
 C
 C  LOCAL:
       character*128 cout
@@ -71,6 +73,25 @@ C
       else
         IDUMY = ICHMV_ch(LM,1,cout(1:NCH))
       END IF  !
+
+C  1.5 Data modulation
+C
+      ierr = 1
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
+     .ptr_ch('data_modulation'//char(0)),
+     .ptr_ch('TRACKS'//char(0)),ivexnum)
+      if (iret.ne.0) then ! not there
+        modu = "n/a"
+      else ! got one
+        iret = fvex_field(1,ptr_ch(cout),len(cout))
+        NCH = fvex_len(cout)
+        IF  (NCH.GT.3.or.NCH.le.0) THEN  !
+          write(lu,'("VUNPTRK15 - Data modulation wrong length")')
+          iret=-1
+        else
+          modu = cout(1:nch)
+        END IF  !
+      endif ! not there/got one
 C
 C  2. Fanout def statements
 C

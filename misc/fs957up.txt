@@ -1,0 +1,616 @@
+File: /usr2/fs-9.5.7/misc/fs957up.txt  Version: 1.0  Date: 020417
+
+I. Introduction
+
+This memo is divided into 4 sections:
+   I.   Introduction.
+   II.  Changes Since Version 9.5.3
+   III. Installation
+   IV.  Transferring The Update Archive By DOS Floppy
+
+Please print this notice and read it carefully before installing the
+new version. There are no required new features in this version except
+for stations that need the Mark V piggyback mode (Kokee and Wetzell).
+The other major new feature of this version, Mark IV barrel-rolling is
+not required for any station yet. Stations that will need this
+feature, especially EVN stations participating in the May session
+where there will be test of mark IV barrel-rolling should probably
+wait for the next version which will also contain new features for
+that session. The update notice for the next version will cover the
+items in this update as well.
+
+II. Changes Since Version 9.5.3
+
+The sections is divided into three sub-sections: A. Change in the FS,
+B. Changes in DRUDG, and C. Known Bugs. The latter section as not
+changed since version 9.5.0. Each sub-section starts with a summary of
+the items covered followed by a more detailed description.
+
+			 A. Changes in the FS
+
+The following is a summary of the changes. More detailed text follows
+the summary.
+
+1. VLBA42 recorder support
+2. Improved error reporting in chekr
+3. Mark V preliminary support
+4. mcbad.ctl can now have comments
+5. Assigning non-zero lag tracks for VLBA fan in Mark IV causes error
+6. "help" now works for device independent commands when 2 drives are used
+7. mark IV tracks= command accepts "*"
+8. Monit i3/rx no-check display fixed
+9. Mark IV barrel-rolling supported
+10. GPIB support for NI driver fixed
+11. K4 rec_mode and st commands re-organized
+12. Reduced debug output for Mark IV formatter
+13. pdplt has some presentation improvements
+14. logpl has some presentation improvements
+15. tacd error message improved
+16. Data modulation supported for Mark IV
+17. Other new Mark IV firmware features supported
+
+A more detailed discussion of these changes follows.
+
+1. VLBA42 recorder support - Support has been added for a new recorder
+   type: "VLBA42", which is a P&G recorder configured for Mark IV two
+   head recording. The only know instance of this is at Torun. Some
+   details still remain to be worked out and some revisions of the
+   recorder firmware may still be required. This version contains what
+   has been developed so far.
+ 
+2. Improved error reporting in chekr - Error reports in chekr have
+   been improved so that when a low-level communication error with a
+   device occurs, the details of that error are reported.
+
+3. Mark V preliminary support - Initial support to Mark V recorders is
+   included. Currently Mark V recorders are only supported for
+   experiments in so called "piggyback" mode. Please see
+   /usr2/fs/misc/m5/readme.txt for a detailed description of currently
+   available support for Mark V recorders.
+ 
+4. mcbad.ctl can now have comments - Due to an oversight several years
+   ago, comments (lines starting with asterisk, "*") could not not be
+   included in the file. This has been fixed. Thanks to Dave Graham
+   (MPIfR) for reporting this.
+
+5. Assigning non-zero lag tracks for VLBA fan in Mark IV causes error
+   - The FS now complains when standard VLBA fan-outs (1:2 and 1:4)
+   are used with a Mark IV formatter and data has been assigned to a
+   track used for a non-zero lag data and no data has been assigned to
+   the associated zero lag track. Data may only be assigned to the
+   zero lag channel. The error detection was already catching cases
+   where data had been assigned to both non-zero and zero lag tracks
+   in a fan-out group. Thanks to Dan Smythe (Haystack) who was
+   unfortunate enough to discover the need for this improvement.
+
+6. "help" now works for device independent commands when 2 drives are
+   used - an error in the implementation of the help command prevented
+   equipment independent commands from having their help files
+   displayed. This was also corrected in fsvue.
+
+7. Mark IV tracks= command accepts "*" - This feature was added to
+   facilitate Mark V piggyback mode and may be removed at a latter
+   date. When the track command is used without an asterisk, "*", as
+   the first parameter only the tracks mentionde are enabled. If an
+   asterisk is used, the mentioned tracks are enabled in addition to
+   any already enabled.
+
+8. Monit i3/rx no-check display fixed - An error in monit caused the
+   check/no-check status of rx and i3 to be incorrectly
+   displayed. Thanks to Richard Strand (Gilcreek) and Guiseppe
+   Maccaferri (Medicina) for reporting this problem.
+
+9. Mark IV barrel-rolling supported - The FS now support
+   barrel-rolling with the Mark IV formatter. This requires the new
+   firmware version, number greater than or equal to 40. Please see
+   the Mark IV form and rollform commands for details.
+
+10. GPIB support for NI driver fixed - A bug in IBCON which interacted
+    with the NI driver to limit only one device per invocation of the
+    FS to be read from. This has been fixed. Thanks to Jay Redmond
+    (MV-3) for discovering this.
+
+11. K4 rec_mode and st commands re-organized - The rec_mode command
+    now includes settable control of the time-stamp insertion
+    parameters for K-4 type 2 (DFC-2100) recorders. The defaults for
+    these parameters are adjusted appropriately depending on the
+    recording bandwidth. The rec_mode command now must be executed
+    before a st=record for K-4 type 2 recorders.
+
+12. Reduced debug output for Mark IV formatter - Due to the improved
+    communications reliability of the new Mark IV formatter firmware,
+    the amount logged debug information has been reduced. There are
+    still formatters with the old firmware in the field, but as far as
+    we know the old debug output was not actually found to be useful
+    and so will probably not be missed greatly. The log file looks
+    cleaner as a result of this change.
+
+13. pdplt has some presentation improvements - The size of the pdplt
+    window is now sensitive to the size of the display. This should
+    allow the entire window to be displayed even on some lower
+    resolution monitors. Thanks to Kokee park for reporting this
+    problem. The labels in the table on the right hand side for the
+    information on the point under the pointer have be
+    re-aligned. Thanks to Andrey Mikhailov (IAA) for noting this
+    issue.
+
+14. logpl has some presentation improvements - The size of the logpl
+    window is now sensitive to the size of the display. This should
+    allow the entire window to be displayed even on some lower
+    resolution monitors. Thanks to Kokee park for reporting this
+    problem. Manual scaling now works. Thanks to Andrey Mikhailov
+    (IAA) for noting this issue.
+
+15. tacd error message improved - Some of the tacd error messages have
+    been modified to make it clearer that they are coming from tacd.
+
+16. Data modulation supported for Mark IV - The FS supports user
+    control of data modulation with the Mark IV formatter.  This
+    requires the new firmware version, number greater than or equal to
+    40. Please see the Mark IV form command for details.
+
+17. Other new Mark IV firmware features supported - The new version of
+    the Mark IV formatter firmwares, numbers 40 or greater are now
+    supported. In addition to barrel-rolling and data modulation
+    control, some of the detailed interaction with the formatter has
+    changed. Some of the later parameters in the form command have
+    been modified. Please see the Mark IV form command documentation
+    for more information.
+
+                         B. Changes in DRUDG
+
+The following areas in DRUDG were modified:
+
+1. S2 experiment corrections
+2. REPRO command additional parameter.
+3. Barrel roll support.
+4. Mark5 piggyback support.
+5. Data modulation. 
+
+A more detailed discussion of these changes follows.
+
+1. S2 experiment corrections. Thanks to sleuthing by Jonathan Quick
+several problems with generating .snp files for S2 recorders were
+fixed. Schedules for next Syowa session (NASA sked format file input)
+and a recent LBA session (NRAO VEX file input) now work properly.
+
+2. REPRO command additional parameter. The setup procedures for
+stations with Mk4 and VLBA4 recorders were changed so that the
+REPRO command now has the track bitrate parameter explicitly given.
+This should remove problems with the decoder misbehaving during
+bypass reproduce.
+
+3. Barrel roll support. The barrel roll parameter on the FORM
+command is provided for stations with Mk4 formatters when barrel
+roll is turned on in the schedule file. Two "canned" rolls are
+recognized: rolling by 8 and 16. In the FORM command the roll
+parameter will be "8" or "16". Stations with VLBA formatters using 
+barrel roll will have "8:1" and "16:1" as the two possible rolls.
+
+A procedure with ROLLFORM commands is written for cases where the 
+barrel roll is specified but is not equal to one of the two canned 
+modes. In this case the roll type on the FORM command is "M". The
+feature of arbitrary roll tables is only available when using a
+VEX file as input because the older sked-format file does not have
+this capability.
+
+4. Mark5 piggyback support. The use of Mark5P systems in piggyback
+mode is support in procedure files (.prc) and SNAP files (.snp)
+generated by drudg. In this mode the normal tape recording is done
+and the Mark5 disc recording is done simultaneously using the same 
+data bits. Stations with VLBA formatters use the second recorder 
+output to feed the Mark5 and stations with Mk4 formatters use the 
+second head output. 
+
+To invoke the Mark5 mode in drudg, use new Option 13 which toggles
+the mode on and off.
+
+The .snp file has the following new disc control commands located
+adjacent to the normal commands:
+  READY          followed by READY_DISC
+  TAPE           followed by DISC_POS
+  DATA_VALID=ON  followed by DISC_START
+  DATA_VALID=OFF followed by DISC_END 
+  TAPE           followed by DISC_POS and DISC_CHECK
+
+The .prc file for stations with VLBA formatters is identical to the
+non-Mark5 file.
+
+The .prc file for stations with Mk4 formatters has additional commands
+to specify the tracks and data source on the second head. 
+Example for the Intensive at Wettzell:
+normal:  tracks=v0,v1,18,19,20,21,22,23,24,25,26,27,28,29
+add:     tracks=*,v4,v5,118,119,120,121,122,123,124,125,126,127,128,129
+normal:  trackform=2,1us,6,2us,10,3us,14,4us,18,5us,22,6us,26,7us,3,8us
+normal:  trackform=7,9us,11,10us,15,11us,19,12us,23,13us,27,14us
+add:     trackform=102,1us,106,2us,110,3us,114,4us,118,5us,122,6us,126,7us,
+add:     trackform=103,8us trackform=107,9us,111,10us,115,11us,119,12us,
+add:     trackform=123,13us,127,14us
+
+
+NOTE: The Mk5 mode is intended for use with the geodetic Intensive
+sessions as a test series. This mode should not be used for general
+Mk5 recording because there are special conditions that have to be
+met that might not exist appropriately for every schedule.
+
+5. Data modulation. If data modulation is ON, then "ON" is added 
+as a parameter on the FORM command. This feature is available only
+when a VEX file is used as input because the older sked-style
+format does not have the ability to specify data modulation.
+
+
+			    C. Known Bugs
+
+The following is a summary list of known bugs. They are described in
+more detail after the list.
+
+1. There are communication problems with the Mark IV formatter. 
+2. Do not run "fmset" for extended periods.
+3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work. 
+4. "odd" and "even" head types not supported for Mark IV & VLBA4.
+5. "odd"/"even" head types not supported for VLBA style tapeforms.
+6. CHEKR does not check the status of the Mark IV formatter.
+7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+8. Extraneous errors when tape is stopped by low tape sensor.
+9. "Comm=" command in logex extracts only the first command.
+10. S2 error scheme clumsy.
+11. No extra spaces allowed in "ibad.ctl" file.
+12. ONOFF and FIVPT programs hang.
+13. FS SNAP command pages don't list tape drive suffix numbers.
+14. Tk/tcl problems
+
+A more detailed discussion of these bugs follows.
+
+1. There are communication problems with the Mark IV formatter.  It
+apparently misses some characters that are sent to it and time-outs on
+occasion.  It appears that this is related to the 1 PPS interrupt
+service routine in the formatter.  In spite of this problem, we have
+managed to make formatter communications fairly robust.  It is
+important that the (extra) time-out parameter for the formatter in the
+"matad.ctl" file be set to 200 centiseconds.  The FS will try all the
+communications up to three times if an unrecognized command response
+(formatter error "7") or time-out occurs.  Debug information about
+communication errors are logged in the log file, but are not displayed
+in the log display window.
+
+A further problem which may or may not be related is that very rarely
+(although one case was repeatable and therefore was coded around) the
+formatter A/D assignments (sent with the "/ASS" command) do not appear
+to take.
+
+The formatter is not using the correct line protocol for the MAT bus.
+It is using one rather than two stops bits at 9600 BAUD.  The main
+manifestation of this is that occasionally the formatter reports
+communication errors in the "error word".  Whether or not this
+contributes to the other communication problems is unclear.
+
+Another problem related to using the Mark IV formatter on the MAT bus
+has been noticed both on the development system at Haystack and at
+Effelsberg.  After switching to version 9.3.1, both systems had
+occasional headstack controller MAT hangs.  It is unclear how the FS
+could cause this to happen.  It may be a problem generic to the head
+controller.  This problem has happened very rarely: three or four
+times at Haystack over one particular week and we don't know how many
+times it occurred at Effelsberg.  Recovery is possible by just
+reseting the head controller MAT.  If this happens to you please let
+Ed know.
+
+Another problem is that occasionally the formatter "stutters" the
+first character of its response.  In the case the first character is
+repeated and the second characters are omitted.  This is fairly benign,
+but may appear to cause intermittent problems.
+
+Another formatter problem is that it occasionally responds incorrectly
+with a NAK.  However this version of the Field System is able to handle
+this case completely.
+
+Improved formatter firmware has made its way into the field. The next
+revision of the FS will contain improvements in the formatter's
+behavior.
+
+2. Do not run "fmset" for extended periods. For stations that have
+VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+should not be run for extended periods of time.  The "fmset" program
+should be used only to set or briefly verify that the formatter time
+is correct.  Do not leave "fmset" running after completing either of
+these tasks, especially during an experiment.
+
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
+
+3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work.  This
+isn't a bug, actually it is feature (apologies in advance).  The name
+"ALL" was incorrectly thought to conflict with the 2 character code
+for BBC lower-sideband "al", so it was accidently eliminated.  It will
+be restored in a future revision but is of doubtful utility for VLBA
+racks.  For Mark III, you can achieve the same effect by entering:
+
+TPI=odd,even,if1,if2,if3
+
+Use the same parameters for the other similar commands.  You should
+omit "if3", if you don't have that module.  For VLBA racks a similar
+command can be used but is of doubtful utility:
+
+TPI=oddl,evenl,oddu,evenu,ifa,ifb,ifc,ifd
+
+This will select all 28 video power detectors (14 BBCs with two
+side-bands each) and all the IF distributors.  A more useful version
+might be:
+
+TPI=oddu,evenu,ifa,ifb,ifc,ifd
+
+4. "odd"/"even" head types not supported for Mark IV & VLBA4. The
+Mark IV and VLBA4 rack version of the "form" command and the Mark IV
+and VLBA4 recorder versions of the "repro" and "parity" commands do
+not support the "odd" and "even" parameters for the read and write
+head types and reproduce electronics in the "head.ctl" control file.
+This means that automatic substitution of odd or even head in passes
+that use only even or odd heads respectively does not occur.  The only
+correct settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
+
+5. "odd"/"even" head types not supported for VLBA style tapeforms. For
+any mode recorded with VLBA style tapeform (14 index positions), the
+only correct setting of the read and write head types on the
+"head.ctl" is "all".  This will be fixed in a future revision.  Please
+let Ed know if you are missing some tracks and need to work around
+this limitation.
+
+6. CHEKR does not check the status of the Mark IV formatter.
+Implementation of this has been deferred until the formatter
+communication problems have been resolved.
+
+7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+This always occurs for experiments run from .DRG and non-VEX .SKD
+files regardless of whether they are needed or not.  This occurs
+because it is impossible to know whether IF3 is needed or not.
+
+8. Extraneous errors when tape is stopped by low tape sensor. When a
+tape drive has been commanded to move the tape and then stops because
+it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
+"CHEKR" will complain periodically that the tape drive is not in the
+correct state.  In principle the FS should be smarter about this.
+However, if the tape is managed correctly by the schedule this error
+message should never occur.  If it does, then it it an indication that
+there is either a problem with: (1) the schedule, (2) the check
+procedures, (3) the recorder, or (4) the tape is too short.  If any of
+these cases apply they should be corrected.  It is more likely that
+this error message will occur when the tape is being controlled
+manually.  In this case, issuing an "ET" command will convince the FS
+that the tape drive should be stopped and the error message will
+cease.
+
+9. "Comm=" command in logex extracts only the first command. The
+"comm=" command in "logex" extracts only the first command commanded
+and displayed.  This problem was noted by Giuseppe Maccaferri
+(Medicina).
+
+10. S2 error scheme clumsy. The error and status response number
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic "rl" are mostly error responses from the recorder or the RCL
+interface library that is used to communicate with the recorder.  If
+the numeric part of an "rl" error is greater than -130, then it is the
+error code returned by the recorder.  If the numeric part is less than
+-130, but greater than -300, then add 130 to the value, the absolute
+value of the result is the error response code from the RCL library.
+For values less than or equal to -300, a FS error has been detected.
+Status response codes are all reported with mnemonic "rz" and the
+numeric value is the negative of the status response code.  In all
+cases an appropriate error or status message is displayed.  These
+messages are retained in the log.
+
+11. No extra spaces allowed in "ibad.ctl" file. The format of the
+"ibad.ctl" must not contain any leading or embedded spaces.  In system
+that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
+"no_untalk/unlisten_after" is misspelled or an incorrect device name
+is supplied, the driver will cause a segmentation violation when it is
+initialized and the FS will terminate.  Unfortunately there is no way
+to prevent this problem in a general way; it reflects a limitation in
+the driver.
+
+12. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
+been known to "hang" mysteriously.  This seems to be caused by some
+problem with the "go" mechanism that is used to restart the program
+when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
+execute.  The "go" that is used to restart the program fails for some
+reason.  This has been exceedingly difficult to debug because it is
+intermittent and fairly rare.  There is however a good work around for
+it.  The CALON and CALOFF procedures are called by procedures CALONFP
+and CALOFFFP for FIVPT and CALONNF and CALOFFNF for ONOFF.  FIVPT or
+ONOFF may hang during (or actually just after) the execution of one
+these procedures that FIVPT and ONOFF will typically hang.  If this
+happens, you will have to terminate the FS to recover.  You can
+prevent it from happening again (for this procedure) by adding the
+lines:
+
+!+1s
+sy=go fivpt &
+
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
+
+!+1s
+sy=go onoff &
+
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
+
+13. FS SNAP command pages don't list tape drive suffix numbers. The FS
+SNAP manual pages and the help pages available through the "help="
+command do not reflect when multiple versions are available with
+different suffixes depending on the number of drive specified in the
+control files. For example, there is only a "tape" page, no "tape1" or
+"tape2" page. However, the help facility will display the version of
+the command with no suffix when an available command with a suffix is
+used. For example, if two drives are defined, then "help=tape1" and
+"help=tape2" will work, but "help=tape" will not and vice-versa if
+only one drive is defined.
+
+14. Tk/tcl problems. Please note the following problems with Tk/tcl
+applications in the FS: (1) defining the plot limits manually in
+"logpl" does not work, i.e., only "autoscale" works, (2) the labels
+for point information in the upper right corner of "pdplt" does not
+line up with the data for all versions of Tk, (3) the windows of the
+"msg" and "logpl" utilities are too large to work with comfortably on
+some smaller resolution displays, particularly 1024x768.
+
+III. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual or the "nfsload.txt" memo.  In this case
+you should also get a copy of the current FS9 "Control Files and Field
+System Initialization" manual.
+
+The remainder of this section explains how to install this version as
+an upgrade from 9.5.3. If you are upgrading from an different version
+please contact Ed for additional instructions.
+
+(0) Before you begin the upgrade make sure you have a current back-up
+of your system in case something goes wrong.  Please refer to the
+directions for making disk-to-disk back-ups in Section 5.8 of the FS9
+"Computer Reference" manual.  If you are running one of the Debian
+distribution kernels and do not have documentation on how to make a
+back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
+Reference" manual has a discussion of drive ID numbers if you are
+unsure about these.  You may choose to install the FS on your back-up
+disk for testing and then later copy the back-up onto the primary once
+you are satisfied with the new version.  In any event, please be sure
+to make a fresh back-up before continuing with the installation.
+
+(1) Please be sure that you have at least 20 MB of free space (use the
+"df" UNIX command to check free space) on your "/usr2" partition
+before starting the upgrade.  This would probably only be a problem
+for stations with 200 MB disks.  If you are tight on space, you may
+want to delete old log files and old versions of the FS (except your
+most recent one of course).  Since you should have backed-up your
+system, you even can delete the "*.[oas]" and executable files of your
+most recent version.  You might want to keep the source of the previous
+version around for reference if you have room.  You can eliminate the
+unnecessary files by "cd"-ing to the old FS directory as "prog" and
+doing a "make rmdoto rmexe".  If you have any questions about how to
+do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.5.7 archive in your "/tmp" directory. For
+example you might do the following:
+
+    cd /tmp
+    ncftp -u atri.gsfc.nasa.gov
+    (enter your account name for the server at prompt)
+    (enter your password for the server at prompt)
+    cd /home/ftp/fs/test
+    get fs-9.5.7.tar.gz
+    quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section "IV. Transferring The Update Archive By DOS Floppy" below.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+    cd /
+    tar -xzpf /tmp/fs-9.5.7.tar.gz
+
+(6) Set the link for the new FS vesion:
+
+    cd /usr2
+    ln -sfn fs-9.5.7 fs
+
+(7) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(8) Make the FS:
+
+    cd /usr2/fs
+    make
+
+(9) Remake your local software. To remake the software if you have
+    standard station software "Makefile" configuration, the following
+    steps should do the trick:
+
+      cd /usr2/st
+      make rmdoto rmexe all
+
+(10) Reboot the computer.
+
+(11) Log in as oper
+
+(12) Add the Mark IV formatter firmware version number to the
+     equip.ctl file. This should be the new last line of the
+     file. You can use /usr2/fs/st.default/control/equip.ctl as a
+     guide. If you don't have a Mark IV Formatter or don't know what
+     version of the firmware you have you can use "40" for now. If you
+     have Mark IV formatter and did not know the firmware version, you
+     can query the formatter with the "form" command to find the
+     correct value and then modify your control file. The version in
+     the control file must agree with the version in the formatter and
+     the FS will complain if it doesn't.
+
+(13) Set-up the "mk5ad.ctl" control file. As oper:
+
+       cd /usr2/control
+       cp /usr2/fs/st.default/control/mk5ad.ctl .
+
+     If you have a Mark V recorder, edit the file
+     "/usr2/control/mk5ad.ctl" and enter the address, port, and
+     time-out for the Mark 5 recorder. Using the IP address instead of
+     the host name is strongly recommended. If you only have the host
+     name, it is easy to look-up its address with "nslookup". The
+     initial port number is 2620. It is unknown what the correct
+     time-out should be.  Initially, 100 is recommended if the Mark 5
+     is on the local network; 500 for a remote device. If time-outs
+     occur these values can be increased.
+
+(14) Append "ready_disc" to your station.prc file. As "oper":
+
+       cd /usr2/proc
+       cat /usr2/fs/st.default/proc/m5.prc >> station.prc
+
+(15) Test the FS.  Generally speaking a fairly thorough test is to run
+     a test experiment: start with DRUDG-ing a schedule, executing
+     part of it (preferably at least a tape change and a parity check
+     in each direction), do any normal post-experiment plotting and
+     clean-up that you do.  The idea here is to verify that everything
+     works as you expect for normal operations.  It also is a good
+     idea to (at least) briefly try any calibration procedures that
+     you use the FS for, such as pointing and narrow track head
+     calibration.
+
+
+VII. Transferring The Update Archive By DOS Floppy
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.5.7.tar.gz archive have been placed
+in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
+small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs957tg.aa
+fs957tg.ab
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs957tg.* >fs-9.5.7.tar.gz
+
+This will create an exact image of the original fs-9.5.7.tar.gz
+archive on your computer.  Please be sure to use binary transfer when
+getting the files from atri or kurp-ftp.

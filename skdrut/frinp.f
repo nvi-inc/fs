@@ -24,7 +24,7 @@ C  LOCAL:
       integer ix,n,ITRK(4,max_subpass,max_headstack)
       integer*2 LNA(4)
       integer idum,ib,ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
-      integer icx,nvlist,ivlist(max_chan)
+      integer icx,nvlist,ivlist(max_chan),ir,it,iu
       integer*2 lc,lsg,lm(8),lid,lin,ls
       integer*2 lst(4,max_stn)
       real*8 bitden
@@ -70,6 +70,7 @@ C 991122 nrv LMODE can be 16 characters to accommodate S2 modes.
 C            Store S2 mode into LMODE as well as LS2MODE.
 C 011011 nrv If S2 mode was already set up from the equip line, don't
 C            overwrite it.
+C 020114 nrv Fill in roll defs.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -344,11 +345,24 @@ C 6. This section for the barrel roll line.
 9401          format('FRINP06 - Station ',4a2,' not selected. ',
      .        'Barrel roll for this station ignored.')
             else ! save it
-             idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
-            endif
-          enddo
-        endif
-      endif
+              idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
+              if (ichcm_ch(lbarrel(1,i,icode),1,"8").eq.0) ir=1
+              if (ichcm_ch(lbarrel(1,i,icode),1,"16").eq.0) ir=2
+              if (ir.eq.1.or.ir.eq.2) then ! fill roll table
+                iroll_inc_period(i,icode) = ircan_inc(ir)
+                iroll_reinit_period(i,icode) = ircan_reinit(ir)
+                nrolldefs(i,icode) = nrcan_defs(ir)
+                nrollsteps(i,icode) = nrcan_steps(ir)
+                do iu=1,nrcan_defs(ir)
+                  do it=1,2+nrcan_steps(ir)
+                    iroll_def(it,iu,i,icode) = icantrk(it,iu,ir)
+                  enddo
+                enddo
+              endif ! fill roll table
+            endif ! save it
+          enddo ! each station name found on the line
+        endif ! station names on "B" line
+      endif ! barrel
 
 C 7. This section for the recording format line.
 

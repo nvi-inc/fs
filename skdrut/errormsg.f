@@ -17,6 +17,7 @@ C History
 C 970122 nrv New.
 C 970718 nrv Correct some of the error numbers to be consistent
 C            with the VUNPxxx routines.
+C 020111 nrv Add more ROLL messages.
 
 C Input:
       integer iret ! return from the parser
@@ -103,6 +104,8 @@ C     2. Print error messages by group.
         else if (cgroup(1:4).eq.'ROLL') then
           if (ierr.eq.1) cmsg='1 = roll on/off'
           if (ierr.eq.2) cmsg='2 = roll_def statements'
+          if (ierr.eq.3) cmsg='3 = roll_inc_period statement'
+          if (ierr.eq.4) cmsg='4 = roll_reinit_period statement'
           if (ierr.eq.21) cmsg='21 = headstack'
           if (ierr.eq.22) cmsg='22 = home track'
           if (ierr.eq.23) cmsg='23 = track list'

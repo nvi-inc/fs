@@ -1,158 +1,164 @@
      pass - positioning by pass number (longitudinal drives)
-
-Syntax:     pass=cmdPw,cmdPr,woffset
-
-Response:   pass/cmdPw,cmdPr,woffset,cmdMw,cmdMr,actMw,actMr,
+ 
+              Syntax:      pass=cmdPw,cmdPr,woffset
+ 
+              Response:    pass/cmdPw,cmdPr,woffset,cmdMw,cmdMr,actMw,actMr,
           deltaMw,deltaMr
-
-
-Settable parameters:
-cmdPw   Command pass number for write head stack (Mark IV stack
-        1), range 1-100 for Mark III and VLBA, 1-112 for Mark
-        IV. Default is to not move the write head stack. For
-        Mark IV recorders, if the parameter is stack2, then
-        stack 1 is moved to the most recently commanded stack 2
-        position.
-cmdPr     Command pass number for read head stack (Mark IV stack
-          2), same range as for write head stack. This parameter
-          may not be specified for VLBA recorders. If the
-          parameter is same, the read pass will be same as the
-          write pass. For Mark IV, if the parameter is mk4, then
-          stack 2 is positioned to 100 plus the pass number for
-          stack 1. Default is to not move the read head stack.
-woffset   Type of offset for the write head. auto (default) or
-          none. Only the first character is checked. For auto,
-          the head stack position is automatically adjusted
-          according to the write head type parameter in the
-          head.ctl control file. For none, no adjustments are
-          made. Use none for Mark IV recording and for all mode A
-          recording. The read head is always adjusted.
-
-Monitor-only parameters:
-cmdMw   Microns corresponding to command write head pass
-        number.
-cmdMr   Microns corresponding to command read head pass number,
-        null for VLBA.
-actMw     Microns corresponding to actual write head pass number.
-actMr     Microns corresponding to actual read head pass number,
-          null for VLBA.
-deltaMw   Micron error between actual and commanded write head
-          position.
-deltaMr   Micron error between actual and commanded read head
-          position, null for VLBA.
-
-Comments: 
-This command moves the read and/or write head stacks to the
-position for the commanded passes. The correspondence of pass
-numbers to a priori micron positions is established by the
-tapeform command. The requested pass must have been set-up by the
-tapeform command to be used. Odd pass numbers are used for
-forward passes, even for reverse.
-
-Only the write head stack parameters in this command are used for
-VLBA recorders. The read head stack parameters are reported as
-nulls. For Mark IV, the write head stack parameters refer to head
-stack 1, the read head stack parameters refer to the head stack
-2.
-
-The head stack position in microns is determined by
-
-position = tapeform offset + absolute offset          (forward pass)
-position = tapeform offset + absolute offset + for/rev offset(reverse pass)
-
-where tapeform offset is the a priori offset as specified with the
-tapeform command, and the absolute offset and forward/reverse offset are
-specified in the head.ctl control file.
-
-If woffset is auto, and the commanded pass is a reverse pass, and
-the write head stack is defined as odd in the head.ctl control
-file, then an offset of 698.5 microns is added to the write head
-stack position.
-
-If woffset is auto, and the commanded pass is a forward pass, and
-the write head stack is defined as even in the head.ctl control
-file, then an offset of 698.5 microns is subtracted from the
-write head stack position.
-
-If woffset is none, then no offset is applied to the a priori
-offset for the write head. The read head is always adjusted.
-
-An individual head stack can be moved by not specifying a command
-pass number for the other head stack. The read (stack 2) command
-pass can be same, which causes it to be the same as the write
-head stack pass number. This feature is useful for setting both
-head stacks to the same pass number in set-up procedures. The
-read (stack 2) command pass can be mk4, which causes head stack 2
-to be positioned to the position for the pass number specified
-for head stack 1 plus 100. This feature is useful for positioning
-both Mark IV head stacks using a single pass number in set-up
-procedures. Also for Mark IV, the write (stack 1) command pass
-can be stack2, which causes head stack 1 to be positioned to the
-most recently commanded position of stack 2. This feature is
-useful for positioning stack 1 (the only stack that can play
-back) to read tracks that were just recorded with stack 2.
-
-The deltaM parameters are reported with the sign of actual minus
-commanded.
-
-The commanded positions of the lvdt, pass, and stack commands are
-reported consistently. For example, if you command the head stack
-positions with the stack or pass command, you can determine the
-corresponding command voltage with lvdt. And vice-versa, the
-micron position corresponding to a voltage position commanded
-with lvdt can be determined with stack or pass.
-
-The commanded pass numbers reported by pass are given special
-values if either lvdt or stack last commanded the positions. If
-lvdt or stack is used with uncalibrated positions, the commanded
-pass number will be reported as 0. If the stack command with
-forward calibrated positions was used, -1 will be reported for
-the pass number, for reverse calibrations -2 will be reported.
-
-For Mark III fromatters, when the write head is moved by either
-pass, stack, or lvdt, the auxiliary data field used by the
-formatter is set to reflect the commanded position. The twelve
-characters of the auxiliary data field are set as:
-
+ 
+ 
+ Settable parameters:
+            cmdPw      Command pass number for write head stack (Mark IV
+            stack 1), range 1-100 for Mark III and VLBA, 1-112
+            for Mark IV. Default is to not move the write head
+            stack. For Mark IV recorders, if the parameter is
+            stack2, then stack 1 is moved to the most recently
+            commanded stack 2 position.
+            cmdPr      Command pass number for read head stack (Mark IV
+            stack 2), same range as for write head stack. This
+            parameter may not be specified for VLBA recorders.
+            If the parameter is same, the read pass will be same
+            as the write pass. For Mark IV, if the parameter is
+            mk4, then stack 2 is positioned to 100 plus the pass
+            number for stack 1. Default is to not move the read
+            head stack.
+            woffset    Type of offset for the write head. auto (default) or
+            none. Only the first character is checked. For auto,
+            the head stack position is automatically adjusted
+            according to the write head type parameter in the
+            head.ctl control file. For none, no adjustments are
+            made. Use none for Mark IV recording and for all
+            mode A recording. The read head is always adjusted.
+ 
+ Monitor-only parameters:
+            cmdMw      Microns corresponding to command write head pass
+            number.
+            cmdMr      Microns corresponding to command read head pass
+            number, null for VLBA.
+            actMw      Microns corresponding to actual write head pass
+            number.
+            actMr      Microns corresponding to actual read head pass
+            number, null for VLBA.
+            deltaMw    Micron error between actual and commanded write head
+            position.
+            deltaMr    Micron error between actual and commanded read head
+            position, null for VLBA.
+ 
+ Comments: 
+ This command moves the read and/or write head stacks to the
+ position for the commanded passes. The correspondence of pass
+ numbers to a priori micron positions is established by the
+ tapeform command. The requested pass must have been set-up by
+ the tapeform command to be used. Odd pass numbers are used for
+ forward passes, even for reverse.
+ 
+ Only the write head stack parameters in this command are used
+ for VLBA recorders. The read head stack parameters are
+ reported as nulls. For Mark IV, the write head stack
+ parameters refer to head stack 1, the read head stack
+ parameters refer to the head stack 2.
+ 
+ The head stack position in microns is determined by
+ 
+ position = tapeform offset + absolute offset         (forward pass)
+ position = tapeform offset + absolute offset + for/rev offset(reverse pass)
+ 
+ where tapeform offset is the a priori offset as specified with
+ the tapeform command, and the absolute offset and
+ forward/reverse offset are specified in the head.ctl control
+ file.
+ 
+ If woffset is auto, and the commanded pass is a reverse pass,
+ and the write head stack is defined as odd in the head.ctl
+ control file, then an offset of 698.5 microns is added to the
+ write head stack position.
+ 
+ If woffset is auto, and the commanded pass is a forward pass,
+ and the write head stack is defined as even in the head.ctl
+ control file, then an offset of 698.5 microns is subtracted
+ from the write head stack position.
+ 
+ If woffset is none, then no offset is applied to the a priori
+ offset for the write head. The read head is always adjusted.
+ 
+ An individual head stack can be moved by not specifying a
+ command pass number for the other head stack. The read (stack
+ 2) command pass can be same, which causes it to be the same as
+ the write head stack pass number. This feature is useful for
+ setting both head stacks to the same pass number in set-up
+ procedures. The read (stack 2) command pass can be mk4, which
+ causes head stack 2 to be positioned to the position for the
+ pass number specified for head stack 1 plus 100. This feature
+ is useful for positioning both Mark IV head stacks using a
+ single pass number in set-up procedures. Also for Mark IV, the
+ write (stack 1) command pass can be stack2, which causes head
+ stack 1 to be positioned to the most recently commanded
+ position of stack 2. This feature is useful for positioning
+ stack 1 (the only stack that can play back) to read tracks
+ that were just recorded with stack 2.
+ 
+ The deltaM parameters are reported with the sign of actual
+ minus commanded.
+ 
+ The commanded positions of the lvdt, pass, and stack commands
+ are reported consistently. For example, if you command the
+ head stack positions with the stack or pass command, you can
+ determine the corresponding command voltage with lvdt. And
+ vice-versa, the micron position corresponding to a voltage
+ position commanded with lvdt can be determined with stack or
+ pass.
+ 
+ The commanded pass numbers reported by pass are given special
+ values if either lvdt or stack last commanded the positions.
+ If lvdt or stack is used with uncalibrated positions, the
+ commanded pass number will be reported as 0. If the stack
+ command with forward calibrated positions was used, -1 will be
+ reported for the pass number, for reverse calibrations -2 will
+ be reported.
+ 
+ For Mark III fromatters, when the write head is moved by
+ either pass, stack, or lvdt, the auxiliary data field used by
+ the formatter is set to reflect the commanded position. The
+ twelve characters of the auxiliary data field are set as:
+ 
                            xxwxwxyzyzff
-
-xx        ff for forward calibration (odd passes)
-          fe for reverse calibration (even passes)
-          fd for uncalibrated positions.
-wxyz      0000-3999 for positive micron positions
-          4000-7999 for negative micron positions
-ff          hex characters ff
-
-The positions occupied by wxyz are the four digits of the
-commanded micron write head position. In the auxiliary data field
-the digits are repeated two at a time.  The negative positions
-are represented as the 4000+ absolute value of the position.  The
-xx field is used to identify which type of calibration was used
-to set the position. The last two digits of the auxiliary data
-are fixed with the value ff. 
-
-For VLBA fomatters, the auxiliary data field depends on the
-format used. For "data replacement format", the auxilary data
-field for the Mark III formatter is used. For VLBA format, the
-contents of the auxilary data field are controlled by the
-formatter. The FS writes the station hardware ID to formatter
-address 0xA6 and the micron head position in BCD (with the most
-significant bit in the most significant digit on for negative
-values) to address 0xA7. 
-
-For Mark IV, there are eight characters (32 bits) available for
-auxiliary data. They are set as:
-
+ 
+        xx       ff for forward calibration (odd passes)
+                   fe for reverse calibration (even passes)
+                   fd for uncalibrated positions.
+          wxyz     0000-3999 for positive micron positions
+                   4000-7999 for negative micron positions
+          ff         hex characters ff
+ 
+ The positions occupied by wxyz are the four digits of the
+ commanded micron write head position. In the auxiliary data
+ field the digits are repeated two at a time.  The negative
+ positions are represented as the 4000+ absolute value of the
+ position.  The xx field is used to identify which type of
+ calibration was used to set the position. The last two digits
+ of the auxiliary data are fixed with the value ff. 
+ 
+ For VLBA fomatters, the auxiliary data field depends on the
+ format used. For "data replacement format", the auxilary data
+ field for the Mark III formatter is used. For VLBA format, the
+ contents of the auxilary data field are controlled by the
+ formatter. The FS writes the station hardware ID to formatter
+ address 0xA6 and the micron head position in BCD (with the
+ most significant bit in the most significant digit on for
+ negative values) to address 0xA7. 
+ 
+ For Mark IV, there are eight characters (32 bits) available
+ for auxiliary data. They are set as:
+ 
                              abcdwxyz
-
-abcd      head stack 0 position in microns
-wxyz      head stack 1 position in microns
-
-Characters a and w have the following bit structure:
-
-bit 0     thousands digit for the micron position, usually 0
-bit 1     0 for forward calibration (odd passes), 1 for
-          uncalibrated
-bit 2     0 for reverse calibration (even passes), 1 for
-          uncalibrated
-bit 3     sign of the position, 0 for positive, 1 for negative
+ 
+ abcd     head stack 0 position in microns
+          wxyz     head stack 1 position in microns
+ 
+ Characters a and w have the following bit structure:
+ 
+            bit 0      thousands digit for the micron position, usually 0
+            bit 1      0 for forward calibration (odd passes), 1 for
+            uncalibrated
+            bit 2      0 for reverse calibration (even passes), 1 for
+            uncalibrated
+            bit 3      sign of the position, 0 for positive, 1 for negative 

@@ -24,6 +24,7 @@ C            If user changes it then bitdens gets changed.
 C 000126 nrv Add S2 speed output.
 C 000319 nrv Add K4 speed calculation.
 C 010817 nrv Change K4 speeds per Takashima.
+C 020111 nrv Check LSTREC not LTERNA for recorder type.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -50,8 +51,10 @@ C
 
 C Determine type of equipment.
 
-      ks2 = ichcm_ch(lterna(1,is),1,'S2').eq.0
-      kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
+C     ks2 = ichcm_ch(lterna(1,is),1,'S2').eq.0
+C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
+      ks2 = ichcm_ch(lstrec(1,is),1,'S2').eq.0
+      kk4 = ichcm_ch(lstrec(1,is),1,'K4').eq.0
 
       if (ks2) then
         if (ichcm_ch(ls2speed(1,is),1,'LP').eq.0) then

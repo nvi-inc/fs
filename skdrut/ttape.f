@@ -37,6 +37,7 @@ C            variables bitdens and maxtap.
 C 000125 nrv Add S2 length and speed. Add K4 length.
 C 000319 nrv Add K4 specification and output.
 C 001003 nrv Add SHORT tape option.
+C 020111 nrv Check LSTREC not LTERNA to determine S2 and K4 types.
 C
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
@@ -51,8 +52,8 @@ C
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
         do i=1,nstatn
-          ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
-          kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
+          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
+          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
           if (ks2) then
             if (ichcm_ch(ls2speed(1,i),1,'LP').eq.0) s2sp=SPEED_LP
             if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
@@ -76,8 +77,8 @@ C
 9912        FORMAT(' ID  Station   Tape length            Speed')
         enddo
         DO  I=1,NSTATN
-          ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
-          kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
+          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
+          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
 C         Write bit density for freq code 1 only.
           WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4)
 9111      FORMAT(1X,A2,2X,4A2,$)
@@ -120,20 +121,20 @@ C         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! next station
         endif
 C       Station ID is valid. Check tape type now.
         if (istn.gt.0) then ! individual station
-          ks2 = ichcm_ch(lterna(1,istn),1,'S2').eq.0
-          kk4 = ichcm_ch(lterna(1,istn),1,'K4').eq.0
+          ks2 = ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+          kk4 = ichcm_ch(lstrec(1,istn),1,'K4').eq.0
         else ! all stations
-          ks2 = ichcm_ch(lterna(1,1),1,'S2').eq.0
-          kk4 = ichcm_ch(lterna(1,1),1,'K4').eq.0
+          ks2 = ichcm_ch(lstrec(1,1),1,'S2').eq.0
+          kk4 = ichcm_ch(lstrec(1,1),1,'K4').eq.0
           do i=2,nstatn
-            ks21 = ichcm_ch(lterna(1,i),1,'S2').eq.0
+            ks21 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
             if (ks2.and..not.ks21) then
               write(luscn,9991) (lstnna(j,i),j=1,4)
 9991          format('TTAPE99 - All stations must be S2 to use the ',
      .        '_ character.')
               return
             endif
-            kk41 = ichcm_ch(lterna(1,i),1,'K4').eq.0
+            kk41 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
             if (kk4.and..not.kk41) then
               write(luscn,9992) (lstnna(j,i),j=1,4)
 9992          format('TTAPE99 - All stations must be K4 to use the ',
@@ -239,8 +240,8 @@ C       Station ID is valid. Check tape type now.
 C   3. Now set parameters in common.
 
         DO  I = 1,NSTATN
-          kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
-          ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
+          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
+          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
           if ((istn.eq.0).or.(istn.gt.0.and.i.eq.istn)) then ! this station
             if (.not.ks2.and..not.kk4) then ! Mk3/4
               if (ichcm_ch(lkey,1,'TH').eq.0) then

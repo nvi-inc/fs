@@ -1,82 +1,85 @@
              tacd - Totally Accurate Clock (TAC) data
-
-Syntax:     tacd=action
+ 
+              Syntax:      tacd=action
           tacd
-
-Response:   tacd/status,host,port,file,state
+ 
+              Response:    tacd/status,host,port,file,state
           tacd/time,age,ddddd.ffffff,ss,aa,g.ggg.c.cccc,t.tttt
-          tacd/average,age,ddddd.ffffff,sec,rms,max,min,average
-
-
-Settable Parameters:
-action      A key word specifying what you want from the TAC:
-            status  Return TAC status, also ?.
-            time    Return time.
-            average Return average counters. 
-            cont    Retrieve information from TAC every 100
+          tacd/average,age,ddddd.ffffff,sec,rms,max,min,averag
+ e
+ 
+ 
+ Settable Parameters:
+          action   A key word specifying what you want from the TAC:
+                               status  Return TAC status, also ?.
+                               time    Return time.
+                               average Return average counters. 
+                               cont    Retrieve information from TAC every 100
                     centiseconds.
-            stop    Stop tacd from connecting to the TAC and stop
-                    giving errors.
-            start   Undo the stop command, and does a restart.
-          Default (null) is to undo the effect of cont command.
-
-Monitor-only Parameter:
-status:
-host    Computer that is hosting the TAC.
-port      IP port being used to connect to TAC.
-file      Name of the file being used to on host to record
-          measurements.
-state   Status of file (open or closed).
-time:
-age     OLD or NEW result. OLD indicates a previously logged
-        result.
-ddddd.fffff The ddddd field may be yyddd or MJD or Excel date (days
-            since 1900.0). The ffffff field is always the time in
-            fractions of a day.
-ss      ONCORE receiver's ñ 52 nanosecond sawtooth correction to
-        the GPS 1PPS (nanoseconds).
-aa      An estimate of the accuracy of the GPS tick
-        (nanoseconds).
-g.ggg   Amount by which the GPS receiver's 1PPS output has been
-        intentionally biased (microseconds).
-c.cccc    Corrected (cooked) counter reading after applying the ss
-          and g.ggg corrections (microseconds).
-t.tttt      Raw counter reading (microseconds).
-average:
-age     OLD or NEW result. OLD indicates a previously logged
-        result.
-ddddd.fffff The ddddd field may be yyddd or MJD or Excel date (days
-            since 1900.0). The ffffff field is always the time in
-            fractions of a day.
-sec     Number of seconds of data going into average.
-rms     RMS scatter of the sec data points about the average
-        (microseconds).
-max   The extreme maximum of the sec points (microseconds).
-min     The extreme minimum of the sec points
-        (microseconds).Comments: 
-average Average counter reading (microseconds).
-
-Comments:
-A simple tacd command (with no =) causes either the current raw
-or current averaged measurement, depending on the last set-up of
-the tacd command, to be logged. If the command has not been set-
-up previously, a raw measurement is logged.
-
-Since the time and average output records can contain values
-previously logged, values of OLD or NEW for age are used to
-distinguish previously logged and new results. This is intended
-to assist in identifying independent measurements for plotting
-(use NEW as the string in logpl).
-
-It will startup with the Field System the tacd program gets the
-host and port assignment from the tacd.ctl control file. If no
-control file is available it will give a one time error and not
-attempt to open any host connections. If a control file is
-available and is empty tacd will sleep until a control file is
-provided and a start command is issued. If the file is not empty
-it will attempt to establish connection and then retrieve data
-every 30 seconds. If connection fails, it will keep on trying
-every 30 seconds until a connection is made.
-
-The contents of file on the TAC host may contain averaged or un-
-averaged data depending on the set-up of the TAC.
+                               stop    Stop tacd from connecting to the TAC and
+                    stop giving errors.
+                               start   Undo the stop command, and does a restart.
+                   Default (null) is to undo the effect of cont
+          command.
+ 
+ Monitor-only Parameter:
+ status:
+            host       Computer that is hosting the TAC.
+            port       IP port being used to connect to TAC.
+            file       Name of the file being used to on host to record
+            measurements.
+              state        Status of file (open or closed).
+ time:
+              age          OLD or NEW result. OLD indicates a previously
+              logged result.
+              ddddd.fffff  The ddddd field may be yyddd or MJD or Excel date
+              (days since 1900.0). The ffffff field is always
+              the time in fractions of a day.
+            ss         ONCORE receiver's ñ 52 nanosecond sawtooth
+            correction to the GPS 1PPS (nanoseconds).
+            aa         An estimate of the accuracy of the GPS tick
+            (nanoseconds).
+              g.ggg        Amount by which the GPS receiver's 1PPS output has
+              been intentionally biased (microseconds).
+            c.cccc     Corrected (cooked) counter reading after applying
+            the ss and g.ggg corrections (microseconds).
+            t.tttt     Raw counter reading (microseconds).
+ average:
+                age            OLD or NEW result. OLD indicates a previously
+                logged result.
+                ddddd.fffff    The ddddd field may be yyddd or MJD or Excel
+                date (days since 1900.0). The ffffff field is
+                always the time in fractions of a day.
+                sec            Number of seconds of data going into average.
+                rms            RMS scatter of the sec data points about the
+                average (microseconds).
+                max            The extreme maximum of the sec points
+                (microseconds).
+                min            The extreme minimum of the sec points
+                (microseconds).Comments: 
+                average        Average counter reading (microseconds).
+ 
+ Comments:
+ A simple tacd command (with no =) causes either the current
+ raw or current averaged measurement, depending on the last
+ set-up of the tacd command, to be logged. If the command has
+ not been set-up previously, a raw measurement is logged.
+ 
+ Since the time and average output records can contain values
+ previously logged, values of OLD or NEW for age are used to
+ distinguish previously logged and new results. This is
+ intended to assist in identifying independent measurements for
+ plotting (use NEW as the string in logpl).
+ 
+ It will startup with the Field System the tacd program gets
+ the host and port assignment from the tacd.ctl control file.
+ If no control file is available it will give a one time error
+ and not attempt to open any host connections. If a control
+ file is available and is empty tacd will sleep until a control
+ file is provided and a start command is issued. If the file is
+ not empty it will attempt to establish connection and then
+ retrieve data every 30 seconds. If connection fails, it will
+ keep on trying every 30 seconds until a connection is made.
+ 
+ The contents of file on the TAC host may contain averaged or
+ un-averaged data depending on the set-up of the TAC. 

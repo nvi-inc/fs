@@ -44,7 +44,7 @@ int *ierr;
 
   if(response.state == -1) {
      clr_res(&buff_out);
-     *ierr=-201;
+     *ierr=-200;
      return;
   }
   clr_res(&buff_out);

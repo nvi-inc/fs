@@ -113,6 +113,7 @@ C 16         SN = SNR parameters
 C 16         PR = PROCEDURE parameters
 C 16         GE = GENENRAL parameters
 C 16         AL = ALL parameters
+C 16         NO = for the NOtes file
 C For SNR command
 C 17         MR = MARGIN parameter for SNR
 C For the 
@@ -167,17 +168,18 @@ C 000326 nrv Add JAVA and GET for parameters program.
 C 000605 nrv Remove DYNAMIC tape motion. Add AUTO and SCHEDULED for
 C            tape allocation type.
 C 001003 nrv Add SHORT as a tape type.
+C 020227 nrv Add NOTES as a parameter type.
 C
 C   LOCAL VARIABLES
       integer numcmd,ic,ifunc1,ifunc,nccmd
 C
       character*20 ckeyin ! input keyword
-      character*20 ckey(132) ! keywords to match
-      character*2 ccode(132)  ! corresponding 2-letter code
-      integer ivalid(132) ! type for which it is valid
+      character*20 ckey(133) ! keywords to match
+      character*2 ccode(133)  ! corresponding 2-letter code
+      integer ivalid(133) ! type for which it is valid
 C
 C  Initialized
-      data numcmd/132/
+      data numcmd/133/
       data ckey/'START','CABLE','SUBNET','DURATION','IDLE',
      .'CALIBRATION','FREQUENCY','PREOB','MIDOB','POSTOB',
      .
@@ -206,7 +208,7 @@ C  Initialized
      .'LINE','XYAZEL','POLAZEL','COVERAGE','DISTANCE','EL','AZ',
      .'FILE','BASELINE','STATS','HIST','SNR',
      .
-     .'SNR','PROCEDURE','GENERAL','ALL',
+     .'SNR','PROCEDURE','GENERAL','ALL','NOTES',
      .'MARGIN',
      .'AUTO','MANUAL','ON','OFF','SUB','ALL','YES','NO',
      .'FULL','MINIMUM','NO',
@@ -239,7 +241,7 @@ C
      .'FT','AZ','DU','SX','MX','FL','A2','ON','OF',
      .'CO','AD','SS',
      .'LI','XY','PO','CO','DI','EL','AZ','FI','BA','ST','HI','HS',
-     .'SN','PR','GE','AL',
+     .'SN','PR','GE','AL','NO',
      .'MR',
      .'AU','MA','ON','OF','SU','AL','YE','NO',
      .'FU','MI','NO',
@@ -251,7 +253,7 @@ C
      .'AU','SC'/
 
       DATA ivalid/10*1,43*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
-     .3*14,12*15,4*16,17,8*18,3*19,3*20,3*21,6*22,7*23,2*24,2*25/
+     .3*14,12*15,5*16,17,8*18,3*19,3*20,3*21,6*22,7*23,2*24,2*25/
 C
 C
 C  1. Find the command in the list of commands with minimum matching.

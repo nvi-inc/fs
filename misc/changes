@@ -5423,3 +5423,293 @@ Version 9.5.2 011029
 
 Version 9.5.3 011203
 
+020111 WEH quikr/mic2vlt.f
+           quikr/head_vlt.f
+           clib/get_vatod.c
+           quikr/set_vlt.f
+           control/fserr.ctl
+           quikv/rec_dec.c
+           quikr/worm.f
+           quikr/hdata.f
+           incom/equip.f
+           quikr/hdcalc.f
+           clib/vst_util.c
+           help/tape._w_
+           help/hdata._l_
+           st.default/proc/v42station.prc
+           st.default/proc/v2station.prc
+           st.default/control/equip.ctl
+           headp/headp.f
+           boss/lhead.f
+           boss/newlg.f
+           chekr/hdchk.f
+           clib/vrepro_util.c
+           clib/tape_util.c
+           quikv/wvolt.c
+           quikv/vst.c
+           quikv/vrepro.c
+           quikv/tape_dis.c
+           quikv/tape.c
+           quikv/rvac.c
+           quikv/rec_dis.c
+           quikv/rec.c
+           fslb/lvdonn.f
+           fslb/lvdofn.f
+           quikr/savev.f
+           quikr/peak.f
+           quikr/mezhr.f
+           quikr/lvdt.f
+           quikr/locate.f
+           include/params.i
+           fslb/vlt_head.f
+           fslb/vlt2mic.f
+           include/params.h
+           updated for VLBA42
+
+020111 RDG fsvue/vueinfo.c
+           erchk/erchk.c
+           updated for VLBA42
+
+020115 WEH clib/vacuum.c
+           updated for VLBA42
+
+020123 WEH chekr/rec_brk.c
+           chekr/dist_brk.c
+           chekr/vfrom_brk.c
+           fix error number
+
+020123 WEH chekr/hdchk.f
+           chekr/bbchk.c
+           chekr/distchk.c
+           chekr/vformchk.c
+           chekr/recchk.c
+           report control program errors
+
+020124 WEH chekr/bbc_brk.c
+           fix error number
+
+020124 WEH chekr/chekr.c
+           kludge for VLBA42
+
+Version 9.5.4 020124
+
+020225 WEH mk5cn/Makefile
+           mk5cn/mk5cn.c
+           created
+
+020226 WEH boss/binit.f
+	   control/fspgm.ctl
+           updated for mk5cn
+
+020226 WEH mk5cn/tstMark5A.c
+           copied from John Ball
+
+020227 WEH quikv/mk5_dis.c
+           quikv/ed_dis.c
+           quikv/disc_serial_dis.c
+           quikv/pd_dis.c
+           quikv/pd.c
+           quikv/mk5.c
+           created for mk5
+
+020227 WEH quikv/scan_name.c
+           modified for mk5
+
+020307 WEH st.default/control/mk5ad.ctl
+           created for mk5
+
+020308 WEH mcbcn/mcbcn.c
+           handle comments in control file
+
+020308 WEH clib/form4_util.c
+           detect when log0 fan track is empty but other lag tracks
+           are assigned
+
+020308 WEH quikv/data_check_pos.c
+           quikv/disc_check_dis.c
+           quikv/disc_check.c
+           quikv/disc_serial.c
+           quikv/ed.c
+           quikv/sd_dis.c
+           quikv/sd.c
+           created for mk5
+
+020311 WEH misc/m5/readme.txt
+           st.default/proc/m5.prc
+           quikv/Makefile
+           quikv/mk5relink.c
+           mk5cn/mk5cn.c
+           quikv/mk5close.c
+
+020311 WEH control/fscmd.ctl
+           control/fserr.ctl
+           quikv/quikv.c
+           updated for mk5
+
+020311 WEH clib/v2_motion_done.c
+           kludge for VLBA42 in chekr
+
+020311 WEH st.default/control/mk5ad.ctl
+           misc/m5/readme.txt
+           fixed typos
+
+020311 WEH boss/newlg.f
+           VLBA42 added for drive 2
+
+020312 WEH boss/helpstr.c
+           fixed for "___" with 2 drives and allow explicit file
+
+020313 WEH clib/v2_motion_done.c
+           improved kludge for VLBA42
+
+020313 WEH misc/m5/readme.txt
+           fix typos
+
+020314 WEH mk5cn/tstMark5ato.c
+           mk5cn/mk5cn.c.longjmp
+           mk5cn/mk5cn.c.new
+           mk5cn/mk5cn.c.select
+           test versions, still considering
+
+020314 WEH control/fserr.ctl
+           mk5cn/mk5cn.c
+           updated to use select() for connect() time-out and
+           longjmp() for gethostbyname() time-out
+
+020314 WEH boss/binit.f
+           mk5cn/mk5cn.c
+           don't terminate on initial network errors for mk5cn
+
+020314 WEH st.default/proc/m5.prc
+           typos
+
+020314 WEH st.default/control/mk5ad.ctl
+           make IP recommedation stronger
+
+020314 WEH help/disc_start.___
+           included description of second parameter
+
+020314 WEH misc/m5/readme.txt
+           typos and new description of time-outs
+
+020315 WEH mk5cn/mk5cn.c
+           add some missing close(sock) for error returns in open_mk5()
+ 
+020320 WEH boss/bwork.f
+           no error for null procedure parameter
+
+020320 WEH clib/tracks4_util.c
+           accept "*" as first parameter to increment tracks list
+
+020320 WEH help/tracks.g__
+           updated to explain "*" in Mark IV tracks command
+ 
+Version 9.5.5 020320
+
+020121 WEH monit/mout2.c
+           fix i3/rx no check display
+
+020312 WEH incom/equip.f
+           add fm firmware version
+
+020312 WEH control/fscmd.ctl
+          
+020312 WEH quikv/quikv.c
+           quikv/Makefile
+           updated for rollform
+
+020313 WEH include/params.h
+           include/form4_ds.h
+           modified to hold roll table(s)
+
+020313 WEH quikv/rollform_dis.c
+           quikv/rollform.c
+           created
+           
+020315 WEH st.default/control/mk5ad.ctl
+           st.default/proc/m5.prc
+           fix typos
+
+020318 WEH ibcon/rddev.c
+           fix ASCII last for non-converter use
+
+020319 WEH clib/cshm_init.c
+           intialize roll data
+
+020321 WEH poclb/Makefile
+           poclb/logitn.c
+           created
+
+020322 WEH include/form4_ds.h
+           quikv/form4.c
+           quikv/form4_dis.c
+	   updated for new firmware and rolling
+
+020322 WEH help/disc_start.___
+           misc/m5/readme.txt
+           explained that =on starts recording
+
+020325 HO  clib/k4rec_mode_util.c
+           clib/k4st_util.c
+           include/k4rec_mode_ds.h
+           quikv/k4rec_mode.c
+           quikv/k4rec_mode_util.c
+           quikv/k4st.c
+           misc/k4/k4spec.txt
+           updated for im and nm commandable in rec_mode
+
+020327 WEH st.default/control/equip.ctl
+           include formatter firmware version
+
+020328 WEH quikv/rollform.c
+           fixed = null problem
+
+020328 WEH clib/form4_util.c
+           fixed a2d table transmit problem
+
+020328 WEH clib/rollform_util.c
+           fixed 16th output track problem
+
+Version 9.5.6 020328
+ 
+020328 WEH quikv/logmatmsgfm.c
+           removed debug output for /STA response
+
+020328 WEH control/fserr.ctl
+           updated for rollform
+
+020329 WEH boss/newlg.f
+           updated for firmware version
+
+020405 WEH misc/m5/readme.txt
+           changed date/version
+
+020412 OH  quikv/k4st.c
+           control/fserr.ctl
+           clib/cshm_init.c
+           added interlock between rec_mode and st
+
+020115 RDG pdplt/pdplt
+           added sizing according to resolution of monitor.
+           aligned labels with data.
+
+020117 RDG logpl/logpl
+           added sizing according to resolution of monitor.
+           added x-axis line for data seperation.
+           fixed manual scaling problem.           
+
+020122 RDG control/fserr.ctl
+           tacd error
+           'Can't connect to socket.' modified to read.
+           'TACD: Can't connect to socket.'
+
+020415 RDG fsvue/what_help.c
+           added similar logic made in 020312 boss/helpstr.c.
+
+020416 OH  quikv/k4rec_mode.c
+           don't reset-up recorder if the mode hasn't changed
+
+020417 WEH quikv/k4rec_mode.c
+           remove previous change, no reset-up, until improved
+	   
+Version 9.5.7 020417

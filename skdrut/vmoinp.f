@@ -33,6 +33,8 @@ C 971208 nrv Add call to VUNPPCAL.
 C 991110 nrv Save modedefname as catalog name.
 C 011119 nrv Clean up logic so that information isn't saved if there
 C            aren't any chan_defs.
+C 020112 nrv Add roll parameters to VUNPROLL call. Add call to CKROLL.
+C 020327 nrv Add data modulation paramter to VUNPTRK.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -47,29 +49,26 @@ C  OUTPUT:
 C  CALLED BY: 
 C  CALLS:  fget_mode_def
 C          frinit
-C          vunpfrq
-C          vunpbbc
-C          vunpif
-C          vunpprc
-C          vunptrk
-C          vunphead
+C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
+C          vunroll,ckroll
 C
 C  LOCAL:
       integer ix,idum,ib,ic,i,icode,istn
       integer il,im,iret,ierr1,iul,ism,ip,ipc,itone
       integer ipct(max_chan,max_tone),ntones(max_chan)
       integer ifanfac,itrk(max_track),ivc(max_bbc)
+      integer irtrk(2+max_track,max_roll_def),iinc,ireinit
       double precision posh(max_index,max_headstack)
       integer ih,ihdn(max_track),indexp(max_index),indexl(max_pass)
       character*1 csubpassl(max_pass),csubpass(max_subpass)
       character*3 cpassl(max_pass)
       double precision bitden_das
-      integer nsubpass,npcaldefs
+      integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
      .ls(max_ifd),ls2m(8),lpre(4),lp(max_ifd)
       double precision bitden
-      character*4 croll
+      character*4 cmodu, croll ! ON or OFF
       character*3 cs(max_chan)
       character*6 cfrbbref(max_chan),cbbcref(max_bbc),
      .cbbifdref(max_chan),cifdref(max_ifd),cfrpcalref(max_chan),
@@ -207,7 +206,7 @@ C         Get $TRACKS statements (i.e. fanout).
           else
             call vunptrk(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
-     .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
+     .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac,cmodu)
           endif
           if (ierr.ne.0) then 
             write(lu,'("VMOINP06 - Error getting $TRACKS information",
@@ -247,7 +246,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
 
 C         Get $ROLL statements.
           call vunproll(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,croll)
+     .    ivexnum,iret,ierr,lu,croll,irtrk,iinc,ireinit,nrdefs,nrsteps)
           if (ierr.ne.0) then 
             write(lu,'("VMOINP08 - Error getting $ROLL information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
@@ -388,8 +387,6 @@ C         Sample rate.
           if (ks2rec) then
             idum = ichmv(ls2mode(1,istn,icode),1,ls2m,1,16)
           else ! m3/m4/vrec
-C         Store barrel roll
-            idum = ichmv_ch(lbarrel(1,istn,icode),1,croll)
 C         Set bit density depending on the mode and rack type
             if (ichcm_ch(lmode(1,istn,icode),1,'V').eq.0) then 
               bitden=34020 ! VLBA non-data replacement
@@ -446,6 +443,18 @@ C    Store head positions and subpases
           endif ! m3/4 or v rec
           npassl(istn,icode) = npl
         endif ! chandefs > 0
+
+        if (km4rec.or.km3rec.or.kvrec) then
+C         Check barrel roll. croll is either the standard name for
+C         the canned mode or "M" to indicate non-standard, or off.
+C         The name in the schedule file is not used unless it is "off".
+            call ckroll(nrdefs,nrsteps,irtrk,iinc,ireinit,
+     .                    istn,icode,croll)
+            idum = ichmv_ch(lbarrel(1,istn,icode),1,croll)
+        endif
+
+C       Store data modulation
+        cmodulation(istn,icode) = cmodu
 
 C       Store the procedure prefix by station and code.
         if (ichcm_ch(lpre,1,'      ').eq.0) then ! missing 

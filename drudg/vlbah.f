@@ -41,6 +41,7 @@ C 961101 nrv New set of pcalx commands from Craig.
 C 980729 nrv Add "autoallocate" and "autoreverse" per Craig.
 C 980924 nrv Remove "auto" for RDV11.
 C 990106 nrv Add back in for RDVs.
+C 020103 nrv Change 7010 to 5010 for phase cal freqs.
 C
 C
 C  INPUT:
@@ -409,7 +410,7 @@ C   If nchan=14 use these lines.
           call writf_asc(lu,ierr,ibuf,34)
 C   If nchan=8 use these lines.
         else if (nchan(istn,icod).eq.8) then
-          if (ivcb.eq.8) then ! 8 MHz bandwidth use 7010
+          if (ivcb.eq.8) then ! 8 MHz bandwidth use 5010
           call ifill(ibuf,1,iblen,32)
           call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S1),(6
      .,S3),(7,S5),(8,S7)',ibuf,1,68)
@@ -419,12 +420,12 @@ C   If nchan=8 use these lines.
      .,S4),(7,S6),(8,S8)',ibuf,1,68)
           call writf_asc(lu,ierr,ibuf,34)
           call ifill(ibuf,1,iblen,32)
-          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,7010)
-     .(6,7010),(7,7010),(8,7010) ',ibuf,1,78)
+          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,5010)
+     .(6,5010),(7,5010),(8,5010) ',ibuf,1,78)
           call writf_asc(lu,ierr,ibuf,39)
           call ifill(ibuf,1,iblen,32)
-          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,7010)
-     .(6,7010),(7,7010),(8,7010) ',ibuf,1,78)
+          call char2hol('pcalxfreq2=(1,10),(2,10),(3,10),(4,10),(5,5010)
+     .(6,5010),(7,5010),(8,5010) ',ibuf,1,78)
           call writf_asc(lu,ierr,ibuf,39)
           else if (ivcb.eq.4) then ! 4 MHz bandwidth
           call ifill(ibuf,1,iblen,32)

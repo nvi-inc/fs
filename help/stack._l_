@@ -1,84 +1,87 @@
     stack - stack positioning by microns (longitudinal drives)
-
-Syntax:     stack=cmdMw,cmdMr,calW,calR,woffset
-
-Response:   stack/cmdMw,cmdMr,calW,calR,woffset,actMw,actMr,
+ 
+              Syntax:      stack=cmdMw,cmdMr,calW,calR,woffset
+ 
+              Response:    stack/cmdMw,cmdMr,calW,calR,woffset,actMw,actMr,
           deltaMw,deltaMr
-
-
-Settable parameters:
-cmdMw   Write head stack (stack 1) command position in microns.
-        Default is not to move.
-cmdMr   Read head stack (stack 2) command position in microns.
-        Default is not to move. May not be specified for VLBA.
-calW      Write head stack (stack 1) calibration to use: Forward,
-          Reverse, or Uncalibrated. Only the first letter is
-          checked. Default is Uncalibrated.
-calR      Read head stack (stack 2) calibration to use: Forward,
-          Reverse, or Uncalibrated. Only the first letter is
-          checked. Default is Uncalibrated. May not be specified
-          for VLBA.
-woffset   Write head type offset. auto (default) to automatically
-          adjust the head stack positions according to the write
-          head type parameter in the head.ctl control file. For
-          none no adjustments are made. The read head is always
-          adjusted.
-
-Monitor-only parameters:
-actMw     Actual write head stack (stack 1) position, microns.
-actMr     Actual read head stack (stack 2) position, microns.
+ 
+ 
+ Settable parameters:
+          cmdMw    Write head stack (stack 1) command position in
+          microns. Default is not to move.
+          cmdMr    Read head stack (stack 2) command position in microns.
+          Default is not to move. May not be specified for VLBA.
+        calW   Write head stack (stack 1) calibration to use:
+        Forward, Reverse, or Uncalibrated. Only the first
+        letter is checked. Default is Uncalibrated.
+        calR   Read head stack (stack 2) calibration to use: Forward,
+        Reverse, or Uncalibrated. Only the first letter is
+        checked. Default is Uncalibrated. May not be specified
+        for VLBA.
+          woffset  Write head type offset. auto (default) to
+          automatically adjust the head stack positions
+          according to the write head type parameter in the
+          head.ctl control file. For none no adjustments are
+          made. The read head is always adjusted.
+ 
+ Monitor-only parameters:
+          actMw    Actual write head stack (stack 1) position, microns.
+          actMr    Actual read head stack (stack 2) position, microns.
           Null for VLBA.
-deltaMw   Difference of actual and commanded position for write
+          deltaMw  Difference of actual and commanded position for write
           head stack (stack 1), microns.
-deltaMr   Difference of actual and commanded position for read
+          deltaMr  Difference of actual and commanded position for read
           head stack (stack 2), microns. Null for VLBA.
-
-Comments: 
-This command is used to position the head stacks in micron units.
-An individual head stack may be moved by not specifying the
-command position and calibration to use for the other head stack.
-For VLBA recorders, only the write head stack parameters are
-used; read head stack parameters are reported as null. For Mark
-IV, the write parameters refer to head stack 1, read parameters
-refer to head stack 2.
-
-The deltam parameters are reported with the sign of actual minus
-commanded.
-
-The command positions reported by the lvdt, pass, and stack
-commands are consistent. See the description of the pass command
-for more information.
-
-The head stack position in microns is determined by
-
-position = cmdM + absolute offset                   (Forward calibration)
-position = cmdM + absolute offset + for/rev offset        (Reverse calibration)
-position = cmdM                               (Uncalibrated)
-
-where cmdM is the commanded position and the absolute offset and
-forward/reverse offset are specified in the head.ctl control file.
-
-If woffset is auto, and the calibration is Reverse, and the write
-head stack is defined as odd in the head.ctl control file, then
-an offset of 698.5 microns is added to the write head stack
-position.
-
-If woffset is auto, and the calibration is Forward, and the write
-head stack is defined as even in the head.ctl control file, then
-an offset of 698.5 microns is subtracted from the write head
-stack position.
-
-If woffset is none, no offset is applied to the write head. The
-read head is always adjusted.
-
-If the head stacks were last positioned with the pass or lvdt
-commands, the response calw and calr will correctly identify the
-calibration used. Odd pass numbers will be reported as forward
-calibrations, even passes as reverse calibrations. Positions
-commanded with the lvdt command are uncalibrated.
-
-If the write head stack position is commanded, the auxiliary data
-field is set to reflect the commanded position, see the pass
-command for more information.
-
-See the Narrow Track Calibration manual.
+ 
+ Comments: 
+ This command is used to position the head stacks in micron
+ units. An individual head stack may be moved by not specifying
+ the command position and calibration to use for the other head
+ stack. For VLBA recorders, only the write head stack
+ parameters are used; read head stack parameters are reported
+ as null. For Mark IV, the write parameters refer to head stack
+ 1, read parameters refer to head stack 2.
+ 
+ The deltam parameters are reported with the sign of actual
+ minus commanded.
+ 
+ The command positions reported by the lvdt, pass, and stack
+ commands are consistent. See the description of the pass
+ command for more information.
+ 
+ The head stack position in microns is determined by
+ 
+ position = cmdM + absolute offset                    (Forward
+ calibration)
+ position = cmdM + absolute offset + for/rev offset       
+ (Reverse calibration)
+ position = cmdM                                (Uncalibrated)
+ 
+ where cmdM is the commanded position and the absolute offset
+ and forward/reverse offset are specified in the head.ctl
+ control file.
+ 
+ If woffset is auto, and the calibration is Reverse, and the
+ write head stack is defined as odd in the head.ctl control
+ file, then an offset of 698.5 microns is added to the write
+ head stack position.
+ 
+ If woffset is auto, and the calibration is Forward, and the
+ write head stack is defined as even in the head.ctl control
+ file, then an offset of 698.5 microns is subtracted from the
+ write head stack position.
+ 
+ If woffset is none, no offset is applied to the write head.
+ The read head is always adjusted.
+ 
+ If the head stacks were last positioned with the pass or lvdt
+ commands, the response calw and calr will correctly identify
+ the calibration used. Odd pass numbers will be reported as
+ forward calibrations, even passes as reverse calibrations.
+ Positions commanded with the lvdt command are uncalibrated.
+ 
+ If the write head stack position is commanded, the auxiliary
+ data field is set to reflect the commanded position, see the
+ pass command for more information.
+ 
+ See the Narrow Track Calibration manual.

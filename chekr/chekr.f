@@ -75,6 +75,10 @@ c
       call fs_get_drive(drive)
       call fs_get_rack(rack)
 C
+C  Kldge for VLBA42
+C
+      call set_chekr_v2_motion_done()
+C
 C  Now set up the loop over the to-be-checked modules.
 C  Fill up classes with requests to MATCN for data, and
 C  send them out.  Do only one module at a time so as not to

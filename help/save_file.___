@@ -1,38 +1,40 @@
            save_file - save/retrieve string from a file
-
-Syntax:     save_file=file,string
-
-Response:     none
-
-
-Settable parameters:
-file        name of file in /usr2/control to read from or write to.
-            If the leading character is +, it is removed from the
-            file name and interpreted as a flag meaning "append"
-            for writing or "read all lines" for reading
-string      string to write to file, up to 512 characters
-
-
-Comments:
-This command allows a user to store a string in a file. The
-contents of the first line or all lines of file can be executed as
-commands by omitting the string parameter. This might be used for
-example to store the name of a set-up SNAP procedure for a
-receiver in a file. The set-up procedure can then be invoked by
-the initi procedure when the FS is started. This will effectively
-make the receiver set-up commanded in the initi procedure
-variable without having to modify initi itself for each receiver
-change.
-
-If file does not start with +, then for reading only the first
-line of the file will be read and executed. For writing, if the
-file already exists its contents will unceremoniously overwritten
-unless there is a permission conflict that prevents it.
-
-If file starts with +, it is removed from the file name and
-interpreted as a flag meaning "append" for writing or "read all
-lines" for reading.  This can be used to append additional
-commands to an existing file (although it will create the file if
-it doesn't exist). It will cause all lines in a file to be
-executed as commands when reading from the file.
-
+ 
+              Syntax:      save_file=file,string
+ 
+              Response:      none
+ 
+ 
+ Settable parameters:
+            file       name of file in /usr2/control to read from or
+            write to. If the leading character is +, it is
+            removed from the file name and interpreted as a
+            flag meaning "append" for writing or "read all
+            lines" for reading
+            string     string to write to file, up to 512 characters
+ 
+ 
+ Comments:
+ This command allows a user to store a string in a file. The
+ contents of the first line or all lines of file can be
+ executed as commands by omitting the string parameter. This
+ might be used for example to store the name of a set-up SNAP
+ procedure for a receiver in a file. The set-up procedure can
+ then be invoked by the initi procedure when the FS is started.
+ This will effectively make the receiver set-up commanded in
+ the initi procedure variable without having to modify initi
+ itself for each receiver change.
+ 
+ If file does not start with +, then for reading only the first
+ line of the file will be read and executed. For writing, if
+ the file already exists its contents will unceremoniously
+ overwritten unless there is a permission conflict that
+ prevents it.
+ 
+ If file starts with +, it is removed from the file name and
+ interpreted as a flag meaning "append" for writing or "read
+ all lines" for reading.  This can be used to append additional
+ commands to an existing file (although it will create the file
+ if it doesn't exist). It will cause all lines in a file to be
+ executed as commands when reading from the file.
+ 

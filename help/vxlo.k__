@@ -1,26 +1,26 @@
         vxlo - video converter LO frequency (all K4 racks)
-
-Syntax:     vxlo=vc,freq
-
-Response:   vxlo/vc,freq,yes/no,lock
-
-
-Settable Parameters:
-vc        VC channel to set the LO of, 1-16 for K4 type 1, 1-8
-          for K4 type 2, or one of alarm, hold_on, or hold_off,
-          no default 
-freq        LO frequency in MHz, 99.99-511.99 for K4 type 1,
-            499.99-999.99 for K4 type 2, no default.
-
-Monitor-only Parameters:
-yes/no      LO is  present, yes or no
-lock      lock or unlock or missing
-
-Comments:
-The "x" in the command is replaced with "c" for K4 type 1 VC. For
-K4 type 2 VCs the "x" is replaced with "a" or "b" for the first
-and second bank of VCs respectively.
-
-Only one LO in each bank of VCs can be commanded at a time, but
-the monitor response consists of several lines, one for each LO
-in the bank.
+ 
+              Syntax:      vxlo=vc,freq
+ 
+              Response:    vxlo/vc,freq,yes/no,lock
+ 
+ 
+ Settable Parameters:
+          vc       VC channel to set the LO of, 1-16 for K4 type 1, 1-8
+          for K4 type 2, or one of alarm, hold_on, or
+          hold_off, no default 
+          freq     LO frequency in MHz, 99.99-511.99 for K4 type 1,
+          499.99-999.99 for K4 type 2, no default.
+ 
+ Monitor-only Parameters:
+          yes/no   LO is  present, yes or no
+          lock     lock or unlock or missing
+ 
+ Comments:
+ The "x" in the command is replaced with "c" for K4 type 1 VC.
+ For K4 type 2 VCs the "x" is replaced with "a" or "b" for the
+ first and second bank of VCs respectively.
+ 
+ Only one LO in each bank of VCs can be commanded at a time,
+ but the monitor response consists of several lines, one for
+ each LO in the bank. 

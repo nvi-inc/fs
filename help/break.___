@@ -1,13 +1,14 @@
                 break - stop the current procedure
-
-Syntax:     break
-
-Response:   none
-
-
-Comments: The currently-executing procedure is stopped after the
-current command is finished. The procedure stack is popped to the
-next higher level. This is an immediate execution command.
-
-
+ 
+              Syntax:      break
+ 
+              Response:    none
+ 
+ 
+ Comments: The currently-executing procedure is stopped after
+ the current command is finished. The procedure stack is popped
+ to the next higher level. This is an immediate execution
+ command.
+ 
+ 
               NOTE: This command is not implemented.
