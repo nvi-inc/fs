@@ -1,0 +1,4 @@
+#!/bin/sh
+# change window title
+echo -n "]2;$1"
+echo -n "]1;$1"
