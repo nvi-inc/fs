@@ -103,7 +103,9 @@ int rcl_open(const char* hostname, int* addr, char* errmsg)
  */
 {
    extern int sys_nerr;             /* number of SunOS error messages */
+#ifndef LINUX
    extern char *sys_errlist[];      /* SunOS error messages */
+#endif
    int result;              /* Unix return code */
    struct sockaddr_in sa;
    struct hostent *phost;
