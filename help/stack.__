@@ -9,20 +9,20 @@ Response:   stack/cmdMw,cmdMr,calW,calR,woffset,actMw,actMr,
 Settable parameters:
 cmdMw   Write head stack (stack 1) command position in microns.
         Default is not to move.
-cmdMr   Read head stack (stack 2) command position in microns.
-        Default is not to move. May not be specified for VLBA.
+cmdMr     Read head stack (stack 2) command position in microns.
+          Default is not to move. May not be specified for VLBA.
 calW      Write head stack (stack 1) calibration to use: Forward,
           Reverse, or Uncalibrated. Only the first letter is
           checked. Default is Uncalibrated.
-calR      Read head stack (stack 2) calibration to use: Forward,
-          Reverse, or Uncalibrated. Only the first letter is
-          checked. Default is Uncalibrated. May not be specified
-          for VLBA.
-woffset   Write head type offset. auto (default) to automatically
-          adjust the head stack positions according to the write
-          head type parameter in the head.ctl control file. For
-          none no adjustments are made. The read head is always
-          adjusted.
+calR        Read head stack (stack 2) calibration to use: Forward,
+            Reverse, or Uncalibrated. Only the first letter is
+            checked. Default is Uncalibrated. May not be specified
+            for VLBA.
+woffset     Write head type offset. auto (default) to automatically
+            adjust the head stack positions according to the write
+            head type parameter in the head.ctl control file. For
+            none no adjustments are made. The read head is always
+            adjusted.
 
 Monitor-only parameters:
 actMw     Actual write head stack (stack 1) position, microns.
@@ -30,8 +30,8 @@ actMr     Actual read head stack (stack 2) position, microns. Null
           for VLBA.
 deltaMw   Difference of actual and commanded position for write
           head stack (stack 1), microns.
-deltaMr   Difference of actual and commanded position for read head
-          stack (stack 2), microns. Null for VLBA.
+deltaMr     Difference of actual and commanded position for read
+            head stack (stack 2), microns. Null for VLBA.
 
 Comments: 
 This command is used to position the head stacks in micron units.

@@ -2,55 +2,56 @@
 
 Syntax:     form=mode,rate,fan,barrel
 
-Response:   form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat,sfwstat,intstat
+Response:   form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat,
+            sfwstat,intstat
 
 
 Settable Parameters:
-mode      The recording mode, reboot (see below) to reboot the CPU,
-          or configure to cause the formatter to perform a hardware
-          configuration. Choices for the mode are prn, v, m, a, b,
-          b1, b2, c, c1, c2, and dn, where n=1 to 28. Default b.
-          Modes prn, m, a, b, b1, b2, c, c1, c2, and dn imply Mark
-          III data replacement format. prn selects pseudo random
-          noise to be sent to all tracks including system tracks.
-          Modes a, b, and c correspond to the traditional Mark III
-          modes. Mode dn is the same as Mark III mode D, where n
-          corresponds to the Mark III track on which the data are
-          written. Mode v implies VLBA non-data replacement format.
-          Modes b1 and c1 are the same as the even VLBA recorder
-          tracks of modes b and c respectively; b2 and c2 are for
-          odd VLBA recorder tracks. Modes m and v use the sampler
-          track assignments and formatter track enables specified
-          by the trackform and tracks commands. The system tracks
-          are disabled except in prn mode.
-rate        Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2, 4,
-            8, 16, and 32. Default 4. For Nyquist sampling this
-            selection must be twice the bandwidth set-up used in the
-            bbc commands
-fan       The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1,
-          and 4:1, where on a per channel or track basis, the
-          number before the colon is the number of sampled channels
-          and the number after is the number of tracks. Default
-          1:1. rate and fan combinations that imply more than 8
-          Mbits/sec of data per tape track or less than 0.25
-          Mbits/second of data per tape track are not permitted.
-          The tape clock rate is set to be 9/8 of the implied data
-          bit rate per track for Mark III modes, and 9.072/8 of the
-          impled bit-rate per track in VLBA mode.
-barrel      Barrel-roll mode. Choices are: off, 8:1, and 16:1, where
-            the number before the colon is the number of tracks to
-            roll-over. Default off.
+mode  The recording mode, reboot (see below) to reboot the CPU, or
+      configure to cause the formatter to perform a hardware
+      configuration. Choices for the mode are prn, v, m, a, b, b1,
+      b2, c, c1, c2, and dn, where n=1 to 28. Default b. Modes prn,
+      m, a, b, b1, b2, c, c1, c2, and dn imply Mark III data
+      replacement format. prn selects pseudo random noise to be
+      sent to all tracks including system tracks. Modes a, b, and
+      c correspond to the traditional Mark III modes. Mode dn is
+      the same as Mark III mode D, where n corresponds to the
+      Mark III track on which the data are written. Mode v implies
+      VLBA non-data replacement format. Modes b1 and c1 are the
+      same as the even VLBA recorder tracks of modes b and c
+      respectively; b2 and c2 are for odd VLBA recorder tracks.
+      Modes m and v use the sampler track assignments and formatter
+      track enables specified by the trackform and tracks commands.
+      The system tracks are disabled except in prn mode.
+rate    Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2, 4, 8,
+        16, and 32. Default 4. For Nyquist sampling this selection
+        must be twice the bandwidth set-up used in the bbc commands
+fan   The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1, and
+      4:1, where on a per channel or track basis, the number before
+      the colon is the number of sampled channels and the number
+      after is the number of tracks. Default 1:1. 
+barrel  Barrel-roll mode. Choices are: off, 8:1, and 16:1, where the
+        number before the colon is the number of tracks to roll-over.
+        Default off.
 
 Monitor-only Parameters:
-rev       Formatter firmware revision number, displayed as x.xx.
-genstat   General status, ok or the hex value of hex address 20.
-mcbstat   Communications status, ok or the hex value of hex address
-          21.
-hdwstat   Hardware status, ok or the hex value of hex address 22.
-sfwstat   Software status, ok or the hex value of hex address 23.
-intstat     Internal status, ok or the hex value of hex address 24.
+rev     Formatter firmware revision number, displayed as x.xx.
+genstat General status, ok or the hex value of hex address 20.
+mcbstat Communications status, ok or the hex value of hex address
+        21.
+hdwstat Hardware status, ok or the hex value of hex address 22.
+sfwstat Software status, ok or the hex value of hex address 23.
+intstat   Internal status, ok or the hex value of hex address 24.
+
 
 Comments:
+
+rate and fan combinations that imply more than 8 Mbits/sec of data
+per tape track or less than 0.25 Mbits/second of data per tape
+track are not permitted. The tape clock rate is set to be 9/8 of
+the implied data bit rate per track for Mark III modes, and 9.072/8
+of the impled bit-rate per track in VLBA mode.
+
 This command syntax applies to VLBA formatters only.  The many
 possible error conditions for the formatter are monitored and
 reported by chekv (not yet implemented).

@@ -6,7 +6,7 @@ Response:   repro/bypass,trackA,trackB,bandwidth,equalizer
 
 
 Settable parameters:
-bypass      byp (default) for bypass, raw for read-after-write.
+bypass    byp (default) for bypass, raw for read-after-write.
 trackA      Track for decoder channel A, default 1, 0-28 allowed.
 trackB      Track for decoder channel B, default 1, 0-28 allowed.
 bandwidth Bandwidth for decoding (MHz), default 2.

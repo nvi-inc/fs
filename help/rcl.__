@@ -9,7 +9,7 @@ Settable Parameters:
 device      The two character module mnemonic for the device to
             communicate with as defined in the rclad.ctl control
             file, e.g. rc for the S2
-command   name of RCL command function
+command name of RCL command function
 parameters  command delimited additional parameters required for this
             RCL command function
  
@@ -31,16 +31,23 @@ Command           Parameters
 align             absolute,year,day,hour,min,sec,nanosec
                   relative, + or -,hour,min,sec,nanosec
                   re-align or self-align
+barrel_roll_read
+barrel_roll_set   on or off
+bercd             fmber or uiber or uidcb, chan, measurement time
 consolecmd        command string
 delay_read
 delay_set         absolute or relative,nanoseconds
 delaym_read
+diag              value
 eject
 errmess           samples
 esterr_read       transport or channel
 ff
 group_read
 group_set         group number
+ident
+mk3_form_read
+mk3_form_set      enable or disable
 mode_read
 mode_set          mode string
 pause
@@ -70,6 +77,7 @@ tapetype_set      tape type character or string
 time_read
 time_read_pb
 time_set          year,day,hours,minutes,seconds
+transport_times
 unpause
 user_dv_read
 user_dv_read_pb

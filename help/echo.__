@@ -58,15 +58,14 @@ commands, and the order of the parameters sent and received is the
 same as that in ISTS's S2-RT User's Manual, Appendix A. In addition
 whenever possible menomonics are substituted for numeric
 parameters. Error and parameter menonics correspond closely to
-those in the previously mentioned user's manual appendix. Remote
-errors are displayed as numeric values until  a successful
-ERROR_DECODE command has been completed for that error code.
-Effectively this means that the mnemomic is not used in the display
-of remote errors until the second time the error is encountered
-after the last Field System start. If the value of a parameter that
-is normally displayed as menomic doesn't correspond to the value of
-a known mnemonic for that parameter, the hex value will be
-displayed.
+those in the appendix of ISTS's manual. Remote errors are displayed
+as numeric values until  a successful ERROR_DECODE command has been
+completed for that error code. Effectively this means that the
+mnemomic is not used in the display of remote errors until the
+second time the error is encountered after the most recent Field
+System start. If the value of a parameter that is normally
+displayed as menomic doesn't correspond to the value of a known
+mnemonic for that parameter, the hex value will be displayed.
 
 For the TIME_READ command the Field System's raw times immediately
 before and after the call to rcl_time_read are displayed in curly

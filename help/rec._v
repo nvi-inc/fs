@@ -35,7 +35,7 @@ action    A key word specifying what you want the recorder to do.
 Monitor-only Parameters:
 feet      The current footage counter reading.
 supply    Footage left on the supply reel.
-takeup    Footage left on the takeup reel.
+takeup  Footage left on the takeup reel.
 length    Total length of the tape, supply+takeup.
 revno   Software revision number.
 

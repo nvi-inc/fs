@@ -7,7 +7,7 @@ Response:   rx/channel,dcal,box,S,X,K,cal,lostat,value
 
 Settable parameters:
 channel Hex value or code word (next page). No default.
-dcal      Delay cal heater, on (default) or off.
+dcal    Delay cal heater, on (default) or off.
 box     Box heaters. Turn on with A (default) or B (for the A or B
         controller), or off.
 S,X,K   IF amplifier controls, on (default) or off. 
