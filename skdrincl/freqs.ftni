@@ -22,6 +22,7 @@ C            4*max_pass because max_pass is now set to max_subpass*max_index.
 C 960709 nrv Add barrel roll by station and code
 C 961031 nrv Add LMFMT for recording format. LMODE should be reserved for
 C            the mode name if any.
+C 970114 nrv Add LPREFIX.
 C
       double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
@@ -73,7 +74,7 @@ C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
 C     npassl - number of passes in the pass order list
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
-     .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode
+     .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix
 C     LCODE - the 2-character frequency codes 
 C     LMODE - the observing mode name for each code
 C     LMFMT - the observing mode format for each code
@@ -92,6 +93,7 @@ C     lpol - polarization per channel
 C     lnetsb - net sideband for each channel
 C     losb - net sideband for each station's lo
 C     lbarrel - barrel roll for each station
+C     lprefix - procedure name prefix
 C
       character*3 cset ! switch set per channel
       character*128 modedefnames ! def names from the vex file
@@ -133,7 +135,8 @@ C
      .       LPOL(max_chan,max_stn,max_frq),
      .       LNETSB(max_chan,max_stn,max_frq),
      .       losb(max_chan,max_stn,max_frq),lband(max_band),
-     .       lbarrel(2,max_stn,max_frq),ls2mode(8,max_stn,max_frq)
+     .       lbarrel(2,max_stn,max_frq),ls2mode(8,max_stn,max_frq),
+     .       lprefix(4,max_stn,max_frq)
 C
       COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
-     .       modedefnames(max_frq),cpassorderl(max_pass,max_stn)
+     .       modedefnames(max_frq),cpassorderl(max_pass,max_stn,max_frq)
