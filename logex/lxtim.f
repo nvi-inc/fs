@@ -51,14 +51,16 @@ C
 50    ich = ieq+1 
       call gtprm(ibuf,ich,nchar,1,parm, id) 
       if (cjchar(parm,1).ne.',') goto 100
-      its1 = 0
+C jan 1 1970
+      its1 = 1
       its2 = 0
+      its3 = 0
       goto 200
 C 
 C  Call GTTIM to decode the snap time format. 
 C  Snap time format = 103022825 - day, hours, minutes, & seconds. 
 C 
-100   call gttim(ibuf,ieq+1,ich-2,0,its1,its2,it3,ierr) 
+100   call gttim(ibuf,ieq+1,ich-2,0,its1,its2,its3,ierr) 
       if (ierr.ge.0) goto 200 
         outbuf='LXTIM10 - error sp '
         call ib2as(ierr,answer,1,4)
@@ -69,12 +71,14 @@ C
         icode=-1
         goto 700
 C 
+C NOT NEEDED ANYMORE, KEEP ITS1 AS IT WAS
 C The following in-line function returns the day by calculating 
 C (YR-1970)*1024+day. After December 31, 2002, this function
 C will return a negative number. A lot longer now because we I*4
 C on UNIX.
 C 
-200   its1 = mod(its1,1024) 
+200     continue
+C       its1 = mod(its1,1024) 
 C 
 C 
 C  ************************************************************ 
@@ -109,8 +113,10 @@ C
       nlines = 0
       call gtprm(ibuf,ich,nchar,1,parm,id) 
       if (cjchar(parm,1).ne.',') goto 500
-        ite1 = 9999 
+C not Y10K compliant
+        ite1 = (2038-1970)*1024+1 
         ite2 = 0
+        ite3 = 0
         goto 700
 C 
 C Call GTTIM to decode snap time format.
@@ -127,9 +133,11 @@ C
         icode=-1
         goto 700
 C 
+C NOT NEEDED ANYMORE
 C Store calculated stop day in ITE1.
 C 
-600   ite1 = mod(ite1,1024) 
+600   continue
+C     ite1 = mod(ite1,1024) 
 C
 700   continue
       return
