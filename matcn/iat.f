@@ -17,7 +17,6 @@ C  LUMAT  - LU of MAT daisy chain
 C
       integer*2 itran(1)         ! buffer to be transmitted
       logical kecho              ! true if MAT communications echo desired
-      logical kecho_log          ! true if echo is suppose to go into log
 C 
 C  OUTPUT VARIABLES: 
 C 
@@ -52,6 +51,7 @@ C  NRSPN  - number of responses possible
       integer maxlog,maxmess,maxlogwd
       parameter (maxlog=512,maxmess=maxlog-18,maxlogwd=maxmess/2)
       integer*2 echo_log(maxlogwd)
+      integer*2 dbg_buf(maxlogwd)
       integer*2 irecx(10)
       character*1 cjchar
 C
@@ -129,8 +129,7 @@ C                   Write the buffer to the MAT bus
       if (ifrecv.eq.0) then
         iat = 0
         if (kecho) then
-           idum=ichmv_ch(echo_log,1,'echo:')
-           idum=ichmv(echo_log,idum,iebuf,1,min(maxmess-idum-1,iecho))
+           idum=ichmv(echo_log,1,iebuf,1,min(maxmess-idum-1,iecho))
            call logit2(echo_log,idum-1)
         endif
         return    !  we're done now if there is to be no response.
@@ -186,8 +185,7 @@ c
       nrc=ilen
       if (kecho) then
          call echoe(irecv,iebuf2,nrc,iecho2,maxech)
-         idum=ichmv_ch(echo_log,1,'echo:')
-         idum=ichmv(echo_log,idum,iebuf,1,min(maxmess-idum-1,iecho))
+         idum=ichmv(echo_log,1,iebuf,1,min(maxmess-idum-1,iecho))
          idum=ichmv(echo_log,idum,iebuf2,1,min(maxmess-idum-1,iecho2))
          call logit2(echo_log,idum-1)
       endif
@@ -202,11 +200,13 @@ C
       if (ireg(1).eq.-2) then          ! timeout
          if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
             call echoe(itran,iebuf,nctran,iecho,maxech)
-            call logit2(iebuf,iecho)
+            idum=ichmv_ch(dbg_buf,1,"debug: ")
+            idum=ichmv(dbg_buf,idum,iebuf,1,iecho)
             if(nrc.gt.0) then
                call echoe(irecv,iebuf2,nrc,iecho2,maxech)
-               call logit2(iebuf2,iecho2)
+               idum=ichmv(dbg_buf,idum,iebuf2,1,iecho2)
             endif
+            call logit2(dbg_buf,idum-1)
          endif
          if ((imode.eq.9.or.imode.eq.10.or.imode.eq.-54).and.itry.lt.3)
      &        goto 200
@@ -226,7 +226,9 @@ c                                ! wrong # of characters in response
                if(cjchar(irecv,i).eq.'?') then
                   if(ichcm_ch(irecv,i,'? ERROR').eq.0) then
                      call echoe(irecv,iebuf2,nrc,iecho2,maxech)
-                     call logit2(iebuf2,iecho2)
+                     idum=ichmv_ch(dbg_buf,1,"debug: ")
+                     idum=ichmv(dbg_buf,idum,iebuf2,1,iecho2)
+                     call logit2(dbg_buf,idum-1)
                      ierr=ias2b(irecv,i+8,1+(nrc-1)-(i+8))
                      if(ierr.eq.7.and.itry.lt.3) goto 200
                      if(ierr.lt.-1000.or.ierr.gt.1000) then
