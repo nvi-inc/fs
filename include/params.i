@@ -8,6 +8,8 @@ c
       integer MK3           ! Mark III comparison bit variable
       integer VLBA          ! VLBA comparison bit variable
       integer MK4           ! Mark IV comparison bit variable
+      integer VLBAG         ! VLBA geodesy rack
+      integer VLBA2         ! VLBA drive type 2
       character*5 FS_ROOT
       integer MAX_BBC
       integer CH_PRIOR      ! chekr        realtime priority
@@ -24,6 +26,8 @@ c
       parameter ( MK3 = z'01'   )
       parameter ( VLBA = z'02'  )
       parameter ( MK4 = z'04'   )
+      parameter ( VLBAG = z'10'  )
+      parameter ( VLBA2 = z'20'  )
       parameter ( FS_ROOT='/usr2')
       parameter ( MAX_BBC = 14 )
       parameter ( CH_PRIOR=-04)
@@ -32,3 +36,9 @@ c
       parameter ( AN_PRIOR=-16)
       parameter ( MAX_RXCODES = 40)
       parameter ( MAX_HOR = 30)
+
+
+
+
+
+

@@ -65,6 +65,9 @@
 #define VLBA        0x02
 #define MK3         0x01
 
+#define VLBAG       0x10
+#define VLBA2       0x20
+
 #define FS_ROOT     "/usr2"
 
 #define CH_PRIOR    -4
