@@ -15,7 +15,7 @@
 #include "../include/fscom.h"
 
 extern struct fscom *shm_addr;
-int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack;
+int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kM3rack,kM4rack,kV4rack;
 
 main()
 {
@@ -41,6 +41,7 @@ main()
   kM3rack=rack==MK3;
   kM4rack=rack==MK4;
   kVrack=rack==VLBA;
+  kV4rack=rack==VLBA4;
 
   drive=shm_addr->equip.drive;
   kMdrive=drive==MK3 || drive==MK4;
@@ -68,7 +69,8 @@ main()
     rte_time(it,&iyear);
     mout2(it,iyear);
     move(ROW1,COL1+16);
-    printw("%d-%.3d %.2d:%.2d:%.2d",iyear,it[4],it[3],it[2],
+    /* not Y10K compliant */
+    printw("%d.%.3d.%.2d:%.2d:%.2d",iyear,it[4],it[3],it[2],
             it[1]);
     move(ROW1,COL1+33);
     refresh();
