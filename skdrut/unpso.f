@@ -10,7 +10,7 @@ C     pcount=5 gets only source names
 C            17 gets names, ra, dec
 C            26 gets satellite info
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  HISTORY:
 C      NRV   891110  Modified UNSKS for use by new catalog routines

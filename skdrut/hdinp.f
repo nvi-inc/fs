@@ -4,7 +4,7 @@ C     This routine reads and decodes one line in the $HEAD section.
 C     Call this routine in a loop to get all the head positions
 C     filled in.
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -17,8 +17,8 @@ C  OUTPUT:
       integer ierr
 C     IERR - error number
 C
-       INCLUDE 'freqs.ftni'
-       INCLUDE 'statn.ftni'
+      include '../skdrincl/freqs.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  LOCAL:
       integer*2 lc,lstn
@@ -28,12 +28,14 @@ C  LOCAL:
 C
 C  History
 C  930707 nrv Created.
+C 960213 nrv Uppercase the frequency code.
 C
 C
 C     1.   Decode the line.
 C 1.5 If there are errors, handle them first.
 C
       CALL UNPHD(IBUF,ILEN,IERR,lstn,lc,ip,idir,ihd,n)
+      call hol2upper(lc,2) ! uppercase frequency code
 C
       IF  (IERR.NE.0) THEN
         IERR = -(IERR+100)

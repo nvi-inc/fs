@@ -1,6 +1,6 @@
       integer FUNCTION IGTSO(LKEYWD,IKEY)
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'sourc.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/sourc.ftni'
 C     CHECK THROUGH LIST OF SOURCES FOR A MATCH WITH LKEYWD
 C     RETURN INDEX IN IKEY AND IN FUNCTION IF MATCH, ELSE 0
 C     ALSO MAY HAVE A SOURCE INDEX NUMBER ALLOWED.

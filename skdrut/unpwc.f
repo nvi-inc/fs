@@ -6,7 +6,7 @@ C
 C     UNPWC unpacks celestial source information from source entry record.
 C           This routine is a utility for unpso.
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  HISTORY:
 C    NRV  891110  Modified UNPWC for new catalog routines

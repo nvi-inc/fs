@@ -20,7 +20,7 @@ C        -il    : number of characters read in
 C        -ibuf  : integer buffer for reading
 C
 C  Local:
-       character*256 ch,nam
+       character*1024 ch,nam
 C        -ch    : character buffer for initial input
        integer     trimlen
 C        -trimlen : find number of character read in
@@ -31,11 +31,12 @@ C        -trimlen : find number of character read in
 C        -k : variable for iostat error-checking
 C
 C  880523  -written by P. Ryan
+C 960212 nrv Extend buffer
 C
 
        inquire(iunit,exist=ex,opened=opn,name=nam)
        read(iunit,10,end=20,iostat=k) ch
-10     format (A256)
+10     format (A1024)
        kerr = k
        il   = trimlen(ch)
        if (kerr .ne. 0) then

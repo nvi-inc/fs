@@ -3,7 +3,7 @@ C
 C  CABLW returns the azimuth difference between the NOW and the
 C              NEW source positions, taking into account cable wraps.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT VARIABLES:
       integer istn
@@ -23,8 +23,8 @@ C        LWRNEW - new cable wrap indicator
 C        CABLW - delta-azimuth required to be moved.
 C
 C   COMMON BLOCKS USED
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C     CALLING SUBROUTINES: SLEWT
 C

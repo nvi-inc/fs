@@ -1,6 +1,6 @@
       logical function kbit(iarray,ibit)
       implicit none
-      integer iarray(1),ibit
+      integer iarray(*),ibit
 c 
 c  kbit is true if the ibit-th bit of iarray is set, false otherwise
 c  the first max_int_bits are in the first int of the array,

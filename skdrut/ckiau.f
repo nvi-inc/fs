@@ -3,7 +3,7 @@
 C    CKIAU generates the IAU name and checks it against
 C    the name of the source.
 
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 
 C Input
       integer*2 liau(4),lcom(4)

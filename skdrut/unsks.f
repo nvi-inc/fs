@@ -15,7 +15,7 @@ C           27 parameters will work for no parrallax and proper motion.
 C**NOTE: THIS VERSION OF UNPVS IS USED BY SKED BECAUSE
 C        IT CAN HANDLE SATELLITES.
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  HISTORY:
 C      NRV   ??????  CREATED

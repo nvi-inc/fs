@@ -1,7 +1,7 @@
       integer FUNCTION IGTST(LKEYWD,IKEY)
 C
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C     SEARCH THROUGH THE STATION CODES FOR A MATCH WITH
 C     THE FIRST CHARACTER OF THE INPUT VARIABLE.

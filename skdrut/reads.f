@@ -2,7 +2,7 @@
 C
 C  READS reads the schedule file
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer iunit,iblen,imode

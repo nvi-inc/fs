@@ -1,7 +1,7 @@
       integer FUNCTION IGTST2(LKEYWD,IKEY)
 C
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C 950411 nrv New. A 2-letter version of IGTST.
 C 950412 nrv Check for ambiguous IDs.

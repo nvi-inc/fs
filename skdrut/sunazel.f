@@ -2,7 +2,7 @@
 C
 C   SUNEL converts the sun's ra and dec into az, el
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C     INPUT VARIABLES:
       integer istn,mjd
@@ -16,8 +16,8 @@ C     OUTPUT VARIABLES:
 C        AZ,EL - az,el at input date and time, radians
 C
 C   COMMON BLOCKS USED
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C     LOCAL VARIABLES:
       real*8 slat,clat,sha,cha,arg
