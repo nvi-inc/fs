@@ -95,8 +95,8 @@ C
 C  4. Handle line # parameter here.
 C
 300   iline = ias2b(ibuf,ich+1,ilst-ich)
-      if(iline.lt.0) goto 310
-      idum = fmpsetline(idcbsk,ierr,iline)
+      if(iline.le.0) goto 310
+      idum = fmpsetline(idcbsk,ierr,iline-1)
       if(ierr.ge.0) goto 500
 cxx      if(ierr.eq.0) goto 500
 310     call logit7ci(0,0,0,1,-106,'bo',iline)
