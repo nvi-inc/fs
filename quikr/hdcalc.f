@@ -67,6 +67,7 @@ C
       if(kbdwrite_fs) then
         rbdwrite_fs=
      &  (rv15flip_fs-rv15for_fs)*rsread_fs/2.+rvw0_fs*rswrite_fs+350.
+        call fs_get_wrhd_fs(wrhd_fs)
         if(wrhd_fs.eq.2) rbdwrite_fs=rbdwrite_fs+698.5
       endif
 C
@@ -74,7 +75,13 @@ C
       if(kbdread_fs) then
         rbdread_fs=
      &  (rv15flip_fs+rv15for_fs)*rsread_fs/2.+350.
-        if(rdhd_fs.eq.2) rbdread_fs=rbdread_fs+698.5
+        call fs_get_drive(drive)
+        if(drive.eq.VLBA) then
+           call fs_get_wrhd_fs(wrhd_fs)
+           if(wrhd_fs.eq.1) rbdread_fs=rbdread_fs+698.5
+        else
+           if(rdhd_fs.eq.2) rbdread_fs=rbdread_fs+698.5
+        endif
       endif
 C
       call fs_get_drive(drive)
@@ -113,7 +120,7 @@ C
       if(kswrite_fs.and.drive_type.NE.VLBA2) then
         nch=nch+ir2as(rswrite_fs,ibuf,nch,8,2)
       else if(kswrite_fs) then
-        nch=nch+ir2as(rswrite_fs,ibuf,nch,10,4)
+        nch=nch+ir2as(rswrite_fs,ibuf,nch,8,5)
       endif
       nch=mcoma(ibuf,nch)
 C
