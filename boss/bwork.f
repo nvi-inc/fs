@@ -18,16 +18,15 @@ C                logit4 call for the TI, time list, command print out.
 C     920922 gag Consolidated quikr routines back into one program.
 C
       include '../include/fscom.i'
-      include 'bosscm.i'
 C
       dimension ip(5)          !  array for rmpar parameters
       dimension lnames(12,1)
-      integer*2 lproc1(10,1),lproc2(10,1)
+      integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
-      dimension itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(50)         !  input buffer containing command
-      integer*2 ibuf2(50)
-      character*100 ibc
+      integer*4 itscb(13,1)          !  time scheduling control block
+      integer*2 ibuf(256)         !  input buffer containing command
+      integer*2 ibuf2(256)
+      character*512 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
@@ -78,7 +77,7 @@ C     ICLASS - general variable for class with command/response
 C     ICLOP2 - secondary operator class after immediate commands
 C             have been stripped
 C     MAXPR1,2 - Maximum number of procs allowed in each lists
-      data iblen/50/
+      data iblen/256/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/24,2,24*0/, lstkop/24,2,24*0/
@@ -89,21 +88,22 @@ C**********************************************************************
 C
 C     1. Initialize.
 C
+      call fc_rte_time(itmlog,itmlog(6))
       iclass = 0
       iclop2 = 0
       call fc_rte_time(it,it(6))
       iotref(1) = (it(6)-1970)*1024 + it(5)
       iotref(2) = it(4)*60 + it(3)
-      iotref(3) = it(2)*100
+      iotref(3) = it(2)*100+it(1)
       istref(1) = iotref(1)
       istref(2) = iotref(2)
+      istref(3) = iotref(3)
       call char2hol('/',lsor2,1,1)
       lstp = 'station'
       call char2hol(lstp,ilstp,1,8)
       call fs_set_lstp(ilstp)
       call opnpf(lstp,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,'n')
       if (ierr.lt.0) call logit7ci(0,0,0,1,-133,'bo',ierr)
-      call fc_rte_time(itmlog,itmlog(6))
 C
 C     2. First and always, check the time list for something to do.
 C     This is the highest priority.  Get next job, or next time to awaken.
@@ -138,6 +138,22 @@ C
         nchar = min0(ireg(2),iblen*2)
         call logit4(ibuf,nchar,lsor,lprocn)
         kts = .true.
+        if (cjchar(itype,2).ne.'F') then
+           indexold=index
+           ichara = iscn_ch(ias,1,nchar,'=')
+           if (ichara.eq.0) ichara=nchar+1
+           icharb = iscn_ch(ias,1,nchar,'@')
+           if (icharb.eq.0) icharb=nchar+1
+           ichar1 = min0(ichara,icharb,nchar+1)
+           call gtnam(ibuf,1,ichar1-1,lnames,nnames,lproc1,nproc1,
+     .          lproc2,nproc2,ierr,itype,index)
+           if (ierr.ne.0) then
+              call logit7ci(0,0,0,0,ierr,'sp',0)
+              call cants(itscb,ntscb,5,indexold,indts)
+              call clrcl(iclass)
+              goto 200
+           endif
+        endif
         goto 500
       endif
 C
@@ -184,8 +200,9 @@ C                     procs for the same reason
         if (indts.ne.0) goto 220
 C                     Jump back into the command loop if there's
 C                     something to do.  Not very elegant!
+        iy = itime(1)/1024+1970
         id = mod(itime(1),1024)
-        ih = mod(itime(2)/60,24)
+        ih = itime(2)/60
         im = mod(itime(2),60)
         is = itime(3)/100
         ims = mod(itime(3),100)
@@ -203,16 +220,15 @@ C
         itw(3)=im
         itw(4)=ih
         itw(5)=id
-        itw(6)=itn(6)
+        itw(6)=iy
+c not Y2038 compliant
         call fc_rte2secs(itn,secsnow)
+c not Y2038 compliant
         call fc_rte2secs(itw,secswait)
 c
-c  assume that if the next time is more than 10 minutes in the
-c  it is actually for tomorrow
-c
-        if(secsnow.lt.secswait-60000) secswait=secswait+86400
+c not Y2038 compliant
         delta=(secswait-secsnow)*100+itw(1)-itn(1)
-        if(delta.gt.5*60*100.or.delta.lt.0) delta=5*60*100
+        if(delta.gt.5*60*100) delta=5*60*100
         kput=delta.gt.200
         if(kput) then
            call rn_put('fsctl')
@@ -222,7 +238,6 @@ c
         if(kput) then
            iold=rn_take('fsctl',0)
         endif
-c       call wait_abstd('boss ',ip,id,ih,im,is,ims)
 C                   Self-suspend, saving our suspension point
 C********************************************************************
 C***************THIS IS THE WAKE-UP POINT****************************
@@ -417,7 +432,7 @@ C
           nch = ichmv_ch(ibuf,nchar+1,'/')
           call fs_get_llog(illog)
           nch = nch + ichmv(ibuf,nch,illog,1,8)
-          call logit4(ibuf,nch-1,lsor,lprocn)
+          call logit4(ibuf,nch-1,lsor2,lprocn)
         else
 C                   User requested log name, format response and log it.
           ic2 = iscn_ch(ibuf,ich,nchar,',')
@@ -450,12 +465,12 @@ C  User requested schedule name, format response and log it.
             nch = ichmv_ch(ibuf,nchar+1,'/')
             call fs_get_lskd(ilskd)
             call hol2char(ilskd,1,8,lskd)
-            ibc(nch:nch+6) = lskd(1:7)
-            nch=nch+7
+            ibc(nch:nch+7) = lskd(1:8)
+            nch=nch+8
             nch = mcoma(ibuf,nch)
             if (ierr.lt.0) icurln=0
             nch = nch+ib2as(icurln,ibuf,nch,o'100000'+5)
-            call logit4(ibuf,nch-1,lsor,lprocn)
+            call logit4(ibuf,nch-1,lsor2,lprocn)
             call rn_put('pfmed')
             goto 600
           endif
@@ -474,6 +489,11 @@ C  If a comma but no schedule name.
             call rn_put('pfmed')
             goto 600
           endif
+          if(kstak(istkop,istksk,1)) then
+             call logit7ci(0,0,0,0,-211,'bo',0)
+             call rn_put('pfmed')
+             goto 600
+          endif           
           nproc1 = 0
           istksk(2) = 2
           lstksk(2) = 2
@@ -572,7 +592,7 @@ C  a valid schedule or all is set to zero.
           endif
           call rn_put('pfmed')
 C
-C log all the leading comments in the schdeule
+C log all the leading comments in the schedule
 C
           idum = fmpposition(idcbsk,ierr,irec,id)
           idum = fmpsetpos(idcbsk,ierr,0,id)
@@ -678,22 +698,30 @@ C                     First the type
             if (jchar(ibuf,2).eq.0) idummy = ichmv_ch(ibuf,2,' ')
             idummy = ichmv(ibuf,3,itscb(13,i),2,1)
 C                     Next the source of the command
-            idummy = ib2as(itscb(11,i),ibuf,4,2)
+            idummy = ib2as(itscb(11,i),ibuf,4,4)
 C                     The index in the function or proc lists
-            idummy = ichmv_ch(ibuf,6,'@')
-         idummy = ib2as(mod(itscb(1,i),1024),ibuf,7,o'40000'+o'400'*3+3)
-         idummy = ib2as(itscb(2,i)/60,ibuf,10,o'40000'+o'400'*2+2)
-         idummy = ib2as(mod(itscb(2,i),60),ibuf,12,o'40000'+o'400'*2+2)
-         idummy = ib2as(itscb(3,i)/100,ibuf,14,o'40000'+o'400'*2+2)
+            idummy = ichmv_ch(ibuf,8,'@')
+       idummy = ib2as(itscb(1,i)/1024+1970,ibuf,9,o'40000'+o'400'*4+4)
+       idummy = ichmv_ch(ibuf,13,'.')
+       idummy = ib2as(mod(itscb(1,i),1024),ibuf,14,o'40000'+o'400'*3+3)
+       idummy = ichmv_ch(ibuf,17,'.')
+       idummy = ib2as(itscb(2,i)/60,ibuf,18,o'40000'+o'400'*2+2)
+       idummy = ichmv_ch(ibuf,20,':')
+       idummy = ib2as(mod(itscb(2,i),60),ibuf,21,o'40000'+o'400'*2+2)
+       idummy = ichmv_ch(ibuf,23,':')
+       idummy = ib2as(itscb(3,i)/100,ibuf,24,o'40000'+o'400'*2+2)
+       idummy = ichmv_ch(ibuf,26,'.')
+       idummy = ib2as(mod(itscb(3,i),100),ibuf,27,o'40000'+o'400'*2+2)
+       idummy = ichmv_ch(ibuf,29,'   ')
 C                     The time next scheduled
             icl = itscb(12,i)
             nch = 0
             if (icl.ne.0) then
-              ireg(2) = get_buf(icl,ibuf(9),-(iblen-9),idum,idum)
+              ireg(2) = get_buf(icl,ibuf(16),-(iblen-16),idum,idum)
               nch = ireg(2)
 C                     Get the buffer in the class
             endif
-            call logit4(ibuf,min0(16+nch,iblen*2),lsor,lprocn)
+            call logit4(ibuf,min0(30+nch,iblen*2),lsor2,lprocn)
           endif
         enddo
 C
@@ -731,14 +759,14 @@ C
           call hol2char(ilprc,1,8,lprc)
           ibc(nch:nch+7) = lprc(1:8)
           nch = nch+8
-          call logit4(ibuf,nch-1,lsor,lprocn)
+          call logit4(ibuf,nch-1,lsor2,lprocn)
         else
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
           call fs_get_lstp(ilstp)
           call hol2char(ilstp,1,8,lstp)
           if (kstak(istkop,istksk,1)) then
-            call logit7ci(0,0,0,0,-133,'bo',0)
+            call logit7ci(0,0,0,0,-212,'bo',0)
           else if (ibc(ich:ic2-1).eq.lstp) then
 C  the station procedure library is opened on startup and remains open
 C  therefore, station as a procedure command parameter is an error.
