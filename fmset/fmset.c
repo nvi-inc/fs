@@ -38,6 +38,7 @@ long inclass;         /* input class number */
 long outclass;        /* output class number */
 int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 int synch=0;
+long nanosec=-1;
 
 main()  
 {
@@ -129,7 +130,7 @@ if(!toggle) {
 	     "    <esc> to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 } else {
   mvwaddstr( maindisp, ROW+irow++, 10,
-	     "    't' or 'T' to toggle between S2 recorder and formatter.");
+     "    't' or 'T' to toggle between S2 recorder and VLBA formatter.");
   mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    <esc> to quit.");
 }  
