@@ -42,7 +42,16 @@ C 970304 nrv Add COPTION for defaults
 C 970312 nrv Add call to READ_SNAP1 to read first line in freefield
 C 970313 nrv Compute itearl_local with full d/h/m/s instead of just seconds
 C 970313 nrv Revise footage counts to correctly handle adaptive early start.
-C 970402 nrv Add a check so that IDUR is not re-calculated upon POSTOB.
+C 970321 nrv For continuous motion use "data comments.
+C 970401 nrv Save variables for LSTSUMO and print them after the next
+C            midob is found, so that we know if there was an ET.
+C 970401 nrv Add itlate_local to LSTSUMO call.
+C 970728 nrv Set ifeet_print=ifeet if ifeet_print=-1 when the previous 
+C            output line is printed, because this means no ST or data_start
+C            have occurred for a non-tape scan. Don't update the footage
+C            on "data stop" if the tape is not running.
+C 970730 nrv Don't set ifeet=0 at midtp because it might not be.
+C 970801 nrv For non-tape scans set cnewtap='@  '
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -54,13 +63,13 @@ C Input:
 C Output:
       INTEGER   IERR
 C Local:
-      integer iwid,ite,itearl_local
+      integer iwid,itlate_local,itearl_local
       INTEGER   IC,TRIMLEN
       integer idir,nline,ntapes,ncount,npage,maxline,iline,
      .ifeet,inewp,iyear,ix,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
-     .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,ids,
+     .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,
      .idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save,
-     .ifeet_print,idt,iht,imt,ist
+     .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift
       real rs,ds,val
       real speed_snap ! speed from SNAP file
       integer ichcm_ch,isecdif,julda ! function
@@ -70,11 +79,19 @@ C Local:
       character*8 csor,cexper,cstn
       character*3 cdir,cnewtap,cday
       character*9 cti,c1,c2,c3
-      character*2 cid,cpassp,cpass,ch1,cm1,cs1
+      character*2 cid,cpassp,cpass,ch1,cm1,cs1,ch3,cm3,cs3
       character*1 cid1,cs,csgn
       character*7 cwrap
-      logical kstart,ket,ks2,krunning
+      logical kgot,kend,kstart,ks2,krunning
       double precision xpos,ypos,zpos,rarad,dcrad,ut,az,el
+      integer nsline_s,ihd_s,imd_s,isd_s,
+     .ih2_s,im2_s,is2_s,idurm_s,idurs_s,ifeet_print_s,mjd_s
+      double precision rarad_s,dcrad_s,ut_s
+      character*3 cdir_s,cday_s,cnewtap_s
+      character*2 cpass_s,ch1_s,cm1_s,cs1_s
+      logical kstart_s,kmotion,kmotion_s
+      character*8 csor_s
+      character*7 cwrap_s
 
 
 C 1.0  Check existence of SNAP file.
@@ -137,16 +154,19 @@ C 4. Loop over SNAP file records
 
       cexper=' '
       iyear = 0
+      kgot=.false.
       cstn = ' '
       cid = '  '
       kazel=.false.
       kwrap=.false.
       ksat=.false.
-      ket=.true.
       kstart=.true.
+      kend=.false.
       krunning=.false.
+      kmotion=.false.
       csor=' '
       idir = 0
+      speed_snap=0
       ifdur_save=0
       nline = 0
       ntapes = 0
@@ -155,9 +175,11 @@ C 4. Loop over SNAP file records
       iline = maxline
       cday = '   '
       idur=-1
+      ift=-1
       ifeet = 0
+      ifeet_print=-1 ! set as a flag
       inewp = 0
-      cnewtap = 'XXX'
+      cnewtap = '   '
       if (kskd) then
         ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
       else ! read SNAP file
@@ -233,50 +255,60 @@ C9001        format(2x,a8,2x,i4,1x,a8,2x,a2)
             call c2upper(cbuf_in,cbuf)
         endif !read first lines
 
-        if (cbuf(1:1).ne.'"') then !non-comment line
+C       if (cbuf(1:1).ne.'"') then !non-comment line
         if (index(cbuf,'SOURCE=').ne.0) then ! new scan starts here
           if (csor.ne.' ') then ! output a line
             if (npage.eq.0) then
 C           Here is where we can determine early start without the schedule
               if (kskd) then ! get from common
                 itearl_local=itearl(istn)
+                itlate_local=itlate(istn)
               else ! calculate local ITEARL here
                 itearl_local = isecdif(idd,ihd,imd,isd,id1,ih1,im1,is1)
                 if (itearl_local.lt.0) 
      .          itearl_local = isecdif(id1,ih1,im1,is1,idd,ihd,imd,isd)
+                itlate_local=0 ! figure this out later
               endif
             endif
-            call lstsumo(iline,npage,cstn,cid,cexper,maxline,
-     .      idir,
-     .      speed_snap,itearl_local,kwrap,ks2,cday,kazel,ksat,ket,
-     .      kstart,nsline,csor,cwrap,ch1,cm1,cs1,ih1,im1,is1,
-     .      ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet_print,cnewtap,
-     .      cdir,kskd,ncount,ntapes,
-     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
-C           if (ket) then ! update footage with duration
-C             idur=idm*60+ids
-C             ite=0
-C             if (ket) ite=itearl_local
-C             if (ks2) then
-C               ifeet = ifeet + (idur+ite)
-C             else
-C               ifeet = ifeet + (idur+ite)*idir*(speed_snap/12.0) 
-C             endif
-C             Reset running time to stop time 
-C             idr=id2
-C             ihr=ih2
-C             imr=im2
-C             isr=is2
-C             ket = .false.
-C           endif
+            kgot=.true.
+            cday_s=cday
+            kstart_s=kstart
+            nsline_s=nsline
+            csor_s=csor
+            cwrap_s=cwrap
+            ch1_s=ch1
+            cm1_s=cm1
+            cs1_s=cs1
+            ihd_s=ihd
+            imd_s=imd 
+            isd_s=isd
+            ih2_s=ih2
+            im2_s=im2
+            is2_s=is2
+            idurm_s=idurm
+            idurs_s=idurs
+            cpass_s=cpass
+            ifeet_print_s=ifeet_print
+            cnewtap_s=cnewtap
+            kmotion_s=kmotion
+            cdir_s=cdir
+            rarad_s=rarad
+            dcrad_s=dcrad
+            mjd_s=mjd
+            ut_s=ut
             ifdur_save=0
+            ifeet_print=-1 ! set as a flag
             idur=-1
+            ift=-1
+            cnewtap = '   '
+            kmotion=.false.
           endif ! output a line
 C       Now get the source info for the new scan 
           ns = index(cbuf,',')-1
           csor = cbuf(8:ns)
           nsline = nline
           kstart=.false.
+C         kend=.false.
           ns2 = ns+2+index(cbuf(ns+2:),',')-2
           if (csor.ne.'AZEL') then ! celestial source
             ksat=.false.
@@ -310,8 +342,10 @@ C       Now get the source info for the new scan
 
         else if (index(cbuf,'MIDTP').ne.0) then
           inewp = 1
+          idur=-1 ! reset duration so it gets calculated again
           if (idir.eq.1) inewp = 0
           if (inewp.eq.1) ifeet = 0
+          if (ifeet.lt.0) ifeet=0
 
         else if (index(cbuf,'MIDOB').ne.0) then ! data start time
           read(cti,'(i3,3i2)') idd,ihd,imd,isd
@@ -330,21 +364,36 @@ C         Reset running time
           ihr=ihd
           imr=imd
           isr=isd
-
-        else if (index(cbuf,'!').ne.0) then
-          if (cbuf(2:2).ge.'0'.and.cbuf(2:2).le.'9') then ! valid day
-          cti = cbuf(2:10)
-          if (cti(1:3).ne.cday) then
-            cday = cti(1:3)
+C        Now print the line because we would have found the ET by now.
+          if (kgot) then ! got the _s variables set
+          if (cnewtap_s.eq.'   '.and..not.kmotion_s) cnewtap_s='@  '
+          if (ifeet_print_s.eq.-1) ifeet_print_s=0
+          call lstsumo(iline,npage,cstn,cid,cexper,maxline,
+     .    itearl_local,itlate_local,kwrap,ks2,cday_s,kazel,ksat,
+     .    kstart_s,kend,nsline_s,csor_s,cwrap_s,ch1_s,cm1_s,cs1_s,
+     .    ihd_s,imd_s,isd_s,ih2_s,im2_s,is2_s,ch3,cm3,cs3,
+     .    idurm_s,idurs_s,cpass_s,ifeet_print_s,
+     .    cnewtap_s,cdir_s,kskd,ncount,ntapes,
+     .    rarad_s,dcrad_s,xpos,ypos,zpos,mjd_s,ut_s)
+          kend=.false.
+          if (ifeet_print.eq.-1) ifeet_print=ifeet
+          endif
+          if (cday.ne.cday_s) then
             if (npage.gt.0) then
-              write(luprt,9320) cday
-9320          format('  Day ',a)
+              write(luprt,'("  Day ",a)') cday
               iline=iline+1
             endif
           endif
+
+        else if (index(cbuf,'!').ne.0) then
+          if (cbuf(2:2).ge.'0'.and.cbuf(2:2).le.'9') then ! valid day
+            cti = cbuf(2:10)
+            cday = cti(1:3)
           endif ! valid day
 
-        else if (index(cbuf(1:2),'ST').ne.0) then ! tape start time
+        else if (index(cbuf(1:2),'ST').ne.0.or.
+     .           index(cbuf(1:11),'"DATA START').ne.0) then ! tape start time
+          kmotion=.true.
           if (.not.krunning) then ! this is a true start
             krunning = .true. ! tape has started
             ch1=cti(4:5)
@@ -363,18 +412,19 @@ C                       or real (example: 266.66)
             read(cbuf(8:),*,iostat=ierr) val
             if (ierr.eq.0) then ! valid speed
               speed_snap = val 
-              ifeet = 10*ifix(float(ifeet/10)) ! nearest 10 feet
+C             ifeet = 10*ifix(float(ifeet/10)) ! nearest 10 feet
+C             Do this round off just before printing, in lstsumo
             endif
             idir = 1
             cdir = cbuf(4:6)
             if (cdir.eq.'REV') idir=-1
           else ! update footage 
             read(cti,'(i3,3i2)') idt,iht,imt,ist
-            irun = isecdif(idt,iht,imt,ist,idr,ihr,imr,isr)
+            ift = isecdif(idt,iht,imt,ist,idr,ihr,imr,isr)
             if (ks2) then
-              ifeet = ifeet + irun ! seconds
+              ifeet = ifeet + ift ! seconds
             else
-              ifeet = ifeet + irun*idir*(speed_snap/12.0) ! feet
+              ifeet = ifeet + ift*idir*(speed_snap/12.0) ! feet
             endif
 C           Restart the running time clock
             idr=idt
@@ -382,16 +432,21 @@ C           Restart the running time clock
             imr=imt
             isr=ist
           endif
-          ifeet_print=ifeet ! save this footage for printing
+          if (ifeet_print.eq.-1) ifeet_print=ifeet ! for printing
 
-        else if (index(cbuf(1:2),'ET').ne.0.or.
-     .           index(cbuf(1:6),'POSTOB').ne.0) then ! data stop time
+        else if (index(cbuf(1:2),'ET').ne.0) then
+          krunning = .false. 
+          kend=.true.
           read(cti,'(i3,3i2)') id2,ih2,im2,is2
-          if (index(cbuf(1:2),'ET').ne.0) krunning = .false. 
-          if (idur.eq.-1) then ! no dur computed yet for this scan
+          ch3=cti(4:5)
+          cm3=cti(6:7)
+          cs3=cti(8:9)
+C         If a "data stop" already occurred for this scan, don't make
+C         a new duration.
+          if (idur.eq.-1) then ! no dur yet this scan
             idur = isecdif(id2,ih2,im2,is2,idr,ihr,imr,isr)
-            idm = idur/60
-            ids = idur - idm*60
+            idurm = idur/60
+            idurs = idur - idurm*60
 C           Update running time
             idr=id2
             ihr=ih2
@@ -403,7 +458,34 @@ C           Update footage with timing
             else
               ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
             endif
-          endif
+C         idir=0
+C         Set direction to 0 now that we are stopped. It will take
+C         an "st" command to reset this
+          endif ! no dur yet this scan
+
+        else if (index(cbuf(1:10),'"DATA STOP').ne.0  .or.
+     .           index(cbuf(1:6),'POSTOB').ne.0) then ! data stop time
+          read(cti,'(i3,3i2)') id2,ih2,im2,is2
+          if (idur.eq.-1) then ! no stop yet
+            idur = isecdif(id2,ih2,im2,is2,idr,ihr,imr,isr)
+            idurm = idur/60
+            idurs = idur - idurm*60
+C           Update running time
+            idr=id2
+            ihr=ih2
+            imr=im2
+            isr=is2
+C           Update footage with timing
+C Only update footage if tape is still running. It will have been already
+C updated at the 'et' if it's now stopped. If there was not 'et' then
+C this is either continuous tape motion (needs updating) or else
+C non-tape and not running (no updating).
+            if (ks2) then
+              ifeet = ifeet + idur ! seconds
+            else if (krunning) then
+              ifeet = ifeet + idur*idir*(speed_snap/12.0) ! feet
+            endif
+          endif ! no stop yet
 
         else if (index(cbuf,'FAST').ne.0) then !add spin feet
           nm = index(cbuf,'M')
@@ -431,22 +513,30 @@ C           Update footage with timing
         else if (index(cbuf,'=').ne.0) then !probably setup proc
           ieq = index(cbuf,'=')
           cpassp=cpass ! previous pass
+          cpass = '  '
           cpass = cbuf(ieq+1:ieq+2)
+          if (cpass(2:2).eq.' ') then ! shift right
+            cpass(2:2)=cpass(1:1)
+            cpass(1:1)=' '
+          endif ! shift right
           if (ks2.and.cpass.ne.cpassp) ifeet=0 ! reset feet for new group
 
         endif
-        endif !non-comment line
+C       endif !non-comment line
       enddo !read loop
 
 990   continue
       ierr=0
 C     Output the final scan
       if (ifdur_save.ne.0) ifeet=ifeet-ifdur_save ! undo the final fastr
+      if (cnewtap.eq.'   '.and..not.kmotion) cnewtap='@  '
       call lstsumo(iline,npage,cstn,cid,cexper,maxline,
-     .      idir,
-     .speed_snap,itearl_local,kwrap,ks2,cday,kazel,ksat,ket,
-     .kstart,nsline,csor,cwrap,ch1,cm1,cs1,ih1,im1,is1,
-     .ihd,imd,isd,ih2,im2,is2,idm,ids,cpass,ifeet_print,cnewtap,cdir,
+     .itearl_local,itlate_local,kwrap,ks2,cday,kazel,ksat,
+     .kstart,kend,nsline,csor,cwrap,ch1,cm1,cs1,
+     .ihd,imd,isd,ih2,im2,is2,
+     .ch3,cm3,cs3,
+     .idurm,idurs,cpass,ifeet_print,
+     .cnewtap,cdir,
      .kskd,ncount,ntapes,
      .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
       write(luprt,'(/" Total number of scans: ",i5/
