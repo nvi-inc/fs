@@ -171,3 +171,4 @@ status       *xx 0000 17 FF
 help         *xx 0000 18 FF
 ?            *xx 0000 18 FF
 date         *xx 0000 19 FF
+op_stream    *xx 0000 20 FF
