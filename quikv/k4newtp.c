@@ -55,11 +55,12 @@ long ip[5];                       /* ipc parameters */
       itape=0;
       tpnum=command->argv[0];
 
-      while(*tpnum != '\0'){
-        tape[i] = *tpnum;
-        itape = itape*10 + (*tpnum - '0');
-        i++; tpnum++;
-      }
+      if(tpnum!=NULL)
+	while(*tpnum != '\0'){
+	  tape[i] = *tpnum;
+	  itape = itape*10 + (*tpnum - '0');
+	  i++; tpnum++;
+	}
       tape[i] = '\0';
 
 /* check label of a tape */
