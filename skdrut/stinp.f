@@ -20,26 +20,32 @@ C
       include '../skdrincl/freqs.ftni'
 C
 ! functions
-      integer ichcm,igtba,ichcm_ch,ichmv_ch,ichmv,jchar ! functions
+      integer igtba,ichmv_ch ! functions
+      integer iwhere_in_string_list
 
 C  LOCAL:
-      integer*2 ibufin(40)
-      character*80 cbufin
+      integer MaxBufIn
+      parameter (MaxBufIn=50)
+      integer*2 ibufin(MaxBufIn)
+      character*(2*MaxBufIn) cbufin
       equivalence (ibufin,cbufin)
 
       logical kline,ks2,kk4
       integer*2 LNAME(4),LAXIS(2)
+      character*8 cname
+      character*4 caxis
+      equivalence (caxis,laxis) , (cname,lname)
+
       real*4 SLRATE(2),ANLIM1(2),ANLIM2(2)
-      integer*2 LD(7),LOCC(4)
+      character*8 cocc
+
       integer islcon(2)
       REAL*4 AZH(MAX_HOR),ELH(MAX_HOR),CO1(MAX_COR),CO2(MAX_COR)
       real*4 DIAM
       real*4 sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
-      real*8 POSXYZ(3),AOFF
+      real*8 POSXYZ(3),AXOFF
 
-      character*8 cname
-      equivalence (cname,lname)
 
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band)
@@ -48,8 +54,10 @@ C      - these are used in unpacking station info
 
       character*8 crack,crec1,crec2
       equivalence (crack,lrack),(crec1,lrec1),(crec2,lrec2)
-      character*4 cidt
-      equivalence (cidt,lidt)
+      character*4 cidt,cidhor,cidpos
+      character*2 cid
+      equivalence (cid,lid)
+      equivalence (cidt,lidt),(cidpos,lidpos),(cidhor,lidhor)
 
       double precision poslat,poslon
       integer ibitden
@@ -57,8 +65,13 @@ C      - these are used in unpacking station info
       integer*2 ls2sp(2)
       character*4 cs2sp
       equivalence (ls2sp,cs2sp)
-
       real s2sp
+
+! These are used to parse the input line.
+      integer MaxToken
+      integer NumToken
+      parameter(MaxToken=20)
+      character*30 ltoken(MaxToken)
 
 C
 C  INITIALIZED
@@ -102,82 +115,75 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
-      do i=1,min(ilen,40)
+      cbufin=" "
+      do i=1,min(ilen,MaxBufIn)
         ibufin(i)=ibufx(i)
       end do
+      i=index(cbufin,char(0))
+      if(i .ne. 0) then
+         cbufin(i:2*MaxBufin)=" "
+      endif
 
-      ITYPE=0
-      IF (JCHAR(IBUFX,1).EQ.OCAPA) THEN !      'A'
-        ITYPE=1
-      ELSE IF (JCHAR(IBUFX,1).EQ.OCAPP) THEN ! 'P'
-        ITYPE=2
-      ELSE IF (JCHAR(IBUFX,1).EQ.OCAPT) THEN ! 'T'
-        ITYPE=3
-      ELSE IF (JCHAR(IBUFX,1).EQ.OCAPC) THEN ! 'C'
-        ITYPE=4
-      ELSE IF (JCHAR(IBUFX,1).EQ.OCAPH) THEN ! 'H'
-        ITYPE=5
-      END IF
+      itype=index("APTCH",cbufin(1:1))
+      if(itype .eq. 0) then
+        write(*,*) "STINP: Unknown Antenna line!"
+        return
+      endif
 
-      IF (ITYPE.EQ.1) THEN
-        J=16
-        CALL UNPVA(IBUFX(2),ILEN-1,IERR,LID,LNAME,
-     .    LAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,LIDPOS,LIDT,
-     .    LIDHOR,ISLCON,J)
-      ELSE IF (ITYPE.EQ.2) THEN
-        J = 12
-        CALL UNPVP(IBUFX(2),ILEN-1,IERR,LID,LNAME,
-     .    POSXYZ,LD,LD,LD,POSLAT,POSLON,LOCC)
-      ELSE IF (ITYPE.EQ.3) THEN
-        j=8
-        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
-     .  nstack,maxt,nr,ls2sp,
-     .  lb,sefd,j,par,npar,lrack,lrec1,lrec2)
-      ELSE IF (ITYPE.EQ.4) THEN
-        J = 8
-        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NCO,CO1,CO2)
-      ELSE IF (ITYPE.EQ.5) THEN
-        J = 8
-        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NHZ,AZH,ELH)
-      END IF
-C
-C
-C     2. Now decide what to do with this information.
-C     We have ignored the terminal type of entry, this is only for
-C     the correlator.
-C     If we have an antenna entry, check for its name already established
-C     by the $CODES section.  If we have a position entry, then we must
-C     already have the antenna entry.
-C
-9105  format("STINP23 - Error in field ",i4," of the following line"
-     ./120a2)
-C
-      IF  (ITYPE.EQ.1) THEN  !antenna entry
-        IF  (IERR.NE.0) THEN
-          IERR = -(IERR+100)
-          write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          if (ierr.lt. 5) RETURN
-        END IF  !
-C
-        I=1
-        DO WHILE (i.le.nstatn.and.LID.NE.LSTCOD(I))
-          I=I+1
-        END DO
-        IF  (I.GT.NSTATN) THEN  !new entry
-          IF  (i.GT.MAX_STN) THEN  !
-            write(lu,'("STINP20 - Too many antennas.  Max is ",i3)')
-     >         max_stn
-            goto 900
-          END IF  !
-          NSTATN = NSTATN+1
-        END IF  !new entry
+      cbufin(1:1)=" "            !this just gets rid of the type: A,P,T,C,H
+
+! initalize all the tokens.
+      do i=1,Maxtoken
+        ltoken(i)=" "
+      end do
+
+! extract all the tokens and parcel them out.
+      call splitNtokens(cbufin,ltoken,Maxtoken,NumToken)
+
+! Antenna line
+! ID  Name    Caxis axix_off rate1 con1 low1   high1  rate2 con2  low2  high2 diam  Cidpos cidt cidhor
+!  1   2       3      4       5    6     7     8       9    10   11    12     13     14 15 16
+!  B  BR-VLBA  AZEL 2.00000  90.0  0    270.0  810.0  30.0  0    2.3   88.0  25.0    Br BR BV
+      if(itype .eq. 1) then
+        cid =ltoken(1)
+        cname=ltoken(2)
+        caxis=ltoken(3)
+        read(ltoken(4),*,err=900) axoff
+        read(ltoken(5),*,err=900) slrate(1)
+        read(ltoken(6),*,err=900) islcon(1)
+        read(ltoken(7),*,err=900) anlim1(1)
+        read(ltoken(8),*,err=900) anlim1(2)
+        read(ltoken(9),*,err=900) slrate(2)
+        read(ltoken(10),*,err=900) islcon(2)
+        read(ltoken(11),*,err=900) anlim2(1)
+        read(ltoken(12),*,err=900) anlim2(2)
+        read(ltoken(13),*,err=900) Diam
+        cidpos=ltoken(14)
+        if(NumToken .ge. 15) then
+          cidt=ltoken(15)
+        endif
+        if(NumToken .ge. 16) then
+          cidhor=ltoken(16)
+        endif
+
+        i=iwhere_in_string_list(cstcod(i),nstatn,cid)
+        if(i .eq. 0) then        !new entry.
+          if(nstatn .lt. Max_stn) then
+             nstatn=nstatn+1
+             i=nstatn
+          else
+             write(lu,'(a,i3)')
+     >       "STINP: Too many antennas. Max is: ", max_stn
+             goto 900
+          endif
+        endif
 C
 C     2.2 Now we have, in "I", the proper index to use for the antenna
 C     information.
 C NO: Store the position ID temporarily into the first word of STNPOS.
 C     Put the position ID into a permanent place in LPOCOD
 C
-        LSTCOD(I) = LID
+        cSTCOD(I) = cID
         call axtyp(laxis,iaxis(i),1)
         STNRAT(1,I) = SLRATE(1)*deg2rad/60.0d0
         STNRAT(2,I) = SLRATE(2)*deg2rad/60.0d0
@@ -187,83 +193,82 @@ C
         STNLIM(2,1,I) = ANLIM1(2)*deg2rad
         STNLIM(1,2,I) = ANLIM2(1)*deg2rad
         STNLIM(2,2,I) = ANLIM2(2)*deg2rad
-        AXISOF(I)=AOFF
+        AXISOF(I)=AXOFF
         DIAMAN(I)=DIAM
-        LPOCOD(I)   = LIDPOS
-        idummy = ichmv(LTERID(1,I),1,LIDT,1,4)
+        cPOCOD(I)   = cIDPOS
+        cterid(i)=cidt
         lhccod(i) = lidhor
         NHORZ(I) = 0
         cantna(i)=cname
-C
-C     END IF  !antenna entry
-C
-C     2.3 Here we handle the position information.
-C     It is not an error to have the occ. code or lat,lon missing.
-C
-      ELSE IF  (ITYPE.EQ.2) THEN  !position entry
-        IF  (IERR.NE.0) THEN
-          IERR = -(IERR+100)
-          write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          if (ierr.le.5) RETURN
-        END IF
-C
-        I=1
-        DO WHILE (i.le.nstatn.and.LID.NE.LPOCOD(I))
-          I=I+1
-        END DO
-        IF  (I.GT.NSTATN) THEN  !entry not found
-          write(lu,'("STINP21 - Pointer not found. ")')
+        return
+      else if(itype .eq. 2) then
+        if(numtoken .lt. 8) then
+           write(lu,*) "Not enough tokens in line"
+           goto 900
+        endif
+! Do the position line.
+! cidpos cname   posxyz(1)        posxyz(2)     posxyz(3)      Locc      poslon  poslat    Who
+!   1    2          3              4               5             6       7        8          9
+!  Sc  SC-VLBA   2607848.52822 -5488069.69340  1932739.53143   76159001  64.58   17.76      GLB1069
+        cid=ltoken(1)
+        cname=ltoken(2)
+        read(ltoken(3),*,err=900) posxyz(1)
+        read(ltoken(4),*,err=900) posxyz(2)
+        read(ltoken(5),*,err=900) posxyz(3)
+        read(ltoken(7),*,err=900) poslon
+        read(ltoken(8),*,err=900) poslat
+
+        i=iwhere_in_string_list(cpocod,nstatn,cid)
+        if(i .eq. 0) then
+          write(lu, "(a)") "STINP21: pointer not found!"
           goto 900
-        END IF  !entry not found
+        endif
 C
 C     2.3 Now "I" contains the index into which we will put the
 C     position information.
 C
-!        IDUMMY = ICHMV(LSTNNA(1,I),1,LNAME,1,8)
         cstnna(i)=cname
         STNPOS(1,I) = POSLON*deg2rad
         STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
-        idum=ichmv(loccup(1,i),1,locc,1,8)
-C
-C  2.4 Here we handle terminal information
-C
-      ELSE IF  (ITYPE.EQ.3) THEN  !terminal entry
-        IF  (IERR.NE.0) THEN
-          write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          if (ierr.lt.5) return
-        END IF  !
-        if (ichcm_ch(lidt,1,'    ').ne.0.and.
-     .      ichcm_ch(lidt,1,'--').ne.0) then ! try to match IDs
-          I = 1
-          DO WHILE (i.le.nstatn.and.ichcm(LIDT,1,LTERID(1,I),1,4).ne.0)
-            I=I+1
-          END DO
-        else
-          i=nstatn+1
+        coccup(i)=ltoken(6)
+        return
+      else if(itype .eq. 3) then
+! Terminal line.
+! ID   Terminal  HDXDen  NumTape Bl   SEFD  B   SEFD2 SEFD1 params       SEFD2 Params
+! 101  MOJ-VLBA 1x56000  17640    X   750   S   800   X 1.0 0.954 0.0464 S 1.0 0.974 0.0263 VLBA VLBA
+        cidt=ltoken(1)
+        cname=ltoken(2)
+        kk4=cname(1:2).eq."K4"
+        ks2=cname(1:2).eq."S2"
+
+        j=8
+        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
+     .  nstack,maxt,nr,ls2sp,
+     .  lb,sefd,j,par,npar,lrack,lrec1,lrec2)
+        if(ierr .ne. 0) goto 900
+
+        i=0
+        if (cidt .ne. " " .and. cidt .ne. "--") then
+          i=iwhere_in_string_list(cterid,nstatn,cidt)
         endif
-        if (i.gt.nstatn) then ! try to match station name
-          I = 1
-          DO WHILE (i.le.nstatn.and.cname .ne. cstnna(i))
-            I=I+1
-          END DO
+        if (i.eq. 0) then ! try to match station name
+          i=iwhere_in_string_list(cstnna,nstatn,cname)
         endif
-        IF  (I.GT.NSTATN) THEN  !matching entry not found
+        IF  (I.eq.0) THEN  !matching entry not found
           write(lu,'("STINP24 - Name or ID match not found.",a)') cname
           goto 900
         END IF  !matching entry not found
+! Assume the terminal id line is correct.
+        if(cidt .ne. " " .and. cidt .ne. "--") then
+          cterid(i)=cidt
+        endif
 C  Got a match. Initialize names.
 !        IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
         cterna(i)=cname
-C       It used to be that the recorder type was encoded in the DAT name.
-C       ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
-C       kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
-!        idummy = ichmv_ch(lstrack(1,i),1,'unknown ')
-!        idummy = ichmv_ch(lstrec(1,i),1,'unknown ')
-!        idummy = ichmv_ch(lstrec2(1,i),1,'none    ')
-!        idummy = ichmv_ch(ls2speed(1,i),1,'    ')
+
         cstrack(i)="unknown"
         cstrec(i)="unknown"
         cstrec2(i)="none"
@@ -331,10 +336,39 @@ C    Store other info depending on the type.
             lbsefd(ib,i) = lb(ib)
           end if
         enddo
-C
-C 2.5 Here we handle the horizon mask
-C
-      ELSE IF (ITYPE.EQ.5) THEN  !horizon mask
+        return
+
+      else if(itype .eq. 4) then
+        J = 8
+        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NCO,CO1,CO2)
+        IF (IERR.NE.0) THEN
+          if (ierr.eq.-99) then
+            write(lu,*)
+     >      "STINP260 - Too many coordinate mask pairs. Max is ",max_cor
+            goto 900
+          endif
+          if (ierr.eq.-103) then
+C           error for no matching value, which is ok
+          endif
+        END IF  !
+        I = 1
+        DO WHILE (LID.NE.LhcCOD(I).AND.I.LE.NSTATN)
+          I = I+1
+        END DO
+        IF (I.GT.NSTATN) THEN ! matching entry not found
+          write(lu,'("STINP26 - Pointer not found.  Coordinate mask ")')
+          goto 900
+        ELSE ! keep it
+          NCORD(I) = NCO
+          DO J=1,NCORD(I)
+            CO1MASK(J,I) = CO1(J)*deg2rad
+            CO2MASK(J,I) = CO2(J)*deg2rad
+          END DO
+        END IF
+        return
+      ELSE IF (ITYPE.EQ.5) THEN
+        J = 8
+        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NHZ,AZH,ELH)
         kline=.true.
         IF (IERR.NE.0) THEN
           if (ierr.lt.-200) then
@@ -344,8 +378,9 @@ C
             RETURN
           endif
           if (ierr.eq.-99)then
-            write(lu,'("STINP250 - Too many horizon mask az/el pairs. ",
-     .      "Max is ",i5)') max_hor 
+            write(lu,'(a,i5)')
+     >       "STINP250 - Too many horizon mask az/el pairs. Max is ",
+     >        max_hor
             write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
             RETURN
           endif
@@ -389,40 +424,12 @@ C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
             ELHORZ(J,I) = ELH(J)*deg2rad
           END DO
         END IF
-C     END IF   ! horizon mask
-C
-C 2.6 Here we handle the coordinate mask
-C
-      ELSE IF (ITYPE.EQ.4) THEN ! coordinate mask
-        IF (IERR.NE.0) THEN
-          if (ierr.eq.-99) then
-            write(lu,*)
-     >      "STINP260 - Too many coordinate mask pairs. Max is ",max_cor
-            goto 900
-          endif
-          if (ierr.eq.-103) then
-C           error for no matching value, which is ok
-          endif
-        END IF  !
-        I = 1
-        DO WHILE (LID.NE.LhcCOD(I).AND.I.LE.NSTATN)
-          I = I+1
-        END DO
-        IF (I.GT.NSTATN) THEN ! matching entry not found
-          write(lu,'("STINP26 - Pointer not found.  Coordinate mask ")')
-          goto 900
-        ELSE ! keep it
-          NCORD(I) = NCO
-          DO J=1,NCORD(I)
-            CO1MASK(J,I) = CO1(J)*deg2rad
-            CO2MASK(J,I) = CO2(J)*deg2rad
-          END DO
-        END IF
+        return
       END IF
-      RETURN
+
 C! come here on bad line.
 900   continue
-      write(lu,'("Ignoring: ",40a2)') (ibufx(i),i=2,min(ilen,40))
+      write(lu,'("Problem with: ",40a2)') (ibufx(i),i=1,min(ilen,40))
       RETURN
 
       END

@@ -14,7 +14,8 @@ C  Common blocks:
 
 ! called functions
       logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
-      integer GETPID
+!      integer GETPID
+      
 
 C Subroutine interface:
 C     Called by: drudg (C routine)
@@ -38,6 +39,7 @@ C LOCAL:
       character*128 cdum
       character*128 csnap,cproc,csked,cexpna
       logical kex,kskd,kskdfile,kdrgfile,kknown
+      logical kequip_over
       integer nch,nci
       character*2  response,scode
       character*8 dr_rack_type, dr_rec1_type, dr_rec2_type
@@ -45,8 +47,6 @@ C LOCAL:
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
       integer nch1,nch2,nch3,iserr(max_stn)
-      integer ipid
-      character*5 cpidx
 
       character*2 cbnd(2)   !used in count_freq_tracks
       integer     nbnd      ! ditto
@@ -192,16 +192,16 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
 C
 C Initialize some things.
-!      iVerMajor_FS = 09
-!      iVerMinor_FS = 07
-!      iVerPatch_FS = 01
-      iVerMajor_FS = VERSION
-      iVerMinor_FS = SUBLEVEL
-      iVerPatch_FS = PATCHLEVEL
+      iVerMajor_FS = 09
+      iVerMinor_FS = 07
+      iVerPatch_FS = 02
+!      iVerMajor_FS = VERSION
+!      iVerMinor_FS = SUBLEVEL
+!      iVerPatch_FS = PATCHLEVEL
 
 
 C Initialize the version date.
-      cversion = '040929'
+      cversion = '041019'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -267,7 +267,7 @@ C***********************************************************
      .           ctmpnam,
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
      .           rlabsize,cepoch,coption,luscn,
-     .           dr_rack_type,dr_rec1_type,dr_rec2_type,
+     .           dr_rack_type,dr_rec1_type,dr_rec2_type,kequip_over,
      .           tpid_prompt,itpid_period,tpid_parm,
      >           cdum,cdum,cdum,cdum,cdum)      !these are mysql values not used in drudg.
       kdr_type = .not.
@@ -579,6 +579,7 @@ C       endif ! get one/get all
            endif
          endif
        endif
+
 C
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
@@ -593,7 +594,8 @@ C  Set equipment from control file, if equipment is unknown, and
 C  if it was not set by the schedule.
           kknown = .not.
      >      (cstrec(istn).eq.'unknown'.or. cstrack(istn) .eq. 'unknown')
-          if (.not.kknown.and.kdr_type) then ! equipment is in control file
+          if (.not.kknown.and.kdr_type .or.
+     >        kdr_type .and. kequip_over) then ! equipment is in control file
               cstrack(istn)=dr_rack_type
               cstrec(istn) =dr_rec1_type
               cstrec2(istn)=dr_rec2_type
@@ -626,7 +628,8 @@ C       Are the equipment types now known?
           write(luscn,9169) cstnna(istn)
 9169      format(/' Equipment at ',a,' is unknown. Use Option 11',
      .    ' to specify equipment.')
-        endif ! write equipment 
+        endif ! write equipment
+        call init_hardware_common(istn)
 C  Write warning messages if control file and schedule do not agree.
         if (kdr_type) then ! check it
         if (cstrack(istn).ne. dr_rack_type) then
@@ -719,7 +722,8 @@ C  Write warning messages if control file and schedule do not agree.
                 write(luscn,'(38x,a)')
      >        ' 14 = Toggle Mk5P piggyback mode '
             endif
-            if(istn .ne. 0 .and. kxfer_stat(istn).and. km5A) then
+            if(istn .ne. 0 .and. km5A .and.
+     >         (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
                 write(luscn,'(38x,a)')
      >        ' 15 = Data Transfer Overide '
             endif

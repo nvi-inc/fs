@@ -8,6 +8,7 @@ C Version 9.0 is supported with this routine.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
+      include '../skdrincl/data_xfer.ftni'
       include 'hardware.ftni'           !common block containing info on hardware
 C
 C History
@@ -329,6 +330,7 @@ C     integer nspd
       logical kvracks                   !=kvrack .or. kv4rack
       logical Km5Disk(2)                !non-piggyback
       character*5 lform                 !Mark4 or VLBA
+      logical kin2net_on                !Is in2net on?
 !
       integer itvec(130),ibvec(130),isbvec(130),ibitvec(130)  !used in piggyback mode.
 
@@ -428,7 +430,15 @@ C
       call procintr
 ! write short exper_init
       call proc_write_define(lu_outfile,luscn," ")  !this initializes this routine
-      call proc_exper_initi(lu_outfile,luscn)
+
+      if(.not. kno_data_xfer .and.
+     >  ((.not. Kin2net_2_disk2file .and. kstat_in2net(istn)) .or.
+     >  (Kdisk2file_2_in2net .and. kstat_disk2file(istn)))) then
+         kin2net_on=.true.
+      endif
+
+      call proc_exper_initi(lu_outfile,luscn,kin2net_on)
+
       if(km5a .or. km5a_piggy) call proc_postob_mk5a(lu_outfile,luscn)
 
 C

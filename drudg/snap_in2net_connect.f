@@ -11,6 +11,7 @@
 ! local
       integer nch2,nch3
       character*200 ldum
+      if(ldestin .eq. " ") return
 
       nch2=trimlen(ldestin)
       if(nch2 .eq. 0) nch2=1

@@ -174,7 +174,6 @@ C        beginning the current observation
       integer iwait5sec
       parameter (iwait5sec=5)
       integer itime_scan_end(5)             !end of scan    =istart+idur
-      integer itime_off(5)                  !               =istart+ioff
       integer itime_early(5)                !early start    =istart-itearl
       integer itime_tape_stop(5)                 !late end       =iend+ilate
       integer itime_tape_stop_spin(5)       !time when a tape stops spinning (after last obs on tape).
@@ -192,7 +191,6 @@ C        beginning the current observation
       integer itime_pass_end(5)              !Time when we reach the end of this pass
       real    speed_ft          !Speed in feet.
       real    rmax_scan_time    !Length of scan in time.
-      integer iscan_dur         !length of scan
       integer icod_old          !previous code.
       integer imin,isec         !iminutes, seconds
 ! Logical variables
@@ -592,7 +590,9 @@ C
 ! See if have data transfer statements.
         kin2net=.false.
         kdisk2file=.false.
-        if(.not.knodatatransfer .and. kxfer_stat(istn)) then
+
+        if(.not.kno_data_xfer .and.
+     >     (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
           if(km5a .and. ixfer_beg(iobs_now) .ne. 0) then
             do i=ixfer_beg(iobs_now),ixfer_end(iobs_now)
                if(istn .eq. ixfer_stat(i)) then
@@ -604,11 +604,17 @@ C
                       ldest=" "
                     else
                       kin2net=.true.
+                      if(kglobal_in2net) then
+                         ldest=lglobal_in2net
+                      endif
                     endif
                   else if(ixfer_method(i) .eq. ixfer_disk2file) then
                     if(kdisk2file_2_in2net) then
                        kin2net=.true.
                        ldest=ldestin_in2net
+                       if(kglobal_in2net) then
+                         ldest=lglobal_in2net
+                       endif
                     else
                        kdisk2file=.true.
                     endif

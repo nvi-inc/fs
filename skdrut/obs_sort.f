@@ -6,68 +6,82 @@ C 000725 nrv Check NOBS and don't try to sort 0 or 1 obs!
 C 001109 nrv scan_name is character now.
 C 010102 nrv Stop if error parsing an observation.
 C 03July11 JMG Modified to use sktime.
+! 04Oct15  JMGipson. Completely rewritten.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
 C Input
       integer luscn
+! functions
+      integer julda
 C Local
-      integer*2 itim1(6),itim2(6),name(5),namep(5)
-      integer j,i,irec,idum
-      integer idayr,ihr,imin,idayr_next,ihr_next,imin_next
-      integer ias2b,ichmv
-      logical kearl
-      character*12 ctim1,ctim2
-      equivalence (itim1,ctim1),(itim2,ctim2)
 
-C  1. Sort the obs.
+      integer*2 itim1(6)
+      character*12 ctim1
+      equivalence (itim1,ctim1)
 
-      write(luscn,'("OBS_SORT00 - Sorting scans by time.")')
-      if (nobs.ge.2) then ! sort
-        do j=2,nobs
-          irec=iskrec(j)
-          call sktime(lskobs(1,iskrec(j)),itim1)
-          do i=j-1,1,-1
-            call sktime(lskobs(1,iskrec(i)),itim2)
-            if (.not.kearl(itim1,itim2)) goto 10
-            iskrec(i+1) = iskrec(i)
-          enddo
-          i=0
-10        iskrec(i+1)=irec
-        enddo
-      endif ! sort
+      integer j,i,irec
+      double precision jday(Max_obs)
+      integer iyear,iday
+      double precision rhr,rmin,rs
 
-C  2. Generate scan names
+      integer iptr,iptr_old
+      integer ndup
+      character*26 lextra
+      data lextra/"abcdefghijklmnopqrstuvwxyz"/
 
       if (nobs.eq.0) return
-      call ifill(namep,1,10,oblank)
-      call ifill(name ,1,10,oblank)
-      irec=iskrec(1)
-      call sktime(lskobs(1,irec),itim1)
-      IDAYR = IAS2B(itim1,3,3)
-      IHR   = IAS2B(itim1,6,2)
-      iMIN  = IAS2B(itim1,8,2)
-      if (nobs.le.2) return
-      do i=2,nobs
-        irec=iskrec(i)
-        call sktime(lskobs(1,irec),itim1)
-        IDAYR_next = IAS2B(itim1,3,3)
-        IHR_next   = IAS2B(itim1,6,2)
-        iMIN_next  = IAS2B(itim1,8,2)
-        call sname(idayr,ihr,imin,namep,name,
-     .     idayr_next,ihr_next,imin_next)   
-        call hol2char(name,1,9,scan_name(iskrec(i-1)))
-C       idum= ichmv(scan_name(1,iskrec(i-1)),1,name,1,9)
-        idayr= idayr_next
-        ihr= ihr_next
-        imin= imin_next
-        idum= ichmv(namep,1,name,1,9)
+
+!  1. Sort the obs by time and then by source_name.
+
+      do i=1,nobs
+        call sktime(lskobs(1,iskrec(i)),itim1)
+        read(ctim1,'(i2,i3,3(i2))') iyear,iday,rhr,rmin,rs
+        if(iyear .lt. 50) then
+           iyear=iyear+2000
+        else
+           iyear=iyear+1900
+        endif
+        jday(i)=julda(1,iday,iyear)+(rs+rmin*60.d0+rhr*3600.)/86400.d0
+      end do
+
+      write(luscn,'("OBS_SORT00 - Sorting scans by time.")')
+      do j=2,nobs
+        irec=iskrec(j)
+        do i=j-1,1,-1
+          if(jday(irec) .gt. jday(iskrec(i)) .or.
+     >       (jday(irec) .eq. jday(iskrec(i)) .and.
+     >       cskobs(irec)(1:10) .gt. cskobs(iskrec(i)))) goto 10
+          iskrec(i+1)=iskrec(i)
+        end do
+        i=0
+10      iskrec(i+1)=irec
       enddo
-C     Last scan
-      idayr_next = -1
-      call sname(idayr,ihr,imin,namep,name,
-     .     idayr_next,ihr_next,imin_next)   
-C     idum= ichmv(scan_name(1,iskrec(nobs)),1,name,1,9)
-      call hol2char(name,1,9,scan_name(iskrec(i-1)))
+
+C  2. Generate scan names
+      call sktime(lskobs(1,iskrec(1)),itim1)
+
+      iptr=iskrec(1)
+      call sktime(lskobs(1,iptr),itim1)
+      scan_name(iptr)=ctim1(3:5)//"-"//ctim1(6:9)
+      ndup=0
+      iptr_old=iptr
+
+      do i=2,nobs
+        iptr=iskrec(i)
+        call sktime(lskobs(1,iptr),itim1)
+        scan_name(iptr)=ctim1(3:5)//"-"//ctim1(6:9)
+        if(scan_name(iptr)(1:8).eq.scan_name(iptr_old)(1:8))then
+          if(ndup .eq. 0) then
+            ndup=ndup+1
+            scan_name(iptr_old)(9:9)=lextra(ndup:ndup)
+          endif
+          ndup=ndup+1
+          scan_name(iptr)(9:9)=lextra(ndup:ndup)
+        else
+          ndup=0
+        endif
+        iptr_old=iptr
+      end do
 
       return
       end

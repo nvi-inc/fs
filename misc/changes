@@ -7115,3 +7115,19 @@ Version 9.7.0 040731
            fix typos
 
 Version 9.7.1 040930
+
+041003 weh quikv/k4newtp.c
+       weh quikv/k4oldtp.c
+           fix null parameter crash
+
+041018 weh misc/other_files.txt
+           created
+
+041019 weh quikv/save_file.c
+           clib/cchmod.c
+           use correct headers for chmod
+
+041019 weh control/fsser.ctl
+           add k4 oldtape error message
+
+Version 9.7.2 041020

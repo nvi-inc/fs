@@ -8,6 +8,7 @@
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
      .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
      .                 dr_rack_type,dr_reca_type,dr_recb_type,
+     >                 kequip_over,
      .                 tpid_prompt,itpid_period,tpid_parm,
      >         lmysql_user,lmysql_password,lmysql_host,lmysql_socket,
      >         lmysql_db)
@@ -43,6 +44,15 @@ C 020524 nrv Set TPICD defaults.
 C 021010 nrv Remove check for rack and recorder names because these
 C            names are not known until skdrini is called later. Just
 C            send the names back.
+! 2004    JMGipson
+!            modified to use extract_token etc.
+! 2004Oct14-17.  Fixed two problems in above conversion
+!          1. In printer commands, some stations assumed that drudg read
+!             rest of line after keyword. (As was done in earlier versions.)
+!             This version used to read just the value. Now made backward compatible.
+!          2. Previous versions of drudg assigned keyword of line "optionX  YY" to
+!             coption(1,2,3) where X =1,4,5.  Made an error in trying to assign to coption(X),
+!             e.g., if X=4, would assign to coption(4).  Fixed to agree with previous usage.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -60,6 +70,7 @@ C
       character*(*) lmysql_password,lmysql_db
       character*4 cepoch
       character*8 dr_rack_type,dr_reca_type,dr_recb_type
+      logical kequip_over
       real rlabsize(6)
       character*2 coption(3)
       integer luscn,itpid_period
@@ -67,6 +78,7 @@ C
       integer  trimlen     !function call
 C
 C  LOCAL VARIABLES
+      integer ind,nch
       integer itmplen     !variable for filename length
       logical*4 kexist         !control file existence
       character*128 ctemp   !temporary control file variable
@@ -90,6 +102,7 @@ C  1. Open the default control file if it exists.
       ilen = 0
       ierr = 0
       lu = 11
+      kequip_over=.false.         !initialize
 
 C  2. Process the control file if it exists. This loops through twice, 
 C     once for each control file.
@@ -251,24 +264,29 @@ C  $PRINT
                 call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
      >             knospace, keol)
                 call capitalize(lkeyword)
+                if(lvalue .ne. " ") then
+                  nch=trimlen(lvalue)
+                  ind=index(cbuf,lvalue(1:nch))
+                  nch=trimlen(cbuf)
+                endif
 
                 if (lkeyword .eq.'LABELS') then
                   if(ktoken) then
-                    cprtlab=lvalue
+                    cprtlab=cbuf(ind:nch)
                     call null_term(cprtlab)
                   else ! null
                     cprtlab=' '
                   endif
                 else if (lkeyword .eq.'PORTRAIT') then
                   if(ktoken) then
-                    cprtpor=lvalue
+                    cprtpor=cbuf(ind:nch)
                     call null_term(cprtpor)
                   else ! null
                     cprtpor=' '
                   endif
                 else if (lkeyword .eq.'LANDSCAPE') then
                   if(ktoken) then
-                    cprtlan=lvalue
+                    cprtlan=cbuf(ind:nch)
                     call null_term(cprtlan)
                   else ! null
                     cprtlan=' '
@@ -308,6 +326,11 @@ C  $PRINT
                       call capitalize(lvalue)
                       if (lvalue.eq.'PS'.or.lvalue.eq.'PL'.or.
      .                    lvalue.eq.'LS'.or.lvalue.eq.'LL') then
+                        if(ic .eq. 4) then
+                          ic=2
+                        else if(ic .eq. 5) then
+                          ic=3
+                        endif
                         coption(ic)=lvalue(1:2)
                       else
                         write(luscn,9215) ctemp
@@ -355,6 +378,8 @@ C         EQUIPMENT
                   istart=inext
                   call ExtractNextToken(cbuf,istart,inext,dr_recb_type,
      >              ktoken,knospace, keol)
+                else if(lkeyword .eq. 'EQUIPMENT_OVERRIDE') then
+                  kequip_over=.true.
 C         TPICD
                 elseif (lkeyword .eq. 'TPICD') then
                   lprompt=lvalue(1:3)

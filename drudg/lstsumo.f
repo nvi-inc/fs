@@ -430,7 +430,7 @@ C  Footage
         write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
       else if(kdisk) then
         if(kskd) then
-          write(luprt,'(f8.1,$)') counter/1024  !convert megabytes to Gigabytes
+          write(luprt,'(f8.1,$)') counter/1000  !convert megabytes to Gigabytes
         endif
       else if(kk4) then
         if(kskd) then

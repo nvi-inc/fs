@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.1/misc/fs9701up.txt  Version: 0.6 Date: 040930
+File: /usr2/fs-9.7.2/misc/fs9702up.txt  Version: 0.9 Date: 041020
 
 I. Introduction
 
@@ -7,7 +7,8 @@ This memo is divided into 4 sections:
    II.  Changes Since Version 9.6.9
    III. Installation
    IV.  Updating from 9.7.0
-   V.  Transferring The Update Archive By DOS Floppy
+   V.   Updating from 9.7.1
+   VI.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
 new version.
@@ -40,8 +41,8 @@ This version is intended to installed as an update for 9.6.9.  This
 update does not require as many changes to local procedures and
 control files as some relatively recent ones have.  It should be
 fairly easy to install.  For stations that have already installed
-9.7.0, a separate section below describes how to update from that
-version.
+9.7.0 or 9.7.1, separate sections below provide even more abbreviated
+instructions from these versions.
 
 II. Changes Since Version 9.6.9
 
@@ -54,7 +55,7 @@ description.
 
 The following is a summary of the changes.  Items numbered 4 and above
 were added after 9.6.10. Items numbered 43 and above were added after
-9.7.0.
+9.7.0. Items  numbered 51 and above were added after 9.7.1.
 
 1. New USER_DEVICE command for support of station detectors in ONOFF,
    FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
@@ -116,6 +117,8 @@ were added after 9.6.10. Items numbered 43 and above were added after
 49. Fix handling of Mark5A "vsn?" response to filter out DSM code.
 50. Added use of FS_CHECK_NTP environment variable for NTP status
     checking.
+51. /usr2/fs/misc/other_files.txt added.
+52. K4 newtape/oldtape with null argument crash fixed.
 
 A more detailed discussion of these changes follows.
 
@@ -537,15 +540,26 @@ A more detailed discussion of these changes follows.
     NTP, the FS now does not check the NTP status unless the
     "FS_CHECK_NTP" variable has been set.
 
+51. /usr2/fs/misc/other_files.txt added.  This file is intended to
+    provide some documentation on other user and system files that may
+    directly or indirectly impact FS operation.  It is not inteneded
+    to be exhaustive, but to provide a pointer to other files that
+    important.  It will probably be expanded as time goes on.
+
+52. K4 newtape/oldtape with null argument crash fixed. If the tape
+    number was omitted for the DMS slot to access, the FS
+    crashed. This was fixed.
+
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 040929.  The release of DRUDG includes
+DRUDG opening message date is 041019.  The release of DRUDG includes
 limited support for eVLBI.  In addition it incorporates changes in the
 format of some Mark5 commands, several bug fixes, and support for the
 Dymo label printer.  The following is a summary of changes.  They are
 described in more detail after the summary.  Items numbered 10 and
-above were added after 9.7.0.
+above were added after 9.7.0.  Items numbered 18 and above were added
+after 9.7.1.
 
 1. Several minor K4 related bugs were fixed.
 2. If recorder configuration is "none", no tape related commands are
@@ -569,6 +583,21 @@ above were added after 9.7.0.
     not enough tracks enabled to fill up the barrel. 
 16. The time allocated for disk2file was changed.
 17. Default file names for disk2file transfers were not implemented.
+18. Modified barrel rolling so that we only keep distinct barrel
+    rolls.
+19. Barrel rolling check. 
+20. Changed calculation of storage space for Mark5.
+21. Fixed bug in reading labels line in skedf.ctl. 
+22. Fixed bug in reading optionX line in skedf.ctl. 
+23. In2net with no destination handled.  
+24. In2net network parameters set.  
+25. A global in2net destination can be specified using the
+    Data_Transfer_Override option in DRUDG.  
+26. New data_transfer_override features
+27. Unique scan names for Mark III .skd files.  
+28. Equipment_override keyword in skedf.ctl.
+29. Bug in label command fixed. 
+30. Negative LO frequency warning message removed. 
 
 A more detailed discussion of these changes follows.
 
@@ -757,6 +786,143 @@ A more detailed discussion of these changes follows.
 17. Default file names for disk2file transfers were not implemented.
     This is waiting for a consensus on this topic to stablize.
 
+18. Modified barrel rolling so that we only keep distinct barrel
+    rolls.  Previous versions of DRUDG stored one barrel roll per
+    station per mode, even if all of them were the same.  This caused
+    DRUDG to run out of space in a very complicated schedule generated
+    by D. Graham (MPIfR).  This fix should also makes DRUDG start
+    quicker.
+
+19. Barrel rolling check.  DRUDG will now do some simple checks of
+    barrel rolling to ensure that data does not "roll off the barrel".
+    If DRUDG thinks there is a problem, it will issue a warning
+    message.
+
+    This feature was actually present in release 9.7.1.  However,
+    there was a problem in checking barrel rolling with fan-out.  This
+    problem has since been fixed.
+
+20. Changed calculation of storage space for Mark5.  Previously, it
+    divided by 1,024,000,000.  Now it divides by 1,000,000,000.  The
+    only thing this effects is the snap summary listing.
+
+21. Fixed bug in reading labels line in skedf.ctl.  Previously DRUDG
+    assumed that the labels line in skedf.ctl was of format
+
+      labels script_name
+
+    This was what was in the documentation.  Some stations used lines
+    like
+
+       labels lpr -Pepson
+
+    Version 9.7.1 of DRUDG would only pick up the first argument
+    ("lpr" above).  This version of DRUDG has been modified to be
+    backward compatible, and now picks up all the arguments.
+
+22. Fixed bug in reading optionX line in skedf.ctl.  An error was made
+    in setting a variable read by DRUDG.  If DRUDG encounters the line
+
+      optionX YY
+
+     where X is 1,4,5, character array coption(j) (j=1,2 or 3,
+     respectively) should be assigned the value YY.  DRUDG was
+     inadvertently modified to try to set coption(X) to YY.  In the
+     case of X=4 or 5 this resulted in an array overflow error.
+
+23. In2net with no destination handled.  If the destination is missing
+    in the .skd schedule file for an "in2net" data transfer statement,
+    DRUDG will not put out an "in2net=connect..." command in the .snp
+    schedule file.  This behavior is scan dependent, so that if some
+    scans do have a destination specified, this command will be issued
+    for these scans, and omitted for the scans with no destination.
+
+    Other in2net commands that do not depend on the destination are
+    not affected by the absense or presence of a destination.
+
+24. In2net network parameters set.  If the in2net command is issued for a
+    station, then procs will add the following line to the
+    exper_initi procedure:
+
+      mk5=net_protocol:tcp:4194304:2097152
+
+    This assumes that "data_transfer_override" has not turned off
+    in2net.  This feature allows the network buffer parameters for
+    Mark5A to be set to what appear to be reasonable values.  However,
+    because thecommand is placed in exper_initi, it gives each station
+    the option of modifying the values, possibly on per experiment
+    basis.
+
+25. A global in2net destination can be specified using the
+    Data_Transfer_Override option in DRUDG.  This option can be toggled
+    on or off. If the option is on, and the global destination is
+    blank, then no "in2net=connect,..." commands will be issued.  This
+    gives the station the option of opening the connection manually or
+    overriding a destination present in the .skd schedule file.
+
+    If a data_transfer_ovverride command has previously been used to
+    convert disk2file commands to in2net_commands, the destination
+    will be that of the global in2net command.
+
+26. New data_transfer_override features:
+
+    The data_transfer_override options "In2net_2_disk2file" (which
+    converts in2net commands into disk2file commands) and
+    "Disk2file_2_in2net" have been turned into toggles.  Specifying
+    these commands once turns them on. Twice turns them off.
+
+    Previously In2net_2_disk2file would convert all in2net commands
+    into disk2file commands, and cancel the conversion of disk2file
+    commands which had been converted into in2net commands. In this
+    release in2net_2_disk2file only affects in2net commands.
+
+    The behavior of disk2file_2_in2net is similar.
+
+27. Unique scan names for Mark III .skd files.  This applies only to
+    old style Mark III schedule files (normally only made by NASA
+    SKED).  Previously scans are sorted first by time, and then by
+    order in the schedule file.  If several scans start within the
+    same minute, the first scan is labeled 145-1215a, the second
+    145-1215b, etc..., where 145 is the day and 1215 is the time in
+    the format HHMM.
+
+    There was a potential ambiguity in scan names if a schedule has
+    two scans which start on the same second.  In that case, if the
+    order of the scans is reversed, the scan names would be reversed.
+    This problem has been fixed by sorting all scans first on time,
+    and then on name of source.  The labeling of scans is identical to
+    before.  If several scans start within the same minute, the first
+    scan is labeled 145-1215a, the second 145-1215b, etc..., where 145
+    is the day and 1215 is the time in the format HHMM.
+
+28. Equipment_override keyword in skedf.ctl. This is a new keyword in
+    skedf.ctl.  If present, the equipment specified in the "equipment"
+    line in skedf.ctl will override the equipment specified in the
+    .skd schedule file.  For example, the following two lines
+
+       equipment Mark4  Mark5A none
+       equipment_override
+
+    specify that the station has a Mark4 rack and a Mark5A recorder as
+    recorder one and no recorder 2.
+
+    If the equipment_override line is absent, the equipment line
+    skedf.ctl will be used only if there is NO equipment specified in
+    the schedule.
+
+29. Bug in label command fixed.  DRUDG version 9.7.1 introduced
+    support for the DYMO label printer.  In the process a bug was
+    introduced in the label command (option 6).  If you tried to print
+    out labels for several experiments in a row, by reading in an
+    experiment using option 8, then making the labels, using option 6,
+    and repeating this process, DRUDG would only make labels for the
+    first experiment.  This bug has been fixed.  A work around is to
+    only make labels for one session at a time.
+
+30. Negative LO frequency warning message removed.  Previous versions
+    of DRUDG printed a warning message if one of the LO frequencies
+    was negative. Version 9.7.2 removes this message.
+
  			    C. Known FS Bugs
 
 The following is a summary list of known bugs.  They are described in
@@ -916,8 +1082,8 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
-If you are updating from 9.7.0, please follow the directions in the
-separate section below titled "IV. Updating from 9.7.0".
+If you are updating from 9.7.0 and 9.7.1, please follow the directions
+in the separate section below titled "IV. Updating from 9.7.0 and 9.7.1".
 
 The following instructions are for upgrading from 9.6.9 and 9.6.10.
 Please follow all the steps.
@@ -925,7 +1091,7 @@ Please follow all the steps.
 Below is a list of "critical updates" is given.  These are updates
 that must be applied sequentially.  Please start with the next update
 with a later version number than you have and apply it and the
-remaining listed version before upgrading to 9.7.1.  You can find the
+remaining listed version before upgrading to 9.7.2.  You can find the
 installation notes for these versions on the FS FTP servers in the
 docs.old sub-directory.  The list of critical updates is:
 
@@ -970,7 +1136,7 @@ any questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.7.1 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.7.2 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -978,7 +1144,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.1.tgz
+      get fs-9.7.2.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -992,12 +1158,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.1.tgz
+      tar -xzpf /tmp/fs-9.7.2.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.1 fs
+      ln -sfn fs-9.7.2 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1028,7 +1194,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
 (11) Log in as oper
 
-(12) Modify your procedure files.  There are three require
+(12) Modify your procedure files.  There are four required
      modifications.
 
      A. One of these is to update your CHANGE_PACK procedure.  Please
@@ -1047,6 +1213,24 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         the S2 DAS time to be logged; the time model will still be
         referenced to the S2 recorder in this case.
 
+     D. You should check your SNAP procedure libraries for low-level
+        "mk5=..." commands that use "informal" syntax and update these
+        to formal syntax.  The primary changes that this entails are
+        that semi-colons must be used instead of spaces to separate
+        parameters and queries must always use question marks, "?", at
+        the end.  A way to find the commands that need to be changed
+        is to use the shell commands:
+
+          cd /usr2/proc
+          grep mk5= |less
+
+        which will show you what "mk5=..." commands exist in which of
+        your .prc files.  It will not show you which individual
+        procedures contain the commands.  However, you can find those
+        by listing the relevant .prc files with "less" and searching
+        for the command.  You should use "pfmed" to make the actual
+        changes to the procedures.
+
      An optional modification is to add the procedures in
      /usr2/fs/st.default/proc/mk5old.prc to your station.prc library.
      These procedures provide backward compatible synonyms for the old
@@ -1057,20 +1241,20 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      hardship for you otherwise.  Eliminating the old names as soon as
      possible will be beneficial.
 
-(13) Skip this step if you have 9.6.10 installed.  If you use station
-     detectors, you will need to update any procedures that use them.
-     Please delete all uses of CALTEMPx, FLUXx, TSYSx, and BEAMx,
-     where x=5 or 6 from your procedure libraries, probably only
-     station.prc and point.prc.  You now must define your detectors
-     using the new USER_DEVICE command (please use HELP=USER_DEVICE
-     for more details about the new command).  For pointing and gain
-     calibration, you would typically do this in the INITP procedure,
-     or equivalent, in point.prc.  If you use station devices in your
-     CALTSYS procedure, please look at
-     /usr2/fs/st.default/proc/u5u6caltsys.prc for an example of how it
-     should be set-up.  Please not that you cannot use u5 and u6 for
-     system temperature measurements if your rack device type is Mark
-     III/IV or VLBA/4.
+(13) Skip this step if you have 9.6.10 or later installed or if you
+     don't use station detectors.  If you use station detectors you
+     will need to update your procedures.  Please delete all uses of
+     CALTEMPx, FLUXx, TSYSx, and BEAMx, where x=5 or 6 from your
+     procedure libraries, probably only station.prc and point.prc.
+     You now must define your detectors using the new USER_DEVICE
+     command (please use HELP=USER_DEVICE for more details about the
+     new command).  For pointing and gain calibration, you would
+     typically do this in the INITP procedure, or equivalent, in
+     point.prc.  If you use station devices in your CALTSYS procedure,
+     please look at /usr2/fs/st.default/proc/u5u6caltsys.prc for an
+     example of how it should be set-up.  Please not that you cannot
+     use u5 and u6 for system temperature measurements if your rack
+     device type is Mark III/IV or VLBA/4.
 
 (14) Update your control files.  There are two required modifications.
 
@@ -1162,10 +1346,10 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         (usually non-FS) Linux distribution.
 
         I. If you have the FS Linux 4 or FS Linux 5 distribution
-           installed, you should diff the 9.7.1 version against the
+           installed, you should diff the 9.7.2 version against the
            9.6.9 version:
 
-             cd /usr2/fs-9.7.1/st.default/prog
+             cd /usr2/fs-9.7.2/st.default/prog
              diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
 
            and then make the corresponding changes in your local copy of
@@ -1255,15 +1439,15 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      particular for this upgrade you should test that Mark 5
      operations work as expected.
 
-
 IV.  Updating from 9.7.0
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.0 and are updating to 9.7.1
+stations that have already installed 9.7.0 and are updating to 9.7.2.
+A separate following section describes updating from 9.7.1.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.1 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.2 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1271,7 +1455,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.1.tgz
+      get fs-9.7.2.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1285,12 +1469,12 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.1.tgz
+      tar -xzpf /tmp/fs-9.7.2.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.1 fs
+      ln -sfn fs-9.7.2 fs
 
 (6) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1365,26 +1549,108 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      "FS_CHECK_NTP" at the end of these files should be copied to the
      ends of the corresponding user's files and uncommented.
 
-(11) Reboot the computer.  This is important for both re-initializing
+(11) Unless you have done so already, you should check your SNAP
+     procedure libraries for low-level "mk5=..." commands that use
+     "informal" syntax and update these to formal syntax.  The primary
+     changes that this entails are that semi-colons must be used
+     instead of spaces to separate parameters and queries must always
+     use question marks, "?", at the end.  A way to find the commands
+     that need to be changed is to use the shell commands:
+
+       cd /usr2/proc
+       grep mk5= |less
+
+     which will show you what "mk5=..." commands exist in which of
+     your .prc files.  It will not show you which individual
+     procedures contain the commands.  However, you can find those by
+     listing the relevant .prc files with "less" and searching for the
+     command.  You should use "pfmed" to make the actual changes to
+     the procedures.
+
+(12) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
-V. Transferring The Update Archive By DOS Floppy
+IV.  Updating from 9.7.1
+
+This section contains abbreviated installation instructions for
+stations that have already installed 9.7.1 and are updating to 9.7.2.
+
+(1) Log-in as prog.
+
+(2) Place a copy of the fs-9.7.2 archive in your "/tmp" directory.
+For example you might do the following:
+
+      cd /tmp
+      ncftp -u atri.gsfc.nasa.gov
+      (enter your account name for the server at prompt)
+      (enter your password for the server at prompt)
+      cd /fs/dist
+      get fs-9.7.2.tgz
+      quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section "V. Transferring The Update Archive By DOS Floppy" below.
+
+(3) Log-out as prog and log-in as root.
+
+(4) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/fs-9.7.2.tgz
+
+(5) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.7.2 fs
+
+(6) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(7) Make the FS:
+
+      cd /usr2/fs
+      make
+
+(9) Unless you have done so already, you should check your SNAP
+    procedure libraries for low-level "mk5=..." commands that use
+    "informal" syntax and update these to formal syntax.  The primary
+    changes that this entails are that semi-colons must be used
+    instead of spaces to separate parameters and queries must always
+    use question marks, "?", at the end.  A way to find the commands
+    that need to be changed is to use the shell commands:
+
+      cd /usr2/proc
+      grep mk5= |less
+
+    which will show you what "mk5=..." commands exist in which of your
+    .prc files.  It will not show you which individual procedures
+    contain the commands.  However, you can find those by listing the
+    relevant .prc files with "less" and searching for the command.
+    You should use "pfmed" to make the actual changes to the
+    procedures.
+
+(10) Reboot the computer.  This is important for both re-initializing
+     shared memory and the login environment.
+
+VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.7.1.tgz archive have been placed in
+floppy, "split" files of the fs-9.7.2.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9701tg.aa
-fs9701tg.ab
-fs9701tg.ac
+fs9702tg.aa
+fs9702tg.ab
+fs9702tg.ac
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9701tg.* >fs-9.7.1.tgz
+cat fs9702tg.* >fs-9.7.2.tgz
 
-This will create an exact image of the original fs-9.7.1.tgz archive
+This will create an exact image of the original fs-9.7.2.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.

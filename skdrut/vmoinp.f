@@ -81,7 +81,8 @@ C  LOCAL:
       character*128 cout
       integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
       integer ptr_ch,fvex_len,fget_mode_def
-      logical km3rack,km4rack,kvrack,klrack,km4rec,km3rec,kvrec,ks2rec 
+      logical km3rack,km4rack,kvrack,klrack,km4rec,km3rec,kvrec,ks2rec
+
       integer z4000,z100
       DATA Z4000/Z'4000'/,Z100/Z'100'/
  
@@ -101,9 +102,11 @@ C
           ncodes=ncodes+1
           modedefnames(ncodes)=cout
           if (il.gt.16) then
-            write(lu,'("VMOINP02 - Mode name ",a," too long for ",
-     .      " matching in sked catalogs. Only the ",
-     .      "first 16 characters were kept.")') cout(1:il)
+            write(lu,'(a)')
+     >      "VMOINP02 - Mode name   "//cout(1:il)//
+     >      " too long for matching in sked catalogs."
+            write(lu,'(a)')
+     >      "Only keeping 16 chars: "//cout(1:16)
             il=16
           endif
           call char2hol(cout,lmode_cat(1,ncodes),1,il)
@@ -131,19 +134,21 @@ C    Assign a code to the mode and the same to the name
 
           il=fvex_len(modedefnames(icode))
           im=fvex_len(stndefnames(istn))
-C         Recognized recorder types
-          kvrec=ichcm_ch(lstrec(1,istn),1,'VLBA').eq.0
-          km3rec=ichcm_ch(lstrec(1,istn),1,'Mark3').eq.0
-          km4rec=ichcm_ch(lstrec(1,istn),1,'Mark4').eq.0
-          ks2rec=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+
+          kvrec=cstrec(istn).eq.'VLBA'.or. cstrec(istn).eq. 'VLBA4'
+          km3rec=cstrec(istn).eq.'Mark3'
+          km4rec=cstrec(istn).eq.'Mark4'
+          ks2rec=cstrec(istn).eq.'S2'
 C         Recognized rack types
-          klrack=ichcm_ch(lstrack(1,istn),1,'LBA').eq.0
-          kvrack=ichcm_ch(lstrack(1,istn),1,'VLBA').eq.0
-     .    .or.ichcm_ch(lstrack(1,istn),1,'VLBAG').eq.0
-          km3rack=ichcm_ch(lstrack(1,istn),1,'Mark3').eq.0
-          km4rack=ichcm_ch(lstrack(1,istn),1,'Mark4').eq.0
+          klrack=cstrack(istn).eq.'LBA'
+          kvrack=cstrack(istn).eq.'VLBA'.or.cstrack(istn).eq.'VLBAG'.or.
+     >           cstrack(istn).eq. 'VLBA4'
+
+          km3rack=cstrack(istn).eq.'Mark3'
+          km4rack=cstrack(istn).eq.'Mark4'
 C         Initialize roll to blank
-          idum = ichmv_ch(lbarrel(1,istn,icode),1,'    ')
+          cbarrel(istn,icode)=" "
+
 
 C         Get $FREQ statements. If there are no chan_defs for this
 C         station, then skip the other sections.
@@ -465,7 +470,7 @@ C         the canned mode or "M" to indicate non-standard, or off.
 C         The name in the schedule file is not used unless it is "off".
             call ckroll(nrdefs,nrsteps,irtrk,iinc,ireinit,
      .                    istn,icode,croll)
-            idum = ichmv_ch(lbarrel(1,istn,icode),1,croll)
+            cbarrel(istn,icode)=croll
         endif
 
 C       Store data modulation
