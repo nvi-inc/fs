@@ -10,6 +10,7 @@ C History:
 C 960517 nrv New.
 C 960810 nrv Add tape motion to VUNPDAS call. Store LSTREC.
 C 960817 nrv Add tape speed and number of tapes to VUNPDAS.
+c 970123 nrv Add calls to ERRORMSG.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -70,6 +71,7 @@ C     2. Now call routines to retrieve all the station information.
           write(lu,'("VSTINP01 - Error getting $ANTENNA information",
      .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
      .    iret,ierr
+          call errormsg(iret,ierr,'ANTENNA',lu)
           ierr1=1
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
@@ -78,6 +80,7 @@ C     2. Now call routines to retrieve all the station information.
           write(lu,'("VSTINP02 - Error getting $SITE information",
      .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
      .    iret,ierr
+          call errormsg(iret,ierr,'SITE',lu)
           ierr1=2
         endif
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
@@ -87,6 +90,7 @@ C     2. Now call routines to retrieve all the station information.
           write(lu,'("VSTINP03 - Error getting $DAS information",
      .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
      .    iret,ierr
+          call errormsg(iret,ierr,'DAS',lu)
           ierr1=3
         endif
 C
@@ -180,10 +184,12 @@ C           write(lu,'("VSTINP255 - Step function horizon mask being ",
 C    .      "used for ",4a2)') (lstnna(j,ii),j=1,4)
 C         endif
           NHORZ(I) = NHZ
-          DO J=1,NHORZ(I)
-            AZHORZ(J,I) = AZH(J)
-            ELHORZ(J,I) = ELH(J)
-          END DO
+          if (nhorz(i).gt.0) then
+            DO J=1,NHORZ(I)
+              AZHORZ(J,I) = AZH(J)
+              ELHORZ(J,I) = ELH(J)
+            END DO
+          endif
 C
 C      2.6 Here we handle the coordinate mask
 C
