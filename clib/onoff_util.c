@@ -53,6 +53,8 @@ static char *lmarklc[ ]={
   "ifp1","ifp2","ifp3","ifp4","ifp5","ifp6","ifp7","ifp8","ifp9",
   "ifp10","ifp11","ifp12","ifp13","ifp14"};
 
+static char *luser[ ] = {"u1", "u2", "u3", "u4", "u5", "u6" };
+
 int onoff_dec(lcl,count,ptr)
 struct onoff_cmd *lcl;
 int *count;
@@ -62,14 +64,15 @@ char *ptr;
     int i, j, k;
     double freq;
     static int iconv, isb;
-    static int itpis_save[MAX_DET];
+    static int itpis_save[MAX_ONOFF_DET];
+    int itpis_test[MAX_ONOFF_DET];
 
     ierr=0;
     if(ptr==NULL) {
       if(*count>5) {
 	*count=-1;
       /*
-      for(i=0;i<MAX_DET;i++)
+      for(i=0;i<MAX_ONOFF_DET;i++)
 	if(lcl->itpis[i]!=0)
 	  printf("i %d lcl->itpis[i] %d lcl->ifc[i] %d lcl->lwhat[i] %2.2s\n",
 		 i,lcl->itpis[i],lcl->ifc[i],lcl->lwhat[i]);
@@ -81,7 +84,7 @@ char *ptr;
     }
     switch (*count) {
     case 1:
-      for(i=0;i<MAX_DET;i++) {
+      for(i=0;i<MAX_ONOFF_DET;i++) {
 	itpis_save[i]=lcl->itpis[i];
 	lcl->itpis[i]=0;
       }
@@ -115,10 +118,18 @@ char *ptr;
 	  ierr=-106;
 	  return ierr;
       }
+      for(i=(sizeof(luser)/sizeof(char *))-2;i<sizeof(luser)/sizeof(char *);i++) {
+	if(strcmp(ptr,luser[i])==0) {
+	  lcl->itpis[MAX_DET+i]=1;
+	  strncpy(lcl->devices[MAX_DET+i].lwhat,luser[i],2);
+	  goto done;
+	}
+      }
       if(strcmp(ptr,"*")==0) {
 	for (i=0;i<14;i++)
 	  lcl->itpis[i]=itpis_save[i];
-      } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
+      } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4
+		||shm_addr->equip.rack==LBA4) {
 	if(strcmp(ptr,"allvc")==0) {
 	  for (i=0;i<14;i++) {
 	    lcl->itpis[i]=1;
@@ -130,6 +141,50 @@ char *ptr;
 	    lcl->itpis[i]=1;
 	    strncpy(lcl->devices[i].lwhat,lmark[i],2);
 	  }
+	  goto done;
+	} else if(strcmp(ptr,"formvc")==0) {
+	  for(i=0;i<MAX_ONOFF_DET;i++)
+	    itpis_test[i]=0;
+	  if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
+	    mk4vcd(itpis_test);
+	  else if(shm_addr->equip.rack==MK3) {
+	    if(shm_addr->imodfm==0||shm_addr->imodfm==2)
+	      for(i=0;i<14;i++)
+		itpis_test[i]=1;
+	    else if(shm_addr->imodfm==1)
+	      for(i=0;i<13;i+=2)
+		itpis_test[i]=1;
+	    else if(shm_addr->imodfm==3)
+		itpis_test[0]=1;
+	  }
+	  for (i=0;i<14;i++)
+	    if(itpis_test[i]!=0) {
+	      lcl->itpis[i]=1;
+	      strncpy(lcl->devices[i].lwhat,lmark[i],2);
+	    }
+	  goto done;
+	} else if(strcmp(ptr,"formif")==0) {
+	  for(i=0;i<MAX_ONOFF_DET;i++)
+	    itpis_test[i]=0;
+	  if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
+	    mk4vcd(itpis_test);
+	  else if(shm_addr->equip.rack==MK3) {
+	    if(shm_addr->imodfm==0||shm_addr->imodfm==2)
+	      for(i=0;i<14;i++)
+		itpis_test[i]=1;
+	    else if(shm_addr->imodfm==1)
+	      for(i=0;i<13;i+=2)
+		itpis_test[i]=1;
+	    else if(shm_addr->imodfm==3)
+		itpis_test[0]=1;
+	  }
+	  for(j=1;j<4;j++)
+	    for (i=0;i<14;i++) {
+	      if(itpis_test[i]!=0 && abs(shm_addr->ifp2vc[i])==j) {
+		lcl->itpis[13+j]=1;
+		strncpy(lcl->devices[13+j].lwhat,lmark[13+j],2);
+	      }
+	    }
 	  goto done;
 	} else { 
 	  for(i=0;i<sizeof(lmark)/sizeof(char *);i++) {
@@ -173,6 +228,31 @@ char *ptr;
 	    lcl->itpis[i]=1;
 	    strncpy(lcl->devices[i].lwhat,lwhat[i],2);
 	  }
+	  goto done;
+
+	} else if(strcmp(ptr,"formbbc")==0) {
+	  if(shm_addr->equip.rack==VLBA4)
+	    mk4bbcd(&lcl->itpis);
+	  else if(shm_addr->equip.rack==VLBA)
+	    vlbabbcd(&lcl->itpis);
+	  for (i=0;i<MAX_BBC*2;i++)
+	    if(lcl->itpis[i]==1)
+	      strncpy(lcl->devices[i].lwhat,lwhat[i],2);
+	  goto done;
+	} else if(strcmp(ptr,"formif")==0) {
+	  for(i=0;i<MAX_ONOFF_DET;i++)
+	    itpis_test[i]=0;
+	  if(shm_addr->equip.rack==VLBA4)
+	    mk4bbcd(&itpis_test);
+	  else if(shm_addr->equip.rack==VLBA)
+	    vlbabbcd(&itpis_test);
+	  for (j=0;j<4;j++)
+	    for(i=0;i<14;i++)
+	      if(itpis_test[i]!=0||itpis_test[i+14]!=0)
+		if(shm_addr->bbc[i].source==j) {
+		  lcl->itpis[28+j]=1;
+		  strncpy(lcl->devices[28+j].lwhat,lwhat[28+j],2);
+		}
 	  goto done;
 	} else { 
 	  for(i=0;i<sizeof(lwhat)/sizeof(char *);i++) {
@@ -243,7 +323,7 @@ struct onoff_cmd *lcl;
   }
   
   if(*count >= 2) {
-    for(i=inext;i<MAX_DET;i++) {
+    for(i=inext;i<MAX_ONOFF_DET;i++) {
       inext=i+1;
       if(lcl->itpis[i]!=0) {
 	if(lcl->setup) { 
