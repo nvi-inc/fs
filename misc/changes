@@ -6177,3 +6177,8 @@ Version 9.6.7 030905
            don't check record time if scan length not set
 
 Version 9.6.8 030910
+
+030904 WEH quikv/bank_check.c
+           fixed too frequent "change_pack" procedures
+
+Version 9.6.9 030915
