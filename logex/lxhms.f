@@ -32,6 +32,8 @@ C LOCAL VARIABLES:
 C 
 C     LXDAY,LXHR,LXMIN,LXSEC - Day, Hours, Minutes, & Seconds 
 C     TIME - Contains log time
+      integer it(6)
+      integer*4 secs
 C 
 C INITIALIZED VARIABLES:
 C 
@@ -44,29 +46,21 @@ C
 C ******************************************************************* 
 C 
 C 
-      time = xx 
-      lxday = time
-      time = time - lxday 
-      time = time * 24.d0 
-      lxhr = time 
-      time = time - lxhr
-      time = time * 60.d0 
-      lxmin = time
-      time = time - lxmin 
-      time = time * 60.d0 
-      lxsec = time
-      call ib2as(lxday,line,nch,3)
-      nch=nch+3 
-      call ifill_ch(line,nch,1,'-')
-      nch=nch+1 
-      call ib2as(lxhr,line,nch,o'40000'+o'400'+2) 
-      nch=nch+2 
-      call ib2as(lxmin,line,nch,o'40000'+o'400'+2)
-      nch=nch+2 
-      if (ikey.ne.13) then
-        call ib2as(lxsec,line,nch,o'40000'+o'400'+2)
-        nch=nch+2 
-      end if
+      secs=int(xx/100.0d0+0.005d0)
+      call fc_secs2rte(secs,it)
+      it(1)=(xx-secs*100.0d0)+.5
+      nch=nch+ib2as(it(6),line,nch,4)
+      nch=ichmv_ch(line,nch,'.')
+      nch=nch+ib2as(it(5),line,nch,o'40000'+o'400'*2+3) 
+      nch=ichmv_ch(line,nch,'.')
+      nch=nch+ib2as(it(4),line,nch,o'40000'+o'400'+2) 
+      nch=ichmv_ch(line,nch,':')
+      nch=nch+ib2as(it(3),line,nch,o'40000'+o'400'+2)
+      nch=ichmv_ch(line,nch,':')
+      nch=nch+ib2as(it(2),line,nch,o'40000'+o'400'+2)
+      nch=ichmv_ch(line,nch,'.')
+      nch=nch+ib2as(it(1),line,nch,o'40000'+o'400'+2)
+
 C
       return
       end 
