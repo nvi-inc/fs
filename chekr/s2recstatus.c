@@ -36,6 +36,12 @@ char *lwho;
   int summary, num_entries;
   unsigned char status_list[RCL_STATUS_MAX*2];
   int i, target;
+  static long unsigned pos_err_count=0;
+  static long pos_err=0;
+  static long unsigned code_err_count=0;
+  static long code_err=0;
+  static long unsigned end_err_count=0;
+  static long end_err=0;
 
   target=1&(shm_addr->actual.s2rec_inuse+1);
   shm_addr->actual.s2rec[target].rstate_valid=FALSE;
@@ -56,8 +62,15 @@ char *lwho;
   skd_par(ip);
   if(ip[2]!=0) {
     cls_clr(ip[0]);
-    logita(NULL,ip[2],ip+3,ip+4);
+    if(pos_err!=ip[2] || ((pos_err_count++%20)==0))
+      logita(NULL,ip[2],ip+3,ip+4);
+    if(pos_err!=ip[2])
+      pos_err_count=1;
+    pos_err=ip[2];
     goto end_update;
+  } else if(pos_err!=0){
+    pos_err=0;
+    pos_err_count=0;
   }
 
   opn_rclcn_res(&res_buf,ip);
@@ -77,9 +90,15 @@ char *lwho;
       goto end_update;
 
     if(code!=0) {
-      logita(NULL,-517,lwho,"rc");
+      if(code_err!=code || ((code_err_count++%20)==0))
+	logita(NULL,-517,lwho,"rc");
+      if(code_err!=code)
+	code_err_count=1;
+      code_err=code;
       goto end_update;
     } else {
+      code_err=0;
+      code_err_count=0;
       shm_addr->actual.s2rec[target].position=position.overall.position;
       shm_addr->actual.s2rec[target].posvar  =position.overall.posvar;
       shm_addr->actual.s2rec[target].position_valid=TRUE;
@@ -87,8 +106,16 @@ char *lwho;
   }
   
 end_update:
-  if(ierr!=0)
-    logita(NULL,ierr-20,lwho,"rc");
+  if(ierr!=0) {
+    if(end_err!=ierr ||((end_err_count++%20)==0))
+      logita(NULL,ierr-20,lwho,"rc");
+    if(end_err!=ierr)
+      end_err_count=1;
+    end_err=ierr;
+  } else if(end_err!=0) {
+    end_err=0;
+    end_err_count=0;
+  } 
 
   shm_addr->actual.s2rec_inuse=target;
 
@@ -134,17 +161,19 @@ end_update:
       int istat=status_list[i*2];
       int itype=status_list[i*2+1];
 
-      if((0==(itype&0x4))&&!first)
+      if(!first)
 	stat_now[istat]++;
 
-      if(itype&0x4 || 0==stat_count[istat]%20|| first) {
-	if((!first) && (itype&0x4)==0)
-	  stat_count[istat]++;
+      if((itype&0x4&&stat_count[istat]==1) ||0==stat_count[istat]%20|| first) {
 
 	if(icount++==0)
 	  ini_rclcn_req(&req_buf);
 	add_rclcn_status_detail(&req_buf,"rc",istat,FALSE,FALSE);
       }
+
+      if((!first))
+	stat_count[istat]++;
+
     }
     if(icount == 0)
       goto clean_up;
@@ -213,6 +242,7 @@ end_update:
 	}
 	if((!first) || save)
 	  logite(outbuf,ierr,"rz");
+	j++;
       }
     }
     
@@ -222,7 +252,7 @@ clean_up:
     first=0;
 
   for (i=0;i<RCL_STATCODE_MAX;i++)
-    if(stat_count[i]>0 && stat_now[i]==0) {
+    if(stat_count[i]>1 && stat_now[i]==0) {
       sprintf(outbuf,"occurred a total of %d times, but has now stopped",
 	      stat_count[i]);
       logite(outbuf,-i,"rz");
