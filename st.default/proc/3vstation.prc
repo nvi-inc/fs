@@ -344,6 +344,7 @@ define  ready         00000000000x
 sxcts
 rxmon
 newtape
+tape=low,reset
 st=for,135,off
 !+11s
 et
