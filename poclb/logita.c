@@ -22,7 +22,7 @@ char *who;           /* 2-char string identifying the error  */
 char *what;          /* 2-char string with more info         */
 
 {
-  char buf[100];    /* Holds the complete log entry */
+  char buf[512];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  
@@ -35,13 +35,13 @@ char *what;          /* 2-char string with more info         */
   int2str(buf,it[3],-2,1);
   int2str(buf,it[2],-2,1);
   int2str(buf,it[1],-2,1);
-  int2str(buf,it[1],-2,1);
+  int2str(buf,it[0],-2,1);
 
 /* For error messages, put ?ERROR xx (nn) into the log entry.
 */
   if (ierr != 0) {
     strcat(buf,"?ERROR ");
-    strcat(buf,who);
+    strncat(buf,who,2);
     int2str(buf,ierr,-5,0);
     strcat(buf,"(");
     strncat(buf,what,2);
