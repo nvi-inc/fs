@@ -65,7 +65,7 @@ C     IF (IERR.EQ.0.OR.NARGS.LT.8) GOTO 300
       if(ierr.eq.0) go to 300
       nch = ichmv_ch(ibuf,nch,'?ERROR ') 
       nch = ichmv(ibuf,nch,lwho,1,2)
-      nch = ichmv_ch(ibuf,nch,'  ')
+      nch = ichmv_ch(ibuf,nch,' ')
       nch = nch + ib2as(ierr,ibuf,nch,4)
 C     IF (NARGS .LT. 9 .OR. LWHAT.EQ.0) GOTO 900
       if(nargs.lt.9) goto 900
