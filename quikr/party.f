@@ -142,7 +142,7 @@ C
           enddo
         endif
       else
-         do i=1,35
+         do i=1,36
             if(index('0123456789',cjchar(iparm,1)).ne.0) 
      .           goto 255
             if (cjchar(iparm,1).eq.'*') then
@@ -158,10 +158,10 @@ C
                goto 990
             end if
             ig=ias2b(iparm,2,1)
-            if(drive.ne.VLBA.and.ig.lt.1.or.ig.gt.4) then
+            if(drive.ne.VLBA.and.(ig.lt.1.or.ig.gt.4)) then
                ierr = -206
                goto 990
-            else if(drive.eq.VLBA.and.ig.lt.0.or.ig.gt.3) then
+            else if(drive.eq.VLBA.and.(ig.lt.0.or.ig.gt.3)) then
                ierr = -216
                goto 990
             end if
@@ -186,10 +186,10 @@ C
  255        nc=1
             if(cjchar(iparm,2).ne.' ') nc=2
             it=ias2b(iparm,1,nc)
-            if(drive.ne.VLBA.and.it.lt.1.or.it.gt.28) then
+            if(drive.ne.VLBA.and.(it.lt.1.or.it.gt.28)) then
                ierr = -207
                goto 990
-            else if(drive.eq.VLBA.and.it.lt.0.or.it.gt.34) then
+            else if(drive.eq.VLBA.and.(it.lt.0.or.it.gt.34)) then
                ierr = -217
                goto 990
             end if
@@ -212,7 +212,7 @@ C
       isethr=iseth
       idecpa_fs=idecpa
       kdoaux_fs=kdoaux
-      do i=1,35
+      do i=1,36
         if(itrk(i).eq.1) call sbit(itrkpa,i,1)
         if(itrk(i).eq.0) call sbit(itrkpa,i,0)
       end do
