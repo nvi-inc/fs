@@ -33,6 +33,7 @@ C               - DEFINE line at top of each procedure
 C
 C 2.2.   COMMON BLOCKS USED:
 C
+      include '../include/params.i'
       include 'pfmed.i'
 C
 C 2.3.   DATA BASE ACCESSES: none
@@ -58,7 +59,7 @@ C
       character lrn
       logical ldupl
 c     logical lge,lle
-      character*34 pathname
+      character*64 pathname,link
 C               - file names
       character*74 lnam1,lnam2,ibc,ibc2
       character*80 ibcd
@@ -402,8 +403,22 @@ C     Get full name for reading.
         call pfblk(1,lpf,lfr)
 C     Read until procedure found.
         nch = trimlen(lpf)
-        if (nch.gt.0) pathname = '/usr2/proc/' //
-     .                        lpf(1:nch) // lfr(1:4)
+        if (nch.le.0) then
+           write(6,*) 'ffmp: illegal filename length'
+           goto 900
+        else
+           call follow_link(lpf(:nch),link,ierr)
+           if(ierr.ne.0) return
+           if(link.ne.' ') then                 
+              if(lfr(:4).eq.'.prx') then
+                 iprc=index(link,".prc")
+                 link(iprc+3:iprc+3)='x'
+              endif
+              pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
+           else
+              pathname = FS_ROOT//'/proc/'//lpf(:nch)//lfr(1:4)
+           endif
+        endif
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
           write(lui,1117) lpf(:nch)

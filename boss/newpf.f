@@ -33,7 +33,7 @@ C
 C  LOCAL:
 C
 C     KSTAK - function which is TRUE if there's some procedure in the stacks
-      character*28 pathname,pathname2
+      character*64 pathname,pathname2,link
       logical kstak
       integer trimlen, nch, rn_take
 C
@@ -64,13 +64,28 @@ C
           call fs_get_lprc(ilprc)
           call hol2char(ilprc,1,8,lprc)
           nch = trimlen(lprc)
-          pathname = FS_ROOT//'/proc/' // lprc(1:nch) // '.prc'
+          call follow_link(lprc(:nch),link,ierr)
+          if(ierr.lt.0) then
+             call logit7ci(0,0,0,1,-500+ierr,'bo',ierr)
+             goto 300
+          endif
+          if(link.eq.' ') then
+             pathname = FS_ROOT//'/proc/' // lprc(:nch) // '.prc'
+          else
+             pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
+          endif
           call ftn_purge(pathname,ierr)
 C                     Purge the old version of the file
           call fs_get_lprc(ilprc)
           call hol2char(ilprc,1,8,lprc)
           nch = trimlen(lprc)
-          pathname2= FS_ROOT//'/proc/' // lprc(1:nch) // '.prx'
+          if(link.eq.' ') then
+             pathname2= FS_ROOT//'/proc/' // lprc(:nch) // '.prx'
+          else
+             iprc=index(link,".prc")
+             link(iprc+3:iprc+3)='x'
+             pathname2= FS_ROOT//'/proc/' // link(:trimlen(link))
+          endif
           call ftn_rename(pathname2,ierr1,pathname,ierr2)
 C                     Rename the edited version to the proper name
           if (ierr1.lt.0) then
@@ -92,6 +107,7 @@ C                     Rename the edited version to the proper name
 C
 C     3. Get a new version of the station proc file.
 C
+ 300    continue
         call fs_get_lnewpr(ilnewpr)
         if (ilnewpr(1).eq.0) then
           lnewpr=' '
@@ -103,12 +119,27 @@ C
           call fs_get_lstp(ilstp)
           call hol2char(ilstp,1,8,lstp)
           nch = trimlen(lstp)
-          pathname = FS_ROOT//'/proc/' // lstp(1:nch) // '.prc'
+          call follow_link(lstp(:nch),link,ierr)
+          if(ierr.lt.0) then
+             call logit7ci(0,0,0,1,-505+ierr,'bo',ierr)
+             goto 400
+          endif
+          if(link.eq.' ') then
+             pathname = FS_ROOT//'/proc/' // lstp(:nch) // '.prc'
+          else
+             pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
+          endif
           call ftn_purge(pathname,ierr)
           call fs_get_lstp(ilstp)
           call hol2char(ilstp,1,8,lstp)
           nch = trimlen(lstp)
-          pathname2= FS_ROOT//'/proc/' // lstp(1:nch) // '.prx'
+          if(link.eq.' ') then
+             pathname2= FS_ROOT//'/proc/' // lstp(:nch) // '.prx'
+          else
+             iprc=index(link,".prc")
+             link(iprc+3:iprc+3)='x'
+             pathname2= FS_ROOT//'/proc/' // link(:trimlen(link))
+          endif
           call ftn_rename(pathname2,ierr1,pathname,ierr2)
           if (ierr1.lt.0) then
             call logit7ci(0,0,0,1,-127,'bo',ierr1)
@@ -127,6 +158,7 @@ C
           endif
         endif
 C
+ 400    continue
         call rn_put('pfmed') 
         if (ierr.lt.0) call logit7ci(0,0,0,1,-131,'bo',ierr)
       endif
