@@ -57,7 +57,7 @@ mk5cn:
 	}
 	return;
       }
-      disk_check_dis(command,itask,ip);
+      data_check_dis(command,itask,ip);
       return;
 
 error:
