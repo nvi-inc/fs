@@ -1,4 +1,4 @@
-      function itped(iwhat,index,ias,ic1,ic2)
+      function itped(iwhat,index,lgenx,ias,ic1,ic2)
 
 C  This routine encodes or decodes information relating
 C  to MAT communications for the tape drive
@@ -9,8 +9,9 @@ C
 C  INPUT: 
 C 
 C     IWHAT - code for type of conversion, <0 encode, >0 decode 
-      integer*2 ias(20) 
+      integer*2 ias(20),lgenx(2)
 C      - string with ASCII characters 
+C      - input or ouput rate generator
 C 
 C 
 C  If encode
@@ -31,11 +32,12 @@ C
 C 
 C  SUBROUTINES called: character manipulation 
 C 
+      character*1 cjchar
 C 
 C  LOCAL: 
 C 
       double precision das2b, val
-      real tsp1(8),tsp2(8),tsp3(8),tsp4(8)
+      real tsp1(8),tsp2(8),tsp3(8),tsp4(8), tsp5(8),tsp6(8),tsp7(8)
       integer*2 lfast(4),lcaps(7),lstop(5),ltach(6)
       integer*2 ldir(3),llow(3),lreset(5),lrec(3)
       integer itsp(8)
@@ -45,11 +47,14 @@ C
 C 
 C  INITIALIZED: 
 C 
-      data itsp/0,3,7,15,30,60,120,240/ 
-      data tsp1/0,3.75,7.5,15,30,60,120,240/ 
-      data tsp2/0.0,3.375,7.875,16.875,33.75,67.5,135.0,270.0/
-      data tsp3/0.0,4.21875,8.4375,16.875,33.75,67.5,135.0,270.0/
-      data tsp4/0.0,5,10,20,40,80,160,320/ 
+      data itsp/0,3      ,7      ,15    ,30   ,60   ,120  ,240   / 
+      data tsp1/0,3.75   ,7.5    ,15    ,30   ,60   ,120  ,240   / 
+      data tsp2/0,3.375  ,7.875  ,16.875,33.75,67.5 ,135.0,270   /
+      data tsp3/0,4.21875,8.4375 ,16.875,33.75,67.5 ,135.0,270   /
+      data tsp4/0,4.998  ,10     ,20    ,40   ,80   ,160  ,320   /
+      data tsp5/0,2.50   ,5      ,10.01 ,20.02,40.03,80.06,160.12/   
+      data tsp6/0,5.16   ,10.31  ,20.62 ,41.25,82.5 ,165  ,330   /   
+      data tsp7/0,5.625  ,11.25  ,22.5  ,45   ,90   ,180  ,360   /   
       data nsp/8/
       data lrem   /2Hre,2Hm ,2Hlo,2Hc /
       data nrem/3,3/ 
@@ -86,11 +91,35 @@ C
 201   continue
 C     IF (IWHAT.NE.-1) GOTO 202 
       if (ic1-1+3.gt.ic2) return
-      call fs_get_lgen(lgen)
-      if (ichcm_ch(lgen,1,'853').eq.0) then
-        itped = ic1 + ir2as(tsp4(index+1),ias,ic1,6,1)
+      if (ichcm_ch(lgenx,1,'853').eq.0) then
+        itped = ic1 + ir2as(tsp4(index+1),ias,ic1,7,3)
+      else if(ichcm_ch(lgenx,1,'427').eq.0) then
+        itped = ic1 + ir2as(tsp5(index+1),ias,ic1,6,2)
+      else if(ichcm_ch(lgenx,1,'880').eq.0) then
+        itped = ic1 + ir2as(tsp6(index+1),ias,ic1,6,2)
+      else if(ichcm_ch(lgenx,1,'960').eq.0) then
+        itped = ic1 + ir2as(tsp7(index+1),ias,ic1,7,3)
+      else if(ichcm_ch(lgenx,1,'720').eq.0) then
+        itped = ic1 + ir2as(tsp3(index+1),ias,ic1,9,5)
       else
-        itped = ic1 + ir2as(tsp3(index+1),ias,ic1,8,3)
+         ii = ias2b(lgenx,1,3)
+         if (ii.ne.-32768) then
+            gii=ii/720.
+            itped = ic1 + ir2as(tsp3(index+1)*gii,ias,ic1,9,5)
+         endif
+      endif
+      do while(itped.gt.1)
+         if(cjchar(ias,itped-1).eq.'0') then
+            itped=itped-1
+         else
+            goto 20
+         endif
+      enddo
+ 20   continue
+      if(itped.gt.1) then
+         if(cjchar(ias,itped-1).eq.'.') then
+            itped=itped-1
+         endif
       endif
       return
 C 
@@ -177,53 +206,43 @@ C  Code 1, TAPE SPEEDS
 C 
 301   continue
       index=-1
-      call ichmv_ch(lgen,1,'720')
-      call fs_set_lgen(lgen)
+      call ichmv_ch(lgenx,1,'720')
       ii = ias2b(ias,ic1,ic2-ic1+1) 
       if (ii.eq.-32768) goto 3011
       do i=1,nsp 
         if (ii.eq.itsp(i)) index = i-1
       enddo
+      if(index.ne.-1) return
 
 3011  continue
-      if (index.eq.-1) then
-        ierr=0
-        val = das2b(ias,ic1,ic2-ic1+1,ierr) 
-        if (ierr.ne.0) return 
-        do i=1,nsp 
-          if (abs(val-tsp1(i)).lt.abs(1e-5*val)) index = i-1
-        enddo
+      val = das2b(ias,ic1,ic2-ic1+1,ierr) 
+      do i=1,nsp 
+         if (abs(val-tsp1(i)).lt.abs(1e-5*val)) index = i-1
+      enddo
+      if(index.ne.-1) return
+      do i=1,nsp 
+         if (abs(val-tsp2(i)).lt.abs(1e-5*val)) index = i-1
+      enddo
+      if(index.ne.-1) return
+      do i=1,nsp 
+         if (abs(val-tsp3(i)).lt.abs(1e-5*val)) index = i-1
+      enddo
+      if(index.ne.-1) return
+      do i=3,nsp 
+         if (abs(val-tsp4(i)).lt.abs(1e-5*val)) index = i-1
+      enddo
+      if (index.ne.-1) then     ! set rate generator
+         call ichmv_ch(lgenx,1,'853')
+         return
       endif
-      if (index.eq.-1) then
-        ierr=0
-        val = das2b(ias,ic1,ic2-ic1+1,ierr) 
-        if (ierr.ne.0) return 
-        do i=1,nsp 
-          if (abs(val-tsp2(i)).lt.abs(1e-5*val)) index = i-1
-        enddo
+      do i=3,3
+         if (abs(val-tsp5(i)).lt.abs(1e-5*val)) index = i-1
+      enddo
+      if (index.ne.-1) then     ! set rate generator
+         call ichmv_ch(lgenx,1,'427')
+         return
       endif
-      if (index.eq.-1) then
-        ierr=0
-        val = das2b(ias,ic1,ic2-ic1+1,ierr) 
-        if (ierr.ne.0) return 
-        do i=1,nsp 
-          if (abs(val-tsp3(i)).lt.abs(1e-5*val)) index = i-1
-        enddo
-      endif
-      if (index.eq.-1) then
-         val = das2b(ias,ic1,ic2-ic1+1,ierr) 
-         if (ierr.ne.0) return 
-         do i=1,nsp 
-            if (abs(val-tsp4(i)).lt.abs(1e-5*val)) index = i-1
-         enddo
-         if (index.ne.-1) then  ! set rate generator
-            call ichmv_ch(lgen,1,'853')
-            call fs_set_lgen(lgen)
-         endif
-      endif
-
       return
-C 
 C 
 C  TAPE DIRECTION
 C 
