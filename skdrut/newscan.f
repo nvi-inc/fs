@@ -45,7 +45,7 @@ C     Source name is first
       NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,8)
 C     Cal time. Define as 10 for now
       ical = 10
-      nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,4)
+      nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,3)
 C     Freq code
       NCH = ICHMV(IBUF,NCH+1,LCODE(ICOD),1,2)
 C     Preob 
@@ -100,6 +100,7 @@ C Store the record in common
         return
       endif
       NOBS = NOBS + 1
+C     write(6,'(i5)') nobs
       ISKREC(NOBS) = nobs
       DO I=1,ibuf_len
         LSKOBS(I,ISKREC(NOBS)) = IBUF(I)
