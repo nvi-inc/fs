@@ -74,9 +74,9 @@ C     2. Get the parameter (foot count) and decode it.
 C               TAPEPOS=<position>
 C
       ich = 1+ieq
-      call gtprm(ibuf,ich,nchar,1,parm,ierr)
+      call gtprm2(ibuf,ich,nchar,1,parm,ierr)
 C                   Get the position in feet
-      if (cjchar(parm,1).eq.'*' .or.cjchar(parm,1).eq.',') then
+      if (ierr.eq.1.or.ierr.eq.2) then
         ierr = -101
         goto 990
       endif
