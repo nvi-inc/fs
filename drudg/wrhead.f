@@ -19,6 +19,7 @@ C     nrv   930412 implicit none
 C     nrv   930708 Added imode in calling list, rewrote to simplify and
 C                  use built-in features of ib2as. Add inner loop to get
 C                  all channels for Mode A written out.
+C 960703 nrv Use ix index when writing sideband.
 C
 C  INPUT:
       integer lu,iblen,icod
@@ -80,11 +81,10 @@ C  loop on the number of channels read from schedule file
 C           nch = nch + ib2as(idoub(ix,istn,icod),ibuf,nch,ileft+2)
             nch = nch + ib2as(idoub(ichan,istn,icod),ibuf,nch,ileft+2)
 	  else if (ido.eq.4) then ! use character array
-            if (ichcm_ch(ldoub(ix,istn,icod),1,'U').eq.0) then !U/L
+            if (ichcm_ch(ldoub(ichan,istn,icod),1,'U').eq.0) then !U/L
               if (im.eq.1) nch = ichmv_ch(ibuf,nch,'U')
               if (im.eq.2) nch = ichmv_ch(ibuf,nch,'L')
             else
-C             nch = ichmv(ibuf,nch,ldoub(ix,istn,icod),1,1)
               nch = ichmv(ibuf,nch,ldoub(ichan,istn,icod),1,1)
             endif
 	  end if
