@@ -21,6 +21,13 @@ C 970110 nrv Save the pass order list by code number.
 C 970114 nrv Call VUNPPRC to read $PROCEDURES. Store prefix. 
 C 970114 nrv Add polarization to VUNPIF call. Save LPOL per channel.
 C 970121 nrv Save npassl by code and station!
+C 970123 nrv Add calls to ERRORMSG
+C 970124 nrv Remove "lm" from call to vunpS2M
+C 970206 nrv Remove itra2, ihdpo2,ihddi2 and add headstack index
+C            Change call to VUNPHP to add number of headstacks found.
+C 970206 nrv Change size of arrays to VUNPTRK for fandefs to max_track.
+C 970213 nrv Remove the test for a rack before setting NCHAN. It should be
+C            set even for rack=none
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -45,14 +52,14 @@ C
 C  LOCAL:
       integer ix,idum,ib,ic,i,icode,istn
       integer il,im,iret,ierr1,iul,ism,ip
-      integer ifanfac,itrk(max_pass),ivc(max_bbc)
-      double precision pos1(max_index),pos2(max_index)
-      integer ihd(max_pass),indexp(max_index),indexl(max_pass)
+      integer ifanfac,itrk(max_track),ivc(max_bbc)
+      double precision posh(max_index,max_headstack)
+      integer ih,ihdn(max_track),indexp(max_index),indexl(max_pass)
       character*1 csubpassl(max_pass),csubpass(max_subpass)
       character*3 cpassl(max_pass)
       double precision bitden_das
       integer nsubpass
-      integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhdpos,npl
+      integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
       integer*2 lsb(max_chan),lsg(max_chan),lm(4),lin(max_ifd),
      .ls(max_ifd),ls2m(8),lpre(4),lp(max_ifd)
       double precision bitden
@@ -60,8 +67,8 @@ C  LOCAL:
       character*3 cs(max_chan)
       character*6 cfrbbref(max_chan),cbbcref(max_bbc),
      .cbbifdref(max_chan),cifdref(max_ifd)
-      character*6 cchanidref(max_chan),ctrchanref(max_pass)
-      character*1 cp(max_pass),csm(max_pass)
+      character*6 cchanidref(max_chan),ctrchanref(max_track)
+      character*1 cp(max_track),csm(max_track)
       double precision frf(max_chan),flo(max_chan),vbw(max_chan),srate
       character*128 cout
       integer ib2as,numc2,ichmv,ichmv_ch,ichcm_ch ! functions
@@ -132,6 +139,7 @@ C         station, then skip the other sections.
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            call errormsg(iret,ierr,'FREQ',lu)
             ierr1=1
           endif
 
@@ -144,6 +152,7 @@ C         (Get other procedure timing info later.)
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            call errormsg(iret,ierr,'PROCEDURES',lu)
             ierr1=1
           endif
 
@@ -157,6 +166,7 @@ C         Get $BBC statements.
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            call errormsg(iret,ierr,'BBC',lu)
             ierr1=2
           endif
 
@@ -169,24 +179,30 @@ C         Get $IF statements.
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            call errormsg(iret,ierr,'IF',lu)
             ierr1=3
           endif
   
 C         Get $TRACKS statements (i.e. fanout).
           if (ks2rec) then
             call vunps2m(modedefnames(icode),stndefnames(istn),
-     .      ivexnum,iret,ierr,lu,ls2m,lm)
+     .      ivexnum,iret,ierr,lu,ls2m)
             ifanfac=0
           else
             call vunptrk(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
-     .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihd,ifanfac)
+     .      lm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
           endif
           if (ierr.ne.0) then 
             write(lu,'("VMOINP06 - Error getting $TRACKS information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            if (ks2rec) then
+              call errormsg(iret,ierr,'S2_TRACKS',lu)
+            else
+              call errormsg(iret,ierr,'TRACKS',lu)
+            endif
             ierr1=4
           endif
 
@@ -197,7 +213,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
           else
             call vunphp(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,
-     .      indexp,pos1,pos2,nhdpos,cpassl,indexl,csubpassl,npl)
+     .      indexp,posh,nhdpos,nhd,cpassl,indexl,csubpassl,npl)
           endif
           if (ierr.ne.0) then 
             write(lu,'("VMOINP07 - Error getting $HEAD_POS and",
@@ -205,6 +221,11 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            if (ks2rec) then
+              call errormsg(iret,ierr,'S2_HEAD_POS',lu)
+            else
+              call errormsg(iret,ierr,'HEAD_POS',lu)
+            endif
             ierr1=5
           endif
 
@@ -216,6 +237,7 @@ C         Get $ROLL statements.
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
      .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      .      iret,ierr
+            call errormsg(iret,ierr,'ROLL',lu)
             ierr1=6
           endif
 C
@@ -238,14 +260,21 @@ C    Not necessary for S2 recorders.
                 ix=ix+1
               enddo
               if (ix.gt.nsubpass) then ! a new one
-                nsubpass=nsubpass+1
-                csubpass(nsubpass)=cp(i)(1:1)
+                if (nsubpass.gt.max_subpass) then
+                  write(lu,'("VMOINP15 - Too many subpasses for mode",
+     .            a," station ",a,". Max is ",i5,".")') 
+     .            modedefnames(icode)(1:il),stndefnames(istn)(1:im),
+     .            max_subpass
+                else
+                  nsubpass=nsubpass+1
+                  csubpass(nsubpass)=cp(i)(1:1)
+                endif
               endif
             enddo
           endif
 
 C    Save the chan_def info and its links.
-          if (km3rack.or.km4rack.or.kvrack) then
+C         if (km3rack.or.km4rack.or.kvrack) then
           nchan(istn,icode) = nchdefs
           do i=1,nchdefs ! each chan_def line
             invcx(i,istn,icode)=i ! save channel index number 
@@ -291,18 +320,16 @@ C          Track assignments
                 enddo
                 if (ip.gt.nsubpass) then
                   write(lu,'("VMOINP11 - Subpass not found for "
-     .            "channel ",i3,
-     .            " for mode ",a," station ",a)') i,
+     .            "chandef ",i3,", fanden ",i3,
+     .            " for mode ",a," station ",a)') i,ix,
      .            modedefnames(icode)(1:il),stndefnames(istn)(1:im)
                 else
                   ism=1 ! sign
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
                   if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
-                  if (ihd(ix).eq.1) 
-     .            itras(iul,ism,i,ip,istn,icode)=itrk(ix)-3 ! store as Mk3 numbers
-                  if (ihd(ix).eq.2) 
-     .            itra2(iul,ism,i,ip,istn,icode)=itrk(ix)-3 ! store as Mk3 numbers
+                  itras(iul,ism,ihdn(ix),i,ip,istn,icode)=itrk(ix)-3 
+C                                               ! store as Mk3 numbers
                 endif
               endif ! matched link
             enddo ! check each fandef
@@ -316,8 +343,10 @@ C         Make these identical for now in VEX files. When there is a
 C         mode name available, put that in LMODE. SPEED checks LMFMT
 C         to determine DR/NDR. drudg modifies LMFMT from user input
 C         for non-VEX.
-          idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
-          idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
+          if (.not.ks2rec) then
+            idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
+            idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
+          endif
 C         Sample rate.
           samprate(icode)=srate ! sample rate
           if (ks2rec) then
@@ -350,7 +379,7 @@ C       Check number of passes and pass order indices
             if (npl.ne.nhdpos*nsubpass) then
               write(lu,'("VMOINP13 - Inconsistent pass order list")')
             endif
-            do ip=1,npl
+            do ip=1,npl ! number of passes in list
               ix=1
               do while (ix.le.nhdpos.and.indexl(ip).ne.indexp(ix))
                 ix=ix+1
@@ -363,26 +392,26 @@ C       Check number of passes and pass order indices
             enddo  
           endif ! m3/4 or v rec
 C    Store head positions and subpases
-          do ip=1,npl
+          do ip=1,npl ! number of passes in list
             cpassorderl(ip,istn,icode) = cpassl(ip)
           enddo
           if (km4rec.or.km3rec.or.kvrec) then
-            do ip=1,npl
+            do ip=1,npl ! number of passes in list
               ix=1 ! find subpass number
               do while (ix.le.nsubpass.and.
      .                  csubpass(ix).ne.csubpassl(ip))
                 ix=ix+1
               enddo
-              ihdpos(ip,istn,icode)=pos1(indexl(ip))
-              ihddir(ip,istn,icode)=ix
-              ihdpo2(ip,istn,icode)=pos2(indexl(ip))
-              ihddi2(ip,istn,icode)=ix
-            enddo 
+              do ih=1,nhd ! store the head offsets
+                ihdpos(ih,ip,istn,icode)=posh(indexl(ip),ih)
+                ihddir(ih,ip,istn,icode)=ix
+              enddo
+            enddo  ! number of passes in list
           endif ! m3/4 or v rec
           npassl(istn,icode) = npl
-          else ! set nchan=0 as a flag
-            nchan(istn,icode) = 0
-          endif ! nchdefs>0 or =0
+C         else ! set nchan=0 as a flag
+C           nchan(istn,icode) = 0
+C         endif ! nchdefs>0 or =0
 
 C       Store the procedure prefix by station and code.
         if (ichcm_ch(lpre,1,'      ').eq.0) then ! missing 
