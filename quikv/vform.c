@@ -158,6 +158,9 @@ parse:
       request.addr=0x9A;
       vform9Amc(&request.data, &lcl); add_req(&buffer,&request); 
 
+      request.addr=0x9C;
+      vform9Cmc(&request.data, &lcl); add_req(&buffer,&request); 
+
       request.addr=0x9D;
       vform9Dmc(&request.data, &lcl); add_req(&buffer,&request); 
 
