@@ -80,7 +80,7 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 2)
+      PARAMETER (MAX_FRQ = 8)
 C
 C     The maximum number of frequency bands within a schedule.
 C       **NOTE** This is restricted to be no more than 2!
