@@ -396,6 +396,13 @@ struct vform_cmd *lcl;
 {
     *data=0x8000 | (bits16on(3) & lcl->qa.chan);
 }
+void vform9Cmc(data, lcl) 
+unsigned *data;
+struct vform_cmd *lcl;
+{
+  *data=0x8002;
+
+}
 
 void vform9Dmc(data, lcl) 
 unsigned *data;
@@ -410,6 +417,7 @@ struct vform_cmd *lcl;
     else
       *data=0x8032;    /* rates below 2 MHz we can't handle */
 }
+
 
 void vformA6mc(data, hwid, lcl)
 unsigned *data;
