@@ -207,7 +207,7 @@ int get_rclcn_time_read(struct rclcn_res_buf *buffer, int *year, int *day,
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,centisec ,2*sizeof(long));
+  ierr=get_rclcn_res_data(buffer,centisec ,6*sizeof(long));
 
   return ierr;
 }
