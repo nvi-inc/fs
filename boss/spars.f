@@ -12,7 +12,7 @@ C        IFC    - first character of command in IAS
 C        IEC    - last character of command in IAS
 C****NOTE**** IEC IS MODIFIED IF IAS IS EXPANDED
       dimension lnames(12,1)
-      integer*2 lproc1(10,1),lproc2(10,1) 
+      integer*4 lproc1(4,1),lproc2(4,1) 
 C               - lists of recognized functions and procedures
 C        NNAMES - number of entries in LNAMES array 
 C        NPROC1 - number of entries in LPROC1 array 
@@ -85,7 +85,7 @@ C               - character counters
       dimension ireg(2)
 C        REG
 C               - registers from EXEC 18 (CLASS I/O)
-      integer*2 lbuf(50)
+      integer*2 lbuf(256)
 C               - buffer sent to CLASS I/O
 C        NCHAR  - number of characters in LBUF
 C        CHAR2 - second character in command
@@ -228,7 +228,7 @@ C      including parameters.
 C
       nchar = icharb - ifc
       idummy = ichmv(lbuf,1,ias,ifc,icharb-1)
-      if (nchar.gt.80) then
+      if (nchar.gt.512) then
         ierr = -2
         goto 999
       endif
