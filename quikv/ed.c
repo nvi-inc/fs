@@ -69,8 +69,9 @@ mk5cn:
 	
 	if(ip[2]<0) return;
 	bank_check_dis(command,itask,ip);
-	return;
       }
+      return;
+
 error:
       ip[0]=0;
       ip[1]=0;
