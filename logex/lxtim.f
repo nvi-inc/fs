@@ -71,7 +71,8 @@ C
 C 
 C The following in-line function returns the day by calculating 
 C (YR-1970)*1024+day. After December 31, 2002, this function
-C will return a negative number.
+C will return a negative number. A lot longer now because we I*4
+C on UNIX.
 C 
 200   its1 = mod(its1,1024) 
 C 
