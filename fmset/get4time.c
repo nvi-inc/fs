@@ -21,17 +21,19 @@ void rte2secs();
 static short tmget[4]= {0,0,0,0};
 static short sync_buf[4]= {0,0,0,0};
 
-void get4time(unixtime,unixhs,fstime,fshs,formtime,formhs)
+void get4time(unixtime,unixhs,fstime,fshs,formtime,formhs,raw)
 time_t *unixtime; /* computer time */
 int *unixhs;
 time_t *fstime; /* fs time */
 int *fshs;
 time_t *formtime; /* formatter time */
 int *formhs;
+long *raw;
 {
 	int it[6],ms,nbytes,nrecs,ierr;
-        long centisec[2], centiavg, centidiff;
+        long centisec[6], centiavg, centidiff;
 	int cnt=0;
+	char *name;
 
 	if (tmget[0] == 0) {
 		tmget[0]=-54;
@@ -47,6 +49,7 @@ tryagain:
 	if(synch) {
 	  cls_snd(&outclass, sync_buf ,sizeof(sync_buf), 0, 0); 
 	  nrecs++;
+	  logit("Formatter re-synch command sent.",0,NULL);
 	}
 	cls_snd(&outclass, tmget ,sizeof(tmget), 0, 0); 
 	nrecs++;
@@ -56,8 +59,16 @@ tryagain:
 	ip[2] = 0;
 	ip[3] = 0;
 	ip[4] = 0;
+	name="matcn";
         nsem_take("fsctl",0);
-	skd_run("matcn",'w',ip);
+	while(skd_run_to(name,'w',ip,100)==1) {
+	  if (nsem_test(NSEM_NAME) != 1) {
+	    endwin();
+	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    exit(0);
+	  }
+	  name=NULL;
+	}
         nsem_put("fsctl");
 
 /* get reply from matcn */
@@ -68,7 +79,7 @@ tryagain:
 	if( ierr < 0 )
 		{
 		endwin();
-		printf("Error reply from matcn - error %d\n", ierr );
+		fprintf(stderr,"Error reply from matcn - error %d\n", ierr );
                 logita(NULL,ip[2],ip+3,ip+4);
 		cls_clr(outclass);
 		cls_clr(inclass);
@@ -81,7 +92,7 @@ tryagain:
 				 &rtn1, &rtn2, msgflg, save)) <0)
 	    {
 	      endwin();
-	      printf("Error rec. msg - %d bytes received\n" ,nbytes);
+	      fprintf(stderr,"Error rec. msg - %d bytes received\n" ,nbytes);
 	      logita(NULL,-6,"fv"," ");
 	      cls_clr(outclass);
 	      cls_clr(inclass);
@@ -94,7 +105,7 @@ tryagain:
                                &rtn1, &rtn2, msgflg, save)) <0)
 		{
 		endwin();
-		printf("Error rec. msg - %d bytes received\n" ,nbytes);
+		fprintf(stderr,"Error rec. msg - %d bytes received\n" ,nbytes);
                 logita(NULL,-1,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
@@ -103,11 +114,12 @@ tryagain:
 		}
 	inbuf[nbytes]='\0';
 
-	if ( (nbytes = cls_rcv(inclass, centisec, 8, 
+	if ( (nbytes = cls_rcv(inclass, centisec, 24, 
                                &rtn1, &rtn2, msgflg, save)) <0)
 		{
 		endwin();
-		printf("Error rec. time - %d bytes received\n" ,nbytes);
+		fprintf(stderr,
+			"Error rec. time - %d bytes received\n" ,nbytes);
                 logita(NULL,-2,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
@@ -127,7 +139,7 @@ tryagain:
         if(*formtime<0) 
 		if(cnt++>5) {
 		endwin();
-		printf("Error year less than 1970 for 5 tries\n");
+		fprintf(stderr,"Error year less than 1970 for 5 tries\n");
                 logita(NULL,-3,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
@@ -136,13 +148,17 @@ tryagain:
 		} else
 			goto tryagain;
 			*/
+	/* for mark IV, first sample closest to truth, but preserve averaging
+           logic */
+
+	centisec[1]=centisec[0];
+	*unixtime=centisec[2];
+	*unixhs=centisec[4];
+	
         centidiff =centisec[1]-centisec[0];
         centiavg= centisec[0]+centidiff/2;
+	*raw=centiavg;
 
-        rte_cmpt(unixtime,&centiavg);
-        *unixhs=centiavg;
-
-        centiavg= centisec[0]+centidiff/2;
         rte_fixt(fstime,&centiavg);
         *fshs=centiavg;
         
