@@ -1,4 +1,9 @@
-#!/bin/sh
+#!/bin/csh
 # change window title
-echo -n "]2;$1"
-echo -n "]1;$1"
+if ("$1" == "") then
+  echo -n "]2;`hostname`"
+  echo -n "]1;`hostname`"
+else
+  echo -n "]2;$1"
+  echo -n "]1;$1"
+endif
