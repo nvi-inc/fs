@@ -1,6 +1,6 @@
 *command     seg sbpa bo eq
 form         qkr 0101 01 17
-form4        qkr 0102 01 44
+form4        qkr 0102 01 47
 vc01         qkr 0201 01 57
 vc02         qkr 0202 01 57
 vc03         qkr 0203 01 57
