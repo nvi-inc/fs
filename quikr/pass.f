@@ -4,7 +4,7 @@ C  PASS controls the position of the tape recorder head blocks
 C
 C  INPUT VARIABLES:
 C
-      dimension ip(1),ip2(1)
+      dimension ip(1),ip1(5),ip2(5)
 C        IP(1) - class # of input parameter buffer
 C
 C  OUTPUT VARIABLES:
@@ -40,6 +40,7 @@ C
       ichold = -99
       ioclas = 0
       norec = 0
+      ip1(3)=0
 C
       call fs_get_drive(drive)
       iclcm = ip(1)
@@ -77,8 +78,7 @@ C
         call fs_get_ipashd(ipashd)
         ipas(1)=ipashd(1)
         kpas(1)=.true.
-      else if(ichcm_ch(ibuf,ichs,'stack2').eq.0.and.
-     .        (MK4.eq.and(drive,MK4))) then
+      else if(ichcm_ch(ibuf,ichs,'stack2').eq.0.and.MK4.eq.drive) then
         call fs_get_ipashd(ipashd)
         ipas(1)=ipashd(2)
         kpas(1)=.true.
@@ -194,9 +194,7 @@ C
       call lvdonn('lock',ip)
       if(ip(3).ne.0) goto 800
 C
-      call set_pass(ihd,ipas ,kauto,microns,ip,0.40)
-      if(ip(3).ne.0) go to 800
-C
+      call set_pass(ihd,ipas ,kauto,microns,ip1,0.40)
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
@@ -204,7 +202,7 @@ C
       iclass=0
 C
       call fs_get_rack(rack)
-      if(MK3.eq.and(rack,MK3)) THEN
+      if(MK3.eq.rack) THEN
         if(ihd.eq.2) go to 500
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         ibuf2(1) = 0
@@ -232,7 +230,7 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(MK4.eq.and(rack,MK4)) THEN
+      else if(MK4.eq.rack.or.VLBA4.eq.rack) THEN
         call frmaux4(lauxfm4,posnhd)
         ibuf2(1) = 9
         call char2hol('fm/AUX 0x',ibuf2(2),1,9)
@@ -251,7 +249,10 @@ C
       endif
       call clrcl(ip(1))
       ip(2)=0
-      if(ip(3).lt.0)  go to 800
+      if(ip(3).lt.0) then
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        ip(3)=0
+      endif
 C
 C  5. Here we read the device to get current head positions.
 C
@@ -359,10 +360,12 @@ C
         goto 999
       endif
 C
-
-C
 990   ip(1) = ioclas
       ip(2) = norec
+      if(ip1(3).ne.0) then
+         ip(3)=ip1(3)
+         ip(5)=ip1(5)
+      endif
       call char2hol('q@',ip(4),1,2)
 999   continue
       if (ichold.ne.-99) then
@@ -375,3 +378,6 @@ C
       endif
       return
       end
+
+
+
