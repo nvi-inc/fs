@@ -33,7 +33,7 @@ C LOCAL:
       integer nch,nci
       character*2  response,scode
       character    upper,lower
-      integer cclose,inew,ivexnum,h2c,heqb,o36
+      integer cclose,inew,ivexnum,h2c,heqb,o36,iktype
       character*256 cbuf
       integer i,j,k,l,ncs,ix2,ix,ixp,ic,ierr,iret,nobs_stn,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
@@ -136,9 +136,19 @@ C 970317 nrv Remove reading ELEVATION lines, done in SREAD now.
 C 970328 nrv Add station_cat to RDCTL
 C 970603 nrv Add option for printing cover leter in .drg files.
 C 970610 nrv Always print out postscript file in non-interactive mode.
-C 971003 nrv New date.
-C 971003 nrv Stop if schedule file name has more than 6 letters.
-C 971003 nrv "All stations" not allowed with VEX file.
+C 970915 nrv Add "VLBA4" option for procedures.
+C 971003 nrv Stop if schedule file name has > 6 characters.
+C 971003 nrv NOT CHANGED in HPUX: in the mira version, the '=' option has been
+C            removed, but you can use '==' to get the same effect.
+C 971014 nrv With the 'D' option for an existing PS file, remember
+C            to delete the file!
+C 971211 nrv Initialize kparity and kprepass here.
+C 980218 nrv Add K4 to menus for non-VEX.
+C 980916 nrv Make option 21 print .txt file for non-drudg file.
+C 980916 nrv Remove the "shift the .SNP file" option
+C 980916 nrv Remove K4 for the initial Y2K version.
+C 980924 nrv Remove .skd shift for the Y2K version.
+C 980929 nrv Add K4 back in, but with a single option. Add call to "k4type".
 C
 C Initialize some things.
 
@@ -217,6 +227,8 @@ C
       if (csked.eq.'./') ncs=0
       kskdfile = .false.
       kdrgfile = .false.
+      kparity = .false.
+      kprepass = .false.
 C  Initialize variables.   Moved here from SREAD
 C  In drcom.ftni
       kmissing = .false.
@@ -261,7 +273,7 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 971027)')
+     .  '(NRV 981016)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -294,9 +306,11 @@ C       Opening message
             ix=index(lskdfi(1:),'.')
           endif
           l=trimlen(lskdfi)
+          ctextname = ''
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
               lskdfi=lskdfi(1:l)//'.skd'
+              ctextname = lskdfi(1:l)//'.txt'
               kskdfile = .true.
               kdrg_infile=.false.
             else ! try .drg
@@ -305,7 +319,10 @@ C       Opening message
               kdrg_infile=.true.
             endif
           else
-            if (lskdfi(ix:l).eq.'.skd') kdrg_infile=.false.
+            if (lskdfi(ix:l).eq.'.skd') then !
+              kdrg_infile=.false.
+              ctextname = lskdfi(1:ix-1)//'.txt'
+            endif
             if (lskdfi(ix:l).eq.'.drg') kdrg_infile=.true.
           endif ! automatic extension
           ixp=1
@@ -315,13 +332,12 @@ C       Opening message
             if (ix.gt.0) ixp=ixp+ix
           enddo
         cexpna=lskdfi(ixp:) ! exp name is root of file name
-        ix=index(cexpna,'.')-1
+        IX = INDEX(cexpna,'.')-1
         if (ix.gt.6) then ! too many letters
           write(luscn,9022)
-9022      format(' ERROR: Schedule file name is too long. Please ',
-     .    'rename ',
-     .    'the file to have 6 characters or less before the file ',
-     .    'extension.')
+9022      format(' ERROR: Schedule name is too long. Please ',
+     .    'rename the file to have 6 characters or less before the ',
+     .    'file extension.')
           goto 990
         endif
         kskd = .true.
@@ -425,15 +441,10 @@ C
 C         WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
 9053      FORMAT(' Stations: '/
      .     10(   '  ', 5(A2,' (',4A2,')',1X)/))
-           if (.not.kvex) then ! all is OK
-             WRITE(LUSCN,9050)
-9050         format(/' Output for which station (type a code, :: to ',
-     .      'quit, = for all) ? ',$)
-           else ! all not allowed
-             WRITE(LUSCN,9052)
-9052         format(/' Output for which station (type a code, :: to ',
-     .      'quit) ? ',$)
-           endif
+           WRITE(LUSCN,9050)
+C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
+9050       format(/' Output for which station (type a code, :: to ',
+     .    'quit, = for all) ? ',$)
          else
            write(luscn,9051)
 9051      format(' Enter station 2-letter code (e.g. Wf, :: to quit)? ',
@@ -449,11 +460,7 @@ C     Convert to convention upper/lower for 2 letters
       response(2:2)=lower(response(2:2))
       call char2hol(response(1:2),lstn,1,2)
       ISTN = 0
-      iF (ichcm_ch(LSTN,1,'==').eq.0) goto 699 ! special all stations
-      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) then
-        if (.not.kvex) GOTO 699 ! all stations
-        if (kvex) goto 500 ! all stations not allowed
-      endif
+      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 699 ! all stations
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
 C         Convert stored code to string for comparing
@@ -536,46 +543,52 @@ C
      .      '  7 = Re-specify stations'/
      .      ' 2 = Make antenna pointing file       ',
      .      '  8 = Get a new schedule file'/
-     .      ' 3 = Make Mark III/IV SNAP file (.SNP)',
+     .      ' 3 = Make Mk3/Mk4/V4 SNAP file (.SNP) ',
      .      '  9 = Change output destination, format '/
      .      ' 31= Make VLBA SNAP file (.SNP)       ',
-     .      ' 10 = Shift the .SKD file  '/,
+C    .      ' 10 = Shift the .SKD file  '/,
+     .      '                           '/,
+C    .      ' 32= Make K4 SNAP file (.SNP)         ',
+C    .      ' 11 = Shift the .SNP file  '/,
+C    .      '                           '/,
      .      ' 4 = Print complete .SNP file         ',
-     .      ' 11 = Shift the .SNP file  '/,
+     .      ' 12 = Make Mark III procedures (.PRC)'/,
      .      ' 5 = Print summary of .SNP file       ',
-     .      ' 12 = Make Mark III procedures (.PRC) ')
+     .      ' 13 = Make VLBA procedures (.PRC)')
             if (clabtyp.eq.'POSTSCRIPT') then
               write(luscn,9170)
 9170          FORMAT(
      .        ' 6 = Make PostScript label file       ',
-     .        ' 13 = Make VLBA procedures (.PRC)'/,
+     .        ' 14 = Make Mk3/VLBA procedures (.PRC)'/
      .        ' 61= Print PostScript label file      ',
-     .        ' 14 = Make hybrid procedures (.PRC)')
+     .        ' 15 = Make Mark IV procedures (.PRC)')
             else
               write(luscn,9270)
 9270          FORMAT(
      .        ' 6 = Make tape labels                 ',
-     .        ' 13 = Make VLBA procedures (.PRC)'/,
+     .        ' 14 = Make Mk3/VLBA procedures (.PRC)'/,
      .        '                                      ',
-     .        ' 14 = Make hybrid procedures (.PRC)')
+     .        ' 15 = Make Mark IV procedures (.PRC)')
             endif
             if (kdrg_infile) then ! .drg file
               write(luscn,9370)
 9370          FORMAT(
-     .        ' 17 = Print PI cover letter           ',
-     .        ' 15 = Make Mark IV procedures (.PRC)'/,
-     .        ' 0 = Done with DRUDG                  ',
-     .        ' 16 = Make 8-BBC procedures (.PRC)'/,
-     .        ' ? ',$)
+     .        ' 21 = Print PI cover letter           ',
+     .        ' 16 = Make 8-BBC procedures (.PRC)')
             else ! .skd file
               write(luscn,9369)
 9369          FORMAT(
-     .        '                                      ',
-     .        ' 15 = Make Mark IV procedures (.PRC)'/,
-     .        ' 0 = Done with DRUDG                  ',
-     .        ' 16 = Make 8-BBC procedures (.PRC)'/,
-     .        ' ? ',$)
+     .        ' 21 = Print notes file (.TXT)         ',
+     .        ' 16 = Make 8-BBC procedures (.PRC)')
             endif ! .drg/.skd
+            write(luscn,9372)
+9372        format(
+     .        '                                      ',
+     .        ' 17 = Make VLBA4 procedures (.PRC)'/,
+C    .        '                                      ',
+C    .        ' 18 = Make K4 procedures (.PRC)'/,
+C    .        ' 0 = Done with DRUDG '/
+     .        ' ? ',$)
           else ! gotem in the vex file
             write(luscn,9073)
 9073        FORMAT('Supporting VEX 1.5'/
@@ -586,9 +599,11 @@ C
      .      ' 3 = Create SNAP command file (.SNP)  ',
      .      '  9 = Change output destination, format '/
      .      ' 4 = Print complete .SNP file         ',
-     .      ' 10 = Shift the .SKD file  '/,
+C    .      ' 10 = Shift the .SKD file  '/,
+     .      '                           '/,
      .      ' 5 = Print summary of .SNP file       ',
-     .      ' 11 = Shift the .SNP file  ')
+C    .      ' 11 = Shift the .SNP file  ')
+     .      '                           ')
             if (clabtyp.eq.'POSTSCRIPT') then
               write(luscn,9173)
 9173          FORMAT(
@@ -620,14 +635,16 @@ C
      .    ' 6 = Make PostScript label file        ',
      .    '  9 = Change output destination, format'/,
      .    ' 61= Print PostScript label file       ',
-     .    ' 11 = Shift the .SNP file')
+C    .    ' 11 = Shift the .SNP file')
+     .    '                         ')
           else
             write(luscn,9271)
 9271        format(
      .      ' 6 = Make tape labels                  ',
      .      '  9 = Change output destination, format'/,
      .      '                                       ',
-     .      ' 11 = Shift the .SNP file')
+C    .      ' 11 = Shift the .SNP file')
+     .      '                         ')
           endif
           write(luscn,9371)
 9371      format(
@@ -640,13 +657,16 @@ C
         read(command,*,err=991) ifunc
       endif
 
-      if ((ifunc.lt.0).or.(ifunc.gt.17.and.ifunc.ne.31.and.ifunc.ne.61)
-     .  .and..not.kbatch) GOTO 700
-      if ((ifunc.lt.0).or.(ifunc.gt.17.and.ifunc.ne.31.and.ifunc.ne.61)
-     .  .and.kbatch) GOTO 991
+      if ((ifunc.lt.0).or.(ifunc.gt.21.and.ifunc.ne.31.and.ifunc.ne.61
+     .  .and.ifunc.ne.32)
+     .  .and..not.kbatch) GOTO 700 ! not recognized, interactive ask again
+      if ((ifunc.lt.0).or.(ifunc.gt.21.and.ifunc.ne.31.and.ifunc.ne.61
+     .  .and.ifunc.ne.32)
+     .  .and.kbatch) GOTO 991 ! not recognized, batch quit
       if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.(ifunc.ge.17.and.ifunc.ne.31.and.
-     .   ifunc.ne.61))) goto 700
+     .  .or.ifunc.eq.10.or.(ifunc.ge.21.and.ifunc.ne.31.and.
+     .   ifunc.ne.32.and.
+     .   ifunc.ne.61))) goto 700 ! snp file not schedule
       if (ifunc.eq.6.and.clabtyp.eq.' ') then
         write(luscn,'("Unknown label printer type in the",
      .  " control file.")')
@@ -738,6 +758,8 @@ c            I = nstnx
             CALL SNAP(cr1,1)
           ELSE IF (IFUNC.EQ.31) THEN
             CALL SNAP(cr1,2)
+          ELSE IF (IFUNC.EQ.32) THEN
+            CALL SNAP(cr1,3)
           ELSE IF (IFUNC.EQ.4) THEN
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
@@ -750,8 +772,17 @@ c            I = nstnx
               CALL PROCS(4) ! Mark IV backend procedures
           ELSE IF (IFUNC.EQ.16) THEN
               CALL PROCS(5) ! 8-BBC VLBA backend procedures
-          else if (ifunc.eq.17) then
+          ELSE IF (IFUNC.EQ.17) THEN
+              CALL PROCS(6) ! VLBA4 backend procedures
+          ELSE IF (IFUNC.EQ.18) THEN
+              call k4type(cr1,iktype)
+              if (iktype.gt.0) CALL PROCS(6+iktype) 
+          else if (ifunc.eq.21) then
+            if (kdrg_infile) then ! .drg file
               call prcov
+            else
+              call prtxt
+            endif
           ELSE IF (IFUNC.EQ.6) THEN
             if (nstnx.eq.1) then ! just one station
               pcode = 1
@@ -810,7 +841,7 @@ C
           if (.not.kbatch) then
             do while (response(1:1).ne.'p'.and.response(1:1).ne.'d')
               write(luscn,'("PostScript label file exists. Do you want",
-     .        " to print it or delete it? (P/D) ?",$)')
+     .        " to print it or delete it? (P/D) ?")')
               read(luusr,'(A)') response(1:2)
               response(1:1)=lower(response(1:1))
             enddo
