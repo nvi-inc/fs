@@ -38,7 +38,9 @@ C
 C
 C MAKE SURE THE CAL IS OFF
 C
-      call scmds('calofffp',1)
+      if(calfp.gt.0.0) then
+         call scmds('calofffp',1)
+      endif
 C
 C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
@@ -104,23 +106,29 @@ C
 C
 C  NOW DO TPICAL
 C
+      if(calfp.gt.0.0) then
+C
 C       TURN CAL ON
 C 
-      call scmds('calonfp',1)
+         call scmds('calonfp',1)
 C 
 C       GET DATA
 C 
-      call volts(tpical,sig,tdum,intp,rut,ierr) 
-      if (ierr.ne.0) goto 8000
+         call volts(tpical,sig,tdum,intp,rut,ierr) 
+         if (ierr.ne.0) goto 8000
 C 
 C       CAL OFF
 C
-      call scmds('calofffp',1)
+         call scmds('calofffp',1)
 C
 C  FINALLY, GET THE SYSTEM TEMPEARTURE AND VSLOPE
 C
-      vslope=calfp/(tpical-tpia)
-      temps=(tpia-vbase)*vslope
+         vslope=calfp/(tpical-tpia)
+         temps=(tpia-vbase)*vslope
+      else
+         temps=-calfp
+         vslope=temps/(tpia-vbase)
+      endif
       sigts=sigts*vslope
       return
 C
