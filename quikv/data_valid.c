@@ -24,6 +24,7 @@ long ip[5];                           /* ipc parameters */
 
       int data_valid_dec();                 /* parsing utilities */
       char *arg_next();
+      int kS2drive;
 
       void data_valid_dis();
       void ini_rclcn_req(), end_rclcn_req();
@@ -34,13 +35,21 @@ long ip[5];                           /* ipc parameters */
 
       ichold= -99;                    /* check vlaue holder */
 
-      ini_rclcn_req(&buffer);
+      kS2drive=shm_addr->equip.drive == S2;
 
-      if (command->equal != '=') {            /* read module */
-	add_rclcn_user_dv_read(&buffer,device);
-	goto rclcn;
-      } 
-      else if (command->argv[0]==NULL) goto parse;  /* simple equals */
+      if(kS2drive)
+	ini_rclcn_req(&buffer);
+
+      if (command->equal != '=') {           /* read module */
+	if(kS2drive) {
+	  add_rclcn_user_dv_read(&buffer,device);
+	  goto rclcn;
+	} else {
+	  data_valid_dis(command,ip);
+	  return;
+	}
+      } else if (command->argv[0]==NULL)
+	goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
         if (*command->argv[0]=='?') {
           data_valid_dis(command,ip);
@@ -61,11 +70,20 @@ parse:
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.s2rec.check;
-      shm_addr->check.s2rec.check=0;
-
-      memcpy(&shm_addr->data_valid,&lcl,sizeof(lcl));
+      if(kS2drive) {
+	ichold=shm_addr->check.s2rec.check;
+	shm_addr->check.s2rec.check=0;
+      }
       
+      memcpy(&shm_addr->data_valid,&lcl,sizeof(lcl));
+
+      skd_run("pcald",'w',ip);
+
+      if(!kS2drive) {
+	ip[0]=ip[1]=ierr=0;
+	return;
+      }
+
 /* format buffers for rclcn */
 
       add_rclcn_user_dv_set(&buffer,device,lcl.user_dv,lcl.pb_enable);
