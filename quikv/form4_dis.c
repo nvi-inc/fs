@@ -19,7 +19,7 @@ long ip[5];
 {
       struct form4_cmd lclc;
       struct form4_mon lclm;
-      int ind,kcom,i,j,ich, ierr, count, nrec, nchar, idum;
+      int ind,kcom,i,j,ich, ierr, count, nrec, nchar, idum, icount;
       long iclass;
 
       char output[MAX_OUT];
@@ -31,7 +31,7 @@ long ip[5];
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
       if ((!kcom) && command->equal == '=') {
-         logmatmsg(output,command,ip);
+         logmatmsgfm(output,command,ip);
          return;
       } else if(kcom)
          memcpy(&lclc,&shm_addr->form4,sizeof(lclc));
@@ -45,6 +45,14 @@ long ip[5];
 
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSTAform4(&lclc,&lclm,buff);
+	if(lclm.error & (1<<15))
+	  logit(NULL,-502,"4f");
+	icount=0;
+	for (i=0;i<8;i++)
+	  if(! (lclm.rack_ids & 1<<i))
+	    icount++;
+	if(icount < 2) 
+	  logit(NULL,-503,"4f");
 
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSHOform4(&lclc,buff);
