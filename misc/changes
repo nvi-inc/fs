@@ -84,4 +84,14 @@ Version 9.0.6 950920
 
 Version 9.0.7  951004
 
+951207 WEH lnfch/iscn_ch.f
+           corrected character position to "i+j-1"
+
+951208 NRV drudg/fdrudg.f
+           New date of 12/8 on opening line
+
+951208 NRV drudg/procs.f
+           Move TAPEFORM command before PASS in setup procedure
+
+Version 9.0.8  951208
 
