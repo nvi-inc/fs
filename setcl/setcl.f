@@ -100,11 +100,27 @@ c
       call rmpar(ip)
       nerr = 0
       call fs_get_rack(rack)
+      call fs_get_drive(drive)
 c
 50    continue
       iclasm = 0
       nrec = 0
-      if (VLBA.eq.and(rack,VLBA)) then
+      if(drive.eq.S2) then
+         idum=rn_take('fsctl',0)
+         call fc_get_s2time(centisec,it,ip)
+         call rn_put('fsctl')
+         centisec(1)=centisec(2)
+         if(ip(3).lt.0) then
+            if(ip(3).lt.-400.and.ip(3).gt.-404) then
+               call char2hol('sc',ip(4),1,2)
+            endif
+            call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+            nerr=nerr+1
+            if(nerr.le.3) goto 50
+            goto 998
+         endif
+         goto 200
+      else if (VLBA.eq.rack) then
         idum=rn_take('fsctl',0)
         call fc_get_vtime(centisec,it,ip)
         call rn_put('fsctl')
@@ -115,7 +131,7 @@ c
            goto 998
         endif
         goto 200
-      else if (MK4.eq.and(rack,MK4)) then
+      else if (MK4.eq.rack) then
         ibuf(1) = -54
         idum = ichmv_ch(ibuf,3,'fm')
         idum = ichmv_ch(ibuf,5,'/TIM')
@@ -125,7 +141,7 @@ C                   into buffer
         nrec = nrec + 1
         call put_buf(iclasm,ibuf,-nch,'fs','  ')
 C             two return buffers with imode = -54
-      else    ! Mark III formatter
+      else if(MK3.eq.rack) then   ! Mark III formatter
         ibuf(1) = -53
         call char2hol('fm',ibuf(2),1,2)
         nrec = nrec + 1
@@ -134,6 +150,9 @@ C             two return buffers with imode = -53
         ibuf(1) = -4
         nrec = nrec + 1
         call put_buf(iclasm,ibuf,-4,'fs','  ')
+      else
+         call logit7ci(idum,idum,idum,-1,-11,'sc',0)
+         goto 1
       endif
 C
       idum=rn_take('fsctl',0)
@@ -169,7 +188,7 @@ C     The message we are formatting for the system is:
 C         TM,yyyy,ddd,hh,mm,ss
 C
 198   continue
-      if (MK3.eq.and(rack,MK3)) then
+      if (MK3.eq.rack) then
         call ifill_ch(ibuft,1,20,' ')
         call ifill_ch(ibuf ,1,20,' ')
         ireg(2) = get_buf(iclass,ibuft,-20,idum,idum)
@@ -281,7 +300,7 @@ c
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
       if (epochti_fs.eq.0.or.set.eq.'offset') then
-        inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
+        inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
       else
@@ -289,7 +308,7 @@ c
      & (float((secs_fm-secsoffti_fs)*100+it(1)-centiavg-offsetti_fs)
      &     /(centiavg-epochti_fs))*86400.
 c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
-     &     ,ibuf,inxtc,8,3)
+     &     ,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as((centiavg-epochti_fs)/3600e2,ibuf,inxtc,8,3)
       endif
