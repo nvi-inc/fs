@@ -403,6 +403,7 @@ C 2003Jun11 JMGipson. Fixed bug with kcontpass. kcontpass was "off by 1".
 C                     Solved by using kcontpass_old
 C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 C 2004Jul13 JMGipson. Fixed bug in scan names.
+! 2004Sep13 JMGipson.  Add midtape command for Mark5.
 
 
       icod_old=-1
@@ -668,10 +669,10 @@ C         Force new tape on the first scan on tape.
           if(knewtp .or. icod .ne. icod_old) then
             speed_ft=speed(icod,istn)
             rmax_scan_time=maxtap(istn)/speed_ft        !time in seconds for scan
-	    if(krec) then 
+            if(krec) then
             call snap_recalc_speed(luscn,kvex,speed_ft,
      >          ls2speed(1,istn),ibuf)
-	    endif
+            endif
             icod_old=icod
           endif
 
@@ -882,7 +883,9 @@ C  For S2 or continuous, stop tape if needed after the SOURCE command
         if (idir.ne.0.and.krec) then ! skip tape stuff if not recording
 C MIDTP procedure when changing direction
 C Note this will never be called for S2 because it only records forward.
-          if (.not.(kk4 .or. ks2.or.km5)) then ! check for mid-tape
+!          if (.not.(kk4 .or. ks2.or.km5)) then ! check for mid-tape
+! 2003Sep13. Put in midtape command for mark5
+           if (.not.(kk4 .or. ks2)) then ! check for mid-tape
             IF (KNEWTP) IOBSP = 1  ! first observation on this pass
             IF (LDIR(ISTNSK).NE.LDIRP.AND..NOT.KNEWTP.AND.IPASP.GT.-1)
      >        THEN
@@ -902,7 +905,7 @@ C Calculate tape spin time. But don't do for ks2,kk4,km5 or continuous.
           endif
 C
 C Unload tape.
-          IF (.not.km5.and.krec.and.KNEWTP.AND.IOBSst.NE.0) THEN !unload old tape
+          IF (.not.km5.and.krec.and.(KNEWTP.AND.IOBSst.NE.0)) THEN !unload old tape
             klast_tape=.false.
             call TimeSub(itime_tape_start,itctim,itime_tape_need)
             if(ks2) then
@@ -1216,7 +1219,8 @@ C POSTOB
 ! find speed of recorder
              call find_recorder_speed(icod,speed_recorder,.true.)
 ! factor of 3 is too give extra time for scan to complete.
-             idt=3+(xfer_end_time(ixfer_ptr)-xfer_beg_time(ixfer_ptr))*
+! increased this to 5 seconds.
+             idt=5+(xfer_end_time(ixfer_ptr)-xfer_beg_time(ixfer_ptr))*
      >                      speed_recorder*(8./110.)
              call TimeAdd(itime_scan_end,idt,itime_disk_abort)
              kdisk2file=.false.
@@ -1257,12 +1261,14 @@ C     Copy ibuf_next into IBUF and unpack it.
         call TimeAdd(itime_scan_end,itlate(istn), itime_pass_end)
         call snap_wait_time(lu_outfile,itime_pass_end)
       endif
+
       if(krec) then
       call snap_unload_tape(luscn,itime_tape_stop_prev,
      >    itime_tape_stop_spin,itime_tape_need,iSpinDelay,
      >    nrecst(istn),ntape,
      >    kpostpass,kcontpass,kcont,klast_tape)
       endif
+
 C End of schedule
       write(Lu_outFile,'(a)') "sched_end"
 C

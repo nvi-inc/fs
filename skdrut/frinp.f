@@ -42,6 +42,7 @@ C  LOCAL:
       character*1 lchar
       integer*2   itemp
       equivalence (lchar,itemp)
+      character*2 cifinptmp
 
       integer ilen2
 C
@@ -285,23 +286,23 @@ C             losb(ic,istn,icode) = ls ! sideband
           do i=1,nchan(istn,icode)
             iv=invcx(i,istn,icode) ! channel index assumed same as BBC#
             if (lsg.eq.lsubvc(iv,istn,icode)) then ! match sub-group
-              if (ichcm_ch(lifinp(iv,istn,icode),1,'  ').eq.0) then ! first time
-                LIFINP(iv,istn,ICODE) = LIN 
+              cifinptmp=cifinp(iv,istn,icode)
+              if (cifinptmp .eq. " ") then
+                LIFINP(iv,istn,ICODE) = LIN
                 FREQLO(iv,ISTN,ICODE) = F
                 call char2hol('U ',losb(iv,istn,icode),1,2)
               else ! had a previous LO already
                 rbbc=abs(freqlo(iv,istn,icode)-freqrf(i,istn,icode))
-                kmk3 =ichcm_ch(lifinp(iv,istn,icode),1,'1N').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'2N').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'3N').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'1A').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'2A').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'3O').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'3I').eq.0
-                kvlba=ichcm_ch(lifinp(iv,istn,icode),1,'A').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'B').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'C').eq.0.or.
-     .                ichcm_ch(lifinp(iv,istn,icode),1,'D').eq.0
+                kmk3 =cifinptmp .eq. "1N" .or. cifinptmp .eq. "2N" .or.
+     >                cifinptmp .eq. "3N" .or.
+     >                cifinptmp .eq. "1A" .or. cifinptmp .eq. "2A" .or.
+     >                cifinptmp .eq. "3O" .or. cifinptmp .eq. "3I"
+
+
+                kvlba=
+     >               cifinptmp(1:1).eq."A" .or.cifinptmp(1:1).eq."B".or.
+     >              cifinptmp(1:1).eq."C" .or.cifinptmp(1:1).eq."D"
+
                 if ((rbbc.gt.1000.0.and.kvlba).or.
      .              (rbbc.gt.500.0.and.kmk3)) then
                   LIFINP(iv,istn,ICODE) = LIN 
@@ -400,14 +401,14 @@ C 7. This section for the recording format line.
             endif
 C       RESet bit density depending on the recording format.
 C       Check once more on the bit density but this time use LMFMT.
-            if (ichcm_ch(lmfmt(1,i,icode),1,'V').eq.0) then 
+            if (cmfmt(i,icode)(1:1) .eq. "V") then
               bitden=34020 ! VLBA non-data replacement
-            else 
+            else
               bitden=33333 ! Mark3/4 data replacement
             endif
 C           If "56000" was specified, use higher station bit density
             if (ibitden_save(i).eq.56000) then 
-              if (ichcm_ch(lmfmt(1,i,icode),1,'V').eq.0) then 
+              if (cmfmt(i,icode)(1:1) .eq. "V") then
                 bitden=56700 ! VLBA non-data replacement
               else 
                 bitden=56250 ! Mark3/4 data replacement

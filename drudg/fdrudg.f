@@ -14,6 +14,7 @@ C  Common blocks:
 
 ! called functions
       logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
+      integer GETPID
 
 C Subroutine interface:
 C     Called by: drudg (C routine)
@@ -44,6 +45,11 @@ C LOCAL:
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
       integer nch1,nch2,nch3,iserr(max_stn)
+      integer ipid
+      character*5 cpidx
+
+      character*2 cbnd(2)   !used in count_freq_tracks
+      integer     nbnd      ! ditto
 
       logical kallowpig
 C
@@ -183,12 +189,19 @@ C 001114 nrv Remove call to VOB1INP because VOBINP is called in VREAD.
 C 020304 nrv Add option 13 for Mk5 piggyback mode.
 C 020614 nrv Change FS version to y/m/d digits for HPUX version.
 C 021002 nrv Write comments about geo/astro VEX/standard schedule.
+! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
 C
 C Initialize some things.
+!      iVerMajor_FS = 09
+!      iVerMinor_FS = 07
+!      iVerPatch_FS = 01
+      iVerMajor_FS = VERSION
+      iVerMinor_FS = SUBLEVEL
+      iVerPatch_FS = PATCHLEVEL
+
 
 C Initialize the version date.
-      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
-      cversion = '040724'
+      cversion = '040929'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -315,9 +328,6 @@ C       Opening message
         WRITE(LUSCN,9020) cversion
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
      .  '(NRV & JMGipson ',a6,')')
-        write(luscn,'("Field system version: ",i1,".",i2.2,".",i2.2))')
-     >           iverMajor_FS,iverMinor_FS,iverPatch_FS
-
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -442,8 +452,8 @@ C     Reset for the next time through.
           kdrgfile = .false.
 C
 C     Derive number of passes for each code
-        CALL GNPAS(luscn,ierr,iserr)
-          call setba_dr
+          CALL GNPAS(luscn,ierr,iserr)
+          call count_freq_tracks(cbnd,nbnd,luscn)
           if (ierr.ne.0) then ! can't continue
             write(luscn,9999) 
 9999        format(/'DRUDG00: WARNING! Inconsistent or missing ',
@@ -649,6 +659,7 @@ C  Write warning messages if control file and schedule do not agree.
      >       (cstrack(istn) .eq. "Mark3A") .or. !or for mark3 formatters
      >       (cstrack(istn)(1:2).eq."K4".and.   !or k4 (non-mk4 formatters)
      >               cstrack(istn)(6:7) .ne."M4") .or.
+     >        cstrec(istn) .eq. "S2"      .or.     !Can't do piggyback with S2 recorders
      >        cstrec(istn) .eq. "Mark5A"  .or.     !Can't do piggyback with Mark5A or Mark5P recorders.
      >        cstrec(istn) .eq. "Mk5APigW" .or.
      >        cstrec(istn) .eq. "Mark5P") then
@@ -695,7 +706,7 @@ C  Write warning messages if control file and schedule do not agree.
 9273          FORMAT(
      .        ' 6 = Make DYMO label file             ',
      .        ' 12 = Make procedures (.PRC) '/,
-     .        ' 61= Print DYMO label file           ')
+     .        ' 61= Print DYMO label file      ')
             else
               write(luscn,9373)
 9373          FORMAT(
@@ -740,7 +751,7 @@ C         endif ! known/unknown equipment
           else if (clabtyp.eq.'DYMO') then
             write(luscn,9271)
 9271        format(
-     .    ' 6 = Make DYMO label file              ',
+     .    ' 6 = Make DYMO label file        ',
      .    '  9 = Change output destination, format'/,
      .    ' 61= Print PostScript label file       ',
      .    '                         ')

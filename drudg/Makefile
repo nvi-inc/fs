@@ -77,7 +77,7 @@ $(DR)ckobs.o $(DR)clist.o $(DR)drudg.o $(DR)gtsnp.o \
 $(DR)lists.o $(DR)lspin.o $(DR)m3inf.o $(DR)point.o \
 $(DR)procs.o $(DR)snap.o  $(DR)sread.o \
 $(DR)unpsk.o $(DR)fdrudg.o $(DR)spdstr.o $(DR)drset.o \
-$(DR)iaddtr.o $(DR)setba_dr.o $(DR)wrdur.o $(DR)wrtap.o $(DR)wrsor.o\
+$(DR)iaddtr.o $(DR)wrdur.o $(DR)wrtap.o $(DR)wrsor.o\
 $(DR)label.o $(DR)blabl.o $(DR)wrtrack.o  $(DR)wrhead.o \
 $(DR)cmshf.o $(DR)tshft.o $(DR)getqual.o $(DR)bbsyn.o \
 $(DR)skdshft.o $(DR)snpshft.o $(DR)luff.o $(DR)cbinf.o $(DR)bcode.o \
