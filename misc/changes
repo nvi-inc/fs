@@ -3278,3 +3278,33 @@ Version 9.3.13 970828
 
 970905 WEH quikr/sorce.f
            fix sun and moon
+
+Version 9.3.14 970905
+
+970908 WEH st.default/proc/vstation.prc
+           st.default/proc/3vstation.prc
+           st.default/proc/v2station.prc
+           st.default/proc/4station.prc
+           add precondthin, prepassthin
+
+970908 WEH st.default/proc/vstation.prc
+           st.default/proc/3vstation.prc
+           st.default/proc/v2station.prc
+           add !+10s after second rec=load in prepass
+           add rec=unload to prepass procedures
+
+970908 WEH st.default/sched/prethin.snp
+           st.default/sched/vprethin.snp
+           st.default/proc/vswitch.prc
+           st.default/proc/4switch.prc
+           created
+
+970909 FML logpl/logpl
+           fixed 4 channel plots in command mode
+
+970909 NRV drudg/snap.f
+           Do PREOB if it's a non-VEX file and CAL>1. In a VEX file,
+           do PREOB only if the tape is not running.
+
+Version 9.3.15 970909
+
