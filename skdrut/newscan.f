@@ -39,7 +39,7 @@ C Output:
 C Local
       integer*2 ibuf(ibuf_len)
       integer i,ical,nch,idl,iyr
-      integer iflch,ichcm_ch,ichmv,ichmv_ch,ib2as
+      integer iflch,ichmv,ichmv_ch,ib2as
       integer numc2,numc3
       integer feetscan,gdscan,durscan
 

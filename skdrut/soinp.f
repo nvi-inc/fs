@@ -4,6 +4,8 @@ C     This routine reads and decodes a source entry
 C     and puts the variables into the source common.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
+
       include '../skdrincl/sourc.ftni'
 C
 C  INPUT:
@@ -16,27 +18,32 @@ C  OUTPUT:
       integer ierr
 C     IERR - error number
 C     INUM - number of error message
+
+! Functions
+      integer iwhere_in_String_list
+      integer julda             !julian day
 C
 C  LOCAL:
-      LOGICAL KNAEQ,KORBIT
+      LOGICAL KORBIT
 C      -LNFCH routine, local variable for orbit identification
-      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2),LRA(8),LDC(7),
-     .lname(max_sorlen/2)
+      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2)
+      integer*2 LRA(8),LDC(7),lname(max_sorlen/2)
+
+      character*(max_sorlen) ciau,cname,ccom,corbit
+      equivalence (lname,cname), (ciau,liau),(lcom,ccom)
+
 C      - temporary variables for unpacking
       double precision RA,RARAD,DEC,DECRAD,R,D
 C        - temporary for unpacking
-      double precision rah,decd,radh,decdd,tjd ! for APSTAR
+      double precision tjd ! for APSTAR
       double precision OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,OEDY
 C        - temporary for unpacking
-      integer*2 LORBIT(max_sorlen/2)
+
       integer iepy
-      CHARACTER*8 LORBIT_CHAR
-      EQUIVALENCE (LORBIT,LORBIT_CHAR) ! added by P. Ryan
 C        - HOLDS THE ASCII VALUE 8HORBIT   /
-      INTEGER   i,iep,J,irah,iram,idecd,idecm,idummy
+      INTEGER   i,iep,J,irah,iram,idecd,idecm
       integer*2 lds
       real epoch
-      integer ichmv,julda,ichcm_ch
 C
 C  History:
 C     WEH  830523  ADDED SATELLITES
@@ -53,17 +60,17 @@ C     nrv  940112 Keep common name internally for satellites, not ORBIT.
 C     nrv  950321 Add error message for duplicate source names.
 C 970114 nrv Change 4 to max_sorlen/2
 C 990606 nrv Store IAU name
+C 2003Dec09 JMGipson replace holleriths by characcters.
 C
-      DATA LORBIT_CHAR /'ORBIT   '/
+      DATA cORBIT/'ORBIT   '/
 C
 C     1. Call UNPSO to unpack the buffer we were passed.
 C     Put all of the fields into temporary variables.
 C
       J = 17
       CALL UNPSO(IBUF,ILEN,IERR,LIAU,LCOM,LRA,IRAH,IRAM,RA,RARAD,
-     .LDS,LDC,IDECD,IDECM,DEC,DECRAD,EPOCH,
-     .OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IEPY,OEDY,
-     .j)
+     >  LDS,LDC,IDECD,IDECM,DEC,DECRAD,EPOCH,
+     >  OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IEPY,OEDY,j)
 C
       IF  (IERR.NE.0) THEN  !
         write(lu,9100) ierr,(ibuf(i),i=1,ilen)
@@ -81,19 +88,15 @@ C     in the SKED environment but might as well check.
 C     For celestial sources, make sure we have 1950 or J2000 coordinates.
 C     (Until flexibility to handle others is built in.)
 C
-      KORBIT=KNAEQ(LIAU,LORBIT,max_sorlen/2)
-      IDUMMY = ICHMV(lname,1,LIAU,1,max_sorlen)
-      IF (ichcm_ch(LCOM(1),1,'$ ').ne.0) 
-     .IDUMMY= ICHMV(lname,1,LCOM,1,max_sorlen)
+      Korbit=Ciau .eq. corbit
+      cname=ciau
+      if(ccom(1:1) .ne. "$") cname=ccom
 C
-      I=1
-      DO WHILE (.NOT.KNAEQ(lname,LSORNA(1,I),max_sorlen/2).AND.
-     . I.LE.NSOURC)
-        I=I+1
-      END DO
-      IF  (I.LE.NSOURC) then ! duplicate source
-        write(lu,9101) (lsorna(j,i),j=1,max_sorlen/2)
-9101    format('SOINP22 - Duplicate source name ',12a2,
+      i=iwhere_in_string_list(csorna,nsourc,cname)
+
+      IF  (I.ne.0) then ! duplicate source
+        write(lu,9101) csorna(i)
+9101    format('SOINP22 - Duplicate source name ',a,
      .  '. Using the position of the first one.')
         RETURN
       endif ! duplicate source
@@ -124,9 +127,9 @@ C
         RETURN
       END IF  !
 C
-      IF  (.NOT.KORBIT) THEN  !"nonorbit"
-        IDUMMY = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
-        IDUMMY = ICHMV(LIAUNA(1,NCELES),1,liau,1,max_sorlen)
+      IF  (.NOT.KORBIT) THEN  !"non-orbit"
+         ciauna(nceles)= ciau
+         csorna(nceles)= cname
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
           IEP = EPOCH+.01 
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
@@ -135,19 +138,16 @@ C
             DECRAD = D
           ELSE  ! full precession
             tjd=julda(1,1,iep-1900)+2440000.d0
-            rah = RARAD*12.d0/pi
-            decd = DECRAD*180.d0/pi
-            call mpstar(tjd,3,rah,decd,radh,decdd)
-            RARAD=radh*pi/12.d0
-            DECRAD=decdd*pi/180.d0
+            call mpstar_rad(tjd,rarad,decrad)
           END IF  !
         END IF  !"convert to J2000"
         SORP50(1,NCELES) = RARAD   !J2000 position
         SORP50(2,NCELES) = DECRAD  !J2000 position
-        call ckiau(liau,lcom,rarad,decrad,lu)
+        call ckiau(ciau,ccom,rarad,decrad,lu)
       ELSE  !"satellite"
 C       IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,LIAU,1,max_sorlen)
-        IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,lname,1,max_sorlen)
+!        IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,lname,1,max_sorlen)
+        csorna(max_cel+nsatel)=cname
         SATP50(1,NSATEL) = OINC
         SATP50(2,NSATEL) = OECC
         SATP50(3,NSATEL) = OPER

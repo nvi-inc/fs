@@ -4,9 +4,9 @@ LIBES = ../bosslb/bosslb.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a\
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a\
 ../poclb/poclb.a ../newlb/newlb.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
-OBJECTS = quikr.o aeoff.o beam.o cable.o cadis.o cal.o chk.o\
-class_frm.o ctemp.o de.o dedis.o devds.o ena.o endis.o\
-et.o flux.o flxvl.o fm.o fmdis.o form4.o\
+OBJECTS = quikr.o aeoff.o cable.o cadis.o cal.o chk.o\
+class_frm.o de.o dedis.o devds.o ena.o endis.o\
+et.o fm.o fmdis.o form4.o\
 fpdis.o frmaux.o frmaux4.o fsvrs.o fvpnt.o get_power.o gtrad.o\
 hdata.o hdcalc.o head_d_mic.o head_move.o head_vlt.o\
 hecho.o ib.o if3.o if3dis.o ifd.o ifdis.o iphck.o\

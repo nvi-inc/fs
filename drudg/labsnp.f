@@ -21,12 +21,11 @@ C Input:
 c Output:
       integer nlabpr ! number of labels actually printed
 C Local
-      integer*2 lstnam(4),lco
       integer iy1(5),id1(5),ih1(5),im1(5),iy2(5),id2(5),ih2(5),im2(5)
       integer ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape
       integer nout,newlab,idayr,ihr,imn,idayr2,ihr2,imn2,idum
       INTEGER   IERR
-      character*128 cbuf,cbuf1
+      character*128 ctmp,ctmp1
       character*20 cti,ctiformat,cctiformat
       integer ichmv
 
@@ -37,18 +36,16 @@ C 1.  Initialize variables
       ntape = 0
       nlabpr = 0
       newlab = 1
-      idum = ichmv(lstnam,1,lstnna(1,1),1,8)
-      idum = ichmv(lco,1,lstcod(1),1,2)
 
 C 2. Loop over SNAP records
 
       do while (.true.) ! read loop
-        read(lu_infile,'(a)',err=990,end=901,iostat=IERR) cbuf1
-          call c2upper(cbuf1,cbuf)
-        if (cbuf(1:1).ne.'"') then !non-comment line
-        if (index(cbuf,'UNLOD').ne.0) then
+        read(lu_infile,'(a)',err=990,end=901,iostat=IERR) ctmp1
+          call c2upper(ctmp1,ctmp)
+        if (ctmp(1:1).ne.'"') then !non-comment line
+        if (index(ctmp,'UNLOD').ne.0) then
           if (nout.ge.nlab) then !print a row
-            if (clabtyp.ne.'POSTSCRIPT') then ! laser or Epson
+            if (clabtyp.ne.'POSTSCRIPT' .and. clabtyp .ne. 'DYMO') then ! laser or Epson
               call blabl(luprt,nout,lexper,lstnna(1,1),lstcod(1),
      .        iy1,id1,ih1,im1,iy2,id2,ih2,im2,ilabrow,
      .        cprttyp,clabtyp,cprport)
@@ -64,7 +61,8 @@ C 2. Loop over SNAP records
               ipsd2=id2(1)
               ipsh2=ih2(1)
               ipsm2=im2(1)
-              call make_pslabel(fileptr,lstnam,lco,lexper,
+              call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
+     >           cexper,clabtyp,
      .        ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
      .        inew,rlabsize,ilabrow,ilabcol,inewpage)
               ilabcol=ilabcol+1
@@ -80,9 +78,9 @@ C 2. Loop over SNAP records
             endif ! laser/Epson/ps
           endif
           newlab = 1
-        else if (index(cbuf,'!').ne.0) then
-          call timin(cbuf,cti,ctiformat,cctiformat,iyear)
-        else if (index(cbuf(1:2),'ST').ne.0) then
+        else if (index(ctmp,'!').ne.0) then
+          call timin(ctmp,cti,ctiformat,cctiformat,iyear)
+        else if (index(ctmp(1:2),'ST').ne.0) then
           read(cti,ctiformat) idayr,ihr,imn
           if (newlab.eq.1) then
             nout = nout + 1
@@ -93,7 +91,7 @@ C 2. Loop over SNAP records
             im1(nout) = imn
             newlab = 0
           endif
-        else if (index(cbuf(1:2),'ET').ne.0) then
+        else if (index(ctmp(1:2),'ET').ne.0) then
           read(cti,ctiformat) idayr2,ihr2,imn2
           iy2(nout) = iyear
           id2(nout) = idayr2
@@ -102,7 +100,7 @@ C 2. Loop over SNAP records
         endif ! UNLOD
         endif !non=comment line
       enddo !read loop
-901   if (clabtyp.ne.'POSTSCRIPT') then
+901   if (clabtyp.ne.'POSTSCRIPT'.and. clabtyp .ne. 'DYM0') then
         if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.cprttyp.eq.'FILE') 
      .  call blabl(luprt,nout,lexper,
      .  lstnna(1,1),lstcod(1),
@@ -115,7 +113,8 @@ C 2. Loop over SNAP records
         ipsd2=id2(1)
         ipsh2=ih2(1)
         ipsm2=im2(1)
-        call make_pslabel(fileptr,lstnam,lco,lexper,
+        call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
+     >           cexper,clabtyp,
      .  ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
      .        inew,rlabsize,ilabrow,ilabcol,inewpage)
       endif

@@ -5,11 +5,13 @@
  * 970122 NRV Remove numlaser and use tape_number instead.
  * 970228 nrv Make label size, barcode size into variables.
  * 970228 nrv Keep counting up labels every time we're called.
- * 970827 nrv Remove nlaser, add icol, irow to call. 
+ * 970827 nrv Remove nlaser, add icol, irow to call.
+ * 2004Jul20 JMGipson added dymo label type
  *
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
  *
+	Last change:  JG   20 Jul 2004    4:28 pm
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -86,9 +88,8 @@ int barsize(char *,char *,unsigned,unsigned,unsigned,Boolean,int);
   
 void bar_code_labels(void);
 
-void make_pslabel(FILE **,char *,char *,char *,
+void make_pslabel(FILE **,char *,char *,char *,char *,
 int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,float[],int*,int*,int*);
-
 
 /* Make one label */
 void 
@@ -97,7 +98,7 @@ make_pslabel__
 #else
 make_pslabel
 #endif
-(FILE **fp, char * station_name, char * station_code, char * expt_name,
+(FILE **fp, char * station_name, char * station_code, char * expt_name, char * clabtyp,
 int *start_year, int *start_day, int *start_hour, int *start_min,
 int *end_year, int *end_day,   int *end_hour,   int *end_min, int *tape_number,
 int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
@@ -143,13 +144,17 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
      fprintf(*fp,"/Courier findfont\n 10 scalefont\n setfont\n");
      }
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
+   if(!strncmp(clabtyp, "DYMO",4)){
+    fprintf(*fp,"90 rotate\n");}
    }
 
 /* Write showpage if this label will start a new page */
   if(*new_page==1){
    fprintf(*fp,"showpage\n%%%Trailer\n");
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
-   *new_page=0;
+   if(!strncmp(clabtyp, "DYMO",4)){
+    fprintf(*fp,"90 rotate\n");}
+    *new_page=0;
   }
 
   /* Print the station code, day, hour/min into string like this:

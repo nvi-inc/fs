@@ -1,6 +1,5 @@
-      SUBROUTINE unplo(IBUF,ILEN,IERR,
-     .LIDSTN,LCODE,LSUBGR,LIFINP,FREQLO,
-     .iv,ls,nv)
+      SUBROUTINE unplo(IBUF,ILEN,IERR,LIDSTN,LCODE,LSUBGR,LIFINP,FREQLO,
+     >   iv,ls,nv)
 C
 C     UNPLO unpacks the record holding information on a LO configuration
 C

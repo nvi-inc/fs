@@ -23,10 +23,8 @@ C  Local:
 Cinteger*4 ifbrk
       integer iblen,ifc,ilc,ic1,ic2,i,ilen,iy,id,ih,im,is,
      .inday,inhr,inmin,insec,idum
-      integer jchar,ichmv,ias2b ! functions
+      integer ichmv,ias2b ! functions
 	logical kearl
-	integer Z24
-	data Z24/Z'24'/
 
 
 C 1. The current observation is already read into IBUF.
@@ -54,13 +52,12 @@ c    ierr=-1
 c    return
 c  endif
 	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IF(IERR.NE.0) THEN
+   	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9740) IERR
 9740      FORMAT(' GTSHFT01 - ERROR ',I5,' reading observation line')
 	    RETURN
 	  ENDIF
-	  IF ((iLEN.eq.-1).or.(JCHAR(IBUF,1).eq.Z24)) then
+	  IF ((iLEN.eq.-1).or.(cbuf(1:1).eq."$")) then
 	    iy=ias2b(itimn,1,2)
 	    id=ias2b(itimn,3,3)
 	    ih=ias2b(itimn,6,2)

@@ -62,6 +62,7 @@ C            Add max_roll_def = nhd*ntrk
 C 020620 nrv Add max_change_list
 C 020923 nrv Change max_rec_type to 10 to allow Mark5.
 C 2003Jul23 JMG changed to 12 params
+C 2004Jul05 JMG changed max # sources to 1000
 C
 C********************************************************************
 C
@@ -96,7 +97,7 @@ C *** NOTE: If this value is changed, then at least one of MAX_CEL
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 305)
+      PARAMETER (MAX_SOR = 1005)
 
 C     The maximum number of CHARACTERS in a source name. Should be
 C     an even integer. Maximum size now is 26, to be cmpatible with
@@ -110,7 +111,7 @@ C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
 C *** NOTE: If this value is changed at least one of MAX_SOR
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_CEL = 300)
+      PARAMETER (MAX_CEL = 1000)
 C
 C     The maximum number of satellite (orbital element) sources which
 C     can be selected for an experiment at one time. Used in SKED
@@ -225,37 +226,6 @@ C     Speeds for S2.
       parameter (SPEED_LP = 6.3) ! in/sec
       parameter (SPEED_SLP = 4.2) ! in/sec
 
-C     Value for PI.
-C
-      real*8 PI,ROG,ROZ,SECRAD,OMEGA,EPS,ROS,C,TWOPI
-      PARAMETER (PI = 3.1415926535897932D0)
-      PARAMETER (TWOPI = 2.d0*PI)
-C
-C     EPSILON FOR 23 DEG AND 27 MIN IN RADIANS
-      PARAMETER (EPS=0.4092797096D0) 
-C
-C     Speed of light
-      PARAMETER (C=2.99792458D8)
-C
-C     Degrees per radian
-      PARAMETER (ROG=57.2957795131D0)
-C 
-C     Seconds of time per radian
-      PARAMETER (ROZ=13750.98708313D0)
-C
-C     Seconds of arc per radian
-      PARAMETER (ROS=206264.8062471D0)
-C
-C     Radians per second of arc
-      PARAMETER (SECRAD=4.8481368111D-6)
-C
-C     Radians per second of time
-      PARAMETER (OMEGA=7.272205217D-5)
-C
-      real*8 flcon1,flcon2
-C     Note: 0.6931471=alog(2)
-      PARAMETER (flcon1 = (pi*pi)/(4.0*0.6931471))
-      PARAMETER (flcon2 = pi/(3600.d0*180.d0*1.d3)) ! marcsec --> radians
 
       integer max_par_esti,max_par_opti,max_dim_esti
       integer max_sor_esti,max_chart

@@ -4,6 +4,7 @@ C
 C     UNPVP unpacks a record containing position information.
 C
       include '../skdrincl/skparm.ftni'
+      include "../skdrincl/constants.ftni"
 C
 C  History
 C  NRV 891215 Removed catalog info
@@ -28,7 +29,7 @@ C            - site coordinates, meters
 C            - occupation code
 C     POSLAT - computed latitude, degrees
 C     POSLON - computed longitude, degrees
-      real*4 poslat,poslon
+      double precision poslat,poslon
       integer*2 LPOSX(7),LPOSY(7),LPOSZ(7)
 C            - ASCII coordinates, to preserve sigfigs
 C
@@ -36,12 +37,6 @@ C  LOCAL:
       real*8 DAS2B,R
       integer ich,nch,ic1,ic2,idumy,i,nc,idc,i1
       integer ichmv,iscnc
-C
-C  INITIALIZED:
-      real*8 ERAD,EFLAT
-C               - compiled-in values of earth rad and flattening
-      DATA ERAD/0.6378145D07/
-      DATA EFLAT/0.3352891869D-2/
 C
 C
 C  1. Start the unpacking with the first character of the buffer.
@@ -99,15 +94,8 @@ C     "coordinates"
         END IF  !"Z"
       END DO  !"coordinates"
 C     Now compute derived coordinates
-        POSLON = (-DATAN2(POSXYZ(2),POSXYZ(1)))*180.0/PI
-        IF (POSLON.LT.0.D0) POSLON=POSLON+360.D0
-C                   West longitude = ATAN(y/x)
-        POSLAT = (DATAN2(POSXYZ(3)*ERAD**2,
-     .    DSQRT((POSXYZ(1)**2+POSXYZ(2)**2)) *
-     .    (ERAD**2*(1.D0-EFLAT)**2))) * 180.0/PI
-C                   Geocentric latitude = ATAN(z/sqrt(x^2+y^2))
-C                   Geodetic latitude includes earth radius and flattening
-C
+      call xyz2latlon(posxyz,poslat,poslon)
+
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH=IC2-IC1+1
       IF  (NCH.NE.8) THEN

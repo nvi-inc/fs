@@ -66,7 +66,7 @@ C       Space
 		enddo
 	    ENDIF
 	  ELSE
-	    IP=4-AND(jISHFT(SPACE,I-5),1)    !3-wide space, 4-narrow space
+	    IP=4-iAND(ISHFT(SPACE,I-5),1)    !3-wide space, 4-narrow space
 	    DO J=1,PARMS(IP)
 		idum = ichmv(ibuf,ibyte,zero,1,1)
 		IBYTE=IBYTE+1
@@ -74,7 +74,7 @@ C       Space
 	  ENDIF
 C
 C     Bar
-	  IP=2-AND(jISHFT(BAR,I-5),1)     !1-Wide bar, 2-Narrow bar
+	  IP=2-iAND(ISHFT(BAR,I-5),1)     !1-Wide bar, 2-Narrow bar
 	  DO J=1,PARMS(IP)
 	    idum = ichmv(ibuf,ibyte,ZFF,1,2)
 	    IBYTE=IBYTE+1

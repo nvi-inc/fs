@@ -5,7 +5,7 @@
       logical kmv               !configuration info.
       logical kwrap, kazel
       character*8 cstn                  !station
-      character*8 cexper                !experiment
+      character*8 cexpername            !experiment
       character*8 crack,creca,crecb     !raks, recorder.
       character*2 cid                   !station id.
       character*1 cid1
@@ -13,6 +13,6 @@
       common /lstsumcmn/xpos,ypos,zpos
       common /lstsumcmn/iyear
       common /lstsumcmn/kmv,kwrap,kazel
-      common /lstsumcmn/cexper,crack,creca,crecb,cstn
+      common /lstsumcmn/cexpername,crack,creca,crecb,cstn
       common /lstsumcmn/cid,cid1
 

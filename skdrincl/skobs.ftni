@@ -12,8 +12,20 @@ C 001109 nrv Change scan names to character.
 C nobs - number of observations in this schedule (really: scans)
 C iskrec - time-ordered index of observation records 
       integer isettm,ipartm,ihdtm,itaptm,imtptm,isortm
-      integer iyr_start,ida_start,ihr_start,imin_start,isc_start,
-     .iyr_end,ida_end,ihr_end,imin_end,isc_end
+      integer iyr_start,ida_start,ihr_start,imin_start,isc_start
+      integer iyr_end,  ida_end,ihr_end,imin_end,isc_end
+      integer itimestart(5),itimeend(5)
+      equivalence(itimestart(1),iyr_start)
+      equivalence(itimestart(2),ida_start)
+      equivalence(itimestart(3),ihr_start)
+      equivalence(itimestart(4),imin_start)
+      equivalence(itimestart(5),isc_start)
+      equivalence(itimeend(1),iyr_end)
+      equivalence(itimeend(2),ida_end)
+      equivalence(itimeend(3),ihr_end)
+      equivalence(itimeend(4),imin_end)
+      equivalence(itimeend(5),isc_end)
+
       integer*2 lskobs,lexper
 C lskobs - Hollerith observation record, use iskrec to enter
 C          this array
@@ -32,6 +44,10 @@ C *_end - nominal end time
      .iyr_end,ida_end,ihr_end,imin_end,isc_end,
      .ISKREC(MAX_OBS),
      .LSKOBS(IBUF_LEN,MAX_OBS),lexper(4)
+      character*8 cexper
+      equivalence (cexper,lexper)
+      character*(ibuf_len*2) cskobs(max_obs)
+      equivalence (cskobs,lskobs)
 
       COMMON/SKOBS_CH/
      .cexperdes,cpiname,ccorname,vex_version,scan_name(max_obs)

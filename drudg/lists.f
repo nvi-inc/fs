@@ -1,8 +1,9 @@
-      SUBROUTINE LISTS(iin)    !LIST ONE STATION'S SCHEDULE 
+      SUBROUTINE LISTS(iin)    !LIST ONE STATION'S SCHEDULE
 
 C This routine lists on the printer a schedule
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
@@ -15,14 +16,21 @@ C INPUT:
       integer iin ! 1=standard, 2=S2, 3=K4
 C OUTPUT: none
 C LOCAL:
-      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
-     .LMON(2),
-     . LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
-      integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn),
-     .ioff(max_stn)
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN)
+      character*2 ccable(max_stn)
+      equivalence (ccable,lcable)
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
+
+      integer*2 LMON(2),LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
+      integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn)
+      integer ioff(max_stn)
       character*1 cs
       integer ipasp,iftold,idirp,idir,ituse
-      integer i,j,k,id
+      integer i,j,id
       real wlon,alat,al11,al12,al21,al22,rt1,rt2
       real az,el,x30,y30,x85,y85,dc,ha1
       real speed,spdips
@@ -33,8 +41,8 @@ C LOCAL:
       integer idd3,idm3,idd1,idm1,idd2,idm2
       real ras,decs,ras3,ras2,ras1,dcs1,dcs2,dcs3,has,d
       real tslew,dum
-      integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod,
-     .mjdpre,ispre,iyr2,idayr2,ihr2,min2,isc2
+      integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod
+      integer mjdpre,ispre,iyr2,idayr2,ihr2,min2,isc2
       integer*2 lfreq,lcbpre,lcbnew
       double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat,ivc
@@ -43,7 +51,7 @@ C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
       integer nlobs,nlmax,nlines,ntapes,ierr,ilen,npage
 C NLOBS - number of observation lines written for this station
-C NLINES, Lnobs, NTAPES - number of lines on a page, observations, tapes
+C NLINES, iobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
       INTEGER IC, TRIMLEN
       LOGICAL KNEWT,knewtp,ks2,kk4
@@ -53,17 +61,12 @@ C function to determine if a new tape has started
 C for precession routines
       double precision HA
 C     integer*2 LAXIS(2,7),
-      integer*2 laxis(2)
-      integer idum,lnobs
+!      integer*2 laxis(2)
+      character*4 laxis
+      integer idum,iobs
       LOGICAL KUP ! true if source is up at station
       logical kwrap
       integer*2 HHR
-
-      character*(max_sorlen) csname
-      character*2 cstn(max_stn)
-      character*2 cfreq
-      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
-
 
       double precision speed_k4 ! speed for K4
       double precision conv_k4 ! speed scaling for feet-->counts
@@ -155,8 +158,8 @@ C
       end if
       NLINES = 0
       NTAPES = 0
-      LNOBS = 0
-      nlobs = 0 ! number of scan line written 
+      iobs = 0
+      nlobs = 0 ! number of scan line written
       ks2=.false.
       kk4=.false.
       if (iin.eq.2) kk4=.true.
@@ -188,18 +191,21 @@ C       Scale by sample rate.
      .kwrap=.true.
 C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
       call ifill(ibuf,1,ibuf_len*2,oblank)
-      if (lnobs+1.le.nobs) then
-        idum = ichmv(ibuf,1,lskobs(1,iskrec(lnobs+1)),1,ibuf_len*2)
+      if (iobs+1.le.nobs) then
+        idum = ichmv(ibuf,1,lskobs(1,iskrec(iobs+1)),1,ibuf_len*2)
         ilen = iflch(ibuf,ibuf_len*2)
       else
         ilen=-1
       endif
+      do i=1,max_stn
+	cstn(i)=" "
+      end do
       CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
      .     LFREQ,IPAS,LDIR,IFT,LPRE,
      .     IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .     NSTNSK,LSTN,LCABLE,
      .     MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-      CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+      CALL CKOBS(cSNAME,cSTN,NSTNSK,cFREQ,ISOR,ISTNSK,ICOD)
       ituse=0
 C
       IF (ISOR.EQ.0.OR.ICOD.EQ.0) THEN
@@ -213,26 +219,26 @@ C
       CALL CHAR2HOL('  ',LCBPRE,1,2)
 C
       IC = TRIMLEN(LSKDFI)
-      WRITE(LUSCN,100) (LSTNNA(I,ISTN),I=1,4),LSKDFI(1:ic) ! new
-100   FORMAT(' Schedule listing for ',4A2,' from file ',A) ! was A32
-      WLON = STNPOS(1,ISTN)*180.0/PI
-      ALAT = STNPOS(2,ISTN)*180.0/PI
+      WRITE(LUSCN,100) cSTNNA(ISTN),LSKDFI(1:ic) ! new
+100   FORMAT(' Schedule listing for ',A,' from file ',A) ! was A32
+      WLON = STNPOS(1,ISTN)*rad2deg
+      ALAT = STNPOS(2,ISTN)*rad2deg
 C     LAX1 = LAXIS(1,IAXIS(ISTN))
 C     LAX2 = LAXIS(2,IAXIS(ISTN))
       call axtyp(laxis,iaxis(istn),2) ! convert code to name
-      Rt1 = STNRAT(1,ISTN)*180.0*60.0/PI
-      Rt2 = STNRAT(2,ISTN)*180.0*60.0/PI
-      AL11 = STNLIM(1,1,ISTN)*180.0/PI
-      AL21 = STNLIM(2,1,ISTN)*180.0/PI
-      AL12 = STNLIM(1,2,ISTN)*180.0/PI
-      AL22 = STNLIM(2,2,ISTN)*180.0/PI
+      Rt1 = STNRAT(1,ISTN)*60.0*rad2deg
+      Rt2 = STNRAT(2,ISTN)*60.0*rad2deg
+      AL11 = STNLIM(1,1,ISTN)*rad2deg
+      AL21 = STNLIM(2,1,ISTN)*rad2deg
+      AL12 = STNLIM(1,2,ISTN)*rad2deg
+      AL22 = STNLIM(2,2,ISTN)*rad2deg
 C
 
-      WRITE(luprt,99) (LSTNNA(I,ISTN),I=1,4),(LEXPER(i),i=1,4),
-     .WLON,ALAT,laxis(1),laxis(2),
-     .laxis(1),Rt1,AL11,AL21,laxis(2),Rt2,AL12,AL22
+      WRITE(luprt,99) cSTNNA(ISTN),cEXPER,
+     .WLON,ALAT,laxis(1:2),laxis(3:4),
+     .laxis(1:2),Rt1,AL11,AL21,laxis(3:4),Rt2,AL12,AL22
 99    FORMAT(/////5X,'SCHEDULE FOR  ',
-     . 4A2,'  EXPERIMENT  ',4A2///
+     . A,'  EXPERIMENT  ',A///
      .10X,'Longitude ',F8.2,' degrees WEST'/
      .10X,'Latitude  ',F8.2,' degrees NORTH'/
      .10X,'Axis type ',A2,'-',A2//
@@ -298,13 +304,13 @@ C
 C
 C       IF (iwid.EQ.137.OR.iwid.EQ.106)
         IF (cs.EQ.'S')
-     .  WRITE(LUPRT,91) (LSORNA(J,I),J=1,4),IRH3,IRM3,RAS3,LDS3,
+     .  WRITE(LUPRT,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
      .      IDD3,IDM3,DCS3,IRH2,IRM2,RAS2,LDS2,
      .      IDD2,IDM2,DCS2,IRH1,IRM1,RAS1,LDS1,IDD1,IDM1,DCS1
-91      FORMAT(6X,4A2,'  ',3(I2.2,':',I2.2,':',F5.2,'  ',
+91      FORMAT(6X,A,'  ',3(I2.2,':',I2.2,':',F5.2,'  ',
      .         A1,I2.2,':',I2.2,':',F4.1,'     '))
         IF (cs.EQ.'L')
-     .  WRITE(luprt,91) (LSORNA(J,I),J=1,4),IRH3,IRM3,RAS3,LDS3,
+     .  WRITE(luprt,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
      .      IDD3,IDM3,DCS3,IRH2,IRM2,RAS2,LDS2,IDD2,IDM2,DCS2
 90    CONTINUE
 C
@@ -317,24 +323,23 @@ C
       DO 150 NSAT=1,NSATEL
 C  if (ifbrk().lt.0) goto 900
         I=NCELES+NSAT
-        WRITE(luprt,9150) I,(LSORNA(K,I),K=1,4),(SATP50(J,NSAT),J=1,7),
+        WRITE(luprt,9150) I,csorna(i)(1:8),(SATP50(J,NSAT),J=1,7),
      .       ISATY(NSAT),SATDY(NSAT)
-9150    FORMAT(I4,1X,4A2,1X,F7.2,F7.5,3F7.2,F11.1,F8.3,I5,F7.2)
+9150    FORMAT(I4,1X,A,1X,F7.2,F7.5,3F7.2,F11.1,F8.3,I5,F7.2)
 150   CONTINUE
 C
 102   NPAGE = 1
       call luff(luprt)
-      WRITE(luprt,101) (LSTNNA(I,ISTN),I=1,4),LEXPER,
-     .      LDAY,LMON,IDA,IYR,IDAYR,NPAGE
-101   FORMAT(' ',//' SCHEDULE FOR ',4A2,' EXPERIMENT ',4A2,
+      WRITE(luprt,101) cSTNNA(ISTN),cEXPER,LDAY,LMON,IDA,IYR,IDAYR,NPAGE
+101   FORMAT(' ',//' SCHEDULE FOR ',A8,' EXPERIMENT ',A8,
      .       'ON ',2A2,', ',2A2,' ',I2.2,', ',
      .       I4,' (DAY ',I3,')',10X,'Page ',I3//)
       if (itearl(istn).gt.0) then
-        write(luprt,'(" ***** NOTE: Tape will start moving ",i3,
-     .  " seconds before start time. *****"/)') itearl(istn)
+        write(luprt,'(a,i3,a,/)')" ***** NOTE: Tape will start moving ",
+     >             itearl(istn)," seconds before start time. *****"
       else
         write(luprt,'(/)')
-       endif
+      endif
 C
       if (kwrap) then ! print cable wrap
 C       IF (iwid.EQ.137) THEN
@@ -361,9 +366,20 @@ C       IF (iwid.EQ.137) THEN
 C
 C 2. Begin the loop on schedule entries.  Check that the source
 C is in the list, and the requested station is in the observation.
-      DO WHILE (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.ODOLLAR)
+      do iobs=1,nobs
+        if(iobs .ne. 1) then
+          cbuf=cskobs(iskrec(iobs))
+          ilen=trimlen(cbuf)
+          if(cbuf(1:1) .eq. "$") goto 900
+        endif
+        CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
+     .         LFREQ,IPAS,LDIR,IFT,LPRE,
+     .         IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
+     .         NSTNSK,LSTN,LCABLE,
+     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
+
 C DO BEGIN Loop on observations
-        CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+        CALL CKOBS(cSNAME,cSTN,NSTNSK,cFREQ,ISOR,ISTNSK,ICOD)
         IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 900
 C
 C 3. Set up major block for calculations and printing.
@@ -377,14 +393,16 @@ C THEN BEGIN Current station in observation
 C THEN BEGIN new page
             NPAGE = NPAGE + 1
             call luff(luprt)
-            WRITE(luprt,101) (LSTNNA(I,ISTN),I=1,4),LEXPER,
+            WRITE(luprt,101) cSTNNA(ISTN),cEXPER,
      .            LDAY,LMON,IDA,IYR,IDAYR,NPAGE
             if (itearl(istn).gt.0) then
-              write(luprt,'(" ***** NOTE: Tape will start moving ",i3,
-     .        " seconds before start time. *****"/)') itearl(istn)
+                write(luprt,'(a,i3,a,/)')
+     >             " ***** NOTE: Tape will start moving ",
+     >             itearl(istn)," seconds before start time. *****"
             else
               write(luprt,'(/)')
-             endif
+            endif
+
             if (kwrap) then
             IF (cs.EQ.'S') THEN
               WRITE(LUPRT,1137)
@@ -435,8 +453,8 @@ C CONVERT TO SINGLE PRECISION
      .               KUP)
           HA = HA1
 C CONVERT BACK TO DOUBLE
-          AZ = AZ*180.0/PI
-          EL = EL*180.0/PI
+          AZ = AZ*rad2deg
+          EL = EL*rad2deg
           IF (ISOR.LE.NCELES) THEN
             CALL RADED(RA50(ISOR),DEC50(ISOR),HA,
      .           IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,
@@ -473,17 +491,17 @@ C ENDE source not up
 C
 C     5. Now write out the observation line.
           CALL M3INF(ICOD,SPDIPS,IVC)
-          call cbinf(lcable(istnsk),cwrap)
+          call cbinf(ccable(istnsk),cwrap)
           if (kwrap) then ! print cable wrap
 C         IF (iwid.EQ.137) then
           IF (cs.EQ.'S') then
             WRITE(LUPRT,9510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,(LSNAME(i),i=1,4),
+     .      ISC2,cSNAME,
      .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD)
 9510        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
-     .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
+     .      '  ',A,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',a5,' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
             if (ks2) then
@@ -504,10 +522,10 @@ C         IF (iwid.EQ.137) then
 C         else IF (iwid.EQ. 80) then
           else IF (cs.EQ. 'L') then
             WRITE(luprt,9518) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,(LSNAME(i),i=1,4),
+     .      ISC2,csNAME,
      .      LHSIGN,IHAH,IHAM,AZ,EL,cwrap,TSLEW
 9518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
-     .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
+     .      '  ',A,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
      .      a5,' ',F4.1,$)
             if (ks2) then
               write(luprt,9517) IFT(ISTNSK)/conv_s2
@@ -525,12 +543,12 @@ C         else IF (iwid.EQ. 80) then
 C         IF (iwid.EQ.137) then
           IF (cs.EQ.'S') then
             WRITE(LUPRT,8510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,(LSNAME(i),i=1,4),
+     .      ISC2,cSNAME,
      .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD)
 8510        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
-     .      '  ',4A2,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
+     .      '  ',A,'  ',I2.2,':',I2.2,':',F5.2,' ',A1,I2.2,':',
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
             if (ks2) then
@@ -551,9 +569,9 @@ C         IF (iwid.EQ.137) then
 C         else IF (iwid.EQ. 80) then
           else IF (cs.EQ. 'L') then
             WRITE(luprt,8518) IHR,iMIN,ISC,IHR2,
-     .      MIN2,ISC2,(LSNAME(i),i=1,4),LHSIGN,IHAH,IHAM,AZ,EL,TSLEW
+     .      MIN2,ISC2,cSNAME,LHSIGN,IHAH,IHAM,AZ,EL,TSLEW
 8518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
-     .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',F4.1,$)
+     .      '  ',A,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',F4.1,$)
             if (ks2) then
               write(luprt,8517) IFT(ISTNSK)/conv_s2
 8517          format(I5,' ',' ________________'/)
@@ -583,24 +601,6 @@ C
           IDIRP=IDIR
         ENDIF
 C ENDT Current station in observation
-C
-C  CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-          LNOBS = LNOBS + 1
-      call ifill(ibuf,1,ibuf_len*2,oblank)
-      if (lnobs+1.le.nobs) then
-        idum = ichmv(ibuf,1,lskobs(1,iskrec(lnobs+1)),1,ibuf_len*2)
-        ilen = iflch(ibuf,ibuf_len*2)
-      else
-        ilen=-1
-      endif
-        IF (IERR.GE.0.AND.ILEN.GT.0.AND.JCHAR(IBUF,1).NE.ODOLLAR) then
-          CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
-     .         LFREQ,IPAS,LDIR,IFT,LPRE,
-     .         IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
-     .         NSTNSK,LSTN,LCABLE,
-     .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-        ENDIF
-C ENDW Loop on observations
       ENDDO
 C
       WRITE(luprt,9900) NTAPES,NLOBS

@@ -39,7 +39,7 @@ C LOCAL:
       integer idum,ias2b,ichmv_ch,ichcm_ch,iflch,ichmv,ichcm
       integer max_rack_local,max_rec_local,max_rec2_local
       integer*2 lrec1
-      character*80 cbuf
+      character*80 ctmp
       character*1 crec1
       character*1 cx(20),cit_rack(20),cit_rec1(20),cit_rec2(20),
      .            cy(20)
@@ -169,9 +169,9 @@ C 2. Interactive input
         irec1=0
         irec2=0
         idum = ichmv_ch(lrec1,1,'0 ')
-        read(luusr,'(a)') cbuf
+        read(luusr,'(a)') ctmp
         call ifill(ibuf,1,80,oblank)
-        call char2hol(cbuf,ibuf,1,ibuf_len)
+        call char2hol(ctmp,ibuf,1,ibuf_len)
         nch = iflch(ibuf,80)
         ich=1
         call gtfld(ibuf,ich,nch,ic1,ic2) ! rack field

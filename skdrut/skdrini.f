@@ -29,8 +29,7 @@ C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 C
 C LOCAL
-      integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,
-     .iy,ir,ity2,k,l
+      integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,iy,ir
 C DATA
 C     data ((roll_def(i,j,1),j=1,32),i=1,17)/ 
 C    .   02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,

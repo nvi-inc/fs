@@ -9,6 +9,7 @@ C
       integer*2 lsorna,liauna
       character*1 cfltype
       character*128 sordefnames
+      real rmin_astro(Max_sor),rmax_astro(max_sor)
 c
       COMMON/SOURC/SORP50(2,MAX_SOR),SORPDA(2,MAX_SOR),
      .       SATP50(7,MAX_SAT),SATDY(MAX_SAT),
@@ -18,9 +19,10 @@ c
      .       nflux(max_band,max_sor),
      .       nsorlen(max_sor),
      .       LSORNA(MAX_SORLEN/2,MAX_SOR),
-     .       LIAUNA(MAX_SORLEN/2,MAX_SOR)
-             character*(Max_sorlen) csorna(Max_sor)
-             equivalence (csorna,lsorna)
+     .       LIAUNA(MAX_SORLEN/2,MAX_SOR),
+     >       rmin_astro,rmax_astro
+             character*(Max_sorlen) csorna(Max_sor),ciauna(Max_sor)
+             equivalence (csorna,lsorna),(ciauna,liauna)
 c
       COMMON/SOURC_CH/
      .       cfltype(max_band,max_sor),

@@ -1,6 +1,7 @@
-      subroutine snap_start_recording
+      subroutine snap_start_recording(kin2net)
       implicit none
       include 'hardware.ftni'
+      logical kin2net
 
       character*5 lmid          !for, or rev
       character*3 lpre          !st, or st1
@@ -15,7 +16,11 @@
       endif
 
       if(km5A.or.KM5P) then
-        write(luFile,'("disc_start=on")')
+        if(kin2net) then
+            write(lufile,'(a)') "in2net=on"
+        else
+           write(luFile,'("disk_record=on")')
+        endif
       else if(kk4) then
         write(luFile,"(a,'=record')") lpre(1:npre)       !stX=record, where X is optional "1" or "2"
       else
@@ -27,7 +32,7 @@
 ! lspeed ch is ascii version of speed, calculated in snap_calc_speed.
         write(luFile,'(a,a,a)') lpre(1:npre),lmid,lspeed(1:nspdCh)
       endif
-      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disc_start=on")')
+      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disk_record=on")')
 
       krunning=.true.           !turn on running flag.
 

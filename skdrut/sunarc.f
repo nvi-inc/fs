@@ -5,6 +5,7 @@ C   SUNARC calculates the distance of a source from the sun and
 C             returns the arc distance in degrees.
 C
       include '../skdrincl/skparm.ftni'
+      include "../skdrincl/constants.ftni"
 C
 C  INPUT VARIABLES:
       integer nsor,mjd

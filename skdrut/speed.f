@@ -29,7 +29,7 @@ C 020713 nrv Add third K4 speed for 128 Mbps.
 C 020926 nrv Change K4 sample rate logic to get correct speed (per S. Kurihara)
 C 021003 nrv Calculate K4 speed in dm/s not m/s. This will make the
 C            footages in the schedule be in dm not meters, for more precision.
-C 030109 jmg Back to m/s on K4.
+C 030109 jmg Back to m/s on K4
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -58,13 +58,13 @@ C Determine type of equipment.
 
 C     ks2 = ichcm_ch(lterna(1,is),1,'S2').eq.0
 C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
-      ks2 = ichcm_ch(lstrec(1,is),1,'S2').eq.0
-      kk4 = ichcm_ch(lstrec(1,is),1,'K4').eq.0
+      ks2=cstrec(is)(1:2) .eq. "S2"
+      kk4=cstrec(is)(1:2) .eq. "K4"
 
       if (ks2) then
-        if (ichcm_ch(ls2speed(1,is),1,'LP').eq.0) then
+        if (cs2speed(is)(1:2) .eq. "LP") then
           sp = speed_lp ! ips
-        else if (ichcm_ch(ls2speed(1,is),1,'SLP').eq.0) then
+        else if (cs2speed(is)(1:3) .eq. "SLP") then
           sp = speed_slp ! ips
         else ! unknown
           speed=-1.0
@@ -81,7 +81,7 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
         else 
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
-        sp=sp/1000. ! convert to  m/s
+        sp=sp/1000.0 ! convert to m/s
 
 C 1. First account for the fan factor.
 
@@ -91,21 +91,14 @@ C 1. First account for the fan factor.
         else
           fanfac=1.0
         endif
-
 C 2. Get the correct overhead factor for DR or NDR.
-
         ohfac = 1.125    ! factor is 8/9 for Mk3/4 DR format
         if (ichcm_ch(lmfmt(1,is,icode),1,'V').eq.0) then
           ohfac = 1.134  ! factor is 9.072/8 for VLBA NDR format
         endif
-
 C 3. Calculate the tape speed. Sample rate is in Mb/s.
-
-        SP = ohfac * fanfac * samprate(icode)*1.d6
-     .              / bitdens(is,icode) ! ips
-C
-      sp=sp/12.0 ! convert to fps
-
+        SP = ohfac * fanfac * samprate(icode)*1.d6/ bitdens(is,icode) ! ips
+        sp=sp/12.0 ! convert to fps
       endif ! S2/K4/Mk3/4
 
       speed=sp

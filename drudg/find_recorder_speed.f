@@ -5,8 +5,6 @@
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
       include 'hardware.ftni'
-! 28Aug2003  JMGipson. Divide Gbyte count by ifan_fact.
-
 ! passed
       integer icode                     ! current mode
       logical kskd                      ! do we have a sked file? need to get speed for Mark5A or Mark5P
@@ -33,10 +31,11 @@
           else if(km5p .or. Km5P_piggy) then
 !            if(km5P_piggy) nchans_obs=32/ifan_fact
             conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
+            nchans_obs=32         !always record 32 tracks for Mark5P.
             spd_rec=nchans_obs*samprate(icode)*conv
           endif
+	  spd_rec=spd_rec/ifan_fact
         endif
-        spd_rec=spd_rec/ifan_fact
       else if(kk4) then
          if(kskd) then
            conv = 55.389387393d0 ! counts/sec

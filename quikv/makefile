@@ -1,6 +1,6 @@
 #
 CFLAGS= 
-LIBES = ../clib/clib.a ../rtelb/rtelb.a ../poclb/poclb.a ../rtelb/rtelb.a
+LIBES = ../clib/clib.a ../rtelb/rtelb.a ../s2das/s2das.a ../poclb/poclb.a
 #
 OBJECTS =\
 quikv.o dist.o dist_dis.o logmsg.o vrepro.o vrepro_dis.o vform.o vform_dis.o\
@@ -21,13 +21,18 @@ k4vcbw.o k4vcbw_dis.o k3fm.o k3fm_dis.o k4label.o k4label_dis.o k4newtp.o\
 k4oldtp.o k4rec_mode.o k4rec_mode_dis.o logmatmsgfm.o k4recpatch.o\
 k4recpatch_dis.o k4pcalports.o k4pcalports_dis.o selectcmd.o\
 selectcmd_dis.o scan_name.o ifadjust.o get_att.o set_vc_sb.o get_itp.o\
-reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o mk5.o mk5_dis.o sd.o\
-sd_dis.o ed.o ed_dis.o pd.o pd_dis.o disc_serial.o disc_serial_dis.o\
-disc_check.o disc_check_dis.o data_check_pos.o mk5relink.o mk5close.o\
+reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o mk5.o mk5_dis.o\
+disk_record.o disk_record_dis.o\
+disk_pos.o disk_pos_dis.o disk_serial.o disk_serial_dis.o\
+data_check.o data_check_dis.o data_check_pos.o mk5relink.o mk5close.o\
 rollform.o rollform_dis.o tpicd.o tpicd_dis.o onoff.o onoff_dis.o calrx.o\
 calrx_dis.o ds.o ds_dis.o lba_cor.o lba_cor_dis.o lba_ft.o lba_ft_dis.o\
 lba_ifp.o lba_ifp_dis.o lba_mon.o lba_mon_dis.o lba_trkfrm.o lba_trkfrm_dis.o\
-bank_check.o bank_check_dis.o rtime_decode.o bank_inc_check.o
+bank_check.o bank_check_dis.o logm5msg.o disk2file.o disk2file_dis.o\
+in2net.o in2net_dis.o user_device.o user_device_dis.o\
+s2agc.o s2bbc.o s2diag.o s2encode.o s2fs.o s2ifx.o s2version.o s2mode.o\
+s2ping.o s2pwrmon.o s2status.o s2tonedet.o  s2chkr.o s2delay.o
+
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

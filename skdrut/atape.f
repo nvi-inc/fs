@@ -77,14 +77,18 @@ C
         endif
 C       Station ID is valid. Check tape type now.
         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! type
-        IF  (IC1.GT.0) THEN 
+        if(ic1 .le. 0) then
+          write(luscn,'(3(a,1x))')
+     >     "ATAPE02 Error - You must specify a type: ",list(1:2)
+          return
+        else IF  (IC1.GT.0) THEN
           nch=min0(ikey_len,ic2-ic1+1)
           ckeywd=" "
           idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
-          ikey=istringminmatch(ckeywd,list,ilist_len)
+          ikey=istringminmatch(list,ilist_len,ckeywd)
           if (ikey.eq.0) then ! invalid type
             write(luscn,
-     >       '("ATAPE03 Error - invalid type. Must be one of",4(a,1x))')
+     >     '("ATAPE03 Error - invalid type. Must be one of ",4(a,1x))')
      >      list
             return
           END IF  !invalid type

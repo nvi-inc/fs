@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #define PORT 30384 /* the port client will be connecting to */
 
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
   if ((fp=fopen(argv[1],"r")) == 0) {
     /* If the file does not exist complain only once. */
     err_report("metclient: metlog.ctl does not exist", NULL,0,0);
+    fclose(fp);
     sleep(10);
     goto file_err;
   } else {
@@ -116,14 +118,7 @@ int main(int argc, char *argv[])
   their_addr.sin_port = htons(PORT);  /* short, network byte order */
   their_addr.sin_addr = *((struct in_addr *)he->h_addr);
   memset(&(their_addr.sin_zero), '\0', 8);  /* zero the rest of the struct */
-  
-  if (connect(sockfd, (struct sockaddr *)&their_addr, 
-	      sizeof(struct sockaddr)) == -1) {
-    err_report("metclient client error", NULL,0,0);
-    sleep(10);
-    goto hostname_err;
-  }
-  
+
   /* Set socket nonblocking  */
   if ((flags = fcntl (sockfd, F_GETFL, 0)) < 0) 
     err_report("metclient f_getfl error", NULL,0,0);
@@ -134,12 +129,24 @@ int main(int argc, char *argv[])
     err_report("metclient f_setfl error", NULL,0,0);
   
   to.tv_sec = 4;
-  
+  to.tv_usec = 0;
+  if (connect(sockfd, (struct sockaddr *)&their_addr,
+	      sizeof(struct sockaddr)) < 0) {
+    if(errno != EAGAIN && errno != EINPROGRESS) {
+      perror("connect");
+      err_report("metclient client connect error", NULL,0,0);
+      sleep(10);
+      goto hostname_err;
+    }
+  } 
+   
+  sleep(1);
   FD_ZERO(&ready);
   FD_SET(sockfd, &ready);
   
   select(sockfd+1, &ready, NULL, NULL, &to);
-  
+
+  sleep(1);
   if ((numbytes=recv(sockfd, buf, 29, 0)) < 0) {
     err_report("metclient recv error", NULL,0,0);
     strcpy(buf,"Client Timed Out");

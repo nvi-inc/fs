@@ -5,6 +5,7 @@ C     and stores it in common.
 C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C History:
 C 960517 nrv New.
@@ -22,6 +23,11 @@ C INPUT:
 C
 C OUTPUT:
       integer ierr ! error number, non-zero is bad
+
+! functions
+      integer ichmv_ch,ichcm_ch,ichmv ! functions
+      integer ptr_ch,fget_station_def,fvex_len
+
 C
 C LOCAL:
       logical kline
@@ -30,22 +36,19 @@ C LOCAL:
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
       integer*2 LOCC(4),lrec(4),lrack(4),ls2sp(2)
       integer islcon(2),ns2tp
-      real AZH(MAX_HOR),ELH(MAX_HOR),CO1(MAX_COR),CO2(MAX_COR)
+      real AZH(MAX_HOR),ELH(MAX_HOR)
       real DIAM
       real sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
       double precision POSXYZ(3),AOFF
-      INTEGER J,nr,maxt,npar(max_band),
-     .idummy,ib,ii,nco,nhz,i,idum
+      INTEGER J,nr,maxt,npar(max_band),idummy,nhz,i,idum
       integer*2 lidt(2),lid,ltlc
       character cstid(max_stn)
-      real poslat,poslon
+      double precision poslat,poslon
       integer nstack
       integer il,ite,itl,itg
       integer iret ! return from vex routines
       character*128 cout,ctapemo
-      integer ichmv_ch,ichcm_ch,igtba,ichmv ! functions
-      integer ptr_ch,fget_station_def,fvex_len
 
 C
 C     1. First get all the def names 
@@ -54,8 +57,9 @@ C
       iret = fget_station_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
       do while (iret.eq.0.and.fvex_len(cout).gt.0)
         IF  (nstatn.eq.MAX_STN) THEN  !
-          write(lu,'("VSTINP20 - Too many antennas.  Max is ",
-     .    i3,".  Ignored: ",a)') MAX_STN,cout
+          write(lu,
+     > '("VSTINP20 - Too many antennas.  Max is ",i3,".  Ignored: ",a)')
+     >  MAX_STN,cout
         else
           nstatn=nstatn+1
           stndefnames(nstatn)=cout
@@ -72,18 +76,19 @@ C     2. Now call routines to retrieve all the station information.
         CALL vunpant(stndefnames(i),ivexnum,iret,ierr,lu,
      .    lant,LAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)
         if (iret.ne.0.or.ierr.ne.0) then 
-          write(lu,'("VSTINP01 - Error getting $ANTENNA information",
-     .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
-     .    iret,ierr
+          write(lu,
+     >    '(a, a,/,"iret=",i5," ierr=",i5)')
+     >     "VSTINP01 - Error getting $ANTENNA information for ",
+     >     stndefnames(i)(1:il),  iret,ierr
           call errormsg(iret,ierr,'ANTENNA',lu)
           ierr1=1
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
      .    LID,lsit,POSXYZ,POSLAT,POSLON,LOCC,nhz,azh,elh)
         if (iret.ne.0.or.ierr.ne.0) then 
-          write(lu,'("VSTINP02 - Error getting $SITE information",
-     .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
-     .    iret,ierr
+          write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
+     >     "VSTINP02 - Error getting $SITE information for ",
+     >      stndefnames(i)(1:il),  iret,ierr
           call errormsg(iret,ierr,'SITE',lu)
           ierr1=2
         endif
@@ -92,9 +97,9 @@ C     2. Now call routines to retrieve all the station information.
      .    lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tp,
      .    ltlc)
         if (iret.ne.0.or.ierr.ne.0) then 
-          write(lu,'("VSTINP03 - Error getting $DAS information",
-     .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
-     .    iret,ierr
+          write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
+     >    "VSTINP03 - Error getting $DAS information for ",
+     >    stndefnames(i)(1:il),  iret,ierr
           call errormsg(iret,ierr,'DAS',lu)
           ierr1=3
         endif
@@ -129,8 +134,8 @@ C       2.2 Here we handle the position information.
 C     It is not an error to have the occ. code or lat,lon missing.
 C
         IDUMMY = ICHMV(LSTNNA(1,I),1,lsit,1,8)
-        STNPOS(1,I) = POSLON*PI/180.0
-        STNPOS(2,I) = POSLAT*PI/180.0
+        STNPOS(1,I) = POSLON*deg2rad
+        STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
@@ -204,16 +209,6 @@ C         endif
 C
 C      2.6 Here we handle the coordinate mask
 C
-C           write(lu,'("VSTINP260 - Too many coordinate mask pairs. ",
-C    .      "Max is ",i5)') max_cor 
-C         if (ierr.eq.-103) then
-C           error for no matching value, which is ok
-C         endif
-C         NCORD(I) = NCO
-C         DO J=1,NCORD(I)
-C           CO1MASK(J,I) = CO1(J)*PI/180.0
-C           CO2MASK(J,I) = CO2(J)*PI/180.0
-C         END DO
 
       enddo ! get all station information
 

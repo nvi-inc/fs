@@ -15,6 +15,7 @@
       integer lu_outfile                !only used to delete file.
       logical kdone
 
+      ierr=0
       inquire(file=lfilnam,exist=kexist,iostat=ierr)
       ic = trimlen(lfilnam)
       if (kexist) then

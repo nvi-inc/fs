@@ -35,7 +35,7 @@ C Input:
       logical kskd
 C
 C LOCAL:
-      CHARACTER*256 cbuf,LBUF
+      CHARACTER*256 ctmp,LBUF
       character cs
       INTEGER iwid,IC, TRIMLEN, IL, NCHAR, MAXLIN
       integer maxwid,ierr,nrec,iyear,i,npage,numlin,l
@@ -68,8 +68,8 @@ C   Check for existence of SNAP file.
 C  Read the first line to get the station name for the header
 C  in case this is a SNAP file reading only.
       nrec=1
-      read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
-      call read_snap1(cbuf(2:),cexper,iyear,cstn,cid1,cid2,ierr)
+      read(lu_infile,'(a)',err=990,end=990,iostat=IERR) ctmp
+      call read_snap1(ctmp(2:),cexper,iyear,cstn,cid1,cid2,ierr)
       if (ierr.lt.0) then ! set defaults instead
         if (ierr.ge.-1) cexper='XXX'
         if (ierr.ge.-2) iyear=0
@@ -78,11 +78,11 @@ C  in case this is a SNAP file reading only.
         if (ierr.ge.-5) cid2='  '
       endif
       ierr=0
-C     read(cbuf,9001) cexper,iyear,cstn
+C     read(ctmp,9001) cexper,iyear,cstn
 C9001  format(2x,a8,2x,i4,1x,a8,2x,a1)
-      if (.not.kskd) call char2hol(cstn,lstnna(1,1),1,8)
-      WRITE(LUSCN,9100) (LSTNNA(I,ISTN),I=1,4),SNPNAME(1:ic)
-9100  FORMAT(' SNAP COMMAND FILE LISTING FOR ',4A2,' FROM FILE ',A)
+      if (.not.kskd) cstnna(1)=cstn
+      WRITE(LUSCN,9100) cSTNNA(ISTN),SNPNAME(1:ic)
+9100  FORMAT(' SNAP COMMAND FILE LISTING FOR ',A,' FROM FILE ',A)
 C
 C
 C  Set up for proper width/length, depending on font size and
@@ -134,9 +134,9 @@ C   Loop through SNAP FILE
 C
       if (kskd) then
         ic=trimlen(snpname)
-        write(luprt,9302) snpname(1:ic),(lstnna(i,istn),i=1,4),npage
+        write(luprt,9302) snpname(1:ic),cstnna(istn),npage
 9302    FORMAT(//'  SNAP Commands in file ',A,' for station ',
-     .       4A2,10x,'Page ',I3//)
+     .       A,10x,'Page ',I3//)
       else
         write(luprt,9303) snpname(1:ic),cstn,npage
 9303    format(//'  SNAP Commands in file ',A,' for station ',
@@ -144,15 +144,15 @@ C
       endif
 
       if (nrec.eq.1) then !write out first line
-        l = trimlen(cbuf)
-        WRITE(LUPRT,9904) nrec,cbuf(1:l)
+        l = trimlen(ctmp)
+        WRITE(LUPRT,9904) nrec,ctmp(1:l)
         NUMLIN = NUMLIN + 1
       endif
 
 120   IF (NUMLIN.GE.MAXLIN) GOTO 110
-      CALL clear_array(cbuf)
-      READ(LU_INFILE,'(A)',END=108,IOSTAT=IERR) cbuf
-      IL = TRIMLEN(cbuf)
+      ctmp=" "
+      READ(LU_INFILE,'(A)',END=108,IOSTAT=IERR) ctmp
+      IL = TRIMLEN(ctmp)
       IF (IERR.NE.0) GOTO 990
       NREC = NREC + 1
       IF (IL.GE.0) GOTO 125
@@ -166,11 +166,11 @@ C END OF FILE DETECTED
 C
 C WE HAVE A COMMAND IN THE BUFFER
 
-C125   IF ((cbuf(1:6).NE.'SOURCE'.and.cbuf(1:6).ne.'source') 
-C     ..and. (cbuf(1:6).NE.'SCAN_N'.and.cbuf(1:6).ne.'scan_n') 
-125   IF ((cbuf(1:6).NE.'SCAN_N'.and.cbuf(1:6).ne.'scan_n') 
-     ..and. ((cbuf(1:1).eq.CHAR(34).and.il.lt.40) 
-     ..or. (cbuf(1:1).ne.char(34))))goto 130
+C125   IF ((ctmp(1:6).NE.'SOURCE'.and.ctmp(1:6).ne.'source') 
+C     ..and. (ctmp(1:6).NE.'SCAN_N'.and.ctmp(1:6).ne.'scan_n')
+125   IF ((ctmp(1:6).NE.'SCAN_N'.and.ctmp(1:6).ne.'scan_n')
+     ..and. ((ctmp(1:1).eq.CHAR(34).and.il.lt.40)
+     ..or. (ctmp(1:1).ne.char(34))))goto 130
 C                             "
       IF (NREC.EQ.1.OR.NCHAR.LE.1) GOTO 126
 C
@@ -185,7 +185,7 @@ Cif (ifbrk().lt.0) goto 999
 C
 C NOW WRITE OUT THE CURRENT LINE NUMBER AND THE NEW SOURCE COMMAND
 
-126   WRITE(LUPRT,9904) NREC, cbuf(1:IL)
+126   WRITE(LUPRT,9904) NREC, ctmp(1:IL)
 9904  FORMAT(1X,I6,1X,A)
       numlin = numlin + 1
       NCHAR = 1
@@ -204,7 +204,7 @@ C IF NOT, THEN WRITE OUT BUFFER, AND CONTINUE
 C
 C ADD THE COMMAND TO THE END OF THE LINE AND ADD ONE BLANK
 
-140   LBUF(NCHAR:NCHAR+IL+1) = cbuf(1:IL) // ' '
+140   LBUF(NCHAR:NCHAR+IL+1) = ctmp(1:IL) // ' '
       NCHAR = NCHAR+IL+1
       GOTO 120
 

@@ -7,6 +7,7 @@ C              rise/set times were available. Use this version with
 C              drudg. Use the new version with sked.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C     INPUT VARIABLES:
          integer nsnow,mjd,nsnew,istn,lookah

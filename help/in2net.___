@@ -1,0 +1,34 @@
+               in2net - Transfer data from Mark 5 input to network
+
+            Syntax:     in2net=control,destination,options
+
+            Response:   in2net/control,destination,options,status,
+                               received,buffered
+
+
+Settable Parameters:
+          control     on to start transfer, off to end, connect to establish
+                      connection, disconnect to close connection
+          destination destination IP address or node name to transfer to,
+                      IP address is more robust against name server problems,
+                      maximum 64 characters, no default
+          options     Currently ignored, maximum 32 characters
+
+Monitor-only parameters:
+          status      inactive, connected, sending
+          received    number of bytes transferred from input since connect
+          buffered    bytes remaining in outgoing buffer
+
+Comments:
+The in2net command can be used to transfer data from the Mark 5 input
+to the network, another Mark 5 is expected to be receiving the data at
+the other end. This transfer can not be done while the system is
+recording or performing some other type of Mark 5 data operation, such
+as recording. The data transfer can not be interrupted by other data
+operations or configuration changes.
+
+The destination parameter is ignored on command unless control is
+connect.
+
+The "options" settable parameter is currently ignored, but is included
+for future expansion.

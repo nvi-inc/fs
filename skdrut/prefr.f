@@ -9,7 +9,8 @@ C     IEPIN - original epoch, either 1950 or 2000 only
 C           - new epoch is assumed to be 2000 or 1950, respectively
 C
       implicit none
-      real*8 PI,PSI,PHI,THI,RAIN,DECIN,RAOUT,DECOUT
+      include "../skdrincl/constants.ftni"
+      real*8 PSI,PHI,THI,RAIN,DECIN,RAOUT,DECOUT
       integer iepin
       real*8 X,Y,Z,X1,Y1,Z1
       real*8 CS,CP,CT,SS,SP,ST
@@ -17,7 +18,6 @@ C
 C  HISTORY
 C  890103 NRV Created, tested
 C
-      PI = 3.1415926535D0
       PSI = -19.243561D0*PI/(180.D0*60.D0)
       PHI = -19.197312D0*PI/(180.D0*60.D0)
       THI = 16.704244D0*PI/(180.D0*60.D0)

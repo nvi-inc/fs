@@ -24,6 +24,7 @@
       endif
 
 ! Put some instructions out for MK5 recorders.
+
       write(ldum,'("mk5=play_rate=data:",i4)') idrate
       call squeezewrite(lufile,ldum)
 

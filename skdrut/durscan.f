@@ -11,6 +11,7 @@ C Input AND Output
       integer*2 ibuf(*)
       integer nch ! next blank character in ibuf
       integer idur ! duration in seconds
+C Called by: NEWSCAN
 
 C Local
       integer*2 ibufx(4)

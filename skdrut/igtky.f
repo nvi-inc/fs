@@ -179,6 +179,8 @@ C
       character*20 ckey(134) ! keywords to match
       character*2 ccode(134)  ! corresponding 2-letter code
       integer ivalid(134) ! type for which it is valid
+      integer i,nch
+      character*1 lq
 C
 C  Initialized
       data numcmd/134/

@@ -11,6 +11,7 @@ C            observations scan by scan.
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
+      include '../skdrincl/data_xfer.ftni'
 C
 C  INPUT:
       integer ivexnum,lu,iret
@@ -25,34 +26,65 @@ C          fvex_scan_source          (get source in this scan)
 c          newscan                   (form new scan)
 C          addscan                   (add each station to the scan)
 C
+! functions
+      integer fvex_scan_source,fvex_date
+      integer fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len
+      integer fget_station_scan,fget_scan
+      integer fget_data_transfer_scan
+      integer ivgtso,ivgtmo,ivgtst
 C  LOCAL:
-      integer isor,icod,il,ip,ifeet,i,idrive,nstn_scan,istn
-      integer idum,irec,ipnt
-      integer*2 itim1(6),itim2(6)
-      integer*2 lcb
+      integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
+      integer irec
+
+      integer*2 lcb          !cable wrap
+      character*2 ccb
+      equivalence (lcb,ccb)
       character*128 cmo,cstart,csor,cout,cunit,cscan_id
-      integer ic1,ic2,ic11,ic12,ich,istart(5)
+      integer istart(5)
       double precision d,start_sec
       integer idstart,idend
-      logical knew,kearl,ks2
-      integer ichmv,ichmv_ch,ivgtso,ivgtmo,ivgtst
-      integer ichcm_ch,fget_scan_station,fvex_scan_source,fvex_date,
-     .fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len,
-     .fget_station_scan,fget_scan
+      logical ks2
+
+      character*128 ldata_transfer_method
+      integer ixfer_cnt
+
+      integer itemp
+      integer nch
+! 0. Initialize data transfer info.
+      ixfer_cnt=0
+      do istn=1,max_stn
+        kxfer_stat(istn)=.false.        !set all stations to no data-transfer.
+      end do
+
+      Kin2Net_2_Disk2File=.false.
+      kDisk2File_2_in2net=.false.
+      knodatatransfer=.false.
+      ldestin_in2net=" "
 
 C 1. Get scans one by one.
 
-      write(lu,9100) 
-9100  format('VOBINP - Generating observations')
-      iret = fget_scan(ptr_ch(cstart),len(cstart),
-     .       ptr_ch(cmo),len(cmo),
-     .       ptr_ch(cscan_id),len(cscan_id),
-     .       ivexnum)
+      write(lu,"('VOBINP - Generating observations ',$)")
       nobs=0
       ierr = 1 ! station
-      do while (iret.eq.0) ! get all scans 
-        if (nobs.gt.0.and.mod(nobs,100).eq.0) write(lu,9101) nobs
-9101    format(i6," scans ... ")
+      do while (iret.eq.0) ! get all scans
+        if(nobs .eq. 0) then
+           itemp=ivexnum
+        else
+           itemp=0
+        endif
+        iret = fget_scan(ptr_ch(cstart),len(cstart),
+     .         ptr_ch(cmo),len(cmo),
+     .         ptr_ch(cscan_id),len(cscan_id),
+     .         itemp)
+
+        if(iret .ne. 0) then
+          if(ierr .gt. 0) ierr=0
+          if(ierr .eq. 0) iret=0
+          write(lu, '(/,i6," scans in this schedule.")') nobs
+          return
+        endif
+        if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
+
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
         ierr=8 ! date/time
         if (iret.ne.0) return
@@ -74,25 +106,27 @@ C 1. Get scans one by one.
         il=fvex_len(cscan_id)
 C-------------------------------------------------------------
 C       Now get each station line that is part of this scan.
-        nstn_scan = 0
-        iret = fget_station_scan(nstn_scan+1)
-        do while (iret.eq.0) ! get all stations in the scan
-          nstn_scan = nstn_scan + 1
-          ierr = 1 ! station
+        cout=" "
+        do istn_scan=1,Max_Stn
+          if(fget_station_scan(istn_scan) .ne. 0) goto 100
           iret = fvex_field(1,ptr_ch(cout),len(cout))
+          ierr=1
+          if (iret.ne.0) then
+            return
+          endif
+
           il = fvex_len(cout)
-          if (iret.ne.0) return
           if (ivgtst(cout,istn).le.0) then
-            write(lu,'("VOBINP04 - Station ",a," not found!")') 
-     .      cout(1:il)
+            write(lu,*) "VOBINP04 - Station ",cout(1:il)," not found!"
             return
           endif
           if (nchan(istn,icod).eq.0) then ! code not defined
-            write(lu,'("VOBINP03 - Mode ",a," not defined for this ",
-     .      "station!!")') cmo(1:il)
+            write(lu,*) "VOBINP03 - Mode ",
+     >      cmo(1:il)," not defined for this station!!"
             return
           endif ! code not defined
-          ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+
+          ks2=cstrec(istn)(1:2).eq."S2"
           ierr = 2 ! data start
           iret = fvex_field(2,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -100,6 +134,7 @@ C       Now get each station line that is part of this scan.
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0) return
           idstart = d
+
           ierr = 3 ! data end
           iret = fvex_field(3,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -107,8 +142,8 @@ C       Now get each station line that is part of this scan.
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0) return
           idend = d
+
 C       Keep good data offset and duration separate
-C         idur = det-dst
           ierr = 4 ! footage
           iret = fvex_field(4,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -134,11 +169,11 @@ C         idur = det-dst
           if (iret.ne.0) return
           il = fvex_len(cout)
           if (il.eq.0) then ! null wrap
-            idum=ichmv_ch(lcb,1,'- ')
+            ccb="- "
           else ! check it
-            if (cout(1:il).eq.'&n') idum=ichmv_ch(lcb,1,'- ')
-            if (cout(1:il).eq.'&cw') idum=ichmv_ch(lcb,1,'C ')
-            if (cout(1:il).eq.'&ccw') idum=ichmv_ch(lcb,1,'W ')
+            if (cout(1:il).eq.'&n')  ccb="- "
+            if (cout(1:il).eq.'&cw') ccb="C "
+            if (cout(1:il).eq.'&ccw') ccb="W "
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))
@@ -149,7 +184,7 @@ C         idur = det-dst
 
 C  Make the new scan if this is the first source.
 
-         if (nstn_scan.eq.1) then  ! new
+         if (istn_scan.eq.1) then  ! first station in this scan--new scan.
            call newscan(istn,isor,icod,istart,idstart,
      .        idend,ifeet,ip,idrive,lcb,ierr)
            il = fvex_len(cscan_id)
@@ -157,8 +192,7 @@ C  Make the new scan if this is the first source.
            if (ierr.ne.0) write (lu,9108) ierr
 9108       format('VOBINP05 - Error ',i5,' from newscan')
          else ! add
-           irec = nobs
-           call addscan(irec,istn,icod,idstart,idend,
+           call addscan(nobs,istn,icod,idstart,idend,
      .        ifeet,ip,idrive,lcb,ierr)
            if (ierr.ne.0) then
              write(lu,9103) ierr,irec,istn,istart
@@ -166,22 +200,90 @@ C  Make the new scan if this is the first source.
      .          i3,'istart=',5i5)
            endif
          endif ! new or add
-
-          iret = fget_station_scan(nstn_scan+1) ! get next station
         enddo  ! get all stations in this scan
+100     continue
+
+! Now process the data_transfer lines
+        ixfer_beg(nobs)=ixfer_cnt+1
+        do istn_scan=1,Max_Stn
+          if(fget_data_transfer_scan(istn_scan) .ne. 0) goto 200
+          ixfer_cnt=ixfer_cnt+1            !
+! Now parse the line
+! First get station.
+          iret = fvex_field(1,ptr_ch(cout),len(cout))
+          if (iret.ne.0) then
+            return
+          endif
+! Check to see if a valid station.
+! Should check to see if this station is in this scan?
+          il = fvex_len(cout)
+          ixfer_stat(ixfer_cnt)=ivgtst(cout,istn)
+          kxfer_stat(ixfer_stat(ixfer_cnt))=.true.       !indicate at least one datatransfer
+
+          if(ixfer_stat(ixfer_cnt) .le. 0) then
+            write(lu,*) "VOBINP14 - Station ",cout(1:il)," not found!"
+            return
+          endif
+!
+          iret = fvex_field(2,ptr_ch(cout),len(cout))
+          if (iret.ne.0) return
+          ldata_transfer_method=cout(1:fvex_len(cout))
+          call capitalize(ldata_transfer_method)
+          if(ldata_transfer_method.eq."IN2NET") then
+            ixfer_method(ixfer_cnt)=ixfer_in2net
+          else if(ldata_transfer_method.eq."DISK2FILE") then
+            ixfer_method(ixfer_cnt)=ixfer_disk2file
+          else
+            write(lu,*) "VOBINP: Unknown data transfer type!"
+            return
+          endif
+
+          iret = fvex_field(3,ptr_ch(cout),len(cout))
+          if(iret .ne. 0) return
+          nch=fvex_len(cout)
+          if(nch .eq. 0) then
+            lxfer_destination(ixfer_cnt)=" "
+          else
+            lxfer_destination(ixfer_cnt)=cout(1:nch)
+          endif
+
+          iret = fvex_field(4,ptr_ch(cout),len(cout))
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
+! may not have anything here. If so, use beginning of scan.
+          if(iret .eq. 0) then
+             xfer_beg_time(ixfer_cnt)=d
+          else
+             xfer_beg_time(ixfer_cnt)=0.
+          endif
+
+          iret = fvex_field(5,ptr_ch(cout),len(cout))
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
+          if(iret .eq. 0) then
+             xfer_end_time(ixfer_cnt)=d 
+          else
+             xfer_end_time(ixfer_cnt)=idend
+          endif
+
+          iret = fvex_field(6,ptr_ch(cout),len(cout))
+          if(iret .eq. 0) then
+             lxfer_options(ixfer_cnt)=" "
+          else
+             lxfer_options(ixfer_cnt)=cout(1:fvex_len(cout))
+          endif
+
+        end do
+200     continue
+        if(ixfer_cnt .lt. ixfer_beg(nobs)) then
+            ixfer_beg(nobs)=0
+        else
+          ixfer_end(nobs)=ixfer_cnt
+        endif
 
 C 5. Get the next scan.
-
-        iret = fget_scan(ptr_ch(cstart),len(cstart),
-     .         ptr_ch(cmo),len(cmo),
-     .         ptr_ch(cscan_id),len(cscan_id),
-     .         0)
+        iret=0
       enddo ! get all scans
 
-      if (ierr.gt.0) ierr=0
-      if (ierr.eq.0) iret=0
-
-      write(lu,9102) nobs
-9102  format(1x,i6," scans in this schedule.")
       return
       end

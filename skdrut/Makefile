@@ -33,9 +33,9 @@
 ARC = skdrut
  
 OBJECTS=\
-istringminmatch.o itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
-capitalize.o ifill4.o\
-iroll_def.o itras.o \
+lyes_no.o istringminmatch.o itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
+capitalize.o lowercase.o  ifill4.o xyz2latlon.o iwhere_in_string_list.o mpstar_rad.o \
+readline.o iroll_def.o itras.o getiauname.o ckiau.o extractnexttoken.o  \
 sktime.o \
 aposn.o axtyp.o backward.o cablw.o ckiau.o clear_array.o clndr.o\
 cvpos.o flinp.o forward.o frinp.o gnpas.o hdinp.o hol2lower.o\
@@ -50,7 +50,7 @@ unpwo.o upper.o writf_asc.o writf_asc_ch.o xat.o idchk.o\
 ydjul.o ymday.o printer.o unprat.o unpbar.o unpfmt.o \
 vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
 vglinp.o vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
-vsoinp.o vob1inp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
+vsoinp.o vob1inp.o vobinp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
 vread.o addscan.o findscan.o newscan.o pnum.o knewt.o c2upper.o \
 frinit.o vunps2m.o vunps2g.o vunproll.o vunpprc.o errormsg.o \
 fc_gwinsz.o fc_gwinw.o igtky.o selev.o stape.o searl.o i2long.o \

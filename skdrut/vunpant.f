@@ -10,6 +10,7 @@ C     Only generic error messages are written. The calling
 C     routine should list the station name for clarity.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  History:
 C 960516 nrv New.
@@ -69,10 +70,10 @@ C  Initialize at start in case we have to leave early.
       slrate(2)=0.0
       islcon(1)=0
       islcon(2)=0
-      anlim1(1)=+999.9*pi/180.d0
-      anlim1(2)=-999.9*pi/180.d0
-      anlim2(1)=+999.9*pi/180.d0
-      anlim2(2)=-999.9*pi/180.d0
+      anlim1(1)=+999.9*deg2rad
+      anlim1(2)=-999.9*deg2rad
+      anlim2(1)=+999.9*deg2rad
+      anlim2(2)=-999.9*deg2rad
       diaman=0.0
 
 C  1. The antenna name.
@@ -183,8 +184,9 @@ C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
         if (cax(1:1).eq.cax2(1:1)) i1=2
         if (i1.eq.0) then
           ierr=-4
-          write(lu,'("VUNPANT05 - Unmatched axis types ",a," and ",a,
-     .    " or ",a)') cax,cax1,cax2
+          write(lu,
+     >     '("VUNPANT05 - Unmatched axis types ",a," and ",a," or ",a)')
+     >      cax,cax1,cax2
         else
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get slewing rate
         if (iret.ne.0) return
@@ -193,8 +195,8 @@ C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         if (iret.ne.0) then
           ierr=-4
-          write(lu,'("VUNPANT06 - Invalid first axis constant ",
-     .    i2)') i
+          write(lu,
+     >     '("VUNPANT06 - Invalid first axis constant ", i2)') i
         else
           SLRATE(i1) = R
         endif
@@ -206,8 +208,8 @@ C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)
         if (ierr.lt.0) then
           iret=-7
-          write(lu,'("VUNPANT06 - Invalid first axis constant ",
-     .    i2)') i
+          write(lu,
+     >     '("VUNPANT06 - Invalid first axis constant ", i2)') i
         else
           ISLCON(i1) = R
         endif
@@ -292,10 +294,10 @@ C         Select the max and min of all sectors for now.
      .  ptr_ch('ANTENNA'//char(0)),iv)
       enddo
       if (nl.eq.0) then ! no sectors found
-        anlim1(1)=-999.9*pi/180.d0
-        anlim1(2)=+999.9*pi/180.d0
-        anlim2(1)=-999.9*pi/180.d0
-        anlim2(2)=+999.9*pi/180.d0
+        anlim1(1)=-999.9*deg2rad
+        anlim1(2)=+999.9*deg2rad
+        anlim2(1)=-999.9*deg2rad
+        anlim2(2)=+999.9*deg2rad
       endif ! no sectors found
 
 C  6. Antenna diameter

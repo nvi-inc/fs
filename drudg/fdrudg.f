@@ -10,6 +10,7 @@ C  Common blocks:
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
       include 'hardware.ftni'
+      include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
 
 ! called functions
       logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
@@ -29,26 +30,22 @@ C Input:
 C
 C LOCAL:
       double precision R,D
-      integer*2 lstn,lc
+      integer*2 lstn
+      character*2 cstn
+      equivalence (lstn,cstn)
       integer TRIMLEN,pcode
       character*128 cdum
       character*128 csnap,cproc,csked,cexpna
       logical kex,kskd,kskdfile,kdrgfile,kknown
       integer nch,nci
       character*2  response,scode
-      character    lower
       character*8 dr_rack_type, dr_rec1_type, dr_rec2_type
-      integer cclose,inew,ivexnum,heqb
-      character*256 cbuf
-      integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
-     .idummy,inext,isatl,ifunc,nstnx
-      integer ichmv_ch,ichmv,ichcm,ichcm_ch ! functions
+      integer cclose,inew,ivexnum
+      integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
+      integer inext,isatl,ifunc,nstnx
       integer nch1,nch2,nch3,iserr(max_stn)
 
       logical kallowpig
-
-
-      data heqb/2h= /
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -190,15 +187,9 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '030915'
+      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
+      cversion = '040724'
 C Initialize FS version
-
-!      iVerMajor_FS = 09
-!      iVerMinor_FS = 06
-!      iVerPatch_FS = 06
-      iVerMajor_FS = VERSION
-      iVerMinor_FS = SUBLEVEL
-      iVerPatch_FS = PATCHLEVEL
 
 C PeC Permissions on output files
       iperm=o'0666'
@@ -226,7 +217,8 @@ C Initialize the $PROC section location
 C Initialize default epoch for source positions
       cepoch = '1950'
 C Codes for passes and bandwidths
-      idummy=ichmv_ch(lbname,1,'D8421HQE')
+!      idummy=ichmv_ch(lbname,1,'D8421HQE')
+      cbname='D8421HQE'
 c Initialize no. entries in lband (freqs.ftni)
       NBAND= 2
 
@@ -263,7 +255,8 @@ C***********************************************************
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
      .           rlabsize,cepoch,coption,luscn,
      .           dr_rack_type,dr_rec1_type,dr_rec2_type,
-     .           tpid_prompt,itpid_period,tpid_parm)
+     .           tpid_prompt,itpid_period,tpid_parm,
+     >           cdum,cdum,cdum,cdum,cdum)      !these are mysql values not used in drudg.
       kdr_type = .not.
      .   (dr_rack_type.eq.'unknown'.and.
      .    dr_rec1_type.eq.'unknown'.and.
@@ -274,9 +267,14 @@ C
 200   continue
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
+! GetPID doesn't exist in linux
+!      ipid=getpid()
+!      write(cpidx,'(i5.5)') ipid
+
       if (nch.gt.0) then
-        tmpname = ctmpnam(:nch)//'DR.tmp'
-        labname = ctmpnam(:nch)//'DRlab.tmp'
+         tmpname = ctmpnam(:nch)//'DR.tmp'
+         labname = ctmpnam(:nch)//'DRlab.tmp'
+!         labname = ctmpnam(:nch)//'DRlab.tmp'//cpidx
       else
         tmpname = 'DR.tmp'
         labname = 'DRlab.tmp'
@@ -291,19 +289,19 @@ C
       kprepass = .false.
       km5P_piggy = .false.
       km5A_piggy = .false.
+      km5A=.false.
 
 C  In drcom.ftni
       kmissing = .false.
-      idummy= ichmv_ch(lbarrel,1,'NONE')
 C  Initialize lots of things in the common blocks
       call skdrini
 
 C   Check for non-interactive mode.
-201     nch1=trimlen(cfile)
-        nch2=trimlen(cstnin)
-        nch3=trimlen(command)
-        cexpna = ' '
-        if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
+201   nch1=trimlen(cfile)
+      nch2=trimlen(cstnin)
+      nch3=trimlen(command)
+      cexpna = ' '
+      if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
 
 C 3. Get the schedule file name
 
@@ -317,6 +315,9 @@ C       Opening message
         WRITE(LUSCN,9020) cversion
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
      .  '(NRV & JMGipson ',a6,')')
+        write(luscn,'("Field system version: ",i1,".",i2.2,".",i2.2))')
+     >           iverMajor_FS,iverMinor_FS,iverPatch_FS
+
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -325,15 +326,14 @@ C       Opening message
      .    ' <return> if using a .snp file, :: to quit) ? ',$)
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
         else ! command line file name
-          call char2hol(cfile,ibuf,1,nch)
+!          call char2hol(cfile,ibuf,1,nch)
+          cbuf=cfile
         endif 
-        endif
+      endif
         IF (NCH.GT.0) THEN !got a name
-          IF (ichcm_ch(IBUF(1),1,'::').eq.0) GOTO 990
-          call hol2char(ibuf,1,256,cbuf)
-          if (ichcm_ch(ibuf(1),1,'.').eq.0.OR.
-     .      ichcm_ch(ibuf(1),1,'/').eq.0) then ! path 
-            lskdfi = cbuf(1:nch) 
+          if(cbuf(1:2) .eq. "::") goto 990
+          if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
+            lskdfi = cbuf(1:nch)
           else  ! no path given
             if (ncs.gt.0) then ! prepend
               LSKDFI = csked(:ncs) // CBUF(1:NCH)
@@ -476,7 +476,8 @@ C  Now change J2000 coordinates to 1950 and save for later use
         DO I=1,NSATEL !MOVE NAMES
           INEXT=NCELES+I
           ISATL=MAX_CEL+I
-          IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,max_sorlen)
+!          IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,max_sorlen)
+          csorna(inext)=csorna(isatl)
         END DO
 C
 C  Check for sufficient information
@@ -493,7 +494,7 @@ C
 500   CONTINUE
       km5A_piggy=.false.
       km5p_piggy=.false.
-      call clear_array(response)
+      response=" "
       if (.not.kbatch) then
         if (kskd) then
           WRITE(LUSCN,9053) (lpocod(K),cstnna(K),K=1,NSTATN)
@@ -514,17 +515,14 @@ C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
       endif
       if (response(1:2).eq.'::') goto 990
 C     Convert to convention upper/lower for 2 letters
-      response(1:1)=lower(response(1:1))
-      response(2:2)=lower(response(2:2))
-      call char2hol(response(1:2),lstn,1,2)
+      call lowercase(response)
+      cstn=response
       ISTN = 0
-      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 699 ! all stations
+      if(response .eq. "=") goto 699
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
-C         Convert stored code to string for comparing
-          call hol2char(lpocod(i),1,2,scode)
-          scode(1:1)  = lower(scode(1:1))
-          scode(2:2)  = lower(scode(2:2))
+          scode=cpocod(i)
+          call lowercase(scode)
           IF (scode.EQ.response) ISTN = I
         END DO
         IF (ISTN.EQ.0) then
@@ -546,33 +544,11 @@ C         Convert stored code to string for comparing
 699   continue
       if (kvex) then !get the station's observations now
 C getting all the scans (needed to generate scan names)
-        nobs=0
-C       write(luscn,'("  Getting scans ...")')
-C       if (istn.eq.0) then ! get all in a loop
-C         do i=1,nstatn
-C           call vob1inp(ivexnum,i,luscn,ierr,iret,nobs_stn) 
-C           if (ierr.ne.0.or.iret.ne.0) then
-C             write(luscn,'("FDRUDG01 - Error from vob1inp=",
-C    .        i5,", iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
-C             call errormsg(iret,ierr,'SCHED',luscn)
-C           else
-C             write(luscn,'("  Number of scans for this station: ",i5)')
-C    .        nobs_stn
-C           endif
-C         enddo
-C         write(luscn,'("  Total number of scans in this schedule: ",
-C    .    i5)') nobs
-C       call obs_sort
-C***************** Write out observations for checking *************
-C       open(lu_outfile,file=tmpname)
-C       do i=1,nobs
-C         nch = iflch(lskobs(1,i),ibuf_len)
-C         call writf_asc(lu_outfile,ierr,lskobs(1,i),(nch+1)/2)
-C       enddo
-C       close(lu_outfile)
-C       write(luscn,'("Wrote obs in ",a)') tmpname
-C*******************************************************************
-C       else ! get one station's obs
+
+! This uses vob1inp--which gets the scans for a single station.
+        if(.false.) then
+!        if(.true.) then
+          nobs=0
           call vob1inp(ivexnum,istn,luscn,ierr,iret,nobs_stn)
           if (ierr.ne.0) then
             write(luscn,'("FDRUDG02 - Error from vob1inp=",i5,",
@@ -581,12 +557,18 @@ C       else ! get one station's obs
           else
             write(luscn,'("  Number of scans for this station: ",i5)') 
      .      nobs_stn
-C           write(luscn,'("  Total number of scans in this schedule: ",
-C    .      i5)') 
-C    .      nobs
-          endif
+         endif
 C       endif ! get one/get all
-      endif
+        else
+! This gets in all the scans.
+          call VOBINP(ivexnum,LUscn,iret,IERR)
+           if (ierr.ne.0) then
+             write(luscn,'("FDRUDG02 - Error from vobinp=",i5,",
+     >       iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
+             call errormsg(iret,ierr,'SCHED',luscn)
+           endif
+         endif
+       endif
 C
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
@@ -630,7 +612,6 @@ C       Are the equipment types now known?
      >        write(luscn,'("   Mark5A in piggyback mode. ")')
           if(km5p_piggy)
      >        write(luscn,'("   Mark5P in piggyback mode. ")')
-
         else
           write(luscn,9169) cstnna(istn)
 9169      format(/' Equipment at ',a,' is unknown. Use Option 11',
@@ -676,19 +657,26 @@ C  Write warning messages if control file and schedule do not agree.
         else
           write(luscn,9067) lskdfi(1:l)
 9067      FORMAT(/' Select DRUDG option for schedule ',A,
-     .    ' (all stations)'/)
-       endif ! one station check equipment
-          write(luscn,9073)
-9073      FORMAT(
-     .      ' 1 = Print the schedule               ',
-     .      '  7 = Re-specify stations'/
-     .      ' 2 = Make antenna pointing file       ',
-     .      '  8 = Get a new schedule file'/
-     .      ' 3 = Make SNAP file (.SNP)            ',
-     .      '  9 = Change output destination, format '/
-     .      ' 4 = Print complete .SNP file         ',
-     .      ' 10 = Shift the .SKD file  '/
-     >      ' 5 = Print summary of .SNP file       ',$)
+     .       ' (all stations)'/)
+        endif ! one station check equipment
+
+         write(luscn,'(a)')
+     >      ' 1 = Print the schedule               '//
+     >     '  7 = Re-specify stations'
+          write(luscn,'(a)')
+     >      ' 2 = Make antenna pointing file       '//
+     >      '  8 = Get a new schedule file'
+
+          write(luscn,'(a)')
+     >      ' 3 = Make SNAP file (.SNP)            '//
+     >      '  9 = Change output destination, format '
+          write(luscn,'(a)')
+     >      ' 4 = Print complete .SNP file         '//
+     >      ' 10 = Shift the .SKD file  '
+
+          write(luscn,'(a,$)')
+     >      ' 5 = Print summary of .SNP file       '
+
           if(istn .gt. 0) then
             write(luscn,'(a)')
      >          ' 11 = Show/set equipment type'
@@ -702,20 +690,29 @@ C  Write warning messages if control file and schedule do not agree.
      .        ' 6 = Make PostScript label file       ',
      .        ' 12 = Make procedures (.PRC) '/,
      .        ' 61= Print PostScript label file      ')
+            else if (clabtyp.eq.'DYMO') then
+              write(luscn,9273)
+9273          FORMAT(
+     .        ' 6 = Make DYMO label file             ',
+     .        ' 12 = Make procedures (.PRC) '/,
+     .        ' 61= Print DYMO label file           ')
             else
-              write(luscn,9174)
-9174          FORMAT(
+              write(luscn,9373)
+9373          FORMAT(
      .        ' 6 = Make tape labels                 ',
      .        ' 12 = Make procedures (.PRC) ')
             endif
             if(kallowpig) then
-                write(luscn,9175)
-9175              Format(
-     >        '                                      ',
-     >        ' 13 = Toggle Mk5A piggyback mode '/
-     >        '                                      ',
-     >        ' 14 = Toggle Mk5P piggyback mode ')
+                write(luscn,'(38x,a)')
+     >        ' 13 = Toggle Mk5A piggyback mode '
+                write(luscn,'(38x,a)')
+     >        ' 14 = Toggle Mk5P piggyback mode '
             endif
+            if(istn .ne. 0 .and. kxfer_stat(istn).and. km5A) then
+                write(luscn,'(38x,a)')
+     >        ' 15 = Data Transfer Overide '
+            endif
+
             if (kdrg_infile.or.kvex) then
               write(luscn,"(' 51 = Print PI cover letter')")
             else ! .skd file
@@ -739,19 +736,25 @@ C         endif ! known/unknown equipment
      .    ' 6 = Make PostScript label file        ',
      .    '  9 = Change output destination, format'/,
      .    ' 61= Print PostScript label file       ',
-C    .    ' 11 = Show/set equipment type')
      .    '                         ')
-          else
+          else if (clabtyp.eq.'DYMO') then
             write(luscn,9271)
 9271        format(
+     .    ' 6 = Make DYMO label file              ',
+     .    '  9 = Change output destination, format'/,
+     .    ' 61= Print PostScript label file       ',
+     .    '                         ')
+          else
+            write(luscn,9371)
+9371        format(
      .      ' 6 = Make tape labels                  ',
      .      '  9 = Change output destination, format'/,
      .      '                                       ',
 C    .      ' 11 = Show/set equipment type')
      .      '                         ')
           endif
-          write(luscn,9371)
-9371      format(
+          write(luscn,9372)
+9372      format(
      .    ' 0 = Done with DRUDG           ',
      .   /' ? ',$)
         endif
@@ -783,6 +786,7 @@ C    .      ' 11 = Show/set equipment type')
       if( ifunc.eq.11 .and. istn .le. 0) goto 700
       if((ifunc.eq.13 .or. ifunc.eq.14).and. .not.kallowpig) goto 700
 
+
       IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
         call port
@@ -807,21 +811,17 @@ C    .      ' 11 = Show/set equipment type')
       ENDIF
 C
       NSTNX = 1
-      IF (ichcm(LSTN,1,HEQB,1,1).eq.0) NSTNX = NSTATN
+      IF (cstn .eq."=") nstnx=nstatn
 C
       I = 1
       do while (I.le.nstnx)  !loop over stations
-        IF (ichcm(LSTN,1,HEQB,1,1).eq.0) ISTN = I
+        IF (cSTN.eq. "=") ISTN = I
         kmissing=.false.
         if (iserr(istn).ne.0) kmissing=.true.
         IX = INDEX(cexpna,'.')-1
         if (ix.lt.0) ix=trimlen(cexpna)
-        idummy = ichmv_ch(lc,1,'  ')
-        idummy = ichmv(lc,1,lpocod(istn),1,2) ! 2-letter-code for file
-C                                               names is LPOCOD
-        call hol2char(lc,1,2,scode)
-        scode(1:1)  = lower(scode(1:1))
-        scode(2:2)  = lower(scode(2:2))
+        scode=cpocod(istn)
+        call lowercase(scode)
         ncs = trimlen(scode)
         nch = trimlen(csnap)
         nci = trimlen(cproc)
@@ -871,44 +871,37 @@ C           call lists(3)
 c            I = nstnx
           ELSE IF (IFUNC.EQ.3) THEN
             call snap(cr1)
-C           CALL SNAP(cr1,1)
-C         ELSE IF (IFUNC.EQ.31) THEN
-C           CALL SNAP(cr1,2)
-C         ELSE IF (IFUNC.EQ.32) THEN
-C           call snap(cr1,3)
-C         ELSE IF (IFUNC.EQ.33) THEN
-C           call snap(cr1,4)
           ELSE IF (IFUNC.EQ.4) THEN
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
-              call procs
+            call procs
           ELSE IF (IFUNC.EQ.13) THEN
-              if (km5A_piggy) then
-                write(luscn,"('Mark5A piggyback mode turned OFF')")
-                km5A_piggy = .false.
-              else
-                write(luscn,"('Mark5A piggyback mode turned ON')")
-                km5A_piggy = .true.
-                if(km5P_piggy) then
-                   write(luscn,"('Mark5P piggyback mode turned OFF')")
-                   km5P_piggy=.false.
-                endif
-              endif
-          ELSE IF (IFUNC.EQ.14) THEN
-              if (km5P_piggy) then
+            if (km5A_piggy) then
+              write(luscn,"('Mark5A piggyback mode turned OFF')")
+              km5A_piggy = .false.
+            else
+              write(luscn,"('Mark5A piggyback mode turned ON')")
+              km5A_piggy = .true.
+              if(km5P_piggy) then
                 write(luscn,"('Mark5P piggyback mode turned OFF')")
-                km5P_piggy = .false.
-              else
-                write(luscn,"('Mark5P piggyback mode turned ON')")
-                km5P_piggy = .true.
-                if(km5A_piggy) then
-                   write(luscn,"('Mark5A piggyback mode turned OFF')")
-                   km5A_piggy=.false.
-                endif
-
+                km5P_piggy=.false.
               endif
-
-C             CALL PROCS(1) ! Mark III backend procedures OR known equipment
+            endif
+          ELSE IF (IFUNC.EQ.14) THEN
+            if (km5P_piggy) then
+              write(luscn,"('Mark5P piggyback mode turned OFF')")
+              km5P_piggy = .false.
+            else
+              write(luscn,"('Mark5P piggyback mode turned ON')")
+              km5P_piggy = .true.
+              if(km5A_piggy) then
+                write(luscn,"('Mark5A piggyback mode turned OFF')")
+                km5A_piggy=.false.
+              endif
+            endif
+          else if(ifunc .eq. 15 .and. km5A) then
+              call xfer_override(luscn)
+C           CALL PROCS(1) ! Mark III backend procedures OR known equipment
 C         ELSE IF (IFUNC.EQ.13) THEN
 C             CALL PROCS(2) ! VLBA backend procedures
 C         ELSE IF (IFUNC.EQ.14) THEN
@@ -966,6 +959,7 @@ C             CALL PROCS(21) ! VLBA4+VLBA
                 write(luscn,9994)
                 goto 991
               endif
+              call init_hardware_common(istn)
 C             call snpshft(ierr)
           ELSE IF (IFUNC.EQ.5) THEN
               cinname = snpname
@@ -1002,7 +996,7 @@ C         ierr=cclose(fileptr)
               write(luscn,'("PostScript label file exists. Do you want",
      .        " to print it or delete it? (P/D) ?")')
               read(luusr,'(A)') response(1:2)
-              response(1:1)=lower(response(1:1))
+              call lowercase(response)
             enddo
           endif
           if (response(1:1).eq.'p') then

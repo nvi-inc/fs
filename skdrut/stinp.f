@@ -3,6 +3,7 @@ C
 C     This routine reads and decodes a station entry
 C
       include '../skdrincl/skparm.ftni'
+      include "../skdrincl/constants.ftni"
 C
 C  INPUT:
       integer*2 IBUFX(*)
@@ -18,8 +19,15 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
 C
+! functions
+      integer ichcm,igtba,ichcm_ch,ichmv_ch,ichmv,jchar ! functions
+
 C  LOCAL:
-      logical knaeq,kline,ks2,kk4
+      integer*2 ibufin(40)
+      character*80 cbufin
+      equivalence (ibufin,cbufin)
+
+      logical kline,ks2,kk4
       integer*2 LNAME(4),LAXIS(2)
       real*4 SLRATE(2),ANLIM1(2),ANLIM2(2)
       integer*2 LD(7),LOCC(4)
@@ -29,17 +37,29 @@ C  LOCAL:
       real*4 sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
       real*8 POSXYZ(3),AOFF
+
+      character*8 cname
+      equivalence (cname,lname)
+
 C      - these are used in unpacking station info
-      INTEGER J,itype,nr,maxt,npar(max_band),
-     .idummy,ib,ii,nco,nhz,i,idum
-      integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(8)
-      real*4 poslat,poslon
+      INTEGER J,itype,nr,maxt,npar(max_band)
+      integer idummy,ib,ii,nco,nhz,i,idum
+      integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(4)
+
+      character*8 crack,crec1,crec2
+      equivalence (crack,lrack),(crec1,lrec1),(crec2,lrec2)
+      character*4 cidt
+      equivalence (cidt,lidt)
+
+      double precision poslat,poslon
       integer ibitden
       integer nstack
       integer*2 ls2sp(2)
+      character*4 cs2sp
+      equivalence (ls2sp,cs2sp)
+
       real s2sp
-      integer ichcm,igtba,ichcm_ch,ichmv_ch,ichmv,jchar ! functions
-C
+
 C
 C  INITIALIZED
 C
@@ -82,6 +102,10 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
+      do i=1,min(ilen,40)
+        ibufin(i)=ibufx(i)
+      end do
+
       ITYPE=0
       IF (JCHAR(IBUFX,1).EQ.OCAPA) THEN !      'A'
         ITYPE=1
@@ -141,9 +165,9 @@ C
         END DO
         IF  (I.GT.NSTATN) THEN  !new entry
           IF  (i.GT.MAX_STN) THEN  !
-            write(lu,'("STINP20 - Too many antennas.  Max is ",
-     .      i3,".  Ignored:"/120a2)') MAX_STN,(ibufx(i),i=2,ilen)
-            RETURN
+            write(lu,'("STINP20 - Too many antennas.  Max is ",i3)')
+     >         max_stn
+            goto 900
           END IF  !
           NSTATN = NSTATN+1
         END IF  !new entry
@@ -155,21 +179,21 @@ C     Put the position ID into a permanent place in LPOCOD
 C
         LSTCOD(I) = LID
         call axtyp(laxis,iaxis(i),1)
-        STNRAT(1,I) = SLRATE(1)*PI/(180.0*60.0)
-        STNRAT(2,I) = SLRATE(2)*PI/(180.0*60.0)
+        STNRAT(1,I) = SLRATE(1)*deg2rad/60.0d0
+        STNRAT(2,I) = SLRATE(2)*deg2rad/60.0d0
         ISTCON(1,I) = ISLCON(1)
         ISTCON(2,I) = ISLCON(2)
-        STNLIM(1,1,I) = ANLIM1(1)*PI/180.0
-        STNLIM(2,1,I) = ANLIM1(2)*PI/180.0
-        STNLIM(1,2,I) = ANLIM2(1)*PI/180.0
-        STNLIM(2,2,I) = ANLIM2(2)*PI/180.0
+        STNLIM(1,1,I) = ANLIM1(1)*deg2rad
+        STNLIM(2,1,I) = ANLIM1(2)*deg2rad
+        STNLIM(1,2,I) = ANLIM2(1)*deg2rad
+        STNLIM(2,2,I) = ANLIM2(2)*deg2rad
         AXISOF(I)=AOFF
         DIAMAN(I)=DIAM
         LPOCOD(I)   = LIDPOS
         idummy = ichmv(LTERID(1,I),1,LIDT,1,4)
         lhccod(i) = lidhor
         NHORZ(I) = 0
-        IDUMMY = ICHMV(LANTNA(1,I),1,LNAME,1,8)
+        cantna(i)=cname
 C
 C     END IF  !antenna entry
 C
@@ -188,17 +212,17 @@ C
           I=I+1
         END DO
         IF  (I.GT.NSTATN) THEN  !entry not found
-          write(lu,'("STINP21 - Pointer not found.  Position ",
-     .    "ignored:"/120a2)') (ibufx(i),i=2,ilen)
-          RETURN
+          write(lu,'("STINP21 - Pointer not found. ")')
+          goto 900
         END IF  !entry not found
 C
 C     2.3 Now "I" contains the index into which we will put the
 C     position information.
 C
-        IDUMMY = ICHMV(LSTNNA(1,I),1,LNAME,1,8)
-        STNPOS(1,I) = POSLON*PI/180.0
-        STNPOS(2,I) = POSLAT*PI/180.0
+!        IDUMMY = ICHMV(LSTNNA(1,I),1,LNAME,1,8)
+        cstnna(i)=cname
+        STNPOS(1,I) = POSLON*deg2rad
+        STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
@@ -222,51 +246,57 @@ C
         endif
         if (i.gt.nstatn) then ! try to match station name
           I = 1
-          DO WHILE (i.le.nstatn.and.
-     .             .not.knaeq(lname,lstnna(1,i),4))
+          DO WHILE (i.le.nstatn.and.cname .ne. cstnna(i))
             I=I+1
           END DO
         endif
         IF  (I.GT.NSTATN) THEN  !matching entry not found
-          write(lu,'("STINP24 - Name or ID match not found. Equipment",
-     .    " ignored:"/120a2)') (ibufx(i),i=2,ilen)
-          RETURN
+          write(lu,'("STINP24 - Name or ID match not found.",a)') cname
+          goto 900
         END IF  !matching entry not found
 C  Got a match. Initialize names.
-        IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
+!        IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
+        cterna(i)=cname
 C       It used to be that the recorder type was encoded in the DAT name.
 C       ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
 C       kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
-        idummy = ichmv_ch(lstrack(1,i),1,'unknown ')
-        idummy = ichmv_ch(lstrec(1,i),1,'unknown ')
-        idummy = ichmv_ch(lstrec2(1,i),1,'none    ')
-        idummy = ichmv_ch(ls2speed(1,i),1,'    ')
+!        idummy = ichmv_ch(lstrack(1,i),1,'unknown ')
+!        idummy = ichmv_ch(lstrec(1,i),1,'unknown ')
+!        idummy = ichmv_ch(lstrec2(1,i),1,'none    ')
+!        idummy = ichmv_ch(ls2speed(1,i),1,'    ')
+        cstrack(i)="unknown"
+        cstrec(i)="unknown"
+        cstrec2(i)="none"
+        cs2speed(i)=" "
+
+
 C  Store equipment names.
-        if (ichcm_ch(lrack,1,' ').ne.0) then
-          idummy = ichmv(lstrack(1,i),1,lrack,1,8) ! rack type
+        if (crack .ne. " ") then
+          cstrack(i)=crack
         endif
-        if (ichcm_ch(lrec1,1,' ').ne.0) then
-          idummy = ichmv(lstrec(1,i),1,lrec1,1,8) ! recorder 1 type
+        if (crec1 .ne. " ") then
+           cstrec(i)=crec1
         endif
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
-        if (ichcm_ch(lrec2,1,' ').ne.0) then
-          if (ichcm_ch(lrec1,1,'S2').eq.0) then 
+        if (crec2 .ne. " ") then
+          if (crec1 .eq. 'S2')then
             idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
           else 
-            idummy = ichmv(lstrec2(1,i),1,lrec2,1,8) ! recorder 2 type
+            cstrec2(i)=crec2
           endif
         endif
         idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! starting recorder default
 C       Now set the S2 and K4 switches depending on the recorder type.
-        ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
-        kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
+        ks2=cstrec(i).eq."S2"
+        kk4=cstrec(i).eq."K4"
 C    Store other info depending on the type.
         nrecst(i) = nr
         if (ks2) then ! set S2 variables
-          idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4)
-          if (ichcm_ch(ls2sp,1,'LP').eq.0) s2sp=SPEED_LP
-          if (ichcm_ch(ls2sp,1,'SLP').eq.0) s2sp=SPEED_SLP
+!          idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4)
+          cs2speed(i)=cs2sp
+          if(cs2sp.eq.   "LP") s2sp=SPEED_LP
+          if(cs2sp .eq. "SLP") s2sp=SPEED_SLP
           nheadstack(i)=1
           ibitden_save(i)=1
           maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
@@ -308,8 +338,8 @@ C
         kline=.true.
         IF (IERR.NE.0) THEN
           if (ierr.lt.-200) then
-            write(lu,'("STINP252 - Horizon mask azimuths are out ",
-     .      "of order. Error in field ",i5)') -(ierr+200)
+            write(lu,*) "STINP252 - Horizon mask azimuths are out "//
+     >      "of order. Error in field ", -(ierr+200)
             write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
             RETURN
           endif
@@ -332,16 +362,17 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
           I=I+1
         END DO
         if (i.gt.nstatn) then !check position codes too
-          write(lu,'("STINP251 - Horizon mask pointer not found. ",
-     .    "Checking position code."/120a2)') (ibufx(i),i=2,ilen)
+          write(lu,*) "STINP251 - Horizon mask pointer not found. "//
+     >      "Checking position code."
+          write(lu,'(40a2)')  (ibufx(i),i=2,min(ilen,40))
           I =1
           DO WHILE (LID.NE.LPOCOD(I).AND.I.LE.NSTATN)
             I=I+1
           END DO
         endif
         IF (I.GT.NSTATN) THEN  !matching entry not found
-          write(lu,'("STINP25 - Pointer not found.  Horizon mask ",
-     .    "ignored:"/120a2)') (ibufx(i),i=2,ilen)
+          write(lu,'("STINP25 - Pointer not found.  Horizon mask ")')
+          goto 900
         ELSE  ! keep it
           if (kline) then
             klineseg(i)=.true.
@@ -354,8 +385,8 @@ C    .      "used for ",4a2)') (lstnna(j,i),j=1,4)
           endif
           NHORZ(I) = NHZ
           DO J=1,NHORZ(I)
-            AZHORZ(J,I) = AZH(J)*PI/180.0
-            ELHORZ(J,I) = ELH(J)*PI/180.0
+            AZHORZ(J,I) = AZH(J)*deg2rad
+            ELHORZ(J,I) = ELH(J)*deg2rad
           END DO
         END IF
 C     END IF   ! horizon mask
@@ -365,10 +396,9 @@ C
       ELSE IF (ITYPE.EQ.4) THEN ! coordinate mask
         IF (IERR.NE.0) THEN
           if (ierr.eq.-99) then
-            write(lu,'("STINP260 - Too many coordinate mask pairs. ",
-     .      "Max is ",i5)') max_cor 
-            write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-            return
+            write(lu,*)
+     >      "STINP260 - Too many coordinate mask pairs. Max is ",max_cor
+            goto 900
           endif
           if (ierr.eq.-103) then
 C           error for no matching value, which is ok
@@ -379,15 +409,20 @@ C           error for no matching value, which is ok
           I = I+1
         END DO
         IF (I.GT.NSTATN) THEN ! matching entry not found
-          write(lu,'("STINP26 - Pointer not found.  Coordinate mask ",
-     .    "ignored:"/120a2)') (ibufx(i),i=2,ilen)
+          write(lu,'("STINP26 - Pointer not found.  Coordinate mask ")')
+          goto 900
         ELSE ! keep it
           NCORD(I) = NCO
           DO J=1,NCORD(I)
-            CO1MASK(J,I) = CO1(J)*PI/180.0
-            CO2MASK(J,I) = CO2(J)*PI/180.0
+            CO1MASK(J,I) = CO1(J)*deg2rad
+            CO2MASK(J,I) = CO2(J)*deg2rad
           END DO
         END IF
       END IF
       RETURN
+C! come here on bad line.
+900   continue
+      write(lu,'("Ignoring: ",40a2)') (ibufx(i),i=2,min(ilen,40))
+      RETURN
+
       END

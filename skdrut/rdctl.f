@@ -8,7 +8,9 @@
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
      .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
      .                 dr_rack_type,dr_reca_type,dr_recb_type,
-     .                 tpid_prompt,itpid_period,tpid_parm)
+     .                 tpid_prompt,itpid_period,tpid_parm,
+     >         lmysql_user,lmysql_password,lmysql_host,lmysql_socket,
+     >         lmysql_db)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -54,256 +56,259 @@ C
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
      .               tpid_prompt,tpid_parm
+      character*(*) lmysql_host,lmysql_socket,lmysql_user
+      character*(*) lmysql_password,lmysql_db
       character*4 cepoch
       character*8 dr_rack_type,dr_reca_type,dr_recb_type
       real rlabsize(6)
       character*2 coption(3)
       integer luscn,itpid_period
+! functions
+      integer  trimlen     !function call
 C
 C  LOCAL VARIABLES
       integer itmplen     !variable for filename length
-      integer ias2b,trimlen,ichcm_ch,jchar     !function call 
-      logical*4 kex         !control file existence
+      logical*4 kexist         !control file existence
       character*128 ctemp   !temporary control file variable
-      character*128 ctmp2   !temporary control file variable
-      integer*2 isecname(5) !$section name
-      integer*2 ltmpnam(10)  !variable identifier
+      character*10 lsecname
+      character*3 lprompt
+      integer itemp
+      character*20 lkeyword     !keyword
+      character*128 lvalue      !value
       integer lu          !open lu
-      integer ic,ifield,j,ilen,ierr,ich,ic1,ic2,nch,idum,ichmv,i
-      real ras2b,val
-      integer*2 ibuf(ibuf_len)
-C
+      integer ic,j,ilen,ierr
+!      integer*2 ibuf(ibuf_len)
+ !     character*(2*ibuf_len) cbuf
+!      equivalence (cbuf,ibuf)
+      character*256 cbuf
+      logical ktoken,keol,knospace
+      integer istart,inext
+      logical keof      !EOF reached in reading in file
 C
 C  1. Open the default control file if it exists.
 
-      kex = .false.
       ilen = 0
       ierr = 0
       lu = 11
-      ctmp2 = cctfil
-      itmplen = trimlen(ctmp2)
-
-      inquire(file=cctfil,exist=kex)
-      if (kex) then
-        open(lu,file=cctfil,iostat=ierr,status='old')
-        if (ierr.ne.0) then
-          write(luscn,9100) ctmp2(1:itmplen)
-9100      format("RDCTL01 ERROR: Error opening control file ",A)
-          close(lu)
-          return
-        end if
-        write(luscn,9105) ctmp2(1:itmplen)
-9105    format("RDCTL02 - Reading system control file ",A)
-      else
-        write(luscn,9110) ctmp2(1:itmplen)
-9110    format("RDCTL03 ERROR: Can't find system control file ",A)
-      end if
 
 C  2. Process the control file if it exists. This loops through twice, 
 C     once for each control file.
 
-      j = 1
-      do while (j.le.2)
-        if (kex) then
-          call ifill(ibuf,1,ibuf_len*2,oblank)
-          call reads(lu,ierr,ibuf,ibuf_len,ilen,1) !read first $
-          do while (ilen.ne.-1)
-            ich = 1
-            call gtfld(ibuf,ich,ilen,ic1,ic2)
-            nch = ic2-ic1+1
-            call ifill(isecname,1,10,oblank)
-            idum= ichmv(isecname,1,ibuf,ic1,nch)
-            call hol2upper(isecname,nch)
-            call ifill(ibuf,1,ibuf_len*2,oblank)
-            call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
-      
+      do j=1,2
+        if(j .eq. 1) then
+          ctemp=cctfil
+        else
+          ctemp = cownctl
+        endif
+        itmplen = trimlen(ctemp)
+        kexist = .false.
+        inquire(file=ctemp,exist=kexist)
+        if(kexist) then
+          open(lu,file=ctemp,iostat=ierr,status='old')
+          if (ierr.ne.0) then
+            write(luscn,9100) ctemp(1:itmplen)
+9100        format("RDCTL01 ERROR: Error opening control file ",A)
+            close(lu)
+            return
+           end if
+           if(j .eq. 1) then
+             write(luscn,9105) ctemp(1:itmplen)
+9105         format("RDCTL02 - Reading system control file ",A)
+           else
+             write(luscn,9106) ctemp(1:itmplen)
+9106         format("RDCTL02 - Reading local control file ",A)
+           endif
+        else if(j .eq. 1) then              !output an error if we can'f find the system.
+          write(luscn,9110) ctemp(1:itmplen)
+9110      format("RDCTL03 ERROR: Can't find system control file ",A)
+        end if
+! File exists, and we have opened it.
+        if (kexist) then
+          call readline(lu,cbuf,keof,ierr,1) !read first $
+          do while (.not.keof)
+            read(cbuf,'(a)') lsecname
+            call capitalize(lsecname)
+            call readline(lu,cbuf,keof,ierr,2)  !space to next valid line.
 C  $CATALOGS
-            if (ichcm_ch(isecname,1,'$CATALOGS').eq.0) then 
-              do while((ilen.ne.-1).and.(jchar(ibuf,1).ne.o'44')) 
-                ich = 1
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                nch = ic2-ic1+1
-                call ifill(ltmpnam,1,20,oblank)
-                idum= ichmv(ltmpnam,1,ibuf,ic1,nch)
-                call hol2upper(ltmpnam,nch)
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                if (ichcm_ch(ltmpnam,1,'SOURCE').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,source_cat) 
-                else if (ichcm_ch(ltmpnam,1,'STATION').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,station_cat) 
-                else if (ichcm_ch(ltmpnam,1,'ANTENNA').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,antenna_cat) 
-                else if (ichcm_ch(ltmpnam,1,'POSITION').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,position_cat) 
-                else if (ichcm_ch(ltmpnam,1,'EQUIP').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,equip_cat) 
-                else if (ichcm_ch(ltmpnam,1,'MASK').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,mask_cat) 
-                else if (ichcm_ch(ltmpnam,1,'FREQ').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,freq_cat) 
-                else if (ichcm_ch(ltmpnam,1,'RX').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,rx_cat) 
-                else if (ichcm_ch(ltmpnam,1,'LOIF').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,loif_cat) 
-                else if (ichcm_ch(ltmpnam,1,'MODES').eq.0.and.
-     .            nch.eq.5) then
-                  call hol2char(ibuf,ic1,ic2,modes_cat) 
-                else if (ichcm_ch(ltmpnam,1,'MODES_DESCRIPTION').eq.0) 
-     .            then
-                  call hol2char(ibuf,ic1,ic2,modes_description_cat) 
-                else if (ichcm_ch(ltmpnam,1,'REC').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,rec_cat) 
-                else if (ichcm_ch(ltmpnam,1,'HDPOS').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,hdpos_cat) 
-                else if (ichcm_ch(ltmpnam,1,'TRACKS').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,tracks_cat) 
-                else if (ichcm_ch(ltmpnam,1,'FLUX').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,flux_cat) 
-                else if (ichcm_ch(ltmpnam,1,'COMMENTS').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,flux_comments) 
-                else if (ichcm_ch(ltmpnam,1,'PROGRAM').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,cat_program_path) 
-                else if (ichcm_ch(ltmpnam,1,'PARAMETER').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,par_program_path) 
+            if (lsecname .eq. "$CATALOGS") then
+              do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
+                istart=1
+                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
+     >             knospace, keol)
+                istart=inext
+                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
+     >             knospace, keol)
+                call capitalize(lkeyword)
+
+                if (lkeyword.eq.'SOURCE') then
+                  source_cat=lvalue
+                else if (lkeyword.eq.'STATION') then
+                  station_cat=lvalue
+                else if (lkeyword.eq.'ANTENNA') then
+                  antenna_cat=lvalue
+                else if (lkeyword.eq.'POSITION') then
+                  position_cat=lvalue
+                else if (lkeyword.eq.'EQUIP') then
+                  equip_cat=lvalue
+                else if (lkeyword.eq.'MASK') then
+                  mask_cat=lvalue
+                else if (lkeyword.eq.'FREQ') then
+                  freq_cat=lvalue
+                else if (lkeyword.eq.'RX') then
+                  rx_cat=lvalue
+                else if (lkeyword.eq.'LOIF') then
+                  loif_cat=lvalue
+                else if (lkeyword.eq.'MODES') then
+                  modes_cat=lvalue
+                else if (lkeyword.eq.'MODES_DESCRIPTION') then
+                  modes_description_cat=lvalue
+                else if (lkeyword.eq.'REC') then
+                  rec_cat=lvalue
+                else if (lkeyword.eq.'HDPOS') then
+                  hdpos_cat=lvalue
+                else if (lkeyword.eq.'TRACKS') then
+                  tracks_cat=lvalue
+                else if (lkeyword.eq.'FLUX') then
+                  flux_cat=lvalue
+                else if (lkeyword.eq.'COMMENTS') then
+                  flux_comments=lvalue
+                else if (lkeyword.eq.'PROGRAM') then
+                  cat_program_path=lvalue
+                else if (lkeyword.eq.'PARAMETER') then
+                  par_program_path=lvalue
                 else
-                  write(luscn,9200) ltmpnam
-9200              format("RDCTL04 ERROR: Unrecognizable catalog name: ",
-     .            5A2)
+                  write(luscn,9200) lkeyword
+9200              format("RDCTL04 ERROR: Unknown catalog name: ",A)
                 end if
-
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
+                call readline(lu,cbuf,keof,ierr,2)
               end do
+! $MYSQL
+            else if(lsecname .eq. "$MYSQL") then
+              do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
+                istart=1
+               call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
+     >             knospace, keol)
+                istart=inext
+               call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
+     >             knospace, keol)
+               call capitalize(lkeyword)
 
+               if (lkeyword.eq.'HOST') then
+                 lmysql_host=lvalue(1:len(lmysql_host))
+                 call null_term(lmysql_host)
+               else if (lkeyword.eq.'SOCKET') then
+                 lmysql_socket=lvalue(1:len(lmysql_socket))
+                 call null_term(lmysql_socket)
+               else if (lkeyword.eq.'USER') then
+                 call null_term(lmysql_socket)
+                 lmysql_user=lvalue(1:len(lmysql_user))
+                 call null_term(lmysql_user)
+               else if (lkeyword.eq.'PASSWORD') then
+                 lmysql_password=lvalue(1:len(lmysql_password))
+                 call null_term(lmysql_password)
+               else if (lkeyword.eq.'DATABASE') then
+                 lmysql_db=lvalue(1:len(lmysql_db))
+                 call null_term(lmysql_db)
+               else
+                  write(luscn,9201) lkeyword
+9201              format("RDCTL04x ERROR: Unknown mysql name: ",A)
+               end if
+               call readline(lu,cbuf,keof,ierr,2)
+             end do
 C  $SCHEDULES
-            else if (ichcm_ch(isecname,1,'$SCHEDULES').eq.0) then
-              if ((jchar(ibuf,1).ne.o'44').and.(ilen.ne.-1)) then
-                ich = 1
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                ctemp = ' '
-                call hol2char(ibuf,ic1,ic2,ctemp)
-                csked = ctemp
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
+            else if (lsecname .eq.'$SCHEDULES') then
+              if ((cbuf(1:1) .ne. '$').and..not.keof) then
+                read(cbuf,'(a)') csked
+                call readline(lu,cbuf,keof,ierr,1)
               end if
-
-C  $SNAP 
-            else if (ichcm_ch(isecname,1,'$SNAP').eq.0.or.
-     .               ichcm_ch(isecname,1,'$DRUDG').eq.0) then
-              if ((jchar(ibuf,1).ne.o'44').and.(ilen.ne.-1)) then
-                ich = 1
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                ctemp = ' '
-                call hol2char(ibuf,ic1,ic2,ctemp)
-                csnap = ctemp
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
+C  $SNAP
+            else if (lsecname .eq. "$SNAP" .or.
+     >               lsecname .eq. "$DRUDG") then
+              if ((cbuf(1:1) .ne. '$').and..not.keof) then
+                read(cbuf,'(a)') csnap
+                call readline(lu,cbuf,keof,ierr,1)
               end if
-
-C  $PROC 
-            else if (ichcm_ch(isecname,1,'$PROC').eq.0) then
-              if ((jchar(ibuf,1).ne.o'44').and.(ilen.ne.-1)) then
-                ich = 1
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                ctemp = ' '
-                call hol2char(ibuf,ic1,ic2,ctemp)
-                cproc = ctemp
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
+C  $PROC
+            else if (lsecname .eq. '$PROC') then
+              if ((cbuf(1:1) .ne. '$').and..not.keof) then
+                read(cbuf,'(a)') cproc
+                call readline(lu,cbuf,keof,ierr,1)
               end if
-
 C  $SCRATCH
-            else if (ichcm_ch(isecname,1,'$SCRATCH').eq.0) then
-              if ((jchar(ibuf,1).ne.o'44').and.(ilen.ne.-1)) then
-                ich = 1
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                ctmpnam = ' '
-                call hol2char(ibuf,ic1,ic2,ctmpnam)
+            else if (lsecname .eq. '$SCRATCH') then
+              if ((cbuf(1:1) .ne. '$').and..not.keof) then
+                read(cbuf,'(a)') ctmpnam
+                call readline(lu,cbuf,keof,ierr,1)
               end if
-              call ifill(ibuf,1,ibuf_len*2,oblank)
-              call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
-        
 C  $PRINT
-            else if (ichcm_ch(isecname,1,'$PRINT').eq.0) then
-              do while((ilen.ne.-1).and.(jchar(ibuf,1).ne.o'44'))
-                ich = 1
-C               Get the keyword field
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                nch = ic2-ic1+1
-                call ifill(ltmpnam,1,10,oblank)
-                idum= ichmv(ltmpnam,1,ibuf,ic1,nch)
-                call hol2upper(ltmpnam,nch)
-C               Get the value field
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                if (ichcm_ch(ltmpnam,1,'LABELS').eq.0) then
-                  if (ic1.gt.0) then
-                    call hol2char(ibuf,ic1,ilen,cprtlab)
+            else if (lsecname .eq.'$PRINT') then
+              do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
+! get keyword, value.
+                istart=1
+                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
+     >             knospace, keol)
+                istart=inext
+                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
+     >             knospace, keol)
+                call capitalize(lkeyword)
+
+                if (lkeyword .eq.'LABELS') then
+                  if(ktoken) then
+                    cprtlab=lvalue
                     call null_term(cprtlab)
                   else ! null
                     cprtlab=' '
                   endif
-                else if (ichcm_ch(ltmpnam,1,'PORTRAIT').eq.0) then
-                  if (ic1.gt.0) then
-                    call hol2char(ibuf,ic1,ilen,cprtpor)
+                else if (lkeyword .eq.'PORTRAIT') then
+                  if(ktoken) then
+                    cprtpor=lvalue
                     call null_term(cprtpor)
-                  else
+                  else ! null
                     cprtpor=' '
                   endif
-                else if (ichcm_ch(ltmpnam,1,'LANDSCAPE').eq.0) then
-                  if (ic1.gt.0) then
-                    call hol2char(ibuf,ic1,ilen,cprtlan)
+                else if (lkeyword .eq.'LANDSCAPE') then
+                  if(ktoken) then
+                    cprtlan=lvalue
                     call null_term(cprtlan)
-                  else
+                  else ! null
                     cprtlan=' '
                   endif
-                else if (ichcm_ch(ltmpnam,1,'PRINTER').eq.0) then ! printer line
-                  nch=ic2-ic1+1
-                  if (nch.gt.0) then
-                    idum = ichmv(ltmpnam,1,ibuf,ic1,nch) ! type
-                    call hol2upper(ltmpnam,nch)
-                    call hol2char(ltmpnam,1,nch,ctemp)
-                    if (ctemp.eq.'EPSON'.or.ctemp.eq.'LASER'.or.
-     .               ctemp.eq.'EPSON24') then
-                      cprttyp=ctemp
-                    else
-                      write(luscn,9211) ctemp
-9211                  format('RDCTL05 ERROR: Unrecognized printer type ',
-     .                A)
-                    endif
+                else if (lkeyword .eq. 'PRINTER') then ! printer line
+                  call capitalize(lvalue)
+                  if (lvalue.eq.'EPSON'.or.lvalue.eq.'LASER'.or.
+     >                lvalue.eq.'EPSON24') then
+                      cprttyp=lvalue
+                  else
+                     write(luscn,9211) lvalue(1:trimlen(lvalue))
+9211                 format('RDCTL05 ERROR: Unknown printer type ',A)
                   endif
-                else if (ichcm_ch(ltmpnam,1,'LABEL_PRINTER').eq.0) then 
-                  nch=ic2-ic1+1
-                  if (nch.gt.0) then
-                    idum = ichmv(ltmpnam,1,ibuf,ic1,nch) ! type
-                    call hol2upper(ltmpnam,nch)
-                    call hol2char(ltmpnam,1,nch,ctemp)
-                    if (ctemp.eq.'EPSON'.or.ctemp.eq.'POSTSCRIPT'.or.
-     .               ctemp.eq.'LASER+BARCODE_CARTRIDGE'.or. 
-     .               ctemp.eq.'EPSON24') then
-                      clabtyp=ctemp
+                else if (lkeyword .eq. 'LABEL_PRINTER') then
+                  if(ktoken) then
+                    call capitalize(lvalue)
+                    if (lvalue.eq.'EPSON'.or.
+     >                  lvalue.eq. 'DYMO' .or.
+     >                  lvalue.eq.'POSTSCRIPT'.or.
+     .                  lvalue.eq.'LASER+BARCODE_CARTRIDGE'.or.
+     .                  lvalue.eq.'EPSON24') then
+                      clabtyp=lvalue
                     else
-                      write(luscn,9212) ctemp
+                      write(luscn,9212) lvalue(1:trimlen(lvalue))
 9212                  format('RDCTL10 ERROR: Unrecognized label ',
      .                'printer type ',A)
                     endif
                   endif
-                else if (ichcm_ch(ltmpnam,1,'OPTION').eq.0) then 
-                  ic = ias2b(ltmpnam,7,1)
+                else if (lkeyword(1:6) .eq. 'OPTION') then
+                  read(lkeyword(7:7),*) ic
                   if (ic.ne.1.and.ic.ne.4.and.ic.ne.5) then
-                    write(luscn,9216) ic
-9216                format('RDCTL14 ERROR: Invalid option number, ',
+                    write(luscn,9213) ic
+9213                format('RDCTL14 ERROR: Invalid option number, ',
      .              i3,' must be 1, 4, or 5.')
                   else
-                    nch=ic2-ic1+1
-                    if (nch.gt.0) then
-                      idum = ichmv(ltmpnam,1,ibuf,ic1,nch) ! option
-                      call hol2upper(ltmpnam,nch)
-                      call hol2char(ltmpnam,1,nch,ctemp)
-                      if (ctemp.eq.'PS'.or.ctemp.eq.'PL'.or.
-     .                    ctemp.eq.'LS'.or.ctemp.eq.'LL') then
-                        if (ic.eq.1) coption(1)=ctemp
-                        if (ic.eq.4) coption(2)=ctemp
-                        if (ic.eq.5) coption(3)=ctemp
+                    if (ktoken) then
+                      call capitalize(lvalue)
+                      if (lvalue.eq.'PS'.or.lvalue.eq.'PL'.or.
+     .                    lvalue.eq.'LS'.or.lvalue.eq.'LL') then
+                        coption(ic)=lvalue(1:2)
                       else
                         write(luscn,9215) ctemp
 9215                    format('RDCTL13 ERROR: Unrecognized option ',
@@ -311,161 +316,77 @@ C               Get the value field
                       endif
                     endif
                   endif
-                else if (ichcm_ch(ltmpnam,1,'LABEL_SIZE').eq.0) then 
+                else if (lkeyword .eq.'LABEL_SIZE') then
 C                 label_size ht wid nrows ncols topoff leftoff
-                  do ifield=1,6
-                    nch=ic2-ic1+1 ! first field already gotten
-                    if (nch.gt.0) then
-                      val=ras2b(ibuf,ic1,nch,ierr)
-                      if (ierr.eq.0) then
-                        rlabsize(ifield)=val
-                      else
-                        write(luscn,9213) ifield+1,(ibuf(j),j=1,ilen/2)
-9213                    format('RDCTL11 ERROR: Invalid number in field',
-     .                  i5,' of this line:'/40a2) 
-                      endif
-                      call gtfld(ibuf,ich,ilen,ic1,ic2)
-                    else
-                      write(luscn,9214) ifield
-9214                  format('RDCTL12 ERROR: Field ',i3,' missing on ',
-     .                ' the label size line. ')
-                    endif
-                  enddo
-                end if !printer line
-
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
+                  read(cbuf,*,err=92140) lkeyword,rlabsize
+                  goto 9216
+92140             write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"
+                else
+                   write(luscn,'(a)') "Error in $PRINT section"
+                   write(luscn,'(a)') cbuf(1:trimlen(cbuf))
+                endif
+9216            continue
+                call readline(lu,cbuf,keof,ierr,2)
               end do
-
 C  $MISC
-            else if (ichcm_ch(isecname,1,'$MISC').eq.0) then
-              do while((ilen.ne.-1).and.(jchar(ibuf,1).ne.o'44'))
-                ich = 1
-C               Get keyword field
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-                nch = ic2-ic1+1
-                call ifill(ltmpnam,1,10,oblank)
-C               Move keyword from ibuf to ltmpnam, make it upper case
-                idum= ichmv(ltmpnam,1,ibuf,ic1,nch)
-                call hol2upper(ltmpnam,nch)
-C               Get value field
-                call gtfld(ibuf,ich,ilen,ic1,ic2)
-C         EPOCH
-                if (ichcm_ch(ltmpnam,1,'EPOCH').eq.0) then
-                  nch=ic2-ic1+1
-                  call hol2char(ibuf,ic1,ilen,ctemp)
-                  if (ctemp(1:4).eq.'1950') then
-                    cepoch='1950'
-                  else if (ctemp(1:4).eq.'2000') then
-                    cepoch='2000'
+            else if (lsecname .eq. '$MISC') then
+              do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
+                istart=1
+                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
+     >             knospace, keol)
+                istart=inext
+                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
+     >             knospace, keol)
+
+                call capitalize(lkeyword)
+                if(lkeyword .eq. "EPOCH") then
+                  if(lvalue .eq. "1950" .or. lvalue .eq. "2000") then
+                     cepoch=lvalue(1:4)
                   else
                     write(luscn,'("RDCTL06 ERROR: Invalid epoch ",a)')
-     .              ctemp(1:trimlen(ctemp))
+     .              lvalue(1:trimlen(lvalue))
                   endif
-                endif
 C         EQUIPMENT
-                if (ichcm_ch(ltmpnam,1,'EQUIPMENT').eq.0) then
-                  call hol2char(ibuf,ic1,ic2,ctemp) ! rack
-C skdrini has not yet been read, so the rack and recorder types
-C are not known yet.
-C                 i=1
-C                 do while (i.le.max_rack_type.and.
-C    .              rack_type(i).ne.ctemp)
-C                   i=i+1
-C                 enddo
-C                 if (i.le.max_rack_type) dr_rack_type = ctemp
-                  dr_rack_type = ctemp
-                  call gtfld(ibuf,ich,ilen,ic1,ic2)
-                  call hol2char(ibuf,ic1,ic2,ctemp) ! rec A
-C                 i=1
-C                 do while (i.le.max_rec_type.and.
-C    .              rec_type(i).ne.ctemp)
-C                   i=i+1
-C                 enddo
-C                 if (i.le.max_rec_type) dr_reca_type = ctemp
-                  dr_reca_type = ctemp
-                  call gtfld(ibuf,ich,ilen,ic1,ic2)
-                  call hol2char(ibuf,ic1,ic2,ctemp) ! rec B
-C                 i=1
-C                 do while (i.le.max_rec2_type.and.
-C    .              rec_type(i).ne.ctemp)
-C                   i=i+1
-C                 enddo
-C                 if (i.le.max_rec_type) dr_recb_type = ctemp
-                  dr_recb_type = ctemp
-                endif ! equipment line
-
+                else if (lkeyword  .eq.'EQUIPMENT') then
+                  dr_rack_type=lvalue(1:8)
+                  istart=inext
+                  call ExtractNextToken(cbuf,istart,inext,dr_reca_type,
+     >              ktoken,knospace, keol)
+                  istart=inext
+                  call ExtractNextToken(cbuf,istart,inext,dr_recb_type,
+     >              ktoken,knospace, keol)
 C         TPICD
-                if (ichcm_ch(ltmpnam,1,'TPICD').eq.0) then ! TPICD line
-                  tpid_prompt = "NO" ! default is no prompot
-                  itpid_period = 0  ! default is off
-                  if (ic1.gt.0) then ! prompt specified
-                    call hol2char(ibuf,ic1,ic2,ctemp) ! prompt yes/no
-                    call c2upper(ctemp,ctmp2)
-                    if (ctmp2.eq."YES".or.ctmp2.eq."NO") then
-                      tpid_prompt = ctmp2
-                    else
-                      write(luscn,'("RDCTL10 ERROR: TPI prompt ",
-     .                "must be YES or NO")')
-                    endif
-                   endif ! prompt specified
-                  call gtfld(ibuf,ich,ilen,ic1,ic2)
-                  if (ic1.gt.0) then ! period specified
-                    ic = ias2b(ibuf,ic1,ic2-ic1+1)
-                    if (ic.ge.0) then 
-                      itpid_period = ic
-                    else
-                      write(luscn,'("RDCTL11 ERROR: Invalid TPI period"
-     .                )')
-                    endif 
-                  endif ! period specified
-C Temporarily remove reading parameter from the control file.
-C                 call gtfld(ibuf,ich,ilen,ic1,ic2)
-C                 if (ic1.gt.0) then
-C                   call hol2char(ibuf,ic1,ic2,ctemp) ! param
-C                   tpid_parm = ctemp
-C                 endif
+                elseif (lkeyword .eq. 'TPICD') then
+                  lprompt=lvalue(1:3)
+                  call capitalize(lprompt)
+                  if(lprompt .eq. "YES" .or. lprompt .eq. "NO") then
+                    tpid_prompt=lprompt
+                  else
+                     write(luscn, *)
+     >                "RDCTL10 ERROR: TPI prompt must be YES or NO"
+                  endif
+                  istart=inext
+                  call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
+     >               knospace, keol)
+                  read(lvalue,*) itemp
+                  if(itemp .gt. 0) then
+                    itpid_period=itemp
+                  else
+                    write(luscn,*) "RDCTL11 ERROR: Invalid TPI period"
+                  endif
                 endif ! TPICD line
-                call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
+                call readline(lu,cbuf,keof,ierr,2)
               enddo
+! End $MISC
             else ! unrecognized
-              write(luscn,9220) isecname
-9220          format("RDCTL07 ERROR: Unrecognized section name ",5A2)
-              call ifill(ibuf,1,ibuf_len*2,oblank)
-              call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
+              write(luscn,9220) lsecname
+9220          format("RDCTL07 ERROR: Unrecognized section name ",A)
+              call readline(lu,cbuf,keof,ierr,1)
             end if
           end do
-
           close (lu)
         end if  !"control file exists"
-
-        if (j.lt.2) then
-          inquire(file=cownctl,exist=kex)
-          if (kex) then
-            ctmp2 = cownctl
-            open(lu,file=cownctl,iostat=ierr,status='old')
-            if (ierr.ne.0) then
-              write(luscn,9230) ctmp2(1:trimlen(ctmp2))
-9230          format("RDCTL08 ERROR: Error opening local control file ",
-     .        a)
-              close(lu)
-              return
-            end if
-            itmplen = trimlen(ctmp2)
-            write(luscn,9240) ctmp2(1:itmplen)
-9240        format("RDCTL09 - Reading personal control file ",A)
-          else
-            j = 2
-          end if
-
-        end if  !"j<2"
-        j = j + 1
-
       end do  !"do 1,2"
-
-C
-      close(lu)
 
       RETURN
       END

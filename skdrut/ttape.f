@@ -32,14 +32,14 @@ C  LOCAL
       character*24 ckeywd
       equivalence (lkeywd,ckeywd)
       character*6 cTapeType(max_stn)
-      character*4 cTapeDens(max_stn)
+      character*6 cTapeDens(max_stn)
 
       integer ilist_len
       parameter (ilist_len=3)
       character*12 list(ilist_len)
 
       integer ilist_hl
-      parameter (ilist_hl=2)
+      parameter (ilist_hl=4)
       character*12 list_hl(ilist_hl)
 
       integer ilist_lens2
@@ -49,7 +49,7 @@ C  LOCAL
       integer ikey,ikeyhl,ikeys2
 
       data list/"SHORT","THICK","THIN"/
-      data list_hl/'HIGH','LOW'/
+      data list_hl/'HIGH','LOW','SUPER','DUPER'/
       data listS2/'LP','SLP'/
 
       data ikey_len/20/
@@ -65,7 +65,7 @@ C 020111 nrv Check LSTREC not LTERNA to determine S2 and K4 types.
 C 020705 nrv Check NCODES not ICODE for KK4.
 C 020815 nrv Add number of passes to listing.
 C 021003 nrv Adjust K4 output for speed being in dm internally.
-C
+! 2004Jun21 JMG. Added "Super" tape density
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
         write(luscn,*)
@@ -78,6 +78,21 @@ C
       ICH = 1
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
+        kk4=cterna(1)(1:2).eq."K4"
+        ks2=cterna(1)(1:2).eq."S2"
+
+! write header
+        if(ks2) then
+          WRITE(LUDSP,'(a)')
+     >     ' ID  Station   Tape length            Speed '
+        else if(kk4) then
+          WRITE(LUDSP,'(a)')
+     >     ' ID  Station   Tape length            Speed '
+        else
+          WRITE(LUDSP,'(a)')
+     >  ' ID  Station   Tape length         Density         Passes'
+        endif
+
         do i=1,nstatn
           if (cstrec(i)(1:2).eq.'S2') then
             if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
@@ -87,20 +102,21 @@ C
             k4sp = speed(1,i)*10.d0 ! speed for code 1 in m/s
             ival = idint(0.1 + maxtap(i)/(60.d0*k4sp)) ! min=m/(60*m/s)
           else 
-            cTapeDens(i)='Low'
-            if (bitdens(i,1).gt.56000.0) cTapeDens(i)='High'
+            if(bitDens(i,1)      .gt.5600000.0) then
+               cTapeDens(i)="DUPER"
+            else if(bitDens(i,1) .gt.560000.0) then
+               cTapeDens(i)="SUPER"
+            else if(bitDens(i,1) .gt.56000.0) then
+               cTapeDens(i)="HIGH"
+            else
+               cTapeDens(i)="Low"
+            endif
+
             cTapeType(i)='Thin'
             if (maxtap(i).lt.10000.and.maxtap(i).gt.5000)
      .        cTapeType(i)='Thick'
             if (maxtap(i).lt.5000) cTapeType(i)='Short'
           endif
-          if (i.eq.1.and.(.not.ks2.and..not.kk4)) WRITE(LUDSP,9910)
-9910        FORMAT(' ID  Station   Tape length        Density   ',
-     .      '    Passes')
-          if (i.eq.1.and.ks2) WRITE(LUDSP,9911)
-9911        FORMAT(' ID  Station   Tape length            Speed ')
-          if (i.eq.1.and.kk4) WRITE(LUDSP,9912)
-9912        FORMAT(' ID  Station   Tape length            Speed')
         enddo
         DO  I=1,NSTATN
 C         Write bit density for freq code 1 only.
@@ -116,10 +132,9 @@ c                             min   feet           slp/lp          ips
             write(ludsp,9114) ival,maxtap(i),k4sp
 9114        format(i6," min (",i6," m)",2x," ",f5.1," mm/s")
           else
-             WRITE(LUDSP,9112) maxtap(i),cTapeType(i),bitdens(i,1),
+             WRITE(LUDSP,9112) maxtap(i),cTapeType(i),int(bitdens(i,1)),
      >        cTapeDens(i), maxpas(i)
-9112        FORMAT(i6,'feet (',a,')',3x,f6.0,' (',a,')',3x,i3)
-
+9112        FORMAT(i6,'feet (',a,')',3x,i7,' (',a,')',3x,i3)
           endif
         END DO  
         RETURN
@@ -172,7 +187,7 @@ C       Station ID is valid. Check tape type now.
             nch=min0(ikey_len,ic2-ic1+1)
             ckeywd=" "
             idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
-            ikey=istringminmatch(ckeywd,list,ilist_len)
+            ikey=istringminmatch(list,ilist_len,ckeywd)
             if (ikey.eq.0) then ! invalid type
               write(luscn,9203) ckeywd(1:trimlen(ckeywd))
 9203          format('TTAPE03 Error - invalid type: ',a,', must be ',
@@ -195,7 +210,7 @@ C       Station ID is valid. Check tape type now.
             nch=min0(ikey_len,ic2-ic1+1)
             ckeywd=" "
             idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
-            ikeyhl=istringminmatch(ckeywd,list_hl,ilist_hl)
+            ikeyhl=istringminmatch(list_hl,ilist_hl,ckeywd)
             if (ikeyhl.eq.0) then ! invalid type
               write(luscn,9204) ckeywd
 9204          format('TTAPE03 Error - invalid bit density: ',a,
@@ -217,15 +232,14 @@ C       Station ID is valid. Check tape type now.
             kdefault = .false.
             CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! speed
             IF  (IC1.EQ.0) THEN  !no speed
-              write(luscn,9206)
-9206          format('TTAPE06 Error - You must also specify SLP or LP',
-     .        ' speed.')
+              write(luscn,'(a)')
+     >         "TTAPE06 Error - You must also specify SLP or LP speed."
               RETURN
             endif ! no speed
             nch=min0(ikey_len,ic2-ic1+1)
             ckeywd=" "
             idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
-            ikeys2=istringminmatch(ckeywd,lists2,ilist_lens2)
+            ikeys2=istringminmatch(lists2,ilist_lens2,ckeywd)
             if (ikeys2.eq.0) then ! invalid speed
               write(luscn,9207) ckeywd
 9207          format('TTAPE03 Error - invalid S2 speed: ',a,
@@ -285,6 +299,14 @@ C   3. Now set parameters in common.
                       bitdens(i,icode)=56250 ! Mark3/4 data replacement
                     endif
                   enddo
+                else if(list_hl(ikeyhl) .eq. 'SUPER') then
+                  do icode=1,NCODES
+                     bitdens(i,icode)=562500.0
+                  end do
+                else if(list_hl(ikeyhl) .eq. 'DUPER') then
+                  do icode=1,NCODES
+                     bitdens(i,icode)=5625000.0
+                  end do
                 else                            !low density.
                   do icode=1,NCODES
                     bitdens(i,icode)=33333

@@ -29,18 +29,21 @@ C        -trimlen : find number of character read in
        integer*4 k
        integer oblank
        data oblank /O'40'/
- 
 C        -k : variable for iostat error-checking
 C
 C  880523  -written by P. Ryan
 C 960212 nrv Extend buffer
 C
-
        inquire(iunit,exist=ex,opened=opn,name=nam)
        read(iunit,10,end=20,iostat=k) ch
 10     format (A1024)
        kerr = k
        il   = trimlen(ch)
+       if(il .gt. 0 .and. ch(il:il) .eq. char(13)) then
+         ch(il:il)=" "
+         il=trimlen(ch)
+       endif
+
        if (kerr .ne. 0) then
          il = -1
          return

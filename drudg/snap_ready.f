@@ -23,7 +23,7 @@
 
       if((km5A.or.kM5P.or.km5a_piggy.or.km5p_piggy)
      >        .and.kfirst_tape) then
-        write(luFile,'(a)') 'ready_disc'
+        write(luFile,'(a)') 'ready_disk'
         kfirst_tape=.false.
       endif
       if(km5A.or.km5P) return              !don't need to do tape ready.

@@ -1,4 +1,4 @@
-      integer function iStringMinMatch(ltest,list,ilen)
+      integer function iStringMinMatch(list,ilen,ltest)
 
 ! functions
       integer trimlen
