@@ -16,8 +16,7 @@ int *ierr;
 {
   struct vform_cmd lclc;
   struct vform_cmd lcomm;
-  int i,j, itracks[ 32];
-  unsigned aux_data[28][4];
+  int i,j, itracks[ 32], codes;
   struct res_buf buff_out;
   struct res_rec response;
   void get_res();
@@ -37,23 +36,12 @@ int *ierr;
   get_res(&response,&buff_out); mc8Fvform(&lclc,response.data);
   get_res(&response,&buff_out); mc90vform(&lclc,response.data);
   get_res(&response,&buff_out); mc91vform(&lclc,response.data);
+  get_res(&response,&buff_out); mc92vform(&lclc,response.data);
+  get_res(&response,&buff_out); mc93vform(&lclc,response.data);
   get_res(&response,&buff_out); mc99vform(&lclc,response.data);
   get_res(&response,&buff_out); mc9Avform(&lclc,response.data);
   get_res(&response,&buff_out); mcADvform(&lclc,response.data);
 
-  goto skip_aux;
-  for (i=0;i<28;i++) {                   /* 28 tracks of aux data */
-    get_res(&response,&buff_out);
-    get_res(&response,&buff_out);
-
-    for (j=0;j<4;j++) {                  /* 3 words per track */
-       get_res(&response,&buff_out);
-       aux_data[i][j]=response.data;
-    }
-  }
-  mcD6vform(&lclc,aux_data);
-
-skip_aux:
   if(response.state == -1) {
      clr_res(&buff_out);
      *ierr=-201;
@@ -63,7 +51,11 @@ skip_aux:
 
   memcpy(&lcomm,&shm_addr->vform,sizeof(lcomm));
 
-  if (lcomm.mode != lclc.mode) icherr[0]=1;
+  codes = TRUE;
+  for (i=0;i<32;i++)
+    codes &= lcomm.codes[i] == lclc.codes[i];
+
+  if (!codes) icherr[0]=1;
   if (lcomm.rate != lclc.rate) icherr[1]=1;
   if (lcomm.format != lclc.format) icherr[2]=1;
   if (lcomm.enable.low    != lclc.enable.low ||
