@@ -9,6 +9,10 @@ extern double fpoly();
 extern double ftau();
 int fit();
 
+/* Allow main stubs to keep linker happy */
+void MAIN__(){}
+void MAIN_(){}
+
 int
 main(int argc, char **argv)
 {
