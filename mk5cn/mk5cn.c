@@ -1,4 +1,19 @@
 /* mk5cn: based on John Ball's tstMark5A of 2002 February 18 */
+
+/* FS Linux 1 is not supported. However, you can probably make it work
+ * by finding and changing the call below:
+
+    if(getsockopt(sock, SOL_SOCKET, SO_ERROR,
+		  (void *) &error,(socklen_t *) &serror) < 0) {
+
+ * to
+
+    if(getsockopt(sock, SOL_SOCKET, SO_ERROR,
+		  (void *) &error,(int *) &serror) < 0) {
+
+ * This will at least allow the program to compile. It has not been tested
+ * beyond that. Any other Linux 1 issues are *hoped* to be benign.
+ */ 
  
 #include <stdio.h> 
 #include <fcntl.h>

@@ -47,6 +47,8 @@ main()
 #endif
   while(TRUE) {
     skd_wait("flagr",ip,shm_addr->iapdflg);
+    if(nsem_test("onoff") == 1 || nsem_test("fivpt") == 1)
+      continue;
 #ifdef TESTX
   printf(" woke-up\n");
 #endif
