@@ -27,7 +27,7 @@ C
 C
       if (ichcm_ch(lname,1,'sun       ').ne.0) goto 20
       call fc_rte_time(it,it(6))
-      call sun(dra,ddec,it)
+      call sunpo(dra,ddec,it)
       goto 100
 C
 20    continue
