@@ -1,3 +1,4 @@
+#!/bin/tcsh
 cd /usr2/log
 mv point.log log$1
 xtrac log$1 xtr$1 ' ' /usr2/control/parpo.ctl 6
