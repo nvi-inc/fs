@@ -266,7 +266,7 @@ C  CHECK DEVICE NAME (FIRST WORD)
 c
  221  continue
       if((imode.gt.4.and.imode.lt.9).or.imode.eq.11) then
-         ilimit=ibuf(3)
+         ilimit=min(ibuf(3),ibufln*2)
       endif
 C
       if(idev.gt.0) then
@@ -287,10 +287,18 @@ C
          endif
          if(imode.eq.1) then
             ibin=0
-            imax=30
+            if(iserial.ne.0) then
+               imax=32
+            else
+               imax=ibufln*2
+            endif
          else if(imode.eq.3) then
             ibin=1
-            imax=256
+            if(iserial.ne.0) then
+               imax=256
+            else
+               imax=ibufln*2
+            endif
          else if(imode.eq.5) then
             ibin=0
             imax=ilimit
