@@ -1,6 +1,7 @@
       program labck
 C 
-      integer*2 labt(4),lchk(2),labta(4),labtb(4) ,ihash,icode
+      integer*2 labt(4),lchk(2),labta(4),ihash,icode
+      character*1 cjchar,ch
 C 
       lu = 6
       lui = 5
@@ -10,34 +11,32 @@ C
       read(lui,9902) labt
 9902  format(4a2) 
       if (ichcm_ch(labt,1,'::').eq.0) goto 999 
+      call upper(labt,1,4)
       write(lu,9905)
 9905  format(1x,"enter tape number again to double check (:: to quit) ")
       read(lui,9902) labta 
       if (ichcm_ch(labta,1,'::').eq.0) goto 999 
-      write(lu,9906)
-9906  format(1x,"enter tape number once more, just to be sure ", 
-     .   " (:: to quit) ") 
-      read(lui,9902)labtb
-      if (ichcm_ch(labtb,1,'::').eq.0) goto 999 
+      call upper(labta,1,4)
 C 
 C     Generate check label.  Change any "O" to "0" in tape number first.
 C     Check for exactly 8 characters in tape number.
 C 
-      do 322 i=1,8
-        ic = jchar(labt,i)
-        if (ic.ne.o'40') goto 321 
-C                            no blanks allowed
-        write(lu,9904)
+      do i=1,8
+         ch=cjchar(labt,i)
+         if(ch.eq.' ') then
+            write(lu,9904)
 9904    format(1x,"tape label must be exactly 8 characters, no blanks all
      .owed.  try again.") 
-        goto 200
-321     if (ic.eq.o'117') call ichmv(labt,i,o'60',2,1)
-C                            "O"                     "0"
-        if(jchar(labta,i).eq.ic.and.jchar(labtb,i).eq.ic) goto 322
-          write(lu,9907)
-9907      format(1x,"tape numbers disagree. try again.") 
-          goto 200
-322     continue
+            goto 200
+         endif
+         if (index('Oo',ch).ne.0) call char2hol('0',labt,i,i)
+         if(cjchar(labta,i).ne.ch) then
+            write(lu,9907)
+ 9907       format(1x,"tape numbers disagree. try again.") 
+            goto 200
+         endif
+      enddo
+
       call upper(labt,1,8)
 C 
       icode = ihash(labt,1,8) 
