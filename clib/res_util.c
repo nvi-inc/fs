@@ -41,8 +41,8 @@ struct res_buf *buffer;        /* response buffer */
 
     switch (response->code) {
       case 4:
-        memcpy(response->array,ptr+3,8);
-        adv+=8;
+        memcpy(response->array,ptr+3,24);
+        adv+=24;
       case 1:
         response->data=(0xff00 & (*++ptr<<8)) | (0xff & (*++ptr) );
         adv+=2;

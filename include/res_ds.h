@@ -14,5 +14,5 @@ struct res_rec {
      int state;
      int code;
      unsigned data;
-     unsigned char array[8];
+     unsigned char array[24];
      };
