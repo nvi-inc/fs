@@ -28,7 +28,8 @@ C
       character*79 outbuf
       integer answer, trimlen, ichcm_ch
       integer idcb1(2), idcb2(2)
-      integer idcb3(2)
+      integer idcb3(2),it(6)
+      integer*4 secs
       integer*2 iqc, isize
       dimension scale(5)
 C        - Scale values for each parameter
@@ -60,6 +61,7 @@ C        - Contains the min,max scale values in double precision.
 C          This is done because there are no routines to convert
 C          double precision to ASCII.
 C
+      save oldformat
       equivalence(ltitle(24),imin(1)),(ltitle(30),imax(1))
       equivalence (cmax,imax),(cmin,imin)
       equivalence (parm,iparm(1)),(value,ival(1))
@@ -95,6 +97,7 @@ C
 C       - Plot characters
 C
       data scale/1.149253,4*0.0/
+      data oldformat/-1/
 C
 C
 C **************************************************************
@@ -155,21 +158,56 @@ C
 C Pick up the decoded time from common and check XX for min & max
 C time scale.
 C
-        xa=itl1
-        xb=itl2
-        xc=it3
-        xx=xa+xb/1440.d0+xc/86400.d0
+        it(6)=itl1/1024+1970
+        it(5)=mod(itl1,1024)
+        it(4)=itl2/60
+        it(3)=mod(itl2,60)
+        it(2)=itl3/100
+        it(1)=mod(itl3,100)
+        call fc_rte2secs(it,secs)
+        xx=secs*100.0d0+it(1)
         if (xx.lt.xmin) xmin=xx
         if (xx.gt.xmax) xmax=xx
 C
 C Get specified parm store the value
 C
+        if(logformat.ne.oldformat) then
+           if(logformat.eq.1) then
+              idyps=1
+              ihrps=4
+              imnps=6
+              iscps=8
+              ildch=10
+              ifrst=11
+           else if(logformat.eq.2) then
+              idyps=3
+              ihrps=6
+              imnps=8
+              iscps=10
+              ildch=14
+              ifrst=15
+           else if(logformat.eq.3) then
+C     not Y10K compliant
+              idyps=6
+C     not Y10K compliant
+              ihrps=10
+C     not Y10K compliant
+              imnps=13
+C     not Y10K compliant
+              iscps=16
+C     not Y10K compliant
+              ildch=21
+C     not Y10K compliant
+              ifrst=22
+           endif
+           oldformat=logformat
+        endif
         do 440 n=1,nump
 C
 C  Skip over the time field plus the number of characters in NCOMND
 C  to begin the first character of the PARM at ICH.
 C
-          ich = 15+ncomnd(1)
+          ich = ifrst+ncomnd(1)
           if (nparm(n).eq.1) goto 410
 C
 C  If more than one PARM is specified, the following DO loop will
@@ -228,12 +266,25 @@ C
 C **************************************************************
 C
 C
-      xa=its1
-      xb=its2
-      if (its1.ne.0) xmin=xa+xb/1440.d0
-      xa=ite1
-      xb=ite2
-      if (ite1.ne.9999.and.ite1.ne.0) xmax=xa+xb/1440.d0
+      it(6)=its1/1024+1970
+      it(5)=mod(its1,1024)
+      it(4)=its2/60
+      it(3)=mod(its2,60)
+      it(2)=its3/100
+      it(1)=mod(its3,100)
+      call fc_rte2secs(it,secs)
+      xa=secs*100.0d0+it(1)
+      if (its1.ne.1) xmin=xa
+c
+      it(6)=ite1/1024+1970
+      it(5)=mod(ite1,1024)
+      it(4)=ite2/60
+      it(3)=mod(ite2,60)
+      it(2)=ite3/100
+      it(1)=mod(ite3,100)
+      call fc_rte2secs(it,secs)
+      xa=secs*100.0d0+it(1)
+      if (ite1.ne.(2038-1970)*1024+1) xmax=xa
       kpass2=.false.
       do i=1,nump
         kpass2=kpass2.or.sdelta(i).ne.0.0
@@ -269,7 +320,7 @@ C
         smax(i)=ymax(i)
         smin(i)=ymin(i)
 710   continue
-      if (ikey.eq.6) isize=iwidth-11
+      if (ikey.eq.6) isize=iwidth-21
       if (ikey.eq.13) isize=ihgt-1
       scalex=(xmax-xmin)/float(iwidth-1)
       do i=1,nump
@@ -288,11 +339,12 @@ C Write up to 5 plot titles giving Y-information.
 C Write one line giving X-information.
 C
       do i=1,nump
+        call ifill_ch(ltitle(2),1,22,' ')
         jlen=iflch(logna,20)
         call ichmv(ltitle(2),1,logna,1,jlen)
         idum= mcoma(ltitle,jlen+3)
         call ichmv(ltitle(2),jlen+4,lstatn,1,8)
-        call ichmv(ltitle(2),jlen+14,lcomnd,1,12)
+        call ichmv(ltitle(2),24,lcomnd,1,12)
         id = ib2as(nparm(i),ltitle(2),37,1)
         rlg10=0.0
         if (smin(i).ne.0.0) rlg10=log10(abs(smin(i)))
@@ -336,7 +388,7 @@ C
 C Write a blank line, then a line of dashes for the strip-chart.
 C
       call lxwrt(line,iwidth)
-      call ifill_ch(line,12,iwidth-12,'--')
+      call ifill_ch(line,22,iwidth-22,'--')
       call lxwrt(line,iwidth)
       goto 1000
 C
@@ -351,7 +403,7 @@ C
 900   call ifill_ch(line,1,130,' ')
       nch=1
       call lxhms(xmin,line,nch)
-      nch=iwidth-7
+      nch=iwidth-19
       call lxhms(xmax,line,nch)
       call lxwrt(line,nch)
       if(icode.eq.-1) goto 1200
@@ -417,19 +469,19 @@ C
         if(ikey.ne.6) goto 1030
         nch=1
         call lxhms(xx,line,nch)
-        call ichmv_ch(line,11,'|')
-        call ifill_ch(line,12,iwidth-12,' ')
+        call ichmv_ch(line,21,'|')
+        call ifill_ch(line,22,iwidth-22,' ')
         call ichmv_ch(line,iwidth,'|')
 C
         do 1020 k=1,nump
           if(iy(k).lt.1) iy(k)=1
-          if(iy(k).gt.iwidth) iy(k)=isize
-          iqc=jchar(line,iy(k)+11)
-          if ((ichcm_ch(iqc,1,' ').ne.0).and.
+          if(iy(k).gt.isize) iy(k)=isize
+          iqc=jchar(line,iy(k)+21)
+           if ((ichcm_ch(iqc,1,' ').ne.0).and.
      .       (ichcm_ch(iqc,1,'|').ne.0)) goto 1015
-          call ichmv(line,iy(k)+11,iplch(k),1,1)
+          call ichmv(line,iy(k)+21,iplch(k),1,1)
           goto 1020
-1015      call ichmv_ch(line,iy(k)+11,'=')
+1015      call ichmv_ch(line,iy(k)+21,'=')
 1020    continue
 C
         call lxwrt(line,iwidth)
@@ -464,7 +516,7 @@ C
 C
       if (ikey.eq.13) goto 1080
       call ifill_ch(line,1,130,' ')
-      call ifill_ch(line,12,iwidth-12,'-')
+      call ifill_ch(line,22,iwidth-22,'-')
       call lxwrt(line,iwidth)
       goto 1200
 C
