@@ -24,8 +24,9 @@ C
       double precision timt,dtpi,dri,tpita,sigt,timta,didim1
       integer*2 icmnd(4,18),indata(10),iques,lwho,lwhat
       integer it(5),iti(5)
+      integer*4 ip(5)
 c     character*1 cjchar
-      logical kbreak
+      logical kbreak, kst
 C 
        include '../include/fscom.i'
 C 
@@ -58,8 +59,14 @@ C  0. INITIALIZE
 C
 C       WHICH DEVICE?
 C 
+      kst=ichcm_ch(ldevfp,1,'u').eq.0
+      if(kst) then
+         id=-1
+         goto 11
+      endif
+C
       call fs_get_rack(rack)
-      if(VLBA.eq.and(rack,VLBA)) then
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id=-1
         goto 11
       endif
@@ -89,8 +96,10 @@ C
 C       WAIT FOR A SECOND TO CYCLE TPI
 C        (WE WILL WAIT AN ADDITIONAL SECOND BEFORE THE FIRST READING) 
 C 
-      call susp(1,102)
-      call fc_rte_time(iti,idum) 
+      if(.not.kst) then
+         call susp(1,102)
+         call fc_rte_time(iti,idum) 
+      endif
 C 
 C   1. LOOP GETTING DATA
 C 
@@ -99,28 +108,43 @@ C
 C       WAIT TILL THE NEXT SECOND AT LEAST
 C 
         if (kbreak('fivpt')) goto 80040  
-        call fc_rte_time(it,idum) 
-        itv1=it(1)-iti(1)                    
-        itv2=it(2)-iti(2)                    
-        itim=itv1*100+itv2+102 
-        if (itim.lt.0) itim=itim+6000.            
-        call susp(1,itim)
+        if(.not.kst) then
+           call fc_rte_time(it,idum) 
+           itv1=it(1)-iti(1)                    
+           itv2=it(2)-iti(2)                    
+           itim=itv1*100+itv2+102 
+           if (itim.lt.0) itim=itim+6000.            
+           call susp(1,itim)
+        endif
 C 
 C      GET THE STUFF
 C 
         itry=ntry
 12      continue 
-        if(VLBA.eq.and(rack,VLBA)) then
-          call mcbcn(dtpi,ierr)
+        if(kst) then
+           idum=ichmv(user_dev1_name,1,ldevfp,1,2)
+           call fs_set_user_dev1_name(user_dev1_name)
+           idum=ichmv_ch(user_dev2_name,1,'  ')
+           call fs_set_user_dev2_name(user_dev2_name)
+           call run_prog('antcn','wait',8,idum,idum,idum,idum)
+           call rmpar(ip)
+           if(ip(3).ne.0) then
+              ierr=-83
+           else
+              call fs_get_user_dev1_value(user_dev1_value)
+              dtpi=user_dev1_value
+           endif
+        else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+           call mcbcn(dtpi,ierr)
         else
-          call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
+           call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 
 C 
 C      CONVERT TO COUNTS
 C 
-        if(VLBA.ne.and(rack,VLBA)) then
+        if(VLBA.ne.rack.and.VLBA4.ne.rack.and..not.kst) then
           if (id.ge.17) dtpi=float(ia22h(indata(2)))*256.0+ 
      +                       float(ia22h(indata(3)))
           if (id.lt.17) dtpi=float(ia22h(indata(4)))*256.0+ 
