@@ -1,0 +1,30 @@
+               calrx - band/receiver calibration file link
+ 
+ 
+              Syntax:      calrx=name,type,lo1,lo2
+ 
+              Response:    calrx=name,type,lo1,lo2
+ 
+ 
+ Settable parameters:
+            name       Name of a .rxg control file (only the part of the
+                       name before the dot should be used).
+            type       LO definition type "fixed" or "range"
+            lo1        First fixed LO value for type "fixed" or
+                       lower end of range for type "range", MHz.
+            lo2        Second fixed LO value for type "fixed" or
+                       upper end of range for type "range", MHz.
+ 
+ Monitor-only parameters: None.
+ 
+ Comments:
+ This command is used to provide the link between the log file
+ containing ONOFF data that will be analyzed using the "gnplt" and the
+ coresponding .rxg file that defines the receiver parameters for that
+ band. This command must be entered into the log that contains the
+ data for the band. Usually it would be entered in the "ACQUIRE"
+ procedure used to set-up data acquisition for that band. Each band
+ should use a unqiue log name. The LO definition parameters in the
+ command (type, lo1, lo2) must agree with the contents of the file
+ specified by "name". You should omit the ".rxg" extension from the
+ name in the command.

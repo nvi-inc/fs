@@ -21,16 +21,37 @@
  
  Comments: 
  This command calculates and displays system temperatures for
- the different video and IF channels.The formula is:
+ the different video and IF channels.The formula for Mark III/IV is:
  
-          tsys = (tpi - tpzero) * (caltemp/(tpical-tpi))
+         tsys = (tpi - tpzero) * (caltemp/(tpdiff))
+
+ For VLBA/4 the formula is:
+
+          tsys = (tpi/(tpgain*tpgian) - tpzero/(tpdiffgain*tpdiffgain))
+	         * (caltemp/(tpdiff/(tpdiffgain*tpdiffgain)))
  
+ where:
  tsys         system temperature, as reported in tsys command
-              tpi          cal-off reading, from tpi command
-              tpzero       zero-level reading, from tpzero command
-              tpical       cal-on reading, from tpical command
-                caltemp        noise calibration source temperature, from
-                caltemp command.
+ tpi          cal-off reading, from tpi command divided
+ tpgain       VLBA TPI gain reading, from tpgain command
+ tpzero       zero-level reading, from tpzero command
+ tpdiff       TPICAL-TPI reading, from tpdiff command
+ tpdiffgain   VLBA TPDIFF gain reading, from tpdiffgain command
+ caltemp      noise calibration source temperature, from
+              caltemp command.
+ 
+ For VLBA/4 TPGAIN must be a measurement of the gain level
+ when TPI is measured and likewise TPDIFFGAIN must be a measurement of
+ the gain level when TPZERO and TPDIFF are measured. However, if TPGAIN
+ and/or TPDIFFGAIN return incorrect values because of some problem, they
+ can be omitted as long as the gain level is the same for all tpi, tpzero,
+ and tpdiff.
+
+ For all systems, the tpi value used for tpdiff may be different from
+ the valued use for tpi use for Tsys. The tpidiff is used to define
+ the conversion factor from counts to degrees (according to caltemp) only
+ Please see the default CALTSYS, PREOB, and MIDOB procedures for examples
+ of how Tsys is used.
  
  Except for station defined detectors, the results are returned
  grouped in pairs of detector mnemonic,value, the output is

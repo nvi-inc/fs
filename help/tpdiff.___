@@ -1,19 +1,17 @@
-         tpgain - measure TPI gain levels (VLBA, VLBA4 racks)
+          tpdiff - TPICAL-TPI difference
  
-              Syntax:      tpgain=list
+              Syntax:      tpdiff=list
  
-              Response:    tpgain/gain levels
+              Response:    tpdiff/readings
  
  
- Settable parameters: 
-            list       List of modules for which gain levels are to be
-            measured. Standard detector mnemonics allowed, but
-            no station detectors.
+ Settable parameters:
+            list       List of total power integrators to be read back.
+            Standard detector mnemonics allowed.
  
  Monitor-only parameters:
-              zero levels  List of gain levels, counts. These values are needed
-              for post processing of stored for use by the
-              tsys/5/6.
+            readings   List of readings, counts. These values are stored
+            for use by the tsys/5/6 commands.
  
  Comments: 
  Except for station defined detectors, the results are returned
@@ -30,15 +28,12 @@
  other detectors from being displayed.  A negative integer will
  be shown for each channel that had an error that prevented an
  actual measurement from being displayed. An overflow value,
- 255, is displayed as dollar signs, $$$.
+ 65535, is displayed as dollar signs, $$$$$.
  
  For Mark III/IV racks the detector mnemonics for the VC are
  displayed as hs, where h is the VC number as hex and s is for
  the detector is use: d (dual for upper/lower), u (upper), l
  (lower), or a digit 4-7 for other detectors.
  
- It is assumed that the gain is locked in manual to get a stable
- level.
-
- This value is used by the Tsys command to calculate the system
- temperature.
+ This command forms the difference between TPICAL and TPI
+ measurements for use in the Tsys command.
