@@ -20,7 +20,7 @@ C LOCAL:
      .          LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
       integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN)
       integer iob,idum
-	LOGICAL   KEX
+	LOGICAL   KEX,ks2
 C IYR, MON, IDA, IHR, iMIN, IDUR, ICAL, IDLE,
 C LFREQ, ISP, LMODE,
 C These are holders for the information contained
@@ -46,9 +46,10 @@ C NLAB - number of labels across a page
       real*4 speed ! function
 	integer Z24
         integer*2 hhr
+         integer ichcm_ch
 
 C INITIALIZED:
-	DATA IPASP/0/, IFTOLD/0/
+	DATA IPASP/-1/, IFTOLD/0/
 	DATA Z24/Z'24'/, HHR/2HR /
 
 C SUBROUTINES CALLED:
@@ -79,6 +80,8 @@ C             labels will be spit out.
 C  940627 nrv Add batch mode
 C  950829 nrv Remove ' ' in front of lines written to CLASER
 C 960531 nrv Remove READS and get obs from common.
+C 960810 nrv Change itearl to array
+C 960820 nrv Don't try to use SPEED in a calculation for S2.
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -124,7 +127,8 @@ C
 C
       NOUT = 0
       NLABPR = 0
-	IPASP=0
+	IPASP=-1
+         ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
 
 C  If pcode is 1 or 2, we want to open up the output, otherwise,
 C  we assume it is already open
@@ -275,8 +279,12 @@ c       IS2(NOUT) = ISC2
 	  ID2(NOUT) = IDAYR2
 C       NOB(NOUT) = NOB(NOUT)+1
 	  IPASP = IPAS(ISTNSK)
-	  IFTOLD = IFT(ISTNSK) + IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
+         if (ks2) then
+          iftold = ift(istnsk)+idur(istnsk)
+          else
+	  IFTOLD = IFT(ISTNSK) + IFIX(IDIR*(ITEARL(istn)+IDUR(ISTNSK))
      .     *speed(icod,istn))
+           endif
 	  IDIRP = IDIR
 	ENDIF !process this observation
 C
