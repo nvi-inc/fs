@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
   double tcal_ass_array[MAXDETECTORS], flux_ass_array[MAXDETECTORS], dpfu_ass_array[MAXDETECTORS];
   double gcurve_ass_array[MAXDETECTORS], dpfu_gcurve_ass_array[MAXDETECTORS], LO_array[MAXDETECTORS];
   double trec_array[MAXDETECTORS], tatm_array[MAXDETECTORS], tspill_array[MAXDETECTORS], tau_array[MAXDETECTORS];
-  double LO1array[MAXRX], LO2array[MAXRX], tau0_array[MAXDETECTORS];
+  double LO1array[MAXRX], LO2array[MAXRX], tau0_array[MAXDETECTORS], airmass_array[MAXDETECTORS];
+  double tcal_log_array[MAXRX];
   double a,b,c,elev,am;
   int detcount, valcount, i, j, k, right, firstapr, firstval; 
   int rxcount, error, icount, LOcount, works, somethingelse;
@@ -110,6 +111,7 @@ int main(int argc, char *argv[])
   fputs("Source\n", parsedFile);
   fputs("Azimuth\n", parsedFile);
   fputs("Elevation\n", parsedFile);
+  fputs("Airmass\n", parsedFile);
   fputs("Detector\n", parsedFile);
   fputs("IF Channel\n", parsedFile);
   fputs("Polarization\n", parsedFile);
@@ -128,7 +130,10 @@ int main(int argc, char *argv[])
   fputs("Assumed DPFU*Gain Curve\n", parsedFile);
   fputs("LO\n", parsedFile);
   fputs("SourceType\n", parsedFile);
-  fputs("Tau\n", parsedFile);
+  fputs("Trec\n", parsedFile);
+  fputs("Tspill\n", parsedFile);
+  fputs("Tsys-Tspill\n", parsedFile);
+  /*fputs("Tau\n", parsedFile);*/
   /*fputs("Tau0\n", parsedFile);*/
   fputs("*\n", parsedFile);
   
@@ -191,7 +196,7 @@ int main(int argc, char *argv[])
       
       strncpy(detector_array[detcount],detector,min(MAXDETECTORS,strlen(detector))+1);
       skyfreq_array[detcount] = skyfreq;
-      tcal_ass_array[detcount] = tcal_ass;
+      tcal_log_array[detcount] = tcal_ass;
       flux_ass_array[detcount] = flux_ass;
       dpfu_ass_array[detcount] = tcalk_over_jy_ass;
       gcurve_ass_array[detcount] = gcurve_ass;
@@ -277,13 +282,11 @@ int main(int argc, char *argv[])
       strncpy(source_array[valcount],source,min(MAXDETECTORS,strlen(source))+1);
       azimuth_array[valcount] = azimuth;
       elevation_array[valcount] = elevation;
+      airmass_array[valcount] = 1/sin(3.1415927/180*elevation);
       strncpy(ifchan_array[valcount],ifchan,min(MAXDETECTORS,strlen(ifchan))+1);
       strncpy(polarization_array[valcount],polarization,min(MAXDETECTORS,strlen(polarization))+1);
       gainc_array[valcount] = gainc;
       tsys_array[valcount] = tsys;
-      trec_array[valcount] = 10;
-      tspill_array[valcount] = 20;
-      tatm_array[valcount] = 273;
       if(tsys == BADVALUE || (tsys-trec_array[valcount]-tspill_array[valcount])/tatm_array[valcount] >= 1) {
 	tau_array[valcount] =  BADVALUE;
       } else {
@@ -294,13 +297,15 @@ int main(int argc, char *argv[])
       
       for (i=0; i<=detcount; i++) {
 	if(strcmp(detector,detector_array[i])==0) {
-	  float fwhm,dpfu,gain,tcal;
+	  float fwhm,dpfu,gain,tcal,trec,tspill;
 	  /*printf("%d %f %f\n",rxcount,LO_array[i],skyfreq_array[i]);*/
-	  get_gain_par2(&rxgain,MAXRX,LO_array[i],skyfreq_array[i],1.0,elevation_array[valcount],polarization_array[valcount][0],&fwhm,&dpfu,&gain,&tcal);
+	  get_gain_par2(&rxgain,MAXRX,LO_array[i],skyfreq_array[i],1.0,elevation_array[valcount],polarization_array[valcount][0],&fwhm,&dpfu,&gain,&tcal,&trec,&tspill);
 	  tcal_ass_array[i]=tcal;
+	  tsys_array[valcount]=tsys_array[valcount]*tcal/tcal_log_array[valcount];
 	  dpfu_ass_array[i]=dpfu;
 	  gcurve_ass_array[i]=gain;
-	  /*printf("Freq: %f LO: %f TCal: %f DPFU: %f Gain %f \n",skyfreq_array[i],LO_array[i],tcal,dpfu,gain);*/
+	  trec_array[i] = trec;
+	  tspill_array[i] = tspill;
 	  if(tcaljy_array[i]<=0 || tcal_ass_array[i]<=0) {
 	    tcalk_array[i]=BADVALUE;
 	    calratio_array[i]=BADVALUE;
@@ -314,6 +319,7 @@ int main(int argc, char *argv[])
 	  fprintf(parsedFile, "%s ", source_array[valcount]);
 	  fprintf(parsedFile, "%.1f ", azimuth_array[valcount]);
 	  fprintf(parsedFile, "%.1f ", elevation_array[valcount]);
+  	  fprintf(parsedFile, "%.2f ", airmass_array[valcount]);
 	  fprintf(parsedFile, "%s ", detector_array[i]);
 	  fprintf(parsedFile, "%s ", ifchan_array[valcount]);
 	  fprintf(parsedFile, "%s ", polarization_array[valcount]);
@@ -340,10 +346,10 @@ int main(int argc, char *argv[])
 	  fprintf(parsedFile, "%.4f ", dpfu_gcurve_ass_array[i]);
 	  fprintf(parsedFile, "%.1f ", LO_array[i]);
 	  fprintf(parsedFile, "%s ", sourcetype_array[i]);
-	  fprintf(parsedFile, "%.4f\n", tau_array[valcount]);
-	  /*  elev=3.1415927/180*elevation_array[valcount]; */
-/*  	  am=(1/(1+a/(1+b/(1+c))))/(1/(sin(elev)+a/(sin(elev)+b/(sin(elev)+c)))); */
-/*  	  fprintf(parsedFile, "%.4f\n ", tau_array[valcount]/am); */
+	  fprintf(parsedFile, "%.1f ", trec_array[i]);
+	  fprintf(parsedFile, "%.1f ", tspill_array[i]);
+	  fprintf(parsedFile, "%.2f\n", tsys_array[valcount]-tspill_array[i]);
+	  /*fprintf(parsedFile, "%.4f\n", tau_array[valcount]);*/
 	}
       }
       valcount++;
