@@ -21,14 +21,21 @@ struct cmd_ds *command;
 long ip[5];
 {
   char  output[MAX_OUT];
-  int i;
+  int i, ierr;
 
   strcpy(output,command->name);
   strcat(output,"/");
 
 
+  if(shm_addr->tacd.day_frac == 0.0 &&
+     shm_addr->tacd.day_frac_old == 0.0 &&
+     !strstr(shm_addr->tacd.oldnew,"time,OLD")) {
+    ierr=-9;
+  }
+
   if(!strcmp(command->argv[0],"status") ||
      !strcmp(command->argv[0],"?")) {
+    if (ierr==-9) goto error;
     sprintf(output+strlen(output),
 	    "status,%s,%d,%s,%s",
 	    shm_addr->tacd.hostpc,
@@ -36,13 +43,16 @@ long ip[5];
 	    shm_addr->tacd.file,
 	    shm_addr->tacd.status);
   } else if(!strcmp(command->argv[0],"stop")) {
+    if (ierr==-9) goto error;
     sprintf(output+strlen(output),
 	    "You have requested to stop checking the TAC.");
   } else if(!strcmp(command->argv[0],"single")) {
+    if (ierr==-9) goto error;
     sprintf(output+strlen(output),
 	    "Check the TAC every %d centisecs.",
 	    shm_addr->tacd.check);
   } else if(!strcmp(command->argv[0],"time")) {
+    if (ierr==-9) goto error;
     if(shm_addr->tacd.day_frac!=shm_addr->tacd.day_frac_old) {
       shm_addr->tacd.day_frac_old = shm_addr->tacd.day_frac;
       strcpy(shm_addr->tacd.oldnew,"time,NEW\0");
@@ -50,7 +60,7 @@ long ip[5];
       strcpy(shm_addr->tacd.oldnew,"time,OLD\0");
     }
     sprintf(output+strlen(output),
-	    "%s,%lf,%lf,%d,%d,%lf,%lf",
+	    "%s,%lf,%lf,%lf,%d,%lf,%lf",
 	    shm_addr->tacd.oldnew,
 	    shm_addr->tacd.day_frac,
 	    shm_addr->tacd.msec_counter,
@@ -60,6 +70,7 @@ long ip[5];
 	    shm_addr->tacd.cooked_correction,
 	    shm_addr->tacd.msec_counter);
   } else if(!strcmp(command->argv[0],"average")) {
+    if (ierr==-9) goto error;
     if(shm_addr->tacd.day_frac!=shm_addr->tacd.day_frac_old) {
       shm_addr->tacd.day_frac_old = shm_addr->tacd.day_frac;
       strcpy(shm_addr->tacd.oldnew,"average,NEW\0");
@@ -76,6 +87,7 @@ long ip[5];
 	    shm_addr->tacd.min,
 	    shm_addr->tacd.usec_average);
   } else if(!strcmp(command->argv[0],"cont")) {
+    if (ierr==-9) goto error;
     sprintf(output+strlen(output),"retrive data every second.");
   }
 
@@ -88,6 +100,7 @@ long ip[5];
 error:
       ip[0]=0;
       ip[1]=0;
-      memcpy(ip+3,"st",2);
+      ip[2]=ierr;
+      memcpy(ip+3,"ta",2);
       return;
 }
