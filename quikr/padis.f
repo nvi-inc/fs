@@ -77,6 +77,7 @@ C
           ic1 = nch 
           jc = 0
 C 
+          call fs_get_ifp2vc(ifp2vc)
           do  i = 1,14 
             if (iabs(ifp2vc(i)).eq.j) then
               nch = mcoma(ibuf2,nch)

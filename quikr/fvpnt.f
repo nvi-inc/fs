@@ -218,6 +218,7 @@ c  video channels
 c
 405     continue
         indvc = ia2hx(ldevfp,2)
+        call fs_get_ifp2vc(ifp2vc)
         ichain=iabs(ifp2vc(indvc))
         if(ichain.lt.1.or.ichain.gt.3) then
           ierr=-209
@@ -279,6 +280,7 @@ C  Now check the cal and freq values.
       if((rack.eq.and(rack,MK3)).or.(rack.eq.and(rack,MK4))) then
         if(cjchar(ldevfp,1).eq.'i') goto 504
         indvc = ia2hx(ldevfp,2)
+        call fs_get_freqvc(freqvc)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 504
 C             - VC MUST BE SETUP
           ierr = -303

@@ -22,6 +22,7 @@ C
       include '../include/fscom.i'
 C 
       kcorel = .false.
+      call fs_get_freqvc(freqvc)
       if (freqvc(ivc).ne.freqvc(ivc2)) goto 990 
       lsb1 = itr2vc(itrk,imodfm+1)
       lsb2 = itr2vc(itrkpc(itrk),imodfm+1)

@@ -23,10 +23,12 @@ C
       ivc = itr2vc(itrk,imodfm+1) 
       if (ivc.lt.0) lsb = 1 
       ivc = iabs(ivc) 
+      call fs_get_ifp2vc(ifp2vc)
       i1dex = iabs(ifp2vc(ivc)) 
       call fs_get_freqlo(rflo,i1dex-1)
       flo=rflo
       if(i1dex.eq.3.and.imixif3_fs.eq.1) flo=flo+freqif3_fs*0.01d0
+      call fs_get_freqvc(freqvc)
       fvc = freqvc(ivc)+5.d-3 
       fvc = fvc*100.d0
       fvc = (aint(fvc))/100.d0 

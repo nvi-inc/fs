@@ -37,6 +37,7 @@ C
       dlyab = phasea-phaseb 
       if (dlyab.lt.-180.) dlyab = 360.+dlyab
       if (dlyab.gt.180.) dlyab = 360.-dlyab 
+      call fs_get_freqvc(freqvc)
       dlyab = abs(dlyab/(freqvc(ivc)-freqvc(ivc2))) 
 990   continue
 C 

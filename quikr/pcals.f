@@ -308,6 +308,7 @@ C
 312   continue
       call fs_get_inp1if(inp1if)
       call fs_get_inp2if(inp2if)
+      call fs_get_ifp2vc(ifp2vc)
       do 305 i = 1,14 
           i1dex(i) = iabs(ifp2vc(i))
           if (i1dex(i).eq.1) i2dex(i) = inp1if+1
@@ -331,6 +332,7 @@ C                Check if we have already done this LO
 C                 Remember this LO if it is new 
 306       ivcmin = i
           ivcmax = i
+          call fs_get_freqvc(freqvc)
           do 307 ij = i+1,14
               if (i1dex(i).ne.i1dex(ij).or.i2dex(i).ne.i2dex(ij)) 
      .              goto 307
