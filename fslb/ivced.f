@@ -68,10 +68,10 @@ C
 201   continue
       if (ic1+5.gt.ic2) return
       call fs_get_rack(rack)
-      if (rack.eq.MK4) then
-        ivced = ic1 + ir2as(bw4(index+1),ias,ic1,6,3)
-      else
+      if (rack.eq.MK3) then
         ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
+      else
+        ivced = ic1 + ir2as(bw4(index+1),ias,ic1,6,3)
       endif
       if(index.eq.0.and.extbw.ge.0.0) then
          ivced=ichmv_ch(ias,ivced,"(")
@@ -120,13 +120,13 @@ C
       endif
       if (ierr.ne.0) return 
       call fs_get_rack(rack)
-      if (rack.eq.MK4) then
+      if (rack.eq.MK3) then
         do 3010 i=1,nbw 
-          if (val.eq.bw4(i)) index = i-1 
+          if (val.eq.bw(i)) index = i-1 
 3010      continue
       else
         do 3011 i=1,nbw 
-          if (val.eq.bw(i)) index = i-1 
+          if (val.eq.bw4(i)) index = i-1 
 3011      continue
       endif
       if(index.eq.0.and.ilp.ne.0) then

@@ -1,3 +1,6 @@
+define  exper_initi   00000000000
+sched_initi
+enddef
 define  sched_initi   00000000000
 enddef
 define  bbcagc        00000000000

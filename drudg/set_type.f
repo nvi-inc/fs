@@ -1,5 +1,6 @@
       subroutine set_type(istn,km3rack,km4rack,kvrack,kv4rack,
-     .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
+     .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,klrack,
+     .k8bbc,
      .km3rec,km4rec,kvrec,
      .kv4rec,ks2rec,kk41rec,kk42rec,km5rec)
 C
@@ -12,11 +13,14 @@ C 991205 nrv Correct spelling of 8-BBC rack names. Remove VLBAG.
 C 991214 nrv Add kkfmk4rack for K3 formatters
 C 000329 nrv VLBAG rack same as VLBA
 C 020923 nrv Add Mark5 recorders.
+C 021111 jfq Add LBA racks.
+C 2003Apr17 JMG Added Mark5P.
+
 
 C Input
       integer istn
 C Output
-      logical km3rack,km4rack,kvrack,kv4rack,
+      logical km3rack,km4rack,kvrack,kv4rack,klrack,
      .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
      .km3rec(2),km4rec(2),kvrec(2),km5rec(2),
      .kv4rec(2),ks2rec(2),kk41rec(2),kk42rec(2)
@@ -34,6 +38,7 @@ C  LOCAL:
       kk42rack=.false.
       km4fmk4rack=.false.
       kk3fmk4rack=.false.
+      klrack=.false.
       km3rec(1)=.false.
       km3rec(2)=.false.
       km4rec(1)=.false.
@@ -69,8 +74,14 @@ C This is for Mark4
       km4rec(1)  = ichcm_ch(lstrec(1,istn),1,'Mark4').eq.0 
       km4rec(2)  = ichcm_ch(lstrec2(1,istn),1,'Mark4').eq.0 
 C Mark5 recorders
-      km5rec(1)  = ichcm_ch(lstrec(1,istn),1,'Mark5').eq.0 
-      km5rec(2)  = ichcm_ch(lstrec2(1,istn),1,'Mark5').eq.0 
+      km5rec(1)  = ichcm_ch(lstrec(1,istn),1,'Mark5').eq.0
+     >             .and. ilrec(1) .eq. 5
+      km5rec(2)  = ichcm_ch(lstrec2(1,istn),1,'Mark5').eq.0
+     >             .and. ilrec2(1) .eq. 5
+C Mark5p recorders
+      km5prec(1)  = ichcm_ch(lstrec(1,istn),1,'Mark5p').eq.0
+      km5prec(2)  = ichcm_ch(lstrec2(1,istn),1,'Mark5p').eq.0
+
 C K4 recorders
       kk41rec(1)  = ichcm_ch(lstrec(1,istn),1,'K4-1').eq.0 
       kk41rec(2)  = ichcm_ch(lstrec2(1,istn),1,'K4-1').eq.0 
@@ -93,6 +104,7 @@ C Racks
      .              ichcm_ch(lstrack(1,istn),5,'/M4').eq.0 
       kk3fmk4rack = ichcm_ch(lstrack(1,istn),1,'K4-').eq.0.and.
      .              ichcm_ch(lstrack(1,istn),5,'/K3').eq.0 
+      klrack = ichcm_ch(lstrack(1,istn),1,'LBA').eq.0 
 
       return
       end

@@ -39,11 +39,20 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
     if(itim>0)
       rte_sleep(itim);
 
-    if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+    if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
       if(tpi_mark(ip,itpis,ierr))
 	return -1;
     } else if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
       tpi_vlba(ip,itpis,1);
+      if(ip[2]<0) {
+	if(ip[1]!=0)
+	  cls_clr(ip[0]);
+	logita(NULL,ip[2],ip+3,ip+4);
+	*ierr=-16;
+	return -1;
+      }
+    } else if(shm_addr->equip.rack==LBA) {
+      tpi_lba(ip,itpis,1);
       if(ip[2]<0) {
 	if(ip[1]!=0)
 	  cls_clr(ip[0]);
@@ -58,7 +67,7 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
     if(stm < rut)
       stm+=86400.0;
 
-    if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+    if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
       tpget_mark(ip,itpis,tpi);
       for(j=0;j<17;j++)
 	if(itpis[j]!=0) {
@@ -66,6 +75,13 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
 	}
     } else if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
       if(tpget_vlba(ip,itpis,ierr,tpi))
+	 return -1;
+      for(j=0;j<MAX_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=tpi[j];
+	}
+    } else if(shm_addr->equip.rack==LBA) {
+      if(tpget_lba(ip,itpis,ierr,tpi))
 	 return -1;
       for(j=0;j<MAX_DET;j++)
 	if(itpis[j]!=0) {

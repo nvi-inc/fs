@@ -26,9 +26,9 @@ C     NC - character position in LNAM
 C     IC2 - 2nd character of mnemonic 
 C 
 C  CONSTANTS: 
-      character*9 cistcr
+      character*10 cistcr
 C 
-      data cistcr /'aoeftivbr'/
+      data cistcr /'aoeftivbrp'/
 C          - legal decimal values for 1st character of module name
 C 
 C  DATE  WHO  CHANGES 
@@ -40,11 +40,11 @@ C  Initialize and transfer control based on first character of module name
       cicr = ' '
       call hol2char(lnam,ifc,ilc,cicr)
 
-      do i=1,9
+      do i=1,10
         if (cicr(1:1).eq.cistcr(i:i)) goto 105 
       enddo
       goto 900 
-105   goto (110,120,130,140,150,160,170,180,190) i 
+105   goto (110,120,130,140,150,160,170,180,190,200) i 
 
 C  Handle ALL, ODD, EVEN
 
@@ -71,7 +71,7 @@ C  Handle formatter or tape
       endif
       goto 900 
 
-C  Handle IFD's 
+C  Handle IFD's
 
 160   continue
 
@@ -92,6 +92,81 @@ C  look for VLBA mnemonics
         nc=4
 166   if (cicr(nc:nc).eq.'a') call char2hol('ia',mdnam,1,2)
       if (cicr(nc:nc).eq.'c') call char2hol('ic',mdnam,1,2)
+
+C  look for LBA mnemonics
+
+      if (cicr(1:3).eq.'ifp') then    !!! IFP
+        if (cicr(4:4).eq.'0') then    !!! IFPnn
+           if ((cicr(5:5).ge.'1').and.(cicr(5:5).le.'9').and.
+     .         (cicr(6:6).eq.' ')) then
+             call char2hol(cicr(3:3),mdnam,1,1)
+             call char2hol(cicr(5:5),mdnam,2,2)
+             goto 900
+           else
+             goto 900
+           endif
+        else if ((cicr(4:4).eq.'1').and.(cicr(5:5).ge.'0').and.
+     .                                  (cicr(5:5).le.'6')) then
+          call char2hol(cicr(5:5),ic2,1,1)
+          ic2=ic2+49
+          call hol2char(ic2,1,1,cic2)
+          if (cicr(6:6).eq.' ') then
+            call char2hol(cicr(3:3),mdnam,1,1)
+            call char2hol(cic2,mdnam,2,2)
+            goto 900
+          else
+            goto 900
+          endif
+        else if ((cicr(4:4).ge.'1').and.(cicr(4:4).le.'9').or.
+     .           (cicr(4:4).ge.'a').and.(cicr(4:4).le.'g')) then
+C   !!! IFPn
+          if (cicr(5:5).eq.' ') then
+            call char2hol(cicr(3:3),mdnam,1,1)
+            call char2hol(cicr(4:4),mdnam,2,2)
+            goto 900
+          else
+            goto 900
+          endif
+        endif
+      else if (cicr(1:2).eq.'ip') then    !!! IP
+        if (cicr(3:3).eq.'0') then    !!! IPnn
+          if ((cicr(4:4).ge.'1').and.(cicr(4:4).le.'9')) then
+            if (cicr(5:5).eq.' ') then
+              call char2hol(cicr(2:2),mdnam,1,1)
+              call char2hol(cicr(4:4),mdnam,2,2)
+              goto 900
+            else
+              goto 900
+            endif
+          else
+            goto 900
+          endif
+        else if ((cicr(3:3).eq.'1').and.((cicr(4:4).ge.'0').and.
+     .                                   (cicr(4:4).le.'6'))) then
+          call char2hol(cicr(4:4),ic2,1,1)
+          ic2=ic2+49
+          call hol2char(ic2,1,1,cic2)
+          if (cicr(5:5).eq.' ') then
+            call char2hol(cicr(2:2),mdnam,1,1)
+            call char2hol(cic2,mdnam,2,2)
+            goto 900
+          else
+            goto 900
+          endif
+        else if (((cicr(3:3).ge.'1').and.(cicr(3:3).le.'9')).or.
+     .           ((cicr(3:3).ge.'a').and.(cicr(3:3).le.'g'))) then
+C    !!! IPn
+          if (cicr(4:4).eq.' ') then
+            call char2hol(cicr(2:2),mdnam,1,1)
+            call char2hol(cicr(3:3),mdnam,2,2)
+            goto 900
+          else
+            goto 900
+          endif
+        else
+          goto 900
+        endif
+      endif
 
       goto 900 
 
@@ -242,6 +317,17 @@ C  Check for recorder
          call char2hol('r2',mdnam,1,2)
       endif
       goto 900 
+
+C  Check for IF processors Pn
+
+200   continue
+
+      if (cicr(3:3).eq.' ') then
+        if ((cicr(2:2).ge.'1'.and.cicr(2:2).le.'9').or.(cicr(2:2).ge.'a'
+     ..and.cicr(2:2).le.'g')) call ichmv(mdnam,1,lnam(1),1,2)
+        goto 900 
+      endif
+      goto 900
 
 C  Return to calling routine
 

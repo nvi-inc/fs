@@ -1,21 +1,21 @@
                  mk5 - Low-level Mark V interface
- 
-              Syntax:      mk5=command,...
- 
-              Response:    mk5/response,...
- 
- 
- Settable parameters:
-            command    low-level Mark 5 command or query
- 
- Monitor-only parameters:
-                response       response from the Mark 5.
- 
- 
- Comments:
- Multiple commands  can be sent with one mk5 command by
- separating them with commas. The responses for each command are
- separated by commas.
- 
- Please refer to the Mark V command sent document for details
- on available commands and their responses. 
+
+            Syntax:     mk5=command,...
+
+            Response:   mk5/response,...
+
+
+Settable parameters:
+            command     low-level Mark 5 command or query
+
+Monitor-only parameters:
+              response      response from the Mark 5.
+
+
+Comments:
+Multiple commands  can be sent with one mk5 command by
+separating them with commas. The responses for each command are
+separated by commas.
+
+Please refer to the Mark V command sent document for details
+on available commands and their responses.

@@ -23,6 +23,7 @@ C
 C 3.  LOCAL VARIABLES 
       dimension itpis(17) 
       integer itpis_vlba(32) 
+      integer itpis_lba(2*MAX_DAS) 
       integer itpis_norack(2)
 C      - which TPIs to read back, filled in by TPLIS
 C        ICH    - character counter 
@@ -58,10 +59,12 @@ C
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
 
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tplis(ip,itpis)
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
+      else if (LBA.eq.rack) then
+        call tplisl(ip,itpis_lba)
       else
         call tplisn(ip,itpis_norack)
       endif
@@ -80,7 +83,7 @@ C
 C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
-      if(MK3.eq.rack.or.MK4.eq.rack) then
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          do i=1,17 
             if (itpis(i).ne.0) then
                j = i+14
@@ -181,6 +184,9 @@ C
 C     
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tsys_vlba(ip,itpis_vlba,ibuf,nch,nsub)
+        return
+      else if (LBA.eq.rack) then
+        call fc_tsys_lba(ip,itpis_lba,ibuf,nch,nsub)
         return
       else
         call fc_tsys_norack(itpis_norack,ibuf,nch, caltmp(indtmp))

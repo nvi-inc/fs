@@ -25,7 +25,9 @@ reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o mk5.o mk5_dis.o sd.o\
 sd_dis.o ed.o ed_dis.o pd.o pd_dis.o disc_serial.o disc_serial_dis.o\
 disc_check.o disc_check_dis.o data_check_pos.o mk5relink.o mk5close.o\
 rollform.o rollform_dis.o tpicd.o tpicd_dis.o onoff.o onoff_dis.o calrx.o\
-calrx_dis.o
+calrx_dis.o ds.o ds_dis.o lba_cor.o lba_cor_dis.o lba_ft.o lba_ft_dis.o\
+lba_ifp.o lba_ifp_dis.o lba_mon.o lba_mon_dis.o lba_trkfrm.o lba_trkfrm_dis.o\
+bank_check.o bank_check_dis.o rtime_decode.o bank_inc_check.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

@@ -41,6 +41,8 @@ C     1. If we have a class buffer, then we are to set the IFD.
 C     If no class buffer, we have been requested to read the IFD. 
 C 
       kfirst=.true.
+      kdef(1)=.false.
+      kdef(2)=.false.
       ichold = -99
       iclcm = ip(1) 
       if (iclcm.eq.0) then
@@ -79,7 +81,6 @@ C     2.1 ATTEN1 AND ATTEN2, PARAMETERS 1 AND 2
 C
       ich = 1+ieq
       do i=1,2
-        kdef(i)=.false.
         ist = ich
         call gtprm2(ibuf,ich,nchar,0,parm,ierr)
         if(ichcm_ch(iparm,1,'max').eq.0) then

@@ -15,6 +15,7 @@
 
 static char chanm[] = "0123";
 static char chanv[] = "0abcd";
+static char chanl[] = "01234";
 static char hex[]= "0123456789abcdef";
 static char det[] = "dlu34567";
 static char *lwhat[ ]={
@@ -37,6 +38,20 @@ static char *lmarkb[ ]={
 static char *lmarkc[ ]={
   "vc1","vc2","vc3","vc4","vc5","vc6","vc7","vc8","vc9","vc10","vc11","vc12",
   "vc13","vc14","if1","if2","if3"};
+
+static char *lmarkl[ ]={
+  "p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe"};
+
+static char *lmarkla[ ]={
+  "p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12","p13","p14"};
+
+static char *lmarklb[ ]={
+  "ifp1","ifp2","ifp3","ifp4","ifp5","ifp6","ifp7","ifp8","ifp9",
+  "ifpa","ifpb","ifpc","ifpd","ifpe"};
+
+static char *lmarklc[ ]={
+  "ifp1","ifp2","ifp3","ifp4","ifp5","ifp6","ifp7","ifp8","ifp9",
+  "ifp10","ifp11","ifp12","ifp13","ifp14"};
 
 int onoff_dec(lcl,count,ptr)
 struct onoff_cmd *lcl;
@@ -103,14 +118,18 @@ char *ptr;
       if(strcmp(ptr,"*")==0) {
 	for (i=0;i<14;i++)
 	  lcl->itpis[i]=itpis_save[i];
-      } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+      } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	if(strcmp(ptr,"allvc")==0) {
-	  for (i=0;i<14;i++)
+	  for (i=0;i<14;i++) {
 	    lcl->itpis[i]=1;
+	    strncpy(lcl->devices[i].lwhat,lmark[i],2);
+	  }
 	  goto done;
 	} else if(strcmp(ptr,"all")==0) {
-	  for (i=0;i<17;i++)
+	  for (i=0;i<17;i++) {
 	    lcl->itpis[i]=1;
+	    strncpy(lcl->devices[i].lwhat,lmark[i],2);
+	  }
 	  goto done;
 	} else { 
 	  for(i=0;i<sizeof(lmark)/sizeof(char *);i++) {
@@ -166,6 +185,25 @@ char *ptr;
 	}
 	ierr=-206;
 	return ierr;
+      } else if(shm_addr->equip.rack==LBA) {
+	if(strcmp(ptr,"allifp")==0||strcmp(ptr,"all")==0) {
+	  for (i=0;i<2*shm_addr->n_das;i++) {
+	    lcl->itpis[i]=1;
+            strncpy(lcl->devices[i].lwhat,lmarkl[i],2);
+          }
+	  goto done;
+	} else { 
+	  for(i=0;i<sizeof(lmarkl)/sizeof(char *);i++) {
+	    if(strcmp(ptr,lmarkl[i])==0||strcmp(ptr,lmarkla[i])==0
+	       ||strcmp(ptr,lmarklb[i])==0||strcmp(ptr,lmarklc[i])==0) {
+	      lcl->itpis[i]=1;
+	      strncpy(lcl->devices[i].lwhat,lmarkl[i],2);
+	      goto done;
+	    }
+	  }
+	  ierr=-206;
+	  return ierr;
+	}
       }
 
     }

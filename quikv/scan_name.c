@@ -26,7 +26,12 @@ long ip[5];                           /* ipc parameters */
 
 	strcpy(output,command->name);
 	strcat(output,"/");
-	strcat(output,shm_addr->scan_name);
+	strcat(output,shm_addr->scan_name.name);
+	strcat(output,",");
+	strcat(output,shm_addr->scan_name.session);
+	strcat(output,",");
+	if(shm_addr->scan_name.duration > 0)
+	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.duration);
 	for (i=0;i<5;i++) ip[i]=0;
 	cls_snd(&ip[0],output,strlen(output),0,0);
 	ip[1]++;
@@ -37,14 +42,37 @@ long ip[5];                           /* ipc parameters */
       } else if (strcmp(command->argv[0],"*")==0) {
 	ierr=-301;
 	goto error;
-      } else if (strlen(command->argv[0])>sizeof(shm_addr->scan_name)-1) {
+      } else if (strlen(command->argv[0])>sizeof(shm_addr->scan_name.name)-1) {
 	ierr=-201;
 	goto error;
       }
-      strcpy(shm_addr->scan_name,command->argv[0]);
+      strcpy(shm_addr->scan_name.name,command->argv[0]);
+
+      if (command->argv[0]==NULL||command->argv[1]==NULL) {
+	shm_addr->scan_name.session[0]=0;
+      } else if (strcmp(command->argv[1],"*")==0) {
+	ierr=-302;
+	goto error;
+      } else if (strlen(command->argv[1])>
+		 sizeof(shm_addr->scan_name.session)-1) {
+	ierr=-202;
+	goto error;
+      } else
+	strcpy(shm_addr->scan_name.session,command->argv[1]);
+
+      if (command->argv[0]==NULL||command->argv[1]==NULL||
+	  command->argv[2]==NULL) {
+	shm_addr->scan_name.duration=-1;
+      } else if (strcmp(command->argv[2],"*")==0) {
+	ierr=-303;
+	goto error;
+      } else if (1!=
+		 sscanf(command->argv[2],"%ld",&shm_addr->scan_name.duration)){
+	ierr=-203;
+	goto error;
+      }
 	
 /* all parameters parsed okay, update common */
-
       
       ip[0]=ip[1]=ierr=0;
       return;

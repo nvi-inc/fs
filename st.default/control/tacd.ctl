@@ -2,5 +2,5 @@
 *
 * NO commas allowed as delimiters - just spaces.
 *
-* host             port  interval
-*tac.ggao.nasa.gov 32325 1000
+* host             port 
+*tac.ggao.nasa.gov 32325

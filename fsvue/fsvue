@@ -6,12 +6,12 @@
 # Window manager configurations
 
 # Use a small font for help all the time.
-  set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
   set ICONDIR /usr2/fs/fsvue/images
   set FSDIR /usr2/fs
   set BINDIR /usr2/fs/bin
   set LIBDIR /usr2/fs/fsvue/lib
+  set LIBDEF /usr2/fs/fsvue/def_lib
   set LOGDIR /usr2/log
 
   set vieX [winfo screenwidth .]
@@ -34,14 +34,22 @@
 
   global inpipe stopscroll
 
+
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-#      set newfile_filename [lindex $argv 1]
-      set fontsize "L"
+  if {$argv=="D"} {
+      exec $LIBDEF/fsvue &; exit
+  } elseif {$argv=="F"} {
+      set bfont [exec $LIBDIR/vue_sysfonts {}]
+      set fontsize $bfont
+      set ibfont [open $LIBDIR/my_font w+]
+      puts $ibfont $bfont
+      catch {close $ibfont}
   } else { 
-      set bfont {9x15} 
-      set fontsize "S"
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+#      set newfile_filename [lindex $argv 1]
+      set fontsize $bfont
+      catch {close $ibfont}
   }
 
   # Use an associative array to store keys and commands
@@ -94,15 +102,9 @@ frame .m \
 # two buttons in the menu giving dropdown menus
 menubutton .m.file -text "File" -relief {raise} -font $bfont -menu .m.file.menu -background navy -fg white
 
-#menubutton .m.ss -text "Scrolling" -relief {raise} -font $bfont -menu .m.ss.menu -background navy -fg white
-
 menubutton .m.dsp -text "Displays" -relief {raise} -font $bfont -menu .m.dsp.menu -background navy -fg white
 
 menubutton .m.cmd -text "Execute" -relief {raise} -font $bfont -menu .m.cmd.menu -background navy -fg white
-
-#button .m.logm -text "Log" -relief {raise} -font $bfont \
-	-background navy -fg white \
-	-command {fileselection_dialog}
 
 button .m.fshelp -text "Field System HELP" -relief {raise} -font $bfont -background navy -fg white -command {exec $LIBDIR/vue_fshelp $fontsize &}
 
@@ -155,7 +157,6 @@ proc displayWin { } {
     label .m1.val06 -font $bfont -textvariable val06 -background white -fg black
     label .m1.val07 -font $bfont -textvariable val07 -background white -fg black
     label .m1.val08 -font $bfont -textvariable val08 -background white -fg black
-
     pack .m1 -side left  -fill both
     pack .m1.txt05
     pack .m1.val06 -fill both
@@ -192,15 +193,10 @@ menu .m.file.menu  -background blue -fg white
 .m.file.menu add command -label Load -font $bfont -command LoadFile
 .m.file.menu add command -label Save -font $bfont -command SaveFile
 
-#menu .m.ss.menu  -background blue -fg white
-#.m.ss.menu add command -label Stop -font $bfont -command sscroll
-#.m.ss.menu add command -label Continue -font $bfont -command qscroll
-
 menu .m.dsp.menu -background blue -fg white
 .m.dsp.menu add command -label General -font $bfont -command {DSPit monit2}
 .m.dsp.menu add command -label Time -font $bfont -command {DSPit monit1}
 .m.dsp.menu add command -label Tsys -font $bfont -command {DSPit monit3}
-#.m.dsp.menu add command -label Errors -font $bfont -command {DSPit errchk}
 .m.dsp.menu add command -label Weather -font $bfont -command {exec $LIBDIR/vue_fswx $fontsize &}
 
 # Help menu
@@ -769,7 +765,7 @@ The Help Menu prints Help.}
 # ---------------------------------------------------------------------------
 #
 proc tk_dialog {w title text bitmap default args} {
-    global tk_priv bfont2
+    global tk_priv bfont
 
     # 1. Create the top-level window and divide it into top
     # and bottom parts.
@@ -787,7 +783,7 @@ proc tk_dialog {w title text bitmap default args} {
 
     # 2. Fill the top part with bitmap and message.
 
-    message $w.msg -width 8i -text $text -font $bfont2
+    message $w.msg -width 8i -text $text -font $bfont
     pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
     if {$bitmap != ""} {
         label $w.bitmap -bitmap $bitmap
@@ -869,4 +865,3 @@ proc fileselection_dialog {} {
       AnotherLog 
  }
 }
-

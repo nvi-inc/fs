@@ -4,9 +4,11 @@
 # Product of Raymond Gonzalez for NVI,Inc./GSFC (2000)
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
+
+# fsvue directories
   set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
 # Use this size of fonts for the information icon, or help.
-  set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
   global tkVersion
   wm positionfrom . user
@@ -30,13 +32,16 @@ set newfile_filename ""
 set current_filename ""               ;# The selected log file
 set current_DefaultDir /usr2/log      ;# Default directory for FS log files
 
-set newfile_filename [lindex $argv 1]
 
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-  } else { 
-      set bfont {9x15}
+  if {$argc<=1} {
+      set newfile_filename [lindex $argv 0]
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+      set newfile_filename [lindex $argv 1]
   }  
 
 # Top frame is a menubar
@@ -120,12 +125,12 @@ proc loadcalling file {
     }
 
     # Mark error messages.
-    #forAllMatches .t "ERROR" {
-    #    .t tag add big first last
-    #}
-    #.t tag configure big -background Red -foreground white -borderwidth 2 \
-    #        -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
-    #        -relief sunken
+    forAllMatches .t "ERROR" {
+        .t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+            -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+            -relief sunken
     close $f
     .t2 delete 1.0 end
     .t2 insert end "You are now viewing $newfile_filename"
@@ -392,7 +397,7 @@ data: The error or entry field.
 #               bottom of the dialog box.
 
 proc tk_dialog {w title text bitmap default args} {
-    global tk_priv bfont2
+    global tk_priv bfont
 
     set ICONDIR /usr2/fs/fsvue/images
     # 1. Create the top-level window and divide it into top
@@ -411,7 +416,7 @@ proc tk_dialog {w title text bitmap default args} {
 
     # 2. Fill the top part with bitmap and message.
 
-    message $w.msg -width 8i -text $text -font $bfont2
+    message $w.msg -width 8i -text $text -font $bfont
     pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
     if {$bitmap != ""} {
         label $w.bitmap -bitmap $bitmap

@@ -38,7 +38,7 @@ C LOCAL:
       character*256 cbuf
       integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
      .idummy,inext,isatl,ifunc,nstnx
-      integer iflch,ichmv_ch,ichmv,ichcm,ichcm_ch ! functions
+      integer ichmv_ch,ichmv,ichcm,ichcm_ch ! functions
       integer nch1,nch2,nch3,iserr(max_stn)
       data heqb/2h= /
 C
@@ -182,14 +182,14 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '021022'
+      cversion = '030501'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-C     iVerMajor_FS = 02
-C     iVerMinor_FS = 02
-C     iVerPatch_FS = 13
+C      iVerMajor_FS = 02
+C      iVerMinor_FS = 02
+C      iVerPatch_FS = 13
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -304,7 +304,7 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,9020) cversion
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV ',a6,')')
+     .  '(NRV & JMGipson ',a6,')')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -396,17 +396,18 @@ C
         CALL SREAD(IERR,ivexnum)
         IF (IERR.NE.0) goto 201
 
-        if (kgeo)
-     .  write(luscn,"(' This is a geodetic schedule.')")
-        if (.not.kgeo)
-     .  write(luscn,"(' This is an astro schedule.')")
-        if (kvex)
-     .  write(luscn,"(' This is a VEX format schedule file.')")
-        if (.not.kvex)
-     .  write(luscn,"(' This is a standard format (non-VEX) schedule ',
-     .  'file.')")
+        if (kgeo) then
+          write(luscn,'(a)') ' This is a geodetic schedule.'
+        else
+          write(luscn,'(a)') ' This is an astronomy schedule.'
+        endif
+        if(kvex) then
+          write(luscn,'(a)') ' This is a VEX format schedule file.'
+        else
+          write(luscn,'(a)')' This is a standard non-Vex schedule file.'
+        endif
         if (kdrgfile)
-     .  write(luscn,"(' This is a .drg schedule file.')")
+     >    write(luscn,"(' This is a .drg schedule file.')")
         if (itearl(1).gt.0) then
           write(luscn,9301) itearl(1)
 9301        format(' NOTE: This schedule was created using early '
@@ -561,8 +562,8 @@ C*******************************************************************
 C       else ! get one station's obs
           call vob1inp(ivexnum,istn,luscn,ierr,iret,nobs_stn)
           if (ierr.ne.0) then
-            write(luscn,'("FDRUDG02 - Error from vob1inp=",
-     .      i5,", iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
+            write(luscn,'("FDRUDG02 - Error from vob1inp=",i5,",
+     >       iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
             call errormsg(iret,ierr,'SCHED',luscn)
           else
             write(luscn,'("  Number of scans for this station: ",i5)') 
@@ -700,12 +701,9 @@ C  Write warning messages if control file and schedule do not agree.
               write(luscn,9275)
 9275          FORMAT(' 51 = Print notes file (.TXT)') 
             endif ! .drg/.skd
-            write(luscn,9373)
-9373        format(
-C    .      ' 0 = Done with DRUDG                   ',
-     .      ' 0 = Done with DRUDG '/
-     .      '20 = Make fake lvex '/
-     .      ' ? ',$)
+            write(luscn,'(a)') ' 0 = Done with DRUDG '
+!            write(luscn,'(a)') '20 = Make fake lvex  '
+            write(luscn,'(a, $)') ' ?'
 C         endif ! known/unknown equipment
         else ! SNAP file
         l=trimlen(cexpna)
@@ -757,8 +755,8 @@ C    .      ' 11 = Show/set equipment type')
      .   ifunc.ne.51.and.
      .   ifunc.ne.61))) goto 700 ! snp file not schedule
       if (ifunc.eq.6.and.clabtyp.eq.' ') then
-        write(luscn,'("Unknown label printer type in the",
-     .  " control file.")')
+        write(luscn,'(a)')
+     >   "Unknown label printer type in the control file."
         goto 700
       endif
 

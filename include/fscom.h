@@ -38,6 +38,8 @@ typedef struct fscom {
 	float tempwx;
 	float humiwx;
 	float preswx;
+        float speedwx;
+        int directionwx;
 	float ep1950;
         float epoch;
 	float cablev;
@@ -103,6 +105,8 @@ typedef struct fscom {
 	  long rc_ld_tm[2];
 	  struct s2rec_check s2rec;
 	  struct k4rec_check k4rec;
+	  int ifp[2*MAX_DAS];
+	  long ifp_time[2*MAX_DAS];
         } check;
         char stcnm[4][2];
         int  stchk[4];
@@ -120,6 +124,7 @@ typedef struct fscom {
            int drive[2];
 	   int drive_type[2];
 	   int rack_type;
+	   int wx_met;
         } equip; 
 
         int klvdt_fs[2];
@@ -218,7 +223,7 @@ typedef struct fscom {
 	int rdhd_fs[2];
         int knewtape[2];
         int ihdmndel[2];
-        char scan_name[17];
+        struct scan_name_cmd scan_name;
         struct tacd_shm tacd;
 /*        struct ifatt_shm ifatt; This will be used in the future.*/
         int iat1if;
@@ -249,4 +254,19 @@ typedef struct fscom {
   float caltemps[ MAX_DET];
   struct calrx_cmd calrx;
 
+       int ibds;
+       char ds_dev[64];
+       unsigned char n_das;		/* No of installed LBA DAS */
+       unsigned char lba_image_reject_filters;	/* Station default setting */
+       enum bits lba_digital_input_format;	/* Station default setting */
+       struct das das[MAX_DAS];	/* Up to MAX_DAS LBA DASs allowed */
+       unsigned long ifp_tpi[2*MAX_DAS];
+       unsigned char m_das;		/* Current DAS in Monit4 */
+
+  char mk5vsn[33];
+  long mk5vsn_logchg;
+  long logchg;
 } Fscom;
+
+
+

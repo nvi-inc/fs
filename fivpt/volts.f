@@ -69,6 +69,11 @@ C
       if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id=-1
         goto 11
+      else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
+c       do nothing
+      else if(LBA.eq.rack) then
+        id=-1
+        goto 11
       endif
 c
 c  check M3 devices
@@ -136,15 +141,17 @@ C
            endif
         else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
            call mcbcn(dtpi,ierr)
-        else
+        else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
            call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
+        else if(LBA.eq.rack) then
+           call dscon(dtpi,ierr)
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 
 C 
 C      CONVERT TO COUNTS
 C 
-        if(VLBA.ne.rack.and.VLBA4.ne.rack.and..not.kst) then
+        if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
           if (id.ge.17) dtpi=float(ia22h(indata(2)))*256.0+ 
      +                       float(ia22h(indata(3)))
           if (id.lt.17) dtpi=float(ia22h(indata(4)))*256.0+ 

@@ -28,6 +28,7 @@
 #define HORAZ_N  4*MAX_HOR
 #define HOREL_N  4*MAX_HOR
 #define CWRAP_N 8
+#define IDEVDS_N 64
 
 extern struct fscom *shm_addr;
 
@@ -214,6 +215,30 @@ void fs_get_preswx__(preswx)
 	{
 	  *preswx = shm_addr->preswx;
 	}
+
+void fs_set_speedwx__(speedwx)
+        float *speedwx;
+        {
+          shm_addr->speedwx = *speedwx;
+        }
+
+void fs_get_speedwx__(speedwx)
+        float *speedwx;
+        {
+          *speedwx = shm_addr->speedwx;
+        }
+
+void fs_set_directionwx__(directionwx)
+        int *directionwx;
+        {
+          shm_addr->directionwx = *directionwx;
+        }
+
+void fs_get_directionwx__(directionwx)
+        int *directionwx;
+        {
+          *directionwx = shm_addr->directionwx;
+        }
 
 void fs_set_ep1950__(ep1950)
 	float *ep1950;
@@ -1403,6 +1428,18 @@ void fs_get_drive_type__(drive_type)
 	  drive_type[1] = shm_addr->equip.drive_type[1];
 	}
 
+void fs_set_met__(wx_met)
+        int *wx_met;
+        {
+          shm_addr->equip.wx_met = *wx_met;
+        }
+
+void fs_get_met__(wx_met)
+        int *wx_met;
+        {
+          *wx_met = shm_addr->equip.wx_met;
+        }
+
 void fs_set_iskdtpsd__(iskdtpsd,i)
 	int *iskdtpsd,*i;
 	{
@@ -2132,3 +2169,109 @@ void fs_get_ipcalif3__(ipcalif3)
 	{
 	  *ipcalif3=shm_addr->ipcalif3;
 	}
+
+void fs_set_ibds__(ibds)
+	int *ibds;
+	{
+	  shm_addr->ibds = *ibds;
+	}
+
+void fs_get_ibds__(ibds)
+	int *ibds;
+	{
+	  *ibds = shm_addr->ibds;
+	}
+
+void fs_set_idevds__(idevds)
+	char *idevds;
+	{
+	  size_t N;
+	  N = IDEVDS_N;
+	  memcpy(shm_addr->ds_dev,idevds,N);
+	}
+
+void fs_get_idevds__(idevds)
+	char *idevds;
+ 	{
+	  size_t N;
+	  N = IDEVDS_N;
+	  memcpy(idevds,shm_addr->ds_dev,N);
+	}
+
+void fs_set_ndas__(ndas)
+	int *ndas;
+	{
+	  shm_addr->n_das = *ndas;
+	}
+
+void fs_get_ndas__(ndas)
+	int *ndas;
+	{
+	  *ndas = shm_addr->n_das;
+	}
+
+void fs_set_idasfilt__(idasfilt)
+	int *idasfilt;
+	{
+	  shm_addr->lba_image_reject_filters = *idasfilt;
+	}
+
+void fs_get_idasfilt__(idasfilt)
+	int *idasfilt;
+	{
+	  *idasfilt = shm_addr->lba_image_reject_filters;
+	}
+
+void fs_set_idasbits__(idasbits)
+	int *idasbits;
+	{
+	  shm_addr->lba_digital_input_format = *idasbits;
+	}
+
+void fs_get_idasbits__(idasbits)
+	int *idasbits;
+	{
+	  *idasbits = shm_addr->lba_digital_input_format;
+	}
+
+void fs_set_ichlba__(ichlba,N)
+	int *ichlba, *N;
+	{
+	  shm_addr->check.ifp[*N-1] = *ichlba;
+	}
+
+void fs_get_ichlba__(ichlba,N)
+	int *ichlba, *N;
+	{
+	  *ichlba = shm_addr->check.ifp[*N-1];
+	}
+
+void fs_set_ifp_tpi__(ifp_tpi,i)
+	unsigned long ifp_tpi;
+	int *i;
+	{
+	  if(*i >0 && *i < 2*MAX_DAS+1) {
+	    shm_addr->ifp_tpi[*i-1] = ifp_tpi;
+	  }
+	}
+
+void fs_get_ifp_tpi__(ifp_tpi,i)
+	unsigned long ifp_tpi;
+	int *i;
+	{
+	  if(*i >0 && *i < 2*MAX_DAS+1) {
+	    ifp_tpi = shm_addr->ifp_tpi[*i-1];
+	  }
+	}
+void fs_set_logchg__(logchg)
+	long *logchg;
+	{
+	  shm_addr->logchg = *logchg;
+	}
+
+void fs_get_logchg__(logchg)
+	long *logchg;
+	{
+	  *logchg = shm_addr->logchg;
+	}
+

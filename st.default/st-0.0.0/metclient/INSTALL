@@ -1,0 +1,129 @@
+Paroscientific, Inc.
+MET3
+Meteorological Measurement System
+
+and 
+
+Handar TSI Company.
+Ultrasonic Wind Sensors.
+
+PRICE and SUPPORT:
+------------------
+As of 01/29/03: MET-3 meteorology sensor system   $4175.00
+                (less powersupplies and cables)
+support: support@paroscientific.com
++
+As of 01/29/03: Ultrasonic Wind Sensor            $1545.00
+                (less powersupplies and cables)
+support: www.vaisala.com
+
+
+HARDWARE INSTALLATION DIAGRAMS:
+-------------------------------
+Visit URL: http://lupus.gsfc.nasa.gov/fs
+
+
+GENERAL INSTALLATION INSTRUCTIONS
+---------------------------------
+Installation is fairly simple. This software can also be run without any
+Field System software.
+
+1.) Install the Server first '/usr2/st/metserver'
+
+2.) Make sure all requirements listed above are met. 
+
+    metclient
+     |-- Makefile    - The make file for compiling Library, Server and Client.
+     |-- INSTALL     - Installation instructions for client(s).
+     |-- README      - Information.
+     |-- metclient.sh - bootup script.
+     |-- metclient   - executable.
+     |-- lib       - Source directory empty left for future use?.
+     |-- metlog.ctl    - example of file logging and station information.
+     `-- src           - Source directory for Client and Server.
+         |-- Makefile  - The make file for compiling Server and Client.
+         |-- err_report.c - Error handler.
+         |-- logwx.c   - Format and send information to logging file.
+         `-- metclient.c  - Client source for logging weather information.
+
+
+3.) If you would like to startup a client for logging data.
+    NOTE: The client is only needed if you would like to create a log file
+          with only weather data. The Field System (FS) does not need this
+          client to log data in your station observing file. The FS has it's
+          own client that works with your existing 'wx' SNAP command. 
+
+    prompt> log in as prog
+    prompt> cd /usr2/fs/st.default/st-0.0.0
+    prompt> cp -a metclient /usr2/st
+    prompt> cd /usr2/st/metclient
+    prompt> make
+
+    NOTE2: Since this dosen't need to be remade with each Field System
+           update please do not include the metclient directory in the 
+           global /usr2/st/Makefile.
+
+4.) If you are going to run a client to create a weather data log.
+    Using your favorite editor create a control file for the client. 
+    For completeness sake you should call it metlog.ctl and put it in 
+    /usr2/st/metclient directory. Remember that this is an example and 
+    you must create the file to match your enviroment.
+
+    WARNING-WARNING-WARNING-WARNING-WARNING-WARNING:
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    ----------------------------------------------------------------------
+    If you name the control file by any other name, other then 'metlog.ctl'
+    and/or you don't put it the '/usr2/st/metclient' directory you MUST 
+    change the metclient.sh script mentioned at Item 2.) in STARTING CLIENT. 
+    ---------------------------------------------------------------------
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    An example exists in your metclient directory.
+
+    example metlog.ctl.example file:
+	*=COMMENT.
+	*metget.ctl
+	GG            station two-letter code
+	0             place holder for sampling period for wind data (not used)
+	1200          logging period for all data (seconds)
+	/usr2/log     directory for logging data, must be < 27 characters
+	GGAO7108      Station Name
+	76.8265       Longitude
+	39.0219       Latitude
+	14.99         Station Elevation
+	*
+
+STARTING CLIENT:
+----------------
+
+1.) Running the metclient. Please run metclient from root.
+
+    NOTE: Only one parameter is needed for metclient; the control file 
+          which was created by you in the /usr2/st/metclient directory.
+
+   prompt> log in as root.
+   prompt> /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl&
+
+2.) If you would like metclient to startup at boot time.
+
+    2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING:
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    ----------------------------------------------------------------------
+    If you name the control file by any other name, other then 'metlog.ctl'
+    and/or you don't put it the '/usr2/st/metclient' directory you MUST 
+    MUST change the metclient.sh script. 
+    ----------------------------------------------------------------------
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    prompt> log in as root
+    prompt> cd /etc/init.d
+    prompt> cp /usr2/st/metclient/metclient.sh .
+    prompt> cd /etc/rcS.d
+    prompt> ln -sfn ../init.d/metclient.sh S92metclient.sh
+
+    Everytime you reboot your system, the metclient will start logging 
+    automatically.
+
+ ===== Read the README file for logfile names and log file information. =====
+
+You're done!

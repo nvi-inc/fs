@@ -172,7 +172,7 @@ C
       endif
 C
       call fs_get_rack(rack)
-      if (MK3.eq.rack.or.MK4.eq.rack) then
+      if (MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
 C                      Default for MK3 and MK4 is IF1
         if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 270
@@ -184,6 +184,11 @@ C                      Default for VLBA is IA
      .      ((cjchar(ldev,1).ge.'1').and.(cjchar(ldev,1).le.'9')).or.
      .      ((cjchar(ldev,1).ge.'a').and.(cjchar(ldev,1).le.'f')))
      .    goto 270
+
+      else if (LBA.eq.rack) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'p1')
+C                      Default for LBA is IFP1
+        if(cjchar(ldev,1).eq.'p') goto 270
       endif
 C
       ierr = -202

@@ -1,0 +1,99 @@
+Station experiment check list, Experiment ______________ Date ___________
+
+START
+
+1. Pointing: Sky Conditions ________________
+
+Source         Az/El       Pointing Offsets  SEFD   X/S
+
+________ ________/________ ________/________ ________/________
+
+________ ________/________ ________/________ ________/________
+
+________ ________/________ ________/________ ________/________
+
+2. Reset pointing offsets to ZERO? __________
+
+3. Tsys IF 1 (A) ________ IF 2 (B) ________ IF 3 (C) ________
+
+4. Cable sign with comments in the log
+
+                 ________ normal
+
+                 ________ long
+
+                 ________ difference, nominal _________, okay? _____
+
+                 longer cable: increases _____ decreases _____
+
+                 extra cable removed? _______
+
+5. WX  temperature ______ pressure ______ humidity ______
+
+6. Formatter time _______________ Agrees with GPS? __________
+
+7. Formatter-GPS offset _________ Counter started by: GPS ____ FMOUT ____
+
+8. Maser    -GPS offset _________ Counter started by: GPS ____ Maser ____
+
+9. VCs phase-cal ______ Levels ________ Frequencies (counter) _________
+
+10. Local checks _______________________________
+
+11. Send "ready" e-mail with TSYS, SEFDs, pointing offsets, source, az-el
+    weather, sky conditions, gps-fmout offset, first source and time,
+    recorder humidty, any problems, confirmation of any unusual set-up,
+    equipment condition
+
+12. send "start" message
+
+EVERY HOUR or more often
+
+1. Enter weather and sky conditions
+2. Check phase-cal all VCs
+3. Check VC signal levels
+4. Check system temperatures
+5. Check formatter time
+6. Gps-fmout reasonable?
+7. Cable cal value reasonable?
+8. WX values reasonable?
+9. Parity errors okay?
+
+END
+
+1. Pointing: Sky Conditions ________________
+
+Source         Az/El       Pointing Offsets  SEFD   X/S
+
+________ ________/________ ________/________ ________/________
+
+2. Reset pointing offsets to ZERO? __________
+
+3. Tsys IF 1 (A) ________ IF 2 (B) ________ IF 3 (C) ________
+
+4. Cable sign with comments in the log (if not already done)
+
+                 ________ normal
+
+                 ________ long
+
+                 ________ difference, nominal _________, okay? _____
+
+                 longer cable: increases _____ decreases _____
+
+                 extra cable removed? _______
+
+5. WX  temperature ______ pressure ______ humidity ______
+
+6. Formatter time _______________ Agrees with GPS? __________
+
+7. Formatter-GPS offset _________ Counter started by: GPS ____ FMOUT ____
+
+8. Maser    -GPS offset _________ Counter started by: GPS ____ Maser ____
+
+9. VCs phase-cal ______ Levels ________ Frequencies (counter) _________
+
+10. Local checks _______________________________
+
+11. send "end" message with log location
+

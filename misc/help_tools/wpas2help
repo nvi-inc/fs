@@ -40,7 +40,7 @@ while(<>) {
 	elsif (/\(Mark III racks\)[ ]*$/i) {
 	    $suffix=".m__";
 	}
-	elsif (/\(Mark III, Mark IV racks\)[ ]*$/i) {
+	elsif (/\(LBA4, Mark III\/IV racks\)[ ]*$/i) {
 	    $suffix=".n__";
 	    if($fname eq "vcnn") {
 		$mname=$fname . $suffix;
@@ -76,23 +76,50 @@ while(<>) {
 		symlink($mname,$lname) || die "couldn't link $lname";
 	    }
 	}
-	elsif (/\(Mark III, Mark IV, VLBA, VLBA4 racks\)[ ]*$/i) {
+	elsif (/\(LBA4, Mark III\/IV, VLBA, VLBA4 racks\)[ ]*$/i) {
 	    $suffix=".e__";
 	}
-	elsif (/\(Mark III, Mark IV, all K4 racks\)[ ]*$/i) {
+	elsif (/\(LBA4, Mark III\/IV, all K4 racks\)[ ]*$/i) {
 	    $suffix=".f__";
 	}
 	elsif (/\(Mark IV racks\)[ ]*$/i) {
 	    $suffix=".4__";
 	}
-	elsif (/\(Mark IV, VLBA, VLBA4, K4MK4 racks\)[ ]*$/i) {
+	elsif (/\(LBA4, Mark IV, VLBA\/4, K4MK4 racks\)[ ]*$/i) {
 	    $suffix=".g__";
+	    if($fname eq "tracks") {
+		$mname=$fname . $suffix;
+		$lname="4tracks" . ".___";
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
 	}
-	elsif (/\(Mark IV, VLBA4, K4MK4 racks\)[ ]*$/i) {
+	elsif (/\(LBA4, Mark IV, VLBA4, K4MK4 racks\)[ ]*$/i) {
 	    $suffix=".h__";
+	    if($fname eq "form") {
+		$mname=$fname . $suffix;
+		$lname="4form" . ".___";
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	}
+	elsif (/\(Mark IV, VLBA\/4, K4MK4 racks\)[ ]*$/i) {
+	    $suffix=".i__";
+	    if($fname eq "trackform") {
+		$mname=$fname . $suffix;
+		$lname="4trackform" . ".___";
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
 	}
 	elsif (/\(VLBA racks\)[ ]*$/i) {
 	    $suffix=".v__";
+	    if($fname eq "form") {
+		$mname=$fname . $suffix;
+		$lname="vform" . ".___";
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    } elsif($fname eq "dqa") {
+		$mname=$fname . $suffix;
+		$lname="vdqa" . ".___";
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    } 
 	}
 	elsif (/\(VLBA, VLBA4 racks\)[ ]*$/i) {
 	    $suffix=".w__";
@@ -133,6 +160,53 @@ while(<>) {
 	}
 	elsif (/\(all racks\)[ ]*$/i) {
 	    $suffix=".a__";
+	}
+	elsif (/\(LBA, LBA4 racks\)[ ]*$/i) {
+	    $suffix=".l__";
+	    if($fname eq "cornn") {
+		$mname=$fname . $suffix;
+		$lname="cor01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="cor02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="cor03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="cor04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	    elsif($fname eq "ftnn") {
+		$mname=$fname . $suffix;
+		$lname="ft01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ft02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ft03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ft04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	    elsif($fname eq "ifpnn") {
+		$mname=$fname . $suffix;
+		$lname="ifp01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ifp02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ifp03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="ifp04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	    elsif($fname eq "monnn") {
+		$mname=$fname . $suffix;
+		$lname="mon01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="mon02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="mon03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="mon04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
 	}
 	elsif (/\(K4 drives\)[ ]*$/i) {
 	    $suffix="._k_";
@@ -213,23 +287,9 @@ while(<>) {
 	    $suffix=".___";
 	    if($fname eq "caltemp") {
 		$mname=$fname . $suffix;
-		$lname="caltemp1" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltemp2" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltemp3" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="caltemp5" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="caltemp6" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltempa" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltempb" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltempc" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="caltempd" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
 	    } elsif($fname eq "tsys") {
 		$mname=$fname . $suffix;
@@ -239,43 +299,15 @@ while(<>) {
 		symlink($mname,$lname) || die "couldn't link $lname";
 	    } elsif($fname eq "flux") {
 		$mname=$fname . $suffix;
-		$lname="flux1" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="flux2" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="flux3" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="flux5" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="flux6" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="fluxa" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="fluxb" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="fluxc" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="fluxd" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
 	    } elsif($fname eq "beam") {
 		$mname=$fname . $suffix;
-		$lname="beam1" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beam2" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beam3" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="beam5" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="beam6" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beama" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beamb" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beamc" . $suffix;
-		symlink($mname,$lname) || die "couldn't link $lname";
-		$lname="beamd" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
 	    }
 	}
@@ -284,7 +316,7 @@ while(<>) {
 	    $fname = $ofname;
 	    $oldline =~ s/\cL//;
 	    print OUTPUT $oldline;
-	}elsif($ofname eq ">rx.___" && $fname eq ""){
+	}elsif($ofname eq ">rx.___" && $fname eq "Standard"){
 	    $fname = $ofname;
 	    $oldline =~ s/\cL//;
 	    print OUTPUT $oldline;
@@ -299,3 +331,4 @@ while(<>) {
     }
     print OUTPUT;
 }
+

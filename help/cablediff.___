@@ -1,32 +1,32 @@
            cablediff - calculate cable change and sign
- 
-              Syntax:      cablediff
- 
-              Response:    cablediff/change,sign
- 
- 
- Settable parameters: None
- 
- Monitor-only parameters:
-              change       The absolute value of the difference between the
+
+            Syntax:     cablediff
+
+            Response:   cablediff/change,sign
+
+
+Settable parameters: None
+
+Monitor-only parameters:
+              change        The absolute value of the difference between the
               last cable and cablelong measurements, in
               seconds. The value is printed in scaled
               scientific notation so that the digit before the
               decimal point is microseconds. If the value is
               greater than 1.0 seconds the scaling is
               different.
-              sign         The sign of the difference between the last
+              sign          The sign of the difference between the last
               cable and cablelong measurements absolute value
               of the difference between the last cable and
               cablelong measurements, corresponding to change.
               Values are +, -, or the value 0 if change is
               less than 0.05 microseconds.
- 
- Comments: 
- This command is used to automatically calculate the change in
- the cable counter reading when a short cable extension is
- added to check the performance of the system and sign of the
- change. This command provides a standard format for recording
- the results in the log.
- 
- Please see also the cablediff and cablelong commands. 
+
+Comments: 
+This command is used to automatically calculate the change in
+the cable counter reading when a short cable extension is
+added to check the performance of the system and sign of the
+change. This command provides a standard format for recording
+the results in the log.
+
+Please see also the cablediff and cablelong commands.

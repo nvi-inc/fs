@@ -47,6 +47,10 @@ monit2.input:		false
 ! monit3 (Tsys display, 17 lines)
 monit3*geometry:	32x17-0+120
 monit3.title:		System Temperatures
+! monit4 (LBA display, 24 lines)
+monit4*geometry:	80x24-0+160
+monit4.title:		LBA DAS Monitor
+monit4*font:		fixed
 !login shell
 login_sh.title:		login shell
 login_sh*scrollBar:	true

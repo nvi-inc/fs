@@ -39,7 +39,6 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
 	ir=i;
       }
     }
-
   if(ir==-1)
     return;
   
@@ -58,7 +57,6 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
   for(i=rxgain[ir].gain.ncoeff-1;i>-1;i--) {
     *gain=*gain*arg+rxgain[ir].gain.coeff[i];
   }
-
   switch(pol) {
   case 'r':
     /* ifchain is r */
@@ -71,7 +69,7 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
     ilast=-1;
     for(i=0;i<rxgain[ir].tcal_ntable;i++)
       if(rxgain[ir].tcal[i].pol=='r' &&
-	 rxgain[ir].tcal[i].freq < center)
+	 rxgain[ir].tcal[i].freq <= center)
 	ifirst=i;
       else if(rxgain[ir].tcal[i].pol=='r' &&
 	      center < rxgain[ir].tcal[i].freq) {
@@ -101,7 +99,7 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
     ilast=-1;
     for(i=0;i<rxgain[ir].tcal_ntable;i++)
       if(rxgain[ir].tcal[i].pol=='l' &&
-	 rxgain[ir].tcal[i].freq < center)
+	 rxgain[ir].tcal[i].freq <= center)
 	ifirst=i;
       else if(rxgain[ir].tcal[i].pol=='l' &&
 	      center < rxgain[ir].tcal[i].freq) {
@@ -125,3 +123,14 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal)
     break;
   }
 }
+
+
+
+
+
+
+
+
+
+
+

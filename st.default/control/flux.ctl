@@ -29,7 +29,18 @@
    cygnusa  c    20  2000 4.695  0.085 -0.178  115   2pts  115s
    cygnusa  c  2000 31000 7.161 -1.244  0.0    115   2pts  115s
    taurusa  c   500 35000 3.915 -0.299  0.0    300   gauss 100 4.2m 2.6m
-   ngc7027  c 10550 43200 1.322 -0.134  0       10   gauss 100 7s   10s
+*
+*  Flux of ngc7027 scaled by -0.5% per year (from Ott et al 1994) to 
+*  epoch 13th Oct 2003 gives a flux density reduction to  93.7% 
+*  of the 1990 level. John Conway 030205
+*
+   ngc7027  c 10550 43200 1.2937 -0.134  0       10   gauss 100 7s   10s
+*
+*  Flux density of DR21 at K band taken from Ott et al (1994)
+*  Ott et al 1994. John Conway 030205
+*
+   dr21     c 21000 24000 1.231  0.000  0.0     20  gauss  100 20s  20s 
+
 * casa is special name with flux decreasing from 1980.0
    casa     p   300 31000 5.745 -0.770  0       240  disk  4m
 * the following points added from FS Manual WEH 0208xx

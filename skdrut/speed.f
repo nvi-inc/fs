@@ -29,6 +29,7 @@ C 020713 nrv Add third K4 speed for 128 Mbps.
 C 020926 nrv Change K4 sample rate logic to get correct speed (per S. Kurihara)
 C 021003 nrv Calculate K4 speed in dm/s not m/s. This will make the
 C            footages in the schedule be in dm not meters, for more precision.
+C 030109 jmg Back to m/s on K4.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -80,7 +81,7 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
         else 
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
-        sp=sp/100.0 ! convert to dm/s
+        sp=sp/1000. ! convert to  m/s
 
 C 1. First account for the fan factor.
 

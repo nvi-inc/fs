@@ -1,65 +1,65 @@
-        tpicd - tpi (Mark III, Mark IV, VLBA, VLBA4 racks)
- 
-              Syntax:      tpicd=cont,cycle
+        tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4 racks)
+
+            Syntax:     tpicd=cont,cycle
           tpid=stop
           tpicd=?
- 
-              Response:    tpicd/cont,cycle
+
+            Response:   tpicd/cont,cycle
           tpicd/detector list
- 
- 
- Settable parameters:
-              cont         Whether to sample continuously or not: no
+
+
+Settable parameters:
+              cont          Whether to sample continuously or not: no
               (default) or yes. If no, samplng is stopped and
               started by the data_valid=  command.
-              cylce        Number of centiseconds per cycle, 0 disables
-              sampling.
- 
- Monitor-only parameters:
-                  detector list    List of detectors to be sampled, grouped by IF
-                  channel as in the tpi, tpical, tpzero, tpgain,and
-                  tsys commands. The list is constructed from the
-                  VCs selected by the formatter and the IFs that
-                  feed them when the pcal=... command is issued. 
- 
- Comments:
- The form pcald is used to start the extraction. The form
- pcald=stop is used to halt it. The form tpicd=? returns the
- current set-up information.
- 
- If tpic is being controlled by the data_valid command, it
- begins and stops sampling and recording data within one second
- of a request to do so. In other words within one second of the
- execution of a data_valid=  command.
- 
- This command controls the tpicd TPI  measurement daemon.  The
- remaining comments describe the daemon.
- 
- The daemon measures the TPI values (Mark III/IV racks) and BBC
- channels gains and IF channel TPI values (VLBA/VLBA4 racks).
- For Mark III/IV racks the values appear in the log as
- #tpicd#tpi/ entries. For VLBA/VLBA4 racks the values appear in
- the log as #tpicd#tpgain/ entries. Neither are displayed to
- the operator. They only go in the log. IF TPI values for the
- VLBA/VLBA4 racks are reported in tpgain/ records even though
- they are not gains.
- 
- The tpicd daemon results are returned grouped in pairs of
- detector mnemonic,value, the output is collected into lines by
- IF channel. Detectors that have no IF assigned are displayed
- first followed by IFs 1-3 (Mark III/IV) and a-d (VLBA/VLBA4).
- If the output for an IF would make a long output line, the
- output is split into more than one line.
- 
- A time-out or other error on one more devices for a Mark
- III/IV or VLBA/VLBA4 detector will not prevent results from
- other detectors from being displayed.  A negative integer will
- be shown for each channel that had an error that prevented an
- actual measurement from being displayed. An overflow value,
- 65535, is displayed as dollar signs, $$$$$, (for gains an
- overflow is 255).
- 
- For Mark III/IV racks the detector mnemonics for the VC are
- displayed as hs, where h is the VC number as hex and s is for
- the detector is use: d (dual for upper/lower), u (upper), l
- (lower), or a digit 4-7 for other detectors. 
+            cylce       Number of centiseconds per cycle, 0 disables
+            sampling.
+
+Monitor-only parameters:
+                detector list   List of detectors to be sampled, grouped by IF
+                channel as in the tpi, tpical, tpzero, tpgain,and
+                tsys commands. The list is constructed from the
+                VCs selected by the formatter and the IFs that
+                feed them when the pcal=... command is issued. 
+
+Comments:
+The form pcald is used to start the extraction. The form
+pcald=stop is used to halt it. The form tpicd=? returns the
+current set-up information.
+
+If tpic is being controlled by the data_valid command, it
+begins and stops sampling and recording data within one second
+of a request to do so. In other words within one second of the
+execution of a data_valid=  command.
+
+This command controls the tpicd TPI  measurement daemon.  The
+remaining comments describe the daemon.
+
+The daemon measures the TPI values (Mark III/IV and LBA4
+racks) and BBC channels gains and IF channel TPI values
+(VLBA/4 racks). For Mark III/IV racks the values appear in the
+log as #tpicd#tpi/ entries. For VLBA/4 racks the values appear
+in the log as #tpicd#tpgain/ entries. Neither are displayed to
+the operator. They only go in the log. IF TPI values for the
+VLBA/4 racks are reported in tpgain/ records even though they
+are not gains.
+
+The tpicd daemon results are returned grouped in pairs of
+detector mnemonic,value, the output is collected into lines by
+IF channel. Detectors that have no IF assigned are displayed
+first followed by IFs 1-3 (Mark III/IV or LBA4), 1-4 (LBA),
+and a-d (VLBA/4). If the output for an IF would make a long
+output line, the output is split into more than one line.
+
+A time-out or other error on one more devices for a Mark
+III/IV, LBA, or VLBA/4 detector will not prevent results from
+other detectors from being displayed.  A negative integer will
+be shown for each channel that had an error that prevented an
+actual measurement from being displayed. An overflow value,
+65535, is displayed as dollar signs, $$$$$, (for gains an
+overflow is 255).
+
+For Mark III/IV and LBA4 racks the detector mnemonics for the
+VCs are displayed as hs, where h is the VC number as hex and s
+is for the detector is use: d (dual for upper/lower), u
+(upper), l (lower), or a digit 4-7 for other detectors.

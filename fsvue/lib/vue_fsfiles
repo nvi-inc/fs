@@ -5,6 +5,7 @@
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
   set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
 
   global tkVersion
   wm positionfrom . user
@@ -32,11 +33,14 @@ set snap_DefaultDir /usr2/sched      ;# Default directory for FS snp files
 
 
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-  } else { 
-      set bfont {9x15}
-  }
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+      set font $bfont
+  } else {
+      set bfont [lindex $argv 0]
+  }  
 
 # Top frame is a menubar
 # there is more magic that you can do with this
@@ -44,12 +48,13 @@ set snap_DefaultDir /usr2/sched      ;# Default directory for FS snp files
 frame .m \
 	-bg {navy} \
 	-borderwidth {2} \
-	-relief {groove} 
+	-relief {groove} \
 
 frame .m2 \
 	-bg {linen} \
 	-borderwidth {1} \
 	-relief {raised} 
+
 
 button .m.fsctl -text "Control" -relief {raise} -font $bfont -background navy -fg white -command { fileselection_dialog $control_DefaultDir }
 
@@ -63,8 +68,6 @@ button .m.q -text "Exit" -relief {raise} -font $bfont -background red -fg white 
 
 pack append . .m2 {left frame n expand fill}
 
-#entry .m.ent -relief {sunken} -bg linen -fg black
-#pack .m.help .m.fsctl .m.fsprc .m.fssnp .m.ent -side left -fill both
 pack .m.help .m.fsctl .m.fsprc .m.fssnp -side left -fill both  -expand 1
 pack .m.q -side right -fill both  -expand 1
 pack .m -side top -fill x -expand 1
@@ -93,9 +96,9 @@ proc forAllMatches { w pattern script} {
 # setup display area( text and scrollbar) to monitor Field System.
 # This will be pipeing information from the station.log file.
 # 
-text .t -yscrollc {.sb set} -font $bfont -bg linen
+text .t -yscrollc {.sb set} -bg linen
 scrollbar .sb -bg linen -command {.t yview}
-text .t2 -height 1 -font $bfont -bg white -fg Red
+text .t2 -height 1 -bg white -fg Red
 
 .t tag configure errtag -foreground black -background red
 
@@ -326,7 +329,8 @@ proc tk_dialog {w title text bitmap default args} {
 
     # 2. Fill the top part with bitmap and message.
 
-    message $w.msg -width 8i -text $text -font $bfont
+#    message $w.msg -width 8i -text $text -font $bfont
+    message $w.msg -width 8i -text $text
     pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
     if {$bitmap != ""} {
         label $w.bitmap -bitmap $bitmap

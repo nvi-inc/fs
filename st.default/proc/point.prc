@@ -44,8 +44,14 @@ enddef
 define  initp         00000000000
 setupa=1
 caloff
-fivept=xyns,-2,9,.4,1,i1,120
-onoff=2,1,75,3,120,all
+"sample fivept set-up for azel antenna with Mark III/IV rack
+"fivept=azel,-2,9,.4,1,i1,120
+"sample fivept set-up for xyns antenna with VLBA/4 rack
+fivept=xyns,-2,9,.4,1,ia,120
+" sample onoff set-up for Mark III/IV
+"onoff=2,1,75,3,120,all
+" sample onoff set-up for VLBA/4
+onoff=2,1,75,3,120,allu,ia,ib,ic
 check=
 sy=go aquir &
 enddef
@@ -126,7 +132,7 @@ define  oriona        00000000000
 source=orion-a,053516.,-052322.,2000.
 enddef
 define  virgoa        00000000000
-source=virgo-a,123049.42,+122328.0,2000.
+source=virgoa,123049.42,+122328.0,2000.
 enddef
 define  3c273b        00000000000
 source=3c273b,122906.70,+020308.6,2000.0

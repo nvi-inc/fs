@@ -6,8 +6,8 @@
 
 # Window manager configurations for directories
   set ICONDIR /usr2/fs/fsvue/images
-  set BINDIR /usr2/fs/bin
-  set HELPDIR /usr2/fs/help/
+  set BINDIR /usr2/fs/fsvue/bin
+  set LIBDIR /usr2/fs/fsvue/lib
 
   global tkVersion
   wm positionfrom . user
@@ -21,13 +21,16 @@
   set w .
   $w config -cursor {top_left_arrow black white}
 
+
 # Decide on font size.
-  if {$argv=="L"} {
-      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
-  } else { 
-      set bfont {9x15}
-  }
-  
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+  }  
+
 # Top frame is a menubar
 # there is more magic that you can do with this
 # build widget .m
@@ -206,6 +209,17 @@ menu .m.c.menu  -background blue -fg white
 .m.c.menu add command -label cont  \
 -font $bfont -command {exec vueinfo help cont &}
 
+.m.c.menu add command -label cor01  \
+-font $bfont -command {exec vueinfo help cor01 &}
+.m.c.menu add command -label cor02  \
+-font $bfont -command {exec vueinfo help cor02 &}
+.m.c.menu add command -label cor03  \
+-font $bfont -command {exec vueinfo help cor03 &}
+.m.c.menu add command -label cor04  \
+-font $bfont -command {exec vueinfo help cor04 &}
+.m.c.menu add command -label cornn  \
+-font $bfont -command {exec vueinfo help cornn &}
+
 menu .m.d.menu  -background blue -fg white
 .m.d.menu add command -label data_valid  \
 -font $bfont -command {exec vueinfo help data_valid &}
@@ -217,6 +231,8 @@ menu .m.d.menu  -background blue -fg white
 -font $bfont -command {exec vueinfo help decode4 &}
 .m.d.menu add command -label dqa \
 -font $bfont -command {exec vueinfo help dqa &}
+.m.d.menu add command -label ds \
+-font $bfont -command {exec vueinfo help ds &}
 
 menu .m.e.menu  -background blue -fg white
 .m.e.menu add command -label echo \
@@ -274,6 +290,17 @@ menu .m.f.menu  -background blue -fg white
 .m.f.menu add command -label fsversion \
 -font $bfont -command {exec vueinfo help fsversion &}
 
+.m.f.menu add command -label ft01  \
+-font $bfont -command {exec vueinfo help ft01 &}
+.m.f.menu add command -label ft02  \
+-font $bfont -command {exec vueinfo help ft02 &}
+.m.f.menu add command -label ft03  \
+-font $bfont -command {exec vueinfo help ft03 &}
+.m.f.menu add command -label ft04  \
+-font $bfont -command {exec vueinfo help ft04 &}
+.m.f.menu add command -label ftnn  \
+-font $bfont -command {exec vueinfo help ftnn &}
+
 menu .m.g.menu  -background blue -fg white
 .m.g.menu add command -label "No G's" \
 -font $bfont -command {}
@@ -313,6 +340,17 @@ menu .m.i.menu  -background blue -fg white
 -font $bfont -command {exec vueinfo help ifdab &}
 .m.i.menu add command -label ifdcd \
 -font $bfont -command {exec vueinfo help ifdcd &}
+
+.m.i.menu add command -label ifp01  \
+-font $bfont -command {exec vueinfo help ifp01 &}
+.m.i.menu add command -label ifp02  \
+-font $bfont -command {exec vueinfo help ifp02 &}
+.m.i.menu add command -label ifp03  \
+-font $bfont -command {exec vueinfo help ifp03 &}
+.m.i.menu add command -label ifp04  \
+-font $bfont -command {exec vueinfo help ifp04 &}
+.m.i.menu add command -label ifpnn  \
+-font $bfont -command {exec vueinfo help ifpnn &}
 
 menu .m.j.menu  -background blue -fg white
 .m.j.menu add command -label "No J's" \
@@ -359,6 +397,18 @@ menu .m.lm.menu  -background blue -fg white
 -font $bfont -command {exec vueinfo help matLOAD &}
 .m.lm.menu add command -label mcb \
 -font $bfont -command {exec vueinfo help mcb &}
+
+.m.lm.menu add command -label mon01  \
+-font $bfont -command {exec vueinfo help mon01 &}
+.m.lm.menu add command -label mon02  \
+-font $bfont -command {exec vueinfo help mon02 &}
+.m.lm.menu add command -label mon03  \
+-font $bfont -command {exec vueinfo help mon03 &}
+.m.lm.menu add command -label mon04  \
+-font $bfont -command {exec vueinfo help mon04 &}
+.m.lm.menu add command -label monnn  \
+-font $bfont -command {exec vueinfo help monnn &}
+
 .m.lm.menu add command -label mount \
 -font $bfont -command {exec vueinfo help mount &}
 .m.lm.menu add command -label mount1 \

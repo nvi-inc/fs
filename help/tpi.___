@@ -1,38 +1,38 @@
          tpi - read back total power integrators, cal off
- 
-              Syntax:      tpi=list
- 
-              Response:    tpi/readings
- 
- 
- Settable parameters:
-            list       List of total power integrators to read back.
+
+            Syntax:     tpi=list
+
+            Response:   tpi/readings
+
+
+Settable parameters:
+            list        List of total power integrators to read back.
             Standard detector mnemonics allowed.
- 
- Monitor-only parameters:
-            readings   List of readings, counts. These values are stored
+
+Monitor-only parameters:
+            readings    List of readings, counts. These values are stored
             for use by the tsys/5/6 commands.
- 
- Comments:
- Except for station defined detectors, the results are returned
- grouped in pairs of detector mnemonic,value, the output is
- collected into lines by IF channel. Detectors that have no IF
- assigned are displayed first followed by IFs 1-3 (Mark III/IV)
- and a-d (VLBA/VLBA4). If the output for an IF would make a
- long output line, the output is split into more than one line.
- For station defined detectors the results are just displayed
- in order: u5, u6.
- 
- A time-out or other error on one more devices for a Mark
- III/IV or VLBA/VLBA4 detector will not prevent results from
- other detectors from being displayed.  A negative integer will
- be shown for each channel that had an error that prevented an
- actual measurement from being displayed. An overflow value,
- 65535, is displayed as dollar signs, $$$$$.
- 
- For Mark III/IV racks the detector mnemonics for the VC are
- displayed as hs, where h is the VC number as hex and s is for
- the detector is use: d (dual for upper/lower), u (upper), l
- (lower), or a digit 4-7 for other detectors.
- 
- It is assumed the noise calibration signal is off. 
+
+Comments:
+Except for station defined detectors, the results are returned
+grouped in pairs of detector mnemonic,value, the output is
+collected into lines by IF channel. Detectors that have no IF
+assigned are displayed first followed by IFs 1-3 (Mark III/IV
+or LBA4), 1-4 (LBA) and a-d (VLBA/4). If the output for an IF
+would make a long output line, the output is split into more
+than one line. For station defined detectors the results are
+just displayed in order: u5, u6.
+
+A time-out or other error on one more devices for a Mark
+III/IV or VLBA/4 detector will not prevent results from other
+detectors from being displayed.  A negative integer will be
+shown for each channel that had an error that prevented an
+actual measurement from being displayed. An overflow value,
+65535, is displayed as dollar signs, $$$$$.
+
+For Mark III/IV and LBA4 racks the detector mnemonics for the
+VCs are displayed as hs, where h is the VC number as hex and s
+is for the detector is use: d (dual for upper/lower), u
+(upper), l (lower), or a digit 4-7 for other detectors.
+
+It is assumed the noise calibration signal is off.

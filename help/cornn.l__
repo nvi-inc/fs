@@ -1,0 +1,41 @@
+      cornn - IF processor Correlator port (LBA, LBA4 racks)
+
+            Syntax:     cornn=type,source1,source2,delay
+
+            Response:   cornn/type,source1,source2,delay
+
+
+Settable parameters:
+          type      Either AT for output to a Australia Telescope
+          4-level correlator or MB for use with a Multibeam
+          3-level  correlator.  Default is AT.
+        source1 The source of the signal to be sent to either an AT
+        correlator or to channel 1 of a MB correlator that is
+        connected to the correlator port of IF processor nn.
+        Required value is one of:
+          BSU - the upper sideband output of the Band Splitter
+          BSL - the lower sideband output of the Band Splitter
+          FTU - the upper sideband output of the Fine Tuner
+          FTL - the lower sideband output of the Fine Tuner
+          32 - the full 32MHz output of the Band Splitter
+          64 - the raw 64MHz output of the Analog Sampler
+                    USB - the default USB output ( including 32/64 ) as
+          setup by the latest ifpnn command
+                    LSB - the default LSB output ( including 32/64 ) as
+          setup by the latest ifpnn command.
+                Default is USB for AT correlator, LSB for MB.
+        source2 The source of the signal to be sent to channel 2 of a
+        MB correlator, values as per source1.  Default is USB.
+        delay   The clock delay in cycles to be applied to an AT
+        correlator output, either 0, 1, 2, or 3. Default is 0.
+ 
+ Monitor-only parameters: none
+ 
+ Comments: The pinouts differ quite markedly from AT to MB
+correlator mode.
+ 
+ Note that the appropriate 4-level or 3-level statistics must
+be setup using  the ifpnn command for accurate absolute
+calibration of resulting spectra.
+ 
+ See also: ftnn, ifpnn, monnn.

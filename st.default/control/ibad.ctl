@@ -1,6 +1,6 @@
-CA=dev03,0
+CA=dev3,0
 * default K4 devices
-*R1=dev04,4
+*R1=dev4,4
 *V4=dev24,4
 *VA=dev25,4
 *LA=dev26,4

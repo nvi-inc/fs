@@ -48,3 +48,6 @@
 #include "rxgain_ds.h"
 #include "flux_ds.h"
 #include "calrx_ds.h"
+#include "ds_ds.h"
+#include "lba_das_shm.h"
+#include "scan_name_ds.h"

@@ -59,6 +59,10 @@ long ip[5];                           /* ipc parameters */
 /* if we get this far it is a set-up command so parse it */
 
 parse:
+      lcl.dir=shm_addr->idirtp[indx];
+      lcl.speed= shm_addr->ispeed[indx];
+      lcl.cips=shm_addr->cips[indx];
+
       ilast=0;                                      /* last argv examined */
 
       count=1;
@@ -93,6 +97,7 @@ parse:
       ichold=shm_addr->check.rec[indx];
       shm_addr->check.rec[indx]=0;
 
+      shm_addr->idirtp[indx]=lcl.dir;
       shm_addr->ispeed[indx]=lcl.speed;
       shm_addr->cips[indx]=lcl.cips;
 
@@ -125,7 +130,6 @@ parse:
 
       request.addr=0xb1;
       vstb1mc(&request.data,&lcl); add_req(&buffer,&request);
-      shm_addr->idirtp[indx]=lcl.dir;
 
       if(lcl.cips <500 &&
 	 ((shm_addr->equip.drive[indx] == VLBA &&

@@ -30,21 +30,27 @@ int tzero(ip,onoff,rut,accum,ierr)
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
 
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
+     shm_addr->equip.rack==LBA4) {
     iclass=0;
     nrec=0;
     buf2[0]=0;
     if(ifc[0]||ifc[1]) {
+      char temp[3];
       memcpy(buf2+1,"if",2);
       memcpy(buf2+2,"00003F3F",8);
       if(shm_addr->inp2if!=0)
 	memcpy(((char *)(buf2+2))+2,"8",1);
       if(shm_addr->inp1if!=0)
 	memcpy(((char *)(buf2+2))+3,"8",1);
-      if(!ifc[1])
-	sprintf(((char *)(buf2+2))+4,"%2.2X",(shm_addr->iat2if)&0x3F);
-      if(!ifc[0])
-	sprintf(((char *)(buf2+2))+6,"%2.2X",(shm_addr->iat1if)&0x3F);
+      if(!ifc[1]) {
+	snprintf(temp,sizeof(temp),"%2.2X",(shm_addr->iat2if)&0x3F);
+	memcpy(((char *)(buf2+2))+4,temp,2);
+      }
+      if(!ifc[0]) {
+	sprintf(temp,sizeof(temp),"%2.2X",(shm_addr->iat1if)&0x3F);
+	memcpy(((char *)(buf2+2))+6,temp,2);
+      }
       cls_snd(&iclass,buf2,12,0,0); nrec++;
     }
     if(ifc[2]) {
@@ -124,12 +130,29 @@ int tzero(ip,onoff,rut,accum,ierr)
       goto restore;
     }
     clr_res(&buff_res);
+  } else if(shm_addr->equip.rack==LBA) {
+    /* digital detetector - assume tpzero=0 */
   }
-  
-  get_samples(ip,onoff->itpis,onoff->intp,rut,accum,&ierr2);
+
+  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4||
+     shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+
+    get_samples(ip,onoff->itpis,onoff->intp,rut,accum,&ierr2);
+
+  } else if(shm_addr->equip.rack==LBA) {
+
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<2*shm_addr->n_das; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
+
+  }
 
  restore:
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4) {
+  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
     iclass=0;
     nrec=0;
     buf2[0]=0;
@@ -209,6 +232,8 @@ int tzero(ip,onoff,rut,accum,ierr)
       goto failed;
     }
     clr_res(&buff_res);
+  } else if(shm_addr->equip.rack==LBA) {
+    /* digital detetector - assume tpzero=0 */
   }
 
   if(ierr2!=0) {

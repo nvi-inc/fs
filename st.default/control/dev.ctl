@@ -9,3 +9,5 @@
 /dev/null     Barcode reader device name
 /dev/null     VLBA MCB device name
 57600         VLBA MCB baud rate
+/dev/null     ATNF Dataset device name
+38400         ATNF Dataset baud rate

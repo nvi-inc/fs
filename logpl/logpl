@@ -2,7 +2,7 @@
 
 # ==========================================================================
 #
-#                             INITILIZING SECTION
+#                             INITILIING SECTION
 #
 # ==========================================================================
 
@@ -15,6 +15,9 @@
   set win_sizeX [winfo screenwidth .]
   set win_sizeY [winfo screenheight .]  
   wm geometry . +0+0
+
+# Directories
+  set LIBDIR /usr2/fs/logpl/lib
 
 #position window full screen from top left corner.
 # wm geometry . $vieX\x$vieY+0+0
@@ -165,6 +168,7 @@ a new value (i.e. without the '=' sign).
 
 set xsizelimit [expr 180*$size*$aspect]
 set ysizelimit [expr 180*$size]
+set zeroxscrpos [expr 1*$size*$aspect+$xoffset]
 set halfxscrpos [expr 90*$size*$aspect+$xoffset]
 set fullxscrpos [expr 180*$size*$aspect+$xoffset]
 set plotlimit_xmin $xoffset
@@ -437,63 +441,91 @@ proc setDataMenus {} {
     global selectMatrix noOfSelects nodeDataMatrix noOfChannels currentSet
     if {$noOfChannels > 0} {
 	.mbar.data(1).menu delete 0 last
+	set menu_cnt 12
 	.mbar.data(1).menu add radiobutton -label "No data" \
 		-variable currentSet(1) -value 0 -command {dataMenuClick 1 0}
 	.mbar.data(1).menu add separator
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
-	    .mbar.data(1).menu add radiobutton -label $selectMatrix($counter,3) \
-		    -variable currentSet(1) -value $counter -command {dataMenuClick 1 0}
+		if {$counter==12} {
+		    .mbar.data(1).menu add separator
+		    .mbar.data(1).menu add checkbutton -label "Invert" \
+			    -variable optionInvert(1) -command {dataMenuClick 1 1}
+		    .mbar.data(1).menu add checkbutton -label "Log scale" \
+			    -variable optionLog(1) -command {dataMenuClick 1 1}
+		}
+		if {$counter%$menu_cnt == 0} {
+		    .mbar.data(1).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(1) -value $counter -command {dataMenuClick 1 0} -columnbreak 1
+		    set menu_cnt [expr $menu_cnt+16]
+		} else {
+		    .mbar.data(1).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(1) -value $counter -command {dataMenuClick 1 0} -columnbreak 0
+		}
+	    }
 	}
-	.mbar.data(1).menu add separator
-	.mbar.data(1).menu add checkbutton -label "Invert" \
-		-variable optionInvert(1) -command {dataMenuClick 1 1}
-	.mbar.data(1).menu add checkbutton -label "Log scale" \
-		-variable optionLog(1) -command {dataMenuClick 1 1}
-    }
     if {$noOfChannels > 1} {
 	.mbar.data(2).menu delete 0 last
+	set menu_cnt 12
 	.mbar.data(2).menu add radiobutton -label "No data" \
 		-variable currentSet(2) -value 0 -command {dataMenuClick 2 0}
 	.mbar.data(2).menu add separator
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
-	    .mbar.data(2).menu add radiobutton -label $selectMatrix($counter,3) \
-		    -variable currentSet(2) -value $counter -command {dataMenuClick 2 0}
+		if {$counter==12} {
+		    .mbar.data(2).menu add separator
+		    .mbar.data(2).menu add checkbutton -label "Invert" \
+			    -variable optionInvert(2) -command {dataMenuClick 2 1}
+		    .mbar.data(2).menu add checkbutton -label "Log scale" \
+			    -variable optionLog(2) -command {dataMenuClick 2 1}
+		}
+		if {$counter%$menu_cnt == 0} {
+		    .mbar.data(2).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(2) -value $counter -command {dataMenuClick 2 0} -columnbreak 1
+		    set menu_cnt [expr $menu_cnt+16]
+		} else { 
+		    .mbar.data(2).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(2) -value $counter -command {dataMenuClick 2 0} -columnbreak 0
+		}
+	    }
 	}
-	.mbar.data(2).menu add separator
-	.mbar.data(2).menu add checkbutton -label "Invert" \
-		-variable optionInvert(2) -command {dataMenuClick 2 1}
-	.mbar.data(2).menu add checkbutton -label "Log scale" \
-		-variable optionLog(2) -command {dataMenuClick 2 1}
-    }
     if {$noOfChannels > 2} {
 	.mbar.data(3).menu delete 0 last
+	set menu_cnt 12
 	.mbar.data(3).menu add radiobutton -label "No data" \
 		-variable currentSet(3) -value 0 -command {dataMenuClick 3 0}
 	.mbar.data(3).menu add separator
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
-	    .mbar.data(3).menu add radiobutton -label $selectMatrix($counter,3) \
-		    -variable currentSet(3) -value $counter -command {dataMenuClick 3 0}
+		if {$counter==12} {
+		    .mbar.data(3).menu add separator
+		    .mbar.data(3).menu add checkbutton -label "Invert" \
+			    -variable optionInvert(3) -command {dataMenuClick 3 1}
+		    .mbar.data(3).menu add checkbutton -label "Log scale" \
+			    -variable optionLog(3) -command {dataMenuClick 3 1}
+		}
+	    if {$counter%$menu_cnt == 0} {
+		.mbar.data(3).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(3) -value $counter -command {dataMenuClick 3 0} -columnbreak 1
+		set menu_cnt [expr $menu_cnt+16]
+	    } else { 
+		.mbar.data(3).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(3) -value $counter -command {dataMenuClick 3 0} -columnbreak 0
+	    }
 	}
-	.mbar.data(3).menu add separator
-	.mbar.data(3).menu add checkbutton -label "Invert" \
-		-variable optionInvert(3) -command {dataMenuClick 3 1}
-	.mbar.data(3).menu add checkbutton -label "Log scale" \
-		-variable optionLog(3) -command {dataMenuClick 3 1}
     }
     if {$noOfChannels > 3} {
 	.mbar.data(4).menu delete 0 last
+	set menu_cnt 12
 	.mbar.data(4).menu add radiobutton -label "No data" \
 		-variable currentSet(4) -value 0 -command {dataMenuClick 4 0}
 	.mbar.data(4).menu add separator
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
-	    .mbar.data(4).menu add radiobutton -label $selectMatrix($counter,3) \
-		    -variable currentSet(4) -value $counter -command {dataMenuClick 4 0}
+		if {$counter==12} {
+		    .mbar.data(4).menu add separator
+		    .mbar.data(4).menu add checkbutton -label "Invert" \
+			    -variable optionInvert(4) -command {dataMenuClick 4 1}
+		    .mbar.data(4).menu add checkbutton -label "Log scale" \
+			    -variable optionLog(4) -command {dataMenuClick 4 1}
+		}
+	    if {$counter%$menu_cnt == 0} {
+		.mbar.data(4).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(4) -value $counter -command {dataMenuClick 4 0} -columnbreak 1
+		set menu_cnt [expr $menu_cnt+16]
+	    } else { 
+		.mbar.data(4).menu add radiobutton -label $selectMatrix($counter,3) -variable currentSet(4) -value $counter -command {dataMenuClick 4 0} -columnbreak 0
+	    }
 	}
-	.mbar.data(4).menu add separator
-	.mbar.data(4).menu add checkbutton -label "Invert" \
-		-variable optionInvert(4) -command {dataMenuClick 4 1}
-	.mbar.data(4).menu add checkbutton -label "Log scale" \
-		-variable optionLog(4) -command {dataMenuClick 4 1}
     }
 }
 
@@ -986,6 +1018,7 @@ proc changeYdata {} {
     global currentChan global_ymin global_ymax timebase
     set global_ymin(0) [format "%13.8g" $global_ymin($currentChan)]
     set global_ymax(0) [format "%13.8g" $global_ymax($currentChan)]
+
 }
 
 # Procedure for removing point in memory (called by user mouse-click on point)
@@ -993,7 +1026,13 @@ proc changeYdata {} {
 
 proc removePoint {x y} {
     global nodeDataMatrix scrNodeNo scrSetNo currentChan timepoints currentSet
-    set nodeList [.c find enclosed [expr $x-8] [expr $y-8] [expr $x+8] [expr $y+8]]
+    global optionXvY statusMsg
+
+    if {$optionXvY != 0} {
+	set statusMsg "ERROR: Sorry, autoscaleing not allow in chan1:chan2 mode for now."
+	return;
+    }
+     set nodeList [.c find enclosed [expr $x-8] [expr $y-8] [expr $x+8] [expr $y+8]]
     foreach nodeNo $nodeList {
 	set correct [string first point($currentChan) [.c gettags $nodeNo]]
 	if {$correct >= 0} {
@@ -1046,6 +1085,7 @@ proc XvYplot {} {
     global current_filename statusMsg text_no_logfile
     global global_xmin global_xmax text_outOfRange global_startmode
     global global_ymin global_ymax currentChan optionXvY c1_vs_c2 c1_c2
+
     set validname [newfile_checkfile $current_filename 2]
     set validrange [catch {if {$global_xmax > $global_xmin} {}}]
     if {[expr {$validname == 1}] && [expr {$validrange == 0}]} {
@@ -1068,7 +1108,6 @@ proc XvYplot {} {
 	.c delete lines($currentChan)
 
 	# Find number of active channels. If changed, all channels shall be plotted.
-	
 	if {$optionXvY == 0} {
 	    set noactive 0
 	    set screenpos 1
@@ -1127,9 +1166,13 @@ proc XvYplot {} {
 			set statusMsg $text_plot_wait
 			update
 		    }
+
 		    if { $optionXvY == 0} {
 			calcRange $currentSet($counter) $counter
 			calcCoord $currentSet($counter) $counter $noactive $channelpos($counter)
+		    } else {
+			calcRange $dataset $currentChan
+			XvYcalcCoord $dataset $currentChan $noactive $channelpos($currentChan)
 		    }
 
 		    if {$optionLine == 1} {createLines $dataset $currentChan}
@@ -1164,7 +1207,7 @@ proc XvYplot {} {
 proc Replot {} {
     global current_filename statusMsg text_no_logfile
     global global_xmin global_xmax text_outOfRange global_startmode
-    global global_ymin global_ymax currentChan optionXvY noactive c1_c2 menu
+    global global_ymin global_ymax currentChan optionXvY noactive c1_c2
     set validname [newfile_checkfile $current_filename 2]
     set validrange [catch {if {$global_xmax > $global_xmin} {}}]
     if {[expr {$validname == 1}] && [expr {$validrange == 0}]} {
@@ -1187,7 +1230,6 @@ proc Replot {} {
 	.c delete lines($currentChan)
 
 	# Find number of active channels. If changed, all channels shall be plotted.
-	
 	if {$optionSuperimpose == 0} {
 	    set noactive 0
 	    set screenpos 1
@@ -1215,7 +1257,7 @@ proc Replot {} {
 	# Plot active channel
 	
 	if {$dataset != 0} {
-	    if {$selectMatrix($dataset,4) != 1 || $c1_c2 <= 2} {
+	    if {$selectMatrix($dataset,4) != 1 && $c1_c2 <= 2} {
 		readData $dataset
 		set statusMsg $text_plot_wait
 		update
@@ -1252,7 +1294,6 @@ proc Replot {} {
 	}
 	
 	# Label axes and set displayed data
-	
 	labelaxes channelpos
 	set global_ymin(0) [format "%13.8g" $global_ymin($currentChan)]
 	set global_ymax(0) [format "%13.8g" $global_ymax($currentChan)]
@@ -1475,6 +1516,7 @@ proc calcCoord {dataset channel noactive screenpos} {
     global sizelimit xsizelimit xoffset yoffset aspect nodeDataMatrix
     global plotlimit_xmin plotlimit_xmax offplot_xmin offplot_xmax
     global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax
+
     set xmin $global_xmin; set xmax $global_xmax
     if {$optionInvert($channel)} {
 	set ymin $global_ymin($channel); set ymax $global_ymax($channel)
@@ -1483,6 +1525,7 @@ proc calcCoord {dataset channel noactive screenpos} {
     }
     if {$xmin == $xmax} {set xmax [expr ($xmax + .0001)]}
     if {$ymin == $ymax} {set ymax [expr ($ymax + .0001)]}
+
     set temp1 [expr $xmax-$xmin]
     set temp3 [expr $xsizelimit/$temp1]
     if {$optionLog($channel) == 1} {
@@ -1531,7 +1574,6 @@ proc calcCoord {dataset channel noactive screenpos} {
 	    set result $offplot_ymax($noactive,$screenpos)
 	}
 	set nodeDataMatrix($dataset,$counter,5) $result
-
 	if {$nodeDataMatrix($dataset,$counter,6) <= 1} {
 	    mkNode $dataset $counter $channel
 	    if {$nodeDataMatrix($dataset,$counter,1) == 1} {incr timepoints($channel)}
@@ -1555,9 +1597,32 @@ proc XvYcalcCoord {dataset channel noactive screenpos} {
     global sizelimit xsizelimit xoffset yoffset aspect nodeDataMatrix
     global plotlimit_xmin plotlimit_xmax offplot_xmin offplot_xmax
     global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax
+    global timestart timestop
 
+    
     set xmin $global_ymin(1); set xmax $global_ymax(1); 
     set ymax $global_ymin(2); set ymin $global_ymax(2);
+
+    # first point 
+#    for {set counter 1} {$counter < $timepoints(1)} {incr counter} {
+#	if { $xmax <= $nodeDataMatrix($c1_vs_c2(0),$counter,3) } {
+#             set global_ymax(1) $nodeDataMatrix($c1_vs_c2(0),$counter,3)
+#	puts "$global_ymin(1),$global_ymax(1)";
+#	set global_ymin(1) $global_ymax(1);
+#	}
+#    }
+
+    # first point 
+#    for {set counter 1} {$counter < $timepoints(1)} {incr counter} {
+#	if { $ymin <= $nodeDataMatrix($c1_vs_c2(1),$counter,3) } {
+#             set global_ymax(2) $nodeDataMatrix($c1_vs_c2(1),$counter,3)
+#	puts "$global_ymax(2)";
+#	set global_ymin(2) $global_ymax(2);
+#	}
+#    }
+
+#    set xmin $global_ymin(1); set xmax $global_ymax(1); 
+#    set ymax $global_ymin(2); set ymin $global_ymax(2);
 
     if {$xmin == $xmax} {set xmax [expr ($xmax + .0001)]}
     if {$ymin == $ymax} {set ymax [expr ($ymax + .0001)]}
@@ -1568,20 +1633,39 @@ proc XvYcalcCoord {dataset channel noactive screenpos} {
     set temp4 [expr $ymax-$ymin]
     set temp5 [expr $sizelimit($noactive)/$temp4]
 
+    set flag 0;
     set counter2 1;
     for {set counter 1} {$counter < $nodeDataMatrix($c1_vs_c2(0),0,1) && $counter2 < $nodeDataMatrix($c1_vs_c2(1),0,1)} {incr counter} {
-	
 	for { } {$counter <= $counter2} { } {
-	    if { $nodeDataMatrix($c1_vs_c2(0),$counter,2) <= $nodeDataMatrix($c1_vs_c2(1),$counter2,2) } {
+	if { $timepoints(1) == $counter ||\
+	$timepoints(1) == $counter2} { break; }
+	    if { $nodeDataMatrix($c1_vs_c2(0),$counter,2) <= $nodeDataMatrix($c1_vs_c2(1),$counter2,2)} {
 		set xrel [expr $nodeDataMatrix($c1_vs_c2(0),$counter,3)-$xmin]
 		set result [expr $temp3*$xrel+$xoffset]
+		if {$result < $plotlimit_xmin} {
+		    set nodeDataMatrix($dataset,$counter,6) 2
+		    set result $offplot_xmin
+		}
+		if {$result > $plotlimit_xmax} {
+		    set nodeDataMatrix($dataset,$counter,6) 2
+		    set result $offplot_xmax
+		}
+
 		set nodeDataMatrix($c1_vs_c2(0),$counter,4) $result
 
 		if { $nodeDataMatrix($c1_vs_c2(1),$counter2,3) == " "} { break }
 		set yrel [expr $nodeDataMatrix($c1_vs_c2(1),$counter2,3)-$ymin]
 		set result [expr $temp5*$yrel+$plotlimit_ymin($noactive,$screenpos)]
+		if {$result < $plotlimit_ymin($noactive,$screenpos)} {
+		    incr nodeDataMatrix($dataset,$counter,6)
+		    set result $offplot_ymin($noactive,$screenpos)
+		}
+		if {$result > $plotlimit_ymax($noactive,$screenpos)} {
+		    incr nodeDataMatrix($dataset,$counter,6)
+		    set result $offplot_ymax($noactive,$screenpos)
+		}
 		set nodeDataMatrix($c1_vs_c2(0),$counter,5) $result
-		
+
 		mkNode $c1_vs_c2(0) $counter $channel
 		incr counter2;
 		break;
@@ -1600,6 +1684,8 @@ proc XvYlabelaxes {thePos} {
     global xoffset currentSet noOfChannels selectMatrix colorArray timebase
     global fullxscrpos xrightoffset dotsize polysize global_antennaname
     global optionLog optionSuperimpose optionInvert optionXvY switch_it
+    global timestart timestop timepoints c1_vs_c2 nodeDataMatrix
+
     upvar $thePos channelpos
     set xmin $global_xmin; set xmax $global_xmax
     for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
@@ -1692,6 +1778,12 @@ proc XvYlabelaxes {thePos} {
     }
     .c insert title1 0 [format "Station: %s" $global_antennaname]
     .c insert title2 0 [format "Filename: %s" $current_filename]
+    if { $optionXvY != 0 } {
+        .c insert x3 0 [time2str [expr $xmin+$timebase] 2]
+        .c insert x4 0 [time2str [expr $timebase+($xmax+$xmin)/2] 2]
+        .c insert x5 0 [time2str [expr $xmax+$timebase] 2]
+       }
+
 }
 
 # Procedure for labeling coordinate system axes and header
@@ -1807,7 +1899,8 @@ proc labelaxes {thePos} {
 
 proc calcRange {dataset channel} {
     global global_xmin global_xmax global_ymin global_ymax timepoints
-    global nodeDataMatrix global_xmode
+    global nodeDataMatrix global_xmode optionXvY
+
     if {$nodeDataMatrix($dataset,0,1) > 1} {
 	if {$global_xmode == 1} {
 	    set counter 1
@@ -2124,7 +2217,7 @@ proc newfile_OK {output} {
     global global_xmin global_xmax timebase global_xmaxoffset global_xdefmax
     global selectMatrix noOfSelects noOfChannels global_antennaname
     global timestart timestop currentSet oldyear firstday
-    global timepoints global_ymin global_ymax
+    global timepoints global_ymin global_ymax tk_version
     if [newfile_checkfile $newfile_filename $output] {
 	set current_filename $newfile_filename
 	set fileID [open $current_filename r]
@@ -2166,7 +2259,9 @@ proc newfile_OK {output} {
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
 	    set selectMatrix($counter,4) 0
 	}
-	if {$output == 0} {destroy .newfile}
+        if { $tk_version < 4.2 } {
+            if {$output == 0} {destroy .newfile}
+        }
 	SetXreset
 	changeXdata
 	Replot
@@ -2436,7 +2531,6 @@ proc fileselection_dialog {} {
 
 }
 
-
 # ==========================================================================
 #
 #                           TK WIDGETS SECTION
@@ -2455,6 +2549,7 @@ for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
     menubutton .mbar.data($counter) -text "Chan$counter" \
 	    -underline 4 -menu .mbar.data($counter).menu
 }
+
 
 frame .statusbar -relief raised -borderwidth 2
 label .labelStatusMsg -textvariable statusMsg
@@ -2525,30 +2620,50 @@ if { $tk_version < 4.2 } {
     set noactive 1; 
     set currentChan 2;
     if { $switch_it == 0} {
+	if { $c1_vs_c2(1) == 0 || $c1_vs_c2(0) == 0} {
+#	    set c1_vs_c2(1) $c1_vs_c2(0);
+            set statusMsg "ERROR: Please select (2)two channels Channels 1 and 2."
+	    set optionXvY 0
+	} else {
+	 XvYplot
+	}
+    } else {
+	set switch_it 0;
+	set tmp $c1_vs_c2(0);
+	set c1_vs_c2(0) $c1_vs_c2(1);
+	set c1_vs_c2(1) $tmp
+	set tmp2 $global_ymin(1);
+	set tmp3 $global_ymax(1);
+	set global_ymin(1) $global_ymin(2);
+	set global_ymax(1) $global_ymax(2);
+	set global_ymin(2) $tmp2;
+	set global_ymax(2) $tmp3;
 	if { $c1_vs_c2(1) == 0 } {
 	    set c1_vs_c2(1) $c1_vs_c2(0);
 	}
 	XvYplot
-    } else {
-	error "Click on Switch Channels to reset"
     }
 }
 .mbar.option.menu add command -label "Switch Channels" \
 	-command {
-    set noactive 1;
-    if { $switch_it == 0 } {
-	set switch_it 1;
-    } else { set switch_it 0; }
-    set tmp $c1_vs_c2(0);
-    set c1_vs_c2(0) $c1_vs_c2(1);
-    set c1_vs_c2(1) $tmp
-    set tmp2 $global_ymin(1);
-    set tmp3 $global_ymax(1);
-    set global_ymin(1) $global_ymin(2);
-    set global_ymax(1) $global_ymax(2);
-    set global_ymin(2) $tmp2;
-    set global_ymax(2) $tmp3;
-    XvYplot
+    if {$optionXvY==0} { 
+	set statusMsg "ERROR: You must be in chan1:chan2 mode."
+    } else {
+	set noactive 1;
+	if { $switch_it == 0 } {
+	     set switch_it 1;
+	} else { set switch_it 0; }
+	set tmp $c1_vs_c2(0);
+	set c1_vs_c2(0) $c1_vs_c2(1);
+	set c1_vs_c2(1) $tmp
+	set tmp2 $global_ymin(1);
+	set tmp3 $global_ymax(1);
+	set global_ymin(1) $global_ymin(2);
+	set global_ymax(1) $global_ymax(2);
+	set global_ymin(2) $tmp2;
+	set global_ymax(2) $tmp3;
+	XvYplot
+    }
 }
 
 frame .frame1
@@ -2569,9 +2684,11 @@ frame .subframe22222
 frame .subframe22223
 frame .subframe223
 
-button .buttonResetX -width 12 -text "Reset" -command {SetXreset; Replot}
-button .buttonAutoX -width 12 -text "Autoscale" -command {SetXauto; Replot}
-button .buttonAutoY -width 12 -text "Autoscale" -command {SetYauto; Replot}
+button .buttonResetX -width 12 -text "Reset" -command {SetXreset; if { $optionXvY } {dataMenuClick 1 0; dataMenuClick 2 0; XvYplot;} else { Replot}}
+
+button .buttonAutoX -width 12 -text "Autoscale" -command {SetXauto; if { $optionXvY } {dataMenuClick 1 0; dataMenuClick 2 0; XvYplot;} else { Replot}}
+
+button .buttonAutoY -width 12 -text "Autoscale" -command {SetYauto; if { $optionXvY } {dataMenuClick 1 0; dataMenuClick 2 0; XvYplot;} else {Replot}}
 
 label .labelTime -width 6 -text "Time"
 label .labelForm -anchor w -width 4
@@ -2605,21 +2722,32 @@ entry .entryYmin -width 20 -relief sunken -textvariable global_ymin(0)
 entry .entryYmax -width 20 -relief sunken -textvariable global_ymax(0)
 
 # X-axis bindings
-bind .entryTimestart <Return> {focus .; Replot}
+#bind .entryTimestart <Return> {focus .; Replot};
+bind .entryTimestart <Return> {focus .; if {$optionXvY } { XvYplot } else {Replot}};
 bind .entryTimestart <Left> {.entryTimestart icursor [expr insert-1]}
 bind .entryTimestart <Right> {.entryTimestart icursor insert}
-bind .entryTimestop <Return> {focus .; set global_xmode 0; Replot}
-bind .entryTimepoints <Return> {focus .; set global_xmode 1; Replot}
+
+bind .entryTimestop <Return> {focus .; set global_xmode 0; if {$optionXvY } { dataMenuClick 1 0; dataMenuClick 2 0; XvYplot } else { Replot}}
+
+bind .entryTimepoints <Return> {focus .; set global_xmode 1; if {$optionXvY } {dataMenuClick 1 0; dataMenuClick 2 0; XvYplot } else { Replot}}
+
+#bind .entryTimestop <Return> {focus .; set global_xmode 0; Replot}
+#bind .entryTimepoints <Return> {focus .; set global_xmode 1; Replot}
 bind .entryTimestart <FocusIn> {set xchangeFlag 1}
 bind .entryTimestop <FocusIn> {set xchangeFlag 1}
 bind .entryTimepoints <FocusIn> {set xchangeFlag 1}
 
 # Y-axis bindings
-bind .entryYmin <Return> {focus .;set global_ymin($currentChan) $global_ymin(0);Replot}
-bind .entryYmax <Return> {focus .;set global_ymax($currentChan) $global_ymax(0);Replot}
+bind .entryYmin <Return> {focus .; set global_ymin($currentChan) $global_ymin(0); if { $optionXvY} { dataMenuClick 1 0; dataMenuClick 2 0; XvYplot } else {Replot}}
+bind .entryYmax <Return> {focus .; set global_ymax($currentChan) $global_ymax(0); if { $optionXvY} { dataMenuClick 1 0; dataMenuClick 2 0; XvYplot } else {Replot}}
+
+#bind .entryYmin <Return> {focus .; set global_ymin($currentChan) $global_ymin(0);Replot}
+#bind .entryYmax <Return> {focus .; set global_ymax($currentChan) $global_ymax(0);Replot}
 
 canvas .c -width [expr $xsizelimit+$xoffset+$xrightoffset] \
-	-height [expr $ysizelimit+$yoffset+$yrightoffset]
+	-height [expr $ysizelimit+$yoffset+$yrightoffset+18]
+#canvas .c -width [expr $xsizelimit+$xoffset+$xrightoffset] \
+#	-height [expr $ysizelimit+$yoffset+$yrightoffset]
 
 bind .c <Button-1> {removePoint %x %y}
 
@@ -2687,6 +2815,9 @@ proc create_mainWindow {} {
 .c create text [expr $fullxscrpos+$xrightoffset-16] 25 -fill $colorArray(4) -anchor ne -tags {text axisname(4)}
 .c create text $halfxscrpos 25 -anchor s -tags {text title1}
 .c create text $halfxscrpos 25 -anchor n -tags {text title2}
+.c create text $plotlimit_xmin [expr $ysizelimit+$yoffset+30] -anchor n -tags {text x3}
+.c create text $halfxscrpos [expr $ysizelimit+$yoffset+30] -anchor n -tags {text x4}
+.c create text $plotlimit_xmax [expr $ysizelimit+$yoffset+30] -anchor n -tags {text x5}
 
 proc createSystem {no} {
 

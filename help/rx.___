@@ -1,43 +1,43 @@
                 rx - receiver monitor and control
- 
-              Syntax:      rx=channel,dcal,box,S,X,K,cal
- 
-              Response:    rx/channel,dcal,box,S,X,K,cal,lostat,value
- 
- 
- Settable parameters:
-            channel    Hex value or code word (next page). No default.
-            dcal       Delay cal heater, on (default) or off.
-            box        Box heaters. Turn on with A (default) or B (for the
-            A or B controller), or off.
-            S,X,K      IF amplifier controls, on (default) or off. 
-            cal        Noise cal control. May be on, off (default), oon
-            (Override on), oof (override off), or external
-            modulation.
- 
- Monitor-only parameters:
-            lostat     Status of LO, locked or unlocked.
-            value      Reading in A/D channel shown in first parameter.
-            Units are appropriate for channel in use.
- 
- Comments: 
- This command is used to control and monitor a standard
- cryogenic CDP S/X receiver.
- 
- MAT module functions are available.
- 
- Channel assignments for the "standard" receiver are on the
- next page. Your station's channel assignments are in the
- rxdef.ctl file. Details of the MAT protocol are in the MAT
- Communications manual.
- 
- The mnemonic RX and the receiver's address must be specified
- in matad.ctl control file.
+
+            Syntax:     rx=channel,dcal,box,S,X,K,cal
+
+            Response:   rx/channel,dcal,box,S,X,K,cal,lostat,value
+
+
+Settable parameters:
+          channel   Hex value or code word (next page). No default.
+            dcal        Delay cal heater, on (default) or off.
+          box       Box heaters. Turn on with A (default) or B (for the
+          A or B controller), or off.
+          S,X,K     IF amplifier controls, on (default) or off. 
+          cal       Noise cal control. May be on, off (default), oon
+          (Override on), oof (override off), or external
+          modulation.
+
+Monitor-only parameters:
+            lostat      Status of LO, locked or unlocked.
+          value     Reading in A/D channel shown in first parameter.
+          Units are appropriate for channel in use.
+
+Comments: 
+This command is used to control and monitor a standard
+cryogenic CDP S/X receiver.
+
+MAT module functions are available.
+
+Channel assignments for the "standard" receiver are on the
+next page. Your station's channel assignments are in the
+rxdef.ctl file. Details of the MAT protocol are in the MAT
+Communications manual.
+
+The mnemonic RX and the receiver's address must be specified
+in matad.ctl control file.
 
              Standard Receiver A/D converter channels
- 
- channel  code  Voltage         Description
- # (hex)  name  Div. Ratio
+
+channel code  Voltage         Description
+# (hex) name  Div. Ratio
     00  FRONT   1       Temperature probe: box front
     01  REAR    1       Temperature probe: box rear
     02  LO      1       Temperature probe: LO
@@ -45,15 +45,17 @@
     04  INLET   1       Temperature probe: inlet air 
                         (after heat)
     05  RET     1       Temperature probe: return air
-    06  SUP     1       Temperature probe: supply air (cold)
-    07  2.73V   2       -2.73 volt ref. for temperature probes
+    06  SUP     1       Temperature probe: supply air
+(cold)
+    07  2.73V   2       -2.73 volt ref. for temperature
+probes
     08  SIF     1       S-band IF power level
     09  XIF     1       X-band IF power level
     0A  KIF     1       Secondary S-band IF power level
     0B  SLO     1       S-band LO power level
     0C  XLO     1       X-band LO power level
     0D  KLO     1       Secondary S-band 2020 MHz LO power
- level 
+level 
     0E  LO5MHZ  1       5 MHz power level to LO
     0F          1       spare
     10  28V     101     +28 volt power supply voltage
@@ -75,8 +77,8 @@
                         in dewar
     1F  70K     1       temperature diode on 70K station 
                         in dewar
- 
- Note: This table applies only to standard S/X receivers.
- Channel assignments for your station's receiver may be found
- in control file rxdef.ctl. Conversion from volts to
- temperature for channels 0 through 6 is 100 deg C/V. 
+
+Note: This table applies only to standard S/X receivers.
+Channel assignments for your station's receiver may be found
+in control file rxdef.ctl. Conversion from volts to
+temperature for channels 0 through 6 is 100 deg C/V.

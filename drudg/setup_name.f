@@ -1,4 +1,4 @@
-      subroutine setup_name(itype,icode,isubpass,lnamep,nch)
+      subroutine setup_name(itype,icode,isubpass,lnamep)
 
 C SETUP_NAME generates the setup procedure name.
 
@@ -6,6 +6,7 @@ C SETUP_NAME generates the setup procedure name.
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
+      include 'hardware.ftni'
 
 C History
 C 991102 nrv New. Removed from PROCS and SNAP.
@@ -23,6 +24,7 @@ C Local
       character*28 cpass,cvpass
       character*1 cp ! selection from cpass or cvpass
       integer iflch,ichmv_ch,ichmv,jchar
+      integer num_trk_rec
       data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
       data cvpass /'ABCDEFGHIJKLMNOPQRSTUVWXYZAB'/
 
@@ -33,7 +35,7 @@ C Local
       else ! mnemonic name
         call trkall(itras(1,1,1,1,isubpass,istn,icode),
      .  lmode(1,istn,icode),
-     .  itrk,lpmode,npmode,ifan(istn,icode))
+     .  itrk,lpmode,npmode,ifan(istn,icode),num_trk_rec)
         nch = ICHMV(lnamep,1,LCODE(ICODE),1,nco)   ! ff
         CALL M3INF(ICODE,SPDIPS,IB)
 C       choices in LBNAME are D,8,4,2,1,H,Q,E
@@ -46,7 +48,9 @@ C       else
 C         cp=cpass(isubpass:isubpass)
 C       endif
         NCH=ICHMV_ch(lnamep,NCH,cp)
-      endif  ! setup or mnemonic 
+      endif  ! setup or mnemonic
+! if two recorders, append the recorder number.
+      if(krec_append) nch=ichmv_ch(lnamep,nch,crec(irec))
 
       return
       end

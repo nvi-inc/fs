@@ -178,8 +178,8 @@ struct vrepro_cmd *lcl;
       case 6:
         ind=*count-5;
         ivalue=lcl->equalizer[ ind];
-        if(ivalue>=0 && ivalue <NKEY_EQU )
-          strcpy(output,key_equ[ivalue]);
+        if(ivalue>=0 && ivalue <NKEY_EQU3 )
+          strcpy(output,key_equ3[ivalue]);
         else
           strcpy(output,BAD_VALUE);
         break;

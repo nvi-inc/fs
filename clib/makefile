@@ -24,7 +24,9 @@ get_k4time.o v_vlt_head.o k4label_util.o k4rec_mode_util.o k4recpatch_util.o\
 rp2code.o k4pcalports_util.o rp2codek41.o rp2codek42.o tpi_norack.o\
 selectcmd_util.o rollform_util.o mk4vcd.o vlbabbcd.o mk4bbcd.o tpicd_util.o\
 onoff_util.o flux_val.o find_next_noncomment.o get_tcal_fwhm.o get_gain_par.o\
-calrx_util.o
+calrx_util.o ds_util.o dscon_util.o bsfo2vars.o lbaifpd.o lba_cor_util.o \
+lba_ft_util.o lba_ifp_util.o lba_mon_util.o lba_trkfrm_util.o tpi_lba.o \
+dscon_v.o fsmetc.o
 #
 CFLAGS = 
 #FFLAGS = 

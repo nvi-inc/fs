@@ -66,6 +66,8 @@ m3init()
     mvaddstr(ROW1+1,COL1+13,"(IFC)");
     mvaddstr(ROW1+1,COL1+26,"(IFD)");
     mvaddstr(ROW1+2,COL1,"BBC");
+  } else if(shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) {
+    mvaddstr(ROW1+2,COL1+1,"IFP");
   } else {
     mvaddstr(ROW1,COL1+13,"(IF1)");
     mvaddstr(ROW1,COL1+26,"(IF2)");
@@ -79,6 +81,8 @@ m3init()
   standend();
 
   for(j=1;j<=14;j++) {
+    if ((shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) 
+        && j > 2*shm_addr->n_das) break;
     move(ROW1+2+j,COL1+1);
     preint(outpt,j,-2,1);
     printw("%s",outarr);
@@ -99,17 +103,19 @@ mout3()
     outpt = &outarr[0];
     ptfreq= &freq[0];
 
-    move(ROW1,COL1+7);
-    preflt(outpt,shm_addr->systmp[28],-5,1);
-    printw("%s",outarr);
+    if(shm_addr->equip.rack != LBA && shm_addr->equip.rack != LBA4) {
+      move(ROW1,COL1+7);
+      preflt(outpt,shm_addr->systmp[28],-5,1);
+      printw("%s",outarr);
 
-    move(ROW1,COL1+20);
-    preflt(outpt,shm_addr->systmp[29],-5,1);
-    printw("%s",outarr);
+      move(ROW1,COL1+20);
+      preflt(outpt,shm_addr->systmp[29],-5,1);
+      printw("%s",outarr);
 
-    move(ROW1+1,COL1+7);
-    preflt(outpt,shm_addr->systmp[30],-5,1);
-    printw("%s",outarr);
+      move(ROW1+1,COL1+7);
+      preflt(outpt,shm_addr->systmp[30],-5,1);
+      printw("%s",outarr);
+    }
 
     if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
       move(ROW1+1,COL1+20);
@@ -123,6 +129,9 @@ mout3()
         long bbc2freq(),freq;
         freq=bbc2freq(shm_addr->bbc[i-1].freq);
         sprintf(ptfreq,"%-06.2f",(float)freq/100);
+      } else if(shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) {
+        if (i > 2*shm_addr->n_das) break;
+        sprintf(ptfreq,"%-06.2lf",shm_addr->das[(i-1)/2].ifp[(i-1)%2].frequency);
       } else {
         k = (i-1)*6;
         memcpy(ptfreq,shm_addr->lfreqv+k,6);

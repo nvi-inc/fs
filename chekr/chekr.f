@@ -23,6 +23,8 @@ C     GETTP - decode the MATCN buffers for TP
 C     ERR_REP - report errors from MK3 modules
 C     RXCHK - receiver check
 C     HDCHK - tape drive check
+C
+      integer fc_nsem_test
 C 
 C  LOCAL VARIABLES: 
       integer ichcm_ch
@@ -96,6 +98,8 @@ C
         call mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr)
       else if (VLBA.eq.rack)  then
         call vlbarack(lwho)
+      else if (LBA.eq.rack.or.LBA4.eq.rack)  then
+        call lbarack(lwho,ichecks)
       endif
       if (MK3.eq.drive(1).or.MK4.eq.drive(1)) then
         call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
@@ -179,6 +183,9 @@ C
             call fs_get_ichvlba(icheck(i),i)
          else if(rack.eq.MK3.or. rack.eq.MK4) then
             call fs_get_icheck(icheck(i),i)
+         else if((rack.eq.LBA.or.rack.eq.LBA4).and.
+     .           i.le.2*MAX_DAS) then
+            call fs_get_ichlba(icheck(i),i)
          endif
       enddo
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
@@ -206,6 +213,15 @@ C
          call wait_relt('chekr',ip,2,1)
          call fc_rte_rawt(after)
          kpapa=fc_dad_pid().ne.0
+         if ((rack.eq.LBA.or.rack.eq.LBA4).and.
+     .       fc_nsem_test('mont4',5).ne.0) then
+            do i = 1, 2*MAX_DAS
+               call fs_get_ichlba(icheck(i),i)
+               if(icheck(i).gt.0) then
+                  call ifpstatus(lwho,i)
+               endif
+            enddo
+         endif
          call fs_get_select(select)
          if (drive(1).eq.s2.and.select.eq.0) then
             call fs_get_ichs2(icheck(18))
@@ -237,6 +253,9 @@ C
                call fs_get_ichvlba(icheck(i),i)
             else if(rack.eq.MK3.or. rack.eq.MK4) then
                call fs_get_icheck(icheck(i),i)
+            else if((rack.eq.LBA.or.rack.eq.LBA4).and.
+     .              i.le.2*MAX_DAS) then
+               call fs_get_ichlba(icheck(i),i)
             endif
          enddo
          if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then

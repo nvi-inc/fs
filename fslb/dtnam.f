@@ -28,9 +28,9 @@ C     NC - character position in LNAM
 C     IC2 - 2nd character of mnemonic 
 C 
 C  CONSTANTS: 
-      character*5 cistcr
+      character*6 cistcr
 C 
-      data cistcr /'oeivb'/
+      data cistcr /'oeivbp'/
 C          - legal decimal values for 1st character of module name
 C 
 C  DATE  WHO  CHANGES 
@@ -42,12 +42,12 @@ C  Initialize and transfer control based on first character of module name
       cicr = ' '
       call hol2char(lnam,ifc,ilc,cicr)
 c
-      do i=1,9
+      do i=1,6
         if (cicr(1:1).eq.cistcr(i:i)) goto 105 
       enddo
-      goto 160   !! if start with a number 0-9 or a,c,d,f
-105   goto (110,120,130,140,150) i 
-C            o   e   i   v   b
+      goto 170   !! if start with a number 0-9 or a,c,d,f
+105   goto (110,120,130,140,150,160) i 
+C            o   e   i   v   b   p
 C
 
 110   continue  !! ODD
@@ -80,7 +80,7 @@ C
       endif
       goto 900 
 
-C  Handle IFD's 
+C  Handle IFD's and IFPs
 
 130   continue
 
@@ -100,6 +100,30 @@ C  Handle IFD's
      .  call char2hol('ic',dtnam,1,2)
       if ((cicr(nc:nc).eq.'d').and.(cicr(nc+1:nc+1).eq.' '))
      .  call char2hol('id',dtnam,1,2)
+      if (cicr(nc:nc).eq.'f') nc=3
+      if (cicr(nc:nc).eq.'p') then
+        if (cicr(nc+1:nc+1).eq.' ')
+     .    call char2hol('ip',dtnam,1,2)
+        if ((cicr(nc+1:nc+1).ge.'1').and.(cicr(nc+1:nc+1).le.'9').or.
+     .      (cicr(nc+1:nc+1).ge.'a').and.(cicr(nc+1:nc+1).le.'g')) then
+          if (cicr(nc+2:nc+2).eq.' ')
+     .      call char2hol(cicr(nc:nc+1),dtnam,1,2)
+        endif
+        if ((cicr(nc+1:nc+1).eq.'0').and.
+     .      (cicr(nc+2:nc+2).ge.'1').and.(cicr(nc+2:nc+2).le.'9')) then
+          call char2hol(cicr(nc:nc),dtnam,1,1)
+          call char2hol(cicr(nc+2:nc+2),dtnam,2,2)
+        endif
+        if ((cicr(nc+1:nc+1).eq.'1').and.
+     .      (cicr(nc+2:nc+2).ge.'0').and.(cicr(nc+2:nc+2).le.'6')) then
+          call char2hol(cicr(nc+2:nc+2),ic2,1,1)
+          ic2=ic2+49   !! change the number to corresponing letter,
+          call hol2char(ic2,1,1,cic2)
+C                       i.e. 5 to f
+          call char2hol(cicr(nc:nc),dtnam,1,1)
+          call char2hol(cic2,dtnam,2,2)
+        endif
+      endif
 
       goto 900 
 
@@ -218,9 +242,19 @@ C    !!! BCn
       endif
       goto 900 
 
+160   continue !!! P's
+
+      if (cicr(3:3).eq.' ') then
+        if ((cicr(2:2).ge.'1'.and.cicr(2:2).le.'9').or.(cicr(2:2).ge.'a'
+     ..and.cicr(2:2).le.'g')) call char2hol(cicr(1:2),dtnam,1,2)
+        goto 900 
+      endif
+
+      goto 900 
+
 C  Take care of other baseband detectors not leading with a "b"
 
-160   continue
+170   continue
 
       if (cicr(1:1).eq.'0') then    !!! BBCnn
         if ((cicr(2:2).ge.'1').and.(cicr(2:2).le.'9')) then

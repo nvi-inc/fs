@@ -1,0 +1,3151 @@
+#!/usr/bin/wish -f
+
+# ==========================================================================
+#
+#                             INITILIZING SECTION
+#
+# ==========================================================================
+
+# Set some global constants and variables
+# ---------------------------------------
+
+# Screen layout constants
+
+# Determine the resolution. 
+  set win_sizeX [winfo screenwidth .]
+  set win_sizeY [winfo screenheight .]  
+  wm geometry . +0+0
+
+# Directories
+  set LIBDIR /usr2/fs/logpl/lib
+
+#position window full screen from top left corner.
+# wm geometry . $vieX\x$vieY+0+0
+  if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
+      set size 2.5  ;# Multipication factor to change size of plotting area
+  } else {
+      set size 3    ;# Multipication factor to change size of plotting area
+  }
+set aspect 1.1      ;# Factor of (X-axis size)/(Y-axis size)
+set xoffset 85      ;# Distance between window edge and plotting area vert-axis
+set yoffset 65      ;# Distance between window edge and plotting area upper limit
+set xrightoffset 85 ;# Distance between text labels and plotting area right limit
+set yrightoffset 30 ;# Distance between window edge and plotting area horz-axis
+set ytitleoffset 15 ;# Distance between window edge and header text for plot
+set pointoffplot 4  ;# Distance between effective plotting area and point outside
+                     # plot marking line.
+set dotsize 2       ;# Size of data point dots, integer multiplication factor
+
+# Initialization of global variables
+
+set global_startmode 0                ;# 0=Interactive mode; 1=Command-line mode
+                                       # 2=Script-file mode
+set current_filename ""               ;# The selected log file
+set current_CTL "/usr2/control/logpl.ctl" ;# Default path to logpl control file.
+set current_DefaultDir /usr2/log      ;# Default directory for FS log files
+set current_TEMP /tmp/logpl.tmpresult ;# Temporary file for grep and tail commands.
+set statusMsg "Ready."                ;# Status field on bottom of window
+set global_xmin 0                     ;# Lowest time on current plot.
+set global_xmax 0                     ;# Highest time on current plot.
+set timebase 0.0                      ;# Lowest time in current log file.
+set global_xmaxoffset 0.0             ;# Highest time in current log file.
+set global_xdefmax 0                  ;# Time difference between xbase and xmaxoffset.
+set noOfSelects 1                     ;# Current number of selections.
+set currentChan 1                     ;# Selected set of data, min=1, max=noOfChannels.
+set newChan 1                         ;# Help variable for currentChan.
+set noOfChannels 4                    ;# Number of data channels, min=1, max=4.
+set global_xmode 0                    ;# 0=Set highest time as 'stop' entry field.
+                                       # 1=Set highest time as '#pts' entry field.
+set oldactive 0                       ;# Number of active channels at last Replot
+set xchangeFlag 0                     ;# 1 if user has changed X-axis data, 0 otherwise.
+set c1_c2 0                           ;# which channel 1-2.
+set switch_it 0                       ;# Chan2 vs Chan1, on/off.
+set optionXvY 0                       ;# Chan1 vs Chan2, on/off.
+set optionLine 0                      ;# Connecting line, on/off.
+set optionSuperimpose 0               ;# Superimposed plots, on/off.
+set firstday -1                       ;# first day encountered in type 1 log
+set menucnt 0                         ;# submenu count
+
+# Initialization of channel data
+
+for {set counter 0} {$counter <= $noOfChannels} {incr counter} {
+    set timepoints($counter) 0        ;# No of points displayed on screen
+    set global_ymin($counter) 0       ;# No of points displayed on screen
+    set global_ymax($counter) 0       ;# No of points displayed on screen
+    set currentSet($counter) 0        ;# Current data selection on Y-axis
+                                       # 0=No data, >0 = Index in selectMatrix
+    set optionInvert($counter) 0      ;# Invert Y-axis, on/off.
+    set optionLog($counter) 0         ;# Log scale on Y-axis, on/off.
+    set c1_vs_c2($counter) 0          ;# Channel numbers.
+}
+
+# Colors used for separating channels
+
+set colorArray(1) Black
+set colorArray(2) NavyBlue
+set colorArray(3) red4
+set colorArray(4) DarkGreen
+
+# Initialization of selectMatrix (menu selections in channel menus).
+
+for {set counter -1} {$counter >= -$noOfChannels} {incr counter -1} {
+    set selectMatrix($counter,1) ""    ;# Command
+    set selectMatrix($counter,2) 0     ;# Parameter
+    set selectMatrix($counter,3) [format "(as specified with 'command' and 'parm' commands for channel %d)" [expr -$counter]]  ;# Description
+    set selectMatrix($counter,4) 0     ;# 1=Data in memory, 0=Data not in memory
+    set selectMatrix($counter,5) ""    ;# Optional matching search string
+}
+
+# Status messages
+
+set text_ready "Ready."
+set text_plot_wait "Preparing plot, please wait..."
+set text_printing_wait "Printing, please wait..."
+set text_title_preferences "I/O setup"
+set newfiletext_nofile_specified "No file specified."
+set newfiletext_nofile "The file specified could not be opened."
+set newfiletext_noday "The file specified did not start with a valid day no."
+set text_generating_list "Generating source list, please wait..."
+set text_generating_glist "Generating log file entry list, please wait..."
+set text_creating_lines "Preparing lines, please wait..."
+set text_no_logfile "ERROR: Current log file was not valid."
+set text_outOfRange "ERROR: Time range specified was too big to represent. Max 497 days allowed."
+set text_selection_instruction "Press 'Update' to accept changes."
+set text_selection_enternew "Press 'Update' to create new selection."
+set text_selection_BOF "No more previous selections."
+set glist_error_nofile "ERROR: Source log file did not contain any data for current selection."
+
+# Default printing options for GUI mode. Some changes made if startup in cmdline mode.
+
+set print_filename "logplot_output"  ;# Default output file name
+set print_destination 0  ;# 0=Printer, 1=File
+set print_command 0      ;# 0=lpr, 1=psprint, 2=lpr disabled, 3=psprint disabled
+set print_overwrite 3    ;# 0=Yes, 1=No, 2=Yes disabled, 3=No disabled
+set current_printmode 0  ;# 0=Print plot, 1=Print text. Set by create_printWindow.
+
+# Help text for help command in command-line mode
+
+set helptext {
+Command  Parameter     Description
+-------  ---------     -----------
+
+command= SNAP-command  Command to grep for in log file, for current data
+                       channel.
+control= filename      Read pre-set selections from logpl control file.
+channel= int           Set the current data channel. Range 1-4.
+cfile=   filename      Transfer control to command file.
+invert=  0/1           Invert Y-axis on plot, on/off.
+exit     void          Terminate logpl and exit.
+glist=   int,int/#int  Set time as (start,stop or #points), or "reset". 
+                       Then write all log file source lines in range.
+help     void          Display help text (this text).
+line=    0/1           Connecting line between data points on/off.
+list=    int,int/#int  Set time as (start,stop or #points), or "reset".
+                       Then write a list of all data points in range.
+log=     filename      Open specified log file.
+lscale=  0/1           Logarithmic Y-axis scale on/off.
+output=  filename,mode Set output filename for plots or "printer" for $PRINTER.
+                       mode = lpr/psprint       ;when destination is $PRINTER.
+                       mode = overwrite/append  ;when destination is filename.
+parm=    int           The data column following the command in the log file,
+                       for the current data channel.
+plot=    int,int/#int  Set time as (start,stop or #points), or "reset".
+                       Then write plot to output, in eps format.
+query=   varname       Query any Tcl variable. Used for system maintainance.
+scale=   int,int       Set the Y-axis scale for the current channel.
+                       Use scale=0,0 to autoscale the Y-axis.
+select=  int           Set current channel to display data as specified by 
+                       preset command in logpl control file. Select=0 disables
+                       current channel (i.e. no data is shown).
+string=  string        Optional string for extracting data from log file. 2nd
+                       level grep, after the Command string. Current data chan.
+super=   0/1           Print superimposed plots, on/off.
+
+You can always query the current settings by typing the command without setting
+a new value (i.e. without the '=' sign).
+}
+
+# Help variables for faster computing (one-time-only calculations)
+
+set xsizelimit [expr 180*$size*$aspect]
+set ysizelimit [expr 180*$size]
+set halfxscrpos [expr 90*$size*$aspect+$xoffset]
+set fullxscrpos [expr 180*$size*$aspect+$xoffset]
+set plotlimit_xmin $xoffset
+set plotlimit_xmax [expr $xoffset+$xsizelimit]
+set offplot_xmin [expr $xoffset-$pointoffplot]
+set offplot_xmax [expr $xoffset+$xsizelimit+$pointoffplot]
+
+set sizelimit(1) [expr 180*$size]
+set sizelimit(2) [expr 90*$size]
+set sizelimit(3) [expr 60*$size]
+set sizelimit(4) [expr 45*$size]
+
+set offplot_ymin(1,1) $yoffset
+set offplot_ymax(1,1) [expr $yoffset+$sizelimit(1)]
+
+set offplot_ymin(2,1) $yoffset
+set offplot_ymax(2,1) [expr $yoffset+$sizelimit(2)]
+set offplot_ymin(2,2) $offplot_ymax(2,1)
+set offplot_ymax(2,2) [expr $yoffset+$sizelimit(1)]
+
+set offplot_ymin(3,1) $yoffset
+set offplot_ymax(3,1) [expr $yoffset+$sizelimit(3)]
+set offplot_ymin(3,2) $offplot_ymax(3,1)
+set offplot_ymax(3,2) [expr $yoffset+$sizelimit(3)+$sizelimit(3)]
+set offplot_ymin(3,3) $offplot_ymax(3,2)
+set offplot_ymax(3,3) [expr $yoffset+$sizelimit(1)]
+
+set offplot_ymin(4,1) $yoffset
+set offplot_ymax(4,1) [expr $yoffset+$sizelimit(4)]
+set offplot_ymin(4,2) $offplot_ymax(4,1)
+set offplot_ymax(4,2) [expr $yoffset+$sizelimit(2)]
+set offplot_ymin(4,3) $offplot_ymax(4,2)
+set offplot_ymax(4,3) [expr $yoffset+$sizelimit(2)+$sizelimit(4)]
+set offplot_ymin(4,4) $offplot_ymax(4,3)
+set offplot_ymax(4,4) [expr $yoffset+$sizelimit(1)]
+
+set count1 1
+while {$count1 <= 4} {
+    set count2 1
+    while {$count2 <= $count1} {
+	set plotlimit_ymin($count1,$count2) \
+		[expr $offplot_ymin($count1,$count2)+$pointoffplot]
+	set plotlimit_ymax($count1,$count2) \
+		[expr $offplot_ymax($count1,$count2)-$pointoffplot]
+	incr count2
+    }
+    incr count1
+}
+
+set sizelimit(1) [expr 180*$size-2*$pointoffplot]
+set sizelimit(2) [expr 90*$size-2*$pointoffplot]
+set sizelimit(3) [expr 60*$size-2*$pointoffplot]
+set sizelimit(4) [expr 45*$size-2*$pointoffplot]
+
+set polysize [expr $dotsize+1]
+
+# Printer colormap (all colors set to black)
+
+for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+    set colorMap($colorArray($counter)) {0.0 0.0 0.0 setrgbcolor}
+}
+
+# ==========================================================================
+#
+#                         TIME CONVERTING SECTION
+#
+#    NB! The procedures in this section are only designed to work from
+#        January 1 (day 1), 1970 until March 1, (day 50), 2100.
+#
+# ==========================================================================
+
+# The following line makes the TCL interpreter compatible with the IEEE
+# double precision number format, which is needed, although more than enough
+# precison, for the time converting procedures to work until year 2100.
+
+set tcl_precision 17
+
+# Procedure to convert time from numeric form to readable form
+# ------------------------------------------------------------
+
+# Input:  100ths of seconds after January 1, 1970
+# Output: Time, as a string in format decided by the outform parameter
+
+proc time2str {time outform} {
+    set time [expr double($time)]
+    set leapyears [expr int(($time+3153600000.0)/12623040000.0)]
+    set day366 [expr int(($time+3153600000.0+8640000.0)/12623040000.0)-$leapyears]
+    set time [expr $time-$leapyears*8640000.0]
+    set year [expr int($time/3153600000.0)-$day366]
+    set time [expr $time-$year*3153600000.0]
+    set day [expr int($time/8640000.0)]
+    set time [expr $time-$day*8640000.0]
+    set hour [expr int($time/360000.0)]
+    set time [expr $time-$hour*360000.0]
+    set min [expr int($time/6000.0)]
+    set time [expr $time-$min*6000.0]
+    set sec [expr int($time/100.0)]
+    set sec100 [expr int($time-$sec*100.0)]
+# not Y10K compliant, will need leading zero added for years less than 10K
+    set year [expr $year+1970]
+    incr day 1
+    if {$day < 10} {set day [format "0%s" $day]}
+    if {$day < 100} {set day [format "0%s" $day]}
+    if {$hour < 10} {set hour [format "0%s" $hour]}
+    if {$min < 10} {set min [format "0%s" $min]}
+    if {$sec < 10} {set sec [format "0%s" $sec]}
+    if {$sec100 < 10} {set sec100 [format "0%s" $sec100]}
+    switch $outform {
+	1 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
+		;# FS log file format}
+	2 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
+		;# Used by labelaxes}
+	3 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
+		;# Used by changeXdata (timestart, timestop)}
+	4 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
+		;# Used by listRange}
+    }
+    return $result
+}
+
+# Procedure to determine how many leap years have passed since 1970.
+# ---------------------------------------------------
+
+# This procedure is only designed to work between the years 1970 and 2100.
+# During this time period, every 4th year is a leap year, except year
+# 2100, which why the routine fails in 2101 and after.
+# The internationally accepted gregorian calendar removes 3 leap years per
+# 400 years, namely those that can be divided by 100, but not by 400.
+
+# Input:  Number of years after 1970
+# Output: Number of leap years passed since Input.
+
+proc leap_years {year} {
+# not Y2.1K compliant, (actually) 2.101 is when it fails
+    set leaps [expr ($year+1)/4]
+    set leaps [expr int($leaps)]
+    return $leaps
+}
+
+# Procedure to convert time from readable form to numeric form
+# ------------------------------------------------------------
+
+# Input:  Time, as a string in format YYDDDHHMMSSSS or YYYY.DDD.HH:MM:SS.SS or
+#         DDDHHMMSS and the year is supplied externally by $oldyear
+# Output: 100ths of seconds after January 1, 1970
+
+proc str2time {str} {
+    global oldyear firstday
+    if {[string length $str] >= 10 } {
+# not Y10K compliant, there will be a '.' at index 9 
+	if {[string first [string range $str 9 9] "0123456789"] == -1} {
+	    set year $oldyear
+	    set day [string range $str 0 2]
+	    set hour [string range $str 3 4]
+	    set min [string range $str 5 6]
+	    set sec [string range $str 7 8]
+	    set sec100 0
+	    if {$year < 1970} {
+		set year 0
+	    } else {
+		incr year -1970
+	    }
+	    if {$firstday < 0 } {
+		set firstday $day
+	    } elseif {$day < $firstday} {
+		incr year 1
+	    }
+	} elseif {[string length $str] >= 13 && [string compare [string range $str 4 4] "."] == 0} {
+	    set year [string range $str 0 3]
+	    set day [string range $str 5 7]
+	    set hour [string range $str 9 10]
+	    set min [string range $str 12 13]
+	    set sec [string range $str 15 16]
+	    set sec100 [string range $str 18 19]
+	    if { $firstday < 0} {
+		set oldyear $year
+		set firstday $day
+	    }
+	    incr year -1970
+	} else {
+# not Y10K compliant
+	    set year [string range $str 0 1]
+	    set day [string range $str 2 4]
+	    set hour [string range $str 5 6]
+	    set min [string range $str 7 8]
+	    set sec [string range $str 9 10]
+	    set sec100 [string range $str 11 12]
+	    if {$year < 70} {
+		incr year 30
+	    } else {
+		incr year -70
+	    }
+	    if { $firstday < 0} {
+		set oldyear [expr $year+1970]
+		set firstday $day
+	    }
+	}
+
+	set year [string trimleft $year 0]
+	if {[string compare $year ""] == 0} {set year 0}
+	set day [string trimleft $day 0]
+	if {[string compare $day ""] == 0} {set day 0}
+	set hour [string trimleft $hour 0]
+	if {[string compare $hour ""] == 0} {set hour 0}
+	set min [string trimleft $min 0]
+	if {[string compare $min ""] == 0} {set min 0}
+	set sec [string trimleft $sec 0]
+	if {[string compare $sec ""] == 0} {set sec 0}
+	set sec100 [string trimleft $sec100 0]
+	if {[string compare $sec100 ""] == 0} {set sec100 0}
+	incr day -1
+	set time [expr 3153600000.0*$year+[leap_years $year]*8640000.0]
+	set time [expr $time+8640000.0*$day]
+	set time [expr $time+360000.0*$hour]
+	set time [expr $time+6000.0*$min]
+	set time [expr $time+100.0*$sec]
+	set time [expr $time+$sec100]
+    } else {
+	set time 0.0
+    }
+    return $time
+}
+
+# ==========================================================================
+#
+#                             I/O SECTION
+#
+# ==========================================================================
+
+# Procedure to read logpl control file, logpl.ctl
+# -----------------------------------------------
+
+proc readControl {filename} {
+    global noOfSelects selectMatrix current_TEMP
+    if [file isfile $filename] {
+	for {set counter -4} {$counter < $noOfSelects} {incr counter} \
+		{if [file isfile $current_TEMP.$counter] \
+		{exec rm -f $current_TEMP.$counter}}
+	set noOfSelects 1
+	set fileID [open $filename r]
+	set flagEOF [gets $fileID readline]
+	while {$flagEOF >= 0} {
+	    set comment [string first "*" $readline]
+	    if {$comment != 0} {
+		set conversions [scan $readline "%s%s%s%s" \
+			command parm description grepstring]
+		if {$conversions >= 3} {
+		    if {$conversions == 3} {set grepstring ""}
+		    set selectMatrix($noOfSelects,1) $command
+		    set selectMatrix($noOfSelects,2) $parm
+		    set selectMatrix($noOfSelects,3) $description
+		    set selectMatrix($noOfSelects,4) 0
+		    set selectMatrix($noOfSelects,5) $grepstring
+		    incr noOfSelects
+		}
+	    }
+	    set flagEOF [gets $fileID readline]
+	}
+	setDataMenus
+	return 1
+    } else {
+	return 0
+    }
+}
+
+# Procedure to build data menus after changes in selectMatrix
+# -----------------------------------------------------------
+
+proc setDataMenus {} {
+    global selectMatrix noOfSelects nodeDataMatrix noOfChannels currentSet
+    global menucnt
+
+    if {$noOfChannels > 0} {
+	.mbar.data(1).menu delete 0 last
+	.mbar.data(1).menu add radiobutton -label "No data" \
+		-variable currentSet(1) -value 0 -command {dataMenuClick 1 0}
+	.mbar.data(1).menu add separator
+	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
+	    lappend datamenu1($selectMatrix($counter,1)) \
+		    $selectMatrix($counter,3)
+	}
+	# Create the menubutton and menu
+	set m .mbar.data(1).menu
+
+	# Create a cascaded menu for each group of examples
+	if { $menucnt == 0 } {
+	    set i 0 
+	} else {
+	    set i $menucnt;
+	}
+	set counter 1
+	foreach key [lsort -decreasing [array names datamenu1]] {
+	    $m add cascade -label $key -menu $m.sub$i
+	    set sub [menu $m.sub$i -title "(Chan1)$key"]
+	    incr i
+	    foreach item [lsort -decreasing $datamenu1($key)] {
+		if {$counter%12 == 0} {
+		    $sub add radiobutton -label $item -variable currentSet(1) -value $counter -command {dataMenuClick 1 0} -columnbreak 1
+		} else {
+		    $sub add radiobutton -label $item -variable currentSet(1) -value $counter -command {dataMenuClick 1 0} -columnbreak 0
+		}
+		incr counter
+	    }
+	}
+	.mbar.data(1).menu add separator
+	.mbar.data(1).menu add checkbutton -label "Invert" \
+		-variable optionInvert(1) -command {dataMenuClick 1 1}
+	.mbar.data(1).menu add checkbutton -label "Log scale" \
+		-variable optionLog(1) -command {dataMenuClick 1 1}
+    }
+    if {$noOfChannels > 1} {
+	.mbar.data(2).menu delete 0 last
+	.mbar.data(2).menu add radiobutton -label "No data" \
+		-variable currentSet(2) -value 0 -command {dataMenuClick 2 0}
+	.mbar.data(2).menu add separator
+	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
+	    lappend datamenu2($selectMatrix($counter,1)) \
+		    $selectMatrix($counter,3)
+	}
+	# Create the menubutton and menu
+	set m .mbar.data(2).menu
+
+	# Create a cascaded menu for each group of examples
+	set i $menucnt;
+	set counter 1
+	foreach key [lsort -decreasing [array names datamenu2]] {
+	    $m add cascade -label $key -menu $m.sub$i
+	    set sub [menu $m.sub$i -title "(Chan2)$key" -tearoff 1]
+	    incr i
+	    foreach item [lsort -decreasing $datamenu2($key)] {
+		if {$counter%12 == 0} {
+		    $sub add radiobutton -label $item -variable currentSet(2) -value $counter -command {dataMenuClick 2 0} -columnbreak 1
+		} else {
+		    $sub add radiobutton -label $item -variable currentSet(2) -value $counter -command {dataMenuClick 2 0} -columnbreak 0
+		}
+		incr counter
+	    }
+	}
+	.mbar.data(2).menu add separator
+	.mbar.data(2).menu add checkbutton -label "Invert" \
+		-variable optionInvert(2) -command {dataMenuClick 2 1}
+	.mbar.data(2).menu add checkbutton -label "Log scale" \
+		-variable optionLog(2) -command {dataMenuClick 2 1}
+    }
+    if {$noOfChannels > 2} {
+	.mbar.data(3).menu delete 0 last
+	.mbar.data(3).menu add radiobutton -label "No data" \
+		-variable currentSet(3) -value 0 -command {dataMenuClick 3 0}
+	.mbar.data(3).menu add separator
+	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
+	    lappend datamenu3($selectMatrix($counter,1)) \
+		    $selectMatrix($counter,3)
+	}
+	# Create the menubutton and menu
+	set m .mbar.data(3).menu
+
+	# Create a cascaded menu for each group of examples
+	set i $menucnt;
+	set counter 1
+	foreach key [lsort -decreasing [array names datamenu3]] {
+	    $m add cascade -label $key -menu $m.sub$i
+	    set sub [menu $m.sub$i -title "(Chan3)$key" -tearoff 1]
+	    incr i
+	    foreach item [lsort -decreasing $datamenu3($key)] {
+		if {$counter%12 == 0} {
+		    $sub add radiobutton -label $item -variable currentSet(3) -value $counter -command {dataMenuClick 3 0} -columnbreak 1
+		} else {
+		    $sub add radiobutton -label $item -variable currentSet(3) -value $counter -command {dataMenuClick 3 0} -columnbreak 0
+		}
+		incr counter
+	    }
+	}
+	.mbar.data(3).menu add separator
+	.mbar.data(3).menu add checkbutton -label "Invert" \
+		-variable optionInvert(3) -command {dataMenuClick 3 1}
+	.mbar.data(3).menu add checkbutton -label "Log scale" \
+		-variable optionLog(3) -command {dataMenuClick 3 1}
+    }
+    if {$noOfChannels > 3} {
+	.mbar.data(4).menu delete 0 last
+	.mbar.data(4).menu add radiobutton -label "No data" \
+		-variable currentSet(4) -value 0 -command {dataMenuClick 4 0}
+	.mbar.data(4).menu add separator
+	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
+	    lappend datamenu4($selectMatrix($counter,1)) \
+		    $selectMatrix($counter,3)
+	}
+	# Create the menubutton and menu
+	set m .mbar.data(4).menu
+
+	# Create a cascaded menu for each group of examples
+	set i $menucnt;
+	set counter 1
+	foreach key [lsort -decreasing [array names datamenu4]] {
+	    $m add cascade -label $key -menu $m.sub$i
+	    set sub [menu $m.sub$i -title "(Chan4)$key" -tearoff 1]
+	    incr i
+	    foreach item [lsort -decreasing $datamenu4($key)] {
+		if {$counter%12 == 0} {
+		    $sub add radiobutton -label $item -variable currentSet(4) -value $counter -command {dataMenuClick 4 0} -columnbreak 1
+		} else {
+		    $sub add radiobutton -label $item -variable currentSet(4) -value $counter -command {dataMenuClick 4 0} -columnbreak 0
+		}
+		incr counter
+	    }
+	}
+	set menucnt $i
+	.mbar.data(4).menu add separator
+	.mbar.data(4).menu add checkbutton -label "Invert" \
+		-variable optionInvert(4) -command {dataMenuClick 4 1}
+	.mbar.data(4).menu add checkbutton -label "Log scale" \
+		-variable optionLog(4) -command {dataMenuClick 4 1}
+    }
+}
+
+# Procedure to handle clicks in data menus
+# ----------------------------------------
+
+proc dataMenuClick {menu mode} {
+    global currentSet newChan timepoints global_ymin global_ymax
+    global optionLog optionInvert c1_c2
+
+    set c1_c2 [expr $menu - 1]
+    if {$mode <= 0} {
+	set timepoints($menu) 0
+	set global_ymin($menu) 0
+	set global_ymax($menu) 0
+	set optionLog($menu) 0
+	set optionInvert($menu) 0
+    }
+    if {$mode >= 0} {
+	changeYdata
+	set newChan $menu
+	updateChandata
+	Replot
+    }
+}
+
+# Procedure for reading channel data from log file
+# ------------------------------------------------
+proc readData {inx} {
+    global nodeDataMatrix selectMatrix current_filename statusMsg
+    global timepoints current_TEMP timebase c1_vs_c2 c1_c2
+
+# collect information for chan1 vs chan2
+
+    set c1_vs_c2($c1_c2) $inx;
+
+    if { $c1_vs_c2(1) == 0 } {
+	#set c1_vs_c2(1) $inx ;#Channel 1
+    } elseif { $c1_vs_c2(0) == 0 } {
+	#set c1_vs_c2(0) $inx ;#Channel 2
+    }
+
+    incr c1_c2
+    if { $c1_c2 >= 2 } {set c1_c2 0} 
+#
+    set nocommand [string compare "" $selectMatrix($inx,1)]
+    if {[expr {$selectMatrix($inx,2) == 0}] || [expr {$nocommand == 0}]} {
+	set nodeDataMatrix($inx,0,1) 1
+	set nodeDataMatrix($inx,0,2) 0                  ;# Undo-counter
+	set selectMatrix($inx,4) 1                      ;# Dataset now in memory
+	set timepoints(0) 0
+	catch {exec grep ^.*$selectMatrix($inx,1) $current_filename > $current_TEMP.firstgrep}
+	catch {exec grep $selectMatrix($inx,5) $current_TEMP.firstgrep > $current_TEMP.$inx}
+	exec rm -f $current_TEMP.firstgrep
+    } else {
+	set datalabel [string tolower $selectMatrix($inx,3)]
+	set statusMsg "Reading $datalabel data, please wait..."
+	update
+	set noOfPoints 1
+	if ![catch {exec grep $selectMatrix($inx,1) $current_filename > $current_TEMP.firstgrep}] {
+	    if ![catch {exec grep $selectMatrix($inx,5) $current_TEMP.firstgrep > $current_TEMP.$inx}] {
+		set fileID [open $current_TEMP.$inx r]
+		set counter 1
+		set flagEOF [gets $fileID readline]
+		while {$flagEOF >= 0} {
+		    if { $selectMatrix($inx,2) > 0 } {
+			set datapos [string first $selectMatrix($inx,1) $readline]
+ 			set datapos [expr $datapos+[string length $selectMatrix($inx,1)]]
+			set dataline [string range $readline $datapos [string length $readline]]
+		    } else {
+			set datapos [string first $selectMatrix($inx,5) $readline]
+			set datapos [expr $datapos+[string length $selectMatrix($inx,5)]]
+			set dataline [string range $readline $datapos [string length $readline]]
+		    }
+
+                    # First remove all blanks, and leave only the commas.
+                    regsub -all {[ ]*,[ ]*} $dataline , dataline
+                    regsub -all {^[ ]+} $dataline {} dataline
+                    regsub -all {[ ]+} $dataline , dataline
+                    # Split it into parameters.
+                    set datalist [split $dataline ,]
+
+		    if { $selectMatrix($inx,2) > 0 } {
+			set value [lindex $datalist [expr $selectMatrix($inx,2)-1]]
+		    } else {
+			set value [lindex $datalist [expr $selectMatrix($inx,2)+2]]
+		    }
+		    set conversions [scan $value %f value]
+		    if {$conversions == 1} {
+			set abstime [str2time $readline]
+			set reltime [expr $abstime-$timebase]
+			set nodeDataMatrix($inx,$noOfPoints,1) 1        ;# Status flag
+			set nodeDataMatrix($inx,$noOfPoints,2) $reltime
+			set nodeDataMatrix($inx,$noOfPoints,3) $value
+			set nodeDataMatrix($inx,$noOfPoints,7) 0        ;# Undo-index
+			incr noOfPoints
+		    }
+		    set flagEOF [gets $fileID readline]
+		}
+		close $fileID
+	    }
+	    exec rm -f $current_TEMP.firstgrep
+	}
+	set nodeDataMatrix($inx,0,1) $noOfPoints
+	set nodeDataMatrix($inx,0,2) 0                  ;# Undo-counter
+	set selectMatrix($inx,4) 1                      ;# Dataset now in memory
+	set timepoints(0) [expr $noOfPoints-1]
+    }
+}
+
+# ==========================================================================
+#
+#                          COMMAND-LINE SECTION
+#
+# ==========================================================================
+
+# Procedure to decode command-line command
+# ----------------------------------------
+
+proc decode {cmdline} {
+    global helptext
+    set cmdlist [split $cmdline =]
+    set query [llength $cmdlist]
+    set arg [lindex $cmdlist 1]
+    set cmdline [string tolower $cmdline]
+    set cmdline [string trim $cmdline]
+    set result "ERROR: Command '$cmdline' not recognized. Type 'help' for help."
+    if {[string first cf $cmdline] == 0} {set result [cfileCmd $arg]}
+    if {[string first ch $cmdline] == 0} {set result [channelCmd $arg]}
+    if {[string first com $cmdline] == 0} {set result [commandCmd $query $arg 1]}
+    if {[string first con $cmdline] == 0} {set result [controlCmd $arg]}
+    if {[string first ex $cmdline] == 0} {exitCmd}
+    if {[string first gl $cmdline] == 0} {set result [listCmd $arg 2]}
+    if {[string first he $cmdline] == 0} {set result $helptext}
+    if {[string first in $cmdline] == 0} {set result [optionCmd $arg 3]}
+    if {[string first lin $cmdline] == 0} {set result [optionCmd $arg 1]}
+    if {[string first lis $cmdline] == 0} {set result [listCmd $arg 1]}
+    if {[string first ls $cmdline] == 0} {set result [optionCmd $arg 4]}
+    if {[string first ou $cmdline] == 0} {set result [outputCmd $arg]}
+    if {[string first pa $cmdline] == 0} {set result [commandCmd $query $arg 2]}
+    if {[string first pl $cmdline] == 0} {set result [plotCmd $arg]}
+    if {[string first que $cmdline] == 0} {set result [queryCmd $arg]}
+    if {[string first qui $cmdline] == 0} {exitCmd}
+    if {[string first sc $cmdline] == 0} {set result [scaleCmd $query $arg]}
+    if {[string first se $cmdline] == 0} {set result [selectCmd $arg]}
+    if {[string first st $cmdline] == 0} {set result [commandCmd $query $arg 3]}
+    if {[string first su $cmdline] == 0} {set result [optionCmd $arg 2]}
+    if {[string first :: $cmdline] == 0} {exitCmd}
+    set cmdlog [string first lo $cmdline]
+    set cmdvoid [string compare "" $cmdline]
+    if {$cmdlog == 0} {set result ""; logCmd $arg}
+    if {$cmdvoid == 0} {set result ""}
+    if {[expr {$cmdvoid != 0}] && [expr {$cmdlog != 0}]} {puts "$result"}
+    if {[string first ERROR $result] == 0} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc cfileCmd {filename} {
+    global cfile_filename current_filename
+    set correct [file isfile $filename]
+    if {$correct == 1} {set correct [newfile_checkfile $current_filename 2]}
+    if {$correct == 1} {
+	set fileID [open $filename r]
+	set EOF [gets $fileID readline]
+	while {$EOF >= 0} {
+	    set command [string trim $readline]
+	    set errorflag [decode $command] \
+		    ;# Recursive call for decoding command-file
+	    if {$errorflag == 1} {break}
+	    set EOF [gets $fileID readline]
+	}
+	if {$errorflag == 0} {
+	    return "Cfile: End of control file $filename reached."
+	} else {
+	    return "Cfile: Error in control file detected. Execution halted."
+	}
+    } else {
+	return "Cfile: Control file did not exist, or current log file was invalid."
+    }
+}
+
+proc channelCmd {chan} {
+    global currentChan
+    set conversions [scan $chan %d chan]
+    if {$conversions < 1} {set chan $currentChan}
+    if {[expr {$chan >= 1}] && [expr {$chan <=4}]} {
+	set currentChan $chan
+	return "Channel: Current data channel set to $currentChan."
+    } else {
+	return "Channel: The current data channel must be in range 1-4."
+    }
+}
+
+proc commandCmd {query newvalue mode} {
+    global selectMatrix currentSet timepoints global_ymin global_ymax currentChan
+    if {[ expr {$mode == 2}] && [expr {$query == 2}]} {
+	set query 1; set mode 4
+	set conversions [scan $newvalue %d $newvalue]
+	if {$conversions == 1} {if {$newvalue > 0} {set query 2; set mode 2}}
+    }
+    if {$query == 2} {
+	set timepoints($currentChan) 0
+	set global_ymin($currentChan) 0
+	set global_ymax($currentChan) 0
+	set currentSet($currentChan) -$currentChan
+	set selectMatrix(-$currentChan,4) 0
+	switch $mode {
+	    1 {set selectMatrix(-$currentChan,1) $newvalue}
+	    2 {set selectMatrix(-$currentChan,2) $newvalue}
+	    3 {set selectMatrix(-$currentChan,5) $newvalue}
+	}
+	set selectMatrix(-$currentChan,3) [format "Cmd=%s Parm=%d" \
+		$selectMatrix(-$currentChan,1) $selectMatrix(-$currentChan,2)]
+	set strset [string compare "" $selectMatrix(-$currentChan,5)]
+	if {$strset != 0} {set selectMatrix(-$currentChan,3) [format "%s String=%s" \
+		$selectMatrix(-$currentChan,3) $selectMatrix(-$currentChan,5)]}
+    }
+    switch $mode {
+	1 {return "Command: The command for channel $currentChan is $selectMatrix(-$currentChan,1)"}
+	2 {return "Parm: The parameter for channel $currentChan is $selectMatrix(-$currentChan,2)"}
+	3 {return "String: The matching string for channel $currentChan is $selectMatrix(-$currentChan,5)"}
+	4 {return "Parm: The parameter must be an integer greater than zero."}
+    }
+}
+
+proc controlCmd {filename} {
+    global current_CTL
+    set ctlOK [readControl $filename]
+    if {$ctlOK == 1} {set current_CTL $filename}
+    return "Control: Current logpl control file is $current_CTL"
+}
+
+proc listCmd {theTimes mode} {
+    global currentChan currentSet timestart timepoints timestop
+    global selectMatrix current_filename optionXvY
+    set dataset $currentSet($currentChan)
+    set validname [newfile_checkfile $current_filename 2]
+    if {[expr {$dataset != 0}] && [expr {$validname == 1}]} {
+	if {$selectMatrix($dataset,4) != 1} {readData $dataset}
+	setTimes $theTimes
+	calcRange $currentSet($currentChan) $currentChan
+	if {$mode == 1} {set noOfPoints [listRange $dataset]}
+	if {$mode == 2} {set noOfPoints [glistRange $dataset]}
+	return [format "List: Time from %s to %s, Data points listed=%d." $timestart $timestop $noOfPoints]
+    } else {
+	if {$mode == 1} {return "List: Current filename invalid, or channel set not to display any data."}
+	if {$mode == 2} {return "Glist: Current filename invalid, or channel set not to display any data."}
+    }
+}
+
+proc logCmd {filename} {
+    global newfile_filename current_filename global_startmode
+    if {[string length $filename] > 0} {
+	set newfile_filename $filename
+	newfile_OK $global_startmode
+    } else {
+	puts "Log: Selected FS log file is $current_filename"
+    }
+}
+
+proc optionCmd {newvalue option} {
+    global optionLine optionSuperimpose optionInvert optionLog currentChan
+    global optionXvY c1_vs_c2
+    proc bool2onoff {bool} {
+	if {$bool == 1} {return "on"}
+	if {$bool == 0} {return "off"}
+    }
+    set conversions [scan $newvalue %d newvalue]
+    if {$conversions == 1} {
+	if {[expr {$newvalue == 0}] || [expr {$newvalue == 1}]} {
+	    switch $option {
+		1 {set optionLine $newvalue}
+		2 {set optionSuperimpose $newvalue}
+		3 {set optionInvert($currentChan) $newvalue}
+		4 {set optionLog($currentChan) $newvalue}
+		5 {set optionXvY $newvalue}
+	    }
+	}
+    }
+    switch $option {
+	1 {return [format "Line: Connecting line is %s." [bool2onoff $optionLine]]}
+	2 {return [format "Super: Superimpose is %s." [bool2onoff $optionSuperimpose]]}
+	3 {return [format "Invert: Inverting on channel %d is %s." $currentChan [bool2onoff $optionInvert($currentChan)]]}
+	4 {return [format "Lscale: Log scale on channel %d is %s." $currentChan [bool2onoff $optionLog($currentChan)]]}
+	5 {return [format "XvY: chan2 vs chan1 %s." [bool2onoff $optionXvY]]}
+    }
+}
+
+proc outputCmd {argstr} {
+    global print_filename print_destination print_overwrite print_command
+    set arglist [split $argstr ,]
+    set outfile [lindex $arglist 0]
+    if {[string length $outfile] > 0} {
+	set outcode [string toupper $outfile]
+	set printer [string compare PRINTER $outcode]
+	if {$printer == 0} {
+	    set print_destination 0
+	} else {
+	    set print_destination 1
+	    set print_filename $outfile
+	}
+    }
+    if {[llength $arglist] > 1} {
+	set arg [lindex $arglist 1]
+	switch $print_destination {
+	    0 {
+		if {[string first l $arg] == 0} {set print_command 0}
+		if {[string first p $arg] == 0} {set print_command 1}
+	    }
+	    1 {
+		if {[string first o $arg] == 0} {set print_overwrite 0}
+		if {[string first a $arg] == 0} {set print_overwrite 1}
+	    }
+	}		
+    }
+    switch $print_destination {
+	0 {
+	    switch $print_command {
+		0 {return "Output: Output destination is \$PRINTER, with lpr command."}
+		1 {return "Output: Output destination is \$PRINTER, with psprint command."}
+	    }
+	}
+	1 {
+	    switch $print_overwrite {
+		0 {return "Output: Output filename is $print_filename, in overwrite mode."}
+		1 {return "Output: Output filename is $print_filename, in append mode."}
+	    }
+	}
+    }
+}
+
+proc plotCmd {theTimes} {
+    global current_filename print_filename print_destination tk_version
+    set validname [newfile_checkfile $current_filename 2]
+    if {$validname == 1} {
+	setTimes $theTimes
+	Replot
+	if { $tk_version < 4.0 } {
+	    wm deiconify .
+	}
+	update
+	print_OK
+	if { $tk_version < 4.0 } {
+	    wm iconify .
+	}
+	if {$print_destination == 1} {
+	    return "Plot: Encapsulated postscript plot was written to $print_filename"
+	} else {
+	    return "Plot: Encapsulated postscript plot was written to printer with lpr command."
+	}
+    } else {
+	return "Plot: Current filename is not valid. Use log command."
+    }
+}
+
+proc queryCmd {varname} {
+    upvar #0 $varname theValue
+    if [info exists theValue] {
+	return "Query: $varname=$theValue"
+    } else {
+	return "Query: No such variable."
+    }
+}
+
+proc scaleCmd {query yvalues} {
+    global global_ymin global_ymax currentChan
+    set conversions [scan $yvalues "%f,%f" ymin ymax]
+    if {$query == 2} {
+	set global_ymin($currentChan) 0
+	set global_ymax($currentChan) 0
+	if {$conversions >= 1} {set global_ymin($currentChan) $ymin}
+	if {$conversions >= 2} {set global_ymax($currentChan) $ymax}
+    }
+    return "Scale: min=$global_ymin($currentChan), max=$global_ymax($currentChan)"
+}
+
+proc selectCmd {snumber} {
+    global currentSet timepoints global_ymin global_ymax currentChan selectMatrix
+    set conversions [scan $snumber %d snumber]
+    if {$conversions == 1} {
+	if {[expr {$snumber == 0}] || [info exists selectMatrix($snumber,3)]} {
+	    set timepoints($currentChan) 0
+	    set global_ymin($currentChan) 0
+	    set global_ymax($currentChan) 0
+	    set currentSet($currentChan) $snumber
+	} else {
+	    return "Select: The logpl control file did not contain an entry for this number."
+	}
+    }
+    if {$currentSet($currentChan) != 0} {
+	return "Select: Channel $currentChan set to display $selectMatrix($currentSet($currentChan),3)."
+    } else {
+	return "Select: Channel $currentChan set not to display any data."
+    }
+}
+
+# Procedure to set min and max time values (called by listCmd and plotCmd)
+# ------------------------------------------------------------------------
+
+proc setTimes {theTimes} {
+    global timepoints timestart timestop currentChan global_xmode currentSet
+    if {[string first "RESET" [string toupper $theTimes]] == 0} {
+	SetXreset
+	updateTimedata
+	calcRange $currentSet($currentChan) $currentChan
+    } else {
+	set theTimes [split $theTimes ","]
+	if {[llength $theTimes] == 1} {set timestart $theTimes}
+	if {[llength $theTimes] == 2} {
+	    set timestart [lindex $theTimes 0]
+	    set theStop [lindex $theTimes 1]
+	    set isPoint [string compare "#" [string index $theStop 0]]
+	    if {$isPoint == 0} {
+		set timepoints($currentChan) [string range $theStop 1 end]
+		set global_xmode 1
+	    } else {
+		set timestop $theStop
+		set global_xmode 0
+	    }
+	    updateTimedata
+	}
+    }
+}
+
+
+# ==========================================================================
+#
+#                             PLOT SECTION
+#
+# ==========================================================================
+
+# Procedure to update channel data from screen to memory
+# ------------------------------------------------------
+
+proc updateChandata {} {
+    global newChan currentChan timepoints global_ymin global_ymax
+    updateTimedata
+    set correct [string length $timepoints(0)]
+    if {$correct > 0} {
+	set timepoints($currentChan) $timepoints(0)
+	set timepoints(0) $timepoints($newChan)
+    }
+    set correct [string length $global_ymin(0)]
+    if {$correct > 0} {
+# commented out to be able to set range.
+#	set global_ymin($currentChan) $global_ymin(0)
+	set global_ymin(0) [format "%13.8g" $global_ymin($newChan)]
+    }
+    set correct [string length $global_ymax(0)]
+    if {$correct > 0} {
+# commented out to be able to set range.
+#	set global_ymax($currentChan) $global_ymax(0)
+	set global_ymax(0) [format "%13.8g" $global_ymax($newChan)]
+    }
+    set currentChan $newChan
+}
+
+# Procedure to update time data from screen to memory
+# ---------------------------------------------------
+
+proc updateTimedata {} {
+    global global_xmin global_xmax timestart timestop global_xmode timebase
+    set global_xmin [str2time $timestart]
+    set global_xmin [expr $global_xmin-$timebase]
+    if {$global_xmode == 0} {
+	set global_xmax [str2time $timestop]
+	set global_xmax [expr $global_xmax-$timebase]
+    }
+    set timestart [time2str [expr $global_xmin+$timebase] 3]
+    set timestop [time2str [expr $global_xmax+$timebase] 3]
+}
+
+# Procedure to update X-axis data from memory to screen
+# -----------------------------------------------------
+
+proc changeXdata {} {
+    global currentChan timestart timestop timepoints global_xmin global_xmax timebase
+    set timestart [time2str [expr $global_xmin+$timebase] 3]
+    set timestop [time2str [expr $global_xmax+$timebase] 3]
+    set timepoints(0) $timepoints($currentChan)
+}
+
+# Procedure to update Y-axis data from memory to screen
+# -----------------------------------------------------
+
+proc changeYdata {} {
+    global currentChan global_ymin global_ymax timebase
+    set global_ymin(0) [format "%13.8g" $global_ymin($currentChan)]
+    set global_ymax(0) [format "%13.8g" $global_ymax($currentChan)]
+}
+
+# Procedure for removing point in memory (called by user mouse-click on point)
+# ----------------------------------------------------------------------------
+
+proc removePoint {x y} {
+    global nodeDataMatrix scrNodeNo scrSetNo currentChan timepoints currentSet
+    set nodeList [.c find enclosed [expr $x-8] [expr $y-8] [expr $x+8] [expr $y+8]]
+    foreach nodeNo $nodeList {
+	set correct [string first point($currentChan) [.c gettags $nodeNo]]
+	if {$correct >= 0} {
+	    if {$nodeDataMatrix($scrSetNo($nodeNo),$scrNodeNo($nodeNo),1) == 1} {
+		.c delete $nodeNo
+		set nodeDataMatrix($scrSetNo($nodeNo),$scrNodeNo($nodeNo),1) 0
+		incr nodeDataMatrix($scrSetNo($nodeNo),0,2)
+		set nodeDataMatrix($scrSetNo($nodeNo),$scrNodeNo($nodeNo),7) \
+			$nodeDataMatrix($scrSetNo($nodeNo),0,2)
+		mkNode $currentSet($currentChan) $scrNodeNo($nodeNo) $currentChan
+		incr timepoints($currentChan) -1
+		changeXdata
+	    }
+	}
+    }
+}
+
+# Procedure to add point to memory (undo-procedure)
+# -------------------------------------------------
+
+proc undoproc {} {
+    global nodeDataMatrix currentSet currentChan timepoints
+    set dataset $currentSet($currentChan)
+    if {$dataset > 0} {
+	if {$nodeDataMatrix($dataset,0,2) > 0} {
+	    set counter 1
+	    while {$counter < $nodeDataMatrix($dataset,0,1)} {
+		if {$nodeDataMatrix($dataset,$counter,7) == $nodeDataMatrix($dataset,0,2)} {
+		    set nodeDataMatrix($dataset,$counter,1) 1
+		    set nodeDataMatrix($dataset,$counter,7) 0
+		    if {$nodeDataMatrix($dataset,$counter,6) <= 1} {
+			.c delete $nodeDataMatrix($dataset,$counter,8)
+			mkNode $dataset $counter $currentChan
+		    }
+		    break
+		}
+		incr counter
+	    }
+	    incr nodeDataMatrix($dataset,0,2) -1
+	    if {$nodeDataMatrix($dataset,$counter,6) <= 1} \
+		    {incr timepoints($currentChan)}
+	    changeXdata
+	}
+    }
+}
+
+# Procedure to replot chan vs chan on screen. 
+# ------------------------------------------------------------------
+proc XvYplot {} {
+    global current_filename statusMsg text_no_logfile
+    global global_xmin global_xmax text_outOfRange global_startmode
+    global global_ymin global_ymax currentChan optionXvY c1_vs_c2 c1_c2
+    set validname [newfile_checkfile $current_filename 2]
+    set validrange [catch {if {$global_xmax > $global_xmin} {}}]
+    if {[expr {$validname == 1}] && [expr {$validrange == 0}]} {
+	global noOfSelects selectMatrix oldactive
+	global global_ymin global_ymax optionLine
+	global newChan currentSet currentChan noOfChannels xchangeFlag
+	global optionXvY optionLine text_plot_wait text_ready
+	set statusMsg $text_plot_wait 
+	update
+	set dataset $currentSet($currentChan)
+	if {$global_startmode == 0} {
+	    set newChan $currentChan
+	    updateChandata
+	} else {
+	    updateTimedata
+	}
+
+	# Delete old points and lines
+	.c delete point($currentChan)
+	.c delete lines($currentChan)
+
+	# Find number of active channels. If changed, all channels shall be plotted.
+	
+	if {$optionXvY == 0} {
+	    set noactive 0
+	    set screenpos 1
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {$currentSet($counter) != 0} {
+		    incr noactive
+		    set channelpos($counter) $screenpos
+		    incr screenpos
+		}
+	    }
+	} else {
+	    set noactive 1
+	    set screenpos 1
+	    set channelpos(1) 1
+	    set channelpos(2) 1
+	}
+
+# Also, if not in interactive mode, all channels must be replotted.
+	if {[expr {$noactive != $oldactive}] || [expr {$global_startmode != 0}]} {
+	    set xchangeFlag 1
+	    set oldactive $noactive
+	    .c delete coordsys
+	    createSystem $noactive
+	}
+	
+	# Plot active channel
+	
+	if {$dataset != 0} {
+	    if {$selectMatrix($dataset,4) != 1} {
+		readData $dataset
+		set statusMsg $text_plot_wait
+		update
+	    } 
+
+	    if { $optionXvY } {
+		calcRange $dataset $currentChan
+		XvYcalcCoord $dataset $currentChan $noactive $channelpos($currentChan)
+	    } else {
+		calcRange $dataset $currentChan
+		calcCoord $dataset $currentChan $noactive $channelpos($currentChan)
+	    if {$optionLine == 1} {createLines $dataset $currentChan}
+	    }
+	}
+	# If change in x-axis values, or #active channels, plot all channels
+	if {$xchangeFlag == 1} {
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {$counter != $currentChan} {
+		    .c delete point($counter)
+		    .c delete lines($counter)
+		}
+	    }
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {[expr {$currentSet($counter) != 0}] && [expr {$counter != $currentChan}]} {
+		    if {$selectMatrix($currentSet($counter),4) != 1} {
+			readData $currentSet($counter)
+			set statusMsg $text_plot_wait
+			update
+		    }
+		    if { $optionXvY == 0} {
+			calcRange $currentSet($counter) $counter
+			calcCoord $currentSet($counter) $counter $noactive $channelpos($counter)
+		    }
+
+		    if {$optionLine == 1} {createLines $dataset $currentChan}
+		}
+	    set xchangeFlag 0
+	    }
+	}
+	# Label axes and set displayed data
+	
+	XvYlabelaxes channelpos
+	set global_ymin(0) [format "%13.8g" $global_ymin($currentChan)]
+	set global_ymax(0) [format "%13.8g" $global_ymax($currentChan)]
+	changeXdata
+	if {[string first WARNING $statusMsg] != 0} {set statusMsg $text_ready}
+    } else {
+	if {$global_startmode == 0} {
+	    if {$validname == 0} {set statusMsg $text_no_logfile}
+	    if {$validrange == 1} {set statusMsg $text_outOfRange}
+	} else {
+	    if {$validname == 0} {puts $text_no_logfile}
+	    if {$validrange == 1} {puts $text_outOfRange}
+	}
+    }
+#RDG change to make sure axis lines dividers stay present on the graph.
+#    they were disapearing when data was plotted.
+    createSystem $noactive
+}
+
+# Procedure to replot screen. This is the parent plotting procedure.
+# ------------------------------------------------------------------
+
+proc Replot {} {
+    global current_filename statusMsg text_no_logfile
+    global global_xmin global_xmax text_outOfRange global_startmode
+    global global_ymin global_ymax currentChan optionXvY noactive c1_c2 menu
+    set validname [newfile_checkfile $current_filename 2]
+    set validrange [catch {if {$global_xmax > $global_xmin} {}}]
+    if {[expr {$validname == 1}] && [expr {$validrange == 0}]} {
+	global noOfSelects selectMatrix oldactive
+	global global_ymin global_ymax optionLine
+	global newChan currentSet currentChan noOfChannels xchangeFlag
+	global optionSuperimpose optionLine text_plot_wait text_ready
+	set statusMsg $text_plot_wait
+	update
+	set dataset $currentSet($currentChan)
+	if {$global_startmode == 0} {
+	    set newChan $currentChan
+	    updateChandata
+	} else {
+	    updateTimedata
+	}
+
+	# Delete old points and lines
+	.c delete point($currentChan)
+	.c delete lines($currentChan)
+
+	# Find number of active channels. If changed, all channels shall be plotted.
+	
+	if {$optionSuperimpose == 0} {
+	    set noactive 0
+	    set screenpos 1
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {$currentSet($counter) != 0} {
+		    incr noactive
+		    set channelpos($counter) $screenpos
+		    incr screenpos
+		}
+	    }
+	} else {
+	    set noactive 1
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		set channelpos($counter) 1
+	    }
+	}	
+# Also, if not in interactive mode, all channels must be replotted.
+	if {[expr {$noactive != $oldactive}] || [expr {$global_startmode != 0}]} {
+	    set xchangeFlag 1
+	    set oldactive $noactive
+	    .c delete coordsys
+	    createSystem $noactive
+	}
+	
+	# Plot active channel
+	
+	if {$dataset != 0} {
+	    if {$selectMatrix($dataset,4) != 1 || $c1_c2 <= 2} {
+		readData $dataset
+		set statusMsg $text_plot_wait
+		update
+		set optionXvY 0 ;# If you are doing another selection for 
+                                ;# Chan 1 verses Chan 2 turn it off.
+	    }
+	    calcRange $dataset $currentChan
+	    calcCoord $dataset $currentChan $noactive $channelpos($currentChan)
+	    if {$optionLine == 1} {createLines $dataset $currentChan}
+	}
+	
+	# If change in x-axis values, or #active channels, plot all channels
+	
+	if {$xchangeFlag == 1} {
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {$counter != $currentChan} {
+		    .c delete point($counter)
+		    .c delete lines($counter)
+		}
+	    }
+	    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+		if {[expr {$currentSet($counter) != 0}] && [expr {$counter != $currentChan}]} {
+		    if {$selectMatrix($currentSet($counter),4) != 1} {
+			readData $currentSet($counter)
+			set statusMsg $text_plot_wait
+			update
+		    }
+		    calcRange $currentSet($counter) $counter
+		    calcCoord $currentSet($counter) $counter $noactive $channelpos($counter)
+		    if {$optionLine == 1} {createLines $currentSet($counter) $counter}
+		}
+	    }
+	    set xchangeFlag 0
+	}
+	
+	# Label axes and set displayed data
+	
+	labelaxes channelpos
+	set global_ymin(0) [format "%13.8g" $global_ymin($currentChan)]
+	set global_ymax(0) [format "%13.8g" $global_ymax($currentChan)]
+	changeXdata
+	if {[string first WARNING $statusMsg] != 0} {set statusMsg $text_ready}
+    } else {
+	if {$global_startmode == 0} {
+	    if {$validname == 0} {set statusMsg $text_no_logfile}
+	    if {$validrange == 1} {set statusMsg $text_outOfRange}
+	} else {
+	    if {$validname == 0} {puts $text_no_logfile}
+	    if {$validrange == 1} {puts $text_outOfRange}
+	}
+    }
+#RDG change to make sure axis lines dividers stay present on the graph.
+#    they were disapearing when data was plotted.
+    createSystem $noactive
+}
+
+# Procedure to replot screen with reset X-axis
+# --------------------------------------------
+
+proc SetXreset {} {
+    global global_xmin global_xmax global_xmode global_xdefmax
+    global xchangeFlag
+    set xchangeFlag 1
+    set global_xmode 0
+    set global_xmin 0
+    set global_xmax $global_xdefmax
+    changeXdata
+}
+
+# Procedure to replot screen with X-axis autoscale
+# ------------------------------------------------
+
+proc SetXauto {} {
+    global currentChan global_xmin global_xmax xchangeFlag global_xmode
+    set global_xmode 0
+    set xchangeFlag 1
+    set global_xmin 0
+    set global_xmax 0
+    changeXdata
+}
+
+# Procedure to replot screen with Y-axis autoscale
+# ------------------------------------------------
+
+proc SetYauto {} {
+    global currentChan global_ymin global_ymax
+    set global_ymin($currentChan) 0
+    set global_ymax($currentChan) 0
+    changeYdata
+}
+
+# Procedure to create a data point and plot it on screen
+# ------------------------------------------------------
+
+# Input: nodeNo    Index in nodeDataMatrix
+#        status    0 = Active data point; -1 = Inactive data point
+#        x         Data point's x position in screen pixels
+#        y         Data point's y position in screen pixels
+#        channel      The data channel that is currently plotted
+
+proc mkNode {dataset nodeNo channel} {
+    global scrNodeNo scrSetNo dotsize polysize colorArray nodeDataMatrix
+    global offplot_ymin offplot_ymax offplot_xmin offplot_xmax optionXvY
+
+    if {$nodeDataMatrix($dataset,$nodeNo,1) == 1} {
+	switch $channel {
+	    1 { 
+		set new [.c create oval \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			-fill $colorArray($channel) -outline $colorArray($channel) \
+			-tags point($channel)]
+	    }
+	    2 { 
+		set new [.c create rectangle \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			-fill $colorArray($channel) -outline $colorArray($channel) \
+			-tags point($channel)]
+	    }
+	    3 { 
+		set new [.c create poly \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$polysize] \
+			$nodeDataMatrix($dataset,$nodeNo,4) \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$polysize] \
+			-fill $colorArray($channel) -tags point($channel)]
+	    }
+	    4 { 
+		set new [.c create poly \
+			$nodeDataMatrix($dataset,$nodeNo,4) \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$polysize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$polysize] \
+			-fill $colorArray($channel) -tags point($channel)]
+	    }
+	}
+    }
+    if {$nodeDataMatrix($dataset,$nodeNo,1) == 0} {
+	switch $channel {
+	    1 {
+		set new [.c create oval \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			-fill white -outline $colorArray($channel) \
+			-tags point($channel)]
+	    }
+	    2 { 
+		set new [.c create rectangle \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			-fill white -outline $colorArray($channel) \
+			-tags point($channel)]
+	    }
+	    3 { 
+		set new [.c create line \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			$nodeDataMatrix($dataset,$nodeNo,4) \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			-fill $colorArray($channel) -tags point($channel)]
+	    }
+	    4 { 
+		set new [.c create line \
+			$nodeDataMatrix($dataset,$nodeNo,4) \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)-$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,4)+$dotsize] \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)+$dotsize] \
+			$nodeDataMatrix($dataset,$nodeNo,4) \
+			[expr $nodeDataMatrix($dataset,$nodeNo,5)-$dotsize] \
+			-fill $colorArray($channel) -tags point($channel)]
+	    }
+	}
+    }
+    set scrNodeNo($new) $nodeNo
+    set scrSetNo($new) $dataset
+    set nodeDataMatrix($dataset,$nodeNo,8) $new
+}
+
+# Procedure to toggle connecting lines between nodes on/off
+# ---------------------------------------------------------
+
+proc toggleLines {} {
+    global optionLine noOfChannels currentSet optionXvY
+    global statusMsg text_creating_lines text_ready
+    if {$optionLine == 0} {
+	for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	    .c delete lines($counter)
+	}
+    } else {
+	set statusMsg $text_creating_lines
+	update
+	for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	    if { $optionXvY && $counter == 2} {break}
+	    if {$currentSet($counter) != 0 } {createLines $currentSet($counter) $counter}
+	}
+	set statusMsg $text_ready
+    }
+}
+
+# Procedure to add connecting lines between nodes
+# -----------------------------------------------
+
+proc createLines {dataset chan} {
+    global nodeDataMatrix colorArray
+    set counter 0
+    set correct 0
+    while {$correct == 0} {
+	incr counter
+	if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	if {$nodeDataMatrix($dataset,$counter,1) == 1} {set correct 1}
+    }
+    set oldcounter $counter
+    set lineOK 1
+    while 1 {
+	incr counter
+	if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	if {$nodeDataMatrix($dataset,$counter,1) == 1} {
+	    if {$lineOK == 1} {.c create line $nodeDataMatrix($dataset,$oldcounter,4) $nodeDataMatrix($dataset,$oldcounter,5) $nodeDataMatrix($dataset,$counter,4) $nodeDataMatrix($dataset,$counter,5) -tags lines($chan) -fill $colorArray($chan)}
+	    set oldcounter $counter
+	    set lineOK 1
+	} else {
+	    if {$nodeDataMatrix($dataset,$counter,1) == 1} {set lineOK 0}
+	}
+    }
+}
+
+# Procedure for calculating points's coordinates on screen
+# --------------------------------------------------------
+
+# Input:  x     Data point's x value
+#         xmin  The minimum x value of the current scale
+#         xmax  The maximum x value of the current scale
+# Output:       Data point's x position in screen pixels
+
+proc calcCoord {dataset channel noactive screenpos} {
+    global global_xmin global_xmax global_ymin global_ymax optionInvert 
+    global optionLog timepoints statusMsg optionXvY
+    global sizelimit xsizelimit xoffset yoffset aspect nodeDataMatrix
+    global plotlimit_xmin plotlimit_xmax offplot_xmin offplot_xmax
+    global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax
+    set xmin $global_xmin; set xmax $global_xmax
+    if {$optionInvert($channel)} {
+	set ymin $global_ymin($channel); set ymax $global_ymax($channel)
+    } else {
+	set ymin $global_ymax($channel); set ymax $global_ymin($channel)
+    }
+    if {$xmin == $xmax} {set xmax [expr ($xmax + .0001)]}
+    if {$ymin == $ymax} {set ymax [expr ($ymax + .0001)]}
+    set temp1 [expr $xmax-$xmin]
+    set temp3 [expr $xsizelimit/$temp1]
+    if {$optionLog($channel) == 1} {
+	if {[expr {$ymax > 0}] && [expr {$ymin > 0}]} {
+	    set temp4 [expr log10($ymax)-log10($ymin)]
+	} else { 
+	    set optionLog($channel) 0
+	}
+    }
+    if {$optionLog($channel) == 0} {set temp4 [expr $ymax-$ymin]}
+    set temp5 [expr $sizelimit($noactive)/$temp4]
+    set timepoints($channel) 0
+    for {set counter 1} {$counter < $nodeDataMatrix($dataset,0,1)} {incr counter} {
+	set nodeDataMatrix($dataset,$counter,6) 0
+	set xrel [expr $nodeDataMatrix($dataset,$counter,2)-$xmin]
+	set result [expr $temp3*$xrel+$xoffset]
+	if {$result < $plotlimit_xmin} {
+	    set nodeDataMatrix($dataset,$counter,6) 2
+	    set result $offplot_xmin
+	}
+	if {$result > $plotlimit_xmax} {
+	    set nodeDataMatrix($dataset,$counter,6) 2
+	    set result $offplot_xmax
+	}
+	set nodeDataMatrix($dataset,$counter,4) $result
+
+	if {$optionLog($channel)} {
+	    if {$nodeDataMatrix($dataset,$counter,3) <= 0} {
+		set nodeDataMatrix($dataset,$counter,6) 4
+		if {$nodeDataMatrix($dataset,$counter,1) == 1} {
+		    set statusMsg "WARNING: Non-positive value in range. Log error. Point(s) ignored."
+		}
+	    } else {
+		set yrel [expr log10($nodeDataMatrix($dataset,$counter,3))-log10($ymin)]
+	    }
+	} else {
+	    set yrel [expr $nodeDataMatrix($dataset,$counter,3)-$ymin]
+	}
+	set result [expr $temp5*$yrel+$plotlimit_ymin($noactive,$screenpos)]
+	if {$result < $plotlimit_ymin($noactive,$screenpos)} {
+	    incr nodeDataMatrix($dataset,$counter,6)
+	    set result $offplot_ymin($noactive,$screenpos)
+	}
+	if {$result > $plotlimit_ymax($noactive,$screenpos)} {
+	    incr nodeDataMatrix($dataset,$counter,6)
+	    set result $offplot_ymax($noactive,$screenpos)
+	}
+	set nodeDataMatrix($dataset,$counter,5) $result
+
+	if {$nodeDataMatrix($dataset,$counter,6) <= 1} {
+	    mkNode $dataset $counter $channel
+	    if {$nodeDataMatrix($dataset,$counter,1) == 1} {incr timepoints($channel)}
+	}
+    }
+    changeXdata
+}
+
+
+# Procedure for calculating points's coordinates on screen
+# --------------------------------------------------------
+
+# Input:  x     Data point's x value
+#         xmin  The minimum x value of the current scale
+#         xmax  The maximum x value of the current scale
+# Output:       Data point's x position in screen pixels
+
+proc XvYcalcCoord {dataset channel noactive screenpos} {
+    global global_xmin global_xmax global_ymin global_ymax optionInvert 
+    global optionLog timepoints statusMsg optionXvY c1_vs_c2
+    global sizelimit xsizelimit xoffset yoffset aspect nodeDataMatrix
+    global plotlimit_xmin plotlimit_xmax offplot_xmin offplot_xmax
+    global plotlimit_ymin plotlimit_ymax offplot_ymin offplot_ymax
+
+    set xmin $global_ymin(1); set xmax $global_ymax(1); 
+    set ymax $global_ymin(2); set ymin $global_ymax(2);
+
+    if {$xmin == $xmax} {set xmax [expr ($xmax + .0001)]}
+    if {$ymin == $ymax} {set ymax [expr ($ymax + .0001)]}
+
+    set temp1 [expr $xmax-$xmin]
+    set temp3 [expr $xsizelimit/$temp1]
+
+    set temp4 [expr $ymax-$ymin]
+    set temp5 [expr $sizelimit($noactive)/$temp4]
+
+    set counter2 1;
+    for {set counter 1} {$counter < $nodeDataMatrix($c1_vs_c2(0),0,1) && $counter2 < $nodeDataMatrix($c1_vs_c2(1),0,1)} {incr counter} {
+	
+	for { } {$counter <= $counter2} { } {
+	    if { $nodeDataMatrix($c1_vs_c2(0),$counter,2) <= $nodeDataMatrix($c1_vs_c2(1),$counter2,2) } {
+		set xrel [expr $nodeDataMatrix($c1_vs_c2(0),$counter,3)-$xmin]
+		set result [expr $temp3*$xrel+$xoffset]
+		set nodeDataMatrix($c1_vs_c2(0),$counter,4) $result
+
+		if { $nodeDataMatrix($c1_vs_c2(1),$counter2,3) == " "} { break }
+		set yrel [expr $nodeDataMatrix($c1_vs_c2(1),$counter2,3)-$ymin]
+		set result [expr $temp5*$yrel+$plotlimit_ymin($noactive,$screenpos)]
+		set nodeDataMatrix($c1_vs_c2(0),$counter,5) $result
+		
+		mkNode $c1_vs_c2(0) $counter $channel
+		incr counter2;
+		break;
+	    } else {
+		incr counter2;
+	    }
+	}
+    }
+}
+
+# Procedure for labeling coordinate system axes and header
+# --------------------------------------------------------
+
+proc XvYlabelaxes {thePos} {
+    global global_ymax global_xmax global_ymin global_xmin current_filename
+    global xoffset currentSet noOfChannels selectMatrix colorArray timebase
+    global fullxscrpos xrightoffset dotsize polysize global_antennaname
+    global optionLog optionSuperimpose optionInvert optionXvY switch_it
+    upvar $thePos channelpos
+    set xmin $global_xmin; set xmax $global_xmax
+    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	set ymin($counter) $global_ymin($counter); set ymax($counter) $global_ymax($counter)
+	set ymin($counter) [string trimleft $ymin($counter)]
+	set ymax($counter) [string trimleft $ymax($counter)]
+    }
+    set baseX1 10
+    set baseX2 [expr $fullxscrpos+$xrightoffset-10]
+    set baseY1 18
+    set baseY2 30
+    .c dchars text 0 end
+    .c dchars coordsys 0 end
+    .c delete labelfig
+    if { $optionXvY == 0} {
+	.c insert x0 0 [time2str [expr $xmin+$timebase] 2]
+	.c insert x1 0 [time2str [expr $timebase+($xmax+$xmin)/2] 2]
+	.c insert x2 0 [time2str [expr $xmax+$timebase] 2]
+    } else {
+	.c insert x0 0 [format "%13.8g" [expr $ymin(1)]]
+	.c insert x1 0 [format "%13.8g" [expr ($ymax(1)+$ymin(1))/2]]
+	.c insert x2 0 [format "%13.8g" [expr $ymax(1)]]
+    }
+    for {set counter 1} {$counter<=$noOfChannels} {incr counter} {
+	if {$currentSet($counter) != 0} {
+	    if {$optionXvY == 0} {
+		.c insert y($channelpos($counter),0) 0 [format "%10.5g" $ymax($counter)]
+		.c insert y($channelpos($counter),2) 0 [format "%10.5g" $ymin($counter)]
+		.c insert y($channelpos($counter),1) 0 [format "%10.5g" \
+			[expr ($ymax($counter)-$ymin($counter))/2+$ymin($counter)]]
+		for {set secondcount 0} {$secondcount <= 2} {incr secondcount} {
+		    .c itemconfigure y($channelpos($counter),$secondcount) \
+			    -fill $colorArray($counter)
+		}
+	    } 
+	    if { $optionXvY == 0 } {
+		.c insert axisname($counter) 0 [format "%d: %s" \
+			$channelpos($counter) $selectMatrix($currentSet($counter),3)]
+		switch $counter {
+		    1 {
+			.c create oval \
+				[expr $baseX1-$dotsize] [expr $baseY1-$dotsize] \
+				[expr $baseX1+$dotsize] [expr $baseY1+$dotsize] \
+				-fill $colorArray($counter) \
+			    -outline $colorArray($counter) -tags labelfig
+		    }
+		    2 {
+			.c create rectangle \
+				[expr $baseX2-$dotsize] [expr $baseY1-$dotsize] \
+				[expr $baseX2+$dotsize] [expr $baseY1+$dotsize] \
+				-fill $colorArray($counter) \
+				-outline $colorArray($counter) -tags labelfig
+		    }
+		    3 {
+			.c create poly \
+				[expr $baseX1-$polysize] [expr $baseY2-$polysize] \
+				[expr $baseX1+$polysize] [expr $baseY2-$polysize] \
+				$baseX1 [expr $baseY2+$polysize] \
+				-fill $colorArray($counter) -tags labelfig
+		    }
+		    4 {
+			.c create poly $baseX2 \
+				[expr $baseY2-$polysize] [expr $baseX2-$polysize] \
+				[expr $baseY2+$polysize] [expr $baseX2+$polysize] \
+				[expr $baseY2+$polysize] \
+				-fill $colorArray($counter) -tags labelfig
+		    }
+		}
+	    } else {	    
+#		.c create oval \
+			[expr $baseX1-$dotsize] [expr $baseY1-$dotsize] \
+			[expr $baseX1+$dotsize] [expr $baseY1+$dotsize] \
+			-fill $colorArray($counter) \
+			-outline $colorArray($counter) -tags labelfig
+	    }
+	}
+    }
+    if { $optionXvY } { 
+	.c insert y(1,0) 0 [format "%10.5g" $ymax(2)]
+	.c insert y(1,1) 0 [format "%10.5g" [expr ($ymax(2)+$ymin(2))/2]]
+	.c insert y(1,2) 0 [format "%10.5g" $ymin(2)]
+	if { $switch_it == 0} {
+	    .c insert axisname(1) 0 [format "%d: %s:%s" \
+		    $channelpos(1) $selectMatrix($currentSet(2),3) $selectMatrix($currentSet(1),3)]
+	} else {
+	    .c insert axisname(1) 0 [format "%d: %s:%s" \
+		    $channelpos(1) $selectMatrix($currentSet(1),3) $selectMatrix($currentSet(2),3)]
+	}
+
+    }
+    .c insert title1 0 [format "Station: %s" $global_antennaname]
+    .c insert title2 0 [format "Filename: %s" $current_filename]
+}
+
+# Procedure for labeling coordinate system axes and header
+# --------------------------------------------------------
+
+proc labelaxes {thePos} {
+    global global_ymax global_xmax global_ymin global_xmin current_filename
+    global xoffset currentSet noOfChannels selectMatrix colorArray timebase
+    global fullxscrpos xrightoffset dotsize polysize global_antennaname
+    global optionLog optionSuperimpose optionInvert optionXvY
+    upvar $thePos channelpos
+    set xmin $global_xmin; set xmax $global_xmax
+    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	if {$optionInvert($counter)} {
+	    set ymin($counter) $global_ymax($counter); set ymax($counter) $global_ymin($counter)
+	    set ymin($counter) [string trimleft $ymin($counter)]
+	    set ymax($counter) [string trimleft $ymax($counter)]
+	} else {
+	    set ymin($counter) $global_ymin($counter); set ymax($counter) $global_ymax($counter)
+	    set ymin($counter) [string trimleft $ymin($counter)]
+	    set ymax($counter) [string trimleft $ymax($counter)]
+	}
+    }
+    set baseX1 10
+    set baseX2 [expr $fullxscrpos+$xrightoffset-10]
+    set baseY1 18
+    set baseY2 30
+    .c dchars text 0 end
+    .c dchars coordsys 0 end
+    .c delete labelfig
+    .c insert x0 0 [time2str [expr $xmin+$timebase] 2]
+    .c insert x1 0 [time2str [expr $timebase+($xmax+$xmin)/2] 2]
+    .c insert x2 0 [time2str [expr $xmax+$timebase] 2]
+    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	if {$currentSet($counter) != 0} {
+	    if {$optionSuperimpose == 0} {
+		.c insert y($channelpos($counter),0) 0 [format "%10.5g" $ymax($counter)]
+		.c insert y($channelpos($counter),2) 0 [format "%10.5g" $ymin($counter)]
+		if {$optionLog($counter) == 0} {
+		    .c insert y($channelpos($counter),1) 0 [format "%10.5g" \
+			    [expr ($ymax($counter)-$ymin($counter))/2+$ymin($counter)]]
+		} else {
+		    .c insert y($channelpos($counter),1) 0 [format "%10.5g" \
+			    [expr pow(10,((log10($ymax($counter))-\
+			    log10($ymin($counter)))/2+log10($ymin($counter))))]]
+		}
+		for {set secondcount 0} {$secondcount <= 2} {incr secondcount} {
+		    .c itemconfigure y($channelpos($counter),$secondcount) \
+			    -fill $colorArray($counter)
+		}
+	    } else {
+		.c insert y($counter,0) 0 [format "%10.5g" $ymax($counter)]
+		.c insert y($counter,2) 0 [format "%10.5g" $ymin($counter)]
+		if {$optionLog($counter) == 0} {
+		    .c insert y($counter,1) 0 [format "%10.5g" \
+			    [expr ($ymax($counter)-$ymin($counter))/2+$ymin($counter)]]
+		} else {
+		    .c insert y($counter,1) 0 [format "%10.5g" \
+			    [expr pow(10,((log10($ymax($counter))-\
+			    log10($ymin($counter)))/2+log10($ymin($counter))))]]
+		}
+	    }
+	    if {$optionSuperimpose == 0} {
+		.c insert axisname($counter) 0 [format "%d: %s" \
+		    $channelpos($counter) $selectMatrix($currentSet($counter),3)]
+	    } else {	    
+		.c insert axisname($counter) 0 $selectMatrix($currentSet($counter),3)
+	    }
+
+	    switch $counter {
+		1 {
+		    .c create oval \
+			    [expr $baseX1-$dotsize] [expr $baseY1-$dotsize] \
+			    [expr $baseX1+$dotsize] [expr $baseY1+$dotsize] \
+			    -fill $colorArray($counter) \
+			    -outline $colorArray($counter) -tags labelfig
+		}
+		2 {
+		    .c create rectangle \
+			    [expr $baseX2-$dotsize] [expr $baseY1-$dotsize] \
+			    [expr $baseX2+$dotsize] [expr $baseY1+$dotsize] \
+			    -fill $colorArray($counter) \
+			    -outline $colorArray($counter) -tags labelfig
+		}
+		3 {
+		    .c create poly \
+			    [expr $baseX1-$polysize] [expr $baseY2-$polysize] \
+			    [expr $baseX1+$polysize] [expr $baseY2-$polysize] \
+			    $baseX1 [expr $baseY2+$polysize] \
+			    -fill $colorArray($counter) -tags labelfig
+		}
+		4 {
+		    .c create poly $baseX2 \
+			    [expr $baseY2-$polysize] [expr $baseX2-$polysize] \
+			    [expr $baseY2+$polysize] [expr $baseX2+$polysize] \
+			    [expr $baseY2+$polysize] \
+			    -fill $colorArray($counter) -tags labelfig
+		}
+	    }
+	}
+    }
+    .c insert title1 0 [format "Station: %s" $global_antennaname]
+    .c insert title2 0 [format "Filename: %s" $current_filename]
+}
+
+# Procedure to calculate X- and Y-axis scale, and Autoscale if needed
+# -------------------------------------------------------------------
+#
+# Input:  dataset   The dataset in nodeDataMatrix to be plotted
+#         channel   The channel number on which this data is selected
+#
+# Output: Updated values in global variables xmin, xmax, ymin & ymax.
+
+proc calcRange {dataset channel} {
+    global global_xmin global_xmax global_ymin global_ymax timepoints
+    global nodeDataMatrix global_xmode
+    if {$nodeDataMatrix($dataset,0,1) > 1} {
+	if {$global_xmode == 1} {
+	    set counter 1
+	    while {$nodeDataMatrix($dataset,$counter,2) < $global_xmin} {
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {break}
+	    }
+	    incr counter [expr $timepoints($channel)-1]
+	    if {$counter >= $nodeDataMatrix($dataset,0,1)} {set counter [expr $nodeDataMatrix($dataset,0,1)-1]}
+	    set global_xmax $nodeDataMatrix($dataset,$counter,2)
+	    set global_xmode 0
+	}
+	if {[expr {$global_xmin == 0}] && [expr {$global_xmax == 0}]} {
+	    set counter 1
+	    while {$nodeDataMatrix($dataset,$counter,1) != 1} {
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+	    set global_xmin $nodeDataMatrix($dataset,$counter,2)
+	    set global_xmax $nodeDataMatrix($dataset,$counter,2)
+	    while 1 {
+		if {$nodeDataMatrix($dataset,$counter,1) == 1} {
+		    if {$global_xmin > $nodeDataMatrix($dataset,$counter,2)} {set global_xmin $nodeDataMatrix($dataset,$counter,2)}
+		    if {$global_xmax < $nodeDataMatrix($dataset,$counter,2)} {set global_xmax $nodeDataMatrix($dataset,$counter,2)}
+		}
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+	}
+	if {[expr {$global_ymin($channel) == 0}] && [expr {$global_ymax($channel) == 0}]} {
+	    set counter 1
+	    while {$nodeDataMatrix($dataset,$counter,2) < $global_xmin} {
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+	    while {$nodeDataMatrix($dataset,$counter,1) != 1} {
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+	    set global_ymin($channel) $nodeDataMatrix($dataset,$counter,3)
+	    set global_ymax($channel) $nodeDataMatrix($dataset,$counter,3)
+	    while {$nodeDataMatrix($dataset,$counter,2) < $global_xmax} {
+		if {$nodeDataMatrix($dataset,$counter,1) == 1} {
+		    if {$global_ymin($channel) > $nodeDataMatrix($dataset,$counter,3)} {set global_ymin($channel) $nodeDataMatrix($dataset,$counter,3)}
+		    if {$global_ymax($channel) < $nodeDataMatrix($dataset,$counter,3)} {set global_ymax($channel) $nodeDataMatrix($dataset,$counter,3)}
+		}
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+	}
+	if {$global_xmin == $global_xmax} {set global_xmax [expr ($global_xmax+.0001)]}
+	if {$global_ymin($channel) == $global_ymax($channel)} {set global_ymax($channel) [expr ($global_ymax($channel)+.0001)]}
+    }
+    changeXdata
+}
+
+# Procedure to list source data for plot
+# --------------------------------------
+#
+# Input:  dataset  The dataset in nodeDataMatrix to be listed
+
+proc listRange {dataset} {
+    global nodeDataMatrix global_xmin global_xmax global_startmode timebase
+    global statusMsg text_generating_list text_ready current_TEMP
+    global selectMatrix current_printmode timestart timestop
+    set pointcount 0
+    if [info exists nodeDataMatrix($dataset,0,1)] {
+	if {$nodeDataMatrix($dataset,0,1) > 1} {
+	    set statusMsg $text_generating_list
+	    update
+	    if {$global_startmode == 0} {create_sourceWindow 0}
+	    set counter 1
+	    while {$nodeDataMatrix($dataset,$counter,2) < $global_xmin} {
+		incr counter
+		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+	    }
+# not Y10K compliant
+	    if {$global_startmode == 0} {
+		.source.list insert end "------------------------------------------------"
+		.source.list insert end "Status | Time                 | $selectMatrix($dataset,3) value"
+#                                                 yyyy.ddd.hh:mm:ss.ss
+		.source.list insert end "       |                      |"
+		while {$nodeDataMatrix($dataset,$counter,2) <= $global_xmax} {
+		    .source.list insert end [format "  %d    | %s | %f" $nodeDataMatrix($dataset,$counter,1) [time2str [expr $timebase+$nodeDataMatrix($dataset,$counter,2)] 4] $nodeDataMatrix($dataset,$counter,3) 2]
+		    incr counter
+		    incr pointcount
+		    if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+		}
+		.source.list insert end ""
+		.source.list insert end "List: Time from $timestart to $timestop."
+		.source.list insert end "Data points listed: $pointcount."
+		.source.list insert end "------------------------------------------------"
+	    }
+# not Y2.1K compliant
+	    if {$global_startmode >= 1} {
+		set fileID [open $current_TEMP.list w]
+		puts $fileID "------------------------------------------------"
+		puts $fileID "Status | Time                 | $selectMatrix($dataset,3) value"
+#                                      yyyy.ddd.hh:mm:ss.ss
+		puts $fileID "       |                      |"
+		while {$nodeDataMatrix($dataset,$counter,2) <= $global_xmax} {
+		    puts $fileID [format " %d     | %s | %f" $nodeDataMatrix($dataset,$counter,1) [time2str [expr $timebase+$nodeDataMatrix($dataset,$counter,2)] 4] $nodeDataMatrix($dataset,$counter,3) 2]
+		    incr counter
+		    incr pointcount
+		    if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
+		}
+		puts $fileID ""
+		puts $fileID "List: Time from $timestart to $timestop."
+		puts $fileID "Data points listed: $pointcount."
+		puts $fileID "------------------------------------------------"
+		close $fileID
+		set current_printmode 1
+		print_OK
+		set current_printmode 0
+	    }
+	    set statusMsg $text_ready
+	}
+    }
+    return $pointcount
+}
+
+# Procedure to list original source data from grep file
+# -----------------------------------------------------
+#
+# Input:  dataset  The dataset in nodeDataMatrix to be listed
+
+proc glistRange {dataset} {
+    global nodeDataMatrix global_xmin global_xmax current_TEMP current_printmode
+    global statusMsg glist_error_nofile global_startmode timebase
+    global text_generating_glist text_ready timestart timestop
+    global selectMatrix current_filename
+    set pointcount 0
+    if [info exists nodeDataMatrix($dataset,0,1)] {
+	if ![catch {set fileID [open $current_TEMP.$dataset r]}] {
+	    set statusMsg $text_generating_glist
+	    update
+	    if {$global_startmode == 0} {create_sourceWindow 1}
+	    set counter 1
+	    gets $fileID readline
+	    set xval [expr [str2time $readline]-$timebase]
+	    set EOF 13
+	    while {$xval < $global_xmin} {
+		set EOF [gets $fileID readline]
+		set xval [expr [str2time $readline]-$timebase]
+		if {$EOF < 0} {break}
+	    }
+	    if {$EOF >= 0} {
+		while {$EOF < 13} {set EOF [gets $fileID readline]}
+		if {$global_startmode == 0} {
+		    .source.list insert end "------------------------------------------------"
+		    .source.list insert end "Filename: $current_filename"
+		    .source.list insert end "Selected data: $selectMatrix($dataset,3)"
+		    .source.list insert end ""
+		    while {$xval <= $global_xmax} {
+			.source.list insert end $readline
+			incr pointcount
+			incr counter
+			set EOF 0
+			while {[expr {$EOF >= 0}] && [expr {$EOF < 13}]} \
+				{set EOF [gets $fileID readline]}
+			if {$EOF < 0} {break}
+			set xval [expr [str2time $readline]-$timebase]
+		    }
+		    .source.list insert end ""
+		    .source.list insert end "Glist: Time from $timestart to $timestop."
+		    .source.list insert end "Data points listed: $pointcount."
+		    .source.list insert end "------------------------------------------------"
+		}
+		if {$global_startmode == 1} {
+		    set outFileID [open $current_TEMP.list w]
+		    puts $outFileID "------------------------------------------------"
+		    puts $outFileID "Filename: $current_filename"
+		    puts $outFileID "Selected data: $selectMatrix($dataset,3)"
+		    puts $outFileID ""
+		    while {$xval <= $global_xmax} {
+			puts $outFileID $readline
+			incr pointcount
+			incr counter
+			set EOF 0
+			while {[expr {$EOF >= 0}] && [expr {$EOF < 13}]} \
+				{set EOF [gets $fileID readline]}
+			if {$EOF < 0} {break}
+			set xval [expr [str2time $readline]-$timebase]
+		    }
+		    puts $outFileID ""
+		    puts $outFileID "Glist: Time from $timestart to $timestop."
+		    puts $outFileID "Data points listed: $pointcount."
+		    puts $outFileID "------------------------------------------------"
+		    close $outFileID
+		    set current_printmode 1
+		    print_OK
+		    set current_printmode 0
+		}
+	    }
+	    close $fileID
+	    set statusMsg $text_ready
+	} else {
+	    if {$global_startmode == 0} {set statusMsg $glist_error_nofile}
+	    if {$global_startmode == 1} {puts $glist_error_nofile}
+	}
+    }
+    return $pointcount
+}
+
+# Exit procedure
+# --------------
+
+proc exitCmd {} {
+    global current_TEMP noOfSelects
+    for {set counter -4} {$counter < $noOfSelects} {incr counter} \
+	    {if [file isfile $current_TEMP.$counter] \
+	    {exec rm -f $current_TEMP.$counter}}
+    exit
+}
+
+# ==========================================================================
+#
+#                           SELECTION SECTION
+#
+# ==========================================================================
+
+# newSelection menu selection procedure
+# -------------------------------------
+
+proc newSelection {} {
+    create_selectionWindow
+    selection_clearscreen
+}
+
+proc selection_OK {} {
+    global selection_no selection_command selection_parm selection_name
+    global selection_string selectMatrix noOfSelects
+    set selectMatrix($selection_no,1) $selection_command
+    set selectMatrix($selection_no,2) $selection_parm
+    set selectMatrix($selection_no,3) $selection_name
+    set selectMatrix($selection_no,4) 0
+    set selectMatrix($selection_no,5) $selection_string
+    if {$selection_no == $noOfSelects} {incr noOfSelects}
+    setDataMenus
+    set selection_statusMsg "Selection number $selection_no was updated."
+}
+
+proc selection_clearscreen {} {
+    global selection_no selection_command selection_parm selection_name
+    global selection_string noOfSelects
+    global selection_statusMsg text_selection_enternew
+    set selection_no $noOfSelects
+    set selection_command ""
+    set selection_parm ""
+    set selection_name ""
+    set selection_string ""
+    focus .selection.entryCommand
+    set selection_statusMsg $text_selection_enternew
+}
+
+proc selection_next {} {
+    global selection_no selection_command selection_parm selection_name
+    global selection_string selectMatrix noOfSelects
+    global selection_statusMsg text_selection_instruction
+    if {$selection_no < $noOfSelects} {
+	incr selection_no
+	if {$selection_no == $noOfSelects} {
+	    selection_clearscreen
+	} else {
+	    set selection_command $selectMatrix($selection_no,1)
+	    set selection_parm $selectMatrix($selection_no,2)
+	    set selection_name $selectMatrix($selection_no,3)
+	    set selection_string $selectMatrix($selection_no,5)
+	    set selection_statusMsg $text_selection_instruction
+	}
+    }
+}
+
+proc selection_previous {} {
+    global selection_no selection_command selection_parm selection_name
+    global selection_string selectMatrix noOfSelects
+    global selection_statusMsg text_selection_BOF text_selection_instruction
+    if {$selection_no > 1} {
+	incr selection_no -1
+	set selection_command $selectMatrix($selection_no,1)
+	set selection_parm $selectMatrix($selection_no,2)
+	set selection_name $selectMatrix($selection_no,3)
+	set selection_string $selectMatrix($selection_no,5)
+	set selection_statusMsg $text_selection_instruction
+    } else {
+	set selection_statusMsg $text_selection_BOF
+    }
+}
+
+# ==========================================================================
+#
+#                           NEWFILE SECTION
+#
+# ==========================================================================
+
+# newFile menu selection procedure
+# --------------------------------
+
+proc newFile {} {
+    global newfile_filename current_DefaultDir WorkDir current_filename
+    global newfile_statusMsg newfiletext_nofile_specified
+    set newfile_filename $current_filename
+    create_newfileWindow
+    set newfile_statusMsg $newfiletext_nofile_specified
+    focus .newfile.entryFilename
+}
+
+# Procedure to open new log file and set some initilizing variables
+# -----------------------------------------------------------------
+
+proc newfile_OK {output} {
+    global newfile_filename current_DefaultDir current_filename current_TEMP
+    global global_xmin global_xmax timebase global_xmaxoffset global_xdefmax
+    global selectMatrix noOfSelects noOfChannels global_antennaname
+    global timestart timestop currentSet oldyear firstday
+    global timepoints global_ymin global_ymax
+    if [newfile_checkfile $newfile_filename $output] {
+	set current_filename $newfile_filename
+	set fileID [open $current_filename r]
+	gets $fileID readline
+	set timepoints(0) 0
+	set global_ymin(0) 0
+	set global_ymax(0) 0
+	if {[string compare [string range $readline 9 15] ";MARK I"]== 0 } {
+	    set oldyear [lindex [split $readline] 8]
+	} else {
+	    set oldyear 1970
+	}
+	set firstday -1;
+	set timebase [str2time $readline]
+	seek $fileID -500 end
+	set EOF 0
+	set readline ""
+	while {$EOF >= 0} {
+	    set oldline $readline
+	    set EOF [gets $fileID readline]
+	}
+	close $fileID
+	if ![catch {exec grep location $current_filename > $current_TEMP}] {
+	    set fileID [open $current_TEMP r]
+	    gets $fileID readline
+	    set loclist [split $readline ,]
+	    set temp [lindex $loclist 1]
+	    set global_antennaname [string trim $temp]
+	    exec rm -f $current_TEMP
+	} else {
+	    set global_antennaname ""
+	}
+	set global_xmaxoffset [str2time $oldline]
+	set global_xdefmax [expr $global_xmaxoffset-$timebase]
+	for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	    set currentSet($counter) 0
+	    .c delete point($counter)
+	}
+	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
+	    set selectMatrix($counter,4) 0
+	}
+	if {$output == 0} {destroy .newfile}
+	SetXreset
+	changeXdata
+	Replot
+    }
+}
+
+# Procedure to check FS log file, when the user has entered a new input file name
+# -------------------------------------------------------------------------------
+#
+# Input:  filename The filename to check
+#         output   0=Status output to newfile_statusMsg variable
+#                  1=Status output to standard-output
+#                  2=No status output
+# Output: 0=Filename is not valid, or is not an FS log file
+#         1=Filename is an FS log file
+
+proc newfile_checkfile {filename output} {
+    global newfile_filename newfile_statusMsg newfiletext_nofile newfiletext_noday tk_version
+    global newfiletext_day current_DefaultDir current_TEMP oldyear firstday
+    global timepoints global_ymin global_ymax
+    set tempfile ""
+    set globalsign [string index $filename 0]
+    set globalcheck [string compare "/" $globalsign]
+    if {$globalcheck != 0} {set globalcheck [string compare "." $globalsign]}
+    if {$globalcheck != 0} {
+	set correct [file isfile $current_DefaultDir/$filename]
+	if {$correct == 1} {
+	    set tempfile $current_DefaultDir/$filename
+	} else {
+	    set correct [file isfile $current_DefaultDir/$filename.log]
+	    if {$correct == 1} {
+		set tempfile $current_DefaultDir/$filename.log
+	    } else {
+		set newfile_filename ""
+		if {$output == 0} {
+		    set newfile_statusMsg $newfiletext_nofile
+		    focus .newfile.entryFilename
+		}
+		if {$output == 1} {
+		    puts $newfiletext_nofile
+		}
+		return 0
+	    }
+	}
+    } else {
+	set correct [file isfile $filename]
+	if {$correct == 1} {
+	    set tempfile $filename
+	} else {
+	    set correct [file isfile $filename.log]
+	    if {$correct == 1} {
+		set tempfile $filename.log
+	    } else {
+		set newfile_filename ""
+		if {$output == 0} {
+		    set newfile_statusMsg $newfiletext_nofile
+		    focus .newfile.entryFilename
+		}
+		if {$output == 1} {
+		    puts $newfiletext_nofile
+		}
+		return 0
+	    }
+	}
+    }
+    if {[string compare $tempfile ""] != 0} {
+	set fileID [open $tempfile r]
+	gets $fileID readline
+	if {[string compare [string range $readline 9 15] ";MARK I"]== 0 } {
+	    set oldyear [lindex [split $readline] 8]
+	} else {
+	    set oldyear 1970
+	}
+	set timepoints(0) 0
+	set global_ymin(0) 0
+	set global_ymax(0) 0
+	set firstday -1
+	set timebase [str2time $readline]
+	set day [read $fileID 5]
+	close $fileID
+	if {[expr {$day > 0}] && [expr {$day < 100000}]} {
+	    set newfile_filename $tempfile
+	    if ![catch {exec grep location $newfile_filename > $current_TEMP}] {
+		set fileID [open $current_TEMP r]
+		gets $fileID readline
+		set loclist [split $readline ,]
+		set temp [lindex $loclist 1]
+		set antennaname [string trim $temp]
+		exec rm -f $current_TEMP
+	    } else {
+		set antennaname "NOANTENNA"
+	    }
+	    if {$output == 0} {
+# not Y2.1K compliant
+		set newfile_statusMsg [format "This file starts with data for station %s, day %.8s." $antennaname [time2str $timebase 1 ]]
+               if { $tk_version < 4.2 } {                
+		focus .newfile
+               }
+	    }
+	    if {$output == 1} {
+# not Y2.1K compliant
+		puts [format "This file starts with data for antenna %s, day %.8s." $antennaname [time2str $timebase 1]]
+	    }
+	    return 1
+	} else {
+	    set newfile_filename ""
+	    if {$output == 0} {
+		set newfile_statusMsg $newfiletext_noday
+		focus .newfile.entryFilename
+	    }
+	    if {$output == 1} {
+		puts $newfiletext_noday
+	    }
+	    return 0
+	}
+    }
+}
+
+# Procedure to clear all entry fields in newfile window
+# -----------------------------------------------------
+
+proc newfile_clearscreen {} {
+    global newfile_filename newfile_statusMsg newfiletext_nofile_specified
+    set newfile_statusMsg $newfiletext_nofile_specified
+    set newfile_filename ""
+    focus .newfile.entryFilename
+}
+
+# ==========================================================================
+#
+#                           PREFERENCES SECTION
+#
+# ==========================================================================
+
+proc changePrefs {} {
+    global current_DefaultDir current_TEMP current_CTL
+    global pref_DefaultDir pref_TEMP pref_CTL
+    set pref_DefaultDir $current_DefaultDir 
+    set pref_TEMP $current_TEMP
+    set pref_CTL $current_CTL
+    create_prefWindow
+}
+
+proc pref_OK {} {
+    global current_DefaultDir current_TEMP current_CTL
+    global pref_DefaultDir pref_TEMP pref_CTL
+    set current_DefaultDir $pref_DefaultDir 
+    set current_TEMP $pref_TEMP
+    set CTLchange [string compare $current_CTL $pref_CTL]
+    if {$CTLchange != 0} {
+	set nameOK [readControl $pref_CTL]
+	if $nameOK {set current_CTL $pref_CTL}
+    }
+    destroy .pref
+}
+
+# ==========================================================================
+#
+#                              PRINT SECTION
+#
+# ==========================================================================
+
+# Print OK procedure
+# ------------------
+
+proc print_OK {} {
+    global print_filename print_destination current_TEMP global_startmode
+    global statusMsg text_printing_wait text_ready colorMap current_printmode
+    global print_command print_overwrite
+    if {$global_startmode == 0} {
+	destroy .print
+	set statusMsg $text_printing_wait
+	update
+    }
+    if {[expr {$current_printmode == 0}] && [expr {$print_destination == 1}]} {
+	if {[file exists $print_filename] && [expr {$print_overwrite == 1}]} {
+	    .c postscript -pagewidth 7.5i -colormap colorMap -file $current_TEMP.eps2
+	    exec mv -f $print_filename $current_TEMP.eps1
+	    exec cat $current_TEMP.eps1 $current_TEMP.eps2 > $print_filename
+	    exec rm -f $current_TEMP.eps1
+	    exec rm -f $current_TEMP.eps2
+	} else {
+	    .c postscript -pagewidth 7.5i -colormap colorMap -file $print_filename
+	}
+    }
+    if {[expr {$current_printmode == 0}] && [expr {$print_destination == 0}]} {
+	.c postscript -pagewidth 7.5i -colormap colorMap -file $current_TEMP.eps
+	switch $print_command {
+	    0 {exec lpr $current_TEMP.eps}
+	    1 {exec psprint $current_TEMP.eps}
+	}
+	exec rm -f $current_TEMP.eps
+    }
+    if {$global_startmode == 0} {
+	if {[expr {$current_printmode == 1}] && [expr {$print_destination == 1}]} {
+	    if {[file exists $print_filename] && [expr {$print_overwrite == 1}]} {
+		set fileID [open $print_filename a]
+	    } else {
+		set fileID [open $print_filename w]
+	    }
+	    set noOfLines [.source.list size]
+	    for {set counter 0} {$counter < $noOfLines} {incr counter} {
+		set line [.source.list get $counter]
+		puts $fileID $line
+	    }
+	    close $fileID
+	}
+	if {[expr {$current_printmode == 1}] && [expr {$print_destination == 0}]} {
+	    set fileID [open $current_TEMP.txt w]
+	    set noOfLines [.source.list size]
+	    for {set counter 0} {$counter < $noOfLines} {incr counter} {
+		set line [.source.list get $counter]
+		puts $fileID $line
+	    }
+	    close $fileID
+	    switch $print_command {
+		0 {exec lpr $current_TEMP.txt}
+		1 {exec psprint $current_TEMP.txt}
+	    }
+	    exec rm -f $current_TEMP.txt
+	}    
+    }
+    if {$global_startmode >= 1} {
+	if {[expr {$current_printmode == 1}] && [expr {$print_destination == 1}]} {
+	    if {[file exists $print_filename] && [expr {$print_overwrite == 1}]} {
+		exec mv -f $print_filename $current_TEMP.txt1
+		exec cat $current_TEMP.txt1 $current_TEMP.list > $print_filename
+		exec rm -f $current_TEMP.txt1
+		exec rm -f $current_TEMP.list
+		set fileID [open $print_filename a]
+	    } else {
+		exec mv -f $current_TEMP.list $print_filename
+	    }
+	}
+	if {[expr {$current_printmode == 1}] && [expr {$print_destination == 0}]} {
+	    switch $print_command {
+		0 {exec lpr $current_TEMP.list}
+		1 {exec psprint $current_TEMP.list}
+	    }
+	    exec rm -f $current_TEMP.list
+	}    
+    }
+    set statusMsg $text_ready
+}
+
+
+# ==========================================================================
+#
+#                         FILESELECTION SECTION
+#
+# ==========================================================================
+proc fileselection_dialog {} {
+ 
+ global global_startmode current_DefaultDir newfile_filename current_filename 
+
+ set types {
+  {{Log Files} {*.log} }
+  {{All Files} {*} }
+ }
+
+ set newfile_filename $current_filename
+ set newfile_filename [tk_getOpenFile -title "Open new log file" -filetypes $types -initialdir $current_DefaultDir]
+
+ if {$newfile_filename != ""} {
+  newfile_OK $global_startmode
+ }
+
+}
+
+# ==========================================================================
+#
+#                           TK WIDGETS SECTION
+#
+# ==========================================================================
+
+# Tk widgets for the main window
+# ------------------------------
+
+frame .mbar -relief raised -borderwidth 2
+menubutton .mbar.file -text "File" -underline 0 -menu .mbar.file.menu
+menubutton .mbar.edit -text "Edit" -underline 0 -menu .mbar.edit.menu
+menubutton .mbar.option -text "Options" -underline 0 -menu .mbar.option.menu
+
+for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+    menubutton .mbar.data($counter) -text "Chan$counter" \
+	    -underline 4 -menu .mbar.data($counter).menu
+}
+
+frame .statusbar -relief raised -borderwidth 2
+label .labelStatusMsg -textvariable statusMsg
+
+frame .plotwindowframe
+
+focus .
+
+menu .mbar.file.menu
+menu .mbar.edit.menu
+menu .mbar.option.menu
+for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+    menu .mbar.data($counter).menu
+}
+
+if { $tk_version < 4.2 } {
+.mbar.file.menu add command -label "New log file" -command newFile
+} else {
+.mbar.file.menu add command -label "New log file" -command fileselection_dialog
+}
+
+.mbar.file.menu add command -label "Print" -command {create_printWindow 0}
+.mbar.file.menu add command -label "I/O setup" -command changePrefs
+.mbar.file.menu add separator
+.mbar.file.menu add command -label "Exit" -command {exitCmd}
+
+.mbar.edit.menu add command -label "Undo last remove" -command undoproc
+.mbar.edit.menu add separator
+.mbar.edit.menu add command -label "View source" -command \
+	{listRange $currentSet($currentChan)}
+.mbar.edit.menu add command -label "View log file" -command \
+	{glistRange $currentSet($currentChan)}
+
+.mbar.option.menu add command -label "Edit selections" -command newSelection
+.mbar.option.menu add separator
+
+#.mbar.option.menu add command -label "Gnuplot" \
+#	-command {
+#     set counter 1
+#    readData $c1_vs_c2(0);
+#    readData $c1_vs_c2(1);
+#    while { $counter <= $timepoints(0) } {
+#	exec cat << $nodeDataMatrix($c1_vs_c2(0),$counter,3)\ $nodeDataMatrix($c1_vs_c2(1),$counter,3)\n >> /tmp/log.dat
+#	incr counter
+#    }
+# This is to check againest gnuplot function.
+#    exec gnuplot -persist batch_log &
+#    exec rm /tmp/log.dat
+#}
+
+.mbar.option.menu add checkbutton -label "Connecting line" \
+	-variable optionLine -command toggleLines
+.mbar.option.menu add checkbutton -label "Superimpose" \
+	-variable optionSuperimpose -command {
+    if { $optionXvY == 0} {
+	set noactive 0
+	for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	    if {$currentSet($counter) != 0} {
+		incr noactive
+	    }
+	}
+	if {$noactive > 1} {Replot}
+    }
+}
+.mbar.option.menu add separator
+.mbar.option.menu add checkbutton -label "Chan1:Chan2" \
+	-variable optionXvY -command {
+    set noactive 1; 
+    set currentChan 2;
+    if { $switch_it == 0} {
+	if { $c1_vs_c2(1) == 0 || $c1_vs_c2(0) == 0} {
+#	    set c1_vs_c2(1) $c1_vs_c2(0);
+            set statusMsg "ERROR: Please select (2)two channels Channels 1 and 2."
+	    set optionXvY 0
+	} else {
+	    XvYplot
+	}
+    } else {
+	set switch_it 0;
+	set tmp $c1_vs_c2(0);
+	set c1_vs_c2(0) $c1_vs_c2(1);
+	set c1_vs_c2(1) $tmp
+	set tmp2 $global_ymin(1);
+	set tmp3 $global_ymax(1);
+	set global_ymin(1) $global_ymin(2);
+	set global_ymax(1) $global_ymax(2);
+	set global_ymin(2) $tmp2;
+	set global_ymax(2) $tmp3;
+	if { $c1_vs_c2(1) == 0 } {
+	    set c1_vs_c2(1) $c1_vs_c2(0);
+	}
+	XvYplot
+    }
+}
+.mbar.option.menu add command -label "Switch Channels" \
+	-command {
+    if {$optionXvY==0} { 
+	set statusMsg "ERROR: You must be in chan1:chan2 mode."
+    } else {
+	set noactive 1;
+	if { $switch_it == 0 } {
+	    set switch_it 1;
+	} else { set switch_it 0; }
+	set tmp $c1_vs_c2(0);
+	set c1_vs_c2(0) $c1_vs_c2(1);
+	set c1_vs_c2(1) $tmp
+	set tmp2 $global_ymin(1);
+	set tmp3 $global_ymax(1);
+	set global_ymin(1) $global_ymin(2);
+	set global_ymax(1) $global_ymax(2);
+	set global_ymin(2) $tmp2;
+	set global_ymax(2) $tmp3;
+	XvYplot
+    }
+}
+
+frame .frame1
+frame .frame2
+frame .subframe21 -relief groove -borderwidth 4
+frame .subframe22 -relief groove -borderwidth 4
+frame .subframe211
+frame .subframe212
+frame .subframe2121
+frame .subframe2122
+frame .subframe213
+frame .subframe221
+frame .subframe222
+frame .subframe2221
+frame .subframe2222
+frame .subframe22221
+frame .subframe22222
+frame .subframe22223
+frame .subframe223
+
+button .buttonResetX -width 12 -text "Reset" -command {SetXreset; Replot}
+button .buttonAutoX -width 12 -text "Autoscale" -command {SetXauto; Replot}
+button .buttonAutoY -width 12 -text "Autoscale" -command {SetYauto; Replot}
+
+label .labelTime -width 6 -text "Time"
+label .labelForm -anchor w -width 4
+label .labelTimestart -anchor w -width 4 -text "Tmin"
+label .labelTimestop -anchor w -width 4 -text "Tmax"
+label .labelTimepoints -anchor w -width 4 -text "#Pts"
+
+label .labelZoom -width 6 -text "Y-axis"
+label .labelParm -anchor w -width 4 -text "Chan"
+label .labelYmin -anchor w -width 4 -text "Ymin"
+label .labelYmax -anchor w -width 4 -text "Ymax"
+
+label .labelTformat -anchor w -text YYYY.DDD.HH:MM:SS.SS
+entry .entryTimestart -width 20 -relief sunken -textvariable timestart
+entry .entryTimestop -width 20 -relief sunken -textvariable timestop
+entry .entryTimepoints -width 20 -relief sunken -textvariable timepoints(0)
+radiobutton .radiobuttonData1 -width 1 \
+	-activeforeground $colorArray(1) -foreground $colorArray(1) -text "1" \
+	-variable newChan -value 1 -command updateChandata
+radiobutton .radiobuttonData2 -width 1 \
+	-activeforeground $colorArray(2) -foreground $colorArray(2) -text "2" \
+	-variable newChan -value 2 -command updateChandata
+radiobutton .radiobuttonData3 -width 1 \
+	-activeforeground $colorArray(3) -foreground $colorArray(3) -text "3" \
+	-variable newChan -value 3 -command updateChandata
+radiobutton .radiobuttonData4 -width 1 \
+	-activeforeground $colorArray(4) -foreground $colorArray(4) -text "4" \
+	-variable newChan -value 4 -command updateChandata
+
+entry .entryYmin -width 20 -relief sunken -textvariable global_ymin(0)
+entry .entryYmax -width 20 -relief sunken -textvariable global_ymax(0)
+
+# X-axis bindings
+bind .entryTimestart <Return> {focus .; Replot}
+bind .entryTimestart <Left> {.entryTimestart icursor [expr insert-1]}
+bind .entryTimestart <Right> {.entryTimestart icursor insert}
+bind .entryTimestop <Return> {focus .; set global_xmode 0; Replot}
+bind .entryTimepoints <Return> {focus .; set global_xmode 1; Replot}
+bind .entryTimestart <FocusIn> {set xchangeFlag 1}
+bind .entryTimestop <FocusIn> {set xchangeFlag 1}
+bind .entryTimepoints <FocusIn> {set xchangeFlag 1}
+
+# Y-axis bindings
+bind .entryYmin <Return> {focus .;set global_ymin($currentChan) $global_ymin(0);Replot}
+bind .entryYmax <Return> {focus .;set global_ymax($currentChan) $global_ymax(0);Replot}
+
+canvas .c -width [expr $xsizelimit+$xoffset+$xrightoffset] \
+	-height [expr $ysizelimit+$yoffset+$yrightoffset]
+
+bind .c <Button-1> {removePoint %x %y}
+
+# Procedure to pack the main window (called only once, and only in interactive mode)
+# ----------------------------------------------------------------------------------
+
+proc create_mainWindow {} {
+
+    global noOfChannels
+
+    wm title . "Log file plot"
+
+    pack .mbar -fill x
+    pack .mbar.file .mbar.edit .mbar.option -padx 2m -side left
+    for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
+	pack .mbar.data($counter) -padx 2m -side left
+    }
+    pack .statusbar -side bottom -fill x
+    pack .labelStatusMsg -in .statusbar -padx 2m -side left
+    pack .plotwindowframe
+    
+    pack .frame1 .frame2 -side left -in .plotwindowframe
+    pack .subframe21 .subframe22 -padx 4m -pady 2m -in .frame2
+    pack .subframe211 .subframe212 .subframe213 -in .subframe21
+    pack .subframe221 .subframe222 .subframe223 -in .subframe22
+    pack .subframe2121 .subframe2122 -side left -in .subframe212
+    pack .subframe2221 .subframe2222 -side left -in .subframe222
+    pack .subframe22221 .subframe22222 .subframe22223 -in .subframe2222
+    
+    pack .c -in .frame1
+    pack .labelTime -in .subframe211
+    pack .labelForm .labelTimestart .labelTimestop .labelTimepoints -in .subframe2121
+    pack .labelTformat .entryTimestart .entryTimestop .entryTimepoints -padx 2m -in .subframe2122
+    pack .buttonAutoX .buttonResetX -side bottom -pady 2m -in .subframe213
+    
+    pack .labelZoom -in .subframe221
+    pack .labelParm -pady 5m -in .subframe2221
+    pack .labelYmax .labelYmin -in .subframe2221
+    pack .radiobuttonData1 .radiobuttonData2 -side left -in .subframe22221
+    pack .radiobuttonData3 .radiobuttonData4 -side left -in .subframe22222
+    pack .entryYmax .entryYmin -padx 2m -in .subframe22223
+    pack .buttonAutoY -side bottom -pady 2m -in .subframe223
+}
+
+# Set up the canvas to show coordinate system
+# -------------------------------------------
+
+.c create rectangle $offplot_xmin $offplot_ymin(1,1) $offplot_xmax $offplot_ymax(1,1)
+.c create line [expr $offplot_xmin-5] $plotlimit_ymin(1,1) $offplot_xmin $plotlimit_ymin(1,1)
+.c create line $plotlimit_xmin [expr $offplot_ymin(1,1)-5] $plotlimit_xmin [expr $offplot_ymin(1,1)]
+.c create line $halfxscrpos [expr $offplot_ymin(1,1)-5] $halfxscrpos [expr $offplot_ymin(1,1)]
+.c create line $offplot_xmax $plotlimit_ymin(1,1) [expr $offplot_xmax+5] $plotlimit_ymin(1,1)
+.c create line $plotlimit_xmax [expr $offplot_ymin(1,1)-5] $plotlimit_xmax [expr $offplot_ymin(1,1)]
+.c create line [expr $offplot_xmin-5] $plotlimit_ymax(1,1) $offplot_xmin $plotlimit_ymax(1,1)
+.c create line $plotlimit_xmin [expr $offplot_ymax(1,1)+5] $plotlimit_xmin [expr $offplot_ymax(1,1)]
+.c create line $halfxscrpos [expr $offplot_ymax(1,1)+5] $halfxscrpos [expr $offplot_ymax(1,1)]
+.c create line $offplot_xmax $plotlimit_ymax(1,1) [expr $offplot_xmax+5] $plotlimit_ymax(1,1)
+.c create line $plotlimit_xmax [expr $offplot_ymax(1,1)+5] $plotlimit_xmax [expr $offplot_ymax(1,1)]
+.c create text $plotlimit_xmin [expr $ysizelimit+$yoffset+12] -anchor n -tags {text x0}
+.c create text $halfxscrpos [expr $ysizelimit+$yoffset+12] -anchor n -tags {text x1}
+.c create text $plotlimit_xmax [expr $ysizelimit+$yoffset+12] -anchor n -tags {text x2}
+.c create text 16 25 -fill $colorArray(1) -anchor sw -tags {text axisname(1)}
+.c create text 16 25 -fill $colorArray(3) -anchor nw -tags {text axisname(3)}
+.c create text [expr $fullxscrpos+$xrightoffset-16] 25 -fill $colorArray(2) -anchor se -tags {text axisname(2)}
+.c create text [expr $fullxscrpos+$xrightoffset-16] 25 -fill $colorArray(4) -anchor ne -tags {text axisname(4)}
+.c create text $halfxscrpos 25 -anchor s -tags {text title1}
+.c create text $halfxscrpos 25 -anchor n -tags {text title2}
+
+proc createSystem {no} {
+
+    global offplot_xmin offplot_xmax offplot_ymin offplot_ymax 
+    global plotlimit_xmin plotlimit_xmax plotlimit_ymin plotlimit_ymax 
+    global halfxscrpos colorArray
+
+    switch $no {
+	1 {
+	    .c create line [expr $offplot_xmin-5] $offplot_ymax(2,1) $offplot_xmin $offplot_ymax(2,1) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $offplot_ymax(2,1) $offplot_xmax $offplot_ymax(2,1) -tags coordsys
+	}
+	2 {
+	    .c create line [expr $offplot_xmin] $offplot_ymax(2,1) [expr $offplot_xmax] $offplot_ymax(2,1) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(2,1) [expr $offplot_xmin] $plotlimit_ymax(2,1) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(2,2) [expr $offplot_xmin] $plotlimit_ymin(2,2) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(2,1) [expr $offplot_xmax] $plotlimit_ymax(2,1) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(2,2) [expr $offplot_xmax] $plotlimit_ymin(2,2) -tags coordsys
+	}
+	3 {
+	    .c create line [expr $offplot_xmin] $offplot_ymax(3,1) [expr $offplot_xmax] $offplot_ymax(3,1) -tags coordsys
+	    .c create line [expr $offplot_xmin] $offplot_ymax(3,2) [expr $offplot_xmax] $offplot_ymax(3,2) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(3,1) [expr $offplot_xmin] $plotlimit_ymax(3,1) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(3,2) [expr $offplot_xmin] $plotlimit_ymin(3,2) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(3,1) [expr $offplot_xmax] $plotlimit_ymax(3,1) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(3,2) [expr $offplot_xmax] $plotlimit_ymin(3,2) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(3,2) [expr $offplot_xmin] $plotlimit_ymax(3,2) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(3,3) [expr $offplot_xmin] $plotlimit_ymin(3,3) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(3,2) [expr $offplot_xmax] $plotlimit_ymax(3,2) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(3,3) [expr $offplot_xmax] $plotlimit_ymin(3,3) -tags coordsys
+	}
+	4 {
+	    .c create line [expr $offplot_xmin] $offplot_ymax(4,1) [expr $offplot_xmax] $offplot_ymax(4,1) -tags coordsys
+	    .c create line [expr $offplot_xmin] $offplot_ymax(4,2) [expr $offplot_xmax] $offplot_ymax(4,2) -tags coordsys
+	    .c create line [expr $offplot_xmin] $offplot_ymax(4,3) [expr $offplot_xmax] $offplot_ymax(4,3) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(4,1) [expr $offplot_xmin] $plotlimit_ymax(4,1) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(4,2) [expr $offplot_xmin] $plotlimit_ymin(4,2) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(4,1) [expr $offplot_xmax] $plotlimit_ymax(4,1) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(4,2) [expr $offplot_xmax] $plotlimit_ymin(4,2) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(4,2) [expr $offplot_xmin] $plotlimit_ymax(4,2) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(4,3) [expr $offplot_xmin] $plotlimit_ymin(4,3) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(4,2) [expr $offplot_xmax] $plotlimit_ymax(4,2) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(4,3) [expr $offplot_xmax] $plotlimit_ymin(4,3) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymax(4,3) [expr $offplot_xmin] $plotlimit_ymax(4,3) -tags coordsys
+	    .c create line [expr $offplot_xmin-5] $plotlimit_ymin(4,4) [expr $offplot_xmin] $plotlimit_ymin(4,4) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymax(4,3) [expr $offplot_xmax] $plotlimit_ymax(4,3) -tags coordsys
+	    .c create line [expr $offplot_xmax+5] $plotlimit_ymin(4,4) [expr $offplot_xmax] $plotlimit_ymin(4,4) -tags coordsys
+	}
+    }
+    if {$no == 1} {
+	.c create text [expr $offplot_xmin-5] $plotlimit_ymin(1,1) -fill $colorArray(1) -anchor se -tags {coordsys y(1,0)}
+	.c create text [expr $offplot_xmin-5] $offplot_ymax(2,1) -fill $colorArray(1) -anchor se -tags {coordsys y(1,1)}
+	.c create text [expr $offplot_xmin-5] $plotlimit_ymax(1,1) -fill $colorArray(1) -anchor se -tags {coordsys y(1,2)}
+	.c create text [expr $offplot_xmax+5] $plotlimit_ymin(1,1) -fill $colorArray(2) -anchor sw -tags {coordsys y(2,0)}
+	.c create text [expr $offplot_xmax+5] $offplot_ymax(2,1) -fill $colorArray(2) -anchor sw -tags {coordsys y(2,1)}
+	.c create text [expr $offplot_xmax+5] $plotlimit_ymax(1,1) -fill $colorArray(2) -anchor sw -tags {coordsys y(2,2)}
+	.c create text [expr $offplot_xmin-5] $plotlimit_ymin(1,1) -fill $colorArray(3) -anchor ne -tags {coordsys y(3,0)}
+	.c create text [expr $offplot_xmin-5] $offplot_ymax(2,1) -fill $colorArray(3) -anchor ne -tags {coordsys y(3,1)}
+	.c create text [expr $offplot_xmin-5] $plotlimit_ymax(1,1) -fill $colorArray(3) -anchor ne -tags {coordsys y(3,2)}
+	.c create text [expr $offplot_xmax+5] $plotlimit_ymin(1,1) -fill $colorArray(4) -anchor nw -tags {coordsys y(4,0)}
+	.c create text [expr $offplot_xmax+5] $offplot_ymax(2,1) -fill $colorArray(4) -anchor nw -tags {coordsys y(4,1)}
+	.c create text [expr $offplot_xmax+5] $plotlimit_ymax(1,1) -fill $colorArray(4) -anchor nw -tags {coordsys y(4,2)}
+    } else {
+	set counter 1
+	while {$counter <= $no} {
+	    .c create text [expr $offplot_xmin-5] $plotlimit_ymin($no,$counter) -anchor ne -tags y($counter,0)
+	    .c addtag coordsys withtag y($counter,0)
+	    .c create text [expr $offplot_xmin-5] $plotlimit_ymax($no,$counter) -anchor se -tags y($counter,2)
+	    .c addtag coordsys withtag y($counter,2)
+	    incr counter
+	}
+    }
+}
+
+# Tk commands for newfile window
+# ------------------------------
+
+proc create_newfileWindow {} {
+
+    toplevel .newfile
+    wm title .newfile "Open new log file"
+
+    frame .newfile.statusbar -relief raised -borderwidth 2
+    label .newfile.labelStatusMsg -textvariable newfile_statusMsg
+
+    frame .newfile.frame1 -borderwidth 4 -relief groove
+    frame .newfile.frame4
+
+    label .newfile.labelFilename -anchor w -width 10 -text "Filename:"
+
+    entry .newfile.entryFilename -relief sunken -width 40 -textvariable newfile_filename
+
+    button .newfile.buttonOK -text "Ok" -width 8 \
+	    -command {newfile_OK $global_startmode}
+    button .newfile.buttonClearscreen -text "Clear" -width 8 \
+	    -command newfile_clearscreen
+    button .newfile.buttonCancel -text "Cancel" -width 8 \
+	    -command {destroy .newfile}
+
+    pack .newfile.frame1 -fill x -padx 8m -pady 4m -in .newfile
+    pack .newfile.statusbar -side bottom -fill x -in .newfile
+    pack .newfile.frame4 -padx 8m -pady 4m -side bottom -in .newfile
+    pack .newfile.labelStatusMsg -side left -in .newfile.statusbar
+    pack .newfile.labelFilename .newfile.entryFilename -side left -anchor w -padx 2m -pady 2m -in .newfile.frame1
+    pack .newfile.buttonOK .newfile.buttonClearscreen .newfile.buttonCancel -padx 3m -pady 3m -side left -in .newfile.frame4
+
+    bind .newfile.entryFilename <Return> {newfile_checkfile $newfile_filename $global_startmode}
+    bind .newfile <Return> {newfile_OK $global_startmode}
+}
+
+# Tk commands for preferences window
+# ----------------------------------
+
+proc create_prefWindow {} {
+    global text_title_preferences
+
+    toplevel .pref
+
+    wm title .pref $text_title_preferences
+
+    frame .pref.frame1 -borderwidth 4 -relief groove
+    frame .pref.frame4
+    frame .pref.subframe11
+    frame .pref.subframe12
+
+    label .pref.labelDefaultDir -anchor w -width 35 -text "Default directory for FS log files:"
+    label .pref.labelTEMP -anchor w -width 35 -text "Base filename for logpl temp files:"
+    label .pref.labelCTL -anchor w -width 35 -text "Current logpl control file........:"
+
+    entry .pref.entryDefaultDir -width 38 -relief sunken -textvariable pref_DefaultDir
+    entry .pref.entryTEMP -width 38 -relief sunken -textvariable pref_TEMP
+    entry .pref.entryCTL -width 38 -relief sunken -textvariable pref_CTL
+
+    button .pref.buttonOK -text "Ok" -width 10 -command pref_OK
+    button .pref.buttonCancel -text "Cancel" -width 10 -command {destroy .pref}
+
+    pack .pref.frame1 -fill x -padx 8m -pady 4m -in .pref
+    pack .pref.frame4 -padx 8m -pady 4m -side bottom -in .pref
+
+    pack .pref.subframe11 .pref.subframe12 -side left -in .pref.frame1
+    
+    pack .pref.labelDefaultDir .pref.labelTEMP .pref.labelCTL -in .pref.subframe11 -padx 2m -pady 2m
+    pack .pref.entryDefaultDir .pref.entryTEMP .pref.entryCTL -in .pref.subframe12 -padx 2m -pady 2m
+
+    pack .pref.buttonOK .pref.buttonCancel -padx 3m -pady 3m -side left -in .pref.frame4
+
+    bind .pref.entryDefaultDir <Return> {focus .pref}
+    bind .pref.entryTEMP <Return> {focus .pref}
+    bind .pref.entryCTL <Return> {focus .pref}
+    bind .pref <Return> {pref_OK}
+}
+
+# Tk commands for print window
+# ----------------------------
+
+proc create_printWindow {mode} {
+
+    global current_printmode
+    set current_printmode $mode
+
+    toplevel .print
+    if {$mode == 0} {wm title .print "Print plot"}
+    if {$mode == 1} {wm title .print "Print text"}
+    
+    frame .print.frame1 -borderwidth 4 -relief groove
+    frame .print.subframe11
+    frame .print.subframe12
+    frame .print.subframe13
+    frame .print.subframe14
+    frame .print.frame2 -borderwidth 4 -relief groove
+    frame .print.frame4
+    
+    label .print.labelDestination -anchor w -width 17 -text "Destination.....:"
+    label .print.labelCommand -anchor w -width 17 -text "Print command...:"
+    label .print.labelOverwrite -anchor w -width 17 -text "File output mode:"
+    label .print.labelFilename -anchor w -width 17 -text "Output filename.:"
+
+    radiobutton .print.buttonPrinter -text "Printer" \
+	    -variable print_destination -value 0 -command \
+	    {focus .print; if {$print_command > 1} {incr print_command -2}; if {$print_overwrite < 2} {incr print_overwrite 2}}
+    radiobutton .print.buttonFile -text "File" \
+	    -variable print_destination -value 1 -command \
+	    {focus .print.entryFilename; if {$print_command < 2} {incr print_command 2}; if {$print_overwrite > 1} {incr print_overwrite -2}}
+    radiobutton .print.buttonLPR -text "lpr" -variable print_command \
+	    -value 0 -command {set print_destination 0; if {$print_overwrite < 2} {incr print_overwrite 2}; focus .print}
+    radiobutton .print.buttonPSPRINT -text "psprint" -variable print_command \
+	    -value 1 -command {set print_destination 0; if {$print_overwrite < 2} {incr print_overwrite 2}; focus .print}
+    radiobutton .print.buttonOverwriteYes -text "Overwrite" -variable print_overwrite \
+	    -value 0 -command {set print_destination 1; if {$print_command < 2} {incr print_command 2}; focus .print.entryFilename}
+    radiobutton .print.buttonOverwriteNo -text "Append" -variable print_overwrite \
+	    -value 1 -command {set print_destination 1; if {$print_command < 2} {incr print_command 2}; focus .print.entryFilename}
+
+    entry .print.entryFilename -width 40 -relief sunken -textvariable print_filename
+    
+    button .print.buttonOK -text "Print" -width 8 -command print_OK
+    button .print.buttonCancel -text "Cancel" -width 8 -command {destroy .print}
+
+    message .print.messageInstruction(0) -justify left -width 600 -text "The current plot will be printed in encapsulated postscript (eps) format."
+    message .print.messageInstruction(1) -justify left -width 600 -text "The current text view window will be printed in ASCII text format."
+
+    pack .print.frame1 .print.frame2 -fill x -padx 8m -pady 4m -in .print
+    pack .print.frame4 -padx 8m -pady 4m -side bottom -in .print
+    pack .print.subframe11 .print.subframe12 .print.subframe13 \
+	    .print.subframe14 -anchor w -in .print.frame1
+    pack .print.labelDestination .print.buttonPrinter .print.buttonFile \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe11
+    pack .print.labelCommand .print.buttonLPR .print.buttonPSPRINT \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe12
+    pack .print.labelOverwrite .print.buttonOverwriteYes .print.buttonOverwriteNo \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe13
+    pack .print.labelFilename .print.entryFilename \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe14
+    pack .print.messageInstruction($mode) -in .print.frame2
+    pack .print.buttonOK .print.buttonCancel \
+	    -padx 3m -pady 3m -side left -in .print.frame4
+
+    bind .print.entryFilename <Return> {focus .print}
+    bind .print <Return> {print_OK}
+}
+
+# Tk commands for selection window
+# --------------------------------
+
+proc create_selectionWindow {} {
+
+    toplevel .selection
+    wm title .selection "Edit selections"
+
+    frame .selection.statusbar -relief raised -borderwidth 2
+    label .selection.labelStatusMsg -textvariable selection_statusMsg
+
+    frame .selection.frame1 -borderwidth 4 -relief groove
+    frame .selection.subframe11
+    frame .selection.subframe12
+    frame .selection.frame3
+    frame .selection.frame4
+
+    label .selection.labelNo -anchor w -width 27 -text "Selection number..........:"
+    label .selection.labelCommand -anchor w -width 27 -text "Command (grep pattern)....:"
+    label .selection.labelParm -anchor w -width 27 -text "Parameter.................:"
+    label .selection.labelString -anchor w -width 27 -text "Matching string (optional):"
+    label .selection.labelName -anchor w -width 27 -text "Description...............:"
+
+    entry .selection.entryNo -width 6 -relief sunken -textvariable selection_no -state disabled
+    entry .selection.entryCommand -width 16 -relief sunken -textvariable selection_command
+    entry .selection.entryParm -width 6 -relief sunken -textvariable selection_parm
+    entry .selection.entryString -width 16 -relief sunken -textvariable selection_string
+    entry .selection.entryName -width 16 -relief sunken -textvariable selection_name
+
+    button .selection.buttonOK -text "Update" -width 8 -command selection_OK
+    button .selection.buttonClearscreen -text "New" -width 8 -command selection_clearscreen
+    button .selection.buttonNext -text "Next >" -width 8 -command selection_next
+    button .selection.buttonPrev -text "< Prev" -width 8 -command selection_previous
+    button .selection.buttonCancel -text "Close" -width 8 -command {destroy .selection}
+
+    pack .selection.frame1 -fill x -padx 8m -pady 4m -in .selection
+    pack .selection.statusbar -fill x -side bottom -in .selection
+    pack .selection.labelStatusMsg -side left -in .selection.statusbar
+    pack .selection.frame4 .selection.frame3 -padx 8m -side bottom -in .selection
+    pack .selection.subframe11 .selection.subframe12 -side left -in .selection.frame1
+    pack .selection.labelNo .selection.labelCommand .selection.labelParm .selection.labelString .selection.labelName -anchor w -padx 2m -pady 2m -in .selection.subframe11
+    pack .selection.entryNo .selection.entryCommand .selection.entryParm .selection.entryString .selection.entryName -anchor w -padx 2m -pady 2m -in .selection.subframe12
+    pack .selection.buttonPrev .selection.buttonClearscreen .selection.buttonNext -padx 3m -pady 3m -side left -in .selection.frame3
+    pack .selection.buttonOK .selection.buttonCancel -padx 3m -pady 3m -side left -in .selection.frame4
+
+    
+
+    bind .selection.entryCommand <Return> {focus .selection.entryParm}
+    bind .selection.entryParm <Return> {focus .selection.entryString}
+    bind .selection.entryString <Return> {focus .selection.entryName}
+    bind .selection.entryName <Return> {focus .selection}
+
+    bind .selection <Return> {selection_OK}
+}
+
+# Tk commands for viewing listbox window
+# --------------------------------------
+
+proc create_sourceWindow {mode} {
+
+    if [winfo exists .source] {destroy .source}
+    toplevel .source
+
+    if {$mode == 0} {wm title .source "View source"}
+    if {$mode == 1} {wm title .source "View log file"}
+    
+    frame .source.frame1
+    frame .source.frame4
+    
+    listbox .source.list -relief sunken -setgrid 1 -yscrollcommand [list .source.sy set]
+    scrollbar .source.sy -relief sunken -orient vertical -command [list .source.list yview]
+
+    button .source.buttonPrint -text "Print" -width 8 -command {create_printWindow 1}
+    button .source.buttonClose -text "Close" -width 8 -command {destroy .source; if [winfo exists .print] {destroy .print}}
+
+    pack .source.frame1 -fill x -in .source
+    pack .source.frame4 -padx 8m -side bottom -in .source
+    pack .source.sy -in .source.frame1 -side right -fill y
+    pack .source.list -in .source.frame1 -side left -fill both -expand true
+    pack .source.buttonPrint .source.buttonClose -padx 3m -pady 3m -side left -in .source.frame4
+
+    bind .source <Return> {destroy .source}
+}
+
+# ==========================================================================
+#
+#                           MAIN PROGRAM SECTION
+#
+# ==========================================================================
+
+# Main initilizing program
+# ------------------------
+
+set global_startmode 0
+set argno 1
+set newfile_filename ""
+if ![catch {set filename [exec lognm]}] \
+	{set newfile_filename [string trim $filename]}
+foreach arg $argv {
+    switch -regexp -- $arg {
+	-cmd {set global_startmode 1}
+	-log {set newfile_filename [lindex $argv $argno]}
+	-cfile {set global_startmode 2; set cmdfile [lindex $argv $argno]}
+	-control {set current_CTL [lindex $argv $argno]}
+    }
+    incr argno
+}		
+readControl $current_CTL
+if {$global_startmode > 0} {
+    set print_destination 0  ;# 0=Printer, 1=File
+    set print_command 0      ;# 0=lpr, 1=psprint
+    set print_overwrite 1    ;# 0=Yes, 1=No
+    if {[string compare "" newfile_filename] != 0} {newfile_OK 2}
+    wm iconify .
+    pack .c
+    Replot
+}
+
+switch $global_startmode {
+    0 {
+	create_mainWindow
+	if {[string compare "" newfile_filename] != 0} {newfile_OK 2}
+    }
+    1 {
+	while 1 {
+	    puts -nonewline "logpl> "
+	    flush stdout
+	    gets stdin cmdline
+	    set errorflag [decode $cmdline]
+	}
+    }
+    2 {
+	set cmdline [format "cfile=%s" $cmdfile]
+	decode $cmdline
+	exit
+    }
+}

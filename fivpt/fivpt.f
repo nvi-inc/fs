@@ -110,6 +110,14 @@ C
                ierr=-111
                goto 80010
             endif
+         else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
+C           do nothing ...
+         else if(LBA.eq.rack) then
+            call fc_dscon_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
          endif
       endif
 C 

@@ -1,47 +1,47 @@
     worm - estimate inchworm velocities (longitudinal drives)
- 
-              Syntax:      worm=stack,scale
- 
-              Response:    worm/stack,scale,fo,so,fi,si
- 
- 
- Settable parameters:
-            stack      Head stack to measure the speed of: 1, 2, write or
-            read. Default is 2 for Mark III/IV and VLBA4, and 1
-            for VLBA. Only 1 is valid for VLBA and MK4B
-            recorders. The value write is synonymous with 1 and
-            read is synonymous with 2, even if the heads are
-            wired differently. Only the first character for
-            write and read is checked.; they are provided only
-            for backward compatibility. 
-            scale      Scale to use for speed measurement, old (default),
-            new, or update. Only the first character is checked.
-            The update mode uses the old scale and updates the
-            speed in use.
- 
- Monitor-only parameters:
-            fo         Fast out speed.
-          so       Slow out speed.
-            fi         Fast in  speed.
-            si         Slow in  speed.
- 
- Comments: 
- This command measures the inchworm speeds. It must be issued
- once with parameters to set it up. Issuing the command without
- parameters will start a measurement. 
- 
- Measurements are made by moving the head stack for 1 second at
- slow speeds and 0.1 seconds at fast speeds in each direction.
- The before and after voltages are compared and the voltage
- scale for that head stack is used to calculate the speed. This
- scheme works best if the inchworm starts well away from the
- limits of its motion. For typical voltage scale factors (170
- microns/volt), the fast speeds measured by this command tend
- be quantized in units slightly smaller than 10; the slow in
- units of about 1.
- 
- Either the current (old) or the new voltage scales can be
- used. The old scale is the one most recently read on Field
- System start-up from the head.ctl control file. The new scale
- is the most recently determined scale factor calculated by the
- hdcalc command.  
+
+            Syntax:     worm=stack,scale
+
+            Response:   worm/stack,scale,fo,so,fi,si
+
+
+Settable parameters:
+          stack     Head stack to measure the speed of: 1, 2, write or
+          read. Default is 2 for Mark III/IV and VLBA4, and 1
+          for VLBA. Only 1 is valid for VLBA and MK4B
+          recorders. The value write is synonymous with 1 and
+          read is synonymous with 2, even if the heads are
+          wired differently. Only the first character for
+          write and read is checked.; they are provided only
+          for backward compatibility. 
+          scale     Scale to use for speed measurement, old (default),
+          new, or update. Only the first character is checked.
+          The update mode uses the old scale and updates the
+          speed in use.
+
+Monitor-only parameters:
+            fo          Fast out speed.
+          so        Slow out speed.
+            fi          Fast in  speed.
+            si          Slow in  speed.
+
+Comments: 
+This command measures the inchworm speeds. It must be issued
+once with parameters to set it up. Issuing the command without
+parameters will start a measurement. 
+
+Measurements are made by moving the head stack for 1 second at
+slow speeds and 0.1 seconds at fast speeds in each direction.
+The before and after voltages are compared and the voltage
+scale for that head stack is used to calculate the speed. This
+scheme works best if the inchworm starts well away from the
+limits of its motion. For typical voltage scale factors (170
+microns/volt), the fast speeds measured by this command tend
+be quantized in units slightly smaller than 10; the slow in
+units of about 1.
+
+Either the current (old) or the new voltage scales can be
+used. The old scale is the one most recently read on Field
+System start-up from the head.ctl control file. The new scale
+is the most recently determined scale factor calculated by the
+hdcalc command. 

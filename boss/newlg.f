@@ -50,6 +50,9 @@ C
           idum=ichmv(lsor,1,lsorin,2,1)
       endif
       call logit5(ibuf(1),nch,lsor,lprocdumm,nl)
+      call fs_get_logchg(logchg)
+      logchg=mod(logchg+1,2147483647)
+      call fs_set_logchg(logchg)
 C
 C     Send configuration info from control files to log
 C
@@ -179,6 +182,10 @@ c
         nch=ichmv_ch(ib,nch,'k42bu/mk4')
       else if(rack.eq.K4MK4.and.rack_type.eq.K42C) then
         nch=ichmv_ch(ib,nch,'k42c/mk4')
+      else if(rack.eq.LBA) then
+        nch=ichmv_ch(ib,nch,'lba')
+      else if(rack.eq.LBA4) then
+        nch=ichmv_ch(ib,nch,'lba4')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -212,6 +219,10 @@ c
         nch=ichmv_ch(ib,nch,'k41/dms')
       else if(drive(1).eq.K4.and.drive_type(1).eq.K42DMS) then
         nch=ichmv_ch(ib,nch,'k42/dms')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5A) then
+        nch=ichmv_ch(ib,nch,'mk5a')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5A_BS) then
+        nch=ichmv_ch(ib,nch,'mk5a_bs')
       else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif

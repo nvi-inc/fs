@@ -185,7 +185,10 @@ void cshm_init()
   shm_addr->knewtape[0]=0;
   shm_addr->knewtape[1]=0;
 
-  shm_addr->scan_name[0]=0;
+  shm_addr->scan_name.name[0]=0;
+  shm_addr->scan_name.session[0]=0;
+  shm_addr->scan_name.duration=-1;
+  
 
   /* 
    * Initialize TAC Shared Memory variables to 0(zero).
@@ -244,6 +247,54 @@ void cshm_init()
     shm_addr->tpigain[i]=128;
     shm_addr->tpidiffgain[i]=128;
   }
+  
+  for (i=0; i<MAX_DAS; i++) {
+
+	sprintf (shm_addr->das[i].ds_mnem,"d%1x",i+1);
+
+	for (j=0; j<2; j++) {
+		/* Initialise CORnn default values */
+		shm_addr->das[i].ifp[j].corr_type = _4_LVL;
+		shm_addr->das[i].ifp[j].corr_source[0] = _A_U;
+		shm_addr->das[i].ifp[j].corr_source[1] = _A_U;
+		shm_addr->das[i].ifp[j].at_clock_delay = 0;
+
+		/* Initialise FTnn default values */
+		shm_addr->das[i].ifp[j].bs.digout.setting = _USB;
+		shm_addr->das[i].ifp[j].ft_lo = 8.0;
+		shm_addr->das[i].ifp[j].ft.clock_decimation = 0;
+		shm_addr->das[i].ifp[j].ft_filter_mode = _NONE;
+		shm_addr->das[i].ifp[j].ft_offs = 0.0;
+		shm_addr->das[i].ifp[j].ft_phase = 0.0;
+		shm_addr->das[i].ifp[j].ft.nco_test = _OFF;
+
+		/* Initialise MONnn default values */
+		shm_addr->das[i].ifp[j].bs.monitor.setting = _LSB;
+		shm_addr->das[i].ifp[j].ft.monitor.setting = _USB;
+		shm_addr->das[i].ifp[j].ft.digout.setting = _USB;
+
+		/* Initialise TRACKFORM default values */
+		shm_addr->das[i].ifp[j].track[0] =
+			 shm_addr->das[i].ifp[j].track[1] = -1;
+
+		/* Hardwire caltmpN to ifpN dependance for 4 IFs */
+		shm_addr->das[i].ifp[j].source = (2*i+j)%4;
+
+		shm_addr->das[i].ifp[j].initialised = 0;
+	}
+  }
+
+  for (i=0;i<2*MAX_DAS;i++) {
+    shm_addr->ifp_tpi[i]=65536;
+  }
+
+  /* Monit4 starts on DAS 0 */
+  shm_addr->m_das=0;
+
+  shm_addr->mk5vsn[0]=0;
+  shm_addr->mk5vsn_logchg=0;
+  shm_addr->logchg=0;
+
   return;
 }
 

@@ -30,6 +30,7 @@ C        ICH    - character counter
       dimension iparm(2)           !  parameters returned from gtprm
       dimension ireg(2)       !  registers from exec calls
       integer get_buf
+      integer fsmetc
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
@@ -60,6 +61,21 @@ C
       if (ieq.ne.0) then
         ip(3) = -1              !  it is an error to specify parameters
         return
+      endif
+      call fs_get_met(wx_met)
+C Call the metserver server for MET3 information.
+      if(MET3.eq.wx_met) then
+         istate = fsmetc()
+         if(istate.ne.0) then
+            ip(3) = istate      !  met3 sensor server problem.
+            return
+         endif
+         call fs_get_tempwx(tempwx)
+         call fs_get_preswx(preswx)
+         call fs_get_humiwx(humiwx)
+         call fs_get_speedwx(speedwx)
+         call fs_get_directionwx(directionwx)
+         goto 8000
       endif
 C 
 C     2. Fill up a request for the three numbers: + (temp), % (humidity), 
@@ -119,6 +135,8 @@ C     which IR2AS doesn't handle properly.
         preswx = 1.0E10
       endif
       call fs_set_preswx(preswx)
+
+8000  continue
 C 
 C     5. Finally, code up the message for BOSS and the display and log. 
 C 
@@ -128,6 +146,12 @@ C
       nch = nch + ir2as(preswx,ibuf2,nch,7,1) 
       nch = mcoma(ibuf2,nch)
       nch = nch + ir2as(humiwx,ibuf2,nch,5,1) 
+      if(MET3.eq.wx_met) then
+         nch = mcoma(ibuf2,nch)
+         nch = nch + ir2as(speedwx,ibuf2,nch,7,1) 
+         nch = mcoma(ibuf2,nch)
+         nch = nch + ib2as(directionwx,ibuf2,nch,3) 
+      endif
 C 
       nch = nch - 1 
       iclass = 0

@@ -1,39 +1,39 @@
                caltemp - set noise cal temperatures
- 
-              Syntax:      caltemp1=temp
-                   caltemp2=temp
-          caltemp3=temp
-                   caltempa=temp
-                   caltempb=temp
-          caltempc=temp
-          caltempd=temp
+
+            Syntax:     caltemp=list
           caltemp5=temp
           caltemp6=temp
- 
-              Response:    caltemp1/temp
-                   caltemp2/temp
-          caltemp3/temp
-                   caltempa/temp
-                   caltempb/temp
-          caltempc/temp
-          caltempd/temp
+
+            Response:   caltemp/values
           caltemp5/temp
           caltemp6/temp
- 
- 
- Settable parameters:
-          temp     temperature of cal signal, in degrees K.
- 
- Monitor-only parameters: none
- 
- Comments: 
- Calibration temperatures, for either Mark III (and Mark IV) or
- VLBA (and VLBA4) systems, may be specified with the
- caltemp1/2/3 and caltempa/b/c/d commands, respectively. The
- commands tsys1/2/3 and tsysa/b/c/d use the temperatures
- specified as caltemp1/2/3 and caltempa/b/c/d respectively. The
- command pairs caltemp1/a, caltemp2/b, and caltemp3/c are
- synonymous.
- 
- The caltemp5/6 commands are used for defining the calibration
- temperatures used with station dependent detectors u5 and u6.
+
+
+Settable parameters:
+            list        List of total power integrators to read back.
+            Standard detector mnemonics allowed.
+          temp      temperature of cal signal, in degrees K. These
+          values are stored for use by the tsys5/6 commands.
+
+
+Monitor-only parameters:
+            values      List of values, degrees K. These values are stored
+            for use by the tsys command.
+
+Comments:
+Except for station defined detectors, the results are returned
+grouped in pairs of detector mnemonic,value, the output is
+collected into lines by IF channel. Detectors that have no IF
+assigned are displayed first followed by IFs 1-3 (Mark III/IV
+or LBA4), 1-4 (LBA) and a-d (VLBA/4). If the output for an IF
+would make a long output line, the output is split into more
+than one line. For station defined detectors the results are
+just displayed in order: u5, u6.
+
+For Mark III/IV and LBA4 racks the detector mnemonics for the
+VCs are displayed as hs, where h is the VC number as hex and s
+is for the detector is use: d (dual for upper/lower), u
+(upper), l (lower), or a digit 4-7 for other detectors.
+
+The caltemp5/6 commands are used for defining the calibration
+temperatures used with station dependent detectors u5 and u6.

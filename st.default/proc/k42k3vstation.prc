@@ -1,3 +1,6 @@
+define  exper_initi   00000000000
+sched_initi
+enddef
 define  setupa        01138134726x
 pcalon  
 tapefsxc  

@@ -1,34 +1,34 @@
              rec - tape recorder control (S2 drives)
- 
-              Syntax:       rec=list 
- 
-              Response:    rec/position,variance,date/time,valid,version
- 
- 
- Settable Parameters: 
-              list         One of: eject (or unload) which may have a following
-              parameter all, a position to move all selected
-              transports to, or a list of eight comma-separated
-              positions to move the individual transports to.
-              Positions are in units of seconds. In a list of
-              eight positions, uns must be used for transports
-              that are not currently selected.
- 
- Monitor-only Parameters: 
-              position     overall absolute position of select transports, unk
-              if unknown. 
-              variance     linear variance of position of select transports,
-              unk if unknown. 
-              date/time    S2 date and time in format yyy/ddd.hh:mm:ss 
-            valid      valid if S2 time is valid, not-valid if S2 time is
+
+            Syntax:      rec=list 
+
+            Response:   rec/position,variance,date/time,valid,version
+
+
+Settable Parameters: 
+            list        One of: eject (or unload) which may have a
+            following parameter all, a position to move all
+            selected transports to, or a list of eight comma-
+            separated positions to move the individual
+            transports to. Positions are in units of seconds.
+            In a list of eight positions, uns must be used for
+            transports that are not currently selected.
+
+Monitor-only Parameters: 
+            position    overall absolute position of select transports, unk
+            if unknown. 
+            variance    linear variance of position of select transports,
+            unk if unknown. 
+              date/time     S2 date and time in format yyy/ddd.hh:mm:ss 
+            valid       valid if S2 time is valid, not-valid if S2 time is
             not valid 
-            version    ROS software version information string 
- 
- Comments: 
- This command is used to move the selected transports to
- another position. 
- 
- For  eject (or unload), only the selected transports are
- ejected, unless there is an optional following parameter ,all
- which causes all the transports to be ejected.
- 
+            version     ROS software version information string 
+
+Comments: 
+This command is used to move the selected transports to
+another position. 
+
+For  eject (or unload), only the selected transports are
+ejected, unless there is an optional following parameter ,all
+which causes all the transports to be ejected.
+

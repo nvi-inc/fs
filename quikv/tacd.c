@@ -1,104 +1,358 @@
-/* tacd snap command */
-
-#include <stdio.h> 
-#include <string.h> 
+/*********************************************************************
+ * tacd snap command:
+ *  This program creates a socket and initiates a connection.
+ *  Some data are sent over the connection and then the socket
+ *  is closed ending the connection.
+ *********************************************************************/
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/file.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <math.h>
+#include <fcntl.h>
+#include <sys/time.h>
 
 
-#include "../include/params.h"
-#include "../include/fs_types.h"
-#include "../include/fscom.h"         /* shared memory definition */
-#include "../include/shm_addr.h"      /* shared memory pointer */
+#include "../include/fs_types.h"      /* general header file for all fs data
+                                       * structure definations */
+#include "../include/params.h"        /* general fs parameter header */
+#include "../include/fscom.h"         /* shared memory (fscom C data 
+                                       * structure) layout */
+#include "../include/shm_addr.h"      /* declaration of pointer to fscom */
+#define MAX_BUF 256
+
+char *cmd[5] = {"$PCNSL,TICLOG,STATUS\r\n",       /* TAC filename and status */
+		"$PCNSL,TICDATA,TIME,ONCE\r\n",   /* TAC time */
+		"$PCNSL,TICDATA,AVERAGE,ONCE\r\n",/* TAC averages */
+		"$PCNSL,VERSION\r\n",             /* TAC version # */
+		"$PCNSL,EXIT\r\n"};               /* TAC exit */
 
 void tacd(command,itask,ip)
 struct cmd_ds *command;                /* command structure */
 int itask;
 long ip[5];                           /* ipc parameters */
 {
-      int ierr, i;
-      char *reset_host;
+  /*
+   * Local variables
+   */
+  int sock;
+  int i, k, n, ierr, flags;
+  struct sockaddr_in server;
+  struct hostent *hp, *gethostbyname();
+  char buf[1024];
+  char *reset_host;
+  char mode_str[MAX_BUF];
+  struct timeval to;
+  fd_set ready;
+  FILE *fp;
 
-      void tacd_dis();
-      void skd_run(), skd_par();      /* program scheduling utilities */
+  void tacd_dis();
+  void skd_run(), skd_par();      /* program scheduling utilities */
 
-      /*shm_addr->tacd.continuous=0;*/
+  /* Opening file for host and port number. */
+  if ((fp=fopen(FS_ROOT"/control/tacd.ctl","r")) == 0) {
+    /* If the file does not exist complain only once. */
+    logit(NULL,-1,"ta");
+    return;
+  } else {
+    /* Read the contents of the file then close  */
+    i=0;
+    while(fgets(mode_str,MAX_BUF-1,fp) != NULL) {
+      if(mode_str[0]!='*') {
+        /* host name please */
+        for(i=0; mode_str[i]!='\n'; i++) {
+          if(mode_str[i]==',') {
+            logit(NULL,-8,"ta");
+            /* exit(0);*/
+            i=0;
+            break;
+	  }
+	}
+        sscanf(&mode_str[0],"%s %d\n",
+               &shm_addr->tacd.hostpc, 
+               &shm_addr->tacd.port);
+	       continue;
+      }
+    }
+    if(!i) {
+    /* 
+     * File is empty.
+     * logit(NULL,-2,"ta");
+     * logitf("tacd/tacd.ctl control file is empty or just has comments.");
+     */
+      for(;;) {
+        if(shm_addr->LLOG[0]!=' ') {
+          logitf("tacd/,,");
+          break;
+        }
+      }
+    }
+    shm_addr->tacd.hostpc[strlen(shm_addr->tacd.hostpc)]='\0';
+  }
+  close(fp);  
 
-      if (command->equal != '=') {           /* run tacd */
-	if(shm_addr->tacd.display==0){
-	   command->argv[0]="status";
-	}
-	else if(shm_addr->tacd.display==1){
-	   command->argv[0]="time";
-	}
-	else {
-	   command->argv[0]="average";
-	}
+  /* Create the socket for reading */
+  sock = socket( AF_INET, SOCK_STREAM, 0);
+  if(sock == -1) {
+    logit(NULL,-3,"ta");
+    return;
+  }
+  /* 
+   * gethostbyname returns a structure including the network address of
+   * the specified host.
+   */
+  server.sin_family = AF_INET;
+  hp = gethostbyname(shm_addr->tacd.hostpc);
+  
+  if(hp == (struct hostent *) 0) {
+    logit(NULL,-3,"ta");
+    return;
+  }
+  
+  memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
+  server.sin_port = htons((int)shm_addr->tacd.port);
+
+  if(connect(sock, (struct sockaddr *)&server, sizeof server) == -1) {
+    logit(NULL,-4,"ta");
+    close(sock);
+    return;
+  }
+  
+  /* Set socket nonblocking  */
+  if ((flags = fcntl (sock, F_GETFL, 0)) < 0) 
+  
+  flags |= O_NONBLOCK; 
+  
+  if (( fcntl (sock, F_SETFL, flags )) < 0) 
+  
+  to.tv_sec = 4;
+  
+  FD_ZERO(&ready);
+  FD_SET(sock, &ready);
+  
+  select(sock+1, &ready, NULL, NULL, &to);
+
+  /* 
+   * This is the very first instance of the socket being read 
+   * It will never close unless it is closed from outside or the 
+   * Field System closes it with the 'terminate' command.
+   */
+  if( read(sock, buf, sizeof buf) == 0) {
+    logit(NULL,-5,"ta");
+    close(sock);
+  }
+
+  if (command->equal != '=') {           /* run tacd */
+    if(shm_addr->tacd.display==0){
+      command->argv[0]="status";
+    }
+    else if(shm_addr->tacd.display==1){
+      command->argv[0]="time";
+      k = strlen(cmd[1]);
+      if(i=write(sock, cmd[1], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
+	return;
+      }
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[20],"%d.%d,%f,%f,%d,%f,%f,%f,%d,%f",
+	     &shm_addr->tacd.day,
+	     &shm_addr->tacd.day_frac,
+	     &shm_addr->tacd.msec_counter,
+	     &shm_addr->tacd.usec_correction,
+	     &shm_addr->tacd.nsec_accuracy,
+	     &shm_addr->tacd.usec_bias,
+	     &shm_addr->tacd.cooked_correction,
+	     &shm_addr->tacd.pc_v_utc,
+	     &shm_addr->tacd.utc_correction_sec,
+	     &shm_addr->tacd.utc_correction_nsec);
+    }
+    else {
+      command->argv[0]="average";
+      k = strlen(cmd[2]);
+      if(i=write(sock, cmd[2], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
+	return;
+      }
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[23],"%d.%d,%d,%f,%f,%f,%f",
+	     &shm_addr->tacd.day_a,
+	     &shm_addr->tacd.day_frac_a,
+	     &shm_addr->tacd.sec_average,
+	     &shm_addr->tacd.rms,
+	     &shm_addr->tacd.usec_average,
+	     &shm_addr->tacd.max,
+	     &shm_addr->tacd.min);
+    }
+    close(sock);
+    tacd_dis(command,itask,ip);
+    return;
+  } else if (command->argv[0]==NULL) {
+    shm_addr->tacd.continuous=0;
+    skd_run("tacd",'n',ip);
+    ip[0]=ip[1]=ip[2]=0;
+    close(sock);
+    return;
+  } else if (command->argv[1]==NULL) {/* special cases */
+    if (*command->argv[0]=='?') {
+      tacd_dis(command,itask,ip);
+      close(sock);
+      return;
+    } else if(!strcmp(command->argv[0],"status")){
+      k = strlen(cmd[0]);
+      if(i=write(sock, cmd[0], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
+	return;
+      }
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[21],"%s,%s",
+	     &shm_addr->tacd.file,
+	     &shm_addr->tacd.status);
+      shm_addr->tacd.display=0;
+      close(sock);
+      tacd_dis(command,itask,ip);
+      return;
+    } else if(!strcmp(command->argv[0],"version")){
+      k = strlen(cmd[3]);
+      if(i=write(sock, cmd[3], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
+	return;
+      }
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[15],"%s",
+	     &shm_addr->tacd.tac_ver);
+      close(sock);
+      tacd_dis(command,itask,ip);
+      return;
+      /* We might change our minds on this this. */
+      /*} else if(!strcmp(command->argv[0],"cont")){
+	shm_addr->tacd.continuous=1;
+	skd_run("tacd",'n',ip);
+	ip[0]=ip[1]=ip[2]=0;
+	close(sock);
 	tacd_dis(command,itask,ip);
 	return;
-      } else if (command->argv[0]==NULL) {
+	} else if(!strcmp(command->argv[0],"single")){
 	shm_addr->tacd.continuous=0;
 	skd_run("tacd",'n',ip);
 	ip[0]=ip[1]=ip[2]=0;
+	close(sock);
+	tacd_dis(command,itask,ip);
+	return; */
+    } else if(!strcmp(command->argv[0],"time")){
+      k = strlen(cmd[1]);
+      if(i=write(sock, cmd[1], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
 	return;
-      } else if (command->argv[1]==NULL) {/* special cases */
-        if (*command->argv[0]=='?') {
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"status")){
-	  shm_addr->tacd.display=0;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"version")){
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"cont")){
-	  shm_addr->tacd.continuous=1;
-	  skd_run("tacd",'n',ip);
-	  ip[0]=ip[1]=ip[2]=0;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"single")){
-	  shm_addr->tacd.continuous=0;
-	  skd_run("tacd",'n',ip);
-	  ip[0]=ip[1]=ip[2]=0;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"time")){
-	  shm_addr->tacd.display=1;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"average")){
-	  shm_addr->tacd.display=2;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"stop")){
-	  shm_addr->tacd.continuous=0;
-	  shm_addr->tacd.stop_request=1;
-	  skd_run("tacd",'n',ip);
-	  ip[0]=ip[1]=ip[2]=0;
-          tacd_dis(command,itask,ip);
-	  return;
-	} else if(!strcmp(command->argv[0],"start")){
-	  shm_addr->tacd.continuous=0;
-	  shm_addr->tacd.stop_request=-1;
-	  shm_addr->tacd.display=2;
-	  skd_run("tacd",'n',ip);
-	  ip[0]=ip[1]=ip[2]=0;
-	  return;
-	} else {
-	  ierr=-201;
-	  goto error;
-	}
       }
-
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[20],"%d.%d,%f,%f,%d,%f,%f,%f,%d,%f",
+	     &shm_addr->tacd.day,
+	     &shm_addr->tacd.day_frac,
+	     &shm_addr->tacd.msec_counter,
+	     &shm_addr->tacd.usec_correction,
+	     &shm_addr->tacd.nsec_accuracy,
+	     &shm_addr->tacd.usec_bias,
+	     &shm_addr->tacd.cooked_correction,
+	     &shm_addr->tacd.pc_v_utc,
+	     &shm_addr->tacd.utc_correction_sec,
+	     &shm_addr->tacd.utc_correction_nsec);
+      close(sock);
+      shm_addr->tacd.display=1;
+      tacd_dis(command,itask,ip);
+      return;
+    } else if(!strcmp(command->argv[0],"average")){
+      k = strlen(cmd[2]);
+      if(i=write(sock, cmd[2], k) == 0) {
+	logit(NULL,-6,"ta");
+	close(sock);
+	return;
+      }
+      if( k=read(sock, buf, sizeof buf) == 0) {
+	logit(NULL,-5,"ta");
+	close(sock);
+	return;
+      }
+      sscanf(&buf[23],"%d.%d,%d,%f,%f,%f,%f",
+	     &shm_addr->tacd.day_a,
+	     &shm_addr->tacd.day_frac_a,
+	     &shm_addr->tacd.sec_average,
+	     &shm_addr->tacd.rms,
+	     &shm_addr->tacd.usec_average,
+	     &shm_addr->tacd.max,
+	     &shm_addr->tacd.min);
+      close(sock);
+      shm_addr->tacd.display=2;
+      tacd_dis(command,itask,ip);
+      return;
+    } else if(!strcmp(command->argv[0],"stop")){
+      shm_addr->tacd.continuous=0;
+      shm_addr->tacd.stop_request=1;
+      skd_run("tacd",'n',ip);
       ip[0]=ip[1]=ip[2]=0;
+      close(sock);
+      tacd_dis(command,itask,ip);
       return;
-error:
-      ip[0]=0;
-      ip[1]=0;
-      ip[2]=ierr;
-      memcpy(ip+3,"ta",2);
+    } else if(!strcmp(command->argv[0],"start")){
+      shm_addr->tacd.continuous=0;
+      shm_addr->tacd.stop_request=-1;
+      shm_addr->tacd.display=2;
+      skd_run("tacd",'n',ip);
+      ip[0]=ip[1]=ip[2]=0;
+      close(sock);
       return;
+    } else {
+      close(sock);
+      ierr=-201;
+      goto error;
+    }
+  }
+  
+  ip[0]=ip[1]=ip[2]=0;
+  close(sock);
+  return;
+ error:
+  ip[0]=0;
+  ip[1]=0;
+  ip[2]=ierr;
+  memcpy(ip+3,"ta",2);
+  return;
 }
+
+
+
+
+
+
+
+
 
 

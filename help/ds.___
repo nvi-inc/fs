@@ -1,0 +1,26 @@
+         ds - low level dataset communications, via DSCON
+
+
+            Syntax:     ds=mnem,func,data
+
+            Response:   ds/ack,data
+                    ds/ack,warn,err
+
+
+Settable parameters:
+      mnem  Dataset 2 char mnemonic from /usr2/control/ds_ad.ctl
+        func    Dataset function in the range 0 to 511. No default.
+        data    Hexadecimal data to be sent to module.  Required to 
+        write, use null parameter to read.
+
+Monitor-only parameters:
+      ack   Response code:
+                ACK if successful
+                BEL if the Dataset gave a warning
+                NAK if the Dataset gave an error
+                NUL if the driver had a problem
+        data    Response of module, only generated on successful 
+        requests.
+      warn  Current contents of Dataset warning register.
+      err   Current contents of Dataset error register (will contain
+      error number if driver problem).

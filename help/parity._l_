@@ -1,22 +1,22 @@
         parity - check parity errors (longitudinal drives)
- 
-              Syntax:      parity=pemax,syncmax,channel,aux,tracks
+
+            Syntax:     parity=pemax,syncmax,channel,aux,tracks
           parity
- 
-              Response:    parity/parity-errors
+
+            Response:   parity/parity-errors
           parity/re-sync-errors
- 
- 
- Settable Parameters:
-            pemax      Maximum allowable parity errors per channel per
-            megabyte of data. Default is 600. If errors exceed
-            threshold, an error message is issued.
-            syncmax    Default is 12. Otherwise handled the same as parity
-            error threshold.
-            channel    Decoder channel. Can be a, b, or ab (default).
-            aux        Aux data check, on (default) or off. Not supported
-            for VLBA DQA decoder.
-            tracks     List of recorder tracks on which to measure errors.
+
+
+Settable Parameters:
+          pemax     Maximum allowable parity errors per channel per
+          megabyte of data. Default is 600. If errors exceed
+          threshold, an error message is issued.
+          syncmax   Default is 12. Otherwise handled the same as parity
+          error threshold.
+          channel   Decoder channel. Can be a, b, or ab (default).
+          aux       Aux data check, on (default) or off. Not supported
+          for VLBA DQA decoder.
+            tracks      List of recorder tracks on which to measure errors.
             Default is the currently enabled tracks. For Mark
             III drives, tracks and must be between 1 and 28,
             and/or may be specified by groups (g1, g2, g3, g4)
@@ -27,72 +27,71 @@
             the VLBA groups (v0, v1, v2, v3),or specified as the
             Mark III  tracks in the VLBA groups (m0, m1, m2,
             m3).
- 
- Monitor-only parameters:
-                  parity-errors    For each track in the list, the corresponding
-                  parity error rates per megabyte of data per
-                  track.
-                re-sync-errors For each track in the list, the corresponding re-
+
+Monitor-only parameters:
+                parity-errors   For each track in the list, the corresponding
+                parity error rates per megabyte of data per track.
+                re-sync-errors  For each track in the list, the corresponding re-
                 sync error rates per megabyte of data per track.
- 
- Comments:
- Issuing this command with an equal sign without or without a
- list of parameters sets up the command. Issuing the command
- with no equal sign then measures the error rates.
- 
- A repro=  must be issued before the parity command will work.
- For Mark IV and VLBA/4 this specifies the bit rate. For
- Mark III this specifies the next best thing, the reproduce
- bandwidth.
- 
- This command assumes the read head stack is positioned
- appropriately for the tracks that will be read. The heads that
- are used to reproduce data are automatically mapped from even
- to odd or vice-versa depending on the reproduce electronics
- specified in the head.ctl control file. For VLBA and VLBA2
- drives the write head parameter controls which heads are used.
- If a mixture odd and even heads are requested no mapping is
- done.
- 
- If the auxiliary data field was set using the form or head
- positioning commands, then it is checked for accuracy, unless
- the aux parameter is off. An error message is issued if the
- auxiliary data on the tape does not agree with the value last
- sent to the formatter.
- 
- If the log entry for the error rates is too long to fit in one
- line, then additional log entries are generated as necessary.
- Parity error rates are listed first followed by synch error
- rates. The parity error rate log entries  include decimal
- points in the numbers to distinguished them from the synch
- error log entries which do not.
- 
- The decoder channels used to read the data can be specified,
- either a, b, or both a and b reproduce channels can be used.
- If pcalr is running, it should be suspended before starting
- this command so that there's no competition for the b channel.
- 
- The data stream is sampled for an amount of time that should
- be equivalent to 1 megabyte of data per channel and the
- effective error rates per megabyte of data are reported. For
- the typical reproduce bit rate of 4 Mbits/sec/track, 1
- megabyte corresponds to 2 seconds. For slower bit rates it
- will take longer.
- 
- The decoder type (mk3, mk4, dqa, or none) must specified on
- the second line of the sw.ctl control file.  If the type is
- none, the tracks are cycled through with a pause of 2 seconds
- between changes to allow visual inspection of the eye-pattern
- (and perhaps a K3 decoder if available) even if no supported
- decoder is available.
- 
- Note that a VLBA or Mark IV track number equals the Mark III
- track number plus three. Consequently, odd Mark III tracks are
- even VLBA or Mark IV track numbers and vice-versa. See the
- Track Assignment Tables in the System Set-up Manual. Also VLBA
- group numbers equal Mark III group numbers minus one, but the
- VLBA groups include additional tracks. Note that this command
- uses VLBA, Mark IV, or Mark III track and VLBA or Mark III
- group numbers depending on the type of drive in use.
- 
- 
+
+Comments:
+Issuing this command with an equal sign without or without a
+list of parameters sets up the command. Issuing the command
+with no equal sign then measures the error rates.
+
+A repro=  must be issued before the parity command will work.
+For Mark IV and VLBA/4 this specifies the bit rate. For
+Mark III this specifies the next best thing, the reproduce
+bandwidth.
+
+This command assumes the read head stack is positioned
+appropriately for the tracks that will be read. The heads that
+are used to reproduce data are automatically mapped from even
+to odd or vice-versa depending on the reproduce electronics
+specified in the head.ctl control file. For VLBA and VLBA2
+drives the write head parameter controls which heads are used.
+If a mixture odd and even heads are requested no mapping is
+done.
+
+If the auxiliary data field was set using the form or head
+positioning commands, then it is checked for accuracy, unless
+the aux parameter is off. An error message is issued if the
+auxiliary data on the tape does not agree with the value last
+sent to the formatter.
+
+If the log entry for the error rates is too long to fit in one
+line, then additional log entries are generated as necessary.
+Parity error rates are listed first followed by synch error
+rates. The parity error rate log entries  include decimal
+points in the numbers to distinguished them from the synch
+error log entries which do not.
+
+The decoder channels used to read the data can be specified,
+either a, b, or both a and b reproduce channels can be used.
+If pcalr is running, it should be suspended before starting
+this command so that there's no competition for the b channel.
+
+The data stream is sampled for an amount of time that should
+be equivalent to 1 megabyte of data per channel and the
+effective error rates per megabyte of data are reported. For
+the typical reproduce bit rate of 4 Mbits/sec/track, 1
+megabyte corresponds to 2 seconds. For slower bit rates it
+will take longer.
+
+The decoder type (mk3, mk4, dqa, or none) must specified on
+the second line of the sw.ctl control file.  If the type is
+none, the tracks are cycled through with a pause of 2 seconds
+between changes to allow visual inspection of the eye-pattern
+(and perhaps a K3 decoder if available) even if no supported
+decoder is available.
+
+Note that a VLBA or Mark IV track number equals the Mark III
+track number plus three. Consequently, odd Mark III tracks are
+even VLBA or Mark IV track numbers and vice-versa. See the
+Track Assignment Tables in the System Set-up Manual. Also VLBA
+group numbers equal Mark III group numbers minus one, but the
+VLBA groups include additional tracks. Note that this command
+uses VLBA, Mark IV, or Mark III track and VLBA or Mark III
+group numbers depending on the type of drive in use.
+
+

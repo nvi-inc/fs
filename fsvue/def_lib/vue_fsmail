@@ -1,0 +1,186 @@
+#!/usr/bin/wish -f
+# vue_fsmail source
+# Basic font for button, menus and labels for FS eMail
+# Modified by RDG 2001
+# to be incorporated into the VLBI Field System.
+
+# Window manager configurations
+  set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
+
+
+  global tkVersion
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900
+  wm iconposition . 1200 500
+  wm iconbitmap . @$ICONDIR/vlb.icon
+  wm iconname . {fsvue}
+#  wm geometry . +5+25
+  wm title . {FS VLBI User Environment}
+  set w .
+  $w config -cursor {top_left_arrow black white}
+
+# Decide on font size.
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+  }  
+
+option add *Entry.background linen startupFile
+option add *Text.background linen startupFile
+option add *Text.width 75 startupFile
+option add *Text.height 10 startupFile
+
+proc send_message {} {
+    set to [.controls.to get]
+    set cc [.controls.cc get]
+    set subject [.controls.subject get]
+    set text [.message.text get 1.0 end]
+
+    if {[string trim $to] == ""} {
+        notice "Address must be specified" error
+        return
+    }
+    if {[info exists env(REPLYTO)]} {
+        set from $env(REPLYTO)
+    } else {
+        set from [exec whoami]
+    }
+
+    set cmd {email_send $to $from $cc $subject $text}
+    if {[catch $cmd result] != 0} {
+        notice "ERROR:\n$result" error
+    } else {
+        notice "Message sent"
+    }
+}
+
+proc email_send {to from cc subject text} {
+    set fid [open "| /usr/sbin/sendmail -oi -t " "w"]
+    puts $fid "To: $to"
+    if { [string length $from] > 0} {
+	puts $fid "From: $from"
+    }
+    if { [string length $cc] > 0} {
+	puts $fid "Cc: $cc"
+    }
+    puts $fid "Subject: $subject"
+    puts $fid "Date: [clock format [clock seconds]]"
+    puts $fid " " ;# sendmail terminator header with blank line
+    puts $fid $text
+    close $fid
+}
+
+proc notice {mesg {icon "info"}} {
+    set top [dialog_create Notice]
+    set x [expr [winfo rootx .]+50]
+    set y [expr [winfo rooty .]+50]
+
+    wm geometry $top "+$x+$y"
+
+    set info [dialog_info $top]
+
+    label $info.icon -bitmap $icon
+    pack $info.icon -side left -padx 8 -pady 8
+    label $info.mesg -text $mesg -wraplength 4i
+    pack $info.mesg -side right -expand yes -fill both \
+	    -padx 8 -pady 8
+    set cntls [dialog_controls $top]
+    button $cntls.dismiss -pady 4
+#    exit
+    return $top
+}
+
+proc dialog_create {class {win "auto"}} {
+    if {$win == "auto"} {
+	set count 0
+	set win ".dialog[incr count]"
+	while {[winfo exists $win]} {
+	    set win ".dialog[incr count]"
+	}
+    }
+    toplevel $win -class $class
+    frame $win.info
+    pack $win.info -expand yes -fill both -padx 2 -pady 2
+    frame $win.sep -height 2 -borderwidth 1 -relief sunken
+    pack $win.sep -fill x -pady 4
+    frame $win.controls
+    pack $win.controls -fill x -padx 4 -pady 4
+    wm title $win $class
+    wm group $win .
+    after idle [format {
+	update idletasks
+	wm minsize %s [winfo reqwidth %s] [winfo reqheight %s]
+    } $win $win $win]
+	return $win
+    }
+
+proc dialog_info {win} {
+    return "$win.info"
+}
+proc dialog_controls {win} {
+    return "$win.controls"
+}
+	
+# ----------------------------------------------------------------------
+# MAIN WINDOW
+# ----------------------------------------------------------------------
+wm title . "FS email"
+
+frame .controls \
+	-bg {navy} \
+        -borderwidth {2} \
+        -relief {groove} 
+   
+label .controls.tolab -background navy -fg white -text "To:"
+entry .controls.to 
+label .controls.cclab -background navy -fg white -text "Cc:"
+entry .controls.cc 
+label .controls.sublab -background navy -fg white -text "Subject:"
+entry .controls.subject 
+button .controls.send -text "Send\nMessage" -background navy -fg white -command send_message
+button .controls.q -text "Exit" -relief {raise} -background red -fg white -command exit
+
+grid .controls.tolab -row 0 -column 0 -sticky e
+grid .controls.to -row 0 -column 1 -sticky ew
+grid .controls.send -row 0 -column 2 -rowspan 3 -sticky nsew
+grid .controls.q -row 0 -column 3 -rowspan 3 -sticky nsew
+grid .controls.cclab -row 1 -column 0 -sticky e
+grid .controls.cc -row 1 -column 1 -sticky ew
+grid .controls.sublab -row 2 -column 0 -sticky e
+grid .controls.subject -row 2 -column 1 -sticky ew
+grid columnconfigure .controls 1 -weight 1
+
+bind .controls.to      <KeyPress-Return> {focus .controls.cc}
+bind .controls.cc      <KeyPress-Return> {focus .controls.subject}
+bind .controls.subject <KeyPress-Return> {focus .message.text}
+
+frame .message
+
+scrollbar .message.sbar -command {.message.text yview}
+text .message.text  -yscrollcommand {.message.sbar set}
+
+pack .message.sbar -side right -fill y
+pack .message.text -side left -expand yes -fill both
+
+pack .controls -fill x -padx 4 -pady 4
+pack .message -expand yes -fill both -padx 4 -pady 4
+
+menu .message.text.edit -tearoff 0
+.message.text.edit add command -label "Cut" \
+    -command {tk_textCut .message.text}
+.message.text.edit add command -label "Copy" \
+    -command {tk_textCopy .message.text}
+.message.text.edit add command -label "Paste" \
+    -command {tk_textPaste .message.text}
+
+bind .message.text <ButtonPress-3> {
+    tk_popup .message.text.edit %X %Y
+}
+
+
+

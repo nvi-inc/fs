@@ -49,7 +49,7 @@ C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
       call fs_get_rack(rack)
       if(.not.kst) then
-         if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+         if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
             if(ichfp_fs.ne.3) then
                call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
                if (ierr.ne.0) return
@@ -66,9 +66,11 @@ c9954 format(' nin',i10,' indata "',6a2,'"')
                call i32ma(isav(3),iat3if,imixif3,iswif3_fs(1),
      &              iswif3_fs(2),iswif3_fs(3),iswif3_fs(4),ipcalif3)
             endif
-         else
+         else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
             call get_vatt(name,lwho,ierr,ichfp_fs,0)
             if (ierr.ne.0) return
+         else if(LBA.eq.rack) then
+c           digital detector - assume tpzero=0
          endif
       endif
 C
@@ -77,7 +79,7 @@ C
       if (kst) then
          call scmds('sigofffp',1)
          ierr=0
-      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+      else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          if(ichfp_fs.ne.3) then
             idum=ichmv(izero,5,indata,3,10)
             call char2hol('93',izero,2,3)
@@ -95,14 +97,25 @@ C
      &           iswif3_fs(2),iswif3_fs(3),iswif3_fs(4),ipcalif3)
          endif
          call matcn(izero,-13,idolr,indata,nin,2,ierr)
-      else
+      else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call zero_vatt(name,lwho,ierr)
+      else if(LBA.eq.rack) then
+c       digital detector - assume tpzero=0
       endif
       if (ierr.ne.0) goto 8000
 C
 C  OKAY GET THE VOLTS
 C
-      call volts(vbase,sig,tdum,intp,rut,ierr)
+      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
+     .   VLBA.eq.rack.or.VLBA4.eq.rack) then
+        call volts(vbase,sig,tdum,intp,rut,ierr)
+      else if(LBA.eq.rack) then
+c       digital detector - assume tpzero=0
+	vbase=0.0
+	sig=0.0
+	tdum=0
+	ierr=0
+      endif
       if (ierr.ne.0) goto 8000
 C
 C  RESET THE ATTENUATORS
@@ -110,10 +123,12 @@ C
       if (kst) then
          call scmds('sigonfp',1)
          ierr=0
-      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+      else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
-      else
+      else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
          call rst_vatt(name,lwho,ierr)
+      else if(LBA.eq.rack) then
+c        digital detector - assume tpzero=0
       endif
       if (ierr.ne.0) goto 8000
 C
@@ -160,10 +175,12 @@ C
       if (kst) then
          call scmds('sigonfp',1)
          jerr=0
-      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+      else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,jerr)
-      else
+      else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
          call rst_vatt(name,lwho,jerr)
+      else if(LBA.eq.rack) then
+c       digital detector - assume tpzero=0
       endif
       jtry=jtry-1
       if (jerr.gt.0.and.jtry.gt.0) goto 8001

@@ -87,6 +87,10 @@ C
         ichvlba(i)=0
         call fs_set_ichvlba(ichvlba(i),i)
       enddo
+      do i=1,2*MAX_DAS
+        ichlba(i)=0
+        call fs_set_ichlba(ichlba(i),i)
+      enddo
       iadcrx =  0
       lswcal = 0
       call char2hol(' ',laxfp,1,4)
@@ -500,6 +504,7 @@ C LINE #1  STATION NAME
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 900
       n = ic2-ic1+1
       if (n.gt.8) then
         call logit7ci(0,0,0,1,-119,'bo',1)
@@ -513,6 +518,7 @@ C LINE #2  WEST LONGITUDE
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 900
       wlong = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_wlong(wlong)
       if (ierr.ne.0) then
@@ -524,6 +530,7 @@ C LINE #3  LATITUDE
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 900
       alat = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_alat(alat)
       if (ierr.ne.0) then
@@ -535,7 +542,7 @@ C LINE #4  STATION ELEVATION
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 900
+      if (ic1.le.0) goto 900
       height = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       call fs_set_height(height)
       if (ierr.ne.0) then
@@ -600,6 +607,7 @@ C  GPIB CONFIGURATION FILE
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevgpib,1,64)
       idummy = ichmv(idevgpib,1,ibuf,ic1,ic2-ic1+1) ! GPIB device name
       call fs_set_idevgpib(idevgpib)
@@ -608,6 +616,7 @@ C  MAT DEVICE NAME
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevmat,1,64)
       idummy = ichmv(idevmat,1,ibuf,ic1,ic2-ic1+1) ! MAT device name
 C  MAT BAUD RATE
@@ -615,6 +624,7 @@ C  MAT BAUD RATE
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       ibmat = ias2b(ibuf,ic1,ic2-ic1+1)           ! baud rate for MAT
       call fs_set_ibmat(ibmat)
       if (ibmat.eq.-32768) then
@@ -635,6 +645,7 @@ C  DATA BUFFER DEVICE NAME
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevdb,1,64)
       idummy = ichmv(idevdb,1,ibuf,ic1,ic2-ic1+1) ! DB device name
 C  DATA BUFFER BAUD RATE 
@@ -642,6 +653,7 @@ C  DATA BUFFER BAUD RATE
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       ibdb = ias2b(ibuf,ic1,ic2-ic1+1)        ! data buffer baud rate
       if (ibdb.eq.-32768) then
         call logit7ci(0,0,0,1,-122,'bo',5)
@@ -661,6 +673,7 @@ C  ANTENNA DEVICE NAME
       if (ierr.lt.0) goto 910
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevant,1,64)
       idummy = ichmv(idevant,1,ibuf,ic1,ic2-ic1+1) ! antenna device name
       call fs_set_idevant(idevant)
@@ -669,6 +682,7 @@ C  BARCODE READER DEVICE NAME
       if (ierr.lt.0) goto 910
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevwand,1,64)
       idummy = ichmv(idevwand,1,ibuf,ic1,ic2-ic1+1) ! barcode reader device name
 C  MCB DEVICE NAME
@@ -676,6 +690,7 @@ C  MCB DEVICE NAME
       if (ierr.lt.0) goto 910
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       call char2hol(' ',idevmcb,1,64)
       idummy = ichmv(idevmcb,1,ibuf,ic1,ic2-ic1+1) ! mcb device name
       call fs_set_idevmcb(idevmcb)
@@ -684,10 +699,32 @@ C  MCB BAUD RATE
       if (ierr.lt.0) goto 910
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
       ibmcb = ias2b(ibuf,ic1,ic2-ic1+1)      ! baud rate for MCB
       call fs_set_ibmcb(ibmcb)
       if (ibmcb.eq.-32768. or. ibmcb .ne.57600) then
-        call logit7ci(0,0,0,1,-122,'bo',9)
+        call logit7ci(0,0,0,1,-122,'bo',11)
+        goto 990
+      endif
+C  DS DEVICE NAME
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 910
+      ich=1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
+      call char2hol(' ',idevds,1,64)
+      idummy = ichmv(idevds,1,ibuf,ic1,ic2-ic1+1) ! DS device name
+      call fs_set_idevds(idevds)
+C  DS BAUD RATE
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0) goto 910
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.le.0) goto 910
+      ibds = ias2b(ibuf,ic1,ic2-ic1+1)      ! baud rate for DS
+      call fs_set_ibds(ibds)
+      if (ibds.ne.2400 .and. ibds.ne.38400) then
+        call logit7ci(0,0,0,1,-122,'bo',13)
         goto 990
       endif
 C
@@ -731,7 +768,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       slew1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',2)
@@ -743,7 +780,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       slew2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',3)
@@ -755,7 +792,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       lolim1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',4)
@@ -766,7 +803,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       uplim1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',5)
@@ -777,7 +814,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       lolim2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',6)
@@ -788,7 +825,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       uplim2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-156,'bo',7)
@@ -799,7 +836,7 @@ C
       if (ierr.lt.0) goto 930
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 930
+      if (ic1.le.0) goto 930
       idummy = ichmv(iaxis,1,ibuf,ic1,ic2-ic1+1)
       call fmpclose(idcb,ierr)
 C

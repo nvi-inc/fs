@@ -205,6 +205,7 @@ menu .m.dsp.menu -background blue -fg white
 
 # Help menu
 menu .m.help.menu -background blue -fg white
+.m.help.menu add command -label "Logo" -font $bfont -command {exec $LIBDIR/vue_logo &}
 .m.help.menu add command -label "About fsvue" -font $bfont -command {Help VUE}
 .m.help.menu add command -label "Using fsvue" -font $bfont -command {Help using}
 .m.help.menu add command -label "Menus" -font $bfont -command {Help menus}
@@ -632,6 +633,8 @@ proc AddCmd {} {
         focus $oldFocus
         # load the Command menu and resume
         LoadCmdMenu
+	# reload so as not the see two listings 
+	LoadFile
 }
 
 # ---------------------------------------------------
