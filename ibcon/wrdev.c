@@ -34,7 +34,8 @@ extern int serial;
 
 /*----------------------------------------------------------------------*/
 
-int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout, no_after)
+int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout, no_after, kecho,
+	   itime, centisec)
 
 int *mode,*devid;
 long *ipcode;
@@ -43,6 +44,9 @@ int *buflen;  		/* length of the message in buffer, characters */
 int *error;
 int *timeout;
 int *no_after;
+int *kecho;
+int *itime;
+long centisec[2];
 {
   int val;
   char locbuf[BSIZE];
@@ -51,6 +55,23 @@ int *no_after;
 
   *error = 0;
   *ipcode = 0;
+
+  if (serial) {
+    ierr=sib(ID_hpib,"tmo .1\r",-1,0,100,0,centisec);
+    if(ierr<0) {
+      if(ierr==-1 || ierr==-2 || ierr==-5)
+	logit(NULL,errno,"un");
+      *error = -520+ierr;
+      memcpy((char *)ipcode,"WT",2);
+      return -1;
+    } else if(ibsta&(S_ERR|S_TIMO)) {
+      if(ibser!=0)
+	logita(NULL,-(540 + ibser),"ib","WT");
+      *error = -(IBSCODE + iberr);
+      memcpy((char *)ipcode,"WT",2);
+      return -1;
+    }
+  }
 
 #if 0
   if(!serial) {
@@ -68,7 +89,7 @@ int *no_after;
     return -1;
 #endif
   } else {
-    ierr=sib(ID_hpib,"cm \n_?\r",0,0,100);
+    ierr=sib(ID_hpib,"cm \n_?\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -84,12 +105,19 @@ int *no_after;
     }
   }
 #endif
-  if (*mode == 2){
+
+  if (*mode == 0){
     if(!serial) {
 #ifdef CONFIG_GPIB
       memcpy(locbuf,buffer,*buflen);
       memcpy(locbuf+*buflen,"\r\n",2);
+      if(*kecho)
+	echo_out('w',*mode,*devid,locbuf,*buflen+2);
+      if(*itime)
+	rte_rawt(centisec);
       ibwrt(*devid,locbuf,*buflen+2);
+      if(*itime)
+	rte_rawt(centisec+1);
       if ((ibsta & TIMO) != 0) {
 	*error = TIMEOUT;
 	memcpy((char *)ipcode,"W1",2);
@@ -110,7 +138,9 @@ int *no_after;
       len=strlen(locbuf);
       memcpy(locbuf+len,buffer,*buflen);
       memcpy(locbuf+len+*buflen,"\r\n",2);
-      ierr=sib(ID_hpib,locbuf,len+*buflen+2,0,100);
+      if(*kecho)
+	echo_out('w',*mode,*devid,locbuf+len,*buflen+2);
+      ierr=sib(ID_hpib,locbuf,len+*buflen+2,0,*timeout,*itime,centisec);
       if(ierr<0) {
 	if(ierr==-1 || ierr==-2 || ierr==-5)
 	  logit(NULL,errno,"un");
@@ -118,9 +148,11 @@ int *no_after;
 	memcpy((char *)ipcode,"W1",2);
 	return -1;
       } else if ((ibsta & S_TIMO) != 0) {
+/* ignore
 	*error = TIMEOUT;
 	memcpy((char *)ipcode,"W1",2);
 	return -1;
+ */
       } else if ((ibsta & S_ERR) != 0) {
 	if(ibser!=0)
 	  logita(NULL,-(540 + ibser),"ib","W1");
@@ -132,6 +164,8 @@ int *no_after;
   } else {
     if(!serial) {
 #ifdef CONFIG_GPIB  
+      if(*kecho)
+	echo_out('w',*mode,*devid,buffer,*buflen);
       ibwrt(*devid,buffer,*buflen);
       if ((ibsta & TIMO) != 0) {	/* timeout ? */ 
 	*error = -(IBCODE + iberr);
@@ -150,10 +184,14 @@ int *no_after;
       sprintf(locbuf,"wrt #%d %d\n",*buflen,*devid);
       len=strlen(locbuf);
       memcpy(locbuf+len,buffer,*buflen);
-      ierr=sib(ID_hpib,locbuf,*buflen+len,0,*timeout);
+      if(*kecho)
+	echo_out('w',*mode,*devid,buffer,*buflen);
+      ierr=sib(ID_hpib,locbuf,*buflen+len,0,*timeout,0,centisec);
       if ((ibsta & S_TIMO) != 0) {	/* timeout ? */ 
+/* ignore
 	*error = -(IBSCODE + iberr);
 	memcpy((char *)ipcode,"W2",2);
+ */
       } else if ((ibsta & S_ERR) != 0) {		/* bus error ? */ 
 	if(ibser!=0)
 	  logita(NULL,-(540 + ibser),"ib","W2");
@@ -178,7 +216,7 @@ int *no_after;
 #endif
 #if 0
   } else {
-    ierr=sib(ID_hpib,"cm \n_?\r",0,0,100);
+    ierr=sib(ID_hpib,"cm \n_?\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
