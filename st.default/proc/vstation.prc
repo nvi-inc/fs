@@ -1,231 +1,6 @@
-define  ifdas         00000000000
-ifdab=0,0,nor,nor
-ifdcd=0,0,nor,nor
-lo=
-lo=loa,7600.10,usb,rcp,1
-lo=lob,1540.10,usb,rcp,1
+define  sched_initi   00000000000
 enddef
-define  as4c2         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcas4
-ifdas
-enable=g1,g3
-tape=low
-repro=byp,9,21,,alt2
-!*+8s
-enddef
-define  as4c1         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcas4
-ifdas
-enable=g0,g2
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  as4a1         00000000000
-tapeforma
-pass=$,,none
-form=a,8.000
-!*
-bit_density=33333
-systracks=
-bbcas4
-ifdas
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  as2c2         00000000000
-tapeformc
-pass=$
-form=c,4.000
-!*
-bit_density=33333
-systracks=
-bbcas2
-ifdas
-enable=g1,g3
-tape=low
-repro=byp,9,21
-!*+8s
-enddef
-define  as2c1         00000000000
-tapeformc
-pass=$
-form=c,4.000
-!*
-bit_density=33333
-systracks=
-bbcas2
-ifdas
-enable=g0,g2
-tape=low
-repro=byp,8,20
-!*+8s
-enddef
-define  as2a1         00000000000
-tapeforma
-pass=$,,none
-form=a,4.000
-!*
-bit_density=33333
-systracks=
-bbcas2
-ifdas
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20
-!*+8s
-enddef
-define  bbcas4        00000000000
-bbc01=610.89,a,4.0,4.0
-bbc02=620.89,a,4.0,4.0
-bbc03=650.89,a,4.0,4.0
-bbc04=700.89,a,4.0,4.0
-bbc05=820.89,a,4.0,4.0
-bbc06=940.89,a,4.0,4.0
-bbc07=950.89,a,4.0,4.0
-bbc08=970.89,a,4.0,4.0
-bbc09=680.89,b,4.0,4.0
-bbc10=690.89,b,4.0,4.0
-bbc11=710.89,b,4.0,4.0
-bbc12=770.89,b,4.0,4.0
-bbc13=800.89,b,4.0,4.0
-bbc14=805.89,b,4.0,4.0
-enddef
-define  bbcas2        00000000000
-bbc01=610.89,a,2.0,2.0
-bbc02=620.89,a,2.0,2.0
-bbc03=650.89,a,2.0,2.0
-bbc04=700.89,a,2.0,2.0
-bbc05=820.89,a,2.0,2.0
-bbc06=940.89,a,2.0,2.0
-bbc07=950.89,a,2.0,2.0
-bbc08=970.89,a,2.0,2.0
-bbc09=680.89,b,2.0,2.0
-bbc10=690.89,b,2.0,2.0
-bbc11=710.89,b,2.0,2.0
-bbc12=770.89,b,2.0,2.0
-bbc13=800.89,b,2.0,2.0
-bbc14=805.89,b,2.0,2.0
-enddef
-define  wb4a1         00000000000
-tapeforma
-pass=$,,none
-form=a,8.000
-!*
-bit_density=33333
-systracks=
-bbcwb4
-ifdwb
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  wb2a1         00000000000
-tapeforma
-pass=$,,none
-form=a,4.000
-!*
-bit_density=33333
-systracks=
-bbcwb2
-ifdwb
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20
-!*+8s
-enddef
-define  rxmon         00000000000
-rx=lo,*,*,*,*,*,*
-rx
-rx=dcal,*,*,*,*,*,*
-rx
-rx=lo5mhz,*,*,*,*,*,*
-rx
-rx=pres,*,*,*,*,*,*
-rx
-rx=20k,*,*,*,*,*,*
-rx
-rx=70k,*,*,*,*,*,*
-rx
-enddef
-define  rxall         00000000000
-rx=00,*,*,*,*,*,*
-rx
-rx=01,*,*,*,*,*,*
-rx
-rx=02,*,*,*,*,*,*
-rx
-rx=03,*,*,*,*,*,*
-rx
-rx=04,*,*,*,*,*,*
-rx
-rx=05,*,*,*,*,*,*
-rx
-rx=06,*,*,*,*,*,*
-rx
-rx=07,*,*,*,*,*,*
-rx
-rx=08,*,*,*,*,*,*
-rx
-rx=09,*,*,*,*,*,*
-rx
-rx=0a,*,*,*,*,*,*
-rx
-rx=0b,*,*,*,*,*,*
-rx
-rx=0c,*,*,*,*,*,*
-rx
-rx=0d,*,*,*,*,*,*
-rx
-rx=0e,*,*,*,*,*,*
-rx
-rx=0f,*,*,*,*,*,*
-rx
-rx=10,*,*,*,*,*,*
-rx
-rx=11,*,*,*,*,*,*
-rx
-rx=12,*,*,*,*,*,*
-rx
-rx=13,*,*,*,*,*,*
-rx
-rx=14,*,*,*,*,*,*
-rx
-rx=15,*,*,*,*,*,*
-rx
-rx=16,*,*,*,*,*,*
-rx
-rx=17,*,*,*,*,*,*
-rx
-rx=18,*,*,*,*,*,*
-rx
-rx=19,*,*,*,*,*,*
-rx
-rx=1a,*,*,*,*,*,*
-rx
-rx=1b,*,*,*,*,*,*
-rx
-rx=1c,*,*,*,*,*,*
-rx
-rx=1d,*,*,*,*,*,*
-rx
-rx=1e,*,*,*,*,*,*
-rx
+define  sched_end     00000000000
 enddef
 define  bbcagc        00000000000
 bbc01=*,*,*,*,*,agc
@@ -291,64 +66,18 @@ bbc12=727.89,b,2.0,2.0
 bbc13=752.89,b,2.0,2.0
 bbc14=762.89,b,2.0,2.0
 enddef
-define  bbcsx4        00000000000
-bbc01=610.89,a,4.0,4.0
-bbc02=620.89,a,4.0,4.0
-bbc03=650.89,a,4.0,4.0
-bbc04=710.89,a,4.0,4.0
-bbc05=820.89,a,4.0,4.0
-bbc06=900.89,a,4.0,4.0
-bbc07=950.89,a,4.0,4.0
-bbc08=970.89,a,4.0,4.0
-bbc09=677.89,b,4.0,4.0
-bbc10=682.89,b,4.0,4.0
-bbc11=697.89,b,4.0,4.0
-bbc12=727.89,b,4.0,4.0
-bbc13=752.89,b,4.0,4.0
-bbc14=762.89,b,4.0,4.0
-enddef
-define  bbcwb2        00000000000
-bbc01=612.89,a,2.0,2.0
-bbc02=652.89,a,2.0,2.0
-bbc03=752.89,a,2.0,2.0
-bbc04=912.89,a,2.0,2.0
-bbc05=652.99,c,2.0,2.0
-bbc06=772.99,c,2.0,2.0
-bbc07=832.99,c,2.0,2.0
-bbc08=852.99,c,2.0,2.0
-bbc09=680.89,b,2.0,2.0
-bbc10=690.89,b,2.0,2.0
-bbc11=710.89,b,2.0,2.0
-bbc12=765.89,b,2.0,2.0
-bbc13=800.89,b,2.0,2.0
-bbc14=805.89,b,2.0,2.0
-enddef
-define  bbcwb4        00000000000
-bbc01=612.89,a,4.0,4.0
-bbc02=652.89,a,4.0,4.0
-bbc03=752.89,a,4.0,4.0
-bbc04=912.89,a,4.0,4.0
-bbc05=652.99,c,4.0,4.0
-bbc06=772.99,c,4.0,4.0
-bbc07=832.99,c,4.0,4.0
-bbc08=852.99,c,4.0,4.0
-bbc09=680.89,b,4.0,4.0
-bbc10=690.89,b,4.0,4.0
-bbc11=710.89,b,4.0,4.0
-bbc12=765.89,b,4.0,4.0
-bbc13=800.89,b,4.0,4.0
-bbc14=805.89,b,4.0,4.0
-enddef
 define  caloff        00000000000
-rx=*,*,*,*,*,*,off
+"turn the cal off
+"rx=*,*,*,*,*,*,off
 enddef
 define  calon         00000000000
-rx=*,*,*,*,*,*,on
+"turn the cal on
+"rx=*,*,*,*,*,*,on
 enddef
 define  caltemps      00000000000
-caltempa=20.8
-caltempb=21.4
-caltempc=20.8
+caltempa=x
+caltempb=x
+caltempc=x
 enddef
 define  dat           00000000000
 bbcsx2
@@ -406,17 +135,10 @@ lo=
 lo=loa,7600.10,usb,rcp,1
 lo=lob,1540.10,usb,rcp,1
 enddef
-define  ifdwb         00000000000
-ifdab=0,0,nor,nor
-ifdcd=0,0,nor,nor
-lo=
-lo=loa,7600.10,usb,rcp,1
-lo=lob,1540.10,usb,rcp,1
-lo=loc,8080.00,usb,rcp,1
-enddef
 define  initi         00000000000
 "welcome to the pc field system
 vlbainit
+vform=c,4
 sy=run setcl &
 enddef
 define  midob         00000000000
@@ -434,6 +156,8 @@ ifdcd
 bbc02
 bbc06
 bbc11
+"add your station command to measure the gps to fm output clock offset
+"gps-fmout=c2
 sy=run setcl &
 enddef
 define  midtp         00000000000
@@ -446,10 +170,10 @@ tpzero=9u,10u,11u,12u,13u,14u,ifb
 bbcagc
 ifdab=0,0,*,*
 ifdcd=0,0,*,*
-rxmon
+"rxmon
 enddef
 define  min15         00000000000
-rxall
+"rxall
 wx
 cable
 sxcts
@@ -459,7 +183,7 @@ log=overnite
 setup
 check=*,-tp
 min15@!,15m
-rxmon@!+2m30s,5m
+"rxmon@!+2m30s,5m
 repro=byp,8,14
 dqa=1
 dqa@!,1m
@@ -498,10 +222,12 @@ et
 !+9s
 wakeup
 rec=release
+!+3s
+rec=release
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape
-"use the cont command when finished.
+"use the label=... command when finished.
 halt
 xdisp=off
 rec=load
@@ -529,6 +255,8 @@ et
 !+9s
 wakeup
 rec=release
+!+3s
+rec=release
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape
@@ -545,10 +273,11 @@ rec=unload
 enddef
 define  ready         00000000000
 sxcts
-rxmon
+"rxmon
 newtape
 loader
 label
+rec
 check=*,tp
 enddef
 define  loader        00000000000
@@ -559,9 +288,6 @@ st=for,135,off
 !+11s
 et
 !+3s
-enddef
-define  rxx           00000000000
-rx=$,*,*,*,*,*,*
 enddef
 define  setup         00000000000
 dat
@@ -578,26 +304,11 @@ srw
 !+$
 et
 enddef
-define  sx2a1         00000000000
-tapeforma
-pass=$,,none
-form=a,4.000
-!*
-bit_density=33333
-systracks=
-bbcsx2
-ifdsx
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20
-!*+8s
-enddef
-define  sx2c1         00000000000
+define  sx2ca         00000000000
 tapeformc
 pass=$
 form=c,4.000
 !*
-bit_density=33333
 systracks=
 bbcsx2
 ifdsx
@@ -606,60 +317,17 @@ tape=low
 repro=byp,8,20
 !*+8s
 enddef
-define  sx2c2         00000000000
+define  sx2cb         00000000000
 tapeformc
 pass=$
 form=c,4.000
 !*
-bit_density=33333
 systracks=
 bbcsx2
 ifdsx
 enable=g1,g3
 tape=low
 repro=byp,9,21
-!*+8s
-enddef
-define  sx4a1         00000000000
-tapeforma
-pass=$,,none
-form=a,8.000
-!*
-bit_density=33333
-systracks=
-bbcsx4
-ifdsx
-enable=g0,g1,g2,g3
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  sx4c1         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcsx4
-ifdsx
-enable=g0,g2
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  sx4c2         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcsx4
-ifdsx
-enable=g1,g3
-tape=low
-repro=byp,9,21,,alt2
 !*+8s
 enddef
 define  sxcts         00000000000
@@ -683,10 +351,6 @@ caltemps
 tsys1=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tsys2=9u,10u,11u,12u,13u,14u,ifb
 enddef
-define  tapeforma     00000000000
-tapeform=1,-350,2,  0,3,-295, 4, 55, 5, -240, 6,110
-tapeform=7,-185,8,165,9,-130,10,220,11,  -75,12,275
-enddef
 define  tapeformc     00000000000
 tapeform=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
 tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
@@ -706,62 +370,6 @@ define  unloader      00000000000
 enable=,
 tape=off
 rec=unload
-enddef
-define  wb2c1         00000000000
-tapeformc
-pass=$
-form=c,4.000
-!*
-bit_density=33333
-systracks=
-bbcwb2
-ifdwb
-enable=g0,g2
-tape=low
-repro=byp,8,20
-!*+8s
-enddef
-define  wb2c2         00000000000
-tapeformc
-pass=$
-form=c,4.000
-!*
-bit_density=33333
-systracks=
-bbcwb2
-ifdwb
-enable=g1,g3
-tape=low
-repro=byp,9,21
-!*+8s
-enddef
-define  wb4c1         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcwb4
-ifdwb
-enable=g0,g2
-tape=low
-repro=byp,8,20,,alt2
-!*+8s
-enddef
-define  wb4c2         00000000000
-tapeformc
-pass=$
-form=c,8.000
-!*
-bit_density=33333
-systracks=
-bbcwb4
-ifdwb
-enable=g1,g3
-tape=low
-repro=byp,9,21,,alt2
-!*+8s
 enddef
 define  vlbainit      00000000000
 bbc01=addr
@@ -788,76 +396,83 @@ rec=release
 !+3s
 rec=release
 enddef
-define  checkr135     000000000000
-check=*,-rc
-form=*,4
+define  check135r     000000000000
+vform=*,4
 parity=,,ab,off
-sfastf=12.07s
-!+5.4s
+sfastf=18.41s
+!+6s
 repro=read,4,6
 !*
 st=rev,135,off
-!+2.5s
+!+3s
 parity
-!*+29.5s
+!*+45s
 et
-!+2.5s
+!+3s
 repro=byp,4,6
-check=*,rc
 enddef
-define  checkf135     00000000000 
-check=*,-rc
-form=*,4
+define  check135f     00000000000 
+vform=*,4
 parity=,,ab,off
-sfastr=12.07s
-!+5.4s
+sfastr=18.41s
+!+6s
 repro=read,4,6
 !*
 st=for,135,off
-!+2.5s
+!+3s
 parity
-!*+29.5s
+!*+45s
 et
-!+2.5s
+!+3s
 repro=byp,4,6
-check=*,rc
 enddef
-define  checkr80      00000000000
-check=*,-rc
-form=*,4
+define  check80r      00000000000
+vform=*,4
 parity=,,ab,off
-sfastf=6.59s
-!+5.4s
+sfastf=10.66s
+!+6s
 repro=read,4,6
 !*
 st=rev,80,off
-!+1.7s
+!+2s
 parity
-!*+27.2s
+!*+44s
 et
-!+1.7s
+!+2s
 repro=byp,4,6
-check=*,rc
 enddef
-define  checkf80      00000000000
-check=*,-rc
-form=*,4
+define  check80f      00000000000
+vform=*,4
 parity=,,ab,off
-sfastr=6.59s
-!+5.4s
+sfastr=10.66s
+!+6s
 repro=read,4,6
 !*
 st=for,80,off
-!+1.7s
+!+2s
 parity
-!*+27.2s
+!*+44s
 et
-!+1.7s
+!+2s
 repro=byp,4,6
-check=*,rc
 enddef
 define  tapeformv     98222124704x
 tapeform=  1,-319,  2,  31,  3,-271,  4,  79,  5,-223,  6, 127
 tapeform=  7,-175,  8, 175,  9,-127, 10, 223, 11, -79, 12, 271
 tapeform= 13, -31, 14, 319
+enddef
+define  tapeforma     00000000000
+tapeform=1,-350,2,  0,3,-295, 4, 55, 5, -240, 6,110
+tapeform=7,-185,8,165,9,-130,10,220,11,  -75,12,275
+enddef
+define  pcalon        00000000000
+"no phase cal control is implemented here
+enddef
+define  pcaloff       00000000000 
+"no phase cal control is implemented here
+enddef
+define  checkcrc      00000000000 
+"comment out the following lines if you do _not_ have a mark iii decoder
+"decode=a,crc
+"decode
 enddef
