@@ -287,7 +287,7 @@ C
         goto 990
       endif
       fx=flxvl(imdl,arr,bm,corr)
-301   continue
+ 301  continue
       if(indtmp.eq.1) then
         imdl1fx_fs=imdl
         do i=1,6

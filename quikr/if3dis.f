@@ -91,11 +91,13 @@ C                   Move buffer contents into output list
             iat = iat3if
             call fs_get_imixif3(imixif3)
             imix = imixif3
+            call fs_get_iswif3_fs(iswif3_fs)
             do i=1,4
                isw(i)=iswif3_fs(i)
             enddo
             call fs_get_freqif3(freqif3)
             freq=freqif3
+            call fs_get_ipcalif3(ipcalif3)
             ipcal=ipcalif3
          else
             ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)

@@ -250,6 +250,12 @@ loop:
       case 80:
 	tpicd(&command,itask,ip);
 	break;
+      case 81:
+	onoff(&command,itask,ip);
+	break;
+      case 82:
+	calrx(&command,itask,ip);
+	break;
       default:
 	ierr=-4;
 	goto error;

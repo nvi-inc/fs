@@ -40,6 +40,7 @@ C 001003 nrv Add SHORT tape option.
 C 020111 nrv Check LSTREC not LTERNA to determine S2 and K4 types.
 C 020705 nrv Check NCODES not ICODE for KK4.
 C 020815 nrv Add number of passes to listing.
+C 021003 nrv Adjust K4 output for speed being in dm internally.
 C
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
@@ -61,7 +62,7 @@ C
             if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
             ival = idint(0.1 + maxtap(i)/(s2sp*5.d0)) ! feet/(ips*5) = min
           elseif (kk4) then
-            k4sp = speed(1,i) ! speed for code 1 in m/s
+            k4sp = speed(1,i)*10.d0 ! speed for code 1 in m/s
             ival = idint(0.1 + maxtap(i)/(60.d0*k4sp)) ! min=m/(60*m/s)
           else 
             cdens(i)='Low'

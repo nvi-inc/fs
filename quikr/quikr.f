@@ -128,10 +128,10 @@ c
         endif
       else if (isub.eq.12) then
         if (itask.eq.1.or.itask.eq.2.or.
-     $        (itask.gt.12.and.itask.lt.17)) then
+     $        (itask.gt.14.and.itask.lt.17)) then
           call ctemp(ip,itask)
-        else if (itask.eq.5.or.itask.eq.6.or.
-     &         (itask.ge.17.and.itask.le.20)) then
+        else if (itask.eq.5.or.itask.eq.6.or.itask.eq.10.or.
+     &         (itask.ge.19.and.itask.le.20)) then
           call tsys(ip,itask)
         else
           call tpi(ip,itask)
@@ -158,8 +158,6 @@ c          call upset(ip)
           call oprid(ip)
         else if (itask.eq.3) then
           call fvpnt(ip)
-        else if (itask.eq.4) then
-          call onofc(ip)
         else if (itask.eq.5) then
           call pc(ip)
         else if (itask.eq.6) then
@@ -174,9 +172,9 @@ C       endif
       else if (isub.eq.18) then
         call tpform(ip,itask)
       else if (isub.eq.19) then
-        if (itask.ge.1.and.itask.le.6) then
+        if (itask.ge.5.and.itask.le.6) then
           call beam(ip,itask)
-        else if (itask.ge.11.and.itask.le.16) then
+        else if (itask.ge.15.and.itask.le.16) then
           call flux(ip,itask)
         endif
       else if (isub.eq.21) then

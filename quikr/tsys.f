@@ -33,6 +33,7 @@ C     NCHAR  - character count
       integer*2 lwho,lwhat(17)
       integer get_buf
       logical kskip
+      real epoch, flux, corr
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
@@ -83,29 +84,34 @@ C
          do i=1,17 
             if (itpis(i).ne.0) then
                j = i+14
-               kskip=.false.
-               if(i.le.14) then
-                  kskip=iabs(ifp2vc(i)).lt.1.or.iabs(ifp2vc(i)).gt.3
-               endif
-               if (kskip) then
-                  t = -1.0
-               else if (abs(tpspc(j)-tpsor(j)).lt.0.5.or.
-     &                 tpzero(j).lt.0.5.or. 
-     &                 tpspc(j).gt.65534.5.or.
-     &                 tpsor(j).gt.65534.5  ) then
-                  t= 1d9
-               else
+               if(nsub.eq.5) then
+                  kskip=.false.
                   if(i.le.14) then
-                     ind=iabs(ifp2vc(i))
-                  else
-                     ind=i-14
+                     kskip=iabs(ifp2vc(i)).lt.1.or.iabs(ifp2vc(i)).gt.3
                   endif
-                  t = (tpsor(j)-tpzero(j))*caltmp(ind)/
-     &                 (tpspc(j)-tpsor(j))
-               endif
-               systmp(j) = t
-               if((t.ge.999999.95.or.t.lt.0).and..not.kskip) then
-                  call logit7(idum,idum,idum,-1,-211,lwho,lwhat(i)) 
+                  if (kskip) then
+                     t = -1.0
+                  else if (tpidiff(j).lt.0.5.or.tpidiff(j).gt.65534.5
+     &                    .or.tpzero(j).lt.0.5.or.
+     &                    tpsor(j).lt.0.5.or.tpsor(j).gt.65534.5) then
+                     t= 1d9
+                  else
+                     t = (tpsor(j)-tpzero(j))*caltemps(j)/tpidiff(j)
+                  endif
+                  systmp(j) = t
+                  if((t.ge.999999.95.or.t.lt.0).and..not.kskip) then
+                     call logit7(idum,idum,idum,-1,-211,lwho,lwhat(i)) 
+                  endif
+               else if(nsub.eq.6) then
+                  tpidiff(j)=tpspc(j)-tpsor(j)
+                  if (tpspc(j).gt.65534.5.or.tpsor(j).gt.65534.5.or.
+     &                 tpspc(j).lt.0.5.or.tpsor(j).lt.0.5) then
+                     tpidiff(j)= 1d9
+                  endif
+               else if(nsub.eq.10) then
+                  epoch=-1.0
+                  call fc_get_tcal_fwhm(lwhat(i),caltemps(j),fwhm,
+     &                 epoch,flux,corr,ssize,ierr)
                endif
             endif
          enddo
@@ -135,7 +141,13 @@ C
                      nch=nch+ib2as(and(itpivc(i),7),ibuf,nch,1)
                   endif
                   nch = mcoma(ibuf,nch)
-                  nch = nch+ir2as(systmp(i+14),ibuf,nch,8,1)
+                  if(nsub.eq.5) then
+                     nch = nch+ir2as(systmp(i+14),ibuf,nch,8,1)
+                  else if(nsub.eq.6) then
+                     nch = nch+ir2as(tpidiff(i+14),ibuf,nch,6,0)-1
+                  else if(nsub.eq.10) then
+                     nch = nch+ir2as(caltemps(i+14),ibuf,nch,8,3)
+                  endif
                   nch = mcoma(ibuf,nch)
                endif
             enddo
@@ -149,7 +161,13 @@ C
                   nch=ichmv_ch(ibuf,nch,'i')
                   nch=nch+ib2as(j,ibuf,nch,1)
                   nch = mcoma(ibuf,nch)
-                  nch = nch+ir2as(systmp(j+28),ibuf,nch,8,1)
+                  if(nsub.eq.5) then
+                     nch = nch+ir2as(systmp(j+28),ibuf,nch,8,1)
+                  else if(nsub.eq.6) then
+                     nch = nch+ir2as(tpidiff(j+28),ibuf,nch,6,0)-1
+                  else if(nsub.eq.10) then
+                     nch = nch+ir2as(caltemps(j+28),ibuf,nch,8,3)
+                  endif
                   nch = mcoma(ibuf,nch)
                endif
             endif
@@ -162,7 +180,7 @@ C
          goto 990
 C     
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
-        call fc_tsys_vlba(ip,itpis_vlba,ibuf,nch,caltmp)
+        call fc_tsys_vlba(ip,itpis_vlba,ibuf,nch,nsub)
         return
       else
         call fc_tsys_norack(itpis_norack,ibuf,nch, caltmp(indtmp))

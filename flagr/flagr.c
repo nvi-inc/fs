@@ -32,6 +32,7 @@ main()
   last_dec=shm_addr->decdat;
   strncpy(last_lsorna,shm_addr->lsorna,sizeof(last_lsorna));
   acquired=FALSE;
+  new=FALSE;
 
 #ifdef TESTX
   printf(" iapdflg %d\n",shm_addr->iapdflg);
@@ -52,19 +53,19 @@ main()
 #ifdef TESTX
   printf(" woke-up\n");
 #endif
-    new=last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat;
-    if(strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||new) {
+    if(strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||
+       last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat) {
 #ifdef TESTX
   printf(" new\n");
 #endif
       logit("flagr/antenna,new-source",0,NULL);
-      new=FALSE;
+      new=TRUE;
       acquired=FALSE;
       last_ra=shm_addr->radat;
       last_dec=shm_addr->decdat;
       strncpy(last_lsorna,shm_addr->lsorna,sizeof(last_lsorna));
     }
-    if (!acquired) {
+    if (new && !acquired) {
 #ifdef TESTX
   printf(" not acquired\n");
 #endif
@@ -72,6 +73,7 @@ main()
       if(shm_addr->ionsor==1) {
 	logit("flagr/antenna,acquired",0,NULL);
         acquired=TRUE;
+	new=FALSE;
 	lost=FALSE;
       }
     } else if(acquired &&!lost) {
@@ -83,7 +85,7 @@ main()
 	logit("flagr/antenna,off-source",0,NULL);
         lost=TRUE;
       }
-    } else if(lost) {
+    } else if(acquired && lost) {
 #ifdef TESTX
   printf(" lost\n");
 #endif

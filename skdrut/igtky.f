@@ -65,6 +65,7 @@ C  2         ST = nominal start time
 C  2         EN = nominal end time
 C  2         JA = start java parameters program
 C  2         GT = get parameters from java program
+C  2         PS = POSTPASS 
 C  3         TA = TAPE shift
 C  3         TI = TIME shift
 C  3         ID = IDLE for CHECK
@@ -169,17 +170,18 @@ C 000605 nrv Remove DYNAMIC tape motion. Add AUTO and SCHEDULED for
 C            tape allocation type.
 C 001003 nrv Add SHORT as a tape type.
 C 020227 nrv Add NOTES as a parameter type.
+C 021011 nrv Add POSTPASS parameter
 C
 C   LOCAL VARIABLES
       integer numcmd,ic,ifunc1,ifunc,nccmd
 C
       character*20 ckeyin ! input keyword
-      character*20 ckey(133) ! keywords to match
-      character*2 ccode(133)  ! corresponding 2-letter code
-      integer ivalid(133) ! type for which it is valid
+      character*20 ckey(134) ! keywords to match
+      character*2 ccode(134)  ! corresponding 2-letter code
+      integer ivalid(134) ! type for which it is valid
 C
 C  Initialized
-      data numcmd/133/
+      data numcmd/134/
       data ckey/'START','CABLE','SUBNET','DURATION','IDLE',
      .'CALIBRATION','FREQUENCY','PREOB','MIDOB','POSTOB',
      .
@@ -190,7 +192,7 @@ C  Initialized
      .'SOURCE','PRFLAG','HEAD','TAPETM','MINBETWEEN','MIDTP','SUNDIS',
      .'MINSCAN','VSCAN','MODSCAN','WIDTH','VIS','CONFIRM','CORSYNCH',
      .'SNR','MAXSCAN','DESCRIPTION','SCHEDULER','CORRELATOR',
-     .'START','END','JAVA','GET',
+     .'START','END','JAVA','GET','POSTPASS',
      .
      .'TAPE','TIME','IDLE',
      .'SELECT','LIST',
@@ -228,6 +230,7 @@ C
      .'MO','LO','MN','CH','EX','TE','SM','SY','SP','PA','PP',
      .'BR','SO','PF','HD','TP','MB','MT','SD','MS','VS','MD','WI',
      .'VI','CO','CR','SA','XS','DE','PI','TC','ST','EN','JA','GT',
+     .'PS',
      .
      .'TA','TI','ID',
      .'SE','LI',
@@ -252,7 +255,7 @@ C
      .'ST','GT',
      .'AU','SC'/
 
-      DATA ivalid/10*1,43*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
+      DATA ivalid/10*1,44*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
      .3*14,12*15,5*16,17,8*18,3*19,3*20,3*21,6*22,7*23,2*24,2*25/
 C
 C

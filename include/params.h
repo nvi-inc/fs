@@ -9,7 +9,7 @@
 #define PAGE_SIZE   4096
 
 #define SHM_KEY     1
-#define C_RES       8*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       33*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_KEY     1
@@ -96,4 +96,5 @@
 #define FS_PRIOR   -12
 #define AN_PRIOR   -16
 
-
+#define MAX_RXGAIN 20
+#define MAX_FLUX   50

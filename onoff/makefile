@@ -1,16 +1,11 @@
-OBJECTS = onoff.o antcn.o dpnt2.o gooff.o jr2as.o \
-local.o matcn.o onof.o onsor.o orign.o reslt.o \
-scmds.o site.o sorce.o tzer.o vlts2.o mcbcn2.o
+OBJECTS = onoff.o jr2as.o tpi_mark.o tpget_mark.o get_samples.o ini_accum.o\
+inc_accum.o red_accum.o savoff.o antcn.o onsor.o scmds.o gooff.o local.o\
+tzero.o matcn.o wcounts.o tpget_vlba.o agc.o
 #
-#FFLAGS = -c  -i2
-FFLAGS = -c 
-#LIBES = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a
-LIBES = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a \
-../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a \
-../port/port.a ../rtelb/rtelb.a
+LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/onoff: $(OBJECTS)
-	$(FC)  -o ../bin/onoff $(OBJECTS) $(LIBES)
+	cc  -o ../bin/onoff $(OBJECTS) $(LIBES) -lm
 	strip ../bin/onoff
 #
 onoff:

@@ -238,4 +238,15 @@ typedef struct fscom {
         long tpigain[ MAX_DET];
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
+        struct onoff_cmd onoff;
+        struct rxgain_ds rxgain[20];
+  int iswif3_fs[4];
+  int ipcalif3;
+  struct flux_ds flux[MAX_FLUX];
+
+  long tpidiff[ MAX_DET];
+  long tpidiffgain[ MAX_DET];
+  float caltemps[ MAX_DET];
+  struct calrx_cmd calrx;
+
 } Fscom;

@@ -89,6 +89,12 @@ C 020531 nrv Don't reset footage to zero at the start of the next
 C            forward pass. The schedule doesn't always return the tape
 C            to zero footage but may leave it positioned to start the
 C            next pass at that point.
+C 021014 nrv If the footage is not reset to zero at the start of the next
+C            pass, then slight errors in timing/footage calculations may 
+C            accumulate and result in erroneous printed footages. If there 
+C            is a FASTR after the MIDTP, consider it a signal from the
+C            schedule and reset to zero.
+C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -108,13 +114,13 @@ C Local:
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,
      .idur,ne,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save,
      .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift,idif,ix
-      real rs,ds,val
+      real rs,ds,val,rifdur
       real speed_snap ! speed from SNAP file
       double precision speed_k4 ! speed for K4
       double precision conv_k4 ! speed scaling for feet-->counts
       integer isecdif,julda ! function
       LOGICAL   KEX
-      logical     kazel,kwrap,ksat
+      logical     kazel,kwrap,ksat,kmidtp
       character*128 cbuf,cbuf_in
       character*8 csor,cexper,cstn
       character*3 cdir,cday_prev
@@ -206,6 +212,7 @@ C 3. Initialize local variables
       kwrap=.false.
       ksat=.false.
       kstart=.true.
+      kmidtp=.false.
       kend=.false.
       krunning=.false.
       kmotion=.false.
@@ -369,6 +376,8 @@ C The schedule might have left the footage at the place where the
 C tape stopped on the previous pass.
 C         if (idir.eq.1) inewp = 0
 C         if (inewp.eq.1) ifeet = 0
+C Instead, reset the footage if a FASTR is found after midtp.
+          kmidtp=.true.
           if (ifeet.lt.0) ifeet=0
 
         else if (index(cbuf,'MIDOB').ne.0) then ! data start time
@@ -539,23 +548,34 @@ C non-tape and not running (no updating).
           endif ! no stop yet
 
         else if (index(cbuf,'FAST').ne.0) then !add spin feet
+C         examples: fastf=3m42.34s   fastr=2.35m   fastf=34.56s
           ne = index(cbuf,'=')
           nm = index(cbuf,'M')
-          if (nm.gt.0) then
-            read(cbuf(ne+1:nm-1),*) ival
-            ifdur = 60*ival
-          else
-            nm=6
+          if (nm.gt.0) then ! "M" found
+            read(cbuf(ne+1:nm-1),*) val
+            ifdur = ifix(60.0*val)
+          else 
+            nm=ne
             ifdur=0
-          endif
+          endif ! "M" found
           l=trimlen(cbuf)
-          read(cbuf(nm+1:l-1),*) ival
-          ifdur = ifdur + ival 
-          ifdur = 160 + (ifdur-10)*(270.0/12.0) ! footage of fastf/r
+          read(cbuf(nm+1:l-1),*) val
+          rifdur = ifdur + val ! seconds of time for spin
+          ifdur = ifix(160.0 + (rifdur-10.0)*(270.0/12.0)) ! footage of fastf/r
           id=+1
           if (cbuf(5:5).eq.'R') id=-1
-          if (inewp.eq.0.or.ifeet.gt.0) ifeet=ifeet+ifdur*id
+C Why only update the footage if it's a new pass ? The FASTF could occur
+C anywhere in the pass.
+C         if (inewp.eq.0.or.ifeet.gt.0) ifeet=ifeet+ifdur*id
+          if (              ifeet.gt.0) ifeet=ifeet+ifdur*id
+          if (ifeet.lt.0) ifeet=0
           ifdur_save = ifdur*id ! save in case we have to undo it
+C If there was a recent MIDTP then assume that this FASTR is meant to return 
+C the footage to zero to start the new forward pass.
+          if (id.eq.-1) then ! this was FASTR
+            if (kmidtp) ifeet = 0 
+          endif ! this was FASTR
+          kmidtp=.false.
 
         else if (index(cbuf,'CHECK').ne.0) then
           if (cnewtap.eq.'    ') cnewtap = ' *  '

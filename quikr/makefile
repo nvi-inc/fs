@@ -12,7 +12,7 @@ hdata.o hdcalc.o head_d_mic.o head_move.o head_vlt.o\
 hecho.o ib.o if3.o if3dis.o ifd.o ifdis.o iphck.o\
 ivc2t.o ivcat.o iw2ma.o label.o lchd.o lgout.o locate.o\
 lvdt.o ma.o matld.o mezhr.o\
-mic2vlt.o mic_read.o mvdis.o newtp.o nfdis.o onofc.o onsor.o\
+mic2vlt.o mic_read.o mvdis.o newtp.o onsor.o\
 oprid.o padis.o party.o pas2mic.o pass.o patch.o\
 pc.o pcalc.o pcals.o pcdis.o pe.o peak.o pedis.o\
 pkhd.o rdoff.o repds.o repds4.o repro.o repro4.o\

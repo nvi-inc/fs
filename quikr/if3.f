@@ -138,6 +138,7 @@ C
 C
 C     2.3 sw1-sw4, parameters 3-6
 C
+      call fs_get_iswif3_fs(iswif3_fs)
       do i=1,4
         call gtprm2(ibuf,ich,nchar,1,parm,ierr)
         if(ierr.eq.2) then
@@ -156,6 +157,7 @@ C
 C
 C   2.4 pcal control On or OFF, parameter 7
 C
+      call fs_get_ipcalif3(ipcalif3)
       ic1 = ich 
       call gtprm2(ibuf,ich,nchar,0,parm,ierr) 
       if (ierr.eq.2) then
@@ -192,7 +194,9 @@ C
       do i=1,4
         iswif3_fs(i)=isw(i)
       enddo
+      call fs_set_iswif3_fs(iswif3_fs)
       ipcalif3=ipcal
+      call fs_set_ipcalif3(ipcalif3)
       iolif3_fs = iold
       if3_set=1
       call fs_set_if3_set(if3_set)

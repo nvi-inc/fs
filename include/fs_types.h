@@ -44,3 +44,7 @@
 #include "tacd_shm.h"
 #include "ifatt_shm.h"
 #include "tpicd_ds.h"
+#include "onoff_ds.h"
+#include "rxgain_ds.h"
+#include "flux_ds.h"
+#include "calrx_ds.h"

@@ -234,7 +234,7 @@ AQ  -12
 FIVPT or ONOFF is not dormant
 ""
 AQ  -13
-FIVPT or ONOFF did not start to execute within 10 seconds.
+FIVPT or ONOFF did not start to execute within 30 seconds.
 ""
 AQ  -20
 Source not acquired in alloted time
@@ -592,6 +592,12 @@ Error reading flagr.ctl FMP ?FFF
 ""
 BO -402
 Error antenna check period in TIME.CTL
+""
+BO -403
+Error ?FFF reading antenna gain file, see preceeding message for file name.
+""
+BO -404
+Error ?FFF reading flux.ctl file.
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -1877,6 +1883,42 @@ MARK5 device error: inconsistent ot conflicting request
 NF   -1
 Break Detected in ONOFF
 ""
+NF   -3
+ONOFF already running
+""
+NF   -4
+Error occurred while trying to return to source at end. Check offsets.
+""
+NF   -5
+Error occurred while trying to return to AGC. Check BBC gain settings.
+""
+NF   -6
+Error occurred while trying to restore IF att. Check IF att settings.
+""
+NF   -7
+WARNING: Source structure correction greater than 20% for detector ?W.
+""
+NF  -10
+MCBCN failed setting AGC
+""
+NF  -11
+internal program error, not enough MCBCN response records getting tpi
+""
+NF  -12
+MCBCN failed setting IF attenuators
+""
+NF  -13
+internal program error, not enough MCBCN response records setting IF att
+""
+NF  -14
+internal program error, not enough MCBCN response records resetting IF att
+""
+NF  -15
+MCBCN failed resetting IF attenuators
+""
+NF  -16
+MCBCN failed getting TPI
+""
 NF  -20
 Did not reach source in allotted time
 ""
@@ -2164,6 +2206,48 @@ Can't read which ports are in use.
 ""
 PP -402
 Porgram error: Impossible situation in pcalports_dis.
+""
+Q1 -106
+No default for detectors.
+""
+Q1 -201
+Repititions must be 1-100.
+""
+Q1 -202
+Integration period must be 1-100.
+""
+Q1 -203
+Cut-off must be between 0.0 and 90.0.
+""
+Q1 -204
+Step must be between 0.0 and 90.0.
+""
+Q1 -204
+Wait must be 1-1200.
+""
+Q1 -206
+Unknown detectors.
+""
+Q1 -301
+Un-supported VC detector.
+""
+Q1 -302
+Unknown LO sideband.
+""
+Q1 -303
+VC patching not defined.
+""
+Q1 -304
+No detectors selected.
+""
+Q1 -305
+ONOFF or FIVPT already running.
+""
+Q1 -306
+BBC patching not defined.
+""
+Q1 -307
+WARNING: Source structure correction greater than 20% for detector ?W.
 ""
 QA -101
 No default for tape number.
@@ -2773,6 +2857,9 @@ bbc not set-up for ifa or ifb.
 ""
 QZ -211
 Detector device not one of ia, ib, or bbc1 ... bbc14.
+""
+QZ -212
+Wait time must be 1-1200
 ""
 QZ -301
 FIVPT is not dormant.

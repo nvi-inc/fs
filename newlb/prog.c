@@ -2104,3 +2104,31 @@ void fs_get_iapdflg__(iapdflg)
         {
           *iapdflg = shm_addr->iapdflg;
         }
+
+void fs_set_iswif3_fs__(iswif3_fs)
+	int *iswif3_fs;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->iswif3_fs);
+	  memcpy(shm_addr->iswif3_fs,iswif3_fs,N);
+	}
+
+void fs_get_iswif3_fs__(iswif3_fs)
+	int *iswif3_fs;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->iswif3_fs);
+	  memcpy(iswif3_fs,shm_addr->iswif3_fs,N);
+	}
+
+void fs_set_ipcalif3__(ipcalif3)
+	int *ipcalif3;
+	{
+	  shm_addr->ipcalif3=*ipcalif3;
+	}
+
+void fs_get_ipcalif3__(ipcalif3)
+	int *ipcalif3;
+	{
+	  *ipcalif3=shm_addr->ipcalif3;
+	}

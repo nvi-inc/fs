@@ -1,0 +1,237 @@
+(please excuse the odd notation)
+
+Assumed values by ONOFF:
+TCAL(K), FLUXsource, (gain curve), DPFU (degrees per flux unit)
+
+Calculated by ONOFF:
+SEFD=TSYS(Jy)=FLUXsource*(TPsky-TPzero)/(TPsource-TPsky)
+TSYS(K)=(TPsky-TPzero)*TCAL(k)/(TPcal-TPsky)
+TCAL(Jy)=(TPcal-TPsky)*FLUXsource/(TPsource-TPsky)
+Measured TCAL(K)=DPFU*TCAL(Jy)*(gain curve)
+CALratio=(Measured TCAL(K))/(Assumed TCAL(K))*100
+Gain compression =
+100*(ONSOURCE:(TPICAL-TPsky))/(OFFSOURCE:(TPICAL-TPsky))
+Do we need source/cal and Shaffer number any more? NO
+
+ONOFF Record format:
+xxxxxxxxx1xxxxxxxxx2xxxxxxxxx3xxxxxxxxx4xxxxxxxxx5xxxxxxxxx6xxxxxxxxx7xxxxxxxxx8      
+12345678901234567890123456789012345678901234567890123456789012345678901234567890123
+iii ssssssssss aaa.a ee.e dd i p mmmmmmm.m gg.gg tt.tt ffff.f ccc.ccc
+z.zzz rr.rr
+
+iii        = VAL or RMS
+ssssssssss = source name (10 chars enough?)
+aaa.a        azimuth
+ee.e         elevation
+dd           detector
+i            if channel: 1,2,3,a,b,c,d
+p            polarization "l" or "r"
+mmmmmm.m     center sky frequency in MHz
+gg.gg        gain compression (percent)
+tt.tt        tsys(K)
+ffff.f       SEFD
+ccc.ccc      TCAL(Jy), cal/src for variable sources
+z.zzz        measured Tcal(K)
+rr.rr        Cal ratio (percent)
+
+Output will be grouped in order of LCP the RCP, then by sky frequency.
+RMS lines will come out first as a block and then VAL lines as a block.
+
+If the source has no defined flux,   a flux of 1 Jy will be assumed and
+the values of SEFD, Tcal(jy), Tcal(k), and cal ratio will be negative
+
+By the way:
+TCAL(Jk)*(gain curve) is flat versus elevation 
+DPFU=TSYS(K)/(TSYS(JK)*Gain curve)
+    =(TCAL(K)/(TPcal-TPsky))*((TPsource-TPsky)/((gain curve)*FLUXsource)
+gain curve is in unitless since K/Jy in DPFU
+gain curve is assumed to be the same for both polarization
+DPFU and Tcal(k) may be different for each pol.
+
+0. External program "gndta" is used to extract the data from the log
+   and produce the flat file that will be read by "gnplt". The file
+   will be in two sections. The first will have a list of labels
+   for the quantities in the table. The second will be the table.
+   The quantities in the table will be:
+   date/time, source detector, if channel, polarization, sky
+   frequency, azimuth, elevation Tsys, SEFD, TPICAL-TPI,
+   gain compression {recalculated: Tcalratio, Tcal(k),
+   Tcal(k)/Tcal(Jy)}, {observed: Tcalratio, Tcal(K)},
+   {assumed: Tcal(k), source flux, Tcal(k)/Tcal(Jy), gain
+   curve, DPFU*gain curve}
+   This program will have a "recalculate" recalculated quantities
+   so that the log doesn't have to be re-read each time the assumed
+   quantities are updated
+I. New program: gnplt, three major display sections: Items vs time,
+   Items vs. elevation, Items vs. freq, operates on user selected
+   log file. In some cases, the plot program must run "gndta"
+   program (transparently to the user) to calculate items
+    0. Common elements of plots:
+       1. plot a or all detectors, each has separate letter
+       2. plot a, all primary calibrators, or all sources,
+          each has separate letter (CAPs?)
+       3. able to highlight one source or detector
+       4. Pull down menus for detector and source selection
+       5. Source selection menu for primary calibrators
+       6. Auto-scaling by default, manual scaling available
+       7. Delete/undelete points, autoscale ignores deleted
+       8. Plot quantities as described for Roman numeral "0",
+          "gndta"
+   A. Items versus time
+       1. Plot standards items versus time
+       2. default display is recalculated tcalratio versus time
+          for first detector
+   B. Items vs elevation
+       1. Plot standard items versus elevation, plus
+       2. Item: calculated Tcal(k)/Tcal(Jy), user can optionally select
+          one of three origins for Tcal(k): (i) from control files,
+          (ii) user input, (iii) specify expected K/Jy for some
+          range of elevations
+       3. for Tcal(k)/Tcal(Jy) special interactive tools (with a given
+          detector choice, new detector choice resets all):
+          0. add existing gain curve to plot, include statistics about
+             the level of agreement, offset, RMS, etc?
+          a. Select a starting source, deferred for now
+          b. Select variable calibrators to be adjusted with
+             an scale factor relative to starting source, deferred
+          c. Select sources for no offset (for primary calibrators),
+             deferred
+          d. Select sources
+          e. fitting options, fit selected source skip deleted
+             points, after each fit, plot residuals, fit types,
+             default order:
+             (i) adjust for new DPFU, assumes TCal(k) and gain are
+                 okay
+             (ii) fit for gain curve and DPFU, external program fits
+                  a polynomial (to user selected degree default 4,
+                  versus el or ZA or other dependence) to resulting
+                  set of selected sources (ignore those not selected
+                  and deleted points), normalized to 1.0 at peak,
+                  DPFU is maximum K/Jy at gain curve=1.0 point
+             (iii) adjust TCal(k) to make data lie on exisiting curve,
+                  assumes exisiting Tcal(k) is wrong by a scale factor
+          f. option to write fit parameters to file,
+             CALRX sets LO value or frequency range, and file name
+             dialogue to override default, 
+          g. if TCal(k) was adjusted then the exisiting table is
+             scaled by new value/old value
+          h. is only one DPFU
+             calculated, check that this okay before writing
+       4. Two passes one for DPFU and gain curve for one polarization
+          and then second pass for DPFU for second pol (different
+          detectors)
+       5. Rename log file after updating gain and DPFU
+       6. default display: first detector, all sources
+       7. Option (deferred for now) to fit opacities to correct gain
+          curve.
+    C. item versus freq
+       1. Plot standard items versus freq, plus
+       2. For Tcal(k) and Tcalratio plots mark location of
+          exisiting Tcal(K) table entries on plot, include statistics
+          about the level of agreement, offset, RMS, etc?
+       3. source selection includes time of observation, more
+          than one time possible and also all times for this source
+       4. Update Tcal(k) in file from Tcal(k) display
+          using values, averages for each point if more than one
+          point in time is being displayed for this source
+       5. Update Tcal(k) in file from display of Tcalratio (DEFERRED):
+          a. graphically select bins to update
+          b. average over data in bin and make new table
+          c. plot data relative to new table
+          d. iterate if necessary
+          e. option to delete ranges graphically
+          f. allow user to update Tcal(k) in file
+       6. Default display recalculated TCALratio for first source
+          on first pol.
+II. Control files indexed by LO settings, three types, RX parameters,
+    gain curve, and TCal/frequency, independent files to ease keep
+    updating modular.
+    0. When a file is update the old values are added to the
+       top and old values commented out
+    A. RX parameters: *.rx
+       1. LO Ranges and values
+       2. Polarizations: LCP, RCP, both
+       3. Set-up procedure for this LO,
+          execute for each LO= command (deferred)
+       4. Cal-on proc (deferred)
+       5. Cal-off proc (deferred)
+       6. Beamwidth versus freq table
+    B. Gain: *.gain
+       1. LO Ranges and values
+       2. Creation Date
+       3. Polarizations: LCP, RCP, both
+       4. DPFU LCP, DPFU RCP
+       5. gain curve
+    C. Tcal/freq: *.tcal
+       1. LO Ranges and values
+       2. Creation date
+       3. Polarizations: LCP, RCP, both
+       4. Tcal versus freq table LCP, RCP
+    D. precedence of files
+       The concept will be that files are allowed to specify any number
+       of LO ranges and off specific values (no one can appear more
+       than once)
+       If an LO= command value matches a range and a specific value, the
+       specific value takes precedence, a narrower range takes
+       precedence over a wider range
+    E. RX dependent pointing models in a similiar style? (deferred)
+    F. Tpickup as a function of elevation (deferred)
+
+III. source flux tables by sourve
+      1. Flux with functional dependance from John's subroutine
+         with same functional dependences
+      2. Current FS structure models available
+      3. Entry to identify primary calibrator or variables
+      4. Files provided with FS but station specific
+
+IV. New SNAP commands:
+    A. CALRX=<file_name>,<lo ranges and values>
+1. <file_name> prefix for names in section II
+       2. <lo ranges and values> for first lines in files of 
+          section II
+       3. To record book-keeping information during acquisition
+V. Use
+   A. Initial Set-up
+      1. A station would need to set-up the *.rx, *gain and *.tcal files
+      for each RX.
+      The *.tcal files can by one for each RX with as much resolution as
+      available or one file that covers all the bands with just the band
+      endpoint and a constant value for each band.
+      2. There would be two aquir set-ups per *.rx, for gain curve
+         measurements, one for Tcal(k) versus freq, CALRX definitions
+         should match between gain curve and Tcal(k) versus freq
+         set-ups
+         a Gain aquir set-up
+           i. Set VCs, LO, and patching for band
+           ii. Set CALRX information for use during analysis
+           iii. Provide list of useful sources for band
+           iv. includes both polarization
+         b. Tcal(k) versus freq
+           0. Use multiple entries for a source with differnt VC
+              settings to get higher frequency resolution
+           i. Set VCs, LO, and patching for band
+           ii. Set CALRX inormation for use during analysis
+           iii. Provide list of useful sources for band
+           iv. includes both polarization
+      3. Set DPFU to Tsys/SEFD (or 1.0) and gain curve to unity
+   B. Acquisition
+      1. For gain curves, take several hours of data with ONOFF run
+         after peaking up on each source. A new logfile is used for
+         each gain curve determination.
+      2. For Tcal(k) versus frequency for a few sources, after peaking
+         One logfile is used for each band, should be renamed
+         periodically, each session? after a new gain curve is
+         determined anyway in gnplt.
+   C. Analysis
+      1. Gain curves: run gnplt, reduce data, update *.gain files if
+         needed
+      2. Tcal(k) versus frequency: run gnplt, reduce data, update
+         *.tcal files.
+      3. File names and LO ranges/values generate use CALRX entered
+         in log to simplify user book-keeping
+      4. how apply scaling?
+
+VI. Logging of DPFU, gain, and Tcal(k) versus freuquency
+    1. The first time an LO is specified by command in a log since it
+       was opened, this information will be recorded for the used
+       RX IFs.

@@ -8,6 +8,7 @@ C 991028 nrv Add second recorder type.
 C 991101 nrv Add lfirstrec for first recorder to use. 
 C 991108 nrv Remove lstform because this is incorporated in K4 rack names.
 C 000605 nrv Add tape_allocation
+C 021010 nrv Add tape_motion_save
 
       double precision stnxyz,baselen,axisof,
      .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ    
@@ -26,7 +27,7 @@ C
       logical klineseg
 
       character*128 stndefnames,tape_motion_type,rack_type,
-     .rec_type,tape_allocation
+     .rec_type,tape_allocation,tape_motion_save
 C
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
      .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
@@ -66,7 +67,7 @@ C
 
       COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
      .rack_type(max_rack_type),rec_type(max_rec_type),
-     .tape_allocation(max_stn)
+     .tape_allocation(max_stn),tape_motion_save(max_stn)
 C 
 C two_letter_code is a unique identifier for each DAS.
 C  NSTN   - number of stations

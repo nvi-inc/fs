@@ -31,6 +31,7 @@ C 970729 nrv Handle the old format (for ADAPTIVE only) without the
 C            station list and with the GAP key word.
 C 980629 nrv Add tape length to listing.
 C 980629 nrv Allow DYNAMIC type.
+C 021010 nrv Save tape motion for later restoring.
 C
 
 C     1. Check for some input.  If none, write out current.
@@ -113,6 +114,7 @@ C         For old format, skip the 'gap' key word
             else if (ichcm_ch(lkey,1,'DY').eq.0) then
               tape_motion_type(i)='DYNAMIC'
             endif
+            tape_motion_save(i)=tape_motion_type(i)
           endif
         END DO
 C       get next station name
