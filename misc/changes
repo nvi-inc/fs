@@ -2591,3 +2591,22 @@ Version 9.3.7 970123
 
 970313 nrv drudg/procs.f
            Do not write barrel roll for Mk4 racks, and issue warning message.
+
+Version 9.3.8 970313
+
+970401 NRV drudg/trkall.f
+           Disable filling array ITRAX with fanned out tracks.
+
+970401 NRV drudg/fdrudg.f
+           Change date to 970401.
+  
+970402 NRV drudg/lstsum.f
+           Use a flag to indicate whether scan duration has already been
+           computed because both ET and POSTOB were being used as
+           "end of scan".
+
+970402 NRV drudg/fdrudg.f
+           A better date is 970402.
+
+Version 9.3.9 970403
+
