@@ -1,7 +1,7 @@
 #
 VERSION = 9
 SUBLEVEL = 3
-PATCHLEVEL = 204
+PATCHLEVEL = 110
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
@@ -25,6 +25,7 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'  -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                 >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tar.gz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 #
 clean:
@@ -32,7 +33,6 @@ clean:
 	rm -f `find . -name '#*#' -print`
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
-	rm -f `find . -name 'y.tab.h' -print`
 #
 rmexe:
 	rm -f bin/*
