@@ -521,7 +521,7 @@ proc readData {inx} {
     global nodeDataMatrix selectMatrix current_filename statusMsg
     global timepoints current_TEMP timebase
     set nocommand [string compare "" $selectMatrix($inx,1)]
-    if {[expr {$selectMatrix($inx,2) <= 0}] || [expr {$nocommand == 0}]} {
+    if {[expr {$selectMatrix($inx,2) == 0}] || [expr {$nocommand == 0}]} {
 	set nodeDataMatrix($inx,0,1) 1
 	set nodeDataMatrix($inx,0,2) 0                  ;# Undo-counter
 	set selectMatrix($inx,4) 1                      ;# Dataset now in memory
@@ -540,11 +540,21 @@ proc readData {inx} {
 		set counter 1
 		set flagEOF [gets $fileID readline]
 		while {$flagEOF >= 0} {
-		    set datapos [string first $selectMatrix($inx,1) $readline]
-		    set datapos [expr $datapos+[string length $selectMatrix($inx,1)]]
-		    set dataline [string range $readline $datapos [string length $readline]]
+		    if { $selectMatrix($inx,2) > 0 } {
+			set datapos [string first $selectMatrix($inx,1) $readline]
+ 			set datapos [expr $datapos+[string length $selectMatrix($inx,1)]]
+			set dataline [string range $readline $datapos [string length $readline]]
+		    } else {
+			set datapos [string first $selectMatrix($inx,5) $readline]
+			set datapos [expr $datapos+[string length $selectMatrix($inx,5)]]
+			set dataline [string range $readline $datapos [string length $readline]]
+		    }
 		    set datalist [split $dataline ,]
-		    set value [lindex $datalist [expr $selectMatrix($inx,2)-1]]
+		    if { $selectMatrix($inx,2) > 0 } {
+			set value [lindex $datalist [expr $selectMatrix($inx,2)-1]]
+		    } else {
+			set value [lindex $datalist [expr $selectMatrix($inx,2)+2]]
+		    }
 		    set conversions [scan $value %f value]
 		    if {$conversions == 1} {
 			set abstime [str2time $readline]
