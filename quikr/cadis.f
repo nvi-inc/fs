@@ -1,4 +1,4 @@
-      subroutine cadis(ip,iclcm)
+      subroutine cadis(ip,iclcm, itask)
 C  display cable cal c#870115:04:36#
 C 
 C 1.  CADIS PROGRAM SPECIFICATION 
@@ -28,6 +28,7 @@ C               - input class buffer, output display buffer
 C        ILEN   - length of buffers, chars
 C        NCH    - character counter 
 C 
+      character*1 cjchar
       dimension ireg(2) 
       integer get_buf
 C               - registers from EXEC 
@@ -66,10 +67,22 @@ C                   Put / to indicate a response
 C 
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
       nchar = ireg(2) 
-      ich = 4 
       if(jchar(ibuf,nchar).eq.10) nchar=nchar-1 !remove LF if present
       if(jchar(ibuf,nchar).eq.13) nchar=nchar-1 !remove CR if present
-      call gtfld(ibuf(2),ich,nchar-2,ic1,ic2) 
+      if (itask.ne.0) then
+         ich = itask            ! nominally 4
+         if(ich.gt.nchar-2) ich=nchar-2
+      else
+         ich=1
+         do while(ich.le.nchar-2)
+            if(0.ne.index("0123456789+-.",cjchar(ibuf(2),ich))) then
+               goto 200
+            endif
+            ich=ich+1
+         enddo
+ 200     continue
+      endif
+      call gtfld(ibuf(2),ich,nchar-2,ic1,ic2)
       if(ic1.gt.0.and.ic2-ic1+1.ge.1) then
         nch = ichmv(ibuf2,nch,ibuf(2),ic1,ic2-ic1+1)
 C                   Skip the " S " before the number
