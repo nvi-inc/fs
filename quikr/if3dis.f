@@ -1,4 +1,4 @@
-      subroutine if3dis(ip,iclcm)
+      subroutine if3dis(ip,iclcm,kfirst)
 C  if distributor display <880922.1239>
 C 
 C 1.1.   IF3DIS gets data from the IF3 distributor and displays it
@@ -23,6 +23,9 @@ C 2.2.   COMMON BLOCKS USED
       include '../include/fscom.i'
 C 
 C 2.5.   SUBROUTINE INTERFACE:
+c
+      logical kfirst
+c
 C     CALLING SUBROUTINES: IFD
 C     CALLED SUBROUTINES: character utilities 
 C 
@@ -67,7 +70,7 @@ C
 C 
       nchar = ireg(2) 
       nch = iscn_ch(ibuf2,1,nchar,'=')
-      kdata = (nch.eq.0)
+      kdata = (nch.eq.0).or..not.kfirst
 C                   If our command was only "device" we are waiting for 
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
@@ -84,7 +87,8 @@ C                   Move buffer contents into output list
         enddo
       else
          if (kcom) then
-            iat = iatif3_fs
+            call fs_get_iat3if(iat3if)
+            iat = iat3if
             call fs_get_imixif3(imixif3)
             imix = imixif3
             do i=1,4
@@ -92,6 +96,7 @@ C                   Move buffer contents into output list
             enddo
             call fs_get_freqif3(freqif3)
             freq=freqif3
+            ipcal=ipcalif3
          else
             ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
             ireg(2) = get_buf(iclass,ibuf,-10,idum,idum)
@@ -99,7 +104,7 @@ C
 C     3. Now the buffer contains: IFD=, and we want to add the data.
 C 
             call ma2i3(ibuf1,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
-     &           iswp,freq,irem,ilo,tpi)
+     &           ipcalp,iswp,freq,irem,ipcal,ilo,tpi)
          endif
 C     
          ierr = 0
@@ -112,10 +117,18 @@ C
                nch = nch + ib2as(isw(i),ibuf2,nch,1) ! encode switches
             endif
          enddo
+         nch = mcoma(ibuf2,nch)
+         if(pcalcntrl.eq.3) then
+            nch = iif3ed(-5,ipcal,ibuf2,nch,ilen) !pcal state
+         endif
 c     
          nch = mcoma(ibuf2,nch)
          if (.not.kcom) then
             nch = iif3ed(-2,iswp,ibuf2,nch,ilen) ! switch box present
+         endif
+         nch = mcoma(ibuf2,nch)
+         if (.not.kcom) then
+            nch = iif3ed(-2,ipcalp,ibuf2,nch,ilen) ! pcal control present
          endif
          nch = mcoma(ibuf2,nch)
 c
