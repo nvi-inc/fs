@@ -69,12 +69,12 @@ C
         enddo
         if (iremtp.ne.0) inerr(1)=inerr(1)+1
       endif
-      if (kmvtp_fs) then
+      if (kmvtp_fs.or.kldtp_fs) then
         call fs_get_idirtp(idirtp)
         call fs_get_ispeed(ispeed)
-        if (isp.ne.ispeed) then
-          if (ispeed.eq.0) inerr(2)=inerr(2)+1
-          if (ispeed.gt.0) inerr(3)=inerr(3)+1
+        if (isp.ne.ispeed.and.isp+ispeed.ne.1) then
+          if (ispeed.lt.2) inerr(2)=inerr(2)+1
+          if (ispeed.gt.1) inerr(3)=inerr(3)+1
         else if ((isp.ne.0.and.idir.ne.idirtp).and.
      .           (idirtp.ne.-1)) then
           inerr(4)=inerr(4)+1
@@ -85,6 +85,7 @@ C
         if (ichcm_ch(lchgen,1,'720').ne.0.and.
      .      ichcm_ch(lchgen,1,'880').ne.0.and. 
      .      ichcm_ch(lchgen,1,'000').ne.0.and. 
+     .      ichcm_ch(lchgen,1,'427').ne.0.and. 
      .      ichcm_ch(lchgen,1,'853').ne.0) inerr(12)=inerr(12)+1
       endif
 CXX  NEED TO ADD CODE FOR VARIABLE WHICH STORES RATE GENERATOR INSTEAD
@@ -95,7 +96,7 @@ CXX  OF HARD CODING IT IN AS IN THE ABOVE STATEMENTS.
         if (ierr.ne.0) inerr(5)=inerr(5)+1
       endif
       if ((kentp_fs.and.kmvtp_fs).and.(MK3.eq.and(MK3,drive))) then
-        if (ispeed.ne.0.and.ienatp.ne.0.and.ntrks.eq.0)
+        if (ispeed.gt.1.and.ienatp.ne.0.and.ntrks.eq.0)
      &      inerr(13)=inerr(13)+1
       endif
       if (krptp_fs) then
