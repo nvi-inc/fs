@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/other_files.txt  Version: 0.1  Date: 041018
+File: /usr2/fs/misc/other_files.txt  Version: 0.2  Date: 041021
 
 		  Other Files that affect the Field System
 
@@ -6,8 +6,12 @@ File: /usr2/fs/misc/other_files.txt  Version: 0.1  Date: 041018
 
 INTRODUCTION
 
-This short document is intended to provide a pointer to other files
-that either directly or indirectly impact FS operations.
+This short document is intended to provide a list (expected to be
+incomplete at this time) of other files that either directly or
+indirectly impact FS operations.  The list may be expanded from
+time-to-time.  This document describes the relevant files for FS Linux
+Distrubtion 5 (based on Debian "woody"), the current standard
+distribution.
 
 USER FILES
 
