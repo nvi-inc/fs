@@ -11,18 +11,26 @@ C  Output:
       integer ierr,ivexnum
 
 C  Local:
-      integer ilen,ltype,ich,ic1,ic2,idummy,ic,
+      integer ical,iyr,idayr,ihr,imin,isc,nstnsk,mjd,mon,ida
+      double precision ut,gst
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
+     .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN),
+     .          lfreq,itim1(6),itim2(6)
+      integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
+      integer irec,ipnt,ilen,ltype,ich,ic1,ic2,idummy,ic,
      .icx,nch,iret,i
       integer htype ! section 2-letter code
       logical kcod ! set to ksta when $CODES is found
       logical ksta ! set to true when $STATIONS is found
       logical kvlb ! set to true when $VLBA is found
       logical khed ! set to ksta when $HEAD is found
+      logical kearl,kpartm,ksettm,ksortm,ktaptm,khdtm
       integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd,idum
       integer iscnc,iscn_CH,ias2b,jchar,ichcm,ichmv ! functions
       integer ichcm_ch,trimlen
       real rdum,reio
       character*128 cbuf
+      character*128 ltape
 C Initialized:
       data    Z24/Z'24'/, hbb/2h  /, hex/2hEX/, hpa/2hPA/, hso/2hSO/
       data    hhd/2hHD/
@@ -44,6 +52,10 @@ C 961023 nrv Check for 'TAPE ' along with 'TAPETM' parameter values.
 C 970114 nrv Pass CBUF to VREAD so it can check the VEX version
 C 970114 nrv Remove the call to VGLINP (put it into VREAD). Write out
 C            experiment name, description, PI.
+C 970129 nrv Add a check for TAPE_MOTION and GAP
+C 970207 nrv Unpack each scan and check the parity flag
+C 970219 nrv If parameter values are not in schedule file, set to defaults
+C 970307 nrv Initialize ISKREC for SKED files, and time order it at the end.
 C
 C
       close(unit=LU_INFILE)
@@ -63,6 +75,13 @@ C
         kcod = .false.
         kvlb = .false.
         khed = .false.
+      ltape=''
+          kparity = .false.
+      ksettm = .false.
+      kpartm = .false.
+      ktaptm = .false.
+      ksortm = .false.
+      khdtm = .false.
 C
       kvex=.false.
       read(lu_infile,'(a)') cbuf
@@ -153,41 +172,59 @@ C
               IF (IC.NE.0) THEN !parity time
                 CALL GTFLD(IBUF,IC+6,ILEN*2,IC1,IC2)
                 IPARTM=IAS2B(IBUF,IC1,IC2-IC1+1)
+                kpartm=.true.
               ENDIF !parity time
               IC = ISCN_CH(IBUF,1,ILEN*2,'SETUP')
               IF (IC.NE.0) THEN !setup time
                 CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
                 ISETTM=IAS2B(IBUF,IC1,IC2-IC1+1)
+                ksettm=.true.
               ENDIF !setup time
               IC = ISCN_CH(IBUF,1,ILEN*2,'BARREL')
               IF (IC.NE.0) THEN !barrel roll
                 CALL GTFLD(IBUF,IC+7,ILEN*2,IC1,IC2)
-              if (ic1.ne.0) idummy = ichmv(lbarrel,1,ibuf,ic1,ic2-ic1+1)
-                  ENDIF !barrel roll
+C               if (ic1.ne.0) idummy = ichmv(lbarrel,1,ibuf,ic1,ic2-ic1+1)
+              ENDIF !barrel roll
               IC = ISCN_CH(IBUF,1,ILEN*2,'SOURCE')
               IF (IC.NE.0) THEN !source time
                 CALL GTFLD(IBUF,IC+6,ILEN*2,IC1,IC2)
                 ISORTM=IAS2B(IBUF,IC1,IC2-IC1+1)
-                  ENDIF !source time
-                  IC = ISCN_CH(IBUF,1,ILEN*2,'HEAD')
-                  IF (IC.NE.0) THEN !head time
-                    CALL GTFLD(IBUF,IC+4,ILEN*2,IC1,IC2)
-                    IHDTM=IAS2B(IBUF,IC1,IC2-IC1+1)
-                  ENDIF !head time
-                  IC = ISCN_CH(IBUF,1,ILEN*2,'EARLY')
-                  IF (IC.NE.0) THEN !early time
-                    CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
-                    ITEARL(1)=IAS2B(IBUF,IC1,IC2-IC1+1) ! save one value
-                  ENDIF !early time
-                  IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE ')
+                ksortm=.true.
+              ENDIF !source time
+              IC = ISCN_CH(IBUF,1,ILEN*2,'HEAD')
+              IF (IC.NE.0) THEN !head time
+                CALL GTFLD(IBUF,IC+4,ILEN*2,IC1,IC2)
+                IHDTM=IAS2B(IBUF,IC1,IC2-IC1+1)
+                khdtm=.true.
+              ENDIF !head time
+              IC = ISCN_CH(IBUF,1,ILEN*2,'EARLY')
+              IF (IC.NE.0) THEN !early time
+                CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
+                ITEARL(1)=IAS2B(IBUF,IC1,IC2-IC1+1) ! save one value
+              ENDIF !early time
+              IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE ') ! older name
               ICX= ISCN_CH(IBUF,1,ILEN*2,'TAPETM')
-              IF (IC.NE.0.OR.ICX.NE.0) THEN !tape time
+              IF (IC.NE.0.or.icx.ne.0) THEN !tape time
+                if (icx.eq.0) ICH=IC+4
                 IF (IC.EQ.0) ICH=ICX+6
-                IF (ICX.EQ.0) ICH=IC+4
+                CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+                ITAPTM=IAS2B(IBUF,IC1,ic2-ic1+1)
+                ktaptm=.true.
+              endif !tape time
+              IC= ISCN_CH(IBUF,1,ILEN*2,'TAPE_MOTION')
+              IF (IC.NE.0) THEN !tape motion
+                ICH=IC+12
                 CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
                 nch=ic2-ic1+1
-                if (nch.gt.0) ITAPTM=IAS2B(IBUF,IC1,nch)
-              ENDIF !tape time
+                if (nch.gt.0) call hol2char(ibuf,ic1,ic2,ltape)
+              endif !tape motion
+              IC= ISCN_CH(IBUF,1,ILEN*2,'GAP')
+              IF (IC.NE.0) THEN !gap time
+                ICH=IC+3
+                CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+                nch=ic2-ic1+1
+                if (nch.gt.0) itgap(1)=IAS2B(IBUF,IC1,nch)
+              endif !gap time
             ENDIF
 C
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -241,6 +278,13 @@ C         Read the first line of the schedule
 C           Store in memory
             call ifill(lskobs(1,nobs),1,ibuf_len*2,z20)
             idum = ichmv(lskobs(1,nobs),1,ibuf,1,ilen)
+            iskrec(nobs)=nobs ! initialize the array in order
+C         Unpack the scan just to get kflg
+          CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+     .    IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
+     .    MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG)
+C           If any scans have flag2 set, remember this.
+            if (kflg(2)) kparity = .true.
 C
 C           Read the next schedule entry
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -301,15 +345,50 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         enddo 
       endif
 C
-C For SKED file, enitialize early start for all stations and set 
-C other S2 values to zero.
+C For SKED file, initialize early start for all stations and set 
+C other tape values to zero.
       do i=1,max_stn
         itearl(i)=itearl(1)
         itlate(i)=0
-        itgap(i)=0
-        tape_motion_type(i)='start&stop'
+        itgap(i)=itgap(1)
+        if (ltape.ne.'') then
+          tape_motion_type(i)=ltape
+        else ! default
+          tape_motion_type(i)='start&stop'
+        endif
       enddo
+C For .DRG files, these times will probably not be defined!
+      if (.not.ksettm) isettm = 20
+      if (.not.kpartm) ipartm = 70
+      if (.not.ktaptm) itaptm = 1
+      if (.not.ksortm) isortm = 5
+      if (.not.khdtm) ihdtm = 6
+C
+C Order the observations, in case they were not so in the $SKED section.
+      if (nobs.le.0) then
+        write(luscn,9901)
+9901    format('SREAD02 - No observations found in the schedule')
+      else
+        irec=nobs ! start at the end
+        ich=1
+        do i=1,5 ! want the 5th field 
+          CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
+        enddo
+        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
+        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
+        do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
+C         Swap pointers
+          ipnt = iskrec(irec-1)
+          iskrec(irec-1) = iskrec(irec)
+          iskrec(irec) = ipnt
+C         Get new time fields -- starting in ic1
+          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
+          irec = irec-1
+          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
+        end do  !out of order
+      endif
 C
       endif ! VEX/skd
+C
       RETURN
       END
