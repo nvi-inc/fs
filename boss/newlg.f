@@ -31,7 +31,6 @@ C     The new-log information line:
 C   MARK IV FIELD SYSTEM VERSION <version> <station> <year> <occup#>
 C     Send this with option "NL" to LOGIT, i.e. start new log file.
 C
-      call ifill_ch(ibuf,3,60,' ')
       nch = ichmv_ch(ibuf,1,'Log Opened: ')
       nch = ichmv_ch(ibuf,nch,'Mark IV Field System ')
       nch = ichmv_ch(ibuf,nch,'Version ')
@@ -54,14 +53,11 @@ C
 C
 C     Send configuration info from control files to log
 C
-      call ifill_ch(ib,1,120,' ')
       nch = 1
       nch=ichmv_ch(ib,nch,'location')
       nch=mcoma(ib,nch)
       call fs_get_lnaant(lnaant)
       nch=ichmv(ib,nch,lnaant,1,8)
-      nch=mcoma(ib,nch)
-      nch=ichmv(ib,nch,lidstn,1,1)
       nch=mcoma(ib,nch)
       call fs_get_wlong(wlong)
       call fs_get_alat(alat)
@@ -73,20 +69,9 @@ C
       nch=mcoma(ib,nch)
       call fs_get_height(height)
       nch = nch + ir2as(height,ib,nch,6,1)
-      nch=mcoma(ib,nch)
-      nch = ichmv(ib,nch,loccup,1,8)
-      nch=mcoma(ib,nch)
-      nch = nch + ib2as(iacttp,ib,nch,o'100000'+6)
-      nch=mcoma(ib,nch)
-      nch = nch + ib2as(i20kch,ib,nch,o'100000'+6)
-      nch=mcoma(ib,nch)
-      nch = nch + ib2as(i70kch,ib,nch,o'100000'+6)
-      nch=mcoma(ib,nch)
-      call fs_get_iyrctl_fs(iyrctl_fs)
-      nch = nch + ib2as(iyrctl_fs,ib,nch,o'100000'+6)
       nch=nch-1
       call logit3(ib,nch,lsor)
-      call ifill_ch(ib,1,120,' ')
+c
       nch = 1
       nch = ichmv_ch(ib,nch,'horizon1')
       nch = mcoma(ib,nch)
@@ -102,7 +87,6 @@ C
       enddo
 400   nch = nch-2
       call logit3(ib,nch,lsor)
-      call ifill_ch(ib,1,120,' ')
       nch = 1
       nch = ichmv_ch(ib,nch,'horizon2')
       nch = mcoma(ib,nch)
@@ -116,78 +100,7 @@ C
       enddo
 500   nch = nch-2
       if(nch.gt.8) call logit3(ib,nch,lsor)
-C
-      nch = 1
-      nch = ichmv_ch(ib,nch,'head0,')
-      do i=1,4
-        if (i.eq.1) then
-           call fs_get_wrhd_fs(wrhd_fs)
-          idum=wrhd_fs
-        else if(i.eq.2) then
-          idum=rdhd_fs
-        else if(i.eq.3) then
-          idum=rpro_fs
-        else
-          idum=rpdt_fs
-        endif
-        if(idum.eq.0) then
-          nch=ichmv_ch(ib,nch,'all')
-        else if(idum.eq.1) then
-          nch=ichmv_ch(ib,nch,'odd')
-        else if(idum.eq.2) then ! no else so illegal value is blank
-          nch=ichmv_ch(ib,nch,'even')
-        endif
-        nch=mcoma(ib,nch)
-      enddo
-      if(kadapt_fs) then
-        nch=ichmv_ch(ib,nch,'adaptive')
-      else
-        nch=ichmv_ch(ib,nch,'fixed')
-      endif
-      nch=mcoma(ib,nch)
-      if(kiwslw_fs) then
-        nch=ichmv_ch(ib,nch,'yes')
-      else
-        nch=ichmv_ch(ib,nch,'no')
-      endif
-      nch=mcoma(ib,nch)
-      nch=nch+ir2as(lvbosc_fs,ib,nch,6,4)
-      nch=mcoma(ib,nch)
-      nch=nch+ib2as(ilvtl_fs,ib,nch,o'100000'+5)
-      nch=nch-1
-      call logit3(ib,nch,lsor)
-C
-      call fs_get_drive_type(drive_type)
-      if(drive_type.eq.VLBA2) then
-         ipr=5
-      else
-         ipr=2
-      endif
 c
-      do i=1,2
-        call ifill_ch(ib,1,120,' ')
-        nch = 1
-        nch = ichmv_ch(ib,nch,'head')
-        nch = nch + ib2as(i,ib,nch,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(fastfw(i),ib,nch,7,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(slowfw(i),ib,nch,5,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(foroff(i),ib,nch,6,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(fastrv(i),ib,nch,7,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(slowrv(i),ib,nch,5,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(revoff(i),ib,nch,6,1)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(pslope(i),ib,nch,8,ipr)
-        nch=mcoma(ib,nch)
-        nch = nch + ir2as(rslope(i),ib,nch,8,ipr)
-        call logit3(ib,nch,lsor)
-      enddo
-      call ifill_ch(ib,1,120,' ')
       nch = 1
       nch = ichmv_ch(ib,nch,'antenna,')
       call fs_get_diaman(diaman)
@@ -214,39 +127,8 @@ c
       nch = ichmv(ib,nch,iaxis,1,4) - 1
       call logit3(ib,nch,lsor)
 
-      call ifill_ch(ib,1,120,' ')
-      nch = ichmv_ch(ib,1,'equip1,')
-      call fs_get_iacttp(iacttp)
-      nch = nch + ib2as(iacttp,ib,nch,3)
-      nch=mcoma(ib,nch)
-      call fs_get_imaxtpsd(imaxtpsd)
-      if (imaxtpsd.eq.-2) then
-        nch = nch + ib2as(360,ib,nch,3)
-      else if (imaxtpsd.eq.-1) then
-        nch = nch + ib2as(330,ib,nch,3)
-      else if (imaxtpsd.eq.7) then
-        nch = nch + ib2as(270,ib,nch,3)
-      endif
-      nch=mcoma(ib,nch)
-      call fs_get_iskdtpsd(iskdtpsd)
-      if (iskdtpsd.eq.-2) then
-        nch = nch + ib2as(360,ib,nch,3)
-      else if (iskdtpsd.eq.-1) then
-        nch = nch + ib2as(330,ib,nch,3)
-      else if (iskdtpsd.eq.7) then
-        nch = nch + ib2as(270,ib,nch,3)
-      endif
-      nch=mcoma(ib,nch)
-      call fs_get_refreq(refreq)
-      nch = nch + ir2as(refreq,ib,nch,7,1)
-      nch=mcoma(ib,nch)
-      call fs_get_i70kch(i70kch)
-      nch = nch + ib2as(i70kch,ib,nch,z'8005')
-      nch=mcoma(ib,nch)
-      call fs_get_i20kch(i20kch)
-      nch = nch + ib2as(i20kch,ib,nch,z'8005')
+      nch = ichmv_ch(ib,1,'equip,')
 c
-      nch=mcoma(ib,nch)
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
       if(rack.eq.MK3) then
@@ -267,28 +149,36 @@ c
         nch=ichmv_ch(ib,nch,'k42')
       else if(rack.eq.K4.and.rack_type.eq.K42A) then
         nch=ichmv_ch(ib,nch,'k42a')
+      else if(rack.eq.K4.and.rack_type.eq.K42B) then
+        nch=ichmv_ch(ib,nch,'k42b')
       else if(rack.eq.K4.and.rack_type.eq.K42BU) then
         nch=ichmv_ch(ib,nch,'k42bu')
-      else if(rack.eq.K4.and.rack_type.eq.K41K3) then
+      else if(rack.eq.K4.and.rack_type.eq.K42C) then
+        nch=ichmv_ch(ib,nch,'k42c')
+      else if(rack.eq.K4K3.and.rack_type.eq.K41) then
         nch=ichmv_ch(ib,nch,'k41/k3')
-      else if(rack.eq.K4.and.rack_type.eq.K41UK3) then
+      else if(rack.eq.K4K3.and.rack_type.eq.K41U) then
         nch=ichmv_ch(ib,nch,'k41u/k3')
-      else if(rack.eq.K4.and.rack_type.eq.K42K3) then
+      else if(rack.eq.K4K3.and.rack_type.eq.K42) then
         nch=ichmv_ch(ib,nch,'k42/k3')
-      else if(rack.eq.K4.and.rack_type.eq.K42AK3) then
+      else if(rack.eq.K4K3.and.rack_type.eq.K42A) then
         nch=ichmv_ch(ib,nch,'k42a/k3')
-      else if(rack.eq.K4.and.rack_type.eq.K42BUK3) then
+      else if(rack.eq.K4K3.and.rack_type.eq.K42BU) then
         nch=ichmv_ch(ib,nch,'k42bu/k3')
-      else if(rack.eq.K4MK4.and.rack_type.eq.K41MK4) then
+      else if(rack.eq.K4MK4.and.rack_type.eq.K41) then
         nch=ichmv_ch(ib,nch,'k41/mk4')
-      else if(rack.eq.K4MK4.and.rack_type.eq.K41UMK4) then
+      else if(rack.eq.K4MK4.and.rack_type.eq.K41U) then
         nch=ichmv_ch(ib,nch,'k41u/mk4')
-      else if(rack.eq.K4MK4.and.rack_type.eq.K42MK4) then
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42) then
         nch=ichmv_ch(ib,nch,'k42/mk4')
-      else if(rack.eq.K4MK4.and.rack_type.eq.K42AMK4) then
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42A) then
         nch=ichmv_ch(ib,nch,'k42a/mk4')
-      else if(rack.eq.K4MK4.and.rack_type.eq.K42BUMK4) then
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42B) then
+        nch=ichmv_ch(ib,nch,'k42b/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42BU) then
         nch=ichmv_ch(ib,nch,'k42bu/mk4')
+      else if(rack.eq.K4MK4.and.rack_type.eq.K42C) then
+        nch=ichmv_ch(ib,nch,'k42c/mk4')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -296,69 +186,77 @@ c
       nch=mcoma(ib,nch)
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(drive.eq.MK3.and.drive_type.eq.MK3B) then
-        nch=ichmv_ch(ib,nch,'mk3b')
-      else if(drive.eq.MK3) then
+      if(drive(1).eq.MK4.and.drive_type(1).eq.MK4B) then
+        nch=ichmv_ch(ib,nch,'mk4b')
+      else if(drive(1).eq.MK3) then
         nch=ichmv_ch(ib,nch,'mk3')
-      else if(drive.eq.VLBA.and.drive_type.eq.VLBA) then
+      else if(drive(1).eq.VLBA.and.drive_type(1).eq.VLBA) then
         nch=ichmv_ch(ib,nch,'vlba')
-      else if(drive.eq.VLBA.and.drive_type.eq.VLBA2) then
+      else if(drive(1).eq.VLBA.and.drive_type(1).eq.VLBA2) then
         nch=ichmv_ch(ib,nch,'vlba2')
-      else if(drive.eq.MK4) then
+      else if(drive(1).eq.VLBA.and.drive_type(1).eq.VLBAB) then
+        nch=ichmv_ch(ib,nch,'vlbab')
+      else if(drive(1).eq.MK4) then
         nch=ichmv_ch(ib,nch,'mk4')
-      else if(drive.eq.S2) then
+      else if(drive(1).eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
-      else if(drive.eq.VLBA4.and.drive_type.eq.VLBA4) then
+      else if(drive(1).eq.VLBA4.and.drive_type(1).eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
-      else if(drive.eq.K4.and.drive_type.eq.K41) then
+      else if(drive(1).eq.K4.and.drive_type(1).eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
-      else if(drive.eq.K4.and.drive_type.eq.K42) then
+      else if(drive(1).eq.K4.and.drive_type(1).eq.K42) then
         nch=ichmv_ch(ib,nch,'k42')
-      else if(drive.eq.0) then
+      else if(drive(1).eq.K4.and.drive_type(1).eq.K41DMS) then
+        nch=ichmv_ch(ib,nch,'k41/dms')
+      else if(drive(1).eq.K4.and.drive_type(1).eq.K42DMS) then
+        nch=ichmv_ch(ib,nch,'k42/dms')
+      else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
 c
       nch=mcoma(ib,nch)
-      call fs_get_hwid(hwid)
-      nch=nch+ib2as(hwid,ib,nch,z'8005')
-c
-      call logit3(ib,nch-1,lsor)
-      nch = ichmv_ch(ib,1,'equip2,')
-c
-      call fs_get_motorv(motorv)
-      nch=nch+ir2as(motorv,ib,nch,12,3)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_inscint(inscint)
-      nch=nch+ir2as(inscint,ib,nch,12,3)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_inscsl(inscsl)
-      nch=nch+ir2as(inscsl,ib,nch,12,3)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_outscint(outscint)
-      nch=nch+ir2as(outscint,ib,nch,12,3)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_outscsl(outscsl)
-      nch=nch+ir2as(outscsl,ib,nch,12,3)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_itpthick(itpthick)
-      nch=nch+ib2as(itpthick,ib,nch,z'8000'+10)
-c
-      nch=mcoma(ib,nch)
-      call fs_get_wrvolt(wrvolt)
-      nch=nch+ir2as(wrvolt,ib,nch,12,3)
+      call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
+      if(drive(2).eq.MK4.and.drive_type(2).eq.MK4B) then
+        nch=ichmv_ch(ib,nch,'mk4b')
+      else if(drive(2).eq.MK3) then
+        nch=ichmv_ch(ib,nch,'mk3')
+      else if(drive(2).eq.VLBA.and.drive_type(2).eq.VLBA) then
+        nch=ichmv_ch(ib,nch,'vlba')
+      else if(drive(2).eq.VLBA.and.drive_type(2).eq.VLBA2) then
+        nch=ichmv_ch(ib,nch,'vlba2')
+      else if(drive(2).eq.VLBA.and.drive_type(2).eq.VLBAB) then
+        nch=ichmv_ch(ib,nch,'vlbab')
+      else if(drive(2).eq.MK4) then
+        nch=ichmv_ch(ib,nch,'mk4')
+      else if(drive(2).eq.S2) then
+        nch=ichmv_ch(ib,nch,'s2')
+      else if(drive(2).eq.VLBA4.and.drive_type(2).eq.VLBA4) then
+        nch=ichmv_ch(ib,nch,'vlba4')
+      else if(drive(2).eq.K4.and.drive_type(2).eq.K41) then
+        nch=ichmv_ch(ib,nch,'k41')
+      else if(drive(2).eq.K4.and.drive_type(2).eq.K42) then
+        nch=ichmv_ch(ib,nch,'k42')
+      else if(drive(2).eq.K4.and.drive_type(2).eq.K41DMS) then
+        nch=ichmv_ch(ib,nch,'k41/dms')
+      else if(drive(2).eq.K4.and.drive_type(2).eq.K42DMS) then
+        nch=ichmv_ch(ib,nch,'k42/dms')
+      else if(drive(2).eq.0) then
+        nch=ichmv_ch(ib,nch,'none')
+      endif
 c
       nch=mcoma(ib,nch)
-      call fs_get_capstan(capstan)
-      nch=nch+ib2as(capstan,ib,nch,z'8000'+10)
+      if(decoder4.eq.3) then
+         nch=ichmv_ch(ib,nch,"mk3")
+      else if(decoder4.eq.4) then
+         nch=ichmv_ch(ib,nch,"mk4")
+      else if(decoder4.eq.1) then
+         nch=ichmv_ch(ib,nch,"dqa")
+      else
+         nch=ichmv_ch(ib,nch,"none")
+      endif
 c
-      call logit3(ib,nch-1,lsor)
-      nch = ichmv_ch(ib,1,'equip3,')
-c
+      nch=mcoma(ib,nch)
       call fs_get_freqif3(freqif3)
       nch=nch+ib2as(freqif3/100,ib,nch,z'8000'+10)
 c
@@ -375,30 +273,49 @@ c
       else if (vfm_xpnt.eq.1) then
          nch=ichmv_ch(ib,nch,'dsm')
       endif
-
-      nch=mcoma(ib,nch)
-      call fs_get_motorv2(motorv2)
-      nch=nch+ir2as(motorv2,ib,nch,12,3)
 c
       nch=mcoma(ib,nch)
-      call fs_get_itpthick2(itpthick2)
-      nch=nch+ib2as(itpthick2,ib,nch,z'8000'+10)
+      call fs_get_hwid(hwid)
+      nch=nch+ib2as(hwid,ib,nch,z'8005')
 c
       nch=mcoma(ib,nch)
-      call fs_get_wrvolt2(wrvolt2)
-      nch=nch+ir2as(wrvolt2,ib,nch,12,3)
+      call fs_get_i70kch(i70kch)
+      nch = nch + ib2as(i70kch,ib,nch,z'8005')
 c
       nch=mcoma(ib,nch)
-      call fs_get_wrvolt4(wrvolt4)
-      nch=nch+ir2as(wrvolt4,ib,nch,12,3)
+      call fs_get_i20kch(i20kch)
+      nch = nch + ib2as(i20kch,ib,nch,z'8005')
 c
       nch=mcoma(ib,nch)
-      call fs_get_wrvolt42(wrvolt42)
-      nch=nch+ir2as(wrvolt42,ib,nch,12,3)
-c
+      if(pcalcntrl.eq.3) then
+         nch=ichmv_ch(ib,nch,"if3")
+      else
+         nch=ichmv_ch(ib,nch,"none")
+      endif
       call logit3(ib,nch-1,lsor)
 c
-      call ifill_ch(ib,1,120,' ')
+      if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
+         call ldrivev('drivev1',lsor,1)
+      else if(drive(1).eq.MK3.or.drive(1).eq.MK4) then
+         call ldrivem('drivem1',lsor,1)
+      endif
+c
+      if(drive(2).eq.VLBA.or.drive(2).eq.VLBA4) then
+         call ldrivev('drivev2',lsor,2)
+      else if(drive(2).eq.MK3.or.drive(2).eq.MK4) then
+         call ldrivem('drivem2',lsor,2)
+      endif
+c
+      if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4.or.
+     $     drive(1).eq.MK3.or.drive(1).eq.MK4) then
+         call lhead('head1',lsor,1)
+      endif
+c
+      if(drive(2).eq.VLBA.or.drive(2).eq.VLBA4.or.
+     $     drive(2).eq.MK3.or.drive(2).eq.MK4) then
+         call lhead('head2',lsor,2)
+      endif
+c
       nch = 1
       nch = ichmv_ch(ib,nch,'time,')
       nch = nch + ir2as(rate0ti_fs*86400.,ib,nch,12,3)
@@ -412,19 +329,11 @@ c
          nch=ichmv_ch(ib,nch,'offset')
       else if (model.eq.'r') then
          nch=ichmv_ch(ib,nch,'rate')
+      else if (model.eq.'c') then
+         nch=ichmv_ch(ib,nch,'ntp')
       endif
       call logit3(ib,nch-1,lsor)
 C
-      call ifill_ch(ib,1,120,' ')
-      nch = 1
-      nch = ichmv_ch(ib,nch,'sw,')
-      call fs_get_vacsw(vacsw)
-      if (vacsw.eq.1) then
-         nch=ichmv_ch(ib,nch,'yes')
-      else if (vacsw.eq.0) then
-         nch=ichmv_ch(ib,nch,'no')
-      endif
-      call logit3(ib,nch-1,lsor)
       return
       end
 
