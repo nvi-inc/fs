@@ -20,6 +20,7 @@ C 960817 nrv Add S2 tape length and tape motion fields
 C 961022 nrv Change MARK to Mark if found in rack and recorder names.
 C 970114 nrv Add "_type" to rack and recorder Vex names.
 C 970123 nrv Move initialization to start.
+C 970406 nrv Make ctapemo always upper case
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -201,7 +202,7 @@ C
         if (iret.ne.0) return
         if (d.lt.0.d0.or.iret.ne.0) then
           write(lu,'("VUNPDAS07 - Invalid tape length")')
-          ierr=-7
+          ierr=-6
         else
           if (.not.ks2) then
             maxtap = d*100.d0/(12.d0*2.54) ! convert from m to feet
@@ -245,7 +246,7 @@ C  7. Number of recorders
         if (iret.ne.0) return
         if (i.le.0) then
           write(lu,'("VUNPDAS08 - Invalid number of recorders")')
-          ierr=-8
+          ierr=-7
         else
           nrec = i
         endif
@@ -262,10 +263,10 @@ C  8. Tape motion, early start, late stop, gap time.
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         IF  (NCH.GT.128.or.NCH.le.0) THEN  !
-          write(lu,'("VUNPDAS09 - Tape motion type too long")')
-          ierr=-9
+          write(lu,'("VUNPDAS09 - Tape motion type string error.")')
+          ierr=-8
         else
-          ctapemo=cout(1:nch)
+          call c2upper(cout(1:nch),ctapemo)
         endif
         iret = fvex_field(2,ptr_ch(cout),len(cout))  ! early start
         if (iret.eq.0) then 
@@ -273,7 +274,7 @@ C  8. Tape motion, early start, late stop, gap time.
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
           if (iret.ne.0) return
-          if (d.le.0.0) then
+          if (d.lt.0.0) then
             write(lu,'("VUNPDAS10 - Invalid early start value")')
             ierr=-10
           else
@@ -286,7 +287,7 @@ C  8. Tape motion, early start, late stop, gap time.
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
           if (iret.ne.0) return
-          if (d.le.0.0) then
+          if (d.lt.0.0) then
             write(lu,'("VUNPDAS11 - Invalid late stop value")')
             ierr=-11
           else
@@ -299,7 +300,7 @@ C  8. Tape motion, early start, late stop, gap time.
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
           if (iret.ne.0) return
-          if (d.le.0.0) then
+          if (d.lt.0.0) then
             write(lu,'("VUNPDAS12 - Invalid gap time value")')
             ierr=-12
           else
