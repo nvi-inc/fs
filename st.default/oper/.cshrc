@@ -19,4 +19,5 @@ a rl	'source ~/.login'
 a rc	'source ~/.cshrc'
 a rlxr	'xrdb -merge ~/.Xresources'
 a psall 'ps aux | egrep -v "^bin|^root"'
+set noclobber
 cd .
