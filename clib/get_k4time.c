@@ -28,8 +28,12 @@ long ip[5];                          /* ipc array */
   cls_clr(ip[0]);
   ip[0]=0;
 
-  icount=sscanf(buf+4,"%2d%3d%2d%2d%2d.%3d",
-		&year,fm_tim+4,fm_tim+3,fm_tim+2,fm_tim+1,&ms);
+  if(shm_addr->equip.drive_type == K41 )
+     icount=sscanf(buf+4,"%2d%3d%2d%2d%2d.%3d",
+   		&year,fm_tim+4,fm_tim+3,fm_tim+2,fm_tim+1,&ms);
+  else
+     icount=sscanf(buf+4,"%2d%3d%2d%2d%2d%3d",
+   		&year,fm_tim+4,fm_tim+3,fm_tim+2,fm_tim+1,&ms);
 
   fm_tim[5]=100*((shm_addr->iyrctl_fs)/100)+year;
   if(ms >=995) {
