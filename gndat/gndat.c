@@ -13,7 +13,7 @@
 #define MAXDETECTORS 32
 #define BADVALUE -6000000
 #define BADSTRVALUE "X"
-#define MAXLINE 256
+#define MAXLINE 1024
 
 int min(int x, int y); 
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 {
   char onoffFileName[64], *cptr;
   char parsedFileName[64], tempFileName[64];
-  char rxgFileName[20], work[20];
+  char rxgFileName[20], controlFileDir[64];
   double azimuth, elevation, skyfreq, gainc, tsys, sefd, tcaljy, tcalk, calratio, tcal_ass;
   double flux_ass, tcalk_over_jy_ass, gcurve_ass, dpfu_gcurve_ass, LO;
   char onetime[22], time[22], source[11], dummy[31], detector[3], ifchan[2], polarization[2], sourcetype[2];
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   FILE *parsedFile;
   FILE *rxgFile;
   FILE *tempFile;
-  char line[1000];     /* line buffer for fgets() */
+  char line[MAXLINE];     /* line buffer for fgets() */
   struct rxgain_ds rxgain[MAXRX];
   char names[MAXRX][256];
   int *ierr;
@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
   somethingelse=1;
   strncpy(onoffFileName,argv[1],STL(onoffFileName,argv[1]));
   strncpy(parsedFileName,argv[2],STL(parsedFileName,argv[2]));
+  strncpy(controlFileDir,argv[4],STL(controlFileDir,argv[4]));
   strcpy(tempFileName,"/tmp/temp.txt");
   if(argc >= 4 &&  1!=sscanf(argv[3],"%d",&works)) {
     printf("Pid might be wrong. Please open the log file again.");
@@ -69,10 +70,10 @@ int main(int argc, char *argv[])
   
   if(argc >= 4)
     cptr=argv[3];
-  else
+  else 
     cptr="";
   
-  icount = get_rxgain_files(rxgain,names,&ierr,cptr)-1;
+  icount = get_rxgain_files(controlFileDir,rxgain,names,&ierr,cptr)-1;
   
   if(icount < 0)
     {
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
 	if(((rxgain[i].type=='f') && \
 	    ((LO>=(rxgain[i].lo[1] - rxgain[i].lo[1]/1000) && LO<=(rxgain[i].lo[1] + rxgain[i].lo[1]/1000)) || \
 	     (LO>=(rxgain[i].lo[0] - rxgain[i].lo[0]/1000) && LO<=(rxgain[i].lo[0] + rxgain[i].lo[0]/1000)))) || \
-	   ((rxgain[i].type=='r') && (skyfreq<=rxgain[i].lo[1] && skyfreq>=rxgain[i].lo[0]))) {
+	   ((rxgain[i].type=='r') && (LO<=rxgain[i].lo[1] && LO>=rxgain[i].lo[0]))) {
 	  k=0;
 	  for(j=0; j<=icount; j++) {
 	    if(strcmp(namearray[j],names[i])==0) {
@@ -326,8 +327,12 @@ int main(int argc, char *argv[])
 	  if(tcaljy_array[i]<=0) {
 	    fprintf(parsedFile, "%.2f ", BADVALUE);
 	  } else {
-	    fprintf(parsedFile, "%.4f ", tcal_ass_array[i]/tcaljy_array[valcount]);
-	  } 
+	    if(tcal_ass_array[i]/tcaljy_array[valcount]<0.01) {
+	      fprintf(parsedFile, "%.6f ", tcal_ass_array[i]/tcaljy_array[valcount]);
+	    } else {
+	      fprintf(parsedFile, "%.5f ", tcal_ass_array[i]/tcaljy_array[valcount]);
+	    } 
+	  }
 	  fprintf(parsedFile, "%.3f ", tcal_ass_array[i]);
 	  fprintf(parsedFile, "%.1f ", flux_ass_array[i]);
 	  fprintf(parsedFile, "%.4f ", dpfu_ass_array[i]);
