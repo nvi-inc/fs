@@ -904,3 +904,25 @@ Version 9.1.4 960611
            remove extra F77=gf77 lines
 
 Version 9.1.5 960703
+
+960809 WEH clib/vst_util.c
+	   accepts 80 and 160 speeds now
+           speed parsing simplified
+
+960809 WEH clib/arg_util.c
+           fixed so that 0 = 0.0 for float comparisons of keys
+
+960809 NRV drudg/spdstr.f
+           Recognizes 80 and 160 ips as valid speeds
+
+960809 WEH labck/labck.f
+           now slightly less brain dead
+
+960814 NRV drudg/labsnp.f
+           handle lower-case SNAP files
+
+960814 NRV drudg/blabl.f
+           comment out a debug line that could cause aborts
+
+Version 9.1.6 960819
+

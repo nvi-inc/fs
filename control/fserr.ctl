@@ -1142,6 +1142,9 @@ Tape number must be 8 charaters.
 QA -202
 Check label doesn't match.  Check it and try again.
 ""
+QA -203
+Third parameter must be "thick" or "thin" if specified.
+""
 QA -301
 Error RP'ing program PRLAB
 ""
@@ -2128,6 +2131,9 @@ Can't set footage of a VLBA2 drive.
 ""
 RC -205
 Can't reboot a VLBA2 drive.
+""
+RC -206
+Can't load VLBA drive until a label is entered.
 ""
 RC -401
 program error: incorrect number of responses in rec.

@@ -1,7 +1,7 @@
 #
 VERSION = 9
 SUBLEVEL = 1
-PATCHLEVEL = 5
+PATCHLEVEL = 6
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
@@ -40,12 +40,13 @@ rmdoto:
 #
 libs:
 	for dir in $(LIB_DIR); do\
-		make -C $$dir ;\
+		make --no-print-directory -C $$dir ;\
 	done
 #
 execs:
 	for dir in $(EXEC_DIR); do \
-		make -C $$dir; \
+		make --no-print-directory -C $$dir; \
 	done
 install:
 	sh misc/fsinstall
+
