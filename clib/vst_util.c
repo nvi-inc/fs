@@ -12,16 +12,17 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *sp1_key[ ]={"0","3.38","7.88","16.88","33.75","67.5","133.33",
-                         "135", "266.66", "270"};
-static char *sp2_key[ ]={"0","3",    "7",    "15",    "30",   "60","133.33",
-                         "135", "266.66", "270"};
-static int  sp3_key[ ]={0,   338,    788,   1688,    3375,   6750,  13333,
-                          13500,  26666,   27000};
-static char *sp4_key[ ]={"0","3",    "7",    "15",    "30",   "60","133.33",
-                         "120", "266.66", "240"};
-static char *sp5_key[ ]={"0","3.375","7.875","16.875","33.75","67.5","133.33",
-                         "135", "266.66", "270"};
+/*true speeds*/
+static char *sp1_key[ ]={"3.38", "7.88", "16.88", "33.75","67.5", "135",
+			   "270", "0", "80", "133.33", "160", "266.66"};
+/* nominal M3 speeds that are different */
+static char *sp2_key[ ]={"3",    "7",    "15",    "30",   "60",   "120",
+			   "240"};
+/* speeds in 0.01 ips */
+static int   sp3_key[ ]={ 338,    788,    1688,    3375,   6750,   13500,
+			    27000, 0,   8000, 13333,    16000, 26666};
+/*true M3 speeds that are different */
+static char *sp4_key[ ]={"3.375","7.875","16.875"};
 
 static char *dir_key[ ]={ "rev","for"};
 static char *rec_key[ ]={ "off","on"};
@@ -30,7 +31,6 @@ static char *rec_key[ ]={ "off","on"};
 #define SP2_KEY sizeof(sp2_key)/sizeof( char *)
 #define SP3_KEY sizeof(sp3_key)/sizeof( char *)
 #define SP4_KEY sizeof(sp4_key)/sizeof( char *)
-#define SP5_KEY sizeof(sp5_key)/sizeof( char *)
 #define DIR_KEY sizeof(dir_key)/sizeof( char *)
 #define REC_KEY sizeof(rec_key)/sizeof( char *)
 
@@ -51,13 +51,11 @@ char *ptr;
         ierr=arg_key(ptr,dir_key,DIR_KEY,&lcl->dir,0,FALSE);
         break;
       case 2:
-        ierr=arg_key(ptr,sp1_key,SP1_KEY,&lcl->speed,0,FALSE);
+	ierr=arg_key_flt(ptr,sp1_key,SP1_KEY,&lcl->speed,0,FALSE);
         if (ierr !=0)
           ierr=arg_key_flt(ptr,sp2_key,SP2_KEY,&lcl->speed,0,FALSE);
         if (ierr !=0)
           ierr=arg_key_flt(ptr,sp4_key,SP4_KEY,&lcl->speed,0,FALSE);
-        if (ierr !=0)
-          ierr=arg_key_flt(ptr,sp5_key,SP5_KEY,&lcl->speed,0,FALSE);
 	if (ierr==0) {
 	  lcl->cips=sp3_key[lcl->speed];
 	  lcl->speed=-3;
