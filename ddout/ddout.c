@@ -13,7 +13,7 @@
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
 #define ULIMIT 40960L
-#define MAX_BUF 120
+#define MAX_BUF 512
 
 extern struct fscom *shm_addr;
 long ulimit();
@@ -198,7 +198,7 @@ Ack:    ich = strtok(NULL, ",");
 	ip[0]=class;
 	skd_run("fserr", 'w', ip); 
 	skd_par(ip);
-	iburl=cls_rcv(ip[0], ibur, 80, &rtn1f, &rtn2f, 0,0);
+	iburl=cls_rcv(ip[0], ibur, 118, &rtn1f, &rtn2f, 0,0);
 	/*      iburl=0;
 	 */
 	ibur[iburl]='\0';
@@ -233,7 +233,6 @@ Append:           /* send message to station error program */
         ip[0]=class;
         skd_run("sterp", 'n', ip); 
       }
-      if (*cp2 == 'b') strcat(buf, "\007");
       { char bufout[256];
       strncpy(bufout+0,buf+5,2);
       strncpy(bufout+2,":",1);
@@ -242,7 +241,10 @@ Append:           /* send message to station error program */
       strncpy(bufout+6,buf+9,2);
       strncpy(bufout+8,".",1);
       strcpy(bufout+9,buf+11);
-      printf("%s\n", bufout);
+      if (*cp2 == 'b')
+	strcat(bufout, "\007");
+      strcat(bufout, "\n");
+      printf("%s", bufout);
       }
     }
 
@@ -250,14 +252,11 @@ Append:           /* send message to station error program */
 /*  write information to the log file if conditions are met */
 
     if (fd >= 0 && (kxl || (!kp && !kack))) {
-      bull = strlen(bul);
-      if(bull != write(fd, bul, bull)) {
+      strcat(buf,"\n");
+      bull = strlen(buf);
+      if(bull != write(fd, buf, bull)) {
 	printf("!! wrong length written, file probably too large\n");
 	goto Trouble;
-      }
-      if(1 != write(fd, "\n", 1)) {
-	printf("!! wrong length written, file probably too large\n");
-        goto Trouble;
       }
     }
 
