@@ -1,8 +1,8 @@
                     scan_name - set scan name
 
-            Syntax:     scan_name=name,session,length
+            Syntax:     scan_name=name,session,length,continuous
 
-            Response:   scan_name/name,session,length
+            Response:   scan_name/name,session,length,continuous
 
 
 Settable Parameters:
@@ -19,6 +19,8 @@ Settable Parameters:
           in length. May be empty.
           length    The number of seconds in the scan, greater than zero.
           May be empty. 
+	  continuous The number of second of continuous recording that
+          are scheduled to occur, greater than zero. May be empty.
 
 Comments:
 The scan name is used by the correlator to help organize the
@@ -29,4 +31,10 @@ The scan name is supplied by drudg which places the
 scan_name=  command in the schedule before the source= 
 command. The scan_name=  command defines the start of each
 scan. If a schedule is started in the middle it should be
-started at this command for that scan. 
+started at this command for that scan.
+
+When a Mark 5A unit is in use with FS implemented automatic bank
+switching (this is the case for all piggyback operations and when the
+recorder type one in equip.ctl is "mk5a_bs"). The length of the scan
+and the continuous recording time are used by the FS to decide when to
+switch banks. See the bank_check command for further details.
