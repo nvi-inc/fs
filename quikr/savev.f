@@ -161,29 +161,35 @@ C
 500   continue
       nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+         ipr=1
+      else
+         ipr=3
+      endif
 C
-      if(kvrevw_fs)      nch=nch+ir2as(rvrevw_fs,ibuf,nch,8,3)
+      if(kvrevw_fs)      nch=nch+ir2as(rvrevw_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15rev_fs)     nch=nch+ir2as(rv15rev_fs,ibuf,nch,8,3)
+      if(kv15rev_fs)     nch=nch+ir2as(rv15rev_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15for_fs)     nch=nch+ir2as(rv15for_fs,ibuf,nch,8,3)
+      if(kv15for_fs)     nch=nch+ir2as(rv15for_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15scale_fs)   nch=nch+ir2as(rv15scale_fs,ibuf,nch,8,3)
+      if(kv15scale_fs)   nch=nch+ir2as(rv15scale_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv13_fs)        nch=nch+ir2as(rv13_fs,ibuf,nch,8,3)
+      if(kv13_fs)        nch=nch+ir2as(rv13_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15flip_fs)    nch=nch+ir2as(rv15flip_fs,ibuf,nch,8,3)
+      if(kv15flip_fs)    nch=nch+ir2as(rv15flip_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kvw0_fs)        nch=nch+ir2as(rvw0_fs,ibuf,nch,8,3)
+      if(kvw0_fs)        nch=nch+ir2as(rvw0_fs,ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kvw8_fs)        nch=nch+ir2as(rvw8_fs,ibuf,nch,8,3)
+      if(kvw8_fs)        nch=nch+ir2as(rvw8_fs,ibuf,nch,8,ipr)
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')
