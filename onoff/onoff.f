@@ -112,7 +112,9 @@ c
 C 
 C MAKE SURE THE CAL IS OFF
 C 
-      call scmds('caloffnf',1)  
+      if(cal1nf.gt.0.0.or.cal2nf.gt.0.0) then
+         call scmds('caloffnf',1)  
+      endif
 C 
 C  REMEMBER WHERE WE ARE
 C 
@@ -160,25 +162,18 @@ C
 C
 C       TURN CAL ON
 C
-      call scmds('calonnf',1)
-      call vlts2(vcal,sigcal,tmcal,intpnf,rut,ierr)
-      if(ierr.ne.0) goto 80010
+      if(cal1nf.gt.0.0.or.cal2nf.gt.0.0) then
+         call scmds('calonnf',1)
+         call vlts2(vcal,sigcal,tmcal,intpnf,rut,ierr)
+         if(ierr.ne.0) goto 80010
 C
-      call dpnt2('cal ',i,tmcal,astep,estep,vcal,sigcal,intpnf,lbuf,
-     +            isbuf)
+         call dpnt2('cal ',i,tmcal,astep,estep,vcal,sigcal,intpnf,lbuf,
+     +        isbuf)
 C
 C  TURN CAL OFF
 C
-      call scmds('caloffnf',1)
-C
-      dtemp1=cal1nf*((vons(1)-vofs(1))/(vcal(1)-vofs(1)))
-      dtemp2=cal2nf*((vons(2)-vofs(2))/(vcal(2)-vofs(2)))
-      dri=1.d0/dble(float(i))
-      dim1=dble(float(i-1))
-      avg1 =(avg1*dim1+dtemp1)*dri
-      avg2 =(avg2*dim1+dtemp2)*dri
-      sig1 =(sig1*dim1+dtemp1*dtemp1)*dri
-      sig2 =(sig2*dim1+dtemp2*dtemp2)*dri
+         call scmds('caloffnf',1)
+      endif
 C
       if(i.gt.1) goto 9
       call tzer(vzer,sigzer,tmzer,intpnf,rut,ierr)
@@ -187,6 +182,27 @@ C
      +           lbuf,isbuf)
 C
 9     continue
+C
+C  fix up cal voltage if there is no cal
+C
+      if(cal1nf.le.0.0) then
+         vcal(1)=vzer(1)
+      endif
+      if(cal2nf.le.0.0) then
+         vcal(2)=vzer(2)
+      endif
+
+      dri=1.d0/dble(float(i))
+      dim1=dble(float(i-1))
+C
+      dtemp1=cal1nf*((vons(1)-vofs(1))/(vcal(1)-vofs(1)))
+      avg1 =(avg1*dim1+dtemp1)*dri
+      sig1 =(sig1*dim1+dtemp1*dtemp1)*dri
+C
+      dtemp2=cal2nf*((vons(2)-vofs(2))/(vcal(2)-vofs(2)))
+      avg2 =(avg2*dim1+dtemp2)*dri
+      sig2 =(sig2*dim1+dtemp2*dtemp2)*dri
+C
       dtemp1=cal1nf*((vofs(1)-vzer(1))/(vcal(1)-vofs(1))) 
       dtemp2=cal2nf*((vofs(2)-vzer(2))/(vcal(2)-vofs(2))) 
       tsyav1 =(tsyav1*dim1+dtemp1)*dri
