@@ -44,6 +44,12 @@ C 961022 nrv Add Mark IV as a procedures option
 C 961024 nrv No FORM=RESET for Mk4. 
 C 961030 nrv Add subpass index to Mk3 mode for Mk4 formatter.
 C 961031 nrv Use LMFMT for non-Mk3 modes in FORM= command.
+C 961101 nrv Don't make procedures for modes undefined at this station.
+C 961101 nrv Use channel indirect indexing for patching command, and patch
+C            only BBCs not channels.
+C 961105 nrv Put commas in LO command for LO values not defined.
+C 961105 nrv Don't write out fan if it's 1:1 and there is no roll.
+C 961105 nrv Make mode E FORM command for Mk4 indicate group number.
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec, 4=S2
@@ -57,7 +63,7 @@ C LOCAL VARIABLES:
       LOGICAL KUS ! true if our station is listed for a procedure
       integer itrax(2,2,max_chan) ! fanned-out version
       integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,
-     .ict,ilen,ich,ic1,ic2,ibuflen,itrk(36),ig0,ig1,ig2,ig3,
+     .ilen,ich,ic1,ic2,ibuflen,itrk(36),ig,ig0,ig1,ig2,ig3,
      .npmode,itrk2(36),isb,ibit,ichan,ib,itrka,itrkb
       logical kok,km3mode
       logical kvrack,kvrec,km3rack,km3rec,ks2rec,km4rack,km4rec
@@ -192,6 +198,7 @@ C    Get the track assignments first, and the mode name to use
 C    for procedure names.
 
       DO ICODE=1,NCODES !loop on codes
+        if (nchan(istn,icode).gt.0) then ! this mode defined
         nco=2
         IF (JCHAR(LCODE(ICODE),2).EQ.oblank) nco=1
 
@@ -358,20 +365,35 @@ C                    !MODE E = B ON ODD, C ON EVEN PASSES
             else ! not Mk3 mode
               nch = ICHMV(IBUF,nch,lmFMT(1,istn,icode),1,1)
             endif
-C           Add sub-pass index for Mk4 formatter
+C           Add group index for Mk4 formatter
             if (km4rack.and.km3mode.and.
-     .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then 
-              nch = nch+ib2as(ipass,ibuf,nch,1)
+     .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then ! add group
+              if (itrk(2).eq.1.or.itrk(4).eq.1.or.itrk(6).eq.1.or.
+     .          itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
+     .          itrk(14).eq.1.or.itrk(16).eq.1) ig=1
+              if (itrk(3).eq.1.or.itrk(5).eq.1.or.itrk(7).eq.1.or.
+     .            itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
+     .            itrk(15).eq.1.or.itrk(17).eq.1) ig=2
+              if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
+     .            itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
+     .            itrk(30).eq.1.or.itrk(32).eq.1) ig=3
+              if (itrk(19).eq.1.or.itrk(21).eq.1.or.itrk(23).eq.1.or.
+     .            itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
+     .            itrk(31).eq.1.or.itrk(33).eq.1) ig=4
+              nch = nch+ib2as(ig,ibuf,nch,1)
             endif
+C           Add sample rate
             nch = MCOMA(IBUF,nch)
             nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
             if (.not.ks2rec) then ! non-S2 only
-            if (ifan(istn,icode).ne.0 .or.
+C           If no fan, or if fan is 1:1, skip it unless we have roll.
+            if ((ifan(istn,icode).ne.0.and.ifan(istn,icode).ne.1) .or.
      .        (ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! barrel or fan
               nch = MCOMA(IBUF,nch)
-              if (ifan(istn,icode).ne.0) then ! a fan mode
+C             Put in fan only if non-zero
+              if (ifan(istn,icode).ne.0) then ! fan
                 nch = ichmv_ch(ibuf,nch,'1:')
                 nch = nch+ib2as(ifan(istn,icode),ibuf,nch,1)
               endif
@@ -729,12 +751,13 @@ C
             i2=0
             i3=0
             do i=1,nchan(istn,icode)
-              if (i1.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'1').eq.0) 
-     .          i1=i
-              if (i2.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'2')
-     .          .eq.0) i2=i
-              if (i3.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'3')
-     .          .eq.0) i3=i
+              ic=invcx(i,istn,icode) ! channel number
+              if (i1.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'1')
+     .          .eq.0) i1=ic
+              if (i2.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'2')
+     .          .eq.0) i2=ic
+              if (i3.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'3')
+     .          .eq.0) i3=ic
             enddo
             NCH = ichmv_ch(IBUF,NCH,'atn1,atn2,')
             if (i1.ne.0) then
@@ -772,41 +795,46 @@ C
             if (i1.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i1,ISTN,ICODE),IBUF,NCH,8,2)
             endif
-            if (i2.gt.0) then
               NCH = MCOMA(IBUF,NCH)
+            if (i2.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i2,ISTN,ICODE),IBUF,NCH,8,2)
             endif
-            if (i3.gt.0) then
               NCH = MCOMA(IBUF,NCH)
+            if (i3.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i3,ISTN,ICODE),IBUF,NCH,8,2)
             endif
             call hol2lower(ibuf,nch)
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
 C
-            DO I=1,2 ! two IFs
+C PATCH command
+            DO I=1,3 ! three IFs need a patch command
+              if (i.eq.1.and.i1.gt.0.or.i.eq.2.and.i2.gt.0.or.
+     .        i.eq.3.and.i3.gt.0) then ! this LO in use
               call ifill(ibuf,1,ibuflen,oblank)
               NCH = ichmv_ch(IBUF,1,'PATCH=LO')
               NCH = NCH + IB2AS(I,IBUF,NCH,1)
-              DO ichan = 1,nchan(istn,icode)
-                iv=invcx(ichan,istn,icode) ! channel number
-                if ((ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0.
-     .                and.i.eq.1).or.
-     .                (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0.
-     .                and.i.eq.2)) then ! correct LO
-                  ict=1
-                  if (iv.ge.10) ict=2
-                  NCH = MCOMA(IBUF,NCH)
-                  NCH = nch+IB2AS(IV,IBUF,NCH,ict)
-                  if (fvc(iv).lt.220.0) then !low
-                    nch=ichmv_ch(ibuf,nch,'L')
-                  else
-                    nch=ichmv_ch(ibuf,nch,'H')
-                  endif
-                endif ! correct LO
+              DO ic = 1,nchan(istn,icode)
+                iv=invcx(ic,istn,icode) ! channel number
+                if (ichcm_ch(lnetsb(iv,istn,icode),1,'U').eq.0) then ! USB only
+                  ib=ibbcx(iv,istn,icode) ! BBC number
+                  if ((ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0.
+     .                  and.i.eq.1).or.
+     .                  (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0.
+     .                  and.i.eq.2)) then ! correct LO
+                    NCH = MCOMA(IBUF,NCH)
+                    NCH = nch+IB2AS(ib,IBUF,NCH,2+z8000) ! VC number
+                    if (fvc(ib).lt.220.0) then !low
+                      nch=ichmv_ch(ibuf,nch,'L')
+                    else ! high
+                      nch=ichmv_ch(ibuf,nch,'H')
+                    endif
+                  endif ! correct LO
+                endif ! USB only
               ENDDO
               call hol2lower(ibuf,nch)
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,((NCH+1))/2)
-            ENDDO ! two IFs
+              endif ! this LO in use
+            ENDDO ! three IFs need a patch command
           endif ! m3rack
           if (kvrack) then 
             CALL IFILL(IBUF,1,ibuflen,oblank)
@@ -822,34 +850,35 @@ C
             i2=0
             i3=0
             i4=0
+C           Find out which IFs are in use for this mode
             do i=1,nchan(istn,icode)
-              if (i1.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'A').eq.0) 
-     .            i1=i
-              if (i2.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'B')
-     .          .eq.0) i2=i
-              if (i3.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'C')
-     .          .eq.0) i3=i
-              if (i4.eq.0.and.ichcm_ch(lifinp(i,istn,icode),1,'D')
-     .          .eq.0) i4=i
+              ic=invcx(i,istn,icode) ! channel number
+              if (i1.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'A')
+     .           .eq.0) i1=ic
+              if (i2.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'B')
+     .          .eq.0) i2=ic
+              if (i3.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'C')
+     .          .eq.0) i3=ic
+              if (i4.eq.0.and.ichcm_ch(lifinp(ic,istn,icode),1,'D')
+     .          .eq.0) i4=ic
             enddo
 C
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'LO=')
             if (i1.gt.0) then 
               NCH = NCH+IR2AS(FREQLO(i1,ISTN,ICODE),IBUF,NCH,8,2)
-              NCH = MCOMA(IBUF,NCH)
             endif
+              NCH = MCOMA(IBUF,NCH)
             if (i2.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i2,ISTN,ICODE),IBUF,NCH,8,2)
-              NCH = MCOMA(IBUF,NCH)
             endif
+              NCH = MCOMA(IBUF,NCH)
             if (i3.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i3,ISTN,ICODE),IBUF,NCH,8,2)
-              NCH = MCOMA(IBUF,NCH)
             endif
+              NCH = MCOMA(IBUF,NCH)
             if (i4.gt.0) then
               NCH = NCH+IR2AS(FREQLO(i4,ISTN,ICODE),IBUF,NCH,8,2)
-              NCH = MCOMA(IBUF,NCH)
             endif
             nch=nch-1
             CALL IFILL(IBUF,NCH,1,oblank)
@@ -956,6 +985,7 @@ C                   Use BBC number, not channel number
         endif 
       endif
 
+      endif ! code is defined
       ENDDO ! loop on codes
 
 C 7. Write out standard tape loading procedures
