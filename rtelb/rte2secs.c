@@ -19,8 +19,11 @@ long *seconds;
  
   int year,numleap,nonleap;
 
-  if ((it[5]< 1970) ||(it[5]>2037)) { /* overflow long (32-bit) int */
-    *seconds = -1;
+  if ((it[5]< 1970) || it[5]>2038 || (it[5] == 2038 && it[4]> 1)) {
+    /* overflow long (32-bit) int */
+    *seconds=-1;
+    fprintf(stderr,"rte2secs: date outside range %d %d\n",it[5],it[4]);
+      exit(-1);
     return;
   }
   
@@ -29,8 +32,12 @@ long *seconds;
   numleap = (year+1)/4; /* number of leap years (before this year) since 1970 */
   nonleap = year-numleap; /* number of non leap years */
 
+  /* not Y2038 compliant */
   *seconds = (nonleap*NONLEAP_SECS) + (numleap*LEAP_SECS)+
            (DAY_SECS*(it[4]-1))+(HR_SECS*it[3])+(MIN_SECS*it[2])+it[1];
 
   return;
 }
+
+
+
