@@ -9,8 +9,8 @@ c
       dimension lnames(12,ifsnum)
       integer MAX_PROC1, MAX_PROC2
       PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
-      integer*2 lproc1(10,MAX_PROC1),lproc2(10,MAX_PROC2)
-      integer itscb(13,15)
+      integer*4 lproc1(10,MAX_PROC1),lproc2(10,MAX_PROC2)
+      integer*4 itscb(13,15)
       integer idcbsk(2)
       integer ntscb,maxpr1,maxpr2,nnames,ierr,idum,fc_rte_prior
       data ntscb/15/
