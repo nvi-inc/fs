@@ -1,4 +1,4 @@
-#
+#!/bin/sh
 file=/usr2/fs/bin/fsalloc
 if [ -f ${file} ]
 then
