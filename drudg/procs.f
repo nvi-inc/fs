@@ -3,7 +3,7 @@
 C PROCS writes procedure file for the Field System.
 C Version 9.0 is supported with this routine.
 
-	INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C History
 C 930714  nrv  created,copied from procs
@@ -11,27 +11,36 @@ C 940308  nrv  Added a check for "NW" to make the correct BBC
 C              IF input 
 C 940620  nrv  In batch mode, always 'Y' for purging existing.
 C 951213 nrv Modifications for new FS and new Mk4/VLBA setups.
+C 960124 nrv Modifications for VLBA fan-out modes
+c 960129 nrv change "d0" to "v0" and remove the fan-outs from
+C            the trackform command
+C 960208 nrv Use invcx to get channel number to enter VC arrays
+C 960219 nrv Change TAPEFORM procedure name to include freq code,
+C            change procedure name to TAPEFRM to stay below 12 letters.
+C 960223 nrv Call chmod to change permissions.
+C 960305 nrv Add "code" to TRKFRM procedure names.
 C
 C COMMON 
-	INCLUDE 'freqs.ftni'
-	INCLUDE 'drcom.ftni'
-	INCLUDE 'statn.ftni'
+      include '../skdrincl/freqs.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec
 
 C Called by: FDRUDG
-C Calls: TRKALL
+C Calls: TRKALL,IADDTR
 
 C LOCAL VARIABLES:
       integer*2 IBUF2(40) ! secondary buffer for writing files
       integer*2 lpmode(2) ! mode for procedure names
       integer*2 lfan(2) ! fan characters
       LOGICAL*4 KUS ! true if our station is listed for a procedure
-      integer IC,ierr,i,idummy,nch,ipass,icode,it,ivcn,
-     .iv,ict,ilen,ich,ic1,ic2,ibuflen,itrk(36),ig0,ig1,ig2,ig3,
+      integer itrax(2,2,max_chan) ! fanned-out version
+      integer IC,ierr,i,idummy,nch,ipass,icode,it,ivcn,n,iv,
+     .ict,ilen,ich,ic1,ic2,ibuflen,itrk(36),ig0,ig1,ig2,ig3,
      .npmode,itrk2(36),isb,ibit,ichan,ib,iden
-      logical km3mode,kvlba,kmk3,khyb
+      logical kok,km3mode,kvlba,kmk3,khyb
       real*4 spdips
 	CHARACTER UPPER
 	CHARACTER*4 STAT
@@ -42,26 +51,25 @@ C LOCAL VARIABLES:
       real*8 DRF,DLO,DFVC
       real*4 fvc(14),rfvc  !VC frequencies
       integer Z4000,Z100
-      integer i1,i2,i3,i4
-      integer ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
-      integer ichcm_ch, ichmv_ch
+      integer i1,i2,i3,i4,nco
+      integer ias2b,ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
+      integer ichcm_ch,ichmv_ch,iaddtr
       character*28 cpass,cvpass
-      character*1 csb(2),cbit(2)
+      character*1 cp ! selection from cpass or cvpass
 C
 C INITIALIZED VARIABLES:
         data ibuflen/80/
       data Z4000/Z'4000'/,Z100/Z'100'/
       data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
       data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
-      data csb(1)/'u'/,csb(2)/'l'/,cbit(1)/'s'/,cbit(2)/'m'/
 C
 C  1. Create the file. Initialize
 
       if (kmissing) then
         write(luscn,9101)
 9101    format(' PROCS00 - Missing or inconsistent head/track/pass',
-     .  ' information.'/' Can''t make procedure library.')
-        return
+     .  ' information.'/' Your procedures may be incorrect, or ',
+     .  ' may cause a program abort.')
       endif
       kmk3=.false.
       kvlba=.false.
@@ -140,37 +148,40 @@ C    Get the track assignments first, and the mode name to use
 C    for procedure names.
 
       DO ICODE=1,NCODES !loop on codes
+        nco=2
+        IF (JCHAR(LCODE(ICODE),2).EQ.oblank) nco=2
+
         DO IPASS=1,NPASSF(istn,ICODE) !loop on number of sub passes
 
           call trkall(itras(1,1,1,ipass,istn,icode),lmode(1,istn,icode),
-     .    itrk,lpmode,npmode,lfan)
+     .    itrk,lpmode,npmode,lfan,itrax)
           km3mode=jchar(lpmode,1).eq.ocapa.or.jchar(lpmode,1).eq.ocapb
      .        .or.jchar(lpmode,1).eq.ocapc.or.jchar(lpmode,1).eq.ocapd
      .        .or.jchar(lpmode,1).eq.ocape
 
           CALL IFILL(LNAMEP,1,12,oblank)
-          IDUMMY = ICHMV(LNAMEP,1,LCODE(ICODE),1,2)
-          NCH = 3 ! next character in the name
-          IF (JCHAR(LCODE(ICODE),2).EQ.oblank) NCH=2
+          nch = ICHMV(LNAMEP,1,LCODE(ICODE),1,nco)
           CALL M3INF(ICODE,SPDIPS,IB)
 C choices in LBNAME are D,8,4,2,1,H,Q,E
           NCH=ICHMV(LNAMEP,NCH,LBNAME,IB,1)
           NCH=ICHMV(LNAMEP,NCH,Lpmode,1,npmode)
 C Convert pass index to integer or alpha
           if (jchar(lpmode,1).eq.ocapv) then
-            NCH=ICHMV_ch(LNAMEP,NCH,cvPASS(IPASS:ipass))
+            cp=cvpass(ipass:ipass)
           else
-            NCH=ICHMV_ch(LNAMEP,NCH,cPASS(IPASS:ipass))
-          endif      
+            cp=cpass(ipass:ipass)
+          endif
+          NCH=ICHMV_ch(LNAMEP,NCH,cp)
           CALL CRPRC(LU_OUTFILE,LNAMEP)
           WRITE(LUSCN,9112) LNAMEP
 9112      FORMAT(' PROCEDURE ',6A2)
 C
 C 3. Write out the following lines in the setup procedure:
 
-C  TAPEFORMm
+C  TAPEFRMffm
           call ifill(ibuf,1,ibuflen,oblank)
-          nch = ichmv_ch(IBUF,1,'TAPEFORM')
+          nch = ichmv_ch(IBUF,1,'TAPEFRM')
+          nch = ICHMV(ibuf,nch,LCODE(ICODE),1,nco)
           nch = ichmv(ibuf,nch,lpmode,1,npmode)
           call hol2lower(ibuf,(nch+1))
           CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
@@ -180,11 +191,13 @@ C  PASS=$
           if (kmk3) nch = ichmv_ch(ibuf,nch,',SAME') ! 2 heads on Mk3 recorders
           call hol2lower(ibuf,(nch+1))
           CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-C  TRKFRMm
+C  TRKFRMffmp
           if (kvlba.and..not.km3mode) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'TRKFRM')
+            nch = ICHMV(ibuf,nch,LCODE(ICODE),1,nco)
             nch = ichmv(ibuf,nch,lpmode,1,npmode)
+            nch = ichmv_ch(ibuf,nch,cp)
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
@@ -215,25 +228,25 @@ C         tracks still left in the table.
               itrk2(i)=itrk(i)
             enddo
             if (ig0.eq.1) then
-              nch = ichmv_ch(ibuf,nch,'D0,')
+              nch = ichmv_ch(ibuf,nch,'V0,')
               do i=2,16,2
                 itrk2(i)=0
               enddo
             endif
             if (ig1.eq.1) then
-              nch = ichmv_ch(ibuf,nch,'D1,')
+              nch = ichmv_ch(ibuf,nch,'V1,')
               do i=3,17,2
                 itrk2(i)=0
               enddo
             endif
             if (ig2.eq.1) then
-              nch = ichmv_ch(ibuf,nch,'D2,')
+              nch = ichmv_ch(ibuf,nch,'V2,')
               do i=18,32,2
                 itrk2(i)=0
               enddo
             endif
             if (ig3.eq.1) then
-              nch = ichmv_ch(ibuf,nch,'D3,')
+              nch = ichmv_ch(ibuf,nch,'V3,')
               do i=19,33,2
                 itrk2(i)=0
               enddo
@@ -263,24 +276,24 @@ C                  !MODE E = B ON ODD, C ON EVEN PASSES
             nch = ICHMV(IBUF,nch,lmode(1,istn,icode),1,1)
 	  ENDIF
           nch = MCOMA(IBUF,nch)
-          nch = nch+IR2AS(VCBAND(1,istn,ICODE)*2.0,IBUF,nch,5,3)
-          if (kvlba) then
-            if (.not.(ichcm_ch(lfan,1,'    ').eq.0.and.
-     .         (ichcm_ch(lbarrel,1,'    ').eq.0.or.
-     .          ichcm_ch(lbarrel,1,'NONE').eq.0.or.
-     .          ichcm_ch(lbarrel,1,'OFF ').eq.0))) then ! fan or barrel
-            nch = MCOMA(IBUF,nch)
-            if (ichcm_ch(lfan,1,'    ').ne.0) then ! a fan mode
-              nch = ichmv(ibuf,nch,lfan,1,3)
-            endif
-            nch = MCOMA(IBUF,nch)
-            if (.not.(ichcm_ch(lbarrel,1,'    ').eq.0.or.
-     .          ichcm_ch(lbarrel,1,'NONE').eq.0.or.
-     .          ichcm_ch(lbarrel,1,'OFF ').eq.0)) then ! a roll mode
-              nch = ichmv(ibuf,nch,lbarrel,1,4)
-            endif
-            endif
-          endif
+          nch = nch+IR2AS(VCBAND(1,istn,ICODE)*2.0,IBUF,nch,6,3)
+          if (kvlba) then ! check for fan or barrel
+            if (ichcm_ch(lfan,1,'    ').ne.0 .or.
+     .        (ichcm_ch(lbarrel,1,'    ').ne.0.and.
+     .          ichcm_ch(lbarrel,1,'NONE').ne.0.and.
+     .          ichcm_ch(lbarrel,1,'OFF ').ne.0)) then ! barrel or fan
+                nch = MCOMA(IBUF,nch)
+                if (ichcm_ch(lfan,1,'    ').ne.0) then ! a fan mode
+                  nch = ichmv(ibuf,nch,lfan,1,3)
+                endif
+                if ((ichcm_ch(lbarrel,1,'    ').ne.0.and.
+     .            ichcm_ch(lbarrel,1,'NONE').ne.0.and.
+     .            ichcm_ch(lbarrel,1,'OFF ').ne.0)) then ! a roll mode
+                  nch = MCOMA(IBUF,nch)
+                  nch = ichmv(ibuf,nch,lbarrel,1,4)
+                endif
+            endif ! barrel or fan
+          endif ! check for fan or barrel
           call hol2lower(ibuf,(nch+1))
           CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           if (kmk3.or.khyb) then ! form=reset
@@ -300,8 +313,8 @@ C  bit_density=<value>
           if (kvlba.or.khyb) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'bit_density=')
-            if (bitdens(istn).gt.1000) then ! valid number
-              iden=bitdens(istn)
+            if (bitdens(istn,icode).gt.1000) then ! valid number
+              iden=bitdens(istn,icode)
               nch = nch + ib2as(iden,ibuf,nch,5)
             else ! use default
               nch = ichmv_ch(ibuf,nch,'33333')
@@ -320,7 +333,7 @@ C  BBCffb
           call ifill(ibuf,1,ibuflen,oblank)
           if (kvlba) nch = ichmv_ch(IBUF,1,'BBC')
           if (kmk3.or.khyb) nch = ichmv_ch(IBUF,1,'VC')
-          nch = ichmv(ibuf,nch,lcode(icode),1,2)
+          nch = ichmv(ibuf,nch,lcode(icode),1,nco)
           CALL M3INF(ICODE,SPDIPS,IB)
           NCH=ICHMV(ibuf,NCH,LBNAME,IB,1)
           call hol2lower(ibuf,(nch+1))
@@ -328,7 +341,7 @@ C  BBCffb
 C  IFDff
           call ifill(ibuf,1,ibuflen,oblank)
           nch = ichmv_ch(IBUF,1,'IFD')
-          nch = ICHMV(IBUF,nch,LCODE(ICODE),1,2)
+          nch = ICHMV(IBUF,nch,LCODE(ICODE),1,nco)
           call hol2lower(ibuf,(nch+1))
           CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  TAPE=LOW
@@ -459,13 +472,15 @@ C ENDDEF
 
         ENDDO ! loop on number of passes
 C
+C Now continue with procedures that are code-based
+
 C 3. Write out the baseband converter frequency procedure.
 C Name is VCffb or BBCffb      (ff=code,b=bandwidth)
 C Contents: VCnn=freq,bw or BBCnn=freq,if,bw,bw
         CALL IFILL(LNAMEP,1,12,oblank)
         if (kvlba) nch = ichmv_ch(LNAMEP,1,'BBC')
         if (kmk3.or.khyb) nch = ichmv_ch(LNAMEP,1,'VC')
-        nch = ICHMV(LNAMEP,nch,LCODE(ICODE),1,2)
+        nch = ICHMV(LNAMEP,nch,LCODE(ICODE),1,nco)
         CALL M3INF(ICODE,SPDIPS,IB)
         NCH=ICHMV(LNAMEP,NCH,LBNAME,IB,1)
 	CALL CRPRC(LU_OUTFILE,LNAMEP)
@@ -478,54 +493,73 @@ C
      .    'not be correct, nor will IFD procedure.') 
         endif
         DO IVCN=1,nvcs(istn,icode) !loop on channels
+          iv=invcx(ivcn,istn,icode) ! channel number
           call ifill(ibuf,1,ibuflen,oblank)
-      	  DRF = FREQRF(IVCN,istn,ICODE)
-          DLO = FREQLO(ivcn,ISTN,ICODE)
+      	  DRF = FREQRF(IV,istn,ICODE)
+          DLO = FREQLO(iv,ISTN,ICODE)
           DFVC = DRF-DLO   ! BBCfreq = RFfreq - LOfreq
           rFVC = DFVC
           rFVC = ABS(rFVC)
-          fvc(ivcn) = rfvc
+          fvc(iv) = rfvc
           if (kvlba) nch = ichmv_ch(ibuf,1,'BBC')
           if (kmk3.or.khyb) nch = ichmv_ch(ibuf,1,'VC')
-          nch = nch + ib2as(ivcn,ibuf,nch,Z4000+2*Z100+2)
+          nch = nch + ib2as(iv,ibuf,nch,Z4000+2*Z100+2)
           nch = ichmv_ch(IBUF,nch,'=')
           NCH = nch + IR2AS(rFVC,IBUF,nch,6,2)
-C         if (.not.(
-C    .        (kmk3.and.(ichcm_ch(lifinp(ivcn,istn,icode),1,'1N').eq.0
-C    .         .or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'2N').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'3N').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'1A').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'2A').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'3A').eq.0))
-C    .    or (kvlba.and.(ichcm_ch(lifinp(ivcn,istn,icode),1,'A').eq.0
-C    .           .or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'B').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'C').eq.0.or.
-C    .      ichcm_ch(lifinp(ivcn,istn,icode),1,'D').eq.0)))) then
-C           write(luscn,9909) lifinp(i,istn,icode)
-C909        format(' PROC04 - WARNING! IF input of ',a2,' is not',
-C    .      ' consistent with these procedures.')
+          kok=.false.
+          if (kmk3) then
+            if(ichcm_ch(lifinp(iv,istn,icode),1,'1N').eq.0 .or.
+     .         ichcm_ch(lifinp(iv,istn,icode),1,'2N').eq.0.or.
+     .         ichcm_ch(lifinp(iv,istn,icode),1,'3N').eq.0.or.
+     .         ichcm_ch(lifinp(iv,istn,icode),1,'1A').eq.0.or.
+     .         ichcm_ch(lifinp(iv,istn,icode),1,'2A').eq.0.or.
+     .         ichcm_ch(lifinp(iv,istn,icode),1,'3A').eq.0) kok=.true.
+          endif
+          if (kvlba) then
+            if (ichcm_ch(lifinp(iv,istn,icode),1,'A').eq.0.or.
+     .      ichcm_ch(lifinp(iv,istn,icode),1,'B').eq.0.or.
+     .      ichcm_ch(lifinp(iv,istn,icode),1,'C').eq.0.or.
+     .      ichcm_ch(lifinp(iv,istn,icode),1,'D').eq.0) kok=.true.
+          endif
+C         if (kvlba.and..not.kok) then ! change IF name
+C           write(luscn,9908) lifinp(iv,istn,icode)
+C9908        format(' PROC05 - NOTE: IF input ',a2,' changed to ',$)
+C           if (ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0) then
+C             idummy=ichmv_ch(lifinp(iv,istn,icode),1,'A ')
+C           else if (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0) then
+C             idummy=ichmv_ch(lifinp(iv,istn,icode),1,'B ')
+C           else if (ichcm_ch(lifinp(iv,istn,icode),1,'3').eq.0) then
+C             idummy=ichmv_ch(lifinp(iv,istn,icode),1,'C ')
+C           endif
+C           write(luscn,'(a2)') lifinp(iv,istn,icode)
 C         endif
+          if (kmk3.and..not.kok) write(luscn,9919) 
+     .      lifinp(iv,istn,icode)
+9919        format(' PROC04 - WARNING! IF input ',a2,' not',
+     .      ' consistent with Mark III procedures.')
+          if (kvlba.and..not.kok) write(luscn,9909) 
+     .      lifinp(iv,istn,icode)
+9909        format(' PROC04 - WARNING! IF input ',a2,' not',
+     .      ' consistent with VLBA procedures.')
           if (kvlba.and.(rfvc.lt.500.0.or.rfvc.gt.1000.0)) then
-            write(luscn,9911) ivcn,rfvc
+            write(luscn,9911) iv,rfvc
 9911        format(' PROC03 - WARNING! BBC ',i2,' frequency '
-     .      f7.2,' is out of range. Check LO frequencies.')
+     .      f7.2,' is out of range. Check LO and IF in schedule.')
           else if ((kmk3.or.khyb).and.(rfvc.lt.0.0.or.rfvc.gt.500.0))
      .      then
-            write(luscn,9912) ivcn,rfvc
+            write(luscn,9912) iv,rfvc
 9912        format(' PROC03 - WARNING! VC ',i2,' frequency '
-     .      f7.2,' is out of range. Check LO frequencies.')
+     .      f7.2,' is out of range. Check LO and IF in schedule.')
           endif
           if (kvlba) then
             NCH = MCOMA(IBUF,NCH)
-            nch = ichmv(ibuf,nch,lifinp(ivcn,istn,icode),1,1)
+            nch = ichmv(ibuf,nch,lifinp(iv,istn,icode),1,1)
           endif
           NCH = MCOMA(IBUF,NCH)
-          NCH = NCH + IR2AS(VCBAND(ivcn,istn,ICODE),IBUF,NCH,5,3)
+          NCH = NCH + IR2AS(VCBAND(iv,istn,ICODE),IBUF,NCH,6,3)
           if (kvlba) then
             NCH = MCOMA(IBUF,NCH)
-            NCH = NCH + IR2AS(VCBAND(ivcn,istn,ICODE),IBUF,NCH,5,3)
+            NCH = NCH + IR2AS(VCBAND(iv,istn,ICODE),IBUF,NCH,6,3)
           endif
           call hol2lower(ibuf,nch+1)
           CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
@@ -549,7 +583,7 @@ C               lo=lo1,lo2,lo3
 C               patch=...
         CALL IFILL(LNAMEP,1,12,oblank)
         IDUMMY = ichmv_ch(LNAMEP,1,'IFD')
-        IDUMMY = ICHMV(LNAMEP,4,LCODE(ICODE),1,2)
+        IDUMMY = ICHMV(LNAMEP,4,LCODE(ICODE),1,nco)
         CALL CRPRC(LU_OUTFILE,LNAMEP)
         WRITE(LUSCN,9112) LNAMEP
 C
@@ -618,7 +652,8 @@ C
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'PATCH=LO')
             NCH = NCH + IB2AS(I,IBUF,NCH,1)
-            DO IV = 1,nvcs(istn,icode)
+            DO IVcn = 1,nvcs(istn,icode)
+              iv=invcx(ivcn,istn,icode) ! channel number
               if ((ichcm_ch(lifinp(iv,istn,icode),1,'1').eq.0.
      .              and.i.eq.1).or.
      .              (ichcm_ch(lifinp(iv,istn,icode),1,'2').eq.0.
@@ -690,11 +725,12 @@ C
         CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
 C
 
-C 5. Write TAPEFORM procedure.
-C    TAPEFORM=index,offset lists
+C 5. Write TAPEFRMffm procedure.
+C    command format: TAPEFORM=index,offset lists
 
       CALL IFILL(LNAMEP,1,12,oblank)
-      nch = ichmv_ch(LNAMEP,1,'TAPEFORM')
+      nch = ichmv_ch(LNAMEP,1,'TAPEFRM')
+      nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)
       nch = ICHMV(LNAMEP,nch,lpmode,1,npmode)
       cALL CRPRC(LU_OUTFILE,LNAMEP)
       WRITE(LUSCN,9112) LNAMEP
@@ -733,10 +769,11 @@ C    trkform=track,BBC#-sb-bit
       if (kvlba.and..not.km3mode) then
         DO IPASS=1,NPASSF(istn,ICODE) !loop on sub passes
         call trkall(itras(1,1,1,ipass,istn,icode),lmode(1,istn,icode),
-     .  itrk,lpmode,npmode,lfan)
+     .  itrk,lpmode,npmode,lfan,itrax)
 
         CALL IFILL(LNAMEP,1,12,oblank)
         nch = ichmv_ch(LNAMEP,1,'TRKFRM')
+        nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)
         nch = ICHMV(LNAMEP,nch,lpmode,1,npmode)
         if (jchar(lpmode,1).eq.ocapv) then
           NCH=ICHMV_ch(LNAMEP,NCH,cvPASS(IPASS:ipass))
@@ -748,19 +785,22 @@ C    trkform=track,BBC#-sb-bit
 
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'TRACKFORM=')
-        do isb=1,2
-          do ibit=1,2
-            do ichan=1,nvcs(istn,icode)
+        do ichan=1,max_chan
+          do isb=1,2
+            do ibit=1,2
               it=itras(isb,ibit,ichan,ipass,istn,icode)
-              if (it.ne.-99) then
-                nch = nch + ib2as(it+3,ibuf,nch,2)
-                nch = mcoma(ibuf,nch)
-                nch = nch + ib2as(ichan,ibuf,nch,2)
-                nch = ichmv_ch(ibuf,nch,csb(isb))
-                nch = ichmv_ch(ibuf,nch,cbit(ibit))
-                nch = mcoma(ibuf,nch)
+              if (it.ne.-99) then ! assigned
+                nch = iaddtr(ibuf,nch,it+3,ichan,isb,ibit)
                 ib=1
-              endif
+C               n=ias2b(lpmode,3,1) ! fan-out value
+C               if (n.eq.2.or.n.eq.4) then ! fan out this track
+C                 nch = iaddtr(ibuf,nch,it+3+2,ichan,isb,ibit)
+C                 if (n.eq.4) then 
+C                   nch = iaddtr(ibuf,nch,it+3+4,ichan,isb,ibit)
+C                   nch = iaddtr(ibuf,nch,it+3+6,ichan,isb,ibit)
+C                 endif
+C               endif ! fan out this track
+              endif ! assigned
               if (ib.ne.0.and.nch.gt.60) then ! write a line
                 nch=nch-1
                 CALL IFILL(IBUF,NCH,1,oblank)
@@ -830,6 +870,7 @@ C         ENDW "read $PROC section"
 C ENDT "procedures"
 	ENDIF
 	CLOSE(LU_OUTFILE,IOSTAT=IERR)
+        call drchmod(prcname,iperm,ierr)
 C
       RETURN
       END
