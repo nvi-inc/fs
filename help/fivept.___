@@ -13,12 +13,18 @@ axis        Axis system for scan.
               xyew = X/Y, +X South  (unimplemented)
 rep       Number of repetitions: -10 to -1 and 1 to 10 allowed.
           Default is -2. Negative repetition counts are described
-          in the fivpt manual.
+          in the fivpt manual. The absolute value implies a
+          maximum repetitions count, but once the scans are well
+          s\centered on bth axes, additional repetitions will be
+          skipped.
 pts       Number of points on each axis, if even, it is increased
-          by 1. pts must be between 3 and 31. Default is 7. 
+          by 1. pts must be between -31 to -3 or  3 to 31,
+          inclusive. Default is 7. Negative point counts cause
+          the system temperature measurement to be skipped. The
+          absolute value is used as the number of points.
 stp       Step size for distance between points, in multiples of
           a beamwidth. Default is 0.5. 
-intp      Integration period, 1 to 32 seconds.
+intp        Integration period, 1 to 32 seconds.
 dev       Mnemonic for the device to be used as the detector.
           Standard devices are allowed. Note that for Mark III
           equipment, the whether the video converter USB or LSB
@@ -37,17 +43,17 @@ cal       Calibration noise source temperature in degrees K. This
 beam      The full width half maximum beam size degrees. This is
           determined from the last beamx commands in conjunction
           with the patch (Mark III/IV) or bbc (VLBA/4) command.
-flux      The apparent flux of the source. This is determined
-          from the last fluxx commands in conjunction with the
-          patch (Mark III/IV) or bbc (VLBA/4) command.
+flux        The apparent flux of the source. This is determined
+            from the last fluxx commands in conjunction with the
+            patch (Mark III/IV) or bbc (VLBA/4) command.
 chain     The IF chain, 1-6, that the detector is on. Chains 5
           and 6 are for station specific detectors u5 and u6.
           Mark III/IV racks use IFs 1-3. IFs 1-4 correspond to
           IFs a-d for VLBA/4 racks.
  
 Comments: 
-The parameters should be setup with a fivept=  command. A scan is
-started by issuing a simple fivept command (i.e. with no
+The parameters should be setup with a fivept=  command. A scan
+is started by issuing a simple fivept command (i.e. with no
 parameters), this will determine the current values of the
 display only parameters and then schedule an external program,
 fivpt, which then uses the Field System to perform the necessary
@@ -67,16 +73,16 @@ original offset is used.
 
 In order for this command to work, the following conditions must
 be met: (1) the detector device has been setup by the Field
-System, (2) the appropriate lo=  command has been issued, (3) the
-IF distributor or IF3 module has been setup by the Field System
-and is in remote (Mark III/IV only), (4) the appropriate beamX= 
-and caltempX= . must have been issued. If a Mark III/IV video
-converter is used as the detector then the appropriate patch= 
-command must have been issued as well. For a VLBA/4 rack with a
-BBC selected as a detector the appropriate BBC IF input must be
-selected with a bbcXX=  command. If estimates of performance
-based on the source flux are desired, then the appropriate
-fluxX=  command must have been issued as well.
+System, (2) the appropriate lo=  command has been issued, (3)
+the IF distributor or IF3 module has been setup by the Field
+System and is in remote (Mark III/IV only), (4) the appropriate
+beamX=  and caltempX= . must have been issued. If a Mark III/IV
+video converter is used as the detector then the appropriate
+patch=  command must have been issued as well. For a VLBA/4 rack
+with a BBC selected as a detector the appropriate BBC IF input
+must be selected with a bbcXX=  command. If estimates of
+performance based on the source flux are desired, then the
+appropriate fluxX=  command must have been issued as well.
 
 If the noise diode temperature is less than zero, it is assumed
 that there is no noise diode to use. All power measurements will
@@ -133,3 +139,9 @@ first line each procedure should contain:
 The indication that this is needed is if  fivpt seems to hang
 after executing one of these procedures. Please see the "Known
 Bugs" section of the latest update notice for more details.
+
+A negative value for the number of pts will disable the initial
+system temperature measuement. A nominal conversion factor of
+unit and offset of zero is assumed in converting from detector
+counts to displayed antenna temperature, i.e., measurements are
+reported in detector units with an assumed zero offset.

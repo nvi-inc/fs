@@ -1,4 +1,4 @@
-         ifadjust - Adjust IF attenuators (Mark IV racks)
+         ifadjust - adjust IF attenuators (Mark IV racks)
 
 Syntax:     ifadjust=target
           ifadjust
@@ -56,10 +56,10 @@ done in parallel for each IF channel in use. In the worst case,
 it may take up to 16 seconds per pass. If the command
 successfully converges to an optimal value for all sidebands in
 use, the monitor response above is printed with the final values.
-Logged output (what format?) messages are printed as progress
-reports at each step. The attenuators are left set to the final
-values and these become the default (null) and previous "*"
-values for these parameters.
+Logged output messages are printed as progress reports at each
+step. The attenuators are left set to the final values and these
+become the default (null) and previous "*" values for these
+parameters.
 
 The optimal setting for each IF attenuator is defined as the
 maximum amount of attenuation that keeps all TPI levels for data
@@ -74,7 +74,7 @@ RFI that causes the TPI levels to exceed the available dynamic
 range, about 12 dB. If the range of TPI levels in the active
 sidebands for a given IF channel exceeds 6 dB a warning message
 will printed even if the adjustment process converges. Likewise
-if any channel's TPI level exceeds 20000  counts at the final
+if any channel's TPI level exceeds 20000 counts at the final
 settings a warning message will be printed. These warning
 messages do not necessarily mean that there is a problem, but it
 would prudent to examine your system more closely if you get them
@@ -83,4 +83,4 @@ as there could well be a potential problem.
 Please note that for Mark IV VCs the 10 dB pads in each sideband
 of the converter should be on, i.e., in the signal path, at all
 times. The automatic level setting and correct data recording
-depends on this.  
+depends on this.                    

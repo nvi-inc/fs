@@ -6,23 +6,23 @@ Response:   k4ib/data
 
 
 Settable parameters:
-device    mnemonic of device on K-4 bus from ibad.ctl to send
-          data to, may be null if mode=poll and must be null for
-          mode=status
+device      mnemonic of device on K-4 bus from ibad.ctl to send
+            data to, may be null if mode=poll and must be null for
+            mode=status
 command   data to send, null if mode=poll or status or read
 mode      Function: normal (default), read, write, write/read,
           poll, or status
-format    response format: normal (default), ascii, or binary
-length    response length: normal (default), decimal value
+format      response format: normal (default), ascii, or binary
+length      response length: normal (default), decimal value
 
 Comments:
 The mode, format, and length parameters are organized so that as
 often as possible they can be omitted. 
 
 If mode is normal, the interpretation depends on the command
-sent: if command contains a ? or is stat, rd, lc, or lv, the mode
-defaults to write/read, otherwise if command is null it defaults
-to read, non-null write.
+sent: if command contains a ? or is stat, rd, lc, or lv, the
+mode defaults to write/read, otherwise if command is null it
+defaults to read, non-null write.
 
 If  format is normal, the interpretation depends on the command
 sent: if command contains stat or err? or if mode is poll or

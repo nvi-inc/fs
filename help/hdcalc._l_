@@ -11,13 +11,13 @@ none, however hdcalc=clear will delete previously calculated
 values
 
 Monitor-only parameters:
-writeF      Forward absolute offset for the write head
+writeF        Forward absolute offset for the write head
 readF       Forward absolute offset for the read head, null for
             VLBA
-writeR      Reverse relative offset for the write head
+writeR        Reverse relative offset for the write head
 readR       Reverse relative offset for the read head, null for
             VLBA
-writeS      Write head scale
+writeS        Write head scale
 readS       Read head scale, null for VLBA
 
 Comments: 

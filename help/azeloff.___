@@ -8,8 +8,8 @@ Response:   azeloff/az,el
 Settable parameters:
 az        Offset in azimuth, in numeric angle/degrees format.
           Response is in decimal degrees.
-el        Offset in elevation, in numeric angle/degrees format.
-          Response is in decimal degrees.
+el          Offset in elevation, in numeric angle/degrees format.
+            Response is in decimal degrees.
 
 Monitor-only parameters: none
 

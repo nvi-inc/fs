@@ -3,8 +3,7 @@
 Syntax:     form=mode,rate,fan,barrel,dqa
           vform=mode,rate,fan,barrel,dqa
 
-Response:   form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat
-            ,sfwstat,intstat
+Response:   form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat,sfwstat,intstat
           vform/mode,rate,fan,barrel,rev,genstat,mcbstat,
           hdwstat,sfwstat,intstat
 
@@ -13,37 +12,37 @@ Settable Parameters:
 mode      The recording mode, reboot (see below) to reboot the
           CPU, or configure to cause the formatter to perform a
           hardware configuration. Choices for the mode are prn,
-          v, m, a, b, b1, b2, c, c1, c2, and dn, where n=1 to 28.
-          No default. Modes prn, m, a, b, b1, b2, c, c1, c2, and
-          dn imply Mark III data replacement format. prn selects
-          pseudo random noise to be sent to all tracks including
-          system tracks. Modes a, b, and c correspond to the
-          traditional Mark III modes. Mode dn is the same as
-          Mark III mode D, where n corresponds to which Mark III
-          track that would be written. Mode v implies VLBA non-
-          data replacement format. Modes b1 and c1 are the same
-          as the forward passes (even VLBA recorder heads) of
-          modes b and c respectively; b2 and c2 for reverse
-          passes (odd VLBA recorder heads). Modes m and v use the
-          sampler track assignments and formatter track enables
-          specified by the trackform and tracks commands. The
-          system tracks are disabled except in prn mode.
-rate      Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2,
-          4, 8, 16, and 32. Default 4. For Nyquist sampling this
-          selection must be twice the bandwidth set-up used in
-          the bbc commands
+          v, m, a, b, b1, b2, c, c1, c2, and dn, where n=1 to
+          28. No default. Modes prn, m, a, b, b1, b2, c, c1, c2,
+          and dn imply Mark III data replacement format. prn
+          selects pseudo random noise to be sent to all tracks
+          including system tracks. Modes a, b, and c correspond
+          to the traditional Mark III modes. Mode dn is the same
+          as Mark III mode D, where n corresponds to which
+          Mark III track that would be written. Mode v implies
+          VLBA non-data replacement format. Modes b1 and c1 are
+          the same as the forward passes (even VLBA recorder
+          heads) of modes b and c respectively; b2 and c2 for
+          reverse passes (odd VLBA recorder heads). Modes m and v
+          use the sampler track assignments and formatter track
+          enables specified by the trackform and tracks commands.
+          The system tracks are disabled except in prn mode.
+rate        Sample rate in Mbits/sec. Choices are 0.25, 0.5, 1, 2,
+            4, 8, 16, and 32. Default 4. For Nyquist sampling this
+            selection must be twice the bandwidth set-up used in
+            the bbc commands
 fan       The fan-in or fan-out ratio. Choices are 1:4, 1:2, 1:1,
           2:1, and 4:1, where on a per channel or track basis,
           the number before the colon is the number of sampled
           channels and the number after is the number of tracks.
           Other, not commonly used, choices are available: x0,
           x1, and  x7. Default 1:1.
-barrel    Barrel-roll mode. Choices are: off, 8:1, and 16:1,
-          where the number before the colon is the number of
-          tracks to roll-over and the number after is the number
-          of tracks to step per frame. Other, not commonly used,
-          choices are available: 8:2, 8:4, off4, 16:2, and 16:4.
-          Default off.
+barrel      Barrel-roll mode. Choices are: off, 8:1, and 16:1,
+            where the number before the colon is the number of
+            tracks to roll-over and the number after is the number
+            of tracks to step per frame. Other, not commonly used,
+            choices are available: 8:2, 8:4, off4, 16:2, and 16:4.
+            Default off.
 dqa       DQA module recorder input select: 1 or 2. Default is
           the recorder specified by the select command or
           whichever recorder is installed if there is only or
@@ -57,7 +56,7 @@ mcbstat   Communications status, ok or the hex value of hex
           address 21.
 hdwstat   Hardware status, ok or the hex value of hex address 22.
 sfwstat   Software status, ok or the hex value of hex address 23.
-intstat   Internal status, ok or the hex value of hex address 24.
+intstat     Internal status, ok or the hex value of hex address 24.
 
 Comments:
 MCB functions are available. See section 1.0 of this manual.
@@ -105,9 +104,15 @@ and even tracks required, so no mapping is required for these
 modes.
 
 The vform command is provided for use with all types of racks
-that use a VLBA DQA module for a decoder. The vform=... works
-with all racks types, including VLBA and VLBA4. The vform= 
-command must be used to specify the formatter tape clock if the
-rack type is not VLBA. The vdqa and vform comands are particular
-useful for writting rack independent procedures for stations that
-switch between VLBA and VLBA4 rack types.
+that use a VLBA DQA module for a decoder. The vform=... works with
+all racks types, including VLBA and VLBA4. The vform=  command
+must be used to specify the formatter tape clock if the rack type
+is not VLBA. The vdqa and vform comands are particular useful for
+writting rack independent procedures for stations that switch
+between VLBA and VLBA4 rack types.
+
+For longitudinal drives, the correlators can not reproduce
+recordings made at speeds below 40 ips, but this limitation is
+subject to change in the future. This limitation is functionally
+equivalent to a minimum per track data rate of 2 Mbit/sec.
+

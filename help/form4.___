@@ -6,8 +6,8 @@ Response:   form/response
 
 
 Settable parameters:
-command   any legal command sentence as described in the Mark IV
-          Formatter Vocabulary manual. The characters \r\n
+command   any legal command sentence as described in the Mark
+          IV Formatter Vocabulary manual. The characters \r\n
           (carriage-return, line-feed) are appended before
           sending the command.
 

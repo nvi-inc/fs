@@ -27,10 +27,10 @@ address when data is being written to the module. The address or
 data is xx, represented as two hex characters. MCB control bytes
 are displayed with special 3-letter mnemonics:
 
-      [SYN]   hex 16    synchronization byte
-      <ACK>   hex 06    acknowledge
+      [SYN]     hex 16    synchronization byte
+      <ACK>     hex 06    acknowledge
       <NAK>   hex 15    not acknowledge
-      <DC1>   hex 11    data control 1
+      <DC1>     hex 11    data control 1
       <DC2>   hex 12    data control 2
 
 For MAT communications, most of the data bytes are printable

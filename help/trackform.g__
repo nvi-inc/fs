@@ -11,8 +11,8 @@ track     VLBA or Mark IV recorder track number whose sampler
           Mark IV add 100 to the track number for stack 2.
 sampler   For VLBA racks , the sampler that will be mapped to the
           preceding track, 0, or in the form nnsd, where nn=bbc number
-          (1 through 14), s=sideband (u for upper or l for lower),
-          d is the data bit (s for sign bit or m for magnitude bit).
+          (1 through 14), s=sideband ( u for upper or l for lower), d is the data
+          bit (s for sign bit or m for magnitude bit).
           For Mark IV racks, the same syntax can be used as for
           VLBA racks. In addition the nnsd sampler code can have
           nn values of 15 and 16, and also a +m can be appended,
@@ -22,12 +22,12 @@ sampler   For VLBA racks , the sampler that will be mapped to the
 Comments: 
 The tracks and samplers must appear in pairs. Multiple commands
 are allowed because all of the pairs may not fit on a single
-line. The first trackform command after a form=... command resets
-all the unspecified tracks to 0. This command specifies the how
-the samplers will be assigned in the next form=... command that
-uses either mode m or v. Please note that although tracks are
-specified as recorder tracks, this command assigns the samplers
-to tracks in the formatter.
+line. The first trackform command after a form=... command resets all
+the unspecified tracks to 0. This command specifies the how the
+samplers will be assigned in the next form=... command that uses
+either mode m or v. Please note that although tracks are specified
+as recorder tracks, this command assigns the samplers to tracks
+in the formatter.
 
 The samplers that can be selected are determined by the rack type
 specified in the equip.ctl control file. For rack type vlba, only

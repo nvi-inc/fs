@@ -6,34 +6,31 @@ Response:   repro/mode,trackA,trackB,equalizer,bitrate
 
 
 Settable parameters:
-mode        Reproduce mode, byp (default) for bypass, read or raw
-            for playback.
-trackA      track for decoder channel A, between 0 and 35,
-            default 2. For tracks on head stack 2, add 100 to the
-            desired track number. If mode is read, only tracks
-            from head stack 1 may be specified.
-trackB      track for decoder channel B, between 0 and 35,
-            default 3. For tracks on head stack 2, add 100 to the
-            desired track number. If mode is read, only tracks
-            from head stack 1 may be specified. 
-equalizer   0, 1, 2 (default if mode is read), 3 or dis (default
-            if mode is byp) to select the equalizer installed at
-            location 0, 1, 2, or 3 in the recorder. Use 80, 135,
-            160, 270 to select the equalizer by playback rate
-            according to the following table:
-              Location 0    test/special
-              Location 1    135 or 80 ips (normally used for 4
-              MHz playback)
-              Location 2    160/270 ips (normally used for 8 MHz
-              playback)
-              Location 3    disable reproduce (used for bypass
-              mode)
-bitrate     Clock recovery bit rate, Mb/s. Choices are 16, 8, 4,
-            2. Default is the bit rate that corresponds to the
-            selected equalizer. For equalizer 80 or 135, default
-            is 4; for equalizers 160 and 270 default is 8. If
-            equalizer is dis, this parameter is undefined but is
-            set to have the legal value of 4.
+mode    Reproduce mode, byp (default) for bypass, read or raw for
+        playback.
+trackA    track for decoder channel A, between 0 and 35, default 2.
+          For tracks on head stack 2, add 100 to the desired track
+          number. If mode is read, only tracks from head stack 1
+          may be specified.
+trackB    track for decoder channel B, between 0 and 35, default 3.
+          For tracks on head stack 2, add 100 to the desired track
+          number. If mode is read, only tracks from head stack 1
+          may be specified. 
+equalizer 0, 1, 2 (default if mode is read), 3 or dis (default if
+          mode is byp) to select the equalizer installed at
+          location 0, 1, 2, or 3 in the recorder. Use 80, 135, 160,
+          270 to select the equalizer by playback rate according to
+          the following table:
+  Location 0    test/special
+  Location 1    135 or 80 ips (normally used for 4 MHz playback)
+  Location 2    160/270 ips (normally used for 8 MHz playback)
+  Location 3    disable reproduce (used for bypass mode)
+bitrate   Clock recovery bit rate, Mb/s. Choices are 16, 8, 4, 2,
+          or 1. Default is the bit rate that corresponds to the
+          selected equalizer. For equalizer 80 or 135, default is
+          4; for equalizers 160 and 270 default is 8. If equalizer is
+          dis, this parameter is undefined but is set to have the
+          legal value of 4.
 
 Monitor-only parameters: none
 

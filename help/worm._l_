@@ -21,7 +21,7 @@ scale     Scale to use for speed measurement, old (default), new,
 Monitor-only parameters:
 fo        Fast out speed.
 so        Slow out speed.
-fi        Fast in  speed.
+fi          Fast in  speed.
 si        Slow in  speed.
 
 Comments: 

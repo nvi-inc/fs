@@ -2,18 +2,18 @@
 
 Syntax:     form=mode,rate,input,aux,synch,aux_start,output
 
-Response:   form/mode,rate,input,aux,synch,aux_start,output,dayti
-            me,st1,st2,st3
+Response:   form/mode,rate,input,aux,synch,aux_start,output,daytime,st1,st
+            2,st3
 
 
 Settable Parameters:
 mode      A, B, C, D. No default.
-rate      0.25, 0.50, 1.00, 2.00, 4.00 (default), 8.00 Mbit/sec
+rate        0.25, 0.50, 1.00, 2.00, 4.00 (default), 8.00 Mbit/sec
 input     nor (default), ext, crc, low, high
 aux       up to 12 hex digits, default is no change
 synch     synch test on (default) or off
-aux_start start new aux on next frm (default) or 1PPS
-output    nor (default), low, or high 
+aux_start   start new aux on next frm (default) or 1PPS
+output      nor (default), low, or high 
 
 Monitor-only Parameters:
 st1       status byte 1, hex
@@ -26,22 +26,26 @@ The status of the formatter is not checked so it is necessary to
 visual verify that the formatter is in remote. A future
 implementation will have a different response:
 
-        form/mode,rate,input,aux,synch,aux_start,output,test,sign
-        ,run/set,rem/lcl,pwr,daytime,threshold,pend,1pps,frame,da
-        ta,tape,plo,srq
+        form/mode,rate,input,aux,synch,aux_start,output,test,sign,run/set,re
+        m/lcl,pwr,daytime,threshold,pend,1pps,frame,data,tape,plo,srq
 
 test      fail or ok
 sign      synch polarity: + or -
 run/set   time set switch: run or set
 rem/lcl   remote/local switch: rem or lcl
-pwr       power interrupted: ok or pwr
-daytime   date and time in format yydddhhmmss.sss
+pwr     power interrupted: ok or pwr
+daytime date and time in format yydddhhmmss.sss
 threshold synch test threshold: nanseconds (values of
           13.9x1,2,4,8,16,32)
-pend      sample rate update: pend or ok
-1pps      external 1 PPS: 1pps or ok
-frame     clock: frame or ok
+pend    sample rate update: pend or ok
+1pps    external 1 PPS: 1pps or ok
+frame   clock: frame or ok
 data      clock: data or ok
 tape      clock: slip or ok
-plo       lock or unlocked
-srq       srq or ok
+plo     lock or unlocked
+srq     srq or ok
+
+For longitudinal drives, the correlators can not reproduce recordings made at speeds below 40
+ips, but this limitation is subject to change in the future. This limitation is functionally equivalent
+to a minimum per track data rate of 2 Mbit/sec.
+

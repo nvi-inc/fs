@@ -16,8 +16,8 @@ action      A key word specifying what you want the recorder to
                   switching it also commands the vacuum level
                   based on the most recent label command before
                   attempting to load the tape. 
-            novac On Mark IV drives with vacuum switching this
-                  removes the vacuum. 
+            novac   On Mark IV drives with vacuum switching this
+                    removes the vacuum. 
 
 Comments: 
 For Mark III and Mark IV drives without vacuum switching, this

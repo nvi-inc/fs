@@ -6,8 +6,9 @@ Response:   decode/response
 
 
 Settable parameters:
-command   any legal command for Mark IV decoder. The terminating
-          "$" character is  appended before sending the command.
+command   any legal command for Mark IV decoder. The
+          terminating "$" character is  appended before sending
+          the command.
 
 Monitor-only parameters:
 data        response to command.

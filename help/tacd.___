@@ -1,4 +1,4 @@
-         tacd - Examine Totally Accurate Clock (TAC) data
+             tacd - Totally Accurate Clock (TAC) data
 
 Syntax:     tacd=action
           tacd
@@ -23,35 +23,35 @@ action      A key word specifying what you want from the TAC:
 Monitor-only Parameter:
 status:
 host    Computer that is hosting the TAC.
-port    IP port being used to connect to TAC.
-file    Name of the file being used to on host to record
-        measurements.
+port      IP port being used to connect to TAC.
+file      Name of the file being used to on host to record
+          measurements.
 state   Status of file (open or closed).
 time:
 age     OLD or NEW result. OLD indicates a previously logged
         result.
-ddddd.fffff The ddddd field may be yyddd or MJD or Excel date
-            (days since 1900.0). The ffffff field is always the
-            time in fractions of a day.
+ddddd.fffff The ddddd field may be yyddd or MJD or Excel date (days
+            since 1900.0). The ffffff field is always the time in
+            fractions of a day.
 ss      ONCORE receiver's ñ 52 nanosecond sawtooth correction to
         the GPS 1PPS (nanoseconds).
 aa      An estimate of the accuracy of the GPS tick
         (nanoseconds).
 g.ggg   Amount by which the GPS receiver's 1PPS output has been
         intentionally biased (microseconds).
-c.cccc  Corrected (cooked) counter reading after applying the ss
-        and g.ggg corrections (microseconds).
-t.tttt    Raw counter reading (microseconds).
+c.cccc    Corrected (cooked) counter reading after applying the ss
+          and g.ggg corrections (microseconds).
+t.tttt      Raw counter reading (microseconds).
 average:
 age     OLD or NEW result. OLD indicates a previously logged
         result.
-ddddd.fffff The ddddd field may be yyddd or MJD or Excel date
-            (days since 1900.0). The ffffff field is always the
-            time in fractions of a day.
+ddddd.fffff The ddddd field may be yyddd or MJD or Excel date (days
+            since 1900.0). The ffffff field is always the time in
+            fractions of a day.
 sec     Number of seconds of data going into average.
 rms     RMS scatter of the sec data points about the average
         (microseconds).
-max     The extreme maximum of the sec points (microseconds).
+max   The extreme maximum of the sec points (microseconds).
 min     The extreme minimum of the sec points
         (microseconds).Comments: 
 average Average counter reading (microseconds).

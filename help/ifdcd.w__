@@ -2,21 +2,20 @@
 
 Syntax:     ifdcd=attenC,attenD,inputC,inputD,avper
 
-Response:   ifdcd/attenC,attenD,inputC,inputD,avper,TPC,TPD,serno
-            ,err
+Response:   ifdcd/attenC,attenD,inputC,inputD,avper,TPC,TPD,serno,err
 
 
 Settable Parameters:
-attenC    Attenuator setting for IF channel C. 0 (default) or 20
-          db. Normally this attenuator should be set to 0 so that
-          the 20 db can be used for radiometry.
-attenD    Attenuator setting for IF channel A. 0 (default) or 20
-          db. Normally this attenuator should be set to 0 so that
-          the 20 db can be used for radiometry.
-inputC    Input source for IF channel C. nor (default) for normal
-          input, ext for front panel IF input.
-inputD    Input source for IF channel D. nor (default) for normal
-          input, ext for front panel IF input.
+attenC      Attenuator setting for IF channel C. 0 (default) or 20
+            db. Normally this attenuator should be set to 0 so that
+            the 20 db can be used for radiometry.
+attenD      Attenuator setting for IF channel A. 0 (default) or 20
+            db. Normally this attenuator should be set to 0 so that
+            the 20 db can be used for radiometry.
+inputC      Input source for IF channel C. nor (default) for normal
+            input, ext for front panel IF input.
+inputD      Input source for IF channel D. nor (default) for normal
+            input, ext for front panel IF input.
 avper     Averaging period in seconds for the total power
           integrator. May be 0, 1, 2, 4, 10, 20, 40, or 60
           seconds. A value of 0 results in 1/80 sec averaging

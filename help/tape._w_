@@ -7,8 +7,8 @@ Response:   tape/lowset,footage,lowsense,capstan,tach,ready,
 
 
 Settable Parameters:
-lowset    low (default) to turn on low tape sensor, off to turn
-          off. Normally this sensor is always left on.
+lowset      low (default) to turn on low tape sensor, off to turn
+            off. Normally this sensor is always left on.
 footage   If reset, set footage counter to 0, otherwise set
           footage counter to footage.
 
@@ -16,8 +16,8 @@ Monitor-only Parameters:
 footage   Current tape footage counter, 5 digits with leading
           zeroes. Use the rec command to move the tape to a
           desired footage or to determine the footage.
-lowsense  low indicates tape is at the low tape point, otherwise
-          off.
+lowsense    low indicates tape is at the low tape point, otherwise
+            off.
 capstan   Capstan is moving or stop has been completed.
 tach      Tach is locked or unlocked, i.e. tape is up to speed.
 ready     Tape drive vacuum is ready or notready. Null for VLBA2
@@ -29,7 +29,7 @@ error     Error flag, hex. okay if no errors, otherwise the error
           MCB protocol, word 74 for recorder.
 
 Comments:
-This command is analogous to the Mark III tape command. The
+This command is analagous to the Mark III tape command. The
 footage count as recorded in the log file will be found in the
 same location for both Mark III and VLBA systems.
 

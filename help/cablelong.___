@@ -17,12 +17,12 @@ reading to the HPIB counter which is connected to the phase cal
 cable measurement system.
 
 The cablelong command is identical to the cable command. It is
-intended to be used for the "long" cable measurement when checking
-the sign of the cable counter before and after an experiment. If
-cablelong is used for the measurements, auto-scaled plots of the
-cable/ output will have reasonable resolution. It also provides a
-"long" cable measurement for cablediff to use to calculate the
-change and sign.
+intended to be used for the "long" cable measurement when
+checking the sign of the cable counter before and after an
+experiment. If cablelong is used for the measurements, auto-
+scaled plots of the cable/ output will have reasonable
+resolution. It also provides a "long" cable measurement for
+cablediff to use to calculate the change and sign.
 
 The ibad.ctl control file must contain an entry with mnemonic CA
 and the device name.
@@ -34,10 +34,11 @@ in your stcmd.ctl file:
 *command     seg sbpa bo eq
 cablelong    qkr 76xx 01 FFFFFF
 
-where xx is the number of the character position to begin decoding
-at. The first character position is counted as position 1. If the
-value of xx is 00 decoding will begin at the first character from
-the left that could be part of a number in scientific notation
-("0123456789.+-Ee").  The FS uses a value of 04 for xx by default.
+where xx is the number of the character position to begin
+decoding at. The first character position is counted as position
+1. If the value of xx is 00 decoding will begin at the first
+character from the left that could be part of a number in
+scientific notation ("0123456789.+-Ee").  The FS uses a value of
+04 for xx by default.
 
 Please see also the cable and cablediff commands.

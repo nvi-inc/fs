@@ -6,8 +6,8 @@ Response:   rec/feet,supply,takeup,length,revno
 
 
 Settable Parameters:
-action      A key word specifying what you want the recorder to
-            do. Choices are:
+action      A key word specifying what you want the recorder to do.
+            Choices are:
               reboot    Reboot the microprocessor in the
                         recorder. See comments below.
               load      Load a tape into the vacuum columns. This

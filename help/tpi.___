@@ -6,8 +6,8 @@ Response:   tpi/readings
 
 
 Settable parameters:
-list        List of total power integrators to read back.
-            Standard detector mnemonics allowed.
+list        List of total power integrators to read back. Standard
+            detector mnemonics allowed.
 
 Monitor-only parameters:
 readings    List of readings, counts. These values are stored for

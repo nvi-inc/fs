@@ -6,7 +6,7 @@ Response:   rec/position,drum,synch_test,synch,stat1,stat2
 
 
 Settable parameters:
-action    eject (or unload) to eject the tape
+action      eject (or unload) to eject the tape
           init (or ini) to initialize recorder
           synch to synchronize INT and EXT 1 PPS
           id maximum seven digit ID point to move tape to

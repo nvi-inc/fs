@@ -3,7 +3,7 @@
 Syntax:     fsversion
 
 Response:   fsversion/version
-                                    
+
 
 Monitor-only parameters:
 version         field system version number.
