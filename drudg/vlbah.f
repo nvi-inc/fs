@@ -35,6 +35,9 @@ C 960515 nrv Correct index for baseband, ifchan, wideband commands
 C 960516 nrv Switching set for dummy is '0' not ' '
 C 960709 nrv Fix "synth=" command so that only 2 synthesizers are used,
 C            and 3 if we're switching.
+C 961031 nrv Clean up the wordy "synth=" code.
+C 961031 nrv Write out "nchanr" for the NCHAN command.
+C 961101 nrv New set of pcalx commands from Craig.
 C
 C
 C  INPUT:
@@ -63,7 +66,7 @@ C  LOCAL VARIABLES
         logical k96      ! true if 9600 synth is in use
 	real*4 squal1(max_chan), squal2(max_chan) ! BBC freqs. grouped by sets
         integer*2 ldum
-      integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,k,ileft,im
+      integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,k,ileft,im,iysave
       real*8 fr
       integer ib2as,ichcm_ch,ir2as,ichmv,ichmv_ch ! functions
 C
@@ -99,19 +102,22 @@ C pass 1 only.
 C itras(ul,sm,chan,pass,stn,code)
 
         nchanr = 0
+        imode=1
         do i=1,2 ! upper,lower
           do k=1,max_chan
-            if (itras(i,1,k,1,istn,icod).ne.-99) nchanr=nchanr+1
+            if (itras(i,1,k,1,istn,icod).ne.-99) then
+              nchanr=nchanr+1
+              if (i.eq.2) imode=2 ! BOTH u/l in this mode
+            endif
             i2bit(k,istn,icod)=1
             if (itras(i,2,k,1,istn,icod).ne.-99) i2bit(k,istn,icod)=2
           enddo
         enddo
-        imode=1
-        if (nchanr.eq.28) imode=2
+C       if (nchanr.eq.28) imode=2 ! for mode A
 
         call ifill(ibuf,1,iblen,32)
         call char2hol('nchan = ',ibuf,1,8)
-        idum = ib2as(nchan(istn,icod),ibuf,9,2)
+        idum = ib2as(nchanr,ibuf,9,2)
         call writf_asc(lu,ierr,ibuf,5)
 
 C format = <mode>
@@ -352,8 +358,25 @@ C PCAL = 1MHz
         call char2hol('pcal = 1MHZ ',ibuf,1,12)
         call writf_asc(lu,ierr,ibuf,6)
 C   These lines allow the use of the pcal extractors on the DS board.
+        if (nchanr.eq.16) then ! probably u/l mode
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S9),(6
+     .,S11),(7,S13),(8,15)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxbit2=(1,S2),(2,S4),(3,S6),(4,S8),(5,S10),(
+     .6,S12),(7,S14),(8,16)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq1=(1,10),(2,10),(3,10),(4,10),(5,10),(
+     .6,10),(7,10),(8,10)',ibuf,1,68)
+          call writf_asc(lu,ierr,ibuf,34)
+          call ifill(ibuf,1,iblen,32)
+          call char2hol('pcalxfreq2=(1,990),(2,990),(3,990),(4,990),(5,9
+     .90),(6,990),(7,990),(8,990)',ibuf,1,76)
+          call writf_asc(lu,ierr,ibuf,38)
 C   If nchan=14 use these lines.
-        if (nchan(istn,icod).eq.14) then
+        else if (nchan(istn,icod).eq.14) then
           call ifill(ibuf,1,iblen,32)
           call char2hol('pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),(5,S9),(6
      .,S11),(7,S13),(8,S1)',ibuf,1,68)
@@ -435,9 +458,8 @@ C         either 1 or 2 or 3. 3 is used only for switched.
           if (ichcm_ch(lifinp(nvc,istn,icod),1,'B').eq.0) isyn(nvc)=1 ! X
 C There is no synthesizer 4. C and D are normally LCP
 C         if (ichcm_ch(lifinp(nvc,istn,icod),1,'C').eq.0) isyn(nvc)=4
-C D is upper X for switched
-          if (ichcm_ch(lifinp(nvc,istn,icod),1,'D').eq.0.and.ksw) 
-     .    isyn(nvc)=3 ! sw
+C D is upper X for switched and for unswitched too!
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'D').eq.0) isyn(nvc)=3 ! Xu
         enddo
         immax = -1
 C       Find highest value of isyn (1, 2, or 3)
@@ -460,47 +482,28 @@ C       Find highest value of isyn (1, 2, or 3)
         end do
 
         call ifill(ibuf,1,iblen,32)
-        call char2hol('synth = ',ibuf,1,8)
-        iy = 9
+        iy = ichmv_ch(ibuf,1,'synth = ')
         k96=.false.
         do ix=1,immax
-          call char2hol('(',ibuf,iy,iy+1)
-          iy = iy+1
-          if (ix.le.9) then
-            idum = ib2as(ix,ibuf,iy,1)
-            iy = iy + 1
-          else
-            idum = ib2as(ix,ibuf,iy,2)
-            iy = iy + 2
-          end if
-          call char2hol(',',ibuf,iy,iy+1)
-          iy = iy + 1
-          idum = ir2as(mmaxv(ix),ibuf,iy,6,4)
-                 if (ichcm_ch(ibuf,iy,'9.6').eq.0) k96=.true.
-	  iy = iy + 6
+          iy = ichmv_ch(ibuf,iy,'(')
+          iy = iy + ib2as(ix,ibuf,iy,2+ileft)
+          iy = ichmv_ch(ibuf,iy,',')
+          iysave=iy
+          iy = iy + ir2as(mmaxv(ix),ibuf,iy,6,4)
+          if (ichcm_ch(ibuf,iysave,'9.6').eq.0) k96=.true.
           ixy = 1
-          do while (ixy.eq.1)
+          do while (ixy.eq.1) ! strip trailing zeros
             if (ichcm_ch(ibuf,iy-1,'0').eq.0) then
         	iy = iy - 1
             else
         	ixy = 2
             end if
           end do
-          call char2hol('),',ibuf,iy,iy+2)
-          iy = iy + 2
-          if (ix.eq.8) then
-            call char2hol(' ',ibuf,iy-1,iy)
-            call writf_asc(lu,ierr,ibuf,(iy+1)/2)
-            call ifill(ibuf,1,iblen,32)
-            call char2hol('synth = ',ibuf,1,8)
-            iy=9
-          end if
+          iy = ichmv_ch(ibuf,iy,')')
         end do
-        if (immax.ne.8) then
-          call char2hol(' ',ibuf,iy-1,iy)
-          call writf_asc(lu,ierr,ibuf,(iy+1)/2)
-          call ifill(ibuf,1,iblen,32)
-        end if
+        iy = ichmv_ch(ibuf,iy,' ')
+        call writf_asc(lu,ierr,ibuf,iy/2)
+        call ifill(ibuf,1,iblen,32)
 
 C ifdistr = (1,0),(2,0),(3,0),(4,0)   for all codes
 
