@@ -2,20 +2,20 @@
 
 C Write a file or a tape with pointing controls
 C
-	INCLUDE 'skparm.ftni'
-	INCLUDE 'drcom.ftni'
-	INCLUDE 'statn.ftni'
-	INCLUDE 'sourc.ftni'
-	INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/freqs.ftni'
 C INPUT
       character*(*) cr1,cr2,cr3,cr4
 C
 C LOCAL:
-      LOGICAL KINTR,kmatch,knewtp,knewt
+      LOGICAL KINTR,kmatch,knewtp,knewt,ksw
       integer*2 ldirword(4)
       integer nch,i,ierr,ilen,iblk,ical,nstnsk,lu_outfil2
-      integer idirp,ipasp,iobs,iftold,idir,icode,
-     .idrate
+      integer idirp,ipasp,iobs,iftold,idir,icode,ix,
+     .idrate,icodp
       integer*2 lfreq
       integer mon,ida,mjd,iyr,idayr,ihr,imin,isc,iyr2,idayr2,
      .ihr2,min2,isc2,ihrp,minp,iscp,idayp,idayrp,irecp
@@ -80,6 +80,8 @@ C 930609 nrv Change logic for DSN output for narrow heads
 C 930708 nrv Check for head positions for VLBA output
 C 940623 nrv Add batch mode
 c 940701 nrv Change VLBA output file names
+C 951012 nrv Remove DSN output to separate subroutine
+C 960223 nrv Call chmod to change permissions.
 
 	kintr = .false.
       if (kbatch) then
@@ -94,18 +96,19 @@ c 940701 nrv Change VLBA output file names
 9019  FORMAT(' Select type of pointing output for: ',4a2/
      .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
      .       ' 3 - DSN stations         4 - Bonn     '/
+     .       ' 5 - VLBA terminal only   6 - VLBA antenna'/
      .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
 
 	call gtrsp(ibuf,80,luusr,nch)
 	istin= ias2b(ibuf(1),1,1)
 	IF (ISTIN.EQ.0) RETURN
 	IF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
-        if (istin.eq.5.or.istin.eq.6) goto 1
       endif
 C
 C 2. First get output file or LU for pointing commands.
 C If problems, quit.
 
+         icodp=0
 	if (istin.eq.5.or.istin.eq.6) then
           ih=0
           do i=1,2*max_pass
@@ -367,20 +370,26 @@ C
 	  else IF (ISTIN.EQ.5.or.istin.eq.6) THEN !VLBA observe files
 	    if (.not.kintr) then
 		call snapintr(2,iyr)
-C********* Comment out until SNAP procs are worked out first
-C	call vlbah(istin,icod,lu_outfile,ierr)
+                call vlbah(istin,icod,lu_outfile,ierr)
 		idayp = 0
 		kintr = .true.
 	    end if
+            if (icodp.ne.0.and.icod.ne.icodp) then ! write header again
+              call vlbah(istin,icod,lu_outfile,ierr)
+            endif
 	    if (itearl.gt.0) call tmsub(iyr,idayr,ihr,imin,isc,itearl,
      .      iyr,idayr,ihr,imin,isc)
-C    CALL VLBAT(LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
-C    .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
-C    .       MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
-C    .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
-C    .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
-C    .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
-C    .       idayrp,ihrp,minp,iscp,iobs,irecp)
+            do ix=1,nvcs(istn,icod) ! find out if switched
+              ksw=cset(invcx(ix,istn,icod),istn,icod).ne.'   '
+            end do
+	    CALL VLBAT(ksw,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+     .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
+     .       MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
+     .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
+     .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
+     .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
+     .       idayrp,ihrp,minp,iscp,iobs,irecp)
+            icodp=icod
 C
 	    END IF !if istin
 C
@@ -414,6 +423,7 @@ C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
 990   CLOSE(LU_OUTFILE)
+      call drchmod(pntname,iperm,ierr)
 C
 	RETURN
 
