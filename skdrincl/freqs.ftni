@@ -1,0 +1,99 @@
+C     FREQUENCY CODE INFORMATION COMMON BLOCK 
+C 
+C 891117 nrv Added dimension to change NFREQ from total number of frequencies
+C 910702 nrv changed VLBA-related arrays to correspond to PC version
+C 910709 NRV Changed FREQLO,LSGINP to allow 3 LO frequencies, removed PATCH
+C 910924 NRV Add WAVEI 
+C 930802 NRV Add ihdpos, ihddir to hold head position information
+C 940620 nrv Add trkn to hold number of tracks being recorded
+C 950303 nrv Add variables effreq, ffact for ionosphere S/X correction.
+C 950405 nrv Change index on head arrays for mode E (4*max_pass)
+C 951018 nrv Remove special VLBA arrays and add LO per channel and 8-letter 
+C            recording modes. Change "14" to MAX_CHAN. Change "2" to MAX_BAND.
+C 951020 nrv Remove lsb and isyn -- not needed
+C 951115 nrv Make frequency sequences indexed by station. Add SB.
+C
+      real*8 effreq,ffact,bitdens
+C     ffact   - frequency factor, for S/X ionosphere corrections
+C     effreq  - effective frequency for each band, for S/X ionosphere corrections
+C     bitdens - bit density by station and code
+C
+      real*4 vcband,freqrf,freqlo,wavei,bwrms,trkn
+C     VCBAND - final video bandwidth, MHz 
+C     FREQRF - observing frequency for each VC, in each code
+C     FREQLO - LO frequencies, for each channel, by station, for each code
+C     wavei   - constant to convert baseline length to wavelengths
+C     bwrms - rms bandwidth
+C     trkn    - number of tracks recorded per band, per station (may be non-integer
+C               in the case of switching)
+ 
+      integer ncodes,nfreq,npassf,nband,nvcs,invcx,
+     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx
+C     nband  - number of entries in lband
+C     NCODES - number of codes filled in
+C     NFREQ - number of frequencies in each subgroup in each code
+C     NPASSF - number of passes per head position for this code 
+C     nvcs   - total number of frequency channels per station and code
+C     invcx  - index number of each frequency channel, if zero then
+C              this channel is not recorded at this station
+C     ibbcx - physical BBC number of each channel
+C     itras  - track assignments(s,b,p,c,f)
+C          s = U/L 
+C          b = sign/magnitude bit
+C          p = corresponding passes, forward/reverse (1-max_pass, e.g.
+C              1 for mode A, 2 for B and C, 28 for D, 4 for E)
+C          c = channels (1 to max_chan)
+C          f = code
+C     ihdpos - head position offsets
+C     ihddir - corresponding pass number
+C     ntrakf - number of tracks recorded per pass for this code
+C     nstsav,istsav - number and indices of station names found on the "F" line
+C
+      integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,
+     .lband,lpol,lnetsb,losb,lnafrsub
+C     LCODE - the 2-character frequency codes 
+C     LMODE - the observing mode for each code
+C     LSUBVC - sub-group code for each VC, in each code
+C     lifinp - hollerith IF input, e.g. A,B,C,D,1A,1N,2A,2N,3A,3N
+C     LNAFRQ - 8-char name for this code
+C     LNAFRSUB - 8-char name for this sub-code (subset of frequencies)
+C     lband  - all bands in all codes
+C     lpol - polarization per channel
+C     lnetsb - net sideband for each channel
+C     losb - net sideband for each station's lo
+C
+      character*3 cset
+C     cset   - switch set per channel
+C
+      COMMON/FREQS/
+     .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
+     .       bitdens(max_stn,max_frq),
+     .
+     .       VCBAND(MAX_CHAN,max_stn,MAX_FRQ),
+     .       FREQRF(MAX_CHAN,max_stn,MAX_FRQ),
+     .       FREQLO(MAX_CHAN,MAX_STN,MAX_FRQ),
+     .       wavei(max_band,max_stn,max_frq),
+     .       bwrms(max_band,max_stn,max_frq),
+     .       trkn(max_band,max_stn,max_frq),
+     .
+     .       NCODES,nband,
+     .       NFREQ(MAX_BAND,max_stn,MAX_FRQ), 
+     .       NPASSF(max_stn,MAX_FRQ),
+     .       ntrakf(max_stn,MAX_FRQ),
+     .       nvcs(max_stn,max_frq),
+     .       invcx(max_chan,max_stn,max_frq),
+     .       ibbcx(max_chan,max_stn,max_frq),
+     .       itras(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
+     .       ihdpos(4*max_pass,max_stn,max_frq),
+     .       ihddir(4*max_pass,max_stn,max_frq),
+     .       nstsav,istsav(max_stn),
+     .
+     .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
+     .       LCODE(MAX_FRQ),LMODE(4,max_stn,MAX_FRQ),
+     .       LSUBVC(MAX_CHAN,max_stn,MAX_FRQ), 
+     .       LIFINP(MAX_CHAN,max_stn,MAX_FRQ),
+     .       LPOL(max_chan,max_stn,max_frq),
+     .       LNETSB(max_chan,max_stn,max_frq),
+     .       losb(max_chan,max_stn,max_frq),lband(max_band)
+C
+      COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq)
