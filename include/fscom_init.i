@@ -10,7 +10,7 @@ c
      . REVOFF(2), RSLOPE(2),
      . SOF2HI, SON2HI, SON2LO, TMPK_FS(30), rate0ti_fs
 
-      integer*4 freqif3_fs, span0ti_fs
+      integer*4 span0ti_fs
 
       INTEGER I20KCH, I70KCH, IACFTP, IACTTP, IBDB, ILENAL,
      . ILENTS, ILVTL_FS, IMONDS, INTAMP, INTPHA, IRDCL_FS,
@@ -36,7 +36,7 @@ c
      . PHATOL, PHJMAX, PI, PSLOPE, PVOLT_FS,
      . REVOFF, RSLOPE,
      . SOF2HI, SON2HI, SON2LO, TMPK_FS, rate0ti_fs,
-     . freqif3_fs, span0ti_fs,
+     .  span0ti_fs,
      . I20KCH, I70KCH, IACFTP, IACTTP, IBDB, ILENAL,
      . ILENTS, ILVTL_FS, IMONDS, INTAMP, INTPHA, 
      . IRDCL_FS, ITR2VC, IWRCL_FS, 

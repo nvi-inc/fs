@@ -64,7 +64,8 @@ C
 C Now compare values with acceptable limits
       if(irem.ne.1)          inerr(1)=inerr(1)+1
       if(iat.ne.iatif3_fs)   inerr(2)=inerr(2)+1
-      if(imix.ne.imixif3_fs) inerr(3)=inerr(3)+1
+      call fs_get_imixif3(imixif3)
+      if(imix.ne.imixif3) inerr(3)=inerr(3)+1
       iswc=0
       do i=1,4
          if(kbit(iswavif3_fs,i)) then
@@ -72,7 +73,8 @@ C Now compare values with acceptable limits
            if(isw(i).ne.iswif3_fs(i)) inerr(3+i)=inerr(3+i)+1
          endif
       enddo
-      if(freq.ne.freqif3_fs) inerr(8)=inerr(8)+1
+      call fs_get_freqif3(freqif3)
+      if(freq.ne.freqif3) inerr(8)=inerr(8)+1
       if(ilo.ne.1) inerr(9) = inerr(9)+1
       if(tpi.gt.65534.5) inerr(10)=inerr(10)+1
 c
