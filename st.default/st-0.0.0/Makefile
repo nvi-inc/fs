@@ -11,7 +11,11 @@ LIB_DIR =
 EXEC_DIR =
 #EXEC_DIR = antcn cheks stalloc sterp stqkr
 #
-all:	libs execs
+ifdef LIB_DIR
+all:    libs execs
+else
+all:    execs
+endif
 #
 backup:
 	rm -rf /tmp/st-$(ST_VERSION).tar.gz /tmp/stbackup-exclude /tmp/stbackup-include
@@ -36,10 +40,12 @@ rmexe:
 rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 #
+ifdef LIB_DIR
 libs:
-	for dir in $(LIB_DIR); do\
-		make -C $$dir ;\
-	done
+        for dir in $(LIB_DIR); do\
+                make -C $$dir ;\
+        done
+endif
 #
 execs:
 	for dir in $(EXEC_DIR); do \
