@@ -9,6 +9,7 @@ C 960518 nrv New.
 C 960522 nrv Revised.
 C 960610 nrv Move initialization of freqs.ftni arrays here
 C 960817 nrv Add S2 record mode
+C 961003 nrv Keep getting modes even if there are too many.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -62,15 +63,15 @@ C
       ncodes=0
       iret = fget_mode_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
       do while (iret.eq.0.and.fvex_len(cout).gt.0)
-c       il=fvex_len(cout)
+        il=fvex_len(cout)
         IF  (ncodes.eq.MAX_FRQ) THEN  !
           write(lu,'("VMOINP01 - Too many modes.  Max is ",
-     .    i3,".  Ignored: ",a)') MAX_FRQ,cout
+     .    i3,".  Ignored: ",a)') MAX_FRQ,cout(1:il)
         else
           ncodes=ncodes+1
           modedefnames(ncodes)=cout
-          iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
         END IF 
+        iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
       enddo
 
 C 1.5 Now initialize arrays using nstatn and ncodes.
