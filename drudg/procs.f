@@ -329,7 +329,7 @@ C
                   endif
                 endif !IF3
 		CALL CHAR2HOL('VC',IBUF(1),1,2)
-		IBUF(2) = LVCN(IVCN)
+                idummy = ichmv(IBUF,3,LVCN(IVCN),1,2)
 		IDUMMY = ichmv_ch(IBUF,5,'=')
 		NCH = 6 + IR2AS(FVC(ivcn),IBUF,6,6,2)
 		NCH = MCOMA(IBUF,NCH)
@@ -347,7 +347,7 @@ C DO BEGIN "loop for ALARM"
 	    IF (FREQRF(IVCN,ICODE).NE.0.0)  THEN
 C THEN BEGIN
 		CALL CHAR2HOL('VC',IBUF(1),1,2)
-		IBUF(2) = LVCN(IVCN)
+                idummy=ichmv(IBUF,3,LVCN(IVCN),1,2)
 		IDUMMY = ichmv_ch(IBUF,5,'=ALARM')
 		CALL writf_asc(LU_OUTFILE,IERR,IBUF,(10)/2)
 		CALL INC(LU_OUTFILE,IERR)
