@@ -220,6 +220,8 @@ C 020510 nrv Add tpi sideband to VC commands.
 C 020514 nrv Check head 2 for BBC connections.
 C 020515 nrv Correct the placement of TPI daemon commands.
 C 020522 nrv Correct the reading of prompt for TPI.
+C 020524 nrv Move statement initializing itpid_period_use out of
+C            prompt block.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -343,9 +345,9 @@ C
         close(lu_outfile,status='delete')
       end if
 C
+      itpid_period_use = itpid_period
       if (tpid_prompt.eq."YES") then ! get TPID period
         kdone = .false.
-        itpid_period_use = itpid_period
         do while (.not.kdone)
 9932      write(luscn,9132) itpid_period
 9132      format(' Enter TPI period in centiseconds (default is',
