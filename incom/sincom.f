@@ -645,7 +645,10 @@ C LINE #8  TYPE OF RECORDER - drive
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
-      if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
+      if (ichcm_ch(ibuf,ic1,'mk3b').eq.0) then
+        drive = MK3
+        drive_type = MK3B
+      else if (ichcm_ch(ibuf,ic1,'mk3').eq.0) then
         drive = MK3
         drive_type = MK3
       else if (ichcm_ch(ibuf,ic1,'vlba2').eq.0) then

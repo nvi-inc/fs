@@ -101,11 +101,12 @@ C
 C  2.2 Get second requested head position index.
 C
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       ichs=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
+      if (cjchar(parm,1).eq.','.or.MK3B.eq.drive_type) then
         kpas(2)=.false.
-      else if(VLBA.eq.and(drive,VLBA)) then
+      else if(VLBA.eq.drive) then
         ip(3)=-501
         goto 990
       else if(ichcm_ch(ibuf,ichs,'same').eq.0.and.kpas(1)) then
@@ -267,7 +268,7 @@ C  read the postions
 C
       call fs_get_ipashd(ipashd)
       ihd=3
-      if(VLBA.eq.and(drive,VLBA)) ihd=1
+      if(VLBA.eq.drive.or.MK3B.eq.drive_type) ihd=1
       call mic_read(ihd,ipashd,kautohd_fs,pnow,ip)
       if(ip(3).ne.0) goto 800
 C
@@ -293,7 +294,7 @@ C
       nch = ichmv_ch(ibuf,nch,'/')
       call fs_get_ipashd(ipashd)
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.drive_type.ne.MK3B)) then
           nch = nch+ib2as(ipashd(i),ibuf,nch,o'100000'+3)
         endif
         nch = mcoma(ibuf,nch)
@@ -309,21 +310,21 @@ C
 C
       call fs_get_posnhd(posnhd)
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.drive_type.ne.MK3B)) then
           nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.drive_type.ne.MK3B)) then
           nch = nch+ir2as(pnow(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.drive_type.ne.MK3B)) then
           nch = nch+ir2as(poff(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)

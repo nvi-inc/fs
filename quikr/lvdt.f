@@ -42,6 +42,7 @@ C
       norec = 0
 C
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
       iclcm = ip(1)
       ip(3) = 0
       if (iclcm.eq.0) then                     ! zero class number
@@ -74,8 +75,8 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kvolts(1)=.false.
-      else if(cjchar(parm,1).eq.','.and.
-     &        VLBA.eq.and(drive,VLBA)) then
+      else if(cjchar(parm,1).eq.','
+     &       .and.(VLBA.eq.drive.or.MK3B.eq.drive_type)) then
         ip(3)=-501
         goto 990
       else if(cjchar(parm,1).eq.'*') then
@@ -100,7 +101,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kvolts(2)=.false.
-      else if(VLBA.eq.and(drive,VLBA)) then
+      else if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
@@ -228,7 +229,7 @@ C
 C  read the postions
 C
       ihd=3
-      if(VLBA.eq.and(drive,VLBA)) ihd=1
+      if(VLBA.eq.drive.or.MK3B.eq.drive_type) ihd=1
       call vlt_read(ihd,volts,ip)
       if(ip(3).ne.0) goto 800
 C
@@ -249,7 +250,7 @@ C
       call fs_get_posnhd(posnhd)
       call fs_get_drive_type(drive_type)
         do i=1,2
-          if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+          if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
             call mic2vlt(i,ipashd(i),kautohd_fs,posnhd(i),volt(i),ip)
             if(drive_type.ne.VLBA2) then
                nch = nch+ir2as(volt(i),ibuf,nch,8,3)
@@ -262,7 +263,7 @@ C
       endif
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+        if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
           if(drive_type.ne.VLBA2) then
             nch = nch+ir2as(volts(i),ibuf,nch,8,3)
           else
@@ -274,7 +275,7 @@ C
 C
       if(itask.eq.3) then
         do i=1,2
-          if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
+          if(i.eq.1.or.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
             if(drive_type.ne.VLBA2) then
               nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
             else

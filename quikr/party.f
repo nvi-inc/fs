@@ -33,7 +33,8 @@ C
 C  Set flag for PCALR to stop
       ipcflg=1
       call fs_get_drive(drive)
-      if(MK3.eq.and(drive,MK3)) then
+      call fs_get_drive_type(drive_type)
+      if(MK3.eq.drive) then
         call fs_get_icheck(icheck(18),18)
         ichold=icheck(18)
       else !!! VLBA
@@ -131,7 +132,7 @@ C
       end do
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
-        if(MK3.eq.and(drive,MK3)) then
+        if(MK3.eq.drive) then
           do i=1,28
             itrk(i)=itrkenus_fs(i)
           end do
@@ -221,16 +222,20 @@ C
 C  5.  Measure errors
 C
 500   continue
-      if(MK3.eq.and(drive,MK3)) then
+      call fs_get_wrhd_fs(wrhd_fs)
+      itype=rpro_fs
+      if(MK3.eq.drive) then
         icheck(18) = 0
         call fs_set_icheck(icheck(18),18)
+        if(MK3B.eq.drive_type) itype=wrhd_fs
       else !!! VLBA
         ichvlba(18)=0
         call fs_set_ichvlba(ichvlba(18),18)
+        itype=wrhd_fs
       endif
       itrkpalo(1)=0
       itrkpalo(2)=0
-      if (rpro_fs.lt.0.or.rpro_fs.gt.2) then  !out of range reproduce value
+      if (itype.lt.0.or.itype.gt.2) then  !out of range reproduce value
          ierr = -308
          goto 990
       end if
@@ -248,22 +253,20 @@ c
 C
 C if only one side repro than we can have odd or even but not both
 C
-      if (drive.ne.VLBA.and.
-     &     (rpro_fs.eq.1.or.rpro_fs.eq.2).and.keven.and.kodd) then
+      if ((itype.eq.1.or.itype.eq.2).and.keven.and.kodd) then
          ierr = -309
          goto 990
       end if
 c
       call fs_get_vrepromode(vrepromode)
-      call fs_get_wrhd_fs(wrhd_fs)
       do i=1,36
          if (kbit(itrkpa,i)) then
 c pick which tracks to actually reproduce according to rep. electronics type
             iv=i                ! okay as is
             if(drive.ne.VLBA) then
-               if (rpro_fs.eq.2.and.ibypas.eq.0) then !map to even
+               if (itype.eq.2.and.ibypas.eq.0) then !map to even
                   if (mod(iv,2).eq.1) iv = iv + 1
-               else if (rpro_fs.eq.1.and.ibypas.eq.0) then !map to odd
+               else if (itype.eq.1.and.ibypas.eq.0) then !map to odd
                   if (mod(iv,2).eq.0) iv = iv - 1
                end if
             else if(.not.(keven.and.kodd)) then
@@ -453,7 +456,7 @@ C
       ip(3)=ierr
       ip(5)=0
 998   ipcflg=0
-      if(MK3.eq.and(drive,MK3)) then
+      if(MK3.eq.drive) then
         icheck(18)=ichold
         call fs_set_icheck(icheck(18),18)
       else  !!! VLBA

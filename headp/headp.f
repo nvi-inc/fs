@@ -24,14 +24,14 @@ c
       call rcpar(1,name)
 C
       kcal=kswrite_fs.and.kbdwrite_fs.and.ksdwrite_fs
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
          kcal=kcal.and.ksread_fs.and.ksdread_fs.and.kbdread_fs
       endif
       if(.not.kcal) write(16,*)
      &  'head calibration has not been completed successfully.'
 C
       kspd=kwrwo_fs
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
          kspd=kspd.and.krdwo_fs
        endif
       if(.not.kspd.and.VLBA2.ne.drive_type) write(16,*)
@@ -97,7 +97,7 @@ C
       if(VLBA2.eq.drive_type) then
         write(16,9060) 0.0,0.0
         write(16,9070) 0.0,0.0
-      else if(VLBA.ne.and(drive,VLBA)) then
+      else if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
         write(16,9060) fowo_fs
         write(16,9070) sowo_fs
       else
@@ -106,7 +106,7 @@ C
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
         write(16,9080) rbdwrite_fs,rbdread_fs
       else
         write(16,9080) rbdread_fs,0.0
@@ -116,7 +116,7 @@ C
       if(VLBA2.eq.drive_type) then
         write(16,9090) 0.0,0.0
         write(16,9100) 0.0,0.0
-      else if(VLBA.ne.and(drive,VLBA)) then
+      else if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
         write(16,9090) fiwo_fs
         write(16,9100) siwo_fs
       else
@@ -125,14 +125,14 @@ C
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA.ne.drive.and.MK3B.ne.drive_type) then
         write(16,9110) rsdwrite_fs,rsdread_fs
       else
         write(16,9110) rsdread_fs,0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.and(drive,VLBA)) then
+      if(VLBA.ne.drive.and.drive_type.ne.MK3B) then
         write(16,9120) rswrite_fs,rsread_fs
         write(16,9130) rswrite_fs,rsread_fs
       else if(drive_type.ne.VLBA2) then

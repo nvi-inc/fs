@@ -132,11 +132,17 @@ C
 C  CHECK FOR ODD AND EVEN TRACKS GIVEN FOR ODD OR EVEN ELECTRONICS
 C
 240   continue
+      call fs_get_drive_type(drive_type)
+      call fs_get_wrhd_fs(wrhd_fs)
       if (
      .    ( (mod(ita,2).eq.0.and.mod(itb,2).ne.0).or.
      .      (mod(ita,2).ne.0.and.mod(itb,2).eq.0)    ).and.
      .    (ita.ne.0.and.itb.ne.0)  .and.iby.ne.1.and.
-     .    (rpro_fs.eq.2.or.rpro_fs.eq.1)
+     .   (
+     .    ((rpro_fs.eq.2.or.rpro_fs.eq.1).and.MK3B.ne.drive_type)
+     .    .or.
+     .    ((wrhd_fs.eq.2.or.wrhd_fs.eq.1).and.MK3B.eq.drive_type)
+     .   )
      .    ) then
         ierr = -206
         goto 990
@@ -182,12 +188,19 @@ C
       icheck(18) = 0
       call fs_set_icheck(icheck(18),18)
       itrakaus_fs=ita
+      call fs_get_drive_type(drive_type)
+      call fs_get_wrhd_fs(wrhd_fs)
+      if(drive_type.ne.MK3B) then
+         itype=rpro_fs
+      else
+         itype=wrhd_fs
+      endif
       if (ita.ne.0.and.iby.ne.1) then
-        if (rpro_fs.eq.2) then         !even
+        if (itype.eq.2) then         !even
           if (mod(ita,2).ne.0) ita = ita + 1
-        else if (rpro_fs.eq.1) then    !odd
+        else if (itype.eq.1) then    !odd
           if (mod(ita,2).eq.0) ita = ita - 1
-        else if (rpro_fs.ne.0) then    !all
+        else if (itype.ne.0) then    !all
           ierr = -207
           goto 990
         end if
@@ -197,11 +210,11 @@ C
 C
       itrakbus_fs=itb
       if (itb.ne.0.and.iby.ne.1) then
-        if (rpro_fs.eq.2) then         !even
+        if (itype.eq.2) then         !even
           if (mod(itb,2).ne.0) itb = itb + 1
-        else if (rpro_fs.eq.1) then    !odd
+        else if (itype.eq.1) then    !odd
           if (mod(itb,2).eq.0) itb = itb - 1
-        else if (rpro_fs.ne.0) then    !all
+        else if (itype.ne.0) then    !all
           ierr = -207
           goto 990
         end if

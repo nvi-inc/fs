@@ -76,7 +76,8 @@ C
         rbdread_fs=
      &  (rv15flip_fs+rv15for_fs)*rsread_fs/2.+350.
         call fs_get_drive(drive)
-        if(drive.eq.VLBA) then
+        call fs_get_drive_type(drive_type)
+        if(drive.eq.VLBA.or.drive_type.eq.MK3B) then
            call fs_get_wrhd_fs(wrhd_fs)
            if(wrhd_fs.eq.1) rbdread_fs=rbdread_fs+698.5
         else
@@ -85,7 +86,8 @@ C
       endif
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.and(drive,VLBA)) then
+      call fs_get_drive_type(drive_type)
+      if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
         kswrite_fs=ksread_fs
         ksdwrite_fs=ksdread_fs
         kbdwrite_fs=kbdread_fs
