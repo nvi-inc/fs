@@ -57,7 +57,8 @@ long ip[5];                           /* ipc parameters */
   if ((fp=fopen(FS_ROOT"/control/tacd.ctl","r")) == 0) {
     /* If the file does not exist complain only once. */
     logit(NULL,-1,"ta");
-    return;
+    logitf("tacd/,,");
+    goto error;
   } else {
     /* Read the contents of the file then close  */
     i=0;
@@ -87,7 +88,7 @@ long ip[5];                           /* ipc parameters */
       for(;;) {
         if(shm_addr->LLOG[0]!=' ') {
           logitf("tacd/,,");
-          break;
+	  goto error;
         }
       }
     }
@@ -98,28 +99,29 @@ long ip[5];                           /* ipc parameters */
   /* Create the socket for reading */
   sock = socket( AF_INET, SOCK_STREAM, 0);
   if(sock == -1) {
-    logit(NULL,-3,"ta");
-    return;
+    ierr=-3;
+    goto error;
   }
+
   /* 
    * gethostbyname returns a structure including the network address of
    * the specified host.
    */
   server.sin_family = AF_INET;
   hp = gethostbyname(shm_addr->tacd.hostpc);
-  
+
   if(hp == (struct hostent *) 0) {
-    logit(NULL,-3,"ta");
-    return;
+    ierr=-3;
+    goto error;
   }
   
   memcpy((char *)&server.sin_addr, (char *)hp->h_addr, hp->h_length);
   server.sin_port = htons((int)shm_addr->tacd.port);
 
   if(connect(sock, (struct sockaddr *)&server, sizeof server) == -1) {
-    logit(NULL,-4,"ta");
+    ierr=-4;
     close(sock);
-    return;
+    goto error;
   }
   
   /* Set socket nonblocking  */
@@ -137,13 +139,12 @@ long ip[5];                           /* ipc parameters */
   select(sock+1, &ready, NULL, NULL, &to);
 
   /* 
-   * This is the very first instance of the socket being read 
-   * It will never close unless it is closed from outside or the 
-   * Field System closes it with the 'terminate' command.
+   * socket being read 
    */
   if( read(sock, buf, sizeof buf) == 0) {
-    logit(NULL,-5,"ta");
+    ierr=-5;
     close(sock);
+    goto error;
   }
 
   if (command->equal != '=') {           /* run tacd */
@@ -154,14 +155,14 @@ long ip[5];                           /* ipc parameters */
       command->argv[0]="time";
       k = strlen(cmd[1]);
       if(i=write(sock, cmd[1], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[20],"%d.%d,%f,%f,%d,%f,%f,%f,%d,%f",
 	     &shm_addr->tacd.day,
@@ -179,14 +180,14 @@ long ip[5];                           /* ipc parameters */
       command->argv[0]="average";
       k = strlen(cmd[2]);
       if(i=write(sock, cmd[2], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[23],"%d.%d,%d,%f,%f,%f,%f",
 	     &shm_addr->tacd.day_a,
@@ -214,14 +215,14 @@ long ip[5];                           /* ipc parameters */
     } else if(!strcmp(command->argv[0],"status")){
       k = strlen(cmd[0]);
       if(i=write(sock, cmd[0], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[21],"%s,%s",
 	     &shm_addr->tacd.file,
@@ -233,14 +234,14 @@ long ip[5];                           /* ipc parameters */
     } else if(!strcmp(command->argv[0],"version")){
       k = strlen(cmd[3]);
       if(i=write(sock, cmd[3], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[15],"%s",
 	     &shm_addr->tacd.tac_ver);
@@ -265,14 +266,14 @@ long ip[5];                           /* ipc parameters */
     } else if(!strcmp(command->argv[0],"time")){
       k = strlen(cmd[1]);
       if(i=write(sock, cmd[1], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[20],"%d.%d,%f,%f,%d,%f,%f,%f,%d,%f",
 	     &shm_addr->tacd.day,
@@ -292,14 +293,14 @@ long ip[5];                           /* ipc parameters */
     } else if(!strcmp(command->argv[0],"average")){
       k = strlen(cmd[2]);
       if(i=write(sock, cmd[2], k) == 0) {
-	logit(NULL,-6,"ta");
+	ierr=-6;
 	close(sock);
-	return;
+	goto error;
       }
       if( k=read(sock, buf, sizeof buf) == 0) {
-	logit(NULL,-5,"ta");
+	ierr=-5;
 	close(sock);
-	return;
+	goto error;
       }
       sscanf(&buf[23],"%d.%d,%d,%f,%f,%f,%f",
 	     &shm_addr->tacd.day_a,
