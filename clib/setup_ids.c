@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -40,4 +41,12 @@ void setup_ids()
       exit(-1);
     }
 
+    if (SIG_ERR==signal(SIGFPE,SIG_IGN)) {
+      perror("setup_ids: ignoring SIGFPE");
+      exit(-1);
+    }
+
 }
+
+
+
