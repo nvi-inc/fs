@@ -1,4 +1,4 @@
-      SUBROUTINE VOB1INP(ivexnum,istn,LU,IERR)
+      SUBROUTINE VOB1INP(ivexnum,istn,LU,IERR,iret)
 
 C  This routine gets all the observations for one station
 C  from the vex file.
@@ -10,6 +10,8 @@ C 960531 nrv New.
 C 960817 nrv Changes for S2. Note that VOBINP has NOT been changed!
 C            These two routines should be combined so that VOBINP
 C            calls this one!
+C 970110 nrv Add code index to cpassorderl
+C 970121 nrv Add station and code index to npassl
 
 
       include '../skdrincl/skparm.ftni'
@@ -51,6 +53,7 @@ C 1. Get scans for one station.
         iret = fget_scan_station(ptr_ch(cstart),len(cstart),
      .         ptr_ch(cmo),len(cmo),
      .         ptr_ch(stndefnames(istn)),ivexnum)
+        nobs = 0
         ierr = 1 ! station
         ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
         do while (iret.eq.0) ! get all scans for this station
@@ -101,11 +104,11 @@ C 1. Get scans for one station.
           if (iret.ne.0) return
           il = fvex_len(cout)
           ip=1
-          do while (ip.le.npassl.and.cout(1:il).ne.
+          do while (ip.le.npassl(istn,icod).and.cout(1:il).ne.
      .              cpassorderl(ip,istn,icod)(1:il))
             ip=ip+1
           enddo
-          if (ip.gt.npassl) return ! pass not found
+          if (ip.gt.npassl(istn,icod)) return ! pass not found
           ierr = 10 ! pointing sector
           iret = fvex_field(6,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
