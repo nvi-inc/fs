@@ -32,7 +32,7 @@ C               - input class buffer, output display buffer
       integer*2 lby(4)
 C        ILEN   - length of buffers, chars
 C        NCH    - character counter 
-      dimension ibws1(4), ibws3(4)
+      dimension ibws1(4), ibws3(5)
       logical kcom,kdata
 C              - true if COMMON variables wanted
 C 
@@ -46,7 +46,7 @@ C
       data ilen/40/
       data lby/2hre,2had,2hby,2hp /
       data ibws1/0,1,2,3/       !!! EQUALIZERS !!!
-      data ibws3/16,8,4,2/   !!! BITRATES !!!
+      data ibws3/16,8,4,2,1/   !!! BITRATES !!!
 C
 C  HISTORY:
 C  WHO  WHEN    DESCRIPTION
@@ -142,7 +142,7 @@ C
 C                   The equalizer selection 
       if (ieq.ne.ieq4tap(indxtp)) ierr = -305
       nch = mcoma(ibuf2,nch)
-      if(ibr.ge.1.and.ibr.le.4) then
+      if(ibr.ge.1.and.ibr.le.5) then
         ncx = ib2as(ibws3(ibr),ibuf2,nch,o'100000'+2)
       else
         nch = ichmv_ch(ibuf2,nch,'bad_value') 

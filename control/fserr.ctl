@@ -2367,7 +2367,7 @@ QR -209
 Equalizer must be 0, 1, 2, 3 (DIS) or 80, 135, 160, 270.
 ""
 QR -210
-Bitrate must be 16, 8, 4, or 2.
+Bitrate must be 16, 8, 4, 2, or 1.
 ""
 QR -301
 Bypass in disagreement with common.
