@@ -136,6 +136,9 @@ C 970317 nrv Remove reading ELEVATION lines, done in SREAD now.
 C 970328 nrv Add station_cat to RDCTL
 C 970603 nrv Add option for printing cover leter in .drg files.
 C 970610 nrv Always print out postscript file in non-interactive mode.
+C 971003 nrv New date.
+C 971003 nrv Stop if schedule file name has more than 6 letters.
+C 971003 nrv "All stations" not allowed with VEX file.
 C
 C Initialize some things.
 
@@ -258,7 +261,7 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 970901)')
+     .  '(NRV 971003)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -312,6 +315,15 @@ C       Opening message
             if (ix.gt.0) ixp=ixp+ix
           enddo
         cexpna=lskdfi(ixp:) ! exp name is root of file name
+        ix=index(cexpna,'.')-1
+        if (ix.gt.6) then ! too many letters
+          write(luscn,9022)
+9022      format(' ERROR: Schedule file name is too long. Please ',
+     .    'rename ',
+     .    'the file to have 6 characters or less before the file ',
+     .    'extension.')
+          goto 990
+        endif
         kskd = .true.
       else ! none
         write(luscn,9021)
@@ -413,10 +425,15 @@ C
 C         WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
 9053      FORMAT(' Stations: '/
      .     10(   '  ', 5(A2,' (',4A2,')',1X)/))
-           WRITE(LUSCN,9050)
-C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
-9050       format(/' Output for which station (type a code, :: to ',
-     .    'quit, = for all) ? ',$)
+           if (.not.kvex) then ! all is OK
+             WRITE(LUSCN,9050)
+9050         format(/' Output for which station (type a code, :: to ',
+     .      'quit, = for all) ? ',$)
+           else ! all not allowed
+             WRITE(LUSCN,9052)
+9052         format(/' Output for which station (type a code, :: to ',
+     .      'quit) ? ',$)
+           endif
          else
            write(luscn,9051)
 9051      format(' Enter station 2-letter code (e.g. Wf, :: to quit)? ',
@@ -432,7 +449,11 @@ C     Convert to convention upper/lower for 2 letters
       response(2:2)=lower(response(2:2))
       call char2hol(response(1:2),lstn,1,2)
       ISTN = 0
-      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 699 ! all stations
+      iF (ichcm_ch(LSTN,1,'==').eq.0) goto 699 ! special all stations
+      iF (ichcm(LSTN,1,HEQB,1,1).eq.0) then
+        if (.not.kvex) GOTO 699 ! all stations
+        if (kvex) goto 500 ! all stations not allowed
+      endif
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
 C         Convert stored code to string for comparing
