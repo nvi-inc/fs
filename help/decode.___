@@ -10,11 +10,12 @@
           mode     Type of data to be read. Choices are auxilliary
           data, synch, crc word, time, data bits, or error
           counts (default). 
-            counter    Error counter control: byte (default), frame, reset.
+              counter      Error counter control: byte (default), frame,
+              reset.
  
  Monitor-only parameters:
-          data     Data returned according to mode specified in control
-          command.
+            data       Data returned according to mode specified in
+            control command.
                              err   sspppppp (s=synch errors, p=parity errors)
                   Note that monitored error values are error
                   counts, not rates.

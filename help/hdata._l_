@@ -10,10 +10,10 @@
  Monitor-only parameters:
             hd0p       Head 0 position.
             hd1p       Head 1 position
-            hd0t       Head 0 temperature
-            hd1t       Head 1 temperature
+              hd0t         Head 0 temperature
+              hd1t         Head 1 temperature
               vac          Vacuum sensor
-            oddpwr     Odd reproduce power
+              oddpwr       Odd reproduce power
               evpwr        Even reproduce power
               ref          Reference voltage
  

@@ -8,21 +8,19 @@
  Settable parameters:
             atten1     IF1 attenuator setting in db, range 0 (default) to
             63 db. Enter a numerical value preceeded by + or -
-            to indicate relative change. Other options are
-            max, or old to restore the previous value after a
-            max.
+            to indicate relative change. Other options are max,
+            or old to restore the previous value after a max.
             atten2     IF2 attenuator setting in db, range 0 (default) to
             63 db. Enter a numerical value preceeded by + or -
-            to indicate relative change. Other options are
-            max, or old to restore the previous value after a
-            max.
+            to indicate relative change. Other options are max,
+            or old to restore the previous value after a max.
             input1     IF1 input, nor (default) or alt. 
             input2     IF2 input, nor (default) or alt.  
  
  Monitor-only parameters:
               rem/lcl      switch setting, remote or local
-              TP1          IF1 total power reading
-              TP2          IF2 total power reading
+            TP1        IF1 total power reading
+            TP2        IF2 total power reading
  
  Comments: 
  MAT module functions available. See section 1.0 of this

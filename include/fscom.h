@@ -111,9 +111,9 @@ typedef struct fscom {
 
         struct bbc_cmd bbc[ MAX_BBC];
 
-        unsigned tpi[ MAX_DET];
-        unsigned tpical[ MAX_DET];
-        unsigned tpizero[ MAX_DET];
+        long tpi[ MAX_DET];
+        long tpical[ MAX_DET];
+        long tpizero[ MAX_DET];
 
         struct {
            int rack;
@@ -232,5 +232,9 @@ typedef struct fscom {
         unsigned long mifd_tpi[3];
 	float cablevl;
         float cablediff;
-  int imk4fmv;
+        int imk4fmv;
+        struct tpicd_cmd tpicd;
+        int ITPIVC[15];
+        long tpigain[ MAX_DET];
+        int iapdflg;
 } Fscom;

@@ -470,9 +470,6 @@ Error initiliazing rclcn, internal error ?WWW
 BO -192
 Error initiliazing mk5cn, internal error ?WWW
 ""
-BO -200
-Error opening SW.CTL FMP ?FFF
-""
 BO -201
 Error vacuum switching field (line 1) in SW.CTL
 ""
@@ -583,6 +580,15 @@ Internal error in help command.
 ""
 BO -309
 Help not available for that command, maybe your equipment type is wrong.
+""
+BO -400
+Error opening flagr.ctl FMP ?FFF
+""
+BO -401
+Error reading flagr.ctl FMP ?FFF
+""
+BO -402
+Error antenna check period in TIME.CTL
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -1745,6 +1751,12 @@ Interface ?W has the wrong block length.
 MC  -20
 Formatter MM:SS stuck.
 ""
+MC  -21
+Write request to mcb device failed.
+""
+MC  -22
+MCB device is /dev/null, MCB devices inaccessible.
+""
 MC -101
 Unable to open mcbcn.ctl file.
 ""
@@ -1768,12 +1780,6 @@ Unable to open mcb device.
 ""
 MC -108
 Error in request buffer format.
-""
-MC -121
-Write request to mcb device failed.
-""
-MC -122
-MCB device is /dev/null, MCB devices inaccessible.
 ""
 M5   -1
 mk5cn: error opening mk5ad.ctl
@@ -2402,38 +2408,23 @@ Sample time must be 0 to 2 seconds.
 QJ -205
 Mode must be REC or PLAY.
 ""
+QK   -1
+Class buffer trouble.
+""
 QK -101
 No default for the list of TPIs to be read.
 ""
+QK -102
+Previous detectors not remembered between uses.
+""
 QK -201
-1st TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+TPIs requested must be one of FORM,ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -202
-2nd TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+TPIs must be one of FORM,ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...14u,14l.
 ""
 QK -203
-3rd TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -204
-4th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -205
-5th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -206
-6th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -207
-7th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -208
-8th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -209
-9th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
-""
-QK -210
-10th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
+No detectors selected
 ""
 QK -211
 Tsys value for device ?W overflowed or were less than zero.

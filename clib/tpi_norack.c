@@ -45,7 +45,7 @@ int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
 int ilen;                /* number of characters ibuf can hold, ignored */
 {
-    unsigned *ptr;
+    long *ptr;
     int i;
 
     switch (isub) {                        /* set the pointer for the type */

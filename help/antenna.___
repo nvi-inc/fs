@@ -6,9 +6,9 @@
  
  
  Settable parameters:
-              message      message to be sent to the antenna in the exact
-              form required by the pointing software. Each
-              message between commas will be sent separately.
+            message    message to be sent to the antenna in the exact form
+            required by the pointing software. Each message
+            between commas will be sent separately.
  
  Monitor-only parameters:
             response   response of the antenna to the message. This

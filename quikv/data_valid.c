@@ -80,6 +80,7 @@ parse:
       memcpy(&shm_addr->data_valid[indx],&lcl,sizeof(lcl));
 
       skd_run("pcald",'w',ip);
+      skd_run("tpicd",'w',ip);
 
       if(!kS2drive) {
 	ip[0]=ip[1]=ierr=0;

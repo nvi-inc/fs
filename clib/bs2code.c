@@ -23,7 +23,16 @@ static char *vlbag[ 32]= {
      "", "14ls", "13ls", "12ls",
 
 };
-
+static int vlba_bbcd[32]= { /*bbc detector, + for upper, - for lower */
+  4,       3,     2,      1,
+ -4,      -3,    -2,     -1,
+  0,      11,    10,      9,
+  0,     -11,   -10,     -9,
+  8,       7,     6,      5,
+ -8,      -7,    -6,     -5,
+  0,      14,    13,     12,
+  0,     -14,   -13,    -12,
+};
 /* test code
  *
  * main()
@@ -96,4 +105,25 @@ char *type;
 
   return (*array)[pin];
 }
-  
+int code2det(pin,type)
+int pin;
+char *type;
+{
+  if (type == NULL)
+    return 0;
+
+  if(pin <= -1 || pin > 31)
+    return 0;
+
+  if (strcmp(type,"vlba") == 0) {
+    int bbc;
+    bbc=pin/4+1;
+    if(0==(pin/2)%2)
+      bbc=-bbc;
+    return bbc;
+  } else if(strcmp(type,"vlbag") ==0)
+    return vlba_bbcd[pin];
+  else
+    return 0;
+
+}

@@ -9,11 +9,11 @@
           vc       VC channel to set the LO of, 1-16 for K4 type 1, 1-8
           for K4 type 2, or one of alarm, hold_on, or
           hold_off, no default 
-          freq     LO frequency in MHz, 99.99-511.99 for K4 type 1,
-          499.99-999.99 for K4 type 2, no default.
+            freq       LO frequency in MHz, 99.99-511.99 for K4 type 1,
+            499.99-999.99 for K4 type 2, no default.
  
  Monitor-only Parameters:
-          yes/no   LO is  present, yes or no
+            yes/no     LO is  present, yes or no
           lock     lock or unlock or missing
  
  Comments:

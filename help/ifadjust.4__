@@ -31,8 +31,8 @@
  procedure to be used for recording, e.g., sx2ca=1, then the
  adjustment process can be started by specifying a target level
  with ifadjust=  or just typing ifadjust to reuse the last
- target. If there has not been measurement made since the last
- FS start, the default target value is used.
+ target. If there has not been measurement made since the last FS
+ start, the default target value is used.
  
  The ifadjust command attempts to optimize the IF attenuator
  settings for all data channels that are specified as being
@@ -66,8 +66,8 @@
  
  The optimal setting for each IF attenuator is defined as the
  maximum amount of attenuation that keeps all TPI levels for
- data channels connected to that IF at least target counts
- above the TPZERO level.
+ data channels connected to that IF at least target counts above
+ the TPZERO level.
  
  If the adjustment process fails to converge, possible causes
  include: an inconsistency between the patching specified by

@@ -8,12 +8,12 @@
  Settable parameters:
           mnemonic Two character error code, e.g., sp.
         number   Error message number, e.g., -999.
-          off/on   Display status on or off (default).
+            off/on     Display status on or off (default).
  
  Monitor-only parameters:
-          list     List of error messages for which display is turned
-          off, in format: mnemonic,number, one log entry per
-          error.
+            list       List of error messages for which display is turned
+            off, in format: mnemonic,number, one log entry per
+            error.
  
  Comments: 
  This command can be used to suppress the display of an error

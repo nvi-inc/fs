@@ -1,5 +1,5 @@
       subroutine stat(ibuf,khalt,kopblk,kskblk,icurln,idcbsk,
-     .itscb,ntscb,lskd)
+     .itscb,ntscb,lskd,iwait,ipinsnp)
 C
 C     STAT displays current status information concerning the currently
 C     running schedule on the operator's terminal
@@ -17,6 +17,8 @@ C          - 2-character name of current schedule
 C         - DCB of current schedule file
 C         - time-schedule list
 C     NTSCB - maximum # of items on time list
+      integer iwait
+      integer*4 ipinsnp(5)
 C
 C  CALLING SUBROUTINES: BWORK
 C
@@ -55,19 +57,30 @@ C
       kendtp = .false.
       ksto = .false.
       ksttp = .false.
-      call susp(2,2)
 C
 C    Print display heading.
       lm2(21:32) = lskd(1:8)
       call char2hol(lm2,lm1,1,32)
       call put_cons(lm1,32)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-32,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       call ifill_ch(ibuf,1,100,' ')
       idummy = ichmv_ch(ibuf,5,'time')
       idummy = ichmv_ch(ibuf,23,'event')
       call put_cons(ibuf,27)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-27,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       call ifill_ch(ibuf,5,4,'-')
       call ifill_ch(ibuf,23,5,'-')
       call put_cons(ibuf,27)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-27,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
 C
 C    Get and display current time.
       call fc_rte_time(it,idum)
@@ -86,6 +99,10 @@ C    Get and display current time.
       nch0= nch
       nch = ichmv_ch(lm1,nch,'now')
       call put_cons(lm1,nch-1)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
 C
 C   Save current schedule position.
       idum = fmpposition(idcbsk,ierr,irec,ioff)
@@ -101,6 +118,11 @@ C
       if (ierr.lt.0) goto 500
       if(ilen.ge.0) goto 210
         call putcon_ch('end of schedule')
+        if(iwait.ne.0) then
+           idum=ichmv_ch(ibuf,1,'end of schedule')-1
+           call put_buf(ipinsnp(1),ibuf,-idum,'  ','  ')
+           ipinsnp(2)=ipinsnp(2)+1
+        endif
         goto 300
 210   if(cjchar(ib,1).ne.'!') goto 220
       if(index('0123456789',cjchar(ib,2)).eq.0) goto 200
@@ -126,6 +148,10 @@ C  End of observation
         nch = ichmv_ch(lm1,nch0,'end of current observation')
       end if
       call put_cons(lm1,nch-1)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       kendo = .true.
       goto 200
 C
@@ -137,6 +163,10 @@ C  End of tape
         nch = ichmv_ch(lm1,nch0,'end of current tape')
       end if
       call put_cons(lm1,nch-1)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       kendtp = .true.
       goto 200
 C
@@ -145,12 +175,20 @@ C
 C  Start of observation
       nch = ichmv_ch(lm1,nch0,'start of next observation')
       call put_cons(lm1,nch-1)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       ksto = .true.
 C
 250   if (.not.kendtp.or.ksttp) goto 200
 C  Start of tape
       nch = ichmv_ch(lm1,nch0,'start of next tape')
       call put_cons(lm1,nch-1)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       ksttp = .true.
       goto 200
 C
@@ -161,6 +199,10 @@ C
       if(.not.khalt)ich = ichmv_ch(ibuf,ich,'not ')
       ich = ichmv_ch(ibuf,ich,'halted')-1
       call put_cons(ibuf,ich)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-ich,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
 C
 C  4.  Display time-blocked status.
 C
@@ -201,6 +243,10 @@ C
       ich = ich + ib2as(it(1),ibuf,ich,o'41002')
       ich = ich - 1
 340   call put_cons(ibuf,ich)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-ich,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       ich = ichmv_ch(ib,1,'operator stream is ')
       if(kopblk) goto 350
         ich = ichmv_ch(ib,ich,'not time-blocked')-1
@@ -237,6 +283,10 @@ C
       ich = ich + ib2as(it(1),ib,ich,o'41002')
       ich = ich - 1
 370   call put_cons(ib,ich)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ib,-ich,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
 C
 C  5.  Restore schedule to original position.
 C
@@ -251,11 +301,19 @@ C  6.  Display current line of schedule.
 C
       idummy = ichmv_ch(ibuf,1,'current line of schedule is:')
       call put_cons(ibuf,28)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-28,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
       ich=ichmv_ch(ibuf,1,' #')
       icur = icurln
       nc = ib2as(icur,ibuf,ich,o'100006')
       ich = ichmv(ibuf,9,ib,1,ilen)-1
       call put_cons(ibuf,ich)
+      if(iwait.ne.0) then
+         call put_buf(ipinsnp(1),ibuf,-ich,'  ','  ')
+         ipinsnp(2)=ipinsnp(2)+1
+      endif
 C
       return
       end

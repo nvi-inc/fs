@@ -8,8 +8,8 @@
  Settable parameters:
         chan   loX, where X is one of 1, 2, or 3 for Mark III/IV and
         K-4 or a, b, c, or d for VLBA/4. No default.
-        freq   LO frequency for this channel, MHz. No default. No
-        previous value available.
+          freq     LO frequency for this channel, MHz. No default. No
+          previous value available.
         sb     Net sideband for this channel, unknown, usb or lsb.
         Default is unknown..
           pol      Polarization for this channel, unknown, rcp, or lcp.

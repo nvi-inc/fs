@@ -21,7 +21,7 @@
  
  where 
           dt       time between the ff or rw command and the et command
-            dfeet      number of feet to move
+          dfeet    number of feet to move
           tacc     a parameter which accounts for acceleration and
           deceleration. The nominal value for tacc is 100, and
           is taken from the drivem1.ctl or drivem2.ctl file,

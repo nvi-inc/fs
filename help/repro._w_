@@ -8,14 +8,15 @@
  Settable parameters:
               modeA        Reproduce mode for channel A. byp (default) for
               bypass, raw or read for read (playback).
-            trackA     Track for decoder channel A, default 4. 0-35
-            allowed for VLBA, in addition 100-135 are allowed
-            for VLBA4.
-            trackB     Track for decoder channel B, default 4. 0-35
-            allowed for VLBA, in addition 100-135 are allowed
-            for VLBA4.
-              modeB        Reproduce mode for channel B. byp for bypass, raw
-              or read for read (playback). Default is modeA.
+              trackA       Track for decoder channel A, default 4. 0-35
+              allowed for VLBA, in addition 100-135 are allowed
+              for VLBA4.
+              trackB       Track for decoder channel B, default 4. 0-35
+              allowed for VLBA, in addition 100-135 are allowed
+              for VLBA4.
+              modeB        Reproduce mode for channel B. byp for bypass,
+              raw or read for read (playback). Default is
+              modeA.
             equA       Equalizer to use for decoding channel A: std,
             alt1, alt2, dis (disable) or reproduce speed 80,
             135, 160, 270 ips or 0, 1, 2, or 3 equalizer
@@ -38,9 +39,9 @@
             double speed (270 ips), alt2 unspecified.  For
             VLBA2 recorders, thin tape speeds 80 and 160 ips
             are not accepted.
-              bitrate      Nominal bit rate per track in Mbits/second: 16, 8,
-              4, 2, 1, or 0.5. The default corresponds to the
-              nominal bitrate for the equA setting.
+                bitrate        Nominal bit rate per track in Mbits/second: 16, 8,
+                4, 2, 1, or 0.5. The default corresponds to the
+                nominal bitrate for the equA setting.
  
  Monitor-only parameters: none
  

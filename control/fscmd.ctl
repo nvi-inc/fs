@@ -113,17 +113,11 @@ caltempc     qkr 1213 01 17FFFF
 caltempd     qkr 1214 01 12FFFF
 tpi          qkr 1203 01 FFFFFF
 tpical       qkr 1204 01 FFFFFF
-tsys1        qkr 1205 01 17FFFF
-tsys2        qkr 1206 01 17FFFF
-tsys3        qkr 1217 01 17FFFF
-tsys4        qkr 1218 01 12FFFF
+tsys         qkr 1205 01 17FFFF
 tsys5        qkr 1219 01 FFFFFF
 tsys6        qkr 1220 01 FFFFFF
-tsysa        qkr 1205 01 17FFFF
-tsysb        qkr 1206 01 17FFFF
-tsysc        qkr 1217 01 17FFFF
-tsysd        qkr 1218 01 12FFFF
 tpzero       qkr 1207 01 FFFFFF
+tpgain       qkr 1208 01 12FFFF
 cable        qkr 1304 01 FFFFFF
 pcal         qkr 1401 01 0101FF
 patch        qkr 1403 01 E5FFFF
@@ -345,6 +339,7 @@ disc_check   qkr 7805 01 FFFFFF
 mk5relink    qkr 7806 01 FFFFFF
 mk5close     qkr 7807 01 FFFFFF
 rollform     qkr 7901 01 54FFFF
+tpicd        qkr 8001 01 17FFFF
 * boss internal
 cont         *xx 0000 02 FFFFFF
 halt         *xx 0000 03 FFFFFF

@@ -6,24 +6,23 @@
  
  
  Settable parameters:
-            file       name of file in /usr2/control to read from or
-            write to. If the leading character is +, it is
-            removed from the file name and interpreted as a
-            flag meaning "append" for writing or "read all
-            lines" for reading
+            file       name of file in /usr2/control to read from or write
+            to. If the leading character is +, it is removed
+            from the file name and interpreted as a flag meaning
+            "append" for writing or "read all lines" for reading
             string     string to write to file, up to 512 characters
  
  
  Comments:
  This command allows a user to store a string in a file. The
- contents of the first line or all lines of file can be
- executed as commands by omitting the string parameter. This
- might be used for example to store the name of a set-up SNAP
- procedure for a receiver in a file. The set-up procedure can
- then be invoked by the initi procedure when the FS is started.
- This will effectively make the receiver set-up commanded in
- the initi procedure variable without having to modify initi
- itself for each receiver change.
+ contents of the first line or all lines of file can be executed
+ as commands by omitting the string parameter. This might be used
+ for example to store the name of a set-up SNAP procedure for a
+ receiver in a file. The set-up procedure can then be invoked
+ by the initi procedure when the FS is started. This will
+ effectively make the receiver set-up commanded in the initi
+ procedure variable without having to modify initi itself for
+ each receiver change.
  
  If file does not start with +, then for reading only the first
  line of the file will be read and executed. For writing, if

@@ -83,6 +83,10 @@ C
 C  Code -2, VC TPI selection
 C 
 202   continue
+      if(index.lt.0.or.index.gt.7) then
+         ivced=ic1
+         return
+      endif
       if (ic1-1+nchtp(index+1).gt.ic2) return 
       ivced = ichmv(ias,ic1,ltp(index+1),1,nchtp(index+1))
       return

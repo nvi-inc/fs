@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.7/misc/fs957up.txt  Version: 1.0  Date: 020417
+File: /usr2/fs-9.5.8/misc/fs958up.txt  Version: 1.0  Date: 020513
 
 I. Introduction
 
@@ -9,27 +9,27 @@ This memo is divided into 4 sections:
    IV.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
-new version. There are no required new features in this version except
-for stations that need the Mark V piggyback mode (Kokee and Wetzell).
-The other major new feature of this version, Mark IV barrel-rolling is
-not required for any station yet. Stations that will need this
-feature, especially EVN stations participating in the May session
-where there will be test of mark IV barrel-rolling should probably
-wait for the next version which will also contain new features for
-that session. The update notice for the next version will cover the
-items in this update as well.
+new version. The intended audience for this version is EVN stations
+participating the in the May EVN sessions. There are several new
+features that will be useful or these stations including: mode
+independent Tsys, periodic TPI, and onsource flagging. Otherwise there
+are no critical updates. There is an improvement in the handling of
+reproduce by DRUDG for double speed recordings with VLBA and VLBA4
+recorders.
+
+This version includes all features of 9.5.7, specially the Mark V
+piggyback recording mode.
 
 II. Changes Since Version 9.5.3
 
 The sections is divided into three sub-sections: A. Change in the FS,
-B. Changes in DRUDG, and C. Known Bugs. The latter section as not
-changed since version 9.5.0. Each sub-section starts with a summary of
-the items covered followed by a more detailed description.
+B. Changes in DRUDG, and C. Known Bugs. Each sub-section starts with a
+summary of the items covered followed by a more detailed description.
 
 			 A. Changes in the FS
 
 The following is a summary of the changes. More detailed text follows
-the summary.
+the summary. New features since 9.5.7 start at number 18.
 
 1. VLBA42 recorder support
 2. Improved error reporting in chekr
@@ -48,6 +48,10 @@ the summary.
 15. tacd error message improved
 16. Data modulation supported for Mark IV
 17. Other new Mark IV firmware features supported
+18. TPI improvements
+19. Periodic TPI measurements
+20. Antenna onsource flagging
+21. "inject_snap" returns command results
 
 A more detailed discussion of these changes follows.
 
@@ -157,15 +161,176 @@ A more detailed discussion of these changes follows.
     been modified. Please see the Mark IV form command documentation
     for more information.
 
+18. TPI improvements. The TPI, TPICAL, TPZERO, and TSYSx commands have
+    been overhauled. These changes are intended to make all use of
+    these commands to be mode independent so that they do not have to
+    be revised for different set-ups. In addition they are intended to
+    compliment the new periodic TPI measurement scheme and to
+    facilitate delogging of Tsys data to generate ANTAB files. There
+    are several changes: (1) Two new detector types for each rack type
+    can now be specified. For Mark III/IV racks: "formvc" and "formif"
+    can be used. These specify the VCs that are currently having data
+    formatted by the formatter and the IFs that feed these VCs
+    respectively. For VLBA/VLBA4 racks the corresponding parameters
+    are "formbbc" and "formif". The "formbbc" parameter will select
+    all side-bands being recorded. For Mark III/IV, selection of
+    sidebands depends on DRUDG which will select detectors "ul", "l"
+    or "u" for each VC depending on which sidebands from that VC are
+    being recorded. (2) The output format has been revised so that the
+    detector readings are displayed paired with a preceding parameter
+    that identifies the VC (or BBC) and which side-band or the IFD
+    channel. The output is organized so that all detectors are
+    displayed grouped by IF channel. All entries for the first IF
+    channel are displayed, possibly on multiple lines if the output
+    would be very long, followed by the second IF channel, and so
+    on. The VCs (or BBCs) that haven't been commanded to an IF, either
+    by the PATCH command or the BBCnn setup command are displayed
+    before the other channels. The detector identifiers are all two
+    characters. For the VCs/BBCs the first character is the hex
+    converter number; the second character is the sideband
+    (d=dual,l=lower,u=upper). For IF distributors, the first character
+    is "i", followed by 1, 2, or 3 for the Mark III/IV and a, b, c,
+    and d for VLBA/VLBA4 IF channels. The output TSYS5 and TSYS6 is
+    still in the old format. (3) The TSYSx commands, where "x" is the
+    IF channel, have been replaced, except for "x=5,6", with a single
+    TSYS command that determines which Cal Diode value to use for
+    calculations based on the IF set-up. Use of station detectors "u5"
+    and "u6" in Tsys commands still require the use of TSYS5 and TSYS6
+    to associate the detectors with the correct Cal Diode value. (4)
+    The TPIC, TPICAL, and TPZERO commands will now not give up if one
+    or more devices times-out or has some other communication
+    error. Instead, detectors for which an error occurred will have
+    their reading displayed as a negative value and all detectors that
+    had their values read successfully will be displayed normally. (5)
+    For VLBA and VLBA4 racks, a new command TPGAIN has been added that
+    samples the BBC channel gains. The syntax, behavior, and output of
+    this command is completely parallel to the TPI, TPICAL, and TPZERO
+    commands. It displays the gain levels in the gain counts used by
+    BBC. This command is needed to support the periodic TPI
+    measurements for the VLBA and VLBA4 racks. It should be used to
+    record the gain levels during the period when the gain is locked
+    during PREOB. (6) To reflect the new mode independent nature of
+    Tsys measurements, the "sxcts" standard SNAP procedure has been
+    renamed "caltsys". (7) To allow plotting of the new format Tsys
+    data, the "logpl" program has been modified to accept "-1" as a
+    parameter number. This value means that the parameter occurring
+    immediately after the "string" in the log entry is taken as the
+    value.
+ 
+19. Periodic TPI measurements. A new daemon, "tpicd" has been added to
+    record TPI levels periodically during observations. The current
+    implementation is preliminary, but is fully functional. It may be
+    necessary to revise how the measurements are made, particularly in
+    case of VLBA/VLBA4 racks, in the future. However, these changes
+    will be essentially transparent to users, except perhaps for
+    control file changes.
+
+    The set-up of the periodic measurements is controlled by DRUDG
+    which can be set-up to never use them, always use, or prompt the
+    operator on an experiment by experiment basis for what to
+    do. DRUDG adds the commands to the set-up procedures. We plan in
+    the future to able to control this directly from the schedule to
+    eliminate any need to prompt for this value.
+
+    The periodic recording is turned on and off by the "data_valid=on"
+    and "data_valid=off" commands. The sampling interval can be fixed
+    or adjusted experiment by experiment. For Mark III/IV (and
+    VLBA/VLBA4) racks all the VCs (and BBC sidebands) and IFs that
+    were set-up for recording in the set-up procedure are sampled at
+    the specified interval and recorded in #tpicd#tpi/ (and
+    #tpicd#tpgain/) log entries. For VLBA/VLBA4 racks the IF channel
+    TPI levels are reported in tpgain/ entries even though strictly
+    speaking they aren't gains. The log entries use the same
+    formatting style, and communications problem handling as the TPI
+    and TPGAIN commands. To reduce the amount of clutter in the
+    information presented to the operator, these log entries are not
+    displayed. They are only added to the log.
+
+20. Antenna onsource flagging. A new daemon, "flagr" is provided to
+    report onsource status periodically. The interval is set in a new
+    control file "flagr.ctl". The interval may need to be adjusted
+    depending on the behavior of a station's antcn. In extreme cases
+    it may need to be disabled by setting the interval to a
+    non-positive integer. The "flagr" program puts out four different
+    records depending on the situation:
+
+    #flagr#flagr/antenna,new-source
+    #flagr#flagr/antenna,acquired
+    #flagr#flagr/antenna,off-source
+    #flagr#flagr/antenna,re-acquired
+
+    The "flagr" determines which is appropriate by comparing the
+    currently commanded source to the previous one running antcn in
+    mode "5" to test the onsource status. It is important that antcn
+    mode "5" not produce any log output. Besides checking at the
+    specified interval, "flagr" is forced to check for each
+    "source=.." and "onsource" command. Stations that implement their
+    sidereal tracking loop in the FS computer can probably achieve
+    better resolution (and are encouraged to do so) by disabling
+    "flagr" and outputting the log entries "flagr/antenna,..." as
+    appropriate from their own programs (the #flagr# field will be
+    replaced by the name of the local program). A post processing
+    script will be developed to generate a flagging table from this
+    data for AIPS and other possible users.
+
+21. "inject_snap" returns command results. The "inject_snap" command
+    has been expanded to accept a single additional argument, "-w"
+    ("w" for "wait") before the command to send to the FS. If this
+    flag is set, "inject_snap" will wait for the command to complete
+    and print the results to standard output. If any error is
+    encountered, either the FS not being active or if the executed
+    SNAP command produces an error, "inject_snap" will return an
+    non-zero status, which can be tested for. The output is the terse,
+    "no-news is good news", "xdisp=on" format that is usually
+    displayed to the operator. In the future there might be a switch
+    to enable extended display. For certain "soft" errors, such as
+    parity and synch error thresholds being exceeded in the "parity"
+    command, the formatter synch test failing and the not enough zeros
+    in the rack ID in the Mark IV "form" command are not reported. The
+    "date" command does not produce any output for "inject_snap
+    -w". The error messages are in a slightly different, but easier to
+    parse format if they contain an addition string or number. All of
+    these short-comings can be addressed in future versions depending
+    on interest. If a SNAP procedure is executed or an external
+    program is started by using "inject_snap -w", the "inject_snap"
+    program will return immediately after the procedure or program is
+    initiated, not when it is finished.
+
+    This change is preliminary and it is expected that it will be
+    expanded in the future. The basic concept is broader than
+    providing the ability to enter and see the results of SNAP
+    commands on text terminals. This facility can be used to provide a
+    "FS" server which can be used in scripting language (Tcl, Perl,
+    Python, etc.) to send commands to the FS and retrieve results
+    without having to tail the log. In some sense this solves the
+    conundrum of which scripting language should be built into
+    SNAP. Any user is allowed to pick the scripting language they
+    prefer. They can form SNAP commands in that language, pass them to
+    the FS, and retrieve the results. Several expansions of this
+    facility can be made depending on users needs. For example instead
+    of just printing the results to standard out, they could
+    optionally (by use of another command line switch) be returned by
+    a different mechanism or in a format suitable for a particular
+    scripting language. For example for Tcl, there might be option to
+    place response parameters into a list. Another expansion that is
+    seen as likely is to include a program that might be called
+    "fs_state", to return the status of some programs such as "fivpt"
+    and "onoff" or information that is stored in shared memory.
+
                          B. Changes in DRUDG
 
-The following areas in DRUDG were modified:
+drudg opening message date is 020510. The following areas in DRUDG were
+modified. Changes since version 9.5.7 start with item 6.
 
 1. S2 experiment corrections
 2. REPRO command additional parameter.
 3. Barrel roll support.
 4. Mark5 piggyback support.
 5. Data modulation. 
+6. Control file addition.
+7. New command in setup procedures.
+8. VC command changes.
+9. REPRO command changes.
 
 A more detailed discussion of these changes follows.
 
@@ -238,6 +403,28 @@ as a parameter on the FORM command. This feature is available only
 when a VEX file is used as input because the older sked-style
 format does not have the ability to specify data modulation.
 
+6. Control file addition. Parameters for the new TPI daemon may
+be specified in the control file. Extensive comments in the 
+fs/st.default/control/skedf.ctl file show the legal values for 
+parameters on the "tpicd" line in the $misc section. Default 
+values within drudg are set to not use the daemon if you do 
+not enter the new line in the control file. 
+
+7. New command in setup procedures. The TPICD commands are output
+in the setup procedures. If the control file specifies that the
+user is to be prompted for the period, then a prompt is issued and 
+the default value for the period is displayed. If the control file
+specifies that no prompt is wanted, then the default value in
+the control file is always used. If the daemon is not in use,
+the command is tpicd=no,0.
+
+8. VC command changes. The TPI monitor for video converters (either
+u, l, or ul) is explicitly listed in the VC commands. 
+
+9. REPRO command changes. For VLBA and VLBA4 drives, the bitrate
+parameter was moved to the 7th command parameter.
+
+
 
 			    C. Known Bugs
 
@@ -246,18 +433,17 @@ more detail after the list.
 
 1. There are communication problems with the Mark IV formatter. 
 2. Do not run "fmset" for extended periods.
-3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work. 
-4. "odd" and "even" head types not supported for Mark IV & VLBA4.
-5. "odd"/"even" head types not supported for VLBA style tapeforms.
-6. CHEKR does not check the status of the Mark IV formatter.
-7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
-8. Extraneous errors when tape is stopped by low tape sensor.
-9. "Comm=" command in logex extracts only the first command.
-10. S2 error scheme clumsy.
-11. No extra spaces allowed in "ibad.ctl" file.
-12. ONOFF and FIVPT programs hang.
-13. FS SNAP command pages don't list tape drive suffix numbers.
-14. Tk/tcl problems
+3. "odd" and "even" head types not supported for Mark IV & VLBA4.
+4. "odd"/"even" head types not supported for VLBA style tapeforms.
+5. CHEKR does not check the status of the Mark IV formatter.
+6. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+7. Extraneous errors when tape is stopped by low tape sensor.
+8. "Comm=" command in logex extracts only the first command.
+9. S2 error scheme clumsy.
+10. No extra spaces allowed in "ibad.ctl" file.
+11. ONOFF and FIVPT programs hang.
+12. FS SNAP command pages don't list tape drive suffix numbers.
+13. Tk/tcl problems
 
 A more detailed discussion of these bugs follows.
 
@@ -329,28 +515,8 @@ However, even in the future "fmset" should only be left running for as
 short a time as possible.  A reminder about this is included in the
 "fmset" menu.
 
-3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work.  This
-isn't a bug, actually it is feature (apologies in advance).  The name
-"ALL" was incorrectly thought to conflict with the 2 character code
-for BBC lower-sideband "al", so it was accidently eliminated.  It will
-be restored in a future revision but is of doubtful utility for VLBA
-racks.  For Mark III, you can achieve the same effect by entering:
 
-TPI=odd,even,if1,if2,if3
-
-Use the same parameters for the other similar commands.  You should
-omit "if3", if you don't have that module.  For VLBA racks a similar
-command can be used but is of doubtful utility:
-
-TPI=oddl,evenl,oddu,evenu,ifa,ifb,ifc,ifd
-
-This will select all 28 video power detectors (14 BBCs with two
-side-bands each) and all the IF distributors.  A more useful version
-might be:
-
-TPI=oddu,evenu,ifa,ifb,ifc,ifd
-
-4. "odd"/"even" head types not supported for Mark IV & VLBA4. The
+3. "odd"/"even" head types not supported for Mark IV & VLBA4. The
 Mark IV and VLBA4 rack version of the "form" command and the Mark IV
 and VLBA4 recorder versions of the "repro" and "parity" commands do
 not support the "odd" and "even" parameters for the read and write
@@ -362,23 +528,23 @@ electronics is "all".  This will be fixed in a future revision.
 Please let Ed know if you are missing some tracks and need to work
 around this limitation.
 
-5. "odd"/"even" head types not supported for VLBA style tapeforms. For
+4. "odd"/"even" head types not supported for VLBA style tapeforms. For
 any mode recorded with VLBA style tapeform (14 index positions), the
 only correct setting of the read and write head types on the
 "head.ctl" is "all".  This will be fixed in a future revision.  Please
 let Ed know if you are missing some tracks and need to work around
 this limitation.
 
-6. CHEKR does not check the status of the Mark IV formatter.
+5. CHEKR does not check the status of the Mark IV formatter.
 Implementation of this has been deferred until the formatter
 communication problems have been resolved.
 
-7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+6. DRUDG almost always generates IF3 commands for Mark III/IV racks.
 This always occurs for experiments run from .DRG and non-VEX .SKD
 files regardless of whether they are needed or not.  This occurs
 because it is impossible to know whether IF3 is needed or not.
 
-8. Extraneous errors when tape is stopped by low tape sensor. When a
+7. Extraneous errors when tape is stopped by low tape sensor. When a
 tape drive has been commanded to move the tape and then stops because
 it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
 "CHEKR" will complain periodically that the tape drive is not in the
@@ -393,12 +559,12 @@ manually.  In this case, issuing an "ET" command will convince the FS
 that the tape drive should be stopped and the error message will
 cease.
 
-9. "Comm=" command in logex extracts only the first command. The
+8. "Comm=" command in logex extracts only the first command. The
 "comm=" command in "logex" extracts only the first command commanded
 and displayed.  This problem was noted by Giuseppe Maccaferri
 (Medicina).
 
-10. S2 error scheme clumsy. The error and status response number
+9. S2 error scheme clumsy. The error and status response number
 reporting scheme for S2 recorders is clumsy.  FS errors that have
 mnemonic "rl" are mostly error responses from the recorder or the RCL
 interface library that is used to communicate with the recorder.  If
@@ -412,7 +578,7 @@ numeric value is the negative of the status response code.  In all
 cases an appropriate error or status message is displayed.  These
 messages are retained in the log.
 
-11. No extra spaces allowed in "ibad.ctl" file. The format of the
+10. No extra spaces allowed in "ibad.ctl" file. The format of the
 "ibad.ctl" must not contain any leading or embedded spaces.  In system
 that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
 "no_untalk/unlisten_after" is misspelled or an incorrect device name
@@ -421,7 +587,7 @@ initialized and the FS will terminate.  Unfortunately there is no way
 to prevent this problem in a general way; it reflects a limitation in
 the driver.
 
-12. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
+11. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
 been known to "hang" mysteriously.  This seems to be caused by some
 problem with the "go" mechanism that is used to restart the program
 when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
@@ -448,7 +614,7 @@ sy=go onoff &
 If you see other situations where FIVPT or ONOFF hang, please let Ed
 know.
 
-13. FS SNAP command pages don't list tape drive suffix numbers. The FS
+12. FS SNAP command pages don't list tape drive suffix numbers. The FS
 SNAP manual pages and the help pages available through the "help="
 command do not reflect when multiple versions are available with
 different suffixes depending on the number of drive specified in the
@@ -459,7 +625,7 @@ used. For example, if two drives are defined, then "help=tape1" and
 "help=tape2" will work, but "help=tape" will not and vice-versa if
 only one drive is defined.
 
-14. Tk/tcl problems. Please note the following problems with Tk/tcl
+13. Tk/tcl problems. Please note the following problems with Tk/tcl
 applications in the FS: (1) defining the plot limits manually in
 "logpl" does not work, i.e., only "autoscale" works, (2) the labels
 for point information in the upper right corner of "pdplt" does not
@@ -475,9 +641,14 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
-The remainder of this section explains how to install this version as
-an upgrade from 9.5.3. If you are upgrading from an different version
-please contact Ed for additional instructions.
+If you are upgrading from 9.5.7, please follow steps (0)-(11) and then
+skip to and follow steps (15)-(19).
+
+The steps in section describe how to install this version as an
+upgrade from 9.5.3. Please follow all the steps.
+
+If you are upgrading from an different version that wasn't mention
+here, please contact Ed for additional instructions.
 
 (0) Before you begin the upgrade make sure you have a current back-up
 of your system in case something goes wrong.  Please refer to the
@@ -506,7 +677,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.7 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.8 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -514,7 +685,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.7.tar.gz
+    get fs-9.5.8.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -528,12 +699,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.7.tar.gz
+    tar -xzpf /tmp/fs-9.5.8.tar.gz
 
 (6) Set the link for the new FS vesion:
 
     cd /usr2
-    ln -sfn fs-9.5.7 fs
+    ln -sfn fs-9.5.8 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -584,7 +755,228 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
        cd /usr2/proc
        cat /usr2/fs/st.default/proc/m5.prc >> station.prc
 
-(15) Test the FS.  Generally speaking a fairly thorough test is to run
+(15) Set-up "flagr.ctl" control file. Please copy the default version
+     to your control file directory:
+
+       cd /usr2/control
+       cp /usr2/fs/st.default/control/flagr.ctl flagr.ctl
+
+     Please edit this file to set the onsource status checking
+     interval. The first non-comment record in the file is the number
+     centiseconds for the interval. It is recommended that this be set
+     to 200 (2 seconds) under normal conditions. However, if your
+     "antcn" proram" takes a longtime to run, you may prefer to set it
+     to a longer interval to avoid tying up the program. In addition,
+     if "flagr" returns incorrect results or seems to be causing other
+     problems with your system, it is recommended that you disable it,
+     by setting the interval to zero, "0", until the problem is
+     resolved.
+
+(16) Modify your procedure files for the new TPI, TPICAL, TPZERO,
+     TSYS, and TPGAIN commands. These changes are probably confined
+     entirely to procedures in your "station.prc" file, but a check of
+     other procedure files is recommended. For the standard
+     procedures, you can compare your procedures to the defaults in
+     /usr2/fs/st.default/proc. Handling for Mark III/IV (steps with
+     labels starting with "M") and VLBA/VLBA4 (steps with labels
+     starting with "V") provided separately.
+
+     Please note that support periodic TPI measurement, it is
+     necessary that PREOB be set-up as described.
+
+     Please also note that it would be more correct to measure TPZERO
+     in PREOB. If you can do this without having PREOB run over the 10
+     second limit, it is recommended that you do that. In this case
+     you can remove the TPZERO measurements from the MIDTP procedure.
+
+     For Mark III/IV systems:
+
+       M1. Please make the section of your PREOB procedure that
+           handles TPI measurements look like this:
+
+             calon
+             !+2s
+             tpical=formvc,formif
+             caloff
+
+           or if you can include TPZERO:
+
+             calon
+             !+2s
+             tpical=formvc,formif
+             caloff
+             ifd=max,max,*,*
+             if3=max,*,*,*,*,*
+             !+2s
+             tpzero=formvc,formif
+             ifd=old,old,*,*
+             if3=old,*,*,*,*,*
+
+
+       M2. Please make the section of your MIDOB procedure that
+           handles TPI measurements look like this:
+ 
+             tpi=formvc,formif
+             caltemps
+             tsys=formvc,formif
+
+           If this gives erratic Tsys results, please add a two second
+           wait before the "tpi=formvc,formif". If the commands before
+           this take two or more seconds to complete, this shouldn't
+           be necessary.
+
+       M3. Please rename your SXCTS procedure to CALTSYS and make its
+           contents look like:
+
+             tpi=formvc,formif
+             ifd=max,max,*,*
+             if3=max,*,*,*,*,*
+             !+2s
+             tpzero=formvc,formif
+             ifd=old,old,*,*
+             if3=old,*,*,*,*,*
+             calon
+             !+2s
+             tpical=formvc,formif
+             caloff
+             caltemps
+             tsys=formvc,formif
+
+       M4. Change all uses of "sxcts" in your procedure libraries to
+           "caltsys".
+
+       M5. Please make the section of your MIDTP procedure that
+           handles TPI measurements look like this:
+
+             ifd=max,max,*,*
+             if3=max,*,*,*,*,*
+             !+2s
+             tpzero=formvc,formif
+             ifd=old,old,*,*
+             if3=old,*,*,*,*,*
+
+           or if you have placed TPZERO measurements in PREOB, you can
+           delete these lines.
+
+     For VLBA/VLBA4 systems:
+
+       V1. Please make the section of your PREOB procedure that
+           handles TPI measurements look like this:
+
+             bbcman
+             calon
+             !+2s
+             tpical=formbbc,formif
+             tpgain=formbbc,formif
+             caloff
+
+           or if you can include TPZERO:
+
+             bbcman
+             calon
+             !+2s
+             tpical=formbbc,formif
+             tpgain=formbbc,formif
+             caloff
+             ifdab=20,20,*,*
+             ifdcd=20,20,*,*
+             !+2s
+             tpzero=formbbc,formif
+             ifdab=0,0,*,*
+             ifdcd=0,0,*,*
+
+       V2. Please make the section of your MIDOB procedure that
+           handles TPI measurements look like this:
+ 
+             tpi=formbbc,formif
+             bbcagc
+             caltemps
+             tsys=formbbc,formif
+
+           If this gives erratic Tsys results, please add a two second
+           wait before the "tpi=formbbc,formif". If the commands
+           before this take two or more seconds to complete this
+           shouldn't be necessary.
+
+       V3. Please rename your SXCTS procedure to CALTSYS and make its
+           contents look like:
+
+             bbcman
+             tpi=formbbc,formif
+             ifdab=20,20,*,*
+             ifdcd=20,20,*,*
+             !+2s
+             tpzero=formbbc,formif
+             ifdab=0,0,*,*
+             ifdcd=0,0,*,*
+             calon
+             !+2s
+             tpical=formbbc,formif
+             tpgain=formbbc,formif
+             bbcagc
+             caloff
+             caltemps
+             tsys=formbbc,formif
+
+       V4. Change all uses of "sxcts" in your procedure libraries to
+           "caltsys".
+
+       V5. Please make the section of your MIDTP procedure that
+           handles TPI measurements look like this:
+
+             bbcman
+             ifdab=20,20,*,*
+             ifdcd=20,20,*,*
+             !+2s
+             tpzero=formbbc,formif
+             bbcagc
+             ifdab=0,0,*,*
+             ifdcd=0,0,*,*
+
+           or if you have placed TPZERO measurements in PREOB, you can
+           delete these lines.
+
+(17) Update your skedf.ctl file. Please add a tpicd line to the end of
+     your sked.ctl control file for DRUDG. At this time, we have the
+     following recommendations: (i) stations that do only geodesy or
+     do not have VLBA BBCs or Mark III/IV VCs should set the line for
+     "no" prompt and not to run the daemon, period "0", (ii) stations
+     that do only astronomy and have VLBA BBCs or Mark III/IV VCs
+     should set the line for "no" prompt and the period to 15 seconds,
+     "1500" (centisecods), and (iii) stations with VLBA BBCs or Mark
+     III/IV VCs and do both geodesy and astronomy, should set it for
+     "yes" prompt" and a default interval of 15 seconds, "1500"
+     centiseconds. For case (iii), when DRUDG-ing geodesy schedules, a
+     value of "0" can be provided to the prompt to disable periodic
+     measurements; for astronomy, the default can be accept enable
+     periodic measurements. Perhaps some more convenient means can be
+     worked out locally at stations in this class until this can be
+     controlled by the schedule.
+
+(18) Update your logpl.ctl control file and scripts. The parameters
+     used to plot value from the tsys/ lines will need to be changed
+     to reflect the change in the format of these commands. The
+     commands TSYSx, where "x" is one of "1,2,3,a,b,c,d" have been
+     combined into one TSYS command. You will need to change the name
+     of the commands accordingly. You should use "-1" as the parameter
+     number. Provide the detector label for the detector's whose value
+     you want to plot. Some examples are:
+
+     Label    Detector
+     "ia"     VLBA IFD A
+     "ib"     VLBA IFD B
+     "ic"     VLBA IFD B
+     "1u"     VLBA BBC  1 Upper Sideband
+     "1l"     VLBA BBC  1 Lower Sideband
+     "eu"     VLBA BBC 14 Upper Sideband
+     "i1"     Mark III/IV IFD 1
+     "i2"     Mark III/IV IFD 2
+     "i3"     Mark III/IV IFD 3
+     "1d"     MArk III/IV VC 1  Dual Sideband 
+     "1u"     MArk III/IV VC 1 Upper Sideband 
+     "1l"     MArk III/IV VC 1 Lower Sideband 
+
+(19) Test the FS.  Generally speaking a fairly thorough test is to run
      a test experiment: start with DRUDG-ing a schedule, executing
      part of it (preferably at least a tape change and a parity check
      in each direction), do any normal post-experiment plotting and
@@ -598,19 +990,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.7.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.8.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs957tg.aa
-fs957tg.ab
+fs958tg.aa
+fs958tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs957tg.* >fs-9.5.7.tar.gz
+cat fs958tg.* >fs-9.5.8.tar.gz
 
-This will create an exact image of the original fs-9.5.7.tar.gz
+This will create an exact image of the original fs-9.5.8.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

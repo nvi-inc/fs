@@ -43,3 +43,4 @@
 #include "k4pcalports_ds.h"
 #include "tacd_shm.h"
 #include "ifatt_shm.h"
+#include "tpicd_ds.h"

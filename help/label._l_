@@ -6,16 +6,16 @@
  
  
  Settable parameters:
-        vsn    8 or 10-character tape Volume Serial Number (VSN),
-        e.g. HS001234.
+          vsn      8 or 10-character tape Volume Serial Number (VSN),
+          e.g. HS001234.
           check    4-character check-label corresponding to VSN, e.g.
           8E45. If no check label appears on the tape, run
           program labck to generate it.
-        type   thick or thin, defaults to type implied by VSN. For
-        monitor, this value only appears until the tape is
-        loaded with a rec=load command. This parameter is not
-        available unless vacuum switching is enabled in sw.ctl
-        control file.
+          type     thick or thin, defaults to type implied by VSN. For
+          monitor, this value only appears until the tape is
+          loaded with a rec=load command. This parameter is
+          not available unless vacuum switching is enabled in
+          sw.ctl control file.
  
  Comments: 
  Normally used after newtape command has halted the schedule.
@@ -47,5 +47,5 @@
  0VLB, 3MTHN, CMVA, DSCP, EVNT, GIFT00, HST, ISAS, JIVE, MPIT,
  NAIC, NASA, SAMP, SVLB, THNINT, UNQU, USN01, and VLBA. All
  others are assumed to be thick. There are no known deviations
- from this at this time. However, the type parameter can be
- used to override the default if necessary.   
+ from this at this time. However, the type parameter can be used
+ to override the default if necessary.   

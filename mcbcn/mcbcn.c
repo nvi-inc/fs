@@ -33,6 +33,7 @@
 #define SEND 0  /* message type */
 #define SENDB 7 /* total bytes in message */
 #define RECV 1
+#define RECVT 21
 #define RECVB 5
 #define INIT 2
 #define INITB 3
@@ -382,6 +383,7 @@ long *ip4;
     int done;                    /* TIMEW has completed */
     struct tms tms_buff;
     long end;
+    int imode;
 
     inptr = outptr = msgflg = save = outclass = nbufout = 0;
     numbuf = ip[2];
@@ -402,8 +404,9 @@ long *ip4;
         inptr=0;
         while (inptr < nchars) {
           if (knull) 
-            result = -122;
-          else
+            result = -22;
+          else {
+	    imode=inbuf[inptr];
             switch (inbuf[inptr]) {
                 case SEND:   /* send data to an MCB address */
 #ifdef DEBUG
@@ -430,8 +433,8 @@ long *ip4;
                     putout ( outmess, 1);
                     inptr += SENDB;
                     break;
-
-                case RECV:   /* get data from an MCB address */
+	    case RECV:   /* get data from an MCB address */
+	    case RECVT:
 #ifdef DEBUG
                     printf("RECV request received\n");
 #endif
@@ -452,7 +455,13 @@ long *ip4;
                     devad += inbuf[inptr+4] + 0x100*inbuf[inptr+3];
                     devdata = inbuf[inptr+6] + 0x100*inbuf[inptr+5];
                     mcb_get (devad, &devdata, &result);
-                    outmess[0] = result;
+		    if(result<0 && imode == RECVT) {
+		      result+=50;
+		      outmess[0] = result;
+		      result=1;
+		    } else
+		      outmess[0] = result;
+		      
                     outmess[1] = (devdata>>8) & 0xff;
                     outmess[2] = devdata & 0xff;
                     putout(outmess,3);
@@ -658,10 +667,11 @@ done_timew:
 #endif
                     return(-108);
             }
-            if( result <0) {
-              cls_clr( ip[1]);
-              return (result);
-            }
+	  }
+	  if( result <0) {
+	    cls_clr( ip[1]);
+	    return (result);
+	  }
         }
     }
     putout(NULL,-1);
@@ -955,7 +965,7 @@ int *result;         /* return code */
 #ifdef DEBUG
         printf("write failed on MCB\n");
 #endif
-        *result = -121;
+        *result = -21;
         goto done;
     }
 
@@ -1004,7 +1014,7 @@ int *result;         /* return code */
 #ifdef DEBUG
         printf("write failed on MCB\n");
 #endif
-        *result = -121;
+        *result = -21;
         goto done;
     }
 

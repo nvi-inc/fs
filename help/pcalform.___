@@ -10,13 +10,14 @@
           chan     Channel of the form ns, where n is 1,..,14 (decimal)
           or 1,...,e (hex) and s is u or l for upper and lower
           sideband respectively. No default.
-          tone     Tone to extract, either given in MHz or a pound sign
-          # followed by an integer, e.g. #1, to indicate the
-          number of the tone to extract. If the integer is
-          positive, it indicates the tone above DC. If the
-          integer is negative, it indicates the tone below the
-          nominal top of the bandpass of the channel. If the
-          integer is zero it indicates state counting.
+            tone       Tone to extract, either given in MHz or a pound
+            sign # followed by an integer, e.g. #1, to
+            indicate the number of the tone to extract. If the
+            integer is positive, it indicates the tone above
+            DC. If the integer is negative, it indicates the
+            tone below the nominal top of the bandpass of the
+            channel. If the integer is zero it indicates state
+            counting.
  Comments: 
  The form pcalform= will remove all definitions.
  

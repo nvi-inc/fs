@@ -2,51 +2,48 @@
  
               Syntax:      form=mode,rate,fan,barrel,modulate,synch
  
-              Response:    form/mode,rate,fan,barrel,modulate,synch,test,rev,
-              rack,error
+              Response:    form/mode,rate,fan,barrel,modulate,synch,test,rev,rack,error
  
  
  Settable Parameters:
-          mode     The recording mode. Choices for the mode are m, a,
-          b1, b2, c1, c2, e1, e2, e3, e4, and dn, where n=1 to
-          28. No default. Modes a, b, b1, b2, c1, c2, e1, e2,
-          e3, e4, and dn correspond to the traditional Mark
-          III modes. For the bx and cx modes, x corresponds to
-          the sub-pass recorded (odd Mark III tracks for b1
-          and c1, even Mark III tracks for b2 and c2). For the
-          dn modes, n corresponds to the Mark III track number
-          recorded. For the ex modes, x corresponds to the
-          Mark III group number recorded. Mode m uses the
-          sampler track assignments and formatter track
-          enables specified by the trackform and tracks
-          commands.
+        mode   The recording mode. Choices for the mode are m, a, b1,
+        b2, c1, c2, e1, e2, e3, e4, and dn, where n=1 to 28.
+        No default. Modes a, b, b1, b2, c1, c2, e1, e2, e3,
+        e4, and dn correspond to the traditional Mark III
+        modes. For the bx and cx modes, x corresponds to the
+        sub-pass recorded (odd Mark III tracks for b1 and c1,
+        even Mark III tracks for b2 and c2). For the dn modes,
+        n corresponds to the Mark III track number recorded.
+        For the ex modes, x corresponds to the Mark III group
+        number recorded. Mode m uses the sampler track
+        assignments and formatter track enables specified by
+        the trackform and tracks commands.
           rate     Sample rate in Mbits/sec. Choices are 0.125, 0.25,
           0.5, 1, 2, 4, 8, 16, and 32. Default 4. For Nyquist
           sampling this selection must be twice the bandwidth
           set-up used in the bbc commands
-            fan        The fan-in or fan-out ratio. Choices are 1:4, 1:2,
-            2:1, where on a per channel or track basis, the
-            number before the colon is the number of sampled
-            channels and the number after is the number of
-            tracks. Default 1:1.
+          fan      The fan-in or fan-out ratio. Choices are 1:4, 1:2,
+          2:1, where on a per channel or track basis, the number
+          before the colon is the number of sampled channels and
+          the number after is the number of tracks. Default 1:1.
           barrel   Barrel-roll mode: off (default), 8, 16, or m. Old
           firmware does not support anything but off. Barrel m
           uses the roll maps defined by the rollform command.
           modulate Data modulation: on or off (default). Old firmware
-          does not support anything but off. Monitor display
-          is null because it cannot be read back.
-            synch      Synch test tolerance. Choices are 0-16 ( multiples
-            of 62.5 nanoseconds) or off.  Default is 3. The
-            meaning of 0 is unknown, but may be the same as 1.
-            Monitor displayed is null for formatters with old
-            firmware revision because it cannot be read back.
+          does not support anything but off. Monitor display is
+          null because it cannot be read back.
+          synch    Synch test tolerance. Choices are 0-16 ( multiples of
+          62.5 nanoseconds) or off.  Default is 3. The meaning
+          of 0 is unknown, but may be the same as 1. Monitor
+          displayed is null for formatters with old firmware
+          revision because it cannot be read back.
  
  Monitor-only Parameters:
           test     Synch test result: pass or fail.
-            rev        Formatter firmware revision number, displayed as an
-            integer.
-            rack       Rack ID, reported as a hex value. 
-              error        Error status, okay or the hex value.
+ rev      Formatter firmware revision number, displayed as an
+ integer.
+          rack     Rack ID, reported as a hex value. 
+            error      Error status, okay or the hex value.
  
  Comments:
  The Mark IV formatter clock is set with the fmset program. If
@@ -65,13 +62,13 @@
  numbers appended to them to distinguish which sub-pass, group,
  or track is being recorded.
  
- Some combinations of rate and fan cannot be accommodated by
- the formatter. No output that would require more than 16 MHz
+ Some combinations of rate and fan cannot be accommodated by the
+ formatter. No output that would require more than 16 MHz
  nominal data rate per track is supported. Specifically a rate
  of 32 and a fan of 1:1 is impossible. Some combinations of fan
  and rate cannot be accommodated by the recorder. Any
- combination of rate and fan that would imply a nominal data
- rate per track of 0.125 Mbit/sec or less for is not supported.
+ combination of rate and fan that would imply a nominal data rate
+ per track of 0.125 Mbit/sec or less for is not supported.
  
  For a fan of 1:4, the magnitude bits of VC9-14 are not
  available.

@@ -8,10 +8,10 @@
  Settable parameters:
           vsn      up to 20 character Volume Serial Number (VSN), e.g.
           CA-1-0012305.
-        type   one or six character tape type, e.g. 1, or 010020.
-        This field may be omitted if code is csa. If not
-        omitted and code is csa, it must agree with the type
-        specified in the vsn.
+          type     one or six character tape type, e.g. 1, or 010020.
+          This field may be omitted if code is csa. If not
+          omitted and code is csa, it must agree with the type
+          specified in the vsn.
         code   tape label format, an arbitrary string up to 32
         characters, default is csa.
  
@@ -23,9 +23,9 @@
  identifies this as a set of eight tapes. The check-sum is
  checked. If type is specified it must agree with the "T" type
  from the vsn, unless six characters are specified for type. If
- type is not specified, the single character "T" from the vsn
- is used as the typ. The suffix "-N" must be omitted if all
- eight tapes in a set are loaded, even if they will not all be
+ type is not specified, the single character "T" from the vsn is
+ used as the typ. The suffix "-N" must be omitted if all eight
+ tapes in a set are loaded, even if they will not all be
  recorded as one group. If fewer than eight tapes are loaded,
  which tapes are inserted and the order of their insertion in
  the transports should be specified in the suffix. For example
@@ -40,9 +40,8 @@
  inserted in consecutive transports beginning with transport 0,
  the schedule will probably fail.
  
- For all other values of code, vsn may be an arbitrary string
- up to 20 characters long, but type must be specified in this
- case.
+ For all other values of code, vsn may be an arbitrary string up
+ to 20 characters long, but type must be specified in this case.
  
  If the recorder is already recording and a tape type different
  than what is in use is requested, no change will be made and

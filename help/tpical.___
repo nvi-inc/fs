@@ -11,16 +11,28 @@
  
  Monitor-only parameters:
             readings   List of readings, counts. These values are stored
-            for use by the tsys1/2/3 and tsysa/b/c/d commands.
+            for use by the tsys/5/6 commands.
  
  Comments: 
- For Mark III/IV racks, only USB or LSB total power readings
- are accepted; if another total power selection has been set up
- with the vc command, the reading is returned as -1. It is
- assumed the noise calibration signal is on.
+ Except for station defined detectors, the results are returned
+ grouped in pairs of detector mnemonic,value, the output is
+ collected into lines by IF channel. Detectors that have no IF
+ assigned are displayed first followed by IFs 1-3 (Mark III/IV)
+ and a-d (VLBA/VLBA4). If the output for an IF would make a
+ long output line, the output is split into more than one line.
+ For station defined detectors the results are just displayed
+ in order: u5, u6.
  
- For Mark III/IV racks, the readings are listed from the
- selected detectors in the order: VC01-VC14, IF1, IF2, IF3. For
- VLBA racks, the readings are listed from the selected
- detectors in the order: Lower Side Band: BBC01-BBC14, Upper
- Side Band: BBC01-BBC14, IFA, IFB, IFC, IFD.
+ A time-out or other error on one more devices for a Mark
+ III/IV or VLBA/VLBA4 detector will not prevent results from
+ other detectors from being displayed.  A negative integer will
+ be shown for each channel that had an error that prevented an
+ actual measurement from being displayed. An overflow value,
+ 65535, is displayed as dollar signs, $$$$$.
+ 
+ For Mark III/IV racks the detector mnemonics for the VC are
+ displayed as hs, where h is the VC number as hex and s is for
+ the detector is use: d (dual for upper/lower), u (upper), l
+ (lower), or a digit 4-7 for other detectors.
+ 
+ It is assumed the noise calibration signal is on. 

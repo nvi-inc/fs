@@ -5713,3 +5713,11 @@ Version 9.5.6 020328
            remove previous change, no reset-up, until improved
 	   
 Version 9.5.7 020417
+
+020503 RDG logpl/logpl
+           added ability.
+	   logpl can now plot: /cmd/str,para,str,para
+
+0205xx WEH numerous, to be updated
+
+Version 9.5.8 020513

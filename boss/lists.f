@@ -1,4 +1,4 @@
-      subroutine lists(idcbsk,ibuf,nchar,icurln)
+      subroutine lists(idcbsk,ibuf,nchar,icurln,iwait,ipinsnp)
 C
 C     LISTS displays 10 lines of the current schedule on the operator's terminal
 C
@@ -10,6 +10,8 @@ C         - DCB of schedule file
 C         - buffer containing entire command
 C     NCHAR - number of characters in IBUF
 C     ICURLN - record # of current line of schedule
+      integer iwait
+      integer*4 ipinsnp(5)
 C
 C  CALLING SUBROUTINES: BWORK
 C
@@ -57,6 +59,11 @@ C
       call gttim(ibuf,ich,ilst,0,it1,it2,it3,ierr)
       if (ierr.lt.0) then
         call logit6c(0,0,0,0,ierr,'sp')
+        if(iwait.ne.0) then
+           ipinsnp(3)=ierr
+           call char2hol('sp',ipinsnp(4),1,2)
+           ipinsnp(5)=0
+        endif
         goto 900
       endif
       it(6) = it1/1024+1970
@@ -71,6 +78,11 @@ C
       numln = numln + 1
       if (ilen.lt.0) then
         call putcon_ch('schedule ends before requested time')
+        if(iwait.ne.0) then
+         idum=ichmv_ch(ib,1,'schedule ends before requested time')-1
+         call put_buf(ipinsnp(1),ib,-idum,'  ','  ')
+           ipinsnp(2)=ipinsnp(2)+1
+        endif
         goto 900
       endif
       clc1 = cjchar(ib,1)
@@ -102,6 +114,11 @@ C
       if(ierr.ge.0) goto 500
 cxx      if(ierr.eq.0) goto 500
 310     call logit7ci(0,0,0,1,-106,'bo',iline)
+        if(iwait.ne.0) then
+           ipinsnp(3)=-106
+           call char2hol('bo',ipinsnp(4),1,2)
+           ipinsnp(5)=iline
+        endif
         goto 900
 C
 C  5. List requested lines of schedule.
@@ -112,6 +129,11 @@ C
       call gtprm(ibuf,ich,nchar,1,parm,ierr)
       if(ierr.eq.0.and.iparm(1).gt.0) goto 502
         call logit6c(0,0,0,0,-138,'bo')
+        if(iwait.ne.0) then
+           ipinsnp(3)=-138
+           call char2hol('bo',ipinsnp(4),1,2)
+           ipinsnp(5)=0
+        endif
         goto 900
 502   nlines=iparm(1)
 C
@@ -123,12 +145,21 @@ C         -give OPRIN time to suspend
         ilen = fmpread(idcbsk,ierr,ibuf,iblen*2)
         if(ilen.lt.0) then
           call putcon_ch('end of schedule')
+          if(iwait.ne.0) then
+             idum=ichmv_ch(ib,1,'end of schedule')-1
+             call put_buf(ipinsnp(1),ib,-idum,'  ','  ')
+             ipinsnp(2)=ipinsnp(2)+1
+          endif
           goto 900
         endif
         if(i.eq.icurln) idummy = ichmv_ch(ib,1,'>')
         idummy = ib2as(i,ib,2,4)
         ich = ichmv(ib,7,ibuf,1,ilen)-1
         call put_cons(ib,ich)
+        if(iwait.ne.0) then
+           call put_buf(ipinsnp(1),ib,-ich,'  ','  ')
+           ipinsnp(2)=ipinsnp(2)+1
+        endif
 520   continue
 
 900   continue 

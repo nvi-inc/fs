@@ -1,10 +1,11 @@
-void fc_tpi_vlba__(ip,itpis_vlba)
+void fc_tpi_vlba__(ip,itpis_vlba,isub)
 long ip[5];
 int itpis_vlba[34];
+int *isub;
 {
     void tpi_vlba();
 
-    tpi_vlba(ip,itpis_vlba);
+    tpi_vlba(ip,itpis_vlba,*isub);
 
     return;
 }
@@ -24,15 +25,16 @@ int *ilen;
     return;
 }
 
-void fc_tsys_vlba__(itpis_vlba,ibuf,nch,caltmp)
+void fc_tsys_vlba__(ip,itpis_vlba,ibuf,nch,caltmp)
+long ip[5];
 int itpis_vlba[34];
 char *ibuf;
 int *nch;
-float *caltmp;
+float caltmp[4];
 {
     void tsys_vlba();
 
-    tsys_vlba(itpis_vlba,ibuf,nch,*caltmp);
+    tsys_vlba(ip,itpis_vlba,ibuf,nch,caltmp);
 
     return;
 }

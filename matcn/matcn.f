@@ -25,6 +25,8 @@ C     Buffer from class I/O contains following:
 C     IBUF(1) = mode, must be between MINMOD and MAXMOD
 C                  -54 - get MK4 fm data and cpu time
 C                  -53 - get ( strobe data and cpu time
+C                  -22 - get % strobe data, don't abort on time-out
+C                  -21 - get ! strobe data, don't abort on time-out
 C                   -8 - get ; strobe data
 C                   -7 - get . strobe data
 C                   -6 - get - strobe data
@@ -221,6 +223,7 @@ C
         if(imode.eq.-53.or.imode.eq.55) goto 220
         if (imode.ge.minmod.and.imode.le.maxmod) goto 220
         if(imode.eq.-54) goto 220
+        if(imode.eq.-21.or.imode.eq.-22) goto 220
         ierr = -2
         goto 900
 C
@@ -275,7 +278,11 @@ C     where s=strobe character
 C 
 400     continue
         istrob=imode
-        if(imode.eq.-53) istrob=-3
+        if(imode.eq.-21.or.imode.eq.-22) then
+           istrob=istrob+20
+        elseif(imode.eq.-53) then
+           istrob=-3
+        endif
         nchar = ichmv(ibuf,4,lstrob(-istrob),1,2)-1
 C                   Put proper strobe character followed by > into buffer 
         call fs_get_kecho(kecho)
@@ -392,7 +399,14 @@ C
 C 
 C     9.  End of outer loop on class records. 
 C 
-899     if ((ierr.lt.0.and.ierr.ne.-5).or.nch2.eq.0) goto 900 
+ 899    continue
+        if (imode.eq.-21.or.imode.eq.-22) then
+           call put_buf(iclasr,ierr,-4,'fs','  ')
+           nclrer = nclrer + 1 
+           ierr=0
+        elseif((ierr.lt.0.and.ierr.ne.-5).or.nch2.eq.0) then
+           goto 900 
+        endif
 C                   If there was a real error, skip any responses 
 C                   EXCEPTION: for wrong-length responses, report 
 C                   the actual response - it might be interesting. 

@@ -8,7 +8,7 @@
  Settable Parmeters: None
  
  Monitor-only Parameters:
-          year     4 digit year
+            year       4 digit year
             doy        Day of year, 1-366
  
  Comments:

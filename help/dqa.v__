@@ -1,45 +1,43 @@
              dqa - data quality analyzer (VLBA racks)
  
               Syntax:      dqa=duration
-            vdqa=duration
+          vdqa=duration
                                                         
-              Response:    dqa/duration,Asampler,Atrack,Aparity,Aresync,Anosy
-              nc,Acalamp,
-                       Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bc
-            alamp,Bcalphs
-                                           vdqa/duration,Asampler,Atrack,Aparity,Ar
-                      esync,Anosync,Acalamp,Acalphs,Bsampler,B
-                      track,Bparity,Bresync,Bnosync,Bcalamp,Bc
-                      alphs
+              Response:    dqa/duration,Asampler,Atrack,Aparity,Aresync,Anosync,Acalamp,
+          Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bcalamp,Bcalphs
+          vdqa/duration,Asampler,Atrack,Aparity,Aresync,Anosync,Acalamp,
+          Acalphs,Bsampler,Btrack,Bparity,Bresync,Bnosync,Bcalamp,Bcalphs
  
  
  Settable Parameters:
-          duration The duration of the analysis in seconds. Default 1
-          sec, max 5 seconds. Set up the command with
-          dqa=duration. Subsequent commands dqa will make a
-          measurement. For each measurement, the DQA module is
-          started, allowed to run for duration and then
-          stopped. The accumulated counters are then read out.
+            duration   The duration of the analysis in seconds. Default 1
+            sec, max 5 seconds. Set up the command with
+            dqa=duration. Subsequent commands dqa will make a
+            measurement. For each measurement, the DQA module is
+            started, allowed to run for duration and then stopped.
+            The accumulated counters are then read out.
  
  Monitor-only Parameters:
-          Asampler Sampler for the A channel signal, 0 if unknown or in
-          the form nnsd, nn=baseband converter number,
-          s=sideband u or l, d=data sample bit m  or s.
-          Atrack   Track with the A channel signal on it, as set up in
-          the repro command.
- Aparity    Measured parity error rate for A channel, per Mbyte.
+            Asampler   Sampler for the A channel signal, 0 if unknown or
+            in the form nnsd, nn=baseband converter number,
+            s=sideband u or l, d=data sample bit m  or s.
+            Atrack     Track with the A channel signal on it, as set up in
+            the repro command.
+ Aparity      Measured parity error rate for A channel, per
+ Mbyte.
  Aresync    Measured resync rate for A channel, per Mbyte.
  Anosync    Measured nosync rate for A channel, per Mbyte.
             Acalamp    Measured phase calibrator amplitude for A channel,
             in units of voltage percentage.
             Acalphs    Measured phase calibrator phase for A channel,
             degrees.
-          Bsampler Sampler of the B channel signal, 0 if unknown or in
-          the form nnsd, nn=baseband converter number,
-          s=sideband u or l, d=data sample bit m  or s.
-          Btrack   Track with the B channel signal on it, as set up in
-          the repro command.
- Bparity    Measured parity error rate for B channel, per Mbyte.
+            Bsampler   Sampler of the B channel signal, 0 if unknown or
+            in the form nnsd, nn=baseband converter number,
+            s=sideband u or l, d=data sample bit m  or s.
+            Btrack     Track with the B channel signal on it, as set up in
+            the repro command.
+ Bparity      Measured parity error rate for B channel, per
+ Mbyte.
  Bresync    Measured resync rate for B channel, per Mbyte.
  Bnosync    Measured nosync rate for B channel, per Mbyte.
             Bcalamp    Measured phase calibrator amplitude for B channel,

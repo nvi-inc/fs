@@ -34,6 +34,7 @@ static int  argc = -1;
 static long mtype();
 static void nullfcn();
 void skd_end();
+void skd_run_arg_cls( char *name, char w, long ip[5], char *arg, char nsem[6]);
 
 int skd_get( key, size)
 key_t key;
@@ -103,6 +104,27 @@ key_t key;
     }
 }
 
+void skd_boss_inject_w(iclass, buffer, length)
+long    *iclass;
+char	*buffer;	/* contains message for process */
+int	length;	/* length of buffer in bytes */
+{
+  char arg[]= "";
+  char insnp[]="insnp";
+  static long ipr[5] = { 0, 0, 0, 0, 0};
+
+  if(*iclass==0)
+    return;
+
+  nsem_take(insnp,0);
+
+  /* Execute this SNAP command via "boss". */
+  
+  cls_snd( iclass, buffer, length, 0, 1);
+  skd_run_arg_cls("boss ",'w',ipr,arg,insnp);
+
+
+}
 void skd_run( name, w, ip)
 char    name[5], w;
 long    ip[5];
@@ -110,13 +132,21 @@ long    ip[5];
 	    void skd_run_arg();
 	    char arg[]= "";
 	    
-	    skd_run_arg( name, w, ip, arg);
+	    skd_run_arg_cls( name, w, ip, arg, (char *) NULL);
 }
-
-
 void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
 long	ip[5];
+
+{
+	    skd_run_arg_cls( name, w, ip, arg, NULL);
+
+}
+
+void skd_run_arg_cls( name, w, ip, arg, nsem)
+char	name[5], w, *arg;	
+long	ip[5];
+char nsem[6];
 {
 int	status, i, n;
 struct skd_buf sched;
@@ -148,6 +178,8 @@ if (status == -1) {
     exit( -1);
   }
 }
+if(nsem!=NULL && nsem[0]!=0)
+  nsem_put(nsem);
 
 if(w != 'w') return;
 
@@ -248,6 +280,74 @@ argc=-1;
 
 return 1;
 }
+int skd_end_inject_snap( name, ip)
+char    name[ 5];
+long	ip[5];
+{
+int	status,i;
+struct skd_buf	sched;
+long    type;
+char *s1;
+
+ if(strncmp("boss ",name,5)==0) {
+   type=mtype("bossx");
+
+ waitrx:
+   status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		type, IPC_NOWAIT);
+
+   if(status == -1) {
+     if(errno == EINTR)
+       goto waitrx;
+     else if (errno == ENOMSG) {
+       goto next;
+     } else {
+       perror("skd_end_inject_snap: receiving message 1");
+       exit( -1);
+     }
+   }
+
+   goto process;
+ }
+
+ next:
+type=mtype(name);
+s1=memcpy(prog_name,name,5);
+
+waitr:
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		type, IPC_NOWAIT);
+
+if(status == -1) {
+  if(errno == EINTR)
+    goto waitr;
+  else if (errno == ENOMSG)
+    return -1;
+  else {
+    perror("skd_end_inject_snap: receiving message 2");
+    exit( -1);
+  }
+}
+
+ process:
+if(sched.messg.rtype == 0)
+  goto waitr;
+
+rtype=sched.messg.rtype;
+
+if (getpid() == sched.messg.dad)
+  dad=0;
+else
+  dad=sched.messg.dad;
+
+strcpy(arg,sched.messg.arg);
+argc=-1;
+
+  skd_end(ip);
+
+  return 0;
+
+}
 
 void skd_wait( name, ip, centisec)
 char    name[ 5];
@@ -295,6 +395,24 @@ if (status == -1) {
   }
 }
 
+ if(strncmp("boss ",name,5)==0 &&sched.messg.rtype!=0) {
+   sched.mtype=mtype("bossx");
+ waits:
+   status = msgsnd(msqid, (struct msgbuf *) &sched,
+		   sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1), 0);
+   
+   if (status == -1) {
+     if(errno == EINTR)
+       goto waits;
+     else {
+       fprintf( stderr,"skd_run: msqid %d,",msqid);
+       perror(" sending schedule message");
+       exit( -1);
+     }
+   }
+   sched.messg.rtype=0;
+ }
+   
 for (i=0;i<5;i++)
     ip[i]=sched.messg.ip[i];
 

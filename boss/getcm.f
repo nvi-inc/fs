@@ -2,7 +2,7 @@
      .            kblksk,kblkop,khalt,kbreak,iclopr,iclop2,
      .            iblen,ibuf,nchar,lsor,lprocs,lproco,lpparm,ncparm,
      .            lnames,nnames,lproc1,nproc1,lproc2,nproc2,
-     .            maxpr1,maxpr2,ierr,icurln,ilstln)
+     .            maxpr1,maxpr2,ierr,icurln,ilstln,iwait)
 C
 C     GETCM - gets the next command for BOSS to process
 C
@@ -57,7 +57,8 @@ C     or any time-scheduling commands.
 C     If so, then that's our highest priority.
 C
 200   continue
-      ireg(2) = get_buf(iclopr+o'120000',ibuf,-iblen*2,idum,idum)
+      iwait = 0
+      ireg(2) = get_buf(iclopr+o'120000',ibuf,-iblen*2,idum,iwait)
       nchar = iflch(ibuf,min0(ireg(2),iblen*2))
       nchar = fblnk(ibuf,1,nchar)
       do i=1,nchar
@@ -89,7 +90,7 @@ C                                      functions have priority.
      &    iscn_ch(ibuf,1,nchar,'@').ne.0)) return
       endif
       ierr = 0      !  reset error flag from gtnam, we'll discover it later
-      call put_buf(iclop2,ibuf,-nchar,'fs','  ')
+      call put_buf(iclop2,ibuf,-nchar,'fs',iwait)
 C                   In this case, it's an ordinary command.  Put it into
 C                   the secondary operator class for later pick-up.
       goto 200
@@ -154,7 +155,7 @@ C
      .nproc1,ibuf,iblen,istkop,istksk)
       ncparm = 0
       if (iclop2.gt.0) then
-        ireg(2) = get_buf(iclop2+o'120000',ibuf,-iblen*2,idum,idum)
+        ireg(2) = get_buf(iclop2+o'120000',ibuf,-iblen*2,idum,iwait)
         nchar = iflch(ibuf,min0(ireg(2),iblen*2))
         if (ireg(1).lt.0) nchar = 0
       end if
