@@ -18,6 +18,7 @@ int ires;      /* resolution of idt, i.e. which unit of time applies */
 /* number of days in the year plus one */
 
   itm[4] = 366;
+  /* not Y2.1K compliant */
   if (it[5]%4 == 0)
     itm[4]=367;
 

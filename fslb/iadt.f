@@ -11,6 +11,7 @@ C   INITIALIZE ILP
 C   GET # DAYS/YEAR PLUS 1
 C
       itm(5)=366
+c not Y2.1K compliant
       if (mod(it(6),4).eq.0) itm(5)=367
 C
 C   SET UP LOOP
