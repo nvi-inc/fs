@@ -31,21 +31,37 @@ char *ptr;
     }
 
     if (strcmp(ptr,"v0")==0)
-      lcl->enable[0] |= 0x5555;
+      lcl->enable[0] |= 0x00005555;
     else if (strcmp(ptr,"v1")==0)
-      lcl->enable[0] |= 0xAAAA;
+      lcl->enable[0] |= 0x0000AAAA;
     else if (strcmp(ptr,"v2")==0)
       lcl->enable[0] |= 0x55550000;
     else if (strcmp(ptr,"v3")==0)
       lcl->enable[0] |= 0xAAAA0000;
     else if (strcmp(ptr,"v4")==0)
-      lcl->enable[1] |= 0x5555;
+      lcl->enable[1] |= 0x00005555;
     else if (strcmp(ptr,"v5")==0)
-      lcl->enable[1] |= 0xAAAA;
+      lcl->enable[1] |= 0x0000AAAA;
     else if (strcmp(ptr,"v6")==0)
       lcl->enable[1] |= 0x55550000;
     else if (strcmp(ptr,"v7")==0)
       lcl->enable[1] |= 0xAAAA0000;
+    else if (strcmp(ptr,"m0")==0)
+      lcl->enable[0] |= 0x00005554;
+    else if (strcmp(ptr,"m1")==0)
+      lcl->enable[0] |= 0x0000AAA8;
+    else if (strcmp(ptr,"m2")==0)
+      lcl->enable[0] |= 0x15550000;
+    else if (strcmp(ptr,"m3")==0)
+      lcl->enable[0] |= 0x2AAA0000;
+    else if (strcmp(ptr,"m4")==0)
+      lcl->enable[1] |= 0x00005554;
+    else if (strcmp(ptr,"m5")==0)
+      lcl->enable[1] |= 0x0000AAA8;
+    else if (strcmp(ptr,"m6")==0)
+      lcl->enable[1] |= 0x15550000;
+    else if (strcmp(ptr,"m7")==0)
+      lcl->enable[1] |= 0x2AAA0000;
     else if (strcmp(ptr,"s1")==0)
       lcl->enable[0]=~0;
     else if (strcmp(ptr,"s2")==0)
