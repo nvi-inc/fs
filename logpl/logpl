@@ -1789,7 +1789,7 @@ proc newfile_OK {output} {
     global global_xmin global_xmax timebase global_xmaxoffset global_xdefmax
     global selectMatrix noOfSelects noOfChannels global_antennaname
     global timestart timestop currentSet oldyear firstday
-    global timepoints global_ymin global_ymax
+    global timepoints global_ymin global_ymax tk_version
     if [newfile_checkfile $newfile_filename $output] {
 	set current_filename $newfile_filename
 	set fileID [open $current_filename r]
@@ -1831,7 +1831,9 @@ proc newfile_OK {output} {
 	for {set counter 1} {$counter < $noOfSelects} {incr counter} {
 	    set selectMatrix($counter,4) 0
 	}
-	if {$output == 0} {destroy .newfile}
+	if {$tk_version < 4.2} {
+	    if {$output == 0} {destroy .newfile}
+	}
 	SetXreset
 	changeXdata
 	Replot
@@ -2201,10 +2203,10 @@ label .labelParm -anchor w -width 4 -text "Chan"
 label .labelYmin -anchor w -width 4 -text "Ymin"
 label .labelYmax -anchor w -width 4 -text "Ymax"
 
-label .labelTformat -anchor w -text YYYY.DDD.HH:MM:SS.SS
-entry .entryTimestart -width 20 -relief sunken -textvariable timestart
-entry .entryTimestop -width 20 -relief sunken -textvariable timestop
-entry .entryTimepoints -width 20 -relief sunken -textvariable timepoints(0)
+label .labelTformat -anchor w -text yyyy.ddd.hh:mm:ss.ss
+entry .entryTimestart -width 18 -relief sunken -textvariable timestart
+entry .entryTimestop -width 18 -relief sunken -textvariable timestop
+entry .entryTimepoints -width 18 -relief sunken -textvariable timepoints(0)
 radiobutton .radiobuttonData1 -width 1 \
 	-activeforeground $colorArray(1) -foreground $colorArray(1) -text "1" \
 	-variable newChan -value 1 -command updateChandata
@@ -2217,8 +2219,8 @@ radiobutton .radiobuttonData3 -width 1 \
 radiobutton .radiobuttonData4 -width 1 \
 	-activeforeground $colorArray(4) -foreground $colorArray(4) -text "4" \
 	-variable newChan -value 4 -command updateChandata
-entry .entryYmin -width 20 -relief sunken -textvariable global_ymin(0)
-entry .entryYmax -width 20 -relief sunken -textvariable global_ymax(0)
+entry .entryYmin -width 18 -relief sunken -textvariable global_ymin(0)
+entry .entryYmax -width 18 -relief sunken -textvariable global_ymax(0)
 
 bind .entryTimestart <Return> {focus .; Replot}
 bind .entryTimestart <Left> {.entryTimestart icursor [expr insert-1]}
