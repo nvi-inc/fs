@@ -123,6 +123,7 @@ C
       nch = ichmv_ch(ib,nch,'head0,')
       do i=1,4
         if (i.eq.1) then
+           call fs_get_wrhd_fs(wrhd_fs)
           idum=wrhd_fs
         else if(i.eq.2) then
           idum=rdhd_fs
@@ -158,6 +159,13 @@ C
       nch=nch-1
       call logit3(ib,nch,lsor)
 C
+      call fs_get_drive_type(drive_type)
+      if(drive_type.eq.VLBA2) then
+         ipr=5
+      else
+         ipr=2
+      endif
+c
       do i=1,2
         call ifill_ch(ib,1,120,' ')
         nch = 1
@@ -176,9 +184,9 @@ C
         nch=mcoma(ib,nch)
         nch = nch + ir2as(revoff(i),ib,nch,6,1)
         nch=mcoma(ib,nch)
-        nch = nch + ir2as(pslope(i),ib,nch,8,2)
+        nch = nch + ir2as(pslope(i),ib,nch,8,ipr)
         nch=mcoma(ib,nch)
-        nch = nch + ir2as(rslope(i),ib,nch,8,2)
+        nch = nch + ir2as(rslope(i),ib,nch,8,ipr)
         call logit3(ib,nch,lsor)
       enddo
       call ifill_ch(ib,1,120,' ')
@@ -232,7 +240,7 @@ C
       endif
       nch=mcoma(ib,nch)
       call fs_get_refreq(refreq)
-      nch = nch + ir2as(refreq,ib,nch,6,1)
+      nch = nch + ir2as(refreq,ib,nch,7,1)
       nch=mcoma(ib,nch)
       call fs_get_i70kch(i70kch)
       nch = nch + ib2as(i70kch,ib,nch,z'8005')
@@ -242,9 +250,12 @@ C
 c
       nch=mcoma(ib,nch)
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(rack.eq.MK3) then
         nch=ichmv_ch(ib,nch,'mk3')
-      else if(rack.eq.VLBA) then
+      else if(rack.eq.VLBA.and.rack_type.eq.VLBAG) then
+        nch=ichmv_ch(ib,nch,'vlbag')
+      else if(rack.eq.VLBA.and.rack_type.eq.VLBA) then
         nch=ichmv_ch(ib,nch,'vlba')
       else if(rack.eq.MK3) then
         nch=ichmv_ch(ib,nch,'mk4')
@@ -305,6 +316,14 @@ c
 c
       nch=mcoma(ib,nch)
       nch=ichmv(ib,nch,ihx2a(iswavif3_fs),2,1)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_vfm_xpnt(vfm_xpnt)
+      if (vfm_xpnt.eq.0) then
+         nch=ichmv_ch(ib,nch,'a/d')
+      else if (vfm_xpnt.eq.1) then
+         nch=ichmv_ch(ib,nch,'dsm')
+      endif
 c
       call logit3(ib,nch-1,lsor)
 c
