@@ -1,4 +1,4 @@
-      subroutine ma2rp4(ibuf,iby,ieq,ita,itb)
+      subroutine ma2rp4(ibuf,irem,iby,ieq,ita,itb)
 
 C  convert mat buffer to rp data for Mark IV drive
 C 
@@ -27,7 +27,8 @@ C     e = equalizer
 C    bb = stack head and track for b
 C    aa = stack head and track for a
 C 
-C     bit 31,30 =
+C     bit 31    = local
+C            30 =
 C            29 = master reset
 C         26-28 = 0
 C            25 = Bypass mode
@@ -40,7 +41,9 @@ C          6-7  = Channel A stack select
 C          0-5  = Channel A head select
 C 
       integer*2 itemp
-C 
+C
+      irem = and(ia2hx(ibuf,3),8)/8
+C
       iby = and(ia2hx(ibuf,4),2)/2 
       ieq = ia2hx(ibuf,5)
 

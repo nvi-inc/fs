@@ -103,7 +103,7 @@ C
 C
 C     3.  Format of data received from tape controller:
 C
-      call ma2rp4(ibuf,iby,ieq,ita,itb)
+      call ma2rp4(ibuf,iremtp,iby,ieq,ita,itb)
       call ma2rpbr4(ibuf3,ibr)
       goto 320
 310   ita = itrakaus_fs
