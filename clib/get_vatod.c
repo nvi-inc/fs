@@ -8,10 +8,11 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-static int rel_addr[ ]={0x51,0x54,0x52,0x55,0x57,0x53,0x56,0x58};
+static int rel_addr[ ]   ={0x51,0x54,0x52,0x55,0x57,0x53,0x56,0x58};
     /* rel_addr gives the VLBA monitor point for the equiv. M3 channel */
     /* except for channel 1 and 2 with the LVDT on, this requires active */
     /*     measurement */
+static int rel_addr_v2[ ]={0,0,0,0,0,0x60,0x61,0};
 
 void get_vatod(ichan,volts,ip)
 int ichan;                           /* M3 style channel number */
@@ -26,7 +27,8 @@ long ip[5];                          /* ipc array */
       struct tms tms_buff;
       long end;
 
-      if(ichan<1 || ichan >(sizeof(rel_addr)/sizeof(int))) {
+      if(ichan<1 || ichan >(sizeof(rel_addr)/sizeof(int)) ||
+        (shm_addr->equip.drive == VLBA2 && rel_addr[ichan-1] == 0) ) {
           ip[0]=ip[1]=0;
           ip[2]=-283;
           memcpy(ip+3,"q@",2);
@@ -44,7 +46,11 @@ long ip[5];                          /* ipc array */
         rte_sleep( 5);
       } 
 
-      request.addr=rel_addr[ichan-1];
+      if (shm_addr->equip.drive_type == VLBA2)
+        request.addr=rel_addr_v2[ichan-1];
+      else
+        request.addr=rel_addr[ichan-1];
+
       add_req(&buffer,&request);
 
       end_req(ip,&buffer);                  /* send buffer and schedule */
@@ -56,7 +62,10 @@ long ip[5];                          /* ipc array */
       get_res(&response, &buffer_out);
       counts=0xFFF & response.data;
       if((counts & 0x800)!=0) counts|=~0xFFF;   /*sign extend */
-      *volts=counts*4.8828125e-3;
+      if (shm_addr->equip.drive_type == VLBA2)
+	*volts=counts*0.4e-3;
+      else
+	*volts=counts*4.8828125e-3;
 
       ip[0]=ip[1]=ip[4]=ip[2]=0;
       memcpy(ip+3,"q@",2);
