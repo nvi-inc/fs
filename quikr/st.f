@@ -9,7 +9,7 @@ C
 C
       include '../include/fscom.i'
 C
-      integer*2 ibuf(20)
+      integer*2 ibuf(20), lgenx(2)
       character cjchar
       equivalence (ireg(1),reg)
       data ilen/40/
@@ -33,6 +33,7 @@ C
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) goto 500
       call fs_get_ispeed(ispeed)
+      call fs_get_lgen(lgen)
       call fs_get_idirtp(idirtp)
       call fs_get_ienatp(ienatp)
       if (ieq.eq.nchar.or.cjchar(ibuf,ieq+1).ne.'?') goto 210
@@ -62,7 +63,7 @@ C                   Get the direction, ASCII
       ierr = -101 
 C                   No default for the direction
       goto 990
-211   call itped(2,idir,ibuf,ic1,ich-2) 
+211   call itped(2,idir,lgenx,ibuf,ic1,ich-2) 
       if (idir.ge.0) goto 220 
       ierr = -201 
       goto 990
@@ -73,11 +74,17 @@ C
 220   ic1 = ich 
       call gtprm(ibuf,ich,nchar,1,parm,ierr) 
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 221 
-      if (cjchar(parm,1).eq.'*') isp = ispeed
-      if (cjchar(parm,1).eq.',') isp = 6 
+      if (cjchar(parm,1).eq.'*') then
+         isp = ispeed
+         idum=ichmv(lgenx,1,lgen,1,3)
+      endif
+      if (cjchar(parm,1).eq.',') then
+         isp = 6
+         idum=ichmv_ch(lgenx,1,'720')
 C                   Default is 120 ips
+      endif
       goto 230
-221   call itped(1,isp,ibuf,ic1,ich-2)
+221   call itped(1,isp,lgenx,ibuf,ic1,ich-2)
       if (isp.ge.0) goto 230
       ierr = -202 
       goto 990
@@ -92,7 +99,7 @@ C
 C             - default is record ON
       goto 300
 231   continue
-      call itped(5,iena,ibuf,ic1,ich-2) 
+      call itped(5,iena,lgenx,ibuf,ic1,ich-2) 
       if (iena.ge.0) goto 300 
         ierr = -203 
         goto 990
@@ -111,6 +118,8 @@ C
       call fs_set_idirtp(idirtp)
       ienatp = iena 
       call fs_set_ienatp(ienatp)
+      idum=ichmv(lgen,1,lgenx,1,3)
+      call fs_set_lgen(lgen)
 C 
 C 
 C     4. Set up buffer for tape drive.  Send to MATCN.
@@ -143,7 +152,7 @@ C          if vacuum not ready, forget it
 410   continue
       nrec = 0
       iclass = 0
-
+c
       call fs_get_rack(rack)
       if(rack.eq.MK4) then
          ibuf(1)=9
@@ -159,10 +168,10 @@ C          if vacuum not ready, forget it
       ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
       call fs_get_drive(drive)
-      if (MK3.eq.and(drive,MK3)) then
+      if (MK3.eq.drive) then
         call en2ma(ibuf(3),ienatp,-1,ltrken)
-      else if (MK4.eq.and(drive,MK4)) then
-        call fs_get_kena(kenastk)
+      else if (MK4.eq.drive) then
+        call fs_get_kenastk(kenastk)
         call en2ma4(ibuf(3),ienatp,kenastk)
       endif
       call put_buf(iclass,ibuf,-13,'fs','  ')
