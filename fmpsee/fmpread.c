@@ -17,6 +17,11 @@ int *error,*len;
   buf[clen]=' ';
   if(clen>0 && buf[clen-1]=='\n')
     buf[--clen]=' ';
+  else if(clen > 0){
+    char ch=fgetc(*dcb);
+    while (ch!= EOF && ch!= '\n')
+      ch=fgetc(*dcb);
+  }
 
   if(c == NULL) {
     if(clen 	== 0)
