@@ -33,9 +33,11 @@ int find_next_noncomment(fp,buff,sbuff)
   if(strchr(buff,'\n')==NULL)
     return -4;
 
-  for(i=0;i<strlen(buff);i++)
-    if(strchr(" \n\t",buff[i])!=NULL)
+  for(i=0;i<strlen(buff);i++) {
+    if(strchr(" \n\t",buff[i])==NULL) {
       return 0;
+    }
+  }
   
   goto start;
 }
