@@ -27,6 +27,7 @@ main()
 
   initscr();
   signal(SIGINT, die);
+  cbreak();
   noecho ();
   nodelay(stdscr, TRUE);
 
