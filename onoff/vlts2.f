@@ -25,9 +25,10 @@ C
       double precision tpia1,tpia2,sig1,sig2,timta,timt 
       double precision dri,dim1,didim1,dtpi1,dtpi2
       integer it(5),iti(5)
+      integer*4 ip(5)
       integer*2 icmnd(4,18),indata(10),indat2(10)
       integer*2 iques,lwho,lwhat
-      logical kbreak
+      logical kbreak, kst1,kst2
 C 
       include '../include/fscom.i'
 C 
@@ -60,11 +61,16 @@ C  0. INITIALIZE
 C
 C       WHICH DEVICE? 
 C 
+      kst1=ichcm_ch(ldv1nf,1,'u').eq.0
+      if(kst1) then
+         id1=-1
+         goto 11
+      endif
+C
       call fs_get_rack(rack) 
-      if(VLBA.eq.and(rack,VLBA)) then
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id1=-1
-        id2=-1
-        goto 13
+        goto 11
       endif
       do 8 i=1,ndev 
         if (icmnd(1,i).ne.ldv1nf) goto 8 
@@ -80,6 +86,17 @@ C            GOT IT
 C 
 11    continue
 C 
+      kst2=ichcm_ch(ldv2nf,1,'u').eq.0
+      if(kst2) then
+         id2=-1
+         goto 13
+      endif
+C
+      call fs_get_rack(rack) 
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+        id2=-1
+        goto 13
+      endif
       do 12 i=1,ndev
         if(icmnd(1,i).ne.ldv2nf) goto 12
         id2=i
@@ -104,8 +121,10 @@ C
 C 
 C  WAIT ONE SECOND TO CYCLE THE INTEGERATOR 
 C   (WE WILL WAIT ON MORE SECOND AT THE BEFORE THE FIRST SAMPLE AS WELL)
-C 
-      call susp(1,102)
+C
+      if((.not.kst1).or.(.not.kst2)) then
+         call susp(1,102)
+      endif
       call fc_rte_time(iti,idum) 
 C 
 C   1. LOOP GETTING DATA
@@ -115,22 +134,57 @@ C
 C       WAIT TILL THE NEXT SECOND AT LEAST
 C 
         if(kbreak('onoff'))goto 80040
-        call fc_rte_time(it,idum) 
-        itv1=it(1)-iti(1)                    
-        itv2=it(2)-iti(2)                    
-        itim=itv1*100+itv2+102 
-        if (itim.lt.0) itim=itim+6000.            
-        call susp(1,itim)
+        if((.not.kst1).or.(.not.kst2)) then
+           call fc_rte_time(it,idum) 
+           itv1=it(1)-iti(1)                    
+           itv2=it(2)-iti(2)                    
+           itim=itv1*100+itv2+102 
+           if (itim.lt.0) itim=itim+6000.            
+           call susp(1,itim)
+        endif
 C 
 C      GET THE STUFF
 C 
         itry=ntry
-15      continue 
-        if(VLBA.eq.and(rack,VLBA)) then
-          call mcbcn2(dtpi1,dtpi2,ierr)
-        else
-          call matcn(icmnd(2,id1),-5,iques,indata,nin, 9,ierr) 
-          if (.not.
+15      continue
+        if(kst1.or.kst2) then
+           if(kst1) then
+              idum=ichmv(user_dev1_name,1,ldv1nf,1,2)
+           else
+              idum=ichmv_ch(user_dev1_name,1,'  ')
+           endif
+           call fs_set_user_dev1_name(user_dev1_name)
+           if(kst2) then
+              idum=ichmv(user_dev2_name,1,ldv2nf,1,2)
+           else
+              idum=ichmv_ch(user_dev1_name,1,'  ')
+           endif
+           call fs_set_user_dev2_name(user_dev2_name)
+           call run_prog('antcn','wait',8,idum,idum,idum,idum)
+           call rmpar(ip)
+           if(ip(3).ne.0) then
+              ierr=-83
+              return
+           else
+              if(kst1) then
+                 call fs_get_user_dev1_value(user_dev1_value)
+                 dtpi1=user_dev1_value
+              endif
+              if(kst2) then
+                 call fs_get_user_dev2_value(user_dev2_value)
+                 dtpi2=user_dev2_value
+              endif
+           endif
+        endif   
+        if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+           if((.not.kst1).or.(.not.kst2)) then
+              call mcbcn2(dtpi1,dtpi2,ierr)
+           endif
+        else if(rack.eq.MK3.or.rack.eq.MK4) then
+           if(.not.kst1) then
+              call matcn(icmnd(2,id1),-5,iques,indata,nin, 9,ierr) 
+           endif
+          if ((kst1.and..not.kst2).or..not.
      +      (id1.gt.15.and.id2.gt.15.and.id1.lt.18.and.id2.lt.18)
      +    ) call matcn(icmnd(2,id2),-5,iques,indat2,nin, 9,ierr) 
         endif
@@ -139,19 +193,23 @@ C
 C 
 C      CONVERT TO COUNTS
 C 
-        if(VLBA.ne.and(rack,VLBA)) then
-          if (id1.ge.17) dtpi1=float(ia22h(indata(2)))*256.0+ 
-     +                      float(ia22h(indata(3)))
-          if (id1.lt.17) dtpi1=float(ia22h(indata(4)))*256.0+ 
-     +                      float(ia22h(indata(5)))
-          if (.not.
+        if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+           if(.not.kst1) then
+              if (id1.ge.17) dtpi1=float(ia22h(indata(2)))*256.0+ 
+     +             float(ia22h(indata(3)))
+              if (id1.lt.17) dtpi1=float(ia22h(indata(4)))*256.0+ 
+     +             float(ia22h(indata(5)))
+          endif
+          if ((kst1.and..not.kst2).or..not.
      +      (id1.gt.15.and.id2.gt.15.and.id1.lt.18.and.id2.lt.18)
      +                    ) idum=ichmv(indata,1,indat2,1,10) 
-          if (id2.ge.17) dtpi2=float(ia22h(indata(2)))*256.0+ 
-     +                      float(ia22h(indata(3)))
-          if (id2.lt.17) dtpi2=float(ia22h(indata(4)))*256.0+ 
-     +                      float(ia22h(indata(5)))
-         endif
+          if(.not.kst2) then
+             if (id2.ge.17) dtpi2=float(ia22h(indata(2)))*256.0+ 
+     +            float(ia22h(indata(3)))
+             if (id2.lt.17) dtpi2=float(ia22h(indata(4)))*256.0+ 
+     +            float(ia22h(indata(5)))
+          endif
+       endif
 C 
 C       CHECK FOR TPI SATURATION
 C 
