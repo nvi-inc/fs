@@ -28,8 +28,10 @@ C 970121 nrv Add station and code indices to npassl
 C 970206 nrv Remove ihdpo2,itra2,ihddi2 and add an index to
 C            ihdpos,itras,ihddir
 C 970718 nrv Change FREQLO and FREQRF to double precision
+C 971208 nrv Add FPCAL, FPCAL_BASE, IPCTONE, NPCTONE
 C
-      double precision effreq,ffact,bitdens,freqlo,freqrf
+      double precision effreq,ffact,bitdens,freqlo,freqrf,
+     .freqpcal,freqpcal_base
 C     ffact   - frequency factor, for S/X ionosphere corrections
 C     effreq  - effective frequency for each band, for S/X ionosphere 
 C               corrections
@@ -39,6 +41,10 @@ C
 C     VCBAND - final video bandwidth, MHz 
 C     FREQRF - observing frequency for each VC, in each code, MHz
 C     FREQLO - LO frequencies, for each channel, by station, for each code, MHz
+C     FREQPCAL - PCAL spacing frequencies, for each channel, 
+C                by station, for each code, MHz
+C     FREQPCAL_BASE - PCAL base frequencies, for each channel, 
+C                by station, for each code, MHz
 C     wavei   - constant to convert baseline length to wavelengths
 C     bwrms - rms bandwidth
 C     trkn    - total number of tracks recorded per band, per station 
@@ -48,7 +54,8 @@ C               at the sample rate.
 C     samprate - sample rate, per frequency code, Mb/s.
  
       integer ncodes,nfreq,npassf,nband,nchan,invcx,ifan,
-     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,npassl
+     .itras,ihdpos,ihddir,ntrakf,nstsav,istsav,ibbcx,npassl,ipctone,
+     .npctone
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
@@ -73,6 +80,8 @@ C     ntrakf - number of tracks recorded per pass for this code
 C     nstsav,istsav - number and indices of station names found on the "F" line
 C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
 C     npassl - number of passes in the pass order list
+C     ipctone - list of pcal tone numbers for each channel, station, code
+C     npctone - number in the above list
 C
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
      .lband,lpol,lnetsb,losb,lnafrsub,lbarrel,ls2mode,lprefix
@@ -104,6 +113,8 @@ C
      .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
      .       FREQRF(MAX_CHAN,max_stn,MAX_FRQ),
      .       FREQLO(MAX_CHAN,MAX_STN,MAX_FRQ),
+     .       FREQPCAL(MAX_CHAN,MAX_STN,MAX_FRQ),
+     .       FREQPCAL_BASE(MAX_CHAN,MAX_STN,MAX_FRQ),
      .       bitdens(max_stn,max_frq),
      .
      .       VCBAND(MAX_CHAN,max_stn,MAX_FRQ),
@@ -119,6 +130,8 @@ C
      .       nchan(max_stn,max_frq),
      .       invcx(max_chan,max_stn,max_frq),
      .       ibbcx(max_chan,max_stn,max_frq),
+     .       ipctone(max_tone,max_chan,max_stn,max_frq),
+     .       npctone(max_chan,max_stn,max_frq),
      .       itras(2,2,max_headstack,MAX_CHAN,MAX_subPASS,
      .               max_stn,max_frq),
      .       ihdpos(max_headstack,max_pass,max_stn,max_frq),
