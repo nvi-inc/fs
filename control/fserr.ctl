@@ -2183,6 +2183,9 @@ Fan must be on of 1:1, 1:2, 1:4, 4:1, 2:1, X0, X1, or X7.
 VF -204
 Barrel-roll must be one of: off, 8:1, 8:2, 8:4, 16:1, 16:2, 16:4, off4.
 ""
+VF -301
+Modes a, b, and c are not supported for vlba rack type.
+""
 VF -303
 Rate and fan ratio combination is not supported
 ""
