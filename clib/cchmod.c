@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+
 void cchmod(filename,permissions,ilen,error,flen)
 char *filename;
 int *permissions;
@@ -7,7 +10,6 @@ int flen;
 {
     char chname[64];
     int i;
-    void chmod();
 
     *error = 0;
     if ((flen < 0) || (flen > 64)){
