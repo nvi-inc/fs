@@ -280,6 +280,9 @@ enddef
 define  precond       00000000000
 schedule=prepass,#1
 enddef
+define  precondthin   00000000000
+schedule=prethin,#1
+enddef
 define  preob         00000000000
 onsource
 calon
@@ -310,6 +313,31 @@ halt
 xdisp=off
 srw
 !+5m28s
+et
+!+9s
+enddef
+define  prepassthin   00000000000
+wakeup
+xdisp=on
+" mount the next tape without cleaning the tape drive.
+" use the cont command when finished.
+halt
+xdisp=off
+check=*,-tp,-hd
+tape=low
+sff
+!+10m54s
+et
+!+9s
+wakeup
+xdisp=on
+"drop vacuum loop, clean the tape drive thoroughly.
+"re-thread the tape, establish vacuum.
+"type cont when finished.
+halt
+xdisp=off
+srw
+!+10m54s
 et
 !+9s
 enddef
