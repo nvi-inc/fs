@@ -4,6 +4,7 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 #define MAX_OUT 120
 #define MAX_BUF 256
@@ -44,6 +45,9 @@ long ip[5];
 	  icount++;
       if(icount < 2) 
 	logit(NULL,-503,"4f");
+      if(lclm.version != shm_addr->imk4fmv)
+	logitn(NULL,-504,"4f",lclm.version);
+      continue;
     }
 
     if(memcmp(buff+2,"ack",3)!=0 ) {
@@ -51,7 +55,6 @@ long ip[5];
 	 cls_snd(ip,output,strlen(output),0,0);
 	 ip[1]++;
       }
-      strcpy(output+iend,"debug:");
       ilen=strlen(output);
       icopy=MAX_OUT-(ilen+1);
       icopy= icopy < (nchar-2) ? icopy : (nchar-2);
