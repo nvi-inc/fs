@@ -28,7 +28,7 @@ C
       integer*2 isav3(10),izero3(10)
       integer*2 lwho
       character*5 name
-      logical kif1,kif2,kif3
+      logical kif1,kif2,kif3, kst1,kst2
 
       data icmnd/ 2H#9,2H3%,2H__/,iques/2H??  /,idolr/2H$$  /
       data isav /2H#9,2H3=,0,0,0,0,2H__,0,0,0/
@@ -39,8 +39,11 @@ C
 C
 C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
+      kst1=ichcm_ch(ldv1nf,1,'u').eq.0
+      kst2=ichcm_ch(ldv2nf,1,'u').eq.0
+C
       call fs_get_rack(rack)
-      if(VLBA.eq.and(rack,VLBA)) then
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call get_vatt(name,lwho,ierr,ich1nf_fs,ich2nf_fs)
         if(ierr.ne.0) return
       else
@@ -53,14 +56,19 @@ C
           call ichmv(isav,5,indata,3,8)
         endif
         if(kif3) then
-          call i32ma(isav3(3),iatif3_fs,imixif3_fs,iswif3_fs(1),
+          call fs_get_imixif3(imixif3)
+          call i32ma(isav3(3),iatif3_fs,imixif3,iswif3_fs(1),
      &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
         endif
       endif
 C
 C  TURN ON ALL THE ATTENUATORS
 C
-      if(VLBA.eq.and(rack,VLBA)) then
+      if (kst1.or.kst2) then
+         call scmds('sigoffnf',1)
+         ierr=0
+      endif
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call zero_vatt(name,lwho,ierr)
       else
         if(kif1.or.kif2) then
@@ -71,7 +79,8 @@ C
           if (kif3.and.ierr.ne.0) goto 8000
         endif
         if(kif3) then
-          call i32ma(izero3(3),63,imixif3_fs,iswif3_fs(1),
+          call fs_get_imixif3(imixif3)
+          call i32ma(izero3(3),63,imixif3,iswif3_fs(1),
      &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
           call matcn(izero3,-13,idolr,indata,nin,2,ierr)
         endif
@@ -85,7 +94,11 @@ C
 C
 C  RESET THE ATTENUATORS
 C
-      if(VLBA.eq.and(rack,VLBA)) then
+      if (kst1.or.kst2) then
+         call scmds('sigonnf',1)
+         ierr=0
+      endif
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call rst_vatt(name,lwho,ierr)
       else
         if(kif1.or.kif2) then
@@ -106,7 +119,11 @@ C
 8001  continue
       jerr=0
       jerr3=0
-      if(VLBA.eq.and(rack,VLBA)) then
+      if (kst1.or.kst2) then
+         call scmds('sigonnf',1)
+         jerr=0
+      endif
+      if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call rst_vatt(name,lwho,jerr)
       else
         if(kif1.or.kif2) then
@@ -115,7 +132,7 @@ C
         if(kif3) call matcn(isav3,-13,idolr,indata,nin,2,jerr3)
       endif
       jtry=jtry-1
-      if(VLBA.ne.and(rack,VLBA)) then   !don't retry device that was okay
+      if(VLBA.ne.rack.and.VLBA4.ne.rack) then !don't retry device that was okay
         if((kif1.or.kif2).and.(jerr.eq.0)) then
           kif1=.false.
           kif2=.false.
