@@ -18,10 +18,11 @@ static char *pb_key[ ]={"ignore","use"};
 #define DV_KEY  sizeof(dv_key)/sizeof( char *)
 #define PB_KEY  sizeof(pb_key)/sizeof( char *)
 
-int data_valid_dec(lcl,count,ptr)
+int data_valid_dec(lcl,count,ptr,kS2drive)
 struct data_valid_cmd *lcl;
 int *count;
 char *ptr;
+int kS2drive;
 {
     int ierr, arg_key(), arg_int();
     int len;
@@ -34,7 +35,7 @@ char *ptr;
       ierr=arg_key(ptr,dv_key,DV_KEY,&lcl->user_dv,0,FALSE);
       break;      
     case 2:
-      if(shm_addr->equip.drive[0] != S2) {
+      if(!kS2drive) {
 	*count=-1;
 	break;
       }
@@ -49,10 +50,11 @@ char *ptr;
     return ierr;
 }
 
-void data_valid_enc(output,count,lcl)
+void data_valid_enc(output,count,lcl,kS2drive)
 char *output;
 int *count;
 struct data_valid_cmd *lcl;
+int kS2drive;
 {
   int ivalue;
 
@@ -67,7 +69,7 @@ struct data_valid_cmd *lcl;
       sprintf(output,"0x%x",ivalue);
     break;
   case 2:
-    if(shm_addr->equip.drive[0] != S2) {
+    if(!kS2drive) {
       *count=-1;
       break;
     }

@@ -231,8 +231,9 @@ rec_mode     qk1 4201 01 FFF008FFF
 rec_mode1    qk3 4201 01 FFF008FFF
 data_valid   qk1 4301 01 FFFFFFFFF
 data_valid1  qk3 4301 01 FFFFFFFFF
-data_valid   qk2 4302 01 FFFFFF0F7
-data_valid2  qk3 4302 01 FFFFFF0F7
+data_valid   qk2 4302 01 FFFFFFFFF
+data_valid2  qk3 4302 01 FFFFFFFF7
+data_valid   qkr 4300 01 FFFFFFFF7
 label        qk1 4401 01 FFF008FFF
 label1       qk3 4401 01 FFF008FFF
 rec          qk1 4501 01 FFF008FFF
