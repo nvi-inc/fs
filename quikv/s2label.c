@@ -144,17 +144,19 @@ parse:
 	if(strcmp(tapetype,lcl.tapetype)!=0) {
 	  ierror=1;
 	  ierr=-306;
-	  goto check;
+	  goto rclcn0;
 	}
       } else
 	add_rclcn_tapetype_set(&buffer,device,lcl.tapetype);
 
       iset=TRUE;
 rclcn:
+      ierror=0;
+rclcn0:
+      iret=0;
       end_rclcn_req(ip,&buffer);
       skd_run("rclcn",'w',ip);
       skd_par(ip);
-      iret=ierror=0;
 
 check:
       if (ichold != -99) {
@@ -167,19 +169,19 @@ check:
 
       if(iret)
 	return;
-      else if(ierror)
-	goto error;
 
       if(ip[2]<0) {
 	cls_clr(ip[0]);
 	ip[0]=ip[1]=0;
 	return;
       }
-      if(iset)
+      if(iset && !ierror)
 	shm_addr->KHALT=0;
 
       s2label_dis(command,ip);
-      return;
+
+      if(!ierror)
+	return;
 
 error:
       ip[0]=0;
