@@ -114,6 +114,7 @@ typedef struct fscom {
         struct {
            int rack;
            int drive;
+	   int drive_type;
         } equip; 
 
         int klvdt_fs;
