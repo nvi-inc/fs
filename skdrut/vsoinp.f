@@ -59,6 +59,7 @@ C     2. Now call routines to retrieve all the source information.
           write(lu,'("VSOINP01 - Error getting $SOURCE information",
      .    " for ",a/"iret=",i5," ierr=",i5)') sordefnames(isor)(1:il),
      .    iret,ierr
+          call errormsg(iret,ierr,'SOURCE',lu)
           ierr1=1
         endif
 C

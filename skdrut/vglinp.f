@@ -1,4 +1,4 @@
-      SUBROUTINE VGLINP(ivexnum,LU,IERR)
+      SUBROUTINE VGLINP(ivexnum,LU,IERR,iret)
 
 C  This routine gets the experiment information.
 C  For now, the experiment name, description and PI name are put
@@ -7,6 +7,7 @@ C  Called by drudg/SREAD.
 C
 C History
 C 960603 nrv New.
+C 970124 nrv Add iret to call.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
@@ -25,13 +26,19 @@ C  LOCAL:
       integer idum,iret,nch,ichmv_ch
       integer fget_global_lowl,fvex_field,ptr_ch,fvex_len
 
+C Initialize.
+
+      call ifill(lexper,1,8,oblank)
+      cexperdes=' '
+      cpiname=' '
+      ccorname=' '
+
 C 1. Get experiment name
 
       ierr=1
       iret = fget_global_lowl(ptr_ch('exper_name'//char(0)),
      .ptr_ch('EXPER'//char(0)),
      .ivexnum)
-      call ifill(lexper,1,8,oblank)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -48,7 +55,6 @@ C 2. Get experiment description
       iret = fget_global_lowl(ptr_ch('exper_description'//char(0)),
      .ptr_ch('EXPER'//char(0)),
      .ivexnum)
-      cexperdes=' '
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -65,7 +71,6 @@ C 3. Get PI name
       iret = fget_global_lowl(ptr_ch('PI_name'//char(0)),
      .ptr_ch('EXPER'//char(0)),
      .ivexnum)
-      cpiname=' '
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -82,7 +87,6 @@ C 4. Get correlator
       iret = fget_global_lowl(ptr_ch('target_correlator'//char(0)),
      .ptr_ch('EXPER'//char(0)),
      .ivexnum)
-      ccorname=' '
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
