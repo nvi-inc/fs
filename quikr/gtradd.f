@@ -42,7 +42,7 @@ C        IFSEC  - fractional seconds
 cxx      dimension isuf(2)
       integer*2 isuf(2)
 C               - suffixes to be scanned for
-      dimension fld(3)
+      double precision fld(3)
 C               - H,M,S values
       character cjchar
 C
