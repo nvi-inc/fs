@@ -26,6 +26,7 @@ static char *key_mode[ ]={ "prn", "v"  , "m"  , "a"  , "b"  , "c"  ,
 #define NKEY_MODE sizeof(key_mode)/sizeof( char *)
 
 extern struct fscom *shm_addr;
+extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive;
 
 mout2(it,iyear)
 
@@ -36,8 +37,7 @@ int iyear;
   int idum;
   int i, sv, k, icr;
   int irah,iram,idecd,idecm;
-  int kMrack, kMdrive;
-  int itemp, ivalue;
+  int ivalue;
   unsigned int iversion;
   double azim={0.0},elev={0.0};
   double ha={0.0},dc,az,el;
@@ -58,13 +58,8 @@ int iyear;
   void preflt();
   void preint();
   int len;
-
-  kMrack = 0;
-  kMdrive = 0;
-  itemp=shm_addr->equip.rack;
-  if ((itemp & 0x01) || (itemp & 0x04)) kMrack=1;
-  itemp=shm_addr->equip.drive;
-  if ((itemp & 0x01) || (itemp & 0x04)) kMdrive=1;
+  int inuse, rstate, rstate_valid, position_valid;
+  long int position,posvar;
 
   ptfeet = &feet[0];
   checkln = &checkarr[0];
@@ -158,39 +153,54 @@ int iyear;
 /* ROW 3 */
 
 /* MODE */
-  move(ROW1+2,COL1+1);
-  if (kMrack) {
+  move(ROW1+2,COL1+0);
+
+  if (kS2drive) {
+    char mode[21];
+    strcpy(mode,shm_addr->rec_mode.mode);
+    for (i=strlen(mode);i<sizeof(mode);i++)
+      mode[i]=' ';
+    mode[sizeof(mode)-1]=0;
+    printw(mode);
+  } else if (kMrack) {
     switch (shm_addr->imodfm) {
     case 0:
-      printw(" a ");
+      printw("  a ");
       break;
     case 1:
-      printw(" b ");
+      printw("  b ");
       break;
     case 2:
-      printw(" c ");
+      printw("  c ");
       break;
     case 3:
-      printw("d  ");
+      printw(" d  ");
       break;
     default:
-      printw("   ");
+      printw("    ");
     }
-  }
-  else {
+  } else if(kVrack) {
     ivalue=shm_addr->vform.mode;
 /* hex value for version 290 */
-    if (shm_addr->form_version < 656) iversion = 0x7000;
-    else iversion = 0x0002;
-    if(ivalue >= 0 && ivalue <= NKEY_MODE)
-      printw("%-3s",key_mode[ivalue]);
+    if (shm_addr->form_version < 656)
+      iversion = 0x7000;
     else
-      printw("  ");
+      iversion = 0x0002;
+    if(ivalue >= 0 && ivalue <= NKEY_MODE)
+      printw("%-4s",key_mode[ivalue]);
+    else
+      printw("    ");
   }
 
 /* RATE */
   move(ROW1+2,COL1+5);
-  if (kMrack) {
+  if(kS2drive) {
+    move(ROW1+1,COL1+11);
+    if(shm_addr->rec_mode.group>7)
+      printw("$");
+    else if(shm_addr->rec_mode.group>=0)
+      printw("%1d",0x7&shm_addr->rec_mode.group);
+  } else if (kMrack) {
     switch (shm_addr->iratfm) {
     case 0:
       printw("8.000");
@@ -219,8 +229,7 @@ int iyear;
     default:
       printw("     ");
     }
-  }
-  else {
+  } else if (kVrack) {
     switch (shm_addr->vform.rate) {
     case 0:
       printw("0.250");
@@ -252,48 +261,65 @@ int iyear;
     }
   }
   move(ROW1+2,COL1+11);
-  switch (shm_addr->ispeed) {
-  case 0:
-    printw("  0");
-    break;
-  case 1:
-    printw("  3");
-    break;
-  case 2:
-    printw("  8");
-    break;
-  case 3:
-    printw(" 17");
-    break;
-  case 4:
-    printw(" 34");
-    break;
-  case 5:
-    printw(" 68");
-    break;
-  case 6:
-    printw("135");
-    break;
-  case 7:
-    printw("270");
-    break;
-  case -3:
-    printw("%3d",shm_addr->cips/100);
-  default:
-    printw("  0");
-  }
+  if(kS2drive) {
+    move(ROW1+1,COL1+19);
+    switch (shm_addr->s2st.speed) {
+    case 1:
+      printw(" lp");
+      break;
+    case 2:
+      printw("slp");
+      break;
+    default:
+      if(shm_addr->s2st.speed<=0)
+	printw("   ");
+      else
+	printw("$$$");
+    }
+  } else if(kMdrive || kVdrive)
+    switch (shm_addr->ispeed) {
+    case 0:
+      printw("  0");
+      break;
+    case 1:
+      printw("  3");
+      break;
+    case 2:
+      printw("  8");
+      break;
+    case 3:
+      printw(" 17");
+      break;
+    case 4:
+      printw(" 34");
+      break;
+    case 5:
+      printw(" 68");
+      break;
+    case 6:
+      printw("135");
+      break;
+    case 7:
+      printw("270");
+      break;
+    case -3:
+      printw("%3d",shm_addr->cips/100);
+    default:
+      printw("  0");
+    }
 
   move(ROW1+2,COL1+16);
-  switch (shm_addr->idirtp) {
-  case 0:
-    printw("REV");
-    break;
-  case 1:
-    printw("FOR");
-    break;
-  default:
-    printw("   ");
-  }
+  if(kMdrive || kVdrive)
+    switch (shm_addr->idirtp) {
+    case 0:
+      printw("REV");
+      break;
+    case 1:
+      printw("FOR");
+      break;
+    default:
+      printw("   ");
+    }
 
   move(ROW1+2,COL1+26);
   printw("%.8s",shm_addr->LSKD);
@@ -369,39 +395,107 @@ int iyear;
 
 /* ROW 5 */
 
+  inuse=shm_addr->actual.s2rec_inuse;
+  rstate=shm_addr->actual.s2rec[inuse].rstate;
+  rstate_valid=shm_addr->actual.s2rec[inuse].rstate_valid;
+  position=shm_addr->actual.s2rec[inuse].position;
+  posvar=shm_addr->actual.s2rec[inuse].posvar;
+  position_valid=shm_addr->actual.s2rec[inuse].position_valid;
+
   move(ROW1+4,COL1+0);
-  if (shm_addr->IRDYTP == 0)
-    printw("READY   ");
-  else if (shm_addr->IRDYTP == 1)
-    printw("NOTREADY");
-  else
-    printw("        ");
+  if(kS2drive) {
+    if(!rstate_valid)
+      printw("        ");
+    else
+      switch (rstate) {
+      case RCL_RSTATE_PLAY:
+	printw("PLAY    ");
+	break;
+      case RCL_RSTATE_RECORD:
+	printw("RECORD  ");
+	break;
+      case RCL_RSTATE_REWIND:
+	printw("REWIND  ");
+	break;
+      case RCL_RSTATE_FF:
+	printw("FF      ");
+	break;
+      case RCL_RSTATE_STOP:
+	printw("STOP    ");
+	break;
+      case RCL_RSTATE_PPAUSE:
+	printw("PPAUSE  ");
+	break;
+      case RCL_RSTATE_RPAUSE:
+	printw("RPAUSE  ");
+	break;
+      case RCL_RSTATE_CUE:
+	printw("CUE     ");
+	break;
+      case RCL_RSTATE_REVIEW:
+	printw("REVIEW  ");
+	break;
+      case RCL_RSTATE_NOTAPE:
+	printw("NOTAPE  ");
+	break;
+      case RCL_RSTATE_POSITION:
+	printw("POSITION");
+	break;
+      default:
+	printw("0x%4.4x  ",rstate);
+      }
+  } else if(kVdrive || kMdrive) {
+    if (shm_addr->IRDYTP == 0)
+      printw("READY   ");
+    else if (shm_addr->IRDYTP == 1)
+      printw("NOTREADY");
+    else
+      printw("        ");
+  }
   move(ROW1+4,COL1+9);
-  if (shm_addr->ICAPTP == 0)
-    printw("STOPPED");
-  else if (shm_addr->ICAPTP == 1)
-    printw("MOVING ");
-  else
-    printw("       ");
-  move(ROW1+4,COL1+17);
-  memcpy(ptfeet,shm_addr->LFEET_FS,6);
-  printw("%.5s",ptfeet);
-  move(ROW1+4,COL1+29);
-  preint(outf,(int)(shm_addr->systmp[28]+.5),-3,0);
-  printw("%s",outfloat);
-
-  move(ROW1+4,COL1+33);
-  preint(outf,(int)(shm_addr->systmp[29]+.5),-3,0);
-  printw("%s",outfloat);
-
-  move(ROW1+4,COL1+37);
-  preint(outf,(int)(shm_addr->systmp[30]+.5),-3,0);
-  printw("%s",outfloat);
-
-  if(!kMrack) {
-    move(ROW1+4,COL1+41);
-    preint(outf,(int)(shm_addr->systmp[31]+.5),-3,0);
+  if(kS2drive) {
+    if(!position_valid)
+      printw("       ");
+    else if(position == RCL_POS_UNKNOWN)
+      printw("unknown");
+    else 
+      printw("%5ld  ",position);
+    move(ROW1+4,COL1+17);
+    if(!position_valid)
+      printw("       ");
+    else if(posvar == RCL_POS_UNKNOWN)
+      printw("unknown");
+    else 
+      printw("%5ld  ",posvar);
+  } else if(kMdrive || kVdrive) {
+    if (shm_addr->ICAPTP == 0)
+      printw("STOPPED");
+    else if (shm_addr->ICAPTP == 1)
+      printw("MOVING ");
+    else
+      printw("       ");
+    move(ROW1+4,COL1+17);
+    memcpy(ptfeet,shm_addr->LFEET_FS,6);
+    printw("%.5s",ptfeet);
+  }
+  if(kMrack||kVrack) {
+    move(ROW1+4,COL1+29);
+    preint(outf,(int)(shm_addr->systmp[28]+.5),-3,0);
     printw("%s",outfloat);
+     
+    move(ROW1+4,COL1+33);
+    preint(outf,(int)(shm_addr->systmp[29]+.5),-3,0);
+    printw("%s",outfloat);
+    
+    move(ROW1+4,COL1+37);
+    preint(outf,(int)(shm_addr->systmp[30]+.5),-3,0);
+    printw("%s",outfloat);
+    
+    if(kVrack) {
+      move(ROW1+4,COL1+41);
+      preint(outf,(int)(shm_addr->systmp[31]+.5),-3,0);
+      printw("%s",outfloat);
+    }
   }
 
   it[5]=iyear;
@@ -430,12 +524,14 @@ int iyear;
   printw("%s",outfloat);
 */
 
-  move(ROW1+4,COL1+74);
-  preint(outf,shm_addr->ipashd[0],-3,0);
-  printw("%s",outfloat);
-  move(ROW1+4,COL1+78);
-  preint(outf,shm_addr->ipashd[1],-3,0);
-  printw("%s",outfloat);
+  if(kMdrive || kVdrive) {
+    move(ROW1+4,COL1+74);
+    preint(outf,shm_addr->ipashd[0],-3,0);
+    printw("%s",outfloat);
+    move(ROW1+4,COL1+78);
+    preint(outf,shm_addr->ipashd[1],-3,0);
+    printw("%s",outfloat);
+  }
 
 /* ROW 6 */
 
@@ -468,7 +564,7 @@ int iyear;
         }
       }
     }
-  } else {                            /* VLBA */
+  } else if(kVrack) {                            /* VLBA */
     for (i=0; i<17; i++) {
       if (i<=13) {
         if (shm_addr->check.bbc[i]<=0) {
@@ -506,9 +602,12 @@ int iyear;
     if (shm_addr->ICHK[17]<=0) {
       strcat(checkln," tp");
     }
-  } else {
+  } else if(kVdrive) {
     if (shm_addr->check.rec<=0)
-      strcat(checkln," rc");
+      strcat(checkln," tp");
+  } else if(kS2drive) {
+    if (shm_addr->check.s2rec.check <=0)
+      strcat(checkln," tp");
   }
 
   for (i=18; i<21; i++) {
