@@ -69,11 +69,12 @@ C
       if (cjchar(parm,1).ne.',') goto 1440
       itsk1=0
       itsk2=0
+      itsk3=0
       goto 1460
 C
 C Call GTTIM to decode snap time format
 C
-1440  call gttim(ibuf,ic2,ich-2,0,itsk1,itsk2,it3,ierr)
+1440  call gttim(ibuf,ic2,ich-2,0,itsk1,itsk2,itsk3,ierr)
       if (ierr.ge.0) goto 1450
         outbuf='LXSKD70 - error sp '
         call ib2as(ierr,answer,1,4)
@@ -86,17 +87,20 @@ C
 C
 C Store calculated start schedule day in ITSK1
 C
-1450  itsk1=mod(itsk1,1024)
+1450  continue
+C     itsk1=mod(itsk1,1024)
 C
 C Get the schedule stop time
 C
 1460  ic3=ich
       call gtprm(ibuf,ich,nchar,1,parm,id)
       if (cjchar(parm,1).ne.',') goto 1470
-      itske1=9999
+C not Y2038K compliant
+      itske1=(2038-1970)*1024+1
+      itske2=0
       itske2=0
       goto 1700
-1470  call gttim(ibuf,ic3,ich-2,0,itske1,itske2,it3,ierr)
+1470  call gttim(ibuf,ic3,ich-2,0,itske1,itske2,itske3,ierr)
       if (ierr.ge.0) goto 1480
         outbuf='LXSKD80 - error sp '
         call ib2as(ierr,answer,1,4)
@@ -106,7 +110,8 @@ C
         call po_put_c(outbuf)
         icode=-1
         goto 1700
-1480  itske1=mod(itske1,1024)
+1480  continue
+c     itske1=mod(itske1,1024)
 C
 1700  continue
       return
