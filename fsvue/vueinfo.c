@@ -43,6 +43,7 @@ static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
 /*  */
 void setup_ids();
 void helpstr_();
+void skd_wait();
 void get_err();
 
 #define MAX_BUF 256
@@ -65,7 +66,7 @@ main(int argc, char *argv[])
     kV4rack, kK4drive[2],kK41drive_type[2],kK42drive_type[2],selectm;
   int i, j, iyear;
   int ip[5], it[6];
-  char what[10];
+  char what[10], cmd[100];
   char cnam[120];
   char runstr[120], cthp[10];
   int clength;
@@ -83,14 +84,18 @@ main(int argc, char *argv[])
   char buff[120];
   char log_name[15];
   char *whichone;
+  char ibc1[12],ibc2[12],pathname[MAX_LEN];
   int *p;
 
-/* connect me to the FS */
+/* connect me to the FS  */
   putpname("vueinfo");
   setup_ids();
   fs = shm_addr;
-  
+
+  if (argc<2) {printf("vueinfo needs more information\n"); exit(0);}
   strcpy(what,argv[1]);
+  if (argc>=3) strcpy(cmd,argv[2]);
+  else cmd[0]='\0';
 
   rte_time(it,&iyear);
 
@@ -137,8 +142,8 @@ main(int argc, char *argv[])
     exit(0);
   } else if (strstr(what,"sour")) {
     sprintf(buff,"%.10s",shm_addr->lsorna);
-    if(buff[0]==' ');
-    sprintf(buff,"%.10s","NO SOURCE ");
+    if(buff[0]==' ')
+      sprintf(buff,"%.10s","NO SOURCE ");
     buff[strlen(buff)]='\0';
     printf("%s",buff);
     exit(0);
@@ -468,13 +473,8 @@ main(int argc, char *argv[])
     buff[strlen(buff)]='\0';
     printf("%s",buff);
     exit(0);
-  } else if (strstr(what,"list")) {
-    strncpy(site,shm_addr->LSKD,8);
-    if (strstr(site,"none")) {
-      printf("no schedule currently active");
-    } else {
-      printf("list");
-    }
+  } else if (strstr(what,"vuecalq")) {
+    vuecalq(cmd);
     exit(0);
   } else if (strstr(what,"tactim")) {
     printf("day[%f]\nmsec_counter[%0.4f]\nusec_bais[%0.4f]\ncooked_correction[%0.4f]\nRMS[%0.4f]\nusec_average[%0.4f]\nmax[%0.4f]\nmin[%0.4f]\nusec_correction[%d]\nnsec_accuracy[%d]\nsec_average[%d]",
@@ -491,88 +491,119 @@ main(int argc, char *argv[])
 	   shm_addr->tacd.sec_average);
       exit(0);
   } else if (strstr(what,"fscom")) {
-    printf("[%d] ",fs->iclbox);
-    printf("[%d] ",fs->iclopr);
-    printf("[%0.4f] ",fs->AZOFF);
-    printf("[%0.4f] ",fs->DECOFF);
-    printf("[%0.4f] ",fs->ELOFF);
-    printf("[%d] ",fs->ibmat);
-    printf("[%d]\n",fs->ibmcb);
-    printf("[%d,%d] ",fs->ICAPTP[0],fs->ICAPTP[1]);
-    printf("[%d,%d] ",fs->IRDYTP[0],fs->IRDYTP[1]);
-    printf("[%d] ",fs->IRENVC);
-    printf("[%d] ",fs->ILOKVC);
-    printf("[%d,%d,",fs->ITRAKA[0],fs->ITRAKA[1]);
-    printf("%d,%d]\n",fs->ITRAKB[0],fs->ITRAKB[1]);
-    printf("[%d,%d,%d,",fs->TPIVC[0],fs->TPIVC[1],fs->TPIVC[2]);
+    printf("iclbox=%d, ",fs->iclbox);
+    printf("iclopr=%d\n",fs->iclopr);
+    printf("AZOFF=%0.4f, ",fs->AZOFF);
+    printf("DECOFF=%0.4f, ",fs->DECOFF);
+    printf("ELOFF=%0.4f\n",fs->ELOFF);
+    printf("ibmat=%d, ",fs->ibmat);
+    printf("ibmcb=%d\n",fs->ibmcb);
+    printf("ICAPTP=[%d,%d], ",fs->ICAPTP[0],fs->ICAPTP[1]);
+    printf("IRDYTP=[%d,%d], ",fs->IRDYTP[0],fs->IRDYTP[1]);
+    printf("IRENVC=%d, ",fs->IRENVC);
+    printf("ILOKVC=%d\n ",fs->ILOKVC);
+    printf("ITRAKA=[%d,%d], ",fs->ITRAKA[0],fs->ITRAKA[1]);
+    printf("ITRAKB=[%d,%d]\n",fs->ITRAKB[0],fs->ITRAKB[1]);
+    printf("TPIVC=[%d,%d,%d,",fs->TPIVC[0],fs->TPIVC[1],fs->TPIVC[2]);
     printf("%d,%d,%d,",fs->TPIVC[3],fs->TPIVC[4],fs->TPIVC[5]);
-    printf("%d,%d,%d,",fs->TPIVC[6],fs->TPIVC[7],fs->TPIVC[8]);
-    printf("%d,%d,%d]\n",fs->TPIVC[9],fs->TPIVC[10],fs->TPIVC[11]);
-    printf("[%0.4f,%0.4f] ",fs->ISTPTP[0],fs->ISTPTP[1]);
-    printf("[%0.4f,%0.4f] ",fs->ITACTP[0],fs->ITACTP[1]);
-    printf("[%d] ",fs->KHALT);
-    printf("[%d] ",fs->KECHO);
-    printf("[%d,%d,%d,%d] ",fs->KENASTK[0][0],fs->KENASTK[0][1],
+    printf("%d,%d,%d,\n",fs->TPIVC[6],fs->TPIVC[7],fs->TPIVC[8]);
+    printf("%d,%d,%d,",fs->TPIVC[9],fs->TPIVC[10],fs->TPIVC[11]);
+    printf("%d,%d,%d]\n",fs->TPIVC[12],fs->TPIVC[13],fs->TPIVC[14]);
+    printf("ISTPTP=[%0.4f,%0.4f], ",fs->ISTPTP[0],fs->ISTPTP[1]);
+    printf("ITACTP=[%0.4f,%0.4f], ",fs->ITACTP[0],fs->ITACTP[1]);
+    printf("KHALT=%d, ",fs->KHALT);
+    printf("KECHO=%d\n",fs->KECHO);
+    printf("KENASTK=[%d,%d,%d,%d], ",fs->KENASTK[0][0],fs->KENASTK[0][1],
 	   fs->KENASTK[1][0],fs->KENASTK[1][1]);
-    printf("[%d:%d:%d] ",fs->INEXT[0],fs->INEXT[1],fs->INEXT[2]);
-    printf("[%0.4f] ",fs->RAOFF);
-    printf("[%0.4f] ",fs->XOFF);
-    printf("[%0.4f]\n",fs->YOFF);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LLOG[0],fs->LLOG[1],fs->LLOG[2],fs->LLOG[3],
-	   fs->LLOG[4],fs->LLOG[5],fs->LLOG[6],fs->LLOG[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LNEWPR[0],fs->LNEWPR[1],fs->LNEWPR[2],fs->LNEWPR[3],
-	   fs->LNEWPR[4],fs->LNEWPR[5],fs->LNEWPR[6],fs->LNEWPR[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LNEWSK[0],fs->LNEWSK[1],fs->LNEWSK[2],fs->LNEWSK[3],
-	   fs->LNEWSK[4],fs->LNEWSK[5],fs->LNEWSK[6],fs->LNEWSK[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LPRC[0],fs->LPRC[1],fs->LPRC[2],fs->LPRC[3],
-	   fs->LPRC[4],fs->LPRC[5],fs->LPRC[6],fs->LPRC[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LSTP[0],fs->LSTP[1],fs->LSTP[2],fs->LSTP[3],
-	   fs->LSTP[4],fs->LSTP[5],fs->LSTP[6],fs->LSTP[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LSKD[0],fs->LSKD[1],fs->LSKD[2],fs->LSKD[3],
-	   fs->LSKD[4],fs->LSKD[5],fs->LSKD[6],fs->LSKD[7]);
-    printf("[%c%c%c%c%c%c%c%c] ",
-	   fs->LEXPER[0],fs->LEXPER[1],fs->LEXPER[2],fs->LEXPER[3],
-	   fs->LEXPER[4],fs->LEXPER[5],fs->LEXPER[6],fs->LEXPER[7]);
-    printf("[%c%c%c%c%c%c] ",
-	   fs->LFEET_FS[0][0],fs->LFEET_FS[0][1],fs->LFEET_FS[0][2],
-	   fs->LFEET_FS[0][3],fs->LFEET_FS[0][4],fs->LFEET_FS[0][5]);
-    printf("[%c%c%c%c%c%c]\n",
-	   fs->LFEET_FS[1][0],fs->LFEET_FS[1][1],fs->LFEET_FS[1][2],
-	   fs->LFEET_FS[1][3],fs->LFEET_FS[1][4],fs->LFEET_FS[1][5]);
-    printf("[%d,%d,%d,%d] ",
+    printf("INEXT=[%d:%d:%d]\n",fs->INEXT[0],fs->INEXT[1],fs->INEXT[2]);
+    printf("RAOFF=%0.4f, ",fs->RAOFF);
+    printf("XOFF=%0.4f, ",fs->XOFF);
+    printf("YOFF=%0.4f, ",fs->YOFF);
+    printf("LLOG=%0.8s\n", fs->LLOG);
+    printf("INEWPR=%0.8s, ", fs->LNEWPR);
+    printf("LNEWSK=%0.8s, ", fs->LNEWSK);
+    printf("LPRC=%0.8s, ", fs->LPRC);
+    printf("LSTP=%0.8s, ", fs->LSTP);
+    printf("LSKD=%0.8s\n", fs->LSKD);
+    printf("LEXPER=%0.8s, ", fs->LEXPER);
+    printf("LFEET_FS=%0.6s, ", fs->LFEET_FS[0]);
+    printf("LFEET_FS2=%0.6s, ", fs->LFEET_FS[1]);
+    printf("lgen=[%d,%d,%d,%d]\n ",
 	   fs->lgen[0][0],fs->lgen[0][1],fs->lgen[1][0],fs->lgen[1][1]);
+    printf("ICHK=[");
     for (i=0; i<=22; i++) {
-      printf("[%d] ",
+      printf("%d, ",
 	     fs->ICHK[i]);
 	     }
-    printf("\n");
-    printf("[%0.4f] ",fs->tempwx);
-    printf("[%0.4f] ",fs->humiwx);
-    printf("[%0.4f] ",fs->preswx);
-    printf("[%0.4f] ",fs->ep1950);
-    printf("[%0.4f] ",fs->epoch);
-    printf("[%0.4f] ",fs->cablev);
-    printf("[%0.4f] ",fs->height);
-    printf("[%0.4f] ",fs->ra50);
-    printf("[%0.4f] ",fs->dec50);
-    printf("[%0.4f] ",fs->alat);
-    printf("[%0.4f]\n",fs->wlong);
-    for (i=0; i<=31; i++) {
-      printf("[%0.4f] ",
-	     fs->systmp[i]);
-      if(i==10 || i==20) printf("\n");
-      	     }
-    printf("\n");
-    printf("[%d]",fs->ldsign);
+    printf("]\n");
+    printf("tempwx=%0.4f, ",fs->tempwx);
+    printf("humiwx=%0.4f, ",fs->humiwx);
+    printf("preswx=%0.4f, ",fs->preswx);
+    printf("speedwx=%0.4f, ",fs->speedwx);
+    printf("directionwx=%d\n",fs->directionwx);
+    printf("ep1950=%0.4f, ",fs->ep1950);
+    printf("epoch=%0.4f, ",fs->epoch);
+    printf("cablev=%0.4f, ",fs->cablev);
+    printf("height=%0.4f\n",fs->height);
+    printf("ra50=%0.4f, ",fs->ra50);
+    printf("dec50=%0.4f, ",fs->dec50);
+    printf("alat=%0.4f, ",fs->alat);
+    printf("wlong=%0.4f\n",fs->wlong);
+    printf("systmp=[");
+    for (i=0; i<32; i++) {
+      if(i==8 || i==16 || i==24) printf("\n");
+      if (i==31) printf("%0.4f",fs->systmp[i]);
+      else printf("%0.4f, ",fs->systmp[i]);
+    }
+    printf("]\n");
+    printf("ldsign=%d\n",fs->ldsign);
+    printf("lfreqv=%0.90s\n",fs->lfreqv);
+    printf("lnaant=%0.8s, ",fs->lnaant);
+    printf("lsorna=%0.10s\n",fs->lsorna);
+    printf("idevant=%0.64s\n",fs->idevant);
+    printf("idevgpib=%0.64s\n",fs->idevgpib);
+    printf("idevlog0=%0.64s\n",fs->idevlog[0]);
+    printf("idevlog1=%0.64s\n",fs->idevlog[1]);
+    printf("idevlog2=%0.64s\n",fs->idevlog[2]);
+    printf("idevlog3=%0.64s\n",fs->idevlog[3]);
+    printf("idevlog4=%0.64s\n",fs->idevlog[4]);
+    printf("ndevlog=%d, ",fs->ndevlog);
+    printf("imodfm=%d, ",fs->imodfm);
+    printf("ipashd=[%d,%d,%d,%d], ",
+	   fs->ipashd[0][0],fs->ipashd[0][1],
+	   fs->ipashd[1][0],fs->ipashd[1][1]);
+    printf("iratfm=%d, ",fs->iratfm);
+    printf("ispeed=[%d,%d]\n",fs->ispeed[0],fs->ispeed[1]);
+    printf("idirtp=[%d,%d], ",fs->idirtp[0],fs->idirtp[1]);
+    printf("cips=[%d,%d], ",fs->cips[0],fs->cips[1]);
+    printf("bit_density=[%d,%d], ",fs->bit_density[0],fs->bit_density[1]);
+    printf("ienatp=[%d,%d]\n",fs->ienatp[0],fs->ienatp[1]);
+    printf("inp1if=%d, ",fs->inp1if);
+    printf("inp2if=%d, ",fs->inp2if);
+    printf("ionsor=%d\n",fs->ionsor);
+    printf("imaxtpsd=[%d,%d], ",fs->imaxtpsd[0],fs->imaxtpsd[1]);
+    printf("iskdtpsd=[%d,%d], ",fs->iskdtpsd[0],fs->iskdtpsd[1]);
+    printf("motorv=[%0.4f,%0.4f]\n",fs->motorv[0],fs->motorv[1]);
+    printf("inscint=[%0.4f,%0.4f], ",fs->inscint[0],fs->inscint[1]);
+    printf("inscsl=[%0.4f,%0.4f]\n",fs->inscsl[0],fs->inscsl[1]);
+    printf("outscint=[%0.4f,%0.4f], ",fs->outscint[0],fs->outscint[1]);
+    printf("outscsl=[%0.4f,%0.4f]\n",fs->outscsl[0],fs->outscsl[1]);
+    printf("itpthick=[%d,%d], ",fs->itpthick[0],fs->itpthick[1]);
+    printf("wrvolt=[%0.4f,%0.4f], ",fs->wrvolt[0],fs->wrvolt[1]);
+    printf("capstan=[%d,%d]\n",fs->capstan[0],fs->capstan[1]);
+    exit(0);
+  } else if (strstr(what,"errs")) {
     exit(0);
   /*  } else if (strstr(what,"fs")) {
       exit(0);*/
+  } else if (strstr(what,"chksem")) {
+    if ( 1 == nsem_take("fs   ",1)) {
+       printf("fs already running");
+    }
+    if ( 1 == nsem_take("fsctl",1)) {
+       printf("fsctl semaphore failed");
+    }
+    exit(0);
   } else {
     printf("$$vueinfo$$");
     exit(0);
