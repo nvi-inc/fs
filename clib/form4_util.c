@@ -129,7 +129,11 @@ char *ptr;
     ierr=arg_key(ptr,key_fan,NKEY_FAN,&lcl->fan,2,TRUE);
     if(ierr==0) {
       int ic;
-      if (lcl->fan == 4)
+      if (lcl->fan == 2) {
+      	for (i=0;i<64;i++)
+	  if(lcl->codes[i]!=-1 && 0==(lcl->codes[i]&0x100))
+	    lcl->codes[i  ]=lcl->codes[i]|0x100;
+      } else if (lcl->fan == 4)
 	for (ic=0;ic<64;ic+=8) {
 	  i=ic;
 	  if(lcl->codes[i]!=-1 && 0==(lcl->codes[i]&0x100)) {
@@ -444,20 +448,26 @@ struct form4_cmd *lclc;
 char *buff;
 {
 
-  int i, itrack, map, stack, head, code[16];
+  int i, itrack, map, stack, head, code[16], icount;
 
-  sscanf(buff+2,
+  icount=sscanf(buff+2,
 	 "map[%i].stack[%i].head[%i] = x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x x%x",
 	 &map,&stack,&head,
 	 code+0,code+1,code+2 ,code+3 ,code+4 ,code+5 ,code+6 ,code+7,
 	 code+8,code+9,code+10,code+11,code+12,code+13,code+14,code+15);
 
-  if(map!=0)
+  if(map!=0 || icount <4)
+    return;
+
+  if(stack!=1 && stack!=2)
+    return;
+
+  if(head <2 || head >33)
     return;
 
   itrack=32*(stack-1)+head-2;
 
-  for (i=0;i<16;i++) {
+  for (i=0;i<(icount-3);i++) {
     if(code[i]==0xff)
       lclc->codes[itrack+i]=-1;
     else
@@ -489,4 +499,3 @@ char *buff;
   }
 
 }
-
