@@ -118,6 +118,7 @@ main()
 
     /* loop forever for message received */
 
+    putpname("mcbcn");
     setup_ids();    /* attach to the shared memory */
     rte_prior(FS_PRIOR);
     initialized = FALSE;
@@ -1063,7 +1064,10 @@ int iparm,i,inext,ilast;
     if(ilast>necho) strcat(secho_out,"...");
 
 report:
+/*
     memcpy(&iparm,"to",2);
     cls_snd(&shm_addr->iclbox,secho_out,strlen(secho_out),0,iparm);
+*/
+    logit(secho_out,0,NULL);
     necho=0;
 }
