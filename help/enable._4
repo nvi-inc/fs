@@ -6,10 +6,11 @@ Response:   enable/stack1,stack2
 
 
 Settable parameters:
-stack1,stack2   Stack to be enabled. May be stack1, stack2, or null. 
+stack1,stack2   Stack to be enabled. May be s1 (stack1), s2
+                (stack2), or null. 
 
 Monitor-only parameters: none
 
 Comments: 
 MAT module functions available. The use of * as a parameter is not
-supported by this command.
+supported by this command. 

@@ -81,9 +81,19 @@ C  loop on the number of channels read from schedule file
 C           nch = nch + ib2as(idoub(ix,istn,icod),ibuf,nch,ileft+2)
             nch = nch + ib2as(idoub(ichan,istn,icod),ibuf,nch,ileft+2)
 	  else if (ido.eq.4) then ! use character array
-            if (ichcm_ch(ldoub(ichan,istn,icod),1,'U').eq.0) then !U/L
-              if (im.eq.1) nch = ichmv_ch(ibuf,nch,'U')
-              if (im.eq.2) nch = ichmv_ch(ibuf,nch,'L')
+            if (ichcm_ch(ldoub(ichan,istn,icod),1,'U').eq.0.or.
+     .          ichcm_ch(ldoub(ichan,istn,icod),1,'L').eq.0) then !U/L
+C             For the usb, take the LO sb as given
+              if (im.eq.1) nch = ichmv(ibuf,nch,
+     .            ldoub(ichan,istn,icod),1,1)
+C             For the lsb, take the other one
+              if (im.eq.2) then
+                if (ichcm_ch(ldoub(ichan,istn,icod),1,'U').eq.0) then
+                  nch = ichmv_ch(ibuf,nch,'L')
+                else
+                  nch = ichmv_ch(ibuf,nch,'U')
+                endif
+              endif
             else
               nch = ichmv(ibuf,nch,ldoub(ichan,istn,icod),1,1)
             endif

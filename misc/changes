@@ -1538,6 +1538,52 @@ Version 9.2.1 961007
 961023 nrv drudg/sread.f
            Decoding the parameter time for TAPE was incorrect.
 
+961026 WEH include/fs_types.h
+           add form4_ds
+
+961026 WEH include/fscom.h
+           add form4_cmd
+
+961027 WEH quikv/trkfrm4_dis.c
+           quikv/trkfrm4.c
+           created from VLBA analogues
+
+961027 WEH quikv/Makefile
+           updated for M4 formatter commands
+
+961027 WEH clib/Makefile
+           updated for M4 formatter commands
+
+961027 WEH clib/vform_util.c
+           add explicit break; if not a valid tape clock
+
+961028 WEH clib/tracks4_util.c
+           clib/trkfrm4_util.c
+           quikv/tracks4_dis.c
+           created from VLBA analogues
+
+961028 WEH clib/cshm_init.c
+           initialize M4 shm variables
+
+961028 WEH quikv/quikv.c
+           new Mark IV FM commands
+
+961030 WEH include/form4_ds.h
+           created
+
+961030 WEH fmset/get4time.c
+           fmset/fmset.c
+           add synch featurefor M4
+
+961030 WEH fmset/asktime.c
+           move down one line
+
+961030 WEH fmset/getfmtime.c
+           adjust phasing to get get time close to 1 PPS
+
+961030 WEH quikv/form4_dis.c
+           created from VLBA analogue
+
 961030 nrv drudg/procs.f
            Add subpass index to Mk3 modes for Mk4 formatter.
            No FORM=RESET for Mk4 formatters.
@@ -1568,5 +1614,87 @@ Version 9.2.1 961007
            If there are no chan_def's for a station, do not try to get
            or save anything else.
 
+961031 WEH matcn/matcn.f
+           add mode 10 for M4 formatter
+
+961031 WEH quikv/logmatmsg.c
+           create to log MAT responses
+
+961031 WEH quikr/lvdt.f
+           quikr/stack.f
+           quikr/pass.f
+           updated to use set m4 aux correctly
+
+961031 WEH quikr/st.f
+           set fm record on/off based on on/off parameter
+
+961031 WEH quikr/repro4.f
+           set fm record on/off based on bypass parameter
+
+961031 WEH quikr/frmaux4.f
+           updated to agree with M4 memo 230
+
+961031 WEH quikr/endis.f
+           quikr/ena.f
+           s1 and s2 now standard instead of stack1 and stack2
+
+961031 WEH matcn/iat.f
+           add mode 10 for M4 FM
+           error checking and logging for M4 FM
+
+961031 WEH quikv/tracks4.c
+           quikv/form4.c
+           clib/bsfo2code.c
+           clib/form4_util.c
+           st.default/sched/4hdcal.snp
+           created 
+
+961031 WEH fserr/listinit.c
+           fserr/hashcode.c
+           updated to handle mnemonics that start with numbers
+
 Version 9.3.0 961031
 
+961101 nrv drudg/procs.f
+           Use channel indirect index for PATCH command, and BBC numbers.
+
+961101 nrv drudg/vlbah.f
+           New set of pcalx commands from C. Walker for upper/lower sideband.
+
+961101 nrv drudg/ckobs.f
+           Codes undefined for this station are invalid.
+
+961101 nrv drudg/procs.f           
+           Don't make procedures for modes undefined at this station.
+
+961101 nrv drudg/vlbah.f
+           New set of pcalx commands from Craig.
+
+961101 nrv drudg/wrtrack.f
+           Don't write an extra NEXT after 8 channels if there are more to come.
+
+961104 nrv drudg/fdrudg.f
+           Make ISLKLEN the same size as ibuf_len!
+
+961105 nrv drudg/procs.f
+           Don't write out fan if it's 1:1 and there is no roll.
+           Put commas in LO command for LOs not used.
+
+961105 nrv drudg/lstsum.f
+           Check for READY instead of UNLOD for a new tape, so that the
+           final scan in the SNAP file is printed correctly.
+
+961105 nrv drudg/lists.f
+           Add one space to the bandwidth so that 16 MHz comes out right.
+
+961105 WEH st.default/proc/4station.prc
+           created
+
+961105 WEH misc/wpas2help
+           boss/helpstr.c
+           updated for VLBA/M4 combination
+
+961105 NRV drudg/procs.f
+           FORM command for mode E with Mark IV formatter indicates group.
+
+Version 9.3.1 961105

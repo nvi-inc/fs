@@ -119,9 +119,16 @@ C  1.4 IF input
               write(lu,'("VUNPIFD05 - Invalid IF input")')
             endif
           endif
-        else ! not there, use last char of ref <<<<<<<<<<< kludge
+        else ! not there, use last 2 char of ref <<<<<<<<<<< kludge
           nch = trimlen(cifref(id))
-          idum = ichmv_ch(lin(id),1,cifref(id)(nch:nch))
+          if (cifref(id)(nch-1:nch).eq.'1A'.or.
+     .        cifref(id)(nch-1:nch).eq.'2A'.or.
+     .        cifref(id)(nch-1:nch).eq.'1N'.or.
+     .        cifref(id)(nch-1:nch).eq.'2N') then ! 2 char
+            idum = ichmv_ch(lin(id),1,cifref(id)(nch-1:nch))
+          else ! 1 char
+            idum = ichmv_ch(lin(id),1,cifref(id)(nch:nch))
+          endif
         endif
 
 C       Get next IFD def statement

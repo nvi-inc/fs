@@ -233,7 +233,7 @@ C  Set up tracks for forward or reverse
 	iwr = 0
 	ktape = .false.
         ktrack = .false.
-        ktrack=.true. !****************** always write them for pol
+C       ktrack=.true. !****************** always write them for pol
 
         IF (IDIR.NE.IDIRP) THEN !change direction
           ktrack = .true.  ! always write new tracks when changing direction

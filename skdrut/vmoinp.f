@@ -15,6 +15,8 @@ C            the BBC list was searched, instead of the channel index.
 C            Check "lnetsb" and not "lsubvc" (subgroup!) for sideband.
 C 961020 nrv Add call to VUNPROLL and store the roll def in LBARREL
 C 961022 nrv Change MARK to Mark for checking rack/rec types.
+C 961101 nrv Don't complain if things are missing from the modes for 
+C            some stations. Just set nchan to 0 as a flag.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -358,8 +360,9 @@ C    Store head positions and subpases
             enddo 
           endif ! m3/4 or v rec
           npassl = npl
-
-          endif ! nchdefs>0
+          else ! set nchan=0 as a flag
+            nchan(istn,icode) = 0
+          endif ! nchdefs>0 or =0
         enddo ! for one station at a time
       enddo ! get all mode information
 

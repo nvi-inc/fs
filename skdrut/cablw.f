@@ -93,13 +93,13 @@ C     We are in the first 360 degrees
       call char2hol ('  ',LWRNEW,1,2)
       IF (AZNEW.LT.(STNLIM(2,1,ISTN)-2.0*PI))
      .  call char2hol ('W ',LWRNEW,1,2)
-      GOTO 990
+      GOTO 130
 C     We are in the outer overlapped portion
 120   CABLW = DAZ2
       call char2hol ('C ',LWRNEW,1,2)
       AZNEW = AZNEW+2.0*PI
-C     if (ichcm_ch(lwrnew,1,'N ').eq.0) goto 600 !special section for NOTO slewing 
-      if (ichcm_ch(lstnna(1,istn),1,'Noto    ').eq.0.or.
+C     Special for NOTO slewing 
+130   if (ichcm_ch(lstnna(1,istn),1,'Noto    ').eq.0.or.
      .    ichcm_ch(lstnna(1,istn),1,'NOTO    ').eq.0) goto 600
       GOTO 990
 C
@@ -157,11 +157,11 @@ C     and spring of 1994.
 
 C 6. Special NOTO slewing logic. 
 
-C     True if moving from quadrant 3 to 1
-600   kq31 = aznow_orig.gt.0.5*pi.and.aznow_orig.le.    pi.and.
-     .       aznew_orig.gt.1.5*pi.and.aznew_orig.le.2.0*pi
 C     True if moving from quadrant 2 to 4
-      kq24 = aznow_orig.gt.    pi.and.aznow_orig.le.1.5*pi.and.
+600   kq24 = aznow_orig.gt.0.5*pi.and.aznow_orig.le.    pi.and.
+     .       aznew_orig.gt.1.5*pi.and.aznew_orig.le.2.0*pi
+C     True if moving from quadrant 1 to 3
+      kq31 = aznow_orig.gt.    pi.and.aznow_orig.le.1.5*pi.and.
      .       aznew_orig.gt.0.0   .and.aznew_orig.le.0.5*pi
       if (kq31.or.kq24) then
         aznew2 = -1.0
@@ -173,12 +173,11 @@ C     True if moving from quadrant 2 to 4
         if (kq31) aznew=amin0(aznew1,aznew2)
         if (kq24) aznew=amax0(aznew1,aznew2)
         cablw = abs(aznew-aznow)
-      else
-C       Allow extra time for the antenna to slew the wrong way to the
-c       CCW limit and then start slewing from there around 360 degrees.
-        if (ichcm_ch(lwrcur,1,'W ').eq.0.and.aznow.lt.2.5*pi.and.
-     .  aznew.gt.3.5*pi.and.aznew.lt.(stnlim(1,1,istn)+2.0*pi) )
-     .  cablw = cablw + (aznow-stnlim(1,1,istn)) 
+        call char2hol ('  ',LWRNEW,1,2)
+        if (aznew .gt. 3.5*pi)
+     .    call char2hol ('C ',LWRNEW,1,2)
+        if (aznew .lt. 2.5*pi)
+     .    call char2hol ('W ',LWRNEW,1,2)
       endif
       goto 990
 C
