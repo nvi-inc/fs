@@ -169,7 +169,7 @@ C
       call set_mic(hd,ipass,kauto,micnow,ip,0.40)
       if(ip(3).ne.0) return
       if(echo.or.j.eq.icount) then
-        call get_atod(hd,vltpos,ip)
+        call vlt_head(hd,vltpos,ip)
         if(ip(3).ne.0) return
 C
         call get_power(odev,nsamp,peakv,mper,ip)
