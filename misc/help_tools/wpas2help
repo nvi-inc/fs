@@ -247,6 +247,10 @@ while(<>) {
 		symlink($mname,$lname) || die "couldn't link $lname";
 		$lname="tsysd" . $suffix;
 		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsys5" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsys6" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
 	    } elsif($fname eq "flux") {
 		$mname=$fname . $suffix;
 		$lname="flux1" . $suffix;
