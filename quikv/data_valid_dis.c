@@ -11,10 +11,10 @@
 
 #define MAX_OUT 256
 
-void data_valid_dis(command,ip,indx)
+void data_valid_dis(command,ip,indx,kS2drive)
 struct cmd_ds *command;
 long ip[5];
-int indx;
+int indx, kS2drive;
 {
       struct data_valid_cmd lclc;
       int kcom, i, ierr, count, start;
@@ -24,7 +24,7 @@ int indx;
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
-      kcom=kcom||shm_addr->equip.drive[0] !=S2;
+      kcom=kcom||!kS2drive;
 
       if ((!kcom) && command->equal == '=') {
          logrclmsg(output,command,ip);
@@ -54,7 +54,7 @@ int indx;
         if (count != 0)
 	  strcat(output,",");
         count++;
-        data_valid_enc(output,&count,&lclc);
+        data_valid_enc(output,&count,&lclc,kS2drive);
       }
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 
