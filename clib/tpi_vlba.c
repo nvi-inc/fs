@@ -194,7 +194,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
       i=2*MAX_BBC+j;
       if(itpis_vlba[i]!=0) {
 	if(strlen(ibuf)>60) {
-	    if(isub > 0) {
+	    if(isubin > 0) {
 	      cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
 	      nrec=nrec+1;
 	    } else {
