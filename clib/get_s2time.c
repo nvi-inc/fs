@@ -9,8 +9,9 @@
 void skd_run();
 void skd_par();
 
-void get_s2time(centisec,it,nanosec,ip)
-long centisec[2];
+int get_s2time(dev,centisec,it,nanosec,ip,to)
+char dev[];
+long centisec[6];
 int it[6];
 long *nanosec;
 long ip[5];                          /* ipc array */
@@ -22,17 +23,27 @@ long ip[5];                          /* ipc array */
   ibool validated;
 
   ini_rclcn_req(&reqbuf);
-  add_rclcn_delaym_read(&reqbuf,"r1");
-  add_rclcn_time_read(&reqbuf,"r1");
+  add_rclcn_delaym_read(&reqbuf,dev);
+  add_rclcn_time_read(&reqbuf,dev);
   end_rclcn_req(ip,&reqbuf);
 
-  skd_run("rclcn",'w',ip);
+  if(to!=0) {
+    char *name;
+    name="rclcn";
+    while(skd_run_to(name,'w',ip,100)==1) {
+      if (nsem_test("fs   ") != 1) {
+	return 1;
+      }
+      name=NULL;
+    }
+  } else
+    skd_run("rclcn",'w',ip);
 
   skd_par(ip);
   if( ip[2] < 0 ) {
     logita(NULL,ip[2],ip+3,ip+4);
     cls_clr(ip[0]);
-    return;
+    return 0;
   }
   opn_rclcn_res(&resbuf,ip);
 
@@ -41,7 +52,7 @@ long ip[5];                          /* ipc array */
   if(ierr!=0) {
     clr_rclcn_res(&resbuf);
     ip[2]=ierr;
-    return;
+    return 0;
   }
 
  ierr=get_rclcn_time_read(&resbuf,&year,&day,&hour,&min,&sec,
@@ -49,7 +60,7 @@ long ip[5];                          /* ipc array */
   clr_rclcn_res(&resbuf);
   if(ierr!=0) {
     ip[2]=ierr;
-    return;
+    return 0;
   }
 
   it[5]=year;
@@ -59,4 +70,5 @@ long ip[5];                          /* ipc array */
   it[1]=sec;
   it[0]=0;
           
+  return 0;
 }
