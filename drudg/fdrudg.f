@@ -1,4 +1,4 @@
-      subroutine fdrudg(cfile,cstn,command,cr1,cr2,cr3,cr4)
+      subroutine fdrudg(cfile,cstnin,command,cr1,cr2,cr3,cr4)
 C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
@@ -15,7 +15,7 @@ C     Called by: drudg (C routine)
 
 C Input:
       character*(*) cfile   ! file name 
-      character*(*) cstn    ! station
+      character*(*) cstnin    ! station
       character*(*) command ! command 
       character*(*) cr1
       character*(*) cr2
@@ -24,20 +24,20 @@ C Input:
 
 C
 C LOCAL:
-      real*8 DAS2B,R,D
-      integer*2 lstn,lc
+      double precision DAS2B,R,D
+      integer*2 lstn,lc,l2
       integer TRIMLEN,pcode
       character*128 cdum
-      character*128 cdrudg,csked,cexpna
-      logical kskd,kskdfile,kdrgfile
-      integer nch
-      character*2  response
-      character    lower, scode
-      integer ivexnum,h2c,heqb,o36
+      character*128 csnap,cproc,csked,cexpna
+      logical kex,kskd,kskdfile,kdrgfile
+      integer nch,nci
+      character*2  response,scode
+      character    upper,lower
+      integer cclose,inew,ivexnum,h2c,heqb,o36
       character*256 cbuf
-      integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,
+      integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
-      real*4 val
+      real val
       integer ichmv_ch,ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
       integer nch1,nch2,nch3,iserr(max_stn)
       data h2c/2h::/, heqb/2h= /, o36/o'36'/
@@ -109,7 +109,29 @@ C 970114 nrv Change 8 to max_sorlen
 C 970121 nrv Add iret to vob1inp call
 C 970121 nrv Null terminate TMPNAME here. Add IIN to LABEL call. Add
 C            option 61 for ps labels.
-C 970123 nrv Revise option 61 description. Change date to 970123.
+C 970123 nrv Change description of option 61. Change date to 970123.
+C 970124 nrv Change date to 970124.
+C 970129 nrv Change VOB1INP call to return number of scans for the station.
+C 970129 nrv Change date to 970129, to distinguish from FS 9.3.7.
+C 970204 nrv Change date to 970204.
+C 970205 nrv Print tape_motion_type as information at start.
+C 970207 nrv Remove all but cr1 from call to SNAP.
+c 970207 nrv Add CEPOCH to RDCTL call.
+C 970207 nrv Initialize default printer width to -1.
+C 970213 nrv List 2-letter codes for selection, read 2-letter codes from
+C            user input, make file names with 2-letter codes.
+C 970218 nrv Change sample prompt for SNAP file from PPMN3 to ca036.
+C 970221 nrv Remove "(VLBA)" from description of option 2.
+C 970228 nrv Add clabtyp and rlabsize to RDCTL call.
+C 970228 nrv Change prompts to replace opt 61 with "print labels"
+C            Add labname. Add inew.
+C 970301 nrv Initialize CSIZE.
+C 970303 nrv Different prompts depending on label printer type.
+C 970303 nrv Prompt at end of label temp file exists.
+C 970304 nrv Add "cproc" to RDCTL call, change "cdrudg" to "csnap"
+C 970304 nrv Add "coption" to RDCTL call.
+C 970310 nrv Check for prepend and station id when forming file names.
+C 970311 nrv Allow "./" to preceed schedule names.
 C
 C Initialize some things.
 
@@ -124,12 +146,18 @@ C The length of a schedule file record
 C Initialize the number of labels and lines/label
       NLAB=1
       NLLAB=9
-C Initialize printer width
-      IWIDTH=137
+C Initialize ps label file to new.
+      inew=1
+C Initialize printer width to default for each type
+      IWIDTH=-1
+C Initialize font size to default for each type
+      CSIZE='D' ! default
 C Initialize the $PROC section location
       IRECPR=0
       IRBPR=0
       IOFFPR=0
+C Initialize default epoch for source positions
+      cepoch = '1950'
 C Codes for passes and bandwidths
       idummy=ichmv_ch(lbname,1,'D8421HQE')
 c Initialize no. entries in lband (freqs.ftni)
@@ -138,50 +166,48 @@ c Initialize no. entries in lband (freqs.ftni)
       luscn = STDOUT
       luusr = STDIN
       csked = './'
-      cdrudg = './'
+      csnap = './'
+      cproc = './'
       ctmpnam = './'
       cprport = 'PRINT'
       cprttyp = 'LASER'
+      clabtyp = ' '
       cprtpor = ' '
       cprtlan = ' '
       cprtlab = ' '
-      iwidth = 137
+      coption(1)='LS'
+      coption(2)='PS'
+      coption(3)='PS'
       klab = .false.
       ifunc = -1
       ierr=0
-      kskdfile = .false.
-      kdrgfile = .false.
-C
-C
-C     0. Set up for break routines.
-C
-C     ierrset = SETUP_BRK()   ! sets up break interrupt
-C     if (ierrset.lt.0) then
-C       write(luscn,"(' Error from SETUP_BRK = ', i2)") ierrset
-C       stop
-C     endif
-C
 C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
       call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
-     .           cdum,cdum,cdum,cdum,cdum,cdum,csked,cdrudg,ctmpnam,
-     .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,luscn)
+     .           cdum,cdum,cdum,cdum,cdum,cdum,csked,csnap,cproc,
+     .           ctmpnam,
+     .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
+     .           rlabsize,cepoch,coption,luscn)
+C
+C     2. Initialize local variables
+C
+200   continue
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
       if (nch.gt.0) then
         tmpname = ctmpnam(:nch)//'DR.tmp'
+        labname = ctmpnam(:nch)//'DRlab.tmp'
       else
-        tmpname = 'DG.tmp'
+        tmpname = 'DR.tmp'
+        labname = 'DRlab.tmp'
       endif
       call null_term(tmpname)
+      call null_term(labname)
       ncs=trimlen(csked)
       if (csked.eq.'./') ncs=0
-C
-C     2. Next read in the schedule file name.
-C
-200   continue
-C     write(luscn,'("Initializing ...")')
+      kskdfile = .false.
+      kdrgfile = .false.
 C  Initialize variables.   Moved here from SREAD
 C  In drcom.ftni
       kmissing = .false.
@@ -210,10 +236,12 @@ C  In freqs.ftni
 
 C   Check for non-interactive mode.
 201     nch1=trimlen(cfile)
-        nch2=trimlen(cstn)
+        nch2=trimlen(cstnin)
         nch3=trimlen(command)
         cexpna = ' '
         if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
+
+C 3. Get the schedule file name
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
@@ -224,7 +252,7 @@ C   Check for non-interactive mode.
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 970123)')
+     .  '(NRV 970315)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -237,18 +265,19 @@ C       Opening message
         endif 
         endif
         IF (NCH.GT.0) THEN !got a name
-          IF (ichcm(IBUF(1),1,H2C,1,2).eq.0) GOTO 990
+          IF (ichcm_ch(IBUF(1),1,'::').eq.0) GOTO 990
           call hol2char(ibuf,1,256,cbuf)
-	  if ((cbuf(2:2).eq.':').OR.(CBUF(1:1).EQ.'/')) then
-            lskdfi = cbuf(1:nch)
-          else
-            if (ncs.gt.0) then
+          if (ichcm_ch(ibuf(1),1,'.').eq.0.OR.
+     .      ichcm_ch(ibuf(1),1,'/').eq.0) then ! path 
+            lskdfi = cbuf(1:nch) 
+          else  ! no path given
+            if (ncs.gt.0) then ! prepend
               LSKDFI = csked(:ncs) // CBUF(1:NCH)
             else
-              LSKDFI = CBUF(1:NCH)
+              lskdfi = cbuf(1:nch) 
             endif
-          endif
-          ix=index(lskdfi,'.')
+          endif ! path/no path
+          ix=index(lskdfi(2:),'.')
           l=trimlen(lskdfi)
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
@@ -258,71 +287,86 @@ C       Opening message
               lskdfi=lskdfi(1:l)//'.drg'
               kdrgfile = .true.
             endif
-          endif
+          endif ! automatic extension
           ixp=1
           ix=1
-          do while (ix.ne.0)
+          do while (ix.ne.0) ! find the last '/'
             ix=index(lskdfi(ixp:),'/')
             if (ix.gt.0) ixp=ixp+ix
           enddo
-	  cexpna=lskdfi(ixp:)
-	  kskd = .true.
-	else ! none
-	  write(luscn,9021)
-9021      format(' Enter schedule name (e.g. PPMN3): ',$)
-	  read(luusr,'(A)') cbuf
-	  l = trimlen(cbuf)
-	  if (l.gt.0) cexpna = cbuf(1:l)
-	  kskd = .false.
+        cexpna=lskdfi(ixp:) ! exp name is root of file name
+        kskd = .true.
+      else ! none
+        write(luscn,9021)
+9021      format(' Enter schedule name (e.g. ca036): ',$)
+        read(luusr,'(A)') cbuf
+        l = trimlen(cbuf)
+        if (l.gt.0) cexpna = cbuf(1:l)
+        kskd = .false.
         ENDIF !got a name
       END DO !get schedule file name
 C  ********************************************************
 C
 C     3. Read the schedule file sections.
 C
-	if (.not.kskd) goto 500
-	  ix=trimlen(cexpna)
-	  IC=TRIMLEN(LSKDFI)
-	  WRITE(LUSCN,9300) LSKDFI(1:IC),cexpna(1:ix)
-9300    FORMAT(' Opening file ',A,' for schedule ',A)
-	  CALL SREAD(IERR,ivexnum)
-	  if (itearl(1).gt.0) then
-	    write(luscn,9301) itearl(1)
-9301      format(' NOTE: This schedule was created using early '
-     .    ,'start with EARLY = ',i3,' seconds.')
-	  endif
-	  IF (IERR.NE.0) goto 201
+      kvex = .false. 
+      if (.not.kskd) goto 500
+        ix=trimlen(cexpna)
+        IC=TRIMLEN(LSKDFI)
+        WRITE(LUSCN,9300) LSKDFI(1:IC),cexpna(1:ix)
+9300      FORMAT(' Opening file ',A,' for schedule ',A)
+        CALL SREAD(IERR,ivexnum)
+        IF (IERR.NE.0) goto 201
+
+        if (itearl(1).gt.0) then
+          write(luscn,9301) itearl(1)
+9301        format(' NOTE: This schedule was created using early '
+     .      ,'start with EARLY = ',i3,' seconds.')
+        endif
+          if (tape_motion_type(1)(1:5).ne.'start'.and.
+     .        tape_motion_type(1).ne.'') then
+            nch=trimlen(tape_motion_type(1))
+            if (nch.gt.0) then
+            call c2upper(tape_motion_type(1)(1:nch),cdum)
+            write(luscn,9302) (cdum(1:nch))
+9302        format(' NOTE: This schedule uses ',a,' tape motion.')
+            if (tape_motion_type(1)(1:5).eq.'start') 
+     .      write(luscn,9303) itgap(1)
+9303        format('       Gap time = ',i3,' seconds.')
+            endif
+          endif
+
           kskdfile = .false.
           kdrgfile = .false.
 C
 C     Now go back and pick up station elevations.
 C
-	  IF (IRECEL.EQ.-1.0) THEN   !no el limits
-	    DO I=1,NSTATN
-		STNELV(I)=0.0
-	    ENDDO
-	  ELSE                       !get el limits
-	    IRECEL = IRECEL-1
-	    call aposn(LU_INFILE,IERR,irecel)
-	    CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-	    DO WHILE (JCHAR(IBUF,1).NE.o36.AND.ILEN.NE.-1.AND.
+        IF (IRECEL.EQ.-1.0) THEN   !no el limits
+          DO I=1,NSTATN
+      	STNELV(I)=0.0
+          ENDDO
+        ELSE                       !get el limits
+          IRECEL = IRECEL-1
+          call aposn(LU_INFILE,IERR,irecel)
+          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+          DO WHILE (JCHAR(IBUF,1).NE.o36.AND.ILEN.NE.-1.AND.
      .      ichcm_ch(IBUF,1,'ELEVATION ').EQ.0) !process ELEVATION lines
-		ICH = 11
-		CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-		DO WHILE (IC1.GT.0) !scan this line
-		  IDUMMY = ICHMV(L,1,IBUF,IC1,1)
-		  IDUMMY = IGTST(L,ISTN)
-		  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-		  VAL = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
-		  if (istn.gt.0) STNELV(ISTN) = VAL*PI/180.0
-		  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-		ENDDO
-		CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-	    ENDDO
-	  ENDIF
+      	ICH = 11
+      	CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
+      	DO WHILE (IC1.GT.0) !scan this line
+      	  IDUMMY = ICHMV(L2,1,IBUF,IC1,1)
+      	  IDUMMY = IGTST(L2,ISTN)
+      	  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
+      	  VAL = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      	  if (istn.gt.0) STNELV(ISTN) = VAL*PI/180.0
+      	  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
+      	ENDDO
+      	CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+          ENDDO
+        ENDIF
 C
 C     Derive number of passes for each code
-	  CALL GNPAS(luscn,ierr,iserr)
+        CALL GNPAS(luscn,ierr,iserr)
           call setba_dr
           if (ierr.ne.0) then ! can't continue
             write(luscn,9999) 
@@ -338,32 +382,33 @@ C     Derive number of passes for each code
           endif
 C
             WRITE(LUSCN,9490) NSOURC
-	    IF (NSATEL.GT.0) WRITE(LUSCN,9496) NCELES,NSATEL
-	    WRITE(LUSCN,9492) NSTATN,NOBS,NCODES
+          IF (NSATEL.GT.0) WRITE(LUSCN,9496) NCELES,NSATEL
+          WRITE(LUSCN,9492) NSTATN,NCODES
 9490    FORMAT(' Number of sources: ',I5)
 9496    FORMAT('(',1x,I5,' celestial, ',I5,' satellites)')
 9492    FORMAT(' Number of stations: ',I5/
-     .  ' Number of observations: ',I5/
      .  ' Number of frequency codes: ',I5)
+        if (.not.kvex) write(luscn,9493) nobs
+9493    format(' Total number of scans in this schedule: ',I5)
 C
 C  Now change J2000 coordinates to 1950 and save for later use
-	  DO I=1,NCELES
-	    CALL PREFR(SORP50(1,I),SORP50(2,I),2000,R,D)
-	    RA50(I) = R
-	    DEC50(I) = D
-	  END DO
-	  DO I=1,NSATEL !MOVE NAMES
-	    INEXT=NCELES+I
-	    ISATL=MAX_CEL+I
-	    IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,max_sorlen)
-	  END DO
+        DO I=1,NCELES
+          CALL PREFR(SORP50(1,I),SORP50(2,I),2000,R,D)
+          RA50(I) = R
+          DEC50(I) = D
+        END DO
+        DO I=1,NSATEL !MOVE NAMES
+          INEXT=NCELES+I
+          ISATL=MAX_CEL+I
+          IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,max_sorlen)
+        END DO
 C
 C  Check for sufficient information
-	  IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.ncodes.GT.0) GOTO 500
-	  WRITE(LUSCN,9491)
+        IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.ncodes.GT.0) GOTO 500
+        WRITE(LUSCN,9491)
 9491    FORMAT(' Insufficient information in file.'/)
           ierr=-1
-	  GOTO 200
+        GOTO 200
 C
 C
 C     5. Ask for the station(s) to be processed.  These will be done
@@ -373,43 +418,51 @@ C
       call clear_array(response)
       if (.not.kbatch) then
         if (kskd) then
-          WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
-9053      FORMAT(' Stations: ', 5(A2,'(',4A2,')',1X)/
-     .     10(   '           ',5 (A2,'(',4A2,')',1X)/))
-          WRITE(LUSCN,9050)
-9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
-     .    ' Output for which station (type a code, :: to ',
+          WRITE(LUSCN,9053) (lpocod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
+C         WRITE(LUSCN,9053) (lstcod(K),(lstnna(I,K),I=1,4),K=1,NSTATN)
+9053      FORMAT(' Stations: '/
+     .     10(   '  ', 5(A2,' (',4A2,')',1X)/))
+           WRITE(LUSCN,9050)
+C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
+9050       format(/' Output for which station (type a code, :: to ',
      .    'quit, = for all) ? ',$)
-        else
-          write(luscn,9051)
-9051      format(' Enter station ID (e.g. M, :: to quit)? ',$)
-        endif
+         else
+           write(luscn,9051)
+9051      format(' Enter station 2-letter code (e.g. Wf, :: to quit)? ',
+     .    $)
+         endif
         read(luusr,'(A)') response(1:2)
       else
-        response = cstn
+        response = cstnin
       endif
       if (response(1:2).eq.'::') goto 990
-C     response(1:1) = upper(response(1:1))
-      call char2hol(response(1:1),lstn,1,2)
+C     Convert to convention upper/lower for 2 letters
+      response(1:1)=lower(response(1:1))
+      response(2:2)=lower(response(2:2))
+      call char2hol(response(1:2),lstn,1,2)
       ISTN = 0
       iF (ichcm(LSTN,1,HEQB,1,1).eq.0) GOTO 699 ! all stations
       if (kskd) then !check for valid ID
         DO I=1,NSTATN
-          IF (LSTCOD(I).EQ.LSTN) ISTN = I
+C         Convert stored code to string for comparing
+          call hol2char(lpocod(i),1,2,scode)
+          scode(1:1)  = lower(scode(1:1))
+          scode(2:2)  = lower(scode(2:2))
+          IF (scode.EQ.response) ISTN = I
         END DO
         IF (ISTN.EQ.0) then
           if (.not.kbatch) then !try again interactively
             GOTO 500
           else ! no recovery in batch
-            write(luscn,9059) cstn
+            write(luscn,9059) cstnin
 9059        format(' No such station in schedule: ',a)
             goto 990
           endif
         endif
       else !make up valid index
-	istn=1
-	nstatn=1
-	lstcod(1)=lstn
+      istn=1
+      nstatn=1
+      lpocod(1)=lstn
       endif !check for validID
       kmissing=.true.
       if (iserr(istn).ne.0) kmissing=.true.
@@ -418,21 +471,31 @@ C     response(1:1) = upper(response(1:1))
         nobs=0
         if (istn.eq.0) then ! get all in a loop
           do i=1,nstatn
-            call vob1inp(ivexnum,i,luscn,ierr,iret) ! get the station's obs
+            call vob1inp(ivexnum,i,luscn,ierr,iret,nobs_stn) 
             if (ierr.ne.0) then
-              write(luscn,'("FDRUDGxx - Error from vob1inp=",
-     .        i5,", iret=",i5)') ierr,iret
+              write(luscn,'("FDRUDG01 - Error from vob1inp=",
+     .        i5,", iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
+              call errormsg(iret,ierr,'SCHED',luscn)
             else
-              write(luscn,'("  Number of obs: ",i5)') nobs
+              write(luscn,'("  Number of scans for this station: ",i5)')
+     .        nobs_stn
             endif
           enddo
+          write(luscn,'("  Total number of scans in this schedule: ",
+     .    i5)') 
+     .    nobs
         else ! get one station's obs
-          call vob1inp(ivexnum,istn,luscn,ierr,iret)
+          call vob1inp(ivexnum,istn,luscn,ierr,iret,nobs_stn)
           if (ierr.ne.0) then
-            write(luscn,'("FDRUDGxx - Error from vob1inp=",
-     .      i5,", iret=",i5)') ierr,iret
+            write(luscn,'("FDRUDG02 - Error from vob1inp=",
+     .      i5,", iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
+            call errormsg(iret,ierr,'SCHED',luscn)
           else
-            write(luscn,'("  Number of obs: ",i5)') nobs
+            write(luscn,'("  Number of scans for this station: ",i5)') 
+     .      nobs_stn
+            write(luscn,'("  Total number of scans in this schedule: ",
+     .      i5)') 
+     .      nobs
           endif
         endif ! get one/get all
       endif
@@ -443,16 +506,16 @@ C        on stations and schedules, respectively.  Within the loop,
 C        schedule the appropriate segment.
 C
 700   if (.not.kbatch) then
-	if (kskd) then !schedule file
-	  l=trimlen(lskdfi)
+      if (kskd) then !schedule file
+        l=trimlen(lskdfi)
           if (istn.gt.0) then !one station
             WRITE(LUSCN,9068) lskdfi(1:l),(lstnna(i,istn),i=1,4)
           else !all stations
             write(luscn,9067) lskdfi(1:l)
           endif
-9068      FORMAT(/' Select *new* DRUDG option for schedule ',A,
+9068      FORMAT(/' Select DRUDG option for schedule ',A,
      .    ' at ',4A2/)
-9067      FORMAT(/' Select *new* DRUDG option for schedule ',A,
+9067      FORMAT(/' Select DRUDG option for schedule ',A,
      .    ' (all stations)'/)
 C         if (ichcm_ch(lstrack(1,istn),1,'unknown ').eq.0.or.
 C    .        ichcm_ch(lstrec (1,istn),1,'unknown ').eq.0.or.
@@ -461,102 +524,142 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
           if (.not.kvex) then ! unknown equipment
             write(luscn,9070)
 9070        FORMAT(
-     .      ' 1 = Print the schedule                ',
+     .      ' 1 = Print the schedule               ',
      .      '  7 = Re-specify stations'/
-     .      ' 2 = Make antenna pointing file (VLBA) ',
+     .      ' 2 = Make antenna pointing file       ',
      .      '  8 = Get a new schedule file'/
-     .      ' 3 = Make Mark III/IV SNAP file (.SNP) ',
-     .      '  9 = Change output destination, width '/
-     .      ' 31= Make VLBA SNAP file (.SNP)        ',
+     .      ' 3 = Make Mark III/IV SNAP file (.SNP)',
+     .      '  9 = Change output destination, format '/
+     .      ' 31= Make VLBA SNAP file (.SNP)       ',
      .      ' 10 = Shift the .SKD file  '/,
-     .      ' 4 = Print complete .SNP file          ',
+     .      ' 4 = Print complete .SNP file         ',
      .      ' 11 = Shift the .SNP file  '/,
-     .      ' 5 = Print summary of .SNP file        ',
-     .      ' 12 = Make Mark III procedures (.PRC) '/,
-     .      ' 6 = Make Epson or laser (3x10) labels ',
-     .      ' 13 = Make VLBA procedures (.PRC)'/,
-     .      ' 61= Make PostScript (2x6) tape labels ',
-     .      ' 14 = Make hybrid procedures (.PRC)'/,
-     .      ' 0 = Done with DRUDG                   ',
+     .      ' 5 = Print summary of .SNP file       ',
+     .      ' 12 = Make Mark III procedures (.PRC) ')
+            if (clabtyp.eq.'POSTSCRIPT') then
+              write(luscn,9170)
+9170          FORMAT(
+     .        ' 6 = Make PostScript label file       ',
+     .        ' 13 = Make VLBA procedures (.PRC)'/,
+     .        ' 61= Print PostScript label file      ',
+     .        ' 14 = Make hybrid procedures (.PRC)')
+            else
+              write(luscn,9270)
+9270          FORMAT(
+     .        ' 6 = Make tape labels                 ',
+     .        ' 13 = Make VLBA procedures (.PRC)'/,
+     .        '                                      ',
+     .        ' 14 = Make hybrid procedures (.PRC)')
+            endif
+            write(luscn,9370)
+9370        FORMAT(
+     .      '                                      ',
      .      ' 15 = Make Mark IV procedures (.PRC)'/,
-     .      '                                       ',
+     .      ' 0 = Done with DRUDG                  ',
      .      ' 16 = Make 8-BBC procedures (.PRC)'/,
      .      ' ? ',$)
           else ! gotem in the vex file
             write(luscn,9073)
 9073        FORMAT('Supporting VEX 1.5'/
-     .      ' 1 = Print the schedule                ',
+     .      ' 1 = Print the schedule               ',
      .      '  7 = Re-specify stations'/
-     .      ' 2 = Make antenna pointing file (VLBA) ',
+     .      ' 2 = Make antenna pointing file       ',
      .      '  8 = Get a new schedule file'/
-     .      ' 3 = Create SNAP command file (.SNP)   ',
-     .      '  9 = Change output destination, width '/
-     .      ' 4 = Print complete .SNP file          ',
+     .      ' 3 = Create SNAP command file (.SNP)  ',
+     .      '  9 = Change output destination, format '/
+     .      ' 4 = Print complete .SNP file         ',
      .      ' 10 = Shift the .SKD file  '/,
-     .      ' 5 = Print summary of .SNP file        ',
-     .      ' 11 = Shift the .SNP file  '/,
-     .      ' 6 = Make Epson or laser (3x10) labels ',
-     .      ' 12 = Make procedures (.PRC) '/,
-     .      ' 61= Make PostScript (2x6) tape labels ',
-     .      ' '/,
-     .      ' 0 = Done with DRUDG                   ',
-     .      ' '/,
+     .      ' 5 = Print summary of .SNP file       ',
+     .      ' 11 = Shift the .SNP file  ')
+            if (clabtyp.eq.'POSTSCRIPT') then
+              write(luscn,9173)
+9173          FORMAT(
+     .        ' 6 = Make PostScript label file       ',
+     .        ' 12 = Make procedures (.PRC) '/,
+     .        ' 61= Print PostScript label file   ')
+            else
+              write(luscn,9273)
+9273          FORMAT(
+     .        ' 6 = Make tape labels                 ',
+     .        ' 12 = Make procedures (.PRC) ')
+            endif
+            write(luscn,9373)
+9373        format(
+     .      ' 0 = Done with DRUDG  '/
      .      ' ? ',$)
           endif
         else ! SNAP file
-	  l=trimlen(cexpna)
-	  WRITE(LUSCN,9071) cexpna(1:l),lstcod(1)
+        l=trimlen(cexpna)
+        WRITE(LUSCN,9071) cexpna(1:l),lpocod(1)
 9071      FORMAT(/' Select DRUDG option for experiment ',A,' at ',A2/
      .    ' 4 = Print complete .SNP file          ',
      .    '  7 = Re-specify stations'/
      .    ' 5 = Print summary of .SNP file        ',
-     .    '  8 = Get a new schedule file'/
-     .    ' 6 = Make Epson or laser (3x10) labels ',
-     .    '  9 = Change output destination, width'/,
-     .    ' 61= Make PostScript (2x6) tape labels ',
-     .    ' 11 = Shift the .SNP file'/,
-     .    ' 0 = Done with DRUDG                   ',
+     .    '  8 = Get a new schedule file')
+          if (clabtyp.eq.'POSTSCRIPT') then
+            write(luscn,9171)
+9171        format(
+     .    ' 6 = Make PostScript label file        ',
+     .    '  9 = Change output destination, format'/,
+     .    ' 61= Print PostScript label file       ',
+     .    ' 11 = Shift the .SNP file')
+          else
+            write(luscn,9271)
+9271        format(
+     .      ' 6 = Make tape labels                  ',
+     .      '  9 = Change output destination, format'/,
+     .      '                                       ',
+     .      ' 11 = Shift the .SNP file')
+          endif
+          write(luscn,9371)
+9371      format(
+     .    ' 0 = Done with DRUDG           ',
      .   /' ? ',$)
         endif
-	IFUNC = -1
-	READ(LUUSR,*,ERR=700) IFUNC
+      IFUNC = -1
+      READ(LUUSR,*,ERR=700) IFUNC
       else
         read(command,*,err=991) ifunc
       endif
 
-	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
+      if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and..not.kbatch) GOTO 700
-	if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
+      if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and.kbatch) GOTO 991
-	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
+      if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
      .  .or.ifunc.eq.10.or.(ifunc.ge.16.and.ifunc.ne.31.and.
      .   ifunc.ne.61))) goto 700
+      if (ifunc.eq.6.and.clabtyp.eq.' ') then
+        write(luscn,'("Unknown label printer type in the",
+     .  " control file.")')
+        goto 700
+      endif
 
-	IF (IFUNC.EQ.9) THEN
+      IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
-	  call port
-	  goto 700
-	ELSE IF (IFUNC.EQ.7) THEN
+        call port
+        goto 700
+      ELSE IF (IFUNC.EQ.7) THEN
           if (kbatch) goto 991
-	  GOTO 500
-	ELSE IF (IFUNC.EQ.8) THEN
+        GOTO 500
+      ELSE IF (IFUNC.EQ.8) THEN
           if (kbatch) goto 991
-	  GOTO 200
-	ELSE IF (IFUNC.EQ.0) THEN
-	  GOTO 990
-	ELSE IF (IFUNC.EQ.10) THEN
-	  CINNAME = LSKDFI
+        GOTO 200
+      ELSE IF (IFUNC.EQ.0) THEN
+        GOTO 990
+      ELSE IF (IFUNC.EQ.10) THEN
+        CINNAME = LSKDFI
           if (kbatch) then
             write(luscn,9994)
 9994        format(' Batch mode not available for shifting.')
             goto 991
           endif
-	  call skdshft(ierr)
-	  GOTO 700
-	ENDIF
+        call skdshft(ierr)
+        GOTO 700
+      ENDIF
 C
       NSTNX = 1
-	IF (ichcm(LSTN,1,HEQB,1,1).eq.0) NSTNX = NSTATN
+      IF (ichcm(LSTN,1,HEQB,1,1).eq.0) NSTNX = NSTATN
 C
       I = 1
       do while (I.le.nstnx)  !loop over stations
@@ -564,103 +667,108 @@ C
         kmissing=.false.
         if (iserr(istn).ne.0) kmissing=.true.
         IX = INDEX(cexpna,'.')-1
-	  if (ix.lt.0) ix=trimlen(cexpna)
-        call char2hol('  ',lc,1,2)
-        idummy = ichmv(lc,2,lstcod(istn),1,1)
-        call hol2char(lc,2,2,scode)
-	  scode  = lower(scode)
-	  nch = trimlen(cdrudg)
-          if (cdrudg(1:2).eq.'./') nch=0
-	  if (cexpna(2:2).eq.':'.or.cexpna(1:1).eq.'/') nch=0
-          if (nch.gt.0) then ! prepend
-	    SNPNAME=cdrudg(:nch)//cexpna(1:ix)//scode//'.snp'
-            if (scode.eq.' ') SNPNAME=cdrudg(:nch)//cexpna(1:ix)//'.snp'
-	    PRCNAME = cdrudg(:nch)//cexpna(1:ix)//scode//'.prc'
-            LSTNAME = cdrudg(:nch)//cexpna(1:ix)//scode//'.lst'
-            PNTNAME = cdrudg(:nch)//cexpna(1:ix)//scode//'.pnt'
-          else ! no prepend
-	    SNPNAME=cexpna(1:ix)//scode//'.snp'
-            if (scode.eq.' ') SNPNAME=cexpna(1:ix)//'.snp'
-	    PRCNAME = cexpna(1:ix)//scode//'.prc'
-            LSTNAME = cexpna(1:ix)//scode//'.lst'
-            PNTNAME = cexpna(1:ix)//scode//'.pnt'
+        if (ix.lt.0) ix=trimlen(cexpna)
+        idummy = ichmv_ch(lc,1,'  ')
+        idummy = ichmv(lc,1,lpocod(istn),1,2)
+        call hol2char(lc,1,2,scode)
+        scode(1:1)  = lower(scode(1:1))
+        scode(2:2)  = lower(scode(2:2))
+        ncs = trimlen(scode)
+        nch = trimlen(csnap)
+        nci = trimlen(cproc)
+        if (csnap(1:2).eq.'./') nch=0
+        if (cproc(1:2).eq.'./') nci=0
+        if (cexpna(2:2).eq.':'.or.cexpna(1:1).eq.'/') nch=0
+        if (nch.gt.0) then ! prepend
+          if (ncs.gt.0) then ! station id present
+            SNPNAME=csnap(:nch)//cexpna(1:ix)//scode(1:ncs)//'.snp'
+            PNTNAME = csnap(:nch)//cexpna(1:ix)//scode(1:ncs)//'.pnt'
+          else
+            SNPNAME=csnap(:nch)//cexpna(1:ix)//'.snp'
+            PNTNAME = csnap(:nch)//cexpna(1:ix)//'.pnt'
           endif
+        else ! no prepend
+          if (ncs.gt.0) then ! station id present
+            SNPNAME=cexpna(1:ix)//scode(1:ncs)//'.snp'
+            PNTNAME = cexpna(1:ix)//scode(1:ncs)//'.pnt'
+          else
+            SNPNAME=cexpna(1:ix)//'.snp'
+            PNTNAME = cexpna(1:ix)//'.pnt'
+          endif
+        endif ! prepend
+        if (nci.gt.0) then ! prepend
+          if (ncs.gt.0) then ! station id present
+            PRCNAME = cproc(:nci)//cexpna(1:ix)//scode(1:ncs)//'.prc'
+          else
+            PRCNAME = cproc(:nci)//cexpna(1:ix)//'.prc'
+          endif
+        else
+          if (ncs.gt.0) then ! station id present
+            PRCNAME = cexpna(1:ix)//scode(1:ncs)//'.prc'
+          else
+            PRCNAME = cexpna(1:ix)//'.prc'
+          endif
+        endif
         ierr=0
-C No longer need this because the schedule is stored in memory.
-C  IF (kskd) THEN
-C         open(unit=LU_INFILE,file=LSKDFI,iostat=IERR)
-C         rewind(LU_INFILE)
-C         call initf(LU_INFILE,IERR)
-C    IF (IFUNC.NE.12.and.ifunc.ne.13) 
-C    .        call aposn(LU_INFILE,IERR,irecsk)
-C    IF ((IFUNC.EQ.12.or.ifunc.eq.13).AND.IRECPR.NE.0)
-C    .        call aposn(LU_INFILE,IERR,irecpr)
-C       END IF
         IF (IERR.EQ.0)  THEN
           IF (IFUNC.EQ.1) THEN
             CALL LISTS
           ELSE IF (IFUNC.EQ.2) THEN
             CALL POINT(cr1,cr2,cr3,cr4)
 c            I = nstnx
-	    ELSE IF (IFUNC.EQ.3) THEN
-	      CALL SNAP(cr1,cr2,cr3,cr4,1)
-	    ELSE IF (IFUNC.EQ.31) THEN
-	      CALL SNAP(cr1,cr2,cr3,cr4,2)
-	    ELSE IF (IFUNC.EQ.4) THEN
-	      CALL CLIST(kskd)
-	    ELSE IF (IFUNC.EQ.12) THEN
+          ELSE IF (IFUNC.EQ.3) THEN
+            CALL SNAP(cr1,1)
+          ELSE IF (IFUNC.EQ.31) THEN
+            CALL SNAP(cr1,2)
+          ELSE IF (IFUNC.EQ.4) THEN
+            CALL CLIST(kskd)
+          ELSE IF (IFUNC.EQ.12) THEN
               CALL PROCS(1) ! Mark III backend procedures
             ELSE IF (IFUNC.EQ.13) THEN
               CALL PROCS(2) ! VLBA backend procedures
-	    ELSE IF (IFUNC.EQ.14) THEN
+          ELSE IF (IFUNC.EQ.14) THEN
               CALL PROCS(3) ! hybrid backend procedures
-	    ELSE IF (IFUNC.EQ.15) THEN
+          ELSE IF (IFUNC.EQ.15) THEN
               CALL PROCS(4) ! Mark IV backend procedures
-	    ELSE IF (IFUNC.EQ.16) THEN
+          ELSE IF (IFUNC.EQ.16) THEN
               CALL PROCS(5) ! 8-BBC VLBA backend procedures
-	    ELSE IF (IFUNC.EQ.6) THEN
-	      if (nstnx.eq.1) then ! just one station
-		pcode = 1
-	      else if (i.eq.1) then ! first station
-		pcode = 2
-	      else if (i.eq.nstnx) then ! last station
-		pcode = 3
-	      else
-		pcode = 0
-	      end if
-	      cinname = snpname
+          ELSE IF (IFUNC.EQ.6) THEN
+            if (nstnx.eq.1) then ! just one station
+            	pcode = 1
+            else if (i.eq.1) then ! first station
+            	pcode = 2
+            else if (i.eq.nstnx) then ! last station
+            	pcode = 3
+            else
+            	pcode = 0
+            end if
+            cinname = snpname
               klab = .true.
-              call label(pcode,kskd,cr1,cr2,cr3,cr4,1)
+              call label(pcode,kskd,cr1,cr2,cr3,cr4,inew)
               klab = .false.
-	    ELSE IF (IFUNC.EQ.61) THEN
-	      if (nstnx.eq.1) then ! just one station
-		pcode = 1
-	      else if (i.eq.1) then ! first station
-		pcode = 2
-	      else if (i.eq.nstnx) then ! last station
-		pcode = 3
-	      else
-		pcode = 0
-	      end if
-	      cinname = snpname
-              klab = .true.
-              call label(pcode,kskd,cr1,cr2,cr3,cr4,2)
-              klab = .false.
-	    ELSE IF (IFUNC.EQ.11) THEN
+          ELSE IF (IFUNC.EQ.61) THEN
+              if (clabtyp.eq.'POSTSCRIPT'.and.i.eq.1) then ! only first station
+                klab = .true.
+                ierr=cclose(fileptr)
+                call prtmp(0)
+                inew=1 ! reset flag for new file
+                klab = .false.
+              endif
+          ELSE IF (IFUNC.EQ.11) THEN
               cinname = snpname
               if (kbatch) then
                 write(luscn,9994)
                 goto 991
               endif
               call snpshft(ierr)
-	    ELSE IF (IFUNC.EQ.5) THEN
+          ELSE IF (IFUNC.EQ.5) THEN
               cinname = snpname
               call lstsum(kskd,ierr)
           END IF
           close(LU_INFILE,iostat=IERR)
           close(LU_OUTFILE,iostat=IERR)
         ELSE
-	    WRITE(LUSCN,9072) IERR,lskdfi
+          WRITE(LUSCN,9072) IERR,lskdfi
 9072      FORMAT(' Error ',I3,' opening schedule file ',A32)
         END IF
         I = I + 1
@@ -674,6 +782,28 @@ C
 991   write(luscn,9911)
 9911  format(' Invalid function requested.')
 990   close(LU_INFILE,iostat=IERR)
+      if (clabtyp.eq.'POSTSCRIPT') then
+        inquire(file=labname,exist=kex)
+        if (kex) then 
+          response='x'
+          do while (response(1:1).ne.'y'.and.response(1:1).ne.'n')
+            write(luscn,'("PostScript label file exists. Do you want ",
+     .      "to print it now ?"/"(If you don''t print it, the file ",
+     .      "will be deleted.) (Y/N)  ?  ")')
+            read(luusr,'(A)') response(1:2)
+            response(1:1)=lower(response(1:1))
+            if (response(1:1).eq.'y') then
+              klab = .true.
+              ierr=cclose(fileptr)
+              call prtmp(0)
+            else if (response(1:1).eq.'n') then
+              ierr=cclose(fileptr)
+              open(luprt,file=labname,status='old')
+              close(luprt,status='delete')
+            endif
+          enddo
+        endif
+      endif
       WRITE(LUSCN,9090)
 9090  FORMAT(' DRUDG DONE')
       END
