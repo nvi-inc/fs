@@ -99,7 +99,7 @@ float rate;
         flt2str(output,lcl->a.amp,-4,1);
         break;
       case 7:
-        flt2str(output,lcl->a.phase*180.0/M_PI,-6,0);
+        flt2str(output,(float)(lcl->a.phase*180.0/M_PI),-6,0);
         output[strlen(output)-1]='\0';
         break;
       case 8:
@@ -123,7 +123,7 @@ float rate;
         flt2str(output,lcl->b.amp,-4,1);
         break;
       case 14:
-        flt2str(output,lcl->b.phase*180.0/M_PI,-6,0);
+        flt2str(output,(float)(lcl->b.phase*180.0/M_PI),-6,0);
         output[strlen(output)-1]='\0';
         break;
       default:
@@ -190,18 +190,24 @@ unsigned uarray[32];
     else
       n_b.sin=0.0;
 
+    n_a.cos = sin(n_a.cos*M_PI/2.0);
+    n_a.sin = sin(n_a.sin*M_PI/2.0);
+
+    n_b.cos = sin(n_b.cos*M_PI/2.0);
+    n_b.sin = sin(n_b.sin*M_PI/2.0);
+
     lcl->a.amp=sqrt( n_a.cos*n_a.cos + n_a.sin*n_a.sin )*100.0;
     lcl->b.amp=sqrt( n_b.cos*n_b.cos + n_b.sin*n_b.sin )*100.0;
 
     if(n_a.sin == 0.0 && n_a.cos == 0.0)
       lcl->a.phase=999.9;
     else
-      lcl->a.phase=atan2(n_a.sin,n_a.cos);
+      lcl->a.phase=-atan2(n_a.sin,n_a.cos);
 
     if(n_b.sin == 0.0 && n_b.cos == 0.0)
       lcl->b.phase=999.9;
     else
-      lcl->b.phase=atan2(n_b.sin,n_b.cos);
+      lcl->b.phase=-atan2(n_b.sin,n_b.cos);
 
 /*average number of bits */
 
@@ -225,3 +231,5 @@ unsigned uarray[32];
 
     return;
 }
+
+
