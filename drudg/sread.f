@@ -74,6 +74,8 @@ C 020713 nrv Move reading of $PARAM to DRPRRD.
 C 020713 nrv Set kgeo=.true. for sked file, false for VEX. Will be
 C            set to .true. if sked_params block is found later in the VEX file.
 C 021014 nrv Set kpostpass=.true. for astro (.not.geo) schedules.
+C 021021 nrv Don't set default tape motion parameters for VEX files
+C            because they have already been read in.
 C
 C
       close(unit=LU_INFILE)
@@ -339,13 +341,13 @@ C
       endif ! VEX/sked
 
 C     Read parameters needed by drudg
-        do i=1,nstatn
-          tape_motion_type(i)='START&STOP'
-          itearl(i)=0
-          itlate(i)=0
-          itgap(i)=0
-          itlate(i)=0
-        enddo
+C       do i=1,nstatn
+C         tape_motion_type(i)='START&STOP'
+C         itearl(i)=0
+C         itlate(i)=0
+C         itgap(i)=0
+C         itlate(i)=0
+C       enddo
         isettm = 20
         ipartm = 70
         itaptm = 1
