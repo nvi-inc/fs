@@ -35,7 +35,7 @@ C INPUT VARIABLES:
 C
 C OUTPUT VARIABLES:
 C
-      integer*2 lnewso(4)
+      integer*2 lnewso(8)
 C       - Contains the new source name.
 C
 C
@@ -81,7 +81,7 @@ C
       integer*2 lsn(4)
 C        - Contains the schedule source name.
 C
-      integer*2 lsum(25), lrun(39), lnewsn
+      integer*2 lsum(25), lrun(40), lnewsn
       integer*2 star(2)
       integer ilsft,ileft
 C
@@ -89,12 +89,14 @@ C     data lsum/48,'*summary of                  for                '/
       data lsum/48,2H*s,2Hum,2Hma,2Hry,2H o,2Hf ,2H  ,2H  ,2H  ,2H  ,
      .2H  ,2H  ,2H  ,2H  ,2H f,2Hor,2H  ,2H  ,2H  ,2H  ,2H  ,2H  ,2H  ,
      .2H  /
-C      data lrun/75,'*run-id    source    tape #  feet     start       ',
-C     .'stop      feet  status  '/
-      data lrun/75,2H*r,2Hun,2H-i,2Hd ,2H  ,2H s,2Hou,2Hrc,2He ,2H  ,
-     .2H t,2Hap,2He ,2H# ,2H f,2Hee,2Ht ,2H  ,2H  ,2Hst,2Har,2Ht ,2H  ,
-     .2H  ,2H  ,2Hst,2Hop,2H  ,2H  ,2H  ,2Hfe,2Het,2H  ,2Hst,2Hat,2Hus,
-     .2H  ,2H  /
+C      data lrun/78,'*run-id    source        ',
+C     .'    tape #  feet     start       ',
+C     .'stop    feet  status'/
+      data lrun/78,2H*r,2Hun,2H-i,2Hd ,2H  ,2H  ,2H  ,
+     .2Hso,2Hur,2Hce,2H  ,2H  ,2H  ,
+     .2H t,2Hap,2He ,2H# ,2H f,2Hee,2Ht ,
+     .2H  ,2H  ,2H  ,2Hst,2Har,2Ht ,2H  ,
+     .2H  ,2H  ,2H s,2Hto,2Hp ,2H  ,2Hfe,2Het,2H  ,2Hst,2Hat,2Hus/
       data star/1,'*'/
 C
 C INITIALIZED VARIABLES:
@@ -111,8 +113,8 @@ C
 C  **************************************************************
 C
 C
-      call ifill_ch(lsourn,1,8,' ')
-      call ifill_ch(lnewso,1,8,' ')
+      call ifill_ch(lsourn,1,16,' ')
+      call ifill_ch(lnewso,1,16,' ')
       call ifill_ch(lsft,1,5,' ')
       call ifill_ch(left,1,5,' ')
       call ifill_ch(lsouon,1,8,' ')
@@ -124,6 +126,7 @@ C
       if (ikey.eq.12) then
         ierr=0
         call fmprewind(idcbsk,ierr)
+        call po_put_c("LXSUM - SKSUMMARY temporarily disabled")
         goto 600
       endif
       kmatch=.true.
@@ -232,41 +235,43 @@ C
         endif
       endif
       if(kmatch) then
-        call ichmv(jbuf,11,lsourn,1,8)
-        call ichmv(jbuf,21,ltapen,1,8)
+        call ichmv(jbuf,10,lsourn,1,16)
+        call ichmv(jbuf,27,ltapen,1,8)
         ilsft = lsft
-        call ib2as(ilsft,jbuf,30,o'40000'+o'400'*5+5)
+        call ib2as(ilsft,jbuf,36,o'40000'+o'400'*5+5)
         if (isld.eq.0) then
-          call ifill_ch(jbuf,41,1,'-')
-        else
-          call ib2as(isld,jbuf,36,o'40000'+o'400'+3)
-          call ifill_ch(jbuf,39,1,'-')
-          call ib2as(islhr,jbuf,40,o'40000'+o'400'+2)
-          call ifill_ch(jbuf,42,1,':')
-          call ib2as(islmin,jbuf,43,o'40000'+o'400'+2)
-          call ifill_ch(jbuf,45,1,':')
-          call ib2as(islsec,jbuf,46,o'40000'+o'400'+2)
+          call ifill_ch(jbuf,47,1,'.')
+        else          
+          call ib2as(isly,jbuf,42,o'40000'+o'400'*4+4)
+          call ifill_ch(jbuf,46,1,'.')
+          call ib2as(isld,jbuf,47,o'40000'+o'400'*2+3)
+          call ifill_ch(jbuf,50,1,'.')
+          call ib2as(islhr,jbuf,51,o'40000'+o'400'+2)
+          call ifill_ch(jbuf,53,1,':')
+          call ib2as(islmin,jbuf,54,o'40000'+o'400'+2)
+          call ifill_ch(jbuf,56,1,':')
+          call ib2as(islsec,jbuf,57,o'40000'+o'400'+2)
         endif
         if (ield.eq.0) then
-          call ifill_ch(jbuf,53,1,'-')
+          call ifill_ch(jbuf,63,1,'-')
         else
-          call ib2as(ielhr,jbuf,50,o'40000'+o'400'+2)
-          call ifill_ch(jbuf,52,1,':')
-          call ib2as(ielmin,jbuf,53,o'40000'+o'400'+2)
-          call ifill_ch(jbuf,55,1,':')
-          call ib2as(ielsec,jbuf,56,o'40000'+o'400'+2)
+          call ib2as(ielhr,jbuf,60,o'40000'+o'400'+2)
+          call ifill_ch(jbuf,62,1,':')
+          call ib2as(ielmin,jbuf,63,o'40000'+o'400'+2)
+          call ifill_ch(jbuf,65,1,':')
+          call ib2as(ielsec,jbuf,66,o'40000'+o'400'+2)
           ileft=left
-          call ib2as(ileft,jbuf,59,o'40000'+o'400'*5+5)
+          call ib2as(ileft,jbuf,69,o'40000'+o'400'*5+5)
         endif
-        call ichmv(jbuf,65,lstat,1,6)
+        call ichmv(jbuf,75,lstat,1,6)
       else
-        call ifill_ch(jbuf,23,1,'-')
-        call ichmv(jbuf,11,lsn,1,8)
-        call ifill_ch(jbuf,31,1,'-')
-        call ifill_ch(jbuf,41,1,'-')
+        call ifill_ch(jbuf,21,1,'-')
+        call ichmv(jbuf,10,lsn,1,16)
+        call ifill_ch(jbuf,42,1,'-')
         call ifill_ch(jbuf,52,1,'-')
-        call ifill_ch(jbuf,59,1,'-')
-        call ifill_ch(jbuf,66,1,'-')
+        call ifill_ch(jbuf,62,1,'-')
+        call ifill_ch(jbuf,69,1,'-')
+        call ifill_ch(jbuf,76,1,'-')
       end if
       call lxwrt(jbuf,nsum)
       nlout=nlout+1
@@ -290,3 +295,5 @@ C
 C
       return
       end
+
+
