@@ -93,6 +93,7 @@ C special version to write extra header lines for Bob's pol
 C nrv 940617
 C***********************************************************
 C 960219 nrv Add KSW to call, true if switching.
+C 960810 nrv Change itearl to an array
 C
 C  Initialization
 
@@ -232,7 +233,7 @@ C  Set up tracks for forward or reverse
 	iwr = 0
 	ktape = .false.
         ktrack = .false.
-C       ktrack=.true. !****************** always write them for pol
+        ktrack=.true. !****************** always write them for pol
 
         IF (IDIR.NE.IDIRP) THEN !change direction
           ktrack = .true.  ! always write new tracks when changing direction
@@ -391,7 +392,7 @@ C  (save the last write for the end of outer loop)
 C  Save tape info for checking on next pass
 
 	IPASP=IPAS(ISTNSK)
-        IFTOLD=IFT(ISTNSK)+IFIX(IDIR*(ITEARL+IDUR(ISTNSK))*
+        IFTOLD=IFT(ISTNSK)+IFIX(IDIR*(ITEARL(istn)+IDUR(ISTNSK))*
      .              SPEED(ICOD,istn))
 	IDIRP=IDIR
 	IDAYP=IDAYR
