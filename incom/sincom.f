@@ -179,10 +179,12 @@ C                   Initialize previous segment name for LINKP
         idummy = ichmv_ch(lfreqv(1,i),1,'000.00')
         freqvc(i)=0.0
         extbwvc(i)=-1.0
+        itpivc(i)=-1
       enddo
       call fs_set_lfreqv(lfreqv)
       call fs_set_freqvc(freqvc)
       call fs_set_extbwvc(extbwvc)
+      call fs_set_itpivc(itpivc)
       iratfm = -1
       call fs_set_iratfm(iratfm)
       imodfm = 1
@@ -986,6 +988,8 @@ C  each array.
       if (pierr.ne.0) call logit7ci(0,0,0,0,pierr,'bo',0)
       call fmpclose(idcb,ierr)
 C
+C 7.0 time.ctl control file
+C
 700   continue
       call fmpopen
      &   (idcb,FS_ROOT//'/control/time.ctl',ierr,'r',idum)
@@ -1034,6 +1038,34 @@ C
       modelti_fs=model0ti_fs
       call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &   rateti_fs,spanti_fs, modelti_fs)
+      call fmpclose(idcb,ierr)
+C
+C 8.0 flagr.ctl control file
+C
+800   continue
+      call fmpopen
+     &   (idcb,FS_ROOT//'/control/flagr.ctl',ierr,'r',idum)
+      if (ierr.lt.0) then
+        call logit7ci(0,0,0,1,-400,'bo',ierr)
+        goto 990
+      endif
+C
+C  8.1 Read and decode each line.
+C
+      ilen=0
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-401,'bo',ierr)
+        goto 990
+      endif
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      call gtprm(ibuf,ic1,ic2,1,iapdflg,ierr)
+      if (ierr.lt.0) then
+        call logit7ci(0,0,0,1,-402,'bo',0)
+        goto 990
+      endif
+      call fs_set_iapdflg(iapdflg)
       call fmpclose(idcb,ierr)
       goto 995
 C

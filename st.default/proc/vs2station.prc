@@ -107,12 +107,10 @@ vlbas2init
 sy=run setcl &
 enddef
 define  midob         00000000000
-tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpi=9u,10u,11u,12u,13u,14u,ifb
+tpi=formbbc,formif
 bbcagc
 caltemps
-tsys1=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tsys2=9u,10u,11u,12u,13u,14u,ifb
+tsys=formbbc,formif
 onsource
 wx
 cable
@@ -130,8 +128,7 @@ bbcman
 ifdab=20,20,*,*
 ifdcd=20,20,*,*
 !+2s
-tpzero=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpzero=9u,10u,11u,12u,13u,14u,ifb
+tpzero=formbbc,formif
 bbcagc
 ifdab=0,0,*,*
 ifdcd=0,0,*,*
@@ -141,7 +138,7 @@ define  min15         00000000000
 "rxall
 wx
 cable
-sxcts
+caltsys
 enddef
 define  overnite      00000000000
 log=overnite
@@ -160,14 +157,14 @@ onsource
 bbcman
 calon
 !+2s
-tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpical=9u,10u,11u,12u,13u,14u,ifb
+tpical=formbbc,formif
+tpgain=formbbc,formif
 caloff
 enddef
 define  prepass       00000000000
 enddef
 define  ready         00000000000
-sxcts
+caltsys
 "rxmon
 newtape
 loader
@@ -197,26 +194,23 @@ bbcsx2
 ifdsx
 !*+8s
 enddef
-define  sxcts         00000000000
+define  caltsys       00000000000
 bbcman
-tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpi=9u,10u,11u,12u,13u,14u,ifb
+tpi=formbbc,formif
 ifdab=20,20,*,*
 ifdcd=20,20,*,*
 !+2s
-tpzero=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpzero=9u,10u,11u,12u,13u,14u,ifb
+tpzero=formbbc,formif
 ifdab=0,0,*,*
 ifdcd=0,0,*,*
 calon
 !+2s
-tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tpical=9u,10u,11u,12u,13u,14u,ifb
+tpical=formbbc,formif
+tpgain=formbbc,formif
 bbcagc
 caloff
 caltemps
-tsys1=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
-tsys2=9u,10u,11u,12u,13u,14u,ifb
+tsys=formbbc,formif
 enddef
 define  unlod         00000000000
 check=*,-tp

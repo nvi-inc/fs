@@ -65,7 +65,7 @@ define  min15         00000000000
 "rxall
 wx
 cable
-"sxcts
+"caltsys
 enddef
 define  overnite      00000000000
 log=overnite

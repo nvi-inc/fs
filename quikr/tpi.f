@@ -14,7 +14,7 @@ C     INPUT VARIABLES:
 C               - parameters from SLOWP 
 C        IP(1)  - class number of input parameter buffer
 C        IP(2-5)- not used
-C        ISUB   - which sub-function, 3=TPI, 4=TPICAL, 7=TPZERO 
+C        ISUB   - which sub-function, 3=TPI, 4=TPICAL, 7=TPZERO, 8=TPGAIN(BBCs)
 C 
 C     OUTPUT VARIABLES: 
 C        IP(1) - CLASS
@@ -86,13 +86,13 @@ C
          if(itpis(i).ne.0.and.
      &      (i.ne.16.or.(i.eq.16.and.itpis(15).eq.0)) ) then
             if (i.le.14) then
-              ibuf(1) = -2
+              ibuf(1) = -22
               ibuf(2) = lvcn(i)
             else if (i.le.16) then
-              ibuf(1) = -1
+              ibuf(1) = -21
               call char2hol('if',ibuf(2),1,2)
             else
-              ibuf(1) = -2
+              ibuf(1) = -22
               call char2hol('i3',ibuf(2),1,2)
             endif
             call put_buf(iclass,ibuf,-4,'fs','  ')
@@ -105,7 +105,7 @@ C
         if (ip(3).lt.0) return
 
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
-        call fc_tpi_vlba(ip,itpis_vlba)
+        call fc_tpi_vlba(ip,itpis_vlba,isub)
         if(ip(3).lt.0) return
       else
          call fc_tpi_norack(ip,itpis_norack)
@@ -123,15 +123,15 @@ C
       nch = ichmv_ch(ibuf,ieq,'/')
 C                     Get the command part of the response set up
       if(MK3.eq.rack.or.MK4.eq.rack) then
-        call tpput(ip,itpis,isub,ibuf,nch,ilen)
+        call tpput(ip,itpis,isub,ibuf,nch)
+        return
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)
-        if(ip(3).lt.0) return
+        return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)
         if(ip(3).lt.0) return
       endif
-      iclass = 0
       call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec = 1
 C

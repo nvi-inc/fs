@@ -148,7 +148,7 @@ min15@!,15m
 define  postob        00000000000
 enddef
 define  ready         00000000000
-sxcts
+"caltsys
 "rxmon
 newtape
 loader

@@ -60,11 +60,9 @@ if3
 vc01
 vc05
 vc09
-tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpi=v9,v10,v11,v12,v13,v14,if2
+tpi=formvc,formif
 caltemps
-tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tsys2=v9,v10,v11,v12,v13,v14,if2
+tsys=formvc,formif
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
 sy=run setcl &
@@ -73,8 +71,7 @@ define  midtp         00000000000
 ifd=max,max,*,*
 if3=max,*,*,*,*,*
 !+2s
-tpzero=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpzero=v9,v10,v11,v12,v13,v14,if2
+tpzero=formvc,formif
 ifd=old,old,*,*
 if3=old,*,*,*,*,*
 "rxmon
@@ -85,7 +82,7 @@ wx
 sy=brk pcalr &
 !+15s
 cable
-sxcts
+caltsys
 pcal
 enddef
 define  overnite      00000000000
@@ -106,8 +103,7 @@ define  preob         00000000000
 onsource
 calon
 !+2s
-tpical=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpical=v9,v10,v11,v12,v13,v14,if2
+tpical=formvc,formif
 caloff
 enddef
 define  prepass       00000000000
@@ -136,7 +132,7 @@ et
 !+9s
 enddef
 define  ready         00000000000
-sxcts
+caltsys
 "rxmon
 newtape
 " if your brake release doesn't reset your footage
@@ -188,24 +184,20 @@ tape=low
 repro=byp,6,18
 checkcrc
 enddef
-define  sxcts         00000000000
-tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpi=v9,v10,v11,v12,v13,v14,if2
+define  caltsys       00000000000
+tpi=formvc,formif
 ifd=max,max,*,*
 if3=max,*,*,*,*,*
 !+2s
-tpzero=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpzero=v9,v10,v11,v12,v13,v14,if2
+tpzero=formvc,formif
 ifd=old,old,*,*
 if3=old,*,*,*,*,*
 calon
 !+2s
-tpical=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tpical=v9,v10,v11,v12,v13,v14,if2
+tpical=formvc,formif
 caloff
 caltemps
-tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
-tsys2=v9,v10,v11,v12,v13,v14,if2
+tsys=formvc,formif
 enddef
 define  tapeforma     00000000000
 tapeform=1,-350,2,  0,3,-295, 4, 55, 5,-240, 6,110

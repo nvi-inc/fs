@@ -311,7 +311,7 @@ et2
 rec2=unload
 enddef
 define  ready2        00000000000x
-sxcts
+caltsys
 "rxmon
 newtape2=$
 loader2
