@@ -67,8 +67,15 @@ int rlen;
   unlink("/tmp/LS.NUM");
   ierr = -3;
   while(-1!=fscanf(idum,"%s",outbuf)){
-    decloc = strchr(outbuf,'.');
-    if(declocstr != NULL) {
+    decloc = strrchr(outbuf,'.');
+    /*    printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+           outbuf[0],outbuf[1],outbuf[2],outbuf[4],
+	   outbuf[5],outbuf[6],outbuf[7],outbuf[8],
+	   outbuf[9],outbuf[10],outbuf[11],outbuf[12],
+	   outbuf[13],outbuf[14],outbuf[15],outbuf[16],
+	   outbuf[17],outbuf[18],outbuf[19],outbuf[20],
+	   outbuf[21],outbuf[22]); */
+    if(declocstr !=NULL) {
       strcpy(runstr ,outbuf);
       ierr = 0;
       break;
@@ -120,9 +127,10 @@ int rlen;
 	  (ch3 == 'l' && (MK3   == drive2 || MK4   == drive2 ||
 			  VLBA  == drive2 || VLBA4 == drive2 )))
 	 &&
-	 (((drive1 == 0) == (ch2 != '+' )) ||
-	  ((drive2 == 0) == (ch3 != '+' )))
-	 ) {
+         ((drive1 !=0 && drive2 !=0 && ((ch2 == '+' || ch3 == '+') ||
+                                          (ch2 =='_' && ch3 == '_'))) ||
+          ((drive1 ==0 || drive2 == 0) && (ch2 != '+' && ch3 != '+')))
+         ) {
         strcpy(runstr,outbuf);
         ierr = 0;
         break;
