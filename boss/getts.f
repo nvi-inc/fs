@@ -78,17 +78,24 @@ C
       if (it4.eq.0) goto 410
 C                   If once-only, mark as "last time" 
 C     INCREMENT TO NEXT EXECUTION TIME
-300   if (it4.ne.3) goto 310
+ 300  continue
+      if (it4.ne.3) goto 310
       it2 = it2 + it5 
       goto 320
-310   if (it4.eq.2) it3 = it3 + it5*100 
-      if (it4.eq.1) it3 = it3 + it5 
+c
+ 310  continue
+      if (it4.eq.2) it3 = it3 + it5*100 
+      if (it4.eq.1) it3 = it3 + it5
+c
       if (it3.lt.6000) goto 400 
-      it3 = it3 - 6000
-      it2 = it2 + 1 
-320   if (it2.lt.1440) goto 400 
-      it2 = it2 - 1440
-      it1 = it1 + 1 
+      it2 = it2 + it3 / 6000
+      it3 = mod(it3, 6000)
+c
+ 320  continue
+      if (it2.lt.1440) goto 400 
+      it1 = it1 + it2 / 1440
+      it2 = mod(it2, 1440)
+      goto 320
 C 
 400   t1 = 86400.d0*mod(it1,1024) +it2*60.d0 + it3/100.d0 
       if (t1.lt.tnow) goto 300
