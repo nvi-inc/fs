@@ -3469,3 +3469,17 @@ Version 9.3.21 980204
            add "latest"
 
 Version 9.3.22 980210
+
+980213 WEH drudg/drudg.c
+           skdrut/frinp.c
+           deleted
+
+980216 WEH logpl/logpl
+           pdplt/pdplt
+           change "focus default ." to "focus ."
+
+980216 WEH st.default/prog.1.2.12
+           st.default/oper.1.2.12
+           created and moved the .*.1.2.12 files from prog and oper
+
+Version 9.3.23 980216
