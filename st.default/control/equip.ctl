@@ -8,10 +8,10 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
 *                     k42c/mk4 or none)
-mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, mk4, mk4b,
-*                           s2, k41, k41/dms, k42, k42/dms, or none)
-mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, mk4, mk4b,
-*                           or none)
+mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
+*		            mk4b, s2, k41, k41/dms, k42, k42/dms, or none)
+mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
+*                           mk4b, or none)
 mk3     type of decoder (mk3, dqa, mk4, or none)
 *
 * Mark III/IV rack parameters
@@ -27,3 +27,6 @@ mk3     type of decoder (mk3, dqa, mk4, or none)
 20      Receiver 20K Stage Check Temperature
 * pcal control
 none    type of phase cal control (if3 or none)
+*mk iv fm firmware version
+40      pre-40 versions have no barrel-rolling or data modulation
+
