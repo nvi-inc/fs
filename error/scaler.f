@@ -23,7 +23,8 @@ C
           pause
         endif
         div=dsqrt(matrix(ii))
-        if (div.lt.1d-14) then
+c        if (div.lt.1d-14) then
+        if (div.lt.1d-10) then
           scale(i)=0.0d0
         else
           scale(i)=1.0d0/div
