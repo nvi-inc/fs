@@ -20,7 +20,11 @@ char *ptr;
     static int itrk;
 
     ierr = 0;
-    if(*count==1) {
+
+    if(*count==1 && ptr != NULL && strcmp(ptr,"*")==0) {
+      (*count)++;
+      return ierr;
+    } else if (*count==1) {
       lcl->enable[0] = 0;
       lcl->enable[1] = 0;
     }
