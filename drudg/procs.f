@@ -367,21 +367,25 @@ C                    !MODE E = B ON ODD, C ON EVEN PASSES
             endif
 C           Add group index for Mk4 formatter
             if (km4rack.and.km3mode.and.
-     .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then ! add group
-              if (itrk(2).eq.1.or.itrk(4).eq.1.or.itrk(6).eq.1.or.
-     .          itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
-     .          itrk(14).eq.1.or.itrk(16).eq.1) ig=1
-              if (itrk(3).eq.1.or.itrk(5).eq.1.or.itrk(7).eq.1.or.
-     .            itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
-     .            itrk(15).eq.1.or.itrk(17).eq.1) ig=2
-              if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
-     .            itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
-     .            itrk(30).eq.1.or.itrk(32).eq.1) ig=3
-              if (itrk(19).eq.1.or.itrk(21).eq.1.or.itrk(23).eq.1.or.
-     .            itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
-     .            itrk(31).eq.1.or.itrk(33).eq.1) ig=4
-              nch = nch+ib2as(ig,ibuf,nch,1)
-            endif
+     .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then ! 
+              if (ichcm_ch(lmode(1,istn,icode),1,'E').eq.0) THEN ! add group
+                if (itrk(2).eq.1.or.itrk(4).eq.1.or.itrk(6).eq.1.or.
+     .              itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
+     .              itrk(14).eq.1.or.itrk(16).eq.1) ig=1
+                if (itrk(3).eq.1.or.itrk(5).eq.1.or.itrk(7).eq.1.or.
+     .              itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
+     .              itrk(15).eq.1.or.itrk(17).eq.1) ig=2
+                if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
+     .              itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
+     .              itrk(30).eq.1.or.itrk(32).eq.1) ig=3
+                if (itrk(19).eq.1.or.itrk(21).eq.1.or.itrk(23).eq.1.or.
+     .              itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
+     .              itrk(31).eq.1.or.itrk(33).eq.1) ig=4
+                nch = nch+ib2as(ig,ibuf,nch,1) ! mode E group
+              else ! add subpass number
+                nch = nch+ib2as(ipass,ibuf,nch,1) ! mode B or C subpass
+              endif
+            endif ! add group or subpass
 C           Add sample rate
             nch = MCOMA(IBUF,nch)
             nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
