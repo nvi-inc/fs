@@ -97,6 +97,9 @@ C 970228 nrv Use labname for output file.
 C 970312 nrv Add call to READ_SNAP1 to read first line freeform.
 C 970827 nrv Add startlab to make_pslabel call. Add prompts for 
 C            starting position of label.
+C 971014 nrv Add better S2 logic.
+C 971028 nrv Force new tape when starting a schedule (this was needed for
+C            S2 in case it starts in middle of tape).
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -147,7 +150,11 @@ C
       NLABPR = 0
       ntape=-1
       IPASP=-1
-      ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      ks2=.false.
+      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
+     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
+        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      endif
 
 C  If label printer is postscript then don't open the file, that
 C  will be done later with a C call.
@@ -324,17 +331,16 @@ C    and initiate the main loop.
 
         iob=0
        ierr=0
-        if (kskd) then !read schedule file
-C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-       call ifill(ibuf,1,ibuf_len*2,oblank)
-       idum = ichmv(lstnam,1,lstnna(1,istn),1,8)
-       idum = ichmv(lco,1,lstcod(istn),1,2)
-       if (iob+1.le.nobs) then
-         idum = ichmv(ibuf,1,lskobs(1,iskrec(iob+1)),1,ibuf_len*2)
-         ilen = iflch(ibuf,ibuf_len*2)
-       else
-         ilen=-1
-       endif
+       if (kskd) then !read schedule file
+         call ifill(ibuf,1,ibuf_len*2,oblank)
+         idum = ichmv(lstnam,1,lstnna(1,istn),1,8)
+         idum = ichmv(lco,1,lstcod(istn),1,2)
+         if (iob+1.le.nobs) then
+           idum = ichmv(ibuf,1,lskobs(1,iskrec(iob+1)),1,ibuf_len*2)
+           ilen = iflch(ibuf,ibuf_len*2)
+         else
+           ilen=-1
+         endif
         DO WHILE (IERR.GE.0) !loop on observations
 
 C 2. Unpack the observation, calculate the stop time.
@@ -371,8 +377,18 @@ C
             IF (LDIR(ISTNSK).EQ.HHR) IDIR=-1
           ENDIF
           KNEW=.TRUE.
-          IF(ISTNSK.NE.0)
-     .    KNEW=KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,IDIRP,IFTOLD)
+          IF(ISTNSK.NE.0) then
+            if (ks2) then
+              knew = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+            else if (idir.ne.0) then
+              KNEW = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
+     .        IDIRP,IFTOLD)
+            else
+              knew = .false.
+            endif
+          endif
+C         Force new tape logic when starting a schedule.
+          if (iob.eq.0) knew=.true.
 C
           IF (KNEW) THEN !NEW TAPE
             ntape=ntape+1
@@ -435,7 +451,6 @@ C       NOB(NOUT) = NOB(NOUT)+1
           IDIRP = IDIR
         ENDIF !process this observation
 C
-C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
        iob=iob+1
        call ifill(ibuf,1,ibuf_len*2,oblank)
        if (iob+1.le.nobs) then
