@@ -103,7 +103,11 @@ C
           if (ic1.gt.0) then
             if (ichcm_ch(ibuf,ic1,'stack2').eq.0) then
               kena(2)= .true.
+            else if (ichcm_ch(ibuf,ic1,'s2').eq.0) then
+              kena(2)= .true.
             else if (ichcm_ch(ibuf,ic1,'stack1').eq.0) then
+              kena(1)= .true.
+            else if (ichcm_ch(ibuf,ic1,'s1').eq.0) then
               kena(1)= .true.
             else if (ichcm_ch(ibuf,ic1,'null').eq.0) then
               kena(1)= .false.
@@ -117,7 +121,11 @@ C
           if (ic1.gt.0) then
             if (ichcm_ch(ibuf,ic1,'stack2').eq.0) then
               kena(2)= .true.
+            else if (ichcm_ch(ibuf,ic1,'s2').eq.0) then
+              kena(2)= .true.
             else if (ichcm_ch(ibuf,ic1,'stack1').eq.0) then
+              kena(1)= .true.
+            else if (ichcm_ch(ibuf,ic1,'s1').eq.0) then
               kena(1)= .true.
             else
               ierr= -103
