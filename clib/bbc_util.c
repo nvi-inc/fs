@@ -109,7 +109,7 @@ char *ptr;
         if (lcl->gain.mode==1) {
           *count=-1; /* values are legit only for manual mode */
         }
-        else if (*ptr==NULL) {
+        else if (*ptr==0) {
           lcl->gain.value[ind]=-999; /* signal for default */
           break;
         }
