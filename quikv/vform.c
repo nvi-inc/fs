@@ -15,7 +15,7 @@ int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
-      int  aux_track, j, version;
+      int j, version;
       unsigned long iptr;
       unsigned itracks[32];
       char *ptr;
@@ -56,33 +56,16 @@ long ip[5];                           /* ipc parameters */
          request.addr=0x60; add_req(&buffer,&request); /* version */
          request.addr=0x8D; add_req(&buffer,&request); /* low track enables */
          request.addr=0x8E; add_req(&buffer,&request); /* high track enables */
-         request.addr=0x8F; add_req(&buffer,&request); /* system track enables*/
+         request.addr=0x8F; add_req(&buffer,&request); /*system track enables*/
          request.addr=0x90; add_req(&buffer,&request);
          request.addr=0x91; add_req(&buffer,&request);
+         request.addr=0x92; add_req(&buffer,&request);
+         request.addr=0x93; add_req(&buffer,&request);
          request.addr=0x99; add_req(&buffer,&request);
          request.addr=0x9A; add_req(&buffer,&request);
          request.addr=0xAD; add_req(&buffer,&request);
-
-         goto skip_aux;
-         for (i=0;i<28;i++) {                   /* 28 tracks of aux data */
-           if(i<14) aux_track=i+1; /* calculate formatter track number */
-           else aux_track=i+3;
-
-           iptr=aux_track*16;                   /* indirect address */
-
-           request.type=0;                      /* set aux buffer address */
-           request.data=0xFFFF & (iptr>>16);    /* msw */
-           request.addr=0xD4; add_req(&buffer,&request);
-
-           request.data=0xFFFF & iptr;          /* lsw */
-           request.addr=0xD5; add_req(&buffer,&request);
-
-           request.type=1;                      /* fetch aux data */
-           request.addr=0xD6;
-           for (j=0;j<4;j++) add_req(&buffer,&request);  /* 4 words per track */
-         }
-skip_aux:
          goto mcbcn;
+
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
         else if (command->argv[1]==NULL) /* special cases */
          if (*command->argv[0]=='?') {
@@ -99,18 +82,24 @@ skip_aux:
             request.addr=0x81;
             request.data=0x8001; add_req(&buffer,&request);
             goto mcbcn;
+         } else if(0==strcmp(command->argv[0],"configure")) {
+            request.type=0;
+            request.addr=0x82;
+            request.data=0x8001; add_req(&buffer,&request);
+            goto mcbcn;
          } 
 
 /* if we get this far it is a set-up command so parse it */
 
 parse:
       ierr=0;
+
+
       vform_ver(&version,ip);
-      if(ip[2]<0)
-        return;
+      if(ip[2]<0) /* optimistic assumption but it doesn't matter really */
+	shm_addr->form_version = 292;
       else
         shm_addr->form_version = version;
-   
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->vform,sizeof(lcl));
 
@@ -125,7 +114,15 @@ parse:
 
       ichold=shm_addr->check.vform;
       shm_addr->check.vform=0;
+
       memcpy(&shm_addr->vform,&lcl,sizeof(lcl));
+
+/* if getting the version number failed, we give now after we have
+ * determined the correct tape_clock so that default tape speed can
+ * be calculated
+ */
+      if(ip[2]<0)
+	return;
       
       request.type=0;                /* clear MCB status register */
       request.addr=0xA1;
@@ -149,6 +146,12 @@ parse:
       request.addr=0x91;
       vform91mc(&request.data, &lcl); add_req(&buffer,&request); 
 
+      request.addr=0x92;
+      vform92mc(&request.data, &lcl); add_req(&buffer,&request); 
+
+      request.addr=0x93;
+      vform93mc(&request.data, &lcl); add_req(&buffer,&request); 
+
       request.addr=0x99;
       vform99mc(&request.data, &lcl); add_req(&buffer,&request); 
 
@@ -159,7 +162,10 @@ parse:
       vform9Dmc(&request.data, &lcl); add_req(&buffer,&request); 
 
       request.addr=0xA6; /* send rack ID */
-      vformA6mc(&request.data, shm_addr->hwid); add_req(&buffer,&request); 
+      vformA6mc(&request.data,shm_addr->hwid,&lcl); add_req(&buffer,&request); 
+
+      request.addr=0xA7; /* send micron position */
+      vformA7mc(&request.data, shm_addr->posnhd[0]);add_req(&buffer,&request); 
 
       request.addr=0xAD;
       vformADmc(&request.data, &lcl); add_req(&buffer,&request); 
@@ -178,14 +184,6 @@ parse:
            add_req(&buffer,&request);
         }
       }
-
-      goto skip_aux2;
-      if(lcl.mode != 0) {
-        aux_config(&lcl,ip);          /* configure the aux data */
-        if(ip[2]<0) return;
-      }
-
-skip_aux2:
 
       request.addr=0x82;                               /* configure */
       request.data=0x8001; add_req(&buffer, &request);
