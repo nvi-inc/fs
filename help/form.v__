@@ -3,9 +3,9 @@
               Syntax:      form=mode,rate,fan,barrel,dqa
           vform=mode,rate,fan,barrel,dqa
  
-              Response:    form/mode,rate,fan,barrel,rev,genstat,mcbstat,hdwstat,sfwstat,ints
-              tat
-          vform/mode,rate,fan,barrel,rev,genstat,mcbstat,
+              Response:    form/mode,rate,fan,barrel,dqa,rev,genstat,mcbstat,
+                           hdwstat,sfwstat,intstat
+          vform/mode,rate,fan,barrel,dqa,rev,genstat,mcbstat,
           hdwstat,sfwstat,intstat
  
  

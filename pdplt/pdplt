@@ -1548,17 +1548,19 @@ set temp [open tempFile r]
 set k 0
 set l 0
 while {-1 != [gets $temp line]} {
-        incr k
-        if {$k%13==6} {
-	    set flagList $line
-	    split $flagList
-	    if {([llength $flagList]<=[expr $flagRows*$flagColumns+1])} {
-		for {set p 0} {($p<=[expr $flagRows*$flagColumns+1])} {incr p} {
-                    set flagArray($p) [lindex $flagList $p]
+        if {[string index $line 0] != "\*"} {
+	    incr k
+	    if {$k==2} {
+		set flagList $line
+		split $flagList
+		if {([llength $flagList]<=[expr $flagRows*$flagColumns+1])} {
+		    for {set p 0} {($p<=[expr $flagRows*$flagColumns+1])} {incr p} {
+			set flagArray($p) [lindex $flagList $p]
+		    }
 		}
-	    }
-	}	    
-}
+	    }	    
+	}
+    }
 }
 
 # ------------------------------------------
