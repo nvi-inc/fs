@@ -3,6 +3,7 @@ C  Write tape labels from reading the SNAP file
 C
 C NRV 901206 New routine
 C nrv 930412 implicit none
+C 960814 nrv Allow upper/lower case in SNAP file
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -17,7 +18,7 @@ C Local
 	integer iy1(5),id1(5),ih1(5),im1(5),id2(5),ih2(5),im2(5)
       integer nout,newlab,idayr,ihr,imn,idayr2,ihr2,imn2
       INTEGER   IERR
-	character*128 cbuf
+	character*128 cbuf,cbuf1
 Cinteger*4 ifbrk
 	character*9 cti
 
@@ -32,7 +33,8 @@ C 2. Loop over SNAP records
 
 	do while (.true.) ! read loop
 C  if (ifbrk().lt.0) goto 990
-	  read(lu_infile,'(a)',err=990,end=901,iostat=IERR) cbuf
+	  read(lu_infile,'(a)',err=990,end=901,iostat=IERR) cbuf1
+          call c2upper(cbuf1,cbuf)
 	  if (cbuf(1:1).ne.'"') then !non-comment line
 	  if (index(cbuf,'UNLOD').ne.0) then
 	    if (nout.ge.nlab) then !print a row
