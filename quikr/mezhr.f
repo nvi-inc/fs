@@ -43,8 +43,14 @@ c
         call char2hol('tp',ibuf2(2),1,2)
         call fs_get_itraka(itraka)
         call fs_get_itrakb(itrakb)
-        if(itrk(1).ne.0) itraka=itrk(1)
-        if(itrk(2).ne.0) itrakb=itrk(2)
+        if(itrk(1).ne.0) then
+           itraka=itrk(1)
+           if(MK4.eq.drive) itraka=itraka-1
+        endif
+        if(itrk(2).ne.0) then
+           itrakb=itrk(2)
+           if(MK4.eq.drive) itrakb=itrakb-1
+        endif
         call fs_set_itraka(itraka)
         call fs_set_itrakb(itrakb)
         iclass=0
@@ -232,117 +238,120 @@ C
 c
 c  Check COMMON for AUX data
 c
-        if (MK3.eq.and(rack,MK3)) then
-          do i=1,6
-            if(lauxfm(i).ne.0) goto 401
-          enddo
-          goto 990     !no aux to check
-        else if (MK4.eq.and(rack,MK4)) then
-          do i=1,4
-            if(lauxfm4(i).ne.0) goto 401
-          enddo
-        endif
-c
-401     continue
-        do ii=1,2
-          if(itrk(ii).ne.0)then
-            nch=1+12*(ii-1)
-            do i=1,2
-              idumm1 = ichmv_ch(ibuf2,5,'00000000')
-              if(ii.eq.2) idumm1 = ichmv_ch(ibuf2,11,'1')
-              if(i.eq.1) idumm1 = ichmv_ch(ibuf2,12,'0')
-              if(i.eq.2) idumm1 = ichmv_ch(ibuf2,12,'1')
-              ibuf2(1)=0
-              call char2hol('de',ibuf2(2),1,2)
-              iclass=0
-              call put_buf(iclass,ibuf2,-12,'fs','  ')
-              ibuf2(1)=5
-              call char2hol('> ',ibuf2(2),1,2)
-              call put_buf(iclass,ibuf2,-3,'fs','  ')
-              call char2hol('/ ',ibuf2(2),1,2)
-              call put_buf(iclass,ibuf2,-3,'fs','  ')
-              call run_matcn(iclass,3)
-              call rmpar(ip)
-              iclass=ip(1)
-              if(ip(3).lt.0) return
-              do j=1,3
-                ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
-              enddo
-              nch=ichmv(laux,nch,ibuf,3,4)
-              if(i.eq.1) nch=ichmv(laux,nch,ibuf,7,4)
+         if (MK3.eq.and(rack,MK3)) then
+            do i=1,6
+               if(lauxfm(i).ne.0) goto 401
             enddo
-            call lower(laux(6*(ii-1)+1),12)
-            if (MK3.eq.and(MK3,rack)) then
-              if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
-                if(ii.eq.1) iauxa = 1
-                if(ii.eq.2) iauxb = 1
-              endif
-            else if (MK4.eq.and(MK4,rack)) then
-              if(ichcm(laux,12*(ii-1)+1,lauxfm4,1,12).ne.0) then
-                if(ii.eq.1) iauxa = 1
-                if(ii.eq.2) iauxb = 1
-              endif
+            goto 990            !no aux to check
+         else if (MK4.eq.and(rack,MK4)) then
+            do i=1,4
+               if(lauxfm4(i).ne.0) goto 401
+            enddo
+            goto 990
+         endif
+         goto 990
+c
+ 401     continue
+         do ii=1,2
+            if(itrk(ii).ne.0)then
+               nch=1+12*(ii-1)
+               do i=1,2
+                  idumm1 = ichmv_ch(ibuf2,5,'00000000')
+                  if(ii.eq.2) idumm1 = ichmv_ch(ibuf2,11,'1')
+                  if(i.eq.1) idumm1 = ichmv_ch(ibuf2,12,'0')
+                  if(i.eq.2) idumm1 = ichmv_ch(ibuf2,12,'1')
+                  ibuf2(1)=0
+                  call char2hol('de',ibuf2(2),1,2)
+                  iclass=0
+                  call put_buf(iclass,ibuf2,-12,'fs','  ')
+                  ibuf2(1)=5
+                  call char2hol('> ',ibuf2(2),1,2)
+                  call put_buf(iclass,ibuf2,-3,'fs','  ')
+                  call char2hol('/ ',ibuf2(2),1,2)
+                  call put_buf(iclass,ibuf2,-3,'fs','  ')
+                  call run_matcn(iclass,3)
+                  call rmpar(ip)
+                  iclass=ip(1)
+                  if(ip(3).lt.0) return
+                  do j=1,3
+                     ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
+                  enddo
+                  nch=ichmv(laux,nch,ibuf,3,4)
+                  if(i.eq.1) nch=ichmv(laux,nch,ibuf,7,4)
+               enddo
+               call lower(laux(6*(ii-1)+1),12)
+               if (MK3.eq.and(MK3,rack)) then
+                  if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
+                     if(ii.eq.1) iauxa = 1
+                     if(ii.eq.2) iauxb = 1
+                  endif
+               else if (MK4.eq.and(MK4,rack)) then
+                  if(ichcm(laux,12*(ii-1)+1,lauxfm4,1,8).ne.0) then
+                     if(ii.eq.1) iauxa = 1
+                     if(ii.eq.2) iauxb = 1
+                  endif
+               endif
             endif
-          endif
-        enddo
-
-      else !vlba RACK
-        call fc_get_vaux(iaux,itrk,ip) !check our aux data
-        if(ip(3).lt.0) return
-        call clrcl(ip(1))
-        do i=1,2
-          if(iaux(i).eq.1) then
-            if(i.eq.1)  then
-              iauxa=1
-            else
-              iauxb=1
-            endif
-          endif
-        enddo
-        if(itrk(1).ne.0.and.itrk(2).ne.0) then !swap a & b tracks
-C !mk3 or mk4 drive (&VLBA rack), not likely
-          if((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
-            nrec=0
-            ibuf2(1)=0
-            call char2hol('tp',ibuf2(2),1,2)
-            itraka=itrk(2)
-            itrakb=itrk(1)
-            call fs_set_itraka(itraka)
-            call fs_set_itrakb(itrakb)
-            iclass=0
-            if (MK3.eq.and(drive,MK3)) then
-              call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-            else if (MK4.eq.and(drive,MK4)) then
-              call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
-              call put_buf(iclass,ibuf2,-13,'fs','  ')
-              nrec = nrec+1
-              call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
-            endif
-            call put_buf(iclass,ibuf2,-13,'fs','  ')
-            nrec=nrec+1
-            call run_matcn(iclass,nrec)
-            call rmpar(ip)
-          else !VLBA drive
-            itrk2(1)=itrk(2)
-            itrk2(2)=itrk(1)
-            call fc_set_vrptrk(itrk2, ip)
-          endif
-          if(ip(3).lt.0) return
-          call clrcl(ip(1))
-          call fc_get_vaux(iaux,itrk2,ip)
-          if(ip(3).lt.0) return
-          call clrcl(ip(1))
-          do i=1,2
+         enddo
+         
+      else                      !vlba RACK
+         call fc_get_vaux(iaux,itrk,ip) !check our aux data
+         if(ip(3).lt.0) return
+         call clrcl(ip(1))
+         do i=1,2
             if(iaux(i).eq.1) then
-              if(i.eq.1)  then
-                iauxa=1
-              else
-                iauxb=1
-              endif
+               if(i.eq.1)  then
+                  iauxa=1
+               else
+                  iauxb=1
+               endif
             endif
-          enddo
-        endif
+         enddo
+         if(itrk(1).ne.0.and.itrk(2).ne.0) then !swap a & b tracks
+C !mk3 or mk4 drive (&VLBA rack), not likely
+            if((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
+               nrec=0
+               ibuf2(1)=0
+               call char2hol('tp',ibuf2(2),1,2)
+               itraka=itrk(2)-1
+               itrakb=itrk(1)-1
+               call fs_set_itraka(itraka)
+               call fs_set_itrakb(itrakb)
+               iclass=0
+               if (MK3.eq.and(drive,MK3)) then
+                 call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
+               else if (MK4.eq.and(drive,MK4)) then
+                  call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
+                  call put_buf(iclass,ibuf2,-13,'fs','  ')
+                  nrec = nrec+1
+                  call rpbr2ma4(ibuf2(3),ibr4tap) !! bitrate has a different strobe
+               endif
+               call put_buf(iclass,ibuf2,-13,'fs','  ')
+               nrec=nrec+1
+               call run_matcn(iclass,nrec)
+               call rmpar(ip)
+            else                !VLBA drive
+               itrk2(1)=itrk(2)
+               itrk2(2)=itrk(1)
+               call fc_set_vrptrk(itrk2, ip)
+            endif
+            if(ip(3).lt.0) return
+            call clrcl(ip(1))
+            call fc_get_vaux(iaux,itrk2,ip)
+            if(ip(3).lt.0) return
+            call clrcl(ip(1))
+            do i=1,2
+               if(iaux(i).eq.1) then
+                  if(i.eq.1)  then
+                     iauxa=1
+                  else
+                     iauxb=1
+                  endif
+               endif
+            enddo
+         endif
       endif
 c
 990   return
       end
+
