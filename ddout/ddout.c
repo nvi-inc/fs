@@ -12,13 +12,12 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
-#define ULIMIT 40960L
 #define MAX_BUF 512
+#define BUFFSIZE 8192
 /* not Y10K compliant */
 #define FIRST_CHAR 21
 
 extern struct fscom *shm_addr;
-long ulimit();
 
 main()
 {
@@ -39,7 +38,6 @@ main()
     char sllog[9], sllog0[9];
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
     int irgb, iburl;
-    int err=0;
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs;
     long class;
     long offset;
@@ -57,18 +55,20 @@ main()
     } *base = NULL;
     struct list *ptr, *ptr2, **pptr;
     int display;
+    int knl=FALSE;
+    int fail, count, countw, fd2;
+    char buf_copy[BUFFSIZE];
+    long size,before,after,seconds,cum;
 
 /* SECTION 1 */
     
     setup_ids();
     sig_ignore();
-    lnamef[0]='\0';
-    if(ULIMIT > ulimit(1,ULIMIT))
-	ulimit(2, ULIMIT); /* set maximum log size to 20 megabytes */
+    lnamef[0]=0;
 
 /* SECTION 2 */
 
-    memcpy(llog0, shm_addr->LLOG, 8);
+    llog0[0]=0;
 
 Messenger:
     /* get next message */
@@ -76,7 +76,7 @@ Messenger:
     status = cls_rcv(shm_addr->iclbox,buf,MAX_BUF,&rtn1,&rtn2,0,1);
     bufl = status;
     /* set buf up as a string */
-    *(buf+bufl)='\0';
+    buf[bufl]=0;
     strcpy(bul,buf);
     bull=bufl;
     cp2 = (char *) &rtn2;
@@ -134,8 +134,10 @@ Messenger:
 	memcpy(ptr->ch,buf,2);
 	ptr->num=ix;
 	ptr->next=NULL;
-      } else
-	perror("getting tnx structure");
+      } else {
+	shm_addr->abend.other_error=1;
+	perror("!! help! ** getting tnx structure, ddout");
+      }
       goto Messenger;
     }
     if (memcmp(cp2,"tf",2)==0) {
@@ -163,58 +165,160 @@ Messenger:
 	}
       goto Messenger;
     }
-    if(rtn2 == -1) goto Bye;
    
 /* SECTION 3 */
 
-    if(memcmp(cp2,"nl",2)==0){
-      if (*lnamef != '\0') 
-        {
-          err = close(fd);
-          if(err<0) perror("closing file");
-        }
+    if(memcmp(cp2,"nl",2)==0 || rtn2 == -1){
+      knl=TRUE;
+      if (fd >=0) {
+	fail=FALSE;
+	fd2=open(lnamef,O_RDONLY);  /* check to see if the file exists */
+	if(fd2<0 && errno == ENOENT) {
+	  shm_addr->abend.other_error=1;
+	  fprintf(stderr,"\007!! help! ** log file '%s' doesn't exist, attempting to recover by re-copying\n",
+		  lnamef);
+
+	  fd2 = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS); /* try to create it */
+	  if (fd2 < 0) {
+	    fprintf(stderr,
+		    "\007!! help! ** can't open/create file '%s', giving up\n",
+		    lnamef);
+	    fail=TRUE;
+	  } 
+
+	  /* now try to make a copy */
+	  size=lseek(fd,0L,SEEK_CUR);
+	  if(size <0)
+	    perror("determining size of old file to copy, ddout");
+	  offset=lseek(fd, 0L, SEEK_SET);
+	  if(offset < 0) {
+	    fprintf(stderr,"\007!! help! ** can't rewind original file, giving up\n");
+	    fail=TRUE;
+	  } else {
+	    count=0;
+	    countw=0;
+	    cum=0;
+	    rte_rawt(&before);
+	    seconds=2;
+	    fprintf(stderr,"\007!! help! ** please wait ...    ");
+	    while(count==countw && 0 < (count=read(fd,buf_copy,BUFFSIZE))) {
+	      countw= write(fd2,buf_copy,count);
+	      if(size >0) {
+		cum+=count;
+		rte_rawt(&after);
+		if((after-before)>seconds*100) {
+		  fprintf(stderr,"\b\b\b%2d%%",(int) (cum*100./size));
+		  seconds=seconds+2;
+		}
+	      }
+	    }
+	    if(count < 0) {
+	      fprintf(stderr,"\b\b\bfailed\n\007!! help! ** error reading original file, giving up\n",lnamef);
+	      perror("!! help! ** ddout");
+	      fail=TRUE;
+	    } else if (count!=0 && count!=countw) {
+	      fprintf(stderr,"\b\b\bfailed\n\007!! help! ** error writing to '%s', giving up\n",lnamef);
+	      perror("!! help! ** ddout");
+	      fail=TRUE;
+	    } else 
+	      fprintf(stderr,"\b\b\bdone\n");
+	      
+	  }
+	  if(fail) {
+	    fprintf(stderr,"\007!! help! ** you can attempt to recover by unmounting the file system and\n");
+	    fprintf(stderr,"\007!! help! ** grep-ing the file system for lines starting with the date\n");
+	    fprintf(stderr,"\007!! help! ** portion of time tag for the date(s) of the session try to\n");
+	    fprintf(stderr,"\007!! help! ** do as little as possible to the file system until you\n");
+	    fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery for details.\n");
+	  } else 
+	    fprintf(stderr,"\007!! help! ** good news, log file '%s' seems to be recovered, please check it\n",lnamef);
+	}
+	if( close(fd2) < 0) {
+	  shm_addr->abend.other_error=1;
+	  perror("closing fd2, ddout");
+	}
+	if(close(fd) < 0) {
+	  shm_addr->abend.other_error=1;
+	  perror("!! help! ** closing file, ddout");
+	}
+      }
+
+      if(rtn2 == -1)
+	goto Bye;
+
       strcpy(lnamef,"/usr2/log/");
-      memcpy(sllog, shm_addr->LLOG, 8);
       llogndx = memccpy(sllog, shm_addr->LLOG, ' ', 8);
-      if(llogndx==NULLPTR) *(sllog+8) = '\0';
-      else *(llogndx-1) = '\0';
+      if(llogndx!=NULLPTR) {
+	if(llogndx!=sllog)
+	  *(llogndx-1)=0;
+	else
+	  llogndx[0]=0;
+      } else
+	sllog[8]=0;
+
       strcat(lnamef, sllog);
       strcat(lnamef, ".log");
-      fd = open(lnamef, O_RDWR|O_SYNC );
-      if(fd >= 0) {
-        offset= lseek(fd, 0L, SEEK_END);
-        if (offset > 0) {
-          offset=lseek(fd, -1L, SEEK_END);
-          if (offset < 0) perror("DDOUT: error positioning log file");
-          read(fd,&ch,1);
-          if(ch != '\n') write(fd, "\n", 1);
-        }
-        if(strcmp(shm_addr->LLOG, llog0)!=0) memcpy(llog0, shm_addr->LLOG,8);
-        goto Append;  /* always write first message */
+      fd = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS);
+      if (fd < 0) {  /* if open/create failed, try recovering */
+	shm_addr->abend.other_error=1;
+	fprintf(stderr,
+		"\007!! help! ** error opening/creating log file %.8s\n",
+		sllog);
+	perror("!! help! ** ddout");
+	  
+	/* try previous log file now */
+	llogndx = memccpy(sllog0,llog0, ' ', 8);
+	if(llogndx!=NULLPTR) {
+	  if(llogndx!=sllog0)
+	    *(llogndx-1)=0;
+	  else
+	    llogndx[0]=0;
+	} else
+	  sllog0[8]=0;
+	if (strcmp(sllog, sllog0)!=0 && llog0[0]!=0) {
+	  strcpy(sllog, sllog0);
+	  strcpy(lnamef, "/usr2/log/");
+	  strcat(lnamef, sllog);
+	  strcat(lnamef, ".log");
+	  fprintf(stderr,
+		  "\007!! help! ** now trying to re-open log file %.8s\n",
+		  sllog);
+	  fd = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS);
+	  if(fd >=0) {
+	    memcpy(shm_addr->LLOG,llog0,8);
+	    fprintf(stderr,
+		    "\007!! help! ** succesfully re-opened log file %.8s\n",
+		    sllog);
+	  } else {
+	    fprintf(stderr,
+		    "\007!! help! ** error re-opening log file %.8s\n",sllog);
+	    perror("!! help! ** ddout");
+	  }
+	}
       }
-      while (fd < 0) {  /* if open failed, try creating the file */
-        fd = creat(lnamef, PERMISSIONS);
-        if(fd<0){
-          /* try previous log file now */
-          memcpy(sllog0, llog0, 8);
-          llogndx = memccpy(sllog0,llog0, ' ', 8);
-          if(llogndx==NULLPTR) *(sllog0+8) = '\0';
-          if (strcmp(sllog, sllog0)==0) {
-            printf("trouble creating file\n");
-            strcpy(lnamef, "        ");
-            goto Trouble;
-          }
-          strcpy(sllog, sllog0);
-          strcpy(lnamef, "/usr2/log/");
-          strcat(lnamef, sllog);
-          strcat(lnamef, ".log");
-          fd = open(lnamef, O_RDWR|O_SYNC );
-        }
-        chmod(lnamef,PERMISSIONS);
-      }    /* end while   */
-      if(strcmp(shm_addr->LLOG, llog0)!=0) memcpy(llog0, shm_addr->LLOG,8);
+      if(fd >= 0) {
+	memcpy(llog0, shm_addr->LLOG,8);
+	offset= lseek(fd, 0L, SEEK_END);
+	if (offset > 0) {
+	  offset=lseek(fd, -1L, SEEK_END);
+	  if (offset < 0) {
+	    shm_addr->abend.other_error=1;
+	    perror("!! help! ** error positioning log file, ddout");
+	  }
+	  read(fd,&ch,1);
+	  if(ch != '\n')
+	    write(fd, "\n", 1);
+	  if(offset > 1024L*1024L*10L)
+	    logit(NULL,-999,"bo");
+	} else if(offset < 0) {
+	  shm_addr->abend.other_error=1;
+	  perror("finding end of log file, ddout");
+	}
+      } else
+	fprintf(stderr,"\007!! help! ** no file is now open\n");
+      
+      goto Append;  /* always write first message */
     }
-
 /* SECTION 4 */
 
     strcpy(buf2,buf);
@@ -349,11 +453,14 @@ Append:           /* send message to station error program */
 /* SECTION 6 */
 /*  write information to the log file if conditions are met */
 
-    if (fd >= 0 && (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0)) {
+    if (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0) {
+      if (fd <0)
+	goto Trouble;
       strcat(buf,"\n");
       bull = strlen(buf);
       if(bull != write(fd, buf, bull)) {
-	printf("!! wrong length written, file probably too large\n");
+	shm_addr->abend.other_error=1;
+	fprintf(stderr,"!! wrong length written, file probably too large\n");
 	goto Trouble;
       }
     }
@@ -368,8 +475,14 @@ Post:
 /*  routine called if trouble occurs with log file */
 
 Trouble:
-    printf("\007!! help! ** error writing log file %.8s\n",sllog);
-    if (rtn2 != -1) goto Messenger;
+    if(knl) {
+      shm_addr->abend.other_error=1;
+      fprintf(stderr,
+	      "\007!! help! ** log file '%.8s' not open, can't write to disk\n",
+	     sllog);
+    }
+    if (rtn2 != -1)
+      goto Messenger;
 
 /* SECTION 9 */
 /*  exit from program */
@@ -377,7 +490,6 @@ Trouble:
 Bye:
     ip[0]=-1;
     skd_run("fserr", 'n', ip); 
-    close(fd);
 
     exit( -1);
 }
