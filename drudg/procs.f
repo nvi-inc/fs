@@ -84,6 +84,13 @@ C 970119 nrv If we have a VEX file as input, then the IF3 command can
 C            be safely omitted if it does not appear. Otherwise, write
 C            out IF3 for all Mk3 and Mk4 racks.
 C 970123 nrv Fix wrong 0.5 for VC filter check, change to 0.25.
+C 970124 nrv Set KLSBLO initially if RF<LO for ANY channel, then 
+C            check KLSBLO for EACH channel in TRACKFORM command
+C 970206 nrv Add headstack index=1 to itras, ihdpos,ihddir, itrk,itrax
+C 970210 nrv Add bit_density back to setup procedures.
+C 970224 nrv bit_density is only for VLBA racks, not Mk4
+C 970225 nrv Add call to PROCINTR
+C 970313 nrv Allow barrel roll only for VLBA racks.
 
 C Input
       integer iin ! 1=mk3, 2=VLBA, 3=hybrid Mk3 rack+VLBA rec, 4=S2, 5=8 BBCs
@@ -96,11 +103,13 @@ C LOCAL VARIABLES:
       integer*2 lpmode(2) ! mode for procedure names
       integer*2 linp(max_chan) ! IF input local variable
       LOGICAL KUS ! true if our station is listed for a procedure
-      integer itrax(2,2,max_chan) ! fanned-out version
+      integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       integer IC,ierr,i,idummy,nch,ipass,icode,it,iv,
-     .ilen,ich,ic1,ic2,ibuflen,itrk(36),ig,ig0,ig1,ig2,ig3,
+     .ilen,ich,ic1,ic2,ibuflen,itrk(max_track,max_headstack),
+     .ig,ig0,ig1,ig2,ig3,
      .im0,im1,im2,im3,
-     .npmode,itrk2(36),isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs
+     .npmode,itrk2(max_track),
+     .isbx,isb,ibit,ichan,ib,itrka,itrkb,nprocs
       logical kok,km3mode,km3be,km3a
       logical kvrack,kvrec,km3rack,km3rec,ks2rec,km4rack,km4rec,k8bbc,
      .kinclude,klast8,kfirst8,klsblo
@@ -212,7 +221,7 @@ C
 9113  FORMAT(' PROCEDURE LIBRARY FILE ',A,' FOR ',4A2)
       write(luscn,9114) 
 9114  format(' **NOTE** These procedures are for stations using '/
-     .' the following software and backend equipment:')
+     .' the following equipment:')
       if (km3rack) write(luscn,'("   >> Mark III rack")')
       if (km4rack) write(luscn,'("   >> Mark IV rack")')
       if (kvrack)  write(luscn,'("   >> VLBA rack")')
@@ -227,9 +236,10 @@ C
         rewind(LU_OUTFILE)
       ELSE
         WRITE(LUSCN,9131) IERR,PRCNAME(1:IC)
-9131    FORMAT(' PROC02 - Error ',I6,' creating file ',A)
+9131    FORMAT(' PROCS02 - Error ',I6,' creating file ',A)
         return
       END IF
+      call procintr
 C
 C 2. Set up the loop over all frequency codes, and the
 C    inner loop over the number of passes.
@@ -249,7 +259,7 @@ C    for procedure names.
             nch = ichmv_ch(lnamep,1,'SETUP')
             nch = ICHMV(LNAMEP,nch,LCODE(ICODE),1,nco)   ! ff
           else
-            call trkall(itras(1,1,1,ipass,istn,icode),
+            call trkall(itras(1,1,1,1,ipass,istn,icode),
      .      lmode(1,istn,icode),
      .      itrk,lpmode,npmode,ifan(istn,icode),itrax)
             km3mode=jchar(lpmode,1).eq.ocapa
@@ -260,7 +270,13 @@ C    for procedure names.
             km3be=jchar(lpmode,1).eq.ocapb
      .          .or.jchar(lpmode,1).eq.ocape
             km3a=jchar(lpmode,1).eq.ocapa
-            klsblo=freqrf(1,istn,icode).lt.freqlo(1,istn,icode)
+C Find out if any channel is LSB, to decide what procedures are needed.
+            klsblo=.false.
+            DO ichan=1,nchan(istn,icode) !loop on channels
+              ic=invcx(ichan,istn,icode) ! channel number
+              if (freqrf(ic,istn,icode).lt.freqlo(ic,istn,icode)) 
+     .          klsblo=.true.
+            enddo
             nch = ICHMV(LNAMEP,1,LCODE(ICODE),1,nco)   ! ff
             CALL M3INF(ICODE,SPDIPS,IB)
 C choices in LBNAME are D,8,4,2,1,H,Q,E
@@ -292,11 +308,10 @@ C  TAPEFRMffm
             nch = ichmv(ibuf,nch,lpmode,1,npmode)
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-C  PASS=$
+C  PASS=$,SAME
             call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(IBUF,1,'PASS=$')
-            if (km3rec.or.km4rec) nch = ichmv_ch(ibuf,nch,',SAME') ! 2 heads on Mk3 
-            call hol2lower(ibuf,(nch+1))
+            nch = ichmv_ch(IBUF,1,'pass=$')
+            if (km3rec.or.km4rec) nch = ichmv_ch(ibuf,nch,',same') ! 2 heads on Mk3 
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
 C  TRKFRMffmp
 C  Also write trkfrm for Mk3 modes if it's an 8 BBC station or LSB LO
@@ -321,23 +336,31 @@ C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
               ig1=0
               ig2=0
               ig3=0
-              if (itrk(2).eq.1.and.itrk(4).eq.1.and.itrk(6).eq.1.and.
-     .            itrk(8).eq.1.and.itrk(10).eq.1.and.itrk(12).eq.1.and.
-     .            itrk(14).eq.1.and.itrk(16).eq.1) ig0=1
-              if (itrk(3).eq.1.and.itrk(5).eq.1.and.itrk(7).eq.1.and.
-     .            itrk(9).eq.1.and.itrk(11).eq.1.and.itrk(13).eq.1.and.
-     .            itrk(15).eq.1.and.itrk(17).eq.1) ig1=1
-              if (itrk(18).eq.1.and.itrk(20).eq.1.and.itrk(22).eq.1.and.
-     .            itrk(24).eq.1.and.itrk(26).eq.1.and.itrk(28).eq.1.and.
-     .            itrk(30).eq.1.and.itrk(32).eq.1) ig2=1
-              if (itrk(19).eq.1.and.itrk(21).eq.1.and.itrk(23).eq.1.and.
-     .            itrk(25).eq.1.and.itrk(27).eq.1.and.itrk(29).eq.1.and.
-     .            itrk(31).eq.1.and.itrk(33).eq.1) ig3=1
+              if (itrk(2,1).eq.1.and.itrk(4,1).eq.1.and.
+     .            itrk(6,1).eq.1.and.
+     .            itrk(8,1).eq.1.and.itrk(10,1).eq.1.and.
+     .            itrk(12,1).eq.1.and.
+     .            itrk(14,1).eq.1.and.itrk(16,1).eq.1) ig0=1
+              if (itrk(3,1).eq.1.and.itrk(5,1).eq.1.and.
+     .            itrk(7,1).eq.1.and.
+     .            itrk(9,1).eq.1.and.itrk(11,1).eq.1.and.
+     .            itrk(13,1).eq.1.and.
+     .            itrk(15,1).eq.1.and.itrk(17,1).eq.1) ig1=1
+              if (itrk(18,1).eq.1.and.itrk(20,1).eq.1.and.
+     .            itrk(22,1).eq.1.and.
+     .            itrk(24,1).eq.1.and.itrk(26,1).eq.1.and.
+     .            itrk(28,1).eq.1.and.
+     .            itrk(30,1).eq.1.and.itrk(32,1).eq.1) ig2=1
+              if (itrk(19,1).eq.1.and.itrk(21,1).eq.1.and.
+     .            itrk(23,1).eq.1.and.
+     .            itrk(25,1).eq.1.and.itrk(27,1).eq.1.and.
+     .            itrk(29,1).eq.1.and.
+     .            itrk(31,1).eq.1.and.itrk(33,1).eq.1) ig3=1
 C         Write out the group names we have found. Zero out these
 C         track names in a copy of the track table. Then list any
 C         tracks still left in the table.
-              do i=1,36
-                itrk2(i)=itrk(i)
+              do i=1,max_track
+                itrk2(i)=itrk(i,1)
               enddo
               if (ig0.eq.1) then
                 nch = ichmv_ch(ibuf,nch,'V0,')
@@ -367,18 +390,24 @@ C         tracks still left in the table.
               im1=0
               im2=0
               im3=0
-              if (ig0.eq.0.and.itrk(4).eq.1.and.itrk(6).eq.1.and.
-     .            itrk(8).eq.1.and.itrk(10).eq.1.and.itrk(12).eq.1.and.
-     .            itrk(14).eq.1.and.itrk(16).eq.1) im0=1
-              if (ig1.eq.0.and.itrk(5).eq.1.and.itrk(7).eq.1.and.
-     .            itrk(9).eq.1.and.itrk(11).eq.1.and.itrk(13).eq.1.and.
-     .            itrk(15).eq.1.and.itrk(17).eq.1) im1=1
-              if (itrk(18).eq.1.and.itrk(20).eq.1.and.itrk(22).eq.1.and.
-     .            itrk(24).eq.1.and.itrk(26).eq.1.and.itrk(28).eq.1.and.
-     .            itrk(30).eq.1.and.ig2.eq.0) im2=1
-              if (itrk(19).eq.1.and.itrk(21).eq.1.and.itrk(23).eq.1.and.
-     .            itrk(25).eq.1.and.itrk(27).eq.1.and.itrk(29).eq.1.and.
-     .            itrk(31).eq.1.and.ig3.eq.0) im3=1
+              if (ig0.eq.0.and.itrk(4,1).eq.1.and.itrk(6,1).eq.1.and.
+     .            itrk(8,1).eq.1.and.itrk(10,1).eq.1.and.
+     .            itrk(12,1).eq.1.and.
+     .            itrk(14,1).eq.1.and.itrk(16,1).eq.1) im0=1
+              if (ig1.eq.0.and.itrk(5,1).eq.1.and.itrk(7,1).eq.1.and.
+     .            itrk(9,1).eq.1.and.itrk(11,1).eq.1.and.
+     .            itrk(13,1).eq.1.and.
+     .            itrk(15,1).eq.1.and.itrk(17,1).eq.1) im1=1
+              if (itrk(18,1).eq.1.and.itrk(20,1).eq.1.and.
+     .            itrk(22,1).eq.1.and.
+     .            itrk(24,1).eq.1.and.itrk(26,1).eq.1.and.
+     .            itrk(28,1).eq.1.and.
+     .            itrk(30,1).eq.1.and.ig2.eq.0) im2=1
+              if (itrk(19,1).eq.1.and.itrk(21,1).eq.1.and.
+     .            itrk(23,1).eq.1.and.
+     .            itrk(25,1).eq.1.and.itrk(27,1).eq.1.and.
+     .            itrk(29,1).eq.1.and.
+     .            itrk(31,1).eq.1.and.ig3.eq.0) im3=1
 C         Write out the group names we have found. Zero out these
 C         track names in a copy of the track table. Then list any
 C         tracks still left in the table.
@@ -443,7 +472,7 @@ C           If roll is NOT blank then use it.
             nch = ichmv_ch(IBUF,1,'data_valid=off  ')
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH)/2)
           endif ! ks2rec
-C  FORM=m,r,fan,barrel   (m=mode,r=rate=2*b)
+C  FORM=m,r,fan,barrel   (m=mode,r=rate=2*b) (no barrel for Mk4)
 C  For S2, leave out command entirely
 C  For 8-BBC stations, use "M" for Mk3 modes
           if ((kvrack.or.km3rack.or.km4rack).and..not.ks2rec) then
@@ -472,18 +501,26 @@ C           ... but not for LSB case
             if (km4rack.and.km3mode.and..not.klsblo.and.
      .        ichcm_ch(lmode(1,istn,icode),1,'A').ne.0) then ! 
               if (ichcm_ch(lmode(1,istn,icode),1,'E').eq.0) THEN ! add group
-                if (itrk(2).eq.1.or.itrk(4).eq.1.or.itrk(6).eq.1.or.
-     .              itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
-     .              itrk(14).eq.1.or.itrk(16).eq.1) ig=1
-                if (itrk(3).eq.1.or.itrk(5).eq.1.or.itrk(7).eq.1.or.
-     .              itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
-     .              itrk(15).eq.1.or.itrk(17).eq.1) ig=2
-                if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
-     .              itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
-     .              itrk(30).eq.1.or.itrk(32).eq.1) ig=3
-                if (itrk(19).eq.1.or.itrk(21).eq.1.or.itrk(23).eq.1.or.
-     .              itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
-     .              itrk(31).eq.1.or.itrk(33).eq.1) ig=4
+                if (itrk(2,1).eq.1.or.itrk(4,1).eq.1.or.
+     .              itrk(6,1).eq.1.or.
+     .              itrk(8,1).eq.1.or.itrk(10,1).eq.1.or.
+     .              itrk(12,1).eq.1.or.
+     .              itrk(14,1).eq.1.or.itrk(16,1).eq.1) ig=1
+                if (itrk(3,1).eq.1.or.itrk(5,1).eq.1.or.
+     .              itrk(7,1).eq.1.or.
+     .              itrk(9,1).eq.1.or.itrk(11,1).eq.1.or.
+     .              itrk(13,1).eq.1.or.
+     .              itrk(15,1).eq.1.or.itrk(17,1).eq.1) ig=2
+                if (itrk(18,1).eq.1.or.itrk(20,1).eq.1.or.
+     .              itrk(22,1).eq.1.or.
+     .              itrk(24,1).eq.1.or.itrk(26,1).eq.1.or.
+     .              itrk(28,1).eq.1.or.
+     .              itrk(30,1).eq.1.or.itrk(32,1).eq.1) ig=3
+                if (itrk(19,1).eq.1.or.itrk(21,1).eq.1.or.
+     .              itrk(23,1).eq.1.or.
+     .              itrk(25,1).eq.1.or.itrk(27,1).eq.1.or.
+     .              itrk(29,1).eq.1.or.
+     .              itrk(31,1).eq.1.or.itrk(33,1).eq.1) ig=4
                 nch = nch+ib2as(ig,ibuf,nch,1) ! mode E group
               else ! add subpass number
                 nch = nch+ib2as(ipass,ibuf,nch,1) ! mode B or C subpass
@@ -507,8 +544,14 @@ C             Put in fan only if non-zero
               if ((ichcm_ch(lbarrel(1,istn,icode),1,'    ').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'NONE').ne.0.and.
      .          ichcm_ch(lbarrel(1,istn,icode),1,'off ').ne.0)) then ! a roll mode
-                nch = MCOMA(IBUF,nch)
-                nch = ichmv(ibuf,nch,lbarrel(1,istn,icode),1,4)
+                if (kvrack) then ! only for VLBA racks
+                  nch = MCOMA(IBUF,nch)
+                  nch = ichmv(ibuf,nch,lbarrel(1,istn,icode),1,4)
+                else if (km4rack) then
+                  write(luscn,9137) 
+9137              format(/'PROCS05 - WARNING! Barrel roll is not',
+     .            ' supported for Mark IV racks.')
+                endif
               endif
             endif ! barrel or fan
             endif ! non-S2 only
@@ -526,7 +569,14 @@ C  !*
           if (kvrack.and..not.ks2rec) then ! wait mark for formatter reset
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!*')
-            call hol2lower(ibuf,(nch+1))
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+          endif
+C  BIT_DENSITY=33333
+          if (kvrack.and..not.ks2rec) then ! bit_density
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(ibuf,1,'bit_density=')
+            ibit=bitdens(istn,icode)
+            nch = nch + ib2as(ibit,ibuf,nch,5)
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 C  SYSTRACKS=
@@ -568,18 +618,20 @@ C  Remember that tracks are VLBA track numbers in itrk.
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'ENABLE=')
             if (kvrec) then ! group-only enables for VLBA recorders
-              if (itrk(2).eq.1.or.itrk(4).eq.1.or.itrk(6).eq.1.or.
-     .          itrk(8).eq.1.or.itrk(10).eq.1.or.itrk(12).eq.1.or.
-     .          itrk(14).eq.1.or.itrk(16).eq.1) then
+              if (itrk(2,1).eq.1.or.itrk(4,1).eq.1.or.itrk(6,1).eq.1.or.
+     .          itrk(8,1).eq.1.or.itrk(10,1).eq.1.or.itrk(12,1).eq.1.or.
+     .          itrk(14,1).eq.1.or.itrk(16,1).eq.1) then
                 ig0=1
                 itrka=6
                 itrkb=8
                 nch = ichmv_ch(ibuf,nch,'G0')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(3).eq.1.or.itrk(5).eq.1.or.itrk(7).eq.1.or.
-     .            itrk(9).eq.1.or.itrk(11).eq.1.or.itrk(13).eq.1.or.
-     .            itrk(15).eq.1.or.itrk(17).eq.1) then
+              if (itrk(3,1).eq.1.or.itrk(5,1).eq.1.or.
+     .            itrk(7,1).eq.1.or.
+     .            itrk(9,1).eq.1.or.itrk(11,1).eq.1.or.
+     .            itrk(13,1).eq.1.or.
+     .            itrk(15,1).eq.1.or.itrk(17,1).eq.1) then
                 ig1=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=7
@@ -590,9 +642,11 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = ichmv_ch(ibuf,nch,'G1')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(18).eq.1.or.itrk(20).eq.1.or.itrk(22).eq.1.or.
-     .            itrk(24).eq.1.or.itrk(26).eq.1.or.itrk(28).eq.1.or.
-     .            itrk(30).eq.1.or.itrk(32).eq.1) then
+              if (itrk(18,1).eq.1.or.itrk(20,1).eq.1.or.
+     .            itrk(22,1).eq.1.or.
+     .            itrk(24,1).eq.1.or.itrk(26,1).eq.1.or.
+     .            itrk(28,1).eq.1.or.
+     .            itrk(30,1).eq.1.or.itrk(32,1).eq.1) then
                 ig2=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=20
@@ -603,9 +657,11 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = ichmv_ch(ibuf,nch,'G2')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(19).eq.1.or.itrk(21).eq.1.or.itrk(23).eq.1.or.
-     .            itrk(25).eq.1.or.itrk(27).eq.1.or.itrk(29).eq.1.or.
-     .            itrk(31).eq.1.or.itrk(33).eq.1) then
+              if (itrk(19,1).eq.1.or.itrk(21,1).eq.1.or.
+     .            itrk(23,1).eq.1.or.
+     .            itrk(25,1).eq.1.or.itrk(27,1).eq.1.or.
+     .            itrk(29,1).eq.1.or.
+     .            itrk(31,1).eq.1.or.itrk(33,1).eq.1) then
                 ig3=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=21
@@ -617,9 +673,10 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = MCOMA(IBUF,nch)
               endif
             else if (km3rec) then ! group enables plus leftovers
-              if (itrk(4).eq.1.and.itrk(6).eq.1.and.itrk(8).eq.1.and.
-     .            itrk(10).eq.1.and.itrk(12).eq.1.and.
-     .            itrk(14).eq.1.and.itrk(16).eq.1) then
+              if (itrk(4,1).eq.1.and.itrk(6,1).eq.1.and.
+     .            itrk(8,1).eq.1.and.
+     .            itrk(10,1).eq.1.and.itrk(12,1).eq.1.and.
+     .            itrk(14,1).eq.1.and.itrk(16,1).eq.1) then
                 ig0=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=3 ! Mk3 track number
@@ -628,9 +685,10 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = ichmv_ch(ibuf,nch,'G1')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(5).eq.1.and.itrk(7).eq.1.and.
-     .            itrk(9).eq.1.and.itrk(11).eq.1.and.itrk(13).eq.1.and.
-     .            itrk(15).eq.1.and.itrk(17).eq.1) then
+              if (itrk(5,1).eq.1.and.itrk(7,1).eq.1.and.
+     .            itrk(9,1).eq.1.and.itrk(11,1).eq.1.and.
+     .            itrk(13,1).eq.1.and.
+     .            itrk(15,1).eq.1.and.itrk(17,1).eq.1) then
                 ig1=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=4
@@ -641,9 +699,11 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = ichmv_ch(ibuf,nch,'G2')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(18).eq.1.and.itrk(20).eq.1.and.itrk(22).eq.1.and.
-     .            itrk(24).eq.1.and.itrk(26).eq.1.and.itrk(28).eq.1.and.
-     .            itrk(30).eq.1) then
+              if (itrk(18,1).eq.1.and.itrk(20,1).eq.1.and.
+     .            itrk(22,1).eq.1.and.
+     .            itrk(24,1).eq.1.and.itrk(26,1).eq.1.and.
+     .            itrk(28,1).eq.1.and.
+     .            itrk(30,1).eq.1) then
                 ig2=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=17
@@ -654,9 +714,11 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 nch = ichmv_ch(ibuf,nch,'G3')
                 nch = MCOMA(IBUF,nch)
               endif
-              if (itrk(19).eq.1.and.itrk(21).eq.1.and.itrk(23).eq.1.and.
-     .            itrk(25).eq.1.and.itrk(27).eq.1.and.itrk(29).eq.1.and.
-     .            itrk(31).eq.1) then
+              if (itrk(19,1).eq.1.and.itrk(21,1).eq.1.and.
+     .            itrk(23,1).eq.1.and.
+     .            itrk(25,1).eq.1.and.itrk(27,1).eq.1.and.
+     .            itrk(29,1).eq.1.and.
+     .            itrk(31,1).eq.1) then
                 ig3=1
                 if (itrka.eq.0.and.itrkb.eq.0) then
                   itrka=18
@@ -670,8 +732,8 @@ C  Remember that tracks are VLBA track numbers in itrk.
 C         Write out the Mk3 group names we have found. Zero out these
 C         track names in a copy of the track table. Then list any
 C         tracks still left in the table.
-              do i=1,36
-                itrk2(i)=itrk(i)
+              do i=1,max_track
+                itrk2(i)=itrk(i,1)
               enddo
               if (ig0.eq.1) then
                 do i=4,16,2
@@ -702,7 +764,7 @@ C         tracks still left in the table.
             else if (km4rec) then ! stack enables 
               kok=.false.
               do i=2,33 ! if any tracks are on, enable the stack
-                if (itrk(i).eq.1) then
+                if (itrk(i,1).eq.1) then
                   kok=.true.
                   if (itrka.ne.0.and.itrkb.eq.0) itrkb=i
                   if (itrka.eq.0) itrka=i
@@ -759,7 +821,7 @@ C Contents: VCnn=freq,bw or BBCnn=freq,if,bw,bw
 C
           if (freqlo(1,istn,icode).lt.0.05) then ! missing LO
             write(luscn,9910)
-9910        format(' PROC02 - WARNING! LO frequencies are missing!'/
+9910        format(/'PROCS02 - WARNING! LO frequencies are missing!'/
      .      '   BBC or VC frequency procedure will ',
      .      'not be correct, nor will IFD procedure.') 
           endif
@@ -851,24 +913,24 @@ C               Make a copy of the IF input
                 endif
                 if ((km3rack.or.km4rack).and..not.kok) write(luscn,9919) 
      .            lifinp(ic,istn,icode)
-9919                format(' PROC04 - WARNING! IF input ',a2,' not',
+9919                format(/'PROCS04 - WARNING! IF input ',a2,' not',
      .            ' consistent with Mark III/IV rack.')
                 if (kvrack.and..not.kok) write(luscn,9909) 
      .            lifinp(ic,istn,icode)
 C    .            lifinp(ic,istn,icode),linp(ic)
-9909              format(' PROC04 - WARNING! IF input ',a2,' not',
+9909              format(/'PROCS04 - WARNING! IF input ',a2,' not',
      .            ' consistent with VLBA rack.')
 C                  /'          Changing',
 C    .            ' IF input to ',a2)
                 if (kvrack.and.(rfvc.lt.500.0.or.rfvc.gt.1000.0)) then
                   write(luscn,9911) ib,rfvc
-9911              format(' PROC03 - WARNING! BBC ',i2,' frequency '
+9911              format(/'PROCS03 - WARNING! BBC ',i2,' frequency '
      .            f7.2,' is out of range.'/
      .            21x,' Check LO and IF in schedule.')
                 else if ((km3rack.or.km4rack).and.
      .            (rfvc.lt.0.0.or.rfvc.gt.500.0)) then
                   write(luscn,9912) ib,rfvc
-9912              format(' PROC03 - WARNING! VC ',i2,' frequency '
+9912              format(/'PROCS03 - WARNING! VC ',i2,' frequency '
      .            f7.2,' is out of range.'/
      .            21x,' Check LO and IF in schedule.')
                 endif
@@ -917,6 +979,11 @@ C               lo=lo1,lo2,lo3
 C               patch=lo1,...
 C               patch=lo2,...
 C               patch=lo3,...
+C Later: add a check of patching to determine how the IF3 switches
+C should really be set. 
+C         if (VC3  is LOW) switch 1 = 1, else 2
+C         if (VC11 is LOW) switch 2 = 1, else 2
+
         if (km3rack.or.km4rack.or.kvrack) then
           CALL IFILL(LNAMEP,1,12,oblank)
           IDUMMY = ichmv_ch(LNAMEP,1,'IFD')
@@ -929,6 +996,7 @@ C               patch=lo3,...
           nprocs=nprocs+1
           WRITE(LUSCN,9112) LNAMEP
 C
+C IFD command
           if (km3rack.or.km4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'IFD=')
@@ -990,6 +1058,7 @@ C           Not needed for the VEX file unless it's specified.
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
             endif ! we know/don't know about IF3
 C
+C LO command
             call ifill(ibuf,1,ibuflen,oblank)
             NCH = ichmv_ch(IBUF,1,'LO=')
             if (i1.gt.0) then
@@ -1116,10 +1185,10 @@ C    command format: TAPEFORM=index,offset lists
         call ifill(ibuf,1,ibuflen,oblank)
         nch = ichmv_ch(ibuf,1,'TAPEFORM=')
         do i=1,max_pass
-          if (ihdpos(i,istn,icode).ne.9999) then 
+          if (ihdpos(1,i,istn,icode).ne.9999) then 
             nch = nch + ib2as(i,ibuf,nch,3) ! pass number
             nch = mcoma(ibuf,nch)
-            nch = nch + ib2as(ihdpos(i,istn,icode),ibuf,nch,4) ! offset
+            nch = nch + ib2as(ihdpos(1,i,istn,icode),ibuf,nch,4) ! offset
             nch = mcoma(ibuf,nch)
             ib=1
           endif
@@ -1149,8 +1218,8 @@ C    trkfrm=track,BBC#-sb-bit
         if ((km4rack.or.kvrack).and.
      .      (.not.km3mode.or.klsblo
      .      .or.((km3be.or.km3a).and.k8bbc))) then
-          DO IPASS=1,NPASSF(istn,ICODE) !loop on sub passes
-            call trkall(itras(1,1,1,ipass,istn,icode),
+          DO IPASS=1,NPASSF(istn,ICODE) !loop on subpasses
+            call trkall(itras(1,1,1,1,ipass,istn,icode),
      .      lmode(1,istn,icode),
      .      itrk,lpmode,npmode,ifan(istn,icode),itrax)
 
@@ -1178,7 +1247,7 @@ C    trkfrm=track,BBC#-sb-bit
               ic=invcx(ichan,istn,icode) ! channel number
               do isb=1,2 ! sidebands
                 do ibit=1,2 ! bits
-                  it=itras(isb,ibit,ic,ipass,istn,icode)
+                  it=itras(isb,ibit,1,ic,ipass,istn,icode)
                   if (it.ne.-99) then ! assigned
 C                   Use BBC number, not channel number
                     ib=ibbcx(ic,istn,icode) ! BBC number
@@ -1199,6 +1268,8 @@ C                         Write out a max of 8 channels for 8-BBC stations
                     endif
                     if (kinclude) then
                       isbx=isb
+                      klsblo=freqrf(ic,istn,icode).lt.
+     .                       freqlo(ic,istn,icode)
                       if (klsblo) then ! reverse sidebands
                         if (isb.eq.1) isbx=2
                         if (isb.eq.2) isbx=1
