@@ -1,5 +1,5 @@
       SUBROUTINE BLABL(LU,NOUT,LEXPER,LSTNNA,LSTCOD,IYR,ID1,IH1,IM1,
-     .                 ID2,IH2,IM2,ILABROW,cprttyp,cprport)
+     .                 ID2,IH2,IM2,ILABROW,cprttyp,clabtyp,cprport)
 C Print barcode Mark III field labels  ARW 830920
 C Print barcode field labels for Mark III tapes on laser printer.
 C
@@ -7,7 +7,7 @@ C
       integer lu,nout,iyr,id1(*),ih1(*),im1(*),id2(*),ih2(*),im2(*),
      .        ilabrow
       integer*2 lexper(4),lstnna(4),lstcod
-      character*128 cprttyp,cprport
+      character*128 cprttyp,cprport,clabtyp
 C
 C On entry:
 C   LU,     printer lu
@@ -27,6 +27,7 @@ C NRV 901026 Modified to include Epson
 C NRV 910306 Modified laser control to spread out bar codes
 C nrv 950829 PC-DRUDG version converted to linux
 C 960814 nrv Comment out debug line that was left in.
+C 970228 nrv Add clabtyp to call
 C
       integer*2 jbuf(80),lbuf(80),label(6),jch
       integer l,jyr,i,ichek,j,ic,idummy,ip,il,i1,idum
@@ -42,7 +43,8 @@ C  Initialized
 
 C 1. Send escape sequence to set up for printing headers.
 
-      if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then !laserjet
+      if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.
+     .         cprttyp.eq.'FILE') then !laserjet
 	  Cprint=CHAR(27)// '&l6D' // CHAR(27) // '(0U'
      .               // CHAR(27) // '(s0p16.66h9.5v0s0b6T'//char(13)
 	  l=trimlen(cprint)
@@ -62,7 +64,8 @@ C    .CARRIAGE CONTROL='LIST')
 
 C     Now write the normal ASCII information
 	JYR=MOD(IYR,100)
-	if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then !Laser jet
+	if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
+     .     .or.cprttyp.eq.'FILE') then !Laser jet
 	  WRITE(lu,130) (LSTNNA,JYR,ID1(I),IH1(I),IM1(I),i=1,nout),
      .    char(13)
 130       FORMAT(6X,3(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
@@ -71,7 +74,7 @@ C     Now write the normal ASCII information
      .    char(13)
 140     FORMAT(6X,3(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
-	else if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then
+	else if (clabtyp.eq.'EPSON'.or.clabtyp.eq.'EPSON24') then
 	  JYR=MOD(IYR,100)
 	  WRITE(lu,1301) LSTNNA,JYR,ID1(1),IH1(1),IM1(1),char(13)
 1301    FORMAT(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
@@ -124,14 +127,15 @@ C                     LABEL looks like    nddd-hhmm x
 C  3. For Epson, generate graphics buffer and print labels.
 C     For laser, write ASCII version, then print label in bar code font.
 
-	if (cprttyp.eq.'EPSON'.or.cprttyp.eq.'EPSON24') then
+	if (clabtyp.eq.'EPSON'.or.clabtyp.eq.'EPSON24') then
 	  idum = ichmv_ch(lbuf,1,'<')
 
 	  idum = ichmv(lbuf,2,label,1,11)
 	  idum = ichmv_ch(lbuf,13,'>')
-	  call bcode(lu,lbuf,label,cprttyp)
+	  call bcode(lu,lbuf,label,clabtyp)
 
-	else if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then
+	else if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
+     .     .or.cprttyp.eq.'FILE') then
 C       Send ASCII version of labels to laser printer.
 C     write(6,9210) (lbuf(i),i=1,60)
 	  WRITE(lu,9210)(LBUF(J),J=1,60),char(13)
@@ -152,13 +156,8 @@ C       Write bar code labels
 	    WRITE(lu,9220)(JBUF(J),J=1,32),char(13)
 	  ENDDO
 9220    FORMAT(32A2,a1)
-C
 	endif
 
-C  Re-open the output to change back to Fortran type control
-COPEN(UNIT=LU,FILE=cprport,STATUS='UNKNOWN',IOSTAT=IERR,
-C    .CARRIAGE CONTROL='FORTRAN')
-
-900   RETURN
+      RETURN
 	END
 
