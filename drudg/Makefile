@@ -21,6 +21,7 @@
 # 991118 nrv Remove SNPSHFT                                           #
 # 000620 nrv RAdd FAKESUM, LV_OPEN, PRCOV_VEX                         #
 # 010104 nrv Move TMADD, TMSUB to skdrut                              #
+# 021002 nrv Add DRPRRD                                               #
 #                                                                     #
 #######################################################################
 
@@ -64,7 +65,8 @@ $(DR)read_snap1.o $(DR)drset.o $(DR)wrsor.o $(DR)prcov.o $(DR)iaddpc.o \
 $(DR)k4proc_type.o $(DR)prtxt.o $(DR)k4snap_type.o \
 $(DR)timin.o $(DR)timout.o $(DR)iaddk4.o $(DR)wrday.o $(DR)equip_type.o \
 $(DR)set_type.o $(DR)setup_name.o $(DR)snap_info.o $(DR)lstsum_info.o  \
-$(DR)read_snap6.o $(DR)fakesum.o $(DR)lv_open.o $(DR)prcov_vex.o
+$(DR)read_snap6.o $(DR)fakesum.o $(DR)lv_open.o $(DR)prcov_vex.o \
+$(DR)drprrd.o
 
 #
 # Set compiling and linking flags

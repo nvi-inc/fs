@@ -7,7 +7,7 @@ C
 C********************************************************************
 C NOTE: If you have FS Linux 1 you may have to change parameters
 C           max_stn from 30 to 20
-C           max_frq from 20 to 13 
+C           max_frq from 20 to 17 
 C so that drudg will compile and load.
 C********************************************************************
 C
@@ -59,6 +59,8 @@ C 010619 nrv Change short_length from 2900 to 2750.
 C 020104 nrv Change short_length from 2750 to 2700.
 C 020112 nrv Remove max_roll. Each station and mode may have a roll table.
 C            Add max_roll_def = nhd*ntrk
+C 020620 nrv Add max_change_list
+C 020923 nrv Change max_rec_type to 10 to allow Mark5.
 C
 C********************************************************************
 C
@@ -69,7 +71,7 @@ C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone,max_roll_def
+     .max_subpass,max_tone,max_roll_def,max_change_list
 
       PARAMETER (MAX_STN = 30)
 C
@@ -203,6 +205,12 @@ C     channels. But there are explicit chandef's for each u/l channel
 C     in VEX file, so this probably has to be 32 now.
 C
       PARAMETER (MAX_CHAN = 32)
+
+C     Maximum number of tapes for which tape change times will be
+C     displayed in the summary listing. This does not limit
+C     the number of tapes that can be scheduled.
+
+      PARAMETER (max_change_list = 10)
 
 C     Lengths for thick and thin tape.
 
@@ -367,7 +375,7 @@ C     MAX_FRQ*MAX_STN.
 C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
       PARAMETER (MAX_RACK_TYPE= 14)
-      PARAMETER (MAX_REC_TYPE = 9)
+      PARAMETER (MAX_REC_TYPE = 10)
       PARAMETER (MAX_REC2_TYPE = 6)
 
 C     The name of the control files. These files are

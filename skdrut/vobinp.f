@@ -1,4 +1,4 @@
-      SUBROUTINE VOBINP(ivexnum,LU,iret,IERR,cscan_id)
+      SUBROUTINE VOBINP(ivexnum,LU,iret,IERR)
 
 C  This routine gets all the observations from the vex file.
 C

@@ -176,18 +176,20 @@ C 001101 nrv Write out $SKED section generated from VEX input for
 C            testing (commented out).
 C 001114 nrv Remove call to VOB1INP because VOBINP is called in VREAD.
 C 020304 nrv Add option 13 for Mk5 piggyback mode.
+C 020614 nrv Change FS version to y/m/d digits for HPUX version.
+C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '020619'
+      cversion = '021002'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-C     iVerMajor_FS = 9
-C     iVerMinor_FS = 5
-C     iVerPatch_FS = 8
+C     iVerMajor_FS = 02
+C     iVerMinor_FS = 02
+C     iVerPatch_FS = 07
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -384,6 +386,7 @@ C
 C     3. Read the schedule file sections.
 C
       kvex = .false. 
+      kgeo = .true.
       if (.not.kskd) goto 500
         ix=trimlen(cexpna)
         IC=TRIMLEN(LSKDFI)
@@ -392,6 +395,17 @@ C
         CALL SREAD(IERR,ivexnum)
         IF (IERR.NE.0) goto 201
 
+        if (kgeo)
+     .  write(luscn,"(' This is a geodetic schedule.')")
+        if (.not.kgeo)
+     .  write(luscn,"(' This is an astro schedule.')")
+        if (kvex)
+     .  write(luscn,"(' This is a VEX format schedule file.')")
+        if (.not.kvex)
+     .  write(luscn,"(' This is a standard format (non-VEX) ',
+     .  'schedule file.')")
+        if (kdrgfile)
+     .  write(luscn,"(' This is a .drg schedule file.')")
         if (itearl(1).gt.0) then
           write(luscn,9301) itearl(1)
 9301        format(' NOTE: This schedule was created using early '
@@ -689,7 +703,7 @@ C  Write warning messages if control file and schedule do not agree.
 9373        format(
 C    .      ' 0 = Done with DRUDG                   ',
      .      ' 0 = Done with DRUDG '/
-C    .      '20 = Make fake lvex '/
+     .      '20 = Make fake lvex '/
      .      ' ? ',$)
 C         endif ! known/unknown equipment
         else ! SNAP file

@@ -17,6 +17,7 @@ C Initialized:
 C
 C History:
 C nrv 930407 implicit none
+C 020606 nrv Add kcomment to indicate a comment was found
 
 100   CALL GTFLD(IBUF,ICH,NCHAR,IC1,IC2)
       kcomment=.false.

@@ -5754,5 +5754,38 @@ Version 9.5.11 020528
 
 Version 9.5.12 020625
 
+020625 WEH quikv/data_check_pos.c
+           control/fserr.ctl
+           don't allow negative read pointers at Dan Smythe's request
 
+020730 RDG logpl/logpl
+           logpl can now plot chan1 verses chan2. It can also switch
+           channels.
 
+020916 RDG tacd/parse_it.c 
+           tacd/tacd_srv.c	
+           tacd/tacd.c	
+           removed parse_it, and incorporated code into tacd_srv.c
+           allow for code changes in tacd.c.
+           introduced code for reading TAC PC code version.
+
+020916 RDG quikv/tacd.c 
+           quikv/tacd_dis.c
+           allowed for changes in ../tacd/tacd_srv.c
+           introduced code for reading TAC PC code version.
+
+021003 RDG vex/all 
+           introduced the changes for writing vex files. There were changes
+           that were made 001114 which were introduced by Ed Himwich
+           for reading the (scanid).
+
+020819 RDG fsvue/
+           fsvue/fsvue
+           fsvue/fsvue_start
+           fsvue/vue_fslog
+           fsvue/vue_fshelp
+           restructured the fsvue directory for better bookkeeping.
+           introduced code for reading current log file when examining logs.
+           introduced code for reading tnx help file.
+
+Version 9.5.13 021004

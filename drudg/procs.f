@@ -226,6 +226,11 @@ C 020606 nrv Initialize IBUF2 for writing out procedures. Add kcomment
 C            to GTSNP call.
 C 020618 nrv Inconsistent use of itype in setup_name for K4 between
 C            procs and snap. Use itype=2 for both K4 and S2.
+C 020705 nrv Add recorder number to RECPATCH and OLDTAPE commands.
+C 020923 nrv Add km5rec to set_type call.
+C 020925 nrv Add km5rec tests so that tape-only commands are not written.
+C 021003 nrv With a Mk4 formatter, with Mk5 recorder only, use the
+C            second headstack, same as piggyback mode.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -250,7 +255,7 @@ C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       logical kvrack,kv4rack,km3rack,km4rack,kk41rack,kk42rack,
      .km4fmk4rack,k8bbc,kk4vcab,kk3fmk4rack,knorack
       logical kv4rec(2),kvrec(2),km3rec(2),ks2rec(2),
-     .km4rec(2),kk42rec(2),kk41rec(2),kuse(2)
+     .km4rec(2),kk42rec(2),kk41rec(2),kuse(2),km5rec(2)
 C     real speed,spd
       real spdips
 C     integer*2 lspd(4)
@@ -311,7 +316,7 @@ C  1. Create the file. Initialize
       call set_type(istn,km3rack,km4rack,kvrack,kv4rack,
      .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
      .km3rec,km4rec,kvrec,
-     .kv4rec,ks2rec,kk41rec,kk42rec)
+     .kv4rec,ks2rec,kk41rec,kk42rec,km5rec)
       knorack = ichcm_ch(lstrack(1,istn),1,'none').eq.0
      . .or.     ichcm_ch(lstrack(1,istn),1,'NONE').eq.0
       kk4vcab=.false.
@@ -412,9 +417,6 @@ C
         return
       END IF
       call procintr
-C    .(km3rack,km4rack,kvrack,kv4rack,
-C    .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,km3rec,km4rec,kvrec,
-C    .kv4rec,ks2rec,kk41rec,kk42rec)
 C
 C 2. Set up the loop over all frequency codes, and the
 C    inner loop over the number of passes.
@@ -462,7 +464,8 @@ C    for procedure names.
             if (kuse(irec)) then ! procs for this recorder
           CALL IFILL(LNAMEP,1,12,oblank)
           itype=2
-          if (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec)) itype=1
+          if (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec)
+     .       .or.km5rec(irec)) itype=1
           call setup_name(itype,icode,ipass,lnamep,nch)
               
           call trkall(itras(1,1,1,1,ipass,istn,icode),
@@ -537,19 +540,27 @@ C  PCALON or PCALOFF
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
           endif
 
+C  TPICD=STOP 
+            call ifill(ibuf,1,ibuflen,oblank)
+            nch = ichmv_ch(IBUF,1,'tpicd=stop')
+            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+
           if (kvrec(irec).or.km3rec(irec).or.km4rec(irec)
-     .      .or.kv4rec(irec)) then 
+     .      .or.kv4rec(irec).or.km5rec(irec)) then ! all these for ....
 C  PCALD=STOP
             if (kpcal_d) then
               call ifill(ibuf,1,ibuflen,oblank)
               nch = ichmv_ch(IBUF,1,'pcald=stop')
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
             endif
-C  TPICD=STOP
-            call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(IBUF,1,'tpicd=stop')
-            CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+c..debug:check if 2nd head active, i.e. hd posns are set
+          head2active=0 !debug
+          do i=1,max_pass !debug
+            if (ihdpos(2,i,istn,icode).ne.9999)head2active=1       !debug
+          enddo !debug
 C  TAPEFffm
+          if (km3rec(irec).or.km4rec(irec).or.kvrec(irec)
+     .           .or.kv4rec(irec)) then ! no TAPEFORM for mk5
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'TAPEF')
             nch = ICHMV(ibuf,nch,LCODE(ICODE),1,nco)
@@ -557,11 +568,6 @@ C  TAPEFffm
             if (krec_2rec      ) nch = ichmv_ch(ibuf,nch,crec(irec))
             call hol2lower(ibuf,(nch+1))
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-c..debug:check if 2nd head active, i.e. hd posns are set
-          head2active=0 !debug
-          do i=1,max_pass !debug
-            if (ihdpos(2,i,istn,icode).ne.9999)head2active=1       !debug
-          enddo !debug
 C  PASS=$,SAME
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'pass')
@@ -574,10 +580,12 @@ C  PASS=$,SAME
                if(head2active .eq. 1)nch = ichmv_ch(ibuf,nch,',mk4') ! debug Mk4 2 write hedz
             endif  !debug
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
+          endif  ! no TAPEFORM for mk5
 C  TRKFffmp
 C  Also write trkf for Mk3 modes if it's an 8 BBC station or LSB LO
-            if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
-     .        km4rec(irec).or.kk41rec(irec).or.kk42rec(irec)) then
+          if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
+     .      km5rec(irec).or.
+     .      km4rec(irec).or.kk41rec(irec).or.kk42rec(irec)) then
             if ((km4rack.or.kvrack.or.kv4rack.or.kk41rack.or.kk42rack)
      .          .and.(.not.km3mode.or.
      .          klsblo.or.((km3ac.or.km3be).and.k8bbc))) then
@@ -588,7 +596,6 @@ C  Also write trkf for Mk3 modes if it's an 8 BBC station or LSB LO
               NCH=ICHMV_ch(ibuf,NCH,cvPASS(IPASS:ipass))
               call hol2lower(ibuf,(nch+1))
               CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
-            endif
             endif
 C  PCALFff
             if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
@@ -608,14 +615,17 @@ C  ROLLFORMff
                 CALL writf_asc(LU_OUTFILE,IERR,IBUF,(nch+1)/2)
               endif
             endif ! non-canned roll
+          endif
 C  TRACKS=tracks   
 C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
             if ((kvrack.or.km4rack.or.kv4rack.or.km4fmk4rack).and.
      .        (.not.km3mode.or.klsblo.or.
      .         ((km3ac.or.km3be).and.k8bbc))) then
           do ipig=1,2 ! twice for piggyback
-           if (ipig.eq.1.or.(ipig.eq.2.and.
-     .      kmk5_piggyback.and.km4rack)) then ! second time for piggyback
+           if (ipig.eq.1.or.
+     .        (ipig.eq.2.and.kmk5_piggyback.and.km4rack).or.
+     .        (ipig.eq.2.and.km5rec(irec).and.km4rack)) then ! 
+C                use second headstack for Mk5
               call ifill(ibuf,1,ibuflen,oblank)
               if (ipig.eq.1) NCH = ichmv_ch(IBUF,1,'TRACKS=')
               if (ipig.eq.2) NCH = ichmv_ch(IBUF,1,'TRACKS=*,')
@@ -809,7 +819,7 @@ C  Leftovers for the second headstack.
             endif ! second time for piggyback
             enddo ! twice for piggyback
             endif ! kvrack.or.km4rack.or.kv4rack and .not. km3mode
-          endif ! km3rec .or.km4rec or kvrec or kv4rec
+          endif ! all these for only km3rec km4rec kvrec kv4rec km5rec
 C  REC_MODE=<mode>,$,<roll>
 C  user_info=1,label,station
 C  user_info=2,label,source
@@ -1301,7 +1311,7 @@ C         tracks still left in the table.
                   nch = MCOMA(IBUF,nch)
                 endif
               enddo ! pick up leftover tracks
-            else if (km4rec(irec)) then ! stack enables 
+            else if (km5rec(irec).or.km4rec(irec)) then ! stack enables 
               kok=.false.
               do i=2,33 ! if any tracks are on, enable the stack
                 if (itrk(i,1).eq.1) then
@@ -2216,6 +2226,7 @@ C Therefore, use the index of the recorder in use for all the tests
 C in this section.
 C    
       if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
+     .        .or.km5rec(ir)
      .        .or.kk41rec(ir).or.kk42rec(ir)) then
         if ((km4rack.or.kvrack.or.kv4rack.or.kk41rack.or.kk42rack).and.
      .      (.not.km3mode.or.klsblo
@@ -2226,8 +2237,8 @@ C
      .      itrk,lpmode,npmode,ifan(istn,icode))
 
             CALL IFILL(LNAMEP,1,12,oblank)
-            if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)) 
-     .        then
+            if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
+     .        .or.km5rec(ir)) then
               nch = ichmv_ch(LNAMEP,1,'TRKF')
               nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)
               nch = ICHMV(LNAMEP,nch,lpmode,1,npmode)
@@ -2252,22 +2263,26 @@ C             endif
             WRITE(LUSCN,9112) LNAMEP
 
             call ifill(ibuf,1,ibuflen,oblank)
-            if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)) 
-     .        then
+            if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
+     .        .or.km5rec(ir)) then
               nch = ichmv_ch(ibuf,1,'TRACKFORM=')
             endif
             if (kk41rec(ir).or.kk42rec(ir)) then
-              nch = ichmv_ch(ibuf,1,'RECPATCH=')
+              nch = ichmv_ch(ibuf,1,'RECPATCH')
+              if (krec_2rec      ) nch = ichmv_ch(ibuf,nch,crec(ir))
+              nch = ichmv_ch(ibuf,nch,'=')
             endif
             call hol2lower(ibuf,nch)
             call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
          do ipig=1,2 ! twice through for piggyback mode
-            if (ipig.eq.1.or.(ipig.eq.2.and.
-     .          kmk5_piggyback.and.km4rack)) then ! second time for piggyback
+            if (ipig.eq.1.or.
+     .         (ipig.eq.2.and.kmk5_piggyback.and.km4rack).or.
+     .         (ipig.eq.2.and.km5rec(ir).and.km4rack)) then ! 
+C                 use second headstack for Mk5
                 if (ipig.eq.2) then ! initialize buffer
                     call ifill(ibuf,1,ibuflen,oblank)
 C                   if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
-C    .                km4rec(ir)) then
+C    .                km4rec(ir).or.km5rec(ir)) then
                       nch = ichmv_ch(ibuf,1,'TRACKFORM=')
                  endif ! initialize buffer
             ib=0
@@ -2305,7 +2320,7 @@ C                         Write out a max of 8 channels for 8-BBC stations
                         if (isb.eq.2) isbx=1
                       endif ! reverse sidebands
                       if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
-     .                  km4rec(ir)) then
+     .                  km4rec(ir).or.km5rec(ir)) then
                          if (mhead .eq. 2.or.ipig.eq.2)then               !debug
                            if((it+3) .lt.10)nch=ichmv_ch(ibuf,nch,'10') !debug
                            if((it+3) .ge.10)nch=ichmv_ch(ibuf,nch,'1') !debug
@@ -2335,11 +2350,13 @@ C trackform=102,1us,106,2us,110,3us,114,4us,118,5us,122,6us,126,7us,103,8us
 C trackform=107,9us,111,10us,115,11us,119,12us,123,13us,127,14us
                     call ifill(ibuf,1,ibuflen,oblank)
                     if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.
-     .                km4rec(ir)) then
+     .                km4rec(ir).or.km5rec(ir)) then
                       nch = ichmv_ch(ibuf,1,'TRACKFORM=')
                     endif
                     if (kk41rec(ir).or.kk42rec(ir)) then
-                      nch = ichmv_ch(ibuf,1,'RECPATCH=')
+                      nch = ichmv_ch(ibuf,1,'RECPATCH')
+                      if (krec_2rec) nch = ichmv_ch(ibuf,nch,crec(ir))
+                      nch = ichmv_ch(ibuf,nch,'=')
                     endif
                     ib=0
                   endif
@@ -2368,7 +2385,8 @@ C same logic can be used for TRKF and RECP.
 C Therefore, use index 1 for all the tests in this section.
 
       if (kpcal_d) then 
-      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)) then
+      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
+     .  .or.km5rec(ir)) then
         if ((km4rack.or.kvrack.or.kv4rack).and.
      .      (.not.km3mode.or.klsblo
      .      .or.((km3be.or.km3ac).and.k8bbc))) then
@@ -2481,6 +2499,7 @@ C 9. Write out standard tape loading and unloading procedures
 C UNLOADER procedure
       do irec=1,nrecst(istn) ! loop on recorders
         if (kuse(irec)) then ! procs for this recorder
+          if (.not.km5rec(irec)) then ! not for Mk5
           CALL IFILL(LNAMEP,1,12,oblank)
           nch = ichmv_ch(LNAMEP,1,'UNLOADER')
           if (krec_2rec      ) nch = ichmv_ch(lnamep,nch,crec(irec)) 
@@ -2509,7 +2528,9 @@ C UNLOADER procedure
             nch = ichmv_ch(ibuf,1,'!+10s')
             call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
             call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(ibuf,1,'oldtape=$')
+            nch = ichmv_ch(ibuf,1,'oldtape')
+            if (krec_2rec      ) nch = ichmv_ch(ibuf,nch,crec(irec))
+            nch = ichmv_ch(ibuf,nch,'=$')
             call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!+20s')
@@ -2547,12 +2568,14 @@ C UNLOADER procedure
           endif
 C       endif ! non-empty proces for single recorder
         CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
+        endif ! not for Mk5
         endif ! procs for this recorder
       enddo ! loop on recorders
      
 C LOADER procedure
       do irec=1,nrecst(istn) ! loop on recorders
         if (kuse(irec)) then ! procs for this recorder
+          if (.not.km5rec(irec)) then ! not for Mk5
           CALL IFILL(LNAMEP,1,12,oblank)
           nch = ichmv_ch(LNAMEP,1,'LOADER')
           if (krec_2rec      ) nch = ichmv_ch(lnamep,nch,crec(irec)) 
@@ -2637,6 +2660,7 @@ C           call ifill(ibuf,1,ibuflen,oblank)
             call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
           endif
         CALL writf_asc_ch(LU_OUTFILE,IERR,'enddef')
+        endif ! not for Mk5
         endif ! procs for this recorder
       enddo ! loop on recorders
 

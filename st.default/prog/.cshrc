@@ -10,7 +10,7 @@ a lsf	'ls -CF'
 a ll	'ls -l'
 a lt	'ls -lt \!*|less'
 a last	'ls -lt \!*|head'
-a latest 'lt `find \( -path ./bin  -prune \) -o \( -path ./oprin/readline-2.0 -prune \) -o ! -type d ! -name "*.[oas]"`'
+a latest 'lt `find \( -path ./bin  -prune \) -o \( -path ./oprin/readline-2.0 -prune \) -o ! -type d ! -type l ! -name "*.[oas]"`'
 a pu	'pushd \!*;set prompt="`hostname`:`pwd`/:> "'
 a po	'popd \!*;set prompt="`hostname`:`pwd`/:> "'
 a d	dirs

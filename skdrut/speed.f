@@ -25,6 +25,8 @@ C 000126 nrv Add S2 speed output.
 C 000319 nrv Add K4 speed calculation.
 C 010817 nrv Change K4 speeds per Takashima.
 C 020111 nrv Check LSTREC not LTERNA for recorder type.
+C 020713 nrv Add third K4 speed for 128 Mbps.
+C 020926 nrv Change K4 sample rate logic to get correct speed (per S. Kurihara)
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -69,10 +71,13 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
 
       else if (kk4) then 
         totrate=samprate(icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
-C       if (totrate.gt.250.0) sp = 423.8 ! mm/sec for 256 Mbps
-C       if (totrate.lt.100.0) sp = 105.9 ! mm/sec for  64 Mbps
-        if (totrate.gt.100.0) sp = 423.8 ! mm/sec 
-        if (totrate.lt.100.0) sp = 105.9 ! mm/sec 
+        if (totrate.gt.129.0) then
+          sp = 423.8 ! mm/sec for 256 Mbps
+        else if (totrate.lt.65.0) then
+          sp = 105.9 ! mm/sec for 64 Mbps
+        else 
+          sp = 211.9 ! mm/sec for 128 Mbps
+        endif
         sp=sp/1000.0 ! convert to mps
 
 C 1. First account for the fan factor.

@@ -13,8 +13,9 @@ C
 C History
 C 991103 nrv New. Removed from LSTSUM.
 C 000611 nrv Add KSCAN to call.
+C 020923 nrv Add kmk5 to set_type call.
 
-C Calls: READ_SNAP1, READ_SNAP6
+C Calls: READ_SNAP1, READ_SNAP6, SET_TYPE
 
 C Input
       logical kskd
@@ -34,7 +35,7 @@ C Local
       character*20 c1,c2,c3
       logical km3rack,km4rack,kvrack,kv4rack,
      .  kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
-     .  km3rec(2),km4rec(2),kvrec(2),
+     .  km3rec(2),km4rec(2),kvrec(2),km5rec(2),
      .  kv4rec(2),ks2rec(2),kk41rec(2),kk42rec(2)
       integer trimlen,ichcm_ch
 
@@ -107,9 +108,10 @@ C 4.3  Find out the equipment.
         call hol2char(lstrec2(1,istn),1,8,crecb)
         call set_type(istn,km3rack,km4rack,kvrack,kv4rack,
      .  kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
-     .  km3rec,km4rec,kvrec,
+     .  km3rec,km4rec,kvrec,km5rec,
      .  kv4rec,ks2rec,kk41rec,kk42rec)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
+C       because the "kk4" or "ks2" flag gets set.
         kk4 = kk41rec(1).or.kk42rec(1).or.kk41rec(2).or.kk42rec(2)
         ks2 = ks2rec(1).or.ks2rec(2)
       else ! read .snp file

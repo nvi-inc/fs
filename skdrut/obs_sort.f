@@ -18,6 +18,7 @@ C Local
 
 C  1. Sort the obs.
 
+      write(luscn,'("OBS_SORT00 - Sorting scans by time.")')
       if (nobs.ge.2) then ! sort
         do j=2,nobs
           irec=iskrec(j)

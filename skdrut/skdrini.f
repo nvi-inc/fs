@@ -23,6 +23,7 @@ C 020111 nrv Move roll table initialization back here because drudg
 C            needs them to read and check roll_defs from VEX files.
 C            But remove the DATA statement which seems to balloon the
 C            program size.
+C 020713 nrv Add Mk5 recorder type
 C
 C LOCAL
       integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,
@@ -201,6 +202,7 @@ C  In freqs.ftni
         rec_type(7) = 'S2'
         rec_type(8) = 'K4-1'
         rec_type(9) = 'K4-2'
+        rec_type(10) = 'Mark5'
       enddo
 
 C Initialize canned roll defs
