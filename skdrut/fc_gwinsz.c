@@ -1,10 +1,10 @@
 
-#include <sys/termio.h>
+#include <termio.h>
 
 #ifdef _NEEDED
-int *fc_gwinsz_()
+int fc_gwinsz_()
 #else
-int *fc_gwinsz()
+int fc_gwinsz()
 #endif
 {
      struct winsize ws;
