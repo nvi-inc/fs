@@ -9,7 +9,8 @@ C
 C
       logical kfild,kglin,kfound,kfmp,kuse
 C
-      integer*2 lstrng(5),nstrn
+      integer*2 lstrng(5)
+      integer nstrn
       integer*2 lnfond(11)
 C
       data lstrng /2H$c,2Hor,2hre,2Hct,2Hed/
