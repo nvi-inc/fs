@@ -1,4 +1,4 @@
-      SUBROUTINE VOB1INP(ivexnum,istn,LU,IERR,iret)
+      SUBROUTINE VOB1INP(ivexnum,istn,LU,IERR,iret,nobs_stn)
 
 C  This routine gets all the observations for one station
 C  from the vex file.
@@ -12,6 +12,9 @@ C            These two routines should be combined so that VOBINP
 C            calls this one!
 C 970110 nrv Add code index to cpassorderl
 C 970121 nrv Add station and code index to npassl
+C 970129 nrv Add nobs_stn to call
+C 970307 nrv Find the time field by skipping fields, not using absolute
+C            character counts. 
 
 
       include '../skdrincl/skparm.ftni'
@@ -25,6 +28,7 @@ C
 C  OUTPUT:
       integer iret ! error from vex routines
       integer ierr ! error from this routine
+      integer nobs_stn ! number of scans found for this station
 
 C  CALLED BY: 
 C  CALLS:  fget_scan_station         (get station lines)
@@ -39,12 +43,12 @@ C  LOCAL:
       integer*2 itim1(6),itim2(6)
       integer*2 lcb
       character*128 cmo,cstart,csor,cout,cunit
-      integer istart(5)
+      integer ic1,ic2,ich,istart(5)
       double precision d,start_sec,dst,det
       logical knew,kearl,ks2
       integer ichmv,ichmv_ch,ivgtso,ivgtmo
       integer ichcm_ch,fget_scan_station,fvex_scan_source,fvex_date,
-     .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len,fvex_int
+     .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len
 
 C 1. Get scans for one station. 
 
@@ -53,10 +57,11 @@ C 1. Get scans for one station.
         iret = fget_scan_station(ptr_ch(cstart),len(cstart),
      .         ptr_ch(cmo),len(cmo),
      .         ptr_ch(stndefnames(istn)),ivexnum)
-        nobs = 0
+        nobs_stn=0
         ierr = 1 ! station
         ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
         do while (iret.eq.0) ! get all scans for this station
+          nobs_stn=nobs_stn+1
           iret = fvex_date(ptr_ch(cstart),istart,start_sec)
           ierr=2 ! date/time
           if (iret.ne.0) return
@@ -73,6 +78,11 @@ C 1. Get scans for one station.
             il=fvex_len(cmo)
           if (ivgtmo(cmo,icod).le.0) then
             write(lu,'("VOBINP02 - Mode ",a," not found")') cmo(1:il)
+          endif
+          if (nchan(istn,icod).eq.0) then ! code not defined
+            write(lu,'("VOBINP03 - Mode ",a," not defined for this ",
+     .      "station!!")') cmo(1:il)
+            return
           endif
           ierr = 6 ! data start
           iret = fvex_field(2,ptr_ch(cout),len(cout))
@@ -127,7 +137,7 @@ C    If there is not one, make a new observation.
      
             call findscan(isor,icod,istart,irec)
             if (irec.ne.0) then ! add this station
-              call addscan(irec,istn,idur,ifeet,ip,lcb,ierr)
+              call addscan(irec,istn,icod,idur,ifeet,ip,lcb,ierr)
               knew=.false.
               if (ierr.ne.0) then
                 write(lu,9103) ierr,irec,istn,istart
@@ -148,17 +158,22 @@ C     bubble it up until it is.
 C
       if (nobs.ge.2.and.knew) then ! check time order
         irec=nobs
-        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
-        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
+C       Find the time field by skipping over 4 fields
+        ich=1
+        do i=1,5 ! want the 5th field 
+          CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
+        enddo
+        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
+        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
         do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
 C         Swap pointers
           ipnt = iskrec(irec-1)
           iskrec(irec-1) = iskrec(irec)
           iskrec(irec) = ipnt
-C         Get new time fields -- starting in char 24
-          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
+C         Get new time fields -- starting in ic1
+          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),ic1,11)
           irec = irec-1
-          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
+          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),ic1,11)
         end do  !out of order
       endif
 
