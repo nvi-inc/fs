@@ -20,7 +20,6 @@ ifd          qkr 0301 01 5F
 if3          qkr 0302 01 5F
 mat          qkr 0401 01 FF
 hpib         qkr 0402 01 FF
-cable        qkr 0403 01 FF
 wx           qkr 0404 01 FF
 wakeup       qkr 0405 01 FF
 check        qkr 0406 01 FF
@@ -34,6 +33,7 @@ rw           qkr 0603 01 F7
 ff           qkr 0604 01 F7
 srw          qkr 0605 01 F7
 sff          qkr 0606 01 F7
+rec          qkr 0607 01 F5
 reset        qkr 0701 01 FF
 newtape      qkr 0702 01 FF
 label        qkr 0703 01 F7
@@ -70,6 +70,7 @@ tsysb        qkr 1206 01 7F
 tsysc        qkr 1217 01 7F
 tsysd        qkr 1218 01 2F
 tpzero       qkr 1207 01 7F
+cable        qkr 1304 01 FF
 pcal         qkr 1401 01 11
 lo           qkr 1402 01 7F
 patch        qkr 1403 01 7F
