@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.10/misc/fs9510up.txt  Version: 1.2  Date: 020522
+File: /usr2/fs-9.5.11/misc/fs9511up.txt  Version: 1.2  Date: 020522
 
 I. Introduction
 
@@ -18,8 +18,8 @@ reproduce by DRUDG for double speed recordings with VLBA and VLBA4
 recorders.
 
 This version includes all features of 9.5.7, specifically the Mark V
-piggyback recording mode. It also includes some small patches to 9.5.8
-and 9.5.9.
+piggyback recording mode. It also includes some small patches to
+9.5.8, 9.5.9, and 9.5.10.
 
 II. Changes Since Version 9.5.3
 
@@ -666,9 +666,9 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
-If you are upgrading from 9.5.8 or 9.5.9, please follow steps (0)-(8),
-skip step (9), and complete step (10). Please also complete item M6 or
-V6, as appropriate, in step (16).
+If you are upgrading from 9.5.8, 9.5.9, or 9.5.10, please follow steps
+(0)-(8), skip step (9), and complete step (10). Please also complete
+item M6 or V6, as appropriate, in step (16).
 
 If you are upgrading from 9.5.7, please follow steps (0)-(11) and then
 skip to and follow steps (15)-(19). Please also complete item M6 or
@@ -707,7 +707,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.10 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.11 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -715,7 +715,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.10.tar.gz
+    get fs-9.5.11.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -729,12 +729,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.10.tar.gz
+    tar -xzpf /tmp/fs-9.5.11.tar.gz
 
 (6) Set the link for the new FS vesion:
 
     cd /usr2
-    ln -sfn fs-9.5.10 fs
+    ln -sfn fs-9.5.11 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1049,19 +1049,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.10.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.11.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9510tg.aa
-fs9510tg.ab
+fs9511tg.aa
+fs9511tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9510tg.* >fs-9.5.10.tar.gz
+cat fs9511tg.* >fs-9.5.11.tar.gz
 
-This will create an exact image of the original fs-9.5.10.tar.gz
+This will create an exact image of the original fs-9.5.11.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.
