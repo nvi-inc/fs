@@ -61,9 +61,9 @@ C
 C                     Retain class for later response
       call fs_get_rack(rack)
 
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(MK3.eq.rack.or.MK4.eq.rack) then
         call tplis(ip,itpis)
-      else if (VLBA .eq. and(rack,VLBA)) then
+      else if (VLBA .eq. rack .or. VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
       endif
 C
@@ -78,7 +78,7 @@ C
       nrec = 0
       iclass = 0
 
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(MK3.eq.rack.or.MK4.eq.rack) then
         do i=1,17
          if(itpis(i).ne.0.and.
      &      (i.ne.16.or.(i.eq.16.and.itpis(15).eq.0)) ) then
@@ -101,7 +101,7 @@ C
         call rmpar(ip)
         if (ip(3).lt.0) return
 
-      else if (VLBA .eq. and(rack,VLBA)) then
+      else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpi_vlba(ip,itpis_vlba)
         if(ip(3).lt.0) return
       endif
@@ -116,7 +116,7 @@ C
       if (ieq.eq.0) ieq=nchar+1
       nch = ichmv_ch(ibuf,ieq,'/')
 C                     Get the command part of the response set up
-      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if(MK3.eq.rack.or.MK4.eq.rack) then
         call tpput(ip,itpis,isub,ibuf,nch,ilen)
       else
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)

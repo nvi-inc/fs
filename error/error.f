@@ -12,7 +12,8 @@ C
 C
       double precision lat,lon
       real latoff,lonoff,latres,lonres
-      real latr,ltofr,lonr,lnofr
+      real ltofr,lnofr
+      double precision latr,lonr
 C
       external fln,flt0
       double precision fln,flt0
