@@ -305,7 +305,7 @@ enddef
 define  postob        00000000000
 enddef
 define  precond       00000000000
-schedule=prepass,#1
+schedule=vprepass,#1
 enddef
 define  preob         00000000000
 onsource
