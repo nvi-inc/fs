@@ -102,6 +102,67 @@ int flag;                            /* TRUE if default is okay */
     return ierr;
 }
 
+int arg_float(ptr,fptr,dflt,flag)  /* parse arg string for float */
+char *ptr;                         /* ptr to string */
+float *fptr;                       /* ptr to store result */
+float dflt;                        /* default result value */
+int flag;                          /* TRUE if default is okay */
+
+/* this routine handles SNAP argument interpretation for flt arguments */
+/* "*" use current value (already stored in *fptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as float */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+    int ierr;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *fptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*")) return ierr;
+
+    if(1 != sscanf(ptr,"%f",fptr)) ierr=-200;
+
+    return ierr;
+}
+int arg_dble(ptr,dptr,dflt,flag)  /* parse arg string for dble */
+char *ptr;                         /* ptr to string */
+double *dptr;                      /* ptr to store result */
+double dflt;                       /* default result value */
+int flag;                          /* TRUE if default is okay */
+
+/* this routine handles SNAP argument interpretation for flt arguments */
+/* "*" use current value (already stored in *dptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as double */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+    int ierr;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *dptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*")) return ierr;
+
+    if(1 != sscanf(ptr,"%lf",dptr)) ierr=-200;
+
+    return ierr;
+}
+
 int arg_key(ptr,key,nkey,iptr,dflt,flag)   /* parse arg string for keyword */
 char *ptr;                           /* ptr to string */
 char **key;                          /* array of pointers to keyword STRINGS */
@@ -116,6 +177,8 @@ int flag;                            /* TRUE if default is okay */
 /* other strings are compared to keywords */
 /* return value: 0 no errror, -100 no default allowed and arg was "" */
 /*                            -200 wouldn't decode                   */
+/* a "*" can be matched in a key list because the key list is checked */
+/* before the "*" use current value check is made */
 {
     int ierr, icount;
 
@@ -129,14 +192,15 @@ int flag;                            /* TRUE if default is okay */
       return ierr;
     }
 
-    if(0==strcmp(ptr,"*")) return ierr;
-
     icount=0;
     while (icount < nkey)
        if(0==strcmp(ptr,key[icount++])) {
           *iptr=icount-1;
           return 0;
        }
+
+    if(0==strcmp(ptr,"*")) return ierr;
+
 
     return -200;
 }
