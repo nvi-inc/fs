@@ -26,6 +26,7 @@ C NRV 881021 Created
 C NRV 901026 Modified to include Epson
 C NRV 910306 Modified laser control to spread out bar codes
 C nrv 950829 PC-DRUDG version converted to linux
+C 960814 nrv Fix index in print command
 C
       integer*2 jbuf(80),lbuf(80),label(6),jch
       integer l,jyr,i,ichek,j,ic,idummy,ip,il,i1,idum
@@ -132,7 +133,7 @@ C     For laser, write ASCII version, then print label in bar code font.
 
 	else if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then
 C       Send ASCII version of labels to laser printer.
-      write(6,9210) (lbuf(j),i=1,60)
+C     write(6,9210) (lbuf(i),i=1,60)
 	  WRITE(lu,9210)(LBUF(J),J=1,60),char(13)
 9210    FORMAT(60A2,a1)
 C       Switch to bar code font
