@@ -18,6 +18,7 @@
 #define LEXPER_N 8
 #define SYSTMP_N 32
 #define LFREQV_N 90
+#define FREQVC_N 15
 #define LNAANT_N 8
 #define LSORNA_N 10
 #define IDEVANT_N 64
@@ -26,6 +27,7 @@
 #define IDEVMCB_N 64
 #define HORAZ_N  4*MAX_HOR
 #define HOREL_N  4*MAX_HOR
+#define CWRAP_N 8
 
 extern struct fscom *shm_addr;
 
@@ -433,6 +435,12 @@ void fs_set_systmp__(systmp)
             shm_addr->systmp[i]=*(systmp++);
 	}
 
+void fs_get_systmp__(systmp)
+        float *systmp;
+        {         
+          memcpy(systmp,shm_addr->systmp,sizeof(shm_addr->systmp));
+        }         
+
 void fs_set_ipashd__(ipashd)
 	int ipashd[2];
 	{
@@ -475,6 +483,54 @@ void fs_get_lfreqv__(lfreqv)
           size_t N;
 	  N = LFREQV_N;
 	  memcpy(lfreqv,shm_addr->lfreqv,N);
+	}
+
+void fs_set_freqvc__(freqvc)
+	float *freqvc;
+	{
+          size_t N;
+	  N = sizeof(shm_addr->freqvc);
+	  memcpy(shm_addr->freqvc,freqvc,N);
+	}
+
+void fs_get_freqvc__(freqvc)
+	float *freqvc;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->freqvc);
+	  memcpy(freqvc,shm_addr->freqvc,N);
+	}
+
+void fs_set_ibwvc__(ibwvc)
+	int *ibwvc;
+	{
+          size_t N;
+	  N = sizeof(shm_addr->ibwvc);
+	  memcpy(shm_addr->ibwvc,ibwvc,N);
+	}
+
+void fs_get_ibwvc__(ibwvc)
+	int *ibwvc;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->ibwvc);
+	  memcpy(ibwvc,shm_addr->ibwvc,N);
+	}
+
+void fs_set_ifp2vc__(ifp2vc)
+	int *ifp2vc;
+	{
+          size_t N;
+	  N = sizeof(shm_addr->ifp2vc);
+	  memcpy(shm_addr->ifp2vc,ifp2vc,N);
+	}
+
+void fs_get_ifp2vc__(ifp2vc)
+	int *ifp2vc;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->ifp2vc);
+	  memcpy(ifp2vc,shm_addr->ifp2vc,N);
 	}
 
 void fs_set_lnaant__(lnaant)
@@ -1538,4 +1594,78 @@ void fs_get_vrepromode__(vrepromode)
           vrepromode[1]=shm_addr->vrepro.mode[1];
 	}
 
+void fs_set_cwrap__(cwrap)
+	char *cwrap;
+	{
+          size_t N;
+	  N = CWRAP_N;
+	  memcpy(shm_addr->cwrap,cwrap,N);
+	}
 
+void fs_get_cwrap__(cwrap)
+	char *cwrap;
+	{
+          size_t N;
+	  N = CWRAP_N;
+	  memcpy(cwrap,shm_addr->cwrap,N);
+	}
+
+void fs_set_vacsw__(vacsw)
+	int *vacsw;
+	{
+	  shm_addr->vacsw = *vacsw;
+	}
+
+void fs_get_vacsw__(vacsw)
+	int *vacsw;
+	{
+	  *vacsw = shm_addr->vacsw;
+	}
+
+void fs_set_motorv2__(motorv2)
+	float *motorv2;
+	{
+	  shm_addr->motorv2 = *motorv2;
+	}
+
+void fs_get_motorv2__(motorv2)
+	float *motorv2;
+	{
+	  *motorv2 = shm_addr->motorv2;
+	}
+
+void fs_set_itpthick2__(itpthick2)
+	int *itpthick2;
+	{
+	  shm_addr->itpthick2 = *itpthick2;
+	}
+
+void fs_get_itpthick2__(itpthick2)
+	int *itpthick2;
+	{
+	  *itpthick2 = shm_addr->itpthick2;
+	}
+
+void fs_set_thin__(thin)
+	int *thin;
+	{
+	  shm_addr->thin = *thin;
+	}
+
+void fs_get_thin__(thin)
+	int *thin;
+	{
+	  *thin = shm_addr->thin;
+	}
+
+void fs_set_vac4__(vac4)
+	int *vac4;
+	{
+	  shm_addr->vac4 = *vac4;
+	}
+
+void fs_get_vac4__(vac4)
+	int *vac4;
+	{
+	  *vac4 = shm_addr->vac4;
+	}
