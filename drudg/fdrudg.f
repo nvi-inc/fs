@@ -9,6 +9,7 @@ C  Common blocks:
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+      include 'hardware.ftni'
 
 C Subroutine interface:
 C     Called by: drudg (C routine)
@@ -182,14 +183,14 @@ C
 C Initialize some things.
 
 C Initialize the version date.
-      cversion = '030507'
+      cversion = '030514'
 C Initialize FS version
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
-C      iVerMajor_FS = 02
-C      iVerMinor_FS = 02
-C      iVerPatch_FS = 13
+!      iVerMajor_FS = 02
+!      iVerMinor_FS = 02
+!      iVerPatch_FS = 13
 C PeC Permissions on output files
       iperm=o'0666'
 C Initialize LU's
@@ -279,7 +280,9 @@ C
       kdrgfile = .false.
       kparity = .false.
       kprepass = .false.
-      kmk5_piggyback = .false.
+      km5P_piggy = .false.
+      km5A_piggy = .false.
+
 C  In drcom.ftni
       kmissing = .false.
       idummy= ichmv_ch(lbarrel,1,'NONE')
@@ -630,6 +633,11 @@ C       Are the equipment types now known?
      .    ' Recorder 1: ',4a2,' Recorder 2: ',4a2)
           if (nrecst(istn).eq.2) write(luscn,9070) lfirstrec(istn)
 9070      format(' Schedule will start with recorder ',a1,'.')
+          if(km5a_piggy)
+     >        write(luscn,'("   Mark5A in piggyback mode. ")')
+          if(km5p_piggy)
+     >        write(luscn,'("   Mark5P in piggyback mode. ")')
+
         else
           write(luscn,9169) (lstnna(i,istn),i=1,4)
 9169      format(/' Equipment at ',4a2,' is unknown. Use Option 11',
@@ -684,7 +692,9 @@ C  Write warning messages if control file and schedule do not agree.
      .        ' 6 = Make PostScript label file       ',
      .        ' 12 = Make procedures (.PRC) '/,
      .        ' 61= Print PostScript label file      '
-     .        ' 13 = Toggle Mk5 piggyback mode ',
+     .        ' 13 = Toggle Mk5A piggyback mode ',
+     .        '                                      ',
+     .        ' 14 = Toggle Mk5P piggyback mode '
      .      )
             else
               write(luscn,9273)
@@ -692,7 +702,9 @@ C  Write warning messages if control file and schedule do not agree.
      .        ' 6 = Make tape labels                 ',
      .        ' 12 = Make procedures (.PRC) '/
      .        '                                      ',
-     .        ' 13 = Toggle Mk5 piggyback mode ')
+     .        ' 13 = Toggle Mk5A piggyback mode '/
+     .        '                                      ',
+     .        ' 14 = Toggle Mk5P piggyback mode ')
             endif
             if (kdrg_infile.or.kvex) then 
               write(luscn,9274)
@@ -860,13 +872,31 @@ C           call snap(cr1,4)
           ELSE IF (IFUNC.EQ.12) THEN
               call procs
           ELSE IF (IFUNC.EQ.13) THEN
-              if (kmk5_piggyback) then
-                write(luscn,"('Mark5 piggyback mode turned OFF')")
-                kmk5_piggyback = .false.
+              if (km5A_piggy) then
+                write(luscn,"('Mark5A piggyback mode turned OFF')")
+                km5A_piggy = .false.
               else
-                write(luscn,"('Mark5 piggyback mode turned ON')")
-                kmk5_piggyback = .true.
+                write(luscn,"('Mark5A piggyback mode turned ON')")
+                km5A_piggy = .true.
+                if(km5P_piggy) then
+                   write(luscn,"('Mark5P piggyback mode turned OFF')")
+                   km5P_piggy=.false.
+                endif
               endif
+          ELSE IF (IFUNC.EQ.14) THEN
+              if (km5P_piggy) then
+                write(luscn,"('Mark5P piggyback mode turned OFF')")
+                km5P_piggy = .false.
+              else
+                write(luscn,"('Mark5P piggyback mode turned ON')")
+                km5P_piggy = .true.
+                if(km5A_piggy) then
+                   write(luscn,"('Mark5A piggyback mode turned OFF')")
+                   km5A_piggy=.false.
+                endif
+
+              endif
+
 C             CALL PROCS(1) ! Mark III backend procedures OR known equipment
 C         ELSE IF (IFUNC.EQ.13) THEN
 C             CALL PROCS(2) ! VLBA backend procedures

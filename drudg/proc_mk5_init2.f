@@ -12,6 +12,7 @@
       integer idrate
       character*5 lform        !Rack discriptor
       character*50 ldum
+      integer itemp
 
       ierr=0
 
@@ -30,8 +31,15 @@
 
       write(ldum,'("mk5=play_rate=data:",i4)') idrate
       call squeezewrite(lufile,ldum)
-      write(ldum,'("mk5=mode=",a,":",i2,";")')lform,ntrack_rec_mk5
+
+      if(km5a_piggy) then
+         itemp=32
+      else
+         itemp=ntrack_rec_mk5
+      endif
+      write(ldum,'("mk5=mode=",a,":",i2,";")')lform,itemp
       call squeezewrite(lufile,ldum)
+
       write(lufile,'("bank_check")')
       end
 

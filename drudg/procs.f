@@ -309,8 +309,9 @@ C     integer nspd
       character*80 cbuf
       equivalence (cbuf,ibuf)
       integer itemp                     !Short lived variable.
-      integer num_sub_pass                !number of passes we loop on.
+      integer num_sub_pass              !number of passes we loop on.
                                         !For mark5 mode this is 1. For other recorders is npassf
+      Character*2 lgrp                !V0, V1,  ..etc.
 
       data im5chn_vec/
      >2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,
@@ -482,7 +483,7 @@ C    for procedure names.
 c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
             kpiggy_km3mode =km3mode  !2hd mk3 on mk5  !------2hd---
 
-            if(kmk5_piggyback)kpiggy_km3mode=.false.  !------2hd---
+            if(km5P_piggy)kpiggy_km3mode=.false.  !------2hd---
             if(km5) kpiggy_km3mode= .false.           !no piggyback for Mark5
 
 c.. also no pig if 2nd head is set-----------------------2hd---
@@ -490,6 +491,14 @@ c.. also no pig if 2nd head is set-----------------------2hd---
             do i=2,33
               if (itrk(i,2) .eq. 1)kallow_pig=.false.
             enddo
+            if((km5A_piggy .or. km5P_piggy) .and. .not. kallow_pig) then
+               write(luscn,'(a)')
+     >          "PROCS11 - 2nd headstack not allowed in piggyback mode!"
+               if(km5A_piggy) write(luscn,'("Mark5A piggyback is on")')
+               if(km5P_piggy) write(luscn,'("Mark5P piggyback is on")')
+               return
+            endif
+
 C Find out if any channel is LSB, to decide what procedures are needed.
             klsblo=.false.
             DO ichan=1,nchan(istn,icode) !loop on channels
@@ -498,7 +507,7 @@ C Find out if any channel is LSB, to decide what procedures are needed.
      >         klsblo=.true.
             enddo
 
-          if(km5 .or. km5p) then
+          if(km5 .or. km5p .or. km5A_piggy .or. km5P_piggy) then
              ifan_fact=max(1,ifan(istn,icode))
              call find_num_chans_rec(itras(1,1,1,1,ipass,istn,icode),
      >            ifan_fact,num_chans_obs,num_tracks_rec_mk5)
@@ -508,7 +517,6 @@ C Find out if any channel is LSB, to decide what procedures are needed.
      >          "Tried to record: ",num_chans_obs*ifan_fact
                  return
              endif
-
              call proc_mk5_init1(num_chans_obs,num_tracks_rec_mk5,
      >            luscn,ierr)
              if(ierr .ne. 0) return
@@ -617,8 +625,7 @@ C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
             do ipig=1,2 ! twice for piggyback
               if (ipig.eq.1.or.
      >           (ipig .eq. 2 .and. km4rack .and.
-     >             ((km5_piggyback .and. kallow_pig) .or.
-     >              (km5prec(irec) .and. km4rack   )) ))  then
+     >           (km5P_piggy.or.km5A_piggy.or.km5prec(irec)))) then
 C               use second headstack for Mk5
 C         copy of the track table in itrk2
                 do i=1,max_track
@@ -630,64 +637,83 @@ C         copy of the track table in itrk2
 ! ...find marked groups and zero them in 2nd copy of track table, put "V0" etc as appropriate.
                 if(ipig .eq. 1) then
                   NCH = ichmv_ch(IBUF,1,'TRACKS=')
-                  call ChkGrpAndZeroWrite(itrk, 2,16,1,'V0',
-     >              itrk2,kgrp0,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk, 3,17,1,'V1',
-     >              itrk2,kgrp1,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk,18,32,1,'V2',
-     >              itrk2,kgrp2,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk,19,33,1,'V3',
-     >               itrk2,kgrp3,ibuf,nch)
-              else if(ipig .eq. 2) then
+                else if(ipig .eq. 2) then
                   NCH = ichmv_ch(IBUF,1,'TRACKS=*,')
-                  call ChkGrpAndZeroWrite(itrk, 2,16,1,'V4',
-     >               itrk2,kgrp0,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk, 3,17,1,'V5',
-     >               itrk2,kgrp1,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk,18,32,1,'V6',
-     >               itrk2,kgrp2,ibuf,nch)
-                  call ChkGrpAndZeroWrite(itrk,19,33,1,'V7',
-     >               itrk2,kgrp3,ibuf,nch)
-              endif
+                endif
+                if(ipig .eq. 1) then
+                  lgrp="V0"
+                else
+                  lgrp="V4"
+                endif
+                call ChkGrpAndWrite(itrk2,2,16,1,lgrp,kgrp0,ibuf,nch)
+
+                if(ipig .eq. 1) then
+                  lgrp="V1"
+                else
+                  lgrp="V5"
+                endif
+                call ChkGrpAndWrite(itrk2, 3,17,1,lgrp,kgrp1,ibuf,nch)
+
+                if(ipig .eq. 1) then
+                  lgrp="V2"
+                else
+                  lgrp="V6"
+                endif
+                call ChkGrpAndWrite(itrk2,18,32,1,lgrp,kgrp2,ibuf,nch)
+                if(ipig .eq. 1) then
+                  lgrp="V3"
+                else
+                  lgrp="V7"
+                endif
+                call ChkGrpAndWrite(itrk2,19,33,1,lgrp,kgrp3,ibuf,nch)
 ! head2
-              call ChkGrpAndZeroWrite(itrk, 2,16,2,'V4',
-     >             itrk2,kgrp4,ibuf,nch)
-              call ChkGrpAndZeroWrite(itrk, 3,17,2,'V5',
-     >             itrk2,kgrp5,ibuf,nch)
-              call ChkGrpAndZeroWrite(itrk,18,32,2,'V6',
-     >             itrk2,kgrp6,ibuf,nch)
-              call ChkGrpAndZeroWrite(itrk,19,33,2,'V7',
-     >             itrk2,kgrp7,ibuf,nch)
+                call ChkGrpAndWrite(itrk2, 2,16,2,'V4', kgrp4,ibuf,nch)
+                call ChkGrpAndWrite(itrk2, 3,17,2,'V5', kgrp5,ibuf,nch)
+                call ChkGrpAndWrite(itrk2,18,32,2,'V6', kgrp6,ibuf,nch)
+                call ChkGrpAndWrite(itrk2,19,33,2,'V7', kgrp7,ibuf,nch)
 
 c.. do  m0-m3
-              if(ipig .eq. 1) then
-                if(.not.kgrp0) call ChkGrpAndZeroWrite(itrk,
-     >                   4, 16,1,'M0', itrk2,kgrp0,ibuf,nch)
-                if(.not.kgrp1) call ChkGrpAndZeroWrite(itrk,
-     >                   5, 17,1,'M1', itrk2,kgrp1,ibuf,nch)
-                if(.not.kgrp2) call ChkGrpAndZeroWrite(itrk,
-     >                   18,30,1,'M2', itrk2,kgrp2,ibuf,nch)
-                if(.not.kgrp3) call ChkGrpAndZeroWrite(itrk,
-     >                   19,31,1,'M3', itrk2,kgrp3,ibuf,nch)
-              else if(ipig .eq. 2) then
-                if(.not.kgrp0) call ChkGrpAndZeroWrite(itrk,
-     >                   4, 16,1,'M4', itrk2,kgrp0,ibuf,nch)
-                if(.not.kgrp1) call ChkGrpAndZeroWrite(itrk,
-     >                   5, 17,1,'M5', itrk2,kgrp1,ibuf,nch)
-                if(.not.kgrp2) call ChkGrpAndZeroWrite(itrk,
-     >                   18,30,1,'M6', itrk2,kgrp2,ibuf,nch)
-                if(.not.kgrp3) call ChkGrpAndZeroWrite(itrk,
-     >                   19,31,1,'M7', itrk2,kgrp3,ibuf,nch)
-              endif
+               if(.not.kgrp0) then
+                 if(ipig.eq.1) then
+                   lgrp="M0"
+                 else
+                   lgrp="M4"
+                 endif
+                 call ChkGrpAndWrite(itrk2,4,16,1,lgrp,kgrp0,ibuf,nch)
+               endif
+               if(.not.kgrp1) then
+                 if(ipig.eq.1) then
+                   lgrp="M1"
+                 else
+                   lgrp="M5"
+                 endif
+                 call ChkGrpAndWrite(itrk2,5,17,1,lgrp,kgrp1,ibuf,nch)
+               endif
+               if(.not.kgrp2) then
+                 if(ipig.eq.1) then
+                   lgrp="M2"
+                 else
+                   lgrp="M6"
+                 endif
+                 call ChkGrpAndWrite(itrk2,18,30,1,lgrp,kgrp2,ibuf,nch)
+               endif
+               if(.not.kgrp3) then
+                  if(ipig.eq.1) then
+                    lgrp="M3"
+                  else
+                    lgrp="M7"
+                  endif
+                  call ChkGrpAndWrite(itrk2,19,31,1,lgrp,kgrp3,ibuf,nch)
+               endif
 ! 2nd head
-              if(.not.kgrp4) call ChkGrpAndZeroWrite(itrk,
-     >                   4, 16,2,'M4', itrk2,kgrp4,ibuf,nch)
-              if(.not.kgrp5) call ChkGrpAndZeroWrite(itrk,
-     >                   5, 17,2,'M5', itrk2,kgrp5,ibuf,nch)
-              if(.not.kgrp6) call ChkGrpAndZeroWrite(itrk,
-     >                   18,30,2,'M6', itrk2,kgrp6,ibuf,nch)
-              if(.not.kgrp7) call ChkGrpAndZeroWrite(itrk,
-     >                   19,31,2,'M7', itrk2,kgrp7,ibuf,nch)
+              if(.not.kgrp4)
+     >           call ChkGrpAndWrite(itrk2, 4,16,2,'M4',kgrp4,ibuf,nch)
+              if(.not.kgrp5)
+     >           call ChkGrpAndWrite(itrk2, 5,17,2,'M5',kgrp5,ibuf,nch)
+              if(.not.kgrp6)
+     >           call ChkGrpAndWrite(itrk2,18,30,2,'M6',kgrp6,ibuf,nch)
+              if(.not.kgrp7)
+     >           call ChkGrpAndWrite(itrk2,19,31,2,'M7',kgrp7,ibuf,nch)
 
 C  Now pick up leftover tracks that didn't appear in a whole group
 C  and list each one separately.
@@ -967,17 +993,17 @@ C     .            ' supported for Mark IV formatters.')
           endif
           endif ! kv4rack.or.kvrack or km3rac.or.km4rack but not S2 or K4
 
-          if(km5) then
-!             write(lu_outfile,'(!+2s)')
+          if(km5 .or. km5A_piggy) then
+!            write(lu_outfile,'(!+2s)')
              call proc_mk5_init2(ifan(istn,icode),
-     >             samprate(1),num_tracks_rec_mk5,luscn,ierr)
+     >             samprate(icode),num_tracks_rec_mk5,luscn,ierr)
               if(ierr .ne. 0) return
           endif
 
 C  FORM=RESET
           if (km3rack.and..not.ks2rec(irec).and. .not.
      >         (km5rec(irec) .or.
-     >          (km5prec(irec) .and. .not. kmk5_piggyback))) then
+     >          (km5prec(irec) .and. .not. km5P_piggy))) then
             write(lu_outfile,'(a)') 'form=reset'
           endif
 C  !*
@@ -1051,47 +1077,43 @@ C  Remember that tracks are VLBA track numbers in itrk.
                 itrk2(i,1)=itrk(i,1)
               enddo
 ! check if group g1 is present. If so, write it out.
-              call ChkGrpAndZeroWrite(itrk, 4,16,1,'G1',
-     >             itrk2,kgrp1,ibuf,nch)
-               if(kgrp1) then
-                  if (itrka.eq.0.and.itrkb.eq.0) then
-                    itrka=3 ! Mk3 track number
-                    itrkb=5
-                  endif
-               endif
+              call ChkGrpAndWrite(itrk2,4,16,1,'G1',kgrp1,ibuf,nch)
+              if(kgrp1) then
+                 if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=3 ! Mk3 track number
+                  itrkb=5
+                 endif
+              endif
 ! ditto fo g2
-               call ChkGrpAndZeroWrite(itrk, 5,17,1,'G2',
-     >             itrk2,kgrp2,ibuf,nch)
-               if(kgrp2) then
-                  if (itrka.eq.0.and.itrkb.eq.0) then
-                    itrka=4
-                    itrkb=6
-                  else
-                    itrkb=6
-                  endif
-               endif
+              call ChkGrpAndWrite(itrk2, 5,17,1,'G2',kgrp2,ibuf,nch)
+              if(kgrp2) then
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=4
+                  itrkb=6
+                else
+                  itrkb=6
+                endif
+              endif
 ! ... for g3
-               call ChkGrpAndZeroWrite(itrk, 18,30,1,'G3',
-     >               itrk2,kgrp3,ibuf,nch)
-               if(kgrp3) then
-                  if (itrka.eq.0.and.itrkb.eq.0) then
-                    itrka=17
-                    itrkb=19
-                  else
-                    itrkb=19
-                  endif
-               endif
+              call ChkGrpAndWrite(itrk2, 18,30,1,'G3',kgrp3,ibuf,nch)
+              if(kgrp3) then
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=17
+                  itrkb=19
+                else
+                  itrkb=19
+                endif
+              endif
 
-               call ChkGrpAndZeroWrite(itrk, 19,31,1,'G4',
-     >               itrk2,kgrp4,ibuf,nch)
-               if(kgrp4) then
-                  if (itrka.eq.0.and.itrkb.eq.0) then
-                    itrka=18
-                    itrkb=20
-                  else
-                    itrkb=18
-                  endif
-               endif
+              call ChkGrpAndWrite(itrk2, 19,31,1,'G4',kgrp4,ibuf,nch)
+              if(kgrp4) then
+                if (itrka.eq.0.and.itrkb.eq.0) then
+                  itrka=18
+                  itrkb=20
+                else
+                  itrkb=18
+                endif
+              endif
 C         Then list any  tracks still left in the table.
               do i=4,31 ! pick up leftover Mk3 tracks not in a whole group
                 if (itrk2(i,1).eq.1) then ! Mark3 numbering
@@ -2094,7 +2116,7 @@ C
             call writf_asc(lu_outfile,ierr,ibuf,(nch+1)/2)
             do ipig=1,2 ! twice through for piggyback mode
             if (ipig.eq.1.or.(ipig.eq.2 .and. km4rack .and.
-     >              (kmk5_piggyback .or. km5prec(ir)))) then
+     >          (km5A_piggy .or.km5P_piggy .or. km5prec(ir)))) then
 C                 use second headstack for Mk5
               if (ipig.eq.2) then ! initialize buffer
                  call ifill(ibuf,1,ibuflen,oblank)
@@ -2193,7 +2215,7 @@ C trackform=107,9us,111,10us,115,11us,119,12us,123,13us,127,14us
                   endif
                 enddo ! bits
               enddo ! sidebands
-      enddo !2hd loop on hedzz
+          enddo !2hd loop on hedzz
             enddo ! loop on channels
             if (ib.ne.0) then ! final line
               nch=nch-1

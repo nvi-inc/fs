@@ -8,6 +8,7 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+      include 'hardware.ftni'
 C
 C History
 C 970225 nrv New. Copied from snapintr.
@@ -55,22 +56,24 @@ C
       nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
       call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
 
-      CALL IFILL(IBUF2,1,iblen,32)
-      nch = 0
-      NCH = ichmv_ch(IBUF2,1,'"< ')
-      nch = ichmv(ibuf2,nch,lstrack(1,istn),1,8)
-      NCH = ichmv_ch(IBUF2,nch,' rack >')
-      NCH = ichmv_ch(IBUF2,nch,'< ')
-      nch = ichmv(ibuf2,nch,lstrec(1,istn),1,8)
-      NCH = ichmv_ch(IBUF2,nch,' recorder 1> ')
-      if (nrecst(istn).eq.2) then
-        NCH = ichmv_ch(IBUF2,nch,'< ')
-        nch = ichmv(ibuf2,nch,lstrec2(1,istn),1,8)
-        NCH = ichmv_ch(IBUF2,nch,' recorder 2 >')
+      write(lu_outfile,'(5a,$)')
+     >   '"< ',cstrack(istn),' rack >< ',cstrec(istn), ' recorder 1>'
+      if(nrecst(istn) .eq. 2) then
+        write(lu_outfile,'("< ",a," recorder 2>")') cstrec2(istn)
+      else
+        write(lu_outfile, '(a)')
       endif
-      call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+
+      if(km5A_piggy) then
+        write(lu_outfile,90) "   Mark5A operating in piggyback mode."
+      endif
+      if(km5P_piggy) then
+        write(lu_outfile,90) "   Mark5P operating in piggyback mode."
+      endif
 
       CALL writf_asc_ch(LU_OUTFILE,kERR,'enddef')
+
+90    format('"',a,'"')
 C
       RETURN
       END

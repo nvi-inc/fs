@@ -16,8 +16,7 @@
       endif
 
       if(km5) then
-        write(luFile,'(a)') 'disc_start=on'
-        if (km5_piggyback) write(luFile,'(a)') 'disc_start=on'
+        write(luFile,'("disc_start=on")')
       else if(kk4) then
         write(luFile,"(a,'=record')") lpre(1:npre)       !stX=record, where X is optional "1" or "2"
       else
@@ -29,6 +28,7 @@
 ! lspeed ch is ascii version of speed, calculated in snap_calc_speed.
         write(luFile,'(a,a,a)') lpre(1:npre),lmid,lspeed(1:nspdCh)
       endif
+      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disc_start_on")')
 
       krunning=.true.           !turn on running flag.
 

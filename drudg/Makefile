@@ -48,8 +48,8 @@ PROGRAM = drudg
 # Set objects
 #
 DROBS=\
-$(DR)chkgrpandzero.o $(DR)counter_init.o \
-$(DR)find_num_chans_rec.o \
+$(DR)chkgrpandwrite.o $(DR)counter_init.o \
+$(DR)find_num_chans_rec.o $(DR)find_recorder_speed.o\
 $(DR)kcheckgrpor.o $(DR)init_hardware_common.o\
 $(DR)name_trkf.o \
 $(DR)proc_exper_initi.o $(DR)proc_mk5_init1.o $(DR)proc_mk5_init2.o\

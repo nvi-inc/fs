@@ -5937,3 +5937,12 @@ Version 9.6.0 030506
            remove use of "ps"
 
 Version 9.6.1 030508
+
+030512 WEH quikr/wx.f
+           clib/fsmet.c
+           fix error codes
+
+030514 WEH quikr/bank_check.c
+           assume non MK5 drives have MK5A_BS in piggyback
+
+Version 9.6.2 030515

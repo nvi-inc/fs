@@ -39,8 +39,8 @@ C
 	double precision RA50,DEC50
         real rlabsize
 c
-	logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
-     .          kprepass,kdr_type,kmk5_piggyback,kgeo,kpostpass
+      logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
+     .          kprepass,kdr_type,kgeo,kpostpass
 c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
@@ -66,7 +66,7 @@ c
 C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
-     .       kdrg_infile,kprepass,kdr_type,kmk5_piggyback,kgeo,
+     .       kdrg_infile,kprepass,kdr_type,kgeo,
      .       kpostpass,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
