@@ -115,9 +115,6 @@ Version 9.0.8  951208
 951110 WEH include/fscom_dum.i
            fixed sterp location in common
 
-951207 WEH lnfch/iscn_ch.f
-           corrected character position to "i+j-1"
-
 951102 WEH quikr/hdata.f
            for vlba2 recorder support
 
@@ -250,14 +247,403 @@ Version 9.0.8  951208
 951207 WEH st.default/sched/v2hdcal.snp
            adjust timings for slow start of rec= command
 
+951207 WEH lnfch/iscn_ch.f
+           corrected character position to "i+j-1"
+
 951213 WEH clib/get_vatod.c
            change VLBA2 conversion factor to .4mv/bit
 
 951213 WEH quikr/pkhd.f
            use vlt_read to get position, not get_atod
 
+951213 WEH quikr/lchd.f
+           use vlt_read to get position, not get_atod
+
 951213 WEH st.default/sched/v2hdcal.snp
            add rec=load at start in case of manual loading
            increase peak threshold to .25 volts to be safer
 
-Version 9.0.9 951213 
+Version 9.0.9 951213
+
+951210 WEH fclib/fc_cshm_init.c
+           created for c common area initialization without requiring
+             fs_set_*() for that purpose only
+
+951210 WEH clib/cshm_init.c
+           created for c common area initialization without requiring
+             fs_set_*() for that purpose only
+
+951210 WEH clib/bs2code.c
+           created "Bit-Stream" to sampler code conversion
+
+951210 WEH fclib/Makefile
+           added new routines
+
+951210 WEH quikv/trkfrm.c
+           created new trackform command
+
+951210 WEH quikv/tracks.c
+           created new tracks command
+
+951210 WEH quikv/tracks_dis.c
+           created new trcaks command
+
+951211 WEH quikr/pass.f
+           move posnhd to fsdum/C shared memory area
+
+951211 WEH quikr/stack.f
+           move posnhd to fsdum/C shared memory area
+
+951211 WEH quikr/lvdt.f
+           move posnhd to fsdum/C shared memory area
+
+951211 WEH chekr/hdchk.f
+           move posnhd to fsdum/C shared memory area
+
+951212 WEH include/vst_ds.h
+           add actual speed in centi-inches per second
+
+951212 WEH quikv/vst.c
+           store speed in 'cips'
+ 
+951212 WEH fslb/ifmed.f
+           add protection for out of bounds rates
+
+951213 WEH chekr/vformchk.c
+           deleted AUX data references
+
+951213 WEH chekr/vform_brk.c
+           deleted AUX data references
+           compare sampler codes for mode verification
+
+951214 WEH quikv/bit_density.c
+           created new bit_density command
+
+951214 WEH quikv/bit_density_dis.c
+           created new bit_density command
+
+951214 WEH clib/bit_density_util.c
+           created new bit_density command
+
+951214 WEH quikv/vform.c
+           delete AUX data references
+           add support for fan and barrel-rolling
+
+951214 WEH quikv/vform_dis.c
+           delete AUX data references
+           add support for fan and barrel-rolling
+
+951214 WEH clib/vform_util.c
+           delete AUX data references
+           add support for fan and barrel-rolling
+
+951214 WEH quikv/vst_dis.c
+           report cips
+
+951214 WEH include/fscom_quik.i
+           moved rdhd_fs to fscom_init
+           moved wrhd_fs, posnhd to fscom_dum/C
+
+951214 WEH include/fscom_init.i
+           get rdhd_fs from fscom_quik
+
+951214 WEH include/fscom_dum.i
+           added wrhd_fs and posnhd
+
+951214 WEH include/fscom.h
+           added wrhd_fs and posnhd
+
+951214 WEH fslb/vlt2mic.f
+           adjusted conversion for VLBA odd/even-ness being opposite of M3
+
+951214 WEH include/vform_ds.h
+           added smapler codes, fan, barrel and "last" use variables
+
+951215 WEH quikv/trkfrm_dis.c
+           created new trackform command
+
+951215 WEH clib/trkfrm_util.c
+           created new trackform command
+
+951215 WEH clib/tracks_util.c
+           created new tracks command
+
+951215 WEH quikr/ena.f
+           must allow odd *and* even with odd *or* even head
+            so mode A will work
+
+951219 WEH quikr/mezhr.f
+           handle VLBA2 drive equalizer set-up for rates
+
+951219 WEH quikr/lodis.f
+           expand field-width for mm freqs, this is temporary will
+             require double float and new formatting to be correct
+
+951219 WEH quikr/onofc.f
+           fix interation uper limit to agree with documentation
+
+951219 WEH quikr/rdoff.f
+           fixed raoff formatting
+
+951219 WEH quikv/quikv.c
+           added calls for new commands tracks, trackform, bit_density,
+             and systracks
+
+951219 WEH control/fscmd.ctl
+           added entries for new commands tracks, trackform, bit_density,
+             and systracks
+
+951219 WEH include/systracks_ds.h
+           created
+
+951219 WEH include/fs_types.h
+           added systracks_ds.h
+
+951219 WEH quikv/Makefile
+           updated for new routines
+
+951219 WEH clib/Makefile
+           updated for new routines
+
+951219 WEH clib/tape_util.c
+           removed debug output
+
+951219 WEH clib/systracks_util.c
+           new command systracks
+
+951219 WEH quikv/systracks_dis.c
+           new command systracks
+
+951219 WEH quikv/systracks.c
+           new command systracks
+
+951219 WEH clib/venable_util.c
+           switch to VLBA group numbers and respect odd/even wrhd_fs
+
+951219 WEH clib/dqa_util.c
+           use bit stream names instead of bbc channels for display
+
+951219 WEH quikv/dqa_dis.c
+           remove use of itrk2bbc, add systrack support, use VLBA track
+             numbers
+
+951219 WEH clib/vst_util.c
+           use cips internally and for display, accept 133.33 and 266.66 input
+           use bit_density and formatter tape clock for default
+
+951219 WEH clib/vrepro_util.c
+           use VLBA track numbers and respect odd/even wrhd_fs
+
+951219 WEH newlb/prog.c
+           add set and/or get for posnhd, cips, ichsystracks, rack_type,
+             wrhd_fs, vfm_xpnt, vrepromode
+
+951219 WEH include/fscom.h
+           add cips, bit_density, rack_type, systracks check, vfm_xpnt
+
+951219 WEH chekr/rec_brk.c
+           use cips instead of speed
+
+951220 WEH clib/et_v.c
+           set cips
+
+951220 WEH quikv/rec.c
+           use maxtpspd instead of skdtpspd
+           set cips
+           set idirtp correctly
+
+951220 WEH clib/rwff_v.c
+           set cips
+
+951220 WEH quikr/mic2vlt.f
+           adjust position for odd/even VLBA head
+
+951220 WEH include/fscom_dum.i
+           add cips, ichsystracks, rack_type, vfm_xpnt, vrepromode
+
+951220 WEH quikr/party.f
+           adjusted for VLBA track numbers and odd/even VLBA head
+
+951221 WEH control/fserr.ctl
+           new error messages for new and modified commands added
+
+951221 WEH quikr/hdcalc.f
+           respect VLBA head odd/even
+           formatting changed for VLBA2
+
+951221 WEH quikr/locate.f
+           use cips
+           formatting changed for VLBA2
+
+951221 WEH quikr/savev.f
+           formatting changed for VLBA2
+
+951221 WEH quikr/peak.f
+           use cips
+           formatting changed for VLBA2
+
+951221 WEH incom/sincom.f
+           VLBAG rack recongnized
+           rack_type, ichsystrack initialized
+           vfm_xpnt a/d dsm parsed
+           wrhd_fs moved to fscom-dum/C
+
+951222 WEH boss/newlg.f
+           change head scale precison for VLBA2
+           change refreq formating
+           report vlbag rack type
+           report a/d to dsm xpnt switch type
+
+951222 WEH headp/headp.f
+           get wrhd_fs from fscom_dum/C
+           change scale precision, comment for VLBA2
+
+951222 WEH clib/vform_util.c
+           add m, v, c1, c2, b1, and b2 modes
+           utilize trackform table
+           utilize tracks formatter track enable table
+           support odd/even VLBA head mapping
+           remove DQA channel and AUX data specification
+           add 16 and 32 MHz sample rates
+           change format specified for M3 to 0x8002 for rev 2.4 per G. Peck
+           calculate tape clock from sample rate and fan mode
+           remove aux data references
+           set serial status register 0xA6 for VLBA mode
+           set serial status register 0xA7 for VLBA mode
+           set odd & even track from M3 modes dX
+           remove "need_config" function
+
+951222 WEH quikv/vform.c
+           add "configure" option
+           if version number reading fails quit after parsing so that
+             tape_clock has be calculated for use in st=
+ 
+951222 WEH monit/mout2.c
+           respect new fm modes and rates
+           use cips
+
+951222 WEH st.default/sched/3vhdcal.snp
+           use 135 ips
+           use vlba track numbers
+
+951222 WEH st.default/sched/v2hdcal.snp
+           use 135 ips
+           use vlba track numbers
+
+951222 WEH st.default/sched/vhdcal.snp
+           use 135 ips
+           use vlba track numbers
+
+951228 WEH Makefile
+           version 10
+           remove drutils and add skdrutils
+
+951228 WEH logex/readl.f
+           fix pasrsing of source name in summary mode
+
+951228 WEH st.default/proc/vstation.prc
+           update for VLBA track/group numbers
+           change pass/form order in set-up procedures
+           add bit_density and systracks=
+
+951228 WEH clib/itrk2bbc.c
+           deleted
+
+951228 WEH clib/Makefile
+           removed itrk2bbc.o reference
+
+951228 WEH control/fserr.ctl
+           fix parity track error messages for VLBA
+           fix upper limit for onoff iteration count
+
+951228 WEH st.default/sched/hdcal.snp
+           use 135 ips
+
+951229 WEH Makefile
+           removed drutils, added skdrut
+
+951229 WEH headp/headp.f
+           change label for tolerance for VLBA2
+
+951229 WEH clib/vform_util.c
+           returned mode default to "b"
+
+960103 WEH clib/bit_density_util.c
+           error for negative AND zero values
+
+960103 WEH quikv/bit_density.c
+           use "vd" as error code
+
+960103 WEH quikr/lvdt.f
+           increase VLBA2 monitor field width to 7
+
+960103 WEH st.default/sched/hdcal.snp
+           updated version date
+
+960104 WEH st.default/proc/vstation.prc
+           changed to use "alt2" equalizer for double speed
+           use "*" for all repro parameters dqaodd/even
+
+960104 WEH st.default/proc/v2station.prc
+           created for VLBA2 drive systems
+
+960104 WEH st.default/proc/3vstation.prc
+           created for M3/VLBA hybrid systems
+
+960105 WEH clib/vst_util.c
+           changed to handle both 120.00 and 135.00 and double speed versions
+
+960105 WEH control/fserr.ctl
+           changed vs -202 error message for speeds
+
+960111 NRV drudg/*.f
+           Numerous changes to support FS9.1. Routines proc.f, sread.f,
+           and snap.f had the most extensive changes. Routine trkall.f is new.
+
+960111 NRV skdrut/*.f, *.c
+           New versions of many utility routines that read the schedule
+           file. This subdirectory replaces "drutils".
+
+960116 WEH antcn/antcn.c
+           fixed classr/nrecr initialization error
+
+960116 WEH st.default/st-0.0.0/antcn/antcn.c
+           fixed classr/nrecr initialization error
+
+960116 WEH control/fserr.ctl
+           removed "ALL" from list of possible TPI parameters
+
+960116 WEH clib/vst_util.c
+           accept M3 real speeds as well as 0.01 ips resolution versions
+
+960117 WEH st.default/proc/station.prc
+           remove 2 MHz equalizer specification in some repro commands
+             for single speed
+
+960117 WEH st.default/proc/3vstation.prc
+           remove 2 MHz equalizer specification in some repro commands
+             for single speed
+
+960118 WEH misc/change
+           created
+
+960118 WEH st.default/proc/vstation.prc
+           remove bbc15 commands from "setup"
+           changes all 120 ips to 135
+
+960118 WEH st.default/proc/v2station.prc
+           remove bbc15 commands from "setup"
+           changes all 120 ips to 135
+
+960118 WEH st.default/proc/3vstation.prc
+           changes all 120 ips to 135
+
+960118 WEH st.default/proc/station.prc
+           changes all 120 ips to 135
+
+960122 WEH help/*
+           updated for new version
+
+Version 9.1.0 960122
+
+

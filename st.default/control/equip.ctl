@@ -9,8 +9,8 @@
 60      Receiver 70K Stage Check Temperature
 20      Receiver 20K Stage Check Temperature
 *  VLBI equipment
-mk3     type of rack (MK3, VLBA, or MK4) 
-mk3     type of recorder (MK3, VLBA, or MK4)
+mk3     type of rack (mk3, vlba, vlbag, or mk4)
+mk3     type of recorder (mk3, vlba, vlba2, or mk4)
 101     Hardware ID for VLBA rack (assigned by GSFC)
 *
 10.0    vacuum level (inches)
@@ -24,3 +24,5 @@ mk3     type of recorder (MK3, VLBA, or MK4)
 *
  500.10 IF3 LO Frequency
    3    hex mask indicating which IF3 switches are installed, sw N ~ 2^(N-1)
+*
+  a/d   VLBA formatter cross-point switch (a/d or dsm)
