@@ -44,34 +44,34 @@ long ip[5];
          memcpy(&lclc,&shm_addr->dqa,sizeof(lclc)); 
 	 ivalue=shm_addr->vrepro.track[0];
 	 lclm.a.track=ivalue;
-	 if(ivalue <2)
+	 if(-1 < ivalue && ivalue <2)
 	   ivalue=shm_addr->systracks.track[ivalue];
-	 else if (ivalue > 33)
+	 else if (33 < ivalue && ivalue < 36 )
 	   ivalue=shm_addr->systracks.track[ivalue-32];
-	 if(ivalue <2 || ivalue > 33)
+	 if(ivalue < 2 || 33 < ivalue)
 	   ifm=-1;
 	 else if(ivalue%2==0)
 	   ifm=15+ivalue/2;
 	 else
 	   ifm=(ivalue-3)/2;
-	 if(ifm>0)
+	 if(ifm>=0)
 	   lclm.a.bbc=shm_addr->vform.codes[ifm];
 	 else
 	   lclm.a.bbc=-1;
 
 	 ivalue=shm_addr->vrepro.track[1];
 	 lclm.b.track=ivalue;
-	 if(ivalue <2)
+	 if(-1 < ivalue && ivalue < 2)
 	   ivalue=shm_addr->systracks.track[ivalue];
-	 else if (ivalue > 33)
+	 else if (33 < ivalue && ivalue < 36)
 	   ivalue=shm_addr->systracks.track[ivalue-32];
-	 if(ivalue <2 || ivalue > 33)
+	 if(ivalue < 2 || 33 < ivalue)
 	   ifm=-1;
 	 else if(ivalue%2==0)
 	   ifm=15+ivalue/2;
 	 else
 	   ifm=(ivalue-3)/2;
-	 if(ifm>0)
+	 if(ifm>=0)
 	   lclm.b.bbc=shm_addr->vform.codes[ifm];
 	 else
 	   lclm.b.bbc=-1;
