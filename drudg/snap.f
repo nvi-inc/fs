@@ -49,6 +49,8 @@ c     integer itrax(2,2,max_chan) ! fanned-out version of itras
       double precision RA,DEC,TJD,RAH,DECD,RADH,DECDD
       logical kcont ! true for CONTINUOUS recording
       logical kadap ! true for ADAPTIVE recording in VEX file
+      logical kcontpass ! true if a pass is actually continuous
+C                         even though the tape_motion_type is adaptive
       logical krec_append ! true to append '1' or '2' to rec commands
       real az,el,x30,y30,x85,y85,ha1,dc
       character*4  response
@@ -284,6 +286,8 @@ C            Postpass flag is set true for astro VEX schedules as default.
 C 021011 nrv Add one more digit to output of RA seconds.
 C 021014 nrv Change LSPIN and TSPIN "seconds" argument to real.
 C 021017 nrv Use FSPIN for superfast tape spinning.
+C 021021 nrv If last pass of a tape scheduled as ADAPTIVE is actually 
+C            continuous, then don't need to postpass.
 C
 C
       iblen = ibuf_len*2
@@ -645,12 +649,14 @@ C This is restricted to "adaptive" coming from VEX files.
               idt = isecdif(idayr_next,ihr_next,imin_next,isc_next,
      .                  idayr7,ihr7,min7,isc7)
               ket = idt.gt.itgap(istn)
+              if (ket) kcontpass = .false. ! this pass not continuous
 C             Use the offsets instead of slewing to determine good data time
 C             time5 = data start = tape start + offset
               call tmadd(iyr1,idayr1,ihr1,iimin1,isc1,ioff(istnsk),
      .                 iyr5,idayr5,ihr5,min5,isc5)
             else ! new direction, must stop
               ket = .true.
+              kcontpass = .true. ! reset to true at start of a new pass
             endif ! same/new direction
           else ! no next
             ket = .true.
@@ -912,22 +918,26 @@ C Unload old tape
                   TSPINS=0.0
                 endif ! enough to spin
               else ! postpass thin tape
-                CALL IFILL(IBUF2,1,iblen,32)
-                TSPINS=FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
-                CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use_old,
-     .          nrecst(istn),  krec_append)
-                call hol2lower(ibuf2,(nch+1))
-                call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
-                CALL IFILL(IBUF2,1,iblen,32)
-                nch = ichmv_ch(IBUF2,1,'!+5s ')
-                call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
-                TSPINS=FSPIN(maxtap(istn),ISPM,SPS)
-                CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use_old,
-     .          nrecst(istn),  krec_append)
-                call hol2lower(ibuf2,(nch+1))
-                call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
-                kspin = .true. !Just wrote a FASTx command
-                TSPINS=0.0
+                if (iftold.lt.200.and.kcontpass) then ! tape is near BOT and
+C                    the last pass was continuous, so don't need to postpass
+                else ! postpass
+                  CALL IFILL(IBUF2,1,iblen,32)
+                  TSPINS=FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
+                  CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use_old,
+     .            nrecst(istn),  krec_append)
+                  call hol2lower(ibuf2,(nch+1))
+                  call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+                  CALL IFILL(IBUF2,1,iblen,32)
+                  nch = ichmv_ch(IBUF2,1,'!+5s ')
+                  call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+                  TSPINS=FSPIN(maxtap(istn),ISPM,SPS)
+                  CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use_old,
+     .            nrecst(istn),  krec_append)
+                  call hol2lower(ibuf2,(nch+1))
+                  call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
+                  kspin = .true. !Just wrote a FASTx command
+                  TSPINS=0.0
+                endif ! not needed/postpass
               endif ! spin down/postpass
             END IF 
             if (krunning) then ! stop continuous tape
@@ -1524,19 +1534,23 @@ C
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif ! stop it first
         if (maxtap(istn).gt.10000.and.kpostpass) THEN ! postpass last thin tape
-          TSPINS = FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
-          CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
-     .    krec_append)
-          call hol2lower(ibuf2,(nch+1))
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
-          CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'!+5s ')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
-          TSPINS = FSPIN(maxtap(istn),ISPM,SPS)
-          CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
-     .    krec_append)
-          call hol2lower(ibuf2,(nch+1))
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+          if (iftold.lt.200.and.kcontpass) then ! tape is near BOT and the
+C                    last pass was continuous, so don't need to postpass
+          else ! postpass 
+            TSPINS = FSPIN(maxtap(istn)-IFTOLD,ISPM,SPS)
+            CALL LSPIN(+2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .      krec_append)
+            call hol2lower(ibuf2,(nch+1))
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'!+5s ')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+            TSPINS = FSPIN(maxtap(istn),ISPM,SPS)
+            CALL LSPIN(-2,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .      krec_append)
+            call hol2lower(ibuf2,(nch+1))
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+          endif 
         else if (iftold.gt.50) then! spin off last tape
           TSPINS = TSPIN(IFTOLD,ISPM,SPS)
           CALL LSPIN(-1,ISPM,SPS,IBUF2,NCH,crec_use,nrecst(istn),
