@@ -171,7 +171,7 @@ long ip[5];
   case RCL_CMD_TIME_READ: {
     int year, day, hour, min, sec;
     ibool validated;
-    long centisec[2];
+    long centisec[6];
     
     ierr=get_rclcn_time_read(&buffer,&year,&day,&hour,&min,&sec,
 			     &validated, centisec);

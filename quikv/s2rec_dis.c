@@ -39,7 +39,7 @@ long ip[5];
 	char version[RCL_MAXSTRLEN_VERSION];
 	int year, day, hour, min, sec;
 	ibool validated;
-	long centisec[2];
+	long centisec[6];
 
 	/* format output buffer */
 
@@ -83,8 +83,9 @@ long ip[5];
 	  strcat(output,",not-valid");
 
 	/*
-	sprintf(output+strlen(output),",%ld,%ld",
-		centisec[0],centisec[1]);
+	sprintf(output+strlen(output),",%ld,%ld,%ld,%ld,%ld,%ld",
+		centisec[0],centisec[2],centisec[4],
+		centisec[1],centisec[3],centisec[5]);
 	*/
 
 	sprintf(output+strlen(output),",%s",version);
