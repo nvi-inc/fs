@@ -17,6 +17,8 @@ Settable Parameters:
           aux       Aux data check, on (default) or off. Not supported
           for VLBA DQA decoder.
             tracks      List of recorder tracks on which to measure errors.
+            "*" (asterisk) as the first list elment preserves previously
+            assigned tracks
             Default is the currently enabled tracks. For Mark
             III drives, tracks and must be between 1 and 28,
             and/or may be specified by groups (g1, g2, g3, g4)
@@ -94,4 +96,10 @@ VLBA groups include additional tracks. Note that this command
 uses VLBA, Mark IV, or Mark III track and VLBA or Mark III
 group numbers depending on the type of drive in use.
 
+An asterisk "*" can be used as the first element of the list of tracks
+to add additional tracks to be checked. This can be useful for
+instance to add system tracks to the default list. For example:
+ 
+parity=
+parity=,,,,*,0,1
 

@@ -137,9 +137,14 @@ C
 C  2.5  List of tracks
 C
 C
-      do i=1,36
-        itrk(i)=0
-      end do
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+      if (ierr.ne.1) then
+         do i=1,36
+            itrk(i)=0
+         end do
+      else
+         call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+      endif
 C
       itype=rpro_fs(indxtp)
       call fs_get_wrhd_fs(wrhd_fs,indxtp)
@@ -153,8 +158,7 @@ C
          goto 990
       end if
 C
-      call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(iparm,1).eq.',') then
+      if (ierr.eq.2) then
          if(MK3.eq.drive(indxtp)) then
             do i=1,28
                itrk(1+3+i)=itrkenus_fs(i,indxtp)
@@ -284,8 +288,8 @@ C mk4 formatter
             else
                itrk(it+1)=1
             endif
- 270        call gtprm(ibuf,ich,nchar,0,parm,ierr)
-            if(cjchar(iparm,1).eq.',') goto 295
+ 270        call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+            if(ierr.eq.2) goto 295
          end do
  295     continue
          ierr=0
