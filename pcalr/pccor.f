@@ -24,6 +24,7 @@ C
       kcorel = .false.
       call fs_get_freqvc(freqvc)
       if (freqvc(ivc).ne.freqvc(ivc2)) goto 990 
+      call fs_get_imodfm(imodfm)
       lsb1 = itr2vc(itrk,imodfm+1)
       lsb2 = itr2vc(itrkpc(itrk),imodfm+1)
       if ((lsb1.gt.0.and.lsb2.lt.0).or.(lsb1.lt.0.and.lsb2.gt.0)) 

@@ -106,6 +106,7 @@ C
         if (ichcm_ch(iprm,1,'formvc').ne.0) goto 205
         call fs_get_rack(rack)
         if(rack.eq.MK3) then
+           call fs_get_imodfm(imodfm)
            if(imodfm.eq.0.or.imodfm.eq.2) then
               do ii=1,14
                  itpis(ii)=1
