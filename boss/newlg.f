@@ -5,7 +5,6 @@ C           and sends this to DDOUT for starting a new log.
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
-      include 'bosscm.i'
 C
 C  INPUT:
 C
@@ -27,8 +26,6 @@ C  WEH  880708  REMOVE FSUPDATE CALL
 C  gag  920902  Changed code to use pi from the include file dpi.i
 C
 C  LOCAL
-      integer itsp(8)
-      data itsp/0,3,7,15,30,60,120,240/
 C
 C     The new-log information line:
 C   MARK IV FIELD SYSTEM VERSION <version> <station> <year> <occup#>
@@ -226,8 +223,8 @@ c
         nch = nch + ib2as(360,ib,nch,3)
       else if (imaxtpsd.eq.-1) then
         nch = nch + ib2as(330,ib,nch,3)
-      else
-        nch = nch + ib2as(itsp(imaxtpsd+1),ib,nch,3)
+      else if (imaxtpsd.eq.7) then
+        nch = nch + ib2as(270,ib,nch,3)
       endif
       nch=mcoma(ib,nch)
       call fs_get_iskdtpsd(iskdtpsd)
@@ -235,8 +232,8 @@ c
         nch = nch + ib2as(360,ib,nch,3)
       else if (iskdtpsd.eq.-1) then
         nch = nch + ib2as(330,ib,nch,3)
-      else
-        nch = nch + ib2as(itsp(iskdtpsd+1),ib,nch,3)
+      else if (iskdtpsd.eq.7) then
+        nch = nch + ib2as(270,ib,nch,3)
       endif
       nch=mcoma(ib,nch)
       call fs_get_refreq(refreq)
@@ -259,6 +256,8 @@ c
         nch=ichmv_ch(ib,nch,'vlba')
       else if(rack.eq.MK4) then
         nch=ichmv_ch(ib,nch,'mk4')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4) then
+        nch=ichmv_ch(ib,nch,'vlba4')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -278,6 +277,8 @@ c
         nch=ichmv_ch(ib,nch,'mk4')
       else if(drive.eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
+      else if(drive.eq.VLBA4.and.drive_type.eq.VLBA4) then
+        nch=ichmv_ch(ib,nch,'vlba4')
       else if(drive.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -313,14 +314,21 @@ c
       nch=nch+ib2as(itpthick,ib,nch,z'8000'+10)
 c
       nch=mcoma(ib,nch)
+      call fs_get_wrvolt(wrvolt)
+      nch=nch+ir2as(wrvolt,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
       call fs_get_capstan(capstan)
       nch=nch+ib2as(capstan,ib,nch,z'8000'+10)
 c
-      nch=mcoma(ib,nch)
-      nch=nch+ib2as(freqif3_fs/100,ib,nch,z'8000'+10)
+      call logit3(ib,nch-1,lsor)
+      nch = ichmv_ch(ib,1,'equip3,')
+c
+      call fs_get_freqif3(freqif3)
+      nch=nch+ib2as(freqif3/100,ib,nch,z'8000'+10)
 c
       nch=ichmv_ch(ib,nch,'.')
-      nch=nch+ib2as(mod(freqif3_fs,100),ib,nch,z'C100'+2)
+      nch=nch+ib2as(mod(freqif3,100),ib,nch,z'C100'+2)
 c
       nch=mcoma(ib,nch)
       nch=ichmv(ib,nch,ihx2a(iswavif3_fs),2,1)
@@ -340,6 +348,18 @@ c
       nch=mcoma(ib,nch)
       call fs_get_itpthick2(itpthick2)
       nch=nch+ib2as(itpthick2,ib,nch,z'8000'+10)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_wrvolt2(wrvolt2)
+      nch=nch+ir2as(wrvolt2,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_wrvolt4(wrvolt4)
+      nch=nch+ir2as(wrvolt4,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_wrvolt42(wrvolt42)
+      nch=nch+ir2as(wrvolt42,ib,nch,12,3)
 c
       call logit3(ib,nch-1,lsor)
 c
