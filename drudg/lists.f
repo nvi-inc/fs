@@ -436,7 +436,8 @@ C
 9900  FORMAT(' NUMBER OF MARK III TAPES: ',I5/
      .       ' NUMBER OF OBSERVATIONS:   ',I5/)
 900   call luff(luprt)
-      if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+C     if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+      close(luprt)
       call prtmp
 C
       RETURN

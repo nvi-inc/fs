@@ -180,9 +180,15 @@ C
 		WRITE(luprt,9104) CLASER(1:l)
 9104        FORMAT(A)
 C    endif !first on a page
+	  else if (cprttyp.eq.'EPSON24') then ! Epson 24-pin setup
+	    claser = char(27)//char(64)//char(27)
+     .      //char(65)//char(12) !<esc>@ power up reset
+C                                 plus <esc> A 12 for 24-pin
+	    write(luprt,'(a,$)') claser(1:5)
+	    nlab = 1  !1 across
 	  else ! Epson setup
-	    claser = '&'//char(27)//char(64)  !<esc>@ power up reset
-	    write(luprt,'(a)') claser(1:3)
+	    claser = char(27)//char(64)  !<esc>@ power up reset
+	    write(luprt,'(a,$)') claser(1:2)
 	    nlab = 1  !1 across
 	  ENDIF !set up printers
 	endif !first station
@@ -278,15 +284,16 @@ Cif (ifbrk().lt.0) GOTO 900
      .               // CHAR(27) // '(s3T' // char(13)
 	  l=trimlen(claser)
 	  WRITE(luprt,'(a)') Claser(1:l)
+      ENDIF
 C
 C if pcode is 1 (one station) or 3 (last station) then close file
 	IF (PCODE.EQ.1.OR.PCODE.EQ.3) THEN
          if (cprttyp.eq.'LASER'.or.cprttyp.eq.'FILE') then
            write(luprt,'(a)') char(12) ! FORM FEED
          endif
-	  if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+C  if (cprttyp.eq.'FILE') CLOSE(LUPRT)
+         close(luprt)
          call prtmp
-	ENDIF
 	endif
 C
 990   IF (IERR.NE.0) WRITE(LUSCN,9900) IERR
