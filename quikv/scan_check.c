@@ -37,10 +37,6 @@ parse:
       out_recs=0;
       out_class=0;
 
-      strcpy(outbuf,"scan_set = ;\n");
-      cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-      out_recs++;
-
       strcpy(outbuf,"scan_check?\n");
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
