@@ -34,14 +34,15 @@ c
      . iat1if, iat2if, iat3if,
      $ reccpu(2), select, rdhd_fs(2), ifd_set, if3_set, imk4fmv,
      $ ITPIVC(15),iapdflg, iswif3_fs(4),ipcalif3, directionwx,
-     $ ibds, ndas, idasfilt, idasbits, ichlba(2*MAX_DAS)
+     $ ibds, ndas, idasfilt, idasbits, ichlba(2*MAX_DAS), mk4sync_dflt,
+     $ icomputer
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
      . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4),
      . cwrap(4), user_dev1_name(2), user_dev2_name(2),
-     . idevds(32)
+     . idevds(32), hostpc_fs(40)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
@@ -74,13 +75,14 @@ c
      . iat1if, iat2if, iat3if,
      $ reccpu, select, rdhd_fs, ifd_set, if3_set, imk4fmv,
      $ ITPIVC,iapdflg,iswif3_fs, ipcalif3, directionwx,
-     $ ibds, ndas, idasfilt, idasbits, ichlba(2*MAX_DAS),
+     $ ibds, ndas, idasfilt, idasbits, ichlba, mk4sync_dflt,
+     $ icomputer,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
      . modelti_fs, stcnm, cwrap, user_dev1_name, user_dev2_name,
-     . idevds
+     . idevds, hostpc_fs
 c
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
 c
