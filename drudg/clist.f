@@ -17,7 +17,7 @@ C PMR 900108 rewrote to use character strings
 C nrv 900413 changed printer call to remove printer name
 C            and add strings from control file
 C            Added BREAK
-C NRV 901206 Changed maxwidth and maxlines
+C NRV 901206 Changed maxwidthth and maxlines
 C            Added call to SETPRINT
 C NRV 910703 Added call to PRTMP at end.
 C nrv 930407 implicit none
@@ -36,13 +36,13 @@ C Input:
 C
 C LOCAL:
       CHARACTER*256 ctmp,LBUF
-      character cs
-      INTEGER iwid,IC, TRIMLEN, IL, NCHAR, MAXLIN
-      integer maxwid,ierr,nrec,iyear,i,npage,numlin,l
+      INTEGER IC, TRIMLEN, IL, NCHAR, MAXLIN
+      integer maxwidth,ierr,nrec,iyear,npage,numlin,l
       character*8 cexper,cstn
       character*1 cid1
       character*2 cid2
       LOGICAL EX
+      character*2 csize
 C     integer*4 ifbrk
 C
 C   Check for existence of SNAP file.
@@ -81,42 +81,17 @@ C  in case this is a SNAP file reading only.
 C     read(ctmp,9001) cexper,iyear,cstn
 C9001  format(2x,a8,2x,i4,1x,a8,2x,a1)
       if (.not.kskd) cstnna(1)=cstn
-      WRITE(LUSCN,9100) cSTNNA(ISTN),SNPNAME(1:ic)
+      cstn=cstnna(istn)
+      WRITE(LUSCN,9100) cstn,SNPNAME(1:ic)
+
 9100  FORMAT(' SNAP COMMAND FILE LISTING FOR ',A,' FROM FILE ',A)
 C
 C
 C  Set up for proper width/length, depending on font size and
 C  orientation.
+      call setup_printer(cpaper_size,coption(2),csize,
+     >   maxwidth,maxlin,ierr)
 
-      cs = csize
-      if (cs.eq.'D') cs = coption(2)(2:2) ! use default
-      iwid = iwidth
-      if (iwid.eq.-1) then ! use default
-        if (coption(2)(1:1).eq.'P') iwid=80
-        if (coption(2)(1:1).eq.'L') iwid=137
-      endif
-      IF (iwid.EQ.80.or.iwid.eq.-1) THEN ! portrait
-        if (cs.eq.'L') then ! large font
-          MAXLIN = 50
-          maxwid = 70
-          call setprint(ierr,0)
-        else ! small font, default
-          MAXLIN = 70
-          maxwid = 115
-          call setprint(ierr,2)
-        endif
-      ELSE ! landscape 
-        if (cs.eq.'L') then ! large
-          call setprint(ierr,1)
-          maxlin = 35
-          maxwid = 90
-        else ! small, default
-          call setprint(ierr,3)
-          maxlin = 50
-          maxwid = 140
-        endif
-      ENDIF
-C
       IF (IERR.ne.0) THEN
         WRITE(LUSCN,9061) IERR
 9061    FORMAT(' CLIST03 - ERROR ',I5,' accessing printer')
@@ -130,17 +105,22 @@ C   Loop through SNAP FILE
 
 110   IF (NPAGE.GT.0) call luff(luprt)
       NPAGE = NPAGE + 1
-      NUMLIN = 0
+      NUMLIN = 2
 C
-      if (kskd) then
-        ic=trimlen(snpname)
+! length of header line is:
+! 24+ic+13+8+15+3
+!  =64+ic
+      if(ic+64 .le. maxwidth) then
         write(luprt,9302) snpname(1:ic),cstnna(istn),npage
-9302    FORMAT(//'  SNAP Commands in file ',A,' for station ',
-     .       A,10x,'Page ',I3//)
+9302    FORMAT(/' SNAP Commands in file ',A,' for station ',
+     .       A,10x,'Page ',I3/)
+        numlin=numlin+3
       else
-        write(luprt,9303) snpname(1:ic),cstn,npage
-9303    format(//'  SNAP Commands in file ',A,' for station ',
-     .       A8,10x,'Page ',i3//)
+        write(luprt,9303) snpname(1:ic)
+        write(luprt,9304) cstnna(istn),npage
+9303    FORMAT(/' SNAP Commands in file ',A)
+9304    Format('    for station: ',a,5x,'Page: ',i3,/)
+        numlin=numlin+4
       endif
 
       if (nrec.eq.1) then !write out first line
@@ -196,7 +176,7 @@ C
 C CHECK TO MAKE SURE THAT THE COMMAND WILL FIT ON THE PAGE,
 C IF NOT, THEN WRITE OUT BUFFER, AND CONTINUE
 
-      IF ((NCHAR+IL+1).LE.(maxwid)) GOTO 140
+      IF ((NCHAR+IL+1).LE.(maxwidth-10)) GOTO 140
       NCHAR=MIN0(NCHAR,128)
       NUMLIN = NUMLIN + 1
       WRITE(LUPRT,9902) LBUF(1:NCHAR)
@@ -204,7 +184,8 @@ C IF NOT, THEN WRITE OUT BUFFER, AND CONTINUE
 C
 C ADD THE COMMAND TO THE END OF THE LINE AND ADD ONE BLANK
 
-140   LBUF(NCHAR:NCHAR+IL+1) = ctmp(1:IL) // ' '
+140   continue
+      LBUF(NCHAR:NCHAR+IL+1) = ctmp(1:IL) // ' '
       NCHAR = NCHAR+IL+1
       GOTO 120
 
@@ -216,7 +197,7 @@ C ADD THE COMMAND TO THE END OF THE LINE AND ADD ONE BLANK
 
 999   call luff(luprt)
       close(luprt)
-      if (iwid.eq.-1.or.iwid.eq.137) then
+      if(csize(1:1) .eq. "L") then
         call prtmp(1)
       else
         call prtmp(0)

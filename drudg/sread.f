@@ -323,19 +323,11 @@ C Not needed for VEX because they are read in when station is selected.
 C
       endif ! VEX/sked
 
-C     Read parameters needed by drudg
-C       do i=1,nstatn
-C         tape_motion_type(i)='START&STOP'
-C         itearl(i)=0
-C         itlate(i)=0
-C         itgap(i)=0
-C         itlate(i)=0
-C       enddo
-        isettm = 20
-        ipartm = 70
-        itaptm = 1
-        isortm = 5
-        ihdtm = 6
+      isettm = 20
+      ipartm = 70
+      itaptm = 1
+      isortm = 5
+      ihdtm = 6
       call drprrd(ivexnum)
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.

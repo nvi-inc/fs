@@ -21,7 +21,7 @@ C 960226 nrv Add cprtlab
 C 960709 nrv Remove LBARREL, moved to freqs.ftni
 C 970207 nrv Add cepoch. Add kparity.
 C 970228 nrv Add rlabsize, clabtyp, labname, fileptr
-C 970301 nrv Add CSIZE
+C 970301 nrv Add cpapersize
 C 970304 nrv Add coption
 C 970603 nrv Add IRECCV for coverletter rec# and kdrg_infile
 C 970827 nrv Add ilabcol to remember the position on the page between
@@ -36,6 +36,8 @@ C 020508 nrv Add tpid_prompt,itpid_period,tpid_parm
 C 020713 nrv Add kgeo
 C 021010 nrv Add kpostpass
 C 2003Jul11 JMG added itctim
+! 2004Nov12 JMGipson. Removed iwidth, csize
+!                     Replaced with  cpaper_size
 C
 	double precision RA50,DEC50
         real rlabsize
@@ -46,7 +48,7 @@ c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
      .  nlab,nllab,lulasr,ludesk,
-     .  irecpr,irbpr,ioffpr,luflop,iwidth,icrty6,
+     .  irecpr,irbpr,ioffpr,luflop,icrty6,
      .  itpos,itctim,ilabrow,ilabcol,inewpage,
      .  ibout,luscn,
      .  ibbclen,nbbcbuf,nchanr,iperm,fileptr,itpid_period
@@ -60,7 +62,8 @@ C
      .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
      .tpid_prompt,tpid_parm
 c
-        character*1 csize
+        character*2 cpaper_size
+
         character*2 coption
 	character*6 cpid
         character*4 cepoch
@@ -76,7 +79,7 @@ C
      .       ireccv,IRECSK,IRECST,IRECEL,
      >       itctim,
      .       IRECPR,IRBPR,IOFFPR,LUFLOP,
-     .       IWIDTH,ICRTY6,
+     .       ICRTY6,
      .       ITPOS(500),ilabrow,ilabcol,inewpage,
      .       IBOUT(40),luscn,itpid_period,
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,fileptr,
@@ -90,9 +93,11 @@ C
         character*(2*ibuf_len) cbuf
 	equivalence (cbuf,ibuf)
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
-     .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .       cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,csize,
-     .       coption(3),ctextname,cversion,tpid_prompt,tpid_parm
+     .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
+     .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
+     >    cpaper_size,coption(3),ctextname,cversion,
+     >    tpid_prompt,tpid_parm
+!
 C
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records

@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.3/misc/fs9703up.txt  Version: 1.0 Date: 041021
+File: /usr2/fs-9.7.4/misc/fs9704up.txt  Version: 1.1 Date: 041119
 
 I. Introduction
 
@@ -7,7 +7,7 @@ This memo is divided into 4 sections:
    II.  Changes Since Version 9.6.9
    III. Installation
    IV.  Updating from 9.7.0
-   V.   Updating from 9.7.1 or 9.7.2
+   V.   Updating from 9.7.1, 9.7.2, or 9.7.4
    VI.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
@@ -41,7 +41,7 @@ This version is intended to installed as an update for 9.6.9.  This
 update does not require as many changes to local procedures and
 control files as some relatively recent ones have.  It should be
 fairly easy to install.  For stations that have already installed
-9.7.0 or 9.7.1/9.7.2, separate sections below provide even more
+9.7.0 or 9.7.1/9.7.2/9.7.3, separate sections below provide even more
 abbreviated instructions for upgrading from these versions.
 
 II. Changes Since Version 9.6.9
@@ -55,7 +55,8 @@ description.
 
 The following is a summary of the changes.  Items numbered 4 and above
 were added after 9.6.10. Items numbered 43 and above were added after
-9.7.0. Items  numbered 51 and above were added after 9.7.1.
+9.7.0. Items numbered 51 and above were added after 9.7.1. Items
+numbered 53 and above were added after 9.7.3.
 
 1. New USER_DEVICE command for support of station detectors in ONOFF,
    FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
@@ -119,6 +120,26 @@ were added after 9.6.10. Items numbered 43 and above were added after
     checking.
 51. /usr2/fs/misc/other_files.txt added.
 52. K4 newtape/oldtape with null argument crash fixed.
+53. data_valid commands works even if drive type is "none"
+54. VEX parser tester compiles in place
+55. Ari's archive of "dila" for making Mark5 labels is included
+56. Log recovery error handling improved slightly, but not visibly.
+57. Help files for "form4" and "decode4" include web deocumentation
+    references.
+58. Internal buffers for decode4 command expanded
+59. VEX parser extended to handle de facto Mark 5 VEX standard.
+60. VEX parser allows "options" field in "data_transfer" statement to
+    be optional.
+61. disk2file "start" and "stop" parameters are now just strings
+    passed to Mark5A "scan_set" command.
+62. Window title script, "wt" for oper improved
+63. Crash related to "command not associated with your equipment"
+    fixed.
+64. Added extended time-outs for Mark5A "scan_set=..." command added,
+    "record=..." time-outs set more reliably, and "play=" time-outs
+    increased.
+65. Fixed erroneous errors from "data_valid=..." commands for non-S2
+    drives.
 
 A more detailed discussion of these changes follows.
 
@@ -528,7 +549,7 @@ A more detailed discussion of these changes follows.
 48. ONOFF does not fail if a BBC is unresponsive. ONOFF did not
     properly handle a failed BBC when setting the gain mode. This has
     been fixed so that if a BBC is not working, i.e. not responding,
-    it will not cause th e result from other channels to be lost.
+    it will not cause the result from other channels to be lost.
 
 49. Fix handling of Mark5A "vsn?" response to filter out DSM code. The
     "vsn?" responses returned by older Mark5A versions, '2004y083d' or
@@ -550,16 +571,72 @@ A more detailed discussion of these changes follows.
     number was omitted for the DMS slot to access, the FS
     crashed. This was fixed.
 
+53. data_valid commands works even if drive type is "none". This
+    extension allows "data_valid=..." to be supported for all cases.
+
+54. VEX parser tester compiles in place. The test parser now compiles
+    in its directory, /usr2/fs/vex/test_parser.
+
+55. Ari's archive of "dila" for making Mark5 labels is included.  Ari
+    Mujunen's (Metsahovi) "dila" utility is provided as a tar archive.
+    Stations that want to install it will need to follow the included
+    instructions.
+
+56. Log recovery error handling improved slightly, but not visibly.  A
+    few pathological error cases were not handled completely.  These
+    cases were not very likely to occur.
+
+57. Help files for "form4" and "decode4" include web deocumentation
+    references. Dan Smythe (Haystack) provided improved text.
+
+58. Internal buffers for decode4 command expanded. This allows
+    "decode4=..." commands to display some particularly long responses
+    that may occur.
+
+59. VEX parser extended to handle de facto Mark 5 VEX standard. The
+    parser can now read in schedules written as "native" Mark 5
+    schedules.  However, DRUDG does not support this mode yet.
+
+60. VEX parser allows "options" field in "data_transfer" statement to
+    be optional.  This is a backward compatible extension to the
+    previous version.  The "canonical" version of the "data_transfer"
+    statement (as produced by vex_print.c) includes this field.
+ 
+61. disk2file "start" and "stop" parameters are now just strings
+    passed to Mark5A "scan_set" command.  This allows any Mark5A
+    accepted format start and stop position in the Mark5A scan_set
+    command to be used.
+
+62. Window title script, "wt" for oper improved.  The "wt" script will
+    now use the hostname as the window title if no argument is
+    provided.  Improved version supplied by Dan Smythe (Haystack).
+
+63. Crash related to "command not associated with your equipment"
+    fixed.  An obscure and rarely occuring bug when a command for
+    equipment that was select was used has been fixed.  It may have
+    also affected the behavior of "inject_snap -w <command>".  This
+    bug was introduced in version 9.5.8.  Thanks to Andrea Orlati
+    (Medicina) for discovering and helping to locate this bug.
+
+64. Added extended time-outs for Mark5A "scan_set=..." command added,
+    "record=..." time-outs set more reliably, and "play=" time-outs
+    increased.
+
+65. Fixed erroneous errors from "data_valid=..." commands for non-S2
+    drives.  This bug caused data_valid=... commads for non-S2 drives
+    to retun the error (if any) of the previous SNAP command.
+
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 041021.  The release of DRUDG includes
+DRUDG opening message date is 041117.  The release of DRUDG includes
 limited support for eVLBI.  In addition it incorporates changes in the
 format of some Mark5 commands, several bug fixes, and support for the
 Dymo label printer.  The following is a summary of changes.  They are
 described in more detail after the summary.  Items numbered 10 and
 above were added after 9.7.0.  Items numbered 18 and above were added
-after 9.7.1.  Items numbered 31 and above were added after 9.7.1.
+after 9.7.1.  Items numbered 31 and above were added after
+9.7.1. Items numbered 34 and above were added after 9.7.3.
 
 1. Several minor K4 related bugs were fixed.
 2. If recorder configuration is "none", no tape related commands are
@@ -602,6 +679,23 @@ after 9.7.1.  Items numbered 31 and above were added after 9.7.1.
 32. Modification in summary output.
 33. Modification in calculation of start time for scans in summary
     output.
+34. Barrel rolling error message changed for VEX files.
+35. DRUDG respects "ccw", "cw", and "n" for cable wrap in VEX files.
+36. Reduced information repeated at the top of each summary listing
+    page.
+37. Fixed page overflow in summary listings.
+38. Does not check for enough time for a tape change if Mark5 only
+    recorder.
+39. Line length and lines/page unified beween SNAP, schedule, and
+    summary listings.
+40. Form of issued "disk2file" command changed.
+41. Modified printer.c to pass "Recode latin1..ibmpc" in linux system.
+42. DRUDG silently ignores unknown options in a Mark III .skd file.
+43. If the recorder tape is specified as "none", issue "data_valid=on"
+    and "data_valid=off" commands.
+44. After an "in2net" scan, a "postob" command is used instead of
+    "postob_mk5a".
+
 
 A more detailed discussion of these changes follows.
 
@@ -612,7 +706,7 @@ A more detailed discussion of these changes follows.
 
 2. If recorder configuration is "none", no tape related commands are
    emitted.  If both recorders are set to "none", DRUDG will generate
-   a snap file with no tape commands.
+   a SNAP file with no tape commands.
 
 3. The calculation of tape spin times was changed to be more accurate.
 
@@ -699,7 +793,7 @@ A more detailed discussion of these changes follows.
                   command.
 
     If a scan contains the data_transfer keyword, DRUDG will issue the
-    snap commands "disk2file" or "in2net" as appropriate.
+    SNAP commands "disk2file" or "in2net" as appropriate.
 
     1.) Disk2file.
        a) If the mode is "disk2file", a disk2file=abort command will
@@ -711,7 +805,7 @@ A more detailed discussion of these changes follows.
        c) At this time, not having a filename ()o invoke a default
           name) is not supported.
 
-    2.) In2net.  The following substitutions are made in snap commands.
+    2.) In2net.  The following substitutions are made in SNAP commands.
        a) disk_record=on/off -> by in2net=on/off.
        b) disk_pos -> in2net
        c) If the destination is non-blank, DRUDG issues
@@ -808,7 +902,7 @@ A more detailed discussion of these changes follows.
 
 20. Changed calculation of storage space for Mark5.  Previously, it
     divided by 1,024,000,000.  Now it divides by 1,000,000,000.  The
-    only thing this effects is the snap summary listing.
+    only thing this effects is the SNAP summary listing.
 
 21. Fixed bug in reading labels line in skedf.ctl.  Previously DRUDG
     assumed that the labels line in skedf.ctl was of format
@@ -950,11 +1044,75 @@ A more detailed discussion of these changes follows.
     schedules generated by D. Graham (MPIfR).  These schedules were
     pathological in that the first several scans started at the same
     tape footage.  Since these schedules were generated for the VLBA,
-    which doesn't use our snap commands, the schedules would actually
+    which doesn't use our SNAP commands, the schedules would actually
     run OK.  However, DRUDG looks for various SNAP commands to
     initialize the data_start time.  In this particular case the
     commands were not output.  DRUDG was modified to also look for the
     "PREOB" token to initialize the data_start_time.
+
+34. Barrel rolling error message changed for VEX files.  VEX files say
+    "off" for no barrell rolling. Mark III .skd files say "none".  In
+    checking for a valid type, (which wasn't done before) DRUDG will
+    now check for both "none" and "off".
+
+35. DRUDG respects "ccw", "cw", and "n" for cable wrap in VEX files.
+    In reading in VEX files, DRUDG was checking for "&ccw" instead of
+    "ccw", etc.  The VEX parser correctly strips off leading "&" sign.
+    Modified DRDUG to interpret these cable wrap specifications
+    "correctly".  According to VEX standard this is actually incorrect
+    since the cable wrap strings should refer to the antenna pointing
+    sector definition, which is currently ignored by DRUDG.  A warning
+    message is issued for unrecognized strings, e.g, "xyz". Routine
+    changed: vobinp.f
+
+36. Reduced information repeated at the top of each summary listing
+    page.  Modified lstsumo.f so that it will only print the extra
+    information on the first page of the summary listing.  Remaining
+    pages will have a single line wich gives the experiment and the
+    page number.  Previously would print explanatory info (which took
+    up 1/3 or so of a page) on all pages.
+
+37. Fixed page overflow in summary listings.  Modified lstsumo.f so
+    that pages would actually fit on a page.  Additions to the header
+    information caused the pages to overflow.
+
+38. Does not check for enough time for a tape change if Mark5 only
+    recorder.  DRUDG use to always check to see if there was enough
+    time to change the tape.  This check was removed in the case that
+    the recorder is any Mark5 variant.
+
+39. Line length and lines/page unified beween SNAP, schedule, and
+    summary listings. Looked at printer setup done in clist.f (SNAP
+    listing), list.f (schedule listing) and lstsumo.f (summary
+    listing).  All three routines used similar, but slightly different
+    setup.  Unified the three into a subroutine call. Cleaned up lists
+    subroutine a bit in the process of fixing formatting.  Removed
+    argument from lists subroutine. The argument was obsolete and not
+    used.
+
+40. Form of issued "disk2file" command changed.  It was changed to use
+    the default (last recording) for scan name and for start and stop
+    times to use UT epochs in VEX time format.  The "disk2file"
+    commands now look like:
+    
+      disk2file=,dist.ext,12h32m17.11s,12h33m17.11s,opt_param
+
+41. Modified printer.c to pass "Recode latin1..ibmpc" in linux system.
+    Old syntax was "Recode latin1:ibmc" which is deprecated.
+
+42. DRUDG silently ignores unknown options in a Mark III .skd file.
+    Previously it would issue a warning message.  These unknown
+    options occur because of upgrades in SKED.  These upgrades often
+    only effect the way the schedule is generated (which is not of
+    interest to DRUDG.)
+
+43. If the recorder tape is specified as "none", issue "data_valid=on"
+    and "data_valid=off" commands.  This is useful for non-standard
+    recorders.
+
+44. After an "in2net" scan, a "postob" command is used instead of
+    "postob_mk5a".  This is because in2net does not entail recording
+    to disk and "postob_mk5a" checks disk recording statistics.
 
  			    C. Known FS Bugs
 
@@ -1118,9 +1276,9 @@ System Initialization" manual.
 If you are updating from 9.7.0, please follow the directions in the
 separate section below titled "IV. Updating from 9.7.0".
 
-If you are updating from 9.7.1 or 9.7.2, please follow the directions
-in the separate section below titled "V. Updating from 9.7.1 or
-9.7.2".
+If you are updating from 9.7.1, 9.7.2, or 9.7.3, please follow the
+directions in the separate section below titled "V. Updating from
+9.7.1, 9.7.2, or 9.7.3".
 
 The following instructions are for upgrading from 9.6.9 and 9.6.10.
 Please follow all the steps.
@@ -1128,7 +1286,7 @@ Please follow all the steps.
 Below is a list of "critical updates" is given.  These are updates
 that must be applied sequentially.  Please start with the next update
 with a later version number than you have and apply it and the
-remaining listed version before upgrading to 9.7.3.  You can find the
+remaining listed version before upgrading to 9.7.4.  You can find the
 installation notes for these versions on the FS FTP servers in the
 docs.old sub-directory.  The list of critical updates is:
 
@@ -1173,7 +1331,7 @@ any questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.7.3 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1181,7 +1339,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.3.tgz
+      get fs-9.7.4.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1195,12 +1353,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.3.tgz
+      tar -xzpf /tmp/fs-9.7.4.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.3 fs
+      ln -sfn fs-9.7.4 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1210,7 +1368,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
       make
 
 (9) Remake your station software (this is necessary whether or not the
-    follwoing discussion of ftok() applies to your station).  Before
+    following discussion of ftok() applies to your station).  Before
     doing this, if your station software uses ftok() to generate IPC
     keys, you should probably update it so that the value of the
     second argument of ftok() is unique within the FS, your station
@@ -1253,13 +1411,15 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      D. You should check your SNAP procedure libraries for low-level
         "mk5=..." commands that use "informal" syntax and update these
         to formal syntax.  The primary changes that this entails are
-        that semi-colons must be used instead of spaces to separate
-        parameters and queries must always use question marks, "?", at
-        the end.  A way to find the commands that need to be changed
-        is to use the shell commands:
+        that commands must have equal signs, "=", between the keyword
+        and following parameters, semi-colons, ";" must be used
+        instead of spaces to separate parameters, and queries must
+        always use question marks, "?", at the end.  A way to find the
+        commands that may need to be changed is to use the shell
+        commands:
 
           cd /usr2/proc
-          grep mk5= |less
+          grep mk5= *.prc |less
 
         which will show you what "mk5=..." commands exist in which of
         your .prc files.  It will not show you which individual
@@ -1269,7 +1429,7 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         changes to the procedures.
 
      An optional modification is to add the procedures in
-     /usr2/fs/st.default/proc/mk5old.prc to your station.prc library.
+     /usr2/fs/st.default/proc/mk5old.prc to your station.prc libraryx.
      These procedures provide backward compatible synonyms for the old
      Mark 5 command names (disc_start, disc_end, ..., etc).  You only
      need to install these procedures if you want to have the old
@@ -1383,10 +1543,10 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         (usually non-FS) Linux distribution.
 
         I. If you have the FS Linux 4 or FS Linux 5 distribution
-           installed, you should diff the 9.7.3 version against the
+           installed, you should diff the 9.7.4 version against the
            9.6.9 version:
 
-             cd /usr2/fs-9.7.3/st.default/prog
+             cd /usr2/fs-9.7.4/st.default/prog
              diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
 
            and then make the corresponding changes in your local copy of
@@ -1479,12 +1639,13 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 IV.  Updating from 9.7.0
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.0 and are updating to 9.7.3.
-A separate following section describes updating from 9.7.1 or 9.7.2..
+stations that have already installed 9.7.0 and are updating to 9.7.4.
+A separate following section describes updating from 9.7.1, 9.7.2, or
+9.7.3.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.3 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1492,7 +1653,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.3.tgz
+      get fs-9.7.4.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1506,12 +1667,12 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.3.tgz
+      tar -xzpf /tmp/fs-9.7.4.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.3 fs
+      ln -sfn fs-9.7.4 fs
 
 (6) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1574,14 +1735,15 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (10) Set the FS_CHECK_NTP environment variable.  This variable is used
      to tell the FS whether to check the status of NTP in "setcl" and
      "fmset".  If you do not have NTP configured or there is some
-     problem that causes "fmset" to not update every second reliably,
-     you should *not* have this variable set.  However, for the
-     majority of installations that have NTP working, this feature
-     should work well.  If you want to set the variable, it should be
-     set in the ".login" or ".profile" files (as appropriate depending
-     on the user's login shell) in the accounts of users (typically
-     only "oper") on your system that run the FS.  Please see the
-     lines in default .login and .profile files for "oper" located in
+     problem that causes "fmset" to not update every second reliably
+     or causes "setcl" to generate error messages, you should *not*
+     have this variable set.  However, for the majority of
+     installations that have NTP working, this feature should work
+     well.  If you want to set the variable, it should be set in the
+     ".login" or ".profile" files (as appropriate depending on the
+     user's login shell) in the accounts of users (typically only
+     "oper") on your system that run the FS.  Please see the lines in
+     default .login and .profile files for "oper" located in
      "/usr2/fs/st.default/oper" for examples. The lines that use
      "FS_CHECK_NTP" at the end of these files should be copied to the
      ends of the corresponding user's files and uncommented.
@@ -1589,13 +1751,15 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (11) Unless you have done so already, you should check your SNAP
      procedure libraries for low-level "mk5=..." commands that use
      "informal" syntax and update these to formal syntax.  The primary
-     changes that this entails are that semi-colons must be used
-     instead of spaces to separate parameters and queries must always
-     use question marks, "?", at the end.  A way to find the commands
-     that need to be changed is to use the shell commands:
+     changes that this entails are that commands must have equal
+     signs, "=", between the keyword and following parameters,
+     semi-colons, ";" must be used instead of spaces to separate
+     parameters, and queries must always use question marks, "?", at
+     the end.  A way to find the commands that may need to be changed
+     is to use the shell commands:
 
-       cd /usr2/proc
-       grep mk5= |less
+        cd /usr2/proc
+        grep mk5= *.prc |less
 
      which will show you what "mk5=..." commands exist in which of
      your .prc files.  It will not show you which individual
@@ -1607,15 +1771,15 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (12) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
 
-V.  Updating from 9.7.1 or 9.7.2
+V.  Updating from 9.7.1, 9.7.2, or 9.7.3
 
 This section contains abbreviated installation instructions for
-stations that have already installed 9.7.1 or 9.7.2 and are updating
-to 9.7.3.
+stations that have already installed 9.7.1, 9.7.2, or 9.7.3 and are
+updating to 9.7.4.
 
 (1) Log-in as prog.
 
-(2) Place a copy of the fs-9.7.3 archive in your "/tmp" directory.
+(2) Place a copy of the fs-9.7.4 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -1623,7 +1787,7 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.3.tgz
+      get fs-9.7.4.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -1637,12 +1801,12 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (4) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.3.tgz
+      tar -xzpf /tmp/fs-9.7.4.tgz
 
 (5) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.3 fs
+      ln -sfn fs-9.7.4 fs
 
 (6) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1654,13 +1818,15 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 (9) Unless you have done so already, you should check your SNAP
     procedure libraries for low-level "mk5=..." commands that use
     "informal" syntax and update these to formal syntax.  The primary
-    changes that this entails are that semi-colons must be used
-    instead of spaces to separate parameters and queries must always
-    use question marks, "?", at the end.  A way to find the commands
-    that need to be changed is to use the shell commands:
+    changes that this entails are that commands must have equal signs,
+    "=", between the keyword and following parameters, semi-colons,
+    ";" must be used instead of spaces to separate parameters, and
+    queries must always use question marks, "?", at the end.  A way to
+    find the commands that may need to be changed is to use the shell
+    commands:
 
       cd /usr2/proc
-      grep mk5= |less
+      grep mk5= *.prc |less
 
     which will show you what "mk5=..." commands exist in which of your
     .prc files.  It will not show you which individual procedures
@@ -1675,20 +1841,19 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.7.3.tgz archive have been placed in
+floppy, "split" files of the fs-9.7.4.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9703tg.aa
-fs9703tg.ab
-fs9703tg.ac
+fs9704tg.aa
+fs9704tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9703tg.* >fs-9.7.3.tgz
+cat fs9704tg.* >fs-9.7.4.tgz
 
-This will create an exact image of the original fs-9.7.3.tgz archive
+This will create an exact image of the original fs-9.7.4.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.

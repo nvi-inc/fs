@@ -51,8 +51,12 @@ C  LOCAL:
 
       integer itemp
       integer nch
+      logical kcablewrap_warn
+
+      ccb=" "
 ! 0. Initialize data transfer info.
       ixfer_cnt=0
+      kcablewrap_warn=.true.
 
       Kin2Net_2_Disk2File=.false.
       kDisk2File_2_in2net=.false.
@@ -174,11 +178,21 @@ C       Keep good data offset and duration separate
           if (iret.ne.0) return
           il = fvex_len(cout)
           if (il.eq.0) then ! null wrap
-            ccb="N "            !None
+            ccb="- "
           else ! check it
-            if (cout(1:il).eq.'&n')  ccb="- "
-            if (cout(1:il).eq.'&cw') ccb="C "
-            if (cout(1:il).eq.'&ccw') ccb="W "
+! Removed "&" from the check.
+            if (cout(1:il) .eq. "n") then
+               ccb="- "
+            if (cout(1:il) .eq. "cw") then
+               ccb="C "
+            if (cout(1:il).eq. "ccw") then
+                ccb="W "
+            else
+              if(kcablewrap_warn) then
+                write(*,*) "Unknown cablewrap sector: ", cout(1:il)
+                kcablewrap_warn=.false.            !only output error message once.
+              endif
+            endif
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))

@@ -49,7 +49,7 @@ PROGRAM = drudg
 #
 DROBS=\
 $(DR)chkgrpandwrite.o $(DR)counter_init.o \
-$(DR)get_version.o \
+$(DR)get_version.o $(DR)setup_printer.o \
 $(DR)snap_in2net_connect.o fix_snap_file.o xfer_override.o \
 $(DR)delete_comma_and_write.o checkmk5xlat.o \
 $(DR)find_num_chans_rec.o $(DR)find_recorder_speed.o\

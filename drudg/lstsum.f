@@ -98,8 +98,10 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 ! 011503 JMG Completely rewritten.
 ! 2003Nov13  JMgipson Logic which calculats tape footage for spin commands
 !            changed after change in tspin,fspin
-! 2004Nov21  JMGipson Added "PREOB" as a condition for start time.
+! 2004Oct21  JMGipson Added "PREOB" as a condition for start time.
 !            This is because some of D.Graham's schedules did not have tape or disks!
+! 2004Nov21  Modified Maxline.  lstsumo (called by this) does better job of
+!            calculating line position.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -120,10 +122,10 @@ C Output:
       INTEGER TRIMLEN           !length of string excluding blanks.
 
 C Local:
-      integer iwid,itlate_local,itearl_local
+      integer itlate_local,itearl_local
       INTEGER IC
-      integer nline,num_tapes,npage,maxline,iline,
-     >  inewp,ne,nm,l,ifdur,id,ieq
+      integer nline,num_tapes,npage,maxwidth,maxline,iline
+      integer inewp,ne,nm,l,ifdur,id,ieq
       real dif
 
       logical kvalidtime                !valid time read?
@@ -193,6 +195,8 @@ C Local:
       integer icode_old                 !old version
       character*2 ccode_tmp
       integer iSpinDelay
+      character*2 csize                 !what is paper orientation, font size
+                                        !values are ls,ll,ps,pl
 
 
 C 1.0  Check existence of SNAP file.
@@ -218,36 +222,15 @@ C 2. Set up printer and write header lines
 
       write(luscn,9200) cinname(1:ic)
 9200  format(' Printing summary of SNAP file ',a)
+      call setup_printer(cpaper_size,coption(3),csize,
+     >     maxwidth,maxline,ierr)
 
-      if (csize.eq.'D') csize=coption(3)(2:2) ! use default
-      iwid = iwidth
-      if (iwid.eq.-1) then ! use default
-        if (coption(3)(1:1).eq.'P') iwid=80
-        if (coption(3)(1:1).eq.'L') iwid=137
-      endif
-      if (iwid.eq.-1.or.iwid.eq.80) then !default is portrait
-        if (csize.eq.'S') then ! small
-          call setprint(ierr,2)
-          maxline = 55
-        else ! large
-          maxline = 40
-          call setprint(ierr,0)
-        endif
-      else if (iwid.eq.137) then ! landscape
-        if (csize.eq.'S') then ! small
-          maxline = 38
-          call setprint(ierr,3)
-        else ! large
-          maxline = 25
-          call setprint(ierr,1)
-        endif
-      endif
-        
       if (ierr.ne.0) then
         write(luscn,'("LSTSUM03 - Error ",i5," setting up printer.")')
      .  ierr
         return
       endif
+
 C
 C 3. Initialize local variables 
 
@@ -619,10 +602,10 @@ C the counter to zero to start the new forward pass.
 
       call luff(luprt)
       close(luprt)
-      if (iwid.eq.-1.or.iwid.eq.80) then
-        call prtmp(0)
-      else if (iwid.eq.137) then
+      if(csize(1:1) .eq. "L") then
         call prtmp(1)
+      else
+        call prtmp(0)
       endif
 
 991   if (ierr.ne.0) then

@@ -1,4 +1,4 @@
-      SUBROUTINE LISTS(iin)    !LIST ONE STATION'S SCHEDULE
+      SUBROUTINE LISTS()    !LIST ONE STATION'S SCHEDULE
 
 C This routine lists on the printer a schedule
 C
@@ -11,9 +11,10 @@ C
       include '../skdrincl/skobs.ftni'
 C
 C INPUT:
-      integer iflch,ichcm_ch,ichmv,julda,jchar ! functions
+! functions
+      integer julda
+      integer trimlen
 
-      integer iin ! 1=standard, 2=S2, 3=K4
 C OUTPUT: none
 C LOCAL:
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN)
@@ -26,7 +27,7 @@ C LOCAL:
       equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
 
       integer*2 LMON(2),LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
-      integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn)
+      integer ipas(max_stn),ift(max_stn),idur(max_stn)
       integer ioff(max_stn)
       character*1 cs
       integer ipasp,iftold,idirp,idir,ituse
@@ -42,18 +43,19 @@ C LOCAL:
       real ras,decs,ras3,ras2,ras1,dcs1,dcs2,dcs3,has,d
       real tslew,dum
       integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod
-      integer mjdpre,ispre,iyr2,idayr2,ihr2,min2,isc2
+      integer mjdpre,ispre,iyr2,idayr2,ihr2,imin2,isc2
       integer*2 lfreq,lcbpre,lcbnew
       double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat,ivc
       character*7 cwrap ! cable wrap string returned from CBINF 
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
-      integer nlobs,nlmax,nlines,ntapes,ierr,ilen,npage
+      integer nlobs,nlines,ntapes,ierr,ilen,npage
+      integer maxline,maxwidth
 C NLOBS - number of observation lines written for this station
 C NLINES, iobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
-      INTEGER IC, TRIMLEN
+      INTEGER IC
       LOGICAL KNEWT,knewtp,ks2,kk4
 C function to determine if a new tape has started
       double precision RA,DEC
@@ -63,10 +65,12 @@ C for precession routines
 C     integer*2 LAXIS(2,7),
 !      integer*2 laxis(2)
       character*4 laxis
-      integer idum,iobs
+      integer iobs
       LOGICAL KUP ! true if source is up at station
       logical kwrap
       integer*2 HHR
+      character*2 csize
+      integer iheader_Space
 
       double precision speed_k4 ! speed for K4
       double precision conv_k4 ! speed scaling for feet-->counts
@@ -125,31 +129,15 @@ C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
 C current values for initialization.
 C
-      iwid = iwidth
-      cs = csize
-      if (cs.eq.'D') cs=coption(1)(2:2)
-      if (iwidth.eq.-1) then
-        if (coption(1)(1:1).eq.'L') iwid=137 
-        if (coption(1)(1:1).eq.'P') iwid=80 
-      endif
+      iheader_space=11
+      call setup_printer(cpaper_size,coption(1),csize,
+     >    maxwidth,maxline,ierr)
 
-      if (iwid.eq.80) then ! portrait
-        if (cs.eq.'S') then 
-          nlmax = 32 ! checked
-          call setprint(ierr,2)
-        else ! large
-          nlmax = 23 ! checked
-          call setprint(ierr,0)
-        endif
-      else ! landscape
-        if (cs.eq.'S') then
-          call setprint(ierr,3)
-          nlmax = 22
-        else ! large
-          nlmax = 15
-          call setprint(ierr,1)
-        endif     
-      end if
+      if(maxwidth .ge. 135) then
+        cs="S"
+      else
+        cs="L"
+      endif
 
       if (ierr.ne.0) then
         write(luscn,9061) ierr
@@ -162,13 +150,10 @@ C
       nlobs = 0 ! number of scan line written
       ks2=.false.
       kk4=.false.
-      if (iin.eq.2) kk4=.true.
-      if (iin.eq.3) ks2=.true.
-      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
-     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
-        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
-        kk4=   ichcm_ch(lstrec(1,istn),1,'DFC').eq.0.or.
-     .         ichcm_ch(lstrec(1,istn),1,'K4').eq.0
+      if(cstrack(istn) .ne. "unknown" .and.
+     >   cstrec(istn) .ne. "unknown") then
+        ks2= cstrec(istn) .eq. "S2"
+        kk4= cstrec(istn) .eq. "DFC" .or. cstrec(istn) .eq. "K4"
       endif
       if (kk4) then ! K4 speed
 C       scaling factor is 55 cpd/11.25 fps if the schedule
@@ -186,15 +171,13 @@ C       Fake it with high density stations, long footage tapes.
 C       Scale by sample rate.
         conv_s2 = 60.d0*6.667*(samprate(1)/4.0)
       endif
-      kwrap=.false.
-      if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
-     .kwrap=.true.
+      kwrap=(iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
 C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-      call ifill(ibuf,1,ibuf_len*2,oblank)
       if (iobs+1.le.nobs) then
-        idum = ichmv(ibuf,1,lskobs(1,iskrec(iobs+1)),1,ibuf_len*2)
-        ilen = iflch(ibuf,ibuf_len*2)
+        cbuf=cskobs(iskrec(iobs+1))
+        ilen=trimlen(cbuf)
       else
+        cbuf=" "
         ilen=-1
       endif
       do i=1,max_stn
@@ -273,19 +256,17 @@ C
       WRITE(luprt,97) IYR,idayr
 97    FORMAT(' ',////'     SOURCES IN THIS SCHEDULE',10X,
      .    '(DATE=',I4,'.',I3.3,')'///)
-C     IF (iwid.EQ.137.OR.iwid.EQ.106) THEN
-      IF (cs.EQ.'S') THEN
+      if(cs .eq.'S') then
         WRITE(LUPRT,98)
 98      FORMAT(8X,'NAME     -RA(1950)-  -DEC(1950)-      -RA(DATE)-  ',
      .   '-DEC(DATE)-      -RA(2000)-  -DEC(2000)-'/)
-C     ELSE IF (iwid.EQ.80) THEN
-      ELSE IF (cs.EQ.'L') THEN
+      else
         WRITE(luprt,94)
 94      FORMAT(8X,'NAME     -RA(1950)-  -DEC(1950)-      -RA(DATE)-  ',
      .   '-DEC(DATE)-'/)
       ENDIF
 C
-      DO 90 I=1,NCELES
+      DO I=1,NCELES
         RA = SORP50(1,I)
         DEC = SORP50(2,I)
         RAH = RA*12.D0/PI
@@ -302,17 +283,17 @@ C
         CALL RADED(SORPDA(1,I),SORPDA(2,I),0.d0,IRH2,IRM2,RAS2,LDS2,
      .        IDD2,IDM2,DCS2,LD,ID,ID,D)
 C
-C       IF (iwid.EQ.137.OR.iwid.EQ.106)
-        IF (cs.EQ.'S')
-     .  WRITE(LUPRT,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
+        IF (cs.EQ.'S') then
+           WRITE(LUPRT,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
      .      IDD3,IDM3,DCS3,IRH2,IRM2,RAS2,LDS2,
      .      IDD2,IDM2,DCS2,IRH1,IRM1,RAS1,LDS1,IDD1,IDM1,DCS1
-91      FORMAT(6X,A,'  ',3(I2.2,':',I2.2,':',F5.2,'  ',
-     .         A1,I2.2,':',I2.2,':',F4.1,'     '))
-        IF (cs.EQ.'L')
-     .  WRITE(luprt,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
+        else IF (cs.EQ.'L') then
+            WRITE(luprt,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
      .      IDD3,IDM3,DCS3,IRH2,IRM2,RAS2,LDS2,IDD2,IDM2,DCS2
-90    CONTINUE
+        endif
+91      FORMAT(6X,A,3x,3(I2.2,':',I2.2,':',F5.2,'  ',
+     .         A1,I2.2,':',I2.2,':',F4.1,'     '))
+      end do
 C
       IF (NSATEL.EQ.0) GOTO 102
       WRITE(luprt,9141)
@@ -328,7 +309,9 @@ C  if (ifbrk().lt.0) goto 900
 9150    FORMAT(I4,1X,A,1X,F7.2,F7.5,3F7.2,F11.1,F8.3,I5,F7.2)
 150   CONTINUE
 C
-102   NPAGE = 1
+102   continue
+      nlines=iheader_space
+      NPAGE = 1
       call luff(luprt)
       WRITE(luprt,101) cSTNNA(ISTN),cEXPER,LDAY,LMON,IDA,IYR,IDAYR,NPAGE
 101   FORMAT(' ',//' SCHEDULE FOR ',A8,' EXPERIMENT ',A8,
@@ -342,7 +325,6 @@ C
       endif
 C
       if (kwrap) then ! print cable wrap
-C       IF (iwid.EQ.137) THEN
         IF (cs.EQ.'S') THEN
           WRITE(LUPRT,1137)
         ELSE 
@@ -389,7 +371,7 @@ C Unless we are spinning blank tape, in which case list
 C the observation with a message.
         IF (ISTNSK.NE.0)  THEN
 C THEN BEGIN Current station in observation
-          IF (NLINES.GE.NLMAX.OR.MJD.NE.MJDPRE) THEN
+          IF (NLINES.GE.maxline.OR.MJD.NE.MJDPRE) THEN
 C THEN BEGIN new page
             NPAGE = NPAGE + 1
             call luff(luprt)
@@ -402,7 +384,6 @@ C THEN BEGIN new page
             else
               write(luprt,'(/)')
             endif
-
             if (kwrap) then
             IF (cs.EQ.'S') THEN
               WRITE(LUPRT,1137)
@@ -416,7 +397,7 @@ C THEN BEGIN new page
               WRITE(luprt,9080)
             ENDIF
             endif
-            NLINES = 0
+            NLINES = iheader_space            !this leaves space for header.
 C ENDT new page
           ENDIF
           IDIR=+1
@@ -436,17 +417,16 @@ C         IF (KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,
 C    .        IDIR,IDIRP,IFTOLD)) THEN
 C THEN BEGIN new tape
           if (knewtp) then
-            WRITE(luprt,9320)
-9320        FORMAT('    *** NEW TAPE ***'/)
+            WRITE(luprt,"('    *** NEW TAPE ***'/)")
             NTAPES = NTAPES + 1
-            NLINES = NLINES + 1
+            NLINES = NLINES + 2
           ENDIF
 C
 C ENDT new tape
 C 4. Calculate all of the numbers we need now.
           ID=IDUR(ISTNSK)
           CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,ID,
-     .               IYR2,IDAYR2,IHR2,MIN2,ISC2)
+     .               IYR2,IDAYR2,IHR2,imin2,ISC2)
           HA1 = HA
 C CONVERT TO SINGLE PRECISION
           CALL CVPOS(ISOR,ISTN,MJD,UT,AZ,EL,HA1,DC,X30,Y30,X85,Y85,
@@ -469,7 +449,7 @@ C
             WRITE(luprt,9331)
 9331        FORMAT('  THE FOLLOWING SOURCE REQUIRES NEGATIVE ',
      .             'SLEWING TIME.  INFORM THE SCHEDULER!'/)
-                  NLINES = NLINES + 1
+                  NLINES = NLINES + 2
           endif
           IF (KUP) THEN !source is up
             lcbnew=lcable(istnsk)
@@ -485,7 +465,7 @@ C
             WRITE(luprt,9330)
 9330        FORMAT('  THE FOLLOWING SOURCE IS OUTSIDE TELESCOPE ',
      .             'LIMITS.  INFORM THE SCHEDULER!'/)
-                  NLINES = NLINES + 1
+                  NLINES = NLINES + 2
 C ENDE source not up
           ENDIF
 C
@@ -493,11 +473,9 @@ C     5. Now write out the observation line.
           CALL M3INF(ICOD,SPDIPS,IVC)
           call cbinf(ccable(istnsk),cwrap)
           if (kwrap) then ! print cable wrap
-C         IF (iwid.EQ.137) then
           IF (cs.EQ.'S') then
-            WRITE(LUPRT,9510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,cSNAME,
-     .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
+            WRITE(LUPRT,9510) IHR,iMIN,ISC,IHR2,imin2,ISC2,
+     >      cSNAME(1:8),  IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,cwrap,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD)
 9510        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
@@ -519,11 +497,9 @@ C         IF (iwid.EQ.137) then
 9512          format(I2,A1,' ',I5,' ',F4.0,
      .        ' ______________________________________________'/)
             endif
-C         else IF (iwid.EQ. 80) then
           else IF (cs.EQ. 'L') then
-            WRITE(luprt,9518) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,csNAME,
-     .      LHSIGN,IHAH,IHAM,AZ,EL,cwrap,TSLEW
+            WRITE(luprt,9518) IHR,iMIN,ISC,IHR2,imin2,ISC2,
+     >      csNAME(1:8), LHSIGN,IHAH,IHAM,AZ,EL,cwrap,TSLEW
 9518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',A,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
      .      a5,' ',F4.1,$)
@@ -540,11 +516,9 @@ C         else IF (iwid.EQ. 80) then
             endif
           endif ! wid 137/80
           else ! no cable wrap
-C         IF (iwid.EQ.137) then
           IF (cs.EQ.'S') then
-            WRITE(LUPRT,8510) IHR,iMIN,ISC,IHR2,MIN2,
-     .      ISC2,cSNAME,
-     .      IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
+            WRITE(LUPRT,8510) IHR,iMIN,ISC,IHR2,imin2,ISC2,
+     >       cSNAME(1:8),IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,LHSIGN,
      .      IHAH,IHAM,AZ,EL,TSLEW,ICAL,LFREQ,LMODE(1,istn,ICOD),
      .      VCBAND(1,istn,ICOD)
 8510        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
@@ -566,10 +540,9 @@ C         IF (iwid.EQ.137) then
 8512          format( I2, A1,' ',I5,' ',F4.0,
      .        ' ____________________________________________________'/)
             endif
-C         else IF (iwid.EQ. 80) then
           else IF (cs.EQ. 'L') then
-            WRITE(luprt,8518) IHR,iMIN,ISC,IHR2,
-     .      MIN2,ISC2,cSNAME,LHSIGN,IHAH,IHAM,AZ,EL,TSLEW
+            WRITE(luprt,8518) IHR,iMIN,ISC,IHR2,imin2,ISC2,
+     >        cSNAME(1:8),LHSIGN,IHAH,IHAM,AZ,EL,TSLEW
 8518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',A,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',F4.1,$)
             if (ks2) then
@@ -587,7 +560,7 @@ C         else IF (iwid.EQ. 80) then
           endif ! wid 137/80
           endif ! cable/no cable
 C
-          NLINES = NLINES + 1
+          NLINES = NLINES + 2
           nlobs = nlobs + 1
           IPASP = IPAS(ISTNSK)
           if (ks2) then
@@ -608,7 +581,7 @@ C
      .       ' NUMBER OF SCANS:   ',I5/)
 900   call luff(luprt)
       close(luprt)
-      if (iwid.eq.-1.or.iwid.eq.137) then
+      if(csize(1:1) .eq. "L") then
         call prtmp(1)
       else
         call prtmp(0)

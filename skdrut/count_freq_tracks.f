@@ -83,9 +83,10 @@ C                 Add another 0.978 for magnitude bit
 ! Issue warning.
           itrk_tot=(ntrkn(1,is,ic)+ntrkn(2,is,ic))*ifan(is,ic)
           if(itrk_tot .ne. 0) then
-            if(cbarrel(is,ic) .ne. "NONE") then
+            if(cbarrel(is,ic) .ne. "NONE" .and.
+     >          cbarrel(is,ic) .ne. "off") then
               if(itrk_tot .ne. 8 .and. itrk_tot .ne. 16 .and.
-     >           itrk_tot .ne. 32) then
+     >           itrk_tot .ne. 32 .and. itrk_tot .ne. 64) then
                 write(*,*)
      >             " Warning!!!  Barrel roll ",cbarrel(is,ic),
      >             " is not allowed for ", cstnna(is)

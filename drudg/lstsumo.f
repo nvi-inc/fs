@@ -39,6 +39,8 @@ C 000107 nrv If tape_motion_type is null, don't write it.
 C 000529 nrv Add scan name.
 C 021011 nrv Another digit for printing gap time.
 ! 122302 JMG Output tape type in header, also procedure names.
+! 2004Nov05 JMGipson.  Modified so that only put complete header info on first page.
+!
 
 ! Functions
       integer julda
@@ -66,7 +68,6 @@ C Input
       character*9 cscan
       character*2 cpass
       character*128 cbuf_source         !contains source info.
-
 C Output
 C These are modified on return: iline, page,num_scans,ntapes
 
@@ -115,7 +116,10 @@ C Local
       character*6 cTapeType     !THICK,THIN SHORT
       character*4 cTapeDens     !HIGH, LOW
       logical kdisk
+      logical kprint_doy
 
+
+      kprint_doy=.false.
       kdisk=km5A .or. KM5P
 
 ! Initialize
@@ -140,82 +144,86 @@ C  1. Headers.
         call strip_path(cinname,lfilnam)
 
         write(luprt,9200) lfilnam,npage
-9200      format(' Schedule file: ',2x,a12,50x,'Page ',i3)
-        if (kskd) then
-          write(luprt,9201) cstnna(istn),lpocod(istn),
-     .    lstcod(istn),(lexper(i),i=1,4)
-9201      format(' Station:    ',5x,a8,' (',a2,') (',a1,')',4x,
-     .           ' Session:    ',5x,4a2)
-        else
-          write(luprt,9203) cstn,cid,cexpername
-9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
-          if(kdisk) then
-            write(luprt)
-     >       "Warning! Can't give byte-count without schedule file."
-          else if(kk4) then
-            write(luprt)
-     >       "Warning! Can't give count without schedule file."
-          endif
-        endif
+9200      format(' Schedule file: ',2x,a12,10x,'Page ',i3)
+        iline=1
 
-        if(kskd) then
-          i=trimlen(tape_motion_type(istn))
-          if(i .ne. 0) then
-            if(tape_motion_type(istn) .eq. "ADAPTIVE") then
-              write(luprt,9204) itgap(istn)
-9204          format(" Tape motion:     ADAPTIVE (gap=",i3,")",3x,$)
-            else
-              write(luprt,9205) tape_motion_type(istn)(1:10)
-9205          format(" Tape motion:     ",a,11x,$)
+! Various header information.
+        if(npage .eq. 1) Then
+          if (kskd) then
+            write(luprt,9201) cstnna(istn),lpocod(istn),
+     .      lstcod(istn),cexper
+9201        format(' Station:    ',5x,a8,' (',a2,') (',a1,')',4x,
+     .           ' Session:    ',5x,a)
+          else
+            write(luprt,9203) cstn,cid,cexpername
+9203        format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
+            if(kdisk) then
+              write(luprt)
+     >         "Warning! Can't give byte-count without schedule file."
+            else if(kk4) then
+              write(luprt)
+     >         "Warning! Can't give count without schedule file."
             endif
           endif
 
-          if (ks2) then
-            write(luprt,  '(" Recorder type:   S2")')
-          else if (kk4) then
-            write(luprt,  '(" Recorder type:   K4")')
-          else if(kdisk) then
-            write(luprt,  '(" Recorder type:   DISK")')
-          else if(.not. (kdisk)) then
-            if (bitdens(istn,1).gt.56000.0) then
-               cTapeDens='High'
-            else
-               cTapeDens='Low'
+          if(kskd) then
+            i=trimlen(tape_motion_type(istn))
+            if(i .ne. 0) then
+              if(tape_motion_type(istn) .eq. "ADAPTIVE") then
+                write(luprt,9204) itgap(istn)
+9204            format(" Tape motion:     ADAPTIVE (gap=",i3,")",3x,$)
+              else
+                write(luprt,9205) tape_motion_type(istn)(1:10)
+9205            format(" Tape motion:     ",a,11x,$)
+              endif
             endif
-            if(maxtap(istn) .lt. 5000) then
-               cTapeType="Short"
-            else if(maxtap(istn) .lt. 10000) then
-               cTapeType="Thick"
-            else
-               cTapeType="Thin"
-            endif
-            write(luprt,'(" Tape type:       ",a6,2x,a4)')
-     >           cTapeType,cTapeDens
-          endif
-        endif
 
-        write(luprt,9210)  cstrack(istn)
-9210    format(" Rack:            ",a)
-        write(luprt, 9211)    cstrec(istn),itearl_local
-9211    format(" Recorder 1:      ",a,14x,"Early start: ",i6,1x,"sec")
-        write(luprt, 9212)    cstrec2(istn),itlate_local
-9212    format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
+            if (ks2) then
+              write(luprt,  '(" Recorder type:   S2")')
+            else if (kk4) then
+              write(luprt,  '(" Recorder type:   K4")')
+            else if(kdisk) then
+              write(luprt,  '(" Recorder type:   DISK")')
+            else if(.not. (kdisk)) then
+              if (bitdens(istn,1).gt.56000.0) then
+                 cTapeDens='High'
+              else
+                 cTapeDens='Low'
+              endif
+              if(maxtap(istn) .lt. 5000) then
+                 cTapeType="Short"
+              else if(maxtap(istn) .lt. 10000) then
+                 cTapeType="Thick"
+              else
+                 cTapeType="Thin"
+              endif
+              write(luprt,'(" Tape type:       ",a6,2x,a4)')
+     >             cTapeType,cTapeDens
+            endif
+          endif            !end kskd
+
+          write(luprt,9210)  cstrack(istn)
+9210      format(" Rack:            ",a)
+          write(luprt, 9211)    cstrec(istn),itearl_local
+9211      format(" Recorder 1:      ",a,14x,"Early start: ",i6,1x,"sec")
+          write(luprt, 9212)    cstrec2(istn),itlate_local
+9212      format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
 
 ! Put out procedure names
-        if (kdisk .or.ks2.or.kk4) then ! setup proc names
-          itype=1
-        else
-          itype=2
-        endif
+          if (kdisk .or.ks2.or.kk4) then ! setup proc names
+            itype=1
+          else
+            itype=2
+          endif
 
-        num_recs=nrecst(istn)
-        if(nrecst(istn) .eq. 2) then
-          if(crecb .eq. "unused" .or. crecb .eq. "none") then
-             num_recs=1
-           endif
-        endif
+          num_recs=nrecst(istn)
+          if(nrecst(istn) .eq. 2) then
+            if(crecb .eq. "unused" .or. crecb .eq. "none") then
+               num_recs=1
+             endif
+          endif
+          iline=6
 
-        if(npage .eq. 1) then
           do icode=1,ncodes
             do irec=1,num_recs ! loop on number of recorders
               num_sub_pass=npassf(istn,icode)
@@ -230,41 +238,44 @@ C  1. Headers.
               lcodeTmp=lcode(icode)
               call c2lower(ccodetmp,ccodetmp)
               write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
+              iline=iline+1
             end do
           end do
-        endif
 ! End of put out procedure names.
 
-        write(luprt,'()')
-        write(luprt,'(a)')
-     >  ' Times are in the format hh:mm:ss'
-        write(luprt,'(a)') ' Scan   = scan_name command in .snp file'
-        write(luprt,'(a)')
-     >  ' Line#  = line number in .snp file where this scan starts'
-        write(luprt,'(a)')
-     >  ' Dur    = time interval of on-source data (Start Data to'//
-     >  ' Stop Data) in mmm:ss'
+! write out additional info.
+          iline=iline+8
+
+          write(luprt,'()')
+          write(luprt,'(a)')
+     >    ' Times are in the format hh:mm:ss'
+          write(luprt,'(a)') ' Scan   = scan_name command in .snp file'
+          write(luprt,'(a)')
+     >    ' Line#  = line number in .snp file where this scan starts'
+          write(luprt,'(a)')
+     >    ' Dur    = time interval of on-source data (Start Data to'//
+     >    ' Stop Data) in mmm:ss'
 ! last line depends on what we are.
-        if(ks2) then
-          write(luprt,'(a)')
-     >   ' Group (min) = group number and nearest minute on tape (S2)'
-        elseif(kk4) then
-          write(luprt,'(a)')
-     >   ' Counts = tape counts at start of scan'
+          if(ks2) then
+            write(luprt,'(a)')
+     >     ' Group (min) = group number and nearest minute on tape (S2)'
+          elseif(kk4) then
+            write(luprt,"(' Counts = tape counts at start of scan')")
         else if(kdisk) then
-          write(luprt,'(a)')
-     >   ' Gbyte  = Gigabytes at start of scan'
+            write(luprt,"(' Gbyte  = Gigabytes at start of scan')")
         else
-          write(luprt,'(a)')
-     >   ' Feet   = footage at start of scan, to nearest 10 feet'
+            write(luprt,'(a)')
+     >     ' Feet   = footage at start of scan, to nearest 10 feet'
         endif
-        writE(luprt,'(a)') ' Record Usage:  XXX'//
-     >   '    or Rec1=start recorder 1, Rec2=start recorder 2'
-        write(luprt,'(a)')
-     >   '              *=parity check, @=no tape motion'
-        write(luprt,'()')
+          writE(luprt,'(a)') ' Record Usage:  XXX'//
+     >     '    or Rec1=start recorder 1, Rec2=start recorder 2'
+          write(luprt,'(a)')
+     >     '              *=parity check, @=no tape motion'
+          write(luprt,'()')
+        endif           !end of other information.
 C
 C  2. Column heads.
+        iline=iline+4
 
         if (.not.kwrap) cbuf='                            '//
      .    '       Start'
@@ -316,13 +327,12 @@ C  2. Column heads.
         endif
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
-
         call wrday(luprt,itime_start(1),itime_start(2))
-        iline=0
+        kprint_doy=.true.
       endif ! new page, write header
 
 ! Indicate a day change.
-      if(iline .ne. 0 .and. itime_start(2) .ne. iday_old) then
+      if(.not.kprint_doy .and. itime_start(2) .ne. iday_old) then
          call wrday(luprt,itime_start(1),itime_start(2))
          iline=iline+1
       endif

@@ -190,6 +190,8 @@ C 020304 nrv Add option 13 for Mk5 piggyback mode.
 C 020614 nrv Change FS version to y/m/d digits for HPUX version.
 C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
+! 2004Nov12 JMGipson.  Replace csize, iwidth (which are font size and widht
+!            by variable cpaper_size. First is orientation, second size.
 C
 C Initialize some things.
 !      iVerMajor_FS = 09
@@ -201,7 +203,7 @@ C Initialize some things.
 
 
 C Initialize the version date.
-      cversion = '041021'
+      cversion = '041117'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -219,10 +221,8 @@ C Initialize ps label file to new.
       inew=1
 C Initialize newpage for labels.
       inewpage=0
-C Initialize printer width to default for each type
-      IWIDTH=-1
-C Initialize font size to default for each type
-      CSIZE='D' ! default
+! Initialize cpaper_Size to "default Defualt"
+      cpaper_size="DD"
 C Initialize the $PROC section location
       IRECPR=0
       IRBPR=0
@@ -878,11 +878,7 @@ C
         ierr=0
         IF (IERR.EQ.0)  THEN
           IF (IFUNC.EQ.1) THEN
-            CALL LISTS(1)
-C         else if (ifunc.eq.102) then
-C           call lists(2)
-C         else if (ifunc.eq.103) then
-C           call lists(3)
+            CALL LISTS()
           ELSE IF (IFUNC.EQ.2) THEN
             CALL POINT(cr1,cr2,cr3,cr4)
 c            I = nstnx

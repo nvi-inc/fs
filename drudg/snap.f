@@ -49,6 +49,10 @@ C     TSPINS - time, in seconds, to spin tape
       integer ierr
       integer itime_scan_beg(5)   !iyr,iday,ihr,imin,isec
       integer itime_disk_abort(5) !time to end disk2file
+      integer itime_disk2file_beg(5)
+      integer itime_disk2file_end(5)
+      integer isec_beg,isec_end   !integer part of disk2file offset
+      real    rsec_beg,rsec_end   !total seconds part of disk2file beg or end
       integer idur(max_stn)
 
       integer ioff(max_stn)
@@ -86,6 +90,7 @@ C     TSPINS - time, in seconds, to spin tape
       logical kflg_next(4)
       integer ierr_next
       integer itime_scan_beg_next(5)
+      integer ilast_wait_time(5)
       integer idur_next(max_stn)
       integer ioff_next(max_stn)
 
@@ -402,6 +407,8 @@ C                     Solved by using kcontpass_old
 C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2004Sep13 JMGipson.  Add midtape command for Mark5.
+! 2004Nov17 JMGipson.  added data_valid=on,off if recorder is "none".
+!   "                  For in2net, changed postob_mk5a to postob
 
 
       icod_old=-1
@@ -450,9 +457,11 @@ C    and whether maximal checks are wanted.
       ierr=1
 
       if (ks2rec(1).or.ks2rec(2).or.kk41rec(1).or.kk41rec(2).or.
-     >    kk42rec(1).or.kk42rec(2).or.km5Arec(1).or.km5Arec(2)) then
+     >    kk42rec(1).or.kk42rec(2).or.km5Arec(1).or.km5Arec(2) .or.
+     >    km5Prec(1).or.km5Prec(2) .or.
+     >    km5APigwire(1).or.km5APigwire(2)  ) then
         maxchk = 'N'
-        dopre = 'N'
+        dopre =  'N'
       else
         call snap_info(cr2,maxchk,dopre)
       endif
@@ -924,7 +933,7 @@ C Unload tape.
      >          kpostpass,kcontpass_prev,kcont,klast_tape)
 
             idt=iTimeDifSec(iTime_tape_stop_spin,iTime_tape_need) !tape_stop-tape_start
-            if(idt .gt. 0) then    !not enough time.
+            if(idt .gt. 0 .and. .not. Km5) then    !not enough time.
                imin=itctim/60
                isec=itctim-imin*60
                write(luscn,'(a,$)')
@@ -1110,7 +1119,22 @@ C Wait until data start time
            call snap_wait_time(lu_outfile,itime_scan_beg)
         endif ! don't/do write
 
-C S2 DATA_VALID 
+! Special case: Recorder set to none. Still issue data_valid commands at appropriate times.
+        if(cstrec(istn) .eq. 'none') then
+          idt = iTimeDifSec(itime_scan_end,itime_tape_start)
+          if (idt.gt.0) then ! some valid data
+            idt=iTimeDifSec(ilast_wait_Time,itime_data_valid)
+            if (kvex.and. idt .ne. 0) then ! good data time
+              call snap_wait_time(lu_outfile,itime_data_valid)
+            endif ! good data time
+C Good data flag -- AFTER the ST command or good-data time
+            call snap_data_valid('=on')
+          endif ! some valid data
+        endif
+! End special case.
+
+C S2 DATA_VALID
+
         if (krec.and.idir.ne.0) then ! non-zero recording scan
           if (ks2) then
             call snap_data_valid('=on')
@@ -1119,6 +1143,7 @@ C S2 DATA_VALID
 C TAPE monitor command
           if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write tape
           else ! do write it
+            call snap_last_wait_time(ilast_wait_time)
             call snap_monitor(kin2net)
           endif ! don't/do write
 
@@ -1130,7 +1155,8 @@ C Start tape if not already running.
 C Wait until good data time for VEX files
           idt = iTimeDifSec(itime_scan_end,itime_tape_start)
           if (idt.gt.0) then ! some valid data
-            if (kvex.and..not.ks2) then ! good data time
+            idt=iTimeDifSec(ilast_wait_Time,itime_data_valid)
+            if (kvex.and..not.ks2 .and. idt .ne. 0) then ! good data time
               call snap_wait_time(lu_outfile,itime_data_valid)
               call snap_monitor(kin2net)
             endif ! good data time
@@ -1143,9 +1169,14 @@ C Good data flag -- AFTER the ST command or good-data time
 C MIDOB procedure
         call lowercase(cmid)
         write(lu_outfile,'(a)') cmid
-
 C Wait until data end time
         call snap_wait_time(lu_outfile,itime_scan_end)
+
+        if(cstrec(istn) .eq. 'none') then
+          call snap_data_valid('=off')
+        endif
+
+
 C Stop data flag
         if (krec.and.idir.ne.0) then ! non-zero recording scan
           call snap_data_valid('=off')
@@ -1162,7 +1193,6 @@ C         Wait until late stop time before issuing ET
             if (km5 .or. KM5A_piggy .or. KM5P_piggy) then
               if(kin2net) then
                 write(lufile,'(a)') 'in2net=off'
-                kin2net=.false.
               else
                 write(luFile,'(a)') 'disk_record=off'
               endif
@@ -1172,7 +1202,10 @@ C         Wait until late stop time before issuing ET
           call snap_monitor(kin2net)
 C Do DISK_CHECK for Mk5 in piggyback mode. (Can't do if tape is running!)
           if (km5 .or. km5a_piggy .or. km5p_piggy) then
-            if(.not. krunning) write(luFile,'(a)') "data_check"
+            if(kin2net) then
+            else
+              if(.not. krunning) write(luFile,'(a)') "data_check"
+            endif
           endif
 C S2 DATA_VALID
           if (ks2.and..not.krunning) then ! need another data_valid off
@@ -1198,7 +1231,7 @@ C Save information about this scan before going on to the next one
 C POSTOB
         if(km5a.or.km5a_piggy) then
 ! if the disk is recording, executing postob_mk5a screws things up.
-          if(krunning) then
+          if(krunning .or. kin2net) then
             write(lu_outfile,'(a)') "postob"
           else
             write(lu_outfile,'(a)') "postob_mk5a"
@@ -1216,11 +1249,31 @@ C POSTOB
             endif
             nch3=trimlen(lxfer_options(ixfer_ptr))
             if(nch3.eq. 0) nch3=1
-            write(ldum,"('disk2file=',a,',',a,',',i4,',',i4,',',a)")
-     >         scan_name(iobs_now)(1:nch),ldest(1:nch2),
-     >         nint(xfer_beg_time(ixfer_ptr))+itearl(istn),
-     >         nint(xfer_end_time(ixfer_ptr))+itearl(istn),
-     >         lxfer_options(ixfer_ptr)(1:nch3)
+
+
+!            write(ldum,"('disk2file=',a,',',a,',',i4,',',i4,',',a)")
+!     >         scan_name(iobs_now)(1:nch),ldest(1:nch2),
+!     >         nint(xfer_beg_time(ixfer_ptr))+itearl(istn),
+!     >         nint(xfer_end_time(ixfer_ptr))+itearl(istn),
+!     >         lxfer_options(ixfer_ptr)(1:nch3)
+             isec_beg=int(xfer_beg_time(ixfer_ptr))
+             isec_end=int(xfer_end_time(ixfer_ptr))
+             rsec_beg=xfer_beg_time(ixfer_ptr)-isec_beg   !get fractional part.
+             rsec_end=xfer_end_time(ixfer_ptr)-isec_end
+
+             call TimeAdd(itime_scan_beg,isec_beg,itime_disk2file_beg)
+             call TimeAdd(itime_scan_beg,isec_end,itime_disk2file_end)
+
+             rsec_beg=rsec_beg+itime_disk2file_beg(5)
+             rsec_end=rsec_end+itime_disk2file_end(5)
+             write(ldum,
+     >         "('disk2file=,',a,',',2(i2.2,'h',i2.2,'m',f5.2,'s,'),a)")
+     >        ldest(1:nch2),
+     >        itime_disk2file_beg(3),itime_disk2file_beg(4),rsec_beg,
+     >        itime_disk2file_end(3),itime_disk2file_end(4),rsec_end,
+     >        lxfer_options(ixfer_ptr)(1:nch3)
+
+
              call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
 ! find speed of recorder
              call find_recorder_speed(icod,speed_recorder,.true.)

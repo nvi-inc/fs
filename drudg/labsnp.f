@@ -23,11 +23,10 @@ c Output:
 C Local
       integer iy1(5),id1(5),ih1(5),im1(5),iy2(5),id2(5),ih2(5),im2(5)
       integer ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape
-      integer nout,newlab,idayr,ihr,imn,idayr2,ihr2,imn2,idum
+      integer nout,newlab,idayr,ihr,imn,idayr2,ihr2,imn2
       INTEGER   IERR
       character*128 ctmp,ctmp1
       character*20 cti,ctiformat,cctiformat
-      integer ichmv
 
 C
 C 1.  Initialize variables

@@ -27,6 +27,7 @@ char   *fname, *labels, *orien;
    951016 nrv If "orien" is non-blank, use the scripts, otherwise use
               the recode command.
    960226 nrv Add separate argument for labels. 
+   2004Nov17 JMG  Changed to latin1..ibmpc
 
 */
 
@@ -49,7 +50,7 @@ char   *fname, *labels, *orien;
       } 
       else { /* text mode */
         if (strncmp(orien," ",1) == 0) { /* no script use recode */
-          strcpy(command,"recode latin1:ibmpc < ");
+          strcpy(command,"recode latin1..ibmpc < ");
           strcat(command,fname);
           strcat(command," | lpr");
         }

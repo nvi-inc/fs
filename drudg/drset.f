@@ -90,8 +90,10 @@ C
       IDUMMY = ICHMV(LKEYWD,3,LINSTQ(2),IC1,NC)
       ikey = istringminmatch(listpr,MaxPr,ckeywd)
       IF  (IKEY.EQ.0) THEN  !invalid
-        write(luscn,9110) ckeywd
-9110    format('DRSET01 - ',a24,' is not a valid parameter name.')
+! Don't issue an error message because it could be a parameter that sked
+! knows about but not drudg.
+!        write(luscn,9110) ckeywd
+!9110    format('DRSET01 - ',a24,' is not a valid parameter name.')
         RETURN
       END IF  !invalid
       ckey=listprshort(ikey)
