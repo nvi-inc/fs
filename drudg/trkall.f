@@ -1,4 +1,4 @@
-      subroutine trkall(itras,lmode,itrk,lm,nm,ifan)
+      subroutine trkall(ipass,istn,icode,lmode,itrk,lm,nm,ifan)
 
 C  TRKALL returns the complete list of tracks to be
 C  recorded, given the mode and list of tracks assigned
@@ -23,15 +23,18 @@ C 960531 nrv Fanout factor is input, already determined.
 C 961018 nrv Fan out the 'M' modes just like the 'V' ones.
 C 970206 nrv Add headstack index
 C 970401 nrv Remove itrax -- not used
+! 25Jul2003 JMG changed itras to a function
 C
 C Called by: PROCS
 
       include '../skdrincl/skparm.ftni'
+! functions
+      integer itras
 C
 C  INPUT:
-      integer itras(2,2,max_headstack,max_chan)
 C             Mark III # track assignments from schedule
 C             sub-array for only this code, this station
+      integer ipass,istn,icode
       integer*2 lmode ! first 2 characters of mode from schedule
       integer ifan ! fanout factor
 C
@@ -64,7 +67,7 @@ C    Initialize itrk to 0.
           do ihd=1,max_headstack
             do ichan=1,max_chan
 C             itrax(isb,ibit,ihd,ichan)=itras(isb,ibit,ihd,ichan)
-              it = itras(isb,ibit,ihd,ichan)
+              it = itras(isb,ibit,ihd,ichan,ipass,istn,icode)
               if (it.ne.-99) itrk(it+3,ihd)=1
             enddo
           enddo
@@ -85,7 +88,7 @@ C     If this is a VLBA mode or Mk4 mode, check for fan-out
               do ibit=1,2 ! s/m
                 do ihd=1,max_headstack ! headstacks
                   do ichan=1,max_chan ! channels
-                    it = itras(isb,ibit,ihd,ichan)
+                    it = itras(isb,ibit,ihd,ichan,ipass,istn,icode)
                     if (it.ne.-99) then ! fan it out
                       if (ifan.eq.2.or.ifan.eq.4) then ! 1:2
 C                       itrax(isb,ibit,ihd,ichan+2)=it+2

@@ -17,17 +17,41 @@ C     include 'skcom.ftni'
 C
 C  Called by: fsked, sread
 C  Calls: gtfld, igtst2, ifill, wrerr
+! functions
+      integer istringminmatch
+      integer trimlen
 
 C  LOCAL
       real speed
       double precision s2sp,k4sp
-      integer*2 lkeyw2(12),LKEYWD(12),lkey,lkey2
-      integer ikey_len,ikey,ich,ic1,ic2,nch,i,j,istn
+      integer*2 LKEYWD(12)
+      integer ikey_len,ich,ic1,ic2,nch,i,j,istn
       integer ival,idum,icode,ias2b
-      integer ichcm_ch,igtky,i2long,igtst2,ichmv,jchar,ichmv_ch
-      character*5 ctype(max_stn)
-      character*4 cdens(max_stn)
-      logical kdefault,ks2,kk4,ks21,kk41
+      integer i2long,igtst2,ichmv,jchar
+      logical kdefault,ks2,kk4
+      character*24 ckeywd
+      equivalence (lkeywd,ckeywd)
+      character*6 cTapeType(max_stn)
+      character*4 cTapeDens(max_stn)
+
+      integer ilist_len
+      parameter (ilist_len=3)
+      character*12 list(ilist_len)
+
+      integer ilist_hl
+      parameter (ilist_hl=2)
+      character*12 list_hl(ilist_hl)
+
+      integer ilist_lens2
+      parameter (ilist_lens2=2)
+      character*3 lists2(ilist_lens2)
+
+      integer ikey,ikeyhl,ikeys2
+
+      data list/"SHORT","THICK","THIN"/
+      data list_hl/'HIGH','LOW'/
+      data listS2/'LP','SLP'/
+
       data ikey_len/20/
 C
 C MODIFICATIONS:
@@ -44,8 +68,8 @@ C 021003 nrv Adjust K4 output for speed being in dm internally.
 C
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
-        write(luscn,'("TTAPE00 - Select frequencies and ",
-     .  "stations first.")')
+        write(luscn,*)
+     >    "TTAPE00 - Select frequencies and stations first."
         RETURN
       END IF  !no stations selected
 
@@ -55,22 +79,20 @@ C
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
         do i=1,nstatn
-          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
-          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
-          if (ks2) then
-            if (ichcm_ch(ls2speed(1,i),1,'LP').eq.0) s2sp=SPEED_LP
-            if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
+          if (cstrec(i)(1:2).eq.'S2') then
+            if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
+            if (cs2speed(i).eq.'SLP') s2sp=SPEED_SLP
             ival = idint(0.1 + maxtap(i)/(s2sp*5.d0)) ! feet/(ips*5) = min
-          elseif (kk4) then
+          elseif (cstrec(i)(1:2).eq.'K4') then
             k4sp = speed(1,i)*10.d0 ! speed for code 1 in m/s
             ival = idint(0.1 + maxtap(i)/(60.d0*k4sp)) ! min=m/(60*m/s)
           else 
-            cdens(i)='Low'
-            if (bitdens(i,1).gt.56000.0) cdens(i)='High'
-            ctype(i)='Thin'
-            if (maxtap(i).lt.10000.and.maxtap(i).gt.5000) 
-     .        ctype(i)='Thick'
-            if (maxtap(i).lt.5000) ctype(i)='Short'
+            cTapeDens(i)='Low'
+            if (bitdens(i,1).gt.56000.0) cTapeDens(i)='High'
+            cTapeType(i)='Thin'
+            if (maxtap(i).lt.10000.and.maxtap(i).gt.5000)
+     .        cTapeType(i)='Thick'
+            if (maxtap(i).lt.5000) cTapeType(i)='Short'
           endif
           if (i.eq.1.and.(.not.ks2.and..not.kk4)) WRITE(LUDSP,9910)
 9910        FORMAT(' ID  Station   Tape length        Density   ',
@@ -81,25 +103,23 @@ C
 9912        FORMAT(' ID  Station   Tape length            Speed')
         enddo
         DO  I=1,NSTATN
-          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
-          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
 C         Write bit density for freq code 1 only.
-          WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4)
-9111      FORMAT(1X,A2,2X,4A2,$)
-          if (.not.ks2.and..not.kk4) then
-            WRITE(LUDSP,9112) maxtap(i),ctype(i),bitdens(i,1),cdens(i),
-     .      maxpas(i)
-9112        FORMAT(i6,'feet (',a,')',3x,f6.0,' (',a,')',3x,i3)
-          else if (ks2) then
-            if (ichcm_ch(ls2speed(1,i),1,'LP').eq.0) s2sp=SPEED_LP
-            if (ichcm_ch(ls2speed(1,i),1,'SLP').eq.0) s2sp=SPEED_SLP
+          WRITE(LUDSP,"(1X,A2,2X,A8,$)") cpoCOD(I),cSTNNA(i)
+          if(cstrec(i)(1:2) .eq. "S2") then
+            if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
+            if (cs2speed(i).eq.'SLP') s2sp=SPEED_SLP
 c                             min   feet           slp/lp          ips
             write(ludsp,9113) ival,maxtap(i),(ls2speed(j,i),j=1,2),s2sp
 9113        format(i6," min (",i6," feet)",2x,2a2," (",f3.1," ips)")
-          else if (kk4) then
+          else if (cstrec(i)(1:2) .eq. "K4") then
             k4sp = speed(1,i)*1000.0
             write(ludsp,9114) ival,maxtap(i),k4sp
 9114        format(i6," min (",i6," m)",2x," ",f5.1," mm/s")
+          else
+             WRITE(LUDSP,9112) maxtap(i),cTapeType(i),bitdens(i,1),
+     >        cTapeDens(i), maxpas(i)
+9112        FORMAT(i6,'feet (',a,')',3x,f6.0,' (',a,')',3x,i3)
+
           endif
         END DO  
         RETURN
@@ -126,24 +146,17 @@ C         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! next station
         endif
 C       Station ID is valid. Check tape type now.
         if (istn.gt.0) then ! individual station
-          ks2 = ichcm_ch(lstrec(1,istn),1,'S2').eq.0
-          kk4 = ichcm_ch(lstrec(1,istn),1,'K4').eq.0
+          ks2 = cstrec(istn)(1:2).eq.'S2'
+          kk4 = cstrec(istn)(1:2).eq.'K4'
         else ! all stations
-          ks2 = ichcm_ch(lstrec(1,1),1,'S2').eq.0
-          kk4 = ichcm_ch(lstrec(1,1),1,'K4').eq.0
+          ks2 = cstrec(1)(1:2).eq.'S2'
+          kk4 = cstrec(1)(1:2).eq.'K4'
           do i=2,nstatn
-            ks21 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
-            if (ks2.and..not.ks21) then
-              write(luscn,9991) (lstnna(j,i),j=1,4)
-9991          format('TTAPE99 - All stations must be S2 to use the ',
-     .        '_ character.')
-              return
-            endif
-            kk41 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
-            if (kk4.and..not.kk41) then
-              write(luscn,9992) (lstnna(j,i),j=1,4)
-9992          format('TTAPE99 - All stations must be K4 to use the ',
-     .        '_ character.')
+            if((ks2 .and. cstrec(i)(1:2) .ne. "S2") .or.
+     >         (kk4 .and. cstrec(i)(1:2) .ne. "K4")) then
+              write(luscn,
+     >       "('TTAPE99:  All stations must be identical to use _ ',a)")
+     >        cstnna(i)
               return
             endif
           enddo
@@ -157,21 +170,20 @@ C       Station ID is valid. Check tape type now.
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! type
           IF  (IC1.GT.0) THEN 
             nch=min0(ikey_len,ic2-ic1+1)
-            idum = ichmv(lkeyw2(2),1,linstq(2),ic1,nch)
-            lkeyw2(1)=nch
-            ikey = IGTKY(LKEYW2,23,LKEY)
+            ckeywd=" "
+            idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
+            ikey=istringminmatch(ckeywd,list,ilist_len)
             if (ikey.eq.0) then ! invalid type
-              write(luscn,9203) (lkeyw2(i),i=1,12)
-9203          format('TTAPE03 Error - invalid type: ',12a2,', must be ',
+              write(luscn,9203) ckeywd(1:trimlen(ckeywd))
+9203          format('TTAPE03 Error - invalid type: ',a,', must be ',
      .        'THICK or THIN or SHORT.') 
               return
             END IF  !invalid type
             kdefault = .false.
           else ! use defaults for type and density
             kdefault = .true.
-            idum = ichmv_ch(lkey,1,'  ')
           endif ! type/use defaults
-          if ((ichcm_ch(lkey,1,'TN').eq.0.or.ichcm_ch(lkey,1,'SH').eq.0)
+          if((list(ikey) .eq. "SHORT" .or. list(ikey) .eq. "THIN")
      .      .and..not.kdefault) then ! density 
             CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
             IF  (IC1.EQ.0) THEN  !no matching density
@@ -181,12 +193,12 @@ C       Station ID is valid. Check tape type now.
               RETURN
             endif ! no matching density
             nch=min0(ikey_len,ic2-ic1+1)
-            idum = ichmv(lkeyw2(2),1,linstq(2),ic1,nch)
-            lkeyw2(1)=nch
-            ikey = IGTKY(LKEYW2,23,LKEY2)
-            if (ikey.eq.0) then ! invalid type
-              write(luscn,9204) (lkeyw2(i),i=1,12)
-9204          format('TTAPE03 Error - invalid bit density: ',12a2,
+            ckeywd=" "
+            idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
+            ikeyhl=istringminmatch(ckeywd,list_hl,ilist_hl)
+            if (ikeyhl.eq.0) then ! invalid type
+              write(luscn,9204) ckeywd
+9204          format('TTAPE03 Error - invalid bit density: ',a,
      .        ', must be HIGH or LOW.') 
               return
             END IF  !invalid type
@@ -211,18 +223,17 @@ C       Station ID is valid. Check tape type now.
               RETURN
             endif ! no speed
             nch=min0(ikey_len,ic2-ic1+1)
-            idum = ichmv(lkeyw2(2),1,linstq(2),ic1,nch)
-            lkeyw2(1)=nch
-            ikey = IGTKY(LKEYW2,23,LKEY2)
-            if (ikey.eq.0) then ! invalid speed
-              write(luscn,9207) (lkeyw2(i),i=1,12)
-9207          format('TTAPE03 Error - invalid S2 speed: ',12a2,
+            ckeywd=" "
+            idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
+            ikeys2=istringminmatch(ckeywd,lists2,ilist_lens2)
+            if (ikeys2.eq.0) then ! invalid speed
+              write(luscn,9207) ckeywd
+9207          format('TTAPE03 Error - invalid S2 speed: ',a,
      .        ', must be SLP or LP.') 
               return
             END IF  !invalid speed
           else ! use defaults for length and speed 
             kdefault = .true.
-            idum = ichmv_ch(lkey,1,'  ')
           endif ! type/use defaults
         else if (kk4) then
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! length in min
@@ -238,35 +249,43 @@ C       Station ID is valid. Check tape type now.
             kdefault = .false.
           else ! use defaults for length and speed 
             kdefault = .true.
-            idum = ichmv_ch(lkey,1,'  ')
           endif ! type/use defaults
         endif 
 
 C   3. Now set parameters in common.
 
         DO  I = 1,NSTATN
-          kk4 = ichcm_ch(lstrec(1,i),1,'K4').eq.0
-          ks2 = ichcm_ch(lstrec(1,i),1,'S2').eq.0
           if ((istn.eq.0).or.(istn.gt.0.and.i.eq.istn)) then ! this station
-            if (.not.ks2.and..not.kk4) then ! Mk3/4
-              if (ichcm_ch(lkey,1,'TH').eq.0) then
+            if (cstrec(i)(1:2).eq."S2") then
+              if (lists2(ikeys2) .eq. "LP") then
+                cs2speed(i)="LP"
+                s2sp = SPEED_LP
+              else
+                cs2speed(i)="SLP"
+                s2sp = SPEED_SLP
+              endif 
+              maxtap(i)=ival*5.d0*s2sp ! convert to feet
+            else if (cstrec(i)(1:2) .eq. "K4") then
+              k4sp = speed(1,i) ! for code 1
+              maxtap(i)=ival*k4sp*60.d0 ! convert to meters
+            else
+              if (list(ikey) .eq. "THICK") then
                 maxtap(i)=thick_length
                 do icode=1,NCODES
                   bitdens(i,icode)=33333
                 enddo
-              else if (ichcm_ch(lkey,1,'TN').eq.0.or.
-     .                 ichcm_ch(lkey,1,'SH').eq.0) then
+              elseif(list(ikey).eq."THIN".or.list(ikey).eq."SHORT")then
                 maxtap(i)=thin_length
-                if (ichcm_ch(lkey,1,'SH').eq.0) maxtap(i)=short_length
-                if (ichcm_ch(lkey2,1,'HI').eq.0) then
+                if(list(ikey) .eq. "SHORT") maxtap(i)=short_length
+                if (list_hl(ikeyhl).eq. 'HIGH') then
                   do icode=1,NCODES
-                    if (ichcm_ch(lmode(1,i,icode),1,'V').eq.0) then
+                    if (cmode(i,icode)(1:1) .eq. "V") then
                       bitdens(i,icode)=56700 ! VLBA non-data replacement
                     else
                       bitdens(i,icode)=56250 ! Mark3/4 data replacement
                     endif
                   enddo
-                else if (ichcm_ch(lkey2,1,'LO').eq.0) then
+                else                            !low density.
                   do icode=1,NCODES
                     bitdens(i,icode)=33333
                   enddo
@@ -277,19 +296,7 @@ C   3. Now set parameters in common.
                   bitdens(i,icode)=bitdens(i,icode) ! code 1 only
                 enddo
               endif
-            else if (ks2) then !S2
-              if (ichcm_ch(lkey2,1,'LP').eq.0) then
-                idum = ichmv_ch(ls2speed(1,i),1,'LP  ')
-                s2sp = SPEED_LP
-              else
-                idum = ichmv_ch(ls2speed(1,i),1,'SLP ')
-                s2sp = SPEED_SLP
-              endif 
-              maxtap(i)=ival*5.d0*s2sp ! convert to feet
-            else if (kk4) then !S2
-              k4sp = speed(1,i) ! for code 1
-              maxtap(i)=ival*k4sp*60.d0 ! convert to meters
-            endif ! Mk3/4/S2/K4
+            endif
           endif ! this station
         END DO
 C       get next station name

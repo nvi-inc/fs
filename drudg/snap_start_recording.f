@@ -6,7 +6,6 @@
       character*3 lpre          !st, or st1
       integer npre
 
-      if(krunning) return
       lpre="st"
       if(krec_append) then
         lpre(3:3)=crec(irec)
@@ -15,7 +14,7 @@
         npre=2
       endif
 
-      if(km5) then
+      if(km5A.or.KM5P) then
         write(luFile,'("disc_start=on")')
       else if(kk4) then
         write(luFile,"(a,'=record')") lpre(1:npre)       !stX=record, where X is optional "1" or "2"

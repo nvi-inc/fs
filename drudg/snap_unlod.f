@@ -7,8 +7,6 @@
       character*7 lprefix
       integer nch
 
-      if(km5) return
-
       lprefix="unlod"             !lprefix:   unlodX=    , where "= and "X" is optional
       if(krec_append) then
         lprefix(6:6)=crec(irec)

@@ -9,6 +9,9 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+
+! function
+      integer itras
 C
 C   HISTORY:
 C     WHO   WHEN   WHAT

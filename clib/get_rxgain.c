@@ -11,15 +11,16 @@ int get_rxgain(file,rxgain)
 {
   FILE *fp;
   int ierr, iread, i;
-  char cdum;
   char type[11], pol0[4], pol1[4], gform[6], gtype[5], tcpol[4];
-  char buff[81];
+  char buff[256];
 
   if( (fp= fopen(file,"r"))==NULL )
     return -1;
 
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-100;
+
+  lower(buff);
 
   /* Line 1: type, lomin, lomax */
 
@@ -52,6 +53,8 @@ int get_rxgain(file,rxgain)
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-200;
   
+  lower(buff);
+
   /* Line 2: Update date: year, month day */
   
   iread=sscanf(buff,"%d %d %d",&rxgain->year,&rxgain->month,&rxgain->day);
@@ -68,6 +71,8 @@ int get_rxgain(file,rxgain)
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-300;
   
+  lower(buff);
+
   /* Line 3: FWHM */
   
   iread=sscanf(buff,"%10s %f %f",type,&rxgain->fwhm.coeff);
@@ -96,6 +101,8 @@ int get_rxgain(file,rxgain)
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-400;
 
+  lower(buff);
+
   /* Line 4: polarizations */
 
   iread=sscanf(buff,"%3s %3s",pol0,pol1);
@@ -122,6 +129,8 @@ int get_rxgain(file,rxgain)
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-500;
 
+  lower(buff);
+
   /* Line 5: DPFU */
 
   iread=sscanf(buff,"%f %f",&rxgain->dpfu[0],&rxgain->dpfu[1]);
@@ -143,9 +152,11 @@ int get_rxgain(file,rxgain)
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-600;
 
+  lower(buff);
+
   /* Line 6: gain curve */
 
-  iread=sscanf(buff,"%5s %4s %f %f %f %f %f %f %f %f %f %f %1c",
+  iread=sscanf(buff,"%5s %4s %f %f %f %f %f %f %f %f %f %f",
 	       gform,gtype,
 	       &rxgain->gain.coeff[0],
 	       &rxgain->gain.coeff[1],
@@ -156,86 +167,153 @@ int get_rxgain(file,rxgain)
 	       &rxgain->gain.coeff[6],
 	       &rxgain->gain.coeff[7],
 	       &rxgain->gain.coeff[8],
-	       &rxgain->gain.coeff[9],
-	       &cdum);
+	       &rxgain->gain.coeff[9]);
 
   if(iread<3 || iread >12)
     return -611;
   
-  if(strcmp("ELEV",gform)==0)
+  if(strcmp("elev",gform)==0)
      rxgain->gain.form='e';
-  else if(strcmp("ALTAZ",gform)==0)
+  else if(strcmp("altaz",gform)==0)
      rxgain->gain.form='a';
   else
     return -612;
 
-  if(strcmp("POLY",gtype)==0)
+  if(strcmp("poly",gtype)==0)
     rxgain->gain.type='p';
   else
     return -613;
 
   rxgain->gain.ncoeff=iread-2;
 
-  rxgain->tcal_ntable==0;
+  if(strstr(buff,"opacity_corrected")!=NULL)
+    rxgain->gain.opacity='y';
+  else
+    rxgain->gain.opacity='n';
+
+
+  rxgain->tcal_ntable=0;
   rxgain->tcal_npol[0]=0;
   rxgain->tcal_npol[1]=0;
 
-  for(i=0;i<MAX_TCAL;i++) {
-    if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0) {
-      if(ierr==-1) {
-	if(rxgain->tcal_ntable==0)
-	  return -2;
-	else
-	  return 0;
-      } else if(ierr!=0)
-	return ierr-700;
-    }
+  while(1) {
+    char pol;       /* polarization 'l' (lcp) or 'r' (rcp) */
+    float freq;     /* tabular point for frequency MNz */
+    float tcal;     /* cal temperature (degrees K) */
+
+    ierr=find_next_noncomment(fp,buff,sizeof(buff));
+
+    if(ierr==-1)
+      return -2;
+    else if(ierr!=0)
+      return ierr-700;
+
+    lower(buff);
+
+    if(strstr(buff,"end_tcal_table")!=NULL)
+      if(rxgain->tcal_ntable==0)
+	return -716;
+      else
+	goto trec;
 
   /* Line 7 and following, Tcal tables: pol, freq, tcal */
 
     iread=sscanf(buff,"%3s %f %f",
-		 tcpol,
-		 &rxgain->tcal[i].freq,
-		 &rxgain->tcal[i].tcal);
+		 tcpol,&freq,&tcal);
 
-   if(iread != 3)
-     return -711;
-   else if(strcmp("rcp",tcpol)==0)
-     rxgain->tcal[i].pol='r';
-   else if(strcmp("lcp",tcpol)==0)
-     rxgain->tcal[i].pol='l';
-   else
-     return -712;
-
-   if(rxgain->tcal[i].pol==rxgain->pol[0])
-     rxgain->tcal_npol[0]+=1;
-   else if(rxgain->pol[1]!=0
-	   && rxgain->tcal[i].pol==rxgain->pol[1])
-     rxgain->tcal_npol[1]+=1;
-   else
-     return -713;
-
-    if(rxgain->tcal[i].freq < 0.0)
+    if(iread != 3)
+      return -711;
+    else if(strcmp("rcp",tcpol)==0)
+      pol='r';
+    else if(strcmp("lcp",tcpol)==0)
+      pol='l';
+    else
+      return -712;
+    
+    if(pol==rxgain->pol[0])
+      rxgain->tcal_npol[0]+=1;
+    else if(rxgain->pol[1]!=0 && pol==rxgain->pol[1])
+      rxgain->tcal_npol[1]+=1;
+    else
+      return -713;
+    
+    if(freq < 0.0)
       return -714;
-
-    /* negative gain means no gain diode
-     *
-     *  if(rxgain->tcal[i].tcal < 0.0)
-     *    return -715;
-     */
-
-    rxgain->tcal_ntable=i+1;
+    
+    if( rxgain->tcal_ntable >= MAX_TCAL)
+      return -715;
+    
+    rxgain->tcal[rxgain->tcal_ntable].pol=pol;
+    rxgain->tcal[rxgain->tcal_ntable].freq=freq;
+    rxgain->tcal[rxgain->tcal_ntable].tcal=tcal;
+    rxgain->tcal_ntable++;
   }
+  
+  /* check for trec and spill table */
+  
+ trec:
+  rxgain->trec=0.0;
+    rxgain->spill_ntable=0;
+    
+    ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-  /* check for traling junk */
+    if(ierr==-1)
+      return -2;
+    else if(ierr!=0)
+      return ierr-700;
+
+    lower(buff);
+
+    iread=sscanf(buff,"%f",&rxgain->trec);
+    
+    if(iread!=1)
+      return -801;
+
+    if(rxgain->trec < 0.0)
+      return -802;
+
+    while(1) {
+      char tk;
+      float el;
+      ierr=find_next_noncomment(fp,buff,sizeof(buff));
+
+      if(ierr==-1)
+	return -2;
+      else if(ierr!=0)
+	return ierr-900;
+
+      lower(buff);
+
+      if(strstr(buff,"end_spillover_table")!=NULL)
+	goto done;
+
+  /* Line 9 and following, Tspill tables: el tk */
+
+      iread=sscanf(buff,"%f %f",&el,&tk);
+
+      if(iread != 2)
+	return -911;
+      
+      if( rxgain->spill_ntable >= MAX_SPILL)
+	return -912;
+
+      rxgain->spill[rxgain->spill_ntable].el=el;
+      rxgain->spill[rxgain->spill_ntable].tk=tk;
+      rxgain->spill_ntable++;
+    }
+ done:
+
+  /* check for trailing junk */
   
   ierr=find_next_noncomment(fp,buff,sizeof(buff));
-  switch(ierr) {
-  case -1:
-    return 0;
-    break;
-  default:
-    return ierr-10;
-    break;
-  }
+  if(ierr==-1) {
+    if(0==fclose(fp))
+      return 0;
+    else
+      return -999;
+  } else if(ierr!=0)
+    return ierr-998;
+  else
+    return -998;
+
 }

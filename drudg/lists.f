@@ -9,7 +9,9 @@ C
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 C
-C INPUT: 
+C INPUT:
+      integer iflch,ichcm_ch,ichmv,julda,jchar ! functions
+
       integer iin ! 1=standard, 2=S2, 3=K4
 C OUTPUT: none
 C LOCAL:
@@ -56,7 +58,13 @@ C     integer*2 LAXIS(2,7),
       LOGICAL KUP ! true if source is up at station
       logical kwrap
       integer*2 HHR
-      integer iflch,ichcm_ch,ichmv,julda,jchar ! functions
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
+
+
       double precision speed_k4 ! speed for K4
       double precision conv_k4 ! speed scaling for feet-->counts
       double precision conv_s2 ! speed scaling for feet-->minutes

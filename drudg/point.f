@@ -1,4 +1,4 @@
-	SUBROUTINE POINT(cr1,cr2,cr3,cr4)
+      SUBROUTINE POINT(cr1,cr2,cr3,cr4)
 
 C Write a file or a tape with pointing controls
 C
@@ -8,6 +8,12 @@ C
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+
+! functions
+      integer ias2b,trimlen,jchar,iflch,ichmv,ib2as ! functions
+      integer ichmv_ch,ichcm_ch
+      real speed ! function
+
 C INPUT
       character*(*) cr1,cr2,cr3,cr4
 C
@@ -47,9 +53,14 @@ C LOCAL:
 	LOGICAL EX
 Cinteger*4 ifbrk
 	integer Z24
-      integer ias2b,trimlen,jchar,iflch,ichmv,ib2as ! functions
-      integer ichmv_ch,ichcm_ch
-      real speed ! function
+
+      character*(max_sorlen) csname
+      character*2 cstn(max_stn)
+      character*2 cfreq
+      equivalence (csname,lsname),(lstn,cstn),(cfreq,lfreq)
+
+
+
 	DATA Z24/Z'24'/
 
 C Initialized:
@@ -255,7 +266,9 @@ C DO BEGIN "Schedule file entries"
      .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .       NSTNSK,LSTN,LCABLE,
      .       MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-	  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+!	  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+          call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+
 	  IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 990
 C
 C 4. If station is in observation, process it.  Use block

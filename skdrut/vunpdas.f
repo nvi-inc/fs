@@ -61,7 +61,7 @@ C  LOCAL:
       integer i,nch,idumy
       logical ks2 ! true for an S2 recorder
       integer fvex_double,fvex_int,fget_station_lowl,fvex_field,
-     .fvex_units,fget_all_lowl,
+     .fvex_units,
      .ptr_ch,fvex_len,ichcm_ch,ichmv_ch ! function
 C
 C
@@ -104,7 +104,7 @@ C
           if (ichcm_ch(lrec,1,'MARK4').eq.0) 
      .    IDUMY = ICHMV_ch(lrec,1,'Mark4')
           i=1
-          do while (i.le.max_rec_type.and.cout(1:nch).ne.rec_type(i))  
+          do while (i.le.max_rec_type.and.cout(1:nch).ne.crec_type(i))
             i=i+1
           enddo
           if (i.gt.max_rec_type) then ! no match
@@ -136,7 +136,7 @@ C
           if (ichcm_ch(lrack,1,'MARK4').eq.0)
      .    IDUMY = ICHMV_ch(lrack,1,'Mark4')
           i=1
-          do while (i.le.max_rack_type.and.cout(1:nch).ne.rack_type(i))  
+          do while (i.le.max_rack_type.and.cout(1:nch).ne.crack_type(i))
             i=i+1
           enddo
           if (i.gt.max_rack_type) then ! no match

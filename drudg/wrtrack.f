@@ -12,8 +12,12 @@ C   nrv   930709  Fixed to write correct mode A tracks
 C   nrv   950406  fixed to write correct mode E tracks
 C 961101 nrv Don't write an extra NEXT after 8 channels if there are
 C            both u/l for a total of 16 channels
+! 2003Jul25 JMG  Changed itras to function.
 C
       include '../skdrincl/skparm.ftni'
+
+! function
+      integer itras
 C
 C  INPUT:
       integer idx,lu,iblen,icod

@@ -26,6 +26,7 @@ C            program size.
 C 020713 nrv Add Mk5 recorder type
 C 021111 jfq Add LBA rack type
 C 2003Apr17  JMG   Added Mark5p
+C 2003Jul23  JMG   Added Mk5PigW
 C
 C LOCAL
       integer ic,ix,ib,is,j,iv,i,idum,ichmv_ch,itx,ity,itz,idef,
@@ -179,34 +180,35 @@ C  In freqs.ftni
       enddo
 
 !      do i=1,max_rack_type
-        rack_type(1) = 'none'
-        rack_type(2) = 'Mark3A'
-        rack_type(3) = 'VLBA'
-        rack_type(4) = 'VLBAG'
-        rack_type(5) = 'VLBA/8'
-        rack_type(6) = 'VLBA4/8'
-        rack_type(7) = 'Mark4'
-        rack_type(8) = 'VLBA4'
-        rack_type(9) = 'K4-1'
-        rack_type(10) = 'K4-2'
-        rack_type(11) = 'K4-1/K3'
-        rack_type(12) = 'K4-2/K3'
-        rack_type(13) = 'K4-1/M4'
-        rack_type(14) = 'K4-2/M4'
-        rack_type(15) = 'LBA'
+        crack_type(1) = 'none'
+        crack_type(2) = 'Mark3A'
+        crack_type(3) = 'VLBA'
+        crack_type(4) = 'VLBAG'
+        crack_type(5) = 'VLBA/8'
+        crack_type(6) = 'VLBA4/8'
+        crack_type(7) = 'Mark4'
+        crack_type(8) = 'VLBA4'
+        crack_type(9) = 'K4-1'
+        crack_type(10) = 'K4-2'
+        crack_type(11) = 'K4-1/K3'
+        crack_type(12) = 'K4-2/K3'
+        crack_type(13) = 'K4-1/M4'
+        crack_type(14) = 'K4-2/M4'
+        crack_type(15) = 'LBA'
 !      enddo
 !      do i=1,max_rec_type
-        rec_type(1) = 'none'
-        rec_type(2) = 'unused'
-        rec_type(3) = 'Mark3A'
-        rec_type(4) = 'VLBA'
-        rec_type(5) = 'VLBA4'
-        rec_type(6) = 'Mark4'
-        rec_type(7) = 'S2'
-        rec_type(8) = 'K4-1'
-        rec_type(9) = 'K4-2'
-        rec_type(10) = 'Mark5A'
-        rec_type(11) = 'Mark5P'
+        crec_type(1) = 'none'
+        crec_type(2) = 'unused'
+        crec_type(3) = 'Mark3A'
+        crec_type(4) = 'VLBA'
+        crec_type(5) = 'VLBA4'
+        crec_type(6) = 'Mark4'
+        crec_type(7) = 'S2'
+        crec_type(8) = 'K4-1'
+        crec_type(9) = 'K4-2'
+        crec_type(10) = 'Mark5A'
+        crec_type(11) = 'Mk5APigW'
+        crec_type(12) = 'Mark5P'
 !      enddo
 
 C Initialize canned roll defs
@@ -283,17 +285,19 @@ C Initialize to zero
       enddo ! two canned patterns for 8 and 16
 
 C Initialize non-standard roll tables to -99.
+      call init_iroll_def()
+
       do i=1,max_frq
         do j=1,max_stn
           iroll_inc_period(j,i) = 0
           iroll_reinit_period(j,i) = 0
           nrolldefs(j,i) = 0
           nrollsteps(j,i) = 0
-          do k=1,max_track*max_headstack
-            do l=1,max_track+2
-              iroll_def(l,k,j,i) = -99
-            enddo
-          enddo
+!          do k=1,max_track*max_headstack
+!            do l=1,max_track+2
+!              iroll_def(l,k,j,i) = -99
+!            enddo
+!          enddo
         enddo
       enddo
 

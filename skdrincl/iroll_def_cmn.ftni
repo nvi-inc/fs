@@ -1,0 +1,9 @@
+! Common array that holds different track assignments.
+      integer max_val,num_val
+      parameter(max_val=40000)   !way big.
+      integer*4 iroll_Def_indvec(Max_val)
+      integer*2 iroll_defvec(max_val)  !last is value
+
+      common /iroll_def_cmn/num_val,iroll_def_indvec,iroll_defvec
+
+      

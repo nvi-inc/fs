@@ -23,6 +23,8 @@ C
 C  LOCAL:
       integer*2 lb ! band for unpacking
       integer*2 lname(max_sorlen/2) !temp source name for unpacking
+      character*(max_sorlen) cname
+      equivalence (lname,cname)
       real*4 fl(max_flux)
 C      - temporary baseline/flux holders for unpacking
       integer j,j1,nfl,i,is,ib
@@ -62,10 +64,14 @@ C
       if (ib.gt.0.and.is.gt.0) then !band and source are selected
         cfltype(ib,is) = cfl
         if (cfl.eq.'M') then !model
+          if(nflux(ib,is) .lt. 0) then  !This reinitializes source models.
+             nflux(ib,is)=0
+          endif
           nflux(ib,is)=nflux(ib,is)+1
           if (nflux(ib,is).gt.MAX_FLUX/6) then
-            write(lu,'("FLINP04 - Too many model components, max is ",
-     .      i4)') MAX_FLUX/6
+            write(lu,'(a,i4)')
+     >       "FLINP04 - Too many model components, max is ",
+     >        MAX_FLUX/6
             write(lu,'(40a2)') (ibuf(i),i=1,ilen)
             return
           endif
@@ -76,8 +82,9 @@ C
         else !baseline pairs
           nflux(ib,is) = ((nfl+1)/2)-1
           if (nflux(ib,is).gt.MAX_FLUX) then
-            write(lu,'("FLINP04 - Too many baseline/flux entries, ",
-     .      "max is ",i4)') MAX_FLUX
+            write(lu,'(a,i4)')
+     >      "FLINP04 - Too many baseline/flux entries:  max is ",
+     >       MAX_FLUX
             write(lu,'(40a2)') (ibuf(i),i=1,ilen)
             return
           endif

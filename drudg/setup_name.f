@@ -14,6 +14,7 @@ C 991205 nrv Use letter codes for passes and not numbers.
 C Input
       integer itype ! 1=SETUP 2=mnemonic name
       integer icode,isubpass
+      integer istat
 C Output
       integer*2 lnamep(*)
       integer nch
@@ -33,7 +34,7 @@ C Local
         nch = ichmv_ch(lnamep,1,'SETUP')
         nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)   ! ff
       else ! mnemonic name
-        call trkall(itras(1,1,1,1,isubpass,istn,icode),
+        call trkall(isubpass,istat,icode,
      .  lmode(1,istn,icode),
      .  itrk,lpmode,npmode,ifan(istn,icode),num_trk_rec)
         nch = ICHMV(lnamep,1,LCODE(ICODE),1,nco)   ! ff

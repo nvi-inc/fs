@@ -5,6 +5,7 @@ C  to change if desired.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
+      include 'hardware.ftni'
 C History
 C 990730 nrv New.
 C 990910 nrv Add warning message. Change LMODE and LMFMT from 'v' to
@@ -28,13 +29,14 @@ C 010820 nrv Don't switch mode M to V, ok to switch V to M.
 C 020515 nrv Check length of rack/rec name as well as letters, so
 C            that "VLBA" does not match "VLBA4" if only the first
 C            four letters are checked.
+C 17Apr2003  JMG.  Added Mark5 option.
 
 C Input:
       character*(*) cr1
 C LOCAL:
-      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ilx,il,ix
+      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ix
       integer irack_in,irec1_in,irec2_in,irec2_fix
-      integer idum,ias2b,ichmv_ch,ichcm_ch,iflch,ichmv,trimlen,ichcm
+      integer idum,ias2b,ichmv_ch,ichcm_ch,iflch,ichmv,ichcm
       integer max_rack_local,max_rec_local,max_rec2_local
       integer*2 lrec1
       character*80 cbuf
@@ -48,7 +50,12 @@ C 0. Determine current types.
 C       max_rack_local = 8
 C       max_rec_local = 7
         max_rack_local = max_rack_type
+
         max_rec_local = max_rec_type
+        if(Km5A_piggy .or.km5p_piggy) then
+          max_rec_local=max_rec_local-3   !exclude Mark5A & Mark5P modes.
+        endif
+
         max_rec2_local = max_rec2_type
         ix=max(max_rack_local,max_rec_local)
         do i=1,ix
@@ -61,19 +68,19 @@ C       max_rec_local = 7
         if (ichcm_ch(lfirstrec(istn),1,'2').eq.0) cy(2)='*'
         irack_in=1
         do while (irack_in.le.max_rack_local.and.
-     .    ichcm_ch(lstrack(1,istn),1,rack_type(irack_in)(1:8)).ne.0)
+     >        cstrack(istn) .ne. crack_type(irack_in))
           irack_in=irack_in+1
         enddo
         if (irack_in.le.max_rack_local) cit_rack(irack_in)='*'
         irec1_in=1
         do while (irec1_in.le.max_rec_local.and.
-     .    ichcm_ch(lstrec(1,istn),1,rec_type(irec1_in)(1:8)).ne.0)
+     >       cstrec(istn).ne. crec_type(irec1_in))
           irec1_in=irec1_in+1
         enddo
         if (irec1_in.le.max_rec_local) cit_rec1(irec1_in)='*'
         irec2_in=1
         do while (irec2_in.le.max_rec_local.and.
-     .    ichcm_ch(lstrec2(1,istn),1,rec_type(irec2_in)(1:8)).ne.0)
+     >       cstrec2(istn) .ne. crec_type(irec2_in))
           irec2_in=irec2_in+1
         enddo
         if (irec2_in.le.max_rec_local) cit_rec2(irec2_in)='*'
@@ -110,38 +117,36 @@ C 1. Batch input
 C 2. Interactive input
 
       else ! interactive
- 1      WRITE(LUSCN,9019) (lantna(I,ISTN),I=1,4),
-     .  (lstrack(i,istn),i=1,4),(lstrec(i,istn),i=1,4),
-     .  (lstrec2(i,istn),i=1,4),lfirstrec(istn)
+ 1      WRITE(LUSCN,9019) cantna(ISTN),
+     >  cstrack(istn),cstrec(istn),cstrec2(istn),lfirstrec(istn)
 
 9019    FORMAT(
-     .       ' Equipment set for ',4a2,' is: '/
-     .       '   Rack: ',4a2,' Recorder 1: ',4a2, ' Recorder 2: ',4a2/
+     .       ' Equipment set for ',a8,' is: '/
+     .       '   Rack: ',a8,' Recorder 1: ',a8, ' Recorder 2: ',a8/
      .       '   Schedule will start with recorder ',a1/
      .       '|Select rack  |Select Rec 1 |Select Rec 2 '
      .       '|Select starting recorder')
           do i=1,ix ! write each line
             if (i.le.max_rack_local.and.i.le.max_rec_local) then ! full
               if (i.gt.max_rec2_local) then ! no rec 2 (3=Mk3)
-                write(luscn,9018) cit_rack(i),i,rack_type(i)(1:8),
-     .          cit_rec1(i),i,rec_type(i)(1:8),
-     .          cy(i),cx(i)
+                write(luscn,9018) cit_rack(i),i,crack_type(i),
+     .          cit_rec1(i),i,crec_type(i),   cy(i),cx(i)
 9018            format('|',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
      .          12x,         ' |',4x,a1,a1)
               else ! write them all
-                write(luscn,9020) cit_rack(i),i,rack_type(i)(1:8),
-     .          cit_rec1(i),i,rec_type(i)(1:8),
-     .          cit_rec2(i),i,rec_type(i)(1:8),cy(i),cx(i)
+                write(luscn,9020) cit_rack(i),i,crack_type(i),
+     .          cit_rec1(i),i,crec_type(i),
+     .          cit_rec2(i),i,crec_type(i),cy(i),cx(i)
 9020            format('|',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
      .          a1,i2,'=',a8,' |',4x,a1,a1)
               endif
             else if (i.le.max_rack_local.and.i.gt.max_rec_local) then ! rack only
-              write(luscn,9021) cit_rack(i),i,rack_type(i)(1:8),
+              write(luscn,9021) cit_rack(i),i,crack_type(i),
      .        cy(i),cx(i)
 9021          format('|',a1,i2,'=',a8,' |',12x,' |',12x,' |',4x,a1,a1)
             else if (i.gt.max_rack_local.and.i.le.max_rec_local) then ! rec only
-              write(luscn,9022) cit_rec1(i),i,rec_type(i)(1:8),
-     .        cit_rec2(i),i,rec_type(i)(1:8),cy(i),cx(i)
+              write(luscn,9022) cit_rec1(i),i,crec_type(i),
+     .        cit_rec2(i),i,crec_type(i),cy(i),cx(i)
 9022          format('|',12x,' |',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
      .        4x,a1,a1)
             endif
@@ -210,27 +215,23 @@ C 3. Modify rack type
 C Now modify the common variables and send warnings.
         if (irack.ne.0) then ! modify
           if ((irack.ge.1.and.irack.le.max_rack_local)) then 
-            il=trimlen(rack_type(irack))
-            ilx=iflch(lstrack(1,istn),8)
-            if (ichcm_ch(lstrack(1,istn),1,
-     .          rack_type(irack)(1:il)).ne.0.or.il.ne.ilx) then ! change
-              write(luscn,901) (lantna(i,istn),i=1,4),
-     .        (lstrack(i,istn),i=1,4),rack_type(irack)(1:il)
-901           format('EQUIP05 - CHANGED ',4a2,' rack from ',
-     .        4a2,' to ',a)
-              call ifill(lstrack(1,istn),1,8,oblank)
-              idum = ichmv_ch(lstrack(1,istn),1,rack_type(irack)(1:il))
+            if (cstrack(istn) .ne. crack_type(irack)) then
+              write(luscn,901) cantna(istn),
+     >          cstrack(istn),crack_type(irack)
+901           format('EQUIP05 - CHANGED ',a,' rack from ',
+     >        a8,' to ',a)
+              cstrack(istn)=crack_type(irack)
             endif ! change
 C Retain switching from V mode to M if it's a Mk4 or VLBA4 
 C formatter because they can't record V modes.
-            if (ichcm_ch(lmode(1,istn,1),1,'VLBA').eq.0.and.
-     .         (ichcm_ch(lstrack(1,istn),1,'Mark4').eq.0.or.
-     .          ichcm_ch(lstrack(1,istn),1,'Mark3').eq.0.or.
-     .          ichcm_ch(lstrack(1,istn),1,'VLBA4').eq.0)) then ! swap V->M
+            if( cmode(istn,1) .eq. "VLBA" .and.
+     >          (cstrack(istn) .eq. "Mark4" .or.
+     >           cstrack(istn) .eq. "Mark3" .or.
+     >           cstrack(istn) .eq. "VLBA4")) then
               do ic=1,ncodes
-                write(luscn,903) (lnafrq(i,ic),i=1,4)
+                write(luscn,903) cnafrq(ic)
 903             format('EQUIP01 - WARNING: changed recording ',
-     .           'format for mode ',4a2,' from VLBA to Mk4.')
+     .           'format for mode ',a,' from VLBA to Mk4.')
 C               don't change because it could be a Mk3 mode??
 C               idum = ichmv_ch(lmode(1,istn,ic),1,'M       ')
                 idum = ichmv_ch(lmfmt(1,istn,ic),1,'M       ')
@@ -274,16 +275,12 @@ C 4. Modify rec 1
 
         if (irec1.ne.0) then ! modify
           if (irec1.ge.1.and.irec1.le.max_rec_local) then
-            il=trimlen(rec_type(irec1))
-            ilx=iflch(lstrec(1,istn),8)
-            if (ichcm_ch(lstrec(1,istn),1,
-     .          rec_type(irec1)(1:il)).ne.0.or.il.ne.ilx) then ! change
-              write(luscn,902) (lantna(i,istn),i=1,4),
-     .        (lstrec(i,istn),i=1,4),rec_type(irec1)(1:il)
-902           format('EQUIP03 - CHANGED ',4a2,' recorder 1 from ',
-     .        4a2,' to ',a)
-              call ifill(lstrec(1,istn),1,8,oblank)
-              idum = ichmv_ch(lstrec(1,istn),1,rec_type(irec1)(1:il))
+            if (cstrec(istn) .ne. crec_type(irec1)) then
+              write(luscn,902) cantna(istn),
+     .          cstrec(istn),crec_type(irec1)
+902           format('EQUIP03 - CHANGED ',a,' recorder 1 from ',
+     .        a,' to ',a)
+              cstrec(istn)=crec_type(irec1)
             endif ! change
           endif
         endif
@@ -299,10 +296,7 @@ C           irec2_fix = 1
 C       endif
         if (irec2.ne.0) then ! modify
           if (irec2.ge.1.and.irec2.le.max_rec2_local) then
-            il=trimlen(rec_type(irec2))
-            ilx=iflch(lstrec2(1,istn),8)
-            if (ichcm_ch(lstrec2(1,istn),1,
-     .            rec_type(irec2)(1:il)).ne.0.or.il.ne.ilx) then ! try to change
+            if (cstrec2(istn) .ne. crec_type(irec2)) then
 C             If rec 1 is K4, S2 or Mk3 then can't have rec 2
 C             if ((ichcm_ch(lstrec(1,istn),1,'K4').eq.0.or.
 C    .             ichcm_ch(lstrec(1,istn),1,'Mark3A').eq.0.or.
@@ -316,23 +310,22 @@ C               irec2 = 1
 C               call ifill(lstrec2(1,istn),1,8,oblank)
 C               idum = ichmv_ch(lstrec2(1,istn),1,rec_type(irec2)(1:il))
 C             else ! change
-                write(luscn,909) (lantna(i,istn),i=1,4),
-     .          (lstrec2(i,istn),i=1,4),rec_type(irec2)(1:il)
-909             format('EQUIP09 - CHANGED ',4a2,' recorder 2 from ',
-     .          4a2,' to ',a)
-                call ifill(lstrec2(1,istn),1,8,oblank)
-                idum = ichmv_ch(lstrec2(1,istn),1,rec_type(irec2)(1:il))
+                write(luscn,909) cantna(istn),
+     .          cstrec2(istn),crec_type(irec2)
+909             format('EQUIP09 - CHANGED ',a,' recorder 2 from ',
+     .           a,' to ',a)
+                cstrec2(istn)=crec_type(irec2)
 C             endif
             endif ! try to change
             if (nrecst(istn).eq.1.and.irec2.gt.1) then
-              write(luscn,910) (lantna(i,istn),i=1,4)
+              write(luscn,910) cantna(istn)
 910           format('EQUIP10 - WARNING: Second recorder was added to ',
-     .        'the equipment for ',4a2,'.')
+     .        'the equipment for ',a,'.')
               nrecst(istn)=2
             else if (nrecst(istn).eq.2.and.irec2.eq.1) then
-              write(luscn,911) (lantna(i,istn),i=1,4)
+              write(luscn,911) cantna(istn)
 911           format('EQUIP11 - WARNING: Second recorder was removed ',
-     .        'from equipment for ',4a2,'.')
+     .        'from equipment for ',a8,'.')
               nrecst(istn)=1
             endif
           endif
@@ -344,9 +337,9 @@ C 6. Modify first recorder
         if (ichcm_ch(lrec1,1,'0').ne.0) then ! modify firstrec
           call hol2upper(lrec1,2)
           if (ichcm(lfirstrec(istn),1,lrec1,1,1).ne.0) then ! change
-            write(luscn,912) (lantna(i,istn),i=1,4),
+            write(luscn,912) cantna(istn),
      .      lfirstrec(istn),lrec1
-912         format('EQUIP12 - CHANGED ',4a2,' first recorder from '
+912         format('EQUIP12 - CHANGED ',a,' first recorder from '
      .      a1,' to ',a1)
             call ifill(lfirstrec(istn),1,2,oblank)
             idum = ichmv(lfirstrec(istn),1,lrec1,1,1)

@@ -334,8 +334,8 @@ C       Convert these cases to lower case
         i=1
         kmatch=.false.
         do while (i.le.max_rack_type.and..not.kmatch) ! check rack type
-          il=trimlen(rack_type(i))
-          kmatch = ichcm_ch(lrack,1,rack_type(i)(1:il)).eq.0
+          il=trimlen(crack_type(i))
+          kmatch = ichcm_ch(lrack,1,crack_type(i)(1:il)).eq.0
           i=i+1
         enddo ! check rack type
         if (i.gt.max_rack_type+1) ierr=-10-2*npar(1)
@@ -351,8 +351,8 @@ C Rec A field
           i=1
           kmatch=.false.
           do while (i.le.max_rec_type.and..not.kmatch) ! check rec A type
-            il=trimlen(rec_type(i))
-            kmatch = ichcm_ch(lreca,1,rec_type(i)(1:il)).eq.0
+            il=trimlen(crec_type(i))
+            kmatch = ichcm_ch(lreca,1,crec_type(i)(1:il)).eq.0
             i=i+1
           enddo ! check rec A type
           if (i.gt.max_rec_type+1) ierr=-11-2*npar(1)
@@ -369,8 +369,8 @@ C           check recorder
             i=1
             kmatch=.false.
             do while (i.le.max_rec_type.and..not.kmatch) ! check rec B type
-              il=trimlen(rec_type(i))
-              kmatch = ichcm_ch(lrecb,1,rec_type(i)(1:il)).eq.0
+              il=trimlen(crec_type(i))
+              kmatch = ichcm_ch(lrecb,1,crec_type(i)(1:il)).eq.0
               i=i+1
             enddo ! check rec B type
             if (ichcm_ch(lreca,1,'S2').eq.0) then ! field is S2 mode

@@ -38,13 +38,18 @@ C This is for Mark4
       km4rec(1)  = cstrec(istn)  .eq. "Mark4"
       km4rec(2)  = cstrec2(istn) .eq. "Mark4"
 C Mark5 recorders
-      km5rec(1)  =cstrec(istn)   .eq. "Mark5A"
-      km5rec(2)  =cstrec2(istn)  .eq. "Mark5A"
+      km5Arec(1)  =cstrec(istn)   .eq. "Mark5A"
+      km5Arec(2)  =cstrec2(istn)  .eq. "Mark5A"
 ! Mark5P
       km5prec(1)  =cstrec(istn)  .eq. "Mark5P"         !note capital P
       km5prec(2)  =cstrec2(istn) .eq. "Mark5P"
+!Mark5A piggyback wiring
+      km5APigwire(1) =cstrec(istn)  .eq. "Mk5APigW"
+      km5APigwire(2) =cstrec2(istn) .eq. "Mk5APigW"
 
-      km5 =km5rec(1) .or. km5rec(2)
+
+      km5A=km5Arec(1) .or. km5Arec(2) .or.
+     >     Km5Apigwire(1) .or.Km5APigwire(2)
       km5p=km5prec(1) .or. km5prec(2)
 
 C K4 recorders

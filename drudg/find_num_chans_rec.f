@@ -1,9 +1,11 @@
-      subroutine find_num_chans_rec(itras,ifan,nchan_obs,nchan_rec_mk5)
+      subroutine find_num_chans_rec(ipass,istn,icode,
+     > ifan,nchan_obs,nchan_rec_mk5)
       include '../skdrincl/skparm.ftni'
 
+      integer itras
+
 C  INPUT:
-      integer itras(2,2,max_headstack,max_chan)    !  Mark III # track assignments from schedule
-                                                   !  sub-array for only this code, this station
+      integer ipass,istn,icode
       integer ifan                                 ! fan out factor.
 ! returned.
       integer nchan_obs,nchan_rec_mk5
@@ -16,7 +18,7 @@ C  INPUT:
         do ibit=1,2
           do ihd=1,max_headstack
             do ichan=1,max_chan
-              it = itras(isb,ibit,ihd,ichan)
+              it = itras(isb,ibit,ihd,ichan,ipass,istn,icode)
               if (it.ne.-99) then
                  nchan_obs=nchan_obs+1
               endif

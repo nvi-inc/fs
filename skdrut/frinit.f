@@ -9,7 +9,9 @@ C 991119 nrv Add initialization of trkn.
 C 000126 nrv Add initialization of ntrkn.
 C 010207 nrv Add initialization of freqpcal and freqpcal_base
 C 011011 nrv Initialize LS2MODE.
-C 021111 jfq Add initialization of LS2DATA.
+C 021111 jfq Add initialization of LS2DATA
+C 31Jul2003  JMG Made itras virtual.
+C 26Aug2003  JMG made cbarrel, cinfip character strings.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -18,8 +20,7 @@ C Input
       integer nst,nco ! number of stations, codes to initialize
 
 C Local
-      integer i,j,k,m,idum,ih
-      integer ichmv_ch ! function
+      integer i,j,k,ih
 
       do i=1,nco
         samprate(i)=0.0
@@ -31,7 +32,7 @@ C Local
             trkn(k,i,j)=0.0
             ntrkn(k,i,j)=0
           enddo
-          idum=ichmv_ch(lbarrel(1,i,j),1,'NONE')
+          cbarrel(i,j)="NONE"
           call ifill(ls2mode(1,i,j),1,16,oblank)
           call ifill(ls2data(1,i,j),1,8,oblank)
         enddo
@@ -43,20 +44,9 @@ C Local
           enddo
         enddo
       enddo
-      do i=1,nco
-        do m=1,nst
-          DO J=1,max_subpass
-            DO K=1,max_chan
-              do ih=1,max_headstack
-                ITRAS(1,1,ih,K,J,m,I)=-99
-                ITRAS(2,1,ih,K,J,m,I)=-99
-                ITRAS(1,2,ih,K,J,m,I)=-99
-                ITRAS(2,2,ih,K,J,m,I)=-99
-              END DO
-            END DO
-          END DO
-        end do
-      enddo
+
+      call init_itras()
+
       do k=1,nco
         do j=1,nst
           do i=1,max_pass
@@ -75,7 +65,7 @@ C Local
           do k=1,max_chan
             freqpcal(k,j,i) = -1.d0
             freqpcal_base(k,j,i) = -1.d0
-            idum=ichmv_ch(lifinp(k,j,i),1,'  ')
+            cifinp(k,j,i)="  "
           enddo
         enddo
       enddo

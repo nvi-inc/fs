@@ -10,6 +10,8 @@ C
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 
+! functions
+      integer ichcm_ch,trimlen
 C  Output:
       integer ierr,ivexnum
 
@@ -28,7 +30,6 @@ C  Local:
       logical khed ! set to ksta when $HEAD is found
       integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd,idum
       integer iflch,iscn_ch,iscnc,jchar,ichcm,ichmv ! functions
-      integer ichcm_ch,trimlen
       real rdum,reio
       character*128 cbuf
 C Initialized:
@@ -135,9 +136,8 @@ C       Write out experiment information now.
 
 C Find the length of each source name and store it for use by vob1inp.
         do i=1,nsourc
-          nsorlen(i)=iflch(lsorna(1,i),max_sorlen) 
+          nsorlen(i)=trimlen(csorna(i))
         enddo
-
 
 C*********************************************************
 C sked file section
@@ -185,7 +185,7 @@ C
           CALL IFILL(LEXPER,1,8,Z20)
           IF (IC1.GT.0) IDUMMY = ICHMV(LEXPER,1,IBUF,IC1,IC2-IC1+1)
           rdum= reio(2,LUSCN,IBUF,-ILEN)
-C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
+!          write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C         Get the next line
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
           DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1) ! read all lines

@@ -9,7 +9,7 @@
 #define PAGE_SIZE   4096
 
 #define SHM_KEY     ftok("/usr2/fs",1)
-#define C_RES       34*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       35*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_KEY     ftok("/usr2/fs",2)

@@ -377,7 +377,8 @@ C           Track assignments
                        if (Frf(i).gt.Frf(ia)) iul=1 ! IFP USB channel
                     endif
                   endif
-                  itras(iul,ism,ihdn(ix),i,ip,istn,icode)=itrk(ix)-3 
+                  call set_itras(iul,ism,ihdn(ix),i,ip,istn,icode,
+     >               itrk(ix)-3)
 C                                               ! store as Mk3 numbers
                 endif
               endif ! matched link

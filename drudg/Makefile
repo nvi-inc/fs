@@ -49,11 +49,12 @@ PROGRAM = drudg
 #
 DROBS=\
 $(DR)chkgrpandwrite.o $(DR)counter_init.o \
+$(DR)delete_comma_and_write.o checkmk5xlat.o \
 $(DR)find_num_chans_rec.o $(DR)find_recorder_speed.o\
 $(DR)kcheckgrpor.o $(DR)init_hardware_common.o\
 $(DR)name_trkf.o \
 $(DR)proc_exper_initi.o $(DR)proc_mk5_init1.o $(DR)proc_mk5_init2.o\
-$(DR)proc_write_define.o $(DR)purge_file.o \
+$(DR)proc_write_define.o $(DR)proc_postob_mk5a.o $(DR)purge_file.o \
 $(DR)squeezeleft.o $(DR)squeezewrite.o \
 $(DR)snap_bit_density.o $(DR)snap_check.o \
 $(DR)snap_data_valid.o  \

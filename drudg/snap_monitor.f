@@ -1,7 +1,7 @@
       subroutine snap_monitor
       include 'hardware.ftni'
 
-      if(km5) then
+      if(km5A.or.KM5P) then
         write(luFile,'("disc_pos")')
       else
         if(krec_append) then

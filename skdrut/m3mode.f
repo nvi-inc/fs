@@ -7,6 +7,10 @@ C  correspond to any of the standard Mark3 modes.
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
 
+! function
+      integer itras_size
+      integer itras
+
 C INPUT
       integer istn,icode
 C OUTPUT
@@ -19,22 +23,28 @@ C 020909 nrv If a station has all the tracks of a standard mode
 C            plus some others, it should not be classified as a
 C            standard mode.  Count tracks in itras and compare 
 C            to 28.
+C 25Jul2003 JMG  Changed itras to be a function.
+!           JMG  Quick exit if ntra<>28
 
 C     itras(bit,sb,max_headstack,MAX_CHAN,MAX_subPASS,max_stn,max_frq)
 
 C  Count the tracks
-      ntra = 0
-      do i=1,2 ! nbits
-        do j=1,2 ! sideband
-          do k=1,max_headstack
-            do l=1,max_chan
-              do m=1,max_subpass
-                if (itras(i,j,k,l,m,istn,icode).ne.-99) ntra=ntra+1
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
+!      ntra = 0
+!      do i=1,2 ! nbits
+!        do j=1,2 ! sideband
+!          do k=1,max_headstack
+!            do l=1,max_chan
+!              do m=1,max_subpass
+!                if (itras(i,j,k,l,m,istn,icode).ne.-99) ntra=ntra+1
+!              enddo
+!            enddo
+!          enddo
+!        enddo
+!      enddo
+      ntra=itras_size()
+
+
+      if(ntra.ne.28) return
 
 C  Check the tracks
       if ( itras(1,1,1, 1,1,istn,icode).eq.15 .and.
@@ -66,8 +76,7 @@ C  Check the tracks
      .     itras(1,1,1,13,2,istn,icode).eq.28 .and.
      .     itras(1,1,1,14,2,istn,icode).eq.14 .and.
      .     nchan(istn,icode).eq.14 .and.
-     .     ntra.eq.28 .and.
-     .     npassf(istn,icode).eq.2 ) then ! mode C 
+     .     npassf(istn,icode).eq.2 ) then ! mode C
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'C') 
       endif ! mode C
@@ -101,8 +110,7 @@ C  Check the tracks
      .     itras(2,1,1,13,1,istn,icode).eq.27 .and.
      .     itras(2,1,1,14,1,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.28 .and.
-     .     ntra.eq.28 .and.
-     .     npassf(istn,icode).eq.1 ) then ! mode A 
+     .     npassf(istn,icode).eq.1 ) then ! mode A
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'A') 
       endif ! mode A
@@ -136,8 +144,7 @@ C  Check the tracks
      .     itras(2,1,1,13,2,istn,icode).eq.26 .and.
      .     itras(2,1,1,14,2,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq.14 .and.
-     .     ntra.eq.28 .and.
-     .     npassf(istn,icode).eq.2 ) then ! mode B 
+     .     npassf(istn,icode).eq.2 ) then ! mode B
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'B') 
       endif ! mode B
@@ -171,8 +178,7 @@ C  Check the tracks
      .     itras(1,1,1, 6,4,istn,icode).eq.26 .and.
      .     itras(1,1,1, 7,4,istn,icode).eq.28 .and.
      .     nchan(istn,icode).eq. 7 .and.
-     .     ntra.eq.28 .and.
-     .     npassf(istn,icode).eq.4 ) then ! mode E 
+     .     npassf(istn,icode).eq.4 ) then ! mode E
         call ifill(lmode(1,istn,icode),1,8,oblank)
         idum = ichmv_ch(LMODE(1,istn,ICODE),1,'E') 
       endif ! mode E
