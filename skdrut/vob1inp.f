@@ -7,6 +7,10 @@ C  Call in a loop to get all stations, or use VOBINP.
 C
 C History
 C 960531 nrv New.
+C 960817 nrv Changes for S2. Note that VOBINP has NOT been changed!
+C            These two routines should be combined so that VOBINP
+C            calls this one!
+
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -28,17 +32,17 @@ C          addscan                   (add a station to a scan)
 C          findscan                  (find a matching scan)
 C
 C  LOCAL:
-      integer isor,icod,il,ip,idur,ifeet
+      integer isor,icod,il,ip,idur,ifeet,i
       integer idum,irec,ipnt
       integer*2 itim1(6),itim2(6)
       integer*2 lcb
       character*128 cmo,cstart,csor,cout,cunit
       integer istart(5)
       double precision d,start_sec,dst,det
-      logical knew,kearl
+      logical knew,kearl,ks2
       integer ichmv,ichmv_ch,ivgtso,ivgtmo
-      integer fget_scan_station,fvex_scan_source,fvex_date,
-     .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len
+      integer ichcm_ch,fget_scan_station,fvex_scan_source,fvex_date,
+     .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len,fvex_int
 
 C 1. Get scans for one station. 
 
@@ -48,6 +52,7 @@ C 1. Get scans for one station.
      .         ptr_ch(cmo),len(cmo),
      .         ptr_ch(stndefnames(istn)),ivexnum)
         ierr = 1 ! station
+        ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0
         do while (iret.eq.0) ! get all scans for this station
           iret = fvex_date(ptr_ch(cstart),istart,start_sec)
           ierr=2 ! date/time
@@ -86,8 +91,11 @@ C 1. Get scans for one station.
           if (iret.ne.0) return
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
-          if (iret.ne.0) return
-          ifeet = d*100.d0/(2.54*12.d0) ! convert mks to feet
+          if (ks2) then 
+            ifeet = d ! leave as seconds
+          else 
+            ifeet = d*100.d0/(2.54*12.d0) ! convert mks to feet
+          endif
           ierr = 9 ! pass
           iret = fvex_field(5,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
