@@ -36,7 +36,7 @@ int *ierr;
     shm_addr->vifd_tpi[2*ind+0]=65536;
     shm_addr->vifd_tpi[2*ind+1]=65536;
      clr_res(&buffer);
-     *ierr=-201;
+     *ierr=-200;
      return;
   }
 

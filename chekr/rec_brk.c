@@ -40,7 +40,7 @@ int indx, stat;
 
   if(response.state == -1) {
      clr_res(&buffer);
-     *ierr=-201;
+     *ierr=-200;
      return;
   }
 
