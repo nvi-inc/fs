@@ -257,7 +257,7 @@ C     Put an "=" sign before the data
 C
         idum=ichmv_ch(ibuf,4,'=')
         call fs_get_kecho(kecho)
-        call datat(imode,ibuf,nchar,lumat,kecho,lu,
+        call datat(imode,ibuf,nchar,lumat,kecho,
      .             ibuf2(2),nch2,ierr,itn)
         goto 899
 C
@@ -275,7 +275,7 @@ C
         nchar = ichmv(ibuf,4,lstrob(-istrob),1,2)-1
 C                   Put proper strobe character followed by > into buffer 
         call fs_get_kecho(kecho)
-        if (ktp) call iat(ibuf,nchar,lumat,kecho,lu,ibuf2(2),
+        if (ktp) call iat(ibuf,nchar,lumat,kecho,ibuf2(2),
      .    nch2,ierr,itn)
 C                   Send #nns> to the tape drive and let it get 
 C                   ready for the following data request. 
@@ -288,7 +288,7 @@ C                   Put the ? into the buffer, so that
 C                   for the tape drive, we have #nn?
 C                   and for the others, we have #nns?
         call fs_get_kecho(kecho)
-        call iat(ibuf,nchar,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn)
+        call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn)
         goto 899
 C
 C
@@ -323,7 +323,7 @@ C
         endif
 501     continue
         call fs_get_kecho(kecho)
-        call iat(ibuf(2),nchar-2,lumat,kecho,lu,ibuf2(2),
+        call iat(ibuf(2),nchar-2,lumat,kecho,ibuf2(2),
      .    nch2,ierr,itn)
         goto 899
 C
@@ -334,7 +334,7 @@ C
         call pchar(ibuf,4,o'33')
         nch = 4
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn)
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn)
 C                   Send <escape> to the device
         if (ierr.lt.0.or.nch2.eq.0) goto 601
         call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
@@ -344,7 +344,7 @@ C                   Send <escape> to the device
 C                   Send some UU's to synch up again
         nch = 5 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierrx,itn)
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierrx,itn)
         goto 900
 C 
 C 
@@ -353,7 +353,7 @@ C
 700     idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
 C                   Send ' to query alarm 
         if (ierr.lt.0.or.nch2.eq.0) goto 900
         call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
@@ -361,12 +361,12 @@ C                   Send ' to query alarm
         idum=ichmv_ch(ibuf,4,'"') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
 C                   Send " to reset alarm 
         idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
-        call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
         goto 899
 C 
 C 
@@ -379,7 +379,7 @@ C
           call pchar(ibuf,nchar,10)
         endif
         call fs_get_kecho(kecho)
-        call iat(ibuf,nchar,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
+        call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
         goto 899
 C 
 C 
