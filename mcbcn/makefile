@@ -1,6 +1,6 @@
 #
 CFLAGS= 
-LIBES = ../clib/clib.a ../rtelb/rtelb.a
+LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ifeq (/usr/src/linux/drivers/char/digi.h,\
 $(wildcard /usr/src/linux/drivers/char/digi.h))

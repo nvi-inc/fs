@@ -1827,3 +1827,85 @@ Version 9.3.2 961111
            disable the IF translation from Mk3 to VLBA names.
 
 Version 9.3.3 961203
+
+961218 WEH clib/get_s2time.c
+           fclib/fc_get_s2time.c
+           setcl/setcl.f
+           retrieve delaym as well as time as new parameter in get_s2time
+           and propogate the change to callers
+
+961218 WEH fmset/gets2time.c
+           change in call to get_s2time
+           nanosec extern added
+
+961218 WEH fmset/fmset.c
+           correct 't' message
+           add definition of nanosec
+
+961218 WEH fmset/sets2time.c
+           only set delay to zero if nanosec delaym is zero
+           if delayis set, rechecktime and compensate
+           
+961218 WEH rclcn/rclcn.c
+           put echo output in log
+
+961218 WEH include/fscom.i
+           clib/nsem_util.c
+           clib/go_util.c
+           antcn/antcn.c
+           remove references to /usr2/fs so includes are relative
+
+961218 WEH antcn/Makefile
+           all library references relative
+
+961218 WEH include/stcom.i
+           include/tr_com.i
+           include/st_com.i
+           cleaned up and moved to st.default/st-0.0.0/include/
+
+961218 WEH include/stcom.h
+           deleted, extraneous, in st.default/st-0.0.0/include/
+
+961219 WEH fslb/ivced.f
+           fixed formatting for 16 MHz BW, as noticed by Tony Foley
+
+961219 WEH control/fserr.ctl
+           fixed VC BW error message
+
+961219 WEH clib/rclcn_req_util.c
+           chekr/s2recchk.c
+           clib/get_s2time.c
+           clib/rcl_util.c
+           clib/rclcn_res_util.c
+           fmset/sets2time.c
+           quikv/get_s2speed.c
+           quikv/get_s2state.c
+           quikv/get_s2tapetype.c
+           quikv/rcl_dis.c
+           quikv/s2rec_dis.c
+           rclcn/rclcn.c
+           remove undef of TRUE and FALSE no longer needed also some
+           redundant includes of rcl.h
+
+961219 WEH clib/form4_util.c
+           changed order of modes E2 and E3
+
+961219 WEH quikv/rec_mode.c
+           quikv/rec_mode_dis.c
+           chekr/s2recchk.c
+           chekr/s2drive.f
+           add barrelroll rcl lib calls for real control and montior of roll
+
+961219 WEH control/fserr.ctl
+           add roll check message
+
+961219 WEH mcbcn/mcbcn.c
+           mcbcn/Makefile
+           changed to send echo to log
+
+rcl lib
+ clib/rcl_util.c
+ clib/rclcn_res_util.c
+ quikv/rcl_dis.c
+ rclcn/rclcn.c
+ clib/rclcn_req_util.c
