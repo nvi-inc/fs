@@ -1,0 +1,18 @@
+               s2ping - ping S2 device
+
+            Syntax: s2ping=device 
+  
+            Response: s2ping/device,delay 
+
+            device : Instrument code.
+
+Settable Parameters: none
+
+Monitor-only Parameters:
+
+            delay : response time in milliseconds.
+
+Comments: 
+Use to detect if device is responding
+
+Intrument device code is "da" for the S2 DAS or "r1" for S2 RT.
