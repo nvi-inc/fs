@@ -24,7 +24,7 @@ extern int ibser;
 #define TIMEOUT		-4
 #define BUS_ERROR	-8
 #define HPIBERR		-20
-#define BSIZE 		256   /* this size for DMA */
+#define BSIZE           256   /* this size for DMA */
 #define IBCODE		300
 #define IBSCODE		300
 #define ASCII		  0
@@ -38,28 +38,30 @@ static int read_size;
 
 /*-------------------------------------------------------------------------*/
 
-int rddev_(mode,devid,buffer,buflen,error, ipcode, timeout, no_after)
+int rddev_(mode,devid,buf,buflen,error, ipcode, timeout, no_after, kecho)
 
 /* rddev returns the count of the number of bytes read, if there are
    no errors.
 
-   The mode flag indicates ASCII (1) or BINARY (3) data reads.
+   The mode flag indicates ASCII (0) or BINARY (1) data reads.
  
    If an error occurs, *error is set to -4 for a timeout, -8 for a bus
    error. If a bus error occurs, rddev returns the system error variable.
 */
 int *mode,*devid;
 long *ipcode;
-unsigned char *buffer;
+unsigned char *buf;
 int *buflen;  /* buffer length in characters */
 int *error;
 int *timeout;
 int *no_after;
+int *kecho;
 {
   int i;
   int iret, ierr;
-  unsigned char lret,locbuf[BSIZE];
+  unsigned char lret;
   int val, icopy;
+  long centisec[2];
 
   *error = 0;
   *ipcode = 0;
@@ -74,6 +76,23 @@ int *no_after;
  * of characters to be read with the ibrd command must also be set high, 
  * 256 in this case works.
  */
+
+  if (serial) {
+    ierr=sib(ID_hpib,"tmo 3\r",-1,0,100,0,centisec);
+    if(ierr<0) {
+      if(ierr==-1 || ierr==-2 || ierr==-5)
+	logit(NULL,errno,"un");
+      *error = -520+ierr;
+      memcpy((char *)ipcode,"RT",2);
+      return -1;
+    } else if(ibsta&(S_ERR|S_TIMO)) {
+      if(ibser!=0)
+	logita(NULL,-(540 + ibser),"ib","RT");
+      *error = -(IBSCODE + iberr);
+      memcpy((char *)ipcode,"RT",2);
+      return -1;
+    }
+  }
 
 #if 0
   if(!serial) {
@@ -91,7 +110,7 @@ int *no_after;
     return -1;
 #endif
   } else {
-    ierr=sib(ID_hpib,"cm \n_?\r",0,0,100);
+    ierr=sib(ID_hpib,"cm \n_?\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -108,7 +127,7 @@ int *no_after;
   }
 #endif
 
-  if (*mode == 1 && ascii_last!=1) {
+  if (*mode == 0 && ascii_last!=1) {
     if (!serial) {
 #ifdef CONFIG_GPIB
       val = (REOS << 8) + LF;
@@ -125,7 +144,7 @@ int *no_after;
       return -1;
 #endif
     } else {
-      ierr=sib(ID_hpib,"eos R 10\r",0,0,100);
+      ierr=sib(ID_hpib,"eos R 10\r",-1,0,100,0,centisec);
       if(ierr<0) {
 	if(ierr==-1 || ierr==-2 || ierr==-5)
 	  logit(NULL,errno,"un");
@@ -142,7 +161,7 @@ int *no_after;
     }
     ascii_last=1;
     read_size=30;
-  } else if (*mode != 1 && ascii_last != 0) {
+  } else if (*mode != 0 && ascii_last != 0) {
     if (!serial) {
 #ifdef CONFIG_GPIB
       ibeos(*devid,0);		/* turn off all EOS detection */
@@ -158,7 +177,7 @@ int *no_after;
       return -1;
 #endif
     } else {
-      ierr=sib(ID_hpib,"eos D\r",0,0,100);
+      ierr=sib(ID_hpib,"eos D\r",-1,0,100,0,centisec);
       if(ierr<0) {
 	if(ierr==-1 || ierr==-2 || ierr==-5)
 	  logit(NULL,errno,"un");
@@ -179,7 +198,7 @@ int *no_after;
 
   if (!serial) {
 #ifdef CONFIG_GPIB
-    ibrd(*devid,locbuf,BSIZE);    
+    ibrd(*devid,buf,*buflen);
     if ((ibsta & TIMO) != 0) {	/* has the device timed out? */ 
       *error = TIMEOUT;
       memcpy((char *)ipcode,"RE",2);
@@ -196,8 +215,8 @@ int *no_after;
     return -1;
 #endif
   } else {
-    sprintf(locbuf,"rd #%d %d\r",read_size,*devid);
-    ierr=sib(ID_hpib,locbuf,0,read_size,*timeout);
+    sprintf(buf,"rd #%d %d\r",read_size,*devid);
+    ierr=sib(ID_hpib,buf,-1,read_size,*timeout,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -216,6 +235,8 @@ int *no_after;
       return(-1);
     }
   }
+  if(*kecho)
+    echo_out('r',*mode,*devid,buf,ibcnt);
 
   iret = ibcnt;
 
@@ -235,7 +256,7 @@ int *no_after;
 #endif
 #if 0
   } else {
-    ierr=sib(ID_hpib,"cm \n_?\r",0,0,100);
+    ierr=sib(ID_hpib,"cm \n_?\r",-1,0,100,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -252,21 +273,15 @@ int *no_after;
 #endif
   }
 
-  if (*mode == 1) {  
+  if (*mode == 0) {  
     if (iret <= 0)
       return (0);
     else
-      lret = locbuf[iret-1];
+      lret = buf[iret-1];
     
     while ((iret > 0) && (strchr("\r\n",lret) != 0))
-      lret = locbuf[--iret-1];
+      lret = buf[--iret-1];
   }
-
-  icopy=iret;
-  if(iret > *buflen)
-    icopy=*buflen;
-
-  memcpy(buffer,locbuf,icopy);
 
   return(iret);
 
