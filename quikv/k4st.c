@@ -53,6 +53,20 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
+/* format buffers for k4con if BW is 256 set time code off after 30 seconds */
+
+      tcoff=shm_addr->equip.drive[0]==K4 &&
+	(shm_addr->equip.drive_type[0]== K42 ||
+	 shm_addr->equip.drive_type[0] == K42DMS);
+
+/* In case recording on DFC-2100 rec_mode=... must be set-up first. */
+
+      if((shm_addr->k4rec_mode.im<0||shm_addr->k4rec_mode.nm<0)
+         && lcl.record==1 && tcoff==1) {
+        ierr=-301;
+        goto error;
+      }
+
 /* all parameters parsed okay, update common */
 
       ichold=shm_addr->check.k4rec.check;
@@ -76,13 +90,6 @@ parse:
 	cls_clr(ip[0]);
 	ip[0]=ip[1]=0;
       }
-      
-/* format buffers for k4con if BW is 256 set time code off after 30 seconds */
-
-      tcoff=shm_addr->equip.drive[0]==K4 &&
-	(shm_addr->equip.drive_type[0]== K42 ||
-	 shm_addr->equip.drive_type[0] == K42DMS)  &&
-	shm_addr->k4rec_mode.bw==5;
 
       ip[0]=ip[1]=0;
       k4st_req_c(ip,&lcl,tcoff,sqn);
