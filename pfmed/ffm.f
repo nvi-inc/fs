@@ -70,7 +70,7 @@ C
       character*74 ibc
       character*80 dirstr
       character*12 twochr
-      character*28 pathname,pathname2
+      character*64 pathname,pathname2,link
       integer trimlen
       integer i2byte(6)
       integer iret
@@ -244,6 +244,12 @@ C     PFPU - purge procedure file.
         end if
         call fclose(idcb1,ierr)
         if (ierr.lt.0) goto 800
+        call follow_link(lnam1(:nch1),link,ierr)
+        if(ierr.ne.0) return
+        if(link.ne.' ') then
+           write(6,*) "can't purge a link ",lnam1(:nch1)
+           return
+        endif
         pathname = '/usr2/proc/' // lnam1(1:nch1) // '.prc'
         call purn(lui,lnam1,lproc,lstp,lprc,pathname,ierr)
         if (ierr.ne.0) return
@@ -274,11 +280,17 @@ C     PFRN - rename procedure file.
         endif
  
         pathname = '/usr2/proc/' // lnam1(1:nch1) // '.prc'
+        call follow_link(lnam1(:nch1),link,ierr)
+        if(ierr.ne.0) return
+        if(link.ne.' ') then
+           write(6,*) "can't rename a link ",lnam1(:nch1)
+           return
+        endif
         inquire(file=pathname,exist=kex)
         if (.not.kex) then
           nch=trimlen(pathname)
           write(lui,1108) pathname(:nch)
-1108      format(" file ",a," does not exist")
+1108      format(" ffm file ",a," does not exist")
           return
         end if
         pathname2 = '/usr2/proc/' // lnam2(1:nch2) // '.prc'

@@ -23,6 +23,7 @@ C        LUI     - terminal LU
 C
 C 2.2.   COMMON BLOCKS USED:
 C
+      include '../include/params.i'
       include 'pfmed.i'
 C
 C 2.3.   DATA BASE ACCESSES: none
@@ -46,7 +47,7 @@ C 3.  LOCAL VARIABLES:
 C
       character*12 lfr
 C                - correct file name for reading
-      character*34 pathname
+      character*64 pathname,link
       integer trimlen
       logical kex,kerr
 C
@@ -74,14 +75,28 @@ c        call exec(2,lui,lm6,-24)
         iret = 0
         call pfblk(1,lp,lfr)
         nch = trimlen(lp)
-        if (nch.gt.0) pathname = '/usr2/proc/' 
-     .                  // lp(1:nch) // lfr(1:4)
+        if (nch.le.0) then
+           write(6,*) 'pfcop: illegal filename length'
+           return
+        else
+           call follow_link(lp(:nch),link,ierr)
+           if(ierr.ne.0) return
+           if(link.ne.' ') then                 
+              if(lfr(:4).eq.'.prx') then
+                 iprc=index(link,".prc")
+                 link(iprc+3:iprc+3)='x'
+              endif
+              pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
+           else
+              pathname = FS_ROOT//'/proc/'//lp(:nch)//lfr(1:4)
+           endif
+        endif
 C     Open procedure file.
         inquire(file=pathname,exist=kex)
         if (.not.kex) then
           nch = trimlen(pathname)
           if (nch.gt.0) write(lui,9200) pathname(1:nch)
-9200      format(" file ",a," does not exist!!")
+9200      format(" pfcop file ",a," does not exist!!")
           iret = -1
         else
           call fclose(idcb3,ierr)

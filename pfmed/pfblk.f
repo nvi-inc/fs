@@ -26,7 +26,7 @@ C                  3 - about to replace file, 4 - error after 1 or 2)
 C                - target procedure file
       character*(*) lfr
 C                - correct extent name for reading
-      character*28 fname
+      character*64 fname,link
 C
 C 2.2.   COMMON BLOCKS USED:
 C
@@ -94,14 +94,25 @@ C     If file to be replaced is not current to BOSS, purge old and rename.
         lfr(1:4)='.prc'
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
-        nch = trimlen(lp)
-        if (nch.gt.0) fname = '/usr2/proc/' // lp(1:nch) // lfr(1:4)
         call fclose(idcb2,ierr)
         if(kerr(ierr,me,'closing',lp,0,0)) return
         if (ierr.lt.0) then
           write(lui,9100)
 9100      format('pfblk - error closing file.')
         end if
+        nch = trimlen(lp)
+        if(nch.le.0) then
+           write(6,*) 'pfblk: 1 illegal filename length',nch
+           return
+        else
+           call follow_link(lp(:nch),link,ierr)
+           if(ierr.ne.0) return
+           if(link.eq.' ') then
+              fname = FS_ROOT //'/proc/' // lp(:nch) // lfr(1:4)
+           else
+              fname = FS_ROOT //'/proc/'//link(:trimlen(link))
+           endif
+        endif
         call ftn_purge(fname,ierr)
         if(kerr(ierr,me,'purging',fname,0,0)) return
         call ftn_rename(lsf2,ierr1,fname,ierr2)
@@ -115,7 +126,20 @@ C     If file is second copy, purge old, rename, and schedule BOSS.
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
         nch = trimlen(lp)
-        if (nch.gt.0) fname = '/usr2/proc/' // lp(1:nch) // lfr(1:4)
+        if(nch.le.0) then
+           write(6,*) 'pfblk: 2 illegal filename length',nch
+           return
+        else
+           call follow_link(lp(:nch),link,ierr)
+           if(ierr.ne.0) return
+           if(link.eq.' ') then
+              fname= FS_ROOT//'/proc/' // lp(:nch) // lfr(:4)
+           else
+              iprc=index(link,".prc")
+              link(iprc+3:iprc+3)='x'
+              fname= FS_ROOT//'/proc/' // link(:trimlen(link))
+           endif
+        endif
         call ftn_purge(fname,ierr)
         if(kerr(ierr,me,'purging',fname,0,0)) return
         call fclose(idcb2,ierr)
@@ -133,7 +157,20 @@ C     schedule BOSS.
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
         nch = trimlen(lp)
-        if (nch.gt.0) fname = '/usr2/proc/' // lp(1:nch) // lfr(1:4)
+        if(nch.le.0) then
+           write(6,*) 'pfblk: 3 illegal filename length',nch
+           return
+        else
+           call follow_link(lp(:nch),link,ierr)
+           if(ierr.ne.0) return
+           if(link.eq.' ') then
+              fname= FS_ROOT//'/proc/' // lp(:nch) // lfr(:4)
+           else
+              iprc=index(link,".prc")
+              link(iprc+3:iprc+3)='x'
+              fname= FS_ROOT//'/proc/' // link(:trimlen(link))
+           endif
+        endif
         call ftn_purge(fname,ierr)
 c       if(kerr(ierr,me,'purging',fname,0,0)) return
         call fclose(idcb2,ierr)
