@@ -15,6 +15,7 @@ C 911112  NRV  Added bw to VC name, added IF3
 C 920222  NRV  Add VLBA procedures
 C 930407  nrv  implicit none
 C 940620  nrv  In batch mode, always 'Y' for purging existing.
+C 951117  nrv  Move PASS command after TAPEFORM
 C
 C COMMON BLOCKS USED:
 	INCLUDE 'freqs.ftni'
@@ -169,6 +170,12 @@ C
 	    CALL writf_asc(LU_OUTFILE,IERR,IBUF,(10)/2)
 	    CALL INC(LU_OUTFILE,IERR)
 C
+            call ifill(ibuf,1,10,z20)
+	    CALL CHAR2HOL('TAPEFORM',IBUF(1),1,8)
+	    IDUMMY = ICHMV(IBUF,9,LMODE(ICODE),1,1)
+	    CALL writf_asc(LU_OUTFILE,IERR,IBUF,5)
+	    CALL INC(LU_OUTFILE,IERR)
+C
 	    IF (MAXPAS(ISTN).GT.1) THEN !HIGH DENSITY STATION
                 call ifill(ibuf,1,12,z20)
 		IDUMMY = ichmv_ch(IBUF,1,'PASS=$,SAME')
@@ -180,12 +187,6 @@ C
 	    IDUMMY = ichmv_ch(IBUF,1,'IFD')
 	    IDUMMY = ICHMV(IBUF,4,LCODE(ICODE),1,2)
 	    CALL writf_asc(LU_OUTFILE,IERR,IBUF,(6)/2)
-	    CALL INC(LU_OUTFILE,IERR)
-C
-            call ifill(ibuf,1,10,z20)
-	    CALL CHAR2HOL('TAPEFORM',IBUF(1),1,8)
-	    IDUMMY = ICHMV(IBUF,9,LMODE(ICODE),1,1)
-	    CALL writf_asc(LU_OUTFILE,IERR,IBUF,5)
 	    CALL INC(LU_OUTFILE,IERR)
 C
 	    IDUMMY = ichmv_ch(IBUF,1,'TAPE=LOW')
