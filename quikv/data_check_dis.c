@@ -70,6 +70,11 @@ long ip[5];
       for (i=0;i<5;i++) ip[i]=0;
       cls_snd(&ip[0],output,strlen(output),0,0);
       ip[1]=1;
+
+      if((lclm.mode.state.error || (!lclm.mode.state.known)
+	  || strcmp("?",lclm.mode.mode)==0))
+	logit(NULL,-601,"5d");
+
       return;
 
 error:
