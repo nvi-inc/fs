@@ -38,6 +38,14 @@ char *ptr;
       lcl->enable.high|= 0xFF00;
     else if (strcmp(ptr,"v3")==0)
       lcl->enable.low|= 0xFF00;
+    else if (strcmp(ptr,"m0")==0)
+      lcl->enable.high|= 0x00FE;
+    else if (strcmp(ptr,"m1")==0)
+      lcl->enable.low|= 0x00FE;
+    else if (strcmp(ptr,"m2")==0)
+      lcl->enable.high|= 0x7F00;
+    else if (strcmp(ptr,"m3")==0)
+      lcl->enable.low|= 0x7F00;
     else if (strcmp(ptr,"all")==0) {
       lcl->enable.low = 0xFFFF;
       lcl->enable.high= 0xFFFF;

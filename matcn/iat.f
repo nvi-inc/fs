@@ -1,4 +1,4 @@
-      function iat(itran,ntr,lumat,kecho,lu,irecv,nrc,ierr,itn)
+      function iat(itran,ntr,lumat,kecho,irecv,nrc,ierr,itn)
 C 
 C   IAT handles communications with the MAT 
 C 
@@ -14,9 +14,10 @@ C  INPUT VARIABLES:
 C 
 C  NTR    - number of characters in ITRAN 
 C  LUMAT  - LU of MAT daisy chain 
-C  LU     - LU for operator's terminal
+C
       integer*2 itran(1)         ! buffer to be transmitted
       logical kecho              ! true if MAT communications echo desired
+      logical kecho_log          ! true if echo is suppose to go into log
 C 
 C  OUTPUT VARIABLES: 
 C 
@@ -45,8 +46,12 @@ C  NRSPN  - number of responses possible
       integer nchrc(8)   ! number of characters received in responses
       integer*2 irspn(4) ! terminal characters which generate a response
       integer wrdech,maxech
-      parameter (wrdech=320,maxech=wrdech*2)
-      integer iebuf(wrdech),iebuf2(wrdech),itn
+      parameter (wrdech=256,maxech=wrdech*2)
+      integer*2 iebuf(wrdech),iebuf2(wrdech)
+      integer itn
+      integer maxlog,maxmess,maxlogwd
+      parameter (maxlog=512,maxmess=maxlog-18,maxlogwd=maxmess/2)
+      integer*2 echo_log(maxlogwd)
       integer*2 irecx(10)
       character*1 cjchar
 C
@@ -124,8 +129,9 @@ C                   Write the buffer to the MAT bus
       if (ifrecv.eq.0) then
         iat = 0
         if (kecho) then
-          call put_cons_raw(iebuf,iecho)
-          call put_cons_raw(o'006412',1)   !cr-lf
+           idum=ichmv_ch(echo_log,1,'echo:')
+           idum=ichmv(echo_log,idum,iebuf,1,min(maxmess-idum-1,iecho))
+           call logit2(echo_log,idum-1)
         endif
         return    !  we're done now if there is to be no response.
       endif
@@ -180,9 +186,10 @@ c
       nrc=ilen
       if (kecho) then
          call echoe(irecv,iebuf2,nrc,iecho2,maxech)
-         call put_cons_raw(iebuf,iecho)
-         call put_cons_raw(iebuf2,iecho2)
-         call put_cons_raw(o'006412',1)    !cr-lf
+         idum=ichmv_ch(echo_log,1,'echo:')
+         idum=ichmv(echo_log,idum,iebuf,1,min(maxmess-idum-1,iecho))
+         idum=ichmv(echo_log,idum,iebuf2,1,min(maxmess-idum-1,iecho2))
+         call logit2(echo_log,idum-1)
       endif
 C  If echo requested, write response on screen
       itry = itry + 1

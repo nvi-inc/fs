@@ -1772,3 +1772,58 @@ Version 9.3.1 961105
 961111 WEH matcn/iat.f
            change evalution of logic for if statement for time-out retry
            for M4 formatter
+
+Version 9.3.2 961111
+
+961120 WEH fslb/logit.f
+           handle log messages upto 512 characters
+
+961120 WEH lnfch/ifill_ch.f
+           correct error message
+
+961120 WEH setcl/setcl.f
+           don't fail if M4 FM response is garbled
+
+961124 WEH monit/mout2.c
+           monit/monit2.c
+           handle M4 FM
+
+961125 WEH matcn/matcn.f
+           remove extraneous "LU" in calls to iat
+
+961125 WEH matcn/matcn.f
+           remove extraneous "LU" in calling sequence
+           make "echo" write to the log
+
+961129 NRV drudg/fdrudg.f
+           Add option 16 for 8-BBC stations
+
+961129 NRV drudg/procs.f
+           Handle 8-BBC station option.
+           Change Mk3 IF names to VLBA IF names for VLBA procedures:
+             1N --> A, 1A --> B, 2N --> C, 2A --> D
+           Write out procedure names across a line instead of down.
+
+961202 NRV drudg/procs.f
+           Write TRKFORM procedures for 8-BBC case also.
+           No special handling for 8-BBC case for modes A or C.
+           Use "mx" groups for tracks instead of listing them all.
+           Edit trackform section to use indices instead of max_chan.
+
+961203 WEH clib/tracks4_util.c
+           add m0,...,m7 designators for mark III tracks
+
+961203 WEH clib/tracks4_util.c
+           add m0,...,m3 designators for mark III tracks
+
+961203 WEH control/fserr.ctl
+           add m0,...,m7 to m4 tracks error message
+           add m0,...,m3 to VLBA tracks error message
+
+961203 WEH drudg/ifvlbafix
+           corrected typo in "section" variable
+
+961203 NRV drudg/procs.f
+           disable the IF translation from Mk3 to VLBA names.
+
+Version 9.3.3 961203
