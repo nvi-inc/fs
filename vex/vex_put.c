@@ -102,6 +102,8 @@ FILE *fp;
  *	          char *str9)                                         *
  * create_station_drive_list(char *str) create a drive list.          *
  * str: drive                                                         *
+ * create_data_transfer(char *str, char *str2, char *str3, char *str4,*
+ *	          char *str5, char *str6, char *str7, *str 8)         *
  *                                                                    *
  * All the calls to these functions are basically the same the        *
  * definitions can be found in the "VEX File Definition/Example" doc. *
@@ -430,7 +432,55 @@ create_station_drive_list(char *str)
     }
 
 }
+/*-------------------------------------------------------------------*/
+void *
+create_data_transfer(char *str, char *str2, char *str3, char *str4,
+		     char *str5, char *str6, char *str7, char *str8)
+{
+  char *data_transfer_key;
+  char *data_transfer_method;
+  char *data_transfer_destination;
+  char *data_transfer_start_value;
+  char *data_transfer_start_units;
+  char *data_transfer_stop_value;
+  char *data_transfer_stop_units;
+  char *data_transfer_options;
 
+  data_transfer_key=(char *)strdup(str);
+  data_transfer_method=(char *)strdup(str2);
+  data_transfer_destination=(char *)strdup(str3);
+  data_transfer_start_value=(char *)strdup(str4);
+  data_transfer_start_units=(char *)strdup(str5);
+  data_transfer_stop_value=(char *)strdup(str6);
+  data_transfer_stop_units=(char *)strdup(str7);
+  data_transfer_options=(char *)strdup(str8);
+
+  qref_list = add_list(qref_list,
+	      make_lowl(T_DATA_TRANSFER,
+		        make_data_transfer(data_transfer_key,
+		         data_transfer_method,
+		         data_transfer_destination,
+		         make_dvalue(data_transfer_start_value,
+			             data_transfer_start_units),
+			 make_dvalue(data_transfer_stop_value,
+			             data_transfer_stop_units),
+			 data_transfer_options)));
+  /*
+    if(str==NULL || str2==NULL)
+    {
+      
+      printf("%s \'antenna_diam\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      diam_value=(char *)strdup(str);
+      diam_units=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_ANTENNA_DIAM,
+				     make_dvalue(diam_value,diam_units)));
+				     }*/
+  q_list=NULL;
+}
 /*-------------------------------------------------------------------*/
 /* ANTENNA block builders                                            */
 /*-------------------------------------------------------------------*/
