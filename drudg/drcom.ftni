@@ -18,6 +18,7 @@ C 951218 nrv Replace LB with the name LBNAME, remove LPASS.
 C 960119 nrv Add kmissing
 C 960215 nrv Add perm = permissions o'0666'
 C 960226 nrv Add cprtlab
+C 960709 nrv Remove LBARREL, moved to freqs.ftni
 C
 	real*8 RA50,DEC50
 c
@@ -31,7 +32,7 @@ c
      .  ibout,luscn,ilabrow,
      .  ibbclen,nbbcbuf,nchanr,iperm
 C
-        integer*2 ld,itim,itims,ibbcbuf,ibuf,lbarrel,
+        integer*2 ld,itim,itims,ibbcbuf,ibuf,
      .  lbname
 C
 C
@@ -55,7 +56,7 @@ C
      .       ilabrow,
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,
      .       LD(500),ITIM(6),ITIMS(6),
-     .       IBUF(ibuf_len),lbarrel(2),lbname(4),
+     .       IBUF(ibuf_len),lbname(4),
      .       ibbcbuf(40,2,3)
 
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
