@@ -17,6 +17,7 @@ C 960409 nrv Add IHDPO2 and IHDDI2 for headstack 2
 C 960510 nrv Add IFAN for fan-out factor
 C 960517 nrv Add def names
 C 960527 nrv Add cpassorderl
+C 960610 nrv Change first index on ihddir, ihdpos to max_pass
 C
       double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
@@ -110,10 +111,10 @@ C
      .       ibbcx(max_chan,max_stn,max_frq),
      .       itras(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
      .       itra2(2,2,MAX_CHAN,MAX_PASS,max_stn,max_frq),
-     .       ihdpos(4*max_pass,max_stn,max_frq),
-     .       ihddir(4*max_pass,max_stn,max_frq),
-     .       ihdpo2(4*max_pass,max_stn,max_frq),
-     .       ihddi2(4*max_pass,max_stn,max_frq),
+     .       ihdpos(max_pass,max_stn,max_frq),
+     .       ihddir(max_pass,max_stn,max_frq),
+     .       ihdpo2(max_pass,max_stn,max_frq),
+     .       ihddi2(max_pass,max_stn,max_frq),
      .       nstsav,istsav(max_stn),
      .       ifan(max_stn,max_frq),npassl,
      .
