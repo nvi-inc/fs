@@ -31,6 +31,7 @@ C 960219 nrv Check for LOs present also.
 C 960610 nrv Change loop to nchan instead of max_chan for counting tracks.
 C 960817 nrv Skip track checks for S2
 C 961101 nrv Skip checks if the mode is not defined for this station.
+C 961107 nrv Skip ALL checks for undefined modes.
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -129,6 +130,7 @@ C     codes--this should not be attempted in a single experiment.
       do is=1,nstatn ! stations
         if (ichcm_ch(lstrec(1,is),1,'S2').ne.0) then ! not for S2
         do ic=1,ncodes ! codes
+          if (nchan(is,ic).gt.0) then ! this station has this mode defined
           ip=0
           ip2=0
           do j=1,max_pass
@@ -148,10 +150,13 @@ C     codes--this should not be attempted in a single experiment.
 9909        format('GNPAS09 - Inconsistent number of passes in $HEAD',
      .      ' between headstacks 1 and 2 for ',a2,' at ',4a2)
           endif
+          endif ! defined
         enddo ! codes
         iprr=0
         do ic=1,ncodes
-          if (maxp(ic).ne.maxp(1)) iprr=1
+          if (nchan(is,ic).gt.0) then ! this station has this mode defined
+            if (maxp(ic).ne.maxp(1)) iprr=1
+          endif ! defined
         enddo
         if (iprr.ne.0) then
           ierr=1
@@ -169,6 +174,7 @@ C 3. Check for LOs present and issue warning if not.
 
       do ic=1,ncodes
         do is=1,nstatn
+          if (nchan(is,ic).gt.0) then ! this station has this mode defined
           kmiss=.false.
           do ix=1,nchan(is,ic)
             nvc=invcx(ix,is,ic)
@@ -178,6 +184,7 @@ C 3. Check for LOs present and issue warning if not.
           if (kmiss) write(luscn,9906) lcode(ic),(lstnna(i,is),i=1,4)
 9906      format('GNPAS06 - Warning: ',a2,' LO information missing ',
      .    'for ',4a2)
+          endif ! defined
         enddo
       enddo
 
