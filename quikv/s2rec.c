@@ -9,7 +9,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void s2rec(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
@@ -41,16 +41,22 @@ long ip[5];                           /* ipc parameters */
 	goto rclcn;
       } else if (command->argv[0]==NULL)   /* simple equals */
 	goto parse;
-      else if (command->argv[1]==NULL)     /* special cases */
+      else if (command->argv[1]==NULL){     /* special cases */
         if (strcmp(command->argv[0],"eject")==0
 	    || strcmp(command->argv[0],"unload")==0) {
-	  add_rclcn_consolecmd(&buffer,device,"transport all eject");
+	  add_rclcn_eject(&buffer,device);
 	  goto rclcn;
 	} else if (strcmp(command->argv[0],"re-establish")==0) {
 	  add_rclcn_position_reestablish(&buffer,device);
 	  goto rclcn;
 	} 
-
+      } else if (command->argv[2]==NULL)     /* special cases */
+        if ((strcmp(command->argv[0],"eject")==0
+	    || strcmp(command->argv[0],"unload")==0) &&
+	    strcmp(command->argv[1],"all")==0) {
+	  add_rclcn_consolecmd(&buffer,device,"transport all eject");
+	  goto rclcn;
+	}
       
 /* if we get this far it is a set-up command so parse it */
 
