@@ -15,6 +15,7 @@ static char dev1[2],dev2[2];
 static unsigned word2d1,word2d2;
 static char bbcs[]={"123456789abcde"};
 static int b1, b2;
+static int kuser1, kuser2;
 
 void mcbcn_d2(device1, device2, ierr, ip)
 char device1[2],device2[2];             /* device mnemonics */
@@ -28,19 +29,28 @@ long ip[5];
     struct res_rec response;
     static char bbcs[]={"123456789abcde"};
 
+    *ierr=0;
     dtlkup( &request[0],device1,ierr);
     dev1[0]=device1[0];
     dev1[1]=device1[1];
-    if(*ierr!=0)
-      return;
 
+    kuser1=device1[0]=='u';
+    if(!kuser1 && *ierr!=0)
+	return;
+
+    *ierr=0;
     dtlkup( &request[1],device2,ierr);
     dev2[0]=device2[0];
     dev2[1]=device2[1];
 
+    kuser2=device2[0]=='u';
+    if(!kuser2 && ierr!=0)
+	return;
+
+    *ierr=0;
     b1=strchr(bbcs,dev1[0]) != NULL;
     b2=strchr(bbcs,dev2[0]) != NULL;
-    if(*ierr!=0 || (!b1 && !b2) )
+    if(!b1 && !b2)
        return;
 
 /* retrive gain MAN/AGC control for any BBC's we might be using */
@@ -125,8 +135,10 @@ long ip[5];
     struct res_rec response;
 
     ini_req(&buffer);              /* initialize structure */
-    add_req(&buffer,&request[0]);  /* use request already set-up by mcbcn_d2 */
-    add_req(&buffer,&request[1]);
+    if(!kuser1)
+      add_req(&buffer,&request[0]);/* use request already set-up by mcbcn_d2 */
+    if(!kuser2)
+      add_req(&buffer,&request[1]);
     end_req(ip,&buffer);
     skd_run("mcbcn",'w',ip);
     skd_par(ip);
@@ -136,10 +148,14 @@ long ip[5];
     }
 
     opn_res(&buff_res,ip);
-    get_res(&response,&buff_res);
-    *dtpi1=(double) (unsigned) response.data;
-    get_res(&response,&buff_res);
-    *dtpi2=(double) (unsigned) response.data;
+    if(!kuser1) {
+      get_res(&response,&buff_res);
+      *dtpi1=(double) (unsigned) response.data;
+    }
+    if(!kuser2) {
+      get_res(&response,&buff_res);
+      *dtpi2=(double) (unsigned) response.data;
+    }
     if(response.state == -1) {
       ip[2]=-90;
       memcpy(ip+3,"nf",2);
