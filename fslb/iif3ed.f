@@ -49,7 +49,9 @@ C
 C 
 C     2.01 Code -1, mixer state
 C 
-201   if (ic1-1+nin(index+1).gt.ic2) return
+201   continue
+      if (index.lt.0) return
+      if (ic1-1+nin(index+1).gt.ic2) return
       iif3ed = ichmv(ias,ic1,lin,1+3*index,nin(index+1))
       return
 C  
