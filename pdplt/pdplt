@@ -1,0 +1,1964 @@
+#!/usr/bin/wish -f
+
+# ==========================================================================
+#
+#                             INITILIZING SECTION
+#
+# ==========================================================================
+
+# Set some global constants and variables
+# ---------------------------------------
+
+# Screen layout constants
+
+set size 3          ;# Multipication factor to change size of plotting area
+set xoffset 80      ;# Distance between window edge and plotting area vert-axis
+set yoffset 50      ;# Distance between window edge and plotting area upper limit
+set xrightoffset 60 ;# Distance between text labels and plotting area right limit
+set yrightoffset 45 ;# Distance between window edge and plotting area horz-axis
+set ytitleoffset 15 ;# Distance between window edge and header text for plot
+set pointoffplot 4  ;# Distance between effective plotting area and point outside
+                     # plot marking line.
+set dotsize 3       ;# Size of data point dots, multiplication factor
+
+# Default file names
+
+set WorkDir [pwd];                           ;# Set the working directory.
+set current_DefaultDir "/usr2/log"           ;# Default directory for log files.
+set current_PARPO "/usr2/control/parpo.ctl"  ;# Control file for xtrac.
+set current_MDLPO "/usr2/control/mdlpo.ctl"  ;# Control file for error.
+set current_XTRAC "/tmp/pdplt.xtr"            ;# Temporary output file for xtrac.
+set current_ERROR "/tmp/pdplt.err"            ;# Temporary output file for error.
+set current_TEMP  "/tmp/pdplt.tmp"            ;# Temporary file for greps and prints
+set current_XSAVE "(will be set when a file is opened)"
+                                              # Output file for xtrac output saves.
+set current_ESAVE "(will be set when a file is opened)"
+                                              # Output file for error output saves.
+set OverWriteFlag 0                          ;# Overwrite existing output files
+                                              # (1=Yes, 0=No).
+
+# Initialization of global variables
+
+set currentPlot 1           ;# The current plot type, range 1-5
+set currentErrorBar 1       ;# The current sigma, range 1-4
+                             # 1=No, 2=a-priori, 3=Input, 4=a-posteriori
+set noOfNodes 1             ;# Number of nodes in nodeDataMatrix
+set noOfGood 1              ;# Number of good nodes in nodeDataMatrix
+set statusMsg "Ready."      ;# Status field on bottom of window
+set statusVariable 0        ;# Used for waiting at error messages
+set global_antennaname ""   ;# Current antenna's name
+set global_antennatype ""   ;# Current antenna's type (XYNS, XYEW, HADC, AZEL)
+set global_xmin 0           ;# Minumum x value of current plot. (0,0)=Autoscale.
+set global_xmax 0           ;# Maximum x value of current plot. (0,0)=Autoscale.
+set global_ymin 0           ;# Minumum y value of current plot. (0,0)=Autoscale.
+set global_ymax 0           ;# Maximum y value of current plot. (0,0)=Autoscale.
+set NumberNodes "#Points: 0/0"
+set NoFilenameFlag 0
+set reprocFlag 1            ;# 1=Current error output is up-to-date. 0=It's not.
+set saveFlag 1              ;# 1=Current xtrac save is up-to-date. 0=It's not.
+
+# Status text constants
+
+set text_title_main "Pointing data plot"
+set text_title_newfile "Open new FS log file"
+set text_title_openfile "Open xtrac file"
+set text_title_print "Print plot"
+set text_title_sigma "x-sigma"
+set text_title_preferences "I/O setup"
+set text_title_quit "Quit"
+
+set text_processing_wait "Processing internal data, please wait..."
+set text_running_error "Running error external program, please wait..."
+set text_running_xtrac "Running xtrac external program, please wait..."
+set text_reading_errorfile "Reading error output file, please wait..."
+set text_reading_xtrac "Reading additional data from xtrac output file, please wait..."
+set text_updating_sources "Checking sources data, please wait..."
+set text_writing_xtrac "Creating new error input file, please wait..."
+set text_plot_wait "Preparing plot, please wait..."
+set text_printing_wait "Printing, please wait..."
+set text_saving_wait "Saving, please wait..."
+set text_give_filename "ERROR: You must enter correct filenames in 'I/O setup'."
+set text_ready "Ready."
+set text_no_dayno "WARNING: Check output file names in 'I/O setup'."
+set text_file_saved "Your editing was saved as specified in 'I/O setup'. Ready."
+
+set newfiletext_nofile_specified "No file specified."
+set newfiletext_day "This filename contains data for day no"
+set newfiletext_nofile "The file specified could not be opened."
+set newfiletext_noday "The file specified did not start with a valid day no."
+
+set openfiletext_nofile_specified "No file specified."
+set openfiletext_antenna "This filename contains data for station"
+set openfiletext_nofile "The file specified could not be opened."
+set openfiletext_noantenna "The file specified did not start with a valid \$antenna section."
+
+set print_default_filename "postscript.eps"
+set print_destination 0    ;# 0=Printer, 1=File
+set print_command 0        ;# 0=lpr, 1=psprint
+
+# Instruction text constants
+
+set newfiletext_instruction  "The filename must be an FS log file. When pressing <Return>, the station name and day number will be shown below, if the file was a valid log file."
+
+set openfiletext_instruction "The filename must be a file of xtrac output type. When pressing <Return>, the station name will be shown below, if the file contained a valid \$antenna section."
+
+set quittext_instruction "Are you sure you have saved your editing?\n\nAlso, if you did not reprocess your data before saving, the error output file saved may be inconsistent with the xtrac output file. In that case, you might want to reprocess and save again.\n\nReally quit?"
+
+# Initialization of data labels on screen's upper right
+
+set XPointLabel "1st axis.:"
+set YPointLabel "2nd axis.:"
+set XPointOffsetLabel "1st offs.:"
+set YPointOffsetLabel "2nd offs.:"
+set XPointSigmaLabel "1st sigma:"
+set YPointSigmaLabel "2nd sigma:"
+
+# Some help variables for faster calculations
+# -------------------------------------------
+
+set plotsize [expr 180*$size]
+set plotsize [expr double($plotsize)]
+
+# ============================================================================
+#
+#                             DISK I/O SECTION
+#
+#   Note that disk I/O is also performed in the newfile, openfile and print
+#   sections. This section contains most of the code for decoding space-
+#   separated ASCII files read from disk.
+#
+# ============================================================================
+
+# Procedure to read "error" and "xtrac" files to memory
+# -----------------------------------------------------
+
+proc readErrorFile {} {
+    global fileID nodeDataMatrix noOfNodes global_antennaname
+    global global_antennatype statusMsg text_reading_errorfile
+    global text_reading_xtrac reprocFlag
+    global currentErrorBar statusVariable noOfGood current_XTRAC current_ERROR
+    set fileID [open $current_ERROR r]
+    set statusMsg $text_reading_errorfile
+    update
+    set EOF 0
+    set correct -1
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$corrected" $readline]
+    }
+    set correctedPos [tell $fileID]
+    set currentPos [tell $fileID]
+    set EOF [gets $fileID readline]
+    set correct [string first "\$" $readline]
+    set noOfNodes 1
+    set linenumber 1
+    set noOfGood 1
+    set errorversion 1
+    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+	set conversions [scan $readline "%d" status]
+	if {$conversions != 1} {set status -1}
+	if {[expr {$status == 0}] || [expr {$status == 1}]} {
+	    set conversions [scan $readline "%d%f%f%f%f%f%f%f%f%f" status nodeDataMatrix($noOfNodes,1) nodeDataMatrix($noOfNodes,2) nodeDataMatrix($noOfNodes,3) nodeDataMatrix($noOfNodes,4) nodeDataMatrix($noOfNodes,5) nodeDataMatrix($noOfNodes,8) nodeDataMatrix($noOfNodes,9) nodeDataMatrix($noOfNodes,14) nodeDataMatrix($noOfNodes,15)]
+	    set nodeDataMatrix($noOfNodes,6) $currentPos
+	    set nodeDataMatrix($noOfNodes,7) [expr $status-1]
+	    if {$conversions >= 6} {
+		if {$conversions < 10} {set errorversion 0}
+		if {$status == 1} {incr noOfGood}
+		incr noOfNodes
+	    } else {
+		set statusMsg "Error reading error output file, line #$linenumber. Data point skipped. Press any key."
+		unset statusVariable
+		tkwait variable statusVariable
+		set statusMsg $text_reading_errorfile
+		update
+	    }
+	}
+	set currentPos [tell $fileID]
+	set EOF [gets $fileID readline]
+	incr linenumber
+	set correct [string first "\$" $readline]
+    }
+    set EOF [gets $fileID readline]
+    set conversions [scan $readline "%f%f%f%f" Xmean Xrms Ymean Yrms]
+    if {$conversions != 4} {set Xmean ???; set Xrms ???; set Ymean ???; set Yrms ???}
+    close $fileID
+
+    # Build error menu according to whether sigma values were found in error
+    # output file, and set default errorbar.
+
+    .mbar.error.menu delete 0 last
+    .mbar.error.menu add radio -label "No sigma shown" -variable currentErrorBar -value 1 -command {Replot}
+    .mbar.error.menu add separator
+    .mbar.error.menu add radio -label "Input" -variable currentErrorBar -value 3 -command {if {$currentPlot != 1} {ReplotYauto}}
+    if {$errorversion == 1} {.mbar.error.menu add radio -label "a-priori" -variable currentErrorBar -value 2 -command {if {$currentPlot != 1} {ReplotYauto}}}
+    if {$errorversion == 1} {.mbar.error.menu add radio -label "a-posteriori" -variable currentErrorBar -value 4 -command {if {$currentPlot != 1} {ReplotYauto}}}
+    if {$errorversion == 0} {
+	set currentErrorBar 3
+    } else {
+	set currentErrorBar 2
+    }
+
+    # Read Input-sigma data from xtrac-file
+
+    set fileID [open $current_XTRAC r+]
+    set statusMsg $text_reading_xtrac
+    update
+
+    # Read antenna section
+
+    set EOF 0
+    set correct -1
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$antenna" $readline]
+    }
+    gets $fileID readline
+    set conversions [scan $readline "%s%s" global_antennaname global_antennatype]
+    if {$conversions < 2} {
+	set global_antennaname "???"
+	set global_antennatype "XYNS"
+	set statusMsg "WARNING: Antenna type not found in xtrac output file. Using XYNS. Press any key."
+	unset statusVariable
+	tkwait variable statusVariable
+	set statusMsg $text_reading_xtrac
+	update
+    } else {
+	set global_antennaname [string toupper $global_antennaname]
+	set global_antennatype [string toupper $global_antennatype]
+    }
+
+    # Read data section
+
+    set correct [string first "\$data" $readline]
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$data" $readline]
+    }
+    set dataPos [tell $fileID]
+    set currentPos [tell $fileID]
+    set EOF [gets $fileID readline]
+    set correct [string first $readline "\$"]
+    set errorFlag 0
+    set counter 1
+    set linenumber 1
+    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+	set conversions [scan $readline "%d" status]
+	if {$conversions != 1} {set status -1}
+	if {[expr {$status == 0}] || [expr {$status == 1}]} {
+	    set conversions [scan $readline "%d%f%f%f%f%f%f%s%f" status col1 col2 col3 col4 col5 col6 col7 col8]
+	    if {$conversions == 9} {
+		while 1 {
+		    if {[expr {$nodeDataMatrix($counter,1)==$col1}] && [expr {$nodeDataMatrix($counter,2)==$col2}]} {
+			set nodeDataMatrix($counter,12) $col5
+			set nodeDataMatrix($counter,13) $col6
+			set nodeDataMatrix($counter,10) $col7
+			set nodeDataMatrix($counter,11) $col8
+			break
+		    }
+		    incr counter
+		    if {$counter == $noOfNodes} {
+			if {$errorFlag == 0} {
+			    set counter 1; set errorFlag 1
+			} else {
+			    set theError [format "Error while trying to match the following line in the \$corrected section of the error output file to the xtrac output file: %s" $readline]
+			    error "The error output file did not match the current xtrac output file. At least one data point were missing in the xtrac output file. This could be caused by someone tampering with the current output files or by disk failure." $theError
+			}
+		    }
+		}
+	    } else {
+		set statusMsg "Error reading xtrac output file line #$linenumber. Data point skipped. Press any key."
+		unset statusVariable
+		tkwait variable statusVariable
+		set statusMsg $text_reading_xtrac
+		update
+	    }
+	}
+	set currentPos [tell $fileID]
+	incr linenumber
+	set EOF [gets $fileID readline]
+	set correct [string first "\$" $readline]
+    }
+    close $fileID
+    set reprocFlag 1
+    settypedata $Xmean $Xrms $Ymean $Yrms
+    updatesources
+}
+
+# Procedure for setting antennatype-dependent labels and statistics menu
+# ----------------------------------------------------------------------
+
+# Input: Data for statistics menu
+
+proc settypedata {Xmean Xrms Ymean Yrms} {
+    global global_antennatype XPointLabel YPointLabel XPointOffsetLabel YPointOffsetLabel XPointSigmaLabel YPointSigmaLabel
+    set typeval 0
+    foreach typestr {concat XYNS XYEW HADC AZEL NONE} {
+	set temp [string compare $typestr $global_antennatype]
+	if {$temp == 0} {break}
+	incr typeval
+    }
+    .mbar.graph.menu delete 0 last
+    switch $typeval {
+	1 {
+	    set XPointLabel "X........:"
+	    set YPointLabel "Y........:"
+	    set XPointOffsetLabel "X-offset.:"
+	    set YPointOffsetLabel "Y-offset.:"
+	    set XPointSigmaLabel "X-sigma..:"
+	    set YPointSigmaLabel "Y-sigma..:"
+	    set xmeanlabel "X-mean.:"
+	    set xrmslabel "X-rms..:"
+	    set ymeanlabel "Y-mean.:"
+	    set yrmslabel "Y-rms..:"
+	    .mbar.graph.menu add radio -label "X-axis vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add separator
+	    .mbar.graph.menu add radio -label "X-axis vs X-offset" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-axis vs Y-offset" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-axis vs X-offset" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-axis vs Y-offset" -variable currentPlot -value 5 -command {plotdefault}
+	}
+	2 {
+	    set XPointLabel "X........:"
+	    set YPointLabel "Y........:"
+	    set XPointOffsetLabel "X-offset.:"
+	    set YPointOffsetLabel "Y-offset.:"
+	    set XPointSigmaLabel "X-sigma..:"
+	    set YPointSigmaLabel "Y-sigma..:"
+	    set xmeanlabel "X-mean.:"
+	    set xrmslabel "X-rms..:"
+	    set ymeanlabel "Y-mean.:"
+	    set yrmslabel "Y-rms..:"
+	    .mbar.graph.menu add radio -label "X-axis vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add separator
+	    .mbar.graph.menu add radio -label "X-axis vs X-offset" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-axis vs Y-offset" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-axis vs X-offset" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-axis vs Y-offset" -variable currentPlot -value 5 -command {plotdefault}
+	}
+	3 {
+	    set XPointLabel "Hour ang.:"
+	    set YPointLabel "Decl.....:"
+	    set XPointOffsetLabel "HA-offset:"
+	    set YPointOffsetLabel "DC-offset:"
+	    set XPointSigmaLabel "HA-sigma.:"
+	    set YPointSigmaLabel "DC-sigma.:"
+	    set xmeanlabel "HA-mean:"
+	    set xrmslabel "HA-rms.:"
+	    set ymeanlabel "DC-mean:"
+	    set yrmslabel "DC-rms.:"
+	    .mbar.graph.menu add radio -label "HA-axis vs DC-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add separator
+	    .mbar.graph.menu add radio -label "HA-axis vs HA-offset" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "HA-axis vs DC-offset" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "DC-axis vs HA-offset" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "DC-axis vs DC-offset" -variable currentPlot -value 5 -command {plotdefault}
+	}
+	4 {
+	    set XPointLabel "Azimuth..:"
+	    set YPointLabel "Elevation:"
+	    set XPointOffsetLabel "AZ-offset:"
+	    set YPointOffsetLabel "EL-offset:"
+	    set XPointSigmaLabel "AZ-sigma.:"
+	    set YPointSigmaLabel "EL-sigma.:"
+	    set xmeanlabel "AZ-mean:"
+	    set xrmslabel "AZ-rms.:"
+	    set ymeanlabel "EL-mean:"
+	    set yrmslabel "EL-rms.:"
+	    .mbar.graph.menu add radio -label "AZ-axis vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add separator
+	    .mbar.graph.menu add radio -label "AZ-axis vs AZ-offset" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "AZ-axis vs EL-offset" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "EL-axis vs AZ-offset" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "EL-axis vs AZ-offset" -variable currentPlot -value 5 -command {plotdefault}
+	}
+	5 {
+	    set XPointLabel "???:"
+	    set YPointLabel "???:"
+	    set XPointOffsetLabel "???:"
+	    set YPointOffsetLabel "???:"
+	    set xmeanlabel "???:"
+	    set xrmslabel "???:"
+	    set ymeanlabel "???:"
+	    set yrmslabel "???:"
+	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add separator
+	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 5 -command {plotdefault}
+	}
+    }
+    .mbar.stat.menu delete 0 last
+    .mbar.stat.menu add command -label "$xmeanlabel $Xmean"
+    .mbar.stat.menu add command -label "$xrmslabel $Xrms"
+    .mbar.stat.menu add command -label "$ymeanlabel $Ymean"
+    .mbar.stat.menu add command -label "$yrmslabel $Yrms"
+}
+
+# Procedure for creating/updating sources menu
+# --------------------------------------------
+
+proc updatesources {} {
+    global nodeDataMatrix noOfNodes noOfSources sourceMatrix currentSource statusMsg text_updating_sources
+    set statusMsg $text_updating_sources
+    update
+    .mbar.source.menu delete 0 last
+    .mbar.source.menu add radio -label "No source" -variable currentSource -value "NO SOURCE AT ALL" -command {UpdateScreen}
+    .mbar.source.menu add separator
+    set currentSource "NO SOURCE AT ALL"
+    set noOfSources 1
+    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	set newsource 1
+	set scounter 1
+	while {[expr {$scounter < $noOfSources}] && [expr {$newsource != 0}]} {
+	    set newsource [string compare $sourceMatrix($scounter) $nodeDataMatrix($counter,10)]
+	    incr scounter
+	}
+	if {$newsource != 0} {
+	    set sourceMatrix($noOfSources) $nodeDataMatrix($counter,10)
+	    .mbar.source.menu add radio -label $sourceMatrix($noOfSources) -variable currentSource -value $sourceMatrix($noOfSources) -command {UpdateScreen}
+	    incr noOfSources
+	}
+    }
+}
+
+# Procedure for removing points from "xtrac" file (when saving or reprocessing)
+# -----------------------------------------------------------------------------
+
+proc fileRemovePoints {} {
+    global current_XTRAC nodeDataMatrix noOfNodes statusMsg text_writing_xtrac statusVariable
+    set fileID [open $current_XTRAC r+]
+    set statusMsg $text_writing_xtrac
+    update
+    set readline ""
+    set EOF 0
+    set correct -1
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$data" $readline]
+    }
+    set currentPos [tell $fileID]
+    set EOF [gets $fileID readline]
+    set correct [string first $readline "\$"]
+    set errorFlag 0
+    set counter 1
+    set linenumber 1
+    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+	set conversions [scan $readline "%d" status]
+	if {$conversions != 1} {set status -1}
+	if {[expr {$status == 0}] || [expr {$status == 1}]} {
+	    set conversions [scan $readline "%d%f%f%f%f%f" status col1 col2 col3 col4 col5]
+	    if {$conversions == 6} {
+		while 1 {
+		    if {[expr {$nodeDataMatrix($counter,1)==$col1}] && [expr {$nodeDataMatrix($counter,2)==$col2}]} {
+			set nextPos [tell $fileID]
+			seek $fileID $currentPos
+			if {$nodeDataMatrix($counter,7) != 0} {
+			    puts -nonewline $fileID "  0 "
+			} else {
+			    puts -nonewline $fileID "  1 "
+			}
+			seek $fileID $nextPos
+			break
+		    }
+		    incr counter
+		    if {$counter == $noOfNodes} {
+			if {$errorFlag == 0} {
+			    set counter 1; set errorFlag 1
+			} else {
+			    set theError [format "Error while trying to match the following line in the current xtrac output file to memory: %s" $readline]
+			    error "The xtrac output file did not match the current data in memory. At least one data point were missing in the xtrac output file. This could be caused by someone tampering with the current xtrac output file or by disk failure." $theError
+			}
+		    }
+		}
+	    } else {
+		set statusMsg "Error reading xtrac output file line #$linenumber. Data point skipped. Press any key."
+		unset statusVariable
+		tkwait variable statusVariable
+		set statusMsg $text_writing_xtrac
+		update
+	    }
+	}
+	incr linenumber
+	set currentPos [tell $fileID]
+	set EOF [gets $fileID readline]
+	set correct [string first "\$" $readline]
+    }
+    close $fileID
+}
+
+# Procedure for running error external program
+# --------------------------------------------
+
+proc runError {} {
+    global currentPlot noOfNodes current_XTRAC current_ERROR current_MDLPO statusMsg text_processing_wait text_running_error text_ready
+    if {$noOfNodes > 1} {
+	set statusMsg $text_processing_wait
+	update
+	fileRemovePoints
+	set statusMsg $text_running_error
+	update
+	puts -nonewline [exec error $current_XTRAC $current_ERROR o $current_MDLPO]
+	readErrorFile
+	if {$currentPlot == 1} {Replot} else {ReplotYauto}
+	set statusMsg $text_ready
+    }
+}
+
+# Procedure to save temporary XTRAC and ERROR files to disk
+# ---------------------------------------------------------
+
+proc saveFile {} {
+    global current_XTRAC current_ERROR current_XSAVE current_ESAVE
+    global savefile_filename statusMsg text_saving_wait text_give_filename
+    global text_file_saved statusVariable NoFilenameFlag OverWriteFlag
+    global saveFlag
+    set correct_XSAVE [string compare $current_XSAVE ""]
+    set correct_ESAVE [string compare $current_ESAVE ""]
+    if {$correct_XSAVE != 0} {set correct_XSAVE [string first "(" $current_XSAVE]}
+    if {$correct_ESAVE != 0} {set correct_ESAVE [string first "(" $current_ESAVE]}
+    if {[expr {$correct_XSAVE != 0}] && [expr {$correct_ESAVE != 0}]} {
+	set statusMsg $text_saving_wait
+	update
+	fileRemovePoints
+	if {$OverWriteFlag == 1} {
+	    exec cp $current_XTRAC $current_XSAVE
+	    exec cp $current_ERROR $current_ESAVE
+	} else {
+	    exec cp -b $current_XTRAC $current_XSAVE
+	    exec cp -b $current_ERROR $current_ESAVE
+	}
+	set statusMsg $text_file_saved
+    } else {
+	set statusMsg $text_give_filename
+	set NoFilenameFlag 1
+    }
+    set saveFlag 1
+}
+
+proc doExit {} {
+    global current_XTRAC current_ERROR
+    exec rm -f $current_XTRAC
+    exec rm -f $current_ERROR
+    exit
+}
+
+# ==========================================================================
+#
+#                             PLOT SECTION
+#
+# ==========================================================================
+
+# Procedure for toggling point in memory (called by user mouse-click)
+# -------------------------------------------------------------------
+
+proc togglePoint {} {
+    global nodeDataMatrix scrNodeNo noOfGood noOfNodes NumberNodes currentSource
+    global saveFlag reprocFlag
+    set nodeNo [.c find withtag current]
+    set colornode [string compare $nodeDataMatrix($scrNodeNo($nodeNo),10) $currentSource]
+    if {$nodeDataMatrix($scrNodeNo($nodeNo),7) == 0} {
+	if {$colornode != 0} {
+	    .c itemconfigure current -fill white
+	} else {
+	    .c itemconfigure current -fill lightblue
+	}
+	set nodeDataMatrix($scrNodeNo($nodeNo),7) -1
+	incr noOfGood -1
+   } else {
+	if {$colornode != 0} {
+	    .c itemconfigure current -fill black
+	} else {
+	    .c itemconfigure current -fill cyan
+	}
+	set nodeDataMatrix($scrNodeNo($nodeNo),7) 0
+	incr noOfGood 1
+    }
+    set temp1 [expr $noOfGood-1]
+    set temp2 [expr $noOfNodes-1]
+    set NumberNodes [format "#Points: %d/%d" $temp1 $temp2]
+    set saveFlag 0
+    set reprocFlag 0
+}
+
+# Procedure for re-adding all points to memory (menu selection procedure)
+# -----------------------------------------------------------------------
+
+proc addallPoints {} {
+    global nodeDataMatrix noOfGood noOfNodes NumberNodes currentSource
+    global saveFlag reprocFlag
+    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	set nodeDataMatrix($counter,7) 0
+    }
+    .c itemconfigure point -fill black
+    set noOfGood $noOfNodes
+    UpdateScreen
+    set saveFlag 0
+    set reprocFlag 0
+}
+
+proc UpdateScreen {} {
+    global nodeDataMatrix noOfNodes noOfGood currentSource NumberNodes
+    set temp1 [expr $noOfGood-1]
+    set temp2 [expr $noOfNodes-1]
+    set NumberNodes [format "#Points: %d/%d" $temp1 $temp2]
+    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	set colornode [string compare $nodeDataMatrix($counter,10) $currentSource]
+	if {$colornode == 0} {
+	    if {$nodeDataMatrix($counter,7) == 0} {
+		.c itemconfigure $nodeDataMatrix($counter,16) -fill cyan
+	    } else {
+		.c itemconfigure $nodeDataMatrix($counter,16) -fill lightblue
+	    }
+	} else {
+	    if {$nodeDataMatrix($counter,7) == 0} {
+		.c itemconfigure $nodeDataMatrix($counter,16) -fill black
+	    } else {
+		.c itemconfigure $nodeDataMatrix($counter,16) -fill white
+	    }
+	}
+    }
+}
+
+# Procedure to replot screen
+# --------------------------
+
+proc Replot {} {
+    global currentPlot global_xmin global_xmax global_ymin global_ymax NumberNodes noOfGood noOfNodes NoFilenameFlag statusMsg text_no_dayno
+    switch $currentPlot {
+	1 {plot 1 2}
+	2 {plot 1 3}
+	3 {plot 1 4}
+	4 {plot 2 3}
+	5 {plot 2 4}
+    }
+    set temp1 [expr $noOfGood-1]
+    set temp2 [expr $noOfNodes-1]
+    set NumberNodes [format "#Points: %d/%d" $temp1 $temp2]
+    if {$NoFilenameFlag == 1} {set statusMsg $text_no_dayno}
+}
+
+# Procedure to replot screen with X-axis autoscale
+# ------------------------------------------------
+
+proc ReplotXauto {} {
+    global global_xmin global_xmax
+    set global_xmin 0
+    set global_xmax 0
+    Replot
+}
+
+# Procedure to replot screen with Y-axis autoscale
+# ------------------------------------------------
+
+proc ReplotYauto {} {
+    global global_ymin global_ymax
+    set global_ymin 0
+    set global_ymax 0
+    Replot
+}
+
+# Procedure to create a data point and plot it on screen
+# ------------------------------------------------------
+
+# Input: nodeNo    Index in nodeDataMatrix
+#        status    0 = Active data point; -1 = Inactive data point
+#        x         Data point's x position in screen pixels
+#        y         Data point's y position in screen pixels
+#        xerrmin   Errorbar's min-x position in screen pixels
+#        xerrmax   Errorbar's max-x position in screen pixels; 0 = No x error bar
+#        yerrmin   Errorbar's min-y position in screen pixels
+#        yerrmax   Errorbar's max-y position in screen pixels; 0 = No y error bar
+
+proc mkNode {nodeNo status x y xerrmax xerrmin yerrmax yerrmin} {
+    global scrNodeNo dotsize nodeDataMatrix size pointoffplot xoffset yoffset plotsize currentSource
+    set colornode [string compare $nodeDataMatrix($nodeNo,10) $currentSource]
+    if {$status == 0} {
+	if {$colornode != 0} {
+	    set new [.c create oval [expr $x-$dotsize] [expr $y-$dotsize] [expr $x+$dotsize] [expr $y+$dotsize] -fill black -tags point]
+	} else {
+	    set new [.c create oval [expr $x-$dotsize] [expr $y-$dotsize] [expr $x+$dotsize] [expr $y+$dotsize] -fill cyan -tags point]
+	}
+    } else {
+	if {$colornode != 0} {
+	    set new [.c create oval [expr $x-$dotsize] [expr $y-$dotsize] [expr $x+$dotsize] [expr $y+$dotsize] -fill white -tags point]
+	} else {
+	    set new [.c create oval [expr $x-$dotsize] [expr $y-$dotsize] [expr $x+$dotsize] [expr $y+$dotsize] -fill lightblue -tags point]
+	}
+    }
+    set scrNodeNo($new) $nodeNo
+    set nodeDataMatrix($nodeNo,16) $new
+    if {$xerrmax > 0} {
+	set bordermax [expr $xoffset+$plotsize+$pointoffplot]
+	set bordermin [expr $xoffset-$pointoffplot]
+	if {[expr {$x > $bordermin}] && [expr {$xerrmin < $bordermax}]} {
+	    .c create line $xerrmin $y [expr $x-$dotsize] $y -tags {errorbar node($nodeNo)}
+	    .c create line $xerrmin [expr $y-5] $xerrmin [expr $y+5] -tags {errorbar node($nodeNo)}
+	}
+	if {[expr {$x < $bordermax}] && [expr {$xerrmax > $bordermin}]} {
+	    .c create line [expr $x+$dotsize] $y $xerrmax $y -tags {errorbar node($nodeNo)}
+	    .c create line $xerrmax [expr $y-5] $xerrmax [expr $y+5] -tags {errorbar node($nodeNo)}
+	}
+    }
+    if {$yerrmax > 0} {
+	set bordermax [expr $yoffset+$plotsize+$pointoffplot]
+	set bordermin [expr $yoffset-$pointoffplot]
+	if {[expr {$y < $bordermax}] && [expr {$yerrmin > $bordermin}]} {
+	    .c create line $x $yerrmin $x [expr $y+$dotsize] -tags {errorbar node($nodeNo)}
+	    .c create line [expr $x-5] $yerrmin [expr $x+5] $yerrmin -tags {errorbar node($nodeNo)}
+	}
+	if {[expr {$y > $bordermin}] && [expr {$yerrmax < $bordermax}]} {
+	    .c create line $x [expr $y-$dotsize] $x $yerrmax -tags {errorbar node($nodeNo)}
+	    .c create line [expr $x-5] $yerrmax [expr $x+5] $yerrmax -tags {errorbar node($nodeNo)}
+	}
+    }
+}
+
+# Procedure for calculating node's X-coordinates on screen
+# --------------------------------------------------------
+
+# Input:  x     Data point's x value
+#         xmin  The minimum x value of the current scale
+#         xmax  The maximum x value of the current scale
+# Output:       Data point's x position in screen pixels
+
+proc nodeCoordX {x xmin xmax} {
+    global size xoffset pointoffplot plotsize
+    set xmin [expr double($xmin)]
+    set xmax [expr double($xmax)]
+    if {$xmin == $xmax} {set xmax [expr ($xmax + .0001)]}
+    set temp1 [expr $xmax-$xmin]
+    set temp2 [expr $plotsize/$temp1]
+    set xrel [expr $x-$xmin]
+    set result [expr $temp2*$xrel+$xoffset]
+    if {$result < $xoffset} {set result [expr $xoffset-$pointoffplot]}
+    if {$result > [expr $xoffset+$plotsize]} {set result [expr $xoffset+$plotsize+$pointoffplot]}
+    return $result
+}
+
+# Procedure for calculating node's Y-coordinates on screen
+# --------------------------------------------------------
+
+# Input:  y     Data point's y value
+#         ymin  The minimum y value of the current scale
+#         ymax  The maximum y value of the current scale
+# Output:       Data point's y position in screen pixels
+
+proc nodeCoordY {y ymin ymax} {
+    global size yoffset pointoffplot plotsize
+    set ymin [expr double($ymin)]
+    set ymax [expr double($ymax)]
+    if {$ymin == $ymax} {set ymax [expr ($ymax + .0001)]}
+    set mirror [expr ($ymax-$ymin)/2+$ymin]
+    set newpoint [expr $y-2*($y-$mirror)]
+    set result [expr ($plotsize/($ymax-$ymin))*($newpoint-$ymin)+$yoffset]
+    if {$result < $yoffset} {set result [expr $yoffset-$pointoffplot]}
+    if {$result > [expr $yoffset+$plotsize]} {set result [expr $yoffset+$plotsize+$pointoffplot]}
+    return $result
+}
+
+# Procedure to label coordinate system header and footer
+# ------------------------------------------------------
+
+proc labelheader {} {
+    global currentPlot global_antennaname global_antennatype
+    .c dchars title 0 end
+    .c insert title 0 [format "%s %s antenna" $global_antennaname $global_antennatype]
+    set typeval 0
+    foreach typestr {concat XYNS XYEW HADC AZEL NONE} {
+	set temp [string compare $typestr $global_antennatype]
+	if {$temp == 0} {break}
+	incr typeval
+    }
+    switch $typeval {
+	1 {
+	    switch $currentPlot {
+		1 {set xlabel "X-axis"; set ylabel "Y-axis"}
+		2 {set xlabel "X-axis"; set ylabel "X-offset"}
+		3 {set xlabel "X-axis"; set ylabel "Y-offset"}
+		4 {set xlabel "Y-axis"; set ylabel "X-offset"}
+		5 {set xlabel "Y-axis"; set ylabel "Y-offset"}
+	    }
+	}
+	2 {
+	    switch $currentPlot {
+		1 {set xlabel "X-axis"; set ylabel "Y-axis"}
+		2 {set xlabel "X-axis"; set ylabel "X-offset"}
+		3 {set xlabel "X-axis"; set ylabel "Y-offset"}
+		4 {set xlabel "Y-axis"; set ylabel "X-offset"}
+		5 {set xlabel "Y-axis"; set ylabel "Y-offset"}
+	    }
+	}
+	3 {
+	    switch $currentPlot {
+		1 {set xlabel "Hour angle"; set ylabel "Declination"}
+		2 {set xlabel "Hour angle"; set ylabel "HA-offset"}
+		3 {set xlabel "Hour angle"; set ylabel "Decl-offset"}
+		4 {set xlabel "Declination"; set ylabel "HA-offset"}
+		5 {set xlabel "Declination"; set ylabel "Decl-offset"}
+	    }
+	}
+	4 {
+	    switch $currentPlot {
+		1 {set xlabel "Azimuth"; set ylabel "Elevation"}
+		2 {set xlabel "Azimuth"; set ylabel "AZ-offset"}
+		3 {set xlabel "Azimuth"; set ylabel "EL-offset"}
+		4 {set xlabel "Elevation"; set ylabel "AZ-offset"}
+		5 {set xlabel "Elevation"; set ylabel "EL-offset"}
+	    }
+	}
+	5 {set xlabel "???"; set ylabel "???"}
+    }
+    .c dchars xaxislabel 0 end
+    .c insert xaxislabel 0 $xlabel
+    .c dchars yaxislabel 0 end
+    .c insert yaxislabel 0 $ylabel
+}
+
+# Procedure for labeling coordinate system axes
+# ---------------------------------------------
+
+proc labelaxes {xmin xmax ymin ymax} {
+    global currentPlot pointoffplot xoffset size
+    .c delete yzero
+    .c dchars text 0 end
+    .c insert x0 0 $xmin
+    .c insert x1 0 [expr ($xmax-$xmin)/2+$xmin]
+    .c insert x2 0 $xmax
+    .c insert y0 0 $ymin
+    .c insert y1 0 [expr ($ymax-$ymin)/2+$ymin]
+    .c insert y2 0 $ymax
+    if {$currentPlot > 1} {
+	if {[expr {$ymin < 0}] && [expr {$ymax > 0}]} {
+	    .c create line [expr $xoffset-10] [nodeCoordY 0 $ymin $ymax] [expr $xoffset+$size*180+$pointoffplot] [nodeCoordY 0 $ymin $ymax] -tags {yzero}
+	    .c create text [expr $xoffset-10] [nodeCoordY 0 $ymin $ymax] -anchor se -tags {text yzero yzerotext}
+	    .c insert yzerotext 0 0
+	}
+    }
+}
+
+# Procedure to show point data on screen (when mouse enters data point)
+# ---------------------------------------------------------------------
+
+proc updatePointData {} {
+    global nodeDataMatrix scrNodeNo PointX PointY PointXOffset PointYOffset PointXSigma PointYSigma PointSource PointElevation currentErrorBar
+    set node [.c find withtag current]
+    set PointX $nodeDataMatrix($scrNodeNo($node),1)
+    set PointY $nodeDataMatrix($scrNodeNo($node),2)
+    set PointXOffset $nodeDataMatrix($scrNodeNo($node),3)
+    set PointYOffset $nodeDataMatrix($scrNodeNo($node),4)
+    set PointSource $nodeDataMatrix($scrNodeNo($node),10)
+    set PointElevation $nodeDataMatrix($scrNodeNo($node),11)
+    switch $currentErrorBar {
+	1 {
+	    set PointXSigma ""
+	    set PointYSigma ""
+	}
+	2 {
+	    set PointXSigma $nodeDataMatrix($scrNodeNo($node),8)
+	    set PointYSigma $nodeDataMatrix($scrNodeNo($node),9)
+	}
+	3 {
+	    set PointXSigma $nodeDataMatrix($scrNodeNo($node),12)
+	    set PointYSigma $nodeDataMatrix($scrNodeNo($node),13)
+	}
+	4 {
+	    set PointXSigma $nodeDataMatrix($scrNodeNo($node),14)
+	    set PointYSigma $nodeDataMatrix($scrNodeNo($node),15)
+	}
+    }
+}
+
+# Procedure to clear point data from screen (when mouse leaves data point)
+# ------------------------------------------------------------------------
+
+proc clearPointData {} {
+    global PointX PointY PointXOffset PointYOffset PointXSigma PointYSigma PointSource PointElevation
+    set PointX ""
+    set PointY ""
+    set PointXOffset ""
+    set PointYOffset ""
+    set PointXSigma ""
+    set PointYSigma ""
+    set PointSource ""
+    set PointElevation ""
+}
+
+# Procedure plotdefault (to set plot values to their default)
+# -----------------------------------------------------------
+
+proc plotdefault {} {
+    global global_antennatype currentPlot global_xmin global_xmax global_ymin global_ymax
+    set azel [string compare AZEL $global_antennatype]
+    if {$azel != 0} {
+	switch $currentPlot {
+	    1 {set global_xmin -90; set global_xmax 90; set global_ymin -90; set global_ymax 90}
+	    2 {set global_xmin -90; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	    3 {set global_xmin -90; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	    4 {set global_xmin -90; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	    5 {set global_xmin -90; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	}
+    } else {
+	switch $currentPlot {
+	    1 {set global_xmin 0; set global_xmax 360; set global_ymin 0; set global_ymax 90}
+	    2 {set global_xmin 0; set global_xmax 360; set global_ymin 0; set global_ymax 0}
+	    3 {set global_xmin 0; set global_xmax 360; set global_ymin 0; set global_ymax 0}
+	    4 {set global_xmin 0; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	    5 {set global_xmin 0; set global_xmax 90; set global_ymin 0; set global_ymax 0}
+	}
+    }
+    Replot
+}
+
+# Procedure to plot all data points on screen
+# -------------------------------------------
+
+# Input: xcol The column in nodeDataMatrix to be plotted on the X-axis
+#        ycol The column in nodeDataMatrix to be plotted on the Y-axis
+
+proc plot {xcol ycol} {
+    global nodeDataMatrix noOfNodes currentPlot currentErrorBar statusMsg text_plot_wait text_ready global_xmin global_xmax global_ymin global_ymax
+    set statusMsg $text_plot_wait
+    update
+    set ErrorBar $currentErrorBar
+    if {$currentPlot == 1} {set ErrorBar 1}
+    .c delete point
+    .c delete errorbar
+
+# Autoscale if necessary
+
+    if {$noOfNodes > 1} {
+	if {[expr {$global_xmin == 0}] && [expr {$global_xmax == 0}]} {
+	    set global_xmin 1000
+	    set global_xmax -1000
+	    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+		if {$nodeDataMatrix($counter,7) == 0} {
+		    if {$global_xmin > $nodeDataMatrix($counter,$xcol)} {set global_xmin $nodeDataMatrix($counter,$xcol)}
+		    if {$global_xmax < $nodeDataMatrix($counter,$xcol)} {set global_xmax $nodeDataMatrix($counter,$xcol)}
+		}
+	    }
+	}
+	if {[expr {$global_ymin == 0}] && [expr {$global_ymax == 0}]} {
+	    set global_ymin 1000
+	    set global_ymax -1000
+	    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+		if {$nodeDataMatrix($counter,7) == 0} {
+		    switch $ErrorBar {
+			1 {
+			    if {$global_ymin > $nodeDataMatrix($counter,$ycol)} {set global_ymin $nodeDataMatrix($counter,$ycol)}
+			    if {$global_ymax < $nodeDataMatrix($counter,$ycol)} {set global_ymax $nodeDataMatrix($counter,$ycol)}
+			}
+			2 {
+			    if {$global_ymin > [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+5])]} {set global_ymin [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+5])]}
+			    if {$global_ymax < [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+5])]} {set global_ymax [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+5])]}
+			}
+			3 {
+			    if {$global_ymin > [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+9])]} {set global_ymin [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+9])]}
+			    if {$global_ymax < [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+9])]} {set global_ymax [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+9])]}
+			}
+			4 {
+			    if {$global_ymin > [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+11])]} {set global_ymin [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+11])]}
+			    if {$global_ymax < [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+11])]} {set global_ymax [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+11])]}
+			}
+		    }
+		}
+	    }
+	}
+	if {$global_xmin == 1000} {set global_xmin 0; set global_xmax 0}
+	if {$global_ymin == 1000} {set global_ymin 0; set global_ymax 0}
+	if {$global_xmin == $global_xmax} {set global_xmax [expr ($global_xmax + .0001)]}
+	if {$global_ymin == $global_ymax} {set global_ymax [expr ($global_ymax + .0001)]}
+
+# Make nodes (and errorbars)
+
+        for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	    switch $ErrorBar {
+		1 {
+		    mkNode $counter $nodeDataMatrix($counter,7) [nodeCoordX $nodeDataMatrix($counter,$xcol) $global_xmin $global_xmax] [nodeCoordY $nodeDataMatrix($counter,$ycol) $global_ymin $global_ymax] 0 0 0 0
+		}
+		2 {
+		    mkNode $counter $nodeDataMatrix($counter,7) [nodeCoordX $nodeDataMatrix($counter,$xcol) $global_xmin $global_xmax] [nodeCoordY $nodeDataMatrix($counter,$ycol) $global_ymin $global_ymax] 0 0 [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+5])] $global_ymin $global_ymax] [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+5])] $global_ymin $global_ymax] 
+		}
+		3 {
+		    mkNode $counter $nodeDataMatrix($counter,7) [nodeCoordX $nodeDataMatrix($counter,$xcol) $global_xmin $global_xmax] [nodeCoordY $nodeDataMatrix($counter,$ycol) $global_ymin $global_ymax] 0 0 [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+9])] $global_ymin $global_ymax] [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+9])] $global_ymin $global_ymax] 
+		}
+		4 {
+		    mkNode $counter $nodeDataMatrix($counter,7) [nodeCoordX $nodeDataMatrix($counter,$xcol) $global_xmin $global_xmax] [nodeCoordY $nodeDataMatrix($counter,$ycol) $global_ymin $global_ymax] 0 0 [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)+$nodeDataMatrix($counter,[expr $ycol+11])] $global_ymin $global_ymax] [nodeCoordY [expr $nodeDataMatrix($counter,$ycol)-$nodeDataMatrix($counter,[expr $ycol+11])] $global_ymin $global_ymax] 
+		}
+	    }
+	}
+	labelaxes $global_xmin $global_xmax $global_ymin $global_ymax
+	labelheader
+    }
+    set statusMsg $text_ready
+}
+
+# ==========================================================================
+#
+#                           NEWFILE SECTION
+#
+# ==========================================================================
+
+# newFile menu selection procedure
+# --------------------------------
+
+proc newFile {} {
+    global newfile_filename current_DefaultDir WorkDir newfile_statusMsg newfiletext_nofile_specified
+    set newfile_filename ""
+    create_newfileWindow
+    set newfile_statusMsg $newfiletext_nofile_specified
+    focus .newfile.entryFilename
+}
+
+# Procedure to do first-time processing by running xtrac and error
+# ----------------------------------------------------------------
+
+proc newfile_OK {} {
+    global newfile_filename current_DefaultDir current_PARPO current_MDLPO
+    global current_XTRAC current_ERROR current_XSAVE current_ESAVE
+    global statusMsg text_processing_wait text_running_error text_running_xtrac
+    global saveFlag text_ready
+    set correct [newfile_checkfile $newfile_filename]
+    if {$correct == 1} {
+	set fileID [open $newfile_filename r]
+	set day [read $fileID 5]
+	close $fileID
+	set current_XSAVE [format "%s/xtr%s" $current_DefaultDir $day]
+	set current_ESAVE [format "%s/err%s" $current_DefaultDir $day]
+	.c delete point
+	destroy .newfile
+	set statusMsg $text_running_xtrac
+	update
+	puts -nonewline [exec xtrac $newfile_filename $current_XTRAC o $current_PARPO]
+	set statusMsg $text_running_error
+	update
+	puts -nonewline [exec error $current_XTRAC $current_ERROR o $current_MDLPO]
+	set statusMsg $text_ready
+	readErrorFile
+	set saveFlag 0
+	plotdefault
+    }
+}
+
+# Procedure to find day no. when the user has entered a new input file name
+# -------------------------------------------------------------------------
+
+proc newfile_checkfile {filename} {
+    global newfile_filename newfile_statusMsg newfiletext_nofile
+    global newfiletext_noday newfiletext_day current_DefaultDir
+    global current_TEMP
+    set tempfile ""
+    set globalsign [string index $filename 0]
+    set globalcheck [string compare "/" $globalsign]
+    if {$globalcheck != 0} {set globalcheck [string compare "." $globalsign]}
+    if {$globalcheck != 0} {
+	set correct [file isfile $current_DefaultDir/$filename]
+	if {$correct == 1} {
+	    set tempfile $current_DefaultDir/$filename
+	} else {
+	    set correct [file isfile $current_DefaultDir/$filename.log]
+	    if {$correct == 1} {
+		set tempfile $current_DefaultDir/$filename.log
+	    } else {
+		set newfile_filename ""
+		set newfile_statusMsg $newfiletext_nofile
+		focus .newfile.entryFilename
+		return 0
+	    }
+	}
+    } else {
+	set correct [file isfile $filename]
+	if {$correct == 1} {
+	    set tempfile $filename
+	} else {
+	    set correct [file isfile $filename.log]
+	    if {$correct == 1} {
+		set tempfile $filename.log
+	    } else {
+		set newfile_filename ""
+		set newfile_statusMsg $newfiletext_nofile
+		focus .newfile.entryFilename
+		return 0
+	    }
+	}
+    }
+    if {[string compare $tempfile ""] != 0} {
+	set fileID [open $tempfile r]
+	set day [read $fileID 5]
+	close $fileID
+	if {[expr {$day > 0}] && [expr {$day < 100000}]} {
+	    set newfile_filename $tempfile
+	    if ![catch {exec grep location $newfile_filename > $current_TEMP}] {
+		set fileID [open $current_TEMP r]
+		gets $fileID readline
+		set loclist [split $readline ,]
+		set temp [lindex $loclist 1]
+		set antennaname [string trim $temp]
+		exec rm -f $current_TEMP
+	    } else {
+		set antennaname "NOT FOUND"
+	    }
+	    set newfile_statusMsg [format "This file contains data for station %s, day %s." $antennaname $day]
+	    return 1
+	} else {
+	    set newfile_filename ""
+	    set newfile_statusMsg $newfiletext_noday
+	    focus .newfile.entryFilename
+	    return 0
+	}
+	close $fileID
+    }
+}
+
+# Procedure to clear all entry fields in newfile window
+# -----------------------------------------------------
+
+proc newfile_clearScreen {} {
+    global newfile_filename newfile_statusMsg newfiletext_nofile_specified
+    set newfile_statusMsg $newfiletext_nofile_specified
+    set newfile_filename ""
+    focus .newfile.entryFilename
+}
+
+# ==========================================================================
+#
+#                           OPENFILE SECTION
+#
+# ==========================================================================
+
+# openfile menu selection procedure
+# ---------------------------------
+
+proc openFile {} {
+    global openfile_filename openfile_statusMsg openfiletext_nofile_specified
+    set openfile_statusMsg $openfiletext_nofile_specified
+    set openfile_filename ""
+    create_openfileWindow
+}
+
+# Procedure to do processing on existing xtrac file by running error
+# ------------------------------------------------------------------
+
+proc openfile_OK {} {
+    global openfile_filename current_XTRAC current_ERROR current_MDLPO current_XSAVE current_ESAVE statusMsg text_processing_wait text_running_error text_ready statusVariable NoFilenameFlag
+    set correct [openfile_checkfile $openfile_filename]
+    if {$correct == 1} {
+	destroy .openfile
+	.c delete point
+	set correct 0
+	set pos [string last xtr $openfile_filename]
+	if {$pos > 1} {
+	    set day [string range $openfile_filename [expr $pos+3] end]
+	    if {[regexp {^[0-9]+$} $day]} {
+		if {[expr {$day > 0}] && [expr {$day < 100000}]} {set correct 1}
+	    }
+	}
+	if {$correct == 1} {
+	    set current_XSAVE $openfile_filename
+	    if {$pos > 0} {
+		set current_ESAVE [format "%s%s%d" [string range $openfile_filename 0 [expr $pos-1]] err $day]
+	    } else {
+		set current_ESAVE [format "%s%d" err $day]
+	    }
+	    set NoFilenameFlag 0
+	} else {
+	    set current_XSAVE ""
+	    set current_ESAVE ""
+	    set NoFilenameFlag 1
+	}
+	set correct [string compare $openfile_filename $current_XTRAC]
+	if {$correct != 0} {exec cp -f $openfile_filename $current_XTRAC}
+	set statusMsg $text_running_error
+	update
+	puts -nonewline [exec error $current_XTRAC $current_ERROR o $current_MDLPO]
+	set statusMsg $text_ready
+	readErrorFile
+	plotdefault
+    }
+}
+
+# Procedure to clear all entry fields in openfile window
+# ------------------------------------------------------
+
+proc openfile_clearscreen {} {
+    global openfile_filename openfile_statusMsg openfiletext_nofile_specified
+    set openfile_statusMsg $openfiletext_nofile_specified
+    set openfile_filename ""
+    focus .openfile.entryFilename
+}
+
+# Procedure to find antenna name when user enters filename
+# --------------------------------------------------------
+
+proc openfile_checkfile {filename} {
+    global openfile_filename openfile_statusMsg openfiletext_nofile openfiletext_noantenna openfiletext_antenna global_antennaname current_DefaultDir
+    set tempfile ""
+    set globalsign [string index $filename 0]
+    set globalcheck [string compare "/" $globalsign]
+    if {$globalcheck != 0} {set globalcheck [string compare "." $globalsign]}
+    if {$globalcheck != 0} {
+	set correct [catch {set fileID [open $current_DefaultDir/$filename r]}]
+	if {$correct == 0} {
+	    set tempfile $current_DefaultDir/$filename
+	} else {
+	    set correct [catch {set fileID [open $current_DefaultDir/$filename.xtr r]}]
+	    if {$correct == 0} {
+		set tempfile $current_DefaultDir/$filename.xtr
+	    } else {
+		set openfile_filename ""
+		set openfile_statusMsg $openfiletext_nofile
+		focus .openfile.entryFilename
+		return 0
+	    }
+	}
+    } else {
+	set correct [catch {set fileID [open $filename r]}]
+	if {$correct == 0} {
+	    set tempfile $filename
+	} else {
+	    set correct [catch {set fileID [open $filename.xtr r]}]
+	    if {$correct == 0} {
+		set tempfile $filename.xtr
+	    } else {
+		set openfile_filename ""
+		set openfile_statusMsg $openfiletext_nofile
+		focus .openfile.entryFilename
+		return 0
+	    }
+	}
+    }
+    if {[string compare $tempfile ""] != 0} {
+	gets $fileID readline
+	set correct [string first "\$antenna" $readline]
+	if {$correct < 0} {
+	    set openfile_filename ""
+	    set openfile_statusMsg $openfiletext_noantenna
+	    focus .openfile.entryFilename
+	    return 0
+	} else {
+	    gets $fileID readline
+	    set conversions [scan $readline "%s%s" antennaname antennatype]
+	    if {$conversions != 2} {set antennaname "???"; set antennatype "???"}
+	    set openfile_filename $tempfile
+	    set antennaname [string toupper $antennaname]
+	    set openfile_statusMsg [format "$openfiletext_antenna %s." $antennaname]
+	    return 1
+	}
+	close $fileID
+    }
+}
+
+# ==========================================================================
+#
+#                              PRINT SECTION
+#
+# ==========================================================================
+
+# Print menu selection procedure
+# ------------------------------
+
+proc printPlot {} {
+    global print_filename print_destination print_default_filename
+    set print_filename $print_default_filename
+    create_printWindow
+}
+
+# Print OK procedure
+# ------------------
+
+proc print_OK {} {
+    global print_filename print_destination statusMsg text_printing_wait text_ready
+    global print_command current_TEMP
+    destroy .print
+    set statusMsg $text_printing_wait
+    update
+    switch $print_destination {
+	0 {
+	    .c postscript -pagewidth 7.5i -file $current_TEMP
+	    switch $print_command {
+		0 {exec lpr $current_TEMP}
+		1 {exec psprint $current_TEMP}
+	    }
+	    exec rm -f $current_TEMP
+	}
+	1 {
+	    .c postscript -pagewidth 7.5i -file $print_filename
+	}
+    }
+    set statusMsg $text_ready
+}
+
+# Procedure to clear all entry fields in print window
+# ---------------------------------------------------
+
+proc print_clearscreen {} {
+    global print_filename print_destination
+    set print_filename ""
+    switch $print_destination {
+	0 {focus .print}
+	1 {focus .print.entryFilename}
+    }
+}
+
+# ==========================================================================
+#
+#                           PREFERENCES SECTION
+#
+# ==========================================================================
+
+proc changePrefs {} {
+    global current_DefaultDir current_PARPO current_MDLPO current_XSAVE current_ESAVE
+    global pref_DefaultDir pref_PARPO pref_MDLPO pref_XSAVE pref_ESAVE
+    global pref_OverWrite OverWriteFlag NoFilenameFlag noOfNodes
+    global current_XTRAC current_ERROR current_TEMP pref_XTRAC pref_ERROR pref_TEMP
+    set pref_DefaultDir $current_DefaultDir 
+    set pref_PARPO $current_PARPO
+    set pref_MDLPO $current_MDLPO 
+    set pref_XSAVE $current_XSAVE
+    set pref_ESAVE $current_ESAVE
+    set pref_XTRAC $current_XTRAC
+    set pref_ERROR $current_ERROR
+    set pref_TEMP $current_TEMP
+    set pref_OverWrite $OverWriteFlag
+    create_prefWindow
+    if {$noOfNodes > 1} {
+	.pref.entryXTRAC config -state disabled
+	.pref.entryERROR config -state disabled
+    } else {
+	.pref.entryXSAVE config -state disabled
+	.pref.entryESAVE config -state disabled
+    }
+    if {$NoFilenameFlag == 1} {focus .pref.entryXSAVE}
+}
+
+proc pref_OK {} {
+    global current_DefaultDir current_PARPO current_MDLPO current_XSAVE current_ESAVE
+    global pref_DefaultDir pref_PARPO pref_MDLPO pref_XSAVE pref_ESAVE
+    global pref_OverWrite OverWriteFlag NoFilenameFlag statusMsg text_ready
+    global current_XTRAC current_ERROR current_TEMP pref_XTRAC pref_ERROR pref_TEMP
+    set current_DefaultDir $pref_DefaultDir 
+    set current_PARPO $pref_PARPO
+    set current_MDLPO $pref_MDLPO 
+    set current_XSAVE $pref_XSAVE
+    set current_ESAVE $pref_ESAVE
+    set current_XTRAC $pref_XTRAC
+    set current_ERROR $pref_ERROR
+    set current_TEMP $pref_TEMP
+    set OverWriteFlag $pref_OverWrite
+    destroy .pref
+    if {$NoFilenameFlag == 1} {
+	set NoFilenameFlag 0
+	set statusMsg $text_ready
+    }
+}
+
+# ==========================================================================
+#
+#                             SIGMA SECTION
+#
+# ==========================================================================
+
+# Sigma menu selection procedure
+# ------------------------------
+
+proc runSigma {} {
+    global currentErrorBar noOfNodes sigma_factor
+    if {$noOfNodes > 1} {
+	set sigma_factor 3
+	create_sigmaWindow $currentErrorBar
+	focus .threesigma.entryFactor
+    }
+}
+
+# Sigma OK procedure
+# ------------------
+
+proc sigma_OK {} {
+    global nodeDataMatrix noOfNodes currentErrorBar statusMsg
+    global sigma_factor text_processing_wait text_ready noOfGood
+    global saveFlag reprocFlag
+    if {$currentErrorBar > 1} {
+	set statusMsg $text_processing_wait
+	update
+	switch $currentErrorBar {
+	    2 {set xcol 8; set ycol 9}
+	    3 {set xcol 12; set ycol 13}
+	    4 {set xcol 14; set ycol 15}
+	}
+	for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	    if {$nodeDataMatrix($counter,7) == 0} {
+		set sigmacrit [expr abs($nodeDataMatrix($counter,$xcol)*$sigma_factor)]
+		set value [expr abs($nodeDataMatrix($counter,3))]
+		if {$value > $sigmacrit} {set nodeDataMatrix($counter,7) -1}
+		set sigmacrit [expr abs($nodeDataMatrix($counter,$ycol)*$sigma_factor)]
+		set value [expr abs($nodeDataMatrix($counter,4))]
+		if {$value > $sigmacrit} {set nodeDataMatrix($counter,7) -1}
+		if {$nodeDataMatrix($counter,7) == -1} {incr noOfGood -1}
+	    }
+	}
+	UpdateScreen
+	set statusMsg $text_ready
+    }
+    set saveFlag 0
+    set reprocFlag 0
+    destroy .threesigma
+}
+
+# ==========================================================================
+#
+#                           TK WIDGETS SECTION
+#
+# ==========================================================================
+
+# Create Tk widgets on the top level
+# ----------------------------------
+
+frame .mbar -relief raised -borderwidth 2
+menubutton .mbar.file -text "File" -underline 0 -menu .mbar.file.menu
+menubutton .mbar.edit -text "Edit" -underline 0 -menu .mbar.edit.menu
+menubutton .mbar.graph -text "Graph" -underline 0 -menu .mbar.graph.menu
+menubutton .mbar.error -text "Sigma" -underline 0 -menu .mbar.error.menu
+menubutton .mbar.source -text "Source" -underline 1 -menu .mbar.source.menu
+menubutton .mbar.stat -text "Statistics" -underline 1 -menu .mbar.stat.menu
+
+wm title . $text_title_main
+
+frame .statusbar -relief raised -borderwidth 2
+label .labelStatusMsg -textvariable statusMsg
+label .labelNumberNodes -anchor e -textvariable NumberNodes
+
+frame .plotwindowframe
+
+focus default .
+
+# Pack Tk widgets on the top level
+# --------------------------------
+
+pack .mbar -fill x
+pack .mbar.file .mbar.edit .mbar.graph .mbar.error .mbar.source .mbar.stat -padx 2m -side left
+pack .statusbar -side bottom -fill x
+pack .labelStatusMsg -in .statusbar -padx 2m -side left
+pack .labelNumberNodes -in .statusbar -padx 2m -side right
+pack .plotwindowframe
+
+# Create Tk menu widgets
+# ----------------------
+
+menu .mbar.file.menu
+menu .mbar.edit.menu
+menu .mbar.graph.menu
+menu .mbar.error.menu
+menu .mbar.source.menu
+menu .mbar.stat.menu
+
+.mbar.file.menu add command -label "New" -command newFile
+.mbar.file.menu add command -label "Open" -command openFile
+.mbar.file.menu add command -label "Save" -command saveFile
+.mbar.file.menu add command -label "I/O setup" -command changePrefs
+.mbar.file.menu add separator
+.mbar.file.menu add command -label "Print" -command printPlot
+.mbar.file.menu add separator
+.mbar.file.menu add command -label "Exit" -command {
+    if {$reprocFlag && $saveFlag} {
+	doExit
+    } else {
+	create_quitWindow
+    }
+}
+
+.mbar.edit.menu add command -label "Add all points" -command addallPoints
+.mbar.edit.menu add separator
+.mbar.edit.menu add command -label "Reprocess" -command runError
+.mbar.edit.menu add command -label "x-sigma" -command runSigma
+
+# Create Tk widgets for the plot window
+# -------------------------------------
+
+frame .frame1
+frame .frame2
+frame .subframe21
+frame .subframe22
+frame .subframe211
+frame .subframe212
+
+canvas .c -width [expr $size*180+$xoffset+$xrightoffset] -height [expr $size*180+$yoffset+$yrightoffset]
+
+label .labelLabelPointX -width 10 -anchor w -textvariable XPointLabel
+label .labelLabelPointY -width 10 -anchor w -textvariable YPointLabel
+label .labelLabelPointXOffset -width 10 -anchor w -textvariable XPointOffsetLabel
+label .labelLabelPointYOffset -width 10 -anchor w -textvariable YPointOffsetLabel
+label .labelLabelPointXSigma -width 10 -anchor w -textvariable XPointSigmaLabel
+label .labelLabelPointYSigma -width 10 -anchor w -textvariable YPointSigmaLabel
+label .labelLabelPointSource -width 10 -anchor w -text "Source...:"
+label .labelLabelPointElevation -width 10 -anchor w -text "Elevation:"
+label .labelLabelDummy1 -width 10 -anchor w
+label .labelLabelXmin -width 10 -anchor w -text "Horz-min.:"
+label .labelLabelXmax -width 10 -anchor w -text "Horz-max.:"
+label .labelLabelYmin -width 10 -anchor w -text "Vert-min.:"
+label .labelLabelYmax -width 10 -anchor w -text "Vert-max.:"
+label .labelLabelDummy2 -width 10 -anchor w
+
+label .labelPointX -width 10 -anchor e -textvariable PointX
+label .labelPointY -width 10 -anchor e -textvariable PointY
+label .labelPointXOffset -width 10 -anchor e -textvariable PointXOffset
+label .labelPointYOffset -width 10 -anchor e -textvariable PointYOffset
+label .labelPointXSigma -width 10 -anchor e -textvariable PointXSigma
+label .labelPointYSigma -width 10 -anchor e -textvariable PointYSigma
+label .labelPointSource -width 10 -anchor e -textvariable PointSource
+label .labelPointElevation -width 10 -anchor e -textvariable PointElevation
+label .labelDummy1 -width 10 -anchor e
+label .labelDummy2 -width 10 -anchor e
+
+button .buttonAutoX -width 20 -text "Autoscale horz-axis" -command ReplotXauto
+button .buttonAutoY -width 20 -text "Autoscale vert-axis" -command ReplotYauto
+
+entry .entryXmin -width 10 -relief sunken -textvariable global_xmin
+entry .entryXmax -width 10 -relief sunken -textvariable global_xmax
+entry .entryYmin -width 10 -relief sunken -textvariable global_ymin
+entry .entryYmax -width 10 -relief sunken -textvariable global_ymax
+
+bind .entryXmin <Return> {focus .;Replot}
+bind .entryXmax <Return> {focus .;Replot}
+bind .entryYmin <Return> {focus .;Replot}
+bind .entryYmax <Return> {focus .;Replot}
+
+# Set up canvas to show coordinate system
+
+.c create rectangle [expr $xoffset-$pointoffplot] [expr $yoffset-$pointoffplot] [expr $size*180+$xoffset+$pointoffplot] [expr $size*180+$yoffset+$pointoffplot]
+.c create line [expr $xoffset-10] $yoffset [expr $xoffset-$pointoffplot] $yoffset
+.c create line [expr $xoffset] [expr $yoffset-$pointoffplot] $xoffset [expr $yoffset-10]
+.c create line [expr $size*90+$xoffset] [expr $yoffset-10] [expr $size*90+$xoffset] [expr $yoffset-$pointoffplot] 
+.c create line [expr $size*180+$xoffset] [expr $yoffset-10] [expr $size*180+$xoffset] [expr $yoffset-$pointoffplot]
+.c create line [expr $size*180+$xoffset+$pointoffplot] $yoffset [expr $size*180+$xoffset+10] $yoffset
+.c create line [expr $size*180+$xoffset+$pointoffplot] [expr $size*90+$yoffset] [expr $size*180+$xoffset+10] [expr $size*90+$yoffset]
+.c create line [expr $size*180+$xoffset+10] [expr $size*180+$yoffset] [expr $size*180+$xoffset+$pointoffplot] [expr $size*180+$yoffset]
+.c create line [expr $size*180+$xoffset] [expr $size*180+$yoffset+$pointoffplot] [expr $size*180+$xoffset] [expr $size*180+$yoffset+10]
+.c create line [expr $size*90+$xoffset] [expr $size*180+$yoffset+$pointoffplot] [expr $size*90+$xoffset] [expr $size*180+$yoffset+10]
+.c create line [expr $xoffset-10] [expr $size*180+$yoffset] [expr $xoffset-$pointoffplot] [expr $size*180+$yoffset]
+.c create line $xoffset [expr $size*180+$yoffset+$pointoffplot] $xoffset [expr $size*180+$yoffset+10]
+.c create line [expr $xoffset-10] [expr $size*90+$yoffset] [expr $xoffset-$pointoffplot] [expr $size*90+$yoffset]
+.c create text [expr $size*90+$xoffset] $ytitleoffset -anchor n -tags {title}
+.c create text [expr $xoffset-10] [expr $yoffset-15] -anchor se -tags {yaxislabel}
+.c create text [expr $size*180+$xoffset] [expr $size*180+$yoffset+25] -anchor nw -tags {xaxislabel}
+.c create text $xoffset [expr $size*180+$yoffset+10] -anchor nw -tags {text x0}
+.c create text [expr $size*90+$xoffset] [expr $size*180+$yoffset+10] -anchor nw -tags {text x1}
+.c create text [expr $size*180+$xoffset] [expr $size*180+$yoffset+10] -anchor nw -tags {text x2}
+.c create text [expr $xoffset-10] [expr $size*180+$yoffset] -anchor se -tags {text y0}
+.c create text [expr $xoffset-10] [expr $size*90+$yoffset]  -anchor se -tags {text y1}
+.c create text [expr $xoffset-10] $yoffset -anchor se -tags {text y2}
+
+# Pack Tk widgets for the plot window
+# -----------------------------------
+
+pack .frame1 .frame2 -side left -in .plotwindowframe
+pack .subframe21 .subframe22 -in .frame2
+pack .subframe211 .subframe212 -side left -in .subframe21
+pack .c -in .frame1
+pack .labelLabelPointX .labelLabelPointY .labelLabelPointXOffset .labelLabelPointYOffset .labelLabelPointXSigma .labelLabelPointYSigma .labelLabelPointSource .labelLabelPointElevation .labelLabelDummy1 .labelLabelXmin .labelLabelXmax .labelLabelYmin .labelLabelYmax .labelLabelDummy2 -padx 2m -in .subframe211
+pack .labelPointX .labelPointY .labelPointXOffset .labelPointYOffset .labelPointXSigma .labelPointYSigma .labelPointSource .labelPointElevation .labelDummy1 .entryXmin .entryXmax .entryYmin .entryYmax .labelDummy2 -padx 2m -in .subframe212
+pack .buttonAutoX .buttonAutoY -in .subframe22
+
+# Create all the graphical widgets for the newfile window
+# -------------------------------------------------------
+
+proc create_newfileWindow {} {
+    global newfiletext_instruction text_title_newfile
+
+    toplevel .newfile
+
+    wm title .newfile $text_title_newfile
+
+    frame .newfile.statusbar -relief raised -borderwidth 2
+    label .newfile.labelStatusMsg -textvariable newfile_statusMsg
+
+    frame .newfile.frame1 -borderwidth 4 -relief groove
+    frame .newfile.frame3 -borderwidth 4 -relief groove
+    frame .newfile.frame4
+
+    label .newfile.labelFilename -anchor w -width 30 -text "Please enter a valid filename:"
+    entry .newfile.entryFilename -width 42 -relief sunken -textvariable newfile_filename
+
+    message .newfile.messageInstruction -width 780 -justify left -text $newfiletext_instruction
+  
+    button .newfile.buttonOK -text "Ok" -width 10 -command newfile_OK
+    button .newfile.buttonCancel -text "Cancel" -width 10 -command {destroy .newfile}
+    button .newfile.buttonClearscreen -text "Clear" -width 10 -command newfile_clearScreen
+
+# Pack Tk widgets for the newfile window
+# --------------------------------------
+    
+    pack .newfile.frame1 -fill x -padx 8m -pady 4m -in .newfile
+    pack .newfile.statusbar -side bottom -fill x
+    pack .newfile.frame4 -padx 8m -pady 4m -side bottom -in .newfile
+    pack .newfile.frame3 -fill x -padx 8m -pady 4m -side bottom -in .newfile
+
+    pack .newfile.labelFilename .newfile.entryFilename -side left -padx 2m -pady 2m -in .newfile.frame1
+    
+    pack .newfile.buttonOK .newfile.buttonClearscreen .newfile.buttonCancel -padx 3m -pady 3m -side left -in .newfile.frame4
+
+    pack .newfile.messageInstruction -anchor w -in .newfile.frame3
+
+    pack .newfile.labelStatusMsg -side left -in .newfile.statusbar
+
+    bind .newfile.entryFilename <Return> {focus .newfile; newfile_checkfile $newfile_filename}
+
+    bind .newfile <Return> {newfile_OK}
+}
+
+# Create all the graphical widgets for the openfile window
+# --------------------------------------------------------
+
+proc create_openfileWindow {} {
+    global openfiletext_instruction text_title_openfile
+
+    toplevel .openfile
+    
+    wm title .openfile $text_title_openfile
+
+    frame .openfile.frame1 -borderwidth 4 -relief groove
+    frame .openfile.frame2 -borderwidth 4 -relief groove
+    frame .openfile.frame4
+    
+    frame .openfile.statusbar -relief raised -borderwidth 2
+    label .openfile.labelStatusMsg -textvariable openfile_statusMsg
+
+    label .openfile.labelFilename -anchor w -width 30 -text "Please enter a valid filename:"
+    message .openfile.messageInstruction -width 780 -justify left -text $openfiletext_instruction
+
+    entry .openfile.entryFilename -width 45 -relief sunken -textvariable openfile_filename
+    
+    button .openfile.buttonOK -text "Ok" -width 10 -command openfile_OK
+    button .openfile.buttonClearscreen -text "Clear" -width 10 -command openfile_clearscreen
+    button .openfile.buttonCancel -text "Cancel" -width 10 -command {destroy .openfile}
+    
+# Pack Tk widgets for the openfile window
+# --------------------------------------
+    
+    pack .openfile.frame1 -fill x -padx 8m -pady 4m -in .openfile
+    pack .openfile.frame2 -fill x -padx 8m -pady 4m -in .openfile
+    pack .openfile.frame4 -padx 8m -pady 4m -in .openfile
+    pack .openfile.statusbar -side bottom -fill x
+
+    pack .openfile.labelFilename .openfile.entryFilename -anchor w -padx 2m -pady 2m -side left -in .openfile.frame1
+    
+    pack .openfile.messageInstruction -in .openfile.frame2
+
+    pack .openfile.buttonOK .openfile.buttonClearscreen .openfile.buttonCancel -padx 3m -pady 3m -side left -in .openfile.frame4
+
+    pack .openfile.labelStatusMsg -in .openfile.statusbar -side left
+    
+    bind .openfile.entryFilename <Return> {focus .openfile; openfile_checkfile $openfile_filename}
+
+    bind .openfile <Return> {openfile_OK}
+
+    focus .openfile.entryFilename
+}
+
+# Create all the graphical widgets for the savefile window
+# --------------------------------------------------------
+
+proc create_savefileWindow {} {
+    
+    global savefiletext_instruction text_title_savefile
+
+    toplevel .savefile
+
+    wm title .savefile $text_title_savefile
+    
+    frame .savefile.frame1 -borderwidth 4 -relief groove
+    frame .savefile.frame2 -borderwidth 4 -relief groove
+    frame .savefile.frame4
+    
+    label .savefile.labelFilename -anchor w -width 30 -text "Please enter a valid filename:"
+    message .savefile.messageInstruction -width 750 -anchor w -text $savefiletext_instruction
+    
+    entry .savefile.entryFilename -width 45 -relief sunken -textvariable savefile_filename
+    
+    button .savefile.buttonOK -text "Ok" -width 10 -command savefile_OK
+    button .savefile.buttonClearscreen -text "Clear" -width 10 -command savefile_clearscreen
+    button .savefile.buttonCancel -text "Cancel" -width 10 -command {destroy .savefile}
+    
+# Pack Tk widgets for the savefile window
+# --------------------------------------
+    
+    pack .savefile.frame1 -fill x -padx 8m -pady 4m -in .savefile
+    pack .savefile.frame2 -fill x -padx 8m -pady 4m -in .savefile
+    pack .savefile.frame4 -padx 8m -pady 4m -side bottom -in .savefile
+
+    pack .savefile.labelFilename .savefile.entryFilename -side left -padx 2m -pady 2m -in .savefile.frame1
+
+    pack .savefile.messageInstruction -fill x -in .savefile.frame2
+    
+    pack .savefile.buttonOK .savefile.buttonClearscreen .savefile.buttonCancel -padx 3m -pady 3m -side left -in .savefile.frame4
+
+    bind .savefile.entryFilename <Return> {focus .savefile}
+
+    bind .savefile <Return> {savefile_OK}
+}
+
+# Create all the graphical widgets for the print window
+# -----------------------------------------------------
+
+proc create_printWindow {} {
+    global text_title_print
+
+    toplevel .print
+    
+    wm title .print $text_title_print
+
+    frame .print.frame1 -borderwidth 4 -relief groove
+    frame .print.subframe11
+    frame .print.subframe12
+    frame .print.subframe13
+    frame .print.frame4
+    
+    label .print.labelDestination -anchor w -width 14 -text "Destination..:"
+    label .print.labelCommand -anchor w -width 14 -text  "Print command:"
+    label .print.labelFilename -anchor w -width 14 -text "Filename.....:"
+
+    radiobutton .print.buttonPrinter -text "Printer" \
+	    -variable print_destination -value 0 -command \
+	    {focus .print; if {$print_command > 1} {incr print_command -2}}
+    radiobutton .print.buttonFile -text "File" \
+	    -variable print_destination -value 1 -command \
+	    {focus .print.entryFilename; if {$print_command < 2} {incr print_command 2}}
+    radiobutton .print.buttonLPR -text "lpr" -variable print_command \
+	    -value 0 -command {set print_destination 0; focus .print}
+    radiobutton .print.buttonPSPRINT -text "psprint" -variable print_command \
+	    -value 1 -command {set print_destination 0; focus .print}
+
+    entry .print.entryFilename -width 47 -relief sunken -textvariable print_filename
+    
+    button .print.buttonOK -text "Print" -width 10 -command print_OK
+    button .print.buttonClearscreen -text "Clear" -width 10 -command print_clearscreen
+    button .print.buttonCancel -text "Cancel" -width 10 -command {destroy .print}
+    
+    # Pack Tk widgets for the print window
+    # ------------------------------------
+    
+    pack .print.frame1 -fill x -padx 8m -pady 4m -in .print
+    pack .print.frame4 -padx 8m -pady 4m -side bottom -in .print
+    
+    pack .print.subframe11 .print.subframe12 .print.subframe13 \
+	    -anchor w -in .print.frame1
+
+    pack .print.labelDestination .print.buttonPrinter .print.buttonFile \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe11
+
+    pack .print.labelCommand .print.buttonLPR .print.buttonPSPRINT \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe12
+
+    pack .print.labelFilename .print.entryFilename \
+	    -side left -anchor w -padx 2m -pady 2m -in .print.subframe13
+
+    pack .print.buttonOK .print.buttonClearscreen .print.buttonCancel \
+	    -padx 3m -pady 3m -side left -in .print.frame4
+
+    bind .print.entryFilename <Return> {focus .print}
+
+    bind .print <Return> {print_OK}
+}
+
+# Create all the graphical widgets for the preferences window
+# -----------------------------------------------------------
+
+proc create_prefWindow {} {
+    global text_title_preferences
+
+    toplevel .pref
+
+    wm title .pref $text_title_preferences
+
+    frame .pref.frame1 -borderwidth 4 -relief groove
+    frame .pref.frame2 -borderwidth 4 -relief groove
+    frame .pref.frame3 -borderwidth 4 -relief groove
+    frame .pref.frame4
+    frame .pref.subframe11
+    frame .pref.subframe12
+    frame .pref.subframe21
+    frame .pref.subframe22
+    frame .pref.subframe221
+    frame .pref.subframe222
+    frame .pref.subframe31
+    frame .pref.subframe32
+
+    label .pref.labelDefaultDir -anchor w -width 35 -text "Default directory for FS log files:"
+    label .pref.labelPARPO -anchor w -width 35 -text "Control file for xtrac............:"
+    label .pref.labelMDLPO -anchor w -width 35 -text  "Control file for error............:"
+    label .pref.labelXSAVE -anchor w -width 35 -text "Output file name for xtrac........:"
+    label .pref.labelESAVE -anchor w -width 35 -text "Output file name for error........:"
+    label .pref.labelXTRAC -anchor w -width 35 -text "Temporary file for xtrac..........:"
+    label .pref.labelERROR -anchor w -width 35 -text "Temporary file for error..........:"
+    label .pref.labelTEMP -anchor w -width 35 -text "Temporary file for pdplt..........:"
+    label .pref.labelOverWrite -anchor w -width 35 -text "Overwrite output files............:"
+    
+    entry .pref.entryDefaultDir -width 38 -relief sunken -textvariable pref_DefaultDir
+    entry .pref.entryPARPO -width 38 -relief sunken -textvariable pref_PARPO
+    entry .pref.entryMDLPO -width 38 -relief sunken -textvariable pref_MDLPO
+    entry .pref.entryXSAVE -width 38 -relief sunken -textvariable pref_XSAVE
+    entry .pref.entryESAVE -width 38 -relief sunken -textvariable pref_ESAVE
+    entry .pref.entryXTRAC -width 38 -relief sunken -textvariable pref_XTRAC
+    entry .pref.entryERROR -width 38 -relief sunken -textvariable pref_ERROR
+    entry .pref.entryTEMP -width 38 -relief sunken -textvariable pref_TEMP
+
+    button .pref.buttonOK -text "Ok" -width 10 -command pref_OK
+    button .pref.buttonCancel -text "Cancel" -width 10 -command {destroy .pref}
+
+    radiobutton .pref.radiobuttonWriteYes -anchor w -text Yes -variable pref_OverWrite -value 1
+    radiobutton .pref.radiobuttonWriteNo -anchor w -text No -variable pref_OverWrite -value 0
+    
+# Pack Tk widgets for the preferences window
+# ------------------------------------------
+    
+    pack .pref.frame1 -fill x -padx 8m -pady 4m -in .pref
+    pack .pref.frame2 -fill x -padx 8m -pady 4m -in .pref
+    pack .pref.frame3 -fill x -padx 8m -pady 4m -in .pref
+    pack .pref.frame4 -padx 8m -pady 4m -side bottom -in .pref
+
+    pack .pref.subframe11 .pref.subframe12 -side left -in .pref.frame1
+    pack .pref.subframe21 .pref.subframe22 -side left -in .pref.frame2
+    pack .pref.subframe221 -in .pref.subframe22
+    pack .pref.subframe222 -fill x -in .pref.subframe22
+    pack .pref.subframe31 .pref.subframe32 -side left -in .pref.frame3
+    
+    pack .pref.labelDefaultDir .pref.labelPARPO .pref.labelMDLPO -in .pref.subframe11 -padx 2m -pady 2m
+    pack .pref.entryDefaultDir .pref.entryPARPO .pref.entryMDLPO -in .pref.subframe12 -padx 2m -pady 2m
+
+    pack .pref.labelXSAVE .pref.labelESAVE .pref.labelOverWrite -anchor w -padx 2m -pady 2m -in .pref.subframe21
+    pack .pref.entryXSAVE .pref.entryESAVE -in .pref.subframe221 -padx 2m -pady 2m
+    pack .pref.radiobuttonWriteYes .pref.radiobuttonWriteNo -anchor w -side left -padx 2m -pady 2m -in .pref.subframe222
+
+    pack .pref.labelXTRAC .pref.labelERROR .pref.labelTEMP -in .pref.subframe31 -padx 2m -pady 2m
+    pack .pref.entryXTRAC .pref.entryERROR .pref.entryTEMP -in .pref.subframe32 -padx 2m -pady 2m
+
+    pack .pref.buttonOK .pref.buttonCancel -padx 3m -pady 3m -side left -in .pref.frame4
+
+    bind .pref.entryDefaultDir <Return> {focus .pref}
+    bind .pref.entryPARPO <Return> {focus .pref}
+    bind .pref.entryMDLPO <Return> {focus .pref}
+    bind .pref.entryXSAVE <Return> {
+	if {$NoFilenameFlag == 1} {
+	    focus .pref.entryESAVE
+	} else {
+	    focus .pref
+	}
+    }
+    bind .pref.entryESAVE <Return> {focus .pref}
+    bind .pref.entryXTRAC <Return> {focus .pref}
+    bind .pref.entryERROR <Return> {focus .pref}
+    bind .pref <Return> {pref_OK}
+}
+
+# Create all the graphical widgets for the 3-sigma window
+# -------------------------------------------------------
+
+proc create_sigmaWindow {sigmatype} {
+
+    global currentErrorBar text_title_sigma
+
+    toplevel .threesigma
+    
+    wm title .threesigma $text_title_sigma
+
+    frame .threesigma.frame1 -borderwidth 4 -relief groove
+    frame .threesigma.frame2 -borderwidth 4 -relief groove
+    frame .threesigma.frame4
+    
+    label .threesigma.labelFactor -anchor w -text "Factor for x-sigma removal:"
+
+    entry .threesigma.entryFactor -width 4 -relief sunken -textvariable sigma_factor
+
+    switch $sigmatype {
+	1 {set theMessage "You must select a set of sigma values in the Sigma menu before selecting this function."}
+	2 {set theMessage "The A-PRIORI sigma values will be used for this process."}
+	3 {set theMessage "The INPUT sigma values will be used for this process."}
+	4 {set theMessage "The A-POSTERIORI sigma values will be used for this process."}
+    }
+
+    message .threesigma.messageSigma -width 320 -justify left -text $theMessage
+
+    button .threesigma.buttonOK -text "OK" -width 10 -command sigma_OK
+    button .threesigma.buttonCancel -text "Cancel" -width 10 -command {destroy .threesigma}
+    
+# Pack Tk widgets for the sigma window
+# ------------------------------------
+    
+    pack .threesigma.frame1 -fill x -padx 8m -pady 4m -in .threesigma
+    pack .threesigma.frame2 -fill x -padx 8m -pady 4m -in .threesigma
+    pack .threesigma.frame4 -padx 8m -pady 4m -side bottom -in .threesigma
+    
+    pack .threesigma.labelFactor .threesigma.entryFactor -side left -anchor w -padx 2m -pady 2m -in .threesigma.frame1
+
+    pack .threesigma.messageSigma -anchor w -in .threesigma.frame2
+
+    pack .threesigma.buttonOK .threesigma.buttonCancel -padx 3m -pady 3m -side left -in .threesigma.frame4
+
+    bind .threesigma.entryFactor <Return> {focus .threesigma}
+
+    bind .threesigma <Return> {sigma_OK}
+}
+
+# Create Tk widgets for the Quit window
+# -------------------------------------
+
+proc create_quitWindow {} {
+
+    global text_title_quit quittext_instruction
+
+    toplevel .quit
+    
+    wm title .quit $text_title_quit
+
+    frame .quit.frame1 -borderwidth 4 -relief groove
+    frame .quit.frame4
+    
+    message .quit.messageQuit -width 500 -text $quittext_instruction
+
+    button .quit.buttonOK -text "Quit" -width 10 -command doExit
+    button .quit.buttonCancel -text "Cancel" -width 10 -command {destroy .quit}
+    
+# Pack Tk widgets for the sigma window
+# ------------------------------------
+    
+    pack .quit.frame1 -fill x -padx 8m -pady 4m -in .quit
+    pack .quit.frame4 -padx 8m -pady 4m -side bottom -in .quit
+    
+    pack .quit.messageQuit -padx 2m -in .quit.frame1
+
+    pack .quit.buttonOK .quit.buttonCancel -padx 3m -pady 3m -side left -in .quit.frame4
+
+    focus .quit
+
+    bind .quit <Return> {doExit}
+}
+
+    
+
+# Global event bindings
+# ---------------------
+
+.c bind point <Button-1> {togglePoint}
+
+.c bind point <Any-Enter> {
+    updatePointData
+}
+
+.c bind point <Any-Leave> {
+    clearPointData
+}
+
+bind . <KeyPress-n> {
+    incr currentPlot
+    if {$currentPlot == 6} {set currentPlot 1}
+    plotdefault
+}
+
+bind . <KeyPress-p> {
+    incr currentPlot -1
+    if {$currentPlot == 0} {set currentPlot 5}
+    plotdefault
+}
+
+bind . <KeyPress> {
+    set statusVariable 0
+}
