@@ -28,7 +28,7 @@
 ! lspeed ch is ascii version of speed, calculated in snap_calc_speed.
         write(luFile,'(a,a,a)') lpre(1:npre),lmid,lspeed(1:nspdCh)
       endif
-      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disc_start_on")')
+      if(km5A_piggy.or.km5P_piggy) write(luFile,'("disc_start=on")')
 
       krunning=.true.           !turn on running flag.
 

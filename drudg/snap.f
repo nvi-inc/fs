@@ -88,15 +88,17 @@ C        beginning the current observation
       integer itime_scan_end(5)             !end of scan    =istart+idur
       integer itime_off(5)                  !               =istart+ioff
       integer itime_early(5)                !early start    =istart-itearl
-      integer itime_late(5)                 !late end       =iend+ilate
+      integer itime_tape_stop(5)                 !late end       =iend+ilate
+      integer itime_tape_stop_spin(5)       !time when a tape stops spinning (after last obs on tape).
       integer itime_cal(5)         	    !cal		=istart-ical
       integer itime_check(5)                !time to do a check.
       integer itime_tape_start(5)           !
+      integer itime_tape_need(5)            !When do we need the tape?
 !
       integer itime_scan_beg_prev(5)        !ditto for previous measurement
       integer itime_scan_end_prev(5)
       integer itime_early_prev(5)
-      integer itime_late_prev(5)
+      integer itime_tape_stop_prev(5)
       integer itime_delta                   !Difference between two times in seconds
       integer itime_scan_beg_next(5)         !next measurement
 
@@ -104,11 +106,13 @@ C        beginning the current observation
       integer itime_temp(5)
       integer itemp             !short lived variable
       real    speed_ft          !Speed in feet.
+      integer icod_old          !previous code.
 ! Logical variables
       logical kcont 		! true for CONTINUOUS recording
       logical kadap 		! true for ADAPTIVE recording in VEX file
       logical kcontpass       	! true if a pass is actually continuous
       logical knewpass  	! true if this obs on new pass.
+      logical klast_tape        ! last tape?
 !
       character*1 crecorder     ! temporary characer
       integer isession_len      !length of session code
@@ -306,6 +310,7 @@ C            continuous, then don't need to postpass.
 C 021111 jfq Add klrack into set_type call.
 C
 
+      icod_old=-1
       iblen = ibuf_len*2
       if (kmissing) then
         write(luscn,9111)
@@ -323,7 +328,6 @@ C
      .  ' control file.')
         return
       endif
-
 
       call strip_path(lskdfi,lsession)
       isession_len=index(lsession,".")
@@ -558,14 +562,15 @@ C         Force new tape on the first scan on tape.
               itime_early_prev(i)	=itime_early(i)
               itime_scan_beg_prev(i)	=itime_scan_beg(i)
               itime_scan_end_prev(i)	=itime_scan_end(i)
-              itime_late_prev(i)	=itime_late(i)
+              itime_tape_stop_prev(i)	=itime_tape_stop(i)
             end do
           endif
 
-          if(knewtp) then
+          if(knewtp .or. icod .ne. icod_old) then
             speed_ft=speed(icod,istn)
             call snap_recalc_speed(luscn,kvex,speed_ft,
      >          ls2speed(1,istn),ibuf)
+            icod_old=icod
           endif
 
           kNewPass = (ipasp.ne.ipas(istnsk))
@@ -580,8 +585,8 @@ C         Force new tape on the first scan on tape.
           do i=1,5
            itime_tape_start(i)=itime_early(i)
           end do
-!     itime_late=itime_scan_end+itlate
-          call TimeAdd(itime_scan_end,itlate(istn),itime_late)
+!     itime_tape_stop=itime_scan_end+itlate
+          call TimeAdd(itime_scan_end,itlate(istn),itime_tape_stop)
 
 C     Now determine whether the tape will be stopped (ket).
 C     For "adaptive" motion, stop the tape if the time between one
@@ -591,7 +596,7 @@ C
         if(kadap) then
           if(ks2) then          !s2
             if (iobsst.gt.0) then ! got a previous scan
-              idt = iTimeDifSec(itime_early,itime_late_prev)
+              idt = iTimeDifSec(itime_early,itime_tape_stop_prev)
               ket = idt.gt.itgap(istn)
             else ! first scan
               ket = .false.
@@ -601,7 +606,7 @@ C This is restricted to "adaptive" coming from VEX files.
           else  		!not ks2
             if (istnsk_next.ne.999) then ! next scan
               if (idirn.eq.idir) then ! same direction, check gap
-                idt=iTimeDifSec(itime_scan_beg_next,itime_late)-
+                idt=iTimeDifSec(itime_scan_beg_next,itime_tape_stop)-
      >                              itearl(istn)
                 ket = idt.gt.itgap(istn)
                 if (ket) kcontpass = .false. ! this pass not continuous
@@ -771,7 +776,7 @@ C  For S2 or continuous, stop tape if needed after the SOURCE command
             krunning=.false.
 ! This is time to reach end of tape.
 !           TSPINS = TSPIN(IFTREM,ISPM,SPS)
-            call snap_wait_time(itime_pass_end)
+            call snap_wait_time(lu_outfile,itime_pass_end)
             call snap_et
         endif
 
@@ -799,8 +804,23 @@ C Calculate tape spin time. But don't do for ks2,kk4,km5 or continuous.
 C
 C Unload tape.
           IF (.not.km5.and.(KNEWTP.AND.IOBSst.NE.0)) THEN !unload old tape
-            call snap_unload_tape(itime_late, nrecst(istn),ntape,
-     >                     kpostpass,kcontpass,kcont)
+
+            klast_tape=.false.
+            call TimeSub(itime_tape_start,420,itime_tape_need)
+            call snap_unload_tape(luscn,itime_tape_stop_prev,
+     >          itime_tape_stop_spin,itime_tape_need,nrecst(istn),ntape,
+     >          kpostpass,kcontpass,kcont,klast_tape)
+
+            idt=iTimeDifSec(iTime_tape_stop_spin,iTime_tape_need) !tape_stop-tape_start
+            if(idt .gt. 0) then    !not enough time.
+               write(luscn,'(a)')
+     >             "SNAP05: Not enough time to change tape!"
+               write(luscn,'(a,$)') "Tape stops moving at:  "
+               call snap_wait_time(luscn,itime_tape_stop_spin)
+               write(luscn,'(a,$)') "Should have stopped by: "
+               call snap_wait_time(luscn,itime_tape_need)
+            endif
+
             iobsst=0
 C Switch recorders if we have two of them, and they are both used.
             if(nrecst(istn) .eq. 2 .and. .not.
@@ -845,7 +865,7 @@ C           Add the procedure times to the previous data stop (time4).
             if (ilatestop.eq.0) then
               call TimeAdd(itime_scan_end_prev,isppl,itime_check)
             else
-              call TimeAdd(itime_late_prev,isppl,itime_check)
+              call TimeAdd(itime_tape_stop_prev,isppl,itime_check)
             endif
 C           Check against start-early for early <> early
 C           check against start-cal   for early=0.
@@ -942,7 +962,7 @@ C         If FASTx preceeded, add a wait for tape to slow down
           endif
 C  Wait until ITEARL before start time
           if (.not.krunning) ituse=1 ! Don't use early start if already running
-          call snap_wait_time(itime_tape_start)
+          call snap_wait_time(lu_outfile,itime_tape_start)
 C   Write out tape monitor command at early start
           call snap_monitor()
           if(.not. krunning) call snap_start_recording()
@@ -952,7 +972,7 @@ C   Write out tape monitor command at early start
 C Wait until CAL time. Antenna is on-source as of this time.
 C No PREOB if tape is running in a VEX file.
         IF (ICAL.GE.1.and.(.not.kvex.or.(kvex.and..not.krunning))) THEN ! cal and preob
-           call snap_wait_time(itime_cal)
+           call snap_wait_time(lu_outfile,itime_cal)
 C PREOB procedure
            call snap_hol_wrt(lu_outfile,lpre,6)
         ENDIF ! cal and preob
@@ -960,7 +980,7 @@ C PREOB procedure
 C Wait until data start time
         if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write time
         else ! do write it
-           call snap_wait_time(itime_scan_beg)
+           call snap_wait_time(lu_outfile,itime_scan_beg)
         endif ! don't/do write
 
 C S2 DATA_VALID 
@@ -982,7 +1002,7 @@ C Wait until good data time for VEX files
           idt = iTimeDifSec(itime_scan_end,itime_tape_start)
           if (idt.gt.0) then ! some valid data
             if (kvex.and.kadap.and..not.ks2) then ! good data time
-              call snap_wait_time(itime_tape_start)
+              call snap_wait_time(lu_outfile,itime_tape_start)
               call snap_monitor()
             endif ! good data time
 C Good data flag -- AFTER the ST command or good-data time
@@ -995,7 +1015,7 @@ C MIDOB procedure
         call snap_hol_wrt(lu_outfile,lmid,6)
 
 C Wait until data end time
-        call snap_wait_time(itime_scan_end)
+        call snap_wait_time(lu_outfile,itime_scan_end)
 C Stop data flag
         if (krec.and.idir.ne.0) then ! non-zero recording scan
           call snap_data_valid('=off')
@@ -1006,7 +1026,7 @@ C ET command
      .        (ks2.and.ket.and.itlate(istn).eq.0)) then !ET command
 C         Wait until late stop time before issuing ET
             if (itlate(istn).gt.0) then
-               call snap_wait_time(itime_late)
+               call snap_wait_time(lu_outfile,itime_tape_stop)
             endif
 
             krunning = .false.
@@ -1017,11 +1037,11 @@ C         Wait until late stop time before issuing ET
             endif
           endif! ET command
           call snap_monitor()
-C Do DISC_CHECK for Mk5 in piggyback mode.
+C Do DISC_CHECK for Mk5 in piggyback mode. (Can't do if tape is running!)
           if (km5 .or. km5a_piggy .or. km5p_piggy) then
-            call snap_disc_check()
+            if(.not. krunning) call snap_disc_check()
           endif
-C S2 DATA_VALID 
+C S2 DATA_VALID
           if (ks2.and..not.krunning) then ! need another data_valid off
             call snap_data_valid('=off')
           endif
@@ -1069,10 +1089,12 @@ C     Copy ibuf_next into IBUF and unpack it.
 
       END DO ! ilen.gt.0,kerr.eq.0,ierr.eq.0
 
-
 ! Finish up.
-      call snap_unload_tape(itime_late,nrecst(istn),ntape,
-     >                     kpostpass,kcontpass,kcont)
+      klast_tape=.true.
+      call snap_unload_tape(luscn,itime_tape_stop_prev,
+     >    itime_tape_stop_spin,itime_tape_need,nrecst(istn),ntape,
+     >    kpostpass,kcontpass,kcont,klast_tape)
+
 C End of schedule
       write(Lu_outFile,'(a)') "sched_end"
 C

@@ -5777,7 +5777,7 @@ Version 9.5.11 020528
            include/fscom.h
            fast set-up for rec_mode for k4 type 2 recorders
 
-020621 CH  pdplt/pdplt
+020621 CMH pdplt/pdplt
            control of solution parameters added
 
 020621 RDG fsvue/vueinfo.c
@@ -5946,3 +5946,77 @@ Version 9.6.1 030508
            assume non MK5 drives have MK5A_BS in piggyback
 
 Version 9.6.2 030515
+
+030519 WEH bosslb/gttim.c
+           improved rounding performance
+
+030519 CMH gnplt/gnplt
+           improved programming structure, which makes it easier
+	   for the user to edit the code.
+
+030520 WEH clib/find_next_noncomment.c
+           fixed blank line detection
+
+030520 CMH gnplt/gnplt
+           gndat/gndat.c
+	   Made gnplt compare 'range' LOs to the actual LO, instead
+	   of sky frequency.
+
+Version 9.6.3 030520
+
+030521 WEH gndat/get_rxgain_files.c
+           specify rxg file directory as argument
+
+030521 CMH gnplt/gnplt
+030522     gndat/gndat.c
+	   allow user to change the rxg file directory
+    
+030522 WEH incom/Makefile
+           clib/Makefile
+           gndat/Makefile
+           moved get_rxgain.c from incom/ to clib/
+
+030523 WEH st.default/proc/point.prc
+           remove hyphens from CASA, CYNGUSA, TAURUSA, and ORIONA
+
+030527 CMH gnplt/gnplt
+	   changed the autoscaling options.
+	   changed the meaning of median for fitting.
+	   changed the way gnplt deletes points when zooming/rescaling.
+
+030528 CMH gnplt/gnplt
+	   changed 'string range' so old versions of tcl can use it
+           the 'delete points with bad gain compression' now works better
+	   fixed the columnbreak for source/frequency menus
+	   
+030529 CMH gnplt/gnplt
+	   added a box next to plot with the number of points highlighted,
+	   selected, included and total.
+	   changed the order in which the cascaded menus are displayed
+	   both the fitted and the original tcal curve now have checkbuttons
+	   
+030529 CMH gndat/gndat.c
+	   added an extra decimal to the gain output
+	   made sure MAXLINE is used properly
+
+030530 CMH gnplt/gnplt
+	   made the gain curve tools menu options consistent with tcal curve
+	   added stuff to the help menu
+	   fixed bugs in the 'area delete' option
+
+030530 WEH quikv/ifadjust.c
+           fix to work with two heads and more than 7 VC sig and mag
+
+030601 WEH quikv/reset_vc.c
+           quikv/ifadjust.c
+           only talk to VCs specified by trackform
+
+030602 CMH gnplt/gnplt
+	   the gain shortcut now computes the gain using the option selected
+	   on the axis menu, not always the first option as before.
+
+030603 CMH gnplt/gnplt
+	   the curve as a result of a fit is now dashed, both for gain curves
+	   and tcal curves.
+
+Version 9.6.4 030604

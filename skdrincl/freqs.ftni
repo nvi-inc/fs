@@ -205,6 +205,8 @@ C
       equivalence (cpol,lpol)
       character*2 csubvc(max_chan,max_stn,max_frq)
       equivalence (csubvc,lsubvc)
+      character*2 ccode(max_frq)
+      equivalence (ccode,lcode)
 
       character*16 cmode(max_stn,max_frq)
       equivalence (cmode,lmode)

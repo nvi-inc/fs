@@ -1,4 +1,4 @@
-File: /usr2/fs-9.6.2/misc/fs9602up.txt  Version: 1.9 Date: 030514
+File: /usr2/fs-9.6.4/misc/fs9604up.txt  Version: 2.1 Date: 030604
 
 I. Introduction
 
@@ -385,8 +385,10 @@ A more detailed discussion of these changes follows.
     to use a different computer to display this file.
 
 26. Support for Mark 5A systems has been added. This support is
-    preliminary. To enable this support, please select either "mk5a"
-    or "mk5a_bs" for drive 1 in equip.ctl according to your
+    preliminary and does NOT include support for "formal" parsing (if
+    you are using a Mark 5A please be sure to configure it for
+    "informal" parsing).  To enable this support, please select either
+    "mk5a" or "mk5a_bs" for drive 1 in equip.ctl according to your
     equipment. For "mk5a", the FS assumes that either no bank
     management is necessary because either any recorded experiment
     will fit on one bank or the Mark 5A supports "automatic bank
@@ -521,7 +523,7 @@ A more detailed discussion of these changes follows.
 
 			 B. Changes in DRUDG
 				   
-drudg opening message date is 030507. The following areas in DRUDG
+drudg opening message date is 030603. The following areas in DRUDG
 were modified. Items numbered 3 and above are new since 9.5.13. Items
 numbered 6 and above were added after 9.5.15.
 
@@ -644,7 +646,13 @@ A more detailed discussion of these changes follows.
 15. Drudg now does a post-pass for all thin tapes if the postpass flag
     is true.  This flag is set to true for astro VEX schedules by
     default, and set to false for geo schedules. The postpass is done
-    if the last reverse pass on the tape was not continous.
+    if the last reverse pass on the tape was not continous.  For
+    schedules where post-passing is turned on, DRUDG will check to
+    make sure that there is enough time to do the post pass for tape
+    changes in the middle of an experiment. If there is not, it will
+    ignore the post pass, and write an error message. DRUDG does no
+    checking at the end of an experiment, since it does not know when
+    the next experiment starts.
 
 16. The summary listing for Mark5A and Mark5P stations now calculates
     the byte count and displays it instead of footages.
@@ -892,7 +900,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.6.2 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.6.4 archive in your "/tmp" directory. For
 example you might do the following:
 
       cd /tmp
@@ -900,7 +908,7 @@ example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.6.2.tar.gz
+      get fs-9.6.4.tar.gz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -914,12 +922,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.6.2.tar.gz
+      tar -xzpf /tmp/fs-9.6.4.tar.gz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.6.2 fs
+      ln -sfn fs-9.6.4 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -1258,19 +1266,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.6.2.tar.gz archive have been placed
+floppy, "split" files of the fs-9.6.4.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9602tg.aa
-fs9602tg.ab
+fs9604tg.aa
+fs9604tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9602tg.* >fs-9.6.2.tar.gz
+cat fs9604tg.* >fs-9.6.4.tar.gz
 
-This will create an exact image of the original fs-9.6.2.tar.gz
+This will create an exact image of the original fs-9.6.4.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

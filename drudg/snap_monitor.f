@@ -9,7 +9,8 @@
         else
           writE(luFile,'("tape")')
         endif
+        if(km5P_piggy .or. km5A_piggy) write(luFile,'("disc_pos")')
       endif
-      if(km5P_piggy .or. km5A_piggy)  write(luFile,'("disc_pos")')
+
       return
       end
