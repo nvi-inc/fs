@@ -35,7 +35,8 @@ Settable Parameters:
           does not support anything but off. Monitor display
           is null because it cannot be read back.
         synch   Synch test tolerance. Choices are 0-16 ( multiples of
-        62.5 nanoseconds) or off.  Default is 3. The meaning
+        62.5 nanoseconds) or off (also selectable as  -1).  Default
+        is determined by the value in the equip.ctl file. The meaning
         of 0 is unknown, but may be the same as 1. Monitor
         displayed is null for formatters with old firmware
         revision because it cannot be read back.
