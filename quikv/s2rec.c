@@ -35,7 +35,9 @@ long ip[5];                           /* ipc parameters */
       ini_rclcn_req(&buffer);
 
       if (command->equal != '=') {            /* read module */
-	add_rclcn_position_read(&buffer,device,1);
+	add_rclcn_position_read(&buffer,device,0);
+	add_rclcn_version(&buffer,device);
+	add_rclcn_time_read(&buffer,device);
 	goto rclcn;
       } else if (command->argv[0]==NULL)   /* simple equals */
 	goto parse;
