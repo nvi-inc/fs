@@ -21,26 +21,24 @@ stp       Distance off source for off source and calibration
           points, in multiples of a beamwidth. Default is 5.0.
 
 Monitor-only parameters:
-cal1        Calibration noise source temperature in degrees K for
-            detector 1. This is determined from the last caltempx
-            command in conjunction with the patch (Mark III) or bbc
-            command.
-cal2        Calibration noise source temperature in degrees K for
-            detector 2. This is determined from the last caltempx
-            command in conjunction with the patch (Mark III) or bbd
-            command.
-beam1     The full width half maximum beam size (degrees) for
-          device 1. It is determined from the beamx command and
-          the patch (Mark III) or bbc (VLBA) command.
-beam2     The full width half maximum beam size (degrees) for
-          device 2. It is determined from the beamx command and
-          the patch (Mark III) or bbc (VLBA) command.
-flux1       The apparent source flux for device 1, based on the
-            fluxx command and the patch (Mark III) or bbc (VLBA)
-            command.
-flux2       The apparent source flux for device 2, based on the
-            fluxx command and the  patch (Mark III) or bbc (VLBA)
-            command.
+cal1      Calibration noise source temperature in degrees K for
+          detector 1. This is determined from the last caltempx
+          command in conjunction with the patch (Mark III) or bbc
+          command.
+cal2      Calibration noise source temperature in degrees K for
+          detector 2. This is determined from the last caltempx
+          command in conjunction with the patch (Mark III) or bbd
+          command.
+beam1   The full width half maximum beam size (degrees) for
+        device 1. It is determined from the beamx command and the
+        patch (Mark III) or bbc (VLBA) command.
+beam2   The full width half maximum beam size (degrees) for
+        device 2. It is determined from the beamx command and the
+        patch (Mark III) or bbc (VLBA) command.
+flux1     The apparent source flux for device 1, based on the fluxx
+          command and the patch (Mark III) or bbc (VLBA) command.
+flux2     The apparent source flux for device 2, based on the fluxx
+          command and the  patch (Mark III) or bbc (VLBA) command.
 
 
 Comments: 
@@ -77,9 +75,11 @@ recommended form for these procedures is:
 
 calonnf:  calon
           !+1s 
+          sy=go onoff &
 
 caloffnf: caloff
-          !+1s 
+          !+1s
+          sy=go onoff &
 
 calon and caloff are local procedures that do whatever is necessary
 to turn the noise source on and off.

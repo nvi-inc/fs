@@ -17,7 +17,7 @@ communications and, at some stations, antenna communications also.
 
 For MCB communications, each byte is displayed as
 
-    bytes sent to the MCB         [nxx]
+    bytes sent to the MCB           [nxx]
     bytes received from the MCB     <nxx>
 
 where n is normally a blank. n is + for the first byte of the
@@ -27,9 +27,9 @@ are displayed with special 3-letter mnemonics:
 
       [SYN]     hex 16    synchronization byte
       <ACK>     hex 06    acknowledge
-      <NAK>     hex 15    not acknowledge
+      <NAK>   hex 15    not acknowledge
       <DC1>     hex 11    data control 1
-      <DC2>     hex 12    data control 2
+      <DC2>   hex 12    data control 2
 
 For MAT communications, most of the data bytes are printable ASCII
 characters which are displayed simply as the character. The
@@ -45,7 +45,7 @@ shown in the table below. The "del" character (127) is displayed as
 
 For RCL communications, each piece of information is displayed as
 
-    information sent to the RCL         [xxx]
+    information sent to the RCL           [xxx]
     information received from the RCL     <xxx>
 
 where xxx is a representation of the data in an appropriate format.

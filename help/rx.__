@@ -71,7 +71,6 @@ matad.ctl control file.
     1D  S3BIAS  4.9   3rd stage S-band FET bias current
     1E  20K     1     temperature diode, 20K station in dewar
     1F  70K     1     temperature diode, 70K station in dewar
-
 Note: This table applies only to standard S/X receivers. Channel
 assignments for your station's receiver may be found in control
 file rxdef.ctl. Conversion from volts to temperature for channels

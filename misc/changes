@@ -929,7 +929,14 @@ Version 9.1.6 960819
 960827 WEH quikr/party.f
            fixed systrack and VLBA group number problem
 
-Version 9.1.7 960830
+961007 NRV drudg/fdrudg.f
+           drudg/spdstr.f
+           fix number of elements in speed string array
+
+961007 WEH quikr/party.f
+           second try on systrack number problem
+
+Version 9.1.7 961007
 
 960709 nrv skdrut/frinp.f
            Initialize ifan to 0 instead of 1. This caused the fanout to 
@@ -1344,11 +1351,41 @@ Version 9.1.7 960830
 960904 WEH control/fscmd.ctl
            fixed tsys4's rack type to 2
 
+960904 WEH boss/helpstr.c
+           fixed to handle S2
+
+960904 WEH vex/Makefile
+           clean-up vex.yy.c
+
 960905 NRV drudg/procs.f
            Minor changes for S2 procedures and command names.
 
 960905 WEH st.default/control/equip.ctl
            fixed rack and recorder comment for s2 and none options
+
+960910 WEH chekr/s2drive.f
+	   reduce error count by one (delay not zero is not handle here)
+
+960910 WEH clib/s2st_util.c
+           remove debug
+
+960910 WEH fmset/fmset.c
+           add suggestion to user to not run fmset for long
+
+960910 WEH quikv/quikv.c
+           add s2rec call
+
+960910 WEH control/fscmd.ctl
+           remove eject command add rec
+
+960911 WEH quikv/s2rec.c
+           created
+
+960911 WEH quikv/s2tape.c
+           fixed missing index for "reset"
+
+960911 WEH clib/Makefile
+           add s2rec_util.o
 
 960912 NRV drudg/procs.f
            Change EJECT to REC=EJECT, add group to REC_MODE. Add RW and
@@ -1366,6 +1403,60 @@ Version 9.1.7 960830
 960912 NRV skdrut/stinp.f, vstinp.f
            Initialize rack and recorder types to "unknown" or blank.
 
+960912 WEH rclcn/rclcn.c
+           fix rcl includes
+           fix delaym_read debug
+
+960912 WEH clib/get_s2time.c
+           clib/rcl_util.c
+           clib/rclcn_req_util.c
+           clib/rclcn_res_util.c
+           include/fs_types.h
+           quikv/rcl_dis.c
+           quikv/rec_mode.c
+           quikv/s2tape_dis.c
+           fmset/sets2time.c
+           fix rcl includes
+
+960912 WEH clib/s2rec_util.c
+           quikv/get_s2speed.c
+           quikv/get_s2state.c
+           quikv/get_s2tapetype.c
+           created
+
+960912 WEH clib/s2tape_util.c
+           fix counting of number of parameters
+
+960912 WEH clib/bbc_util.c
+           remove incorrect use of NULL instead of 0
+
+960912 WEH quikv/s2et.c
+           fix rcl includes
+           remove eject command
+
+960912 WEH quikv/s2st.c
+           fix rcl includes
+           don't set speed if already recording
+
+960912 WEH chekr/s2recchk.c
+           change non-zero delay to specially formatted message
+
+960912 WEH fserr/fserr.c
+           fix rcl includes
+	   get correct length of already stored error message
+
+960912 WEH quikv/s2label.c
+           fix rcl includes
+           fix incorrect use of iok&= to iok=iok &&
+           distinguish between incorrect format and bad checksum
+           don't change tapetype if recording
+
+960912 WEH rclco/Makefile
+           modified to put rclco into ../bin
+
+960912 WEH quikv/Makefile
+           add new modules
+
 960913 NRV drudg/fdrudg.f
            If recorder and rack type are known from VEX file, show only
            one "make procedure" option in menu.
@@ -1374,4 +1465,55 @@ Version 9.1.7 960830
            Handle "no rack" case by checking recorder or rack type 
            before writing each command. Add TAPE commands before ST for S2.
 
-Version 9.2.0 9609??
+960913 NRV drudg/lstsum.f
+           Change logic because structure of SNAP files for S2 was changed.
+
+960913 NRV drudg/snap.f
+           Reverse order of data_valid and tape monitor commants.
+
+960913 WEH rclcn/Makefile
+           correct rcl binary references
+
+960913 WEH ddout/ddout.c
+           increase allowed return buffer length allowed from fserr
+
+Version 9.2.0 960913
+
+960920 nrv drudg/lstsum.f
+           Re-arrange logic to print a line when a new source appears.
+           Then write output line at end of file also.
+
+960920 nrv drudg/lstsumo.f
+           New. Output a line for LSTSUM.
+
+960920 NRV drudg/Makefile
+           updated
+
+960923 nrv drudg/spdstr.f
+           Add 320 ips as a legal speed.
+
+960923 nrv drudg/snap.f
+           Use !+5s after ET for record speeds greater than 200 ips.
+
+961001 WEH quikv/s2rec_dis.c
+           quikv/s2rec.c
+           output position, time and version information for simple "rec"
+
+961001 WEH chekr/s2recstatus.c
+           filter out most messages on first query
+
+961001 WEH control/fserr.ctl
+           add rv -302
+
+961001 WEH quikv/rcl_dis.c
+           rclcn/rclcn.c
+           correct incorrect bit testing for status type bits
+
+961002 WEH misc/wpas2help
+           fix help message
+
+961003 NRV skdrut/vmoinp.f
+           Keep getting mode defs even if there are too many.
+
+Version 9.2.1 961007
+

@@ -1,21 +1,12 @@
-           systracks - system track set-up (VLBA drive)
+	systracks - system track set-up (VLBA drive)
 
-Syntax:     systracks=st0,st1,st34,st35
+Syntax:			systracks=st0,st1,st34,st35
 
-Response:   systracks/st0,st1,st34,st35
+Response:		systracks/st0,st1,st34,st35
 
 
 Settable parameters:
-stX     The recorder track that will have its output from the
-        formatter placed on recorder track X, where X is one of the
-        system tracks: 0, 1, 34, or 35. Default is itself, i.e.,
-        for st0 the default is 0, for st1 the default is 1, for st34
-        the default is 34, and for st35 the default is 35.
+stX			The recorder track that will have its output from the formatter placed on recorder track X, where X is one of the system tracks: 0, 1, 34, or 35. Default is itself, i.e., for st0 the default is 0, for st1 the default is 1, for st34 the default is 34, and for st35 the default is 35.
 
 Comments: 
-This command is used to define what data will be recorded on the
-system tracks. This can be used to duplicate data from one of the
-normal data tracks if that track has failed. Under Field System
-control, the formatter will not normally send any data to the
-system tracks, therefore if the default is used for any parameter's
-value, normally no data will be written to that track.
+This command is used to define what data will be recorded on the system tracks. This can be used to duplicate data from one of the normal data tracks if that track has failed. Under Field System control, the formatter will not normally send any data to the system tracks, therefore if the default is used for any parameter's value, normally no data will be written to that track.

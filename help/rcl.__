@@ -81,4 +81,4 @@ spcll_mode_set    xtal or manual or refclk or 1hz or errmes
 status
 status_decode     status code,true or false
 status_detail     status code,true or false, true or false
-version
+version 

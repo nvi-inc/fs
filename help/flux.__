@@ -29,13 +29,13 @@ model     source model, one of gaussian, disk, twopoints
 flux1     flux density of the first source component, Janskys
 angle1      first angular dimension of the first component
 angel2      second angular dimension of the first component
-flux2       flux density of the second source component, Janskys
+flux2     flux density of the second source component, Janskys
 angle3      first angular dimension of the second component
 angle4      second angular dimension of the second component
 
 Monitor-only parameters:
-corr          correction divisor
-aflux       apparent flux density 
+corr        correction divisor
+aflux     apparent flux density 
 
 
 Comments: 
@@ -63,9 +63,9 @@ If model is twopoints, then the source is assumed to consist of two
 equally bright points. flux1 is the total flux density of the two
 points.  angel1 is their angular separation.
 
-If model is disk, then the source is assumed to consist of a
-uniform circular disk brightness distribution.  flux1 is the total
-flux density. angel1 is the diameter of the disk.
+If model is disk, then the source is assumed to consist of a uniform
+circular disk brightness distribution.  flux1 is the total flux
+density. angel1 is the diameter of the disk.
 
 Once the model is specified, the fluxx command will use the
 appropriate beam size to calculate the apparent flux density of the

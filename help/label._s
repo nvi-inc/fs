@@ -6,12 +6,12 @@ Response:   label/vsn,type,code
 
 
 Settable parameters:
-vsn     up to 20 character VSN, e.g., CA-1-0012305
-type    one or six character tape type, e.g., 1, or 010020, may be
-        omitted if code is csa. If not omitted and code is csa, it
-        must agree with the type specified in the vsn.
-code    tape label format, an arbitrary string up to 32 characters,
-        default is csa.
+vsn       up to 20 character VSN, e.g., CA-1-0012305
+type      one or six character tape type, e.g., 1, or 010020, may
+          be omitted if code is csa. If not omitted and code is
+          csa, it must agree with the type specified in the vsn.
+code      tape label format, an arbitrary string up to 32
+          characters, default is csa.
 
 Comments: 
 Normally used after newtape command has halted the schedule.
@@ -37,3 +37,7 @@ beginning with transport 0, the schedule will probably fail.
 
 For all other values of code, vsn may be an arbitrary string up to
 20 characters long, but type must be specified in this case.
+
+If the recorder is already recording and a tape type different than
+what is use is requested, no change will be made and an error will
+be reported.
