@@ -328,6 +328,9 @@ define  ready         00000000000
 sxcts
 rxmon
 newtape
+" if your brake release doesn't reset your footage
+" counter, uncomment the following line
+"tape=low,reset
 loader
 label
 check=*,tp
