@@ -28,10 +28,10 @@ C
         do j=1,nverr-1
           if(icherr(indx+j).gt.0)nerr=nerr+1
         enddo
-        if(nerr.gt.nverr/2) then
-          call logit7(0,0,0,0,-310,lwho,lmodna(iloop))
-          goto 720
-        endif
+c        if(nerr.gt.nverr/2) then
+c          call logit7(0,0,0,0,-310,lwho,lmodna(iloop))
+c          goto 720
+c        endif
         do j=1,nverr-1
           if(icherr(indx+j).gt.0)
      .      call logit7(0,0,0,0,-301-j,lwho,lmodna(iloop))
@@ -52,10 +52,10 @@ C
       do j=1,niferr-1
         if(icherr(indx+j).gt.0) nerr=nerr+1
       enddo
-      if(nerr.gt.niferr/2) then
-        call logit7(0,0,0,0,-319,lwho,lmodna(16))
-        goto 750
-      endif
+c      if(nerr.gt.niferr/2) then
+c        call logit7(0,0,0,0,-319,lwho,lmodna(16))
+c        goto 750
+c      endif
       do j=1,niferr-1
         if(icherr(indx+j).gt.0)
      .  call logit7(0,0,0,0,-311-j,lwho,lmodna(16))
@@ -75,10 +75,10 @@ C
       do j=1,nfmerr-1
         if(icherr(indx+j).gt.0) nerr=nerr+1
       enddo
-      if(nerr.gt.nfmerr/2) then
-        call logit7(0,0,0,0,-331,lwho,lmodna(17))
-        goto 780
-      endif
+c      if(nerr.gt.nfmerr/2) then
+c        call logit7(0,0,0,0,-331,lwho,lmodna(17))
+c        goto 780
+c      endif
       do j=1,nfmerr-1
         if (icherr(indx+j).gt.0)
      .  call logit7(0,0,0,0,-320-j,lwho,lmodna(17))
@@ -98,10 +98,10 @@ C
       do j=1,ntperr-1
         if(icherr(indx+j).gt.0) nerr=nerr+1
       enddo
-      if(nerr.gt.ntperr/2) then
-        call logit7(0,0,0,0,-347,lwho,lmodna(18))
-        goto 800
-      endif
+c      if(nerr.gt.ntperr/2) then
+c        call logit7(0,0,0,0,-347,lwho,lmodna(18))
+c        goto 800
+c      endif
       do j=1,ntperr-1
         if(icherr(indx+j).gt.0)
      .  call logit7(0,0,0,0,-332-j,lwho,lmodna(18))
