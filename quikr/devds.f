@@ -23,7 +23,7 @@ C
 C  LOCAL VARIABLES
 C     NSUB - subroutine number in segment 
 C            8 = ANTENNA
-      integer*2 ibuf(50),ibuf2(70),icr,ilf
+      integer*2 ibuf(256),ibuf2(256),icr,ilf
 C               - input class buffer, output display buffer 
 C        ILEN   - length of buffers, chars
 C        NCH    - character counter 
@@ -33,7 +33,7 @@ C               - registers from EXEC
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
-      data ilen/100/,ilen2/140/
+      data ilen/512/,ilen2/512/
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED: 800831 
@@ -72,10 +72,15 @@ C                   Delete CR and LF from the ends
           enddo
         endif
 200     continue
-        if (nsub.ne.8) nch = ichmv(ibuf2,nch,ibuf(2),1,nchar-2) 
+        if (nsub.ne.8) then
+           nchar=min(nchar-2,ilen2-(nch-1))
+           nch = ichmv(ibuf2,nch,ibuf(2),1,nchar) 
 C                   For MA and IB responses, skip word 1
-        if (nsub.eq.8) nch = ichmv(ibuf2,nch,ibuf,1,nchar)
+        else
+           nchar=min(nchar,ilen2-(nch-1))
+           nch = ichmv(ibuf2,nch,ibuf,1,nchar)
 C                   For antenna responses, use word 1 
+        endif
 C                   Move buffer contents into output list 
       enddo
 C 
