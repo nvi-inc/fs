@@ -24,22 +24,58 @@
 
 #define ATAN2Z(a,b) ((a==0.0 && b==0.0) ? 0.0 : atan2(a,b))
 
-void sider();
+void sider(),sider2();
+static void cnvrt0();
 
-cnvrt(mode,ain1,ain2,out1,out2,it,alat,wlong)
+void cnvrt(mode,ain1,ain2,out1,out2,it,alat,wlong)
 int mode;               /* type of conversion */
 double ain1, ain2;      /* input angles       */
 double *out1, *out2;    /* output angles      */
 int it[6];              /* standard rte time  */
 double alat,wlong;      /* lat,lon of station */
-
 {
-  double ha,sidt,tlst;
+  double sidt;
+/*
+  fprintf(stdout,"   it=%d/%d-%d:%d:%d\n",it[5],it[4],it[3],it[2],it[1]);
+*/
+  sider(it,it[5],&sidt);
+/*
+  fprintf(stdout,"sidt= %f\n",sidt*RAD2DEG);
+*/
+  cnvrt0(mode,ain1,ain2,out1,out2,sidt,alat,wlong);
+}
+
+void cnvrt2(mode,ain1,ain2,out1,out2,it,dut,alat,wlong)
+int mode;               /* type of conversion */
+double ain1, ain2;      /* input angles       */
+double *out1, *out2;    /* output angles      */
+int it[6];              /* standard rte time  */
+float dut;              /* delta UT */
+double alat,wlong;      /* lat,lon of station */
+{
+  double sidt;
+/*
+  fprintf(stdout,"   it=%d/%d-%d:%d:%d\n",it[5],it[4],it[3],it[2],it[1]);
+*/
+  sider2(it,dut,&sidt);
+/*
+  fprintf(stdout,"sidt= %f\n",sidt*RAD2DEG);
+*/
+  cnvrt0(mode,ain1,ain2,out1,out2,sidt,alat,wlong);
+}
+
+static void cnvrt0(mode,ain1,ain2,out1,out2,sidt,alat,wlong)
+int mode;               /* type of conversion */
+double ain1, ain2;      /* input angles       */
+double *out1, *out2;    /* output angles      */
+double sidt;            /* apparent Greenwich sideral time */
+double alat,wlong;      /* lat,lon of station */
+{
+  double ha,tlst;
   double slat,clat,sin1,sin2,cin1,cin2,sha,cha;
 /*
   fprintf(stdout,"cnvrt: mode=%d, in=%f,%f\n",
   mode,ain1*RAD2DEG,ain2*RAD2DEG);
-  fprintf(stdout,"   it=%d/%d-%d:%d:%d\n",it[5],it[4],it[3],it[2],it[1]);
 */
   slat = sin(alat);
   clat = cos(alat);
@@ -47,10 +83,7 @@ double alat,wlong;      /* lat,lon of station */
   sin2 = sin(ain2);
   cin1 = cos(ain1);
   cin2 = cos(ain2);
-  sider(it,it[5],&sidt);
-/*
-  fprintf(stdout,"sidt= %f\n",sidt*RAD2DEG);
-*/
+
   tlst = sidt - wlong;
   ha = tlst - ain1;
 /*
