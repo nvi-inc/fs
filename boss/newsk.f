@@ -25,11 +25,11 @@ C
       integer ichcm_ch
       logical kpast,ktime
       integer it(6)
-      integer*2 ib(50), lsor
-      character*100 ibc
+      integer*2 ib(256)
+      character*512 ibc
       character cjchar
       equivalence (ib,ibc)
-      data  ibl/50/, lsor/2h::/
+      data  ibl/256/
 C
 C  First check 1st line of schedule for experiment name and year
       ilog=0
@@ -105,12 +105,15 @@ C 1.2 The case of #nnn - just position to the line and we're done.
 C
       iline = ias2b(ibuf,ic1+1,ic2-ic1-2)
       ierr = 0
-      if (iline.lt.0) then
+      if (iline.le.0) then
         call logit7ci(0,0,0,1,-106,'bo',iline)
         ierr = -1
         goto 900
       endif
-      if(iline.le.ilog) iline=ilog+1
+      if(iline.eq.1.and.(nlines.gt.ilog.or.nlines.eq.0)) then
+         iline=ilog+1
+         if(nlines.gt.ilog) nlines=nlines-ilog
+      endif
       if (iline.le.1) goto 800
       irec2 = iline
       idum = fmpsetline(idcbsk,ierr,irec2-1)
@@ -134,7 +137,7 @@ C
         call logit6c(0,0,0,0,-124,'bo')
         goto 900
       endif
-      if (ichcm_ch(ib,1,'source=').eq.0) then
+      if (ichcm_ch(ib,1,'scan_name=').eq.0) then
         idum = fmpposition(idcbsk,ierr,irec,ioff)
         irec2=irec-ilen-1
         irec2ln = irecln-1
