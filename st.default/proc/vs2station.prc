@@ -500,7 +500,7 @@ wakeup
 xdisp=off
 enddef
 define  unloader      00000000000
-rec_mode=16x81-1,0
+rec_mode=16x8-1,0
 rec=eject
 enddef
 define  wb2c1         00000000000
