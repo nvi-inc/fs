@@ -9,8 +9,6 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#undef TRUE
-#undef FALSE
 #include "../rclco/rcl/rcl_def.h"
 
 void s2recchk_(icherr,lwho)
@@ -93,6 +91,9 @@ char *lwho;
 
   if(s2rec.group)
     add_rclcn_group_read(&req_buf,device);
+
+  if(s2rec.roll)
+    add_rclcn_barrelroll_read(&req_buf,device);
 
   if(s2rec.dv)
     add_rclcn_user_dv_read(&req_buf,device);
@@ -185,6 +186,22 @@ char *lwho;
       goto error;
     
     icherr[11]=group!=shm_addr->rec_mode.group;
+  }
+
+  if(s2rec.roll)  {
+    ibool barrelroll;
+    int roll;
+
+    ierr=get_rclcn_barrelroll_read(&res_buf,&barrelroll);
+    if(ierr!=0)
+      goto error;
+    
+    if(barrelroll)
+      roll=1;
+    else
+      roll=0;
+
+    icherr[17]=roll!=shm_addr->rec_mode.roll;
   }
 
   if(s2rec.dv)  {
