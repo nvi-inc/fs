@@ -2232,16 +2232,22 @@ M5 -902
 MARK5 device error: command not implemented or not relevant to this DTS
 ""
 M5 -903
-MARK5 device error: syntax or parameter error
+MARK5 device error: syntax (or parameter error)
 ""
 M5 -904
-MARK5 device error: error encountered
+MARK5 device error: error encountered (during attempt to execute)
 ""
 M5 -905
 MARK5 device error: currently too busy to service request; try again later
 ""
 M5 -906
-MARK5 device error: inconsistent ot conflicting request
+MARK5 device error: inconsistent or conflicting request
+""
+M5 -907
+MARK5 device error: no such keyword
+""
+M5 -906
+MARK5 device error: parameter error
 ""
 NF   -1
 Break Detected in ONOFF
@@ -2790,7 +2796,7 @@ QG -309
 Odd and Even tracks requested with Odd or Even electronics.
 ""
 QG -310
-Asterisk (*) notation not supported for tracks with PARITY command.
+Asterisk (*) notation only supported for first track in list.
 ""
 QG -311
 Equalizer must be set with repro command first.
@@ -4648,3 +4654,15 @@ MET: Server not running.
 ""
 WX   -8
 MET: Can not get localhost information.
+""
+WX   -9
+MET: Error in temperature response from met sensor.
+""
+WX   -10
+MET: Error in pressure response from met sensor.
+""
+WX   -11
+MET: Error in humidity response from met sensor.
+""
+WX   -12
+MET: Error in wind and speed response wind sensor.
