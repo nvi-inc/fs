@@ -1,5 +1,5 @@
-int printer_(fname,orien)
-char   *fname, *orien;
+int printer_(fname,labels,orien)
+char   *fname, *labels, *orien;
 
 /*
     Pat Ryan 1.9.88
@@ -20,6 +20,7 @@ char   *fname, *orien;
    951002 nrv Use "recode latin1:ibmpc < file | lpr" for the Linux magic filter.
    951016 nrv If "orien" is non-blank, use the scripts, otherwise use
               the recode command.
+   960226 nrv Add separate argument for labels. 
 
 */
 
@@ -29,21 +30,28 @@ char   *fname, *orien;
 
 /* Form the command by attaching the file name to the command */
 
-      if (strncmp(orien,"r",1) == 0) {    /* 'raw' mode      */
-        strcpy(command,"lpr ");
-        strcat(command,fname);
+      if (strncmp(labels,"l",1) == 0) { /* label mode */
+        if (strncmp(orien," ",1) == 0) {    /* no script, use lpr */
+          strcpy(command,"lpr ");
+          strcat(command,fname);
+        }
+        else {
+          strcpy(command,orien); /* use script provided */
+          strcat(command," ");
+          strcat(command,fname);
+        }
       } 
-      else if (strncmp(orien," ",1) == 0) { /* 'no script provided */
-	/* PC commands */
-        strcpy(command,"recode latin1:ibmpc < ");
-        strcat(command,fname);
-        strcat(command," | lpr");
-      }
-      else {
-	/* HP commands */
-        strcpy(command,orien);
-        strcat(command," ");
-        strcat(command,fname);
+      else { /* text mode */
+        if (strncmp(orien," ",1) == 0) { /* no script use recode */
+          strcpy(command,"recode latin1:ibmpc < ");
+          strcat(command,fname);
+          strcat(command," | lpr");
+        }
+        else { /* use script provided */
+          strcpy(command,orien);
+          strcat(command," ");
+          strcat(command,fname);
+        }
       }
 
 /* call system with command line */
