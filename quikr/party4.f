@@ -50,6 +50,13 @@ C
         goto 700
       end if
 C
+      call fs_get_vacsw(vacsw)
+      call fs_get_vac4(vac4)
+      if(vacsw.eq.1.and.(vac4.lt.0.or.vac4.gt.2)) then
+         ierr=-311
+         goto 990
+      endif
+C
 C  2. GET PARAMETERS.
 C
 C  2.1  PARITY ERROR THRESHHOLD

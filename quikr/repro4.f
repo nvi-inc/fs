@@ -93,6 +93,13 @@ C                                     8 -> 160, 270
 C
 C  2.1 MODE, PARAMETER 1
 C
+      call fs_get_vacsw(vacsw)
+      call fs_get_vac4(vac4)
+      if(vacsw.eq.1.and.(vac4.lt.0.or.vac4.gt.2)) then
+         ierr=-307
+         goto 990
+      endif
+c
       ich = 1+ieq
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(iparm,1).ne.','.and.cjchar(iparm,1).ne.'*') goto 211
@@ -241,7 +248,8 @@ C
       iclass = 0
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      call rpbr2ma4(ibuf(3),ibr)
+      call fs_get_vac4(vac4)
+      call rpbr2ma4(ibuf(3),ibr,vac4)
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 2
 
