@@ -9,10 +9,6 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#include "../rclco/rcl/rcl.h"
-#undef TRUE
-#undef FALSE
-
 #include "../rclco/rcl/rcl_def.h"
 
 #define MAX_OUT 2048
@@ -387,6 +383,23 @@ long ip[5];
 
     break;
   }
+  case RCL_CMD_BARRELROLL_SET:
+    ierr=get_rclcn_barrelroll_set(&buffer);
+    break;
+  case RCL_CMD_BARRELROLL_READ: {
+    ibool barrelroll;
+
+    ierr=get_rclcn_barrelroll_read(&buffer,&barrelroll);
+    if(ierr!=0)
+      break;
+
+    if(barrelroll)
+      strcat(output,",on");
+    else
+      strcat(output,",off");
+    
+    break;
+  }
   case RCL_CMD_ALIGN:
     ierr=get_rclcn_align(&buffer);
     break;
@@ -521,6 +534,52 @@ long ip[5];
     
     break;
   }
+  case RCL_CMD_MK3_FORM_SET:
+    ierr=get_rclcn_mk3_form_set(&buffer);
+    break;
+  case RCL_CMD_MK3_FORM_READ: {
+    ibool mk3;
+
+    ierr=get_rclcn_mk3_form_read(&buffer,&mk3);
+    if(ierr!=0)
+      break;
+
+    if(mk3)
+      strcat(output,",enabled");
+    else
+      strcat(output,",disabled");
+    
+    break;
+  }
+  case RCL_CMD_TRANSPORT_TIMES: {
+    int num_entries;
+    unsigned short serial[8];
+    unsigned long tot_on_time[8];
+    unsigned long tot_head_time[8];
+    unsigned long head_use_time[8];
+    unsigned long in_service_time[8];
+    int i;
+
+    ierr=get_rclcn_transport_times(&buffer,&num_entries,serial,tot_on_time,
+				   tot_head_time,head_use_time,
+				   in_service_time);
+    if(ierr!=0)
+      break;
+
+    sprintf(output+strlen(output),",%i",num_entries);
+
+
+    for(i=0;i<num_entries;i++) {
+      strcat(start,",\\");
+      cls_snd(&class,output,strlen(output),0,0);
+      nrecs+=1;
+      sprintf(start,"%hu,%lu,%lu,%lu,%lu",
+	      serial[i],tot_on_time[i],tot_head_time[i],
+	      head_use_time[i],in_service_time[i]);
+    }
+
+    break;
+  }
   case RCL_CMD_STATION_INFO_READ: {
     int station;
     long int serialnum;
@@ -619,7 +678,7 @@ long ip[5];
       sprintf(start,"%d,%s",status_det_list[j],st);
       j+=2;
       colon=strchr(status_det_list+j,':');
-      if(colon!=NULL) {
+      if(colon!=NULL && strncmp(status_det_list+j,"STAT_",5)==0) {
 	*colon=0;
 	strcat(start,",");
 	strcat(start,status_det_list+j);
@@ -637,7 +696,9 @@ long ip[5];
 	if(newln!=NULL)
 	  *newln=0;
 	strcat(start,status_det_list+j);
-	j+=strlen(status_det_list+j)+1;
+	j+=strlen(status_det_list+j);
+	if(newln!=NULL)
+	  j++;
 	if(status_det_list[ j]!=0) {
 	  strcat(start,"\\");
 	  cls_snd(&class,output,strlen(output),0,0);
@@ -645,6 +706,7 @@ long ip[5];
 	  start[0]=0;
 	}
       }
+      j++;
     }
     break;
   }
@@ -659,7 +721,7 @@ long ip[5];
 
     j=0;
     colon=strchr(stat_msg,':');
-    if(colon!=NULL) {
+    if(colon!=NULL && strncmp(stat_msg,"STAT_",5)==0) {
       *colon=0;
       strcat(start,",");
       strcat(start,stat_msg);
@@ -677,7 +739,9 @@ long ip[5];
       if(newln!=NULL)
 	*newln=0;
       strcat(start,stat_msg+j);
-      j+=strlen(stat_msg+j)+1;
+      j+=strlen(stat_msg+j);
+      if(newln!=NULL)
+	j++;
       if(stat_msg[ j]!=0) {
 	strcat(start,"\\");
 	cls_snd(&class,output,strlen(output),0,0);
@@ -686,6 +750,31 @@ long ip[5];
       }
     }
 
+    break;
+  }
+  case RCL_CMD_DIAG:
+    ierr=get_rclcn_diag(&buffer);
+    break;
+  case RCL_CMD_BERDCB: {
+    unsigned long err_bits, tot_bits;
+    
+    ierr=get_rclcn_berdcb(&buffer,&err_bits,&tot_bits);
+    if(ierr!=0)
+      break;
+
+    sprintf(output+strlen(output),",%i,%i",err_bits,tot_bits);
+    
+    break;
+  }
+  case RCL_CMD_IDENT: {
+    char devtype[RCL_MAXSTRLEN_IDENT];
+    
+    ierr=get_rclcn_version(&buffer,devtype);
+    if(ierr!=0)
+      break;
+
+    sprintf(output+strlen(output),",%s",devtype);
+    
     break;
   }
   case RCL_CMD_PING:
