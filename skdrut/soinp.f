@@ -2,7 +2,7 @@
 C
 C     This routine reads and decodes a source entry
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -15,7 +15,7 @@ C  OUTPUT:
 C     IERR - error number
 C     INUM - number of error message
 C
-       INCLUDE 'sourc.ftni'
+      include '../skdrincl/sourc.ftni'
 C
 C  LOCAL:
       LOGICAL KNAEQ,KORBIT

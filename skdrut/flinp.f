@@ -3,7 +3,7 @@ C
 C     FLINP reads and decodes a source flux line, and puts
 C           the information into common
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -18,7 +18,7 @@ C
 C  Called by: FLGET
 C
 C  Common
-       INCLUDE 'sourc.ftni'
+      include '../skdrincl/sourc.ftni'
 C
 C  LOCAL:
       integer*2 lb ! band for unpacking

@@ -4,7 +4,7 @@ C
 C   CVPOS converts source ra and dec into az,el,ha,x, and y; or satellite
 C         elememts into the same plus dec.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT VARIABLES:
       integer nsor,istn,mjd
@@ -20,13 +20,14 @@ C        AZ,EL,HA,DC,X30,Y30,X85,Y85 - az,el,ha,dc,and x,y at input date and tim
       LOGICAL KUP ! TRUE if source is above limits at MJD,UT
 C
 C   COMMON BLOCKS USED
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C     LOCAL VARIABLES:
       real*4 slat,clat,sha,cha,saz,sel,cel,azx,
      .caz,arcd,sunaz,sunel,x,arg,sunarc
       integer i
+      real eli
 C        SDEC,CDEC,SLAT,CLAT,SHA,CHA
 C               - SIN,COS of DEC,LAT,HA
 C        ARG,SAZ,DEC
@@ -71,6 +72,9 @@ C     931012 nrv Remove statement functions for acos, asin//REPLACED
 C                Remove DMOD and check HA for 2PI
 C     940804 nrv Changed limit on horizon check to i<nhorz because the
 C                value is checked between (i) and (i+1).
+C 960223 nrv Change to using (az,el) points actually on the horizon 
+C            and interpolating between the line segments. Keep the
+C            coordinate mask unchanges.
 C
 C
 C     1. Define the statement function ACOS.
@@ -247,9 +251,15 @@ C      Now check horizon mask for stations that have one.
         I=1
         DO WHILE(I.LT.NHORZ(ISTN).AND.
      .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
-          I=I+1
+          I=I+1 ! find AZ between i and i+1
         ENDDO
-        KUP=KUP.AND.EL.GE.ELHORZ(I,ISTN)
+C     This is for step functions
+        eli=elhorz(i,istn)
+C     This is for interpolating horizon mask line segment end points
+C       eli=((elhorz(i+1,istn)-elhorz(i,istn))/
+C    .      (azhorz(i+1,istn)-azhorz(i,istn)))
+C    .  *(az-azhorz(i,istn)) + elhorz(i,istn) ! interpolate
+        KUP=KUP.AND.EL.GE.eli
       ENDIF
 C
       RETURN

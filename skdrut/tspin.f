@@ -4,7 +4,7 @@ C     TSPIN computes the time required to spin the tape at high speed
 C     IFEET is the number of feet to move
 C     TSPIN returns the number of seconds
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
       integer ifeet,ispm,isps
           TSPIN = (FLOAT(IFEET)-160.0)/22.5 + 10.0

@@ -15,7 +15,7 @@ C        kerr  : variable to return error on output (nonzero if error)
 C
        integer i
 c
-       write(iunit,'(128a2)',ERR=100) (ibuf(i),i=1,ilc)
+       write(iunit,'(512a2)',ERR=100) (ibuf(i),i=1,ilc)
        kerr=0
        return
 c

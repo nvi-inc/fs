@@ -4,7 +4,7 @@ C     This checks that an observation is continuous, i.e. that it
 C     doesn't end on a different part of the cable from which it began.
 C     KCONT is returned TRUE if the observation is continuous.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       real*8 UT
@@ -25,7 +25,7 @@ C  LOCAL:
       integer ichcm_ch
 C
 C  COMMON:
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C   PROGRAMMER: MAH  811125
 C    MODIFICATIONS:

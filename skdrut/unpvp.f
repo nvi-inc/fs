@@ -3,7 +3,7 @@
 C
 C     UNPVP unpacks a record containing position information.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  History
 C  NRV 891215 Removed catalog info

@@ -4,7 +4,7 @@ C
 C   SUNARC calculates the distance of a source from the sun and
 C             returns the arc distance in degrees.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT VARIABLES:
       integer nsor,mjd
@@ -17,7 +17,7 @@ C      SUNARC - arc distance of NSOR from sun, degrees
 C          -1.0 if NSOR is a satellite
 C
 C  COMMON BLOCKS USED
-      INCLUDE 'sourc.ftni'
+      include '../skdrincl/sourc.ftni'
 C
 C     CALLING SUBROUTINES: SKED, NEWOB, SOLIS, SKOPN
 C     CALLED SUBROUTINES:  SUNPO

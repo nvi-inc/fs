@@ -1,6 +1,6 @@
       integer FUNCTION IGTBA(LKEYWD,IKEY)
-      INCLUDE 'skparm.ftni'
-      INCLUDE 'freqs.ftni'
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/freqs.ftni'
 C     Check through all bands for a match with the first character
 C     of LKEYWD.
 C     RETURN INDEX IN IKEY AND IN FUNCTION IF MATCH, ELSE 0

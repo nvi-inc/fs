@@ -3,7 +3,7 @@
 C
 C   SLEWT calculates the slew time and the cable wrap
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C     INPUT VARIABLES:
          integer nsnow,mjd,nsnew,istn,lookah
@@ -36,8 +36,8 @@ C        trise  =  time until the source rises, seconds
 C          (it this is > 0 then TSLEW includes this time)
 C
 C   COMMON BLOCKS USED
-      INCLUDE 'sourc.ftni'
-      INCLUDE 'statn.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C     CALLING SUBROUTINES: OBSCM,CHCMD, and others
 C     CALLED SUBROUTINES: CVPOS,CABLW

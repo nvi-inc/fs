@@ -4,7 +4,7 @@ C
 C     UNPWO unpacks the satellite specific information in a source record.
 C           This routine is a utility to unpso.
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  HISTORY:
 C     WEH  820519  CREATED

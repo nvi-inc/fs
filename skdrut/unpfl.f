@@ -2,7 +2,7 @@
 C
 C     unpfl unpacks a record containing flux information
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)

@@ -3,7 +3,7 @@
 C
 C     UNPFR unpacks the lines in the FREQ.CAT catalog
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 
 C  History:
 C  900117 NRV Created, modeled after UNPFR of old FRCAT program

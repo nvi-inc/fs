@@ -2,7 +2,7 @@
 C
 C     UNPVH unpacks a record containing horizon mask data.
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -54,21 +54,31 @@ C
       IF (IC1.EQ.0) GOTO 2
       NC = IC2-IC1+1
       IF (NC.EQ.1.AND.JCHAR(IBUF,IC1).EQ.OCAPX) GOTO 2
-      NHOR = NHOR + 1
       R = DAS2B(IBUF,IC1,NC,IERR)
       IF (IERR.NE.0) THEN
         IERR = -101-NHOR*2
         RETURN
       ENDIF
-C     AZH(NHOR) = R*PI/180.0
+      if (r.lt.0.or.r.gt.360.0) then ! out of range
+        ierr=-101-nhor*2
+        return
+      endif
+      if (nhor.eq.max_hor) then ! too many
+        ierr=-99
+        return
+      endif
+      NHOR = NHOR + 1
       AZH(NHOR) = R
 C  If az entries are not in ascending order, error
       if (nhor.gt.1.and.azh(nhor).le.azh(nhor-1)) then
         ierr=-201-nhor*2
         return
       endif
-      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-      IF (IC1.EQ.0) GOTO 2
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! get matching el
+      IF (IC1.EQ.0) then ! no matching el
+        ierr=-103
+        return
+      endif
       NC = IC2-IC1+1
       IF (NC.EQ.1.AND.JCHAR(IBUF,IC1).EQ.OCAPX) GOTO 2
       R = DAS2B(IBUF,IC1,NC,IERR)
@@ -76,6 +86,10 @@ C  If az entries are not in ascending order, error
         IERR = -102-NHOR*2
         RETURN
       ENDIF
+      if (r.lt.0.or.r.gt.90.0) then ! out of range
+        ierr=-102-nhor*2
+        return
+      endif
 C     ELH(NHOR) = R*PI/180.0
       ELH(NHOR) = R
       GOTO 1

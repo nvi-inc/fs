@@ -12,7 +12,6 @@
 #########################################################################
  
 ARC = skdrut
-IN = ../include-new/
  
 OBJECTS=\
 aposn.o axtyp.o backward.o cablw.o ckiau.o clear_array.o clndr.o\
@@ -27,7 +26,7 @@ unplo.o unpso.o unpva.o unpvh.o unpvp.o unpvt.o unpwc.o\
 unpwo.o upper.o writf_asc.o writf_asc_ch.o xat.o\
 ydjul.o ymday.o printer.o 
 #
-FFLAGS=-C -c -g -I$(IN)
+FFLAGS=-C -c -g 
 CFLAGS= -c -g
 #
 $(ARC).a: $(OBJECTS)

@@ -1,6 +1,6 @@
       subroutine sbit(iarray,ibit,ival) 
       implicit none
-      integer iarray(1),ibit,ival
+      integer iarray(*),ibit,ival
 c 
 c   sbit sets (or resets) the ibit-th bit of iarray if ival is one
 c   (or zero). sbit uses the same bit numbering convention as kbit.

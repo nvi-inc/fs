@@ -1,10 +1,10 @@
       SUBROUTINE unpva(IBUF,ILEN,IERR,LIDANT,LNAANT,LAXIS,
-     .AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,LIDPOS,IDTER,lidhor,
+     .AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,LIDPOS,LIDTER,lidhor,
      .ISLCON,ipcount)
 C
 C     UNPVA unpacks a record containing antenna information.
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  History:
 C  NRV 891215 Removed call to catalog info unpacking routine,
@@ -12,6 +12,7 @@ C             added horizon mask ID
 C  NRV 900301 Allow terminal ID to be numeric or hollerith
 C  nrv 930225 implicit none
 C  nrv 940719 Allow numerals as station IDs
+C 960227 nrv All station terminal IDs are hollerith
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -23,7 +24,8 @@ C        5 gets name and ID only
 C        16 (or anything >5) gets all values
 C
 C  OUTPUT:
-      integer ierr,idter
+      integer ierr
+      integer lidter(2)
       integer*2 lidhor
 C     IERR    - error return, 0=ok, -100-n=error in nth field
 C     LIDANT - antenna ID, 1 character in upper byte, lower byte is blank
@@ -40,14 +42,14 @@ C            - antenna upper,lower limits for axis 1, degrees
 C            - antenna upper,lower limits for axis 2, degrees
 C     DIAMAN - diameter of antenna, in m
 C     LIDPOS  - 2-char ID of the position information
-C     IDTER  - 2-char ID of the Mark III terminal information
+C     LIDTER  - 2-char ID of the Mark III terminal information
 C     lidhor  - 2-char ID of the horizon mask entry
 C
 C  LOCAL:
       real*8 DAS2B,R
       integer*2 ldum(2)
       integer ich,nch,ic1,ic2,idumy,iax,i,id
-      integer jchar,ichmv,ias2b ! function
+      integer jchar,ichmv_ch,ichmv,ias2b ! function
 C
 C
 C  1. Start the unpacking with the first character of the buffer.
@@ -144,24 +146,29 @@ C
       call char2hol ('  ',LIDPOS,1,2)
       IDUMY = ICHMV(LIDPOS,1,IBUF,IC1,2)
 C
-C     The Mark III ID, OK if it's not a number.
+C     The Mark III ID, up to 4 characters. Optional.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+      idumy=ichmv_ch(lidter,1,'    ')
       NCH = IC2-IC1+1
-      id=-1
-      if (nch.gt.0) id = ias2b(ibuf,ic1,nch)
-      IF (id.lt.0) THEN
-        idumy = ichmv(idter,1,ibuf,ic1,min0(nch,2))
-      else
-        idter = id
-      END IF
+C     if (nch.gt.0) id = ias2b(ibuf,ic1,nch)
+      if (nch.gt.4) then
+        ierr=-115
+        return
+      endif
+      idumy = ichmv(lidter,1,ibuf,ic1,nch)
+C     IF (id.lt.0) THEN
+C       idumy = ichmv(lidter,1,ibuf,ic1,min0(nch,2))
+C     else
+C       idter = id
+C     END IF
 C
 C     The horizon ID (optional, blank if not there). 
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       call char2hol ('  ',LIDHOR,1,2)
       NCH = IC2-IC1+1
-      IF (NCH.EQ.2) IDUMY = ICHMV(LIDHOR,1,IBUF,IC1,2)
+      IF (NCH.ge.2) IDUMY = ICHMV(LIDHOR,1,IBUF,IC1,nch)
 C
       RETURN
       END

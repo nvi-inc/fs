@@ -3,7 +3,7 @@
 C
 C     unphd unpacks a record containing head information
 C
-      INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  Called by: HDINP
 

@@ -1,0 +1,1 @@
+      call hol2upper(ibuf(2),ilen-1) ! uppercase for $CODES section

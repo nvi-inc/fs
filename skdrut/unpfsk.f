@@ -3,7 +3,7 @@
 C
 C     UNPFR unpacks the "F" lines in the $CODES section.
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 
 C  900117 NRV Created, modeled after UNPFR of old FRCAT program
 C  930225 nrv implicit none
