@@ -14,32 +14,31 @@ C       2 = B
 C
       include '../include/fscom.i'
 
-      logical kbit,keven,kodd,kbreak,kdoaux
+      logical kbit,kone,kother,kbreak,kdoaux
       integer*4 ip(1)
-      integer*2 ibuf(50)
+      integer*2 ibuf(128), lwhat
       real perr(36)
       integer ireg(2),iparm(2),get_buf,ichcm_ch,idecpa,iserr(36)
-      integer itrk(36),iaux(36),iptr(2),ig1(4),itrkpalo(2),igv1(4)
+      integer itrk(36),iaux(36),iptr(2),ig1(4),igv1(4)
       integer igv2(4),igv3(4)
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1))
-      data ilen/100/
+      data ilen/256/
       data ig1/0,1,14,15/
       data igv1/0,1,18,19/
       data igv2/2,3,18,19/
       data igv3/4,5,18,19/
       data pth/600./,sth/12./
 C
-C  Set flag for PCALR to stop
-      ipcflg=1
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(MK3.eq.drive) then
+      call fs_get_rack(rack)
+      if(MK3.eq.drive.or.MK4.eq.drive) then
         call fs_get_icheck(icheck(18),18)
         ichold=icheck(18)
-      else !!! VLBA
-        call fs_get_ichvlba(ichvlba(18),18)
-        ichold=ichvlba(18)
+      else                      !!! VLBA or VLBA4
+         call fs_get_ichvlba(ichvlba(18),18)
+         ichold=ichvlba(18)
       endif
 C
 C  1.  Get the command
@@ -66,9 +65,9 @@ C  2.1  Parity error threshhold
 C
       ich=ieq+1
       call gtprm(ibuf,ich,nchar,1,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
+      if (cjchar(iparm,1).eq.',') then
         peth=pth
-      else if (cjchar(parm,1).eq.'*') then
+      else if (cjchar(iparm,1).eq.'*') then
         peth=pethr
       else if(ierr.ne.0) then
         ierr=-201
@@ -80,9 +79,9 @@ C
 C  2.2  Sync error threshhold
 C
       call gtprm(ibuf,ich,nchar,1,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
+      if (cjchar(iparm,1).eq.',') then
         iseth=sth
-      else if (cjchar(parm,1).eq.'*') then
+      else if (cjchar(iparm,1).eq.'*') then
         iseth=isethr
       else if(ierr.ne.0) then
         ierr=-202
@@ -94,7 +93,7 @@ C
 C  2.3  Channel(s)
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
+      if (cjchar(iparm,1).eq.',') then
         idecpa = 0
       else if((cjchar(iparm,1).eq.'a').and.(cjchar(iparm,2).eq.'b'))
      .    then
@@ -113,11 +112,13 @@ C
 C  2.4 AUX check ON or OFF
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
+      if (rack.eq.VLBA) then
+         kdoaux=.false.
+      else if (cjchar(parm,1).eq.',') then
         kdoaux=.true.
-      else if (ichcm_ch(parm,1,'on').eq.0) then
+      else if (ichcm_ch(iparm,1,'on').eq.0) then
         kdoaux=.true.
-      else if (ichcm_ch(parm,1,'off').eq.0) then
+      else if (ichcm_ch(iparm,1,'off').eq.0) then
         kdoaux=.false.
       else
         ierr = -204
@@ -130,43 +131,102 @@ C
       do i=1,36
         itrk(i)=0
       end do
+C
+      itype=rpro_fs
+      call fs_get_wrhd_fs(wrhd_fs)
+      if(MK3.eq.drive) then
+         if(MK3B.eq.drive_type) itype=wrhd_fs
+      else if(VLBA.eq.drive) then
+         itype=wrhd_fs
+      endif
+      if (itype.lt.0.or.itype.gt.2) then !out of range reproduce value
+         ierr = -308
+         goto 990
+      end if
+C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') then
-        if(MK3.eq.drive) then
-          do i=1,28
-            itrk(i)=itrkenus_fs(i)
-          end do
-        else
-          call fs_get_vgroup(vgroup)
-          do i=0,35
-             if(vgroup(1+2*(i/18)+mod(i,2)).eq.1) itrk(i+1)=1
-          enddo
-        endif
-      else
+      if (cjchar(iparm,1).eq.',') then
+         if(MK3.eq.drive) then
+            do i=1,28
+               itrk(3+i)=itrkenus_fs(i)
+            end do
+         else if(MK4.eq.drive) then
+            if(MK3.ne.rack) then
+               do i=2,33
+                  itrk(1+i)=1
+               enddo
+            else
+               call fs_set_kenastk(kenastk)
+               if(kenastk(1)) then
+                  do i=2,32,2
+                     itrk(1+i)=1
+                  enddo
+               endif
+               if(kenastk(2)) then
+                  do i=3,33,2
+                     itrk(1+i)=1
+                  enddo
+               endif
+            endif
+         else if(VLBA.eq.drive.or.VLBA4.eq.drive) then
+            call fs_get_vgroup(vgroup)
+            do i=2,33
+               if(vgroup(1+2*(i/18)+mod(i,2)).eq.1) itrk(i+1)=1
+            enddo
+         endif
+         if(MK4.eq.rack.or.VLBA4.eq.rack) then
+C mk4 rack
+            call fs_get_fm4enable(fm4enable)
+            do i=2,33
+               if(.not.kbit(fm4enable,i-1)) then
+                  itrk(1+i)=0
+               endif
+            enddo
+         else if(VLBA.eq.rack) then
+            call fs_get_vfmenablehi(vfmenablehi)
+            call fs_get_vfmenablelo(vfmenablelo)
+            do i=0,15
+               if(.not.kbit(vfmenablehi,i+1)) then
+                  itrk(1+(i+1)*2)=0
+               endif
+               if(.not.kbit(vfmenablelo,i+1))then
+                  itrk(1+(i+1)*2+1)=0
+               endif
+            enddo
+         endif
+         if(MK3.eq.drive) then
+            do i=1,28
+               itrk(i)=itrk(3+i)
+            enddo
+            do i=29,36
+               itrk(i)=0
+            enddo
+         endif
+      else                      ! decode track number
          do i=1,36
-            if(index('0123456789',cjchar(iparm,1)).ne.0) 
-     .           goto 255
-            if (cjchar(iparm,1).eq.'*') then
+            if(index('0123456789',cjchar(iparm,1)).ne.0) then
+               goto 255
+            else if (cjchar(iparm,1).eq.'*') then
                ierr = -310
                goto 990
-            end if
-            if (drive.ne.VLBA.and.cjchar(iparm,1).ne.'g') then
+            else if (drive.eq.MK3.and.cjchar(iparm,1).ne.'g') then
                ierr = -205
                goto 990
-            else if (drive.eq.VLBA.and.
-     .              index('gvm', cjchar(iparm,1)).eq.0)then
+            else if (drive.ne.MK3.and.
+     &              index('gvm', cjchar(iparm,1)).eq.0)then
                ierr = -215
                goto 990
             end if
             ig=ias2b(iparm,2,1)
-            if(drive.ne.VLBA.and.(ig.lt.1.or.ig.gt.4)) then
+            if(drive.eq.MK3.and.(ig.lt.1.or.ig.gt.4)) then
                ierr = -206
                goto 990
-            else if(drive.eq.VLBA.and.(ig.lt.0.or.ig.gt.3)) then
+            else if((drive.ne.MK3).and.
+     &              (ig.lt.0.or.ig.gt.3)) then
                ierr = -216
                goto 990
             end if
-            if(drive.ne.VLBA) then
+            if(drive.eq.MK3) then
                do j=1,14,2
                   itrk(j+ig1(ig))=1
                end do
@@ -178,7 +238,7 @@ C
                do j=0,15,2
                   itrk(1+j+igv2(ig+1))=1
                enddo
-            else !mX
+            else                !mX
                do j=0,13,2
                   itrk(1+j+igv3(ig+1))=1
                enddo
@@ -187,26 +247,73 @@ C
  255        nc=1
             if(cjchar(iparm,2).ne.' ') nc=2
             it=ias2b(iparm,1,nc)
-            if(drive.ne.VLBA.and.(it.lt.1.or.it.gt.28)) then
+            if(drive.eq.MK3.and.(it.lt.1.or.it.gt.28)) then
                ierr = -207
                goto 990
-            else if(drive.eq.VLBA.and.(it.lt.0.or.it.gt.35)) then
+            else if(drive.ne.MK3.and.(it.lt.0.or.it.gt.35)) then
                ierr = -217
                goto 990
             end if
-            if(drive.ne.VLBA) then
+            if(drive.eq.MK3) then
                itrk(it)=1
             else
                itrk(it+1)=1
             endif
  270        call gtprm(ibuf,ich,nchar,0,parm,ierr)
-            if(cjchar(parm,1).eq.',') goto 295
+            if(cjchar(iparm,1).eq.',') goto 295
          end do
-      end if
-  
-295   ierr=0
+ 295     continue
+         ierr=0
+c     
+c check odd/even-ness
+c
+         kone=.false.
+         kother=.false.
+         do i=1,36
+            if (itrk(i).eq.1) then
+               if (mod(i,2).eq.0) kone=.true.
+               if (mod(i,2).eq.1) kother=.true.
+            end if
+         end do
+C     
+C if only one side repro than we can have odd or even but not both
 C
+         if ((itype.eq.1.or.itype.eq.2).and.kone.and.kother) then
+            ierr = -309
+            goto 990
+         end if
+      endif
 C
+C what kind of head do we have
+C
+      if(itype.ne.0) then
+         if(drive.eq.MK3) then
+            do i=1,28,2
+               if(itrk(i).ne.0.or.itrk(i+1).ne.0) then
+                  if(itype.eq.1) then
+                     itrk(i)=1
+                     itrk(i+1)=0
+                  else
+                     itrk(i)=0
+                     itrk(i+1)=1
+                  endif
+               endif
+            end do
+         else
+            do i=2,33,2
+               if(itrk(1+i).ne.0.or.itrk(1+i+1).ne.0) then
+                  if(itype.eq.2) then
+                     itrk(1+i)=1
+                     itrk(1+i+1)=0
+                  else if(itype.eq.1) then
+                     itrk(1+i)=0
+                     itrk(1+i+1)=1
+                  endif
+               endif
+            end do
+         endif
+      endif
+C     
 C  3. Plant values in COMMON
 C
       pethr=peth
@@ -214,75 +321,34 @@ C
       idecpa_fs=idecpa
       kdoaux_fs=kdoaux
       do i=1,36
-        if(itrk(i).eq.1) call sbit(itrkpa,i,1)
-        if(itrk(i).eq.0) call sbit(itrkpa,i,0)
+         if(itrk(i).eq.1) call sbit(itrkpa,i,1)
+         if(itrk(i).eq.0) call sbit(itrkpa,i,0)
       end do
       goto 990
 C
 C  5.  Measure errors
 C
 500   continue
-      call fs_get_wrhd_fs(wrhd_fs)
-      itype=rpro_fs
-      if(MK3.eq.drive) then
-        icheck(18) = 0
-        call fs_set_icheck(icheck(18),18)
-        if(MK3B.eq.drive_type) itype=wrhd_fs
-      else !!! VLBA
-        ichvlba(18)=0
-        call fs_set_ichvlba(ichvlba(18),18)
-        itype=wrhd_fs
+C
+      call fs_get_vacsw(vacsw)
+      call fs_get_vac4(vac4)
+      if(vacsw.eq.1.and.(vac4.lt.0.or.vac4.gt.2)) then
+         ierr=-311
+         goto 990
       endif
-      itrkpalo(1)=0
-      itrkpalo(2)=0
-      if (itype.lt.0.or.itype.gt.2) then  !out of range reproduce value
-         ierr = -308
-         goto 990
-      end if
-c
-c check odd/even-ness
-c
-      keven=.false.
-      kodd=.false.
-      do i=0,35
-         if (itrk(1+i).eq.1) then
-            if (mod(i,2).eq.0) keven=.true.
-            if (mod(i,2).eq.1) kodd=.true.
-         end if
-      end do
-C
-C if only one side repro than we can have odd or even but not both
-C
-      if ((itype.eq.1.or.itype.eq.2).and.keven.and.kodd) then
-         ierr = -309
-         goto 990
-      end if
-c
+C     
+      if(MK3.eq.drive.or.Mk4.eq.drive) then
+         icheck(18) = 0
+         call fs_set_icheck(icheck(18),18)
+      else                      !!! VLBA and VLBA4
+         ichvlba(18)=0
+         call fs_set_ichvlba(ichvlba(18),18)
+      endif
+c     
       call fs_get_vrepromode(vrepromode)
-      do i=1,36
-         if (kbit(itrkpa,i)) then
-c pick which tracks to actually reproduce according to rep. electronics type
-            iv=i                ! okay as is
-            if(drive.ne.VLBA) then
-               if (itype.eq.2.and.ibypas.eq.0) then !map to even
-                  if (mod(iv,2).eq.1) iv = iv + 1
-               else if (itype.eq.1.and.ibypas.eq.0) then !map to odd
-                  if (mod(iv,2).eq.0) iv = iv - 1
-               end if
-            else if(.not.(keven.and.kodd)) then
-c pick which tracks to actually reproduce according to wrhd type
-               if (wrhd_fs.eq.2.and.vrepromode(1).eq.0) then !map to even
-                  if (mod(iv-1,2).eq.1) iv = iv - 1
-               else if (wrhd_fs.eq.1.and.vrepromode(1).eq.0) then !map to odd
-                  if (mod(iv-1,2).eq.0) iv = iv + 1
-               end if
-            endif
-            call sbit(itrkpalo,iv,1)
-         endif
-      end do
 c
       do i=1,36
-        if(kbit(itrkpalo,i))goto 501
+         if(kbit(itrkpa,i))goto 501
       end do
       ierr=-306                 ! no tracks selected: error
       goto 990
@@ -309,37 +375,37 @@ c
       i=0
       ilast=-1
       do while (i.lt.36)   !loop over tracks
-        j=0
-        itrk(1)=0          ! set decode tracks for channels a and b
-        itrk(2)=0
-        do while (j.lt.nptr.and.i.lt.36)
-           i=i+1
-           if(kbit(itrkpalo,i)) then
-              j=j+1
-              itrk(iptr(j))=i
-           endif
-        enddo
-        if(j.eq.0) goto 600
-        call mezhr(avpea,avpeb,iserra,iserrb,ip,iauxa,iauxb,itrk)
-        if(ip(3).lt.0) goto 998
-        if(itrk(1).ne.0) then
-          perr(itrk(1))=avpea
-          iserr(itrk(1))=iserra
-          iaux(itrk(1))=iauxa
-        endif
-        if(itrk(2).ne.0) then
-          perr(itrk(2))=avpeb
-          iserr(itrk(2))=iserrb
-          iaux(itrk(2))=iauxb
-        endif
-        ilast=max(itrk(1),itrk(2),ilast)  !remember last sampled track
-        if(kbreak('quikr')) goto 600
-C            If BREAK is requested, go ahead and report what's already done
+         j=0
+         itrk(1)=0              ! set decode tracks for channels a and b
+         itrk(2)=0
+         do while (j.lt.nptr.and.i.lt.36)
+            i=i+1
+            if(kbit(itrkpa,i)) then
+               j=j+1
+               itrk(iptr(j))=i
+            endif
+         enddo
+         if(j.eq.0) goto 600
+         call mezhr(avpea,avpeb,iserra,iserrb,ip,iauxa,iauxb,itrk)
+         if(ip(3).lt.0) goto 998
+         if(itrk(1).ne.0) then
+            perr(itrk(1))=avpea
+            iserr(itrk(1))=iserra
+            iaux(itrk(1))=iauxa
+         endif
+         if(itrk(2).ne.0) then
+            perr(itrk(2))=avpeb
+            iserr(itrk(2))=iserrb
+            iaux(itrk(2))=iauxb
+         endif
+         ilast=max(itrk(1),itrk(2),ilast) !remember last sampled track
+         if(kbreak('quikr')) goto 600
+C     If BREAK is requested, go ahead and report what's already done
       end do
 C
 C  6.  Set up response
 C
-600   continue
+ 600  continue
 C
 C  Parity errors first
 C
@@ -348,10 +414,10 @@ C
       nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
       do i=1,36
-         if (kbit(itrkpalo,i)) then
+         if (kbit(itrkpa,i)) then
             if(i.le.ilast) then !only report as far as we got
                iv=i
-               if(drive.eq.VLBA) iv=iv-1
+               if(drive.ne.MK3) iv=iv-1
                nc=ib2as(iv,lwhat,1,2) !report actual, not requested track
                if (perr(i).gt.pethr) then
                   call logit7ci(0,0,0,0,-303,'qg',lwhat)
@@ -381,9 +447,9 @@ C  Now sync errors
 C
       nch=ichmv_ch(ibuf,1,'parity/')
       do i=1,36
-         if (kbit(itrkpalo,i)) then
+         if (kbit(itrkpa,i)) then
             iv=i
-            if(drive.eq.VLBA) iv=iv-1
+            if(drive.ne.MK3) iv=iv-1
             if(i.le.ilast) then !report only as far as we got
                if (iserr(iv).gt.isethr) then
                   nc=ib2as(iv,lwhat,1,2) !report actual, not requested
@@ -432,10 +498,10 @@ C
       endif
       nch=mcoma(ibuf,nch)
       ntrk=0
-      do i=1,35
+      do i=1,36
          if (kbit(itrkpa,i)) then
             iv=i
-            if(drive.eq.VLBA) iv=iv-1
+            if(drive.ne.MK3) iv=iv-1
             nch=nch+ib2as(iv,ibuf,nch,o'100002')
             nch=mcoma(ibuf,nch)
             ntrk=ntrk+1
@@ -455,11 +521,12 @@ C
       ip(2)=nrec
       ip(3)=ierr
       ip(5)=0
-998   ipcflg=0
-      if(MK3.eq.drive) then
+C
+998   continue
+      if(MK3.eq.drive.or.MK4.eq.drive) then
         icheck(18)=ichold
         call fs_set_icheck(icheck(18),18)
-      else  !!! VLBA
+      else  !!! VLBA or VLBA4
         ichvlba(18)=ichold
         call fs_set_ichvlba(ichvlba(18),18)
       endif
