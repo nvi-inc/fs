@@ -88,6 +88,9 @@ parse:
 	goto error;
       }
 
+      strcpy((char *) (buff+2),"/STA");
+      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
+
       form4RATma(buff,&lcl);
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 
@@ -112,6 +115,9 @@ parse:
 	  cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 	}
       }
+
+      form4LIMma(buff,&lcl);
+      cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
 
       strcpy((char *) (buff+2),"/CON 0");
       cls_snd(&iclass,buff,4+strlen((char *) (buff+2)),0,0); nrec++;
