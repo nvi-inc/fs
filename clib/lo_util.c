@@ -55,9 +55,10 @@ char *ptr;
 	else if(shm_addr->equip.rack==LBA || shm_addr->equip.rack==LBA4)
 	  ierr=arg_key(ptr,lol_key,LOL_KEY,&lo,0,FALSE);
 	if(ierr==-100) {
-	  for (i=0;i<4;i++)
+	  for (i=0;i<4;i++) {
 	    lcl->lo[i]=-1;
 	    lcl->sideband[i]=0;
+	  }
 	  ierr=0;
 	  *count=-1;
 	}
