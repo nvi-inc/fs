@@ -3,14 +3,25 @@
 
 #include "vex.h"
 #include "y.tab.h"
+extern struct vex *vex_ptr;
+int print_to_file=0;
 
 void print_vex(struct vex *vex)
 {
+  if(filename) /* Check to see if create_vex() set this to 1 */
+    {               /* Found in vex_put.c source                  */
+      fp=fopen(filename,"w");
+      print_to_file=1;
+    }
+  else
+    fp=stdout;
   print_lowl(vex->version);
 
   print_vex_blocks(vex->blocks);
-  printf("\n");
+  if(print_to_file)
+    fprintf(fp,"\n");
 }
+
 void print_vex_blocks(struct llist *blocks)
 {
   char *ptr;
@@ -19,15 +30,15 @@ void print_vex_blocks(struct llist *blocks)
     struct block *this=(struct block *)blocks->ptr;
     switch (this->block) {
     case B_GLOBAL:
-      printf("\n$GLOBAL;");
+      fprintf(fp, "\n$GLOBAL;");
       print_qref_block(this->items);
       break;
     case B_STATION:
-      printf("\n$STATION;");
+      fprintf(fp, "\n$STATION;");
       print_def_block(this->items,print_qref_block);
       break;
     case B_MODE:
-      printf("\n$MODE;");
+      fprintf(fp, "\n$MODE;");
       print_def_block(this->items,print_qref_block);
       break;
     case T_COMMENT:
@@ -37,9 +48,9 @@ void print_vex_blocks(struct llist *blocks)
       print_comment_trailing((char *)this->items);
       break;
     default:
-      printf("\n");
+      fprintf(fp,"\n");
       print_block_name(this->block);
-      printf(";");
+      fprintf(fp,";");
       print_def_block(this->items,print_lowl);
       break;
     }
@@ -54,25 +65,39 @@ void print_def_block(struct llist *items,void func())
     case T_DEF:
       {struct def *def=(struct def *)this->item;
 
-      printf("\n  def ");
-      print_svalue(def->name);
-      printf(";");
-
-      func(def->refs);
-
-      printf("\n  enddef;");
+      /* new */
+      if(!strstr(def->name,"comment")) {
+	fprintf(fp, "\n  def ");
+	print_svalue(def->name);
+	fprintf(fp, ";");
+	
+	func(def->refs);
+	
+	fprintf(fp, "\n  enddef;");
+      } else {
+	func(def->refs);
+      }
       }
       break;
+      /*end new */
+
+      /* old */
+      /*fprintf(fp, "\n  def ");
+      print_svalue(def->name);
+      fprintf(fp, ";");
+      func(def->refs);
+      fprintf(fp, "\n  enddef;");
+      */
+      /*end old*/
     case T_SCAN:
       {struct def *def=(struct def *)this->item;
-
-      printf("\n  scan ");
+      fprintf(fp, "\n  scan ");
       print_svalue(def->name);
-      printf(";");
+      fprintf(fp, ";");
 
       func(def->refs);
 
-      printf("\n  endscan;");
+      fprintf(fp, "\n  endscan;");
       }
       break;
     case T_COMMENT:
@@ -94,13 +119,13 @@ void print_qref_block(struct llist *items)
     struct lowl *this=(struct lowl *)items->ptr;
     switch(this->statement) {
     case T_REF:
-      {struct qref *qref=(struct qref *)this->item;
-      printf("\n    ref ");
+      { struct qref *qref=(struct qref *)this->item;
+      fprintf(fp, "\n    ref ");
       print_block_name(qref->primitive);
-      printf(" = ");
+      fprintf(fp, " = ");
       print_svalue(qref->name);
       print_qualifiers(qref->qualifiers);
-      printf(";");
+      fprintf(fp, ";");
       }
       break;
     case T_COMMENT:
@@ -125,13 +150,13 @@ void print_block_name(int block)
     fprintf(stderr,"unknown block in print_block_name %d\n",block);
     exit(1);
   }
-  printf("$%s",ptr);
+  fprintf(fp, "$%s",ptr);
 }
 void print_qualifiers(struct llist *items)
 {
   while (items!=NULL) {
     char *this=(char *)items->ptr;
-    printf(":");
+	fprintf(fp, ":");
     print_svalue(this);
     items=items->next;
   }
@@ -171,23 +196,24 @@ void print_lowl_st(int statement, void *ptr)
       continue;
     if(i==0) {
       if(statement!=T_VEX_REV)
-	printf("\n   ");
+/*	fprintf(fp, "   ");*/
+	fprintf(fp, "\n   "); 
     } else if(i==1)
-      printf(" =");
+	fprintf(fp, " =");
     else
-      printf(" :");
+	fprintf(fp, " :");
     if(value!=NULL && *value!='\0') {
       if(statement!=T_VEX_REV || i !=0)
-	printf(" ");
+	fprintf(fp, " ");
       if(link)
-	printf("&");
+	fprintf(fp, "&");
       if(name)
 	print_svalue(value);
       else
-	printf("%s",value);
+	fprintf(fp, "%s",value);
       if(units!=NULL && *units!='\0') {
-	printf(" ");
-	printf("%s",units);
+	fprintf(fp, " ");
+	fprintf(fp, "%s",units);
       }
     }
   }
@@ -198,19 +224,19 @@ void print_lowl_st(int statement, void *ptr)
       fprintf(stderr,"Unknown error in print_lowl_st %d\n",ierr);
       exit(1);
   }
-  printf(";");
+    fprintf(fp, ";");
 }
 void print_external(struct external *this)
 {
-  printf("\n    ref ");
+    fprintf(fp, "\n    ref ");
   print_svalue(this->file);
 
-  printf(":");
+    fprintf(fp, ":");
   print_block_name(this->primitive);
 
-  printf(" = ");
+    fprintf(fp, " = ");
   print_svalue(this->name);
-  printf(";");
+    fprintf(fp, ";");
 
 }
 void print_svalue(char *svalue)
@@ -231,16 +257,16 @@ void print_svalue(char *svalue)
   }
   
   if(!quote) {       
-    printf("%s",svalue);
-    return;
+    fprintf(fp, "%s",svalue);
+  return;
   }
 
-  printf("\"");
+    fprintf(fp, "\"");
   for(ptr=svalue;*ptr!=0;ptr++) {
     if(isprint(*ptr) && '"'!=*ptr) {
-      printf("%c",*ptr);
+	fprintf(fp, "%c",*ptr);
     } else {
-      printf("\\");
+	fprintf(fp, "\\");
       switch (*ptr) {
       case '\b':
 	outch='b';
@@ -265,41 +291,39 @@ void print_svalue(char *svalue)
 	break;
       outch:
       default:
-	printf("x%02x",*ptr);
-	outch='\0';
+	fprintf(fp, "x%02x",*ptr);
+      outch='\0';
       }
       if(outch!='\0') {
-	printf("%c",outch);
+	fprintf(fp, "%c",outch);
       }
     }
   }
-  printf("\"");
-  
+	fprintf(fp, "\"");
 }
 
 void print_literal_list(struct llist *literals)
 {
   char *text=(char *) literals->ptr;
 
-  printf("\nstart_literal(");
-  printf("%s",text);
-  printf(");");
+	fprintf(fp, "\nstart_literal(");
+	fprintf(fp, "%s",text);
+	fprintf(fp, ");");
 
   literals=literals->next;
   while (literals!=NULL) {
-    printf("\n%s",(char *) literals->ptr);
+      fprintf(fp, "\n%s",(char *) literals->ptr);
     literals=literals->next;
   }
-  printf("\nend_literal(");
-  printf("%s",text);
-  printf(");");
-
+      fprintf(fp, "\nend_literal(");
+      fprintf(fp, "%s",text);
+      fprintf(fp, ");");
 }
 void print_comment(char *comment)
 {
-  printf("\n%s",comment);
+    fprintf(fp, "\n%s",comment);
 }
 void print_comment_trailing(char *comment_trailing)
 {
-  printf(" %s",comment_trailing);
+    fprintf(fp, " %s",comment_trailing);
 }

@@ -24,7 +24,7 @@ static char *quote();
 
 static int ref=0;
 static trailing=0;
-int lines=0;
+int lines=1;
 static int version=1;
 %}
 
@@ -43,7 +43,7 @@ DOUBLE		{MANTISSA}{EXPONENT}?
 SEC		[0-9]{1,2}|{DOUBLE}
 ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 %%
-		{if(version){lines=1;BEGIN(VERSION);}version=0;}
+		{if(version)BEGIN(VERSION);version=0;}
 
 <VERSION>"*"     	{yyerror("Comment not allowed before end of VEX_REV statement\n");}
 <VERSION>VEX_rev	{return T_VEX_REV;}
@@ -249,7 +249,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 :		{return(yytext[0]);}
 .		{yyerror("lexical error 5 - non-token after statement started");}
 
-<<EOF>>         {version=1;ref=0;trailing=0;yyterminate();}
+<<EOF>>         {version=1;ref=0;trailing=0;lines=1;yyterminate();}
 %%
 static struct llist *lit()
 {
