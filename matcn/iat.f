@@ -48,6 +48,7 @@ C  NRSPN  - number of responses possible
       parameter (wrdech=320,maxech=wrdech*2)
       integer iebuf(wrdech),iebuf2(wrdech),itn
       integer*2 irecx(10)
+      character*1 cjchar
 C
       equivalence (ireg(1),reg)
 C
@@ -80,6 +81,8 @@ C
       else if (imode.eq.-54) then
         ifrecv = 1
       else if (imode.eq.9) then
+        ifrecv = 1
+      else if (imode.eq.10) then
         ifrecv = 1
       else
 C  A colon in the message means a response to the download 
@@ -114,6 +117,8 @@ C  Write message on the screen if echo is on
         ierr=portwrite(lumat,itran,nctran)
       else
         ierr=portwrite(lumat,itran,nctran)
+c        write(6,'(i10,1x,39a2)')
+c     &       nctran,(itran(iweh),iweh=1,(nctran+1)/2)
       endif
 C                   Write the buffer to the MAT bus
       if (ifrecv.eq.0) then
@@ -149,14 +154,21 @@ C  at this time, don't know how many characters are expected 7/16/92
       else if(imode.eq.-54) then
         maxc=40
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
-        call fc_rte_rawt(centisec(2))
-        ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,10,itimeout)
-        idum=ichmv(irecv,1,irecx,1,1)
-        idum=ichmv(irecv,2,irecx(2),1,maxc-1)
-        ilen=ilen+1
-      else if (imode.eq.9) then
-        maxc=78
+        if(ireg(1).eq.0.and.ilen.eq.1) then
+           call fc_rte_rawt(centisec(2))
+           ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,10,itimeout)
+           idum=ichmv(irecv,1,irecx,1,1)
+           idum=ichmv(irecv,2,irecx(2),1,maxc-1)
+           ilen=ilen+1
+        endif
+      else if (imode.eq.9.or.imode.eq.10) then
+        maxc=100
+        if(imode.eq.10) itimeout=max(210,itimeout)
         ireg(1)=portread(lumat,irecv,ilen,maxc,10,itimeout)
+c         read(5,'(39a2)') (irecv(iweh),iweh=1,39)
+c         ilen=iscn_ch(irecv,1,78,'$')-1
+c         write(6,'(''got:'',39a2)') (irecv(iweh),iweh=1,(ilen+1)/2)
+c         ireg(1)=0
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
       endif
@@ -183,28 +195,50 @@ C
       if (ireg(1).eq.-2) then          ! timeout
         if (itry.lt.maxtry) goto 200
         ierr = -4
-      else if (nrc.ne.nchrc(ir).and.imode.ne.9.and.imode.ne.-54) then
+      else if (nrc.ne.nchrc(ir).and.imode.ne.9.and.imode.ne.10
+     &       .and.imode.ne.-54) then
 c                                ! wrong # of characters in response
         if (itry.lt.maxtry) goto 200
         call ifill_ch(irecv,1,80,' ')
         nrc=0
         ierr = -5
-      else if (jchar(irecv,1).eq.o'6') then        ! ack response
-        ierr = +1
-        nrc = ichmv_ch(irecv,1,'ack') - 1
-      else if (jchar(irecv,1).eq.o'25') then     ! nak response
-        if (ir.eq.5.and.itry.lt.maxtry) goto 200
-        ierr = +2
-        nrc = ichmv_ch(irecv,1,'nak') - 1
+      else if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
+         nrc=nrc-3
+         if(nrc.ge.10) then
+            do i=nrc,max(1,nrc-24),-1
+               if(cjchar(irecv,i).eq.'?') then
+                  if(ichcm_ch(irecv,i,'? ERROR').eq.0) then
+                     ierr=ias2b(irecv,i+8,1+(nrc-1)-(i+8))
+                     if(ierr.eq.7.and.itry.lt.maxtry) goto 200
+                     if(ierr.lt.-1000.or.ierr.gt.1000) then
+                        ierr=-999
+                     else if(ierr.gt.0) then
+                        ierr=-800-ierr
+                     else if(ierr.lt.0) then
+                        ierr=-850+ierr
+                     endif
+                     call logit2(irecv,nrc)
+                     goto 999
+                  endif
+               endif
+            enddo
+         else if(nrc.eq.0) then
+            ierr = +1
+            nrc = ichmv_ch(irecv,1,'ack') - 1
+         endif
+      else if (jchar(irecv,1).eq.o'6') then ! ack response
+         ierr = +1
+         nrc = ichmv_ch(irecv,1,'ack') - 1
+      else if (jchar(irecv,1).eq.o'25') then ! nak response
+         if (ir.eq.5.and.itry.lt.maxtry) goto 200
+         ierr = +2
+         nrc = ichmv_ch(irecv,1,'nak') - 1
       else
-        ierr = 0
+         ierr = 0
       endif
+c
+ 999  continue
       iat = ierr
 c
       return
       end 
-
-
-
-
-
