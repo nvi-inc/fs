@@ -49,10 +49,10 @@
 
 #include <stdio.h>
 
-#include "../../fs/include/params.h" /* FS parameters            */
-#include "../../fs/include/fs_types.h" /* FS header files        */
-#include "../../fs/include/fscom.h"  /* FS shared mem. structure */
-#include "../../fs/include/shm_addr.h" /* FS shared mem. pointer */
+#include "../include/params.h" /* FS parameters            */
+#include "../include/fs_types.h" /* FS header files        */
+#include "../include/fscom.h"  /* FS shared mem. structure */
+#include "../include/shm_addr.h" /* FS shared mem. pointer */
 
 struct fscom *fs;
 
