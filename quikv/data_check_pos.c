@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../include/m5state_ds.h"
+#include "../include/disk_pos_ds.h"
+
 #define BUFSIZE 512
 
 int data_check_pos(ip)
@@ -18,6 +21,9 @@ long ip[5];
   int save=0;    /* argument for cls_rcv - unused */
   int nchars;
   char *ptr;
+  struct disk_pos_mon lclm;
+  long class, nrecs;
+  int i;
 
   out_recs=0;
   out_class=0;
@@ -32,61 +38,42 @@ long ip[5];
   skd_run("mk5cn",'w',ip);
   skd_par(ip);
   
-  if(ip[2]<0) return;
-
-  if ((nchars =
-       cls_rcv(ip[0],inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-    ip[3] = -401;
-    goto error;
-  }
-  ptr=strchr(inbuf,'=');
-  if(ptr == NULL) {
-    ip[2]=-402;
-  } else {
-    if(1!=sscanf(ptr+1,"%d",&ierr)){
-      ierr=-403;
-      goto error;
-    } else if(ierr != 0) {
-      logita(NULL,-900-ierr,"m5","  ");
-      ierr=-410;
-      goto error;
-    } else {
-      ptr=strchr(inbuf,':');
-      if(ptr==NULL) {
-	ierr=-404;
-	goto error;
-      }
-      ptr=strtok(ptr+1," ");
-      icount=0;
-      while (ptr!=NULL && strcmp(ptr,";")!=0 && icount <2) {
-	if (strcmp(ptr,":")!=0 && icount==0) {
-	  icount++;
-	  if(icount==1)
-	    if(1!=sscanf(ptr,"%lf",&pos)) {
-	      ierr=-405;
-	      goto error;
-	    }
-	}
-	ptr=strtok(NULL," ");
-      }
+  if(ip[2]<0) {
+    if(ip[0]!=0) {
+      cls_clr(ip[0]);
+      ip[0]=ip[1]=0;
     }
-    if(icount!=1)  {
-      ierr=-406;
-      goto error;
-    }
+    return -1;
   }
 
-  pos-=1e6;
+  class=ip[0];
+  nrecs=ip[1];
+
+  for (i=0;i<nrecs;i++) {
+    char *ptr;
+    if ((nchars =
+	 cls_rcv(class,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+      ip[3] = -401;
+      goto error;
+    }
+    if(i==0)
+      if(0!=m5_2_disk_pos(inbuf,&lclm,ip)) {
+	cls_clr(class);
+	return -1;
+      }
+  }
+
+  pos=lclm.record.record-1e6;
 
   if(pos<0) {
-    ierr=-412;
+    ierr=-402;
     goto error;
   }
 
   out_recs=0;
   out_class=0;
     
-  sprintf(outbuf,"play off %16.0lf\n",pos);
+  sprintf(outbuf,"play = off : %16.0lf\n",pos);
   cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
   out_recs++;
   
@@ -96,27 +83,16 @@ long ip[5];
   skd_run("mk5cn",'w',ip);
   skd_par(ip);
   
-  if(ip[2]<0) return;
-
-  if ((nchars =
-       cls_rcv(ip[0],inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-    ip[3] = -407;
-    goto error;
-  }
-  ptr=strchr(inbuf,'=');
-  if(ptr == NULL) {
-    ip[2]=-408;
-    goto error;
-  } else {
-    if(1!=sscanf(ptr+1,"%d",&ierr)){
-      ierr=-409;
-      goto error;
-    } else if(ierr != 0) {
-      logita(NULL,-900-ierr,"m5","  ");
-      ierr=-411;
-      goto error;
+  if(ip[2]<0) {
+    if(ip[0]!=0) {
+      cls_clr(ip[0]);
+      ip[0]=ip[1]=0;
     }
+    return -1;
   }
+
+  cls_clr(ip[0]);
+  ip[0]=ip[1]=0;
   ip[0]=ip[1]=ip[2]=0;
   return 0;
 
@@ -126,5 +102,5 @@ long ip[5];
     ip[1]=0;
     ip[2]=ierr;
     memcpy(ip+3,"5d",2);
-    return ierr;
+    return -1;
 }
