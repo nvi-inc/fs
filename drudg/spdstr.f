@@ -23,7 +23,7 @@ C Local
       integer ichmv_ch
 
 C INITIALIZED:
-      data maxspd/10/
+      data maxspd/12/
       data sp/0,3.375,7.785,16.875,33.75,67.5,80.0,133.33,135.0,
      .        160.0,266.66,270.0/
       data csp/'0','3.375','7.785','16.875','33.75','67.5','80',
