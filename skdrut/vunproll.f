@@ -12,7 +12,7 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C  History:
-C 961020 nrv New. Copied from vunptrk
+C 961020 nrv New. 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -30,7 +30,7 @@ C
 C  LOCAL:
       character*128 cout
       integer i,it(max_track),in,iroll,maxroll,j,nn,ifield
-      integer fvex_len,fvex_int,fvex_field,fget_mode_lowl,ptr_ch
+      integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
 C  Initialize maxroll here. When more complex patterns are handled,
 C  this should be in the parameters file.
@@ -38,24 +38,26 @@ C  this should be in the parameters file.
 
 C  1. Roll on or off -- not there in version 1.3
 
-C     ierr = 1
-C     croll = '    '
-C     iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
-C    .ptr_ch('roll'//char(0)),
-C    .ptr_ch('ROLL'//char(0)),ivexnum)
-C     if (iret.ne.0) return
-C     if (fvex_len(cout).gt.4) then
-C       ierr = -1
-C       write(lu,'("VUNPROLL01 - Roll on/off statement too long.")')
-C     else
-C       croll = cout(1:fvex_len(cout))
-C     endif
-C     if (croll.eq.'off') return ! no more to do
+      ierr = 1
+      croll = '    '
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
+     .ptr_ch('roll'//char(0)),
+     .ptr_ch('ROLL'//char(0)),ivexnum)
+      if (iret.ne.0) return
+      iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get roll
+      if (fvex_len(cout).gt.4) then
+        ierr = -1
+        write(lu,'("VUNPROLL01 - Roll must be on or off.")')
+      else
+        croll = cout(1:fvex_len(cout))
+      endif
+      if (ierr.gt.0) ierr=0
+      if (croll.eq.'off') return ! no more to do
 C
 C  2. Roll def statements. "roll" statements in version 1.3
 C
       ierr = 2
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('roll'//char(0)),
      .ptr_ch('ROLL'//char(0)),ivexnum)
       in=0
@@ -128,7 +130,7 @@ C       Check for consistent fanout
         endif ! save first/check subsequent defs
         
 C       Get next roll def statement
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('roll'//char(0)),
      .  ptr_ch('ROLL'//char(0)),0)
       enddo ! get all roll defs

@@ -61,7 +61,7 @@ C        NLOOPS - Number of iterations on slewing time
 C        AZ1,AZ2,LWR1,LWR2
 C               - current,new values of az,wrap
       real*4 cablw ! function
-      real*8 rme
+      real rme
 C
 C  History
 C      DATE   WHO    CHANGES

@@ -1,7 +1,8 @@
       subroutine ckiau(liau,lcom,rarad,decrad,lu)
 
 C    CKIAU generates the IAU name and checks it against
-C    the name of the source.
+C    the name of the source. Only the first 8 char are
+C    checked.
 
       include '../skdrincl/skparm.ftni'
 

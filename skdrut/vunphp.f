@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960520 nrv New.
+C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -39,14 +40,14 @@ C  LOCAL:
       character*12 cx
       integer*2 ldum(6)
       integer il,ih,i,j
-      integer fvex_len,fvex_double,fvex_int,fvex_field,fget_mode_lowl,
+      integer fvex_len,fvex_double,fvex_int,fvex_field,fget_all_lowl,
      .fvex_units,ias2b,ptr_ch
 C
 C
 C  1. Headstack positions
 C
       ierr = 1
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('headstack_pos'//char(0)),
      .ptr_ch('HEAD_POS'//char(0)),ivexnum)
       ih=0
@@ -87,7 +88,7 @@ C  1.2 List of head positions
           i=i+1
         enddo
 
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('headstack_pos'//char(0)),
      .  ptr_ch('HEAD_POS'//char(0)),0)
       enddo
@@ -96,7 +97,7 @@ C  1.2 List of head positions
 C  2. Pass order list
 C
       ierr = 2
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('pass_order'//char(0)),
      .ptr_ch('PASS_ORDER'//char(0)),ivexnum)
       if (iret.ne.0) return
