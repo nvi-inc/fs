@@ -186,6 +186,7 @@ form         qkr 6401 01 207F
 newtape      qkr 6501 01 7F20
 label        qkr 6601 01 7F20
 oldtape      qkr 6701 01 7F20
+rec_mode     qkr 6801 01 7F20
 * boss internal
 cont         *xx 0000 02 7F7F
 halt         *xx 0000 03 7F7F

@@ -1145,6 +1145,12 @@ Channel must be 1-16 for K-4 type 1 VCs and 1-8 for type 2 VCs.
 KL -202
 Frequency must be 99.99-511.99 for K-4 type 1 VCs and 499.99-999.99 for type 2.
 ""
+KM -101
+Record mode bandwidth must be one of 64, 128, or 256.
+""
+KM -301
+Record mode bandwidth can only be set for K4 type 2 recorder (DFC2100).
+""
 KR -101
 No default for action.
 ""
