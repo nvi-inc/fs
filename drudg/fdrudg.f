@@ -197,6 +197,10 @@ C   Check for non-interactive mode.
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
+          if (kskdfile.and.kdrgfile) then ! reinitialize
+            kskdfile=.false.
+            kdrgfile=.false.
+           endif
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
      .  '(NRV 960815)')
