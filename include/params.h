@@ -6,10 +6,11 @@
 #endif
 
 #define WORD_BIT    32
+#define PAGE_SIZE   4096
 
 #define SHM_KEY     1
-#define SHM_SIZE    12288       /* should be a multiple of 4096 */
-#define C_RES       6144        /* reserves bytes for Fscom     */
+#define C_RES       6*PAGE_SIZE /* reserves bytes for Fscom     */
+#define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_KEY     1
 #define CLS_SIZE    20480
@@ -61,13 +62,19 @@
 #define MAX_HOR   30
 #define MAX_RXCODES   40
 
+/* rack/drive */
+
+#define VLBA4       0x10
 #define S2          0x08
 #define MK4         0x04
 #define VLBA        0x02
 #define MK3         0x01
 
-#define VLBAG       0x10
-#define VLBA2       0x20
+/* rack/drive _types */
+
+#define VLBAG       0x100
+#define VLBA2       0x200
+#define MK3B        0x400
 
 #define FS_ROOT     "/usr2"
 
