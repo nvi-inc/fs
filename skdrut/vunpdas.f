@@ -21,6 +21,7 @@ C 961022 nrv Change MARK to Mark if found in rack and recorder names.
 C 970114 nrv Add "_type" to rack and recorder Vex names.
 C 970123 nrv Move initialization to start.
 C 970406 nrv Make ctapemo always upper case
+C 971006 nrv Add "VLBA4" rec and rack types.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -81,7 +82,8 @@ C
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         IF  (NCH.GT.8.or.NCH.le.0) THEN  !
-          write(lu,'("VUNPDAS01 - Recorder type name too long")')
+          write(lu,'("VUNPDAS01 - Recorder type name too long: ",a)') 
+     .    cout(1:nch)
           ierr=-1
         else
           IDUMY = ICHMV_ch(lrec,1,cout(1:nch))
@@ -92,7 +94,8 @@ C
           if (ichcm_ch(lrec,1,'S2').ne.0.and.
      .        ichcm_ch(lrec,1,'VLBA').ne.0.and.
      .        ichcm_ch(lrec,1,'Mark3A').ne.0.and.
-     .        ichcm_ch(lrec,1,'Mark4').ne.0) then
+     .        ichcm_ch(lrec,1,'Mark4').ne.0.and.
+     .        ichcm_ch(lrec,1,'VLBA4').ne.0) then
             write(lu,'("VUNPDAS22 - Unrecognized recorder type: ",a)')
      .      cout(1:nch)
           endif
@@ -111,7 +114,8 @@ C
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         IF  (NCH.GT.8.or.NCH.le.0) THEN  !
-          write(lu,'("VUNPDAS02 - Rack type name too long")')
+          write(lu,'("VUNPDAS02 - Rack type name too long: ",a)') 
+     .    cout(1:nch)
           ierr=-2
         else
           IDUMY = ICHMV_ch(lrack,1,cout(1:nch))
@@ -121,6 +125,7 @@ C
      .    IDUMY = ICHMV_ch(lrack,1,'Mark4')
           if (ichcm_ch(lrack,1,'VLBA').ne.0.and.
      .        ichcm_ch(lrack,1,'VLBAG').ne.0.and.
+     .        ichcm_ch(lrack,1,'VLBA4').ne.0.and.
      .        ichcm_ch(lrack,1,'Mark3A').ne.0.and.
      .        ichcm_ch(lrack,1,'Mark4').ne.0 .and.
      .        ichcm_ch(lrack,1,'NONE').ne.0 .and.
