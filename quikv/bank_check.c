@@ -71,19 +71,19 @@ parse:
 
 	  if(ip[2]<0) return;
 	  bank_inc_check(ip);
+	  {
+	    long ip[5];
+	    char mess[ ]="change_pack";
+	    
+	    cls_snd( &(shm_addr->iclopr), mess, strlen(mess) , 0, 0);
+	    skd_run("boss ",'n',ip);
+	  }
 	  rte_rawt(&after);
 	  isleep=400-(after-before)+1;
 	  if(isleep <= 401)
 	    rte_sleep(isleep);
 	}
 
-	{
-	  long ip[5];
-	  char mess[ ]="change_pack";
-
-	  cls_snd( &(shm_addr->iclopr), mess, strlen(mess) , 0, 0);
-	  skd_run("boss ",'n',ip);
-	}
       }
       ilast=0;                                      /* last argv examined */
       out_recs=0;
