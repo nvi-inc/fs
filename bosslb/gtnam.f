@@ -61,25 +61,29 @@ C
       call fs_get_rack(rack)
       call fs_get_drive(drive)
       do 290 i=1,nnames
-        if (ichcm(lnames(1,i),1,lmatch,1,12).ne.0) goto 290
-        index=i
-        if (and(lnames(11,index),rack) .eq.0.or.
-     .      and(lnames(12,index),drive).eq.0) then
-          do j=i+1,nnames
-            if(ichcm(lnames(1,j),1,lmatch,1,12).eq.0.and.
-     .         and(lnames(11,j),rack).ne.0.and.
-     .         and(lnames(12,j),drive).ne.0) then
-              index=j
-              goto 280
+         if (ichcm(lnames(1,i),1,lmatch,1,12).ne.0) goto 290
+         index=i
+         if ((and(lnames(11,i),rack ).eq.0.and.lnames(11,i).ne.15)
+     &        .or.
+     &        (and(lnames(12,i),drive).eq.0
+     &        .and.lnames(12,i).ne.15)) then
+            do j=i+1,nnames
+               if(ichcm(lnames(1,j),1,lmatch,1,12).eq.0.and.
+     &              (and(lnames(11,j),rack).ne.0
+     &         .or. lnames(11,j).eq.15)
+     &         .and.(and(lnames(12,j),drive).ne.0
+     &         .or. lnames(12,j).eq.15) ) then
+               index=j
+               goto 280
             endif
-          enddo
-          ierr=-13
-          return
-        endif
-280     continue
-        call char2hol('F',itype,2,2)
-        return
-290   continue
+         enddo
+         ierr=-13
+         return
+      endif
+ 280  continue
+      call char2hol('F',itype,2,2)
+      return
+ 290  continue
 C
 C     3.  No match found in first list.
 C         Search the first procedure list.
