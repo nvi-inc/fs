@@ -219,6 +219,7 @@ C 020508 nrv Add TPI daemon commands.
 C 020510 nrv Add tpi sideband to VC commands.
 C 020514 nrv Check head 2 for BBC connections.
 C 020515 nrv Correct the placement of TPI daemon commands.
+C 020522 nrv Correct the reading of prompt for TPI.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -250,7 +251,7 @@ C     integer*2 lspd(4)
 C     integer nspd
         CHARACTER UPPER
         CHARACTER*4 STAT
-        CHARACTER*4 RESPONSE
+        CHARACTER*128 RESPONSE
         integer*2 LNAMEP(6)
         logical ex
         logical kdone
@@ -263,7 +264,7 @@ C     integer nspd
       real rpc ! pc freq
       real samptest
       integer Z8000,Z4000,Z100
-      integer igig,i1,i2,i3,i4,nco,ix
+      integer igig,i1,i2,i3,i4,nco,ix,il,itpid_period_use
       integer ir2as,ib2as,mcoma,trimlen,jchar,ichmv ! functions
       integer iflch,ichcm_ch,ichmv_ch,iaddtr,iaddpc,iaddk4
       integer mhead,head2active ,ig4,ig5,ig6,ig7 !debug
@@ -343,18 +344,26 @@ C
       end if
 C
       if (tpid_prompt.eq."YES") then ! get TPID period
-9932    kdone = .false.
+        kdone = .false.
+        itpid_period_use = itpid_period
         do while (.not.kdone)
-          write(luscn,9132) itpid_period
-9132      format(' Enter TPI daemon period in centiseconds (default is',
-     .    i5,'):  ',$)
-          read(luusr,'(i10)',ERR=9932) ival
-          if (ival.ge.0) then
-            itpid_period = ival
+9932      write(luscn,9132) itpid_period
+9132      format(' Enter TPI period in centiseconds (default is',
+     .    i5,', 0 for OFF):  ',$)
+          read(luusr,'(A)') response
+          il=trimlen(response)
+          if (il.eq.0) then ! default
+            itpid_period_use = itpid_period
             kdone = .true.
-          else 
-            write(luscn,'("Invalid period, must be >0.")')
-          endif
+          else ! decode it
+            read(response,'(i10)',ERR=9932) ival
+            if (ival.ge.0) then
+              itpid_period_use = ival
+              kdone = .true.
+            else 
+              write(luscn,'("Invalid period, must be >=0.")')
+            endif
+          endif ! default/decode
         enddo
       endif ! get TPID period
 
@@ -1094,7 +1103,7 @@ C  TPICD=no,period
           if (km3rack.or.km4rack.or.kvrack.or.kv4rack) then
             call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(IBUF,1,'tpicd=no,')
-            nch = nch + ib2as(itpid_period,ibuf,nch,Z8000+10)
+            nch = nch + ib2as(itpid_period_use,ibuf,nch,Z8000+10)
 C temporarily remove reading and writing out parameter.
 C           ic = trimlen(tpid_parm)
 C           if (ic.gt.0) then
