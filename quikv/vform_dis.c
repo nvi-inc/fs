@@ -57,23 +57,12 @@ long ip[5];
          get_res(&response,&buff_out); mc8Fvform(&lclc,response.data);
          get_res(&response,&buff_out); mc90vform(&lclc,response.data);
          get_res(&response,&buff_out); mc91vform(&lclc,response.data);
+         get_res(&response,&buff_out); mc92vform(&lclc,response.data);
+         get_res(&response,&buff_out); mc93vform(&lclc,response.data);
          get_res(&response,&buff_out); mc99vform(&lclc,response.data);
          get_res(&response,&buff_out); mc9Avform(&lclc,response.data);
          get_res(&response,&buff_out); mcADvform(&lclc,response.data);
 
-         goto skip_aux;
-         for (i=0;i<28;i++) {                   /* 28 tracks of aux data */
-           get_res(&response,&buff_out);
-           get_res(&response,&buff_out);
-
-           for (j=0;j<4;j++) {                  /* 3 words per track */
-              get_res(&response,&buff_out);
-              aux_data[i][j]=response.data;
-           }
-         }
-         mcD6vform(&lclc,aux_data);
-
-skip_aux:
          if(response.state == -1) {
             clr_res(&buff_out);
             ierr=-401;
