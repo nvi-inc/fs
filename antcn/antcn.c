@@ -97,6 +97,9 @@ Continue:
   class = ip[1];
   nrec = ip[2];
 
+  nrecr = 0;
+  clasr = 0;
+
   if (imode < MINMODE || imode > MAXMODE) {
     ierr = -1;
     goto End;
@@ -137,8 +140,6 @@ Continue:
     case 4:            /* direct antenna= command */
       if (class == 0)
         goto End;
-      nrecr = 0;
-      clasr = 0;
       for (i=0; i<nrec; i++) {
         strcpy(buf2,"Received message for antenna: ");
         nchar = cls_rcv(class,buf,sizeof(buf),&r1,&r2,dum,dum);
