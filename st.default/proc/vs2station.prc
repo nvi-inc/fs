@@ -1,8 +1,9 @@
 define  ifdas         00000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
-lo=8080.00,2020.00
-upconv=479.9,479.9
+lo=
+lo=loa,7600.10,usb,rcp,1
+lo=lob,1540.10,usb,rcp,1
 enddef
 define  as4c2         00000000000
 form=c,8.000
@@ -293,16 +294,6 @@ caltempa=20.8
 caltempb=21.4
 caltempc=20.8
 enddef
-define  check2a1      00000000000
-check2c1
-enddef
-define  check2a2      00000000000
-check2c2
-enddef
-define  check2c1      00000000000
-enddef
-define  check2c2      00000000000
-enddef
 define  dat           00000000000
 bbcsx2
 ifdsx
@@ -325,14 +316,17 @@ enddef
 define  ifdsx         00000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
-lo=8080.00,2020.00
-upconv=479.9,479.9
+lo=
+lo=loa,7600.10,usb,rcp,1
+lo=lob,1540.10,usb,rcp,1
 enddef
 define  ifdwb         00000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
-lo=8080.00,2020.00,8080.0
-upconv=479.9,479.9,0
+lo=
+lo=loa,7600.10,usb,rcp,1
+lo=lob,1540.10,usb,rcp,1
+lo=loc,8080.00,usb,rcp,1
 enddef
 define  initi         00000000000
 "welcome to the pc field system
