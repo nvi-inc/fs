@@ -19,6 +19,8 @@ C 960124 nrv Missing SB argument in call.
 C 960121 nrv Remove switching and channel from call.
 C 960228 nrv Change iv to an array, add nv as count. Decode patching
 C            from PC-SCHED lines and use as BBC/VC assignments
+C 970117 nrv Allow IF3O and IF3I (out and in). If "N" is encountered,
+C            assume it's I, i.e. "in".
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -84,17 +86,19 @@ C
       IDUMY = ICHMV(LSUBGR,1,IBUF,IC1,NCH)
 C
 C     IF distributor channel and input
-C     May be: IFA,IFB,IFC,IFD or IF1N,IF2N,IF1A,IF2A,IF3A
-C         oo A,B,C,D or 1N,2N,1A,2A,3N
+C     May be: IFA,IFB,IFC,IFD or IF1N,IF2N,IF1A,IF2A,IF3O,IF3I
+C         or A,B,C,D or 1N,2N,1A,2A,3O,3I
+C         Interpret 3N as 3I 
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       i=ias2b(ibuf,ic1,1) ! decode first character
       if (ichcm_ch(ibuf,ic1,'IF').eq.0) then ! IFnx
         I = IAS2B(IBUF,IC1+2,1)
-        if (i.gt.0) then ! valid Mark III channel
+        if (i.gt.0) then ! valid Mark III channel: 1, 2, or 3
           L = JCHAR(IBUF,IC1+3)
           IF  ((I.NE.1.AND.I.NE.2.and.i.ne.3).OR.
-     .    (L.NE.OCAPA.AND.L.NE.OCAPN)) THEN
+     .    (L.NE.OCAPA.AND.L.NE.OCAPN.and.
+     .     l.ne.ocapo.and.l.ne.ocapi)) THEN ! suffix A,N,O,I
             IERR = -104
             RETURN
           END IF  !
@@ -108,10 +112,10 @@ C
           endif
           IDUMY = ICHMV(LIFINP,1,ibuf,ic1+2,2)
         endif
-      else if (i.ge.1.and.i.le.3) then ! IF1,2,3
+      else if (i.ge.1.and.i.le.3) then ! 1,2,3
         l=jchar(ibuf,ic1+1)
         IF  ((I.NE.1.AND.I.NE.2.and.i.ne.3).OR.
-     .  (L.NE.OCAPA.AND.L.NE.OCAPN)) THEN
+     .  (L.NE.OCAPA.AND.L.NE.OCAPN.and.l.ne.ocapi.and.l.ne.ocapo)) THEN
           IERR = -104
           RETURN
         END IF  !
