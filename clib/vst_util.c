@@ -43,9 +43,9 @@ static char *rec_key[ ]={"off","on"};
 #define DIR_KEY sizeof(dir_key)/sizeof( char *)
 #define REC_KEY sizeof(rec_key)/sizeof( char *)
 
-int vst_dec(lcl,count,ptr)
+int vst_dec(lcl,count,ptr,indx)
 struct vst_cmd *lcl;
-int *count;
+int *count,indx;
 char *ptr;
 {
     int ierr, arg_key();
@@ -74,7 +74,7 @@ char *ptr;
 	if (ierr==0) {
 	  lcl->cips=sp3_key[lcl->speed];
 	  lcl->speed=-3;
-	} else if (ierr == -100 && shm_addr->bit_density > 0 &&
+	} else if (ierr == -100 && shm_addr->bit_density[indx] > 0 &&
 		   ((shm_addr->equip.rack == VLBA && 
 		     shm_addr->vform.tape_clock > 0) ||
 		    (shm_addr->equip.rack == MK3 &&
@@ -93,21 +93,23 @@ char *ptr;
 	    idum=shm_addr->iratfm;
 	    if(idum=0)
 	      idum=8;
-	    lcl->cips=100*((9e6/(1<<8-idum))/shm_addr->bit_density);
+	    lcl->cips=100*((9e6/(1<<8-idum))/shm_addr->bit_density[indx]);
 	  } else if (shm_addr->equip.rack == VLBA)
 	    if (shm_addr->vform.tape_clock<8)
 	      lcl->cips=100*((9.072e6/(1<<(0x7-shm_addr->vform.tape_clock)))/
-			     shm_addr->bit_density); 
+			     shm_addr->bit_density[indx]); 
 	    else
 	      lcl->cips=100*((9e6/(1<<(0xf-shm_addr->vform.tape_clock)))/
-			     shm_addr->bit_density);
+			     shm_addr->bit_density[indx]);
 	  else if(shm_addr->equip.rack == MK4 ||
 		  shm_addr->equip.rack == VLBA4 ||
 		  shm_addr->equip.rack == K4MK4)
 	    lcl->cips=100*((144e6/
 			    (1<<(8-shm_addr->form4.rate+shm_addr->form4.fan)))/
-			   shm_addr->bit_density);
+			   shm_addr->bit_density[indx]);
 	}
+	if(lcl->cips <500 && shm_addr->equip.drive[indx] == VLBA &&
+	   shm_addr->equip.drive_type[indx] == VLBA2) lcl->cips=0;
 	break;
       case 3:
         ierr=arg_key(ptr,rec_key,REC_KEY,&lcl->rec,1,TRUE);
