@@ -15,12 +15,28 @@ long ip[5];
       struct req_buf buffer;
       struct req_rec request;
       struct vst_cmd lcl;
+      struct venable_cmd lclve;
       int ichold;
+
+      if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ) {
+	setMK4FMrec(0,ip);
+	if(ip[2]<0)
+	  return;
+      }
 
       ichold = -99;
 
       ini_req(&buffer);                      /* format the buffer */
       memcpy(request.device,"rc",2);
+
+      request.type=0;
+      memcpy(&lclve,&shm_addr->venable,sizeof(lclve));
+      lclve.general=0;                  /* turn off record */
+      shm_addr->venable.general=0;
+      venable81mc(&request.data,&lclve);
+      request.addr=0x81;
+      add_req(&buffer,&request);
+
       request.type=0;
       request.addr=0xb0; request.data=0x01  ; add_req(&buffer,&request);
       lcl.cips=0;
