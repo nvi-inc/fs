@@ -1698,3 +1698,77 @@ Version 9.3.0 961031
            FORM command for mode E with Mark IV formatter indicates group.
 
 Version 9.3.1 961105
+
+961105 NRV drudg/procs.f
+           FORM command for modes B and C with Mark IV formatter indicates
+           subpass.
+
+961106 WEH bosslb/kstak.f
+           correct incorrect detection of stack non-empty
+
+961107 NRV drudg/ckobs.f
+           If a station is not in the observation, don't generate an error.
+
+961107 NRV skdrut/gnpas.f
+           Skip over consistency checks if the mode is undefined for a
+               station.
+
+961107 WEH boss/bwork.f
+           fix date command log entry
+
+961107 WEH quikr/repro4.f
+           default in read to location 1
+
+961107 WEH boss/stat.f
+           fixed formating problems
+
+961107 WEH quikr/tppos.f
+           fixed to handle values 42 and 44 modulo 256
+
+961108 NRV drudg/lstsum.f
+           Undo the final FASTR spindown so the last footage is correct.
+
+961108 WEH newlb/ftn_purge.c
+           don't set permission on renamed files in case we don't own them
+
+961108 WEH clib/brk_util.c
+           fix declaration of mtype()
+
+961108 WEH clib/prog_exec.c
+           fflush( stderr) if can't exec in child
+
+961108 WEH boss/lists.f
+           fixed off by one bug in line listings
+
+961108 WEH fmset/set4time.c
+           fixed '=' option to not delete any zeros
+
+961108 WEH matcn/iat.f
+           increased to three retries on Mark IV formatter errors
+           log all messages that generated time-outs from M4 FM
+           log all error 7 messages from M4 FM
+
+961108 WEH quikr/party4.f
+           add gX, mX, vX options correct to handle track 0 
+
+961108 WEH quikr/mezhr.f
+           correct to handle track 0 for M4 recorder
+           check only 8 AUX characters for M4 rack
+
+961109 WEH vex/vex_util.c
+           prevent use of NULL pointer when start position in "station"
+             is null
+
+961110 WEH fmset/set4time.c
+           fixed '=' option, again, to delete leading zeros only
+
+961111 WEH clib/form4_util.c
+           avoid segmentation faults if bad /SHO response
+           handle 1:1 fan-out bit setting for "m" mode
+
+961111 WEH quikv/form4_dis.c
+           initialize local code to illegal in case /SHO get garbage
+
+961111 WEH matcn/iat.f
+           change evalution of logic for if statement for time-out retry
+           for M4 formatter

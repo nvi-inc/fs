@@ -6,7 +6,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18,4
+repro=byp,9,21,3
 decode=a,crc
 decode
 enddef
@@ -18,7 +18,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -30,7 +30,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -42,7 +42,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18
+repro=byp,9,21
 decode=a,crc
 decode
 enddef
@@ -54,7 +54,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -112,7 +112,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -124,7 +124,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -136,7 +136,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -161,15 +161,14 @@ define  check2c1      00000000000
 check=*,-tp,-hd
 enable=
 decode=a,crc,byte
-parity=,,ab,on,g1,g3
+parity=,,ab,on,m0,m2
 fastr=15s
 !+6s
 !*
 st=for,135,off
 !+4s
-repro=raw,1,3
+repro=raw,4,6
 parity
-repro=byp,0,0
 !*+29.20s
 et
 !+3s
@@ -179,15 +178,14 @@ define  check2c2      00000000000
 check=*,-tp,-hd
 enable=
 decode=a,crc,byte
-parity=,,ab,on,g2,g4
+parity=,,ab,on,m1,m3
 fastf=15s
 !+6s
 !*
 st=rev,135,off
 !+4s
-repro=raw,2,4
+repro=raw,5,7
 parity
-repro=byp,0,0
 !*+29.20s
 et
 !+3s
@@ -415,7 +413,7 @@ dat
 et
 enable=
 tape=alarm
-repro=byp,1,3
+repro=byp,4,6
 enddef
 define  sfastf        00000000000
 sff
@@ -435,7 +433,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -447,7 +445,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -459,7 +457,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18
+repro=byp,9,21
 decode=a,crc
 decode
 enddef
@@ -471,7 +469,7 @@ tapeforma
 pass=$,same,none
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -483,7 +481,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -495,7 +493,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18,4
+repro=byp,9,21,3
 decode=a,crc
 decode
 enddef
@@ -654,7 +652,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17
+repro=byp,8,20
 decode=a,crc
 decode
 enddef
@@ -666,7 +664,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18
+repro=byp,9,21
 decode=a,crc
 decode
 enddef
@@ -678,7 +676,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,5,17,4
+repro=byp,8,20,3
 decode=a,crc
 decode
 enddef
@@ -690,7 +688,7 @@ tapeformc
 pass=$,same
 enable=s1
 tape=low
-repro=byp,6,18,4
+repro=byp,9,21,3
 decode=a,crc
 decode
 enddef
