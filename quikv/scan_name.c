@@ -90,7 +90,7 @@ long ip[5];                           /* ipc parameters */
 	
 /* all parameters parsed okay, update common */
       
-      ip[0]=ip[1]=ierr=0;
+      ip[0]=ip[1]=ip[2]=ierr=0;
       return;
 
 error:

@@ -408,6 +408,7 @@ C
 C     5.1 This is the QUIKR/STQKR processing section.
 C
       else if (mbranch.eq.1) then
+         ip(3)=0
         if (ichcm_ch(lnames(7,index),1,'st').eq.0) then
           call run_prog('stqkr','wait',iclass,lnames(9,index),ip(3),
      .                   ip(4),ip(5))
