@@ -28,6 +28,7 @@ C                   EARLIEST TIME FAR IN FUTURE FOR TESTING
       itnow(3)=it(2)*100+it(1)
 c not Y2038 compliant
       call fc_rte2secs(it,secsnow)
+      if(secsnow.lt.0) call logit7ci(0,0,0,1,-253,'bo',0)
       ihsnow=it(1)
 C 
       do 100 i=1,ntscb
@@ -83,16 +84,24 @@ C     WE HAVE FOUND SOMETHING TO DO!
       it(1)=mod(itscb(3,itmin),100)
 c not Y2038 compliant
       call fc_rte2secs(it,secsmin)
+      if(secsmin.lt.0) call logit7ci(0,0,0,1,-254,'bo',0)
       ihsmin=it(1)
       do i=1,9
         it(i) = itscb(i,itmin)
       enddo
 c not Y2038 compliant
       delta=(secsmin-secsnow)*100+ihsmin-ihsnow
-      if (delta.gt.2) return
-      if (delta.gt.0) then
-        call susp(1,1)
-        goto 1
+c
+c do comparsions on secsmin and seconds first to rule out precision
+c problems for large differences
+c
+      if(secsmin.ge.secsnow+2) return
+      if(secsmin.ge.secsnow) then 
+         if (delta.gt.2) return
+         if (delta.gt.0) then
+            call susp(1,1)
+            goto 1
+         endif
       endif
 C                   IF EARLIEST JOB IS IN FUTURE, HAVE BOSS SUSPEND TILL THEN
 C
