@@ -28,6 +28,7 @@ main()
 
   initscr(); /* the first routine called should almost always be initscr */
   signal(SIGINT, die);
+  cbreak();
   noecho ();
   nodelay(stdscr, TRUE);
 
