@@ -16,7 +16,7 @@ long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
       char *ptr;
-      struct k4rec_mode_cmd lcl;
+      struct k4rec_mode_cmd lclc;
       int ivc;
 
       char *arg_next();
@@ -52,25 +52,30 @@ long ip[5];                           /* ipc parameters */
 
 parse:
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->k4rec_mode,sizeof(lcl));
+      memcpy(&lclc,&shm_addr->k4rec_mode,sizeof(lclc));
 
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=k4rec_mode_dec(&lcl,&count, ptr);
+        ierr=k4rec_mode_dec(&lclc,&count, ptr);
         if(ierr !=0 ) goto error;
       }
 
+      /* removed for now WEH 020417
+      if (!memcmp(&shm_addr->k4rec_mode,&lclc,sizeof(lclc))) {
+        return;
+      }
+      */
 /* all parameters parsed okay, update common */
 
       ichold=shm_addr->check.k4rec.check;
       shm_addr->check.k4rec.check=0;
 
-      memcpy(&shm_addr->k4rec_mode,&lcl,sizeof(lcl));
-      
+      memcpy(&shm_addr->k4rec_mode,&lclc,sizeof(lclc));
+
 /* format buffers for k4con */
 
-      k4rec_mode_req_c(ip,&lcl);
+      k4rec_mode_req_c(ip,&lclc);
 
 k4con:
       skd_run("ibcon",'w',ip);
