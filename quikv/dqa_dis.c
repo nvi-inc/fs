@@ -25,6 +25,7 @@ long ip[5];
       void get_res();
       char output[MAX_OUT];
       float rate;
+      int ivalue, ifm;
 
       ind=itask-1;
 
@@ -41,37 +42,61 @@ long ip[5];
 /* command parameters are stored in memory for this command */
 
          memcpy(&lclc,&shm_addr->dqa,sizeof(lclc)); 
-         if(shm_addr->vform.mode<4) {
-           lclm.a.bbc=itrk2bbc(shm_addr->vrepro.track[0],shm_addr->vform.mode);
-           lclm.b.bbc=itrk2bbc(shm_addr->vrepro.track[1],shm_addr->vform.mode);
-         } else {
-           lclm.a.bbc=itrk2bbc(shm_addr->vrepro.track[0],4);
-           lclm.b.bbc=itrk2bbc(shm_addr->vrepro.track[1],4);
-         }
-         lclm.a.track=shm_addr->vrepro.track[0];
-         lclm.b.track=shm_addr->vrepro.track[1];
+	 ivalue=shm_addr->vrepro.track[0];
+	 lclm.a.track=ivalue;
+	 if(ivalue <2)
+	   ivalue=shm_addr->systracks.track[ivalue];
+	 else if (ivalue > 33)
+	   ivalue=shm_addr->systracks.track[ivalue-32];
+	 if(ivalue <2 || ivalue > 33)
+	   ifm=-1;
+	 else if(ivalue%2==0)
+	   ifm=15+ivalue/2;
+	 else
+	   ifm=(ivalue-3)/2;
+	 if(ifm>0)
+	   lclm.a.bbc=shm_addr->vform.codes[ifm];
+	 else
+	   lclm.a.bbc=-1;
+
+	 ivalue=shm_addr->vrepro.track[1];
+	 lclm.b.track=ivalue;
+	 if(ivalue <2)
+	   ivalue=shm_addr->systracks.track[ivalue];
+	 else if (ivalue > 33)
+	   ivalue=shm_addr->systracks.track[ivalue-32];
+	 if(ivalue <2 || ivalue > 33)
+	   ifm=-1;
+	 else if(ivalue%2==0)
+	   ifm=15+ivalue/2;
+	 else
+	   ifm=(ivalue-3)/2;
+	 if(ifm>0)
+	   lclm.b.bbc=shm_addr->vform.codes[ifm];
+	 else
+	   lclm.b.bbc=-1;
 
          opn_res(&buffer,ip);
          get_res(&response, &buffer);
          get_res(&response, &buffer);        /* fetch index set responses */
          get_res(&response, &buffer);
          for (i=0;i<36;i++) {                /* array contents */
-            get_res(&response, &buffer); iarray[ i]=response.data;
-         }
+	   get_res(&response, &buffer); iarray[ i]=response.data;
+	 }
          mcCAdqa(&lclm,iarray);
          if(response.state == -1) {
-            clr_res(&buffer);
-            ierr=-401;
-            goto error;
+	   clr_res(&buffer);
+	   ierr=-401;
+	   goto error;
          }
          clr_res(&buffer);
-      }
-
-   /* format output buffer */
- 
+       }
+      
+      /* format output buffer */
+      
       strcpy(output,command->name);
       strcat(output,"/");
-
+      
       count=0;
       while( count>= 0) {
         if (count > 0) strcat(output,",");
