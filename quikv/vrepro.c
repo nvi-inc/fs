@@ -38,14 +38,27 @@ long ip[5];                           /* ipc parameters */
 
       if (command->equal != '=') {            /* read module */
          request.type=1;
+
+         request.addr=0x98; add_req(&buffer,&request);
+         request.addr=0x99; add_req(&buffer,&request);
+
          request.addr=0x90; add_req(&buffer,&request);
          request.addr=0x91; add_req(&buffer,&request);
+
+	 if(shm_addr->equip.drive == VLBA4) {
+	   request.addr=0x92; add_req(&buffer,&request);
+	   request.addr=0x93; add_req(&buffer,&request);
+	 }
 
          request.addr=0x94; add_req(&buffer,&request);
          request.addr=0x95; add_req(&buffer,&request);
 
-         request.addr=0x98; add_req(&buffer,&request);
-         request.addr=0x99; add_req(&buffer,&request);
+	 if(shm_addr->equip.drive == VLBA4) {
+	   request.addr=0x96; add_req(&buffer,&request);
+	   request.addr=0x97; add_req(&buffer,&request);
+	 }
+	 
+         request.addr=0xa8; add_req(&buffer,&request);
          goto mcbcn;
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
         else if (command->argv[1]==NULL) /* special cases */
@@ -82,17 +95,46 @@ parse:
 /* format buffers for mcbcn */
       
       request.type=0; 
-      request.addr=0x90;
-      vrepro90mc(&request.data,&lcl); add_req(&buffer,&request);
 
-      request.addr=0x91;
-      vrepro91mc(&request.data,&lcl); add_req(&buffer,&request);
+      if(lcl.head[0]==1) {
+	request.addr=0x90;
+	vrepro90mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
 
-      request.addr=0x94;
-      vrepro94mc(&request.data,&lcl); add_req(&buffer,&request);
+      if(lcl.head[0]==1) {
+	request.addr=0x91;
+	vrepro91mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
 
-      request.addr=0x95;
-      vrepro95mc(&request.data,&lcl); add_req(&buffer,&request);
+      if(lcl.head[0]==2) {
+	request.addr=0x92;
+	vrepro90mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
+	
+      if(lcl.head[0]==2) {
+	request.addr=0x93;
+	vrepro91mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
+
+      if(lcl.head[0]==1) {
+	request.addr=0x94;
+	vrepro94mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
+      
+      if(lcl.head[0]==1) {
+	request.addr=0x95;
+	vrepro95mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
+
+      if(lcl.head[0]==2) {
+	request.addr=0x96;
+	vrepro94mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
+      
+      if(lcl.head[0]==2) {
+	request.addr=0x97;
+	vrepro95mc(&request.data,&lcl); add_req(&buffer,&request);
+      }
 
       request.addr=0x98;
       vrepro98mc(&request.data,&lcl); add_req(&buffer,&request);
