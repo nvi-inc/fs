@@ -203,7 +203,7 @@ C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE
             modtbl(2,icount) = ias2b(ibuf,icomma+1,1)
          endif
          idum = ichmv(moddev(1,icount),1,ibuf,4,iend-3)
-         icomma = iscn_ch(ibuf,icomma+2,icomma+2,',') 
+         icomma = iscn_ch(ibuf,icomma+1,ireg,',') 
          if (icomma.eq.0) then
             modtbl(3,icount) = 12
          else
