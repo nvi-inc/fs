@@ -1,0 +1,18 @@
+               s2delays - read S2 delay measurements (S2 racks)
+
+            Syntax: s2delays 
+  
+            Response: s2delays/station,wavefront,gps 
+
+
+Settable Parameters: none
+
+Monitor-only Parameters:
+
+            station   : station delay measurement in milliseconds.
+            wavefront : wavefront delay measurement in milliseconds.
+            gps       : gps delay measurement in milliseconds.
+
+Comments: 
+
+If gps delay measurement is not available, err(-42) will be displayed.  

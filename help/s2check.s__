@@ -1,0 +1,17 @@
+              s2check - s2 setting to be checked by chekr (S2 racks)
+
+            Syntax:     s2check=lis
+
+            Response:   s2check/lis
+
+
+Settable parameters
+
+        list : The list of setting to be checked (agc, mode, encode fs and status).
+
+Monitor-only parameters: non
+
+Comments:
+
+Adding and deliting setting is done in a similar way than check
+

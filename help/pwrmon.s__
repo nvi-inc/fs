@@ -1,0 +1,24 @@
+               pwrmon - power monitor voltage measurements (S2 racks)
+
+            Syntax: pwrmon=module 
+            Syntax: pwrmon 
+
+            Response: pwrmon/module,+15Va,-15Va,+12Va,-12Va,+6Va,-6Va,+5Va,-5Va,+12Vd,-12Vd+5Vd,-5Vd 
+  
+            module : one of the das module (clk, ifx, bbc1, bbc2, bbc3, bbc4)
+  
+Settable Parameters: none
+
+  
+Monitor-only Parameters:
+
+            Voltages (a) analog, (d) digital. 
+Comments: 
+
+Not all voltages are valid for each module.
+Negative voltage are given as the absolute value.
+  
+  
+  
+  
+  
