@@ -35,7 +35,7 @@ C LOCAL:
       character    upper,lower
       integer cclose,inew,ivexnum,h2c,heqb,o36
       character*256 cbuf
-      integer i,j,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn,
+      integer i,j,k,l,ncs,ix2,ix,ixp,ic,ierr,iret,nobs_stn,
      .ilen,ich,ic1,ic2,idummy,inext,isatl,ifunc,nstnx
       real val
       integer ichmv_ch,ichmv,ichcm,jchar,igtst,ichcm_ch ! functions
@@ -132,6 +132,10 @@ C 970304 nrv Add "cproc" to RDCTL call, change "cdrudg" to "csnap"
 C 970304 nrv Add "coption" to RDCTL call.
 C 970310 nrv Check for prepend and station id when forming file names.
 C 970311 nrv Allow "./" to preceed schedule names.
+C 970317 nrv Remove reading ELEVATION lines, done in SREAD now.
+C 970328 nrv Add station_cat to RDCTL
+C 970603 nrv Add option for printing cover leter in .drg files.
+C 970610 nrv Always print out postscript file in non-interactive mode.
 C
 C Initialize some things.
 
@@ -148,6 +152,8 @@ C Initialize the number of labels and lines/label
       NLLAB=9
 C Initialize ps label file to new.
       inew=1
+C Initialize newpage for labels.
+      inewpage=0
 C Initialize printer width to default for each type
       IWIDTH=-1
 C Initialize font size to default for each type
@@ -184,7 +190,7 @@ c Initialize no. entries in lband (freqs.ftni)
 C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
-      call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
+      call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
      .           cdum,cdum,cdum,cdum,cdum,cdum,csked,csnap,cproc,
      .           ctmpnam,
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
@@ -252,7 +258,7 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 970402)')
+     .  '(NRV 970901)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -277,16 +283,27 @@ C       Opening message
               lskdfi = cbuf(1:nch) 
             endif
           endif ! path/no path
-          ix=index(lskdfi(2:),'.')
+          if (lskdfi(1:2).eq.'..') then
+            ix=index(lskdfi(3:),'.')
+          else if (lskdfi(1:1).eq.'.') then
+            ix=index(lskdfi(2:),'.')
+          else
+            ix=index(lskdfi(1:),'.')
+          endif
           l=trimlen(lskdfi)
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
               lskdfi=lskdfi(1:l)//'.skd'
               kskdfile = .true.
+              kdrg_infile=.false.
             else ! try .drg
               lskdfi=lskdfi(1:l)//'.drg'
               kdrgfile = .true.
+              kdrg_infile=.true.
             endif
+          else
+            if (lskdfi(ix:l).eq.'.skd') kdrg_infile=.false.
+            if (lskdfi(ix:l).eq.'.drg') kdrg_infile=.true.
           endif ! automatic extension
           ixp=1
           ix=1
@@ -323,47 +340,21 @@ C
 9301        format(' NOTE: This schedule was created using early '
      .      ,'start with EARLY = ',i3,' seconds.')
         endif
-          if (tape_motion_type(1)(1:5).ne.'start'.and.
+          if (tape_motion_type(1)(1:5).ne.'START'.and.
      .        tape_motion_type(1).ne.'') then
             nch=trimlen(tape_motion_type(1))
             if (nch.gt.0) then
             call c2upper(tape_motion_type(1)(1:nch),cdum)
             write(luscn,9302) (cdum(1:nch))
 9302        format(' NOTE: This schedule uses ',a,' tape motion.')
-            if (tape_motion_type(1)(1:5).eq.'start') 
+            if (tape_motion_type(1)(1:5).eq.'ADAPT') 
      .      write(luscn,9303) itgap(1)
 9303        format('       Gap time = ',i3,' seconds.')
             endif
           endif
-
+C     Reset for the next time through.
           kskdfile = .false.
           kdrgfile = .false.
-C
-C     Now go back and pick up station elevations.
-C
-        IF (IRECEL.EQ.-1.0) THEN   !no el limits
-          DO I=1,NSTATN
-      	STNELV(I)=0.0
-          ENDDO
-        ELSE                       !get el limits
-          IRECEL = IRECEL-1
-          call aposn(LU_INFILE,IERR,irecel)
-          CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-          DO WHILE (JCHAR(IBUF,1).NE.o36.AND.ILEN.NE.-1.AND.
-     .      ichcm_ch(IBUF,1,'ELEVATION ').EQ.0) !process ELEVATION lines
-      	ICH = 11
-      	CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-      	DO WHILE (IC1.GT.0) !scan this line
-      	  IDUMMY = ICHMV(L2,1,IBUF,IC1,1)
-      	  IDUMMY = IGTST(L2,ISTN)
-      	  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-      	  VAL = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
-      	  if (istn.gt.0) STNELV(ISTN) = VAL*PI/180.0
-      	  CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-      	ENDDO
-      	CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-          ENDDO
-        ENDIF
 C
 C     Derive number of passes for each code
         CALL GNPAS(luscn,ierr,iserr)
@@ -472,7 +463,7 @@ C         Convert stored code to string for comparing
         if (istn.eq.0) then ! get all in a loop
           do i=1,nstatn
             call vob1inp(ivexnum,i,luscn,ierr,iret,nobs_stn) 
-            if (ierr.ne.0) then
+            if (ierr.ne.0.or.iret.ne.0) then
               write(luscn,'("FDRUDG01 - Error from vob1inp=",
      .        i5,", iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
               call errormsg(iret,ierr,'SCHED',luscn)
@@ -517,10 +508,6 @@ C
      .    ' at ',4A2/)
 9067      FORMAT(/' Select DRUDG option for schedule ',A,
      .    ' (all stations)'/)
-C         if (ichcm_ch(lstrack(1,istn),1,'unknown ').eq.0.or.
-C    .        ichcm_ch(lstrec (1,istn),1,'unknown ').eq.0.or.
-C    .        ichcm_ch(lstrack(1,istn),1,'        ').eq.0.or.
-C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
           if (.not.kvex) then ! unknown equipment
             write(luscn,9070)
 9070        FORMAT(
@@ -551,13 +538,23 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .        '                                      ',
      .        ' 14 = Make hybrid procedures (.PRC)')
             endif
-            write(luscn,9370)
-9370        FORMAT(
-     .      '                                      ',
-     .      ' 15 = Make Mark IV procedures (.PRC)'/,
-     .      ' 0 = Done with DRUDG                  ',
-     .      ' 16 = Make 8-BBC procedures (.PRC)'/,
-     .      ' ? ',$)
+            if (kdrg_infile) then ! .drg file
+              write(luscn,9370)
+9370          FORMAT(
+     .        ' 17 = Print PI cover letter           ',
+     .        ' 15 = Make Mark IV procedures (.PRC)'/,
+     .        ' 0 = Done with DRUDG                  ',
+     .        ' 16 = Make 8-BBC procedures (.PRC)'/,
+     .        ' ? ',$)
+            else ! .skd file
+              write(luscn,9369)
+9369          FORMAT(
+     .        '                                      ',
+     .        ' 15 = Make Mark IV procedures (.PRC)'/,
+     .        ' 0 = Done with DRUDG                  ',
+     .        ' 16 = Make 8-BBC procedures (.PRC)'/,
+     .        ' ? ',$)
+            endif ! .drg/.skd
           else ! gotem in the vex file
             write(luscn,9073)
 9073        FORMAT('Supporting VEX 1.5'/
@@ -622,12 +619,12 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
         read(command,*,err=991) ifunc
       endif
 
-      if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
+      if ((ifunc.lt.0).or.(ifunc.gt.17.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and..not.kbatch) GOTO 700
-      if ((ifunc.lt.0).or.(ifunc.gt.16.and.ifunc.ne.31.and.ifunc.ne.61)
+      if ((ifunc.lt.0).or.(ifunc.gt.17.and.ifunc.ne.31.and.ifunc.ne.61)
      .  .and.kbatch) GOTO 991
       if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.(ifunc.ge.16.and.ifunc.ne.31.and.
+     .  .or.ifunc.eq.10.or.(ifunc.ge.17.and.ifunc.ne.31.and.
      .   ifunc.ne.61))) goto 700
       if (ifunc.eq.6.and.clabtyp.eq.' ') then
         write(luscn,'("Unknown label printer type in the",
@@ -732,15 +729,17 @@ c            I = nstnx
               CALL PROCS(4) ! Mark IV backend procedures
           ELSE IF (IFUNC.EQ.16) THEN
               CALL PROCS(5) ! 8-BBC VLBA backend procedures
+          else if (ifunc.eq.17) then
+              call prcov
           ELSE IF (IFUNC.EQ.6) THEN
             if (nstnx.eq.1) then ! just one station
-            	pcode = 1
+              pcode = 1
             else if (i.eq.1) then ! first station
-            	pcode = 2
+              pcode = 2
             else if (i.eq.nstnx) then ! last station
-            	pcode = 3
+              pcode = 3
             else
-            	pcode = 0
+              pcode = 0
             end if
             cinname = snpname
               klab = .true.
@@ -786,22 +785,22 @@ C
         inquire(file=labname,exist=kex)
         if (kex) then 
           response='x'
-          do while (response(1:1).ne.'y'.and.response(1:1).ne.'n')
-            write(luscn,'("PostScript label file exists. Do you want ",
-     .      "to print it now ?"/"(If you don''t print it, the file ",
-     .      "will be deleted.) (Y/N)  ?  ")')
-            read(luusr,'(A)') response(1:2)
-            response(1:1)=lower(response(1:1))
-            if (response(1:1).eq.'y') then
-              klab = .true.
-              ierr=cclose(fileptr)
-              call prtmp(0)
-            else if (response(1:1).eq.'n') then
-              ierr=cclose(fileptr)
-              open(luprt,file=labname,status='old')
-              close(luprt,status='delete')
-            endif
-          enddo
+          ierr=cclose(fileptr)
+          if (.not.kbatch) then
+            do while (response(1:1).ne.'p'.and.response(1:1).ne.'d')
+              write(luscn,'("PostScript label file exists. Do you want",
+     .        " to print it or delete it? (P/D) ?",$)')
+              read(luusr,'(A)') response(1:2)
+              response(1:1)=lower(response(1:1))
+            enddo
+          endif
+          if (response(1:1).eq.'p') then
+            klab = .true.
+            call prtmp(0)
+          else if (response(1:1).eq.'d'.or.kbatch) then
+C           open(luprt,file=labname,status='old')
+C           close(luprt,status='delete')
+          endif
         endif
       endif
       WRITE(LUSCN,9090)
