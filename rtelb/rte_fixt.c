@@ -13,22 +13,28 @@ void rte_fixt( poClock, plCentiSec)
 time_t *poClock;
 long *plCentiSec;
 {
-    
-     if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c') {
-     	int iIndex;
-     	long lEpoch, lAddHs;
+  
+  int iIndex;
+  iIndex = 01 & shm_addr->time.index;
 
-        iIndex = 01 & shm_addr->time.index;
+  if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c' &&
+     shm_addr->time.epoch[iIndex]!=0 && shm_addr->time.icomputer[iIndex]==0) {
+
+        long lEpoch, lAddHs;
+
+        lEpoch = shm_addr->time.epoch[iIndex];
 	lAddHs = shm_addr->time.offset[iIndex];
-     	lEpoch = shm_addr->time.epoch[iIndex];
 
      	if (lEpoch && shm_addr->time.model == 'r') {
                 float fAdd;
        		fAdd = shm_addr->time.rate[iIndex] * (*plCentiSec-lEpoch);
-                lAddHs += (fAdd + 0.5);
+
+		if((lAddHs+fAdd) >= 0.0)
+		  lAddHs += (fAdd + 0.5);
+		else
+		  lAddHs += (fAdd - 0.5);
         }
         *plCentiSec += lAddHs;
-
      }
 
      if (*plCentiSec >= 0) { 
