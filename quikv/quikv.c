@@ -93,9 +93,36 @@ loop:
  	  case 36:
 	    systracks(&command,itask,ip);
 	    break;
-         default:
-            ierr=-4;
-            goto error;
+      case 37:
+	rcl(&command,itask,ip);
+	break;
+      case 38:
+	user_info(&command,itask,ip);
+	break;
+      case 39:
+	s2st(&command,itask,ip);
+	break;
+      case 40:
+	s2et(&command,itask,ip);
+	break;
+      case 41:
+	s2tape(&command,itask,ip);
+	break;
+      case 42:
+	rec_mode(&command,itask,ip);
+	break;
+      case 43:
+	data_valid(&command,itask,ip);
+	break;
+      case 44:
+	s2label(&command,itask,ip);
+	break;
+      case 45:
+	s2rec(&command,itask,ip);
+	break;
+      default:
+	ierr=-4;
+	goto error;
       }
       goto loop;
 
