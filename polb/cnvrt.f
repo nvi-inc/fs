@@ -26,6 +26,7 @@ C     OUT2 - second output coordinate
 C
       implicit double precision (a-h,o-z)
       double precision sidt,sider,had,tlst
+      real dut
       dimension it(6)
 C
       include '../include/dpi.i'
@@ -33,13 +34,19 @@ C
       dasin(x) = datan2z(x,dsqrt(dabs(1.-x*x)))
       dacos(x)=datan2z(dsqrt(dabs(1.-x*x)),x)
 C
+      sidt=sider(it)
+      goto 10
+C
+      entry cnvrt2(imode,ain1,ain2,out1,out2,it,dut,alat,wlong)
+      sidt=sider2(it,dut)
+C
+ 10   continue
       slat = dsin(alat)
       clat = dcos(alat)
       sin1 = dsin(ain1)
       sin2 = dsin(ain2)
       cin1 = dcos(ain1)
       cin2 = dcos(ain2)
-      sidt=sider(it)
       tlst=sidt-wlong
       had = tlst-ain1
       if (had.gt.0.d0) had=dmod(had,dtwopi)
