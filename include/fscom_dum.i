@@ -9,7 +9,8 @@ c
      . cablev, systmp(32), epoch, height, diaman, slew1, slew2,
      . lolim1, lolim2, uplim1, uplim2,
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv, inscint, inscsl, 
-     . outscint, outscsl, wrvolt, rateti_fs, POSNHD(2)
+     . outscint, outscsl, wrvolt, rateti_fs, POSNHD(2),
+     . FREQVC(15), motorv2
 
       integer*4 iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs,ichfm_cn_tm, cips
@@ -24,12 +25,14 @@ c
      . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog,
      . rack, drive, imaxtpsd, ichvlba(18), iskdtpsd, itpthick,
      . vform_rate, vgroup(4), capstan, stchk(4), sterp, drive_type,
-     . rack_type, wrhd_fs, vfm_xpnt, vrepromode(2), ichs2
+     . rack_type, wrhd_fs, vfm_xpnt, vrepromode(2), ichs2,
+     . IBWVC(15), IFP2VC(14), vacsw, itpthick2, thin, vac4
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3), lgen(2),
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
-     . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4)
+     . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4),
+     . cwrap(4)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
@@ -38,7 +41,7 @@ c
      . cablev, systmp, epoch, height, diaman, slew1, slew2,
      . lolim1, lolim2, uplim1, uplim2,
      . HORAZ, HOREL, motorv, inscint, inscsl, outscint,
-     . outscsl, wrvolt, rateti_fs, POSNHD(2),
+     . outscsl, wrvolt, rateti_fs, POSNHD(2),  FREQVC, motorv2,
 c
      . iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs,ichfm_cn_tm, cips,
@@ -55,11 +58,12 @@ c
      . itpthick, 
      . vform_rate, vgroup, capstan, stchk, sterp, drive_type,
      . rack_type, wrhd_fs, vfm_xpnt, vrepromode, ichs2,
+     . IBWVC, IFP2VC, vacsw, itpthick2, thin, vac4,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
-     . modelti_fs, stcnm
+     . modelti_fs, stcnm, cwrap
 
 
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
