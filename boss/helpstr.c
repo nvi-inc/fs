@@ -71,6 +71,8 @@ int rlen;
     equip1='4';
   else if(VLBA==*rack)
     equip1='v';
+  else if(VLBA4==*rack)
+    equip1='u';
   else
     equip1='_';
 
@@ -82,6 +84,8 @@ int rlen;
     equip2='4';
   else if(VLBA==*drive)
     equip2='v';
+  else if(VLBA4==*drive)
+    equip2='u';
   else if(S2==*drive)
     equip2='s';
   else
@@ -94,10 +98,23 @@ int rlen;
       ch1=*(decloc+1);
       ch2=*(decloc+2);
  /* m4 defaulting to m3 works because 4 preceeds m in ls order */
-      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4')
-	   || (ch1 == 'w' && (equip1 == '4' || equip1 == 'v')))
-	  && (ch2==equip2 || ch2=='_' || (ch2 =='m' && equip2 == '4')
-	      || (ch2=='x' && equip2 != 's'))   ) {
+ /* vlba4 defaulting to vlba works because u proceeds v in ls order */
+      if ((
+	   ch1==equip1 ||
+	   ch1=='_' ||
+	   (ch1 =='m' && equip1 == '4') ||
+	   (ch1 =='v' && equip1 == 'u') ||
+	   (ch1 == 'w' && (equip1 == '4' || equip1 == 'v' || equip1 == 'u')) ||
+	   (ch1 == 'y' && (equip1 == '4' || equip1 == 'u')) ||
+	   (ch1 == 'z' && (equip1 == '3' || equip1 == 'u')) ||
+	   (ch1 == 'a' && equip1 == 'v')
+	   ) && (
+		 ch2==equip2 ||
+		 ch2=='_' ||
+		 (ch2 =='m' && equip2 == '4') ||
+		 (ch2 =='v' && equip2 == 'u') ||
+		 (ch2=='x' && equip2 != 's'))
+	  ) {
         strcpy(runstr,outbuf);
         *ierr = 0;
         break;
