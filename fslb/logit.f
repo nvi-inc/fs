@@ -38,7 +38,7 @@ C
 C  LOCAL: 
 C 
 C     NCH - character counter in IBUF 
-      integer*2 ibuf(60)
+      integer*2 ibuf(256)
 C      - buffer in which log entry is formatted 
 C     NARGS - number of arguments passed to us
       character*2 copt2
@@ -86,7 +86,6 @@ C     purposes and put it into the mailbox.  That's all we do.
 C 
       nch = ichmv_ch(ibuf,nch,' ')-2
 C                   Pad with a blank
-      call ifill_ch(ibuf,nch+1,120-nch,' ')
 c
       call fs_get_iclbox(iclbox)
       if(nargs.eq.5) then
