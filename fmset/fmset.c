@@ -39,6 +39,7 @@ long outclass;        /* output class number */
 int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 int synch=0;
 long nanosec=-1;
+static long ipr[5] = { 0, 0, 0, 0, 0};
 
 main()  
 {
@@ -59,6 +60,7 @@ char   inc;
 struct tm *disptm;
 int toggle= FALSE;
 int other,temp, irow;
+int changedfm=0;
 
 
 setup_ids();         /* connect to shared memory segment */
@@ -69,10 +71,16 @@ if (nsem_test(NSEM_NAME) != 1) {
   exit(0);
 }
 
+if ( 1 == nsem_take("fmset",1)) {
+  fprintf( stderr,"fmset already running\n");
+  rte_sleep(SLEEP_TIME);
+  exit(0);
+}
+
 rte_prior(CL_PRIOR); /* set our priority */
 
 rack=shm_addr->equip.rack;
-drive=shm_addr->equip.drive;
+drive=shm_addr->equip.drive[0];
 
 if (drive==S2) {
   source=S2;
@@ -113,7 +121,12 @@ if(source == S2)
 else
   mvwaddstr( maindisp, 4, 10, "Formatter  " );
 mvwaddstr( maindisp, 5, 10, "Field System" );
-mvwaddstr( maindisp, 6, 10, "Computer" );
+if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c')
+  mvwaddstr( maindisp, 6, 10, "Computer" );
+else if(shm_addr->time.model == 'n')
+  mvwaddstr( maindisp, 6, 10, "Field System is using computer time" );
+else if(shm_addr->time.model == 'c')
+  mvwaddstr( maindisp, 6, 10, "Field System and computer are using NTP" );
 mvwaddstr( maindisp, 2, 23, "fmset - formatter/S2 recorder time set" );
 mvwaddstr( maindisp, ROW, 10,
  "Use '+'   to increment formatter time by one second." );
@@ -124,7 +137,7 @@ mvwaddstr( maindisp,  ROW+2, 10,
 mvwaddstr( maindisp, ROW+3, 10, 
  "    '.'   to set formatter time to Field System time.");
 irow=4;
-if(rack& MK4 || rack & K4MK4 || rack &VLBA4)
+if(rack& MK4 || rack &VLBA4)
   mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    's' or 'S' to SYNCH formatter (rarely needed)");
 if(!toggle) {
@@ -155,10 +168,14 @@ do 	{
            disptime++;
         }
           
-        sprintf( fmt, "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
-        disptm = gmtime(&disptime);
-	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 4, 30, buffer );
+	if(disptime>=0) {
+	  sprintf(fmt,
+		  "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+	  disptm = gmtime(&disptime);
+	  strftime ( buffer, sizeof(buffer), fmt, disptm );
+	  mvwaddstr( maindisp, 4, 30, buffer );
+	} else                      /* 123456789012345678901234567890123456*/
+	  mvwaddstr( maindisp, 4, 30, "Year out of range: [1970 to 2037]   ");
 
         disptime=fstime;
         disphs=fshs+5;
@@ -172,17 +189,20 @@ do 	{
 	strftime ( buffer, sizeof(buffer), fmt, disptm );
 	mvwaddstr( maindisp, 5, 30, buffer );
 
-        disptime=unixtime;
-        disphs=unixhs+5;
-        if (disphs > 99) {
-           disphs-=100;
-           disptime++;
-        }
+	if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c') {
+	  disptime=unixtime;
+	  disphs=unixhs+5;
+	  if (disphs > 99) {
+	    disphs-=100;
+	    disptime++;
+	  }
           
-        sprintf( fmt, "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
-        disptm = gmtime(&disptime);
-	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 6, 30, buffer );
+	  sprintf(fmt,
+		  "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+	  disptm = gmtime(&disptime);
+	  strftime ( buffer, sizeof(buffer), fmt, disptm );
+	  mvwaddstr( maindisp, 6, 30, buffer );
+	}
 
 	wrefresh ( maindisp );
 
@@ -190,17 +210,22 @@ do 	{
 	switch ( inc ) {
 	case INC_KEY :  /* Increment seconds */
 	  setfmtime(formtime++,1);
+	  changedfm=1;
 	  break;
 	case DEC_KEY :  /* Decrement seconds */
 	  setfmtime(formtime--,-1);
+	  changedfm=1;
 	  break;
 	case SET_KEY :  /* Get time from user */
 	  formtime = asktime( maindisp,&flag, formtime);
-	  if(flag)
+	  if(flag) {
 	    setfmtime(formtime,0);
+	    changedfm=1;
+	  }
 	  break;
 	case EQ_KEY :  /* set form time from comp time */
 	  setfmtime(formtime=fstime+(fshs+50)/100,0);
+	  changedfm=1;
 	  break;
 	case ESC_KEY :  /* ESC character */
 	  running = FALSE;
@@ -216,6 +241,7 @@ do 	{
 	case SYNCH_KEY:
 	case SYNCH2_KEY:
 	  synch=1;
+	  changedfm=1;
 	  break;
 	default     :
 			running = TRUE;
@@ -224,6 +250,8 @@ do 	{
 } while ( running );
 
 endwin ();
+if(shm_addr->time.model != 'c' && shm_addr->time.model != 'n' && changedfm)
+  skd_run_arg("setcl",' ',ipr,"setcl offset");
 exit(0);
 
 }
