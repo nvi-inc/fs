@@ -16,10 +16,14 @@ long *lRawTime;
      long times();
      struct tms buffer;
      struct timeval tv;
+     int index;
 
-     if(shm_addr->time.model!='c')
+     index=01 & shm_addr->time.index;
+     if(shm_addr->time.model!='c'
+	&& shm_addr->time.epoch[index]!=0
+	&& shm_addr->time.icomputer[index]==0 ) {
        *lRawTime=times(&buffer);
-     else {
+     } else {
        if(0!= gettimeofday(&tv, NULL)) {
 	 perror("getting timeofday, fatal\n");
 	 exit(-1);
