@@ -40,7 +40,7 @@ char *who;           /* 2-char string identifying the error  */
 */
   if (ierr != 0) {
     strcat(buf,"?ERROR ");
-    strcat(buf,who);
+    strncat(buf,who,2);
     int2str(buf,ierr,-5,0);
   }
 /* Get the name of our main program and append #pname# to the
