@@ -1,7 +1,7 @@
 #!/usr/bin/wish -f
-# vue source
+# fsvue source
 # Basic font for button and labels
-# Product of Raymond Gonzalez for NVI,Inc./GSFC (2000)
+# Product of NVI,Inc./GSFC (2000)
 # To be incorporated into the VLBI Field System.
 
 # Window manager configurations
@@ -9,19 +9,30 @@
   set bfont2 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
   set bfont3 {-*-lucida-bold-r-*-sans-24-*-*-*-*-*-*-*}
 
+# directories responsible for this information.
   set icondir /usr2/fs/fsvue
+  set bindir /usr2/fs/bin
+
+# height and width of window.
+  set vieX [winfo screenwidth .]
+  set vieY [winfo screenheight .]  
+
+# position from left and top of monitor.
   set const 3
-  set vieX [expr [winfo screenwidth .]/$const]
-  set vieY [expr [winfo screenheight .]/$const] 
+  set vieX1 [expr [winfo screenwidth .]/$const]
+  set vieY1 [expr [winfo screenheight .]/$const] 
 
   global tkVersion
   wm positionfrom . user
   wm sizefrom . ""
-  wm maxsize . 410 280
+#  wm maxsize . 410 280
   wm iconposition . 1200 500
   wm iconbitmap . @$icondir/vlb.icon
   wm iconname . {fsvue}
-  wm geometry . +$vieX+$vieY
+# position window at calculated window position.
+# wm geometry . $vieX\x$vieY+$vieX1+$vieY1
+# position window at top left corner with full screen size.
+  wm geometry . $vieX\x$vieY
   wm title . {FS VLBI User Environment}
   set w .
 
@@ -38,12 +49,12 @@ frame .m \
 	-borderwidth {2} \
 	-relief {groove}
 
-$w config -cursor {top_left_arror black white}
+#$w config -cursor {top_left_arrow black white}
 
 # two buttons in the menu giving dropdown menus
 button .m.info -bitmap @$icondir/info.icon -relief {raise} -font $bfont2 -background navy -fg white -command AboutVUE
 
-button .m.vier -text "START" -relief {raise} -font $bfont2 -background navy -fg white -command {exec $icondir/vue_start $newfile_filename &; exit}
+button .m.vier -text "START" -relief {raise} -font $bfont2 -background navy -fg white -command {exec $bindir/fsvue &; exit}
 
 button .m.q -text "EXIT" -relief {raise} -font $bfont2 -background red -fg black -command exit
 

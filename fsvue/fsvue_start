@@ -1,15 +1,18 @@
 #!/usr/bin/wish -f
 # fsvue source for the Tk toolkit
 # Basic font for button, menus and labels
-# Product of RDG for NVI,Inc./GSFC (2000)
+# Product of NVI,Inc./GSFC (2000)
 # to be incorporated into the VLBI Field System.
-  # Window manager configurations
-  set bfont {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
-  set bfont2 {-*-lucida-normal-r-*-sans-16-*-*-*-*-*-*-*}
-  set bfont3 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
-  set bfont4 {-*-lucida-normal-r-*-sans-20-*-*-*-*-*-*-*}
+# Window manager configurations
+
+# Use a small font for help all the time.
+  set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
   set icondir /usr2/fs/fsvue
+  set bindir /usr2/fs/bin
+  set vieX [winfo screenwidth .]
+  set vieY [winfo screenheight .]  
+
   global tkVersion
   wm positionfrom . user
   wm sizefrom . ""
@@ -17,15 +20,28 @@
   wm iconposition . 1200 500
   wm iconbitmap . @$icondir/vlb.icon
   wm iconname . {fsvue}
-#  wm geometry . +5+25
+#position window full screen from top left corner.
+#  wm geometry . $vieX\x$vieY+0+0
+#position window from top left corner.
+  wm geometry . +0+0
   wm title . {FS VLBI User Environment}
   set w .
   $w config -cursor {top_left_arrow black white}
 
-  global inpipe
+  global inpipe stopscroll
+
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+#      set newfile_filename [lindex $argv 1]
+      set fontsize "L"
+  } else { 
+      set bfont {9x15}
+      set fontsize "S"
+  }
 
   # Use an associative array to store keys and commands
-  set cmd(Send_mail) "$icondir/vue_fsmail"
+  set cmd(Send_mail) "$icondir/vue_fsmail $fontsize"
   set cmd(Netscape_mail) "netscape -mail"
   set cmd(Field_System) "/usr2/fs/bin/fs"
   set cmd(FS_Console) "xterm -geom 60x5+0+650 -e /usr2/fs/bin/oprin"
@@ -38,14 +54,14 @@
   # File storage
   set xfsfile "~/.xfscmds"
   set global_startmode 0            ;# 0=Interactive mode; 1=Command-line mode
-  set current_filename [lindex $argv 0]
+#set current_filename [lindex $argv 0]
   set current_filename ""           ;# The selected log file
   set current_DefaultDir /usr2/log  ;# Default directory for FS log files
-  if {$argc != 0} {
-      set newfile_filename [lindex $argv 0]
-  } else { 
-      set newfile_filename "station.log"
-  }
+  set stopscroll 0
+
+# Set the log file to station.log to start out with.
+  set newfile_filename "station.log"
+
 # Results
   set val01 [exec vueinfo time]
   set val02 $newfile_filename
@@ -64,26 +80,33 @@ frame .m \
 	-borderwidth {2} \
 	-relief {groove} 
 
+# ==========================================================================
+#
+#           COOK UP THE BUTTONS AND PACK THEM SECTION
+#
+# ==========================================================================
 # two buttons in the menu giving dropdown menus
-menubutton .m.file -text "File" -relief {raise} -font $bfont3 -menu .m.file.menu -background navy -fg white
+menubutton .m.file -text "File" -relief {raise} -font $bfont -menu .m.file.menu -background navy -fg white
 
-menubutton .m.dsp -text "Displays" -relief {raise} -font $bfont3 -menu .m.dsp.menu -background navy -fg white
+#menubutton .m.ss -text "Scrolling" -relief {raise} -font $bfont -menu .m.ss.menu -background navy -fg white
 
-menubutton .m.cmd -text "Execute" -relief {raise} -font $bfont3 -menu .m.cmd.menu -background navy -fg white
+menubutton .m.dsp -text "Displays" -relief {raise} -font $bfont -menu .m.dsp.menu -background navy -fg white
 
-#button .m.logm -text "Log" -relief {raise} -font $bfont3 \
+menubutton .m.cmd -text "Execute" -relief {raise} -font $bfont -menu .m.cmd.menu -background navy -fg white
+
+#button .m.logm -text "Log" -relief {raise} -font $bfont \
 	-background navy -fg white \
 	-command {fileselection_dialog}
 
-button .m.fshelp -text "Field System HELP" -relief {raise} -font $bfont3 -background navy -fg white -command {exec $icondir/vue_fshelp &}
+button .m.fshelp -text "Field System HELP" -relief {raise} -font $bfont -background navy -fg white -command {exec $icondir/vue_fshelp $fontsize &}
 
-button .m.fs -text "Examine LOGS" -relief {raise} -font $bfont3 -background navy -fg white -command {exec $icondir/vue_fslog &}
+button .m.fs -text "Examine LOGS" -relief {raise} -font $bfont -background navy -fg white -command {exec $icondir/vue_fslog $fontsize &}
 
-button .m.fso -text "Other Files" -relief {raise} -font $bfont3 -background navy -fg white -command {exec $icondir/vue_fsfiles &}
+button .m.fso -text "Other Files" -relief {raise} -font $bfont -background navy -fg white -command {exec $icondir/vue_fsfiles $fontsize &}
 
-button .m.q -text "Exit" -relief {raise} -font $bfont3 -background red -fg white -command execAndLogClose
+button .m.q -text "Exit" -relief {raise} -font $bfont -background red -fg white -command execAndLogClose
 
-menubutton .m.help -bitmap @$icondir/info.icon -menu .m.help.menu -relief {raise} -font $bfont3 -menu .m.help.menu -background navy -fg white
+menubutton .m.help -bitmap @$icondir/info.icon -menu .m.help.menu -relief {raise} -font $bfont -menu .m.help.menu -background navy -fg white
 
 entry .m.ent -relief {sunken} -bg linen -fg black
 
@@ -107,25 +130,25 @@ focus .m.ent
 proc displayWin { } {
     global val01 val02 val03 val04 val05 val06 val07 val08
     global txt01 txt02 txt03 txt04 txt05 txt06 txt07 txt08
-    global bfont2
+    global bfont
 
     frame .m1 \
 	    -bg {blue} \
 	    -borderwidth {5} \
 	    -relief {groove} 
 
-    label .m1.txt02 -font $bfont2 -background blue -fg white -text "SCHEDULE"
-    label .m1.txt03 -font $bfont2 -background blue -fg white -text "RACK"
-    label .m1.txt04 -font $bfont2 -background blue -fg white -text "DRIVES"
-    label .m1.txt05 -font $bfont2 -background blue -fg white -text "SITE"
-    label .m1.txt08 -font $bfont2 -background blue -fg white -text "IF Attenuators"
-    label .m1.val02 -font $bfont2 -textvariable val02 -background white -fg black
-    label .m1.val03 -font $bfont2 -textvariable val03 -background white -fg black
-    label .m1.val04 -font $bfont2 -textvariable val04 -background white -fg black
-    label .m1.val05 -font $bfont2 -textvariable val05 -background white -fg black
-    label .m1.val06 -font $bfont2 -textvariable val06 -background white -fg black
-    label .m1.val07 -font $bfont2 -textvariable val07 -background white -fg black
-    label .m1.val08 -font $bfont2 -textvariable val08 -background white -fg black
+    label .m1.txt02 -font $bfont -background blue -fg white -text "SCHEDULE"
+    label .m1.txt03 -font $bfont -background blue -fg white -text "RACK"
+    label .m1.txt04 -font $bfont -background blue -fg white -text "DRIVES"
+    label .m1.txt05 -font $bfont -background blue -fg white -text "SITE"
+    label .m1.txt08 -font $bfont -background blue -fg white -text "IF Attenuators"
+    label .m1.val02 -font $bfont -textvariable val02 -background white -fg black
+    label .m1.val03 -font $bfont -textvariable val03 -background white -fg black
+    label .m1.val04 -font $bfont -textvariable val04 -background white -fg black
+    label .m1.val05 -font $bfont -textvariable val05 -background white -fg black
+    label .m1.val06 -font $bfont -textvariable val06 -background white -fg black
+    label .m1.val07 -font $bfont -textvariable val07 -background white -fg black
+    label .m1.val08 -font $bfont -textvariable val08 -background white -fg black
 
     pack .m1 -side left  -fill both
     pack .m1.txt05
@@ -143,40 +166,54 @@ proc displayWin { } {
 # Setup display window to the left
 displayWin
 
+# Just a Timer
 proc displayTimer {} {
     global val01
-    label .m1.txt01 -font $bfont2 -background blue -fg white -text "UT:"
-    label .m1.val01 -font $bfont2 -textvariable val01 -background white -fg black
+    label .m1.txt01 -font $bfont -background blue -fg white -text "UT:"
+    label .m1.val01 -font $bfont -textvariable val01 -background white -fg black
     pack .m1.txt01
     pack .m1.val01 -fill both
 
 }
 # Setup FS clock
-
+# ==========================================================================
+#
+#           COOK UP THE ITEMS UNDER THE BUTTONS SECTION
+#
+# ==========================================================================
 # File menu
 menu .m.file.menu  -background blue -fg white
-.m.file.menu add command -label Load -font $bfont2 -command LoadFile
-.m.file.menu add command -label Save -font $bfont2 -command SaveFile
+.m.file.menu add command -label Load -font $bfont -command LoadFile
+.m.file.menu add command -label Save -font $bfont -command SaveFile
+
+#menu .m.ss.menu  -background blue -fg white
+#.m.ss.menu add command -label Stop -font $bfont -command sscroll
+#.m.ss.menu add command -label Continue -font $bfont -command qscroll
 
 menu .m.dsp.menu -background blue -fg white
-.m.dsp.menu add command -label General -font $bfont2 -command {DSPit monit2}
-.m.dsp.menu add command -label Time -font $bfont2 -command {DSPit monit1}
-.m.dsp.menu add command -label Tsys -font $bfont2 -command {DSPit monit3}
-#.m.dsp.menu add command -label Errors -font $bfont2 -command {DSPit errchk}
-.m.dsp.menu add command -label Weather -font $bfont2 -command {exec $icondir/vue_fswx &}
+.m.dsp.menu add command -label General -font $bfont -command {DSPit monit2}
+.m.dsp.menu add command -label Time -font $bfont -command {DSPit monit1}
+.m.dsp.menu add command -label Tsys -font $bfont -command {DSPit monit3}
+#.m.dsp.menu add command -label Errors -font $bfont -command {DSPit errchk}
+.m.dsp.menu add command -label Weather -font $bfont -command {exec $icondir/vue_fswx $fontsize &}
 
 # Help menu
 menu .m.help.menu -background blue -fg white
-.m.help.menu add command -label "About fsvue" -font $bfont2 -command {Help VUE}
-.m.help.menu add command -label "Using fsvue" -font $bfont2 -command {Help using}
-.m.help.menu add command -label "Menus" -font $bfont2 -command {Help menus}
-.m.help.menu add command -label "Aliases & Commands" -font $bfont2 -command {Help commands}
+.m.help.menu add command -label "About fsvue" -font $bfont -command {Help VUE}
+.m.help.menu add command -label "Using fsvue" -font $bfont -command {Help using}
+.m.help.menu add command -label "Menus" -font $bfont -command {Help menus}
+.m.help.menu add command -label "Aliases & Commands" -font $bfont -command {Help commands}
  
 # Command menu
 menu .m.cmd.menu -background blue -fg white
-.m.cmd.menu add command -label Add -font $bfont2 -command AddCmd
+.m.cmd.menu add command -label Add -font $bfont -command AddCmd
 .m.cmd.menu add separator
 
+# ==========================================================================
+#
+#           COOK UP PROCEDURES SECTION
+#
+# ==========================================================================
 proc forAllMatches { w pattern script} {
     scan [$w index end] %d numLines
     for {set i 1} {$i < $numLines} {incr i} {
@@ -192,23 +229,28 @@ proc forAllMatches { w pattern script} {
 	    }
 	}
     }
-
-
+# --------------------------------------------------------------------------
 # setup display area( text and scrollbar) to monitor Field System.
 # This will be pipeing information from the station.log file.
+# --------------------------------------------------------------------------
 # 
-text .t -yscrollc {.sb set} -font $bfont3 -bg linen
+text .t -yscrollc {.sb set} -font $bfont -bg linen
 scrollbar .sb -bg linen -command {.t yview}
-text .t2 -height 1 -font $bfont3 -bg white -fg Red
+text .t2 -height 1 -font $bfont -bg white -fg Red
 
 .t tag configure errtag -foreground black -background red
 
 pack .sb -side right -fill y
 pack .t .t2 -side top -fill both -expand 1
 
+# --------------------------------------
 # Update display area with line of text
+# --------------------------------------
+#
 proc line {text} {
     global newfile_filename val02 val03 val04 val05 val06 val07 val08
+    global stopscroll
+
     set val02 $newfile_filename
     set val03 [exec vueinfo rack]
     set val04 [exec vueinfo drive1]
@@ -222,7 +264,10 @@ proc line {text} {
     update idletask
 }
 
+# -----------------------------------------------
 # Monitor fd (inpipe) and feed into display area
+# -----------------------------------------------
+#
 proc logOutput {inpipe cmd} {
     global newfile_filename pids 
 
@@ -249,7 +294,10 @@ proc logOutput {inpipe cmd} {
     .t2 insert end "You are now viewing $newfile_filename"
 }
 
+# -------------------
 # Setup fd monitoring 
+# -------------------
+#
 proc execAndLog {cmd} {
     global newfile_filename inpipe pids
 
@@ -258,7 +306,10 @@ proc execAndLog {cmd} {
     fileevent $inpipe readable [list logOutput $inpipe $cmd]
  }
 
+# -------------------
 # Close fd monitoring 
+# -------------------
+#
 proc execAndLogClose {} {
     global newfile_filename pids
     incr pids 1
@@ -268,12 +319,17 @@ proc execAndLogClose {} {
     exit
 }
 
-
-# -- mainline  this was to test the loop ---
+# -------------------
+# -- mainline this was to test the loop ---
+# -------------------
+#
 set newfile_filename [exec vueinfo log] 
 execAndLog "tail -f -n 24 /usr2/log/$newfile_filename"
 
+# -----------------------------------------
 # setup a display monitor on a growing file
+# -----------------------------------------
+#
 proc AnotherLog {} {
     global inpipe newfile_filename pids
     incr pids 1
@@ -282,7 +338,10 @@ proc AnotherLog {} {
     execAndLog "tail -f -n 24 /usr2/log/$newfile_filename"
 }
 
+# ------------------------------------------
 #text: read a FS log file into a text widget
+# ------------------------------------------
+#
 proc loadFile file {
     global newfile_filename
     .t delete 1.0 end
@@ -292,6 +351,7 @@ proc loadFile file {
 	.t see end; 
 	.t yview end
     }
+
 # Mark error messages.
 forAllMatches .t "ERROR" {
     .t tag add big first last
@@ -312,10 +372,18 @@ forAllMatches .t "ERROR" {
     .t tag configure big -background Red
 }
 
-#.t tag bind big <Button-1> {
-#    open_html lupus.gsfc.nasa.gov/fsdoc/fshome.html
+# help from WWW for FS installation and other things.
+#.t tag bind big <Button-2> {
+#    open_html lupus.gsfc.nasa.gov/fs
 #}
 
+
+# ==========================================================================
+#
+#          CONTINUE COOKING PROCEDURES SECTION
+#
+# ==========================================================================
+#
 proc open_html {file} {
     global tcl_platform
 
@@ -341,7 +409,10 @@ proc open_html {file} {
     }
 }
 
+# ---------------------
 # Field System Displays
+# ---------------------
+#
 proc DSPit dspname {
     if {$dspname == "monit1"} {
 	exec xterm -geom 38x1+0+0 -bg linen -fg black -sb \
@@ -361,25 +432,35 @@ proc DSPit dspname {
     }
 }
 
+# ---------------------------------------------------------------
 # Routine to load the Command Menu dynamically from the cmd array
 # each menu entry will call the procedure ExFromMenu with an
 # argument of the command name
+# ---------------------------------------------------------------
+#
 proc LoadCmdMenu {} {
-        global cmd bfont2
+        global cmd bfont
 
         foreach name [lsort [array names cmd]] {
                 set c "ExFromMenu $name"
-	    .m.cmd.menu add command -label $name -font $bfont2 -command $c
+	    .m.cmd.menu add command -label $name -font $bfont -command $c
         }
 }
+
+# -------------------------------------
 # Load the command menu at startup time
+# -------------------------------------
+#
 LoadCmdMenu
 
+# -------------------------------------------------------
 # That's all the top level windows
 # Now we have a bunch of actions to do things
-
+#
 # The execute routine. Called when Return is typed in the
 # main entry window and also from the Command Menu
+# -------------------------------------------------------
+#
 proc Execute {} {
         global cmd
         
@@ -402,8 +483,10 @@ proc Execute {} {
         }
 }
 
-#
+# ----------------------------
 # Minimum length matching code
+# ----------------------------
+#
 proc MinMatch { str } {
         global cmd
         
@@ -420,18 +503,23 @@ proc MinMatch { str } {
         return $found
 }
 
-#
+# -------------------------------------------------
 # Called from the Command menu to execute a command
+# -------------------------------------------------
+#
 proc ExFromMenu {name} {
 
         .m.ent delete 0 end
         .m.ent insert end $name
         Execute
 }
-#
+
+# ----------------------------------------------------------
 # Load the cmd array from a file
 # currently this is called .xfscmds in the current directory
 # You should change this
+# ----------------------------------------------------------
+#
 proc LoadFile {} {
         global cmd xfsfile
 
@@ -448,12 +536,17 @@ proc LoadFile {} {
         LoadCmdMenu
 
 }
-#       Executed as we start working
 
+# ----------------------------------
+#       Executed as we start working
+# ----------------------------------
+#
 LoadFile
 
-#
+# --------------------------
 # The converse - save a file
+# --------------------------
+#
 proc SaveFile {} {
         global cmd xfsfile
 
@@ -464,10 +557,13 @@ proc SaveFile {} {
         close $f
 }
 
+# ---------------------------------------------
 # Called from the Add entry in the command menu
 # creates a pop-up window
+# ---------------------------------------------
+#
 proc AddCmd {} {
-        global cmd bfont2
+        global cmd bfont
 
         # on error kill this
         catch {destroy .pop}
@@ -483,9 +579,9 @@ proc AddCmd {} {
 
         # The frame is a title, and entry box, another title and another
         # entry box
-        label .pop.f.lab1 -text "Command Name" -font $bfont2
+        label .pop.f.lab1 -text "Command Name" -font $bfont
         entry .pop.f.e1 -relief sunken
-        label .pop.f.lab2 -text "Command" -font $bfont2
+        label .pop.f.lab2 -text "Command" -font $bfont
         entry .pop.f.e2 -relief sunken
         pack .pop.f.lab1 .pop.f.e1 .pop.f.lab2 .pop.f.e2 -side top
         # The bottom of the frame has two buttons, one to get rid of this
@@ -493,8 +589,8 @@ proc AddCmd {} {
         frame .pop.f.m -bd 2 -bg linen
         pack .pop.f.m -fill x -expand yes -side top
 
-        button .pop.f.m.d -text "Dismiss" -font $bfont2 -command PopDown
-        button .pop.f.m.l -text "Load" -font $bfont2 -command LoadIt
+        button .pop.f.m.d -text "Dismiss" -font $bfont -command PopDown
+        button .pop.f.m.l -text "Load" -font $bfont -command LoadIt
         pack .pop.f.m.d .pop.f.m.l -side left -expand yes -fill x
 
         # we set the focus to the top box, when we type return in that
@@ -532,14 +628,19 @@ proc AddCmd {} {
         LoadCmdMenu
 }
 
-#
+# ---------------------------------------------------
 # Called from the Dismiss button, just kill the popup
+# ---------------------------------------------------
+#
 proc PopDown {} {
         destroy .pop
 }
 
+# ------------------------------------------------------------
 # Load the cmd vector from the contents of the two entry boxes
 # and kill the popup
+# ------------------------------------------------------------
+#
 proc LoadIt {} {
         global cmd
 
@@ -551,8 +652,10 @@ proc LoadIt {} {
         PopDown
 }
 
-#
+# --------------------
 #       Help procedure
+# --------------------
+#
 #
 proc Help {sel} {
         global cmd
@@ -579,7 +682,10 @@ This has a menu of popup displays used by the Field System. General, Time, Tsys,
 This will display a menu with all the known command names and also allows you to add commands using the [Add] entry. This has a window next to it where you type a new keyword and command.
 
 [Examine LOGS]
-This will popup a window that will help you examine passed logs. Information on how to use it is under the [i] button.
+This will popup a window that will help you examine passed logs. Information on how to use it is under the [i] button in the popup window.
+
+[Other Files]
+This will popup a window that will help you examine Field System related files. Information on how to use it is under the [i] button in the popup window.
 
 [Field System HELP]
 This will popup a window that will contain the help files from the Field System.
@@ -605,7 +711,8 @@ The Help Menu prints Help.}
         }
         tk_dialog .help "Information" $h($sel) {} -1 OK
 }
-#
+
+# -----------------------------------------------------------------------------
 # This is a standard bit of code, modified to use my font
 # dialog.tcl --
 #
@@ -650,7 +757,8 @@ The Help Menu prints Help.}
 #               (-1 means none).
 # args -        One or more strings to display in buttons across the
 #               bottom of the dialog box.
-
+# ---------------------------------------------------------------------------
+#
 proc tk_dialog {w title text bitmap default args} {
     global tk_priv bfont2
 
@@ -729,6 +837,7 @@ proc tk_dialog {w title text bitmap default args} {
 #                         FILESELECTION SECTION
 #
 # ==========================================================================
+#
 proc fileselection_dialog {} {
  
  global global_startmode current_DefaultDir newfile_filename current_filename
@@ -751,3 +860,4 @@ proc fileselection_dialog {} {
       AnotherLog 
  }
 }
+

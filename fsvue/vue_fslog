@@ -5,9 +5,8 @@
 # to be incorporated into the VLBI Field System.
   # Window manager configurations
   set icondir /usr2/fs/fsvue
-  set bfont {-*-lucida-bold-r-*-sans-14-*-*-*-*-*-*-*}
-  set bfont2 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
-  set bfont3 {-*-lucida-normal-r-*-sans-14-*-*-*-*-*-*-*}
+# Use this size of fonts for the information icon, or help.
+  set bfont2 {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
 
   global tkVersion
   wm positionfrom . user
@@ -30,6 +29,14 @@ set argno 1
 set newfile_filename ""
 set current_filename ""               ;# The selected log file
 set current_DefaultDir /usr2/log      ;# Default directory for FS log files
+
+
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+  } else { 
+      set bfont {9x15}
+  }
 
 # Top frame is a menubar
 # there is more magic that you can do with this
@@ -93,7 +100,7 @@ proc forAllMatches { w pattern script} {
 # 
 text .t -yscrollc {.sb set} -font $bfont -bg linen
 scrollbar .sb -bg linen -command {.t yview}
-text .t2 -height 1 -font $bfont2 -bg white -fg Red
+text .t2 -height 1 -font $bfont -bg white -fg Red
 
 .t tag configure errtag -foreground black -background red
 
@@ -358,7 +365,7 @@ data: The error or entry field.
 #               bottom of the dialog box.
 
 proc tk_dialog {w title text bitmap default args} {
-    global tk_priv bfont
+    global tk_priv bfont2
 
     set icondir /usr2/fs/fsvue
     # 1. Create the top-level window and divide it into top
@@ -377,7 +384,7 @@ proc tk_dialog {w title text bitmap default args} {
 
     # 2. Fill the top part with bitmap and message.
 
-    message $w.msg -width 8i -text $text -font $bfont
+    message $w.msg -width 8i -text $text -font $bfont2
     pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
     if {$bitmap != ""} {
         label $w.bitmap -bitmap $bitmap

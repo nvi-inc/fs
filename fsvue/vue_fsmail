@@ -21,6 +21,12 @@
   set w .
   $w config -cursor {top_left_arrow black white}
 
+# Decide on font size.
+  if {$argv=="L"} {
+      set bfont {-*-lucida-medium-r-*-sans-18-*-*-*-*-*-*-*}
+  } else { 
+      set bfont {9x15}
+  }
 
 option add *Entry.background linen startupFile
 option add *Text.background linen startupFile
