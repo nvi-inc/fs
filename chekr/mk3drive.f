@@ -26,7 +26,7 @@ C
         do j=1,4
 C  For the Mark IV tape drive, do not want to send ! strobe, which
 C  is mode -1 to matcn. Replace with -5 which is the + strobe.
-          if ((MK4.eq.and(MK4,drive)).and.(j.eq.1)) then
+          if (MK4.eq.drive.and.j.eq.1) then
             ibuf1(1) = -5
           else
             ibuf1(1) = icodes(j)
