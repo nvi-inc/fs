@@ -8,6 +8,8 @@ C
 C
 C History:
 C 960517 nrv New.
+C 960810 nrv Add tape motion to VUNPDAS call. Store LSTREC.
+C 960817 nrv Add tape speed and number of tapes to VUNPDAS.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -21,8 +23,8 @@ C LOCAL:
       integer ierr1
       integer*2 lant(4),LAXIS(2),lter(4),lsit(4)
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
-      integer*2 LOCC(4),lrec(4),lrack(4)
-      integer islcon(2)
+      integer*2 LOCC(4),lrec(4),lrack(4),ls2sp(2)
+      integer islcon(2),ns2tp
       real AZH(MAX_HOR),ELH(MAX_HOR),CO1(MAX_COR),CO2(MAX_COR)
       real DIAM
       real sefd(max_band),par(max_sefdpar,max_band)
@@ -34,9 +36,9 @@ C LOCAL:
       character cstid(max_stn)
       real poslat,poslon
       integer nheadstack
-      integer il
+      integer il,ite,itl,itg
       integer iret ! return from vex routines
-      character*128 cout
+      character*128 cout,ctapemo
       integer ichmv_ch,ichcm_ch,igtba,ichmv ! functions
       integer ptr_ch,fget_station_def,fvex_len
 
@@ -80,7 +82,7 @@ C     2. Now call routines to retrieve all the station information.
         endif
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    LIDT,lter,nheadstack,maxt,nr,lb,sefd,par,npar,
-     .    lrec,lrack)
+     .    lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tp)
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'("VSTINP03 - Error getting $DAS information",
      .    " for ",a/"iret=",i5," ierr=",i5)') stndefnames(i)(1:il),
@@ -132,9 +134,17 @@ C
         else
           IDUMMY = ICHMV(LTERNA(1,I),1,lter,1,8)
         endif
-        nheads(i)=nheadstack
-        maxtap(i) = maxt
-        nrecst(i) = nr
+        idummy = ichmv(lstrec(1,i),1,lrec,1,8) ! recorder type
+        idummy = ichmv(lstrack(1,i),1,lrack,1,8) ! rack type
+        nheads(i)=nheadstack ! number of headstacks
+        maxtap(i) = maxt     ! tape length
+        nrecst(i) = nr       ! number of recorders
+        ns2tapes(i) = ns2tp  ! number of S2 tapes
+        idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4) ! rack type
+        tape_motion_type(i)=ctapemo   ! tape motion
+        itearl(i)=ite                 ! early start time
+        itlate(i)=itl                 ! late stop time
+        itgap(i)=itg                  ! gap time
 C Skip SEFDs for now
 C       do ib=1,2
 C         idum = igtba(lb(ib),ii)
