@@ -14,6 +14,8 @@
 #define PERMISSIONS 0666
 #define ULIMIT 40960L
 #define MAX_BUF 512
+/* not Y10K compliant */
+#define FIRST_CHAR 21
 
 extern struct fscom *shm_addr;
 long ulimit();
@@ -43,6 +45,8 @@ main()
     long offset;
     long lseek();
     void dxpm();
+    int kdebug;
+    char *st;
 
 /* SECTION 1 */
     
@@ -108,7 +112,7 @@ Messenger:
       strcat(lnamef, sllog);
       strcat(lnamef, ".log");
       fd = open(lnamef, O_RDWR|O_SYNC );
-      if(fd > 0) {
+      if(fd >= 0) {
         offset= lseek(fd, 0L, SEEK_END);
         if (offset > 0) {
           offset=lseek(fd, -1L, SEEK_END);
@@ -145,9 +149,9 @@ Messenger:
 /* SECTION 4 */
 
     strcpy(buf2,buf);
-    kack = (buf[13] == '/');
+    kack = (buf[FIRST_CHAR-1] == '/');
     if(kack) {
-      ich = memchr(buf+14, '/', bufl-14);
+      ich = memchr(buf+FIRST_CHAR, '/', bufl-FIRST_CHAR);
       /* ich now points to spot '/' */
       kack = (ich != NULLPTR);
       ich++;
@@ -162,18 +166,23 @@ Ack:    ich = strtok(NULL, ",");
     }
     strcpy(buf,buf2);
 
+    st="/form/debug:";
+    kdebug=strncmp(buf+FIRST_CHAR-1,st,strlen(st))==0;
+    st="#matcn#debug:";
+    kdebug = kdebug || strncmp(buf+FIRST_CHAR-1,st,strlen(st))==0;
+
 /* SECTION 5 */
 /*  error recognition and message expansion */
 
-    kp = (buf[13] == '$');
-    if(kxd || (rtn2 == -1) || (!kp && !kack)){
+    kp = (buf[FIRST_CHAR-1] == '$');
+    if(kxd || (rtn2 == -1) || (!kp && !kack &&!kdebug)){
       if (*cp2 != 'b') goto Append;
       iwhe = NULL;
       iwhs = NULL;
       iwl =  0;
-      iwhs = memchr(buf+10, '(', bufl-10);
+      iwhs = memchr(buf+FIRST_CHAR, '(', bufl-FIRST_CHAR);
       if(iwhs != NULL) {
-        iwhe = memchr(buf+10, ')', bufl-10);
+        iwhe = memchr(iwhs+1, ')',bufl-(iwhs+1-buf));
         if (iwhe != NULL){
           iwl = 4 < iwhe-iwhs+1 ? 4 : iwhe-iwhs-1;
           strncpy(iwhat, iwhs+1, iwl);
@@ -181,9 +190,9 @@ Ack:    ich = strtok(NULL, ",");
       }
       else iwhs = buf + bufl + 1;
 
-      if(strncmp(buf+20,"un",2)==0) {
+      if(strncmp(buf+FIRST_CHAR+6,"un",2)==0) {
 	int ierr;
-        strncpy(ibur,buf+22,5);
+        strncpy(ibur,buf+FIRST_CHAR+8,5);
 	ibur[5]='\0';
 	if(1==sscanf(ibur,"%d",&ierr) && ((sys_nerr>=ierr) && (ierr >=0))) {
 	  strncpy(ibur,sys_errlist[ierr],80);
@@ -233,25 +242,19 @@ Append:           /* send message to station error program */
         ip[0]=class;
         skd_run("sterp", 'n', ip); 
       }
-      { char bufout[256];
-      strncpy(bufout+0,buf+5,2);
-      strncpy(bufout+2,":",1);
-      strncpy(bufout+3,buf+7,2);
-      strncpy(bufout+5,":",1);
-      strncpy(bufout+6,buf+9,2);
-      strncpy(bufout+8,".",1);
-      strcpy(bufout+9,buf+11);
+/* not Y10K compliant */
+      printf("%.8s",buf+9);
+/* not Y10K compliant */
+      printf("%s",buf+20);
       if (*cp2 == 'b')
-	strcat(bufout, "\007");
-      strcat(bufout, "\n");
-      printf("%s", bufout);
-      }
+	printf("\007");
+      printf("\n");
     }
 
 /* SECTION 6 */
 /*  write information to the log file if conditions are met */
 
-    if (fd >= 0 && (kxl || (!kp && !kack))) {
+    if (fd >= 0 && (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0)) {
       strcat(buf,"\n");
       bull = strlen(buf);
       if(bull != write(fd, buf, bull)) {
