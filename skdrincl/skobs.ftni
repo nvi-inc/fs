@@ -12,6 +12,10 @@ C iskrec - time-ordered index of observation records
 C lskobs - Hollerith observation record, use iskrec to enter
 C          this array
 C lexper - Experiment name
+      character*128 cexperdes,cpiname,ccorname
+C cexperdes - experiment description
+C cpiname - PI name
+C ccorname - correlator
  
       COMMON/SKOBS/
      .nobs,
@@ -19,3 +23,5 @@ C lexper - Experiment name
      .ISKREC(MAX_OBS),
      .LSKOBS(IBUF_LEN,MAX_OBS),lexper(4)
 
+      COMMON/SKOBS_CH/
+     .cexperdes,cpiname,ccorname

@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960522 nrv New.
+C 961122 nrv change fget_mode_lowl to fget_all_lowl
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -33,13 +34,13 @@ C
 C  LOCAL:
       character*128 cout
       integer ib,i,nch
-      integer fvex_int,fvex_len,fvex_field,fget_mode_lowl,ptr_ch
+      integer fvex_int,fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
 C
 C  1. BBC assignment statements
 C
       ierr = 1
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('BBC_assign'//char(0)),
      .ptr_ch('BBC'//char(0)),ivexnum)
       ib=0
@@ -88,7 +89,7 @@ C  1.3 IFD ref
         endif
 
 C       Get next BBC def statement
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('BBC_assign'//char(0)),
      .  ptr_ch('BBC'//char(0)),0)
       enddo ! get all BBC defs

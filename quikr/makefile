@@ -2,7 +2,7 @@
 FFLAGS = -c
 LIBES = ../bosslb/bosslb.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a\
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a\
-../newlb/newlb.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
+../poclb/poclb.a ../newlb/newlb.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 OBJECTS = quikr.o aeoff.o beam.o cable.o cadis.o cal.o chk.o\
 class_frm.o ctemp.o de.o dedis.o devds.o ena.o endis.o\

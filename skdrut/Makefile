@@ -9,6 +9,7 @@
 # 951017 nrv Initial version                                            #
 # 951019 nrv Changes for VLBA modes and LO per channel                  #
 # 960602 nrv Changes for VEX file reading                               #
+# 970118 nrv Add vunpprc and unpfmt.                                     #
 #                                                                       #
 #########################################################################
  
@@ -30,7 +31,7 @@ vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
 vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
 vsoinp.o vglinp.o vob1inp.o vobinp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
 vread.o addscan.o findscan.o newscan.o pnum.o frinit.o vunps2g.o \
-vunps2m.o vunproll.o
+vunps2m.o vunproll.o vunpprc.o unpfmt.o
 #
 FFLAGS=-C -c
 CFLAGS= -c

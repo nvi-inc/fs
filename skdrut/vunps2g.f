@@ -31,8 +31,7 @@ C
 C  LOCAL:
       character*128 cout
       integer il,i
-      integer fvex_len,fvex_field,fget_mode_lowl,ptr_ch,
-     .fget_all_lowl
+      integer fvex_len,fvex_field,fget_all_lowl,ptr_ch
 C
 C
 C  1. Pass order list
@@ -42,9 +41,6 @@ C
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('S2_group_order'//char(0)),
      .ptr_ch('PASS_ORDER'//char(0)),ivexnum)
-C     iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
-C    .ptr_ch('pass_order'//char(0)),
-C    .ptr_ch('PASS_ORDER'//char(0)),ivexnum)
       if (iret.ne.0) return
 
 C  1.1 <group>

@@ -1,4 +1,4 @@
-	SUBROUTINE wrtrack(idx,lu,iblen,icod)
+      SUBROUTINE wrtrack(idx,lu,iblen,icod)
 C
 C  wrtrack writes the track lines for VLBA pointing files.
 C
@@ -16,7 +16,7 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
-	integer idx,lu,iblen,icod
+      integer idx,lu,iblen,icod
 C
 C     CALLED BY: VLBAT
 C
@@ -42,14 +42,14 @@ C       frequency
 
         ileft = o'100000'
         iy=0
-	iprint = 0
-	call ifill(ibuf,1,iblen,32)
-	call char2hol('track=',ibuf,1,6)
-	nch = 7
+      iprint = 0
+      call ifill(ibuf,1,iblen,32)
+      call char2hol('track=',ibuf,1,6)
+      nch = 7
         iul=1
-	do ichan=1,nchan(istn,icod)  !channels
-	  do ul=1,2  !Upper and lower
-	    iassign = itras(ul,1,invcx(ichan,istn,icod),idx,istn,icod)
+      do ichan=1,nchan(istn,icod)  !channels
+        do ul=1,2  !Upper and lower
+          iassign = itras(ul,1,invcx(ichan,istn,icod),idx,istn,icod)
 C  Note: for mode A there is no track assignment for pass 2, so
 C  no tracks are written. But both u/l are assigned.
 C  Note: for 2-bit sampling, the track for the magnitude is automatically
@@ -58,43 +58,43 @@ C  explicitly in ITRAS.
 C  Note: for fan-out, the next track(s) are automatically recorded on
 C  the next one on the stack. This track does not appear
 C  explicitly in ITRAS.
-	    if (iassign.gt.-99) then  !if number
+          if (iassign.gt.-99) then  !if number
                 if (ul.eq.2) iul=2 ! we have both u/l
-		iassign = iassign + 3 ! VLBA track numbers
+      	iassign = iassign + 3 ! VLBA track numbers
                 nch = ichmv_ch(ibuf,nch,'(')
-		iprint = iprint + 1
+      	iprint = iprint + 1
                 iy = iy+1
                 nch = nch + ib2as(iy,ibuf,nch,ileft+2)
                 nch = ichmv_ch(ibuf,nch,',')
                 nch = nch + ib2as(iassign,ibuf,nch,ileft+2)
                 nch = ichmv_ch(ibuf,nch,'),')
-	    end if !if number
-	  end do !Upper and lower
-	  if (iprint.eq.8) then
-	    if (iprint.eq.iul*nchan(istn,icod)) then
+          end if !if number
+        end do !Upper and lower
+           if (iprint.eq.8) then
+C             if (iprint.eq.iul*nchan(istn,icod)) then
 C               nch = ichmv(ibuf,nch-1,2h  ,1,2)
-                nch = ichmv_ch(ibuf,nch-1,' !NEXT!')
-	    else
+C               nch = ichmv_ch(ibuf,nch-1,' !NEXT!')
+C             else
                 nch = ichmv_ch(ibuf,nch-1,'  ')
-	    end if
-	    CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
-	    call ifill(ibuf,1,iblen,32)
-	    iprint = 0
-	    call char2hol('track=',ibuf,1,6)
-	    nch = 7
-	  end if
-	end do !channels
-	if (iprint.ne.0) then
-          nch = ichmv_ch(ibuf,nch-1,' !NEXT!')
-	  CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
-	  call ifill(ibuf,1,iblen,32)
-	end if
-	if (iy.eq.0) then !didn't write any tracks, but need a NEXT
+C             end if
+          CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
+          call ifill(ibuf,1,iblen,32)
+          iprint = 0
+          call char2hol('track=',ibuf,1,6)
+          nch = 7
+        end if
+      end do !channels
+C     if (iprint.ne.0) then
           nch = ichmv_ch(ibuf,1,' !NEXT!')
-	  CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
-	  call ifill(ibuf,1,iblen,32)
-	end if
+        CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
+        call ifill(ibuf,1,iblen,32)
+C     end if
+      if (iy.eq.0) then !didn't write any tracks, but need a NEXT
+          nch = ichmv_ch(ibuf,1,' !NEXT!')
+        CALL writf_asc(LU,IERR,IBUF,(nch+1)/2)
+        call ifill(ibuf,1,iblen,32)
+      end if
 C
-	RETURN
-	END
+      RETURN
+      END
 

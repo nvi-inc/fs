@@ -33,7 +33,7 @@ C  OUTPUT:
       integer ierr,irah,iram,idecd,idecm
       integer*2 lprot,ldsign
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
-      integer*2 LNAME1(4), LNAME2(4)
+      integer*2 LNAME1(max_sorlen/2), LNAME2(max_sorlen/2)
 C           - IAU and common names
 C
 C   Celestial Source Info:
@@ -125,12 +125,12 @@ C     IAU-name, 8 characters.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8)
+      IF  (NCH.GT.max_sorlen)
      &  THEN  !"too long"
           IERR = -101
           RETURN
           END IF  !"too long"
-      CALL IFILL(LNAME1,1,8,oblank)
+      CALL IFILL(LNAME1,1,max_sorlen,oblank)
       IDUMY = ICHMV(LNAME1,1,IBUF,IC1,NCH)
 C
 C
@@ -138,12 +138,12 @@ C     Common-name, 8 characters.
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8)
+      IF  (NCH.GT.max_sorlen)
      &  THEN  !"too many"
           IERR = -102
           RETURN
           END IF  !"too many"
-      CALL IFILL(LNAME2,1,8,oblank)
+      CALL IFILL(LNAME2,1,max_sorlen,oblank)
       IDUMY = ICHMV(LNAME2,1,IBUF,IC1,NCH)
 C
 C

@@ -501,7 +501,7 @@ C       Find highest value of isyn (1, 2, or 3)
           end do
           iy = ichmv_ch(ibuf,iy,')')
         end do
-        iy = ichmv_ch(ibuf,iy,' ')
+        iy = ichmv_ch(ibuf,iy,'  ')
         call writf_asc(lu,ierr,ibuf,iy/2)
         call ifill(ibuf,1,iblen,32)
 

@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960520 nrv New.
+C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -38,14 +39,14 @@ C  LOCAL:
       character*128 cout
       integer it(4),j,nn,in,i,nch,idumy
       integer ichmv_ch ! function
-      integer fvex_len,fvex_int,fvex_field,fget_mode_lowl,ptr_ch
+      integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
 C
 C  1. The recording format
 C
       ierr = 1
       CALL IFILL(LM,1,8,oblank)
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('track_frame_format'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
       if (iret.ne.0) return
@@ -61,7 +62,7 @@ C
 C  2. Fanout def statements
 C
       ierr = 2
-      iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+      iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('fanout_def'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
       in=0
@@ -166,7 +167,7 @@ C       Check for consistent fanout
         endif ! save first/check subsequent defs
         
 C       Get next fanout def statement
-        iret = fget_mode_lowl(ptr_ch(stdef),ptr_ch(modef),
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('fanout_def'//char(0)),
      .  ptr_ch('TRACKS'//char(0)),0)
       enddo ! get all fanout defs

@@ -1971,3 +1971,242 @@ Version 9.3.4 961220
            merged 9.3.4 changes into original 9.3.3 version
 
 Version 9.3.5 961227
+
+970102 nrv skdrut/slewt.f
+           change variable RME to single precision for AMAX1 (Simone Magri)
+
+970103 nrv drudg/spdstr.f
+           Add 40 speed
+
+970108 nrv drudg/procs.f
+           For Mk4 rack, if VCbw=1 or 0.25, set to "0" for external.
+
+970108 nrv skdrut/vmoinp.f, skdrut/vob1inp.f, skdrincl/freqs.ftni
+           Add the frequency code index to the pass order list.
+
+970110 nrv skdrut/vmoinp.f
+           Save the pass order list by code number.
+
+970107 WEH fmset/getfmtime.c
+           get Mark 4 FM time 0.1 sec after 1 PPS, seems more robust
+
+970113 WEH ibcon.old/
+           deleted
+
+970113 nrv drudg/procs.f
+           Add !+10s in S2 LOADER procedure.
+
+970113 nrv drudg/procs.f
+           No FORM= command at all for S2, nor !*.
+
+970113 nrv drudg/procs.f
+           Automatically reverse LSB<-->USB in TRACKFORM command for LSB.
+
+970113 nrv drudg/procs.f
+           Allow first-8 BBCs or last-8 BBCs for mode A.
+
+970114 nrv skdrut/vunpso.f
+           Change 4 to max_sorlen/2
+
+970114 nrv skdrincl/freqs.ftni
+           Add LPREFIX.
+
+970114 nrv skdrincl/skparm.ftni
+           Add MAX_SORLEN, length of source names.
+
+970114 nrv skdrincl/sourc.ftni
+           Change dimension of LSORNA to use MAX_SORLEN
+
+970114 nrv drudg/ckobs.f
+           Change 4 to max_sorlen/2
+
+970114 nrv drudg/snap.f
+           Change 8 to max_sorlen
+
+970114 nrv drudg/fdrudg.f
+           Change 8 to max_sorlen
+
+970114 nrv drudg/lists.f
+           Change lsname(4) to (max_sorlen/4). Print only first 8 characters.
+
+970114 nrv drudg/point.f
+           Write out first 8 char of source name only.
+
+970114 nrv drudg/sread.f
+           Pass CBUF to VREAD so it can check the VEX version
+
+970114 nrv drudg/sread.f
+           Remove the call to VGLINP (put it into VREAD). Write out 
+           experiment info at start.
+
+970114 nrv drudg/unpsk.f
+           Change 8 to max_sorlen
+
+970114 nrv drudg/vlbat.f
+           Change 8 to max_sorlen. Still need to check out the formatting.
+
+970114 nrv skdrut/cablw.f
+           Change amin0,amax0 to amin1,amax1 (found by Simone Magri, ATNF)
+
+970114 nrv skdrut/findscan.f
+           Chane 8 to max_sorlen
+
+970114 nrv skdrut/flinp.f
+           Change dimension of lname to max_sorlen
+
+970114 nrv skdrut/igtso.f
+           Change 4 to max_sorlen/2
+
+970114 nrv skdrut/ivgtso.f
+           Change 4 to max_sorlen/2
+
+970114 nrv skdrut/newscan.f
+           change 8 to max_sorlen
+
+970114 nrv skdrut/unpfl.f
+           Change 4 to max_sorlen/2
+
+970114 nrv skdrut/soinp.f
+           Change 4 to max_sorlen/2
+
+970114 nrv skdrut/unpso.f
+           Change 4 and 8 to max_sorlen/2 and max_sorlen
+
+970114 nrv skdrut/vmoinp.f
+           Call VUNPPRC to read $PROCEDURES. Store prefix. 
+
+970114 nrv skdrut/vmoinp.f
+           Add polarization to VUNPIF call. Save LPOL per channel.
+
+970114 nrv skdrut/vread.f
+           Stop if the supported VEX version is not found.
+
+970114 nrv skdrut/vread.f
+           Add a call to VGLINP
+
+970114 nrv skdrut/vsoinp.f
+           Change 8 to max_sorlen
+
+970114 nrv skdrut/vunpdas.f
+           Add "_type" to rack and recorder Vex names.
+
+970114 nrv skdrut/vunpfrq.f
+           Remove polarization, shift up all subsequent field numbers.
+
+970114 nrv skdrut/vunpif.f
+           For Vex 1.5 get IF name from def directly instead of ref name, 
+
+970114 nrv skdrut/vunpprc.f
+           New. Unpack procedure prefix name.
+
+970114 WEH st.default/proc/*s2station.prc
+           fixed rec_mode commands in unloader
+
+970114 WEH ./vex/print_vex.c
+           updated for VEX 1.5
+
+970114 WEH ./st.default/proc/vs2station.prc
+           ./st.default/proc/s2station.prc
+	   add !+10s to S2 loader procedures
+
+970115 WEH ./clib/dqa_util.c
+           report nosync errors as well
+
+970115 WEH ./vex/vexf.c
+           ./vex/vex.h
+           ./vex/vex_get.c
+           updated for VEX 1.5
+
+970115 nrv skdrut/frinp.f
+           Add call to UNPFMT for recording format by station line.
+
+970115 nrv skdrut/unpfmt.f
+           New. Unpack data format statement for sked files, telling
+           whether station is using DR or NDR.
+
+970116 nrv skdrut/vunpant.f
+           Change "ant_motion" to "antenna_motion" for Vex 1.5
+
+970116 WEH clib/dqa_util.c
+           add no-sync errors to output
+           fix display of track 3 bit-stream
+           make bit stream calculation more robust
+
+970116 WEH control/fserr.ctl
+           improved Mark III/IV ST=,speed error message
+
+970116 WEH ./quikv/dqa_dis.c
+           report nosync errors as well
+
+970117 WEH st.default/station.prc
+           st.default/3vstation.prc
+           st.default/4station.prc
+           changed if3 commands to set both switches
+
+970117 nrv drudg/procs.f
+           Don't write IF3 commands unless there is an IF3 in the schedule.
+
+970117 nrv drudg/procs.f
+           Add patch command for IF3
+
+970117 nrv drudg/cazel.f
+           check for argument to ACOS being slightly greater than +/-1.0 
+           and set it exactly.
+
+970117 nrv skdrut/frinp.f
+           Add IF3O and IF3I to Mk3-4 allowed values.
+
+970117 nrv skdrut/vunps2m.f
+           Remove "track_frame_format", irrelevant for S2.
+
+970117 nrv skdrut/unplo.f
+           Allow IF3O and IF3I (out and in). "N" still means "I".
+
+970117 WEH ./st.default/proc/station.prc
+           ./st.default/proc/3vstation.prc
+           ./st.default/proc/4station.prc
+           fixed if3= commands
+
+970118 nrv drudg/spdstr.f
+           Add the rest of the valid speeds.
+
+970118 WEH ./vex/vex.y
+           ./vex/vex_util.c
+           ./vex/vex.yy.l
+           updated for VEX 1.5
+
+970118 WEH ./monit/mout2.c
+           tape recorder speeds cleaned-up
+
+970118 WEH ./clib/vst_util.c
+           accept correct and complete speeds
+
+970118 WEH ./fslb/itped.f
+           accept correct and complete speeds
+           M3 drive can accept thin speeds
+      
+970118 WEH ./quikr/Makefile
+           add poclb.a to libraries
+
+970118 WEH ./quikr/tplisv.f
+           don't accept "al" as "all"
+
+970119 nrv drudg/procs.f
+           Extend LSB support to work for any station with VLBA or
+           Mk4 rack. 
+
+970119 WEH ./quikr/tpi.f
+           increase buffer limit
+
+970119 WEH ./clib/tpi_vlba.c
+           ./control/fserr.ctl
+           ./quikr/tsys.f
+           add error message if tsys overflows or is less than zero
+
+970119 WEH help/
+           updated
+
+970119 WEH st.default/dos
+           deleted
+
+Version 9.3.6 970119

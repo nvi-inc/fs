@@ -10,7 +10,7 @@ C
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
      .ncord,maxtap,nsefdpar,nrecst,nheads,ibitden_save,
-     .itearl,itlate,itgap,ns2tapes
+     .itearl,itlate,itgap,ns2tapes,itearl_save
 C
       integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
      .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed
@@ -40,7 +40,7 @@ C
      .       NCORD(MAX_STN),maxtap(max_stn),
      .       nsefdpar(max_band,max_stn),
      .       nrecst(max_stn),nheads(max_stn),
-     .       ibitden_save(max_stn),
+     .       ibitden_save(max_stn),itearl_save,
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
      .       ns2tapes(max_stn),
      .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN), 

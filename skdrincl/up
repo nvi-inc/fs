@@ -1,0 +1,3 @@
+freqs.ftni:25:C 970114 nrv Add LPREFIX.
+skparm.ftni:37:C 970114 nrv Add MAX_SORLEN, length of source names.
+sourc.ftni:2:C 970114 nrv Change dimension of LSORNA to use MAX_SORLEN
