@@ -9,7 +9,7 @@ C
 C
       character*63 iobuf,iibuf
       dimension ireg(2),ldum(3),rotat(2,2)
-      integer*2 jbuf(50),laxis(2),lant(4)
+      integer*2 jbuf(100),laxis(2),lant(4)
       integer*2 ilabel(40)
       integer*2 lstrng(40)
       integer idcbo(2)
@@ -26,7 +26,7 @@ C
 C          too man input poinhts, limit is
       data lnopt  /  15,2hno,2h i,2hnp,2hut,2h p,2hoi,2hnt,2hs /
 C          no input points
-      data il/50/,mpts/500/,iwds/3072/,idcbos/784/,is/40/
+      data il/100/,mpts/500/,iwds/3072/,idcbos/784/,is/40/
 C
       ic=ib2as(mpts,ldum,1,o'100000'+6)
 C
