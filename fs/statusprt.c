@@ -38,6 +38,6 @@ int status;
         else
             fprintf(stderr,"Signal # %d",code);
         if ((status & 0200) == 0200)
-            fprintf(stderr,"-code dumped");
+            fprintf(stderr,"-core dumped");
     }
 }
