@@ -19,7 +19,7 @@ C
       integer*2 ibuf2(10),ibuf(20),laux(12)
       integer*4 ip(5),jperr(2),jsync(2)
       integer itrk(2),isyna(5),isynb(5),ireg(2),itrk2(2),iaux(2)
-      integer equalizer
+      integer equalizer, itrkl(2)
 C
       data itper/25/,nav/4/,ilen/40/
 C             - time 10s of milliseconds
@@ -61,7 +61,9 @@ c
         call run_matcn(iclass,nrec)
         call rmpar(ip)
       else !VLBA
-        call fc_set_vrptrk(itrk, ip)
+        itrkl(1)=itrk(1)-1
+        itrkl(2)=itrk(2)-1
+        call fc_set_vrptrk(itrkl, ip)
       endif
       if(ip(3).lt.0) return
       call clrcl(ip(1))
@@ -194,12 +196,23 @@ C
         secs=1     !!! MAKE ONE UNTIL MORE KNOWLEDGE OF MK4 !!! 
       else
         call fs_get_vrepro_equalizer(equalizer,1)
-        if(equalizer.eq.1) then
-          secs=2.0
-        else if(equalizer.eq.2) then
-          secs=1.0
-        else 
-          secs=1.0
+        call fs_get_drive_type(drive_type)
+        if(drive_type.eq.VLBA) then
+           if(equalizer.eq.1) then
+              secs=2.0
+           else if(equalizer.eq.2) then
+              secs=1.0
+           else 
+              secs=1.0
+           endif
+        else !VLBA2
+           if(equalizer.eq.0) then
+              secs=2.0
+           else if(equalizer.eq.1) then
+              secs=1.0
+           else 
+              secs=1.0
+           endif
         endif
       endif
       tper=(itper*0.01)-0.005 ! average sample period 
