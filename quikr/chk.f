@@ -24,11 +24,12 @@ C   LOCAL VARIABLES
       integer ichcm_ch
       logical kminus
 C               - true if parameter is preceded by a minus sign 
-      logical kMrack, kMdrive
+      logical kMrack, kMdrive,kS2drive,kVrack,kVdrive
 C               - true for MK3 rack and drive, respectively
 C               - if false, then VLBA rack or drive, respectively
       integer ick(21) 
       integer ickv(18)
+      integer icks2
       integer icks(4)
 C        ICH    - character counter 
 C     NCHAR  - character count
@@ -73,14 +74,13 @@ C
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = min0(ireg(2),ilen)
       ieq = iscn_ch(ibuf,1,nchar,'=')
-      kMrack=.false.
-      kMdrive=.false.
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4)))
-     . kMrack = .true.
-      if ((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4)))
-     . kMdrive = .true.
+      kMrack= MK3.eq.rack.or.MK4.eq.rack
+      kVrack= VLBA.eq.rack
+      kMdrive= MK3.eq.drive.or.MK4.eq.drive
+      kVdrive= VLBA.eq.drive
+      kS2drive=S2.eq.drive
       if (ieq.eq.0) goto 500
 C                   If no parameters, go report current list
 C 
@@ -92,14 +92,16 @@ C                   V1 to V15 - video converters
 C                   VC - all video converters (1 to 15) 
 C                   IF - IF distributor 
 C                   FM - formatter
-C                   TP - tape 
+C                   TP or RC - tape 
 C                   HD - high density heads
 C     VLBA parameters:
 C                   B1 to B16 - baseband converters
 C                   IA - IF distributor, channels A & B
 C                   IC - IF distributor, channels C & D
 C                   FM - formatter
-C                   RC - tape recorder
+C                   TP or RC - tape recorder
+C     S2 parameters:
+C                   TP or RC - tape recorder
 C     Other modules:
 C                   RX - S/X receiver
 C                   ALL - all modules 
@@ -117,6 +119,7 @@ C Turn off all of the parameters to start
       do i=1,18
         ickv(i) = 0
       enddo
+      icks2=0
       do i=1,4
         icks(i) = 0
       enddo
@@ -132,6 +135,8 @@ C  Handle * if present
           call fs_get_ichvlba(ichvlba(i),i)
           if (ichvlba(i).gt.0) ickv(i)=1
         enddo
+        call fs_get_ichs2(ichs2)
+        if (ichs2.gt.0) icks2=1
         do i=1,4
           if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
             call fs_get_stchk(stchk(i),i)
@@ -186,21 +191,23 @@ C  2.2 check for ALL.
 C 
         else if (ichcm_ch(lprm,1,'al').eq.0) then
           if (kMrack) then
-            do i=1,17
-              ick(i) = iset
-            enddo
-            ick(21) = iset
-          else
-            do i=1,17
-              ickv(i) = iset
-            enddo
+             do i=1,17
+                ick(i) = iset
+             enddo
+             ick(21) = iset
+          else if(kVrack) then
+             do i=1,17
+                ickv(i) = iset
+             enddo
           endif
           ick(19) = iset
           ick(20) = iset
           if (kMdrive) then
-            ick(18) = iset
-          else
-            ickv(18) = iset
+             ick(18) = iset
+          else if(kS2drive) then
+             icks2=iset
+          else if(kVdrive) then
+             ickv(18) = iset
           endif
           do i=1,4
             if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
@@ -238,7 +245,7 @@ C
 C 
 C  2.6 One of the video converters.
 C 
-        else if ((cjchar(lprm,1).eq.'v').and.(kMrack)) then
+        else if (cjchar(lprm,1).eq.'v'.and.kMrack) then
           ii=jchar(lprm,2)-z'30'
           if (ii.gt.9) ii=ii-7-z'20'
           if (ii.le.0 .or. ii.gt.15) then
@@ -249,7 +256,7 @@ C
 C
 C  2.7 One of the baseband converters.
 C
-        else if ((cjchar(lprm,1).eq.'b').and.(.not.kMrack)) then
+        else if (cjchar(lprm,1).eq.'b'.and.kVrack) then
           ii=jchar(lprm,2)-z'30'
           if (ii.gt.9) ii=ii-7-z'20'
           if (ii.le.0 .or. ii.gt.14) then
@@ -260,34 +267,45 @@ C
 C 
 C  2.8 IF distributor
 C 
-        else if ((ichcm_ch(lprm,1,'if').eq.0).and.(kMrack)) then
+        else if (ichcm_ch(lprm,1,'if').eq.0.and.kMrack) then
           ick(16) = iset
 
-        else if ((ichcm_ch(lprm,1,'i3').eq.0).and.(kMrack)) then
+        else if (ichcm_ch(lprm,1,'i3').eq.0.and.kMrack) then
           ick(21) = iset
 
-        else if ((ichcm_ch(lprm,1,'ia').eq.0).and.(.not.kMrack)) then
+        else if (ichcm_ch(lprm,1,'ia').eq.0.and.kVrack) then
           ickv(15) = iset
 
-        else if ((ichcm_ch(lprm,1,'ic').eq.0).and.(.not.kMrack)) then
+        else if (ichcm_ch(lprm,1,'ic').eq.0.and.kVrack) then
           ickv(16) = iset
 C 
 C  2.9 Formatter 
 C 
-        else if ((ichcm_ch(lprm,1,'fm').eq.0).and.(kMrack)) then
+        else if (ichcm_ch(lprm,1,'fm').eq.0.and.kMrack) then
           ick(17) = iset
 
-        else if ((ichcm_ch(lprm,1,'fm').eq.0).and.(.not.kMrack)) then
+        else if (ichcm_ch(lprm,1,'fm').eq.0.and.kVrack) then
           ickv(17) = iset
 C 
 C  2.10 Tape (MK3)
 C 
-        else if ((ichcm_ch(lprm,1,'tp').eq.0).and.(kMdrive)) then
+        else if (kMdrive
+     $         .and.(ichcm_ch(lprm,1,'rc').eq.0
+     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
           ick(18) = iset
 C 
-C  2.11 Recorder (VLBA) 
+C  2.11 Recorder (S2) 
 C 
-        else if ((ichcm_ch(lprm,1,'rc').eq.0).and.(.not.kMdrive)) then
+       else if (kS2drive
+     $         .and.(ichcm_ch(lprm,1,'rc').eq.0.
+     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
+          icks2 = iset 
+C 
+C  2.12 Recorder (VLBA) 
+C 
+        else if (kVdrive
+     $         .and.(ichcm_ch(lprm,1,'rc').eq.0
+     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
           ickv(18) = iset 
 C 
 C     2.99 None of the above
@@ -315,13 +333,19 @@ C             If the module was set up, don't check it now
 C             If the module was previously ignored, check it now
           call fs_set_ichvlba(ichvlba(i),i)
         enddo
+        call fs_get_ichs2(ichs2)
+        if (icks2.eq.0.and.ichs2.gt.0) ichs2 = -1
+C     If the module was set up, don't check it now
+        if (icks2.eq.1.and.ichs2.lt.0) ichs2 = +1
+C     If the module was previously ignored, check it now
+        call fs_set_ichs2(ichs2)
         do i=1,4
-          if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
-            call fs_get_stchk(stchk(i),i)
-            if(icks(i).eq.0.and.stchk(i).gt.0) stchk(i) = -1
-            if(icks(i).eq.1.and.stchk(i).lt.0) stchk(i) = +1
-            call fs_set_stchk(stchk(i),i)
-          endif
+           if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
+              call fs_get_stchk(stchk(i),i)
+              if(icks(i).eq.0.and.stchk(i).gt.0) stchk(i) = -1
+              if(icks(i).eq.1.and.stchk(i).lt.0) stchk(i) = +1
+              call fs_set_stchk(stchk(i),i)
+           endif
         enddo
 C 
       goto 900
@@ -351,7 +375,7 @@ C
             nch = mcoma(ibuf,nch)
           endif
         enddo
-      else        !! if VLBA rack
+      else if(kVrack) then       !! if VLBA rack
         do i=1,17
           call fs_get_ichvlba(ichvlba(i),i)
           if (ichvlba(i).ge.1) then
@@ -374,10 +398,16 @@ C
           nch = ichmv_ch(ibuf,nch,'tp')
           nch = mcoma(ibuf,nch)
         endif
-      else   !! if VLBA drive
+      else if(kS2drive) then  !! if s2 drive
+        call fs_get_ichs2(ichs2)
+        if (ichs2.ge.1) then
+           nch = ichmv_ch(ibuf,nch,'tp')
+           nch = mcoma(ibuf,nch)
+        endif
+      else if(KVdrive) then  !! if VLBA drive
         call fs_get_ichvlba(ichvlba(18),18)
         if (ichvlba(18).ge.1) then
-           nch = ichmv_ch(ibuf,nch,'rc')
+           nch = ichmv_ch(ibuf,nch,'tp')
            nch = mcoma(ibuf,nch)
         endif
       endif
