@@ -4,7 +4,6 @@
 
 #include "../include/rclcn_res_ds.h"
 
-#undef TRUE
 #include "../rclco/rcl/rcl_def.h"
 
 void opn_rclcn_res(buffer,ip)      /* initialize (open) response structs */
@@ -402,6 +401,21 @@ int get_rclcn_delaym_read(struct rclcn_res_buf *buffer,
 
   return ierr;
 }
+int get_rclcn_barrelroll_set(struct rclcn_res_buf *buffer)
+{
+  return get_rclcn_res(buffer);
+}
+int get_rclcn_barrelroll_read(struct rclcn_res_buf *buffer, ibool *barrelroll)
+{
+  int ierr=get_rclcn_res(buffer);
+
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,barrelroll, sizeof(ibool));
+
+  return ierr;
+}
 int get_rclcn_align(struct rclcn_res_buf *buffer)
 {
   int ierr=get_rclcn_res(buffer);
@@ -526,6 +540,57 @@ int get_rclcn_tapetype_read(struct rclcn_res_buf *buffer, char *tapetype)
     return ierr;
 
   ierr=get_rclcn_res_string(buffer,tapetype);
+
+  return ierr;
+}
+int get_rclcn_mk3_form_set(struct rclcn_res_buf *buffer)
+{
+  return get_rclcn_res(buffer);
+}
+int get_rclcn_mk3_form_read(struct rclcn_res_buf *buffer, ibool *mk3)
+{
+  int ierr=get_rclcn_res(buffer);
+
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,mk3, sizeof(ibool));
+
+  return ierr;
+}
+int get_rclcn_transport_times(struct rclcn_res_buf *buffer, int *num_entries,
+			      unsigned short serial[],
+			      unsigned long tot_on_time[],
+			      unsigned long tot_head_time[],
+			      unsigned long head_use_time[],
+			      unsigned long in_service_time[])
+{
+  int ierr=get_rclcn_res(buffer);
+
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,num_entries, sizeof(int));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,serial, 8*sizeof(unsigned short));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,tot_on_time, 8*sizeof(unsigned long));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,tot_head_time, 8*sizeof(unsigned long));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,head_use_time, 8*sizeof(unsigned long));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,in_service_time, 8*sizeof(unsigned long));
 
   return ierr;
 }
@@ -655,6 +720,37 @@ int get_rclcn_status_decode(struct rclcn_res_buf *buffer, char *stat_msg)
     return ierr;
 
   ierr=get_rclcn_res_string(buffer,stat_msg);
+
+  return ierr;
+}
+int get_rclcn_diag(struct rclcn_res_buf *buffer)
+{
+  return get_rclcn_res(buffer);
+}
+int get_rclcn_berdcb(struct rclcn_res_buf *buffer,long int *err_bits,
+		     long int *tot_bits)
+{
+  int ierr=get_rclcn_res(buffer);
+
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,err_bits, sizeof(long int));
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_data(buffer,tot_bits, sizeof(long int));
+
+  return ierr;
+}
+int get_rclcn_ident(struct rclcn_res_buf *buffer, char *devtype)
+{
+  int ierr=get_rclcn_res(buffer);
+
+  if(ierr!=0)
+    return ierr;
+
+  ierr=get_rclcn_res_string(buffer,devtype);
 
   return ierr;
 }
