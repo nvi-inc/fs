@@ -193,23 +193,35 @@ C     try communications all over again.
 C     If we got a o'6' (ack) or o'25' (nak) substitute readable ACK or NAK.
 C
       if (ireg(1).eq.-2) then          ! timeout
-        if (itry.lt.maxtry) goto 200
-        ierr = -4
+         if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
+            call echoe(itran,iebuf,nctran,iecho,maxech)
+            call logit2(iebuf,iecho)
+            if(nrc.gt.0) then
+               call echoe(irecv,iebuf2,nrc,iecho2,maxech)
+               call logit2(iebuf2,iecho2)
+            endif
+         endif
+         if ((imode.eq.9.or.imode.eq.10.or.imode.eq.-54).and.itry.lt.3)
+     &        goto 200
+         if (itry.lt.maxtry) goto 200
+         ierr = -4
       else if (nrc.ne.nchrc(ir).and.imode.ne.9.and.imode.ne.10
      &       .and.imode.ne.-54) then
 c                                ! wrong # of characters in response
-        if (itry.lt.maxtry) goto 200
-        call ifill_ch(irecv,1,80,' ')
-        nrc=0
-        ierr = -5
+         if (itry.lt.maxtry) goto 200
+         call ifill_ch(irecv,1,80,' ')
+         nrc=0
+         ierr = -5
       else if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
          nrc=nrc-3
          if(nrc.ge.10) then
             do i=nrc,max(1,nrc-24),-1
                if(cjchar(irecv,i).eq.'?') then
                   if(ichcm_ch(irecv,i,'? ERROR').eq.0) then
+                     call echoe(irecv,iebuf2,nrc,iecho2,maxech)
+                     call logit2(iebuf2,iecho2)
                      ierr=ias2b(irecv,i+8,1+(nrc-1)-(i+8))
-                     if(ierr.eq.7.and.itry.lt.maxtry) goto 200
+                     if(ierr.eq.7.and.itry.lt.3) goto 200
                      if(ierr.lt.-1000.or.ierr.gt.1000) then
                         ierr=-999
                      else if(ierr.gt.0) then
@@ -217,7 +229,6 @@ c                                ! wrong # of characters in response
                      else if(ierr.lt.0) then
                         ierr=-850+ierr
                      endif
-                     call logit2(irecv,nrc)
                      goto 999
                   endif
                endif
