@@ -122,7 +122,8 @@ C
 C 9. Check tape head positioning.
 C
 900   continue
-      if(MK3.eq.drive.or.MK4.eq.drive.or.VLBA.eq.drive) then
+      if(MK3.eq.drive.or.MK4.eq.drive.or.VLBA.eq.drive.or.
+     &     VLBA4.eq.drive) then
          call fs_get_icheck(icheck(20),20)
          if (icheck(20).le.0.or.ichecks(20).ne.icheck(20)) goto 910
          call hdchk(ichecks,lwho)
@@ -149,13 +150,13 @@ C
          call run_prog('cheks','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       endif
       do i=1,17
-         if(rack.eq.VLBA) then
+         if(rack.eq.VLBA.or.rack.eq.VLBA4) then
             call fs_get_ichvlba(icheck(i),i)
          else if(rack.eq.MK3.or. rack.eq.MK4) then
             call fs_get_icheck(icheck(i),i)
          endif
       enddo
-      if(drive.eq.VLBA) then
+      if(drive.eq.VLBA.or.drive.eq.VLBA4) then
          call fs_get_ichvlba(icheck(18),18)
       else if(drive.eq.MK3.or.drive.eq.MK4) then
          call fs_get_icheck(icheck(18),18)
@@ -185,13 +186,13 @@ C
       call read_quikr
       if (kpapa) then
          do i=1,17
-            if(rack.eq.VLBA) then
+            if(rack.eq.VLBA.or.rack.eq.VLBA4) then
                call fs_get_ichvlba(icheck(i),i)
             else if(rack.eq.MK3.or. rack.eq.MK4) then
                call fs_get_icheck(icheck(i),i)
             endif
          enddo
-         if(drive.eq.VLBA) then
+         if(drive.eq.VLBA.or.drive.eq.VLBA4) then
             call fs_get_ichvlba(icheck(18),18)
          else if(drive.eq.MK3.or.drive.eq.MK4) then
             call fs_get_icheck(icheck(18),18)

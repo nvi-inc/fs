@@ -131,7 +131,7 @@ c
            goto 998
         endif
         goto 200
-      else if (MK4.eq.rack) then
+      else if (MK4.eq.rack.or.VLBA4.eq.rack) then
         ibuf(1) = -54
         idum = ichmv_ch(ibuf,3,'fm')
         idum = ichmv_ch(ibuf,5,'/TIM')

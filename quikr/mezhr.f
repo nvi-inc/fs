@@ -37,7 +37,7 @@ c set reproduce tracks
 c
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      if ((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
+      if (MK3.eq.drive.or.MK4.eq.drive) THEN
         nrec=0
         ibuf2(1)=0
         call char2hol('tp',ibuf2(2),1,2)
@@ -54,20 +54,16 @@ c
         call fs_set_itraka(itraka)
         call fs_set_itrakb(itrakb)
         iclass=0
-        if (MK3.eq.and(MK3,drive)) then
+        if (MK3.eq.drive) then
           call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-        else if (MK4.eq.and(MK4,drive)) then
+        else if (MK4.eq.drive) then
           call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
-          call put_buf(iclass,ibuf2,-13,'fs','  ')
-          nrec = nrec+1
-          call fs_get_vac4(vac4)
-          call rpbr2ma4(ibuf2(3),ibr4tap,vac4)!! bitrate has a different strobe
         endif
         call put_buf(iclass,ibuf2,-13,'fs','  ')
         nrec = nrec+1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else !VLBA
+      else !VLBA or VLBA4
         itrkl(1)=itrk(1)-1
         itrkl(2)=itrk(2)-1
         call fc_set_vrptrk(itrkl, ip)
@@ -86,7 +82,7 @@ c
 c
 c  initialize decoder error counters
 c
-      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if (MK3.eq.rack.or.MK4.eq.rack.or.VLBA4.eq.rack) then
         ibuf2(1)=0
         call char2hol('de%',ibuf2(2),1,3)
         iclass=0
@@ -197,14 +193,14 @@ C
           isysmb=min(isysmb,isynb(i))
         endif
       enddo
-      if (MK3.eq.and(drive,MK3)) then
+      if (MK3.eq.drive) then
         secs=2**(7-ibwtap)      ! seconds for a full megabyte
-      else if (MK4.eq.and(drive,MK4)) then
+      else if (MK4.eq.drive) then
         secs=1     !!! MAKE ONE UNTIL MORE KNOWLEDGE OF MK4 !!! 
       else
         call fs_get_vrepro_equalizer(equalizer,1)
         call fs_get_drive_type(drive_type)
-        if(drive_type.eq.VLBA) then
+        if(drive_type.eq.VLBA.or.drive_type.eq.VLBA4) then
            if(equalizer.eq.1) then
               secs=2.0
            else if(equalizer.eq.2) then
@@ -235,16 +231,16 @@ C
 C  4.  Check AUX data.
 C
       if (.not.kdoaux_fs) goto 990
-      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+      if (MK3.eq.rack.or.MK4.eq.rack.or.VLBA4.eq.rack) then
 c
 c  Check COMMON for AUX data
 c
-         if (MK3.eq.and(rack,MK3)) then
+         if (MK3.eq.rack) then
             do i=1,6
                if(lauxfm(i).ne.0) goto 401
             enddo
             goto 990            !no aux to check
-         else if (MK4.eq.and(rack,MK4)) then
+         else 
             do i=1,4
                if(lauxfm4(i).ne.0) goto 401
             enddo
@@ -281,12 +277,12 @@ c
                   if(i.eq.1) nch=ichmv(laux,nch,ibuf,7,4)
                enddo
                call lower(laux(6*(ii-1)+1),12)
-               if (MK3.eq.and(MK3,rack)) then
+               if (MK3.eq.rack) then
                   if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
                      if(ii.eq.1) iauxa = 1
                      if(ii.eq.2) iauxb = 1
                   endif
-               else if (MK4.eq.and(MK4,rack)) then
+               else
                   if(ichcm(laux,12*(ii-1)+1,lauxfm4,1,8).ne.0) then
                      if(ii.eq.1) iauxa = 1
                      if(ii.eq.2) iauxb = 1
@@ -310,7 +306,7 @@ c
          enddo
          if(itrk(1).ne.0.and.itrk(2).ne.0) then !swap a & b tracks
 C !mk3 or mk4 drive (&VLBA rack), not likely
-            if((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
+            if(MK3.eq.drive.or.MK4.eq.drive) THEN
                nrec=0
                ibuf2(1)=0
                call char2hol('tp',ibuf2(2),1,2)
@@ -319,9 +315,9 @@ C !mk3 or mk4 drive (&VLBA rack), not likely
                call fs_set_itraka(itraka)
                call fs_set_itrakb(itrakb)
                iclass=0
-               if (MK3.eq.and(drive,MK3)) then
+               if (MK3.eq.drive) then
                  call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-               else if (MK4.eq.and(drive,MK4)) then
+               else if (MK4.eq.drive) then
                   call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
                   call put_buf(iclass,ibuf2,-13,'fs','  ')
                   nrec = nrec+1
