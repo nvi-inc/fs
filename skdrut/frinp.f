@@ -21,7 +21,7 @@ C     IERR - error number
 C
 C
 C  LOCAL:
-      integer ix,n,ITRK(4,max_pass),ITR2(4,max_pass)
+      integer ix,n,ITRK(4,max_subpass,max_headstack)
       integer*2 LNA(4)
       integer idum,ib,ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan)
@@ -63,6 +63,7 @@ C            It is reset to 1,2,4 if it's a VLBA mode.
 C 961020 nrv Set the BBC sideband to "U" for non-Vex input.
 C 970115 nrv Add UNPFMT for recording format by station line.
 C 970117 nrv Add IF3O and IF3I to Mk3-4 allowed values.
+C 970206 nrv Change itra2 to itras and add headstack index
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -75,7 +76,7 @@ C
       IF (JCHAR(IBUF,1).EQ.OCAPB) ITYPE=5 ! B barrel roll lines 
       IF (JCHAR(IBUF,1).EQ.OCAPD) ITYPE=6 ! D recording format lines
       IF (ITYPE.EQ.1) CALL UNPCO(IBUF(2),ILEN-1,IERR,
-     .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,itr2,cs,ivc)
+     .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,cs,ivc)
       IF (ITYPE.EQ.2) CALL UNPLO(IBUF(2),ILEN-1,IERR,
      .                LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
       IF (ITYPE.EQ.3) CALL UNPFSK(IBUF(2),ILEN-1,IERR,LNA,LC,lst,
@@ -163,15 +164,18 @@ C         If "56000" was specified, use higher station bit density
           endif
 C         Store the bit density by station
           bitdens(is,icode)=bitden
-          DO  I=1,max_pass
-            IF (ITRK(1,I).NE.-99) itras(1,1,icx,i,is,icode) = itrk(1,i)
-            IF (ITRK(2,I).NE.-99) itras(2,1,icx,i,is,icode) = itrk(2,i)
-            IF (ITRK(3,I).NE.-99) itras(1,2,icx,i,is,icode) = itrk(3,i)
-            IF (ITRK(4,I).NE.-99) itras(2,2,icx,i,is,icode) = itrk(4,i)
-            IF (ITR2(1,I).NE.-99) itra2(1,1,icx,i,is,icode) = itr2(1,i)
-            IF (ITR2(2,I).NE.-99) itra2(2,1,icx,i,is,icode) = itr2(2,i)
-            IF (ITR2(3,I).NE.-99) itra2(1,2,icx,i,is,icode) = itr2(3,i)
-            IF (ITR2(4,I).NE.-99) itra2(2,2,icx,i,is,icode) = itr2(4,i)
+C         Store the track assignments. 
+          DO  I=1,max_subpass
+            do ix=1,max_headstack
+              IF (ITRK(1,I,ix).NE.-99) 
+     .        itras(1,1,ix,icx,i,is,icode)=itrk(1,i,ix)
+              IF (ITRK(2,I,ix).NE.-99) 
+     .        itras(2,1,ix,icx,i,is,icode)=itrk(2,i,ix)
+              IF (ITRK(3,I,ix).NE.-99) 
+     .        itras(1,2,ix,icx,i,is,icode)=itrk(3,i,ix)
+              IF (ITRK(4,I,ix).NE.-99) 
+     .        itras(2,2,ix,icx,i,is,icode)=itrk(4,i,ix)
+            enddo
           END DO 
           cset(icx,is,icode) = cs
           if (ivc.eq.0) then

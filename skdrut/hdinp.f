@@ -23,13 +23,14 @@ C
 C  LOCAL:
       integer*2 lc,lstn
       integer ip(MAX_PASS),ihd(MAX_PASS),idir(MAX_PASS),
-     .istn,n,i,icode
+     .ih,istn,n,i,icode
       integer igtfr,igtst ! functions
 C
 C  History
 C  930707 nrv Created.
 C 960213 nrv Uppercase the frequency code.
 C 960409 nrv Allow second headstack passes
+C 970206 nrv Remove ihddir and ihdpo2 and add headstack index.
 C
 C
 C     1.   Decode the line.
@@ -60,17 +61,20 @@ C
       END IF  !not recognized
 
 C     2. Now store this information
-C        ip=list of passes, idir=list of directions,
+C        ip=list of sequential pass numbers, 
+C        idir=list of subpasses,
 C        ihd=list of head positions
 C        n = number of entries in the lists
 C
       do i=1,n
         if (ip(i).lt.100) then ! headstack 1
-          ihdpos(ip(i),istn,icode) = ihd(i)
-          ihddir(ip(i),istn,icode) = idir(i)
+          ih=1
+          ihdpos(ih,ip(i),istn,icode) = ihd(i)  ! offset
+          ihddir(ih,ip(i),istn,icode) = idir(i) ! subpass
         else ! headstack 2
-          ihdpo2(ip(i)-100,istn,icode) = ihd(i)
-          ihddi2(ip(i)-100,istn,icode) = idir(i)
+          ih=2
+          ihdpos(ih,ip(i)-100,istn,icode) = ihd(i)
+          ihddir(ih,ip(i)-100,istn,icode) = idir(i)
         endif
       END DO 
 C

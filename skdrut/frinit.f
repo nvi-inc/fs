@@ -4,6 +4,7 @@ C  FRINIT initializes arrays in freqs.ftni before reading from a schedule file.
 
 C 960610 nrv New.
 C 960709 nrv Add barrel initialization.
+C 970206 nrv Remove itra2,ihddi2,ihdpo2 and add max_headstack
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -12,7 +13,7 @@ C Input
       integer nst,nco ! number of stations, codes to initialize
 
 C Local
-      integer i,j,k,m,idum
+      integer i,j,k,m,idum,ih
       integer ichmv_ch ! function
 
       do i=1,nco
@@ -33,43 +34,25 @@ C Local
       enddo
       do i=1,nco
         do m=1,nst
-          DO J=1,max_pass
+          DO J=1,max_subpass
             DO K=1,max_chan
-C             do l=1,2
-C               do n=1,2
-                  ITRAS(1,1,K,J,m,I)=-99
-                  ITRAS(2,1,K,J,m,I)=-99
-                  ITRAS(1,2,K,J,m,I)=-99
-                  ITRAS(2,2,K,J,m,I)=-99
-C               enddo
-C             enddo
+              do ih=1,max_headstack
+                ITRAS(1,1,ih,K,J,m,I)=-99
+                ITRAS(2,1,ih,K,J,m,I)=-99
+                ITRAS(1,2,ih,K,J,m,I)=-99
+                ITRAS(2,2,ih,K,J,m,I)=-99
+              END DO
             END DO
           END DO
-        END DO
-      end do
-      do i=1,nco
-        do m=1,nst
-          DO J=1,max_pass
-            DO K=1,max_chan
-C             do l=1,2
-C               do n=1,2
-                  ITRA2(1,1,K,J,m,I)=-99
-                  ITRA2(2,1,K,J,m,I)=-99
-                  ITRA2(1,2,K,J,m,I)=-99
-                  ITRA2(2,2,K,J,m,I)=-99
-C               enddo
-C             enddo
-            END DO
-          END DO
-        END DO
-      end do
+        end do
+      enddo
       do k=1,nco
         do j=1,nst
           do i=1,max_pass
-            ihdpos(i,j,k)=9999
-            ihddir(i,j,k)=0
-            ihdpo2(i,j,k)=9999
-            ihddi2(i,j,k)=0
+            do ih=1,max_headstack
+              ihdpos(ih,i,j,k)=9999
+              ihddir(ih,i,j,k)=0
+            enddo
           enddo
         enddo
       enddo
