@@ -88,6 +88,7 @@ int rlen;
 			  K4K3  == *rack || K4MK4 == *rack ||
 			  K4    == *rack || LBA4  == *rack)) ||
 	  (ch1 == '4' &&  MK4   == *rack) ||
+	  (ch1 == 's' &&  S2    == *rack) ||
 	  (ch1 == 'g' && (MK4   == *rack || VLBA  == *rack ||
 			  VLBA4 == *rack || K4MK4 == *rack ||
 			  LBA4  == *rack)) ||

@@ -40,6 +40,20 @@ while(<>) {
 	elsif (/\(Mark III racks\)[ ]*$/i) {
 	    $suffix=".m__";
 	}
+	elsif (/\(S2 racks\)[ ]*$/i) {
+	    $suffix=".s__";
+	    if($fname eq "bbcn") {
+		$mname=$fname . $suffix;
+		$lname="bbc1" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc2" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc3" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc4" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	}
 	elsif (/\(LBA4, Mark III\/IV racks\)[ ]*$/i) {
 	    $suffix=".n__";
 	    if($fname eq "vcnn") {
