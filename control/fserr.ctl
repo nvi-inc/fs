@@ -1,4 +1,4 @@
-""
+"
 4F -201
 Mode must be one of: a, b1, b2, c1, c2, d1, ..., d28, e1, ..., e4.
 ""
@@ -22,9 +22,6 @@ No corresponding canned mode to prime formatter with.
 ""
 4F -501
 Formatter was failing the synch test.
-""
-4F -502
-Formatter is failing the synch test.
 ""
 4F -503
 Rack ID does not have at least two zero bits.
@@ -85,6 +82,9 @@ Pointing computer tracking errors are too large.
 ""
 AQ   -1
 Break Detected in AQUIR
+""
+AQ   -2
+AQUIR RN already locked
 ""
 AQ  -10
 FIVPT or ONOFF did not finish in the allotted time.
@@ -198,7 +198,7 @@ BO -130
 Reading edited proc file. FMP ?FFF
 ""
 BO -131
-Reading new procedure library FMP ?FFF
+Reading new procedure library FMP ?FFF
 ""
 BO -132
 No SOURCE command found in schedule.
@@ -302,9 +302,6 @@ Temperatures from RXDIODE.CTL are equal.
 BO -167
 Voltages from RXDIODE.CTL are equal.
 ""
-BO -168
-Syntax error with SCHEDULE command.
-""
 BO -169
 Too many entries in MATAD.CTL file only ?WWW permitted.
 ""
@@ -313,12 +310,6 @@ Too many entries in IBAD.CTL file only ?WWW permitted.
 ""
 BO -171
 Resource locked. Cannot terminate. Is PFMED running?
-""
-BO -172
-Incorrect amount of digits,?WWW, in year from LOCATION.CTL.  Should be 4.
-""
-BO -173
-Year,?WWW, in LOCATION.CTL is wrong. Must end in a 0, i.e. 1990.
 ""
 BO -180
 Error opening TIME.CTL FMP ?FFF
@@ -345,10 +336,10 @@ BO -200
 Error opening SW.CTL FMP ?FFF
 ""
 BO -201
-Error vacuum switching field in SW.CTL
+Error vacuum switching field (line 1) in SW.CTL
 ""
 BO -202
-Error in recorder CPU field in SW.CTL
+Error reading decoder field (line 2) in SW.CTL
 ""
 BO -209
 Error reading SW.CTL FMP ?FFF
@@ -361,6 +352,99 @@ Can't open a new schedule when an experiment procedure is executing
 ""
 BO -212
 Can't change experiment procedure library when an experiment procedure is executing
+""
+BO -219
+Error opening drivev1.ctl ?FFF
+""
+BO -220
+Error decoding drivev1.ctl line ?WWW
+""
+BO -221
+Error opening drivem1.ctl ?FFF
+""
+BO -222
+Error decoding drivem1.ctl line ?WWW
+""
+BO -223
+Error opening drivev2.ctl ?FFF
+""
+BO -224
+Error decoding drivev2.ctl line ?WWW
+""
+BO -225
+Error opening drivem2.ctl ?FFF
+""
+BO -226
+Error decoding drivem2.ctl line ?WWW
+""
+BO -227
+Error opening head1.ctl ?FFF
+""
+BO -228
+Error decoding head1.ctl line ?WWW
+""
+BO -229
+Error opening head2.ctl ?FFF
+""
+BO -230
+Error decoding head2.ctl line ?WWW
+""
+BO -251
+Internal error: time for secsnow invalid
+""
+BO -252
+Internal error: time for secswait invalid
+""
+BO -253
+Internal error: time for secsnow invalid
+""
+BO -254
+Internal error: time for secsmin invalid
+""
+BO -255
+Internal error: time for seconds invalid
+""
+BO -256
+Internal error: time for logsecs invalid
+""
+BO -257
+Internal error: time for prsecs invalid
+""
+BO -258
+Internal error: time for secsnow invalid
+""
+BO -259
+Internal error: time for secst invalid
+""
+BO -300
+There must be two character error mnemonic for TNX.
+""
+BO -301
+Error decoding error number in TNX.
+""
+BO -302
+TNX action parameter must be 'on' or 'off'.
+""
+BO -303
+This error not found in TNX list, so it can't be turned 'on'.
+""
+BO -304
+This error already in TNX list, so it is already 'off'.
+""
+BO -305
+TNX=... command cannot be executed from a procedure.
+""
+BO -306
+TNX=... command cannot be executed from time-list.
+""
+BO -307
+TNX=... command cannot be executed from the schedule.
+""
+BO -308
+Internal error in help command.
+""
+BO -309
+Help not available for that command, maybe your equipment type is wrong.
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -379,6 +463,9 @@ Improper response (wrong number of chars) from MATCN
 ""
 CH   -6
 Verify error from MATCN
+""
+CH   -7
+MATCN reports MAT device is /dev/null, MAT devices inaccessible.
 ""
 CH -201
 ?W communication trouble
@@ -668,6 +755,12 @@ Total power integrator overflow on IF3
 CH -371
 IF3 alarm is on
 ""
+CH -372
+IF3 pcal control not present, equip.ctl says it is.
+""
+CH -373
+IF3 pcal control state doesn't check with request.
+""
 CH -401
 Head is still moving.
 ""
@@ -745,6 +838,18 @@ program error: Recorder returned individual positions, overall was expected.
 ""
 CH -518
 Barrelroll mode does not agree with request.
+""
+CH -601
+Internal error: time for secs_fm invalid
+""
+DS -101
+No default for recorder selection.
+""
+DS -201
+Recorder selected must be 1 or 2.
+""
+DS -301
+Recorder selection can be set/changed unless two recorders are in use.
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
@@ -883,9 +988,6 @@ fmset: Error receiving message from matcn
 ""
 FV   -2
 fmset: Error receiving time from matcn
-""
-FV   -3
-fmset: Year less than 1900 for 5 tries, giving up
 ""
 FV   -4
 fmset: Error receiving message from mcbcn
@@ -1109,14 +1211,98 @@ GPIB/232 (EOFL) serial buffer overflow detected by converter, ?W
 IB -544
 GPIB/232 (EFRM) serial data framing error detected by converter, ?W
 ""
+IF -301
+Error can't open ifatt.ctl.
+""
+IF -302
+>=100 entries. Only 100 entries in SHM, cleanup 'ifatt.ctl'.
+""
+IF -303
+>=50 entries. Only 100 entries allowed, start cleanup of 'ifatt.ctl'.
+""
+IF -304
+mode_name not found - misspelled,or not in SHM.
+""
+IF -501
+No VC's patched
+""
+IF -502
+Unable to decode IF 1 or 2 attenuator setting
+""
+IF -503
+Wrong number of TPI records returned
+""
+IF -504
+Unable to decode VC ?W power level
+""
+IF -505
+The attenuators for one or more IF channels failed to converge.
+""
+IF -506
+The attenuators for IF channel 1 failed to converge.
+""
+IF -507
+The attenuators for IF channel 2 failed to converge.
+""
+IF -508
+The attenuators for IF channel 3 failed to converge.
+""
+IF -509
+Unable to decode IF 3 attenuator setting
+""
+IF -510
+Break detected in IFADJUST.
+""
+IF -511
+VC(s) in trackform not patched.
+""
 KA -201
 K4 tape label must have 8 characters or be a "#".
 ""
 KB -201
 Bandwith must be one of 2, 4, 8, 16, 32 depending on VC type.
 ""
+KC -101
+No default port A.
+""
+KC -201
+Port A must be 1-16. 
+""
+KC -102
+No default port B.
+""
+KC -202
+Port B must be 1-16. 
+""
 KE -301
 No equals for ET command.
+""
+KF -101
+No default for the mode.
+""
+KF -201
+Mode must be one of a, b, c, d.
+""
+KF -202
+Rate must be one of 0.25, 0.5, 1, 2, 4, 8.
+""
+KF -203
+Input must be one of nor, ext, crc, low, high.
+""
+KF -204
+Aux data must be up to 12 hex digits.
+""
+KF -205
+Sync must be on or off.
+""
+KF -206
+Aux start must be frm or 1pps.
+""
+KF -207
+Output  must be nor, high, or low.
+""
+KF -301
+Formatter is not in remote.
 ""
 KI -201
 IF attenuator 1 must be 0-15.
@@ -1145,11 +1331,32 @@ Channel must be 1-16 for K-4 type 1 VCs and 1-8 for type 2 VCs.
 KL -202
 Frequency must be 99.99-511.99 for K-4 type 1 VCs and 499.99-999.99 for type 2.
 ""
-KM -101
+KM -201
 Record mode bandwidth must be one of 64, 128, or 256.
+""
+KM -202
+Number of sample bits must be one of 1, 2, 4, or 8.
+""
+KM -203
+Number of channels must be one of 1, 2, 4, 8, or 16.
 ""
 KM -301
 Record mode bandwidth can only be set for K4 type 2 recorder (DFC2100).
+""
+KP -201
+Recorder port number must be 1-16
+""
+KP -202
+Channel input must be one of 1...16u/l for K4 type 1 rack.
+""
+KP -203
+Channel input must be one of a1...a8u/l for K4 type 2 rack.
+""
+KP -204
+Channel input must be one of 1...14u/l for Mark III/IV or none rack.
+""
+KP -300
+There mus be pairs of ports, channels.
 ""
 KR -101
 No default for action.
@@ -1225,6 +1432,18 @@ Number of entries from MATAD control file exceed table limit of ?WWW
 ""
 MA -102
 Unsupported BAUD rate, use one of 110, 300, 600, 1200, 2400, 4800, or 9600.
+""
+MA -701
+MK4 DE unknown command 
+""
+MA -702
+MK4 DE wrong number of arguments
+""
+MA -703
+MK4 DE illegal argument type
+""
+MA -704
+MK4 DE argument out of range
 ""
 MA -801
 MK4 FM auxdata loading conflict 
@@ -1322,14 +1541,17 @@ MK4 FM front panel display hung busy
 MA -851
 MK4 FM C_FIRMWARE_ERROR -1
 ""
-MA -851
+MA -852
 MK4 FM T_LATCH_ERROR -2
 ""
-MA -851
+MA -853
 MK4 FM X_FIRMWARE_ERROR -3
 ""
-MA -851
+MA -854
 MK4 FM V_FIRMWARE_ERROR -4    
+""
+MA -998
+MK4 DE error exceeds FS reportable range
 ""
 MA -999
 MK4 FM error exceeds FS reportable range
@@ -1700,6 +1922,9 @@ Thin/thick override must be "thin" or "thick".
 QA -301
 Error RP'ing program PRLAB
 ""
+QA -302
+Cannot use mount1 (or 2)  when drive 1 (or 2) is selected.
+""
 QA -303
 Thin/thick override not allowed unless vaccum switching is enabled.
 ""
@@ -1751,6 +1976,9 @@ Data type must be AUX, SYN, TIME, ERR, or DATA.
 QD -301
 Synch block CRC checksum test FAILED.
 ""
+QD -302
+Decode command only supports Mark III decoder.
+""
 QE -102
 Asterisk (*) notation not supported by ENABLE command.
 ""
@@ -1774,6 +2002,9 @@ Error in 5th track specified.  Must be G1,G2,G3,G4,1,...28.
 ""
 QE -207
 Write electronics variable from HEAD.CTL incorrectly set.
+""
+QF -101
+No default for mode.
 ""
 QF -201
 Formatter mode must be A, B, C, D.
@@ -1823,6 +2054,9 @@ Number with G, M, or V for track assignment must be between 0 and 3.
 QG -217
 Track must be between 0 and 35.
 ""
+QG -218
+Parity command only accepts one or two digit track numbers.
+""
 QG -302
 No class number available.
 ""
@@ -1836,7 +2070,7 @@ QG -305
 AUX data differs from expected value on track ?W.
 ""
 QG -306
-Command must be set up first.
+No tracks selected, was command set-up?
 ""
 QG -307
 Parity command doesn't support your combination of rack and recorder.
@@ -1851,10 +2085,25 @@ QG -310
 Asterisk (*) notation not supported for tracks with PARITY command.
 ""
 QG -311
-Vacuum level must be established with rec= command first
+Equalizer must be set with repro command first.
+""
+QG -312
+Too few frames detected in track ?W.
+""
+QG -313
+Error decoding Mark IV decoder dqa response.
+""
+QG -314
+Bit rate must be set with repro command first.
+""
+QG -315
+Bandwidth must be set with repro command first.
 ""
 QH -101
 No default for calibration temperature.
+""
+QH -201
+Calibration temperature must be a number.
 ""
 QI -101
 No default for IF1 attenuator
@@ -1873,6 +2122,15 @@ IF1 input must be NOR or ALT
 ""
 QI -204
 IF2 input must be NOR or ALT
+""
+QI -300
+Unable to read IFD attenuator setting, default setting failed.
+""
+QI -301
+Rack read to determine default IFD attenuators, please modify command.
+""
+QI -302
+Last commanded IFD attenuations used as default, please modify command.
 ""
 QJ -101
 No default for track to be decoded.
@@ -1928,6 +2186,15 @@ QK -210
 QK -211
 Tsys value for device ?W overflowed or were less than zero.
 ""
+QK -212
+No default for detector devices
+""
+QK -213
+Previous detectors not remembered between uses.
+""
+QK -214
+No rack detectors must be one of u5 or u6
+""
 QL -101
 No default for the MAT address.
 ""
@@ -1950,10 +2217,7 @@ QM -201
 Baud rate must be one of 9600,4800,2400,1200,600,300,110
 ""
 QN -201
-Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,V1...V15,HD,RX.
-""
-QN -301
-Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,B1...B16,RC.
+Error in request. Unknown module or does not match your equipment.
 ""
 QO   -1
 No parameters permitted for track command.
@@ -2067,10 +2331,10 @@ QQ -203
 Patching must be L(ow) or H(igh)
 ""
 QQ -204
-Patching must be 1-4, 5-8, 9-12, or 13-16.
+Patching must be 1-4, 5-8, 9-12, or 13-16 for K4 type 1 VC.
 ""
-QQ -301
-LO parameter must be LO1 or LO2.
+QQ -205
+Patching must be a1-a8, b1-b8 for K4 type 2 VC.
 ""
 QR -1
 No class number available.
@@ -2244,13 +2508,13 @@ QZ -204
 Number of repetitions must be between 1 and 10.
 ""
 QZ -205
-Number of points must be between 3 and 31.
+Number (absolute value) of points must be between 3 and 31.
 ""
 QZ -206
 Beam size was not retrievable from COMMON.
 ""
 QZ -207
-Integration period must be between 1 and 10.
+Integration period must be between 1 and 32.
 ""
 QZ -208
 Step size must be a real number.
@@ -2349,7 +2613,7 @@ Q* -105
 No default for LO pcal spacing
 ""
 Q* -201
-LO channel must be loa/lob/loc/lod for VLBA/VLBA4, lo1,lo2,lo3 for MK3/MK4
+LO channel must be loa/b/c/d for VLBA/VLBA4, lo1/2/3 for MK3/MK4/K4
 ""
 Q* -202
 LO frequency positive real number
@@ -2482,6 +2746,9 @@ novac can only be used for MK4 drives with vacuum switching
 ""
 Q< -504
 rec must set at least one parameter
+""
+Q< -505
+Internal error, wrong sub-recorder index number.
 ""
 Q?   -2
 Tape position must be greater than or equal to 0
@@ -2682,7 +2949,7 @@ Q@ -406
 Formatter must be set-up before calibrated positioning.
 ""
 Q@ -407
-Head reached limit or is stuck.
+Head ?W reached limit or is stuck.
 ""
 Q@ -408
 Error locking LVDT Resource Number.
@@ -2719,6 +2986,18 @@ if3 switch 3 state must be 1 or 2.
 ""
 Q+ -206
 if3 switch 4 state must be 1 or 2.
+""
+Q+ -207
+if3 pcal control must be on or off.
+""
+Q+ -300
+Unable to read IF3 attenuator setting, default setting failed.
+""
+Q+ -301
+Rack read to determine default IF3 attenuator, please modify command.
+""
+Q+ -302
+Last commanded IF3 attenuation used as default, please modify command.
 ""
 Q+ -303
 if3 switch 1 not available, check equip.ctl.
@@ -3204,7 +3483,7 @@ SC   -2
 setcl: formatter time out-of-range
 ""
 SC   -3
-setcl: reseting system clock failed.
+setcl: setting system time not supported
 ""
 SC   -4
 setcl: formatter to cpu time difference greater than two weeks
@@ -3218,6 +3497,12 @@ setcl: failed too many times, time information not updated.
 SC  -11
 setcl: cannot set fs time without Mark 3/4/VLBA, K4*/MK4 rack or S2, K4 recorder
 ""
+SC  -12
+setcl: cannot set offset or rate when using NTP
+""
+SC  -13
+setcl: formatter to FS time difference 0.5 seconds or greater
+""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
 ""
@@ -3226,6 +3511,30 @@ Program error: less than zero length data object request for device ?W
 ""
 SC -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+SF -301
+Error opening save file for reading.
+""
+SF -302
+Error reading save file.
+""
+SF -303
+Error closing save file after reading.
+""
+SF -305
+Error opening save file for writing.
+""
+SF -306
+Error setting permissions of save file.
+""
+SF -307
+Error writing save file.
+""
+SF -308
+Error closing save file after writing.
+""
+SF -309
+save file was empty
 ""
 SP   -1
 Error in characters following a !
@@ -3265,6 +3574,36 @@ More than 100 characters in expanded command.
 ""
 SP  -13
 This command not supported for your equipment, check equip.ctl.
+""
+SP  -14
+Date more than one day in past, please give year explicitly.
+""
+TA   -1
+tacd.ctl control file not present.
+""
+TA   -2
+tacd.ctl control file is empty or just has comments.
+""
+TA   -3
+Can't open the socket or someone else is using it.
+""
+TA   -4
+Can't connect to socket.
+""
+TA   -5
+Can't read from socket.
+""
+TA   -6
+Can't write to socket.
+""
+TA   -7
+,,
+""
+TA   -8
+Syntax ERROR in tacd.ctl - no commas allowed as delimeters.
+""
+TA   -201
+commands are tacd={,status,time,average,cont,stop,start} only.
 ""
 TE   -9
 Video converter frequency has not been set
@@ -3330,7 +3669,7 @@ VB -208
 LSB gain value must be between -18.0 and 12.0.
 ""
 VB -401
-program error: incorrect number of responses in bbc.
+program error: incorrect number of responses in bbc_dis.
 ""
 VD -101
 No default for bit density.
@@ -3350,8 +3689,11 @@ Redundant list entries.
 VE -301
 mcb functions addr and test not supported for this command.
 ""
-VR -401
-program error: incorrect number of responses in venable_dec.
+VE -401
+program error: incorrect number of responses in venable_dis.
+""
+VF -101
+No default for mode.
 ""
 VF -201
 Mode must be one of: prn, a, b, c, d1, ..., d28.
@@ -3428,14 +3770,26 @@ no default for tracks track number
 VN -200
 tracks track must be v(0-3), m(0-3), or 2-33.
 ""
+VQ -101
+No default for duration.
+""
+VQ -201
+Duration must be in the range 1-5 inclusive.
+""
+VQ -501
+Duration must be set first.
+""
+VQ -502
+QA recoder must be selected with form command first.
+""
 VR -201
 modeA must be read (raw), or byp.
 ""
 VR -202
-trackA must 1-28.
+trackA must 0-35 or 100-135 depending on recorder.
 ""
 VR -203
-trackB must 1-28.
+trackB must 0-35 or 100-135 depending on recorder.
 ""
 VR -204
 modeB must be read (raw), or byp.
@@ -3450,7 +3804,7 @@ VR -301
 mcb functions addr and test not supported for this command.
 ""
 VR -401
-program error: incorrect number of responses in vrepro_dec.
+program error: incorrect number of responses in vrepro_dis.
 ""
 VS -1
 Tape drive has no vacuum.
@@ -3477,7 +3831,7 @@ VS -203
 Record parameter must be on or off.
 ""
 VS -401
-program error: incorrect number of responses in vst.
+program error: incorrect number of responses in vst_dis.
 ""
 VT -201
 Tape parameter must be low, or off.
@@ -3501,7 +3855,7 @@ VT -204
 system tracks must be in the range 0-35
 ""
 VX -401
-program error: incorrect number of responses in systracks.
+program error: incorrect number of responses in systracks_dis.
 ""
 V@   -1
 program error: missing class number in quikv.
@@ -3514,3 +3868,15 @@ Too many parameters in command for quikv to parse.
 ""
 V@   -4
 program error: unknown command in quikv.
+""
+WC -100
+Cablediff has no parameters.
+""
+WS -101
+No default for scan name.
+""
+WS -201
+Scan name must be less than 17 characters. 
+""
+WS -301
+No previous value for scan name
