@@ -1,5 +1,4 @@
 #
-F77= gf77
 FFLAGS = -c
 LIBES = ../bosslb/bosslb.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a\
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a\
@@ -25,7 +24,7 @@ updis.o upset.o vc.o vcdis.o vlt_read.o wakop.o wohd.o\
 worm.o wx.o xyoff.o gtradd.o
 #
 ../bin/quikr: $(OBJECTS)
-	f77 -o ../bin/quikr $(OBJECTS) $(LIBES)
+	$(FC) -o ../bin/quikr $(OBJECTS) $(LIBES)
 	strip ../bin/quikr
 #
 quikr:

@@ -10,7 +10,7 @@ LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/resid: $(OBJECTS)
-	f77  -o ../bin/resid $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/resid $(OBJECTS) $(LIBES)
 	strip ../bin/resid
 #
 resid:

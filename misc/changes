@@ -874,3 +874,33 @@ Version 9.1.3 960603
            don't install st-0.0.0 if "st" exists even if it is a link
 
 Version 9.1.4 960611
+
+960702 WEH ibcon/*
+           updated to support 232/488 converter
+           streamlined interaction with bus, extra command removed (UNT, UNL,
+           etc).
+           Error reporting improved and now include UNIX errors
+
+960702 WEH ibcon.old/*
+           contains 9.1.4 ibcon in case the new ibcon causes problems at
+           some stations
+
+960702 WEH ddout/ddout.c
+           support "un" error mnemonic for UNIX errors
+
+960702 WEH fslb/logen.c
+           removed extra space between code and number in error reporting
+
+960702 WEH */Makefile
+           change all f77 references to $(FC)
+
+960702 NRV drudg/wrhead.f
+           Correct the index used when writing sideband for VLBA output files.
+
+960703 NRV drudg/fdrudg.f
+           Change the date of drudg to 960703.
+
+960703 WEH */Makefile
+           remove extra F77=gf77 lines
+
+Version 9.1.5 960703

@@ -9,7 +9,7 @@ LIBES =  ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a ../flib/flib.a\
 ../rtelb/rtelb.a
 #
 ../bin/pcalr: $(OBJECTS)
-	f77  -o ../bin/pcalr $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/pcalr $(OBJECTS) $(LIBES)
 	strip ../bin/pcalr
 #
 pcalr:

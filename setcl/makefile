@@ -6,7 +6,7 @@ LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 ../bin/setcl: $(OBJECTS)
-	f77  -o ../bin/setcl $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/setcl $(OBJECTS) $(LIBES)
 	strip ../bin/setcl
 #
 setcl:

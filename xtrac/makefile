@@ -10,7 +10,7 @@ LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/xtrac: $(OBJECTS)
-	f77  -o ../bin/xtrac $(OBJECTS) $(LIBES)
+	$(FC)  -o ../bin/xtrac $(OBJECTS) $(LIBES)
 	strip ../bin/xtrac
 #
 xtrac:
