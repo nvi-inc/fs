@@ -94,7 +94,12 @@ C
 c
       ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
-      call en2ma(ibuf(3),ienatp,-1,ltrken)
+      if(drive.eq.MK4) then
+        call fs_get_kenastk(kenastk)
+        call en2ma4(ibuf(3),ienatp,kenastk)
+      else if(drive.eq.MK3) then
+         call en2ma(ibuf(3),ienatp,-1,ltrken)
+      endif
       call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call tp2ma(ibuf(3),ilowtp,0)
