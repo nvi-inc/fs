@@ -111,6 +111,9 @@ C
       else if(ichcm_ch(ibuf,ichs,'same').eq.0.and.kpas(1)) then
         kpas(2)=.true.
         ipas(2)=ipas(1)
+      else if(ichcm_ch(ibuf,ichs,'$').eq.0.and.kpas(1)) then
+        kpas(2)=.true.
+        ipas(2)=ipas(1)
       else if(ichcm_ch(ibuf,ichs,'mk4').eq.0.and.kpas(1)) then
         kpas(2)=.true.
         ipas(2)=ipas(1)+100
@@ -169,26 +172,30 @@ C
       icheck(20) = 0
       call fs_set_icheck(icheck(20),20)
 C
-      call lvdonn('lock',ip)
-      if(ip(3).ne.0) goto 800
-C
-      call set_pass(ihd,ipas ,kauto,microns,ip,0.40)
-      if(ip(3).ne.0) go to 800
-C
 C  save the results in common
 C
       call fs_get_ipashd(ipashd)
       call fs_get_posnhd(posnhd)
+C
       do i=1,2
         if(kpas(i)) then
+          call pas2mic(i,ipas(i),microns(i),ip)
           posnhd(i)=microns(i)
           ipashd(i)=ipas(i)
           kposhd_fs(i)=.true.
           if(i.eq.1) kautohd_fs=kauto
         endif
       enddo
+C
       call fs_set_ipashd(ipashd)
       call fs_set_posnhd(posnhd)
+C
+      call lvdonn('lock',ip)
+      if(ip(3).ne.0) goto 800
+C
+      call set_pass(ihd,ipas ,kauto,microns,ip,0.40)
+      if(ip(3).ne.0) go to 800
+C
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
@@ -342,10 +349,13 @@ C
       call lvdofn('unlock',ip2)
       if(ip2(3).ne.0) then
         call logit7(0,0,0,0,ip2(3),ip2(4),ip2(5))
+        call clrcl(ip(1))
+        ip(1)=0
+        ip(2)=0
         goto 999
       endif
 C
-C  9. That's all for now.
+
 C
 990   ip(1) = ioclas
       ip(2) = norec
