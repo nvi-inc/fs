@@ -137,10 +137,21 @@ proc readErrorFile {} {
     global global_antennatype statusMsg text_reading_errorfile
     global text_reading_xtrac reprocFlag
     global currentErrorBar statusVariable noOfGood current_XTRAC current_ERROR
+    global XmeanRes YmeanRes XrmsRes YrmsRes
+    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw
+
     set fileID [open $current_ERROR r]
     set statusMsg $text_reading_errorfile
     update
     set EOF 0
+    set correct -1
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$observed_stats" $readline]
+    }
+    set EOF [gets $fileID readline]
+    set conversions [scan $readline "%f%f%f%f" XmeanRaw XrmsRaw YmeanRaw YrmsRaw]
+    if {$conversions != 4} {set XmeanRaw ???; set XrmsRaw ???; set YmeanRaw ???; set YrmsRaw ???}
     set correct -1
     while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
 	set EOF [gets $fileID readline]
@@ -161,6 +172,8 @@ proc readErrorFile {} {
 	    set conversions [scan $readline "%d%f%f%f%f%f%f%f%f%f" status nodeDataMatrix($noOfNodes,1) nodeDataMatrix($noOfNodes,2) nodeDataMatrix($noOfNodes,3) nodeDataMatrix($noOfNodes,4) nodeDataMatrix($noOfNodes,5) nodeDataMatrix($noOfNodes,8) nodeDataMatrix($noOfNodes,9) nodeDataMatrix($noOfNodes,14) nodeDataMatrix($noOfNodes,15)]
 	    set nodeDataMatrix($noOfNodes,6) $currentPos
 	    set nodeDataMatrix($noOfNodes,7) [expr $status-1]
+	    set nodeDataMatrix($noOfNodes,17) $nodeDataMatrix($noOfNodes,3)
+	    set nodeDataMatrix($noOfNodes,18) $nodeDataMatrix($noOfNodes,4)
 	    if {$conversions >= 6} {
 		if {$conversions < 10} {set errorversion 0}
 		if {$status == 1} {incr noOfGood}
@@ -179,10 +192,10 @@ proc readErrorFile {} {
 	set correct [string first "\$" $readline]
     }
     set EOF [gets $fileID readline]
-    set conversions [scan $readline "%f%f%f%f" Xmean Xrms Ymean Yrms]
-    if {$conversions != 4} {set Xmean ???; set Xrms ???; set Ymean ???; set Yrms ???}
+    set conversions [scan $readline "%f%f%f%f" XmeanRes XrmsRes YmeanRes YrmsRes]
+    if {$conversions != 4} {set XmeanRes ???; set XrmsRes ???; set YmeanRes ???; set YrmsRes ???}
     close $fileID
-
+#
     # Build error menu according to whether sigma values were found in error
     # output file, and set default errorbar.
 
@@ -253,6 +266,8 @@ proc readErrorFile {} {
 			set nodeDataMatrix($counter,13) $col6
 			set nodeDataMatrix($counter,10) $col7
 			set nodeDataMatrix($counter,11) $col8
+                        set nodeDataMatrix($counter,19) $col3
+                        set nodeDataMatrix($counter,20) $col4
 			break
 		    }
 		    incr counter
@@ -278,9 +293,10 @@ proc readErrorFile {} {
 	set EOF [gets $fileID readline]
 	set correct [string first "\$" $readline]
     }
+
     close $fileID
     set reprocFlag 1
-    settypedata $Xmean $Xrms $Ymean $Yrms
+    changeData
     updatesources
 }
 
@@ -389,10 +405,10 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	}
     }
     .mbar.stat.menu delete 0 last
-    .mbar.stat.menu add command -label "$xmeanlabel $Xmean"
-    .mbar.stat.menu add command -label "$xrmslabel $Xrms"
-    .mbar.stat.menu add command -label "$ymeanlabel $Ymean"
-    .mbar.stat.menu add command -label "$yrmslabel $Yrms"
+    .mbar.stat.menu add command -label [format "%-10s %+11.5f" $xmeanlabel $Xmean]
+    .mbar.stat.menu add command -label [format "%-11s %+11.5f" $xrmslabel $Xrms]
+    .mbar.stat.menu add command -label [format "%-10s %+11.5f" $ymeanlabel $Ymean]
+    .mbar.stat.menu add command -label [format "%-11s %+11.5f" $yrmslabel $Yrms]
 }
 
 # Procedure for creating/updating sources menu
@@ -1017,7 +1033,7 @@ proc newfile_OK {} {
     global newfile_filename current_DefaultDir current_PARPO current_MDLPO
     global current_XTRAC current_ERROR current_XSAVE current_ESAVE
     global statusMsg text_processing_wait text_running_error text_running_xtrac
-    global saveFlag text_ready
+    global saveFlag text_ready tk_version
     set correct [newfile_checkfile $newfile_filename]
     if {$correct == 1} {
 	set fileID [open $newfile_filename r]
@@ -1030,7 +1046,9 @@ proc newfile_OK {} {
 	set current_XSAVE [format "%s/xtr%s" $current_DefaultDir $day]
 	set current_ESAVE [format "%s/err%s" $current_DefaultDir $day]
 	.c delete point
-	destroy .newfile
+	if { $tk_version < 4.2 } {
+	    destroy .newfile
+	}
 	set statusMsg $text_running_xtrac
 	update
 	puts -nonewline [exec xtrac $newfile_filename $current_XTRAC o $current_PARPO]
@@ -1041,7 +1059,9 @@ proc newfile_OK {} {
 	readErrorFile
 	set saveFlag 0
 	plotdefault
+        return 1
     }
+    return 0
 }
 
 # Procedure to find day no. when the user has entered a new input file name
@@ -1050,7 +1070,7 @@ proc newfile_OK {} {
 proc newfile_checkfile {filename} {
     global newfile_filename newfile_statusMsg newfiletext_nofile
     global newfiletext_noday newfiletext_day current_DefaultDir
-    global current_TEMP
+    global current_TEMP statusMsg tk_version
     set tempfile ""
     set globalsign [string index $filename 0]
     set globalcheck [string compare "/" $globalsign]
@@ -1066,7 +1086,10 @@ proc newfile_checkfile {filename} {
 	    } else {
 		set newfile_filename ""
 		set newfile_statusMsg $newfiletext_nofile
-		focus .newfile.entryFilename
+		set statusMsg $newfile_statusMsg
+		if { $tk_version < 4.2 } { 
+		    focus .newfile.entryFilename
+		}
 		return 0
 	    }
 	}
@@ -1081,15 +1104,22 @@ proc newfile_checkfile {filename} {
 	    } else {
 		set newfile_filename ""
 		set newfile_statusMsg $newfiletext_nofile
-		focus .newfile.entryFilename
+		set statusMsg $newfile_statusMsg
+		if { $tk_version < 4.2 } { 
+		    focus .newfile.entryFilename
+		}
 		return 0
 	    }
 	}
     }
     if {[string compare $tempfile ""] != 0} {
 	set fileID [open $tempfile r]
-	set day [read $fileID 5]
+	set day [read $fileID 8]
 	close $fileID
+	set dot [string range $day 4 4]
+	if {[string compare $dot "."] != 0} {
+	    set day [string range $day 0 4]
+	}
 	if {[expr {$day > 0}] && [expr {$day < 100000}]} {
 	    set newfile_filename $tempfile
 	    if ![catch {exec grep location $newfile_filename > $current_TEMP}] {
@@ -1107,7 +1137,10 @@ proc newfile_checkfile {filename} {
 	} else {
 	    set newfile_filename ""
 	    set newfile_statusMsg $newfiletext_noday
-	    focus .newfile.entryFilename
+            set statusMsg $newfile_statusMsg
+	    if { $tk_version < 4.2 } { 
+		focus .newfile.entryFilename
+	    }
 	    return 0
 	}
 	close $fileID
@@ -1145,24 +1178,28 @@ proc openFile {} {
 
 proc openfile_OK {} {
     global openfile_filename current_XTRAC current_ERROR current_MDLPO current_XSAVE current_ESAVE statusMsg text_processing_wait text_running_error text_ready statusVariable NoFilenameFlag
+    global tk_version
+
     set correct [openfile_checkfile $openfile_filename]
     if {$correct == 1} {
-	destroy .openfile
+        if {$tk_version < 4.2} {
+            destroy .openfile
+        }
 	.c delete point
 	set correct 0
 	set pos [string last xtr $openfile_filename]
 	if {$pos > 1} {
 	    set day [string range $openfile_filename [expr $pos+3] end]
-	    if {[regexp {^[0-9]+$} $day]} {
+	    if {[regexp {^[0-9\.]+$} $day]} {
 		if {[expr {$day > 0}] && [expr {$day < 100000}]} {set correct 1}
 	    }
 	}
 	if {$correct == 1} {
 	    set current_XSAVE $openfile_filename
 	    if {$pos > 0} {
-		set current_ESAVE [format "%s%s%d" [string range $openfile_filename 0 [expr $pos-1]] err $day]
+		set current_ESAVE [format "%s%s%s" [string range $openfile_filename 0 [expr $pos-1]] err $day]
 	    } else {
-		set current_ESAVE [format "%s%d" err $day]
+		set current_ESAVE [format "%s%s" err $day]
 	    }
 	    set NoFilenameFlag 0
 	} else {
@@ -1431,16 +1468,24 @@ proc sigma_OK {} {
 proc fileselection_dialog {} {
  
  global global_startmode current_DefaultDir newfile_filename 
+ global statusMsg
 
  set types {
   {{Log Files} {*.log} }
   {{All Files} {*} }
  }
-
- set newfile_filename [tk_getOpenFile -title "Open new FS log file" -filetypes $types -initialdir $current_DefaultDir]
+ set state_state 0
+ while { [expr {$state_state == 0}]} {
+     set newfile_filename [tk_getOpenFile -title "Open new FS log file" -filetypes $types -initialdir $current_DefaultDir]
  
- if {$newfile_filename != ""} {
-  newfile_OK
+     if {$newfile_filename != ""} {
+         set state_state [newfile_OK]
+     } else {
+         set state_state 1
+     }
+     if {$state_state == 0} {
+         tk_messageBox -message $statusMsg -type ok
+     }
  }
 
 }
@@ -1455,7 +1500,7 @@ proc open_fileselection_dialog {} {
   {{All Files} {*} }
  }
 
- set openfile_filename [tk_getOpenFile -title "Open new FS log file" -filetypes $types -initialdir $current_DefaultDir]
+ set openfile_filename [tk_getOpenFile -title "Open xtrac output file" -filetypes $types -initialdir $current_DefaultDir]
  
  if {$openfile_filename != ""} {
   openfile_OK
@@ -1478,6 +1523,7 @@ frame .mbar -relief raised -borderwidth 2
 menubutton .mbar.file -text "File" -underline 0 -menu .mbar.file.menu
 menubutton .mbar.edit -text "Edit" -underline 0 -menu .mbar.edit.menu
 menubutton .mbar.graph -text "Graph" -underline 0 -menu .mbar.graph.menu
+menubutton .mbar.data -text "Data" -underline 0 -menu .mbar.data.menu
 menubutton .mbar.error -text "Sigma" -underline 0 -menu .mbar.error.menu
 menubutton .mbar.source -text "Source" -underline 1 -menu .mbar.source.menu
 menubutton .mbar.stat -text "Statistics" -underline 1 -menu .mbar.stat.menu
@@ -1496,7 +1542,7 @@ focus .
 # --------------------------------
 
 pack .mbar -fill x
-pack .mbar.file .mbar.edit .mbar.graph .mbar.error .mbar.source .mbar.stat -padx 2m -side left
+pack .mbar.file .mbar.edit .mbar.graph .mbar.data .mbar.error .mbar.source .mbar.stat -padx 2m -side left
 pack .statusbar -side bottom -fill x
 pack .labelStatusMsg -in .statusbar -padx 2m -side left
 pack .labelNumberNodes -in .statusbar -padx 2m -side right
@@ -1508,12 +1554,16 @@ pack .plotwindowframe
 menu .mbar.file.menu
 menu .mbar.edit.menu
 menu .mbar.graph.menu
+menu .mbar.data.menu
 menu .mbar.error.menu
 menu .mbar.source.menu
 menu .mbar.stat.menu
 
- 
+if { $tk_version < 4.2 } {
+.mbar.file.menu add command -label "New" -command newFile
+} else {
 .mbar.file.menu add command -label "New" -command fileselection_dialog
+}
 
 if { $tk_version < 4.2 } {
 .mbar.file.menu add command -label "Open" -command openFile
@@ -1538,6 +1588,34 @@ if { $tk_version < 4.2 } {
 .mbar.edit.menu add separator
 .mbar.edit.menu add command -label "Reprocess" -command runError
 .mbar.edit.menu add command -label "x-sigma" -command runSigma
+
+.mbar.data.menu add radio -label "Raw Data" -variable currentData -value 1 -command changeData
+.mbar.data.menu add radio -label "Residuals" -variable currentData -value 2 -command changeData
+set currentData 2
+
+proc changeData {} {
+
+    global currentData currentPlot nodeDataMatrix noOfNodes
+    global XmeanRes YmeanRes XrmsRes YrmsRes
+    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw
+    
+    for {set counter 1} {$counter < $noOfNodes} {incr counter} {
+	switch $currentData {
+            1 {
+                set nodeDataMatrix($counter,3) $nodeDataMatrix($counter,19)
+                set nodeDataMatrix($counter,4) $nodeDataMatrix($counter,20)
+                settypedata $XmeanRaw $XrmsRaw $YmeanRaw $YrmsRaw
+            }
+            2 {
+                set nodeDataMatrix($counter,3) $nodeDataMatrix($counter,17)
+                set nodeDataMatrix($counter,4) $nodeDataMatrix($counter,18)
+                settypedata $XmeanRes $XrmsRes $YmeanRes $YrmsRes
+            }
+        }
+    }
+ 
+    if {$currentPlot != 1} {ReplotYauto}
+}
 
 # Create Tk widgets for the plot window
 # -------------------------------------
