@@ -16,8 +16,8 @@ code      tape label format, an arbitrary string up to 32
 Comments: 
 Normally used after newtape command has halted the schedule.
 
-If code is csa, vsn is interpreted as a CSA format, "XX-T-YYYYZZ-N"
-label. The "XX-T-YYYYZZ" part of label uniquely identifies a set of
+If code is csa, vsn is interpreted as a CSA format, "XX-T-YYYYYZZ-N"
+label. The "XX-T-YYYYYZZ" part of label uniquely identifies a set of
 eight tapes. The check-sum in checked. If type is specified it must
 agree with the "T" type from the vsn, unless six characters are
 specified for type. If type is not specified, the single character
