@@ -34,6 +34,8 @@ C
 C  History
 C  NRV 910528 created for DRUDG use reading SNAP files only
 C  nrv 930412 implicit none
+C 970117 nrv check for argument to ACOS being slightly greater than 1.0 and
+C            set it to 1.0
 C
 C
 C  1. First calculate the station latitude, longitude.
@@ -63,12 +65,16 @@ C       HA is Greenwich ST - west long - right ascension
 	CHA = COS(HA)
 C
 	ARG = CDEC*CLAT*CHA + SDEC*SLAT
+        if (arg.gt.1.0) arg=1.0
+        if (arg.lt.-1.0) arg=-1.0
 	EL = PI/2.0 - ACOS(ARG)
 	SEL = SIN(EL)
 	CEL = COS(EL)
 	ARG = (-SLAT/(CLAT*CEL))*(SEL-SDEC/SLAT)
 	IF (ABS(HA).LT.1.D-3.AND.ARG.LT.0.0) ARG=-1.0
 	IF (ABS(HA).LT.1.D-3.AND.ARG.GE.0.0) ARG=+1.0
+        if (arg.gt.1.0) arg=1.0
+        if (arg.lt.-1.0) arg=-1.0
 	AZ = ACOS(ARG)
 	AZX = -CDEC*SHA/CEL
 	IF (AZX.LT.0) AZ = 2.0*PI - AZ
