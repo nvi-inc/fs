@@ -26,15 +26,18 @@ main()
   }
 
   initscr();
-/*
   signal(SIGINT, die);
-*/
+  noecho ();
+  nodelay(stdscr, TRUE);
+
   clear();
   refresh();
 
   m3init();
 
   while(1) {
+    while(ERR!=getch())
+      ;
     mout3();
     rte_sleep(100);
     if (nsem_test(NSEMNAME) != 1) {
