@@ -38,7 +38,7 @@ static int read_size;
 
 /*-------------------------------------------------------------------------*/
 
-int rddev_(mode,devid,buffer,buflen,error, ipcode, timeout)
+int rddev_(mode,devid,buffer,buflen,error, ipcode, timeout, no_after)
 
 /* rddev returns the count of the number of bytes read, if there are
    no errors.
@@ -54,7 +54,7 @@ unsigned char *buffer;
 int *buflen;  /* buffer length in characters */
 int *error;
 int *timeout;
-
+int *no_after;
 {
   int i;
   int iret, ierr;
@@ -219,7 +219,7 @@ int *timeout;
 
   iret = ibcnt;
 
-  if (!serial) {
+  if ((!serial)&&(!*no_after)) {
 #ifdef CONFIG_GPIB
     ibcmd(ID_hpib,"_?",2);  	/* unaddress all listeners and talkers */
     if ((ibsta & (ERR|TIMO)) != 0) {
