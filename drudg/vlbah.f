@@ -33,6 +33,8 @@ C 960219 nrv Finish modes for new setups
 C 960228 nrv Make i2bit 3-d as are other arrays passed to wrhead
 C 960515 nrv Correct index for baseband, ifchan, wideband commands
 C 960516 nrv Switching set for dummy is '0' not ' '
+C 960709 nrv Fix "synth=" command so that only 2 synthesizers are used,
+C            and 3 if we're switching.
 C
 C
 C  INPUT:
@@ -425,16 +427,20 @@ C   If nchan=8 use these lines.
         endif
 
 C synth = (m,Synth(m)/1000), ... where m=1 to nsynth and nsynth=
-C         largest value of Syn#
+C         either 1 or 2 or 3. 3 is used only for switched.
 
         do ix=1,nchan(istn,icod)
           nvc=invcx(ix,istn,icod)
-          if (ichcm_ch(lifinp(nvc,istn,icod),1,'A').eq.0) isyn(nvc)=2
-          if (ichcm_ch(lifinp(nvc,istn,icod),1,'B').eq.0) isyn(nvc)=1
-          if (ichcm_ch(lifinp(nvc,istn,icod),1,'C').eq.0) isyn(nvc)=4
-          if (ichcm_ch(lifinp(nvc,istn,icod),1,'D').eq.0) isyn(nvc)=3
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'A').eq.0) isyn(nvc)=2 ! S
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'B').eq.0) isyn(nvc)=1 ! X
+C There is no synthesizer 4. C and D are normally LCP
+C         if (ichcm_ch(lifinp(nvc,istn,icod),1,'C').eq.0) isyn(nvc)=4
+C D is upper X for switched
+          if (ichcm_ch(lifinp(nvc,istn,icod),1,'D').eq.0.and.ksw) 
+     .    isyn(nvc)=3 ! sw
         enddo
         immax = -1
+C       Find highest value of isyn (1, 2, or 3)
         do ix=1,nchan(istn,icod)
           nvc=invcx(ix,istn,icod)
           if (immax.lt.isyn(nvc)) then
