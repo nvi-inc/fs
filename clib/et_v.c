@@ -23,7 +23,7 @@ long ip[5];
       memcpy(request.device,"rc",2);
       request.type=0;
       request.addr=0xb0; request.data=0x01  ; add_req(&buffer,&request);
-      lcl.speed=0;
+      lcl.cips=0;
       request.addr=0xb5; 
       vstb5mc(&request.data,&lcl); add_req(&buffer,&request);
 
@@ -32,7 +32,9 @@ long ip[5];
       ichold=shm_addr->check.rec;
       shm_addr->check.rec=0;
 
-      shm_addr->ispeed=0;
+      shm_addr->ispeed=-3;
+      shm_addr->cips=0;
+      shm_addr->idirtp = -1;
 
       end_req(ip,&buffer);                /* send buffer and schedule */
       skd_run("mcbcn",'w',ip);

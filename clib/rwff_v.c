@@ -77,7 +77,8 @@ int *ierr;
           } else {
             request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
           }
-          shm_addr->ispeed=shm_addr->iskdtpsd;
+          shm_addr->ispeed=-3;
+	  shm_addr->cips=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x00; 
           add_req(&buffer,&request);
@@ -92,7 +93,8 @@ int *ierr;
           } else {
             request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
           }
-          shm_addr->ispeed=shm_addr->iskdtpsd;
+          shm_addr->ispeed=-3;
+	  shm_addr->cips=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x01; 
           add_req(&buffer,&request);
@@ -107,7 +109,8 @@ int *ierr;
           } else {
             request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
           }
-          shm_addr->ispeed=shm_addr->imaxtpsd;
+          shm_addr->ispeed=-3;
+	  shm_addr->cips=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x00; 
           add_req(&buffer,&request);
@@ -122,7 +125,8 @@ int *ierr;
           } else {
             request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
           }
-          shm_addr->ispeed=shm_addr->imaxtpsd;
+          shm_addr->ispeed=-3;
+	  shm_addr->cips=request.data;
           add_req(&buffer,&request);
           request.addr=0xb1; request.data=0x01; 
           add_req(&buffer,&request);
