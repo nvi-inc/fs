@@ -52,7 +52,7 @@ LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../bin/$(PROGRAM): $(DROBS) 
 	rm -f ./core
 	@echo Linking $(PROGRAM)...
-	@f77 -o ../bin/$(PROGRAM) $(DROBS) $(LIBS)
+	@$(FC) -o ../bin/$(PROGRAM) $(DROBS) $(LIBS)
 	@strip ../bin/$(PROGRAM)
 	@echo done.
 
@@ -63,7 +63,7 @@ LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 #  The following are special dependency lines for compiling.
 
 .f.o:
-	cd $(<D); f77 $(FFLAGS) $<
+	cd $(<D); $(FC) $(FFLAGS) $<
 .c.o:
 	cd $(<D); cc $(CFLAGS) $<
 
