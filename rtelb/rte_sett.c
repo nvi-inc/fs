@@ -31,9 +31,11 @@ char *sMode;
 {
     int iIndex, ierr;
     char model;
+    int iComputer;
 
     iIndex = 01 & shm_addr->time.index;
     model = shm_addr->time.model;
+    iComputer= shm_addr->time.icomputer[iIndex];
 
     if (!strcmp(sMode,"cpu")) {
         rte_sleep(25);
@@ -58,7 +60,7 @@ char *sMode;
                   	   /* don't update rate, but save the other stuff */
          lEpoch=lCentiSec;
          lOffset = lDiffHs;
-       } else if (!strcmp(sMode,"rate") ) {
+       } else if (!strcmp(sMode,"adapt") || !strcmp(sMode,"rate") ) {
 					/* update the rate */
          lSpan = lCentiSec-lEpoch;
          fRate=((double)(lDiffHs-lOffset))/lSpan;
@@ -69,6 +71,7 @@ char *sMode;
        shm_addr->time.span[iIndex] = lSpan;
        shm_addr->time.offset[iIndex] = lOffset;
        shm_addr->time.epoch[iIndex] = lEpoch;
+       shm_addr->time.icomputer[iIndex] = iComputer;
        shm_addr->time.index = iIndex;
 
        ierr=0;
