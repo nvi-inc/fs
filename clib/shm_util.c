@@ -55,7 +55,7 @@ key_t key;
    }
 
    shm_addr = NULL;
-   shm_addr = (struct fscom *) shmat ( shmid, shm_addr, 0 );
+   shm_addr = (struct fscom *) shmat ( shmid, (char *) shm_addr, 0 );
    if ( BAD_ADDR  == (char *) shm_addr ) {
 	perror("shm_att: attaching memory segment failed");
 	exit( -1);

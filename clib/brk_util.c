@@ -63,7 +63,7 @@ if ( msqid == -1 ) {
 }
 
 while ( -1 !=
-msgrcv( msqid, &brbuf, 0, -LONG_MAX,IPC_NOWAIT|MSG_NOERROR));
+msgrcv( msqid, (struct msgbuf *) &brbuf, 0, -LONG_MAX,IPC_NOWAIT|MSG_NOERROR));
 if( errno != ENOMSG){
     perror("brk_ini: error cleaning brk queue\n");
     exit(-1);
@@ -88,7 +88,7 @@ struct brk_buf brbuf;
 
 brbuf.mtype=mtype(name);
 
-if ( -1 == msgsnd( msqid, &brbuf, 0, NULL ) ) {
+if ( -1 == msgsnd( msqid, (struct msgbuf *) &brbuf, 0, 0 ) ) {
        fprintf( stderr,"brk_run: msqid %d,",msqid);
         perror(" sending break message");
         exit( -1);
@@ -106,7 +106,7 @@ type=mtype(name);
 ret = FALSE;
 
 while (TRUE) {
-   status = msgrcv( msqid, &brbuf, 0, type, IPC_NOWAIT);
+   status = msgrcv( msqid, (struct msgbuf *) &brbuf, 0, type, IPC_NOWAIT);
    
    if (status != -1 ) ret=TRUE;
    else if (status == -1 && errno == EINTR) ;
