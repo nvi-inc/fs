@@ -1,0 +1,8 @@
+    In order to use this version, two environment variables are
+    required to be set in ~/.cshrc:
+
+      setenv PGPLOT_DIR /usr/lib/pgplot
+      setenv PGPLOT_DEV /xwin
+
+    The first variable depends on the place where pgplot is
+    installed. For some systems /usr/local/lib/pgplot is appropriate.
