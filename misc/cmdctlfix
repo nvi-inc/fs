@@ -65,7 +65,7 @@ if(!open(OUT,">" . $out)) {
 $not=0;
 
 while(<BAK>) {
-    if (/^\*/) {
+    if (/^\*/||/^[ ]*$/) {
 	print OUT;
 	next;
     }
