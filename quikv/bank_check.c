@@ -52,6 +52,8 @@ parse:
 	if(ip[2]<0) return;
 	rtime_decode(&rtime,ip);
 	if(rtime < shm_addr->scan_name.duration+5.0) {
+	  long before, after;
+	  unsigned isleep;
 
 	  out_recs=0;
 	  out_class=0;
@@ -62,11 +64,24 @@ parse:
 	  ip[0]=1;
 	  ip[1]=out_class;
 	  ip[2]=out_recs;
+          rte_rawt(&before);
 	  skd_run("mk5cn",'w',ip);
 	  skd_par(ip);
 
 	  if(ip[2]<0) return;
 	  bank_inc_check(ip);
+	  rte_rawt(&after);
+	  isleep=400-(after-before)+1;
+	  if(isleep <= 401)
+	    rte_sleep(isleep);
+	}
+
+	{
+	  long ip[5];
+	  char mess[ ]="change_pack";
+
+	  cls_snd( &(shm_addr->iclopr), mess, strlen(mess) , 0, 0);
+	  skd_run("boss ",'n',ip);
 	}
       }
       ilast=0;                                      /* last argv examined */
@@ -74,6 +89,10 @@ parse:
       out_class=0;
 
       strcpy(outbuf,"vsn?\n");
+      cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+      out_recs++;
+
+      strcpy(outbuf,"disk_serial?\n");
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 
@@ -95,3 +114,4 @@ error:
       memcpy(ip+3,"5b",2);
       return;
 }
+
