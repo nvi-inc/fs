@@ -38,6 +38,7 @@ C               - remote, lock indicators
       logical kcom,kdata
       dimension lfr(3)
       dimension ireg(2) 
+      real extbw
       integer get_buf
 C               - registers from EXEC 
       equivalence (reg,ireg(1)) 
@@ -101,6 +102,7 @@ C
      .     ilokvc(ivcn),tpivc(ivcn),ial)
       call fs_set_tpivc(tpivc)
       call fs_set_ilokvc(ilokvc)
+      extbw=-1.0
       goto 320
 c
  310  continue
@@ -108,6 +110,10 @@ c
       idumm1 = ichmv(lfr,1,lfreqv(1,ivcn),1,6)
       call fs_get_ibwvc(ibwvc)
       ibw = ibwvc(ivcn) 
+      if(ibw.eq.0) then
+         call fs_get_extbwvc(extbwvc)
+         extbw=extbwvc(ivcn)
+      endif
       itp = itpivc(ivcn)
       iatu = iatuvc(ivcn) 
       iatl = iatlvc(ivcn) 
@@ -118,13 +124,13 @@ C                   Move in frequency
       if (ichcm(lfr,1,lfreqv(1,ivcn),1,6).ne.0) ierr = -301 
       nch = mcoma(ibuf2,nch)
 C 
-      nch = ivced(-1,ibw,ibuf2,nch,ilen2) 
+      nch = ivced(-1,ibw,extbw,ibuf2,nch,ilen2) 
 C                   Convert real number bandwidth to characters 
       call fs_get_ibwvc(ibwvc)
       if (ibw.ne.ibwvc(ivcn)) ierr = -302 
       nch = mcoma(ibuf2,nch)
 C 
-      nch = ivced(-2,itp,ibuf2,nch,ilen2) 
+      nch = ivced(-2,itp,extbw,ibuf2,nch,ilen2) 
 C                   Total power selection, ASCII letters
       if (itp.ne.itpivc(ivcn)) ierr = -303
       nch = mcoma(ibuf2,nch)
@@ -140,12 +146,12 @@ C
 C 
       nch = mcoma(ibuf2,nch)
 C 
-      nch = ivced(-3,iremvc(ivcn),ibuf2,nch,ilen2)
+      nch = ivced(-3,iremvc(ivcn),extbw,ibuf2,nch,ilen2)
 C                   Remote setting
       nch = mcoma(ibuf2,nch)
 C 
       call fs_get_ilokvc(ilokvc)
-      nch = ivced(-4,ilokvc(ivcn),ibuf2,nch,ilen2)
+      nch = ivced(-4,ilokvc(ivcn),extbw,ibuf2,nch,ilen2)
 C                   Oscillator locked or not
       nch = mcoma(ibuf2,nch)
 C 
