@@ -134,6 +134,7 @@ typedef struct fscom {
         struct rec_mode_cmd rec_mode;
         struct data_valid_cmd data_valid;
         struct s2label_cmd s2label;
+	struct form4_cmd form4;
         float freqlo[4];
         float frequp[4];
         float diaman;
