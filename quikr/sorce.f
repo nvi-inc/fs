@@ -7,10 +7,10 @@ C
 C
       integer*4 ip(5)
       integer it(6),iparm(2),get_buf,ichcm_ch,itb(6)
-      integer*2 ibuf(40),ibufi(18),ibufo( 8),ls(5),lds,lhs
+      integer*2 ibuf(40),ibufi(18),ibufo( 8),ls(5),lds,lhs,cwp(4)
       double precision rad,decd,alati,elong,gheig,ra,dec
 C      - double precision versions of ra and dec for MOVE
-      double precision dra,ddec,dc
+      double precision dra,ddec
 C      - returned by MOVE: changes in ra and dec to be added
 C        to the old values
       logical kd,kprec,ksun,kmoon      
@@ -148,12 +148,28 @@ C
           goto 990
         endif
       endif
+C
+C     2.5 The cable wrap
+C
+      ic1 = ich 
+      call gtprm(ibuf,ich,nchar,0,parm,ierr) 
+      if (cjchar(parm,1).eq.'*') then
+        call fs_get_cwrap(cwrap)
+        idumm1 = ichmv(cwp,1,cwrap,1,8)     !  pick up the name from common
+      else if (cjchar(parm,1).eq.',') then
+        idumm1 = ichmv_ch(cwp,1,'        ')
+      else
+        idumm1 = ichmv_ch(cwp,1,'        ')
+        idumm1 = ichmv(cwp,1,ibuf,ic1,min0(8,ich-ic1-1))
+      endif
 C 
 C     3. Precess the positions to today's date from the epoch 
 C     given as input.  Store the variables away in COMMON.
 C 
 300   idumm1 = ichmv(lsorna,1,ls,1,10)
       call fs_set_lsorna(lsorna)
+      idumm1 = ichmv(cwrap,1,cwp,1,8)
+      call fs_set_cwrap(cwrap)
 C                   Make sure the proper dates are in common
       rad = ra
       decd = dec
@@ -163,15 +179,20 @@ C                   Initialize apparent deltas
 C                   Pick out today's day-of-year for precession 
       call fc_rte_time(it,it(6))
       kprec = (ep.gt.0.0) .and. .not.(kd.or.ksun.or.kmoon)         
-      if(kprec) call move(ifix(ep),it(6),1,it(5),rad,decd,dra,ddec,dc)
+c     if(kprec) call move(ifix(ep),it(6),1,it(5),rad,decd,dra,ddec,dc)
+      if(kprec) then
+         call fs_get_wlong(wlong)
+         call fs_get_alat(alat)
+         call fs_get_height(height)
+         call move2t(it,wlong,alat,dble(height),
+     &        rad,decd,ep,radat,decdat)
+      endif
 C 
       ra50 = ra 
       call fs_set_ra50(ra50)
       dec50 = dec 
       call fs_set_dec50(dec50)
-      radat = ra + dra
       call fs_set_radat(radat)
-      decdat = dec + ddec 
       call fs_set_decdat(decdat)
       idinyr = 365
       if(mod(it(6),400).eq.0 .or. 
@@ -199,7 +220,7 @@ C
         go to 990
       endif
       call fc_rte_time(it,it(6))
-      call sun(rad,decd,it) 
+      call sunpo(rad,decd,it) 
       ra = rad
       dec = decd
       go to 300 
@@ -286,35 +307,43 @@ C                   Adjust next char to be first blank in source name.
         nch = nch + ir2as(sngl(ra50*180.0/RPI),ibuf,nch,7,2)
         nch = mcoma(ibuf,nch)
         nch = nch + ir2as(sngl(dec50*180.0/RPI),ibuf,nch,7,2)
+        nch = mcoma(ibuf,nch)
+        nch = mcoma(ibuf,nch)
       else
         call radec(ra50,dec50,0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d) 
-        is=ras*10
-        ras=is/10.0
-        nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,8,1)
+        nch=nch+ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
+        nch=nch+ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
+        nch = nch + ir2as(ras,ibuf,nch,-6,-3)
         nch = mcoma(ibuf,nch)
-C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
         if (dec50.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
-        is=dcs
-        dcs=is
-        nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,7,0)
+        nch=nch+ib2as(idcd,ibuf,nch,o'40000'+o'400'*2+2)
+        nch=nch+ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
+        nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
         nch = mcoma(ibuf,nch)
         call fs_get_ep1950(ep1950)
-        nch = nch + ir2as(ep1950,ibuf,nch,6,1)
+        nch = nch + ir2as(ep1950,ibuf,nch,9,4)
         nch = mcoma(ibuf,nch)
-        call radec(radat,decdat,0.0,irah,iram,ras,
-     .     lds,idcd,idcm,dcs,lhs,i,i,d) 
-        is=ras*10
-        ras=is/10.0
-        nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,8,1)
-        nch = mcoma(ibuf,nch)
-C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
-        if (decdat.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
-        is=dcs*10
-        dcs=is/10.0
-        nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,7,0)
-        nch = mcoma(ibuf,nch)
-        nch = nch + ir2as(epoch,ibuf,nch,6,1)
+      endif
+      call fs_get_cwrap(cwrap)
+      if(ichcm_ch(cwrap,1,'        ').ne.0) then
+         ilc=iflch(cwrap,8)
+         nch=ichmv(ibuf,nch,cwrap,1,ilc)
+      endif
+      nch = mcoma(ibuf,nch)
+      if(.not.kd) then
+         call radec(radat,decdat,0.0,irah,iram,ras,
+     .        lds,idcd,idcm,dcs,lhs,i,i,d) 
+         nch=nch+ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
+         nch=nch+ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
+         nch = nch + ir2as(ras,ibuf,nch,-6,-3)
+         nch = mcoma(ibuf,nch)
+         if (decdat.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
+         nch=nch+ib2as(idcd,ibuf,nch,o'40000'+o'400'*2+2)
+         nch=nch+ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
+         nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
+         nch = mcoma(ibuf,nch)
+         nch = nch + ir2as(epoch,ibuf,nch,8,3)
       endif
 530   iclass = 0
       nch = nch - 1 
