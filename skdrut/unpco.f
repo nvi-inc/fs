@@ -1,16 +1,19 @@
       SUBROUTINE unpco(IBUF,ILEN,IERR,
-     .LCODE,LSUBGR,FREQRF,FREQPC,IVCN,LMODE,VCBAND,
-     .ITRK)
+     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,
+     .ITRK,cs,ivc)
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
 C
-      include 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C  History:
 C  950622 nrv Remove check for valid letters for mode.
 C             Check for tracks between -3 and 36.
 C 951019 nrv change "14" to max_chan, "28" to max_pass, observing mode
 C            may be 8 characters
+C 960126 nrv Decode sub-passes allowing null track assignments.
+C            This leaves room for the magnitude bit assignment.
+C 960121 nrv Add switching and BBC# to call, decode at end of line.
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -19,7 +22,7 @@ C           - buffer having the record
 C     ILEN - length of the record in IBUF, in words
 C
 C  OUTPUT:
-      integer ierr,ivcn
+      integer ierr,ichan
       integer*2 lcode,lsubgr,lmode(4)
       real*4 freqrf,freqpc,vcband
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
@@ -27,11 +30,13 @@ C     LCODE - frequency code, 2-char
 C     LSUBGR - subgroup within the code, 1-char in upper byte
 C     FREQRF - observing frequency, MHz
 C     FREQPC - phase cal frequency, Hz
-C     IVCN - video converter for this frequency
+C     Ichan - channel number for this frequency
 C     LMODE - observing mode, 1 char in upper byte
 C     VCBAND - final video bandwidth, MHz
       integer ITRK(4,max_pass)
 C      - tracks to be recorded, by pass
+      character*3 cs ! switching
+      integer ivc ! physical BBC# for this channel
 C
 C  LOCAL:
       integer IPARM(2),j,idumy,i,ipas
@@ -42,7 +47,7 @@ C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
       integer ich,nch,ic2,ic1,ict,ip,ix,itx,it1
-      integer ichmv,ias2b,iscnc ! functions
+      integer jchar,ichmv,ias2b,iscnc ! functions
 C
 C
 C     1. Start decoding this record with the first character.
@@ -100,7 +105,7 @@ C
       FREQPC = D
 C
 C
-C     Video converter number
+C     Channel number
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       I = IAS2B(IBUF,IC1,IC2-IC1+1)
@@ -108,7 +113,7 @@ C
         IERR = -105
         RETURN
       END IF  !
-      IVCN = I
+      Ichan = I
 C
 C
 C     Observing mode
@@ -152,16 +157,15 @@ C
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       IX = 1
-      DO WHILE (IC1.NE.0) !get p(t1,t2,t3,t4) fields
-        IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
-C                              (
-C            Find the opening parenthesis
-        IF  (IP.EQ.0) THEN  !no tracks!
-          IERR = -107-IX
-          RETURN
-        END IF  !no tracks!
+      if (ic1.eq.0) then ! no tracks !
+        ierr=-107-ix
+        return
+      endif
+      IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
+C                              (        Find the opening parenthesis
+      DO WHILE (ip.gt.0) !get p(t1,t2,t3,t4) fields
         IPAS = IAS2B(IBUF,IC1,IP-IC1) ! the tape sub-pass
-        IF  (IPAS.lt.0) THEN  
+        IF  (IPAS.lt.0.or.ipas.gt.max_pass) THEN  
           IERR = -107-IX
           RETURN
         END IF  !
@@ -170,22 +174,58 @@ C            Find the opening parenthesis
         itx=0
         do while (ict.le.ic2) ! scan (t1,t2,t3,t4)
           CALL GTPRM(IBUF,ICT,IC2,1,PARM,NULL,5)
-          it1=iparm(1)
-          if (it1.lt.-3.or.it1.gt.36) then 
+          IX = IX + 1
+          itx=itx+1
+          if (itx.gt.4) then ! too many
             ierr=-107-ix
             return
           endif
-          itx=itx+1
-          ITRK(itx,IPAS) = it1
-          IX = IX + 1
+          if (jchar(iparm,1).ne.OCOMMA) then ! value
+            it1=iparm(1)
+            if (it1.lt.-3.or.it1.gt.36) then 
+              ierr=-107-ix
+              return
+            endif
+            ITRK(itx,IPAS) = it1
+          endif ! value
         enddo ! scan (t1,t2,t3,t4)
         IF  (itx.eq.0) THEN  !no tracks in this field!
           IERR = -107-IX
           RETURN
         END IF  !no tracks!
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-      END DO  !get p(t1,t2) fields
+        ip=0
+        if (ic1.gt.0) IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
+      END DO  !get p(t1,t2,t3,t4) fields
 C
+C  Done with track assignments. Now check for switching and BBC #s.
+C     switching set number - 0 1 2 or 1,2
 C
+      ivc=0
+
+      if (ic1.eq.0) then ! no switching, no BBC#s
+        cs = '   '
+        return
+      else
+        NCH = IC2-IC1+1
+        cs = '   '
+        call hol2char(ibuf,ic1,ic2,cs)
+        IF ((cs(1:1).ne.'1').and.(cs(1:1).ne.'2').and.
+     .      (cs(1:1).ne.'0').and.(cs.ne.'1,2')) then
+          IERR = -108-ix
+          RETURN
+        END IF  !
+      endif
+
+C  Finally physical BBC#. Only present when switching is too.
+C
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+      I = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF  (I.LT.1.OR.I.GT.max_chan) THEN  !
+        IERR = -109-ix
+        RETURN
+      END IF  !
+      Ivc = I
+
       RETURN
       END
