@@ -30,7 +30,7 @@ long ip[5];                           /* ipc parameters */
 	 trkfrm4_dis(command,&shm_addr->form4,ip);
 	 return;
       } else if (command->argv[0]==NULL) { /* simple equals */
-	for (i=0;i<32;i++) 
+	for (i=0;i<64;i++) 
 	  lcl.codes[i]=-1;
         goto copy;
       }
