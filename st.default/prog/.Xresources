@@ -53,6 +53,9 @@ monit3.title:		System Temperatures
 monit4*geometry:	80x24-0+160
 monit4.title:		LBA DAS Monitor
 monit4*font:		fixed
+! monit5 (Mark 5 display, 24 lines)
+monit5*geometry:	46x3-0+157
+monit5.title:		Mark 5 Remaining Capacity
 !login shell
 login_sh.title:		login shell
 login_sh*scrollBar:	true

@@ -520,6 +520,7 @@ Popup "Operator Menu"
 	Exec	"Monit: status  C-S-2"	exec xterm -name monit2 -e monit2 &
 	Exec	"Monit: Tsys    C-S-3"	exec xterm -name monit3 -e monit3 &
 	Exec	"Monit: LBA     C-S-4"	exec xterm -name monit4 -e monit4 &
+	Exec	"Monit: Mark 5  C-S-4"	exec xterm -name monit5 -e monit5 &
 	Exec	"Chekr          C-S-C"	exec run -w chekr &
 	Exec	"Emacs          C-S-E"	exec emacs &
 	Exec	"Logex          C-S-L"	exec xterm -name logex -e logex &
@@ -622,6 +623,7 @@ Key 1		A	CS	Exec "monit1" exec xterm -name monit1 -e monit1 &
 Key 2		A	CS	Exec "monit2" exec xterm -name monit2 -e monit2 &
 Key 3		A	CS	Exec "monit3" exec xterm -name monit3 -e monit3 &
 Key 4		A	CS	Exec "monit4" exec xterm -name monit4 -e monit4 &
+Key 5		A	CS	Exec "monit5" exec xterm -name monit5 -e monit5 &
 Key c		A	CS	Exec "chekr" exec run -w chekr &
 Key e		A	CS	Exec "emacs" exec emacs &
 Key l		A	CS	Exec "logex" exec xterm -name logex -e logex &
