@@ -59,7 +59,7 @@ chown -R prog fs fs-$FS_VERSION
 chgrp -R rtx fs fs-$FS_VERSION
 chmod -R a+r,u+w,go-w fs fs-$FS_VERSION
 #
-if [ ! -e st-0.0.0 -a \( -L st -o ! -e st \) ]; then
+if [ ! -e st-0.0.0 -a ! -e st ]; then
   echo "Creating /usr2/st default directory structure..."
   mkdir /usr2/st-0.0.0
   cd /usr2/fs/st.default/st-0.0.0
