@@ -96,9 +96,10 @@ long *ipcode;
 
   if(!serial) {
 #ifdef CONFIG_GPIB
-/* this causes some problem
+#ifdef REV_2
+/* this causes some problem for rev 1 */
     ierr=ibonl(ID_hpib,1);
-*/
+#endif
     ierr=0;
     if (ierr&ERR) {
       if(iberr==0)

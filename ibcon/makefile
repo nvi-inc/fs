@@ -5,6 +5,9 @@ CFLAGS =
 ifeq (/usr/include/gpib,$(wildcard /usr/include/gpib))
 GPIB_LIBS=-lf2c -lgpib -lfl
 CFLAGS := -I/usr/include/gpib -DCONFIG_GPIB
+ifneq (/usr/include/gpib/ugpib.h,$(wildcard /usr/include/gpib/ugpib.h))
+CFLAGS := $(CFLAGS) -DREV_2
+endif
 endif
 #
 LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../flib/flib.a ../fclib/fclib.a \
