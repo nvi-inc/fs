@@ -8,9 +8,10 @@ C 901108 NRV Informational messages added, Break added
 C 901109 NRV Removed display of start times, added request for a time.
 C 910826 NRV Always wrap by 1 day
 c 930412 nrv implicit none
+C 960223 nrv change permissions on output file
 
-	INCLUDE 'skparm.ftni'
-	INCLUDE 'drcom.ftni'
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
 
 C Input: none
 C Output:
@@ -601,5 +602,6 @@ C
 	end do !copy to end
 C
 990   close(lu_outfile)
+      call drchmod(coutname,iperm,ierr)
 	RETURN
 	END
