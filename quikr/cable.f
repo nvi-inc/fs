@@ -1,4 +1,4 @@
-      subroutine cable(ip)
+      subroutine cable(ip, itask)
 C  measure cable cal c#870115:04:36#
 C 
 C   CABLE gets the cable cal value
@@ -85,7 +85,7 @@ C     8. All IBCON requests are scheduled here, and then CADIS called.
 C 
 800   call run_prog('ibcon','wait',iclass,nrec,idum,idum,idum)
       call rmpar(ip)
-      call cadis(ip,iclcm)
+      call cadis(ip,iclcm, itask)
       return
 C 
 990   ip(1) = 0 

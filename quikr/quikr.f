@@ -58,8 +58,6 @@ C
           call ma(ip,itask)
         else if (itask.eq.2) then
           call ib(ip)
-        else if (itask.eq.3) then
-          call cable(ip)
         else if (itask.eq.4) then
           call wx(ip)
         else if (itask.eq.5) then
@@ -82,6 +80,8 @@ C
           call et(ip)
         else if (itask.ge.3.and.itask.le.6) then
           call rwff(ip,itask)
+        else if (itask.eq.7) then
+          call rec(ip)
         endif
       else if (isub.eq.7) then
         if (itask.eq.1) then
@@ -134,7 +134,9 @@ C
         else
           call tpi(ip,itask)
         endif
-C for WVR stations only    else if (isub.eq.13) then
+C 13 was for WVR stations only
+      else if (isub.eq.13) then
+          call cable(ip,itask)
       else if (isub.eq.14) then
         if (itask.eq.1) then
           call pcalc(ip)
