@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.8/misc/fs958up.txt  Version: 1.0  Date: 020513
+File: /usr2/fs-9.5.9/misc/fs959up.txt  Version: 1.1  Date: 020520
 
 I. Introduction
 
@@ -17,8 +17,8 @@ are no critical updates. There is an improvement in the handling of
 reproduce by DRUDG for double speed recordings with VLBA and VLBA4
 recorders.
 
-This version includes all features of 9.5.7, specially the Mark V
-piggyback recording mode.
+This version includes all features of 9.5.7, specifically the Mark V
+piggyback recording mode. It also includes some small patches to 9.5.8.
 
 II. Changes Since Version 9.5.3
 
@@ -246,6 +246,13 @@ A more detailed discussion of these changes follows.
     information presented to the operator, these log entries are not
     displayed. They are only added to the log.
 
+    The FS attempts to force the measurements to desired period. The
+    cycle time specified is not the time between measurements, but the
+    time interval between the start of one measurement and the
+    next. The actual measuerements take less than 200 milliseconds for
+    VLBA/VLBA4 racks and less than 500 milliseconds for Mark III/IV
+    racks.
+
 20. Antenna onsource flagging. A new daemon, "flagr" is provided to
     report onsource status periodically. The interval is set in a new
     control file "flagr.ctl". The interval may need to be adjusted
@@ -272,6 +279,21 @@ A more detailed discussion of these changes follows.
     replaced by the name of the local program). A post processing
     script will be developed to generate a flagging table from this
     data for AIPS and other possible users.
+
+    The display of the antenna flagr messages is disabled when the
+    "fivpt" and "onoff" programs are active to minimize the display of
+    extraneous and possibly confusing messages.
+
+    The period specified for the cycle time is the interval between
+    measurements, not including the time required for the
+    measurements. Thus if the cycle time is selected as 2 seconds and
+    the antcn programs requires 1 second to actually check the
+    onsource status of the antenna, the actual period will be 3
+    seconds. This contrasts with the way tpicd works which is force
+    the specified interval. However, since it not known a priori how
+    long various antcn takes it was deemed prudent to use a more
+    conservative approach in this case. This approach may be modified
+    in the future.
 
 21. "inject_snap" returns command results. The "inject_snap" command
     has been expanded to accept a single additional argument, "-w"
@@ -319,7 +341,7 @@ A more detailed discussion of these changes follows.
 
                          B. Changes in DRUDG
 
-drudg opening message date is 020510. The following areas in DRUDG were
+drudg opening message date is 020515. The following areas in DRUDG were
 modified. Changes since version 9.5.7 start with item 6.
 
 1. S2 experiment corrections
@@ -331,6 +353,7 @@ modified. Changes since version 9.5.7 start with item 6.
 7. New command in setup procedures.
 8. VC command changes.
 9. REPRO command changes.
+10. Option 11 fix.
 
 A more detailed discussion of these changes follows.
 
@@ -424,7 +447,9 @@ u, l, or ul) is explicitly listed in the VC commands.
 9. REPRO command changes. For VLBA and VLBA4 drives, the bitrate
 parameter was moved to the 7th command parameter.
 
-
+10. Option 11 fix. In Option 11 the rack and recorder names for VLBA
+and VLBA4 were being confused. Now drudg checks both the name and the
+length of the name.
 
 			    C. Known Bugs
 
@@ -514,7 +539,6 @@ so that there will probably be less danger if "fmset" is left running.
 However, even in the future "fmset" should only be left running for as
 short a time as possible.  A reminder about this is included in the
 "fmset" menu.
-
 
 3. "odd"/"even" head types not supported for Mark IV & VLBA4. The
 Mark IV and VLBA4 rack version of the "form" command and the Mark IV
@@ -641,6 +665,9 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
+If you are upgrading from 9.5.8, please follow steps (0)-(8), skip
+step (9), and complete step (10).
+
 If you are upgrading from 9.5.7, please follow steps (0)-(11) and then
 skip to and follow steps (15)-(19).
 
@@ -677,7 +704,7 @@ do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.5.8 archive in your "/tmp" directory. For
+(3) Place a copy of the fs-9.5.9 archive in your "/tmp" directory. For
 example you might do the following:
 
     cd /tmp
@@ -685,7 +712,7 @@ example you might do the following:
     (enter your account name for the server at prompt)
     (enter your password for the server at prompt)
     cd /home/ftp/fs/test
-    get fs-9.5.8.tar.gz
+    get fs-9.5.9.tar.gz
     quit
 
 Please note "ncftp" will automatically get this file in binary mode.
@@ -699,12 +726,12 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
     cd /
-    tar -xzpf /tmp/fs-9.5.8.tar.gz
+    tar -xzpf /tmp/fs-9.5.9.tar.gz
 
 (6) Set the link for the new FS vesion:
 
     cd /usr2
-    ln -sfn fs-9.5.8 fs
+    ln -sfn fs-9.5.9 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -990,19 +1017,19 @@ section "IV. Transferring The Update Archive By DOS Floppy" below.
 VII. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.5.8.tar.gz archive have been placed
+floppy, "split" files of the fs-9.5.9.tar.gz archive have been placed
 in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
 small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs958tg.aa
-fs958tg.ab
+fs959tg.aa
+fs959tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs958tg.* >fs-9.5.8.tar.gz
+cat fs959tg.* >fs-9.5.9.tar.gz
 
-This will create an exact image of the original fs-9.5.8.tar.gz
+This will create an exact image of the original fs-9.5.9.tar.gz
 archive on your computer.  Please be sure to use binary transfer when
 getting the files from atri or kurp-ftp.

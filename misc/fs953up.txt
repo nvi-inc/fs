@@ -1,4 +1,4 @@
-File: /usr2/fs-9.5.4/misc/fs95up.txt  Version: 1.4  Date: 020111
+File: /usr2/fs-9.5.3/misc/fs953up.txt  Version: 1.4  Date: 020111
 
 I. Introduction
 
@@ -1148,7 +1148,6 @@ second drive during a schedule again. In any event, it not possible to
 use the "prepass" procedure or any of its relatives since these
 procedures start schedules to do a prepass. Doing so would interrupt
 the execution of the observation schedule.
-
 
 IV. Installation
 
