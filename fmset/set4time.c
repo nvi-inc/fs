@@ -37,8 +37,8 @@ int count;
                 formtm=gmtime(&formtime);
 		(void) strftime(outbuf+2,sizeof(outbuf)-2,
                                 "fm/tim %Y %j %H %M %S",formtm);
-		for (cp=outbuf+2;*cp!='\0';cp++)
-			if(*cp==' '&&*(cp+1)=='0')
+		for (cp=outbuf+2;*(cp+2)!=0;cp++)
+			if(*cp==' '&&*(cp+1)=='0' && *(cp+2)!=' ')
 				*(cp+1)=' ';
 	} else if (delta <0)
 		(void) strcpy(outbuf+2,"fm /tre");
