@@ -43,10 +43,10 @@ int fsmetc_()
     return (-313);
   }
 
-  /* Is the Field System running? status = 0 for yes */
+  /* Is the Field System running? status = 0 for yes 
   status = system("ps -e | grep metserver > /dev/null");
 
-  if (!status) {
+  if (!status) {*/
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
       return (-306);
     }
@@ -94,10 +94,10 @@ int fsmetc_()
 	       &shm_addr->speedwx,
 	       &shm_addr->directionwx);
       }
-      close(sockfd);
-  } else {
-    return (-312);
-  }
+      /*close(sockfd);
+	} else {
+	return (-312);
+	}*/
   close(sockfd);
   return (0);
 }
