@@ -86,7 +86,7 @@ if (drive==S2) {
   if(rack & MK3)
     printf("fmset does not support Mark 3 racks - fmset aborting\n");
   else if(rack == 0)
-    printf("fmset requires a VLBA/Mark IV rack or S2 recorder to set - fmset aborting\n");
+    printf("fmset requires a VLBA/VLBA4/Mark IV rack or S2 recorder to set - fmset aborting\n");
   rte_sleep(SLEEP_TIME);
   exit(0);
 } else
@@ -101,7 +101,9 @@ maindisp = newwin ( 24, 80, 0, 0 );
 cbreak();
 nodelay ( maindisp, TRUE );
 noecho ();
-clear_scrn ( maindisp, 24 );
+curs_set(0);
+wclear(maindisp);
+wrefresh(maindisp);
 box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 
 /* build display screen */
@@ -109,7 +111,7 @@ build:
 if(source == S2)
   mvwaddstr( maindisp, 4, 10, "S2 Recorder" );
 else
-  mvwaddstr( maindisp, 4, 10, "Formatter" );
+  mvwaddstr( maindisp, 4, 10, "Formatter  " );
 mvwaddstr( maindisp, 5, 10, "Field System" );
 mvwaddstr( maindisp, 6, 10, "Computer" );
 mvwaddstr( maindisp, 2, 23, "fmset - formatter/S2 recorder time set" );
@@ -122,7 +124,7 @@ mvwaddstr( maindisp,  ROW+2, 10,
 mvwaddstr( maindisp, ROW+3, 10, 
  "    '.'   to set formatter time to Field System time.");
 irow=4;
-if(rack& MK4)
+if(rack& MK4 || rack &VLBA4)
   mvwaddstr( maindisp, ROW+irow++, 10,
 	     "    's' or 'S' to SYNCH formatter (rarely needed)");
 if(!toggle) {
