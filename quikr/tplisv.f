@@ -105,11 +105,11 @@ C                           *
 C                   We haven't any stored values to pick up here
 C 
         if (lprm.eq.0) goto 285
-        if (ichcm_ch(lprm,1,'al').ne.0) goto 220
-        do ii=1,32
-          itpis_vlba(ii) = 1
-        enddo
-        goto 290
+C        if (ichcm_ch(lprm,1,'al').ne.0) goto 220
+C        do ii=1,32
+C          itpis_vlba(ii) = 1
+C        enddo
+C        goto 290
 C 
 220     if (ichcm_ch(lprm,1,'vu').ne.0) goto 225
         do ii=16,28,2
