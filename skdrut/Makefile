@@ -29,10 +29,10 @@ ydjul.o ymday.o printer.o unprat.o \
 vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
 vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
 vsoinp.o vglinp.o vob1inp.o vobinp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
-readv.o addscan.o findscan.o newscan.o pnum.o
+vread.o addscan.o findscan.o newscan.o pnum.o frinit.o
 #
-FFLAGS=-C -c -g 
-CFLAGS= -c -g
+FFLAGS=-C -c
+CFLAGS= -c
 #
 $(ARC).a: $(OBJECTS)
 	touch $(LIB)$(ARC).a
