@@ -28,10 +28,10 @@ C Output
       integer irec ! non-zero is record number
 
 C Local
-      integer nch,is,iob,idum,ich,ic,ic1,ic2,iyr,ida,ihr,imin,isc
-      integer iob_end,irec_save,icsor,ir,numc3,numc2,itry
-      integer*2 ibuf(ibuf_len),lstart(6)
-      integer iflch,ib2as,ichcm,ias2b,ichmv,igtso,igtfr
+      integer nch,iob,ich,ic1,ic2,iyr
+      integer iob_end,irec_save,ir,numc3,numc2,itry
+      integer*2 lstart(6)
+      integer ib2as,ichcm
 
 C 1. Find source name and frequency code.
 C    Convert start time to Hollerith .
@@ -65,11 +65,9 @@ C iob is the observation to start with in the existing scan array.
         endif
       do while (iob.le.iob_end)
 C       write(6,'("checking ",i4)') iob        
-C       idum = ichmv(ibuf,1,lskobs(1,iskrec(iob)),1,ibuf_len*2)
         ir=iskrec(iob)
         ICH = 1
 C  Source name
-C       icsor=iflch(lsorna(1,isor),max_sorlen) ! new source name
         CALL GTFLD(lskobs(1,ir),ICH,IBUF_LEN*2,IC1,IC2) ! scan source name
 C       if (ichcm(lsorna(1,isor),1,lskobs(1,ir),ic1,ic2-ic1+1).eq.0
 C    .     .and.ic2-ic1+1.eq.icsor) then ! continue

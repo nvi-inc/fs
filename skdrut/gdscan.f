@@ -5,6 +5,8 @@ C NOTE: ibuf and nch are modified on return.
 C History
 C 970722 nrv New. Removed from addscan and newscan
 
+C Called by: NEWSCAN
+
 C Input AND Output
       integer*2 ibuf(*)
       integer nch ! character to start with in ibuf

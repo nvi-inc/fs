@@ -20,6 +20,9 @@ C  ISOR - source index into COMMON arrays
 C  ISTNSK - which station in the observation
 C  ICOD - which code in the COMMON list
 C
+! functions
+      integer iwhere_in_string_list
+
 C LOCAL:
       integer i
 
@@ -32,31 +35,17 @@ C 961101 nrv Codes undefined for this station are invalid too.
 C 961107 nrv Don't check for undefined if this station isn't in this scan.
 C 970114 nrv Change 4 to max_sorlen/2
 C 200310Jun JMG Got rid of holleriths.
-      ISOR = 0
-      do i=1,nsourc
-        if(csor .eq. csorna(i)) then
-          isor=i
-          goto 20
-        endif
-      end do
-20    continue
+      isor=iwhere_in_string_list(csorna,nsourc,csor)
       IF (ISOR.EQ.0) THEN
         WRITE(LUSCN,9210) cSOR
 9210    FORMAT('CKOBS01 -  SOURCE ',a,' NOT IN YOUR LIST.  QUITTING.')
         RETURN
       ENDIF
 
-      ISTNSK = 0
-      DO I=1,NSTNSK
-        if(cstn(i)(1:1) .eq. cstcod(istn)(1:1)) istnsk=i
-      ENDDO
+      istnsk=iwhere_in_string_list(cstn,nstnsk,cstcod(istn))
 C
-      ICOD = 0
-      DO I=1,NCODES
-        IF (CCOD.EQ.cCODE(I)) ICOD=I
-      ENDDO
+      icod=iwhere_in_string_list(ccode,ncodes,ccod)
 
-30    continue
       IF (ICOD.EQ.0) THEN
         WRITE(LUSCN,9230) cCOD
 9230    FORMAT(' CKOBS02 - FREQUENCY CODE ',A,

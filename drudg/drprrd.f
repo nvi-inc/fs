@@ -3,6 +3,7 @@
 C   DRPRRD reads the lines in the $PARAM section needed by drudg.
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 C History
 C 020713 nrv copied from sked
 
@@ -10,18 +11,16 @@ C Input
       integer ivexnum
 
 C Local
-      integer nch,ilen,ic1,ic2,ich,ncout,idummy,ierr
-      character*128 cout
+      integer nch,ilen,ic1,ic2,ich,idummy,ierr
       integer*2 ibufq(100)
       logical kmore
-      integer ichmv,ichcm_ch,i2long,trimlen,jchar
+      integer ichmv,ichcm_ch,i2long,jchar
       integer fget_literal,iret,ptr_ch,fget_all_lowl,fvex_len
 
       if (.not.kvex) then ! find $PARAM section
         rewind(lu_infile)
         ibufq(1) = 0
         DO WHILE (ibufq(1).ne.-1.and.ichcm_ch(ibuf,1,'$PARAM').NE.0) 
-          call ifill(ibuf,1,isklen*2,oblank)
           CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2) ! get next line
           ibufq(1) = ilen
         enddo
@@ -34,7 +33,6 @@ C Local
       endif ! $PARAM or SCHEDULING_PARAMS
 
 C  Get the initial line of parameters
-      call ifill(ibuf,1,isklen*2,oblank)
       if (.not.kvex) then ! read sk file first line
         CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2)
         ibufq(1) = ilen
@@ -79,7 +77,6 @@ C  Loop on parameter section lines
           idummy=ichmv(ibufq(2),1,ibuf,1,i2long(ibufq(1)))
           CALL drSET(IBUFQ)
         ENDIF
-        call ifill(ibuf,1,isklen*2,oblank)
         if (.not.kvex) then ! read sk file first line
           CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2)
           ibufq(1) = ilen

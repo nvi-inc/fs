@@ -5,6 +5,7 @@ C
 C     RADED converts ra,dec,ha in radians to the hms, dms, hms.
 C
       implicit none
+      include "../skdrincl/constants.ftni"
 C  INPUT:
       real*8 RA,DEC,HA
 C     RA, DEC, HA - in radians
@@ -18,11 +19,10 @@ C     LDSIGN,IDECD,IDECM,DECS - sign, dms for dec
 C     LHSIGN,IHAH,IHAM,HAS - sign, hms for hour angle
 C
 C  LOCAL:
-      real*8 PI,H,D
+      real*8 H,D
 C
 C  CONSTANTS:
-      DATA PI/3.1415926535D0/
-C
+
 C
 C     1. First convert the RA.
 C

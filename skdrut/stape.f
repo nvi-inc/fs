@@ -5,6 +5,8 @@ c     This routine reads the TAPE_MOTION lines in the schedule
 C     and handles the MOTION command.
 C
       include '../skdrincl/skparm.ftni'
+
+
 C
 C  INPUT:
       integer*2 LINSTQ(*)
@@ -17,12 +19,12 @@ C
 C  Calls: gtfld, igtst2, ifill, wrerr
 ! functions
       integer istringminmatch
+      integer ias2b,trimlen,i2long,igtst2,ichmv,jchar
 
 C  LOCAL
       integer*2 lkeywd(12)
       integer ikey_len,ikey,ich,ic1,ic2,nch,i,idummy,istn
       integer idum,il
-      integer ias2b,ichcm_ch,trimlen,i2long,igtst2,ichmv,jchar
       logical kold ! true for the old format TAPE_MOTION ADAPTIVE GAP 10
 
       character*24 ckeywd
@@ -93,15 +95,17 @@ C       if (kold) ic1 and ic2 already cover 'adaptive'
         if (.not.kold) CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),
      .         IC1,IC2) ! type
         IF  (IC1.EQ.0) THEN  !no matching type
-          write(luscn,*) 'STAPE02 Error - You must specify a type.'
+          write(luscn,'(4(a,1x))')
+     >     'STAPE02 Error - You must specify a type: ', list(1:3)
           RETURN
         END IF  !no matching type
         nch=min0(ikey_len,ic2-ic1+1)
         ckeywd=" "
         idummy = ichmv(lkeywd,1,linstq(2),ic1,nch)
-        ikey=istringminmatch(ckeywd,list,ilist_len)
+        ikey=istringminmatch(list,ilist_len,ckeywd)
         if (ikey.eq.0) then ! invalid type
-          write(luscn,"('STAPE03 Error - invalid type: ',a)")ckeywd
+          write(luscn,"('STAPE03 Error - invalid type: ',a)") ckeywd
+          write(luscn,'(4(a,1x))') "Must be one of: ",list(1:3)
         else
           if (list(ikey) .eq. "ADAPTIVE") then
 C         For old format, skip the 'gap' key word

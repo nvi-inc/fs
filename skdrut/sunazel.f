@@ -3,6 +3,7 @@ C
 C   SUNEL converts the sun's ra and dec into az, el
 C
       include '../skdrincl/skparm.ftni'
+      include "../skdrincl/constants.ftni"
 C
 C     INPUT VARIABLES:
       integer istn,mjd

@@ -33,14 +33,12 @@ Cinteger*4 ifbrk
 	CHARACTER*80 CHT
 	character*3 stat
              integer*2 HBB
-	INTEGER Z21,Z20,Z46,Z39,Z30,H2C,HQUB,z4202
+	INTEGER Z46,Z39,Z30,H2C,HQUB,z4202
       integer iday0,ias2b,jchar,ib2as,ichcm,ichmv ! functions
-      integer ichmv_ch, ichcm_ch
+      integer ichcm_ch
       data z4202/z'4202'/
-	DATA Z21/Z'21'/, HBB/2H  /, H2C/2H::/, HQUB/2H" /
-	DATA Z20/Z'20'/, Z46/Z'46'/, Z39/Z'39'/, Z30/Z'30'/
-C       DATA LM7/2HSI,2HDE,2HRE,2HAL,2H S,2HHI,2HFT,2H I,2HS ,2H  ,2H  ,
-C      .2HD ,2HAN,2HD ,2H  ,2H  ,2HH ,2H  ,2H  ,2HM ,2H  ,2H  ,2HS /
+      DATA HBB/2H  /, H2C/2H::/, HQUB/2H" /
+      DATA Z46/Z'46'/, Z39/Z'39'/, Z30/Z'30'/
       DATA LM7/2H S,2HID,2HER,2HEA,2HL ,2HSH,2HIF,2HT ,2HIS,2H  ,2H  ,
      .2H D,2H A,2HND,2H  ,2H  ,2H H,2H  ,2H  ,2H M,2H  ,2H  ,2H S/
 
@@ -133,9 +131,7 @@ C
 	  write(luscn,9120) ierr
 9120    format(' SNPSHFT07 - READ error ',i5)
 	  return
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+  	ENDIF
 C
 	IF ((ichcm_ch(IBUF,1,'SOURCE').ne.0).and.
      .   (ICHCM(IBUF,1,hqub,    1,2).ne.0)) THEN
@@ -157,8 +153,7 @@ C       WE HAVE THE ORIGINAL YEAR OF SCHEDULE AVAILABLE
 	IYR=IAS2B(IBUF,IC1,IC2-IC1+1)
 	IF (IY.NE.IYR) IDUMMY = IB2AS(IY,IBUF,IC1,4)
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+ 	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 9121    format(' SNPSHFT04 - WRITE error ',i5)
 	  return ! GOTO 1201
@@ -192,12 +187,10 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+     	ENDIF
 C
 C Read up to the first time (! command)
-1501  IF(JCHAR(IBUF,1).NE.Z21)GOTO 1512 
+1501  IF(cbuf(1:1) .ne. "!") goto 1512
 C       If there is a ! line, re-set the day of year
 	IDOYR = IAS2B(IBUF,2,3)
 C
@@ -228,9 +221,7 @@ Cif (ifbrk().lt.0) return
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+    	ENDIF
 C
 	IF(iLEN.EQ.-1)GOTO 1800
 	IF(ichcm_ch(IBUF,1,'READY').EQ.0.OR.ICHCM_CH(IBUF,1,'MIDTP')
@@ -262,9 +253,7 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+  	ENDIF
 C
 	IDUMMY = IB2AS(IY2,IYT,1,Z4202)
 	IDUM = ICHMV(ITIM,1,IYT,1,2)
@@ -276,7 +265,8 @@ C
 	ISH=INHR
 	icol = 1
 C
-1702  CALL IFILL(IBUF,1,ISKLEN*2,Z20)
+1702  continue
+      cbuf=" "
 C     IF (MOD(ICOUNT,4).EQ.0) then !write a line
       if (icol.eq.5) then
 	WRITE(LUSCN,9171) CHT
@@ -322,9 +312,7 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+ 	ENDIF
 	IF(ichcm_ch(IBUF,1,'SOURCE').NE.0)GOTO 1803
 C
 	CALL LOCF(LU_INFILE,IREC)
@@ -335,8 +323,7 @@ C
 C
 C 19.0 Write out shifted schedule.
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+   	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
@@ -345,38 +332,29 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
 	ENDIF
 C
 C  Delete "UNLOD" and/or "FASTR" at beginning of new schedule
-	IF(ichcm_ch(IBUF,1,'UNLOD').EQ.0)GOTO 1902
-	IF(ichcm_ch(IBUF,1,'FAST').EQ.0)GOTO 1902
-	IF(ichcm_ch(IBUF,1,'MIDTP').EQ.0)GOTO 1902
-	IF(ichcm_ch(IBUF,1,'CHECK').EQ.0)GOTO 1902
+        if(cbuf(1:5) .eq. "UNLOD" .or. cbuf(1:4) .eq. "FAST" .or.
+     >     cbuf(1:5) .eq. "MIDTP" .or. cbuf(1:4) .eq. "CHECK") goto 1902
 C
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+  	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
 C
-	CALL IFILL(IBUF,1,ISKLEN*2,Z20)
-	IDUMMY = ichmv_ch(IBUF,1,'READY')
+        cbuf="READY"
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,3)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+     	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
 C
 	IF (JCHAR(LD(ITAPE),1).EQ.Z46) GOTO 1905
-	CALL IFILL(IBUF,1,ISKLEN*2,Z20)
-	IDUMMY = ichmv_ch(IBUF,1,'FASTF=6M42S')
+        cbuf='FASTF=6M42S'
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,6)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+     	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
@@ -385,13 +363,10 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+     	ENDIF
 C
-	IF (ichcm_ch(IBUF,1,'READY').EQ.0) GOTO 1905
-	IF (ichcm_ch(IBUF,1,'FAST').EQ.0) GOTO 1905
-	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
+        if(cbuf(1:5) .eq. "READY" .or. cbuf(1:4) .eq. "FAST") goto 1905
+       	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUMMY = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)
@@ -399,8 +374,7 @@ C
 C
 C Main copying loop
 1900  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+  	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
@@ -408,15 +382,11 @@ C Main copying loop
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+     	ENDIF
 C
 	IF(iLEN.EQ.-1)GOTO 1903
-	IF(JCHAR(IBUF,1).NE.Z21)GOTO 1900
-	ICH = JCHAR(IBUF,2)
-	IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 1900
-C
+	IF(cbuf(1:1) .ne. "!")GOTO 1900
+        if(cbuf(2:2) .lt. "0" .or. cbuf(2:2) .gt. "9") goto 1900
 C Shift times appropriately.
 	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUM = ICHMV(ITIM,3,IBUF,2,9)
@@ -447,9 +417,7 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+    	ENDIF
 C
 	IF(ichcm_ch(IBUF,1,'POSTOB').NE.0)GOTO 1904
 	CALL LOCF(LU_INFILE,ILREC)
@@ -457,12 +425,6 @@ C
 	  write(luscn,9125) ierr
 	  return ! GOTO 1205
 	ENDIF
-C      CALL writf_asc(LU_OUTFILE,IERR,IBUF,-1)
-C      call inc(LU_OUTFILE,ierr)
-C      IF (IERR.NE.0) THEN
-C        write(luscn,9121) ierr
-C        return ! GOTO 1201
-C      ENDIF
 C
 C Compute and save next allowable time.
 	IDUM = ICHMV(ITIMS,1,ITIM,1,11)
@@ -498,12 +460,9 @@ C
 	  IF(IERR.NE.0) THEN
 	    write(luscn,9120) ierr
 	    return ! GOTO 1200
-	  else
-	    call inc(LU_INFILE,ierr)
-	  ENDIF
-	  IF(JCHAR(IBUF,1).NE.Z21)GOTO 2003
-	  ICH = JCHAR(IBUF,2)
-	  IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 2003
+     	  ENDIF
+	  IF(cbuf(1:1).ne."$")GOTO 2003
+          if(cbuf(2:2) .lt. "0" .or. cbuf(2:2) .gt. "9") goto 2003
 C
 C Decode time and compare with last time in current schedule.
 	  IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
@@ -524,15 +483,12 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+ 	ENDIF
 	IF(ichcm_ch(IBUF,1,'SOURCE').NE.0)GOTO 2005
 C
 C  Shift and copy remainder of schedule.
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+     	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
@@ -553,13 +509,10 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+ 	ENDIF
 	IF(iLEN.EQ.-1)GOTO 2007
 	CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+    	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF
@@ -575,9 +528,7 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+  	ENDIF
 	IF (ichcm_ch(IBUF,1,'MIDTP').EQ.0) GOTO 2008
 	IF (ichcm_ch(IBUF,1,'CHECK').EQ.0) GOTO 2008
 	IF(ichcm_ch(IBUF,1,'UNLOD').NE.0)GOTO 2009
@@ -586,9 +537,7 @@ C
 	IF(IERR.NE.0) THEN
 	  write(luscn,9120) ierr
 	  return ! GOTO 1200
-	else
-	  call inc(LU_INFILE,ierr)
-	ENDIF
+ 	ENDIF
 C
 2009  IF(iLEN.EQ.-1) then
 	write(luscn,9209) coutname
@@ -597,18 +546,16 @@ C
         call drchmod(coutname,iperm,ierr)
 	return ! GOTO 2010
       endif
-	IF(JCHAR(IBUF,1).NE.Z21)GOTO 2001
-	ICH = JCHAR(IBUF,2)
-	IF((ICH.LT.Z30).OR.(ICH.GT.Z39))GOTO 2001
-	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
+	IF(cbuf(1:1).ne."$")GOTO 2001
+        if(cbuf(2:2) .lt. "0" .or.cbuf(2:2) .gt. "9") goto 2001
+        	IDUMMY = IB2AS(IY2,ITIM,1,Z4202)
 	IDUMMY = ICHMV(ITIM,3,IBUF,2,9)
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)
 	IDUM = ICHMV(IBUF,2,ITIM,3,9)
 C
 2001  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	call inc(LU_OUTFILE,ierr)
-	IF (IERR.NE.0) THEN
+    	IF (IERR.NE.0) THEN
 	  write(luscn,9121) ierr
 	  return ! GOTO 1201
 	ENDIF

@@ -5,6 +5,7 @@
      >   iDur,counter,cpass,cnewtap,cdir,cscan,cbuf_source)
 
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
@@ -86,7 +87,6 @@ C These are modified on return: iline, page,num_scans,ntapes
 C Local
       integer i,il,iaz,iel,ifeet_print
       logical kcont,kearl
-      character*128 cbuf
 !
 ! Saved local variables.
       integer iday_old
@@ -147,7 +147,7 @@ C  1. Headers.
 9201      format(' Station:    ',5x,a8,' (',a2,') (',a1,')',4x,
      .           ' Session:    ',5x,4a2)
         else
-          write(luprt,9203) cstn,cid,cexper
+          write(luprt,9203) cstn,cid,cexpername
 9203      format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
           if(kdisk) then
             write(luprt)
@@ -338,13 +338,13 @@ C  2. Column heads.
       ns2 = ns+2+index(cbuf_source(ns+2:),',')-2
       if (csor.ne.'AZEL') then ! celestial source
         read(cbuf_source(ns+2:ns2),'(i2,i2,f4.1)') irh,irm,sec
-        rarad = (irh+irm/60.d0+sec/3600.d0)*PI/12.d0
+        rarad = (irh+irm/60.d0+sec/3600.d0)*ha2rad
         ns3 = ns2+2+index(cbuf_source(ns2+2:),',')-1
         read(cbuf_source(ns2+2:ns2+2),'(a1)') csgn
         if (csgn.eq.'-'.or.csgn.eq.'+') ns2=ns2+1
 
         read(cbuf_source(ns2+2:ns3),'(i2,i2,f4.1)') ideg,imin,sec
-        dcrad = (ideg+imin/60.d0+sec/3600.d0)*PI/180.d0
+        dcrad = (ideg+imin/60.d0+sec/3600.d0)*deg2rad
         if (csgn.eq.'-') dcrad=-dcrad
         ns4 = ns3+index(cbuf_source(ns3+2:),',')
         if (ns4.gt.ns3) then
@@ -357,8 +357,8 @@ C  2. Column heads.
           mjd=julda(1,itime_start(2),itime_start(1)-1900)
           ut=itime_start(3)*3600.d0+itime_start(4)*60.d0+itime_start(5)
           call cazel(rarad,dcrad,xpos,ypos,zpos,mjd,ut,az,el)
-          iaz = (az*180.d0/PI)+0.5
-          iel = (el*180.d0/PI)+0.5
+          iaz = (az*rad2deg)+0.5
+          iel = (el*rad2deg)+0.5
         endif
       else ! satellite AZEL
         ns2 = ns+2+index(cbuf_source(ns+2:),'D')-2
@@ -430,7 +430,7 @@ C  Footage
         write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
       else if(kdisk) then
         if(kskd) then
-          write(luprt,'(f8.1,$)') counter/1000   !convert megabytes to Gigabytes
+          write(luprt,'(f8.1,$)') counter/1024  !convert megabytes to Gigabytes
         endif
       else if(kk4) then
         if(kskd) then

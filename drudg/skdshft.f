@@ -24,28 +24,23 @@ C LOCAL:
 	integer iblen    !maximum buffer length
 	INTEGER  IY,IM,IC,ICX,TRIMLEN
 	LOGICAL KFNDMD,KFNDCH,kfndpr
-	LOGICAL KEX ! TRUE IF FILE EXISTS
-	integer iyr,idoyr       ! original first date, fully specified
+     	integer iyr,idoyr       ! original first date, fully specified
         integer iyr2 ! 2-digit year
 	integer*2 itim1(6)        ! first shifted obs time
 	integer*2 itim0(6)        ! original first obs time
 	integer*2 itimn(6)        ! user's target time
         integer*2 itimo(6)        ! original time of shifted obs
-	character*4 response
       integer ic1,ic2,imodp,ichngp,iprep,indoyr,inday,inyr,
      .inhr,inmin,insec,id1,ih1,im1,id,ihn,imn,
      .isn,idum,ilen,ifc,ilc,i,ih0,im0,is,
      .nh,idur,ispin,ndskd,ih,
      .iyx,idx,ihx,imx,isx,idnow,ihnow,imnow
       integer nhshft,ihshft,isshft,imshft,idshft
-	character upper
-	logical kdone,kname,kresp,ktim,kearl
+      logical kdone,kname,ktim,kearl
 Cinteger*4 ifbrk
-      integer ias2b,ichmv,iday0,ib2as,ichcm_ch,jchar,nhdif ! function
-	integer Z24,Z2A ! $, *
-	INTEGER Z4202,Z4203
-	DATA Z4202/Z'4202'/, Z4203/Z'4203'/
-	DATA    Z24/Z'24'/,  Z2A/Z'2A'/
+      integer ias2b,ichmv,iday0,ib2as,ichcm_ch,nhdif ! function
+      INTEGER Z4202,Z4203
+      DATA Z4202/Z'4202'/, Z4203/Z'4203'/
 C Time variables:
 C Original time of first observation: idoyr, ih0, im0
 C First observation of shifted schedule: id1, ih1, im1
@@ -81,30 +76,8 @@ C 1.0  Get output file name
 	    ENDIF
 	  end do  ! kname
 C
-	  INQUIRE(FILE=COUTNAME,EXIST=KEX)
-	  IF (KEX) then
-	    kresp = .false.
-	    do while (.not.kresp)
-		WRITE(LUSCN,'(" FILE EXISTS  OK TO PURGE?(Y OR N): ",$)')
-		read(luusr,'(A)') response
-		response(1:1) = upper(response(1:1))
-		if (response(1:1).eq.'Y') then
-		  kdone = .true.
-		  kresp = .true.
-		  OPEN (LU_OUTFILE,STATUS='OLD',FILE=COUTNAME,IOSTAT=IERR)
-		  CLOSE(LU_OUTFILE,STATUS='DELETE',IOSTAT=IERR)
-		  IF (IERR.ne.0) then
-		    WRITE(LUSCN,9110) IERR,coutname
-		    return
-		  end if
-		else if(response(1:1).eq.'N') then
-		  kresp = .true.
-		  kname = .false.
-		end if
-	    end do ! kresp
-	  else
-	    kdone = .true.
-	  end if ! kex
+          call purge_file(coutname,luscn,luusr,kbatch,ierr)
+          if(ierr .ne. 0) return
 	end do ! kdone
 
 	OPEN(LU_OUTFILE,FILE=COUTNAME,STATUS='NEW',IOSTAT=IERR)
@@ -181,11 +154,10 @@ C  2.6  Get desired length of schedule
 C
 C 3.0 Check for proper start of schedule.
 C
-	call char2hol('* ',ibuf,1,2)
-	do while (jchar(ibuf,1).eq.Z2A)
+        cbuf="* "
+	do while (cbuf(1:1) .eq. "*")
 	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IF(IERR.NE.0) THEN
+  	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9300) IERR
 9300      FORMAT(' SKDSHFT02 - READ ERROR ',I5)
 	    RETURN !
@@ -202,10 +174,7 @@ C 4.0  Locate change, modular, and prepass parameters.
 C
 	call char2hol('  ',ibuf,1,2)
 	do while (ichcm_ch(IBUF,1,'$PARAM').NE.0)
-	  call ifill(ibuf,1,iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-C
+   	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
 	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9400) IERR
 9400      FORMAT(' SKDSHFT03 - READ ERROR ',i5,' looking for $PARAM')
@@ -222,15 +191,13 @@ C
 	KFNDCH = .FALSE.
 	kfndpr = .false.
 	do while ((.not.kfndmd).or.(.not.kfndch).or.(.not.kfndpr))
-	  CALL IFILL(IBUF,1,iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IF(IERR.NE.0) THEN
+ 	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+      	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9420) IERR
 9420      FORMAT(' SKDSHFT05 - READ ERROR ',i5,' in $PARAM section')
 	    RETURN
 	  ENDIF
-	  IF(JCHAR(IBUF,1).EQ.Z24) THEN
+	  IF(cbuf(1:1) .eq. "$") THEN
 	    WRITE(LUSCN,9430)
 9430      FORMAT(' SKDSHFT06 - Did not find MODULAR and/or CHANGE ',
      .    'and/or PREPASS in $PARAM section.')
@@ -290,12 +257,9 @@ C
 	write(luscn,9501)
 9501  format(' Writing out schedule file up to $SKED section.')
 	do while (ichcm_ch(IBUF,1,'$SKED').ne.0)
-	  CALL IFILL(IBUF,1,Iblen,32)
 C  if (ifbrk().lt.0) return
 	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-C
-	  IF(IERR.NE.0) THEN
+ 	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9500) IERR
 9500      FORMAT(' SKDSHFT09 - READ ERROR ',I5,' searching for $SKED')
 	    RETURN
@@ -307,8 +271,7 @@ C
 	  ENDIF
 C
 	  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	  CALL INC(LU_OUTFILE,IERR)
-	  IF(IERR.NE.0) THEN
+      	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9520) IERR
 9520      FORMAT(' SKDSHFT11 - WRITE ERROR ',I5,' before $SKED found.')
 	    RETURN
@@ -318,10 +281,7 @@ C
 C 6.0  Get original date and compute shift.
 C    File is positioned to read the first observation in $SKED section.
 C
-	CALL IFILL(IBUF,1,Iblen,32)
-	CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	CALL INC(LU_INFILE,IERR)
-C
+ 	CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
 	IF(IERR.NE.0) THEN
 	  WRITE(LUSCN,9600) IERR
 9600      FORMAT(' SKDSHFT12 - READ ERROR ',I5,' first observation.')
@@ -366,16 +326,13 @@ C       If so, there is no need for an initial shift.
 	if (kearl(itim0,itimn)) then ! search for new time in original
 	  kdone = .false.
 	  do while (.not.kdone) ! check each time
-	    CALL IFILL(IBUF,1,Iblen,32)
-C    if (ifbrk().lt.0) return
 	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	    CALL INC(LU_INFILE,IERR)
-	    IF(IERR.NE.0) THEN
+ 	    IF(IERR.NE.0) THEN
 		WRITE(LUSCN,9650) IERR
 9650        FORMAT(' SKDSHFT69 - READ ERROR ',I5,' looking for time')
 		RETURN
 	    ENDIF
-	    IF(iLEN.EQ.-1.or.(jchar(ibuf,1).eq.Z24)) THEN !eof
+	    IF(iLEN.EQ.-1.or.cbuf(1:1) .eq."$") THEN !eof
 		kdone = .true.
 		ktim = .false.
 	    else !check time
@@ -404,15 +361,10 @@ C    if (ifbrk().lt.0) return
 	    call initf(lu_infile,ierr)
 	    call char2hol('  ',ibuf,1,2)
 	    do while (ichcm_ch(IBUF,1,'$SKED').ne.0)
-		CALL IFILL(IBUF,1,Iblen,32)
-C	if (ifbrk().lt.0) return
 		CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-		CALL INC(LU_INFILE,IERR)
-	    end do !"read until $SKED"
-	    CALL IFILL(IBUF,1,Iblen,32)
+   	    end do !"read until $SKED"
 	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	    CALL INC(LU_INFILE,IERR)
-	    IFC = 1
+ 	    IFC = 1
 	    ILC = iLEN*2
 	    DO I=1,5
 		CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
@@ -494,10 +446,8 @@ C
 9900      FORMAT(' SKDSHFT23 - POSNT ERROR ',I5)
 	    RETURN
 	  ENDIF
-	  CALL IFILL(IBUF,1,iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IF(IERR.NE.0) THEN
+    	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+        	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9910) IERR
 9910      FORMAT(' SKDSHFT24 - ERROR ',I5,' re-reading last obs.')
 	    RETURN
@@ -529,15 +479,10 @@ C
 	  call initf(lu_infile,ierr)
 	  call char2hol('  ',ibuf,1,2)
 	  do while (ichcm_ch(IBUF,1,'$SKED').ne.0)
-	    CALL IFILL(IBUF,1,Iblen,32)
-C    if (ifbrk().lt.0) return
-	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	    CALL INC(LU_INFILE,IERR)
-	  end do !"read until $SKED"
-	  CALL IFILL(IBUF,1,Iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IFC = 1
+    	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+   	  end do !"read until $SKED"
+    	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+ 	  IFC = 1
 	  ILC = iLEN*2
 	  DO I=1,5
 	    CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
@@ -590,11 +535,9 @@ C
 9801    format(' Copying rest of schedule file beyond $SKED section.')
 	end if
 C
-	do while (jchar(ibuf,1).ne.Z24.and.ilen.ne.-1) !read to next $
-	  call ifill(ibuf,1,iblen,32)
-	  call readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  call inc(lu_infile,ierr)
-	  IF(IERR.ne.0) THEN
+	do while (cbuf(1:1).ne."$" .and. ilen .ne.-1) !read to next $
+     	  call readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+       	  IF(IERR.ne.0) THEN
 	    WRITE(LUSCN,8020) IERR
 8020      FORMAT(' SKDSHFT33 - Error ',I5,' finding end of $SKED')
 	    RETURN
@@ -602,20 +545,14 @@ C
 	enddo !read to next $
 
 	do while (ilen.ne.-1) !copy to end
-C  if (ifbrk().lt.0) return
 	  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	  CALL INC(LU_OUTFILE,IERR)
-C
 	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,8010) IERR
 8010      FORMAT(' SKDSHFT30 - WRITE ERROR ',I5)
 	    RETURN
 	  ENDIF
-	  CALL IFILL(IBUF,1,iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-C
-	  IF(IERR.ne.0) THEN
+   	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+ 	  IF(IERR.ne.0) THEN
 	    WRITE(LUSCN,8030) IERR
 8030      FORMAT(' SKDSHFT31 - READ ERROR ',I5)
 	    RETURN
@@ -627,5 +564,5 @@ C
 C
 990   close(lu_outfile)
       call drchmod(coutname,iperm,ierr)
-	RETURN
-	END
+      RETURN
+      END

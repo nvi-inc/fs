@@ -311,8 +311,6 @@ C     integer nspd
       integer im5chn_dup                !number of duplicated channels.
       character*80 ldum
       integer ifan_fact                 !identical to ifan(,) unless ifan(,)=0, in which case this is 1.
-      character*80 cbuf
-      equivalence (cbuf,ibuf)
       integer itemp                     !Short lived variable.
       integer num_sub_pass              !number of passes we loop on.
                                         !For mark5 mode this is 1. For other recorders is npassf
@@ -501,7 +499,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
 
             if(km5P_piggy)kpiggy_km3mode=.false.  !------2hd---
             if(km5A_piggy)kpiggy_km3mode=.false.
-            if(km5A.or. KM5P) kpiggy_km3mode= .false.           !no piggyback for Mark5
+            if(km5A.or.KM5P) kpiggy_km3mode= .false.           !no piggyback for Mark5
 
 ! Previously checked here to see if 2nd head was set.
 ! Now this is done in drudg, and won't execute piggyback if this is the case.
@@ -578,7 +576,7 @@ C  PCALD=STOP
             if (kpcal_d) then
               write(lu_outfile,'(a)') 'pcald=stop'
             endif
-c..debug:check if 2nd head active, i.e. hd posns are set
+c check if 2nd head active, i.e. hd posns are set
           khead2active=.false.
           do i=1,max_pass !2hd
             if (ihdpos(2,i,istn,icode).ne.9999)khead2active=.true.       !2hd
@@ -634,7 +632,9 @@ C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
               else if(num_tracks_rec_mk5 .eq. 32) then
                 write(lu_outfile,'(a)') "tracks=v4,v5,v6,v7"
               else
-                writE(*,*) "Should never get here! Tell JMGipson"
+                writE(*,*)
+     >            "Proc error: Should never get here! Tell JMGipson"
+                write(*,*) " jmg@leo.gsfc.nasa.gov"
                 return
               endif
             else
@@ -968,8 +968,7 @@ C  PCALD=
             write(lu_outfile,'(a)') 'pcald='
           endif
 
-
-C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b) 
+C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b)
 C  For S2, leave out command entirely
 C  For 8-BBC stations, use "M" for Mk3 modes
           if (kvracks.or.km3rack.or.km4rack
@@ -981,8 +980,11 @@ C           if (km3rec(irec).or.km4rec(irec).or.kvrec(irec).or.
 C    .        kv4rec(irec)) then
               call ifill(ibuf,1,ibuflen,oblank)
               nch = ichmv_ch(IBUF,1,'form=')
+              cbuf="form="
+              nch=6
               if(km5A .or. km5A_piggy.or. KM5P .or. KM5P_Piggy) then
-                if(km3mode .or. cmfmt(istn,icode)(1:1) .eq. "m"
+                if(km3mode .or. km4form
+     >                     .or. cmfmt(istn,icode)(1:1) .eq. "m"
      >                     .or. cmfmt(istn,icode)(1:1) .eq. "M") then
                    nch = ichmv_ch(ibuf,nch,'m')
                    lform="mark4"
@@ -2073,6 +2075,9 @@ C 5. Write TAPEFffm procedure.
 C    command format: TAPEFORM=index,offset lists
 
       do irec=1,nrecst(istn) ! loop on recorders
+        if (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec)
+     .          .or. KM5Disk(irec)) itype=1
+
         if (kuse(irec)) then ! procs for this recorder
         if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
      .    km4rec(irec)) then
@@ -2163,6 +2168,7 @@ C in this section.
 
             if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
      .        .or.km5disk(ir).or.ks2rec(ir)) then
+
               call name_trkf(itype,codtmp,cpmode,cvpass(ipass),cnamep)
             else if (kk41rec(ir).or.kk42rec(ir)) then
               cnamep="recp"//ccode(icode)
@@ -2651,7 +2657,7 @@ C       rewind(lu_infile) May not be open any more.
           CALL READF_ASC(lu_infile,iERR,IBUF,ILEN,ILen)
         enddo
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-        DO WHILE (IERR.GE.0.AND.ILEN.NE.-1.AND.JCHAR(IBUF,1).NE.odollar)
+        DO WHILE (IERR.GE.0.AND.ILEN.NE.-1.AND.cbuf(1:1) .ne. "$")
 C         read $PROC section
           ICH = 1
           KUS=.FALSE.
@@ -2659,6 +2665,9 @@ C         read $PROC section
           DO I=IC1,IC2
             IF (JCHAR(IBUF,I).EQ.JCHAR(LSTCOD(ISTN),1)) KUS=.TRUE.
           ENDDO
+          if(ic1 .lt. ic2 .and. ic1 .ne. 0) then
+             kus=index(cbuf(ic1:ic2),cstcod(istn)(1:1)) .ne. 0
+          endif
 C
           IF (KUS) THEN ! a proc for us
             CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)

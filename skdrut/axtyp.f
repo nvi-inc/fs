@@ -6,9 +6,11 @@ C     of axis type and the code number used in SKED
 
 C  History
 C  900125 NRV Created to replace duplicated code in several routines.
+C  2004Feb04 JMGipson. Changed to string instead of holerith
 
 C  Input
-      integer*2 laxis(2) !  axis type name
+!      integer*2 laxis(2) !  axis type name
+      character*4 laxis
       integer iaxis    !  axis type code
       integer ix       ! 1=convert name-->code
 C                          2=convert code-->name
@@ -21,19 +23,19 @@ C  Local
 C      1. Name --> code
  
       if (ix.eq.1) then
-        if (ichcm_ch(laxis,1,'HADC').eq.0) then
+        if (laxis .eq.'HADC') then
           iaxis=1
-        else if (ichcm_ch(laxis,1,'XYEW').EQ.0) then
+        else if (laxis .eq.'XYEW') then
           iaxis=2
-        else if (ichcm_ch(laxis,1,'AZEL').eq.0) then
+        else if (laxis .eq.'AZEL') then
           iaxis=3
-        else if (ichcm_ch(laxis,1,'XYNS').eq.0) then
+        else if (laxis .eq.'XYNS') then
           iaxis=4
-        else if (ichcm_ch(laxis,1,'RICH').eq.0) then
+        else if (laxis .eq.'RICH') then
           iaxis=5
-        else if (ichcm_ch(laxis,1,'SEST').eq.0) then
+        else if (laxis .eq.'SEST') then
           iaxis=6
-        else if (ichcm_ch(laxis,1,'ALGO').eq.0) then
+        else if (laxis .eq.'ALGO') then
           iaxis=7
         else 
           iaxis=0
@@ -43,21 +45,21 @@ C      2. Code --> name
 
       else
         if (iaxis.eq.1) then
-          idum= ichmv_ch(laxis,1,'HADC')
+          laxis='HADC'
         else if (iaxis.eq.2) then
-          idum= ichmv_ch(laxis,1,'XYEW')
+          laxis='XYEW'
         else if (iaxis.eq.3) then
-          idum= ichmv_ch(laxis,1,'AZEL')
+          laxis='AZEL'
         else if (iaxis.eq.4) then
-          idum= ichmv_ch(laxis,1,'XYNS')
+          laxis='XYNS'
         else if (iaxis.eq.5) then
-          idum= ichmv_ch(laxis,1,'RICH')
+          laxis='RICH'
         else if (iaxis.eq.6) then
-          idum= ichmv_ch(laxis,1,'SEST')
+          laxis='SEST'
         else if (iaxis.eq.7) then
-          idum= ichmv_ch(laxis,1,'ALGO')
-        else 
-          idum= ichmv_ch(laxis,1,'----')
+          laxis='ALGO'
+        else
+          laxis='----'
         endif
       endif
 

@@ -4,6 +4,8 @@ C   CAZEL calculates az,el given a source position, station location,
 C         and time.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
+
 C
 C     INPUT VARIABLES:
 	double precision ra,dec  ! source position, radians
@@ -25,12 +27,6 @@ C                   - double for internal use
 C               - sidereal time at 0h UT, UT/ST ratio, SIDEREAL TIME AT G
       real cel,sel,ha,stnlat,stnlon,azx
 
-C  INITIALIZED:
-	double precision ERAD,EFLAT
-C               - compiled-in values of earth rad and flattening
-	DATA ERAD/0.6378145D07/
-	DATA EFLAT/0.3352891869D-2/
-C
 C  History
 C  NRV 910528 created for DRUDG use reading SNAP files only
 C  nrv 930412 implicit none
@@ -41,9 +37,8 @@ C
 C  1. First calculate the station latitude, longitude.
 
 	stnLON = (-DATAN2(yPOS,xPOS))
-	IF (stnLON.LT.0.D0) stnLON=stnLON+2.d0*PI !West lon = ATAN(y/x)
-	stnLAT = (DATAN2(zPOS*ERAD**2,DSQRT((xPOS**2+yPOS**2))*
-     .(ERAD**2*(1.D0-EFLAT)**2)))
+	IF (stnLON.LT.0.D0) stnLON=stnLON+twopi !West lon = ATAN(y/x)
+	stnLAT = DATAN2(zPOS,DSQRT((xPOS**2+yPOS**2))*(1.D0-EFLAT)**2)
 C             Geocentric latitude = ATAN(z/sqrt(x^2+y^2))
 C             Geodetic latitude includes earth radius and flattening
 
@@ -56,10 +51,10 @@ C     2. Now calculate hour angle, and then the el,az.
 C       HA is Greenwich ST - west long - right ascension
 	SDEC = DSIN(DEC)
 	CDEC = DCOS(DEC)
-	IF (HAD.GT.0) HAD=DMOD(HAD,2.D0*PI)
-	IF (HAD.LT.0) HAD=DMOD(HAD,-2.D0*PI)
-	IF (HAD.GT.PI) HAD=HAD-PI*2.0
-	IF (HAD.LT.-PI) HAD=HAD+PI*2.0
+	IF (HAD.GT.0) HAD=DMOD(HAD,twopi)
+	IF (HAD.LT.0) HAD=DMOD(HAD,-twopi)
+	IF (HAD.GT.PI) HAD=HAD-twopi
+	IF (HAD.LT.-PI) HAD=HAD+twopi
 	HA = HAD
 	SHA = SIN(HA)
 	CHA = COS(HA)

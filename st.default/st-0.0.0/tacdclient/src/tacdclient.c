@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
   if ((fp=fopen(argv[1],"r")) == 0) {
     /* If the file does not exist complain only once. */
     err_report("tacdclient: tacdlog.ctl does not exist", NULL,0,0);
+    fclose(fp);
     sleep(10);
     goto file_err;
   } else {
@@ -121,13 +122,6 @@ int main(int argc, char *argv[])
     their_addr.sin_addr = *((struct in_addr *)he->h_addr);
     memset(&(their_addr.sin_zero), '\0', 8);  /* zero the rest of the struct */
     
-    if (connect(sockfd, (struct sockaddr *)&their_addr, 
-		sizeof(struct sockaddr)) == -1) {
-      err_report("tacdclient connect error", NULL,0,0);
-      sleep(10);
-      goto hostname_err;
-    }
-    
     /* Set socket nonblocking  */
     if ((flags = fcntl (sockfd, F_GETFL, 0)) < 0) 
       err_report("tacdclient f_getfl error", NULL,0,0);
@@ -138,15 +132,27 @@ int main(int argc, char *argv[])
       err_report("tacdclient f_setfl error", NULL,0,0);
     
     to.tv_sec = 4;
+    to.tv_usec = 0;
+
+    if (connect(sockfd, (struct sockaddr *)&their_addr, 
+		sizeof(struct sockaddr)) < 0) {
+      if(errno != EAGAIN && errno != EINPROGRESS) {
+	err_report("tacdclient connect error", NULL,0,0);
+	sleep(10);
+	goto hostname_err;
+      }
+    }
     
     FD_ZERO(&ready);
     FD_SET(sockfd, &ready);
-    
+
+    sleep(1);
     select(sockfd+1, &ready, NULL, NULL, &to);
     
     /* 
      * This is the very first instance of the socket being read. 
      */
+    sleep(1);
     if( read(sockfd, buf, sizeof buf) == 0) {
       err_report("tacdclient sock read error", NULL,0,0);
       close(sockfd);
@@ -178,7 +184,7 @@ int main(int argc, char *argv[])
     }
 
     /* Year, Day, and UT time */
-    ptr=gmtime(&t);
+    (int *)ptr=gmtime(&t);
 
     /* HEADER */
     strftime(loc_stamp,sizeof(loc_stamp),"%Y.%j.%H:%M:%S.00",ptr);

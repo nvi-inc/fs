@@ -319,7 +319,7 @@ C
 C Rack, Rec types
       idum = ichmv_ch(lrack,1,'        ')
       idum = ichmv_ch(lreca,1,'        ')
-      idum = ichmv_ch(lrecb,1,'                ')
+      idum = ichmv_ch(lrecb,1,'        ')
 C     GTFLD has already been done above if there were no SEFD parameters.
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field

@@ -22,49 +22,59 @@ C   LOCAL VARIABLES
       equivalence (lkeywd,ckeywd)
 C               - Key word, longest is 22 characters
       character*2 ckey
-
       integer MaxPr
-      parameter (MaxPr=47)
+      parameter (MaxPr=48)
       character*15 listPr(MaxPr)
       character*2  listPrShort(MaxPr)
-      integer MaxYN
-      parameter (maxyn=2)
+
+      character*6 ListAM(2),ListAS(2),ListOO(2)
       Character*3 listyn(2)
-! DATA statements
-      data listyn/"YES","NO"/
+      characteR*6 lSRCDIST(4)
+
       data listPr/
+     > "ALL_BL_GOOD",
      > "BARREL",    "CALIBRATION","CHANGE",     "CONFIRM",
-     > "CORRELATOR","CORSYNCH",   "DESCRIPTION","DURATION",
+     > "CORRELATOR","CORSYNCH",   "DEBUG",      "DESCRIPTION",
+     > "DURATION",
      > "EARLY",     "END",        "EXPERIMENT", "FILLIN",
      > "FREQUENCY",
      > "GET",       "HEAD",       "IDLE",       "JAVA",
      > "LOOKAHEAD", "MAXSCAN",    "MIDOB",      "MIDTP",
      > "MINBETWEEN","MINIMUM",    "MINSCAN",    "MINSUBNET",
-     > "MODSCAN",   "MODULAR",    "PARITY",     "POSTOB",
+     > "MODSCAN",   "MODULAR",    "NOREWIND",
+     > "PARITY",     "POSTOB",
      > "POSTPASS",  "PREOB",      "PREPASS",    "PRFLAG",
      > "SCHEDULER", "SETUP",      "SNR",        "SOURCE",
-     > "SRCFLR",    "SRCDIST",
      > "START",     "SUBNET",     "SUNDIS",     "SYNCHRONIZE",
      > "TAPETM",    "VIS",        "VSCAN",      "WIDTH"/
 
       data listPrShort/
+     >"AG",
      >"BR","CA","CH","CO",
-     >"TC","CR","DE","DU",
+     >"TC","CR","DG","DE","DU",
      >"TE","EN","EX","FI","FR",
      >"GT","HD","ID","JA",
      >"LO","XS","MI","MT",
      >"MB","MN","MS","SM",
-     >"MD","MO","PA","PO",
+     >"MD","MO","NR","PA","PO",
      >"PS","PR","PP","PF",
      >"PI","SP","SA","SO",
-     >"SF","--",                      !"SD" is used by SUNDIS
      >"ST","SU","SD","SY",
      >"TP","VI","VS","WI"/
+
+
+      data ListAM/"AUTO","MANUAL"/
+      data ListYN/"YES","NO"/
+      data ListAS/"ALL","SUBNET"/
+      data listOO/"ON","OFF"/
+      data lsrcdist/"NONE","UPTIME","SQRT","EVEN"/
+
 C
 C  History
 C 970401 nrv New. Copied from sked's PRSET, leaving only those
 C                 parameters drudg is interested in.
 C 021010 nrv Add POSTPASS y or n parameter.
+! 2004Jul16  JMGipson rewritten
 C
 C
 C  1. Now parse the input string, getting each key word and its value.
@@ -78,7 +88,7 @@ C
       NC = IC2-IC1+1
       ckeywd=" "
       IDUMMY = ICHMV(LKEYWD,3,LINSTQ(2),IC1,NC)
-      ikey = istringminmatch(ckeywd,listpr,MaxPr)
+      ikey = istringminmatch(listpr,MaxPr,ckeywd)
       IF  (IKEY.EQ.0) THEN  !invalid
         write(luscn,9110) ckeywd
 9110    format('DRSET01 - ',a24,' is not a valid parameter name.')
@@ -100,7 +110,7 @@ C  Character values
         nc = ic2-ic1+1
         ckeywd=" "
         idummy = ichmv(lkeywd,3,linstq(2),ic1,nc)
-        ikey=istringMinMatch(ckeywd,listyn,MaxYN)
+        ikey=istringMinMatch(listyn,2,ckeywd)
         IF  (ikey.EQ.0) THEN
           WRITE(LUSCN,9441)
 9441      FORMAT(' PRSET26 - Error: POSTPASS must be Y or N')
@@ -133,6 +143,8 @@ C  Numerical values
             itearl(is) = inum
           enddo
         endif
+      else if(ckey .eq. 'SF') then   !srcfloor takes two parameters. Read 2nd.
+          CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       endif
  
 C  5.  Test to see if there is more to the line which we need to

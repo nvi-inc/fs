@@ -5,6 +5,7 @@ C   CVPOS converts source ra and dec into az,el,ha,x, and y; or satellite
 C         elememts into the same plus dec.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  INPUT VARIABLES:
       integer nsor,istn,mjd

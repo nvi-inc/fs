@@ -11,7 +11,8 @@ C
       include '../skdrincl/skobs.ftni'
 
 ! functions
-      integer ichcm_ch,trimlen
+      integer trimlen
+      integer ichmv ! functions
 C  Output:
       integer ierr,ivexnum
 
@@ -22,20 +23,18 @@ C  Local:
      .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN),
      .          lfreq
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
-      integer ilen,ltype,ich,ic1,ic2,idummy,iret,i
-      integer htype ! section 2-letter code
+      integer ilen,ich,ic1,ic2,idummy,iret,i
+
+      character*2 ctype  !two letter code.
+
       logical kcod ! set to ksta when $CODES is found
       logical ksta ! set to true when $STATIONS is found
       logical kvlb ! set to true when $VLBA is found
       logical khed ! set to ksta when $HEAD is found
-      integer Z24,hbb,hex,hpa,hso,hst,hfr,hsk,hpr,Z20,hhd,idum
-      integer iflch,iscn_ch,iscnc,jchar,ichcm,ichmv ! functions
       real rdum,reio
-      character*128 cbuf
-C Initialized:
-      data    Z24/Z'24'/, hbb/2h  /, hex/2hEX/, hpa/2hPA/, hso/2hSO/
-      data    hhd/2hHD/
-      data    hst/2hST/, hfr/2hFR/, hsk/2hSK/, hpr/2hPR/,Z20/Z'20'/
+
+      character*80 cfirstline
+
 C
 C  History
 C  900413 NRV Added re-reading of $CODES section
@@ -96,11 +95,11 @@ C
       khed = .false.
       call frinit(max_stn,max_frq)
 C
-      read(lu_infile,'(a)') cbuf
+      read(lu_infile,'(a)') cfirstline
 C*********************************************************
 C vex file section
 C*********************************************************
-      if (cbuf(1:3).eq.'VEX') then ! read VEX file
+      if (cfirstline(1:3).eq.'VEX') then ! read VEX file
         kvex=.true.
         kgeo=.false. ! will be set to true if SKED_PARAMS is found later
 C       Read up to the $EXPER section to find the line number
@@ -108,18 +107,16 @@ C       Read up to the $EXPER section to find the line number
         call initf(lu_infile,ierr)
         ireccv=0
         CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-        call inc(lu_infile,ierr)
         DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
-          IF (ichcm_ch(IBUF,1,'$EXPER').eq.0) THEN
+          IF (cbuf(1:6) .eq. "$EXPER") then
             call locf(LU_INFILE,IRECCV)
           endif
           CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-          call inc(lu_infile,ierr)
         enddo !read schedule file
         close(lu_infile)
 C       read stations, codes, sources
-        i=index(cbuf,';')
-        call VREAD(cbuf(1:i),lskdfi,luscn,iret,ivexnum,ierr) 
+        i=index(cfirstline,';')
+        call VREAD(cfirstline(1:i),lskdfi,luscn,iret,ivexnum,ierr)
         if (iret.ne.0.or.ierr.ne.0) then
           write(luscn,9009) iret,ierr
 9009      format(' from VREAD iret=',i5,' ierr=',i5)
@@ -154,70 +151,61 @@ C*********************************************************
 9210      FORMAT(' Error ',I5,' reading schedule file.')
           RETURN
         END IF
-        call char2hol('  ',LTYPE,1,2)
-        IF (ichcm_ch(IBUF,1,'$EXPER').EQ.0) THEN
-          call char2hol('EX',LTYPE,1,2)
-        ELSE IF (ichcm_ch(IBUF,1,'$SOURC').EQ.0) THEN
-          call char2hol('SO',LTYPE,1,2)
-        ELSE IF (ichcm_ch(IBUF,1,'$STATI').EQ.0) THEN
-          call char2hol('ST',LTYPE,1,2)
+        ctype=" "
+        IF (cbuf(1:6) .eq. '$EXPER') THEN
+          ctype="EX"
+        ELSE IF (cbuf(1:7) .eq. '$SOURCE') THEN
+          ctype="SO"
+        ELSE IF (cbuf(1:8) .eq. '$STATION') THEN
+          ctype="ST"
           ksta = .true.
-        ELSE IF (ichcm_ch(IBUF,1,'$SKED ').EQ.0) THEN
-          call char2hol('SK',LTYPE,1,2)
-        ELSE IF (ichcm_ch(IBUF,1,'$CODES').EQ.0) THEN
-          call char2hol('FR',LTYPE,1,2)
+        ELSE IF (cbuf(1:5) .eq. '$SKED') THEN
+          ctype="SK"
+        ELSE IF (cbuf(1:6) .eq. '$CODES') THEN
+          ctype="FR"
           kcod = ksta
-        ELSE IF (ichcm_ch(IBUF,1,'$HEAD').EQ.0) THEN
-          call char2hol('HD',LTYPE,1,2)
+        ELSE IF (cbuf(1:5) .eq. '$HEAD') THEN
+          ctype="HD"
           khed = kcod
-        ELSE IF (ichcm_ch(IBUF,1,'$PROCE').EQ.0) THEN
-          call char2hol('PR',LTYPE,1,2)
+        ELSE IF (cbuf(1:5) .eq. '$PROC') THEN
+          ctype="PR"
         END IF
 C
-        htype= (LTYPE)
 C
-        IF(ichcm(htype,1,hbb,1,2).eq.0) THEN !unrecognized
+        IF(ctype .eq. " ") THEN !unrecognized
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-C
-        ELSE IF(ichcm(htype,1,hex,1,2).eq.0) THEN !experiment line
-          ICH = ISCNC(IBUF,1,ILEN,Z20)
+        ELSE IF(ctype .eq. "EX") THEN !experiment line
+          ich=index(cbuf," ")
           CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
-          CALL IFILL(LEXPER,1,8,Z20)
+          cexper=" "
           IF (IC1.GT.0) IDUMMY = ICHMV(LEXPER,1,IBUF,IC1,IC2-IC1+1)
           rdum= reio(2,LUSCN,IBUF,-ILEN)
-!          write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C         Get the next line
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
-          DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1) ! read all lines
-            call hol2char(ibuf,1,ilen*2,cbuf)
+          DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             write(luscn,'(a)') cbuf(1:trimlen(cbuf))
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
           END DO
 C
-        ELSE IF(ichcm(htype,1,hso,1,2).eq.0 
-     .  .or.    ichcm(htype,1,hst,1,2).eq.0 
-     .  .or.    ichcm(htype,1,hfr,1,2).eq.0 
-     .  .or.    ichcm(htype,1,hhd,1,2).eq.0 )
-     .  THEN !parameter section
+        ELSE IF(ctype .eq. "SO" .or. ctype .eq. "ST" .or.
+     >          ctype .eq. "FR" .or. ctype .eq. "HD") then
           rdum= reio(2,LUSCN,IBUF,-ILEN)
-C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
-C
 C         Get the first line of this section
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-          DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
+          DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             IF (IERR.LT.0)  THEN
               WRITE(LUSCN,9220) IERR
 9220          FORMAT(' Error ',I5,' reading schedule file.')
               RETURN
             END IF
             ILEN=(ILEN+1)/2
-            IF(ichcm(ltype,1,hso,1,2).eq.0) then
+            IF(ctype .eq. "SO") then
               CALL SOINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ichcm(ltype,1,hst,1,2).eq.0) then
+            else IF(ctype .eq. "ST") then
               CALL STINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ichcm(ltype,1,hfr,1,2).eq.0.and.ksta) then
+            else IF(ctype .eq. "FR" .and. ksta) then
               CALL FRINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ichcm(ltype,1,hhd,1,2).eq.0.and.kcod) then
+            else IF(ctype .eq. "HD" .and. kcod) then
               CALL HDINP(IBUF,ILEN,LUSCN,IERR)
             END IF
 C           Do not return on error.  Information messages from
@@ -226,22 +214,21 @@ C
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           END DO
 C
-        ELSE IF(ichcm(htype,1,hsk,1,2).eq.0) THEN !schedule
+        ELSE IF(ctype .eq. "SK") then !schedule
           rdum= reio(2,LUSCN,IBUF,-ILEN)
 C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C
 C         Read the first line of the schedule
           call locf(LU_INFILE,IRECSK)
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-          DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
+          DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             IF (IERR.LT.0)  THEN
               WRITE(LUSCN,9220) IERR
               RETURN
             END IF
             NOBS = NOBS + 1
 C           Store in memory
-            call ifill(lskobs(1,nobs),1,ibuf_len*2,z20)
-            idum = ichmv(lskobs(1,nobs),1,ibuf,1,ilen)
+            cskobs(nobs)=cbuf
             iskrec(nobs)=nobs ! initialize the array in order
 C         Unpack the scan just to get kflg
           CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
@@ -256,7 +243,7 @@ C           Read the next schedule entry
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           END DO
 C
-        ELSE IF(ichcm(htype,1,hpr,1,2).eq.0) THEN !procedures
+        ELSE IF(ctype .eq. "PR") then !procedures
           rdum= reio(2,LUSCN,IBUF,-ILEN)
 C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C         Get the position of this section
@@ -276,11 +263,11 @@ C  needed, because it was checked before.
         call initf(LU_INFILE,IERR)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) !read schedule file
-          IF (ichcm_ch(IBUF,1,'$CODES').EQ.0) THEN
+          IF (cbuf(1:6) .eq. "$CODES") then
             rdum= reio(2,LUSCN,IBUF,-ILEN)
 C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
+            DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
               ILEN=(ILEN+1)/2
               CALL FRINP(IBUF,ILEN,LUSCN,IERR)
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -296,11 +283,11 @@ C Re-read $HEAD section if needed.
         call initf(LU_INFILE,IERR)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) 
-          IF (ichcm_ch(IBUF,1,'$HEAD ').EQ.0) THEN
+          IF (cBUF(1:5) .eq. "$HEAD") THEN
             rdum= reio(2,LUSCN,IBUF,-ILEN)
 C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (JCHAR(IBUF,1).NE.Z24.AND.ILEN.NE.-1)
+            DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
               ILEN=(ILEN+1)/2
               CALL HDINP(IBUF,ILEN,LUSCN,IERR)
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
@@ -316,13 +303,11 @@ C       Look for the string "Cover Letter" in .drg file
           call initf(lu_infile,ierr)
           write(luscn,'(" Re-reading to find the cover letter ... ",$)')
           CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-          call inc(lu_infile,ierr)
           DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
-            IF (iscn_ch(IBUF,1,ilEN*2,'Cover Letter').gt.0) THEN
+            if(index(cbuf(1:ilen*2),'Cover Letter').gt.0) THEN
               call locf(LU_INFILE,IRECCV)
             endif
             CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-            call inc(lu_infile,ierr)
           enddo !read schedule file
           write(luscn,'()')
         endif ! .drg file

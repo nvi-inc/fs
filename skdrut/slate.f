@@ -16,7 +16,7 @@ C  Calls: gtfld, igtst2, ifill, wrerr
 
 C  LOCAL
       integer*2 LKEYWD(12)
-      integer ival,ich,ic1,ic2,nch,i,j,idummy,ierr,istn
+      integer ival,ich,ic1,ic2,nch,i,idummy,istn
       integer ias2b,i2long,igtst2,ichmv,jchar !functions
 C
 C MODIFICATIONS:
@@ -36,8 +36,8 @@ C
 9110    FORMAT(' ID  STATION  LATE STOP (sec)')
         DO  I=1,NSTATN
 C
-          WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4),itlate(i)
-9111      FORMAT(1X,A2,2X,4A2,1X,i5)
+          WRITE(LUDSP,9111) LpoCOD(I),cSTNNA(I),itlate(i)
+9111      FORMAT(1X,A2,2X,A,1X,i5)
         END DO  !
         RETURN
       END IF  !no input
@@ -88,8 +88,8 @@ C         get matching time
 9903        format('SLATE03 - Late stop must be > 0 for ',a2)
           else ! valid
             ITLATE(ISTN) = ival
-            write(luscn,'("SLATE05 Warning - Late stop by station",
-     .      " is not supported at Mark III correlators.")')
+            write(luscn,'(a)')"SLATE05 Warning - Late stop by "//
+     >      "station is not supported at Mark III correlators."
 C           get next station name
           endif ! invalid/valid time
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)

@@ -1,5 +1,6 @@
       subroutine snap_unload_tape(luscn,itime_tape_stop,
-     >   itime_tape_stop_spin,itime_tape_need,iRecNum,ntape,
+     >   itime_tape_stop_spin,itime_tape_need,iSpinDelay,
+     >   iRecNum,ntape,
      >   kpostpass,kcontpass,kcont,klast_tape)
 ! do end of tape housework
 !
@@ -14,6 +15,7 @@
       integer itime_tape_stop_spin(5)   !time tape stops moving after spinning
       integer itime_tape_need(5)        !time we need the tape.
 
+      integer iSpinDelay        !extra delay to get tape moving
       integer iRecNum           !Recorder number
       integer ntape             !for kk4
 
@@ -36,6 +38,9 @@
 
       iwait5sec=5
 
+!      itime_tape_stop_spin=itime_tape_stop      !default is no time for spin down.
+      call TimeAdd(itime_tape_stop,0,itime_tape_stop_spin)
+
 ! stop and unload tape if neccesary.
 ! Take care of some simple cases.
       if(KM5A .or. KM5P) then
@@ -51,15 +56,13 @@
         return
       endif
 
-!      itime_tape_stop_spin=itime_tape_stop      !default is no time for spin down.
-      call TimeAdd(itime_tape_stop,0,itime_tape_stop_spin)
 
 ! In principle need to postpass.
       if (MaxTapeLen.gt.10000.and.kpostpass .and. .not. kcont) then
 ! But if tape is near the bottom and the last pass is continuous, just spin off.
         if (iftold.lt.200.and.kcontpass) goto 400
-        tspin_for = FSPIN(MaxTapeLen-IFTOLD,ISPM_for,SPS_for)
-        tspin_rev = FSPIN(MaxTapeLen,       ISPM_rev,SPS_rev)
+        tspin_for = FSPIN(MaxTapeLen-IFTOLD,ISPM_for,SPS_for,iSpinDelay)
+        tspin_rev = FSPIN(MaxTapeLen,       ISPM_rev,SPS_rev,iSpinDelay)
 
 ! Calculate time it takes to do the prepass with 5 second pause between.
         call TimeAdd(itime_tape_stop,
@@ -91,7 +94,7 @@
 ! come here to spin off tape.
 400   continue
       if (iftold.gt.50) then! spin off last tape
-       tspin_rev = TSPIN(IFTOLD,ISPM_rev,SPS_rev)
+       tspin_rev = TSPIN(IFTOLD,ISPM_rev,SPS_rev,iSpinDelay)
        call snap_fast(ifstrev,ISPM_rev,SPS_rev,iRecNum)              !fast reverse,
        call TimeAdd(itime_tape_stop,int(tspin_rev),itime_tape_stop_spin)
       endif

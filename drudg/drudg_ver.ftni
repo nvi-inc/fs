@@ -1,0 +1,7 @@
+!      iVerMajor_FS = 09
+!      iVerMinor_FS = 06
+!      iVerPatch_FS = 06
+      iVerMajor_FS = VERSION
+      iVerMinor_FS = SUBLEVEL
+      iVerPatch_FS = PATCHLEVEL
+

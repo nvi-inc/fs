@@ -85,8 +85,10 @@ C
      .       ibbcbuf(40,2,3),
      .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 
-        character*100 cbuftmp
-	equivalence (cbuftmp,ibuf)
+        character*8 cbname
+        equivalence (cbname,lbname)
+        character*(2*ibuf_len) cbuf
+	equivalence (cbuf,ibuf)
         COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .       lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .       cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,csize,

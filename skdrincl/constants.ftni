@@ -1,0 +1,48 @@
+!various constants.
+      real*8 PI,ROG,ROZ,SECRAD,OMEGA,EPS,ROS,C,TWOPI
+      PARAMETER (PI = 3.1415926535897932D0)
+      PARAMETER (TWOPI = 2.d0*PI)
+      real*8 Deg2rad, rad2deg
+      parameter (deg2rad=twopi/360.d0, rad2deg=360.d0/twopi)
+      real*8 Ha2Rad,Rad2HA
+      parameter (HA2Rad=Pi/12.d0, Rad2Ha=12.d0/pi)
+C     EPSILON FOR 23 DEG AND 27 MIN IN RADIANS
+      PARAMETER (EPS=0.4092797096D0)
+!     Seconds in a day
+      real*8 secperday
+      parameter (secperday=86400.d0)
+
+C     Speed of light
+      PARAMETER (C=2.99792458D8)      !speed of light
+
+      double precision erad,ef,gme,sratio
+      parameter (erad=6378.145D0)      	!earth Radius
+      parameter (ef=298.25D0)           ! 1/flattening
+      parameter (gme=7.5369793D13)      !  GM((ORBITS/DAY)**2/KM**3)
+      parameter (sratio=1.0027379093D0) !Sideral ratio
+
+      real*8 EFLAT
+      parameter (EFLAT=0.3352891869D-2)
+
+
+C     Degrees per radian
+      PARAMETER (ROG=57.2957795131D0)
+C 
+C     Seconds of time per radian
+      PARAMETER (ROZ=13750.98708313D0)
+C
+C     Seconds of arc per radian
+      PARAMETER (ROS=206264.8062471D0)
+C
+C     Radians per second of arc
+      PARAMETER (SECRAD=4.8481368111D-6)
+C
+C     Radians per second of time
+      PARAMETER (OMEGA=7.272205217D-5)
+
+      real*8 flcon1,flcon2
+C     Note: 0.6931471=alog(2)
+      PARAMETER (flcon1 = (pi*pi)/(4.0*0.6931471))
+      PARAMETER (flcon2 = pi/(3600.d0*180.d0*1.d3)) ! marcsec --> radians
+
+

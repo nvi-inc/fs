@@ -7,6 +7,7 @@ C    UNPSK unpacks the record found in IBUF and puts the data into
 C              the output variables
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  INPUT:
       integer*2 ibuf(128)
@@ -115,7 +116,7 @@ C     After CLNDR, IYR is now a 4-digit year
       MJD = JULDA(1,IDAYR,IYR-1900)
       UT = IHR*3600.D0+iMIN*60.D0+ISC
       CALL SIDTM(MJD,ST0,FRAC)
-      GST = DMOD(ST0 + UT*FRAC, 2.0d0*PI)
+      GST = DMOD(ST0 + UT*FRAC, twopi)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
       IDURS= IAS2B(IBUF,IC1,IC2-IC1+1)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)

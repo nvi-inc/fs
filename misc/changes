@@ -6182,3 +6182,860 @@ Version 9.6.8 030910
            fixed too frequent "change_pack" procedures
 
 Version 9.6.9 030915
+
+040110 WEH clib/lo_util.c
+040110     control/fserr.ctl
+           fix clearing values for sideband, and LO value error message
+
+040110 WEH include/fs_types.h
+           quikv/user_device_dis.c
+           include/params.h
+           include/fscom.h
+           clib/Makefile
+           Makefile
+           clib/get_gain_par.c
+           clib/onoff_util.c
+           include/user_device_ds.h
+           include/onoff_ds.h
+           quikv/Makefile
+           clib/user_device_util.c
+           quikv/user_device.c
+           quikv/quikv.c
+           clib/cshm_init.c
+           updated for user devices
+
+040111 WEH onoff/ini_accum.c
+           onoff/inc_accum.c
+           onoff/red_accum.c
+           clib/get_tcal_fwhm.c
+           updated for user devices
+
+040114 WEH ibcon/ibcon.f
+           fix parsing of time-out value
+
+040115 WEH quikv/onoff.c
+           quikr/fpdis.f
+           quikr/fvpnt.f
+           onoff/wcounts.c
+           onoff/onoff.c
+           onoff/tzero.c
+           onoff/get_samples.c
+           updated for user devices
+
+040116 WEH quikr/tpi.f
+           quikr/tsys.f
+           fclib/fc_tpi_norack.c
+           clib/tpi_norack.c
+           help/user_device.___
+           control/fscmd.ctl
+           updated for user devices
+
+Version 9.6.10 040116
+
+030905 RDG fsvue/vueclaq.c
+           fsvue/lib/vue_fscalq.
+	   New function, and display for fsvue.
+           Can do many many types of calculations and displays them in
+           Decimal,Hex,Octal, and bits.
+	   Lives in fsvue under the Execute menu button as Calculator.
+
+030925 CMH gnplt/gnplt
+           bug fixes
+
+031001 WEH st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/change_pack.prc
+           revised change_pack.prc and fixed overwritten .prc files
+
+031010 WEH fmset/Makefile
+           fmset/asksure.c
+           fmset/fmset.c
+           fmset/get4time.c
+           ask if sure before re-synching mk4, also log it when it happens
+
+031014 WEH incom/equip.f
+           boss/newlg.f
+           newlb/prog.c
+           clib/form4_util.c
+           help/form.h__
+           control/fserr.ctl
+           add mk4 synch default value to equip.ctl
+
+031014 RDG quikr/wx.f
+           newlb/prog.c
+           make fs_get_wx_met() name consistent
+
+031014 WEH newlb/newlg.f
+           add LBA DAS and MET parameters to equip line
+
+031014 WEH control/fserr.ctl
+           add missing 4F -101
+
+031023 WEH include/params.h
+           include/ipckeys.h
+           fs/Makefile
+           fsalloc/fsalloc.c
+           clib/setup_ids.c
+           class/class2.c
+           class/Makefile
+           fsalloc/Makefile
+           fs/fs.c
+           clib/Makefile
+           support OSes without ftok with NO_FTOK_FS env. variable
+
+031030 RDG fsvue/fsvue
+           fsvue/Makefile
+           fsvue/lib/vue_fscalq
+           fsvue/vueinfo.c
+           fsvue/vuecalq.c
+	   added vuecalq to makefile, vueinfo and fsvue 
+
+031112 WEH fmset/asksure.c
+           improve prompt
+
+031113 WEH st.default/control/equip.ctl
+           updated for synch default
+
+031114 RDG quikv/tacd.c
+	   Added more error checking and cleaned up code.
+	   removed opening tacd.ctl file, and moved it to incom/sincom.f.
+	   control/fserr.ctl
+           Added error -10 and -11 for TAC, and -405,-406,-407 for BO.
+           Also changed wording on some.  Corrected connect function to 
+           be non-blocking when calling connect().
+
+031117 RDG st-default/st-0.0.0/tacdclient/src/tacdclient.c
+           st-default/st-0.0.0/metclient/src/metclient.c
+           st.default/st-0.0.0/tacdclient/README
+           st.default/st-0.0.0/metclient/README
+           Corrected connect function to be non-blocking.
+	   Corrected README document to read kill -15 PID instead of
+           kill PID. The -15 will terminate the function gracefully.
+
+031126 RDG incom/sincom.f
+           Added tacd.ctl file.
+
+031126 RDG newlb/prog.c
+           Added new set and get calls for tacd.
+           fs_get_tacd_port, fs_set_tacd_port
+           fs_get_tacd_hostpc, fs_set_tacd_hostpc
+           For setting/getting SHMEM for TACD port and host. 
+
+031206 WEH quikv/disk_serial_dis.c
+           rewrite
+
+031214 WEH quikv/disk_serial.c
+           quikv/disk_pos.c
+           rewrite
+
+031216 WEH quikv/data_check_dis.c
+           rewrite
+
+031216 WEH include/m5state_ds.h
+           created
+
+031218 WEH include/m5time_ds.h
+           created
+
+031224 RDG incom/sincom.f
+           quikv/tacd.c
+           read tacd.ctl file in incom instead of in tacd command
+
+031230 WEH quikv/data_check_pos.c
+           include/data_check_ds.h
+           include/disk_pos_ds.h
+           quikv/logm5msg.c
+           re-write
+
+040128 WEH include/params.h
+           be sure /usr2/st _KEYS use different numbers
+
+040128 WEH quikr/quikr.f
+           quikr/Makefile
+           remove now extraneous beam and flux commands
+
+040227 WEH class/class
+           class/Makefile
+           fsalloc/Makefile
+           fs/Makefile
+           add comments for NO_FTOK_FS
+
+040227 WEH fivpt.visual/Makefile
+           made to compile under FS Linux 5, but untested
+
+040302 WEH clib/form4_util.c
+           fixed "bad_value" display when "off"
+
+040305 WEH st.default/prog/.cshrc
+           st.default/oper/.cshrc
+           added "set noclobber"
+
+040309 WEH fs/fs.c
+           add termination error log
+
+040309 WEH quikv/data_check.c
+           rewrite
+
+040310 WEH include/rtime_ds.h
+           include/bank_set_ds.h
+           created
+
+040311 RDG misc/INSTALL-rc.fs.txt
+           added note about applicability to Debian only
+
+040312 WEH quikv/disk_record.c
+           include/disk_record_ds.h
+           rewrite and created .h
+
+040315 WEH include/disk_serial_ds.h
+           rewrite
+
+040317 WEH quikv/disk_pos_dis.c
+           quikv/mk5relink.c
+           quikv/mk5close.c
+           clib/disk_pos_util.c
+           clib/disk_serial_util.c
+           quikv/disk_record_dis.c
+           rewrite
+
+040318 WEH monit/Makefile
+           monit/monit5.c
+           monit/mout5.c
+           monit/m5init.c
+           include/fscom.h
+           clib/cshm_init.c
+           create monit5
+
+040319 WEH mk5cn/mk5cn.c
+           quikv/bank_check.c
+           control/fscmd.ctl
+           create bank_status command and always log when incrementing
+
+040320 WEH quikv/disk2file_dis.c
+           include/disk2file_ds.h
+           quikv/disk2file.c
+           created disk2file command
+
+040320 WEH clib/m5_utils.c
+ 
+040320 WEH quikv/in2net.c
+           quikv/in2net_dis.c
+           created in2net command
+
+040324 WEH include/vsn_ds.h
+           created
+
+040324 WEH clib/bank_check_util.c
+           use m5state_init()
+
+040324 WEH monit/m5init.c
+           improved header line
+
+040325 WEH vex/test_parser/t.f
+           vex/test_parser/wh
+           vex/test_parser/wh1
+           vex/test_parser/Makefile
+           vex/test_parser/main.c
+           archived here
+
+040325 RDG vex/vex.h
+           vex/vex_util.c
+           vex/vex_get.c
+           vex/vex.y
+           vex/vexf.c
+           vex/vexf_put.c
+           vex/vex.yy.l
+           add data_transfer and ignore extraneous carriage returns
+           add missing ";"s to vex.y to remove warnings
+
+040325 WEH quikv/bank_check_dis.c
+           always log when incrementing
+
+040326 WEH help/disk_pos.___
+           help/disk_serial.___
+           help/disk_record.___
+           help/mk5relink.___
+           help/data_check.___
+           help/echo.___
+           help/mk5.___
+           help/mk5close.___
+           help/bank_status.___
+           help/disk2file.___
+           help/in2net.___
+
+040326 WEH vex/vex_put.c
+           add data_transfer
+
+040329 WEH include/scan_name_ds.h
+           help/scan_name.___
+           help/bank_check.___
+           quikv/scan_name.c
+           quikv/bank_check.c
+           add continuous recording time parameter for scan_name for bank_check
+           and send message to change_pack for fs.prompt when a pack needs to
+           be changed
+
+040329 WEH include/in2net_ds.h
+           clib/disk2file_util.c
+           clib/in2net_util.c
+           created
+
+040329 WEH clib/disk_record_util.c
+           clib/data_check_util.c
+           rewrite
+
+040330 WEH Makefile
+           set to 9.6.12
+
+040330 WEH fserr/fserr.h
+           increase array size
+
+040408 WEH st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/change_pack.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/m5.prc
+           st.default/proc/mk5old.prc
+           updated change_pack to use fs.prompt
+
+040409 WEH include/fscom.h
+           quikv/Makefile
+           quikv/quikv.c
+           control/fscmd.ctl
+           clib/cshm_init.c
+           control/fserr.ctl
+           include/fscom_dum.i
+           fs.prompt/fs.prompt
+           include/fs_types.h
+           clib/Makefile
+           merge changes from 9.6.10
+
+040409 WEH newlb/prog.c
+           correct size of move for hostpc
+
+040409 RDG vex/vex.yy.l
+           add missing T_DATA_TRANSFER for data_transfer keyword.
+
+040414 WEH quikv/disk_record.c
+           add check of VSN in case of Mark5A (not _BS)
+
+040414 WEH control/fserr.ctl
+           ddout/ddout.c
+           add warning if log file is larger than 10 MB
+
+040414 WEH st.default/prog/.fvwm2rc
+           st.default/oper/.fvwm2rc
+           st.default/prog/.Xresources
+           st.default/oper/.Xresources
+           st.default/prog/.fvwmrc
+           st.default/oper/.fvwmrc
+           updated for Monit5
+
+040416 WEH include/fscom.h
+           clib/cshm_init.c
+           newlb/prog.c
+           boss/boss.f
+           fs/fs.c
+           more complete abend detection
+
+040416 WEH st.default/proc/u5u6caltsys.prc
+           example created
+
+040419 RDG vex/vexf.c
+	   added fget_data_transfer_scan function.
+
+040419 WEH newlb/put_stderr.c
+           newlb/Makefile
+           aquir/demas.f
+           fivpt/fgaus.f
+           fivpt.visual/fgaus.f
+           fivpt/scmds.f
+           fivpt.visual/scmds.f
+           fslb/logit2_ch.f
+           fslb/logit4_ch.f
+           lnfch/ichcm_ch.f
+           lnfch/ichcm.f
+           lnfch/ichmv.f
+           lnfch/ichmv_ch.f
+           lnfch/ifill.f
+           lnfch/ifill_ch.f
+           lnfch/iscnc.f
+           lnfch/iscn_ch.f
+           setcl/setcl.f
+           send abort error messages to standard out
+
+040419 WEH misc/logrecovery.txt
+           explanation added
+
+040420 WEH ddout/ddout.c
+           error output for more cases
+
+040421 WEH boss/stat.f
+           made Mark 5 aware
+
+040421 weh monit/monit5.c
+           improvement placement of cursor when waiting
+
+040422 weh quikv/disk_record.c
+           check vsn and disk_serial when stopping record and MK5A
+
+040422 weh clib/disk_record_util.c
+           fix NRECORD_DISPLAY_KEY
+
+040422 weh clib/bank_check_util.c
+           if capacity is less than 0, make zero.
+
+040426 weh labck/labck.f
+           add disk support
+
+040427 weh quikv/bank_check.c
+           add information about which bank to change
+           improve update when errors occur
+           improve handling of missing banks
+           add command output for log for status
+
+040427 weh boss/stat.f
+           use data_valid=on/off rather than media start/stop to define obs
+
+040427 weh help/bank_status.___
+           updated
+
+040427 weh clib/setup_ids.c
+           add unbuffering to generic set-up
+ 
+040427 rdg fsvue/vueinfo.c
+           added check for FS semaphore.
+
+040427 weh monit/mout5.c
+           round remaining seconds
+
+040427 weh ddout/ddout.c
+           clean up error reporting
+
+040427 rdg vex/vex.yy.l
+           fix typo in data_transfer
+
+040427 rdg fsvue/lib/fsvue_mon
+	   added fsvue tcl/tk version of a Client.
+
+040427 rdg fsvue/lib/vue_logo
+	   added version of fsvue 2.0.
+
+040427 rdg fsvue/lib/version_updates
+	   added information for fsvue version 2.0.
+
+040428 weh include/in2net_ds.h
+           clib/cshm_init.c
+           add in2net.last_destination
+
+040428 weh mk5cn/mk5cn.c
+           improve missing return code detection
+
+040428 weh quikv/in2net.c
+           make no op if opening same last_detsination
+
+040504 rdg fsvue/fsvue
+           Converted from log reader GUI to fsvue GUI server for 
+           the Field System.
+           Added sockets and protections for use as a server.
+
+040504 rdg fsvue/bin/fsvue
+           Same as fsvue/fsvue comment above.
+
+040520 weh quikr/devds.f
+           increase buffer lengths to 512 for M4 decoder
+
+040604 weh quikv/set_att.c
+           fix crash if no VCs patched
+
+040608 weh onoff/onoff.c
+           fix test, so extra wait if aquir is NOT running
+
+040608 weh pfmed/readpl.c
+           improve help display
+
+040608 weh clib/Makefile
+           clib/ntp_synch.c
+           added 
+
+040608 weh fclib/Makefile
+           fclib/fc_rte_cmpt.c
+           added 
+
+040618 weh boss/newlg.f
+           changed "ntp" to "computer"
+
+040618 weh rtelb/rte_cmpt.c
+           changed to just use computer time-of-day
+
+040618 weh setcl/Makefile
+           control/fspgm.ctl
+           Place setcl in ../bin/internal
+
+040620 weh rtelb/tesths.c
+           test program created
+
+040620 weh matcn/matcm.i
+           matcn/matcn.f
+           matcn/iat.f
+           include/time_arrays.i
+           moved centisecs to tme arrays and added unix variables
+           use ticks for raw time and "cmpt" for computer
+
+040620 weh rtelb/tesths
+           test routine created
+
+040621 weh rtelb/Makefile
+           fclib/Makefile
+           fclib/fc_rte_ticks.c
+           rtelb/rte_ticks.c
+           created rte_ticks and fc_rte_ticks
+
+040621 weh boss/bwork.f
+           fix crashing if scheduling not started
+
+040622 weh clib/skd_util.c
+           add time-out feature option for scheduling:skd_prog_to()
+
+040622 weh fmset/getfmtime.c
+           fix phasing for Mark IV and fix error message
+
+040622 weh fmset/setfmtime.c
+           fix error message
+
+040622 weh mcbcn/mcbcn.c
+           ibcon/sib.c
+           ibcon/wrdev.c
+           rclcn/rclcn.c
+           return clock ticks instead of raw time
+
+040622 weh fmset/getvtime.c
+           fclib/fc_get_vtime.c
+           chekr/timechk.f
+           fmset/set4time.c
+           fmset/get4time.c
+           fmset/sets2time.c
+           fmset/setvtime.c
+           clib/get_vtime.c
+           clib/get_s2time.c
+           fclib/fc_get_s2time.c
+           fmset/gets2time.c
+           trap schedule time-outs
+
+040622 mpb quikv/s2agc.c
+           quikv/s2diag.c
+           quikv/s2encode.c
+           quikv/s2fs.c
+           quikv/s2ifx.c
+           quikv/s2mode.c
+           quikv/s2ping.c
+           quikv/s2pwrmon.c
+           quikv/s2status.c
+           quikv/s2tonedet.c
+           quikv/s2version.c
+           rclcn/Makefile
+           rclcn/rclcn_das.c
+           rclco/rcl/rcl_sysn.c
+           s2das/stats.h
+           s2das/stats.c
+           s2das/s2das_util.h
+           s2das/s2das_util.c
+           s2das/s2das.h
+           s2das/rcl_das.h
+           s2das/quik_util.f
+           s2das/message.h
+           s2das/message.c
+           s2das/Makefile
+           S2 DAS support contributed by Mario Berube
+
+040623 weh rtelb/rte_secs.c
+           simplify
+
+040625 weh clib/ntp_synch.c
+           fclib/fc_ntp_synch.c
+           improved error handling
+
+040701 weh msg/msg
+           update for new disk_record=on command
+
+040702 weh incom/sincom.f
+           change time model "ntp" to "computer"
+
+040702 weh fsalloc/fsalloc.c
+           initialize more variables for time model
+
+040702 weh newlb/prog.c
+040702 weh include/fscom_dum.i
+040702 weh include/fscom.h
+040702 weh rtelb/rte_fixt.c
+040702 weh rtelb/rte_rawt.c
+040702 weh rtelb/rte_sett.c
+040702 weh fmset/fmset.c
+           add icomputer[2] to fscom time structure
+
+040702 weh rtelb/rte_fixt.c
+           improve rounding
+          
+040702 weh rtelb/rte_sett.c
+           add "adapt" option
+
+040702 weh fmset/fmset.c
+           new model/NTP information
+
+040702 weh control/fserr.ctl
+           updated for new setcl errors
+
+040704 weh setcl/setcl.f
+           new time models, option "adapt", and better error checking
+
+040707 weh misc/fstime.txt
+           created
+
+040707 weh labck/labck.f
+           remove debug output
+
+040707 weh quikv/in2net.c
+           remove debug output
+
+040708 rdg st.default/prog/.fvwm2rc
+	   CirculateDown and CirculateUP replaced with
+           Prev Focus and Next Focus respectively.
+           Ctrl-ESC for moving from screen to screen now works.
+
+040708 rdg st.default/oper/.fvwm2rc
+	   CirculateDown and CirculateUP replaced with
+           Prev Focus and Next Focus respectively.
+           Ctrl-ESC for moving from screen to screen now works.
+
+040709 weh fmset/fmset.c
+           report "formatter time reset" even for resynching only
+
+040709 WEH Makefile
+           rclcn/rclcn.c
+           include/fs_types.h
+           include/fscom.h
+           incom/equip.f
+           boss/newlg.f
+           chekr/chekr.f
+           control/fscmd.ctl
+           merged Mario's S2 DAS changes
+
+040712 WEH fmset/setfmtime.c
+           fmset/sets2time.c
+           fmset/getfmtime.c
+           fmset/gets2time.c
+           clib/get_s2time.c
+           s2das/rcl_das.c
+           quikv/s2bbc.c
+           fclib/fc_get_s2time.c
+           quikv/Makefile
+           quikv/quikv.c
+           fmset/fmset.c
+           setcl/setcl.f
+           merged Mario's S2 DAS changes.
+
+040712 weh st.default/control/equip.ctl
+           updated for S2 DAS
+
+040712 weh st.default/control/time.ctl
+           more comments
+
+040715 weh include/fscom.h
+           add ntp_synch_unknown
+
+040715 rdg fsvue/lib/version_updates
+
+040716 weh setcl/setcl.f
+           don't print errors for ntp_synch() after first error report
+
+040718 weh clib/ntp_synch.c
+           greatly expanded error handling:
+             wait4's added to try to catch ntpq zombie
+             only allow one failure and never run ntpq again
+             attempt to kill ntpq if an error occurs
+             add select() to detect unresponsive ntpq and then time-out
+             interact with FS abend error reporting mechanism for catching
+               debug output if there is an error
+
+040719 weh fmset/fmset.c
+           distinguish between s2das and formatter for final message
+           and running of setcl (setcl s2das)
+
+040719 weh msg/msg
+           Added disk inventory features to stop page
+
+040719 weh misc/fstime.txt
+           improved for s2das
+
+040719 weh include/disk2file_ds.h
+           change start and end to be floats
+
+040719 weh clib/cshm_init.c
+           float intialization for disk2file,start/stop
+           initialize ntp_synch_unknown
+
+040719 weh clib/m5_utils.c
+           add %f format option to m5sprint
+
+040719 weh clib/disk2file_util.c
+           changed for float  for disk2file.start/stop
+           special null params to Mark5 for start and stop of scan
+
+040720 rdg fsvue/fsvue
+           added quick keys Field System time (C-S-1) -to- 
+           New Window (C-S-W). Also added them to the Display button.
+           Now the [Display] button has the same items of Mouse Button-2 
+           of the X-window operators console.
+
+040720 weh st.default/st-0.0.0/ntpq_dummy
+           dummy version of ntpq for those that have recurrent problems
+ 
+040420 WEH misc/logrecovery.txt
+           thanks added
+
+040721 rdg fsvue/README
+           updated for new client/server form
+
+040721 weh misc/help_tools/wpas2help
+           misc/help_tools/what.c
+           boss/helpstr.c
+           updated for S2 DAS
+
+040721 weh control/fscmd.ctl
+040721 weh help/s2version.___
+040721 weh help/ping.___
+           converted s2version and ping to  generic command 
+
+040721 mpb help/agc.s__
+040721 mpb help/bbcn.s__
+040721 mpb help/diag.s__
+040721 mpb help/encode.s__
+040721 mpb help/errmsg.s__
+040721 mpb help/fs.s__
+040721 mpb help/ifx.s__
+040721 mpb help/mode.s__
+040721 mpb help/pwrmon.s__
+040721 mpb help/s2check.s__
+040721 mpb help/s2delays.s__
+040721 mpb help/s2status.s__
+040721 mpb help/stamsg.s__
+040721 mpb help/tonedet.s__
+040721 mpb help/tonemeas.s__
+           added
+
+040722 weh rclcn/rclcn.c
+           quikv/rcl_dis.c
+           clib/rclcn_res_util.c
+           quikv/s2rec_dis.c
+           clib/get_s2time.c
+           fmset/gets2time.c
+           fclib/fc_get_s2time.c
+           include/time_arrays.i
+           setcl/setcl.f
+           added computer time return for S2
+	   
+040722 jmg st.default/control/skedf.ctl
+           updated for Dymo printer
+
+040723 sk  quikv/k4oldtp.c
+           updated to light led
+
+040723 cp  gnfit/gnfit.c
+           stubs added to allow it to link with some fort77 versions
+
+040723 weh quikr/tplis.f
+           pcalr/pccor.f
+           be we have fresh copy of imodfm from shared memory
+
+040723 weh misc/fstime.txt
+           improvements
+
+040723 weh boss/bwork.f
+040723 weh control/fserr.ctl
+           trap errors for schedule or proc file name too long
+
+040723 weh fs/fs.c
+           correct fmset semaphore test to use test instead of take
+
+040726 weh fmpsee/fmpopen.c
+           improve error message (error scheme should be reworked)
+
+040726 weh clib/onoff_util.c
+           accept formbbc, formif, and formvc devices
+
+040726 weh help/onoff.___
+           updated for formbbc, formif and formvc device
+           updated description of u5/u6 handling
+
+040726 weh help/fivept.___
+           updated description of u5/u6 handling
+
+040727 weh control/fserr.ctl
+           setcl/Makefile
+           control/fspgm.ctl
+           setcl/setcl.f
+           revise method for preventing more than one setcl to use semaphores
+
+040728 weh clib/ntp_sync.c
+           don't kill ntpq if doesn't exit right away
+
+040728 weh fmset/fmset.c
+           use long delay for no FS at start so C-S-T window does more than
+           flash by
+
+040728 weh fclib/fc_get_vtime.c
+           clib/res_util.c
+           include/res_ds.h
+           mcbcn/mcbcn.c
+           clib/get_vtime.c
+           setcl/setcl.f
+           fmset/fmset.c
+           updated to get ticks and computer time when checking VLBA time
+
+040728 mpb quikv/s2mode.c
+           help/mode.___
+           corrected
+
+040728 mpb st.default/proc/s2s2station.prc
+           st.default/control/rclcd.prc
+           created/updated for S2 DAS
+
+040728 weh help/s2ping.___
+           control/fscmd.ctl
+           change "ping" to "s2ping"
+
+040728 weh aquir/scmd.f
+           use postive waits as minutes
+
+040728 weh fmset/getvtime.c
+           setcl/setcl.f
+           use "before" time for VLBA formatter as more accurate 
+
+Version 9.7.0 040731

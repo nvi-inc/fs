@@ -3,6 +3,7 @@ C
 C     SELEV reads/writes station elevation limits
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  INPUT:
       integer*2 LINSTQ(*)
@@ -43,9 +44,9 @@ C
 9110    FORMAT(' ID  STATION  EL LIMIT(deg)')
         DO  I=1,NSTATN
 C
-          EL = STNELV(I)*180.0/PI
-          WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4),EL
-9111      FORMAT(1X,A2,2X,4A2,1X,F5.1)
+          EL = STNELV(I)*rad2deg
+          WRITE(LUDSP,9111) LpoCOD(I),cSTNNA(I),EL
+9111      FORMAT(1X,A2,2X,A,1X,F5.1)
         END DO  !
         RETURN
       END IF  !no input
@@ -69,7 +70,7 @@ C
             RETURN
           END IF  !invalid
           DO  I = 1,NSTATN
-            STNELV(I) = VAL*PI/180.0
+            STNELV(I) = VAL*deg2rad
           END DO
           RETURN
         END IF  !all stations
@@ -92,7 +93,7 @@ C         get matching elevation
             write(luscn,9903) lkeywd(1)
 9903        format('SELEV03 - Invalid elevation for ',a2)
           else ! valid
-            STNELV(ISTN) = VAL*PI/180.0
+            STNELV(ISTN) = VAL*deg2rad
 C           get next station name
             CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
           endif ! invalid/valid elevation

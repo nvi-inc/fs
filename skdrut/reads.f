@@ -21,7 +21,7 @@ C     IL - length of record read IN CHARACTERS, -1 means EOF
 C     KERR - error return from FMP
 C 
 C  LOCAL:
-      integer i,jchar ! function
+      integer jchar ! function
 C HISTORY:
 C  LAST MODIFIED: CREATED 800809
 C                 CLEAR BUFFER BEFORE EACH READ!  810705
@@ -32,12 +32,15 @@ C    900205 NRV Added check for zero-length records, if found read
 C               another record.
 C    930225 nrv implicit none
 C    951002 nrv Add mode 3 = read next line of any type
+C    2003Oct14 JMGipson. Add code to handle ^M at the end of a line--
+C              Most likely due to transfer from Dos to UX.
 
 C
 C     0. INITIALIZE
 C
       KERR = 0
       IL = 0
+      CALL IFILL(IBUF,1,IBLEN*2,oblank)  !fill with blanks to initiliaze.
 C
 C
 C     1. This section handles mode 1: get next "$" line.

@@ -49,6 +49,8 @@ PROGRAM = drudg
 #
 DROBS=\
 $(DR)chkgrpandwrite.o $(DR)counter_init.o \
+$(DR)get_version.o \
+$(DR)snap_in2net_connect.o fix_snap_file.o xfer_override.o \
 $(DR)delete_comma_and_write.o checkmk5xlat.o \
 $(DR)find_num_chans_rec.o $(DR)find_recorder_speed.o\
 $(DR)kcheckgrpor.o $(DR)init_hardware_common.o\
@@ -83,7 +85,7 @@ $(DR)snapintr.o $(DR)bbbuf.o $(DR)cazel.o $(DR)gtshft.o $(DR)bar1.o \
 $(DR)labsnp.o $(DR)port.o $(DR)lstsum.o $(DR)nhdif.o $(DR)setprint.o \
 $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
 $(DR)b3of9.o $(DR)dsnout.o $(DR)trkall.o  $(DR)timout.o \
-$(DR)fc_chmod.o $(DR)vlbat.o $(DR)vlbah.o $(DR)drchmod.o \
+$(DR)vlbat.o $(DR)vlbah.o $(DR)drchmod.o \
 $(DR)lstsumo.o $(DR)copen.o $(DR)psbar.o \
 $(DR)procintr.o $(DR)read_snap1.o $(DR)prcov.o $(DR)iaddpc.o \
 $(DR)prtxt.o $(DR)timin.o $(DR)k4proc_type.o $(DR)iaddk4.o \

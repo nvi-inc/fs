@@ -5,6 +5,7 @@ C     doesn't end on a different part of the cable from which it began.
 C     KCONT is returned TRUE if the observation is continuous.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  INPUT:
       real*8 UT

@@ -19,23 +19,31 @@ C
 C  OUTPUT:
       integer ierr
 C     IERR - error number
-C
+! function
+      integer iwhere_in_string_list
 C
 C  LOCAL:
       integer ix,n,ITRK(4,max_subpass,max_headstack)
       integer*2 LNA(4)
-      integer idum,ib,ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
+      integer idum,ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan),ir,it,iu
       integer*2 lc,lsg,lm(8),lid,lin,ls
       integer*2 lst(4,max_stn)
+      character*8 cst(max_stn)
+      equivalence (lst,cst)
       real*8 bitden
       logical kvlba,kmk3
       character*3 cs
       real f2,vb,rbbc,srate
       double precision f1,f
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
-      integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst 
-      logical knaeq
+      integer ichmv_ch,ias2b,iscn_ch,ichcm_ch,ichmv,igtfr,igtst
+
+      character*1 lchar
+      integer*2   itemp
+      equivalence (lchar,itemp)
+
+      integer ilen2
 C
 C  History
 C     880310 NRV DE-COMPC'D
@@ -78,21 +86,28 @@ C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
       ITYPE=0
-      IF (JCHAR(IBUF,1).EQ.OCAPF) ITYPE=3 ! F frequency name, code and stations
-      IF (JCHAR(IBUF,1).EQ.OCAPC) ITYPE=1 ! C frequency sequence lines
-      IF (JCHAR(IBUF,1).EQ.OCAPL) ITYPE=2 ! L LO lines
-      IF (JCHAR(IBUF,1).EQ.OCAPR) ITYPE=4 ! R sample rate lines
-      IF (JCHAR(IBUF,1).EQ.OCAPB) ITYPE=5 ! B barrel roll lines 
-      IF (JCHAR(IBUF,1).EQ.OCAPD) ITYPE=6 ! D recording format lines
-      IF (ITYPE.EQ.1) CALL UNPCO(IBUF(2),ILEN-1,IERR,
-     .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,cs,ivc)
-      IF (ITYPE.EQ.2) CALL UNPLO(IBUF(2),ILEN-1,IERR,
-     .                LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
-      IF (ITYPE.EQ.3) CALL UNPFSK(IBUF(2),ILEN-1,IERR,LNA,LC,lst,
-     .                ns)
-      IF (ITYPE.EQ.4) CALL UNPRAT(IBUF(2),ILEN-1,IERR,lc,srate)
-      IF (ITYPE.EQ.5) CALL UNPBAR(IBUF(2),ILEN-1,IERR,lc,lst,ns,lbar)
-      IF (ITYPE.EQ.6) CALL UNPFMT(IBUF(2),ILEN-1,IERR,lc,lst,ns,lfmt)
+      itemp=ibuf(1)   !this bit of code makes lchar=first character in ibuf
+
+      ilen2=ilen-1
+      if(lchar .eq. "C") then
+        itype=1
+       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,ITRK,cs,ivc)
+      else if(lchar .eq. "L") then
+        itype=2
+        CALL UNPLO(IBUF(2),ilen2,IERR,LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
+      else if(lchar .eq. "F") then
+        itype=3
+        CALL UNPFSK(IBUF(2),ilen2,IERR,LNA,LC,lst,ns)
+      else if(lchar .eq. "R") then
+        itype=4
+        CALL UNPRAT(IBUF(2),ilen2,IERR,lc,srate)
+      else if(lchar .eq. "B") then
+        itype=5
+        CALL UNPBAR(IBUF(2),ilen2,IERR,lc,lst,ns,lbar)
+      else if(lchar .eq. "D") then
+        itype=5
+        CALL UNPFMT(IBUF(2),ilen2,IERR,lc,lst,ns,lfmt)
+      endif
       call hol2upper(lc,2) ! uppercase frequency code
 C
 C 1.5 If there are errors, handle them first.
@@ -211,9 +226,10 @@ C     3. Next, LO type entries, from the "L" lines.
 C
       IF  (ITYPE.EQ.2) THEN  !LO entry
         IF  (IGTST(LID,ISTN).EQ.0) THEN  !error
-          write(lu,'("FRINP03 - Station ",a2," not selected.",
-     .    " LO entry on the following line ignored:"/40a2)') lid,
-     .    (ibuf(i),i=2,ilen)
+          write(lu,'(a,a2,a,/,40a2)')
+     >     "FRINP03 - Station ",lid,
+     >     " not selected.  LO entry on the following line ignored:",
+     >    (ibuf(i),i=2,ilen)
           IERR = MAX_STN
           RETURN
         END IF  !error
@@ -225,14 +241,18 @@ C
             ib=ibbcx(ic,istn,icode) ! BBC index from "C" line
             if (ib.gt.0.and.ib.eq.ivlist(1)) then 
 C                                    ! this channel on this BBC
-              if (lsg.ne.lsubvc(ic,istn,icode)) 
-     .        write(lu,'("FRINP04 - Subgroup ",a2," inconsistent with "
-     .        ,a2," for channel ",i3,", station ",4a2)') lsg,
-     .        lsubvc(ic,istn,icode),ic,(lstnna(i,istn),i=1,4)
+              if (lsg.ne.lsubvc(ic,istn,icode))
+     .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
+     >        "FRINP04 - Subgroup ", lsg," inconsistent with ",
+     >        lsubvc(ic,istn,icode), " for channel ",ic,
+     >        "station",cstnna(istn)
+
               if (lc.ne.lcode(icode)) 
-     .        write(lu,'("FRINP05 - Code ",a2," inconsistent with ",
-     .        a2," for channel ",i3,", station ",4a2)') lc,lcode(icode)
-     .        ,ic,(lstnna(i,istn),i=1,4)
+     .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
+     >        "FRINP05 - Code ",lc," inconsistent with ",
+     >         lcode(icode), " for channel ",ic,
+     >        "station",cstnna(istn)
+
               LIFINP(ic,istn,ICODE) = LIN ! IF input channel
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
               losb(ic,istn,icode) = ls ! sideband
@@ -241,14 +261,19 @@ C                                    ! this channel on this BBC
           else ! many BBCs on this line (from PC-SCHED)
             do iv=1,nvlist
               ic=ivlist(iv)
-              if (lsg.ne.lsubvc(ic,istn,icode)) 
-     .        write(lu,'("FRINP04 - Subgroup ",a2," inconsistent with "
-     .        ,a2," for channel ",i3,", station ",4a2)') lsg,
-     .        lsubvc(ic,istn,icode),ic,(lstnna(i,istn),i=1,4)
+
+              if (lsg.ne.lsubvc(ic,istn,icode))
+     .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
+     >        "FRINP04 - Subgroup ", lsg," inconsistent with ",
+     >        lsubvc(ic,istn,icode), " for channel ",ic,
+     >        "station",cstnna(istn)
+
               if (lc.ne.lcode(icode)) 
-     .        write(lu,'("FRINP05 - Code ",a2," inconsistent with ",
-     .        a2," for channel ",i3,", station ",4a2)') lc,lcode(icode)
-     .        ,ic,(lstnna(i,istn),i=1,4)
+     .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
+     >        "FRINP05 - Code ",lc," inconsistent with ",
+     >         lcode(icode), " for channel ",ic,
+     >        "station",cstnna(istn)
+
               LIFINP(ic,istn,ICODE) = LIN ! IF input channel
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
 C             there's no sideband on this line
@@ -299,14 +324,10 @@ C       Check the list of station names.
         ibad=0
         if (ns.gt.0) then ! station names on "F" line
           do is=1,ns ! for each station name found on the line
-            i=1
-            do while (i.le.nstatn.and..not.knaeq(lst(1,is),
-     .               lstnna(1,i),4))
-              i=i+1
-            enddo
-            if (i.gt.nstatn) then ! no match
-              write(lu,9400) (lst(ii,is),ii=1,4)
-9400          format('FRINP04 - Station ',4a2,' not selected. ',
+            i=iwhere_in_string_list(cstnna,nstatn,cst(is))
+            if (i.eq.0) then ! no match
+              write(lu,9400) cst(is)
+9400          format('FRINP04 - Station ',a,' not selected. ',
      .        'Frequency sequence for this station ignored.')
               istsav(is)=-1
             else
@@ -337,14 +358,10 @@ C 6. This section for the barrel roll line.
       if (itype.eq.5) then ! barrel
         if (ns.gt.0) then ! station names on "B" line
           do is=1,ns ! for each station name found on the line
-            i=1
-            do while (i.le.nstatn.and..not.knaeq(lst(1,is),
-     .               lstnna(1,i),4))
-              i=i+1
-            enddo
-            if (i.gt.nstatn) then ! no match
-              write(lu,9401) (lst(ii,is),ii=1,4)
-9401          format('FRINP06 - Station ',4a2,' not selected. ',
+            i=iwhere_in_string_list(cstnna,nstatn,cst(is))
+            if (i.eq.0) then ! no match
+              write(lu,9401) cst(is)
+9401          format('FRINP06 - Station ',a,' not selected. ',
      .        'Barrel roll for this station ignored.')
             else ! save it
               idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
@@ -371,14 +388,10 @@ C 7. This section for the recording format line.
       if (itype.eq.6) then ! format
         if (ns.gt.0) then ! station names on the line
           do is=1,ns ! for each station name found on the line
-            i=1
-            do while (i.le.nstatn.and..not.knaeq(lst(1,is),
-     .               lstnna(1,i),4))
-              i=i+1
-            enddo
-            if (i.gt.nstatn) then ! no match
-              write(lu,9402) (lst(ii,is),ii=1,4)
-9402          format('FRINP07 - Station ',4a2,' not selected. ',
+            i=iwhere_in_string_list(cstnna,nstatn,cst(is))
+            if (i.eq.0) then ! no match
+              write(lu,9402) cst(is)
+9402          format('FRINP07 - Station ',a,' not selected. ',
      .        'Recording format for this station ignored.')
             else ! save it
               if (ichcm_ch(lfmt(1,is),1,'N').eq.0) then ! force non-data replacement

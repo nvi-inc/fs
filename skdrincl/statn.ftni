@@ -18,7 +18,7 @@ C
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
      .ncord,maxtap,nsefdpar,nrecst,nheadstack,ibitden_save,
-     .itearl,itlate,itgap,ns2tapes,itearl_save,tape_length
+     .itearl,itlate,itgap,ns2tapes,tape_length
 C
       integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
      .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed,
@@ -52,7 +52,7 @@ C
      .       tape_length(max_stn),
      .       nsefdpar(max_band,max_stn),
      .       nrecst(max_stn),nheadstack(max_stn),
-     .       ibitden_save(max_stn),itearl_save,
+     .       ibitden_save(max_stn),
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
      .       ns2tapes(max_stn),
      .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN), 
@@ -73,6 +73,8 @@ C
       equivalence (lstrec,cstrec), (lstrack,cstrack),(lstrec2,cstrec2)
       character*8 coccup(max_stn)
       equivalence (coccup,loccup)
+      character*2 cfirstrec(max_stn)
+      equivalence (cfirstrec,lfirstrec)
 
       character*4 cs2speed(max_stn),  cterid(max_stn)
       equivalence (cs2speed,ls2speed),(cterid,lterid)

@@ -24,10 +24,9 @@ C  Local:
      .inday,inhr,inmin,insec
 	logical kdone
 Cinteger*4 ifbrk
-	integer Z24
-      integer ias2b,jchar,ichmv,nhdif ! function
-	data Z24/Z'24'/
+      integer ias2b,ichmv,nhdif ! function
 
+   
 C  1.  IBUF and ITIM already contain the first shifted observation.
 C   The main loop writes out the current line, already shifted.
 C   Then, read an observation line and shift it.
@@ -44,8 +43,7 @@ C  endif
 	  ihnow = ias2b(itim,6,2)
 	  imnow = ias2b(itim,8,2)
 	  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	  CALL INC(LU_OUTFILE,IERR)
-	  IF(IERR.NE.0) THEN
+     	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9830) IERR
 9830      FORMAT(' SKDSHFT22 - ERROR ',I5,' writing shifted ',
      .    'observation line.')
@@ -53,18 +51,16 @@ C  endif
 	    RETURN
 	  ENDIF
 
-	  CALL IFILL(IBUF,1,iblen,32)
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  CALL INC(LU_INFILE,IERR)
-	  IF(IERR.NE.0) THEN
+      	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+  	  IF(IERR.NE.0) THEN
 	    WRITE(LUSCN,9810) IERR
 9810      FORMAT(' SHFCOP20 - ERROR ',I5,' reading observation.')
 	    ierr=-1
 	    RETURN
 	  ENDIF
 C
-	  if ((iLEN.eq.-1).or.(JCHAR(IBUF,1).eq.Z24).or.(nhdif(idnow,
-     .  ihnow,imnow,id1,ih1,im1).ge.nhshft)) then
+	  if ((iLEN.eq.-1).or.cbuf(1:1) .eq. "$".or.
+     >      (nhdif(idnow,ihnow,imnow,id1,ih1,im1).ge.nhshft)) then
 	    kdone = .true.
 	  else
 	    IFC = 1

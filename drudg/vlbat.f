@@ -18,10 +18,10 @@ C
 C
 C  INPUT:
       logical ksw ! true if switching
-        integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LMON(2),
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LMON(2),
      .LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),lfreq,
      .ldsign2
-        integer IPAS(MAX_STN),
+      integer IPAS(MAX_STN),
      .IFT(MAX_STN),IDUR(MAX_STN),ical,
      .iyr,idayr,ihr,imin,isc,nstnsk,mjd,mon,ida,istnsk,isor,icod,
      .ipasp,iblk,idirp,iftold,nchar,irah2,iram2,idecd2,
@@ -36,10 +36,10 @@ C  LOCAL
         integer*2 lspdir,lsodir ! tape direction
       integer iblen
       integer*2 isname(23),blank10(5)
-      integer ispin,irec,idir,ispinoff,idum,ierr,ihead,idx,
-     .ispins,iyrs,idayrs,ihrs,mins,iscs,iras,isra,idecs,idec2d,
+      integer ispin,irec,idir,ispinoff,ierr,ihead,idx,
+     .ispins,iyrs,idayrs,ihrs,mins,iscs,
      .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,iftrem,
-     .mino,isco,isp,i,nch,ispm,in,itu,idayrt,iyrt,ihrt,mint,isct
+     .mino,isco,isp,i,nch,ispm,itu,idayrt,iyrt,ihrt,mint,isct
       real spdips,sps
       logical ktape,ktrack,kcont,kauto
         logical kspin ! true if we need to spin tape to get to the
@@ -51,8 +51,11 @@ C                          to the end before changing it
         integer*2 oapostrophe
       integer*2 ldirr
       LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
-      INTEGER ib2as,ichmv,iflch,ichmv_ch ! function
+      INTEGER ib2as,ichmv,ichmv_ch ! function
         real tspin,speed ! functions
+      integer iSpinDelay
+
+      Data iSpinDelay/0/
 
 C  INITIALIZED:
       DATA ldirr/2HR /
@@ -120,18 +123,19 @@ C            if tape has auto allocation.
 C 011011 nrv New variable KAUTO used to set up for autoallocate.
 C 011011 nrv Add KAUTO to wrtap call.
 C 021014 nrv Change "seconds" argument in TSPIN to real.
+C 2003Nov13 JMGipson.  Added extra argument to TSPIn
 C
 C  Initialization
 
       izero2 = 2+Z4000 + Z100*2
       izero3 = 3+Z4000 + Z100*3
       iblen = 2*IBUF_LEN
-        kcont = tape_motion_type(istn).eq.'CONTINUOUS'
+      kcont = tape_motion_type(istn).eq.'CONTINUOUS'
 C
 C  Add a comment if a new tape is to mounted before the next observation
 
       kauto = tape_allocation(istn).eq.'AUTO'
-        irec=irecp
+       irec=irecp
       if (kauto) irec = 1 ! always, for dynamic
       IDIR=+1
       IF (LDIR(ISTNSK).EQ.ldirr) IDIR=-1
@@ -147,7 +151,8 @@ Cdyn
       IF (KNEWTP) THEN ! new tape
         idirp=-1
           if (nrecst(istn).eq.1.and.iftold.gt.10) then !spin down the tape to the end
-            ispinoff = ifix((270.0/330.0)*tspin(iftold,ispm,sps))
+            ispinoff = ifix((270.0/330.0)*
+     >                  tspin(iftold,ispm,sps,iSpinDelay))
             kspinoff = .true.
             if (kcont) kspinoff=.false.
             iftold=0
@@ -253,8 +258,8 @@ C  mode. It is not simply the direction, except for modes B and C.
 
 C  Calculate tape spin time and block stop time
 
-      ispins = ifix((270.0/330.0)*TSPIN(
-     .             IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS))
+      ispins = ifix((270.0/330.0)*
+     >        TSPIN(IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS,ispindelay))
       kend = ift(istnsk).eq.0.or.ift(istnsk).eq.maxtap(istn)
       kspin = ispins.gt.10 .and. .not.kend .and. .not.kcont
       ispin=0
@@ -286,31 +291,6 @@ C     Setup block. None needed for continuous unless change of direction.
 
 C  Source name, ra, dec in J2000 coordinates
 
-C     IRAS = RAS2+.05
-C     isra = ((ras2-iras)*10.0)+.5
-C     IDECS = DECS2+0.5
-C     if (idecs.ge.60) then
-C       idecs=idecs-60
-C       idecm2=idecm2+1
-C     endif
-C     if (idecm2.ge.60) then
-C       idecm2=idecm2-60
-C       idecd2=idec2d+1
-C     endif
-C       in=iflch(lsname,max_sorlen)
-C       idum = ichmv(isname,8,blank10,1,9)
-C     idum = ichmv(isname,8,lsname,1,in)
-C       idum = ichmv(isname,8+in,oapostrophe,1,1)
-C     idum = ib2as(irah2,isname,21,izero2)
-C     idum = ib2as(iram2,isname,24,izero2)
-C     idum = ib2as(iras,isname,27,izero2)
-C     idum = ib2as(isra,isname,30,1)
-C     idum = ichmv(isname,37,ldsign2,1,1)
-C     idum = ib2as(idecd2,isname,38,izero2)
-C     idum = ib2as(idecm2,isname,41,izero2)
-C     idum = ib2as(idecs,isname,44,izero2)
-C     CALL writf_asc(LU,IERR,isname,23)
-C     call ifill(ibuf,1,iblen,32)
       call wrsor(lsname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,decs2,lu)
 
 C  Set up tracks for forward or reverse

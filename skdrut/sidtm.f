@@ -1,14 +1,14 @@
       SUBROUTINE sidtm(JD,SIDTM0,FRACT)
       implicit none
-      real*8 SIDTM0,FRACT,T,PI
+      real*8 SIDTM0,FRACT,T
       integer jd,j
+      include "../skdrincl/constants.ftni"
 C     M.E.ASH AND R.A.GOLDSTEIN  JULY 1964
 C             JD = INPUT JULIAN DAY NUMBER AS COMPUTED BY "JULDA" 21MX
 C                =  (JD-2440000)
 C     SIDTM0 = OUTPUT MEAM SIDEREAL TIME AT 0 HR UT
 C        = MEAN SIDEREAL TIME AT JULIAN DATE JD-.5 (IN RADIANS)
 C     FRACT = OUTPUT RATIO BETWEEN MEAN SIDEREAL TIME AND UNIVERSAL TIME MUL
-      PI=3.1415926536D0
       T=JD
       T=T+24980.D0
       T=T-0.5D0

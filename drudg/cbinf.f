@@ -5,24 +5,21 @@ C     corresponds to the single hollerith character input.
 C  940131 nrv created
 
 C  Input:
-      integer*2 cable  ! -, C, or W from schedule
+      character*2 cable
 C  Output
       character*7 wrap ! 'NEUTRAL', 'CW', or 'CCW'
 
 C  Local
-      integer hn,hc,hw,hlc,hlw
+      character*2 cable_in
 
 C  Initialized
-      data hn/2h- /,hc/2hC /,hw/2hW /
-      data          hlc/2hc /,hlw/2hw /
-
-      if (ichcm(cable,1,hn,1,2).eq.0) then
+      cable_in=cable
+      call capitalize(cable_in)
+      if(cable_in(1:1) .eq. "-") then
         wrap='NEUTRAL'
-      else if (ichcm(cable,1,hc,1,2).eq.0.or.
-     .         ichcm(cable,1,hlc,1,2).eq.0) then
+      else if(cable_in(1:1) .eq. "C") then
         wrap='CW'
-      else if (ichcm(cable,1,hw,1,2).eq.0.or.
-     .         ichcm(cable,1,hlw,1,2).eq.0) then
+      else if(cable_in(1:1) .eq. "W") then
         wrap='CCW'
       else
         wrap=' '

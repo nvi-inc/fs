@@ -20,7 +20,8 @@ fc_go_put.o fc_v2_vlt_head.o fc_v2_head_vmov.o fc_cshm_init.o fc_get_s2time.o\
 fc_putpname.o fc_get_k3time.o fc_set_k3aux.o fc_get_k4time.o\
 fc_dqa4_cnvrt.o fc_tpi_norack.o fc_mk4vcd.o fc_skd_end_insnp.o fc_vlbabbcd.o\
 fc_mk4bbcd.o fc_get_rxgain_files.o fc_get_flux_file.o fc_get_tcal_fwhm.o \
-fc_lbaifpd.o fc_tpi_lba.o fc_dscon_v.o
+fc_lbaifpd.o fc_tpi_lba.o fc_dscon_v.o fc_ntp_synch.o fc_rte_cmpt.o\
+fc_rte_ticks.o
 #
 #CFLAGS = 
 #FFLAGS = 

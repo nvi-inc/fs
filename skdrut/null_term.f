@@ -17,8 +17,8 @@ C 990916 nrv Uncommented the warning message if the string is too short.
       end do
       i = i + 1
       if (i .gt. j) then ! no trailing blanks or nulls
-C       print *, 'NULL_TERM: string too short, last char replaced ',
-C    .  'with NULL'//cstr
+        print*, 'NULL_TERM: string too short, last char replaced ',
+     .  'with NULL'
         i=i-1
       end if
       cstr(i:i) = char(0)

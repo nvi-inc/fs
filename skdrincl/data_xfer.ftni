@@ -1,0 +1,28 @@
+! Auxiliariay info for datatransfer.
+      integer ixfer_in2net,ixfer_disk2file
+      parameter (ixfer_in2net=1,ixfer_disk2file=2)
+
+      integer max_xfer
+      parameter(max_xfer=10000) 	!Maximum number of data transfer statements.
+
+      logical kxfer_stat(Max_stn)       !true if station has some data transfer statements
+      integer ixfer_stat(max_xfer)      !station number.
+      integer ixfer_method(max_xfer)
+      character*128 lxfer_destination(max_xfer)      !where to put it
+      character*128 lxfer_options(max_xfer)
+      integer ixfer_beg(max_obs)     	!1st data_transfer statement for a given scan.
+      integer ixfer_end(max_obs)        !last
+      real xfer_beg_time(max_xfer)      !beggining and end of xfer/w/rt/ scan
+      real xfer_end_time(max_xfer)
+      logical Kin2Net_2_Disk2File
+      logical kDisk2File_2_in2net
+      logical kNoDataTransfer
+      character*128 ldestin_in2net
+
+      Common/Data_xfer/kxfer_stat,
+     >     Kin2Net_2_Disk2File,kDisk2File_2_in2net, knodatatransfer,
+     >     ldestin_in2net,
+     >     ixfer_stat,ixfer_method,lxfer_destination,lxfer_options,
+     >     ixfer_beg,ixfer_end,  xfer_beg_time,xfer_end_time
+
+       

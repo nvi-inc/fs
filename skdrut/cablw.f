@@ -4,6 +4,7 @@ C  CABLW returns the azimuth difference between the NOW and the
 C              NEW source positions, taking into account cable wraps.
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/constants.ftni'
 C
 C  INPUT VARIABLES:
       integer istn
@@ -100,9 +101,8 @@ C     We are in the outer overlapped portion
 120   CABLW = DAZ2
       call char2hol ('C ',LWRNEW,1,2)
       AZNEW = AZNEW+2.0*PI
-C     Special for NOTO slewing 
-130   if (ichcm_ch(lstnna(1,istn),1,'Noto    ').eq.0.or.
-     .    ichcm_ch(lstnna(1,istn),1,'NOTO    ').eq.0) goto 600
+C     Special for NOTO slewing
+130   if(cstnna(istn).eq.'Noto' .or. cstnna(istn).eq.'NOTO') goto 600
       GOTO 990
 C
 C

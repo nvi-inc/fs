@@ -1,6 +1,5 @@
       SUBROUTINE vunpsit(stdef,ivexnum,iret,ierr,lu,
-     .lidpos,LNAPOS,POSXYZ,POSLAT,POSLON,LOCCUP,
-     .nhz,azh,elh)
+     .lidpos,LNAPOS,POSXYZ,POSLAT,POSLON,LOCCUP,nhz,azh,elh)
 C
 C     VUNPSIT gets the site information for station
 C     STDEF and converts it.
@@ -31,7 +30,7 @@ C          where error occurred, <0 is invalid value
       integer*2 LNAPOS(4) ! name of the site position
       double precision POSXYZ(3) ! site coordinates, meters
       integer*2 LOCCUP(4) ! occupation code
-      real poslat,poslon !omputer lat, lon
+      double precision poslat,poslon !omputer lat, lon
       integer nhz
       real azh(max_hor),elh(max_hor)
 
@@ -43,10 +42,6 @@ C  LOCAL:
      .ptr_ch,fvex_units,fvex_len,ichmv_ch ! function
 C
 C  INITIALIZED:
-      double precision ERAD,EFLAT
-C               - compiled-in values of earth rad and flattening
-      DATA ERAD/0.6378145D07/
-      DATA EFLAT/0.3352891869D-2/
 C
 C
 C  First initialize everything in case we have to leave early.
@@ -108,8 +103,8 @@ C  3. Site position
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
         if (iret.ne.0) then
           ierr=-5
-          write(lu,'("VUNPSIT05 - Error converting site position ",
-     .    "field ",i2)') i
+          write(lu,
+     >  '("VUNPSIT05 - Error converting site position ","field ",i2)') i
         else
           posxyz(i) = d
         endif
@@ -117,15 +112,8 @@ C  3. Site position
 
 C     Now compute derived coordinates
 
-      if (ierr.gt.0) then 
-        POSLON = (-DATAN2(POSXYZ(2),POSXYZ(1)))*180.0/PI
-        IF (POSLON.LT.0.D0) POSLON=POSLON+360.D0
-C                   West longitude = ATAN(y/x)
-        POSLAT = (DATAN2(POSXYZ(3)*ERAD**2,
-     .    DSQRT((POSXYZ(1)**2+POSXYZ(2)**2)) *
-     .    (ERAD**2*(1.D0-EFLAT)**2))) * 180.0/PI
-C                   Geocentric latitude = ATAN(z/sqrt(x^2+y^2))
-C                   Geodetic latitude includes earth radius and flattening
+      if (ierr.gt.0) then
+         call xyz2latlon(posxyz,poslat,poslon)
       endif
 
 C  4. Occupation code
@@ -177,8 +165,8 @@ C  5. AZ fields Horizon map
         enddo ! get az fields
         if (i.gt.max_hor) then
           ierr=-9
-          write(lu,'("VUNPSIT09 - Too many horizon azs, max is ",
-     .    i2)') max_hor
+          write(lu,
+     >   '("VUNPSIT09 - Too many horizon azs, max is ", i2)') max_hor
           nhz = max_hor
         else
           nhz = i
@@ -219,8 +207,8 @@ C  6. EL fields Horizon map
       iret=0
       if (i.gt.max_hor) then
         ierr=-9
-        write(lu,'("VUNPSIT09 - Too many horizon els, max is ",
-     .  i2)') max_hor
+        write(lu,
+     >   '("VUNPSIT09 - Too many horizon els, max is ", i2)') max_hor
       endif
 
       if (ierr.gt.0) ierr=0

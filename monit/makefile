@@ -1,4 +1,4 @@
-all: ../bin/monit1 ../bin/monit2 ../bin/monit3 ../bin/monit4
+all: ../bin/monit1 ../bin/monit2 ../bin/monit3 ../bin/monit4 ../bin/monit5
 #
 FFLAGS = -c
 CFLAGS =  -I/usr/include/ncurses
@@ -29,3 +29,10 @@ OBJECTS4 = monit4.o die4.o m4init.o mout4.o
 ../bin/monit4: $(OBJECTS4)
 	cc -o ../bin/monit4 $(OBJECTS4) $(LIBES) -lm
 	strip ../bin/monit4
+#
+OBJECTS5 = monit5.o die.o pre_str.o m5init.o\
+mout5.o
+#
+../bin/monit5: $(OBJECTS5)
+	cc -o ../bin/monit5 $(OBJECTS5) $(LIBES) -lm
+	strip ../bin/monit5

@@ -1,0 +1,1057 @@
+File: /usr2/fs-9.7.0/misc/fs9700up.txt  Version: 0.4 Date: 040727
+
+I. Introduction
+
+This memo is divided into 4 sections:
+   I.   Introduction.
+   II.  Changes Since Version 9.6.9
+   III. Installation
+   IV.  Transferring The Update Archive By DOS Floppy
+
+Please print this notice and read it carefully before installing the
+new version.
+
+This version is intended for all stations.  The most significant
+changes in this version are that it expects the Mark5A to be operating
+in formal parsing mode and support for the S2 DAS is included.
+Previous versions of the FS assumed informal processing for Mark5A
+operations.  In addition, you must use a version of the Mark5A program
+dated 23 March 2004 (day 083) or later with this version of the FS.
+S2 DAS support was provided Mario Bérubé.  This version has S2 DAS
+SNAP command, "setcl", and "fmset" support are included in this
+version.  S2 DAS DRUDG support is not included at this time.
+
+Additional significant change are: the FS time model has been revised
+to include better support for NTP, a new method of updating the model
+rate with a new "setcl" parameter "adapt", a remaining disk pack
+capacity display, "monit5", and fsvue now operates in a client/server
+configuration to support multiple interfaces.
+
+This version is intended to installed as an update for 9.6.9.  This
+update does not require as many changes to local procedures and
+control files as some relatively recent ones have.  It should be
+fairly easy to install.
+
+II. Changes Since Version 9.6.9
+
+The sections is divided into three sub-sections: A. Change in the FS,
+B. Changes in DRUDG, and C. Known FS Bugs.  Each sub-section starts
+with a summary of the items covered followed by a more detailed
+description.
+
+			 A. Changes in the FS
+
+The following is a summary of the changes.  Items numbered 4 and above
+were added after 9.6.10.
+
+1. New USER_DEVICE command for support of station detectors in ONOFF,
+   FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
+   completely.
+2. ONOFF support for systems without noise diodes restored.
+3. Existing Mark 5 commands renamed, changed.
+4. Mark5A devices are supported with formal parsing only.
+5. The BANK_CHECK command has been modified.
+6. Improved error reporting for Mark5 errors.
+7. New Mark 5 BANK_STATUS, DISK2FILE, and IN2NET commands.
+8. New monitor display, monit5, shows Mark 5 remaining capacity
+9. CHANGE_PACK procedure revised.
+10. SCAN_NAME command has new "continuous" recording time parameter.
+11. Damaged default procedure files restored.
+12. fmset asks "if sure" before executing a resynch of Mark IV
+    formatter.
+13. Mark IV FORM command "synch tolerance" default value in equip.ctl.
+14. Automatic recording of abnormal termination messages.
+15. Improved handling of log file problems.
+16. MET03 client and server, WX (MET03 version) SNAP command, and TACD
+    client and SNAP command have been made more robust.
+17. fsvue includes base conversion calculator.
+18. Increased size of fserr error list to 2000.
+19. The VEX test software now included in /usr2/fs/vex/test_parser
+20. Boot "rc" file set-up documented in
+    /usr2/fs/misc/INSTALL-rc.fs.txt
+21. "set noclobber" added to default .cshrc files.
+22. fivpt.visual compiles under FS Linux 5, but is untested.
+23. Warning on use of ftok()
+24. Conditional compilation feature for systems with ftok() function.
+25. Several bugs in gnplt fixed.
+26. Many small unreported bugs fixed.
+27. S2 DAS support added.
+28. FS time model/setcl revised.
+29. Status of NTP reported by fmset and setcl.
+30. fstime.txt document created to help explain FS time.
+31. msg includes disk inventory information in stop message.
+32. fmset will now auto-terminate if FS ends.
+33. fmset will now show Mark IV formatter time at whole seconds
+34. Support for longer Mark IV decoder messages.
+35. Control file open error message improved.
+36. K4 DMS lights LED when unloading tape
+37. FSVUE is now a server/client GUI for the FS.
+38. ONOFF now does not wait up to 5 minutes for ONSOURCE when AQUIR is
+    running.
+39. setcl has been modified so that "sy=setcl" won't accidently
+    start another instance.
+40. fmset puts formatter time change messages in log and the error
+    messages were improved.
+41. onoff command accepts new detector names: formvc, formif, and
+    formbbc.
+42. AQUIR obeys positive wait times for procedures in control file.
+
+A more detailed discussion of these changes follows.
+
+1. New USER_DEVICE command for support of station detectors in ONOFF,
+   FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
+   completely.  ONOFF has been updated to work with station detectors.
+   This was implemented by creating a new command USER_DEVICE that is
+   used to defined the characteristics of the station detector.
+   Please see the help page ("help=user_device") for details.  The
+   command is similar to the LO command.  It allows the necessary data
+   from the .rxg files to be accessed as they would be for the
+   standard Mark III/IV and VLBA/4 detectors.  FIVPT and Tsys related
+   commands (TPI, TPICAL, TPZERO, TPDIFF) have been updated to use the
+   new system for station detectors as well.  As a result the last
+   vestiges of the BEAMx, FLUXx, CALTEMPx, and TSYSx commands for
+   station detectors, x=5 and x=6, have been removed.  The only
+   limitation on general usage of station detectors (and it is not a
+   new limitation) is that they cannot be used for the Tsys related
+   commands when the rack type is Mark III/IV and VLBA/A.  Please note
+   that the TSYS command now requires use of TPDIFF (see the TSYS help
+   page and the default CALTSYS procedure in default procedure library
+   u5u6caltsys.prc for more details).  Existing station code
+   implementing station detectors should not need modifications to
+   work with the new FS.  It has not been verified that gnplt works
+   for 'u5' and 'u6', but if it doesn't it should easy to fix.
+
+2. ONOFF support for systems without noise diodes restored.  The new
+   version of ONOFF supports systems without noise diodes now.  Of
+   course this isn't useful for gain calibration, but is still useful
+   for estimating SEFDs.
+
+3. Existing Mark 5 commands renamed, changed.  The Mark 5 commands
+   beginning with DISC_ have been changed to be DISK_ for consistency
+   with the Mark5A command set.  The DISC_START and DISC_END commands
+   have been replaced with DISK_RECORD=ON and DISK_RECORD=OFF for
+   better agreement with the structure of the Mark5A command set.  The
+   DISC_CHECK commands has been renamed to be DATA_CHECK.  A default
+   procedure library mk5old.prc is provided which can be used to
+   simulate the old names.
+
+4. Mark5A devices are supported with formal parsing only.  You should
+   not use informal parsing, specified with the "-f0" command line
+   switch, when starting the Mark5A control program.  You must use a
+   version of the Mark5A program dated 23 March 2004 (day 083) or
+   later with this version of the FS.
+
+5. The BANK_CHECK command has been modified.  It will now always log
+   the VSN and disk serial numbers if it changes banks, even if the
+   VSN in both banks is the same.  This is intended to make logging
+   the disk serial number information more reliable.  When the
+   BANK_CHECK changes banks it will now send the CHANGE_PACK procedure
+   the bank and VSN that needs to be changed.  The new change_pack
+   procedure uses the FS.PROMPT Tcl/Tk program to show a message on
+   screen reminding the operator to change the pack.  The message will
+   stay there until it is dismissed by the operator.  This is intended
+   to provide a persistent reminder that the pack needs to be changed
+   (unlike the log display messages in the CHANGE_PACK procedure which
+   scroll off the screen and are lost).  When the BANK_CHECK command
+   changes banks, it will check the capacity of the pack in the new
+   bank.  If it also is full, it will issue another CHANGE_PACK
+   procedure call for the other pack to be changed and then make the
+   original bank active again.
+
+6. Improved error reporting for Mark5 errors.  The error handling for
+   all Mark5A commands has been overhauled and made more consistent.
+   It will now report error return codes and the newly added
+   information string returned at the end of the Mark5A's response (if
+   available) to help clarify the cause of the error.
+
+7. New Mark 5 BANK_STATUS, DISK2FILE, and IN2NET commands.  See the
+   paragraphs below and the help pages for each command for more
+   detailed information.
+
+   The BANK_STATUS command is useful for checking the status of the
+   disk packs in both banks.  It checks the remaining capacity time on
+   the current active bank, makes the other bank active, checks its
+   capacity, and makes the original bank active again.  This command
+   produces a summary output and updates the FS internal data base of
+   the status of both banks.  The contents of which are displayed in
+   the monit5 status window.  It is useful for example before starting
+   an experiment to check on the status of the packs currently
+   installed.  This command cannot be used during recording.  It
+   should be used carefully at other times, e.g., it should not be
+   used just before recording is about to start since it might delay
+   the start.
+
+   The DISK2FILE command is useful for moving part or all of scans
+   from the Mark5A media to the local Linux file system on the Mark5A
+   computer.  This may be used automatically in experiments, via the
+   "data_transfer" keyword in VEX schedules, to retrieve a section of
+   the most recent observation for ftp-ing for near-realtime fringe
+   checks.  It may also be used manually after a schedule has been
+   completed to retrieve a section of any observation on the Mark5A
+   media.
+
+   THE IN2NET command is useful for transferring data over the network
+   in realtime.  It may be used automatically in experiments via the
+   "data_transfer" keyword in schedules.
+
+8. New monitor display, monit5, shows Mark 5 remaining capacity.  This
+   new monitor display is available as hot-key sequence
+   Control-Shift-5.  It shows the currently selected bank (marked with
+   '>'), the VSN mounted in each bank, the remaining recording
+   capacity on the pack in each bank, and the last UT time the
+   capacity was checked for each bank.  The capacity is shown in three
+   different units: recording time available in the current mode,
+   Gigabytes, and percentage.  Please note the time remaining is the
+   available record time not clock time until the bank will be full.
+   The clock time until the bank will be full may be significantly
+   different, typically twice as long for geodesy, depending on the
+   recording duty cycle.  The information for the non-selected bank
+   may be shown as blank if it has not been checked with bank_status
+   since the pack was mounted.  The time for the last check is shown
+   because it is normally checked only during the set-up for each scan
+   and does not update dynamically.  The information for the
+   non-selected bank may be quite old.
+
+9. CHANGE_PACK procedure revised.  The wording of the instructions in
+   the procedure has been updated to be clearer.  In addition, the
+   fs.prompt program is now used to make a persistent warning window
+   to alert the operator that a bank needs a new pack.  After the pack
+   is replaced, the window can be dismissed using the "Continue"
+   button.  The contents of the command used to run fs.prompt has been
+   optimized for use by the BANK_CHECK procedure to allow information
+   identifying which bank/VSN should be changed to be displayed.
+
+10. SCAN_NAME command has new "continuous" recording time parameter.
+    In order to accommodate schedules where continuous and/or adaptive
+    recording is being used.  The continuous recording time is used by
+    the BANK_CHECK command, in addition to the scan length time, to
+    decide if the bank should be switched.  This is necessary because
+    the bank cannot be switched during continuous recording.
+
+11. Damaged default procedure files restored.  The default procedure
+    libraries that been inadvertently overwritten in the 9.6.9
+    distribution have been restored and brought up to date.
+
+12. fmset asks "if sure" before executing a resynch of Mark IV
+    formatter.  If the operator presses "s" to resynch the Mark IV,
+    there will now be a prompt to confirm this before the resynch is
+    executed.  This is intended to cause the operator to think again
+    about whether a resynch is really needed (usually it isn't), but
+    may also be useful for canceling accidentally typed "s" commands.
+
+13. Mark IV FORM command "synch tolerance" default value in equip.ctl.
+    This was done in order to allow each site to tailor the default
+    for the synch test tolerance for their particular situation.  The
+    default value of the parameter can now be set in the equip.ctl
+    file.
+
+14. Automatic recording of abnormal termination messages.  The main
+    program of the FS, "fs", has been updated to record the standard
+    error output of all the FS programs to a file.  All places in the
+    on-line FS programs that detect errors send their informational
+    messages to the standard error output.  The file that this
+    information is written to is in the user's home directory with a
+    name of the form fs.time-stamp.err, e.g.,
+    fs.2004.Apr.16.14.56.58.err.  The time-stamp is the time when the
+    FS was started, which is also the time of the file creation.  If
+    the FS terminates normally, this file is automatically deleted.
+    If the FS does not end normally or some other error output
+    information is generated, the file will contain useful debugging
+    information and you should forward it to us.
+
+15. Improved handling of log file problems.  The observers at Wettzell
+    noticed a problem with log file recording: if you attempted to
+    change to a new log file and the open failed (possibly because of
+    a permissions conflict), the original log file was re-opened and
+    its beginning was overwritten; no error message was generated.
+    This has been fixed.  Now if a there is any problem opening a log
+    file, an error message is printed.  If it is not possible to open
+    the requested file, then there will be an attempt to re-open the
+    previously used log file.  Additional entries will now be appended
+    rather than overwriting the file.  A new feature of the log entry
+    system is that when a log file is closed, either because the FS is
+    terminated or a different log file is requested by the operator,
+    the FS will check to make sure the original log file has a
+    directory entry.  If it does not, the FS will attempt to make a
+    copy of the log file with the original name.  This may be useful
+    if the log file is accidently deleted by the operator while it is
+    still open.  In other cases where a log file is deleted
+    accidently, it is often possible to recover it if no further
+    changes are made to the file system until the file is recovered.
+    A description of how to recover in this situation is provided in
+    /usr2/fs/misc/logrecovery.txt.
+
+16. MET03 client and server, WX (MET03 version) SNAP command, and TACD
+    client and SNAP command have been made more robust.  They have
+    been rewritten with better file and error handling and to use
+    non-blocking connections.
+
+17. fsvue includes base conversion calculator.  A new Tcl/Tk script
+    was written for fsvue named vue_fscalq.  This script can be called
+    from the [Execute] button.  It will do the typical calculations
+    and display them in Dec,Hex,Octal, and bits.  Useful when running
+    the "echo=on" Field System command and you want to know what bits
+    are on or off.
+
+18. Increased size of fserr error list to 2000.  The limit was
+    increased from 1700 to accommodate more FS and station error
+    messages.
+
+19. The VEX test software now included in /usr2/fs/vex/test_parser.
+    This effectively archives the test software with the FS
+    distribution.
+
+20. Boot "rc" file set-up documented in
+    /usr2/fs/misc/INSTALL-rc.fs.txt.  This document explains how to
+    set-up the boot "rc" files for the FS on Debian distributions.
+
+21. "set noclobber" added to default .cshrc files.  This switch is now
+    set in .cshrc after having been removed from .login some time ago.
+    This switch prevents files from being overwritten by standard
+    output redirection "">") in tcsh.  It was removed from .login many
+    years ago, because it made the behavior of different instances of
+    tcsh differently for the same user.  Placing it in .cshrc solves
+    this problem and restores a useful setting.
+
+22. fivpt.visual compiles under FS Linux 5, but is untested.  If
+    anyone who uses could test it and let us know if this instance
+    works we would appreciate it.
+
+23. Warning on use of ftok().  Stations where the station software
+    that uses ftok() to generate IPC keys should take care.  Although
+    ftok() is the recommend for generating these keys, the method it
+    uses is not guaranteed to be unique and in fact an instance of
+    generating the same key for two different source directories has
+    been observed.  It is recommended that the second argument to
+    ftok(), "proj", be unique if possible.  The FS currently uses
+    values of 1-7 (see /usr2/fs/include/ipckeys.h).  You should use
+    different values for station software keys, possibly starting at
+    255 and working backwards.  Please note that it can be very hard
+    to figure out what is going wrong if you get a conflict in the
+    value of the keys, especially if it occurs due to an upgrade in
+    the distant future, when this detail may well have been forgotten.
+    So it is strongly recommended that you take care of this now.
+    However, even if you do take care of this we still cannot promise
+    that a problem will not develop, only that it is less likely.
+
+24. Conditional compilation feature for systems with ftok() function.
+    A feature was added to avoid the use of ftok() on systems that do
+    not have it.  If the environment variable NO_FTOK_FS is set,
+    hardwired values will be used for the IPC keys.
+
+25. Several bugs in gnplt fixed.  This includes better interpolation
+    and extrapolation of the Tcal curves when they are plotted.
+
+26. Many small unreported bugs fixed.  These are too numerous to
+    mention, but two examples are that new procedure and schedule file
+    names requested with SNAP commands are now checked to make sure
+    they are 8 characters or less long instead of reporting that they
+    could not be found.
+
+27. S2 DAS support added.  Mario Bérubé has provided FS support for S2
+    DAS racks.  Support is not provided in DRUDG yet.  Currently, the
+    DRUDG output files are currently generated in Ottawa and send to
+    the stations for the experiments.  We hope to include DRUDG
+    support for S2 DAS racks in the next FS release.
+
+28. FS time model/setcl revised.  The main changes are that the "ntp"
+    clock model type in the "time.ctl" control file has been
+    eliminated.  We recommend that all stations use the "rate" model.
+    The "setcl" program now accepts "adapt" as a parameter.  This
+    parameter is similar to the "rate" parameter, but will cause the
+    rate to be updated if the current measurement span if greater than
+    one hour or the current model span, whichever is smaller.  In
+    addition, for the 'adapt" parameter, the model will not be updated
+    if the currently measured offset is greater than +/- 0.5 seconds.
+    This is intended to remove erroneous model adjustment in case of
+    formatter jumps.  A mechanism is now included for handling clock
+    jumps and eliminating error messages when they happen.  Please see
+    the file "/usr2/fs/misc/fstime.txt" for a detailed description of
+    the new features and how the time model works.  There is also a
+    new parameter "s2das" to check the time of an S2 DAS.
+
+29. Status of NTP reported by fmset and setcl.  The setcl programs now
+    include output that describes the status of NTP.  Please see
+    "/usr2/fs/misc/fstime.txt" for a detailed description.
+
+30. fstime.txt document created to help explain FS time.  This
+    document, "/usr2/fs/misc/fstime.txt" was added to describe in
+    detail how the FS time model works and how the "setcl" and "fmset"
+    programs interact with it.  It is recommended reading for all
+    operators.
+
+31. msg includes disk inventory information in stop message.  The msg
+    program was updated to include entries for the inventory for
+    different disk pack types: A (960 GB), B (1440 GB), C (1600 GB),
+    and "D" (larger).  The last choice is intended to be catch-all for
+    future disk sizes that may appear before the program can be
+    upgraded.  As usual, entries for these items can be skipped by
+    putting "na" in the first field.  In addition, for these fields
+    "na" can be entered at any time to skip all the remaining ones.
+
+32. fmset will now auto-terminate if FS ends.  The fmset program has
+    been improved so that it will not hang if the FS is terminated
+    while it is running.  This does not remove the need to use fmset
+    for as short a time as possible before ending it (with the
+    <Escape> key).  The fmset program will end in about one second
+    after the FS is terminated.  In addition an interlock will prevent
+    the FS from being restarted until fmset has terminated.
+
+33. fmset will now show Mark IV formatter time at whole seconds.
+    Previously, in some situations the fmset program would show the
+    formatter time at times other than the change of seconds, e.g., as
+    0.6 seconds versus 0.0 seconds.  This made it difficult to compare
+    the fmset output to a hardware clock or time announcement.  This
+    has been fixed.  The formatter time should reliably be displayed
+    within the 0.0 to 0.1 second window for each second.  It should
+    shift to this display after the first time value is displayed (it
+    needs one sample to get the right timing).  However, it is
+    impossible to test this under every condition that might occur in
+    the field.  If you notice that it is persistently or erratically
+    displaying a different fractional seconds, please let us know.
+    This change can also be made for any other formatters that fmset
+    may not display the time on the whole seconds for if you let us
+    know it is happening.
+
+34. Support for longer Mark IV decoder messages.  The allowed message
+    length to and from the Mark IV decoder has been increased enough
+    to allow arbitrary well formed commands and responses to be
+    handled by the "decode4" command.
+
+35. Control file open error message improved.  An error message
+    describing which file failed in addition to an error message is
+    now displayed.  The error message system for file opening errors,
+    particularly for control files needs to be revised and brought up
+    to date.
+ 
+36. K4 DMS lights LED when unloading tape.  Kurihara-san at GSI added
+    this feature.
+
+37. FSVUE is now a server/client GUI for the FS.  Although it is still
+    experimental, it has most if not all the functionality of the old
+    FS.  All programs can be started via the 'fsvue' buttons.  If you
+    need help, click on the [i] information button on any of the
+    displays.  Please read the /usr2/fs/fsvue/README file on the uses
+    of 'fsvue' if you need further help.  As of this version fsvue
+    should NOT be run in the background.  'fsvue' can be started by
+    typing 'fsvue' at a shell prompt.
+
+38. ONOFF now does not wait up to 5 minutes for ONSOURCE when AQUIR is
+    running.  Kurihara-san at GSI noted this bug.  ONOFF was supposed
+    to wait for up to 5 minutes for the first onsource if AQUIR was
+    not running to allow the antenna time to get there if the operator
+    had entered the ONOFF command before the antenna reached the
+    source.  This is not necessary for AQUIR since it will not issue
+    the command until the antenna is onsource.  This was manifested by
+    AQUIR giving up on ONOFF for taking too much time to complete and
+    then stopping itself.
+
+39. setcl has been modified so that "sy=setcl" won't accidently start
+    another instance.  This removes potential for a problem if the
+    operator accidently mistypes a command like "sy=run setcl &"
+
+40. fmset puts formatter time change messages in log and the error
+    messages were improved.  Now in addition to automatically running
+    "setcl" to reset the FS time offset when the formatter time
+    changes, fmset now also puts messages in the log that the time has
+    been changed or if the Mark IV formatter is re-synched.  It is
+    hoped that this will make it easier to figure out what has
+    happened from the log.  In addition, the reporting of many error
+    conditions by fmset was improved.
+
+41. onoff command accepts new detector names: formvc, formif, and
+    formbbc.  These detector names are short-hands for the detectors
+    for channels that the formatter is set-up to record data for.  For
+    VLBA/4 racks, formbbc and formif can be used; for Mark III/IV/LBA4
+    racks, formvc and formif.
+
+42. AQUIR obeys positive wait times for procedures in control file.
+    Alastair Gunn (Jodrell Bank) discovered that for positive wait
+    times, the AQUIR program did not wait as long as specified for
+    procedures listed in the control file to finish.  In fact, it was
+    waiting that many seconds instead of minutes.  This was fixed.
+
+			 B. Changes in DRUDG
+				   
+drudg opening message date is 040724.  The release of drudg includes
+limited support for eVLBI.  In addition it incorporates changes in the
+format of some Mark5 commands, several bug fixes, and support for the
+Dymo label printer.  The following is a summary of changes.  They are
+described in more detail after the summary.
+
+1. Several minor K4 related bugs were fixed.
+2. If recorder configuration is "none", no tape related commands are
+   emitted.
+3. The calculation of tape spin times was changed to be more accurate.
+4. Procedure generation was modified to correctly handle VLBA4 racks.
+5. There is preliminary support for using Dymo printers to make labels.
+6. Modifications to support Mark5A for continuous recording tape
+   schedules.
+7. Typographic change in Mark5 commands.
+8. Support for eVLBI was added.
+9. Schedule file parsing robust in face of incorrect ftp mode.
+
+A more detailed discussion of these changes follows.
+
+1. Several minor K4 related bugs were fixed.  a) If rec1=k4 and
+   rec2=unused, then 1 is appended to recpatch (i.e.,
+   recpatch->recpatch1) in the call and definition of recpatch1.  b) 1
+   is appended to oldtape in unloader1.
+
+2. If recorder configuration is "none", no tape related commands are
+   emitted.  If both recorders are set to "none", drudg will generate
+   a snap file with no tape commands.
+
+3. The calculation of tape spin times was changed to be more accurate.
+
+4. Procedure generation was modified to correctly handle VLBA4 racks.
+   This was a problem at Kokee.
+
+5. There is preliminary support for using Dymo printers to make
+   labels.  We do not have a Dymo printer to test this with.  However,
+   the tests we were able to do seemed to be okay.  We would
+   appreciate it if some one could test this.  To print to the Dymo
+   you need to make the following changes to skedf.ctl:
+
+   1. Change the label printer to dymo:
+
+      label_printer dymo
+
+   2. Indicate the script that is called to print the labels:
+
+      labels print2dymo
+
+   3. Under the label size, add a comment to show the Dymo label size
+      that should be set with:
+
+      label_size   1.417 3.5     1     1    11.0   0.0    Dymo
+
+   4. In addition, the label script must be in your path, e.g., in
+      /usr2/oper/bin.  A simple script consists of the single line:
+
+      lpr -Pdymo /tmp/DRlab.tmp
+
+   These changes are also described in the new example
+   /usr2/fs/st.default/control/skedf.ctl control file.
+
+6. Modifications to support Mark5A for continuous recording tape
+   schedules:
+
+   1. A parameter was added to the end the scan_name which is the
+      length of time from the beginning of the scan until recording
+      stops.  In the case of start&stop mode, this coincides with the
+      normal scan duration.  In the case of continuous or adaptive
+      tape motion this time will include several scans.
+
+   2. If the Mark5 is recording, the postob command is issued, not the
+      postob_mk5a.
+
+7. Typographic change in Mark5 commands.  The following changes were
+   made in Mark5 commands.
+
+   1. disc_check -> data_check
+   2. disc_start -> disk_record=on
+   3. disc_end  -> disk_record=off
+   4. All other disc_... -> disk_...
+   5. mk5=... commands now use formal parsing.
+   6. mk5=get_status?  was added to postob_mk5a
+
+8. Support for eVLBI was added.  Drudg was modified to support the
+   "data_transfer" keyword in VEX.  Note that for drudg to work
+   correctly with this keyword, the recorder type must be changed to
+   Mark5 with option 11 first.
+
+   The new VEX keyword has the following syntax:
+
+   data_transfer=<station code>:<method>:<destination>:<start>:<stop>:<options>
+
+   where:
+
+   <station code> is the label for the station (two letter code),
+                  blank for applies to all stations in the scan
+   <method>       is disk2file or in2net
+   <destination>  for disk2file an explicit file name or blank for
+                  a default file name (construction rules TBD),
+                  for in2net, an explicit IP address or node name
+                  or if blank then no explicit FS in2net is used
+                  in the schedule, so that the operator can set
+                  this manually
+   <start>        the time (e.g. X sec) of the data relative to
+                  the "start time of the scan block" to begin
+                  the transfer with, blank for start of valid data
+   <end>          the time (e.g. X sec) of the data relative to
+                  the "start time of the scan block" to end the
+                  transfer with, blank for end of valid data
+   <options>      future options, empty for now, but any contents
+                  are faithfully applied to the FS disk2file or in2net
+                  command.
+
+    If a scan contains the data_transfer keyword, drudg will issue the
+    snap commands "disk2file" or "in2net" as appropriate.
+
+    1.) Disk2file.
+       a) If the mode is "disk2file", a disk2file=abort command will
+          be issued 2*T +3 seconds after the disk2file command.  Here
+          T is the calculated length of time for the data transfer to
+          take.
+       b) If the start or end times are not specified, drudg will use
+          the start and end times of the scan.
+       c) At this time, not having a filename ()o invoke a default
+          name) is not supported.
+
+    2.) In2net.  The following substitutions are made in snap commands.
+       a) disk_record=on/off -> by in2net=on/off.
+       b) disk_pos -> in2net
+       c) If the destination is non-blank, drudg issues
+          in2net=<destination> prior to the set up procedure.
+
+    3.) data_transfer Override.  This version of drudg also includes
+        the ability to override the data_transfer statements in the
+        schedule.  There are three options:
+
+        1) Convert in2net to disk2file using the default destinations.
+        2) Convert disk2file to in2net with an optional destination.
+        3) Turn off all data_transfer statements.
+
+        Note that for these options to be visible, the recorder type
+        must be changed to Mark5.
+
+9. Scheduling parsing robust despite an incorrect ftp mode.  The VEX
+   parser has been modified to tolerate the extra carriage returns
+   ('\r') that appear if the file is ftp-ed in a mode that causes the
+   DOS end-of-line indicator ("\r\n") to appear instead of the UNIX
+   end-of-line ('\n').  This was also fixed for old style schedule
+   files.
+
+
+ 			    C. Known FS Bugs
+
+The following is a summary list of known bugs.  They are described in
+more detail after the list.
+
+1. Do not run "fmset" for extended periods.
+2. "odd" and "even" head types not supported for Mark IV & VLBA4.
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+4. CHEKR does not check the status of the Mark IV formatter.
+5. Extraneous errors when tape is stopped by low tape sensor.
+6. "Comm=" command in logex extracts only the first command.
+7. S2 error scheme clumsy.
+8. No extra spaces allowed in "ibad.ctl" file.
+9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable..
+
+A more detailed discussion of these bugs follows.
+
+1. Do not run "fmset" for extended periods.  For stations that have
+VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+should not be run for extended periods of time.  The "fmset" program
+should be used only to set or briefly verify that the formatter time
+is correct.  Do not leave "fmset" running after completing either of
+these tasks, especially during an experiment.
+
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
+
+2. "odd"/"even" head types not supported for Mark IV & VLBA4.  The
+Mark IV and VLBA4 rack version of the "form" command and the Mark IV
+and VLBA4 recorder versions of the "repro" and "parity" commands do
+not support the "odd" and "even" parameters for the read and write
+head types and reproduce electronics in the "head.ctl" control file.
+This means that automatic substitution of odd or even head in passes
+that use only even or odd heads respectively does not occur.  The only
+correct settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
+
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+For any mode recorded with VLBA style tapeform (14 index positions),
+the only correct setting of the read and write head types on the
+"head.ctl" is "all".  This will be fixed in a future revision.  Please
+let Ed know if you are missing some tracks and need to work around
+this limitation.
+
+4. CHEKR does not check the status of the Mark IV formatter.
+Implementation of this has been deferred until the formatter
+communication problems have been resolved.
+
+5. Extraneous errors when tape is stopped by low tape sensor.  When a
+tape drive has been commanded to move the tape and then stops because
+it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
+"CHEKR" will complain periodically that the tape drive is not in the
+correct state.  In principle the FS should be smarter about this.
+However, if the tape is managed correctly by the schedule this error
+message should never occur.  If it does, then it it an indication that
+there is either a problem with: (1) the schedule, (2) the check
+procedures, (3) the recorder, or (4) the tape is too short.  If any of
+these cases apply they should be corrected.  It is more likely that
+this error message will occur when the tape is being controlled
+manually.  In this case, issuing an "ET" command will convince the FS
+that the tape drive should be stopped and the error message will
+cease.
+
+6. "Comm=" command in logex extracts only the first command.  The
+"comm=" command in "logex" extracts only the first command commanded
+and displayed.  This problem was noted by Giuseppe Maccaferri
+(Medicina).
+
+7. S2 error scheme clumsy.  The error and status response number
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic "rl" are mostly error responses from the recorder or the RCL
+interface library that is used to communicate with the recorder.  If
+the numeric part of an "rl" error is greater than -130, then it is the
+error code returned by the recorder.  If the numeric part is less than
+-130, but greater than -300, then add 130 to the value, the absolute
+value of the result is the error response code from the RCL library.
+For values less than or equal to -300, a FS error has been detected.
+Status response codes are all reported with mnemonic "rz" and the
+numeric value is the negative of the status response code.  In all
+cases an appropriate error or status message is displayed.  These
+messages are retained in the log.
+
+8. No extra spaces allowed in "ibad.ctl" file.  The format of the
+"ibad.ctl" must not contain any leading or embedded spaces.  In system
+that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
+"no_untalk/unlisten_after" is misspelled or an incorrect device name
+is supplied, the driver will cause a segmentation violation when it is
+initialized and the FS will terminate.  Unfortunately there is no way
+to prevent this problem in a general way; it reflects a limitation in
+the driver.
+
+9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
+been known to "hang" mysteriously.  This seems to be caused by some
+problem with the "go" mechanism that is used to restart the program
+when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
+execute.  The "go" that is used to restart the program fails for some
+reason.  This has been exceedingly difficult to debug because it is
+intermittent and fairly rare.  There is however a good work around for
+it.  The CALON and CALOFF procedures are called by procedures CALONFP
+and CALOFFFP for FIVPT and CALONNF and CALOFFNF for ONOFF.  FIVPT or
+ONOFF may hang during (or actually just after) the execution of one
+these procedures that FIVPT and ONOFF will typically hang.  If this
+happens, you will have to terminate the FS to recover.  You can
+prevent it from happening again (for this procedure) by adding the
+lines:
+
+!+1s
+sy=go fivpt &
+
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
+
+!+1s
+sy=go onoff &
+
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+FS SNAP manual pages and the help pages available through the "help="
+command do not reflect when multiple versions are available with
+different suffixes depending on the number of drive specified in the
+control files.  For example, there is only a "tape" page, no "tape1"
+or "tape2" page.  However, the help facility will display the version
+of the command with no suffix when an available command with a suffix
+is used.  For example, if two drives are defined, then "help=tape1"
+and "help=tape2" will work, but "help=tape" will not and vice-versa if
+only one drive is defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+Acquisition System currently lacks a functional total power detector
+though support has been included.  To allow approximate system
+temperature calibration, all the setup commands and the TPI detectors
+of the modules of a co-existing Mark IV rack are currently also
+available when the rack type is specified to be LBA4.
+
+III. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual or the "nfsload.txt" memo.  In this case
+you should also get a copy of the current FS9 "Control Files and Field
+System Initialization" manual.
+
+The following instructions are for upgrading from 9.6.9 and 9.6.10.
+Please follow all the steps.
+
+Below is a list of "critical updates" is given.  These are updates
+that must be applied sequentially.  Please start with the next update
+with a later version number than you have and apply it and the
+remaining listed version before upgrading to 9.7.0.  You can find the
+installation notes for these versions on the FS FTP servers in the
+docs.old sub-directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+
+If you have a version older than 9.4.0, please contact Ed.
+
+(0) Before you begin the upgrade make sure you have a current back-up
+of your system in case something goes wrong.  Please refer to the
+directions for making disk-to-disk back-ups in Section 5.8 of the FS9
+"Computer Reference" manual.  If you are running one of the Debian
+distribution kernels and do not have documentation on how to make a
+back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
+Reference" manual has a discussion of drive ID numbers if you are
+unsure about these.  Normally you should choose to install the update
+on your primary after having made and verified your back-up.  Once the
+installation is complete, has been tested, and used for a little
+while, you can copy over your back-up with the upgraded primary.  If
+the upgrade fails, you can use restore the back-up to the primary for
+operations.  You can then try to make the upgrade again when it is
+convenient.  In a desperate situation, use the back-up for operations.
+You may choose to install the FS on your back-up disk for testing and
+then later copy the back-up onto the primary once you are satisfied
+with the new version.  In any event, please be sure to make a fresh
+back-up before continuing with the installation.
+
+(1) Please be sure that you have at least 30 MB of free space (use the
+"df" UNIX command to check free space) on your "/usr2" partition
+before starting the upgrade.  This would probably only be a problem
+for stations with 200 MB disks.  If you are tight on space, you may
+want to delete old log files and old versions of the FS (except your
+most recent one if you can avoid it of course).  Since you should have
+backed-up your system, you even can delete the "*.[oas]" and
+executable files of your old versions with no risk.  You might want to
+keep the source of the previous versions around for reference if you
+have room.  You can eliminate the non-source files by "cd"-ing to old
+FS directories as "prog" and doing a "make rmdoto rmexe".  If you have
+any questions about how to do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.7.0 archive in your "/tmp" directory.
+For example you might do the following:
+
+      cd /tmp
+      ncftp -u atri.gsfc.nasa.gov
+      (enter your account name for the server at prompt)
+      (enter your password for the server at prompt)
+      cd /fs/dist
+      get fs-9.7.0.tgz
+      quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section "IV.  Transferring The Update Archive By DOS Floppy" below.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/fs-9.7.0.tgz
+
+(6) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.7.0 fs
+
+(7) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(8) Make the FS:
+
+      cd /usr2/fs
+      make
+
+(9) Remake your station software.  If your station software uses
+    ftok() to generate IPC keys, you should probably update it so that
+    the value of the second argument of ftok() is unique within the
+    FS, your station software and any other applications you have that
+    use ftok().  If you are not the developer of station software for
+    your station, please ask the person who is to take care of this
+    for you.  If you have any questions about this please contact us.
+
+    Once the calls to ftok() are updated (or even if they aren't).
+    The following steps should do the trick to reload your station
+    software if you have the "standard" configuration for station
+    software:
+
+      cd /usr2/st
+      make rmdoto rmexe all
+
+(10) Reboot your computer.
+
+(11) Log in as oper
+
+(12) Modify your procedure files.  There are three require
+     modifications.
+
+     A. One of these is to update your CHANGE_PACK procedure.  Please
+        edit the version in your station.prc file so that it agrees
+        with the version in /usr2/fs/st.default/proc/change_pack.prc.
+
+     B. The second is rename your READY_DISC procedure in station.prc
+        to READY_DISK.
+
+     C. Update your midob procedure so that the command "sy=run setcl
+        &" now reads "sy=run setcl adapt &".  This will cause the new
+        adaptive time model feature to be used.  This is recommended
+        for all stations.  If you have an S2 DAS and an S2 recorder,
+        it is recommended that you add "sy=run setcl s2das &" just
+        before the "sy=run setcl adapt &" command.  This will allow
+        the S2 DAS time to be logged; the time model will still be
+        referenced to the S2 recorder in this case.
+
+     An optional modification is to add the procedures in
+     /usr2/fs/st.default/proc/mk5old.prc to your station.prc library.
+     These procedures provide backward compatible synonyms for the old
+     Mark 5 command names (disc_start, disc_end, ..., etc).  You only
+     need to install these procedures if you want to have the old
+     Mark5 commands available as synonyms for the new names.  However,
+     it is recommended that you not do this unless it is really a
+     hardship for you otherwise.  Eliminating the old names as soon as
+     possible will be beneficial.
+
+(13) Skip this step if you have 9.6.10 installed.  If you use station
+     detectors, you will need to update any procedures that use them.
+     Please delete all uses of CALTEMPx, FLUXx, TSYSx, and BEAMx,
+     where x=5 or 6 from your procedure libraries, probably only
+     station.prc and point.prc.  You now must define your detectors
+     using the new USER_DEVICE command (please use HELP=USER_DEVICE
+     for more details about the new command).  For pointing and gain
+     calibration, you would typically do this in the INITP procedure,
+     or equivalent, in point.prc.  If you use station devices in your
+     CALTSYS procedure, please look at
+     /usr2/fs/st.default/proc/u5u6caltsys.prc for an example of how it
+     should be set-up.  Please not that you cannot use u5 and u6 for
+     system temperature measurements if your rack device type is Mark
+     III/IV or VLBA/4.
+
+(14) Update your control files.  There are two required modifications.
+
+     A. Add the lines for the default synch tolerance for the Mark IV
+        formatter to the equip.ctl file.  As oper:
+
+         cd /usr2/control
+         tail -2 /usr2/fs/st.default/control/equip.ctl >> equip.ctl
+
+        Now edit equip.ctl and make sure there is no blank line
+        between the met sensor type and the comment for the synch
+        tolerance.  A value of 3 is installed as the default for the
+        synch tolerance, but it can be edited to anything you like in
+        the range 0-16 plus "off".
+
+     B. If your /usr2/control/time.ctl contains any model type other
+        "rate" we recommend that you change it to "rate".  In
+        particular, please note that the "ntp" model type is no longer
+        supported.  If your clock rate in time.ctl is anywhere close
+        to be being correct (+/- a few seconds per day) it should not
+        need to be update.  If you want to re-determine your computer
+        clock rate, please see /usr2/fs/misc/fstime.txt for detailed
+        information.  We recommend that you update if it has not been
+        updated since the last kernel and/or computer change at your
+        station.
+
+(15) Update the X-server set-up for the new Monit5 display, including
+     having Control-Shift-5 be a hot key for starting Monit5.  The
+     instructions for this are presented twice, once for stations that
+     have not customized their local copies of the relevant files
+     (easier) and once for those that have (a little more involved).
+
+     If you are currently using the standard files (i.e. no local
+     customization), you can just copy over the new ones.  As oper:
+
+     	cp /usr2/fs/st.default/oper/.Xresources ~/
+     	cp /usr2/fs/st.default/oper/.fvwmrc ~/
+     	cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+
+     and similarly as prog:
+
+     	cp /usr2/fs/st.default/prog/.Xresources ~/
+     	cp /usr2/fs/st.default/prog/.fvwmrc ~/
+     	cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+
+     If your local copies of .Xresources, .fvwmrc and .fvwm2rc are
+     customized, you will need to merge the new information.  The
+     suggested way to do this is to diff the 9.7.0 version with 9.6.9
+     version:
+
+       cd /usr2/fs-9.7.0/st.default/oper
+       diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
+
+     and then make the corresponding changes in your local copy of the
+     file (in this example /usr2/oper/.Xresources).  You will need to
+     do this for .Xresources and either (or both) of .fvwmrc and
+     .fvwm2rc depending on whether you use fvwm or fvwm2.  You should
+     make the appropriate changes for prog as well.
+
+(16) Update your .cshrc files to set "noclobber".  Edit the file
+     ~oper/.cshrc and add the line "set noclobber" if it is not
+     already included.  You can check /usr2/fs/st.default/oper/.cshrc
+     for an example.  Please make the same change to ~prog/.cshrc.
+
+(17) If you use the MET03 server or the TACD or MET03 off-line
+     clients, you will need to update the ones you use.  If you are
+     using the standard configuration, you can re-installing the
+     appropriate programs according to the directions from the
+     appropriate sub-directory in /usr2/fs/st.default/st-0.0.0 or
+     following the abbreviated instructions given here.
+
+     Abbreviated instructions for the metserver (logged in as 'prog'):
+
+          cd /usr2/st/metserver
+          cp -a /usr2/fs/st.default/st-0.0.0/metserver/metserver.c .
+          make
+
+     Abbreviated instructions for the metclient (logged in as 'prog'):
+
+          cd /usr2/st/metclient
+          cp -a /usr2/fs/st.default/st-0.0.0/metclient/metclient.c .
+          make
+
+     Abbreviated instructions for the tacdclient (logged in as 'prog'):
+
+          cd /usr2/st/tacdclient
+          cp -a /usr2/fs/st.default/st-0.0.0/tacdclient/tacdclient.c .
+          make
+
+(18) Reboot the computer.  This is important for both re-initializing
+     shared memory after the update, but also for a clean unified
+     restart of the various TACD and MET03 client and server programs.
+
+(19) Test the FS.  Generally speaking a fairly thorough test is to run
+     a test experiment: start with DRUDG-ing a schedule, executing
+     part of it (preferably at least a tape change and a parity check
+     in each direction), and perform any normal post-experiment
+     plotting and clean-up that you do.  The idea here is to verify
+     that everything works as you expect for normal operations.  In
+     particular for this upgrade you should test that Mark 5
+     operations work as expected.
+
+VII. Transferring The Update Archive By DOS Floppy
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.7.0.tgz archive have been placed in
+the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
+enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs9700tg.aa
+fs9700tg.ab
+fs9700tg.ac
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs9700tg.* >fs-9.7.0.tgz
+
+This will create an exact image of the original fs-9.7.0.tgz archive
+on your computer.  Please be sure to use binary transfer when getting
+the files from atri or kurp-ftp.

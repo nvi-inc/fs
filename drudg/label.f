@@ -16,13 +16,18 @@ C                1 or 3 close file
       character*(*) cr1,cr2,cr3,cr4
       integer inew ! 1 to start a new ps barcode file
 C OUTPUT: none
+
+!fucntions
+      INTEGER TRIMLEN
+      integer copen,cclose
+      real speed ! function
+
 C LOCAL:
       character*128 cout
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
-     .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),
-     .          lstnam(4),lco
+     .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
       integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
-      integer iob,idum,ilabrowin,ilabcolin
+      integer iob,ilabrowin,ilabcolin
       LOGICAL   KEX,ks2
 
 
@@ -45,16 +50,14 @@ C NLAB - number of labels across a page
      .          iy2(5),ID2(5),IH2(5),IM2(5) ! holders for row of labels
       LOGICAL KNEWT
       LOGICAL KNEW
-      CHARACTER*50 CLASER,cbuf
-      character*8 cexper,cstat
+      integer ic
+      CHARACTER*50 CLASER,ctmp
+      character*8 cstat
       character*1 cid1
       character*2 cid2
-      INTEGER IC, TRIMLEN,jchar,ichmv,iflch
       character*20 response
-      real speed ! function
-      integer Z24
       integer*2 hhr
-      integer ichcm_ch,copen
+      integer i
       character upper
 
       character*(max_sorlen) csname
@@ -64,7 +67,7 @@ C NLAB - number of labels across a page
 
 C INITIALIZED:
       DATA IPASP/-1/, IFTOLD/0/
-      DATA Z24/Z'24'/, HHR/2HR /
+      DATA  HHR/2HR /
 
 C SUBROUTINES CALLED:
 C  UNPSK - unpacks schedule file entry
@@ -117,6 +120,7 @@ C
 
 C 1. First get set up with schedule or SNAP file.
 
+
       if (kskd) then
         IC = TRIMLEN(LSKDFI)
         WRITE(LUSCN,9100) cSTNNA(ISTN),LSKDFI(1:ic)
@@ -138,10 +142,10 @@ C 1. First get set up with schedule or SNAP file.
 9400      FORMAT(' LSTSHFT02 - ERROR ',I3,' OPENING SNAP FILE ',A)
           RETURN
         ENDIF
-        read(lu_infile,'(a)',err=990,end=990,iostat=IERR) cbuf
-C       read(cbuf,9001) cexper,iyear,cstn,cid
+        read(lu_infile,'(a)',err=990,end=990,iostat=IERR) ctmp
+C       read(ctmp,9001) cexper,iyear,cstn,cid
 C9001    format(2x,a8,2x,i4,1x,a8,2x,a1)
-        call read_snap1(cbuf,cexper,iyear,cstat,cid1,cid2,ierr)
+        call read_snap1(ctmp,cexper,iyear,cstat,cid1,cid2,ierr)
         if (ierr.lt.0) then ! set defaults instead
           if (ierr.ge.-1) cexper='XXX'
           if (ierr.ge.-2) iyear=0
@@ -150,14 +154,14 @@ C9001    format(2x,a8,2x,i4,1x,a8,2x,a1)
           if (ierr.ge.-5) cid2='  '
         endif
         ierr=0
-        call char2hol(cexper,lexper,1,8)
-!        call char2hol(jcstn,lstnna(1,1),1,8)
         cstat(1:8)=cstnna(1)(1:8)
         call char2hol(cid1,lstcod(istn),1,8)
         ic=trimlen(cinname)
         write(luscn,9002) cstat,cinname(1:ic)
 9002    format(' Tape labels for ',a8,' from SNAP file ',a)
-      endif
+        call labsnp(nlabpr,iyear,inew)
+        goto 900
+      endif !read schedule/SNAP file
 C
 C
       NOUT = 0
@@ -165,16 +169,16 @@ C
       ntape=-1
       IPASP=-1
       ks2=.false.
-      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
-     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
-        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+      if(cstrack(istn) .ne. 'unknown' .and.
+     >   cstrec(istn) .ne.  'unknown') then
+        ks2=cstrec(istn)(1:2) .eq. 'S2'
       endif
 
 C  If label printer is postscript then don't open the file, that
 C  will be done later with a C call.
 C  If pcode is 1 or 2, we want to open up the output, otherwise,
 C  we assume it is already open.
-      if (clabtyp.ne.'POSTSCRIPT') then ! only for laser or epson
+      if (clabtyp.ne.'POSTSCRIPT' .and.  clabtyp.ne.'DYMO' ) then ! only for laser or epson
         IF ((PCODE.EQ.1).OR.(PCODE.EQ.2)) THEN !first station
           call setprint(ierr,0)
           IF (IERR.NE.0) THEN
@@ -279,9 +283,14 @@ C                                 plus <esc> A 12 for 24-pin
      .       ilabcolin.lt.ilabcol)) inewpage=1
           ilabrow=ilabrowin
           ilabcol=ilabcolin
+        elseif (clabtyp .eq. "DYMO") then
+          ilabrow=1
+          ilabcol=1
+          continue
         else ! interactive
-910       write(luscn,'(" Enter row and column of first label, ",
-     .    "0 to quit,")')
+910       continue
+          write(luscn,'(a)')
+     >      " Enter row and column of first label 0 to quit "
           if (inew.eq.1) then
             write(luscn,'(" default is 1,1 ? ",$)')
           else
@@ -343,19 +352,14 @@ C             leave it alone
 C 1. First initialize counters.  Read the first observation,
 C    and initiate the main loop.
 
-        iob=0
-       ierr=0
-       if (kskd) then !read schedule file
-         call ifill(ibuf,1,ibuf_len*2,oblank)
-         idum = ichmv(lstnam,1,lstnna(1,istn),1,8)
-         idum = ichmv(lco,1,lstcod(istn),1,2)
-         if (iob+1.le.nobs) then
-           idum = ichmv(ibuf,1,lskobs(1,iskrec(iob+1)),1,ibuf_len*2)
-           ilen = iflch(ibuf,ibuf_len*2)
-         else
-           ilen=-1
-         endif
-        DO WHILE (IERR.GE.0) !loop on observations
+      iob=0
+      ierr=0
+      do i=1,max_stn
+	cstn(i)=" "
+      end do
+      do iob=1,Nobs
+        cbuf=cskobs(iskrec(iob))
+        ilen=trimlen(cbuf)
 
 C 2. Unpack the observation, calculate the stop time.
 C If this is a new tape, we might have a full buffer for typing
@@ -367,23 +371,20 @@ C CHECK FOR PRINTING OF LABELS BEFORE PROCESSING OBSERVATION.
 C THIS IS TO GUARANTEE ALL THE LABELS WILL BE PRINTED, EVEN
 C IF THE LAST OBSERVATION DOES NOT INCLUDE THE CURRENT STATION.
 C
-          IF (JCHAR(IBUF,1).NE.Z24.and.ilen.gt.0) THEN
-            CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
+         CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,
      .         LFREQ,IPAS,LDIR,IFT,LPRE,
      .         IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,
      .         NSTNSK,LSTN,LCABLE,
      .         MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
-          ENDIF
 C
 C Preset ISTNSK = 0 in case of EOF, this simplifies the
 C logic in "process this observation".
         ISTNSK=0
-        IF (ILEN.GT.0.AND.JCHAR(IBUF,1).NE.Z24)
-!     .  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
-     >   call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+        call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
+
         IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 900
 C
-        IF (ISTNSK.NE.0.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) THEN ! process
+        IF (ISTNSK.NE.0.OR.Iob.eq.nobs.OR.cbuf(1:1).EQ."$") THEN ! process
           IF(ISTNSK.NE.0)
      .    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
      .               IHR2,MIN2,ISC2)
@@ -403,12 +404,13 @@ C             knew = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
             endif
           endif
 C         Force new tape logic when starting a schedule.
-          if (iob.eq.0) knew=.true.
+          if (iob.eq.1 .or. iob.eq. nobs) knew=.true.
+
 C
           IF (KNEW) THEN !NEW TAPE
             ntape=ntape+1
-            IF (NOUT.GE.NLAB.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) then !type a row
-              if (clabtyp.ne.'POSTSCRIPT') then ! laser or Epson
+            IF (NOUT.GE.NLAB.OR.Iob.eq.nobs.or.cbuf(1:1).EQ."$") then !type a row
+              if (clabtyp.ne.'POSTSCRIPT' .and.clabtyp.ne.'DYMO') then ! laser or Epson
                 CALL BLABL(LUprt,NOUT,LEXPER,LSTNNA(1,ISTN),
      .          LSTCOD(ISTN),IY1,ID1,IH1,IM1,iy2,ID2,IH2,IM2,ILABROW,
      .          cprttyp,clabtyp,cprport)
@@ -428,7 +430,12 @@ C
      >           '(i2,3x,2(2x,i3,":",i2.2,":",i2.2))')
      >           nlabpr, ipsd1,ipsh1,ipsm1, ipsd2,ipsh2,ipsm2
 
-                call make_pslabel(fileptr,lstnam,lco,lexper,
+                if(clabtyp .eq. "DYMO") then
+                  ilabrow=1
+                endif
+
+                call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
+     >           cexper,clabtyp,
      .          ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
      .          inew,rlabsize,ilabrow,ilabcol,inewpage)
                 ilabcol=ilabcol+1
@@ -444,7 +451,7 @@ C
               endif
             END IF !type a row
 C
-            IF (ILEN.LT.0 .OR. JCHAR(IBUF,1).EQ.Z24) GOTO 900
+            IF (iob .eq. nobs .OR. cbuf(1:1).EQ."$") GOTO 900
             NOUT = NOUT + 1
             NLABPR = NLABPR + 1
             IY1(NOUT) = mod(IYR,100)
@@ -472,23 +479,12 @@ C         NOB(NOUT) = NOB(NOUT)+1
           IDIRP = IDIR
         endif ! one of ours
         ENDIF !process this observation
-C
-       iob=iob+1
-       call ifill(ibuf,1,ibuf_len*2,oblank)
-       if (iob+1.le.nobs) then
-         idum = ichmv(ibuf,1,lskobs(1,iskrec(iob+1)),1,ibuf_len*2)
-         ilen = iflch(ibuf,ibuf_len*2)
-       else
-         ilen=-1
-       endif
-        ENDDO !loop on observations
-
-        else !read SNAP file
-          call labsnp(nlabpr,iyear,inew)
-        endif !read schedule/SNAP file
+      ENDDO !loop on observations
 
 900   continue
-      if (clabtyp.ne.'POSTSCRIPT') then
+      if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
+        ierr=cclose(fileptr)
+      else
         IF (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
      .        .or.cprttyp.eq.'FILE') THEN !close laser printer
           Claser=CHAR(27)// '&l6D' // CHAR(27) // '(8U'
@@ -496,10 +492,7 @@ C
           l=trimlen(claser)
           WRITE(luprt,'(a)') Claser(1:l)
         ENDIF
-      endif
-C
 C if pcode is 1 (one station) or 3 (last station) then close file
-      if (clabtyp.ne.'POSTSCRIPT') then
         IF (PCODE.EQ.1.OR.PCODE.EQ.3) THEN
           if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.
      .         cprttyp.eq.'FILE') then
@@ -508,9 +501,6 @@ C if pcode is 1 (one station) or 3 (last station) then close file
           close(luprt)
           call prtmp(0)
         endif
-      else ! print ps file each time
-C       ierr=cclose(fileptr)
-C       call prtmp(0)
       endif
 C
 990   IF (IERR.NE.0) WRITE(LUSCN,9900) IERR

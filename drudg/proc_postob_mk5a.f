@@ -13,8 +13,9 @@
       call proc_write_define(lu_outfile,luscn,cnamep)
 
       do i=1,8
-        write(lu_outfile,'(a)') "mk5=get_stats"
+        write(lu_outfile,'(a)') "mk5=get_stats?"
       end do
+      write(lu_outfile,'(a)') "mk5=status?"
       write(lu_outfile,'(a)') "postob"
       write(lu_outfile,'(a)') "enddef"
       return

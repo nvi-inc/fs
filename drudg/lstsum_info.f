@@ -26,7 +26,7 @@ C Output
       integer ierr ! non-zero means some failure
 C Local
       integer nline,ix
-      character*128 cbuf_in,cbuf
+      character*128 cbuf_in
       character*20 c1,c2,c3
       integer trimlen
 
@@ -38,14 +38,14 @@ C     lines are probably there.
       ierr=-1
       read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
       nline=1
-      call c2upper(cbuf_in,cbuf)
-      if (cbuf(1:1).eq.'"') then
-        call read_snap1(cbuf,cexper,iyear,cstn,cid1,cid,ierr)
+      call c2upper(cbuf_in,cbuf_in)
+      if (cbuf_in(1:1).eq.'"') then
+        call read_snap1(cbuf_in,cexpername,iyear,cstn,cid1,cid,ierr)
       else
         ierr = -1
       endif
       if (ierr.lt.0) then ! set defaults instead
-        if (ierr.ge.-1) cexper='XXX'
+        if (ierr.ge.-1) cexpername='XXX'
         if (ierr.ge.-2) iyear=0
         if (ierr.ge.-3) cstn='        '
         if (ierr.ge.-4) cid1=' '
@@ -66,8 +66,8 @@ C    Read line 2 to get axis type
       else ! read axis type and position from .snp
         read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in !A line
         nline=2
-        call c2upper(cbuf_in,cbuf)
-        read(cbuf(2:),*) c1,c2,c3
+        call c2upper(cbuf_in,cbuf_in)
+        read(cbuf_in(2:),*) c1,c2,c3
         if (c3.eq.'AZEL'.or.c3.eq.'SEST'.or.c3.eq.'ALGO') then
           kwrap=.true.
         else
@@ -76,16 +76,16 @@ C    Read line 2 to get axis type
 C    Read line 3 to get XYZ position
         read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in !P line
         nline=3
-        call c2upper(cbuf_in,cbuf)
-        if (trimlen(cbuf).lt.40) then ! not there
+        call c2upper(cbuf_in,cbuf_in)
+        if (trimlen(cbuf_in).lt.40) then ! not there
           write(luscn,9002)
 9002      format(' SNAP file does not contain station position ',
      .    'data on line 3, therefore '/,
      .    ' az, el will not be calculated for this listing.')
           kazel = .false.
         else ! it's there
-          ix=index(cbuf(6:),' ')
-          read(cbuf(6+ix:),*,err=991,end=990,iostat=IERR) 
+          ix=index(cbuf_in(6:),' ')
+          read(cbuf_in(6+ix:),*,err=991,end=990,iostat=IERR) 
      .    xpos,ypos,zpos
           kazel = .true.
         endif
@@ -123,8 +123,9 @@ C       Read line 6 (equipment)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
           kk4 =  creca(1:2).eq.'K4'.or.crecb(1:2).eq.'K4'
           ks2 =  creca(1:2).eq.'S2'.or.crecb(1:2).eq.'S2'
-          km5A = creca(1:6) .eq. 'Mark5A' .or. crecb(1:6) .eq. 'Mark5A'
-          km5p = creca(1:6) .eq. 'Mark5P' .or. crecb(1:6) .eq. 'Mark5P'       !note the capital P
+          km5A = creca(1:6).eq.'Mark5A' .or. crecb(1:6).eq.'Mark5A' .or.
+     >           creca(1:8).eq.'Mk5APigW' .or. crecb(1:8) .eq.'Mk5APigW'
+          km5p = creca(1:6).eq.'Mark5P' .or. crecb(1:6) .eq. 'Mark5P'       !note the capital P
         else
 C    Couldn't figure out the equipment from the .snp file header,
 C    so look at the actual commands.
@@ -135,13 +136,13 @@ C    so look at the actual commands.
           do while (nline.lt.50.and..not.(kk4.or. ks2 .or. km5A))
             read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
             nline=nline+1
-            call c2upper(cbuf_in,cbuf)
-            km5A = cbuf(1:4) .eq. "DISC"
-            kk4 = index(cbuf,'STA=RECORD').ne.0.or.
-     .            index(cbuf,'STB=RECORD').ne.0
-            ks2 = index(cbuf,'FOR,SLP').ne.0.or.
-     .            index(cbuf,'FOR,LP').ne.0 
-!            kscan = index(cbuf,'SCAN_NAME').ne.0
+            call c2upper(cbuf_in,cbuf_in)
+            km5A = cbuf_in(1:4) .eq. "DISK"
+            kk4 = index(cbuf_in,'STA=RECORD').ne.0.or.
+     .            index(cbuf_in,'STB=RECORD').ne.0
+            ks2 = index(cbuf_in,'FOR,SLP').ne.0.or.
+     .            index(cbuf_in,'FOR,LP').ne.0 
+!            kscan = index(cbuf_in,'SCAN_NAME').ne.0
           enddo
         endif ! decode header line 6/read .snp
  !     endif ! common/read .snp
