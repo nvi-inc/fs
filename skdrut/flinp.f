@@ -22,7 +22,7 @@ C  Common
 C
 C  LOCAL:
       integer*2 lb ! band for unpacking
-      integer*2 lname(4) !temp source name for unpacking
+      integer*2 lname(max_sorlen/2) !temp source name for unpacking
       real*4 fl(max_flux)
 C      - temporary baseline/flux holders for unpacking
       integer j,j1,nfl,i,is,ib
@@ -34,6 +34,7 @@ C   NRV 891113 Created, based on SOINP
 C   NRV 910924 Change UNPFL call, store in new flux variables
 C   NRV 911106 Fixed calculation of number of flux steps
 C   nrv 950626 Make IGTBA a function
+C 970114 nrv Change dimension of lname to max_sorlen
 C
 C
 C     1. Call UNPFL to unpack the buffer we were passed.
