@@ -23,6 +23,7 @@ set text_title_preferences "I/O setup"
 set text_printing_wait "Printing, please wait..."
 set text_ready "Ready."
 set text_replot "Replotting needed"
+set text_zero "Upper and lower limits equal. Check selection, reset the plot (Press 's'), or scale manually."
 
 set print_default_filename "postscript.eps"
 set print_destination 0    ;# 0=Printer, 1=File
@@ -36,6 +37,8 @@ set pointoffplot 4
 set ytitleoffset 15
 set pointsize 3
 set decimals 3
+set thickline 3        ;#The line width for curves in working files
+
 
 set BADVALUE -6000000    ;#gndats definition of a "bad" number
 set BADSTRVALUE X        ;#gndats definition of a "bad" string
@@ -43,13 +46,14 @@ set BADSTRVALUE X        ;#gndats definition of a "bad" string
 
 set pid [pid]
 
+set controlFileDir "/usr2/control"               ;#Default directory for control files   
 set currentInputFitFile "/tmp/input.fit.$pid"    ;#Input file to gnfit
 set currentOutputFitFile "/tmp/output.fit.$pid"  ;#Output file from gnfit
 set current_TEMP  "/tmp/gnplt.tmp.$pid"          ;#Temporary file used by the printing procedures
 set currentRXG ""                                ;#The current .rxg file, is set later
-set tempRXG "/usr2/control/tmp.rxg.$pid"         ;#A temporary .rxg file, used for I/O with .rxg files
+set tempRXG "$controlFileDir\/tmp.rxg.$pid"         ;#A temporary .rxg file, used for I/O with .rxg files
 set currentOutputFile "/tmp/parsed.txt.$pid"     ;#Output file from gndat
-set newfile_filename ""                          ;#The log file that the user selects later
+set newfile_filename ""                          ;#The log file that the user selects
 
 set sourcelist {}        ;#a list of all sources in the datafile
 set detectorlist {}      ;#a list of all detectors in the datafile
@@ -66,8 +70,17 @@ set SDmenus_is_set 0     ;#makes the source and detector menus be set only once
 set writeflag 0          ;#have the .rxg files been updated? 0=No ; 1=yes
 set opacityCorrect 0     ;#flag determining if the gain should be corrected for opacities
 set autoreplot 0         ;#replots automatically when the user selects different axes, 0=No ; 1=Yes
+set autoStyle 0          ;#determines which type of autoscaling to use
+set pointsSelected 0     ;#Number of points selected.
+set pointsHighlighted 0  ;#Number of points highlighted
+set pointsDeleted 0      ;#Number of points deleted.
+set pointsIncluded 0     ;#Number of points included.
 
 set currentPol ""
+
+#These are the items of the X-axis and the Y-axis. 
+set xitemlist {"Time" "Elevation" "Frequency" "Azimuth"} 
+set yitemlist {"Azimuth" "Elevation" "Gain Compression" "Tsys" "SEFD" "TCal(Jy)" "TCal(K)" "TCal Ratio"}
 
 set letteroffset 3       ;#scale factor for how far from points source letters are displayed
 set sourcedisplay 2      ;#1=source letters are displayed, 0=points are diplayed, 2=both are displayed
@@ -99,7 +112,7 @@ set YPointLabel ""
 proc fileselection_dialog {} {
     global global_startmode current_DefaultDir newfile_filename currentOutputFile SDmenus_is_set legendNo header
     global sourcelist detectorlist timelist leftfreqlist rightfreqlist leftfreqLabellist rightfreqLabellist 
-    global LONamelist LOTypelist LOFirstlist LOSecondlist statusMessage
+    global LONamelist LOTypelist LOFirstlist LOSecondlist statusMessage controlFileDir
     set types {
 	{{Log Files} {*.log} }
 	{{All Files} {*.*} }
@@ -129,15 +142,17 @@ proc fileselection_dialog {} {
 	menu .menuBar.frequ.menu
 	menu .menuBar.edit.menu
 	set SDmenus_is_set 0
-	set currentOutputFile [exec gndat $newfile_filename $currentOutputFile 0]
+	set currentOutputFile [exec gndat $newfile_filename $currentOutputFile 0 $controlFileDir]
 	if {$currentOutputFile==-1} {
-	    set statusMessage "There's a problem with the .rxg files. Please check the /usr2/control directory"
-	    update 
+	    set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory"
+	    update
 	} else {
 	    .c delete points
 	    .c delete sourcetext
+	    .c delete fittedgaincurve
 	    .c delete gaincurve
 	    .c delete tcalcurve
+	    .c delete fittedtcalcurve
 	    .c delete tcrcurve
 	    readData $currentOutputFile
 	}
@@ -156,7 +171,7 @@ proc readData filename {
     global dataMatrix xitem items timeinseconds number_of_datalines number_of_datacolumns gainlist statusMessage
     global leftfreqlist rightfreqlist leftfreqLabellist rightfreqLabellist SDmenus_is_set legendNo sourcelist
     global detectorlist timelist LONamelist LOTypelist LOFirstlist LOSecondlist LOFilelist text_replot text_ready
-    global opacityCorrect pid replot autoreplot scaling hasScaled
+    global opacityCorrect pid replot autoreplot scaling hasScaled yitemlist
     set LONamelist {}        ;#a list of the names of the LOs
     set LOFilelist {}        ;#a list of the names of the .rxg files
     set LOTypelist {}        ;#a list of the type of the LOs (range or fixed)
@@ -185,10 +200,7 @@ proc readData filename {
 	    }
 	    if {$header == "LABELS"} {
 		lappend labellist $line
-		if {[string match Azimuth $line] || [string match Elevation $line] || \
-			[string match "Gain Compression" $line] || [string match Tsys $line] || \
-			[string match SEFD $line] || [string match TCal(Jy) $line] || \
-			[string match TCal(K) $line] || [string match "TCal Ratio" $line]} {
+		if {[lsearch $yitemlist $line]!=-1} {
 		    if {$number_of_labels > 0} {
 			set label$number_of_labels $line
 			.menuBar.items.menu add radiobutton -label "$line" -variable items \
@@ -277,7 +289,7 @@ proc readData filename {
     .menuBar.items.menu add separator
     .menuBar.items.menu add cascade -label "Gain" -menu .menuBar.items.menu.gain
     menu .menuBar.items.menu.gain
-    .menuBar.items.menu.gain add radiobutton -label "TCal(K) from control file" -variable gainChoice \
+    .menuBar.items.menu.gain add radiobutton -label "TCal(K) from working file" -variable gainChoice \
 	    -value 1 -command {
 	set statusMessage $text_replot
 	set items "Gain"
@@ -307,30 +319,30 @@ proc readData filename {
 	    replot
 	}
     }
-    .menuBar.items.menu.gain add cascade -label "Correction" -menu .menuBar.items.menu.gain.opac
-    menu .menuBar.items.menu.gain.opac
-    .menuBar.items.menu.gain.opac add radiobutton -label "Correct for opacities" -variable opacityCorrect \
-	    -value 1 -command {
-	set statusMessage $text_replot
-	if {[info exists gainChoice]} {
-	    tcalkFrom $gainChoice 
-	    if {$autoreplot==1} {
-		replot
-	    }
-	}
-	correctForOpacities
-    }
-    .menuBar.items.menu.gain.opac add radiobutton -label "No correction" -variable opacityCorrect \
-	    -value 0 -command {
-	set statusMessage $text_replot
-	if {[info exists gainChoice]} {
-	    tcalkFrom $gainChoice
-	    if {$autoreplot==1} {
-		replot
-	    }
-	}
-	correctForOpacities
-    }
+    #.menuBar.items.menu.gain add cascade -label "Correction" -menu .menuBar.items.menu.gain.opac
+    #menu .menuBar.items.menu.gain.opac
+    #.menuBar.items.menu.gain.opac add radiobutton -label "Correct for opacities" -variable opacityCorrect \
+#	    -value 1 -command {
+	#set statusMessage $text_replot
+	#if {[info exists gainChoice]} {
+	#    tcalkFrom $gainChoice 
+	#    if {$autoreplot==1} {
+	#	replot
+	#    }
+	#}
+	#correctForOpacities
+    #}
+    #.menuBar.items.menu.gain.opac add radiobutton -label "No correction" -variable opacityCorrect \
+#	    -value 0 -command {
+#	set statusMessage $text_replot
+#	if {[info exists gainChoice]} {
+#	    tcalkFrom $gainChoice
+#	    if {$autoreplot==1} {
+#		replot
+#	    }
+#	}
+#	correctForOpacities
+#    }
     if {$SDmenus_is_set==0} {
 	getFrequencies
 	getSources
@@ -338,7 +350,7 @@ proc readData filename {
 	createSelectionMenu
 	setSDmenus
 	foreach rxg $LOFilelist {
-	    if {[string range $rxg end-2 end]=="rxg"} {
+	    if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
 		exec cp $rxg $rxg.work.$pid
 	    }
 	}
@@ -458,30 +470,88 @@ proc correctForOpacities {} {
 # stored in the dataMatrix.
 # -------------------------------------------------------------------------------------------
 
-proc min {datatype} {
+proc min {datatype args} {
     global dataMatrix number_of_datalines minvalue xitem globaltimemin BADVALUE
+    global sourcelist timelist timeAndSourceMatrix detectorlist rightfreqlist leftfreqlist
+    global timeAndSourceMatrix detectorArray rightfreqArray leftfreqArray autoStyle
     set minvalue 2147483647 ;#Largest integer possible
-    for {set i 1} {$i < $number_of_datalines} {incr i} {
-	if $dataMatrix($i,inUse)==1 {
-	    if {$dataMatrix($i,$datatype) < $minvalue && $dataMatrix($i,$datatype) > [expr 0.01*$BADVALUE]} {
-		set minvalue $dataMatrix($i,$datatype)
-		if {$datatype=="Realtime"} {
-		    set globaltimemin $dataMatrix($i,Time)
+    if {$autoStyle==0} {
+	for {set i 1} {$i < $number_of_datalines} {incr i} {
+	    if $dataMatrix($i,inUse)==1 {
+		if {$dataMatrix($i,$datatype) < $minvalue && $dataMatrix($i,$datatype) > [expr 0.01*$BADVALUE]} {
+		    set minvalue $dataMatrix($i,$datatype)
+		    if {$datatype=="Realtime"} {
+			set globaltimemin $dataMatrix($i,Time)
+		    }
 		}
 	    }
 	}
-    }
+    } else {
+	for {set i 1} {$i < $number_of_datalines} {incr i} {
+	    if {$dataMatrix($i,Polarization)=="l"} {
+		if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source))==1 && \
+			$leftfreqArray($dataMatrix($i,Frequency))==1} {
+		    if {$dataMatrix($i,$datatype) < $minvalue && $dataMatrix($i,$datatype) > [expr 0.01*$BADVALUE]} {
+			set minvalue $dataMatrix($i,$datatype)
+			if {$datatype=="Realtime"} {
+			    set globaltimemin $dataMatrix($i,Time)
+			}
+		    }
+		}
+	    }
+	    if {$dataMatrix($i,Polarization)=="r"} {
+		if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source))==1 && \
+			$rightfreqArray($dataMatrix($i,Frequency))==1} {
+		    if {$dataMatrix($i,$datatype) < $minvalue && $dataMatrix($i,$datatype) > [expr 0.01*$BADVALUE]} {
+			set minvalue $dataMatrix($i,$datatype)
+			if {$datatype=="Realtime"} {
+			    set globaltimemin $dataMatrix($i,Time)
+			}
+		    }
+		}
+	    }
+	}
+    }    
 }
 
-proc max {datatype} {
-    global dataMatrix number_of_datalines maxvalue xitem globaltimemax
+proc max {datatype args} {
+    global dataMatrix number_of_datalines maxvalue xitem globaltimemax autoStyle
+    global sourcelist timelist timeAndSourceMatrix detectorlist rightfreqlist leftfreqlist
+    global timeAndSourceMatrix detectorArray rightfreqArray leftfreqArray
     set maxvalue -2147483648 ;#Smallest integer possible
-    for {set i 1} {$i < $number_of_datalines} {incr i} {
-	if $dataMatrix($i,inUse)==1 {
-	    if {$dataMatrix($i,$datatype) > $maxvalue} {
-		set maxvalue $dataMatrix($i,$datatype)
-		if {$datatype=="Realtime"} {
-		    set globaltimemax $dataMatrix($i,Time)
+    if {$autoStyle==0} {
+	for {set i 1} {$i < $number_of_datalines} {incr i} {
+	    if $dataMatrix($i,inUse)==1 {
+		if {$dataMatrix($i,$datatype) > $maxvalue} {
+		    set maxvalue $dataMatrix($i,$datatype)
+		    if {$datatype=="Realtime"} {
+			set globaltimemax $dataMatrix($i,Time)
+		    }
+		}
+	    }
+	}
+    } else {
+	for {set i 1} {$i < $number_of_datalines} {incr i} {
+	    if {$dataMatrix($i,Polarization)=="l"} {
+		if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source))==1 && \
+			$leftfreqArray($dataMatrix($i,Frequency))==1} {
+		    if {$dataMatrix($i,$datatype) > $maxvalue} {
+			set maxvalue $dataMatrix($i,$datatype)
+			if {$datatype=="Realtime"} {
+			    set globaltimemax $dataMatrix($i,Time)
+			}
+		    }   
+		}
+	    }
+	    if {$dataMatrix($i,Polarization)=="r"} {
+		if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source))==1 && \
+			$rightfreqArray($dataMatrix($i,Frequency))==1} {
+		    if {$dataMatrix($i,$datatype) > $maxvalue} {
+			set maxvalue $dataMatrix($i,$datatype)
+			if {$datatype=="Realtime"} {
+			    set globaltimemax $dataMatrix($i,Time)
+			}
+		    } 
 		}
 	    }
 	}
@@ -566,18 +636,22 @@ proc sec2time {seconds} {
 
 proc replot {} {
     global sourcelist xitem items dataMatrix number_of_datalines scaling leftfreqlist rightfreqlist 
-    global leftfreqArray rightfreqArray currentPol timeAndSourceMatrix statusMessage gc tck tcr
+    global leftfreqArray rightfreqArray currentPol timeAndSourceMatrix statusMessage gc fgc tcr ftck tck LOType
     global number_of_LO number_of_pol LONamelist LOFirstlist LOSecondlist LOFilelist currentRXG hasScaled pid
     set gc 0
+    set fgc 0
     set tck 0
+    set ftck 0
     set tcr 0
+    .c delete fittedgaincurve
     .c delete gaincurve
     .c delete tcalcurve
+    .c delete fittedtcalcurve
     .c delete connectCurve
     .c delete tcrcurve
     for {set i 1} {$i < $number_of_datalines} {incr i} {
-	if {(($dataMatrix($i,Polarization)=="l" && $leftfreqArray($dataMatrix($i,Frequency))==1) || \
-		($dataMatrix($i,Polarization)=="r" && $rightfreqArray($dataMatrix($i,Frequency))==1)) && \
+	if {($dataMatrix($i,Polarization)=="l" && $leftfreqArray($dataMatrix($i,Frequency))==1) || \
+		($dataMatrix($i,Polarization)=="r" && $rightfreqArray($dataMatrix($i,Frequency))==1) && \
 		$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
 		$dataMatrix($i,Clicked)==1} {
 	    set dataMatrix($i,inUse) 1
@@ -616,19 +690,50 @@ proc replot {} {
 		    break
 		}
 	    }
-	    if {[lsearch $LOFirstlist $LO]!=-1} {
-		set rxg [lindex $LOFilelist [lsearch $LOFirstlist $LO]]
-		if {[string range $rxg end-2 end]=="rxg"} {
-		    set currentRXG $rxg.work.$pid
-		} else {
-		    set currentRXG $rxg
+	    if {$LOType=="fixed"} {
+		if {[lsearch $LOFirstlist $LO]!=-1} {
+		    set rxg [lindex $LOFilelist [lsearch $LOFirstlist $LO]]
+		    if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+			set currentRXG $rxg.work.$pid
+		    } else {
+			set currentRXG $rxg
+		    }
+		} elseif {[lsearch $LOSecondlist $LO]!=-1} {
+		    set rxg [lindex $LOFilelist [lsearch $LOSecondlist $LO]]
+		    if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+			set currentRXG $rxg.work.$pid
+		    } else {
+			set currentRXG $rxg
+		    }
 		}
-	    } elseif {[lsearch $LOSecondlist $LO]!=-1} {
-		set rxg [lindex $LOFilelist [lsearch $LOSecondlist $LO]]
-		if {[string range $rxg end-2 end]=="rxg"} {
-		    set currentRXG $rxg.work.$pid
-		} else {
-		    set currentRXG $rxg
+	    } elseif {$LOType=="range"} {
+		foreach lo $LOFirstlist {
+		    for {set i 1} {$i < $number_of_datalines} {incr i} {
+			if {$dataMatrix($i,Polarization) == "l"} {
+			    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
+				    $leftfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1} {
+				set rxg [lindex $LOFilelist [lsearch $LOFirstlist $lo]]
+				if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+				    set currentRXG $rxg.work.$pid
+				} else {
+				    set currentRXG $rxg
+				}
+				break
+			    }
+			}
+			if {$dataMatrix($i,Polarization) == "r"} {
+			    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
+				    $rightfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1} {
+				set rxg [lindex $LOFilelist [lsearch $LOFirstlist $lo]]
+				if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+				    set currentRXG $rxg.work.$pid
+				} else {
+				    set currentRXG $rxg
+				}
+				break
+			    }
+			}
+		    }
 		}
 	    }
 	}
@@ -650,7 +755,8 @@ proc replot {} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,Polarization) == "l"} {
 		    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 0 || \
-			    $leftfreqArray($dataMatrix($i,Frequency)) == 0 || $dataMatrix($i,inUse)==0} {
+			    $leftfreqArray($dataMatrix($i,Frequency)) == 0 || $dataMatrix($i,inUse)==0 || \
+			    $dataMatrix($i,Clicked)==0} {
 			set dataMatrix($i,inUse) 0
 		    } else {
 			set dataMatrix($i,inUse) 1
@@ -658,7 +764,8 @@ proc replot {} {
 		}
 		if {$dataMatrix($i,Polarization) == "r"} {
 		    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 0 || \
-			    $rightfreqArray($dataMatrix($i,Frequency)) == 0 || $dataMatrix($i,inUse)==0} {
+			    $rightfreqArray($dataMatrix($i,Frequency)) == 0 || $dataMatrix($i,inUse)==0 || \
+			    $dataMatrix($i,Clicked)==0} {
 			set dataMatrix($i,inUse) 0
 		    } else {
 			set dataMatrix($i,inUse) 1
@@ -670,6 +777,7 @@ proc replot {} {
 	    set statusMessage "Not enough frequencies selected. Please select more frequencies."
 	}
     }
+    createPointLegend
 }
 
 # ---------------------------------------------------------------------------------------------------------
@@ -682,7 +790,7 @@ proc drawNodes {} {
     global dataMatrix xitem items globalxmin globalxmax globalymin globalymax pixelx pixely
     global number_of_datalines number_of_datacolumns sourcelist detectorlist SDmenus_is_set statusMessage
     global decimals globaltimemin globaltimemax letteroffset detectorArray text_ready number_of_pol currentPol
-    global leftfreqlist rightfreqlist leftfreqArray rightfreqArray legendNo timeAndSourceMatrix
+    global leftfreqlist rightfreqlist leftfreqArray rightfreqArray legendNo timeAndSourceMatrix text_zero
     set statusMessage "Processing..."
     update
     .c delete points
@@ -713,8 +821,7 @@ proc drawNodes {} {
 	    }
 	}
     } else {
-	set statusMessage "Divide by zero error. Check the log file, the rxg files and the current selection. If\
-		all seems fine, report the bug."
+	set statusMessage $text_zero
     }
     .c itemconfigure title -text "Plotting $items vs. $xitem"
     .c itemconfigure xaxislabel -text "$xitem"
@@ -760,70 +867,78 @@ proc drawNodes {} {
 # ---------------------------------------------------------------------------------------------------
 
 proc plotnode {i xval yval} {
-    global dataMatrix xitem items pixelx pixely pointsize globalxmin globalxmax globalymin globalymax
+    global dataMatrix xitem items pixelx pixely pointsize globalxmin globalxmax globalymin globalymax BADVALUE
     global pointoffplot xoffset yoffset size
     if {$xval >= $globalxmin && $xval <= $globalxmax && ($yval >= $globalymin) && ($yval <= $globalymax)} {
 	.c create oval [expr $pixelx-$pointsize] [expr $pixely-$pointsize] [expr $pixelx+$pointsize] \
 		[expr $pixely+$pointsize] -fill white -tags point$i
 	.c addtag points withtag point$i
-	#.c addtag $dataMatrix($i,Source) withtag point$i
-	#.c addtag $dataMatrix($i,Frequency) withtag point$i
-	#.c addtag $dataMatrix($i,Source)[string range $dataMatrix($i,Frequency) 0 3] withtag point$i
-	if {$dataMatrix($i,inUse)==0} {
+	if {$dataMatrix($i,inUse)==0 || $dataMatrix($i,Clicked)==0} {
 	    .c itemconfigure point$i -fill red
 	}
     } elseif {$xval<$globalxmin} {
-	set dataMatrix($i,inUse) 0
 	if {$yval>$globalymax} {
 	    .c create oval [expr $xoffset-$pointsize-$pointoffplot] [expr $yoffset-$pointsize-$pointoffplot] \
 		    [expr $xoffset+$pointsize-$pointoffplot] [expr $yoffset+$pointsize-$pointoffplot] \
-		    -fill red -tags point$i
+		    -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	} elseif {$yval<$globalymin} {
 	    .c create oval [expr $xoffset-$pointsize-$pointoffplot] \
 		    [expr $size*180+$yoffset-$pointsize+$pointoffplot] [expr $xoffset+$pointsize-$pointoffplot] \
-		    [expr $size*180+$yoffset+$pointsize+$pointoffplot] -fill red -tags point$i
+		    [expr $size*180+$yoffset+$pointsize+$pointoffplot] -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	} else {
 	    .c create oval [expr $xoffset-$pointsize-$pointoffplot] [expr $pixely-$pointsize] \
-		    [expr $xoffset+$pointsize-$pointoffplot] [expr $pixely+$pointsize] -fill red -tags point$i
+		    [expr $xoffset+$pointsize-$pointoffplot] [expr $pixely+$pointsize] -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	}
-	set $dataMatrix($i,inUse) 0
+	if {$dataMatrix($i,inUse)==0 || $dataMatrix($i,Clicked)==0 || $xval<=[expr 0.1*$BADVALUE] \
+		|| $yval<=[expr 0.1*$BADVALUE]} {
+	    .c itemconfigure point$i -fill red
+	} else {
+	    .c itemconfigure point$i -fill cyan
+	}
     } elseif {$xval>$globalxmax} {
-	set dataMatrix($i,inUse) 0
 	if {$yval>$globalymax} {
 	    .c create oval [expr $size*180+$xoffset-$pointsize+$pointoffplot] \
 		    [expr $yoffset-$pointsize-$pointoffplot] [expr $size*180+$xoffset+$pointsize+$pointoffplot] \
-		    [expr $yoffset+$pointsize-$pointoffplot] -fill red -tags point$i
+		    [expr $yoffset+$pointsize-$pointoffplot] -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	} elseif {$yval<$globalymin} {
 	    .c create oval [expr $size*180+$xoffset-$pointsize+$pointoffplot] \
 		    [expr $size*180+$yoffset-$pointsize+$pointoffplot] \
 		    [expr $size*180+$xoffset+$pointsize+$pointoffplot] \
-		    [expr $size*180+$yoffset+$pointsize+$pointoffplot] -fill red -tags point$i
+		    [expr $size*180+$yoffset+$pointsize+$pointoffplot] -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	} else {
 	    .c create oval [expr $size*180+$xoffset-$pointsize+$pointoffplot] [expr $pixely-$pointsize] \
 		    [expr $size*180+$xoffset+$pointsize+$pointoffplot] [expr $pixely+$pointsize] \
-		    -fill red -tags point$i
+		    -fill white -tags point$i
 	    .c addtag points withtag point$i 
 	}
-	set $dataMatrix($i,inUse) 0
+	if {$dataMatrix($i,inUse)==0 || $dataMatrix($i,Clicked)==0 || $xval<=[expr 0.1*$BADVALUE] \
+		|| $yval<=[expr 0.1*$BADVALUE]} {
+	    .c itemconfigure point$i -fill red
+	} else {
+	    .c itemconfigure point$i -fill cyan
+	}
     } elseif {$xval>$globalxmin && $xval<$globalxmax} {
-	set dataMatrix($i,inUse) 0
 	if {$yval>$globalymax} {
 	    .c create oval [expr $pixelx-$pointsize] [expr $yoffset-$pointsize-$pointoffplot] \
 		    [expr $pixelx+$pointsize] [expr $yoffset+$pointsize-$pointoffplot] \
-		    -fill red -tags point$i
+		    -fill white -tags point$i
 	    .c addtag points withtag point$i 
-	    set $dataMatrix($i,inUse) 0
 	} elseif {$yval<$globalymin} {
 	    .c create oval [expr $pixelx-$pointsize] [expr $size*180+$yoffset-$pointsize+$pointoffplot] \
 		    [expr $pixelx+$pointsize] [expr $size*180+$yoffset+$pointsize+$pointoffplot] \
-		    -fill red -tags point$i
+		    -fill white -tags point$i
 	    .c addtag points withtag point$i 
-	    set $dataMatrix($i,inUse) 0
+	}
+	if {$dataMatrix($i,inUse)==0 || $dataMatrix($i,Clicked)==0 || $xval<=[expr 0.1*$BADVALUE] \
+		|| $yval<=[expr 0.1*$BADVALUE]} {
+	    .c itemconfigure point$i -fill red
+	} else {
+	    .c itemconfigure point$i -fill cyan
 	}
     }
 }
@@ -873,12 +988,34 @@ proc toCoordinates {px py} {
 
 proc drawPoly {DPFU coefflist tag type args} {
     global globalxmin globalxmax globalymin globalymax pixelx pixely statusMessage pointoffplot 
-    global xitem items minvalue maxvalue hasScaled gc
+    global xitem items minvalue maxvalue hasScaled gc fgc thickline
+    if {$tag=="fittedgaincurve"} {
+	set fgc 1
+    } elseif {$tag=="gaincurve"} {
+	set gc 1
+    }
+    if {$gc==1} {
+	set oldc 1
+    } else {
+	set oldc 0
+    }
     if {![info exists oldtype]} {
 	set oldtype $type
     }
+    set args [split [string trim $args "\{\}"]]
+    set dash 0
     if {[lindex $args 0]=="dash"} {
 	set dash 5
+    }
+    if {[llength $args]>1} {
+	set color [lindex $args 1]
+    } else {
+	set color black
+    }
+    if {$color!="black"} {
+	set width $thickline
+    } else {
+	set width 1
     }
     set reScaled 0
     if {$hasScaled==1} {
@@ -922,7 +1059,7 @@ proc drawPoly {DPFU coefflist tag type args} {
 	if {($pixelxold>=$pixelxmin && $pixelxold<=$pixelxmax) && ($pixelxnew>=$pixelxmin && $pixelxnew<=$pixelxmax) && \
 		($pixelyold>=[expr $pixelymin-$pointoffplot] && $pixelyold<=[expr $pixelymax+$pointoffplot]) && \
 		($pixelynew>=[expr $pixelymin-$pointoffplot] && $pixelynew<=[expr $pixelymax+$pointoffplot])} {
-	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags $tag
+	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags $tag -fill $color -width $width
 	}
 	if {[lindex $args 0]=="dash" && $i%$dash==0} {
 	    incr i $dash 
@@ -951,11 +1088,87 @@ proc drawPoly {DPFU coefflist tag type args} {
 	set reScaled 1
     }
     if {$reScaled==1} {
-	set gc 1
 	drawPoly $DPFU $coefflist $tag $type $args
+	if {$oldc==1} {
+	    .menuBar.tools.menu invoke *file
+	}
     }
     set oldtype $type
+    set statusMessage "Ready."
 }
+
+proc drawTCalCurve {xstart ystart xstop ystop tag args} {
+    global globalxmin globalxmax globalymin globalymax pixelx pixely statusMessage pointoffplot 
+    global xitem items minvalue maxvalue hasScaled gc fgc thickline
+    if {$tag=="tcalcurve"} {
+	set color green3
+	set width $thickline
+    } else {
+	set color black
+	set width 1
+    }
+    set dash 0
+    if {[lindex $args 0]=="dash"} {
+	set dash 3
+    }
+    toPixels $globalxmin $globalymin
+    set pixelxmin $pixelx
+    set pixelymax $pixely   ;# reverse coordinate system
+    toPixels $globalxmax $globalymax
+    set pixelxmax $pixelx
+    set pixelymin $pixely   ;# reverse coordinate system
+    toPixels $xstart $ystart
+    set pixelxstart $pixelx
+    set pixelystart $pixely
+    toPixels $xstop $ystop
+    set pixelxstop $pixelx
+    set pixelystop $pixely
+    set dist [expr sqrt(pow(($pixelxstart-$pixelxstop),2)+pow(($pixelystart-$pixelystop),2))]
+    set step [expr $dist/3]
+    set range [expr $xstop-$xstart]
+    set k [expr ($ystop-$ystart)/($xstop-$xstart)]
+    set m [expr $ystop-($ystop-$ystart)/($xstop-$xstart)*$xstop]
+    set coefflist {$m $k}
+    set xold $xstart
+    set yold 0
+    set ylist {}
+    for {set j 0} {$j<[llength $coefflist]} {incr j} {
+	set yold [expr $yold+[lindex $coefflist $j]*pow($xold,$j)]
+    }
+    lappend ylist $yold
+    for {set i 1} {$i<=$step} {incr i} {
+	set xnew [expr double($xstart)+double($range)/double($step)*$i]
+	set ynew 0
+	for {set j 0} {$j<[llength $coefflist]} {incr j} {
+	    set ynew [expr $ynew+[lindex $coefflist $j]*pow($xnew,$j)]
+	}
+	lappend ylist $ynew
+	toPixels $xold $yold
+	set pixelxold $pixelx
+	set pixelyold $pixely
+	toPixels $xnew $ynew
+	set pixelxnew $pixelx
+	set pixelynew $pixely
+	if {($pixelxold>=$pixelxmin && $pixelxold<=$pixelxmax) && ($pixelxnew>=$pixelxmin && $pixelxnew<=$pixelxmax) && \
+		($pixelyold>=[expr $pixelymin-$pointoffplot] && $pixelyold<=[expr $pixelymax+$pointoffplot]) && \
+		($pixelynew>=[expr $pixelymin-$pointoffplot] && $pixelynew<=[expr $pixelymax+$pointoffplot])} {
+	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags $tag -fill $color -width $width \
+		-joinstyle round
+	}
+	if {[lindex $args 0]=="dash" && [expr $i%$dash]==0} {
+	    incr i $dash 
+	    set xold [expr double($xstart)+double($range)/double($step)*$i]
+	    set yold 0
+	    for {set j 0} {$j<[llength $coefflist]} {incr j} {
+		set yold [expr $yold+[lindex $coefflist $j]*pow($xold,$j)]
+	    }
+	} else {
+	    set xold $xnew
+	    set yold $ynew
+	}
+    }
+}
+	   
 
 # -----------------------------------------------------------------------------------------------
 # This procedure displays the current values for certain items to the right of the plotting area.
@@ -1008,9 +1221,9 @@ proc clearPointData {} {
 # ---------------------------------------------------------------------------------------------------------
 
 proc scale {} {
-    global scaling hasScaled gc tck tcr frequ source
+    global scaling hasScaled gc fgc tcr frequ source ftck tck
     if ($hasScaled==-1) {
-	autoScale
+	autoScale 
     } else {
 	if ($hasScaled==0) {
 	    if [string match $scaling Manual] {
@@ -1021,12 +1234,16 @@ proc scale {} {
 	}
     }
     set gc 0
+    set fc 0
     set tck 0
+    set ftck 0
     set tcr 0
     set frequ all
     set source all
     .c delete gaincurve
+    .c delete fittedgaincurve
     .c delete tcalcurve
+    .c delete fittedtcalcurve
     .c delete tcrcurve
 }
 
@@ -1036,7 +1253,7 @@ proc scale {} {
 # -------------------------------------------------------------------------------------------
 
 proc autoScale {} {
-    global xitem items minvalue maxvalue globalxmin globalxmax globalymin globalymax hasScaled statusMessage
+    global xitem items minvalue maxvalue globalxmin globalxmax globalymin globalymax hasScaled statusMessage text_zero
     if {$xitem=="Time"} {
 	min Realtime
 	set globalxmin $minvalue
@@ -1048,9 +1265,9 @@ proc autoScale {} {
 	max $xitem
 	set globalxmax $maxvalue
     }
-    min $items
+    min $items 
     set globalymin $minvalue
-    max $items
+    max $items 
     set globalymax $maxvalue
     if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
 	if ($hasScaled==1) {
@@ -1058,8 +1275,7 @@ proc autoScale {} {
 	}
 	set hasScaled 0
     } else {
-	set statusMessage "Divide by zero error. Check the log file, the rxg files and the current selection. If\
-		all seems fine, report the bug."
+	set statusMessage $text_zero
     }
 } 
 
@@ -1159,7 +1375,6 @@ proc showAll {} {
     for {set i 1} {$i<=$number_of_datalines} {incr i} {
 	set dataMatrix($i,inUse) 1
     }
-    .c itemconfigure points -fill white
     foreach source $sourcelist {
 	foreach time $timelist {
 	    set timeAndSourceMatrix($time,$source) 1
@@ -1174,7 +1389,9 @@ proc showAll {} {
     foreach freq $leftfreqlist {
 	set leftfreqArray($freq) 1
     }
+    checkPol
     drawNodes
+    .c itemconfigure points -fill white
 }
 
 proc showAlmostAll {} {
@@ -1214,12 +1431,18 @@ proc showAlmostAll {} {
 # -------------------------------------------------------------------------------------------------
 
 proc boxZoom {x y} {
-    global xstart ystart globalxmin globalxmax globalymin globalymax hasScaled coordx coordy gc
+    global xstart ystart globalxmin globalxmax globalymin globalymax hasScaled coordx coordy gc fgc tck ftck
     if {[info exists xstart]} {
 	if {($xstart>$x-5 && $xstart<$x+5) || ($ystart>$y-5 && $ystart<$y+5)} {
 	} else {
 	    set gc 0
+	    set fgc 0
+	    set tck 0
+	    set ftck 0
 	    .c delete gaincurve
+	    .c delete fittedgaincurve
+	    .c delete tcalcurve
+	    .c delete fittedtcalcurve
 	    .c delete tcrcurve
 	    toCoordinates $xstart $ystart
 	    set xstart $coordx
@@ -1250,7 +1473,8 @@ proc boxZoom {x y} {
 }
 
 proc boxChange {x y changeTo} {
-    global xstart ystart dataMatrix number_of_datalines xitem items coordx coordy
+    global xstart ystart dataMatrix number_of_datalines xitem items coordx coordy leftfreqArray rightfreqArray
+    global timeAndSourceMatrix pointsIncluded
     if {[info exists xstart] && [info exists items] && [info exists xitem]} {
 	if {($xstart>$x-5 && $xstart<$x+5) || ($ystart>$y-5 && $ystart<$y+5)} {
 	} else {
@@ -1272,12 +1496,21 @@ proc boxChange {x y changeTo} {
 	    }
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,$xitem) >= $xstart && $dataMatrix($i,$xitem) <= $x && \
-			$dataMatrix($i,$items) >= $ystart && $dataMatrix($i,$items) <= $y} {
+			$dataMatrix($i,$items) >= $ystart && $dataMatrix($i,$items) <= $y && \
+			(($dataMatrix($i,Polarization)=="l" && $leftfreqArray($dataMatrix($i,Frequency))==1) || \
+			     ($dataMatrix($i,Polarization)=="r" && $rightfreqArray($dataMatrix($i,Frequency))==1)) && \
+			$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
 		    if {$changeTo==0} {
+			if {$dataMatrix($i,inUse)!=0 && $dataMatrix($i,Clicked)!=0} {
+			    incr pointsIncluded -1
+			}
 			set dataMatrix($i,inUse) 0
 			set dataMatrix($i,Clicked) 0
 			.c itemconfigure point$i -fill red
 		    } else {
+			if {$dataMatrix($i,inUse)==0 && $dataMatrix($i,Clicked)==0} {
+			    incr pointsIncluded
+			}
 			set dataMatrix($i,inUse) 1
 			set dataMatrix($i,Clicked) 1
 			.c itemconfigure point$i -fill white
@@ -1352,6 +1585,26 @@ proc createSourceLegend {} {
 	}
     }
     set legendNo 0
+}
+
+
+proc createPointLegend {} {
+    global dataMatrix number_of_datalines xitem items leftfreqArray rightfreqArray sourcelist timeAndSourceMatrix
+    global pointsSelected pointsDeleted pointsIncluded
+    set pointsDeleted 0
+    set pointsSelected 0
+    set pointsIncluded 0
+    for {set i 1} {$i < $number_of_datalines} {incr i} {
+	if {(($dataMatrix($i,Polarization)=="l" && $leftfreqArray($dataMatrix($i,Frequency))==1) || \
+		 ($dataMatrix($i,Polarization)=="r" && $rightfreqArray($dataMatrix($i,Frequency))==1)) && \
+		$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
+	    incr pointsSelected
+	    if {$dataMatrix($i,Clicked)==0} {
+		incr pointsDeleted
+	    }
+	}
+    }
+    set pointsIncluded [expr $pointsSelected-$pointsDeleted]
 }
 
 # -------------------------------------------------------------------------------------------
@@ -1449,8 +1702,9 @@ proc getFrequencies {} {
 # ----------------------------------------------------------------------------------
     
 proc setSDmenus {} {
-    global sourcelist detectorlist source frequ SDmenus_is_set letteroffset sourcedisplay leftfreqlist rightfreqlist
-    global currentPol leftfreqLabellist rightfreqLabellist leftfreqArray rightfreqArray sourceLetterList
+    global sourcelist detectorlist source currentPolSDmenus_is_set letteroffset sourcedisplay leftfreqlist rightfreqlist
+    global frequ leftfreqLabellist rightfreqLabellist leftfreqArray rightfreqArray sourceLetterList pointsHighlighted 
+    global SDmenus_is_set
     destroy .menuBar.source.menu
     destroy .menuBar.frequ.menu
     menu .menuBar.source.menu
@@ -1461,7 +1715,6 @@ proc setSDmenus {} {
     .menuBar.frequ.menu add separator
     set i 0
     foreach sou $sourcelist {
-	#for {set i 0} {$i < [llength $sourcelist]} {incr i} {}
 	.menuBar.source.menu add radiobutton -label "$sou [lindex $sourceLetterList $i]" \
 		-variable source -value [lindex $sourcelist $i] -command highlight
 	incr i
@@ -1491,9 +1744,8 @@ proc setSDmenus {} {
     set i 0
     set k 0
     foreach lf $leftfreqlist {
-	#for {set i 0} {$i < [llength $leftfreqlist]} {incr i} {}
 	incr k
-	if {$k%30==0} {
+	if {[expr $k%30]==0} {
 	    if {$leftfreqArray($lf) == 1} {
 		.menuBar.frequ.menu add radiobutton -label "$lf [lindex $leftfreqLabellist $i] l" \
 			-variable frequ -value [lindex $leftfreqlist $i]l -columnbreak 1 -command highlight
@@ -1507,14 +1759,12 @@ proc setSDmenus {} {
 	incr i
     }
     set i 0
-    set k 0
     foreach rf $rightfreqlist {
-	#for {set i 0} {$i < [llength $rightfreqlist]} {incr i} {}
 	incr k
-	if {$k%30==0} {
+	if {[expr $k%30]==0} {
 	    if {$rightfreqArray($rf) == 1} {
 		.menuBar.frequ.menu add radiobutton -label "$rf [lindex $rightfreqLabellist $i] r" \
-			-variable frequ -value [lindex $rightfreqlist $i]r -columnbreak 0 -command highlight
+			-variable frequ -value [lindex $rightfreqlist $i]r -columnbreak 1 -command highlight
 	    }
 	} else {
 	    if {$rightfreqArray($rf) == 1} {
@@ -1526,33 +1776,53 @@ proc setSDmenus {} {
     }
     set source all
     set frequ all
+    set pointsHighlighted 0
     set SDmenus_is_set 1
 }
 
 proc highlight {} {
-    global source frequ number_of_datalines dataMatrix
+    global source frequ number_of_datalines dataMatrix pointsHighlighted globalxmin globalxmax globalymin globalymax
+    global xitem items
+    set pointsHighlighted 0
     if {$frequ!="all"} {
 	set pol [string index $frequ end]
-	set frq [string range $frequ 0 end-1]
+	set frq [string range $frequ 0 [expr [string length $frequ]-2]]
     }
     for {set i 1} {$i < $number_of_datalines} {incr i} {
-	.c itemconfigure point$i -fill white
-	if {$frequ=="all"} {
-	    if {$dataMatrix($i,Source)==$source} {
-		.c itemconfigure point$i -fill black
-	    }
-	} elseif {$source=="all"} {
-	    if {$dataMatrix($i,Frequency)==$frq && $dataMatrix($i,Polarization)==$pol} {
-		.c itemconfigure point$i -fill black
-	    }
-	} else {
-	    if {$dataMatrix($i,Source)==$source && $dataMatrix($i,Frequency)==$frq && \
-		    $dataMatrix($i,Polarization)==$pol} {
-		.c itemconfigure point$i -fill black
-	    }
+	if {$xitem=="Time"} {
+	    set xval $dataMatrix($i,Realtime)
+	} else {	    
+	    set xval $dataMatrix($i,$xitem)
 	}
-	if {$dataMatrix($i,inUse)==0} {
-	    .c itemconfigure point$i -fill red
+	set yval $dataMatrix($i,$items)
+	if {$xval >= $globalxmin && $xval <= $globalxmax && ($yval >= $globalymin) && ($yval <= $globalymax)} {
+	    .c itemconfigure point$i -fill white
+	    if {$frequ=="all"} {
+		if {$dataMatrix($i,Source)==$source} {
+		    .c itemconfigure point$i -fill black
+		    if {$dataMatrix($i,inUse)==1} {
+			incr pointsHighlighted
+		    }
+		}
+	    } elseif {$source=="all"} {
+		if {$dataMatrix($i,Frequency)==$frq && $dataMatrix($i,Polarization)==$pol} {
+		    .c itemconfigure point$i -fill black
+		    if {$dataMatrix($i,inUse)==1} {
+			incr pointsHighlighted
+		    }
+		}
+	    } else {
+		if {$dataMatrix($i,Source)==$source && $dataMatrix($i,Frequency)==$frq && \
+			$dataMatrix($i,Polarization)==$pol} {
+		    .c itemconfigure point$i -fill black
+		    if {$dataMatrix($i,inUse)==1} {
+			incr pointsHighlighted
+		    }
+		}
+	    }
+	    if {$dataMatrix($i,inUse)==0} {
+		.c itemconfigure point$i -fill red
+	    }
 	}
     }
 }
@@ -1640,20 +1910,43 @@ proc createSelectionMenu {} {
     global leftfreqlist rightfreqlist leftfreqArray rightfreqArray leftfreqLabellist rightfreqLabellist 
     global currentFreq currentPol timesforsources timeAndSourceMatrix timelist currentTime statusMessage gc
     global LONamelist LOTypelist LOFirstlist LOSecondlist LOFilelist sourcetypelist leftfreqLOlist rightfreqLOlist
-    global text_ready text_replot autoreplot currentW gainChoice
+    global text_ready text_replot autoreplot currentW gainChoice leftincludedlist rightincludedlist
+    global globalxmin globalxmax globalymin globalymax pointsIncluded
     set statusMessage "Selection menus are being created..."
     set currentPol ""
     update
+    destroy .menuBar.edit.menu
+    menu .menuBar.edit.menu
     .menuBar.edit.menu add cascade -label "Select Sources" -menu .menuBar.edit.menu.sources
     menu .menuBar.edit.menu.sources
     .menuBar.edit.menu add cascade -label "Left" -menu .menuBar.edit.menu.left
     menu .menuBar.edit.menu.left
     .menuBar.edit.menu add cascade -label "Right" -menu .menuBar.edit.menu.right
     menu .menuBar.edit.menu.right
-    .menuBar.edit.menu add command -label "Replot" -command {replot}
+    .menuBar.edit.menu add command -label "Replot (r)" -command {replot}
     .menuBar.edit.menu add cascade -label "Auto Replot" -menu .menuBar.edit.menu.auto
     .menuBar.edit.menu add separator
+    .menuBar.edit.menu add command -label "Undelete All For This Selection (s)" -command showAlmostAll
+    .menuBar.edit.menu add command -label "Undelete All Points In Log" -command showAll
     .menuBar.edit.menu add command -label "Delete points with bad GC" -command {deleteGCpoints}
+    .menuBar.edit.menu add command -label "Delete points outside plot" -command {
+	for {set i 1} {$i < $number_of_datalines} {incr i} {
+	    if {(($dataMatrix($i,Polarization)=="l" && $leftfreqArray($dataMatrix($i,Frequency))==1) || \
+		    ($dataMatrix($i,Polarization)=="r" && $rightfreqArray($dataMatrix($i,Frequency))==1)) && \
+		    $timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
+		    $dataMatrix($i,Clicked)==1 && $dataMatrix($i,inUse)==1} {
+		set xval $dataMatrix($i,$xitem)
+		set yval $dataMatrix($i,$items)
+		if {$xval < $globalxmin || $xval > $globalxmax || $yval < $globalymin || $yval > $globalymax} {
+		    set dataMatrix($i,Clicked) 0
+		    set dataMatrix($i,inUse) 0
+		    .c itemconfigure point$i -fill red
+		    incr pointsIncluded -1
+		}
+	    }
+	}
+    }
+    .menuBar.edit.menu add separator
     menu .menuBar.edit.menu.auto
     .menuBar.edit.menu.auto add radiobutton -variable autoreplot -value 1 -label "Yes"
     .menuBar.edit.menu.auto add radiobutton -variable autoreplot -value 0 -label "No"
@@ -1669,7 +1962,6 @@ proc createSelectionMenu {} {
 	set statusMessage $text_replot
 	set i 0
 	foreach sou $sourcelist {
-	    #for {set i 0} {$i < [llength $sourcelist]} {incr i} {}
 	    if {[lindex $sourcetypelist $i]=="c"} {
 		foreach time $timelist {
 		    set timeAndSourceMatrix($time,$sou) 1
@@ -1686,7 +1978,6 @@ proc createSelectionMenu {} {
 	set statusMessage $text_replot
 	set i 0
 	foreach sou $sourcelist {
-	    #for {set i 0} {$i < [llength $sourcelist]} {incr i} {}
 	    if {[lindex $sourcetypelist $i]=="c" || [lindex $sourcetypelist $i]=="p"} {
 		foreach time $timelist {
 		    set timeAndSourceMatrix($time,$sou) 1
@@ -1711,7 +2002,6 @@ proc createSelectionMenu {} {
     set currentTime ""
     set i 0
     foreach source $sourcelist {
-	#for {set i 0} {$i < [llength $sourcelist]} {incr i} {}
 	set sourcelabel [format "%-10s %s" $source [lindex $sourcetypelist $i]]
 	.menuBar.edit.menu.sources add cascade -label "$sourcelabel" -menu .menuBar.edit.menu.sources.$source
 	menu .menuBar.edit.menu.sources.$source
@@ -1766,7 +2056,7 @@ proc createSelectionMenu {} {
     foreach freq $leftfreqlist {
 	set leftfreqArray($freq) 1
     }
-    .menuBar.edit.menu.left add command -label "All" -command {
+    .menuBar.edit.menu.left add command -label "All left" -command {
 	set currentPol lcp
 	set statusMessage $text_replot
 	foreach freq $leftfreqlist {
@@ -1806,8 +2096,8 @@ proc createSelectionMenu {} {
 	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,Polarization)=="l" && \
-			($dataMatrix($i,Frequency)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,Frequency)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			$dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
@@ -1821,36 +2111,40 @@ proc createSelectionMenu {} {
 		set delim "-"
 	    }
 	    .menuBar.edit.menu.left add command -label "[lindex $LOFirstlist $j] $delim [lindex $LOSecondlist $j]" \
-		    -command {
-		set this [expr [$currentW index active]-5]
-		set type [lindex $LOTypelist $this]
-		set currentPol lcp
-		if {[string range [lindex $LOFilelist $this] end-2 end]=="rxg"} {
-		    set currentRXG "[lindex $LOFilelist $this].work.$pid"
-		} else {
-		    set currentRXG "[lindex $LOFilelist $this]"
-		}
-		foreach freq $leftfreqlist {
-		    set leftfreqArray($freq) 0
-		}
-		foreach freq $rightfreqlist {
-		    set rightfreqArray($freq) 0
-		}
-		if {$type=="range"} {
+		-command {
+		    set this [expr [$currentW index active]-5]
+		    set type [lindex $LOTypelist $this]
+		    set currentPol lcp
+		    set fil [lindex $LOFilelist $this]
+		    if {[string range $fil [expr [string length $fil]-3] end]=="rxg"} {
+			set currentRXG "[lindex $LOFilelist $this].work.$pid"
+		    } else {
+			set currentRXG "[lindex $LOFilelist $this]"
+		    }
 		    foreach freq $leftfreqlist {
-			if {$freq>[lindex $LOFirstlist $this] && $freq<[lindex $LOSecondlist $this]} {
-			    set leftfreqArray($freq) 1
+			set leftfreqArray($freq) 0
+		    }
+		    foreach freq $rightfreqlist {
+			set rightfreqArray($freq) 0
+		    }
+		    if {$type=="range"} {
+			for {set i 1} {$i < $number_of_datalines} {incr i} {
+			    if {$dataMatrix($i,Polarization)=="l" && \
+				    ($dataMatrix($i,LO)>=[lindex $LOFirstlist $this] && \
+					 $dataMatrix($i,LO)<=[lindex $LOSecondlist $this]) && \
+				    $timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
+				set leftfreqArray($dataMatrix($i,Frequency)) 1
+			    }
+			}
+		    } elseif {$type=="fixed"} {
+			foreach freq $leftfreqlist {
+			    if {[lindex $leftfreqLOlist [lsearch $leftfreqlist $freq]]==[lindex $LOFirstlist $this] || \
+				    [lindex $leftfreqLOlist [lsearch $leftfreqlist $freq]]==[lindex $LOSecondlist $this]} {
+				set leftfreqArray($freq) 1
+			    }
 			}
 		    }
-		} elseif {$type=="fixed"} {
-		    foreach freq $leftfreqlist {
-			if {[lindex $leftfreqLOlist [lsearch $leftfreqlist $freq]]==[lindex $LOFirstlist $this] || \
-				[lindex $leftfreqLOlist [lsearch $leftfreqlist $freq]]==[lindex $LOSecondlist $this]} {
-			    set leftfreqArray($freq) 1
-			}
-		    }
 		}
-	    }
 	}
     }
 
@@ -1877,7 +2171,7 @@ proc createSelectionMenu {} {
 	}
 	incr i
     }
-    .menuBar.edit.menu.right add command -label "All" -command {
+    .menuBar.edit.menu.right add command -label "All right" -command {
 	set currentPol rcp
 	set statusMessage $text_replot
 	foreach freq $rightfreqlist {
@@ -1917,8 +2211,8 @@ proc createSelectionMenu {} {
 	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,Polarization)=="r" && \
-			($dataMatrix($i,Frequency)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,Frequency)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			$dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
@@ -1932,36 +2226,40 @@ proc createSelectionMenu {} {
 		set delim "-"
 	    }
 	    .menuBar.edit.menu.right add command -label "[lindex $LOFirstlist $j] $delim [lindex $LOSecondlist $j]" \
-		    -command {
-		set this [expr [$currentW index active]-5]
-		set type [lindex $LOTypelist $this]
-		set currentPol rcp
-		if {[string range [lindex $LOFilelist $this] end-2 end]=="rxg"} {
-		    set currentRXG "[lindex $LOFilelist $this].work.$pid"
-		} else {
-		    set currentRXG "[lindex $LOFilelist $this]"
-		}
-		foreach freq $leftfreqlist {
-		    set leftfreqArray($freq) 0
-		}
-		foreach freq $rightfreqlist {
-		    set rightfreqArray($freq) 0
-		}
-		if {$type=="range"} {
+		-command {
+		    set this [expr [$currentW index active]-5]
+		    set type [lindex $LOTypelist $this]
+		    set currentPol rcp
+		    set fil [lindex $LOFilelist $this]
+		    if {[string range $fil [expr [string length $fil]-3] end]=="rxg"} {
+			set currentRXG "[lindex $LOFilelist $this].work.$pid"
+		    } else {
+			set currentRXG "[lindex $LOFilelist $this]"
+		    }
+		    foreach freq $leftfreqlist {
+			set leftfreqArray($freq) 0
+		    }
 		    foreach freq $rightfreqlist {
-			if {$freq>[lindex $LOFirstlist $this] && $freq<[lindex $LOSecondlist $this]} {
-			    set rightfreqArray($freq) 1
+			set rightfreqArray($freq) 0
+		    }
+		    if {$type=="range"} {
+			for {set i 1} {$i < $number_of_datalines} {incr i} {
+			    if {$dataMatrix($i,Polarization)=="r" && \
+				    ($dataMatrix($i,LO)>=[lindex $LOFirstlist $this] && \
+					 $dataMatrix($i,LO)<=[lindex $LOSecondlist $this]) && \
+				    $timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
+				set rightfreqArray($dataMatrix($i,Frequency)) 1
+			    }
+			}
+		    } elseif {$type=="fixed"} {
+			foreach freq $rightfreqlist {
+			    if {[lindex $rightfreqLOlist [lsearch $rightfreqlist $freq]]==[lindex $LOFirstlist $this] || \
+				    [lindex $rightfreqLOlist [lsearch $rightfreqlist $freq]]==[lindex $LOSecondlist $this]} {
+				set rightfreqArray($freq) 1
+			    }
 			}
 		    }
-		} elseif {$type=="fixed"} {
-		    foreach freq $rightfreqlist {
-			if {[lindex $rightfreqLOlist [lsearch $rightfreqlist $freq]]==[lindex $LOFirstlist $this] || \
-				[lindex $rightfreqLOlist [lsearch $rightfreqlist $freq]]==[lindex $LOSecondlist $this]} {
-			    set rightfreqArray($freq) 1
-			}
-		    }
 		}
-	    }
 	}
     }
     		
@@ -1995,103 +2293,118 @@ proc createSelectionMenu {} {
     .menuBar.edit.menu.shortGain add cascade -label "Right" -menu .menuBar.edit.menu.shortGain.right
     menu .menuBar.edit.menu.shortGain.left
     menu .menuBar.edit.menu.shortGain.right
-    set k 0
+    .menuBar.edit.menu.shortGain.left add cascade -label "All" -menu .menuBar.edit.menu.shortGain.left.all
+    menu .menuBar.edit.menu.shortGain.left.all
     set i 0
+    set k 0
     foreach freq $leftfreqlist {
+	set j [lsearch $leftfreqlist $freq]
 	incr k
-	if {$k%30==0} {
-	    set j [lsearch $leftfreqlist $freq]
-	    .menuBar.edit.menu.shortGain.left add cascade -label "$freq [lindex $leftfreqLabellist $i]" \
-		    -columnbreak 1 -menu .menuBar.edit.menu.shortGain.left.$j
-	    menu .menuBar.edit.menu.shortGain.left.$j
-	    .menuBar.edit.menu.shortGain.left.$j add command -label "All" -command {
-		set thisj [lindex [split $currentW .] end]
-		set thisFreq [lindex $leftfreqlist $thisj]
-		gainShortcutFreq left $thisFreq All
-	    }
-	    .menuBar.edit.menu.shortGain.left.$j add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortGain.left.$j add command -label "$sou" -command {
-		    set thisFreq [lindex $leftfreqlist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    gainShortcutFreq left $thisFreq $thisSou
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+		    gainShortcutFreq left $thisFreq All
 		}
-	    }
 	} else {
-	    set j [lsearch $leftfreqlist $freq]
-	    .menuBar.edit.menu.shortGain.left add cascade -label "$freq [lindex $leftfreqLabellist $i]" \
-		    -columnbreak 0 -menu .menuBar.edit.menu.shortGain.left.$j
-	    menu .menuBar.edit.menu.shortGain.left.$j
-	    .menuBar.edit.menu.shortGain.left.$j add command -label "All" -command {
-		set thisj [lindex [split $currentW .] end]
-		set thisFreq [lindex $leftfreqlist $thisj]
-		gainShortcutFreq left $thisFreq All
-	    }
-	    .menuBar.edit.menu.shortGain.left.$j add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortGain.left.$j add command -label "$sou" -command {
-		    set thisFreq [lindex $leftfreqlist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    gainShortcutFreq left $thisFreq $thisSou
+	    .menuBar.edit.menu.shortGain.left.all add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+		    gainShortcutFreq left $thisFreq All
 		}
-	    }
 	}
 	incr i
     }
-    set k 0
+    .menuBar.edit.menu.shortGain.left add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortGain.left add cascade -label "$sou" -menu .menuBar.edit.menu.shortGain.left.$sou
+	menu .menuBar.edit.menu.shortGain.left.$sou
+	set i 0
+	set k 0
+	foreach freq $leftfreqlist {
+	    set j [lsearch $leftfreqlist $freq]
+	    incr k
+	    if {[expr $k%30]==0} {
+		.menuBar.edit.menu.shortGain.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		    -columnbreak 1 -command {
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			gainShortcutFreq left $thisFreq $thisSou
+		    }
+	    } else {
+		.menuBar.edit.menu.shortGain.left.$sou add command -label "$freq [lindex $leftfreqLabellist $i]" \
+		    -columnbreak 0 -command {
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			set thisFreq [lindex $leftfreqlist [expr [$currentW index active]-1]]
+			gainShortcutFreq left $thisFreq $thisSou
+		    }
+	    }
+	    incr i
+	}
+    }
+    .menuBar.edit.menu.shortGain.right add cascade -label "All" -menu .menuBar.edit.menu.shortGain.right.all
+    menu .menuBar.edit.menu.shortGain.right.all
     set i 0
+    set k 0
     foreach freq $rightfreqlist {
+	set j [lsearch $rightfreqlist $freq]
 	incr k
-	if {$k%30==0} {
-	    set j [lsearch $rightfreqlist $freq]
-	    .menuBar.edit.menu.shortGain.right add cascade -label "$freq [lindex $rightfreqLabellist $i]" \
-		    -columnbreak 1 -menu .menuBar.edit.menu.shortGain.right.$j
-	    menu .menuBar.edit.menu.shortGain.right.$j
-	    .menuBar.edit.menu.shortGain.right.$j add command -label "All" -command {
-		set thisj [lindex [split $currentW .] end]
-		set thisFreq [lindex $rightfreqlist $thisj]
-		gainShortcutFreq right $thisFreq All
-	    }
-	    .menuBar.edit.menu.shortGain.right.$j add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortGain.right.$j add command -label "$sou" -command {
-		    set thisFreq [lindex $rightfreqlist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    gainShortcutFreq right $thisFreq $thisSou
+	if {[expr $k%30]==0} {
+	    .menuBar.edit.menu.shortGain.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 1 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    gainShortcutFreq right $thisFreq All
 		}
-	    }
 	} else {
-	    set j [lsearch $rightfreqlist $freq]
-	    .menuBar.edit.menu.shortGain.right add cascade -label "$freq [lindex $rightfreqLabellist $i]" \
-		    -columnbreak 0 -menu .menuBar.edit.menu.shortGain.right.$j
-	    menu .menuBar.edit.menu.shortGain.right.$j
-	    .menuBar.edit.menu.shortGain.right.$j add command -label "All" -command {
-		set thisj [lindex [split $currentW .] end]
-		set thisFreq [lindex $rightfreqlist $thisj]
-		gainShortcutFreq right $thisFreq All
-	    }
-	    .menuBar.edit.menu.shortGain.right.$j add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortGain.right.$j add command -label "$sou" -command {
-		    set thisFreq [lindex $rightfreqlist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    gainShortcutFreq right $thisFreq $thisSou
+	    .menuBar.edit.menu.shortGain.right.all add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		-columnbreak 0 -command {
+		    set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+		    gainShortcutFreq right $thisFreq All
 		}
-	    }
 	}
 	incr i
+    }
+    .menuBar.edit.menu.shortGain.right add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortGain.right add cascade -label "$sou" -menu .menuBar.edit.menu.shortGain.right.$sou
+	menu .menuBar.edit.menu.shortGain.right.$sou
+	set i 0
+	set k 0
+	foreach freq $rightfreqlist {
+	    set j [lsearch $rightfreqlist $freq]
+	    incr k
+	    if {[expr $k%30]==0} {
+		.menuBar.edit.menu.shortGain.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		    -columnbreak 1 -command {
+			set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			gainShortcutFreq right $thisFreq $thisSou
+		    }
+	    } else {
+		.menuBar.edit.menu.shortGain.right.$sou add command -label "$freq [lindex $rightfreqLabellist $i]" \
+		    -columnbreak 0 -command {
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			set thisFreq [lindex $rightfreqlist [expr [$currentW index active]-1]]
+			gainShortcutFreq right $thisFreq $thisSou
+		    }
+	    }
+	    incr i
+	}
     }
     .menuBar.edit.menu.shortTCal add cascade -label "Left" -menu .menuBar.edit.menu.shortTCal.left
     .menuBar.edit.menu.shortTCal add cascade -label "Right" -menu .menuBar.edit.menu.shortTCal.right
     menu .menuBar.edit.menu.shortTCal.left
     menu .menuBar.edit.menu.shortTCal.right
+    .menuBar.edit.menu.shortTCal.left add cascade -label All -menu .menuBar.edit.menu.shortTCal.left.all
+    menu .menuBar.edit.menu.shortTCal.left.all
+    set leftincludedlist {}
     foreach LO $LONamelist {
 	set included 0
 	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,Polarization)=="l" && \
 			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
@@ -2099,67 +2412,128 @@ proc createSelectionMenu {} {
 	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		if {$dataMatrix($i,Polarization)=="l" && \
-			($dataMatrix($i,Frequency)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,Frequency)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
 	    }
 	}
 	if {$included==1} {
-	    .menuBar.edit.menu.shortTCal.left add cascade -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
-		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -menu .menuBar.edit.menu.shortTCal.left.$LO
-	    menu .menuBar.edit.menu.shortTCal.left.$LO
-	    .menuBar.edit.menu.shortTCal.left.$LO add command -label "All" -command {
-		set thisLO [lsearch $LONamelist [lindex [split $currentW .] end]]
-		tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO All
-	    }
-	    .menuBar.edit.menu.shortTCal.left.$LO add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortTCal.left.$LO add command -label "$sou" -command {
-		    set thisLO [lsearch $LONamelist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO $thisSou
+	    lappend leftincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.left.all add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $leftincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO All
+		    }
+	}
+    }
+    .menuBar.edit.menu.shortTCal.left add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortTCal.left add cascade -label $sou -menu .menuBar.edit.menu.shortTCal.left.$sou
+	menu .menuBar.edit.menu.shortTCal.left.$sou
+	set leftincludedlist {}
+	foreach LO $LONamelist {
+	    set included 0
+	    if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+		for {set i 1} {$i < $number_of_datalines} {incr i} {
+		    if {$dataMatrix($i,Polarization)=="l" && \
+			    ($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+				 $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			set included 1
+			break
+		    }
 		}
+	    } elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+		for {set i 1} {$i < $number_of_datalines} {incr i} {
+		    if {$dataMatrix($i,Polarization)=="l" && \
+			    ($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+				 $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			set included 1
+			break
+		    }
+		}
+	    }
+	    if {$included==1} {
+		lappend leftincludedlist $LO
+		.menuBar.edit.menu.shortTCal.left.$sou add command -label \
+		    "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $leftincludedlist [expr [$currentW index active]-1]]]
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			tcalShortcut left [lindex $LOTypelist $thisLO] $thisLO $thisSou
+		    }
 	    }
 	}
     }
+    .menuBar.edit.menu.shortTCal.right add cascade -label All -menu .menuBar.edit.menu.shortTCal.right.all
+    menu .menuBar.edit.menu.shortTCal.right.all
+    set rightincludedlist {}
     foreach LO $LONamelist {
 	set included 0
 	if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
-		if {$dataMatrix($i,Polarization)=="r" && \
+		if {$dataMatrix($i,Polarization)=="l" && \
 			($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			     $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
 	    }
 	} elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
 	    for {set i 1} {$i < $number_of_datalines} {incr i} {
-		if {$dataMatrix($i,Polarization)=="r" && \
-			($dataMatrix($i,Frequency)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
-			$dataMatrix($i,Frequency)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+			     $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
 		    set included 1
 		    break
 		}
 	    }
 	}
 	if {$included==1} {
-	    .menuBar.edit.menu.shortTCal.right add cascade -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
-		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -menu .menuBar.edit.menu.shortTCal.right.$LO
-	    menu .menuBar.edit.menu.shortTCal.right.$LO
-	    .menuBar.edit.menu.shortTCal.right.$LO add command -label "All" -command {
-		set thisLO [lsearch $LONamelist [lindex [split $currentW .] end]]
-		tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO All
-	    }
-	    .menuBar.edit.menu.shortTCal.right.$LO add separator
-	    foreach sou $sourcelist {
-		.menuBar.edit.menu.shortTCal.right.$LO add command -label "$sou" -command {
-		    set thisLO [lsearch $LONamelist [lindex [split $currentW .] end]]
-		    set thisSou [expr [$currentW index active]-3]
-		    tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO $thisSou
+	    lappend rightincludedlist $LO
+	    .menuBar.edit.menu.shortTCal.right.all add command -label "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $rightincludedlist [expr [$currentW index active]-1]]]
+			tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO All
+		    }
+	}
+    }
+    .menuBar.edit.menu.shortTCal.right add separator
+    foreach sou $sourcelist {
+	.menuBar.edit.menu.shortTCal.right add cascade -label $sou -menu .menuBar.edit.menu.shortTCal.right.$sou
+	menu .menuBar.edit.menu.shortTCal.right.$sou
+	set rightincludedlist {}
+	foreach LO $LONamelist {
+	    set included 0
+	    if {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="fixed"} {
+		for {set i 1} {$i < $number_of_datalines} {incr i} {
+		    if {$dataMatrix($i,Polarization)=="r" && \
+			    ($dataMatrix($i,LO)==[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+				 $dataMatrix($i,LO)==[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			set included 1
+			break
+		    }
 		}
+	    } elseif {[lindex $LOTypelist [lsearch $LONamelist $LO]]=="range"} {
+		for {set i 1} {$i < $number_of_datalines} {incr i} {
+		    if {$dataMatrix($i,Polarization)=="r" && \
+			    ($dataMatrix($i,LO)>=[lindex $LOFirstlist [lsearch $LONamelist $LO]] || \
+				 $dataMatrix($i,LO)<=[lindex $LOSecondlist [lsearch $LONamelist $LO]])} {
+			set included 1
+			break
+		    }
+		}
+	    }
+	    if {$included==1} {
+		lappend rightincludedlist $LO
+		.menuBar.edit.menu.shortTCal.right.$sou add command -label \
+		    "[lindex $LOFirstlist [lsearch $LONamelist $LO]] \
+		    [lindex $LOSecondlist [lsearch $LONamelist $LO]]" -command {
+			set thisLO [lsearch $LONamelist [lindex $rightincludedlist [expr [$currentW index active]-1]]]
+			set thisSou [lsearch $sourcelist [lindex [split $currentW .] end]]
+			tcalShortcut right [lindex $LOTypelist $thisLO] $thisLO $thisSou
+		    }
 	    }
 	}
     }
@@ -2168,9 +2542,10 @@ proc createSelectionMenu {} {
 }
 
 proc tcalShortcut {pol type index sourceindex} {
-    global sourcelist timeAndSourceMatrix sourcetypelist timelist xitem items statusMessage
+    global sourcelist timeAndSourceMatrix sourcetypelist timelist xitem items statusMessage number_of_datalines
     global leftfreqlist rightfreqlist leftfreqArray rightfreqArray hasScaled globalxmin globalxmax globalymin globalymax
     global LONamelist LOTypelist LOFirstlist LOSecondlist LOFilelist sourcetypelist leftfreqLOlist rightfreqLOlist
+    global dataMatrix text_zero
     set xitem "Frequency"
     set items "TCal(K)"
     set i 0
@@ -2202,9 +2577,12 @@ proc tcalShortcut {pol type index sourceindex} {
     }
     if {$pol=="left"} {
 	if {$type=="range"} {
-	    foreach freq $leftfreqlist {
-		if {$freq>[lindex $LOFirstlist $index] && $freq<[lindex $LOSecondlist $index]} {
-		    set leftfreqArray($freq) 1
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="l" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist $index] && \
+			$dataMatrix($i,LO)<=[lindex $LOSecondlist $index]) && \
+			$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
+		    set leftfreqArray($dataMatrix($i,Frequency)) 1
 		}
 	    }
 	} elseif {$type=="fixed"} {
@@ -2217,9 +2595,12 @@ proc tcalShortcut {pol type index sourceindex} {
 	}
     } elseif {$pol=="right"} {
 	if {$type=="range"} {
-	    foreach freq $rightfreqlist {
-		if {$freq>=[lindex $LOFirstlist $index] && $freq<=[lindex $LOSecondlist $index]} {
-		    set rightfreqArray($freq) 1
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,Polarization)=="r" && \
+			($dataMatrix($i,LO)>=[lindex $LOFirstlist $index] && \
+			$dataMatrix($i,LO)<=[lindex $LOSecondlist $index]) && \
+			$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1} {
+		    set rightfreqArray($dataMatrix($i,Frequency)) 1
 		}
 	    }
 	} elseif {$type=="fixed"} {
@@ -2231,23 +2612,27 @@ proc tcalShortcut {pol type index sourceindex} {
 	    }
 	}
     }
+    for {set i 1} {$i < $number_of_datalines} {incr i} {
+	if {$dataMatrix($i,Clicked)==1} {
+	    set dataMatrix($i,inUse) 1
+	}
+    }
     set hasScaled 0
     autoScale
     if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
 	replot
     } else {
-	set statusMessage "Divide by zero error. Check the log file, the rxg files and the current selection. If\
-		all seems fine, report the bug."
+	set statusMessage $text_zero
     }
 }
 
 
 proc gainShortcutFreq {pol thisFreq sourceindex} {
     global sourcelist timeAndSourceMatrix sourcetypelist timelist hasScaled statusMessage xitem items gainChoice
-    global leftfreqlist rightfreqlist leftfreqArray rightfreqArray globalxmin globalxmax globalymin globalymax
+    global leftfreqlist rightfreqlist leftfreqArray rightfreqArray globalxmin globalxmax globalymin globalymax text_zero
     set xitem "Elevation"
     set items "Gain"
-    set gainChoice 1
+    #set gainChoice 1
     set i 0
     if {$sourceindex=="All"} {
 	foreach sou $sourcelist {
@@ -2286,8 +2671,7 @@ proc gainShortcutFreq {pol thisFreq sourceindex} {
     if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
 	replot
     } else {
-	set statusMessage "Divide by zero error. Check the log file, the rxg files and the current selection. If\
-		all seems fine, report the bug."
+	set statusMessage $text_zero
     }
 }
 
@@ -2300,25 +2684,27 @@ proc gainShortcutFreq {pol thisFreq sourceindex} {
 # ----------------------------------------------------------------------------------------
 
 proc togglePoint {} {
-    global dataMatrix items BADVALUE
+    global dataMatrix items BADVALUE pointsIncluded
     set taglist [.c gettags current]
     set i [string range [lindex $taglist 0] 5 end]
     if {$dataMatrix($i,inUse)==1} {
 	#if {$dataMatrix($i,Clicked)==1} {}
 	set dataMatrix($i,inUse) 0
 	set dataMatrix($i,Clicked) 0
+	incr pointsIncluded -1
 	.c itemconfigure point$i -fill red
     } elseif {$dataMatrix($i,$items)>$BADVALUE} {
 	.c itemconfigure point$i -fill white
 	set dataMatrix($i,inUse) 1
 	set dataMatrix($i,Clicked) 1
+	incr pointsIncluded
     }
 }
 
 
 
 proc toggleManyPoints {} {
-    global dataMatrix number_of_datalines timeAndSourceMatrix items BADVALUE
+    global dataMatrix number_of_datalines timeAndSourceMatrix items BADVALUE pointsIncluded
     set taglist [.c gettags current]
     set nodeNumber [string range [lindex $taglist 0] 5 end]
     set time $dataMatrix($nodeNumber,Time)
@@ -2328,10 +2714,12 @@ proc toggleManyPoints {} {
 	    if {$inUse} {
 		set dataMatrix($i,inUse) 0
 		set dataMatrix($i,Clicked) 0
+		incr pointsIncluded -1
 		.c itemconfigure point$i -fill red
 	    } elseif {$dataMatrix($i,$items)>$BADVALUE} {
 		set dataMatrix($i,inUse) 1
 		set dataMatrix($i,Clicked) 1
+		incr pointsIncluded
 		.c itemconfigure point$i -fill white
 	    }
 	}
@@ -2369,7 +2757,7 @@ proc deleteGCpoints {} {
 	    set realUpperGC $upperGC
 	}
 	for {set i 1} {$i < $number_of_datalines} {incr i} {
-	    if {$dataMatrix($i,$gcl)>0} {
+	    if {$dataMatrix($i,$gcl)>0 && $dataMatrix($i,$gcl)<1000} {
 		set test [expr $test+$dataMatrix($i,$gcl)]
 	    } else {
 		incr corr
@@ -2417,20 +2805,44 @@ proc deleteGCpoints {} {
 
 proc createToolsMenu xitem {
     global items sourcelist fitchoice currentPol currentRXG pixelx pixely number_of_LO number_of_pol pointoffplot gctype
+    global fctk statusMessage fgc thickline
     destroy .menuBar.tools.menu
     menu .menuBar.tools.menu
+    if {[string match $items "TCal Ratio"] || [string match $items "Gain Compression"]} {
+	.menuBar.tools.menu add checkbutton -variable tcr -label "Draw line at 1" -command {
+	    if {$tcr==1} {
+		set gcl "Gain Compression"
+		set test 0
+		set corr 0
+		#If the user has entered GC in percent, this sets it back to unity
+		for {set i 1} {$i < $number_of_datalines} {incr i} {
+		    if {$dataMatrix($i,$gcl)>0 && $dataMatrix($i,$gcl)<5000} {
+			set test [expr $test+$dataMatrix($i,$gcl)]
+		    } else {
+			incr corr
+		    }
+		}
+		if {[expr $test/($number_of_datalines-$corr)]>10} {
+		    set factor 100
+		} else {
+		    set factor 1
+		}
+		toPixels $globalxmin [expr 1*$factor]
+		set pixelxmin $pixelx
+		set pixelymin $pixely   
+		toPixels $globalxmax [expr 1*$factor]
+		set pixelxmax $pixelx
+		set pixelymax $pixely   
+		.c create line $pixelxmin $pixelymin $pixelxmax $pixelymax -tags tcrcurve 
+	    } elseif {$tcr==0} {
+		.c delete tcrcurve
+	    }
+	}
+    }
     if {$xitem=="Elevation"} {
 	if {$number_of_LO==1 && $number_of_pol==1 && $currentRXG != ""} {
 	    if {[string match Gain $items]} {
-		.menuBar.tools.menu add cascade -label "Fit to" -menu .menuBar.tools.menu.fit
-		menu .menuBar.tools.menu.fit
-		.menuBar.tools.menu.fit add radiobutton -label "New DPFU" \
-		    -command {outputFit 1} -variable fitChoice -value 1
-		.menuBar.tools.menu.fit add radiobutton -label "Gain Curve and DPFU" \
-		    -command {outputFit 2} -variable fitChoice -value 2
-		.menuBar.tools.menu.fit add radiobutton -label "Scale TCal(K)" \
-		    -command {outputFit 3} -variable fitChoice -value 3
-		.menuBar.tools.menu add checkbutton -label "Gain Curve" -variable gc -command {
+		.menuBar.tools.menu add checkbutton -label "Gain Curve in working file" -variable gc -command {
 		    if {$gc==1} {
 			set fileID [open $currentRXG r]
 			set k 1
@@ -2464,13 +2876,31 @@ proc createToolsMenu xitem {
 			    }
 			}
 			close $fileID
-			drawPoly $DPFU [lreplace $gainlist 0 1] gaincurve $gctype dash
+			drawPoly $DPFU [lreplace $gainlist 0 1] gaincurve $gctype nodash green3
 		    }
 		    if {$gc==0} {
 			.c delete gaincurve
 		    }
 		}
-		.menuBar.tools.menu add command -label "Update Working File" -command {updateRXGwithfit $fitChoice}
+		.menuBar.tools.menu add checkbutton -label "Fitted Gain Curve" -variable fgc -command {
+		    if {$fgc==0} {
+			.c delete fittedgaincurve
+		    } elseif {$fgc==1} {
+			set statusMessage " Turn on the fitted curve by refitting"
+		    }
+		}
+		.menuBar.tools.menu add cascade -label "Fit to" -menu .menuBar.tools.menu.fit
+		menu .menuBar.tools.menu.fit
+		.menuBar.tools.menu.fit add radiobutton -label "New DPFU" \
+		    -command {outputFit 1} -variable fitChoice -value 1
+		.menuBar.tools.menu.fit add radiobutton -label "Gain Curve and DPFU" \
+		    -command {outputFit 2} -variable fitChoice -value 2
+		.menuBar.tools.menu.fit add radiobutton -label "Scale TCal(K)" \
+		    -command {outputFit 3} -variable fitChoice -value 3
+		.menuBar.tools.menu add command -label "Update Working File" -command {
+		    updateRXGwithfit $fitChoice
+		    .menuBar.tools.menu invoke *file
+		}
 		.menuBar.tools.menu add separator
 	    }
 	} elseif {$items=="Gain"} {
@@ -2484,89 +2914,72 @@ proc createToolsMenu xitem {
 	}
     }
     if {$xitem=="Frequency"} {
-	if {[string match $items "TCal Ratio"] || [string match $items "Gain Compression"]} {
-	    .menuBar.tools.menu add checkbutton -variable tcr -label "Draw line at 1" -command {
-		if {$tcr==1} {
-		    set gcl "Gain Compression"
-		    set test 0
-		    set corr 0
-		    #If the user has entered GC in percent, this sets it back to unity
-		    for {set i 1} {$i < $number_of_datalines} {incr i} {
-			if {$dataMatrix($i,$gcl)>0} {
-			    set test [expr $test+$dataMatrix($i,$gcl)]
-			} else {
-			    incr corr
-			}
-		    }
-		    if {[expr $test/($number_of_datalines-$corr)]>10} {
-			set factor 100
-		    } else {
-			set factor 1
-		    }
-		    toPixels $globalxmin [expr 1*$factor]
-		    set pixelxmin $pixelx
-		    set pixelymin $pixely   
-		    toPixels $globalxmax [expr 1*$factor]
-		    set pixelxmax $pixelx
-		    set pixelymax $pixely   
-		    .c create line $pixelxmin $pixelymin $pixelxmax $pixelymax -tags tcrcurve
-		} elseif {$tcr==0} {
-		    .c delete tcrcurve
-		}
-	    }
-	}
-    }
-    if {[string match $items TCal(K)]} {
-	if {$number_of_LO==1 && $number_of_pol==1 && $currentRXG != ""} {
-	    .menuBar.tools.menu add checkbutton -label "TCal(K) Curve" -variable tck -command {
-		if {$tck==1} {
-		    set fileID [open $currentRXG r]
-		    set k 1
-		    set xlist {}
-		    set ylist {}
-		    while {-1 != [gets $fileID line]} {
-			if {[string index $line 0] != "\*"} {
-			    if {$k>=7} {
-				split $line
-				if {[lindex $line 0]==$currentPol} {
-				    lappend xlist [lindex $line 1]
-				    lappend ylist [lindex $line 2]
+	if {[string match $items TCal(K)]} {
+	    if {$number_of_LO==1 && $number_of_pol==1 && $currentRXG != ""} {
+		.menuBar.tools.menu add checkbutton -label "TCal(K) Curve in file" -variable tck -command {
+		    if {$tck==1} {
+			set fileID [open $currentRXG r]
+			set k 1
+			set xlist {}
+			set ylist {}
+			while {-1 != [gets $fileID line]} {
+			    if {[string index $line 0] != "\*"} {
+				if {$k>=7} {
+				    split $line
+				    if {[lindex $line 0]==$currentPol} {
+					lappend xlist [lindex $line 1]
+					lappend ylist [lindex $line 2]
+				    }
 				}
+				incr k
 			    }
-			    incr k
+			}
+			close $fileID
+			for {set i 0} {$i<[expr [llength $xlist]-1]} {incr i} {
+			    if {[lindex $xlist $i]<$globalxmin || [lindex $xlist [expr $i+1]]>$globalxmax} {
+			    } elseif {[lindex $ylist [expr $i+1]]>=$globalymin && \
+					  [lindex $ylist [expr $i+1]]<=$globalymax} {
+				drawTCalCurve [lindex $xlist $i] [lindex $ylist $i] [lindex $xlist [expr $i+1]] \
+				    [lindex $ylist [expr $i+1]] tcalcurve
+				# toPixels [lindex $xlist $i] [lindex $ylist $i]
+# 				set pixelxold $pixelx 
+# 				set pixelyold $pixely
+# 				toPixels [lindex $xlist [expr $i+1]] [lindex $ylist [expr $i+1]]
+# 				set pixelxnew $pixelx 
+# 				set pixelynew $pixely
+# 				.c create line $pixelxold $pixelyold $pixelxnew $pixelynew \
+# 				    -tags tcalcurve -width $thickline -fill green3
+			    }
 			}
 		    }
-		    close $fileID
-		    for {set i 0} {$i<[expr [llength $xlist]-1]} {incr i} {
-			if {[lindex $xlist $i]<$globalxmin || [lindex $xlist [expr $i+1]]>$globalxmax} {
-			} elseif {[lindex $ylist [expr $i+1]]>=$globalymin && \
-				      [lindex $ylist [expr $i+1]]<=$globalymax} {
-			    toPixels [lindex $xlist $i] [lindex $ylist $i]
-			    set pixelxold $pixelx 
-			    set pixelyold $pixely
-			    toPixels [lindex $xlist [expr $i+1]] [lindex $ylist [expr $i+1]]
-			    set pixelxnew $pixelx 
-			    set pixelynew $pixely
-			    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags tcalcurve
-			}
+		    if {$tck==0} {
+			.c delete tcalcurve
 		    }
 		}
-		if {$tck==0} {
-		    .c delete tcalcurve
+		.menuBar.tools.menu add checkbutton -label "Fitted TCal(K) Curve" -variable ftck -command {
+		    if {$ftck==0} {
+			.c delete fittedtcalcurve
+		    } elseif {$ftck==1} {
+			set statusMessage "Turn on the fitted curve by refitting"
+			set ftck 0
+		    }
 		}
-	    }
-	    .menuBar.tools.menu add cascade -label "Fit for TCal(K)" -menu .menuBar.tools.menu.fit
-	    menu .menuBar.tools.menu.fit    
-	    .menuBar.tools.menu.fit add command -label "Average at each freq." -command {fitForTCal 1}
-	    .menuBar.tools.menu.fit add command -label "Median at each freq." -command {fitForTCal 2}
-	    .menuBar.tools.menu add command -label "Update working file" -command updateRXGwithTCal
-	} else {
-	    if {$number_of_LO==1 && $currentRXG!=""} {
-		.menuBar.tools.menu add command -label "Please select polarization"
-	    } elseif {$number_of_pol==1} {
-		.menuBar.tools.menu add command -label "Please select LO"
+		.menuBar.tools.menu add separator
+		.menuBar.tools.menu add cascade -label "Fit for TCal(K)" -menu .menuBar.tools.menu.fit
+		menu .menuBar.tools.menu.fit    
+		.menuBar.tools.menu.fit add command -label "Average at each freq." -command {fitForTCal 1}
+		.menuBar.tools.menu.fit add command -label "Median at each freq." -command {fitForTCal 2}
+		.menuBar.tools.menu add command -label "Update Working file" -command {
+		    updateRXGwithTCal
+		}
 	    } else {
-		.menuBar.tools.menu add command -label "Please select both LO & Pol"
+		if {$number_of_LO==1 && $currentRXG!=""} {
+		    .menuBar.tools.menu add command -label "Please select polarization"
+		} elseif {$number_of_pol==1} {
+		    .menuBar.tools.menu add command -label "Please select LO"
+		} else {
+		    .menuBar.tools.menu add command -label "Please select both LO & Pol"
+		}
 	    }
 	}
     }
@@ -2581,17 +2994,34 @@ proc createToolsMenu xitem {
 
 
 proc checkLO {} {
-    global dataMatrix number_of_datalines LOFirstlist LOSecondlist number_of_LO
+    global dataMatrix number_of_datalines LOFirstlist LOSecondlist LOTypelist number_of_LO LOType
     set number_of_LO 0
     set j -1
     foreach LO $LOFirstlist {
 	incr j
-	for {set i 1} {$i < $number_of_datalines} {incr i} {
-	    if {$dataMatrix($i,inUse)==1 && ($dataMatrix($i,LO)==$LO || $dataMatrix($i,LO)==[lindex $LOSecondlist $j])} {
-		incr number_of_LO
-		break
+	set type [lindex $LOTypelist $j]
+	if {$type=="fixed"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,inUse)==1 && ($dataMatrix($i,LO)==$LO || \
+			$dataMatrix($i,LO)==[lindex $LOSecondlist $j])} {
+		    incr number_of_LO
+		    set righttype "fixed"
+		    break
+		}
+	    }
+	} elseif {$type=="range"} {
+	    for {set i 1} {$i < $number_of_datalines} {incr i} {
+		if {$dataMatrix($i,inUse)==1 && ($dataMatrix($i,LO)>=$LO && \
+			$dataMatrix($i,LO)<=[lindex $LOSecondlist $j])} {
+		    incr number_of_LO
+		    set righttype "range"
+		    break
+		}
 	    }
 	}
+    }
+    if {$number_of_LO==1} {
+	set LOType $righttype
     }
 }
 
@@ -2623,7 +3053,7 @@ proc checkPol {} {
 
 proc outputFit choice {
     global number_of_datalines dataMatrix polydeg currentRXG avgdpfu coefflist gc avgtcal
-    global currentPol gctype rchi
+    global currentPol gctype rchi fgc
     set DPFU 1
     set k 1
     set dpfucount 0
@@ -2675,8 +3105,8 @@ proc outputFit choice {
 		} 
 	    }
 	    set avgdpfu [format %.4f [expr double($totaldpfu)/$dpfucount]]
-	    set gc 1
-	    drawPoly $avgdpfu $coefflist gaincurve $gctype
+	    set fgc 1
+	    drawPoly $avgdpfu $coefflist fittedgaincurve $gctype dash black
 	    set DPFU $avgdpfu
 	}
 	2 {
@@ -2735,7 +3165,7 @@ proc outputFit choice {
 	}
     }
     if {[info exists rchi] && [info exists DPFU] && [info exists coefflist]} {
-	.menuBar.tools.menu delete 4 last
+	.menuBar.tools.menu delete 5 last
 	.menuBar.tools.menu add command -label "RMS/DPFU: [format %.6f [expr double($rchi)/$DPFU]]"
 	.menuBar.tools.menu add separator
 	.menuBar.tools.menu add command -label "DPFU: $DPFU"
@@ -2755,9 +3185,9 @@ proc outputFit choice {
 
 proc fitToGainCurve {} {
     global number_of_datalines dataMatrix currentInputFitFile currentOutputFitFile currentPol
-    global gc polydeg currentRXG coefflist DPFU steps rchi gctype
+    global gc polydeg currentRXG coefflist DPFU steps rchi gctype fgc
     global statusMessage
-    set gc 0
+    set fgc 0
     set err -1
     set outFile [open $currentInputFitFile w+]
     exec chmod a+rw $currentInputFitFile
@@ -2796,11 +3226,11 @@ proc fitToGainCurve {} {
 	    set coefflist [lrange $line 7 end]
 	}
 	close $fileID
-	drawPoly $DPFU $coefflist gaincurve $gctype
-	set gc 1
+	drawPoly $DPFU $coefflist fittedgaincurve $gctype dash black
+	set fgc 1
     }
     if {[info exists rchi] && [info exists DPFU] && [info exists coefflist]} {
-	.menuBar.tools.menu delete 4 last
+	.menuBar.tools.menu delete 5 last
 	.menuBar.tools.menu add command -label "RMS/DPFU: [format %.6f [expr double($rchi)/$DPFU]]"
 	.menuBar.tools.menu add separator
 	.menuBar.tools.menu add command -label "DPFU: $DPFU"
@@ -2820,12 +3250,16 @@ proc fitToGainCurve {} {
 # ------------------------------------------------------------------------------------
 	
 proc updateRXGwithfit choice {
-    global currentPol currentRXG coefflist DPFU steps rchi currentOutputFile newfile_filename tempRXG
-    global avgdpfu timeinseconds number_of_datalines dataMatrix avgtcal writeflag gctype editedlist pid
+    global currentPol currentRXG coefflist DPFU steps rchi currentOutputFile newfile_filename tempRXG controlFileDir
+    global avgdpfu timeinseconds number_of_datalines dataMatrix avgtcal writeflag gctype editedlist pid fgc gc
     if {[lsearch $currentRXG $editedlist]==-1} {
 	lappend editedlist $currentRXG
     }
     set writeflag 1
+    set fgc 0
+    set gc 0
+    .c delete gaincurve
+    .c delete fittedgaincurve
     switch $choice {
 	1 {
 	    set tempFile [open $tempRXG w]
@@ -2868,7 +3302,7 @@ proc updateRXGwithfit choice {
 	    close $tempFile
 	    exec cp $tempRXG $currentRXG
 	    exec rm -f $tempRXG
-	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid]
+	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid $controlFileDir]
 	    readData $currentOutputFile
 	}
 	2 {
@@ -2918,7 +3352,7 @@ proc updateRXGwithfit choice {
 	    close $tempFile
 	    exec cp $tempRXG $currentRXG
 	    exec rm -f $tempRXG
-	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid]
+	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid $controlFileDir]
 	    readData $currentOutputFile
 	}
 	3 {
@@ -2951,7 +3385,7 @@ proc updateRXGwithfit choice {
 	    close $tempFile
 	    exec cp $tempRXG $currentRXG
 	    exec rm -f $tempRXG
-	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid]
+	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid $controlFileDir]
 	    readData $currentOutputFile
 	}
     }
@@ -2963,10 +3397,12 @@ proc updateRXGwithfit choice {
 
 proc fitForTCal select {
     global currentPol leftfreqlist rightfreqlist dataMatrix number_of_datalines tck pixelx pixely pointoffplot
-    global globalxmin globalxmax globalymin globalymax BADVALUE
-    set tck 1
-    .c delete tcalcurve
+    global globalxmin globalxmax globalymin globalymax BADVALUE ftck
+    set ftck 1
+    .c delete fittedtcalcurve
     set tc "TCal(K)"
+    set tlist {}
+    set flist {}
     if {$currentPol=="lcp"} {
 	set sortedlist [lsort -real $leftfreqlist]
     }
@@ -2994,7 +3430,14 @@ proc fitForTCal select {
 	    }
 	} elseif {$select==2} {
 	    if {$number_of_times!=0} {
-		set currentTC [format %.4f [lindex $alltclist [expr round([llength $alltclist]/2)]]]
+		set alltclist [lsort -real $alltclist]
+		if {[expr [llength $alltclist]%2]==0} {
+		    set low [lindex $alltclist [expr ([llength $alltclist]/2)-1]]
+		    set high [lindex $alltclist [expr ([llength $alltclist]/2)]]
+		    set currentTC [format %.4f [expr ($high+$low)/2]]
+		} else {
+		    set currentTC [format %.4f [lindex $alltclist [expr int(ceil([llength $alltclist]/2))]]]
+		}
 		lappend tlist $currentTC
 		lappend flist $freq
 	    }
@@ -3007,13 +3450,15 @@ proc fitForTCal select {
 	if {[lindex $xlist $i]<$globalxmin || [lindex $xlist [expr $i+1]]>$globalxmax} {
 	} elseif {[lindex $ylist [expr $i+1]]>=$globalymin && \
 		[lindex $ylist [expr $i+1]]<=$globalymax} {
-	    toPixels [lindex $xlist $i] [lindex $ylist $i]
-	    set pixelxold $pixelx 
-	    set pixelyold $pixely
-	    toPixels [lindex $xlist [expr $i+1]] [lindex $ylist [expr $i+1]]
-	    set pixelxnew $pixelx 
-	    set pixelynew $pixely
-	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags tcalcurve
+	    drawTCalCurve [lindex $xlist $i] [lindex $ylist $i] [lindex $xlist [expr $i+1]] [lindex $ylist [expr $i+1]] \
+		fittedtcalcurve dash
+	    # toPixels [lindex $xlist $i] [lindex $ylist $i]
+# 	    set pixelxold $pixelx 
+# 	    set pixelyold $pixely
+# 	    toPixels [lindex $xlist [expr $i+1]] [lindex $ylist [expr $i+1]]
+# 	    set pixelxnew $pixelx 
+# 	    set pixelynew $pixely
+# 	    .c create line $pixelxold $pixelyold $pixelxnew $pixelynew -tags fittedtcalcurve
 	}
     }
 }
@@ -3052,6 +3497,8 @@ proc updateRXGwithTCal {} {
     } else {
 	set currentTime "Multiple"
     }    
+
+    destroy .rxgWindow
 
     toplevel .rxgWindow
     
@@ -3092,9 +3539,9 @@ proc updateRXGwithTCal {} {
 proc printTCalToRXG {} {
     global currentRXG currentSource currentTime currentPol currentFreq timeinseconds leftfreqlist rightfreqlist
     global dataMatrix number_of_datalines timelist currentTimes writeflag editedlist tck tempRXG currentOutputFile pid
-    global newfile_filename
+    global newfile_filename controlFileDir
     set tck 0
-    .c delete tcalcurve
+    set ftck 0
     set writeflag 1
     set tempFile [open $tempRXG w]
     exec chmod a+rw $tempRXG
@@ -3157,14 +3604,17 @@ proc printTCalToRXG {} {
     close $tempFile
     exec cp $tempRXG $currentRXG
     exec rm -f $tempRXG
-    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid]
+    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid $controlFileDir]
     if {$currentOutputFile==-1} {
-	set statusMessage "There's a problem with the .rxg files. Please check the /usr2/control directory."
+	set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory."
     } else {
 	.c delete points
 	.c delete sourcetext
+	.c delete fittedtcalcurve
+	.c delete tcalcurve
 	readData $currentOutputFile
 	replot
+	.menuBar.tools.menu invoke *file
     }
 }    
 
@@ -3176,10 +3626,11 @@ proc printTCalToRXG {} {
 # ==========================================================================
 
 proc changePrefs {} {
-    global current_DefaultDir pref_DefaultDir currentOutputFile pref_Output 
+    global current_DefaultDir pref_DefaultDir currentOutputFile pref_Output
     global currentInputFitFile pref_InputFit currentOutputFitFile pref_OutputFit
-    global current_TEMP pref_TEMP
-    set pref_DefaultDir $current_DefaultDir 
+    global current_TEMP pref_TEMP controlFileDir pref_controlFileDir
+    set pref_DefaultDir $current_DefaultDir
+    set pref_controlFileDir $controlFileDir
     set pref_Output $currentOutputFile
     set pref_InputFit $currentInputFitFile
     set pref_OutputFit $currentOutputFitFile
@@ -3188,16 +3639,40 @@ proc changePrefs {} {
 }
 
 proc pref_OK {} {
-    global current_DefaultDir pref_DefaultDir currentOutputFile pref_Output 
+    global current_DefaultDir pref_DefaultDir currentOutputFile pref_Output newfile_filename
     global currentInputFitFile pref_InputFit currentOutputFitFile pref_OutputFit
-    global current_TEMP pref_TEMP text_ready
-    set current_DefaultDir $pref_DefaultDir 
+    global current_TEMP pref_TEMP text_ready controlFileDir pref_controlFileDir statusMessage
+    set current_DefaultDir $pref_DefaultDir
+    if {$controlFileDir!=$pref_controlFileDir && $controlFileDir!=[string trimright $pref_controlFileDir "/"] && \
+	    ![info exists newfile_filename]} {
+	set change 1
+	set currentOutputFile \
+		[exec gndat $newfile_filename $currentOutputFile 0 [string trimright $pref_controlFileDir "/"]]
+	if {$currentOutputFile==-1} {
+	    set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory"
+	    update 
+	} else {
+	    .c delete points
+	    .c delete sourcetext
+	    .c delete gaincurve
+	    .c delete fittedgaincurve
+	    .c delete tcalcurve
+	    .c delete fittedtcalcurve
+	    .c delete tcrcurve
+	    readData $currentOutputFile
+	    replot
+	}
+    }
+    set controlFileDir [string trimright $pref_controlFileDir "/"]
+    if {[catch [exec cp $currentOutputFile $pref_Output]]!=0} {
+    }
     set currentOutputFile $pref_Output
+    #exec rm -f $currentOutputFile
     set currentInputFitFile $pref_InputFit
     set currentOutputFitFile $pref_OutputFit
     set current_TEMP $pref_TEMP
     destroy .pref
-    set statusMsg $text_ready
+    set statusMessage $text_ready
 }
 
 # Create all the graphical widgets for the preferences window
@@ -3222,12 +3697,14 @@ proc create_prefWindow {} {
     frame .pref.subframe32
 
     label .pref.labelDefaultDir -anchor w -width 35 -text "Default directory for FS log files:"
+    label .pref.labelControlDir -anchor w -width 35 -text "Default directory for .rxg files:"
     label .pref.labelOutput -anchor w -width 35 -text "Output file for gndat.............:"
     label .pref.labelInputFit -anchor w -width 35 -text "Input file for gnfit..............:"
     label .pref.labelOutputFit -anchor w -width 35 -text "Output file for gnfit.............:"
     label .pref.labelTEMP -anchor w -width 35 -text "Temporary file for gnplt..........:"
         
     entry .pref.entryDefaultDir -width 38 -relief sunken -textvariable pref_DefaultDir
+    entry .pref.entryControlDir -width 38 -relief sunken -textvariable pref_controlFileDir
     entry .pref.entryOutput -width 38 -relief sunken -textvariable pref_Output
     entry .pref.entryInputFit -width 38 -relief sunken -textvariable pref_InputFit
     entry .pref.entryOutputFit -width 38 -relief sunken -textvariable pref_OutputFit
@@ -3248,8 +3725,8 @@ proc create_prefWindow {} {
     pack .pref.subframe21 .pref.subframe22 -side left -in .pref.frame2
     pack .pref.subframe31 .pref.subframe32 -side left -in .pref.frame3
     
-    pack .pref.labelDefaultDir .pref.labelOutput -in .pref.subframe11 -padx 2m -pady 2m
-    pack .pref.entryDefaultDir .pref.entryOutput -in .pref.subframe12 -padx 2m -pady 2m
+    pack .pref.labelDefaultDir .pref.labelControlDir .pref.labelOutput -in .pref.subframe11 -padx 2m -pady 2m
+    pack .pref.entryDefaultDir .pref.entryControlDir .pref.entryOutput -in .pref.subframe12 -padx 2m -pady 2m
 
     pack .pref.labelInputFit .pref.labelOutputFit -anchor w -padx 2m -pady 2m -in .pref.subframe21
     pack .pref.entryInputFit .pref.entryOutputFit -in .pref.subframe22 -padx 2m -pady 2m
@@ -3388,15 +3865,19 @@ proc createShortcutWindow {} {
 
     frame .short.frame1 -borderwidth 4 -relief groove
     frame .short.frame2 -borderwidth 4 -relief groove
+    frame .short.frame3 -borderwidth 4 -relief groove
     frame .short.subframe11
     frame .short.subframe12
     frame .short.subframe21
     frame .short.subframe22
+    frame .short.subframe31
+    frame .short.subframe32
+
 
     label .short.header1 -anchor center -text "Keyboard shortcuts"
     
     label .short.keyexp1 -anchor w -text "Replot"
-    label .short.keyexp2 -anchor w -text "Quit"
+    label .short.keyexp2 -anchor w -text "Quit (q)"
     label .short.keyexp3 -anchor w -text "Shows all points currently selected on the edit menu."
 
     label .short.key1 -anchor w -text "r"
@@ -3414,24 +3895,45 @@ proc createShortcutWindow {} {
     
     label .short.mouseexp1 -anchor w -text "Toggles point on/off."
     label .short.mouseexp2 -anchor w -text "Toggles all points with the same time on/off."
-    label .short.mouseexp3 -anchor w -text "Draws a line between the points with the same source and frequency/time."
+    label .short.mouseexp3 -anchor w -text "Connects the points with the same source and frequency/time."
     label .short.mouseexp4 -anchor w -text "Starts a box for zooming. Drag and release to zoom."
     label .short.mouseexp5 -anchor w -text "Starts a box for editing. All points inside turns on."
     label .short.mouseexp6 -anchor w -text "Starts a box for editing. All points inside turns off."
     
+    label .short.header3 -anchor center -text "Color explanations"
+
+    label .short.color1 -anchor w -text "White point" 
+    label .short.color2 -anchor w -text "Cyan point" -foreground cyan
+    label .short.color3 -anchor w -text "Red point" -foreground red
+    label .short.color4 -anchor w -text "Green curve" -foreground green 
+    label .short.color5 -anchor w -text "Black curve" -foreground black
+
+    label .short.colorexp1 -anchor w -text "Point on the plot, not deleted"
+    label .short.colorexp2 -anchor w -text "Point off the plot, not deleted"
+    label .short.colorexp3 -anchor w -text "Point on or off the plot, deleted"
+    label .short.colorexp4 -anchor w -text "Curve currently in the .rxg file"
+    label .short.colorexp5 -anchor w -text "Curve as result of a fit"
+
     button .short.ok -text "OK" -command {destroy .short}
 
-    pack .short.keyexp1 .short.keyexp2 .short.keyexp3 -in .short.subframe11 -pady 2m -side top 
-    pack .short.key1 .short.key2 .short.key3 -in .short.subframe12 -pady 2m -side top 
+    pack .short.keyexp1 .short.keyexp2 .short.keyexp3 -in .short.subframe11 -pady 0.5m -side top 
+    pack .short.key1 .short.key2 .short.key3 -in .short.subframe12 -pady 0.5m -side top 
     pack .short.mouse1 .short.mouse2 .short.mouse3 .short.mouse4 .short.mouse5 .short.mouse6 \
-	-in .short.subframe21 -pady 2m -side top -fill x
+	-in .short.subframe21 -pady 0.5m -side top -fill x
     pack .short.mouseexp1 .short.mouseexp2 .short.mouseexp3 .short.mouseexp4 .short.mouseexp5 .short.mouseexp6 \
-	-in .short.subframe22 -pady 2m -side top -fill x
+	-in .short.subframe22 -pady 0.5m -side top -fill x
+    pack .short.color1 .short.color2 .short.color3 .short.color4 .short.color5 \
+	-in .short.subframe31 -pady 0.5m -side top -fill x
+    pack .short.colorexp1 .short.colorexp2 .short.colorexp3 .short.colorexp4 .short.colorexp5 \
+	-in .short.subframe32 -pady 0.5m -side top -fill x
+    
     
     pack .short.subframe11 .short.subframe12 -in  .short.frame1 -side left -fill y -padx 4m
     pack .short.subframe21 .short.subframe22 -in  .short.frame2 -side left -fill y -padx 4m
-    
-    pack .short.header1 .short.frame1 .short.header2 .short.frame2 .short.ok -side top -pady 3m 
+    pack .short.subframe31 .short.subframe32 -in  .short.frame3 -side left -fill y -padx 4m
+
+    pack .short.header1 .short.frame1 .short.header2 .short.frame2 .short.header3 .short.frame3 .short.ok \
+	-side top -pady 2m 
 }
 
 # ==========================================================================
@@ -3466,6 +3968,7 @@ proc doExit {} {
 }    
 
 proc createOverwriteWindow {} {
+    global pid LOFilelist
     set overWriteText "You have updated the .rxg working files.\n\n Do you want to overwrite the original .rxg files?\n\nThe old information will be stored below the new one, but commented out.\n\nReally overwrite?"
     toplevel .over
     
@@ -3477,7 +3980,17 @@ proc createOverwriteWindow {} {
     message .over.message -width 500 -text $overWriteText
 
     button .over.buttonOK -text "Yes" -width 10 -command {copyRXG;destroy .over;exit}
-    button .over.buttonCancel -text "No" -width 10 -command {destroy .over;exit}
+    button .over.buttonCancel -text "No" -width 10 -command {
+	foreach rxg $LOFilelist {
+	    if {[string first $pid $rxg]==-1} {
+		exec rm -f $rxg.work.$pid
+	    } else {
+		exec rm -f $rxg
+	    }
+	}
+	destroy .over
+	exit
+    }
 
     pack .over.frame1 -fill x -padx 8m -pady 4m -in .over
     pack .over.frame4 -padx 8m -pady 4m -side bottom -in .over
@@ -3534,13 +4047,18 @@ canvas .c -width [expr $size*180+$xoffset+$xrightoffset+50] -height [expr $size*
 
 frame .subframe2
 frame .subframe2a -borderwidth 3 -relief groove
+frame .subframe2b -borderwidth 3 -relief groove
 frame .subframe20 
 frame .subframe200 
 frame .subframe201 
 frame .subframe202 
 frame .subframe21
 frame .subframe211 
-frame .subframe212 
+frame .subframe212
+frame .subframe22
+frame .subframe221 
+frame .subframe222
+
 
 label .labelLabelPointX -width 10 -anchor w -textvariable XPointLabel
 label .labelLabelPointY -width 10 -anchor w -textvariable YPointLabel
@@ -3561,6 +4079,16 @@ label .labelPointAzimuth -width 10 -anchor e -textvariable PointAzimuth
 label .labelPointElevation -width 10 -anchor e -textvariable PointElevation
 label .labelPointTime -width 10 -anchor e -textvariable PointTime
 label .labelDummy1 -width 10 -anchor e
+
+label .labelLabelSelect -width 15 -anchor w -text "Selected points:"
+label .labelLabelInclude -width 15 -anchor w -text "Included points:"
+label .labelLabelHighlight -width 15 -anchor w -text "Highlighted points:"
+label .labelLabelTotal -width 15 -anchor w -text "Total points:"
+
+label .labelPointSelect -width 6 -anchor e -textvariable pointsSelected
+label .labelPointInclude -width 6 -anchor e -textvariable pointsIncluded
+label .labelPointHighlight -width 6 -anchor e -textvariable pointsHighlighted
+label .labelPointTotal -width 6 -anchor e -textvariable number_of_datalines
 
 # Set up canvas to show coordinate system
 
@@ -3597,8 +4125,8 @@ frame .menuBar -relief raised -borderwidth 2
 
 menubutton .menuBar.file -text "File" -underline 0 -menu .menuBar.file.menu
 menubutton .menuBar.edit -text "Edit" -underline 0 -menu .menuBar.edit.menu
-menubutton .menuBar.items -text "Items (Y-axis)" -underline 7 -menu .menuBar.items.menu
 menubutton .menuBar.xaxis -text "Items (X-axis)" -underline 7 -menu .menuBar.xaxis.menu
+menubutton .menuBar.items -text "Items (Y-axis)" -underline 7 -menu .menuBar.items.menu
 menubutton .menuBar.source -text "Source" -underline 0 -menu .menuBar.source.menu
 menubutton .menuBar.frequ -text "Frequencies" -underline 0 -menu .menuBar.frequ.menu
 menubutton .menuBar.tools -text "Tools" -underline 0 -menu .menuBar.tools.menu
@@ -3627,14 +4155,21 @@ pack .subframe2a -side top -in .subframe2 -anchor center
 pack .subframe200 -side top -in .subframe2a -anchor center
 pack .subframe20 -side top -in .subframe2a -anchor center 
 pack .subframe21 -side top -in .subframe2 -pady 2c
+pack .subframe2b -side top -in .subframe2 -anchor center
+pack .subframe22 -side top -in .subframe2b -anchor center 
 pack .subframe201 .subframe202 -side left -in .subframe20 -fill x
 pack .subframe211 .subframe212 -side left -in .subframe21
+pack .subframe221 .subframe222 -side left -in .subframe22 -fill x
 pack .labelLabelPointX .labelLabelPointY .labelLabelPointSource .labelLabelPointFreq .labelLabelPointPol \
     .labelLabelPointAzimuth .labelLabelPointElevation .labelLabelPointTime .labelLabelDummy1 \
     -padx 2m -fill x -in .subframe211
 pack .labelPointX .labelPointY .labelPointSource .labelPointFreq .labelPointPol .labelPointAzimuth \
     .labelPointElevation .labelPointTime .labelDummy1 -ipadx 1c -in .subframe212
+pack .labelLabelHighlight .labelLabelInclude .labelLabelSelect .labelLabelTotal -padx 2m -fill x -in .subframe221
+pack .labelPointHighlight .labelPointInclude .labelPointSelect .labelPointTotal -ipadx 1c -in .subframe222
 pack .subframe2 -side right
+
+
 
 # Create the menu widgets
 # -----------------------
@@ -3659,66 +4194,56 @@ menu .menuBar.help.menu
 .menuBar.file.menu add command -label "Exit" -command {doExit}
 
 
-.menuBar.xaxis.menu add radiobutton -label "Time" -variable xitem -value "Time" -command {
-    set statusMessage $text_replot
-    set scaling Auto
-    if {$autoreplot==1} {
-	replot
-	set statusMessage $text_ready
-    }
-}
-.menuBar.xaxis.menu add radiobutton -label "Elevation" -variable xitem -value "Elevation" -command {
-    set statusMessage $text_replot
-    set scaling Auto
-    if {$autoreplot==1} {
-	replot
-	set statusMessage $text_ready
-    }
-}
-.menuBar.xaxis.menu add radiobutton -label Frequency -variable xitem -value Frequency -command {
-    set statusMessage $text_replot
-    set scaling Auto
-    if {$autoreplot==1} {
-	replot
-	set statusMessage $text_ready
+
+foreach xit $xitemlist {
+    .menuBar.xaxis.menu add radiobutton -label "$xit" -variable xitem -value "$xit" -command {
+	set statusMessage $text_replot
+	set scaling Auto
+	if {$autoreplot==1} {
+	    replot
+	    set statusMessage $text_ready
+	}
     }
 }
 
-
-.menuBar.scaling.menu add radiobutton -label "Autoscale data on plot" -variable scaling -value Auto \
+.menuBar.scaling.menu add radiobutton -label "Autoscale not including deleted" -variable scaling -value Auto \
 	-command {
     set tempList {}
-    for {set i 1} {$i<$number_of_datalines} {incr i} {
-	if {$dataMatrix($i,$xitem)>=$globalxmin && $dataMatrix($i,$xitem)<=$globalxmax} {
-	    if {[lsearch $tempList $dataMatrix($i,$xitem)]==-1} {
-		lappend tempList $dataMatrix($i,$xitem)
-	    }
-	}
-	if {[llength $tempList]>1} {
-	    break
-	}
-    }
-    if {[llength $tempList]>1} {
-	set hasScaled 0
-	if {[info exists globalxmin]} {
-	    scale
-	    if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
-		drawNodes
-	    } else {
-		set statusMessage "Divide by zero error. Check the log file, the rxg files and the current selection. If\
-			all seems fine, report the bug."
-	    }
+    set autoStyle 0
+    set hasScaled 0
+    if {[info exists globalxmin]} {
+	scale 
+	if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
+	    drawNodes
 	} else {
-	    set statusMessage "No axes selected."
+	    set statusMessage $text_zero
 	}
-    } else { 
-	set statusMessage "Not enough data on X-axis to autoscale."
+    } else {
+	set statusMessage "No axes selected."
     }
 }
+
+.menuBar.scaling.menu add radiobutton -label "Autoscale including deleted" -variable scaling -value AutoInc \
+	-command {
+    set autoStyle 1
+    set tempList {}
+    set hasScaled 0
+    if {[info exists globalxmin]} {
+	scale 
+	if {$globalxmin!=$globalxmax && $globalymin!=$globalymax} {
+	    drawNodes
+	} else {
+	    set statusMessage $text_zero
+	}
+    } else {
+	set statusMessage "No axes selected."
+    }
+}
+
 .menuBar.scaling.menu add radiobutton -label "Manual" -variable scaling -value Manual -command {set hasScaled 0;scale}
-.menuBar.scaling.menu add separator
-.menuBar.scaling.menu add command -label "Show All For This Selection" -command showAlmostAll
-.menuBar.scaling.menu add command -label "Show All Points In Log" -command showAll
+#.menuBar.scaling.menu add separator
+#.menuBar.scaling.menu add command -label "Show All For This Selection" -command showAlmostAll
+#.menuBar.scaling.menu add command -label "Show All Points In Log" -command showAll
 
 .menuBar.help.menu add command -label "Shortcuts" -command createShortcutWindow
 
@@ -3802,10 +4327,10 @@ switch $argc {
 	} else {
 	    set newfile_filename [lindex $argv 0]
 	    set legendNo 1           ;#makes the source legend be set only once
-	    set SDmenus_is_set 0
-	    set currentOutputFile [exec gndat [lindex $argv 0] $currentOutputFile 0]
+	    #set SDmenus_is_set 0
+	    set currentOutputFile [exec gndat [lindex $argv 0] $currentOutputFile 0 $controlFileDir]
 	    if {$currentOutputFile==-1} {
-		set statusMessage "There's a problem with the .rxg files. Please check the /usr2/control directory."
+		set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory."
 	    } else {
 		.c delete points
 		readData $currentOutputFile
@@ -3821,10 +4346,10 @@ switch $argc {
 	}
 	set newfile_filename [lindex $argv 1]
 	set legendNo 1           ;#makes the source legend be set only once
-	set SDmenus_is_set 0
-	set currentOutputFile [exec gndat [lindex $argv 1] $currentOutputFile 0]
+	#set SDmenus_is_set 0
+	set currentOutputFile [exec gndat [lindex $argv 1] $currentOutputFile 0 $controlFileDir]
 	if {$currentOutputFile==-1} {
-	    set statusMessage "There's a problem with the .rxg files. Please check the /usr2/control directory."
+	    set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory."
 	} else {
 	    .c delete points
 	    readData $currentOutputFile
