@@ -550,6 +550,7 @@ rxmon
 newtape
 rec=load
 !+10s
+tape=low,reset
 st=for,135,off
 !+11s
 et
