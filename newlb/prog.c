@@ -517,6 +517,22 @@ void fs_get_ibwvc__(ibwvc)
 	  memcpy(ibwvc,shm_addr->ibwvc,N);
 	}
 
+void fs_set_extbwvc__(extbwvc)
+	float *extbwvc;
+	{
+          size_t N;
+	  N = sizeof(shm_addr->extbwvc);
+	  memcpy(shm_addr->extbwvc,extbwvc,N);
+	}
+
+void fs_get_extbwvc__(extbwvc)
+	float *extbwvc;
+	{
+          size_t N;
+	  N =  sizeof(shm_addr->extbwvc);
+	  memcpy(extbwvc,shm_addr->extbwvc,N);
+	}
+
 void fs_set_ifp2vc__(ifp2vc)
 	int *ifp2vc;
 	{
@@ -686,7 +702,7 @@ void fs_get_inext__(INEXT)
 	    *(INEXT++)=shm_addr->INEXT[i];
 	}
 
-void fs_set_kena__(KENASTK)
+void fs_set_kenastk__(KENASTK)
 	int *KENASTK;
         
 	{
@@ -695,7 +711,7 @@ void fs_set_kena__(KENASTK)
 	    shm_addr->KENASTK[i]=*(KENASTK++);
 	}
 
-void fs_get_kena__(KENASTK)
+void fs_get_kenastk__(KENASTK)
 	int *KENASTK;
 	{
           int i;
@@ -773,18 +789,6 @@ void fs_get_icaptp__(ICAPTP)
 	int *ICAPTP;
 	{
           *ICAPTP = shm_addr->ICAPTP;
-        }
-
-void fs_set_iremtp__(IREMTP)
-	int *IREMTP;
-	{
-	  shm_addr->IREMTP= *IREMTP;
-	}
-
-void fs_get_iremtp__(IREMTP)
-	int *IREMTP;
-	{
-          *IREMTP = shm_addr->IREMTP; 
         }
 
 void fs_set_istptp__(ISTPTP)
@@ -1318,30 +1322,30 @@ void fs_get_imaxtpsd__(imaxtpsd)
 
 void fs_set_freqlo__(freqlo,N)
 	int *N;
-        float *freqlo;
+        double *freqlo;
 	{
-	  shm_addr->freqlo[*N] = *freqlo;
+	  shm_addr->lo.lo[*N] = *freqlo;
 	}
 
 void fs_get_freqlo__(freqlo,N)
 	int *N;
-	float *freqlo;
+	double *freqlo;
 	{
-	  *freqlo = shm_addr->freqlo[*N];
+	  *freqlo = shm_addr->lo.lo[*N];
 	}
 
-void fs_set_frequp__(frequp,N)
+void fs_set_sblo__(sblo,N)
 	int *N;
-        float *frequp;
+        int *sblo;
 	{
-	  shm_addr->frequp[*N] = *frequp;
+	  shm_addr->lo.sideband[*N] = *sblo;
 	}
 
-void fs_get_frequp__(frequp,N)
+void fs_get_sblo__(sblo,N)
 	int *N;
-	float *frequp;
+	int *sblo;
 	{
-	  *frequp = shm_addr->frequp[*N];
+	  *sblo = shm_addr->lo.sideband[*N];
 	}
 
 void fs_get_diaman__(diaman)
@@ -1518,6 +1522,25 @@ void fs_get_vgroup__(vgroup)
 	  vgroup[3] = shm_addr->venable.group[3];
 	}
 
+void fs_get_vfmenablehi__(vfmenablehi)
+        int *vfmenablehi;
+	{
+	  *vfmenablehi = shm_addr->vform.enable.high;
+	}
+
+void fs_get_vfmenablelo__(vfmenablelo)
+        int *vfmenablelo;
+	{
+	  *vfmenablelo = shm_addr->vform.enable.low;
+	}
+
+void fs_get_fm4enable__(fm4enable)
+        long fm4enable[];
+	{
+	  fm4enable[0] = shm_addr->form4.enable[0];
+	  fm4enable[1] = shm_addr->form4.enable[1];
+	}
+
 void fs_get_vrepro_equalizer__(equalizer,n)
         int *equalizer,*n;
 	{
@@ -1668,4 +1691,112 @@ void fs_get_vac4__(vac4)
 	int *vac4;
 	{
 	  *vac4 = shm_addr->vac4;
+	}
+
+void fs_set_wrvolt2__(wrvolt2)
+	float *wrvolt2;
+	{
+	  shm_addr->wrvolt2 = *wrvolt2;
+	}
+
+void fs_get_wrvolt2__(wrvolt2)
+	float *wrvolt2;
+	{
+	  *wrvolt2 = shm_addr->wrvolt2;
+	}
+
+void fs_set_wrvolt4__(wrvolt4)
+	float *wrvolt4;
+	{
+	  shm_addr->wrvolt4 = *wrvolt4;
+	}
+
+void fs_get_wrvolt4__(wrvolt4)
+	float *wrvolt4;
+	{
+	  *wrvolt4 = shm_addr->wrvolt4;
+	}
+
+void fs_set_wrvolt42__(wrvolt42)
+	float *wrvolt42;
+	{
+	  shm_addr->wrvolt42 = *wrvolt42;
+	}
+
+void fs_get_wrvolt42__(wrvolt42)
+	float *wrvolt42;
+	{
+	  *wrvolt42 = shm_addr->wrvolt42;
+	}
+
+void fs_set_user_dev1_name__(user_dev1_name)
+	char *user_dev1_name;
+	{
+	  memcpy(shm_addr->user_dev1_name,user_dev1_name,2);
+	}
+
+void fs_get_user_dev1_name__(user_dev1_name)
+	char *user_dev1_name;
+	{
+	  memcpy(user_dev1_name,shm_addr->user_dev1_name,2);
+	}
+
+void fs_set_user_dev2_name__(user_dev2_name)
+	char *user_dev2_name;
+	{
+	  memcpy(shm_addr->user_dev2_name,user_dev2_name,2);
+	}
+
+void fs_get_user_dev2_name__(user_dev2_name)
+	char *user_dev2_name;
+	{
+	  memcpy(user_dev2_name,shm_addr->user_dev2_name,2);
+	}
+
+void fs_set_user_dev1_value__(user_dev1_value)
+	double *user_dev1_value;
+	{
+	  shm_addr->user_dev1_value = *user_dev1_value;
+	}
+
+void fs_get_user_dev1_value__(user_dev1_value)
+	double  *user_dev1_value;
+	{
+	  *user_dev1_value = shm_addr->user_dev1_value;
+	}
+
+void fs_set_user_dev2_value__(user_dev2_value)
+	double *user_dev2_value;
+	{
+	  shm_addr->user_dev2_value = *user_dev2_value;
+	}
+
+void fs_get_user_dev2_value__(user_dev2_value)
+	double  *user_dev2_value;
+	{
+	  *user_dev2_value = shm_addr->user_dev2_value;
+	}
+
+void fs_set_freqif3__(freqif3)
+	long *freqif3;
+	{
+	  shm_addr->freqif3 = *freqif3;
+	}
+
+void fs_get_freqif3__(freqif3)
+	long *freqif3;
+	{
+	  *freqif3 = shm_addr->freqif3;
+	}
+
+void fs_set_imixif3__(imixif3)
+	int *imixif3;
+	{
+	  shm_addr->imixif3 = *imixif3;
+	}
+
+void fs_get_imixif3__(imixif3)
+	int *imixif3;
+	{
+	  *imixif3 = shm_addr->imixif3;
 	}
