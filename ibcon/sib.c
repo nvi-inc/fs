@@ -40,11 +40,11 @@ int sib(int hpib, char *buffer, int len_in, int max_out, int timeout,
 
   if(len>0) {
     if(itime) {
-      rte_rawt(centisec);
+      rte_ticks(centisec);
     }
     ierr = portwrite_(&hpib,buffer,&len);
     if(itime) {
-      rte_rawt(centisec+1);
+      rte_ticks(centisec+1);
     }
     if(ierr<0)
       return -2;
