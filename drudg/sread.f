@@ -12,7 +12,7 @@ C  Output:
 
 C  Local:
       integer ilen,ltype,ich,ic1,ic2,idummy,ic,
-     .icx,nch,iret
+     .icx,nch,iret,i
       integer htype ! section 2-letter code
       logical kcod ! set to ksta when $CODES is found
       logical ksta ! set to true when $STATIONS is found
@@ -38,6 +38,8 @@ C 951214 nrv Add BARREL
 C 960409 nrv Initialize ITRA2
 C 960522 nrv Add call to VREAD, store observations in memory.
 C 960607 nrv Move initializations into FDRUDG
+C 960610 nrv Initialize in call to FRINIT
+C 960810 nrv Initialize tape motion values
 C
 C
       close(unit=LU_INFILE)
@@ -160,7 +162,7 @@ C
                   IC = ISCN_CH(IBUF,1,ILEN*2,'EARLY')
                   IF (IC.NE.0) THEN !early time
                     CALL GTFLD(IBUF,IC+5,ILEN*2,IC1,IC2)
-                    ITEARL=IAS2B(IBUF,IC1,IC2-IC1+1)
+                    ITEARL(1)=IAS2B(IBUF,IC1,IC2-IC1+1) ! save one value
                   ENDIF !early time
                   IC = ISCN_CH(IBUF,1,ILEN*2,'TAPE')
               ICX= ISCN_CH(IBUF,1,ILEN*2,'TAPETM')
@@ -283,6 +285,14 @@ C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         enddo 
       endif
+C
+C Initialize early start for all stations and set other S2 values to zero.
+      do i=1,max_stn
+        itearl(i)=itearl(1)
+        itlate(i)=0
+        itgap(i)=0
+        tape_motion_type(i)='start&stop'
+      enddo
 C
       endif ! VEX/skd
       RETURN
