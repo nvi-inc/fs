@@ -22,7 +22,6 @@ C
       if (kbreak('fivpt')) goto 80010
       call run_prog('antcn','wait',ip1,0,0,0,0)
       call rmpar(ip)
-      if(ip(1).ne.0) call clrcl(ip(1))
       if (ip(3).ge.0) return 
       call logit7ic(idum,idum,idum,-1,ip(3),ip(4),'fp')
       itry=itry-1 
@@ -32,7 +31,7 @@ C
 C BREAK DETECTED
 C 
 80010 continue
-      ierr=1
+      ierr=-1
       return
 C 
 C FAILED COMMUNICATION
