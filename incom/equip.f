@@ -151,6 +151,9 @@ C LINE #2  TYPE OF RECORDER - drive 1
       else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
         drive(1) = VLBA4
         drive_type(1) = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'vlba42').eq.0.and.il.eq.6) then
+        drive(1) = VLBA4
+        drive_type(1) = VLBA42
       else if (ichcm_ch(ibuf,ic1,'k41').eq.0.and.il.eq.3) then
         drive(1) = K4
         drive_type(1) = K41
@@ -212,6 +215,9 @@ C LINE #3  TYPE OF RECORDER - drive 2
       else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
         drive(2) = VLBA4
         drive_type(2) = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'vlba42').eq.0.and.il.eq.6) then
+        drive(2) = VLBA4
+        drive_type(2) = VLBA42
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive(2) = 0
         drive_type(2) = 0
@@ -400,6 +406,24 @@ C **** Modified rdg
         call logit7ci(0,0,0,1,-140,'bo',11)
         goto 990
       endif
+C ** Mk4 formatter firmware
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',12)
+        goto 990
+      endif
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',12)
+        goto 990
+      endif
+      imk4fmv = ias2b(ibuf,ic1,ic2-ic1+1,ierr)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-140,'bo',12)
+        go to 990
+      endif
+      call fs_set_imk4fmv(imk4fmv)
 C **** end modify rdg
       return
 
