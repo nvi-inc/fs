@@ -248,7 +248,11 @@ C  Store equipment names.
           idummy = ichmv(lstrec(1,i),1,lrec1,1,8) ! recorder 1 type
         endif
         if (ichcm_ch(lrec2,1,' ').ne.0) then
-          idummy = ichmv(lstrec2(1,i),1,lrec2,1,8) ! recorder 2 type
+          if (ichcm_ch(lrec1,1,'S2').eq.0) then 
+            idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
+          else 
+            idummy = ichmv(lstrec2(1,i),1,lrec2,1,8) ! recorder 2 type
+          endif
         endif
         idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! starting recorder default
 C    Store other info depending on the type.

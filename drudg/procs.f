@@ -205,6 +205,8 @@ C            Set up krec_2rec and
 C            check that for whether to append suffix to rec commands.
 C 010920 nrv Add code from D. Graham to enable "S2" for 2-head.
 C 011002 nrv Change second wait in K4 LOADER to 6s per H. Osaki.
+C 011011 nrv Wrong character counting variable in user_info setup.
+C 011022 nrv Remove NEWTAPE from K4 LOADER.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -327,7 +329,7 @@ C
       WRITE(LUSCN,9113) PRCNAME(1:IC), (LSTNNA(I,ISTN),I=1,4)
 9113  FORMAT(' PROCEDURE LIBRARY FILE ',A,' FOR ',4A2)
       write(luscn,9114) 
-9114  format(' **NOTE** These procedures are for stations using '/
+9114  format(' **NOTE** These procedures are for',
      .' the following equipment:')
       write(luscn,'("   >> ",4a2," rack")') (lstrack(i,istn),i=1,4)
       write(luscn,'("   >> ",4a2," recorder 1")') (lstrec(i,istn),i=1,4)
@@ -749,7 +751,7 @@ C           If roll is NOT blank and NOT NONE then use it.
             CALL writf_asc(LU_OUTFILE,IERR,IBUF,(NCH+1)/2)
             call ifill(ibuf,1,ibuflen,oblank)
             nchx = ichmv_ch(IBUF,1,'user_info')
-            if (krec_2rec      ) nchx = ichmv_ch(ibuf,nch,crec(irec))
+            if (krec_2rec      ) nchx = ichmv_ch(ibuf,nchx,crec(irec))
             CALL IFILL(IBUF,nchx,ibuflen,32)
             NCH = ICHMV_ch(IBUF,nchx,'=1,label,station')
             CALL WRITF_ASC(LU_OUTFILE,ierr,IBUF,(NCH+1)/2)
@@ -2322,9 +2324,9 @@ C LOADER procedure
           endif
           if (kk41rec(irec).or.kk42rec(irec)) then
             call ifill(ibuf,1,ibuflen,oblank)
-            nch = ichmv_ch(ibuf,1,'newtape=$')
-            call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
-            call ifill(ibuf,1,ibuflen,oblank)
+C           nch = ichmv_ch(ibuf,1,'newtape=$')
+C           call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
+C           call ifill(ibuf,1,ibuflen,oblank)
             nch = ichmv_ch(ibuf,1,'!+25s ')
             call writf_asc(lu_outfile,ierr,ibuf,(nch)/2)
             call ifill(ibuf,1,ibuflen,oblank)

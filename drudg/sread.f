@@ -66,6 +66,7 @@ C 000517 nrv Find line where $EXPER starts in VEX file and save it.
 C 000611 nrv Add call to OBS_SORT for sked files. VEX files already in order.
 C 000614 nrv Add call to ATAPE.
 C 010102 nrv Add LUSCN to obs_sort call.
+C 011011 nrv Move FRINIT call to start.
 C
 C
       close(unit=LU_INFILE)
@@ -85,6 +86,7 @@ C
       kcod = .false.
       kvlb = .false.
       khed = .false.
+      call frinit(max_stn,max_frq)
 C
       kvex=.false.
       read(lu_infile,'(a)') cbuf
@@ -156,7 +158,6 @@ C*********************************************************
         ELSE IF (ichcm_ch(IBUF,1,'$CODES').EQ.0) THEN
           call char2hol('FR',LTYPE,1,2)
           kcod = ksta
-          if (ksta) call frinit(nstatn,max_frq)
         ELSE IF (ichcm_ch(IBUF,1,'$HEAD').EQ.0) THEN
           call char2hol('HD',LTYPE,1,2)
           khed = kcod

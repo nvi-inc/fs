@@ -67,6 +67,7 @@ C  LOCAL VARIABLES
 	character*3 cs   !set character
 	logical ksx      ! true for S/X frequencies
         logical k96      ! true if 9600 synth is in use
+      logical kauto
 	real squal1(max_chan), squal2(max_chan) ! BBC freqs. grouped by sets
         integer*2 ldum
       integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,k,ileft,im,iysave
@@ -83,6 +84,7 @@ C You could write out a new set of header lines whenever the code
 C changes within the schedule. Keep track as you go through the observations.
 C       icod=1
 
+        kauto = tape_allocation(istn).eq.'AUTO'
 C * comment with station name frequency code
 
         call ifill(ibuf,1,iblen,32)
@@ -325,10 +327,12 @@ C logging = special
 
 C autoallocate=on
 C autoreverse=on
-        n = ichmv_ch(ibuf,1,'autoallocate=on ')
-        call writf_asc(lu,ierr,ibuf,n/2)
-        n = ichmv_ch(ibuf,1,'autoreverse=on ')
-        call writf_asc(lu,ierr,ibuf,n/2)
+        if (kauto) then
+          n = ichmv_ch(ibuf,1,'autoallocate=on ')
+          call writf_asc(lu,ierr,ibuf,n/2)
+          n = ichmv_ch(ibuf,1,'autoreverse=on ')
+          call writf_asc(lu,ierr,ibuf,n/2)
+        endif
 
 C  Following lines are written out only for VLBA antennas
 

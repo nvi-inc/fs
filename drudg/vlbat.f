@@ -41,7 +41,7 @@ C  LOCAL
      .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,iftrem,
      .mino,isco,isp,i,nch,ispm,isps,in,itu,idayrt,iyrt,ihrt,mint,isct
       real spdips
-      logical ktape,ktrack,kcont
+      logical ktape,ktrack,kcont,kauto
         logical kspin ! true if we need to spin tape to get to the
 C                       next observation
         logical kspinoff ! true if we need to spin the tape down
@@ -117,6 +117,8 @@ C            be written. The innitial setup block is needed by operations.
 C            The STOP commands give time for tape readbacks.
 C 000614 nrv Don't do the block that runs the tape to the end of a pass
 C            if tape has auto allocation.
+C 011011 nrv New variable KAUTO used to set up for autoallocate.
+C 011011 nrv Add KAUTO to wrtap call.
 C
 C  Initialization
 
@@ -127,9 +129,9 @@ C  Initialization
 C
 C  Add a comment if a new tape is to mounted before the next observation
 
-Cdyn    irec=irecp
+      kauto = tape_allocation(istn).eq.'AUTO'
         irec=irecp
-      irec = 1 ! always, for dynamic
+      if (kauto) irec = 1 ! always, for dynamic
       IDIR=+1
       IF (LDIR(ISTNSK).EQ.ldirr) IDIR=-1
       KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
@@ -137,9 +139,9 @@ Cdyn    irec=irecp
         ispinoff=0
         kspinoff=.false.
 Cdyn
-      knewtp = .false. ! always, for dynamic
+      if (kauto) knewtp = .false. ! always, for dynamic
 C     Try letting the setup commands appear at tape reversals.
-      idirp = idir ! always, for dynamic
+      if (kauto) idirp = idir ! always, for dynamic
 Cdyn
       IF (KNEWTP) THEN ! new tape
         idirp=-1
@@ -235,7 +237,7 @@ C  Set up tape parameters
       if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp)
      .  call char2hol('+',LSPDIR,1,1)
 Cdyn 
-      call char2hol('+',LSPDIR,1,1) ! forward, always
+      if (kauto) call char2hol('+',LSPDIR,1,1) ! forward, always
 C  ihead is the head offset position in microns
       IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
 C  ihddir is not really "direction", it is the corresponding pass within
@@ -323,13 +325,13 @@ C     ktrack=.true. !****************** always write them for pol
         ktape = .true.
       ENDIF !change direction
 Cdyn
-      ktrack = .false. ! always, for dynamic
-      ktape = .true.   ! always, for dynamic
+      if (kauto) ktrack = .false. ! always, for dynamic
+      if (kauto) ktape = .true.   ! always, for dynamic
 Cdyn
 Cdyn comment out this call to wrtap. The tape=stop is not needed.
 Cdyn Well, it is needed to get parity checks done.
       IF (.not.kcont.or.(kcont.and.(IDIR.NE.IDIRP.or.iobs.eq.0))) THEN ! 
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec) ! stop/head
+        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto) ! stop/head
         ktape = .false.
       endif
       call ifill(ibuf,1,iblen,32)
@@ -356,7 +358,7 @@ C         Stop time of this block is previous stop+ispinoff+isortm
         iwr = 0
         ispin = 330
           call char2hol('-',LSoDIR,1,1)
-        call wrtap(lsodir,ispin,ihead,lu,iwr,ktape,irec)
+        call wrtap(lsodir,ispin,ihead,lu,iwr,ktape,irec,kauto)
 C  Wait block - wait either the time to change the tape
 C               or until the start time
           call char2hol('!* Wait until new tape is mounted *!',
@@ -378,7 +380,7 @@ C               or until the start time
         ktape = .true.
         iwr = 0
         ispin=0
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec)
+        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
       endif !write spin block for old tape
 
 C  Spin tape if required
@@ -402,7 +404,7 @@ C           Stop time of this block is previous stop+ispin+isortm
         ktape = .true.
         iwr = 0
         ispin = 330
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec)
+        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
         call char2hol('!* Wait *!',ibuf,1,10)
         CALL writf_asc(LU,IERR,IBUF,5)
         call ifill(ibuf,1,iblen,32)
@@ -412,7 +414,7 @@ C  Wait block - wait until start time
         ktape = .true.
         iwr = 0
         ispin=0
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec)
+        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
       endif !write spin blocks
 
 C  This is the block for recording
@@ -440,7 +442,7 @@ Cdyn  Comment out the above for auto
       ktape=.false.
       if (.not.kcont.or.(kcont.and.(idir.ne.idirp))
      ..or.(kcont.and.iobs.eq.0))
-     .call wrtap(lspdir,isp,ihead,lu,iwr,ktape,irec)
+     .call wrtap(lspdir,isp,ihead,lu,iwr,ktape,irec,kauto)
 
 C  Loop begins in this block
 
