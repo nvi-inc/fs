@@ -22,6 +22,7 @@ C        ICH    - character counter
       integer*2 IBUF(20)                      ! Class buffer
       integer get_buf,ichcm_ch
       character cjchar
+      logical kdef,kfirst
       integer isw(4)                          ! switch settings
       dimension iparm(2)                      ! parameters from gtprm
       dimension ireg(2)                       ! registers from exec calls
@@ -37,6 +38,7 @@ C
 C     1. If we have a class buffer, then we are to set the IFD. 
 C     If no class buffer, we have been requested to read the IFD. 
 C 
+      kfirst=.true.
       ichold = -99
       iclcm = ip(1) 
       if (iclcm.eq.0) then
@@ -51,7 +53,7 @@ C
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
         ip(4) = o'77'
-        call if3dis(ip,iclcm)
+        call if3dis(ip,iclcm,kfirst)
         return
       endif
 C 
@@ -61,22 +63,25 @@ C
 C 
 C     2. Step through buffer getting each parameter and decoding it.
 C     Command from user has these parameters: 
-C                   IF3=<atten>,<mixer>,<sw1>,<sw2>,<sw3>,<sw4> 
+C                   IF3=<atten>,<mixer>,<sw1>,<sw2>,<sw3>,<sw4>,<pcal>
 C     Choices are:<atten>: attenuator setting, 0 to 63db. Default 0.
 C                          If number is signed, interpret as a change to
 C                          the present attenuator setting.
 C                          IF atten is MAX, go to 63 and remember old value.
 C                          IF atten is OLD, return to old value.
 C                 <mixer>: IN or OUT, default OUT
-C                 <sw1>:   output port, 1 or 2, default 1
+C                 <swX>:   output port X, 1 or 2, default 1
+C                 <pcal>:  pcal control (if available), ON or OFF, default ON
 C
 C     2.1 ATTEN PARAMETER 1
 C
+      kdef=.false.
       ich = 1+ieq
       ist = ich
       call gtprm2(ibuf,ich,nchar,0,parm,ierr)
       if(ichcm_ch(iparm,1,'max').eq.0) then
-        iold=iatif3_fs
+        call fs_set_iat3if(iat3if)
+        iold=iat3if
         iat=63
       else if(ichcm_ch(iparm,1,'old').eq.0) then
         iat=iolif3_fs
@@ -84,11 +89,14 @@ C
         ich=ist
         call gtprm2(ibuf,ich,nchar,1,parm,ierr)
         if (ierr.eq.2) then
-          iat = 0                          ! default
+          kdef=.true.
+          iat = 0              ! default
         else if (ierr.eq.1) then
-          iat = iatif3_fs
+          call fs_set_iat3if(iat3if)
+          iat = iat3if
         else if (iparm(1).lt.0.or.iscn_ch(ibuf,ist,ich-1,'+').ne.0) then
-          iat = iatif3_fs + iparm(1)
+          call fs_set_iat3if(iat3if)
+          iat = iat3if + iparm(1)
         else
           iat = iparm(1)
         endif
@@ -96,6 +104,19 @@ C
       if (iat.lt.0.or.iat.gt.63) then
         ierr = -201
         goto 990
+      endif
+      call fs_get_if3_set(if3_set)
+      if3_set_save=if3_set
+      if(kdef.and.if3_set.ne.1) then
+         call get_at3(iat3,ip)
+         if(ip(3).lt.0) then
+            ierr=-300
+            goto 990
+         endif
+         iat=iat3
+      else if(kdef) then
+         call fs_get_iat3if(iat3if)
+         iat = iat3if
       endif
 C
 C     2.2 mixer - PARAMETERS 2
@@ -133,28 +154,48 @@ C
         endif
       enddo
 C
+C   2.4 pcal control On or OFF, parameter 7
+C
+      ic1 = ich 
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr) 
+      if (ierr.eq.2) then
+        ipcal = 1             !default on
+      else if (ierr.eq.1) then
+        ipcal = ipcalif3
+      else
+        call iif3ed(2,ipcal,ibuf,ic1,ich-2)
+        if (ipcal.lt.0) then
+          ierr = -207
+          goto 990
+        endif
+      endif
+C
 C     3. Finally, format the buffer for the controller.
 C     We have a valid IAT(1),IAT(2),INP(1),INP(2).
 C
       ibuf(1) = 0
       call char2hol('i3',ibuf(2),1,2)
-      call i32ma(ibuf(3),iat,imix,isw(1),isw(2),isw(3),isw(4))
+      call i32ma(ibuf(3),iat,imix,isw(1),isw(2),isw(3),isw(4),ipcal)
 C
 C     4. Now plant these values into COMMON.
 C     Next send the buffer to SAM.
 C     Finally schedule BOSS to request that MATCN gets the data.
 C
-      call fs_get_icheck(icheck(21),21)
-      ichold = icheck(21)
-      icheck(21)=0
-      call fs_set_icheck(icheck(21),21)
-      iatif3_fs = iat
+      call fs_get_icheck(icheck(23),23)
+      ichold = icheck(23)
+      icheck(23)=0
+      call fs_set_icheck(icheck(23),23)
+      iat3if = iat
+      call fs_set_iat3if(iat3if)
       imixif3 = imix
       call fs_set_imixif3(imixif3)
       do i=1,4
         iswif3_fs(i)=isw(i)
       enddo
+      ipcalif3=ipcal
       iolif3_fs = iold
+      if3_set=1
+      call fs_set_if3_set(if3_set)
 C
       iclass=0
       nch = 12
@@ -205,14 +246,24 @@ C
 800   call run_matcn(iclass,nrec)
       call rmpar(ip)
       if (ichold.ne.-99) then
-        icheck(21) = ichold
-        call fs_set_icheck(icheck(21),21)
+        icheck(23) = ichold
+        call fs_set_icheck(icheck(23),23)
       endif
       if (ichold.ge.0) then
-        icheck(21)=mod(ichold,1000)+1
-        call fs_set_icheck(icheck(21),21)
+        icheck(23)=mod(ichold,1000)+1
+        call fs_set_icheck(icheck(23),23)
       endif
-      call if3dis(ip,iclcm)
+      call if3dis(ip,iclcm,kfirst)
+      if(kfirst.and.ieq.ne.0.and.kdef) then
+         kfirst=.false.
+         if(ip(1).ne.0) call clrcl(ip(1))
+         if(if3_set_save.ne.1) then
+            call logit7ci(0,0,0,0,-301,'q+',0)
+         else
+            call logit7ci(0,0,0,0,-302,'q+',0)
+         endif
+         goto 500
+      endif
       return
 C
 990   ip(1) = 0
