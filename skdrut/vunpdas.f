@@ -1,6 +1,6 @@
       SUBROUTINE VUNPDAS(stdef,ivexnum,iret,ierr,lu,
      .lidter,lnater,nheadstack,maxtap,nrec,lb,sefd,par,npar,
-     .lrec,lrack)
+     .lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tap)
 C
 C     VUNPDAS gets the recording terminal information for station
 C     STDEF and converts it. Returns on error from any vex routine.
@@ -15,6 +15,9 @@ C
 C  History:
 C 960517 nrv New.
 C 960521 nrv Revised.
+C 960810 nrv Add tape motion fields
+C 960817 nrv Add S2 tape length and tape motion fields
+C 960913 nrv Recognize "none" and "NONE" as valid rack types.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -33,14 +36,19 @@ C                    section had vex error, <0 is invalid value
       real sefd(*),par(max_sefdpar,*)
       integer npar(*)   ! sefds
       integer*2 lrec(4),lrack(4) ! recorder and rack types
+      character*128 ctapemo ! tape motion type
+      integer ite,itl,itg ! early, late, gap 
+      integer*2 ls2sp(2) ! S2 tape speed
+      integer ns2tap ! number of S2 tapes
 C
 C  LOCAL:
       character*128 cout,cunit
       double precision d
       integer i,nch,idumy
+      logical ks2 ! true for an S2 recorder
       integer fvex_double,fvex_int,fget_station_lowl,fvex_field,
      .fvex_units,
-     .ptr_ch,fvex_len,ichmv_ch ! function
+     .ptr_ch,fvex_len,ichcm_ch,ichmv_ch ! function
 C
 C
 C  1. The recorder type
@@ -59,6 +67,15 @@ C
           ierr=-1
         else
           IDUMY = ICHMV_ch(lrec,1,cout(1:NCH))
+          ks2 = cout(1:2).eq.'S2'
+          IDUMY = ICHMV_ch(lrec,1,cout(1:nch))
+          if (ichcm_ch(lrec,1,'S2').ne.0.and.
+     .        ichcm_ch(lrec,1,'VLBA').ne.0.and.
+     .        ichcm_ch(lrec,1,'MARK3A').ne.0.and.
+     .        ichcm_ch(lrec,1,'MARK4').ne.0) then
+            write(lu,'("VUNPDAS22 - Unrecognized recorder type: ",a)')
+     .      cout(1:nch)
+          endif
         endif
       endif
 
@@ -78,6 +95,15 @@ C
           ierr=-2
         else
           IDUMY = ICHMV_ch(lrack,1,cout(1:nch))
+          if (ichcm_ch(lrack,1,'VLBA').ne.0.and.
+     .        ichcm_ch(lrack,1,'VLBAG').ne.0.and.
+     .        ichcm_ch(lrack,1,'Mark3A').ne.0.and.
+     .        ichcm_ch(lrack,1,'Mark4').ne.0 .and.
+     .        ichcm_ch(lrack,1,'NONE').ne.0 .and.
+     .        ichcm_ch(lrack,1,'none').ne.0) then
+            write(lu,'("VUNPDAS22 - Unrecognized rack type: ",a)')
+     .      cout(1:nch)
+          endif
         endif
       endif
 C
@@ -138,15 +164,20 @@ C  5. Number of headstacks at this station.
       endif
 
 C  6. Maximum tape length. If not present, set to default.
+C     If recorder type is "S2" then length will be in time units,
+C     and speed will follow.
+C *** how to handle this?
 C
       ierr = 6
       maxtap = MAX_TAPE
+      CALL IFILL(ls2sp,1,8,oblank)
+      ns2tap=0
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('tape_length'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get tape length
-        if (iret.ne.0) return
+        if (iret.ne.0) return ! must be there
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
@@ -155,8 +186,33 @@ C
           write(lu,'("VUNPDAS07 - Invalid tape length")')
           ierr=-7
         else
-          maxtap = d*100.d0/(12.d0*2.54)
+          if (.not.ks2) then
+            maxtap = d*100.d0/(12.d0*2.54) ! convert from m to feet
+          else
+            maxtap = d ! seconds
+          endif
         endif
+        if (ks2) then ! S2 speed and number of tapes
+          iret = fvex_field(2,ptr_ch(cout),len(cout)) ! tape speed
+          if (iret.ne.0) return
+          NCH = fvex_len(cout)
+          IF  (NCH.GT.128.or.NCH.le.0) THEN  !
+            write(lu,'("VUNPDAS17 - Tape motion speed too long")')
+            ierr=-17
+          else
+            IDUMY = ICHMV_ch(ls2sp,1,cout(1:NCH))
+          endif
+          iret = fvex_field(3,ptr_ch(cout),len(cout)) ! number of tapes
+          if (iret.ne.0) return
+          iret = fvex_int(ptr_ch(cout),i) ! convert to binary
+          if (iret.ne.0) return
+          if (i.le.0) then
+            write(lu,'("VUNPDAS18 - Invalid number of S2 tapes")')
+            ierr=-18
+          else
+            ns2tap = i
+          endif
+        endif ! S2 speed and number of tapes
       endif
  
 C  7. Number of recorders
@@ -179,6 +235,68 @@ C  7. Number of recorders
         endif
       endif
 
+C  8. Tape motion, early start, late stop, gap time. 
+
+      ierr = 8
+      ite=0
+      itl=0
+      itg=0 
+      ctapemo=''
+      iret = fget_station_lowl(ptr_ch(stdef),
+     .ptr_ch('tape_motion'//char(0)),
+     .ptr_ch('DAS'//char(0)),ivexnum)
+      if (iret.eq.0) then
+        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! tape motion type
+        if (iret.ne.0) return
+        NCH = fvex_len(cout)
+        IF  (NCH.GT.128.or.NCH.le.0) THEN  !
+          write(lu,'("VUNPDAS09 - Tape motion type too long")')
+          ierr=-9
+        else
+          ctapemo=cout(1:nch)
+        endif
+        iret = fvex_field(2,ptr_ch(cout),len(cout))  ! early start
+        if (iret.eq.0) then 
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
+          if (iret.ne.0) return
+          if (d.le.0.0) then
+            write(lu,'("VUNPDAS10 - Invalid early start value")')
+            ierr=-10
+          else
+            ite = d ! convert to integer seconds
+          endif
+        endif 
+        iret = fvex_field(3,ptr_ch(cout),len(cout))  ! late stop
+        if (iret.eq.0) then 
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
+          if (iret.ne.0) return
+          if (d.le.0.0) then
+            write(lu,'("VUNPDAS11 - Invalid late stop value")')
+            ierr=-11
+          else
+            itl = d ! convert to integer seconds
+          endif
+        endif 
+        iret = fvex_field(4,ptr_ch(cout),len(cout))  ! time gap
+        if (iret.eq.0) then 
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
+          if (iret.ne.0) return
+          if (i.le.0) then
+            write(lu,'("VUNPDAS12 - Invalid gap time value")')
+            ierr=-12
+          else
+            itg = d ! convert to integer seconds
+          endif
+        endif 
+      endif
+
+      iret=0
       if (ierr.gt.0) ierr=0
       return
       end
