@@ -25,7 +25,7 @@ Settable parameters:
           of points.
           stp       Step size for distance between points, in multiples
           of a beamwidth. Default is 0.5. 
-            intp        Integration period, 1 to 32 seconds.
+          intp        Integration period, 1 to 32 seconds.
           dev       Mnemonic for the device to be used as the detector.
           Standard devices are allowed. Note that for Mark III
           equipment, the whether the video converter USB or
@@ -36,8 +36,8 @@ Settable parameters:
           detector is i1 for Mark III/IV, ia for VLBA/4.
           Station dependent detectors u5 and u6 may be
           available.
-            wait        seconds to wait for onsource for each point, 1-1200
-            seconds allowed, default 120.
+          wait        seconds to wait for onsource for each point, 1-1200
+          seconds allowed, default 120.
 
 Display-only parameters:
           cal       Calibration noise source temperature in degrees K.
@@ -46,26 +46,26 @@ Display-only parameters:
           information from the lo command and the vcnn and
           patch (Mark III/IV and LBA4) or bbcnn (VLBA/4)
           command for the specified device. For station
-          defined detectors u5 and u6 the value is determine
-          from the last caltemp5 and caltemp6 commands,
+          defined detectors u5 and u6 the value are determine
+          from the user_device=u5,... and user_device=u6,... commands
           respectively.
           beam      The full width half maximum beam size degrees. For
           standard detectors this is determined from the .rxg
           file cal temperature table interpolated using
           information from the lo command and the vcnn and
           patch (Mark III/IV and LBA4) or bbcnn (VLBA/4)
-          command for the specified device. For station
-          defined detectors u5 and u6 the value is determine
-          from the last beam5 and beam6 commands,
+          command for the specified device.  For station
+          defined detectors u5 and u6 the values are determine
+          from the user_device=u5,... and user_device=u6,... commands
           respectively.
-             flux       The apparent flux of the source. For standard
-            detectors this is determined from the flux.ctl
-            file cal using information from the lo command and
-            the vcnn and patch (Mark III/IV and LBA4) or bbcnn
-            (VLBA/4) command for the specified device. For
-            station defined detectors u5 and u6 the value is
-            determine from the last flux5 and flux6 commands,
-            respectively.
+          flux       The apparent flux of the source. For standard
+          detectors this is determined from the flux.ctl
+          file cal using information from the lo command and
+          the vcnn and patch (Mark III/IV and LBA4) or bbcnn
+          (VLBA/4) command for the specified device.  For station
+          defined detectors u5 and u6 the value are determine
+          from the user_device=u5,... and user_device=u6,... commands
+          respectively.
           chain     The IF chain, 1-6, that the detector is on. Chains 5
           and 6 are for station specific detectors u5 and u6.
           Mark III/IV and LBA4 racks use IFs 1-3. For VLBA/4
