@@ -96,18 +96,20 @@ cxx      if (ipgst(6Haquir ).le.0) nwt=300
 C
 C lock gain if a bbc
 C
-      call fs_get_rack(rack)
-      if(VLBA.eq.and(rack,VLBA)) then
-        call fc_mcbcn_d(ldevfp,ierr,ip)
-        if(ierr.ne.0) then
-          ierr=-81
-          goto 80010
-        endif
-        if(ip(3).lt.0) then
-          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-          ierr=-111
-          goto 80010
-        endif
+      if(ichcm_ch(ldevfp,1,'u').ne.0) then
+         call fs_get_rack(rack)
+         if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+            call fc_mcbcn_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               ierr=-111
+               goto 80010
+            endif
+         endif
       endif
 C 
 C   1. Get System Temperature OFF source
@@ -449,12 +451,14 @@ C
 C CLEAN UP AND EXIT
 C
 90000 continue
-      if(VLBA.eq.and(rack,VLBA)) then
-        call fc_mcbcn_r(ip)
-        if(ip(3).lt.0) then
-          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-          call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
-        endif
+      if(ichcm_ch(ldevfp,1,'u').ne.0) then
+         if(VLBA.eq.rack.or.VLBA4.eq.rack) then
+            call fc_mcbcn_r(ip)
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+            endif
+         endif
       endif
       call rn_put('fivpt')
       goto 1
