@@ -50,11 +50,17 @@ C
 c
       nargs=abs(nargsin)
 c
-      nch = 1 + ib2as(mod(iyear,100),ibuf,1,o'41000'+2) 
+c not Y10K compliant
+      nch = 1 + ib2as(iyear,ibuf,1,o'41000'+4)
+      nch = ichmv_ch(ibuf,nch,'.')
       nch = nch + ib2as(itime(5),ibuf,nch,o'41000'+3) 
+      nch = ichmv_ch(ibuf,nch,'.')
       nch = nch + ib2as(itime(4),ibuf,nch,o'41000'+2) 
+      nch = ichmv_ch(ibuf,nch,':')
       nch = nch + ib2as(itime(3),ibuf,nch,o'41000'+2) 
+      nch = ichmv_ch(ibuf,nch,':')
       nch = nch + ib2as(itime(2),ibuf,nch,o'41000'+2) 
+      nch = ichmv_ch(ibuf,nch,'.')
       nch = nch + ib2as(itime(1),ibuf,nch,o'41000'+2) 
 C 
 C 
@@ -98,9 +104,9 @@ C                   Finally move the log entry in
 cxx      write(6,9200) (ibuf(i),i=1,15)
 cxx9200  format(1x,"LOGEN: ibuf=",15a2)
       if(nargsin.eq.-6) then
-         nch=nch+ib2as(iyear,ibuf,nch,4)
+         nch=nch+ib2as(iyear,ibuf,nch,5)
          nch=mcoma(ibuf,nch)
-         nch=nch+ib2as(itime(5),ibuf,nch,3)
+         nch=nch+ib2as(itime(5),ibuf,nch,o'40000'+o'400'*3+3)
       endif
       goto 900
 C 
