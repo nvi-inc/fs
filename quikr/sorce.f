@@ -8,7 +8,7 @@ C
       integer*4 ip(5)
       integer it(6),iparm(2),get_buf,ichcm_ch,itb(6)
       integer*2 ibuf(40),ibufi(18),ibufo( 8),ls(5),lds,lhs,cwp(4)
-      double precision rad,decd,alati,elong,gheig,ra,dec
+      double precision alati,elong,gheig,ra,dec
 C      - double precision versions of ra and dec for MOVE
       logical kd,kprec,ksun,kmoon      
 C      - true if we have azel or xy degrees specified 
@@ -168,9 +168,6 @@ C
       call fs_set_lsorna(lsorna)
       idumm1 = ichmv(cwrap,1,cwp,1,8)
       call fs_set_cwrap(cwrap)
-C                   Make sure the proper dates are in common
-      rad = ra
-      decd = dec
 C                   Pick out today's day-of-year for precession 
       call fc_rte_time(it,it(6))
       kprec = (ep.gt.0.0) .and. .not.(kd.or.ksun.or.kmoon)         
@@ -179,22 +176,25 @@ C                   Pick out today's day-of-year for precession
          call fs_get_alat(alat)
          call fs_get_height(height)
          call move2t(it,wlong,alat,dble(height),
-     &        rad,decd,ep,radat,decdat)
+     &        ra,dec,ep,radat,decdat)
+      else
+         radat=ra
+         decdat=dec
       endif
+      call fs_set_radat(radat)
+      call fs_set_decdat(decdat)
 C 
       ra50 = ra 
       call fs_set_ra50(ra50)
       dec50 = dec 
       call fs_set_dec50(dec50)
-      call fs_set_radat(radat)
-      call fs_set_decdat(decdat)
       idinyr = 365
       if(mod(it(6),400).eq.0 .or. 
      +   (mod(it(6),4).eq.0.and.mod(it(6),100).ne.0)) idinyr=366
       epoch = it(6) + it(5)/float(idinyr) 
       call fs_set_epoch(epoch)
       ep1950 = ep 
-      if (ep.le.0.0 .or. ksun .or. kmoon) ep1950=epoch
+      if (ksun .or. kmoon) ep1950=epoch
       call fs_set_ep1950(ep1950)
 c  
       flx1fx_fs = -2.0
@@ -216,8 +216,6 @@ C
       call fc_rte_time(it,it(6))
       call sunpo(ra,dec,it) 
       idumm1 = ichmv_ch(cwp,1,'        ')
-      radat = ra
-      decdat = dec
       go to 300 
 C
 C  Handle MOON position here.
@@ -243,11 +241,7 @@ C
       call run_prog('moon ','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call rmpar(ip)
       nwords=get_buf(ip(1),ibufo,-16,irtn1,irtn2)
-      radat = ra
-      decdat = dec
       idumm1 = ichmv_ch(cwp,1,'        ')
-C
-390   continue
       go to 300 
 C 
 C     4. Now schedule ANTCN.  Tell it to do source pointing.
@@ -327,7 +321,6 @@ C                   Adjust next char to be first blank in source name.
          nch=ichmv(ibuf,nch,cwrap,1,ilc)
       endif
       nch = mcoma(ibuf,nch)
-      write(6,*) 'kd ',kd, ' nch ', nch
       if(.not.kd) then
          call radec(radat,decdat,0.0,irah,iram,ras,
      .        lds,idcd,idcm,dcs,lhs,i,i,d) 
@@ -340,8 +333,7 @@ C                   Adjust next char to be first blank in source name.
          nch=nch+ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
          nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
          nch = mcoma(ibuf,nch)
-         nch = nch + ir2as(epoch,ibuf,nch,8,3)
-      write(6,*) 'kd ',kd, ' nch ', nch
+         nch = nch + ir2as(epoch,ibuf,nch,9,4)
       endif
 530   iclass = 0
       nch = nch - 1 
