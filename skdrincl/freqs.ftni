@@ -22,7 +22,9 @@ C            4*max_pass because max_pass is now set to max_subpass*max_index.
 C 960709 nrv Add barrel roll by station and code
 C 961031 nrv Add LMFMT for recording format. LMODE should be reserved for
 C            the mode name if any.
+C 970110 nrv Add icode index to cpassorderl
 C 970114 nrv Add LPREFIX.
+C 970121 nrv Add station and code indices to npassl
 C
       double precision effreq,ffact,bitdens
 C     ffact   - frequency factor, for S/X ionosphere corrections
@@ -125,7 +127,7 @@ C
      .       ihdpo2(max_pass,max_stn,max_frq),
      .       ihddi2(max_pass,max_stn,max_frq),
      .       nstsav,istsav(max_stn),
-     .       ifan(max_stn,max_frq),npassl,
+     .       ifan(max_stn,max_frq),npassl(max_stn,max_frq),
      .
      .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
      .       LCODE(MAX_FRQ),LMODE(4,max_stn,MAX_FRQ),
