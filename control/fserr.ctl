@@ -392,6 +392,15 @@ CH -238
 CH -239
 ?W tape drive should be recording but no groups are enabled.
 ""
+CH -288
+Head is moving.
+""
+CH -289
+Command head position out-of-range (VLBA2).
+""
+CH -290
+Head motion timed-out.
+""
 CH -301
 ?W module is not in remote
 ""
@@ -1826,6 +1835,9 @@ Head must be R or W.
 Q@ -272
 Scale calibration must be O(ld) or N(ew).
 ""
+Q@ -273
+Not supported for VLBA2 tape drives.
+""
 Q@ -281
 No parameters allowed except MAT functions.
 ""
@@ -1850,8 +1862,20 @@ program error: incorrect response count in head_vmov.
 Q@ -288
 VLBA recorder head stack still moving.
 ""
+Q@ -289
+VLBA2 recorder head positioning timed-out.
+""
 Q@ -291
 Echo control must be ON or OFF.
+""
+Q@ -292
+program error: incorrect response count in v2_motion_done.
+""
+Q@ -293
+program error: incorrect response count in v2_vlt_head.
+""
+Q@ -294
+program error: incorrect response count in v2_head_vmov.
 ""
 Q@ -301
 Write pass number not defined.
@@ -1981,6 +2005,15 @@ Parameter must be reboot,load,unload,bot,eot,release,<feet>,feet,or zero.
 ""
 RC -202
 No vacuum on recorder or problem reading recorder.
+""
+RC -203
+Can't zero footage of a VLBA2 drive.
+""
+RC -204
+Can't set footage of a VLBA2 drive.
+""
+RC -205
+Can't reboot a VLBA2 drive.
 ""
 RC -401
 program error: incorrect number of responses in rec.
@@ -2224,6 +2257,12 @@ program error: incorrect number of responses in vst.
 ""
 VT -201
 Tape parameter must be low, or off.
+""
+VT -202
+footage parameter must be either reset or >0 and <65536
+""
+VT -302
+Can't set footage for a VLBA2 drive.
 ""
 VT -401
 program error: incorrect number of responses in tape.
