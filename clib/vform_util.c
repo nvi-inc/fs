@@ -198,9 +198,10 @@ char *ptr;
       ierr=arg_key(ptr,key_fan,NKEY_FAN,&lcl->fan,4,TRUE);
       if(ierr==0) {
 	lcl->tape_clock=tape_clock[lcl->rate][lcl->fan];
-	if (lcl->tape_clock == -1)
+	if (lcl->tape_clock == -1) {
 	  ierr = -300;
-	else if (lcl->mode != 1)
+	  break;
+	} else if (lcl->mode != 1)
 	  lcl->tape_clock+= 0x8;
       }
       if (shm_addr->vfm_xpnt == 0 || (lcl->fan !=5 && lcl->fan !=6 ))
