@@ -8,8 +8,16 @@
 */
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
+#else
+extern int ibsta;
+extern int iberr;
+extern int ibcnt;
 #endif
 
 #define	IBCODE		300

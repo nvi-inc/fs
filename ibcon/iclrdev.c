@@ -7,8 +7,12 @@
 #include <errno.h>
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #else
 extern int ibsta;
 extern int iberr;
@@ -84,7 +88,7 @@ int *kecho;
       strcpy(buf,"sic\r");
     else
       sprintf(buf,"clr %d\r",*devid);
-    ierr=sib(ID_hpib,buf,0,0,*timeout,0,centisec);
+    ierr=sib(ID_hpib,buf,-1,0,*timeout,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
@@ -95,7 +99,7 @@ int *kecho;
       value=-1;
     } else if ((ibsta & S_ERR) != 0) { /* if not, some other type of error */
       if(ibser!=0)
-	logit(NULL,-(540 + ibser),"IC");
+	logita(NULL,-(540 + ibser),"ib","IC");
       *error = -(IBSCODE + iberr);
       memcpy((char *)ipcode,"IC",2);
       return(-1);

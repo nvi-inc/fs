@@ -1,8 +1,12 @@
 #include <stdio.h>
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #else
 int ibsta;
 int iberr;

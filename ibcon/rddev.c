@@ -9,8 +9,12 @@
 #include <errno.h>
 
 #ifdef CONFIG_GPIB
+#ifdef NI_DRIVER
+#include <sys/ugpib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #else
 extern int ibsta;
 extern int iberr;
@@ -128,7 +132,7 @@ int *kecho;
   if (*mode == 0 && ascii_last!=1) {
     if (!serial) {
 #ifdef CONFIG_GPIB
-      val = (REOS << 8) + LF;
+      val = REOS | LF;
       ibeos(*devid,val);        /* set to read until REOS+EOS is detected */
       if ((ibsta & (ERR|TIMO)) != 0) {
 	if(iberr==0)
