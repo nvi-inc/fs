@@ -11,8 +11,11 @@
       lprocn(1)=0
       lsor=0
       nchar=len(cmessg)
-      if(nchar.gt.256) stop 999
-      call char2hol(cmessg,lmessg,1,nchar)
+      if(nchar.gt.256) then
+         call put_stderr('logit2_ch message length >256\n'//char(0))
+         stop 999
+      endif
+       call char2hol(cmessg,lmessg,1,nchar)
       call logit(lmessg,nchar,lsor,lprocn,ierr,lwho,lwhat,2)
       return
       end 

@@ -22,9 +22,12 @@ C       Negative and zero values of IFC or ICL are not supported
 C
       INTEGER I,j
       character ch
+      character*72 string
 C
       IF(ILC.LE.0.OR.IFC.LE.0) THEN
-        WRITE(6,*) ' ISCN_CH: Illegal arguments',IFC,ILC
+        WRITE(string,*) ' ISCN_CH: Illegal arguments',IFC,ILC
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C

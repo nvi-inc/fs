@@ -19,7 +19,7 @@ C
         imask=1-i
         return
       else if (i.gt.imsmax) then
-        call putcon_ch('too many elevation mask azimuths')
+        call put_stderr('too many elevation mask azimuths\n'//char(0))
         stop
       endif
       azar(i)=az
@@ -28,7 +28,8 @@ C Elevation
 C
       elar(i)=gtrel(jbuf,ifc,ilc,ifield,iferr)*deg2rad
       if (iferr.lt.0.and.i.lt.2) then
-        call putcon_ch('minimum of two azimuths in elevation mask')
+        call put_stderr(
+     &        'minimum of two azimuths in elevation mask\n'//char(0))
         stop
       else if (iferr.lt.0) then
         iferr=-iferr

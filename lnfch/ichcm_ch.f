@@ -19,9 +19,12 @@ C               - value if character in AR > character in string
 C
       integer nchar,i,i2
       character cjchar,ch1,ch2
+      character*72 strerr
 C
       if (ifc.le.0) then
-        write(6,*) ' ichcm_ch: Illegal arguments',IFC
+        write(strerr,*) ' ichcm_ch: Illegal arguments',IFC
+        call put_stderr(strerr//char(0))
+        call put_stderr('\n'//char(0))
         stop
       endif
 C

@@ -21,9 +21,12 @@ C         Negative and zero values of IC are not support
 C         NCHAR must be non-negative
 C
       INTEGER I
+      character*72 string
 C
       IF(IC.LE.0.OR.NC.LT.0) THEN
-	  WRITE(6,*) ' IFILL_CH: Illegal arguments',IC,NC
+	  WRITE(string,*) ' IFILL_CH: Illegal arguments',IC,NC
+          call put_stderr(string//char(0))
+          call put_stderr('\n'//char(0))
         STOP
       ENDIF
 C
