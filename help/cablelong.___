@@ -1,20 +1,28 @@
-                cable - get the cable cal reading
+            cablelong - get the cable cal long reading
  
- Syntax:      cable=message
+ Syntax:      cablelong=message
  
- Response:    cable/value
+ Response:    cablelong/value
  
  
  Settable parameters:
  message      ASCII character to be sent to counter.
  
  Monitor-only parameters:
- value        cable cal reading
+ value        cable cal long reading
  
  Comments: 
  When issued with no parameters this command sends a request for
  a reading to the HPIB counter which is connected to the phase
  cal cable measurement system.
+ 
+ The cablelong command is identical to the cable command. It is
+ intended to be used for the "long" cable measurement when
+ checking the sign of the cable counter before and after an
+ experiment. If cablelong is used for the measurements, auto-
+ scaled plots of the cable/ output will have reasonable
+ resolution. It also provides a "long" cable measurement for
+ cablediff to use to calculate the change and sign.
  
  The ibad.ctl control file must contain an entry with mnemonic CA
  and the device name.
@@ -24,7 +32,7 @@
  below in your stcmd.ctl file:
  
  *command     seg sbpa bo eq
- cable        qkr 13xx 01 FFFFFF
+ cablelong    qkr 76xx 01 FFFFFF
  
  where xx is the number of the character position to begin
  decoding at. The first character position is counted as position
@@ -33,4 +41,4 @@
  scientific notation). The FS uses a value of 04 for xx by
  default.
  
- Please see also the cablediff and cablelong commands. 
+ Please see also the cable and cablediff commands. 
