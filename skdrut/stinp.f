@@ -2,7 +2,7 @@
 C
 C     This routine reads and decodes a station entry
 C
-       INCLUDE 'skparm.ftni'
+      include '../skdrincl/skparm.ftni'
 C
 C  INPUT:
       integer*2 IBUFX(*)
@@ -15,7 +15,7 @@ C  OUTPUT:
       integer ierr
 C     IERR - error number, non-zero is bad
 C
-       INCLUDE 'statn.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  LOCAL:
       logical knaeq
@@ -30,10 +30,10 @@ C  LOCAL:
       real*8 POSXYZ(3),AOFF
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band),
-     .idt,idummy,ib,ii,nco,nhz,i,idum
-      integer*2 lid,lidpos,lidhor
+     .idummy,ib,ii,nco,nhz,i,idum
+      integer*2 lidt(2),lid,lidpos,lidhor
       real*4 poslat,poslon,bitden
-      integer igtba,ichcm_ch,ichmv,jchar ! functions
+      integer ichcm,igtba,ichcm_ch,ichmv,jchar ! functions
 C
 C
 C  INITIALIZED
@@ -59,6 +59,8 @@ C  940428 nrv Always store away LBSEFD even if frequencies are available.
 C             If new frequencies are selected, this array is checked, so
 C             it needs to be set up correctly and this is the place to do it.
 C 951116 nrv Remove maxpass and replace with bit density
+C 960208 nrv Increment NSTATN after checking for MAX_STN
+C 960227 nrv Make terminal ID up to 4 characters, not integer.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
@@ -78,7 +80,7 @@ C
       IF (ITYPE.EQ.1) THEN
         J=16
         CALL UNPVA(IBUFX(2),ILEN-1,IERR,LID,LNAME,
-     .    LAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,LIDPOS,IDT,
+     .    LAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,LIDPOS,LIDT,
      .    LIDHOR,ISLCON,J)
       ELSE IF (ITYPE.EQ.2) THEN
         J = 12
@@ -86,7 +88,7 @@ C
      .    POSXYZ,LD,LD,LD,POSLAT,POSLON,LOCC)
       ELSE IF (ITYPE.EQ.3) THEN
         j=8
-        CALL UNPVT(IBUFX(2),ILEN-1,IERR,IDT,LNAME,bitden,maxt,nr,
+        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,bitden,maxt,nr,
      .  lb,sefd,j,par,npar)
       ELSE IF (ITYPE.EQ.4) THEN
         J = 8
@@ -119,12 +121,12 @@ C
           I=I+1
         END DO
         IF  (I.GT.NSTATN) THEN  !new entry
-          NSTATN = NSTATN+1
-          IF  (NSTATN.GT.MAX_STN) THEN  !
+          IF  (i.GT.MAX_STN) THEN  !
             write(lu,'("STINP20 - Too many antennas.  Max is ",
      .      i3,".  Ignored:"/120a2)') MAX_STN,(ibufx(i),i=2,ilen)
             RETURN
           END IF  !
+          NSTATN = NSTATN+1
         END IF  !new entry
 C
 C     2.2 Now we have, in "I", the proper index to use for the antenna
@@ -145,7 +147,7 @@ C
         AXISOF(I)=AOFF
         DIAMAN(I)=DIAM
         LPOCOD(I)   = LIDPOS
-        ITERID(I) = IDT
+        idummy = ichmv(LTERID(1,I),1,LIDT,1,4)
         lhccod(i) = lidhor
         NHORZ(I) = 0
         IDUMMY = ICHMV(LANTNA(1,I),1,LNAME,1,8)
@@ -163,7 +165,7 @@ C
         END IF
 C
         I=1
-        DO WHILE (LID.NE.LPOCOD(I).AND.I.LE.NSTATN)
+        DO WHILE (i.le.nstatn.and.LID.NE.LPOCOD(I))
           I=I+1
         END DO
         IF  (I.GT.NSTATN) THEN  !entry not found
@@ -191,9 +193,10 @@ C
           write(lu,9105) ierr,(ibufx(i),i=2,ilen)
           RETURN
         END IF  !
-        if (idt.ne.0.and.ichcm_ch(idt,1,'--').ne.0) then ! try to match IDs
+        if (ichcm_ch(lidt,1,'    ').ne.0.and.
+     .      ichcm_ch(lidt,1,'--').ne.0) then ! try to match IDs
           I = 1
-          DO WHILE (i.le.nstatn.and.IDT.NE.ITERID(I))
+          DO WHILE (i.le.nstatn.and.ichcm(LIDT,1,LTERID(1,I),1,4).ne.0)
             I=I+1
           END DO
         else
@@ -214,13 +217,13 @@ C
         IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
 C       MAXPAS(I) = MAXP
 C       For compatibility, force bit density=333333 if not specified
-        if (bitden.lt.1000) then
-          bitden=33333
-          write(lu,'("STINP27 - Warning: Bit density not specified ",
-     .    "for ",4a2,", value of 33,333 assumed.")') 
-     .      (lstnna(j,i),j=1,4)
-        endif
-        bitdens(i)=bitden
+C       if (bitden.lt.1000) then
+C         bitden=33333
+C         write(lu,'("STINP27 - Note: Bit density ",
+C    .    "for ",4a2," set to 33,333.")') 
+C    .      (lstnna(j,i),j=1,4)
+C       endif
+        bitden_save(i)=bitden
         maxtap(i) = maxt
         nrecst(i) = nr
         do ib=1,2
@@ -246,14 +249,24 @@ C 2.5 Here we handle the horizon mask
 C
       ELSE IF (ITYPE.EQ.5) THEN  !horizon mask
         IF (IERR.NE.0) THEN
-          if (ierr.lt.-200) 
-     .      write(lu,'("STINP252 - Horizon mask azimuths are out ",
+          if (ierr.lt.-200) then
+            write(lu,'("STINP252 - Horizon mask azimuths are out ",
      .      "of order. Error in field ",i5)') -(ierr+200)
-          if (ierr.eq.-99)
-     .      write(lu,'("STINP250 - Too many horizon mask az/el pairs. ",
+            write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+            RETURN
+          endif
+          if (ierr.eq.-99)then
+            write(lu,'("STINP250 - Too many horizon mask az/el pairs. ",
      .      "Max is ",i5)') max_hor 
-          write(lu,9105) -(ierr+100),(ibufx(i),i=2,ilen) 
-          RETURN
+            write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+            RETURN
+          endif
+          if (ierr.eq.-103) then
+C           write(lu,'("STINP251 - No matching el for last azimuth,",
+C    .      " wraparound value used.")')
+            elh(nhz)=elh(1)
+C           write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+          endif
         END IF   !
         I =1
         DO WHILE (LID.NE.LHCCOD(I).AND.I.LE.NSTATN)
