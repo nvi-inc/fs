@@ -32,7 +32,7 @@ C
         call hol2char(LINPUT,i,i,ch) 
         IF(CCH(1:1).EQ.ch) THEN
            do j=2,len(cch)
-              call hol2char(linput,i+j,i+j,ch)
+              call hol2char(linput,i+j-1,i+j-1,ch)
               if(cch(j:j).ne.ch) goto 100
            enddo
            iscn_ch=I
