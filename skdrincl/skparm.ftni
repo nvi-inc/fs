@@ -326,4 +326,3 @@ C
       parameter(cctfil = '/usr2/control/skedf.ctl')
       parameter(cownctl = 'skedf.ctl')
 
-C
