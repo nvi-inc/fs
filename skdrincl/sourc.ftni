@@ -1,4 +1,5 @@
 C     SOURCE INFORMATION COMMON BLOCK 
+C 970114 nrv Change dimension of LSORNA to use MAX_SORLEN
 C 
       real*8 SORP50,SORPDA,SATP50,SATDY 
 c
@@ -17,14 +18,14 @@ c
      .       NSOURC,NCELES,
      .       NSATEL,ISATY (MAX_SAT),
      .       nflux(max_band,max_sor),
-     .       LSORNA(4,MAX_SOR)
+     .       LSORNA(MAX_SORLEN/2,MAX_SOR)
 c
       COMMON/SOURC_CH/
      .       cfltype(max_band,max_sor),
      .       sordefnames(max_sor)
 C 
 C  NSOURC - number of sources selected
-C  LSORNA - source IAU names, up to 8 chars 
+C  LSORNA - source IAU names, up to 8 chars *** now up to 12 char
 C  NCELES - number of celestial sources selected
 C  SORP50 - positions, ra and dec of 2000.0, radians
 C  SORPDA - positions, ra and dec of date, radians
