@@ -63,6 +63,18 @@ void print_def_block(struct llist *items,void func())
       printf("\n  enddef;");
       }
       break;
+    case T_SCAN:
+      {struct def *def=(struct def *)this->item;
+
+      printf("\n  scan ");
+      print_svalue(def->name);
+      printf(";");
+
+      func(def->refs);
+
+      printf("\n  endscan;");
+      }
+      break;
     case T_COMMENT:
       print_comment((char *)this->item);
       break;

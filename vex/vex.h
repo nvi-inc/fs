@@ -50,7 +50,6 @@ typedef struct lowl Lowl;
 
 struct chan_def {
   char *band_id;
-  char *polar;
   struct dvalue *sky_freq;
   char *net_sb;
   struct dvalue *bw;
@@ -94,13 +93,13 @@ struct axis_type {
 
 typedef struct axis_type Axis_type;
 
-struct ant_motion {
+struct antenna_motion {
   char *axis;
   struct dvalue *rate;
   struct dvalue *offset;
 };
 
-typedef struct ant_motion Ant_motion;
+typedef struct antenna_motion Antenna_motion;
 
 struct pointing_sector {
   char *sector;
@@ -122,20 +121,30 @@ struct bbc_assign {
 
 typedef struct bbc_assign Bbc_assign;
 
+struct clock_early {
+  char *start;
+  struct dvalue *offset;
+  char *origin;
+  struct dvalue *rate;
+};
+
+typedef struct clock_early Clock_early;
+
 struct headstack {
   struct dvalue *stack;
   char *type;
-  char *drive_id;
+  struct dvalue *offset;
 };
 
 typedef struct headstack Headstack;
 
-struct data_source {
+struct s2_data_source {
   char *source;
-  char *input[8];
+  char *bbcx_id;
+  char *bbcy_id;
 };
 
-typedef struct data_source Data_Source;
+typedef struct s2_data_source S2_data_source;
 
 struct tape_length {
   struct dvalue *duration;
@@ -163,20 +172,22 @@ typedef struct headstack_pos Headstack_pos;
 
 struct if_def {
   char *if_id;
+  char *physical;
+  char *polar;
   struct dvalue *lo;
   char *sb;
+  struct dvalue *pcal_spacing;
+  struct dvalue *pcal_base;
 };
 
 typedef struct if_def If_def; 
 
-struct pcal_freq {
+struct phase_cal_detect {
   char *pcal_id;
-  char *state;
-  struct dvalue *primary;
-  struct dvalue *increment;
+  struct llist *tones;
 };
 
-typedef struct pcal_freq Pcal_freq; 
+typedef struct phase_cal_detect Phase_cal_detect; 
 
 struct setup_always {
   char *state;
@@ -235,11 +246,17 @@ struct site_position {
   struct dvalue *x;
   struct dvalue *y;
   struct dvalue *z;
-  struct dvalue *epoch;
-  char *ref;
 };
 
 typedef struct site_position Site_position;
+
+struct site_velocity {
+  struct dvalue *x;
+  struct dvalue *y;
+  struct dvalue *z;
+};
+
+typedef struct site_velocity Site_velocity;
 
 struct ocean_load_vert {
   struct dvalue *amp;
@@ -304,21 +321,6 @@ struct vlba_frmtr_sys_trk {
 
 typedef struct vlba_frmtr_sys_trk Vlba_frmtr_sys_trk;
 
-struct s2_data_def {
-  struct llist *bitstream;
-  char *input;
-};
-
-typedef struct s2_data_def S2_data_def;
-
-struct s2_record_mode {
-  char *mode;
-  struct dvalue *groups;
-  struct llist *inputs;
-};
-
-typedef struct s2_record_mode S2_record_mode;
-  
 /* prototypes */
 
 struct llist     *add_list(struct llist *start,void *ptr);
@@ -328,10 +330,10 @@ struct def       *make_def(char *name, struct llist *refs);
 struct block     *make_block(int block,struct llist *items);
 struct vex *make_vex(struct llist *version, struct llist *blocks);
 struct lowl 	 *make_lowl(int statement,void *items);
-struct chan_def  *make_chan_def(char *band_id, char *polar,
-				struct dvalue *sky_freq, char *net_sb,
-				struct dvalue *bw, char *chan_id, char *bbc_id,
-				char *pcal_id, struct llist *states);
+struct chan_def  *make_chan_def(char *band_id, struct dvalue *sky_freq,
+				char *net_sb, struct dvalue *bw,
+				char *chan_id, char *bbc_id, char *pcal_id,
+				struct llist *states);
 struct dvalue *make_dvalue(char *value, char *units);
 struct external *make_external(char *file, int primitive, char *name);
 struct switching_cycle *make_switching_cycle(char *origin,
@@ -340,8 +342,8 @@ struct station  *make_station(char *key, struct dvalue *start,
 			      struct dvalue *stop, struct dvalue *start_pos,
 			      char *pass, char *sector, struct llist *drives);
 struct axis_type *make_axis_type(char *axis1, char *axis2);
-struct ant_motion *make_ant_motion(char *axis,struct dvalue *rate,
-				   struct dvalue *offset); 
+struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
+					   struct dvalue *offset); 
 struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *lolimit1,
 					     struct dvalue *hilimit1,
@@ -350,21 +352,22 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *hilimit2);
 struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
 				   char *if_id);
+struct clock_early *make_clock_early(char *start,struct dvalue *offset,
+				     char *origin, struct dvalue *rate);
 struct headstack *make_headstack(struct dvalue *stack,char *type,
-				 char *drive_id);
-struct data_source *make_data_source(char *source,char *input1, char *input2,
-				     char *input3, char *input4, char *input5,
-				     char *input6, char *input7, char *input8);
+				 struct dvalue *offset);
 struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
 				     struct dvalue *tapes);
 struct tape_motion *make_tape_motion(char *type, struct dvalue *early,
 				     struct dvalue *late, struct dvalue *gap);
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
-struct if_def *make_if_def(char *if_id, struct dvalue *lo, char *sb);
-struct pcal_freq *make_pcal_freq(char *pcal_id,char *state,
-				 struct dvalue *primary,
-				 struct dvalue *increment);
+struct if_def *make_if_def(char *if_id, char *physical, char *polar,
+			   struct dvalue *lo, char *sb,
+			   struct dvalue *pcal_spacing,
+			   struct dvalue *pcal_base);
+struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
+					       struct llist *tones);
 struct setup_always *make_setup_always(char *state, struct dvalue *time);
 struct parity_check *make_parity_check(char *state, struct dvalue *time);
 struct tape_prepass *make_tape_prepass(char *state, struct dvalue *time);
@@ -376,8 +379,9 @@ struct postob_cal *make_postob_cal(char *state, struct dvalue *time,
 				 char *name);
 struct sefd *make_sefd(char *if_id, struct dvalue *flux, struct llist *params);
 struct site_position *make_site_position(struct dvalue *x, struct dvalue *y,
-					 struct dvalue *z,
-					 struct dvalue *epoch, char *ref);
+					 struct dvalue *z);
+struct site_velocity *make_site_velocity(struct dvalue *x, struct dvalue *y,
+					 struct dvalue *z);
 struct ocean_load_vert *make_ocean_load_vert(struct dvalue *amp,
 					     struct dvalue *phase);
 struct ocean_load_horiz *make_ocean_load_horiz(struct dvalue *amp,
@@ -400,10 +404,8 @@ struct vlba_frmtr_sys_trk *make_vlba_frmtr_sys_trk(struct dvalue *output,
 						   char *use,
 						   struct dvalue *start,
 						   struct dvalue *stop);
-struct s2_data_def *make_s2_data_def(struct llist *bitstream,char *input);
-
-struct s2_record_mode *make_s2_record_mode(char *mode, struct dvalue *groups,
-					   struct llist *inputs);
+struct s2_data_source *make_s2_data_source(char *source,char *bbcx_id,
+					   char *bbcy_id);
 
 int
 lowl2int(char *lowl);
@@ -519,6 +521,9 @@ get_scan_station(Llist **lowls_scan, char *station_in,
 
 Llist *
 find_next_def(Llist *defs);
+
+Llist *
+find_next_scan(Llist *defs);
 
 int vex_open(char *name, struct vex **vex);
 
