@@ -15,9 +15,11 @@ C  Output
       integer iserr(max_stn) ! error by station
 
 C  LOCAL VARIABLES:
-      integer ip,ip2,is,it,it2,np,np2,j,k,i,l,itrk(max_pass),
-     .ic1,maxp(max_frq),itr2(max_pass)
-      integer ix,iprr,ipmax,ipma2,ic,m,nvc,ichcm_ch
+      integer ih,ip(max_headstack),is,it(max_headstack),
+     .np(max_headstack),
+     .j,k,i,l,itrk(max_subpass,max_headstack),
+     .ic1,maxp(max_frq)
+      integer ix,iprr,ipmax(max_headstack),ic,m,nvc,ichcm_ch
       logical kmiss
 C
 C     880310 NRV DE-COMPC'D
@@ -35,12 +37,14 @@ C 961107 nrv Skip ALL checks for undefined modes.
 C 961112 nrv Set MAXPAS to the value for the first code for this station,
 C            not for the first code.
 C 961115 nrv If there is only 1 mode, IC1 would remain at zero!
+C 970206 nrv Remove itra2, ihddi2 and add headstack index to all.
+C 970206 nrv Change max_pass to max_subpass
 C
 C
 C     1. For each code, go through all possible passes and add
 C     up the total number of tracks used. 
-C     Use itras(u/l,s/m,max_pass,max_chan,station,code)
-C     Use ihddir(max_pass,station,code)
+C     Use itras(u/l,s/m,head,max_subpass,max_chan,station,code)
+C     Use ihddir(head,max_pass,station,code)
 C
       ierr=0
       IF (NCODES.LE.0) RETURN
@@ -52,68 +56,66 @@ C
             npassf(is,ic)=1
           else ! not S2
             iserr(is)=0
-            np=0
-            np2=0
-            DO  J=1,max_pass ! count sub-passes
-              itrk(j)=0
-              itr2(j)=0
-              IT = 0
-              it2=0
-              do k=1,nchan(is,ic) ! channels
-                do l=1,2 ! upper/lower
-                  do m=1,2 ! sign/mag
-                    if (itras(l,m,k,j,is,ic).ne.-99) it=it+1
-                    if (itra2(l,m,k,j,is,ic).ne.-99) it2=it2+1 ! headstack 2
-                  enddo
-                END DO ! upper/lower
-              enddo ! channels
-              if (it.gt.0) then
-                np=np+1
-                if (np.le.max_pass) itrk(np)=it
+            do ih=1,max_headstack ! for each headstack
+              np(ih)=0
+              DO  J=1,max_subpass ! count sub-passes
+                itrk(j,ih)=0
+                IT(ih) = 0
+                do k=1,nchan(is,ic) ! channels
+                  do l=1,2 ! upper/lower
+                    do m=1,2 ! sign/mag
+                      if (itras(l,m,ih,k,j,is,ic).ne.-99) 
+     .                    it(ih)=it(ih)+1
+                    enddo
+                  END DO ! upper/lower
+                enddo ! channels
+                if (it(ih).gt.0) then
+                  np(ih)=np(ih)+1
+                  if (np(ih).le.max_subpass) itrk(np(ih),ih)=it(ih)
+                endif
+              END DO  ! count sub-passes
+              ipmax(ih)=0
+              do j=1,max_pass ! check sub-passes
+                if (ihddir(ih,j,is,ic).gt.ipmax(ih)) 
+     .          ipmax(ih)=ihddir(ih,j,is,ic)
+              enddo ! check sub-passes
+              if (ih.eq.1) then ! set npassf and increment ntrakf
+                npassf(is,ic)=np(ih) 
+                ntrakf(is,ic)=ntrakf(is,ic)+itrk(np(ih),ih)
+              else ! must be the same for both headstacks 
+                if (np(ih).ne.npassf(is,ic)) then ! inconsistent
+                  write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
+9907              format('GNPAS07 - Inconsistent number of sub-passes ',
+     .            'between headstacks 1 and 2 for ',a2,' at ', 4a2)
+                endif
+                if (itrk(1,1).ne.itrk(1,ih)) then ! inconsistent 
+                  write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
+9908              format('GNPAS08 - Inconsistent number of tracks per',
+     .            ' pass'
+     .            ,'between headstacks 1 and 2 for ',a2,' at ', 4a2)
+                endif
               endif
-              if (it2.gt.0) then
-                np2=np2+1
-                if (np2.le.max_pass) itr2(np2)=it2
-              endif
-            END DO  ! count sub-passes
-            ipmax=0
-            ipma2=0
-            do j=1,max_pass ! check sub-passes
-              if (ihddir(j,is,ic).gt.ipmax) ipmax=ihddir(j,is,ic)
-              if (ihddi2(j,is,ic).gt.ipmax) ipma2=ihddi2(j,is,ic)
-            enddo ! check sub-passes
-            npassf(is,ic)=np ! must be the same for both headstacks 
-            ntrakf(is,ic)=itrk(1)+itr2(1)
-            if (np2.gt.0.and.np.ne.np2) then ! inconsistent between headstacks
-              write(luscn,9907) lcode(ic),(lstnna(i,is),i=1,4)
-9907          format('GNPAS07 - Inconsistent number of sub-passes ',
-     .        'between headstacks 1 and 2 for ',a2,' at ', 4a2)
-            endif
-            if (itr2(1).gt.0.and.itrk(1).ne.itr2(1)) then ! inconsistent 
-              write(luscn,9908) lcode(ic),(lstnna(i,is),i=1,4)
-9908          format('GNPAS08 - Inconsistent number of tracks per pass'
-     .        ,'between headstacks 1 and 2 for ',a2,' at ', 4a2)
-            endif
-            if (ipmax.ne.npassf(is,ic)) then ! inconsistent
+            enddo ! for each headstack
+            if (ipmax(1).ne.npassf(is,ic)) then ! inconsistent
               ierr=1
               iserr(is)=1
               write(luscn,9904) lcode(ic),(lstnna(i,is),i=1,4)
 9904          format('GNPAS04 - Inconsistent number of sub-passes ',
-     .        'in tracks/headpos for ',a2,' at ',4a2)
+     .        'between tracks and headpos for ',a2,' at ',4a2)
             endif
             j=1
-            do while (j.lt.np.and.itrk(j).eq.itrk(j+1))
+            do while (j.lt.np(1).and.itrk(j,1).eq.itrk(j+1,1))
               j=j+1
             enddo
-            if (itrk(1).eq.0.or.np.eq.0.or.j.lt.np.or.np.gt.max_pass) 
-     .        then
+            if (itrk(1,1).eq.0.or.np(1).eq.0.or.j.lt.np(1).or.
+     .        np(1).gt.max_subpass) then
               ierr=1
-              if (itrk(1).eq.0.or.np.eq.0) then
+              if (itrk(1,1).eq.0.or.np(1).eq.0) then
                 write(luscn,9903) lcode(ic),(lstnna(j,is),j=1,4)
 9903            format('GNPAS03 - No passes found in track assignments '
      .          ,' for ',a2,', at ',4a2)
               endif
-              if (j.lt.np.or.np.gt.max_pass) then
+              if (j.lt.np(1).or.np(1).gt.max_subpass) then
                 write(luscn,9901) lcode(ic),(lstnna(j,is),j=1,4)
 9901            format('GNPAS01 - Inconsistent pass/track assignments '
      .          ,' for ',a2,', at ',4a2)
@@ -135,26 +137,30 @@ C     codes--this should not be attempted in a single experiment.
         ic1=0
         do ic=1,ncodes ! codes
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
-          if (ic1.eq.0) ic1=ic ! first ic for t his station
-          ip=0
-          ip2=0
-          do j=1,max_pass
-            if (ihddir(j,is,ic).eq.1) ip=ip+1
-            if (ihddi2(j,is,ic).eq.1) ip2=ip2+1
-          enddo
-          if (ip.eq.0) then
-            ierr=1
-            iserr(is)=1
-            write(luscn,9902) lcode(ic),(lstnna(i,is),i=1,4)
-9902        format('GNPAS02 - No passes found in $HEAD section ',
-     .      'for ',a2,' at ',4a2)
-          endif
-          maxp(ic)=ip
-          if (ip2.ne.0.and.ip.ne.ip2) then
-            write(luscn,9909) lcode(ic),(lstnna(i,is),i=1,4)
-9909        format('GNPAS09 - Inconsistent number of passes in $HEAD',
-     .      ' between headstacks 1 and 2 for ',a2,' at ',4a2)
-          endif
+          if (ic1.eq.0) ic1=ic ! first ic for this station
+          do ih=1,max_headstack ! each headstack
+            ip(ih)=0
+            do j=1,max_subpass
+              if (ihddir(ih,j,is,ic).eq.1) ip(ih)=ip(ih)+1
+            enddo
+            if (ip(ih).eq.0) then
+              ierr=1
+              iserr(is)=1
+              write(luscn,9902) lcode(ic),(lstnna(i,is),i=1,4)
+9902          format('GNPAS02 - No passes found in $HEAD section ',
+     .        'for ',a2,' at ',4a2)
+            endif
+            if (ih.eq.1) then
+              maxp(ic)=ip(ih)
+            else
+              if (ip(ih).ne.ip(1)) then
+                write(luscn,9909) lcode(ic),(lstnna(i,is),i=1,4)
+9909            format('GNPAS09 - Inconsistent number of passes in',
+     .          ' $HEAD',
+     .          ' between headstacks 1 and 2 for ',a2,' at ',4a2)
+              endif
+            endif
+          enddo ! each headstack
           endif ! defined
         enddo ! codes
         if (ic1.gt.0) then ! some code is defined

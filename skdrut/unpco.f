@@ -1,6 +1,6 @@
       SUBROUTINE unpco(IBUF,ILEN,IERR,
      .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,
-     .ITRK,itr2,cs,ivc)
+     .ITRK,cs,ivc)
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
@@ -17,6 +17,8 @@ C 960121 nrv Add switching and BBC# to call, decode at end of line.
 C 960405 nrv Move ISCNC to after check for IC1=0 in decoding tracks
 C 960408 nrv Check IC2 before doing the next ISCNC.
 C 960409 nrv Allow high-number passes for headstack 2
+C 970206 nrv Remove itr2 and add headstack index
+C 970206 nrv Change max_pass to max_subpass
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -36,8 +38,7 @@ C     FREQPC - phase cal frequency, Hz
 C     Ichan - channel number for this frequency
 C     LMODE - observing mode, 1 char in upper byte
 C     VCBAND - final video bandwidth, MHz
-      integer ITRK(4,max_pass) ! tracks to be recorded
-      integer ITR2(4,max_pass) ! tracks to be recorded, headstack 2
+      integer ITRK(4,max_subpass,max_headstack) ! tracks to be recorded
       character*3 cs ! switching
       integer ivc ! physical BBC# for this channel
 C
@@ -49,7 +50,7 @@ C  LOCAL:
 C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
-      integer ihead,ich,nch,ic2,ic1,ict,ip,ix,itx,it1
+      integer k,ihead,ich,nch,ic2,ic1,ict,ip,ix,itx,it1
       integer jchar,ichmv,ias2b,iscnc ! functions
 C
 C
@@ -152,10 +153,11 @@ C     t3 is for USB, t4 for LSB for magnitude bit. <<<<<< This is how
 C                                                         2-bit sampling
 C                                                         is specified.
 C
-      DO  I=1,max_pass ! initialize
-        do j=1,4
-          ITRK(j,I) = -99
-          ITR2(j,I) = -99
+      DO  I=1,max_subpass ! initialize
+        do j=1,4 ! sb and bits
+          do k=1,max_headstack
+            ITRK(j,I,k) = -99
+          enddo
         enddo
       END DO  !initialize
 C
@@ -175,7 +177,7 @@ C                              (        Find the opening parenthesis
           ipas=ipas-100
           ihead=2
         endif
-        IF  (IPAS.lt.0.or.ipas.gt.max_pass) THEN  
+        IF  (IPAS.lt.0.or.ipas.gt.max_subpass) THEN  
           IERR = -107-IX
           RETURN
         END IF  !
@@ -196,8 +198,7 @@ C                              (        Find the opening parenthesis
               ierr=-107-ix
               return
             endif
-            if (ihead.eq.1) ITRK(itx,IPAS) = it1
-            if (ihead.eq.2) ITR2(itx,IPAS) = it1
+            if (ihead.le.max_headstack) ITRK(itx,IPAS,ihead) = it1
           endif ! value
         enddo ! scan (t1,t2,t3,t4)
         IF  (itx.eq.0) THEN  !no tracks in this field!
