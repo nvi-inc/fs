@@ -46,6 +46,7 @@ set oldactive 0                       ;# Number of active channels at last Replo
 set xchangeFlag 0                     ;# 1 if user has changed X-axis data, 0 otherwise.
 set optionLine 0                      ;# Connecting line, on/off.
 set optionSuperimpose 0               ;# Superimposed plots, on/off.
+set firstday -1                       ;# first day encountered in type 1 log
 
 # Initialization of channel data
 
@@ -216,26 +217,26 @@ for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
 #                         TIME CONVERTING SECTION
 #
 #    NB! The procedures in this section are only designed to work from
-#        January 1 (day 1), 1989 until December 31 (day 366), 2088.
+#        January 1 (day 1), 1970 until March 1, (day 50), 2100.
 #
 # ==========================================================================
 
 # The following line makes the TCL interpreter compatible with the IEEE
 # double precision number format, which is needed, although more than enough
-# precison, for the time converting procedures to work until year 2089.
+# precison, for the time converting procedures to work until year 2100.
 
 set tcl_precision 17
 
 # Procedure to convert time from numeric form to readable form
 # ------------------------------------------------------------
 
-# Input:  100ths of seconds after January 1, 1989
+# Input:  100ths of seconds after January 1, 1970
 # Output: Time, as a string in format decided by the outform parameter
 
 proc time2str {time outform} {
     set time [expr double($time)]
-    set leapyears [expr int($time/12623040000.0)]
-    set day366 [expr int(($time+8640000.0)/12623040000.0)-$leapyears]
+    set leapyears [expr int(($time+3153600000.0)/12623040000.0)]
+    set day366 [expr int(($time+3153600000.0+8640000.0)/12623040000.0)-$leapyears]
     set time [expr $time-$leapyears*8640000.0]
     set year [expr int($time/3153600000.0)-$day366]
     set time [expr $time-$year*3153600000.0]
@@ -247,13 +248,9 @@ proc time2str {time outform} {
     set time [expr $time-$min*6000.0]
     set sec [expr int($time/100.0)]
     set sec100 [expr int($time-$sec*100.0)]
-    if {$year < 11} {
-	incr year 89
-    } else {
-	incr year -11
-    }
+# not Y10K compliant, will need leading zero added for years less than 10K
+    set year [expr $year+1970]
     incr day 1
-    if {$year < 10} {set year [format "0%s" $year]}
     if {$day < 10} {set day [format "0%s" $day]}
     if {$day < 100} {set day [format "0%s" $day]}
     if {$hour < 10} {set hour [format "0%s" $hour]}
@@ -261,32 +258,33 @@ proc time2str {time outform} {
     if {$sec < 10} {set sec [format "0%s" $sec]}
     if {$sec100 < 10} {set sec100 [format "0%s" $sec100]}
     switch $outform {
-	1 {set result [format "%s%s%s%s%s%s" $year $day $hour $min $sec $sec100] \
+	1 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
 		;# FS log file format}
-	2 {set result [format "%s.%s-%s:%s:%s" $year $day $hour $min $sec] \
+	2 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
 		;# Used by labelaxes}
-	3 {set result [format "%s%s%s%s%s%s" $year $day $hour $min $sec $sec100] \
+	3 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
 		;# Used by changeXdata (timestart, timestop)}
-	4 {set result [format "%s-%s:%s:%s,%s" $day $hour $min $sec $sec100] \
+	4 {set result [format "%s.%s.%s:%s:%s.%s" $year $day $hour $min $sec $sec100] \
 		;# Used by listRange}
     }
     return $result
 }
 
-# Procedure to determine whether year is a leap year.
+# Procedure to determine how many leap years have passed since 1970.
 # ---------------------------------------------------
 
-# This procedure is only designed to work between the years 1989 and 2088.
-# During this time period, every 4th year is a leap year, including year
-# 2000, since year 2000 yields an integer result when divided by 400.
+# This procedure is only designed to work between the years 1970 and 2100.
+# During this time period, every 4th year is a leap year, except year
+# 2100, which why the routine fails in 2101 and after.
 # The internationally accepted gregorian calendar removes 3 leap years per
 # 400 years, namely those that can be divided by 100, but not by 400.
 
-# Input:  Number of years after 1989.
-# Output: Number of leap years passed since 1989.
+# Input:  Number of years after 1970
+# Output: Number of leap years passed since Input.
 
 proc leap_years {year} {
-    set leaps [expr $year/4]
+# not Y2.1K compliant, (actually) 2.101 is when it fails
+    set leaps [expr ($year+1)/4]
     set leaps [expr int($leaps)]
     return $leaps
 }
@@ -294,22 +292,62 @@ proc leap_years {year} {
 # Procedure to convert time from readable form to numeric form
 # ------------------------------------------------------------
 
-# Input:  Time, as a string in format YYDDDHHMMSSSS
-# Output: 100ths of seconds after January 1, 1989
+# Input:  Time, as a string in format YYDDDHHMMSSSS or YYYY.DDD.HH:MM:SS.SS or
+#         DDDHHMMSS and the year is supplied externally by $oldyear
+# Output: 100ths of seconds after January 1, 1970
 
 proc str2time {str} {
-    if {[string length $str] >= 5} {
-	while {[string length $str] < 13} {
-	    set str [format "%s0" $str]
+    global oldyear firstday
+    if {[string length $str] >= 10 } {
+# not Y10K compliant, there will be a '.' at index 9 
+	if {[string first [string range $str 9 9] "0123456789"] == -1} {
+	    set year $oldyear
+	    set day [string range $str 0 2]
+	    set hour [string range $str 3 4]
+	    set min [string range $str 5 6]
+	    set sec [string range $str 7 8]
+	    set sec100 0
+	    if {$year < 1970} {
+		set year 0
+	    } else {
+		incr year -1970
+	    }
+	    if {$firstday < 0 } {
+		set firstday $day
+	    } elseif {$day < $firstday} {
+		incr year 1
+	    }
+	} elseif {[string length $str] >= 13 && [string compare [string range $str 4 4] "."] == 0} {
+	    set year [string range $str 0 3]
+	    set day [string range $str 5 7]
+	    set hour [string range $str 9 10]
+	    set min [string range $str 12 13]
+	    set sec [string range $str 15 16]
+	    set sec100 [string range $str 18 19]
+	    if { $firstday < 0} {
+		set oldyear $year
+		set firstday $day
+	    }
+	    incr year -1970
+	} else {
+# not Y10K compliant
+	    set year [string range $str 0 1]
+	    set day [string range $str 2 4]
+	    set hour [string range $str 5 6]
+	    set min [string range $str 7 8]
+	    set sec [string range $str 9 10]
+	    set sec100 [string range $str 11 12]
+	    if {$year < 70} {
+		incr year 30
+	    } else {
+		incr year -70
+	    }
+	    if { $firstday < 0} {
+		set oldyear [expr $year+1970]
+		set firstday $day
+	    }
 	}
-    }
-    if {[string length $str] >= 13} {
-	set year [string range $str 0 1]
-	set day [string range $str 2 4]
-	set hour [string range $str 5 6]
-	set min [string range $str 7 8]
-	set sec [string range $str 9 10]
-	set sec100 [string range $str 11 12]
+
 	set year [string trimleft $year 0]
 	if {[string compare $year ""] == 0} {set year 0}
 	set day [string trimleft $day 0]
@@ -322,11 +360,6 @@ proc str2time {str} {
 	if {[string compare $sec ""] == 0} {set sec 0}
 	set sec100 [string trimleft $sec100 0]
 	if {[string compare $sec100 ""] == 0} {set sec100 0}
-	if {$year < 89} {
-	    incr year 11
-	} else {
-	    incr year -89
-	}
 	incr day -1
 	set time [expr 3153600000.0*$year+[leap_years $year]*8640000.0]
 	set time [expr $time+8640000.0*$day]
@@ -482,7 +515,7 @@ proc readData {inx} {
 	set nodeDataMatrix($inx,0,2) 0                  ;# Undo-counter
 	set selectMatrix($inx,4) 1                      ;# Dataset now in memory
 	set timepoints(0) 0
-	catch {exec grep ^..............$selectMatrix($inx,1) $current_filename > $current_TEMP.firstgrep}
+	catch {exec grep ^.*$selectMatrix($inx,1) $current_filename > $current_TEMP.firstgrep}
 	catch {exec grep $selectMatrix($inx,5) $current_TEMP.firstgrep > $current_TEMP.$inx}
 	exec rm -f $current_TEMP.firstgrep
     } else {
@@ -493,7 +526,6 @@ proc readData {inx} {
 	if ![catch {exec grep $selectMatrix($inx,1) $current_filename > $current_TEMP.firstgrep}] {
 	    if ![catch {exec grep $selectMatrix($inx,5) $current_TEMP.firstgrep > $current_TEMP.$inx}] {
 		set fileID [open $current_TEMP.$inx r]
-		exec rm -f $current_TEMP.firstgrep
 		set counter 1
 		set flagEOF [gets $fileID readline]
 		while {$flagEOF >= 0} {
@@ -516,6 +548,7 @@ proc readData {inx} {
 		}
 		close $fileID
 	    }
+	    exec rm -f $current_TEMP.firstgrep
 	}
 	set nodeDataMatrix($inx,0,1) $noOfPoints
 	set nodeDataMatrix($inx,0,2) 0                  ;# Undo-counter
@@ -746,15 +779,19 @@ proc outputCmd {argstr} {
 }
 
 proc plotCmd {theTimes} {
-    global current_filename print_filename print_destination
+    global current_filename print_filename print_destination tk_version
     set validname [newfile_checkfile $current_filename 2]
     if {$validname == 1} {
 	setTimes $theTimes
 	Replot
-	wm deiconify .
+	if { $tk_version < 4.0 } {
+	    wm deiconify .
+	}
 	update
 	print_OK
-	wm iconify .
+	if { $tk_version < 4.0 } {
+	    wm iconify .
+	}
 	if {$print_destination == 1} {
 	    return "Plot: Encapsulated postscript plot was written to $print_filename"
 	} else {
@@ -1352,7 +1389,7 @@ proc labelaxes {thePos} {
     .c dchars coordsys 0 end
     .c delete labelfig
     .c insert x0 0 [time2str [expr $xmin+$timebase] 2]
-    .c insert x1 0 [time2str [expr $timebase+($xmax-$xmin)/2] 2]
+    .c insert x1 0 [time2str [expr $timebase+($xmax+$xmin)/2] 2]
     .c insert x2 0 [time2str [expr $xmax+$timebase] 2]
     for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
 	if {$currentSet($counter) != 0} {
@@ -1512,12 +1549,14 @@ proc listRange {dataset} {
 		incr counter
 		if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
 	    }
+# not Y10K compliant
 	    if {$global_startmode == 0} {
 		.source.list insert end "------------------------------------------------"
-		.source.list insert end "Status | Time            | $selectMatrix($dataset,3) value"
-		.source.list insert end "       |                 |"
+		.source.list insert end "Status | Time                 | $selectMatrix($dataset,3) value"
+#                                                 yyyy.ddd.hh:mm:ss.ss
+		.source.list insert end "       |                      |"
 		while {$nodeDataMatrix($dataset,$counter,2) <= $global_xmax} {
-		    .source.list insert end [format " %d     | %s | %f" $nodeDataMatrix($dataset,$counter,1) [time2str [expr $timebase+$nodeDataMatrix($dataset,$counter,2)] 4] $nodeDataMatrix($dataset,$counter,3) 2]
+		    .source.list insert end [format "  %d    | %s | %f" $nodeDataMatrix($dataset,$counter,1) [time2str [expr $timebase+$nodeDataMatrix($dataset,$counter,2)] 4] $nodeDataMatrix($dataset,$counter,3) 2]
 		    incr counter
 		    incr pointcount
 		    if {$counter == $nodeDataMatrix($dataset,0,1)} {incr counter -1; break}
@@ -1527,11 +1566,13 @@ proc listRange {dataset} {
 		.source.list insert end "Data points listed: $pointcount."
 		.source.list insert end "------------------------------------------------"
 	    }
+# not Y2.1K compliant
 	    if {$global_startmode >= 1} {
 		set fileID [open $current_TEMP.list w]
 		puts $fileID "------------------------------------------------"
-		puts $fileID "Status | Time            | $selectMatrix($dataset,3) value"
-		puts $fileID "       |                 |"
+		puts $fileID "Status | Time                 | $selectMatrix($dataset,3) value"
+#                                      yyyy.ddd.hh:mm:ss.ss
+		puts $fileID "       |                      |"
 		while {$nodeDataMatrix($dataset,$counter,2) <= $global_xmax} {
 		    puts $fileID [format " %d     | %s | %f" $nodeDataMatrix($dataset,$counter,1) [time2str [expr $timebase+$nodeDataMatrix($dataset,$counter,2)] 4] $nodeDataMatrix($dataset,$counter,3) 2]
 		    incr counter
@@ -1747,11 +1788,21 @@ proc newfile_OK {output} {
     global newfile_filename current_DefaultDir current_filename current_TEMP
     global global_xmin global_xmax timebase global_xmaxoffset global_xdefmax
     global selectMatrix noOfSelects noOfChannels global_antennaname
-    global timestart timestop currentSet
+    global timestart timestop currentSet oldyear firstday
+    global timepoints global_ymin global_ymax
     if [newfile_checkfile $newfile_filename $output] {
 	set current_filename $newfile_filename
 	set fileID [open $current_filename r]
 	gets $fileID readline
+	set timepoints(0) 0
+	set global_ymin(0) 0
+	set global_ymax(0) 0
+	if {[string compare [string range $readline 9 15] ";MARK I"]== 0 } {
+	    set oldyear [lindex [split $readline] 8]
+	} else {
+	    set oldyear 1970
+	}
+	set firstday -1;
 	set timebase [str2time $readline]
 	seek $fileID -500 end
 	set EOF 0
@@ -1799,7 +1850,8 @@ proc newfile_OK {output} {
 
 proc newfile_checkfile {filename output} {
     global newfile_filename newfile_statusMsg newfiletext_nofile newfiletext_noday
-    global newfiletext_day current_DefaultDir current_TEMP
+    global newfiletext_day current_DefaultDir current_TEMP oldyear firstday
+    global timepoints global_ymin global_ymax
     set tempfile ""
     set globalsign [string index $filename 0]
     set globalcheck [string compare "/" $globalsign]
@@ -1847,6 +1899,17 @@ proc newfile_checkfile {filename output} {
     }
     if {[string compare $tempfile ""] != 0} {
 	set fileID [open $tempfile r]
+	gets $fileID readline
+	if {[string compare [string range $readline 9 15] ";MARK I"]== 0 } {
+	    set oldyear [lindex [split $readline] 8]
+	} else {
+	    set oldyear 1970
+	}
+	set timepoints(0) 0
+	set global_ymin(0) 0
+	set global_ymax(0) 0
+	set firstday -1
+	set timebase [str2time $readline]
 	set day [read $fileID 5]
 	close $fileID
 	if {[expr {$day > 0}] && [expr {$day < 100000}]} {
@@ -1862,11 +1925,13 @@ proc newfile_checkfile {filename output} {
 		set antennaname "NOANTENNA"
 	    }
 	    if {$output == 0} {
-		set newfile_statusMsg [format "This file contains data for station %s, day %s." $antennaname $day]
+# not Y2.1K compliant
+		set newfile_statusMsg [format "This file starts with data for station %s, day %.8s." $antennaname [time2str $timebase 1 ]]
 		focus .newfile
 	    }
 	    if {$output == 1} {
-		puts [format "This file contains data for for antenna %s, day %s." $antennaname $day]
+# not Y2.1K compliant
+		puts [format "This file starts with data for antenna %s, day %.8s." $antennaname [time2str $timebase 1]]
 	    }
 	    return 1
 	} else {
@@ -2104,10 +2169,10 @@ label .labelParm -anchor w -width 4 -text "Chan"
 label .labelYmin -anchor w -width 4 -text "Ymin"
 label .labelYmax -anchor w -width 4 -text "Ymax"
 
-label .labelTformat -anchor w -text YYDDDHHMMSSSS
-entry .entryTimestart -width 13 -relief sunken -textvariable timestart
-entry .entryTimestop -width 13 -relief sunken -textvariable timestop
-entry .entryTimepoints -width 13 -relief sunken -textvariable timepoints(0)
+label .labelTformat -anchor w -text YYYY.DDD.HH:MM:SS.SS
+entry .entryTimestart -width 20 -relief sunken -textvariable timestart
+entry .entryTimestop -width 20 -relief sunken -textvariable timestop
+entry .entryTimepoints -width 20 -relief sunken -textvariable timepoints(0)
 radiobutton .radiobuttonData1 -width 1 \
 	-activeforeground $colorArray(1) -foreground $colorArray(1) -text "1" \
 	-variable newChan -value 1 -command updateChandata
@@ -2120,8 +2185,8 @@ radiobutton .radiobuttonData3 -width 1 \
 radiobutton .radiobuttonData4 -width 1 \
 	-activeforeground $colorArray(4) -foreground $colorArray(4) -text "4" \
 	-variable newChan -value 4 -command updateChandata
-entry .entryYmin -width 13 -relief sunken -textvariable global_ymin(0)
-entry .entryYmax -width 13 -relief sunken -textvariable global_ymax(0)
+entry .entryYmin -width 20 -relief sunken -textvariable global_ymin(0)
+entry .entryYmax -width 20 -relief sunken -textvariable global_ymax(0)
 
 bind .entryTimestart <Return> {focus .; Replot}
 bind .entryTimestart <Left> {.entryTimestart icursor [expr insert-1]}
@@ -2492,7 +2557,7 @@ proc create_sourceWindow {mode} {
     frame .source.frame1
     frame .source.frame4
     
-    listbox .source.list -geometry 60x20 -relief sunken -setgrid 1 -yscrollcommand [list .source.sy set]
+    listbox .source.list -relief sunken -setgrid 1 -yscrollcommand [list .source.sy set]
     scrollbar .source.sy -relief sunken -orient vertical -command [list .source.list yview]
 
     button .source.buttonPrint -text "Print" -width 8 -command {create_printWindow 1}
@@ -2553,6 +2618,7 @@ switch $global_startmode {
     1 {
 	while 1 {
 	    puts -nonewline "logpl> "
+	    flush stdout
 	    gets stdin cmdline
 	    set errorflag [decode $cmdline]
 	}
