@@ -11,7 +11,8 @@ extern long nanosec;
 
 void rte2secs();
 
-void gets2time(unixtime,unixhs,fstime,fshs,formtime,formhs)
+void gets2time(dev,unixtime,unixhs,fstime,fshs,formtime,formhs)
+char dev[];
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -19,13 +20,17 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 {
-  long centisec[2], centiavg, centidiff;
+  long centisec[6], centiavg, centidiff;
   int it[6], icount;
 
   icount=0;
 try:	
   nsem_take("fsctl",0);
-  get_s2time(centisec,it,&nanosec,ip);
+  if(get_s2time(dev,centisec,it,&nanosec,ip,1)!=0) {
+    endwin();
+    fprintf(stderr,"Field System not running - fmset aborting\n");
+    exit(0);
+  }
   nsem_put("fsctl");
   if( ip[2] < 0) {
     if(ip[2]< -400 && ip[2] > -404)
@@ -36,7 +41,7 @@ try:
       goto try;
     
     endwin();
-    printf("Error %d from formatter\n",ip[2]);
+    fprintf(stderr,"Error %d from formatter\n",ip[2]);
     logita(NULL,ip[2],ip+3,ip+4);
     rte_sleep(SLEEP_TIME);
     exit(0);
@@ -44,10 +49,9 @@ try:
   
   centiavg= centisec[1]; /* for S2 second time is much more accurate */
   
-  rte_cmpt(unixtime,&centiavg);
-  *unixhs=centiavg;
+  *unixtime=centisec[3];
+  *unixhs=centisec[5];
   
-  centiavg= centisec[1];
   rte_fixt(fstime,&centiavg);
   *fshs=centiavg;
   
