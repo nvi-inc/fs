@@ -95,7 +95,7 @@ C        NCLREC - # class records
 C        ICLREC - counter for outer loop over class records
       dimension ireg(2)
 C               - registers from EXEC
-      integer*2 ibuf(180),ibuf2(80)
+      integer*2 ibuf(180),ibuf2(80),ibuf3
 C               - buffers for input, output
 C        ILEN,ILEN2   - length of above buffers
       integer*2 lstrob(8)
@@ -320,18 +320,23 @@ C
           ierr=portbaud(lumat,ibmat)
           if(ierr.ne.0) goto 899
           itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
-        else
+       else
           nch=iscn_ch(ibuf(2),1,nchar-2,'#')
           if(nch.ne.0.and.nch.lt.nchar-3) then
-            nch=nch+1
-            do i=1,ndev
-              if (ichcm(modtbl(2,i),1,ibuf(2),nch,2).eq.0) then
-                itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
-                goto 501
-              endif
-            enddo
+             idum=ichmv(ibuf3,1,ibuf(2),nch+1,2)
+             call lower(ibuf3,2)
+             do i=1,ndev
+                if (ichcm(modtbl(2,i),1,ibuf3,1,2).eq.0) then
+                   itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
+                   goto 501
+                endif
+             enddo
           endif
-        endif
+       endif
+c do something sensible at least for itn if we can't find the device
+c this prevents the FS from hanging if the device is turned off or fails
+c when an answer is expected
+        itn=1.5*10.*100./float(ibdrt(ibx))+5.5
 501     continue
         call fs_get_kecho(kecho)
         call iat(ibuf(2),nchar-2,lumat,kecho,ibuf2(2),
