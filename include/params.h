@@ -9,7 +9,7 @@
 #define PAGE_SIZE   4096
 
 #define SHM_KEY     1
-#define C_RES       6*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       7*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_KEY     1
@@ -54,7 +54,6 @@
 #define MAX_DIST   2
 #define MAX_DET    32
 
-#define DEV_VRC     "rc"
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
 #define DEV_VIC     "ic"
@@ -64,6 +63,7 @@
 
 /* rack/drive */
 
+#define K4K3        0x80
 #define K4MK4       0x40
 #define K4          0x20
 #define VLBA4       0x10
@@ -76,22 +76,17 @@
 
 #define VLBAG       0x100
 #define VLBA2       0x200
-#define MK3B        0x400
+#define MK4B        0x400
 #define K41         0x800
 #define K41U        0x1000
 #define K42         0x2000
 #define K42A        0x4000
 #define K42BU       0x8000
-#define K41K3       0x10000
-#define K41UK3      0x20000
-#define K42K3       0x40000
-#define K42AK3      0x80000
-#define K42BUK3     0x100000
-#define K41MK4      0x200000
-#define K41UMK4     0x400000
-#define K42MK4      0x800000
-#define K42AMK4     0x1000000
-#define K42BUMK4    0x2000000
+#define VLBAB       0x10000
+#define K41DMS      0x20000
+#define K42DMS      0x40000
+#define K42B        0x80000
+#define K42C        0x100000
 
 #define FS_ROOT     "/usr2"
 
