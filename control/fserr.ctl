@@ -3845,6 +3845,9 @@ TA   -7
 TA   -8
 Syntax ERROR in tacd.ctl - no commas allowed as delimeters.
 ""
+TA   -9
+TACD: "Wrong IP address, or TAC32 PC not setup properly.
+""
 TA -201
 commands are tacd={,status,time,average,cont,stop,start} only.
 ""
