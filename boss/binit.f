@@ -73,12 +73,12 @@ C
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.31) then
+          if (ieq1.ge.1 .and. ieq1.le.127) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.1 .and. ieq2.le.31) then
+          if (ieq2.ge.1 .and. ieq2.le.127) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
@@ -116,12 +116,12 @@ C
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.31) then
+          if (ieq1.ge.1 .and. ieq1.le.127) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.1 .and. ieq2.le.31) then
+          if (ieq2.ge.1 .and. ieq2.le.127) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
@@ -151,7 +151,7 @@ C
       ierr=0
       call rdtib(idcbsk,ip)
       if (ip(3).ne.0) then
-        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
         call logit7ci(0,0,0,1,-115,'bo',ip(3))
         call fc_putln('ibcon initialization failed')
       else
