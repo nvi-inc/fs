@@ -237,4 +237,5 @@ typedef struct fscom {
         int ITPIVC[15];
         long tpigain[ MAX_DET];
         int iapdflg;
+        int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
 } Fscom;

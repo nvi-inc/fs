@@ -159,6 +159,7 @@ void cshm_init()
 
   shm_addr->k4rec_mode.im=-1;
   shm_addr->k4rec_mode.nm=-1;
+  shm_addr->k4rec_mode_stat=-1;
 
   shm_addr->check.vkenable[0]=0;
   shm_addr->check.vkenable[1]=0;
