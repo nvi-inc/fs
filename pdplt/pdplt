@@ -11,7 +11,19 @@
 
 # Screen layout constants
 
-set size 3          ;# Multipication factor to change size of plotting area
+# Determine the resolution. 
+  set win_sizeX [winfo screenwidth .]
+  set win_sizeY [winfo screenheight .]  
+  wm geometry . +0+0
+ 
+#position window full screen from top left corner.
+# wm geometry . $vieX\x$vieY+0+0
+  if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
+      set size 2.5  ;# Multipication factor to change size of plotting area
+  } else {
+      set size 3    ;# Multipication factor to change size of plotting area
+  }
+
 set xoffset 80      ;# Distance between window edge and plotting area vert-axis
 set yoffset 50      ;# Distance between window edge and plotting area upper limit
 set xrightoffset 60 ;# Distance between text labels and plotting area right limit
@@ -377,9 +389,9 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	    set XPointSigmaLabel "AZ-sigma.:"
 	    set YPointSigmaLabel "EL-sigma.:"
 	    set xmeanlabel "AZ-mean:"
-	    set xrmslabel "AZ-rms.:"
+	    set xrmslabel "AZ-rms..:"
 	    set ymeanlabel "EL-mean:"
-	    set yrmslabel "EL-rms.:"
+	    set yrmslabel "EL-rms..:"
 	    .mbar.graph.menu add radio -label "AZ-axis   vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
 	    .mbar.graph.menu add radio -label "AZ-offset vs AZ-axis" -variable currentPlot -value 2 -command {plotdefault}
@@ -405,10 +417,10 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	}
     }
     .mbar.stat.menu delete 0 last
-    .mbar.stat.menu add command -label [format "%-10s %+11.5f" $xmeanlabel $Xmean]
-    .mbar.stat.menu add command -label [format "%-11s %+11.5f" $xrmslabel $Xrms]
-    .mbar.stat.menu add command -label [format "%-10s %+11.5f" $ymeanlabel $Ymean]
-    .mbar.stat.menu add command -label [format "%-11s %+11.5f" $yrmslabel $Yrms]
+    .mbar.stat.menu add command -label [format "%s  %+f" $xmeanlabel $Xmean]
+    .mbar.stat.menu add command -label [format "%s  %+f" $xrmslabel $Xrms]
+    .mbar.stat.menu add command -label [format "%s  %+f" $ymeanlabel $Ymean]
+    .mbar.stat.menu add command -label [format "%s  %+f" $yrmslabel $Yrms]
 }
 
 # Procedure for creating/updating sources menu
@@ -1655,18 +1667,18 @@ label .labelPointElevation -width 10 -anchor e -textvariable PointElevation
 label .labelDummy1 -width 10 -anchor e
 label .labelDummy2 -width 10 -anchor e
 
-button .buttonAutoX -width 20 -text "Autoscale horz-axis" -command ReplotXauto
-button .buttonAutoY -width 20 -text "Autoscale vert-axis" -command ReplotYauto
-
-entry .entryXmin -width 10 -relief sunken -textvariable global_xmin
-entry .entryXmax -width 10 -relief sunken -textvariable global_xmax
-entry .entryYmin -width 10 -relief sunken -textvariable global_ymin
-entry .entryYmax -width 10 -relief sunken -textvariable global_ymax
+entry .entryXmin -width 10 -relief sunken -bd 1 -textvariable global_xmin
+entry .entryXmax -width 10 -relief sunken -bd 1 -textvariable global_xmax
+entry .entryYmin -width 10 -relief sunken -bd 1 -textvariable global_ymin
+entry .entryYmax -width 10 -relief sunken -bd 1 -textvariable global_ymax
 
 bind .entryXmin <Return> {focus .;Replot}
 bind .entryXmax <Return> {focus .;Replot}
 bind .entryYmin <Return> {focus .;Replot}
 bind .entryYmax <Return> {focus .;Replot}
+
+button .buttonAutoX -width 20 -text "Autoscale horz-axis" -command ReplotXauto
+button .buttonAutoY -width 20 -text "Autoscale vert-axis" -command ReplotYauto
 
 # Set up canvas to show coordinate system
 
@@ -1701,6 +1713,7 @@ pack .subframe21 .subframe22 -in .frame2
 pack .subframe211 .subframe212 -side left -in .subframe21
 pack .c -in .frame1
 pack .labelLabelPointX .labelLabelPointY .labelLabelPointXOffset .labelLabelPointYOffset .labelLabelPointXSigma .labelLabelPointYSigma .labelLabelPointSource .labelLabelPointElevation .labelLabelDummy1 .labelLabelXmin .labelLabelXmax .labelLabelYmin .labelLabelYmax .labelLabelDummy2 -padx 2m -in .subframe211
+
 pack .labelPointX .labelPointY .labelPointXOffset .labelPointYOffset .labelPointXSigma .labelPointYSigma .labelPointSource .labelPointElevation .labelDummy1 .entryXmin .entryXmax .entryYmin .entryYmax .labelDummy2 -padx 2m -in .subframe212
 pack .buttonAutoX .buttonAutoY -in .subframe22
 
