@@ -31,6 +31,7 @@ C  LOCAL:
       logical kvlba,kmk3
       character*3 cs
       real*4 f1,f2,f,vb,rbbc,srate
+      integer*2 lbar(2,max_stn)
       integer ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst ! functions
       logical knaeq
 C
@@ -56,6 +57,9 @@ C            in frequency sequences etc.
 C 960409 nrv Allow for headstack 2 in call to UNPCO and setting ITRAS,ITRA2
 C 960516 nrv Crosscheck sub-groups on "L" lines and "C" lines using
 C            channel numbers not BBC numbers
+C 960709 nrv Add "B" line for barrel roll
+C 960709 nrv Initialize fanout factor to 0, for Mark III modes.
+C            It is reset to 1,2,4 if it's a VLBA mode.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -65,6 +69,7 @@ C
       IF (JCHAR(IBUF,1).EQ.OCAPC) ITYPE=1 ! C frequency sequence lines
       IF (JCHAR(IBUF,1).EQ.OCAPL) ITYPE=2 ! L LO lines
       IF (JCHAR(IBUF,1).EQ.OCAPR) ITYPE=4 ! R sample rate lines
+      IF (JCHAR(IBUF,1).EQ.OCAPB) ITYPE=5 ! B barrel roll lines 
       IF (ITYPE.EQ.1) CALL UNPCO(IBUF(2),ILEN-1,IERR,
      .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,itr2,cs,ivc)
       IF (ITYPE.EQ.2) CALL UNPLO(IBUF(2),ILEN-1,IERR,
@@ -72,6 +77,7 @@ C
       IF (ITYPE.EQ.3) CALL UNPFSK(IBUF(2),ILEN-1,IERR,LNA,LC,lst,
      .                ns)
       IF (ITYPE.EQ.4) CALL UNPRAT(IBUF(2),ILEN-1,IERR,lc,srate)
+      IF (ITYPE.EQ.5) CALL UNPBAR(IBUF(2),ILEN-1,IERR,lc,lst,ns,lbar)
       call hol2upper(lc,2) ! uppercase frequency code
 C
 C 1.5 If there are errors, handle them first.
@@ -119,9 +125,9 @@ C
           LCODE(ICODE) = LC ! 2-letter code for the sequence
           idum = ichmv(LMODE(1,is,ICODE),1,LM,1,8) ! recording mode
 C         Determine fanout factor here. Fan-in code is commented for now.
+          ifan(is,icode)=0
           ix = iscn_ch(lmode(1,is,icode),1,8,'1:') 
 C         iy = iscn_ch(lmode(1,is,icode),1,8,':1') 
-          ifan(is,icode)=1
           if (ix.ne.0) then ! possible fan-out
             n=ias2b(lmode(1,is,icode),ix+2,1)
             if (n.gt.0) ifan(is,icode)=n
@@ -282,9 +288,30 @@ C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C
 C 5. This is the sample rate line.
 
-      if (itype.eq.5) then ! sample rate
+      if (itype.eq.4) then ! sample rate
         samprate(icode)=srate
       endif ! sample rate
+
+C 6. This section for the barrel roll line.
+
+      if (itype.eq.5) then ! barrel
+        if (ns.gt.0) then ! station names on "B" line
+          do is=1,ns ! for each station name found on the line
+            i=1
+            do while (i.le.nstatn.and..not.knaeq(lst(1,is),
+     .               lstnna(1,i),4))
+              i=i+1
+            enddo
+            if (i.gt.nstatn) then ! no match
+              write(lu,9401) (lst(ii,is),ii=1,4)
+9401          format('FRINP06 - Station ',4a2,' not selected. ',
+     .        'Barrel roll for this station ignored.')
+            else ! save it
+             idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
+            endif
+          enddo
+        endif
+      endif
 
       IERR = 0
       INUM = 0
