@@ -55,6 +55,7 @@ define  loader        00000000000
 rw
 !+20s
 et
+!+10s
 tape=reset
 enddef
 define  setup         00000000000

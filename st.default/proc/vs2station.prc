@@ -409,6 +409,7 @@ define  loader        00000000000
 rw
 !+20s
 et
+!+10s
 tape=reset
 enddef
 define  rxx           00000000000
