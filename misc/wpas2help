@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+# Usage: wpas2help [files]
+#
+# wpas2help reads the files, which are assumed to WordPerfect ASCII output
+#           and writes them into Field System help files
+#           requires fiddling afterwards to put `Standard.__' in `rx.__'
+#
+if ($#ARGV <0) {
+    print "Usage: wpas2help xxx\n";
+    print "where xxx are the files to WP ASCII file to generate help files from\n";
+    print "requires fiddling afterwards to put `Standard.__' in `rx.__';
+    exit -1;
+}
+
+$open=0;
+
+while(<>) {
+    if(/\cL/) {
+	if (! /^[ ]*\cL/) {
+	    s/\cL//;
+	    print OUTPUT;
+	}
+	if ($open) {
+	    close(OUTPUT) || die "error closing output file";
+	}
+	$_ = <ARGV> || die "premature end of file on input";
+	print;
+	/^[\s]*(\S*).*/;
+	$fname=$1;
+	if(/Mark III rack/i) {
+	    $suffix=".m_";
+	}
+	elsif (/Mark III drive/i) {
+	    $suffix="._m";
+	}
+	elsif (/Mark IV rack/i) {
+	    $suffix=".4_";
+	}
+	elsif (/Mark IV drive/i) {
+	    $suffix="._4";
+	}
+	elsif (/VLBA rack/i) {
+	    $suffix=".v_";
+	}
+	elsif (/VLBA drive/i) {
+	    $suffix="._v";
+	}
+	elsif (/non-S2 drive/i) {
+	    $suffix="._x";
+	}
+	elsif (/S2 drive/i) {
+	    $suffix="._s";
+	}
+	else {
+	    $suffix=".__";
+	}
+#
+	$fname = ">" . $fname . $suffix;
+	open(OUTPUT, $fname) ||die "couldn't open $fname";
+	$open=1;
+    }
+    print OUTPUT;
+}
