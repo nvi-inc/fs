@@ -20,10 +20,10 @@ C            same as using a file name in printer port.
 C 970301 nrv Add font size prompt.
 C
 C  Local:
-      character*128 ctemp,ctemp2
+      character*128 ctemp
       integer*2 itemp(10)
       integer trimlen
-        integer nch,l,ierr,idummy,ichmv
+      integer nch,l,ierr,idummy,ichmv
 C
 
 C  1.0  Read the input from user and set port appropriatly.
@@ -35,8 +35,8 @@ C  1.0  Read the input from user and set port appropriatly.
      .       'file name or PRINT  ? ')
 
       call gtrsp(ibuf,25,luusr,nch)
+      if(nch .gt. 0) cprport(1:nch)=cbuf(1:nch)
 
-      if (nch.gt.0) call hol2char(ibuf,1,nch,cprport)
       if (cprport(1:5).eq.'print') cprport='PRINT'
 
 C  2.0  Now get printer type.
@@ -49,20 +49,18 @@ C  2.0  Now get printer type.
      .  'if you do not wish to change,'/' else type LASER, EPSON, ',
      .  'or EPSON24 ? ')
 
+        cbuf=" "
         call gtrsp(ibuf,15,luusr,nch)
 
         if (nch.gt.0) then
-          idummy = ichmv(itemp,1,ibuf,1,nch)
-          call hol2upper(itemp,nch)
-          call hol2char(itemp,1,nch,ctemp)
-          if (ctemp.eq.'EPSON'.or.ctemp.eq.'LASER'
-     .      .or.ctemp.eq.'EPSON24') then
-            call c2upper(ctemp,cprttyp)
+          ctemp=cbuf(1:nch)
+          if (ctemp.eq.'EPSON'.or.ctemp.eq.'LASER' .or.
+     >        ctemp.eq.'EPSON24') then
+            cprttyp=ctemp
             ierr=0
           else
-            write(luscn,9210)
-9210        format(' Invalid printer type.  Only LASER, EPSON, '
-     .      'or EPSON24 allowed.  Try again.')
+            write(luscn,'(a)') " Invalid printer type.  Only LASER, "//
+     >        "EPSON,  'or EPSON24 allowed.  Try again."
           endif
         else
           ierr=0
@@ -71,13 +69,18 @@ C  2.0  Now get printer type.
 
 C  3. Now get printer output orientation.
 
+      if(cpaper_size(1:1) .eq. "D") then
+        ctemp="DEFAULT"
+      else if(cpaper_size(1:1) .eq. "P") then
+        ctemp="Portrait"
+      else if(cpaper_size(1:1) .eq. "L") then
+        ctemp="Landscape"
+      endif
+
+      l=trimlen(ctemp)
       ierr=1
-      ctemp2 = 'DEFAULT'
-      if (iwidth.eq.80) ctemp2='PORTRAIT'
-      if (iwidth.eq.137) ctemp2='LANDSCAPE'
-      l=trimlen(ctemp2)
       do while (ierr.ne.0)
-        write(luscn,9300) ctemp2(1:l)
+        write(luscn,9300) ctemp(1:l)
 9300    format(' Output orientation set to ',a,'.  Just enter return ',
      .  'if you do not wish'/' to change else enter (P)ortrait or',
      .  ' (L)andscape or (D)efault ?  ')
@@ -85,22 +88,14 @@ C  3. Now get printer output orientation.
         call gtrsp(ibuf,15,luusr,nch)
 
         if (nch.gt.0) then
-          idummy = ichmv(itemp,1,ibuf,1,nch)
-          call hol2upper(itemp,nch)
-          call hol2char(itemp,1,nch,ctemp)
-          if (ctemp.eq.'L') then
-            iwidth = 137
-            ierr=0
-          else if (ctemp.eq.'P') then
-            iwidth = 80
-            ierr=0
-          else if (ctemp.eq.'D') then
-            iwidth = -1
-            ierr=0
+          call capitalize(cbuf)
+          if(cbuf(1:1) .eq. "L" .or. cbuf(1:1) .eq. "P" .or.
+     >       cbuf(1:1) .eq. "D") then
+             cpaper_size(1:1)=cbuf(1:1)
+             ierr=0
           else
-            write(luscn,9310)
-9310        format(' Invalid output width. Only P, L, or D',
-     .      ' allowed.  Try again.')
+            write(luscn,'(a)') "' Invalid output width. "//
+     >         "Only P, L, or D allowed.  Try again."
           endif
         else
           ierr=0
@@ -108,14 +103,17 @@ C  3. Now get printer output orientation.
       enddo
 
 C  4. Now get font size.
-
+      if(cpaper_size(1:1) .eq. "D") then
+        ctemp="DEFAULT"
+      else if(cpaper_size(1:1) .eq. "S") then
+        ctemp="Small"
+      else if(cpaper_size(1:1) .eq. "L") then
+        ctemp="Large"
+      endif
       ierr=1
-      ctemp2 = 'DEFAULT'
-      if (csize.eq.'S') ctemp2='SMALL'
-      if (csize.eq.'L') ctemp2='LARGE'
-      l=trimlen(ctemp2)
+      l=trimlen(ctemp)
       do while (ierr.ne.0)
-        write(luscn,9400) ctemp2(1:l)
+        write(luscn,9400) ctemp(1:l)
 9400    format(' Output font size set to ',a,'.  Just enter return ',
      .  'if you do not wish'/' to change else enter (S)mall, ',
      .  '(L)arge or (D)efault ?  ')
@@ -123,28 +121,19 @@ C  4. Now get font size.
         call gtrsp(ibuf,15,luusr,nch)
 
         if (nch.gt.0) then
-          idummy = ichmv(itemp,1,ibuf,1,nch)
-          call hol2upper(itemp,nch)
-          call hol2char(itemp,1,nch,ctemp)
-          if (ctemp(1:1).eq.'D') then
-            csize = 'D'
-            ierr=0
-          else if (ctemp(1:2).eq.'S') then
-            csize = 'S'
-            ierr=0
-          else if (ctemp(1:2).eq.'L') then
-            csize = 'L'
-            ierr=0
+          call capitalize(cbuf)
+          if(cbuf(1:1) .eq. "L" .or. cbuf(1:1) .eq. "S" .or.
+     >       cbuf(1:1) .eq. "D") then
+             cpaper_size(2:2)=cbuf(1:1)
+             ierr=0
           else
-            write(luscn,9410)
-9410        format(' Invalid font size. Only S, L, or D',
-     .      ' allowed.  Try again.')
+            write(luscn,'(a)') "' Invalid output width. "//
+     >         "Only L, S, or D allowed.  Try again."
           endif
         else
           ierr=0
         endif
       enddo
-
 
       RETURN
       END

@@ -7136,3 +7136,64 @@ Version 9.7.2 041020
            added text about FS Linux 5
 
 Version 9.7.3 041021
+
+041029 weh control/fscmd.ctl
+           clib/data_valid_util.c
+           quikv/data_valid.c
+           quikv/data_valid_dis.c
+           updated to work even when tape drive is NONE
+
+041029 weh vex/test_parser/main.c
+           vex/test_parser/Makefile
+           fixed to compile in place
+
+041029 am  misc/dila.tar.gz
+           added
+
+041029 weh ddout/recover_log.c
+           ddout/ddout.c
+           improve structure and error handlng
+
+041102 weh help/decode4.___
+           help/form4.___
+           updated wih web reference to low-level device commands
+
+041110 weh matcn/matcn.f
+           matcn/iat.f
+           expanded return buffers for M4 decoder
+
+041110 weh vex/vex.y
+           make "options" field in "data_transfer" optional
+
+041110 rdg vex/vex.y
+           allow NULL on 2nd parameter on the headstack statement.
+           allow NULL on 1st parameter on fanout_def statement.
+
+041115 weh include/disk2file_ds.h
+           clib/cshm_init.c
+           clib/disk2file_util.c
+           control/fserr.ctl
+           changed start and stop parameters to strings
+
+041116 weh boss/getcm.f
+           fix crash bug for "command not supported for your equipment"
+
+041116 dls st.default/oper/bin/wt
+           improved to use hostname if no title is specified
+
+041116 weh mk5cn/mk5cn.c
+           add time-out for scan_set, improved record= time-outs
+
+041116 weh help/disk2file
+           updated for new start and stop parameters
+
+041117 weh quikv/data_valid.c
+           fixed repeating previous command's error message (if any)
+
+041117 weh mk5cn/mk5cn.c
+           more "play=on" cases for extended time-outs
+
+041119 weh mk5cn/mk5cn.c
+           increase scan_set time-out to 5 seconds
+
+Version 9.7.4 041119

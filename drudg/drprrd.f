@@ -9,18 +9,19 @@ C 020713 nrv copied from sked
 
 C Input
       integer ivexnum
+! functions
+      integer ichmv,i2long
+      integer fget_literal,iret,ptr_ch,fget_all_lowl
 
 C Local
       integer nch,ilen,ic1,ic2,ich,idummy,ierr
       integer*2 ibufq(100)
       logical kmore
-      integer ichmv,ichcm_ch,i2long,jchar
-      integer fget_literal,iret,ptr_ch,fget_all_lowl,fvex_len
 
       if (.not.kvex) then ! find $PARAM section
         rewind(lu_infile)
         ibufq(1) = 0
-        DO WHILE (ibufq(1).ne.-1.and.ichcm_ch(ibuf,1,'$PARAM').NE.0) 
+        DO WHILE (ibufq(1).ne.-1.and.cbuf(1:6).ne.'$PARAM')
           CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2) ! get next line
           ibufq(1) = ilen
         enddo
@@ -48,31 +49,28 @@ C  Loop on parameter section lines
         ICH=1
         CALL GTFLD(IBUF,ICH,i2long(IBUFQ(1)),IC1,IC2)
         nch=ibufq(1)-ic2
-        IF  (ichcm_ch(IBUF,IC1,'SUBNET ').EQ.0) THEN  !SUB line
-        ELSE IF (ichcm_ch(IBUF,IC1,'SCAN ').EQ.0) THEN !SCAN line
-        ELSE IF (ichcm_ch(IBUF,IC1,'WEIGHT ').EQ.0) THEN 
-        ELSE IF (ICHCM_ch(IBUF,IC1,'TAPE_TYPE ').EQ.0) THEN 
+        IF  (    cbuf(1:6).eq. 'SUBNET') THEN  !SUB line
+        ELSE IF (cbuf(1:4).eq. 'SCAN') THEN !SCAN line
+        ELSE IF (cbuf(1:5).eq. 'WEIGHT') THEN
+        ELSE if(cbuf(1:5) .eq. 'TAPE_') then
           ibufq(1) = nch
           idummy=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-          CALL TTAPE(IBUFQ,luscn,luscn)
-        ELSE IF (ICHCM_ch(IBUF,IC1,'TAPE_MOTION ').EQ.0) THEN 
-          ibufq(1) = nch
-          idummy=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-          CALL STAPE(IBUFQ,luscn,luscn)
-        ELSE IF (ICHCM_ch(IBUF,IC1,'TAPE_ALLOCATION ').EQ.0) THEN 
-          ibufq(1) = nch
-          idummy=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
-          CALL ATAPE(IBUFQ,luscn,luscn)
-        ELSE IF (ICHCM_ch(IBUF,IC1,'ELEVATION ').EQ.0) THEN 
+          IF      (cbuf(1:9).eq. 'TAPE_TYPE') THEN
+            CALL TTAPE(IBUFQ,luscn,luscn)
+          ELSE IF (cbuf(1:11) .eq.'TAPE_MOTION') THEN
+            CALL STAPE(IBUFQ,luscn,luscn)
+          ELSE IF (cbuf(1:15).eq.'TAPE_ALLOCATION') THEN
+            CALL ATAPE(IBUFQ,luscn,luscn)
+          ENDIF
+        ELSE IF (cbuf(1:9) .eq.'ELEVATION') THEN
           ibufq(1) = nch
           idummy=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
           CALL SELEV(IBUFQ,luscn,luscn)
-        ELSE IF (ICHCM_ch(IBUF,IC1,'EARLY_START ').EQ.0) THEN 
+        ELSE IF (cbuf(1:11).eq. 'EARLY_START') THEN
           ibufq(1) = nch
           idummy=ichmv(ibufq(2),1,ibuf,ic2+1,nch)
           CALL SEARL(IBUFQ,luscn,luscn)
-        ELSE IF (ichcm_ch(IBUF,IC1,'SNR ').EQ.0) THEN !SNR
-        ELSE IF (ichcm_ch(IBUF,IC1,'SNR_1 ').EQ.0) THEN !SNR_1
+        else if(cbuf(1:3) .eq. 'SNR') then !SNR or SNR_1
         ELSE
           idummy=ichmv(ibufq(2),1,ibuf,1,i2long(ibufq(1)))
           CALL drSET(IBUFQ)
@@ -80,7 +78,7 @@ C  Loop on parameter section lines
         if (.not.kvex) then ! read sk file first line
           CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2)
           ibufq(1) = ilen
-          kmore = JCHAR(IBUF,1).NE.ODOLLAR.AND.IBUFQ(1).NE.-1
+          kmore = cbuf(1:1) .ne. "$" .and. ibufQ(1).NE.-1
         else ! get first literal line
           iret=fget_literal(ibuf)
           ibufq(1) = iret

@@ -25,7 +25,7 @@ C  LOCAL
       real speed
       double precision s2sp,k4sp
       integer*2 LKEYWD(12)
-      integer ikey_len,ich,ic1,ic2,nch,i,j,istn
+      integer ikey_len,ich,ic1,ic2,nch,i,istn
       integer ival,idum,icode,ias2b
       integer i2long,igtst2,ichmv,jchar
       logical kdefault,ks2,kk4
@@ -125,8 +125,8 @@ C         Write bit density for freq code 1 only.
             if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
             if (cs2speed(i).eq.'SLP') s2sp=SPEED_SLP
 c                             min   feet           slp/lp          ips
-            write(ludsp,9113) ival,maxtap(i),(ls2speed(j,i),j=1,2),s2sp
-9113        format(i6," min (",i6," feet)",2x,2a2," (",f3.1," ips)")
+            write(ludsp,9113) ival,maxtap(i),cs2speed(i),s2sp
+9113        format(i6," min (",i6," feet)",2x,a," (",f3.1," ips)")
           else if (cstrec(i)(1:2) .eq. "K4") then
             k4sp = speed(1,i)*1000.0
             write(ludsp,9114) ival,maxtap(i),k4sp
@@ -145,7 +145,7 @@ C     2. Something is specified.  Get each station/type combination.
 C
       DO WHILE (IC1.NE.0) !more decoding
         NCH = IC2-IC1+1
-        CALL IFILL(LKEYWD,1,ikey_len,oblank)
+        ckeywd=" "
         idum = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
         IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
           istn=0
@@ -198,25 +198,25 @@ C       Station ID is valid. Check tape type now.
           else ! use defaults for type and density
             kdefault = .true.
           endif ! type/use defaults
-          if((list(ikey) .eq. "SHORT" .or. list(ikey) .eq. "THIN")
-     .      .and..not.kdefault) then ! density 
-            CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
-            IF  (IC1.EQ.0) THEN  !no matching density
-              write(luscn,9201)
-9201          format('TTAPE02 Error - You must specify HIGH or LOW ',
-     .        'bit density for thin or short tape.')
-              RETURN
-            endif ! no matching density
-            nch=min0(ikey_len,ic2-ic1+1)
-            ckeywd=" "
-            idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
-            ikeyhl=istringminmatch(list_hl,ilist_hl,ckeywd)
-            if (ikeyhl.eq.0) then ! invalid type
-              write(luscn,9204) ckeywd
-9204          format('TTAPE03 Error - invalid bit density: ',a,
-     .        ', must be HIGH or LOW.') 
-              return
-            END IF  !invalid type
+          if(.not. kdefault) then
+            if(list(ikey).eq. "SHORT" .or. list(ikey).eq."THIN") then
+              CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
+              IF  (IC1.EQ.0) THEN  !no matching density
+                write(luscn,'(a)') "TTAPE02 Error:  You must specify "//
+     >               "HIGH or LOW bit density for thin or short tape."
+                RETURN
+              endif ! no matching density
+              nch=min0(ikey_len,ic2-ic1+1)
+              ckeywd=" "
+              idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
+              ikeyhl=istringminmatch(list_hl,ilist_hl,ckeywd)
+              if (ikeyhl.eq.0) then ! invalid type
+                write(luscn,9204) ckeywd
+9204            format('TTAPE03 Error - invalid bit density: ',a,
+     .          ', must be HIGH or LOW.')
+                return
+              END IF  !invalid type
+            endif
           endif ! density
         else if (ks2) then
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! length in min
@@ -283,7 +283,12 @@ C   3. Now set parameters in common.
               k4sp = speed(1,i) ! for code 1
               maxtap(i)=ival*k4sp*60.d0 ! convert to meters
             else
-              if (list(ikey) .eq. "THICK") then
+              if (kdefault) then
+                maxtap(i)=maxtap(1)
+                do icode=1,NCODES
+                  bitdens(i,icode)=bitdens(1,icode) ! code 1 only
+                enddo
+              else if (list(ikey) .eq. "THICK") then
                 maxtap(i)=thick_length
                 do icode=1,NCODES
                   bitdens(i,icode)=33333
@@ -312,11 +317,6 @@ C   3. Now set parameters in common.
                     bitdens(i,icode)=33333
                   enddo
                 endif
-              else if (kdefault) then
-                maxtap(i)=maxtap(i)
-                do icode=1,NCODES
-                  bitdens(i,icode)=bitdens(i,icode) ! code 1 only
-                enddo
               endif
             endif
           endif ! this station

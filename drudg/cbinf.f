@@ -16,11 +16,11 @@ C  Initialized
       cable_in=cable
       call capitalize(cable_in)
       if(cable_in(1:1) .eq. "-") then
-        wrap='NEUTRAL'
+        wrap='neutral'
       else if(cable_in(1:1) .eq. "C") then
-        wrap='CW'
+        wrap='cw'
       else if(cable_in(1:1) .eq. "W") then
-        wrap='CCW'
+        wrap='ccw'
       else
         wrap=' '
       endif
