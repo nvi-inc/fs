@@ -214,4 +214,5 @@ typedef struct fscom {
         struct k3fm_cmd k3fm;
         int reccpu;
         struct k4label_cmd k4label;
+        struct k4rec_mode_cmd k4rec_mode;
 } Fscom;
