@@ -7,6 +7,7 @@ C 960814 nrv Allow upper/lower case in SNAP file
 C 970122 nrv Add IIN, FILEPTR to call. Call make_pslabel.
 C 970228 nrv Remove IIN and use clabtyp instead
 C 970312 nrv Update clabtyp name checking for barcode cartridge
+C 970827 nrv Add irow,icol,inewpage to make_pslabel call.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -64,7 +65,16 @@ C 2. Loop over SNAP records
               ipsm2=im2(1)
               call make_pslabel(fileptr,lstnam,lco,lexper,
      .        iy1900,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2,ntape,
-     .        inew,rlabsize)
+     .        inew,rlabsize,ilabrow,ilabcol,inewpage)
+              ilabcol=ilabcol+1
+              if (ilabcol.gt.rlabsize(4)) then
+                ilabcol=1
+                ilabrow=ilabrow+1
+                if (ilabrow.gt.rlabsize(3)) then
+                  ilabrow=1
+                  inewpage=1
+                endif
+              endif
               NOUT = 0
             endif ! laser/Epson/ps
           endif
