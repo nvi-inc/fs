@@ -22,7 +22,7 @@ C
 C
 C  LOCAL:
       integer*2 lc,lstn
-      integer ip(2*MAX_PASS),ihd(2*MAX_PASS),idir(2*MAX_PASS),
+      integer ip(MAX_PASS),ihd(MAX_PASS),idir(MAX_PASS),
      .istn,n,i,icode
       integer igtfr,igtst ! functions
 C

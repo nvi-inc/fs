@@ -45,7 +45,7 @@ CFLAGS= -c
 #
 
 #
-LIBS=../skdrut/skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
+LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
 ../vex/vex.a -lf2c -lfl
 #

@@ -50,7 +50,7 @@ C
       end do
       if (lchange) then
         write(luscn,9100) xch,istnid(inum)
-9100    format(' Changing id code from ',A,' to ',A,' ',$) 
+9100    format(' Changing id code from ',A,' to ',A,' ') 
       end if
 
 C

@@ -14,7 +14,7 @@ C           - buffer containing the record
 C     ILEN  - length of IBUF in words
 C
 C  OUTPUT:
-      integer ierr,ipass(2*max_pass),idir(2*max_pass),ihd(2*max_pass),
+      integer ierr,ipass(max_pass),idir(max_pass),ihd(max_pass),
      .        nent
       integer*2 lstn,lcod
 C     IERR    - error return, 0=ok, -100-n=error in nth field

@@ -737,7 +737,7 @@ C    command format: TAPEFORM=index,offset lists
 
       call ifill(ibuf,1,ibuflen,oblank)
       nch = ichmv_ch(ibuf,1,'TAPEFORM=')
-      do i=1,max_pass*4
+      do i=1,max_pass
         if (ihdpos(i,istn,icode).ne.9999) then 
           nch = nch + ib2as(i,ibuf,nch,3) ! pass number
           nch = mcoma(ibuf,nch)

@@ -29,21 +29,19 @@ C          findscan                  (find a matching scan)
 C
 C  LOCAL:
       integer isor,icod,il,ip,idur,ifeet
-      integer idum,irec,ipnt,nxtrec
+      integer idum,irec,ipnt
       integer*2 itim1(6),itim2(6)
       integer*2 lcb
       character*128 cmo,cstart,csor,cout,cunit
       integer istart(5)
       double precision d,start_sec,dst,det
-      logical kearl
+      logical knew,kearl
       integer ichmv,ichmv_ch,ivgtso,ivgtmo
       integer fget_scan_station,fvex_scan_source,fvex_date,
      .fvex_field,fvex_double,fvex_units,ptr_ch,fvex_len
 
 C 1. Get scans for one station. 
 
-      nobs = 0
-      nxtrec = 1
         write(lu,9100) lpocod(istn)
 9100    format('VOB1INP - Generating observations for ',a2)
         iret = fget_scan_station(ptr_ch(cstart),len(cstart),
@@ -119,44 +117,47 @@ C    If there is not one, make a new observation.
             call findscan(isor,icod,istart,irec)
             if (irec.ne.0) then ! add this station
               call addscan(irec,istn,idur,ifeet,ip,lcb,ierr)
+              knew=.false.
               if (ierr.ne.0) then
                 write(lu,9103) ierr,irec,istn,istart
 9103            format('addscan error ',i3,' irec=',i3,' istn=',i3,
      .          'istart=',5i5)
               endif
-C      write(lu,9101) istn,istart,isor
-C9101  format('addscan  istn=',i3,' istart=',5i5,' isor=',i3)
             else ! new scan
               call newscan(istn,isor,icod,istart,
      .        idur,ifeet,ip,lcb,ierr)
+              knew=.true.
               if (ierr.ne.0) write (lu,9108) ierr
 9108          format('vob1inpxx - Error ',i5,' from newscan')
-C      write(lu,9100) istn,istart,isor
             endif
 
-C 4. Get the next record.
+C  4. This next section orders the index array, iskrec, in time order.
+C     If we just got a new observation, and it's not in time order,
+C     bubble it up until it is.
+C
+      if (nobs.ge.2.and.knew) then ! check time order
+        irec=nobs
+        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
+        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
+        do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
+C         Swap pointers
+          ipnt = iskrec(irec-1)
+          iskrec(irec-1) = iskrec(irec)
+          iskrec(irec) = ipnt
+C         Get new time fields -- starting in char 24
+          idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
+          irec = irec-1
+          idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
+        end do  !out of order
+      endif
+
+C 5. Get the next station record.
 
           iret = fget_scan_station(ptr_ch(cstart),len(cstart),
      .           ptr_ch(cmo),len(cmo),
      .           ptr_ch(stndefnames(istn)),0)
         enddo ! get all obs for this station
       if (ierr.gt.0) ierr=0
-
-C  5. This next section orders the index array, iskrec, in time order.
-C
-      irec=nobs
-      idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
-      idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
-      do while (kearl(itim1,itim2).and.irec.gt.1)  !out of order
-C       Swap pointers
-        ipnt = iskrec(irec+1)
-        iskrec(irec+1) = iskrec(irec)
-        iskrec(irec) = ipnt
-C       Get new time fields
-        idum= ichmv(itim1,1,lskobs(1,iskrec(irec)),24,11)
-        irec = irec-1
-        idum= ichmv(itim2,1,lskobs(1,iskrec(irec-1)),24,11)
-      end do  !out of order
 
       return
       end

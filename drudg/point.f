@@ -110,7 +110,7 @@ C If problems, quit.
          icodp=0
 	if (istin.eq.5.or.istin.eq.6) then
           ih=0
-          do i=1,2*max_pass
+          do i=1,max_pass
             if (ihdpos(i,istn,1).ne.0) ih=ih+1
           enddo
           if (ih.eq.0) then

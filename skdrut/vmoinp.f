@@ -7,6 +7,7 @@ C
 C History
 C 960518 nrv New.
 C 960522 nrv Revised.
+C 960610 nrv Move initialization of freqs.ftni arrays here
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -20,6 +21,7 @@ C  OUTPUT:
 
 C  CALLED BY: 
 C  CALLS:  fget_mode_def
+C          frinit
 C          vunpfrq
 C          vunpbbc
 C          vunpif
@@ -68,6 +70,10 @@ c       il=fvex_len(cout)
           iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
         END IF 
       enddo
+
+C 1.5 Now initialize arrays using nstatn and ncodes.
+
+      call frinit(nstatn,ncodes)
 
 C 2. Call routines to retrieve and store all the mode/station 
 C    information, one mode/station at a time.

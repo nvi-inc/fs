@@ -28,12 +28,13 @@ C 960208 nrv Don't count effective tracks here. Add check for
 C            consistency between track assignments and head positions.
 C 960209 nrv Add error return by station
 C 960219 nrv Check for LOs present also.
+C 960610 nrv Change loop to nchan instead of max_chan for counting tracks.
 C
 C
 C     1. For each code, go through all possible passes and add
 C     up the total number of tracks used. 
 C     Use itras(u/l,s/m,max_pass,max_chan,station,code)
-C     Use ihddir(4*max_pass,station,code)
+C     Use ihddir(max_pass,station,code)
 C
       ierr=0
       IF (NCODES.LE.0) RETURN
@@ -48,7 +49,7 @@ C
             itr2(j)=0
             IT = 0
             it2=0
-            do k=1,max_chan ! channels
+            do k=1,nchan(is,ic) ! channels
               do l=1,2 ! upper/lower
                 do m=1,2 ! sign/mag
                   if (itras(l,m,k,j,is,ic).ne.-99) it=it+1
@@ -67,7 +68,7 @@ C
           END DO  ! count sub-passes
           ipmax=0
           ipma2=0
-          do j=1,4*max_pass ! check sub-passes
+          do j=1,max_pass ! check sub-passes
             if (ihddir(j,is,ic).gt.ipmax) ipmax=ihddir(j,is,ic)
             if (ihddi2(j,is,ic).gt.ipmax) ipma2=ihddi2(j,is,ic)
           enddo ! check sub-passes
@@ -120,7 +121,7 @@ C     codes--this should not be attempted in a single experiment.
         do ic=1,ncodes ! codes
           ip=0
           ip2=0
-          do j=1,4*max_pass
+          do j=1,max_pass
             if (ihddir(j,is,ic).eq.1) ip=ip+1
             if (ihddi2(j,is,ic).eq.1) ip2=ip2+1
           enddo
