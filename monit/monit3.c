@@ -60,7 +60,7 @@ m3init()
   outpt = &outarr[0];
   standout();
   mvaddstr(ROW1,COL1,"Tsys");
-  if(shm_addr->equip.rack == VLBA) {
+  if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
     mvaddstr(ROW1,COL1+13,"(IFA)");
     mvaddstr(ROW1,COL1+26,"(IFB)");
     mvaddstr(ROW1+1,COL1+13,"(IFC)");
@@ -111,7 +111,7 @@ mout3()
     preflt(outpt,shm_addr->systmp[30],-5,1);
     printw("%s",outarr);
 
-    if(shm_addr->equip.rack == VLBA) {
+    if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
       move(ROW1+1,COL1+20);
       preflt(outpt,shm_addr->systmp[31],-5,1);
       printw("%s",outarr);
@@ -119,7 +119,7 @@ mout3()
 
     for (i=1;i<=14;i++) {
       move(ROW1+2+i,COL1+6);
-      if(shm_addr->equip.rack == VLBA) {
+      if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
         long bbc2freq(),freq;
         freq=bbc2freq(shm_addr->bbc[i-1].freq);
         sprintf(ptfreq,"%-06.2f",(float)freq/100);
