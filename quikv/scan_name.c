@@ -32,6 +32,8 @@ long ip[5];                           /* ipc parameters */
 	strcat(output,",");
 	if(shm_addr->scan_name.duration > 0)
 	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.duration);
+	if(shm_addr->scan_name.continuous > 0)
+	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.continuous);
 	for (i=0;i<5;i++) ip[i]=0;
 	cls_snd(&ip[0],output,strlen(output),0,0);
 	ip[1]++;
@@ -66,9 +68,23 @@ long ip[5];                           /* ipc parameters */
       } else if (strcmp(command->argv[2],"*")==0) {
 	ierr=-303;
 	goto error;
-      } else if (1!=
-		 sscanf(command->argv[2],"%ld",&shm_addr->scan_name.duration)){
+      } else if
+	(1!=sscanf(command->argv[2],"%ld",&shm_addr->scan_name.duration)||
+	 shm_addr->scan_name.duration < 0){
 	ierr=-203;
+	goto error;
+      }
+
+      if (command->argv[0]==NULL||command->argv[1]==NULL||
+	  command->argv[2]==NULL ||command->argv[3]==NULL) {
+	shm_addr->scan_name.continuous=-1;
+      } else if (strcmp(command->argv[2],"*")==0) {
+	ierr=-304;
+	goto error;
+      } else if
+	(1!=sscanf(command->argv[3],"%ld",&shm_addr->scan_name.continuous)||
+	 shm_addr->scan_name.continuous < 0){
+	ierr=-204;
 	goto error;
       }
 	

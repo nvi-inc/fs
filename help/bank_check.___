@@ -2,16 +2,29 @@
 
             Syntax:     bank_check
 
-            Response:   bank_check/VSN
+            Response:   bank_check/VSN,serial1,...serialN
 
 
 Monitor-only parameters:
             VSN     Volume serial number of bank to be recorded
+            serialX the serial number of the Xth disk in this volume
 
 Comments:
-This command will check the VSN. If it has changed or hasn't been
-logged since the current log file was last opened, it will be logged.
+This command will check the VSN of active bank. If it has changed or
+hasn't been logged since the current log file was last opened, it will
+be logged along with the disk serial numbers.
 
 If the active drive type is "mk5a_bs", this command will check the
-remaining record time on the current bank and if the next scan will
-not fit, it will switch banks before checking the VSN.
+remaining record time on the current bank and if the next scan (or
+continuous recording) will not fit, it will switch banks. If the bank
+is switched and the new bank also does not have enough room for the
+next scan (or continuous recording), the bank will be switched again
+to return to the original bank. If the bank is switched (once or
+twice) the VSN and disk serial numbers in the final bank will be
+logged unconditionally.
+
+bank_check determines whether the next scan or continuous recording
+will fit by comparing the recording time remaining on the current bank
+with the length of the scan and continuous recording specified by the
+last scan_name=... command. If the required capacity is greater than five
+seconds less than remaining capacity, the bank will switced.
