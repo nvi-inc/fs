@@ -15,7 +15,7 @@ C      - buffer holding the schedule entry
 C     IBLEN - length of the record in IBUF
 
 C  OUTPUT:
-      integer*2 lsname(4),LPRE(3),LMID(3),lstn(max_stn),
+      integer*2 lsname(max_sorlen/2),LPRE(3),LMID(3),lstn(max_stn),
      .          lcable(max_stn),lfreq,
      .          LMON(2),LDAY(2),ldir(max_stn),lpst(3)
       integer ift(max_stn),idur(max_stn),
@@ -60,6 +60,7 @@ C     880411 NRV DE-COMPC'D
 C     890505 NRV CHANGED IDUR TO AN ARRAY, READ IN DURATIONS IF PRESENT
 C 930407 nrv implicit none
 C 960228 nrv Upper-case the frequency code
+C 970114 nrv Change 8 to max_sorlen
 C
       integer*2 LPASS(56)
 C
@@ -87,8 +88,8 @@ c added 900628
       KERR = 0
       ICH = 1
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
-      CALL IFILL(lsname,1,8,Z20)
-      IDUMMY = ICHMV(lsname,1,IBUF,IC1,MIN0(IC2-IC1+1,8))
+      CALL IFILL(lsname,1,max_sorlen,Z20)
+      IDUMMY = ICHMV(lsname,1,IBUF,IC1,MIN0(IC2-IC1+1,max_sorlen))
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
       ICAL = IAS2B(IBUF,IC1,IC2-IC1+1)
       CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)

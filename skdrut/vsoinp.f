@@ -9,6 +9,7 @@ C
 C
 C History:
 C 960527 nrv New.
+C 970114 nrv Change 8 to max_sorlen
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -24,8 +25,9 @@ C LOCAL:
       character*128 cout
       integer julda,ichcm_ch,ichmv ! functions
       integer ptr_ch,fget_source_def,fvex_len
-      LOGICAL KNAEQ
-      integer*2 LIAU(4),LCOM(4),lname(4)
+      LOGICAL KNAEQ,kblank
+      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2),
+     .lname(max_sorlen/2)
       double precision RARAD,DECRAD,r,d
 C
 C     1. First get all the def names 
@@ -53,9 +55,10 @@ C     2. Now call routines to retrieve all the source information.
         CALL vunpso(sordefnames(isor),ivexnum,iret,ierr,lu,
      .  liau,lcom,RARAD,DECRAD,iep)
         if (ierr.ne.0) then 
-          il=fvex_len(sordefnames(i))
+          il=fvex_len(sordefnames(isor))
           write(lu,'("VSOINP01 - Error getting $SOURCE information",
-     .    " for ",a)') sordefnames(i)(1:il)
+     .    " for ",a/"iret=",i5," ierr=",i5)') sordefnames(isor)(1:il),
+     .    iret,ierr
           ierr1=1
         endif
 C
@@ -64,24 +67,29 @@ C     name, use that, otherwise use the IAU name.  If IAU is blank,
 C     then make both the same.
 C
         if (ierr1.eq.0) then ! continue
-        if (ichcm_ch(liau,1,'        ').eq.0) then ! blank IAU
-          IDUM = ICHMV(lname,1,lcom,1,8)
+        kblank=.true.
+        do i=1,max_sorlen
+          if (ichcm_ch(liau,i,' ').ne.0) kblank=.false.
+        enddo
+        if (kblank) then ! use common name
+          IDUM = ICHMV(lname,1,lcom,1,max_sorlen)
         else
-          IDUM = ICHMV(lname,1,LIAU,1,8)
+          IDUM = ICHMV(lname,1,LIAU,1,max_sorlen)
           IF (ichcm_ch(LCOM(1),1,'$ ').ne.0) 
-     .              IDUM = ICHMV(lname,1,LCOM,1,8)
+     .              IDUM = ICHMV(lname,1,LCOM,1,max_sorlen)
         endif
 C
 C     Then check for a duplicate name.  This should not happen
 C     in the SKED environment but might as well check.
 C     Check up to those source names found so far (isor-1).
         j=1
-        DO WHILE (j.le.isor-1.and..NOT.KNAEQ(lname,LSORNA(1,j),4))
+        DO WHILE (j.le.isor-1.and..NOT.KNAEQ(lname,LSORNA(1,j),
+     .  max_sorlen/2))
           j=j+1
         END DO
         IF  (j.Lt.isor) then ! duplicate source
-          write(lu,9101) (lsorna(j,isor),j=1,4)
-9101      format('SOINP22 - Duplicate source name ',4a2,
+          write(lu,9101) (lsorna(j,isor),j=1,max_sorlen/2)
+9101      format('SOINP22 - Duplicate source name ',20a2,
      .    '. Using the position of the first one.')
         endif ! duplicate source
 C
@@ -94,7 +102,7 @@ C
           RETURN
         ENDIF
 C
-        IDUM = ICHMV(LSORNA(1,NCELES),1,lname,1,8)
+        IDUM = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
         IF  (iep.NE.2000) THEN  !"convert to J2000"
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
             call prefr(rarad,decrad,1950,r,d)

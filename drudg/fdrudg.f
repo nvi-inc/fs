@@ -105,7 +105,7 @@ C 961022 nrv Add Mark IV as a procedures option
 C 961031 nrv Change SNAP option to either Mk3/4 or VLBA rack.
 C 961104 nrv change ISKLEN to be the same size as IBUF (why were they 
 c            different variables?)
-C 961129 nrv Add option 16 for 8-BBC stations.
+C 970114 nrv Change 8 to max_sorlen
 C
 C Initialize some things.
 
@@ -219,7 +219,7 @@ C   Check for non-interactive mode.
 C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 961201)')
+     .  '(NRV 970120)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -350,7 +350,7 @@ C  Now change J2000 coordinates to 1950 and save for later use
 	  DO I=1,NSATEL !MOVE NAMES
 	    INEXT=NCELES+I
 	    ISATL=MAX_CEL+I
-	    IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,8)
+	    IDUMMY = ICHMV(LSORNA(1,INEXT),1,LSORNA(1,ISATL),1,max_sorlen)
 	  END DO
 C
 C  Check for sufficient information
@@ -470,16 +470,16 @@ C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
      .      ' 12 = Make Mark III procedures (.PRC) '/,
      .      ' 6 = Make bar code tape labels         ',
      .      ' 13 = Make VLBA procedures (.PRC)'/,
-     .      '                                       ',
+     .      ' 0 = Done with DRUDG                   ',
      .      ' 14 = Make hybrid procedures (.PRC)'/,
      .      '                                       ',
      .      ' 15 = Make Mark IV procedures (.PRC)'/,
-     .      ' 0 = Done with DRUDG                   ',
+     .      '                                       ',
      .      ' 16 = Make 8-BBC procedures (.PRC)'/,
      .      ' ? ',$)
           else ! gotem in the vex file
             write(luscn,9073)
-9073        FORMAT(
+9073        FORMAT('Supporting VEX 1.5'/
      .      ' 1 = Print the schedule                ',
      .      '  7 = Re-specify stations'/
      .      ' 2 = Make antenna pointing file (VLBA) ',
