@@ -1,0 +1,45 @@
+File: /usr2/fs/misc/other_files.txt  Version: 0.1  Date: 041018
+
+		  Other Files that affect the Field System
+
+			      Ed Himwich
+
+INTRODUCTION
+
+This short document is intended to provide a pointer to other files
+that either directly or indirectly impact FS operations.
+
+USER FILES
+
+~/.fvwm2rc    - sets menu options and hot-key sequences for fvwm2
+~/.fvwmrc     - sets menu options and hot-key sequences for (obsolete fvwm)
+~/.Xresources - defines window placements, colors, and features
+~/.xsession   - sets-up login_shell window and screen blanking time
+~/.profile    - bash start-up script read by .xsession
+
+SHELL START-UP FILES
+
+Which files are important depend on what shell you use. You should see
+the FILES section (and other sections as well) of the "man" page for
+your shell, e.g., "man tcsh" (if you don't know what login shell you
+have, use "chsh" without changing the shell to see, check "man
+chsh"). There are many shells and each typically has many options, not
+all of which are used or needed. For FS standard shell "tcsh", the
+following are usually used:
+
+~/.login  - defines environment variables and path for login shells
+~/.chsrc  - defines aliases for login and sub-shells
+
+For "bash", the simplest set-up is to just use:
+
+~/.profile - user specific login shell start-up script
+
+NTP
+
+/etc/ntp.conf            - defines NTP configuration
+/etc/default/ntp-servers - defines NTP servers for ntpdate boot script
+
+
+
+
+
