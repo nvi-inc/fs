@@ -15,21 +15,20 @@ speed   Tape speed in inches per second, either nominal or actual.
         For Mark III & IV and VLBA drives, choices are:
         Nominal:3.75    7.5    15     30    60    120    240
         Actual: 4.21875 8.4375 16.875 33.75 67.5  135    270
-        VLBA: 4.44    8.88   16.66  33.33 66.66 133.33 266.66
-        Thin:   2.5     5      10     20     40    80    160    320
+        VLBA:           8.33   16.66  33.33 66.66 133.33 266.66
+        Thin:           5      10     20     40    80    160    320
         Mark III & IV and VLBA drives can be commanded to any of
         these speeds, except Mark III & IV drives cannot use the
-        "VLBA" speeds or 2.5 ips and the VLBA drives cannot be
-        commanded to 320 ips. All of these drives will accept a
+        "VLBA" speeds ips, VLBA drives cannot be commanded to
+        3.75 (4.21875) or 320 ips. All of these drives will accept a
         speed of 0. Note that specifying a "nominal" speed selects
         the corresponding "actual" speed. No such mapping occurs
         for "VLBA" and "thin" speeds; these are the actual speeds
         in these cases. For backward compatibility with an error in
         an earlier version of the FS, actual value 4.21875 may also
-        be selected by using values 3 and 3.375 (and 3.38 for
-        VLBA);  8.4375 may selected using values 7 and 7.875 (and
-        7.88 for VLBA) may still be used. These additional nominal
-        values are deprecated and will be removed in a future
+        be selected by using values 3 and 3.375; 8.4375 may be selected
+        using values 7 and 7.875 may still be used. These additional
+        nominal values are deprecated and will be removed in a future
         version. Since the VLBA drives only have speed resolution
         of 0.01 ips, the actual speeds are 4.22, 8.44, and 16.88
         instead of 4.21875, 8.4375, and 16.875, respectively, but
@@ -38,7 +37,7 @@ speed   Tape speed in inches per second, either nominal or actual.
         drives there are additional monitor only values of: sp,
         unknown, or a reported hex value that doesn't correspond to
         a known speed. 
-        For Mark III/IV drives the default speed is 120 ips. There
+        For Mark III/IV drives the default speed is 135 ips. There
         is a default speed for VLBA (or VLBA2) drives only when the
         bit_density and form commands have been issued. the default
         speed is calculated from these commands. No default for S2
@@ -57,9 +56,12 @@ if record is on. For Mark IV, the general record bit is enabled and
 the record bit for each enabled stack is enabled if record is on.
 For VLBA, the track groups are enabled if record is on; they are
 disabled if record is off. For all systems, reproduce mode is not
-changed and the state of the low tape sensor is not changed. For
-Mark III speeds, the rate generator is set to 720, for Mark IV
-speeds it is set to 853.
+changed and the state of the low tape sensor is not changed. On
+Mark III/IV drives, the rate generator is set to 720 for the "actual"
+speeds, for "thin" speeds it is set to 853.
+
+For Mark III/IV drives, the speeds 4.21875 (3.75) and 5 ips do not
+move the tape, they implement a "load" function.
 
 For all drives except S2, the vacuum (drive ready for VLBA2 drives)
 is checked before the command is issued to the recorder. If the
@@ -76,7 +78,7 @@ different than what is use is requested, no change will be made and
 error will be reported.
 
 
-Examples:
+Mark III/IV examples:
 st=for,320        #94(>
                   #94=%80000001$
                   #94=)F8530000$

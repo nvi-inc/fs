@@ -8,9 +8,9 @@ Response:   systracks/st0,st1,st34,st35
 Settable parameters:
 stX     The recorder track that will have its output from the
         formatter placed on recorder track X, where X is one of the
-        system tracks: 0, 1, 34, or 35. Default is itself, i.e., for st0 the
-        default is 0, for st1 the default is 1, for st34 the default is 34,
-        and for st35 the default is 35.
+        system tracks: 0, 1, 34, or 35. Default is itself, i.e.,
+        for st0 the default is 0, for st1 the default is 1, for st34 the
+        default is 34, and for st35 the default is 35.
 
 Comments: 
 This command is used to define what data will be recorded on the

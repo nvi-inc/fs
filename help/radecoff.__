@@ -6,8 +6,8 @@ Response:   radecoff/ra,dec
 
 
 Settable parameters:
-ra        Right ascension offset, in numeric angle/hours format.
-          The response is in numeric angle/hours format.
+ra      Right ascension offset, in numeric angle/hours format. The
+        response is in numeric angle/hours format.
 dec     Declination offset, in numeric angle/degrees format. The
         response is in numeric angle/degrees format.
 

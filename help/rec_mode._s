@@ -2,7 +2,7 @@
 
 Syntax:     rec_mode=mode,group,roll
 
-Response:   rec_mode/mode,group,,numgroups
+Response:   rec_mode/mode,group,roll,numgroups
 
 
 Settable Parameters:
