@@ -2024,6 +2024,9 @@ Time stamp insertion time must be 0 to 30 or 99.
 KM -301
 Record mode bandwidth can only be set for K4 type 2 recorder (DFC2100).
 ""
+KO -301
+oldtape command requires a non-NULL parameter
+""
 KP -201
 Recorder port number must be 1-16
 ""
