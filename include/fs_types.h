@@ -65,3 +65,4 @@
 #include "in2net_ds.h"
 #include "s2bbc_ds.h"
 #include "s2das_check.h"
+#include "scan_check_ds.h"
