@@ -41,7 +41,8 @@ static long ip[]={0,0,0,0,0};
 
 main()
 {
-    int i, ampr, wpid, status, size, err, okay, nsems, les, lesm, lesam, lesm2;
+    int i, ampr, wpid, status, size, err, okay, nsems;
+    int les=-1, lesm=-1, lesam=-1, lesm2=-1;
     int klesam;
     FILE *fp;
     char *s1, line[ MAX_LINE], line2[ 5+MAX_LINE];
@@ -201,7 +202,7 @@ main()
 cleanup:
        okay=FALSE;
        if (npids > 0)
-         for (i=0;i<=ipids;i++) 
+         for (i=0;i<=ipids;i++)
            if (i != lesm && i != lesam && i!= lesm2 && pids[ i] != 0 ||
                i == lesam && pids[ lesm] == 0 ) {
              if ( -1 == kill( pids[ i], SIGKILL))
