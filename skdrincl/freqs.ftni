@@ -211,8 +211,11 @@ C
       character*2 ccode(max_frq)
       equivalence (ccode,lcode)
 
-      character*16 cmode(max_stn,max_frq)
-      equivalence (cmode,lmode)
+      character*8 cs2data(max_stn,max_frq)
+      equivalence (cs2data,ls2data)
+
+      character*16 cmode(max_stn,max_frq),cs2mode(max_stn,max_frq)
+      equivalence (cmode,lmode),(cs2mode,ls2mode)
       character*2 cband(Max_band)
       equivalence (lband,cband)
 

@@ -33,8 +33,8 @@ C Local
             ntrkn(k,i,j)=0
           enddo
           cbarrel(i,j)="NONE"
-          call ifill(ls2mode(1,i,j),1,16,oblank)
-          call ifill(ls2data(1,i,j),1,8,oblank)
+          cs2mode(i,j)=" "
+          cs2data(i,j)=" "
         enddo
       enddo 
       do i=1,nco

@@ -269,7 +269,6 @@ C       kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
         cstrec2(i)="none"
         cs2speed(i)=" "
 
-
 C  Store equipment names.
         if (crack .ne. " ") then
           cstrack(i)=crack
@@ -281,7 +280,8 @@ C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
         if (crec2 .ne. " ") then
           if (crec1 .eq. 'S2')then
-            idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
+!            idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
+             cs2mode(i,1)=crec2
           else 
             cstrec2(i)=crec2
           endif

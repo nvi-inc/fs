@@ -7039,3 +7039,79 @@ Version 9.6.10 040116
            use "before" time for VLBA formatter as more accurate 
 
 Version 9.7.0 040731
+
+040819 weh quikv/data_check.c
+           quikv/data_check_dis.c
+           fix name from disk_check_dis to data_check_dis
+
+040823 weh clib/disk_record_util.c
+           make it non-fatal if unexpected state is found
+
+040823 weh clib/disk2file_util.c
+           change MK5 response order to agree with latest Mark5A version
+
+040823 weh control/fserr.ctl
+           adjust order of in2net and disk2file error messages for latest
+           Mark5A version
+
+040824 rdg fsvue/what_help.c
+           fixed a bug that was preventing some help files
+           from being read.
+
+040824 rdg fsvue/lib/vue_fshelp
+           added disk help files (disk2file....etc).
+
+040830 rdg st.default/oper/.fvwm2rc
+           st.default/oper/.Xresources
+           added monit4 and monit5 items.
+
+040830 weh quikv/bank_check.c
+           fix abort if the mark5 complains it is busy
+
+040902 rdg st.default/prog/.fvwmrc
+           st.default/oper/.fvwmrc
+           added monit4, monit5 and fixed left window widget.
+
+040902 weh mcbcn/mcbcn.c
+           add mode 20 for no about on send
+
+040907 weh clib/in2net_util.c
+           make wrong status parameter response, non-fatal
+
+040909 weh onoff/agc.c
+           use continue mode in mk5cn so that a BBC time-out isn't fatal
+
+040909 weh clib/ntp_synch.c
+           add use of FS_CHECK_NTP variable to enable check
+
+040915 weh mk5cn/mk5cn.c
+           add "continue" mode (20) to ignore errors
+
+040916 weh rtelb/rte_cmpt.c
+           rtelb/rte_rawt.c
+           fmset/get4time.c
+           setcl/setcl.f
+           round time when it is available
+
+040916 weh fmset/getfmtime.c
+           make phasing for Mark IV more sensible
+
+040917 weh clib/bank_check_util.c
+           filter out possible garbage in vsn responses
+
+040920 weh st.default/oper/.login
+           st.default/oper/.profile
+           st.default/prog/.login
+           st.default/prog/.profile
+           add samples for how to set FS_CHECK_NTP
+
+040923 weh misc/fstime.txt
+           updated for FS_CHECK_NTP
+
+040923 weh clib/ntp_synch.c
+           reduce select() time-out to 0.5 seconds
+
+040923 weh misc/fstime.txt
+           fix typos
+
+Version 9.7.1 040930

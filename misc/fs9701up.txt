@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.0/misc/fs9700up.txt  Version: 0.4 Date: 040727
+File: /usr2/fs-9.7.1/misc/fs9701up.txt  Version: 0.6 Date: 040930
 
 I. Introduction
 
@@ -6,7 +6,8 @@ This memo is divided into 4 sections:
    I.   Introduction.
    II.  Changes Since Version 9.6.9
    III. Installation
-   IV.  Transferring The Update Archive By DOS Floppy
+   IV.  Updating from 9.7.0
+   V.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
 new version.
@@ -15,8 +16,16 @@ This version is intended for all stations.  The most significant
 changes in this version are that it expects the Mark5A to be operating
 in formal parsing mode and support for the S2 DAS is included.
 Previous versions of the FS assumed informal processing for Mark5A
-operations.  In addition, you must use a version of the Mark5A program
-dated 23 March 2004 (day 083) or later with this version of the FS.
+operations.  In addition, you should use a version of the Mark5A
+program dated '2004y167d' or later with this version of the FS.
+
+This FS version will also largely work with the Mark 5A program dated
+'2004y083d' with two limitations: (1) the destination and status
+fields in the disk2file monitor command are reversed in the displayed
+parameters and (2) the status and destination fields of the in2net
+montior command will be reversed and the status field will only show
+"bad_value'.
+
 S2 DAS support was provided Mario Bérubé.  This version has S2 DAS
 SNAP command, "setcl", and "fmset" support are included in this
 version.  S2 DAS DRUDG support is not included at this time.
@@ -30,7 +39,9 @@ configuration to support multiple interfaces.
 This version is intended to installed as an update for 9.6.9.  This
 update does not require as many changes to local procedures and
 control files as some relatively recent ones have.  It should be
-fairly easy to install.
+fairly easy to install.  For stations that have already installed
+9.7.0, a separate section below describes how to update from that
+version.
 
 II. Changes Since Version 9.6.9
 
@@ -42,7 +53,8 @@ description.
 			 A. Changes in the FS
 
 The following is a summary of the changes.  Items numbered 4 and above
-were added after 9.6.10.
+were added after 9.6.10. Items numbered 43 and above were added after
+9.7.0.
 
 1. New USER_DEVICE command for support of station detectors in ONOFF,
    FIVPT, and Tsys; BEAMx, FLUXx, CALTEMPx, and TSYSx commands removed
@@ -95,6 +107,15 @@ were added after 9.6.10.
 41. onoff command accepts new detector names: formvc, formif, and
     formbbc.
 42. AQUIR obeys positive wait times for procedures in control file.
+43. disk2file and in2net updated for Mark5A 2004y167d.
+44. disk_record monitor does not give an error for unsupported state.
+45. Fixed help file bug in fsvue.
+46. Fixed default .fvwm2rc and .Xresource files.
+47. bank_status does not cause abort if Mark 5 is recording
+48. ONOFF does not fail if a BBC is unresponsive
+49. Fix handling of Mark5A "vsn?" response to filter out DSM code.
+50. Added use of FS_CHECK_NTP environment variable for NTP status
+    checking.
 
 A more detailed discussion of these changes follows.
 
@@ -194,23 +215,27 @@ A more detailed discussion of these changes follows.
    in realtime.  It may be used automatically in experiments via the
    "data_transfer" keyword in schedules.
 
-8. New monitor display, monit5, shows Mark 5 remaining capacity.  This
-   new monitor display is available as hot-key sequence
-   Control-Shift-5.  It shows the currently selected bank (marked with
-   '>'), the VSN mounted in each bank, the remaining recording
-   capacity on the pack in each bank, and the last UT time the
-   capacity was checked for each bank.  The capacity is shown in three
-   different units: recording time available in the current mode,
-   Gigabytes, and percentage.  Please note the time remaining is the
-   available record time not clock time until the bank will be full.
-   The clock time until the bank will be full may be significantly
-   different, typically twice as long for geodesy, depending on the
-   recording duty cycle.  The information for the non-selected bank
-   may be shown as blank if it has not been checked with bank_status
-   since the pack was mounted.  The time for the last check is shown
-   because it is normally checked only during the set-up for each scan
-   and does not update dynamically.  The information for the
-   non-selected bank may be quite old.
+8. New monitor display, monit5, shows Mark 5 remaining capacity.  The
+   displayed information is not updated automatically; it is updated
+   only in response to an interactively entered "bank_status" command
+   and the schedule issued "bacn_check" command that is part of the
+   set-up for each scan.  This new monitor display is available as
+   hot-key sequence Control-Shift-5 or from the menu you get with a
+   middle mouse button click on the background.  It shows the
+   currently selected bank (marked with '>'), the VSN mounted in each
+   bank, the remaining recording capacity on the pack in each bank,
+   and the last UT time the capacity was checked for each bank.  The
+   capacity is shown in three different units: recording time
+   available in the current mode, Gigabytes, and percentage.  Please
+   note the time remaining is the available record time not clock time
+   until the bank will be full.  The clock time until the bank will be
+   full may be significantly different, typically twice as long for
+   geodesy, depending on the recording duty cycle.  The information
+   for the non-selected bank may be shown as blank if it has not been
+   checked with bank_status since the pack was mounted.  The time for
+   the last check is shown because it is normally checked only during
+   the set-up for each scan and does not update dynamically.  The
+   information for the non-selected bank may be quite old.
 
 9. CHANGE_PACK procedure revised.  The wording of the instructions in
    the procedure has been updated to be clearer.  In addition, the
@@ -372,7 +397,9 @@ A more detailed discussion of these changes follows.
 
 29. Status of NTP reported by fmset and setcl.  The setcl programs now
     include output that describes the status of NTP.  Please see
-    "/usr2/fs/misc/fstime.txt" for a detailed description.
+    "/usr2/fs/misc/fstime.txt" for a detailed description.  (As of
+    9.7.1, the check is only made if the "FS_CHECK_NTP" environment is
+    set; otherwise only "unknown" is displayed.)
 
 30. fstime.txt document created to help explain FS time.  This
     document, "/usr2/fs/misc/fstime.txt" was added to describe in
@@ -471,13 +498,54 @@ A more detailed discussion of these changes follows.
     procedures listed in the control file to finish.  In fact, it was
     waiting that many seconds instead of minutes.  This was fixed.
 
+43. disk2file and in2net updated for Mark5A 2004y167d. These commands
+    now handle the new syntax of the corresponding Mark5A commands. In
+    addition, if an undocumented status response is received, it is
+    shown as "bad_value" instead of causing an error. This allows
+    other parameters to be displayed.
+
+44. disk_record monitor does not give an error for unsupported
+    state. If an undocumented status response is received, it is shown
+    as "bad_value" instead of causing an error. This allows other
+    parameters to be displayed.
+
+45. Fixed help file bug in fsvue. This prevented some files from being
+    displayed.
+
+46. Fixed default .fvwm2rc and .Xresource files. These were not
+    properly updated for ~oper and need to be distribution specific.
+    The installation notes were expanded to handle additional cases.
+
+47. bank_status does not cause abort if Mark 5 is recording. The
+    bank_status command is not useful when the Mark5A is
+    recording. However, if it were issued while recording, accidently
+    or on purpose, it would cause the FS to crash. This has been
+    fixed.
+
+48. ONOFF does not fail if a BBC is unresponsive. ONOFF did not
+    properly handle a failed BBC when setting the gain mode. This has
+    been fixed so that if a BBC is not working, i.e. not responding,
+    it will not cause th e result from other channels to be lost.
+
+49. Fix handling of Mark5A "vsn?" response to filter out DSM code. The
+    "vsn?" responses returned by older Mark5A versions, '2004y083d' or
+    earlier, had extraneous characters for packs that were initialized
+    by Mark5A versions '2004y195d' or later.
+
+50. Added use of "FS_CHECK_NTP" environment variable for NTP status
+    checking.  In order to minimize problems for stations not using
+    NTP, the FS now does not check the NTP status unless the
+    "FS_CHECK_NTP" variable has been set.
+
+
 			 B. Changes in DRUDG
 				   
-drudg opening message date is 040724.  The release of drudg includes
+DRUDG opening message date is 040929.  The release of DRUDG includes
 limited support for eVLBI.  In addition it incorporates changes in the
 format of some Mark5 commands, several bug fixes, and support for the
 Dymo label printer.  The following is a summary of changes.  They are
-described in more detail after the summary.
+described in more detail after the summary.  Items numbered 10 and
+above were added after 9.7.0.
 
 1. Several minor K4 related bugs were fixed.
 2. If recorder configuration is "none", no tape related commands are
@@ -490,6 +558,17 @@ described in more detail after the summary.
 7. Typographic change in Mark5 commands.
 8. Support for eVLBI was added.
 9. Schedule file parsing robust in face of incorrect ftp mode.
+10. A bug was fixed in S2 recorder support.
+11. The midtp command was added in Mark5 recording mode.
+12. DRUDG will not let you try to do Mark5 Piggyback with S2
+    recorders.
+13. The IF patching is changed in DRUDG for geodetic schedules.
+14. If the formatter is VLBA and the mode is not a NAMED Mark3 mode,
+    then the mode is set to "v".
+15. A warning is issued if barrel roll is turned on, but there are
+    not enough tracks enabled to fill up the barrel. 
+16. The time allocated for disk2file was changed.
+17. Default file names for disk2file transfers were not implemented.
 
 A more detailed discussion of these changes follows.
 
@@ -499,7 +578,7 @@ A more detailed discussion of these changes follows.
    is appended to oldtape in unloader1.
 
 2. If recorder configuration is "none", no tape related commands are
-   emitted.  If both recorders are set to "none", drudg will generate
+   emitted.  If both recorders are set to "none", DRUDG will generate
    a snap file with no tape commands.
 
 3. The calculation of tape spin times was changed to be more accurate.
@@ -554,10 +633,10 @@ A more detailed discussion of these changes follows.
    3. disc_end  -> disk_record=off
    4. All other disc_... -> disk_...
    5. mk5=... commands now use formal parsing.
-   6. mk5=get_status?  was added to postob_mk5a
+   6. mk5=status?  was added to postob_mk5a
 
-8. Support for eVLBI was added.  Drudg was modified to support the
-   "data_transfer" keyword in VEX.  Note that for drudg to work
+8. Support for eVLBI was added.  DRUDG was modified to support the
+   "data_transfer" keyword in VEX.  Note that for DRUDG to work
    correctly with this keyword, the recorder type must be changed to
    Mark5 with option 11 first.
 
@@ -586,7 +665,7 @@ A more detailed discussion of these changes follows.
                   are faithfully applied to the FS disk2file or in2net
                   command.
 
-    If a scan contains the data_transfer keyword, drudg will issue the
+    If a scan contains the data_transfer keyword, DRUDG will issue the
     snap commands "disk2file" or "in2net" as appropriate.
 
     1.) Disk2file.
@@ -594,7 +673,7 @@ A more detailed discussion of these changes follows.
           be issued 2*T +3 seconds after the disk2file command.  Here
           T is the calculated length of time for the data transfer to
           take.
-       b) If the start or end times are not specified, drudg will use
+       b) If the start or end times are not specified, DRUDG will use
           the start and end times of the scan.
        c) At this time, not having a filename ()o invoke a default
           name) is not supported.
@@ -602,10 +681,10 @@ A more detailed discussion of these changes follows.
     2.) In2net.  The following substitutions are made in snap commands.
        a) disk_record=on/off -> by in2net=on/off.
        b) disk_pos -> in2net
-       c) If the destination is non-blank, drudg issues
+       c) If the destination is non-blank, DRUDG issues
           in2net=<destination> prior to the set up procedure.
 
-    3.) data_transfer Override.  This version of drudg also includes
+    3.) data_transfer Override.  This version of DRUDG also includes
         the ability to override the data_transfer statements in the
         schedule.  There are three options:
 
@@ -623,6 +702,60 @@ A more detailed discussion of these changes follows.
    end-of-line ('\n').  This was also fixed for old style schedule
    files.
 
+10. A bug was fixed in S2 recorder support.  This bug was noticed by
+    Jonathan Quick, and arose because the dimension of the string that
+    held the second recorder type was reduced from 16 characters to 8
+    characters.  This was done for consistency with the first
+    recorder.  Unfortunately, this lead to an error in initiailizing
+    another string.
+
+11. The midtp command was added in Mark5 recording mode. This command
+    will now be generated where the original schedule (which used
+    tapes) would have a midtp command.
+
+12. DRUDG will not let you try to do Mark5 Piggyback with S2
+    recorders.
+
+13. The IF patching is changed in DRUDG for geodetic schedules. This
+    was done to minimize wiring changes at the stations. The new
+    algorithm is:
+
+    1. If the upper edge of the recorded BandPass (which can possibly
+       be double sideband and is BW dependent) is below 230 MHz, pick
+       low.
+
+    2. If the lower edge of the recorded BP is above 210, pick high.
+
+    3. For others if the center is of the recorded BP is below 220,
+       pick low, otherwise high.
+
+    For VC1, 2, 3, and 9, 10 apply these tests in order 1,2,3.  For
+    VC4, 11, 12, 13, 14 apply them 2,1,3.
+
+    This also involved changing the IF3 command.
+
+14. If the formatter is VLBA and the mode is not a NAMED Mark3 mode,
+    then the mode is set to "v".  This problem arose in RDV45 for
+    Kokee.  Although the VLBA was able to correlate this experiment,
+    they were unhappy about this.
+
+15.  A warning is issued if barrel roll is turned on, but there are
+     not enough tracks enabled to fill up the barrel.  This happened
+     in RD0404 which was partly generated by hand.  This had 14 tracks
+     enabled with barrell rolling turned on, so 2 of the tracks would
+     periodically roll off the edge.
+
+16. The time allocated for disk2file was changed.  The previous
+    version issued an abort after:
+
+      3+2*(calculated_time)
+
+    where calcualted time is the nominal time for the transfer to take
+    place.  The "3" in the front is to acount for extra time for small
+    scans.  This 3 has been increased to 5.
+
+17. Default file names for disk2file transfers were not implemented.
+    This is waiting for a consensus on this topic to stablize.
 
  			    C. Known FS Bugs
 
@@ -783,13 +916,16 @@ follow the installation instructions in Section 4.5 of the FS9
 you should also get a copy of the current FS9 "Control Files and Field
 System Initialization" manual.
 
+If you are updating from 9.7.0, please follow the directions in the
+separate section below titled "IV. Updating from 9.7.0".
+
 The following instructions are for upgrading from 9.6.9 and 9.6.10.
 Please follow all the steps.
 
 Below is a list of "critical updates" is given.  These are updates
 that must be applied sequentially.  Please start with the next update
 with a later version number than you have and apply it and the
-remaining listed version before upgrading to 9.7.0.  You can find the
+remaining listed version before upgrading to 9.7.1.  You can find the
 installation notes for these versions on the FS FTP servers in the
 docs.old sub-directory.  The list of critical updates is:
 
@@ -834,7 +970,7 @@ any questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.7.0 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.7.1 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -842,26 +978,26 @@ For example you might do the following:
       (enter your account name for the server at prompt)
       (enter your password for the server at prompt)
       cd /fs/dist
-      get fs-9.7.0.tgz
+      get fs-9.7.1.tgz
       quit
 
 Please note "ncftp" will automatically get this file in binary mode.
 If you use "ftp" you may have to enable binary mode manually.
 
 If you need to transfer the archive using DOS floppies, please see the
-section "IV.  Transferring The Update Archive By DOS Floppy" below.
+section "V.  Transferring The Update Archive By DOS Floppy" below.
 
 (4) Log-out as prog and log-in as root.
 
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.7.0.tgz
+      tar -xzpf /tmp/fs-9.7.1.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.7.0 fs
+      ln -sfn fs-9.7.1 fs
 
 (7) VERY IMPORTANT: Log-out as root, and log-in prog.
 
@@ -870,13 +1006,15 @@ section "IV.  Transferring The Update Archive By DOS Floppy" below.
       cd /usr2/fs
       make
 
-(9) Remake your station software.  If your station software uses
-    ftok() to generate IPC keys, you should probably update it so that
-    the value of the second argument of ftok() is unique within the
-    FS, your station software and any other applications you have that
-    use ftok().  If you are not the developer of station software for
-    your station, please ask the person who is to take care of this
-    for you.  If you have any questions about this please contact us.
+(9) Remake your station software (this is necessary whether or not the
+    follwoing discussion of ftok() applies to your station).  Before
+    doing this, if your station software uses ftok() to generate IPC
+    keys, you should probably update it so that the value of the
+    second argument of ftok() is unique within the FS, your station
+    software and any other applications you have that use ftok().  If
+    you are not the developer of station software for your station,
+    please ask the person who is to take care of this for you.  If you
+    have any questions about this please contact us.
 
     Once the calls to ftok() are updated (or even if they aren't).
     The following steps should do the trick to reload your station
@@ -960,37 +1098,91 @@ section "IV.  Transferring The Update Archive By DOS Floppy" below.
         station.
 
 (15) Update the X-server set-up for the new Monit5 display, including
-     having Control-Shift-5 be a hot key for starting Monit5.  The
-     instructions for this are presented twice, once for stations that
+     having Control-Shift-5 be a hot key for starting Monit5. The
+     instructions for this are presented twice, as (A) for stations that
      have not customized their local copies of the relevant files
-     (easier) and once for those that have (a little more involved).
+     (easier) and as (B) for those that have (a little more involved).
 
-     If you are currently using the standard files (i.e. no local
-     customization), you can just copy over the new ones.  As oper:
+     A. These are instructions in case you have not customized your
+        local files. Please follow instructions (I) if you have FS Linux
+        4 or 5 or (II) of you have FS Linux 2 or 3 or some other
+        (usually non-FS) Linux distribution.
 
-     	cp /usr2/fs/st.default/oper/.Xresources ~/
-     	cp /usr2/fs/st.default/oper/.fvwmrc ~/
-     	cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+        I. If you have the FS Linux 4 or FS Linux 5 distribution
+           installed, please do the following as "oper":
 
-     and similarly as prog:
+             cp /usr2/fs/st.default/oper/.Xresources ~/
+             cp /usr2/fs/st.default/oper/.fvwmrc ~/
+             cp /usr2/fs/st.default/oper/.fvwm2rc ~/
 
-     	cp /usr2/fs/st.default/prog/.Xresources ~/
-     	cp /usr2/fs/st.default/prog/.fvwmrc ~/
-     	cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+           (If you get a error on the last copy like: "cp: cannot create
+           regular file '/home/oper/.fvwm2rc': Permission denied" then
+           switch to being "root" user and enter the commands:
 
-     If your local copies of .Xresources, .fvwmrc and .fvwm2rc are
-     customized, you will need to merge the new information.  The
-     suggested way to do this is to diff the 9.7.0 version with 9.6.9
-     version:
+             cd /usr2/oper
+             chown oper.rtx .fvwm2rc
 
-       cd /usr2/fs-9.7.0/st.default/oper
-       diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
+           then switch back to being "oper" and enter the last "cp ..."
+           command above again.)
 
-     and then make the corresponding changes in your local copy of the
-     file (in this example /usr2/oper/.Xresources).  You will need to
-     do this for .Xresources and either (or both) of .fvwmrc and
-     .fvwm2rc depending on whether you use fvwm or fvwm2.  You should
-     make the appropriate changes for prog as well.
+           Similarly as "prog":
+
+             cp /usr2/fs/st.default/prog/.Xresources ~/
+             cp /usr2/fs/st.default/prog/.fvwmrc ~/
+             cp /usr2/fs/st.default/prog/.fvwm2rc ~/
+
+           (If you get a error on the last copy like: "cp: cannot create
+           regular file '/home/prog/.fvwm2rc': Permission denied" then
+           switch to being "root" user and enter the commands:
+
+             cd /usr2/prog
+             chown prog.rtx .fvwm2rc
+
+           then switch back to being "prog" and enter the last "cp ..."
+           command above again.)
+
+        II. If you have the FS Linux 2 or FS Linux 3 or some other
+            (usually non-FS) Linux distribution installed, please do the
+            following as "oper":
+
+              cp /usr2/fs/st.default/oper/.Xresources ~/
+
+            Similarly as "prog":
+
+              cp /usr2/fs/st.default/oper/.Xresources ~/
+
+            Please email Ray (rgonzale@gemini.gsfc.nasa.gov) and tell
+            him what Linux distribution and X window manager you have.
+            He will send you the correct .fvwmrc and/or .fvwm2rc file.
+
+     B. These are instructions in case you have customized your local
+        files. In general you will need to merge in the new
+        information. Please follow instructions (I) if you have FS
+        Linux 4 or 5 or (II) of you have FS Linux 2 or 3 or some other
+        (usually non-FS) Linux distribution.
+
+        I. If you have the FS Linux 4 or FS Linux 5 distribution
+           installed, you should diff the 9.7.1 version against the
+           9.6.9 version:
+
+             cd /usr2/fs-9.7.1/st.default/prog
+             diff .Xresources /usr2/fs-9.6.9/st.default/oper |less
+
+           and then make the corresponding changes in your local copy of
+           the file (in this example /usr2/oper/.Xresources).  You will
+           need to do this for .Xresources and either (or both) of
+           .fvwmrc and .fvwm2rc depending on whether you use fvwm or
+           fvwm2.  You should  make the appropriate changes for the
+           files for "prog" as well.
+
+        II. If you have the FS Linux 2 or FS Linux 3 or some other
+            (usually non-FS) Linux distribution installed, you can
+            follow the instructions immediately above in (I) for
+            .Xresources (both "oper" and "prog"). However for .fvwmrc
+            or .fvwm2rc, please email Ray
+            (rgonzale@gemini.gsfc.nasa.gov) and tell him what Linux
+            distribution and X window manage you have. He will send
+            you the correct files for comparison.
 
 (16) Update your .cshrc files to set "noclobber".  Edit the file
      ~oper/.cshrc and add the line "set noclobber" if it is not
@@ -1022,11 +1214,39 @@ section "IV.  Transferring The Update Archive By DOS Floppy" below.
           cp -a /usr2/fs/st.default/st-0.0.0/tacdclient/tacdclient.c .
           make
 
-(18) Reboot the computer.  This is important for both re-initializing
-     shared memory after the update, but also for a clean unified
-     restart of the various TACD and MET03 client and server programs.
+(18) Check ibad.ctl contents if you have changed kernels.  If you are
+     changing from a system that use the Linux Lab Project (LLP)
+     driver to an installation that uses the National Instruments (NI)
+     you will need to change the device names to remove any leading
+     zeros in the numeric part.  As an example you would need to
+     change "CA=dev03" to "CA=dev3".  In addition, you will need to
+     change the GPIB device in dev.ctl from "board" to "gpib0".  You
+     can verify that your current system uses the NI driver by
+     verifying that there is some sub-directory of the form "nigpib-*"
+     in "/usr/src/" (if you have the LLP driver, the sub-directory
+     would be of the form "linux-gpib-*").
 
-(19) Test the FS.  Generally speaking a fairly thorough test is to run
+(19) Set the FS_CHECK_NTP environment variable.  This variable is used
+     to tell the FS whether to check the status of NTP in "setcl" and
+     "fmset".  If you do not have NTP configured or there is some
+     problem that causes "fmset" to not update every second reliably,
+     you should *not* have this variable set.  However, for the
+     majority of installations that have NTP working, this feature
+     should work well.  If you want to set the variable, it should be
+     set in the ".login" or ".profile" files (as appropriate depending
+     on the user's login shell) in the accounts of users (typically
+     only "oper") on your system that run the FS.  Please see the
+     lines in default .login and .profile files for "oper" located in
+     "/usr2/fs/st.default/oper" for examples. The lines that use
+     "FS_CHECK_NTP" at the end of these files should be copied to the
+     ends of the corresponding user's files and uncommented.
+
+(20) Reboot the computer.  This is important for both re-initializing
+     shared memory and the login environment, but also for a clean
+     unified restart of the various TACD and MET03 client and server
+     programs.
+
+(21) Test the FS.  Generally speaking a fairly thorough test is to run
      a test experiment: start with DRUDG-ing a schedule, executing
      part of it (preferably at least a tape change and a parity check
      in each direction), and perform any normal post-experiment
@@ -1035,23 +1255,136 @@ section "IV.  Transferring The Update Archive By DOS Floppy" below.
      particular for this upgrade you should test that Mark 5
      operations work as expected.
 
-VII. Transferring The Update Archive By DOS Floppy
+
+IV.  Updating from 9.7.0
+
+This section contains abbreviated installation instructions for
+stations that have already installed 9.7.0 and are updating to 9.7.1
+
+(1) Log-in as prog.
+
+(2) Place a copy of the fs-9.7.1 archive in your "/tmp" directory.
+For example you might do the following:
+
+      cd /tmp
+      ncftp -u atri.gsfc.nasa.gov
+      (enter your account name for the server at prompt)
+      (enter your password for the server at prompt)
+      cd /fs/dist
+      get fs-9.7.1.tgz
+      quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section "V. Transferring The Update Archive By DOS Floppy" below.
+
+(3) Log-out as prog and log-in as root.
+
+(4) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/fs-9.7.1.tgz
+
+(5) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.7.1 fs
+
+(6) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(7) Make the FS:
+
+      cd /usr2/fs
+      make
+
+(8) Log in as oper
+
+(9)  If you have already fixed the X files installed with 9.7.0 or
+     used the modified installation procedure sent in a subsequent
+     e-mail, you should skip this step.  Otherwise these are the
+     instructions for correcting the results of the erronous 9.7.0
+     installation instructiond for these files.  If you have FS Linux
+     4 or FS Linux 5, please follow instructions (I). If you have FS
+     Linux 2 of FS Linux 3 or some other (usuall non-FS) Linux
+     distribution, please follow instuctions (II).
+
+     I. If you have the FS Linux 4 or FS Linux 5 distribution
+        installed, please do the following:
+
+        1. login to "oper"
+        2. cp /usr2/fs/st.default/oper/.Xresources ~/
+        3. cp /usr2/fs/st.default/oper/.fvwm2rc ~/
+        4. If when you are performing step (3), you get the error:
+
+             "cp: cannot create regular file '/home/oper/.fvwm2rc':
+             Permission denied"
+
+           then switch to being "root" user and enter the commands:
+
+             cd /usr2/oper
+             chown oper.rtx .fvwm2rc
+
+           then go back and re-execute steps 1 and 3.
+
+        5. If you received the error cited above when you tried to
+           copy .fvwm2rc for "prog" for the original update, then a
+           similar fix is required. Switch to being "root" user and
+           enter the commands:
+
+             cd /usr2/prog
+             chown prog.rtx .fvwm2rc
+
+           then switch to "prog" and re-copy the .fvwm2rc file.
+
+             cp /usr2/fs/st.default/prog/.fvwm2rc ~/
+
+     II. If you have the FS Linux 2 or FS Linux 3 or some other (usually
+         non-FS) Linux distribution installed, please do the following:
+
+         1. login to "oper"
+         2. cp /usr2/fs/st.default/oper/.Xresources ~/
+         3. Please email Ray (rgonzale@gemini.gsfc.nasa.gov) and tell
+            him what Linux distribution and X window manager you
+            have. He will send you the correct .fvwmrc and/or .fvwm2rc
+            file.
+
+(10) Set the FS_CHECK_NTP environment variable.  This variable is used
+     to tell the FS whether to check the status of NTP in "setcl" and
+     "fmset".  If you do not have NTP configured or there is some
+     problem that causes "fmset" to not update every second reliably,
+     you should *not* have this variable set.  However, for the
+     majority of installations that have NTP working, this feature
+     should work well.  If you want to set the variable, it should be
+     set in the ".login" or ".profile" files (as appropriate depending
+     on the user's login shell) in the accounts of users (typically
+     only "oper") on your system that run the FS.  Please see the
+     lines in default .login and .profile files for "oper" located in
+     "/usr2/fs/st.default/oper" for examples. The lines that use
+     "FS_CHECK_NTP" at the end of these files should be copied to the
+     ends of the corresponding user's files and uncommented.
+
+(11) Reboot the computer.  This is important for both re-initializing
+     shared memory and the login environment.
+
+V. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.7.0.tgz archive have been placed in
+floppy, "split" files of the fs-9.7.1.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9700tg.aa
-fs9700tg.ab
-fs9700tg.ac
+fs9701tg.aa
+fs9701tg.ab
+fs9701tg.ac
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9700tg.* >fs-9.7.0.tgz
+cat fs9701tg.* >fs-9.7.1.tgz
 
-This will create an exact image of the original fs-9.7.0.tgz archive
+This will create an exact image of the original fs-9.7.1.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.
