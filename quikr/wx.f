@@ -50,6 +50,7 @@ C
       do i=1,3
         ip(i) = 0
       enddo
+
       call char2hol('qx',ip(4),1,2)
       if (iclcm.eq.0) then
         ip(3) = -1
@@ -66,6 +67,7 @@ C
 C Call the metserver server for MET3 information.
       if(MET3.eq.wx_met) then
          istate = fsmetc()
+         call char2hol('wx',ip(4),1,2)
          if(istate.ne.0) then
             ip(3) = istate      !  met3 sensor server problem.
             return
@@ -160,6 +162,11 @@ C
       ip(1) = iclass
       ip(2) = 1
       ip(3) = ierr
-      call char2hol('qx',ip(4),1,2)
+      if(MET3.eq.wx_met) then
+         call char2hol('wx',ip(4),1,2)
+      else
+         call char2hol('qx',ip(4),1,2)
+      endif
       return
       end 
+

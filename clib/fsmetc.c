@@ -40,7 +40,7 @@ int fsmetc_()
   int wdir, status, once=0;
 
   if ((he=gethostbyname("localhost")) == NULL) {  /* get the host info */
-    return (-313);
+    return (-8);
   }
 
   /* Is the Field System running? status = 0 for yes 
@@ -48,7 +48,7 @@ int fsmetc_()
 
   if (!status) {*/
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-      return (-306);
+      return (-1);
     }
   
       their_addr.sin_family = AF_INET;    /* host byte order */
@@ -59,18 +59,18 @@ int fsmetc_()
       if (connect(sockfd, (struct sockaddr *)&their_addr, 
 		  sizeof(struct sockaddr)) == -1) {
 	/*logit(NULL,-307,"wx");*/
-	return (-307);
+	return (-2);
       }
       
       /* Set socket nonblocking  */
       if ((flags = fcntl (sockfd, F_GETFL, 0)) < 0) {
-	return (-308);
+	return (-3);
       }
 
       flags |= O_NONBLOCK; 
       
       if (( fcntl (sockfd, F_SETFL, flags )) < 0) {
-	return (-309);
+	return (-4);
       }
       
       to.tv_sec = 4;
@@ -79,12 +79,12 @@ int fsmetc_()
       FD_SET(sockfd, &ready);
       
       if (select(sockfd+1, &ready, (fd_set *)0, (fd_set *)0, &to) < 0) {
-	return (-310);
+	return (-5);
       }
       bzero(buf, sizeof buf);
       if (FD_ISSET(sockfd, &ready)) {
 	if ((numbytes=recv(sockfd, buf, 29, 0)) == -1) {
-	  return (-311);
+	  return (-6);
 	}
 	buf[numbytes]='\0';
 	sscanf(buf,"%f,%f,%f,%f,%d",
