@@ -20,12 +20,14 @@ C
       include '../include/fscom.i'
 C
       dimension ip(5)          !  array for rmpar parameters
-      dimension lnames(12,1)
+      dimension iparm(2)                      ! parameters from gtprm
+      equivalence (parm,iparm(1))
+      dimension lnames(13,1)
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
       integer*2 ibuf(256)         !  input buffer containing command
-      integer*2 ibuf2(256)
+      integer*2 ibuf2(256),ibufd(2)
       character*512 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
@@ -140,9 +142,9 @@ C
         kts = .true.
         if (cjchar(itype,2).ne.'F') then
            indexold=index
-           ichara = iscn_ch(ias,1,nchar,'=')
+           ichara = iscn_ch(ibuf,1,nchar,'=')
            if (ichara.eq.0) ichara=nchar+1
-           icharb = iscn_ch(ias,1,nchar,'@')
+           icharb = iscn_ch(ibuf,1,nchar,'@')
            if (icharb.eq.0) icharb=nchar+1
            ichar1 = min0(ichara,icharb,nchar+1)
            call gtnam(ibuf,1,ichar1-1,lnames,nnames,lproc1,nproc1,
@@ -183,6 +185,7 @@ C
       if (nchar.le.0) then
         if (ichcm_ch(lsor,1,'::').eq.0) then
           call logit4_ch('*end of schedule',lsor,lprocn)
+          kskblk = .true.
           lskd = 'none'
           call char2hol(lskd,ilskd,1,8)
           call fs_set_lskd(ilskd)
@@ -223,12 +226,15 @@ C
         itw(6)=iy
 c not Y2038 compliant
         call fc_rte2secs(itn,secsnow)
+        if(secsnow.lt.0) call logit7ci(0,0,0,1,-251,'bo',0)
 c not Y2038 compliant
         call fc_rte2secs(itw,secswait)
+        if(secsnow.lt.0) call logit7ci(0,0,0,1,-252,'bo',0)
 c
 c not Y2038 compliant
         delta=(secswait-secsnow)*100+itw(1)-itn(1)
-        if(delta.gt.5*60*100) delta=5*60*100
+        if(delta.gt.5*60*100.or.secsnow.lt.0.or.secswait.lt.0)
+     &       delta=5*60*100
         kput=delta.gt.200
         if(kput) then
            call rn_put('fsctl')
@@ -248,6 +254,7 @@ C
 C
 C     3.2 Log the command.  Parse it.
 C
+ 320  continue
       jind = 1
       call spars(ibuf,jind,nchar,lnames,nnames,lproc1,nproc1,lproc2,
      .nproc2,lpparm,ncparm,itype,ierr,itime,index,iclass)
@@ -456,10 +463,6 @@ C
           ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
           nchar = min0(ireg(2),iblen*2)
           ich = 1+iscn_ch(ibuf,1,nchar,'=')
-          if (ich.eq.(nchar+1)) then
-            ich = 1
-            nchar = nchar-1
-          endif
 C  User requested schedule name, format response and log it.
           if (ich.eq.1) then
             nch = ichmv_ch(ibuf,nchar+1,'/')
@@ -475,19 +478,10 @@ C  User requested schedule name, format response and log it.
             goto 600
           endif
           ic4 = iscn_ch(ibuf,ich,nchar,',')
-C  If a comma but no schedule name.
-          if (ic4.eq.ich) then
-            call logit7ci(0,0,0,0,-168,'bo',0)
-            call rn_put('pfmed')
-            goto 600
-          endif
           if (ic4.eq.0) ic4 = nchar + 1
           cnamef=' '
-          cnamef = ibc(ich:ic4-1)
-          if (cnamef.eq.' ') then
-            call logit7ci(0,0,0,0,-168,'bo',0)
-            call rn_put('pfmed')
-            goto 600
+          if(ich.le.ic4-1) then
+             cnamef = ibc(ich:ic4-1)
           endif
           if(kstak(istkop,istksk,1)) then
              call logit7ci(0,0,0,0,-211,'bo',0)
@@ -499,6 +493,15 @@ C  If a comma but no schedule name.
           lstksk(2) = 2
           call cants(itscb,ntscb,4,0,0)
           call cants(itscb,ntscb,2,0,0)
+C  if the scehdule file name is blank don't try to open it.
+          if(cnamef.eq.' ') then
+             kskblk = .true.
+             lskd = 'none'
+             call char2hol(lskd,ilskd,1,8)
+             call fs_set_lskd(ilskd)
+             call rn_put('pfmed')
+             goto 600
+          endif
 C  Initialize, if we've got this far we must be
 C  a valid schedule or all is set to zero.
           il = iflch(lnamef,20)
@@ -519,19 +522,20 @@ C  a valid schedule or all is set to zero.
           else
             ibc1=FS_ROOT//'/sched/'
             il1=12
-          endif
+          endif     
           lskd = cnamef(ic2+1:ic3-1)
           call char2hol(lskd,ilskd,1,8)
           call fs_set_lskd(ilskd)
           pathname = ibc1(1:il1) // lskd(1:ic3-ic2-1) // ibc2(1:il2)
           call fmpopen(idcbsk,pathname,ierr,'r',id)
           if (ierr.lt.0) then
-            call logit7ci(0,0,0,1,-105,'bo',ierr)
-            lskd = 'none'
-            call char2hol(lskd,ilskd,1,8)
-            call fs_set_lskd(ilskd)
-            call rn_put('pfmed')
-            goto 600
+             call logit7ci(0,0,0,1,-105,'bo',ierr)
+             kskblk = .true.
+             lskd = 'none'
+             call char2hol(lskd,ilskd,1,8)
+             call fs_set_lskd(ilskd)
+             call rn_put('pfmed')
+             goto 600
           endif
           ich = ic4+1
           ierr = 0
@@ -605,6 +609,10 @@ C
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
         end if
+        idum=ichmv_ch(ibuf,1,"sched_initi")
+        nchar=idum-1
+        idum=ichmv_ch(lsor,1,"::")
+        goto 320
 C
 C     5.6 Commands which set switches (XLOG,ECHO,XDISP)
 C
@@ -836,7 +844,10 @@ C
         else
           istart=0
         endif
-        call fshelp(ibuf,istart,nchar)
+        call fshelp(ibuf,istart,nchar,ierr)
+        if(ierr.eq.-2.or.ierr.eq.-3) then
+           call logit7ci(0,0,0,0,-306+ierr,'bo',0)
+        endif
       else if (mbranch.eq.19) then
          nch = ichmv_ch(ibuf,nchar+1,'/')
          call logit4d(ibuf,nch-1,lsor2,lprocn)
@@ -845,6 +856,46 @@ C
         if(istart.ne.0.and.istart.lt.nchar) then
            nch = ichmv(ibuf2,1,ibuf,istart+1,nchar-istart)
            call copin(ibuf2,nch-1)
+        endif
+      else if (mbranch.eq.21) then
+c
+c TNX command
+c
+        ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        nchar = min0(ireg(2),iblen*2)
+        ich = 1+iscn_ch(ibuf,1,nchar,'=')
+        if (ich.eq.1) then
+             call put_buf(iclbox,ibuf,-1,'fs','tl')
+        else
+           call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+           if(ierr.ne.0) then
+              call logit7ci(0,0,0,0,-300,'bo',0)
+           else if(cjchar(lsor,1).eq.'$') then
+              call logit7ci(0,0,0,0,-305,'bo',0)
+           else if(cjchar(lsor,1).eq.'@') then
+              call logit7ci(0,0,0,0,-306,'bo',0)
+           else if(cjchar(lsor,2).eq.':') then
+              call logit7ci(0,0,0,0,-307,'bo',0)
+           else
+              ibufd(1)=iparm(1)
+              call gtprm2(ibuf,ich,nchar,1,parm,ierr)
+              if (ierr.ne.0) then
+                 call logit7ci(0,0,0,0,-301,'bo',0)
+              else 
+                 ibufd(2)=iparm(1)
+                 call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+                   if(ierr.lt.0) then
+                    call logit7ci(0,0,0,0,-302,'bo',0)
+                 else if(0.eq.ichcm_ch(parm,1,'on')) then
+                    call put_buf(iclbox,ibufd,-4,'fs','tf')
+                 else if(0.eq.ichcm_ch(parm,1,'off').or.
+     &                   ierr.eq.2) then
+                    call put_buf(iclbox,ibufd,-4,'fs','tn')
+                 else   
+                    call logit7ci(0,0,0,0,-302,'bo',0)
+                 endif
+              endif
+           endif
         endif
       endif
       mbranch = 0
