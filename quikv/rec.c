@@ -17,7 +17,7 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, i, count, ichold;
+      int ilast, ierr, indx, i, count, ichold;
       int kenable, klowtape, kmove, kload;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
@@ -43,14 +43,18 @@ long ip[5];                           /* ipc parameters */
 
       ini_req(&buffer);
 
-      ind=itask-1;                    /* index for this module */
+      indx=itask-1;                    /* index for this module */
 
-      memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       if (command->equal != '=') {            /* read module */
         request.type=1;
         request.addr=0x30; add_req(&buffer,&request);
-        if (shm_addr->equip.drive_type != VLBA2) {
+        if (!(shm_addr->equip.drive[indx] == VLBA &&
+	    shm_addr->equip.drive_type[indx] == VLBA2)) {
           request.addr=0x31; add_req(&buffer,&request);
           request.addr=0x32; add_req(&buffer,&request);
         }
@@ -60,7 +64,7 @@ long ip[5];                           /* ipc parameters */
       else if (command->argv[0]==NULL) goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
          if (*command->argv[0]=='?') {
-            rec_dis(command,ip);
+            rec_dis(command,ip,indx);
             return;
          } else if(0==strcmp(command->argv[0],ADDR_ST)) {
             request.type=2; add_req(&buffer,&request);
@@ -71,7 +75,8 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],REBOOT)) {
-	    if(shm_addr->equip.drive_type == VLBA2) {
+	    if(shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2) {
 	      ierr= -205;
 	      goto error;
 	    }
@@ -89,38 +94,42 @@ long ip[5];                           /* ipc parameters */
 		return;
 	    }
 
-	    if (shm_addr->equip.drive_type != VLBA2) {
-	      if(shm_addr->vacsw == 1 && shm_addr->thin!= 0 &&
-		 shm_addr->thin!=1) {
+	    if (!(shm_addr->equip.drive[indx] == VLBA &&
+		shm_addr->equip.drive_type[indx] == VLBA2)) {
+	      if(shm_addr->vacsw[indx] == 1 && shm_addr->thin[indx]!= 0 &&
+		 shm_addr->thin[indx]!=1) {
 		ierr=-206;
 		goto error;
 	      }
 	      request.addr=0xb9;                 /* capstan size */
-	      request.data= bits16on(16) & (shm_addr->capstan); 
+	      request.data= bits16on(16) & (shm_addr->capstan[indx]); 
 	      add_req(&buffer,&request);
 
               request.addr=0xbd;                 /* tape thickness */
-	      if(shm_addr->vacsw == 1 )
-		if(shm_addr->thin)
-		  request.data= bits16on(16) & shm_addr->itpthick;
+	      if(shm_addr->vacsw[indx] == 1 )
+		if(shm_addr->thin[indx])
+		  request.data= bits16on(16) & shm_addr->itpthick[indx];
 		else
-		  request.data= bits16on(16) & shm_addr->itpthick2;
+		  request.data= bits16on(16) & shm_addr->itpthick2[indx];
 	      else 
-		request.data= bits16on(16) & shm_addr->itpthick;
+		request.data= bits16on(16) & shm_addr->itpthick[indx];
 
               add_req(&buffer,&request);
 
               request.addr=0xd0;               /* vacuum motor voltage (mV) */
-	      if(shm_addr->vacsw == 1 )
-		if(shm_addr->thin)
+	      if(shm_addr->vacsw[0] == 1 )
+		if(shm_addr->thin[indx])
 		  fvacuum=
-		    (shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+		    (shm_addr->motorv[indx]*shm_addr->inscsl[indx]) +
+		    shm_addr->inscint[indx];
 		else
 		  fvacuum=
-		    (shm_addr->motorv2*shm_addr->inscsl) + shm_addr->inscint;
+		    (shm_addr->motorv2[indx]*shm_addr->inscsl[indx]) +
+		    shm_addr->inscint[indx];
 	      else
 		  fvacuum=
-		    (shm_addr->motorv*shm_addr->inscsl) + shm_addr->inscint;
+		    (shm_addr->motorv[indx]*shm_addr->inscsl[indx]) +
+		    shm_addr->inscint[indx];
 
               request.data = bits16on(14) & (int)(fvacuum);
               add_req(&buffer,&request);
@@ -128,38 +137,40 @@ long ip[5];                           /* ipc parameters */
               request.addr=0xd3;                 /* head 1 write voltage */
 /* the write voltage (millivolts) to send to record is divided by 2 */
 
-	      if(shm_addr->vacsw == 1 )
-		if(shm_addr->thin)
-		  volt = (int)((shm_addr->wrvolt/2)*1000);
+	      if(shm_addr->vacsw[indx] == 1 )
+		if(shm_addr->thin[indx])
+		  volt = (int)((shm_addr->wrvolt[indx]/2)*1000);
 		else
-		  volt = (int)((shm_addr->wrvolt2/2)*1000);
+		  volt = (int)((shm_addr->wrvolt2[indx]/2)*1000);
 	      else
-		  volt = (int)((shm_addr->wrvolt/2)*1000);
+		  volt = (int)((shm_addr->wrvolt[indx]/2)*1000);
 
               request.data= bits16on(14) & volt;
               add_req(&buffer,&request);
 
-	      if(shm_addr->equip.drive == VLBA4) {
+	      if(shm_addr->equip.drive[indx] == VLBA4 ||
+		 (shm_addr->equip.drive[indx] == VLBA &&
+		  shm_addr->equip.drive_type[indx] == VLBAB)) {
 		request.addr=0xd2;                 /* head 2 write voltage */
 /* the write voltage (millivolts) to send to record is divided by 2*/
-		if(shm_addr->vacsw == 1 )
-		  if(shm_addr->thin)
-		    volt = (int)((shm_addr->wrvolt4/2)*1000);
+		if(shm_addr->vacsw[indx] == 1 )
+		  if(shm_addr->thin[indx])
+		    volt = (int)((shm_addr->wrvolt4[indx]/2)*1000);
 		  else
-		    volt = (int)((shm_addr->wrvolt42/2)*1000);
+		    volt = (int)((shm_addr->wrvolt42[indx]/2)*1000);
 		else
-		  volt = (int)((shm_addr->wrvolt4/2)*1000);
+		  volt = (int)((shm_addr->wrvolt4[indx]/2)*1000);
 
 		request.data= bits16on(14) & volt;
 		add_req(&buffer,&request);
 	      }
 
-	      shm_addr->thin=-1;
+	      shm_addr->thin[indx]=-1;
 	    } else {
 
              request.addr=0xd3;                 /* head write voltage */
 /* the write current (milliampers) in unitx of 0.2128 mA/count */
-             request.data= bits16on(14) & (int)((shm_addr->wrvolt/0.2128)+0.5);
+             request.data= bits16on(14) & (int)((shm_addr->wrvolt[indx]/0.2128)+0.5);
              add_req(&buffer,&request);
 	   }
 
@@ -171,7 +182,7 @@ long ip[5];                           /* ipc parameters */
          } else if(0==strcmp(command->argv[0],"unload")) {
            verr=0;
            lerr=0;
-           verr = vacuum(&lerr);
+           verr = vacuum(&lerr,indx);
            if (verr<0) {
              /* vacuum not ready or other error */
              ierr = verr;
@@ -191,16 +202,16 @@ long ip[5];                           /* ipc parameters */
 	   }
 
 	    request.type=0;
-            memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
+            memcpy(&lcl,&shm_addr->venable[indx],sizeof(lcl));
             lcl.general=0;                  /* turn off record */
-            shm_addr->venable.general=0;
+            shm_addr->venable[indx].general=0;
             venable81mc(&request.data,&lcl);
             request.addr=0x81; add_req(&buffer,&request);
 
             request.addr=0xb4;
             request.data=0x01; add_req(&buffer,&request);
-            shm_addr->idirtp=0;
-            shm_addr->lowtp=1;
+            shm_addr->idirtp[indx]=0;
+            shm_addr->lowtp[indx]=1;
 
             kenable = TRUE;
             kmove = TRUE;
@@ -210,7 +221,7 @@ long ip[5];                           /* ipc parameters */
          } else if(0==strcmp(command->argv[0],"bot")) {
            verr=0;
            lerr=0;
-           verr = vacuum(&lerr);
+           verr = vacuum(&lerr,indx);
            if (verr<0) {
              /* vacuum not ready or other error */
              ierr = verr;
@@ -230,32 +241,33 @@ long ip[5];                           /* ipc parameters */
 	   }
 
             request.type=0;
-            memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
+            memcpy(&lcl,&shm_addr->venable[indx],sizeof(lcl));
             lcl.general=0;                  /* turn off record */
-            shm_addr->venable.general=0;
+            shm_addr->venable[indx].general=0;
             venable81mc(&request.data,&lcl);
             request.addr=0x81;
             add_req(&buffer,&request);
 
             request.addr=0xb5;           /* schedule tape speed */
-            if (shm_addr->imaxtpsd == -2) {
+            if (shm_addr->imaxtpsd[indx] == -2) {
               request.data=bits16on(16) & (int)(360*100.0);
-            } else if (shm_addr->imaxtpsd == -1) {
+            } else if (shm_addr->imaxtpsd[indx] == -1) {
               request.data=bits16on(16) & (int)(330*100.0);
             } else {
-              request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
+              request.data=
+		bits16on(16) & (int)(spd[shm_addr->imaxtpsd[indx]]*100.0);
             }
-	   shm_addr->ispeed=-3;
-	   shm_addr->cips=request.data;
+	   shm_addr->ispeed[indx]=-3;
+	   shm_addr->cips[indx]=request.data;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
-            shm_addr->lowtp=1;
+            shm_addr->lowtp[indx]=1;
             request.data= bits16on(1) & 1; 
             add_req(&buffer,&request);
 
             request.addr=0xb1; request.data=0x00; 
-            shm_addr->idirtp=0;
+            shm_addr->idirtp[indx]=0;
             add_req(&buffer,&request);
             kenable = TRUE;
             kmove = TRUE;
@@ -264,7 +276,7 @@ long ip[5];                           /* ipc parameters */
          } else if(0==strcmp(command->argv[0],"eot")) {
            verr=0;
            lerr=0;
-           verr = vacuum(&lerr);
+           verr = vacuum(&lerr,indx);
            if (verr<0) {
              /* vacuum not ready or other error */
              ierr = verr;
@@ -283,32 +295,33 @@ long ip[5];                           /* ipc parameters */
   	   }
 
             request.type=0;
-            memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
+            memcpy(&lcl,&shm_addr->venable[indx],sizeof(lcl));
             lcl.general=0;                  /* turn off record */
-            shm_addr->venable.general=0;
+            shm_addr->venable[indx].general=0;
             venable81mc(&request.data,&lcl);
             request.addr=0x81;
             add_req(&buffer,&request);
 
             request.addr=0xb5;           /* schedule tape speed */
-            if (shm_addr->imaxtpsd == -2) {
+            if (shm_addr->imaxtpsd[indx] == -2) {
               request.data=bits16on(16) & (int)(360*100.0);
-            } else if (shm_addr->imaxtpsd == -1) {
+            } else if (shm_addr->imaxtpsd[indx] == -1) {
               request.data=bits16on(16) & (int)(330*100.0);
             } else {
-              request.data=bits16on(16) & (int)(spd[shm_addr->imaxtpsd]*100.0);
+              request.data=
+		bits16on(16) & (int)(spd[shm_addr->imaxtpsd[indx]]*100.0);
             }
-	   shm_addr->ispeed=-3;
-	   shm_addr->cips=request.data;
+	   shm_addr->ispeed[indx]=-3;
+	   shm_addr->cips[indx]=request.data;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
             request.data= bits16on(1) & 1; 
-            shm_addr->lowtp=1;
+            shm_addr->lowtp[indx]=1;
             add_req(&buffer,&request);
 
             request.addr=0xb1; request.data=0x01; 
-            shm_addr->idirtp=1;
+            shm_addr->idirtp[indx]=1;
             add_req(&buffer,&request);
             kenable = TRUE;
             kmove = TRUE;
@@ -316,7 +329,8 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"release")) {
             request.type=0;
-	    if(shm_addr->equip.drive_type != VLBA2) {
+	    if(!(shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2)) {
               request.addr=0xd0;
               request.data=0x00; add_req(&buffer,&request);
 	    }
@@ -325,7 +339,8 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],"zero")) {
-	    if(shm_addr->equip.drive_type == VLBA2) {
+	    if(shm_addr->equip.drive[indx] == VLBA &&
+	       shm_addr->equip.drive_type[indx] == VLBA2) {
 	      ierr= -203;
 	      goto error;
 	    }
@@ -335,9 +350,13 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else { 
-             ierr = rec_dec(command->argv[0],&buffer,ip);
+             ierr = rec_dec(command->argv[0],&request,&buffer,ip,indx);
              kmove = TRUE;
-             if (ierr!=0) goto error;
+             if (ierr!=0) {
+	       ip[0]=ip[1]=0;
+	       ip[2]=ierr;
+	       return;
+	     }
 	     if(shm_addr->equip.rack == MK4 || shm_addr->equip.rack == VLBA4 ||
 		shm_addr->equip.rack == K4MK4 ) {
 	       setMK4FMrec(0,ip);
@@ -351,8 +370,8 @@ parse:
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.rec;
-      shm_addr->check.rec=0;
+      ichold=shm_addr->check.rec[indx];
+      shm_addr->check.rec[indx]=0;
 
 mcbcn:
       end_req(ip,&buffer);
@@ -361,25 +380,25 @@ mcbcn:
 
       if (ichold != -99) {
          if (kmove) {
-            shm_addr->check.vkmove = FALSE;
-            rte_rawt(&shm_addr->check.rc_mv_tm);
+            shm_addr->check.vkmove[indx] = FALSE;
+            rte_rawt(shm_addr->check.rc_mv_tm+0);
          }
          if (kenable)
-            shm_addr->check.vkenable = FALSE;
+            shm_addr->check.vkenable[indx] = FALSE;
          if (klowtape)
-            shm_addr->check.vklowtape = FALSE;
+            shm_addr->check.vklowtape[indx] = FALSE;
          if (kload){
-            shm_addr->check.vkload = TRUE;
-            rte_rawt(&shm_addr->check.rc_ld_tm);
+            shm_addr->check.vkload[indx] = TRUE;
+            rte_rawt(&shm_addr->check.rc_ld_tm+indx);
          }
          if (ichold >= 0)
             ichold=ichold % 1000 + 1;
-         shm_addr->check.rec=ichold;
+         shm_addr->check.rec[indx]=ichold;
       }
 
 display:
       if(ip[2]<0) return;
-      rec_dis(command,ip);
+      rec_dis(command,ip,indx);
       return;
 
 error:
