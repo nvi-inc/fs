@@ -136,22 +136,17 @@ struct m5state *state;
     else
       state->error=FALSE;
 
-    time->year=0;
-    time->day=0;
-    time->hour=0;
-    time->minute=0;
-    time->seconds=0.0;
+    time->year=-1;
+    time->day=-1;
+    time->hour=-1;
+    time->minute=-1;
+    time->seconds=-1.0;
 
     if(strchr(ptr,'y')!=NULL) {
       if(5!=sscanf(ptr,"%dy%dd%dh%dm%lfs",&time->year,
 		   &time->day,&time->hour,&time->minute,&time->seconds))
 	return -1;
     } else if(strchr(ptr,'d')!=NULL) {
-      time->year=0;
-      time->day=0;
-      time->hour=0;
-      time->minute=0;
-      time->seconds=0.0;
       if(4!=sscanf(ptr,"%dd%dh%dm%lfs",
 		   &time->day,&time->hour,&time->minute,&time->seconds))
 	return -1;
@@ -195,26 +190,27 @@ struct m5state *state;
 {
 
   if(state->known) {
-    if(time->year!=0) {
+    if(time->year!=-1) {
       sprintf(ptr,"%dy",time->year);
       ptr+=strlen(ptr);
     }
-    if(time->day!=0) {
+    if(time->day!=-1) {
       sprintf(ptr,"%dd",time->day);
       ptr+=strlen(ptr);
     }
-    if(time->hour!=0) {
+    if(time->hour!=-1) {
       sprintf(ptr,"%dh",time->hour);
       ptr+=strlen(ptr);
     }
-    if(time->minute!=0) {
+    if(time->minute!=-1) {
       sprintf(ptr,"%dm",time->minute);
       ptr+=strlen(ptr);
     }
-    if(time->seconds_precision < 0)
-      sprintf(ptr,"%lfs",time->seconds);
-    else
-      sprintf(ptr,"%.*lfs",time->seconds_precision,time->seconds);
+    if(time->seconds>-0.1)
+      if(time->seconds_precision < 0)
+	sprintf(ptr,"%lfs",time->seconds);
+      else
+	sprintf(ptr,"%.*lfs",time->seconds_precision,time->seconds);
   }
 
   if(state->error) {
