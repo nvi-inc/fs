@@ -18,6 +18,7 @@ C 970123 nrv Move initialization to front.
 C 970303 nrv When matching up the axis for antenna_motion, change
 C            "dec" to "dc" to keep it to the 2 letters sk/dr use.
 C 970306 nrv Handle XY axis types.
+C 970718 nrv Incorrect error returns for axis limits fixed.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -237,7 +238,7 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         almax1 = r
         if (ierr.ne.0) then
-          iret=-9
+          ierr=-5
           write(lu,9909) nl,i1
         endif
         iret = fvex_field(i2,ptr_ch(cout),len(cout)) ! get lower limit second axis
@@ -247,7 +248,7 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         almin2 = r
         if (ierr.ne.0) then
-          iret=-9
+          ierr=-5
           write(lu,9909) nl,i1
         endif
         iret = fvex_field(i2+2,ptr_ch(cout),len(cout)) ! get lower limit second axis
@@ -257,7 +258,7 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)
         almax2 = r 
         if (ierr.ne.0) then
-          iret=-9
+          ierr=-5
           write(lu,9909) nl,i1
         endif
 C         Select the max and min of all sectors for now.
