@@ -7,6 +7,7 @@ C     FROM GIVEN MONTH,DAY AND YEAR SINCE 1900 (GREGORIAN CALENDAR)
 C     VALID FROM 1601 TO 2099 
 C     NOT QUITE, ANYMORE, DUE TO THE LIMITED INTEGER SIZE IN THE
 C     21MX COMPUTER (+- 32767)
+C     should be okay now with i*4 machine weh
       integer   imonth,iday,iyear,iyr,iyr1
       integer montot(12)
       data montot /0,31,59,90,120,151,181,212,243,273,304,334/
@@ -27,6 +28,7 @@ C
       goto 21
    15 if(imonth.gt.2) goto 21 
       iyr=iyr-1
+c not Y2.1K compliant
    21 julda =(-24980 +365*iyear)+(montot(imonth)+iday+iyr-iyr1) 
 
       return
