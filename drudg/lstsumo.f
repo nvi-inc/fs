@@ -4,7 +4,7 @@
      .      ihd,imd,isd,ih2,im2,is2,ch3,cm3,cs3,
      .      idm,ids,cpass,ifeet,cnewtap,cdir,
      .      kskd,ncount,ntapes,
-     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut)
+     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut,iyear)
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -27,12 +27,14 @@ C 970401 nrv Add itlate_local to call.
 C 970728 nrv Add more explanatory header lines for the last column
 C 970728 nrv If no tape motion, print "--" in pass field.
 C 970812 nrv Print ifeet to nearest 20 feet (=1 sec at fast speed)
+C 971210 nrv Print ifeet to nearest 1 min for S2. Change some headers.
+C 980914 nrv Print full date. Add IYEAR to call.
 
 C Input
       double precision rarad,dcrad,xpos,ypos,zpos,ut
       integer mjd
 C** temporary
-      integer its,itm,is3,im3
+      integer its,itm,is3,im3,iyear
       integer iline,npage,itlate_local,itearl_local,nsline,ncount,
      .ntapes,maxline
       integer ihd,imd,isd,ih2,im2,is2,
@@ -49,7 +51,7 @@ C Output
 C These are modified on return: iline, page,ncount,ntapes
 
 C Local
-      integer i,il,iaz,iel,ifeet_print
+      integer i,il,iaz,iel,ifeet_print,iday
       double precision az,el
       integer trimlen
       logical kcont,kearl
@@ -89,19 +91,20 @@ C  1. Headers.
           write(luprt,9204) cstn,cid,cexper
 9204      format(' Station: ',a8,' (',a2,')'/' Experiment: ',a8)
         endif
-        write(luprt,9205) itearl_local
-9205    format(' Early tape start: ',i3,' seconds')
-        write(luprt,9206) itlate_local
-9206    format(' Late tape stop: ',i3,' seconds')
+        write(luprt,9205) itearl_local,itlate_local
+9205    format(' Early tape start: ',i3,' seconds',
+     .      '    Late tape stop: ',i3,' seconds')
         write(luprt,'()')
         write(luprt,9207)
 9207    format(
      .  ' Line#=line number in .snp file'/
-     .  ' Dur=time interval of on-source data (Start Data to ',
-     .  'Stop Data)'/
-     .  ' Feet = footage at start of scan, to the nearest 10 feet'/
+     .  ' Dur=time interval of on-source data (Start Data to',
+     .  ' Stop Data) in mmm:ss'/
+     .  ' Data and tape times are in the format hh:mm:ss'/
+     .  ' Feet = footage at start of scan, to nearest 10 feet or',
+     .  ' nearest minute for S2'/
      .  ' Key for Tape Usage:  XXX=tape change, *=parity',
-     .  ' check, @=no tape motion'
+     .  ' check, @=no tape motion'/
      .  )
         write(luprt,'()')
 C
@@ -131,13 +134,15 @@ C  2. Column heads.
         il=trimlen(cbuf)
         if (kcont) cbuf=cbuf(1:il)//'     Tape'
         il=trimlen(cbuf)
-        if (.not.ks2) cbuf=cbuf(1:il)//'     Dur  Pass Feet Usage'
-        if (     ks2) cbuf=cbuf(1:il)//'     Dur Group (min)'
+        if (.not.ks2) cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
+        if (     ks2) cbuf=cbuf(1:il)//'      Dur Group (min)'
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
 
-        write(luprt,9320) cday
-9320    format('  Day ',a)
+C       write(luprt,9320) cday
+C9320   format('  Day ',a)
+        read(cday,'(i3)') iday
+        call wrdate(luprt,iyear,iday)
         iline=0
       endif ! new page, write header
 
@@ -180,7 +185,7 @@ C  "Data Stop" field
 C  Continuous or adaptive, "Tape Stop" field
       if (kcont) write(luprt,'(2x,a2,":",a2,":",a2,$)') ch3,cm3,cs3
 C  Duration
-      write(luprt,'(2x,i2.2,":",i2.2,$)') idm,ids
+      write(luprt,'(2x,i3,":",i2.2,$)') idm,ids
 C  Pass
       if (cnewtap.eq.'@  ') then
         write(luprt,'(1x,"--",$)') 
