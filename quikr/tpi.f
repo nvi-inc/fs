@@ -33,8 +33,8 @@ C 3.  LOCAL VARIABLES
 C      - which TPIs to read back
 C        ICH    - character counter
 C     NCHAR  - character count
-      parameter (ibufln=106)     ! worst case: TPZERO/32($$$$$,) + '\0'
-      integer*2 ibuf(ibufln)     !         100 =(  7  + 32*6 + 1)/2
+      parameter (ibufln=156)     ! worst case: TPZERO/32($$$$$$$$,) + '\0'
+      integer*2 ibuf(ibufln)     !         148 =(  7  + 32*9 + 1)/2
 C               - class buffer, holding command
 C        ILEN   - length of IBUF, chars
       dimension ireg(2)
@@ -108,7 +108,6 @@ C
 C
 C     5. Send the results to TPPUT for putting into COMMON.
 C     Send back the response.
-C     If this was a ZERO command, re-set the IFD.
 C
       call ifill_ch(ibuf,1,ibufln*2,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
