@@ -148,7 +148,7 @@ tape=low
 repro=byp,8,20
 !*+8s
 enddef
-define  rxmon         000000000000
+define  rxmon         00000000000
 rx=lo,*,*,*,*,*,*
 rx
 rx=dcal,*,*,*,*,*,*
@@ -162,7 +162,7 @@ rx
 rx=70k,*,*,*,*,*,*
 rx
 enddef
-define  rxall         000000000000
+define  rxall         00000000000
 rx=00,*,*,*,*,*,*
 rx
 rx=01,*,*,*,*,*,*
@@ -226,7 +226,7 @@ rx
 rx=1e,*,*,*,*,*,*
 rx
 enddef
-define  bbcagc        000000000000
+define  bbcagc        00000000000
 bbc01=*,*,*,*,*,agc
 bbc02=*,*,*,*,*,agc
 bbc03=*,*,*,*,*,agc
@@ -242,7 +242,7 @@ bbc12=*,*,*,*,*,agc
 bbc13=*,*,*,*,*,agc
 bbc14=*,*,*,*,*,agc
 enddef
-define  bbcman        000000000000
+define  bbcman        00000000000
 bbc01=*,*,*,*,*,man
 bbc02=*,*,*,*,*,man
 bbc03=*,*,*,*,*,man
@@ -258,7 +258,7 @@ bbc12=*,*,*,*,*,man
 bbc13=*,*,*,*,*,man
 bbc14=*,*,*,*,*,man
 enddef
-define  bread        000000000000
+define  bread         00000000000
 bbc01
 bbc02
 bbc03
@@ -274,7 +274,7 @@ bbc12
 bbc13
 bbc14
 enddef
-define  bbcsx2        000000000000
+define  bbcsx2        00000000000
 bbc01=610.89,a,2.0,2.0
 bbc02=620.89,a,2.0,2.0
 bbc03=650.89,a,2.0,2.0
@@ -290,7 +290,7 @@ bbc12=727.89,b,2.0,2.0
 bbc13=752.89,b,2.0,2.0
 bbc14=762.89,b,2.0,2.0
 enddef
-define  bbcsx4        000000000000
+define  bbcsx4        00000000000
 bbc01=610.89,a,4.0,4.0
 bbc02=620.89,a,4.0,4.0
 bbc03=650.89,a,4.0,4.0
@@ -306,7 +306,7 @@ bbc12=727.89,b,4.0,4.0
 bbc13=752.89,b,4.0,4.0
 bbc14=762.89,b,4.0,4.0
 enddef
-define  bbcwb2        000000000000
+define  bbcwb2        00000000000
 bbc01=612.89,a,2.0,2.0
 bbc02=652.89,a,2.0,2.0
 bbc03=752.89,a,2.0,2.0
@@ -322,7 +322,7 @@ bbc12=765.89,b,2.0,2.0
 bbc13=800.89,b,2.0,2.0
 bbc14=805.89,b,2.0,2.0
 enddef
-define  bbcwb4        000000000000
+define  bbcwb4        00000000000
 bbc01=612.89,a,4.0,4.0
 bbc02=652.89,a,4.0,4.0
 bbc03=752.89,a,4.0,4.0
@@ -338,26 +338,26 @@ bbc12=765.89,b,4.0,4.0
 bbc13=800.89,b,4.0,4.0
 bbc14=805.89,b,4.0,4.0
 enddef
-define  caloff        000000000000
+define  caloff        00000000000
 rx=*,*,*,*,*,*,off
 enddef
-define  calon        000000000000
+define  calon         00000000000
 rx=*,*,*,*,*,*,on
 enddef
-define  caltemps        000000000000
+define  caltemps      00000000000
 caltempa=20.8
 caltempb=21.4
 caltempc=20.8
 enddef
-define  check2a1        000000000000
+define  check2a1      00000000000
 check2c1
 enddef
-define  check2a2        000000000000
+define  check2a2      00000000000
 check2c2
 enddef
 define  check2c1      00000000000
 form=c,4
-check=*,-rc
+check=*,-tp
 enable=
 parity=,,ab,off,m0,m2
 fastr=14s
@@ -371,11 +371,11 @@ repro=byp,4,6
 !*+28.20s
 et
 !+3s
-check=*,rc
+check=*,tp
 enddef
 define  check2c2      00000000000
 form=c,4
-check=*,-rc
+check=*,-tp
 enable=
 parity=,,ab,off,m1,m3
 fastf=14s
@@ -389,14 +389,14 @@ repro=byp,5,7
 !*+28.20s
 et
 !+3s
-check=*,rc
+check=*,tp
 enddef
-define  dat           00000000000x
+define  dat           00000000000
 bbcsx2
 ifdsx
 form=c,4
 enddef
-define  dqaeven        000000000000
+define  dqaeven       00000000000
 dqa=1
 repro=*,4,6,*,*
 dqa
@@ -413,7 +413,7 @@ dqa
 repro=*,28,30,*,*
 dqa
 enddef
-define  dqaodd        000000000000
+define  dqaodd        00000000000
 dqa=1
 repro=*,5,7,*,*
 dqa
@@ -430,34 +430,34 @@ dqa
 repro=*,29,31,*,*
 dqa
 enddef
-define  fastf        000000000000
+define  fastf         00000000000
 ff
 !+$
 et
 enddef
-define  fastr        000000000000
+define  fastr         00000000000
 rw
 !+$
 et
 enddef
-define  ifdsx        000000000000
+define  ifdsx         00000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
 lo=8080.00,2020.00
 upconv=479.9,479.9
 enddef
-define  ifdwb        000000000000
+define  ifdwb         00000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
 lo=8080.00,2020.00,8080.0
 upconv=479.9,479.9,0
 enddef
-define  initi        000000000000
+define  initi         00000000000
 "welcome to the pc field system
 vlbainit
 sy=run setcl &
 enddef
-define  midob        000000000000
+define  midob         00000000000
 tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpi=9u,10u,11u,12u,13u,14u,ifb
 bbcagc
@@ -486,28 +486,28 @@ ifdab=0,0,*,*
 ifdcd=0,0,*,*
 rxmon
 enddef
-define  min15         00000000000x
+define  min15         00000000000
 rxall
 wx
 cable
 sxcts
 enddef
-define  overnite      00000000000x
+define  overnite      00000000000
 log=overnite
 setup
-check=*,-rc
+check=*,-tp
 min15@!,15m
 rxmon@!+2m30s,5m
 repro=byp,8,14
 dqa=1
 dqa@!,1m
 enddef
-define  postob        00000000000x
+define  postob        00000000000
 enddef
-define  precond       00000000000x
+define  precond       00000000000
 schedule=prepass,#1
 enddef
-define  preob         00000000000x
+define  preob         00000000000
 onsource
 bbcman
 calon
@@ -516,14 +516,14 @@ tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpical=9u,10u,11u,12u,13u,14u,ifb
 caloff
 enddef
-define  prepass       00000000000x
+define  prepass       00000000000
 wakeup
 xdisp=on
 " mount the next tape without cleaning the tape drive.
 " use the cont command when finished.
 halt
 xdisp=off
-check=*,-rc
+check=*,-tp
 rec=load
 !+10s
 tape=low,reset
@@ -544,10 +544,15 @@ srw
 et
 !+9s
 enddef
-define  ready         00000000000x
+define  ready         00000000000
 sxcts
 rxmon
 newtape
+loader
+label
+check=*,tp
+enddef
+define  loader        00000000000
 rec=load
 !+10s
 tape=low,reset
@@ -555,28 +560,26 @@ st=for,135,off
 !+11s
 et
 !+3s
-label
-check=*,rc
 enddef
-define  rxx           00000000000x
+define  rxx           00000000000
 rx=$,*,*,*,*,*,*
 enddef
-define  setup         00000000000x
+define  setup         00000000000
 dat
 enable=
 repro=byp,4,6
 enddef
-define  sfastf        00000000000x
+define  sfastf        00000000000
 sff
 !+$
 et
 enddef
-define  sfastr        00000000000x
+define  sfastr        00000000000
 srw
 !+$
 et
 enddef
-define  sx2a1         00000000000x
+define  sx2a1         00000000000
 tapeforma
 pass=$,,none
 form=a,4.000
@@ -604,7 +607,7 @@ tape=low
 repro=byp,8,20
 !*+8s
 enddef
-define  sx2c2         00000000000x
+define  sx2c2         00000000000
 tapeformc
 pass=$
 form=c,4.000
@@ -618,7 +621,7 @@ tape=low
 repro=byp,9,21
 !*+8s
 enddef
-define  sx4a1         00000000000x
+define  sx4a1         00000000000
 tapeforma
 pass=$,,none
 form=a,8.000
@@ -632,7 +635,7 @@ tape=low
 repro=byp,8,20,,alt2
 !*+8s
 enddef
-define  sx4c1         00000000000x
+define  sx4c1         00000000000
 tapeformc
 pass=$
 form=c,8.000
@@ -646,7 +649,7 @@ tape=low
 repro=byp,8,20,,alt2
 !*+8s
 enddef
-define  sx4c2         00000000000x
+define  sx4c2         00000000000
 tapeformc
 pass=$
 form=c,8.000
@@ -660,7 +663,7 @@ tape=low
 repro=byp,9,21,,alt2
 !*+8s
 enddef
-define  sxcts         00000000000x
+define  sxcts         00000000000
 bbcman
 tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpi=9u,10u,11u,12u,13u,14u,ifb
@@ -681,28 +684,31 @@ caltemps
 tsys1=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tsys2=9u,10u,11u,12u,13u,14u,ifb
 enddef
-define  tapeforma     00000000000x
+define  tapeforma     00000000000
 tapeform=1,-350,2,  0,3,-295, 4, 55, 5, -240, 6,110
 tapeform=7,-185,8,165,9,-130,10,220,11,  -75,12,275
 enddef
-define  tapeformc     00000000000x
+define  tapeformc     00000000000
 tapeform=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
 tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
 tapeform=13,0,14,0,15,55,16,55,17,110,18,110
 tapeform=19,165,20,165,21,220,22,220,23,275,24,275
 enddef
-define  unlod         00000000000x
-!+5s
-enable=,
-check=*,-rc
-tape=off
-rec=unload
+define  unlod         00000000000
+check=*,-tp
+unloader
 xdisp=on
 "**dismount this tape now**"
 wakeup
 xdisp=off
 enddef
-define  wb2c1         00000000000x
+define  unloader      00000000000
+!+5s
+enable=,
+tape=off
+rec=unload
+enddef
+define  wb2c1         00000000000
 tapeformc
 pass=$
 form=c,4.000
@@ -716,7 +722,7 @@ tape=low
 repro=byp,8,20
 !*+8s
 enddef
-define  wb2c2         00000000000x
+define  wb2c2         00000000000
 tapeformc
 pass=$
 form=c,4.000
@@ -730,7 +736,7 @@ tape=low
 repro=byp,9,21
 !*+8s
 enddef
-define  wb4c1         00000000000x
+define  wb4c1         00000000000
 tapeformc
 pass=$
 form=c,8.000
@@ -744,7 +750,7 @@ tape=low
 repro=byp,8,20,,alt2
 !*+8s
 enddef
-define  wb4c2         00000000000x
+define  wb4c2         00000000000
 tapeformc
 pass=$
 form=c,8.000
