@@ -1,7 +1,7 @@
       SUBROUTINE vunpprc(modef,stdef,ivexnum,iret,ierr,lu,
      .lpre)
 C
-C     VUNPPRC gets the procedure prefix if any 
+C     VUNPPRE gets the procedure prefix if any 
 C     for station STDEF and mode MODEF and converts it.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned

@@ -1,4 +1,10 @@
-int printer_(fname,labels,orien)
+int 
+#ifdef F2C
+printer_
+#else
+printer
+#endif
+(fname,labels,orien)
 char   *fname, *labels, *orien;
 
 /*

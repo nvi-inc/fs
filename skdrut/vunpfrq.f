@@ -196,12 +196,14 @@ C 2. Bit density
         if (iret.eq.0) then
           iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get number
           if (iret.ne.0) return
-          iret = fvex_int(ptr_ch(cout),j)
-          if (iret.ne.0.or.j.lt.0) then
+          iret = fvex_units(ptr_ch(cunit),len(cunit))
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
+          if (iret.ne.0.or.d.lt.0.d0) then
             ierr=-9
             write(lu,'("VUNPFRQ09 - Invalid bit density")')
           else
-            bitden = j
+            bitden = d
           endif
         endif
 

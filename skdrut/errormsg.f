@@ -1,9 +1,14 @@
+iret errors
+===========
 VEX
 -3 = not found
 -4 = variable/def/name did not fit 
 -6 = field out of range for this statement
 -7 = not a valid real or integer
 -8 = unknown units
+
+ierr errors
+===========
 $ANTENNA
 1 = antenna name
 2 = axis type
@@ -85,4 +90,15 @@ $SOURCE
 3 = RA
 4 = dec
 5 = epoch
+$SCHED
+1 = station
+2 = start date/time
+3 = source name
+4 = source index not found
+5 = code index
+6 = data start time
+7 = data end time
+8 = footage
+9 = pass number
+10 = pointing sector
 

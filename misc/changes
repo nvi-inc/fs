@@ -2210,3 +2210,67 @@ Version 9.3.5 961227
            deleted
 
 Version 9.3.6 970119
+
+970121 nrv skdrincl/freqs.ftni
+           Add station and code indices to npassl.
+
+970121 nrv skdrut/vmoinp.f
+           Save npassl indexed by station and code.
+
+970121 nrv skdrut/vob1inp.f
+           Add indices to npassl.
+
+970121 nrv drudg/label.f
+           change 4 to max_sorlen/2
+
+970121 nrv drudg/lists.f
+           Keep track of number of scans for this station.
+
+970122 nrv drudg/label.f
+           Add a variable to the call to indicate what type of label.
+           Add a call to make_pslabel. 
+
+970122 nrv drudg/psbar.c
+           New. Edited version of PC-SCHED file to make PS bar code labels.
+
+970122 nrv drudg/fdrudg.f
+           Add option 61 for PS bar code labels.
+
+970122 nrv drudg/labsnp.f
+           Add call to make_pslabel. Add iin to call from LABEL.
+
+970122 WEH vex/vex.y
+           allow zero length tone lists in phase_cal_detect
+
+970122 WEH clib/vst_util.c
+           delete 4.44 speed
+           fix 8.88 speed to 8.33
+
+970122 WEH clib/vrepro_util.c
+           add 1, 0.5, and 0.25 MHz bandwidth equalizer choices
+
+970122 WEH clib/vform_util.c
+           use tape clock not sample rate to set up phase-cal extraction
+
+970122 WEH help/
+           updated
+
+970123 NRV drudg/fdrudg.f
+           Change description of option 61. 
+           Change release date to 970123.
+
+970123 NRV drudg/procs.f
+           Fix 0.5 --> 0.25 in code for external filter required.
+           Remove printing a comment about the FS version required.
+
+970123 WEH clib/vst_util.c
+           help/st.__
+           remove 3.75 nominal (and associated actual and thin) speed
+
+970123 WEH st.default/control/equip.ctl
+           "s2" not "S2" in recorder type comment
+
+970123 WEH st.default/control/equip.ctl
+           "s2" not "S2" in recorder type comment
+
+Version 9.3.7 970123
