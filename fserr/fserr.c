@@ -3,10 +3,15 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
+
+#include "../rclco/rcl/rcl.h"
+
 #include "fserr.h"
 
 /*                                                                 */
@@ -35,6 +40,14 @@ struct errorlist{       /* structure type to store error information */
 
 struct errorlist list[MAXERRORS];
 
+struct error_struct {
+  int value;
+  char *mnem;
+  struct error_struct *next;
+};
+
+struct error_struct *error_base=NULL;
+
 FILE *dcbfs;
 
 main(){
@@ -46,6 +59,7 @@ main(){
   int len;
   int hash;
   int hashcount;
+  char device[2];
 
   struct {
     char buf[2];
@@ -109,7 +123,81 @@ Repeat:
       inbuf[i]=toupper(inbuf[i]);
   }
 
-  i = sscanf(inbuf,"%2s %d",entry.buf,&entry.off);
+  i = sscanf(inbuf,"%2s %d (%2c)",entry.buf,&entry.off, device);
+  if(i==3 && strncmp(entry.buf,"RL",2)==0 && entry.off > -129 
+     && entry.off < 0 ) {
+    struct rclcn_req_buf req_buf;
+    struct rclcn_res_buf res_buf;
+    char err_msg[RCL_MAXSTRLEN_ERROR_DECODE];
+    int ierr;
+    long ip[5];
+    char *first;
+    struct error_struct *ptr,*new,*last=NULL,**clean_up;
+
+    for (ptr=error_base;ptr!=NULL;ptr=ptr->next) {
+      last=ptr;
+      if(ptr->value==entry.off) {
+	strcpy(inbuf,ptr->mnem);
+	len=strlen(inbuf);
+	goto done;
+      }
+    }
+
+    ini_rclcn_req(&req_buf);
+    device[0]=tolower(device[0]);
+    device[1]=tolower(device[1]);
+    add_rclcn_error_decode(&req_buf,device,entry.off);
+    end_rclcn_req(ip,&req_buf);
+    skd_run("rclcn",'w',ip);
+    skd_par(ip);
+    if(ip[2]!=0) {
+      cls_clr(ip[0]);
+      ip[0]=0;
+      ip[1]=1;
+      if(ip[2]> -129 && ip[2] < 0 && strncmp((char *)ip+3,"rl",2)==0)
+	ip[2]-=1000;
+      logita(NULL,ip[2],ip+3,ip+4);
+      goto none;
+    }
+
+    opn_rclcn_res(&res_buf,ip);
+    ierr=get_rclcn_error_decode(&res_buf,err_msg);
+    first=strchr(err_msg,':');
+    if(first == NULL) {
+      logit(NULL,0,-902,"er");
+      goto none;
+    }
+    first+=2;
+    len = strlen(first)+1;
+    if(len > 81)
+      len=81;
+    memcpy(inbuf,first,len);
+    if(len==81) inbuf[80]=0;
+
+    new=NULL;
+    if(error_base==NULL) {
+      new=malloc( sizeof(struct error_struct));
+      error_base=new;
+      clean_up=&error_base;
+    } else {
+      new=malloc(sizeof(struct error_struct));
+      last->next=new;
+      clean_up=&last->next;
+    }
+
+    if(new!=NULL) {
+      new->next=NULL;
+      new->value=entry.off;
+      new->mnem=malloc(strlen(inbuf)+1);
+      if(new->mnem==NULL) {
+	free(new);
+	*clean_up=NULL;
+      } else
+	strcpy(new->mnem,inbuf);
+    }
+    goto done;
+  }
+
 
   hashcode(&entry,&hash);
   hashcount=1;
@@ -123,17 +211,24 @@ Repeat:
       break;
   }
 
-  class = 0;
-  if (hashcount==MAXERRORS){
+  if (hashcount==MAXERRORS)
+    goto none;
+  else
+    goto found;
+
+none:
     memcpy(inbuf,"nono",4);
     inbuf[4]='\0';
     len=4;
-  }
-  else {
+    goto done;
+
+found:
     len = strlen(list[hash].message);
     memcpy(inbuf,list[hash].message,len);
     len-=1;
-  }
+
+done:
+  class = 0;
   cls_snd(&class,inbuf,len,0,0);
 
 Suspend:
@@ -144,4 +239,6 @@ Suspend:
     cls_rcv(ip[0], inbuf, 80, &rtn1, &rtn2, 0, 0);
     goto Repeat; 
   }
+
+
 }
