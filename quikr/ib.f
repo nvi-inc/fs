@@ -21,8 +21,8 @@ C   LOCAL VARIABLES
 C        NCHAR  - number of characters in buffer
 C        NCH    - character counter 
 C        IFC     - character index of comma 
-      integer*2 ibuf(20)                      !  class buffer
-      integer*2 ibuf2(20)                     !  output buffer
+      integer*2 ibuf(50)                      !  class buffer
+      integer*2 ibuf2(52)                     !  output buffer
       dimension ireg(2)                       !  registers from exec calls
       integer get_buf
       integer*2 iparm(2)                      !  parameters from gtparm
@@ -31,7 +31,7 @@ C        IFC     - character index of comma
       equivalence (parm,iparm(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
-      data ilen/40/                           !  length of ibuf, characters
+      data ilen/100/                           !  length of ibuf, characters
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED: CREATED  790309
