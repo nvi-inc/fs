@@ -509,14 +509,21 @@ sample2:
       }
     }
 
+    patched_ifs[0]=lp[0]||up[0];
+    patched_ifs[1]=lp[1]||up[1];
+    patched_ifs[2]=lp[2]||up[2];
+
     if(ierr=set_att(inew[0],inew[1],inew[2],patched_ifs,&iat,isave,&isave3))
       return;
     if(ierr=reset_vc(vc_parms_save,vcnum_l,vcnum_u)) return;
 
     if(lu[0] || lu[1]) {
-      shm_addr->iat1if=inew[0];
-      shm_addr->iat2if=inew[1];
-      shm_addr->iat3if=inew[2];
+      if(patched_ifs[0])
+	shm_addr->iat1if=inew[0];
+      if(patched_ifs[1])
+	shm_addr->iat2if=inew[1];
+      if(patched_ifs[2])
+	shm_addr->iat3if=inew[2];
       
       strcpy(output,command->name);
       strcat(output,"/");
