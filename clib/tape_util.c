@@ -123,7 +123,6 @@ struct tape_mon *lcl;
           sprintf(output,"unlocked");
         break;
       case 5:  /* vacuum ok? */
-        printf("lcl->stat %x\n",lcl->stat);
         if ((lcl->stat & 0x40) == 0) {
           sprintf(output,"notready");
           shm_addr->IRDYTP = 1;
