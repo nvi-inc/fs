@@ -95,7 +95,7 @@ C  are enabled. The options for the command are: stack1 and/or stack2
 C  or null.
 C
       call fs_get_drive(drive)
-      if (MK4.eq.and(MK4,drive)) then
+      if (MK4.eq.drive) then
         kena(1)=.false.
         kena(2)=.false.
         if (ich.lt.nchar) then
@@ -133,11 +133,22 @@ C
             endif
           endif
         endif
+        call fs_get_icheck(icheck(18),18)
+        ichold = icheck(18)
+        icheck(18)=0
+        call fs_set_icheck(icheck(18),18)
+C     Turn off checking while we set up the module
         kenastk(1)=kena(1)
         kenastk(2)=kena(2)
-        call fs_set_kena(kenastk)
-        ierr = 0
-        goto 990
+        call fs_set_kenastk(kenastk)
+        call fs_get_ienatp(ienatp)
+        ibuf(1)=0
+        call char2hol('tp',ibuf(2),1,2)
+        call en2ma4(ibuf(3),ienatp,kenastk)
+        iclass=0
+        call put_buf(iclass,ibuf,-13,'fs','  ')
+        nrec = 1
+        goto 800
       endif
 C
 C  2.1 TRACKS, PARAMETERS 2
