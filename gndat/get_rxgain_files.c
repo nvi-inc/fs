@@ -12,7 +12,8 @@
 
 int get_rxgain();
 
-get_rxgain_files(rxgain,names,ierr,work)
+get_rxgain_files(directory,rxgain,names,ierr,work)
+     char *directory;
 struct rxgain_ds rxgain[];
 char names[MAXRX][256], *work;
      int *ierr;
@@ -23,8 +24,8 @@ char names[MAXRX][256], *work;
   FILE *idum;
 
   strcpy(outbuf,"ls ");
-  strcat(outbuf,FS_ROOT);
-  strcat(outbuf,"/control/*.rxg");
+  strcat(outbuf,directory);
+  strcat(outbuf,"/*.rxg");
 
   if(work[0]!= 0 &&strcmp(work,"0")!=0) {
     strcat(outbuf,".work.");
