@@ -22,7 +22,6 @@
 #include "../include/shm_addr.h"      /* declaration of pointer to fscom */
 /*  */
 #define MAX_BUF 256
-#define MAX_OUT 256
 
 main()
 {
@@ -73,6 +72,7 @@ restart_tac:
       for(;;) {
 	if(shm_addr->LLOG[0]!=' ') {
 	  logitf("tacd/,,");
+	  shm_addr->tacd.check=0;
 	  shm_addr->tacd.stop_request=2;
 	  break;
 	}
@@ -86,7 +86,7 @@ restart_tac:
     i = strlen(host_name);
     host_name[i]='\0';
   }
-  close(fp);
+  close(fp);  
 
 no_tac:
   if(shm_addr->tacd.stop_request==2) {
@@ -177,7 +177,3 @@ wakeup_block:
   }
   exit(-1);
 }  /* end main */
-
-
-
-
