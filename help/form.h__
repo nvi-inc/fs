@@ -17,24 +17,24 @@ mode    The recording mode. Choices for the mode are m, a, b1,
         corresponds to the Mark III group number recorded. Mode m
         uses the sampler track assignments and formatter track
         enables specified by the trackform and tracks commands.
-rate    Sample rate in Mbits/sec. Choices are 0.125, 0.25, 0.5,
-        1, 2, 4, 8, 16, and 32. Default 4. For Nyquist sampling
-        this selection must be twice the bandwidth set-up used in
-        the bbc commands
+rate      Sample rate in Mbits/sec. Choices are 0.125, 0.25, 0.5,
+          1, 2, 4, 8, 16, and 32. Default 4. For Nyquist sampling
+          this selection must be twice the bandwidth set-up used in
+          the bbc commands
 fan     The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1,
         where on a per channel or track basis, the number before
         the colon is the number of sampled channels and the
         number after is the number of tracks. Default 1:1.
-barrel  Barrel-roll mode. Currently the only choice is off, which
-        is the default. 
+barrel    Barrel-roll mode. Currently the only choice is off, which
+          is the default. 
 synch   Synch test tolerance. Choices are 0-16 ( multiples of
         62.5 nanoseconds) or off (same as 0).  Default is 3.
 
 Monitor-only Parameters:
 rev     Formatter firmware revision number, displayed as an
 integer.
-rack    Rack ID, reported as a hex value. 
-error   Error status, okay or the hex value.
+rack      Rack ID, reported as a hex value. 
+error     Error status, okay or the hex value.
 
 Comments:
 The Mark IV formatter clock is set with the fmset program. If the
@@ -55,10 +55,22 @@ is being recorded.
 Some combinations of rate and fan cannot be accommodated by the
 formatter. No output that would require more than 16 MHz nominal
 data rate per track is supported. Specifically a rate of 32 and a
-fan of 1:1 is impossible. Some combinations of fan and rate
-cannot be accommodated by the recorder. Any combination of rate
-and fan that would imply a nominal data rate per track of 0.125
-MHz or less for is not supported.
+fan of 1:1 is impossible. Some combinations of fan and rate cannot
+be accommodated by the recorder. Any combination of rate and fan
+that would imply a nominal data rate per track of 0.125 Mbit/sec
+or less for is not supported.
+
+The rate of 0.25 Mbit/sec is supported by the formatter, but for
+this rate to generate correct time tags, the formatter requires
+the "/con" configuration command that sets it up to be issued
+during an odd second of the time of day, e.g. 00:00:01 and
+09:23:35, but not 09:23:36. No provision is made by the form
+command to meet this timing requirement.
+
+For longitudinal drives, the correlators can not reproduce
+recordings made at speeds below 40 ips, but this limitation is
+subject to change in the future. This limitation is functionally
+equivalent to a minimum per track data rate of 2 Mbit/sec.
 
 For the time being, in order to help facilitate debugging of the
 formatter in the field, the status of the settable parameter is

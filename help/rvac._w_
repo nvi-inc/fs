@@ -20,8 +20,9 @@ the next time a rec=load is executed.
 The cmd and mon values are converted to and from the voltages
 used by the tape drive using the conversion coefficients in the
 tape recorder control file, vdrive1.ctl or vdrive2.ctl.  In
-particular this means that the cmd value uses the same conversion
-as the specified default vacuum level in the control file.
+particular this means that the cmd value uses the same
+conversion as the specified default vacuum level in the control
+file.
 
 
 There is no previous value (selected by using * as the parameter)

@@ -6,11 +6,11 @@ Response:   tapeform/pass,offset,pass,offset, ...
 
 
 Settable parameters:
-pass      The pass number whose offset follows, must be between 1
-          and 100 for Mark III and VLBA, between 1 and 112 for
-          Mark IV. 
-offset    The a priori offset, in microns, for the preceding
-          pass, must be between 1 and ñ4000.
+pass    The pass number whose offset follows, must be between 1
+        and 100 for Mark III and VLBA, between 1 and 112 for Mark
+        IV. 
+offset    The a priori offset, in microns, for the preceding pass,
+          must be between 1 and ñ4000.
 
 Comments: 
 The passes and offsets must appear in pairs. Multiple commands

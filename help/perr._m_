@@ -9,13 +9,13 @@ Settable parameters:
 track     Track to be decoded. No default.
 chan      Decoder channel A (default) or B.
 #samples  Number of samples to average, maximum 10, default 2.
-period    Time between samples in seconds, maximum 2, default
-          0.5.
+period      Time between samples in seconds, maximum 2, default
+            0.5.
 mode      rec or play, default rec.
 
 Monitor-only parameters:
 error     Average number of parity errors.
-synerr    Total number of sync errors.
+synerr      Total number of sync errors.
 
 Comments: 
 This command sets up the appropriate track for reproduce, and

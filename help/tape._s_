@@ -10,8 +10,8 @@ list    One of reset,  one position, or list of eight comma
         separated positions. Positions are in units of seconds. 
         unk maybe used to specify a position as unknown. uns must
         be used for transports that are not currently selected in
-        lists of eight positions. reset is equivalent to
-        specifying one value of 0.
+        lists of eight positions. reset is equivalent to specifying
+        one value of 0.
 
 Monitor-only parameters:
 posX  The position in units of second for transport X. unk is

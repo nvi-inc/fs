@@ -6,20 +6,20 @@ Response:   user_info/field,label,string
 
 
 Settable parameters:
-field     Field number, 1-4. No default.
-label     field or label, to indicate which to update. Default
-          field.
-string    An arbitrary string with contents for field or label.
-          No default unless auto is auto and field is 1 or 2, see
+field   Field number, 1-4. No default.
+label   field or label, to indicate which to update. Default
+        field.
+string    An arbitrary string with contents for field or label. No
+          default unless auto is auto and field is 1 or 2, see
           comments below.
-auto      auto or literal. Default literal.
+auto    auto or literal. Default literal.
 
 Monitor-only Parameters: none
 
 Comments: 
 This command sets the specified "User Info" field or label. If 
-auto is auto, and string is null, and if field is 1, then field 1
-is set to the station name (specified in the location.ctl control
+auto is auto, and string is null, and if field is 1, then field 1 is
+set to the station name (specified in the location.ctl control
 file) or if field is 2, then field 2 is set to the source name
 (specified by the source= command).
 

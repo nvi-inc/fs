@@ -12,6 +12,5 @@ message   message to be sent to the antenna in the exact form
 
 Monitor-only parameters:
 response    response of the antenna to the message. This response
-            is either ack or an error message sent by the
-            antenna.
+            is either ack or an error message sent by the antenna.
 

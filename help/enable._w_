@@ -6,19 +6,18 @@ Response:   enable/list-of-groups
 
 
 Settable parameters:
-list-of-groups  List of head groups to be enabled/disabled.
-                Groups are specified by gn, n=0 to 3. In
-                addition, for VLBAB or VLBA4 drives,  groups in
-                headstack two can specified by gn, n=4 to 7. A null list
-                (i.e. enable=) disables all heads. For mode D,
-                the group containing a single track to be
-                recorded may be indicated by setting list-of-
-                groups to dn, n = 1 to 28. The group within which
-                Mark III track n occurs will be enabled. In
-                addition, for VLBAB and VLBA4 drives, the group
-                in headstack two containing a single track to be
-                recorded may be indicated by setting list-of-
-                groups to dn, n = 101 to 128.
+list-of-groups  List of head groups to be enabled/disabled. Groups
+                are specified by gn, n=0 to 3. In addition, for VLBAB
+                or VLBA4 drives,  groups in headstack two can specified by gn, n=4
+                to 7. A null list (i.e. enable=) disables all heads.
+                For mode D, the group containing a single track to be
+                recorded may be indicated by setting list-of-groups to
+                dn, n = 1 to 28. The group within which Mark III
+                track n occurs will be enabled. In addition, for
+                VLBAB and VLBA4 drives, the group in headstack two
+                containing a single track to be recorded may be
+                indicated by setting list-of-groups to dn, n = 101 to
+                128.
 
 Monitor-only parameters: none
 

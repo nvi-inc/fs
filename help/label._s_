@@ -22,12 +22,12 @@ If code is casa, vsn is interpreted as a CSA format, "XX-T-
 YYYYYZZ-N" label. The "XX-T-YYYYZZ" part of the label uniquely
 identifies this as a set of eight tapes. The check-sum is
 checked. If type is specified it must agree with the "T" type
-from the vsn, unless six characters are specified for type. If
-type is not specified, the single character "T" from the vsn is
-used as the typ. The suffix "-N" must be omitted if all eight
-tapes in a set are loaded, even if they will not all be recorded
-as one group. If fewer than eight tapes are loaded, which tapes
-are inserted and the order of their insertion in the transports
+from the vsn, unless six characters are specified for type. If type
+is not specified, the single character "T" from the vsn is used
+as the typ. The suffix "-N" must be omitted if all eight tapes in
+a set are loaded, even if they will not all be recorded as one
+group. If fewer than eight tapes are loaded, which tapes are
+inserted and the order of their insertion in the transports
 should be specified in the suffix. For example if the first four
 tapes in a set are inserted in order the suffix "-0123" should be
 used. When fewer than eight tapes are inserted they should be

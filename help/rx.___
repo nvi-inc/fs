@@ -16,7 +16,7 @@ cal       Noise cal control. May be on, off (default), oon
           modulation.
 
 Monitor-only parameters:
-lostat    Status of LO, locked or unlocked.
+lostat      Status of LO, locked or unlocked.
 value     Reading in A/D channel shown in first parameter. Units
           are appropriate for channel in use.
 

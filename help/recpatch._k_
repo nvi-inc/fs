@@ -7,11 +7,11 @@ Response:   recpatch/port,channel,port,channel,
 
 
 Settable Parameters:
-port      K4 recorder input port, 1-16
+port        K4 recorder input port, 1-16
 channel   ns where n=1-14 for Mark III/IV/VLBA/VLBA4 racks
           where n=1-16 for K4 type 1 rack and rack type "none"
           where n=a1-a8 or b1-b8 (two characters) for K4 type 2
-          rack
+rack
           where s=u or l for upper or lower sideband
                     
 Comments:

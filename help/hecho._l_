@@ -12,5 +12,6 @@ Monitor-only parameters: none
 
 Comments: 
 This command prints debug information for commands that use the
-head positioner (peak and locate).
+head positioner (peak and 
+locate).
 

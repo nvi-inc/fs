@@ -14,10 +14,9 @@ Monitor-only parameters:
 The tr line contains information from the tracking computer (all
 angles are in degrees):
 yy/ddd.hh:m:ss  year day and time of tracking computer
-cmd1        first antenna command angle, x, azimuth, or hour
-            angle
-cmd2        second antenna command angle, y, elevation, or
-            declination
+cmd1      first antenna command angle, x, azimuth, or hour angle
+cmd2      second antenna command angle, y, elevation, or
+          declination
 delta1      tracking error for first command angle
 delta2      tracking error for second command angle
 
@@ -32,8 +31,7 @@ The co line contains calculated correction information (all
 angles are in degrees):
 cor1        pointing correction for first command angle
 cor2        pointing correction for second command angle
-eqeq        approximate Equation of the Equinoxes, seconds of
-            time
+eqeq      approximate Equation of the Equinoxes, seconds of time
 refr        refraction correction
 
 Comments: 

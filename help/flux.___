@@ -10,30 +10,29 @@ Syntax:     flux1=model,flux1,angle1,angle2,flux2,angle3,angle4
           flux5=model,flux1,angle1,angle2,flux2,angle3,angle4
           flux6=model,flux1,angle1,angle2,flux2,angle3,angle4
 
-Response:   flux1/model,flux1,angle1,angle2,flux2,angle3,angle4,c
-            orr,aflux
-  flux2/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  flux3/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  fluxa/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  fluxb/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  fluxc/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  fluxd/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  flux5/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
-  flux6/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+Response:   flux1/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          flux2/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          flux3/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          fluxa/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          fluxb/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          fluxc/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          fluxd/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          flux5/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
+          flux6/model,flux1,angle1,angle2,flux2,angle3,angle4,corr,aflux
 
 
 Settable parameters:
 model     source model, one of gaussian, disk, twopoints
-flux1     flux density of the first source component, Janskys
-angle1    first angular dimension of the first component
-angel2    second angular dimension of the first component
-flux2     flux density of the second source component, Janskys
-angle3    first angular dimension of the second component
-angle4    second angular dimension of the second component
+flux1       flux density of the first source component, Janskys
+angle1      first angular dimension of the first component
+angel2      second angular dimension of the first component
+flux2       flux density of the second source component, Janskys
+angle3      first angular dimension of the second component
+angle4      second angular dimension of the second component
 
 Monitor-only parameters:
-corr      correction divisor
-aflux     apparent flux density 
+corr        correction divisor
+aflux       apparent flux density 
 
 
 Comments: 
@@ -54,20 +53,20 @@ dependent detectors u5 and u6.
 
 If model is gaussian, then the source is assumed to consist of up
 to two, possibly elliptical, Gaussian brightness distributions.
-flux1 gives the flux density value for the first component.
-angle1 and angle2 specify the diameters along the two principal
-axes. angle2 defaults to angel1. flux2 gives the flux density
-value for a second concentric optional Gaussian distribution,
-default value 0. angle3 and angle4 give the principal axes of the
-second component. angle4 defaults to angle3.
+flux1 gives the flux density value for the first component. angle1
+and angle2 specify the diameters along the two principal axes.
+angle2 defaults to angel1. flux2 gives the flux density value for a
+second concentric optional Gaussian distribution, default value
+0. angle3 and angle4 give the principal axes of the second
+component. angle4 defaults to angle3.
 
 If model is twopoints, then the source is assumed to consist of
 two equally bright points. flux1 is the total flux density of the
 two points.  angel1 is their angular separation.
 
 If model is disk, then the source is assumed to consist of a
-uniform circular disk brightness distribution.  flux1 is the
-total flux density. angel1 is the diameter of the disk.
+uniform circular disk brightness distribution.  flux1 is the total
+flux density. angel1 is the diameter of the disk.
 
 Once the model is specified, the fluxx command will use the
 appropriate beam size to calculate the apparent flux density of

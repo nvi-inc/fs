@@ -23,7 +23,7 @@ stack     Head stack to move: 1, 2, write or read. Default is 2
 Monitor-only parameters:
 peakv     peak measured voltage from power detector
 mper      minimum sample voltage as a percentage of peakv
-vltlc     location of the peak in positioner voltage
+vltlc       location of the peak in positioner voltage
 
 Comments: 
 This command performs a coarse grid search for the largest

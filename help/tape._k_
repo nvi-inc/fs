@@ -12,8 +12,8 @@ reset     this causes the position to be reset and a small amount
 
 Monitor-only Parameters:
 position    current sequence number
-drum        on or off
+drum      on or off
 synch_test  on or off
-synch       number lost
-stat1       status byte 1 in hex
-stat2       status byte 2 in hex
+synch     number lost
+stat1     status byte 1 in hex
+stat2     status byte 2 in hex

@@ -26,14 +26,14 @@ debug     0 for no debug printout (default). A value of +1 prints
           of +2 will print the actual data and more detailed
           status information. The values -1 and -2 will simply
           test communications with the data buffer and then quit.
-tracks    Tape recorder track(s) to use. 0 = use all tracks for
-          current mode (default). A list of track numbers may be
-          given. A list of video converters may be specified by
-          preceding each number with v. The words all, even, odd
-          referring to tracks and vall, veven, vodd referring to
-          VCs may be used. Split mode will be set up for the
-          outer channels in the frequency sequence, if bypass
-          mode is set up.
+tracks      Tape recorder track(s) to use. 0 = use all tracks for
+            current mode (default). A list of track numbers may be
+            given. A list of video converters may be specified by
+            preceding each number with v. The words all, even, odd
+            referring to tracks and vall, veven, vodd referring to
+            VCs may be used. Split mode will be set up for the
+            outer channels in the frequency sequence, if bypass
+            mode is set up.
 
 Comments: 
 Invoking this command with no parameters activates pcalr. To stop

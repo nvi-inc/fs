@@ -6,9 +6,9 @@ Response:   wvolt/volt1,volt2
 
 
 Settable parameters:
-volt1       Write voltage for stack 1. No default.
-volt2       Write voltage for stack 2. No default. For VLBA4
-            drives only.
+volt1     Write voltage for stack 1. No default.
+volt2       Write voltage for stack 2. No default. For VLBA4 drives
+            only.
 
 Comments: 
 This command sets and reads the write voltage for heads. However

@@ -29,8 +29,8 @@ This command is analgous to the Mark III mat command. This
 command is used to read values from or write values to a specific
 MCB address. 
 
-If the command is issued as mcb=module,reladdr then the response
-is the hex value at reladdr. 
+If the command is issued as mcb=module,reladdr then the response is
+the hex value at reladdr. 
 
-If the command is issued as mcb=module,reladdr,value then the
-value is downloaded into reladdr and the response is the status.
+If the command is issued as mcb=module,reladdr,value then the value
+is downloaded into reladdr and the response is the status.

@@ -8,7 +8,7 @@ Response:   rec_mode/bw,bits,chan,form,ts,im,nm,ta,pb
 Settable Parameters:
 bw    overall recording bandwidth in MHz, 64 (default) , 128, or
       256
-bits  number of bits per sample: 1 (default), 2, 4, or 8
+bits    number of bits per sample: 1 (default), 2, 4, or 8
 chan  channels recorded: 1, 2, 4, 8, or 16 (default)
 
 Monitor-only parameters: 
