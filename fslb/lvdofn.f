@@ -34,7 +34,7 @@ C
       endif
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.and(drive,VLBA)) then
+      if(VLBA.eq.drive.or.VLBA4.eq.drive) then
         call fc_lvdofn_v(ip)
       else 
         nrec=0
