@@ -18,6 +18,9 @@ int    *fshs;
 time_t *formtime; /* formatter time */
 int    *formhs;
 {
+  static long off =0;
+  long raw, phase,sleep;
+
   if (nsem_test(NSEM_NAME) != 1) {
     printf("Field System not running - fmset aborting\n");
     rte_sleep(SLEEP_TIME);
@@ -30,11 +33,17 @@ int    *formhs;
     if(rack&VLBA)
       getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
     else {
+      sleep=10;
+      rte_sleep(sleep);
+      rte_rawt(&raw);
+      raw%=100;
+      sleep=(100+off-raw)%100;
+      if(sleep!=0)
+	rte_sleep(sleep); 
       get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
-      if(*formhs > 4 || *formhs < 95) {
-	if( *formhs < 92)
-	  rte_sleep((long) (92-*formhs));
-	get4time(unixtime,unixhs,fstime,fshs,formtime,formhs);
+      if(*formhs > -1 || *formhs < 100) {
+        phase=(100+*unixhs-*formhs)%100;
+	off=phase;
       }
     }
   }
