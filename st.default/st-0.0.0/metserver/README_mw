@@ -1,0 +1,68 @@
+Field System 'metwind' software.
+
+INFORMATION: 
+-----------
+
+Field System Homepage:  http://lupus.gsfc.nasa.gov/fs
+
+The metwind gets Paroscientific, Inc. MET3 (Meteorological 
+Measurement System) and Handar TSI Company (Ultrasonic Wind Sensors) 
+information.
+
+This diagnostic software will be compiled when the metserver is
+compiled and installed.
+
+
+THE METWIND:
+------------
+
+metwind retrive from and send commands to MET3 and Wind 
+Sensor by using the ports that you have designated. 
+example: /dev/ttySx /dev/ttySx
+
+You need to modify the met.ctl file that is provided for you.
+the first port: /dev/ttySx is the metsensor.
+the second port: /dev/ttySx is for the windsensor.
+
+Information will be read and send from the named /dev/ports
+
+Examples:
+   prompt> metwind pres
+   prompt> metwind humi
+   prompt> metwind wind
+or
+   prompt> metwind "*0100P3" - which is the command to retrive temp.
+   prompt> metwind "*0100EW*0100UN=2" - to send a command 
+                                       (to change to mbars in this case.
+   "*0100EW" send command to "*0100UN" change units "=2" to milibars.
+
+You also have a widget to do this with named vue_metdisp.
+
+   prompt> vue_metdisp & - will bring up a useful display.
+                           (Click on [i] for help)
+
+
+It can also be compiled and run standalone.
+
+cp /usr2/fs/st.default/st-0.0.0/metserver/src/metwind.c
+cp /usr2/fs/st.default/st-0.0.0/metserver/src/met.ctl
+cp /usr2/fs/st.default/st-0.0.0/metserver/src/MakeDiag
+cp /usr2/fs/st.default/st-0.0.0/metserver/src/vue_metdisp
+
+To whatever directory you want.
+run make
+prompt> make -f MakeDiag
+
+define the ports in met.ctl file.
+prompt> emacs or vi met.ctl
+/dev/ttySx whatever port you metsensor is attached to.
+/dev/ttySx whatever port you windsensor is attached to.
+
+run vue_metdisp 
+prompt> vue_metdisp &
+
+OR 
+run metwind.
+prompt> metwind "xxxxxx" get the commands from the manual.
+
+If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.
