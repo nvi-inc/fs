@@ -64,7 +64,7 @@ c
       freq=fc_bbc2freq(bits)
 c
       irem = 1-and(ia2hx(ibuf2,7),1)
-      ipcal = 1-and(ia2hx(ibuf2,7),2)
+      ipcal = 1-and(ia2hx(ibuf2,7),2)/2
       lck = 1-(and(ia2hx(ibuf2,7),8)/8)
 C
 C  Pick up four bits from each character for TP
