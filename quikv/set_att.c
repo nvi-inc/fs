@@ -27,10 +27,12 @@ char *isave3
   long ip[5];
   long iclass;
 
+  iclass=0;
+  nrec=0;
+
   /* okay get the IF attenuation */
+
   if(patched_ifs[0]>0 || patched_ifs[1]>0) {
-    iclass=0;
-    nrec=0;
     buff[0]=0;
     memcpy(buff+1,"if",2);
     memcpy(buff+2,isave,4);
@@ -46,6 +48,7 @@ char *isave3
     iat[3]&=0xc0;
     cls_snd(&iclass,buff,12,0,0);nrec++;
   } 
+  if(nrec > 0) {
     ip[0]=iclass;
     ip[1]=nrec;
     
@@ -55,5 +58,6 @@ char *isave3
     if(ip[2]<0) return ierr;
     cls_clr(ip[0]);
 
-    return ierr;
+  }
+  return ierr;
 }
