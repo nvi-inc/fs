@@ -1,6 +1,6 @@
       SUBROUTINE unpco(IBUF,ILEN,IERR,
      .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,
-     .ITRK,cs,ivc)
+     .ITRK,itr2,cs,ivc)
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
@@ -14,6 +14,9 @@ C            may be 8 characters
 C 960126 nrv Decode sub-passes allowing null track assignments.
 C            This leaves room for the magnitude bit assignment.
 C 960121 nrv Add switching and BBC# to call, decode at end of line.
+C 960405 nrv Move ISCNC to after check for IC1=0 in decoding tracks
+C 960408 nrv Check IC2 before doing the next ISCNC.
+C 960409 nrv Allow high-number passes for headstack 2
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -33,20 +36,20 @@ C     FREQPC - phase cal frequency, Hz
 C     Ichan - channel number for this frequency
 C     LMODE - observing mode, 1 char in upper byte
 C     VCBAND - final video bandwidth, MHz
-      integer ITRK(4,max_pass)
-C      - tracks to be recorded, by pass
+      integer ITRK(4,max_pass) ! tracks to be recorded
+      integer ITR2(4,max_pass) ! tracks to be recorded, headstack 2
       character*3 cs ! switching
       integer ivc ! physical BBC# for this channel
 C
 C  LOCAL:
-      integer IPARM(2),j,idumy,i,ipas
+      integer ic2save,IPARM(2),j,idumy,i,ipas
       real*4 parm,d
       EQUIVALENCE (IPARM(1),PARM)
       real*8 DAS2B
 C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
-      integer ich,nch,ic2,ic1,ict,ip,ix,itx,it1
+      integer ihead,ich,nch,ic2,ic1,ict,ip,ix,itx,it1
       integer jchar,ichmv,ias2b,iscnc ! functions
 C
 C
@@ -134,7 +137,7 @@ C
       D = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
       IF  (IERR.LT.0.OR.(D.NE.4.0.AND.D.NE.2.0.AND.D.NE.1.0.AND.D.NE.0.5
      .     .AND.D.NE.0.25.AND.D.NE.0.125.and.d.ne.18.0.and.d.ne.8.0
-     .     .and.d.ne.16.0
+     .     .and.d.ne.16.0.and.d.ne.32.0
      .     .and.d.ne.14.67))  THEN  !
         IERR = -107
         RETURN
@@ -152,19 +155,26 @@ C
       DO  I=1,max_pass ! initialize
         do j=1,4
           ITRK(j,I) = -99
+          ITR2(j,I) = -99
         enddo
       END DO  !initialize
 C
-      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! get first character
       IX = 1
       if (ic1.eq.0) then ! no tracks !
         ierr=-107-ix
         return
       endif
+      IC2=ISCNC(IBUF,IC1,ilen*2,ORPAREN) ! find closing paren
       IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
 C                              (        Find the opening parenthesis
       DO WHILE (ip.gt.0) !get p(t1,t2,t3,t4) fields
         IPAS = IAS2B(IBUF,IC1,IP-IC1) ! the tape sub-pass
+        ihead=1
+        if (ipas.gt.100) then ! headstack 2
+          ipas=ipas-100
+          ihead=2
+        endif
         IF  (IPAS.lt.0.or.ipas.gt.max_pass) THEN  
           IERR = -107-IX
           RETURN
@@ -186,46 +196,57 @@ C                              (        Find the opening parenthesis
               ierr=-107-ix
               return
             endif
-            ITRK(itx,IPAS) = it1
+            if (ihead.eq.1) ITRK(itx,IPAS) = it1
+            if (ihead.eq.2) ITR2(itx,IPAS) = it1
           endif ! value
         enddo ! scan (t1,t2,t3,t4)
         IF  (itx.eq.0) THEN  !no tracks in this field!
           IERR = -107-IX
           RETURN
         END IF  !no tracks!
-        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! may be BBC#
+        ic2save=ic2 ! so save ic2
         ip=0
-        if (ic1.gt.0) IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
+        if (ic1.gt.0) then
+          IC2=ISCNC(IBUF,IC1,ilen*2,ORPAREN) ! find closing paren
+          if (ic2.gt.0) then ! closing paren found
+            IP=ISCNC(IBUF,IC1,IC2,OLPAREN)
+          else
+            ip=0 ! not a track
+          endif
+        endif
       END DO  !get p(t1,t2,t3,t4) fields
 C
 C  Done with track assignments. Now check for switching and BBC #s.
-C     switching set number - 0 1 2 or 1,2
 C
       ivc=0
+      cs = '   '
+      if (ic1.eq.0) return ! nothing there
 
-      if (ic1.eq.0) then ! no switching, no BBC#s
-        cs = '   '
-        return
-      else
+C  Physical BBC#. 
+C  Use ic1 and ic2save from previous gtfld
+C
+      ic2=ic2save
+      I = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF  (I.LT.1.OR.I.GT.max_chan) THEN  !
+        IERR = -108-ix
+        RETURN
+      END IF  !
+      ivc = I
+
+C     switching set number - 0 1 2 or 1,2
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+      if (ic1.gt.0) then
         NCH = IC2-IC1+1
         cs = '   '
         call hol2char(ibuf,ic1,ic2,cs)
         IF ((cs(1:1).ne.'1').and.(cs(1:1).ne.'2').and.
      .      (cs(1:1).ne.'0').and.(cs.ne.'1,2')) then
-          IERR = -108-ix
+          IERR = -109-ix
           RETURN
         END IF  !
       endif
 
-C  Finally physical BBC#. Only present when switching is too.
-C
-      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-      I = IAS2B(IBUF,IC1,IC2-IC1+1)
-      IF  (I.LT.1.OR.I.GT.max_chan) THEN  !
-        IERR = -109-ix
-        RETURN
-      END IF  !
-      Ivc = I
 
       RETURN
       END

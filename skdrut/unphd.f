@@ -25,7 +25,7 @@ C     nent - number on this line
 C
 C  LOCAL:
       integer ich,ic1,ic2,nc,nch,idumy
-      integer il,ir,ih,ip,id
+      integer iinc,il,ir,ih,ip,id
       integer iscnc,ias2b,ichmv ! function
       character*62 cpass
       character*1 cp
@@ -36,6 +36,7 @@ C  INITIALIZED:
 C
 C  Modifications:
 C  930707 NRV Created, copied from UNPFL
+C 960409 nrv Allow preceding '1' to indicate second headstack position
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -68,6 +69,7 @@ C    Lines with head positions are in the form
 C      pass-subpass(headpos)
 C    Example: 11(-350) is pass 1, subpass 1, offset -350 microns
 C             42(55) is pass 4, subpass 2, offset 55 microns
+C            142(55) is same as above but for headstack 2
 C    The subpass goes from 1 to the number of passes in the
 C    mode that are required to get all tracks recorded. 
 C    For example, mode A is a one-pass mode so the number
@@ -78,27 +80,33 @@ C
       do while (ic1.gt.0)
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         IF (IC1.EQ.0) return
-        NC = IC2-IC1+1
-        il = ISCNC(IBUF,IC1,IC2,OLPAREN)
-        call hol2char(ibuf,ic1,ic1+1,cp)
+        il = ISCNC(IBUF,IC1,IC2,OLPAREN) ! find (
+        NC = il-IC1  ! number of char in pass/subpass
+        if (nc.eq.3) then ! headstack 2
+          iinc=100
+          ic1=ic1+1 ! skip over this character
+        else
+          iinc=0
+        endif 
+        call hol2char(ibuf,ic1,ic1,cp) ! pass is first char
         ip = index(cpass,cp)
         if (ip.eq.0) then
           ierr=-103-nent
           return
         endif
-        id = ias2b(ibuf,ic1+1,1)
+        id = ias2b(ibuf,ic1+1,1) ! sub-pass is second char
         if (id.le.0) then
           ierr = -103-nent
           return
         endif
         ir = ISCNC(IBUF,IC1,IC2,ORPAREN)
-        ih = ias2b(ibuf,il+1,ir-il-1) ! head position
+        ih = ias2b(ibuf,il+1,ir-il-1) ! head offset position
         if (ih.lt.-2000.or.ih.gt.2000) then
           IERR = -103-nent
           RETURN
         ENDIF
         nent = nent + 1
-        ipass(nent) = ip
+        ipass(nent) = ip+iinc
         idir(nent) = id
         ihd(nent) = ih
       enddo

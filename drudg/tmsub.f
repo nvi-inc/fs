@@ -18,7 +18,7 @@ C     IYR2 - Year of stop time
 C     IDAYR2 - day of stop
 C     IHR2, MIN2, ISC2 - stop time
 C
-	logical*4 LEAP
+	logical LEAP
 C
 C  MODIFICATIONS
 C  880411 NRV DE-COMPC'D

@@ -20,8 +20,8 @@ C Output:
 C LOCAL:
 	integer iblen    !maximum buffer length
 	INTEGER  IY,IM,IC,ICX,TRIMLEN
-	LOGICAL*4 KFNDMD,KFNDCH,kfndpr
-	LOGICAL*4 KEX ! TRUE IF FILE EXISTS
+	LOGICAL KFNDMD,KFNDCH,kfndpr
+	LOGICAL KEX ! TRUE IF FILE EXISTS
 	integer iyr,idoyr       ! original first date
 	integer*2 itim1(6)        ! first shifted obs time
 	integer*2 itim0(6)        ! original first obs time

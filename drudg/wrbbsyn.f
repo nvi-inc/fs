@@ -34,7 +34,7 @@ C  1. Write out bbsyn.
 	iz = 0
 	call char2hol(' bbsynth=',ibuf,1,9)
 	iy = 10
-	do ix=1,nvcs(istn,icod)
+	do ix=1,nchan(istn,icod)
 	  if (squal(ix).ne.0.0) then
 	    call bbsyn(iy,ix,squal(ix))
 	    iz=iz+1

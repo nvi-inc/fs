@@ -9,7 +9,7 @@ C
 C  Local:
 	integer*4 IREC,ierr,ilen
 	integer Z2D,Z22
-        integer jchar,iscnc,ichmv ! functions
+        integer jchar,iscnc ! functions
 
 C Initialized:
 	DATA      Z2D/Z'2D'/, Z22/Z'22'/

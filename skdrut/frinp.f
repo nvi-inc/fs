@@ -21,18 +21,17 @@ C     IERR - error number
 C
 C
 C  LOCAL:
-      integer ITRK(4,max_pass),idum
-C     integer*2 IP(14)
+      integer ix,n,ITRK(4,max_pass),ITR2(4,max_pass)
       integer*2 LNA(4)
-      integer ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
-      integer ix,iy,iscn_ch,icx,nvlist,ivlist(max_chan)
-      integer*2 lc,lsg,lm(4),lid,lin,ls,lsub(4)
+      integer idum,ib,ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
+      integer icx,nvlist,ivlist(max_chan)
+      integer*2 lc,lsg,lm(4),lid,lin,ls
       integer*2 lst(4,max_stn)
       real*8 bitden
       logical kvlba,kmk3
       character*3 cs
-      real*4 f1,f2,f,vb,rbbc
-      integer ichcm_ch,jchar,ichmv,igtfr,igtst ! functions
+      real*4 f1,f2,f,vb,rbbc,srate
+      integer ias2b,iscn_ch,ichcm_ch,jchar,ichmv,igtfr,igtst ! functions
       logical knaeq
 C
 C  History
@@ -50,6 +49,13 @@ C 960221 nrv Read switching from "C" lines, also BBC index.
 C 960223 nrv Fill in "L" line info on per channel basis
 C 960228 nrv Change unplo call to include VC assignments from PC-SCHED
 C            patching info.
+C 960321 nrv Add "R" line for sample rate
+C 960405 nrv Remove "subcode" from reading by UNPFSK
+C 960405 nrv Check for valid station index from "F" line before filling
+C            in frequency sequences etc.
+C 960409 nrv Allow for headstack 2 in call to UNPCO and setting ITRAS,ITRA2
+C 960516 nrv Crosscheck sub-groups on "L" lines and "C" lines using
+C            channel numbers not BBC numbers
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -58,12 +64,14 @@ C
       IF (JCHAR(IBUF,1).EQ.OCAPF) ITYPE=3 ! F frequency name, code and stations
       IF (JCHAR(IBUF,1).EQ.OCAPC) ITYPE=1 ! C frequency sequence lines
       IF (JCHAR(IBUF,1).EQ.OCAPL) ITYPE=2 ! L LO lines
+      IF (JCHAR(IBUF,1).EQ.OCAPR) ITYPE=4 ! R sample rate lines
       IF (ITYPE.EQ.1) CALL UNPCO(IBUF(2),ILEN-1,IERR,
-     .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,cs,ivc)
+     .                LC,LSG,F1,F2,Icx,LM,VB,ITRK,itr2,cs,ivc)
       IF (ITYPE.EQ.2) CALL UNPLO(IBUF(2),ILEN-1,IERR,
      .                LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
-      IF (ITYPE.EQ.3) CALL UNPFSK(IBUF(2),ILEN-1,IERR,LNA,LC,lsub,lst,
+      IF (ITYPE.EQ.3) CALL UNPFSK(IBUF(2),ILEN-1,IERR,LNA,LC,lst,
      .                ns)
+      IF (ITYPE.EQ.4) CALL UNPRAT(IBUF(2),ILEN-1,IERR,lc,srate)
       call hol2upper(lc,2) ! uppercase frequency code
 C
 C 1.5 If there are errors, handle them first.
@@ -102,29 +110,50 @@ C
       IF  (ITYPE.EQ.1) THEN  !code entry
         do j=1,nstsav ! apply to each station on the preceding "F" line
           is=istsav(j)
-          nvcs(is,icode)=nvcs(is,icode)+1 ! count them
-          invcx(nvcs(is,icode),is,icode)=icx ! index number from "C" line
+          if (is.gt.0) then ! valid station
+          nchan(is,icode)=nchan(is,icode)+1 ! count them
+          invcx(nchan(is,icode),is,icode)=icx ! channel index number 
           LSUBVC(icx,is,ICODE) = LSG ! sub-group, i.e. S or X
           FREQRF(icx,is,ICODE) = F1
           VCBAND(icx,is,ICODE) = VB
           LCODE(ICODE) = LC ! 2-letter code for the sequence
           idum = ichmv(LMODE(1,is,ICODE),1,LM,1,8) ! recording mode
-C         Set bit density depending on the mode
+C         Determine fanout factor here. Fan-in code is commented for now.
           ix = iscn_ch(lmode(1,is,icode),1,8,'1:') 
-          iy = iscn_ch(lmode(1,is,icode),1,8,':1') 
-          if (ix.gt.0.or.iy.gt.0) then ! a VLBA mode
-            bitden=34020
-          else ! Mark III
-            bitden=33333
+C         iy = iscn_ch(lmode(1,is,icode),1,8,':1') 
+          ifan(is,icode)=1
+          if (ix.ne.0) then ! possible fan-out
+            n=ias2b(lmode(1,is,icode),ix+2,1)
+            if (n.gt.0) ifan(is,icode)=n
+C         else if (iy.ne.0) then ! possible fan-in
+C           n=ias2b(lmode(1,is,icode),iy+2,1)
+C           if (n.gt.0) ifan(is,icode)=n
           endif
-C         If specified for a station, use that value
-          if (bitden_save(is).gt.1000) bitden=bitden_save(is)
+C         Set bit density depending on the mode
+          if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then 
+            bitden=34020 ! VLBA non-data replacement
+          else 
+            bitden=33333 ! Mark3/4 data replacement
+          endif
+C         If "56000" was specified, use higher station bit density
+          if (ibitden_save(is).eq.56000) then 
+            if (ichcm_ch(lmode(1,is,icode),1,'V').eq.0) then 
+              bitden=56700 ! VLBA non-data replacement
+            else 
+              bitden=56250 ! Mark3/4 data replacement
+            endif
+          endif
+C         Store the bit density by station
           bitdens(is,icode)=bitden
           DO  I=1,max_pass
             IF (ITRK(1,I).NE.-99) itras(1,1,icx,i,is,icode) = itrk(1,i)
             IF (ITRK(2,I).NE.-99) itras(2,1,icx,i,is,icode) = itrk(2,i)
             IF (ITRK(3,I).NE.-99) itras(1,2,icx,i,is,icode) = itrk(3,i)
             IF (ITRK(4,I).NE.-99) itras(2,2,icx,i,is,icode) = itrk(4,i)
+            IF (ITR2(1,I).NE.-99) itra2(1,1,icx,i,is,icode) = itr2(1,i)
+            IF (ITR2(2,I).NE.-99) itra2(2,1,icx,i,is,icode) = itr2(2,i)
+            IF (ITR2(3,I).NE.-99) itra2(1,2,icx,i,is,icode) = itr2(3,i)
+            IF (ITR2(4,I).NE.-99) itra2(2,2,icx,i,is,icode) = itr2(4,i)
           END DO 
           cset(icx,is,icode) = cs
           if (ivc.eq.0) then
@@ -132,6 +161,7 @@ C         If specified for a station, use that value
           else
             ibbcx(icx,is,icode) = ivc ! BBC number
           endif
+          endif ! valid station
         enddo ! each station on "F" line
       END IF  !code entry
 C
@@ -149,9 +179,10 @@ C
 C
         if (nvlist.ne.0) then ! physical BBC info present
           if (nvlist.eq.1) then ! one BBC on this line
-          do iv=1,nvcs(istn,icode)
-            ic=invcx(iv,istn,icode)
-            if (ic.gt.0.and.ibbcx(ic,istn,icode).eq.ivlist(1)) then 
+          do iv=1,nchan(istn,icode) ! check all frequency channels
+            ic=invcx(iv,istn,icode) ! channel index from "C" line
+            ib=ibbcx(ic,istn,icode) ! BBC index from "C" line
+            if (ib.gt.0.and.ib.eq.ivlist(1)) then 
 C                                    ! this channel on this BBC
               if (lsg.ne.lsubvc(ic,istn,icode)) 
      .        write(lu,'("FRINP04 - Subgroup ",a2," inconsistent with "
@@ -183,7 +214,7 @@ C                                    ! this channel on this BBC
             enddo
           endif ! one/many 
         else ! fill physical BBC/IF/LO info assuming all channels get same
-          do i=1,nvcs(istn,icode)
+          do i=1,nchan(istn,icode)
             iv=invcx(i,istn,icode) ! channel index assumed same as BBC#
             if (lsg.eq.lsubvc(iv,istn,icode)) then ! match sub-group
               if (ichcm_ch(lifinp(iv,istn,icode),1,'  ').eq.0) then ! first time
@@ -229,26 +260,32 @@ C       Check the list of station names.
             enddo
             if (i.gt.nstatn) then ! no match
               write(lu,9400) (lst(ii,is),ii=1,4)
-9400          format('FRINP04 - Station ',a4,' not selected. ',
+9400          format('FRINP04 - Station ',4a2,' not selected. ',
      .        'Frequency sequence for this station ignored.')
-              ibad=ibad+1
+              istsav(is)=-1
             else
              istsav(is)=i ! save the station index 
-             idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
+C            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
             endif
           enddo
-          nstsav=ns-ibad ! save the number of good stations
+          nstsav=ns ! 
         else ! no stations listed, assume all
           nstsav=nstatn
           do i=1,nstatn
             istsav(i)=i ! save the station index 
-            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
+C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
           enddo
         endif
         idum= ICHMV(LNAFRQ(1,ICODE),1,LNA,1,8)
         LCODE(ICODE) = LC
       END IF  !name entry
 C
+C 5. This is the sample rate line.
+
+      if (itype.eq.5) then ! sample rate
+        samprate(icode)=srate
+      endif ! sample rate
+
       IERR = 0
       INUM = 0
 C

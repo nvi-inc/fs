@@ -3,16 +3,24 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
 C
+C Input:
+      integer*2 lkeywd(*) ! look in first 2 characters for station ID
+
+C Output:
+      integer ikey ! index number of this station in sked arrays
+
 C 950411 nrv New. A 2-letter version of IGTST.
 C 950412 nrv Check for ambiguous IDs.
-
+C 
 C     SEARCH THROUGH THE position CODES FOR A MATCH WITH
 C     THE FIRST two CHARACTERs OF THE INPUT VARIABLE.
+C     If there is only one character, check if it agrees or it
+C     there are ambiguities.
 C!     RETURN THE INDEX IN THE FUNCTION AND IN IKEY.
 C     NO MATCH RETURNS 0, duplicate returns -1.
 
-      integer*2 lkeywd(*),lc
-      integer ikey,i,jchar,is,imatch
+      integer*2 lc
+      integer i,jchar,is,imatch
       logical kmatch
 
       IKEY=0

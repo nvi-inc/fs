@@ -7,6 +7,7 @@ C nrv 930412 implicit none
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/skobs.ftni'
 C
 C Input:
 	integer iyear ! year of the SNAP file

@@ -23,7 +23,7 @@ C     CALLED BY: vlbat
 C
 C  LOCAL VARIABLES
 	character*32 cdur
-	integer itemp,iput,idum,ierr
+	integer iput,idum,ierr
         integer ib2as ! functions
 C
 C  INITIALIZED:

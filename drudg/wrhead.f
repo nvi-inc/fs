@@ -42,8 +42,8 @@ C
 C     CALLED BY: VLBAH
 C
 C  LOCAL VARIABLES
-      integer idum,ierr,ix,iy,nch,im
-      integer ileft,iout
+      integer ierr,ix,iy,nch,im
+      integer ichan,ileft,iout
       integer ichcm_ch,ichmv,ib2as,ichmv_ch ! function
 C
         ileft = o'100000'
@@ -58,7 +58,8 @@ C  insert string into array
 
 C  loop on the number of channels read from schedule file
 
-        do ix=1,nvcs(istn,icod)
+        do ix=1,nchan(istn,icod) ! is=recorded channel index
+          ichan=invcx(ix,istn,icod) ! ichan=total#channel index
           do im=1,imode
             nch = ichmv_ch(ibuf,nch,'(')
             if (imode.eq.1) then !only one entry, use ix
@@ -69,20 +70,22 @@ C  loop on the number of channels read from schedule file
             endif
             nch = ichmv_ch(ibuf,nch,',')
 
-	  if ((ido.eq.1).or.(ido.eq.2)) then
-            nch = nch + ib2as(isig,ibuf,nch,ileft+2)
+	  if ((ido.eq.1).or.(ido.eq.2)) then ! single value
+            nch = nch + ib2as(isig,ibuf,nch,ileft+2) 
           endif
 
-	  if (ido.eq.2) then ! append "M"
-            nch = ichmv_ch(ibuf,nch,'M')
+	  if (ido.eq.2) then ! append M
+            nch = ichmv_ch(ibuf,nch,'M') 
 	  else if (ido.eq.3) then ! use integer array
-            nch = nch + ib2as(idoub(ix,istn,icod),ibuf,nch,ileft+2)
+C           nch = nch + ib2as(idoub(ix,istn,icod),ibuf,nch,ileft+2)
+            nch = nch + ib2as(idoub(ichan,istn,icod),ibuf,nch,ileft+2)
 	  else if (ido.eq.4) then ! use character array
             if (ichcm_ch(ldoub(ix,istn,icod),1,'U').eq.0) then !U/L
               if (im.eq.1) nch = ichmv_ch(ibuf,nch,'U')
               if (im.eq.2) nch = ichmv_ch(ibuf,nch,'L')
             else
-	      nch = ichmv(ibuf,nch,ldoub(ix,istn,icod),1,1)
+C             nch = ichmv(ibuf,nch,ldoub(ix,istn,icod),1,1)
+              nch = ichmv(ibuf,nch,ldoub(ichan,istn,icod),1,1)
             endif
 	  end if
 
@@ -104,7 +107,7 @@ C  write out buffer if reached 8 channels written into it
 
 C  write out buffer if there is something to write
 
-	if (nvcs(istn,icod).ne.8) then
+	if (nchan(istn,icod).ne.8) then
           nch = ichmv_ch(ibuf,nch-1,' ')
 	  call writf_asc(lu,ierr,ibuf,(nch+1)/2)
 	end if

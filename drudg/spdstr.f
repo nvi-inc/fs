@@ -31,7 +31,7 @@ C INITIALIZED:
 
       i=1
       do while (i.le.maxspd.and.
-     .   .not.(spd+.005.gt.sp(i).and.spd-.005.le.sp(i)))
+     .   .not.(spd+.05.gt.sp(i).and.spd-.05.le.sp(i)))
         i=i+1
       enddo
       if (i.le.maxspd) then ! match

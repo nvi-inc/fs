@@ -6,6 +6,7 @@ C This routine types labels and tape lists for Mark III tapes
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 
 C INPUT:
 C        PCODE - 1 or 2 open file
@@ -17,9 +18,9 @@ C OUTPUT: none
 C LOCAL:
       integer*2 LSNAME(4),LSTN(MAX_STN),LCABLE(MAX_STN),LMON(2),
      .          LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
-      integer IFT(MAX_STN),
-     .          IPAS(MAX_STN),IDUR(MAX_STN)
-	LOGICAL*4   KEX
+      integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN)
+      integer iob,idum
+	LOGICAL   KEX
 C IYR, MON, IDA, IHR, iMIN, IDUR, ICAL, IDLE,
 C LFREQ, ISP, LMODE,
 C These are holders for the information contained
@@ -36,16 +37,15 @@ C NLAB - number of labels across a page
       integer*2 lfreq
 	integer IY1(5),ID1(5),IH1(5),IM1(5),
      .          ID2(5),IH2(5),IM2(5) ! holders for row of labels
-	LOGICAL*4 KNEWT
-      LOGICAL*4 KNEW
+	LOGICAL KNEWT
+      LOGICAL KNEW
 	CHARACTER*50 CLASER,cbuf
 	character*8 cexper,cstn
 	character*1 cid
-      INTEGER IC, TRIMLEN,jchar
+      INTEGER IC, TRIMLEN,jchar,ichmv,iflch
       real*4 speed ! function
 	integer Z24
         integer*2 hhr
-Cinteger*4 ifbrk
 
 C INITIALIZED:
 	DATA IPASP/0/, IFTOLD/0/
@@ -78,6 +78,7 @@ C             the $SKED section is last in the file the last line of
 C             labels will be spit out.
 C  940627 nrv Add batch mode
 C  950829 nrv Remove ' ' in front of lines written to CLASER
+C 960531 nrv Remove READS and get obs from common.
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -196,10 +197,18 @@ C                                 plus <esc> A 12 for 24-pin
 C 1. First initialize counters.  Read the first observation,
 C    and initiate the main loop.
 
+        iob=0
+       ierr=0
 	if (kskd) then !read schedule file
-	CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+       call ifill(ibuf,1,ibuf_len*2,oblank)
+       if (iob+1.le.nobs) then
+         idum = ichmv(ibuf,1,lskobs(1,iob+1),1,ibuf_len*2)
+         ilen = iflch(ibuf,ibuf_len*2)
+       else
+         ilen=-1
+       endif
 	DO WHILE (IERR.GE.0) !loop on observations
-C  if (ifbrk().lt.0) goto 990
 
 C 2. Unpack the observation, calculate the stop time.
 C If this is a new tape, we might have a full buffer for typing
@@ -267,12 +276,19 @@ c       IS2(NOUT) = ISC2
 C       NOB(NOUT) = NOB(NOUT)+1
 	  IPASP = IPAS(ISTNSK)
 	  IFTOLD = IFT(ISTNSK) + IFIX(IDIR*(ITEARL+IDUR(ISTNSK))
-     .     *speed(icod,istn)*135.0/1440.0)
+     .     *speed(icod,istn))
 	  IDIRP = IDIR
 	ENDIF !process this observation
 C
-Cif (ifbrk().lt.0) GOTO 900
-	CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+C      CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+       iob=iob+1
+       call ifill(ibuf,1,ibuf_len*2,oblank)
+       if (iob+1.le.nobs) then
+         idum = ichmv(ibuf,1,lskobs(1,iob+1),1,ibuf_len*2)
+         ilen = iflch(ibuf,ibuf_len*2)
+       else
+         ilen=-1
+       endif
 	ENDDO !loop on observations
 
 	else !read SNAP file

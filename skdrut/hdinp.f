@@ -29,6 +29,7 @@ C
 C  History
 C  930707 nrv Created.
 C 960213 nrv Uppercase the frequency code.
+C 960409 nrv Allow second headstack passes
 C
 C
 C     1.   Decode the line.
@@ -64,8 +65,13 @@ C        ihd=list of head positions
 C        n = number of entries in the lists
 C
       do i=1,n
-        ihdpos(ip(i),istn,icode) = ihd(i)
-        ihddir(ip(i),istn,icode) = idir(i)
+        if (ip(i).lt.100) then ! headstack 1
+          ihdpos(ip(i),istn,icode) = ihd(i)
+          ihddir(ip(i),istn,icode) = idir(i)
+        else ! headstack 2
+          ihdpo2(ip(i)-100,istn,icode) = ihd(i)
+          ihddi2(ip(i)-100,istn,icode) = idir(i)
+        endif
       END DO 
 C
       IERR = 0

@@ -25,7 +25,7 @@ C   COMMON BLOCKS USED
       include '../skdrincl/freqs.ftni'
 C
 C  LOCAL VARIABLES
-      integer ib,iy,ul,ichan,iassign,ierr,iprint,nch,idum,ileft
+      integer iy,ul,ichan,iassign,ierr,iprint,nch,ileft
       integer ichmv_ch,ib2as ! functions
 C
 C  INITIALIZED
@@ -44,7 +44,7 @@ C       frequency
 	call ifill(ibuf,1,iblen,32)
 	call char2hol('track=',ibuf,1,6)
 	nch = 7
-	do ichan=1,nvcs(istn,icod)  !channels
+	do ichan=1,nchan(istn,icod)  !channels
 	  do ul=1,2  !Upper and lower
 	    iassign = itras(ul,1,invcx(ichan,istn,icod),idx,istn,icod)
 C  Note: for mode A there is no track assignment for pass 2, so
@@ -65,7 +65,7 @@ C  the next one on the stack.
 	    end if !if number
 	  end do !Upper and lower
 	  if (iprint.eq.8) then
-	    if (iprint.eq.nvcs(istn,icod)) then
+	    if (iprint.eq.nchan(istn,icod)) then
 C               nch = ichmv(ibuf,nch-1,2h  ,1,2)
                 nch = ichmv_ch(ibuf,nch-1,' !NEXT!')
 	    else

@@ -11,8 +11,7 @@ C  INPUT VARIABLES:
 C        NSOR   - Source index number into DB arrays
 C        ISTN   - Station index number into DB arrays
 C        MJD    - Modified Julian date (from JULDA)
-      real*8 UT
-C               - UT for which positions requested
+      real*8 UT ! UT for which positions requested
      
 C  OUTPUT VARIABLES:
       real*4 az,el,ha,dc,x30,y30,x85,y85
@@ -244,21 +243,26 @@ C       set at SEST!  Compute sun's az,el for the current time.
 C  gag changed 30.0 to 50.0 on 900410
         endif
       endif
-C      Check for station elevation limit, set within SKED
+C     Check for station elevation limit, set within SKED
       KUP=KUP.AND.EL.GT.STNELV(ISTN)
-C      Now check horizon mask for stations that have one.
+C     Now check horizon mask for stations that have one.
       IF (NHORZ(ISTN).GT.0) THEN
         I=1
         DO WHILE(I.LT.NHORZ(ISTN).AND.
      .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
           I=I+1 ! find AZ between i and i+1
         ENDDO
-C     This is for step functions
-        eli=elhorz(i,istn)
-C     This is for interpolating horizon mask line segment end points
-C       eli=((elhorz(i+1,istn)-elhorz(i,istn))/
-C    .      (azhorz(i+1,istn)-azhorz(i,istn)))
-C    .  *(az-azhorz(i,istn)) + elhorz(i,istn) ! interpolate
+        if (.not.klineseg(istn)) then ! use step functions
+          eli=elhorz(i,istn)
+        else ! interpolate horizon mask line segment end points
+          if (azhorz(i+1,istn).eq.azhorz(i,istn)) then ! inf slope
+            eli=elhorz(i,istn) ! pick one
+          else
+            eli=((elhorz(i+1,istn)-elhorz(i,istn))/
+     .      (azhorz(i+1,istn)-azhorz(i,istn)))
+     .      *(az-azhorz(i,istn)) + elhorz(i,istn) 
+          endif ! inf slope
+        endif
         KUP=KUP.AND.EL.GE.eli
       ENDIF
 C

@@ -22,8 +22,8 @@ C  OUTPUT:
      .          ipas(max_stn),
      .          ical,iyr,idayr,ihr,imin,
      .          isc,nstn,mjd,imon,ida,kerr
-      logical*4 KFLG(4)
-      real*8 UT,GST
+      logical KFLG(4)
+      double precision UT,GST
 C     lsname - source name
 C     LPRE - pre-obs proc
 C     LMID - mid-obs proc

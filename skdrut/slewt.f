@@ -22,6 +22,7 @@ C                 clockwise part of overlap.  Modified as necessary by
 C                 this program.
 C        lookah - number of seconds of lookahead time for checking rising
 C        tsris - array from common with rise times by source and station
+      integer nrs
       logical knov
 C
 C     OUTPUT VARIABLES:
@@ -48,7 +49,7 @@ C   LOCAL VARIABLES
      .delx30,dely30,delx85,dely85,aznow,aznew,elnow,elnew,hanow,
      .hanew,decnow,decnew,x30now,x30new,y30now,y30new,x85now,x85new,
      .y85now,y85new,az1,az2,trise,elrate,tslew1,tslew2
-      integer nloops,il
+      integer nloops
       integer*2 lwr1,lwr2,lwr2p
       real*8 rme,srise
       LOGICAL KUP ! Returned from CVPOS, TRUE if source within limits
@@ -62,7 +63,6 @@ C        NLOOPS - Number of iterations on slewing time
 C        AZ1,AZ2,LWR1,LWR2
 C               - current,new values of az,wrap
       real*4 cablw ! function
-      integer*2 mrise,nrs
 C
 C  History
 C      DATE   WHO    CHANGES

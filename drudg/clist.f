@@ -35,7 +35,7 @@ C LOCAL:
       INTEGER IC, TRIMLEN, IL, NCHAR, MAXLIN
       integer maxwid,ierr,nrec,iyear,i,npage,numlin,l
       character*8 cexper,cstn
-      LOGICAL*4 EX
+      LOGICAL EX
 C     integer*4 ifbrk
 C
 C  First set up for proper width/length.

@@ -13,6 +13,7 @@ C
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/skobs.ftni'
 C
 C  INPUT:
       logical ksw ! true if switching
@@ -29,6 +30,7 @@ C  INPUT:
       real*4 ras2,decs2
 C
 C  LOCAL
+        integer itemp
 	integer izero2,izero3
         integer*2 lspdir,lsodir ! tape direction
 	integer iblen
@@ -161,6 +163,10 @@ C  ihead is the head offset position in microns
 C  ihddir is not really "direction", it is the corresponding pass within
 C  the mode. Use it to tell the wrtrack routine which tracks to record.
         idx = ihddir(ipas(istnsk),istn,icod)
+        if (idx.eq.0) then
+C         pause here
+          itemp=1
+        endif
 C  The "corresponding pass" within the mode may be 1-28 depending on the
 C  mode. It is not simply the direction, except for modes B and C. 
 

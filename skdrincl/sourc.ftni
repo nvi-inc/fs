@@ -9,6 +9,7 @@ c
       integer*2 lsorna
 c
       character*1 cfltype
+      character*128 sordefnames
 c
       COMMON/SOURC/SORP50(2,MAX_SOR),SORPDA(2,MAX_SOR),
      .       SATP50(7,MAX_SAT),SATDY(MAX_SAT),
@@ -19,7 +20,8 @@ c
      .       LSORNA(4,MAX_SOR)
 c
       COMMON/SOURC_CH/
-     .       cfltype(max_band,max_sor)
+     .       cfltype(max_band,max_sor),
+     .       sordefnames(max_sor)
 C 
 C  NSOURC - number of sources selected
 C  LSORNA - source IAU names, up to 8 chars 
