@@ -99,6 +99,10 @@ C 960810 nrv Change ITEARL to an array by station
 C 960817 nrv Add S2 option for procedures
 C 960912 nrv Remove the procedure options from the menu if the
 C            rack and recorder types are known from the VEX file.
+C 961007 nrv Re-initialize kskdfile and kdrgfile to false if we didn't
+C            find either one on the first two tries.
+C 961022 nrv Add Mark IV as a procedures option
+C 961031 nrv Change SNAP option to either Mk3/4 or VLBA rack.
 C
 C Initialize some things.
 
@@ -205,9 +209,14 @@ C   Check for non-interactive mode.
 
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
+         if (kskdfile.and.kdrgfile) then ! reinitialize on 3rd time
+           kskdfile=.false.
+           kdrgfile=.false.
+         endif
+C       Opening message
         WRITE(LUSCN,9020)
 9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV 960920)')
+     .  '(NRV 961020)')
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
@@ -274,7 +283,7 @@ C
 9301      format(' NOTE: This schedule was created using early '
      .    ,'start with EARLY = ',i3,' seconds.')
 	  endif
-	  IF (IERR.NE.0) GOTO 201
+	  IF (IERR.NE.0) goto 201
           kskdfile = .false.
           kdrgfile = .false.
 C
@@ -397,27 +406,27 @@ C     response(1:1) = upper(response(1:1))
       kmissing=.true.
       if (iserr(istn).ne.0) kmissing=.true.
 699   continue
-      if (kvex) then !get the statin's input now
-      nobs=0
-      if (istn.eq.0) then ! get all in a loop
-        do i=1,nstatn
-          call vob1inp(ivexnum,i,luscn,ierr) ! get the station's obs
+      if (kvex) then !get the station's observations now
+        nobs=0
+        if (istn.eq.0) then ! get all in a loop
+          do i=1,nstatn
+            call vob1inp(ivexnum,i,luscn,ierr) ! get the station's obs
+            if (ierr.ne.0) then
+              write(luscn,'("FDRUDGxx - Error from vob1inp=",
+     .        i5)') ierr
+            else
+              write(luscn,'("  Number of obs: ",i5)') nobs
+            endif
+          enddo
+        else ! get one station's obs
+          call vob1inp(ivexnum,istn,luscn,ierr)
           if (ierr.ne.0) then
             write(luscn,'("FDRUDGxx - Error from vob1inp=",
      .      i5)') ierr
           else
             write(luscn,'("  Number of obs: ",i5)') nobs
           endif
-        enddo
-      else ! get one station's obs
-        call vob1inp(ivexnum,istn,luscn,ierr)
-        if (ierr.ne.0) then
-          write(luscn,'("FDRUDGxx - Error from vob1inp=",
-     .    i5)') ierr
-        else
-          write(luscn,'("  Number of obs: ",i5)') nobs
-        endif
-      endif
+        endif ! get one/get all
       endif
 C
 C
@@ -433,33 +442,37 @@ C
           else !all stations
             write(luscn,9067) lskdfi(1:l)
           endif
-9068      FORMAT(/' Select DRUDG option for schedule ',A,' at ',4A2/)
-9067      FORMAT(/' Select DRUDG option for schedule ',A,' (all ',
-     .    'stations)'/)
-          if (ichcm_ch(lstrack(1,istn),1,'unknown ').eq.0.or.
-     .        ichcm_ch(lstrec (1,istn),1,'unknown ').eq.0.or.
-     .        ichcm_ch(lstrack(1,istn),1,'        ').eq.0.or.
-     .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
+9068      FORMAT(/' Select *new* DRUDG option for schedule ',A,
+     .    ' at ',4A2/)
+9067      FORMAT(/' Select *new* DRUDG option for schedule ',A,
+     .    ' (all stations)'/)
+C         if (ichcm_ch(lstrack(1,istn),1,'unknown ').eq.0.or.
+C    .        ichcm_ch(lstrec (1,istn),1,'unknown ').eq.0.or.
+C    .        ichcm_ch(lstrack(1,istn),1,'        ').eq.0.or.
+C    .        ichcm_ch(lstrec (1,istn),1,'        ').eq.0) then ! unknown
+          if (.not.kvex) then ! unknown equipment
             write(luscn,9070)
 9070        FORMAT(
      .      ' 1 = Print the schedule                ',
      .      '  7 = Re-specify stations'/
      .      ' 2 = Make antenna pointing file (VLBA) ',
      .      '  8 = Get a new schedule file'/
-     .      ' 3 = Create SNAP command file (.SNP)   ',
+     .      ' 3 = Make Mark III/IV SNAP file (.SNP) ',
      .      '  9 = Change output destination, width '/
-     .      ' 4 = Print complete .SNP file          ',
+     .      ' 31= Make VLBA SNAP file (.SNP)        ',
      .      ' 10 = Shift the .SKD file  '/,
-     .      ' 5 = Print summary of .SNP file        ',
+     .      ' 4 = Print complete .SNP file          ',
      .      ' 11 = Shift the .SNP file  '/,
-     .      ' 6 = Make bar code tape labels         ',
+     .      ' 5 = Print summary of .SNP file        ',
      .      ' 12 = Make Mark III procedures (.PRC) '/,
      .      ' 0 = Done with DRUDG                   ',
      .      ' 13 = Make VLBA procedures (.PRC)'/,
-     .      '                                       ',
+     .      ' 6 = Make bar code tape labels         ',
      .      ' 14 = Make hybrid procedures (.PRC)'/,
+     .      '                                       ',
+     .      ' 15 = Make Mark IV procedures (.PRC)'/,
      .      ' ? ',$)
-          else ! gotem
+          else ! gotem in the vex file
             write(luscn,9073)
 9073        FORMAT(
      .      ' 1 = Print the schedule                ',
@@ -498,10 +511,12 @@ C
         read(command,*,err=991) ifunc
       endif
 
-	if ((ifunc.lt.0).or.(ifunc.gt.14).and..not.kbatch) GOTO 700
-	if ((ifunc.lt.0).or.(ifunc.gt.14).and.kbatch) GOTO 991
+	if ((ifunc.lt.0).or.(ifunc.gt.15.and.ifunc.ne.31)
+     .  .and..not.kbatch) GOTO 700
+	if ((ifunc.lt.0).or.(ifunc.gt.15.and.ifunc.ne.31)
+     .  .and.kbatch) GOTO 991
 	if (.not.kbatch.and..not.kskd.and.((ifunc.gt.0.and.ifunc.lt.4)
-     .  .or.ifunc.eq.10.or.ifunc.ge.14)) goto 700
+     .  .or.ifunc.eq.10.or.(ifunc.ge.15.and.ifunc.ne.31))) goto 700
 
 	IF (IFUNC.EQ.9) THEN
           if (kbatch) goto 991
@@ -574,7 +589,9 @@ C       END IF
             CALL POINT(cr1,cr2,cr3,cr4)
 c            I = nstnx
 	    ELSE IF (IFUNC.EQ.3) THEN
-	      CALL SNAP(cr1,cr2,cr3,cr4)
+	      CALL SNAP(cr1,cr2,cr3,cr4,1)
+	    ELSE IF (IFUNC.EQ.31) THEN
+	      CALL SNAP(cr1,cr2,cr3,cr4,2)
 	    ELSE IF (IFUNC.EQ.4) THEN
 	      CALL CLIST(kskd)
 	    ELSE IF (IFUNC.EQ.12) THEN
@@ -583,6 +600,8 @@ c            I = nstnx
               CALL PROCS(2) ! VLBA backend procedures
 	    ELSE IF (IFUNC.EQ.14) THEN
               CALL PROCS(3) ! hybrid backend procedures
+	    ELSE IF (IFUNC.EQ.15) THEN
+              CALL PROCS(4) ! Mark IV backend procedures
 	    ELSE IF (IFUNC.EQ.6) THEN
 	      if (nstnx.eq.1) then ! just one station
 		pcode = 1
