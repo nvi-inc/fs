@@ -28,15 +28,13 @@ C        NCH    - character counter
 C        I      - bit, converted to 0 or 1
 C        IA     - hex char from MAT 
       integer itrk(28)
-      logical kcom,kdata
+      logical kcom,kdata,kena(2)
 C              - true if COMMON variables wanted
       dimension ireg(2) 
       integer get_buf
-      integer z1
 C 
 C 5.  INITIALIZED VARIABLES 
       data ilen/40/ 
-      data z1/z'01'/
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED: CREATED 790319 
@@ -100,69 +98,49 @@ C     For Mark III:
 C     % data:       TPtttttttt
 C     where each "t" contains 3 or 4 bits regarding tape track status 
 C
-C     For Mark IV:
-C     % data:       TPrxxxxyxz
-C                rxxxxxxt represents bits 0 - 31, 0 starting at z
-C     where the r will have   bit31 = 1 for record enabled.
-C                             remaining bits will be 0.
-C               y will have   bit8 = 1 for stack1 enabled 
-C               z will have   bit0 = 1 for stack2 enabled 
-C                             remaining bits will be 0.
-C
       call fs_get_drive(drive)
-      if (MK4.eq.and(MK4,drive)) then
-        ncx=nch
-        if (z1.eq.and(ia2hx(ibuf,10),z1)) then
-          nch = ichmv_ch(ibuf2,nch,'s1')
-          nch = mcoma(ibuf2,nch)
-        endif
-        if (z1.eq.and(ia2hx(ibuf,8),z1)) then
-          nch = ichmv_ch(ibuf2,nch,'s2')
-          nch = mcoma(ibuf2,nch)
-        endif
-        if (nch.eq.ncx) then
-          nch = ichmv_ch(ibuf2,nch,'null')
-          nch = mcoma(ibuf2,nch)
-        endif
-        nch=nch-1
-        goto 500
+      if (MK4.eq.drive) then
+         call ma2en4(ibuf,iena,kena)
+      else
+         call ma2en(ibuf,iena,itrk,ntrk)
       endif
-
-      call ma2en(ibuf,iena,itrk,ntrk)
       goto 400
 C
 310   continue
       call fs_get_drive(drive)
-      if (MK4.eq.and(MK4,drive)) then
-        call fs_get_kena(kenastk)
-        if (kenastk(1)) then
-          nch = ichmv_ch(ibuf2,nch,'s1')
-          nch = mcoma(ibuf2,nch)
-        endif
-        if (kenastk(2)) then
-          nch = ichmv_ch(ibuf2,nch,'s2')
-          nch = mcoma(ibuf2,nch)
-        endif
-        if ((.not.kenastk(1)).and.(.not.kenastk(2))) then
-          nch = ichmv_ch(ibuf2,nch,'null')
-          nch = mcoma(ibuf2,nch)
-        endif
-        nch=nch-1
-        goto 500
+      if (MK4.eq.drive) then
+        call fs_get_kenastk(kenastk)
+        kena(1)=kenastk(1)
+        kena(2)=kenastk(2)
+      else
+         ntrk = 0
+         do 311 i=1,28
+            itrk(i) = itrkenus_fs(i)
+            if (itrk(i).eq.1) ntrk = ntrk + 1
+ 311     continue
       endif
-      ntrk = 0
-      do 311 i=1,28
-        itrk(i) = itrkenus_fs(i)
-        if (itrk(i).eq.1) ntrk = ntrk + 1
-311     continue
-      call fs_get_ienatp(ienatp)
-      iena = ienatp
-C
+C     
 C
 C     4. Format up the buffer for display.
 C
 400   continue
       ierr = 0
+      if (MK4.eq.drive) then
+        if (kena(1)) then
+          nch = ichmv_ch(ibuf2,nch,'s1')
+          nch = mcoma(ibuf2,nch)
+        endif
+        if (kena(2)) then
+          nch = ichmv_ch(ibuf2,nch,'s2')
+          nch = mcoma(ibuf2,nch)
+        endif
+        if ((.not.kena(1)).and.(.not.kena(2))) then
+          nch = ichmv_ch(ibuf2,nch,'disabled')
+          nch = mcoma(ibuf2,nch)
+        endif
+        nch=nch-1
+        goto 500
+      endif
       if (ntrk.ne.0) goto 401
       nch = ichmv_ch(ibuf2,nch,'disabled')
       goto 500
