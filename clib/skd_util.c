@@ -33,6 +33,7 @@ static int  argc = -1;
 
 static long mtype();
 static void nullfcn();
+void skd_end();
 
 int skd_get( key, size)
 key_t key;
@@ -182,6 +183,47 @@ int  n,len;
 
 }
 
+int skd_chk( name, ip)
+char    name[ 5];
+long	ip[5];
+{
+int	status,i;
+struct skd_buf	sched;
+long    type;
+char *s1;
+
+
+skd_end(ip);
+
+type=mtype(name);
+s1=memcpy(prog_name,name,5);
+
+status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		type, IPC_NOWAIT);
+   
+if (status == -1 && errno == ENOMSG) {
+  return 0;
+} else if ( status == -1 ) {
+  perror("skd_wait: receiving message");
+  exit( -1);
+}
+
+for (i=0;i<5;i++)
+    ip[i]=sched.messg.ip[i];
+
+rtype=sched.messg.rtype;
+
+if (getpid() == sched.messg.dad)
+  dad=0;
+else
+  dad=sched.messg.dad;
+
+strcpy(arg,sched.messg.arg);
+argc=-1;
+
+return 1;
+}
+
 void skd_wait( name, ip, centisec)
 char    name[ 5];
 unsigned centisec;
@@ -192,23 +234,14 @@ struct skd_buf	sched;
 long    type;
 char *s1;
 
-if( rtype != 0) {
-  for (i=0;i<5;i++) {
-      sched.messg.ip[i]=ip[i];
-  }
-  sched.mtype=rtype;
-  if ( -1 == msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
-		    0 )) {
-    perror("skd_wait: sending termination message");
-    exit( -1);
-  }
-}
+
+skd_end(ip);
 
 type=mtype(name);
 s1=memcpy(prog_name,name,5);
 
 if(centisec !=0) {
-  if(signal(SIGALRM,nullfcn) == BADSIG){
+  if(signal(SIGALRM,nullfcn) == SIG_ERR){
      fprintf( stderr,"skd_wait: setting up signals\n");
      exit(-1);
   }
@@ -220,7 +253,7 @@ status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		type, 0);
 if (centisec !=0) {
    rte_alarm((unsigned) 0);
-   if(signal(SIGALRM,SIG_DFL) == BADSIG){
+   if(signal(SIGALRM,SIG_DFL) == SIG_ERR){
      fprintf( stderr,"skd_wait: setting default signals\n");
      exit(-1);
    }
@@ -248,7 +281,25 @@ strcpy(arg,sched.messg.arg);
 argc=-1;
 
 }
+void skd_end(ip)
+long ip[5];
+{
+  int i;
+  struct skd_buf sched;
 
+  if( rtype != 0) {
+    for (i=0;i<5;i++) {
+      sched.messg.ip[i]=ip[i];
+    }
+    sched.mtype=rtype;
+    if ( -1 == msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
+		      0 )) {
+      perror("skd_wait: sending termination message");
+      exit( -1);
+    }
+    rtype = 0;
+  }
+}
 void skd_clr( name)
 char    name[ 5];
 {
@@ -303,7 +354,7 @@ int sig;
     int i;
     void skd_run();
 
-    if(signal(sig,SIG_IGN) == BADSIG ) {
+    if(signal(sig,SIG_IGN) == SIG_ERR ) {
       perror("nullfcn: error ignoring signal");
       exit(-1);
     }
