@@ -7,7 +7,7 @@
 
 void cshm_init()
 {
-  int i,j;
+  int i,j,k;
 
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
@@ -233,8 +233,9 @@ void cshm_init()
   for(i=0;i<16*2+4;i++)
      shm_addr->tpicd.itpis[i]=0;
 
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_ONOFF_DET;i++)
     shm_addr->onoff.itpis[i]=0;
+    
   shm_addr->onoff.setup=FALSE;
 
   for (i=0;i<MAX_RXGAIN;i++)
@@ -294,6 +295,72 @@ void cshm_init()
   shm_addr->mk5vsn[0]=0;
   shm_addr->mk5vsn_logchg=0;
   shm_addr->logchg=0;
+
+  shm_addr->user_device.lo[0]=-1.0;
+  shm_addr->user_device.lo[1]=-1.0;
+  shm_addr->user_device.lo[2]=-1.0;
+  shm_addr->user_device.lo[3]=-1.0;
+  shm_addr->user_device.lo[4]=-1.0;
+  shm_addr->user_device.lo[5]=-1.0;
+
+  shm_addr->user_device.sideband[0]=0;
+  shm_addr->user_device.sideband[1]=0;
+  shm_addr->user_device.sideband[2]=0;
+  shm_addr->user_device.sideband[3]=0;
+  shm_addr->user_device.sideband[4]=0;
+  shm_addr->user_device.sideband[5]=0;
+
+  shm_addr->disk_record.record.record=-1;
+  m5state_init(&shm_addr->disk_record.record.state);
+
+  shm_addr->disk_record.scan.scan[0]=0;
+  m5state_init(&shm_addr->disk_record.scan.state);
+
+  shm_addr->disk_record.session.session[0]=0;
+  m5state_init(&shm_addr->disk_record.session.state);
+
+  shm_addr->disk_record.source.source[0]=0;
+  m5state_init(&shm_addr->disk_record.source.state);
+
+  shm_addr->monit5.pong=0;
+  for (i=0;i<2;i++) {
+    shm_addr->monit5.ping[i].active=-1;
+    for (j=0;j<2;j++) {
+      shm_addr->monit5.ping[i].bank[j].vsn[0]=0;
+      shm_addr->monit5.ping[i].bank[j].seconds=-1.0;
+      shm_addr->monit5.ping[i].bank[j].gb=-1.0;
+      shm_addr->monit5.ping[i].bank[j].percent=-1.0;
+      for (k=0;k<6;k++)
+	shm_addr->monit5.ping[i].bank[j].itime[k]=-1;
+    }
+  }
+  shm_addr->disk2file.scan_name.scan_name[0]=0;
+  m5state_init(&shm_addr->disk2file.scan_name.state);
+
+  shm_addr->disk2file.destination.destination[0]=0;
+  m5state_init(&shm_addr->disk2file.destination.state);
+
+  shm_addr->disk2file.start.start=-1.0;
+  m5state_init(&shm_addr->disk2file.start.state);
+
+  shm_addr->disk2file.end.end=-1.0;
+  m5state_init(&shm_addr->disk2file.end.state);
+
+  shm_addr->disk2file.options.options[0]=0;
+  m5state_init(&shm_addr->disk2file.options.state);
+
+  shm_addr->in2net.control.control=-1;
+  m5state_init(&shm_addr->in2net.control.state);
+
+  shm_addr->in2net.destination.destination[0]=0;
+  m5state_init(&shm_addr->in2net.destination.state);
+
+  shm_addr->in2net.last_destination[0]=0;
+
+  shm_addr->abend.normal_end=0;
+  shm_addr->abend.other_error=0;
+ 
+  shm_addr->ntp_synch_unknown=0;
 
   return;
 }
