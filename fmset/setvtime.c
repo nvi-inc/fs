@@ -29,6 +29,7 @@ struct tm *fmtime;  /* pointer to tm structure */
 int i;              /* general purpose counter */
 int nbytes;         /* number of bytes received from mcbcn */
 unsigned short bcd; /* holder for BCD digits   */
+ char *name; 
 
 /* convert calendar time to conventional time */
 fmtime = gmtime(&formtime);
@@ -82,8 +83,16 @@ ip[1] = outclass; /* class number */
 ip[2] = 1;        /* only one buf */
 ip[3] = 0;
 ip[4] = 0;
+name="mcbcn";
 nsem_take("fsctl",0);
-skd_run("mcbcn",'w',ip);
+	while(skd_run_to(name,'w',ip,100)==1) {
+	  if (nsem_test(NSEM_NAME) != 1) {
+	    endwin();
+	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    exit(0);
+	  }
+	  name=NULL;
+	}
 nsem_put("fsctl");
 
 /* get reply from mcbcn */
@@ -93,7 +102,7 @@ inclass = ip[0];
 if( ip[1] != 1 )
 	{
 	endwin();
-	printf("Error %d from formatter\n",ip[2]);
+	fprintf(stderr,"Error %d from formatter\n",ip[2]);
         logita(NULL,ip[2],ip+3,ip+4);
 	cls_clr(outclass);
 	cls_clr(inclass);
@@ -105,7 +114,7 @@ if ( (nbytes = cls_rcv(inclass, inbuf, 512,
                        &rtn1, &rtn2, msgflg, save)) != 4)
 	{
 	endwin();
-	printf("Wrong len msg - %d bytes received\n" ,nbytes);
+	fprintf(stderr,"Wrong len msg - %d bytes received\n" ,nbytes);
         logita(NULL,-4,"fv","  ");
 	cls_clr(outclass);
 	cls_clr(inclass);
@@ -116,7 +125,7 @@ if ( (nbytes = cls_rcv(inclass, inbuf, 512,
 if( inbuf[0] | inbuf[1] | inbuf[2] | inbuf[3] ) /* check completion code */
 	{
 	endwin();
-	printf("Bad completion code from formatter %d %d %d %d\n",
+	fprintf(stderr,"Bad completion code from formatter %d %d %d %d\n",
                inbuf[0],inbuf[1],inbuf[2],inbuf[3]);
         logita(NULL,-5,"fv","  ");
 	cls_clr(outclass);
