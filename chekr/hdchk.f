@@ -23,8 +23,8 @@ C
       ierr=rn_take('fsctl',0)
       call lvdonn('lock',ip)
       if (ip(3).ne.0) then
-        call logit7ic(0,0,0,0,ip(3),lwho,'hd')
-        goto 1091
+        call logit7ic(0,0,0,0,-201,lwho,'hd')
+        goto 1092
       endif
       call fs_get_ipashd(ipashd)
       call fs_get_posnhd(posnhd)
@@ -69,8 +69,12 @@ C
       call lvdofn('unlock',ip)
       call rn_put('fsctl')
       if (ip(3).lt.0) then
-        call logit7ic(0,0,0,0,ip(3),lwho,'hd')
+        call logit7ic(0,0,0,0,-201,lwho,'hd')
       endif
+      return
 C
+ 1092 continue
+      call lvdofn('unlock',ip)
+      call rn_put('fsctl')
       return
       end
