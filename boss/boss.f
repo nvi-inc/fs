@@ -7,15 +7,15 @@ c
       parameter (ifsnum=256)
       integer*4 ip(5)
       dimension lnames(12,ifsnum)
-      integer MAX_PROC
-      PARAMETER (MAX_PROC=256)
-      integer*2 lproc1(10,MAX_PROC),lproc2(10,MAX_PROC)
+      integer MAX_PROC1, MAX_PROC2
+      PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
+      integer*2 lproc1(10,MAX_PROC1),lproc2(10,MAX_PROC2)
       integer itscb(13,15)
       integer idcbsk(2)
       integer ntscb,maxpr1,maxpr2,nnames,ierr,idum,fc_rte_prior
       data ntscb/15/
 C                     Number of available entries in ITSCB
-      data maxpr1/MAX_PROC/, maxpr2/MAX_PROC/
+      data maxpr1/MAX_PROC1/, maxpr2/MAX_PROC2/
 C                     Number of entries in each proc list
       data nnames/ifsnum/
 C                     Maximum number of entries available in LNAMES
