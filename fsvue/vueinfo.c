@@ -52,7 +52,7 @@ main(int argc, char *argv[])
   char *str, site[8];
   short int buffint[120];
   char buff[120];
-  char log_name[8];
+  char log_name[15];
 
 /* connect me to the FS */
   putpname("vueinfo");
@@ -174,18 +174,15 @@ main(int argc, char *argv[])
     exit(0);
   } else if (strstr(what,"log")) {
     fs_get_llog__(&log_name);
-    for(i=0; i<BLANK; i++) {
-      if(log_name[i]==0x20 || i==8) {
+    for(i=0; i<BLANK; i++)
+      if(log_name[i]==0x20) break;
 	log_name[i++]='.';
 	log_name[i++]='l';
 	log_name[i++]='o';
 	log_name[i++]='g';
 	log_name[i]='\0';
-	break;
-      }
-    }
-    printf("%s",log_name);
-    exit(0);
+	printf("%s",log_name);
+	exit(0);
     /*  } else if (strstr(what,"fs")) {
     exit(0);*/
   } else {
