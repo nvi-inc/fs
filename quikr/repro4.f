@@ -243,6 +243,18 @@ C
       call rpbr2ma4(ibuf(3),ibr)
       call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 2
+
+      call fs_get_rack(rack)
+      if(rack.eq.MK4) then
+         ibuf(1)=9
+         if(iby.eq.0) then
+            call char2hol('fm/rec 0',ibuf(2),1,8)
+         else
+            call char2hol('fm/rec 1',ibuf(2),1,8)
+         endif
+         call put_buf(iclass,ibuf,-10,'fs','  ')
+         nrec = nrec+1
+      endif
       goto 800
 C
 C
