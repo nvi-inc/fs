@@ -31,10 +31,13 @@ C
       integer*2 icmnd(3),iques,idolr,indata(12),isav(10),izero(10)
       integer*2 lwho
       character*5 name
+      logical kst
       data icmnd/ 2H#9,2H3%,2H__/,iques/2H??/,idolr/2H$$/
       data isav/2h#9,2H3=,0,0,0,0,2H__,0,0,0/
       data izero/2H#9,2H3=,2H00,2H00,2H3f,2H3f,2H__,0,0,0/
       data nin/-20/,lwho/2hfp/,name/'fivpt'/
+C
+      kst=ichcm_ch(ldevfp,1,'u').eq.0
 C
 C MAKE SURE THE CAL IS OFF
 C
@@ -45,41 +48,48 @@ C
 C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
       call fs_get_rack(rack)
-      if(VLBA.ne.and(rack,VLBA)) then
-        if(ichfp_fs.ne.3) then
-          call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
-          if (ierr.ne.0) return
-c         write(6,9954) nin,(indata(iweh),iweh=1,6)
-c9954      format(' nin',i10,' indata "',6a2,'"')
-          call char2hol('93',isav,2,3)
-          idum=ichmv(isav,5,indata,3,8)
-        else
-          call char2hol('95',isav,2,3)
-          call i32ma(isav(3),iatif3_fs,imixif3_fs,iswif3_fs(1),
-     &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
-        endif
-      else
-        call get_vatt(name,lwho,ierr,ichfp_fs,0)
-        if (ierr.ne.0) return
+      if(.not.kst) then
+         if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+            if(ichfp_fs.ne.3) then
+               call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
+               if (ierr.ne.0) return
+c     write(6,9954) nin,(indata(iweh),iweh=1,6)
+c9954 format(' nin',i10,' indata "',6a2,'"')
+               call char2hol('93',isav,2,3)
+               idum=ichmv(isav,5,indata,3,8)
+            else
+               call char2hol('95',isav,2,3)
+               call fs_get_imixif3(imixif3)
+               call i32ma(isav(3),iatif3_fs,imixif3,iswif3_fs(1),
+     &              iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+            endif
+         else
+            call get_vatt(name,lwho,ierr,ichfp_fs,0)
+            if (ierr.ne.0) return
+         endif
       endif
 C
 C  TURN ON ALL THE ATTENUATORS
 C
-      if(VLBA.ne.and(rack,VLBA)) then
-        if(ichfp_fs.ne.3) then
-          idum=ichmv(izero,5,indata,3,10)
-          call char2hol('93',izero,2,3)
-          if(ichfp_fs.eq.1) then
-            call char2hol('3f',izero,11,12)
-          else
-            call char2hol('3f',izero,9,10)
-          endif
-        else
-          call char2hol('95',izero,2,3)
-          call i32ma(izero(3),63,imixif3_fs,iswif3_fs(1),
-     &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
-        endif
-        call matcn(izero,-13,idolr,indata,nin,2,ierr)
+      if (kst) then
+         call scmds('sigofffp',1)
+         ierr=0
+      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
+         if(ichfp_fs.ne.3) then
+            idum=ichmv(izero,5,indata,3,10)
+            call char2hol('93',izero,2,3)
+            if(ichfp_fs.eq.1) then
+               call char2hol('3f',izero,11,12)
+            else
+               call char2hol('3f',izero,9,10)
+            endif
+         else
+            call char2hol('95',izero,2,3)
+            call fs_get_imixif3(imixif3)
+            call i32ma(izero(3),63,imixif3,iswif3_fs(1),
+     &           iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+         endif
+         call matcn(izero,-13,idolr,indata,nin,2,ierr)
       else
         call zero_vatt(name,lwho,ierr)
       endif
@@ -92,7 +102,10 @@ C
 C
 C  RESET THE ATTENUATORS
 C
-      if(VLBA.ne.and(rack,VLBA)) then
+      if (kst) then
+         call scmds('sigonfp',1)
+         ierr=0
+      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
       else
          call rst_vatt(name,lwho,ierr)
@@ -139,7 +152,10 @@ C
 C
 8001  continue
       jerr=0
-      if(VLBA.ne.and(rack,VLBA)) then
+      if (kst) then
+         call scmds('sigonfp',1)
+         jerr=0
+      else if(VLBA.ne.rack.and.VLBA4.ne.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,jerr)
       else
          call rst_vatt(name,lwho,jerr)
