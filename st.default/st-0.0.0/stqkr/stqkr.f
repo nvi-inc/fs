@@ -34,7 +34,7 @@ C
 C  main loop
 C
 1     continue
-      call wait_prog('quikr',ip)
+      call wait_prog('stqkr',ip)
       call read_quikr
       isub = ip(2)/100
       itask = ip(2) - 100*isub
