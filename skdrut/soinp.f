@@ -52,6 +52,7 @@ C     nrv  931124 Add arguments to UNPSO to return orbital elements
 C     nrv  940112 Keep common name internally for satellites, not ORBIT.
 C     nrv  950321 Add error message for duplicate source names.
 C 970114 nrv Change 4 to max_sorlen/2
+C 990606 nrv Store IAU name
 C
       DATA LORBIT_CHAR /'ORBIT   '/
 C
@@ -92,7 +93,7 @@ C
       END DO
       IF  (I.LE.NSOURC) then ! duplicate source
         write(lu,9101) (lsorna(j,i),j=1,max_sorlen/2)
-9101    format('SOINP22 - Duplicate source name ',4a2,
+9101    format('SOINP22 - Duplicate source name ',12a2,
      .  '. Using the position of the first one.')
         RETURN
       endif ! duplicate source
@@ -125,6 +126,7 @@ C
 C
       IF  (.NOT.KORBIT) THEN  !"nonorbit"
         IDUMMY = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
+        IDUMMY = ICHMV(LIAUNA(1,NCELES),1,liau,1,max_sorlen)
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
           IEP = EPOCH+.01 
           IF  (IEP.EQ.1950) THEN ! reference frame rotation

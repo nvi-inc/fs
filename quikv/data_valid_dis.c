@@ -11,9 +11,10 @@
 
 #define MAX_OUT 256
 
-void data_valid_dis(command,ip)
+void data_valid_dis(command,ip,indx)
 struct cmd_ds *command;
 long ip[5];
+int indx;
 {
       struct data_valid_cmd lclc;
       int kcom, i, ierr, count, start;
@@ -23,13 +24,13 @@ long ip[5];
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
-      kcom=kcom||shm_addr->equip.drive !=S2;
+      kcom=kcom||shm_addr->equip.drive[0] !=S2;
 
       if ((!kcom) && command->equal == '=') {
          logrclmsg(output,command,ip);
          return;
       } else if (kcom){
-	memcpy(&lclc,&shm_addr->data_valid,sizeof(lclc));
+	memcpy(&lclc,&shm_addr->data_valid[indx],sizeof(lclc));
       } else {
 	opn_rclcn_res(&buffer,ip);
 

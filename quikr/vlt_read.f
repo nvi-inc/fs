@@ -1,6 +1,6 @@
-      subroutine vlt_read(ihead,volt,ip)
+      subroutine vlt_read(ihead,volt,ip,indxtp)
       implicit none
-      integer ihead,ip(5)
+      integer ihead,ip(5),indxtp
       real*4 volt(2)
 C
 C  VLT_READ: read head vaoltage(s)
@@ -17,7 +17,7 @@ C
 C
       do i=1,2
         if(i.eq.ihead.or.ihead.eq.3) then
-          call vlt_head(i,volt(i),ip)
+          call vlt_head(i,volt(i),ip,indxtp)
           if(ip(3).ne.0) return
         endif
       enddo

@@ -1,0 +1,62 @@
+       pcald - pcal (Mark III, Mark IV, VLBA, VLBA4 racks)
+
+Syntax:     pcald=cont,bits,int
+          pcald=stop
+
+Response:   pcald/cont,bits,int
+          pcald/chan,tone,tone, 
+
+
+Settable parameters:
+cont      Whether to extract continuously or not: no (default) or
+          yes. If no, extraction is stopped and started by the
+          data_valid=  command.
+bits      Number of bits to use in extraction: 1, 2, or auto
+          (default). If auto, the number of bits to extract is
+          determined by the pcald extraction daemon.
+int       Number of centiseconds to integrate for. The default is
+          0, which is interpreted by the pcald daemon as "best
+          effort".
+
+Monitor-only parameters:
+chan      Channel of the form ns, where n is 1,..,14 (decimal) or
+          1,...,e (hex) and s is u or l for upper and lower
+          sideband respectively. No default.
+tone      Tone to extract,  given in MHz or if state counting
+          then state_counting.
+            
+Comments:
+The currently implemented daemon is a stub. It doesn't do
+anything, but all the set-up for which tones to extract and how
+often is provided.
+
+This command should support K4, K4K3, and K4MK4 racks, but does
+not do so at present.
+
+The form pcald is used to start the extraction. The form
+pcald=stop is used to halt it.
+
+If pcald is being controlled by the data_valid command, it begins
+and stops extracting and recording data within one second of a
+request to do so. In other words within one second of the
+execution of a data_valid=  command.
+
+If the number of bits is requested as auto, the number of bits to
+be used is left to the discretion of the pcald and could
+conceivable be different for every tone. Likewise when int is
+zero, the pcald program determines the length of time to
+integrate.
+
+The parameters should be modified only when pcald is stopped.
+When the parameters are set, the tones to extract are determined
+from the pcalform command parameters. If any tone numbers were
+specified in pcalform, the approproate hardware must have been
+set-up so that the corresponding frequencies can be determined.
+For Mark III/IV this would include setting up the lo, patch, vcXX
+and possibly if3 commands. For VLBA/4 the lo and bbcXX commands
+must be set-up.
+
+pcald=? displays the current settable parameters and the
+currently selected tones. If a channel requires more than one log
+entry to display all its tones, the tones will continue on
+following lines.

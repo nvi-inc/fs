@@ -22,9 +22,10 @@ C
 C
 C  LOCAL:
       integer*2 lc,lstn
+      logical ks2,kk4
       integer ip(MAX_PASS),ihd(MAX_PASS),idir(MAX_PASS),
      .ih,istn,n,i,icode
-      integer igtfr,igtst ! functions
+      integer ichcm_ch,igtfr,igtst ! functions
 C
 C  History
 C  930707 nrv Created.
@@ -42,7 +43,7 @@ C
       IF  (IERR.NE.0) THEN
         IERR = -(IERR+100)
         write(lu,9201) ierr,(ibuf(i),i=2,ilen)
-9201    format('FRINP01 - Error in field ',I3,' of:'/40a2)
+9201    format('HDINP01 - Error in field ',I3,' of:'/40a2)
         RETURN
       END IF 
 C
@@ -66,17 +67,21 @@ C        idir=list of subpasses,
 C        ihd=list of head positions
 C        n = number of entries in the lists
 C
-      do i=1,n
-        if (ip(i).lt.100) then ! headstack 1
-          ih=1
-          ihdpos(ih,ip(i),istn,icode) = ihd(i)  ! offset
-          ihddir(ih,ip(i),istn,icode) = idir(i) ! subpass
-        else ! headstack 2
-          ih=2
-          ihdpos(ih,ip(i)-100,istn,icode) = ihd(i)
-          ihddir(ih,ip(i)-100,istn,icode) = idir(i)
-        endif
-      END DO 
+      ks2 = ichcm_ch(lterna(1,istn),1,'S2').eq.0
+      kk4 = ichcm_ch(lterna(1,istn),1,'K4').eq.0
+      if (.not.ks2.and..not.kk4) then ! save offsets and subpasses
+        do i=1,n
+          if (ip(i).lt.100) then ! headstack 1
+            ih=1
+            ihdpos(ih,ip(i),istn,icode) = ihd(i)  ! offset
+            ihddir(ih,ip(i),istn,icode) = idir(i) ! subpass
+          else ! headstack 2
+            ih=2
+            ihdpos(ih,ip(i)-100,istn,icode) = ihd(i)
+            ihddir(ih,ip(i)-100,istn,icode) = idir(i)
+          endif
+        END DO 
+      endif ! save offsets and subpasses
 C
       IERR = 0
 C

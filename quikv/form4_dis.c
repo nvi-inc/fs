@@ -46,7 +46,7 @@ long ip[5];
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSTAform4(&lclc,&lclm,buff);
 	if(lclm.error & (1<<15))
-	  logit(NULL,-502,"4f");
+	  logit(NULL,-501,"4f");
 	icount=0;
 	for (i=0;i<8;i++)
 	  if(! (lclm.rack_ids & 1<<i))

@@ -1,0 +1,22 @@
+                ti - list time-scheduled commands
+
+Syntax:     ti
+
+Response:   display of list
+
+
+Settable Parameters: none
+
+Comments: 
+The current time-scheduled commands are listed on the terminal.
+Format:
+
+               ts nn @ yyyy.ddd.hh:mm:ss.ss command
+
+nn                  command or procedure index
+t                   type
+s                   : for schedule or ; for operator stream
+yyyy.ddd.hh:mm:ss.ss    time the command will be executed
+command             the time-scheduled command. 
+
+This is a display-only command for debugging purposes.

@@ -1,4 +1,4 @@
-      subroutine savev(ip)
+      subroutine savev(ip,itask)
 C
 C  Peak up on tape drive read response
 C
@@ -25,6 +25,13 @@ C
 C
 C  1.  Get the command
 C
+      if( itask.eq.5) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+C
+      ip(3)=0
       iclass=0
       nrec=0
       iclcm=ip(1)
@@ -65,25 +72,31 @@ C
         indx=v15flip
       else if(ichcm_ch(ibuf,ich,'vw0').eq.0) then
         indx=vw0
-        if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
+        if((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp))
+     $       .or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))
+     &       ) then
           ip(3)=-502
           goto 990
         endif
       else if(ichcm_ch(ibuf,ich,'vw8').eq.0) then
         indx=vw8
-        if(VLBA.eq.drive.or.MK3B.eq.drive_type) then
-          ip(3)=-502
-          goto 990
+        if((VLBA.eq.drive(indxtp).and.VLBAB.ne.drive_type(indxtp))
+     $       .or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.eq.drive_type(indxtp))
+     &       ) then
+           ip(3)=-502
+           goto 990
         endif
       else if(ichcm_ch(ibuf,ich,'clear').eq.0) then
-        kvrevw_fs=.false.
-        kv15rev_fs=.false.
-        kv15for_fs=.false.
-        kv15scale_fs=.false.
-        kv13_fs=.false.
-        kv15flip_fs=.false.
-        kvw0_fs=.false.
-        kvw8_fs=.false.
+        kvrevw_fs(indxtp)=.false.
+        kv15rev_fs(indxtp)=.false.
+        kv15for_fs(indxtp)=.false.
+        kv15scale_fs(indxtp)=.false.
+        kv13_fs(indxtp)=.false.
+        kv15flip_fs(indxtp)=.false.
+        kvw0_fs(indxtp)=.false.
+        kvw8_fs(indxtp)=.false.
         goto 990
       else
         ip(3) = -251
@@ -98,26 +111,28 @@ c     write(6,9100) indx
       call gtprm(ibuf,ich,nchar,2,parm,ierr)
       if(cjchar(parm,1).eq.',') then
         if(indx.le.6) then   !use peaked position
-          if(.not.kpeakv_fs)  then
+          if(.not.kpeakv_fs(indxtp))  then
             ip(3) =-351
             goto 990
           endif
-          vlt=vltpk_fs
+          vlt=vltpk_fs(indxtp)
         else
-          call lvdonn('lock',ip)
+          call lvdonn('lock',ip,indxtp)
           if(ip(3).ne.0) go to 800
 C
           ihd=1
-          if(.not.kposhd_fs(1)) then
+          if(VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp)
+     $         ) ihd=2
+          if(.not.kposhd_fs(ihd,indxtp)) then
             ip(3) =-352
             goto 990
           endif
 C
-          call vlt_read(ihd,volts,ip)
+          call vlt_read(ihd,volts,ip,indxtp)
           vlt=volts(ihd)
           if(ip(3).ne.0) go to 800
 C
-          call lvdofn('unlock',ip)
+          call lvdofn('unlock',ip,indxtp)
           if(ip(3).ne.0) go to 800
         endif
       else if(ierr.eq.0) then
@@ -131,29 +146,29 @@ C  3. Plant values in COMMON
 C
 300   continue
       if(indx.eq.vrevw) then
-        kvrevw_fs=.true.
-        rvrevw_fs=vlt
+        kvrevw_fs(indxtp)=.true.
+        rvrevw_fs(indxtp)=vlt
       else if(indx.eq.v15rev) then
-        kv15rev_fs=.true.
-        rv15rev_fs=vlt
+        kv15rev_fs(indxtp)=.true.
+        rv15rev_fs(indxtp)=vlt
       else if(indx.eq.v15for) then
-        kv15for_fs=.true.
-        rv15for_fs=vlt
+        kv15for_fs(indxtp)=.true.
+        rv15for_fs(indxtp)=vlt
       else if(indx.eq.v15scale) then
-        kv15scale_fs=.true.
-        rv15scale_fs=vlt
+        kv15scale_fs(indxtp)=.true.
+        rv15scale_fs(indxtp)=vlt
       else if(indx.eq.v13) then
-        kv13_fs=.true.
-        rv13_fs=vlt
+        kv13_fs(indxtp)=.true.
+        rv13_fs(indxtp)=vlt
       else if(indx.eq.v15flip) then
-        kv15flip_fs=.true.
-        rv15flip_fs=vlt
+        kv15flip_fs(indxtp)=.true.
+        rv15flip_fs(indxtp)=vlt
       else if(indx.eq.vw0) then
-        kvw0_fs=.true.
-        rvw0_fs=vlt
+        kvw0_fs(indxtp)=.true.
+        rvw0_fs(indxtp)=vlt
       else if(indx.eq.vw8) then
-        kvw8_fs=.true.
-        rvw8_fs=vlt
+        kvw8_fs(indxtp)=.true.
+        rvw8_fs(indxtp)=vlt
       endif
       goto 990
 C
@@ -162,35 +177,41 @@ C
 500   continue
       nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
+      call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(drive_type.eq.VLBA2) then
+      if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
          ipr=1
       else
          ipr=3
       endif
 C
-      if(kvrevw_fs)      nch=nch+ir2as(rvrevw_fs,ibuf,nch,8,ipr)
+      if(kvrevw_fs(indxtp))
+     $     nch=nch+ir2as(rvrevw_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15rev_fs)     nch=nch+ir2as(rv15rev_fs,ibuf,nch,8,ipr)
+      if(kv15rev_fs(indxtp))
+     $     nch=nch+ir2as(rv15rev_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15for_fs)     nch=nch+ir2as(rv15for_fs,ibuf,nch,8,ipr)
+      if(kv15for_fs(indxtp))
+     $     nch=nch+ir2as(rv15for_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15scale_fs)   nch=nch+ir2as(rv15scale_fs,ibuf,nch,8,ipr)
+      if(kv15scale_fs(indxtp))
+     $     nch=nch+ir2as(rv15scale_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv13_fs)        nch=nch+ir2as(rv13_fs,ibuf,nch,8,ipr)
+      if(kv13_fs(indxtp)) nch=nch+ir2as(rv13_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kv15flip_fs)    nch=nch+ir2as(rv15flip_fs,ibuf,nch,8,ipr)
+      if(kv15flip_fs(indxtp))
+     $     nch=nch+ir2as(rv15flip_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kvw0_fs)        nch=nch+ir2as(rvw0_fs,ibuf,nch,8,ipr)
+      if(kvw0_fs(indxtp)) nch=nch+ir2as(rvw0_fs(indxtp),ibuf,nch,8,ipr)
       nch=mcoma(ibuf,nch)
 C
-      if(kvw8_fs)        nch=nch+ir2as(rvw8_fs,ibuf,nch,8,ipr)
+      if(kvw8_fs(indxtp)) nch=nch+ir2as(rvw8_fs(indxtp),ibuf,nch,8,ipr)
 C
       nch=nch-1
       call put_buf(iclass,ibuf,-nch,'fs','  ')
@@ -201,7 +222,7 @@ C
       if(ip(2).ne.0) call clrcl(ip(1))
       ip(2)=0
       call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
 C
 C  That's all
 C

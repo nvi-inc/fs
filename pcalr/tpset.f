@@ -8,21 +8,21 @@ C
 C
       ierr = 0
       ibuf(1) = 0
-      call char2hol('tp',ibuf(2),1,2)
+      call char2hol('t1',ibuf(2),1,2)
       call fs_get_iratfm(iratfm)
       ieql = iratfm-2
       if (ieql.lt.0) ieql = 6
       ibcd = iratfm-1
       if (ibcd.lt.0) ibcd = 7
-      call fs_get_itraka(itraka)
-      call fs_get_itrakb(itrakb)
+      call fs_get_itraka(itraka,1)
+      call fs_get_itrakb(itrakb,1)
       if (ksa) then
-        call rp2ma(ibuf(3),ibyppc,ieql,ibcd,itrakb,itrakb)
+        call rp2ma(ibuf(3),ibyppc,ieql,ibcd,itrakb(1),itrakb(1))
       else
-        call rp2ma(ibuf(3),ibyppc,ieql,ibcd,itraka,itrakb)
+        call rp2ma(ibuf(3),ibyppc,ieql,ibcd,itraka(1),itrakb(1))
       endif
 C                   Code up the buffer for MATCN.
-      if (ibugpc.gt.0) write(lu,9100) ibyppc,itraka,itrakb
+      if (ibugpc.gt.0) write(lu,9100) ibyppc,itraka(1),itrakb(1)
 9100  format(/" ibyppc="i2" itraka="i3" itrakb="i3)
 C                   Get bandwidth from IRATFM in common
       iclass = 0

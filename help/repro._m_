@@ -1,0 +1,38 @@
+        repro - set up reproduce tracks (Mark III drives)
+
+Syntax:     repro=bypass,trackA,trackB,bandwidth,equalizer 
+
+Response:   repro/bypass,trackA,trackB,bandwidth,equalizer
+
+
+Settable parameters:
+bypass    byp (default) for bypass, raw for read-after-write.
+trackA    Track for decoder channel A, default 1; 0-28 allowed.
+trackB    Track for decoder channel B, default 1; 0-28 allowed.
+bandwidth Bandwidth for decoding , MHz, default 2; 0.0625, 0.125,
+          0.25, 0.5, 1, 2, and 4 MHz allowed or actual tape speed
+          4.21875, 8.4375, 16.875, 33.75, 67.5, 135, and 270 ips
+          allowed
+equalizer Equalizer for reproduce, MHz, defaults to bandwidth;
+          0.0625, 0.125, 0.25, 0.5, 1, 2, and 4 MHz allowed or
+          actual tape speed 4.21875, 8.4375, 16.875, 33.75, 67.5,
+          135, and 270 ips allowed 
+
+Monitor-only parameters: none
+
+Comments: 
+MAT module functions available for Mark III.
+
+The raw mode normally is used only when checking parity errors on
+the tape.
+
+Selection of track 0 for a decoder channel will disable that
+channel until another track is selected.
+
+Note that a VLBA or Mark IV track number equals the Mark III
+track number plus three. Consequently, odd Mark III tracks are
+even VLBA or Mark IV track numbers and vice-versa. See the Track
+Assignment Tables in the System Set-up manual. Also VLBA group
+numbers equal Mark III group numbers minus one, but the VLBA
+groups include additional tracks. Note that this command uses
+Mark III track numbers. 

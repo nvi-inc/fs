@@ -16,6 +16,7 @@ int icherr[5];
 int *ierr;
 {
   struct dist_cmd lclc;
+  struct dist_mon lclm;
   struct dist_cmd lcomm;
   int ind, ich, count;
   struct res_buf buffer;
@@ -29,7 +30,11 @@ int *ierr;
   opn_res(&buffer,ip);
   get_res(&response, &buffer); mc01dist(&lclc, response.data);
   get_res(&response, &buffer); mc02dist(&lclc, response.data);
+  get_res(&response, &buffer); mc06dist(&lclm, response.data);
+  get_res(&response, &buffer); mc07dist(&lclm, response.data);
   if (response.state == -1) {
+    shm_addr->vifd_tpi[2*ind+0]=65536;
+    shm_addr->vifd_tpi[2*ind+1]=65536;
      clr_res(&buffer);
      *ierr=-201;
      return;
@@ -44,6 +49,8 @@ int *ierr;
   if (lcomm.input[0] != lclc.input[0]) icherr[2]=1;
   if (lcomm.input[1] != lclc.input[1]) icherr[3]=1;
   if (lcomm.avper != lclc.avper) icherr[4]=1;
+  shm_addr->vifd_tpi[2*ind+0]=lclm.totpwr[0];
+  shm_addr->vifd_tpi[2*ind+1]=lclm.totpwr[1];
 
   return;
 }

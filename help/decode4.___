@@ -1,0 +1,28 @@
+           decode4 - Mark IV decoder low-level control
+
+Syntax:     decode4=command
+
+Response:   decode/response
+
+
+Settable parameters:
+command   any legal command for Mark IV decoder. The terminating
+          "$" character is  appended before sending the command.
+
+Monitor-only parameters:
+data        response to command.
+
+Comments: 
+This command is a simple feed-through to the Mark IV decoder. No
+checking is done on the command, no action is taken for any
+response. This form of the command is temporary while it is
+determined what standard parameters are desired.
+
+The command is sent to the MAT bus just as if the operator had
+used the mat command. No modifications are made before the
+command is sent on the bus.
+
+This command is for the new  Mark IV decoder which may be
+installed in any of the Mark III, Mark IV, or VLBA4 rack types,
+but this command will work decoder if it is installed with other
+rack types as well.

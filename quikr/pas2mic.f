@@ -1,4 +1,4 @@
-      subroutine pas2mic(ihead,ipass,micron,ip)
+      subroutine pas2mic(ihead,ipass,micron,ip,indxtp)
       integer ihead,ipass,ip(5)
       real*4 micron
 C
@@ -17,8 +17,8 @@ C           = -403 if pass number is undefined
 C
       include '../include/fscom.i'
 C
-      if(itapof(ipass).gt.-13000) then
-        micron=itapof(ipass)
+      if(itapof(ipass,indxtp).gt.-13000) then
+        micron=itapof(ipass,indxtp)
       else
         ip(3)=-403
         call char2hol('q@',ip(4),1,2)

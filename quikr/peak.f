@@ -1,4 +1,4 @@
-      subroutine peak(ip)
+      subroutine peak(ip,itask)
 C
 C  Peak up on tape drive read resposne
 C
@@ -11,6 +11,12 @@ C
       equivalence (reg,ireg(1)),(parm,iparm(1))
       character cjchar
       data ilen/100/
+C
+      if( itask.eq.4) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
 C
       ichold=-99
       iclass=0
@@ -43,7 +49,7 @@ C
       if(cjchar(parm,1).eq.',') then
         nsamp=3
       else if(cjchar(parm,1).eq.'*') then
-        nsamp=nsamppk_fs
+        nsamp=nsamppk_fs(indxtp)
       else if(ierr.eq.0) then
         nsamp=iparm(1)
       else
@@ -57,7 +63,7 @@ C
       if(cjchar(parm,1).eq.',') then
         iter=1
       else if(cjchar(parm,1).eq.'*') then
-        iter=iterpk_fs
+        iter=iterpk_fs(indxtp)
       else if(ierr.eq.0) then
         iter=iparm(1)
       else
@@ -71,7 +77,12 @@ C
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
       if((ichcm_ch(parm,1,'r').eq.0..or.ichcm_ch(parm,1,'2').eq.0)
-     &   .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+     &   .and.(
+     $     (VLBA.eq.drive(indxtp).and.VLBAB.eq.drive_type(indxtp))
+     $     .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &     (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $     )
+     &     ) then
         ihd = 2
       else if(ichcm_ch(parm,1,'r').eq.0.or.
      &        ichcm_ch(parm,1,'2').eq.0) then
@@ -81,9 +92,13 @@ C
      &        ichcm_ch(parm,1,'1').eq.0) then
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
-        ihd=ihdpk_fs
+        ihd=ihdpk_fs(indxtp)
       else if (cjchar(parm,1).eq.','
-     &       .and.(VLBA.ne.drive.and.MK3B.ne.drive_type)) then
+     &       .and.(
+     $       VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
+     &       (MK4.eq.drive(indxtp).and.MK4B.ne.drive_type(indxtp))
+     $       )
+     $       ) then
         ihd = 2
       else if (cjchar(parm,1).eq.',') then
         ihd = 1
@@ -98,7 +113,7 @@ C
       if(cjchar(parm,1).eq.',') then
         vmin=.2
       else if(cjchar(parm,1).eq.'*') then
-        vmin=vminpk_fs
+        vmin=vminpk_fs(indxtp)
       else if(ierr.eq.0) then
         vmin=parm
       else
@@ -109,44 +124,47 @@ C
 C  3. Plant values in COMMON
 C
 300   continue
-      ihdpk_fs=ihd
-      iterpk_fs=iter
-      nsamppk_fs=nsamp
-      vminpk_fs=vmin
+      ihdpk_fs(indxtp)=ihd
+      iterpk_fs(indxtp)=iter
+      nsamppk_fs(indxtp)=nsamp
+      vminpk_fs(indxtp)=vmin
       goto 990
 C
 C  5.  Find peak
 C
 500   continue
-      kpeakv_fs=.false.
-      call fs_get_ispeed(ispeed)
-      call fs_get_cips(cips)
-      call fs_get_idirtp(idirtp)
-      call fs_get_ienatp(ienatp)
-      if(ispeed.eq.0.or.(ispeed.eq.-3.and.cips.eq.0)) then !tape must be moving
+      kpeakv_fs(indxtp)=.false.
+      call fs_get_ispeed(ispeed,indxtp)
+      call fs_get_cips(cips,indxtp)
+      call fs_get_idirtp(idirtp,indxtp)
+      call fs_get_ienatp(ienatp,indxtp)
+      if(ispeed(indxtp).eq.0.or.(ispeed(indxtp).eq.-3.and.
+     $     cips(indxtp).eq.0)) then
+C       !tape must be moving
         ip(3)=-341
         goto 990
-      else if(idirtp.ne.1..and.ienatp.ne.0) then ! not rec in rev
+      else if(idirtp(indxtp).ne.1.and.ienatp(indxtp).ne.0) then ! not rec in rev
         ip(3)= -342
         goto 990
-      else if(ihdpk_fs.eq.0) then ! command must be set-up
+      else if(ihdpk_fs(indxtp).eq.0) then ! command must be set-up
         ip(3)=-343
         goto 990
       endif
 C
-      call fs_get_icheck(icheck(20),20)
-      ichold=icheck(20)
-      icheck(20) = 0
-      call fs_set_icheck(icheck(20),20)
+      call fs_get_icheck(icheck(20+indxtp-1),20+indxtp-1)
+      ichold=icheck(20+indxtp-1)
+      icheck(20+indxtp-1) = 0
+      call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
 C
-      call lvdonn('lock',ip)
+      call lvdonn('lock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call pkhd(ihdpk_fs,iterpk_fs,nsamppk_fs,rpdt_fs,vltpk_fs,peakv,
-     &          mper,ip,khecho_fs,lu,kpeakv_fs,vminpk_fs)
+      call pkhd(ihdpk_fs(indxtp),iterpk_fs(indxtp),nsamppk_fs(indxtp),
+     $     rpdt_fs(indxtp),vltpk_fs(indxtp),peakv,mper,ip,khecho_fs,
+     $     lu,kpeakv_fs(indxtp),vminpk_fs(indxtp),indxtp)
       if(ip(3).ne.0) goto 800
 C
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
       if(ip(3).ne.0) goto 800
 C
 C  6.  Set up response
@@ -156,20 +174,20 @@ C
       if(ieq.eq.0) nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
 C
-      nch=nch+ib2as(nsamppk_fs,ibuf,nch,o'100003')
+      nch=nch+ib2as(nsamppk_fs(indxtp),ibuf,nch,o'100003')
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ib2as(iterpk_fs,ibuf,nch,o'100003')
+      nch=nch+ib2as(iterpk_fs(indxtp),ibuf,nch,o'100003')
       nch=mcoma(ibuf,nch)
 C
-      if(ihdpk_fs.eq.1) then
-        nch=ichmv_ch(ibuf,nch,'write')
-      else if(ihdpk_fs.eq.2) then
-        nch=ichmv_ch(ibuf,nch,'read')
+      if(ihdpk_fs(indxtp).eq.1) then
+        nch=ichmv_ch(ibuf,nch,'1')
+      else if(ihdpk_fs(indxtp).eq.2) then
+        nch=ichmv_ch(ibuf,nch,'2')
       endif
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(vminpk_fs,ibuf,nch,8,3)
+      nch=nch+ir2as(vminpk_fs(indxtp),ibuf,nch,8,3)
       nch=mcoma(ibuf,nch)
 C
       if(ieq.eq.0) nch=nch+ir2as(peakv,ibuf,nch,8,3)
@@ -178,18 +196,19 @@ C
       if(ieq.eq.0) nch=nch+ir2as(mper,ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
 C
-      if(kpeakv_fs) then
+      if(kpeakv_fs(indxtp)) then
         nch=ichmv_ch(ibuf,nch,'t')
       else
         nch=ichmv_ch(ibuf,nch,'f')
       endif
       nch=mcoma(ibuf,nch)
 C
+      call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
-      if(drive_type.eq.VLBA2) then
-         nch=nch+ir2as(vltpk_fs,ibuf,nch,8,1)
+      if(drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2) then
+         nch=nch+ir2as(vltpk_fs(indxtp),ibuf,nch,8,1)
       else
-         nch=nch+ir2as(vltpk_fs,ibuf,nch,8,3)
+         nch=nch+ir2as(vltpk_fs(indxtp),ibuf,nch,8,3)
       endif
 C
       nch=nch-1
@@ -201,7 +220,7 @@ C
       if(ip(2).ne.0) call clrcl(ip(1))
       ip(2)=0
       call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
 C
 C  That's all
 C
@@ -210,8 +229,8 @@ C
       ip(1)=iclass
       ip(2)=nrec
       if(ichold.ne.-99) then
-        icheck(20)=ichold
-        call fs_set_icheck(icheck(20),20)
+        icheck(20+indxtp-1)=ichold
+        call fs_set_icheck(icheck(20+indxtp-1),20+indxtp-1)
       endif
       return
       end

@@ -38,9 +38,10 @@ C
       call ifill_ch(ibuf2,1,ibuf2len*2,' ')
       ireg(2) = get_buf(iclass,ibuf2,-10,idum,idum)
       call ma2vc(ibuf1,ibuf2,lfr,ibw,itp,ia1,ia2,
-     .           iremvc(iloop),ilokvc(iloop),tpivc(iloop),ialarm)
+     .           iremvc(iloop),ilokvc(iloop),tpivcl,ialarm)
       call fs_set_ilokvc(ilokvc)
-      call fs_set_tpivc(tpivc)
+      tpivc(iloop)=nint(tpivcl)
+      call fs_set_tpivc(tpivc,iloop)
       if(iremvc(iloop).ne.0) inerr(1) = inerr(1) + 1
       call fs_get_lfreqv(lfreqv)
       if (ichcm(lfr,1,lfreqv(1,iloop),1,6).ne.0) inerr(2)=inerr(2)+1
@@ -51,8 +52,7 @@ C
       if (ia2.ne.iatlvc(iloop)) inerr(6)=inerr(6)+1
       call fs_get_ilokvc(ilokvc)
       if (ilokvc(iloop).ne.0) inerr(7)=inerr(7)+1
-      call fs_get_tpivc(tpivc)
-      if (tpivc(iloop).eq.65535) inerr(8)=inerr(8)+1
+      if (tpivcl.ge.65534.5) inerr(8)=inerr(8)+1
       call ifill_ch(ibuf1,1,ibuf1len*2,' ')
       ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
       kalarm = ichcm_ch(ibuf1,3,'nak').eq.0

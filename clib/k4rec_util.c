@@ -14,7 +14,7 @@
 
 #include "../include/k4rec_ds.h"
 
-static char device[]={"d4"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 static char *state_key[ ]={"off","on"};
 

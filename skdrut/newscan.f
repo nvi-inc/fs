@@ -18,6 +18,8 @@ C 970114 nrv change 8 to max_sorlen
 C 970721 nrv Add IDRIVE to call, if 0 set direction to 0.
 C 970721 nrv Add idstart fields following durations
 C 970721 nrv Remove footage, duration, and good data to subroutines
+C 000106 nrv Check the year before converting to 2-digit internal year.
+C 001030 nrv Need one more space before the flag field.
 
 C Input:
       integer istn ! first station in this scan
@@ -36,7 +38,7 @@ C Output:
 
 C Local
       integer*2 ibuf(ibuf_len)
-      integer i,ical,nch,idl
+      integer i,ical,nch,idl,iyr
       integer iflch,ichcm_ch,ichmv,ichmv_ch,ib2as
       integer numc2,numc3
       integer feetscan,gdscan,durscan
@@ -58,7 +60,9 @@ C     Freq code
 C     Preob 
       NCH = 1 + ICHMV_ch(IBUF,NCH+1,'PREOB ')
 C     Start time
-      NCH = NCH + IB2AS(istart(1)-1900,IBUF,NCH,2)
+      if (istart(1).ge.2000) iyr = istart(1)-2000
+      if (istart(1).lt.2000) iyr = istart(1)-1900
+      NCH = NCH + IB2AS(iyr,IBUF,NCH,numc2)
       NCH = NCH + IB2AS(istart(2),IBUF,NCH,numc3)
       NCH = NCH + IB2AS(istart(3),IBUF,NCH,numc2)
       NCH = NCH + IB2AS(istart(4),IBUF,NCH,numc2)
@@ -96,20 +100,21 @@ C     NCH = ICHMV_ch(IBUF,NCH,cdir)
 C  Put in footage. For S2 this is in seconds.
 C     NCH=  NCH+IB2AS(ifeet,IBUF,NCH,numc5)
 C   Insert blanks for other stations' footages
-      nch = nch + nstatn*8
+      nch = nch + nstatn*8 ! (1)pass(1)dur(5)footage(1)space
 C  Procedure flags
+      nch=nch+1
       nch = ichmv_ch(ibuf,nch,'YNNN')
 C  Duration
       nch=nch+1
       nch = durscan(ibuf,nch,idend)
 C     NCH = 1 + NCH + IB2AS(idend,IBUF,NCH+1,5)
 C   Insert blanks for other stations' durations
-      nch = nch + nstatn*6
+      nch = nch + nstatn*6 ! (5)dur(1)space
 C  Good data offset
       nch = gdscan(ibuf,nch,idstart)
 C     nch = 1 + nch + ib2as(idstart,ibuf,nch+1,5)
 C   Insert blanks for other stations' good data offsets
-      nch = nch + nstatn*6
+      nch = nch + nstatn*6 ! (5)dur(1)space
 C
 C Store the record in common
 

@@ -26,7 +26,7 @@ C  LOCAL:
 C
       integer*2 ibuf(40),ibuft(10),ibuf2(10),ibuf4(40)
       integer ilen,trimlen
-      integer it(6),get_buf, ireg(2), fc_rte_sett
+      integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
       integer*4 centisec(2),centiavg,secs_fm,secs_fs,centifs
       integer*4 centidiff,diff,nanosec
       character*63 name
@@ -63,6 +63,16 @@ c
 c
       set=' '
       call get_arg(1,set)
+      call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &     rateti_fs,spanti_fs,modelti_fs)
+      if(set.eq.'cpu') then
+          call logit7ci(idum,idum,idum,-1,-3,'sc',0)
+          goto 999
+      else if((set.eq.'offset'.or.set.eq.'rate')
+     &     .and.cjchar(modelti_fs,1).eq.'c') then
+         call logit7ci(idum,idum,idum,-1,-12,'sc',0)
+         goto 999
+      endif
       if(set.eq.'save') then
         name=FS_ROOT//'/control/time.new'
         call fopen(9,name,ierr)
@@ -77,6 +87,8 @@ c
           model='rate'
         else if(cjchar(modelti_fs,1).eq.'o') then
           model='offset'
+        else if(cjchar(modelti_fs,1).eq.'c') then
+           model='ntp'
         else
           model='none'
         endif
@@ -105,7 +117,7 @@ c
 50    continue
       iclasm = 0
       nrec = 0
-      if(drive.eq.S2) then
+      if(drive(1).eq.S2) then
          idum=rn_take('fsctl',0)
          call fc_get_s2time(centisec,it,nanosec,ip)
          call rn_put('fsctl')
@@ -120,7 +132,7 @@ c
             goto 998
          endif
          goto 200
-      else if(K4.eq.drive ) then
+      else if(K4.eq.drive(1) ) then
         idum=rn_take('fsctl',0)
         call fc_get_k4time(centisec,it,ip)
         centisec(2)=centisec(1)
@@ -162,13 +174,7 @@ C             two return buffers with imode = -53
         ibuf(1) = -4
         nrec = nrec + 1
         call put_buf(iclasm,ibuf,-4,'fs','  ')
-      else if(K4.eq.rack. and. (
-     &       K41K3 .eq.rack_type.or.
-     &       K41UK3.eq.rack_type.or.
-     &       K42K3 .eq.rack_type.or.
-     &       K42AK3.eq.rack_type.or.
-     &       K42BUK3.eq.rack_type)
-     &       ) then
+      else if(K4K3.eq.rack) then
         idum=rn_take('fsctl',0)
         call fc_get_k3time(centisec,it,ip)
         centisec(2)=centisec(1)
@@ -226,7 +232,17 @@ C
         ireg(2) = get_buf(iclass,ibuf,-20,idum,idum)
 c
         nch = ichmv_ch(ibuf2,1,'tm,')
-        call fs_get_iyrctl_fs(iyrctl_fs)
+
+        idigyr=ias2b(ibuf,4,1)
+        call fc_rte_time(it,it(6))
+        if(mod(it(6),10).eq.0.and.idigyr.eq.9) then
+           iyrctl_fs=it(6)-10-mod(it(6),10)
+        else if(mod(it(6),10).eq.9.and.idigyr.eq.0) then
+           iyrctl_fs=it(6)+10-mod(it(6),10)
+        else
+           iyrctl_fs=it(6)-mod(it(6),10)
+        endif
+c
         nch = nch+ib2as(iyrctl_fs/10,ibuf2,nch,3)
         nch = ichmv(ibuf2,nch,ibuf,4,1)
 C                   The last digit of the year
@@ -348,7 +364,8 @@ c
       inxtc=ichmv_ch(ibuf,inxtc,'.')
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      if (epochti_fs.eq.0.or.set.eq.'offset') then
+      if (cjchar(modelti_fs,1).ne.'c'
+     &     .and.(epochti_fs.eq.0.or.set.eq.'offset')) then
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
@@ -380,26 +397,16 @@ c
         inxtc = ichmv_ch(ibuf,inxtc,'rate')
       else if(cjchar(modelti_fs,1).eq.'o') then
         inxtc = ichmv_ch(ibuf,inxtc,'offset')
+      else if(cjchar(modelti_fs,1).eq.'c') then
+        inxtc = ichmv_ch(ibuf,inxtc,'ntp')
       else
         inxtc = ichmv_ch(ibuf,inxtc,'none')
       endif
       call logit2(ibuf,inxtc-1)
 c
-      if(set.eq.'cpu') then
-        ierr=fc_rte_sett(secs_fm,it(1),centiavg,'cpu'//char(0))
-        if (ierr.ne.0) then
-          call logit7ci(idum,idum,idum,-1,-3,'sc',0)
-          nerr = nerr+1
-          if (nerr.gt.2) goto 998
-          goto 50
-        endif
-        set='offset'   !everything worked, now read the offset
-        call susp(1,110)
-        nerr=0
-        goto 50
-      else if(set.eq.'offset'
+      if(cjchar(modelti_fs,1).ne.'c'.and.(set.eq.'offset'
      &       .or.(set.eq.'rate'.and.spanti_fs.le.centiavg-epochtifs)
-     &       .or.(set.eq.' '.and.epochti_fs.eq.0)) then!update model
+     &       .or.(set.eq.' '.and.epochti_fs.eq.0))) then!update model
         if(set.eq.' ') set='offset'
 	ierr=fc_rte_sett(secs_fm,it(1),centiavg,
      &                   set(:max(trimlen(set),1))//char(0))
@@ -425,6 +432,8 @@ c
         endif
         call logit2(ibuf,inxtc-1)
 c
+      else if(abs(diff).gt.49) then
+         call logit7ci(idum,idum,idum,-1,-13,'sc',0)
       endif
       goto 999
 C

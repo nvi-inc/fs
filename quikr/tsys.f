@@ -23,6 +23,7 @@ C
 C 3.  LOCAL VARIABLES 
       dimension itpis(17) 
       integer itpis_vlba(32) 
+      integer itpis_norack(2)
 C      - which TPIs to read back, filled in by TPLIS
 C        ICH    - character counter 
 C     NCHAR  - character count
@@ -59,6 +60,8 @@ C                   Pick up the Tsys1 or 2 index
         call tplis(ip,itpis)
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
+      else
+        call tplisn(ip,itpis_norack)
       endif
       
       ierr = ip(3)
@@ -108,8 +111,10 @@ C     Make sure we don't overstep our buffer
          call fs_set_systmp(systmp)
          nch = nch - 2 
 C 
-      else
+      else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tsys_vlba(itpis_vlba,ibuf,nch, caltmp(indtmp))
+      else
+        call fc_tsys_norack(itpis_norack,ibuf,nch, caltmp(indtmp))
       endif
 C
       iclass = 0

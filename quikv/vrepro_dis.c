@@ -11,9 +11,9 @@
 
 #define MAX_OUT 256
 
-void vrepro_dis(command,itask,ip)
+void vrepro_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       struct vrepro_cmd lclc;
@@ -32,7 +32,7 @@ long ip[5];
          logmsg(output,command,ip);
          return;
       } else if(kcom)
-         memcpy(&lclc,&shm_addr->vrepro,sizeof(lclc));
+         memcpy(&lclc,shm_addr->vrepro+indx,sizeof(lclc));
       else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mc98vrepro(&lclc, response.data);
@@ -43,16 +43,18 @@ long ip[5];
 	   mc90vrepro(&lclc, response.data);
 
          get_res(&response, &buffer);
-	 if(lclc.head[0]==1) 
+	 if(lclc.head[1]==1) 
 	   mc91vrepro(&lclc, response.data);
 
-	 if(shm_addr->equip.drive == VLBA4) {
+	 if(shm_addr->equip.drive[indx] == VLBA4||
+	    (shm_addr->equip.drive[indx]==VLBA &&
+	     shm_addr->equip.drive_type[indx]==VLBAB)) {
 	   get_res(&response, &buffer); 
 	   if(lclc.head[0]==2) 
 	     mc92vrepro(&lclc, response.data);
 
 	   get_res(&response, &buffer);
-	   if(lclc.head[0]==2) 
+	   if(lclc.head[1]==2) 
 	     mc93vrepro(&lclc, response.data);
 	 }
 
@@ -61,16 +63,18 @@ long ip[5];
 	   mc94vrepro(&lclc, response.data);
 
          get_res(&response, &buffer);
-	 if(lclc.head[0]==1) 
+	 if(lclc.head[1]==1) 
 	   mc95vrepro(&lclc, response.data);
 
-	 if(shm_addr->equip.drive == VLBA4) {
+	 if(shm_addr->equip.drive[indx] == VLBA4||
+	    (shm_addr->equip.drive[indx]==VLBA &&
+	     shm_addr->equip.drive_type[indx]==VLBAB)) {
 	   get_res(&response, &buffer);
 	   if(lclc.head[0]==2) 
 	     mc96vrepro(&lclc, response.data);
 
 	   get_res(&response, &buffer);
-	   if(lclc.head[0]==2) 
+	   if(lclc.head[1]==2) 
 	     mc97vrepro(&lclc, response.data);
 	 }
 

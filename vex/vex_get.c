@@ -20,7 +20,7 @@ int vex_open(char *name, struct vex **vex)
     return -2;
 
   *vex=vex_ptr;
-  close(yyin);
+  fclose(yyin);
   return 0;
 }
 /*---------------------------------------------------------------------------*/
@@ -86,13 +86,13 @@ ldone:
 }
 /*---------------------------------------------------------------------------*/
 void *
-get_scan_station_next(Llist **lowls_scan)
+get_scan_station_next(Llist **lowls_scan, char **scanid)
 {
-  return get_scan_station(lowls_scan,NULL,NULL);
+  return get_scan_station(lowls_scan, scanid, NULL,NULL);
 }
 /*---------------------------------------------------------------------------*/
 void *
-get_scan_station(Llist **lowls_scan, char *station_in,
+get_scan_station(Llist **lowls_scan, char **scanid, char *station_in,
 		 struct vex *vex_in)
 {
 
@@ -106,6 +106,7 @@ get_scan_station(Llist **lowls_scan, char *station_in,
   static struct vex *vex;
 
   static int state=FALSE;
+  static char *save_scanid;
 
   if(station_in==NULL && !state)
      return NULL;
@@ -136,6 +137,7 @@ lstart:
     goto ldone;
 
   *lowls_scan=((Def *)((Lowl *)defs->ptr)->item)->refs;
+  save_scanid=((Def *)((Lowl *)defs->ptr)->item)->name;
 
   lowls=*lowls_scan;
 
@@ -151,6 +153,7 @@ lstate:
   
   state=TRUE;
 
+  *scanid=save_scanid;
   lowls_this=lowls;
   lowls=lowls->next;
   return ((Lowl *)lowls_this->ptr)->item;
@@ -161,6 +164,91 @@ lend:
 
 ldone:
     state=FALSE;
+    return NULL;
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_scan_next(char **scanid)
+{
+  return get_scan(scanid, NULL);
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_scan(char **scanid, struct vex *vex_in)
+{
+
+  static Llist *defs;
+
+  Llist *blocks;
+  Llist *defs_this;
+
+  static struct vex *vex;
+
+  static int state=FALSE;
+
+  if(vex_in==NULL && !state)
+     return NULL;
+
+  if(vex_in!=NULL) {
+    vex=vex_in;
+    state=FALSE;
+  }
+
+  if(state)
+    goto lstate;
+ 
+  /* find $SCHED block */
+
+  blocks=find_block(B_SCHED, vex);
+  if(blocks==NULL)
+    goto ldone;
+
+  defs=((struct block *)blocks->ptr)->items; 
+
+lstate:
+  /* find a def */
+
+  defs=find_next_scan(defs);
+
+  if (defs==NULL)
+    goto ldone;
+
+  state=TRUE;
+
+  defs_this=defs;
+  defs=defs->next;
+  *scanid=((Def *)((Lowl *)defs_this->ptr)->item)->name;
+  return ((Def *)((Lowl *)defs_this->ptr)->item)->refs;
+
+ldone:
+  state=FALSE;
+  return NULL;
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_station_scan_next()
+{
+  return get_station_scan(NULL);
+}
+/*---------------------------------------------------------------------------*/
+void *
+get_station_scan(Llist *lowls_in)
+{
+  Llist *lowls_this;
+  static Llist *lowls;
+
+  if(lowls_in!=NULL)
+    lowls=lowls_in;
+
+  lowls=find_lowl(lowls,T_STATION);
+  if(lowls==NULL)
+    goto ldone;
+
+  lowls_this=lowls;
+  lowls=lowls->next;
+  return ((Lowl *)lowls_this->ptr)->item;
+
+ldone:
     return NULL;
 }
 /*---------------------------------------------------------------------------*/

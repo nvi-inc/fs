@@ -44,7 +44,6 @@ C      - temporary TP variables
       parameter (ibufln=15)
       integer*2 ibuf(ibufln),ibufd(ibufln)
 C               - input class buffers with MATCN responses
-C        ILEN   - length of buffers, chars
 C               - registers from EXEC 
       dimension ireg(2) 
       integer get_buf
@@ -54,7 +53,6 @@ C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
-      data ilen/10/ 
       data ibufd/15*2H00/
 C 
 C 
@@ -108,7 +106,7 @@ C                     For IF2, pick up second value
 c
 130     continue
         call ma2i3(ibufd,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
-     &                iswp,freq,irem,ilo,tret(1))
+     &                ipcalp,iswp,freq,irem,ipcal,ilo,tret(1))
         if (isub.eq.3) tpsor(i+14)=tret(1)
         if (isub.eq.4) tpspc(i+14)=tret(1)
         if (isub.eq.7) tpzero(i+14)=tret(1) 

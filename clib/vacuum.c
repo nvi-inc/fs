@@ -9,10 +9,11 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
+static char deviceA[]={"r1"};           /* device menemonics */
+static char deviceB[]={"r2"};           /* device menemonics */
 
-int vacuum(ierr)
-int *ierr;
+int vacuum(ierr,indx)
+int *ierr, indx;
 {
   int lierr;
   long ip[5];
@@ -30,10 +31,12 @@ int *ierr;
 
 /* tape ready does not seem to be reliable in RECON 4 */
 
-  return 0;
   ini_req(&buffer);
 
-  memcpy(request.device,device,2);    /* device mnemonic */
+  if(indx==0) 
+    memcpy(request.device,deviceA,2);    /* device mnemonic */
+  else
+    memcpy(request.device,deviceB,2);    /* device mnemonic */
 
   request.type=1;
   request.addr=0x73; add_req(&buffer,&request);
@@ -56,18 +59,18 @@ int *ierr;
   if ((lcl.stat & 0x40) == 0) { 
      /* vacuum not ready */
     lierr = -1;
-    shm_addr->IRDYTP = 1;
+    shm_addr->IRDYTP[indx] = 1;
   }
 #if 0
   else if ((lcl.stat & 0x01)==1) {
     /* error present */
     lierr = -2;
-    shm_addr->IRDYTP = 1;
+    shm_addr->IRDYTP[indx] = 1;
   }
 #endif
   else {                             /* vacuum is ready */
     lierr = 0;
-    shm_addr->IRDYTP = 0;
+    shm_addr->IRDYTP[indx] = 0;
   }
 
   return lierr;

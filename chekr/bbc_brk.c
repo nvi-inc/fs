@@ -16,6 +16,7 @@ int icherr[10];
 int *ierr;
 {
   struct bbc_cmd lclc;
+  struct bbc_mon lclm;
   struct bbc_cmd lcomm;
   int ind;
   struct res_buf buffer;
@@ -35,7 +36,11 @@ int *ierr;
 /*  get_res(&response, &buffer); mc05bbc(&lclc, response.data);
   not implemented yet
 */
+  get_res(&response, &buffer); mc06bbc(&lclm, response.data);
+  get_res(&response, &buffer); mc07bbc(&lclm, response.data);
   if(response.state == -1) {
+    shm_addr->bbc_tpi[ind][0]=65536;
+    shm_addr->bbc_tpi[ind][1]=65536;
      clr_res(&buffer);
      *ierr=-201;
      return;
@@ -54,6 +59,7 @@ int *ierr;
 /*  if (lcomm.gain.value[1] != lclc.gain.value[1]) icherr[8]=1; */
 /* not implemented yet */
   if (lcomm.avper != lclc.avper) icherr[9]=1;
-
+  shm_addr->bbc_tpi[ind][0]=lclm.pwr[0];
+  shm_addr->bbc_tpi[ind][1]=lclm.pwr[1];
   return;
 }

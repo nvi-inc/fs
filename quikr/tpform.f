@@ -1,4 +1,4 @@
-      subroutine tpform(ip)
+      subroutine tpform(ip,itask)
 C  specify tape format c#870115:04:35#
 C 
 C   TPFORM reads the a priori head offsets for each tape pass number
@@ -44,6 +44,12 @@ C
 C     1. Set output parameters (except error flag) and read from input
 C     class into local buffer IBUF.
 C 
+      if( itask.eq.1) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       iclcm = ip(1) 
       iclass = 0
       ip(1)=iclass
@@ -62,11 +68,12 @@ C             the contents of the ITAPOF array.
         nchar = 1
         nrec = 0
         do i=1,maxpass
-          if (itapof(i).ge.minoff .and. itapof(i).le.maxoff) then
+          if (itapof(i,indxtp).ge.minoff .and.
+     $          itapof(i,indxtp).le.maxoff) then
             nchar = ichmv_ch(ibuf,nchar,'  ')
             nchar = nchar + ib2as(i,ibuf,nchar,o'100003')
             nchar = ichmv_ch(ibuf,nchar,'->')
-            nchar = nchar + ib2as(itapof(i),ibuf,nchar,o'100005')
+            nchar = nchar + ib2as(itapof(i,indxtp),ibuf,nchar,o'100005')
             if (nchar.gt.58) then
               call put_buf(iclass,ibuf,1-nchar,'fs','  ')
               nchar = 1
@@ -108,7 +115,7 @@ C
             ip(3) = -3
           else                                 ! normal end of list
             do i=1,m
-              itapof(ipass(i)) = ioffset(i)
+              itapof(ipass(i),indxtp) = ioffset(i)
             enddo
             ip(3) = 0
           endif

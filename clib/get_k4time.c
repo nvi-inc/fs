@@ -12,10 +12,10 @@ long centisec[2];
 int fm_tim[6];
 long ip[5];                          /* ipc array */
 {
-  int year, ms, ilen, icount, ileap;
+  int year, ms, ilen, icount, ileap, it[6], iyrctl_fs;
   char buf[30];
 
-  ib_req11(ip,"d4",30,"TIM?");
+  ib_req11(ip,"r1",30,"TIM?");
 
   skd_run("ibcon",'w',ip);
   skd_par(ip);
@@ -28,14 +28,25 @@ long ip[5];                          /* ipc array */
   cls_clr(ip[0]);
   ip[0]=0;
 
-  if(shm_addr->equip.drive_type == K41 )
+  if(shm_addr->equip.drive[0] == K4 &&
+     (shm_addr->equip.drive_type[0] == K41 ||
+      shm_addr->equip.drive_type[0] == K41DMS) )
      icount=sscanf(buf+4,"%2d%3d%2d%2d%2d.%3d",
    		&year,fm_tim+4,fm_tim+3,fm_tim+2,fm_tim+1,&ms);
   else
      icount=sscanf(buf+4,"%2d%3d%2d%2d%2d%3d",
    		&year,fm_tim+4,fm_tim+3,fm_tim+2,fm_tim+1,&ms);
 
-  fm_tim[5]=100*((shm_addr->iyrctl_fs)/100)+year;
+  rte_time(it,it+5);
+  if(it[5]%100==0&&year==99)
+    iyrctl_fs=it[5]-10-it[5]%10;
+  else if(it[5]%100==99&&year==0)
+    iyrctl_fs=it[5]+10-it[5]%10;
+  else
+    iyrctl_fs=it[5]-it[5]%10;
+
+  fm_tim[5]=iyrctl_fs-iyrctl_fs%100+year;
+
   if(ms >=995) {
     fm_tim[0]=0;
     if(++fm_tim[1]>59) {
@@ -58,3 +69,4 @@ long ip[5];                          /* ipc array */
     fm_tim[0]=(ms+5)/10;
 
 }
+

@@ -24,11 +24,12 @@ C   LOCAL VARIABLES
       integer ichcm_ch
       logical kminus
 C               - true if parameter is preceded by a minus sign 
-      logical kMrack, kMdrive,kS2drive,kVrack,kVdrive
+      logical kMrack, kMdrive1,kMdrive2,kS2drive,kVrack
+      logical kVdrive1,kVdrive2
 C               - true for MK3 rack and drive, respectively
 C               - if false, then VLBA rack or drive, respectively
-      integer ick(21) 
-      integer ickv(18)
+      integer ick(23) 
+      integer ickv(19)
       integer icks2
       integer icks(4)
 C        ICH    - character counter 
@@ -78,9 +79,11 @@ C
       call fs_get_drive(drive)
       kMrack= MK3.eq.rack.or.MK4.eq.rack
       kVrack= VLBA.eq.rack.or.VLBA4.eq.rack
-      kMdrive= MK3.eq.drive.or.MK4.eq.drive
-      kVdrive= VLBA.eq.drive.or.VLBA4.eq.rack
-      kS2drive=S2.eq.drive
+      kMdrive1= MK3.eq.drive(1).or.MK4.eq.drive(1)
+      kMdrive2= MK3.eq.drive(2).or.MK4.eq.drive(2)
+      kVdrive1= VLBA.eq.drive(1).or.VLBA4.eq.drive(1)
+      kVdrive2= VLBA.eq.drive(2).or.VLBA4.eq.drive(2)
+      kS2drive=S2.eq.drive(1)
       if (ieq.eq.0) goto 500
 C                   If no parameters, go report current list
 C 
@@ -113,10 +116,10 @@ C  FIRST CHECK WHAT TYPE OF RACK AND THEN SET APPROPRIATE
 C  ARRAYS FOR THE TYPE OF RACK
 
 C Turn off all of the parameters to start 
-      do i=1,21 
+      do i=1,23 
         ick(i) = 0
       enddo
-      do i=1,18
+      do i=1,19
         ickv(i) = 0
       enddo
       icks2=0
@@ -127,11 +130,11 @@ C
       ich = 1+ieq 
 C  Handle * if present
       if (cjchar(ibuf,ich).eq.'*') then
-        do i=1,21 
+        do i=1,23 
           call fs_get_icheck(icheck(i),i)
           if (icheck(i).gt.0) ick(i)=1
         enddo
-        do i=1,18
+        do i=1,19
           call fs_get_ichvlba(ichvlba(i),i)
           if (ichvlba(i).gt.0) ickv(i)=1
         enddo
@@ -185,7 +188,7 @@ c
 C    check for RX (MDNAM doesn't recognize RX)
 c
         else if (ichcm_ch(iprm(1),1,'rx').eq..0) then
-          ick(19) = iset 
+          ick(22) = iset 
 C 
 C  2.2 check for ALL.
 C 
@@ -194,20 +197,25 @@ C
              do i=1,17
                 ick(i) = iset
              enddo
-             ick(21) = iset
+             ick(23) = iset
           else if(kVrack) then
              do i=1,17
                 ickv(i) = iset
              enddo
           endif
-          ick(19) = iset
+          ick(22) = iset
           ick(20) = iset
-          if (kMdrive) then
+          if (kMdrive1) then
              ick(18) = iset
           else if(kS2drive) then
              icks2=iset
-          else if(kVdrive) then
+          else if(kVdrive1) then
              ickv(18) = iset
+          endif
+          if (kMdrive2) then
+             ick(18) = iset
+          else if(kVdrive2) then
+             ickv(19) = iset
           endif
           do i=1,4
             if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
@@ -240,8 +248,16 @@ C
 C
 C  2.5 Now check for HD
 C
-        else if (ichcm_ch(iprm(1),1,'hd').eq.0) then
+        else if (ichcm_ch(iprm(1),1,'h1').eq.0.and.drive(1).ne.0) then
           ick(20) = iset 
+        else if (ichcm_ch(iprm(1),1,'h2').eq.0.and.drive(2).ne.0) then
+          ick(21) = iset
+        else if (ichcm_ch(iprm(1),1,'hd').eq.0.and.
+     $         drive(1).ne.0.and.drive(2).eq.0) then
+          ick(20) = iset 
+        else if (ichcm_ch(iprm(1),1,'hd').eq.0.and.
+     $         drive(1).eq.0.and.drive(2).ne.0) then
+          ick(21) = iset
 C 
 C  2.6 One of the video converters.
 C 
@@ -260,7 +276,7 @@ C
           ii=jchar(lprm,2)-z'30'
           if (ii.gt.9) ii=ii-7-z'20'
           if (ii.le.0 .or. ii.gt.14) then
-            ip(3) = -301
+            ip(3) = -201
             return
           endif
           ickv(ii) = iset
@@ -271,7 +287,7 @@ C
           ick(16) = iset
 
         else if (ichcm_ch(lprm,1,'i3').eq.0.and.kMrack) then
-          ick(21) = iset
+          ick(23) = iset
 
         else if (ichcm_ch(lprm,1,'ia').eq.0.and.kVrack) then
           ickv(15) = iset
@@ -289,24 +305,37 @@ C
 C 
 C  2.10 Tape (MK3)
 C 
-        else if (kMdrive
-     $         .and.(ichcm_ch(lprm,1,'rc').eq.0
-     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
+        else if (kMdrive1.and.(
+     $         ichcm_ch(lprm,1,'r1').eq.0.or.(drive(2).eq.0.and.
+     $         ichcm_ch(iprm,1,'rc').eq.0.or.
+     $         ichcm_ch(iprm,1,'tp').eq.0))) then
           ick(18) = iset
+        else if (kMdrive2.and.(
+     $         ichcm_ch(lprm,1,'r2').eq.0.or.(drive(1).eq.0.and.
+     $         ichcm_ch(iprm,1,'rc').eq.0.or.
+     $         ichcm_ch(iprm,1,'tp').eq.0))) then
+          ick(19) = iset
 C 
 C  2.11 Recorder (S2) 
 C 
-       else if (kS2drive
-     $         .and.(ichcm_ch(lprm,1,'rc').eq.0.
-     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
+       else if (kS2drive.and.(
+     $         ichcm_ch(lprm,1,'r1').eq.0.or.(drive(2).eq.0.and.
+     $         ichcm_ch(iprm,1,'rc').eq.0.or.
+     $         ichcm_ch(iprm,1,'tp').eq.0))) then
           icks2 = iset 
 C 
 C  2.12 Recorder (VLBA) 
 C 
-        else if (kVdrive
-     $         .and.(ichcm_ch(lprm,1,'rc').eq.0
-     $         .or.ichcm_ch(lprm,1,'tp').eq.0)) then
+        else if (kVdrive1.and.(
+     $         ichcm_ch(lprm,1,'r1').eq.0.or.(drive(2).eq.0.and.
+     $         ichcm_ch(iprm,1,'rc').eq.0.or.
+     $         ichcm_ch(iprm,1,'tp').eq.0))) then
           ickv(18) = iset 
+        else if (kVdrive2.and.(
+     $         ichcm_ch(lprm,1,'r2').eq.0.or.(drive(1).eq.0.and.
+     $         ichcm_ch(iprm,1,'rc').eq.0.or.
+     $         ichcm_ch(iprm,1,'tp').eq.0))) then
+          ickv(19) = iset 
 C 
 C     2.99 None of the above
 C 
@@ -317,7 +346,7 @@ C
         goto 201
 C
 210     continue
-        do i=1,21 
+        do i=1,23 
           call fs_get_icheck(icheck(i),i)
           if (ick(i).eq.0.and.icheck(i).gt.0) icheck(i) = -1
 C             If the module was set up, don't check it now
@@ -325,7 +354,7 @@ C             If the module was set up, don't check it now
 C             If the module was previously ignored, check it now
           call fs_set_icheck(icheck(i),i)
         enddo
-        do i=1,18 
+        do i=1,19 
           call fs_get_ichvlba(ichvlba(i),i)
           if (ickv(i).eq.0.and.ichvlba(i).gt.0) ichvlba(i) = -1
 C             If the module was set up, don't check it now
@@ -392,37 +421,55 @@ C
         enddo
       endif
 C
-      if (kMdrive) then   !! if MK3 drive
+      if (kMdrive1) then   !! if MK3 drive
         call fs_get_icheck(icheck(18),18)
         if (icheck(18).ge.1) then
-          nch = ichmv_ch(ibuf,nch,'tp')
+          nch = ichmv_ch(ibuf,nch,'r1')
           nch = mcoma(ibuf,nch)
         endif
       else if(kS2drive) then  !! if s2 drive
         call fs_get_ichs2(ichs2)
         if (ichs2.ge.1) then
-           nch = ichmv_ch(ibuf,nch,'tp')
+           nch = ichmv_ch(ibuf,nch,'r1')
            nch = mcoma(ibuf,nch)
         endif
-      else if(KVdrive) then  !! if VLBA drive
+      else if(KVdrive1) then  !! if VLBA drive
         call fs_get_ichvlba(ichvlba(18),18)
         if (ichvlba(18).ge.1) then
-           nch = ichmv_ch(ibuf,nch,'tp')
+           nch = ichmv_ch(ibuf,nch,'r1')
            nch = mcoma(ibuf,nch)
         endif
       endif
-      call fs_get_icheck(icheck(19),19)
-      if (icheck(19).ge.1) then
+      if (kMdrive2) then   !! if MK3 drive
+        call fs_get_icheck(icheck(19),19)
+        if (icheck(19).ge.1) then
+          nch = ichmv_ch(ibuf,nch,'r2')
+          nch = mcoma(ibuf,nch)
+        endif
+      else if(KVdrive2) then  !! if VLBA drive
+        call fs_get_ichvlba(ichvlba(19),19)
+        if (ichvlba(19).ge.1) then
+           nch = ichmv_ch(ibuf,nch,'r2')
+           nch = mcoma(ibuf,nch)
+        endif
+      endif
+      call fs_get_icheck(icheck(22),22)
+      if (icheck(22).ge.1) then
         nch = ichmv_ch(ibuf,nch,'rx')
         nch = mcoma(ibuf,nch)
       endif
       call fs_get_icheck(icheck(20),20)
       if (icheck(20).ge.1) then
-        nch = ichmv_ch(ibuf,nch,'hd')
+        nch = ichmv_ch(ibuf,nch,'h1')
         nch = mcoma(ibuf,nch)
       endif
-      if(kMrack.and.icheck(21).ge.1) then
-        call fs_get_icheck(icheck(21),21)
+      call fs_get_icheck(icheck(21),21)
+      if (icheck(21).ge.1) then
+        nch = ichmv_ch(ibuf,nch,'h2')
+        nch = mcoma(ibuf,nch)
+      endif
+      if(kMrack.and.icheck(23).ge.1) then
+        call fs_get_icheck(icheck(23),23)
         nch = ichmv_ch(ibuf,nch,'i3')
         nch = mcoma(ibuf,nch)
       endif

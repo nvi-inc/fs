@@ -1,4 +1,5 @@
       SUBROUTINE LSTSUM(kskd,IERR)
+
 C Create SUMMARY of SNAP file
 C
 C NRV 901121 New routine, modeled on CLIST.BAS
@@ -65,6 +66,25 @@ C 980916 nrv Remove decoding time field to a subroutine TIMIN.
 C 980917 nrv Recognize either "data_valid" command or "data xx" comment.
 C 990115 nrv Recognize ST=RECORD in SNAP file as a K4 command.
 C 990117 nrv Calculate K4 footage using K4 speeds
+C 990304 nrv Use sample rate not bandwidth because all stations
+C            may not be using all the channels.
+C 990305 nrv Call WRDAY instead of WRDATE.
+C 991102 nrv Recognize the dual recorder commands. Remove the code
+C            to a subroutine for getting information from common 
+C            or directly from the .snp file. 
+C 991103 nrv Add crack,creca,crecb to lstsumo call for headers, and
+C            to lstsum_info call.
+C 991108 nrv Parse FAST command timing by finding the '='.
+C 991115 nrv Change 'XXX' to 'AAA' or 'BBB'. To 'Rec1' or 'Rec2'
+C 000107 nrv Reduce maxline by 5, because there are more header lines.
+C 000529 nrv Read scan name from SNAP file.
+C 000601 nrv If ctimin doesn't return a valid format statement then
+C            don't try to read the time.
+C 000606 nrv SCAN_NAME command starts the new scan, not SOURCE=.
+C 000611 nrv Add KSCAN to call.
+C 000622 nrv Don't try to decode a time command without a valid format.
+C 000614 nrv Save the line number of the SCAN_NAME command, not SOURCE.
+C 001114 nrv Don't upper-case SCAN_NAME command.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -80,22 +100,22 @@ C Local:
       integer iwid,itlate_local,itearl_local
       INTEGER   IC,TRIMLEN
       integer idir,nline,ntapes,ncount,npage,maxline,iline,
-     .ifeet,inewp,iyear,ix,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
+     .ifeet,inewp,iyear,ns,nsline,ns2,irh,irm,ns3,ns4,idd,
      .idm,ihd,imd,isd,id1,ih1,im1,is1,mjd,ival,id2,ih2,im2,is2,
-     .idur,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save,
-     .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift,idif
+     .idur,ne,nm,l,ifdur,id,ieq,irun,idr,ihr,imr,isr,ifdur_save,
+     .ifeet_print,idt,iht,imt,ist,idurm,idurs,ift,idif,ix
       real rs,ds,val
       real speed_snap ! speed from SNAP file
-      real speed_k4 ! speed for K4
-      real conv_k4 ! speed scaling for feet-->counts
-      integer ichcm_ch,isecdif,julda ! function
+      double precision speed_k4 ! speed for K4
+      double precision conv_k4 ! speed scaling for feet-->counts
+      integer isecdif,julda ! function
       LOGICAL   KEX
       logical     kazel,kwrap,ksat
       character*128 cbuf,cbuf_in
       character*8 csor,cexper,cstn
-      character*3 cdir,cnewtap,cday_prev
+      character*3 cdir,cday_prev
       integer iday
-      character*20 cti,c1,c2,c3
+      character*20 cti
       character*2 cid,cpassp,cpass,ch1,cm1,cs1,ch3,cm3,cs3
       character*1 cid1,cs,csgn
       character*7 cwrap
@@ -104,13 +124,16 @@ C Local:
       integer nsline_s,ihd_s,imd_s,isd_s,
      .ih2_s,im2_s,is2_s,idurm_s,idurs_s,ifeet_print_s,mjd_s
       double precision rarad_s,dcrad_s,ut_s
-      character*3 cdir_s,cday_save,cnewtap_s,cday_sor
+      character*3 cdir_s,cday_save,cday_sor
+      character*4 cnewtap,cnewtap_s
+      character*12 cscan,cscan_s
       character*2 cpass_s,ch1_s,cm1_s,cs1_s
-      logical kstart_s,kmotion,kmotion_s
+      logical kstart_s,kmotion,kmotion_s,kscan
       character*8 csor_s
       character*7 cwrap_s
       character*20 ctiformat,cctiformat
       character*3 cd1,cd3
+      character*8 crack,creca,crecb
 
 C 1.0  Check existence of SNAP file.
 
@@ -132,7 +155,7 @@ C
         RETURN
       ENDIF
 C
-C 3. Set up printer and write header lines
+C 2. Set up printer and write header lines
 
       write(luscn,9200) cinname(1:ic)
 9200  format(' Printing summary of SNAP file ',a)
@@ -147,17 +170,17 @@ C 3. Set up printer and write header lines
       if (iwid.eq.-1.or.iwid.eq.80) then !default is portrait
         if (cs.eq.'S') then ! small
           call setprint(ierr,2)
-          maxline = 60
+          maxline = 55
         else ! large
-          maxline = 45
+          maxline = 40
           call setprint(ierr,0)
         endif
       else if (iwid.eq.137) then ! landscape
         if (cs.eq.'S') then ! small
-          maxline = 43
+          maxline = 38
           call setprint(ierr,3)
         else ! large
-          maxline = 30
+          maxline = 25
           call setprint(ierr,1)
         endif
       endif
@@ -168,7 +191,7 @@ C 3. Set up printer and write header lines
         return
       endif
 C
-C 4. Loop over SNAP file records
+C 3. Initialize local variables 
 
       cexper=' '
       iyear = 0
@@ -198,101 +221,53 @@ C 4. Loop over SNAP file records
       ifeet = 0
       ifeet_print=-1 ! set as a flag
       inewp = 0
-      cnewtap = '   '
-      kk4=.false.
-      ks2=.false.
-      if (kskd.and.kvex) then ! from sked file
-        ks2=ichcm_ch(lstrec(1,istn),1,'S2').eq.0 ! from VEX file
-      else ! check first 50 lines of snap file
-        nline=0
-        do while (nline.lt.50.and..not.kk4.and..not.ks2)
-          read(lu_infile,'(a)',err=991,end=441,iostat=IERR) cbuf_in
-          nline=nline+1
-          call c2upper(cbuf_in,cbuf)
-          kk4 = index(cbuf,'ST=RECORD').ne.0
-          ks2 = index(cbuf,'FOR,SLP').ne.0.or.index(cbuf,'FOR,LP').ne.0 
-        enddo
-      endif ! sked/snap
-441   rewind(lu_infile)
+      cnewtap = '    '
+      cscan = '     '
+      cscan_s = '     '
+
+C 4. Set other variables by reading the .snp file or getting
+C    information from common.
+
+      call lstsum_info(kskd,cexper,iyear,cstn,cid1,cid,
+     .xpos,ypos,zpos,kazel,kwrap,kk4,ks2,
+     .crack,creca,crecb,ierr,kscan)
+C 
+C Calculate K4 scaling.
       if (kk4) then ! K4 speed 
-C       scaling factor is 55 cpd/11.25 fps if the schedule
-C       was produced using sked with Mk/VLBA footage calculations
-C       and no fan-out or fan-in. Footages were therefore already
-C       scaled by bandwidth calculations in sked.
-        conv_k4 = 55.389387393/11.25 ! counts/foot
-        speed_k4 = 55*vcband(1,1,1)/2.0 ! 55, 110, or 220 cps
+C         K4 scaling factor is 55 cpd/11.25 fps if the schedule
+C         was produced using sked with Mk/VLBA footage calculations
+C         and no fan-out or fan-in. Footages were therefore already
+C         scaled by bandwidth calculations in sked.
+        conv_k4 = 55.389387393d0 ! counts/sec 
+        speed_k4 = conv_k4*samprate(1)/4.0d0 ! 55, 110, or 220 cps
         ifeet = 54
       endif
 
-      nline = 0
+C 5. Main loop to read .snp file and print summary of observations.
+
+441   rewind(lu_infile)
+      nline=0
       do while (.true.) ! read loop
         read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
-          call c2upper(cbuf_in,cbuf)
+        if (index(cbuf_in,'scan_name=').eq.0) then 
+          call c2upper(cbuf_in,cbuf) ! upper-case the input
+        else
+          cbuf = cbuf_in
+        endif
         nline = nline + 1
-
-C 5.  Read first lines of SNAP file to get year, experiment name, station.
-C     If we have a schedule file, station position is already in common,
-C     otherwise read it from the header line. If the first line in the
-C     SNAP file is a comment, then the header lines are probably there.
-C     In all cases, rewind the file at the end so the following program 
-C     loop reads all lines.
-
-        if (nline.eq.1.and.cbuf(1:1).eq.'"') then !read first lines
-C           read(cbuf,9001) cexper,iyear,cstn,cid !header line
-C9001        format(2x,a8,2x,i4,1x,a8,2x,a2)
-          call read_snap1(cbuf,cexper,iyear,cstn,cid1,cid,ierr)
-          if (ierr.lt.0) then ! set defaults instead
-            if (ierr.ge.-1) cexper='XXX'
-            if (ierr.ge.-2) iyear=0
-            if (ierr.ge.-3) cstn='        '
-            if (ierr.ge.-4) cid1=' '
-            if (ierr.ge.-5) cid='  '
-          endif
-          ierr=0
-          if (.not.kskd) then !read station position from SNAP file header
-            read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in !A line
-                call c2upper(cbuf_in,cbuf)
-                read(cbuf(2:),*) c1,c2,c3
-                if (c3.eq.'AZEL'.or.c3.eq.'SEST'.or.c3.eq.'ALGO') then
-                  kwrap=.true.
-                else
-                  kwrap=.false.
-                endif
-            read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in !P line
-                call c2upper(cbuf_in,cbuf)
-            if (trimlen(cbuf).lt.40) then ! not there
-              write(luscn,9002)
-9002          format(' SNAP file does not contain station position ',
-     .        'data on line 3, therefore '/,
-     .        ' az, el will not be calculated for this listing.')
-              kazel = .false.
-            else ! it's there
-                  ix=index(cbuf(6:),' ')
-              read(cbuf(6+ix:),*,err=991,end=990,iostat=IERR) 
-     .         xpos,ypos,zpos
-              nline = 3
-              kazel = .true.
-            endif
-          else !get from common (from schedule file)
-            xpos = stnxyz(1,istn)
-            ypos = stnxyz(2,istn)
-            zpos = stnxyz(3,istn)
-            kazel = .true.
-                kwrap=.false.
-                if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn)
-     .          .eq.7) kwrap=.true.
-          endif !kskd/not
-            rewind(lu_infile)
-            nline = 1
-            read(lu_infile,'(a)',err=991,end=990,iostat=IERR) cbuf_in
-            call c2upper(cbuf_in,cbuf)
-        endif !read first lines
-
 C       if (cbuf(1:1).ne.'"') then !non-comment line
-        if (index(cbuf,'SOURCE=').ne.0) then ! new scan starts here
-          if (csor.ne.' ') then ! output a line
+        if (index(cbuf,'scan_name=').ne.0.or.
+     .    index(cbuf,'SOURCE=').ne.0) then ! new scan starts here
+          if (index(cbuf,'scan_name=').ne.0) then ! scan name
+            cscan_s = cscan
+            ix = index(cbuf,'=')
+            read(cbuf(ix+1:),'(a)') cscan
+            nsline_s = nsline
+            nsline = nline 
+          else if (index(cbuf,'SOURCE=').ne.0) then ! source name
+            if (csor.ne.' ') then ! output a line
             if (npage.eq.0) then
-C           Here is where we can determine early start without the schedule
+C           Here is where we determine early start without the schedule
               if (kskd) then ! get from common
                 itearl_local=itearl(istn)
                 itlate_local=itlate(istn)
@@ -306,7 +281,7 @@ C           Here is where we can determine early start without the schedule
             kgot=.true.
             cday_save=cday_sor
             kstart_s=kstart
-            nsline_s=nsline
+C           nsline_s=nsline
             csor_s=csor
             cwrap_s=cwrap
             ch1_s=ch1
@@ -333,14 +308,14 @@ C           Here is where we can determine early start without the schedule
             ifeet_print=-1 ! set as a flag
             idur=-1
             ift=-1
-            cnewtap = '   '
+            cnewtap = '    '
             kmotion=.false.
           endif ! output a line
 C       Now get the source info for the new scan 
           ns = index(cbuf,',')-1
           csor = cbuf(8:ns)
           cday_sor = ' '
-          nsline = nline
+C         nsline = nline ! moved to scan command
           kstart=.false.
 C         kend=.false.
           ns2 = ns+2+index(cbuf(ns+2:),',')-2
@@ -368,10 +343,16 @@ C         kend=.false.
             ns3 = ns2+2+index(cbuf(ns2+2:),'D')-2
             read(cbuf(ns2+3:ns3),*) el
             ksat = .true.
-            endif
+          endif
+          endif ! scan or source name
 
         else if (index(cbuf,'READY').ne.0) then
-          cnewtap = 'XXX'
+          cnewtap = 'XXX '
+          if (index(cbuf,'READY1').ne.0) then ! rec 1
+            cnewtap = 'Rec1'
+          elseif (index(cbuf,'READY2').ne.0) then ! rec 2
+            cnewtap = 'Rec2'
+          endif
           ifeet = 0
           if (kk4) ifeet = 54
 
@@ -405,11 +386,11 @@ C        Now print the line because we would have found the ET by now.
           if (kgot) then ! got the _s variables set
             if (cday_save.ne.cday_prev.and.cday_prev.ne.' ') then
               read(cday_save,'(i3)') iday
-              call wrdate(luprt,iyear,iday)
+              call wrday(luprt,iyear,iday)
               iline=iline+1
             endif
             cday_prev = cday_save
-            if (cnewtap_s.eq.'   '.and..not.kmotion_s) cnewtap_s='@  '
+            if (cnewtap_s.eq.'    '.and..not.kmotion_s) cnewtap_s='@   '
             if (ifeet_print_s.eq.-1) ifeet_print_s=0
             call lstsumo(iline,npage,cstn,cid,cexper,maxline,
      .      itearl_local,itlate_local,kwrap,kk4,ks2,cday_save,kazel,
@@ -418,18 +399,24 @@ C        Now print the line because we would have found the ET by now.
      .      ihd_s,imd_s,isd_s,ih2_s,im2_s,is2_s,ch3,cm3,cs3,
      .      idurm_s,idurs_s,cpass_s,ifeet_print_s,
      .      cnewtap_s,cdir_s,kskd,ncount,ntapes,
-     .      rarad_s,dcrad_s,xpos,ypos,zpos,mjd_s,ut_s,iyear)
+     .      rarad_s,dcrad_s,xpos,ypos,zpos,mjd_s,ut_s,iyear,
+     .      crack,creca,crecb,cscan_s)
             kend=.false.
             if (ifeet_print.eq.-1) ifeet_print=ifeet
           endif
 
         else if (index(cbuf,'!').ne.0) then ! time 
           call timin(cbuf,cti,ctiformat,cctiformat,iyear)
-          if (cday_sor.eq.' ') read(cti,cctiformat) cday_sor
+          if (ctiformat(1:1).eq.'(') then ! valid format
+            if (cday_sor.eq.' ') read(cti,cctiformat) cday_sor
+          else ! don't read it
+          endif ! valid/don't
 
         else if (index(cbuf(1:2),'ST').ne.0.or.
      .           index(cbuf(1:11),'"DATA START').ne.0.or.
-     .           index(cbuf(1:13),'DATA_VALID=ON').ne.0) then ! tape start time
+     .           index(cbuf(1:13),'DATA_VALID=ON').ne.0.or.
+     .           index(cbuf(1:14),'DATA_VALID1=ON').ne.0.or.
+     .           index(cbuf(1:14),'DATA_VALID2=ON').ne.0) then ! tape start time
           kmotion=.true.
           idur=-1 ! make sure we calculate duration from this point
           if (.not.krunning) then ! this is a true start
@@ -445,18 +432,24 @@ C           Restart the running time clock
             ihr=ih1
             imr=im1
             isr=is1
-C           speed may be a string (example: slp), 
-C                          integer (example: 80, 135), 
-C                       or real (example: 266.66)
-            read(cbuf(8:),*,iostat=ierr) val
-            if (ierr.eq.0) then ! valid speed
-              speed_snap = val 
-C             ifeet = 10*ifix(float(ifeet/10)) ! nearest 10 feet
-C             Do this round off just before printing, in lstsumo
-            endif
-            idir = 1
-            cdir = cbuf(4:6)
-            if (cdir.eq.'REV') idir=-1
+            if (index(cbuf(1:2),'ST').ne.0) then ! get speed and direction
+C             speed may be a string (example: st=for,slp), 
+C                           integer (example: st=rev,80), 
+C                           or real (example: st=for,266.66)
+C             Command may be st, st1, st2.
+              nm = index(cbuf,',') ! find the ,
+              read(cbuf(nm+1:),*,iostat=ierr) val
+              if (ierr.eq.0) then ! valid speed
+                speed_snap = val 
+C               ifeet = 10*ifix(float(ifeet/10)) ! nearest 10 feet
+C               Do this round off just before printing, in lstsumo
+C             else ! may be S2 speed
+              endif
+              idir = 1
+              nm = index(cbuf,'=') ! find the =
+              cdir = cbuf(nm+1:nm+3) ! really should parse this
+              if (cdir.eq.'REV') idir=-1
+            endif ! get speed and direction
           else ! update footage 
             read(cti,ctiformat) idt,iht,imt,ist
             idif = isecdif(idt,iht,imt,ist,idr,ihr,imr,isr)
@@ -507,7 +500,8 @@ C         Set direction to 0 now that we are stopped. It will take
 C         an "st" command to reset this
           endif ! no dur yet this scan
 
-        else if (index(cbuf(1:14),'DATA_VALID=OFF').ne.0  .or.
+        else if (index(cbuf(1:15),'DATA_VALIDA=OFF').ne.0  .or.
+     .           index(cbuf(1:15),'DATA_VALIDB=OFF').ne.0  .or.
      .           index(cbuf(1:10),'"DATA STOP').ne.0.or.
      .           index(cbuf(1:6),'POSTOB').ne.0) then ! data stop time
           read(cti,ctiformat) id2,ih2,im2,is2
@@ -537,9 +531,10 @@ C non-tape and not running (no updating).
           endif ! no stop yet
 
         else if (index(cbuf,'FAST').ne.0) then !add spin feet
+          ne = index(cbuf,'=')
           nm = index(cbuf,'M')
           if (nm.gt.0) then
-            read(cbuf(7:nm-1),*) ival
+            read(cbuf(ne+1:nm-1),*) ival
             ifdur = 60*ival
           else
             nm=6
@@ -555,33 +550,35 @@ C non-tape and not running (no updating).
           ifdur_save = ifdur*id ! save in case we have to undo it
 
         else if (index(cbuf,'CHECK').ne.0) then
-          if (cnewtap.eq.'   ') cnewtap = ' * '
+          if (cnewtap.eq.'    ') cnewtap = ' *  '
 
-        else if (index(cbuf,'=').ne.0) then !probably setup proc
-          ieq = index(cbuf,'=')
-          cpassp=cpass ! previous pass
-          cpass = '  '
-          cpass = cbuf(ieq+1:ieq+2)
-          if (cpass(2:2).eq.' ') then ! shift right
-            cpass(2:2)=cpass(1:1)
-            cpass(1:1)=' '
-          endif ! shift right
-          if (ks2.and.cpass.ne.cpassp) ifeet=0 ! reset feet for new group
-
-        endif
-C       endif !non-comment line
+        else if (index(cbuf,'=').ne.0) then !might be setup proc
+          if (index(cbuf,'DATA_VALID').eq.0.and.
+     .        index(cbuf,'ST1=').eq.0.and.index(cbuf,'ST2=').eq.0) then ! setup
+            ieq = index(cbuf,'=')
+            cpassp=cpass ! previous pass
+            cpass = '  '
+            cpass = cbuf(ieq+1:ieq+2)
+            if (cpass(2:2).eq.' ') then ! shift right
+              cpass(2:2)=cpass(1:1)
+              cpass(1:1)=' '
+            endif ! shift right
+            if (ks2.and.cpass.ne.cpassp) ifeet=0 ! reset feet for new group
+          endif ! setup
+        endif ! might be setup proc
       enddo !read loop
 
 990   continue
       ierr=0
 C     Output the final scan
       if (ifdur_save.ne.0) ifeet=ifeet-ifdur_save ! undo the final fastr
-      if (cnewtap.eq.'   '.and..not.kmotion) cnewtap='@  '
+      if (cnewtap.eq.'    '.and..not.kmotion) cnewtap='@   '
       if (cday_sor.ne.cday_prev.and.cday_prev.ne.' ') then
         read(cday_save,'(i3)') iday
         call wrdate(luprt,iyear,iday)
         iline=iline+1
       endif
+      if (cscan.ne.'     ') cscan_s = cscan
       call lstsumo(iline,npage,cstn,cid,cexper,maxline,
      .itearl_local,itlate_local,kwrap,kk4,ks2,cday_sor,kazel,ksat,
      .kstart,kend,nsline,csor,cwrap,ch1,cm1,cs1,
@@ -590,7 +587,8 @@ C     Output the final scan
      .idurm,idurs,cpass,ifeet_print,
      .cnewtap,cdir,
      .kskd,ncount,ntapes,
-     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut,iyear)
+     .      rarad,dcrad,xpos,ypos,zpos,mjd,ut,iyear,
+     .      crack,creca,crecb,cscan_s)
       write(luprt,'(/" Total number of scans: ",i5/
      .               " Total number of tapes: ",i3)') ncount, ntapes
 

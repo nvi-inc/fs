@@ -1,0 +1,28 @@
+        user_info - user info set and monitor (S2 drives)
+
+Syntax:     user_info=field,label,string,auto
+
+Response:   user_info/field,label,string
+
+
+Settable parameters:
+field     Field number, 1-4. No default.
+label     field or label, to indicate which to update. Default
+          field.
+string    An arbitrary string with contents for field or label.
+          No default unless auto is auto and field is 1 or 2, see
+          comments below.
+auto      auto or literal. Default literal.
+
+Monitor-only Parameters: none
+
+Comments: 
+This command sets the specified "User Info" field or label. If 
+auto is auto, and string is null, and if field is 1, then field 1
+is set to the station name (specified in the location.ctl control
+file) or if field is 2, then field 2 is set to the source name
+(specified by the source= command).
+
+The usable length of string for all labels and fields 1 and 2 is
+16 characters, for field 3 it is 32 characters, for field 4 it is
+48 characters.

@@ -12,7 +12,7 @@ C     IENA - record-enable bit
 C 
 C  LOCAL: 
 C
-      integer ia,ib,ic
+      integer ia,ib
 C 
 C     Format the buffer for the controller. 
 C 

@@ -1,0 +1,19 @@
+       vcif - video converter IF attenuators (all K4 racks)
+
+Syntax:     vcif=att1,att2,att3,att4
+
+Response:   vcif/att1,att2,att3,att4
+
+
+Settable Parameters:
+att1        Attenuator setting for VC channels 1-4, values of 0-
+            15 dB, default 0
+att1        Attenuator setting for VC channels 5-8, values of 0-
+            15 dB, default 0
+att1        Attenuator setting for VC channels 9-12, values of 0-
+            15 dB, default 0
+att1        Attenuator setting for VC channels 13-46, values of
+            0-15 dB, default 0
+
+Comments:
+This command is only used for K4-1 and K4-11A racks.

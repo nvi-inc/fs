@@ -4,8 +4,7 @@
       integer*2 ibuf(1)
       integer ifc,ilc
       integer nchar,i,ival,jchar
-      character ch
- 
+c 
       nchar = ilc - ifc + 1
       if (nchar.le.0) return
       do i=ifc,ilc

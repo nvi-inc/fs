@@ -5,7 +5,7 @@ char buffer[100];
 
     setup_ids();
 
-    class=10;
+    class=6;
     nchars=cls_rcv(class,buffer,100,&rtn1,&rtn2,0,0);
 
     printf(" '%.*s'\n",nchars,buffer);

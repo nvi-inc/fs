@@ -1,6 +1,6 @@
-      subroutine get_atod(ichan,volt,ip)
+      subroutine get_atod(ichan,volt,ip,indxtp)
 
-      integer ichan
+      integer ichan,indxtp
       integer*4 ip(5)
       real volt
 C
@@ -23,8 +23,8 @@ C
 C  check for and handle VLBA REC
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.drive.or.VLBA4.eq.drive) then
-        call fc_get_vatod(ichan,volt,ip)
+      if(VLBA.eq.drive(indxtp).or.VLBA4.eq.drive(indxtp)) then
+        call fc_get_vatod(ichan,volt,ip,indxtp)
         return
       endif
 C
@@ -34,10 +34,14 @@ C
       iclass=0
 C
       ibuf(1)=0
-      call char2hol('hd',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('h1',ibuf(2),1,2)
+      else
+         call char2hol('h2',ibuf(2),1,2)
+      endif
       ilvdt=1
-      call fs_get_klvdt_fs(klvdt_fs)
-      if(klvdt_fs) ilvdt=0
+      call fs_get_klvdt_fs(klvdt_fs,indxtp)
+      if(klvdt_fs(indxtp)) ilvdt=0
       call ad2ma(ibuf(3),ilvdt,0,ichan)
       call add_class(ibuf,-12,iclass,nrec)
 C

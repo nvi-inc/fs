@@ -1,7 +1,7 @@
       subroutine lchd(hd,step,nsamp,rng,odev,vltpos,peakv,mper,ip,echo,
-     &                lu)
+     &                lu,indxtp)
       implicit none
-      integer hd,odev,ip(5),lu,nsamp
+      integer hd,odev,ip(5),lu,nsamp,indxtp
       real*4 vltpos,peakv,mper,step,pmax,vmax,rng
       logical echo
 C
@@ -24,13 +24,13 @@ C  same absolute value, but oppisite sign.  The peak response is at
 C  the intersection of the two lines.
 C
       integer ipass(2),ichcm_ch
-      real*4 micnow(2),micold,volts,minper,pnow,ru,rl,rmper
+      real*4 micnow(2),volts,minper,pnow,ru,rl,rmper
       logical kauto
       data ipass/2*0/,kauto/.true./
 C
 C  get power and current location
 C
-      call mic_read(hd,ipass,kauto,micnow,ip)
+      call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       if(ip(3).ne.0) return
 C
       rl=micnow(hd)-rng
@@ -49,14 +49,14 @@ C
 c
 c set the position, if we get stuck go to the highest peak
 c
-        call set_mic(hd,ipass,kauto,micnow,ip,5.0)
+        call set_mic(hd,ipass,kauto,micnow,ip,5.0,indxtp)
         if(ip(3).eq.-407.and.ichcm_ch(ip(4),1,'q@').eq.0) goto 100
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
         if(ip(3).ne.0) return
 C
-        call get_power(odev,nsamp,volts,minper,ip)
+        call get_power(odev,nsamp,volts,minper,ip,indxtp)
         if(ip(3).ne.0) return
 C
         if(volts.gt.vmax) then
@@ -72,10 +72,10 @@ C
 100   continue
       ip(3)=0
       micnow(hd)=pmax
-      call set_mic(hd,ipass,kauto,micnow,ip,0.40)
+      call set_mic(hd,ipass,kauto,micnow,ip,0.40,indxtp)
       if(ip(3).ne.0) return
 C
-      call vlt_head(hd,vltpos,ip)
+      call vlt_head(hd,vltpos,ip,indxtp)
       if(ip(3).ne.0) return
 C
       peakv=vmax

@@ -1,4 +1,4 @@
-      subroutine wohd(hd,fo,so,fi,si,ip,echo,lud,icl)
+      subroutine wohd(hd,fo,so,fi,si,ip,echo,lud,icl,indxtp)
       integer hd,ip(5),lud,icl
       real*4 fo(2),so(2),fi(2),si(2)
       logical echo
@@ -29,11 +29,12 @@ C
 C  get current location
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,kauto,micnow,ip)   !use existing calibration
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
+c                       !use existing calibration
       else
-        call vlt_read(hd,volt,ip)           ! raw measurements appropriate
-        if(hd.eq.1) scale=rswrite_fs        ! for new
-        if(hd.eq.2) scale=rsread_fs
+        call vlt_read(hd,volt,ip,indxtp)     ! raw measurements appropriate
+        if(hd.eq.1) scale=rswrite_fs(indxtp) ! for new
+        if(hd.eq.2) scale=rsread_fs(indxtp)
         micnow(hd)=volt(hd)*scale
       endif
       if(ip(3).ne.0) return
@@ -44,13 +45,13 @@ C
       idir=1 !out
       ispdhd=1 !fast
       tmove=0.1 ! 0.1 second
-      call head_move(hd,idir,ispdhd,tmove,ip)
+      call head_move(hd,idir,ispdhd,tmove,ip,indxtp)
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       else
-        call vlt_read(hd,volt,ip)
+        call vlt_read(hd,volt,ip,indxtp)
         micnow(hd)=volt(hd)*scale
       endif
       if(ip(3).ne.0) return
@@ -64,13 +65,13 @@ C
       idir=0 !in
       ispdhd=1 !fast
       tmove=0.1  ! 0.1 second
-      call head_move(hd,idir,ispdhd,tmove,ip)
+      call head_move(hd,idir,ispdhd,tmove,ip,indxtp)
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       else
-        call vlt_read(hd,volt,ip)
+        call vlt_read(hd,volt,ip,indxtp)
         micnow(hd)=volt(hd)*scale
       endif
       if(ip(3).ne.0) return
@@ -84,13 +85,13 @@ C
       idir=1 !out
       ispdhd=0 !slow
       tmove=1.0 ! 1 second
-      call head_move(hd,idir,ispdhd,tmove,ip)
+      call head_move(hd,idir,ispdhd,tmove,ip,indxtp)
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       else
-        call vlt_read(hd,volt,ip)
+        call vlt_read(hd,volt,ip,indxtp)
         micnow(hd)=volt(hd)*scale
       endif
       if(ip(3).ne.0) return
@@ -104,13 +105,13 @@ C
       idir=0 !in
       ispdhd=0 !slow
       tmove=1.0 ! 1 second
-      call head_move(hd,idir,ispdhd,tmove,ip)
+      call head_move(hd,idir,ispdhd,tmove,ip,indxtp)
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,kauto,micnow,ip)
+        call mic_read(hd,ipass,kauto,micnow,ip,indxtp)
       else
-        call vlt_read(hd,volt,ip)
+        call vlt_read(hd,volt,ip,indxtp)
         micnow(hd)=volt(hd)*scale
       endif
       if(ip(3).ne.0) return

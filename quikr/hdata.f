@@ -33,6 +33,12 @@ C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
 C
+      if( itask.eq.10) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+C
       ioclas = 0
       iclass = 0
       nrec = 0
@@ -49,7 +55,7 @@ C
       call fs_get_drive(drive)
       if (ieq.eq.0) then
         goto 500
-      else if (VLBA.eq.drive.or.VLBA4.eq.drive) then
+      else if (VLBA.eq.drive(indxtp).or.VLBA4.eq.drive(indxtp)) then
         ip(3)=-282
         goto 990
       else if (ichcm(ibuf,ieq+1,lalrm,1,ilenal).eq.0) then
@@ -70,21 +76,25 @@ C
       call fs_get_drive_type(drive_type)
       nchan=8
       do i=1,nchan
-        if(drive_type.ne.VLBA2.or.i.eq.5.or.i.eq.6) then
-          call get_atod(i,volts(i),ip)
+        if(i.eq.5.or.i.eq.6.or..not.
+     &        (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
+     &        ) then
+          call get_atod(i,volts(i),ip,indxtp)
           if(ip(3).ne.0) goto 800
         endif
       enddo
 C
 C  6. Now we must prepare a response.
 C
-600   continue
+      continue
       nch = ieq
       if (nch.eq.0) nch = nchar+1
       nch = ichmv_ch(ibuf,nch,'/')
 C
       do i=1,nchan
-        if(drive_type.ne.VLBA2.or.i.eq.5.or.i.eq.6) then
+        if(i.eq.5.or.i.eq.6.or..not.
+     &        (drive(indxtp).eq.VLBA.and.drive_type(indxtp).eq.VLBA2)
+     &        ) then
           nch = nch+ir2as(volts(i),ibuf,nch,8,3)
         endif
         nch = mcoma(ibuf,nch)
@@ -99,7 +109,11 @@ C
 C  7. Reset alarm or Test/Reset
 C
 700   continue
-      call char2hol('hd',ibuf2(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('h1',ibuf2(2),1,2)
+      else
+         call char2hol('h2',ibuf2(2),1,2)
+      endif
       nch=4
       iclass = 0
       nrec=0
@@ -115,7 +129,7 @@ C
       if(ip(2).ne.0) call clrcl(ip(1))
       ip(2)=0
       call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-      call lvdofn('unlock',ip)
+      call lvdofn('unlock',ip,indxtp)
 C
 C  9. That's all for now.
 C

@@ -1,4 +1,4 @@
-      subroutine repds(ip,iclcm)
+      subroutine repds(ip,iclcm,indxtp)
 C  reproduce display
 C 
 C    REPDS gets data about the reproduce tracks and displays it 
@@ -109,37 +109,38 @@ C                  ! data in IBUF:   TPrdebtbta
 C
       call ma2rp(ibuf,iremtp,iby,ieq,ibw,ita,itb,ial)
       goto 320
-310   ita = itrakaus_fs
-      itb = itrakbus_fs
-      ibw = ibwtap
-      ieq = ieqtap
-      iby = ibypas
+310   continue
+      ita = itrakaus_fs(indxtp)
+      itb = itrakbus_fs(indxtp)
+      ibw = ibwtap(indxtp)
+      ieq = ieqtap(indxtp)
+      iby = ibypas(indxtp)
 320   ierr = 0
       nch = ichmv(ibuf2,nch,lby(iby*2+1),1,3)
 C                   Bypass or not
-      if (iby.ne.ibypas) ierr = -301
+      if (iby.ne.ibypas(indxtp)) ierr = -301
       nch = mcoma(ibuf2,nch)
 C
       ncx = ib2as(ita,ibuf2,nch,o'100000'+2)
 C                   Encode the A track
-      call fs_get_itraka(itraka)
-      if (ita.ne.itraka.and..not.kcom) ierr = -302
+      call fs_get_itraka(itraka,indxtp)
+      if (ita.ne.itraka(indxtp).and..not.kcom) ierr = -302
       nch = mcoma(ibuf2,nch+ncx)
 C
       ncx = ib2as(itb,ibuf2,nch,o'100000'+2)
 C                   Encode the B track
-      call fs_get_itrakb(itrakb)
-      if (itb.ne.itrakb.and..not.kcom) ierr = -303
+      call fs_get_itrakb(itrakb,indxtp)
+      if (itb.ne.itrakb(indxtp).and..not.kcom) ierr = -303
       nch = mcoma(ibuf2,nch+ncx)
 C
       ncx = ir2as(bws(ibw+1),ibuf2,nch,6,4)
 C                   The bandwidth for reproduce
-      if (ibw.ne.ibwtap) ierr = -304
+      if (ibw.ne.ibwtap(indxtp)) ierr = -304
       nch = mcoma(ibuf2,nch+ncx)
 C
       nch = nch + ir2as(bws(ieq+2),ibuf2,nch,6,4)
 C                   The equalizer selection 
-      if (ieq.ne.ieqtap) ierr = -305
+      if (ieq.ne.ieqtap(indxtp)) ierr = -305
 C 
 C 
 C 

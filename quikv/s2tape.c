@@ -9,7 +9,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 void s2tape(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */

@@ -8,7 +8,7 @@ C
 C  LOCAL VARIABLES: 
 C 
       character*79 outbuf
-      integer answer, nchar, trimlen, jchar, ichcm_ch
+      integer nchar, jchar, ichcm_ch
       integer*2 iprm
       dimension iparm(2)
 C 
@@ -21,8 +21,6 @@ C  INITIALIZED VARIABLES:
 C
       data jtype/5/
       data lspecr/2H:;,2H$@,2H?&,2H/#/
-      data n/1/ 
-C 
 C 
 C  Determine whether any types were specified by search for any equals
 C  sign.  If there was no equals sign, write out the previous specified

@@ -119,3 +119,54 @@ $misc
 * Examples:
 *epoch 2000
 *epoch 1950
+*
+* Station equipment may be specified. Equipment names are case sensitive.
+* Allowed rack and recorder names are: 
+* Racks    |  Recorders
+* -------- |  ---------
+* none     |  none     
+* Mark3A   |  Mark3A   
+* VLBA     |  VLBA     
+* VLBAG    |  VLBA4
+* VLBA4    |  Mark4    
+* Mark4    |  S2   
+* VLBA/8   |  K4-1
+* VLBA4/8  |  K4-2
+* K4-1     |  unused
+* K4-2     |  
+* K4-1/K3  |  
+* K4-2/K3  |             
+* K4-1/M4  |             
+* K4-2/M4  |             
+*
+* Relationship between skedf.ctl and equip.ctl file names:
+*
+*   skedf.ctl        equip.ctl
+*   (and VEX files)
+*   ---------------  --------------------------------------
+*   Mark3A           mk3 mk3b
+*   VLBA             vlba vlbag (both are treated the same in drudg)
+*   VLBAG            vlba vlbag (both are treated the same in drudg)
+*   VLBA/8           vlba vlbag   (8 BBCs only)
+*   VLBA4/8          vlba4        (8 BBCs only)
+*   Mark4            mk4
+*   VLBA4            vlba4
+*   K4-1/K3          k41 k41u k41/k3 k41u/k3
+*   K4-2/K3          k42 k42a k42bu k42/k3 k42a/k3 k42bu/k3
+*   K4-1/M4          k41 k41u k41/m4 k41u/m4
+*   K4-2/M4          k42 k42a k42bu k42/m4 k42a/m4 k42bu/m4
+*   K4-1             k41 k41/dms
+*   K4-2             k42 k42/dms
+*   S2               s2
+*
+* If the schedule file does have equipment specified, then the
+* equipment in the schedule file will be used.
+* If the schedule file does not have equipment specified, then the 
+* equipment in the control file will be used.
+* A warning message is issued if the control file and schedule file 
+* equipment are different.
+* Format:
+* equipment <rack> <recorder A> <recorder B>
+* Examples:
+* equipment Mark4  Mark4  none
+* equipment VLBA   VLBA  VLBA   

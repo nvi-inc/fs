@@ -1,4 +1,4 @@
-      subroutine tpdis(ip,iclcm)
+      subroutine tpdis(ip,iclcm,indxtp)
 C  display tape parameters c#870115:04:33#
 C 
 C 1.1.   TPDIS gets data from the TAPE and displays it
@@ -102,21 +102,22 @@ C
 C 
 C     3. Now the buffer contains: TAPE=, and we want to add the data.
 C
-      call ma2tp(ibufd,ilow,lfeet_fs,ifastp,icaptp,istptp,itactp,irdytp)
-      call fs_set_icaptp(icaptp)
-      call fs_set_istptp(istptp)
-      call fs_set_irdytp(irdytp)
-      call fs_set_itactp(itactp)
-      call fs_set_lfeet_fs(lfeet_fs)
+      call ma2tp(ibufd,ilow,lfeet_fs(1,indxtp),ifastp,icaptp(indxtp),
+     $     istptp(indxtp), itactp(indxtp),irdytp(indxtp))
+      call fs_set_icaptp(icaptp,indxtp)
+      call fs_set_istptp(istptp,indxtp)
+      call fs_set_irdytp(irdytp,indxtp)
+      call fs_set_itactp(itactp,indxtp)
+      call fs_set_lfeet_fs(lfeet_fs,indxtp)
 C
       call fs_get_drive(drive)
-      if (MK3.eq.drive) then
+      if (MK3.eq.drive(indxtp)) then
         call ma2rp(ibufs,iremtp,iby,ieq,ibw,ita,itb,ial)
       else
          call ma2rp4(ibufs,iremtp,iby,ieq,ita,itb)
       endif
       goto 320
-310   ilow = ilowtp
+310   ilow = ilowtp(indxtp)
 C
 320   nch = itped(-5,ilow,lgenx,ibuf2,nch,ilen)
 C                   Low tape setting
@@ -128,8 +129,8 @@ C
 C     IF (ICHCM(LFEET_FS,1,2H0 ,1,1).EQ.0) THEN
 C       NCH = ICHMV(IBUF2,NCH,LFEET_FS,2,4)
 C     ELSE
-        call fs_get_lfeet_fs(lfeet_fs)
-        nch = ichmv(ibuf2,nch,lfeet_fs,1,5)
+        call fs_get_lfeet_fs(lfeet_fs,indxtp)
+        nch = ichmv(ibuf2,nch,lfeet_fs(1,indxtp),1,5)
 C     END IF
 C                   Move footage count into output
       nch = mcoma(ibuf2,nch)
@@ -138,24 +139,24 @@ C
 C                   Fast speed button
       nch = mcoma(ibuf2,nch)
 C
-      call fs_get_icaptp(icaptp)
-      nch = itped(-9,icaptp,lgenx,ibuf2,nch,ilen)
+      call fs_get_icaptp(icaptp,indxtp)
+      nch = itped(-9,icaptp(indxtp),lgenx,ibuf2,nch,ilen)
 C                   Capstan status
       nch = mcoma(ibuf2,nch)
 C
-      call fs_get_istptp(istptp)
+      call fs_get_istptp(istptp,indxtp)
 c     since -7 < 0 -- following itped decodes FROM istptp
-      nch = itped(-7,istptp,lgenx,ibuf2,nch,ilen)
+      nch = itped(-7,istptp(indxtp),lgenx,ibuf2,nch,ilen)
 C                   Stop command status
       nch = mcoma(ibuf2,nch)
 C 
-      call fs_get_itactp(itactp)
-      nch = itped(-4,itactp,lgenx,ibuf2,nch,ilen) 
+      call fs_get_itactp(itactp,indxtp)
+      nch = itped(-4,itactp(indxtp),lgenx,ibuf2,nch,ilen) 
 C                   Tach lock status
       nch = mcoma(ibuf2,nch)
 C 
-      call fs_get_irdytp(irdytp)
-      nch = itped(-8,irdytp,lgenx,ibuf2,nch,ilen) 
+      call fs_get_irdytp(irdytp,indxtp)
+      nch = itped(-8,irdytp(indxtp),lgenx,ibuf2,nch,ilen) 
 C                   Ready status
       nch = mcoma(ibuf2,nch)
 C 

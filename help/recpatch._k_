@@ -1,0 +1,25 @@
+          recpatch - recorder input patching (K4 drives)
+
+Syntax:     recpatch=port,channel,port,channel, 
+          recpatch=
+
+Response:   recpatch/port,channel,port,channel, 
+
+
+Settable Parameters:
+port      K4 recorder input port, 1-16
+channel   ns where n=1-14 for Mark III/IV/VLBA/VLBA4 racks
+          where n=1-16 for K4 type 1 rack and rack type "none"
+          where n=a1-a8 or b1-b8 (two characters) for K4 type 2
+          rack
+          where s=u or l for upper or lower sideband
+                    
+Comments:
+This command specifies the wiring of the VCs to the K-4 input
+ports. This command has no effect on the hardware. It is an
+"information only" command.
+
+A recpatch= clears any pre-existing definition.
+
+The monitor response may consist of more than one line, but each
+line ends with a channel entry.

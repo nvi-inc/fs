@@ -65,8 +65,10 @@ if(!open(OUT,">" . $out)) {
 $not=0;
 
 while(<BAK>) {
-    if (/^\*/||/^[ ]*$/) {
+    if (/^\*/) {
 	print OUT;
+	next;
+    } elsif(/^[ ]*$/) {
 	next;
     }
     $rack=substr($_,25,1);

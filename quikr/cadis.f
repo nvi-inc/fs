@@ -1,4 +1,4 @@
-      subroutine cadis(ip,iclcm, itask)
+      subroutine cadis(ip,iclcm, itask,ilong)
 C  display cable cal c#870115:04:36#
 C 
 C 1.  CADIS PROGRAM SPECIFICATION 
@@ -75,7 +75,7 @@ C
       else
          ich=1
          do while(ich.le.nchar-2)
-            if(0.ne.index("0123456789+-.",cjchar(ibuf(2),ich))) then
+            if(0.ne.index("0123456789+-.Ee",cjchar(ibuf(2),ich))) then
                goto 200
             endif
             ich=ich+1
@@ -87,12 +87,18 @@ C
         nch = ichmv(ibuf2,nch,ibuf(2),ic1,ic2-ic1+1)
 C                   Skip the " S " before the number
 C                   Move buffer contents into output list 
-      cablev = das2b(ibuf(2),ic1,ic2-ic1+1,ierr)
+      cablevt = das2b(ibuf(2),ic1,ic2-ic1+1,ierr)
 C                   Don't check error return
       else
-        cablev = 0.0
+        cablevt = 0.0
       endif
-      call fs_set_cablev(cablev)
+      if(ilong.eq.1) then
+         cablevl=cablevt
+         call fs_set_cablevl(cablevl)
+      else
+         cablev=cablevt
+         call fs_set_cablev(cablev)
+      endif
 C                   Store current cable value in COMMON 
 C 
 C 

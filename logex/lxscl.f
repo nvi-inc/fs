@@ -13,8 +13,7 @@ C
 C  LOCAL VARIABLES: 
 C 
       character*79 outbuf
-      integer answer, nchar, trimlen
-      character cjchar
+      integer answer, nchar
       dimension iparm(2)
 C 
       equivalence (parm,iparm(1))

@@ -1,0 +1,31 @@
+      pcalports - pcal output (Mark IV, VLBA4, K4MK4 racks)
+
+Syntax:     pcalports=PORTx,PORTy
+
+Response:   pcalports/PORTx,PORTy
+
+
+Settable parameters:
+PORTx     VC for the first pcal output port, one of 1, 2, 3, 4,
+          9, 10, 11, or 12. No default.
+PORTy     VC for the second pcal output port, one of 5, 6, 7, 8,
+          13, 14, 15, or 16. No default.
+
+Comments: 
+This command selects which VCs have their output placed on the
+phase-cal output ports of the Mark IV Formatter. These are called
+phase-cal ports because they are intended for phase-cal
+monitoring. Each port provides the two bit sampled version of the
+data stream from both sidebands of the selected VC.
+
+The Mark IV Decoder labels the two ports "x" and "y". That
+nomenclature is adopted here because it corresponds with the
+labeling on the front panel.
+
+The unusual mapping of VCs to ports is determined by which VCs
+are routed to which of the two Altera PLDs:
+
+           PORT:           x       y
+           Altera PLD:    U37     U35
+           VCs:           1-4     5-8
+           VCs:           9-12   13-16

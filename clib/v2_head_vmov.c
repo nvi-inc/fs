@@ -7,10 +7,11 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void v2_head_vmov(ihead,volt,ip)
+void v2_head_vmov(ihead,volt,ip,indxtp)
 int ihead;                     /* head 1-4 */
 float volt;                    /* voltage to set head to */
 long ip[5];                    /* ipc array */
+int indxtp;
 {
       struct req_buf buffer;           /* request buffer */
       struct req_rec request;          /* reqeust record */
@@ -18,9 +19,22 @@ long ip[5];                    /* ipc array */
       struct res_rec response;         /* respones record */
       struct tms tms_buff;
       long end;
+      int indx;
 
+      if(indxtp == 1) {
+	indx=0;
+      } else if(indxtp == 2) {
+	indx=1;
+      } else {
+	ip[2]=-505;
+	memcpy("q<",ip+4,2);
+	return;
+      }
       ini_req(&buffer);                /* initialize */
-      memcpy(request.device,DEV_VRC,2);
+      if(indx == 0)
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
 
       request.type=1;         /* clear out-of-range bit before we start */
       request.addr=0x74;
@@ -62,7 +76,7 @@ long ip[5];                    /* ipc array */
        rte_sleep( 12); /*wait for vlba2 drive to set "moving" bit on */
 
        end=times(&tms_buff)+1502;  /* give it at most 15 seconds to complete*/
-       while(end>times(&tms_buff) && !v2_motion_done(ip))
+       while(end>times(&tms_buff) && !v2_motion_done(ip,indx))
            rte_sleep(50);
        if(ip[2]<0) return;        /* error or still moving */
 

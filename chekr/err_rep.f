@@ -1,5 +1,5 @@
       subroutine err_rep(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
-     .                   ntperr)
+     .                   ntperr,indxtp)
 C
       include '../include/fscom.i'
 C 
@@ -15,6 +15,7 @@ C  LOCAL VARIABLES:
 C 
 C  INITIALIZED:
 C
+      if(indxtp.eq.2) goto 780
       do iloop=1,15
         indx=(iloop-1)*nverr+1
         call fs_get_icheck(icheck(iloop),iloop)
@@ -88,10 +89,11 @@ C  Tape drive error reporting
 C
 780   continue
       indx=15*nverr+niferr+nfmerr+1
-      call fs_get_icheck(icheck(18),18)
-      if(icheck(18).le.0.or.ichecks(18).ne.icheck(18)) goto 800
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      if(icheck(18+indxtp-1).le.0.or.
+     $     ichecks(18+indxtp-1).ne.icheck(18+indxtp-1)) goto 800
       if(icherr(indx).ne.0) then
-        call logit7(0,0,0,0,-332,lwho,lmodna(18))
+        call logit7(0,0,0,0,-332,lwho,lmodna(18+indxtp-1))
         goto 800
       endif
       nerr=0
@@ -99,12 +101,12 @@ C
         if(icherr(indx+j).gt.0) nerr=nerr+1
       enddo
 c      if(nerr.gt.ntperr/2) then
-c        call logit7(0,0,0,0,-347,lwho,lmodna(18))
+c        call logit7(0,0,0,0,-347,lwho,lmodna(18+indxtp-1))
 c        goto 800
 c      endif
       do j=1,ntperr-1
         if(icherr(indx+j).gt.0)
-     .  call logit7(0,0,0,0,-332-j,lwho,lmodna(18))
+     .  call logit7(0,0,0,0,-332-j,lwho,lmodna(18+indxtp-1))
       enddo
 C
 800   continue

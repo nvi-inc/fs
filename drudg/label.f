@@ -101,6 +101,11 @@ C 971014 nrv Add better S2 logic.
 C 971028 nrv Force new tape when starting a schedule (this was needed for
 C            S2 in case it starts in middle of tape).
 C 980916 nrv Add IY2 to hold the year of the stop times.
+C 000107 nrv Calculation of IFTOLD does not use ITUSE but includes
+C            ITEARL always. KNEWT was modified to allow more buffer,
+C            but this will not always work. Calculation of IFTOLD is not
+C            correct.
+C 000705 nrv Use standard KNEWT for S2 also.
 C
 
 C 1. First get set up with schedule or SNAP file.
@@ -369,7 +374,7 @@ C logic in "process this observation".
      .  CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
         IF (ISOR.EQ.0.OR.ICOD.EQ.0) GOTO 900
 C
-        IF (ISTNSK.NE.0.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) THEN
+        IF (ISTNSK.NE.0.OR.ILEN.LT.0.OR.JCHAR(IBUF,1).EQ.Z24) THEN ! process
           IF(ISTNSK.NE.0)
      .    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
      .               IHR2,MIN2,ISC2)
@@ -379,9 +384,9 @@ C
           ENDIF
           KNEW=.TRUE.
           IF(ISTNSK.NE.0) then
-            if (ks2) then
-              knew = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
-            else if (idir.ne.0) then
+C           if (ks2) then
+C             knew = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+            if (idir.ne.0) then
               KNEW = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .        IDIRP,IFTOLD)
             else
@@ -437,20 +442,22 @@ c         IS1(NOUT) = ISC
 C         NOB(NOUT) = 0
           END IF !new tape
 C
-       IY2(NOUT) = mod(IYR2,100)
+        if (istnsk.ne.0) then ! one of ours
+          IY2(NOUT) = mod(IYR2,100)
           IH2(NOUT) = IHR2
           IM2(NOUT) = MIN2
-c       IS2(NOUT) = ISC2
+c         IS2(NOUT) = ISC2
           ID2(NOUT) = IDAYR2
-C       NOB(NOUT) = NOB(NOUT)+1
+C         NOB(NOUT) = NOB(NOUT)+1
           IPASP = IPAS(ISTNSK)
-         if (ks2) then
+         if (ks2) then ! S2 or not
           iftold = ift(istnsk)+idur(istnsk)
           else
           IFTOLD = IFT(ISTNSK) + IFIX(IDIR*(ITEARL(istn)+IDUR(ISTNSK))
      .     *speed(icod,istn))
-           endif
+           endif ! S2 or not
           IDIRP = IDIR
+        endif ! one of ours
         ENDIF !process this observation
 C
        iob=iob+1

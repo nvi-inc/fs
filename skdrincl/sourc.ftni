@@ -1,10 +1,12 @@
 C     SOURCE INFORMATION COMMON BLOCK 
 C 970114 nrv Change dimension of LSORNA to use MAX_SORLEN
+C 990606 nrv Added liauna
+C 001108 nrv Add nsorlen array to hold length of source names.
 C 
       double precision SORP50,SORPDA,SATP50,SATDY 
       real flux
-      integer nsourc,nsatel,nceles,nflux,isaty
-      integer*2 lsorna
+      integer nsourc,nsatel,nceles,nflux,isaty,nsorlen
+      integer*2 lsorna,liauna
       character*1 cfltype
       character*128 sordefnames
 c
@@ -14,7 +16,9 @@ c
      .       NSOURC,NCELES,
      .       NSATEL,ISATY (MAX_SAT),
      .       nflux(max_band,max_sor),
-     .       LSORNA(MAX_SORLEN/2,MAX_SOR)
+     .       nsorlen(max_sor),
+     .       LSORNA(MAX_SORLEN/2,MAX_SOR),
+     .       LIAUNA(MAX_SORLEN/2,MAX_SOR)
 c
       COMMON/SOURC_CH/
      .       cfltype(max_band,max_sor),

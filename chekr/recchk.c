@@ -9,11 +9,11 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-void recchk_(icherr,ierr)
+void recchk_(icherr,ierr,indxtp,stat)
 int icherr[];
-int *ierr;
+int *ierr,*indxtp,*stat;
 {
-  long ip[5],ip2[5];            /* ipc parameters */
+  long ip[5];                   /* ipc parameters */
   struct req_rec request;       /* mcbcn request record */
   struct req_buf buffer;        /* mcbcn request buffer */
   struct vst_cmd lcl;
@@ -25,17 +25,35 @@ int *ierr;
   void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
   void skd_run(), skd_par();      /* program scheduling utilities */
 
+  int indx;
+
+  if(*indxtp == 1) {
+    indx=0;
+  } else if(*indxtp == 2) {
+    indx=1;
+  } else {
+    ip[2]=-505;
+    memcpy("q<",ip+4,2);
+    return;
+  }
+
   ini_req(&buffer);
 
-  memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
+  if(indx == 0) 
+    memcpy(request.device,"r1",2);
+  else 
+    memcpy(request.device,"r2",2);
 
   request.type=1;
   request.addr=0x73; add_req(&buffer,&request);
-  request.addr=0x81; add_req(&buffer,&request);
-  request.addr=0xb1; add_req(&buffer,&request);
-  request.addr=0xb5; add_req(&buffer,&request);
-  request.addr=0xb6; add_req(&buffer,&request);
+  if(*stat==0) {
+    request.addr=0x81; add_req(&buffer,&request);
+    request.addr=0xb1; add_req(&buffer,&request);
+    request.addr=0xb5; add_req(&buffer,&request);
+    request.addr=0xb6; add_req(&buffer,&request);
+  }
   request.addr=0x30; add_req(&buffer,&request);
+ 
 
   end_req(ip,&buffer);
   nsem_take("fsctl",0);
@@ -50,31 +68,8 @@ int *ierr;
     *ierr=-201;
     return;
   }
-  rte_sleep(100); /* wait to resample 0x73 in case we have RECON 4 */
 
-  ini_req(&buffer);
-
-  memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
-
-  request.type=1;
-  request.addr=0x73; add_req(&buffer,&request);
-
-  end_req(ip2,&buffer);
-  nsem_take("fsctl",0);
-
-  skd_run("mcbcn",'w',ip2);
-
-  nsem_put("fsctl");
-  skd_par(ip2);
-
-  if (ip2[2]<0) {
-    cls_clr(ip[0]);
-    cls_clr(ip2[0]);
-    *ierr=-201;
-    return;
-  }
-
-  rec_brk(icherr,ierr,ip,ip2);
+  rec_brk(icherr,ierr,ip,indx,*stat);
 
   return;
 

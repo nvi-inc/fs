@@ -1,6 +1,13 @@
 C     STATION INFORMATION COMMON BLOCK
 C 
 C 960817 nrv Add S2 variables
+C 990524 nrv Add tape_length, specified by user.
+C 990920 nrv Add valid rack and rec types here.
+C 990921 nrv Add two_letter_code
+C 991028 nrv Add second recorder type.
+C 991101 nrv Add lfirstrec for first recorder to use. 
+C 991108 nrv Remove lstform because this is incorporated in K4 rack names.
+C 000605 nrv Add tape_allocation
 
       double precision stnxyz,baselen,axisof,
      .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ    
@@ -9,15 +16,17 @@ C
      .co2mask,sefdst,diaman,sefdpar,sefdstel
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
-     .ncord,maxtap,nsefdpar,nrecst,nheads,ibitden_save,
-     .itearl,itlate,itgap,ns2tapes,itearl_save
+     .ncord,maxtap,nsefdpar,nrecst,nheadstack,ibitden_save,
+     .itearl,itlate,itgap,ns2tapes,itearl_save,tape_length
 C
       integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
-     .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed
+     .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed,
+     .two_letter_code,lstrec2,lfirstrec
 
       logical klineseg
 
-      character*128 stndefnames,tape_motion_type
+      character*128 stndefnames,tape_motion_type,rack_type,
+     .rec_type,tape_allocation
 C
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
      .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
@@ -38,23 +47,28 @@ C
      .       ISTCON(2,MAX_STN),
      .       NHORZ(MAX_STN),
      .       NCORD(MAX_STN),maxtap(max_stn),
+     .       tape_length(max_stn),
      .       nsefdpar(max_band,max_stn),
-     .       nrecst(max_stn),nheads(max_stn),
+     .       nrecst(max_stn),nheadstack(max_stn),
      .       ibitden_save(max_stn),itearl_save,
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
      .       ns2tapes(max_stn),
      .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN), 
      .       LPOCOD(MAX_STN),LPOSID(MAX_STN),
      .       lantna(4,max_stn),lterid(2,max_stn),
-     .       lstrec(4,max_stn),lstrack(4,max_stn),
+     .       lstrec(4,max_stn),lstrack(4,max_stn),lstrec2(4,max_stn),
+     .       lfirstrec(max_stn),
      .       loccup(4,max_stn),
      .       lhccod(max_stn),lterna(4,max_stn),
      .       lbsefd(max_band,max_stn),
-     .       ls2speed(2,max_stn),
+     .       ls2speed(2,max_stn),two_letter_code(max_stn),
      .       klineseg(max_stn)
 
-      COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn)
+      COMMON/STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
+     .rack_type(max_rack_type),rec_type(max_rec_type),
+     .tape_allocation(max_stn)
 C 
+C two_letter_code is a unique identifier for each DAS.
 C  NSTN   - number of stations
 C  LSTNNA - position names, up to 8 chars
 C  STNPOS - station longitude and latitude, geodetic, radians 

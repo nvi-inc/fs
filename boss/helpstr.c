@@ -13,12 +13,13 @@
 
 #define MAX_STRING  256
 
-void helpstr_(cnam,clength,runstr,rack,drive,ierr,clen,rlen)
+void helpstr_(cnam,clength,runstr,rack,drive1,drive2,ierr,clen,rlen)
 char *cnam;
 int *clength;
 char *runstr;
 int *rack;
-int *drive;
+int *drive1;
+int *drive2;
 int *ierr;
 int clen;
 int rlen;
@@ -30,7 +31,7 @@ int rlen;
   int freq,system();
   int i;
   char outbuf[80];
-  char equip1, equip2, ch1, ch2;
+  char equip1, equip2, ch1, ch2, ch3;
 
   *ierr=0;
   if (*clength > MAX_STRING) {
@@ -51,6 +52,7 @@ int rlen;
   strcat(outbuf,string);
 
   strcat(outbuf," > /tmp/LS.NUM 2> /dev/null");
+
   freq = system(outbuf);
 
   strcpy(outbuf,"ls ");
@@ -63,65 +65,56 @@ int rlen;
 
   idum=fopen("/tmp/LS.NUM","r");
   unlink("/tmp/LS.NUM");
-
-  if(decloc != NULL)
-    equip1=*(decloc+1);
-  else if(MK3==*rack)
-    equip1='m';
-  else if(MK4==*rack)
-    equip1='4';
-  else if(VLBA==*rack)
-    equip1='v';
-  else if(VLBA4==*rack)
-    equip1='u';
-  else if(K4==*rack)
-    equip1='k';
-  else if(K4MK4==*rack)
-    equip1='l';
-  else
-    equip1='_';
-
-  if(decloc != NULL)
-    equip2=*(decloc+2);
-  else if(MK3==*drive)
-    equip2='m';
-  else if(MK4==*drive)
-    equip2='4';
-  else if(VLBA==*drive)
-    equip2='v';
-  else if(VLBA4==*drive)
-    equip2='u';
-  else if(S2==*drive)
-    equip2='s';
-  else if(K4==*drive)
-    equip1='k';
-  else
-    equip1='_';
-
   *ierr = -3;
   while(-1!=fscanf(idum,"%s",outbuf)){
     decloc = strchr(outbuf,'.');
     if(decloc != NULL) {
       ch1=*(decloc+1);
       ch2=*(decloc+2);
- /* m4 defaulting to m3 works because 4 preceeds m in ls order */
- /* vlba4 defaulting to vlba works because u proceeds v in ls order */
-      if ((
-	   ch1==equip1 ||
-	   ch1=='_' ||
-	   (ch1 =='m' && equip1 == '4') ||
-	   (ch1 =='v' && equip1 == 'u') ||
-	   (ch1 == 'w' && (equip1 == '4' || equip1 == 'v' || equip1 == 'u')) ||
-	   (ch1 == 'y' && (equip1 == '4' || equip1 == 'u')) ||
-	   (ch1 == 'z' && (equip1 == '3' || equip1 == 'u')) ||
-	   (ch1 == 'a' && equip1 == 'v')
-	   ) && (
-		 ch2==equip2 ||
-		 ch2=='_' ||
-		 (ch2 =='m' && equip2 == '4') ||
-		 (ch2 =='v' && equip2 == 'u') ||
-		 (ch2=='x' && equip2 != 's'))
-	  ) {
+      ch3=*(decloc+3);
+      if((ch1== '_' ||
+	  (ch1 == '3' &&  K4K3  == *rack) ||
+	  (ch1 == 'm' &&  MK3   == *rack) ||
+	  (ch1 == 'n' && (MK3   == *rack || MK4   == *rack)) ||
+	  (ch1 == 'e' && (MK3   == *rack || MK4   == *rack ||
+			  VLBA  == *rack || VLBA4 == *rack )) ||
+	  (ch1 == 'f' && (MK3   == *rack || MK4   == *rack ||
+			  K4K3  == *rack || K4MK4 == *rack ||
+			  K4    == *rack)) ||
+	  (ch1 == '4' &&  MK4   == *rack) ||
+	  (ch1 == 'g' && (MK4   == *rack || VLBA  == *rack ||
+			  VLBA4 == *rack || K4MK4 == *rack)) ||
+	  (ch1 == 'h' && (MK4   == *rack || VLBA4 == *rack ||
+			  K4MK4 == *rack)) ||
+	  (ch1 == 'v' && (VLBA  == *rack)) ||
+	  (ch1 == 'w' && (VLBA  == *rack || VLBA4 == *rack)) ||
+	  (ch1 == 'k' && (K4K3  == *rack || K4MK4 == *rack ||
+			  K4    == *rack)) ||
+	  (ch1 == 'a' &&  0     != *rack)) &&
+	 (ch2 == '_' || ch2 == '+' ||
+	  (ch2 == 'k' &&  K4    == *drive1) ||
+	  (ch2 == 'm' &&  MK3   == *drive1) ||
+	  (ch2 == 'n' && (MK3   == *drive1 || MK4 == *drive1)) ||
+	  (ch2 == '4' &&  MK4   == *drive1) ||
+	  (ch2 == 's' &&  S2    == *drive1) ||
+	  (ch2 == 'w' && (VLBA  == *drive1 || VLBA4 == *drive1)) ||
+	  (ch2 == 'a' &&  0     != *drive1) ||
+	  (ch2 == 'l' && (MK3   == *drive1 || MK4   == *drive1 ||
+			  VLBA  == *drive1 || VLBA4 == *drive1 ))) &&
+	 (ch3 == '_' || ch3 == '+' ||
+	  (ch3 == 'k' &&  K4    == *drive2) ||
+	  (ch3 == 'm' &&  MK3   == *drive2) ||
+	  (ch3 == 'n' && (MK3   == *drive2 || MK4 == *drive2)) ||
+	  (ch3 == '4' &&  MK4   == *drive2) ||
+	  (ch3 == 's' &&  S2    == *drive2) ||
+	  (ch3 == 'w' && (VLBA  == *drive2 || VLBA4 == *drive2)) ||
+	  (ch3 == 'a' &&  0     != *drive2) ||
+	  (ch3 == 'l' && (MK3   == *drive2 || MK4   == *drive2 ||
+			  VLBA  == *drive2 || VLBA4 == *drive2 )))
+	 &&
+	 (((*drive1 == 0) == (ch2 != '+' )) ||
+	  ((*drive2 == 0) == (ch3 != '+' )))
+	 ) {
         strcpy(runstr,outbuf);
         *ierr = 0;
         break;

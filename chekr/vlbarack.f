@@ -33,7 +33,12 @@ C
         enddo
         call fs_get_ichvlba(ichvlba(ibbc),ibbc)
         ichecks=ichvlba(ibbc)
-        if(ichvlba(ibbc).le.0)  goto 199
+        if(ichvlba(ibbc).le.0) then
+           bbc_tpi(1,ibbc)=65536
+           bbc_tpi(2,ibbc)=65536
+           call fs_set_bbc_tpi(bbc_tpi(1,ibbc),ibbc)
+           goto 199
+        endif
         ierr=0
         call bbchk(ibbc,icherr,ierr)
         if (ierr.ne.0) then
@@ -59,7 +64,13 @@ C
         enddo
         call fs_get_ichvlba(ichvlba(nbbc+idist),nbbc+idist)
         ichecks=ichvlba(idist+nbbc)
-        if(ichvlba(idist+nbbc).le.0) goto 299
+        if(ichvlba(idist+nbbc).le.0) then
+           vifd_tpi((idist-1)*2+1)=65536
+           call fs_set_vifd_tpi(vifd_tpi,(idist-1)*2+1)
+           vifd_tpi((idist-1)*2+2)=65536
+           call fs_set_vifd_tpi(vifd_tpi,(idist-1)*2+2)
+           goto 299
+        endif
         ierr=0
         call distchk(idist,icherr,ierr)
         if (ierr.ne.0) then

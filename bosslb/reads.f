@@ -21,8 +21,8 @@ C
 C  LOCAL VARIABLES:
 C
 C     IL  - length of buffer read
-      character*80 ibc
-      integer*2 ib(40)
+      character*512 ibc
+      integer*2 ib(256)
       integer fblnk,fmpreadstr
       equivalence (ib,ibc)
 C
@@ -41,7 +41,7 @@ C
       call char2low(ibc)
       if (ierr.lt.0.or.len.lt.0) goto 900
       if (len.eq.0) goto 100
-      nchar = iflch(ib,80)
+      nchar = iflch(ib,512)
       if (nchar.eq.0) goto 100
       id = ichmv(ibuf,1,ib,1,nchar)
       nchar=fblnk(ibuf,1,nchar)

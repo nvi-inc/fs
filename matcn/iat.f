@@ -90,6 +90,8 @@ C
         ifrecv = 1
       else if (imode.eq.10) then
         ifrecv = 1
+      else if (imode.eq.11) then
+        ifrecv = 1
       else
 C  A colon in the message means a response to the download 
         do ir=1,nrspn
@@ -167,14 +169,17 @@ C  at this time, don't know how many characters are expected 7/16/92
            idum=ichmv(irecv,2,irecx(2),1,maxc-1)
            ilen=ilen+1
         endif
-      else if (imode.eq.9.or.imode.eq.10) then
+      else if (imode.eq.9.or.imode.eq.11) then
         maxc=100
-        if(imode.eq.10) itimeout=max(210,itimeout)
+        if(imode.eq.11) itimeout=max(210,itimeout)
         ireg(1)=portread(lumat,irecv,ilen,maxc,10,itimeout)
 c         read(5,'(39a2)') (irecv(iweh),iweh=1,39)
 c         ilen=iscn_ch(irecv,1,78,'$')-1
 c         write(6,'(''got:'',39a2)') (irecv(iweh),iweh=1,(ilen+1)/2)
 c         ireg(1)=0
+      else if(imode.eq.10) then
+        maxc=100
+        ireg(1)=portread(lumat,irecv,ilen,maxc,ichar('$'),itimeout)
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
       endif
@@ -199,7 +204,8 @@ C     try communications all over again.
 C     If we got a o'6' (ack) or o'25' (nak) substitute readable ACK or NAK.
 C
       if (ireg(1).eq.-2) then          ! timeout
-         if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
+         if (imode.eq.9.or.imode.eq.10.or.imode.eq.11.or.
+     &        imode.eq.-54) then
             call echoe(itran,iebuf,nctran,iecho,maxech)
             idum=ichmv_ch(dbg_buf,1,"debug: ")
             idum=ichmv(dbg_buf,idum,iebuf,1,iecho)
@@ -209,18 +215,18 @@ C
             endif
             call logit2(dbg_buf,idum-1)
          endif
-         if ((imode.eq.9.or.imode.eq.10.or.imode.eq.-54).and.itry.lt.3)
-     &        goto 200
+         if ((imode.eq.9.or.imode.eq.10.or.imode.eq.11.or.imode.eq.-54)
+     &        .and.itry.lt.3) goto 200
          if (itry.lt.maxtry) goto 200
          ierr = -4
       else if (nrc.ne.nchrc(ir).and.imode.ne.9.and.imode.ne.10
-     &       .and.imode.ne.-54) then
+     &       .and.imode.ne.11.and.imode.ne.-54) then
 c                                ! wrong # of characters in response
          if (itry.lt.maxtry) goto 200
          call ifill_ch(irecv,1,80,' ')
          nrc=0
          ierr = -5
-      else if (imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
+      else if (imode.eq.9.or.imode.eq.11.or.imode.eq.-54) then
          if(nrc.ge.3) then
             kprompt=ichcm_ch(irecv,nrc-2,'>'//char(13)//char(10)).eq.0
          endif
@@ -244,7 +250,9 @@ c                                ! wrong # of characters in response
                      call logit2(dbg_buf,idum-1)
                      ierr=ias2b(irecv,i+8,1+(nrc-1)-(i+8))
                      if(ierr.eq.7.and.itry.lt.3) goto 200
-                     if(ierr.lt.-1000.or.ierr.gt.1000) then
+                     if(ierr.eq.32768) then
+                        ierr=-998
+                     else if(ierr.lt.-50.or.ierr.gt.50) then
                         ierr=-999
                      else if(ierr.gt.0) then
                         ierr=-800-ierr
@@ -259,6 +267,17 @@ c                                ! wrong # of characters in response
             ierr = +1
             nrc = ichmv_ch(irecv,1,'ack') - 1
          endif
+      else if (imode.eq.10) then
+         if(ichcm_ch(irecv,1,'error ').eq.0.and.nrc.ge.8) then
+            ierr=ias2b(irecv,7,2)
+            if(ierr.eq.32768) then
+               ierr=-997
+            else
+               ierr=-700-ierr
+            endif
+            goto 999
+         endif
+         nrc=nrc-1
       else if (jchar(irecv,1).eq.o'6') then ! ack response
          ierr = +1
          nrc = ichmv_ch(irecv,1,'ack') - 1

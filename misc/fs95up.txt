@@ -1,0 +1,1461 @@
+File: /usr2/fs-9.5.0/misc/fs95up.txt  Version: 1.0  Date: 010920
+
+I. Introduction
+
+This memo is divided into 7 sections:
+   I.   Introduction.
+   II.  Changes Since Version 9.4.18
+   III. Two Tape Drive Operation
+   IV.  Installation
+   V.   Modifying Procedures and Control Files
+   VI.  DBGET in FS 9.5
+   VII. Transferring The Update Archive By DOS Floppy
+
+Please print this notice and read it carefully before installing the
+new version. The update notice is rather long because there are so
+many new features. You can skip the list of new features and just
+follow the installation instructions to get the system installed for
+the time being. If you do you won't be aware of all the new features,
+but you can come back to this later when you have more time.
+
+
+II. Changes Since Version 9.4.18
+
+The sections is divided into three sub-sections: A. Change in the FS,
+B. Changes in DRUDG, and C. Known Bugs. The latter sections is not
+necessarily just new items for 9.5. Each sub-section starts with a
+summary of the items covered followed by a more detailed description.
+
+			 A. Changes in the FS
+
+The following is a summary of the changes. More detailed text follows
+the summary.
+
+1. K4 rack and recorder support.
+2. Two tape drive support.
+3. SETCL time model changes.
+4. Default IFD and IF3 attenuator settings.
+5. Automatic IFD attenuator adjustment for Mark IV Racks.
+6. IF3 command phase-cal control for Mark III and Mark IV racks.
+7. IF3 switch wiring change.
+8. Mode dependent parity checks procedures name change.
+9. Year change issues.
+10. The decoder type may now be set to "none".
+11. The "vdqa" and "vform" command are now available with all rack
+    types.
+12. Control files re-organized.
+13. PARITY command verifies data is present for DQA&Mark IV decoders.
+14. PARITY command output improved.
+15. IBCON now reads up to 32 characters in ASCII mode.
+16. Mark IV "form" command reports synch errors better.
+17. S2 recorder "rec=eject" command changed.
+18. TNX command
+19. FS initialization error handling improved.
+20. Help file handling has been improved.
+21. Experimental fsVUE (Field System VLBI User Environment).
+22. "erchk", experimental error display systems.
+23. "inject_snap" SNAP command entry program available.
+24. "fs.prompt" user prompt program available.
+25. "tacd" program for monitoring TAC GPS receivers available.
+26. SCHEDULE command fix.
+27. New "sched_initi" schedule initialization procedure.
+28. New "sched_end" schedule termination procedure.
+29. Experimental visual FIVPT.
+30. VLBA/VLBA2 "repro" command improvements.
+31. SAVE_FILE command can write-append and read multi-line files.
+32. New "ds" (directory sort) command in PFMED.
+33. Command stack editing and tab completion available in PFMED.
+34. New keywords in "ibad.ctl".
+35. Modification to check procedures for VLBA4 racks.
+36. FS compiles under FS Linux 4.
+37. A new command "cablediff" has been included.
+38. New "cablelong" command. 
+
+A more detailed discussion of these changes follows.
+
+1. K4 rack and recorder support. The FS has been modified to support
+   K4 racks and recorders. There are several new commands, see the
+   SNAP commands manual, for details, and some existing commands have
+   new versions for K4 equipment. This primarily affects stations with
+   K4 components. However, there were impacts in several areas as
+   well. These include: the maximum size of a command has been
+   increased to 512 characters, the maximum size of a log entry has
+   been increased to 512 characters, several new reserved mnemonics
+   exist for GPIB device names in "ibad.ctl". For all systems, the new
+   "k4ib" command provides an extended version of the old (but still
+   supported) "hpib" command with many more options. The "echo"
+   command also now echoes GPIB communications.
+
+2. Two tape drive support. The FS and DRUDG have been modified to
+   support two drives for sequential use. In other words, one tape
+   drive can be used at a time and they can be used sequentially
+   within an experiment. This is intended to allow stations with two
+   recorders more flexibility by allowing two full tapes to be
+   recordable without operator intervention. For stations with two
+   tape drives, it also provides a way to run the Intensives without
+   unmounting and remounting the tape being used in an experiment that
+   an intensive is interrupting.
+
+   Any of the supported tape recorders (Mark III, Mark IV, VLBA,
+   VLBA4, S2, and K4) can be used for first drive. The second drive
+   can be any of the longitudinal recorders (Mark III, Mark IV, VLBA,
+   and VLBA4). The nomenclature is that the first drive is "drive 1"
+   or "recorder 1" and the second drive is "drive 2" or "recorder
+   2". This name change applies even for systems with only one tape
+   drive. A single recorder is used as either "drive 1" or "drive
+   2". This has been arranged in as backward compatible a way as
+   possible for systems with only one recorder. For these systems the
+   only changes necessary are: re-arrange the equip.ctl control file,
+   and modify the tape recorder mnemonics in the matad.ctl and
+   mcbcn.ctl control files, and rename the parity check
+   procedures. The only other impact is that some display parameters
+   in the FS and monit will show "r1" instead of "rc" or "tp" for
+   recorder one. Aspects of two tape drive operation are discussed in
+   more detail in section "III. Two tape drive operation" below.
+
+3. SETCL time model changes. The FS time model has been modified to
+   accept "ntp" as a model type in the time.ctl file. In this case,
+   the FS will assume that the computer time is set by NTP and is
+   therefore correct. Regardless of the time model being used, if the
+   formatter and the FS time disagree by 0.5 seconds or more, setcl
+   will now issue an error message. Some changes were made in the
+   fmset display to support the NTP model type.
+
+4. Default IFD and IF3 attenuator settings. The IFD and IF3 commands
+   now accept default attentuator settings. The value used for the
+   default is determined in the following way. If the attenuators have
+   been commanded since the last time the FS was started, those values
+   are used. If they haven't been commanded since the last time the FS
+   was started, the rack is read to determine the current values. The
+   resulting settings are displayed in the command response. DRUDG
+   places default attenuator settings, i.e., null parameter values, in
+   the the procedure files it generates. To remind the operator to set
+   the attenuator settings explicitly an error is generated if the
+   default values are used. These features were added to make the
+   experiments more robust in case the operator forgets to edit in the
+   correct attenuator settings beforehand. In some, but certainly not
+   all, cases this should help. The operator should always check and
+   explicitly edit in attenuator settings. Alternatively without
+   editing the procedures, once the attenuator settings have been
+   verified, the TNX command can be used to suppress the warning
+   messages. This must be done with care especially if there is more
+   than one mode in use in an experiment. In a future release a
+   complete solution will be added so that the attenuator settings can
+   be checked and set without editing the procedures.
+
+5. Automatic IFD attenuator adjustment for Mark IV Racks. This command
+   can be used to determine the correct IF attenuator settings for a
+   mode automatically.  It determines the video sidebands being
+   recorded from the formatter set-up and which IF the VCs are
+   connected to from the "patch" command. Compared to the earlier more
+   experimental versions of this command, the new version has been
+   upgraded to handle all Mark IV recording modes. If it successfully
+   converges it makes the new attenuator settings the "commanded"
+   ones, so that "chekr" will not complain about them. It is also
+   faster. In the future it will expanded to support Mark III racks as
+   well.
+
+6. IF3 command phase-cal control for Mark III and Mark IV racks. The
+   IF3 command has been modified to include a parameter to control
+   Giuseppe Maccaferri's phase-cal control modification of the IF3
+   module. This change has two parts. The type of phase-cal control is
+   indicated in the equip.ctl as "if3" or "none". A value of "if3" is
+   used to indicated that the rack wiring has been modified to support
+   this. The FS will monitor the IF3 module's communication response
+   to see if the module also supports this and will report a conflict
+   if the module does not. DRUDG has been modified to command the
+   state of the phase-cal control parameter based on the schedule.
+   This feature has not been tested with hardware yet. The only
+   testing was done stand-alone. If you discover any problems, as
+   always, please let us know.
+
+7. IF3 switch wiring change. The standard wiring for the switches on
+   the IF3 module has changed. The new wiring is: switch 1 for VC03,
+   state 1 for IF1 low and state 2 for IF1 high; switch 2 for VC10,
+   state 1 is for IF2 low and state 2 is IF2 high. Please check the
+   wiring of your switch if you have one.
+
+8. Mode dependent parity checks procedures name change. Mode
+   independent "parity" checks procedures names have been changed. The
+   old names were "checkf80", "checkr80", "checkf135", and
+   "checkr135". The new names are "check80f", "check80r", "check135f",
+   and "check135r". The names were changed to make the procedure names
+   for dual recorder systems easier for the user to type.
+
+9. Year change issues. It was noted that if on the last day of the
+   year a user enters a timed command that is intended to be executed
+   on the first day of the next year and the user omits the year in
+   the time field, the FS will think the time is for earlier in the
+   current year. Since this is always not useful, the FS was modified
+   to reject these commands and complain if the day was farther in the
+   past than previous day. The previous day is accepted since there
+   may be problems around midnight otherwise.  DRUDG generated .snp
+   files use explicit years and dates and are uneffected by this
+   change.
+
+10. The decoder type may now be set to "none". This will cause the
+    parity command to dwell for two seconds on each track pair without
+    querying the decoder. This is intended to assist stations that do
+    not have decoder or do not have computer communications with the
+    decoder to allow visual checks of eye-patterns and parity error
+    rates.
+
+11. The "vdqa" and "vform" command are now available with all rack
+    types.
+
+12. Control files re-organized. The control files have been
+    rearranged for two tape drive support and to eliminate obsolete
+    parameters from location.ctl. The station letter, occupation code,
+    and decade years have been deleted.
+
+13. PARITY command verifies data is present for DQA&Mark IV decoders.
+    The parity command now checks the expected and actual number of
+    processed bits/frame for DQA and Mark IV decoders. If the actual
+    processed number is more than 10% less than expected, an error
+    will be reported. This condition is not likely to occur unless
+    there is no data coming to the decoder. Typically this would be
+    caused by disconnected cables. Otherwise there is no way to
+    distinguish between zero parity errors being really zero or no
+    data being decoded. The Mark III decoder has no way to return
+    information about the number of bits/frames processed, so the
+    only way to make this check for the Mark III decoder is to use the
+    AUX data field check.
+
+14. PARITY command output improved. The automatic wrapping of long
+    output lines for the "parity" command was not as clean as it
+    should have been and has been improved.
+
+15. IBCON now reads up to 32 characters in ASCII mode.  The "ibcon"
+    program now by default accepts responses up to 32 (was 30)
+    characters in ASCII mode. Internally, the options for programatic
+    interaction with "ibcon" have been greatly expanded as part of
+    supported K4 equipment. Some of these changes can be utilized
+    using the "k4ib" command.
+
+16. Mark IV "form" command reports synch errors better. The reporting
+    of synch errors by Mark IV "form" command has been improved. The
+    misleading error message "is failing synch test" has been
+    deleted. Now only the "was failing synch test" message appears.
+
+17. S2 recorder "rec=eject" command changed. The S2 recorder
+    "rec=eject" command was modified to eject only the selected tapes,
+    as it was in the original S2 FS version. This changed is integral
+    to how the S2 tape ejection is handled by DRUDG to make it more
+    like normal S2 operations. Thanks to Tasso Tzioumis (ATNF) and
+    Jonathan Quick (HartRAO) for suggestions and testing of these
+    features. The behavior of the intermediate version where
+    "rec=eject" ejected all tapes regardless of which tapes were
+    selected can be recovered by using "rec=eject,all" .
+
+18. TNX command. This new command allows the operator to acknowledge
+    an error and not have it appear on the log display again. All
+    errors will continue to be recorded in the log. This command is
+    intended to provide a way to suppress error messages that nothing
+    can be done about. It must be used with care because if used
+    incorrectly it can mask out legitimate errors that require
+    operator attention. A possible example of where it might be used
+    is if a VC is returning a incorrect value for some parameter, such
+    as bandwidth even though the selected BW is correct. Previously
+    the only way to avoid having "chekr" complain persistently about
+    this was to uncheck the whole module. Now just this error message
+    can be unchecked. In order to reduce possible mis-use of this
+    command, it will not be accepted if it entered from a SNAP
+    procedure, schedule, or the time-list. It must be entered
+    interactively. Please see the help page for TNX for more details.
+
+19. FS initialization error handling improved. Error handling for
+    problems encountered while reading the control files has been
+    improved. A long standing bug that caused the FS to continue to
+    run even if there were errors in the control file has been fixed.
+    A detected error will now cause the FS to terminate. In addition
+    some lines at the ends of some control files were treated as
+    "optional". This has been changed. Except for control files that
+    specify hardware or network addresses of devices (matad.ctl,
+    mcbcn.ctl, ibad.ctl, rclcn.ctl, and tacd.ctl), all lines must be
+    present even if they contain dummy parameters. Files that contain
+    device addresses are treated differently because actual devices
+    installed can be vary significantly by station. However, the file
+    at least must be present. It is hoped that this will make the FS's
+    behavior more consistent. While the new situation is still not
+    optimal and the operator can count on two things: (1) if a control
+    file field is missing or incorrect the FS will not run, and (2) an
+    error message will be printed that at least mentions which file
+    has the fault and in some cases which line. Please note that it is
+    not always possible for the FS to determine which line is at
+    fault, only which file has a problem. Please compare your control
+    files to the defaults in "/usr2/fs/st.default/control" if you have
+    problems.
+
+20. Help file handling has been improved. Help pages can now be
+    displayed for all commands. In the past some specific commands,
+    such as "vc01" could not be displayed, only the generic "vcnn"
+    help page was available. Now all these commands are available
+    explicitly. The generic commands with specific version now
+    available are: "vcnn", "bbcnn", "tsys", "flux", "caltemp", and
+    "beam". Only commands for the equipment currently specified
+    are available.
+
+21. Experimental fsVUE (Field System VLBI User Environment). fsVUE is
+    an experimental user interface for the FS. It is a Tcl/Tk program
+    that provides a different interaction method for the FS.
+    Knowledgeable users can try fsvue at their own risk. Once the FS
+    is running you can run it as a separate interface. It possible to
+    start the FS directly from fsvue, but we do not recommend that at
+    this time. fsvue places emphasis on errors generated by the FS by
+    coloring them red. Future versions will be more robust and include
+    additional features. We hope to eventually change this into the
+    primary FS interface. The following features are included in
+    fsVUE:
+
+    [i] Gives information on fsvue.
+
+    [File] - This will allows you to [Load] the stored commands from a
+             file called .xfscmds in your home directory, it also has
+             an option [Save] commands added by the [Add] command
+             under the button [Execute].
+
+    [Displays] - This has a menu of popup displays used by the Field
+                 System: General, Time, Tsys, Errors, and Weather.
+
+    [Execute] - This will display a menu with all the known command
+                names and also allows you to add commands using the
+                [Add] entry. This has a window next to it where you
+                type a new keyword and command.
+
+    [Examine LOGS] - This will popup a window that will help you
+                     examine past logs. Information on how to use it
+                     is available under the [Help] button.
+
+    [Other Files] - This will popup a window that will help you
+                    examine Control, Procedure, snap files. It also
+                    has a [Help] and [i] information button.
+
+    [Field System HELP] - This will popup a window that will contain
+                          the help files from the Field System.
+
+    [Exit] - Get out of fsVUE.
+
+22. "erchk", experimental error display systems. "erchk" is another
+    experimental feature. It provides a color error display. We expect
+    to expand and improve this program in the future. For now it gives
+    the colors **** MAGENTA for very critical bo, ch, ma errors, ***
+    RED for ib, mc, an, ** YELLOW for fm, and * BLUE for none critical
+    messages. This can be changed, by changing the code, which is very
+    well commented on how to do this. In the future there will be a
+    configuration file to allow a station to customize the level of
+    each error. Also in the future, "erchk" will work with TNX in
+    order to keep the messages to a minimum. Knowledgeable users can
+    try "erchk" at their own risk. It is used by running it in an
+    xterm from stpgm.ctl. An example line for starting it is included
+    as a comment in /usr2/fs/st.default/stpgm.ctl. You can copy this
+    line to /usr2/control/stpgm.ctl, "uncomment" it, and restart the
+    FS to try it.  Color may not work correctly in the xterms of some
+    of the earlier FS Linux kernels.
+
+23. "inject_snap" SNAP command entry program available. "inject_snap"
+    is a C program that can be run from a shell to send a SNAP command
+    to the FS. This is the old "prgin" program renamed to
+    "inject_snap" in order to recognize the program of that name which
+    was used by JPL for the same purpose. All uses of "prgin" in FS
+    have been changed to "inject_snap".
+
+24. "fs.prompt" user prompt program available. "fs.prompt" is adapted
+    from a similar one, "tk.prompt", used at JPL. It can be used to
+    interact with the operator during SNAP procedures. However we
+    recommend that it not be used during experiments because it has
+    the potential to stop execution of the schedule. Below is a
+    description of the program from the program comments:
+
+    This program displays an X-window prompt and a "OK" and "continue"
+    button. The second parameter decides on whether to send a "cont" to
+    the Field System when the continue button is pressed and is
+    either "0" or "1". This is useful as it allows commands to be typed
+    in the oprin window while fs.prompt is running. The first
+    parameter is the string to display in the window.  Usage for not
+    blocking operator input into oprin:
+      sy=fs.prompt "Please do xxxx" 1 &
+      halt
+    Usage where blocking is required:
+      sy=fs.prompt "Please do xxxx" 
+    note that the "&" causes the program to be run in the background
+    so that no blocking occurs. The parameter "1" causes a "cont" to be
+    sent to the Field system to continue after the "halt" in a schedule
+    has been made.
+
+25. "tacd" program for monitoring TAC GPS receivers available. tacd is
+    a new program that runs in background to interact over the
+    ethernet with a TAC controlled by the TAC32plus program. This can
+    be used to log information about the MASER-to-GPS being measured
+    by the TAC. Please see the new SNAP command "tacd" and the
+    comments in the default /usr2/fs/st.default/control/tacd.ctl
+    control file for more information.
+
+26. SCHEDULE command fix.  A bug in the schedule command was fixed.
+    Previously if you had specified a beginning line number in the
+    range of the initial comments in the schedule and a number of
+    lines to execute, that number of lines after the initial comments
+    would be executed.  It seems doubtful that anyone utilized or was
+    caught by this bug; the behavior has, in any event, been
+    modified. Now, if the specified starting line is in the initial
+    comments, the actual number of lines requested will be executed,
+    unless the initial line number is one and the number of lines to
+    be executed extends beyond the initial comments (including an
+    indefinite numbers of lines, the default).  In this special case,
+    after the initial comments are listed, execution will begin after
+    the initial comments. In all cases the initial comments are always
+    logged whenever execution of a schedule begins. We hope the new
+    behavior is closer to what users want and is more intuitive (even
+    though it is awkward to describe in words).
+
+27. New "sched_initi" schedule initialization procedure. When a
+    schedule is started with a schedule= command, before any lines of
+    a schedule are executed, a call to SNAP procedure "sched_initi" is
+    generated. By default this will execute a procedure in your
+    station procedure library. However, you could customize it on an
+    experiment basis by adding an experiment specific version to the
+    DRUDG generated experiment procedure files.
+
+28. New "sched_end" schedule termination procedure. The default
+    station libraries include an empty "sched_end" procedure. This
+    procedure (somewhat analogously with "sched_initi") is executed at
+    the end of every .SNP schedule produced by DRUDG. If the schedule
+    executes to completion it is executed automatically. If a schedule
+    is stopped before the end of the .snp file, it would have to
+    executed manually if its use is desired.  You can customize the
+    contents of the "sched_end" procedure for your station. The
+    version in your station procedure library would need to be
+    generic, i.e., appropriate for "typical" experiments at your
+    station.  Experiment specific version could be placed in the
+    experiment procedure libraries.
+
+29. Experimental visual FIVPT. Hiro Osaka-san at CRL has a developed a
+    version of fivpt that automatic makes a plot of the scans. This is
+    an experimental version that needs some improvements before it
+    used for normal operations. Knowledgeable users can try it, at
+    their own risk, by executing "make fivpt" in
+    /usr2/fs/fivpt.visual. The makefile requires the g77 compiler,
+    which is available at least in the FS Linux 3 kernel, but possibly
+    FS Linux 2 as well. You can return to the operational version by
+    executing "make fivpt" in /usr2/fs/fivpt.
+
+    In order to use this version, two environment variables are
+    required to be set in ~/.cshrc:
+
+      setenv PGPLOT_DIR /usr/lib/pgplot
+      setenv PGPLOT_DEV /xwin
+
+    The first variable depends on the place where pgplot is
+    installed. For some systems /usr/local/lib/pgplot is appropriate.
+
+30. VLBA/VLBA2 "repro" command improvements. The VLBA/VLBA2 repro
+    command selects "dis" (equalizer 3) by default for equalizer A if
+    the reproduce mode for A is "byp". Equalizers may also be selected
+    now by number 0-3. This is more consistent with Mark IV usage.
+
+31. SAVE_FILE command can write-append and read multi-line files. The
+    SAVE_FILE command now uses the presence or absence of "+" as the
+    first character of the filename to indicate whether or not to
+    append on writing and whether to read multiple lines of the
+    file. Without the "+" SAVE_FILE overwrites on writing and reads a
+    single line.
+
+32. New "ds" (directory sort) command in PFMED. Paul Burgess (Jodrell
+    Bank) has implemented a "directory sort" command, "ds", to display
+    the procedures in a procedure file in alphabetical order using a
+    bubble sort. This should help quite a bit with the locating the
+    procedures in large libraries, especially. The sorted listed can
+    be instead of "dl".  Please note that there is no "pfds" command,
+    yet.
+
+33. Command stack editing and tab completion available in PFMED. Paul
+    Burgess (Jodrell Bank) has also added command stack editing using
+    the readline utility library.  Jonathan Quick (HartRAO) has
+    contributed to this new feature of PFMED. The functionality is
+    similar to that in "tcsh" (default FS operator login shell
+    prompt) and oprin. Command completion with the tab (and a list of
+    available choices with a second tab) is included. The only
+    situation in which tab completion is not yet available is to
+    specify a different procedure library (after the "::") to copy a
+    procedure from in the "st" command. There is also a new "help"
+    command in PFMED that will display a brief summary of the
+    available commands.
+
+34. New keywords in "ibad.ctl". New keywords:
+    "no_interface_clear_board" (disable use of interface clear after
+    board open, for AT-GPIB card only), "interface_clear_converter"
+    (enable use of interface clear after initial converter open, for
+    GPIB-232CT-A converters only, and "set_remote_enable" (sets remote
+    enable after an initial interface clear is or would have been
+    executed) are now available in "ibad.ctl". These options are
+    intended to provide more ways to modify "ibcon"'s behavior to
+    help support difficult devices.  We have at least one device that
+    did not work before with the GPIB board that now does if we use
+    the keywords: "no_write_ren" and "set_remote_enable". In the
+    future, we hope to investigate finding a minimum subset of
+    keywords that will support all devices.
+
+35. Modification to check procedures for VLBA4 racks. There is a
+    problem with the parity check procedures for VLBA4 rack systems
+    that use the VLBA DQA module as the decoder. Thanks to Pablo
+    Vicente (Yebes) for pointing out the path to a solution. The
+    problem here is to find a way to specify a set-up for the tape
+    clock in the formatter that will work both with the Mark IV
+    formatter and the VLBA formatter (for systems that can revert back
+    to using the VLBA formatter). The recommended approach for this is
+    to change the "form=*,4" commands in the check procedures that set
+    the tape clock to "vform=*,4". Then in addition, you should put a
+    "vform=c,4" in the "initi" procedure. The logic here is that: (1)
+    if the Mark IV formatter is in use, the "vform=c,4" in "initi"
+    will set the tape clock for the DQA module to the correct Mark
+    III/IV data rate for 4 Mb/sec/track reproduce and that won't
+    normally be changed by the schedule since the VLBA formatter would
+    not normally get set-up in a schedule that uses the Mark IV
+    formatter, (2) if the VLBA formatter is used, whatever mode is
+    last commanded for it will be picked up the "vform=*,4" in the
+    check procedure, but with with the tape clock set correctly. The
+    "vform" command is a special command that allows access to the
+    VLBA formatter when the Mark IV formatter is in use.
+
+    For VLBA4 stations that are not using the DQA module in the VLBA
+    formatter for parity checks (in other words a Mark III or IV
+    decoder is being used), the "vform" commands mentioned above can
+    be deleted from the "initi" and check procedures.
+
+36. FS compiles under FS Linux 4. Ari Mujunen (Metsahovi) has
+    developed a new standard kernel, so-called "FS Linux 4" to
+    accommodate the more modern PC hardware that is currently
+    available.  The new kernel, based on kernel 2.2.19, will be
+    available soon. The FS has been modified to compile under this
+    kernel as well as the previous supported kernels.  Thanks to
+    Jonathan Quick (HartRAO) for many contributions in this area,
+    especially related to GPIB support.
+
+37. A new command "cablediff" has been included. This command prints
+    the difference and cable cal sign based on the most recent "cable"
+    and "cablelong" commands. It is recommended that this command be
+    used for calculating the cable sign and difference and recording
+    it in a standard format.
+
+38. New "cablelong" command. The "cablelong" command which may have
+    been implemented at some stations as a local command is now a
+    standard part of the FS. It is recommended that "cablelong" be
+    used to record the length of the cable during checks when the
+    cable is long since it will provide a standard log entry format
+    and will avoid spoiling the auto-scaling of cable data plots. In
+    addition, if the new standard version is used to measure the cable
+    when it is long, the "cablediff" command can be used to
+    automatically calculate the cable sign and difference and record
+    them in a standard format.
+
+                         B. Changes in DRUDG
+
+This version of DRUDG has major changes in the following areas.
+
+1. Enhanced handling of rack and recorder types, including
+   handling dual recorders.
+2. Procedure names use letters instead of numbers for subpasses.
+3. Change in data_valid handling for slow antennas.
+4. Scan names added.
+5. Parity checks delayed if the first scan is too short.
+6. S2 tape load/unload handling refined.
+7. IFD and IF3 commands changed.
+8. Two head recording support
+9. sched_end procedure at the end of .snp files
+
+These are discussed in more detail below.
+
+1. Enhancements to rack and recorder type usage 
+
+drudg was updated to use information about the rack and recorder types
+from the schedule file, the control file, or interactive input. drudg
+handles dual recorders and the designation of recorder "1" and
+recorder "2".
+
+drudg cannot make a listing, a SNAP file, or a procedure library file
+unless it knows the equipment at your station.  There are three ways
+to get information about station equipment into drudg: (1) from the
+schedule file, (2) via drudg's Option 11, and (3) from the drudg
+control file. Each method is describe below.
+
+   (1) From the schedule file. The schedule file may contain equipment
+information for your station.
+
+   VEX files will have equipment information, and you should verify
+that this your station's equipment is correctly specified in any VEX
+schedule file that your receive. If the equipment is not correct in
+the VEX file, please notify the maintainers of the relevant scheduling
+system. When you are running drudg, you can verify the equipment with
+Option 11.
+
+   For non-VEX schedules, either from sked or pc-sched, it is possible
+to include equipment information on the "T" lines in the $CODES
+section of the schedule file. The ability to do this is available with
+the new versions of sked and the sked catalogs. (For pc-sched, the
+input catalog codes.sch file could be edited to add the information.)
+
+   If the equipment is not specified in the schedule file, then drudg
+initializes the equipment as follows:
+
+   Rack: unknown   Recorder 1: unknown   Recorder 2: none
+   Schedule will start with recorder 1.
+
+   (2) From drudg Option 11. Option 11 was expanded to allow you to
+specify any of 14 types of racks and 9 types of recorders. You can
+also specify with which recorder you want to start the schedule. As
+usual, caution should be used if you change the number of recorders
+because your choices may not be compatible with the way the schedule
+was written.
+
+   Specifying new equipment with Option 11 overrides any equipment in
+the schedule file or in the drudg control file. Examples: 
+   - You can decide to use two recorders even if the schedule 
+was written for one recorder. 
+   - If you have two recorders, you can specify that a schedule 
+should use recorder 1 only or recorder 2 only.
+
+   (3) From the drudg control file. In the drudg control file,
+"skedf.ctl", you can specify your rack and recorder(s) so that you
+don't have to use Option 11 every time you run drudg. This is the
+recommended approach. The following example for how to do this is also
+included in section "V. Modifying Procedures and Control Files", as
+item (13).
+
+In the $MISC section, add a line with the key word "EQUIPMENT"
+followed by the rack and recorder names. Example:
+
+$MISC
+*          rack    rec A   rec B
+EQUIPMENT  Mark4   Mark4   none
+
+The distributed default version of skedf.ctl has extensive comments
+about how to format this line and what rack and recorder names are
+recognized. Refer to the default file at
+/usr2/fs/st.default/control/skedf.ctl. You should put the edited
+version of skedf.ctl in /usr2/control/skedf.ctl which is the location
+where drudg looks for it.
+
+If the station equipment is specified in the schedule file and it
+doesn't match what is in your control file, drudg will print a WARNING
+message but it will NOT change the equipment and it will leave the
+equipment as it is in the schedule. If you want to use the equipment
+in the control file, you can use Option 11 to change the equipment for
+this drudg session, but you will still get warning messages about the
+differences every time the drudg menu is displayed.
+
+If the station equipment is not specified in the schedule file at all,
+then drudg will use the equipment given in the control file without
+extensive complaints. In this case it will give one warning message,
+set the equipment as specified in the control file, and not give any
+further warnings.
+
+2. Subpasses indicated by letters
+
+The character that indicates the subpass in setup procedure names has
+been changed from a number to a letter. Procedures such as "sx2c1" and
+"sx2c2" are now named "sx2ca" and "sx2cb".  This was done as a move
+towards a more uniform indication of sub-passes by letters.
+
+3. Change to "data_valid" commands
+
+The data_valid commands in the .snp file are issued at the time good
+data begins to be recorded on tape. For start&stop tape motion, this
+is at the time that the recording begins. If the schedule has early
+tape start, the tapes start moving and then the data_valid command is
+issued at the time of the scan start.  For continuous or adaptive tape
+motion, if the tape is moving, the data_valid command is issued at the
+time that the schedule predicted the antenna would get on source. The
+data_valid command is implemented in drudg by issuing a !<time>
+command ("wait until") command where <time> is the time when the data
+is assumed to be valid.
+
+If the antenna is scheduled to participate in a scan but the schedule
+predicts that the antenna will never get to the source, then drudg
+does not issue either the !<time> command or the data_valid
+command. This situation may occur for antennas with slow slewing
+speeds participating in astronomical schedules.
+
+4. Scan names. The new scan_name command was added to the output SNAP
+file. The command occurs just before the source= command.  The scan
+name is printed on the Option 5 SNAP file summary listing as the first
+field. Stations are requested to refer to any problems that occur
+during the session by using the scan name.
+
+5. Parity checks delayed if the first scan is too short. For the
+higher data rate CORE observing modes, scan lengths can be as short as
+30 seconds. This does not give enough tape for the parity check. If
+the first scan of the pass is too short, drudg will delay doing the
+parity check until there is both enough tape and enough time between
+scans.
+
+6. S2 tape load/unload handling refined. Handling of S2 tape loading
+and unloading was changed after extensive discussion with S2 system
+users. At the start of a new tape with group 0, drudg issues
+unload/setup01=0/ready commands. When there is a group change the
+commands unloader/setup01=n/loader are issued, where n>0.
+
+7. IFD and IF3 commands changed. Several changes were made to the IFD
+and IF3 commands:
+
+  (1) The IFD and IF3 commands now have the attenuator settings
+defaulted to null.
+
+  (2) The IF3 command now has the correct VC3 and VC10 patching.  The
+IF3 command determines the patching for VC3 and VC10 and sets the
+third and fourth command parameters correctly. If the video converter
+frequency is greater than 210.0 then the patching is high (parameter
+value of 2), otherwise it is low (parameter value of 1).
+
+  (3) The phase cal on/off parameter was added to the IF3 command.
+
+8. Support for procedures to control 2-head recording was added by
+Dave Graham. For schedules that specify two heads DRUDG will produce
+procedures with appropriate track enabling, track assignments, and
+head positions in the TRACKS, TRACKFORM, and TAPEFORM commands. These
+procedures use the old-style command syntax, which is planned to be
+changed in a future FS release.
+
+9. DRUDG adds a call to the SNAP procedure "sched_end" at the end of
+all .SNP files.
+
+			    C. Known Bugs
+
+The following is a summary list of known bugs. They are described in
+more detail after the list.
+
+1. There are communication problems with the Mark IV formatter. 
+2. Do not run "fmset" for extended periods.
+3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work. 
+4. "odd" and "even" head types not supported for Mark IV & VLBA4.
+5. "odd"/"even" head types not supported for VLBA style tapeforms.
+6. CHEKR does not check the status of the Mark IV formatter.
+7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+8. Extraneous errors when tape is stopped by low tape sensor.
+9. "Comm=" command in logex extracts only the first command.
+10. S2 error scheme clumsy.
+11. No extra spaces allowed in "ibad.ctl" file.
+12. ONOFF and FIVPT programs hang.
+13. FS SNAP command pages don't list tape drive suffix numbers.
+
+A more detailed discussion of these bugs follows.
+
+1. There are communication problems with the Mark IV formatter.  It
+apparently misses some characters that are sent to it and time-outs on
+occasion.  It appears that this is related to the 1 PPS interrupt
+service routine in the formatter.  In spite of this problem, we have
+managed to make formatter communications fairly robust.  It is
+important that the (extra) time-out parameter for the formatter in the
+"matad.ctl" file be set to 200 centiseconds.  The FS will try all the
+communications up to three times if an unrecognized command response
+(formatter error "7") or time-out occurs.  Debug information about
+communication errors are logged in the log file, but are not displayed
+in the log display window.
+
+A further problem which may or may not be related is that very rarely
+(although one case was repeatable and therefore was coded around) the
+formatter A/D assignments (sent with the "/ASS" command) do not appear
+to take.
+
+The formatter is not using the correct line protocol for the MAT bus.
+It is using one rather than two stops bits at 9600 BAUD.  The main
+manifestation of this is that occasionally the formatter reports
+communication errors in the "error word".  Whether or not this
+contributes to the other communication problems is unclear.
+
+Another problem related to using the Mark IV formatter on the MAT bus
+has been noticed both on the development system at Haystack and at
+Effelsberg.  After switching to version 9.3.1, both systems had
+occasional headstack controller MAT hangs.  It is unclear how the FS
+could cause this to happen.  It may be a problem generic to the head
+controller.  This problem has happened very rarely: three or four
+times at Haystack over one particular week and we don't know how many
+times it occurred at Effelsberg.  Recovery is possible by just
+reseting the head controller MAT.  If this happens to you please let
+Ed know.
+
+Another problem is that occasionally the formatter "stutters" the
+first character of its response.  In the case the first character is
+repeated and the second characters are omitted.  This is fairly benign,
+but may appear to cause intermittent problems.
+
+Another formatter problem is that it occasionally responds incorrectly
+with a NAK.  However this version of the Field System is able to handle
+this case completely.
+
+Improved formatter firmware has made its way into the field. The next
+revision of the FS will contain improvements in the formatter's
+behavior.
+
+2. Do not run "fmset" for extended periods. For stations that have
+VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+should not be run for extended periods of time.  The "fmset" program
+should be used only to set or briefly verify that the formatter time
+is correct.  Do not leave "fmset" running after completing either of
+these tasks, especially during an experiment.
+
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
+
+3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work.  This
+isn't a bug, actually it is feature (apologies in advance).  The name
+"ALL" was incorrectly thought to conflict with the 2 character code
+for BBC lower-sideband "al", so it was accidently eliminated.  It will
+be restored in a future revision but is of doubtful utility for VLBA
+racks.  For Mark III, you can achieve the same effect by entering:
+
+TPI=odd,even,if1,if2,if3
+
+Use the same parameters for the other similar commands.  You should
+omit "if3", if you don't have that module.  For VLBA racks a similar
+command can be used but is of doubtful utility:
+
+TPI=oddl,evenl,oddu,evenu,ifa,ifb,ifc,ifd
+
+This will select all 28 video power detectors (14 BBCs with two
+side-bands each) and all the IF distributors.  A more useful version
+might be:
+
+TPI=oddu,evenu,ifa,ifb,ifc,ifd
+
+4. "odd"/"even" head types not supported for Mark IV & VLBA4. The
+Mark IV and VLBA4 rack version of the "form" command and the Mark IV
+and VLBA4 recorder versions of the "repro" and "parity" commands do
+not support the "odd" and "even" parameters for the read and write
+head types and reproduce electronics in the "head.ctl" control file.
+This means that automatic substitution of odd or even head in passes
+that use only even or odd heads respectively does not occur.  The only
+correct settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
+
+5. "odd"/"even" head types not supported for VLBA style tapeforms. For
+any mode recorded with VLBA style tapeform (14 index positions), the
+only correct setting of the read and write head types on the
+"head.ctl" is "all".  This will be fixed in a future revision.  Please
+let Ed know if you are missing some tracks and need to work around
+this limitation.
+
+6. CHEKR does not check the status of the Mark IV formatter.
+Implementation of this has been deferred until the formatter
+communication problems have been resolved.
+
+7. DRUDG almost always generates IF3 commands for Mark III/IV racks.
+This always occurs for experiments run from .DRG and non-VEX .SKD
+files regardless of whether they are needed or not.  This occurs
+because it is impossible to know whether IF3 is needed or not.
+
+8. Extraneous errors when tape is stopped by low tape sensor. When a
+tape drive has been commanded to move the tape and then stops because
+it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
+"CHEKR" will complain periodically that the tape drive is not in the
+correct state.  In principle the FS should be smarter about this.
+However, if the tape is managed correctly by the schedule this error
+message should never occur.  If it does, then it it an indication that
+there is either a problem with: (1) the schedule, (2) the check
+procedures, (3) the recorder, or (4) the tape is too short.  If any of
+these cases apply they should be corrected.  It is more likely that
+this error message will occur when the tape is being controlled
+manually.  In this case, issuing an "ET" command will convince the FS
+that the tape drive should be stopped and the error message will
+cease.
+
+9. "Comm=" command in logex extracts only the first command. The
+"comm=" command in "logex" extracts only the first command commanded
+and displayed.  This problem was noted by Giuseppe Maccaferri
+(Medicina).
+
+10. S2 error scheme clumsy. The error and status response number
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic "rl" are mostly error responses from the recorder or the RCL
+interface library that is used to communicate with the recorder.  If
+the numeric part of an "rl" error is greater than -130, then it is the
+error code returned by the recorder.  If the numeric part is less than
+-130, but greater than -300, then add 130 to the value, the absolute
+value of the result is the error response code from the RCL library.
+For values less than or equal to -300, a FS error has been detected.
+Status response codes are all reported with mnemonic "rz" and the
+numeric value is the negative of the status response code.  In all
+cases an appropriate error or status message is displayed.  These
+messages are retained in the log.
+
+11. No extra spaces allowed in "ibad.ctl" file. The format of the
+"ibad.ctl" must not contain any leading or embedded spaces.  In system
+that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
+"no_untalk/unlisten_after" is misspelled or an incorrect device name
+is supplied, the driver will cause a segmentation violation when it is
+initialized and the FS will terminate.  Unfortunately there is no way
+to prevent this problem in a general way; it reflects a limitation in
+the driver.
+
+12. ONOFF and FIVPT programs hang. The ONOFF and FIVPT programs have
+been known to "hang" mysteriously.  This seems to be caused by some
+problem with the "go" mechanism that is used to restart the program
+when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
+execute.  The "go" that is used to restart the program fails for some
+reason.  This has been exceedingly difficult to debug because it is
+intermittent and fairly rare.  There is however a good work around for
+it.  The CALON and CALOFF procedures are called by procedures CALONFP
+and CALOFFFP for FIVPT and CALONNF and CALOFFNF for ONOFF.  FIVPT or
+ONOFF may hang during (or actually just after) the execution of one
+these procedures that FIVPT and ONOFF will typically hang.  If this
+happens, you will have to terminate the FS to recover.  You can
+prevent it from happening again (for this procedure) by adding the
+lines:
+
+!+1s
+sy=go fivpt &
+
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
+
+!+1s
+sy=go onoff &
+
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
+
+13. FS SNAP command pages don't list tape drive suffix numbers. The FS
+SNAP manual pages and the help pages available through the "help="
+command do not reflect when multiple versions are available with
+different suffixes depending on the number of drive specified in the
+control files. For example, there is only a "tape" page, no "tape1" or
+"tape2" page. However, the help facility will display the version of
+the command with no suffix when an available command with a suffix is
+used. For example, if two drives are defined, then "help=tape1" and
+"help=tape2" will work, but "help=tape" will not and vice-versa if
+only one drive is defined.
+
+
+III. Two Tape Drive Operation
+
+FS 9.5 includes support for sequential use of two drives. For this
+purpose each tape drive has a number "1" or "2". This is true even for
+systems with a single tape drive. Any two longitudinal reorders (Mark
+III, Mark IV, VLBA, VLBA2, VLBA4) may be used together. At this time
+S2 and K4 recorders may only be used as tape drive 1, but (in the
+unlikely event that that anyone would want to do it) a longitudinal
+recorder could be used as drive 2 with a S2 or K4 recorder as drive 1.
+
+For a station with two recorders there are three possible
+configurations in equip.ctl: (1) drive 1 is some specific drive type
+and drive 2 is "none", (2) drive 1 is "none" and drive 2 is some
+specific drive type, and (3) both drive 1 and drive 2 are specified as
+some specific (not necessarily the same) drive types.
+
+In case (3), the commands associated with the tape drives (including
+head stack positioning commands) have either a "1" or "2" appended to
+them to distinguish which drive they refer to. Likewise if DRUDG is
+told that there are two tape drives it will appended the drive number
+to the names of procedures that have drive specific commands; this
+includes set-up and parity check procedures. However in cases (1) and
+(2), the field system accepts only the traditional drive related
+commands but applies them to the appropriate drive. This is true
+regardless of whether the single recorder in use is drive 1 or drive
+2. DRUDG will produce traditional procedures if it is told that there
+is one recorder regardless of whether it is recorder 1 or recorder 2.
+
+The four goals of this design are that: (1) single recorder operation
+should not change in any significant way, (2) a station with two
+recorders can use both for sequential recording during a schedule, (3)
+the syntax allows for the possibility of future (but not yet
+supported) simultaneous recorder use, and (4) a station with two
+recorders, but that is using only one, can decide after DRUDG-ing
+which of the two recorders to use, by changing equip.ctl. The latter
+feature is intended to provide flexibility if there are problems with
+one of the recorders.
+
+One of the results of this design is that a second recorder can be
+used to record a short schedule, such as an Intensive, that interrupts
+a longer session without having to waste time dismounting and mounting
+tapes (twice). The tape for the shorter session can be kept on the
+second drive. When it is time to switch the longer schedule can be
+stopped, the FS stopped, the equip.ctl control file changed to specify
+use of the second drive, the FS restarted and the shorter schedule
+started. A similar method can be used to switch back to the longer
+schedule. Both the longer and short schedule in this case should be
+handled in DRUDG as though there were only one recorder. The changing
+of the control file can be automated with a script to reduce the
+chances of an error and make the change more quickly.
+
+When using DRUDG to generate the .SNP and .PRC files for a schedule,
+the recorder configuration is determined from the skedf.ctl control
+file if it is defined there. In any event, option (11) can be used to
+override the default in the control file or the schedule. DRUDG and
+the FS must agree on whether one or two recorders are in use. If not,
+DRUDG will generate commands that the FS will not be able to
+execute. Option (11) provides an "unused" choice for drive 1 and drive
+2. The "unused" choice differs from "none" in that for "unused" DRUDG
+will assume that the FS has two recorders defined, i.e. recorder
+commands have "1" or "2" appended, but will only generate commands for
+the drive that is not "unused". This may be useful if you don't want
+to change your equip.ctl control when switching between drives. In
+that case you must make the decision about which drive to use when you
+run DRUDG. DRUDG provides a choice in option (11) to specify which
+drive to start on when two drives are available and automatically
+makes the choice for you if you forget.
+
+A new command to support dual drive operation, "select", is
+provided. This command is used to specify which drive is currently
+being used for recording. You don't need to enter this command. The
+appropriate command is placed in the set-up procedure automatically by
+DRUDG. This command affects which drive chekr checks, controls the
+"mount" inter-lock described below, and which recorder monitor output
+is used if a VLBA rack is in use. Currently there is no hardware
+mechanism for selecting the recorder monitor for Mark III, Mark IV, or
+VLBA4 racks.
+
+One of the things that sequential dual recorder use makes possible is
+unattended tape changes. In fact the changes aren't unattended, but
+one of the drives can be changed while the other is in use. An
+operator then need not necessarily be present at the time when the
+tape drive in use would change. To support this there is a new
+"mountX" (X=1 or 2) command. This command provides a mechanism for
+recording the tape label and loading the tape (if the recorder
+supports automated loading). If the label is accepted it will execute
+the experiment library version of the "mounterX" procedure that DRUDG
+will have generated with appropriate contents for the specified type
+of tape drive. Currently this procedure is empty except for VLBA and
+VLBA4 drives. For non-VLBA/VLBA4 drives, the operator will need to
+establish vacuum before entering the label as usual. When it becomes
+time to use this tape, the "newtapeX" command in the "readyX"
+procedure will detect that a new label has already been entered and
+continue execution without waiting for an operator to input the
+"labelX=..."  command. However, if the "mountX=..." command has not
+been issued, it is assumed that a new tape is not mounted and the
+schedule waits for the "labelX=..."  command. So the tape doesn't have
+to be changed beforehand. Please note that as a safety feature, the
+"mountX" command will not work for the tape currently specified by the
+"select" command.
+
+If you have a second recorder, a natural question to ask is: "since
+only one drive is used at a time, can I use the other one to pre-pass
+tapes?" It is possible, but somewhat dangerous. There are two possible
+approaches: (1) specify only one drive in the equip.ctl file and write
+special SNAP procedures to control the other drive using low-level MAT
+or MCB commands, or (2) always have two drives defined in the
+equip.ctl file and use commands that control the drive not being
+recorded with by the schedule. Option (2) seems less prone to
+error. However, both approaches require a high degree of vigilance to
+avoid accidently issuing a command that inappropriately addresses the
+drive being used by the schedule. Making this mistake once would
+probably be enough to convince you to never try prepassing with the
+second drive during a schedule again. In any event, it not possible to
+use the "prepass" procedure or any of its relatives since these
+procedures start schedules to do a prepass. Doing so would interrupt
+the execution of the observation schedule.
+
+
+IV. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual or the "nfsload.txt" memo.  In this case
+you should also get a copy of the current FS9 "Control Files and Field
+System Initialization" manual.
+
+The remainder of this section explains how to install this version as
+an upgrade from 9.4.x, where "x" is in the range 0-18.  If you are
+upgrading from a Beta test version 9.4.117 or greater there have been
+some minor changes. Please check the instruction below, specifically
+steps 12, 14, 16, and 18 in section "V. Modifying Procedures and
+Control Files". If you are upgrading from an different version please
+contact Ed for additional instructions.
+
+(0) Before you begin the upgrade make sure you have a current back-up
+of your system in case something goes wrong.  Please refer to the
+directions for making disk-to-disk back-ups in Section 5.8 of the FS9
+"Computer Reference" manual.  If you are running one of the Debian
+distribution kernels and do not have documentation on how to make a
+back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
+Reference" manual has a discussion of drive ID numbers if you are
+unsure about these.  You may choose to install the FS on your back-up
+disk for testing and then later copy the back-up onto the primary once
+you are satisfied with the new version.  In any event, please be sure
+to make a fresh back-up before continuing with the installation.
+
+(1) Please be sure that you have at least 20 MB of free space (use the
+"df" UNIX command to check free space) on your "/usr2" partition
+before starting the upgrade.  This would probably only be a problem
+for stations with 200 MB disks.  If you are tight on space, you may
+want to delete old log files and old versions of the FS (except your
+most recent one of course).  Since you should have backed-up your
+system, you even can delete the "*.[oas]" and executable files of your
+most recent version.  You might want to keep the source of the previous
+version around for reference if you have room.  You can eliminate the
+unnecessary files by "cd"-ing to the old FS directory as "prog" and
+doing a "make rmdoto rmexe".  If you have any questions about how to
+do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.5.0 archive in your "/tmp" directory. For
+example you might do the following:
+
+    cd /tmp
+    ncftp -u atri.gsfc.nasa.gov
+    (enter your account name for the server at prompt)
+    (enter your password for the server at prompt)
+    cd /home/ftp/fs/test
+    get fs-9.5.0.tar.gz
+    quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section "VII. Transferring The Update Archive By DOS Floppy" below.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+    cd /
+    tar -xzpf /tmp/fs-9.5.0.tar.gz
+
+(6) Install the system:
+
+    cd /usr2/fs-9.5.0
+    make install
+    (answer the question "y" if it is okay to proceed)
+
+(8) Log-out as root, and log-in prog.
+
+(9) Make the FS:
+
+    cd /usr2/fs
+    make
+
+(10) Remake your local software. If you are using Harro Verkouter's
+     DBGET software (this applies primarily to EVN stations), you
+     should check the instructions in the section below titled
+     "VI. DBGET in FS 9.5".  In any event, you will need to recompile
+     and reload all your programs.  Additionally, if you have any
+     station software that uses variables in FS shared memory that
+     refer to the tape drive, these will need to be modified to take
+     into account the fact that most of the variables are arrays; for
+     arrays, a new dimension has been added. Please check with Ed if
+     you have questions.
+
+     However, to simply remake the software if none of neither of
+     these conditions apply and if you have standard station software
+     "Makefile" configuration, the following steps should do the
+     trick:
+
+     cd /usr2/st
+     make rmdoto rmexe all
+
+(11) Reboot the computer.
+
+(12) Log in as oper
+
+(13) Before running the FS, modify your control files, procedures, and
+schedules for the new version.  See the section below "V. Modifying
+Procedures and Control Files" for complete details on how to make
+these changes.
+
+(14) If you have a IF3 module that you use to control the patching of
+VCs, please make sure the wiring agrees with the new standard. The new
+wiring is: switch 1 for VC03, state 1 for IF1 low and state 2 for IF1
+high; switch 2 for VC10, state 1 is for IF2 low and state 2 is IF2
+high. Please check the wiring of your switch if you have one. If the
+new standard will not work for you for some reason, please let us
+know.
+
+(15) Test the FS.  Generally speaking a fairly thorough test is to run
+a test experiment: start with DRUDG-ing a schedule, executing part of
+it (preferably at least a tape change and a parity check in each
+direction), do any normal post-experiment plotting and clean-up that
+you do.  The idea here is to verify that everything works as you
+expect for normal operations.  It also is a good idea to (at least)
+briefly try any calibration procedures that you use the FS for, such
+as pointing and narrow track head calibration.
+
+If you have problem with the FS starting this may be because you
+previously had omitted some fields in the control files. Please use
+the printed error message as guide in correcting the files. You can
+compare to the default versions in "/usr2/fs/st.default/control" as
+examples.
+
+
+V. Modifying Procedures and Control Files
+
+The changes for control files and procedures for this upgrade are
+quite extensive. This is primarily due to the change to support
+sequential use of two recorders.
+
+The most significant changes are to the equip.ctl file. This file has
+been reorganized so that does not contain any tape drive parameters. In
+the long run this simplification should benefit everyone. However,
+there is some short term pain in re-organizing your files. To make
+this as easy as possible, we recommend that start over with a fresh
+copy of the new default equip.ctl file and re-enter your
+information. In most cases the re-arrangement of information is done
+in blocks so that cut-and-paste can be utilized to avoid retyping
+information by hand.
+
+1. Rename your existing equip.ctl file to another unused name,
+   perhaps "equip.old" to save it.
+
+2. Copy the new default equip.ctl to your /usr2/control directory:
+
+     cd /usr2/control
+     cp /usr2/fs/st.default/control/equip.ctl equip.ctl
+
+3. Copy the appropriate default tape drive control file. If you have
+   a Mark III or Mark IV recorder, please execute the following:
+
+     cd /usr2/control
+     cp /usr2/fs/st.default/control/drivem1.ctl drivem1.ctl
+
+   or if you have a VLBA, VLBA2, or VLBA4 recorder, please execute:
+
+     cd /usr2/control
+     cp /usr2/fs/st.default/control/drivev1.ctl drivev1.ctl
+
+4. Working from your original equip.ctl (now equip.old) and sw.ctl
+   files, please update the parameters in your new equip.ctl and
+   drivem1.ctl (or drivev1.ctl) files. If you do not have a Mark
+   III/IV or VLBA/4 drive, you will not need to set-up drivem1.ctl or
+   drivev1.ctl files.  Please note that not all parameters are used
+   depending on which type of drive you have. Please also note that
+   some parameters are new, in particular the pcal control line at the
+   end of equip.ctl. Unless you have a Mark III or Mark IV rack and
+   its wiring had been modified for IF3 command control (please note
+   that this is not the same as having a modified IF3 module itself,
+   this parameter just refers to wiring of the rack itself), the value
+   of the pcal control parameter should be "none". Unless you use a
+   second recorder, your recorder 2 type should be "none".
+
+5. Change device mnemonics in "matad.ctl". The old mnemonics "TP" and
+   "HD" must be changed to "T1" and "H1", respectively. To help avoid
+   future problems, please make this change even if you don't have an
+   MAT controlled tape drive.
+
+6. Change a device mnemonic in "mcbad.ctl". The old mnemonic "rc" must
+   be changed to "r1".  To help avoid future problems, please make
+   change even if you don't have an MCB controlled tape drive.
+
+7. Change the device mnemonic in "rclad.ctl" for the S2 recorder. The
+   old mnemonic "rc" must be changed to "r1".  To help avoid future
+   problems, please make this change even if you don't have an S2 tape
+   drive.
+ 
+8. Rename your "head.ctl" file to "head1.ctl". (You should delete this
+   file if you don't have a Mark III/IV or VLBA/4 drive.)
+
+     cd /usr2/control
+     mv head.ctl head1.ctl
+
+9. Please make sure you aren't already using any of following new K4
+   mnemonics in "ibad.ctl": "R1", "VA", "LA", "VB", "LB", "V4", and
+   "T1". If you are, you should changed them. This may require changes
+   in your SNAP procedures and/or station software. If this causes a
+   problem, please contact Ed.
+
+10. Copy the default tacd.ctl control file from
+    /usr2/fs-9.4.124/st.default/control/tacd.ctl to /usr2/control.
+    Optionally, if you have a TAC supported by the Tac32plus software
+    available on your local network you can set the control file to
+    point to the IP address of that computer.
+
+      cd /usr2/control
+      cp -a /usr2/fs-9.4.124/st.default/control/tacd.ctl tacd.ctl
+
+11. Update your stcmd.ctl file for the new format. The commands:
+
+      cd /usr2/control
+      /usr2/fs-9.4.124/misc/cmdctlfix3 stcmd.ctl
+
+    should do it automatically (a bug in previous versions that caused
+    it to fail if there was a blank line in the file has been fixed).
+    You will need to rename or delete your old "stcmd.bak" if it
+    already exists.  If all your station commands are hardware
+    independent, i.e., the equipment bit fields are "1F1F", as they
+    probably should be, this should work with no problems. The result
+    for hardware independent commands should be "FFFFFF".  You should
+    check the contents of the file to make sure they are correct.
+
+    If you haven't updated your "stcmd.ctl" file since installing 9.4,
+    your equipment bit fields may still be "FF". You can correct this
+    before running "cmdctlfix3" by first running "cmdctlfix2".
+
+    If you haven't updated your "stcmd.ctl" file since the S2
+    equipment support was added, your equipment bits field may be
+    still be "77". You can correct this before running "cmdctlfix2" by
+    first running "cmdctlfix" and renaming or deleting "stcmd.bak".
+
+    Please note that if your "stcmd.ctl" has been partially or
+    incorrectly updated in the past, "cmdctlfix", cmdctlfix2", and
+    "cmdctlfix3" will do the best the can and print a warning.
+
+12. If you have been using a station specific "cablelong" command in
+    your stcmd.ctl file and it is actually just an alias for the
+    normal "cable" command. We recommend that you delete it from your
+    stcmd.ctl file so that the new standard version will be used
+    instead. If it was just an alias for the normal cable command, the
+    entry probably looks like (after running "cmdctlfix3"):
+
+    cablelong    qkr 1304 01 FFFFFF
+
+    Please delete this line.
+
+13. Edit your location.ctl file and remove the three lines:
+    "Occupation Code", "Current decade", and "Station ID" (NOT station
+    name). These are three consecutive lines in the old file.
+
+14. In the skedf.ctl file in the $MISC section, add a line with the
+    key word "EQUIPMENT" followed by the rack and recorder
+    names. Example:
+
+    $MISC
+    *          rack    rec A   rec B
+    EQUIPMENT  Mark4   Mark4   none
+
+    The distributed default version of skedf.ctl has extensive
+    comments about how to format this line and what rack and recorder
+    names are recognized. Refer to the default file at
+    /usr2/fs/st.default/control/skedf.ctl. You should put the edited
+    version of skedf.ctl in /usr2/control/skedf.ctl which is the
+    location where drudg looks for it.
+
+15. Delete your old "sw.ctl", which is no longer used, to avoid
+    confusion in the future.
+
+16. If you have station specific help files in your /usr2/st/help
+    directory, you will need to change the suffix on each file. If all
+    of the suffixes you have used are equipment independent, ".__",
+    you merely need to change each to use three underscores,
+    ".___". If you have used other suffixes which are equipment
+    dependent, you can check the Perl script /usr2/fs/misc/wpas2help
+    or contact Ed for more information about the new suffix
+    conventions.
+
+17. Edit all your SNAP procedures files (usually just station.prc, old
+    unused experiment procedure files should be deleted to reduce
+    clutter), to make the following changes:
+
+    A. Rename your parity check procedures, which will include either
+       all or some of: "checkf80", "checkr80", "checkf135", and
+       "checkr135". The new names are "check80f", "check80r",
+       "check135f", and "check135r". The rename command is "rn". 
+
+    B. If you use a VLBA DQA for parity checks, please make sure that
+       the AUX data check parameter in the parity command set-up in
+       your check procedures is set to "off". This feature is not
+       supported (and not needed) with the DQA.
+
+    C. Add a "sched_initi" procedure to your station procedure
+       library. This may be empty of you may add any commands you want
+       to have executed automatically at the start of every schedule.
+
+    D. Add a "sched_end" procedure to your station procedure
+       library. This may be empty or you may add any commands you want
+       to have executed automatically when the end of .SNP schedule
+       file is reached. Please note this procedure is executed from
+       the schedule, so if the schedule is terminated early for any
+       reason, it will not be executed automatically.
+
+    E. Please remove, or at least rename, all default set-up
+       procedures such "sx2c1", "sx2c2", "wb2c1", "sx2a1", etc. from
+       your station.prc library. This is recommended to avoid possible
+       confusion with experiment procedures of the same name. The
+       problem is that if by some mistake the experiment procedures
+       are not made, the default procedures will be called by
+       mistake. The default versions will most likely have the wrong
+       contents. This is not so much a problem with the schedule
+       procedures because these have new names and do not overlap with
+       the old procedure names. A bigger concern is manually entered
+       commands. The operator might, out of old habit, type the old
+       name name and mis-set the equipment. As an aid for equipment
+       check-out, the standard procedures now include "setupa" and
+       "setupb", which correspond to the old "sx2c1" and "sx2c2"
+       respectively. You can either rename your old "sx2c1" and
+       "sx2c2" procedures to these new names or copy the new defaults
+       from the appropriate default library in
+       /usr2/fs/st.default/proc. The naming conventions for these
+       files are:
+
+        Equipment      Prefix letters  Station Library
+        Rack/drive/drive2
+
+        Mk3/Mk3A                       station.prc
+        VLBA/VLBA          v           vstation.prc
+        Mk4/Mk4            4           4station.prc
+        Mk4/VLBA4          4v4         4v4station.prc
+        VLBA/VLBA2         v2          v2station.prc
+        VLBA4/VLBA4        v4          v4station.prc
+        K42MK4/VLBA        k42mk4v     k42mk4vstation.prc
+        K42MK4/VLBAB/VLBAB k42mk4vb    k42mk4vstation2.prc
+        NONE/S2            s2          s2station.prc
+        VLBA/S2            vs2         vs2station.prc
+        VLBA/VLBA/VLBA                 vstation2.prc
+
+       Please use PFMED to edit the procedures.
+
+18. If you have a VLBA or a VLBA4 (with spare VLBA formatter) system
+    change the command "form=*,4" commands in your parity check
+    procedures to "vform=*,4" and add a "vform=c,4" to your initi
+    procedure. This should make the setting of the tape clock for the
+    DQA module robust independent of which formatter is used in an
+    experiment.
+
+19. Return to item (14) in the section "IV. Installation."
+
+
+VI. DBGET in FS 9.5
+
+The DBGET software has been updated to support dual recorder
+setups. In fact, DBGET versions <2.22 will crash FS 9.5. If you have
+DBGET installed, there are two options:
+
+1) download dbget_v222.tar.gz from ftp.jive.nl/jive/rtc/software/
+(anonymous ftp ok) and then follow the instructions in the INSTALL
+document. Unpack the tar file in your usr2/fs/st directory. You will
+find the INSTALL in the dbgv2.22 directory.
+
+2) Remove the dbget package from your system. This will mean you will
+have to remove the symlink in the stqkr directory and you will have to
+update the stqkr.{f|c} to remove references to dbcmd. You might have
+to edit/remove .ctl files but that I do not know. If, in the future,
+you will want to partake in real-time correlator experiments, you will
+have to reinstall the DBGET package.
+
+In case of doubt or questions, please do not hesitate to contact Harro
+Verkouter at:
+
+Harro Verkouter, Joint Institute for VLBI in Europe
+
+        Email: verkouter@jive.nl
+        Phone: +31521-596516
+
+
+VII. Transferring The Update Archive By DOS Floppy
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.5.0.tar.gz archive have been placed
+in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
+small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs950tg.aa
+fs950tg.ab
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs950tg.* >fs-9.5.0.tar.gz
+
+This will create an exact image of the original fs-9.5.0.tar.gz
+archive on your computer.  Please be sure to use binary transfer when
+getting the files from atri or kurp-ftp.

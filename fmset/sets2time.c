@@ -48,7 +48,7 @@ time_t formtime;
 
   relative=FALSE;
   dnanosec=0;
-  add_rclcn_delay_set(&reqbuf,"rc",relative,dnanosec);
+  add_rclcn_delay_set(&reqbuf,"r1",relative,dnanosec);
 
   end_rclcn_req(ip,&reqbuf);
 
@@ -102,7 +102,7 @@ set:
   hour=fmtime->tm_hour;
   min =fmtime->tm_min;
   sec =fmtime->tm_sec;
-  add_rclcn_time_set(&reqbuf,"rc",year,day,hour,min,sec);
+  add_rclcn_time_set(&reqbuf,"r1",year,day,hour,min,sec);
 
   end_rclcn_req(ip,&reqbuf);
 

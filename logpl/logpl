@@ -1849,7 +1849,7 @@ proc newfile_OK {output} {
 #         1=Filename is an FS log file
 
 proc newfile_checkfile {filename output} {
-    global newfile_filename newfile_statusMsg newfiletext_nofile newfiletext_noday
+    global newfile_filename newfile_statusMsg newfiletext_nofile newfiletext_noday tk_version
     global newfiletext_day current_DefaultDir current_TEMP oldyear firstday
     global timepoints global_ymin global_ymax
     set tempfile ""
@@ -1927,7 +1927,9 @@ proc newfile_checkfile {filename output} {
 	    if {$output == 0} {
 # not Y2.1K compliant
 		set newfile_statusMsg [format "This file starts with data for station %s, day %.8s." $antennaname [time2str $timebase 1 ]]
+               if { $tk_version < 4.2 } {                
 		focus .newfile
+               }
 	    }
 	    if {$output == 1} {
 # not Y2.1K compliant
@@ -2075,6 +2077,31 @@ proc print_OK {} {
     set statusMsg $text_ready
 }
 
+
+# ==========================================================================
+#
+#                         FILESELECTION SECTION
+#
+# ==========================================================================
+proc fileselection_dialog {} {
+ 
+ global global_startmode current_DefaultDir newfile_filename current_filename 
+
+ set types {
+  {{Log Files} {*.log} }
+  {{All Files} {*} }
+ }
+
+ set newfile_filename $current_filename
+ set newfile_filename [tk_getOpenFile -title "Open new log file" -filetypes $types -initialdir $current_DefaultDir]
+
+ if {$newfile_filename != ""} {
+  newfile_OK $global_startmode
+ }
+
+}
+
+
 # ==========================================================================
 #
 #                           TK WIDGETS SECTION
@@ -2107,9 +2134,14 @@ for {set counter 1} {$counter <= $noOfChannels} {incr counter} {
     menu .mbar.data($counter).menu
 }
 
-.mbar.file.menu add command -label "New log file" -command newFile
-.mbar.file.menu add command -label "Print" -command {create_printWindow 0}
 
+if { $tk_version < 4.2 } {
+.mbar.file.menu add command -label "New log file" -command newFile
+} else {
+.mbar.file.menu add command -label "New log file" -command fileselection_dialog
+}
+
+.mbar.file.menu add command -label "Print" -command {create_printWindow 0}
 .mbar.file.menu add command -label "I/O setup" -command changePrefs
 .mbar.file.menu add separator
 .mbar.file.menu add command -label "Exit" -command exitCmd

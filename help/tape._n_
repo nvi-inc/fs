@@ -1,0 +1,28 @@
+    tape - tape recorder parameters (Mark III, Mark IV drives)
+
+Syntax:     tape=lowset,reset
+
+Response:   tape/lowsense,footage,fast,capstan,stop,tach,
+          ready,lcl/rem
+
+
+Settable parameters:
+lowset      If off, tape may run off end of reel. If low
+            (default), end of tape will be sensed.
+reset     reset to reset footage counter to 0, blank to leave
+          counter alone.
+
+Monitor-only parameters:
+lowsense  As monitor, this tells whether tape is actually at the
+          low-tape point, i.e. off means not at low-tape.
+footage   Actual footage counter reading, 5 digits with leading
+          zeroes.
+fast      Fast tape switch on front panel, fast or nor.
+capstan   Capstan is moving, or stop has been completed.
+stop      stop has been issued, or nonstop.
+tach      Tach is locked or unlocked, i.e. tape is up to speed.
+ready     Tape drive vacuum is ready or notready.
+lcl/rem   Switch setting, rem or lcl.
+
+Comments: 
+MAT module functions available.

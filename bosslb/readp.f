@@ -43,8 +43,8 @@ C     IL - length of record read from file
       integer*4 irecl,id
       integer fblnk,fmpposition,fmpreadstr,fmpsetpos
       dimension irec(4)
-      character*80 ibc
-      integer*2 ib(40)
+      character*512 ibc
+      integer*2 ib(256)
       equivalence (ib,ibc)
 C
 C  INITIALIZED VARIABLES:
@@ -78,7 +78,7 @@ C
       if(ierr.lt.0)goto 800
       indx = istack(2) - 2
       istack(indx+1) = irec(1)
-      nchar = iflch(ib,80)
+      nchar = iflch(ib,512)
       if (ibc.eq.' ') goto 100
       nchar=fblnk(ib,1,nchar)
       call lower(ib,nchar)

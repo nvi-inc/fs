@@ -7,8 +7,9 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-int v2_motion_done(ip)
+int v2_motion_done(ip,indx)
 long ip[5];                          /* ipc array */
+int indx;
 {
       struct req_buf buffer;
       struct req_rec request;
@@ -19,7 +20,10 @@ long ip[5];                          /* ipc array */
       long end;
 
       ini_req(&buffer);                      /* format the buffer */
-      memcpy(request.device,DEV_VRC,2);
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
       request.type=1; 
       request.addr=0x74; add_req(&buffer,&request);
       request.addr=0x73; add_req(&buffer,&request);

@@ -15,13 +15,15 @@ double x,y;
 struct pmdl *pmodel;
 
 {
-  double cosx,cosy,cosl,sinx,siny,sinl,f;
+  double cosx,cosy,cosl,sinx,siny,sinl,f,cos2x,sin2x;
 
   cosx = cos(x);
   cosy = cos(y);
   cosl = cos(pmodel->phi);
   sinx = sin(x);
   siny = sin(y);
+  cos2x = cos(2.*x);
+  sin2x = sin(2.*x);
   sinl = sin(pmodel->phi);
   f = 0.0;
 
@@ -36,6 +38,8 @@ struct pmdl *pmodel;
       if (pmodel->ipar[11] != 0) f=f+pmodel->pcof[11]*x;
       if (pmodel->ipar[12] != 0) f=f+pmodel->pcof[12]*cosx;
       if (pmodel->ipar[13] != 0) f=f+pmodel->pcof[13]*sinx;
+      if (pmodel->ipar[16] != 0) f=f+pmodel->pcof[16]*cos2x;
+      if (pmodel->ipar[17] != 0) f=f+pmodel->pcof[17]*sin2x;
       break;
     case 0:
       if (pmodel->ipar[0] != 0) f=1.0;
@@ -63,6 +67,12 @@ struct pmdl *pmodel;
       break;
     case 13:
       if (pmodel->ipar[13] != 0) f=sinx;
+      break;
+    case 16:
+      if (pmodel->ipar[16] != 0) f=cos2x;
+      break;
+    case 17:
+      if (pmodel->ipar[17] != 0) f=sin2x;
       break;
  } 
     return f;

@@ -1,11 +1,13 @@
       SUBROUTINE rdctl(source_cat,station_cat,antenna_cat,position_cat,
-     .                 equip_cat,
-     .                 mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
+     .                 equip_cat,mask_cat,freq_cat,rx_cat,loif_cat,
+     .                 modes_cat,modes_description_cat,
      .                 rec_cat,hdpos_cat,
      .                 tracks_cat,flux_cat,flux_comments,
+     .                 cat_program_path,par_program_path,
      .                 csked,csnap,cproc,
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
-     .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn)
+     .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
+     .                 dr_rack_type,dr_reca_type,dr_recb_type)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -29,17 +31,24 @@ C 970304 nrv Add "cproc" to call, change "cdrudg" to "csnap".
 C 970304 nrv Add "option1", "option4", "option5" key words and options,
 C                and add "coption" to call.
 C 970328 nrv Add "station_cat"
+C 991101 nrv Add EQUIPMENT line 
+C 991117 nrv Add cat_program_path
+C 991211 nrv Add check against max_rec2_type.
+C 000326 nrv Add par_program_path.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/statn.ftni'
 C
       character*128  source_cat,station_cat,antenna_cat,position_cat,
-     .equip_cat,
+     .equip_cat,modes_description_cat,cat_program_path,
+     .               par_program_path,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp
       character*4 cepoch
+      character*8 dr_rack_type,dr_reca_type,dr_recb_type
       real rlabsize(6)
       character*2 coption(3)
       integer luscn
@@ -53,7 +62,7 @@ C  LOCAL VARIABLES
       integer*2 isecname(5) !$section name
       integer*2 ltmpnam(10)  !variable identifier
       integer lu          !open lu
-      integer ic,ifield,j,ilen,ierr,ich,ic1,ic2,nch,idum,ichmv
+      integer ic,ifield,j,ilen,ierr,ich,ic1,ic2,nch,idum,ichmv,i
       real ras2b,val
       integer*2 ibuf(ibuf_len)
 C
@@ -129,8 +138,12 @@ C  $CATALOGS
                   call hol2char(ibuf,ic1,ic2,rx_cat) 
                 else if (ichcm_ch(ltmpnam,1,'LOIF').eq.0) then
                   call hol2char(ibuf,ic1,ic2,loif_cat) 
-                else if (ichcm_ch(ltmpnam,1,'MODES').eq.0) then
+                else if (ichcm_ch(ltmpnam,1,'MODES').eq.0.and.
+     .            nch.eq.5) then
                   call hol2char(ibuf,ic1,ic2,modes_cat) 
+                else if (ichcm_ch(ltmpnam,1,'MODES_DESCRIPTION').eq.0) 
+     .            then
+                  call hol2char(ibuf,ic1,ic2,modes_description_cat) 
                 else if (ichcm_ch(ltmpnam,1,'REC').eq.0) then
                   call hol2char(ibuf,ic1,ic2,rec_cat) 
                 else if (ichcm_ch(ltmpnam,1,'HDPOS').eq.0) then
@@ -139,12 +152,15 @@ C  $CATALOGS
                   call hol2char(ibuf,ic1,ic2,tracks_cat) 
                 else if (ichcm_ch(ltmpnam,1,'FLUX').eq.0) then
                   call hol2char(ibuf,ic1,ic2,flux_cat) 
-                else if (ichcm_ch(ltmpnam,1,'COMMENTS').eq.0) 
-     .            then
+                else if (ichcm_ch(ltmpnam,1,'COMMENTS').eq.0) then
                   call hol2char(ibuf,ic1,ic2,flux_comments) 
+                else if (ichcm_ch(ltmpnam,1,'PROGRAM').eq.0) then
+                  call hol2char(ibuf,ic1,ic2,cat_program_path) 
+                else if (ichcm_ch(ltmpnam,1,'PARAMETER').eq.0) then
+                  call hol2char(ibuf,ic1,ic2,par_program_path) 
                 else
                   write(luscn,9200) ltmpnam
-9200              format("RDCTL04 ERROR: Unrecognizable catalog name ",
+9200              format("RDCTL04 ERROR: Unrecognizable catalog name: ",
      .            5A2)
                 end if
 
@@ -327,6 +343,7 @@ C               Move keyword from ibuf to ltmpnam, make it upper case
                 call hol2upper(ltmpnam,nch)
 C               Get value field
                 call gtfld(ibuf,ich,ilen,ic1,ic2)
+C         EPOCH
                 if (ichcm_ch(ltmpnam,1,'EPOCH').eq.0) then
                   nch=ic2-ic1+1
                   call hol2char(ibuf,ic1,ilen,ctemp)
@@ -339,8 +356,34 @@ C               Get value field
      .              ctemp(1:trimlen(ctemp))
                   endif
                 endif
+C         EQUIPMENT
+                if (ichcm_ch(ltmpnam,1,'EQUIPMENT').eq.0) then
+                  call hol2char(ibuf,ic1,ic2,ctemp) ! rack
+                  i=1
+                  do while (i.le.max_rack_type.and.
+     .              rack_type(i).ne.ctemp)
+                    i=i+1
+                  enddo
+                  if (i.le.max_rack_type) dr_rack_type = ctemp
+                  call gtfld(ibuf,ich,ilen,ic1,ic2)
+                  call hol2char(ibuf,ic1,ic2,ctemp) ! rec A
+                  i=1
+                  do while (i.le.max_rec_type.and.
+     .              rec_type(i).ne.ctemp)
+                    i=i+1
+                  enddo
+                  if (i.le.max_rec_type) dr_reca_type = ctemp
+                  call gtfld(ibuf,ich,ilen,ic1,ic2)
+                  call hol2char(ibuf,ic1,ic2,ctemp) ! rec B
+                  i=1
+                  do while (i.le.max_rec2_type.and.
+     .              rec_type(i).ne.ctemp)
+                    i=i+1
+                  enddo
+                  if (i.le.max_rec_type) dr_recb_type = ctemp
+                endif ! equipment line
                 call ifill(ibuf,1,ibuf_len*2,oblank)
-                call reads(lu,ierr,ibuf,ibuf_len,ilen,1)
+                call reads(lu,ierr,ibuf,ibuf_len,ilen,2)
               enddo
 
             else ! unrecognized

@@ -17,7 +17,7 @@ wakeup
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape
-"use the cont command when finished.
+"use the label=... command when finished.
 halt
 xdisp=off
 rec=load
@@ -47,7 +47,7 @@ wakeup
 xdisp=on
 "drop vacuum loop, clean the tape drive thoroughly.
 "re-thread the tape
-"use the cont command when finished.
+"use the label=... command when finished.
 halt
 xdisp=off
 rec=load

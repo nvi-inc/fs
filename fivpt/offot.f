@@ -7,7 +7,7 @@ C
        include '../include/dpi.i'
 C
       icnext=1
-      icnext=ichmv_ch(lbuf,1,'offset ')
+      icnext=ichmv_ch(lbuf,1,'offset  ')
 C
       icnext=icnext+jr2as(lonpos*180.0/RPI,lbuf,icnext,-9,4,isbuf)
       icnext=ichmv_ch(lbuf,icnext,' ')  

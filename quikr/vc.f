@@ -38,8 +38,6 @@ C        ICH    - character counter
       integer*2 ibuf(20)
 C               - class buffer
       integer*2 lfr(3)
-      integer*2 lfreqvt(3,15)
-C               - frequency holder
 C        ILEN   - length of IBUF, chars 
       dimension iparm(2)
 C               - parameters returned from GTPRM

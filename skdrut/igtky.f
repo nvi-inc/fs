@@ -18,6 +18,7 @@ C        Returned Codes are the following:
 C        -1 = ambiguous (more than 1 match within a type)
 C         0 = unrecognized
 C TYPE
+C type 1 for new obs command
 C  1         ST = START date/time
 C  1         CB = CABLE
 C  1,2       SU = SUBNET
@@ -28,6 +29,7 @@ C  1,2       FR = FREQUENCY
 C  1,2       PR = PREOB procedure name
 C  1,2       MI = MIDOB procedure name
 C  1,2       PO = POSTOB procedure name
+C type 2 for parameters
 C  2         MO = MODULAR time between runs
 C  2         LO = LOOKAHEAD time
 C  2         MN = MINIMUM  time between runs
@@ -45,6 +47,7 @@ C  2         MB = MINBETWEEN
 C  2         MT = MIDTP
 C  2         SD = SUNDIStance
 C  2         MS = MINSCAN
+C  2         XS = MAXSCAN
 C  2         VS = VSCAN
 C  2         MD = MODSCAN
 C  2         WI = WIDTH
@@ -55,6 +58,13 @@ C  2         SA = SNR auto/ask
 C  2         TE = EARLY  
 C  2         SM = MINSUBNET
 C  2         BR = BARREL
+C  2         DE = DESCRIPTION (experiment description)
+C  2         PI = SCHEDULER (scheduler's name)
+C  2         TC = target correlator
+C  2         ST = nominal start time
+C  2         EN = nominal end time
+C  2         JA = start java parameters program
+C  2         GT = get parameters from java program
 C  3         TA = TAPE shift
 C  3         TI = TIME shift
 C  3         ID = IDLE for CHECK
@@ -125,6 +135,17 @@ C 21         SE = SET for OP
 C 21         GO = GO for OP
 C For XNEW command
 C 22         ON/OFF, SEFD, SNR, BASE, FLUX
+C For TTYPE (tape type) command
+C 23         TH = THICK
+C 23         TN = THIN
+C 23         SH = SHORT
+C 23         LO = LOW
+C 23         HI = HIGH
+C 23         SL = SLP (S2 speed)
+C 23         LP = LP (S2 speed)
+C For CATALOG command
+C 24         ST = START
+C 24         GT = GET
 C 
 C     CALLING SUBROUTINES: PRSET, NEWOB, CHCMD, xxSEL, SNRCM
 C                          SUMPR, NEXTPR, XLCMD, XNCMD
@@ -136,17 +157,27 @@ C 970317 nrv Add continuous, adaptive, and start&stop for TAPE motion type.
 C 970326 nrv Add keywords for XNEW command
 C 970423 nrv Add back in "on" and "off" for XLIST
 C 980629 nrv Add dynamic tape motion type.
+C 990412 nrv Add XS for MAXSCAN.
+C 990520 nrv Add DESCRIPTION, SCHEDULER, and CORRELATOR.
+C 990524 nrv Add THICK, THIN for tape type, HIGH, LO for density.
+C 991108 nrv Add START and GET for CATALOG command.
+C 991118 nrv Add START and END for parameters.
+C 000125 nrv Add SLP and LP for S2 speeds.
+C 000326 nrv Add JAVA and GET for parameters program.
+C 000605 nrv Remove DYNAMIC tape motion. Add AUTO and SCHEDULED for
+C            tape allocation type.
+C 001003 nrv Add SHORT as a tape type.
 C
 C   LOCAL VARIABLES
       integer numcmd,ic,ifunc1,ifunc,nccmd
 C
       character*20 ckeyin ! input keyword
-      character*20 ckey(114) ! keywords to match
-      character*2 ccode(114)  ! corresponding 2-letter code
-      integer ivalid(114) ! type for which it is valid
+      character*20 ckey(132) ! keywords to match
+      character*2 ccode(132)  ! corresponding 2-letter code
+      integer ivalid(132) ! type for which it is valid
 C
 C  Initialized
-      data numcmd/114/
+      data numcmd/132/
       data ckey/'START','CABLE','SUBNET','DURATION','IDLE',
      .'CALIBRATION','FREQUENCY','PREOB','MIDOB','POSTOB',
      .
@@ -156,7 +187,8 @@ C  Initialized
      .'MINSUBNET','SYNCHRONIZE','SETUP','PARITY','PREPASS','BARREL',
      .'SOURCE','PRFLAG','HEAD','TAPETM','MINBETWEEN','MIDTP','SUNDIS',
      .'MINSCAN','VSCAN','MODSCAN','WIDTH','VIS','CONFIRM','CORSYNCH',
-     .'SNR',
+     .'SNR','MAXSCAN','DESCRIPTION','SCHEDULER','CORRELATOR',
+     .'START','END','JAVA','GET',
      .
      .'TAPE','TIME','IDLE',
      .'SELECT','LIST',
@@ -169,7 +201,7 @@ C  Initialized
      .'PRINT','SCREEN','APPEND','OVERWRITE',
      .'FEET','AZEL','DUR','SNR','MAX','FLUX','HA','ON','OFF',
      .
-     .'CONTINUOUS','ADAPTIVE','START&STOP','DYNAMIC',
+     .'CONTINUOUS','ADAPTIVE','START&STOP',
      .
      .'LINE','XYAZEL','POLAZEL','COVERAGE','DISTANCE','EL','AZ',
      .'FILE','BASELINE','STATS','HIST','SNR',
@@ -180,14 +212,20 @@ C  Initialized
      .'FULL','MINIMUM','NO',
      .'COVARIANCE','CORRELATION','FE',
      .'LIST','SET','GO',
-     .'ON','OFF','FLUX','SNR','SEFD','BASE'/
+     .'ON','OFF','FLUX','SNR','SEFD','BASE',
+     .
+     .'THICK','THIN','SHORT','HIGH','LOW','SLP','LP',
+     .
+     .'START','GET',
+     .
+     .'AUTO','SCHEDULED'/
 C
       DATA ccode/'ST','CB','SU','DU','ID','CA','FR','PR','MI','PO',
      .
      .'SU','DU','ID','CA','FR','PR','MI','PO',
      .'MO','LO','MN','CH','EX','TE','SM','SY','SP','PA','PP',
      .'BR','SO','PF','HD','TP','MB','MT','SD','MS','VS','MD','WI',
-     .'VI','CO','CR','SA',
+     .'VI','CO','CR','SA','XS','DE','PI','TC','ST','EN','JA','GT',
      .
      .'TA','TI','ID',
      .'SE','LI',
@@ -199,7 +237,7 @@ C
      .'EX',
      .'PR','SC','AP','OV',
      .'FT','AZ','DU','SX','MX','FL','A2','ON','OF',
-     .'CO','AD','SS','DY',
+     .'CO','AD','SS',
      .'LI','XY','PO','CO','DI','EL','AZ','FI','BA','ST','HI','HS',
      .'SN','PR','GE','AL',
      .'MR',
@@ -207,10 +245,13 @@ C
      .'FU','MI','NO',
      .'CV','CR','FE',
      .'LI','SE','GO',
-     .'ON','OF','FL','SN','SE','BA'/
+     .'ON','OF','FL','SN','SE','BA',
+     .'TH','TN','SH','HI','LO','SL','LP',
+     .'ST','GT',
+     .'AU','SC'/
 
-      DATA ivalid/10*1,35*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
-     .4*14,12*15,4*16,17,8*18,3*19,3*20,3*21,6*22/
+      DATA ivalid/10*1,43*2,3*3,2*4,2*5,6,7,8,9,10,4*11,9*12,
+     .3*14,12*15,4*16,17,8*18,3*19,3*20,3*21,6*22,7*23,2*24,2*25/
 C
 C
 C  1. Find the command in the list of commands with minimum matching.
@@ -218,6 +259,7 @@ C    Two matches is error -1, none is error 0.
 
       nccmd=linstq(1)
       if (nccmd.gt.20) return ! can't handle it
+      call hol2upper(linstq(2),nccmd)
       call hol2char(linstq(2),1,nccmd,ckeyin)
 C
       ic = 1

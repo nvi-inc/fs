@@ -1,0 +1,22 @@
+          sff - super fast-forward (longitudinal drives)
+
+Syntax:     sff
+
+Response:   sff/acknowledgement
+
+
+Parameters: none
+
+Comments:
+The tape is started moving forward at super high speed. For Mark
+III and Mark IV drives, the record bit is disabled and the low
+tape sensor is turned on. For VLBA and VLBA4 drives, all track
+groups are disabled and the low tape sensor is turned on. For
+Mark IV and VLBA4 racks the formatter output is disabled
+
+The tape is moved at the "super" speed value as specified in the
+equip.ctl control file. This is the fastest speed that your tape
+drive can manage, normally 330 ips.
+
+Use the ff command and fastf procedure for positioning the tape
+during a schedule.

@@ -1,4 +1,4 @@
-      subroutine pedis(ip,iclcm,perr,isyner)
+      subroutine pedis(ip,iclcm,perr,isyner,indxtp)
 C  parity error display c#870115:04:38#
 C 
 C   PEDIS displays parity errors
@@ -68,15 +68,16 @@ C
 C     2. Now the buffer contains: PERR/ and we want to add
 C     the data. 
 C 
-      nch = nch + ib2as(itrper,ibuf2,nch,o'100000'+2) 
+      nch = nch + ib2as(itrper(indxtp),ibuf2,nch,o'100000'+2) 
       nch = mcoma(ibuf2,nch)
-      nch = ichmv(ibuf2,nch,lchan,ichper+1,1) 
+      nch = ichmv(ibuf2,nch,lchan,ichper(indxtp)+1,1) 
       nch = mcoma(ibuf2,nch)
-      nch = nch + ib2as(insper,ibuf2,nch,o'100000'+3) 
+      nch = nch + ib2as(insper(indxtp),ibuf2,nch,o'100000'+3) 
       nch = mcoma(ibuf2,nch)
-      nch = nch + ir2as(tperer,ibuf2,nch,5,1) 
+      nch = nch + ir2as(tperer(indxtp),ibuf2,nch,5,1) 
       nch = mcoma(ibuf2,nch)
-      nch = ichmv(ibuf2,nch,lmode,imodpe*4+1,nmode(imodpe+1)) 
+      nch = ichmv(ibuf2,nch,lmode,imodpe(indxtp)*4+1,
+     $     nmode(imodpe(indxtp)+1)) 
       if (kcom) goto 500
       nch = mcoma(ibuf2,nch)
 C 
@@ -84,13 +85,13 @@ C     2.1 Average the parity error counts and add
 C     to output buffer. 
 C 
       sum = 0.0 
-      do 350 i=1,insper 
+      do 350 i=1,insper(indxtp) 
         perr(i) = perr(i+1)-perr(i) 
 C                   The number of parity errors is the difference 
 C                   between successive readings 
         sum = sum + perr(i) 
 350     continue
-      sum = sum/(insper)
+      sum = sum/(insper(indxtp))
 C 
       nch = nch + ir2as(sum,ibuf2,nch,6,1)
       nch = mcoma(ibuf2,nch)

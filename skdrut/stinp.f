@@ -16,9 +16,10 @@ C  OUTPUT:
 C     IERR - error number, non-zero is bad
 C
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
 C
 C  LOCAL:
-      logical knaeq,kline
+      logical knaeq,kline,ks2,kk4
       integer*2 LNAME(4),LAXIS(2)
       real*4 SLRATE(2),ANLIM1(2),ANLIM2(2)
       integer*2 LD(7),LOCC(4)
@@ -31,10 +32,12 @@ C  LOCAL:
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band),
      .idummy,ib,ii,nco,nhz,i,idum
-      integer*2 lidt(2),lid,lidpos,lidhor
+      integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(8)
       real*4 poslat,poslon
       integer ibitden
-      integer nheadstack
+      integer nstack
+      integer*2 ls2sp(2)
+      real s2sp
       integer ichcm,igtba,ichcm_ch,ichmv_ch,ichmv,jchar ! functions
 C
 C
@@ -63,8 +66,19 @@ C             it needs to be set up correctly and this is the place to do it.
 C 951116 nrv Remove maxpass and replace with bit density
 C 960208 nrv Increment NSTATN after checking for MAX_STN
 C 960227 nrv Make terminal ID up to 4 characters, not integer.
-C 960409 nrv Change UNPVT call to include nheadstack, ibitden 
+C 960409 nrv Change UNPVT call to include nstack, ibitden 
 C 980629 nrv If "auto" for tape length, set tape_motion_type=DYNAMIC
+C 990607 nrv Add rack,rec,fm to UNPVT call. Store values.
+C 990620 nrv Check rack,rec,frm types for consistency.
+C 990620 nrv Store S2 mode.
+C 991028 nrv Initialize second recorder type to 'none'.
+C 991103 nrv For errors in later fields on the input lines, try decoding anyway.
+C 991103 nrv Remove checks for recorder/rack pairs. Add recb to unpvt call.
+C 991122 nrv Remove S2 speed and mode to be set in the modes section. Set
+c            S2 speed.
+C 991123 nrv Recorder 1 and 2, not a and b.
+C 000126 nrv Convert S2 tape length from minutes (e.g. 360) to feet
+C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
@@ -93,7 +107,8 @@ C
       ELSE IF (ITYPE.EQ.3) THEN
         j=8
         CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
-     .  nheadstack,maxt,nr,lb,sefd,j,par,npar)
+     .  nstack,maxt,nr,ls2sp,
+     .  lb,sefd,j,par,npar,lrack,lrec1,lrec2)
       ELSE IF (ITYPE.EQ.4) THEN
         J = 8
         CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NCO,CO1,CO2)
@@ -117,7 +132,7 @@ C
         IF  (IERR.NE.0) THEN
           IERR = -(IERR+100)
           write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          RETURN
+          if (ierr.lt. 5) RETURN
         END IF  !
 C
         I=1
@@ -193,9 +208,8 @@ C  2.4 Here we handle terminal information
 C
       ELSE IF  (ITYPE.EQ.3) THEN  !terminal entry
         IF  (IERR.NE.0) THEN
-          IERR = -(IERR+100)
           write(lu,9105) ierr,(ibufx(i),i=2,ilen)
-          RETURN
+          if (ierr.lt.5) return
         END IF  !
         if (ichcm_ch(lidt,1,'    ').ne.0.and.
      .      ichcm_ch(lidt,1,'--').ne.0) then ! try to match IDs
@@ -218,32 +232,65 @@ C
      .    " ignored:"/120a2)') (ibufx(i),i=2,ilen)
           RETURN
         END IF  !matching entry not found
+C  Got a match. Initialize names.
         IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
-        ibitden_save(i)=ibitden
-        nheads(i)=nheadstack
-        maxtap(i) = maxt
+        ks2 = ichcm_ch(lterna(1,i),1,'S2').eq.0
+        kk4 = ichcm_ch(lterna(1,i),1,'K4').eq.0
+        idummy = ichmv_ch(lstrack(1,i),1,'unknown ')
+        idummy = ichmv_ch(lstrec(1,i),1,'unknown ')
+        idummy = ichmv_ch(lstrec2(1,i),1,'none    ')
+        idummy = ichmv_ch(ls2speed(1,i),1,'    ')
+C  Store equipment names.
+        if (ichcm_ch(lrack,1,' ').ne.0) then
+          idummy = ichmv(lstrack(1,i),1,lrack,1,8) ! rack type
+        endif
+        if (ichcm_ch(lrec1,1,' ').ne.0) then
+          idummy = ichmv(lstrec(1,i),1,lrec1,1,8) ! recorder 1 type
+        endif
+        if (ichcm_ch(lrec2,1,' ').ne.0) then
+          idummy = ichmv(lstrec2(1,i),1,lrec2,1,8) ! recorder 2 type
+        endif
+        idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! starting recorder default
+C    Store other info depending on the type.
         nrecst(i) = nr
+        if (ks2) then ! set S2 variables
+          idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4)
+          if (ichcm_ch(ls2sp,1,'LP').eq.0) s2sp=SPEED_LP
+          if (ichcm_ch(ls2sp,1,'SLP').eq.0) s2sp=SPEED_SLP
+          nheadstack(i)=1
+          ibitden_save(i)=1
+          maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
+        else if (kk4) then ! set K4 variables
+          nheadstack(i)=1
+          maxtap(i) = maxt ! conversion??
+          ibitden_save(i)=1
+        else ! set Mk34 variables
+          maxtap(i) = maxt
+          ibitden_save(i)=ibitden
+          nheadstack(i)=nstack
+        endif
         do ib=1,2
           idum = igtba(lb(ib),ii)
           if (ii.ne.0) then ! got frequencies selected already
             sefdst(ii,i) = sefd(ib)
-            do j=1,npar(ii)
-              sefdpar(j,ii,i) = par(j,ii)
-            enddo
+            if (npar(ii).gt.0) then
+              do j=1,npar(ii)
+                sefdpar(j,ii,i) = par(j,ii)
+              enddo
+            endif
             nsefdpar(ii,i) = npar(ii)
             lbsefd(ib,i) = lb(ib)
           else ! store away until frequencies are selected
             sefdst(ib,i) = sefd(ib)
-            do j=1,npar(ib)
-              sefdpar(j,ib,i) = par(j,ib)
-            enddo
+            if (npar(ib).gt.0) then
+              do j=1,npar(ib)
+                sefdpar(j,ib,i) = par(j,ib)
+              enddo
+            endif
             nsefdpar(ib,i) = npar(ib)
             lbsefd(ib,i) = lb(ib)
           end if
         enddo
-C Initialize rack and recorder types to "unknown"
-        idummy = ichmv_ch(lstrec(1,i),1,'unknown ') ! recorder type
-        idummy = ichmv_ch(lstrack(1,i),1,'unknown ') ! rack type
 C
 C 2.5 Here we handle the horizon mask
 C

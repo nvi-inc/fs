@@ -72,6 +72,8 @@ C
           END IF
           if (ichcm_ch(ibuf,ic1,'16:1').ne.0.and.
      .        ichcm_ch(ibuf,ic1,'8:1') .ne.0.and.
+     .        ichcm_ch(ibuf,ic1,'on') .ne.0.and.
+     .        ichcm_ch(ibuf,ic1,'ON') .ne.0.and.
      .        ichcm_ch(ibuf,ic1,'none').ne.0.and.
      .        ichcm_ch(ibuf,ic1,'NONE').ne.0) then
             ierr=-101-nx

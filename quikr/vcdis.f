@@ -99,8 +99,7 @@ C
 C     3. Now the buffer contains: VCnn/, and we want to add the data. 
 C 
 300   call ma2vc(ibufv1,ibufv2,lfr,ibw,itp,iatu,iatl,iremvc(ivcn),
-     .     ilokvc(ivcn),tpivc(ivcn),ial)
-      call fs_set_tpivc(tpivc)
+     .     ilokvc(ivcn),rtpivc,ial)
       call fs_set_ilokvc(ilokvc)
       extbw=-1.0
       goto 320
@@ -155,8 +154,7 @@ C
 C                   Oscillator locked or not
       nch = mcoma(ibuf2,nch)
 C 
-      call fs_get_tpivc(tpivc)
-      nch = nch + ir2as(tpivc(ivcn),ibuf2,nch,6,0) - 1
+      nch = nch + ir2as(rtpivc,ibuf2,nch,6,0) - 1
 C                   Total power reading, binary 
 C 
 C 

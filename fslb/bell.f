@@ -14,11 +14,6 @@ C  until all of the suspends were finished suspending. What you would
 C  get was a delay and a one second spurt of dings. Using the print
 C  statement works.  gag
 C
-      integer*2 ibell
-      data ibell/2h/
-
-      do 100 i=1,10
-c       call put_cons_raw(ibell,1)
       print 9100
 9100  format('',$)
         if (ieb.eq.0) itime=25-2*i 

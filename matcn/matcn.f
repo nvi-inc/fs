@@ -101,7 +101,7 @@ C              - strobe characters for modes < 0, requesting data
       logical kini, knull
 C               - TRUE once we have initialized
 C        NDEV   - # devices in module table
-      dimension modtbl(3,25)
+      dimension modtbl(3,30)
 C               - module table, word 1 = mnemonic, word 2 = hex address
 C               - word 3 = time out
       integer*2 lalarm(20)
@@ -119,7 +119,7 @@ C
 C   INITIALIZED VARIABLES
 C
       data kini/.false./
-      data minmod/-8/, maxmod/10/,  maxdev/25/, nalarm/18/
+      data minmod/-8/, maxmod/11/,  maxdev/30/, nalarm/18/
       data ilen/360/
       data lstrob/2h!>,2h%>,2h(>,2h)>,2h+>,2h->,2h.>,2h;>/
       data ibaud/110,300,600,1200,2400,4800,9600/
@@ -236,7 +236,9 @@ C
         itimeout=modtbl(3,i)
         call fs_get_ibmat(ibmat)
         itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
-        ktp=ichcm_ch(modtbl(1,idev),1,'tp').eq.0
+        ktp=ichcm_ch(modtbl(1,idev),1,'t1').eq.0.or.
+     $       ichcm_ch(modtbl(1,idev),1,'t2').eq.0
+
 C
         idum=ichmv_ch(ibuf,1,'#')
         idum=ichmv(ibuf,2,modtbl(2,idev),1,2)
@@ -251,6 +253,7 @@ C
         if (imode.eq.8) goto 800
         if (imode.eq.9) goto 800
         if (imode.eq.10) goto 800
+        if (imode.eq.11) goto 800
 C
 C
 C     3. Here we are sending data to the MAT.
@@ -375,9 +378,12 @@ C     8. Send buffer directly.  Address has already been substituted
 C     into first three characters.  Fill in fourth with a blank.
 C 
 800     idum=ichmv_ch(ibuf,4,' ') 
-        if(imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
-          nchar=nchar+1
-          call pchar(ibuf,nchar,10)
+        if(imode.eq.9.or.imode.eq.11.or.imode.eq.-54) then
+           nchar=nchar+1
+           call pchar(ibuf,nchar,10)
+        else if(imode.eq.10) then
+           nchar=nchar+1
+           call pchar(ibuf,nchar,ichar('$'))
         endif
         call fs_get_kecho(kecho)
         call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn) 
@@ -389,7 +395,7 @@ C
 899     if ((ierr.lt.0.and.ierr.ne.-5).or.nch2.eq.0) goto 900 
 C                   If there was a real error, skip any responses 
 C                   EXCEPTION: for wrong-length responses, report 
-C                   the actual response - it might be intereseting. 
+C                   the actual response - it might be interesting. 
 
         call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
         nclrer = nclrer + 1 

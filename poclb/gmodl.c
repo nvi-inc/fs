@@ -34,7 +34,7 @@ struct pmdl *pmodel;
 */
   mdlfile = fopen(model_file,"r");
   if (mdlfile == (FILE *)NULL) {
-    msg[0]=NULL;
+    msg[0]=0;
     strcat(msg,"Open failed for ");
     strcat(msg,model_file);
     perror(msg);
@@ -45,7 +45,7 @@ struct pmdl *pmodel;
   irec=0;
   while ((c=getc(mdlfile)) != EOF && iline < NPLINES) {
     if (c == '*') {                       /* a comment line        */
-      msg[0]=c; msg[1]=NULL;
+      msg[0]=c; msg[1]=0;
       n=1;
       while ((c=getc(mdlfile)) != '\n') {
 /*

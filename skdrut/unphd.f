@@ -4,6 +4,7 @@ C
 C     unphd unpacks a record containing head information
 C
       include '../skdrincl/skparm.ftni'
+      include '../skdrincl/statn.ftni'
 C
 C  Called by: HDINP
 
@@ -27,16 +28,18 @@ C  LOCAL:
       integer ich,ic1,ic2,nc,nch,idumy
       integer iinc,il,ir,ih,ip,id
       integer iscnc,ias2b,ichmv ! function
-      character*62 cpass
+      character*63 cpass
       character*1 cp
 C
 C  INITIALIZED:
-      data cpass/'123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
-     .tuvwxyz'/
+      data cpass/'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr
+     .stuvwxyz'/
 C
 C  Modifications:
 C  930707 NRV Created, copied from UNPFL
 C 960409 nrv Allow preceding '1' to indicate second headstack position
+C 990629 nrv Allow 0 pass number for S2. Send back index-1.
+C 000510 nrv Make 0 valid for all.
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -89,12 +92,14 @@ C
         endif 
         call hol2char(ibuf,ic1,ic1,cp) ! pass is first char
         ip = index(cpass,cp)
-        if (ip.eq.0) then
+        if (ip.eq.0) then ! illegal character
           ierr=-103-nent
           return
+        else ! adjust index for zero entry
+          ip=ip-1
         endif
         id = ias2b(ibuf,ic1+1,1) ! sub-pass is second char
-        if (id.le.0) then
+        if (id.lt.0) then ! illegal subpass
           ierr = -103-nent
           return
         endif

@@ -30,6 +30,7 @@ C
 C 3.  LOCAL VARIABLES
       integer itpis(17)
       integer itpis_vlba(32)
+      integer itpis_norack(2)
 C      - which TPIs to read back
 C        ICH    - character counter
 C     NCHAR  - character count
@@ -65,6 +66,8 @@ C                     Retain class for later response
         call tplis(ip,itpis)
       else if (VLBA .eq. rack .or. VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
+      else
+         call tplisn(ip,itpis_norack)
       endif
 C
       ierr = ip(3)
@@ -104,6 +107,9 @@ C
       else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpi_vlba(ip,itpis_vlba)
         if(ip(3).lt.0) return
+      else
+         call fc_tpi_norack(ip,itpis_norack)
+         if(ip(3).lt.0) return
       endif
 C
 C     5. Send the results to TPPUT for putting into COMMON.
@@ -118,8 +124,11 @@ C
 C                     Get the command part of the response set up
       if(MK3.eq.rack.or.MK4.eq.rack) then
         call tpput(ip,itpis,isub,ibuf,nch,ilen)
-      else
+      else if (VLBA .eq.rack.or.VLBA4.eq.rack) then
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)
+        if(ip(3).lt.0) return
+      else
+        call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)
         if(ip(3).lt.0) return
       endif
       iclass = 0

@@ -12,8 +12,7 @@ C      Character manipulation routines
 C 
 C  LOCAL VARIABLES: 
 C 
-      character*79 outbuf
-      integer answer, nchar, trimlen
+      integer nchar
       character cjchar
       dimension iparm(2)
 C 

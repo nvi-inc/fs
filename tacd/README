@@ -1,0 +1,38 @@
+tacd - TAC Field System server.
+
+ This is more like a server that a daemon; it has no forks or such.
+ It is executed at Field System startup, and continues in an infinite
+loop until the Field System terminates.
+
+ It calls on the TAC host and opens a socket. This information is kept
+in a file named "tacd.ctl" in the "/usr2/control" directory.
+ After it's initial contact it askes for status,time, and averages and
+places them in the Field System Shared Memory "/usr2/fs/include/fscom.h".
+It repeats this at whatever has been determined.
+
+ Functions that use this server are:
+ /usr2/fs/quikv/tacd.c	/* This function displays and logs, using the function
+                           tacd_dis.c. */ 
+
+ There are a few things that can be done with the tacd function.
+>
+>tacd=time    /* This shows the TAC time. */
+>tacd=average /* This shows the TAC average time. */
+>tacd=cont    /* This will read the TAC computer more often. */
+>tacd=        /* This will stop tacd=cont and return to normal. */
+>tacd=stop    /* This will stop the tacd from queueing the FS TAC daemon. */
+	      /* To stop it from logging errors */
+>tacd=start   /* This undos the stop, and also does a restart. */
+>tacd=status  /* This will give the status. */
+
+ example:
+>tacd=average	
+ will log:
+18:23:38;tacd=average
+18:23:38/tacd/average,NEW,36647.765625,300,0.016172,11.063171,11.093600,11.028600
+
+ If the time is old - it will be labeled OLD:
+>tacd=average	
+18:24:44;tacd=average
+18:24:44/tacd/average,OLD,36647.765625,300,0.016172,11.063171,11.093600,11.028600
+

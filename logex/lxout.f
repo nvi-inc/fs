@@ -13,19 +13,11 @@ C
 C  LOCAL VARIABLES: 
 C 
       character*79 outbuf
-      integer answer, trimlen, ichmv
+      integer answer, ichmv
       character cjchar
       dimension iparm(2)
 C 
       equivalence (parm,iparm(1))
-C 
-C     N - the variable that indicates the parameters the min & max
-C         SCALE values apply to.
-C
-C  INITIALIZED VARIABLES:
-C
-      data n/1/ 
-C 
 C 
 C  Check for a specified OUTPUT LU. If no OUTPUT LU was specified, then
 C  write out the OUTPUT file name.

@@ -17,6 +17,8 @@ C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C 970124 nrv Move initialization to start.
 C 970206 nrv Remove pos2 and add head index position. Add number
 C            of headstacks found to the call.
+C 000907 nrv Get headstack positions up to a max of 4. Check this
+C            against the number compiled in.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -91,11 +93,11 @@ C  1.2 List of head positions per headstack
         ierr = 12
         ih=1
         iret = fvex_field(ih+1,ptr_ch(cout),len(cout)) ! get position
-        do while (ih.le.max_headstack.and.iret.eq.0)
+        do while (ih.le.4.and.iret.eq.0)
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
-          if (iret.eq.0) posh(ip,ih) = d*1.d06
+          if (iret.eq.0.and.ih.le.max_headstack) posh(ip,ih) = d*1.d06
           ih=ih+1
           iret = fvex_field(ih+1,ptr_ch(cout),len(cout)) ! get next position
         enddo

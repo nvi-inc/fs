@@ -1,4 +1,4 @@
-      subroutine stdis(ip,iclcm)
+      subroutine stdis(ip,iclcm,indxtp)
 C  start tape display c#870115:04:42# 
 C 
       include '../include/fscom.i'
@@ -51,17 +51,21 @@ C                   Get response to query of ST
       call ma2mv(ibuf,idir,isp,lgenx)
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
       call fs_get_drive(drive)
-      if (MK4.eq.drive) then
+      if (MK4.eq.drive(indxtp)) then
          call ma2en4(ibuf,iena,kena)
       else
         call ma2en(ibuf,iena,it,nt) 
       endif
       goto 350
-320   isp = ispeed
-      idir = idirtp 
-      iena = ienatp 
-      call fs_get_lgen(lgen)
-      idum=ichmv(lgenx,1,lgen,1,3)
+ 320  continue
+      call fs_get_ispeed(ispeed,indxtp)
+      call fs_get_idirtp(idirtp,indxtp)
+      call fs_get_ienatp(ienatp,indxtp)
+      isp = ispeed(indxtp)
+      idir = idirtp(indxtp) 
+      iena = ienatp(indxtp) 
+      call fs_get_lgen(lgen,indxtp)
+      idum=ichmv(lgenx,1,lgen(1,indxtp),1,3)
 C                   Get speed and direction and record status from common 
 C 
 350   nch = itped(-2,idir,lgenx,ibuf2,nch,ilen2)  

@@ -53,7 +53,7 @@ double *timnow,*timlst;
     *oldcmd=newcmd;
     if(delay==-1)
       delay=K4DEFAULT;
-  } else if (strncmp(nadev,"d4",2)==0) {
+  } else if (strncmp(nadev,"r1",2)==0) {
     delay=K4DEFAULT;
   } else if (strncmp(nadev,"la",2)==0) {
     delay=K4DEFAULT;

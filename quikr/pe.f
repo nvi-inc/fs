@@ -1,4 +1,4 @@
-      subroutine pe(ip)
+      subroutine pe(ip,itask)
 C  !tape error rates c#870115:04:38#
 C 
 C    PE computes tape parity error rates
@@ -46,6 +46,11 @@ C
 C 
 C     1. Get the command. 
 C 
+      if( itask.eq.1) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
       iclass = 0
       nrec = 0
       iclcm = ip(1) 
@@ -59,7 +64,7 @@ C
 C                   If no parameters, go read decoder 
       if (cjchar(ibuf,ieq+1).ne.'?') goto 200
       ip(4) = o'77' 
-      call pedis(ip,iclcm,perr,isyner)
+      call pedis(ip,iclcm,perr,isyner,indxtp)
       return
 C 
 C 
@@ -78,9 +83,9 @@ C
       call gtprm(ibuf,ich,nchar,1,parm,ierr) 
       itrk = -1 
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 201 
-      if (cjchar(parm,1).eq.'*') itrk = itrper 
-      call fs_get_itraka(itraka)
-      if (cjchar(parm,1).eq.',') itrk = itraka 
+      if (cjchar(parm,1).eq.'*') itrk = itrper(indxtp) 
+      call fs_get_itraka(itraka,indxtp)
+      if (cjchar(parm,1).eq.',') itrk = itraka(indxtp) 
 C                   Default to channel A track already set up 
       goto 220
 201   if (iparm(1).ge.1.and.iparm(1).le.28) goto 202
@@ -92,7 +97,7 @@ C     2.2 CHANNEL, PARAMETER 2
 C 
 220   ichan = -1
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
-      if (cjchar(parm,1).eq.'*') ichan = ichand
+      if (cjchar(parm,1).eq.'*') ichan = ichper(indxtp)
       if (cjchar(parm,1).eq.',') ichan = 0 
 C                   Default is channel A
       if (cjchar(parm,1).eq.'a') ichan = 0
@@ -107,7 +112,7 @@ C     2.3 # SAMPLES, PARAMETERS 3
 C 
 230   call gtprm(ibuf,ich,nchar,1,parm,ierr) 
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 231 
-      if (cjchar(parm,1).eq.'*') ins = insper
+      if (cjchar(parm,1).eq.'*') ins = insper(indxtp)
       if (cjchar(parm,1).eq.',') ins = 2 
 C                   Default number of samples is 1 (no averaging) 
       goto 240
@@ -120,7 +125,7 @@ C     2.4 TIME BETWEEN SAMPLES, PARAMETER 4
 C 
 240   call gtprm(ibuf,ich,nchar,2,parm,ierr) 
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 241 
-      if (cjchar(parm,1).eq.'*') tper = tperer 
+      if (cjchar(parm,1).eq.'*') tper = tperer(indxtp) 
       if (cjchar(parm,1).eq.',') tper = 0.5
 C                   Default time between samples is 0.5 sec 
       goto 250
@@ -133,7 +138,7 @@ C     2.5 MODE, PARAMETER 5
 C 
 250   call gtprm(ibuf,ich,nchar,0,parm,ierr) 
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') goto 251 
-      if (cjchar(parm,1).eq.'*') lm = imodpe 
+      if (cjchar(parm,1).eq.'*') lm = imodpe(indxtp) 
       if (cjchar(parm,1).eq.',') lm = 0
 C                   Default mode is REC 
       goto 300
@@ -147,11 +152,12 @@ C
 C 
 C     3. Now plant these values into COMMON.
 C 
-300   insper = ins
-      tperer = tper 
-      ichper = ichan
-      itrper = itrk 
-      imodpe = lm 
+300   continue
+      insper(indxtp) = ins
+      tperer(indxtp) = tper 
+      ichper(indxtp) = ichan
+      itrper(indxtp) = itrk 
+      imodpe(indxtp) = lm 
       ierr = 0
       goto 990
 C 
@@ -170,45 +176,54 @@ C     3) tape moving, in forward direction
 C     4) requested channel is attached to an enabled track
 C 
 500   continue
-      call fs_get_ispeed(ispeed)
-      call fs_get_idirtp(idirtp)
-      call fs_get_ienatp(ienatp)
-      if (imodpe.eq.0.and.ibypas.eq.0.and.ienatp.eq.1.and.ispeed.ne.0.
-     . .and.idirtp.eq.1.and.itrken(itrper).eq.1) goto 501 
-      if (imodpe.eq.1.and.ibypas.eq.0.and.ispeed.ne.0) goto 501 
+      call fs_get_ispeed(ispeed,indxtp)
+      call fs_get_idirtp(idirtp,indxtp)
+      call fs_get_ienatp(ienatp,indxtp)
+      if (imodpe(indxtp).eq.0.and.ibypas(indxtp).eq.0.and.
+     $     ienatp(indxtp).eq.1.and.ispeed(indxtp).ne.0.and.
+     &     idirtp(indxtp).eq.1.and.itrken(itrper(indxtp),indxtp).eq.1
+     $     ) goto 501
+      if (imodpe(indxtp).eq.1.and.ibypas(indxtp).eq.0.and.
+     $     ispeed(indxtp).ne.0
+     $     ) goto 501
       ierr =   00 
       goto 990
 C                     Skip out with no error if we can't measure PEs
 C 
 501   continue
-      call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18) 
-      icheck(18) = 0
-      call fs_set_icheck(icheck(18),18)
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1) 
+      icheck(18+indxtp-1) = 0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       ibuf2(1) = 0
-      call char2hol('tp',ibuf2(2),1,2)
-      if (ichper.eq.0) itraka = itrper  
-      call fs_set_itraka(itraka)
-      if (ichper.eq.1) itrakb = itrper  
-      call fs_set_itrakb(itrakb)
-      call fs_get_itraka(itraka)
-      call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb) 
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf2(2),1,2)
+      else
+         call char2hol('t2',ibuf2(2),1,2)
+      endif
+      if (ichper(indxtp).eq.0) itraka(indxtp) = itrper(indxtp)  
+      call fs_set_itraka(itraka,indxtp)
+      if (ichper(indxtp).eq.1) itrakb(indxtp) = itrper(indxtp)  
+      call fs_set_itrakb(itrakb,indxtp)
+      call fs_get_itraka(itraka,indxtp)
+      call rp2ma(ibuf2(3),ibypas(indxtp),ieqtap(indxtp),ibwtap(indxtp),
+     $     itraka(indxtp), itrakb(indxtp)) 
       iclass=0
       call put_buf(iclass,ibuf2,-13,'fs','  ') 
       call run_matcn(iclass,1) 
       call rmpar(ip)
       if (ip(3).lt.0) return
       call clrcl(ip(1)) 
-      icheck(18) = ichold 
-      call fs_set_icheck(icheck(18),18)
+      icheck(18+indxtp-1) = ichold 
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
 C                   First set up the repro track which was requested. 
 C 
       idumm1 = ichmv_ch(ibuf2,5,'00000008')
-      idumm1 = ichmv(ibuf2,11,ihx2a(ichper),2,1)
+      idumm1 = ichmv(ibuf2,11,ihx2a(ichper(indxtp)),2,1)
 C                   Move in the channel bit 
       perr(1) = 0.0 
-      do 580 isamp=1,insper+1 
-        call susp(1,ifix(tperer*100.0)) 
+      do 580 isamp=1,insper(indxtp)+1 
+        call susp(1,ifix(tperer(indxtp)*100.0)) 
 C                   Suspend between samples and before the first
 C                   sample to let the decoding settle down
         ibuf2(1) = 0
@@ -250,17 +265,22 @@ C     Now set the repro tracks back to what they were.
 C     Turn on checking for the tape drive again.
 C 
 C     IBUF2(1) = 0
-C     IBUF2(2) = 2HTP 
-C     CALL RP2MA(IBUF2(3),IBYPAS,IEQTAP,IBWTAP,ITRAKA,ITRAKB) 
+c     if(indxtp.eq.1) then
+c        call char2hol('t1',ibuf2(2),1,2)
+c     else
+c        call char2hol('t2',ibuf2(2),1,2)
+c     endif
+C     CALL RP2MA(IBUF2(3),IBYPAS(indxtp),IEQTAP(indxtp),IBWTAP(indxtp),
+c    &           ITRAKA(indxtp),ITRAKB(indxtp)) 
 C     ICLASS=0
 C     CALL RMPAR(IP)
 C     IF (IP(3).LT.0) RETURN
 C     CALL CLRCL(IP(1)) 
-C     ICHECK(18) = ICHOLD 
+C     ICHECK(18+indxtp-1) = ICHOLD 
 C 
 C     Now we can display the results, finally.
 C 
-      call pedis(ip,iclcm,perr,isyner)
+      call pedis(ip,iclcm,perr,isyner,indxtp)
       return
 C 
 C 

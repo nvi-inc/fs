@@ -1,4 +1,4 @@
-      subroutine mvdis(ip,iclcm)
+      subroutine mvdis(ip,iclcm,indxtp)
 C  tape motion display   <880620.1431>
 
       include '../include/fscom.i'
@@ -24,7 +24,8 @@ C                   Get command buffer
       nch = ichmv_ch(ibuf2,ireg(2)+1,'/') 
 C                   Put / to indicate a response
 C 
-      if (drive.eq.MK3.or.MK4.eq.drive) then
+      call fs_get_drive(drive)
+      if (drive(indxtp).eq.MK3.or.MK4.eq.drive(indxtp)) then
         do i=1,ncrec
           ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
           if (nch+ireg(2)-2.le.ilen2) then
@@ -35,7 +36,7 @@ C                     Move buffer contents into output list
         enddo
       else
         call fc_mvdis_v(ip,ibuf2,nch)
-        if(ip(3).lt.0) return
+        if(ip(3).lt.0) return 
       endif
 C 
       iclass = 0

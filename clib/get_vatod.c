@@ -14,10 +14,11 @@ static int rel_addr[ ]   ={0x51,0x54,0x52,0x55,0x57,0x53,0x56,0x58};
     /*     measurement */
 static int rel_addr_v2[ ]={0,0,0,0,0,0x60,0x61,0};
 
-void get_vatod(ichan,volts,ip)
+void get_vatod(ichan,volts,ip,indxtp)
 int ichan;                           /* M3 style channel number */
 float *volts;                        /* pointer to store result */
 long ip[5];                          /* ipc array */
+int indxtp;
 {
       struct req_buf buffer;
       struct req_rec request;
@@ -26,9 +27,22 @@ long ip[5];                          /* ipc array */
       int counts;
       struct tms tms_buff;
       long end;
+      int indx;
+
+      if(indxtp == 1) {
+	indx=0;
+      } else if(indxtp == 2) {
+	indx=1;
+      } else {
+	ip[2]=-505;
+	memcpy("q<",ip+4,2);
+	return;
+      }
 
       if(ichan<1 || ichan >(sizeof(rel_addr)/sizeof(int)) ||
-        (shm_addr->equip.drive == VLBA2 && rel_addr[ichan-1] == 0) ) {
+        (shm_addr->equip.drive[indx]==VLBA &&
+	 shm_addr->equip.drive_type[indx] == VLBA2
+	 && rel_addr[ichan-1] == 0) ) {
           ip[0]=ip[1]=0;
           ip[2]=-283;
           memcpy(ip+3,"q@",2);
@@ -37,16 +51,20 @@ long ip[5];                          /* ipc array */
       }
 
       ini_req(&buffer);                      /* format the buffer */
-      memcpy(request.device,DEV_VRC,2);
+      if(indx == 0) 
+	memcpy(request.device,"r1",2);
+      else 
+	memcpy(request.device,"r2",2);
       request.type=1; 
 
-      if(shm_addr->klvdt_fs && (ichan == 1 || ichan ==2)) {
-        lvdonn_v(1,ip);
+      if(shm_addr->klvdt_fs[indx] && (ichan == 1 || ichan ==2)) {
+        lvdonn_v(1,ip,indxtp);
         if(ip[2]<0) return;
         rte_sleep( 5);
       } 
 
-      if (shm_addr->equip.drive_type == VLBA2)
+      if (shm_addr->equip.drive[indx] == VLBA &&
+	  shm_addr->equip.drive_type[indx] == VLBA2)
         request.addr=rel_addr_v2[ichan-1];
       else
         request.addr=rel_addr[ichan-1];
@@ -62,7 +80,8 @@ long ip[5];                          /* ipc array */
       get_res(&response, &buffer_out);
       counts=0xFFF & response.data;
       if((counts & 0x800)!=0) counts|=~0xFFF;   /*sign extend */
-      if (shm_addr->equip.drive_type == VLBA2)
+      if (shm_addr->equip.drive[indx] == VLBA &&
+	  shm_addr->equip.drive_type[indx] == VLBA2)
 	*volts=counts*0.4e-3;
       else
 	*volts=counts*4.8828125e-3;

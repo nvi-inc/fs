@@ -508,15 +508,16 @@ fget_scan_station__
 #else
 fget_scan_station
 #endif
-(start, start_len, mode, mode_len, station, vex)
-char **start, **mode, **station;
-integer *start_len, *mode_len, *vex;
+(start, start_len, mode, mode_len, scanid, scanid_len, station, vex)
+char **start, **mode, **station, **scanid;
+integer *start_len, *mode_len, *scanid_len, *vex;
 /*<      integer function fget_scan_station(ptr_ch(start), len(start),>*/
 /*<     &                                   ptr_ch(mode), len(mode), >*/
+/*<     &                                   ptr_ch(scanid), len(scanid), >*/
 /*<     &                                   ptr_ch(station), >*/
 /*<	&                                   vex) >*/
 /*<       implicit none >*/
-/*<       character*(*) start,mode,station >*/
+/*<       character*(*) start,mode,station,scanid >*/
 /*<       integer vex >*/
 
 /* This routine can be used to retrieve all of the station statments */
@@ -542,19 +543,23 @@ integer *start_len, *mode_len, *vex;
 /*                               use fvex_len to determine useful length */
 /*   character*(*) mode        - mode for this scan */
 /*                               use fvex_len to determine useful length */
+/*   character*(*) scanid      - scanid for this scan */
+/*                               use fvex_len to determine useful length */
 /*   integer (return value)    - error code, zero indicates no error */
 /*                               -3 = no more statements to return */
 /*                               -4 = start did not fit in start */
 /*                               -5 = mode did not fit in mode */
+/*                               -6 = scanid did not fit in scanid */
 {
   int iprimitive, ierr;
   void *ptr;
+  char *sidptr;
 
   if(*vex!=0) {
     save_type=T_STATION;
-    save_ptr=get_scan_station(&save_lowls,*station,(Vex *)*vex);
+    save_ptr=get_scan_station(&save_lowls,&sidptr,*station,(Vex *)*vex);
   } else
-    save_ptr=get_scan_station_next(&save_lowls);
+    save_ptr=get_scan_station_next(&save_lowls,&sidptr);
 
   if(save_ptr==NULL)
     return -3;
@@ -569,6 +574,141 @@ integer *start_len, *mode_len, *vex;
   if(ierr==-1)
     return -5;
 
+  ierr=field_copy(*scanid,*scanid_len,sidptr);
+  if(ierr==-1)
+    return -6;
+
+  return 0;
+}
+/* ----------------------------------------------------------------------- */
+integer 
+#ifdef F2C
+fget_scan__
+#else
+fget_scan
+#endif
+(start, start_len, mode, mode_len, scanid, scanid_len, vex)
+char **start, **mode, **scanid;
+integer *start_len, *mode_len, *scanid_len,*vex;
+/*<      integer function fget_scan(ptr_ch(start),len(start),  */
+/*     &                           ptr_ch(mode),len(mode),     */
+/*     &                           ptr_ch(scanid),len(scanid), */
+/*     &                                   vex)               >*/
+/*<     implicit none                                         >*/
+/*<      character*(*) start,mode,station,scanid
+/*<      integer vex                                          >*/
+
+/* This routine can be used to retrieve all of the station statments */
+/*   associated with a station. Call this routine the first time with vex set*/
+/*   to the value returned by open_vex, on subsequent calls use 0. */
+
+/* When this routine does not return an error, use the fget_station_scan to */
+/*   find the station statements for this scan. */
+
+/* When this routine does not return an error, the source names can be */
+/*   accessed using fvex_scan_source. */
+
+/*  input: */
+/*   integer vex               - vex file reference */
+/*                               use value returned open_vex for first call */
+/*                               use 0 for subsequent calls */
+/*  output: */
+/*   character*(*) start       - nominal start time for this scan */
+/*                               use fvex_len to determine useful length */
+/*                               should be at least 1 character larger than */
+/*                               longest possible value to hold null */
+/*                               termination */
+/*   character*(*) mode        - mode for this scan */
+/*                               use fvex_len to determine useful length */
+/*                               should be at least 1 character larger than */
+/*                               longest possible value to hold null */
+/*                               termination */
+/*   character*(*) scanid      - scanid for this scan */
+/*                               use fvex_len to determine useful length */
+/*                               should be at least 1 character larger than */
+/*                               longest possible value to hold null */
+/*                               termination */
+/*   integer (return value)    - error code, zero indicates no error */
+/*                               -2 = no more scans */
+/*                               -4 = start time did not fit in start */
+/*                               -5 = mode did not fit in mode */
+/*                               -6 = scanid did not fit in scanid */
+{
+  int  ierr;
+  void *ptr;
+  char *cptr;
+
+  if(*vex!=0) {
+    save_lowls=get_scan(&cptr,(Vex *)*vex);
+  } else
+    save_lowls=get_scan_next(&cptr);
+
+  if(save_lowls==NULL)
+    return -2;
+
+  ptr=get_scan_mode(save_lowls);
+  ierr=field_copy(*mode,*mode_len,ptr);
+  if(ierr==-1)
+    return -4;
+
+  ptr=get_scan_start(save_lowls);
+  ierr=field_copy(*start,*start_len,ptr);
+  if(ierr==-1)
+    return -5;
+
+  ierr=field_copy(*scanid,*scanid_len,cptr);
+  if(ierr==-1)
+    return -6;
+
+  return 0;
+}
+/* ----------------------------------------------------------------------- */
+integer 
+#ifdef F2C
+fget_station_scan__
+#else
+fget_station_scan
+#endif
+(n)
+int *n;
+/*<      integer function fget_station_scan(n) >*/
+/*<      implicit none >*/
+/*<      integer n >*/
+
+/* This routine can be used to retrieve the station for a station statement */
+/*   in scan block found by fget_scan. */
+
+/* When this routine does not return an error, the fields in the station */
+/*   statement can be accessed using fvex_field. */
+
+/* This is highly efficent when n increases by one on each call. */
+
+/*   integer n                 - the number of the station statement in this*/
+/*                               scan to return */
+/*  input: */
+/*   integer n                - station statement to return */
+
+/*  output: */
+/*   integer (return value)    - error code, zero indicates no error */
+/*                               -2 = no such station statment in this scan */
+{
+  int i;
+  static int save_n=0;
+  static Llist *save2_lowls=NULL;
+
+  save_type=T_STATION;
+  if(*n!=1 && *n==save_n+1 && save_lowls == save2_lowls)
+    save_ptr=get_station_scan_next();
+  else {
+    save_ptr=get_station_scan(save_lowls);
+    save2_lowls=save_lowls;
+    for (i=1;i<*n && save_ptr!=NULL;i++)
+      save_ptr=get_station_scan_next();
+  }
+
+  if(save_ptr==NULL)
+    return -2;
+  save_n=*n;
   return 0;
 }
 /* ----------------------------------------------------------------------- */

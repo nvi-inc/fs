@@ -21,7 +21,7 @@ C     IL - length of record read IN CHARACTERS, -1 means EOF
 C     KERR - error return from FMP
 C 
 C  LOCAL:
-      integer jchar ! function
+      integer i,jchar ! function
 C HISTORY:
 C  LAST MODIFIED: CREATED 800809
 C                 CLEAR BUFFER BEFORE EACH READ!  810705

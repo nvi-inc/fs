@@ -1,6 +1,6 @@
-      subroutine get_power(oddeve,nsamp,volts,minper,ip)
+      subroutine get_power(oddeve,nsamp,volts,minper,ip,indxtp)
       implicit none
-      integer oddeve,nsamp,ip(5)
+      integer oddeve,nsamp,ip(5),indxtp
       real*4 volts,minper
 C
 C GET_POWER: get read head detected power
@@ -22,7 +22,7 @@ C
       vmin=20.0
       call susp(1,50)
       do i=1,nsamp
-        call get_atod(ichan,volts,ip)
+        call get_atod(ichan,volts,ip,indxtp)
         if(ip(3).ne.0) return
 C
         vmax=max(vmax,volts)

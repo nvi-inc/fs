@@ -13,7 +13,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 #include "../include/k4tape_ds.h"
 
-static char device[]={"d4"};           /* device menemonics */
+static char device[]={"r1"};           /* device menemonics */
 
 static char *state_key[ ]={"reset"};
 static char *state1_key[ ]={"off","on"};

@@ -11,9 +11,9 @@
 
 #define MAX_OUT 256
 
-void tape_dis(command,itask,ip)
+void tape_dis(command,itask,ip,indx)
 struct cmd_ds *command;
-int itask;
+int itask,indx;
 long ip[5];
 {
       struct tape_cmd lclc;
@@ -37,14 +37,15 @@ long ip[5];
          return;
       }
       else if (kcom) {
-         memcpy(&lclc,&shm_addr->lowtp,sizeof(lclc));
+         memcpy(&lclc,&shm_addr->lowtp[indx],sizeof(lclc));
       }
       else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mcb6tape(&lclc, response.data);
          get_res(&response, &buffer); mc30tape(&lclm, response.data);
          get_res(&response, &buffer); mc33tape(&lclm, response.data);
-	 if(shm_addr->equip.drive_type != VLBA2)
+	 if(!(shm_addr->equip.drive[indx] == VLBA &&
+	      shm_addr->equip.drive_type[indx] == VLBA2))
 	   get_res(&response, &buffer); mc57tape(&lclm, response.data);
          get_res(&response, &buffer); mc72tape(&lclm, response.data);
          get_res(&response, &buffer); mc73tape(&lclm, response.data);
@@ -74,7 +75,7 @@ long ip[5];
         while( count>= 0) {
         if (count > 0) strcat(output,",");
           count++;
-          tape_mon(output,&count,&lclm);
+          tape_mon(output,&count,&lclm,indx);
         }
       }
       if(strlen(output)>0) output[strlen(output)-1]='\0';

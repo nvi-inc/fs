@@ -63,8 +63,12 @@ C  Handle formatter or tape
      .  call char2hol('fm',mdnam,1,2)
       goto 900 
 
-150   if ((cicr.eq.'tp').or.(cicr.eq.'tape'))
-     .  call char2hol('rc',mdnam,1,2)
+ 150  continue
+      if ((cicr.eq.'t1').or.(cicr.eq.'tape1')) then
+         call char2hol('r1',mdnam,1,2) 
+      else if ((cicr.eq.'t2').or.(cicr.eq.'tape2')) then
+         call char2hol('r2',mdnam,1,2)
+      endif
       goto 900 
 
 C  Handle IFD's 
@@ -232,8 +236,11 @@ C    !!! BCn
 C  Check for recorder
 
 190   continue
-      if ((cicr.eq.'rc').or.(cicr.eq.'rec'))
-     .  call char2hol('rc',mdnam,1,2)
+      if ((cicr.eq.'r1').or.(cicr.eq.'rec1')) then
+         call char2hol('r1',mdnam,1,2)
+      else if ((cicr.eq.'r2').or.(cicr.eq.'rec2')) then
+         call char2hol('r2',mdnam,1,2)
+      endif
       goto 900 
 
 C  Return to calling routine

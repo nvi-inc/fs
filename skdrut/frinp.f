@@ -25,7 +25,7 @@ C  LOCAL:
       integer*2 LNA(4)
       integer idum,ib,ic,iv,ii,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan)
-      integer*2 lc,lsg,lm(4),lid,lin,ls
+      integer*2 lc,lsg,lm(8),lid,lin,ls
       integer*2 lst(4,max_stn)
       real*8 bitden
       logical kvlba,kmk3
@@ -66,6 +66,8 @@ C 970115 nrv Add UNPFMT for recording format by station line.
 C 970117 nrv Add IF3O and IF3I to Mk3-4 allowed values.
 C 970206 nrv Change itra2 to itras and add headstack index
 C 971211 nrv Set sideband to "U" for all non-VEX (only done for .drg before).
+C 991122 nrv LMODE can be 16 characters to accommodate S2 modes.
+C            Store S2 mode into LMODE as well as LS2MODE.
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -135,15 +137,21 @@ C         All listed Mk3 frequencies are for USB recording.
 C         Any LSB to be recorded is specified in track assignments,
 C         i.e. for mode A and mode B&E.
           idum = ichmv_ch(lnetsb(icx,is,icode),1,'U') 
-          idum = ichmv(LMODE(1,is,ICODE),1,LM,1,8) ! recording mode
+C         Initialize lmode to blanks.
+          call ifill(lmode(1,is,icode),1,16,oblank)
+          idum = ichmv(LMODE(1,is,ICODE),1,LM,1,16) ! recording mode
 C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
 C         modify this when it gets user input on the formatter type.
 C         This is used by SPEED.
-          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,8) ! recording format
+          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,16) ! recording format
+C         Initialize S2 mode to blank. It's probably safe to put
+C         LMODE into LS2MODE.
+          call ifill(ls2mode(1,is,icode),1,16,oblank)
+          idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
-          ix = iscn_ch(lmode(1,is,icode),1,8,'1:') 
-C         iy = iscn_ch(lmode(1,is,icode),1,8,':1') 
+          ix = iscn_ch(lmode(1,is,icode),1,16,'1:') 
+C         iy = iscn_ch(lmode(1,is,icode),1,16,':1') 
           if (ix.ne.0) then ! possible fan-out
             n=ias2b(lmode(1,is,icode),ix+2,1)
             if (n.gt.0) ifan(is,icode)=n

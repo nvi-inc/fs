@@ -1,4 +1,4 @@
-      subroutine ena(ip)
+      subroutine ena(ip,itask)
 C  track enable control c#870115:04:39#
 C
 C 1.1.   ENA controls the track enable function
@@ -57,6 +57,12 @@ C
 C  1. If we have a class buffer, then we are to enable tracks.
 C     If no class buffer, we have been requested to read the enabled tracks.
 C
+      if( itask.eq.1) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       ichold = -99
       iclcm = ip(1)
       if (iclcm.eq.0) then
@@ -72,7 +78,7 @@ C                   If no parameters, go read device
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
         ip(4) = o'77'
-        call endis(ip,iclcm)
+        call endis(ip,iclcm,indxtp)
         return
       end if
 C
@@ -95,7 +101,7 @@ C  are enabled. The options for the command are: stack1 and/or stack2
 C  or null.
 C
       call fs_get_drive(drive)
-      if (MK4.eq.drive) then
+      if (MK4.eq.drive(indxtp)) then
         kena(1)=.false.
         kena(2)=.false.
         if (ich.lt.nchar) then
@@ -133,18 +139,22 @@ C
             endif
           endif
         endif
-        call fs_get_icheck(icheck(18),18)
-        ichold = icheck(18)
-        icheck(18)=0
-        call fs_set_icheck(icheck(18),18)
+        call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+        ichold = icheck(18+indxtp-1)
+        icheck(18+indxtp-1)=0
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
 C     Turn off checking while we set up the module
-        kenastk(1)=kena(1)
-        kenastk(2)=kena(2)
-        call fs_set_kenastk(kenastk)
-        call fs_get_ienatp(ienatp)
+        kenastk(1,indxtp)=kena(1)
+        kenastk(2,indxtp)=kena(2)
+        call fs_set_kenastk(kenastk,indxtp)
+        call fs_get_ienatp(ienatp,indxtp)
         ibuf(1)=0
-        call char2hol('tp',ibuf(2),1,2)
-        call en2ma4(ibuf(3),ienatp,kenastk)
+        if(indxtp.eq.1) then
+           call char2hol('t1',ibuf(2),1,2)
+        else
+           call char2hol('t2',ibuf(2),1,2)
+        endif
+        call en2ma4(ibuf(3),ienatp(indxtp),kenastk(1,indxtp))
         iclass=0
         call put_buf(iclass,ibuf,-13,'fs','  ')
         nrec = 1
@@ -207,23 +217,26 @@ C
 C*************WE ARE NOT TURNING ON THE GENERAL ENABLE BIT WITH THIS COMMAND
 C*************ONLY THE REQUESTED TRACKS ARE SET UP.
 C     IF (NTRK.GT.0) IENA = 1
-      call char2hol('tp',ibuf(2),1,2)
-C
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
 C
 C
 C  4.0  Now plant these values into COMMON.  Send to MATCN.
 C
-      call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18)
-      icheck(18)=0
-      call fs_set_icheck(icheck(18),18)
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1)
+      icheck(18+indxtp-1)=0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
 C                   Turn off checking while we set up the module
   
 C  CHECK FOR EVEN AND ODD TRACKS WITH EVEN OR ODD ELECTRONICS
  
       keven=.false.
       kodd=.false.
-      call fs_get_wrhd_fs(wrhd_fs)
+      call fs_get_wrhd_fs(wrhd_fs,indxtp)
       do i=1,28
         if (itrk(i).eq.1) then
           if (mod(i,2).eq.0) keven=.true.
@@ -232,31 +245,31 @@ C  CHECK FOR EVEN AND ODD TRACKS WITH EVEN OR ODD ELECTRONICS
       end do
 C
       do i=1,28
-        itrkenus_fs(i)=itrk(i)
+        itrkenus_fs(i,indxtp)=itrk(i)
         itrk(i)=0
       end do
-      if(wrhd_fs.lt.0.or.wrhd_fs.gt.2) then
+      if(wrhd_fs(indxtp).lt.0.or.wrhd_fs(indxtp).gt.2) then
         ierr = -207
         goto 990
       endif
       do i=1,28
-        if(itrkenus_fs(i).ne.0) then
+        if(itrkenus_fs(i,indxtp).ne.0) then
           ia=i
           if (kodd.and.keven) then  !we can't map in this case
              continue                    
-          else if (wrhd_fs.eq.2) then           !even
+          else if (wrhd_fs(indxtp).eq.2) then           !even
             if (mod(i,2).ne.0) ia=ia+1
-          else if (wrhd_fs.eq.1) then      !odd
+          else if (wrhd_fs(indxtp).eq.1) then      !odd
             if (mod(i,2).eq.0) ia=ia-1
           end if
           itrk(ia)=1
         endif
       end do
       do i = 1,28
-        itrken(i) = itrk(i)
+        itrken(i,indxtp) = itrk(i)
       end do
-      call fs_get_ienatp(ienatp)
-      call en2ma(ibuf(3),ienatp,itrken,ldummy)
+      call fs_get_ienatp(ienatp,indxtp)
+      call en2ma(ibuf(3),ienatp(indxtp),itrken(1,indxtp),ldummy)
       idumm1 = ichmv(ltrken,1,ibuf,6,8)
       ia = and(ia2hx(ltrken,1),7)
       idumm1 = ichmv(ltrken,1,ihx2a(ia),2,1)
@@ -271,7 +284,11 @@ C     5.  This is the read device section.
 C     Fill up one class buffers, requesting % data (mode -2).
 C 
 500   continue 
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       ibuf(1) = -2
       call put_buf(iclass,ibuf,-4,'fs','  ') 
@@ -284,7 +301,11 @@ C     6. This is the test/reset device section.
 C 
 600   continue 
       ibuf(1) = 6 
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ') 
       nrec = 1
@@ -295,7 +316,11 @@ C     7. This is the alarm query and reset request.
 C
 700   continue
       ibuf(1) = 7
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
@@ -308,15 +333,15 @@ C
       call run_matcn(iclass,nrec)
       call rmpar(ip)
       if(ichold.ne.-99) then
-        icheck(18) = ichold
-        call fs_set_icheck(icheck(18),18)
+        icheck(18+indxtp-1) = ichold
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       endif
       if (ichold.ge.0) then
-         icheck(18)=mod(ichold,1000)+1
-         call fs_set_icheck(icheck(18),18)
-         kentp_fs=.true.
+         icheck(18+indxtp-1)=mod(ichold,1000)+1
+         call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+         kentp_fs(indxtp)=.true.
       endif
-      call endis(ip,iclcm)
+      call endis(ip,iclcm,indxtp)
       return
 C
 990   continue 

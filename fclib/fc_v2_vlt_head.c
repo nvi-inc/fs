@@ -1,11 +1,12 @@
-void fc_v2_vlt_head__(ihead,volt,ip)
+void fc_v2_vlt_head__(ihead,volt,ip,indxtp)
 int *ihead;
 float *volt;
 long ip[5];
+int *indxtp;
 {
     void v2_vlt_head();
 
-    v2_vlt_head(*ihead,volt,ip);
+    v2_vlt_head(*ihead,volt,ip,*indxtp);
 
     return;
 }

@@ -1,6 +1,8 @@
       SUBROUTINE STAPE(LINSTQ,luscn,ludsp)
 C
 C     STAPE reads/writes station tape motion.
+c     This routine reads the TAPE_MOTION lines in the schedule
+C     and handles the MOTION command.
 C
       include '../skdrincl/skparm.ftni'
 C
@@ -38,25 +40,20 @@ C
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
         IF  (NSTATN.LE.0) THEN  !no stations selected
-          write(luscn,'("STAPE00 - Select stations first.")')
+          write(luscn,'("STAPE00 - Select stations first.")') 
           RETURN
         END IF  !no stations selected
         WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  TAPE_MOTION(gap) Tape length(feet)')
+9110    FORMAT(' ID  STATION  TAPE_MOTION (gap) ')
         DO  I=1,NSTATN
           il=trimlen(tape_motion_type(i))
           WRITE(LUDSP,9111) LpoCOD(I),(LSTNNA(J,I),J=1,4),
      .    tape_motion_type(i)(1:il)
 9111      FORMAT(1X,A2,2X,4A2,3X,a,$)
           if (tape_motion_type(i).eq.'ADAPTIVE') then
-            write(ludsp,'(3x,i5,$)') itgap(i)
+            write(ludsp,'(3x,i5)') itgap(i)
           else
-            write(ludsp,'(8x,$)')
-          endif
-          if (tape_motion_type(i).eq.'DYNAMIC') then
-            write(ludsp,'(3x,"auto-allocate")') 
-          else
-            write(ludsp,'(3x,i5)') maxtap(i)
+            write(ludsp,'()')
           endif
         END DO  
         RETURN

@@ -1,4 +1,4 @@
-      subroutine tp(ip)
+      subroutine tp(ip,itask)
 C  parse tape command
 C 
 C  TP controls the tape controller
@@ -53,6 +53,12 @@ C
 C     1. If we have a class buffer, then we are to set the TP.
 C     If no class buffer, we have been requested to read the TP.
 C 
+      if( itask.eq.1) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       ichold = -99
       iclcm = ip(1) 
       if (iclcm.eq.0) then
@@ -68,7 +74,7 @@ C                   If no parameters, go read device
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
         ip(4) = o'77'
-        call tpdis(ip,iclcm)
+        call tpdis(ip,iclcm,indxtp)
         return
       endif
 C 
@@ -88,7 +94,7 @@ C
       ic1 = ich 
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
       if (cjchar(iparm,1).eq.'*') then
-        ilow = ilowtp
+        ilow = ilowtp(indxtp)
       else if (cjchar(iparm,1).eq.',') then
         ilow = 1         ! default value is "on"
       else
@@ -105,7 +111,7 @@ C
       ic1 = ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr) 
       if (cjchar(iparm,1).eq.'*') then
-        irst = irsttp
+        irst = irsttp(indxtp)
       else if (cjchar(iparm,1).eq.',') then
         irst = 0         !  default value is leave alone
       else
@@ -119,12 +125,12 @@ C
 C 
 C     3. Now plant these values into COMMON.
 C 
-      call fs_get_icheck(icheck(18),18)
-      ichold = icheck(18)
-      icheck(18) = 0
-      call fs_set_icheck(icheck(18),18)
-      ilowtp = ilow 
-      irsttp = irst 
+      call fs_get_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ichold = icheck(18+indxtp-1)
+      icheck(18+indxtp-1) = 0
+      call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
+      ilowtp(indxtp) = ilow 
+      irsttp(indxtp) = irst 
 C 
 C 
 C     4. Set up buffer for tape drive.  Send to MATCN.
@@ -132,7 +138,11 @@ C     First message sets up low tape sensor and footage counter:
 C                   TP(l0f00000 
 C 
       ibuf(1) = 0 
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       call tp2ma(ibuf(3),ilow,irst) 
 C 
       iclass = 0
@@ -146,14 +156,19 @@ C     5.  This is the read device section.
 C     Fill up two class buffers,
 C     one  requesting ( (mode -3), one ! (mode -1). 
 C 
-500   call char2hol('tp',ibuf(2),1,2)
+500   continue
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       nrec = 0
       ibuf(1) = -3
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = nrec + 1
       call fs_get_drive(drive)
-      if (MK3.eq.drive) then
+      if (MK3.eq.drive(indxtp)) then
          ibuf(1) = -1
       else
          ibuf(1) = -5
@@ -167,7 +182,11 @@ C
 C     6. This is the test/reset device section. 
 C 
 600   ibuf(1) = 6 
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
@@ -177,7 +196,11 @@ C
 C     7. This is the alarm query and reset request. 
 C 
 700   ibuf(1) = 7 
-      call char2hol('tp',ibuf(2),1,2)
+      if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass=0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
@@ -189,14 +212,14 @@ C
 800   call run_matcn(iclass,nrec)
       call rmpar(ip)
       if (ichold.ne.-99) then
-        icheck(18) = ichold  
-        call fs_set_icheck(icheck(18),18)
+        icheck(18+indxtp-1) = ichold  
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       endif
       if (ichold.ge.0) then
-        icheck(18) = 1 
-        call fs_set_icheck(icheck(18),18)
+        icheck(18+indxtp-1) = 1 
+        call fs_set_icheck(icheck(18+indxtp-1),18+indxtp-1)
       endif
-      call tpdis(ip,iclcm)
+      call tpdis(ip,iclcm,indxtp)
       return
 C 
 C 

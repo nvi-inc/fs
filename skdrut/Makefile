@@ -19,7 +19,13 @@
 # 970406 nrv Move c2upper here from drudg                               #
 # 970722 nrv Add feetscan, durscan, gdscan                              #
 # 971211 nrv Add VUNPPCAL.                                              #
-# 980302 nrv Add LSKORDER.                                              #
+# 990217 nrv Add LSKORDER.                                              #
+# 990629 nrv Add SLATE and TTAPE.                                       #
+# 991108 nrv Add SKDRINI. Move ISECDIF from drudg to here.              #
+# 000620 nrv Add OBS_SORT, remove LSKORDER and SKORDER.                 #
+# 000620 nrv Add SNAME, M3MODE, ATAPE.                                  #
+# 000929 nrv Add TMADD, TMSUB                                           #
+# 001109 nrv Add IVGTST, replace VOB1INP with VOBINP                    #
 #                                                                       #
 #########################################################################
  
@@ -29,21 +35,23 @@ OBJECTS=\
 aposn.o axtyp.o backward.o cablw.o ckiau.o clear_array.o clndr.o\
 cvpos.o flinp.o forward.o frinp.o gnpas.o hdinp.o hol2lower.o\
 hol2upper.o iday0.o idate.o igtba.o igtfr.o igtso.o igtst.o igtst2.o\
-in2a2.o inc.o ind.o initf.o julda.o kbit.o kcont.o kearl.o knaeq.o\
+inc.o ind.o initf.o julda.o kbit.o kcont.o kearl.o knaeq.o\
 locf.o lower.o novas.o null_term.o pid_str.o posnt.o prefr.o \
 raded.o ras2b.o rdctl.o readf_asc.o reads.o reio.o sbit.o secnds.o\
-sidtm.o slewo.o slewt.o soinp.o speed.o stinp.o sunarc.o sunazel.o\
+sidtm.o slewo.o soinp.o speed.o stinp.o sunarc.o sunazel.o\
 sunpo.o trimlen.o tspin.o unpco.o unpfl.o unpfsk.o unpfcat.o unphd.o \
 unplo.o unpso.o unpva.o unpvh.o unpvp.o unpvt.o unpwc.o\
 unpwo.o upper.o writf_asc.o writf_asc_ch.o xat.o idchk.o\
-ydjul.o ymday.o printer.o unprat.o unpbar.o \
+ydjul.o ymday.o printer.o unprat.o unpbar.o unpfmt.o \
 vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o \
-vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
-vsoinp.o vglinp.o vob1inp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
-vread.o addscan.o findscan.o newscan.o pnum.o frinit.o vunps2g.o \
-vunps2m.o vunproll.o vunpprc.o unpfmt.o errormsg.o \
+vglinp.o vunpso.o vunpif.o vunpbbc.o vunptrk.o vunphp.o \
+vsoinp.o vob1inp.o vmoinp.o vstinp.o ivgtmo.o ivgtso.o \
+vread.o addscan.o findscan.o newscan.o pnum.o knewt.o c2upper.o \
+frinit.o vunps2m.o vunps2g.o vunproll.o vunpprc.o errormsg.o \
 fc_gwinsz.o fc_gwinw.o igtky.o selev.o stape.o searl.o i2long.o \
-feetscan.o durscan.o gdscan.o c2upper.o vunppcal.o lskorder.o
+feetscan.o durscan.o gdscan.o vunppcal.o ttape.o \
+slate.o skdrini.o isecdif.o m3mode.o sname.o atape.o obs_sort.o \
+tmadd.o tmsub.o ivgtst.o
 #
 FFLAGS=-C -c
 # f2c needs this others don't

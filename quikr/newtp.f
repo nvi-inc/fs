@@ -1,4 +1,4 @@
-      subroutine newtp(ip)
+      subroutine newtp(ip,itask)
 C  new tape command c#870115:04:41# 
 C 
 C     INPUT VARIABLES:
@@ -25,9 +25,10 @@ C        ICH    - character counter
       integer*2 lmsg(16)         !  message response
       dimension ireg(2) 
       integer get_buf
+      character*1 cjchar
       equivalence (ireg(1),reg) 
       data lmsg   /2h"t,2ho ,2hco,2hnt,2hin,2hue,2h, ,2hus,2he ,2hla, 
-     /             2hbe,2hl ,2hco,2hmm,2han,2hd"/ 
+     /             2hbe,2hl ,2h c,2hom,2hma,2hnd/ 
 cxx lmsg="to continue, use label command"
       data nmsg/32/ 
       data ilen/80/             !  length of ibuf
@@ -35,6 +36,12 @@ C
 C     1. First check out the input variables.  Then get the command 
 C     into a buffer and find the "=". 
 C 
+      if( itask.eq.2) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       iclcm = ip(1) 
       do i=1,3
         ip(i) = 0
@@ -46,24 +53,54 @@ C
       endif
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = min0(ireg(2),ilen)
-C 
+C
+c if we have drives a new tape was mounted don't halt
+c 
+      call fs_get_drive(drive)
+      if(drive(1).ne.0.and.drive(2).ne.0) then
+         call fs_get_knewtape(knewtape,indxtp)
+         if(knewtape(indxtp)) then
+            knewtape(indxtp)=.false.
+            call fs_set_knewtape(knewtape,indxtp)
+            return
+         endif
+      endif
+c
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.ne.0) then
-C                   There can be no parameters for this command 
-        ip(3) = -200
-        return
+C                   Ignore any parameters for this command.
+        nchar=ieq-1
+        do while (nchar.gt.1)
+           if(cjchar(ibuf,nchar).eq.' ') then
+              nchar=nchar-1
+           else
+              goto 100
+           endif
+        enddo
       endif
+ 100  continue
 C 
 C     2. Now form the response message buffer.
 C     ***NOTE WE ARE SETTING BOSS'S HALT VARIABLE OURSELVES!!***
 C 
       nch = ichmv_ch(ibuf,nchar+1,'/')
+      call fs_get_select(select)
+
+      if(drive(1).ne.0.and.drive(2).ne.0) then
+         if(select.eq.0) then
+            idum=ichmv_ch(lmsg,24,'1')
+         else if(select.eq.1) then
+            idum=ichmv_ch(lmsg,24,'2')
+         endif
+      else
+            idum=ichmv_ch(lmsg,24,' ')
+      endif
       nch = ichmv(ibuf,nch,lmsg,1,nmsg) - 1 
 C 
       khalt = .true.
       call fs_set_khalt(khalt)
-      call ifill_ch(ltpnum,1,8,'00') 
-      call ifill_ch(ltpchk,1,4,'00') 
+      call ifill_ch(ltpnum(1,indxtp),1,8,'00') 
+      call ifill_ch(ltpchk(1,indxtp),1,4,'00') 
 C                   Zero out the tape number and check label
 C 
 C     3. Now send the message back to BOSS. 
@@ -74,3 +111,4 @@ C
       ip(2) = 1 
       return
       end 
+

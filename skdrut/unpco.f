@@ -19,6 +19,7 @@ C 960408 nrv Check IC2 before doing the next ISCNC.
 C 960409 nrv Allow high-number passes for headstack 2
 C 970206 nrv Remove itr2 and add headstack index
 C 970206 nrv Change max_pass to max_subpass
+C 991122 nrv Change LMODE to allow 16 characters.
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -28,7 +29,7 @@ C     ILEN - length of the record in IBUF, in words
 C
 C  OUTPUT:
       integer ierr,ichan
-      integer*2 lcode,lsubgr,lmode(4)
+      integer*2 lcode,lsubgr,lmode(8)
       real freqpc,vcband
       double precision freqrf
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
@@ -37,7 +38,7 @@ C     LSUBGR - subgroup within the code, 1-char in upper byte
 C     FREQRF - observing frequency, MHz
 C     FREQPC - phase cal frequency, Hz
 C     Ichan - channel number for this frequency
-C     LMODE - observing mode, 1 char in upper byte
+C     LMODE - observing mode, max 16 characters
 C     VCBAND - final video bandwidth, MHz
       integer ITRK(4,max_subpass,max_headstack) ! tracks to be recorded
       character*3 cs ! switching
@@ -126,11 +127,11 @@ C     Observing mode
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8) THEN  !
+      IF  (NCH.GT.16) THEN  !
         IERR = -106
         RETURN
       END IF  !
-      call ifill(lmode,1,8,oblank)
+      call ifill(lmode,1,16,oblank)
       IDUMY = ICHMV(LMODE,1,ibuf,ic1,nch)
 C
 C

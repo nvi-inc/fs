@@ -168,7 +168,8 @@ parse:
       vformA6mc(&request.data,shm_addr->hwid,&lcl); add_req(&buffer,&request); 
 
       request.addr=0xA7; /* send micron position */
-      vformA7mc(&request.data, shm_addr->posnhd[0]);add_req(&buffer,&request); 
+      vformA7mc(&request.data, shm_addr->posnhd[shm_addr->select][0]);
+      add_req(&buffer,&request); 
 
       request.addr=0xAD;
       vformADmc(&request.data, &lcl); add_req(&buffer,&request); 

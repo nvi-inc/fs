@@ -65,6 +65,10 @@ C
       ierr = -1
       goto 990
 110   continue
+      if(decoder4.ne.3) then
+         ierr=-302
+         goto 990
+      endif
       call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = ireg(2)

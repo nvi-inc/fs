@@ -78,8 +78,7 @@ C
 C  LOCAL VARIABLES: 
 C 
       character*79 outbuf
-      integer answer, nchar, trimlen, ichmv
-      character cjchar
+      integer nchar, ichmv
       dimension iparm(1)
 C 
       equivalence (parm,iparm(1))
@@ -89,17 +88,7 @@ C     IPRM - The special character is stored in IPRM upon its return
 C            from GTPRM.
 C     ITLU - Variable that determines whether the output LU is a non-
 C            disc devices such as a line printer or terminal.
-C     JPARM - total number of parameters possible
 C
-C     N - the variable that indicates the parameters the min & max
-C         SCALE values apply to.
-C
-C  INITIALIZED VARIABLES:
-C
-      data jparm/5/
-      data n/1/ 
-C 
-C 
       go to (100,200,300,1700,500,1700,700,800,1700,1000,1100,1700,1700,
      .1400,1500,1600),ikey
 C 

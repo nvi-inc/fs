@@ -19,11 +19,6 @@ C
 C 
       equivalence (parm,iparm(1))
 C 
-C  INITIALIZED VARIABLES:
-C
-      data n/1/ 
-C 
-C 
 1600  if (iscn_ch(ibuf,1,nchar,'=').ne.0) goto 1610
         outbuf='size= '
         call ib2as(iwidth,answer,1,4)

@@ -11,7 +11,7 @@ C***NOTE*** IAS IS MODIFIED BY EXPANDING PARAMETERS
 C        IFC    - first character of command in IAS 
 C        IEC    - last character of command in IAS
 C****NOTE**** IEC IS MODIFIED IF IAS IS EXPANDED
-      dimension lnames(12,1)
+      dimension lnames(13,1)
       integer*4 lproc1(4,1),lproc2(4,1) 
 C               - lists of recognized functions and procedures
 C        NNAMES - number of entries in LNAMES array 

@@ -127,8 +127,13 @@ int k4ib_dec(struct cmd_ds *command,long int ip[5], int *ireq)
   ip[0]=ip[1]=0;
 
   if(imode==WR) {
-    ib_req2(ip,device,cmd);
-    *ireq=2;
+    if(iformat==BN) {
+      ib_req4(ip,device,cmd,strlen(cmd));
+      *ireq=4;
+    } else {
+      ib_req2(ip,device,cmd);
+      *ireq=2;
+    }
   } else if(imode==WRRD)
     if(iformat==BN) {
       ib_req8(ip,device,ilength,cmd);

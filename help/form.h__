@@ -1,0 +1,81 @@
+       form - formatter setup (Mark IV, VLBA4, K4MK4 racks)
+
+Syntax:     form=mode,rate,fan,barrel,synch
+
+Response:   form/mode,rate,fan,barrel,synch,rev,rack,error
+
+
+Settable Parameters:
+mode    The recording mode. Choices for the mode are m, a, b1,
+        b2, c1, c2, e1, e2, e3, e4, and dn, where n=1 to 28. No
+        default. Modes a, b, b1, b2, c1, c2, e1, e2, e3, e4, and
+        dn correspond to the traditional Mark III modes. For the
+        bx and cx modes, x corresponds to the sub-pass recorded
+        (odd Mark III tracks for b1 and c1, even Mark III tracks
+        for b2 and c2). For the dn modes, n corresponds to the
+        Mark III track number recorded. For the ex modes, x
+        corresponds to the Mark III group number recorded. Mode m
+        uses the sampler track assignments and formatter track
+        enables specified by the trackform and tracks commands.
+rate    Sample rate in Mbits/sec. Choices are 0.125, 0.25, 0.5,
+        1, 2, 4, 8, 16, and 32. Default 4. For Nyquist sampling
+        this selection must be twice the bandwidth set-up used in
+        the bbc commands
+fan     The fan-in or fan-out ratio. Choices are 1:4, 1:2, 2:1,
+        where on a per channel or track basis, the number before
+        the colon is the number of sampled channels and the
+        number after is the number of tracks. Default 1:1.
+barrel  Barrel-roll mode. Currently the only choice is off, which
+        is the default. 
+synch   Synch test tolerance. Choices are 0-16 ( multiples of
+        62.5 nanoseconds) or off (same as 0).  Default is 3.
+
+Monitor-only Parameters:
+rev     Formatter firmware revision number, displayed as an
+integer.
+rack    Rack ID, reported as a hex value. 
+error   Error status, okay or the hex value.
+
+Comments:
+The Mark IV formatter clock is set with the fmset program. If the
+formatter time is set or re-synched, the fmset program will
+automatically reset the FS time if the time model in time.ctl is
+offset or rate. If you change the time in some other way and the
+time model in time.ctl is offset or rate,  issue the command
+
+                      sy=run setcl offset &
+
+to reset the Field System time.
+
+Since the Mark IV recorder does not include group enables, some
+of the traditional Mark III mode names used in mode have numbers
+appended to them to distinguish which sub-pass, group, or track
+is being recorded.
+
+Some combinations of rate and fan cannot be accommodated by the
+formatter. No output that would require more than 16 MHz nominal
+data rate per track is supported. Specifically a rate of 32 and a
+fan of 1:1 is impossible. Some combinations of fan and rate
+cannot be accommodated by the recorder. Any combination of rate
+and fan that would imply a nominal data rate per track of 0.125
+MHz or less for is not supported.
+
+For the time being, in order to help facilitate debugging of the
+formatter in the field, the status of the settable parameter is
+logged when the formatter setup is changed. This information is
+logged in the form of the output of the low level MAT commands
+that return this information. Additionally, whenever the
+formatter times out or reports an unknown command error (error
+"7"), the command that resulted in the time-out or the unknown
+command error response is logged. These debugging features will
+be removed in a future version.
+
+Chekr does not currently support checking of the formatter.
+However, the setup of the formatter can be monitored by entering
+a form command. If any of the displayed values do not agree with
+the last value commanded, then the formatter is not in the last
+commanded state.
+
+The default value of 3 for the synch test is the most lenient
+value, 3*62.5=187.5 nanoseconds, that will catch a slip of 5 MHz.
+The formatter on power-on itself defaults to 8.

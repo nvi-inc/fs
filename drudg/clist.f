@@ -25,6 +25,7 @@ c 960201 nrv check for 'source' as well as 'SOURCE'
 C 970301 nrv Implement font size logic and calls to setprint.
 C 970304 nrv Add COPTION for defaults.
 C 970312 nrv Add call to READ_SNAP1 to read the first line.
+C 000614 nrv Write SCAN_NAME command on separate line too.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -165,13 +166,15 @@ C END OF FILE DETECTED
 C
 C WE HAVE A COMMAND IN THE BUFFER
 
-125   IF ((cbuf(1:6).NE.'SOURCE'.and.cbuf(1:6).ne.'source') 
+C125   IF ((cbuf(1:6).NE.'SOURCE'.and.cbuf(1:6).ne.'source') 
+C     ..and. (cbuf(1:6).NE.'SCAN_N'.and.cbuf(1:6).ne.'scan_n') 
+125   IF ((cbuf(1:6).NE.'SCAN_N'.and.cbuf(1:6).ne.'scan_n') 
      ..and. ((cbuf(1:1).eq.CHAR(34).and.il.lt.40) 
      ..or. (cbuf(1:1).ne.char(34))))goto 130
 C                             "
       IF (NREC.EQ.1.OR.NCHAR.LE.1) GOTO 126
 C
-C SOURCE COMMAND OR COMMENT IS IN THE BUFFER
+C SOURCE COMMAND OR COMMENT or SCAN_NAME IS IN THE BUFFER
 C FIRST WRITE OUT THE PREVIOUS LINE WITH OLD COMMANDS
 
       NCHAR = MIN0(NCHAR,128)

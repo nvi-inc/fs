@@ -14,18 +14,18 @@ C
 C
       integer*4 ip(5)                   !  rmpar values from boss
       integer idcbsk(1)                 !  dcss for schedule
-      dimension lnames(12,1)            !  list of command names
+      dimension lnames(13,1)            !  list of command names
       integer*4 itscb(13,1)             !  time-scheduling control block
       integer ibuf(50)                  !  input buffer containing command
       integer itime(9)                  !  time array returned from spars
       integer lseg(2)                   !  segment name (obsolete)
+      integer*4 icloprx
 C
 C
 C     1. First initialize values from RMPAR parameters.
 C     IP(1) = LU for terminal input and messages
 C     IP(2) = LU for logs and procedures (optional)
 C
-      call fs_get_iclopr(iclopr)
       call fs_get_iclbox(iclbox)
       lu = ip(1)
       if (lu.eq.0) lu = 6
@@ -64,25 +64,36 @@ C
             return
           endif
           idummy = ichmv(lseg,1,ibuf,14,4)
+          itp = ias2b(ibuf,16,1)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
           ieq1 = ia2hx(ibuf,26,1)*16+ia2hx(ibuf,27,1)
           ieq2 = ia2hx(ibuf,28,1)*16+ia2hx(ibuf,29,1)
+          ieq3 = ia2hx(ibuf,30,1)*16+ia2hx(ibuf,31,1)
           idummy = ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
-          lnames(8,iname) = lseg(2)
+          if(itp.ge.0.and.itp.le.3) then
+             lnames(8,iname) = itp
+          else
+             lnames(8,iname) = 0
+          endif
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.127) then
+          if (ieq1.ge.1 .and. ieq1.le.255) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.1 .and. ieq2.le.127) then
+          if (ieq2.ge.0 .and. ieq2.le.255) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
+          if (ieq3.ge.0 .and. ieq3.le.255) then
+            lnames(13,iname) = ieq3
+          else
+            lnames(13,iname) = 0
+         endif
         endif
         call readg(idcbsk,ierr,ibuf,ilen)
       enddo
@@ -106,26 +117,37 @@ C
             call logit7ci(0,0,0,1,-112,'bo',nnames)
             return
           endif
-          idummy = ichmv(lseg,1,ibuf,14,4)
+          idummy = ichmv(lseg,1,ibuf,14,2)
+          itp = ias2b(ibuf,16,1)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
           ieq1 = ia2hx(ibuf,26,1)*16+ia2hx(ibuf,27,1)
           ieq2 = ia2hx(ibuf,28,1)*16+ia2hx(ibuf,29,1)
+          ieq3 = ia2hx(ibuf,30,1)*16+ia2hx(ibuf,31,1)
           idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
-          lnames(8,iname) = lseg(2)
+          if(itp.ge.0.and.itp.le.3) then
+             lnames(8,iname) = itp
+          else
+             lnames(8,iname) = 0
+          endif
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.127) then
+          if (ieq1.ge.1 .and. ieq1.le.255) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.1 .and. ieq2.le.127) then
+          if (ieq2.ge.0 .and. ieq2.le.255) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
+          if (ieq3.ge.0 .and. ieq3.le.255) then
+            lnames(13,iname) = ieq3
+          else
+            lnames(13,iname) = 0
+         endif
         endif
         call readg(idcbsk,ierr,ibuf,ilen)
       enddo
@@ -205,7 +227,7 @@ c
         call logit7ci(0,0,0,1,-191,'bo',ierr)
         call logit7(0,0,0,1,ip(3),ip(4),ip(5))
         call fc_putln('rclcn initialization failed')
-        return
+        ierr=0
       else
         call fc_putln('rclcn initialized')
       endif
@@ -217,8 +239,11 @@ C
       call char2hol('::',ldum,1,2)
       call newlg(ibuf,ldum)
 c    
-      call put_buf_ch(iclopr,'"Boss Initialization Complete','  ','  ')
-      call put_buf_ch(iclopr,'initi','  ','  ')
+      icloprx=0
+      call put_buf_ch(icloprx,'"Boss Initialization Complete','  ','  ')
+      call put_buf_ch(icloprx,'initi','  ','  ')
+      iclopr=icloprx
+      call fs_set_iclopr(iclopr)
 C
       return
       end

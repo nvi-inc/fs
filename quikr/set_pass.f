@@ -1,6 +1,6 @@
-      subroutine set_pass(ihead,ipass,kauto,micpas,ip,tol)
+      subroutine set_pass(ihead,ipass,kauto,micpas,ip,tol,indxtp)
       implicit none
-      integer ihead,ipass(2),ip(5)
+      integer ihead,ipass(2),ip(5),indxtp
       real*4 micpas(2),tol
       logical kauto
 C
@@ -34,12 +34,12 @@ C
 C
       do i=1,2
         if((ihead.eq.i.or.ihead.eq.3).and.ipass(i).gt.0) then
-          call pas2mic(i,ipass(i),micpas(i),ip)
+          call pas2mic(i,ipass(i),micpas(i),ip,indxtp)
           if(ip(3).ne.0) return
         endif
       enddo
 C
-      call set_mic(ihead,ipass,kauto,micpas,ip,tol)
+      call set_mic(ihead,ipass,kauto,micpas,ip,tol,indxtp)
 C
       return
       end

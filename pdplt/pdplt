@@ -310,12 +310,12 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	    set xrmslabel "X-rms..:"
 	    set ymeanlabel "Y-mean.:"
 	    set yrmslabel "Y-rms..:"
-	    .mbar.graph.menu add radio -label "X-axis vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-axis   vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "X-axis vs X-offset" -variable currentPlot -value 2 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "X-axis vs Y-offset" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "Y-axis vs X-offset" -variable currentPlot -value 4 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "Y-axis vs Y-offset" -variable currentPlot -value 5 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-offset vs X-axis" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-offset vs Y-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	2 {
 	    set XPointLabel "X........:"
@@ -328,12 +328,12 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	    set xrmslabel "X-rms..:"
 	    set ymeanlabel "Y-mean.:"
 	    set yrmslabel "Y-rms..:"
-	    .mbar.graph.menu add radio -label "X-axis vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-axis   vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "X-axis vs X-offset" -variable currentPlot -value 2 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "X-axis vs Y-offset" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "Y-axis vs X-offset" -variable currentPlot -value 4 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "Y-axis vs Y-offset" -variable currentPlot -value 5 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-offset vs X-axis" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "Y-offset vs Y-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	3 {
 	    set XPointLabel "Hour ang.:"
@@ -346,12 +346,12 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	    set xrmslabel "HA-rms.:"
 	    set ymeanlabel "DC-mean:"
 	    set yrmslabel "DC-rms.:"
-	    .mbar.graph.menu add radio -label "HA-axis vs DC-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "HA-axis   vs DC-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "HA-axis vs HA-offset" -variable currentPlot -value 2 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "HA-axis vs DC-offset" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "DC-axis vs HA-offset" -variable currentPlot -value 4 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "DC-axis vs DC-offset" -variable currentPlot -value 5 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "HA-offset vs HA-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "DC-offset vs HA-axis" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "HA-offset vs DC-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "DC-offset vs DC-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	4 {
 	    set XPointLabel "Azimuth..:"
@@ -364,12 +364,12 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	    set xrmslabel "AZ-rms.:"
 	    set ymeanlabel "EL-mean:"
 	    set yrmslabel "EL-rms.:"
-	    .mbar.graph.menu add radio -label "AZ-axis vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "AZ-axis   vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "AZ-axis vs AZ-offset" -variable currentPlot -value 2 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "AZ-axis vs EL-offset" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "EL-axis vs AZ-offset" -variable currentPlot -value 4 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "EL-axis vs AZ-offset" -variable currentPlot -value 5 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "AZ-offset vs AZ-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "EL-offset vs AZ-axis" -variable currentPlot -value 3 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "AZ-offset vs EL-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    .mbar.graph.menu add radio -label "EL-offset vs EL-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	5 {
 	    set XPointLabel "???:"
@@ -1185,17 +1185,20 @@ proc openfile_OK {} {
 # ------------------------------------------------------
 
 proc openfile_clearscreen {} {
-    global openfile_filename openfile_statusMsg openfiletext_nofile_specified
+    global openfile_filename openfile_statusMsg openfiletext_nofile_specified tk_version
     set openfile_statusMsg $openfiletext_nofile_specified
     set openfile_filename ""
+
+   if { $tk_version < 4.2 } { 
     focus .openfile.entryFilename
+   }
 }
 
 # Procedure to find antenna name when user enters filename
 # --------------------------------------------------------
 
 proc openfile_checkfile {filename} {
-    global openfile_filename openfile_statusMsg openfiletext_nofile openfiletext_noantenna openfiletext_antenna global_antennaname current_DefaultDir
+    global openfile_filename openfile_statusMsg openfiletext_nofile openfiletext_noantenna openfiletext_antenna global_antennaname current_DefaultDir tk_version
     set tempfile ""
     set globalsign [string index $filename 0]
     set globalcheck [string compare "/" $globalsign]
@@ -1211,7 +1214,11 @@ proc openfile_checkfile {filename} {
 	    } else {
 		set openfile_filename ""
 		set openfile_statusMsg $openfiletext_nofile
+
+               if { $tk_version < 4.2 } { 
 		focus .openfile.entryFilename
+               }
+
 		return 0
 	    }
 	}
@@ -1226,7 +1233,10 @@ proc openfile_checkfile {filename} {
 	    } else {
 		set openfile_filename ""
 		set openfile_statusMsg $openfiletext_nofile
+
+              if { $tk_version < 4.2 } {  
 		focus .openfile.entryFilename
+              }
 		return 0
 	    }
 	}
@@ -1237,7 +1247,11 @@ proc openfile_checkfile {filename} {
 	if {$correct < 0} {
 	    set openfile_filename ""
 	    set openfile_statusMsg $openfiletext_noantenna
+
+          if { $tk_version < 4.2 } { 
 	    focus .openfile.entryFilename
+          }
+
 	    return 0
 	} else {
 	    gets $fileID readline
@@ -1408,6 +1422,49 @@ proc sigma_OK {} {
     destroy .threesigma
 }
 
+
+# ==========================================================================
+#
+#                         FILESELECTION SECTION
+#
+# ==========================================================================
+proc fileselection_dialog {} {
+ 
+ global global_startmode current_DefaultDir newfile_filename 
+
+ set types {
+  {{Log Files} {*.log} }
+  {{All Files} {*} }
+ }
+
+ set newfile_filename [tk_getOpenFile -title "Open new FS log file" -filetypes $types -initialdir $current_DefaultDir]
+ 
+ if {$newfile_filename != ""} {
+  newfile_OK
+ }
+
+}
+
+
+proc open_fileselection_dialog {} {
+  
+ global openfile_filename current_DefaultDir openfile_statusMsg openfiletext_nofile_specified
+
+ set types {
+  {{xtr Files} {xtr*} }
+  {{All Files} {*} }
+ }
+
+ set openfile_filename [tk_getOpenFile -title "Open new FS log file" -filetypes $types -initialdir $current_DefaultDir]
+ 
+ if {$openfile_filename != ""} {
+  openfile_OK
+ }
+
+}
+
+
+
 # ==========================================================================
 #
 #                           TK WIDGETS SECTION
@@ -1455,8 +1512,15 @@ menu .mbar.error.menu
 menu .mbar.source.menu
 menu .mbar.stat.menu
 
-.mbar.file.menu add command -label "New" -command newFile
+ 
+.mbar.file.menu add command -label "New" -command fileselection_dialog
+
+if { $tk_version < 4.2 } {
 .mbar.file.menu add command -label "Open" -command openFile
+} else {
+.mbar.file.menu add command -label "Open" -command open_fileselection_dialog
+}
+
 .mbar.file.menu add command -label "Save" -command saveFile
 .mbar.file.menu add command -label "I/O setup" -command changePrefs
 .mbar.file.menu add separator

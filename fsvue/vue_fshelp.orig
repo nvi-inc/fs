@@ -1,0 +1,639 @@
+#!/usr/bin/wish -f
+# vue_fshelp source
+# Basic font for button, menus and labels for FS Help
+# Modified by Raymond Gonzalez 2000
+# to be incorporated into the VLBI Field System.
+  # Window manager configurations
+  set icondir /usr2/fs/fsvue
+  set bfont {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
+  set bfont2 {-*-lucida-bold-r-*-sans-16-*-*-*-*-*-*-*}
+
+  global tkVersion
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900
+  wm iconposition . 1200 0
+  wm iconbitmap . @$icondir/vlb.icon
+  wm iconname . {fsvue}
+  wm geometry . +5+25
+  wm title . {Help Files}
+  set w .
+  $w config -cursor {top_left_arrow black white}
+
+# Top frame is a menubar
+# there is more magic that you can do with this
+# build widget .m
+frame .m \
+	-bg {linen} \
+	-borderwidth {4} \
+	-relief {groove} 
+
+menubutton .m.fsmk3 -text "MKIII" -relief {raise} -font $bfont -menu .m.fsmk3.menu -background navy -fg white
+
+menubutton .m.fsmkiv -text "MKIV" -relief {raise} -font $bfont -menu .m.fsmkiv.menu -background navy -fg white
+
+menubutton .m.fss2 -text "S2" -relief {raise} -font $bfont -menu .m.fss2.menu -background navy -fg white
+
+menubutton .m.nons2 -text "NON-S2" -relief {raise} -font $bfont -menu .m.nons2.menu -background navy -fg white
+
+menubutton .m.vlba -text "VLBA" -relief {raise} -font $bfont -menu .m.vlba.menu -background navy -fg white
+
+menubutton .m.fsall -text "HELP a - o" -relief {raise} -font $bfont -menu .m.fsall.menu -background navy -fg white
+
+menubutton .m.fsall2 -text "HELP p - z" -relief {raise} -font $bfont -menu .m.fsall2.menu -background navy -fg white
+
+button .m.q -text Exit -relief {raise} -font $bfont -background red -fg black -command exit 
+
+# Main command entry area is under that
+entry .m.ent -relief {sunken} -bg linen -fg black
+pack .m.fsmk3 .m.fsmkiv .m.fss2 .m.nons2 .m.vlba .m.fsall .m.fsall2 .m.q -side left -fill both -expand 1
+
+pack .m -side top -fill x -expand 1
+
+# Build a text frame to display the log file.
+
+#bind .m.ent <Return> {Tools}
+# Put the focus into the box
+
+#focus .m.ent
+
+menu .m.fsmkiv.menu  -background linen
+.m.fsmkiv.menu add command -label enable \
+-font $bfont -command {loadFile enable._4}
+.m.fsmkiv.menu add command -label formatter \
+-font $bfont -command {loadFile form4.__}
+.m.fsmkiv.menu add command -label repro \
+-font $bfont -command {loadFile repro._4}
+.m.fsmkiv.menu add command -label decode \
+-font $bfont -command {loadFile decode4.__}
+.m.fsmkiv.menu add command -label MK4/VLBA_trackform \
+-font $bfont -command {loadFile trackform.g_}
+.m.fsmkiv.menu add command -label MK4/VLBA_tracks \
+-font $bfont -command {loadFile tracks.g_}
+.m.fsmkiv.menu add command -label MK4/VLBA4_form.l_ \
+-font $bfont -command {loadFile form4.__}
+
+menu .m.fss2.menu  -background linen
+.m.fss2.menu add command -label label \
+-font $bfont -command {loadFile label._s}
+.m.fss2.menu add command -label rec \
+-font $bfont -command {loadFile rec._s}
+.m.fss2.menu add command -label rec_mode \
+-font $bfont -command {loadFile rec_mode._s}
+.m.fss2.menu add command -label tape \
+-font $bfont -command {loadFile tape.ZZ}
+.m.fss2.menu add command -label user_info \
+-font $bfont -command {loadFile user_info._s}
+
+menu .m.fsmk3.menu  -background linen
+.m.fsmk3.menu add command -label enable \
+-font $bfont -command {loadFile enable._m}
+.m.fsmk3.menu add command -label formatter \
+-font $bfont -command {loadFile form.m_}
+.m.fsmk3.menu add command -label if3 \
+-font $bfont -command {loadFile if3.m_}
+.m.fsmk3.menu add command -label ifd \
+-font $bfont -command {loadFile ifd.m_}
+.m.fsmk3.menu add command -label patch \
+-font $bfont -command {loadFile patch.m_}
+.m.fsmk3.menu add command -label pcal \
+-font $bfont -command {loadFile pcal.m_}
+.m.fsmk3.menu add command -label recorder \
+-font $bfont -command {loadFile rec._m}
+.m.fsmk3.menu add command -label repro \
+-font $bfont -command {loadFile repro._m}
+.m.fsmk3.menu add command -label tape \
+-font $bfont -command {loadFile tape._m}
+.m.fsmk3.menu add command -label tapepos \
+-font $bfont -command {loadFile tapepos._m}
+.m.fsmk3.menu add command -label vcnn \
+-font $bfont -command {loadFile vcnn.m_}
+.m.fsmk3.menu add command -label MKIII/VLBA4_dcode \
+-font $bfont -command {loadFile decode.k_}
+.m.fsmk3.menu add command -label MKIII/VLBA4_perr \
+-font $bfont -command {loadFile perr.k_}
+
+menu .m.vlba.menu  -background linen
+.m.vlba.menu add command -label bbcnn \
+-font $bfont -command {loadFile bbcnn.w_}
+.m.vlba.menu add command -label bit_density \
+-font $bfont -command {loadFile bit_density._w}
+.m.vlba.menu add command -label enable \
+-font $bfont -command {loadFile enable._w}
+.m.vlba.menu add command -label formatter \
+-font $bfont -command {loadFile form.v_}
+.m.vlba.menu add command -label ifdab \
+-font $bfont -command {loadFile ifdab.w_}
+.m.vlba.menu add command -label ifdcd \
+-font $bfont -command {loadFile ifdcd.w_}
+.m.vlba.menu add command -label recorder \
+-font $bfont -command {loadFile rec._w}
+.m.vlba.menu add command -label repro \
+-font $bfont -command {loadFile repro._w}
+.m.vlba.menu add command -label systracks \
+-font $bfont -command {loadFile systracks._w}
+.m.vlba.menu add command -label tape \
+-font $bfont -command {loadFile tape._w}
+.m.vlba.menu add command -label wvolt \
+-font $bfont -command {loadFile wvolt._w}
+
+menu .m.nons2.menu  -background linen
+.m.nons2.menu add command -label hdata \
+-font $bfont -command {loadFile hdata._l}
+.m.nons2.menu add command -label hdcalc \
+-font $bfont -command {loadFile hdcalc._l}
+.m.nons2.menu add command -label hecho \
+-font $bfont -command {loadFile hecho._l}
+.m.nons2.menu add command -label label \
+-font $bfont -command {loadFile label._l}
+.m.nons2.menu add command -label locate \
+-font $bfont -command {loadFile locate._l}
+.m.nons2.menu add command -label lvdt \
+-font $bfont -command {loadFile lvdt._l}
+.m.nons2.menu add command -label parity \
+-font $bfont -command {loadFile parity._l}
+.m.nons2.menu add command -label pass \
+-font $bfont -command {loadFile pass._l}
+.m.nons2.menu add command -label peak \
+-font $bfont -command {loadFile peak._l}
+.m.nons2.menu add command -label savev \
+-font $bfont -command {loadFile savev._l}
+.m.nons2.menu add command -label sff \
+-font $bfont -command {loadFile sff._l}
+.m.nons2.menu add command -label srw \
+-font $bfont -command {loadFile srw._l}
+.m.nons2.menu add command -label stack \
+-font $bfont -command {loadFile stack._l}
+.m.nons2.menu add command -label tapeform \
+-font $bfont -command {loadFile tapeform._l}
+.m.nons2.menu add command -label worm \
+-font $bfont -command {loadFile worm._l}
+
+#form.l_ 
+
+menu .m.fsall.menu  -background linen
+.m.fsall.menu add command -label antenna \
+-font $bfont -command {loadFile antenna.__}
+.m.fsall.menu add command -label azeloff \
+-font $bfont -command {loadFile azeloff.__}
+.m.fsall.menu add command -label beam \
+-font $bfont -command {loadFile beam.__}
+.m.fsall.menu add command -label break \
+-font $bfont -command {loadFile break.__}
+.m.fsall.menu add command -label cable \
+-font $bfont -command {loadFile cable.__}
+.m.fsall.menu add command -label cal \
+-font $bfont -command {loadFile cal.__}
+.m.fsall.menu add command -label caltemp \
+-font $bfont -command {loadFile caltemp.__}
+.m.fsall.menu add command -label check \
+-font $bfont -command {loadFile check.__}
+.m.fsall.menu add command -label cont \
+-font $bfont -command {loadFile cont.__}
+.m.fsall.menu add command -label data_valid \
+-font $bfont -command {loadFile data_valid.__}
+.m.fsall.menu add command -label echo \
+-font $bfont -command {loadFile echo.__}
+.m.fsall.menu add command -label et \
+-font $bfont -command {loadFile et._a}
+.m.fsall.menu add command -label ff \
+-font $bfont -command {loadFile ff._a}
+.m.fsall.menu add command -label fivept \
+-font $bfont -command {loadFile fivept.__}
+.m.fsall.menu add command -label flush \
+-font $bfont -command {loadFile flush.__}
+.m.fsall.menu add command -label flux \
+-font $bfont -command {loadFile flux.__}
+.m.fsall.menu add command -label halt \
+-font $bfont -command {loadFile halt.__}
+.m.fsall.menu add command -label help \
+-font $bfont -command {loadFile help.__}
+.m.fsall.menu add command -label hpib \
+-font $bfont -command {loadFile hpib.__}
+
+.m.fsall.menu add command -label list \
+-font $bfont -command {loadFile list.__}
+.m.fsall.menu add command -label lo \
+-font $bfont -command {loadFile log.__}
+.m.fsall.menu add command -label logout \
+-font $bfont -command {loadFile logout.__}
+.m.fsall.menu add command -label mat \
+-font $bfont -command {loadFile mat.__}
+.m.fsall.menu add command -label newtape \
+-font $bfont -command {loadFile newtape._a}
+.m.fsall.menu add command -label onoff \
+-font $bfont -command {loadFile onoff.__}
+.m.fsall.menu add command -label onsource \
+-font $bfont -command {loadFile onsource.__}
+.m.fsall.menu add command -label op \
+-font $bfont -command {loadFile op.__}
+.m.fsall.menu add command -label op_stream \
+-font $bfont -command {loadFile op_stream.__}
+
+menu .m.fsall2.menu -background linen
+.m.fsall2.menu add command -label pcald \
+-font $bfont -command {loadFile pcald.e_}
+.m.fsall2.menu add command -label pcalform \
+-font $bfont -command {loadFile pcalform.__}
+.m.fsall2.menu add command -label proc \
+-font $bfont -command {loadFile proc.__}
+.m.fsall2.menu add command -label radecoff \
+-font $bfont -command {loadFile radecoff.__}
+.m.fsall2.menu add command -label rcl \
+-font $bfont -command {loadFile rcl.__}
+.m.fsall2.menu add command -label reset \
+-font $bfont -command {loadFile reset.__}
+.m.fsall2.menu add command -label rw \
+-font $bfont -command {loadFile rw._a}
+.m.fsall2.menu add command -label rx \
+-font $bfont -command {loadFile rx.__}
+.m.fsall2.menu add command -label schedule \
+-font $bfont -command {loadFile schedule.__}
+.m.fsall2.menu add command -label source \
+-font $bfont -command {loadFile source.__}
+.m.fsall2.menu add command -label st \
+-font $bfont -command {loadFile st._a}
+.m.fsall2.menu add command -label status \
+-font $bfont -command {loadFile status.__}
+.m.fsall2.menu add command -label sy \
+-font $bfont -command {loadFile sy.__}
+.m.fsall2.menu add command -label terminate \
+-font $bfont -command {loadFile terminate.__}
+.m.fsall2.menu add command -label ti \
+-font $bfont -command {loadFile ti.__}
+.m.fsall2.menu add command -label tpi \
+-font $bfont -command {loadFile tpi.__}
+.m.fsall2.menu add command -label tpical \
+-font $bfont -command {loadFile tpical.__}
+.m.fsall2.menu add command -label tpzero \
+-font $bfont -command {loadFile tpzero.__}
+.m.fsall2.menu add command -label track \
+-font $bfont -command {loadFile track.__}
+.m.fsall2.menu add command -label tsys \
+-font $bfont -command {loadFile tsys.__}
+.m.fsall2.menu add command -label wakeup \
+-font $bfont -command {loadFile wakeup.__}
+.m.fsall2.menu add command -label wx \
+-font $bfont -command {loadFile wx.__}
+.m.fsall2.menu add command -label xdisp \
+-font $bfont -command {loadFile xdisp.__}
+.m.fsall2.menu add command -label xlog \
+-font $bfont -command {loadFile xlog.__}
+.m.fsall2.menu add command -label xyoff \
+-font $bfont -command {loadFile xyoff.__}
+
+text   .t -yscrollc {.sb set} -font $bfont2 -bg linen
+scrollbar .sb -bg linen -command {.t yview}
+
+pack .sb -side right -fill y
+#pack .q -side bottom
+pack .t -side left -fill both -expand 1
+
+# Update display area with line of text
+proc line {text} {
+    .t insert end $text\n; 
+    .t see end; 
+    .t yview end
+#update idletask
+}
+
+# Monitor fd (inpipe) and feed into display area
+proc logOutput {inpipe cmd} {
+  if {[eof $inpipe]} {
+    close $inpipe
+    line "end of <$cmd>."
+  } else {
+    line [gets $inpipe]
+  }
+}
+
+# Setup fd monitoring 
+proc execAndLog {cmd} {
+  line "Start of <$cmd>."
+  set inpipe [open "|/bin/sh -c \"$cmd &1; :\""]
+  fileevent $inpipe readable [list logOutput $inpipe $cmd]
+}
+
+# -- mainline  this was to test the loop ---
+# it can go away when display is finished.
+#execAndLog {ls -C /tmp}
+
+# setup a display monitor on a growing file
+#execAndLog { tail -f -n 24 /usr2/log/station.log} 
+
+#text: read a FS log file into a text widget
+proc loadFile file {
+    global bfont2
+
+    .t delete 1.0 end
+    set f [open /usr2/fs/help/$file r]
+    while { ![eof $f] } {
+	.t insert end [read $f 1000]
+    }
+    close $f
+}
+# Routine to load the Command Menu dynamically from the cmd array
+# each menu entry will call the procedure ExFromMenu with an
+# argument of the command name
+proc LoadCmdMenu {} {
+        global cmd bfont
+
+        foreach name [lsort [array names cmd]] {
+                set c "ExFromMenu $name"
+                .m.cmd.menu add command -label $name -font $bfont -command $c
+        }
+}
+# Load the command menu at startup time
+#LoadCmdMenu
+
+# That's all the top level windows
+# Now we have a bunch of actions to do things
+
+# The execute routine. Called when Return is typed in the
+# main entry window and also from the Command Menu
+proc Execute {} {
+        global cmd
+        
+        set str [.m.ent get]
+        set str "[MinMatch $str]"
+        if { $str == "" } {
+                return
+        }
+        set val $cmd($str)
+        if { $val == "" } {
+                return
+        }
+        
+        switch $val {
+        quit    {       exit    }
+        default {
+                       .m.ent delete 0 end
+                        eval exec $val &
+                }
+        }
+}
+
+#
+# Minimum length matching code
+proc MinMatch { str } {
+        global cmd
+        
+        set found ""
+        foreach name [lsort [array names cmd]] {
+                if { [string match $str* $name] } {
+                        if { $found != "" } {
+                                return ""
+                        } else {
+                                set found $name
+                        }
+                }
+        }
+        return $found
+}
+
+#
+# Called from the Command menu to execute a command
+proc ExFromMenu {name} {
+
+        .m.ent delete 0 end
+        .m.ent insert end $name
+        Execute
+}
+#
+# Load the cmd array from a file
+# currently this is called xalcmds in the current directory
+# You should change this
+proc LoadFile {} {
+        global cmd xalfile
+
+        if { [file exists $xalfile] } {
+                set f [open $xalfile r]
+                while { [gets $f line] >= 0 } {
+                        set line [split $line ":"]
+                        set new [lindex $line 0]
+                        set cmd($new) [join [lrange $line 1 end] ":"]
+                }
+                close $f
+        }
+        .m.cmd.menu delete 2 last
+        LoadCmdMenu
+
+}
+#       Executed as we start working
+
+#LoadFile
+
+#
+# The converse - save a file
+proc SaveFile {} {
+        global cmd xalfile
+
+        set f [open $xalfile w]
+        foreach name [lsort [array names cmd]] {
+                puts $f "$name:$cmd($name)"
+        }
+        close $f
+}
+
+# Called from the Add entry in the command menu
+# creates a pop-up window
+proc AddCmd {} {
+        global cmd bfont
+
+        # on error kill this
+        catch {destroy .pop}
+        # make a toplevel item
+        toplevel .pop -bg linen
+
+        # add a title for the Window Manager to use
+        wm title .pop "Add Command"
+        
+        # the outer frame
+        frame .pop.f -bd 2
+        pack .pop.f -side top -fill both
+
+        # The frame is a title, and entry box, another title and another
+        # entry box
+        label .pop.f.lab1 -text "Command Name" -font $bfont
+        entry .pop.f.e1 -relief sunken
+        label .pop.f.lab2 -text "Command" -font $bfont
+        entry .pop.f.e2 -relief sunken
+        pack .pop.f.lab1 .pop.f.e1 .pop.f.lab2 .pop.f.e2 -side top
+        # The bottom of the frame has two buttons, one to get rid of this
+        # diaglogue box, one to load the cmd vector
+        frame .pop.f.m -bd 2 -bg linen
+        pack .pop.f.m -fill x -expand yes -side top
+
+        button .pop.f.m.d -text "Dismiss" -font $bfont -command PopDown
+        button .pop.f.m.l -text "Load" -font $bfont -command LoadIt
+        pack .pop.f.m.d .pop.f.m.l -side left -expand yes -fill x
+
+        # we set the focus to the top box, when we type return in that
+        # the cursor goes to the second nox
+        bind .pop.f.e1 <Return> {focus .pop.f.e2}
+        # a return here means load the command array
+        bind .pop.f.e2 <Return> {LoadIt}
+
+        # now get the geometry right.
+        # this is somewhat magic, but the idea is to remove it from
+        # the screen, work out where to place it and then make it
+        # visible again
+        wm withdraw .pop
+        update idletasks
+        set xy [split [wm geom .] "+x"]
+        set x [lindex $xy 2]
+        set y [lindex $xy 3]
+        set x [expr $x + 10 ]
+        set y [expr $y + 10 ]
+        wm geom .pop "+$x+$y"
+        wm deiconify .pop
+
+        # save the old focus
+        set oldFocus [focus]
+        # stop the main window taking events, nothing can happen there until
+        # we leave from this window
+        grab .pop
+        # set the focus
+        focus .pop.f.e1
+        # wait until this top level window dies
+        tkwait window .pop
+        # when that happens reset the focus     
+        focus $oldFocus
+        # load the Command menu and resume
+        LoadCmdMenu
+}
+
+#
+# Called from the Dismiss button, just kill the popup
+proc PopDown {} {
+        destroy .pop
+}
+
+# Load the cmd vector from the contents of the two entry boxes
+# and kill the popup
+proc LoadIt {} {
+        global cmd
+
+        set c [.pop.f.e1 get]
+        set v [.pop.f.e2 get]
+        if { $c != "" && $v != "" } {
+                set cmd($c) $v
+        }
+        PopDown
+}
+#
+# This is a standard bit of code, modified to use my font
+# dialog.tcl --
+#
+# This file defines the procedure tk_dialog, which creates a dialog
+# box containing a bitmap, a message, and one or more buttons.
+#
+# $Header: /user6/ouster/wish/library/RCS/dialog.tcl,v 1.4 93/08/16 16:59:52 ouster Exp $ SPRITE (Berkeley)
+#
+# Copyright (c) 1992-1993 The Regents of the University of California.
+# All.vpeople.rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above cop.vpeople.right notice and the following two paragraphs appear in
+# all copies of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+# OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+# CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+# ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+
+#
+# tk_dialog:
+#
+# This procedure displays a dialog box, waits for a button in the dialog
+# to be invoked, then returns the index of the selected button.
+#
+# Arguments:
+# w -           Window to use for dialog top-level.
+# title -       Title to display in dialog's decorative frame.
+# text -        Message to display in dialog.
+# bitmap -      Bitmap to display in dialog (empty string means none).
+# default -     Index of button that is to display the default ring
+#               (-1 means none).
+# args -        One or more strings to display in buttons across the
+#               bottom of the dialog box.
+
+proc tk_dialog {w title text bitmap default args} {
+    global tk_priv bfont
+
+    # 1. Create the top-level window and divide it into top
+    # and bottom parts.
+
+    catch {destroy $w}
+    toplevel $w -class Dialog
+    wm title $w $title
+    wm iconname $w Dialog
+    frame $w.top -relief raised -bd 1 -bg linen
+    pack $w.top -side top -fill both
+    frame $w.bot -relief raised -bd 1 -bg linen
+    pack $w.bot -side bottom -fill both
+
+    # 2. Fill the top part with bitmap and message.
+
+    message $w.msg -width 5i -text $text -font $bfont
+    pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
+    if {$bitmap != ""} {
+        label $w.bitmap -bitmap $bitmap
+        pack $w.bitmap -in $w.top -side left -padx 5m -pady 5m
+    }
+
+    # 3. Create a row of buttons at the bottom of the dialog.
+
+    set i 0
+    foreach but $args {
+        button $w.button$i -text $but -command "set tk_priv(button) $i"
+        if {$i == $default} {
+            frame $w.default -relief sunken -bd 1 -bg linen
+            raise $w.button$i $w.default
+            pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
+            pack $w.button$i -in $w.default -padx 2m -pady 2m \
+                    -ipadx 2m -ipady 1m
+            bind $w <Return> "$w.button$i flash; set tk_priv(button) $i"
+        } else {
+            pack $w.button$i -in $w.bot -side left -expand 1 \
+                    -padx 3m -pady 3m -ipadx 2m -ipady 1m
+        }
+        incr i
+    }
+
+    # 4. Withdraw the window, then update all the geometry information
+    # so we know how big it wants to be, then center the window in the
+    # display and de-iconify it.
+
+    wm withdraw $w
+    update idletasks
+    set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
+            - [winfo vrootx [winfo parent $w]]]
+    set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
+            - [winfo vrooty [winfo parent $w]]]
+    wm geom $w +$x+$y
+    wm deiconify $w
+
+    # 5. Set a grab and claim the focus too.
+
+    set oldFocus [focus]
+    grab $w
+    focus $w
+
+    # 6. Wait for the user to respond, then restore the focus and
+    # return the index of the selected button.
+
+    tkwait variable tk_priv(button)
+    destroy $w
+    focus $oldFocus
+    return $tk_priv(button)
+}

@@ -278,16 +278,31 @@ int action, save;
 {
 
   if (class <1 || class > MAX_CLS) {
+    /*
+    int i;
+    for(i=0;i<MAX_CLS;i++)
+      fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
+      */
     fprintf( stderr,"cls_chk: illegal class number %d pid %d\n",class,getpid());
      exit( -1);
   }
 
   if (shm_addr->nums[ class-1] == 0) {
-     fprintf( stderr,"cls_chk: class %d not allocated\n",class);
-     exit(-1);
+    /*
+    int i;
+    for(i=0;i<MAX_CLS;i++)
+      fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
+      */
+    fprintf( stderr,"cls_chk: class %d not allocated\n",class);
+    exit(-1);
   }
    shm_addr->nums[class-1]+= action;
   if(shm_addr->nums[class-1] < 1) {
+    /*
+    int i;
+    for(i=0;i<MAX_CLS;i++)
+      fprintf( stderr, "class %d num %x\n",i, shm_addr->nums[ i]);
+    */
     fprintf( stderr,"cls_chk: class %d decremented too far\n",class);
     exit(-1);
   } else if ( shm_addr->nums[class-1] == 1 && save == 0) {

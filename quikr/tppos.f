@@ -1,4 +1,4 @@
-      subroutine tppos(ip)
+      subroutine tppos(ip,itask)
 C  tape position control c#870115:04:34#
 C
 C     TAPPOS sends commands to BOSS that control the position of the tape
@@ -46,6 +46,12 @@ C
 C     1. If there was "=" in the buffer, then we have parameters. 
 C     If none, then error.  If parameter is "?" then give last command. 
 C 
+      if( itask.eq.2) then
+         indxtp=1
+      else
+         indxtp=2
+      endif
+c
       ierr=0
       iclcm = ip(1) 
       iclass = 0
@@ -91,29 +97,34 @@ C     Then, make sure that the tape is stopped!  If not, we can't move it.
 C     Check if the amount to move is within 100 feet.  If so, don't bother.
 C
       ibuf(1) = -3
-      call char2hol('tp',ibuf(2),1,2)
+       if(indxtp.eq.1) then
+         call char2hol('t1',ibuf(2),1,2)
+      else
+         call char2hol('t2',ibuf(2),1,2)
+      endif
       iclass = 0
       call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if (ip(3).lt.0) return
       ireg(2) = get_buf(ip(1),ibuf,-ilen,idum,idum)
-      call ma2tp(ibuf,ilow,lfeet_fs,ifastp,icaptp,istptp,itactp,irdytp)
-      call fs_set_icaptp(icaptp)
-      call fs_set_istptp(istptp)
-      call fs_set_itactp(itactp)
-      call fs_set_irdytp(irdytp)
-      call fs_set_lfeet_fs(lfeet_fs)
+      call ma2tp(ibuf,ilow,lfeet_fs(1,indxtp),ifastp,icaptp(indxtp),
+     $     istptp(indxtp),itactp(indxtp),irdytp(indxtp))
+      call fs_set_icaptp(icaptp,indxtp)
+      call fs_set_istptp(istptp,indxtp)
+      call fs_set_itactp(itactp,indxtp)
+      call fs_set_irdytp(irdytp,indxtp)
+      call fs_set_lfeet_fs(lfeet_fs,indxtp)
 C
       iclass = 0
       nrec = 0
-      call fs_get_icaptp(icaptp)
-      if (icaptp.ne.0) then
+      call fs_get_icaptp(icaptp,indxtp)
+      if (icaptp(indxtp).ne.0) then
         ierr = -301
         goto 990
       endif
-      call fs_get_lfeet_fs(lfeet_fs)
-      iftnow = ias2b(lfeet_fs,1,5)
+      call fs_get_lfeet_fs(lfeet_fs,indxtp)
+      iftnow = ias2b(lfeet_fs(1,indxtp),1,5)
       if (iftnow.gt.20000.or.iftnow.lt.0) iftnow=0
 C                   Consider out-of-range as 0
       iftdif = iabs(iftnow-ift)
@@ -129,28 +140,41 @@ C     Also, set commanded feet into common.
 C 
       iftgo = ift
       call fc_rte_time(it,it(6))
-      idt4 = 0.5d0 + iacttp + iftdif/.225d0
+      idt4 = 0.5d0 + iacttp(indxtp) + iftdif/.225d0
       idt = mod(idt4,100)
       call iadt(it,idt,1)
       idt = idt4/100
       call iadt(it,idt,2) 
-C                     Add on the time difference to the present 
-      call char2hol('ff',ibuf(1),1,2)
-      if (iftnow.gt.iftgo) call char2hol('rw',ibuf(1),1,2)
-      call char2hol('@!et@ ',ibuf(2),1,6)
-      idumm1 = ib2as(it(6),ibuf, 8,o'40000'+o'400'*4+4) 
-      idumm1 = ichmv_ch(ibuf,12,'.')
-      idumm1 = ib2as(it(5),ibuf,13,o'40000'+o'400'*3+3) 
-      idumm1 = ichmv_ch(ibuf,16,'.')
-      idumm1 = ib2as(it(4),ibuf,17,o'40000'+o'400'*2+2)
-      idumm1 = ichmv_ch(ibuf,19,':')
-      idumm1 = ib2as(it(3),ibuf,20,o'40000'+o'400'*2+2) 
-      idumm1 = ichmv_ch(ibuf,22,':')
-      idumm1 = ib2as(it(2),ibuf,23,o'40000'+o'400'*2+2) 
-      idumm1 = ichmv_ch(ibuf,25,'.')
-      idumm1 = ib2as(it(1),ibuf,26,o'40000'+o'400'*2+2)
-      call copin(ibuf,4)
-      call copin(ibuf(3),23)
+C                     Add on the time difference to the present
+      if(drive(1).eq.0.or.drive(2).eq.0) then
+         inext1=ichmv_ch(ibuf,1,'ff')
+         if (iftnow.gt.iftgo) inext1=ichmv_ch(ibuf,1,'rw')
+         inext1=ichmv_ch(ibuf,inext1,'@!')
+         inext2=ichmv_ch(ibuf(4),1,'et@')
+      else if(indxtp.eq.1) then
+         inext1=ichmv_ch(ibuf,1,'ff1')
+         if (iftnow.gt.iftgo) inext1=ichmv_ch(ibuf,1,'rw1')
+         inext1=ichmv_ch(ibuf,inext1,'@!')
+         inext2=ichmv_ch(ibuf(4),1,'et1@')
+      else
+         inext1=ichmv_ch(ibuf,1,'ff2')
+         if (iftnow.gt.iftgo) inext1=ichmv_ch(ibuf,1,'rw2')
+         inext1=ichmv_ch(ibuf,inext1,'@!')
+         inext2=ichmv_ch(ibuf(4),1,'et2@')
+      endif
+      inext2 = inext2 + ib2as(it(6),ibuf(4),inext2,o'40000'+o'400'*4+4)
+      inext2 = ichmv_ch(ibuf(4),inext2,'.')
+      inext2 = inext2 + ib2as(it(5),ibuf(4),inext2,o'40000'+o'400'*3+3) 
+      inext2 = ichmv_ch(ibuf(4),inext2,'.')
+      inext2 = inext2 + ib2as(it(4),ibuf(4),inext2,o'40000'+o'400'*2+2)
+      inext2 = ichmv_ch(ibuf(4),inext2,':')
+      inext2 = inext2 + ib2as(it(3),ibuf(4),inext2,o'40000'+o'400'*2+2) 
+      inext2 = ichmv_ch(ibuf(4),inext2,':')
+      inext2 = inext2 + ib2as(it(2),ibuf(4),inext2,o'40000'+o'400'*2+2) 
+      inext2 = ichmv_ch(ibuf(4),inext2,'.')
+      inext2 = inext2 + ib2as(it(1),ibuf(4),inext2,o'40000'+o'400'*2+2)
+      call copin(ibuf,inext1-1)
+      call copin(ibuf(4),inext2-1)
 C                     Send the commands to BOSS 
 C 
 990   ip(1) = iclass

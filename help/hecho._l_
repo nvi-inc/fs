@@ -1,0 +1,16 @@
+      hecho - head communications echo (longitudinal drives)
+
+Syntax:     hecho=on/off
+
+Response:   hecho/on/off
+
+
+Settable parameters:
+on/off      ON to turn echo on, OFF to turn echo off.
+
+Monitor-only parameters: none
+
+Comments: 
+This command prints debug information for commands that use the
+head positioner (peak and locate).
+

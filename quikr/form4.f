@@ -1,4 +1,4 @@
-      subroutine form4(ip)
+      subroutine form4(ip,itask)
 C  Mark IV formatter command 
 C 
 C  form4 transmits a buffer to MATCN 
@@ -55,17 +55,26 @@ C                   If no parameters, get mad!
       nrec = 0
       iclass = 0
       ifc = 1+ieq
-      call upper(ibuf,1,nchar)
+      if(itask.eq.2) then
+         call upper(ibuf,1,nchar)
+      endif
       nch = nchar - ifc + 1
       call pchar(idum,2,9)
       nenq = iscnc(ibuf,ifc,nchar,9)
 C                   Scan for a tab character
       if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
 C                   If we found one, substitute the enq character
-      ibuf2(1) = 9
+      if(itask.eq.2) then
+         ibuf2(1) = 9
 C                   Set up for MAT mode 9
-      idumm1 = ichmv_ch(ibuf2(2),1,'fm')
+         idumm1 = ichmv_ch(ibuf2(2),1,'fm')
 C                   Place fm mnemonics in buffer.
+      else if(itask.eq.3) then
+         ibuf2(1) = 10
+C                   Set up for MAT mode 9
+         idumm1 = ichmv_ch(ibuf2(2),1,'de')
+C                   Place de mnemonics in buffer.
+      endif
       idumm1 = ichmv(ibuf2(3),1,ibuf,ifc,nch)
 C                   Move characters to output buffer starting at first
 C                   character of this message.

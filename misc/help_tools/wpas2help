@@ -1,0 +1,311 @@
+#!/usr/bin/perl
+# Usage: wpas2help [files]
+#
+# wpas2help reads the files, which are assumed to WordPerfect ASCII output
+#           and writes them into Field System help files
+#
+if ($#ARGV <0) {
+    print "Usage: wpas2help xxx\n";
+    print "where xxx are the files in WP ASCII format to generate help files from\n";
+    exit -1;
+}
+
+$open=0;
+
+while(<>) {
+    if(/\cL/) {
+	if (! /^[ ]*\cL/) {
+	    s/\cL//;
+	    print OUTPUT;
+	}
+	$oldline = $_;
+	$_ = <ARGV> || die "premature end of file on input";
+	print;
+	/^[\s]*(\S*).*/;
+	$ofname=$fname;
+	$fname=$1;
+	if(/\(K4K3 racks\)[ ]*$/i) {
+	    $suffix=".3__";
+	}
+	elsif (/\(Mark III racks and drives\)[ ]*$/i) {
+	    $suffix=".mm_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".m_m";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1.mm+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2.m+m";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(Mark III racks\)[ ]*$/i) {
+	    $suffix=".m__";
+	}
+	elsif (/\(Mark III, Mark IV racks\)[ ]*$/i) {
+	    $suffix=".n__";
+	    if($fname eq "vcnn") {
+		$mname=$fname . $suffix;
+		$lname="vc01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc05" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc06" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc07" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc08" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc09" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc10" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc11" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc12" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc13" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc14" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="vc15" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	}
+	elsif (/\(Mark III, Mark IV, VLBA, VLBA4 racks\)[ ]*$/i) {
+	    $suffix=".e__";
+	}
+	elsif (/\(Mark III, Mark IV, all K4 racks\)[ ]*$/i) {
+	    $suffix=".f__";
+	}
+	elsif (/\(Mark IV racks\)[ ]*$/i) {
+	    $suffix=".4__";
+	}
+	elsif (/\(Mark IV, VLBA, VLBA4, K4MK4 racks\)[ ]*$/i) {
+	    $suffix=".g__";
+	}
+	elsif (/\(Mark IV, VLBA4, K4MK4 racks\)[ ]*$/i) {
+	    $suffix=".h__";
+	}
+	elsif (/\(VLBA racks\)[ ]*$/i) {
+	    $suffix=".v__";
+	}
+	elsif (/\(VLBA, VLBA4 racks\)[ ]*$/i) {
+	    $suffix=".w__";
+	    if($fname eq "bbcnn") {
+		$mname=$fname . $suffix;
+		$lname="bbc01" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc02" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc03" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc04" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc05" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc06" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc07" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc08" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc09" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc10" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc11" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc12" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc13" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="bbc14" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	}
+	elsif (/\(all K4 racks\)[ ]*$/i) {
+	    $suffix=".k__";
+	}
+	elsif (/\(all racks\)[ ]*$/i) {
+	    $suffix=".a__";
+	}
+	elsif (/\(K4 drives\)[ ]*$/i) {
+	    $suffix="._k_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . "1._k+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(Mark III drives\)[ ]*$/i) {
+	    $suffix="._m_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__m";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._m+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+m";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(Mark III, Mark IV drives\)[ ]*$/i) {
+	    $suffix="._n_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__n";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._n+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+n";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(Mark IV drives\)[ ]*$/i) {
+	    $suffix="._4_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__4";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._4+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+4";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(S2 drives\)[ ]*$/i) {
+	    $suffix="._s_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . "1._s+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(VLBA, VLBA4 drives\)[ ]*$/i) {
+	    $suffix="._w_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__w";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._w+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+w";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(all drives\)[ ]*$/i) {
+	    $suffix="._a_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__a";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._a+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+a";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(longitudinal drives\)[ ]*$/i) {
+	    $suffix="._l_";
+	    $mname=$fname . $suffix;
+	    $lname=$fname . ".__l";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "1._l+";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	    $lname=$fname . "2._+l";
+	    symlink($mname,$lname) || die "couldn't link $lname";
+	}
+	elsif (/\(.*\)[ ]*$/i) {
+	    die "no equipment type match for $fname";
+	}
+	else {
+	    $suffix=".___";
+	    if($fname eq "caltemp") {
+		$mname=$fname . $suffix;
+		$lname="caltemp1" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltemp2" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltemp3" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltemp5" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltemp6" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltempa" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltempb" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltempc" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="caltempd" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    } elsif($fname eq "tsys") {
+		$mname=$fname . $suffix;
+		$lname="tsys1" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsys2" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsys3" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsysa" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsysb" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsysc" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="tsysd" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    } elsif($fname eq "flux") {
+		$mname=$fname . $suffix;
+		$lname="flux1" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="flux2" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="flux3" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="flux5" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="flux6" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="fluxa" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="fluxb" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="fluxc" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="fluxd" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    } elsif($fname eq "beam") {
+		$mname=$fname . $suffix;
+		$lname="beam1" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beam2" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beam3" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beam5" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beam6" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beama" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beamb" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beamc" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+		$lname="beamd" . $suffix;
+		symlink($mname,$lname) || die "couldn't link $lname";
+	    }
+	}
+#
+	if($ofname eq ">echo.___" && $fname eq "0"){
+	    $fname = $ofname;
+	    $oldline =~ s/\cL//;
+	    print OUTPUT $oldline;
+	}elsif($ofname eq ">rx.___" && $fname eq ""){
+	    $fname = $ofname;
+	    $oldline =~ s/\cL//;
+	    print OUTPUT $oldline;
+	} else {
+	    if ($open) {
+		close(OUTPUT) || die "error closing output file";
+	    }
+	    $fname = ">" . $fname . $suffix;
+	    open(OUTPUT, $fname) ||die "couldn't open $fname";
+	    $open=1;
+	}
+    }
+    print OUTPUT;
+}

@@ -41,7 +41,7 @@ C  Initialize and transfer control based on first character of module name
       dtnam=0 
       cicr = ' '
       call hol2char(lnam,ifc,ilc,cicr)
-
+c
       do i=1,9
         if (cicr(1:1).eq.cistcr(i:i)) goto 105 
       enddo
@@ -109,7 +109,7 @@ C  Handle VC's
 
       if (cicr(3:3).eq.' ') then
         if ((cicr(2:2).ge.'1'.and.cicr(2:2).le.'9').or.(cicr(2:2).ge.'a'
-     ..and.cicr(2:2).le.'f')) dtnam=lnam(1) 
+     ..and.cicr(2:2).le.'f')) call char2hol(cicr(1:2),dtnam,1,2)
         goto 900 
       endif
       nc=2

@@ -11,6 +11,7 @@ c 930412 nrv implicit none
 C 960223 nrv change permissions on output file
 C 980831 nrv Mods for Y2000. Use IYR2 for 2-digit year, all other
 C            year variables are fully specified.
+C 990427 nrv Require 4-digit input year.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -119,24 +120,25 @@ C
 	im=-1
 	id=-1
 	do while (iy.lt.0.or.im.lt.0.or.id.lt.0)
-	  write(luscn,'(" Enter target date (y,m,d) (0,0,0 to quit): "
-     .  ,$)')
+          write(luscn,'(" Enter target date (yyyy,mm,dd) ",
+     .    "(0,0,0 to quit): ",$)')
 	  read(luusr,*,err=201) iy,im,id
 	  if (iy.eq.0.and.im.eq.0.and.id.eq.0) return
-201     if ((iy.lt.0).or.(im.le.0.or.im.gt.12).or.(id.le.0.or.
+c       Require 4-digit year.
+201     if ((iy.lt.1000).or.(im.le.0.or.im.gt.12).or.(id.le.0.or.
      .  id.gt.31)) then
 	    write(luscn,'(" Invalid number for year, month, or day.")')
 	    iy=-1
 	  endif
 	enddo
-	if (iy.lt.100) then ! 2-digit year
-          iyr2=iy
-          if (iyr2.le.99.and.iyr2.ge.50) iy=iyr2+1900
-          if (iyr2.le.49.and.iyr2.ge. 0) iy=iyr2+2000
-        else ! 4-digit year
+Cif (iy.lt.100) then ! 2-digit year
+C         iyr2=iy
+C         if (iyr2.le.99.and.iyr2.ge.50) iy=iyr2+1900
+C         if (iyr2.le.49.and.iyr2.ge. 0) iy=iyr2+2000
+C       else ! 4-digit year
           if (iy.lt.2000) iyr2=iy-1900
           if (iy.ge.2000) iyr2=iy-2000
-        endif
+C       endif
 	INDOYR = IDAY0(IY,IM) + ID
 	inyr = iy
 
@@ -161,8 +163,8 @@ C
 	idum = ib2as(ihn,itimn,6,z4202)
 	idum = ib2as(imn,itimn,8,z4202)
 	idum = ib2as(isn,itimn,10,z4202)
-	write(luscn,9202) iyr2,indoyr,ihn,imn,isn
-9202  format(' Requested start time of shifted schedule: ',i2,1x,i3,
+	write(luscn,9202) iy,indoyr,ihn,imn,isn
+9202  format(' Requested start time of shifted schedule: ',i4,1x,i3,
      .'-',i2.2,':',i2.2,':',i2.2)
 C
 C  2.6  Get desired length of schedule
@@ -352,8 +354,8 @@ C
 	is=ias2b(itim,10,2)
 	idum = ichmv(itim0,1,itim,1,11)
 C   ITIM0 holds the original time of the first observation.
-	write(luscn,9631) iyr2,idoyr,ih0,im0,is
-9631  format(' Original time of first observation   ',i2,1x,i3,'-',
+	write(luscn,9631) iyr,idoyr,ih0,im0,is
+9631  format(' Original time of first observation   ',i4,1x,i3,'-',
      .i2.2,':',i2.2,':',i2.2)
 
 C  6.5  If the new schedule time is later than the original time,
@@ -434,6 +436,14 @@ C       ITIM and ITIM1 holds the first observation time.
 	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,ISSHFT,IMSHFT,IHSHFT,
      .             IDSHFT)
 	idum = ichmv(itim1,1,itim,1,11)
+	IY = IAS2B(ITIM,1,2)
+	ID1 = IAS2B(ITIM,3,3)
+	ih1=ias2b(itim,6,2)
+	im1=ias2b(itim,8,2)
+	is=ias2b(itim,10,2)
+	write(luscn,9789) iy,id1,ih1,im1,is
+9789  format(' First observation shifts to: ',i2,1x,
+     .i3,'-',i2.2,':',i2.2,':',i2.2)
 
 	call gtshft(isshft,imshft,ihshft,idshft,itimn,itimo,ierr)
 	if (ierr.eq.-1) return

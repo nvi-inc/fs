@@ -2,8 +2,7 @@
 
 C     VREAD calls the routines to read a VEX file.
 C  Called by sked and drudg. Reads sections for experiment,
-C  sources, stations, and modes. Observations are read in
-C  a VOB1INP.
+C  sources, stations, and modes. 
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
@@ -13,6 +12,7 @@ C History
 C 960522 nrv New.
 C 970114 nrv Stop if the supported VEX version is not found.
 C 970124 nrv Add a call to VGLINP, and a call to errormsg
+C 990921 nrv Save the VEX version number.
 
 C Input
       character*(*) cfile ! VEX file path name
@@ -25,15 +25,21 @@ C Output
       integer ivexnum
 
 C Local
-      integer fvex_open,ptr_ch
+      integer*2 ibuf
+      integer fvex_open,ptr_ch,fget_literal,il
+      character*128 scan_id
       integer i,trimlen
 
       i=trimlen(cbuf)
       write(lu,'("VREAD01 -- Got a VEX file to read, ",a".")') 
      .cbuf(1:i)
-      if (cbuf(i-3:i).ne.'1.5;') then
-        write(lu,'("VREAD02 -- Only version 1.5 is supported, sorry.")')
-        stop
+      vex_version = cbuf(i-3:i-1)
+C     if (vex_version.ne.'1.5'.and.vex_version.ne.'1.6') then
+      if (vex_version.ne.'1.5') then
+C       write(lu,'("VREAD02 -- Only versions 1.5 and 1.6 are ",
+        write(lu,'("VREAD02 -- Only version 1.5 is ",
+     .  "supported, sorry.")')
+        return
       endif
       
 C  1. Open the file
@@ -70,10 +76,17 @@ C  2. Read the sections
       if (ierr.ne.0) then
         write(lu,'("VREAD03 - Error reading sources.")')
       endif
-C     call vobinp(ivexnum,lu,ierr) ! observations
+C -------------------------------------------
+C     call vobinp(ivexnum,lu,iret,ierr,scan_id) ! observations
 C     if (ierr.ne.0) then
-C       write(lu,'("VREAD04 - Error reading observations.")')
+C       il=trimlen(scan_id)
+C       write(lu,'("VREAD04 - Error from vobinp=",
+C    .      i5,", iret=",i5,", scan#=",a)') ierr,iret,scan_id(1:il)
+C       call errormsg(iret,ierr,'SCHED',lu)
 C     endif
+C     write(lu,'("  Total number of scans in this schedule: ",
+C    .i5)') nobs
+C -------------------------------------------
 
 C  3. Initialize parameters to standard values. These
 C     are parameters not read in from the vex file.
@@ -84,6 +97,9 @@ C     Early start, late stop, and time gape were read in.
       itaptm = 1
       isortm = 5
       ihdtm = 6
+
+C 3. Read the $SCHEDULING_PARAMS section to get parameters.
+C     iret = fget_literal(ibuf)
 
       return
       end

@@ -26,7 +26,7 @@ C  INITIALIZED:
       if(icheck(18).le.0.or.ichecks(18).ne.icheck(18)) return
       do j=1,18
         if (icherr(j).ne.0) then
-          call logit7ic(0,0,0,0,-500-j,lwho,'rc')
+          call logit7ic(0,0,0,0,-500-j,lwho,'r1')
         endif
       enddo
 C

@@ -39,6 +39,16 @@ C 970204 nrv Change max_subpass to 36, max_frq to 20
 C 970206 nrv Chage max_headstack to 1
 C 971030 nrv Increase max_flux to 120 to allow 20 clean components.
 C 971208 nrv Add max_tone for phase cal tones
+C 990608 nrv Add thick_length, thin_length
+C 990920 nrv Add max_rack_type and max_rec_type
+C 991211 nrv Add max_rec2_type
+C 991212 nrv Change max_chan to 32.
+C 000126 nrv Add speed_lp and speed_slp for S2.
+C 000905 nrv Chage max_headstack to 2
+C 000914 nrv Add MAX_ROLL
+C 001003 nrv Add short_length
+C 001109 nrv Change max_obs to 3000.
+C 010711 nrv Change max_headstack to 2.
 C
 C********************************************************************
 C
@@ -49,9 +59,8 @@ C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone
+     .max_subpass,max_tone,max_roll
 
-C     PARAMETER (MAX_STN = 16)
       PARAMETER (MAX_STN = 35)
 C
 C     The maximum number of baselines.
@@ -144,10 +153,15 @@ C     elevation-dependent SEFDs.
 
       parameter (MAX_SEFDPAR = 5)
 C
+C     Maximum number of roll tables. Each table has up to 17 places
+C     per row (16 + home track) and up to 32 defs (rows).
+
+      parameter (max_roll = 2)
+
 C     Maximum number of headstacks. Limited to 2 within sked/drudg
 C     for now. Change to 1 to save space.
 
-      parameter (max_headstack = 1)
+      parameter (max_headstack = 2)
 
 C     Maximum number of tracks on a headstack.
 
@@ -175,8 +189,23 @@ C     Maximum number of BBCs in a system.
       parameter (max_bbc = 16)
 
 C     Maximum number of video channels.
+C     Formerly this was 16 because u/l are handled as sub-parts of
+C     channels. But there are explicit chandef's for each u/l channel
+C     in VEX file, so this probably has to be 32 now.
 C
-      PARAMETER (MAX_CHAN = 16)
+      PARAMETER (MAX_CHAN = 32)
+
+C     Lengths for thick and thin tape.
+
+      real*4 thick_length,thin_length,short_length
+      parameter (THIN_LENGTH = 17400)
+      parameter (THICK_LENGTH = 8700)
+      parameter (SHORT_LENGTH = 2900)
+
+C     Speeds for S2.
+      real*4 speed_lp, speed_slp
+      parameter (SPEED_LP = 6.3) ! in/sec
+      parameter (SPEED_SLP = 4.2) ! in/sec
 
 C     Value for PI.
 C
@@ -252,12 +281,13 @@ C     Definitions for octal constants.
 
       integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
      .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
-     .          ORPAREN,OBAR
+     .          ORPAREN,OBAR,OCOLON
       parameter (OBLANK = O'40', ODOLLAR = O'44',
      .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
      .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
      .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
-     .OSLASH = O'57', OAND = O'46', OBAR = O'140')
+     .OSLASH = O'57', OAND = O'46', OBAR = O'140',
+     .OCOLON = 58)
       integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
      .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
      .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,OCAPR,
@@ -287,14 +317,12 @@ C     ***NOTE*** You must modify the read/write statements in
 C     readf_asc and writf_asc to extend the buffer size als.
 C
       integer ibuf_len,ibufq_len,max_obs,max_ent_sor,ibfcom_len
-      PARAMETER (IBUF_LEN = 499)
-      PARAMETER (IBUFQ_LEN = 500)
-C     PARAMETER (IBUF_LEN = 256)
-C     PARAMETER (IBUFQ_LEN = 257)
+      PARAMETER (IBUF_LEN = 499)   ! length in words
+      PARAMETER (IBUFQ_LEN = 500)   ! length in words
 C
 C     The maximum number of scans allowed in a schedule
 C
-      PARAMETER (MAX_OBS = 2000)
+      PARAMETER (MAX_OBS = 3000)
 C
 C     The maximum number of entries in the source
 C     catalog. CAUTION: YOU MUST ALSO CHANGE IBFCOM_LEN BELOW.
@@ -318,7 +346,7 @@ C     The maximum number of entries in the modes catalog that
 C     will be read for selection.
 
       integer max_ent_modes
-      PARAMETER (MAX_ENT_MODES = 50)
+      PARAMETER (MAX_ENT_MODES = 100)
 
 C     The maximum size of the selection array, for all types of
 C     selection. This must be the larger of MAX_ENT_SOR, and
@@ -326,6 +354,12 @@ C     MAX_FRQ*MAX_STN.
 
       integer max_sel
       PARAMETER (MAX_SEL = MAX_ENT_SOR)
+
+C     Number of defined rack and recorder names.
+      integer max_rack_type, max_rec_type, max_rec2_type
+      PARAMETER (MAX_RACK_TYPE= 14)
+      PARAMETER (MAX_REC_TYPE = 9)
+      PARAMETER (MAX_REC2_TYPE = 6)
 
 C     The name of the control files. These files are
 C     read at run time. cctfil is the default control
@@ -341,5 +375,3 @@ C     parameter(cctfil = '/usr/local/bin/skedf.ctl')
 C this path is for Linux FS
       parameter(cctfil = '/usr2/control/skedf.ctl')
       parameter(cownctl = 'skedf.ctl')
-
-C

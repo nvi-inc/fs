@@ -22,7 +22,12 @@ long ip[5];                       /* ipc parameters */
       int ierr, max;
       void skd_run(), skd_par();  /* program scheduling utilities */
 
-      if(command->equal != '=' ) {
+      if(shm_addr->equip.drive[0]==K4 &&
+	  (shm_addr->equip.drive_type[0]==K41 ||
+	   shm_addr->equip.drive_type[0]==K42)){
+	ip[0]=ip[1]=0;
+	return;
+      } else if(command->equal != '=' ) {
         ierr=-301;
         goto error1;
       }
@@ -45,18 +50,11 @@ long ip[5];                       /* ipc parameters */
 
       for (i=0;i<5;i++) ip[i]=0;
 
-      ib_req2(ip,"tc",cmd);
+      ib_req2(ip,"t1",cmd);
 
       skd_run("ibcon",'w',ip);
       skd_par(ip);
-
-      if(ip[2]<0){
-	if(ip[2] == -3){
-	  ip[2]=0;
-	  return;
-	}
-	goto error2;
-      }
+      if(ip[2]<0) goto error2;
       return;
 
 error1:

@@ -12,10 +12,11 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
                                               /* parameter keywords */
 static char *key_mode[ ]={ "read", "byp" };
-static char *key_equ [ ]={ "std", "alt1", "alt2"};
+static char *key_equ [ ]={ "std", "alt1", "alt2", "dis"};
 static char *key_equ0[ ]={ "160", "135", "270"};
 static char *key_equ1[ ]={ "160", "80", "270"};
 static char *key_equ2[ ]={ "135", "270"};
+static char *key_equ3[ ]={ "0", "1", "2", "3"};
 
 static char *key_bitsynch[ ] = { "16", "8", "4", "2", "1", "0.5"};
 
@@ -25,11 +26,12 @@ static char *key_bitsynch[ ] = { "16", "8", "4", "2", "1", "0.5"};
 #define NKEY_EQU0      sizeof(key_equ0)/sizeof( char *)
 #define NKEY_EQU1      sizeof(key_equ1)/sizeof( char *)
 #define NKEY_EQU2      sizeof(key_equ2)/sizeof( char *)
+#define NKEY_EQU3      sizeof(key_equ3)/sizeof( char *)
 #define NKEY_BITSYNCH  sizeof(key_bitsynch)/sizeof( char *)
 
-int vrepro_dec(lcl,count,ptr)
+int vrepro_dec(lcl,count,ptr,indx)
 struct vrepro_cmd *lcl;
-int *count;
+int *count,indx;
 char *ptr;
 {
     int ierr, ind, arg_key(), idflt, odd, even;
@@ -52,9 +54,13 @@ char *ptr;
         ind=(*count-1)/2;
         ierr=arg_int(ptr,&lcl->track[ind],4,TRUE);
         if(ierr ==0 && (lcl->track[ind]>35 || lcl->track[ind]<0))
-	  if (shm_addr->equip.drive == VLBA)
+	  if (shm_addr->equip.drive[indx] == VLBA && !
+	      (shm_addr->equip.drive[indx]==VLBA &&
+	       shm_addr->equip.drive_type[indx]==VLBAB))
 	    ierr=-200;
-	  else if (shm_addr->equip.drive == VLBA4 &&
+	  else if ((shm_addr->equip.drive[indx] == VLBA4 ||
+		    (shm_addr->equip.drive[indx] == VLBA &&
+		    shm_addr->equip.drive_type[indx] == VLBAB))&&
 		   (lcl->track[ind]>135 || lcl->track[ind]<100))
 	    ierr=-200;
 	if(lcl->track[ind]<100)
@@ -66,48 +72,60 @@ char *ptr;
         break;
       case 5:
         idflt=1;                               /* alt1 is default */
-	if (shm_addr->equip.drive_type == VLBA2)
+	if(lcl->mode[0]==1)
+	  idflt=3;
+	else if (shm_addr->equip.drive[indx] == VLBA &&
+		 shm_addr->equip.drive_type[indx] == VLBA2)
 	  idflt=0;                         /* standard is default for VLBA2 */
       case 6:
         ind=*count-5;
         if(idflt==-1) idflt=lcl->equalizer[0];      /* equB defaults to equA */
-        ierr=arg_key(ptr,key_equ,NKEY_EQU,&lcl->equalizer[ind],idflt,TRUE);
-	if(ierr!=0 && shm_addr->equip.drive_type == VLBA2)
-	  ierr=arg_key(ptr,key_equ2,NKEY_EQU2,&lcl->equalizer[ind],idflt,TRUE);
-	else if(ierr !=0 && shm_addr->equip.drive_type != VLBA2) {
-	  ierr=arg_key(ptr,key_equ0,NKEY_EQU0,&lcl->equalizer[ind],idflt,TRUE);
-	  if(ierr!=0)
-	    ierr=
-	      arg_key(ptr,key_equ1,NKEY_EQU1,&lcl->equalizer[ind],idflt,TRUE);
+        ierr=arg_key(ptr,key_equ3,NKEY_EQU3,&lcl->equalizer[ind],idflt,FALSE);
+	if(ierr!=0) {
+	  ierr=arg_key(ptr,key_equ,NKEY_EQU,&lcl->equalizer[ind],idflt,TRUE);
+	  if(ierr!=0 && 
+	     shm_addr->equip.drive[indx] == VLBA &&
+	     shm_addr->equip.drive_type[indx] == VLBA2)
+	    ierr=arg_key(ptr,key_equ2,NKEY_EQU2,&lcl->equalizer[ind],idflt,TRUE);
+	  else if(ierr !=0 &&!(
+			       shm_addr->equip.drive[indx] == VLBA &&
+			       shm_addr->equip.drive_type[indx] == VLBA2)) {
+	    ierr=arg_key(ptr,key_equ0,NKEY_EQU0,&lcl->equalizer[ind],idflt,TRUE);
+	    if(ierr!=0)
+	      ierr=
+		arg_key(ptr,key_equ1,NKEY_EQU1,&lcl->equalizer[ind],idflt,TRUE);
+	  }
 	}
         break;
       case 7:
 	idflt=2; /* single speed */
-	if (shm_addr->equip.drive_type != VLBA2) {
-	  if (lcl->equalizer[0]==0 || lcl->equalizer[0]==2)
+	if (!(shm_addr->equip.drive[indx] == VLBA &&
+	    shm_addr->equip.drive_type[indx] == VLBA2)) {
+	  if (lcl->equalizer[0]==0 || lcl->equalizer[0]==2 ||
+	      lcl->equalizer[1]==0 || lcl->equalizer[1]==2)
 	    idflt=1;
-	  else if(lcl->equalizer[0]==1)
+	  else if(lcl->equalizer[0]==1 || lcl->equalizer[1]==1)
 	    idflt=2;
 	} else { /* VLBA2 */
-	  if(lcl->equalizer[0]==0)
+	  if(lcl->equalizer[0]==0|| lcl->equalizer[1]==0)
 	    idflt=2;
-	  else if (lcl->equalizer[0]==1)
+	  else if (lcl->equalizer[0]==1||lcl->equalizer[1]==1)
 	    idflt=1;
 	}
         ierr=arg_key(ptr,key_bitsynch,NKEY_BITSYNCH,&lcl->bitsynch,idflt,TRUE);
 	break;
       default:
-	if (shm_addr->wrhd_fs != 0) { /* fix odd of evenness of tracks */
+	if (shm_addr->wrhd_fs[indx] != 0) { /* fix odd of evenness of tracks */
 	  odd = (lcl->track[0]%2 == 1 && lcl->head[0] == 1) || 
 	    (lcl->track[1]%2 == 1 && lcl->head[1] == 1);
 	  even= (lcl->track[0]%2 == 0 && lcl->head[0] == 1) ||
 	    (lcl->track[1]%2 == 0 && lcl->head[1] == 1);
-	  if (shm_addr->wrhd_fs == 1 && even && !odd) {
+	  if (shm_addr->wrhd_fs[indx] == 1 && even && !odd) {
 	    if(lcl->head[0] == 1)
 	      lcl->track[0]++;
 	    if(lcl->head[1] == 1)
 	      lcl->track[1]++;
-	  } else if (shm_addr->wrhd_fs == 2 && odd && !even) {
+	  } else if (shm_addr->wrhd_fs[indx] == 2 && odd && !even) {
 	    if(lcl->head[0] == 1)
 	      lcl->track[0]--;
 	    if(lcl->head[1] == 1)
@@ -212,14 +230,16 @@ struct vrepro_cmd *lcl;
    return;
 }
 
-void vrepro94mc(data,lcl)
+void vrepro94mc(data,lcl,indx)
 unsigned *data;
 struct vrepro_cmd *lcl;
+int indx;
 {
   int idflt;
 
-  if(lcl->equalizer[ 0] >= 3 ) {
-    if (shm_addr->equip.drive_type == VLBA2)
+  if(lcl->equalizer[ 0] >= 4 ) {
+    if (shm_addr->equip.drive[indx] == VLBA &&
+	shm_addr->equip.drive_type[indx] == VLBA2)
       idflt=0;  /* standard is default for VLBA2 */
     else
       idflt=1; /* alt.1 is default for VLBA */
@@ -231,14 +251,16 @@ struct vrepro_cmd *lcl;
   return;
 }
 
-void vrepro95mc(data,lcl)
+void vrepro95mc(data,lcl,indx)
 unsigned *data;
 struct vrepro_cmd *lcl;
+int indx;
 {
   int idflt;
 
-  if(lcl->equalizer[ 1] >= 3 ) {
-    if (shm_addr->equip.drive_type == VLBA2)
+  if(lcl->equalizer[ 1] >= 4 ) {
+    if (shm_addr->equip.drive[indx] == VLBA &&
+	shm_addr->equip.drive_type[indx] == VLBA2)
       idflt=0;  /* standard is default for VLBA2 */
     else
       idflt=1; /* alt.1 is default for VLBA */
@@ -255,7 +277,7 @@ struct vrepro_cmd *lcl;
 {
   int idflt;
 
-  if(lcl->equalizer[ 0] >= 3 ) {
+  if(lcl->equalizer[ 0] >= 4 ) {
     idflt=1; /* alt.1 is default for VLBA */
   } else
     idflt=lcl->equalizer[ 0];
@@ -271,7 +293,7 @@ struct vrepro_cmd *lcl;
 {
   int idflt;
 
-  if(lcl->equalizer[ 1] >= 3 ) {
+  if(lcl->equalizer[ 1] >= 4 ) {
     idflt=1; /* alt.1 is default for VLBA */
   } else
     idflt=lcl->equalizer[ 1];

@@ -35,6 +35,8 @@ int icherr[5];
   request.type=1;
   request.addr=0x01; add_req(&buffer,&request);
   request.addr=0x02; add_req(&buffer,&request);
+  request.addr=0x06; add_req(&buffer,&request);
+  request.addr=0x07; add_req(&buffer,&request);
 
   end_req(ip,&buffer);
   nsem_take("fsctl",0);
@@ -43,6 +45,8 @@ int icherr[5];
   skd_par(ip);
 
   if(ip[2]<0) {
+    shm_addr->vifd_tpi[2*ind+0]=65536;
+    shm_addr->vifd_tpi[2*ind+1]=65536;
     *ierr=-201;
     return;
   }

@@ -109,8 +109,13 @@ C
 C                 Default is 3 points
       if (cjchar(parm,1).eq.'*') npts = nptsfp
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',')npts=iparm(1)
-      npts = 2*(npts/2)+1
-      if (npts.ge.3.and.npts.le.31) goto 240
+      if(npts.lt.0) then
+         npts = 2*(-npts/2)+1
+         npts = -npts
+      else
+         npts = 2*(npts/2)+1
+      endif
+      if (abs(npts).ge.3.and.abs(npts).le.31) goto 240
         ierr = -205
         goto 990
 C
@@ -138,7 +143,7 @@ C
       if(cjchar(parm,1).eq.'*') intp = intpfp
       if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
      .   intp = iparm(1)
-      if(intp.ge.1.and.intp.le.10) goto 260 
+      if(intp.ge.1.and.intp.le.32) goto 260 
         ierr = -207 
         goto 990
 C 
@@ -286,7 +291,7 @@ C  Now check the cal and freq values.
         bm=beamsz_fs(6)
         fx=flx6fx_fs
       endif
-      if(cal.ne.0) goto 415
+      if(cal.ne.0.0) goto 415
         ierr = -203
         goto 990
 415   if(bm.gt.4.8d-8) goto 420

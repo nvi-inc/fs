@@ -18,7 +18,7 @@ C
 C     CALLED SUBROUTINES: CHARACTER ROUTINES
 C 
 C   LOCAL VARIABLES 
-      dimension ilu(5)                !  temp holder for specified lus
+c      dimension ilu(5)                !  temp holder for specified lus
 C     NLU - temp holder for # of LUs
 C        NCHAR  - number of characters in buffer
 C        NCH    - character counter 

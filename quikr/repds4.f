@@ -1,4 +1,4 @@
-      subroutine repds4(ip,iclcm)
+      subroutine repds4(ip,iclcm,indxtp)
 C  reproduce display for Mark IV drive
 C 
 C  REPDS4 gets data about the reproduce tracks and displays it 
@@ -106,11 +106,11 @@ C
       call ma2rp4(ibuf,iremtp,iby,ieq,ita,itb)
       call ma2rpbr4(ibuf3,ibr)
       goto 320
-310   ita = itrakaus_fs
-      itb = itrakbus_fs
-      ibr = ibr4tap
-      ieq = ieq4tap
-      iby = ibypas
+310   ita = itrakaus_fs(indxtp)
+      itb = itrakbus_fs(indxtp)
+      ibr = ibr4tap(indxtp)
+      ieq = ieq4tap(indxtp)
+      iby = ibypas(indxtp)
 320   ierr = 0
       if (iby.eq.1) then
         nch = ichmv(ibuf2,nch,lby(iby*2+1),1,3)
@@ -118,19 +118,19 @@ C
         nch = ichmv(ibuf2,nch,lby(iby*2+1),1,4)
       endif
 C                   Bypass or not
-      if (iby.ne.ibypas) ierr = -301
+      if (iby.ne.ibypas(indxtp)) ierr = -301
       nch = mcoma(ibuf2,nch)
 C
       ncx = ib2as(ita,ibuf2,nch,o'100000'+3)
 C                   Encode the A track
-      call fs_get_itraka(itraka)
-      if (ita.ne.itraka.and..not.kcom) ierr = -302
+      call fs_get_itraka(itraka,indxtp)
+      if (ita.ne.itraka(indxtp).and..not.kcom) ierr = -302
       nch = mcoma(ibuf2,nch+ncx)
 C
       ncx = ib2as(itb,ibuf2,nch,o'100000'+3)
 C                   Encode the B track
-      call fs_get_itrakb(itrakb)
-      if (itb.ne.itrakb.and..not.kcom) ierr = -303
+      call fs_get_itrakb(itrakb,indxtp)
+      if (itb.ne.itrakb(indxtp).and..not.kcom) ierr = -303
       nch = mcoma(ibuf2,nch+ncx)
 C
       if (ieq.eq.3) then
@@ -140,16 +140,16 @@ C
         nch=nch+ncx
       endif
 C                   The equalizer selection 
-      if (ieq.ne.ieq4tap) ierr = -305
+      if (ieq.ne.ieq4tap(indxtp)) ierr = -305
       nch = mcoma(ibuf2,nch)
-      if (ibws3(ibr).ge.10) then
-        ncx = ib2as(ibws3(ibr),ibuf2,nch,2)
+      if(ibr.ge.1.and.ibr.le.4) then
+        ncx = ib2as(ibws3(ibr),ibuf2,nch,o'100000'+2)
       else
-        ncx = ib2as(ibws3(ibr),ibuf2,nch,1)
+        nch = ichmv_ch(ibuf2,nch,'bad_value') 
       endif
       nch=nch+ncx
 C                   The bitrate for reproduce
-      if (ibr.ne.ibr4tap) ierr = -306
+      if (ibr.ne.ibr4tap(indxtp)) ierr = -306
 C 
 C     4. Now send the buffer to SAM.
 C 

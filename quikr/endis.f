@@ -1,4 +1,4 @@
-      subroutine endis(ip,iclcm)
+      subroutine endis(ip,iclcm,indxtp)
 C track enable display
 C 
 C 1.1.   ENDIS gets data from the tape controller regarding enabled tracks
@@ -99,7 +99,7 @@ C     % data:       TPtttttttt
 C     where each "t" contains 3 or 4 bits regarding tape track status 
 C
       call fs_get_drive(drive)
-      if (MK4.eq.drive) then
+      if (MK4.eq.drive(indxtp)) then
          call ma2en4(ibuf,iena,kena)
       else
          call ma2en(ibuf,iena,itrk,ntrk)
@@ -108,14 +108,14 @@ C
 C
 310   continue
       call fs_get_drive(drive)
-      if (MK4.eq.drive) then
-        call fs_get_kenastk(kenastk)
-        kena(1)=kenastk(1)
-        kena(2)=kenastk(2)
+      if (MK4.eq.drive(indxtp)) then
+        call fs_get_kenastk(kenastk,indxtp)
+        kena(1)=kenastk(1,indxtp)
+        kena(2)=kenastk(2,indxtp)
       else
          ntrk = 0
          do 311 i=1,28
-            itrk(i) = itrkenus_fs(i)
+            itrk(i) = itrkenus_fs(i,indxtp)
             if (itrk(i).eq.1) ntrk = ntrk + 1
  311     continue
       endif
@@ -125,7 +125,7 @@ C     4. Format up the buffer for display.
 C
 400   continue
       ierr = 0
-      if (MK4.eq.drive) then
+      if (MK4.eq.drive(indxtp)) then
         if (kena(1)) then
           nch = ichmv_ch(ibuf2,nch,'s1')
           nch = mcoma(ibuf2,nch)
@@ -147,7 +147,7 @@ C
 C
 401   continue
       do 410 i=1,28
-        if (itrk(i).ne.itrken(i).and..not.kcom) ierr = -300-i
+        if (itrk(i).ne.itrken(i,indxtp).and..not.kcom) ierr = -300-i
         if (itrk(i).eq.0) goto 410
         ncx = ib2as(i,ibuf2,nch,o'100000'+2)
         nch = ichmv_ch(ibuf2,nch+ncx,',')

@@ -187,7 +187,7 @@ C
 C
       if(kbreak('pcalr')) goto 999
       call tpset(ihold,ibuf,ierr,ksplit,ksa)
-      if(ierr.ne.0) call logit7cc(idum,idum,idum,0,ierr,'ma','tp')
+      if(ierr.ne.0) call logit7cc(idum,idum,idum,0,ierr,'ma','t1')
       if (ierr.ne.0) goto 990
 C
 C     4. Reset the data buffer and arm it.  Suspend ourselves for
@@ -279,10 +279,10 @@ C
       call dbcom(luop,ludb,ibugpc,ibuf,1,idata,ilog,ierr,iblk,istat,id,
      . kdbuff,idcb,ibdb)
       if (ibugpc.ne.0) write(luop,9311) ilog,iblk,istat,id,ierr
-      call fs_get_itrakb(itrakb)
-      call fs_get_itraka(itraka)
-      if (kfield.and.(ibypch.ne.ibypas.or.itkb.ne.itrakb.or.(
-     . itka.ne.itraka.and.ksplit))) goto 112
+      call fs_get_itrakb(itrakb,1)
+      call fs_get_itraka(itraka,1)
+      if (kfield.and.(ibypch.ne.ibypas(1).or.itkb.ne.itrakb(1).or.(
+     . itka.ne.itraka(1).and.ksplit))) goto 112
       if (ilog.eq.-1) goto 990
       if(kbreak('pcalr')) goto 999
       if ((.not.ksplit.and.istat.eq.17).or.(ksplit.and.istat.eq.25))

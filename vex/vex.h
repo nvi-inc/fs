@@ -513,11 +513,23 @@ void *
 get_scan_source(Llist *lowls_scan_in);
 
 void *
-get_scan_station_next(Llist **lowls_scan);
+get_scan_station_next(Llist **lowls_scan, char **scanid);
 
 void *
-get_scan_station(Llist **lowls_scan, char *station_in,
+get_scan_station(Llist **lowls_scan, char **scanid, char *station_in,
 		 struct vex *vex_in);
+
+void *
+get_scan_next(char **scanid);
+
+void *
+get_scan(char **scanid, struct vex *vex_in);
+
+void *
+get_station_scan_next();
+
+void *
+get_station_scan(Llist *lowls_in);
 
 Llist *
 find_next_def(Llist *defs);

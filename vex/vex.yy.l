@@ -24,7 +24,8 @@ static char *quote();
 
 static int ref=0;
 static trailing=0;
-int lines=1;
+int lines=0;
+static int version=1;
 %}
 
 %x VERSION DEF LINE REF
@@ -42,7 +43,7 @@ DOUBLE		{MANTISSA}{EXPONENT}?
 SEC		[0-9]{1,2}|{DOUBLE}
 ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 %%
-		{ static int version=1;if(version)BEGIN(VERSION);version=0;}
+		{if(version){lines=1;BEGIN(VERSION);}version=0;}
 
 <VERSION>"*"     	{yyerror("Comment not allowed before end of VEX_REV statement\n");}
 <VERSION>VEX_rev	{return T_VEX_REV;}
@@ -50,7 +51,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <VERSION>{WHITE}*		{ /* skip white space */ }
 <VERSION>;              {trailing=1;BEGIN(LINE); return yytext[0];}
 <VERSION>=		{return(yytext[0]);}
-<VERSION>.		{yyerror("lexical analysis error 1");}
+<VERSION>.		{yyerror("lexical error 1 - non-token in version");}
 
 <DEF>\n			{lines++;}
 <DEF>{WHITE}*		{ /* skip white space */ }
@@ -58,7 +59,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <DEF>{NAME}*		{NEWSTR(yylval.sval,yytext); return T_NAME;}
 <DEF>\"			{ yylval.sval=quote(); return T_NAME;}
 <DEF>:			{ return(yytext[0]);}
-<DEF>.			{ yyerror("lexical analysis error 2");}
+<DEF>.			{ yyerror("lexical error 2 - non-token in def statement");}
 
 <LINE>"*"[^\n]*		{NEWSTR(yylval.sval,yytext);	 /* comment */
 			if(trailing)
@@ -229,9 +230,10 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 	
 <LINE,REF>\n		{trailing=0;lines++;}
 <LINE,REF>{WHITE}*	{/* skip white space */}
+<LINE>.			{yyerror("lexical error 3 - non-token at start of statement");}
 <REF>{NAME}		{ NEWSTR(yylval.sval,yytext);return T_NAME; }
 <REF>:			{return(yytext[0]);}
-<REF>.			{yyerror("lexical analysis error 3");}
+<REF>.			{yyerror("lexical error 4 - non-token in ref statement");}
 
 {ANGLE}		{ NEWSTR(yylval.sval,yytext); return T_ANGLE; }
 
@@ -245,8 +247,9 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 
 ;		{trailing=1;BEGIN(LINE);return(yytext[0]);}
 :		{return(yytext[0]);}
-.		{yyerror("lexical analysis error 4");}
+.		{yyerror("lexical error 5 - non-token after statement started");}
 
+<<EOF>>         {version=1;ref=0;trailing=0;yyterminate();}
 %%
 static struct llist *lit()
 {

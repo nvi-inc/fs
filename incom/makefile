@@ -5,7 +5,7 @@ PATCHLEVEL = 0
 SUBLEVEL = 0
 endif
 #
-OBJECTS = incom.o sincom.o
+OBJECTS = incom.o sincom.o equip.o drivem.o drivev.o head.o driveall.o
 #
 FFLAGS = -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
 LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\

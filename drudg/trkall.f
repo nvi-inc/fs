@@ -1,4 +1,4 @@
-      subroutine trkall(itras,lmode,itrk,lm,nm,ifan,itrax)
+      subroutine trkall(itras,lmode,itrk,lm,nm,ifan)
 
 C  TRKALL returns the complete list of tracks to be
 C  recorded, given the mode and list of tracks assigned
@@ -40,7 +40,7 @@ C  OUTPUT:
 C           VLBA track # assignments
       integer*2 lm(2) ! 3-character mode for procedure names
       integer nm ! number of characters in lm, 1 or 3
-      integer itrax(2,2,max_headstack,max_chan) ! a fanned-out version of itras
+C     integer itrax(2,2,max_headstack,max_chan) ! a fanned-out version of itras
 C
 C  LOCAL:
       integer ihd,idum,it,i,n,iy,ibit,ichan,isb

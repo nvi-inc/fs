@@ -90,7 +90,7 @@ int flag;                            /* TRUE if default is okay */
 /* return value: 0 no errror, -100 no default allowed and arg was "" */
 /*                            -200 wouldn't decode                   */
 {
-    int ierr;
+    int ierr,i;
 
     ierr=0;
 
@@ -104,7 +104,13 @@ int flag;                            /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%d",iptr)) ierr=-200;
+    for(i=strlen(ptr)-1;i>=-1;i--)
+      if(NULL==strchr("+-0123456789 \t\n",ptr[i])) {
+	ierr=-200;
+	goto end;
+      }
 
+end:
     return ierr;
 }
 
@@ -121,7 +127,7 @@ int flag;                          /* TRUE if default is okay */
 /* return value: 0 no errror, -100 no default allowed and arg was "" */
 /*                            -200 wouldn't decode                   */
 {
-    int ierr;
+    int ierr,i;
 
     ierr=0;
 
@@ -135,6 +141,13 @@ int flag;                          /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%f",fptr)) ierr=-200;
+    for(i=strlen(ptr)-1;i>=-1;i--)
+      if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
+	ierr=-200;
+	goto end;
+      }
+
+end:
 
     return ierr;
 }
@@ -151,7 +164,7 @@ int flag;                          /* TRUE if default is okay */
 /* return value: 0 no errror, -100 no default allowed and arg was "" */
 /*                            -200 wouldn't decode                   */
 {
-    int ierr;
+    int ierr,i;
 
     ierr=0;
 
@@ -165,6 +178,13 @@ int flag;                          /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     if(1 != sscanf(ptr,"%lf",dptr)) ierr=-200;
+    for(i=strlen(ptr)-1;i>=-1;i--)
+      if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
+	ierr=-200;
+	goto end;
+      }
+
+end:
 
     return ierr;
 }
@@ -227,7 +247,7 @@ int flag;                            /* TRUE if default is okay */
 /* return value: 0 no errror, -100 no default allowed and arg was "" */
 /*                            -200 wouldn't decode                   */
 {
-    int ierr, icount;
+    int ierr, icount,i;
     float fltarg, fltkey;
 
     ierr=0;
@@ -243,6 +263,11 @@ int flag;                            /* TRUE if default is okay */
     if(0==strcmp(ptr,"*")) return ierr;
 
     sscanf(ptr,"%f",&fltarg);
+    for(i=strlen(ptr)-1;i>=-1;i--)
+      if(NULL==strchr("+-0123456789.ed \t\n",ptr[i])) {
+	goto end;
+      }
+
 
     icount=0;
     while (icount < nkey) {
@@ -252,6 +277,6 @@ int flag;                            /* TRUE if default is okay */
           return 0;
        }
     }
-
+end:
     return -200;
 }

@@ -9,7 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-extern int kMrack, kMdrive, kS2drive,kVrack,kVdrive,kK4drive;
+extern int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kK4drive[2],
+  kV4rack,selectm;
 
 m2init()
 {
@@ -18,19 +19,26 @@ m2init()
   mvaddstr(ROW1,COL1+48,"TEMP");
   mvaddstr(ROW1,COL1+60,"C");
 
+  mvaddstr(ROW1+1,COL1+10,"     ");
+  mvaddstr(ROW1+1,COL1+16,"   ");
+  mvaddstr(ROW1+1,COL1+5,"     ");
+  mvaddstr(ROW1+1,COL1+13,"     ");
+  mvaddstr(ROW1+1,COL1+5,"    ");
+
   standout();
   mvaddstr(ROW1+1,COL1+0,"MODE");
-
-  if(kMdrive || kVdrive) {
-    mvaddstr(ROW1+1,COL1+5,"RATE");
+  mvaddstr(ROW1+1,COL1+5,"RATE");
+    
+  if(kMdrive[selectm] || kVdrive[selectm]) {
     mvaddstr(ROW1+1,COL1+10,"SPEED");
     mvaddstr(ROW1+1,COL1+16,"DIR");
-  } else if(kS2drive) {
+  } else if(kS2drive[selectm]){
     mvaddstr(ROW1+1,COL1+5,"GROUP");
     mvaddstr(ROW1+1,COL1+13,"SPEED");
-  } else if(kK4drive) {
+  } else if(kK4drive[selectm]) {
     mvaddstr(ROW1+1,COL1+5,"RATE");
-  }
+  } 
+    
   standend();
   mvaddstr(ROW1+1,COL1+27,":");
   mvaddstr(ROW1+1,COL1+30,":");
@@ -50,25 +58,39 @@ m2init()
   mvaddstr(ROW1+2,COL1+71,"m");
   mvaddstr(ROW1+2,COL1+75,"(    )");
 
+  mvaddstr(ROW1+3,COL1+0,"     ");
+  mvaddstr(ROW1+3,COL1+11,"   ");
+  mvaddstr(ROW1+3,COL1+19,"   ");
+  mvaddstr(ROW1+3,COL1+0,"      ");
+  mvaddstr(ROW1+3,COL1+9,"    ");
+  mvaddstr(ROW1+3,COL1+15," ");
+  mvaddstr(ROW1+3,COL1+18,"    ");
+  mvaddstr(ROW1+3,COL1+0,"        ");
   standout();
-  if(kS2drive) {
+  if(kS2drive[selectm]) {
     mvaddstr(ROW1+3,COL1+0,"STATE");
     mvaddstr(ROW1+3,COL1+11,"POS");
     mvaddstr(ROW1+3,COL1+19,"VAR");
-  } else if(kMdrive || kVdrive) {
+  } else if(kMdrive[selectm] || kVdrive[selectm]) {
     mvaddstr(ROW1+3,COL1+0,"VACUUM");
     mvaddstr(ROW1+3,COL1+9,"TAPE");
+    standend();
+    if(selectm==0)
+      mvaddstr(ROW1+3,COL1+15,"1");
+    else
+      mvaddstr(ROW1+3,COL1+15,"2");
+    standout();
     mvaddstr(ROW1+3,COL1+18,"FEET");
-  } else if(kK4drive) {
+  } else if(kK4drive[selectm]) {
     mvaddstr(ROW1+3,COL1+0,"SEQUENCE");
-  }
+  } 
   if (kMrack) {
     mvaddstr(ROW1+3,COL1+23,"TSYS:");
     mvaddstr(ROW1+3,COL1+29,"IF1");
     mvaddstr(ROW1+3,COL1+33,"IF2");
     mvaddstr(ROW1+3,COL1+37,"IF3");
 /*  mvaddstr(ROW1+3,COL1+41,"IF4"); */
-  } else if( kVrack) {
+  } else if( kVrack||kV4rack) {
     mvaddstr(ROW1+3,COL1+23,"TSYS:");
     mvaddstr(ROW1+3,COL1+29,"IFA");
     mvaddstr(ROW1+3,COL1+33,"IFB");
@@ -89,7 +111,8 @@ Later feature: display x/y or ha depending on axis type
   mvaddstr(ROW1+4,COL1+44,"HA");
 */
   standend();
-  if(kMdrive||kVdrive)
+  mvaddstr(ROW1+4,COL1+62,"           ");
+  if(kMdrive[selectm]||kVdrive[selectm])
     mvaddstr(ROW1+4,COL1+62,"HEAD PASS #");
   refresh();
 }  /* end m2init */

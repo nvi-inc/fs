@@ -1,0 +1,53 @@
+             tsys - compute and display system temps
+
+Syntax:     tsys1=list
+          tsys2=list
+          tsys3=list
+          tsysa=list
+          tsysb=list
+          tsysc=list
+          tsysd=list
+
+Response:   tsys1/systemps
+          tsys2/systemps
+          tsys3/systemps
+          tsysa/systemps
+          tsysb/systemps
+          tsysc/systemps
+          tsysd/systemps
+
+
+Settable parameters:
+list        List of modules for which Tsys will be computed.
+            Standard mnemonics allowed.
+
+Monitor-only parameters:
+systemps    List of system temperatures, computed from values
+            retrieved by the tpi, tpical, and tpzero commands.
+            -1.0 means no current measurements available.
+
+Comments: 
+This command calculates and displays system temperatures for the
+different video and IF channels. The command pairs, tsys1/a,
+tsys2/b, and tsys3/c are synonymous. The calculations for the
+tsys1/2/3 and tsysa/b/c/d commands use the noise calibration
+values specified in the caltemp1/2/3 and caltempa/b/c/d commands,
+respectively. The formula is:
+
+          tsys = (tpi - tpzero) * (caltemp/(tpical-tpi))
+
+tsys        system temperature, as reported in tsys command
+tpi         cal-off reading, from tpi command
+tpzero      zero-level reading, from tpzero command
+tpical      cal-on reading, from tpical command
+caltemp     noise calibration source temperature, from caltemp
+            command.
+
+For Mark III/IV racks, either USB or LSB system temperature is
+computed and displayed, depending on the last-measured values for
+the total power.
+For Mark III/IV racks, the readings are listed from the selected
+detectors in the order: VC01-VC14, IF1, IF2, IF3. For VLBA racks,
+the readings are listed from the selected detectors in the order:
+Lower Side Band: BBC01-BBC14, Upper Side Band: BBC01-BBC14, IFA,
+IFB, IFC, IFD.

@@ -1,6 +1,6 @@
-      subroutine mic_read(ihead,ipass,kauto,micnow,ip)
+      subroutine mic_read(ihead,ipass,kauto,micnow,ip,indxtp)
       implicit none
-      integer ihead,ipass(2),ip(5)
+      integer ihead,ipass(2),ip(5),indxtp
       real*4 micnow(2)
       logical kauto
 C
@@ -21,12 +21,12 @@ C
       integer i
       real*4 volt(2)
 C
-      call vlt_read(ihead,volt,ip)
+      call vlt_read(ihead,volt,ip,indxtp)
       if(ip(3).ne.0) return
 C
       do i=1,2
         if(ihead.eq.i.or.ihead.eq.3) then
-          call vlt2mic(i,ipass(i),kauto,volt(i),micnow(i),ip)
+          call vlt2mic(i,ipass(i),kauto,volt(i),micnow(i),ip,indxtp)
           if(ip(3).ne.0) return
         endif
       enddo

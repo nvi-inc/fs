@@ -14,7 +14,6 @@
 
 static char *lom_key[ ]={"lo1","lo2","lo3"};
 static char *lov_key[ ]={"loa","lob","loc","lod"};
-static char *lok_key[ ]={"lo1","lo2"};
 static char *sb_key[ ]={"unknown","usb","lsb"};
 static char *pol_key[ ]={"unknown","rcp","lcp"};
 static char *pcal_key[ ]={"unknown","off"};
@@ -22,7 +21,6 @@ static char *star_key[ ]={"*"};
 
 #define LOM_KEY sizeof(lom_key)/sizeof( char *)
 #define LOV_KEY sizeof(lov_key)/sizeof( char *)
-#define LOK_KEY sizeof(lok_key)/sizeof( char *)
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
 #define POL_KEY sizeof(pol_key)/sizeof( char *)
 #define PCAL_KEY sizeof(pcal_key)/sizeof( char *)
@@ -46,12 +44,12 @@ char *ptr;
       if(ierr == 0 && dum == 0)
 	ierr=-300;
       else {
-	if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3)
+	if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3 ||
+	   shm_addr->equip.rack==K4 || shm_addr->equip.rack==K4MK4||
+	   shm_addr->equip.rack==K4K3 )
 	  ierr=arg_key(ptr,lom_key,LOM_KEY,&lo,0,FALSE);
 	else if(shm_addr->equip.rack==VLBA4 || shm_addr->equip.rack==VLBA)
 	  ierr=arg_key(ptr,lov_key,LOV_KEY,&lo,0,FALSE);
-	else if(shm_addr->equip.rack==K4)
-	  ierr=arg_key(ptr,lok_key,LOK_KEY,&lo,0,FALSE);
 	if(ierr==-100) {
 	  for (i=0;i<4;i++)
 	    lcl->lo[i]=-1;
@@ -146,12 +144,12 @@ struct lo_cmd *lcl;
     return;
   }
 
-  if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3)
+  if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3 ||
+     shm_addr->equip.rack==K4 || shm_addr->equip.rack==K4MK4 ||
+     shm_addr->equip.rack==K4K3)
     strcpy(output,lom_key[ilo]);
   else if(shm_addr->equip.rack==VLBA4 || shm_addr->equip.rack==VLBA)
     strcpy(output,lov_key[ilo]);
-  else if(shm_addr->equip.rack==K4)
-    strcpy(output,lok_key[ilo]);
   strcat(output,",");
   
   idec=16;

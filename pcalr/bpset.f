@@ -15,29 +15,31 @@ C
 100   ihold = icheck(18)
       icheck(18) = 0
       call fs_set_icheck(icheck(18),18)
-      itrakb = itrk
-      call fs_set_itrakb(itrakb)
+      itrakb(1) = itrk
+      call fs_set_itrakb(itrakb,1)
       ksplit = .false.
 C      - uncheck tape recorder whilst changing tracks 
 700   goto (701,702,702,704) ireppc+1 
-701   ibyppc = ibypas 
+701   ibyppc = ibypas(1) 
       if (itrkpc(itrk).ge.1.and.itrkpc(itrk).le.28.and.ibyppc.gt.0) 
      . ksplit = .true.
       goto 705
-702   ibypas = ibyppc 
+702   continue
+      ibypas(1) = ibyppc 
       goto 705
-704   ibypas = ibyppc 
+704   continue
+      ibypas(1) = ibyppc 
       if (itrkpc(itrk).ge.1.and.itrkpc(itrk).le.28) ksplit = .true. 
 705   ibypch = ibyppc 
       if (ksplit) then
-        itraka = itrkpc(itrk) 
-        call fs_set_itraka(itraka)
+        itraka(1) = itrkpc(itrk) 
+        call fs_set_itraka(itraka,1)
       endif
-      call fs_get_itraka(itraka)
-      itka = itraka 
-      call fs_get_itrakb(itrakb)
-      itkb = itrakb 
-      if (ibypch.eq.0.and.itrken(itrk).eq.0) iskip = -1 
+      call fs_get_itraka(itraka,1)
+      itka = itraka(1) 
+      call fs_get_itrakb(itrakb,1)
+      itkb = itrakb(1) 
+      if (ibypch.eq.0.and.itrken(itrk,1).eq.0) iskip = -1 
 
       return
       end 

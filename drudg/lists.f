@@ -1,4 +1,4 @@
-      SUBROUTINE LISTS    !LIST ONE STATION'S SCHEDULE 
+      SUBROUTINE LISTS(iin)    !LIST ONE STATION'S SCHEDULE 
 
 C This routine lists on the printer a schedule
 C
@@ -9,7 +9,8 @@ C
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 C
-C INPUT: none
+C INPUT: 
+      integer iin ! 1=standard, 2=S2, 3=K4
 C OUTPUT: none
 C LOCAL:
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
@@ -18,7 +19,7 @@ C LOCAL:
       integer iwid,ipas(max_stn),ift(max_stn),idur(max_stn),
      .ioff(max_stn)
       character*1 cs
-      integer ipasp,iftold,idirp,idir
+      integer ipasp,iftold,idirp,idir,ituse
       integer i,j,k,id
       real wlon,alat,al11,al12,al21,al22,rt1,rt2
       real az,el,x30,y30,x85,y85,dc,ha1
@@ -43,20 +44,24 @@ C NLOBS - number of observation lines written for this station
 C NLINES, Lnobs, NTAPES - number of lines on a page, observations, tapes
 C NLMAX - number of lines max per page
       INTEGER IC, TRIMLEN
-      LOGICAL KNEWT,knewtp,ks2
+      LOGICAL KNEWT,knewtp,ks2,kk4
 C function to determine if a new tape has started
       double precision RA,DEC
       double precision TJD,RAH,DECD,RADH,DECDD
 C for precession routines
       double precision HA
-      integer*2 LAXIS(2,7),lax1,lax2
+C     integer*2 LAXIS(2,7),
+      integer*2 laxis(2)
       integer idum,lnobs
-C names of axis types
       LOGICAL KUP ! true if source is up at station
       logical kwrap
-Cinteger*4 ifbrk
       integer*2 HHR
       integer iflch,ichcm_ch,ichmv,julda,jchar ! functions
+      double precision speed_k4 ! speed for K4
+      double precision conv_k4 ! speed scaling for feet-->counts
+      double precision conv_s2 ! speed scaling for feet-->minutes
+      integer ifeet
+      double precision ffeet0_k4 ! initial counts
       DATA HHR/2HR /
 C
 C SUBROUTINES CALLED:
@@ -69,8 +74,8 @@ C  SLEWT - calculates slewing time
 C
 C INITIALIZED:
       DATA IPASP/-1/, IFTOLD/0/, IDIRP/0/
-      DATA LAXIS /2HHA,2HDC,2HXY,2HEW,2HAZ,2HEL,2HXY,2HNS,2HRI,2HCH,
-     .2hSE,2hST,2hAL,2hGO/
+C     DATA LAXIS /2HHA,2HDC,2HXY,2HEW,2HAZ,2HEL,2HXY,2HNS,2HRI,2HCH,
+C    .2hSE,2hST,2hAL,2hGO/
 C
 C WHO DATE   CHANGES
 C NRV 830818 ADDED SATELLITE CALCULATIONS
@@ -101,6 +106,9 @@ C 970307 nrv Use pointer array ISKREC to insure time order of obs.
 C 971003 nrv Add a check for S2 and determine tape changes for it separately.
 C 980916 nrv Change date header on source page to yyyy.ddd
 C 981202 nrv Add warning message about negative slewing times.
+C 990527 nrv Add option for S2 and K4 non-VEX outputs. 
+C 991118 nrv Removed LAXIS variable and use AXTYP subroutine.
+C 991209 nrv Add ITUSE to iftold calculation.
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -142,9 +150,30 @@ C
       LNOBS = 0
       nlobs = 0 ! number of scan line written 
       ks2=.false.
+      kk4=.false.
+      if (iin.eq.2) kk4=.true.
+      if (iin.eq.3) ks2=.true.
       if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
      .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
         ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+        kk4=   ichcm_ch(lstrec(1,istn),1,'DFC').eq.0.or.
+     .         ichcm_ch(lstrec(1,istn),1,'K4').eq.0
+      endif
+      if (kk4) then ! K4 speed
+C       scaling factor is 55 cpd/11.25 fps if the schedule
+C       was produced using sked with Mk/VLBA footage calculations
+C       and no fan-out or fan-in. Footages were therefore already
+C       scaled by bandwidth calculations in sked.
+        conv_k4 = 55.389387393 ! counts/sec
+        speed_k4 = conv_k4*samprate(1)/4.0 ! 55, 110, or 220 cps
+        speed_k4=speed_k4*12.d0/80.d0 ! converts feet to counts
+C       ifeet0_k4 = 54 ! this is the zero counts
+        ffeet0_k4 = 54.d0/speed_k4 ! this is the zero feet
+      endif
+      if (ks2) then ! S2 scaling
+C       Fake it with high density stations, long footage tapes.
+C       Scale by sample rate.
+        conv_s2 = 60.d0*6.667*(samprate(1)/4.0)
       endif
       kwrap=.false.
       if (iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
@@ -163,6 +192,7 @@ C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
      .     NSTNSK,LSTN,LCABLE,
      .     MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
       CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
+      ituse=0
 C
       IF (ISOR.EQ.0.OR.ICOD.EQ.0) THEN
         RETURN
@@ -179,8 +209,9 @@ C
 100   FORMAT(' Schedule listing for ',4A2,' from file ',A) ! was A32
       WLON = STNPOS(1,ISTN)*180.0/PI
       ALAT = STNPOS(2,ISTN)*180.0/PI
-      LAX1 = LAXIS(1,IAXIS(ISTN))
-      LAX2 = LAXIS(2,IAXIS(ISTN))
+C     LAX1 = LAXIS(1,IAXIS(ISTN))
+C     LAX2 = LAXIS(2,IAXIS(ISTN))
+      call axtyp(laxis,iaxis(istn),2) ! convert code to name
       Rt1 = STNRAT(1,ISTN)*180.0*60.0/PI
       Rt2 = STNRAT(2,ISTN)*180.0*60.0/PI
       AL11 = STNLIM(1,1,ISTN)*180.0/PI
@@ -190,8 +221,8 @@ C
 C
 
       WRITE(luprt,99) (LSTNNA(I,ISTN),I=1,4),(LEXPER(i),i=1,4),
-     .WLON,ALAT,LAX1,LAX2,
-     .LAX1,Rt1,AL11,AL21,LAX2,Rt2,AL12,AL22
+     .WLON,ALAT,laxis(1),laxis(2),
+     .laxis(1),Rt1,AL11,AL21,laxis(2),Rt2,AL12,AL22
 99    FORMAT(/////5X,'SCHEDULE FOR  ',
      . 4A2,'  EXPERIMENT  ',4A2///
      .10X,'Longitude ',F8.2,' degrees WEST'/
@@ -365,7 +396,10 @@ C ENDT new page
           IDIR=+1
           IF (LDIR(ISTNSK).EQ.HHR)IDIR=-1
           if (ks2) then
-            knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+C           knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+C           replaced with:
+            knewtp = IPAS(istnsk).LT.IPASP.OR.
+     .      (IPAS(istnsk).EQ.IPASP.AND.(IFT(istnsk).LT.(IFTOLD-300)))
           else if (idir.ne.0) then
             KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .      IDIRP,IFTOLD)
@@ -445,8 +479,13 @@ C         IF (iwid.EQ.137) then
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',a5,' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
             if (ks2) then
-              write(luprt,9511) IFT(ISTNSK)/60 ! in minutes
+              write(luprt,9511) IFT(ISTNSK)/conv_s2 ! in minutes
 9511          format(I5,
+     .        ' _________________________________________________'/)
+            else if (kk4) then
+              ifeet=(dble(IFT(ISTNSK)+ffeet0_k4))*speed_k4
+              write(luprt,9513) ifeet
+9513          format(i8,
      .        ' _________________________________________________'/)
             else
               write(luprt,9512) IPAS(ISTNSK),LDIR(ISTNSK),
@@ -463,8 +502,12 @@ C         else IF (iwid.EQ. 80) then
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',
      .      a5,' ',F4.1,$)
             if (ks2) then
-              write(luprt,9517) IFT(ISTNSK)/60
+              write(luprt,9517) IFT(ISTNSK)/conv_s2
 9517          format(I5,' ',' ________________'/)
+            else if (kk4) then
+              ifeet=(dble(IFT(ISTNSK)+ffeet0_k4))*speed_k4
+              write(luprt,9519) ifeet
+9519          format(I8,' ',' ________________'/)
             else
               write(luprt,9516) IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 9516          format(I3,A1,' ',I5,' ',' ________________'/)
@@ -483,8 +526,13 @@ C         IF (iwid.EQ.137) then
      .      I2.2,':',F4.1,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,
      .      ' ',' ',F4.1,' ',I3,'  ',A2,' ',A1,' ',F4.1,' ',$)
             if (ks2) then
-              write(luprt,8511) IFT(ISTNSK)/60
+              write(luprt,8511) IFT(ISTNSK)/conv_s2
 8511          format(i5,
+     .        ' ____________________________________________________'/)
+            else if (kk4) then
+              ifeet=(dble(IFT(ISTNSK)+ffeet0_k4))*speed_k4
+              write(luprt,8513) ifeet
+8513          format(i8,
      .        ' ____________________________________________________'/)
             else
               write(luprt,8512) IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK),
@@ -499,8 +547,13 @@ C         else IF (iwid.EQ. 80) then
 8518        FORMAT(1X,I2.2,':',I2.2,':',I2.2,'-',I2.2,':',I2.2,':',I2.2,
      .      '  ',4A2,' ',A1,I2.2,':',I2.2,' ',F5.1,'  ',F4.1,' ',F4.1,$)
             if (ks2) then
-              write(luprt,8517) IFT(ISTNSK)/60
+              write(luprt,8517) IFT(ISTNSK)/conv_s2
 8517          format(I5,' ',' ________________'/)
+            else if (kk4) then
+              ifeet=(dble(IFT(ISTNSK)+ffeet0_k4))*speed_k4
+              write(luprt,8519) ifeet
+8519          format(i8,
+     .        ' ____________________________________________________'/)
             else
               write(luprt,8516) IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 8516          format(I3,A1,' ',I5,' ',' ________________'/)
@@ -513,8 +566,10 @@ C
           IPASP = IPAS(ISTNSK)
           if (ks2) then
             IFTOLD = IFT(ISTNSK)+IDUR(ISTNSK)
+          else if (kk4) then
+            IFTOLD = IFT(ISTNSK)
           else
-            IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ITEARL(istn)+
+            IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
      .      IDUR(ISTNSK)) *speed(icod,istn))
           endif
           IDIRP=IDIR

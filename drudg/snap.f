@@ -1,4 +1,4 @@
-        SUBROUTINE SNAP(cr2,iin)
+        SUBROUTINE SNAP(cr2)
 C
 C     SNAP reads a schedule file and writes a file with SNAP commands
 C
@@ -13,36 +13,29 @@ C INPUT
 C          1) epoch 1950 or 2000 <<<<<<< moved to control file
 C          2) add checks Y or N <<<< not for S2
 C          3) force checks Y or N <<<<<<< removed
-      integer iin ! 1=Mk3/4 back end, 2=VLBA back end. 
-C                   3=K4 type 2, 4=other K3/4
-C                   The difference is that K4 type 2 has "rec=drum_on"
-C       This is ignored for VEX files which already have this information.
-C
 C  LOCAL:
 C     IFTOLD - foot count at end of previous observation
 C     TSPINS - time, in seconds, to spin tape
       integer*2 IBUF2(ibuf_len),ibuf_save(ibuf_len)
       integer*2 ibuf_next(ibuf_len)
       integer*2 lmodep(4),ldirp,lds,lfreq,lspd(4)
-      integer itrax(2,2,max_chan) ! fanned-out version of itras
+c     integer itrax(2,2,max_chan) ! fanned-out version of itras
       integer ilen_next,ical_next,ipas_next(max_stn),ift_next(max_stn),
      .iyr_next,idayr_next,ihr_next,imin_next,isc_next,idirsp,
      .idur_next(max_stn),nstnsk_next,mjd_next,mon_next,ida_next,
-     .ierr_next,isor_next,istnsk_next,icod_next
+     .ierr_next,isor_next,istnsk_next,icod_next,iobs_current
       integer iblen,i,ilen,iobss,iobs,iobsp,icheck,icheckp,iobsst,
      .isorp,ipasp,iftold,kerr,ical,iyr,idayr,ihr,imin,isc,nstnsk,
      .mjd,mon,ida,isor,istnsk,icod,idir,id,iyr2,ierr,ix,idayr2,
      .ihr2,min2,isc2,iyr3,idayr3,ihr3,min3,isc3,iyr5,idayr5,ihr5,
-     .min5,isc5,nch,nc,irah,iram,idcd,idcm,l,idirp,nspd,ipasn,
-     .idayr5_save,ihr5_save,min5_save,isc5_save,
+     .min5,isc5,nch,nc,irah,iram,idcd,idcm,l,idirp,nspd,idurp,
+     .idayr5_save,ihr5_save,min5_save,isc5_save,iftchk,
      .iyr6,idayr6,ihr6,min6,isc6,idirn,ift_save,iftrem,ilatestop,
      .iyr7,idayr7,ihr7,min7,isc7,
      .iyr1,idayr1,ihr1,iimin1,isc1,
-     .iyr5_next,idayr5_next,ihr5_next,min5_next,isc5_next,
      .idum,ispm,isps,ic,ichk,iset,ihd,isppl,iyr4,idayr4,ihr4,
-     .min4,isc4,iyrch,idayrch,ihrch,minch,iscch,ndx,isp,il,mjdpre
-      integer iftend,iften
-      real tspins,d,epoc,ras,dcs,spdips,tslew,dum
+     .min4,isc4,iyrch,idayrch,ihrch,minch,iscch,ndx,il,mjdpre
+      real tspins,d,epoc,ras,dcs,tslew,dum
       integer*2 lsname_next(max_sorlen/2),lfreq_next,lpre_next(3),
      .lmid_next(3),lpst_next(3),ldir_next(max_stn),lstn_next(max_stn),
      .lcable_next(max_stn),lmon_next(2),lday_next(2),lcb_new,lcbpre
@@ -50,25 +43,30 @@ C     TSPINS - time, in seconds, to spin tape
      .          LMON(2),LDAY(2),LPRE(3),LPST(3),LMID(3),LDIR(MAX_STN)
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN)
       integer ioff(max_stn),ioff_next(max_stn)
-      integer npmode,itrk(max_track),nco,idt,itu,ituse
-      integer*2 lpmode(2)
+      integer idt,ituse,itype
       double precision UT,GST,ut_next,gst_next,utpre
       double precision SORRA,SORDEC
       double precision RA,DEC,TJD,RAH,DECD,RADH,DECDD
       logical kcont ! true for CONTINUOUS recording
       logical kadap ! true for ADAPTIVE recording in VEX file
+      logical krec_append ! true to append '1' or '2' to rec commands
       real az,el,x30,y30,x85,y85,ha1,dc
       character*4  response
       character*3  stat
-      character*28 cpass,cvpass
+C     character*28 cpass,cvpass
       character    upper
-      character*1  maxchk,dopre
+      character*1  maxchk,dopre,cx
       logical    ex
       logical kintr ! false until intro lines have been written
       logical kflg_next(4)
       logical      kdone,kspin,kup
-      logical ks2 ! true for S2 recorder
-      logical kk4 ! true for K4 recorder
+      logical ks2,ks2_old ! true for S2 recorder
+      logical kk4,kk4_old ! true for K4 recorder
+      logical km3rack,km4rack,kvrack,kv4rack,
+     .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
+     .km3rec(2),km4rec(2),kvrec(2),
+     .kv4rec(2),ks2rec(2),kk41rec(2),kk42rec(2)
+      logical kdrum ! true when the drum_on command was written
       logical ket ! true if the tape is going to be stopped for this scan
       logical kstopp,kstop ! 
       logical krunning ! true when the tape is running
@@ -89,22 +87,26 @@ C     iobsst - number of obs for this station that are recorded on tape
       character*7 cwrap ! cable wrap from CBINF
       integer itlen ! length of buffer returned from timout
       integer*2 lwrap(4)
+C     integer*2 scan_name(16),scan_namep(16),scan_name_next(16)
       real spd
       logical KNEWTP,KNEWT
 C      - true if a new tape needs to be mounted before
 C        beginning the current observation
-Cinteger*4 ifbrk
       integer jchar,trimlen,ir2as,ib2as,ichmv,iscnc,mcoma ! functions
       integer julda,iflch,ichcm,ichcm_ch,ichmv_ch,isecdif
       real tspin,speed ! functions
+      character*1 crec_use ! recorder in use, 1 or 2
+      character*1 crec_use_old
+      logical krec ! true if the recorder is NOT "none"
+      integer ntape ! count of tapes used in the schedule
 C
 C  INITIALIZED:
       integer Z20,Z4000,Z100,Z8000,Z24
       DATA Z20/Z'20'/,Z4000/Z'4000'/,Z100/Z'100'/
       DATA Z8000/Z'8000'/, Z24/Z'24'/
       DATA LDIRP/2H  /
-      data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
-      data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
+C     data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
+C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 C     NRV 830818 ADDED SATELLITE ORBIT COMMAND OUTPUT
@@ -230,6 +232,45 @@ C 980917 nrv Change "data_valid" back to comments until command is ready.
 C 981016 nrv Now can use data_valid command and checkf
 C 990112 nrv Add REC=DRUM_ON before PREOB for K4 recorders.
 C 990113 nrv Add "iin" option 4 for K4 type 2, option 5 other K4. Disable 3.
+C 990304 nrv Move K4 drum on command before the ST for early start.
+C 990524 nrv Add S2 non-VEX option. Add kk4,ks2 to snapintr call.
+C 990715 nrv Do a SETUP for every scan for S2. Remove duplicate data_valid
+C            =off for S2.
+C 990716 nrv Don't fastr the tape to unload it if it's CONT.
+C 990803 nrv Do a SETUP before READY if it's the first tape.
+C 990901?nrv Remove iin=2 as an option because difference with VLBA
+C            racks is no longer important.
+C 990914 nrv Abort if there is an illegal head/pass.
+C 991102 nrv Removed IIN options. Move prompts for maxchk and dopre to
+C            subroutine SNAP_INFO. Remove kk4,ks2 from SNAPINTR call.
+C            Move setup name generation to SETUP_NAME. 
+C 991102 nrv Dual recorder mode. Recorders 1 and 2 (not A and B). Add crec
+C            to LSPIN call.
+C 991206 nrv Reverse f/r and 80/135 to make e.g. check80f.
+C 991207 nrv Use PREPASSTHIN for thin tapes.
+C 991208 nrv Count the tapes as READY is done. Add ready=n, unlod=n for K4.
+C 991210 nrv Don't switch recorders until after the 'et' after SOURCE.
+C 000315 nrv Don't put in the wait-until and "data_valid" if the time
+C            is later than the scan.
+C 000509 nrv Add call to S2INTRO from C. Klatt.
+C 000522 nrv Add scan_name command, just before the SOURCE= command.
+C 000602 nrv Add call to SNAME to set up scan name.
+C 000623 nrv Remove DRUM_ON command.
+C 000905 nrv Save _old info about S2 and K4 so that these can be a
+C            used as mixed dual recorders.
+C 001013 nrv Remove condition that no times are changed if it's a
+C            new tape in continuous mode.
+C 001109 nrv scan_name array is character.
+C 001113 nrv Test for same pass, not same direction, in continuous.
+C 010207 nrv Add UNLOADER/LOADER for S2 for group changes
+C 010208 nrv Do parity checks only if the scan duration is long enough, and
+C            if it's not then keep trying on that pass.
+C 010508 nrv At the end of the scan, utpre was having idur added again.
+C            but time4 already has it. This was causing some timing
+C            events to be issued at incorrect times for the next scan. 
+C 010726 nrv Add SCHED_END at the end of the file.
+C 010820 nrv Don't append to rec commands if one of the recorders is none.
+C 010831 nrv Send krec_append to LSPIN.
 C
 C
       iblen = ibuf_len*2
@@ -240,44 +281,60 @@ C
      .  ' cause a program abort.')
       endif
 
+      if (ichcm_ch(lstrack(1,istn),1,'unknown').eq.0.or.
+     .    ichcm_ch(lstrec(1,istn),1,'unknown').eq.0) then
+        write(luscn,9102)
+9102    format(/' SNAP01 - Rack or recorder type is unknown. Please',
+     .  ' specify your '/
+     .  ' equipment using Option 11 or the EQUIPMENT line in the ',
+     .  ' control file.')
+        return
+      endif
+
+      call set_type(istn,km3rack,km4rack,kvrack,kv4rack,
+     .kk41rack,kk42rack,km4fmk4rack,kk3fmk4rack,k8bbc,
+     .km3rec,km4rec,kvrec,
+     .kv4rec,ks2rec,kk41rec,kk42rec)
+
 C 2. Check the type of equipment so that bit density is correct.
 C   For VEX files the rack and recorder info is taken from the schedule. 
 C   For non-VEX, the user specified either Mk3/4 or VLBA back end.
 C   For S2, since this must be a VEX file, we will rely on the schedule 
 C   for the rack type.
-      ks2=.false.
-      kk4=.false.
-      if (ichcm_ch(lstrack(1,istn),1,'unknown ').ne.0.and.
-     .    ichcm_ch(lstrec (1,istn),1,'unknown ').ne.0) then ! in VEX file
-        ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
-        kk4=   ichcm_ch(lstrec(1,istn),1,'K4').eq.0 
-C NOTE: types of K4 recorders need to be expanded in VEX!
-      else ! take user input 
+C     ks2=.false.
+C     kk4=.false.
+C     if (ichcm_ch(lstrack(1,istn),1,'unknown').eq.0.or.
+C    .    ichcm_ch(lstrec (1,istn),1,'unknown').eq.0) then ! take user input
 C     Modify bit density and recording format according to formatter type.
-        if (iin.eq.1) then ! Mark III/IV formatter and DR format
-          do i=1,ncodes
-C           Force the format to "M" as the only way this formatter can go.
-            idum = ichmv_ch(lmfmt(1,istn,i),1,'M')
-            if (bitdens(istn,i).lt.40000.d0) then
-              bitdens(istn,i) = 33333.0
-            else
-              bitdens(istn,i) = 56250.0 
-            endif
-          enddo
-        else if (iin.eq.2) then ! VLBA formatter
+C       if (iin.eq.1) then ! Mark III/IV formatter and DR format
 C         do i=1,ncodes
-C           Use the format taken from the mode name. Leave the bit
-C           density alone too.
+C           Force the format to "M" as the only way this formatter can go.
+C           idum = ichmv_ch(lmfmt(1,istn,i),1,'M')
 C           if (bitdens(istn,i).lt.40000.d0) then
-C             bitdens(istn,i) = 34020.0
+C             bitdens(istn,i) = 33333.0
 C           else
-C             bitdens(istn,i) = 56700.0 
+C             bitdens(istn,i) = 56250.0 
 C           endif
 C         enddo
-        else if (iin.ge.3) then ! K4 recorder
-          kk4=.true.
-        endif
-      endif
+CC      else if (iin.eq.2) then ! VLBA formatter
+CC        do i=1,ncodes
+CC          Use the format taken from the mode name. Leave the bit
+CC          density alone too.
+CC          if (bitdens(istn,i).lt.40000.d0) then
+CC            bitdens(istn,i) = 34020.0
+CC          else
+CC            bitdens(istn,i) = 56700.0 
+CC          endif
+CC        enddo
+C       else if (iin.eq.3) then ! K4 recorder
+C         kk4=.true.
+C       else if (iin.eq.4) then ! S2 recorder
+C         ks2=.true.
+C       endif
+C     else ! in the schedule file
+C       ks2=   ichcm_ch(lstrec(1,istn),1,'S2').eq.0
+C       kk4=   ichcm_ch(lstrec(1,istn),1,'K4').eq.0 
+C     endif
 
 C    1. Prompt for additional parameters, epoch of source positions
 C    and whether maximal checks are wanted.
@@ -286,76 +343,13 @@ C    and whether maximal checks are wanted.
 9100  format(/'SNAP output for ',4a2)
       ierr=1
 
-       if (kbatch) then ! batch
-         maxchk = upper(cr2)
-         if (maxchk.ne.'Y'.and.maxchk.ne.'N') then
-           write(luscn,9104) maxchk
-           return
-         endif
-       else ! interactive
-        write(luscn,9112) cepoch(1:trimlen(cepoch))
-9112    format(' Source commands will be written with epoch ',a,'.')
-        if (ks2.or.kk4) then ! parity/prepass
-          maxchk = 'N'
-        else 
-        if (kparity) then
-          write(luscn,9102)
-9102      format(/' Parity checks will be inserted after the first ',
-     .    'scan of each pass,'/' if there is enough time to do them.')
-        else
-          write(luscn,9101)
-9101      format(' No parity checks will be inserted unless you ',
-     .    'request them ',/' with the following response.')
-        endif
-        ierr=1
-        do while (ierr.ne.0)
-          if (kparity) then
-            write(luscn,9103)
-9103        format(' Add more parity checks whenever there is ',
-     .      'enough time?'/' Enter Y or N, 0 to quit ? [default N] ',$)
-          else
-            write(luscn,9105)
-9105        format(' Insert parity checks whenever there is ',
-     .      'enough time?'/' Enter Y or N, 0 to quit ? [default N] ',$)
-          endif
-          read(luusr,'(a)') response
-          if (response(1:1).eq.'0') return
-          response(1:1) = upper(response(1:1))
-          if (response(1:1).eq.' ') response(1:1) = 'N'
-          if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
-            write(luscn,9104) response(1:1)
-9104      format(' Invalid parity check response ',a,'. Enter Y or N.')
-          else
-            maxchk = response(1:1)
-            ierr=0
-          endif
-        enddo
-        if (kprepass) then ! prepass
-          write(luscn,9107)
-9107      format(/' Prepassing tapes is specified in this schedule. ',
-     .    /' Please confirm whether you want do to this.')
-          ierr=1
-          do while (ierr.ne.0)
-            if (kprepass) then
-              write(luscn,9106)
-9106          format(' Do prepasses during the session? ',
-     .        ' Enter Y or N, 0 to quit ? [default N] ',$)
-            endif
-            read(luusr,'(a)') response
-            if (response(1:1).eq.'0') return
-            response(1:1) = upper(response(1:1))
-            if (response(1:1).eq.' ') response(1:1) = 'N'
-            if (response(1:1).ne.'Y'.and.response(1:1).ne.'N') then
-              write(luscn,9108) response(1:1)
-9108        format(' Invalid prepass response ',a,'. Enter Y or N.')
-            else
-              dopre = response(1:1)
-              ierr=0
-            endif
-          enddo
-        endif ! prepass
-        endif ! parity and prepass
-      endif ! batch/interactive
+      if (ks2rec(1).or.ks2rec(2).or.kk41rec(1).or.kk41rec(2).or.
+     .kk42rec(1).or.kk42rec(2)) then
+        maxchk = 'N'
+        dopre = 'N'
+      else
+        call snap_info(cr2,maxchk,dopre)
+      endif
 
 C     1. Create output file for SNAP commands.  If problems, quit.
 
@@ -427,6 +421,26 @@ C
       krunning = .false.
       ilatestop=0
       istnsk=0
+      ntape=0
+C     idum = ichmv_ch(scan_namep,1,'          ')
+C     idum = ichmv_ch(scan_name ,1,'          ')
+
+C Initialize recorder information.
+      call hol2char(lfirstrec(istn),1,1,crec_use)
+      crec_use_old = crec_use 
+      if (crec_use.eq.'1') then ! first recorder 
+        kk4 = kk41rec(1).or.kk42rec(1)
+        ks2 = ks2rec(1)
+        krec = ichcm_ch(lstrec(1,istn),1,'none').ne.0
+      else ! second recorder 
+        kk4 = kk41rec(2).or.kk42rec(2)
+        ks2 = ks2rec(2)
+        krec = ichcm_ch(lstrec2(1,istn),1,'none').ne.0
+      endif
+      krec_append = .false.
+      if (nrecst(istn).gt.1.and.ichcm_ch(lstrec(1,istn),1,'none').ne.0)
+     .krec_append = .true.
+
       do while (istnsk.eq.0.and.ilen.ge.0) ! Get first scan for this station into IBUF
         call ifill(ibuf,1,ibuf_len*2,oblank)
         IOBS = IOBS + 1
@@ -436,6 +450,8 @@ C
           CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .    IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      .    MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
+C         call sname(idayr,ihr,imin,scan_namep,scan_name)
+C         idum = ichmv(scan_namep,1,scan_name,1,16)
           CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
           IF (ISOR.EQ.0.OR.ICOD.EQ.0) RETURN
         else
@@ -459,6 +475,7 @@ C
      ..AND.JCHAR(IBUF,1).NE.Z24)
 C
         istnsk_next=0
+        iobs_current = iobs ! save current obs number for scan ID
         do while (istnsk_next.eq.0) ! Get NEXT scan for this station into ibuf_next
           call ifill(ibuf_next,1,ibuf_len*2,oblank)
           IOBS = IOBS + 1
@@ -474,6 +491,9 @@ C
      .      LMON_next,LDAY_next,IERR_next,KFLG_next,ioff_next)
             CALL CKOBS(LSNAME_next,LSTN_next,NSTNSK_next,LFREQ_next,
      .      isor_next,ISTNSK_next,ICOD_next)
+C           call sname(idayr_next,ihr_next,imin_next,
+C    .      scan_namep,scan_name_next)
+C           idum = ichmv(scan_namep,1,scan_name_next,1,16)
             IF (ISOR_next.EQ.0.OR.ICOD_next.EQ.0) RETURN
           else
             ilen=-1
@@ -495,6 +515,7 @@ C                                             ! got a previous scan
 C
         IF (.not.kintr)   THEN
           call snapintr(1,iyr)
+C         if (ks2rec(1).or.ks2rec(2)) call s2intro
           kintr=.true.
           iobss=0
           iobsst=0
@@ -510,7 +531,32 @@ C           or set a special flag for non-recording scans
           IF (ichcm_ch(LDIR_next(ISTNSK),1,'0').eq.0) IDIRn= 0
           ID=IDUR(ISTNSK)
 
+C****************************************************************
+C This is the confusing part where certain timings are set up,
+C depending on the type of tape motion. This part needs to be
+C cleaned up and rationalized when sked and sched are both using
+C the same logic.
+C****************************************************************
 C  2.5  Calculate all the times and flags we will need. 
+
+C  Does this obs start a new tape?
+C  S2 tapes may not start off with zero footage.
+C         if (ks2) then
+C           too simple a check for a new tape
+C           knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
+C           knewtp = ift(istnsk).eq.0
+C           a better check:
+C           knewtp = IPAS(istnsk).LT.IPASP.OR.
+C    .      (IPAS(istnsk).EQ.IPASP.AND.(IFT(istnsk).LT.(IFTOLD-300)))
+C         else if (idir.ne.0) then
+          if (idir.ne.0) then
+            KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
+     .      IDIRP,IFTOLD)
+          else
+            knewtp = .false.
+          endif
+C         Force new tape on the first scan cn tape.
+          if (iobsst.eq.0) knewtp=.true.
 
 C     time1 = data start time
           iyr1=iyr
@@ -525,7 +571,7 @@ C     time3 = data start - ICAL
           CALL TMSUB(IYR1,IDAYR1,IHR1,iiMIN1,ISC1,ICAL,
      .               IYR3,IDAYR3,IHR3,MIN3,ISC3)
 C     time4 = previous data stop (saved from the last scan)
-C     time5 = tape start = data start - early start
+C     time5 = tape start = data start - early start = data_valid time
           call tmsub(iyr1,idayr1,ihr1,iimin1,isc1,ITEARL(istn),
      .               iyr5,idayr5,ihr5,min5,isc5)
 C     time5_next = next tape start = next data start - early start
@@ -601,9 +647,15 @@ C    .    (tape_motion_type(istn).eq.'ADAPTIVE'.and..not.kstop)) then
           ilatestop=0
           ket = .false.
           kcont = .true.
+C Why was this condition added? It results in the stop time for
+C the new tape being left at the one for the end of the previous pass.
+C         if (knewtp) then ! don't change any calculated times
+C         else if (iobsst.gt.0.and..not.kstopp) then ! calculate new times based
           if (iobsst.gt.0.and..not.kstopp) then ! calculate new times based
 C                                     on on-source time, not start time
-            if (idirp.eq.idir) then ! this obs on same pass
+C           This test results in passes 5F and 7F appearing to be on the same pass
+C           if (idirp.eq.idir) then ! this obs on same pass
+            if (ipasp.eq.ipas(istnsk)) then ! this obs on same pass
 C             time1_new = prev.stop + slew + cal
               if (tslew.lt.0) tslew=0.0
               CALL TMADD(IYR4,IDAYR4,IHR4,MIN4,ISC4,ifix(tslew)+ical,
@@ -644,7 +696,7 @@ C         always stop on the last scan but not for late stop.
         if (istnsk_next.eq.999.and.itlate(istn).eq.0) ket=.true.
 
 C <<<previous>>>>  <<<<<<<<<<current>>>>>>>>>>>>>>>>>>>>>>  <<<next>>>>>>>>>
-C time4=   time6=  time5=        time= time2=               time5_next=
+C time4=   time6=  time5=        time= time2=       time6=  time5_next=
 C data     tape   tape           data   data         tape    tape
 C stop     stop   start          start  stop         stop    start
 C  ^         ^      ^              ^      ^            ^      ^
@@ -652,8 +704,19 @@ C  |---------|------|--------------|------|------------|------|-------------|
 C  <late stop><-idt-><-early start-><-dur-><-late stop-><-idt-><-early start>
 C             (gap)                                     (gap)
 C
+C***************************************************************************
 C
 C     3. Output the SNAP commands. Refer to drudg documentation.
+
+C scan_name command. 
+        CALL IFILL(IBUF2,1,iblen,32)
+        nch = ichmv_ch(ibuf2,1,"scan_name=")
+        il = trimlen(scan_name(iobs_current+1))
+        call char2hol(scan_name(iobs_current+1)(1:il),ibuf2,nch,nch+il)
+        nch = nch+il
+C       nch = ichmv(ibuf2,nch,scan_name(1,iobs_current+1),1,9)
+        NCH = ichmv_ch(IBUF2,NCH,' ')-1
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
 
 C SOURCE command
           IOBSP = IOBSP+1
@@ -739,47 +802,56 @@ C           endif
           call hol2lower(ibuf2,(nch+1))
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
 C
-C  New tape?
-C  S2 tapes may not start off with zero footage.
-          if (ks2) then
-C           too simple a check for a new tape
-C           knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
-C           a better check:
-            knewtp = IPAS(istnsk).LT.IPASP.OR.
-     .      (IPAS(istnsk).EQ.IPASP.AND.(IFT(istnsk).LT.(IFTOLD-300)))
-          else if (idir.ne.0) then
-            KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
-     .      IDIRP,IFTOLD)
-          else
-            knewtp = .false.
-          endif
-C         Force new tape on the first scan cn tape.
-          if (iobsst.eq.0) knewtp=.true.
-C
 C  For S2 or continuous, stop tape if needed after the SOURCE command
-          if ((idir.ne.0.and.ks2.and.itlate(istn).gt.0.and.iobsst.ne.0
-     .       .and.
+          if ((krec.and.idir.ne.0.and.
+     .       ks2.and.itlate(istn).gt.0.and.iobsst.ne.0.and.
      .       ipasp.ge.0.and.(knewtp.or.ket.or.ipasp.ne.ipas(istnsk).or.
      .        ichcm(lmodep,1,lmode(1,istn,icod),1,8).ne.0))
      .      .or.
      .       (.not.ks2.and.kcont.and.iobsst.ne.0.and.idir.ne.0.and.
+     .         krec.and.
      .          (ilatestop.gt.0.or.knewtp
      .         .or.idirp.ne.idir))) then
             call timout(ibuf2,itlen,iyr6,idayr6,ihr6,min6,isc6)
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
+            call ifill(ibuf2,1,iblen,32)
             nch = ichmv_ch(IBUF2,1,'et')
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
             krunning = .false.
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
             if (.not.ks2) then ! wait for tape to stop
-              idum = ichmv_ch(IBUF2,1,'!+3S')
+              call ifill(ibuf2,1,iblen,32)
+              nch = ichmv_ch(IBUF2,1,'!+3S')
               if (speed(icod,istn).gt.15.0) 
-     .             idum = ichmv_ch(IBUF2,1,'!+5s')
-              call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-              CALL IFILL(IBUF2,1,iblen,Z20)
+     .             nch = ichmv_ch(IBUF2,1,'!+5s')
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+              CALL IFILL(IBUF2,1,iblen,32)
             endif 
           endif
 
-          if (idir.ne.0) then ! skip all this tape stuff if no recording
+C Switch recorders if it's a new tape.
+          if (knewtp.and.iobsst.gt.0.and.nrecst(istn).eq.2) then ! switch 
+            if (ichcm_ch(lstrec(1,istn),1,'unused').eq.0.or.
+     .          ichcm_ch(lstrec2(1,istn),1,'unused').eq.0) then ! don't switch
+            else ! switch
+            crec_use_old = crec_use ! save the old one for the UNLOD command
+            ks2_old = ks2
+            kk4_old = kk4
+            if (crec_use.eq.'1') then
+              crec_use = '2'
+              kk4 = kk41rec(2).or.kk42rec(2)
+              ks2 = ks2rec(2)
+              krec = ichcm_ch(lstrec2(1,istn),1,'none').ne.0
+            else
+              crec_use = '1'
+              kk4 = kk41rec(1).or.kk42rec(1)
+              ks2 = ks2rec(2)
+              krec = ichcm_ch(lstrec(1,istn),1,'none').ne.0
+            endif
+            endif ! don't/switch
+          endif ! switch 
+C
+          if (idir.ne.0.and.krec) then ! skip all this tape stuff 
 C MIDTP procedure when changing direction
 C Note this will never be called for S2 because it only records forward.
           IF (KNEWTP) IOBSP = 1  ! first observation on this pass
@@ -788,8 +860,8 @@ C Note this will never be called for S2 because it only records forward.
             icheck = 1 !do a check after this observation
             IOBSP = 1
             CALL IFILL(IBUF2,1,iblen,32)
-            nch = ichmv_ch(IBUF2,1,'midtp  ')
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch-1)/2)
+            nch = ichmv_ch(IBUF2,1,'midtp')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
           else
             icheck=0
           END IF
@@ -803,36 +875,51 @@ C Calculate tape spin time
 C
 C Unload old tape
           IF (KNEWTP.AND.IOBSst.NE.0) THEN !get rid of old tape
-            IF (.not.ks2.and..not.kk4.and.IFTOLD.GT.50 ) THEN !spin down remaining tape
+            IF (.not.ks2_old.and..not.kk4_old.and..not.kcont.and.
+     .        IFTOLD.GT.50 ) THEN 
+C             spin down remaining tape
               CALL IFILL(IBUF2,1,iblen,32)
               TSPINS=TSPIN(IFTOLD,ISPM,ISPS)
               idirsp=-1
-              CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
+              CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use_old,
+     .        nrecst(istn),
+     .  krec_append)
               call hol2lower(ibuf2,(nch+1))
-              call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
               kspin = .true. !Just wrote a FASTx command
               TSPINS=0.0
             END IF !spin down remaining tape
             if (krunning) then ! stop it!
+              CALL IFILL(IBUF2,1,iblen,32)
               nch = ichmv_ch(IBUF2,1,'et')
+              if (krec_append      ) nch = ichmv_ch(ibuf2,nch,
+     .          crec_use_old)
               krunning = .false.
-              call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
-              if (.not.ks2.and..not.kk4) then ! wait for tape to stop
-                idum = ichmv_ch(IBUF2,1,'!+3S')
+              call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+              if (.not.ks2_old.and..not.kk4_old) then ! wait for tape to stop
+                CALL IFILL(IBUF2,1,iblen,32)
+                nch = ichmv_ch(IBUF2,1,'!+3S')
                 if (speed(icod,istn).gt.15.0) 
-     .             idum = ichmv_ch(IBUF2,1,'!+5s')
-                call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-                CALL IFILL(IBUF2,1,iblen,Z20)
+     .             nch = ichmv_ch(IBUF2,1,'!+5s')
+                call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+                CALL IFILL(IBUF2,1,iblen,32)
               endif  ! wait for stop
             endif
             CALL IFILL(IBUF2,1,iblen,32)
-            nch = ichmv_ch(IBUF2,1,'unlod   ')
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch-1)/2)
+            nch = ichmv_ch(IBUF2,1,'unlod')
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,
+     .      crec_use_old) ! unload the old tape
+            if (kk4_old) then ! append tape number
+              nch = ichmv_ch(ibuf2,nch,'=')
+              nch = nch + ib2as(ntape,ibuf2,nch,1)
+            endif
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
           END IF !get rid of old tape
           endif ! skip the tape stuff if not recording
 C
 C Check procedure
-C             for continuous, check after tape stops at end of a pass
+C For continuous tape motion, check after tape stops at end of a pass
+        if (krec) then ! recording
           ICHK = 0
 C         Add "not krunning" so we don't try a check while it's moving!
           IF (.not.krunning.and..not.ks2.and..not.kk4
@@ -866,64 +953,91 @@ C           check against start-cal   for early=0.
      .           IHRch,MINch,ISCch)
              endif
 C CHECK procedure 
-              if (idt.gt.IPARTM) then ! enough time 
-            ICHK = 1
+C Needs 55 sec at 80 ips = 4400 in = 366.667 f
+C NOTE: 55 sec should really be IPARTM
+              iftchk = speed(icod,istn)*idurp ! feet in previous scan
+              if (idt.ge.IPARTM.and.iftchk.ge.366) then ! enough time 
+                ICHK = 1
                 CALL IFILL(IBUF2,1,iblen,32)
                 NCH = ichmv_ch(IBUF2,1,'CHECK')
 C Change to using checkf/r 80 or 135
-C Wait until this is implemented in the FS.
-                if (idirp.eq.1) then ! previous pass was forward
-                  nch=ichmv_ch(ibuf2,nch,'f')
-                else ! previous pass was reverse
-                  nch=ichmv_ch(ibuf2,nch,'r')
-                endif ! for/rev
+C Reverse f/r and 80/135.
                 if (bitdens(istn,icod).lt.40000.0) then ! low 135 ips
                   nch=ichmv_ch(ibuf2,nch,'135')
                 else ! high 80 ips
                   nch=ichmv_ch(ibuf2,nch,'80')
                 endif ! low/high density
-C No longer use check2c1
-C              nch = ichmv_ch(ibuf2,nch,'2')
-C              NCH=ICHMV(IBUF2,NCH,LMODEP     ,1,1)
-C              Use the direction of the previous pass
-C              NDX = 1
-C              IF (IDIRP.EQ.-1) NDX = 2
-C             NCH = NCH + IB2AS(NDX,IBUF2,NCH,1)
-C              Use the subpass, not direction, of the previous pass.
-C              Nope, can't do the above because check procedures are set up
-C              for forward/reverse tape motion and can't be changed.
-C              ndx = ihddir(1,ipasp,istn,icod) ! subpass
-C              if (jchar(lmode,1).eq.ocapv) then           ! p
-C                NCH=ICHMV_ch(ibuf2,NCH,cvPASS(ndx:ndx))  
-C              else
-C                NCH=ICHMV_ch(ibuf2,NCH,cPASS(ndx:ndx))    
-C              endif      
-                CALL IFILL(IBUF2,NCH,1,Z20)
+                if (idirp.eq.1) then ! previous pass was forward
+                  nch=ichmv_ch(ibuf2,nch,'f')
+                else ! previous pass was reverse
+                  nch=ichmv_ch(ibuf2,nch,'r')
+                endif ! for/rev
+                if (krec_append      ) nch=ichmv_ch(ibuf2,nch,crec_use)
                 call hol2lower(ibuf2,(nch+1))
-                call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+                call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+              else ! not enough time, so try later
+                icheck = 1 ! do a check after this obs (or at least try)
               endif ! enough time OR force
             ENDIF !do the check
           END IF !check procedure
+        endif ! recording
 C
-C Put READY before SETUP as of 12/97.
+C Put READY before SETUP as of 12/97. Do SETUP READY SETUP for first tape.
 C 
 C READY
-        IF (KNEWTP.and.idir.ne.0) THEN ! new tape
-          CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'ready  ')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
-C Prepass new tape
-          IF (dopre.eq.'Y'.and..not.ks2.and..not.kk4.AND.KFLG(3)) THEN !prepass
+        IF (KNEWTP.and.idir.ne.0.and.krec) THEN ! new tape
+          if (iobss.eq.0) then ! do a SETUP first
+            ic=Z8000+3
+            if (ks2) then ! setup proc names
+              itype=1 
+            else ! mnemonic proc names
+              itype=2
+              if (ipas(istnsk).le.0) then ! invalid pass
+                write(luscn,9912) ipas(istnsk),icod
+                return
+              endif ! invalid pass
+              ndx = ihddir(1,ipas(istnsk),istn,icod) ! subpass
+              if (ndx.le.0) then ! invalid head position
+                write(luscn,9912) ipas(istnsk),icod,iobs
+9912            format(/'SNAP04 - Illegal head position or pass',
+     .          ' for pass ',i3,' in mode ',i2, ' scan ',i3)
+                return
+              endif
+            endif
             CALL IFILL(IBUF2,1,iblen,32)
-            NCH = ichmv_ch(IBUF2,1,'prepass  ')
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch-1)/2)
+            call setup_name(itype,icod,ndx,ibuf2,nch)
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+            NCH = ichmv_ch(IBUF2,NCH,'=')                ! =
+            NCH = NCH + IB2AS(IPAS(ISTNSK),IBUF2,NCH,ic) ! pass
+            call hol2lower(ibuf2,(nch+1))
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+          endif ! do a SETUP first
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(IBUF2,1,'ready')
+          ntape = ntape + 1
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          if (kk4) then ! append tape number
+            nch = ichmv_ch(ibuf2,nch,'=')
+            nch = nch + ib2as(ntape,ibuf2,nch,1)
+          endif
+          call hol2lower(ibuf2,nch)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C Prepass new tape
+          IF (dopre.eq.'Y'.and.KFLG(3)) THEN !prepass
+            CALL IFILL(IBUF2,1,iblen,32)
+            NCH = ichmv_ch(IBUF2,1,'prepass')
+            if (maxtap(istn).gt.17000) nch=ichmv_ch(ibuf2,nch,'thin')
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+            call hol2lower(ibuf2,nch)
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
           END IF !prepass
           IF (.not.ks2.and..not.kk4.and.IFT(ISTNSK).GT.100) THEN !spin up
             TSPINS=TSPIN(IFT(ISTNSK),ISPM,ISPS)
             idirsp=+1
-            CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
-            call hol2lower(ibuf2,(nch+1))
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+            CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .  krec_append)
+            call hol2lower(ibuf2,nch)
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
             kspin = .true. !Just wrote a FASTx command
           END IF
 C Set TSPINS zero here so that no other spin is done
@@ -931,41 +1045,48 @@ C (move out from previous if test)
           TSPINS=0.0
         END IF ! new tape
 
+C UNLOADER 
+C Called for S2 if the group changed since the last pass
+        if (ks2.and..not.knewtp.and.ipasp.ne.-1.and.
+     .      ipasp.ne.ipas(istnsk)) then
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(ibuf2,1,'unloader')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+        endif
+
 C SETUP procedure 
 C This is called on the first scan, if the setup is wanted on this
 C scan (flag 1=Y), if tape direction changes, or if a check was done
-C prior to this scan. Do only on a new pass for continuous.
+C prior to this scan. Do only on a new pass for continuous. But
+C do it every scan for S2.
         if ((.not.kvex.and..not.kcont).or.(kcont.and..not.krunning).or.
-     .        (kvex.and..not.krunning)) then
-          IF (IOBSs.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
+     .        (kvex.and..not.krunning).or.ks2) then
+        IF (IOBSs.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
      .    .OR.ICHK.EQ.1) THEN
-          ic=Z8000+3
-          nco=iflch(lfreq,2)
+          if (iobss.eq.0.and.ks2) then ! don't do second setup at start for S2
+          else ! do it
+            ic=Z8000+3
+            if (ks2) then ! setup proc name
+              itype=1
+            else ! mnemonic proc name
+              itype=2
+              if (ipas(istnsk).le.0) then ! invalid pass
+                write(luscn,9912) ipas(istnsk),icod
+                return
+              endif ! invalid pass
+              ndx = ihddir(1,ipas(istnsk),istn,icod) ! subpass
+              if (ndx.le.0) then ! invalid head position
+                write(luscn,9912) ipas(istnsk)
+                return
+              endif
+            endif
+          endif ! don't do second setup at start for S2
           CALL IFILL(IBUF2,1,iblen,32)
-          if (ks2) then ! setup 
-            nch = ichmv_ch(ibuf2,1,'setup')
-C           Add the code index 
-            nch = ICHMV(IBUF2,nch,LFREQ,1,nco)           ! ff
-          else ! ffbm
-            nch = ICHMV(IBUF2,1,LFREQ,1,nco)             ! ff
-            ndx = ihddir(1,ipas(istnsk),istn,icod) ! subpass
-            call trkall(itras(1,1,1,1,ndx,istn,icod),
-     .      lmode(1,istn,icod),itrk,lpmode,npmode,ifan(istn,icod),itrax)
-            CALL M3INF(ICOD,SPDIPS,ISP) ! get bandwidth code
-C           choices in LBNAME are D,8,4,2,1,H,Q,E
-C           corresponding to     16,8,4,2,1,.5,.25,.125
-            NCH=ICHMV(ibuf2,NCH,LBNAME,isp,1)            ! b
-            NCH=ICHMV(ibuf2,NCH,Lpmode,1,npmode)         ! m
-C           Append the subpass code
-            if (jchar(lmode,1).eq.ocapv) then           ! p
-              NCH=ICHMV_ch(ibuf2,NCH,cvPASS(ndx:ndx))  
-            else
-              NCH=ICHMV_ch(ibuf2,NCH,cPASS(ndx:ndx))    
-            endif      
-          endif ! setup or ffbmp 
+          call setup_name(itype,icod,ndx,ibuf2,nch)
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
           NCH = ichmv_ch(IBUF2,NCH,'=')                ! =
           NCH = NCH + IB2AS(IPAS(ISTNSK),IBUF2,NCH,ic) ! pass
-          CALL IFILL(IBUF2,NCH,3,Z20)
           call hol2lower(ibuf2,(nch+1))
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
         END IF
@@ -975,30 +1096,34 @@ C LOADER
 C Called for S2 if the group changed since the last pass
         if (ks2.and..not.knewtp.and.ipasp.ne.-1.and.
      .      ipasp.ne.ipas(istnsk)) then
-          nch = ichmv_ch(ibuf2,1,'loader  ')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(ibuf2,1,'loader')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif
 C
 C Spin new tape if necessary to reach footage
 C Don't spin if we're already running. (? shouldn't happen?)
         IF (idir.ne.0.and..not.krunning.and..not.ks2.and..not.kk4.
-     .     and.TSPINS.GT.5.0) THEN
+     .     and.TSPINS.GT.5.0.and.krec) THEN
           CALL IFILL(IBUF2,1,iblen,32)
-          CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH)
+          CALL LSPIN(idirsp,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .  krec_append)
           call hol2lower(ibuf2,(nch+1))
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
           kspin = .true. !Just wrote a FASTx command
           TSPINS = 0.0
         END IF
-
+C K4 initialize whether drum command was written.
+        kdrum=.false.
 C Early start 
-        if (idir.ne.0) then ! this is a non-zero recording scan
+        if (idir.ne.0.and.krec) then ! this is a non-zero recording scan
         if (itearl(istn).gt.0) then ! early start
         if (.not.kcont.or.(kcont.and..not.krunning)) then ! continuous
 C       always do unless continuous and already running
 C         If FASTx preceeded, add a wait for tape to slow down
           if (kspin) then
-            CALL IFILL(IBUF2,1,iblen,Z20)
+            CALL IFILL(IBUF2,1,iblen,32)
             nch = ichmv_ch(IBUF2,1,'!+5s ')
             if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s ')
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
@@ -1016,11 +1141,23 @@ C***** temporary, save for continuous
           idum = ichmv(ibuf_save,1,ibuf2,1,itlen) ! save time
 C   Write out tape monitor command at early start
           CALL IFILL(IBUF2,1,iblen,32)
-          idum = ichmv_ch(IBUF2,1,'tape')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+          nch = ichmv_ch(IBUF2,1,'tape')
+          if (krec_append      ) nch=ichmv_ch(ibuf2,nch,crec_use)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C K4 DRUM ON
+C       if (kk4) then ! turn on the drum
+C         CALL IFILL(IBUF2,1,iblen,32)
+C         nch = ICHMV_ch(IBUF2,1,'rec')
+C         if (krec_append      ) nch=ichmv_ch(ibuf2,nch,crec_use)
+C         nch = ICHMV_ch(IBUF2,nch,'=drum_on')
+C         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C         kdrum=.true.
+C       endif
 C   Start recording
           CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'ST=')
+          nch = ichmv_ch(IBUF2,1,'st')
+          if (krec_append      ) nch=ichmv_ch(ibuf2,nch,crec_use)
+          nch = ichmv_ch(IBUF2,nch,'=')
           krunning = .true.
           if (kk4) then ! k4
             nch=ichmv_ch(ibuf2,nch,'record')
@@ -1029,8 +1166,12 @@ C   Start recording
             IF (idir.eq.-1) nch=ICHMV_ch(IBUF2,nch,'rev,')
           endif ! k4/others
           if (ks2) then ! s2
-            nch=ichmv(ibuf2,nch,ls2speed(1,istn),1,
-     .      iflch(ls2speed(1,istn),4))
+            if (.not.kvex) then
+              nch=ichmv_ch(ibuf2,nch,"slp")
+            else ! from VEX file
+              nch=ichmv(ibuf2,nch,ls2speed(1,istn),1,
+     .        iflch(ls2speed(1,istn),4))
+            endif
           else if (.not.kk4) then ! mk3/4
             spd = 12.0*speed(icod,istn)
             call spdstr(spd,lspd,nspd)
@@ -1060,22 +1201,24 @@ C         call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
         endif !non-zero scan
 C Wait until CAL time. Antenna is on-source as of this time.
 C No PREOB if tape is running in a VEX file.
-        IF (ICAL.GE.1.and.(.not.kvex.or.(kvex.and..not.krunning))) THEN
+        IF (ICAL.GE.1.and.(.not.kvex.or.(kvex.and..not.krunning))) THEN ! cal and preob
           call timout(ibuf2,itlen,iyr3,idayr3,ihr3,min3,isc3)
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
 C                   Wait until ICAL before start time
+C K4 DRUM ON (note: this gets done only if preob is done)
+C         if (krec.and.kk4.and..not.kdrum) then ! turn on the drum
+C           CALL IFILL(IBUF2,1,iblen,32)
+C           nch = ICHMV_ch(IBUF2,1,'rec')
+C           if (krec_append      ) nch=ichmv_ch(ibuf2,nch,crec_use)
+C           nch = ICHMV_ch(IBUF2,nch,'=drum_on')
+C           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C         endif
 C PREOB procedure
-          if (kk4) then ! turn on the drum
-            CALL IFILL(IBUF2,1,iblen,32)
-            nch = ICHMV_ch(IBUF2,1,'rec=drum_on')
-            call hol2lower(ibuf2,(nch+1))
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
-          endif
           CALL IFILL(IBUF2,1,iblen,32)
-          idum = ICHMV(IBUF2,1,LPRE,1,6)
-          call hol2lower(ibuf2,(6+1))
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
-        ENDIF
+          nch = ICHMV(IBUF2,1,LPRE,1,6)
+          call hol2lower(ibuf2,(nch+1))
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+        ENDIF ! cal and preob
 C Wait until data start time
         if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write time
         else ! do write it
@@ -1084,23 +1227,28 @@ C Wait until data start time
           idum = ichmv(ibuf_save,1,ibuf2,1,itlen)
         endif ! don't/do write
 C S2 DATA_VALID 
-        if (idir.ne.0) then ! non-zero recording scan
+        if (krec.and.idir.ne.0) then ! non-zero recording scan
         if (ks2) then
           CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'data_valid=on  ')
+          nch = ichmv_ch(IBUF2,1,'data_valid')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          nch = ichmv_ch(IBUF2,nch,'=on ')
           call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
         endif
 C TAPE monitor command
         if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write tape
         else ! do write it
           CALL IFILL(IBUF2,1,iblen,32)
-          idum = ichmv_ch(IBUF2,1,'tape')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+          nch = ichmv_ch(IBUF2,1,'tape')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif ! don't/do write
 C Start tape if not already running.
         if (.not.krunning) then !start tape command
           CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'ST=')
+          nch = ichmv_ch(IBUF2,1,'st')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          nch = ichmv_ch(IBUF2,nch,'=')
           krunning = .true.
           if (kk4) then
             nch=ichmv_ch(ibuf2,nch,'record')
@@ -1109,8 +1257,12 @@ C Start tape if not already running.
             IF (idir.eq.-1) nch=ICHMV_ch(IBUF2,nch,'rev,')
           endif
           if (ks2) then ! s2
-            nch=ichmv(ibuf2,nch,ls2speed(1,istn),1,
-     .      iflch(ls2speed(1,istn),4))
+            if (.not.kvex) then
+              nch=ichmv_ch(ibuf2,nch,"slp")
+            else ! from VEX file
+              nch=ichmv(ibuf2,nch,ls2speed(1,istn),1,
+     .        iflch(ls2speed(1,istn),4))
+            endif
           else if (.not.kk4) then ! mk3/4
             spd = 12.0*speed(icod,istn)
             call spdstr(spd,lspd,nspd)
@@ -1122,38 +1274,46 @@ C Start tape if not already running.
           endif ! s2 or mk3/4
           krunning = .true.
           call hol2lower(ibuf2,(nch+1))
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH+1)/2)
         endif !start tape now
 C Wait until good data time for VEX files
-        if (kvex.and.kadap.and..not.ks2) then ! good data time
-          call timout(ibuf2,itlen,iyr5,idayr5,ihr5,min5,isc5)
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
-          CALL IFILL(IBUF2,1,iblen,32)
-          idum = ichmv_ch(IBUF2,1,'tape')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-        endif ! good data time
+C       if time5 is later than the end of the scan time2 don't do it
+        idt = isecdif(idayr2,ihr2,min2,isc2,
+     .                idayr5,ihr5,min5,isc5)
+        if (idt.gt.0) then ! some valid data
+          if (kvex.and.kadap.and..not.ks2) then ! good data time
+            call timout(ibuf2,itlen,iyr5,idayr5,ihr5,min5,isc5)
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'tape')
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif ! good data time
 C Good data flag -- AFTER the ST command or good-data time
-        if (.not.ks2) then ! non-S2 data valid
-          CALL IFILL(IBUF2,1,iblen,32)
-C         nch = ichmv_ch(IBUF2,1,'"Data start"')
-          nch = ichmv_ch(IBUF2,1,'data_valid=on')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
-        endif ! non-S2 data valid
+          if (.not.ks2) then ! non-S2 data valid
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'data_valid')
+            if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+            nch = ichmv_ch(IBUF2,nch,'=on')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          endif ! non-S2 data valid
+        endif ! some valid data
         endif ! non-zero recording scan
 C MIDOB procedure
         CALL IFILL(IBUF2,1,iblen,32)
-        idum = ICHMV(IBUF2,1,LMID,1,6)
-        call hol2lower(ibuf2,(6+1))
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,6/2)
+        nch = ICHMV(IBUF2,1,LMID,1,6)
+        call hol2lower(ibuf2,nch+1)
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         CALL IFILL(IBUF2,1,iblen,32)
 C Wait until data end time
         call timout(ibuf2,itlen,iyr2,idayr2,ihr2,min2,isc2)
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
 C Stop data flag
-        if (idir.ne.0) then ! non-zero recording scan
+        if (krec.and.idir.ne.0) then ! non-zero recording scan
         CALL IFILL(IBUF2,1,iblen,32)
-C       nch = ichmv_ch(IBUF2,1,'"Data stop"')
-        nch = ichmv_ch(IBUF2,1,'data_valid=off')
+        nch = ichmv_ch(IBUF2,1,'data_valid')
+        if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+        nch = ichmv_ch(IBUF2,nch,'=off')
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
 C ET command
         if ((.not.ks2.and..not.kcont.and.
@@ -1167,26 +1327,31 @@ C         Wait until late stop time before issuing ET
             call timout(ibuf2,itlen,iyr7,idayr7,ihr7,min7,isc7)
             call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
           endif
-          CALL IFILL(IBUF2,1,iblen,Z20)
-          idum = ichmv_ch(IBUF2,1,'et')
+          CALL IFILL(IBUF2,1,iblen,oblank)
+          nch = ichmv_ch(IBUF2,1,'et')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
           krunning = .false.
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
 C Wait for tape to stop
           if (.not.ks2) then
-            idum = ichmv_ch(IBUF2,1,'!+3S')
-            if (spd.gt.200.0) idum = ichmv_ch(IBUF2,1,'!+5s')
-            call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
-            CALL IFILL(IBUF2,1,iblen,Z20)
+            CALL IFILL(IBUF2,1,iblen,32)
+            nch = ichmv_ch(IBUF2,1,'!+3S')
+            if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s')
+            call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
           endif 
         endif!ET command
 C Tape monitor command
-        idum = ichmv_ch(IBUF2,1,'tape')
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+        CALL IFILL(IBUF2,1,iblen,32)
+        nch = ichmv_ch(IBUF2,1,'tape')
+        if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
 C S2 DATA_VALID 
-        if (ks2) then
+        if (ks2.and..not.krunning) then ! need another data_valid off
           CALL IFILL(IBUF2,1,iblen,32)
-          nch = ichmv_ch(IBUF2,1,'data_valid=off  ')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch)/2)
+          nch = ichmv_ch(IBUF2,1,'data_valid')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          nch = ichmv_ch(IBUF2,nch,'=off ')
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif
         endif ! non-zero recording scan
 
@@ -1201,44 +1366,50 @@ C Save information about this scan before going on to the next one
           IOBSst = IOBSst + 1
           LDIRP = LDIR(ISTNSK)
           idirp=idir
-          if (ks2) then
-            iftold=ift(istnsk)+idur(istnsk)
-            if (ket) iftold=itlate(istn)+iftold+itearl(istn)
-          else
+          idurp=idur(istnsk)
+C         if (ks2) then
+C           iftold=ift(istnsk)+idur(istnsk)
+C           if (ket) iftold=itlate(istn)+iftold+itearl(istn)
+C         else
             IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
      .        IDUR(ISTNSK))*speed(icod,istn))
 C?? how to calculate this? see lstsum?
 C leave it out for now
 C         if (.not.ket) iftold=itlate(istn)+iftold+itearl(istn)
-          endif
+C         endif
           if (kcont.and..not.ks2) ift_save=ift(istnsk)+IFIX(IDIR*
      .            (ituse*ITEARL(istn)+
      .            IDUR(ISTNSK))*speed(icod,istn))
         endif ! update direction and footage
 C POSTOB
-        idum = ICHMV(IBUF2,1,LPST,1,6)
-        call hol2lower(ibuf2,(6+1))
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
+        CALL IFILL(IBUF2,1,iblen,32)
+        nch = ICHMV(IBUF2,1,LPST,1,6)
+        call hol2lower(ibuf2,(nch+1))
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         IYR4 = IYR2
         IDAYR4 = IDAYR2
         IHR4 = IHR2
         MIN4 = MIN2
         ISC4 = ISC2
         mjdpre = JULDA(1,idayr4,IYR-1900) 
-        utpre = ihr4*3600.d0+min4*60.d0+isc4 + idur(istnsk)
+C       Why add idur again? time4 already has it nrv 010508
+C       utpre = ihr4*3600.d0+min4*60.d0+isc4 + idur(istnsk)
+        utpre = ihr4*3600.d0+min4*60.d0+isc4 
         if (utpre.gt.86400.d0) then
           utpre=utpre-86400.d0
           mjdpre = mjdpre+1
         endif
       END IF  ! istnsk.ne.0 means our station is in this scan
 C
-C     Copy ibuf_next into IBUF
+C     Copy ibuf_next into IBUF and unpack it.
       if (ilen.ne.-1) then ! more scans to come
         idum = ichmv(ibuf,1,ibuf_next,1,ibuf_len*2)
         ilen = iflch(ibuf,ibuf_len*2) 
         CALL UNPSK(IBUF,ILEN,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .  IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      .  MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
+C       Scan name has already been made above, just copy it.
+C       idum = ichmv(scan_name,1,scan_name_next,1,16)
         CALL CKOBS(LSNAME,LSTN,NSTNSK,LFREQ,ISOR,ISTNSK,ICOD)
       endif
 
@@ -1249,14 +1420,18 @@ C
       IF (.not.ks2.and..not.kk4.and.TSPINS.GT.5.) THEN
 C       THEN BEGIN "spin off the last tape"
         if (krunning) then ! stop it first
-          idum = ichmv_ch(IBUF2,1,'et  ')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
-          idum = ichmv_ch(IBUF2,1,'!+3S')
-          if (spd.gt.200.0) idum = ichmv_ch(IBUF2,1,'!+5s')
-          call writf_asc(LU_OUTFILE,KERR,IBUF2,(4)/2)
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(IBUF2,1,'et')
+          if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+          CALL IFILL(IBUF2,1,iblen,32)
+          nch = ichmv_ch(IBUF2,1,'!+3S')
+          if (spd.gt.200.0) nch = ichmv_ch(IBUF2,1,'!+5s')
+          call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
         endif ! stop it first
-        CALL LSPIN(-1,ISPM,ISPS,IBUF2,NCH)
-            call hol2lower(ibuf2,(nch+1))
+        CALL LSPIN(-1,ISPM,ISPS,IBUF2,NCH,crec_use,nrecst(istn),
+     .  krec_append)
+        call hol2lower(ibuf2,(nch+1))
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(NCH)/2)
         kspin = .true. !Just wrote a FASTx command
 C       ENDT "spin off the last tape"
@@ -1266,11 +1441,23 @@ C       ENDT "spin off the last tape"
      .    IYR6,IDAYR6,IHR6,MIN6,ISC6)
         call timout(ibuf2,itlen,iyr6,idayr6,ihr6,min6,isc6)
         call writf_asc(LU_OUTFILE,KERR,IBUF2,(itlen+1)/2)
-        idum = ichmv_ch(IBUF2,1,'et  ')
-        call writf_asc(LU_OUTFILE,KERR,IBUF2,(2)/2)
+        CALL IFILL(IBUF2,1,iblen,32)
+        nch = ichmv_ch(IBUF2,1,'et')
+        if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use)
+        call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
       endif ! shut it down
-      idum = ichmv_ch(IBUF2,1,'unlod ')
-      call writf_asc(LU_OUTFILE,KERR,IBUF2,(6)/2)
+      CALL IFILL(IBUF2,1,iblen,32)
+      nch = ichmv_ch(IBUF2,1,'unlod')
+      if (krec_append      ) nch = ichmv_ch(ibuf2,nch,crec_use) ! unload the current tape
+      if (kk4) then ! append tape number
+        nch = ichmv_ch(ibuf2,nch,'=')
+        nch = nch + ib2as(ntape,ibuf2,nch,1)
+      endif
+      call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
+C End of schedule
+      CALL IFILL(IBUF2,1,iblen,32)
+      nch = ichmv_ch(IBUF2,1,'sched_end')
+      call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch+1)/2)
 C
       close(LU_OUTFILE,iostat=IERR)
       call drchmod(snpname,iperm,ierr)
