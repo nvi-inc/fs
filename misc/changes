@@ -3422,3 +3422,50 @@ Version 9.3.17 971029
            versions for old kernel
 
 Version 9.3.21 980204
+
+980209 WEH ibcon/Makefile
+           detect REV_2 gpib driver based on ugpib.h
+
+980209 WEH ibcon/obbrd.c
+           make ibonl call if REV_2 gpib driver
+
+980209 WEH st.default/prog/.profile
+           st.default/prog/.login
+           add new FC logic
+          
+980209 WEH st.default/prog/.profile
+           st.default/prog/.login
+           st.default/oper/.profile
+           st.default/oper/.login
+           add LESS variable
+
+980209 WEH st.default/prog/.profile
+           st.default/oper/.profile
+           add logic to reduce extra fs/bin and st/bins in path
+
+980209 WEH st.default/prog/.xsession.1.2.12
+           st.default/oper/.xsession.1.2.12
+           st.default/prog/.profile.1.2.12
+           st.default/prog/.login.1.2.12
+           renamed from *.old
+
+980209 WEH st.default/prog/.xsession
+           st.default/prog/.xsession
+           delete some extra blank lines
+
+980210 WEH st.default/prog/.Xresources
+           st.default/oper/.Xresources
+           make 10x20 the explicit font for FS windows so that others won't
+
+980210 WEH st.default/oper/.profile
+           st.default/prog/.profile
+           correct path redundacy logic
+
+980210 WEH st.default/prog/.login
+           st.default/oper/.login
+           add path redundancy prevention logic
+
+980210 WEH st.default/prog/.cshrc
+           add "latest"
+
+Version 9.3.22 980210
