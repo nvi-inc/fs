@@ -1586,6 +1586,9 @@ QK -209
 QK -210
 10th TPI requested must be EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
+QK -211
+Tsys value for device ?W overflowed or were less than zero.
+""
 QL -101
 No default for the MAT address.
 ""
@@ -2070,7 +2073,7 @@ Q< -201
 Tape direction must be FOR or REV.
 ""
 Q< -202
-Speed must be one of 3,7,15,30,60,120,240.
+Tape speed must be one of the values listed in manual.
 ""
 Q< -203
 Record enable must be ON or OFF.
@@ -3024,7 +3027,7 @@ VS -102
 No default for tape speed unless bit density and format are defined.
 ""
 VS -202
-Tape speed must be one of actual or nominal values listed in manual.
+Tape speed must be one of the values listed in manual.
 ""
 VS -203
 Record parameter must be on or off.
