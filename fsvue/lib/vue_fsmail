@@ -7,14 +7,14 @@
 # Window manager configurations
   set hfont {-*-lucida-bold-r-*-sans-12-*-*-*-*-*-*-*}
   set bfont {-*-lucida-normal-r-*-sans-16-*-*-*-*-*-*-*}
-  set icondir /usr2/fs/fsvue
+  set ICONDIR /usr2/fs/fsvue/images
 
   global tkVersion
   wm positionfrom . user
   wm sizefrom . ""
   wm maxsize . 1152 900
   wm iconposition . 1200 500
-  wm iconbitmap . @$icondir/vlb.icon
+  wm iconbitmap . @$ICONDIR/vlb.icon
   wm iconname . {fsvue}
 #  wm geometry . +5+25
   wm title . {FS VLBI User Environment}
