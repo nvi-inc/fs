@@ -1,4 +1,7 @@
-"
+""
+4F -101
+No default for mode.
+""
 4F -201
 Mode must be one of: a, b1, b2, c1, c2, d1, ..., d28, e1, ..., e4.
 ""
@@ -15,7 +18,7 @@ Barrel-roll must be off, 8, 16, or m.
 Data modulation must be "off" or "on".
 ""
 4F -206
-Synch must be off or 0, ..., 16.
+Synch must be off (or -1) or 0, ..., 16.
 ""
 4F -303
 Trackform incompatable with VLBA fan-out.
@@ -83,100 +86,226 @@ Rollform output tracks must be null, -1, or 2-23.
 4R -301
 Rollform can not have more than 16 output tracks.
 ""
-5B -201
-command does not accept parameters
-""
 5B -301
-did not find return code
-""
-5B -303
-did not find query return values
-""
-5B -304
-mark5 error, see associated error m5 -9xx
-""
-5B -311
-did not find return code
-""
-5B -312
-could not parse return string
-""
-5B -313
-did not find query return values
-""
-5B -314
-mark5 error, see associated error m5 -9xx
+command does not accept parameters
 ""
 5B -401
 error retrieving class
 ""
 5B -411
-error retrieving class, rtime
+error retrieving class, rtime/bank_set
 ""
-5C -201
-command does not accept parameters
+5B -501
+error decoding rtime? seconds parameter
+""
+5B -502
+error decoding rtime? gb parameter
+""
+5B -503
+error decoding rtime? percent parameter
+""
+5B -504
+error decoding rtime? mode parameter
+""
+5B -505
+error decoding rtime? sub-mode parameter
+""
+5B -506
+error decoding rtime? track rate parameter
+""
+5B -507
+error decoding rtime? total rate parameter
+""
+5B -511
+error decoding bank_set? active bank parameter
+""
+5B -512
+error decoding bank_set? active vsn parameter
+""
+5B -513
+error decoding bank_set? inactive bank parameter
+""
+5B -514
+error decoding bank_set? inactive vsn parameter
+""
+5B -521
+error decoding vsn? vsn parameter
+""
+5B -522
+error decoding vsn? check parameter
+""
+5B -523
+error decoding vsn? disk parameter
+""
+5B -524
+error decoding vsn? original vsn parameter
+""
+5B -525
+error decoding vsn? new vsn parameter
+""
+5B -901
+query response not received
+""
+5B -902
+program error: strdup() failed
+""
+5B -911
+query response not received
+""
+5B -912
+program error: strdup() failed
+""
+5B -921
+query response not received
+""
+5B -922
+program error: strdup() failed
 ""
 5C -301
-did not find return code
+command does not accept parameters
 ""
-5C -303
-did not find query return values
-""
-5C -304
-mark5 error, see associated error m5 -9xx
-""
-5C -401
-error retrieving class
+5D -301
+command does not accept parameters
 ""
 5D -401
 error retrieving class for position response
 ""
 5D -402
-did not find = in position reponse
+less than 1 Megabyte of data recorded, negative play pointer not allowed
 ""
 5D -403
-did not decode return code in position response
+error retrieving class for position response
 ""
-5D -404
-did not find : separator
+5D -501
+error decoding data_check? mode parameter
 ""
-5D -405
-did not decode position
+5D -502
+error decoding data_check? submode parameter
 ""
-5D -406
-did not find position parameter
+5D -503
+error decoding data_check? time parameter
 ""
-5D -407
-error retrieving class for play response
+5D -504
+error decoding data_check? offset parameter
 ""
-5D -408
-did not find = in play reponse
+5D -505
+error decoding data_check? period parameter
 ""
-5D -409
-did not decode return code in play response
+5D -506
+error decoding data_check? bytes parameter
 ""
-5D -410
-mark5 error getting position, see associated error m5 -9xx
+5D -507
+error decoding data_check? missing parameter
 ""
-5D -411
-mark5 error setting play position, see associated error m5 -9xx
+5D -901
+query response not received
 ""
-5D -412
-less than 1 Megabyte of data recorded, negative read pointer not allowed
+5D -902
+program error: strdup() failed
 ""
-5E -201
-command does not accept parameters
+5F -102
+no default for destination
 ""
-5E -301
-did not find return code
+5F -201
+scan name too long (maximum 32 characters)
 ""
-5E -304
-mark5 error, see associated error m5 -9xx
+5F -202
+destinaton file name too long (maximum 64 characters)
 ""
-5E -401
+5F -203
+start time must be non-negative
+""
+5F -204
+end time must be greater start time
+""
+5F -205
+options too long (maximum 32 characters)
+""
+5F -400
+Error retrieving class for response to commands.
+""
+5F -401
+Error retrieving class for response to query.
+""
+5F -501
+error decoding disk2file? destination file name parameter
+""
+5F -502
+error decoding disk2file? status parameter
+""
+5F -503
+error decoding disk2file? start byte parameter
+""
+5F -504
+error decoding disk2file? current byte parameter
+""
+5F -505
+error decoding disk2file? end byte parameter
+""
+5F -506
+error decoding disk2file? option parameter
+""
+5F -511
+error decoding scan_set? scan_number parameter
+""
+5F -512
+error decoding scan_set? scan_name parameter
+""
+5F -513
+error decoding scan_set? start byte parameter
+""
+5F -514
+error decoding scan_set? end byte parameter
+""
+5F -901
+query response not found for disk2file?
+""
+5F -902
+program error: strdup() failed for diskfile?
+""
+5F -911
+query response not found for scan_set?
+""
+5F -912
+program error: strdup() failed for scan_set?
+""
+5I -101
+No default for control parameter
+""
+5I -102
+No default for destination parameter if control is connect.
+""
+5I -201
+Control parameter must be one of: off, on, disconnect, connect
+""
+5I -202
+Destination parameter too long (maximum 64 characters)
+""
+5I -400
+Error retrieving class for response to commands.
+""
+5I -401
 error retrieving class
 ""
-5L -201
+5I -501
+error decoding in2net? destination parameter
+""
+5I -502
+error decoding in2net? status parameter
+""
+5I -503
+error decoding in2net? received parameter
+""
+5I -504
+error decoding in2net? buffered parameter
+""
+5I -901
+query response not found
+""
+5I -902
+program error: strdup() failed
+""
+5L -301
 command does not accept parameters
 ""
 5M -301
@@ -185,38 +314,92 @@ must specify at least 1 argument for mk5 command
 5M -401
 error retrieving class
 ""
-5O -201
+5P -301
 command does not accept parameters
 ""
-5R -201
-command only accepts "on" parameter
+5P -401
+error retrieving class
 ""
-5R -301
-did not find return code
+5P -501
+error decoding position? record position
+""
+5P -502
+error decoding position? play position
+""
+5P -901
+query response not found
+""
+5P -902
+program error: strdup() failed
+""
+5R -101
+no default for record parameter
+""
+5R -201
+record parameter must be 'on' or 'off'.
+""
+5R -202
+scan name parameter too long
+""
+5R -203
+session name parameter too long
+""
+5R -204
+source name parameter too long
+""
+5R -302
+scan name defined scan_name command too long
 ""
 5R -303
-did not find query return values
+session name defined scan_name command too long
 ""
 5R -304
-mark5 error, see associated error m5 -9xx
+source name defined source command too long
+""
+5R -400
+error retrieving acknowledgement of command
 ""
 5R -401
 error retrieving class
 ""
-5S -201
-command does not accept parameters
+5R -501
+error decoding record? state parameter
+""
+5R -502
+error decoding record? scan number parameter
+""
+5R -503
+error decoding record? scan name parameter
+""
+5R -504
+error decoding record? session name parameter
+""
+5R -505
+error decoding record? source name parameter
+""
+5R -901
+query response not found
+""
+5R -902
+program error: strdup() failed
 ""
 5S -301
-did not find return code
-""
-5S -303
-did not find query return values
-""
-5S -304
-mark5 error, see associated error m5 -9xx
+command does not accept parameters
 ""
 5S -401
 error retrieving class
+""
+5S -501
+error decode disk_serial? serial number parameter
+""
+5S -901
+query response not found
+""
+5S -902
+program error: strdup() failed
+""
+5S -903
+program error: too many serial numbers
 ""
 AN   -1
 Illegal mode
@@ -348,7 +531,7 @@ BO -123
 Error positioning in schedule.  FMP ?FFF
 ""
 BO -124
-No (source=...) observation starting at a future time found in schedule.
+No (scan_name=...) observation starting at a future time found in schedule.
 ""
 BO -125
 Reading procedure file, error FMP ?FFF
@@ -590,6 +773,12 @@ Internal error: time for secsnow invalid
 BO -259
 Internal error: time for secst invalid
 ""
+BO -260
+Procedure file name too long, 8 characters maximum.
+""
+BO -261
+Schedule file name too long, 8 characters maximum.
+""
 BO -300
 There must be two character error mnemonic for TNX.
 ""
@@ -634,6 +823,18 @@ Error ?FFF reading antenna gain file, see preceeding message for file name.
 ""
 BO -404
 Error ?FFF reading flux.ctl file.
+""
+BO -405
+Error opening TACD.CTL ?FFF
+""
+BO -406
+Error reading TACD.CTL FMP ?FFF
+""
+BO -407
+Error decoding TACD.CTL line ?WWW
+""
+BO -999
+WARNING: Log file just opened is already larger than 10 MB.
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -1117,6 +1318,111 @@ da?W: +15 Volt supply for both IFPs is out of tolerance.
 ""
 CH -727
 da?W: -15 Volt supply for both IFPs is out of tolerance.
+""
+CH -801
+AGC mode is not as selected.
+""
+CH -802
+Mode is not as selected.
+""
+CH -803
+encode scheme is not as selected.
+""
+CH -804
+Frequency Switching is not as expected.
+""
+CH -805
+Frequency Switching sequence has been changed.
+""
+DQ -1
+Invalid state number for bbc (0 to 64).
+""
+DQ -2
+Invalid LO frequency for bbc (100.0 to 1000.0Mhz). 
+""
+DQ -3
+Invalid IF source for bbc command (i1, i2, i3, i4, none).
+""
+DQ -4
+Invalid bandwith for bbc (16,8,4,2,1,0,5,0,25,0.125,0.0625 in Mhz).
+""
+DQ -5
+Invalid TPI averaging period for bbc (0.01 to 10 seconds).
+""
+DQ -6
+Invalid AGC mode for bbc (on, off).
+""
+DQ -10
+Invalid state number for ifx (0 to 64).
+""
+DQ -11
+Invalid attenuator value (0 to 30, step of 2 or auto).
+""
+DQ -12
+Invalid source (alt, dir or none).
+""
+DQ -13
+Invalid TPI averaging period for ifx (0.01 to 10 seconds).
+""
+DQ -20
+Invalid encode scheme (vlba or sbin).
+""
+DQ -21
+Invalid agc mode (on or off).
+""
+DQ -22
+Invalid module name for powermon (clk, ifx, bbcx). Blank for all.
+""
+DQ -23
+Invalid mode value.
+""
+DQ -24
+Invalid parameter for status request (long, short, brief).
+""
+DQ -25
+Message (>0) or error (<0) code required.
+""
+DQ -30
+Invalid option for frequency switching.
+""
+DQ -31
+Invalid number of state for frequency switching (1 to 64).
+""
+DQ -32
+Invalid period for frequency switching (> 0.02seconds).
+""
+DQ -33
+Invalid state number (1 to 64).
+""
+DQ -34
+Invalid bbc number (1 to 4).
+""
+DQ -35
+Invalid LO frequency (100.0 to 1000.0Mhz).
+""
+DQ -36
+Invalid If source (i1, i2, i3, i4, i?d, i?a)
+""
+DQ -40
+Device not specified (da or r1).
+""
+DQ -41
+Invalid parameter for diag (self1).
+""
+DQ -45
+No parameters. Monitor only.
+""
+DQ -50
+Must specify a bbc number (1 to 4).
+""
+DQ -51
+Invalid bbc number (1 to 4).
+""
+DQ -52
+Invalid state number (0 to 64).
+""
+DQ -70
+Invalid device for ping (da ro r1).
 ""
 DS   -1
 Unable to open dsad.ctl file.
@@ -2225,29 +2531,32 @@ mk5cn: time-out on mk5 device, connection closed
 M5 -105
 mk5cn: select for fgets() returned error, connection closed
 ""
+M5 -899
+unable to find or decode return code
+""
 M5 -901
-MARK5 device error: action initiated or enabled, but not completed
+MARK5 return code 1: action initiated or enabled, but not completed
 ""
 M5 -902
-MARK5 device error: command not implemented or not relevant to this DTS
+MARK5 return code 2: command not implemented or not relevant to this DTS
 ""
 M5 -903
-MARK5 device error: syntax (or parameter error)
+MARK5 return code 3: syntax (or parameter error)
 ""
 M5 -904
-MARK5 device error: error encountered (during attempt to execute)
+MARK5 return code 4: error encountered (during attempt to execute)
 ""
 M5 -905
-MARK5 device error: currently too busy to service request; try again later
+MARK5 return code 5: currently too busy to service request; try again later
 ""
 M5 -906
-MARK5 device error: inconsistent or conflicting request
+MARK5 return code 6: inconsistent or conflicting request
 ""
 M5 -907
-MARK5 device error: no such keyword
+MARK5 return code 7: no such keyword
 ""
-M5 -906
-MARK5 device error: parameter error
+M5 -908
+MARK5 return code 8: parameter error
 ""
 NF   -1
 Break Detected in ONOFF
@@ -3321,7 +3630,7 @@ Q* -201
 LO channel must be loa/b/c/d for VLBA/VLBA4, lo1/2/3 for MK3/MK4/K4
 ""
 Q* -202
-LO frequency positive real number
+LO frequency must be a positive real number
 ""
 Q* -203
 LO sideband must be one of unknown, usb, or lsb.
@@ -3350,8 +3659,53 @@ Previous value not permitted for LO polarization.
 Q* -305
 Previous value not permitted for LO pcal spacing.
 ""
-Q* -301
+Q* -306
 Previous value not permitted for LO pcal offset.
+""
+Q- -101
+No default for User Device channel
+""
+Q- -102
+No default for User Device LO frequency
+""
+Q- -103
+No default for User Device sideband
+""
+Q- -104
+No default for User Device polarization
+""
+Q- -105
+No default for User Device center frequency
+""
+Q- -201
+User Device must be one of u1, u2, ..., u6
+""
+Q- -202
+User Device LO frequency must be a positive real number
+""
+Q- -203
+User Device sideband must be one of unknown, usb, or lsb.
+""
+Q- -204
+User Device polarization must be one of unknown, rcp, or lcp.
+""
+Q- -205
+User Device center frequency must be a positive real number
+""
+Q- -301
+Previous value not permitted for User Device channel.
+""
+Q- -302
+Previous value not permitted for User Device LO frequency.
+""
+Q- -303
+Previous value not permitted for User Device sideband.
+""
+Q- -304
+Previous value not permitted for User Device polarization.
+""
+Q- -305
+Previous value not permitted for User Device center frequency.
 ""
 Q# -201
 An invalid number was specified for an LU
@@ -4191,22 +4545,37 @@ SC   -3
 setcl: setting system time not supported
 ""
 SC   -4
-setcl: formatter to cpu time difference greater than two weeks
+setcl: formatter to cpu time difference greater than 248 days
 ""
 SC   -5
 setcl: formatter time garbled
 ""
 SC  -10
-setcl: failed too many times, time information not updated.
+setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mark 3/4/VLBA, K4*/MK4 rack or S2, K4 recorder
+setcl: cannot set fs time without Mark 3/4/VLBA, S2, K4*/MK4 rack or S2, K4 recorder
 ""
 SC  -12
-setcl: cannot set offset or rate when using NTP
+setcl: FS to computer time difference 0.5 seconds or greater
 ""
 SC  -13
 setcl: formatter to FS time difference 0.5 seconds or greater
+""
+SC  -14
+setcl: Computer time not synced to NTP
+""
+SC  -15
+setcl: Cannot determine NTP sync state
+""
+SC  -16
+setcl: leading digits not allowed in formatter jump value
+""
+SC  -17
+setcl: bad argument
+""
+SC  -18
+setcl: program is already running, try "run setcl" instead.
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -4299,7 +4668,7 @@ TA   -2
 tacd.ctl control file is empty or just has comments.
 ""
 TA   -3
-TACD: Can't open the socket or someone else is using it.
+TACD: Socket can not be created or someone else is using it.
 ""
 TA   -4
 TACD: Can't connect to socket.
@@ -4314,13 +4683,19 @@ TA   -7
 ,,
 ""
 TA   -8
-Syntax ERROR in tacd.ctl - no commas allowed as delimeters.
+Syntax error in tacd.ctl - only spaces and . are allowed as delimeters.
 ""
 TA   -9
 TACD: "Wrong IP address, or TAC32 PC not setup properly.
 ""
+TA   -10
+TACD: Setting non-blocking mode failed. Can not continue.
+""
+TA   -11
+TACD: Unknown host, bad file discriptor, or invalid IP.
+""
 TA -201
-commands are tacd={,status,time,average} only.
+commands are tacd={version,status,time,average} only.
 ""
 TC -102
 cycle period has no default.
@@ -4616,20 +4991,26 @@ No default for scan name.
 WS -201
 Scan name must be less than 17 characters. 
 ""
-WS -301
-No previous value allowed for scan name
-""
 WS -202
 Session name must be less than 17 characters. 
+""
+WS -203
+Error decoding scan length or value was less than zero.
+""
+WS -204
+Error decoding continuous recording length or value was less than zero.
+""
+WS -301
+No previous value allowed for scan name
 ""
 WS -302
 No previous value allowed for session name
 ""
-WS -203
-Error decoding scan length.
-""
 WS -303
 No previous value allowed for scan length.
+""
+WS -304
+No previous value allowed for continuous recording length.
 ""
 WX   -1
 MET: Can not open the socket or someone else is using it.
