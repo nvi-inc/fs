@@ -119,7 +119,7 @@ C
 C   INITIALIZED VARIABLES
 C
       data kini/.false./
-      data minmod/-8/, maxmod/9/,  maxdev/25/, nalarm/18/
+      data minmod/-8/, maxmod/10/,  maxdev/25/, nalarm/18/
       data ilen/360/
       data lstrob/2h!>,2h%>,2h(>,2h)>,2h+>,2h->,2h.>,2h;>/
       data ibaud/110,300,600,1200,2400,4800,9600/
@@ -208,7 +208,6 @@ C
       call ifill_ch(ibuf,1,180,' ')
       do 900 iclrec = 1,nclrec
         ireg(2) = get_buf(or(o'020000',iclass),ibuf,-ilen,idum,idum)
-
         if (ierr.lt.0) goto 900
 C                   If we got an error earlier, skip to end of loop
         if (ireg(1).lt.0) then
@@ -250,6 +249,7 @@ C
         if (imode.eq.7) goto 700
         if (imode.eq.8) goto 800
         if (imode.eq.9) goto 800
+        if (imode.eq.10) goto 800
 C
 C
 C     3. Here we are sending data to the MAT.
@@ -374,7 +374,7 @@ C     8. Send buffer directly.  Address has already been substituted
 C     into first three characters.  Fill in fourth with a blank.
 C 
 800     idum=ichmv_ch(ibuf,4,' ') 
-        if(imode.eq.9.or.imode.eq.-54) then
+        if(imode.eq.9.or.imode.eq.10.or.imode.eq.-54) then
           nchar=nchar+1
           call pchar(ibuf,nchar,10)
         endif
