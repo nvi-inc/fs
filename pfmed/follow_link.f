@@ -19,8 +19,10 @@ c
       include '../include/params.i'
 c
       character*65 fname1
+      character*11 me
       integer fc_readlink,trimlen
       logical kerr
+      data me/'follow_link'/
 
       fname1 = FS_ROOT //'/proc/' // fname // '.prc'//char(0)
       link=' '
@@ -33,12 +35,10 @@ c
             fname1  = FS_ROOT//'/proc/'
      &           // link(:iret)//char(0)
          else if(iret.lt.0.and.ierr.ne.22) then
-            fname1=fname1(:trimlen(fname1)-1)
-            if(kerr(ierr,me,'following link',fname1,0,0)) then
-               link=' '
-               ierr=-1
-               return
-            endif
+            call fc_perror(fname1)
+            link=' '
+            ierr=-1
+            return
          else if(iret.eq.0) then
             fname1=fname1(:trimlen(fname1)-1)
             if(kerr(-2,me,'empty link',fname1,0,0)) then
