@@ -33,6 +33,9 @@ C                   Command names list, and procedure lists
       dimension it(6)          !  time from system 
       integer itn(6),itw(6)
 c
+      integer*2 lsors
+      integer*4 irec,id
+      integer fmpsetpos, fmpposition, fmpreadstr
 c
       integer*4 secsnow,secswait,delta
       dimension iotref(3),istref(3)
@@ -80,6 +83,7 @@ C     MAXPR1,2 - Maximum number of procs allowed in each lists
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/24,2,24*0/, lstkop/24,2,24*0/
       data nproc1/0/, nproc2/0/
+      data lsors/2h::/
 C
 C**********************************************************************
 C
@@ -567,6 +571,17 @@ C  a valid schedule or all is set to zero.
             call fc_rte_time(itmlog,itmlog(6))
           endif
           call rn_put('pfmed')
+C
+C log all the leading comments in the schdeule
+C
+          idum = fmpposition(idcbsk,ierr,irec,id)
+          idum = fmpsetpos(idcbsk,ierr,0,id)
+          ilen = fmpreadstr(idcbsk,ierr,ibc)
+          do while (cjchar(ibuf,1).eq.'"')
+             call logit4(ibuf,ilen,lsors,lproc)
+             ilen = fmpreadstr(idcbsk,ierr,ibc)
+          enddo
+          idum = fmpsetpos(idcbsk,ierr,irec,id)
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
         end if
