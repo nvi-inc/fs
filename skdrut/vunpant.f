@@ -13,6 +13,7 @@ C
 C
 C  History:
 C 960516 nrv New.
+C 970116 nrv Change "ant_motion" to "antenna_motion" for Vex 1.5
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -119,7 +120,7 @@ C  3. Axis offset.
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) ! convert to binary
           IF  (Iret.ne.0) THEN
-            Ierr = -4
+            Ierr = -3
             write(lu,'("VUNPANT04 - Invalid axis offset value.")')
           else
             AXISOF = R
@@ -134,7 +135,7 @@ C  4. Slewing rates and constants.
         iv=0
         if (i.eq.1) iv=ivexnum
         iret = fget_station_lowl(ptr_ch(stdef),
-     .  ptr_ch('ant_motion'//char(0)),
+     .  ptr_ch('antenna_motion'//char(0)),
      .  ptr_ch('ANTENNA'//char(0)),iv)
         if (iret.ne.0) return
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get axis
@@ -150,7 +151,7 @@ C  4. Slewing rates and constants.
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         if (iret.ne.0) then
-          ierr=-6
+          ierr=-4
           write(lu,'("VUNPANT06 - Invalid first axis constant ",
      .    i2)') i
         else
@@ -206,7 +207,7 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         almin1 = r
         if (iret.ne.0) then
-          ierr=-9
+          ierr=-5
           write(lu,9909) nl,i1
 9909      format("VUNPANT09 - Invalid antenna limit on line",
      .    i3,", field ",i3)
@@ -265,7 +266,7 @@ C  6. Antenna diameter
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r) 
         IF  (IERR.LT.0) THEN
-          Ierr = -10
+          Ierr = -6
           write(lu,'("VUNPANT04 - Invalid antenna diameter value.")')
         else
           diaman = R
