@@ -189,7 +189,7 @@ C
             if(drive.ne.VLBA.and.(it.lt.1.or.it.gt.28)) then
                ierr = -207
                goto 990
-            else if(drive.eq.VLBA.and.(it.lt.0.or.it.gt.34)) then
+            else if(drive.eq.VLBA.and.(it.lt.0.or.it.gt.35)) then
                ierr = -217
                goto 990
             end if

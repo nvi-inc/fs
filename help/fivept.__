@@ -76,10 +76,12 @@ used by fivpt to turn the noise diode on and off respectively. The
 recommended form for these procedures is:
 
 calonfp:  calon
-          !+1s 
+          !+1s
+          sy=go fivpt &
 
 calofffp: caloff
-          !+1s 
+          !+1s
+          sy=go fivpt &
 
 calon and caloff are local procedures that do whatever is necessary
 to turn the noise source on and off.
