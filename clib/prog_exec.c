@@ -17,6 +17,7 @@ char	name[5];
       case 0:
         i=execlp(string, string, (char *) 0);
         fprintf( stderr,"exec failed on %s\n", string);
+        fflush( stderr);
         _exit(-2);
     }
     return;
