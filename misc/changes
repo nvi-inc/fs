@@ -6172,3 +6172,8 @@ Version 9.6.6 030803
            instantly. The oldest met data will be 4secs. 
 
 Version 9.6.7 030905
+
+030904 WEH quikv/bank_check.c
+           don't check record time if scan length not set
+
+Version 9.6.8 030910
