@@ -13,7 +13,7 @@
 #include "fmset.h"
 
 extern long ip[5];           /* parameters for fs communications */
-long nanosec;
+extern long nanosec;
 
 void skd_run();
 void skd_par();
@@ -21,7 +21,8 @@ void cls_snd();
 int cls_rcv();
 void cls_clr();
 
-void sets2time(formtime)
+void sets2time(dev,formtime)
+char dev[];
 time_t formtime;
 {
   struct tm *fmtime;  /* pointer to tm structure */
@@ -31,6 +32,7 @@ time_t formtime;
   int year, day, hour, min, sec;
   ibool relative;
   long int dnanosec;
+  char *name;
 
   time_t unixtime; /* computer time */
   int    unixhs;
@@ -48,12 +50,20 @@ time_t formtime;
 
   relative=FALSE;
   dnanosec=0;
-  add_rclcn_delay_set(&reqbuf,"r1",relative,dnanosec);
+  add_rclcn_delay_set(&reqbuf,dev,relative,dnanosec);
 
   end_rclcn_req(ip,&reqbuf);
 
+  name="rclcn";
   nsem_take("fsctl",0);
-  skd_run("rclcn",'w',ip);
+	while(skd_run_to(name,'w',ip,100)==1) {
+	  if (nsem_test(NSEM_NAME) != 1) {
+	    endwin();
+	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    exit(0);
+	  }
+	  name=NULL;
+	}
   nsem_put("fsctl");
 
   skd_par(ip);
@@ -102,12 +112,20 @@ set:
   hour=fmtime->tm_hour;
   min =fmtime->tm_min;
   sec =fmtime->tm_sec;
-  add_rclcn_time_set(&reqbuf,"r1",year,day,hour,min,sec);
+  add_rclcn_time_set(&reqbuf,dev,year,day,hour,min,sec);
 
   end_rclcn_req(ip,&reqbuf);
 
+  name="rclcn";
   nsem_take("fsctl",0);
-  skd_run("rclcn",'w',ip);
+	while(skd_run_to(name,'w',ip,100)==1) {
+	  if (nsem_test(NSEM_NAME) != 1) {
+	    endwin();
+	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    exit(0);
+	  }
+	  name=NULL;
+	}
   nsem_put("fsctl");
 
   skd_par(ip);
