@@ -4,7 +4,11 @@
 # 960201 nrv for Linux                                                #
 # 960602 nrv with vex libraries                                       #
 # 970312 nrv Add read_snap1                                           #
-#                                                                     #
+# 970319 nrv Move knewt to skdrut                                     #
+# 970401 nrv Add DRSET                                                #
+# 970406 nrv Move c2upper to skdrut                                   #
+# 970509 nrv Add WRSOR                                                #
+# 970603 nrv Add PRCOV                                                #
 #                                                                     #
 #######################################################################
 
@@ -31,14 +35,14 @@ $(DR)procs.o $(DR)snap.o  $(DR)sread.o $(DR)tmadd.o $(DR)tmsub.o \
 $(DR)unpsk.o $(DR)fdrudg.o $(DR)trkall.o $(DR)spdstr.o \
 $(DR)setba_dr.o $(DR)wrdur.o $(DR)wrtap.o $(DR)dsnout.o $(DR)iaddtr.o \
 $(DR)label.o $(DR)blabl.o $(DR)wrtrack.o $(DR)wrbbsyn.o $(DR)wrhead.o \
-$(DR)cmshf.o $(DR)tshft.o $(DR)getqual.o $(DR)bbsyn.o $(DR)c2upper.o \
+$(DR)cmshf.o $(DR)tshft.o $(DR)getqual.o $(DR)bbsyn.o \
 $(DR)skdshft.o $(DR)snpshft.o $(DR)luff.o $(DR)cbinf.o $(DR)bcode.o \
 $(DR)snapintr.o $(DR)bbbuf.o $(DR)cazel.o $(DR)gtshft.o $(DR)bar1.o \
 $(DR)labsnp.o $(DR)port.o $(DR)lstsum.o $(DR)nhdif.o $(DR)setprint.o \
 $(DR)shfcop.o $(DR)getstr.o $(DR)prtmp.o $(DR)wrdate.o \
 $(DR)b3of9.o $(DR)drchmod.o $(DR)vlbat.o $(DR)vlbah.o \
 $(DR)lstsumo.o $(DR)isecdif.o $(DR)psbar.o $(DR)copen.o $(DR)procintr.o \
-$(DR)read_snap1.o
+$(DR)read_snap1.o $(DR)drset.o $(DR)wrsor.o $(DR)prcov.o
 
 #
 # Set compiling and linking flags
@@ -62,8 +66,8 @@ LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 	@echo done.
 
 ../bin/ifvlbafix: ifvlbafix
-	cp ifvlbafix ../bin/ifvlbafix
-	chmod a+x ../bin/ifvlbafix
+	rm -f ../bin/ifvlbafix
+	ln -s ../drudg/ifvlbafix ../bin/ifvlbafix
 
 #  The following are special dependency lines for compiling.
 
