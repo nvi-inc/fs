@@ -79,7 +79,7 @@ int *kecho;
 #endif
   } else {
     sprintf(buf,"rsp %d\r",*devid);
-    ierr=sib(ID_hpib,buf,0,-20,*timeout,0,centisec);
+    ierr=sib(ID_hpib,buf,-1,-20,*timeout,0,centisec);
     if(ierr<0) {
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
