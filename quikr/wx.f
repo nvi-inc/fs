@@ -73,10 +73,22 @@ C Call the metserver server for MET3 information.
             return
          endif
          call fs_get_tempwx(tempwx)
+C         if(tempwx .lt. -50.0) then
+C            ierr = -9
+C         endif
          call fs_get_preswx(preswx)
+C         if(preswx .le. -1.0) then
+C            ierr = -10
+C         endif
          call fs_get_humiwx(humiwx)
+C         if(humiwx .le. -1.0) then
+C            ierr = -11
+C         endif
          call fs_get_speedwx(speedwx)
          call fs_get_directionwx(directionwx)
+C         if(speedwx .le. -1.0 .or. directionwx .le. -1.0) then
+C            ierr = -12
+C         endif
          goto 8000
       endif
 C 
@@ -143,18 +155,31 @@ C
 C     5. Finally, code up the message for BOSS and the display and log. 
 C 
       nch = ichmv_ch(ibuf2,nchar+1,'/')
-      nch = nch + ir2as(tempwx,ibuf2,nch,5,1) 
-      nch = mcoma(ibuf2,nch)
-      nch = nch + ir2as(preswx,ibuf2,nch,7,1) 
-      nch = mcoma(ibuf2,nch)
-      nch = nch + ir2as(humiwx,ibuf2,nch,5,1) 
+      if (tempwx.GE.-50.0) then
+         nch = nch + ir2as(tempwx,ibuf2,nch,5,1) 
+      endif
+      if (speedwx.GE.0.0.OR.humiwx.GE.0.0.OR.preswx.GE.0.0) then
+         nch = mcoma(ibuf2,nch)
+      endif
+      if (preswx.GE.0.0) then
+         nch = nch + ir2as(preswx,ibuf2,nch,7,1) 
+      endif
+      if (speedwx.GE.0.0.OR.humiwx.GE.0.0) then
+         nch = mcoma(ibuf2,nch)
+      endif
+      if (humiwx.GE.0.0) then
+         nch = nch + ir2as(humiwx,ibuf2,nch,5,1) 
+      endif
       if(MET3.eq.wx_met) then
-         nch = mcoma(ibuf2,nch)
-         nch = nch + ir2as(speedwx,ibuf2,nch,7,1) 
-         nch = mcoma(ibuf2,nch)
-         nch = nch + ib2as(directionwx,ibuf2,nch,3) 
+         if (speedwx.GE.0.0) then
+            nch = mcoma(ibuf2,nch)
+            nch = nch + ir2as(speedwx,ibuf2,nch,7,1) 
+            nch = mcoma(ibuf2,nch)
+            nch = nch + ib2as(directionwx,ibuf2,nch,o'100000'+3) 
+         endif
       endif
 C 
+8001  continue
       nch = nch - 1 
       iclass = 0
       call put_buf(iclass,ibuf2,-nch,'fs','  ')
