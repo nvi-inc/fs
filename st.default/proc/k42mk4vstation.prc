@@ -69,7 +69,7 @@ cable
 enddef
 define  overnite      00000000000
 log=overnite
-setup
+setupa=1
 check=*,-tp
 min15@!,15m
 "rxmon@!+2m30s,5m
@@ -172,11 +172,6 @@ st=for,135,off
 et
 !+3s
 enddef
-define  setup         00000000000
-dat
-enable=
-repro=byp,4,6
-enddef
 define  sfastf        00000000000
 sff
 !+$
@@ -187,7 +182,8 @@ srw
 !+$
 et
 enddef
-define  sx2ca         00000000000
+define  setupa        00000000000
+pcalon
 tapeformc
 pass=$
 form=c1,4.000
@@ -198,12 +194,13 @@ enable=g0,g2
 tape=low
 repro=byp,8,20
 enddef
-define  sx2cb         00000000000
+define  setupb        00000000000
+pcalon
 tapeformc
 pass=$
 form=c2,4.000
 systracks=
-bbcsx2
+vcsx2
 ifdsx
 enable=g1,g3
 tape=low

@@ -57,9 +57,9 @@ wx
 cable
 ifd
 if3
-vc02
-vc06
-vc11
+vc01
+vc05
+vc09
 tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1,if3
 tpi=v9,v10,v11,v12,v13,v14,if2
 caltemps
@@ -163,6 +163,7 @@ srw
 et
 enddef
 define  setupa        00000000000
+pcalon
 vcsx2
 form=c,4.000
 form=reset
@@ -175,6 +176,7 @@ repro=byp,5,17
 checkcrc
 enddef
 define  setupb        00000000000
+pcalon
 vcsx2
 form=c,4.000
 form=reset

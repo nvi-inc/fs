@@ -106,9 +106,9 @@ wx
 cable
 ifdab
 ifdcd
-bbc02
-bbc06
-bbc11
+bbc01
+bbc05
+bbc09
 gps-fmout=c2
 sy=run setcl &
 enddef
@@ -130,9 +130,9 @@ wx
 cable
 sxcts
 enddef
-define  overnite      00000000000
+define  overnite1     00000000000
 log=overnite
-setup
+setupa1=1
 check=*,-r1
 min15@!,15m
 "rxmon@!+2m30s,5m
@@ -150,11 +150,6 @@ calon
 tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpical=9u,10u,11u,12u,13u,14u,ifb
 caloff
-enddef
-define  setup         00000000000
-dat
-enable1=
-repro1=byp,4,6
 enddef
 define  sxcts         00000000000
 bbcman
@@ -364,7 +359,8 @@ srw1
 !+$
 et1
 enddef
-define  sx2ca1        00000000000
+define  setupa1       00000000000
+pcalon
 select=1
 tapeformc1
 pass1=$
@@ -378,7 +374,8 @@ tape1=low
 repro1=byp,8,20
 !*+8s
 enddef
-define  sx2cb1        00000000000
+define  setupb1       00000000000
+pcalon
 select=1
 tapeformc1
 pass1=$
@@ -634,7 +631,8 @@ srw2
 !+$
 et2
 enddef
-define  sx2ca2        00000000000
+define  setupa2       00000000000
+pcalon
 select=2
 tapeformc2
 pass2=$
@@ -648,7 +646,8 @@ tape2=low
 repro2=byp,8,20
 !*+8s
 enddef
-define  sx2cb2        00000000000
+define  setupb2       00000000000
+pcalon
 select=2
 tapeformc2
 pass2=$

@@ -153,9 +153,9 @@ wx
 cable
 ifdab
 ifdcd
-bbc02
-bbc06
-bbc11
+bbc01
+bbc05
+bbc09
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
 sy=run setcl &
@@ -180,7 +180,7 @@ sxcts
 enddef
 define  overnite      00000000000
 log=overnite
-setup
+setupa=1
 check=*,-rc
 min15@!,15m
 "rxmon@!+2m30s,5m
@@ -287,11 +287,6 @@ label
 rec
 check=*,rc
 enddef
-define  setup         00000000000
-dat
-enable=
-repro=byp,4,6
-enddef
 define  sfastf        00000000000
 sff
 !+$
@@ -302,7 +297,8 @@ srw
 !+$
 et
 enddef
-define  sx2ca         00000000000
+define  setupa        00000000000
+pcalon
 tapeformc
 pass=$
 form=c,4.000
@@ -315,7 +311,8 @@ tape=low
 repro=byp,8,20
 !*+8s
 enddef
-define  sx2cb         00000000000
+define  setupb        00000000000
+pcalon
 tapeformc
 pass=$
 form=c,4.000
