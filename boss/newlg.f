@@ -202,6 +202,8 @@ c
         nch=ichmv_ch(ib,nch,'s2')
       else if(drive(1).eq.VLBA4.and.drive_type(1).eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
+      else if(drive(1).eq.VLBA4.and.drive_type(1).eq.VLBA42) then
+        nch=ichmv_ch(ib,nch,'vlba42')
       else if(drive(1).eq.K4.and.drive_type(1).eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
       else if(drive(1).eq.K4.and.drive_type(1).eq.K42) then
@@ -233,6 +235,8 @@ c
         nch=ichmv_ch(ib,nch,'s2')
       else if(drive(2).eq.VLBA4.and.drive_type(2).eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
+      else if(drive(1).eq.VLBA4.and.drive_type(1).eq.VLBA42) then
+        nch=ichmv_ch(ib,nch,'vlba42')
       else if(drive(2).eq.K4.and.drive_type(2).eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
       else if(drive(2).eq.K4.and.drive_type(2).eq.K42) then
@@ -292,6 +296,11 @@ c
       else
          nch=ichmv_ch(ib,nch,"none")
       endif
+
+      nch=mcoma(ib,nch)
+      call fs_get_imk4fmv(imk4fmv)
+      nch = nch + ib2as(imk4fmv,ib,nch,z'8005')
+
       call logit3(ib,nch-1,lsor)
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
