@@ -98,17 +98,21 @@ struct k4st_cmd *lclc;
 int tcoff;
 {
   char buffer[80];
+  static char *ftfb[]={"FT","FB"};
 
-  if(lclc->record==1 && sqn < 0)
+  if(lclc->record==1 && sqn < 0) {
     if(tcoff) {
-      ib_req2(ip,device,"REC;TSM=ON,FB,30");
+      sprintf(buffer,"REC;TSM=ON,%s,%d",ftfb[shm_addr->k4rec_mode.im],shm_addr->k4rec_mode.nm);
     } else {
-      ib_req2(ip,device,"REC");
+      sprintf(buffer,"REC");
     }
-  else if(lclc->record==1) {
-    sprintf(buffer,"REC=%ld",sqn);
-    if(tcoff)
-      strcat(buffer,";TSM=ON,FB,30");
+    ib_req2(ip,device,buffer);
+  } else if(lclc->record==1) {
+    if(tcoff) {
+      sprintf(buffer,"REC=%ld;TSM=ON,%s,%d",sqn,ftfb[shm_addr->k4rec_mode.im],shm_addr->k4rec_mode.nm);
+    } else {
+      sprintf(buffer,"REC=%ld",sqn);
+    }
     ib_req2(ip,device,buffer);
   } else
     ib_req2(ip,device,"PLY");
