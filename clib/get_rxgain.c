@@ -273,8 +273,7 @@ int get_rxgain(file,rxgain)
       return -802;
 
     while(1) {
-      char tk;
-      float el;
+      float el, tk;
       ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
       if(ierr==-1)
