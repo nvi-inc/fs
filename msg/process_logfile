@@ -27,9 +27,8 @@ while {$read==1} {
  if {[gets $file line] >= 0} {
   puts $line 
   after 2   
+ } else {
+  after 10
  }
 }
 close $file
-
-
-
