@@ -177,6 +177,7 @@ repro=byp,8,14
 "dqa@!,1m
 enddef
 define  postob        00000000000
+form
 enddef
 define  precond       00000000000
 schedule=prepass,#1
