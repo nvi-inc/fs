@@ -64,6 +64,7 @@ setupa1=1
 min15@!,1m
 enddef
 define  postob        00000000000
+form
 enddef
 define  preob         00000000000
 onsource
