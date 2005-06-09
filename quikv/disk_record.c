@@ -34,7 +34,8 @@ long ip[5];                           /* ipc parameters */
 	cls_snd(&out_class, str, strlen(str) , 0, 0);
 	out_recs++;
 	goto mk5cn;
-      } else if (command->argv[1]==NULL) /* special cases */
+      } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
+      else if (command->argv[1]==NULL) /* special cases */
 	if (*command->argv[0]=='?') {
 	  disk_record_dis(command,itask,ip);
 	  return;

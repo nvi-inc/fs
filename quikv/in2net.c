@@ -36,7 +36,8 @@ long ip[5];                           /* ipc parameters */
 	out_recs++;
 	goto mk5cn;
 	query=TRUE;
-      } else if (command->argv[1]==NULL) /* special cases */
+      } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
+      else if (command->argv[1]==NULL) /* special cases */
 	if (*command->argv[0]=='?') {
 	  in2net_dis(command,itask,ip);
 	  return;

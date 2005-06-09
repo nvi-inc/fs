@@ -37,7 +37,8 @@ long ip[5];                           /* ipc parameters */
 	out_recs++;
 	ip[0]=1;
 	goto mk5cn;
-      } else if (command->argv[1]==NULL) /* special cases */
+      } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
+      else if (command->argv[1]==NULL) /* special cases */
 	if (*command->argv[0]=='?') {
 	  disk2file_dis(command,itask,ip);
 	  return;
