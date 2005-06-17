@@ -49,8 +49,8 @@ C     IREC,IOFF - position information for current procedure
       integer fmpposition,fmpreadstr,fmpsetpos,fmpwritestr
       integer fmppost
       dimension itime(6),lprocn(6)
-      character*80 ibc
-      integer*2 ib(40)
+      character*512 ibc
+      integer*2 ib(256)
       integer*4 logsecs,seconds,prsecs
       integer itpr(6)
       equivalence (ib,ibc)
@@ -134,7 +134,7 @@ C
       if (ilen.lt.0.or.ibc(1:6).eq.'define'.or.ibc(1:6).eq.'enddef')
      .   goto 500
       if (ierr.lt.0.or.ilen.lt.0) goto 800
-      ilen = iflch(ib,80)
+      ilen = iflch(ib,512)
       call char2hol('&&',ldum,1,2)
       call logit4(ib,ilen,ldum,lprocn)
       goto 410
