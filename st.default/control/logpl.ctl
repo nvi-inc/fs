@@ -1,11 +1,15 @@
-* FREJA.CTL - Control file for FREJA
+* logpl.ctl - Control file for LOGPL (originally named FREJA by Fredrik)
 *
-* 1. Command, the pattern freja will grep the log file for.
-* 2. Parameter, the column of comma-separated data after the command.
-* 3. Description, the menu label freja will use for the command.
-* 4. String, a level-2 grep. This parameter is optional and may be left out.
+* 1. Command, the pattern logpl will grep the log file for.
+* 2. Parameter, the number of comma-separated data field for the command,
+*               a negative value means to take the value just after the
+*               field with "String"
+* 3. Description, the menu label logpl will use for the command.
+* 4. String, a level-2 grep. This parameter is optional and may be left out,
+*            for negative "Paramter" values, it is the string before the
+*            data field
 *
-* NB! This file is space-separated. That is, no field may contain spaces.
+* NB! This file is space-separated, i.e., no field may contain spaces.
 *
 *
 * 1:Command     2:Parameter   3:Description     4:String
