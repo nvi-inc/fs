@@ -25,7 +25,7 @@ C
 C     INPUT VARIABLES:
 C        LUI, LUO  - input, output LU's
       character*(*) ib
-      character*74 ibc
+      character*512 ibc
 C               - line and record buffer
 C        ICHX   - number of characters from terminal
       character*103 editor

@@ -67,7 +67,7 @@ C
       integer ierr
       character*29 dlstr
       character*12 dlfilenm
-      character*74 ibc
+      character*512 ibc
       character*80 dirstr
       character*12 twochr
       character*64 pathname,pathname2,link

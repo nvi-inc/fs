@@ -61,7 +61,8 @@ C
 c     logical lge,lle
       character*64 pathname,link
 C               - file names
-      character*74 lnam1,lnam2,ibc,ibc2
+      character*74 lnam1,lnam2
+      character*512 ibc,ibc2
       character*80 ibcd
       integer trimlen, fnblnk
       character*40 cmessage
