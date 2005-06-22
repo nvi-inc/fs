@@ -47,6 +47,9 @@ Formatter firmware version in equip.ctl doesn't support data modulation.
 4F -508
 Rack ID is odd and Mark 5 record is in use, formatter reports rack ID ?W
 ""
+4F -509
+Possible bit slip, Altera clock and sync misalign errors.
+""
 4M -100
 no default for trackform track number
 ""
