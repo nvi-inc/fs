@@ -47,6 +47,10 @@ long ip[5];
 	maSTAform4(&lclc,&lclm,buff);
 	if(lclm.error & (1<<15))
 	  logit(NULL,-501,"4f");
+
+	if((lclm.error & 0x600)==0x600)
+	  logit(NULL,-509,"4f");
+
 	icount=0;
 	for (i=0;i<8;i++)
 	  if(! (lclm.rack_ids & 1<<i))
@@ -59,7 +63,7 @@ long ip[5];
 
 	if(lclm.version != shm_addr->imk4fmv)
 	  logitn(NULL,-504,"4f",lclm.version);
-
+	  
 	nchar=cls_rcv(iclass,buff,MAX_BUF,&idum,&idum,0,0);
 	maSSTform4(&lclc,buff);
 

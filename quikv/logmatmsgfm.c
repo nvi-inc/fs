@@ -39,6 +39,10 @@ long ip[5];
       maSTAform4(&lclc,&lclm,buff);
       if(lclm.error & (1<<15))
 	logit(NULL,-501,"4f");
+
+      if((lclm.error & 0x600)==0x600)
+	logit(NULL,-509,"4f");
+
       icount=0;
       for (i=0;i<8;i++)
 	if(! (lclm.rack_ids & 1<<i))
