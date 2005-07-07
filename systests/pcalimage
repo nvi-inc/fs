@@ -1,0 +1,218 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+use PGPLOT;
+require "getopts.pl";
+
+&Getopts("vhf:");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'pcalimage -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[pcalimage 1.0]\n";
+    pgqinf("VERSION",$val,$len);
+    print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: pcalimage -vhf file/device\n";
+    print "Synopsis: extracts and plots image reject using pcal tones from log files\n\n";
+
+    print "This script processes log files to produce plots of image rejection. The lowest\n";
+    print "image rejection that can be detected is plotted as a dotted line, which may be\n";
+    print "overlaid by the actual results.\n\n"; 
+
+    print "Option explanations:\n";
+    print " -v print program and PGPLOT version information and stop\n";
+    print " -h print this help information and stop\n";
+    print " -f file/device send graphs to 'file' using PGPLOT 'device'\n";
+    print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
+    print "    if -f omitted and DISPLAY is not defined, 'pcalimage.ps/vps' will be used\n";
+    print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
+    print "               be sure to quote '?', like \\?\n";
+    print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
+    exit -1;
+}
+
+if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
+    $dev="/xterm";
+} elsif(!defined($opt_f)) {
+    $dev="pcalimage.ps/vps";
+} else {
+    $dev=$opt_f;
+}
+
+# 2.0 extract data
+
+for($state=0;$state<2;$state++) {
+    for ($i=0;$i<16;$i++) {
+	$numb[0][$state][$i]=0;
+	$numb[1][$state][$i]=0;
+    }
+}
+$first=1;
+$state=-1;
+foreach $file (@ARGV) {
+    if(!defined($save_file)) {
+	$save_file=$file;
+    }
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+#   print "file $file \n";
+    $x=0;
+    $y=0;
+    while (<FILE>) {
+	if(/;location,([^,]*)/i) {
+	    $location=$1;
+	} elsif(/pcalimagel/i) {
+	    $state=0;
+	} elsif(/pcalimageu/i) {
+	    $state=1;
+	} elsif(/pcalports=([^,]*),([0-9]+)/i) {
+	    die "log does not contain necessary strings\n" if ($state < 0);
+	    $x=$1;
+	    $y=$2;
+#	    print "Pcalports $x, $y \n";
+	    if($first || $numb[0][$state][$x]!=0 || $numb[1][$state][$x]!=0
+	       || $numb[0][$state][$y]!=0 || $numb[1][$state][$y]!=0 ) {
+#		print "end\n";
+		goto PLOT if(!$first);
+                $first=0;
+		$date=substr($_,0,17);
+	    }
+	} elsif (/decode4\/[p]*cal ([lu])sb([xy])/i) {
+	    $sb = $1;
+	    if($sb eq "u") {
+		$band=1;
+	    } elsif($sb eq "l") {
+		$band=0;
+	    } else {
+		die "unknown side-band $sb\n";
+	    }
+	    $port=$2;
+	    if($port eq "x") {
+		$chan=$x;
+	    } elsif ($port eq "y") {
+		$chan=$y;
+	    } else {
+		die "unknown pcal port $port\n";
+	    }
+	    ($time,$type,@fields)=split(' ');
+	    while($freq=shift(@fields)) {
+		$freq=$freq/1e6;
+		$amp=shift(@fields);
+		$phase=shift(@fields);
+#		print "$band $port $freq $amp $phase\n";
+		$freq[$band][$state][$chan][$numb[$band][$state][$chan]]=$freq;
+		$ampl[$band][$state][$chan][$numb[$band][$state][$chan]]=$amp;
+		$numb[$band][$state][$chan]++;
+	    }
+	}
+    }
+}
+
+# 3.0 Plot
+
+PLOT:
+
+# 3.1 form ratio
+
+$ln10=log(10);
+$some=0;
+for($j=0;$j<2;$j++) {
+    for($i=1;$i<15;$i++) {
+	$count[$j][$i]=0;
+	$true=1-$j;
+	$false=$j;
+	for($k=0;$k<$numb[$true][$j][$i];$k++) {
+	    if(($freq[$true][$j][$i][$k] == $freq[$false][$j][$i][$k])
+	       && ($ampl[$true][$j][$i][$k]!=0)) {
+		$frequencies[$j][$i][$count[$j][$i]]=$freq[$true][$j][$i][$k];
+		$amp=$ampl[$false][$j][$i][$k];
+		$amp=1 if $amp==0;
+		$amplitudes[$j][$i][$count[$j][$i]]
+		    =20*log($amp/$ampl[$true][$j][$i][$k])/$ln10;
+		$sensitivity[$j][$i][$count[$j][$i]]
+		    =20*log(1.0/$ampl[$true][$j][$i][$k])/$ln10;
+		$count[$j][$i]++;
+		$some=1;
+	    }
+	}
+    }
+}
+die "no data to plot\n" if(!$some);
+
+# 3.2 Find minimum
+
+$minv=1e9;
+for($i=1;$i<15;$i++) {
+    for($j=0;$j<2;$j++) {
+	for($k=0;$k<$count[$j][$i];$k++) {
+	    if($amplitudes[$j][$i][$k]<$minv) {
+		$minv=$amplitudes[$j][$i][$k];
+	    }
+	    if($sensitivity[$j][$i][$k]<$minv) {
+		$minv=$sensitivity[$j][$i][$k];
+	    }
+	}
+    }
+}
+$minv=-9.99 if $minv > -10;
+$lower=10 * (-1+int $minv/10);
+$ticks=-$lower/2;
+$lower=$lower+0.01;
+
+# 3.3 Create plots
+
+pgbegin(0,$dev,2,16);
+pgsch(10);
+for($i=1;$i<15;$i++) {
+#    print " Plot loop $i\n";
+    for($j=0;$j<2;$j++) {
+	pgpanl(1+$j,1+$i);
+	pgvport(0.15,.95,0,1);
+	pgwindow(-0.5,16.5,$lower,0+$ticks/4);
+	if($i != 14) {
+	    pgbox("BCST",0.0,0,"BCNST",$ticks,2);
+	} else {
+	    pgbox("BCNST",0.0,0,"BCNST",$ticks,2);
+	    pglabel("Baseband Frequency (MHz)","","");
+	}
+	    
+	if($j == 0) {
+	    pglabel("","L$i","");
+	} else {
+	    pglabel("","U$i","");
+	}
+	for($k=0;$k<$count[$j][$i];$k++) {
+	    $fr[$k]=$frequencies[$j][$i][$k];
+	    $am[$k]=$amplitudes[$j][$i][$k];
+#		print "$i $j $fr[$j] $am[$j]\n";
+	}
+	pgpoint($count[$j][$i], \@fr,\@am,17);
+	pgline($count[$j][$i], \@fr,\@am);
+	for($k=0;$k<$count[$j][$i];$k++) {
+	    $fr[$k]=$frequencies[$j][$i][$k];
+	    $am[$k]=$sensitivity[$j][$i][$k];
+#		print "$i $j $fr[$j] $am[$j]\n";
+	    }
+	pgsls(4);
+	pgline($count[$j][$i], \@fr,\@am);
+	pgsls(1);
+    }
+}
+    
+# 3.4 Title
+
+pgpanl(1,1);
+pgvport(0.15,.95,0,1);
+pgwindow(-0.5,16.5,0,39);
+pgtext(2,10,"$location Baseband Image Rejection (dB) -- $date $save_file");
+pgend;

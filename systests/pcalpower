@@ -1,0 +1,194 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("hvb:");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'pcalpower -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[pcalpower 1.0]\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: pcalpower -bhv vc_bandwidth logs\n";
+    print "Synopsis: tabulates pcal percentage of tsys data\n\n";
+
+    print "This script will collect all tsys data in a log with pcal on and pcal off and\n";
+    print "calculate the fractional power due to the pcal. The '-b' option can be used\n";
+    print "to print the results in the Mark IV Decoders units for the (voltage) amplitude\n";
+    print "of a single tone.\n\n";
+    print "Whether the phase-cal is on or off for particular tsys measurements is\n";
+    print "determined by whether the string 'pcalon' or 'pcaloff' was most recently\n";
+    print "encountered in the log. Note that if 'pcalon' or 'pcaloff' is called from\n";
+    print "a SNAP procedure, then it must be logged with 'xlog=on'.\n\n";
+
+    print "Options explanation:\n";
+    print " -b vc_bandwidth (e.g., 2, 4, 8, 16) for single tone voltage (Mk4 decoder units)\n";
+    print " -h print this help information and stop\n";
+    print " -v print program and PGPLOT version information and stop\n";
+    exit -1;
+}
+
+# 2.0 extract data
+
+foreach $file (@ARGV) {
+    if(!defined($save_file)) {
+	$save_file=$file;
+    }
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+    $pcal="on"; #default
+#   print "file $file \n";
+    while (<FILE>) {
+	if(/;location,([^,]*)/i) {
+	    $location=$1;
+	    $date=substr($_,0,17);
+	} elsif(/pcalon/i) {
+	    $pcal="on";
+	} elsif(/pcaloff/i) {
+	    $pcal="off";
+	} elsif (/\/tsys\//i) {
+	    ($time,$label,$fields)=split('/');
+            @fields=split(',',$fields);
+            while($chan=shift(@fields)) {
+		$tsys=shift(@fields);
+		if(!defined($count{$pcal}{$chan})) {
+		    $count{$pcal}{$chan}=0;
+		}
+		if($tsys !~ /^\$/ && $tsys >= 0.0) {
+		    $n=$count{$pcal}{$chan}+1;
+		    if($n == 1) {
+			$max{$pcal}{$chan}=-1.0;
+			$min{$pcal}{$chan}=1e9;
+		    }
+		    if($max{$pcal}{$chan}<$tsys) {
+			$max{$pcal}{$chan}=$tsys;
+		    }
+		    if($min{$pcal}{$chan}>$tsys) {
+			$min{$pcal}{$chan}=$tsys;
+		    }
+		    $power{$pcal}{$chan}=
+			$power{$pcal}{$chan}*($n-1)/$n+$tsys/$n;
+		    $square{$pcal}{$chan}=
+			$square{$pcal}{$chan}*($n-1)/$n+($tsys*$tsys)/$n;
+		    $count{$pcal}{$chan}=$n;
+		}
+	    }
+	}
+    }
+}
+
+# 3.0 print out statistics
+
+$first=1;
+
+foreach $pcal (keys %count) {
+    if($first) {
+	print "$location pcal power -- $date $save_file\n";
+	$first=0;
+    }
+
+#          1u    39.8     0.0     0.0     1    39.8    39.8
+    print "Ch    $pcal      +/-     rms     n    max     min   noisy  (max-min)/rms\n";
+    foreach $chan (sort keys %{$count{$pcal}}) {
+	if($count{$pcal}{$chan}==0) {
+	    printf "%2.2s\n",$chan;
+	    next;
+	}
+	$power=$power{$pcal}{$chan};
+	$rms=$square{$pcal}{$chan}-$power*$power;
+	$count=$count{$pcal}{$chan};
+	$max=$max{$pcal}{$chan};
+	$min=$min{$pcal}{$chan};
+	$rms = 0.0 if $rms < 0.0;
+        if($count > 1) {
+            $rms=sqrt($rms);
+	    $rms*=$count/($count-1);
+	    $sigma=$rms/sqrt($count);
+	    $sigma{$pcal}{$chan}=$sigma;
+	    if($rms > 0) {
+		$range=($max-$min)/$rms;
+		if($range >= 6.0) {
+		    $noisy{$chan}='*';
+		}
+            } else {
+                $range=0.0;
+            }
+        } else {
+	    printf "%2.2s %7.2f                 %5d\n",
+	    $chan,$power,$count;
+	    next;
+        }
+	if(defined($noisy{$chan})) {
+	    $noisy="*";
+	} else {
+	    $noisy=" ";
+	}
+	printf "%2.2s %7.2f %7.2f %7.2f %5d %7.2f %7.2f %4s %10.2f\n",
+	$chan,$power,$sigma,$rms,$count,$max,$min,$noisy,$range;
+    }
+}
+@keys=(keys %count);
+$n=@keys;
+if($n != 2) {
+    exit;
+}
+#      1u     0.0     0.0     0.0     0.0
+print "Ch    Diff     +/-      %     +/-%  noisy";
+    if (defined($opt_b)) {
+	print "  decoder units\n";
+    } else {
+	print "\n";
+    }
+%seen= ();
+foreach $chan (keys %{$count{'on'}},keys %{$count{'off'}}) {
+    $seen{$chan}++;
+}
+
+foreach $chan (sort keys %seen) {
+    if(!defined($count{'off'}{$chan})&&!defined($count{'off'}{$chan})) {
+	next;
+    } elsif(defined($count{'off'}{$chan})&&$count{'off'}{$chan}==0
+	    ||defined($count{'on'}{$chan})&&$count{'on'}{$chan}==0) {
+	printf "%2.2s\n",$chan;
+	next;
+    }
+    $pon=$power{'on'}{$chan};
+    $pof=$power{'off'}{$chan};
+    $diff=$pon-$pof;
+    $fract=100.0*($pon/$pof-1);
+    if(defined($noisy{$chan})) {
+	$noisy="*";
+    } else {
+	$noisy=" ";
+    }
+    if(defined($sigma{'on'}{$chan}) && defined($sigma{'off'}{$chan})) {
+	$son=$sigma{'on'}{$chan};
+	$sof=$sigma{'off'}{$chan};
+	$sigma=sqrt($son*$son+$sof*$sof);
+	$son/=$pon;
+	$sof/=$pof;
+	$fsig=(100.0*$pon/$pof)*sqrt($son*$son+$sof*$sof);
+	printf "%2.2s %7.2f %7.2f %7.2f %7.2f %4s",
+	$chan, $diff, $sigma, $fract, $fsig, $noisy;
+    } else {
+	printf "%2.2s %7.2f         %7.2f         %4s",
+	$chan, $diff, $fract, $noisy;
+    }
+    if (defined($opt_b)) {
+	$volt=sqrt(($fract*.01)/$opt_b)*100.*10;
+	printf "    %7.0f\n",$volt;
+    } else {
+	print "\n";
+    }
+}
+

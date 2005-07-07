@@ -1,0 +1,222 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+use PGPLOT;
+require "getopts.pl";
+
+&Getopts("vhrf:");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'samplestat -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[samplestat 1.0]\n";
+    pgqinf("VERSION",$val,$len);
+    print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: samplestat -dvhf file/device logs\n";
+    print "Synopsis: extracts and plots sampler statistics from log files\n\n";
+
+    print "This script processes log files to produce plots of sample statistics. The\n";
+    print "ideal values are plotted as a dotted line. The measured statistics appear\n";
+    print "as points connected by lines.  The default mode is print the deviation from\n";
+    print "ideal. The '-r' switch can used to plot the raw statistics instead.\n\n";
+
+    print "Option explanations:\n";
+    print " -r plot raw statistics instead of deviation from ideal\n";
+    print " -v print program and PGPLOT version information\n";
+    print " -h print this help information and stop\n";
+    print " -f file/device send graphs to 'file' using PGPLOT 'device'\n";
+    print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
+    print "    if -f omitted and DISPLAY is not defined, 'samplestat.ps/vps' will be used\n";
+    print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
+    print "               be sure to quote '?', like \\?\n";
+    print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
+    exit -1;
+}
+
+if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
+    $dev="/xterm";
+} elsif(!defined($opt_f)) {
+    $dev="samplestat.ps/vps";
+} else {
+    $dev=$opt_f;
+}
+
+# 2.0 extract data
+
+for ($i=0;$i<17;$i++) {
+    $count[0][$i]=0;
+    $count[1][$i]=0;
+}
+$th[0]=$th[3]=18;
+$th[1]=$th[2]=32;
+$some=0;
+$first=1;
+foreach $file (@ARGV) {
+    if(!defined($save_file)) {
+	$save_file=$file;
+    }
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+#   print "file $file \n";
+    $x=0;
+    $y=0;
+    while (<FILE>) {
+	if(/;location,([^,]*)/i) {
+	    $location=$1;
+	}
+	
+	if(/pcalports=([^,]*),([0-9]+)/i) {
+	    $x=$1;
+	    $y=$2;
+#	    print "Pcalports $x, $y \n";
+	    if($first || $count[0][$x]!=0 || $count[1][$x]!=0
+	       || $count[0][$y]!=0 || $count[1][$y]!=0 ) {
+#		print "end\n";
+		goto PLOT if(!$first);
+                $first=0;
+		$date=substr($_,0,17);
+	    }
+	} elsif (/decode4\/[s]*amples ([lu])sb([xy])/i) {
+	    $sb = $1;
+	    if($sb eq "u") {
+		$band=1;
+	    } elsif($sb eq "l") {
+		$band=0;
+	    } else {
+		die "unknown side-band $sb\n";
+	    }
+	    $port=$2;
+	    if($port eq "x") {
+		$chan=$x;
+	    } elsif ($port eq "y") {
+		$chan=$y;
+	    } else {
+		die "unknown pcal port $port\n";
+	    }
+	    ($time,$type,$mm,$m,$p,$pp)=split(' ');
+	    $total=$mm+$m+$p+$pp;
+	    $st[$band][$chan][0]=$mm*100/$total;
+	    $st[$band][$chan][1]=$m*100/$total;
+	    $st[$band][$chan][2]=$p*100/$total;
+	    $st[$band][$chan][3]=$pp*100/$total;
+	    if(!defined($opt_r)) {
+		for($l=0;$l<4;$l++) {
+		    $st[$band][$chan][$l]-=$th[$l];
+		}
+	    }
+	    $count[$band][$chan]++;
+	    $some=1;
+	}
+    }
+}
+
+# 3.0 Find max/min value
+
+PLOT:
+die "no data to plot\n" if !$some;
+
+if(!defined($opt_r)) {
+    for($i=0;$i<4;$i++) {
+	$th[$i]=0;
+    }
+}
+$maxv=$th[1];
+$minv=$th[0];
+
+for($i=1;$i<15;$i++) {
+    for($j=0;$j<2;$j++) {
+	next if $count[$j][$i] == 0;
+	for($k=0;$k<4;$k++) {
+	    if($st[$j][$i][$k]>$maxv) {
+		$maxv=$st[$j][$i][$k];
+	    }
+	    if($st[$j][$i][$k]<$minv) {
+		$minv=$st[$j][$i][$k];
+	    }
+	}
+    }
+}
+if($maxv >=0) {
+    $upper=5 * (1+int $maxv/5);
+} else {
+    $upper=5 * (int $maxv/5);
+}
+if($minv >=0) {
+    $lower=5 * (int $minv/5);
+} else {
+    $lower=5 * (-1+int $minv/5);
+}
+$ticks=($upper-$lower)/2;
+$upper=$upper;
+$lower=$lower+0.01;
+
+
+for($k=0;$k<4;$k++) {
+    $fr[$k]=1+$k;
+}
+
+# 4.0 plot
+
+pgbegin(0,$dev,2,16);
+pgsch(10);
+
+for($i=1;$i<15;$i++) {
+#    print " Plot loop $i\n";
+    for($j=0;$j<2;$j++) {
+	pgpanl(1+$j,1+$i);
+	pgvport(0.15,.95,0,1);
+	pgwindow(0.5,4.5,$lower,$upper);
+	if($i != 14) {
+	    pgbox("BCT",0.0,0,"BCnST",$ticks,2);
+	} else {
+	    pgbox("BCT",0.0,0,"BCNST",$ticks,2);
+	    pglabel("States","","");
+	}
+	
+	if($j == 0) {
+	    pglabel("","L$i","");
+	} else {
+	    pglabel("","U$i","");
+	}
+	next if $count[$j][$i] == 0;
+	for($k=0;$k<4;$k++) {
+	    $am[$k]=$st[$j][$i][$k];
+#		print "U$i $j $fr[$j] $am[$j]\n";
+	}
+	pgpoint(4, \@fr,\@am,17);
+	pgline(4, \@fr,\@am);
+	pgsls(4);
+	pgline(4, \@fr,\@th);
+	pgsls(1);
+
+    }
+}
+for($i=0;$i<2;$i++) {
+    pgpanl(1+$i,16);
+    pgvport(0.15,.95,0,1);
+    pgwindow(-0.5,16.5,0,39);
+    pgtext(0.90,25,"--");
+    pgtext(5.45,25,"-");
+    pgtext(9.75,25,"+");
+    pgtext(13.65,25,"++");
+}
+
+pgpanl(1,1);
+pgvport(0.15,.95,0,1);
+pgwindow(-0.5,16.5,0,39);
+if(!defined($opt_r)) {
+    pgtext(0,10,"$location Sampler Statistics Deviation (percent)  -- $date $save_file");
+} else {
+    pgtext(3,10,"$location Sampler Statistics (percent) -- $date $save_file");
+}
+pgend;
