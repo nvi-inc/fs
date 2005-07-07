@@ -1,0 +1,190 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+use PGPLOT;
+require "getopts.pl";
+
+&Getopts("vhc:f:");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'pcalamp -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[pcalamp 1.0]\n";
+    pgqinf("VERSION",$val,$len);
+    print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: pcalamp  -c string -vhf file/device logs\n";
+    print "Synopsis: extracts and plots pcal amplitudes from log files\n\n";
+
+    print "This script processes log files to produce plots of pcal amplitudes. The\n";
+    print "default is pcal amplitudes for the first set of amplitudes that appear in the\n";
+    print "file. This behavior can be modified with the '-c' option to plot the first\n";
+    print "occurrence of amplitude data after a FS command that contains the specified\n";
+    print "string.\n\n";
+
+    print "Option explanations:\n";
+    print " -c string plot first set of amplitudes found after a command/procedure\n";
+    print "    matching 'string' was recorded in the log, for this to work; the\n";
+    print "    command/procedure matching 'string' must not be called from a procedure,\n";
+    print "    unless the procedure is logged with 'xlog=on'\n";
+    print " -v print program and PGPLOT version information and stop\n";
+    print " -h print this help information and stop\n";
+    print " -f file/device send graphs to 'file' using PGPLOT 'device'\n";
+    print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
+    print "    if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used\n";
+    print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
+    print "               be sure to quote '?', like \\?\n";
+    print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
+    exit -1;
+}
+
+if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
+    $dev="/xterm";
+} elsif(!defined($opt_f)) {
+    $dev="pcalamp.ps/vps";
+} else {
+    $dev=$opt_f;
+}
+
+# 2.0 extract data
+
+for ($i=0;$i<17;$i++) {
+    $count[0][$i]=0;
+    $count[1][$i]=0;
+}
+$some=0;
+$first=1;
+foreach $file (@ARGV) {
+    if(!defined($save_file)) {
+	$save_file=$file;
+    }
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+#   print "file $file \n";
+    $x=0;
+    $y=0;
+    while (<FILE>) {
+	if(/;location,([^,]*)/i) {
+	    $location=$1;
+	}
+	
+	if(defined($opt_c)&&!$found) {
+	    next if(!/^.{20}[^&].*$opt_c/);
+#	    print "found '$_'\n";
+	    $found=1;
+	}
+		
+	if(/pcalports=([^,]*),([0-9]+)/i) {
+	    $x=$1;
+	    $y=$2;
+#	    print "Pcalports $x, $y \n";
+	    if($first || $count[0][$x]!=0 || $count[1][$x]!=0
+	       || $count[0][$y]!=0 || $count[1][$y]!=0 ) {
+#		print "end\n";
+		goto PLOT if(!$first);
+                $first=0;
+		$date=substr($_,0,17);
+	    }
+	} elsif (/decode4\/[p]*cal ([lu])sb([xy])/i) {
+	    $sb = $1;
+	    if($sb eq "u") {
+		$band=1;
+	    } elsif($sb eq "l") {
+		$band=0;
+	    } else {
+		die "unknown side-band $sb\n";
+	    }
+	    $port=$2;
+	    if($port eq "x") {
+		$chan=$x;
+	    } elsif ($port eq "y") {
+		$chan=$y;
+	    } else {
+		die "unknown pcal port $port\n";
+	    }
+	    ($time,$type,@fields)=split(' ');
+	    while($freq=shift(@fields)) {
+		$freq=$freq/1e6;
+		$amp=shift(@fields);
+		$phase=shift(@fields);
+#		print "$band $port $freq $amp $phase\n";
+		$frequencies[$band][$chan][$count[$band][$chan]]=$freq;
+		$amplitudes[$band][$chan][$count[$band][$chan]]=$amp;
+		$count[$band][$chan]++;
+		$some=1;
+	    }
+	}
+    }
+}
+
+# 3.0 Find max value
+
+PLOT:
+die "no data to plot\n" if !$some;
+
+$maxv=-1;
+for($i=1;$i<15;$i++) {
+    for($j=0;$j<2;$j++) {
+	for($k=0;$k<$count[$j][$i];$k++) {
+	    if($amplitudes[$j][$i][$k]>$maxv) {
+		$maxv=$amplitudes[$j][$i][$k];
+	    }
+	}
+    }
+}
+$maxv=9.99 if $maxv < 10;
+$upper=10 * (1+int $maxv/10);
+$ticks=$upper/2;
+$upper=$upper-0.01;
+
+# 4.0 plot
+
+pgbegin(0,$dev,2,16);
+pgsch(10);
+
+for($i=1;$i<15;$i++) {
+#    print " Plot loop $i\n";
+    for($j=0;$j<2;$j++) {
+	pgpanl(1+$j,1+$i);
+	pgvport(0.15,.95,0,1);
+	pgwindow(-0.5,16.5,0,$upper);
+	if($i != 14) {
+	    pgbox("BCST",0.0,0,"BCNST",$ticks,2);
+	} else {
+	    pgbox("BCNST",0.0,0,"BCNST",$ticks,2);
+	    pglabel("Baseband Frequency (MHz)","","");
+	}
+	
+	if($j == 0) {
+	    pglabel("","L$i","");
+	} else {
+	    pglabel("","U$i","");
+	}
+	for($k=0;$k<$count[$j][$i];$k++) {
+	    $fr[$k]=$frequencies[$j][$i][$k];
+	    $am[$k]=$amplitudes[$j][$i][$k];
+#		print "U$i $j $fr[$j] $am[$j]\n";
+	}
+	pgpoint($count[$j][$i], \@fr,\@am,17);
+	pgline($count[$j][$i], \@fr,\@am);
+    }
+}
+
+pgpanl(1,1);
+pgvport(0.15,.95,0,1);
+pgwindow(-0.5,16.5,0,39);
+
+$string="";
+$string=$opt_c if (defined($opt_c));
+pgtext(3,10,"$location Pcal Amplitude (Voltage %) -- $date $save_file $string");
+
+pgend;
