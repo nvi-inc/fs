@@ -211,7 +211,7 @@ global pointing_id problem_scans_id current_form process_file
   # Destroys every singel widget in the ready and stop  #
   # forms.                                              #
   #*****************************************************# 
-  destroy .form .internal6 .internal7 .internal7a .internal7c .internal8 .internal9 .internal10 .internal11 .internal12 .internal13 .internal14 \
+  destroy .form .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal9 .internal10 .internal11 .internal12 .internal13 .internal14 \
           .internal15 .internal16 .internal17 .ready_form_label .stop_form_label .session_label .session_entry \
           .start_source_label .start_source_entry .comment_label_frame .comment_label .comment_text .comment_scroll \
           .first_source_label .firts_source_entry .at_label .ut_label .time_entry .problem_scan_label .problem_scan_frame \
@@ -219,6 +219,7 @@ global pointing_id problem_scans_id current_form process_file
           .gps_fmout .fmout_gps .gps-fmout_entry .gps_unit_label .tape_inventory_label .thin_entry .thin_label .thick_entry \
            .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label \
            .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label \
+           .disk_inventory_labelE .packE_entry .packE_label \
           .thick_label .wx_frame .wx_label .temperature_label .temperature_entry .pressure_label .pressure_entry \
           .humidity_label .humidity_entry .skycondition_label .skycondition_entry .cable_label .larger_frame \
           .longer_cable_label .finished_label .finished_entry .ut_label \
@@ -633,6 +634,7 @@ frame  .internal6 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7a -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7c -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7e -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal8 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal9 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal10 -width 21c -height 3c -relief flat -bg SteelBlue3
@@ -652,6 +654,7 @@ pack .c -in .internal6
 pack .c -in .internal7
 pack .c -in .internal7a
 pack .c -in .internal7c
+pack .c -in .internal7e
 pack .c -in .internal8
 pack .c -in .internal9
 pack .c -in .internal10
@@ -677,7 +680,7 @@ if {$form==0} {
 pack   .internal1 .internal2 .internal3 .internal4 .internal7 .internal8 .internal9 .internal10 .internal11 \
 .internal12 .internal13 .internal14 .internal15 .internal16 .internal17 -in .form -side top -fill both -expand 1
 } elseif {$form==1} {
-pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7 .internal7a .internal7c  .internal8 .internal16 \
+pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal16 \
 .internal17 -in .form -side top -fill both -expand 1
 }
 
@@ -794,8 +797,12 @@ label  .disk_inventory_labelC -text "               " -bg SteelBlue3 -fg white -
 entry  .packC_entry -width 10 -relief sunken -textvariable packC
 label  .packC_label -text "C (1600 GB)" -bg SteelBlue3 -fg white -width 11
 entry  .packD_entry -width 10 -relief sunken -textvariable packD
-label  .packD_label -text "D (larger )" -bg SteelBlue3 -fg white -width 11
+label  .packD_label -text "D (2000 GB)" -bg SteelBlue3 -fg white -width 11
 pack   .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label -in .internal7c -side left -pady 1m
+label  .disk_inventory_labelE -text "               " -bg SteelBlue3 -fg white -width 25
+entry  .packE_entry -width 10 -relief sunken -textvariable packE
+label  .packE_label -text "(other larger)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelE .packE_entry .packE_label -in .internal7e -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -987,8 +994,6 @@ nr_of_problem_scans_entries nr_of_tape_entries
     puts -nonewline $setup_file "Put message into log:"; puts $setup_file $put_into_log
     puts -nonewline $setup_file "Get session name:"; puts $setup_file $get_exp_name
    close $setup_file
-   exec chmod g+w /usr2/control/msg.ctl
-   exec chmod o+w /usr2/control/msg.ctl
 }
 #*********************************** End of subroutine ****************************************#
 
@@ -1264,7 +1269,7 @@ unset value_entry_array
    set {tsys_entry_array(Tsys_x2:)} $tsys3
    set {value_entry_array(Recorder humidity:)} $rec_humidity
   } elseif {$current_form=="stop"} {
-   global session scan_source scan_start explanation thin thick packA packB packC packD finished
+   global session scan_source scan_start explanation thin thick packA packB packC packD packE finished
    set tape_inventory_entry_array(default) {}; unset tape_inventory_entry_array
    set {text_entry_array(session name:)} $session
    set {tape_inventory_entry_array(thin)} $thin
@@ -1276,6 +1281,7 @@ unset value_entry_array
    set {disk_inventory_entry_array(packB)} $packB
    set {disk_inventory_entry_array(packC)} $packC
    set {disk_inventory_entry_array(packD)} $packD
+   set {disk_inventory_entry_array(packE)} $packE
   }
 
 
@@ -1633,7 +1639,7 @@ set file [open text_message.txt w+]
 
     puts -nonewline $file "Recorder Humidity (%): "; puts $file $rec_humidity
   } elseif {$current_form=="stop"} {
-    global session thin thick packA packB packC packD finished
+    global session thin thick packA packB packC packD packE finished
     set header "Session $session stop message for $station."
     set header_length [string length $header]
      puts $file $header
@@ -1664,13 +1670,16 @@ set file [open text_message.txt w+]
      }
 
      if {[regexp -nocase {^na$} $thin]} {
-#      puts -nonewline $file "Tape Inventory: "; puts $file "$thin"
+#      puts -nonewline $file "Tape Inventory: "; puts $file "Thin $thin"
      } else {
-      puts -nonewline $file "Tape Inventory: "; puts -nonewline $file "$thin "; puts -nonewline $file "thin    "
+      puts -nonewline $file "Tape Inventory: ";
+      puts -nonewline $file "Thin "
+      puts -nonewline $file "$thin";
        if {[regexp -nocase {^na$} $thick]} {
         puts $file ""
        } else {
-        puts -nonewline $file "$thick "; puts $file "thick"
+        puts -nonewline $file ", Thick "
+        puts $file "$thick";
        }
      }
 
@@ -1678,23 +1687,29 @@ set file [open text_message.txt w+]
 #	 puts -nonewline $file "Disk Inventory: "; puts $file "$packA"
      } else {
 	 puts -nonewline $file "Disk Inventory: "; 
-	 puts -nonewline $file "$packA ";
-	 puts -nonewline $file "Type A  "
+	 puts -nonewline $file "A "
+	 puts -nonewline $file "$packA";
 	 if {[regexp -nocase {^na$} $packB]} {
 	     puts $file ""
 	 } else {
-	     puts -nonewline $file "$packB ";
-	     puts -nonewline $file "Type B  "
+	     puts -nonewline $file ", B "
+	     puts -nonewline $file "$packB";
 	     if {[regexp -nocase {^na$} $packC]} {
 		 puts $file ""
 	     } else {
-		 puts -nonewline $file "$packC ";
-		 puts -nonewline $file "Type C  "
+		 puts -nonewline $file ", C "
+		 puts -nonewline $file "$packC";
 		 if {[regexp -nocase {^na$} $packD]} {
 		     puts $file ""
 		 } else {
-		     puts -nonewline $file "$packD ";
-		     puts $file "(larger)"
+		     puts -nonewline $file ", D "
+		     puts -nonewline $file "$packD";
+		     if {[regexp -nocase {^na$} $packE]} {
+		         puts $file ""
+                     } else {
+		         puts -nonewline $file ", (larger) "
+		         puts $file "$packE ";
+		     }
 		 }
 	     }
 	 }
