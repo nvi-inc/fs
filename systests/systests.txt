@@ -1,0 +1,912 @@
+       SYSTESTS - System test measurements and analysis package
+
+		      Ed Himwich and Brian Corey
+
+			    July 30, 2005
+
+INTRODUCTION
+
+This document describes how to install and use the "systests" tools
+for measuring, plotting, analyzing system test data.  The tests
+supported are: (1) band pass shapes, (2) baseband/video converter
+image rejection, (3) phase-cal power measurements, (4) phase-cal
+spurs, (5) sampler statistics, (6) "overnite" stability, (7)
+short-term stability, and (8) orientation dependent effects.  Most of
+these tests require that you have a Mark IV Formatter and Decoder with
+either a VLBA or Mark IV rack. However, test (3) only requires a
+working "caltsys" procedure, and tests (6), (7), and (8) can be
+modified to do a more limited test for other configurations.
+
+Once the tools are installed and set-up, each test requires only two
+type-ins, one to make the measurement and one to produce the plots or
+analysis results.  Some tests require manual intervention by the
+operator to set switches or disconnect/reconnect cables.  Everything
+else is automatic.  The remainder of this document describes the usage
+and installation of the tools.  The "help" output from the data
+processing scripts is provided for reference.
+
+USAGE
+
+After the tools have been installed, you can make the measurements for
+any observing mode.  You should set up the rack in the mode you want
+to test it in before doing any tests.  For example, to use the RD mode
+at Gc, you could use:
+
+     proc=rd0505gc
+     setup8f
+
+After the mode has been set-up, you can make any or all of the
+measurements described below.
+
+			BANDPASS MEASUREMENTS
+
+The amplitudes of all the phase cal tones within a baseband channel
+are measured and plotted to provide a power spectrum with coarse
+frequency resolution.
+
+1. To collect data for bandpass plots, make sure that the equipment is
+   set-up in the mode you want to test in (see above under USAGE),
+   then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     pcalamp
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "pcalamp done" in the log display, the
+   measurement is complete.  The procedure takes about two minutes to
+   run.
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     pcalamp testNN.log
+
+   This will make a graphical display, if you are on X server.  If
+   not, or if this is too big on your display, or you want hardcopy
+   output for documentation, you can generate a printed version with:
+
+      cd /usr2/log
+      pcalamp -f pcalamp.ps/vps testNN.log
+      lpr pcalamp.ps
+
+   Other output formats are available besides PostScript, try:
+
+      pcalamp -f \?
+
+   for more information.
+
+3. If you want to make additional measurements, you must open a new
+   log for each measurement, e.g., after having modified the
+   equipment.  The script will only plot the first amplitude results
+   it finds in the log.
+
+		     IMAGE REJECTION MEASUREMENTS
+
+The amplitudes of the phase cal tones at the normal and image
+frequencies in both the USB and LSB sidebands of each channel are
+measured to provide estimates of the image rejection as a function
+of frequency.
+
+1. To collect data for image rejection plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     pcalimage
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "pcalimage done" in the log display, the
+   measurement is complete.  The procedure takes about four minutes to
+   run.
+
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     pcalimage testNN.log
+
+   The lowest level of image rejection that can be measured, the
+   "sensitivity", is shown as dotted line in the graphs.  The
+   sensitivity is calculated from the phase cal amplitudes in the
+   sideband not under test.  The image rejection values measured are
+   shown as points connected by lines.  The solid line may overlay the
+   dotted line in many cases.  If the points plotted are not above the
+   dotted line, no image rejection problem was found above this level,
+   i.e., it is below the level that could be detected in this
+   configuration.
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you must open a new
+   log for each measurement, e.g., after having modified the equipment.
+   The script will only plot the first amplitude results it finds in
+   the log.
+
+		     PHASE CAL POWER MEASUREMENTS
+
+The fractional contribution of phase cal to the total system power in
+each channel is measured.
+
+1. How you make this measurement would normally depend on whether your
+   station has FS control to turn your phase-cal signal on and off.
+   If you have computer control of your phase-cal, use procedure
+   "pcalpowera".  That procedure will alternate making measurements
+   with the phase-cal on and off.  If you don't have computer control
+   use the "pcalpowerb" procedure, which will make several
+   measurements at a time in each state to reduce the number of manual
+   steps that are necessary.
+
+   For automatic switching, make sure that the equipment is set-up in
+   the mode you want to test in (see above under USAGE), then use
+   these commands:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     pcalpowera
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "pcalpowera done" in the log display, the
+   measurement is complete.  The procedure should take about seven
+   minutes to execute.
+
+   For manual switching, make sure that the equipment is set-up in the
+   mode you want to test in (see above under USAGE), then use these
+   commands:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     pcalpowerb
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "pcalpowerb done" in the log display, the
+   measurement is complete.  The procedure should take about seven
+   minutes to execute plus however long it takes you to respond to the
+   prompts.  There should be five prompts to respond to.  After taking
+   the requested action, click the "continue" button on the prompt
+   window to continue.
+
+   For manual switching, when prompted to turn the phase-cal on, you
+   should make sure the system is set-up normally.  This includes
+   specifically that the phase-cal is on.  When prompted to turn the
+   phase-cal, you should turn the phase-cal off, preferably without
+   directly disconnecting the 5 MHz that runs to the receiver for the
+   phase-cal.
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     pcalpower testNN.log
+
+   The average results for each detector in each state (pcal on and
+   off) are printed followed by the differenced results including the
+   fractional power due to the phase-cal signals. If you use the "-b"
+   option of the script with the single-side band bandwidth of the
+   video- or base-band converters (for example "pcalpower -b 16
+   testNN.log", where "16" is the channel bandwidth), the script will
+   also print the approximate amplitude that should be seen for
+   individual pcal tones in Mark IV decoder units. This is convenient
+   for comparison with the bandpass measurements described above.
+
+   The "noisy" columns in the output contains an asterisk, "*", if the
+   raw data for that device had a spread of six or more times its RMS
+   scatter between the largest and smallest values.  This gives some
+   suggestion about whether the data are too noisy to be useful, but
+   the presence or absence of an asterisk is no guarantee that the
+   data are bad or good, respectively.
+
+   If you want to save the results in a file or print them, then you
+   can redirect them to file, for example:
+
+     pcalpower testNN.log >pcalpower.txt
+     lpr pcalpower.txt
+
+3. If you want to average additional measurements you can continue to
+   take them in the original log.  The "pcalpower" script averages all
+   the values for each state (pcal on and off) that it finds in the
+   log or logs specified on the command line.  However, if want to
+   make measurements to see the results of a hardware change you
+   should start a new log.
+
+		     PHASE CAL SPUR MEASUREMENTS
+
+Evidence for spurious phase cal signals is sought by measuring the
+amount by which the phase cal level drops when phase cal is turned off
+and when the receiver LO is unlocked.
+
+1. To collect data for phase cal spur plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     pcalspur
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "pcalspur done" in the log display, the
+   measurement is complete.  The procedure should take about eight
+   minutes to execute plus however long it takes you to respond to the
+   prompts if any.  There may be up to five prompts to respond to.
+   When you complete each requested action, click the "Continue"
+   button in the prompt window to continue.
+
+   If prompted to turn the phase-cal on, you should make sure the
+   system is set-up normally.  This includes specifically that the
+   phase-cal is on and all LOs are locked.  If prompted to turn off
+   the phase-cal, you should turn the phase-cal off, preferably
+   without physically disconnecting the 5 MHz reference that runs to
+   the receiver for the phase-cal.  (At some stations, the reference
+   is at some frequency other than 5 MHz, such as 500 MHz.)  For
+   instance, if the 5 MHz comes from a Mark IV-style delay cal ground
+   unit, use the front-panel switch on the ground unit to turn phase
+   cal off.  If prompted to unlock the LO, you should unlock the
+   receiver LO, possibly by disconnecting the 5 MHz (or other
+   reference frequency) to which the LO is locked, but not by actually
+   turning the LO off; make sure the phase-cal is turned back on again
+   for this measurement.  If you are prompted to turn off the
+   phase-cal 5 MHz, you should lock the receiver LO again and then
+   physically disconnect the cable that carries 5 MHz (or whatever the
+   phase-cal reference frequency is) to the receiver for the
+   phase-cal.  If you had to disconnect the 5 MHz (or other reference
+   frequency) when you turned off the phase-cal when prompted to do
+   that, this is okay.  However, you should understand that you will
+   not get different measurements for the two cases.  Lastly, if you
+   are prompted to turn on the 5 MHz for the phase-cal, you should do
+   that.  For this last prompt the system should be restored to
+   normal.
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     pcalspur testNN.log
+
+   The lowest level of spur that can be measured, the "sensitivity",
+   is shown as a dotted line in the graphs.  The sensitivity is
+   calculated from the phase cal amplitude when the phase cal is on.
+   The spur levels are shown as points connected by lines.  The solid
+   line may overlay the dotted line in many cases.  If the points
+   plotted are not above the dotted line, no spur was found above this
+   level. There may be spurs below the line. The "-s" option of the
+   "pcalspur" script will generate an additional plot of just the
+   sensitivity.
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you must open a new
+   log for each measurement, e.g., after modifying the equipment.  The
+   script will only plot the first spur results it finds in the log.
+
+		     SAMPLER STATISTICS MEASUREMENTS
+
+The sampler statistics for each channel are recorded for comparison to
+ideal values.
+
+1. To collect data for sampler statistics plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     samplestat
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   When you see the output "samplestat done" in the log display, the
+   measurement is complete.  The procedure should take about two
+   minutes to execute..
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     samplestat testNN.log
+
+   The deviation from ideal percentages for each level is
+   displayed. The levels are "--" (V < -0.2v), "-" (-0.2v < V < 0v),
+   "+" (0v < V < +0.2v) and "++" (+0.2v < V).  The ideal levels are
+   represented as dotted lines.  The actual measurements are
+   represented by dots with solid lines connecting them.  The solid
+   lines may overlay the dotted lines.  The raw percentages can be
+   displayed by using the "-r" command line switch for the script.
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you must open a new
+   log for each measurement, e.g., after having modified the
+   equipment.  The script will only plot the first statistics results
+   it finds in the log.
+
+		   OVERNITE STABILITY MEASUREMENTS
+
+The values of many parameters are recored over an extended period to
+look for stability problems.
+
+1. To collect data for overnite stability plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     overnite
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   You should let the procedure continue to make measurements as long
+   as possible, preferable over a 24 hour or longer period, but at
+   least overnight (more than 8 hours). When you want to stop the
+   measurements, enter:
+
+     onsample@
+     log=station
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     plotlog testNN.log
+
+   Data from wx/, cable/, rx/ (or sx/ or sk/), fmout-gps/ (or
+   gps-fmout/), tsys/, and single tone per upper sideband channel pcal
+   amplitude and phase measurements are plotted. The difference in
+   phase between channels on the same IF can be plotted by selecting
+   the appropriate one of the '1anw' command line switches (see
+   "plotlog -h" for more information).
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you would probably
+   want to open a new log for each measurement.  All the data from a
+   single log are plotted together, regardless of the time span.
+
+		  SHORT-TERM STABILITY MEASUREMENTS
+
+The values of many parameters are recored very rapidly for a short
+time to look for short term stability problems.
+
+1. To collect data for short-term stability plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     rapid
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   You should let the procedure continue to make measurements for a
+   reasonable amount of time, perhaps 30 minutes. When you want to
+   stop the measurements, enter:
+
+     rapid@
+     log=station
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     plotlog testNN.log
+
+   Data from wx/, cable/, rx/ (or sx/ or sk/), fmout-gps/ (or
+   gps-fmout/), tsys/, and single tone per upper sideband channel pcal
+   amplitude and phase measurements are plotted. The difference in
+   phase between channels on the same IF can be plotted by selecting
+   the appropriate one of the '1anw' command line switches (see
+   "plotlog -h" for more information).
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you would probably
+   want to open a new log for each measurement.  All the data from a
+   single log are plotted together, regardless of the time span.
+
+	     ORIENTATION DEPENDENT STABILITY MEASUREMENTS
+
+The values of many parameters are recored very rapidly while antenna
+is moved around its range of motion to look for orientation dependent
+effects.
+
+1. To collect data for orientation dependent plots, make sure that the
+   equipment is set-up in the mode you want to test in (see above
+   under USAGE), then enter:
+
+     log=<pick a convenient name, maybe something like "testNN">
+     proc=systests
+     rapid
+
+   For "NN" in the log file name, you can use a two digit number,
+   possibly sequential with other numbers used for other tests.
+
+   You should proceed to move the antenna around its range of motion
+   either manually or using appropriate "source=azel,..." commands.
+   As the antenna is moved, especially if this being done manually,
+   please enter comments to describe what is happening, e.g. "now
+   moving to el 0 to 90 along az 0".  It is desirable to at least
+   travel along the perimeter of the antenna's range of motion,
+   including the extremes of the cable wrap for AZEL antennas.
+   Traveling along the entire range of at least one intermediate
+   position for each axis is also be desirable.  If the
+   "source=azel,..." (or "source=xy,...") command works for your
+   antenna and your antenna's motions is predictable enough, you may
+   be able to write a schedule to automate the motion.
+
+   When you have finished moving the antenna, you can stop the
+   measurements, by entering:
+
+     stsample@
+     log=station
+
+   Please note that the systests.prc library should not be edited with
+   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
+   versions, the long line lengths in the library are not handled
+   properly and information will be lost.
+
+2. Plot the results, from a shell prompt try:
+
+     cd /usr2/log
+     plotlog testNN.log
+
+   Data from wx/, cable/, rx/ (or sx/ or sk/), fmout-gps/ (or
+   gps-fmout/), tsys/, and single tone per upper sideband channel pcal
+   amplitude and phase measurements are plotted. The difference in
+   phase between channels on the same IF can be plotted by selecting
+   the appropriate one of the '1anw' command line switches (see
+   "plotlog -h" for more information).
+
+   Other options for output are available as described above under
+   "BANDPASS MEASUREMENTS".
+
+3. If you want to make additional measurements, you would probably
+   want to open a new log for each measurement.  All the data from a
+   single log are plotted together, regardless of the time span.
+
+INSTALLATION
+
+The installation of these tools are fairly easy. The process is
+described for two possible scenarios: "first time installation" and
+"update to include stability tests".
+
+		       FIRST TIME INSTALLATION
+
+The steps to install for the first time are described below.  If you
+have FS 9.8.0 later installed, skip steps (1), (2), (4), (7) and (8).
+
+(1) Login as "prog".
+
+(2) Place a copy of the "systests.tgz" archive in your "/tmp"
+    directory.  For example you might do the following:
+
+      cd /tmp
+      ncftp -u atri.gsfc.nasa.gov
+      (enter your account name for the server at prompt)
+      (enter your password for the server at prompt)
+      cd /fs/dist
+      get systests.tgz
+      quit
+
+  Please note "ncftp" will automatically get this file in binary mode.
+  If you use "ftp" you may have to enable binary mode manually.
+
+(3) Login as "root".
+
+(4) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/systests.tgz
+
+(5) Check that you don't already have procedure library named
+    "systests", enter:
+
+      ls /usr2/proc/systests.prc
+
+    If you do already have such a procedure library, you should either
+    rename it or use a different name in the next step as the target
+    file to copy to.  In the latter case, you will have to
+    appropriately modify the "proc=..." commands in the USAGE examples
+    above to open the correct library.
+
+(6) Copy the default procedure library to "/usr2/proc" and set its
+    permissions and ownership:
+
+      cd /usr2/proc
+      cp -a /usr2/fs/systests/systests.prc systests.prc
+      chmod a+w systests.prc
+      chown oper.rtx systests.prc
+
+(7) Login as "prog":
+
+(8) "Make" the executables:
+
+      cd /usr2/fs/systests
+      make
+
+(9) Login as "oper":
+
+(10) Customize the "systests.prc" (or whatever you named it) procedure
+     library.
+
+     Please note that the "systests.prc" library should not be edited
+     with PFMED unless you have FS version FS 9.8.0 or higher.  In
+     earlier versions, the long line lengths in the library are not
+     handled properly and information will be lost .
+
+     If you have FS 9.8.0 or higher, you can use PFMED to edit the
+     procedures, otherwise, you will need to use an editor like "vi"
+     or "emacs" to edit the .prc file directly.  Do not use an editor
+     on the .prc file directly if the FS has the procedure library
+     open.  In fact, it would be good idea to terminate the FS before
+     editing the library directly.  While editing directly be careful
+     to not disturb the "define" and "enddef" lines in the library.
+
+     Ten procedures need to be edited and are all located at the start
+     of the file.  The procedures: "tpisamp", "bbcmanx", and "bbcagcx"
+     are used only by the pcal power measurements.  The "pcalonsys"
+     and "pcaloffsys" procedures are used by both the pcal power
+     measurements and the spur measurements.  The "lounlocksys",
+     "pcal5moffsys" and "pcal5monsys" procedures are used only for
+     pcal spur measurements. The "onsample" and "stsample" procedures
+     are used for the stability tests.
+
+     The "tpisamp", "bbcmanx", and "bbcagx" procedures need to be
+     modified depending on the type of rack: VLBA4 or Mark IV.  There
+     are comments in the procedures describing which lines should be
+     uncommented for each case.  In "tpisamp", the correct forms of
+     the "tpi=..." and "tsys=..." commands must be uncommented.  The
+     ones that aren't to be used have to be commented out.  For VLBA4
+     use the ones with "formbbc". For Mark IV uses the ones with
+     "formvc".  For station specific detectors use the ones with
+     "u5".  For the "bbcmanx" and "bbcagcx" procedures, the "bbcmanz"
+     command and "bbcagcz" commands should be uncommented for VLBA4,
+     but Mark IV should have them commented out.
+
+     The "pcalonsys", "pcaloffsys", "lounlocksys", "pcal5moffsys" and
+     "pcal5monsys" procedures are used to control turning various
+     signals on and off.  Each is set-up by default to prompt the user
+     to manually make the necessary changes.  If your system can
+     control any of these features, you can comment out the "sy=run
+     fs.prompt ..." in the appropriate procedures and add commands
+     where indicated to automate the control.  The feature most likely
+     to have automatic control at a station is turning the phase-cal
+     on and off.  You would edit the "pcalonsys" and "pcaloffsys"
+     procedures to automate this for the tests.  If possible, turning
+     off the phase-cal should not be implemented by physically
+     disconnecting the 5 MHz that runs the antenna for the phase-cal.
+     However, if that is the only way to do it please understand that
+     the phase-cal off and phase-cal 5 MHz disconnected measurements
+     will not give different results.  The "lounlocksys" procedure is
+     intended to unlock the LO and turn the phase-cal on.  Manually
+     unlocking the LO can often be accomplished by removing the 5 MHz
+     signal that it is locked too. It should not be accomplished by
+     actually turning the LO off.  The "pcal5moffsys" procedure should
+     relock the LO and disconnect the phase-cal 5 MHz, as opposed to
+     merely turning the phase-cal off.  Lastly, the "pcal5monsys"
+     procedure should restore the phase-cal 5 MHz, and the phase-cal
+     and LO should be on when it ends.
+
+     The "onsample" and "stsample" procedures should be edited as
+     described by their internal comments.  The issues are: (1)
+     whether or not you have a Mark IV decoder, (2) the name of the
+     procedure or SNAP command to make fmout-gps (or gps-fmout)
+     measurements, and (3) the name of the procedure that records all
+     of the receiver monitor points.
+
+     After making the necessary changes be sure to save them.
+
+(11) In any session (usually an xterm) that you intend to run the
+     analysis scripts from, you will either need to logout and login
+     again or type "rehash".
+
+(12) Install pgperl if your computer doesn't already have it.  On a FS
+     Linux 5 system, you should be able to do this with two commands.
+     If you have a different distribution installed, you will need to
+     determine how to do this yourself.  Ed may be able give you some
+     advice if you need it.
+
+     For FS Linux 5 systems, please be sure that your
+     "/etc/apt/source.list" file does not mention "stable".  All web
+     source references should explicitly use "woody".  If you have any
+     questions about this please contact Ed before attempting the
+     install.  Once you have verified your "sources.list", as "root"
+     please enter:
+
+       apt-get install pgperl
+       apt-get clean
+   
+(13) Make sure that your print command will print PostScript
+     files. This should already be set-up for FS Linux 5 systems with
+     the command "lpr". If you can't print PostScript from your FS PC,
+     you can always transfer the PostScript file to another machine
+     that can or use a different output format (see step 2 above under
+     "BANDPASS MEASUREMENTS" above in the "USAGE" section) that your
+     printer supports.
+
+
+		  UPDATE TO INCLUDE STABILITY TESTS
+
+The steps to update your installation to include stability tests are
+described below.  If you have FS 9.8.0 later installed, skip steps
+(1), (2), (4), (7), and (8).
+
+(1) Login as "prog".
+
+(2) Place a copy of the "systests.tgz" archive in your "/tmp"
+    directory.  For example you might do the following:
+
+      cd /tmp
+      ncftp -u atri.gsfc.nasa.gov
+      (enter your account name for the server at prompt)
+      (enter your password for the server at prompt)
+      cd /fs/dist
+      get systests.tgz
+      quit
+
+  Please note "ncftp" will automatically get this file in binary mode.
+  If you use "ftp" you may have to enable binary mode manually.
+
+(3) Login as "root".
+
+(4) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/systests.tgz
+
+(6) Copy the procedure library holding the new procedures to "/tmp".
+
+      cd /tmp
+      cp -a /usr2/fs/systests/systest2.prc systest2.prc
+      chmod a+rw systest2.prc
+
+(7) Login as "prog":
+
+(8) "Make" the executables:
+
+      cd /usr2/fs/systests
+      make
+
+(9) Login as "oper":
+
+(10) Customize the "systest2.prc" library on /tmp.
+
+     Please note that the "systests.prc" library should not be edited
+     with PFMED unless you have FS version FS 9.8.0 or higher.  In
+     earlier versions, the long line lengths in the library are not
+     handled properly and information will be lost .
+
+     If you have FS 9.8.0 or higher, you can append the new procedures
+     to the existing "systests.prc" library, see step (11) below, and
+     then use PFMED to make the changes described below in the
+     "systests" library.  If you don't have FS 9.8.0 or higher, you
+     will need to use an editor like "vi" or "emacs" to edit the
+     "/tmp/systest2.prc" file directly, then append the new procedures
+     to "systests" (step 11 below).  While editing be careful to not
+     disturb the "define" and "enddef" lines in the library.
+
+     Two procedures need to be edited and are both located at the
+     start of the file: "onsample" and "stsample".  They should be
+     edited as described by their internal comments.  The issues are:
+     (1) whether or not you have a Mark IV decoder, (2) the name of
+     the procedure or SNAP command to make fmout-gps (or gps-fmout)
+     measurements, and (3) the name of the procedure that records all
+     of the receiver monitor points.
+
+     After making the necessary changes be sure to save them.
+
+(11) Append the new procedures to the existing "systests.prc" library
+     (in "/usr2/proc").  The FS should not have the library open when
+     this is done.  In fact, it is just safer to terminate the FS
+     while doing this step.  Once it is safe to proceed, the
+     procedures can be added with:
+
+       cd /usr2/proc
+       cat /tmp/systest2.prc >>systests.prc
+
+     If you named your library something other "systests.prc", you
+     should use that name instead in the command above.
+
+(12) In any session (usually an xterm) that you intend to run the
+     analysis scripts from, you will either need to logout and login
+     again or type "rehash".
+
+HELP OUTPUT
+
+For reference the "help" output from each of the three scripts,
+"pcalamp", "pcalimage", "pcalpower", "pcalspur", "samplestat", and
+"plotlog" is listed below.
+
+			       PCALAMP
+
+Usage: pcalamp  -c string -vhf file/device logs
+Synopsis: extracts and plots pcal amplitudes from log files
+
+This script processes log files to produce plots of pcal amplitudes. The
+default is pcal amplitudes for the first set of amplitudes that appear in the
+file. This behavior can be modified with the '-c' option to plot the first
+occurrence of amplitude data after a FS command that contains the specified
+string.
+
+Option explanations:
+ -c string plot first set of amplitudes found after a command/procedure
+    matching 'string' was recorded in the log, for this to work; the
+    command/procedure matching 'string' must not be called from a procedure,
+    unless the procedure is logged with 'xlog=on'
+ -v print program and PGPLOT version information and stop
+ -h print this help information and stop
+ -f file/device send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, an xterm will be used
+    if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+
+
+			      PCALIMAGE
+
+Usage: pcalimage -vhf file/device
+Synopsis: extracts and plots image reject using pcal tones from log files
+
+This script processes log files to produce plots of image rejection. The lowest
+image rejection that can be detected is plotted as a dotted line, which may be
+overlaid by the actual results.
+
+Option explanations:
+ -v print program and PGPLOT version information and stop
+ -h print this help information and stop
+ -f file/device send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, an xterm will be used
+    if -f omitted and DISPLAY is not defined, 'pcalimage.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+
+
+			       PCALPOWER
+
+Usage: pcalpower -bhv vc_bandwidth logs
+Synopsis: tabulates pcal percentage of tsys data
+
+This script will collect all tsys data in a log with pcal on and pcal off and
+calculate the fractional power due to the pcal. The '-b' option can be used
+to print the results in the Mark IV Decoders units for the (voltage) amplitude
+of a single tone.
+
+Whether the phase-cal is on or off for particular tsys measurements is
+determined by whether the string 'pcalon' or 'pcaloff' was most recently
+encountered in the log. Note that if 'pcalon' or 'pcaloff' is called from
+a SNAP procedure, then it must be logged with 'xlog=on'.
+
+Options explanation:
+ -b vc_bandwidth (e.g., 2, 4, 8, 16) for single tone voltage (Mk4 decoder units)
+ -h print this help information and stop
+ -v print program and PGPLOT version information and stop
+
+
+			       PCALSPUR
+
+Usage: pcalspur -svhf file/device logs
+Synopsis: extracts pcal data from logs and plots pcal spurs
+
+The level of spurs is plotted for each of three states that may occur:
+pcaloff, lounlock, and pcal5moff. These states are plotted relative to the
+'pcalon' state. Data for each of these cases in the log must follow logged
+commands that contain these strings. If the commands are called from
+procedures, they must be logged with 'xlog=on'.
+
+Options explanation:
+ -s make sensitivity (only) plot also
+ -v print program and PGPLOT version information and stop
+ -h print this help information and stop
+ -f file/device send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, an xterm will be used
+    if -f omitted and DISPLAY is not defined, 'pcalspur.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+
+				   
+			      SAMPLESTAT
+
+Usage: samplestat -dvhf file/device logs
+Synopsis: extracts and plots sampler statistics from log files
+
+This script processes log files to produce plots of sample statistics. The
+ideal values are plotted as a dotted line. The measured statistics appear
+as points connected by lines.  The default mode is print the deviation from
+ideal. The '-r' switch can used to plot the raw statistics instead.
+
+Option explanations:
+ -r plot raw statistics instead of deviation from ideal
+ -v print program and PGPLOT version information
+ -h print this help information and stop
+ -f file/device send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, an xterm will be used
+    if -f omitted and DISPLAY is not defined, 'samplestat.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+
+			       PLOTLOG
+
+Usage: plotlog -1anwcrvhf file/device logs
+Synopsis: extracts and plots data from log files
+
+This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
+fmout-gps/), and single tone per channel Mark IV decoder pcal data in log files
+and generates time plots of the data, The time axis of all the plots is the
+same. The data is plotted so that it fits entirely inside the boxes. Points
+that appear along the top line of a plot did not decode ( for example).
+
+The '1anw' switches can be used to select different IF arrangements for
+calculating phase differences between pcal tones. Any combination of the '1anw'
+switches can be used. No difference is plotted more than once. Some simple
+assumptions are made about the time order of the pcal data in the log. If these
+assumptions are violated the phase difference plots may not make much sense.
+
+Cable delay is plotted as one-way cable delay change unless the 'r' switch is
+used.
+
+Option explanations:
+ phase-difference plot options:
+  -1 all converters are on one IF
+  -a odd converters are on one IF, even are on another (astronomy)
+  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
+     also useful for wide band geodesy
+  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
+     (wide band geodesy)
+
+ -r plot cable data in raw units
+ -v print program and PGPLOT version information and stop
+ -h print this help information and stop
+ -f file/device send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, an xterm will be used
+    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
