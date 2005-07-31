@@ -21,9 +21,8 @@ C 970301 nrv Add font size prompt.
 C
 C  Local:
       character*128 ctemp
-      integer*2 itemp(10)
       integer trimlen
-      integer nch,l,ierr,idummy,ichmv
+      integer nch,l,ierr
 C
 
 C  1.0  Read the input from user and set port appropriatly.

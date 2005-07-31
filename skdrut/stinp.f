@@ -111,7 +111,7 @@ C             it needs to be set up correctly and this is the place to do it.
 C 951116 nrv Remove maxpass and replace with bit density
 C 960208 nrv Increment NSTATN after checking for MAX_STN
 C 960227 nrv Make terminal ID up to 4 characters, not integer.
-C 960409 nrv Change UNPVT call to include nstack, ibitden 
+C 960409 nrv Change UNPVT call to include nstack, ibitden
 C 980629 nrv If "auto" for tape length, set tape_motion_type=DYNAMIC
 C 990607 nrv Add rack,rec,fm to UNPVT call. Store values.
 C 990620 nrv Check rack,rec,frm types for consistency.
@@ -128,6 +128,18 @@ C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
       cbufin=" "
+! AEM 20050314 init vars
+      cs2sp = " "
+      caxis = " "
+      cname = " "
+      crack = " "
+      crec1 = " "
+      crec2 = " "
+      cid = " "
+      cidt = " "
+      cidpos = " "
+      cidhor = " "
+      
       do i=1,min(ilen,MaxBufIn)
         ibufin(i)=ibufx(i)
       end do
@@ -161,7 +173,7 @@ C
 !  B  BR-VLBA  AZEL 2.00000  90.0  0    270.0  810.0  30.0  0    2.3   88.0  25.0    Br     BR BV
       if(itype .eq. 1) then
         if(NumToken .lt. 14) goto 950
-        cid =ltoken(1)
+        cid = ltoken(1)
         cname=ltoken(2)
         caxis=ltoken(3)
 
@@ -323,11 +335,13 @@ C  Store equipment names.
         endif
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
-        if (crec2 .ne. " ") then
+        if (crec2 .eq. " ") then
+         if(nr .eq. 2) nr=1
+        else
           if (crec1 .eq. 'S2')then
 !            idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
              cs2mode(i,1)=crec2
-          else 
+          else
             cstrec2(i)=crec2
           endif
         endif
@@ -413,20 +427,20 @@ C           error for no matching value, which is ok
           if (ierr.lt.-200) then
             write(lu,*) "STINP252 - Horizon mask azimuths are out "//
      >      "of order. Error in field ", -(ierr+200)
-            write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+            write(lu,'(80a2)') (ibufx(i),i=2,ilen)
             RETURN
           endif
           if (ierr.eq.-99)then
             write(lu,'(a,i5)')
      >       "STINP250 - Too many horizon mask az/el pairs. Max is ",
      >        max_hor
-            write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+            write(lu,'(80a2)') (ibufx(i),i=2,ilen)
             RETURN
           endif
           if (ierr.eq.-103) then
 C           write(lu,'("STINP251 - No matching el for last azimuth,",
 C    .      " wraparound value used.")')
-C           write(lu,'(80a2)') (ibufx(i),i=2,ilen) 
+C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
             elh(nhz)=elh(1)
             kline=.false.
           endif

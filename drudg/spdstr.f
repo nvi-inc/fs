@@ -1,4 +1,4 @@
-      subroutine spdstr(spd,lspd,nspd)
+      subroutine spdstr(spd,cspd_out,nspd)
 
 C SPDSTR returns a Hollerith "lspd" with the appropriate speed for
 C the value of "spd". "nspd" is the number of characters in lspd.
@@ -14,20 +14,20 @@ C 961121 nrv Add 66.66 speed
 C 970103 nrv Add 40 speed
 C 970118 nrv Add the rest of the valid speeds.
 ! 030211 JMG Changed so that all speeds are actual, not nominal.
-!
+! 050426 JMG Changed to return ASCII, not hollerith.
 
 C INPUT:
       real spd ! speed in inches per second, e.g. 133.33
 
 C OUTPUT:
-      integer*2 lspd(4) ! speed for the ST= command
+      character*8 cspd_out
       integer nspd ! number of characters in lspd, -1 if no match
 
 C Local
       integer i,maxspd,il
       real sp(23)
       character*8 csp(23)
-      integer ichmv_ch,trimlen
+      integer trimlen
 
 C INITIALIZED:
 C     Organized according to types:
@@ -63,9 +63,8 @@ C       320
         i=i+1
       enddo
       if (i.le.maxspd) then ! match
-        call ifill(lspd,1,8,oblank)
-        il=trimlen(csp(i))
-        nspd = ichmv_ch(lspd,1,csp(i)(1:il))-1
+        cspd_out=csp(i)
+        nspd=trimlen(cspd_out)
       else ! error
         nspd=-1
       endif

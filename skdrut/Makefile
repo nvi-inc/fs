@@ -35,7 +35,7 @@ ARC = skdrut
 OBJECTS=\
 lyes_no.o istringminmatch.o itimedifsec.o timesub.o timeadd.o ktimedif.o c2lower.o\
 capitalize.o lowercase.o  ifill4.o xyz2latlon.o iwhere_in_string_list.o mpstar_rad.o \
-count_freq_tracks.o \
+count_freq_tracks.o apstar_rad.o \
 readline.o iroll_def.o itras.o getiauname.o ckiau.o \
 splitntokens.o  extractnexttoken.o  \
 sktime.o \

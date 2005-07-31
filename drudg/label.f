@@ -19,7 +19,7 @@ C OUTPUT: none
 
 !fucntions
       INTEGER TRIMLEN
-      integer copen,cclose
+      integer copen
       real speed ! function
 
 C LOCAL:
@@ -41,7 +41,7 @@ C These are computed in UNPAK and returned.
 C NSTNSK - number of stations in current observation
 C NLAB - number of labels across a page
       integer mjd,ida,iyr2,iyear,iyr,idayr,ihr,imin,isc,
-     .idayr2,ihr2,min2,isc2,mon
+     .idayr2,ihr2,imin2,isc2,mon
       integer ipsy1,ipsy2,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2
       integer istnsk,isor,icod,iftold,nout,nlabpr,l,ilen,ical,
      .nstnsk,idir,idirp,ipasp,ierr,ntape
@@ -119,7 +119,8 @@ C 000705 nrv Use standard KNEWT for S2 also.
 ! 2004Sep??  JMGipson Added support for dymo printer.
 ! 2004Oct19  JMGipson.  Fixed problem if you were printing out several experiments in a row.
 !
-!
+! 2005Mar07  JMGipson.  Fixed problem with last label. Previously ending time was
+!            that of penultimate scan. Now it is time of last scan.
 !
 
 C 1. First get set up with schedule or SNAP file.
@@ -140,7 +141,6 @@ C 1. First get set up with schedule or SNAP file.
         OPEN(LU_INFILE,FILE=CINNAME,STATUS='OLD',IOSTAT=IERR)
         IF(IERR.EQ.0) THEN
           REWIND(LU_INFILE)
-          CALL INITF(LU_INFILE,IERR)
         ELSE
           WRITE(LUSCN,9400) IERR,CINNAME(1:IC)
 9400      FORMAT(' LSTSHFT02 - ERROR ',I3,' OPENING SNAP FILE ',A)
@@ -391,7 +391,7 @@ C
         IF (ISTNSK.NE.0.OR.Iob.eq.nobs.OR.cbuf(1:1).EQ."$") THEN ! process
           IF(ISTNSK.NE.0)
      .    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
-     .               IHR2,MIN2,ISC2)
+     .               IHR2,iMIN2,ISC2)
           IDIR=+1
           IF (ISTNSK.NE.0)  THEN
             IF (LDIR(ISTNSK).EQ.HHR) IDIR=-1
@@ -410,6 +410,13 @@ C             knew = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
 C         Force new tape logic when starting a schedule.
           if (iob.eq.1 .or. iob.eq. nobs) knew=.true.
 
+! If this is the last scan, then the ending time is the end of last scan of this station.
+          if (iob .eq. nobs) then
+            IY2(NOUT) = mod(IYR2,100)
+            IH2(NOUT) = IHR2
+            IM2(NOUT) = iMIN2
+            ID2(NOUT) = IDAYR2
+          endif ! one of ours
 C
           IF (KNEW) THEN !NEW TAPE
             ntape=ntape+1
@@ -469,7 +476,7 @@ C
         if (istnsk.ne.0) then ! one of ours
           IY2(NOUT) = mod(IYR2,100)
           IH2(NOUT) = IHR2
-          IM2(NOUT) = MIN2
+          IM2(NOUT) = iMIN2
 c         IS2(NOUT) = ISC2
           ID2(NOUT) = IDAYR2
 C         NOB(NOUT) = NOB(NOUT)+1

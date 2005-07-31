@@ -1,10 +1,11 @@
-      subroutine snap_start_recording(kin2net)
+      subroutine snap_start_recording(kin2net,cspeed)
       implicit none
       include 'hardware.ftni'
       logical kin2net
 
       character*5 lmid          !for, or rev
       character*3 lpre          !st, or st1
+      character*8 cspeed
       integer npre
 
       lpre="st"
@@ -29,8 +30,8 @@
         else
           lmid="=rev,"
         endif
-! lspeed ch is ascii version of speed, calculated in snap_calc_speed.
-        write(luFile,'(a,a,a)') lpre(1:npre),lmid,lspeed(1:nspdCh)
+! cspeed ch is ascii version of speed, calculated in snap_calc_speed.
+        write(luFile,'(a,a,a)') lpre(1:npre),lmid,cspeed
       endif
       if(km5A_piggy.or.km5P_piggy) write(luFile,'("disk_record=on")')
 

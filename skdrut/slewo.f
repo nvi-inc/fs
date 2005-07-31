@@ -6,6 +6,8 @@ C   ***NOTE*** This is the version as of 10/93 before the pre-calculated
 C              rise/set times were available. Use this version with
 C              drudg. Use the new version with sked.
 C
+C 040623  ZMM  removed trailing RETURN
+
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'
 C
@@ -111,14 +113,18 @@ C       Check for the minute it rises
         if (kup) then !rising within lookahead
           kup=.false.
           il=0
-          do while (kup.eq..false..and.il.le.lookah/60)
+
+C 040623  ZMM  changed, was
+C         do while ( kup.eq..false. .and. il.le.lookah/60 )
+
+          do while ( .not.kup .and. il.le.lookah/60 )
             il=il+1
             CALL CVPOS(NSNEW,ISTN,MJD,UT+il*60.,
      .      AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
           enddo
         trise = il*60.0
 C       Now we have the time to rising and position at rise.
-C       Compute slewing time to this position.  
+C       Compute slewing time to this position.
         endif !rising within lookahead
       endif !check within an hour
       IF (.NOT.KUP) GOTO 980
@@ -176,7 +182,7 @@ C     We get here if the slew has converged OR we iterated 5 times.
         IF(TSLEW.LE.(AMAX1(RSTCON(1),RSTCON(2))+5.))
      .      TSLEW=0.0
         LWRNEW = LWR2
-C       Final slewing time is the larger of 
+C       Final slewing time is the larger of
 C       "time to rise" (trise) and "slew to risen position" (tslew
 C       calculated using az,el at UT+trise).
         if (trise.gt.0..and.tslew.gt.0.) tslew = amax1(tslew,trise)
@@ -188,5 +194,5 @@ C       calculated using az,el at UT+trise).
       END IF  !
 980   TSLEW = -1.0
       trise=-1.0
-990   RETURN
+
       END

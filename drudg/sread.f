@@ -81,8 +81,7 @@ C
 
       if (ierr.eq.0) then
         rewind(LU_INFILE)
-        call initf(LU_INFILE,IERR)
-      else 
+      else
         WRITE(LUSCN,9200) IERR,LSKDFI
 9200    FORMAT(' SREAD01 - Error ',I5,' opening file ',A32)
         RETURN
@@ -104,7 +103,6 @@ C*********************************************************
         kgeo=.false. ! will be set to true if SKED_PARAMS is found later
 C       Read up to the $EXPER section to find the line number
         rewind(lu_infile)
-        call initf(lu_infile,ierr)
         ireccv=0
         CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
         DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
@@ -260,7 +258,6 @@ C  needed, because it was checked before.
         ncodes=0
         if (ksta) call frinit(nstatn,max_frq)
         rewind(LU_INFILE)
-        call initf(LU_INFILE,IERR)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) !read schedule file
           IF (cbuf(1:6) .eq. "$CODES") then
@@ -280,7 +277,6 @@ C Re-read $HEAD section if needed.
       if (.not.khed) then
         write(luscn,'(" Re-reading ... ",$)')
         rewind(LU_INFILE)
-        call initf(LU_INFILE,IERR)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) 
           IF (cBUF(1:5) .eq. "$HEAD") THEN
@@ -300,7 +296,6 @@ C       Look for the string "Cover Letter" in .drg file
         ireccv=0
         if (kdrg_infile) then ! .drg file
           rewind(lu_infile)
-          call initf(lu_infile,ierr)
           write(luscn,'(" Re-reading to find the cover letter ... ",$)')
           CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
           DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file

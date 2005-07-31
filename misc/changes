@@ -7325,3 +7325,83 @@ Version 9.7.6 050126
 
 Version 9.7.7 050216
 
+050217 weh quikv/scan_name.c
+           do not report errors from previous commands
+
+050218 weh boss/bwork.f
+           do not report errors from previous commands
+
+050222 weh quikv/scan_check.c
+           quikv/scan_check_dis.c
+           remove unnecessary scan_set=;
+
+050302 jmg st.default/control/skedf.ctl
+           updated for Dymo, cleaned-up
+
+050307 ao  gnplt/gnplt
+           bug fixes
+
+050308 weh fclib/Makefile
+           fclib/fc_perror.c
+           add fc_perror
+
+050308 weh pfmed/follow_link.f
+           improved error messages
+
+050308 weh quikv/disk2file.c
+           quikv/in2net.c
+           prevent error on simple "="
+
+050310 weh clib/m5_utils.c
+           detect and don't print missing time fields
+
+050417 dms help/disk_record.___
+           updated
+
+050426 ao  clib/get_rxgain.c
+           fix bug decoding spillover table
+
+050523 weh msg/process_logfile
+           add delay to reduce CPU usage
+
+050606 weh st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v4station.prc
+           add "form" to postob to detect Mark IV bit slips
+
+050609 weh quikv/disk_record.c
+           prevent error on simple "="
+
+050617 weh st.default/control/logpl.ctl
+           removed references to "freja" :-)
+
+050617 weh pfmed/fed.f
+           pfmed/ffmp.f
+           pfmed/ffm.f
+           boss/newpr.f
+           updated to handle long procedure file lines,
+           about 512 characters now tolerated
+
+050622 weh control/fserr.ctl
+           quikv/form4_dis.c
+           quikv/logmatmsgfm.c
+           report bit slip type errors
+
+050707 weh systests
+           initial version
+
+050720 weh msg/msg
+           expanded to include Type D modules,
+            improve e-mail message format for media info
+
+050730 weh systests/plotlog
+           systests/Makefile
+           systests/systest2.prc
+           systests/systests.prc
+           systests/systests.txt
+           updated for plotlog
+
+Version 9.8.0 050731

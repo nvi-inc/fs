@@ -5,7 +5,7 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
-      include '../skdrincl/statn.ftni'
+      include '../skdrincl/statn.ftni'                                        '
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
@@ -58,8 +58,7 @@ C NLMAX - number of lines max per page
       INTEGER IC
       LOGICAL KNEWT,knewtp,ks2,kk4
 C function to determine if a new tape has started
-      double precision RA,DEC
-      double precision TJD,RAH,DECD,RADH,DECDD
+      double precision TJD
 C for precession routines
       double precision HA
 C     integer*2 LAXIS(2,7),
@@ -266,16 +265,10 @@ C
      .   '-DEC(DATE)-'/)
       ENDIF
 C
+      TJD = JULDA(MON,IDA,IYR-1900) + 2440000.0D0
       DO I=1,NCELES
-        RA = SORP50(1,I)
-        DEC = SORP50(2,I)
-        RAH = RA*12.D0/PI
-        DECD = DEC*180.D0/PI
-        TJD = JULDA(MON,IDA,IYR-1900) + 2440000.0D0
-C
-        CALL APSTAR(TJD,3,RAH,DECD,0.D0,0.D0,0.D0,0.D0,RADH,DECDD)
-        SORPDA(1,I) = RADH*PI/12.D0
-        SORPDA(2,I) = DECDD*PI/180.D0
+        call apstar_Rad(tjd,sorp50(1,i),sorp50(2,i),
+     >         sorpda(1,i),sorpda(2,i))
         CALL RADED(RA50(I),DEC50(I),0.d0,IRH3,IRM3,RAS3,LDS3,
      .        IDD3,IDM3,DCS3,LD,ID,ID,D)
         CALL RADED(SORP50(1,I),SORP50(2,I),0.d0,IRH1,IRM1,RAS1,LDS1,

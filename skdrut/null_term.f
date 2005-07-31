@@ -1,4 +1,7 @@
       subroutine null_term(cstr)
+
+! AEM 20041125 add implicit none
+      implicit none
 c
 c   'null_term' will null-terminate a character string.  This
 c   is necessary when string must be passed to C routines.
@@ -6,7 +9,7 @@ c
 C 990916 nrv Uncommented the warning message if the string is too short.
 
       character*(*) cstr
-      integer     i,j,len
+      integer i,j,len
 
       j = len(cstr)
 

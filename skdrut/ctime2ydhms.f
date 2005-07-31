@@ -1,0 +1,84 @@
+      subroutine ctime2YDhms(ctime,iyear,iday,ihour,imin,isec,ierr)
+! Convert an ascii string to iyear, idoy, ihour,imin,isec
+! All dashes, spaces and colons are stripped out.
+! Remaining string must be set number of characters long
+! Valid formats are:
+!
+!  2004-271-18:30:40
+!  2004271183040
+!  YYYYDDDHHMMSS   13
+!  YYDDDDHHMMSS    11
+!  DDDHHMMSS        9         Use input year.
+!  HHMMSS           6         Use input year and DOY.
+!  ^                1         before start of experiment,
+!  .                1         Return with no action.
+!  *                1         after end of experiment.
+! History
+!  V1.00 2005Feb17  JMGipson. First version.
+!  V1.01 2005Mar30  JMGipson. Modified to also parse 9 and 6 character strings,
+!                   as well as single characrters: "^", ".", "*"
+
+! Input
+      character*(*) ctime
+      character*13 ctemp
+! output
+      integer iyear,iday,ihour,imin,isec,ierr
+! functions
+      integer trimlen
+! local
+      integer nch,iptr,i
+
+      ctemp=" "
+
+      nch=trimlen(ctime)
+      iptr=0
+      do i=1,nch
+        if(ctime(i:i) .ne. " " .and. ctime(i:i) .ne. "-" .and.
+     >     ctime(i:i) .ne. ":") then
+          iptr=iptr+1
+          if(iptr .gt. 13) goto 900       !out of space.
+          ctemp(iptr:iptr)=ctime(i:i)
+        endif
+      end do
+
+      nch=trimlen(ctemp)
+      if(nch .eq. 1) then
+        if(ctemp(1:1) .eq. ".") return
+        ihour=0
+        imin=0
+        isec=0
+        if(ctemp(1:1) .eq. "*") then
+          iday=366
+          iyear=2099
+          return
+        else if(ctemp(1:1) .eq. "^") then
+          iday=1
+          iyear=1900
+          return
+        else
+           goto 900
+        endif
+      else if(nch .eq. 6) then
+        read(ctemp,'(3(i2))',err=900)  ihour,imin,isec
+      else if(nch .eq. 9) then
+        read(ctemp,'(i3,3(i2))',err=900)  iday,ihour,imin,isec
+      else if(nch .eq. 11) then
+        read(ctemp,'(i2, i3,3(i2))',err=900) iyear,iday,ihour,imin,isec
+        if(iyear .gt. 70) then
+           iyear=iyear+1900
+        else
+           iyear=iyear+2000
+        endif
+      else if(nch .eq. 13) then
+        read(ctemp,'(i4, i3,3(i2))',err=900) iyear,iday,ihour,imin,isec
+      else
+        goto 900
+      endif
+      ierr=0
+      return
+
+900   continue
+      ierr=1
+      write(*,*) "Ctime2YDHMS error: Can't parse ",ctime
+      return
+      end

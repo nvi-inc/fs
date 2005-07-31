@@ -33,22 +33,18 @@ C                   - double for internal use
 C               - sidereal time at 0h UT, UT/ST ratio, SIDEREAL TIME AT G
       real*8 DEC,SDEC,CDEC
       real*8 rasun,decsun
-C        ASIN,X- statement funcion for ARSIN, argument
-C        ACOS,X- statement funcion for ARCOS, argument
-      real*4 acos,asin,x
 C
 C   PROGRAMMER: NRV
 C     WHO  WHEN    WHAT
 C     NRV  900309  Created
 C     nrv  930225  implicit none
 C     nrv  950329  Removed duplicate declaration of FRAC.
+!     2005May05  JMGipson  Removed function defiintion for ACOS, ASIN
 C
 C     1. Define the statement function ACOS, since HP Fortran does not
 C        have it.  Then calculate the trig functions which are needed
 C        more than once.
 C
-      ACOS(X) = ATAN2(SQRT(ABS(1.0-X*X)),X)
-      ASIN(X) = ATAN2(X,SQRT(ABS(1.0-X*X)))
       CLAT = COS(STNPOS(2,ISTN))
       SLAT = SIN(STNPOS(2,ISTN))
 C

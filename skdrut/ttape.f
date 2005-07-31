@@ -19,7 +19,6 @@ C  Called by: fsked, sread
 C  Calls: gtfld, igtst2, ifill, wrerr
 ! functions
       integer istringminmatch
-      integer trimlen
 
 C  LOCAL
       real speed
@@ -35,7 +34,7 @@ C  LOCAL
       character*6 cTapeDens(max_stn)
 
       integer ilist_len
-      parameter (ilist_len=3)
+      parameter (ilist_len=5)
       character*12 list(ilist_len)
 
       integer ilist_hl
@@ -48,7 +47,7 @@ C  LOCAL
 
       integer ikey,ikeyhl,ikeys2
 
-      data list/"SHORT","THICK","THIN"/
+      data list/"SHORT","THICK","THIN","MK5","MARK5A"/
       data list_hl/'HIGH','LOW','SUPER','DUPER'/
       data listS2/'LP','SLP'/
 
@@ -80,7 +79,6 @@ C
       IF  (IC1.EQ.0) THEN  !no input
         kk4=cterna(1)(1:2).eq."K4"
         ks2=cterna(1)(1:2).eq."S2"
-
 ! write header
         if(ks2) then
           WRITE(LUDSP,'(a)')
@@ -94,13 +92,18 @@ C
         endif
 
         do i=1,nstatn
+          WRITE(LUDSP,"(1X,A2,2X,A8,$)") cpoCOD(I),cSTNNA(i)
           if (cstrec(i)(1:2).eq.'S2') then
             if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
             if (cs2speed(i).eq.'SLP') s2sp=SPEED_SLP
             ival = idint(0.1 + maxtap(i)/(s2sp*5.d0)) ! feet/(ips*5) = min
+            write(ludsp,9113) ival,maxtap(i),cs2speed(i),s2sp
+9113        format(i6," min (",i6," feet)",2x,a," (",f3.1," ips)")
           elseif (cstrec(i)(1:2).eq.'K4') then
-            k4sp = speed(1,i)*10.d0 ! speed for code 1 in m/s
+            k4sp = speed(1,i)*1000.0
             ival = idint(0.1 + maxtap(i)/(60.d0*k4sp)) ! min=m/(60*m/s)
+            write(ludsp,9114) ival,maxtap(i),k4sp
+9114        format(i6," min (",i6," m)",2x," ",f5.1," mm/s")
           else 
             if(bitDens(i,1)      .gt.5600000.0) then
                cTapeDens(i)="DUPER"
@@ -111,32 +114,20 @@ C
             else
                cTapeDens(i)="Low"
             endif
-
             cTapeType(i)='Thin'
             if (maxtap(i).lt.10000.and.maxtap(i).gt.5000)
      .        cTapeType(i)='Thick'
             if (maxtap(i).lt.5000) cTapeType(i)='Short'
-          endif
-        enddo
-        DO  I=1,NSTATN
-C         Write bit density for freq code 1 only.
-          WRITE(LUDSP,"(1X,A2,2X,A8,$)") cpoCOD(I),cSTNNA(i)
-          if(cstrec(i)(1:2) .eq. "S2") then
-            if (cs2speed(i).eq. 'LP') s2sp=SPEED_LP
-            if (cs2speed(i).eq.'SLP') s2sp=SPEED_SLP
-c                             min   feet           slp/lp          ips
-            write(ludsp,9113) ival,maxtap(i),cs2speed(i),s2sp
-9113        format(i6," min (",i6," feet)",2x,a," (",f3.1," ips)")
-          else if (cstrec(i)(1:2) .eq. "K4") then
-            k4sp = speed(1,i)*1000.0
-            write(ludsp,9114) ival,maxtap(i),k4sp
-9114        format(i6," min (",i6," m)",2x," ",f5.1," mm/s")
-          else
-             WRITE(LUDSP,9112) maxtap(i),cTapeType(i),int(bitdens(i,1)),
-     >        cTapeDens(i), maxpas(i)
+
+            if(cstrec(i) .eq. "Mark5A") then
+               write(ludsp,'(" Mark5A")')
+            else
+              WRITE(LUDSP,9112) maxtap(i),cTapeType(i),
+     >          int(bitdens(i,1)), cTapeDens(i), maxpas(i)
+            endif
 9112        FORMAT(i6,'feet (',a,')',3x,i7,' (',a,')',3x,i3)
           endif
-        END DO  
+        enddo
         RETURN
       END IF  !no input
 C
@@ -152,11 +143,6 @@ C
         else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
           write(luscn,9901) lkeywd(1)
 9901      format('TTAPE01 Error - Invalid station ID: ',a2)
-C         Since this station is invalid, skip over the type and
-C         density and go get next station name for checking
-C         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! skip type
-C         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! skip density
-C         CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! next station
           return ! don't try to decode the rest of the line
         endif
 C       Station ID is valid. Check tape type now.
@@ -187,13 +173,15 @@ C       Station ID is valid. Check tape type now.
             nch=min0(ikey_len,ic2-ic1+1)
             ckeywd=" "
             idum = ichmv(lkeywd,1,linstq(2),ic1,nch)
+            call capitalize(ckeywd)
             ikey=istringminmatch(list,ilist_len,ckeywd)
             if (ikey.eq.0) then ! invalid type
-              write(luscn,9203) ckeywd(1:trimlen(ckeywd))
-9203          format('TTAPE03 Error - invalid type: ',a,', must be ',
-     .        'THICK or THIN or SHORT.') 
+              write(luscn,'("TTAPE03: Invalid tape type: ",a)') ckeywd
+              write(luscn,'("  Valid types: ",10a)') (list(i),i=1,5)
               return
-            END IF  !invalid type
+            else if(ikey .eq. 4 .or. ikey .eq. 5) then
+               cstrec(istn) = "Mark5A"
+            endif
             kdefault = .false.
           else ! use defaults for type and density
             kdefault = .true.
@@ -212,7 +200,7 @@ C       Station ID is valid. Check tape type now.
               ikeyhl=istringminmatch(list_hl,ilist_hl,ckeywd)
               if (ikeyhl.eq.0) then ! invalid type
                 write(luscn,9204) ckeywd
-9204            format('TTAPE03 Error - invalid bit density: ',a,
+9204            format('TTAPE04 Error - invalid bit density: ',a,
      .          ', must be HIGH or LOW.')
                 return
               END IF  !invalid type
@@ -267,7 +255,6 @@ C       Station ID is valid. Check tape type now.
         endif 
 
 C   3. Now set parameters in common.
-
         DO  I = 1,NSTATN
           if ((istn.eq.0).or.(istn.gt.0.and.i.eq.istn)) then ! this station
             if (cstrec(i)(1:2).eq."S2") then
@@ -283,7 +270,12 @@ C   3. Now set parameters in common.
               k4sp = speed(1,i) ! for code 1
               maxtap(i)=ival*k4sp*60.d0 ! convert to meters
             else
-              if (kdefault) then
+              if(cstrec(i) .eq. "Mark5A") then
+                do icode=1,ncodes
+                  bitdens(i,icode)=1.d9   !Very high density means we don't need to worry about it.
+                end do
+                maxtap(i)=10000         !set to 10 thousand feet.
+              else if (kdefault) then
                 maxtap(i)=maxtap(1)
                 do icode=1,NCODES
                   bitdens(i,icode)=bitdens(1,icode) ! code 1 only

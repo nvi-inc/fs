@@ -7,12 +7,6 @@
       integer itime2stop                !how long does it take to stop?
       integer idir                      !Tape direction.
       Common /hardware/luFile,iftold,MaxTapeLen,itime2stop,idir
-! character version of speed.
-      character*8 lspeed
-      integer*2 ispeed(4)
-      integer nspdCh                    !number of characters
-      equivalence(lspeed,ispeed)
-      common /hardware/lspeed,nspdCh
 
 ! Recorder state.
       logical kdrum 		!drum_on command was written

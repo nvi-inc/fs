@@ -1,4 +1,4 @@
-File: /usr2/fs-9.7.7/misc/fs9707up.txt  Version: 1.4 Date: 050216
+File: /usr2/fs-9.7.7/misc/fs9707up.txt  Version: 1.5 Date: 050730
 
 I. Introduction
 
@@ -16,10 +16,12 @@ new version.
 
 This version is intended for all stations.  The most significant
 changes in this version are that it expects the Mark5A to be operating
-in formal parsing mode and support for the S2 DAS is included.
-Previous versions of the FS assumed informal processing for Mark5A
-operations.  In addition, you should use a version of the Mark5A
-program dated '2004y167d' or later with this version of the FS.
+in formal parsing mode and support for the S2 DAS is included (in
+particular, this means that the "-f0" switch should not be used when
+starting Mark5A).  Previous versions of the FS assumed informal
+processing for Mark5A operations.  In addition, you should use a
+version of the Mark5A program dated '2004y167d' or later with this
+version of the FS.
 
 This FS version will also largely work with the Mark 5A program dated
 '2004y083d' with two limitations: (1) the destination and status
@@ -1691,11 +1693,11 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
         "mk5=..." commands that use "informal" syntax and update these
         to formal syntax.  The primary changes that this entails are
         that commands must have equal signs, "=", between the keyword
-        and following parameters, semi-colons, ";" must be used
-        instead of spaces to separate parameters, and queries must
-        always use question marks, "?", at the end.  A way to find the
-        commands that may need to be changed is to use the shell
-        commands:
+        and following parameters, colons, ":" must be used instead of
+        spaces to separate parameters, commands must end with
+        semi-colons, ";", and queries must always have question marks,
+        "?", at the end.  A way to find the commands that may need to
+        be changed is to use the shell commands:
 
           cd /usr2/proc
           grep mk5= *.prc |less
@@ -2080,9 +2082,10 @@ section "V. Transferring The Update Archive By DOS Floppy" below.
      changes that this entails are that commands must have equal
      signs, "=", between the keyword and following parameters,
      semi-colons, ";" must be used instead of spaces to separate
-     parameters, and queries must always use question marks, "?", at
-     the end.  A way to find the commands that may need to be changed
-     is to use the shell commands:
+     parameters, commands must end with semi-colons, ";", and queries
+     must always use question marks, "?", at the end.  A way to find
+     the commands that may need to be changed is to use the shell
+     commands:
 
         cd /usr2/proc
         grep mk5= *.prc |less
