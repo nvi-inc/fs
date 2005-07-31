@@ -36,6 +36,7 @@ C    880315 NRV    DE-COMPD'C
 C    930225 nrv implicit none
 C 001226 nrv Changed  comment on definition of DUR: it is the
 C            duration not the stop time of the observation.
+! 2005Mar14 JMGipson.  Changed comparison of 'HC' to 'C '
 C
 C
 C     First work out the source position at UT and the position at UT+DUR.
@@ -45,7 +46,7 @@ C     Return KCONT = FALSE if the observation is not continuous
 C     If you don't have an AZ-EL antenna return immediately with KCONT=TRUE
 C
 C
-      IF (IAXIS(IST).EQ.3.or.iaxis(ist).eq.7.or.iaxis(ist).eq.6) 
+      IF (IAXIS(IST).EQ.3.or.iaxis(ist).eq.7.or.iaxis(ist).eq.6)
      .GOTO 100
       KCONT=.TRUE.
       RETURN
@@ -58,7 +59,8 @@ C
       IF (DELAZ.LT.-PI) DELAZ = TWOPI+DELAZ
 C
       IF(AZ1.LT.STNLIM(1,1,IST)) AZ1=AZ1+TWOPI
-      IF(ichcm_ch(LCABL,1,'HC').eq.0) AZ1=AZ1+TWOPI
+!      IF(ichcm_ch(LCABL,1,'HC').eq.0) AZ1=AZ1+TWOPI
+      IF(ichcm_ch(LCABL,1,'C ').eq.0) AZ1=AZ1+TWOPI
       IF(AZ1.GT.STNLIM(2,1,IST)) AZ1=AZ1-TWOPI
 C
       AZ2C = AZ1+DELAZ
@@ -69,7 +71,7 @@ C
      .+TWOPI.AND.ichcm_ch(LCABL,1,'  ').eq.0) THEN  !set end of observation cable wrap
         IF (DELAZ.GT.0.) call char2hol('C ',LCABL,1,2)
         IF (DELAZ.LT.0.) call char2hol('W ',LCABL,1,2)
-      ENDIF 
+      ENDIF
       KCONT = .TRUE.
       IF (AZ2C.LT.STNLIM(1,1,IST)) KCONT = .FALSE.
       IF (AZ2C.GT.STNLIM(2,1,IST)) KCONT = .FALSE.

@@ -58,8 +58,7 @@ C
 	OPEN(LU_INFILE,file=cinname,status='OLD',iostat=IERR)
 	IF(IERR.EQ.0) THEN
 	  rewind(LU_INFILE)
-	  call initf(LU_INFILE,ierr)
-	ELSE
+       	ELSE
 	  WRITE(LUSCN,9400) IERR,cinname(1:ic)
 9400    FORMAT(' SNPSHFT02 - Error ',I5,' opening SNAP file ',A)
 	  return    ! GOTO 200
@@ -87,8 +86,7 @@ C
 	  WRITE(LUSCN,9400) IERR
 	else
 	  rewind(LU_OUTFILE)
-	  call initf(LU_OUTFILE,ierr)
-	ENDIF
+      	ENDIF
 C
 C 4.0  Get target date.
 C
@@ -211,8 +209,7 @@ C 17.0 Display tape start times.
 9175  FORMAT(4('   # ddd-hh:mm:ss D',$))
         write(luscn,'()')
 	REWIND(LU_INFILE)
-	call initf(LU_INFILE,ierr)
-	ICOUNT = 0
+      	ICOUNT = 0
 	KNEWP = .TRUE.
 	LDOLD = hbb
 C
@@ -444,9 +441,8 @@ C Add one more day to shift.
      .           ISSHFT,IMSHFT,IHSHFT,IDSHFT)
 C
 C Locate first record that won't overlap current schedule.
-2002  REWIND(LU_INFILE)
-	call initf(LU_INFILE,ierr)
-C
+2002     REWIND(LU_INFILE)
+
 C Read input until next time is encountered.
 	DO 2004 I=1,NTAP
 	  IF (ichcm_ch(LD(I),1,'R').EQ.0) GOTO 2004

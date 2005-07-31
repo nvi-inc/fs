@@ -39,7 +39,7 @@ C LOCAL:
       character*128 cdum
       character*128 csnap,cproc,csked,cexpna
       logical kex,kskd,kskdfile,kdrgfile,kknown
-      logical kequip_over
+      logical kequip_over,knew_sked
       integer nch,nci
       character*2  response,scode
       character*8 dr_rack_type, dr_rec1_type, dr_rec2_type
@@ -191,20 +191,22 @@ C 020614 nrv Change FS version to y/m/d digits for HPUX version.
 C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2004Sep04  JMGipson  Replaced setba_dr by count_freq_tracks
 ! 2004Nov12 JMGipson.  Replace csize, iwidth (which are font size and widht
-!            by variable cpaper_size. First is orientation, second size.
-! 2005Feb16  JMGipson added menu item for fake lvex files.
+!           by variable cpaper_size. First is orientation, second size.
+! 2005Feb16 JMGipson added menu item for fake lvex files.
+! 2005Mar01 JMGipson. Fixed equip_override.  Previously if it was set, you could not change
+!                     equipment type using option 11.
 C
 C Initialize some things.
 !      iVerMajor_FS = 09
-!       iVerMinor_FS = 07
-!      iVerPatch_FS = 07
+!      iVerMinor_FS = 07
+!      iVerPatch_FS = 08
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
 
 
 C Initialize the version date.
-      cversion = '050216'
+      cversion = '050729'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -279,6 +281,8 @@ C
 C     2. Initialize local variables
 C
 200   continue
+      knew_sked=.true.
+
       nch = trimlen(ctmpnam)
       if (ctmpnam.eq.'./') nch=0
 ! GetPID doesn't exist in linux
@@ -310,11 +314,21 @@ C  In drcom.ftni
 C  Initialize lots of things in the common blocks
       call skdrini
 
-C   Check for non-interactive mode.
-201   nch1=trimlen(cfile)
+! Check for log file processing
+201   continue
+      nch1=trimlen(cfile)
+! Check for label.
+      cexpna=cfile
+      call capitalize(cexpna)
+      if(index(cexpna,".LOG") .ne. 0) then
+         call lablog(cfile,ierr)
+         stop
+      endif
+
       nch2=trimlen(cstnin)
       nch3=trimlen(command)
       cexpna = ' '
+C   Check for non-interactive mode.
       if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
 
 C 3. Get the schedule file name
@@ -582,8 +596,6 @@ C       endif ! get one/get all
            endif
          endif
        endif
-
-C
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
 C        on stations and schedules, respectively.  Within the loop,
@@ -598,12 +610,12 @@ C  if it was not set by the schedule.
           kknown = .not.
      >      (cstrec(istn).eq.'unknown'.or. cstrack(istn) .eq. 'unknown')
           if (.not.kknown.and.kdr_type .or.
-     >        kdr_type .and. kequip_over) then ! equipment is in control file
+     >        kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
               cstrack(istn)=dr_rack_type
               cstrec(istn) =dr_rec1_type
               cstrec2(istn)=dr_rec2_type
 !This keeps us from only doing the override when the schedlue is read in.
-              kequip_over=.false.
+              knew_sked=.false.
               if(cstrec2(istn) .ne. 'none' .and.
      >           cstrec(istn) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
@@ -739,6 +751,7 @@ C  Write warning messages if control file and schedule do not agree.
               write(luscn,"(' 51 = Print notes file (.TXT)')")
             endif ! .drg/.skd
             write(luscn,'(a)') ' 20 = Make fake lvex'
+!            write(luscn,'(a)') ' 62 = Print labels using log file'
             write(luscn,'(a)') ' 0  = Done with DRUDG '
 !            write(luscn,'(a)') '20 = Make fake lvex  '
             write(luscn,'(a, $)') ' ?'
@@ -787,7 +800,7 @@ C    .      ' 11 = Show/set equipment type')
 
       if ((ifunc.lt.0).or.(ifunc.gt.21.and.ifunc.ne.33.and.ifunc.ne.61
      .  .and.ifunc.ne.32.and.ifunc.ne.102.and.ifunc.ne.103
-     .  .and.ifunc.ne.51)
+     .  .and.ifunc.ne.51 .and. ifunc .ne. 62)
      .  .and..not.kbatch) GOTO 700 ! not recognized, interactive ask again
       if ((ifunc.lt.0).or.(ifunc.gt.21.and.ifunc.ne.33.and.ifunc.ne.61
      .  .and.ifunc.ne.32.and.ifunc.ne.102.and.ifunc.ne.103
@@ -969,6 +982,8 @@ C             CALL PROCS(21) ! VLBA4+VLBA
                 inew=1 ! reset flag for new file
                 klab = .false.
               endif
+          else if(ifunc .eq. 62) then
+!             call lablog(ierr)
           ELSE IF (IFUNC.EQ.11) THEN
               call equip_type(cr1)
               cinname = snpname

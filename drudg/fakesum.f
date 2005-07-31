@@ -15,13 +15,12 @@ C 001114 nrv Scan names are character now.
       include '../skdrincl/skobs.ftni'
 
       integer TRIMLEN
-      integer ichcm_ch  ! functions
-
 C
 C LOCAL:
-      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
-     .LMON(2),
-     . LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
+      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN)
+      integer*2 LMON(2), LDAY(2),LMID(3),LPRE(3),LPST(3),LDIR(MAX_STN)
+      character*2 cdir(max_stn)
+      equivalence (ldir,cdir)
       integer ipas(max_stn),ift(max_stn),idur(max_stn),ioff(max_stn)
       integer iftold,idir,ituse,iobs,il,ilen,ihead
       character*18 cstart,cstop
@@ -87,10 +86,10 @@ C THEN BEGIN Current station in observation
           write(cstop,'(i4,"y",i3.3,"d",i2.2,"h",i2.2,"m",i2.2,"s")')
      .    iyr2,idayr2,ihr2,min2,isc2
           idir=1
-          if (ichcm_ch(ldir(istnsk),1,'R').eq.0) idir=-1
+          if (cdir(istnsk)(1:1) .eq. "R") idir=-1
           IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
      .      IDUR(ISTNSK)) *speed(icod,istn))
-               IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
+          IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
 C       Create scan ID from start time and source
 C       ddd-hhmm_source
 C       Use scan IDs already generated.

@@ -1,0 +1,472 @@
+File: /usr2/fs-9.8.0/misc/fs9800up.txt  Version: 1.0 Date: 050731
+
+I. Introduction
+
+This memo is divided into six sections:
+
+   I.   Introduction.
+   II.  Changes Since Version 9.7.7
+   III. Installation
+   IV.  Transferring The Update Archive By DOS Floppy
+
+Please print this notice and read it carefully before installing the
+new version.
+
+This version is intended for all stations.  However, it is a
+preliminary version.  An updated version with additional new features
+will be released in a few days or weeks.  You may choose to wait until
+that release since none of the changes included here are required for
+operations and several are in preliminary form only.  However, if you
+would like to try the new version, we would be happy to get any
+feedback you can provide/
+
+You can access the new Mark 5 disk module label printing feature in
+DRUDG described below without changing to this new version of the FS.
+In this case, when you "install" the new version, skip the steps that
+involve changing the /usr2/fs link, remaking the station software,
+rebooting, and any and all local customization updates. In other
+words, just unpack the archive and "make" it (in /usr2/fs-9.8.0).  The
+new DRUDG can then be run as "/usr2/fs-9.8.0/bin/drudg", but should
+only be used in the new label printing mode as described below.  Your
+old version of the FS will still be used for all other operations.
+
+This version is intended to installed as an update for 9.7.7.  Very
+few local customizations are required for this update.
+
+II. Changes Since Version 9.7.7
+
+The sections is divided into three sub-sections: A. Change in the FS,
+B. Changes in DRUDG, and C. Known FS Bugs.  Each sub-section starts
+with a summary of the items covered followed by a more detailed
+description.
+
+			 A. Changes in the FS
+
+The following is a summary of the changes.
+
+1. Numerous bug fixes
+2. "gnplt" update
+3. "msg" doesn't dominate CPU in "auto-start" mode
+4. "form" command added to "postob" for Mark IV formatters
+5. PFMED now handles long lines in procedures
+6. Mark IV "form" command checks for possible bit slips
+7. "msg" expanded to include Type D modules
+8. "systests" system test utilities added
+
+A more detailed discussion of these changes follows.
+
+1. Numerous bug fixes. These include: simple "=" versions of:
+   "disk_record=", "disk2file=",a nd "in2net=" no longer cause abend;
+   printing of time fields in "data_check" and "scan_check" fixed;
+   errors from previous command are no longer reported by "scan_name"
+   or other commands. If bugs you are aware have not been fixed,
+   please inform Ed (weh@ivscc.gsfc.nasa.gov).
+
+2. "gnplt" update. Andrea Orlati has provided an improved version of
+   "gnplt" with many bugs fixed.  Also, an error in the reading of
+   spillover tables from .rxg files both in the FS and "gnplt"
+   ("gndat" actually) was reported and fixed by Andrea.  Please inform
+   Ed (weh@ivscc.gsfc.nasa.gov) and Andrea (a.orlati@ira.cnr.it) of
+   any other bugs you know of or encounter.
+
+3. "msg" doesn't dominate CPU in "auto-start" mode. An extra delay was
+   added to the "process_logfile" subprocess. This seems to reduce the
+   system thrashing without compromising the functionality.
+
+4. "form" command added to "postob" for Mark IV formatters. This
+   command was added to help identify cases where a bit slip may have
+   occured.
+
+5. "pfmed" now handles long lines in procedures. Line lengths up to
+   about 512 characters are now supported. The new procedure logging
+   facility in "boss" was changed to support longer lines. This was an
+   issue primarily with long Mark IV decoder commands (about 100
+   characters). All other instances of problems with long lines in the
+   FS have been fixed.
+
+6. Mark IV "form" command checks for possible bit slips. The "form"
+   command will check (and report) the error bit combination (0x600)
+   that indicates a bit slip may have happened.
+
+7. "msg" expanded to include Type D modules. The types of modules were
+   increased.  The format of the e-mail message for media information was
+   changed to hopefully improve readability.
+
+8. "systests" system test utilities added. An initial version of a
+   suite of SNAP procedures and data analysis and plotting scripts was
+   added.  See "/usr2/fs/systests/systests.txt" for more information.
+
+
+			 B. Changes in DRUDG
+				   
+DRUDG opening message date is 050729.  This release of DRUDG includes:
+
+1. Labels for Mark 5 disk modules.
+2. "equip_override" bug fixed.
+3. Last scan bug in label command fixed.
+4. S2 tape change time bug fixed.
+5. Mark5 continuous geodetic schedules supported.
+6. Bug in Mark IV label command fixed.
+
+A more detailed discussion of these changes follows.
+
+1. Labels for Mark 5 disk modules.  DRUDG now supports generation of
+   these disk modules.  This is not available through the usual label
+   printing option (6).  Instead it is accessed from the command line
+   of DRUDG.  If DRUDG is started with the name of a log file as the
+   first parameter, e.g.:
+
+     drudg r4181gc.log
+
+   It will print the labels for the disk modules used in that log and
+   then exit.  This is a new feature and any feedback on how it works
+   would be appreciated.
+
+2. "equip_override" bug fixed.  The "equip_override" feature was
+   introduced to allow stations to specify Mark5 in their skedf.ctl
+   file.  Unfortunately it had the unintended consequence that you
+   could not change the equipment type using option 11.  This was
+   because the equip_override code was executed after a file was read
+   in, and also after option 11 was executed.  This bug was fixed in
+   9.7.7: A flag was set, and equip_override was only executed once.
+
+   Unfortunately, this had the consequence that if you read in another
+   schedule, drudg would use the equipment type from the schedule, and
+   not the equipment override option.  This bug has now been fixed in
+   9.7.8.  Equipment override will work once for each schedule.
+
+3. Last scan bug in label command fixed.  The ending time of the last
+   label was that of the 2nd-to-last scan, and not that of the last
+   scan.  This has been fixed.
+
+4. S2 tape change time bug fixed.  Bug in S2 tape change time fixed.
+   Previous versions might change the tape one scan too early.  This
+   generally wasn't a problem with long tapes.
+
+5. Mark5 continuous geodetic schedules supported.  Drudg was modified
+   to change these schedules to "start&stop" to avoid disk wastage.
+   In addition, an early start of 12 seconds was implemented to allow
+   the VLBA correlator to sync up.
+
+6. Bug in Mark IV label command fixed.  Some stations are still not
+   getting the correct number of Mark IV tape labels.  This was fixed.
+
+ 			    C. Known FS Bugs
+
+The following is a summary list of known bugs.  They are described in
+more detail after the list.
+
+1. Do not run "fmset" for extended periods.
+2. "odd" and "even" head types not supported for Mark IV & VLBA4.
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+   recorder.
+5. Extraneous errors when tape is stopped by low tape sensor.
+6. "Comm=" command in logex extracts only the first command.
+7. S2 error scheme clumsy.
+8. No extra spaces allowed in "ibad.ctl" file.
+9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable..
+
+A more detailed discussion of these bugs follows.
+
+1. Do not run "fmset" for extended periods.  For stations that have
+VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+should not be run for extended periods of time.  The "fmset" program
+should be used only to set or briefly verify that the formatter time
+is correct.  Do not leave "fmset" running after completing either of
+these tasks, especially during an experiment.
+
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
+
+2. "odd"/"even" head types not supported for Mark IV & VLBA4.  The
+Mark IV and VLBA4 rack version of the "form" command and the Mark IV
+and VLBA4 recorder versions of the "repro" and "parity" commands do
+not support the "odd" and "even" parameters for the read and write
+head types and reproduce electronics in the "head.ctl" control file.
+This means that automatic substitution of odd or even head in passes
+that use only even or odd heads respectively does not occur.  The only
+correct settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
+
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+For any mode recorded with VLBA style tapeform (14 index positions),
+the only correct setting of the read and write head types on the
+"head.ctl" is "all".  This will be fixed in a future revision.  Please
+let Ed know if you are missing some tracks and need to work around
+this limitation.
+
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+recorder. Now that most communication problems with the Mark IV
+formatter have been solved, this will be possible and will be done in
+the future. CHEKR support will be implemented for Mark 5 despite
+communication problems, they will have to be ignored unless they
+extend beyond a certain amount of time.
+
+5. Extraneous errors when tape is stopped by low tape sensor.  When a
+tape drive has been commanded to move the tape and then stops because
+it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
+"CHEKR" will complain periodically that the tape drive is not in the
+correct state.  In principle the FS should be smarter about this.
+However, if the tape is managed correctly by the schedule this error
+message should never occur.  If it does, then it it an indication that
+there is either a problem with: (1) the schedule, (2) the check
+procedures, (3) the recorder, or (4) the tape is too short.  If any of
+these cases apply they should be corrected.  It is more likely that
+this error message will occur when the tape is being controlled
+manually.  In this case, issuing an "ET" command will convince the FS
+that the tape drive should be stopped and the error message will
+cease.
+
+6. "Comm=" command in logex extracts only the first command.  The
+"comm=" command in "logex" extracts only the first command commanded
+and displayed.  This problem was noted by Giuseppe Maccaferri
+(Medicina).
+
+7. S2 error scheme clumsy.  The error and status response number
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic "rl" are mostly error responses from the recorder or the RCL
+interface library that is used to communicate with the recorder.  If
+the numeric part of an "rl" error is greater than -130, then it is the
+error code returned by the recorder.  If the numeric part is less than
+-130, but greater than -300, then add 130 to the value, the absolute
+value of the result is the error response code from the RCL library.
+For values less than or equal to -300, a FS error has been detected.
+Status response codes are all reported with mnemonic "rz" and the
+numeric value is the negative of the status response code.  In all
+cases an appropriate error or status message is displayed.  These
+messages are retained in the log.
+
+8. No extra spaces allowed in "ibad.ctl" file.  The format of the
+"ibad.ctl" must not contain any leading or embedded spaces.  In system
+that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
+"no_untalk/unlisten_after" is misspelled or an incorrect device name
+is supplied, the driver will cause a segmentation violation when it is
+initialized and the FS will terminate.  Unfortunately there is no way
+to prevent this problem in a general way; it reflects a limitation in
+the driver.
+
+9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
+been known to "hang" mysteriously.  This seems to be caused by some
+problem with the "go" mechanism that is used to restart the program
+when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
+execute.  The "go" that is used to restart the program fails for some
+reason.  This has been exceedingly difficult to debug because it is
+intermittent and fairly rare.  There is however a good work around for
+it.  The CALON and CALOFF procedures are called by procedures CALONFP
+and CALOFFFP for FIVPT and CALONNF and CALOFFNF for ONOFF.  FIVPT or
+ONOFF may hang during (or actually just after) the execution of one
+these procedures that FIVPT and ONOFF will typically hang.  If this
+happens, you will have to terminate the FS to recover.  You can
+prevent it from happening again (for this procedure) by adding the
+lines:
+
+!+1s
+sy=go fivpt &
+
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
+
+!+1s
+sy=go onoff &
+
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+FS SNAP manual pages and the help pages available through the "help="
+command do not reflect when multiple versions are available with
+different suffixes depending on the number of drive specified in the
+control files.  For example, there is only a "tape" page, no "tape1"
+or "tape2" page.  However, the help facility will display the version
+of the command with no suffix when an available command with a suffix
+is used.  For example, if two drives are defined, then "help=tape1"
+and "help=tape2" will work, but "help=tape" will not and vice-versa if
+only one drive is defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+Acquisition System currently lacks a functional total power detector
+though support has been included.  To allow approximate system
+temperature calibration, all the setup commands and the TPI detectors
+of the modules of a co-existing Mark IV rack are currently also
+available when the rack type is specified to be LBA4.
+
+III. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual or the "nfsload.txt" memo.  In this case
+you should also get a copy of the current FS9 "Control Files and Field
+System Initialization" manual.
+
+The following instructions are for upgrading from 9.7.7. Please follow
+all the steps.
+
+A list of "critical updates" is given below.  These are updates that
+must be applied sequentially.  Please start with the next update with
+a later version number than you have and apply it and the remaining
+listed version before upgrading to 9.8.0.  You can find the latest
+versions of installation notes for these FS versions in the
+"/usr2/fs/misc" directory. The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+
+If you have a version older than 9.4.0, please contact Ed.
+
+(0) Before you begin the upgrade make sure you have a current back-up
+of your system in case something goes wrong.  If you are use FS Linux
+5, we recommend you use the tar based back-up that is part of the
+rotating disk back-up scheme.  A draft document that describes this
+method is available in the docs sub-directory on the FS FTP servers as
+backups2.pdf.  If you have an older FS Linux distribution, please use
+the disk-to-disk back scheme described in Section 5.8 of the FS9
+"Computer Reference" manual.  If you are running one of the Debian
+distribution kernels and do not have documentation on how to make a
+back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
+Reference" manual has a discussion of drive ID numbers if you are
+unsure about these.  Normally you should choose to install the update
+on your primary after having made and verified your back-up.  Once the
+installation is complete, has been tested, and used for a little
+while, you can copy over your back-up with the upgraded primary.  If
+the upgrade fails, you should restore the back-up to the primary for
+operations.  You can then try to make the upgrade again when it is
+convenient.  In a desperate situation, you can use the back-up for
+operations.  You may choose to install the FS on your back-up disk for
+testing and then later copy the back-up onto the primary once you are
+satisfied with the new version.  In any event, please be sure to make
+a fresh back-up before continuing with the installation.
+
+(1) Please be sure that you have at least 40 MB of free space (use the
+"df" UNIX command to check free space) on your "/usr2" partition
+before starting the upgrade.  This would probably only be a problem
+for stations with 200 MB disks.  If you are tight on space, you may
+want to delete old log files and old versions of the FS (except your
+most recent one if you can avoid it of course).  Since you should have
+backed-up your system, you even can delete the "*.[oas]" and
+executable files of your old versions with no risk.  You might want to
+keep the source of the previous versions around for reference if you
+have room.  You can eliminate the non-source files by "cd"-ing to old
+FS directories as "prog" and doing a "make rmdoto rmexe".  If you have
+any questions about how to do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.8.0 archive in your "/tmp" directory.
+For example you might do the following:
+
+      cd /tmp
+      ftp atri.gsfc.nasa.gov
+      (enter your account name for the server at the prompt)
+      (enter your password for the server at prompt)
+      binary
+      cd dist
+      get fs-9.8.0.tgz
+      quit
+
+If you need to transfer the archive using DOS floppies, please see the
+section "V.  Transferring The Update Archive By DOS Floppy" below.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/fs-9.8.0.tgz
+
+(6) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.8.0 fs
+
+(7) It is recomended that your local files have the default ownership
+    ("oper.rtx") and permissions ('rw-rw-rw'). To force this, please
+    execute the script:
+
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults , answer "n".  That is the last chance to abort the
+    execution of the script.
+
+(8) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(9) Make the FS:
+
+      cd /usr2/fs
+      make
+
+(10) Remake your station software.  The following steps should do the
+     trick to reload your station software if you have the "standard"
+     configuration for station software:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+(11) Reboot your computer.
+
+(12) Log in as oper
+
+(13) Modify your procedure files.  The only change is for stations
+     that use Mark IV formaters.  They should add the "form" command
+     to any and all versions of their "postob" procedures that are
+     used with the Mark IV formatter.  Please note that the "4form"
+     command can be instead in versions of "postob" that are shared by
+     configurations that use the Mark IV formatter and other systems.
+     In those cases, the use of the "4form" command should prevent
+     getting an error when the Mark IV formatter is not in use.
+
+(14) Update your control files. No control file updates are needed at
+     this time.
+
+(15) Reboot the computer.  This is important for both re-initializing
+     shared memory and the login environment.
+
+(16) Test the FS.  Generally speaking a fairly thorough test is to run
+     a test experiment: start with DRUDG-ing a schedule, executing
+     part of it (preferably at least a tape change and a parity check
+     in each direction), and perform any normal post-experiment
+     plotting and clean-up that you do.  The idea here is to verify
+     that everything works as you expect for normal operations.  In
+     particular for this upgrade you should test that Mark 5
+     operations work as expected.
+
+VI. Transferring The Update Archive By DOS Floppy
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.8.0.tgz archive have been placed in
+the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
+enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs9800tg.aa
+fs9800tg.ab
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs9800tg.* >fs-9.8.0.tgz
+
+This will create an exact image of the original fs-9.8.0.tgz archive
+on your computer.  Please be sure to use binary transfer when getting
+the files from atri or kurp-ftp.

@@ -1,6 +1,5 @@
       SUBROUTINE unpco(IBUF,ILEN,IERR,
-     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,
-     .ITRK,cs,ivc)
+     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,ITRK,cswit,ivc)
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
@@ -23,6 +22,7 @@ C 991122 nrv Change LMODE to allow 16 characters.
 
 C  INPUT:
       integer*2 IBUF(*)
+      character*256 cbuf
       integer ilen
 C           - buffer having the record
 C     ILEN - length of the record in IBUF, in words
@@ -41,27 +41,28 @@ C     Ichan - channel number for this frequency
 C     LMODE - observing mode, max 16 characters
 C     VCBAND - final video bandwidth, MHz
       integer ITRK(4,max_subpass,max_headstack) ! tracks to be recorded
-      character*3 cs ! switching
+      character*3 cswit ! switching
       integer ivc ! physical BBC# for this channel
 C
 C  LOCAL:
-      integer ic2save,IPARM(2),j,idumy,i,ipas
-      real parm
+      integer ic2save,j,idumy,i,ipas
       double precision d
-      EQUIVALENCE (IPARM(1),PARM)
+      integer icnt
+      integer ind
       double precision DAS2B
 C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
-      integer k,ihead,ich,nch,ic2,ic1,ict,ip,ix,itx,it1
-      integer jchar,ichmv,ias2b,iscnc ! functions
+      integer k,ihead,ich,nch,ic2,ic1,ict,ip,ix,itx
+      integer ichmv,ias2b,iscnc ! functions
 C
 C
 C     1. Start decoding this record with the first character.
 C        Assumes that first character is not a C.
 C        i.e. send IBUF(2) if first character is a C.
 
-C
+      call hol2char(ibuf,1,ilen*2,cbuf)
+
       IERR = 0
       ICH = 1
 C
@@ -180,31 +181,32 @@ C                              (        Find the opening parenthesis
           ipas=ipas-100
           ihead=2
         endif
-        IF  (IPAS.lt.0.or.ipas.gt.max_subpass) THEN  
+        IF  (IPAS.lt.0.or.ipas.gt.max_subpass) THEN
           IERR = -107-IX
           RETURN
         END IF  !
         ICT=IP+1  ! Start the scan after the opening parenthesis
         IC2=IC2-1 ! Only scan up to the closing parenthesis
         itx=0
-        do while (ict.le.ic2) ! scan (t1,t2,t3,t4)
-          CALL GTPRM(IBUF,ICT,IC2,1,PARM,NULL,5)
-          IX = IX + 1
-          itx=itx+1
-          if (itx.gt.4) then ! too many
-            ierr=-107-ix
-            return
-          endif
-          if (jchar(iparm,1).ne.OCOMMA) then ! value
-            it1=iparm(1)
-            if (it1.lt.-3.or.it1.gt.36) then 
-              ierr=-107-ix
-              return
+! parse the expression. Can be up to 4
+! first count the number of commas.
+        icnt=0
+        do while(icnt .lt. 4 .and. ict .le. ic2)
+          ind=index(cbuf(ict:ic2),",")
+          if(ind .eq. 0) ind=ic2-ict+1
+          icnt=icnt+1
+          ix=ix+1
+          if(cbuf(ict:ict) .ne. ",") then
+            read(cbuf(ict:ict+ind-1),*,err=900) itx
+            if(itx.lt. -3  .or. itx .gt. 36) then
+               ierr=-107-ix
+               return
             endif
-            if (ihead.le.max_headstack) ITRK(itx,IPAS,ihead) = it1
-          endif ! value
-        enddo ! scan (t1,t2,t3,t4)
-        IF  (itx.eq.0) THEN  !no tracks in this field!
+            if (ihead.le.max_headstack) ITRK(icnt,IPAS,ihead) = itx
+          endif
+          ict=ict+ind
+        end do
+        IF  (icnt.eq.0) THEN  !no tracks in this field!
           IERR = -107-IX
           RETURN
         END IF  !no tracks!
@@ -224,10 +226,10 @@ C
 C  Done with track assignments. Now check for switching and BBC #s.
 C
       ivc=0
-      cs = '   '
+      cswit = '   '
       if (ic1.eq.0) return ! nothing there
 
-C  Physical BBC#. 
+C  Physical BBC#.
 C  Use ic1 and ic2save from previous gtfld
 C
       ic2=ic2save
@@ -242,14 +244,18 @@ C     switching set number - 0 1 2 or 1,2
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       if (ic1.gt.0) then
         NCH = IC2-IC1+1
-        cs = '   '
-        call hol2char(ibuf,ic1,ic2,cs)
-        IF ((cs(1:1).ne.'1').and.(cs(1:1).ne.'2').and.
-     .      (cs(1:1).ne.'0').and.(cs.ne.'1,2')) then
+        cswit = '   '
+        cswit=cbuf(ic1:ic2)
+        IF ((cswit(1:1).ne.'1').and.(cswit(1:1).ne.'2').and.
+     .      (cswit(1:1).ne.'0').and.(cswit.ne.'1,2')) then
           IERR = -109-ix
           RETURN
         END IF  !
       endif
+
+! error return
+900   continue
+      ierr=9
 
 
       RETURN

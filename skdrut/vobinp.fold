@@ -6,8 +6,6 @@ C History
 C 000606 nrv Re-new. Copied from VOB1INP.
 C 001109 nrv New again. Use new vex parser routines to get
 C            observations scan by scan.
-! 2004Feb14 JMG.  When checking cable wrap, check for both "&c" and "c", etc.
-! 2005May05 JMG.  Removed refrences to irec, which is never used.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -28,7 +26,6 @@ C          fvex_scan_source          (get source in this scan)
 c          newscan                   (form new scan)
 C          addscan                   (add each station to the scan)
 C
-
 ! functions
       integer fvex_scan_source,fvex_date
       integer fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len
@@ -38,7 +35,7 @@ C
       integer iwhere_in_string_list
 C  LOCAL:
       integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
-!      integer irec
+      integer irec
 
       integer*2 lcb          !cable wrap
       character*2 ccb
@@ -169,9 +166,10 @@ C       Keep good data offset and duration separate
           il = fvex_len(cout)
 ! fixup for Mark5.
           if(cstrec(istn)(1:5) .eq. "Mark5" .and. il .eq. 0) then
-             ip=1
              if(npassl(istn,icod) .eq. 0) then
                 npassl(istn,icod)=1
+                cpassorderl(1,istn,icod)="5"
+                ip=1
               endif
           else
             ip =iwhere_in_string_list(cpassorderl(1,istn,icod),
@@ -190,9 +188,6 @@ C       Keep good data offset and duration separate
             if (cout(1:il).eq.'&n')  ccb="- "
             if (cout(1:il).eq.'&cw') ccb="C "
             if (cout(1:il).eq.'&ccw') ccb="W "
-            if (cout(1:il).eq.'n')  ccb="- "
-            if (cout(1:il).eq.'cw') ccb="C "
-            if (cout(1:il).eq.'ccw') ccb="W "
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))
@@ -214,9 +209,9 @@ C  Make the new scan if this is the first source.
            call addscan(nobs,istn,icod,idstart,idend,
      .        ifeet,ip,idrive,lcb,ierr)
            if (ierr.ne.0) then
-             write(lu,9103) ierr,istn,istart
-9103         format('VOBINP06 - addscan error ',i3,' istn=',i3,
-     >         'istart=',5i5)
+             write(lu,9103) ierr,irec,istn,istart
+9103         format('VOBINP06 - addscan error ',i3,' irec=',i3,' istn=',
+     .          i3,'istart=',5i5)
            endif
          endif ! new or add
         enddo  ! get all stations in this scan

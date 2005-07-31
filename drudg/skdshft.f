@@ -58,8 +58,7 @@ C Last observation of shifted schedule: idnow, ihnow, imnow
 9100  FORMAT(' SHIFTING ',A)
 	OPEN(LU_INFILE,FILE=CINNAME,STATUS='OLD',IOSTAT=IERR)
 	REWIND(LU_INFILE)
-	call initf(lu_infile,ierr)
-	IF(IERR.NE.0) then
+       	IF(IERR.NE.0) then
 	WRITE(LUSCN,9110) IERR,CINNAME(1:IC)
 9110  FORMAT(' SKDSHFT01 - ERROR ',I5,' OPENING FILE ',A)
 	RETURN
@@ -255,8 +254,7 @@ C
 C 5.0  Copy file up to $SKED section.
 C
 	REWIND(LU_INFILE)
-	call initf(lu_infile,ierr)
-                cbuf=" "
+        cbuf=" "
 	write(luscn,9501)
 9501  format(' Writing out schedule file up to $SKED section.')
 	do while (cbuf(1:5) .ne. '$SKED')
@@ -360,7 +358,6 @@ C       If so, there is no need for an initial shift.
 	    indoyr = idoyr
 	  else !rewind, reposition
 	    REWIND(LU_INFILE)
-	    call initf(lu_infile,ierr)
             cbuf=" "
 	    do while (cbuf(1:5) .ne. '$SKED')
 		CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
@@ -478,7 +475,6 @@ C   Now compute a new shift one day later than the original.
      >      ' days, and ',i5,'h ',i5,'m ',i5,'s')
 C
 	  REWIND(LU_INFILE)
-	  call initf(lu_infile,ierr)
           cbuf="$SKED"
 	  do while (cbuf(1:5) .ne. "$SKED")
     	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)

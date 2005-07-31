@@ -1,4 +1,4 @@
-File: /usr2/fs-9.6.9/misc/fs9609up.txt  Version: 2.8 Date: 030915
+File: /usr2/fs-9.6.9/misc/fs9609up.txt  Version: 2.9 Date: 050609
 
 I. Introduction
 
@@ -431,12 +431,12 @@ A more detailed discussion of these changes follows.
     either it has not been logged since the current log ws last opened
     or it has changed since the last time it was logged. In addition
     if the selected drive is "mk5a_bs", this command will check the
-    remaining record time available on the bank and if it is sufficent
-    for the next scan will force a bank change before checking the
-    VSN. The command used to force bank_changes "bank_set=inc" takes
-    longer than one second to complete. If the time-out specified for
-    the Mark 5 device is less than 2 seconds, it will automatically be
-    increased to 2 seconds.
+    remaining record time available on the bank and if it is not
+    sufficent for the next scan a bank change will be forced before
+    checking the VSN. The command used to force bank_changes
+    "bank_set=inc" takes longer than one second to complete. If the
+    time-out specified for the Mark 5 device is less than 2 seconds,
+    it will automatically be increased to 2 seconds.
 
     The scan length is communicated to the FS as one of the new
     parameters in the scan_name command. The session code has also

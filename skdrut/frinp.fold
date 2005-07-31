@@ -30,8 +30,6 @@ C  LOCAL:
       integer idum,ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan),ir
       integer*2 lc,lsg,lm(8),lid,lin,ls
-      character*2 cs,cin
-      equivalence (ls,cs), (lin,cin)
       character*16 cm
       equivalence (cm,lm)
       integer*2 lst(4,max_stn)
@@ -39,7 +37,7 @@ C  LOCAL:
       equivalence (lst,cst)
       real*8 bitden
       logical kvlba,kmk3
-      character*3 cswit
+      character*3 cs
       real f2,vb,rbbc,srate
       double precision f1,f
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
@@ -91,7 +89,6 @@ C 011011 nrv If S2 mode was already set up from the equip line, don't
 C            overwrite it.
 C 020114 nrv Fill in roll defs.
 C 2003Jul25 JMG  ITRAS changed to function
-! 2005May2  JMG  Converted losb and lifinp to Characters
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -102,8 +99,7 @@ C
       ilen2=ilen-1
       if(lchar .eq. "C") then
         itype=1
-       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,ITRK,
-     >     cswit,ivc)
+       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,ITRK,cs,ivc)
       else if(lchar .eq. "L") then
         itype=2
         CALL UNPLO(IBUF(2),ilen2,IERR,LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
@@ -224,7 +220,7 @@ C         Store the track assignments.
             do ihd=1,max_headstack
               do isb=1,2
                 do ibit=1,2
-                  iptr=(ibit-1)*2+isb
+                  iptr=(isb-1)*2+ibit
                   ival=itrk(iptr,ipass,ihd)
                   if(ival .ne. -99) then
                     call set_itras(isb,ibit,ihd,icx,ipass,is,icode,ival)
@@ -241,7 +237,7 @@ C         Store the track assignments.
 !     .        call set_itras(2,2,ix,icx,i,is,icode,itrk(4,i,ix))
             enddo
           END DO 
-          cset(icx,is,icode) = cswit
+          cset(icx,is,icode) = cs
           if (ivc.eq.0) then
             ibbcx(icx,is,icode) = icx
           else
@@ -283,11 +279,9 @@ C                                    ! this channel on this BBC
      >         lcode(icode), " for channel ",ic,
      >        "station",cstnna(istn)
 
+              LIFINP(ic,istn,ICODE) = LIN ! IF input channel
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
-!              LIFINP(ic,istn,ICODE) = LIN ! IF input channel
-!              losb(ic,istn,icode) = ls ! sideband
-              cIFINP(ic,istn,ICODE) = cIN ! IF input channel
-              cosb(ic,istn,icode) = cs ! sideband
+              losb(ic,istn,icode) = ls ! sideband
             endif
           enddo
           else ! many BBCs on this line (from PC-SCHED)
@@ -306,13 +300,11 @@ C                                    ! this channel on this BBC
      >         lcode(icode), " for channel ",ic,
      >        "station",cstnna(istn)
 
+              LIFINP(ic,istn,ICODE) = LIN ! IF input channel
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
 C             there's no sideband on this line
 C             losb(ic,istn,icode) = ls ! sideband
-!              LIFINP(ic,istn,ICODE) = LIN ! IF input channel
-              cIFINP(ic,istn,ICODE) = cIN ! IF input channel
-!              call char2hol('U ',losb(ic,istn,icode),1,2)
-              cosb(ic,istn,icode)="U "
+              call char2hol('U ',losb(ic,istn,icode),1,2)
             enddo
           endif ! one/many 
         else ! fill physical info assuming all channels get same (old sked)
@@ -321,11 +313,9 @@ C             losb(ic,istn,icode) = ls ! sideband
             if (lsg.eq.lsubvc(iv,istn,icode)) then ! match sub-group
               cifinptmp=cifinp(iv,istn,icode)
               if (cifinptmp .eq. " ") then
-!                LIFINP(iv,istn,ICODE) = LIN
-                cIFINP(iv,istn,ICODE) = cIN
+                LIFINP(iv,istn,ICODE) = LIN
                 FREQLO(iv,ISTN,ICODE) = F
-!               call char2hol('U ',losb(iv,istn,icode),1,2)
-                cosb(iv,istn,icode)="U "
+                call char2hol('U ',losb(iv,istn,icode),1,2)
               else ! had a previous LO already
                 rbbc=abs(freqlo(iv,istn,icode)-freqrf(i,istn,icode))
                 kmk3 =cifinptmp .eq. "1N" .or. cifinptmp .eq. "2N" .or.
@@ -333,17 +323,16 @@ C             losb(ic,istn,icode) = ls ! sideband
      >                cifinptmp .eq. "1A" .or. cifinptmp .eq. "2A" .or.
      >                cifinptmp .eq. "3O" .or. cifinptmp .eq. "3I"
 
+
                 kvlba=
      >               cifinptmp(1:1).eq."A" .or.cifinptmp(1:1).eq."B".or.
      >               cifinptmp(1:1).eq."C" .or.cifinptmp(1:1).eq."D"
 
                 if ((rbbc.gt.1000.0.and.kvlba).or.
      .              (rbbc.gt.500.0.and.kmk3)) then
-!                  LIFINP(iv,istn,ICODE) = LIN
-                  cIFINP(iv,istn,ICODE) = cIN
+                  LIFINP(iv,istn,ICODE) = LIN 
                   FREQLO(iv,ISTN,ICODE) = F
-                  cosb(iv,istn,icode)="U "
-!                  call char2hol('U ',losb(iv,istn,icode),1,2)
+                  call char2hol('U ',losb(iv,istn,icode),1,2)
                 else ! what?
                 endif
               endif ! previous LO/first time

@@ -6,6 +6,9 @@ C of the two string lengths.
 
 C based on c2upper by NRV.
 
+C 040623  ZMM  changed min1 function to min
+C              removed trailing RETURN
+
       character*(*) cbuf_in
       character*(*) cbuf_out
 
@@ -15,7 +18,7 @@ C Local
 
       iin=len(cbuf_in)
       iout=len(cbuf_out)
-      do i=1,min1(iin,iout) 
+      do i=1,min(iin,iout)
         c=cbuf_in(i:i)
         if ((c.ge.'A').and.(c.le.'Z')) then
            cbuf_out(i:i) = char(ichar(c) + (ichar('a') - ichar('A')))
@@ -29,6 +32,5 @@ C         cbuf_out(i:i)=' '
 C       enddo
 C     endif
 
-      return
       end
 
