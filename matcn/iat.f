@@ -184,7 +184,7 @@ c         write(6,'(''got:'',39a2)') (irecv(iweh),iweh=1,(ilen+1)/2)
 c         ireg(1)=0
       else if(imode.eq.10) then
         maxc=178
-        ireg(1)=portread(lumat,irecv,ilen,maxc,ichar('$'),itimeout)
+        ireg(1)=portread(lumat,irecv,ilen,maxc,m4dt,itimeout)
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
       endif
@@ -281,6 +281,12 @@ c                                ! wrong # of characters in response
                ierr=-700-ierr
             endif
             goto 999
+         endif
+         if(m4dt.eq.13.and.jchar(irecv,1).eq.10) then
+           do i=2,nrc
+             call pchar(irecv,i-1,jchar(irecv,i))
+           enddo
+           nrc=nrc-1
          endif
          nrc=nrc-1
       else if (jchar(irecv,1).eq.o'6') then ! ack response

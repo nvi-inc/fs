@@ -437,7 +437,7 @@ C ** Mk4 formatter firmware
         call logit7ci(0,0,0,1,-140,'bo',12)
         goto 990
       endif
-      imk4fmv = ias2b(ibuf,ic1,ic2-ic1+1,ierr)
+      imk4fmv = ias2b(ibuf,ic1,ic2-ic1+1)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-140,'bo',12)
         go to 990
@@ -557,6 +557,31 @@ C mk4 synch test parameter
          endif
       endif
       call fs_set_mk4sync_dflt(mk4sync_dflt)
+C mk4 decoder message terminator
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',18)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',18)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      if (ichcm_ch(ibuf,ic1,'return').eq.0.and.il.eq.6) then
+        mk4dec_fs = 13
+      else if (ichcm_ch(ibuf,ic1,'$').eq.0.and.il.eq.1) then
+        mk4dec_fs = ichar('$')
+      else if (ichcm_ch(ibuf,ic1,'%').eq.0.and.il.eq.1) then
+        mk4dec_fs = ichar('%')
+      else
+         call logit7ci(0,0,0,1,-140,'bo',18)
+         goto 990
+      endif
       return
 
  990  call fmpclose(idcb,ierr)
