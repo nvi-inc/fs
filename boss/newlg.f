@@ -350,6 +350,15 @@ c
          nch = nch + ib2as(mk4sync_dflt,ib,nch,z'8002')
       endif
 
+      nch=mcoma(ib,nch)
+      if(mk4dec_fs.eq.13) then
+         nch=ichmv_ch(ib,nch,'return')
+      else if(mk4dec_fs.eq.ichar('$')) then
+         nch=ichmv_ch(ib,nch,'$')
+      else if(mk4dec_fs.eq.ichar('%')) then
+         nch=ichmv_ch(ib,nch,'%')
+      endif
+
       call logit3(ib,nch-1,lsor)
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then

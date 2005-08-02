@@ -28,6 +28,14 @@ installed in any of the Mark III, Mark IV, or VLBA4 rack
 types, but this command will work decoder if it is installed
 with other rack types as well.
 
+The terminator used for sending transmissions to the decoder is is
+value specified in the equip.ctl control file on the 18th non-comment
+line.  Choices are: 'return' (0x0d), '$' (0x24), or '%' (0x25).  These
+are the three forms accepted by the decoder.  Use of '$' sign form is
+known to cause MATs on the bus to misbehave.  It is suspected that '%'
+will have the same problem.  The best choice is probably 'return', but
+it has not been tested extensively.
+
 Documentation for the Mark 4 Decoder commands can be found in Mark IV Memo #279.  Mark IV Memos can be found at
 ftp://web.haystack.mit.edu/pub/mark4/memos/memoindex.html
 

@@ -396,7 +396,8 @@ C
            call pchar(ibuf,nchar,10)
         else if(imode.eq.10) then
            nchar=nchar+1
-           call pchar(ibuf,nchar,ichar('$'))
+           call pchar(ibuf,nchar,mk4dec_fs)
+           m4dt=mk4dec_fs
         endif
         call fs_get_kecho(kecho)
         call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn)

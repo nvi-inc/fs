@@ -38,4 +38,6 @@ none    type of phase cal control (if3 or none)
 * met sensor type
 cdp     cdp or met3, use cdp if you don't have either
 * default mk4 form command synch test value
-  3
+  3     off or 0, 1, ..., 16
+*mk4 decoder tranmission terminator
+ return return, $, or %
