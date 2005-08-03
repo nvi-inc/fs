@@ -185,6 +185,6 @@ pgwindow(-0.5,16.5,0,39);
 
 $string="";
 $string=$opt_c if (defined($opt_c));
-pgtext(3,10,"$location Pcal Amplitude (Voltage %) -- $date $save_file $string");
+pgtext(3,10,"$location Pcal Amplitude (Voltage, 0.1%) -- $date $save_file $string");
 
 pgend;
