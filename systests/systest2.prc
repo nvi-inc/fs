@@ -10,7 +10,9 @@ rxall
 fmoutgps
 "comment out next command if you don't have a Mark IV decoder
 pcsample
+bbcmanx
 caltsys
+bbcagcx
 enddef
 define  stsample      00000000000x
 "comment out next command if you don't have a cable command

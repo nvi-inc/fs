@@ -92,7 +92,9 @@ rxall
 fmoutgps
 "comment out next command if you don't have a Mark IV decoder
 pcsample
+bbcmanx
 caltsys
+bbcagcx
 enddef
 define  stsample      00000000000x
 "comment out next command if you don't have a cable command
@@ -579,4 +581,39 @@ xdisp=on
 "done with pcalpowerb
 xdisp=off
 xlog=off
+enddef
+define  pcsample      00000000000x
+xlog=on
+pcalports=1,5
+xlog=off
+decode4=pcal usbx 10000 32
+!+1.5s
+decode4=pcal
+decode4=pcal usby 10000 32
+!+1.5s
+decode4=pcal
+xlog=on
+pcalports=4,8
+xlog=off
+decode4=pcal usbx 10000 32
+!+1.5s
+decode4=pcal
+decode4=pcal usby 10000 32
+!+1.5s
+decode4=pcal
+xlog=on
+pcalports=9,14
+xlog=off
+decode4=pcal usbx 10000 32
+!+1.5s
+decode4=pcal
+decode4=pcal usby 10000 32
+!+1.5s
+decode4=pcal
+enddef
+define  rapid         00000000000
+stsample@!,10s
+enddef
+define  overnite      00000000000
+onsample@!,5m
 enddef
