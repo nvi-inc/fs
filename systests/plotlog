@@ -150,7 +150,7 @@ if (defined($opt_h)) {
     print "fmout-gps/), and single tone per channel Mark IV decoder pcal data in log files\n";
     print "and generates time plots of the data, The time axis of all the plots is the\n";
     print "same. The data is plotted so that it fits entirely inside the boxes. Points\n";
-    print "that appear along the top line of a plot did not decode ($$$ for example).\n\n";
+    print "that appear along the top line of a plot did not decode (\$\$\$ for example).\n\n";
 
     print "The '1anw' switches can be used to select different IF arrangements for\n";
     print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
@@ -276,6 +276,7 @@ foreach $file (@ARGV) {
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
 #            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
             $rxcount{$fields[0]}++;
+	    $rxcmd=$cmd;
 	} elsif(/\/((gps-fmout)|(fmout-gps))\//i) {
             (undef,$cmd,@fields)=split('/|,');
             if($fields[0] =~ /($float_pattern)/) {
@@ -454,7 +455,7 @@ foreach $chan (sort keys %rxcount) {
 	$amp[$j]=$rx{$chan}[$j];
 	$tim[$j]=$rxtime{$chan}[$j];
     }
-    $label="$cmd $chan";
+    $label="$rxcmd $chan";
 #    print "$chan\n";
     &vu(\@tim,\@amp,$label);
 }	
