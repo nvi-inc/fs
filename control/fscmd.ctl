@@ -257,6 +257,7 @@ user_device  qkr 5102 01 FFFFFFFFF
 pcalform     qkr 5201 01 FFFFFFFFF
 pcald        qkr 5301 01 217FFFFFF
 pcalports    qkr 5401 01 254FFFFFF
+4pcalport    qkr 5401 01 FFFFFFFFF
 save_file    qkr 5501 01 FFFFFFFFF
 *k4 commands
 k4ib         qkr 5601 01 FFFFFFFFF
