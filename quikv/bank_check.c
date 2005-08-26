@@ -154,9 +154,9 @@ parse:
       increment=FALSE;
       if((itask==8 && ipass <=2) || 
 	 ((shm_addr->scan_name.duration > 0) &&
-	  (rtime_mon.seconds.seconds < shm_addr->scan_name.duration+5.0 ||
+	  (rtime_mon.seconds.seconds < shm_addr->scan_name.duration+200.0 ||
 	  (shm_addr->scan_name.continuous > 0 &&
-	   rtime_mon.seconds.seconds < shm_addr->scan_name.continuous+5.0)) &&
+	   rtime_mon.seconds.seconds < shm_addr->scan_name.continuous+200.0)) &&
 	  ((shm_addr->equip.drive[shm_addr->select] == MK5 &&
 	   shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS)||
 	  shm_addr->equip.drive[shm_addr->select] != MK5) )){
