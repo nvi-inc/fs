@@ -109,6 +109,7 @@ C   Save current schedule position.
 C
 C  2.  Main search loop.
 C
+      nch=0
       ir2 = icurln-1
       ierr = 0
       if (icurln.gt.0) idum = fmpsetline(idcbsk,ierr,ir2)
@@ -117,6 +118,14 @@ C
       call char2low(ibc)
       if (ierr.lt.0) goto 500
       if(ilen.ge.0) goto 210
+        if(nch.ne.0) then
+           nch = ichmv_ch(lm1,nch0,'last event in schedule    ')
+           call put_cons(lm1,nch-1)
+           if(iwait.ne.0) then
+              call put_buf(ipinsnp(1),lm1,-(nch-1),'  ','  ')
+              ipinsnp(2)=ipinsnp(2)+1
+           endif
+        endif
         call putcon_ch('end of schedule')
         if(iwait.ne.0) then
            idum=ichmv_ch(ibuf,1,'end of schedule')-1
