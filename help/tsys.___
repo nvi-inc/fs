@@ -103,7 +103,8 @@ larger than 999999.9 is displayed as dollar signs, $$$$$$$$.
 For Mark III/IV and LBA4 racks the detector mnemonics for the
 VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), or a digit 4-7 for other detectors.
+(upper), l (lower), a digit 3-7 for other detectors or 'x' for
+unknown.
 
 For station dependent detectors, the tsys5 and tsys6 commands
 are used to match the detectors to the corresponding caltemp5

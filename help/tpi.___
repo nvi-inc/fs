@@ -33,6 +33,7 @@ actual measurement from being displayed. An overflow value,
 For Mark III/IV and LBA4 racks the detector mnemonics for the
 VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), or a digit 4-7 for other detectors.
+(upper), l (lower), a digit 3-7 for other detectors or 'x' for
+unknown.
 
 It is assumed the noise calibration signal is off.

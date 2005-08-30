@@ -33,7 +33,8 @@ just displayed in order: u5, u6.
 For Mark III/IV and LBA4 racks the detector mnemonics for the
 VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), or a digit 4-7 for other detectors.
+(upper), l (lower), a digit 3-7 for other detectors or 'x' for
+unknown.
 
 The caltemp5/6 commands are used for defining the calibration
 temperatures used with station dependent detectors u5 and u6.

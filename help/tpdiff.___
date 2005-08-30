@@ -33,7 +33,8 @@ overflow value, 65535, is displayed as dollar signs, $$$$$.
 For Mark III/IV and LBA4 racks the detector mnemonics for the
 VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), or a digit 4-7 for other detectors.
+(upper), l (lower), a digit 3-7 for other detectors or 'x' for
+unknown.
 
 This command forms the difference between tpical and tpi
 measurements for use in the tsys/5/6 command.
