@@ -1,4 +1,7 @@
-int 
+/* AEM 20041125 add string.h */
+#include <string.h>
+
+int
 #ifdef F2C
 printer_
 #else
@@ -27,7 +30,7 @@ char   *fname, *labels, *orien;
    951002 nrv Use "recode latin1:ibmpc < file | lpr" for the Linux magic filter.
    951016 nrv If "orien" is non-blank, use the scripts, otherwise use
               the recode command.
-   960226 nrv Add separate argument for labels. 
+   960226 nrv Add separate argument for labels.
 
 */
 
@@ -47,7 +50,7 @@ char   *fname, *labels, *orien;
           strcat(command," ");
           strcat(command,fname);
         }
-      } 
+      }
       else { /* text mode */
         if (strncmp(orien," ",1) == 0) { /* no script use recode */
           strcpy(command,"recode latin1:ibmpc < ");
@@ -64,6 +67,6 @@ char   *fname, *labels, *orien;
 /* call system with command line */
 
 /*      printf("printer command string: %s\n",command); */
-      return(system(command)); 
+      return(system(command));
 
 }

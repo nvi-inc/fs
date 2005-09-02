@@ -48,8 +48,8 @@ C
 C  LOCAL:
       real*8 DAS2B,R
       integer*2 ldum(2)
-      integer ich,nch,ic1,ic2,idumy,iax,i,id
-      integer jchar,ichmv_ch,ichmv,ias2b ! function
+      integer ich,nch,ic1,ic2,idumy,iax,i
+      integer jchar,ichmv_ch,ichmv ! function
 C
 C
 C  1. Start the unpacking with the first character of the buffer.

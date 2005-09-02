@@ -2,6 +2,7 @@
       implicit none
       include 'hardware.ftni'
       logical kin2net
+! 2005Jul28  JMGipson.  Added "disk_record" after disk_record_on
 
       character*5 lmid          !for, or rev
       character*3 lpre          !st, or st1
@@ -21,6 +22,7 @@
             write(lufile,'(a)') "in2net=on"
         else
            write(luFile,'("disk_record=on")')
+           write(luFile,'("disk_record")')
         endif
       else if(kk4) then
         write(luFile,"(a,'=record')") lpre(1:npre)       !stX=record, where X is optional "1" or "2"

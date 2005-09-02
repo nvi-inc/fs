@@ -26,9 +26,7 @@ C Output
       integer ivexnum
 
 C Local
-      integer*2 ibuf
-      integer fvex_open,ptr_ch,fget_literal,il
-      character*128 scan_id
+      integer fvex_open,ptr_ch
       integer i,trimlen
 
       i=trimlen(cbuf)

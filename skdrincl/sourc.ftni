@@ -1,9 +1,9 @@
-C     SOURCE INFORMATION COMMON BLOCK 
+C     SOURCE INFORMATION COMMON BLOCK
 C 970114 nrv Change dimension of LSORNA to use MAX_SORLEN
 C 990606 nrv Added liauna
 C 001108 nrv Add nsorlen array to hold length of source names.
-C 
-      double precision SORP50,SORPDA,SATP50,SATDY 
+C
+      double precision SORP50,SORPDA,SATP50,SATDY
       real flux
       integer nsourc,nsatel,nceles,nflux,isaty,nsorlen
       integer*2 lsorna,liauna
@@ -27,7 +27,7 @@ c
       COMMON/SOURC_CH/
      .       cfltype(max_band,max_sor),
      .       sordefnames(max_sor)
-C 
+C
 C  NSOURC - number of sources selected
 C  LSORNA - source IAU names, up to 8 chars *** now up to 12 char
 C  NCELES - number of celestial sources selected
@@ -36,15 +36,15 @@ C  SORPDA - positions, ra and dec of date, radians
 C  flux   - flux density by frequency band for each source
 C  nflux  - if cfltype=B, total number of baseline/flux entries
 C           if cfltype=M, number of model components
-C 
+C
 C  NSATEL - number of stallites selected
 C  SATP50 - orbital elements for staellites:
-C         - (1) orbital inclination 
+C         - (1) orbital inclination
 C         - (2) orbital eccentricity
 C         - (3) arguement of preigee
 C         - (4) right ascending node
 C         - (5) mean anomaly
 C         - (6) semimajor axis
 C         - (7) orbital motion
-C  ISATY  - epoch year for satellite orbital elements 
+C  ISATY  - epoch year for satellite orbital elements
 C  SATDY  - day and fraction for satellite epoch

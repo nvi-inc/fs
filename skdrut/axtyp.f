@@ -17,8 +17,6 @@ C                          2=convert code-->name
 C  Output
 C     Either laxis or iaxis is output, depending on ix
 C  Local
-      integer idum
-
 
 C      1. Name --> code
  

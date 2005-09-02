@@ -7,11 +7,11 @@
  * 970228 nrv Keep counting up labels every time we're called.
  * 970827 nrv Remove nlaser, add icol, irow to call.
  * 2004Jul20 JMGipson added dymo label type
- *
+ * 2005Jul25 JMGipson modified to add showpage at the end of each label.
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
  *
-	Last change:  JG   20 Jul 2004    4:28 pm
+	Last change:  JG    4 Aug 2005    2:18 pm
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -88,8 +88,8 @@ int barsize(char *,char *,unsigned,unsigned,unsigned,Boolean,int);
   
 void bar_code_labels(void);
 
-void make_pslabel(FILE **,char *,char *,char *,char *,
-int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,float[],int*,int*,int*);
+void make_pslabel(FILE **,char *,char *,char *,char *, char *,
+int*,int*,int*,int*,int*,int*,int*,int*,int*,float[],int*,int*,int*);
 
 /* Make one label */
 void 
@@ -99,8 +99,9 @@ make_pslabel__
 make_pslabel
 #endif
 (FILE **fp, char * station_name, char * station_code, char * expt_name, char * clabtyp,
+char * ctape_vsn,
 int *start_year, int *start_day, int *start_hour, int *start_min,
-int *end_year, int *end_day,   int *end_hour,   int *end_min, int *tape_number,
+int *end_year, int *end_day,   int *end_hour,   int *end_min,
 int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
 {
   char string[11];
@@ -197,7 +198,9 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
   if (ifont == 10) y-=12;
   if (ifont ==  8) y-=8;
   fprintf(*fp,"%d %d moveto\n",x,y);
-  fprintf(*fp,"(Tape %d) show\n",*tape_number);
+/*  fprintf(*fp,"(Tape %d) show\n",*tape_number);
+*/
+  fprintf(*fp,"(%-8.8s) show\n",ctape_vsn);
   fprintf(*fp,"%d %d moveto\n",x+rightoff,y);
   fprintf(*fp,"(%c%3.3d-%2.2d%2.2d ) show\n", station_code[0], *start_day,
   *start_hour, *start_min);
@@ -217,6 +220,10 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
       }
    temp >>= 1;
       }
+
+   if(!strncmp(clabtyp, "DYMO",4)){
+    fprintf(*fp,"showpage\n");}
+
 
 }
 

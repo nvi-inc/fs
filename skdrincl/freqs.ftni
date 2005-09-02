@@ -196,6 +196,8 @@ C
      .       lnahdpos(4,max_stn,max_frq),
      .       ls2data(4,max_stn,max_frq)
 
+      character*8 cnahdpos(max_stn,max_frq)
+      equivalence (lnahdpos,cnahdpos)
       character*8 cprefix(max_Stn,max_frq)
       equivalence (cprefix,lprefix)
       character*2 cnetsb(max_chan,max_stn,max_frq)

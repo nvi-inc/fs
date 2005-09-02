@@ -60,7 +60,8 @@ C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
-     .tpid_prompt,tpid_parm
+     .tpid_prompt,tpid_parm,
+     >ldisk2file_dir,ldisk2file_node,ldisk2file_userid,ldisk2file_pass
 c
         character*2 cpaper_size
 
@@ -96,7 +97,8 @@ C
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
      >    cpaper_size,coption(3),ctextname,cversion,
-     >    tpid_prompt,tpid_parm
+     >    tpid_prompt,tpid_parm,
+     >ldisk2file_dir,ldisk2file_node,ldisk2file_userid,ldisk2file_pass
 !
 C
 C  IBUF   - buffer for file reads, writes

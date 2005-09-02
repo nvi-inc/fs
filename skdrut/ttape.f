@@ -26,12 +26,14 @@ C  LOCAL
       integer*2 LKEYWD(12)
       integer ikey_len,ich,ic1,ic2,nch,i,istn
       integer ival,idum,icode,ias2b
-      integer i2long,igtst2,ichmv,jchar
+      integer i2long,igtst2,ichmv
       logical kdefault,ks2,kk4
       character*24 ckeywd
       equivalence (lkeywd,ckeywd)
       character*6 cTapeType(max_stn)
       character*6 cTapeDens(max_stn)
+      character*8 cstrec_old(max_stn)
+      save cstrec_old
 
       integer ilist_len
       parameter (ilist_len=5)
@@ -138,7 +140,7 @@ C
         NCH = IC2-IC1+1
         ckeywd=" "
         idum = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
-        IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
+        IF  (ckeywd .eq. "_") THEN  !all stations
           istn=0
         else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
           write(luscn,9901) lkeywd(1)
@@ -180,7 +182,16 @@ C       Station ID is valid. Check tape type now.
               write(luscn,'("  Valid types: ",10a)') (list(i),i=1,5)
               return
             else if(ikey .eq. 4 .or. ikey .eq. 5) then
-               cstrec(istn) = "Mark5A"
+               if(istn .eq. 0) then
+                  do istn=1,nstatn
+                     cstrec_old(istn)=cstrec(istn)
+                     cstrec(istn)="Mark5A"
+                  end do
+                  istn=0
+               else
+                  cstrec_old(istn)=cstrec(istn)
+                  cstrec(istn) = "Mark5A"
+               endif
             endif
             kdefault = .false.
           else ! use defaults for type and density
@@ -270,12 +281,7 @@ C   3. Now set parameters in common.
               k4sp = speed(1,i) ! for code 1
               maxtap(i)=ival*k4sp*60.d0 ! convert to meters
             else
-              if(cstrec(i) .eq. "Mark5A") then
-                do icode=1,ncodes
-                  bitdens(i,icode)=1.d9   !Very high density means we don't need to worry about it.
-                end do
-                maxtap(i)=10000         !set to 10 thousand feet.
-              else if (kdefault) then
+              if (kdefault) then
                 maxtap(i)=maxtap(1)
                 do icode=1,NCODES
                   bitdens(i,icode)=bitdens(1,icode) ! code 1 only
@@ -309,6 +315,16 @@ C   3. Now set parameters in common.
                     bitdens(i,icode)=33333
                   enddo
                 endif
+                if(cstrec(i) .eq. "Mark5A") then
+                  cstrec(i)=cstrec_old(i)          !restore the tape type
+                endif
+              else if(cstrec(i) .eq. "Mark5A") then
+                do icode=1,ncodes
+                  bitdens(i,icode)=1.d7   !Very high density means we don't need to worry about it.
+                end do
+                maxtap(i)=1.d6         !set to 10 thousand feet.
+
+
               endif
             endif
           endif ! this station

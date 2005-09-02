@@ -124,7 +124,7 @@ C
               write(luscn,9910) cstnna(is),nheadstack(is),
      .        lcode(ic),nhstack(is,ic)
 9910          format('GNPAS10 - Station ',a,' has only ',i1,
-     .        'headstack but code ',a2,' uses ',i1,' headstacks.')
+     .        ' headstack but code ',a2,' uses ',i1,' headstacks.')
             endif ! can't do it
             if (ipmax(1).ne.npassf(is,ic)) then ! inconsistent
               ierr=1

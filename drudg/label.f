@@ -17,6 +17,11 @@ C                1 or 3 close file
       integer inew ! 1 to start a new ps barcode file
 C OUTPUT: none
 
+! 2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character
+!            tape_label ctape_num. This is so we can use this
+!            for VSN#s.
+
+
 !fucntions
       INTEGER TRIMLEN
       integer copen
@@ -29,6 +34,7 @@ C LOCAL:
       integer IFT(MAX_STN),IPAS(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
       integer iob,ilabrowin,ilabcolin
       LOGICAL   KEX,ks2
+      character*8 ctape_num
 
 
 C IYR, MON, IDA, IHR, iMIN, IDUR, ICAL, IDLE,
@@ -121,6 +127,8 @@ C 000705 nrv Use standard KNEWT for S2 also.
 !
 ! 2005Mar07  JMGipson.  Fixed problem with last label. Previously ending time was
 !            that of penultimate scan. Now it is time of last scan.
+! 2005Jul25  JMGipson. Modifed dymo printer to always be row1, col1.
+!            Also modified psbar (which prints the labels) to put showpage at the end of each label.
 !
 
 C 1. First get set up with schedule or SNAP file.
@@ -443,11 +451,13 @@ C
 
                 if(clabtyp .eq. "DYMO") then
                   ilabrow=1
+                  ilabcol=1
                 endif
 
+                write(ctape_num,'("Tape ",i2)') ntape
                 call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
-     >           cexper,clabtyp,
-     .          ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
+     >           cexper,clabtyp,ctape_num,
+     .          ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,
      .          inew,rlabsize,ilabrow,ilabcol,inewpage)
                 ilabcol=ilabcol+1
                 if (ilabcol.gt.rlabsize(4)) then

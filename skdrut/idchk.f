@@ -1,4 +1,4 @@
-      SUBROUTINE idchk(inum,istnid,luscn)
+      SUBROUTINE idchk(inum,cstnid,luscn)
 C
 C  This subroutine checks for identical station id characters and
 C  replaces the second with the next character alphabetically.
@@ -19,43 +19,32 @@ C
 C  INPUT:
 C
       integer luscn,inum
-      character istnid(max_stn)
+      character cstnid(max_stn)
+! function
+      integer iwhere_in_string_list
+
 C     inum - number of entries in array
-C     istnid - array with entries
+C     cstnid - array with entries
 C
 C   SUBROUTINES
 C     CALLED BY: AWRST
 C     CALLED: CHAR2HOL,HOL2CHAR
 C
 C  LOCAL VARIABLES
-      LOGICAL lchange
-      INTEGER j
-      integer*2 lch 
-      character xch
-C
-      lchange = .false.
-      xch = istnid(inum)
-      j = 1
-      do while(j.lt.inum)
-        if (istnid(j).eq.istnid(inum)) then
-          lchange = .true.
-          if (istnid(inum).eq.'Z') then
-            istnid(inum) = 'A'
-          else
-            call char2hol(istnid(inum),lch,1,1)
-            lch = lch + 1
-            call hol2char(lch,1,1,istnid(inum))
-          end if
-          j = 0
-        end if
-        j = j + 1
-      end do
-      if (lchange) then
-C*** Commented out 970514
-C       write(luscn,9100) xch,istnid(inum)
-9100    format(' Changing id code from ',A,' to ',A,' ') 
-      end if
+      integer iwhere
 
-C
+      if(inum .le. 1) then
+        return
+      else
+        iwhere=1
+! search for match among earlier entries
+        do while(iwhere .ne. 0)
+          iwhere=iwhere_in_string_list(cstnid,inum-1,cstnid(inum))
+          if(iwhere .ne. 0) then                        !A match.
+             cstnid(inum)=char(ichar(cstnid(inum))+1)   !Change the 1 char ID.
+          endif
+        end do
+      endif
+
       RETURN
       END

@@ -14,4 +14,4 @@
       common /iroll_def_cmn/num_rolls,nbrl_steps,nbrl_defs,iroll_type,
      >  ibrl_roll
 
-      
+

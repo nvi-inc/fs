@@ -31,6 +31,7 @@ C Input:
 
 C
 C LOCAL:
+      character*8 cvsn_in
       double precision R,D
       integer*2 lstn
       character*2 cstn
@@ -50,8 +51,9 @@ C LOCAL:
 
       character*2 cbnd(2)   !used in count_freq_tracks
       integer     nbnd      ! ditto
-
       logical kallowpig
+      character*39 clabline  !used to hold label description,e.g. 6= Make Postscript label
+      character*39 clabprint !used to hold print line
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -198,15 +200,15 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 C
 C Initialize some things.
 !      iVerMajor_FS = 09
-!      iVerMinor_FS = 07
-!      iVerPatch_FS = 08
+!      iVerMinor_FS = 08
+!      iVerPatch_FS = 01
       iVerMajor_FS = VERSION
       iVerMinor_FS = SUBLEVEL
       iVerPatch_FS = PATCHLEVEL
 
 
 C Initialize the version date.
-      cversion = '050729'
+      cversion = '050902'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -272,6 +274,8 @@ C***********************************************************
      .           rlabsize,cepoch,coption,luscn,
      .           dr_rack_type,dr_rec1_type,dr_rec2_type,kequip_over,
      .           tpid_prompt,itpid_period,tpid_parm,
+     >           ldisk2file_dir,ldisk2file_node,ldisk2file_userid,
+     >           ldisk2file_pass,
      >           cdum,cdum,cdum,cdum,cdum)      !these are mysql values not used in drudg.
       kdr_type = .not.
      .   (dr_rack_type.eq.'unknown'.and.
@@ -317,22 +321,21 @@ C  Initialize lots of things in the common blocks
 ! Check for log file processing
 201   continue
       nch1=trimlen(cfile)
+      nch2=trimlen(cstnin)
+      nch3=trimlen(command)
 ! Check for label.
-      cexpna=cfile
-      call capitalize(cexpna)
-      if(index(cexpna,".LOG") .ne. 0) then
-         call lablog(cfile,ierr)
+      if(index(cfile,".log") .ne. 0) then
+         cvsn_in=" "
+         if(nch2 .ne. 0) cvsn_in=cstnin
+         call lablog(cfile,cvsn_in,ierr)
          stop
       endif
 
-      nch2=trimlen(cstnin)
-      nch3=trimlen(command)
       cexpna = ' '
 C   Check for non-interactive mode.
       if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
 
 C 3. Get the schedule file name
-
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
          if (kskdfile.and.kdrgfile) then ! reinitialize on 3rd time
@@ -340,20 +343,20 @@ C 3. Get the schedule file name
            kdrgfile=.false.
          endif
 C       Opening message
-        WRITE(LUSCN,9020) cversion
+        WRITE(LUSCN,'(a)')
+     >   ' DRUDG: Experiment Preparation Drudge Work (NRV & JMGipson '//
+     >    cversion
 	write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
-     >   iverMinor_fs,iverpatch_fs
-9020    FORMAT(/' DRUDG: Experiment Preparation Drudge Work ',
-     .  '(NRV & JMGipson ',a6,')')
+     >     iverMinor_fs,iverpatch_fs
+
         nch = trimlen(cfile)
         if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
           if (kbatch) goto 990
-          write(luscn,9920)
-9920      format(' Enter schedule file name (.skd or .drg default,'/
-     .    ' <return> if using a .snp file, :: to quit) ? ',$)
+          write(luscn,'(a)')
+     >     " Enter schedule file name (.skd or .drg default <return> "
+          write(luscn,'(a,$)') "if using a .snp file, :: to quit) ? "
           CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
         else ! command line file name
-!          call char2hol(cfile,ibuf,1,nch)
           cbuf=cfile
         endif 
       endif
@@ -404,16 +407,15 @@ C       Opening message
         cexpna=lskdfi(ixp:) ! exp name is root of file name
         IX = INDEX(cexpna,'.')-1
         if (ix.gt.6) then ! too many letters
-          write(luscn,9022)
-9022      format(' ERROR: Schedule name is too long. Please ',
-     .    'rename the file '/'to have 6 characters or less before the ',
-     .    'file extension.')
+          write(luscn,'(a)')
+     >      " ERROR: Schedule name is too long. Please rename the file "
+          write(luscn,'(a)')
+     >       "to have 6 characters or less before the file extension."
           goto 990
         endif
         kskd = .true.
       else ! none
-        write(luscn,9021)
-9021      format(' Enter schedule name (e.g. ca036): ',$)
+        write(luscn,'(" Enter schedule name (e.g. ca036): ",$)')
         read(luusr,'(A)') cbuf
         l = trimlen(cbuf)
         if (l.gt.0) cexpna = cbuf(1:l)
@@ -514,7 +516,6 @@ C  Check for sufficient information
           ierr=-1
         GOTO 200
 C
-C
 C     5. Ask for the station(s) to be processed.  These will be done
 C        in the outer loop.
 C
@@ -602,6 +603,22 @@ C        on stations and schedules, respectively.  Within the loop,
 C        schedule the appropriate segment.
 C
 700   if (.not.kbatch) then
+! Several options for label line.
+         clabprint=" "
+         if(km5A) then
+           clabline=" "
+         else
+           if (clabtyp.eq.'POSTSCRIPT') then
+             clabline=  ' 6 = Make PostScript label file       '
+             clabprint= ' 61= Print PostScript label file'
+           else if (clabtyp.eq.'DYMO') then
+             clabline=  ' 6 = Make DYMO label file             '
+             clabprint= ' 61= Print DYMO label file'
+           else
+             clabline=  ' 6 = Make tape labels                 '
+           endif
+         endif
+
       if (kskd) then !schedule file
         l=trimlen(lskdfi)
         if (istn.gt.0) then !one station
@@ -715,25 +732,13 @@ C  Write warning messages if control file and schedule do not agree.
             write(luscn,'()')
           endif
 
-            if (clabtyp.eq.'POSTSCRIPT') then
-              write(luscn,9173)
-9173          FORMAT(
-     .        ' 6 = Make PostScript label file       ',
-     .        ' 12 = Make procedures (.PRC) '/,
-     .        ' 61= Print PostScript label file      ')
-            else if (clabtyp.eq.'DYMO') then
-              write(luscn,9273)
-9273          FORMAT(
-     .        ' 6 = Make DYMO label file             ',
-     .        ' 12 = Make procedures (.PRC) '/,
-     .        ' 61= Print DYMO label file      ')
-            else
-              write(luscn,9373)
-9373          FORMAT(
-     .        ' 6 = Make tape labels                 ',
-     .        ' 12 = Make procedures (.PRC) ')
-            endif
-            if(kallowpig) then
+          write(luscn,'(a,"12 = Make procedures (.PRC) ")')
+     >       clabline
+          if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
+              write(luscn,'(a)') clabprint
+          endif
+
+          if(kallowpig) then
                 write(luscn,'(38x,a)')
      >        ' 13 = Toggle Mk5A piggyback mode '
                 write(luscn,'(38x,a)')
@@ -746,14 +751,12 @@ C  Write warning messages if control file and schedule do not agree.
             endif
 
             if (kdrg_infile.or.kvex) then
-              write(luscn,"(' 51 = Print PI cover letter')")
+              write(luscn,'(" 51 = Print PI cover letter")')
             else ! .skd file
-              write(luscn,"(' 51 = Print notes file (.TXT)')")
+              write(luscn,'(" 51 = Print notes file (.TXT)")')
             endif ! .drg/.skd
             write(luscn,'(a)') ' 20 = Make fake lvex'
-!            write(luscn,'(a)') ' 62 = Print labels using log file'
             write(luscn,'(a)') ' 0  = Done with DRUDG '
-!            write(luscn,'(a)') '20 = Make fake lvex  '
             write(luscn,'(a, $)') ' ?'
 C         endif ! known/unknown equipment
         else ! SNAP file
@@ -764,33 +767,15 @@ C         endif ! known/unknown equipment
      .    '  7 = Re-specify stations'/
      .    ' 5 = Print summary of .SNP file        ',
      .    '  8 = Get a new schedule file')
-          if (clabtyp.eq.'POSTSCRIPT') then
-            write(luscn,9171)
-9171        format(
-     .    ' 6 = Make PostScript label file        ',
-     .    '  9 = Change output destination, format'/,
-     .    ' 61= Print PostScript label file       ',
-     .    '                         ')
-          else if (clabtyp.eq.'DYMO') then
-            write(luscn,9271)
-9271        format(
-     .    ' 6 = Make DYMO label file        ',
-     .    '  9 = Change output destination, format'/,
-     .    ' 61= Print PostScript label file       ',
-     .    '                         ')
-          else
-            write(luscn,9371)
-9371        format(
-     .      ' 6 = Make tape labels                  ',
-     .      '  9 = Change output destination, format'/,
-     .      '                                       ',
-C    .      ' 11 = Show/set equipment type')
-     .      '                         ')
+
+          write(luscn,'(a," 9 = Change output destination, format")')
+     >         clabline
+          if (clabtyp.eq.'POSTSCRIPT'.or.clabtyp .eq. 'DYMO') then
+              write(luscn,'(a)') clabprint
           endif
-          write(luscn,9372)
-9372      format(
-     .    ' 0 = Done with DRUDG           ',
-     .   /' ? ',$)
+
+          write(luscn,'(39x," 11 = Show/set equipment type",/)')
+          write(luscn,'(" 0 = Done with DRUDG           ",/,"?",$)')
         endif
       IFUNC = -1
       READ(LUUSR,*,ERR=700) IFUNC
@@ -970,20 +955,21 @@ C             CALL PROCS(21) ! VLBA4+VLBA
             else
               pcode = 0
             end if
-            cinname = snpname
+            if(.not.km5a) then
+              cinname = snpname
               klab = .true.
               call label(pcode,kskd,cr1,cr2,cr3,cr4,inew)
               klab = .false.
-          ELSE IF (IFUNC.EQ.61) THEN
-              if (clabtyp.eq.'POSTSCRIPT'.and.i.eq.1) then ! only first station
+            endif
+          ELSE IF (IFUNC.EQ.61.and..not.km5a) then     !only print labels for tape.
+              if ((clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO')
+     >         .and.i.eq.1) then ! only first station
                 klab = .true.
                 ierr=cclose(fileptr)
                 call prtmp(0)
                 inew=1 ! reset flag for new file
                 klab = .false.
               endif
-          else if(ifunc .eq. 62) then
-!             call lablog(ierr)
           ELSE IF (IFUNC.EQ.11) THEN
               call equip_type(cr1)
               cinname = snpname

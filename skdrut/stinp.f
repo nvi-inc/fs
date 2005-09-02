@@ -20,7 +20,7 @@ C
       include '../skdrincl/freqs.ftni'
 C
 ! functions
-      integer igtba,ichmv_ch ! functions
+      integer igtba              ! functions
       integer iwhere_in_string_list
       integer trimlen
 
@@ -49,7 +49,7 @@ C  LOCAL:
 
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band)
-      integer idummy,ib,ii,nco,nhz,i,idum
+      integer ib,ii,nco,nhz,i,idum
       integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(4)
 
       character*8 crack,crec1,crec2
@@ -298,8 +298,7 @@ C
 
         j=8
         CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
-     .  nstack,maxt,nr,ls2sp,
-     .  lb,sefd,j,par,npar,lrack,lrec1,lrec2)
+     >   nstack,maxt,nr,ls2sp,lb,sefd,j,par,npar,lrack,lrec1,lrec2)
         if(ierr .ne. 0) goto 910
 
         i=0
@@ -318,7 +317,6 @@ C
           cterid(i)=cidt
         endif
 C  Got a match. Initialize names.
-!        IDUMMY = ICHMV(LTERNA(1,I),1,LNAME,1,8)
         cterna(i)=cname
 
         cstrack(i)="unknown"
@@ -339,13 +337,13 @@ C       then save the second recorder field as the S2 mode.
          if(nr .eq. 2) nr=1
         else
           if (crec1 .eq. 'S2')then
-!            idummy = ichmv(ls2mode(1,i,1),1,lrec2,1,16) ! S2 mode, code 1
              cs2mode(i,1)=crec2
           else
             cstrec2(i)=crec2
           endif
         endif
-        idummy = ichmv_ch(lfirstrec(i),1,'1 ') ! starting recorder default
+        cfirstrec(i)="1 "
+
 C       Now set the S2 and K4 switches depending on the recorder type.
         ks2=cstrec(i).eq."S2"
         kk4=cstrec(i).eq."K4"

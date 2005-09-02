@@ -7405,3 +7405,46 @@ Version 9.7.7 050216
            updated for plotlog
 
 Version 9.8.0 050731
+
+050801 weh incom/equip.f
+           st.default/control/equip.ctl
+           boss/newlg.f
+           help/decode4.___
+050802 weh matcn/matcm.i
+           matcn/matcn.f
+           matcn/iat.f
+           support differtn M4 decoder mesage terminators
+
+050802 weh systests/systests.txt
+           correct typos
+
+050803 weh systests/pcalamp
+           correct vertical scale in title
+
+050806 weh systests/systests.prc
+           systests/systest2.prc
+           add missing bbcmax/bbcagcx in onsample
+
+050806 weh systests/plotlog
+           fix receiver command display
+
+050824 weh control/fscmd.ctl
+           add 4pcalports commands
+
+050826 weh quikv/bank_check.c
+           increase bank change margin to 200 seconds
+
+050830 weh boss/stat.f
+           add last even in schedule line
+
+050830 weh help/tpi.___
+           help/tpical.___
+           help/tpzero.___
+           help/caltemp.___
+           help/tsys.___
+           help/tpdiff.___
+           help/tpicd.e__
+           corrected Mark III/IV VC detector second character range to 3-7
+
+Version 9.8.1 050902
+

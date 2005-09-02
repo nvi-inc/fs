@@ -27,7 +27,7 @@ C  LOCAL:
       integer*2 LNA(4)
       character*8 cna
       equivalence (lna,cna)
-      integer idum,ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
+      integer ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan),ir
       integer*2 lc,lsg,lm(8),lid,lin,ls
       character*2 cs,cin
@@ -43,7 +43,10 @@ C  LOCAL:
       real f2,vb,rbbc,srate
       double precision f1,f
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
-      integer ichmv_ch,ias2b,ichcm_ch,ichmv,igtfr,igtst
+      character*4 cbar(max_stn),cfmt(max_stn)
+      equivalence (cbar,lbar),(cfmt,lfmt)
+
+      integer ias2b,igtfr,igtst
 
       integer isb,ibit,ipass,ihd,ival
       integer iptr
@@ -117,7 +120,7 @@ C
         itype=5
         CALL UNPBAR(IBUF(2),ilen2,IERR,lc,lst,ns,lbar)
       else if(lchar .eq. "D") then
-        itype=5
+        itype=6
         CALL UNPFMT(IBUF(2),ilen2,IERR,lc,lst,ns,lfmt)
       endif
       call hol2upper(lc,2) ! uppercase frequency code
@@ -168,10 +171,11 @@ C
 C         All listed Mk3 frequencies are for USB recording. 
 C         Any LSB to be recorded is specified in track assignments,
 C         i.e. for mode A and mode B&E.
-          idum = ichmv_ch(lnetsb(icx,is,icode),1,'U') 
+!          idum = ichmv_ch(lnetsb(icx,is,icode),1,'U')
 C         Initialize lmode to blanks.
 !          call ifill(lmode(1,is,icode),1,16,oblank)
 !          idum = ichmv(LMODE(1,is,ICODE),1,LM,1,16) ! recording mode
+          cnetsb(icx,is,icode)="U"
           cmode(is,icode)=cm
 
 C         This should be "VLBA" for NDR, otherwise it's DR. drudg will
@@ -402,9 +406,12 @@ C 6. This section for the barrel roll line.
 9401          format('FRINP06 - Station ',a,' not selected. ',
      .        'Barrel roll for this station ignored.')
             else ! save it
-              idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
-              if (ichcm_ch(lbarrel(1,i,icode),1,"8").eq.0) ir=1
-              if (ichcm_ch(lbarrel(1,i,icode),1,"16").eq.0) ir=2
+!              idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
+!              if (ichcm_ch(lbarrel(1,i,icode),1,"8").eq.0) ir=1
+!              if (ichcm_ch(lbarrel(1,i,icode),1,"16").eq.0) ir=2
+              cbarrel(i,icode)=cbar(is)
+              if(cbarrel(i,icode)(1:1) .eq. "8") ir=1
+              if(cbarrel(i,icode)(1:2) .eq. "16") ir=2
               if (ir.eq.1.or.ir.eq.2) then ! fill roll table
                 iroll_inc_period(i,icode) = ircan_inc(ir)
                 iroll_reinit_period(i,icode) = ircan_reinit(ir)
@@ -429,8 +436,10 @@ C 7. This section for the recording format line.
 9402          format('FRINP07 - Station ',a,' not selected. ',
      .        'Recording format for this station ignored.')
             else ! save it
-              if (ichcm_ch(lfmt(1,is),1,'N').eq.0) then ! force non-data replacement
-                idum = ichmv_ch(LMFMT(1,i,ICODE),1,'M') ! recording format
+!             if(ichcm_ch(lfmt(1,is),1,'N').eq.0) then ! force non-data replacement
+!                idum = ichmv_ch(LMFMT(1,i,ICODE),1,'M') ! recording format
+              if (cfmt(is)(1:1) .eq. "N") then
+                cmfmt(i,icode)(1:1)="M"
               endif
             endif
 C       RESet bit density depending on the recording format.

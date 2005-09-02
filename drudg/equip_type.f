@@ -153,7 +153,7 @@ C 2. Interactive input
           enddo
           write(luscn,9023)
 9023      format('|  0=no change|  0=no change|  0=no change|'/
-     .       ' Press <return> or type 0 0 0 0 for no change,'/
+     .       ' Press <return> or type 0 for no change,'
      .       ' else type <rack> <rec1> <rec2> <start>'/ 
      .       '   ********************************************',
      .       '***********************'/

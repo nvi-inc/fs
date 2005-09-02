@@ -1,4 +1,4 @@
-File: /usr2/fs-9.8.0/misc/fs9800up.txt  Version: 1.0 Date: 050731
+File: /usr2/fs-9.8.1/misc/fs9801up.txt  Version: 1.3 Date: 050902
 
 I. Introduction
 
@@ -13,22 +13,25 @@ Please print this notice and read it carefully before installing the
 new version.
 
 This version is intended for all stations.  However, it is a
-preliminary version.  An updated version with additional new features
-will be released in a few days or weeks.  You may choose to wait until
-that release since none of the changes included here are required for
-operations and several are in preliminary form only.  However, if you
-would like to try the new version, we would be happy to get any
-feedback you can provide/
+preliminary version.  Like the previous version (9.8.0), we are not
+recommending that stations start using this for operations yet.  An
+updated version with additional new features will be released in a few
+weeks.  You should choose to wait until that release since none of the
+changes included here are required for operations and several are in
+preliminary form only.  However, if you would like to test the new
+version, we would be happy to get any feedback you can provide.
 
 You can access the new Mark 5 disk module label printing feature in
 DRUDG described below without changing to this new version of the FS.
 In this case, when you "install" the new version, skip the steps that
-involve changing the /usr2/fs link, remaking the station software,
+involve: changing the /usr2/fs link, remaking the station software,
 rebooting, and any and all local customization updates. In other
-words, just unpack the archive and "make" it (in /usr2/fs-9.8.0).  The
-new DRUDG can then be run as "/usr2/fs-9.8.0/bin/drudg", but should
-only be used in the new label printing mode as described below.  Your
-old version of the FS will still be used for all other operations.
+words, just unpack the archive and "make" it (as "prog") (in
+/usr2/fs-9.8.1).  The new DRUDG can then be run as
+"/usr2/fs-9.8.1/bin/drudg", but should only be used in the new label
+printing mode as described below.  Your old version of the FS will
+still be used for all other operations as long as you only type
+"drudg" to run it.
 
 This version is intended to installed as an update for 9.7.7.  Very
 few local customizations are required for this update.
@@ -42,7 +45,8 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of the changes.
+The following is a summary of the changes. Items after (8) were added
+after 9.8.0.
 
 1. Numerous bug fixes
 2. "gnplt" update
@@ -52,15 +56,20 @@ The following is a summary of the changes.
 6. Mark IV "form" command checks for possible bit slips
 7. "msg" expanded to include Type D modules
 8. "systests" system test utilities added
+9. Support for different Mark IV Decoder message terminators.
+10. Fixes for bugs in "systests".
+11. Add 4pcalports command so that pcalports can be accessed when
+    not using Mark IV formatter.
+12. Changed margin for bank change to 200 seconds.
 
 A more detailed discussion of these changes follows.
 
 1. Numerous bug fixes. These include: simple "=" versions of:
-   "disk_record=", "disk2file=",a nd "in2net=" no longer cause abend;
-   printing of time fields in "data_check" and "scan_check" fixed;
-   errors from previous command are no longer reported by "scan_name"
-   or other commands. If bugs you are aware have not been fixed,
-   please inform Ed (weh@ivscc.gsfc.nasa.gov).
+   "disk_record=", "disk2file=",a nd "in2net=" no longer cause an
+   abend; printing of time fields in "data_check" and "scan_check"
+   fixed; errors from previous command are no longer reported by
+   "scan_name" or other commands. If bugs you are aware have not been
+   fixed, please inform Ed (weh@ivscc.gsfc.nasa.gov).
 
 2. "gnplt" update. Andrea Orlati has provided an improved version of
    "gnplt" with many bugs fixed.  Also, an error in the reading of
@@ -75,12 +84,12 @@ A more detailed discussion of these changes follows.
 
 4. "form" command added to "postob" for Mark IV formatters. This
    command was added to help identify cases where a bit slip may have
-   occured.
+   occurred.
 
 5. "pfmed" now handles long lines in procedures. Line lengths up to
    about 512 characters are now supported. The new procedure logging
    facility in "boss" was changed to support longer lines. This was an
-   issue primarily with long Mark IV decoder commands (about 100
+   issue primarily with long Mark IV Decoder commands (about 100
    characters). All other instances of problems with long lines in the
    FS have been fixed.
 
@@ -96,10 +105,39 @@ A more detailed discussion of these changes follows.
    suite of SNAP procedures and data analysis and plotting scripts was
    added.  See "/usr2/fs/systests/systests.txt" for more information.
 
+9. Support for different Mark IV Decoder message terminators.  At
+   least part, if not all the communications problems between the FS
+   and the Mark IV Decoder appear to be due to an interaction between
+   the terminating character used for messages sent to the Mark IV
+   Decoder and MATs in the system.  As far as we can tell, these
+   problems are eliminated by changing to use "return" (0x0d) instead
+   of $" (0x24) as the terminator.  The FS now includes a feature in
+   the "equip.ctl" control file to select which of the three
+   terminators that the Decoder supports should be used (the third is
+   "%" (0x25).  All stations should switch over to using "return"
+   immediately.  However, if it is discovered that this is causing
+   other worse problems, it will be possible in the field to change
+   back to the old terminator.
 
-			 B. Changes in DRUDG
+10. Fixes for bugs in "systests". Some minor procedure and script bugs
+    in "systests" were fixed.  If you are using the tests, updating
+    them is recommended.
+
+11. Add 4pcalports command so that pcalports can be accessed when not
+    using Mark IV formatter. This allows the "4pcalports" command
+    (instead of "pcalports") to be used in procedure files that are
+    shared between Mark IV and non-Mark IV configurations.
+
+12. Changed margin for bank change to 200 seconds. The amount of
+    remaining disk space beyond the minimum require for recording
+    before a bank change is forced was increased from 5 to 200
+    seconds.  This is intended to reduce the number of cases where not
+    enough room is left for a scan because rtime? returns an
+    under estimate because one or more disks is slow.
+
+			 require B. Changes in DRUDG
 				   
-DRUDG opening message date is 050729.  This release of DRUDG includes:
+DRUDG opening message date is 050902.  This release of DRUDG includes:
 
 1. Labels for Mark 5 disk modules.
 2. "equip_override" bug fixed.
@@ -107,33 +145,57 @@ DRUDG opening message date is 050729.  This release of DRUDG includes:
 4. S2 tape change time bug fixed.
 5. Mark5 continuous geodetic schedules supported.
 6. Bug in Mark IV label command fixed.
+7. Dymo printer label printing supported for "cups". 
+8. Option to prepend a directory in disk2file.
+9. FTP options for disk2file.
+10. TPICD = 0 bug fixed.
 
 A more detailed discussion of these changes follows.
 
 1. Labels for Mark 5 disk modules.  DRUDG now supports generation of
-   these disk modules.  This is not available through the usual label
-   printing option (6).  Instead it is accessed from the command line
-   of DRUDG.  If DRUDG is started with the name of a log file as the
-   first parameter, e.g.:
+   field labels for disk modules.  This is not available through the
+   usual label printing option (6).  Instead it is accessed from the
+   command line of DRUDG.  If DRUDG is started with the name of a log
+   file as the first parameter, e.g.:
 
-     drudg r4181gc.log
+     drudg rd0507gc.log
 
    It will print the labels for the disk modules used in that log and
-   then exit.  This is a new feature and any feedback on how it works
-   would be appreciated.
+   then exit.  This feature would normally be used after the
+   experiment is over.
+
+   We recognize that it is not convenient to have to wait until the
+   end of an experiment to generate the labels, especially when there
+   are multiple disk module being used in an experiment.
+   Unfortunately, for a variety of reason it is impossible a priori to
+   predict the correct labels.  Even making a good guess in general
+   requires burdensome data input and bookkeeping.  However to try to
+   reduce the operational problems this may cause, DRUDG can print the
+   label for just a specific disk pack.  The intent is that just
+   before a disk pack is removed (usually because it is full and needs
+   to be shipped) or when an experiment is over, the label for that
+   pack for that experiment can be printed and attached.  To print
+   only the label for a particular pack, enter the eight character VSN
+   of the pack after the log. For example:
+
+      drudg rd0507gc.log bkg-0060
+
+    Label printing for Mark 5 modules is a new feature, (like all
+    features) any feedback on how it works would be appreciated.
 
 2. "equip_override" bug fixed.  The "equip_override" feature was
-   introduced to allow stations to specify Mark5 in their skedf.ctl
-   file.  Unfortunately it had the unintended consequence that you
-   could not change the equipment type using option 11.  This was
-   because the equip_override code was executed after a file was read
-   in, and also after option 11 was executed.  This bug was fixed in
-   9.7.7: A flag was set, and equip_override was only executed once.
+    introduced to allow stations to specify Mark5 in their skedf.ctl
+    file.  Unfortunately it had the unintended consequence that you
+    could not change the equipment type using option 11.  This was
+    because the equip_override code was executed after a file was read
+    in, and also after option 11 was executed.  This bug was fixed in
+    9.7.7: A flag was set, and equip_override was only executed once.
 
-   Unfortunately, this had the consequence that if you read in another
-   schedule, drudg would use the equipment type from the schedule, and
-   not the equipment override option.  This bug has now been fixed in
-   9.7.8.  Equipment override will work once for each schedule.
+    Unfortunately, this had the consequence that if you read in
+    another schedule, drudg would use the equipment type from the
+    schedule, and not the equipment override option.  This bug has now
+    been fixed in 9.7.8.  Equipment override will work once for each
+    schedule.
 
 3. Last scan bug in label command fixed.  The ending time of the last
    label was that of the 2nd-to-last scan, and not that of the last
@@ -144,12 +206,59 @@ A more detailed discussion of these changes follows.
    generally wasn't a problem with long tapes.
 
 5. Mark5 continuous geodetic schedules supported.  Drudg was modified
-   to change these schedules to "start&stop" to avoid disk wastage.
-   In addition, an early start of 12 seconds was implemented to allow
-   the VLBA correlator to sync up.
+   to change these schedules to "start&stop" to avoid wasting disk
+   space.  In addition, an early start of 25 seconds was implemented
+   to allow the VLBA correlator to sync up.
 
 6. Bug in Mark IV label command fixed.  Some stations are still not
    getting the correct number of Mark IV tape labels.  This was fixed.
+
+7. Dymo printer label printing supported with "cups". DRUDG now fully
+   supports the dymo printer. To use dymo printers you need to make
+   several changes in the $printer section of skedf.ctl:
+
+     First, set the label_printer type to dymo:
+
+       label_printer dymo
+
+     Second, set the label size:
+:
+       label_size  1.417  3.5    1      1     11    0      Dymo
+
+     Lastly, you need to specify the appropriate script:
+
+       labels print2dymo
+
+     and you must create this script. It is described in comments in
+     the default skedf.ctl control file:
+ 
+       *  This is to print to the dymo printer.
+       *  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
+       *  must be in your path, e.g. in /usr2/oper/bin,
+       *  and executable, e.g., chmod a+x print2dymo
+
+   The skedf.ctl file included in the distribution has examples of the
+   above.
+
+8. Option to prepend a directory in disk2file.  You can now prepend a
+   directory in the disk2file command.  This can be set in skedf.ctl
+   using the disk2file_dir keyword, e.g. "disk2file_dir /tmp". This
+   can also be changed in drudg using option 15, the data_transfer
+   override option.
+
+9. FTP options for disk2file.  The FS itself does not yet support
+   these options, but you can now specify an ftp destination, userid
+   and password for disk2file transfers in DRUDG.  These can be set in
+   skedf.ctl using the appropriate keywords:
+
+     disk2file_userid jmg@
+     disk2file_pass foopass
+     disk2file_node foo.foo.foo.edu
+
+   All of these can be modified at runtime using option 15.
+
+10. TPICD = 0 bug fixed.  On start-up DRUDG complained if TPI was set
+    to 0.  This has been fixed.
 
  			    C. Known FS Bugs
 
@@ -310,9 +419,9 @@ III. Installation
 
 If you are installing FS9 for the first time with this version, please
 follow the installation instructions in Section 4.5 of the FS9
-"Computer Reference" manual or the "nfsload.txt" memo.  In this case
-you should also get a copy of the current FS9 "Control Files and Field
-System Initialization" manual.
+"Computer Reference" manual.  In this case you should also get a copy
+of the current FS9 "Control Files and Field System Initialization"
+manual.
 
 The following instructions are for upgrading from 9.7.7. Please follow
 all the steps.
@@ -320,7 +429,7 @@ all the steps.
 A list of "critical updates" is given below.  These are updates that
 must be applied sequentially.  Please start with the next update with
 a later version number than you have and apply it and the remaining
-listed version before upgrading to 9.8.0.  You can find the latest
+listed version before upgrading to 9.8.1.  You can find the latest
 versions of installation notes for these FS versions in the
 "/usr2/fs/misc" directory. The list of critical updates is:
 
@@ -357,20 +466,21 @@ a fresh back-up before continuing with the installation.
 
 (1) Please be sure that you have at least 40 MB of free space (use the
 "df" UNIX command to check free space) on your "/usr2" partition
-before starting the upgrade.  This would probably only be a problem
-for stations with 200 MB disks.  If you are tight on space, you may
-want to delete old log files and old versions of the FS (except your
-most recent one if you can avoid it of course).  Since you should have
+before starting the upgrade.  This would probably only be an issue for
+stations with 200 MB disks.  If you are tight on space, you may want
+to delete old log files and old versions of the FS (except your most
+recent one if you can avoid it of course).  Since you should have
 backed-up your system, you even can delete the "*.[oas]" and
 executable files of your old versions with no risk.  You might want to
 keep the source of the previous versions around for reference if you
-have room.  You can eliminate the non-source files by "cd"-ing to old
-FS directories as "prog" and doing a "make rmdoto rmexe".  If you have
-any questions about how to do this, please contact Ed.
+have room.  You can eliminate the non-source files by "cd"-ing to each
+of the old FS directories in turn as "prog" and doing a "make rmdoto
+rmexe".  If you have any questions about how to do this, please
+contact Ed.
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.8.0 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.8.1 archive in your "/tmp" directory.
 For example you might do the following:
 
       cd /tmp
@@ -379,7 +489,7 @@ For example you might do the following:
       (enter your password for the server at prompt)
       binary
       cd dist
-      get fs-9.8.0.tgz
+      get fs-9.8.1.tgz
       quit
 
 If you need to transfer the archive using DOS floppies, please see the
@@ -390,14 +500,14 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.8.0.tgz
+      tar -xzpf /tmp/fs-9.8.1.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.8.0 fs
+      ln -sfn fs-9.8.1 fs
 
-(7) It is recomended that your local files have the default ownership
+(7) It is recommended that your local files have the default ownership
     ("oper.rtx") and permissions ('rw-rw-rw'). To force this, please
     execute the script:
 
@@ -427,17 +537,57 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
 (12) Log in as oper
 
-(13) Modify your procedure files.  The only change is for stations
-     that use Mark IV formaters.  They should add the "form" command
-     to any and all versions of their "postob" procedures that are
-     used with the Mark IV formatter.  Please note that the "4form"
-     command can be instead in versions of "postob" that are shared by
-     configurations that use the Mark IV formatter and other systems.
-     In those cases, the use of the "4form" command should prevent
-     getting an error when the Mark IV formatter is not in use.
+(13) Modify your procedure files.  Two changes are need: (A) install
+     and customize "systests.prc", (B) update "postob". These are
+     described in more detail below.
 
-(14) Update your control files. No control file updates are needed at
-     this time.
+     (A) The "systests.prc" procedure library should be set-up if you
+         want to be able to use the tests.  Instructions for how to do
+         this are included in the "/usr2/fs/systests/systests.txt"
+         file.  If you have already installed a version of
+         "systests.prc", you should compare it to the default one
+         included in "/usr2/fs/systests/systests.prc":
+
+           cd /usr2/proc
+           diff systests.prc /usr2/fs/systests|less
+
+         to see what has changed.  You may prefer to compare the new
+         default "systests.prc" to the default you previously modified
+         if you still have it.  This will avoid having customizations
+         you made show up in the "diff" output.
+
+     (B) This change is only for stations that use Mark IV formatters.
+         They should add the "form" command to any and all versions of
+         their "postob" procedures that are in procedure libraries
+         (usually just versions of "station.prc") that are used with
+         the Mark IV formatter and that do not already contain the
+         command.  Please note that the "4form" command can be instead
+         in versions of "postob" that are in procedure libraries that
+         are shared by configurations that use the Mark IV formatter
+         and other systems as well.  In those cases, the use of the
+         "4form" command should prevent getting an error when the Mark
+         IV formatter is not in use.
+
+(14) Update your control files. Add the lines for the Mark IV Decoder
+     terminator to all your versions of the "equip.ctl" control.  All
+     stations must do this, even if they don't have a Mark IV
+     decoder. This change must be made even for all "equip.ctl" files
+     even versions that are used with hardware.  The additional lines
+     can be added using:
+
+       cd /usr2/control
+       tail -2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+     If your station uses more than one version of "equip.ctl", the
+     "tail" line should be executed once for each version,
+     substituting the appropriate name for the final "equip.ctl".  Be
+     careful to not update a file twice by doing it once for
+     "equip.ctl" and once for the file "equip.ctl" links to.  If when
+     you start the FS the next time, it complains about not being able
+     to read or decode line 18 of "equip.ctl", there was probably a
+     (or more than one) blank line at the end of the "equip.ctl" file
+     before you did the update.  You can edit the file to delete the
+     blank lines to correct this.
 
 (15) Reboot the computer.  This is important for both re-initializing
      shared memory and the login environment.
@@ -451,22 +601,27 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      particular for this upgrade you should test that Mark 5
      operations work as expected.
 
+(17) If you want to use the plotting scripts for the "systests" tools,
+     you will need to install "pgperl" on your system, if you haven't
+     already.  Instructions for how to do this for FS Linux 5 are
+     included in "/usr2/fs/systests/systests.txt".
+
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.8.0.tgz archive have been placed in
+floppy, "split" files of the fs-9.8.1.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9800tg.aa
-fs9800tg.ab
+fs9801tg.aa
+fs9801tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9800tg.* >fs-9.8.0.tgz
+cat fs9801tg.* >fs-9.8.1.tgz
 
-This will create an exact image of the original fs-9.8.0.tgz archive
+This will create an exact image of the original fs-9.8.1.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri or kurp-ftp.

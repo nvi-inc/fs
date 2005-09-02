@@ -10,6 +10,8 @@
      .                 dr_rack_type,dr_reca_type,dr_recb_type,
      >                 kequip_over,
      .                 tpid_prompt,itpid_period,tpid_parm,
+     >                 ldisk2file_dir,ldisk2file_node,ldisk2file_userid,
+     >                 ldisk2file_pass,
      >         lmysql_user,lmysql_password,lmysql_host,lmysql_socket,
      >         lmysql_db)
 C
@@ -53,6 +55,7 @@ C            send the names back.
 !          2. Previous versions of drudg assigned keyword of line "optionX  YY" to
 !             coption(1,2,3) where X =1,4,5.  Made an error in trying to assign to coption(X),
 !             e.g., if X=4, would assign to coption(4).  Fixed to agree with previous usage.
+! 2005Jul26 JMGipson.  Added disk2file_dir,_node,_userid.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -66,6 +69,8 @@ C
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
      .               tpid_prompt,tpid_parm
+      character*(*) ldisk2file_dir,ldisk2file_node,ldisk2file_userid
+      character*(*) ldisk2file_pass
       character*(*) lmysql_host,lmysql_socket,lmysql_user
       character*(*) lmysql_password,lmysql_db
       character*4 cepoch
@@ -86,12 +91,9 @@ C  LOCAL VARIABLES
       character*3 lprompt
       integer itemp
       character*20 lkeyword     !keyword
-      character*128 lvalue      !value
+      character*256 lvalue      !value
       integer lu          !open lu
       integer ic,j,ilen,ierr
-!      integer*2 ibuf(ibuf_len)
- !     character*(2*ibuf_len) cbuf
-!      equivalence (cbuf,ibuf)
       character*256 cbuf
       logical ktoken,keol,knospace
       integer istart,inext
@@ -103,6 +105,10 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
+      ldisk2file_dir=" "
+      ldisk2file_node=" "
+      ldisk2file_userid=" "
+      ldisk2file_pass=" "
 
 C  2. Process the control file if it exists. This loops through twice, 
 C     once for each control file.
@@ -369,6 +375,15 @@ C  $MISC
                     write(luscn,'("RDCTL06 ERROR: Invalid epoch ",a)')
      .              lvalue(1:trimlen(lvalue))
                   endif
+! Disk2file stuff
+                else if (lkeyword .eq. 'DISK2FILE_DIR') then
+                  ldisk2file_dir=lvalue
+                else if (lkeyword .eq. 'DISK2FILE_NODE') then
+                  ldisk2file_node=lvalue
+                else if (lkeyword .eq. 'DISK2FILE_USERID') then
+                  ldisk2file_userid=lvalue
+                else if (lkeyword .eq. 'DISK2FILE_PASS') then
+                  ldisk2file_pass=lvalue
 C         EQUIPMENT
                 else if (lkeyword  .eq.'EQUIPMENT') then
                   dr_rack_type=lvalue(1:8)
@@ -394,7 +409,7 @@ C         TPICD
                   call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
      >               knospace, keol)
                   read(lvalue,*) itemp
-                  if(itemp .gt. 0) then
+                  if(itemp .ge. 0) then
                     itpid_period=itemp
                   else
                     write(luscn,*) "RDCTL11 ERROR: Invalid TPI period"
@@ -412,6 +427,6 @@ C         TPICD
           close (lu)
         end if  !"control file exists"
       end do  !"do 1,2"
-
+      call put_esc_in_string(ldisk2file_userid)
       RETURN
       END
