@@ -10,7 +10,6 @@ C 970406 nrv Minimum matching
       integer*2 LKEYWD(*)
       integer ikey,i,ias2b,iflch
       integer ichcm,im1,imn,im2,nch
-      LOGICAL KNAEQ
 
       IKEY=0
       IGTSO = 0

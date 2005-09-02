@@ -1,22 +1,27 @@
-      SUBROUTINE LABLOG(cfilnam,ierr)
+      SUBROUTINE LABLOG(clogfile,cvsn_in,ierr)
 C  Write tape labels from reading the log file.
 !  Based on labsnp
 !  2005Jul28 JMGipson
+!  2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character VSN.
+!                       Can select on vsn.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
 ! passed
-      character*128 cfilnam
+      character*(*) clogfile
       integer ierr              !<>0 means an error.
+      character*8 cvsn_in
 ! functions
       integer trimlen
       integer copen
       integer cclose
 C Local
+      character*128 cfilnam
       integer iy1(5),id1(5),ih1(5),im1(5),iy2(5),id2(5),ih2(5),im2(5)
-      integer ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape
+      integer ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2
+      integer isec
       integer nout,newlab
       integer iyear,idayr,ihr,imn
       integer nlabpr            !number printed.
@@ -25,12 +30,15 @@ C Local
       integer iline
       integer ind
       integer inew
+      integer nch
 
       integer nlab_per_row
       logical kexist
-      logical kbeg_label
+      logical kfirst_scan
       logical kdone
       character*80 vsn_now,vsn_old
+
+      logical kfound
 
       integer istart
       integer MaxToken
@@ -38,37 +46,20 @@ C Local
       parameter(MaxToken=5)
       character*8 ltoken(MaxToken)
 
-! Get the log file.
-!      cfilnam=cexper(1:trimlen(cexper))//cpocod(istn)//".log"
-!      call lowercase(cfilnam)
-!      write(*,*) "Default log file: ",cfilnam(1:trimlen(cfilnam))
-
-!      write(*,*) "Enter in new log file, or return to accept default."
-!      write(*,*) "Enter in log file: "
-!      read(*,*) cfilnam
-!      ctmp=" "
-!      if(ctmp .ne. " ") then
-!         cfilnam=ctmp
-!        ind=index(cfilnam,".log")
-!        if(ind .eq. 0) then
-!           cfilnam=cfilnam(1:trimlen(cfilnam))//".log"
-!        endif
-!      endif
-
-      inquire(file=cfilnam,exist=kexist)
+      inquire(file=clogfile,exist=kexist)
+      nch=trimlen(clogfile)
       if(.not. kexist) then
-         write(*,*) "File not found. ",cfilnam(1:trimlen(cfilnam))
+         write(*,*) "File not found. ",clogfile(1:nch)
          ierr=-1
          return
       endif
 
-      write(*,*) "Opeing file for proccessing: ",cfilnam(1:20)
-      open(lu_infile,file=cfilnam)
-      kbeg_label=.true.
+      write(*,*) "Opening file for proccessing: ",clogfile(1:nch)
+      open(lu_infile,file=clogfile)
+      kfirst_scan=.true.
 
-      vsn_old=""
+      vsn_old="VSN_OLD"
       vsn_now=""
-
 
 ! Get a handle to the printer.
       if (cprport.eq.'PRINT') then ! temp file name
@@ -77,17 +68,12 @@ C Local
           cfilnam = cprport
       endif
       call null_term(cfilnam)
-      ierr = copen(fileptr,cfilnam,len(cfilnam))
-      if (ierr.eq.0) then
-        write(luscn,'("LABLOG - Can''t open output file ",a)') cfilnam
-        return
-      endif
+      kfound=.false.
 
 ! Now start parsing log file.
 C 1.  Initialize variables
       ierr=0
       nout = 0
-      ntape = 0
       nlabpr = 0
       newlab = 1
       ilabcol=1
@@ -121,10 +107,20 @@ C 1.  Initialize variables
       cstnna(1)=ltoken(3)
       cstcod(1)=ltoken(4)
 
+! Read in next line and check to see if Mark5
+      read(lu_infile,'(a)') cline(iline)
+      write(*,*) cline(iline)(1:80)
+      if(index(cline(iline), "Mark5") .eq. 0) then
+         write(*,*) "Can only process log files for Mark5 recorders"
+         ierr=-2
+         return
+      endif
+
       ind=trimlen(cexper)
       WRITE(LUSCN,'("Generating disk labels for ",a,1x,a)')
      >  cexper(1:ind)  ,cstnna(1)
 !done with this information.
+      call capitalize(cvsn_in)
 
 ! 1. Loop over log records.
 100   continue
@@ -135,20 +131,62 @@ C 1.  Initialize variables
       endif
 
       call capitalize(ctmp)
-      if(index(ctmp,"/BANK_CHECK/") .ne. 0) then
+
+      ind=index(ctmp,"SCAN_NAME=")
+      if(ind .ne. 0) then
+        ind=ind+10
+        read(ctmp(ind:ind+7),'(i3,1x,i2,i2)') idayr,ihr,imn
+        if(kfirst_scan) then
+          nout=nout+1
+          iy1(nout) = iyear
+          id1(nout) = idayr
+          ih1(nout) = ihr
+          im1(nout) = imn
+          kfirst_scan=.false.
+          nlabpr=nlabpr+1
+        endif
+      else if(index(ctmp,"DATA_VALID=OFF") .ne. 0) then
+          read(ctmp,'(i4,1x,i3,1x,i2,1x,i2,1x,i2)')
+     >      iy2(nout),id2(nout),ih2(nout),im2(nout),isec
+            if(isec .gt. 30) then
+              im2(nout)=im2(nout)+1
+              if(im2(nout) .eq. 60) then
+                im2(nout)=0
+                ih2(nout)=ih2(nout)+1
+                if(ih2(nout) .eq. 24) then
+                   ih2(nout)=0
+                   id2(nout)=id2(nout)+1
+                endif
+              endif
+            endif
+      else if(index(ctmp,"/BANK_CHECK/") .ne. 0) then
+!        read(ctmp,'(i4,1x,i3,1x,i2,1x,i2)') iyear,idayr,ihr,imn
         ind=index(ctmp,",")
         vsn_now=ctmp(33:ind-1)
-        if(vsn_old .eq. " ") vsn_old=vsn_now
+        if(vsn_old .ne. "VSN_OLD") goto 110
+        vsn_old=vsn_now
       endif
-      goto 110
+      goto 100
 
+!-----Here is where we print a label---------------------
 105   continue            !come here on EOF
       vsn_now="DONE"      !this makes sure that we print one last label
       kdone=.true.
 
 110   continue
-      if(vsn_now .ne. vsn_old) then          !if a change in vsn_numbers, then print label.
-        kbeg_label=.true.                    !begin a new label after this.
+      if(vsn_now .ne. vsn_old .and.
+     >   (cvsn_in .eq. " " .or. cvsn_in .eq. vsn_old(1:8))) then
+
+        if(.not.kfound) then
+          ierr = copen(fileptr,cfilnam,len(cfilnam))
+          if (ierr.eq.0) then
+            write(luscn,'("LABLOG - Can''t open output file ",a)')
+     >       cfilnam
+            return
+          endif
+          kfound=.true.
+        endif
+
         if (nout.ge.nlab_per_row .or. kdone) then !print a row
           if (clabtyp.ne.'POSTSCRIPT' .and. clabtyp .ne. 'DYMO') then ! laser or Epson
             call blabl(luprt,nout,lexper,lstnna(1,1),lstcod(1),
@@ -158,7 +196,6 @@ C 1.  Initialize variables
             ilabrow = ilabrow + 1
             if (ilabrow.gt.8) ilabrow=ilabrow-8
           else ! postscript
-            ntape=ntape+1
             ipsy1=mod(iy1(1),100)
             ipsd1=id1(1)
             ipsh1=ih1(1)
@@ -173,12 +210,11 @@ C 1.  Initialize variables
             endif
 
             write(luscn,
-     >           '(i2,3x,2(2x,i3,":",i2.2,":",i2.2))')
-     >           nlabpr, ipsd1,ipsh1,ipsm1, ipsd2,ipsh2,ipsm2
-
+     >        '(i2,1x,a,1x,2(2x,i3,":",i2.2,":",i2.2))')
+     >       nlabpr, vsn_old(1:8),ipsd1,ipsh1,ipsm1, ipsd2,ipsh2,ipsm2
             call make_pslabel(fileptr,cstnna(1),cstcod(1),
-     >         cexper,clabtyp,
-     .      ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
+     >         cexper,clabtyp,vsn_old(1:8),
+     .      ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,
      .      inew,rlabsize,ilabrow,ilabcol,inewpage)
             ilabcol=ilabcol+1
             if (ilabcol.gt.rlabsize(4)) then
@@ -193,38 +229,37 @@ C 1.  Initialize variables
           endif ! laser/Epson/ps
         endif
         newlab = 1
-        if(kdone) goto 900
-        goto 100
+        nlabpr=nlabpr+1
+      endif
+      if(kdone) goto 900
+
+      vsn_old=vsn_now
+      if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then ! laser or Epson
+        nout=0
       endif
 
-      if(index(ctmp,"SCAN_NAME=") .ne. 0) then
-        read(ctmp,'(i4,1x,i3,1x,i2,1x,i2)') iyear,idayr,ihr,imn
-
-        if(kbeg_label) then
-          nout=nout+1
-          iy1(nout) = iyear
-          id1(nout) = idayr
-          ih1(nout) = ihr
-          im1(nout) = imn
-          kbeg_label=.false.
-          nlabpr=nlabpr+1
-        else
-          iy2(nout) = iyear
-          id2(nout) = idayr
-          ih2(nout) = ihr
-          im2(nout) = imn
-        endif
-      endif
+      nout=nout+1            !starting time is most recent scan time.
+      iy1(nout) = iyear
+      id1(nout) = idayr
+      ih1(nout) = ihr
+      im1(nout) = imn
       goto 100
+
+!---------------Done label-------------------------
 
 !  Cleanup
 900   continue
       if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
-        ierr=cclose(fileptr)
-        klab=.true.
-        call prtmp(0)
-        inew=1 ! reset flag for new file
-        klab = .false.
+        if(kfound) then
+          ierr=cclose(fileptr)
+          klab=.true.
+          call prtmp(0)
+          inew=1 ! reset flag for new file
+          klab = .false.
+        else
+          write(luscn,'("Lablog: Did not find VSN: ", a)') cvsn_in
+          ierr=-1
+        endif
       endif
 
       close(lu_infile)
@@ -233,11 +268,13 @@ C 1.  Initialize variables
 950   continue
       write(luscn,'("Lablog: Did not find DRUDG stamp")')
       ierr=1
+      close(lu_infile)
       return
 
 960   continue
       write(luscn,'("Lablog: Error reading file.")')
       ierr=2
+      close(lu_infile)
       return
 
       end

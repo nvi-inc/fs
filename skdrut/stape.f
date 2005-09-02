@@ -19,7 +19,7 @@ C
 C  Calls: gtfld, igtst2, ifill, wrerr
 ! functions
       integer istringminmatch
-      integer ias2b,trimlen,i2long,igtst2,ichmv,jchar
+      integer ias2b,trimlen,i2long,igtst2,ichmv
 
 C  LOCAL
       integer*2 lkeywd(12)
@@ -79,7 +79,7 @@ C
         NCH = IC2-IC1+1
         ckeywd=" "
         IDUMMY = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
-        IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
+        if(ckeywd .eq. "_") then
           istn=0
         else if (ckeywd .eq. 'ADAPTIVE') then !old format
           istn=0

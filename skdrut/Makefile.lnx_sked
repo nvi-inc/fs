@@ -6,7 +6,7 @@
 #                                                                       #
 #########################################################################
  
-ARC = skdrut
+ARC = skdrut.a
  
 OBJECTS=\
 aposn.o addscan.o apstar_rad.o atape.o axtyp.o backward.o \
@@ -18,8 +18,8 @@ gdscan.o getiauname.o gnpas.o hdinp.o hol2lower.o hol2upper.o hms2seconds.o \
 idchk.o ifill4.o ifirst_non_blank.o igtba.o igtfr.o igtso.o igtst.o igtst2.o \
 iroll_def.o isecdif.o itras.o itimedifsec.o iday0.o igetsrcnum.o \
 istringminmatch.o ivgtmo.o ivgtso.o ivgtst.o iwhere_in_string_list.o ind.o i2long.o \
-mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knaeq.o  knewt.o ktimedif.o \
-locf.o lower.o lowercase.o lyes_no.o mpstar_rad.o m3mode.o \
+julda.o kbit.o kcont.o kearl.o knaeq.o  knewt.o ktimedif.o \
+locf.o lower.o lowercase.o lyes_no.o mjd2yrdoy.o mpstar_rad.o m3mode.o \
 newscan.o novas.o null_term.o obs_sort.o pid_str.o \
 posnt.o pnum.o prefr.o printer.o put_esc_in_string.o \
 raded.o  rdctl.o readf_asc.o readline.o reads.o reio.o \
@@ -34,21 +34,21 @@ vunpif.o vunpbbc.o vunptrk.o vunphp.o vsoinp.o vob1inp.o vmoinp.o vstinp.o vread
 vunps2m.o vunps2g.o vunproll.o vunpprc.o vobinp.o  vunppcal.o \
 writf_asc.o writf_asc_ch.o xat.o xyz2latlon.o ydjul.o ymday.o
 
-#
 # Use -G for the profiler
-FFLAGS=-C -c  -g
-#FFLAGS=-C -c  -G
-CFLAGS=-C -c -g 
-#
-$(ARC).a: $(OBJECTS)
-	touch $(LIB)$(ARC).a
-	rm $(LIB)$(ARC).a
-	ar -qc $(LIB)$(ARC).a $(OBJECTS)
+#FFLAGS=-C -c -g
+#FFLAGS=-C -c -G
+#CFLAGS=-C -c
+
+FC:=/opt/intel_fc_80/bin/ifort
+FFLAGS:=-I skdrincl -c -nus -static -g
+
+CC:=gcc
+CFLAGS:=-c -static -g
+
+$(ARC): $(OBJECTS)
+	touch $(ARC)
+	rm $(ARC)
+	ar -qc $(ARC) $(OBJECTS)
 # The following command indexes the archive for Linux. Not needed for HP.
-#ar s $(LIB)$(ARC).a
-
-
-
-
-
+	ar -s $(ARC)
 

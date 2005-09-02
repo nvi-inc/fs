@@ -46,7 +46,7 @@ C  LOCAL:
       double precision d
       integer idum,id,nch
       character upper
-      integer trimlen,ichmv_ch ! function
+      integer ichmv_ch ! function
       integer fvex_len,fvex_field,ptr_ch,
      .fvex_double,fvex_units,fget_all_lowl
 C

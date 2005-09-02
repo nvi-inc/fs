@@ -24,7 +24,7 @@ C  LOCAL
       integer*2 LKEYWD(12)
       integer ikey
       integer ikey_len,ich,ic1,ic2,nch,i,istn,idum,il
-      integer i2long,igtst2,ichmv,jchar
+      integer i2long,igtst2,ichmv
 
       character*24 ckeywd
       equivalence (lkeywd,ckeywd)
@@ -68,7 +68,7 @@ C
        NCH = IC2-IC1+1
         ckeywd=" "
         idum = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
-        IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
+        if(ckeywd .eq. "_") then
           istn=0
         else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
           write(luscn,9901) lkeywd(1)

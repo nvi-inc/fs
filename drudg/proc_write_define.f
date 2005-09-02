@@ -1,5 +1,8 @@
       SUBROUTINE proc_write_define(lufile,luscn,LNAMEP)
       implicit none
+! write "define  lnamep        00000000000x"
+! to the (proc) output file, and write lnamep to the screen.
+
 ! passed
       integer lufile
       integer luscn             !screen
@@ -28,6 +31,7 @@
 !     call c2lower(ldum,ldum)
       write(lufile,'(a)') ldum
 
+! This part writes the procedures to the screen.
       if(nproc .eq. 0) then             !indent first proc 5 spaces
          WRITE(luscn,"(5x,a12,$)") lnamep
          nproc =nproc+1

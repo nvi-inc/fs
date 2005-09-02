@@ -16,7 +16,7 @@ C     Speed of light
       PARAMETER (C=2.99792458D8)      !speed of light
 
       double precision erad,ef,gme,sratio
-      parameter (erad=6378.145D0)      	!earth Radius
+      parameter (erad=6378.145D0)       !earth Radius
       parameter (ef=298.25D0)           ! 1/flattening
       parameter (gme=7.5369793D13)      !  GM((ORBITS/DAY)**2/KM**3)
       parameter (sratio=1.0027379093D0) !Sideral ratio
@@ -27,7 +27,7 @@ C     Speed of light
 
 C     Degrees per radian
       PARAMETER (ROG=57.2957795131D0)
-C 
+C
 C     Seconds of time per radian
       PARAMETER (ROZ=13750.98708313D0)
 C

@@ -214,6 +214,8 @@ C        beginning the current observation
       integer iSpinDelay    !time in seconds for tape to start spinning
       double precision speed_recorder   ! speed of recorder in this mode.
       integer itearl_save
+      integer itgap_save
+
 
 ! counter
       integer i
@@ -533,9 +535,15 @@ C
       kcont= (tape_motion_type(istn).eq.'CONTINUOUS')
 
       if(km5) then
+        itgap_save=itgap(istn)
         itearl_save=itearl(istn)
-        itearl(istn)=12
+        itearl(istn)=25
+        itgap(istn)=25
         kcont=.false.
+        if(kcont) then
+          kcont=.false.
+          kadap=.true.
+        endif
       endif
 
 
@@ -908,7 +916,9 @@ C               SOURCE=name,ra,dec,epoch
         if(.false.) then
 !        if(kdisk2file_prev) then
            call snap_wait_time(lu_outfile,itime_disk_abort)
-           write(lufile,'(a)') "disk2file=abort"
+           call snap_disk2file_abort(lufile,ldisk2file_node,
+     >      ldisk2file_userid,ldisk2file_pass)
+
            kdisk2file_prev=.false.
         endif
 
@@ -1099,7 +1109,8 @@ C do it every scan for S2.
             endif
             if(kdisk2file_prev) then
               call snap_wait_time(lu_outfile,itime_disk_abort)
-              write(lufile,'(a)') "disk2file=abort"
+              call snap_disk2file_abort(lufile,ldisk2file_node,
+     >          ldisk2file_userid,ldisk2file_pass)
               kdisk2file_prev=.false.
             endif
             call snap_setup(ipas,istnsk,icod,iobs,kerr)
@@ -1295,13 +1306,14 @@ C POSTOB
 
              rsec_beg=rsec_beg+itime_disk2file_beg(5)
              rsec_end=rsec_end+itime_disk2file_end(5)
+
+             nch3=max(1,trimlen(ldisk2file_dir))
              write(ldum,
      >         "('disk2file=,',a,',',2(i2.2,'h',i2.2,'m',f5.2,'s,'),a)")
-     >        ldest(1:nch2),
+     >        ldisk2file_dir(1:nch3)//ldest(1:nch2),
      >        itime_disk2file_beg(3),itime_disk2file_beg(4),rsec_beg,
      >        itime_disk2file_end(3),itime_disk2file_end(4),rsec_end,
      >        lxfer_options(ixfer_ptr)(1:nch3)
-
 
              call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
 ! find speed of recorder
@@ -1381,6 +1393,7 @@ C
 9902  FORMAT(' SNAP03 - Error ',I5,' writing SNAP output file ',A)
       if(km5) then
         itearl(istn)=itearl_save
+        itgap(istn)=itgap_save
       endif
 
       RETURN

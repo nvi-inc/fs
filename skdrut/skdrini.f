@@ -29,7 +29,7 @@ C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 C
 C LOCAL
-      integer ic,ix,ib,is,j,iv,i,itx,ity,itz,idef,iy,ir
+      integer ix,ib,is,j,i,itx,ity,itz,idef,iy,ir
 C DATA
 C     data ((roll_def(i,j,1),j=1,32),i=1,17)/ 
 C    .   02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,
@@ -142,29 +142,7 @@ C  Number of selected sources, stations, codes
       NSOURC = 0
       NSTATN = 0
 C  In freqs.ftni
-      NCODES = 0
-      do ic=1,max_frq
-        cmode_cat(ic)=" "
-        do is=1,max_stn
-          do iv=1,max_chan
-            ibbcx(iv,is,ic)=0
-            freqrf(iv,is,ic)=0.d0
-          enddo
-          ntrakf(is,ic)=0
-          do i=1,max_band
-            trkn(i,is,ic)=0.0
-            ntrkn(i,is,ic)=0
-            nfreq(i,is,ic)=0
-          enddo
-        enddo
-        lcode(ic)=0
-        do ix=1,max_band
-          do is=1,max_stn
-            wavei(ix,is,ic) = 0.0
-            bwrms(ix,is,ic) = 0.0
-          enddo
-        enddo
-      enddo
+      call freq_init
       NCELES = 0
       NSATEL = 0
       nband = 0
@@ -194,6 +172,7 @@ C  In freqs.ftni
         crack_type(13) = 'K4-1/M4'
         crack_type(14) = 'K4-2/M4'
         crack_type(15) = 'LBA'
+        crack_type(16) ='unknown'
 !      enddo
 !      do i=1,max_rec_type
         crec_type(1) = 'none'
@@ -209,6 +188,7 @@ C  In freqs.ftni
         crec_type(11) = 'Mk5APigW'
         crec_type(12) = 'Mark5P'
         crec_type(13) = 'K5'
+        crec_type(14) = 'unknown'
 !      enddo
 
 C Initialize canned roll defs
@@ -293,11 +273,6 @@ C Initialize non-standard roll tables to -99.
           iroll_reinit_period(j,i) = 0
           nrolldefs(j,i) = 0
           nrollsteps(j,i) = 0
-!          do k=1,max_track*max_headstack
-!            do l=1,max_track+2
-!              iroll_def(l,k,j,i) = -99
-!            enddo
-!          enddo
         enddo
       enddo
 

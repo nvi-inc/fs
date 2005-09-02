@@ -9,6 +9,9 @@ C 970228 nrv Remove IIN and use clabtyp instead
 C 970312 nrv Update clabtyp name checking for barcode cartridge
 C 970827 nrv Add irow,icol,inewpage to make_pslabel call.
 C 980916 nrv Read both kinds of SNAP files, with and without year.
+! 2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character
+!            tape_label ctape_num. This is so we can use this
+!            for VSN#s.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -27,6 +30,7 @@ C Local
       INTEGER   IERR
       character*128 ctmp,ctmp1
       character*20 cti,ctiformat,cctiformat
+      character*8 ctape_num
 
 C
 C 1.  Initialize variables
@@ -60,9 +64,10 @@ C 2. Loop over SNAP records
               ipsd2=id2(1)
               ipsh2=ih2(1)
               ipsm2=im2(1)
+              write(ctape_num,'("Tape ",i2)') ntape
               call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
-     >           cexper,clabtyp,
-     .        ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
+     >           cexper,clabtyp,ctape_num,
+     .        ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,
      .        inew,rlabsize,ilabrow,ilabcol,inewpage)
               ilabcol=ilabcol+1
               if (ilabcol.gt.rlabsize(4)) then
@@ -112,9 +117,10 @@ C 2. Loop over SNAP records
         ipsd2=id2(1)
         ipsh2=ih2(1)
         ipsm2=im2(1)
+        write(ctape_num,'("Tape ",i2)') ntape
         call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
-     >           cexper,clabtyp,
-     .  ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,ntape,
+     >           cexper,clabtyp,ctape_num,
+     .  ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2,
      .        inew,rlabsize,ilabrow,ilabcol,inewpage)
       endif
 

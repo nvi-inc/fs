@@ -25,8 +25,8 @@ c
      . rxlcode(3,MAX_RXCODES),
      . lalrm(3), ltsrs(5), model0ti_fs,
      . sVerMajor_fs, sVerMinor_fs, sVerPatch_fs,
-     . iaxis(2),
-     . e_fill_init(2)
+     . iaxis(2),mk4dec_fs,
+     . e_fill_init(1)
 
       common/fscom_init/b_init,
      . AMPTOL, AZHMWV, CPKMIN, DIFTOL, 
@@ -48,6 +48,6 @@ c
      . rxlcode,
      . lalrm, ltsrs, model0ti_fs,
      . sVerMajor_fs, sVerMinor_fs, sVerPatch_fs,
-     . iaxis,
+     . iaxis,mk4dec_fs,
      . e_fill_init,
      . e_init

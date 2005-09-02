@@ -51,7 +51,6 @@ C
      .     .or.il.eq.0)
           CALL IFILL(IBUF,1,IBLEN*2,oblank)
           CALL READF_ASC(IUNIT,KERR,IBUF,IBLEN,IL)
-          call inc(IUNIT,KERR)
           if (il.eq.0) call char2hol('  ',IBUF,1,2)
         END DO  !
       END IF  !
@@ -65,7 +64,6 @@ C
      .         JCHAR(IBUF,1).NE.ODOLLAR.or.il.eq.0)
           CALL IFILL(IBUF,1,IBLEN*2,oblank)
           CALL READF_ASC(IUNIT,KERR,IBUF,IBLEN,IL)
-          call inc(IUNIT,KERR)
           if (il.eq.0) call char2hol('**',ibuf,1,2)
         END DO  !
       END IF  !
@@ -75,7 +73,6 @@ C     3. This section handles mode 3: get next line
       if (imode.eq.3) then
           CALL IFILL(IBUF,1,IBLEN*2,oblank)
           CALL READF_ASC(IUNIT,KERR,IBUF,IBLEN,IL)
-          call inc(IUNIT,KERR)
           if (il.eq.0) call char2hol('  ',ibuf,1,2)
       END IF  !
 

@@ -252,11 +252,10 @@ C     switching set number - 0 1 2 or 1,2
           RETURN
         END IF  !
       endif
+      return
 
 ! error return
 900   continue
-      ierr=9
-
 
       RETURN
       END

@@ -3,7 +3,7 @@
       parameter (ixfer_in2net=1,ixfer_disk2file=2)
 
       integer max_xfer
-      parameter(max_xfer=10000) 	!Maximum number of data transfer statements.
+      parameter(max_xfer=10000)         !Maximum number of data transfer statements.
       integer ixfer_stat(max_xfer)      !station number.
       integer ixfer_method(max_xfer)
       character*128 lxfer_destination(max_xfer)      !where to put it
@@ -11,7 +11,7 @@
       real xfer_beg_time(max_xfer)      !beggining and end of xfer/w/rt/ scan
       real xfer_end_time(max_xfer)
 
-      integer ixfer_beg(max_obs)     	!1st data_transfer statement for a given scan.
+      integer ixfer_beg(max_obs)        !1st data_transfer statement for a given scan.
       integer ixfer_end(max_obs)        !last
 
 ! All of these have to do with stations.
@@ -38,4 +38,4 @@
      >     ixfer_stat,ixfer_method,lxfer_destination,lxfer_options,
      >     ixfer_beg,ixfer_end,  xfer_beg_time,xfer_end_time
 
-       
+
