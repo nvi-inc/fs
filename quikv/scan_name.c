@@ -30,6 +30,8 @@ long ip[5];                           /* ipc parameters */
 	strcat(output,",");
 	strcat(output,shm_addr->scan_name.session);
 	strcat(output,",");
+	strcat(output,shm_addr->scan_name.station);
+	strcat(output,",");
 	if(shm_addr->scan_name.duration > 0)
 	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.duration);
 	if(shm_addr->scan_name.continuous > 0)
@@ -64,27 +66,41 @@ long ip[5];                           /* ipc parameters */
 
       if (command->argv[0]==NULL||command->argv[1]==NULL||
 	  command->argv[2]==NULL) {
-	shm_addr->scan_name.duration=-1;
+	shm_addr->scan_name.station[0]=0;
       } else if (strcmp(command->argv[2],"*")==0) {
 	ierr=-303;
 	goto error;
-      } else if
-	(1!=sscanf(command->argv[2],"%ld",&shm_addr->scan_name.duration)||
-	 shm_addr->scan_name.duration < 0){
+      } else if (strlen(command->argv[2])>
+		 sizeof(shm_addr->scan_name.station)-1) {
 	ierr=-203;
+	goto error;
+      } else
+	strcpy(shm_addr->scan_name.station,command->argv[2]);
+
+      if (command->argv[0]==NULL||command->argv[1]==NULL||
+	  command->argv[2]==NULL||command->argv[3]==NULL) {
+	shm_addr->scan_name.duration=-1;
+      } else if (strcmp(command->argv[3],"*")==0) {
+	ierr=-304;
+	goto error;
+      } else if
+	(1!=sscanf(command->argv[3],"%ld",&shm_addr->scan_name.duration)||
+	 shm_addr->scan_name.duration < 0){
+	ierr=-204;
 	goto error;
       }
 
       if (command->argv[0]==NULL||command->argv[1]==NULL||
-	  command->argv[2]==NULL ||command->argv[3]==NULL) {
+	  command->argv[2]==NULL||command->argv[3]==NULL||
+	  command->argv[4]==NULL) {
 	shm_addr->scan_name.continuous=-1;
-      } else if (strcmp(command->argv[2],"*")==0) {
-	ierr=-304;
+      } else if (strcmp(command->argv[4],"*")==0) {
+	ierr=-305;
 	goto error;
       } else if
-	(1!=sscanf(command->argv[3],"%ld",&shm_addr->scan_name.continuous)||
+	(1!=sscanf(command->argv[4],"%ld",&shm_addr->scan_name.continuous)||
 	 shm_addr->scan_name.continuous < 0){
-	ierr=-204;
+	ierr=-205;
 	goto error;
       }
 	
