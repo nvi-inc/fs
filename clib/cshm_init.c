@@ -187,7 +187,9 @@ void cshm_init()
 
   shm_addr->scan_name.name[0]=0;
   shm_addr->scan_name.session[0]=0;
+  shm_addr->scan_name.station[0]=0;
   shm_addr->scan_name.duration=-1;
+  shm_addr->scan_name.continuous=-1;
   
 
   /* 
@@ -313,14 +315,8 @@ void cshm_init()
   shm_addr->disk_record.record.record=-1;
   m5state_init(&shm_addr->disk_record.record.state);
 
-  shm_addr->disk_record.scan.scan[0]=0;
-  m5state_init(&shm_addr->disk_record.scan.state);
-
-  shm_addr->disk_record.session.session[0]=0;
-  m5state_init(&shm_addr->disk_record.session.state);
-
-  shm_addr->disk_record.source.source[0]=0;
-  m5state_init(&shm_addr->disk_record.source.state);
+  shm_addr->disk_record.label.label[0]=0;
+  m5state_init(&shm_addr->disk_record.label.state);
 
   shm_addr->monit5.pong=0;
   for (i=0;i<2;i++) {
@@ -334,8 +330,8 @@ void cshm_init()
 	shm_addr->monit5.ping[i].bank[j].itime[k]=-1;
     }
   }
-  shm_addr->disk2file.scan_name.scan_name[0]=0;
-  m5state_init(&shm_addr->disk2file.scan_name.state);
+  shm_addr->disk2file.scan_label.scan_label[0]=0;
+  m5state_init(&shm_addr->disk2file.scan_label.state);
 
   shm_addr->disk2file.destination.destination[0]=0;
   m5state_init(&shm_addr->disk2file.destination.state);

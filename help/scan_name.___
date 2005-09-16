@@ -1,8 +1,8 @@
                     scan_name - set scan name
 
-            Syntax:     scan_name=name,session,length,continuous
+            Syntax:     scan_name=name,session,station,length,continuous
 
-            Response:   scan_name/name,session,length,continuous
+            Response:   scan_name/name,session,station,length,continuous
 
 
 Settable Parameters:
@@ -16,7 +16,9 @@ Settable Parameters:
           same scan name, which is distinct from that from all
           other subnets.
           session   The session code, any string up to 16 characters
-          in length. May be empty.
+          in length, but is typically six characters or less. May be empty.
+          station   The station code, any string up to 16 characters
+          in length, but is typically two characters.. May be empty.
           length    The number of seconds in the scan, greater than zero.
           May be empty. 
 	  continuous The number of second of continuous recording that
@@ -26,6 +28,9 @@ Comments:
 The scan name is used by the correlator to help organize the
 processing of the data. It is the most useful way to refer to
 scans in e-mail messages and log entries about problems.
+
+The name, session, and station parameters on used by the
+disk_record=... command to construct the default scan_label.
  
 The scan name is supplied by drudg which places the
 scan_name=  command in the schedule before the source= 
