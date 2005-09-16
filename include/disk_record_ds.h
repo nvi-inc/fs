@@ -6,20 +6,16 @@ struct disk_record_cmd {
     struct m5state state;
   } record;
   struct {
-    char scan[17];
+    char label[65];
     struct m5state state;
-  } scan ;
-  struct {
-    char session[17];
-    struct m5state state;
-  } session ;
-  struct {
-    char source[17];
-    struct m5state state;
-  } source ;
+  } label ;
   
 };
 struct disk_record_mon {
+  struct {
+    char status[33];
+    struct m5state state;
+  } status ;
   struct {
     long scan;
     struct m5state state;
