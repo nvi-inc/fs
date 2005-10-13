@@ -116,7 +116,7 @@ set glist_error_nofile "ERROR: Source log file did not contain any data for curr
 
 # Default printing options for GUI mode. Some changes made if startup in cmdline mode.
 
-set print_filename "logplot_output"  ;# Default output file name
+set print_filename "/tmp/logpl.ps"  ;# Default output file name
 set print_destination 0  ;# 0=Printer, 1=File
 set print_command 0      ;# 0=lpr, 1=psprint, 2=lpr disabled, 3=psprint disabled
 set print_overwrite 3    ;# 0=Yes, 1=No, 2=Yes disabled, 3=No disabled
