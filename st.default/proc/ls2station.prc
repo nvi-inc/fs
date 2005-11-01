@@ -161,10 +161,12 @@ sy=fs.prompt "bank/vsn '$' should be changed"  &
 xdisp=on
 "the disk module that is not selected may now be replaced.
 "
-"the mark5 will not respond to commands from the fs
-" for almost 20 seconds after the key is turned to "locked".
-" turn the key to "locked" only when the FS will be
-" idle for more than 20 seconds.
+"the mark5 will stop recording momentarily when the key is turned to
+" either "locked" or "unlocked" and it will not respond to commands
+" from the fs for almost 20 seconds after the key is turned to
+" "locked". turn the key to "unlocked" only when not recording.
+" turn the key to "locked" only when the mark5 is not recording
+" and when the fs will be idle for at least 20 more seconds.
 wakeup 
 xdisp=off
 enddef   
@@ -175,3 +177,6 @@ define  checkk5       00000000000
 enddef
 define  ready_k5      00000000000 
 enddef
+define  greplog       00000000000x
+sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+enddef   
