@@ -208,6 +208,12 @@ static  struct {
   {"ut1-utc", T_UT1_UTC},
   {"x_wobble", T_X_WOBBLE},
   {"y_wobble", T_Y_WOBBLE},
+  {"nut_ref_epoch", T_NUT_REF_EPOCH},
+  {"num_nut_points", T_NUM_NUT_POINTS},
+  {"nut_interval", T_NUT_INTERVAL},
+  {"delta_psi", T_DELTA_PSI},
+  {"delta_eps", T_DELTA_EPS},
+  {"nut_model", T_NUT_MODEL},
   
   {"exper_num", T_EXPER_NUM},
   {"exper_name", T_EXPER_NAME},
@@ -876,6 +882,8 @@ char **units)
   case T_A1_TAI:
   case T_NUM_EOP_POINTS:
   case T_EOP_INTERVAL:
+  case T_NUM_NUT_POINTS:
+  case T_NUT_INTERVAL:
   case T_EXPER_NUM:
   case T_TAPE_CHANGE:
   case T_HEADSTACK_MOTION:
@@ -904,6 +912,7 @@ char **units)
     break;
   case T_START:
   case T_EOP_REF_EPOCH:
+  case T_NUT_REF_EPOCH:
   case T_EXPER_NOMINAL_START:
   case T_EXPER_NOMINAL_STOP:
   case T_ORBIT_EPOCH:
@@ -914,6 +923,7 @@ char **units)
   case T_RECORD_TRANSPORT_TYPE:
   case T_ELECTRONICS_RACK_TYPE:
   case T_TAPE_CONTROL:
+  case T_NUT_MODEL:
   case T_EXPER_NAME:
   case T_EXPER_DESCRIPTION:
   case T_PI_NAME:
@@ -973,6 +983,8 @@ char **units)
   case T_UT1_UTC:
   case T_X_WOBBLE:
   case T_Y_WOBBLE:
+  case T_DELTA_PSI:
+  case T_DELTA_EPS:
   case T_S2_GROUP_ORDER:
   case T_ROLL_DEF:
   case T_HORIZON_MAP_AZ:
