@@ -751,6 +751,24 @@ create_x_wobble(char *str, char *str2);
 
 void *
 create_y_wobble(char *str, char *str2);
+
+void *
+create_nut_ref_epoch(char *str);
+
+void *
+create_num_nut_points(char *str);
+
+void *
+create_nut_interval(char *str, char *str2);
+
+void *
+create_delta_psi(char *str, char *str2);
+
+void *
+create_delta_eps(char *str, char *str2);
+
+void *
+create_nut_model(char *str);
 /*---------------------------------------------------------------------------*/
 /* EXPER block builders                                                      */
 /*---------------------------------------------------------------------------*/
@@ -948,10 +966,13 @@ create_site_velocity(char *str, char *str2, char *str3, char *str4,
 		     char *str5, char *str6);
 
 void *
-create_horizon_map_az(char *str, char *str2);
+create_horizon_map(char *str, char *str2);
 
 void *
-create_horizon_map_el(char *str, char *str2);
+create_horizon_map_az();
+
+void *
+create_horizon_map_el();
 
 void *
 create_horizon_map_list(char *str);

@@ -904,6 +904,12 @@ $EOP; *earth-orientation parameters
     ut1-utc = 0.1039 sec : 0.1052 sec : 0.1064 sec : 0.1078 sec : 0.1084 sec;
     x_wobble = 0.231 asec : 0.232 asec : 0.233 asec : 0.234 asec : 0.235 asec;
     y_wobble = -.123 asec : -.124 asec : -0.125 asec : -0.126 asec : -0.127 asec;
+    nut_ref_epoch = 1995y128d;
+    num_nut_points = 4;
+    nut_interval = 48 hr;
+    delta_eps = 0.331 asec : 0.332 asec : 0.333 asec : 0.334 asec : 0.335;
+    delta_psi = 0.431 asec : 0.432 asec : 0.433 asec : 0.434 asec : 0.435;
+    nut_model = IAU1980;
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------

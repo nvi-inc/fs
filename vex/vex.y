@@ -94,6 +94,8 @@ struct s2_data_source  *dsptr;
 
 %token <ival>   T_TAI_UTC T_A1_TAI T_EOP_REF_EPOCH T_NUM_EOP_POINTS
 %token <ival>   T_EOP_INTERVAL T_UT1_UTC T_X_WOBBLE T_Y_WOBBLE
+%token <ival>   T_NUT_REF_EPOCH T_NUM_NUT_POINTS T_NUT_INTERVAL T_DELTA_PSI
+%token <ival>   T_DELTA_EPS T_NUT_MODEL
 
 %token <ival>   T_EXPER_NUM T_EXPER_NAME T_EXPER_NOMINAL_START 
 %token <ival>   T_EXPER_NOMINAL_STOP T_PI_NAME T_PI_EMAIL T_CONTACT_NAME 
@@ -215,6 +217,10 @@ struct s2_data_source  *dsptr;
 %type  <dvptr>  tai_utc a1_tai num_eop_points eop_interval
 %type  <sval>   eop_ref_epoch
 %type  <llptr>  ut1_utc x_wobble y_wobble
+%type  <sval>   nut_ref_epoch
+%type  <dvptr>  num_nut_points nut_interval
+%type  <llptr>  delta_psi delta_eps
+%type  <sval>   nut_model
 
 %type  <llptr>  exper_block exper_defs exper_lowls 
 %type  <dfptr>  exper_def
@@ -745,6 +751,12 @@ eop_lowl:	tai_utc			{$$=make_lowl(T_TAI_UTC,$1);}
 		| ut1_utc		{$$=make_lowl(T_UT1_UTC,$1);}
 		| x_wobble		{$$=make_lowl(T_X_WOBBLE,$1);}
 		| y_wobble		{$$=make_lowl(T_Y_WOBBLE,$1);}
+		| nut_ref_epoch		{$$=make_lowl(T_NUT_REF_EPOCH,$1);}
+		| num_nut_points	{$$=make_lowl(T_NUM_NUT_POINTS,$1);}
+		| nut_interval  	{$$=make_lowl(T_NUT_INTERVAL,$1);}
+		| delta_psi          	{$$=make_lowl(T_DELTA_PSI,$1);}
+		| delta_eps          	{$$=make_lowl(T_DELTA_EPS,$1);}
+		| nut_model     	{$$=make_lowl(T_NUT_MODEL,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -767,6 +779,20 @@ x_wobble:	T_X_WOBBLE '=' unit_list ';'	{$$=$3;}
 ;
 y_wobble:	T_Y_WOBBLE '=' unit_list ';'	{$$=$3;}
 		| T_Y_WOBBLE '=' ';'		{$$=NULL;}
+;
+nut_ref_epoch:	T_NUT_REF_EPOCH '=' T_NAME ';'	{$$=$3;}
+;
+num_nut_points:	T_NUM_NUT_POINTS '=' value ';'	{$$=$3;}
+;
+nut_interval:	T_NUT_INTERVAL '=' unit_value ';'	{$$=$3;}
+;
+delta_psi:      T_DELTA_PSI '=' unit_list ';'	{$$=$3;}
+		| T_DELTA_PSI '=' ';'		{$$=NULL;}
+;
+delta_eps:      T_DELTA_EPS '=' unit_list ';'	{$$=$3;}
+		| T_DELTA_EPS '=' ';'		{$$=NULL;}
+;
+nut_model:	T_NUT_MODEL '=' T_NAME ';'	{$$=$3;}
 ;
 /* $EXPER block */
 
