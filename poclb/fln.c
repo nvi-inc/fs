@@ -74,6 +74,9 @@ struct pmdl *pmodel;
     case 17:
       if (pmodel->ipar[17] != 0) f=sin2x;
       break;
+  default:
+    f=0.0;
+    break;
  } 
     return f;
 }

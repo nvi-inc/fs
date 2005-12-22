@@ -16,14 +16,16 @@ double x,y;
 struct pmdl *pmodel;
 
 {
-  double f,cosx,cosy,sinx,siny,sinl,cosl,cos2x,sin2x;
+  double f,cosx,cosy,sinx,siny,sinl,cosl,cos2x,sin2x,cos8y,sin8y;
  
   cosx=cos(x);
   cosy=cos(y);
   cos2x=cos(2.0*x);
+  cos8y=cos(8.0*y);
   sinx=sin(x);
   siny=sin(y);
   sin2x=sin(2.0*x);
+  sin8y=sin(8.0*y);
   sinl=sin(pmodel->phi);
   cosl=cos(pmodel->phi);
   f=0.0;
@@ -39,6 +41,10 @@ struct pmdl *pmodel;
       if (pmodel->ipar[10] != 0) f=f+pmodel->pcof[10]*siny;
       if (pmodel->ipar[14] != 0) f=f+pmodel->pcof[14]*cos2x;
       if (pmodel->ipar[15] != 0) f=f+pmodel->pcof[15]*sin2x;
+      if (pmodel->ipar[18] != 0) f=f+pmodel->pcof[18]*cos8y;
+      if (pmodel->ipar[19] != 0) f=f+pmodel->pcof[19]*sin8y;
+      if (pmodel->ipar[20] != 0) f=f+pmodel->pcof[20]*cosx;
+      if (pmodel->ipar[21] != 0) f=f+pmodel->pcof[21]*sinx;
       break;
     case 4:
       if (pmodel->ipar[ 4] != 0) f=cosx;
@@ -67,6 +73,21 @@ struct pmdl *pmodel;
     case 15:   
       if (pmodel->ipar[15] != 0) f=sin2x;
       break;
+    case 18:   
+      if (pmodel->ipar[18] != 0) f=cos8y;
+      break;
+    case 19:   
+      if (pmodel->ipar[19] != 0) f=sin8y;
+      break;
+    case 20:   
+      if (pmodel->ipar[20] != 0) f=cosx;
+      break;
+    case 21:   
+      if (pmodel->ipar[21] != 0) f=sinx;
+      break;
+  default:
+    f=0.0;
+    break;
   }
   return f;
 }

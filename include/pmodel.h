@@ -3,7 +3,7 @@
  * pointing model data structure definition file
  */
 
-#define MAX_MODEL_PARAM 20
+#define MAX_MODEL_PARAM 30
  
   struct pmdl {
   double pcof[MAX_MODEL_PARAM];
