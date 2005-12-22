@@ -1,5 +1,6 @@
       program error
 C
+      include '../include/params.i'
       include '../include/dpi.i'
 C
       logical kinit,kgpnt,kopn,koutp,kpst,kplin,kpdat,kpout_ch,kpfit
@@ -15,18 +16,25 @@ C
       real ltofr,lnofr
       double precision latr,lonr
 C
-      external fln,flt0
-      double precision fln,flt0
+      external fln1,flt1
+      double precision fln1,flt1
 C
+      integer MAX_ELEMENTS
+      PARAMETER (MAX_ELEMENTS=(MAX_MODEL_PARAM*(MAX_MODEL_PARAM+1))/2)
+c
       character*64 iibuf,iobuf,imbuf
       dimension ireg(2),ldum(3)
       integer*2 jbuf(60),lant(4),laxis(2)
       dimension lon(600),lat(600),wln(600),wlt(600)
       dimension lonoff(600),latoff(600),luse(32)
       dimension latres(600),lonres(600)
-      dimension idcbo(2),it(6),ipar(20),ito(6),ispar(20)
-      double precision pcof(20),pcofer(20),phi,spcof(20)
-      double precision a(210),b(20),aux(20),scale(20),ddum, c(210)
+      dimension idcbo(2),it(6),ipar(MAX_MODEL_PARAM),ito(6)
+      dimension ispar(MAX_MODEL_PARAM)
+      double precision pcof(MAX_MODEL_PARAM),pcofer(MAX_MODEL_PARAM),phi
+      double precision spcof(MAX_MODEL_PARAM)
+      double precision a(MAX_ELEMENTS),b(MAX_MODEL_PARAM)
+      double precision aux(MAX_MODEL_PARAM)
+      double precision scale(MAX_MODEL_PARAM),ddum, c(MAX_ELEMENTS)
 C
       equivalence (ireg,reg)
 C
@@ -39,8 +47,8 @@ C
 C          too man input points, limit is
       data lnopt  /  15,2hno,2h i,2hnp,2hut,2h p,2hoi,2hnt,2hs /
 C          no input points
-      data il/50/,mpts/600/,mpar/20/,itry/-1/,tol/1e-3/
-      data mc/5/,npar/20/
+      data il/50/,mpts/600/,mpar/MAX_MODEL_PARAM/,itry/-1/,tol/1e-3/
+      data mc/5/,npar/MAX_MODEL_PARAM/
       data feclon/0.0/,feclat/0.0/
 C
       call fc_setup_ids
@@ -50,8 +58,21 @@ c
 C
       if (kinit(lu,iibuf,iobuf,iapp,imbuf,lst)) goto 10010
 C
+      do i=1,mpar
+         ipar(i)=-1
+      enddo
       if (kgetm(lu,imbuf,jbuf,il,idcbo,idcbos,pcof,mpar,ipar,phi,
      +         imdl,ito)) goto 10010
+      do i=1,mpar
+         if(ipar(i).eq.-1) then
+            mpar=i-1
+            do j=i,MAX_MODEL_PARAM
+               ipar(j)=0
+            enddo
+            goto 5
+         endif
+      enddo
+ 5    continue
 C
       call fmpopen(idcbo,iibuf,ierr,'r+',idcbos)
       if (kopn(lu,ierr,iibuf,0)) goto 10010
@@ -150,8 +171,8 @@ C
       enddo
 C
       do i=1,inp
-        lonoff(i)=lonoff(i)+fln(0,lon(i),lat(i),pcof,ipar,phi)
-        latoff(i)=latoff(i)+flt0(0,lon(i),lat(i),pcof,ipar,phi)
+        lonoff(i)=lonoff(i)+fln1(0,lon(i),lat(i),pcof,ipar,phi)
+        latoff(i)=latoff(i)+flt1(0,lon(i),lat(i),pcof,ipar,phi)
         coslt=cos(lat(i))
         distr=sqrt(lonoff(i)*lonoff(i)*coslt*coslt+latoff(i)*latoff(i))
 C
@@ -205,7 +226,7 @@ C
      .    write(lst,9905) itryfe,feclon*rad2deg,feclat*rad2deg
 9905    format(' iteration ',i3,'       fec:',2(1x,f10.5))
         call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
-     +   phi,aux,scale,a,b,npar,tol,itry,fln,flt0,rchi,rlnnr,rltnr,
+     +   phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
      +   nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
       enddo
       iftry=0
@@ -213,7 +234,7 @@ C
       feclon=0.0
       feclat=0.0
       call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
-     + phi,aux,scale,a,b,npar,tol,itry,fln,flt0,rchi,rlnnr,rltnr,
+     + phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
      + nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
 211   continue
 C
@@ -273,7 +294,7 @@ C
         wln1=rchi*sqrt(wln(i)*wln(i)+sign(feclon*feclon,feclon))
         wlt1=rchi*sqrt(wlt(i)*wlt(i)+sign(feclat*feclat,feclat))
         call apost(lon(i),lat(i),aux,wln(i),wlt(i),par,ipar,phi,a,npar,
-     +       fln,flt0,feclon,feclat,rchi,apos1,apos2)
+     +       fln1,flt1,feclon,feclat,rchi,apos1,apos2)
         if (kpdat2(lu,idcbo,kuse,lon(i),lat(i),lonres(i),latres(i),
      +     distr,wln1,wlt1,apos1,apos2,mc,iobuf,lst,jbuf,il)) goto 10000
       enddo
