@@ -8,7 +8,7 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       35*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       47*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
