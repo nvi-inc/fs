@@ -137,7 +137,7 @@ set plotsize [expr double($plotsize)]
 # --------------------------------------------------------------------
 
 set flagColumns 10
-set flagRows 2
+set flagRows 3
 
 
 # ============================================================================
@@ -149,7 +149,6 @@ set flagRows 2
 #   separated ASCII files read from disk.
 #
 # ============================================================================
-
 # Procedure to read "error" and "xtrac" files to memory
 # -----------------------------------------------------
 
@@ -1553,6 +1552,9 @@ while {-1 != [gets $temp line]} {
 	    if {$k==2} {
 		set flagList $line
 		split $flagList
+		if {([llength $flagList]<[expr $flagRows*$flagColumns+1])} {
+		    set flagRows [expr (([llength $flagList]-2)/$flagColumns)+1]
+		}
 		if {([llength $flagList]<=[expr $flagRows*$flagColumns+1])} {
 		    for {set p 0} {($p<=[expr $flagRows*$flagColumns+1])} {incr p} {
 			set flagArray($p) [lindex $flagList $p]
@@ -1599,7 +1601,7 @@ set current_MDLPO $current_FLAGFILE
 # ---------------------------------------
 
 proc paramExplain {} {
-global XPointLabel YPointLabel
+global XPointLabel YPointLabel flagRows flagColumns
 
 if {([string index $XPointLabel 0] == "A") && ([string index $XPointLabel 1] == "z")} {
     set XFlagLabel "AZ"
@@ -1621,7 +1623,7 @@ label .explanation.param4 -text "Parameter 4:Box Offset"
 label .explanation.param5 -text "Parameter 5:Tilt Out (tilt of ${YFlagLabel}=+90 toward \
 	{$XFlagLabel},{$YFlagLabel}=(0,0))"
 label .explanation.param6 -text "Parameter 6:Tilt Over (tilt of ${YFlagLabel}=+90 toward \
-	{$XFlagLabel},{$YFlagLabel}=(0,0))"
+	{$XFlagLabel},{$YFlagLabel}=(+90,0))"
 label .explanation.param7 -text "Parameter 7:${YFlagLabel}-angle Encoder Offset"
 label .explanation.param8 -text "Parameter 8:${YFlagLabel}-angle Sag"
 label .explanation.param9 -text "Parameter 9:ad hoc ${YFlagLabel}-angle Slope (degrees/radian)"
@@ -1638,8 +1640,28 @@ label .explanation.param15 -text "Parameter 15:ad hoc delta${YFlagLabel}cos2${XF
 	Coefficient"
 label .explanation.param16 -text "Parameter 16:ad hoc delta${YFlagLabel}sin2${XFlagLabel} \
 	Coefficient"
+label .explanation.param17 -text "Parameter 17:ad hoc delta${XFlagLabel}cos2${XFlagLabel} \
+	Coefficient"
+label .explanation.param18 -text "Parameter 18:ad hoc delta${XFlagLabel}sin2${XFlagLabel} \
+	Coefficient"
+label .explanation.param19 -text "Parameter 19:ad hoc delta${YFlagLabel}cos8${YFlagLabel} \
+	Coefficient"
+label .explanation.param20 -text "Parameter 20:ad hoc delta${YFlagLabel}sin8${YFlagLabel} \
+	Coefficient"
+label .explanation.param21 -text "Parameter 21:ad hoc delta${YFlagLabel}cos${XFlagLabel} \
+	Coefficient"
+label .explanation.param22 -text "Parameter 22:ad hoc delta${YFlagLabel}sin${XFlagLabel} \
+	Coefficient"
+label .explanation.param23 -text "Parameter 23:unused (zero)"
+label .explanation.param24 -text "Parameter 24:unused (zero)"
+label .explanation.param25 -text "Parameter 25:unused (zero)"
+label .explanation.param26 -text "Parameter 26:unused (zero)"
+label .explanation.param27 -text "Parameter 27:unused (zero)"
+label .explanation.param28 -text "Parameter 28:unused (zero)"
+label .explanation.param29 -text "Parameter 29:unused (zero)"
+label .explanation.param30 -text "Parameter 30:unused (zero)"
 
-for {set i 1} {$i<=16} {incr i} {
+for {set i 1} {$i<=[expr $flagRows*$flagColumns]} {incr i} {
     pack .explanation.param$i -in .explanation -side top -anchor w
 }
 button .explanation.okButton -text "OK" -command {destroy .explanation}
@@ -1663,8 +1685,14 @@ frame .controlWindow.buttons
 # Create the text inside the modifier window
 # ------------------------------------------
 
+    set params [expr $flagColumns * $flagRows ]
 label .controlWindow.instructions -text "Please choose one flag(0-4) for each \
-	parameter(1-20)"
+	parameter(1-$params)"
+    if {$params <= 20} {
+label .controlWindow.empty0
+       label .controlWindow.instructions2 -text "WARNING: THIS LEGACY MODEL FILE ONLY SUPPORTS $params PARAMETERS"
+    }
+
 label .controlWindow.empty1
 label .controlWindow.flagZero -text "Flag 0: This parameter is not in use."
 label .controlWindow.flagOne -text "Flag 1: This parameter is in use."
@@ -1674,10 +1702,16 @@ label .controlWindow.flagThree -text "Flag 3: Update 3's only, hardwire 1's and 
 label .controlWindow.flagFour -text "Flag 4: This parameter is used in current model, but \
 	don't use in new model."
 label .controlWindow.empty2
+    if {$params <= 20} {
+pack .controlWindow.instructions .controlWindow.empty0 \
+   .controlWindow.instructions2 .controlWindow.empty1 .controlWindow.flagZero \
+	.controlWindow.flagOne .controlWindow.flagTwo .controlWindow.flagThree \
+	.controlWindow.flagFour .controlWindow.empty2 -in .controlWindow.text -side top -anchor w 
+    } else {
 pack .controlWindow.instructions .controlWindow.empty1 .controlWindow.flagZero \
 	.controlWindow.flagOne .controlWindow.flagTwo .controlWindow.flagThree \
 	.controlWindow.flagFour .controlWindow.empty2 -in .controlWindow.text -side top -anchor w 
-
+    }
 # Create the buttons for the modifier window
 # ------------------------------------------
 
