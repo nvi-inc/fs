@@ -52,8 +52,12 @@ char names[MAXRX][256], *work;
     } else 
       *ierr=-999; 
     if(*ierr!=0) {
-      printf(" ierr = %d on %s\n",*ierr,outbuf);
-      return;
+      if(*ierr == -715) {
+        printf("too many tcal table entires, max is %d, file was %s\n",
+          MAX_TCAL,outbuf);
+      } else
+        printf(" ierr = %d on %s\n",*ierr,outbuf);
+      return -1;
     }
   }
   *ierr=0;
