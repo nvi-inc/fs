@@ -11,9 +11,11 @@ C
 C
       integer*2   lrerr(10)
       integer*2   lpeof(25)
-      integer*2   leerr(11)
+      integer*2   leerr(15)
       integer*2   lderr(23)
+      integer*2   l2mny(13)
       integer fmpread,ichcm_ch
+      double precision f
 C
 C   OPEN THE DATA FILE
 C
@@ -23,19 +25,23 @@ C          reading record
      /             2Hil,2He ,2Hbe,2Hfo,2Hre,2H r,2Hea,2Hdi,2Hng,2H r,
      /             2Hec,2Hor,2Hd ,2H  ,2H_ /
 C          premature end-of-file before reading record
-      data leerr  /  19,2Hex,2Htr,2Ha ,2Hre,2Hco,2Hrd,2H f,2Hou,2Hnd,
-     /             2H_ /
-C          extra record found
+      data leerr  /  28,2Hex,2Htr,2Ha ,2Hpa,2Hra,2Hme,2Hte,2Hr ,2Hfl,
+     /             2Hag,2Hs ,2Hfo,2Hun,2Hd_/
+C          extra parameter flags found
       data lderr  /  44,2Hfi,2Hel,2Hd ,2H  ,2H i,2Hn ,2Hre,2Hco,2Hrd,
      /             2H  ,2H  ,2H c,2Hou,2Hld,2H n,2Hot,2H b,2He ,2Hde,
      /             2Hco,2Hde,2Hd_/
 C          field    in record     could not be decoded
+      data l2mny  /  23,2Hex,2Htr,2Ha ,2Hpa,2Hra,2Hme,2Hte,2Hrs,2h f,
+     /             2Hou,2Hnd,2h_ /
+C          extra parameters found
 
       call fmpopen(idcb,imbuf,ierr,'r',idum)
       if (kopn(lut,ierr,imbuf,4)) goto 9000
 C
       irec=0
       iline=0
+      npar=0
 50    continue
       len = fmpread(idcb,ierr,jbuf,il*2)
       if (ierr.ne.0) goto 8005
@@ -47,7 +53,8 @@ C
       ifc=1
       ifield=0
       iferr=0
-      goto (100,200,300,300,300,300),  irec
+      goto (100,200),  irec
+      goto 300
 C
 C  MODEL # AND DATE
 C
@@ -67,18 +74,37 @@ C
 200   continue
       phi=gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
       do i=1,mpar
+         ifc1=ifc
+         ilc1=ilc
+         call gtfld(jbuf,ifc1,ilc1,ic1,ic2)
+         if(ic1.le.0) then
+            maxpar=i-1
+c
+c   don't turn off remaining flags, so caller can detect actual model size
+c
+c            do j=maxpar,mpar
+c               ipar(j)=0
+c            enddo
+            goto 50
+         endif
         ipar(i)=igtbn(jbuf,ifc,ilc,ifield,iferr)
       enddo
       if (iferr.ne.0) goto 8020
+      idum=igtbn(jbuf,ifc,ilc,ifield,iferr)
+      if(iferr.eq.0) goto 400
+      maxpar=mpar
       goto 50
 C
 300   continue
       iline=iline+1
       do i=(iline-1)*5+1,iline*5
-        pcof(i) = gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
-        if (iferr.ne.0) goto 8020
+        f = gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
+        if(i.le.maxpar.and.iferr.ne.0) goto 8020
+        if(i.gt.maxpar.and.iferr.eq.0) goto 8040
+        if(iferr.ne.0) goto 50
+        pcof(i) = f
+        npar=i
       enddo
-      if (iline.eq.4) goto 9000
       goto 50
 C
 400   continue
@@ -96,6 +122,7 @@ C
 C PREMATURE END OF FILE
 C
 8010  continue
+      if(irec.ge.3.and.npar.eq.maxpar) goto 9000
       inc=ib2as(irec+1,lpeof(2),45,2)
       kdum=kfmp(lut,0,lpeof(2),lpeof(1),imbuf,0,1)
       ierr=-12
@@ -108,6 +135,13 @@ C
       inc=ib2as(irec,lderr(2),20,3)
       kdum=kfmp(lut,0,lderr(2),lderr(1),imbuf,0,1)
       ierr=iferr
+      goto 9000
+C
+C TOO MANY PARAMETERS
+C
+8040  continue
+      kdum=kfmp(lut,0,l2mny(2),lderr(1),imbuf,0,1)
+      ierr=-13
       goto 9000
 C
 9000  continue
