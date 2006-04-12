@@ -34,8 +34,8 @@ long ip[5];                           /* ipc parameters */
 	str="in2net?\n";
 	cls_snd(&out_class, str, strlen(str) , 0, 0);
 	out_recs++;
-	goto mk5cn;
 	query=TRUE;
+	goto mk5cn;
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
 	if (*command->argv[0]=='?') {
