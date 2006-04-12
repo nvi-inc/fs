@@ -2,20 +2,20 @@
 
             Syntax:     in2net=control,destination,options
 
-            Response:   in2net/control,destination,options,status,
-                               received,buffered
+            Response:   in2net/control,destination,options,received,
+                               buffered
 
 
 Settable Parameters:
           control     on to start transfer, off to end, connect to establish
-                      connection, disconnect to close connection
+                      connection, disconnect to close connection, monitor
+                      values are inactive, connected, sending
           destination destination IP address or node name to transfer to,
                       IP address is more robust against name server problems,
-                      maximum 64 characters, no default
+                      maximum 32 characters, no default
           options     Currently ignored, maximum 32 characters
 
 Monitor-only parameters:
-          status      inactive, connected, sending
           received    number of bytes transferred from input since connect
           buffered    bytes remaining in outgoing buffer
 
