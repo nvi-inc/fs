@@ -2,11 +2,11 @@
 
 struct disk2file_cmd {
   struct {
-    char scan_name[17];
+    char scan_label[65];
     struct m5state state;
-  } scan_name;
+  } scan_label;
   struct {
-    char destination[65];
+    char destination[129];
     struct m5state state;
   } destination ;
   struct {
@@ -41,7 +41,7 @@ struct disk2file_mon {
     struct m5state state;
   } end_byte;
   struct {
-    char status[65];
+    char status[33];
     struct m5state state;
   } status;
   struct {

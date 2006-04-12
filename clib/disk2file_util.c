@@ -25,18 +25,17 @@ char *ptr;
 
     switch (*count) {
       case 1:
-	if(strlen(ptr)>sizeof(lcl->scan_name.scan_name)-1)
+	if(strlen(ptr)>sizeof(lcl->scan_label.scan_label)-1 ||
+	   strlen(ptr)>63)
 	  ierr=-200;
 	else
-	  strcpy(lcl->scan_name.scan_name,ptr);
-	lcl->scan_name.state.known=1;
-	lcl->scan_name.state.error=0;
+	  strcpy(lcl->scan_label.scan_label,ptr);
+	lcl->scan_label.state.known=1;
+	lcl->scan_label.state.error=0;
         break;
       case 2:
 	if(strlen(ptr)>sizeof(lcl->destination.destination)-1)
 	  ierr=-200;
-	else if(strlen(ptr)==0)
-	  ierr=-100;
 	else
 	  strcpy(lcl->destination.destination,ptr);
 	lcl->destination.state.known=1;
@@ -87,7 +86,8 @@ struct disk2file_cmd *lcl;
 
     switch (*count) {
     case 1:
-      m5sprintf(output,"%s",&lcl->scan_name.scan_name,&lcl->scan_name.state);
+      m5sprintf(output,"%s",&lcl->scan_label.scan_label,
+	        &lcl->scan_label.state);
       break;
     case 2:
       m5sprintf(output,"%s",&lcl->destination.destination,
@@ -160,7 +160,7 @@ struct disk2file_cmd *lcl;
 
   strcpy(ptr,"scan_set = ");
 
-  strcat(ptr,lcl->scan_name.scan_name);
+  strcat(ptr,lcl->scan_label.scan_label);
 
   strcat(ptr," : ");
 
@@ -206,7 +206,7 @@ m5_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
     goto error;
   }
 
-  m5state_init(&lclc->scan_name.state);
+  m5state_init(&lclc->scan_label.state);
   m5state_init(&lclc->destination.state);
   m5state_init(&lclc->start.state);
   m5state_init(&lclc->end.state);
@@ -350,28 +350,28 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
 	}
 	break;
       case 2:
-	if(m5string_decode(ptr,lclc->scan_name.scan_name,
-			   sizeof(lclc->scan_name.scan_name),
-			   &lclc->scan_name.state)) {
+	if(m5string_decode(ptr,lclc->scan_label.scan_label,
+			   sizeof(lclc->scan_label.scan_label),
+			   &lclc->scan_label.state)) {
 	  ierr=-512;
 	  goto error2;
 	}
 	break;
       case 3:
-	if(0 == lclm->start_byte.state.known)
-	  if(m5sscanf(ptr,"%Ld",&lclm->start_byte.start_byte,
-		      &lclm->start_byte.state)) {
-	    ierr=-513;
-	    goto error2;
-	  }
+	if(m5string_decode(ptr,lclc->start.start,
+			   sizeof(lclc->start.start),
+			   &lclc->start.state)) {
+	  ierr=-513;
+	  goto error2;
+	}
 	break;
       case 4:
-	if(0 == lclm->end_byte.state.known)
-	  if(m5sscanf(ptr,"%Ld",&lclm->end_byte.end_byte,
-		      &lclm->end_byte.state)) {
-	    ierr=-514;
-	    goto error2;
-	  }
+	if(m5string_decode(ptr,lclc->end.end,
+			   sizeof(lclc->end.end),
+			   &lclc->end.state)) {
+	  ierr=-514;
+	  goto error2;
+	}
 	break;
       default:
 	goto done;
