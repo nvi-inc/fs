@@ -12,10 +12,14 @@ Monitor-only parameters:
               response      response from the Mark 5.
 
 
-Comments:
-Multiple commands  can be sent with one mk5 command by
+Comments: Multiple commands can be sent with one mk5 command by
 separating them with commas. The responses for each command are
-separated by commas.
+displayed in separate output records. Output records, including the
+operator display time-tag are formatted to fit within the 99 columns
+of standard operator display window (Login Shell) Responses that are
+too long for this are split into multiple lines, preferentially at
+colons, commas, and spaces in that order. If all other options fail
+an arbitrary break is made.
 
 Please refer to the Mark 5 command set document for details
 on available commands and their responses.
