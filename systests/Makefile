@@ -1,6 +1,6 @@
 #
-all: ../bin/pcalamp ../bin/pcalimage ../bin/pcalpower ../bin/pcalspur ../bin/samplestat\
-../bin/plotlog
+all: ../bin/pcalamp ../bin/pcalimage ../bin/pcalpower ../bin/pcalspur\
+ ../bin/samplestat ../bin/plotlog ../bin/chk1024
 #
 ../bin/pcalamp: pcalamp
 	rm -f ../bin/pcalamp
@@ -25,3 +25,7 @@ all: ../bin/pcalamp ../bin/pcalimage ../bin/pcalpower ../bin/pcalspur ../bin/sam
 ../bin/plotlog: plotlog
 	rm -f ../bin/plotlog
 	ln -s ../systests/plotlog ../bin/plotlog
+#
+../bin/chk1024: chk1024
+	rm -f ../bin/chk1024
+	ln -s ../systests/chk1024 ../bin/chk1024
