@@ -94,7 +94,7 @@ However, the setup of the formatter can be monitored by
 entering a form command. If any of the displayed values do not
 agree with the last value commanded, then the formatter is not
 in the last commanded state. In particular the BAD_VALUE
-response indicates that the formatter state does agree with
+response indicates that the formatter state does not agree with
 what was commanded.
 
 The default value of 3 for synch  is the most lenient value,
