@@ -95,20 +95,20 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
       switch (++count) {
       case 1:
 	if(m5sscanf(ptr,"%ld",&lclm->scan.scan, &lclm->scan.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
       case 2:
 	if(m5string_decode(ptr,&lclm->label.label,sizeof(lclm->label.label),
 		  &lclm->label.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 3:
 	if(m5string_decode(ptr,&lclm->mode.mode,sizeof(lclm->mode.mode),
 		  &lclm->mode.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	if(0 == lclm->mode.state.known)
@@ -118,31 +118,31 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
 	if(m5string_decode(ptr,&lclm->submode.submode,
 			   sizeof(lclm->submode.submode),
 			   &lclm->submode.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 5:
 	if(m5time_decode(ptr,&lclm->start.start, &lclm->start.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 6:
 	if(m5time_decode(ptr,&lclm->length.length, &lclm->length.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 7:
 	if(m5sscanf(ptr,"%f",&lclm->rate.rate, &lclm->rate.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 8:
 	if(m5sscanf(ptr,"%Ld",&lclm->missing.missing, &lclm->missing.state)) {
-	  ierr=-500+(1-count);
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
