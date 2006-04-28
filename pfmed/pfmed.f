@@ -63,6 +63,7 @@ C
       character*102 cib 
       character*102 cibin
       character*12 ibsrt(MAX_PROC2) ! 010812 
+      character*64 fname
       integer*4 nprc            ! 010815 
 C
       data ccol   /'pfmed: '/
@@ -201,6 +202,53 @@ C       call char2low(cib)
 C     If EX or ::, exit.
         if (cib.eq.'ex'.or.cib.eq.'::'.or.cib.eq.'exit'.or.
      &        cib.eq.'quit'.or.cib.eq.'qu') go to 900
+c
+        if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
+     &       cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
+     &       cib.eq.'emacs'.or.cib(1:6).eq.'emacs,'.or.
+     &       cib.eq.'edit'.or.cib(1:5).eq. 'edit,'.or.
+     &       cib.eq.'pu'.or.cib(1:3).eq.'pu,'.or.
+     &       cib.eq.'rn'.or.cib(1:3).eq.'rn,'.or.
+     &       cib.eq.'st'.or.cib(1:3).eq.'st,'
+     &       ) then
+           nch = trimlen(lproc)
+           if(nch.le.0) then
+              write(6,*) 'pfmed: 1 illegal filename length',nch
+              goto 100
+           else
+              fname = FS_ROOT //'/proc/' // lproc(:nch) // '.prc'
+           endif
+           call ftn_rw_perm(fname,iperm,ierr)
+           if(ierr.ne.0) then
+             write(6,*) 'pfmed: error checking file permissions: '//
+     &             fname(:max(1,trimlen(fname)))
+              goto 100
+           else if(iperm.eq.0) then
+              write(6,*) 'This command is not permitted because you ',
+     &             'don''t have sufficent permission for'
+              write(6,*) 'library ',lproc(:nch),'.'
+              if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
+     &             cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
+     &             cib.eq.'emacs'.or.cib(1:6).eq.'emacs,'.or.
+     &             cib.eq.'edit'.or.cib(1:5).eq. 'edit,') then
+                 call ftn_r_perm(fname,iperm,ierr)
+                 if(ierr.ne.0) then
+                   write(6,*) 'pfmed: error checking file permissions: '
+     &                   //fname(:max(1,trimlen(fname)))
+                    goto 100
+                 else if(iperm.eq.0) then
+                    write(6,*) 'Also insufficent permission to read.'
+                    goto 100
+                 else
+                    write(6,*) 'However, you may view the contents of ',
+     &        'a procedure, but if you modify it,',
+     &                   'your changes will be lost.' 
+                    write(6,'(a,$)') 'Press return to continue '
+                    read(5,'(a1)')idum
+                 endif
+              endif
+           endif  
+        endif
 C     Check mode.
         if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
      &       cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
@@ -252,9 +300,3 @@ cxx      if (knewpf.and.(ipgst(6hboss  ).ne.-1))
 cxx    .    call exec(10,6hboss  ,2hpf)
 C
       end
-
-
-
-
-
-
