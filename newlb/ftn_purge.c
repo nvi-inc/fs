@@ -1,6 +1,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -133,6 +135,96 @@ long *time;
         return;
      }
      *time=(long) sb.st_mtime;
+     *ierr=0;
+     return;
+}
+ftn_rw_perm__(path,perm,ierr,len)
+char *path;
+int len,*ierr;
+int *perm;
+{
+     struct stat sb;
+     char iname[MAX_NAME+1],*s1;
+     size_t n;
+     int fd;
+
+     if(len > MAX_NAME) {    /* make sure the name will fit */
+       *ierr=-2;
+       return;
+     }
+
+     n=len;                  /* copy the name and NULL terminate */
+     s1=strncpy(iname,path,n);
+     iname[len]='\0';
+
+     s1=strchr(iname,' ');    /* put a NULL in place of the first blank */
+     if(s1 != NULL) *s1='\0';
+
+     if(-1==(fd=open(iname,O_RDWR))) {
+       if(errno==EACCES) {
+	 *perm=0;
+	 *ierr=0;
+	 return;
+       } else {
+	 *ierr=-1;
+	 fprintf(stderr," ftn_rw_perm: error opening '%s' read-write\n",iname);
+	 perror(" ftn_rw_perm:");
+	 return;
+       }
+     }
+     if(-1==close(fd)) {
+	 *ierr=-3;
+	 fprintf(stderr," ftn_rw_perm: error closing '%s'\n",iname);
+	 perror(" ftn_rw_perm:");
+	 return;
+     }
+	 
+     *perm=1;
+     *ierr=0;
+     return;
+}
+ftn_r_perm__(path,perm,ierr,len)
+char *path;
+int len,*ierr;
+int *perm;
+{
+     struct stat sb;
+     char iname[MAX_NAME+1],*s1;
+     size_t n;
+     int fd;
+
+     if(len > MAX_NAME) {    /* make sure the name will fit */
+       *ierr=-2;
+       return;
+     }
+
+     n=len;                  /* copy the name and NULL terminate */
+     s1=strncpy(iname,path,n);
+     iname[len]='\0';
+
+     s1=strchr(iname,' ');    /* put a NULL in place of the first blank */
+     if(s1 != NULL) *s1='\0';
+
+     if(-1==(fd=open(iname,O_RDONLY))) {
+       if(errno==EACCES) {
+	 *perm=0;
+	 *ierr=0;
+	 return;
+       } else {
+	 *ierr=-1;
+	 fprintf(stderr," ftn_r_perm: error opening '%s' read-only\n",iname);
+	 perror(" ftn_r_perm:");
+	 return;
+       }
+     }
+     if(-1==close(fd)) {
+	 *ierr=-3;
+	 fprintf(stderr," ftn_r_perm: error closing '%s'\n",iname);
+	 perror(" ftn_r_perm:");
+	 return;
+     }
+	 
+     *perm=1;
      *ierr=0;
      return;
 }
