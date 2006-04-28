@@ -32,6 +32,8 @@ typedef struct {
       
 COMMAND commands[] = {
 
+  { "?",com_help,    "?                   Same as help"},
+  { "??",com_help,   "??                  Same as help"},
   { "::",com_thru,   "::                  End pfmed"},
   { "dl",com_thru,   "dl                  Display procedures in active library"},
   { "ds",com_thru,   "ds                  Display procedures, sorted"},
@@ -40,7 +42,8 @@ COMMAND commands[] = {
   { "emacs",com_thru,"emacs[,proc]        emacs editor"},
   { "ex",com_thru,   "ex                  End pfmed"},
   { "exit",com_thru, "exit                End pfmed"},
-  { "help",com_help, "help                Display this text" },
+  { "he",com_help,   "he                  Same as help" },
+  { "help",com_help, "help                Display this help text, same as: ?, ??, he"},
   { "li",com_thru,   "li,proc             List a procedure"},    
 
   { "pf",com_thru,   "pf,lib              Set active procedure library"},
