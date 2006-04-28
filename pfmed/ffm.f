@@ -135,6 +135,20 @@ C     Move second name if present.
           lnam2 = ib(ic2+1:ic2+nch2)
         end if
       endif
+      if(ib(3:4).eq.'pu'.or.ib(3:4).eq.'rn') then
+         pathname = '/usr2/proc/' // lnam1(1:nch1) // '.prc'
+         call ftn_rw_perm(pathname,iperm,ierr)
+         if(ierr.ne.0) then
+            write(6,*) 'ffm: error checking file permissions: '//
+     &           pathname(:max(1,trimlen(pathname)))
+            goto 920
+         else if(iperm.eq.0) then
+            write(6,*) 'This command is not permitted because you ',
+     &           'don''t have sufficent permission for'
+            write(6,*) 'library ',lnam1(:nch1)
+            goto 920
+         endif
+      endif
   
 C     PFCR - create new procedure file.
   
@@ -145,6 +159,13 @@ C     PFCR - create new procedure file.
           goto 920
         end if
         pathname = '/usr2/proc/' // lnam1(1:nch1) // '.prc'
+C  check to see if target exists already 
+        inquire (FILE=pathname,EXIST=kest)
+        if(kest) then
+          inch=trimlen(pathname)
+          write(lui,1113) pathname(:inch)
+          goto 920
+        end if
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
           goto 800
