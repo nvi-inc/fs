@@ -77,10 +77,14 @@ c        call exec(2,lui,lm6,-24)
         nch = trimlen(lp)
         if (nch.le.0) then
            write(6,*) 'pfcop: illegal filename length'
+           iret=-1
            return
         else
            call follow_link(lp(:nch),link,ierr)
-           if(ierr.ne.0) return
+           if(ierr.ne.0) then
+              iret=-1
+              return
+           endif
            if(link.ne.' ') then                 
               if(lfr(:4).eq.'.prx') then
                  iprc=index(link,".prc")
@@ -99,11 +103,21 @@ C     Open procedure file.
 9200      format(" pfcop file ",a," does not exist!!")
           iret = -1
         else
+           pathsave=' '
+           lpsave=' '
           call fclose(idcb3,ierr)
-          if(kerr(ierr,'pfcop','closing',' ',0,0)) return
+          if(kerr(ierr,'pfcop','closing',' ',0,0)) then
+             iret=-1
+             return
+          endif
           call fopen(idcb3,pathname,ierr)
-          if(kerr(ierr,'pfcop','opening',' ',0,1)) return
+          if(kerr(ierr,'pfcop','opening',' ',0,1)) then
+             iret=-1
+             return
+          endif
 C The last parameter tells KERR to ignore all positive IERR's
+           pathsave=pathname
+           lpsave=lp
         end if
       end if
 
