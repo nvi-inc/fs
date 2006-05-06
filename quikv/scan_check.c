@@ -24,6 +24,11 @@ long ip[5];                           /* ipc parameters */
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
+      shm_addr->last_check.string[0]=0;
+      append_safe(shm_addr->last_check.string,command->name,
+		  sizeof(shm_addr->last_check.string));
+      shm_addr->last_check.ip2=0;
+
       if (command->equal == '=' ) {
 	ierr=-301;
 	goto error;
@@ -53,6 +58,9 @@ mk5cn:
 	  cls_clr(ip[0]);
 	  ip[0]=ip[1]=0;
 	}
+	shm_addr->last_check.ip2=ip[2];
+	memcpy(shm_addr->last_check.who,ip+3,2);
+	shm_addr->last_check.who[2]=0;
 	return;
       }
       scan_check_dis(command,itask,ip);
@@ -63,5 +71,9 @@ error:
       ip[1]=0;
       ip[2]=ierr;
       memcpy(ip+3,"5k",2);
+
+      shm_addr->last_check.ip2=ip[2];
+      memcpy(shm_addr->last_check.who,ip+3,2);
+      shm_addr->last_check.who[2]=0;
       return;
 }

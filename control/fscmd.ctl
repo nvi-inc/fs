@@ -319,6 +319,7 @@ bank_status  qkr 7808 01 FFFFFFFFF
 disk2file    qkr 7809 01 FFFFFFFFF
 in2net       qkr 7810 01 FFFFFFFFF
 scan_check   qkr 7811 01 FFFFFFFFF
+last_check   qkr 7812 01 FFFFFFFFF
 rollform     qkr 7901 01 254FFFFFF
 tpicd        qkr 8001 01 FFFFFFFFF
 onoff        qkr 8101 01 FFFFFFFFF

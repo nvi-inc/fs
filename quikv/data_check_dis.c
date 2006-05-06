@@ -29,6 +29,7 @@ long ip[5];
       char inbuf[BUFSIZE];
       struct data_check_mon lclm;
       long class, nrecs;
+      char *params;
 
    /* format output buffer */
 
@@ -57,6 +58,7 @@ long ip[5];
 
       strcpy(output,command->name);
       strcat(output,"/");
+      params=output+strlen(output);
 
       count=0;
       while( count>= 0) {
@@ -71,9 +73,22 @@ long ip[5];
       cls_snd(&ip[0],output,strlen(output),0,0);
       ip[1]=1;
 
+      /* copy into last_check structure */
+      
+      append_safe(shm_addr->last_check.string,",",
+		  sizeof(shm_addr->last_check.string));
+
+      append_safe(shm_addr->last_check.string,params,
+		  sizeof(shm_addr->last_check.string));
+
       if((lclm.mode.state.error || (!lclm.mode.state.known)
-	  || strcmp("?",lclm.mode.mode)==0))
+	  || strcmp("?",lclm.mode.mode)==0)) {
 	logit(NULL,-601,"5d");
+	shm_addr->last_check.ip2=-601;
+	strncpy(shm_addr->last_check.who,"5d",
+		sizeof(shm_addr->last_check.who));
+	shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1];
+      }
 
       return;
 
@@ -83,5 +98,9 @@ error:
       ip[1]=0;
       ip[2]=ierr;
       memcpy(ip+3,"5d",2);
+
+      shm_addr->last_check.ip2=ip[2];
+      memcpy(shm_addr->last_check.who,ip+3,2);
+      shm_addr->last_check.who[2]=0;
       return;
 }

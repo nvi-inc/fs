@@ -259,6 +259,9 @@ loop:
 	case 11:
 	  scan_check(&command,itask,ip);
 	  break;
+	case 12:
+	  last_check(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  goto error;
