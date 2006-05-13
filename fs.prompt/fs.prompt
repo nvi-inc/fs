@@ -15,6 +15,7 @@
 #
 # Paul Harbison Canberra Deep Space Communications Complex February 1998
 # weh removed some DSN specifics, renamed fs.prompt Feb 2001
+# weh made the -geometry command line option work    Jun 2006
 #
 set prompt [lindex $argv 0]
 set cont [lindex $argv 1]
@@ -51,7 +52,9 @@ pack .buttons_button2 -in .buttons -side right
 
 
 wm title . "Field System Prompt ($PCFS_NAME)"
-wm geometry . +100+30
+if {![info exists geometry]} {
+    wm geometry . +100+30
+}
 #wm colormapwindows
 . configure -background black
 pack .prompt .buttons -in . -side top
