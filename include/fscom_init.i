@@ -6,9 +6,9 @@ c
       REAL AMPTOL, AZHMWV(10), CPKMIN, 
      . DIFTOL, ELHMWV(30), FOROFF(2,2), GDYTOL,
      . LVBOSC_FS(2), rxvfac(MAX_RXCODES), 
-     . PHATOL, PHJMAX, PI, PSLOPE(2,2), PVOLT_FS(30), 
+     . PHATOL, PHJMAX, PI, PSLOPE(2,2), PVOLT_FS(MAXNRX_FS), 
      . REVOFF(2,2), RSLOPE(2,2),
-     . SOF2HI, SON2HI, SON2LO, TMPK_FS(30), rate0ti_fs
+     . SOF2HI, SON2HI, SON2LO, TMPK_FS(MAXNRX_FS), rate0ti_fs
 
       integer*4 span0ti_fs
 
