@@ -54,7 +54,7 @@ static jmp_buf sig_buf;
 
 int sock; /* Socket */ 
 FILE * fsock; /* Socket also as a stream */ 
-char host[81]; /* maximum width plus one */
+char host[sizeof(shm_addr->mk5host)]; /* maximum width plus one */
 int port;
 int is_open=FALSE;
 int time_out;
@@ -158,6 +158,8 @@ int doinit()
    
     if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
       return -3;
+
+    strcpy(shm_addr->mk5host,host);
 
     if(time_out <200)
       time_out= 200;
@@ -679,6 +681,10 @@ long ip[5];
       (void) fputs(outbuf, stdout); /* Print to stdout */ 
 #endif
 
+    outbuf[511]=0; /* truncate to maximum class record size, cls_snd
+                      can't do this because it doesn't know it is a string,
+                      cls_rcv() calling should do it either since this 
+                      would require many more changes */
     cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
     out_recs++;
 
