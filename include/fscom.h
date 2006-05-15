@@ -297,4 +297,12 @@ typedef struct fscom {
 
   int ntp_synch_unknown;
 
+  struct {
+    char string[256];
+    int ip2;
+    char who[3];
+  } last_check;
+
+  char mk5host[129];
+
 } Fscom;
