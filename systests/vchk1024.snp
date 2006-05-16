@@ -1,0 +1,48 @@
+"
+"vchk1024.snp - 5 december 2005 - Dan Smythe - MIT Haystack Observatory
+"for vlba4 rack, mark5 recorder
+!+1s
+"mark4:32 at 512 Mb/s
+scan_name=mk4-32-512,,240
+setup4f
+auxerr32
+recscan=4m
+!*
+mk5=play=on;
+mk5=play?
+auxerr32
+!*+4m
+mk5=play?
+mk5=play=off;
+trkchk32
+"
+"mark4:64 at 512 Mb/s
+scan_name=mk4-64-512,,240
+setup512
+auxerr64
+recscan=4m
+trkchk64
+!*
+mk5=play=on;
+mk5=play?
+auxerr64
+!*+4m
+mk5=play?
+mk5=play=off;
+"
+"mark4:64 at 1024 Mb/s
+scan_name=mk4-64-1024,,240
+setup1g
+auxerr64
+recscan=4m
+trkchk64
+!*
+mk5=play_rate=data:8;
+mk5=play=on;
+mk5=play?
+!+1s
+auxerr64
+!*+8m
+mk5=play?
+mk5=play=off;
+get_stats8
