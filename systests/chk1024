@@ -1,0 +1,458 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("b:f:g:hr:st:v");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'chk1024 -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[chk1024 1.0]\n";
+    exit -1;
+}
+
+if (1<(defined($opt_b)+defined($opt_g)+defined($opt_t))) {
+    print "options ";
+    print "b " if defined($opt_b);
+    print "g " if defined($opt_g);
+    print "t " if defined($opt_t);
+    print "are mutually exclusive\n";
+    print STDERR "Try: 'chk1024 -h'\n";
+    exit -1;
+}
+if (1<(defined($opt_b)+defined($opt_g)+defined($opt_r))) {
+    print "options ";
+    print "b " if defined($opt_b);
+    print "g " if defined($opt_g);
+    print "r " if defined($opt_r);
+    print "are mutually exclusive\n";
+    print STDERR "Try: 'chk1024 -h'\n";
+    exit -1;
+}
+
+if (defined($opt_b) && $opt_b ne "a" && $opt_b ne "e" && $opt_b ne "f") {
+    print "options -b argument must be a|e|f\n";
+    print STDERR "Try: 'chk1024 -h'\n";
+    exit -1;
+}
+if (defined($opt_g) && $opt_g ne "a" && $opt_g ne "e" && $opt_g ne "f") {
+    print "options -g argument must be a|e|f\n";
+    print STDERR "Try: 'chk1024 -h'\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: chk1024 -hvs -t track -r track -f frames -b a|e|f -g a|e|f logs\n";
+    print "Synopsis: analyzes results of Mark5 check schedule v/chk1024 logs\n\n";
+
+    print "This script will summarize the results of v/chk1024 or other similar Mark5\n";
+    print "test schedule. The modes are determined from presence of 'setupX' procedure\n";
+    print "calls in the log. Where 'X' is a string. The mode is either 'play' or 'idle'\n";
+    print "depending on whether or not 'recscan' has been called since the last\n";
+    print "'setupX'.\n\n";
+
+    print "By default, chk1024 prints only summary results grouped by setup. The number\n";
+    print "of tracks checked reflect only those found in the log with full results,\n";
+    print "others may only have been partially checked. If a results for a 'setupX',\n";
+    print "'mode', and 'track' combination appear more than once in the log, only the\n";
+    print "last result for each track is considered, i.e., it is best to have each\n";
+    print "appear only once.  Otherwise the output is difficult to describe.\n\n";
+
+    print "The checks for each track are:\n";
+    print "  Aux:    considered good if decoded track number is correct\n";
+    print "  Errors: considered good if synch, resynch, parity and CRC errors were zero\n";
+    print "  Frames: considered good if more than the minimum frames were processed,\n";
+    print "          minimum frames is settable, but defaults to 300 (0x12c)\n\n";
+    print "Additional detail can be displayed by selecting command line options. The\n";
+    print "next level of detail is selected by the -s option, which will print the\n";
+    print "summary for each check by setup and mode and further summarize them by\n";
+    print "set and odd/even track number. The next level is shown with the -t\n";
+    print "which shows the processed data for the selected track. Finally, the -r\n";
+    print "option will print the raw log records for the selected track.\n\n";
+
+    print "Please note that the set (odd/even) statistics and summary results at\n";
+    print "the end only report the total number of tracks found in the log, not the total\n";
+    print "expected.  The user must verify that total tracks are correct for each case.\n";
+    print "In the case of the summary results, where it may not be so obvious that tracks\n";
+    print "are missing, if some other tracks were not fully checked but present, the\n";
+    print "phrase 'other tracks present' is included for the affected setup.\n\n";
+
+    print "Options explanation:\n";
+    print " -b a|e|f  display  bad tracks for one of the Aux|Errors|Frames\n";
+    print "           checks, cannot be used with -g, -t, or -r\n";
+    print " -g a|e|f  display good tracks for one if the Aux|Errors|Frames\n";
+    print "           checks, cannot be used with -b, -t, or -r\n";
+    print " -f frames sets the minimum level of required frames, default is 300 (0x12c)\n";
+    print " -r track  to display raw data for track, cannot be used with -b or -g\n";
+    print " -s        print summary statistics\n";
+    print " -t track  to display processed data for track, cannot be used with -b or -g\n";
+    print " -h        print this help information and stop\n";
+    print " -v        print program version information and stop\n";
+    exit -1;
+}
+
+# 2.0 extract data
+
+$location="UNKNOWN";
+
+$bad_tracks=defined($opt_b)||defined($opt_g);
+$bad_a=$opt_b eq "a";
+$bad_e=$opt_b eq "e";
+$bad_f=$opt_b eq "f";
+$good_a=$opt_g eq "a";
+$good_e=$opt_g eq "e";
+$good_f=$opt_g eq "f";
+
+if(!defined($opt_f)) {
+    $frame_min=300;
+} else {
+    $frame_min=$opt_f;
+}
+
+if($opt_t) {
+    print "Setup Mode Track      Frames     Parity      Nosync    Resync        CRC  Aux\n";
+}
+foreach $file (@ARGV) {
+    if(!defined($save_file)) {
+	$save_file=$file;
+    }
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+    
+    if($bad_tracks) {
+	$first=1;
+    }
+#   print "file $file \n";
+    while (<FILE>) {
+	if(!defined($date)){
+	    $date=substr($_,0,17);
+	}
+	if(/;location,([^,]*)/i) {
+	    $location=$1;
+	    $date=substr($_,0,17);
+	} elsif(/[:;]setup(.*)/i) {
+	    $setup=$1;
+	    $mode='idle';
+	    if($bad_tracks) {
+		$new=1;
+	    }
+	    if(!defined($config{$setup}{$mode})) {
+		$config{$setup}{$mode}=1;
+	    }
+	} elsif(/recscan/i) {
+	    $mode='play';
+	    if($bad_tracks) {
+		$new=1;
+	    }
+	    if(!defined($config{$setup}{$mode})) {
+		$config{$setup}{$mode}=1;
+	    }
+	} elsif(/track_set\? *0 *: *([^: ]+) *: *([^:; ]+) */i) {
+	    $track1=$1;
+	    $track2=$2;
+	} elsif(/auxilliary_data/i) {
+	    if(!defined($track1)||!defined($track2)) {
+		print "'track-set?' output not found before first" .
+		    " 'auxillary_data' record, giving up\n";
+		exit(-1);
+	    }
+            ($front,@fields)=split(' ');
+	    $aux1=substr($fields[2],0,2);
+	    $aux2=substr($fields[6],0,2);
+	    $t1 = $track1;
+	    $t1 = $t1-60 if $t1 >= 100;
+	    $t2 = $track2;
+	    $t2 = $t2-60 if $t2 >= 100;
+	    $aux{$setup}{$mode}{$track1}=$t1 == $aux1;
+	    $aux{$setup}{$mode}{$track2}=$t2 == $aux2;
+	    if($track1 == $opt_r) {
+		print;
+	    }
+	    if($track2 == $opt_r) {
+		print;
+	    }
+	    if($bad_a || $good_a) {
+		if($good_a == $aux{$setup}{$mode}{$track1}) {
+		    if($new) {
+			if($first) {
+			    $first=0;
+			} else {
+			    print "\n";
+			}
+			if($bad_a) {
+			    print "Aux bad tracks $setup $mode: ";
+			} else {
+			    print "Aux good tracks $setup $mode: ";
+			}
+			$new=0;
+		    }
+		    print "$track1 ";
+		}
+		if($good_a == $aux{$setup}{$mode}{$track2}) {
+		    if($new) {
+			if($first) {
+			    $first=0;
+			} else {
+			    print "\n";
+			}
+			if($bad_a) {
+			    print "Aux bad tracks $setup $mode: ";
+			} else {
+			    print "Aux good tracks $setup $mode: ";
+			}
+			$new=0;
+		    }
+		    print "$track2 ";
+		}
+	    }
+	} elsif(/decode4\/dqa/i) {
+	    if(!defined($track1)||!defined($track2)) {
+		print "'track-set?' output not found before first" .
+		    " 'dqa' decoder data, giving up\n";
+		exit(-1);
+	    }
+            ($front,@fields)=split(' ');
+	    $frames{$setup}{$mode}{$track1}=hex($fields[0])>=$frame_min;
+	    $frames{$setup}{$mode}{$track2}=hex($fields[5])>=$frame_min;
+	    $errors{$setup}{$mode}{$track1}=
+		hex($fields[1])==0 && hex($fields[2])==0 &&
+		hex($fields[3])==0 && hex($fields[4])==0;
+	    $errors{$setup}{$mode}{$track2}=
+		hex($fields[6])==0 && hex($fields[7])==0 &&
+		hex($fields[8])==0 && hex($fields[9])==0;
+	    if($track1 == $opt_r) {
+		print;
+	    }
+	    if($track2 == $opt_r) {
+		print;
+	    }
+	    if(defined($opt_t)) {
+		if($track1 == $opt_t) {
+		    $fr=hex($fields[0]);
+		    $e1=hex($fields[1]);
+		    $e2=hex($fields[2]);
+		    $e3=hex($fields[3]);
+		    $e4=hex($fields[4]);
+		    printf " %4s %4s   %3s  %10d %10d %10d %10d %10d  %3s\n",
+		    $setup,$mode,$opt_t,$fr,$e1,$e2,$e3,$e4,$aux1;
+		}
+		if($track2 == $opt_t) {
+		    $fr=hex($fields[5]);
+		    $e1=hex($fields[6]);
+		    $e2=hex($fields[7]);
+		    $e3=hex($fields[8]);
+		    $e4=hex($fields[9]);
+		    printf " %4s %4s   %3s  %10d %10d %10d %10d %10d  %3s\n",
+		    $setup,$mode,$opt_t,$fr,$e1,$e2,$e3,$e4,$aux2;
+		}
+	    }
+	    if($bad_e || $good_e || $bad_f || $good_f) {
+		if(($good_e || $bad_e) &&
+		   $good_e == $errors{$setup}{$mode}{$track1} ||
+		   ($good_f || $bad_f) &&
+		   $good_f == $frames{$setup}{$mode}{$track1}) {
+		    if($new) {
+			if($first) {
+			    $first=0;
+			} else {
+			    print "\n";
+			}
+			if($bad_e) {
+			    print "Error bad tracks $setup $mode: ";
+			} elsif($good_e) {
+			    print "Error good tracks $setup $mode: ";
+			} elsif($bad_f) {
+			    print "Fames bad tracks $setup $mode: ";
+			} elsif($good_f) {
+			    print "Frames good tracks $setup $mode: ";
+			} else {
+			    print "Unknown tracks list case $setup $mode: ";
+			}
+			$new=0;
+		    }
+		    print "$track1 ";
+		}
+		if(($good_e || $bad_e) &&
+		   $good_e == $errors{$setup}{$mode}{$track2} ||
+		   ($good_f || $bad_f) &&
+		   $good_f == $frames{$setup}{$mode}{$track2}) {
+		    if($new) {
+			if($first) {
+			    $first=0;
+			} else {
+			    print "\n";
+			}
+			if($bad_e) {
+			    print "Error bad tracks $setup $mode: ";
+			} elsif($good_e) {
+			    print "Error good tracks $setup $mode: ";
+			} elsif($bad_f) {
+			    print "Fames bad tracks $setup $mode: ";
+			} elsif($good_f) {
+			    print "Frames good tracks $setup $mode: ";
+			} else {
+			    print "Unknown tracks list case $setup $mode: ";
+			}
+			$new=0;
+		    }
+		    print "$track2 ";
+		}
+	    }
+#	    $fr=hex($fields[0]);
+#	    $er=hex($fields[1]);
+#	    print " $setup $mode $track1 $fields[0] $fields[1] $fr $er $track2 \n";
+#	    print;
+	}
+    }
+}
+
+
+if($bad_tracks) {
+    if(!$first) {
+	print "\n"; 
+    }
+}
+
+# 3.0 print out statistics
+
+print "Location: $location, Date: $date, Log: $save_file\n";
+if(defined($opt_s)) {
+    print "Setup Mode Frames Errors  Aux   Set1odd  Set1even  Set2odd  Set2even\n";
+    print "           --------------------------bad/total----------------------\n";
+}
+
+foreach $setup (keys %config) {
+    foreach $mode (keys %{$config{$setup}}) {
+	$gooda=$bada=0;
+	undef %tested_head_aux;
+	undef %tested_head_frames;
+	undef %tested_head_errors;
+	undef %bad_head;
+	if(defined($aux{$setup}{$mode})) {
+	    foreach $track (keys %{$aux{$setup}{$mode}}) {
+		$tested_aux{$setup}{$track}{$mode}=1;
+		$tested_head_aux{int $track/100}{$track%2}{$track}=1;
+		if(!$aux{$setup}{$mode}{$track}) {
+		    $bada++;
+		    $bad{$setup}{$track}=1;
+		    $bad_head{int $track/100}{$track%2}{$track}=1;
+		} else {
+		    $gooda++;
+		}
+	    }
+	}
+	$totala=$gooda+$bada;
+	
+	$goodf=$badf=0;
+	if(defined($frames{$setup}{$mode})) {
+	    foreach $track (keys %{$frames{$setup}{$mode}}) {
+		$tested_frames{$setup}{$track}{$mode}=1;
+		$tested_head_frames{int $track/100}{$track%2}{$track}=1;
+		if(!$frames{$setup}{$mode}{$track}) {
+		    $badf++;
+		    $bad{$setup}{$track}=1;
+		    $bad_head{int $track/100}{$track%2}{$track}=1;
+		} else {
+		    $goodf++;
+		}
+	    }
+	}
+	$totalf=$goodf+$badf;
+	
+	$goode=$bade=0;
+	if(defined($errors{$setup}{$mode})) {	
+	    foreach $track (keys %{$errors{$setup}{$mode}}) {
+		$tested_errors{$setup}{$track}{$mode}=1;
+		$tested_head_errors{int $track/100}{$track%2}{$track}=1;
+		if(!$errors{$setup}{$mode}{$track}) {
+		    $bade++;
+		    $bad{$setup}{$track}=1;
+		    $bad_head{int $track/100}{$track%2}{$track}=1;
+		} else {
+		    $goode++;
+		}
+	    }
+	}
+	$totale=$goode+$bade;
+
+	if(defined($opt_s)) {
+	    foreach $stack (0,1) {
+		foreach $odd (0,1) {
+		    $totalh[$stack][$odd]=0;
+		    $badh[$stack][$odd]=0;
+		    foreach $track (keys %{$tested_head_aux{$stack}{$odd}}) {
+			if($tested_head_errors{$stack}{$odd}{$track} &&
+			   $tested_head_frames{$stack}{$odd}{$track}) {
+			       $totalh[$stack][$odd]++;
+			       if($bad_head{$stack}{$odd}{$track}) {
+				   $badh[$stack][$odd]++;
+			       }
+			   }
+		    }
+		}
+	    }
+	    printf "%4s %4s  %2d/%2d  %2d/%2d  %2d/%2d" .
+		"   %2d/%2d     %2d/%2d    %2d/%2d     %2d/%2d\n",
+	    $setup,$mode,$badf,$totalf,$bade,$totale,$bada,$totala,
+	    $badh[0][1],$totalh[0][1],$badh[0][0],$totalh[0][0],
+	    $badh[1][1],$totalh[1][1],$badh[1][0],$totalh[1][0];
+	}
+    }
+}
+if(defined($opt_s)) {
+    $hexd=sprintf "%1x",$frame_min;
+    print "Frame check used a minimum of $frame_min (0x$hexd) frames/track.\n";
+}
+
+if(!%config) {
+    print "No test setups were found.\n";
+}
+foreach $setup (keys %config) {
+    $totalo=$bado=0;
+    $partially_checked=0;
+    @tr_list=((keys %{$tested_aux{$setup}}),(keys %{$tested_errors{$setup}}),
+	      (keys %{$tested_frames{$setup}}));
+#
+# find unique tracks
+#    print "@tr_list\n";
+    %seen= ();
+    @tr_list= grep { ! $seen{$_} ++ } @tr_list;
+#    print "@tr_list\n";
+#
+    foreach $track (@tr_list) {
+	$fully_checked=1;
+	foreach $mode (keys %{$config{$setup}}) {
+	    $fully_checked &&= $tested_errors{$setup}{$track}{$mode} &&
+		$tested_frames{$setup}{$track}{$mode} &&
+		$tested_aux{$setup}{$track}{$mode};
+	}
+#	print "setup $setup $track check $fully_checked\n";
+	if($fully_checked) {
+	    $totalo++;
+	    if($bad{$setup}{$track}) {
+		$bado++;
+	    }
+	} else {
+	    $partially_checked=1;
+	}
+    }
+    $goodo=$totalo-$bado;
+    if($totalo == 0) {
+	$percent=0;
+    } else {
+	$percent=int 100.0*($goodo/$totalo)+0.001;
+    }
+    print "Setup `$setup' tested $totalo tracks, $percent\% were good";
+    if($partially_checked) {
+	print ", other tracks present";
+    }
+    print ".\n";
+    
+}
