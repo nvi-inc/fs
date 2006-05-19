@@ -38,7 +38,7 @@ C                   _C (comment)
 C        IERR   - error code, 0=all OK, > 0 soft error, < 0 hard error
 C             0 - OK
 C            -1 - error in characters following a ! 
-C            -2 - more than 40 characters in parameter list 
+C            -2 - two many characters in command
 C            -3 - more than 12 characters in function or procedure name 
 C            -4 - unrecognized name (not a function or procedure) 
 C            -5 - standard format time field error
@@ -109,7 +109,7 @@ C
       idol = iscn_ch(ias,ifc,iec,'$') 
       if (idol.eq.0) goto 200 
 C
-      if (nchar+nparm-1.gt.100) then
+      if (nchar+nparm-1.gt.512) then
         ierr = -12
         goto 999
       endif
@@ -242,11 +242,11 @@ C      All characters from start to @ are sent to class buffer,
 C      including parameters.
 C
       nchar = icharb - ifc
-      idummy = ichmv(lbuf,1,ias,ifc,icharb-1)
       if (nchar.gt.512) then
         ierr = -2
         goto 999
       endif
+      idummy = ichmv(lbuf,1,ias,ifc,nchar)
 C
       call put_buf(iclass,lbuf,-nchar,'fs','  ')
 C
