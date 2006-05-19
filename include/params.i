@@ -3,6 +3,7 @@ c compile time parameters
 c
       integer INT_BITS      ! bits/int
       integer INT_CHARS     ! chars/int
+      integer INT2_CHARS    ! chars/int2
       integer INT_ALIGN     ! number of ints for maximum aligned unit
       integer MAXNRX_FS     ! maximum number of values in rxdiode.ctl
       integer MK3           ! Mark III comparison bit variable
@@ -42,13 +43,18 @@ c
       integer MAX_RXCODES   ! Max number of entries in rxdef.ctl
       integer MAX_HOR      ! Max number of horizon mask entries
       integer MET3          ! MET Sensor with/without wind sensor
-
+      integer MAX_MODEL_PARAM ! maximum pointing model parameters
+c
+      integer MAX_PROC_PARAM_CHARS ! maximum chars in a proc parameter
+      integer MAX_PROC_PARAM_WORDS ! max int words needed for a proc parameter
+      integer MAX_PROC_PARAM_COUNT ! max count of stack spack for proc params
 c
       integer MAX_PROC1, MAX_PROC2
       PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
 c
       parameter ( INT_BITS = 32 )
       parameter ( INT_CHARS=  4 )
+      parameter ( INT2_CHARS= 2 )
       parameter ( INT_ALIGN=  2 )
       parameter ( MAXNRX_FS= 30 )
 C rack/drive
@@ -94,9 +100,9 @@ C
       parameter ( AN_PRIOR=-16)
       parameter ( MAX_RXCODES = 40)
       parameter ( MAX_HOR = 30)
-
-
-
-
-
-
+C
+      parameter (MAX_MODEL_PARAM = 30)
+C
+      parameter (MAX_PROC_PARAM_CHARS=512)
+      parameter (MAX_PROC_PARAM_WORDS=MAX_PROC_PARAM_CHARS/INT2_CHARS)
+      parameter (MAX_PROC_PARAM_COUNT=4*MAX_PROC_PARAM_WORDS)
