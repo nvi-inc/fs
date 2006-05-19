@@ -52,7 +52,9 @@ C                         DCB's for procedures from lists 1 and 2
       dimension lprocn(6)          !  name of currently-executing procedure
       dimension lprocs(6),lproco(6)
 C                   Names of schedule, operator top-of-stack procedures
-      dimension lstksk(26),lstkop(26),lpparm(6)
+      dimension lstksk(2+MAX_PROC_PARAM_COUNT)
+      dimension lstkop(2+MAX_PROC_PARAM_COUNT)
+      dimension lpparm(MAX_PROC_PARAM_WORDS)
 C                   Stacks for procedure parameters, parameter string
 C     NCPARM - # chars in procedure parameter string
       dimension itmlog(6)          !  time log file was opened
@@ -63,6 +65,7 @@ C     NCPARM - # chars in procedure parameter string
       logical rn_test,kxdisp,kxlog,kput
       equivalence (ireg(1),reg)
       integer jchar, itype
+      integer disk_record_record
       character cjchar,chsor,char2
       logical krcur,klast,kts,kskblk,kopblk,kbreak,kstak,kon
 C                   KRCUR returns true if a procedure calls itself
@@ -82,7 +85,8 @@ C     MAXPR1,2 - Maximum number of procs allowed in each lists
       data iblen/256/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
-      data lstksk/24,2,24*0/, lstkop/24,2,24*0/
+      data lstksk/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
+      data lstkop/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
       data nproc1/0/, nproc2/0/
       data lsors/2h::/
 C
@@ -371,8 +375,8 @@ C                   Get the command <name>=<parm>
         ich = iscn_ch(ibuf,1,nchar,'=')
         if (ich.gt.0) then
           ncparm = nchar - ich
-          if (ncparm.lt.0 .or. ncparm.gt.12) then
-            call logit7ci(0,0,0,1,-135,'bo',12)
+          if (ncparm.lt.0 .or. ncparm.gt.MAX_PROC_PARAM_CHARS) then
+            call logit7ci(0,0,0,1,-135,'bo',MAX_PROC_PARAM_CHARS)
             if(iwait.ne.0) then
                ipinsnp(3)=-135
                call char2hol('bo',ipinsnp(4),1,2)
@@ -665,7 +669,7 @@ C  a valid schedule or all is set to zero.
           else
             call fs_get_lskd(ilskd)
             call hol2char(ilskd,1,8,lskd)
-            lprc(1:12) = lskd(1:12)
+            lprc(1:8) = lskd(1:8)
             call char2hol(lprc,ilprc,1,8)
             call fs_set_lprc(ilprc)
           endif
@@ -674,7 +678,7 @@ C  a valid schedule or all is set to zero.
           call fs_get_llog(illog)
           call hol2char(illog,1,8,llog)
           if (llog.ne.lskd) then
-            llog(1:12) = lskd(1:12)
+            llog(1:8) = lskd(1:8)
             call char2hol(llog,illog,1,8)
             call fs_set_llog(illog)
             call newlg(ibuf,lsor)
@@ -761,6 +765,31 @@ C     5.10 TERMINATE command--the only way to leave this program
 C
       else if (mbranch.eq.10) then
          ierr=0
+        ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        nchar = min0(ireg(2),iblen*2)
+        ich = 1+iscn_ch(ibuf,1,nchar,'=')
+        if (ich.ne.1) then
+           if(ichcm_ch(ibuf,ich,'disk_record_ok').ne.0) then
+              call logit7ci(0,0,0,0,-172,'bo',0)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=-172
+                 call char2hol('bo',ipinsnp(4),1,2)
+                 ipinsnp(5)=0
+              endif
+              goto 600
+           endif
+        else
+           call fs_get_disk_record_record(disk_record_record)
+           if(disk_record_record.eq.1) then
+              call logit7ci(0,0,0,0,-173,'bo',0)
+              if(iwait.ne.0) then
+                 ipinsnp(3)=-173
+                 call char2hol('bo',ipinsnp(4),1,2)
+                 ipinsnp(5)=0
+              endif
+              goto 600
+           endif
+        endif
         if (rn_test('pfmed')) then
           call logit7ci(0,0,0,0,-171,'bo',0)
           if(iwait.ne.0) then
