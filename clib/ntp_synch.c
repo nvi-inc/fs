@@ -155,7 +155,9 @@ int errors;
       if(!errors) /* if we aren't printing errors, don't let the child do it */
 	close(2);
       
-      execlp("ntpq", "-n", "-c", "rv", (char *)0); /* start new program */
+      execlp("ntpq",
+	     "ntpq", "-n", "-c", "rv",
+	     (char *)0); /* start new program */
       exit(EXIT_FAILURE); /* if we get here it must have failed, we ignore
 			     the status in the parent, depending on the lack
 			     of a response to signal that there is a problem.
