@@ -15,7 +15,9 @@ static char *string[20];         /* string saves strings while a q_list */
 static char *scan_str;           /* or other list is being built. */
 static int block_flag = 0;
 static int def_flag = 0;
+static int in_def_flag = 0;
 static int scan_flag = 0;
+static int in_scan_flag = 0;
 static int qref_flag = 0;
 static struct llist *def_list=NULL;      /* To help build a def list */
 static struct llist *qref_list=NULL;     /* To help build a ref list */
@@ -46,6 +48,10 @@ FILE *fp;
  * create_def(char *str) - Create a def block.                        *
  * str: def name - Self expanatory.                                   *
  *                                                                    *
+ * end_def() - End the current def.                                   *
+ * This function only needs to be called if you want to add a         *
+ * comment after the enddef within a block.                           *
+ *                                                                    *
  * create_ref(char *str, char *str2) Create a ref.                    *
  * str:  Block name - Self explanatory.                               *
  * str2: Keyname    - This is a defined 'def'.                        *
@@ -75,9 +81,13 @@ FILE *fp;
  * create_scan(char *str) - Create a scan block.                      *
  * str: scan name - Self expanatory.                                  *
  *                                                                    *
+ * end_scan() - End the current scan.                                 *
+ * This function only needs to be called if you want to add a         *
+ * comment after an endscan within a $SCHED block.                    *
+ *                                                                    *
  * create_comment(char *str, char *str2)                              *
- * str: trailing or header - blank for trailing and non-blank for     *
- *                           header.                                  *
+ * str: trailing or header - 't' for trailing and anything else       *
+ *                           using a separate line                    *
  * str2: comment - You must begin with a star(*).                     *
  * Examples:                 create_comment(" ","* This is Eflsberg");*
  *                           def EF        *  This is Eflsberg        *
@@ -129,7 +139,7 @@ void *
 create_vex(char *str) /* str = filename) */
 {
   /* Get the last block_listing produced */
-  if(def_flag)
+  if(in_def_flag)
     {
       def_list = add_list(def_list,
 			  make_lowl(T_DEF,
@@ -137,7 +147,7 @@ create_vex(char *str) /* str = filename) */
       b_list=add_list(b_list,
 		      make_block(blk,def_list));
     }
-  else if(scan_flag)
+  else if(in_scan_flag)
     {
       def_list = add_list(def_list,
 			  make_lowl(T_SCAN,
@@ -145,18 +155,28 @@ create_vex(char *str) /* str = filename) */
       b_list=add_list(b_list,
 		      make_block(blk,def_list));
     }
-  else if(blk == 0)
-    { 
-      b_list=NULL;
+  else if(def_flag || scan_flag)
+    {
+      b_list=add_list(b_list,
+		      make_block(blk,def_list));
     }
-  else 
+  else if(qref_flag) 
     {
       b_list=add_list(b_list,
 		      make_block(blk,qref_list));
     }
+  else if(blk != 0)
+    {
+      b_list=add_list(b_list,
+		      make_block(blk,qref_list));
+    }
+  else if(blk == 0)
+    { 
+      b_list=NULL;
+    }
 
   /* Print it to a file or just the screen */
-  if(str!=NULL) 
+  if(str!=NULL && strlen(str)!=0) 
     {
       filename = str;
       print_vex(make_vex(version_list,b_list));
@@ -170,6 +190,11 @@ create_vex(char *str) /* str = filename) */
   def_list=NULL;
   q_list=NULL;
   b_list=NULL;
+  qref_flag=0;
+  def_flag=0;
+  scan_flag =0;
+  in_def_flag=0;
+  in_scan_flag=0;
 }
 /*-------------------------------------------------------------------*/
 void *
@@ -184,23 +209,21 @@ create_block(char *str)
 	  b_list=add_list(b_list,
 			  make_block(blk,qref_list));
 	}
-      else if(def_flag)
+      else if(in_def_flag)
 	{
 	  def_list = add_list(def_list,
 			      make_lowl(T_DEF,
 			      make_def(def_str,qref_list)));
 	  b_list=add_list(b_list,
 			  make_block(blk,def_list));
-	  def_flag=0;
 	}
-      else if(scan_flag)
+      else if(in_scan_flag)
 	{
 	  def_list = add_list(def_list,
 			      make_lowl(T_SCAN,
 			      make_def(scan_str,qref_list)));
 	  b_list=add_list(b_list,
 			  make_block(blk,def_list));
-	  scan_flag=0;
 	}
       else
 	{
@@ -210,6 +233,11 @@ create_block(char *str)
     }
   qref_list=NULL;
   def_list=NULL;
+  qref_flag=0;
+  def_flag=0;
+  scan_flag =0;
+  in_def_flag=0;
+  in_scan_flag=0;
   block_id=(char *)strdup(str);
   blk=block2int(block_id);
   block_flag = 1;
@@ -218,15 +246,35 @@ create_block(char *str)
 void *
 create_def(char *str)
 {
-  if (def_flag)
+  if (in_def_flag)
+    {
+      def_list = add_list(def_list,
+			  make_lowl(T_DEF,
+			  make_def(def_str,qref_list)));
+    }
+  else if(!def_flag && qref_list!=NULL) {
+    def_list=qref_list;
+  }
+  qref_list=NULL;
+  qref_flag=0;
+  def_str=(char *)strdup(str);
+  def_flag = 1;
+  in_def_flag= 1;
+}
+/*-------------------------------------------------------------------*/
+void *
+end_def()
+{
+  if (in_def_flag)
     {
       def_list = add_list(def_list,
 			  make_lowl(T_DEF,
 			  make_def(def_str,qref_list)));
     }
   qref_list=NULL;
-  def_str=(char *)strdup(str);
-  def_flag = 1;
+  qref_flag=0;
+  def_str=NULL;
+  in_def_flag = 0;
 }
 /*-------------------------------------------------------------------*/
 void *
@@ -257,7 +305,7 @@ create_qref_qualifier(char *str)
   char *blockname,*keyword;
   char *stationkey;
  
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       stationkey=(char *)strdup(str);
       q_list = add_list(q_list,stationkey);
@@ -307,38 +355,68 @@ void *
 create_scan(char *str)
 {
 
-  if (scan_flag)
+  if (in_scan_flag)
     {
       def_list = add_list(def_list,
 			  make_lowl(T_SCAN,
 			  make_def(scan_str,qref_list)));
     }
-  else
-    {
-      def_list=NULL;
-    }
+  else if(!scan_flag && qref_list!=NULL) {
+    def_list=qref_list;
+  }
+
   qref_list=NULL;
+  qref_flag = 0;
   q_list=NULL;
   scan_str=(char *)strdup(str);
   scan_flag = 1;
+  in_scan_flag = 1;
+}
+/*-------------------------------------------------------------------*/
+void *
+end_scan()
+{
+
+  if (in_scan_flag)
+    {
+      def_list = add_list(def_list,
+			  make_lowl(T_SCAN,
+			  make_def(scan_str,qref_list)));
+    }
+  qref_list=NULL;
+  qref_flag = 0;
+  q_list=NULL;
+  scan_str=NULL;
+  in_scan_flag = 0;
 }
 /*-------------------------------------------------------------------*/
 void *
 create_comment(char *str, char *str2)
 {
   char *comment;
+  static struct llist **list;
 
   comment=(char *)strdup(str2);
+
+  if(!block_flag)
+    list=&version_list;
+  else if(in_def_flag||in_scan_flag||!def_flag&&!scan_flag) {
+    list=&qref_list;
+    qref_flag = 1;
+  } else
+    list=&def_list;
+
   if(*str=='t')
     {
-      qref_list = add_list(qref_list,make_lowl(T_COMMENT,
+      *list = add_list(*list,make_lowl(T_COMMENT_TRAILING,
 				     comment));
     }
   else
     {
-      qref_list = add_list(qref_list,make_lowl(T_COMMENT_TRAILING,
+      *list = add_list(*list,make_lowl(T_COMMENT,
 				     comment));
     }
+
 }
 /*-------------------------------------------------------------------*/
 /* SCHEDULE block builders                                           */
@@ -401,7 +479,7 @@ create_station_drive_list(char *str)
   char *station_point_sector;
   char *station_drive;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       station_drive=(char *)strdup(str);
       q_list = add_list(q_list,make_dvalue(station_drive,NULL));
@@ -409,15 +487,15 @@ create_station_drive_list(char *str)
   else
     {
       if(q_list==NULL) q_list = add_list(q_list,make_dvalue(NULL,NULL));
-      station_key=(char *)strdup(string[0]);
-      station_start_value=(char *)strdup(string[1]);
-      station_start_units=(char *)strdup(string[2]);
-      station_stop_value=(char *)strdup(string[3]);
-      station_stop_units=(char *)strdup(string[4]);
-      station_start_pos_value=(char *)strdup(string[5]);
-      station_start_pos_units=(char *)strdup(string[6]);
-      station_pass=(char *)strdup(string[7]);
-      station_point_sector=(char *)strdup(string[8]);
+      station_key=string[0];
+      station_start_value=string[1];
+      station_start_units=string[2];
+      station_stop_value=string[3];
+      station_stop_units=string[4];
+      station_start_pos_value=string[5];
+      station_start_pos_units=string[6];
+      station_pass=string[7];
+      station_point_sector=string[8];
       qref_list = add_list(qref_list,make_lowl(T_STATION,
 		   		     make_station(station_key,
 				     make_dvalue(station_start_value,
@@ -465,20 +543,6 @@ create_data_transfer(char *str, char *str2, char *str3, char *str4,
 			 make_dvalue(data_transfer_stop_value,
 			             data_transfer_stop_units),
 			 data_transfer_options)));
-  /*
-    if(str==NULL || str2==NULL)
-    {
-      
-      printf("%s \'antenna_diam\' %s %s block\n",
-	     err1, err2, int2block(blk));
-    }
-  else
-    {
-      diam_value=(char *)strdup(str);
-      diam_units=(char *)strdup(str2);
-      qref_list = add_list(qref_list,make_lowl(T_ANTENNA_DIAM,
-				     make_dvalue(diam_value,diam_units)));
-				     }*/
   q_list=NULL;
 }
 /*-------------------------------------------------------------------*/
@@ -489,7 +553,8 @@ create_antenna_diam(char *str, char *str2)
 {
   char *diam_value,*diam_units;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str) ==0 ||
+     str2==NULL|| strlen(str2)==0)
     {
       printf("%s \'antenna_diam\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -508,7 +573,8 @@ create_axis_type(char *str, char *str2)
 {
   char *axis_type_az,*axis_type_el;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str) ==0 ||
+     str2==NULL|| strlen(str2)==0)
     {
       printf("%s \'axis_type\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -528,7 +594,8 @@ create_axis_offset(char *str, char *str2)
 {
   char *axis_offset_value,*axis_offset_units;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str) ==0 ||
+     str2==NULL|| strlen(str2)==0)
     {
       printf("%s \'axis_offset\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -552,8 +619,11 @@ create_antenna_motion(char *str, char *str2, char *str3, char *str4,
   char *settle_value,*settle_units;
 
 
-  if(str==NULL || str2==NULL || str3==NULL || 
-     str4==NULL || str5==NULL)
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 ||
+     str5==NULL || strlen(str5)==0)
     {
       printf("%s \'antenna_motion\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -590,10 +660,18 @@ create_pointing_sector(char *str, char *str2, char *str3, char *str4,
   char *hilimit2_value;
   char *hilimit2_units;
 
-  if(str==NULL || str2==NULL || str3==NULL || 
-     str4==NULL || str5==NULL || str6==NULL || 
-     str7==NULL || str8==NULL || str9==NULL || 
-     str10==NULL || str11==NULL)  
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 ||
+     str5==NULL || strlen(str5)==0 ||
+     str6==NULL || strlen(str6)==0 ||
+     str7==NULL || strlen(str7)==0 ||
+     str8==NULL || strlen(str8)==0 ||
+     str9==NULL || strlen(str9)==0 ||
+     str10==NULL || strlen(str10)==0 ||
+     str11==NULL || strlen(str11)==0 )
+       
     {
       printf("%s \'pointing_sector\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -633,7 +711,9 @@ create_bbc_assign(char *str, char *str2, char *str3)
 {
   char *bbc_id, *bbc_physical_id, *bbc_if_id;
 
-  if(str==NULL || str2==NULL || str3==NULL) 
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0) 
     {
       printf("%s \'bbc_assign\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -659,16 +739,18 @@ create_clock(char *str, char *str2, char *str3, char *str4, char *str5)
   char *valid_from, *clock_early_value, *clock_early_units,
        *clock_early_epoch, *rate;
 
-  if(str2==NULL || str3==NULL) 
+  if(str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0) 
     {
       printf("%s \'clock\' %s %s block\n",
 	     err1, err2, int2block(blk));
     }
   else
     {
-      if(str==NULL)
+      if(str==NULL || strlen(str)==0)
 	{
-	  if(str4==NULL || str5==NULL)
+	  if(str4==NULL || strlen(str4)==0 ||
+	     str5==NULL || strlen(str5)==0)
 	    {
 	      clock_early_value=(char *)strdup(str2);
               clock_early_units=(char *)strdup(str3);
@@ -692,7 +774,8 @@ create_clock(char *str, char *str2, char *str3, char *str4, char *str5)
                  		             make_dvalue(rate,NULL))));
 	    }
 	}
-      else if(str4==NULL || str5==NULL)
+      else if(str4==NULL || strlen(str4)==0 ||
+	      str5==NULL || strlen(str5)==0)
 	{ 
 	  valid_from=(char *)strdup(str);
 	  clock_early_value=(char *)strdup(str2);
@@ -727,7 +810,7 @@ create_record_transport_type(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'record_transport_type\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -744,7 +827,7 @@ create_electronics_rack_type(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'electronics_rack_type\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -761,7 +844,7 @@ create_number_drives(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'number_drives\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -779,7 +862,7 @@ create_headstack(char *str, char *str2, char *str3)
 {
   char *headstack, *rw, *drive_offset;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'headstack\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -802,7 +885,7 @@ create_record_density(char *str, char *str2)
 {
   char *type, *speed;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'record_density\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -821,12 +904,13 @@ create_tape_length(char *str, char *str2, char *str3, char *str4)
 {
   char *dur_value, *dur_units, *speed, *tape;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'tape_length\' %s %s block\n",
 	     err1, err2, int2block(blk));
     }
-  else if(str3==NULL || str4==NULL)
+  else if(str3==NULL || strlen(str3)==0 ||
+	  str4==NULL || strlen(str4)==0)
     {
       dur_value=(char *)strdup(str);
       dur_units=(char *)strdup(str2);
@@ -854,7 +938,7 @@ create_recording_system_id(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'recording_system_id\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -873,21 +957,25 @@ create_tape_motion(char *str, char *str2, char *str3, char *str4,
 {
   char *s1, *s2, *s3, *s4, *s5, *s6, *s7; 
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'tape_motion\' %s %s block\n",
 	     err1, err2, int2block(blk));
     }
   else
     {
-      if(str2==NULL)
+      if(str2==NULL || strlen(str2)==0 ||
+	 str3==NULL || strlen(str3)==0)
 	{
 	  s1=(char *)strdup(str);
 	  qref_list = add_list(qref_list,make_lowl(T_TAPE_MOTION,
 		 		         make_tape_motion(s1,
 				         NULL,NULL,NULL)));
 	}
-      else if(str4==NULL)
+      else if(str4==NULL || strlen(str4)==0 ||
+	      str5==NULL || strlen(str5)==0 ||
+	      str6==NULL || strlen(str6)==0 ||
+	      str7==NULL || strlen(str7)==0)
 	{
 	  s1=(char *)strdup(str);
 	  s2=(char *)strdup(str2);
@@ -920,7 +1008,7 @@ create_tape_control(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'tape_control\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -939,7 +1027,8 @@ create_tai_utc(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str)==0 || 
+     str2==NULL || strlen(str2)==0)
     {
       printf("%s \'tai_utc\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -958,7 +1047,8 @@ create_a1_tai(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL  || strlen(str2)==0)
     {
       printf("%s \'a1_tai\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -977,7 +1067,7 @@ create_eop_ref_epoch(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'eop_ref_epoch\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -994,7 +1084,7 @@ create_num_eop_points(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'num_eop_points\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1012,7 +1102,8 @@ create_eop_interval(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
     {
       printf("%s \'eop_interval\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1031,7 +1122,8 @@ create_ut1_utc(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0 &&
+     str2!=NULL && strlen(str2)!=0)
     {
       /* Create a list of things */
       s1=(char *)strdup(str);
@@ -1050,7 +1142,8 @@ create_x_wobble(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0 &&
+     str2!=NULL && strlen(str2)!=0)
     {
       /* Create a list of things */
       s1=(char *)strdup(str);
@@ -1069,7 +1162,8 @@ create_y_wobble(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0 &&
+     str2!=NULL && strlen(str2)!=0)
     {
       /* Create a list of things */
       s1=(char *)strdup(str);
@@ -1083,6 +1177,116 @@ create_y_wobble(char *str, char *str2)
     }
 }  
 /*-------------------------------------------------------------------*/
+void *
+create_nut_ref_epoch(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'nut_ref_epoch\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_NUT_REF_EPOCH,s1));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_num_nut_points(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'num_nut_points\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_NUM_NUT_POINTS,
+				     make_dvalue(s1,NULL)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_nut_interval(char *str, char *str2)
+{
+  char *s1,*s2;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
+    {
+      printf("%s \'nut_interval\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_NUT_INTERVAL,
+				     make_dvalue(s1,s2)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_delta_psi(char *str, char *str2)
+{
+  char *s1,*s2;
+
+  if(str!=NULL && strlen(str)!=0)
+    {
+      /* Create a list of things */
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      q_list = add_list(q_list,make_dvalue(s1,s2));
+    }
+  else
+    {
+      qref_list = add_list(qref_list,make_lowl(T_DELTA_PSI, q_list));
+      q_list=NULL;
+    }
+} 
+/*-------------------------------------------------------------------*/
+void *
+create_delta_eps(char *str, char *str2)
+{
+  char *s1,*s2;
+
+  if(str!=NULL && strlen(str)!=0)
+    {
+      /* Create a list of things */
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      q_list = add_list(q_list,make_dvalue(s1,s2));
+    }
+  else
+    {
+      qref_list = add_list(qref_list,make_lowl(T_DELTA_EPS, q_list));
+      q_list=NULL;
+    }
+} 
+/*-------------------------------------------------------------------*/
+void *
+create_nut_model(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'nut_model\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_NUT_MODEL,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* EXPER block builders                                              */
 /*-------------------------------------------------------------------*/
 void *
@@ -1090,7 +1294,7 @@ create_exper_name(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'exper_name\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1107,7 +1311,7 @@ create_exper_num(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'exper_num\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1125,7 +1329,7 @@ create_exper_description(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'exper_description\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1142,7 +1346,7 @@ create_exper_nominal_start(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'exper_nominal_start\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1159,7 +1363,7 @@ create_exper_nominal_stop(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'exper_nominal_stop\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1176,7 +1380,7 @@ create_pi_name(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'pi_name\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1193,7 +1397,7 @@ create_pi_email(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'pi_email\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1210,7 +1414,7 @@ create_contact_name(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'contact_name\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1227,7 +1431,7 @@ create_contact_email(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'contact_email\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1244,7 +1448,7 @@ create_scheduler_name(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'scheduler_name\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1261,7 +1465,7 @@ create_scheduler_email(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'scheduler_email\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1278,7 +1482,7 @@ create_target_correlator(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'target_correlator\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1297,7 +1501,7 @@ create_chan_def(char *str, char *str2, char *str3, char *str4,
 	        char *str5, char *str6, char *str7, char *str8,
 		char *str9)
 {
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       string[0] = (char *)strdup(str);
     }
@@ -1320,7 +1524,7 @@ create_chan_def_states(char *str)
 {
   char *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9, *s10;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       s1=(char *)strdup(str);
       q_list = add_list(q_list,make_dvalue(s1,NULL));
@@ -1329,14 +1533,14 @@ create_chan_def_states(char *str)
     {
       if(string[0]==NULL)
 	{
-	  s3=(char *)strdup(string[1]);
-	  s4=(char *)strdup(string[2]);
-	  s5=(char *)strdup(string[3]);
-	  s6=(char *)strdup(string[4]);
-	  s7=(char *)strdup(string[5]);
-	  s8=(char *)strdup(string[6]);
-	  s9=(char *)strdup(string[7]);
-	  s10=(char *)strdup(string[8]);
+	  s3=string[1];
+	  s4=string[2];
+	  s5=string[3];
+	  s6=string[4];
+	  s7=string[5];
+	  s8=string[6];
+	  s9=string[7];
+	  s10=string[8];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
 				         make_chan_def(NULL,
 				         make_dvalue(s3,s4),
@@ -1348,15 +1552,15 @@ create_chan_def_states(char *str)
 	}
       else
 	{
-	  s2=(char *)strdup(string[0]);
-	  s3=(char *)strdup(string[1]);
-	  s4=(char *)strdup(string[2]);
-	  s5=(char *)strdup(string[3]);
-	  s6=(char *)strdup(string[4]);
-	  s7=(char *)strdup(string[5]);
-	  s8=(char *)strdup(string[6]);
-	  s9=(char *)strdup(string[7]);
-	  s10=(char *)strdup(string[8]);
+	  s2=string[0];
+	  s3=string[1];
+	  s4=string[2];
+	  s5=string[3];
+	  s6=string[4];
+	  s7=string[5];
+	  s8=string[6];
+	  s9=string[7];
+	  s10=string[8];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
 				         make_chan_def(s2,
 				         make_dvalue(s3,s4),
@@ -1374,7 +1578,8 @@ create_sample_rate(char *str, char *str2)
 {
   char *s1,*s2;
 
-  if(str==NULL || str2==NULL)
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
     {
       printf("%s \'sample_rate\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1393,7 +1598,7 @@ create_bits_per_sample(char *str)
 {
   char *s1;
 
-  if(str==NULL)
+  if(str==NULL || strlen(str)==0)
     {
       printf("%s \'bits_per_sample\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -1418,7 +1623,7 @@ create_cycle(char *str, char *str2)
 {
   char *s1,*s2, *s3;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used by the previous string */
       s1=(char *)strdup(str);
@@ -1427,7 +1632,7 @@ create_cycle(char *str, char *str2)
     }
   else
     {
-      s3=(char *)strdup(string[0]);
+      s3=string[0];
       qref_list = add_list(qref_list,make_lowl(T_SWITCHING_CYCLE,
 				     make_switching_cycle(s3,
 			  	     q_list)));
@@ -1448,7 +1653,8 @@ create_headstack_pos(char *str, char *str2)
 {
   char *s1,*s2, *s3;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0 &&
+     str2!=NULL && strlen(str2)!=0)
     {
       /* create a list of things to be used by the previous string */
       s1=(char *)strdup(str);
@@ -1457,7 +1663,7 @@ create_headstack_pos(char *str, char *str2)
     }
   else
     {
-      s3=(char *)strdup(string[0]);
+      s3=string[0];
       qref_list = add_list(qref_list,make_lowl(T_HEADSTACK_POS,
 				     make_headstack_pos(
 				     make_dvalue(s3,NULL),
@@ -1475,7 +1681,8 @@ create_if_def(char *str, char *str2, char *str3, char *str4,
 {
   char *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9, *s10;
 
-  if(str7==NULL || str8==NULL)
+  if(str7==NULL || strlen(str7)==0 ||
+     str8==NULL || strlen(str8)==0)
     {
       s1=(char *)strdup(str);
       s2=(char *)strdup(str2);
@@ -1490,7 +1697,8 @@ create_if_def(char *str, char *str2, char *str3, char *str4,
 				     NULL,
 				     NULL)));
     }
-  else if(str9==NULL || str10==NULL)
+  else if(str9==NULL || strlen(str9)==0 ||
+	  str10==NULL || strlen(str10)==0)
     {
       s1=(char *)strdup(str);
       s2=(char *)strdup(str2);
@@ -1535,7 +1743,7 @@ create_pass_order(char *str)
 {
   char *s1;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used before placing it in memory */
       s1=(char *)strdup(str);
@@ -1553,7 +1761,7 @@ create_s2_group_order(char *str)
 {
   char *s1;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used before placing it in memory */
       s1=(char *)strdup(str);
@@ -1580,7 +1788,7 @@ create_phase_cal_detect_list(char *str)
 {
   char *s1, *s2;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used by the previous string */
       s1=(char *)strdup(str);
@@ -1588,7 +1796,7 @@ create_phase_cal_detect_list(char *str)
     }
   else
     {
-      s2 = (char *)strdup(string[0]);
+      s2 = string[0];
       qref_list = add_list(qref_list,make_lowl(T_PHASE_CAL_DETECT,
 				     make_phase_cal_detect(s2,
 				     q_list)));
@@ -1770,7 +1978,7 @@ create_roll_def(char *str)
 {
   char *s1;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used before placing it in memory */
       s1=(char *)strdup(str);
@@ -1790,7 +1998,7 @@ create_literal(char *str)
 {
   char *s1;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* Create a list of literals */
       s1=(char *)strdup(str);
@@ -1827,7 +2035,7 @@ create_sefd_model_parameter(char *str)
 {
   char *s1, *s2, *s3, *s4;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       /* create a list of things to be used before placing it in memory */
       s1=(char *)strdup(str);
@@ -1835,9 +2043,9 @@ create_sefd_model_parameter(char *str)
     }
   else
     {
-      s2=(char *)strdup(string[0]);
-      s3=(char *)strdup(string[1]);
-      s4=(char *)strdup(string[2]);
+      s2=string[0];
+      s3=string[1];
+      s4=string[2];
       qref_list = add_list(qref_list,make_lowl(T_SEFD,
 			             make_sefd(s2,
 				     make_dvalue(s3,s4),
@@ -1931,7 +2139,7 @@ create_site_velocity(char *str, char *str2, char *str3, char *str4,
 }  
 /*-------------------------------------------------------------------*/
 void *
-create_horizon_map_az(char *str, char *str2)
+create_horizon_map(char *str, char *str2)
 {
   char *s1, *s2;
 
@@ -1941,31 +2149,17 @@ create_horizon_map_az(char *str, char *str2)
 }
 /*-------------------------------------------------------------------*/
 void *
-create_horizon_map_list(char *str)
+create_horizon_map_az()
 {
-  char *s1;
-
-  if(str!=NULL)
-    {
-      /* create a list of things to be used before placing it in memory */
-      s1=(char *)strdup(str);
-      q_list = add_list(q_list,make_dvalue(s1,NULL));
-    }
-  else
-    {
-      qref_list = add_list(qref_list,make_lowl(T_HORIZON_MAP_AZ, q_list));
-      q_list=NULL;
-    }
+  qref_list = add_list(qref_list,make_lowl(T_HORIZON_MAP_AZ, q_list));
+  q_list=NULL;
 }
-/*------------------------------------------------------------------- */
+/*-------------------------------------------------------------------*/
 void *
-create_horizon_map_el(char *str, char *str2)
+create_horizon_map_el()
 {
-  char *s1, *s2;
-
-  s1=(char *)strdup(str);
-  s2=(char *)strdup(str2);
-  q_list = add_list(q_list,make_dvalue(s1,s2));
+  qref_list = add_list(qref_list,make_lowl(T_HORIZON_MAP_EL, q_list));
+  q_list=NULL;
 }
 /*-------------------------------------------------------------------*/
 void *
@@ -2111,12 +2305,12 @@ create_source_type(char *str, char *str2)
 {
   char *s1, *s2;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       s1=(char *)strdup(str);
       q_list = add_list(NULL,s1);
     }
-  if(str2!=NULL)
+  if(str2!=NULL && strlen(str2)!=0)
     {
       s2=(char *)strdup(str2);
       q_list = add_list(q_list,s2);
@@ -2289,16 +2483,16 @@ create_fanin_def_list(char *str)
 {
   char *s1, *s2, *s3, *s4, *s5;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       s1=(char *)strdup(str);
       q_list = add_list(q_list,s1);
     }
   else
     {
-      s3=(char *)strdup(string[0]);
-      s4=(char *)strdup(string[1]);
-      s5=(char *)strdup(string[2]);
+      s3=string[0];
+      s4=string[1];
+      s5=string[2];
       qref_list = add_list(qref_list,make_lowl(T_FANIN_DEF,
 				     make_fanin_def(s3,
 			             make_dvalue(s4,NULL),
@@ -2325,7 +2519,7 @@ create_fanout_bitstream_list(char *str)
 {
   char *s1;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
       s1=(char *)strdup(str);
       q_list = add_list(q_list,s1);
@@ -2337,7 +2531,7 @@ create_fanout_trksID_list(char *str)
 {
   char *s1, *s2, *s3;
 
-  if(str!=NULL)
+  if(str!=NULL && strlen(str)!=0)
     {
 
       s1=(char *)strdup(str);
@@ -2345,8 +2539,8 @@ create_fanout_trksID_list(char *str)
     }
   else
     {
-      s2=(char *)strdup(string[0]);
-      s3=(char *)strdup(string[1]);
+      s2=string[0];
+      s3=string[1];
       qref_list = add_list(qref_list,make_lowl(T_FANOUT_DEF,
 				     make_fanout_def(s2,
                                      q_list,
@@ -2380,7 +2574,7 @@ create_vlba_frmtr_sys_trk(char *str, char *str2, char *str3, char *str4)
 {
   char *s1, *s2, *s3, *s4;
 
-  if(str4==NULL)
+  if(str4==NULL || strlen(str4)==0)
     {
       s1=(char *)strdup(str);
       s2=(char *)strdup(str2);
@@ -2432,7 +2626,8 @@ create_s2_data_source(char *str, char *str2, char *str3)
 {
   char *s1, *s2, *s3;
 
-  if(str2==NULL || str3==NULL)
+  if(str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0)
     {
       s1=(char *)strdup(str);
       qref_list = add_list(qref_list,make_lowl(T_S2_DATA_SOURCE,
