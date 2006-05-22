@@ -48,7 +48,6 @@ char **file_or_screen;
 /*   VEX format file to disk 'filename' or to screen */
 /* */
 {
-  if(strlen(*file_or_screen)==0) *file_or_screen=NULL;
   create_vex(*file_or_screen);
 /*  return;*/
 }
@@ -71,7 +70,6 @@ char **number;
 /* output: */
 /* */
 {
-  if(strlen(*number)==0) *number=NULL;
   create_version(*number);
 /*  return;*/
 }
@@ -96,7 +94,6 @@ char **blockname;
 /*   VEX format block name */
 /* */
 {
-  if(strlen(*blockname)==0) *blockname=NULL;
   create_block(*blockname);
 /*  return;*/
 }
@@ -121,8 +118,29 @@ char **defname;
 /*   VEX format def name */
 /* */
 {
-  if(strlen(*defname)==0) *defname=NULL;
   create_def(*defname);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fend_def__
+#else
+fend_def
+#endif
+() 
+/*<      subroutine fend_def >*/
+/*<      implicit none >*/
+
+/* ... */
+
+/* input: */
+/*   none
+/* output: */
+/*   VEX format def name */
+/* */
+{
+  end_def();
   return;
 }
 /* ----------------------------------------------------------------------- */
@@ -147,7 +165,6 @@ char **qualifier;
 /*   VEX format def name */
 /* */
 {
-  if(strlen(*qualifier)==0) *qualifier=NULL;
   create_qref_qualifier(*qualifier);
   return;
 }
@@ -178,8 +195,6 @@ char **keyword;
 /*   VEX format def name */
 /* */
 {
-  if(strlen(*blockname)==0) *blockname=NULL;
-  if(strlen(*keyword)==0) *keyword=NULL;
   create_qref(*blockname,*keyword);
   return;
 }
@@ -210,8 +225,6 @@ char **keyword;
 /*   VEX format def name */
 /* */
 {
-  if(strlen(*blockname)==0) *blockname=NULL;
-  if(strlen(*keyword)==0) *keyword=NULL;
   create_ref(*blockname,*keyword);
   return;
 }
@@ -245,9 +258,6 @@ char **keyword;
 /*   VEX format for external ref */
 /* */
 {
-  if(strlen(*filename)==0) *filename=NULL;
-  if(strlen(*blockname)==0) *blockname=NULL;
-  if(strlen(*keyword)==0) *keyword=NULL;
   create_external_ref(*filename,
 		      *blockname,
 		      *keyword);
@@ -274,8 +284,30 @@ char **str;
 /*   VEX format scan name */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_scan(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fend_scan__
+#else
+fend_scan
+#endif
+(str) 
+char **str;
+/*<      subroutine fend_scan >*/
+/*<      implicit none >*/
+
+/* ... */
+
+/* input: */
+/*   NONE */
+/* output: */
+/*   NONE */
+/* */
+{
+  end_scan();
   return;
 }
 /* ----------------------------------------------------------------------- */
@@ -303,8 +335,6 @@ char **comment;
 /*   VEX format for comment */
 /* */
 {
-  if(strlen(*where)==0) *where=NULL;
-  if(strlen(*comment)==0) *comment=NULL;
   create_comment(*where,
 		 *comment);
   return;
@@ -330,7 +360,6 @@ char **str;
 /*   VEX format start */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_start(*str);
   return;
 }
@@ -355,7 +384,6 @@ char **str;
 /*   VEX format mode */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_mode(*str);
   return;
 }
@@ -380,7 +408,6 @@ char **str;
 /*   VEX format source */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_source(*str);
   return;
 }
@@ -438,15 +465,6 @@ char **str9;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
-  if(strlen(*str9)==0) *str9=NULL;
   create_station(*str,
 		 *str2,
 		 *str3,
@@ -480,7 +498,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_station_drive_list(*str);
   return;
 }
@@ -534,14 +551,6 @@ char **str8;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
   create_data_transfer(*str,
 		       *str2,
 		       *str3,
@@ -578,8 +587,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_antenna_diam(*str,
 		      *str2);
   return;
@@ -610,8 +617,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_axis_type(*str,
 		   *str2);
   return;
@@ -642,8 +647,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_axis_offset(*str,
 		     *str2);
   return;
@@ -686,12 +689,6 @@ char **str5;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-
   create_antenna_motion(*str,
 			*str2,
 			*str3,
@@ -761,17 +758,6 @@ char **str11;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
-  if(strlen(*str9)==0) *str9=NULL;
-  if(strlen(*str10)==0) *str10=NULL;
-  if(strlen(*str11)==0) *str11=NULL;
   create_pointing_sector(*str,
 			 *str2,
 			 *str3,
@@ -815,9 +801,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_bbc_assign(*str,
 		    *str2,
 		    *str3);
@@ -868,11 +851,6 @@ char **str5;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
   create_clock(*str,
 	       *str2,
 	       *str3,
@@ -901,7 +879,6 @@ char **name;
 /*   VEX format name */
 /* */
 {
-  if(strlen(*name)==0) name=NULL;
   create_record_transport_type(*name);
   return;
 }
@@ -926,7 +903,6 @@ char **name;
 /*   VEX format name */
 /* */
 {
-  if(strlen(*name)==0) name=NULL;
   create_electronics_rack_type(*name);
   return;
 }
@@ -951,7 +927,6 @@ char **name;
 /*   VEX format name */
 /* */
 {
-  if(strlen(*name)==0) name=NULL;
   create_number_drives(*name);
   return;
 }
@@ -985,9 +960,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_headstack(*str,
 		   *str2,
 		   *str3);
@@ -1019,8 +991,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_record_density(*str,
 			*str2);
   return;
@@ -1046,7 +1016,6 @@ char **name;
 /*   VEX format name */
 /* */
 {
-  if(strlen(*name)==0) name=NULL;
   create_recording_system_id(*name);
   return;
 }
@@ -1084,10 +1053,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_tape_length(*str,
 		     *str2,
 		     *str3,
@@ -1140,12 +1105,6 @@ char **str7;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0 || strlen(*str3)==0)
-    *str2=*str3=*str4=*str5=*str6=*str7=NULL;
-  else if(strlen(*str4)==0 || strlen(*str5)==0 ||
-	  strlen(*str6)==0 || strlen(*str7)==0)
-      *str4=*str5=*str6=*str7=NULL;
   create_tape_motion(*str,
 		     *str2,
 		     *str3,
@@ -1177,7 +1136,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_tape_control(*str);
   return;
 }
@@ -1207,8 +1165,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_tai_utc(*str,
 		 *str2);
   return;
@@ -1239,8 +1195,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_a1_tai(*str,
 		*str2);
   return;
@@ -1254,7 +1208,7 @@ fcreate_eop_ref_epoch
 #endif
 (str)
 char **str;
-/*<      subroutine fcreate_a1_tai(ptr_ch(str)//(char *)0) >*/
+/*<      subroutine fcreate_eop_ref_epoch(ptr_ch(str)//(char *)0) >*/
 /*<      implicit none >*/
 /*<      character*(*) str; >*/
 
@@ -1267,7 +1221,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_eop_ref_epoch(*str);
   return;
 }
@@ -1293,7 +1246,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_num_eop_points(*str);
   return;
 }
@@ -1323,8 +1275,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_eop_interval(*str,
 		      *str2);
   return;
@@ -1355,7 +1305,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0 || strlen(*str2)==0) *str=*str2=NULL;
   create_ut1_utc(*str,
 		 *str2);
   return;
@@ -1386,7 +1335,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0 || strlen(*str2)==0) *str=*str2=NULL;
   create_x_wobble(*str,
 		  *str2);
   return;
@@ -1417,9 +1365,173 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0 || strlen(*str2)==0) *str=*str2=NULL;
   create_y_wobble(*str,
 		  *str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_nut_ref_epoch__
+#else
+fcreate_nut_ref_epoch
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_nut_ref_epoch(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_nut_ref_epoch(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_num_nut_points__
+#else
+fcreate_num_nut_points
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_num_nut_points(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_num_nut_points(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_nut_interval__
+#else
+fcreate_nut_interval
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_nut_interval(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_nut_interval(*str,
+		      *str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_delta_psi__
+#else
+fcreate_delta_psi
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_delta_psi(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_delta_psi(*str,
+		  *str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_delta_eps__
+#else
+fcreate_delta_eps
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_delta_eps(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_delta_eps(*str,
+		  *str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_nut_model__
+#else
+fcreate_nut_model
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_nut_model(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_nut_model(*str);
   return;
 }
 /* ----------------------------------------------------------------------- */
@@ -1444,7 +1556,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_exper_num(*str);
   return;
 }
@@ -1470,7 +1581,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_exper_name(*str);
   return;
 }
@@ -1496,7 +1606,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_exper_description(*str);
   return;
 }
@@ -1522,7 +1631,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_exper_nominal_start(*str);
   return;
 }
@@ -1548,7 +1656,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_exper_nominal_stop(*str);
   return;
 }
@@ -1574,7 +1681,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_pi_name(*str);
   return;
 }
@@ -1600,7 +1706,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_pi_email(*str);
   return;
 }
@@ -1626,7 +1731,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_contact_name(*str);
   return;
 }
@@ -1652,7 +1756,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_contact_email(*str);
   return;
 }
@@ -1678,7 +1781,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_scheduler_name(*str);
   return;
 }
@@ -1704,7 +1806,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_scheduler_email(*str);
   return;
 }
@@ -1730,7 +1831,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_target_correlator(*str);
   return;
 }
@@ -1787,15 +1887,6 @@ char **str9;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
-  if(strlen(*str9)==0) *str9=NULL;
   create_chan_def(*str,
 		  *str2,
 		  *str3,
@@ -1830,7 +1921,6 @@ char **str;
 /* */
 {
 
-  if(strlen(*str)==0) *str=NULL;
   create_chan_def_states(*str);
   return;
 }
@@ -1860,8 +1950,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_sample_rate(*str,
 		     *str2);
   return;
@@ -1888,7 +1976,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_bits_per_sample(*str);
   return;
 }
@@ -1918,8 +2005,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_cycle(*str,
 	       *str2);
   return;
@@ -1946,7 +2031,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_switching_cycle(*str);
   return;
 }
@@ -1976,7 +2060,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=*str2=NULL;
   create_headstack_pos(*str,
 		       *str2);
   return;
@@ -2003,7 +2086,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_headstack_reference(*str);
   return;
 }
@@ -2065,16 +2147,6 @@ char **str10;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
-  if(strlen(*str9)==0) *str9=NULL;
-  if(strlen(*str10)==0) *str10=NULL;
   create_if_def(*str,
 		*str2,
 		*str3,
@@ -2109,7 +2181,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_phase_cal_detect(*str);
   return;
 }
@@ -2135,7 +2206,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_phase_cal_detect_list(*str);
   return;
 }
@@ -2161,7 +2231,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_s2_group_order(*str);
   return;
 }
@@ -2191,8 +2260,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_tape_change(*str,
 		     *str2);
   return;
@@ -2219,7 +2286,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_pass_order(*str);
   return;
 }
@@ -2249,8 +2315,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_new_tape_setup(*str,
 			*str2);
   return;
@@ -2281,8 +2345,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_new_source_command(*str,
 			    *str2);
   return;
@@ -2313,8 +2375,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_headstack_motion(*str,
 			  *str2);
   return;
@@ -2349,9 +2409,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_tape_prepass(*str,
 		      *str2,
 		      *str3);
@@ -2387,9 +2444,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_parity_check(*str,
 		      *str2,
 		      *str3);
@@ -2425,9 +2479,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_setup_always(*str,
 		      *str2,
 		      *str3);
@@ -2467,10 +2518,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_postob_cal(*str,
 		    *str2,
 		    *str3,
@@ -2511,10 +2558,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_midob_cal(*str,
 		   *str2,
 		   *str3,
@@ -2555,10 +2598,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_preob_cal(*str,
 		   *str2,
 		   *str3,
@@ -2588,7 +2627,6 @@ char **str;
 /* */
 {
 
-  if(strlen(*str)==0) *str=NULL;
   create_roll(*str);
   return;
 }
@@ -2614,7 +2652,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_procedure_name_prefix(*str);
   return;
 }
@@ -2644,8 +2681,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_roll_reinit_period(*str,
 			    *str2);
   return;
@@ -2672,7 +2707,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_roll_inc_period(*str);
   return;
 }
@@ -2698,7 +2732,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_roll_def(*str);
   return;
 }
@@ -2727,7 +2760,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_literal(*str);
   return;
 }
@@ -2753,7 +2785,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_sefd_model(*str);
   return;
 }
@@ -2779,7 +2810,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_sefd_model_parameter(*str);
   return;
 }
@@ -2811,9 +2841,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_sefd(*str,
 	      *str2,
 	      *str3);
@@ -2841,7 +2868,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_site_name(*str);
   return;
 }
@@ -2867,7 +2893,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_site_type(*str);
   return;
 }
@@ -2893,7 +2918,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_site_ID(*str);
   return;
 }
@@ -2939,12 +2963,6 @@ char **str6;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
   create_site_position(*str,
 		       *str2,
 		       *str3,
@@ -2975,7 +2993,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_site_position_epoch(*str);
   return;
 }
@@ -3001,7 +3018,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_site_position_ref(*str);
   return;
 }
@@ -3047,12 +3063,6 @@ char **str6;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
   create_site_velocity(*str,
 		       *str2,
 		       *str3,
@@ -3064,41 +3074,62 @@ char **str6;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
-fcreate_horizon_map_list__
+fcreate_horizon_map_az__
 #else
-fcreate_horizon_map_list
+fcreate_horizon_map_az
 #endif
 (str)
 char **str;
-/*<      subroutine fcreate_horizon_map_list(ptr_ch(str)//(char *)0) >*/
+/*<      subroutine fcreate_horizon_map_az >*/
 /*<      implicit none >*/
-/*<      character*(*) str; >*/
 
 /* ... */
 
 /* input: */
-/*   character*(*) str       - string */
 
 /* output: */
 /*   VEX format */
 /* */
 {
 
-  if(strlen(*str)==0) *str=NULL;
-  create_horizon_map_list(*str);
+  create_horizon_map_az();
   return;
 }
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
-fcreate_horizon_map_az__
+fcreate_horizon_map_el__
 #else
-fcreate_horizon_map_az
+fcreate_horizon_map_el
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_horizon_map_el >*/
+/*<      implicit none >*/
+
+/* ... */
+
+/* input: */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+
+  create_horizon_map_el();
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_horizon_map__
+#else
+fcreate_horizon_map
 #endif
 (str, str2) 
 char **str;
 char **str2;
-/*<      subroutine fcreate_horizon_map_az(ptr_ch(str)//(char *)0, >*/
+/*<      subroutine fcreate_horizon_map(ptr_ch(str)//(char *)0, >*/
 /*<                                        ptr_ch(str2)//(char *)0) >*/
 /*<      implicit none >*/
 /*<      character*(*) str; >*/
@@ -3114,41 +3145,7 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  create_horizon_map_az(*str,
-			*str2);
-  return;
-}
-/* ----------------------------------------------------------------------- */
-void
-#ifdef F2C
-fcreate_horizon_map_el__
-#else
-fcreate_horizon_map_el
-#endif
-(str, str2)
-char **str;
-char **str2;
-/*<      subroutine fcreate_horizon_map_el(ptr_ch(str)//(char *)0, >*/
-/*<                                        ptr_ch(str2)//(char *)0)>*/
-/*<      implicit none >*/
-/*<      character*(*) str; >*/
-/*<      character*(*) str2; >*/
-/* ... */
-
-/* input: */
-/*   character*(*) str       - string 1 */
-/*   character*(*) str2      - string 2 */
-
-/* output: */
-/*   VEX format */
-/* */
-{
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  create_horizon_map_el(*str,
-			*str2);
+  create_horizon_map(*str,*str2);
   return;
 }
 /* ----------------------------------------------------------------------- */
@@ -3177,8 +3174,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_zen_atmos(*str,
 		   *str2);
   return;
@@ -3217,10 +3212,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_ocean_load_vert(*str,
 			 *str2,
 			 *str3,
@@ -3261,10 +3252,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_ocean_load_horiz(*str,
 			  *str2,
 			  *str3,
@@ -3293,7 +3280,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_occupation_code(*str);
   return;
 }
@@ -3323,8 +3309,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_inclination(*str,
 		     *str2);
   return;
@@ -3351,7 +3335,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_eccentricity(*str);
   return;
 }
@@ -3381,8 +3364,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_arg_perigee(*str,
 		     *str2);
   return;
@@ -3413,8 +3394,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_ascending_node(*str,
 			*str2);
   return;
@@ -3445,8 +3424,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_mean_anomaly(*str,
 		      *str2);
   return;
@@ -3477,8 +3454,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_semi_major_axis(*str,
 			 *str2);
   return;
@@ -3505,7 +3480,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_mean_motion(*str);
   return;
 }
@@ -3531,7 +3505,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_orbit_epoch(*str);
   return;
 }
@@ -3561,8 +3534,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_source_type(*str,
 		     *str2);
   return;
@@ -3589,7 +3560,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_source_name(*str);
   return;
 }
@@ -3615,7 +3585,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_ra(*str);
   return;
 }
@@ -3641,7 +3610,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_IAU_name(*str);
   return;
 }
@@ -3667,7 +3635,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_dec(*str);
   return;
 }
@@ -3693,7 +3660,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_ref_coord_frame(*str);
   return;
 }
@@ -3719,7 +3685,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_source_position_ref(*str);
 
   return;
@@ -3746,7 +3711,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_source_position_epoch(*str);
 
   return;
@@ -3777,8 +3741,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_ra_rate(*str,
 		 *str2);
 
@@ -3810,8 +3772,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_dec_rate(*str,
 		  *str2);
 
@@ -3843,8 +3803,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_velocity_wrt_LSR(*str,
 			  *str2);
 
@@ -3920,19 +3878,6 @@ char **str13;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
-  if(strlen(*str5)==0) *str5=NULL;
-  if(strlen(*str6)==0) *str6=NULL;
-  if(strlen(*str7)==0) *str7=NULL;
-  if(strlen(*str8)==0) *str8=NULL;
-  if(strlen(*str9)==0) *str9=NULL;
-  if(strlen(*str10)==0) *str10=NULL;
-  if(strlen(*str11)==0) *str11=NULL;
-  if(strlen(*str12)==0) *str12=NULL;
-  if(strlen(*str13)==0) *str13=NULL;
 
   create_source_model(*str,
 		      *str2,
@@ -3984,10 +3929,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_vsn(*str,
 	     *str2,
 	     *str3,
@@ -4025,9 +3966,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_fanin_def(*str,
 		   *str2,
 		   *str3);
@@ -4055,7 +3993,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_fanin_def_list(*str);
   return;
 }
@@ -4081,7 +4018,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_fanout_def_subpass(*str);
   return;
 }
@@ -4107,7 +4043,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_fanout_def_headstack(*str);
   return;
 }
@@ -4133,7 +4068,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_fanout_trksID_list(*str);
   return;
 }
@@ -4159,7 +4093,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_fanout_bitstream_list(*str);
   return;
 }
@@ -4185,7 +4118,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_track_frame_format(*str);
   return;
 }
@@ -4211,7 +4143,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_data_modulation(*str);
   return;
 }
@@ -4249,10 +4180,6 @@ char **str4;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
-  if(strlen(*str4)==0) *str4=NULL;
   create_vlba_frmtr_sys_trk(*str,
 			    *str2,
 			    *str3,
@@ -4285,8 +4212,6 @@ char **str2;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
   create_vlba_trnsprt_sys_trk(*str,
 			      *str2);
 
@@ -4314,7 +4239,6 @@ char **str;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
   create_s2_recording_mode(*str);
   return;
 }
@@ -4348,9 +4272,6 @@ char **str3;
 /*   VEX format */
 /* */
 {
-  if(strlen(*str)==0) *str=NULL;
-  if(strlen(*str2)==0) *str2=NULL;
-  if(strlen(*str3)==0) *str3=NULL;
   create_s2_data_source(*str,
 			*str2,
 			*str3);
