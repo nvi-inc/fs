@@ -4,22 +4,19 @@
 #include "vex.h"
 #include "y.tab.h"
 extern struct vex *vex_ptr;
-int print_to_file=0;
 
 void print_vex(struct vex *vex)
 {
   if(filename) /* Check to see if create_vex() set this to 1 */
     {               /* Found in vex_put.c source                  */
       fp=fopen(filename,"w");
-      print_to_file=1;
     }
   else
     fp=stdout;
   print_lowl(vex->version);
 
   print_vex_blocks(vex->blocks);
-  if(print_to_file)
-    fprintf(fp,"\n");
+  fprintf(fp,"\n");
 }
 
 void print_vex_blocks(struct llist *blocks)
