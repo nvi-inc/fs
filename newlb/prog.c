@@ -2319,3 +2319,9 @@ void fs_set_abend_normal_end__(abend_normal_end)
         {
 	  shm_addr->abend.normal_end = *abend_normal_end;
         }
+void fs_get_disk_record_record__(disk_record_record)
+        int *disk_record_record;
+        {
+          *disk_record_record= shm_addr->disk_record.record.record;
+        }
+
