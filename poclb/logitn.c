@@ -49,7 +49,7 @@ int  what;          /* int with more info                   */
     strncat(buf,who,2);
     int2str(buf,ierr,-5,0);
     strcat(buf,"(");
-    int2str(buf,what,4,0);
+    int2str(buf,what,-4,0);
     strcat(buf,")");
   }
 /* Get the name of our main program and append #pname# to the
