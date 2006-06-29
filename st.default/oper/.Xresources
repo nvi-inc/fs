@@ -67,3 +67,8 @@ login_sh*VT100.Translations:	#override\
 xterm.input:            false
 xterm*scrollBar:	true
 xterm*jumpScroll:	false
+!autoftp
+autoftp*geometry:	80x5-0+253
+autoftp*title:		autoftp
+!greplog
+greplog*title:		greplog
