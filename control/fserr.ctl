@@ -170,12 +170,6 @@ command does not accept parameters
 5D -301
 command does not accept parameters
 ""
-5D -401
-error retrieving class for position response
-""
-5D -402
-less than 1 Megabyte of data recorded, negative play pointer not allowed
-""
 5D -403
 error retrieving class for data_check response
 ""
@@ -209,9 +203,6 @@ query response not received
 5D -902
 program error: strdup() failed
 ""
-5F -102
-no default for destination
-""
 5F -201
 scan name too long (maximum 32 characters)
 ""
@@ -226,6 +217,30 @@ end time too long (maximum 32 characters)
 ""
 5F -205
 options too long (maximum 32 characters)
+""
+5F -301
+fork to create child (to run autoftp script) failed, see above error.
+""
+5F -302
+Exec of xterm (to run autoftp script) failed, see above error.
+""
+5F -303
+fork to create grandchild (to run autoftp script) failed, see above error.
+""
+5F -304
+Child did not exit normally when trying to run autoftp script.
+""
+5F -305
+No locally defined file name and Mark5 system did not return file name.
+""
+5F -306
+Non-zero exist status ?WWW.
+""
+5F -307
+Non-zero exist status from child when trying to run autoftp script, see above.
+""
+5F -308
+Parameter after abort must be 'autoftp' or blank.
 ""
 5F -400
 Error retrieving class for response to commands.
@@ -384,22 +399,10 @@ no default for record parameter
 record parameter must be 'on' or 'off'.
 ""
 5R -202
-scan name parameter too long
-""
-5R -203
-session name parameter too long
-""
-5R -204
-source name parameter too long
+scan label parameter too long
 ""
 5R -302
-scan name defined scan_name command too long
-""
-5R -303
-session name defined scan_name command too long
-""
-5R -304
-source name defined source command too long
+scan_name defined scan label too long
 ""
 5R -400
 error retrieving acknowledgement of command
@@ -408,19 +411,13 @@ error retrieving acknowledgement of command
 error retrieving class
 ""
 5R -501
-error decoding record? state parameter
+error decoding record? status parameter
 ""
 5R -502
 error decoding record? scan number parameter
 ""
 5R -503
-error decoding record? scan name parameter
-""
-5R -504
-error decoding record? session name parameter
-""
-5R -505
-error decoding record? source name parameter
+error decoding record? scan label parameter
 ""
 5R -901
 query response not found
@@ -709,6 +706,12 @@ Too many entries in IBAD.CTL file only ?WWW permitted.
 ""
 BO -171
 Resource locked. Cannot terminate. Is PFMED running?
+""
+BO -172
+Parameter for terminate must be disk_record_ok.
+""
+BO -173
+Disk recording was commanded, either use disk_record=off or terminate=disk_record_ok.
 ""
 BO -180
 Error opening TIME.CTL FMP ?FFF
@@ -4689,7 +4692,7 @@ SP   -1
 Error in characters following a !
 ""
 SP   -2
-More than 80 characters in command including parameters.
+More than 512 characters in command including parameters.
 ""
 SP   -3
 More than 12 characters in function or procedure name.
@@ -4719,7 +4722,7 @@ SP  -11
 Stop time occurs before start time.
 ""
 SP  -12
-More than 100 characters in expanded command.
+More than 512 characters in expanded command.
 ""
 SP  -13
 This command not supported for your equipment, check equip.ctl.
@@ -5061,9 +5064,12 @@ WS -202
 Session name must be less than 17 characters. 
 ""
 WS -203
-Error decoding scan length or value was less than zero.
+Station code must be less than 17 characters. 
 ""
 WS -204
+Error decoding scan length or value was less than zero.
+""
+WS -205
 Error decoding continuous recording length or value was less than zero.
 ""
 WS -301
@@ -5073,9 +5079,12 @@ WS -302
 No previous value allowed for session name
 ""
 WS -303
-No previous value allowed for scan length.
+No previous value allowed for station code.
 ""
 WS -304
+No previous value allowed for scan length.
+""
+WS -305
 No previous value allowed for continuous recording length.
 ""
 WX   -1
