@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+# Usage: file_append input_file [output_files]
+
+if ($#ARGV < 0) {
+    print "Usage: file_append input_file [output_files]\n";
+    print "\n";
+    print "Appends input_file to output_files\n";
+}
+
+$input_file = shift(@ARGV);
+
+FILE: foreach $file (@ARGV) {
+    system("cat $input_file >>$file");
+}
+
