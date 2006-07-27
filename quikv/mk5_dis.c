@@ -9,8 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define MAX_OUT 256
-#define BUFSIZE 2048
+#define MAX_OUT 512
+#define BUFSIZE 513
 
 void mk5_dis(command,itask,ip)
 struct cmd_ds *command;
@@ -26,7 +26,8 @@ long ip[5];
       int nchars;
       long out_class=0;
       int out_recs=0;
-      char inbuf[BUFSIZE];
+      char inbuf[BUFSIZE],*first;
+      int n;
 
    /* format output buffer */
 
@@ -37,20 +38,52 @@ long ip[5];
       
       for (i=0;i<ip[1];i++) {
 	if ((nchars =
-	     cls_rcv(ip[0],inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  ip[3] = -401;
 	  goto error;
 	}
-	if(strlen(inbuf)+1<=sizeof(output)-strlen(output)) {
-	  strcpy(start,inbuf);
-	  if(strlen(output)>0)
-	    output[strlen(output)-1]='\0';
-	} else {
-	  strncpy(start,inbuf,sizeof(output)-strlen(output)-1);
-	  output[sizeof(output)]=0;
+	inbuf[nchars]=0;
+
+	first=inbuf;
+	while(strlen(first)>0) {
+	  *start=0;
+	  if(strlen(first)+1<=sizeof(output)-strlen(output)) {
+	    strcpy(start,first);
+	    if(strlen(output)>0 && output[strlen(output)-1]=='\n')
+	      output[strlen(output)-1]='\0';
+	    first+=strlen(first);
+	  } else {
+	    int last;
+	    n=sizeof(output)-strlen(output)-1;
+	    for(last=n;last>(n-35) && last>0;last--) {
+	      if(first[last-1]==':') {
+		n=last;
+		break;
+	      }
+	    }
+	    if(index(":",first[n-1])==NULL)
+	      for(last=n;last>(n-35) && last>0;last--) {
+		if(first[last-1]==',') {
+		  n=last;
+		  break;
+		}
+	      }
+	    if(index(":,",first[n-1])==NULL)
+	      for(last=n;last>(n-35) && last>1;last--) {
+		if(first[last-1]==' ') {
+		  n=last-1;
+		  break;
+		}
+	      }
+	    strncpy(start,first,n);
+	    start[n]=0;
+	    first+=n;
+	  }
+	  if(strlen(start)>0) {
+	    cls_snd(&out_class,output,strlen(output),0,0);
+	    out_recs++;
+	  }
 	}
-	cls_snd(&out_class,output,strlen(output),0,0);
-	out_recs++;
       }
 
       ip[0]=out_class;
