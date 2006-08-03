@@ -15,6 +15,10 @@ if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
 }
 
 set mainTitleText "Gain Plot"
+set CurrentProgramVersion 1
+set CurrentProgramRelease 1
+set CurrentProgramBuild 2
+
 set current_DefaultDir "/usr2/log"
 set newfile_filename ""
 set statusMessage "Please open a FS log file."
@@ -46,7 +50,7 @@ set BADSTRVALUE X        ;#gndats definition of a "bad" string
 
 set pid [pid]
 
-set controlFileDir "/usr2/control/rxg_files"               ;#Default directory for control files   
+set controlFileDir "/usr2/control/rxg_files"     ;#Default directory for control files   
 set currentInputFitFile "/tmp/input.fit.$pid"    ;#Input file to gnfit
 set currentOutputFitFile "/tmp/output.fit.$pid"  ;#Output file from gnfit
 set current_TEMP  "/tmp/gnplt.tmp.$pid"          ;#Temporary file used by the printing procedures
@@ -687,6 +691,7 @@ proc replot {} {
     global number_of_LO number_of_pol LONamelist LOFirstlist LOSecondlist LOFilelist currentRXG hasScaled pid
     global fittedtrecmark trecmark SDmenus_is_set source frequ pointsHighlighted
     clearScreen
+
     if {$items!="Gain"} {
 	.c itemconfigure opacityHeader -text ""
     }
@@ -1041,6 +1046,7 @@ proc clearScreen {} {
     set tcr 0
     set trecmark 0            
     set fittedtrecmark 0
+    .c delete connectCurve
     .c delete gaincurve
     .c delete fittedgaincurve
     .c delete tcalcurve
@@ -1090,7 +1096,7 @@ proc drawPoly {DPFU coefflist tag type args} {
     if {$color!="black"} {
 	set width $thickline
     } else {
-	set width 1
+	set width 2
     }
     set reScaled 0
     if {$hasScaled==1} {
@@ -1176,8 +1182,8 @@ proc drawTCalCurve {xstart ystart xstop ystop tag args} {
 	set color green3
 	set width $thickline
     } else {
-	set color black
-	set width 1
+	set color red
+	set width 2
     }
     set dash 0
     if {[lindex $args 0]=="dash"} {
@@ -1198,7 +1204,7 @@ proc drawTCalCurve {xstart ystart xstop ystop tag args} {
     set dist [expr sqrt(pow(($pixelxstart-$pixelxstop),2)+pow(($pixelystart-$pixelystop),2))]
     set step [expr $dist/3]
     set range [expr $xstop-$xstart]
-    # MC:AO added to manage the case x1=x2 => division by zero!
+    #MC:AO added to manage the case x1=x2 => division by zero!
     if {$xstop==$xstart} {     
 	    if {($pixelxstart>=$pixelxmin && $pixelxstart<=$pixelxmax) && ($pixelxstop>=$pixelxmin && $pixelxstop<= \
 		$pixelxmax) && ($pixelystart>=[expr $pixelymin-$pointoffplot] && $pixelystart<=[expr $pixelymax+ \
@@ -3688,7 +3694,7 @@ proc curveinFile tckmenu {
 	    }
 	}
 	close $fileID
-	# MC:AO Piece of code rewritten because cases NN=0 and NN=1 were not correctly handled. 
+	#MC:AO Piece of code rewritten because cases NN=0 and NN=1 were not correctly handled. 
 	#       routine rewritten in a more compact and clear fashion.
 	set NN [llength $xlist]
 	if {$NN==0} {
@@ -3831,7 +3837,7 @@ proc curveinFile tckmenu {
 		        #    .c create line $pixelxstart $pixelystart $pixelxstop $pixelystop \
 		        #            -tags tcalcurve -fill green3 -width $thickline
 		        #}
-    # MC:AO typo eliminated. this caused the curve not to be eliminated
+    #MC:AO typo eliminated. this caused the curve not to be eliminated
     } elseif {$tckmenu==0} {
 	.c delete tcalcurve
     }
@@ -4004,6 +4010,7 @@ proc createToolsMenu xitem {
     if {$xitem=="Airmass"} {
 	if {$items=="Tsys-Tspill"} {
 	    .menuBar.tools.menu add checkbutton -label "Mark Trec from file" -variable trecmark -command {
+		set trec 0
 		if {$trecmark==1} {
 		    for {set i 1} {$i < $number_of_datalines} {incr i} {
 		        if {$dataMatrix($i,inUse)==1} {
@@ -4057,6 +4064,7 @@ proc createToolsMenu xitem {
 	    }
 	}
 	.menuBar.tools.menu add separator
+	#fit for receiver temperature. A time interval is requested where the Tatm is supposed stable
 	.menuBar.tools.menu add command -label "Fit for Trec" -command {
 	    min Time
 	    max Time
@@ -4073,7 +4081,7 @@ proc createToolsMenu xitem {
 	    frame .trecintChoice.frame1
 	    frame .trecintChoice.frame2
 	    frame .trecintChoice.frame3
-	    label .trecintChoice.header0 -text "Please select Tatm:"
+	    label .trecintChoice.header0 -text "Please select Tatm (°K):"
 	    label .trecintChoice.header -text "Please select time interval for fit:"
 	    entry .trecintChoice.entry0 -width 3 -textvariable tatm
 	    entry .trecintChoice.entry -width 3 -textvariable hourint
@@ -4222,7 +4230,7 @@ proc checkPol {} {
 # This information is stored in the variable "choice". 
 # 1 = Adjust for new DPFU, assume TCal(K) and Gain are ok.
 # 2 = Fit for both Gain Curve and DPFU. Select also type of gain curve, ELEV or ALTAZ.
-# 3 = Adjust TCal(K) to make data lie on existing curve, assuming TCal(K) is wwrong by a scale factor.
+# 3 = Adjust TCal(K) to make data lie on existing curve, assuming TCal(K) is wrong by a scale factor.
 # ----------------------------------------------------------------------------------------------------
 
 proc outputFit choice {
@@ -4286,7 +4294,7 @@ proc outputFit choice {
 	    }
 	    set avgdpfu [format %.4f [expr double($totaldpfu)/$dpfucount]]
 	    set fgc 1
-	    drawPoly $avgdpfu $coefflist fittedgaincurve $gctype dash black
+	    drawPoly $avgdpfu $coefflist fittedgaincurve $gctype dash red
 	    set DPFU $avgdpfu
 	}
 	2 {
@@ -4411,7 +4419,7 @@ proc fitToGainCurve {} {
 	    set coefflist [lrange $line 7 end]
 	}
 	close $fileID
-	drawPoly $DPFU $coefflist fittedgaincurve $gctype dash black
+	drawPoly $DPFU $coefflist fittedgaincurve $gctype dash red
 	set fgc 1
     }
     if {[info exists rchi] && [info exists DPFU] && [info exists coefflist]} {
@@ -4488,6 +4496,7 @@ proc updateRXGwithfit choice {
 	    close $tempFile
 	    exec cp $tempRXG $currentRXG
 	    exec rm -f $tempRXG
+	    #pid is used to force gndat to take the right "work" file instead of the original rxg file
 	    set currentOutputFile [exec gndat $newfile_filename $currentOutputFile $pid $controlFileDir]
 	    readData $currentOutputFile
 	}
@@ -4586,7 +4595,7 @@ proc updateRXGwithfit choice {
     }
 }        
 
-# MC:AO *
+#MC:AO *
 # ---------------------------------------------------------------------------------------
 # This procedure takes the average or the median of the TCal at the different frequencies
 # end puts them into the calTableFrequency and calTableTemperature lists.
@@ -4937,7 +4946,7 @@ proc updateRXGwithTCal {} {
     
     button .rxgWindow.buttonFrame.ok -text "Ok" -command {printTCalToRXG; destroy .rxgWindow}
     button .rxgWindow.buttonFrame.cancel -text "Cancel" -command {destroy .rxgWindow}
-    # MC:AO deleted because it is not used
+    #MC:AO deleted because it is not used
     #button .rxgWindow.buttonFrame.time -text "All times" -command {set currentTime All}
     # end MC:AO
     pack .rxgWindow.timeLabel .rxgWindow.sourceLabel .rxgWindow.polLabel .rxgWindow.freqLabel \
@@ -4950,7 +4959,7 @@ proc updateRXGwithTCal {} {
     pack .rxgWindow.textFrame .rxgWindow.buttonFrame -in .rxgWindow -side top -fill x
 }
 
-# MC:AO *
+#MC:AO *
 # ----------------------------------------------------------------------------------------------------
 # This procedure does the actual updating of the .rxg file when updating the tcal vs. frequency table.
 # ----------------------------------------------------------------------------------------------------
@@ -5704,6 +5713,27 @@ foreach xit $xitemlist {
 .menuBar.scaling.menu add radiobutton -label "Manual" -variable scaling -value Manual -command {set hasScaled 0;scale}
 
 .menuBar.help.menu add command -label "Shortcuts" -command createShortcutWindow
+.menuBar.help.menu add command -label "About" -command {
+    toplevel .taboutBox 
+    wm title .taboutBox "GNPLT about box"
+    frame .taboutBox.frame0
+    label .taboutBox.infotitle -text "Information about GaiN PLot"
+    label .taboutBox.version -text [format "version: %d.%d.%02d" \
+	$CurrentProgramVersion $CurrentProgramRelease $CurrentProgramBuild]
+    label .taboutBox.descr1 -text "GaiN PLoT is a Field System tool for"
+    label .taboutBox.descr2 -text "amplitude calibration of the VLBI telescopes."
+    label .taboutBox.descr3 -text "Make sure the TCL/TK 8.4.x is properly installed in your system."
+    button .taboutBox.okButton -text "OK" -command {
+	destroy .taboutBox
+    }
+    pack .taboutBox.frame0 -in .taboutBox -anchor center -side top
+    pack .taboutBox.infotitle -in .taboutBox.frame0 -anchor center
+    pack .taboutBox.version -in .taboutBox.frame0 
+    pack .taboutBox.descr1 -in .taboutBox.frame0 
+    pack .taboutBox.descr2 -in .taboutBox.frame0 
+    pack .taboutBox.descr3 -in .taboutBox.frame0 
+    pack .taboutBox.okButton -in .taboutBox.frame0 -side bottom
+}
 
 # ---------------------
 # Global event bindings
@@ -5787,7 +5817,7 @@ switch $argc {
 	    }
 	} else {
 	    set newfile_filename [lindex $argv 0]
-	    set legendNo 1           ;#makes the source legend be set only once
+	    set legendNo 1; #makes the source legend be set only once
 	    set currentOutputFile [exec gndat [lindex $argv 0] $currentOutputFile 0 $controlFileDir]
 	    if {$currentOutputFile==-1} {
 		set statusMessage "There's a problem with the .rxg files. Please check the $controlFileDir directory."
