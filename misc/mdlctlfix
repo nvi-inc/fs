@@ -1,0 +1,101 @@
+#!/usr/bin/perl
+# Usage: cmdctlfix4 file
+
+if ($#ARGV < 0) {
+    print "Usage: mdlctlfix file\n";
+    print "\n";
+    print "Fixes a pre-30 parameter pointing model file (usually mdlpo.ctl) to support 30 parameters\n";
+    print "\n";
+    print "file  is the control file to be fixed\n";
+    print "\n";
+    print "the original file is renamed with a '.bak' extension\n";
+
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try 'mdlctlfix' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$name=$ARGV[0];
+
+if ($name =~ /(.*)\..*$/ ) {
+    $bak = $1 . ".bak";
+    $out = $name;
+    if (!-e $out) {
+	die "Can't find $out. Quitting.\n";
+    }
+}
+
+# rename the original if we can and open the files
+
+if (-e $bak) {
+    die "Backup-file $bak already exists, giving up.\n";
+}
+
+rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+if(!open(BAK,$bak)) {
+    print "Failed to open $bak: $!\n";
+    if(!rename($bak,$out)) {
+	print "In the process of trying to restore order after the error,\n";
+	print "I was unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	print "In order to restore order after the error,\n";
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open $out: $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) { 
+	print "In the process of trying to restore order after the error,\n";
+	print "I was unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	print "In order to restore order after the error,\n";
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+
+#okay now process the file
+
+$count = 0;
+
+while(<BAK>) {
+    if (/^\*/) {
+	print OUT;
+	next;
+    }
+
+    if(++$count == 1 ||$count >= 3 && $count <= 5) {
+	print OUT;
+	next;
+    }
+    if ($count == 2) {
+	chop;
+	print OUT "$_  0 0 0 0 0  0 0 0 0 0\n";
+    }
+    if($count == 6) {
+	print OUT;
+	print OUT "*\n";
+	print OUT "  0.0 0.0 0.0 0.0 0.0\n";
+	print OUT "*\n";
+	print OUT "  0.0 0.0 0.0 0.0 0.0\n";
+    }
+}
+
+if ($count != 6) {
+    print "Warning: I did not see the expected six non-comment lines.\n";
+    print "There is probably something wrong, like $out\n";
+    print "wasn't a FS pointing model file, or it had already been fixed.\n";
+    print "In order to recover you will probably want to\n";
+    print "rename $bak to $out,\n";
+    print "using: \"mv $bak $out\"\n";
+}
