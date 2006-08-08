@@ -61,7 +61,7 @@ struct pmdl *pmodel;
   for (i=0; i<MAX_MODEL_PARAM; i+=NLINE) {
     buf[0]='\0';
     strcat(buf,"PM ");
-    int2str(buf,2+(i+NLINE-1)/NLINE,1,0);
+    int2str(buf,3+(i+NLINE-1)/NLINE,1,0);
     strcat(buf," ");
     for (j=0; j<NLINE; j++) {
       if (i+j>MAX_MODEL_PARAM)
