@@ -5,7 +5,7 @@
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("vhc:f:");
+&Getopts("vhc:f:piu:l:");
 
 if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
     print STDERR "Try: 'pcalamp -h'\n";
@@ -13,14 +13,14 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[pcalamp 1.0]\n";
+    print "[pcalamp 1.2]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit -1;
 }
 
 if (defined($opt_h)) {
-    print "Usage: pcalamp  -c string -vhf file/device logs\n";
+    print "Usage: pcalamp  -c string -vhpi -u upper -l lower -f file/device logs\n";
     print "Synopsis: extracts and plots pcal amplitudes from log files\n\n";
 
     print "This script processes log files to produce plots of pcal amplitudes. The\n";
@@ -34,13 +34,17 @@ if (defined($opt_h)) {
     print "    matching 'string' was recorded in the log, for this to work; the\n";
     print "    command/procedure matching 'string' must not be called from a procedure,\n";
     print "    unless the procedure is logged with 'xlog=on'\n";
+    print " -p plot using power units for comparison to autocorrelation plots\n";
+    print " -i autoscale each plot individually\n";
+    print " -l lower  eliminate points smaller than lower when auto-scaling plots\n";
+    print " -u upper  eliminate points larger  than upper when auto-scaling plots\n";
     print " -v print program and PGPLOT version information and stop\n";
     print " -h print this help information and stop\n";
-    print " -f file/device send graphs to 'file' using PGPLOT 'device'\n";
+    print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
     print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
     print "    if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used\n";
     print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
-    print "               be sure to quote '?', like \\?\n";
+    print "                be sure to quote '?', like \\?\n";
     print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
     exit -1;
 }
@@ -116,9 +120,12 @@ foreach $file (@ARGV) {
 		$freq=$freq/1e6;
 		$amp=shift(@fields);
 		$phase=shift(@fields);
-#		print "$band $port $freq $amp $phase\n";
+#		print "$chan $band $port $freq $amp $phase\n";
 		$frequencies[$band][$chan][$count[$band][$chan]]=$freq;
-		$amplitudes[$band][$chan][$count[$band][$chan]]=$amp;
+		$value=$amp;
+#if power, convert to fractional, square, convert to output units
+		$value=$amp*.001*$amp*.001*10000. if defined($opt_p);
+		$amplitudes[$band][$chan][$count[$band][$chan]]=$value;
 		$count[$band][$chan]++;
 		$some=1;
 	    }
@@ -132,19 +139,43 @@ PLOT:
 die "no data to plot\n" if !$some;
 
 $maxv=-1;
+$minv=1e6;
 for($i=1;$i<15;$i++) {
     for($j=0;$j<2;$j++) {
+	$imaxv[$j][$i]=-1;
+	$iminv[$j][$i]=1e6;
 	for($k=0;$k<$count[$j][$i];$k++) {
+	    next if defined($opt_u) && $amplitudes[$j][$i][$k] > $opt_u;
+	    next if defined($opt_l) && $amplitudes[$j][$i][$k] < $opt_l;
+	    if($amplitudes[$j][$i][$k]>$imaxv[$j][$i]) {
+		$imaxv[$j][$i]=$amplitudes[$j][$i][$k];
+	    }
+	    if($amplitudes[$j][$i][$k]<$iminv[$j][$i]) {
+		$iminv[$j][$i]=$amplitudes[$j][$i][$k];
+	    }
 	    if($amplitudes[$j][$i][$k]>$maxv) {
 		$maxv=$amplitudes[$j][$i][$k];
+	    }
+	    if($amplitudes[$j][$i][$k]<$minv) {
+		$minv=$amplitudes[$j][$i][$k];
 	    }
 	}
     }
 }
-$maxv=9.99 if $maxv < 10;
-$upper=10 * (1+int $maxv/10);
-$ticks=$upper/2;
-$upper=$upper-0.01;
+for($i=1;$i<15;$i++) {
+    for($j=0;$j<2;$j++) {
+	if(!defined($opt_i)) {
+	    $imaxv[$j][$i]=$maxv;
+	    $iminv[$j][$i]=$minv;
+	}	
+	$imaxv[$j][$i]=9.99 if $imaxv[$j][$i] < 10;
+	$upper[$j][$i]=10 * (1+int $imaxv[$j][$i]/10);
+	$lower[$j][$i]=10 * (int $iminv[$j][$i]/10);
+	$ticks[$j][$i]=($upper[$j][$i]-$lower[$j][$i])/2;
+	$upper[$j][$i]=$upper[$j][$i]-0.01;
+#	print " Upper $upper[$j][$i] Lower $lower[$j][$i] ticks $ticks[$j][$i]\n";
+    }
+}
 
 # 4.0 plot
 
@@ -156,11 +187,11 @@ for($i=1;$i<15;$i++) {
     for($j=0;$j<2;$j++) {
 	pgpanl(1+$j,1+$i);
 	pgvport(0.15,.95,0,1);
-	pgwindow(-0.5,16.5,0,$upper);
+	pgwindow(-0.5,16.5,$lower[$j][$i],$upper[$j][$i]);
 	if($i != 14) {
-	    pgbox("BCST",0.0,0,"BCNST",$ticks,2);
+	    pgbox("BCST",0.0,0,"BCNST",$ticks[$j][$i],2);
 	} else {
-	    pgbox("BCNST",0.0,0,"BCNST",$ticks,2);
+	    pgbox("BCNST",0.0,0,"BCNST",$ticks[$j][$i],2);
 	    pglabel("Baseband Frequency (MHz)","","");
 	}
 	
@@ -185,6 +216,9 @@ pgwindow(-0.5,16.5,0,39);
 
 $string="";
 $string=$opt_c if (defined($opt_c));
+if(defined($opt_p)) {
+pgtext(3,10,"$location Pcal Amplitude (Power, 0.01%) -- $date $save_file $string");
+} else {
 pgtext(3,10,"$location Pcal Amplitude (Voltage, 0.1%) -- $date $save_file $string");
-
+}
 pgend;
