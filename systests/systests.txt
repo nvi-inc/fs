@@ -1,8 +1,8 @@
       SYSTESTS - System test measurements and analysis package
 
-		      Ed Himwich and Brian Corey
+	       Ed Himwich, Brian Corey, and Dan Smythe
 
-			    August 2, 2005
+			   October 2, 2006
 
 INTRODUCTION
 
@@ -11,11 +11,12 @@ for measuring, plotting, analyzing system test data.  The tests
 supported are: (1) band pass shapes, (2) baseband/video converter
 image rejection, (3) phase-cal power measurements, (4) phase-cal
 spurs, (5) sampler statistics, (6) "overnite" stability, (7)
-short-term stability, and (8) orientation dependent effects.  Most of
-these tests require that you have a Mark IV Formatter and Decoder with
-either a VLBA or Mark IV rack. However, test (3) only requires a
-working "caltsys" procedure, and tests (6), (7), and (8) can be
-modified to do a more limited test for other configurations.
+short-term stability, (8) orientation dependent effects, and (9) Mark
+5 tests.  Most of these tests require that you have a Mark IV
+Formatter and Decoder with either a VLBA or Mark IV rack. However,
+test (3) only requires a working "caltsys" procedure, and tests (6),
+(7), and (8) can be modified to do a more limited test for other
+configurations.
 
 Once the tools are installed and set-up, each test requires only two
 type-ins, one to make the measurement and one to produce the plots or
@@ -27,16 +28,21 @@ processing scripts is provided for reference.
 
 USAGE
 
-After the tools have been installed, you can make the measurements for
-any observing mode.  You should set up the rack in the mode you want
-to test it in before doing any tests.  For example, to use the RD mode
-at Gc, you could use:
+With exception of the Mark 5 tests,after the tools have been
+installed, you can make the measurements for any observing mode.  You
+should set up the rack in the mode you want to test it in before doing
+any tests.  For example, to use the RD mode at Gc, you could use:
 
      proc=rd0505gc
      setup8f
 
 After the mode has been set-up, you can make any or all of the
 measurements described below.
+
+For Mark 5 tests, you need to use the chk1024.snp and chk1024.prc (for
+Mark IV, use vchk1024.snp and vchk1024.prc for VLBA4) files developed
+by Dan Smythe to make the measurements.  This discussed in more detail
+below.
 
 			BANDPASS MEASUREMENTS
 
@@ -58,11 +64,6 @@ frequency resolution.
    When you see the output "pcalamp done" in the log display, the
    measurement is complete.  The procedure takes about two minutes to
    run.
-
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
 
 2. Plot the results, from a shell prompt try:
 
@@ -109,10 +110,6 @@ of frequency.
    When you see the output "pcalimage done" in the log display, the
    measurement is complete.  The procedure takes about four minutes to
    run.
-
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
 
 2. Plot the results, from a shell prompt try:
 
@@ -190,11 +187,6 @@ each channel is measured.
    phase-cal, you should turn the phase-cal off, preferably without
    directly disconnecting the 5 MHz that runs to the receiver for the
    phase-cal.
-
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
 
 2. Plot the results, from a shell prompt try:
 
@@ -280,11 +272,6 @@ and when the receiver LO is unlocked.
    that.  For this last prompt the system should be restored to
    normal.
 
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
-
 2. Plot the results, from a shell prompt try:
 
      cd /usr2/log
@@ -326,11 +313,6 @@ ideal values.
    When you see the output "samplestat done" in the log display, the
    measurement is complete.  The procedure should take about two
    minutes to execute..
-
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
 
 2. Plot the results, from a shell prompt try:
 
@@ -377,11 +359,6 @@ look for stability problems.
      onsample@
      log=station
 
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
-
 2. Plot the results, from a shell prompt try:
 
      cd /usr2/log
@@ -426,11 +403,6 @@ time to look for short term stability problems.
 
      stsample@
      log=station
-
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
 
 2. Plot the results, from a shell prompt try:
 
@@ -490,11 +462,6 @@ effects.
      stsample@
      log=station
 
-   Please note that the systests.prc library should not be edited with
-   PFMED unless you have FS version FS 9.8.0 or higher.  In earlier
-   versions, the long line lengths in the library are not handled
-   properly and information will be lost.
-
 2. Plot the results, from a shell prompt try:
 
      cd /usr2/log
@@ -517,262 +484,279 @@ effects.
    want to open a new log for each measurement.  All the data from a
    single log are plotted together, regardless of the time span.
 
+			     MARK 5 TESTS
+
+The quality of data sent to Mark 5 is analyzed for both idle and play
+modes to look for problems. More than one set-up is used, including
+the most stressful, 1 Gb/second.
+
+1. To collect data, use the test schedule that is appropriate for your
+   station's equipment, vchk1024.snp or chk1024.snp.  Other schedules
+   with simialr structures, but using different set-ups can be used as
+   well.  Before running the schedule, you should rename any existing
+   log with the schedule's name.  For example, if you you are using
+   chk1024.snp, then enter the shell commands:
+
+     cd /usr2/log
+     mv chk1024.log chk1024_yymmmdd.log
+
+   Where "yymmmdd" is the date that the contents of the log were
+   created.  You could instead use some mnemonic string that will help
+   identify the contents of the log.
+
+   Then enter the SNAP commands:
+
+     schedule=chk1024,#1
+
+   Wait for the schedule to complete, then close the log:
+
+     log=station
+
+   Now would be a good time to rename the log as desribed above,
+   before it is accidently appended to with other data.  The
+   suggestions for renaming described above can be used.
+
+2. To analyze the results, enter the shell commands:
+
+     cd /usr2/log
+     chk1024 LOG
+
+   where LOG is the name of the log file you want to analyze.  The
+   results for each set-up found in the log are summarized.  The name
+   of the analysis program is chk1024 regardless of whether your used
+   the chk1024, vchk1024, or some other schedule.  The program chk1024
+   has several options, try "chk1024 -h" for more information, of
+   which the "-s" option is probably the most immediately useful, for
+   example:
+
+     chk1024 -s LOG
+    
+
 INSTALLATION
 
 The installation of these tools are fairly easy. The process is
-described for two possible scenarios: "first time installation" and
-"update to include stability tests".
+described in the INSTALLATION section for three possible scenarios:
+"first time installation", "update to include stability tests", and
+"update to include Mark 5 tests.".
 
 		       FIRST TIME INSTALLATION
 
-The steps to install for the first time are described below.  If you
-have FS 9.8.0 later installed, skip steps (1), (2), (4), (7) and (8).
+The steps to install for the first time are described below.
 
-(1) Login as "prog".
+(1) Login as "oper".
 
-(2) Place a copy of the "systests.tgz" archive in your "/tmp"
-    directory.  For example you might do the following:
-
-      cd /tmp
-      ncftp -u atri.gsfc.nasa.gov
-      (enter your account name for the server at prompt)
-      (enter your password for the server at prompt)
-      cd /fs/dist
-      get systests.tgz
-      quit
-
-  Please note "ncftp" will automatically get this file in binary mode.
-  If you use "ftp" you may have to enable binary mode manually.
-
-(3) Login as "root".
-
-(4) Extract the source from the archive:
-
-      cd /
-      tar -xzpf /tmp/systests.tgz
-
-(5) Check that you don't already have procedure library named
-    "systests", enter:
+(2) Check that you don't already have procedure libraries and SNAP
+    schedules with the default names, enter:
 
       ls /usr2/proc/systests.prc
+      ls /usr2/proc/*chk1024.prc
+      ls /usr2/sched/*chk1024.snp
 
-    If you do already have such a procedure library, you should either
-    rename it or use a different name in the next step as the target
-    file to copy to.  In the latter case, you will have to
-    appropriately modify the "proc=..." commands in the USAGE examples
-    above to open the correct library.
+    If you do already have such files, you should either rename them
+    or use different names in the next step for the target files to
+    copy to.  In the latter case, you will have to appropriately
+    modify the "proc=..." and "schedule=..." commands in the USAGE
+    examples above to open the correct library.  It may also be that
+    you already the current version of *chk1024.prc and/or
+    *chk1024.snp; you can check this with "diff".
 
-(6) Copy the default procedure library to "/usr2/proc" and set its
-    permissions and ownership:
+(3) Copy the default procedure libraries and schedules to "/usr2/proc"
+    and "/usr2/sched", respectively and set their permissions and
+    ownership.  You should copy the "vchk1024.snp" and "vchk1024.prc"
+    files instead of "chk1024.snp" and "chk1024.prc", if you have a
+    VLBA4 rack instead of a Mark IV rack.
 
       cd /usr2/proc
-      cp -a /usr2/fs/systests/systests.prc systests.prc
-      chmod a+w systests.prc
-      chown oper.rtx systests.prc
+      cp -a /usr2/fs/systests/systests.prc .
+      cp -a /usr2/fs/systests/chk1024.prc .         [or vchk1024.prc]
+      chmod a+w systests.prc chk1024.prc            [or vchk1024.prc]
+      chown oper.rtx systests.prc chk1024.prc       [or vchk1024.prc]
 
-(7) Login as "prog":
+      cd /usr2/sched
+      cp -a /usr2/fs/systests/chk1024.snp .         [or vchk1024.snp]
+      chmod a+w chk1024.snp                         [or vchk1024.snp]
+      chown oper.rtx chk1024.snp                    [or vchk1024.snp]
 
-(8) "Make" the executables:
+(4) Customize the "systests.prc" (or whatever you named it) procedure
+    library.  You should use PFMED to make the changes.  The
+    procedures: "tpisamp", "bbcmanx", and "bbcagcx" are used only by
+    the pcal power measurements.  The "pcalonsys" and "pcaloffsys"
+    procedures are used by both the pcal power measurements and the
+    spur measurements.  The "lounlocksys", "pcal5moffsys" and
+    "pcal5monsys" procedures are used only for pcal spur
+    measurements. The "onsample" and "stsample" procedures are used
+    for the stability tests.
 
-      cd /usr2/fs/systests
-      make
+    The "tpisamp", "bbcmanx", and "bbcagx" procedures need to be
+    modified depending on the type of rack: VLBA4 or Mark IV.  There
+    are comments in the procedures describing which lines should be
+    uncommented for each case.  In "tpisamp", the correct forms of the
+    "tpi=..." and "tsys=..." commands must be uncommented.  The ones
+    that aren't to be used have to be commented out.  For VLBA4 use
+    the ones with "formbbc". For Mark IV uses the ones with "formvc".
+    For station specific detectors use the ones with "u5".  For the
+    "bbcmanx" and "bbcagcx" procedures, the "bbcmanz" command and
+    "bbcagcz" commands should be uncommented for VLBA4, but Mark IV
+    should have them commented out.
 
-(9) Login as "oper":
+    The "pcalonsys", "pcaloffsys", "lounlocksys", "pcal5moffsys" and
+    "pcal5monsys" procedures are used to control turning various
+    signals on and off.  Each is set-up by default to prompt the user
+    to manually make the necessary changes.  If your system can
+    control any of these features, you can comment out the "sy=run
+    fs.prompt ..." in the appropriate procedures and add commands
+    where indicated to automate the control.  The feature most likely
+    to have automatic control at a station is turning the phase-cal on
+    and off.  You would edit the "pcalonsys" and "pcaloffsys"
+    procedures to automate this for the tests.  If possible, turning
+    off the phase-cal should not be implemented by physically
+    disconnecting the 5 MHz that runs the antenna for the phase-cal.
+    However, if that is the only way to do it please understand that
+    the phase-cal off and phase-cal 5 MHz disconnected measurements
+    will not give different results.  The "lounlocksys" procedure is
+    intended to unlock the LO and turn the phase-cal on.  Manually
+    unlocking the LO can often be accomplished by removing the 5 MHz
+    signal that it is locked too. It should not be accomplished by
+    actually turning the LO off.  The "pcal5moffsys" procedure should
+    relock the LO and disconnect the phase-cal 5 MHz, as opposed to
+    merely turning the phase-cal off.  Lastly, the "pcal5monsys"
+    procedure should restore the phase-cal 5 MHz, and the phase-cal
+    and LO should be on when it ends.
 
-(10) Customize the "systests.prc" (or whatever you named it) procedure
-     library.
+    The "onsample" and "stsample" procedures should be edited as
+    described by their internal comments.  The issues are: (1) whether
+    or not you have a Mark IV decoder, (2) the name of the procedure
+    or SNAP command to make fmout-gps (or gps-fmout) measurements, and
+    (3) the name of the procedure that records all of the receiver
+    monitor points.
 
-     Please note that the "systests.prc" library should not be edited
-     with PFMED unless you have FS version FS 9.8.0 or higher.  In
-     earlier versions, the long line lengths in the library are not
-     handled properly and information will be lost .
+(5) In any session (usually an xterm) that you intend to run the
+    analysis scripts from, you will either need to logout and login
+    again or type "rehash".
 
-     If you have FS 9.8.0 or higher, you can use PFMED to edit the
-     procedures, otherwise, you will need to use an editor like "vi"
-     or "emacs" to edit the .prc file directly.  Do not use an editor
-     on the .prc file directly if the FS has the procedure library
-     open.  In fact, it would be good idea to terminate the FS before
-     editing the library directly.  While editing directly be careful
-     to not disturb the "define" and "enddef" lines in the library.
+(6) Install pgperl if your computer doesn't already have it.  On a FS
+    Linux 5 system, you should be able to do this with two commands.
+    If you have a different distribution installed, you will need to
+    determine how to do this yourself.  Ed may be able give you some
+    advice if you need it.
 
-     Ten procedures need to be edited and are all located at the start
-     of the file.  The procedures: "tpisamp", "bbcmanx", and "bbcagcx"
-     are used only by the pcal power measurements.  The "pcalonsys"
-     and "pcaloffsys" procedures are used by both the pcal power
-     measurements and the spur measurements.  The "lounlocksys",
-     "pcal5moffsys" and "pcal5monsys" procedures are used only for
-     pcal spur measurements. The "onsample" and "stsample" procedures
-     are used for the stability tests.
+    For FS Linux 5 systems, please be sure that your
+    "/etc/apt/source.list" file does not mention "stable".  All web
+    source references should explicitly use "woody".  If you have any
+    questions about this please contact Ed before attempting the
+    install.  Once you have verified your "sources.list", as "root"
+    please enter:
 
-     The "tpisamp", "bbcmanx", and "bbcagx" procedures need to be
-     modified depending on the type of rack: VLBA4 or Mark IV.  There
-     are comments in the procedures describing which lines should be
-     uncommented for each case.  In "tpisamp", the correct forms of
-     the "tpi=..." and "tsys=..." commands must be uncommented.  The
-     ones that aren't to be used have to be commented out.  For VLBA4
-     use the ones with "formbbc". For Mark IV uses the ones with
-     "formvc".  For station specific detectors use the ones with
-     "u5".  For the "bbcmanx" and "bbcagcx" procedures, the "bbcmanz"
-     command and "bbcagcz" commands should be uncommented for VLBA4,
-     but Mark IV should have them commented out.
-
-     The "pcalonsys", "pcaloffsys", "lounlocksys", "pcal5moffsys" and
-     "pcal5monsys" procedures are used to control turning various
-     signals on and off.  Each is set-up by default to prompt the user
-     to manually make the necessary changes.  If your system can
-     control any of these features, you can comment out the "sy=run
-     fs.prompt ..." in the appropriate procedures and add commands
-     where indicated to automate the control.  The feature most likely
-     to have automatic control at a station is turning the phase-cal
-     on and off.  You would edit the "pcalonsys" and "pcaloffsys"
-     procedures to automate this for the tests.  If possible, turning
-     off the phase-cal should not be implemented by physically
-     disconnecting the 5 MHz that runs the antenna for the phase-cal.
-     However, if that is the only way to do it please understand that
-     the phase-cal off and phase-cal 5 MHz disconnected measurements
-     will not give different results.  The "lounlocksys" procedure is
-     intended to unlock the LO and turn the phase-cal on.  Manually
-     unlocking the LO can often be accomplished by removing the 5 MHz
-     signal that it is locked too. It should not be accomplished by
-     actually turning the LO off.  The "pcal5moffsys" procedure should
-     relock the LO and disconnect the phase-cal 5 MHz, as opposed to
-     merely turning the phase-cal off.  Lastly, the "pcal5monsys"
-     procedure should restore the phase-cal 5 MHz, and the phase-cal
-     and LO should be on when it ends.
-
-     The "onsample" and "stsample" procedures should be edited as
-     described by their internal comments.  The issues are: (1)
-     whether or not you have a Mark IV decoder, (2) the name of the
-     procedure or SNAP command to make fmout-gps (or gps-fmout)
-     measurements, and (3) the name of the procedure that records all
-     of the receiver monitor points.
-
-     After making the necessary changes be sure to save them.
-
-(11) In any session (usually an xterm) that you intend to run the
-     analysis scripts from, you will either need to logout and login
-     again or type "rehash".
-
-(12) Install pgperl if your computer doesn't already have it.  On a FS
-     Linux 5 system, you should be able to do this with two commands.
-     If you have a different distribution installed, you will need to
-     determine how to do this yourself.  Ed may be able give you some
-     advice if you need it.
-
-     For FS Linux 5 systems, please be sure that your
-     "/etc/apt/source.list" file does not mention "stable".  All web
-     source references should explicitly use "woody".  If you have any
-     questions about this please contact Ed before attempting the
-     install.  Once you have verified your "sources.list", as "root"
-     please enter:
-
-       apt-get install pgperl
-       apt-get clean
+      apt-get install pgperl
+      apt-get clean
    
-(13) Make sure that your print command will print PostScript
-     files. This should already be set-up for FS Linux 5 systems with
-     the command "lpr". If you can't print PostScript from your FS PC,
-     you can always transfer the PostScript file to another machine
-     that can or use a different output format (see step 2 above under
-     "BANDPASS MEASUREMENTS" above in the "USAGE" section) that your
-     printer supports.
+(7) Make sure that your print command will print PostScript
+    files. This should already be set-up for FS Linux 5 systems with
+    the command "lpr". If you can't print PostScript from your FS PC,
+    you can always transfer the PostScript file to another machine
+    that can or use a different output format (see step 2 above under
+    "BANDPASS MEASUREMENTS" above in the "USAGE" section) that your
+    printer supports.
 
+(8) Installation of the vchk1024/chk1024 .snp and .prc files are
+    straightforward.  If you already have the appropriate one for your
+    configurations installed, you can skip this step.
 
 		  UPDATE TO INCLUDE STABILITY TESTS
 
 The steps to update your installation to include stability tests are
-described below.  If you have FS 9.8.0 later installed, skip steps
-(1), (2), (4), (7), and (8).
+described below.  You can tell if the stability tests have already
+been added by whether the procedures "stsample" and "onsample" are
+already in your sysystests.prc library.
 
-(1) Login as "prog".
+(1) Login as "oper".
 
-(2) Place a copy of the "systests.tgz" archive in your "/tmp"
-    directory.  For example you might do the following:
+(2) Copy the procedure library holding the new procedures to "/usr2/proc"
 
-      cd /tmp
-      ncftp -u atri.gsfc.nasa.gov
-      (enter your account name for the server at prompt)
-      (enter your password for the server at prompt)
-      cd /fs/dist
-      get systests.tgz
-      quit
-
-  Please note "ncftp" will automatically get this file in binary mode.
-  If you use "ftp" you may have to enable binary mode manually.
-
-(3) Login as "root".
-
-(4) Extract the source from the archive:
-
-      cd /
-      tar -xzpf /tmp/systests.tgz
-
-(6) Copy the procedure library holding the new procedures to "/tmp".
-
-      cd /tmp
+      cd /usr2/proc
       cp -a /usr2/fs/systests/systest2.prc systest2.prc
       chmod a+rw systest2.prc
 
-(7) Login as "prog":
+(3) Customize the "systest2.prc" library on /usr2/proc.  You should
+    use PFMED to make the changes.  Two procedures need to be edited
+    and are both located at the start of the file: "onsample" and
+    "stsample".  They should be edited as described by their internal
+    comments.  The issues are: (1) whether or not you have a Mark IV
+    decoder, (2) the name of the procedure or SNAP command to make
+    fmout-gps (or gps-fmout) measurements, and (3) the name of the
+    procedure that records all of the receiver monitor points.
 
-(8) "Make" the executables:
+(4) Append the new procedures to the existing "systests.prc" library
+    (in "/usr2/proc").  The FS should not have the library open when
+    this is done.  In fact, it is just safer to terminate the FS while
+    doing this step.  Once it is safe to proceed, the procedures can
+    be added with:
 
-      cd /usr2/fs/systests
-      make
+      cd /usr2/proc
+      cat systest2.prc >>systests.prc
 
-(9) Login as "oper":
+    If you named your library something other "systests.prc", you
+    should use that name instead in the command above.
 
-(10) Customize the "systest2.prc" library on /tmp.
+(5) Once step (4) is completed, you can delete the "systest2.prc"
+    library you modified:
 
-     Please note that the "systests.prc" library should not be edited
-     with PFMED unless you have FS version FS 9.8.0 or higher.  In
-     earlier versions, the long line lengths in the library are not
-     handled properly and information will be lost .
+      cd /usr2/proc
+      rm systest2.prc
 
-     If you have FS 9.8.0 or higher, you can append the new procedures
-     to the existing "systests.prc" library, see step (11) below, and
-     then use PFMED to make the changes described below in the
-     "systests" library.  If you don't have FS 9.8.0 or higher, you
-     will need to use an editor like "vi" or "emacs" to edit the
-     "/tmp/systest2.prc" file directly, then append the new procedures
-     to "systests" (step 11 below).  While editing be careful to not
-     disturb the "define" and "enddef" lines in the library.
+(6) In any session (usually an xterm) that you intend to run the
+    analysis scripts from, you will either need to logout and login
+    again or type "rehash".
 
-     Two procedures need to be edited and are both located at the
-     start of the file: "onsample" and "stsample".  They should be
-     edited as described by their internal comments.  The issues are:
-     (1) whether or not you have a Mark IV decoder, (2) the name of
-     the procedure or SNAP command to make fmout-gps (or gps-fmout)
-     measurements, and (3) the name of the procedure that records all
-     of the receiver monitor points.
+		    UPDATE TO INCLUDE MARK 5 TESTS
 
-     After making the necessary changes be sure to save them.
+The steps to update your installation to include stability tests are
+described below. You can tell if the Mark 5 tests have been added by
+whether the chk1024.snp or vchl1024.snp SNAP schedule is in your
+/usr2/sched directory.
 
-(11) Append the new procedures to the existing "systests.prc" library
-     (in "/usr2/proc").  The FS should not have the library open when
-     this is done.  In fact, it is just safer to terminate the FS
-     while doing this step.  Once it is safe to proceed, the
-     procedures can be added with:
+(1) Login as "oper".
 
-       cd /usr2/proc
-       cat /tmp/systest2.prc >>systests.prc
+(2) Check that you don't already have procedure libraries and SNAP
+    schedules with the default names, enter:
 
-     If you named your library something other "systests.prc", you
-     should use that name instead in the command above.
+      ls /usr2/proc/*chk1024.prc
+      ls /usr2/sched/*chk1024.snp
 
-(12) In any session (usually an xterm) that you intend to run the
-     analysis scripts from, you will either need to logout and login
-     again or type "rehash".
+    If you do already have such files, you should either rename them
+    or use different names in the next step as the target file to copy
+    to.  In the latter case, you will have to appropriately modify the
+    "schedule=..." commands in the USAGE examples above to open the
+    correct library.   It may also be that you already the
+    current version of *chk1024.prc and/or *chk1024.snp; you can check
+    this with "diff".
 
+(3) Copy the default procedure libraries and schedules to "/usr2/proc"
+    and "/usr2/sched", respectively and set their permissions and
+    ownership.  You should copy the "vchk1024.snp" and "vchk1024.prc"
+    files instead of "chk1024.snp" and "chk1024.prc", if you have a
+    VLBA4 rack instead of a Mark IV rack.
+
+      cd /usr2/proc
+      cp -a /usr2/fs/systests/chk1024.prc .         [or vchk1024.prc]
+      chmod a+w chk1024.prc                         [or vchk1024.prc]
+      chown oper.rtx chk1024.prc                    [or vchk1024.prc]
+
+      cd /usr2/sched
+      cp -a /usr2/fs/systests/chk1024.snp .         [or vchk1024.snp]
+      chmod a+w chk1024.snp                         [or vchk1024.snp]
+      chown oper.rtx chk1024.snp                    [or vchk1024.snp]
+      
 HELP OUTPUT
 
 For reference the "help" output from each of the three scripts,
-"pcalamp", "pcalimage", "pcalpower", "pcalspur", "samplestat", and
-"plotlog" is listed below.
+"pcalamp", "pcalimage", "pcalpower", "pcalspur", "samplestat",
+"plotlog", and "chk1024" (listed last) is listed below.
+
 
 			       PCALAMP
 
-Usage: pcalamp  -c string -vhf file/device logs
+Usage: pcalamp  -c string -vhpi -u upper -l lower -f file/device logs
 Synopsis: extracts and plots pcal amplitudes from log files
 
 This script processes log files to produce plots of pcal amplitudes. The
@@ -786,13 +770,17 @@ Option explanations:
     matching 'string' was recorded in the log, for this to work; the
     command/procedure matching 'string' must not be called from a procedure,
     unless the procedure is logged with 'xlog=on'
+ -p plot using power units for comparison to autocorrelation plots
+ -i autoscale each plot individually
+ -l lower  eliminate points smaller than lower when auto-scaling plots
+ -u upper  eliminate points larger  than upper when auto-scaling plots
  -v print program and PGPLOT version information and stop
  -h print this help information and stop
- -f file/device send graphs to 'file' using PGPLOT 'device'
+ -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, an xterm will be used
     if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used
     if '-f ?', you will be prompted for standard pgplot devices,
-               be sure to quote '?', like \?
+                be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
 
 
@@ -919,3 +907,53 @@ Option explanations:
     if '-f ?', you will be prompted for standard pgplot devices,
                be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
+
+			       CHK1024
+
+Usage: chk1024 -hvs -t track -r track -f frames -b a|e|f -g a|e|f logs
+Synopsis: analyzes results of Mark5 check schedule v/chk1024 logs
+
+This script will summarize the results of v/chk1024 or other similar Mark5
+test schedule. The modes are determined from presence of 'setupX' procedure
+calls in the log. Where 'X' is a string. The mode is either 'play' or 'idle'
+depending on whether or not 'recscan' has been called since the last
+'setupX'.
+
+By default, chk1024 prints only summary results grouped by setup. The number
+of tracks checked reflect only those found in the log with full results,
+others may only have been partially checked. If a results for a 'setupX',
+'mode', and 'track' combination appear more than once in the log, only the
+last result for each track is considered, i.e., it is best to have each
+appear only once.  Otherwise the output is difficult to describe.
+
+The checks for each track are:
+  Aux:    considered good if decoded track number is correct
+  Errors: considered good if synch, resynch, parity and CRC errors were zero
+  Frames: considered good if more than the minimum frames were processed,
+          minimum frames is settable, but defaults to 300 (0x12c)
+
+Additional detail can be displayed by selecting command line options. The
+next level of detail is selected by the -s option, which will print the
+summary for each check by setup and mode and further summarize them by
+set and odd/even track number. The next level is shown with the -t
+which shows the processed data for the selected track. Finally, the -r
+option will print the raw log records for the selected track.
+
+Please note that the set (odd/even) statistics and summary results at
+the end only report the total number of tracks found in the log, not the total
+expected.  The user must verify that total tracks are correct for each case.
+In the case of the summary results, where it may not be so obvious that tracks
+are missing, if some other tracks were not fully checked but present, the
+phrase 'other tracks present' is included for the affected setup.
+
+Options explanation:
+ -b a|e|f  display  bad tracks for one of the Aux|Errors|Frames
+           checks, cannot be used with -g, -t, or -r
+ -g a|e|f  display good tracks for one if the Aux|Errors|Frames
+           checks, cannot be used with -b, -t, or -r
+ -f frames sets the minimum level of required frames, default is 300 (0x12c)
+ -r track  to display raw data for track, cannot be used with -b or -g
+ -s        print summary statistics
+ -t track  to display processed data for track, cannot be used with -b or -g
+ -h        print this help information and stop
+ -v        print program version information and stop
