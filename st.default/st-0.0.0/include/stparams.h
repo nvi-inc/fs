@@ -4,5 +4,5 @@
  * station programs.
  */
 
-#define STM_KEY    ftok("/usr2/st",1)
+#define STM_KEY    ftok("/usr2/st",250)
 #define STM_SIZE   4096  /* use multiples of a page (4096) */
