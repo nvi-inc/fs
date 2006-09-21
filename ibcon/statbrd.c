@@ -65,13 +65,13 @@ int *kecho;
     ibsta1=ibwait(ID_hpib,0);    
     if ((ibsta & TIMO) != 0) {	/* has the device timed out? */ 
       *error = TIMEOUT;
-      memcpy((char *)ipcode,"ST",2);
+      memcpy((char *)ipcode,"SB",2);
       return(-1);
     } else if ((ibsta & ERR) != 0) { /* if not, some other type of error */
       if(iberr==0)
 	logit(NULL,errno,"un");
       *error = -(IBCODE + iberr);
-      memcpy((char *)ipcode,"ST",2);
+      memcpy((char *)ipcode,"SB",2);
       return(-1);
     }
 #else
@@ -85,17 +85,17 @@ int *kecho;
       if(ierr==-1 || ierr==-2 || ierr==-5)
 	logit(NULL,errno,"un");
       *error = -520+ierr;
-      memcpy((char *)ipcode,"ST",2);
+      memcpy((char *)ipcode,"SB",2);
       return -1;
     } else if ((ibsta & S_TIMO) != 0) {      /* has the device timed out? */ 
       *error = TIMEOUT;
-      memcpy((char *)ipcode,"ST",2);
+      memcpy((char *)ipcode,"SB",2);
       return(-1);
     } else if ((ibsta & S_ERR) != 0) { /* if not, some other type of error */
       if(ibser!=0)
-	logita(NULL,-(540 + ibser),"ST");
+	logita(NULL,-(540 + ibser),"SB");
       *error = -(IBSCODE + iberr);
-      memcpy((char *)ipcode,"ST",2);
+      memcpy((char *)ipcode,"SB",2);
       return(-1);
     }
   }
