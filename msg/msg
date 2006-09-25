@@ -13,7 +13,7 @@
 #  Example:     msg                                                                                #
 #                                                                                                  #
 #  Input files:  msg.ctl, <session>.log                                                            #
-#  Output files: text_message.txt                                                                  #
+#  Output files: /tmp/text_message.txt                                                                  #
 #                                                                                                  #
 #  Input programs : lognm, inject_snap, mailx, kill, chmod, process_logfile                              #
 #                                                                                                  #
@@ -54,6 +54,7 @@ set nr_of_problem_scans_entries 5
 set auto_start 0
 set put_into_log 0
 set get_exp_name 0
+set pid [pid]
 #***********************************************************************************************#
 
 
@@ -66,7 +67,7 @@ set get_exp_name 0
 # Subroutine: read_setup_file                                                                   #
 # Purpose:    This subroutine reads the file msg.ctl if it exists and sets variables such as    #
 #             send_to, cc, station, nr_of_pointing_entries,nr_of_problem_scans_entries,         #
-#             nr_of_tape_entries, auto_start, put_into_log and get_exp_name.                    #
+#             auto_start, put_into_log and get_exp_name.                        #
 #***********************************************************************************************#
 proc read_setup_file {} {
 global send_to cc station auto_start put_into_log get_exp_name nr_of_pointing_entries nr_of_problem_scans_entries
@@ -216,17 +217,17 @@ global pointing_id problem_scans_id current_form process_file
           .start_source_label .start_source_entry .comment_label_frame .comment_label .comment_text .comment_scroll \
           .first_source_label .firts_source_entry .at_label .ut_label .time_entry .problem_scan_label .problem_scan_frame \
           .add_scan_button .remove_scan_button .scan_source_label .scan_start_label .explanation_label .gps_frame \
-          .gps_fmout .fmout_gps .gps-fmout_entry .gps_unit_label .tape_inventory_label .thin_entry .thin_label .thick_entry \
+          .gps_fmout .fmout_gps .gps-fmout_entry .gps_unit_label \
            .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label \
            .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label \
-           .disk_inventory_labelE .packE_entry .packE_label \
-          .thick_label .wx_frame .wx_label .temperature_label .temperature_entry .pressure_label .pressure_entry \
+           .disk_inventory_labelE .packE_entry .packE_label .packZ_entry .packZ_label \
+           .wx_frame .wx_label .temperature_label .temperature_entry .pressure_label .pressure_entry \
           .humidity_label .humidity_entry .skycondition_label .skycondition_entry .cable_label .larger_frame \
           .longer_cable_label .finished_label .finished_entry .ut_label \
           .is_frame .plus .minus .cable_border .cable_entry .unit_label .is .is_not .nominal_label .pointing_label \
           .pointing_frame .add_button .remove_button .source_label .az_label .el_label .x-sefd_label .s-sefd_label \
           .offset1_label .offset2_label .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label \
-          .tsys_value2_entry .tsys_value3_label .tsys_value3_entry .rec-humidity_label .rec-humidity_entry \
+          .tsys_value2_entry .tsys_value3_label .tsys_value3_entry \
           .send_button_frame .auto
 
 
@@ -250,12 +251,12 @@ global pointing_id problem_scans_id current_form process_file
    set source_time ""
   } elseif {$current_form == "ready"} {
    global gps gps_fmout temperature pressure humidity \
-         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 
    unset gps gps_fmout temperature pressure humidity \
-         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 
   } elseif {$current_form == "stop"} {
-   global thin thick packA packB packC packD finished
-   unset thin thick packA packB packC packD finished
+   global packA packB packC packD packE packZ finished
+   unset packA packB packC packD packE packZ finished
   }
 
      if {$current_form == "ready"} {
@@ -326,7 +327,7 @@ global session first_source source_time
    }
 
    # the lable current source is updated if the line matches :source=. 
-   if {[regexp {:source=} $line]} {
+      if {[regexp {[:;]source=} $line]} {
     set current_source [lindex [split [lindex [split $line =] 1] ,] 0]
     .current_source_label config -text "Current source is: $current_source"
    }
@@ -473,7 +474,7 @@ pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -
 frame     .waiting_frame -width 70 -bg SteelBlue3 -relief flat
 label     .current_source_label -text "Current source is: $first_source" \
 -bg SteelBlue3 -fg white -width 30
-label     .waiting_label -text "Waiting for start tape" -bg SteelBlue3 -fg white -width 25
+label     .waiting_label -text "Waiting for recording start" -bg SteelBlue3 -fg white -width 25
 pack      .waiting_frame -in .internal5 -side top -pady 1m
 pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 1m -fill both
 
@@ -518,7 +519,7 @@ global pointing_id problem_scans_id session first_source source_time
   # Four internal subroutines, add_pointing_entrys,                   #
   # add_problem_scan_entrys, delete_pointing_entrys, and              # 
   # delet_problem_scan_entrys. These routines are used to add or      #
-  # remove dynamic pointing, problem scan or tape entries. Each       #
+  # remove dynamic pointing, problem scan or disk entries. Each       #
   # dynamic frame has its own id which is used to manipulate the      #
   # dynamic variables and structures.                                 #
   #*******************************************************************#
@@ -678,9 +679,9 @@ pack .c -in .internal16
 #**********************************************************************************************#
 if {$form==0} {
 pack   .internal1 .internal2 .internal3 .internal4 .internal7 .internal8 .internal9 .internal10 .internal11 \
-.internal12 .internal13 .internal14 .internal15 .internal16 .internal17 -in .form -side top -fill both -expand 1
+.internal12 .internal13 .internal14 .internal16 .internal17 -in .form -side top -fill both -expand 1
 } elseif {$form==1} {
-pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal16 \
+pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7a .internal7c .internal7e .internal8 .internal16 \
 .internal17 -in .form -side top -fill both -expand 1
 }
 
@@ -779,16 +780,9 @@ pack   .gps_frame .gps-fmout_entry .gps_unit_label -in .internal7 -side left -pa
 pack   propagate .gps_frame 0 
 } else {
 
-label  .tape_inventory_label -text "Tape Inventory:" -bg SteelBlue3 -fg white -width 25
-entry  .thin_entry -width 10 -relief sunken -textvariable thin
-label  .thin_label -text "thin" -bg SteelBlue3 -fg white -width 11
-entry  .thick_entry -width 10 -relief sunken -textvariable thick
-label  .thick_label -text "thick" -bg SteelBlue3 -fg white -width 11
-pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -in .internal7 -side left -pady 1m
-
 label  .disk_inventory_label -text "Disk Inventory:" -bg SteelBlue3 -fg white -width 25
 entry  .packA_entry -width 10 -relief sunken -textvariable packA
-label  .packA_label -text "A (960 GB)" -bg SteelBlue3 -fg white -width 11
+label  .packA_label -text "A (960 GB) " -bg SteelBlue3 -fg white -width 11
 entry  .packB_entry -width 10 -relief sunken -textvariable packB
 label  .packB_label -text "B (1440 GB)" -bg SteelBlue3 -fg white -width 11
 pack   .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label -in .internal7a -side left -pady 1m
@@ -801,8 +795,10 @@ label  .packD_label -text "D (2000 GB)" -bg SteelBlue3 -fg white -width 11
 pack   .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label -in .internal7c -side left -pady 1m
 label  .disk_inventory_labelE -text "               " -bg SteelBlue3 -fg white -width 25
 entry  .packE_entry -width 10 -relief sunken -textvariable packE
-label  .packE_label -text "(other larger)" -bg SteelBlue3 -fg white -width 11
-pack   .disk_inventory_labelE .packE_entry .packE_label -in .internal7e -side left -pady 1m
+label  .packE_label -text "E (3200 GB)" -bg SteelBlue3 -fg white -width 11
+entry  .packZ_entry -width 10 -relief sunken -textvariable packZ
+label  .packZ_label -text "(other larger)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelE .packE_entry .packE_label .packZ_entry .packZ_label -in .internal7e -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -824,7 +820,7 @@ pack   .temperature_label .temperature_entry .pressure_label .pressure_entry \
 } else {
 label  .finished_label -text "Observation finished at:" -bg SteelBlue3 -fg white -width 25
 entry  .finished_entry -width 10 -relief sunken -textvariable finished 
-label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 7
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 7 
 pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady 1m
 }
 
@@ -922,16 +918,8 @@ label  .tsys_value3_label -text "Tsys(x2):" -bg SteelBlue3 -fg white -width 13
 entry  .tsys_value3_entry -width 7 -relief sunken -textvariable tsys3
 pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsys_value2_entry \
 .tsys_value3_label .tsys_value3_entry -in .internal14 -side left -pady 1m
-
-
-
-#**********************************************************************************************#
-# This part builds the internal15 frame with one label and one entry.                          #
-#**********************************************************************************************#
-label  .rec-humidity_label -text "Recorder humidity (%):" -bg SteelBlue3 -fg white -width 25
-entry  .rec-humidity_entry -width 10 -relief sunken -textvariable rec_humidity
-pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 1m
 }
+
 
 #**********************************************************************************************#
 # This part builds the internal16 frame with one send button that calls the routine send_mail  #
@@ -982,8 +970,7 @@ global process_file
 #**********************************************************************************************#
 proc configure_setup_file {} {
 global send_to cc auto_start station put_into_log get_exp_name nr_of_pointing_entries \
-nr_of_problem_scans_entries nr_of_tape_entries
-
+nr_of_problem_scans_entries 
    set setup_file [open /usr2/control/msg.ctl w+]
     puts -nonewline $setup_file "Send to:"; puts $setup_file $send_to
     puts -nonewline $setup_file "Cc:"; puts $setup_file $cc
@@ -1112,8 +1099,7 @@ pack   .station.frame2.buttonframe.ok .station.frame2.buttonframe.cancel -side l
 #             in the dynamic tables.                                                           #
 #**********************************************************************************************#
 proc configure_dynamic_entries {} {
-global nr_of_pointing_entries nr_of_problem_scans_entries nr_of_tape_entries
-
+global nr_of_pointing_entries nr_of_problem_scans_entries 
  proc write_to_setup {} {
    configure_setup_file 
    grab release .dynamic-entries
@@ -1170,18 +1156,18 @@ pack   .dynamic-entries.frame3.buttonframe.ok .dynamic-entries.frame3.buttonfram
 #             current_form a new form will appear.                                             #
 #**********************************************************************************************#
 proc  send_mail {} {
-global session station send_to cc current_form auto_start put_into_log session FS_is_running logname_is_set
+global session station send_to cc current_form auto_start put_into_log session FS_is_running logname_is_set pid
 
   if {[check_if_data_values_ok]} {
    create_text_message
    if {$current_form=="start"} {  
-    exec mailx -s "$session, $station, Start-message" -c $cc $send_to < text_message.txt &
+    exec mailx -s "$session, $station, Start-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
    } elseif {$current_form=="auto start"} {
-    exec mailx -s "$session, $station, Autostart-message" -c $cc $send_to < text_message.txt &
+    exec mailx -s "$session, $station, Autostart-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
    } elseif {$current_form=="ready"} {
-    exec mailx -s "$session, $station, Ready-message" -c $cc $send_to < text_message.txt &
+    exec mailx -s "$session, $station, Ready-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
    } elseif {$current_form=="stop"} {
-    exec mailx -s "$session, $station, Stop-message" -c $cc $send_to < text_message.txt &
+    exec mailx -s "$session, $station, Stop-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
    }
  
    if {$FS_is_running==1} {
@@ -1190,7 +1176,7 @@ global session station send_to cc current_form auto_start put_into_log session F
     }
    }
     
-   exec rm text_message.txt
+   exec rm "/tmp/text_message.txt.$pid"
 
    if {$current_form=="ready"} { 
      if {$auto_start==1} {
@@ -1251,7 +1237,7 @@ unset value_entry_array
    set values_ok 1
   } elseif {$current_form=="ready"} {
    global session first_source source_time gps gps_fmout gps_time temperature pressure \
-   humidity cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+   humidity cabel_sign cable_differens nominal tsys1 tsys2 tsys3 
    set first_source_entry_array(default) {}; unset first_source_entry_array
    set gps_entry_array(default) {}; unset gps_entry_array 
    set cable_entry_array(default) {}; unset cable_entry_array
@@ -1267,13 +1253,9 @@ unset value_entry_array
    set {tsys_entry_array(Tsys_x1:)} $tsys1
    set {tsys_entry_array(Tsys_s:)} $tsys2
    set {tsys_entry_array(Tsys_x2:)} $tsys3
-   set {value_entry_array(Recorder humidity:)} $rec_humidity
   } elseif {$current_form=="stop"} {
-   global session scan_source scan_start explanation thin thick packA packB packC packD packE finished
-   set tape_inventory_entry_array(default) {}; unset tape_inventory_entry_array
+   global session scan_source scan_start explanation packA packB packC packD packE packZ finished
    set {text_entry_array(session name:)} $session
-   set {tape_inventory_entry_array(thin)} $thin
-   set {tape_inventory_entry_array(thick)} $thick
    set {value_entry_array(Observation... :)} $finished
 
    set disk_inventory_entry_array(default) {}; unset disk_inventory_entry_array
@@ -1282,6 +1264,7 @@ unset value_entry_array
    set {disk_inventory_entry_array(packC)} $packC
    set {disk_inventory_entry_array(packD)} $packD
    set {disk_inventory_entry_array(packE)} $packE
+   set {disk_inventory_entry_array(packZ)} $packZ
   }
 
 
@@ -1444,41 +1427,20 @@ unset value_entry_array
       }
      }
  
-    # checks the tape_inventory_entry_array 
-     if {$values_ok == 1} {
-      if {[regexp -nocase {^na$} $tape_inventory_entry_array(thin)]} {
-       set values_ok 1
-      } else {
-       foreach entry [array names tape_inventory_entry_array] {
-        if {[regexp -nocase {^na$} $tape_inventory_entry_array($entry)] || \
-            [regexp {[0-9]} $tape_inventory_entry_array($entry)]} {
-         set values_ok 1
-        } else {
-         set values_ok 0 
-         output_error 3 $entry
-         break
-        }
-       }	
-      }
-     }
 
     # checks the disk_inventory_entry_array 
      if {$values_ok == 1} {
-	 if {[regexp -nocase {^na$} $disk_inventory_entry_array(packA)] } {
-	     set values_ok 1
-	 } else {
-	     foreach entry [array names disk_inventory_entry_array] {
-		 if {[regexp -nocase {^na$} $disk_inventory_entry_array($entry)]} {
-		     set values_ok 1
-		     break
-		 } elseif {[regexp {[0-9]} $disk_inventory_entry_array($entry)]} {
-		     set values_ok 1
-		 } else {
-		     set values_ok 0 
-		     output_error 3 $entry
-		     break
-		 }
-	     }	
+	 foreach entry [lsort [array names disk_inventory_entry_array]] {
+	     if {[regexp -nocase {^na$} $disk_inventory_entry_array($entry)]} {
+		 set values_ok 1
+		 break
+	     } elseif {[regexp {[0-9]} $disk_inventory_entry_array($entry)]} {
+		 set values_ok 1
+	     } else {
+		 set values_ok 0 
+		 output_error 3 $entry
+		 break
+	     }
 	 }
      }
  
@@ -1520,14 +1482,14 @@ unset value_entry_array
 
 #**********************************************************************************************#
 # Subroutine: create_text_message                                                              #
-# Purpose:    This subroutine creates a text file, text_message.txt which is sent in the mail. #
+# Purpose:    This subroutine creates a text file, /tmp/text_message.txt which is sent in the mail. #
 #             Depending on the current form a different text format is produced.               #
 #**********************************************************************************************#
 proc create_text_message {} {
 global current_form pointing_id problem_scans_id pointing_value_array problem_scan_value_array \
-station
+station pid
 
-set file [open text_message.txt w+]
+set file [open "/tmp/text_message.txt.$pid" w+]
 
   if {$current_form=="start"} {
    global session first_source source_time start_time ut_on_source
@@ -1553,7 +1515,7 @@ set file [open text_message.txt w+]
     puts -nonewline $file "at "; puts -nonewline $file "$st_time "; puts $file "UT"
   } elseif {$current_form=="ready"} {
     global session first_source source_time gps gps_fmout gps_time temperature pressure \
-    humidity sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+    humidity sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 
 
      set header "Session $session ready message for $station."
      set header_length [string length $header]
@@ -1637,9 +1599,8 @@ set file [open text_message.txt w+]
       puts $file ""; puts -nonewline $file "Tsys (x1/s/x2): "; puts $file "$tsys1/$tsys2/$tsys3"
      }
 
-    puts -nonewline $file "Recorder Humidity (%): "; puts $file $rec_humidity
   } elseif {$current_form=="stop"} {
-    global session thin thick packA packB packC packD packE finished
+    global session packA packB packC packD packE packZ finished
     set header "Session $session stop message for $station."
     set header_length [string length $header]
      puts $file $header
@@ -1669,20 +1630,6 @@ set file [open text_message.txt w+]
 
      }
 
-     if {[regexp -nocase {^na$} $thin]} {
-#      puts -nonewline $file "Tape Inventory: "; puts $file "Thin $thin"
-     } else {
-      puts -nonewline $file "Tape Inventory: ";
-      puts -nonewline $file "Thin "
-      puts -nonewline $file "$thin";
-       if {[regexp -nocase {^na$} $thick]} {
-        puts $file ""
-       } else {
-        puts -nonewline $file ", Thick "
-        puts $file "$thick";
-       }
-     }
-
      if {[regexp -nocase {^na$} $packA]} {
 #	 puts -nonewline $file "Disk Inventory: "; puts $file "$packA"
      } else {
@@ -1707,8 +1654,15 @@ set file [open text_message.txt w+]
 		     if {[regexp -nocase {^na$} $packE]} {
 		         puts $file ""
                      } else {
-		         puts -nonewline $file ", (larger) "
-		         puts $file "$packE ";
+		         puts -nonewline $file ", E "
+		         puts -nonewline $file "$packE";
+			 if {[regexp -nocase {^na$} $packZ]} {
+			     puts $file ""
+			 } else {
+			     puts -nonewline $file ", (other larger) "
+			     puts -nonewline $file "$packZ";
+			     puts $file ""
+			 }
 		     }
 		 }
 	     }
@@ -1731,11 +1685,12 @@ set file [open text_message.txt w+]
 
 #**********************************************************************************************#
 # Subroutinee: put_message_into_log                                                            #
-# Purpose:     This subroutine will open the text message file text_message.txt, read all the  #
+# Purpose:     This subroutine will open the text message file /tmp/text_message.txt, read all the  #
 #              lines and use the program inject_snap to put these lines into the logfile.            #
 #**********************************************************************************************#
 proc put_message_into_log {} {
-set message_file [open text_message.txt r]
+global pid
+set message_file [open "/tmp/text_message.txt.$pid" r]
 
  while {[gets $message_file line] >=0} {
   exec inject_snap "\"$line"
