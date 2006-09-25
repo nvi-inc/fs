@@ -12,7 +12,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[pcalpower 1.0]\n";
+    print "[pcalpower 1.1]\n";
     exit -1;
 }
 
@@ -98,7 +98,7 @@ foreach $pcal (keys %count) {
     }
 
 #          1u    39.8     0.0     0.0     1    39.8    39.8
-    print "Ch    $pcal      +/-     rms     n    max     min   noisy  (max-min)/rms\n";
+    print "Ch    $pcal      +/-     rms     n    max     min   (max-min)/rms\n";
     foreach $chan (sort keys %{$count{$pcal}}) {
 	if($count{$pcal}{$chan}==0) {
 	    printf "%2.2s\n",$chan;
@@ -118,7 +118,7 @@ foreach $pcal (keys %count) {
 	    if($rms > 0) {
 		$range=($max-$min)/$rms;
 		if($range >= 6.0) {
-		    $noisy{$chan}='*';
+		    $noisy{$pcal}{$chan}='*';
 		}
             } else {
                 $range=0.0;
@@ -128,13 +128,13 @@ foreach $pcal (keys %count) {
 	    $chan,$power,$count;
 	    next;
         }
-	if(defined($noisy{$chan})) {
-	    $noisy="*";
+	printf "%2.2s %7.2f %7.2f %7.2f %5d %7.2f %7.2f %10.2f",
+	$chan,$power,$sigma,$rms,$count,$max,$min,$range;
+	if(defined($noisy{$pcal}{$chan})) {
+	    printf "     noisy\n";
 	} else {
-	    $noisy=" ";
+	    printf "\n";
 	}
-	printf "%2.2s %7.2f %7.2f %7.2f %5d %7.2f %7.2f %4s %10.2f\n",
-	$chan,$power,$sigma,$rms,$count,$max,$min,$noisy,$range;
     }
 }
 @keys=(keys %count);
@@ -143,9 +143,9 @@ if($n != 2) {
     exit;
 }
 #      1u     0.0     0.0     0.0     0.0
-print "Ch    Diff     +/-      %     +/-%  noisy";
+print "Ch    Diff     +/-      %     +/-%  ";
     if (defined($opt_b)) {
-	print "  decoder units\n";
+	print "decoder units\n";
     } else {
 	print "\n";
     }
@@ -155,9 +155,7 @@ foreach $chan (keys %{$count{'on'}},keys %{$count{'off'}}) {
 }
 
 foreach $chan (sort keys %seen) {
-    if(!defined($count{'off'}{$chan})&&!defined($count{'off'}{$chan})) {
-	next;
-    } elsif(defined($count{'off'}{$chan})&&$count{'off'}{$chan}==0
+    if(defined($count{'off'}{$chan})&&$count{'off'}{$chan}==0
 	    ||defined($count{'on'}{$chan})&&$count{'on'}{$chan}==0) {
 	printf "%2.2s\n",$chan;
 	next;
@@ -166,11 +164,6 @@ foreach $chan (sort keys %seen) {
     $pof=$power{'off'}{$chan};
     $diff=$pon-$pof;
     $fract=100.0*($pon/$pof-1);
-    if(defined($noisy{$chan})) {
-	$noisy="*";
-    } else {
-	$noisy=" ";
-    }
     if(defined($sigma{'on'}{$chan}) && defined($sigma{'off'}{$chan})) {
 	$son=$sigma{'on'}{$chan};
 	$sof=$sigma{'off'}{$chan};
@@ -178,17 +171,32 @@ foreach $chan (sort keys %seen) {
 	$son/=$pon;
 	$sof/=$pof;
 	$fsig=(100.0*$pon/$pof)*sqrt($son*$son+$sof*$sof);
-	printf "%2.2s %7.2f %7.2f %7.2f %7.2f %4s",
-	$chan, $diff, $sigma, $fract, $fsig, $noisy;
+	printf "%2.2s %7.2f %7.2f %7.2f %7.2f",
+	$chan, $diff, $sigma, $fract, $fsig;
+	$sigs=1;
     } else {
-	printf "%2.2s %7.2f         %7.2f         %4s",
-	$chan, $diff, $fract, $noisy;
+	printf "%2.2s %7.2f         %7.2f",
+	$chan, $diff, $fract;
+	$sigs=0;
     }
     if (defined($opt_b)) {
-	$volt=sqrt(($fract*.01)/$opt_b)*100.*10;
-	printf "    %7.0f\n",$volt;
-    } else {
-	print "\n";
+	if(!$sigs) {
+	    printf "        ";
+	}
+	if($fract>=0.0) {
+	    $volt=sqrt(($fract*.01)/$opt_b)*100.*10;
+	    printf "  %7.0f     ",$volt;
+	}
     }
-}
+    if(defined($noisy{'off'}{$chan})||defined($noisy{'on'}{$chan})) {
+	if(defined($opt_b) && $fract<0.0) {
+	    printf "              ";
+	} elsif(!$sigs) { # shouldn't be able to get here is $sig is zero
+	    printf "        ";
+	}
+	printf "  noisy\n";
+    } else {
+	printf "\n";
+    }
 
+}
