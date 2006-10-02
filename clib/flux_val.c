@@ -32,8 +32,14 @@ float flux_val(name,flux,nu,epoch,fwhm,corr,size)
       fluxv=pow(10.0,logflux);
       if(strcmp("casa",(flux+i)->name)==0) {
 	float dflux;
-	dflux = 1 - ( (0.97 - 0.30*(lognu-3)) /100.0);
-	fluxv*= pow(10.0,(epoch-1980.0)*log10(dflux));
+	if ((flux+i)->fcoeff[0] > 5.7){  /*entry is for discredited 1977 flux*/
+
+	  dflux = 1 - ( (0.97 - 0.30*(lognu-3)) /100.0);
+	  fluxv*= pow(10.0,(epoch-1980.0)*log10(dflux));
+	} else {                         /*entry for preliminary 2006 flux*/
+         dflux = 1 - ( 0.65  /100.0);
+         fluxv*= pow(10.0,(epoch-2006.0)*log10(dflux));
+       }
       }
       if((flux+i)->model=='g') {
 	fac1=(flux+i)->mcoeff[1]/fwhm;
