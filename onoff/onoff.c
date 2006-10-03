@@ -396,7 +396,7 @@ main()
 		" ",
 		" ",
 		" ");
-	jr2as(gcmp_sig[i],buff,-5,2,sizeof(buff));
+	jr2as(gcmp_sig[i],buff,-6,4,sizeof(buff));
 	strcat(buff," ");
 	jr2as(tsys_sig[i],buff,-5,2,sizeof(buff));
 	strcat(buff," ");
@@ -404,8 +404,10 @@ main()
 	strcat(buff," ");
 	jr2as(tclj_sig[i],buff,-7,3,sizeof(buff));
 	strcat(buff," ");
+	/*
 	jr2as(tclk_sig[i],buff,-5,3,sizeof(buff));
 	strcat(buff," ");
+	*/
 	jr2as(calr_sig[i],buff,-5,2,sizeof(buff));
 	logit(buff,0,NULL);
       }
@@ -435,7 +437,7 @@ main()
 	jr2as(tclk[i],buff,-5,3,sizeof(buff));
 	strcat(buff," ");
 	*/
-	jr2as(calr[i],buff,-6,4,sizeof(buff));
+	jr2as(calr[i],buff,-5,2,sizeof(buff));
 	logit(buff,0,NULL);
 	if(onoff.devices[i].corr>=1.2) {
 	  memcpy(ip+3,"nf",2);
