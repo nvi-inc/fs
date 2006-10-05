@@ -72,6 +72,7 @@ char name[5];
      isem=go_find(name);
 
     semid_put( isem, semid);
+    usleep(20);
     return;
 }    
 int go_test(name)
