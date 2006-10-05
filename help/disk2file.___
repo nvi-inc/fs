@@ -1,6 +1,7 @@
                disk2file - Transfer from Mark 5 to a file
 
             Syntax:     disk2file=scan,destination,start,end,options
+                        disk2file=abort,autoftp,string
 
             Response:   disk2file/scan,destination,start,end,options,
                                   scan_number,option,start_byte,end_byte,
@@ -8,30 +9,39 @@
 
 
 Settable Parameters:
-          scan        Mark 5 scan name or number to transfer,
-                      maximum 16 characters, blank for the most
+          scan        Mark 5 scan label or number to transfer,
+                      maximum 63 characters, blank for the most
                       recent recording, "abort" to stop current
-                      transfer
-          destination Filename to store the transfer data to, maximum 64
-                      characters, no default
+                      transfer, scan label for monitor response
+          destination Filename to store the transfer data to, maximum 128
+                      characters, default uses Mark5A disk2file default. If
+                      scan is "abort", this second optional parameter can
+                      used to enable the "autoftp" feature. See the comments
+                      section below for more details.
           start       String to be passed to Mark5A scan_set command to define
                       start of data transfer, see comments below, maximum 32
-                      characters
+                      characters, for monitor, the start returned by scan_set?
           end         String to be passed to Mark5A scan_set command to define
                       end of data transfer, see comments below. maximum 32
-                      characters
+                      characters, for monitor, the end returned by scan_set?
           options     Curently ignored, maximum 32 characters
+          autoftp     literal string 'autoftp', if included after 'abort'
+                      for scan parameter causes the 'autoftp' script to be run,
+                      default is empty, therefore no running of 'autoftp', see
+                      comments
+          string      optional string to be passed to the 'autoftp' script, if
+                      invoked, see comments
 
 Monitor-only parameters:
-          scan_number Mark 5 scan number
-          option      Mark 5 disk2file transfer option:
+          scan_number Mark5A scan number
+          option      Mark5A disk2file transfer option:
                         n create file; error if existing file
                         w erase existing file, if any; create new file
                         a create file if necessary, or append to existing file
-          start_byte  Mark 5 start byte for transfer
-          end_byte    Mark 5 end byte for transfer
-          status      active or inactive
-          current     current Mark 5 byte of transfer
+          start_byte  Mark5A disk2file? start byte for transfer
+          end_byte    Mark5A disk2file? end byte for transfer
+          status      Mark5A disk2file? status: active or inactive
+          current     current Mark5A disk2file? byte of transfer
 
 Comments:
 The dis2file command can be used to transfer some or all of a recorded
@@ -53,7 +63,40 @@ file. See the monitor only parameter "option" for the details.
 
 The use of "abort" as the first parameter will cause any active
 transfer to be stopped. No error will be returned if there is no
-transfer active or any other Mark 5 error occurs.
+transfer active or any other Mark 5 error occurs. In order to
+implement automatc ftp-ing of the destination file to a correlator, an
+optional second parameter "autoftp" can be included. If included, the
+FS will execute a command equivalent to:
+
+     autoftp node destination string
+
+in a separate "xterm" named "autoftp", where "node" is the node name
+or IP address specified for the Mark5 in mk5ad.ctl, "destination" is
+the previously specified file name parameter in the "disk2file=..."
+that caused the most recent transfer, and "string" is an optional
+additional string that be specified after the "autoftp" parameter. The
+"string" parameter is intended to provide control over the "autoftp"
+script's behavior, if this has been implemented locally. For example,
+it might be used to select which correlator the file is sent to.  If
+no "destination" was explicitly established or the FS has been
+restarted since then, the FS will try to determine the most recently
+used file name using "disk2file?". If that also fails to produce a
+file name, the FS will give up. Please see the file
+/usr2/fs/msic/autoftp.txt for information on how to configure this
+station customizable feature. Unless a local version has been
+configured, a dummy 'stub' "autoftp" that does nothing is used.
+
+Turning the "autoftp" feature on in a schedule requires either setting
+the "AutoFTP" keyword on in the skedf.ctl control file to make it the
+default behavior or using DRUDG option (15) "Data Transfer Override"
+to toggle it on an experiment by experiment basis.  Note that option
+15 only appears if the .skd file contains data_transfer statements.
+Please see the example skedf.ctl control file,
+/usr2/fs/st.default/control/skedf.ctl, for more information about the
+AutoFTP keyword in skedf.ctl.
+
+Each use of autoftp will cause the most recent disk2file destination
+file to be handled even if a previous use of autoftp handled it.
 
 The start and end parameters are fully defined under the "scan_set
 command at "http://web.haystack.mit.edu/mark5/command5a.pdf". For
