@@ -1,0 +1,90 @@
+#!/usr/bin/perl
+# autoftp - automatic ftp of files from Mark5 computer to correlator
+
+$prog=$0;
+$mark5_node=$ARGV[0];
+$file=$ARGV[1];
+$string=$ARGV[2];
+
+# customize the following for your site
+# you can use $string to select different values
+# the value of $string is provided by the SNAP disk2file=abort,string command
+
+$mark5_user="oper";
+$dest="correaltor_ip_address";
+$dest_user="anonymous";
+# be sure to escape any 'at' sign "@" you put the password, e.g. user\@node
+$dest_pass="your_email";
+$dest_dir="/destination_directory";
+
+# end of required site customization
+
+$pre_comment="autoftp: transfer to <$dest> of <$file> ";
+
+inject_snap_comment("initialized: $string");
+
+@args = ("ssh", "$mark5_user\@$mark5_node",
+	 "ncftpput -v -u$dest_user -p$dest_pass $dest $dest_dir $file");
+process_ssh_ncftpput_runcode(system @args);
+
+# give the user a chance to see what happened for result or error
+
+sleep 10;
+
+sub inject_snap_comment {
+    my ($comment) = @_;
+    $comment= $pre_comment . $comment;
+    print "$comment" . "\n";
+    system ("inject_snap",
+	    "\"$comment\"");
+}
+sub process_ssh_ncftpput_runcode {
+    my ($rc) = @_;
+    $rc=0xffff & $rc;
+#    printf "system(%s) returned %#04x: ", "@args", $rc;
+    if($rc ==0) {
+	inject_snap_comment("completed");
+    }
+    elsif ($rc == 0xffff) {
+	inject_snap_comment("Command failed: $!");
+    }
+    elsif ($rc > 0x80) {
+	$rc >>=8;
+	if ($rc == 1) {
+	    inject_snap_comment("failed: Could not connect to remote host.");
+	} elsif ($rc == 2) {
+	    inject_snap_comment("failed: Could not connect to remote host - timed out.");
+	} elsif ($rc == 3) {
+	    inject_snap_comment("failed: Transfer failed.");
+	} elsif ($rc == 4) {
+	    inject_snap_comment("failed: Transfer failed - timed out.");
+	} elsif ($rc == 5) {
+	    inject_snap_comment("failed: Directory change failed.");
+	} elsif ($rc == 6) {
+	    inject_snap_comment("failed: Directory change failed - timed out.");
+	} elsif ($rc == 7) {
+	    inject_snap_comment("failed: Malformed URL.");
+	} elsif ($rc == 8) {
+	    inject_snap_comment("failed: Usage error.");
+	} elsif ($rc == 9) {
+	    inject_snap_comment("failed: Error in login configuration file.");
+	} elsif ($rc == 10) {
+	    inject_snap_comment("failed: Library initialization failed.");
+	} elsif ($rc == 11) {
+	    inject_snap_comment("failed: Session initialization failed.");
+	} elsif ($rc == 255) {
+	    inject_snap_comment("failed: ssh error, exit status $rc");
+	} else {
+	    inject_snap_comment("failed: unknown exit status $rc");
+	}
+    }
+    else {
+#	print "ran with ";
+	if ($rc &   0x80) {
+	    $rc &= ~0x80;
+#	    print "coredump from ";
+	}
+#	print "signal $rc\n";
+	inject_snap_comment("failed: ssh killed by signal $rc");
+    }
+}
