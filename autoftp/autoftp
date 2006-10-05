@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+# autoftp - automatic ftp of files from Mark5 computer to correlator
+
+$prog=$0;
+$mark5_node=$ARGV[0];
+$file=$ARGV[1];
+$string=$ARGV[2];
+
+# customize the following for your site
+# you can use $string to select different values
+# the value of $string is provided by the SNAP disk2file=abort,string command
+
+$mark5_user="oper";
+$dest="correaltor_ip_address";
+$dest_user="anonymous";
+
+# be sure to escape any 'at' sign "@" you put the password, e.g. user\@node
+$dest_pass="your_email";
+
+$dest_dir="/destination_directory";
+
+# end of required site customization
+
+$pre_comment="$prog: stub autoftp doesn't do anything ";
+
+inject_snap_comment(" mark5 node <$mark5_node> file <$file> string <$string>");
+
+# give the user a chance to see what happened for result or error
+
+sleep 10;
+
+sub inject_snap_comment {
+    my ($comment) = @_;
+    $comment= $pre_comment . $comment;
+    print "$comment" . "\n";
+    system ("inject_snap",
+	    "\"$comment\"");
+}
