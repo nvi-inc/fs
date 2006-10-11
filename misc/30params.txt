@@ -1,0 +1,151 @@
+File: /usr2/fs/misc/30params.txt  Version: 0.4  Date: 061011
+
+	       Updating from 20 to 30 Parameter Pointing Models
+
+			      Ed Himwich
+
+
+INTRODUCTION
+
+This documents is only relevant for stations that use the FS software
+tools for analyzing pointing data and/or applying corections to the
+antenna pointing.  It describes how to modify your local files and
+station software to use the new 30 parameter pointing models in the
+FS.  The FS continues to support 20 parameter models.  They will
+continue to work as expected as long as the pointing model file only
+has 20 parameters in it and as long as any unsed model parameters, in
+particular 19 and 20, have "zero" value control flags in the model
+control file.  However for simplicty and future compatability,
+stations should convert to 30 parameters as soon as is feasible.
+There are two steps in updating: (1) changing your point model control
+file and (2) changing your station software.  These steps are covered
+in sections below titled: UPDATING MDLPO.CTL and UPDATING YOUR
+SOFTWARE.  Both steps must be take to complete the update.  It is
+critical that you check your pointing after these changes are made and
+installed to verify that there is no problem.  There is a separate
+section called TESTING to emphasis this point.  Lastly, the form of
+the new model, which has been augmented to include new parameters, is
+discussed in the final section MODEL PARAMETERS.
+
+
+UPDATING MDLPO.CTL
+
+This step is very simple. It can be done automatically, possibly with
+some uncosmetic results, by using the script mdlctlfix:
+
+  /usr2/fs/misc/mdlctlfix FILE
+
+where FILE is the name of the file to be updated.
+
+The changes can also be made manually if you prefer. This paragraph
+describes the steps for doing this.  It involves increasing the number
+of entries in the mdlp.ctl (or any other file you use to hold FS style
+pointing models).  Two changes need to be made.  The first is to
+increase the number of parameter flags.  This is done by adding enough
+zeroes ("0") to the second non-comment line in the file to increase
+the number of parameter flags to 30.  Since the old number of flags
+was probably twenty, you will probably need to add 10 fields of
+zeroes.  Note there is one non-flag field on this line at the
+beginning, the elevation angle of the second antenna axis (Y, EL,
+DEC).  This field must be preserved in this change.
+
+The second change is to increase the actual number of parameters to
+30. This is done by adding two non-comment lines with five "0.0"
+fields after the current model parameters.  If the old model had 20
+parmeters (probably), you would add these two lines after the sixth
+non-comment line. 
+
+
+UPDATING YOUR SOFTWARE
+
+If the station software you have that uses the pointing model is in
+the C-language, you may only need to recompile your software to update
+it.  This should be the case as long the code: (1) uses the macro
+string "MAX_MODEL_PARAM" (from "/usr2/fs/include/pmodel.h") rather
+than hardcoding the number of parameters, (2) uses "sizeof()" to
+determine the size of the "struct pmdl" structure rather than
+hardcoding it, (3) uses the "/usr2/fs/poclb/gmodl.c" function call to
+read the model from disk, and (4) uses the "/usr2/fs/fln.c" and
+".../flt.c" functions to evaulate the model.  The use of
+"/usr2/fs/poclb/pmdlq.c" function to record the model in the log is
+backward compatible (by the way, a bug that caused the mis-numbering
+of model lines in the log entries has been fixed).  If you have other
+code that depends on the details of the model, you will need to update
+it accordingly.  Very few, if any, stations should need to make
+additional changes.  Please check the following section titled TESTING
+for an important reminder about testing.
+
+If the station software you have that uses the pointing model is in
+FORTRAN, you will need to make some relatively small changes if the
+following conditions are met: (1) you have used
+"/usr2/fs/polb/gmodl.f" to read the model from disk; and (2) the only
+use you make of the arrays read by this routine is to pass them to
+"fln.f" and "flt0.f" for evaluation.  If these conditions are met,
+then you should only need to make the following changes: (1) Resize
+any parameter flag and parameter array values you have to 30 elements,
+actually it is recommended that you change to using the FORTRAN
+parameter MAX_MODEL_PARAM in "/usr2/fs/include/params.i" (already
+implicitly included in many routines, note that MAX_MODEL_PARAM can be
+used in DATA statements for a repetition count for constant values,
+e.g. MAX_MODEL_PARAM*0); and (2) change use of "fln.f" and "flt0.f" to
+"fln1.f" and "flt1.f".  If you use a "pmdlq.f" subroutine in your
+"antcn" program to log you pointing model, you may need to change it
+to apply change (1) to it.  If you have other code that manipulates
+the model or depends on the details of the arrays, you will need to
+update it accordingly.  Very few, if any, stations should need to make
+additional changes beyond (1) and (2).  Please check the following
+section titled TESTING for an important reminder about testing.
+
+
+TESTING
+
+It is critical that you check your pointing after these changes are
+made and installed to verify that there is no problem. Failure to do
+so could lead to an avoidable loss of data.
+
+
+MODEL PARAMETERS
+
+The model parameters are expressed in terms of a first angle X and
+second angle Y using FORTRAN notaton. All angles are degrees unless
+otherwise noted.
+
+Delta X =  P1 - P2*cos(Phi)*tan(Y) + P3*tan(Y) - P4/cos(Y)
+         + P5*sin(X)*tan(Y) - P6*cos(X)*tan(Y)
+         + P12*X + P13*cos(X) + P14*sin(X) + P17*cos(2*X) + P18*sin(2*X)
+
+Delta Y =  P5*cos(X) + P6*sin(X)
+         + P7 - P8*(cos(Phi)*sin(Y)*cos(X)-sin(Phi)*cos(Y)) + P9*Y
+         + P10*cos(Y) + P11*sin(Y) + P15*cos(2*X) + P16*sin(2*X)
+         + P19*cos(8*Y) + P20*sin(8*Y) + P21*cos(X) + P22*sin(X)
+
+where:
+
+Delta X = X-angle pointing correction (add to raw angles)
+Delta Y = Y-angle pointing correction (add to raw angles)
+
+Phi = elevation angle of +Y axis (postive from Y=+90 to X,Y=0,0)
+
+P1  = X-angle Encoder Offset
+P2  = X-angle Sag
+P3  = Axis SKew
+P4  = Box Offset
+P5  = Tilt Out (tilt of Y=+90 toward X,Y=0,0)
+P6  = Tilt Over (tilt of Y=+90 toward X,Y=90,0)
+P7  = Y-Angle Encoder Offset
+P8  = Y-Angle Sag
+P9  = ad hoc Y-angle slope (degrees/radian)
+P10 = ad hoc Y-angle cos(Y) term
+P11 = ad hoc Y-angle sin(Y) term
+P12 = ad hoc X-angle slope (degrees/radian)
+P13 = ad hoc X-angle cos(X) term
+P14 = ad hoc X-angle sin(X) term
+P15 = ad hoc Y-angle cos(2*X) term
+P16 = ad hoc Y-angle sin(2*X) term
+P17 = ad hoc X-angle cos(2*X) term
+P18 = ad hoc X-angle sin(2*X) term
+P19 = ad hoc Y-angle cos(8*Y) term
+P20 = ad hoc Y-angle sin(8*Y) term
+P21 = ad hoc Y-angle cos(X) term
+P22 = ad hoc Y-angle sin(X) term
+
