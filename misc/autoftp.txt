@@ -1,0 +1,187 @@
+File: /usr2/fs/misc/autoftp.txt  Version: 0.5  Date: 061011
+
+	       Automatic FTP of Mark5 Files From the FS
+
+			      Ed Himwich
+
+
+INTRODUCTION
+
+This document describes how to configure the FS to automatically FTP
+files that have have been "disk2file"d on the Mark5.  There are four
+aspect to this: SELECTION BY DRUDG, and CONFIGURING THE AUTOFTP
+SCRIPT, XTERM CUSTOMIZATION, and RSA AUTHENTICATION.  These topic are
+covered in the correspondingly titled sections below.  There is also a
+section titled MANUALLY FTP-ING FILES for using the script manually
+either during or after a session.
+
+
+SELECTION BY DRUDG
+
+In order to trigger the automatic FTP-ing of Mark5 files, the
+operation must be selected when the schedule is DRUDG-ed.  Use the
+"data_transfer" override option 15 on the main DRUDG menu.  Note that
+option 15 only appears if the .skd file contains data_transfer
+statements. In the override menu, the disk2file "autoftp" feature can
+be turned on or off.  An optional "autoftp string" can be specified
+(or removed).  If the "autoftp" feature is enabled, each
+"disk2file=abort" command in the schedule will have a
+",autoftp,string" appended to it, where "autoftp" is a literal
+"autoftp" and "string" is the specified string (if any).  Default
+settings for the on/off and string value (possibily blank) may be
+specified in the "skedf.ctl" control file with the "AutoFTP" keyword
+(see /usr2/fs/st.default/control/skedf.ctl for more information).  If
+the "autoftp" parameter is included in a "disk2file=abort" command,
+its use will trigger the FS to execute the equivalent of:
+
+       autoftp node destination string
+
+in a separate xterm window. The window will have an Xresources name of
+"autoftp". The size, position, and other characteristics of this
+window can be specified in the ~/.Xresources files.  This is covered in
+a separate section below titled XTERM CUSTOMIZATION.  Customization of
+the "autoftp" script itself is covered in the next section.
+
+
+CONFIGURING THE AUTOFTP SCRIPT
+
+The "autoftp" script is a station dependent script.  The default
+version can be found in /usr2/fs/st.default/st-0.0.0/autoftp.  To
+install it, as "prog", do the following:
+
+   cd /usr2/st
+   cp -a /usr2/fs/st.default/st-0.0.0/autoftp autoftp
+
+Still as "prog" edit "/usr2/st/Makefile" and add "autoftp" to the
+"EXEC_DIR" variable. Then edit "/usr2/st/autoftp/autoftp" and adjust
+the variables needed for site customization:
+
+mark5_user:  login account to use on the Mark5 system use, probably "oper"
+dest:        destination node or ip address to ftp to
+dest_user:   login account on destination system, possibly "anonymous" 
+dest_pass:   password of account on destination system, possibly your e-mail.
+dest_dir:    target directory on destination system.
+
+The optional "string" command line argument for the script program can
+be used to modify the behavior of the script at runtime.  For
+observing schedules, the contents of "string" is specified when DRUDG
+is run.  This might be used for example to control which destination
+correlator the files would be ftp'd to.  The logic in the script to
+control its behavior would have to be programmed into the script
+locally at the station if it is desired.  Of course you could edit the
+script at observation time to modify its behavior, but the "string"
+feature could allow to use the same script, for example for several
+different destinations, without editing it between sessions.
+
+For this script to work well, you should enable RSA authentication
+login on the Mark5 system. This is covered in a separate section
+titled RSA AUTHENTICATION.  If RSA authentication is not configured
+then you will be prompted to supply the Mark5 user's password by the
+script each it is run.
+
+There is no requirement to base your station's "autoftp" script on the
+provided example.  You can use any script or program that provides
+similar functionality and any extra features you may require locally
+
+
+XTERM CUSTOMIZATION
+
+The size, position, and other characteristics of this window can be
+specified in the ~/.Xresources files.  An example of the most basic
+cutomization can be found in the "autoftp" lines of
+/usr2/fs/st.default/oper/.Xresources file.  If your local
+~/.Xresources file does not contain these three lines, you can add
+them with:
+
+   grep autoftp /usr2/fs/st.default/oper/.Xresources >>~.Xresources
+
+After updating the file you must reload the X resources data base
+either by logging out and back in again or using:
+
+   xrdb -merge ~/.Xresources
+
+You will need to reload the data base each time you change it in order
+to see the effect of a change.  You will also have to either restart
+the window manager or start a new "autoftp" window to see the effect.
+As a quick way to do the latter for testing, you can use:
+
+   xterm -name autoftp &
+
+Be sure to exit each window you open this way.
+
+
+RSA AUTHENTICATION 
+
+In order for the default "autoftp" script to work well, RSA
+authentication must be set-up on the Mark5 system so that the user
+account that you run the FS in on the FS PC (usually "oper") can login
+to the designated user account on the Mark5 PC (usually "oper") with
+RSA authetication, i.e., without having to supply a password
+interactively.
+
+This is covered in detail by "man ssh", but the basic process is as
+follows for the FS Linux 5 (based on Debain "woody") distribution:
+
+1. While logged in on the FS PC in the account you will be running the
+   FS from, create an RSA public/private key pair for the account that
+   will connect from the FS PC:
+
+     cd ~/.ssh
+     ssh-keygen -t rsa
+
+  You will prompted for destination file name, accept the default.
+  You will also be prompted for a passphase, just hit return which
+  will avoid requiring a passphrase to login.
+
+2. Copy (or append) the FS computer users id_rsa.pub file to the
+   ~/.ssh/authorized_keys file for the designated user account on the
+   Mark5 system, e.g. from the FS PC machine:
+
+     ssh oper@mark5
+                           (enter password at prompt)
+                           (after login, further commads are on the
+                            Mark5 system)
+     ssh oper@fspc cat .ssh/id_rsa.pub >> .ssh/authorized_keys
+                           (enter password at prompt)
+
+   The second command appends the contents of the .ssh/id_rsa.pub file
+   from the FS PC to the .ssh/authorized_keys file on the Mark5
+   machine.  You may need to use only one ">" if the authorized_keys
+   file does not already exist, but ">>" is always safe as first try
+   and always avoids overwriting the file if it already exists
+
+3. Make sure the Mark5 PC is a recognized host for ssh on the FS PC.
+   This step is not necessary if you followed the example in step 2
+   for transferring the key.  As the FS user ("oper") on the FS PC,
+   connect to the Mark5 PC using ssh:
+
+      ssh oper@mark5
+                   (if prompted, answer affirmatively to add the host)
+
+
+4. Make sure that the FS PC is a recognized host for ssh by the mark5a
+   system.  This step is not necessary if you followed the example in
+   step 2 for transferring the key.  As the target user ("oper") on
+   the mark5, connect to the FS PC using ssh:
+
+      ssh oper@fspc
+                   (if prompted, answer affirmatively to add the host)
+
+5. As a final optional step you can verify that everything is set-up
+   properly by trying to connect from the FS PC to the Mark5 PC.  As
+   the FS user ("oper") on the FS PC, connect to the Mark5 PC using
+   ssh:
+
+      ssh oper@mark5
+                   (if prompted, answer affirmatively to add the host)
+
+   You should not be prompted for a password; you should be logged-in
+   immediately.  If not, something has gone wrong.  There are many
+   possibilities including the fact that some older Mark5 systems may
+   have an old ssh that does not support this feature as well or ssh
+   on the Mark5 may not be properly configured.  If you can't solve
+   this with local help, please contact Ed
+   (weh@ivscc.gsfc.nasa.gov). He isn't really an ssh expert, but he
+   may be able to suggest something or an expert to contact.
+
+
