@@ -1,32 +1,37 @@
-             disk_check - check Mark 5 recorded data
+             data_check - check Mark 5 recorded data
 
-            Syntax:     disk_check
+            Syntax:     data_check
 
-            Response:   disk_check/format,tracks,time,pos,period,??,
+            Response:   data_check/mode,submode,time,offset,period,bytes,
+                                   missing
 
 
-Settable parameters:
-          command   any legal command for Mark IV decoder. The
-          terminating "$" character is  appended before
-          sending the command.
+Settable parameters: None
 
 Monitor-only parameters:
-            format      Data format: mark4, vlba, test, or ?
-            tracks      Track mode: 8, 16, 32, 64
+            mode        Data mode: ?, st, mark4, vlba, tvg, SS
+            submode     Data submode: 8, 16, 32, 64, mark4, vlba
             time        Data time tag read from first encountered header
-          pos       Byte position of header
-            period      Track frame period (seconds)
-            ??          unknown
+            offset      Byte offset from current play pointer to beginning
+                        of next 'track' frame header.
+            bytes       Total #bytes in recording between track frame headers.
+            missing     Number of missing bytes between last and current
+                         'data_check'
 
 Comments: 
 If format is ?, the remaining fields are not valid.
 
-This command sets the read pointer 1 mega-byte before the
-current write pointer location and attempts to the use the 
-low-level Mark 5 data_check command. The displayed parameters
-are the output of is command. A future version will allow the
-position of the read pointer to be set explicitly, but this
-can be done with a mk5 SNAP command. To check at positon
-"pos", use:
+This command sets the read pointer 1 mega-byte before the current
+write pointer location and attempts to the use the low-level Mark 5
+data_check? command. The displayed parameters are the output of this
+command. More information on the response format can be found in the
+Mark5A program documentation at
+http://www.haystack.mit.edu/tech/vlbi/mark5/docs/command5a.pdf.
+
+A future version may allow the position of the read pointer to be set
+explicitly, but this can be done with a mk5 SNAP command. To check at
+positon "pos", use:
 
 mk5=play off pos,data_check?
+
+This command does not work properly for Mark5B recorders.
