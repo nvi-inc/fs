@@ -78,7 +78,8 @@ int main(int argc, char *argv[])
   
   if(icount < 0)
     {
-      printf("No rxg files found\n");
+      if(icount==-1)
+        printf("No rxg files found\n");
       exit(0);
     }
 
