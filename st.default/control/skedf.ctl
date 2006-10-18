@@ -110,8 +110,8 @@ $print
 *label_printer epson24
 *
 * Label size:
-* Specify label size parameters, only valid for "postscript" type. If
-* no size is specified, drudg cannot print labels.
+* Specify label size parameters, only valid for "postscript" type.
+* If no size is specified, drudg assumes Avery 5160. 
 * The option that has the largest product of <rows>*<cols> is a good choice
 * if you are just printing to plain paper, for example Avery 5160 prints 30
 * labels per page.
@@ -135,6 +135,16 @@ $print
 *label_size  1.5   3.9     7     2     0.5   0.16   Avery L7163
 *
 $misc
+*This is for dealing with Mark5 data transfer issues.
+*Default directory for the disk2file command.
+*Note shell expansions like "~" will not work, use absolute pathnames,
+*     relative pathnames may work if you are careful about the working
+*     directory of the Mark5A program.
+*EXAMPLE
+* disk2file_Dir /r1234/data
+* Sets up AutoFTP
+*EXAMPLE
+* AutoFTP ON arbitrary_string_with_out_spaces 
 *
 * Epoch:
 * Enter the epoch for drudg to use on the SOURCE commands in SNAP files.
