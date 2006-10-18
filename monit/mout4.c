@@ -39,7 +39,7 @@ void mout4(int n_das, int mode)
 		
 		if (!shm_addr->das[n_das].ifp[chan].initialised) break;
 
-		/* Require filter module for BS and FT */
+		/* Digital Filter module */
 		if (shm_addr->das[n_das].ifp[chan].temp_digital > 1) {
 
 			/* Filter status */
@@ -50,66 +50,6 @@ void mout4(int n_das, int mode)
 				mvprintw(ROW1+3,COL1+7+(chan*41),"          NOT READY          ");
 				standend();
 				printf("\7");
-			}
-
-			/* Show level and offset servos */
-			if (shm_addr->das[n_das].ifp[chan].bs.level.mode == _MANUAL ||
-		    	shm_addr->das[n_das].ifp[chan].bs.offset.mode == _MANUAL) {
-				standout();
-				mvprintw(ROW1+5,COL1+7+(chan*41),"       MONITORING ONLY       ");
-				standend();
-			}
-
-			/* Level readout */
-			xc = ((255 - shm_addr->das[n_das].ifp[chan].bs.level.readout)*29)/256;
-			if (shm_addr->das[n_das].ifp[chan].bs.level.mode == _MANUAL) {
-				mvprintw(ROW1+6,COL1+21+(chan*41),"M");
-				standout();
-				if (xc < 14)
-					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"-");
-				else if (xc > 14)
-					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"+");
-				else	mvprintw(ROW1+6,COL1+7+xc+(chan*41),"=");
-				standend();
-			} else {
-				mvprintw(ROW1+6,COL1+21+(chan*41),"C");
-				standout();
-				if (xc < 2)
-					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"-");
-				else if (xc > 26)
-					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"+");
-				else	mvprintw(ROW1+6,COL1+7+xc+(chan*41),"=");
-				if (xc < 2 || xc > 26) {
-					printf("\7");
-					mvprintw(ROW1+5,COL1+7+(chan*41),"     ADJUST INPUT LEVEL      ");
-				}
-				standend();
-			}
-
-			/* Offset readout */
-			xc = (shm_addr->das[n_das].ifp[chan].bs.offset.readout*29)/256;
-			if (shm_addr->das[n_das].ifp[chan].bs.offset.mode == _MANUAL) {
-				mvprintw(ROW1+7,COL1+21+(chan*41),"M");
-				standout();
-				if (xc < 14)
-					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"-");
-				else if (xc > 14)
-					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"+");
-				else	mvprintw(ROW1+7,COL1+7+xc+(chan*41),"=");
-				standend();
-			} else {
-				mvprintw(ROW1+7,COL1+21+(chan*41),"C");
-				standout();
-				if (xc < 2)
-					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"-");
-				else if (xc > 26)
-					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"+");
-				else	mvprintw(ROW1+7,COL1+7+xc+(chan*41),"=");
-				if (xc < 2 || xc > 26) {
-					printf("\7");
-					mvprintw(ROW1+5,COL1+7+(chan*41),"     ADJUST INPUT OFFSET     ");
-				}
-				standend();
 			}
 
 			/* Show Band Splitter USB and LSB threshold servos */
@@ -229,9 +169,70 @@ void mout4(int n_das, int mode)
 			} else	mvprintw(ROW1+19,COL1+27+(chan*41),"PASSIVE");
 		}
 	
-		/* Only Sampler module detects 5 MHz / 1 PPS */
+		/* High Res Sampler module */
 		if (shm_addr->das[n_das].ifp[chan].temp_analog > 1) {
-			/* 5 MHZ and 1 PPS error */
+
+			/* Show level and offset servos */
+			if (shm_addr->das[n_das].ifp[chan].bs.level.mode == _MANUAL ||
+		    	shm_addr->das[n_das].ifp[chan].bs.offset.mode == _MANUAL) {
+				standout();
+				mvprintw(ROW1+5,COL1+7+(chan*41),"       MONITORING ONLY       ");
+				standend();
+			}
+
+			/* Level readout */
+			xc = ((255 - shm_addr->das[n_das].ifp[chan].bs.level.readout)*29)/256;
+			if (shm_addr->das[n_das].ifp[chan].bs.level.mode == _MANUAL) {
+				mvprintw(ROW1+6,COL1+21+(chan*41),"M");
+				standout();
+				if (xc < 14)
+					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"-");
+				else if (xc > 14)
+					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"+");
+				else	mvprintw(ROW1+6,COL1+7+xc+(chan*41),"=");
+				standend();
+			} else {
+				mvprintw(ROW1+6,COL1+21+(chan*41),"C");
+				standout();
+				if (xc < 2)
+					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"-");
+				else if (xc > 26)
+					mvprintw(ROW1+6,COL1+7+xc+(chan*41),"+");
+				else	mvprintw(ROW1+6,COL1+7+xc+(chan*41),"=");
+				if (xc < 2 || xc > 26) {
+					printf("\7");
+					mvprintw(ROW1+5,COL1+7+(chan*41),"     ADJUST INPUT LEVEL      ");
+				}
+				standend();
+			}
+
+			/* Offset readout */
+			xc = (shm_addr->das[n_das].ifp[chan].bs.offset.readout*29)/256;
+			if (shm_addr->das[n_das].ifp[chan].bs.offset.mode == _MANUAL) {
+				mvprintw(ROW1+7,COL1+21+(chan*41),"M");
+				standout();
+				if (xc < 14)
+					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"-");
+				else if (xc > 14)
+					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"+");
+				else	mvprintw(ROW1+7,COL1+7+xc+(chan*41),"=");
+				standend();
+			} else {
+				mvprintw(ROW1+7,COL1+21+(chan*41),"C");
+				standout();
+				if (xc < 2)
+					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"-");
+				else if (xc > 26)
+					mvprintw(ROW1+7,COL1+7+xc+(chan*41),"+");
+				else	mvprintw(ROW1+7,COL1+7+xc+(chan*41),"=");
+				if (xc < 2 || xc > 26) {
+					printf("\7");
+					mvprintw(ROW1+5,COL1+7+(chan*41),"     ADJUST INPUT OFFSET     ");
+				}
+				standend();
+			}
+
+			/* 5 MHz and 1 PPS errors */
 			if (shm_addr->das[n_das].ifp[chan].ref_err)
 				mvprintw(ROW1+20,COL1+7+(chan*41),"ERROR  ");
 			else	mvprintw(ROW1+20,COL1+7+(chan*41),"OK     ");
@@ -261,12 +262,9 @@ void mout4(int n_das, int mode)
 
 		if (!shm_addr->das[n_das].ifp[chan].initialised) break;
 
-		/* Digital module */
+		/* Digital Filter module */
 		if (shm_addr->das[n_das].ifp[chan].temp_digital > 1) {
-			/* Level & Offset */
-			mvprintw(ROW1+5,COL1+6 +(chan*41),"%4d %c",255-shm_addr->das[n_das].ifp[chan].bs.level.readout,shm_addr->das[n_das].ifp[chan].bs.level.mode?'M':'C');
-			mvprintw(ROW1+5,COL1+26+(chan*41),"%4d %c",shm_addr->das[n_das].ifp[chan].bs.offset.readout,shm_addr->das[n_das].ifp[chan].bs.offset.mode?'M':'C');
-	
+
 			/* Band Splitter: USB & LSB thresholds & counters */
 			mvprintw(ROW1+7,COL1+6 +(chan*41),"%4d %c",shm_addr->das[n_das].ifp[chan].bs.usb_threshold,shm_addr->das[n_das].ifp[chan].bs.usb_servo.mode?'M':'C');
 			mvprintw(ROW1+8,COL1+6 +(chan*41),"%4d",255-shm_addr->das[n_das].ifp[chan].bs.usb_servo.readout);
@@ -279,7 +277,7 @@ void mout4(int n_das, int mode)
 			mvprintw(ROW1+10,COL1+26+(chan*41),"%4d %c",shm_addr->das[n_das].ifp[chan].ft.lsb_threshold,shm_addr->das[n_das].ifp[chan].ft.lsb_servo.mode?'M':'C');
 			mvprintw(ROW1+11,COL1+26+(chan*41),"%4d",255-shm_addr->das[n_das].ifp[chan].ft.lsb_servo.readout);
 
-			/* Clock Monitor */
+			/* Clock error */
 			if (shm_addr->das[n_das].ifp[chan].clk_err) 
 				mvprintw(ROW1+15,COL1+28+(chan*41),"ERROR");
 			else	mvprintw(ROW1+15,COL1+28+(chan*41),"OK   ");
@@ -288,13 +286,18 @@ void mout4(int n_das, int mode)
 			mvprintw(ROW1+19,COL1+28+(chan*41),"%2.0f C [%d]",shm_addr->das[n_das].ifp[chan].temp_digital,DAS_TEMP_MAX);
 		}
 
-		/* Analog module */
+		/* High Res Sampler module */
 		if (shm_addr->das[n_das].ifp[chan].temp_analog > 1) {
+
+			/* IF Input Level & Offset */
+			mvprintw(ROW1+5,COL1+6 +(chan*41),"%4d %c",255-shm_addr->das[n_das].ifp[chan].bs.level.readout,shm_addr->das[n_das].ifp[chan].bs.level.mode?'M':'C');
+			mvprintw(ROW1+5,COL1+26+(chan*41),"%4d %c",shm_addr->das[n_das].ifp[chan].bs.offset.readout,shm_addr->das[n_das].ifp[chan].bs.offset.mode?'M':'C');
+	
 			/* 1MHz PLL: Lock Detector & Voltage Control */
 			mvprintw(ROW1+13,COL1+10+(chan*41),"%3.1f V",shm_addr->das[n_das].ifp[chan].pll_ld);
 			mvprintw(ROW1+13,COL1+30+(chan*41),"%3.1f V",shm_addr->das[n_das].ifp[chan].pll_vc);
 
-			/* 5 MHz & 1 PPS Monitors */
+			/* 5 MHz & 1 PPS errors */
 			if (shm_addr->das[n_das].ifp[chan].ref_err) 
 				mvprintw(ROW1+16,COL1+8 +(chan*41),"ERROR");
 			else	mvprintw(ROW1+16,COL1+8 +(chan*41),"OK   ");
