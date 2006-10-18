@@ -28,8 +28,10 @@ int *ierr;
     return;
   }
 
-  /* check both analog and digital modules are present */
-  icherr[0] = (shm_addr->das[ind/2].ifp[ind%2].temp_analog <= 1);
+  /* check analog sampler module presence only where required */
+  if (shm_addr->das[ind/2].ifp[ind%2].bs.digital_format == _8_BIT)
+	icherr[0] = (shm_addr->das[ind/2].ifp[ind%2].temp_analog <= 1);
+  /* check digital filter module is present */
   icherr[1] = (shm_addr->das[ind/2].ifp[ind%2].temp_digital <= 1);
 
   /* check digital module */
@@ -37,21 +39,6 @@ int *ierr;
   {
 	/* check IFP is actually running */
 	icherr[2] = (!shm_addr->das[ind/2].ifp[ind%2].processing);
-	/* check input level and offset servos are functioning correctly */
-	if (shm_addr->das[ind/2].ifp[ind%2].bs.level.mode != _MANUAL) {
-		icherr[3] =
-		    (shm_addr->das[ind/2].ifp[ind%2].bs.level.readout<17);
-		icherr[4] =
-		    (shm_addr->das[ind/2].ifp[ind%2].bs.level.readout>237);
-	}
-	/* save input level as current TPI */
-	shm_addr->ifp_tpi[ind] =
-	  (255-(shm_addr->das[ind/2].ifp[ind%2].bs.level.readout&0x00FF))*256;
-	if (shm_addr->das[ind/2].ifp[ind%2].bs.offset.mode != _MANUAL) {
-		icherr[5] =
-		    (shm_addr->das[ind/2].ifp[ind%2].bs.offset.readout<17) ||
-		    (shm_addr->das[ind/2].ifp[ind%2].bs.offset.readout>237);
-	}
 	/* check Band Splitter USB and LSB servos are functioning correctly */
 	if (shm_addr->das[ind/2].ifp[ind%2].bs.usb_servo.mode != _MANUAL) {
 		icherr[6] =
@@ -80,9 +67,27 @@ int *ierr;
 
   /* check analog module */
   if (shm_addr->das[ind/2].ifp[ind%2].temp_analog > 1) {
+	/* check input level and offset servos are functioning correctly */
+	if (shm_addr->das[ind/2].ifp[ind%2].bs.level.mode != _MANUAL) {
+		icherr[3] =
+		    (shm_addr->das[ind/2].ifp[ind%2].bs.level.readout<17);
+		icherr[4] =
+		    (shm_addr->das[ind/2].ifp[ind%2].bs.level.readout>237);
+	}
+	if (shm_addr->das[ind/2].ifp[ind%2].bs.offset.mode != _MANUAL) {
+		icherr[5] =
+		    (shm_addr->das[ind/2].ifp[ind%2].bs.offset.readout<17) ||
+		    (shm_addr->das[ind/2].ifp[ind%2].bs.offset.readout>237);
+	}
 	/* check internal 1PPS / 5MHz error detectors */
 	icherr[11] = shm_addr->das[ind/2].ifp[ind%2].ref_err;
 	icherr[12] = shm_addr->das[ind/2].ifp[ind%2].sync_err;
+	/* and save input level as current TPI */
+	shm_addr->ifp_tpi[ind] =
+	  (255-(shm_addr->das[ind/2].ifp[ind%2].bs.level.readout&0x00FF))*256;
+  } else {
+	/* Analog Sampler not in use - ie. no level detection possible */
+	shm_addr->ifp_tpi[ind] = 0;
   }
 
   /* check module temperatures */

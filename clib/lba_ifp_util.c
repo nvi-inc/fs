@@ -1521,14 +1521,17 @@ int n_ifp;
 	else if (lcl->track[0] == 0 || lcl->track[1] == 0)
 		printf("**NB: Connect S2 recorder to DAS %1d !!\n",n_das+1);
 	if (lcl->track[0] > 1 || lcl->track[1] > 1)
-		printf("**NB: Ensure kludge cable is _NOT_ inserted !!\n");
+		printf("**NB: Ensure buggary cable is _NOT_ inserted !!\n");
    } else {
 	if ((lcl->track[0] != -1 && lcl->track[0] < 4 && lcl->track[1] != -1) ||
 	    (lcl->track[1] != -1 && lcl->track[1] < 4 && lcl->track[0] != -1))
 		printf("\7**WARNING: requested trackform not yet possible !\n");
 	else if ((lcl->track[0] != -1 && lcl->track[0] < 4) ||
 			 (lcl->track[1] != -1 && lcl->track[1] < 4))
-		printf("**NB: Ensure kludge cable is _INSERTED_ !!\n");
+		printf("**NB: Ensure buggary cable is _INSERTED_ !!\n");
+	else if ((lcl->track[0] != -1 && lcl->track[0] > 3) ||
+			 (lcl->track[1] != -1 && lcl->track[1] > 3))
+		printf("**NB: Ensure buggary cable is _NOT_ inserted !!\n");
    }
 
    /* Implement CORnn SNAP command */
