@@ -63,7 +63,10 @@ sub vu {
 	$min =-0.001;
     } elsif($min == $max) {
 	$max=$max*1.001;
-	$min=$min*0.009;
+	$min=$min*0.999;
+        if($max < $min) {
+          ($max,$min)=($min,$max);
+        }
     }
     for($i=0;$i<=$#$y;$i++) {
 #	print "$$y[$i] ";
@@ -136,7 +139,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.0]\n";
+    print "[plotlog 1.1]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit -1;
@@ -147,10 +150,11 @@ if (defined($opt_h)) {
     print "Synopsis: extracts and plots data from log files\n\n";
 
     print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
-    print "fmout-gps/), and single tone per channel Mark IV decoder pcal data in log files\n";
-    print "and generates time plots of the data, The time axis of all the plots is the\n";
-    print "same. The data is plotted so that it fits entirely inside the boxes. Points\n";
-    print "that appear along the top line of a plot did not decode (\$\$\$ for example).\n\n";
+    print "fmout-gps/), setcl#time/, and single tone per channel Mark IV decoder pcal\n";
+    print "data in log files and generates time plots of the data, The time axis of all\n";
+    print "the plots is the same. The data is plotted so that it fits entirely inside the\n";
+    print "boxes. Points that appear along the top line of a plot did not decode (\$\$\$\n";
+    print "for example).\n\n";
 
     print "The '1anw' switches can be used to select different IF arrangements for\n";
     print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
@@ -203,22 +207,24 @@ foreach $file (@ARGV) {
 	print STDERR "can't open $file: $!\n";
 	next;
     };
+    $some=1;
 #   print "file $file \n";
     $x=0;
     $y=0;
     while (<FILE>) {
+	chomp;
 	if(/;location,([^,]*)/i) {
 	    $location=$1;
 	    (undef)=&time($_);
 	}
 
-	if(/wx\/([^,]*),([^,]*),([^,]*)/i) {
+	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
 	    $temp[$wxcount]=$1;
 	    $pres[$wxcount]=$2;
 	    $humid[$wxcount]=$3;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
-	} elsif(/cable\/([^,]*)/i) {
+	} elsif(/cable\/[ ]*([^, \cM]*)/i) {
 	    $cable[$cablen]=$1;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
@@ -244,7 +250,7 @@ foreach $file (@ARGV) {
 	    } else {
 		die "unknown pcal port $port\n";
 	    }
-	    (undef,undef,@fields)=split(' ');
+	    (undef,undef,@fields)=split('[ \cM]');
 	    next if($#fields!=3);
 	    $freq=shift(@fields);
 	    $rate=shift(@fields);
@@ -260,7 +266,7 @@ foreach $file (@ARGV) {
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcaln[$band][$chan]++;
 	} elsif (/\/tsys\//i) {
-	    (undef,undef,@fields)=split('/|,');
+	    (undef,undef,@fields)=split('[/,\cM]');
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
 #		print "$detect $tsys\n";
@@ -270,29 +276,36 @@ foreach $file (@ARGV) {
 		$tsysn{$detect}++;	 
 	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
-            (undef,$cmd,@fields)=split('/|,');
+            (undef,$cmd,@fields)=split('[/,\cM]');
             ($value,undef)=split(' ',$fields[$#fields]);
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
 #            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
             $rxcount{$fields[0]}++;
 	    $rxcmd=$cmd;
+	} elsif(/#setcl#time\//i) {
+		(undef,@fields)=split('[/,\cM]');
+		$setcl[$setcln]=$fields[9];
+		$setclt[$setcln]=&time($_);
+		$setcln++;
 	} elsif(/\/((gps-fmout)|(fmout-gps))\//i) {
-            (undef,$cmd,@fields)=split('/|,');
+            (undef,$cmd,@fields)=split('[/,\cM]');
             if($fields[0] =~ /($float_pattern)/) {
-               if($cmd eq "gps-fmout") {
-		   $gpsv[$gpsn]=$1;
-               } else {
-		   $gpsv[$gpsn]=-$1;
-               }
-	   } else {
-               $gpsv[$gpsn]=$fields[0];
-	   }
+		if($cmd eq "gps-fmout") {
+		    $gpsv[$gpsn]=$1;
+		} else {
+		    $gpsv[$gpsn]=-$1;
+		}
+	    } else {
+		$gpsv[$gpsn]=$fields[0];
+	    }
             $gpst[$gpsn]=&time($_);
 	    $gpsn++;
 	}
     }
 }
+exit if(!$some);
+
 pgbegin(0,$dev,1,8);
 pgsch(3);
 pgask(-1);
@@ -331,6 +344,9 @@ if(defined(@gpst)) {
          $gpsv[$i]*=1e6;
      }
      &vu(\@gpst, \@gpsv,"gps-fmout (us)");
+}
+if(defined(@setcl)) {
+     &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
 }
 for($i=1;$i<17;$i++) {
     if(defined($pcaln[1][$i])) {
