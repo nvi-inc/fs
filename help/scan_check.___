@@ -1,0 +1,30 @@
+             scan_check - check Mark 5 recorded data
+
+            Syntax:     scan_check
+
+            Response:   scan_check/scan,label,mode,submode,time,length,rate,
+                                   missing
+
+
+Settable parameters: None
+
+Monitor-only parameters:
+            scan        scan number
+            label       scan label
+            mode        Data mode: ?, st, mark4, vlba, tvg, SS
+            submode     Data submode: 8, 16, 32, 64, mark4, vlba
+            time        Data time tag read from first encountered header
+            length      Scan length (seconds)
+            rate        Track data rate, excludes parity bits; will always
+                         be 0.125, 0.25, 0.5, 1, 2, 4, 8 or 16 (Mbps)
+            missing     Number of missing bytes
+
+Comments: 
+If format is ?, the remaining fields are not valid.
+
+This uses the low-level Mark 5 scan_check? command. The displayed
+parameters are the output of this command. More information on the
+response format can be found in the Mark5A program documentation at
+http://www.haystack.mit.edu/tech/vlbi/mark5/docs/command5a.pdf.
+
+This command does not work properly for Mark5B recorders.
