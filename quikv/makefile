@@ -1,6 +1,7 @@
 #
 CFLAGS= 
-LIBES = ../clib/clib.a ../rtelb/rtelb.a ../s2das/s2das.a ../poclb/poclb.a
+LIBES = ../clib/clib.a ../rtelb/rtelb.a ../s2das/s2das.a ../poclb/poclb.a\
+../newlb/newlb.a
 #
 OBJECTS =\
 quikv.o dist.o dist_dis.o logmsg.o vrepro.o vrepro_dis.o vform.o vform_dis.o\
@@ -32,7 +33,7 @@ bank_check.o bank_check_dis.o logm5msg.o disk2file.o disk2file_dis.o\
 in2net.o in2net_dis.o user_device.o user_device_dis.o\
 s2agc.o s2bbc.o s2diag.o s2encode.o s2fs.o s2ifx.o s2version.o s2mode.o\
 s2ping.o s2pwrmon.o s2status.o s2tonedet.o  s2chkr.o s2delay.o\
-scan_check.o scan_check_dis.o
+scan_check.o scan_check_dis.o last_check.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

@@ -36,6 +36,7 @@ C            aren't any chan_defs.
 C 020112 nrv Add roll parameters to VUNPROLL call. Add call to CKROLL.
 C 020327 nrv Add data modulation paramter to VUNPTRK.
 C 021111 jfq Extend S2 mode to support LBA rack
+! 2006Oct06. Made arguments to vunpif all ASCII.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -54,13 +55,20 @@ C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
 C          vunroll,ckroll
 ! function
       integer iwhere_in_string_list
+      integer*4 itras_ind
+      integer itras
 C
 C  LOCAL:
+      integer*4 itrk_map(max_headstack,max_trk)  !Has map of track mappings.
+      integer*4 ind
+      logical kupdate
+
       integer ix,ib,ic,i,ia,icode,istn
       integer il,im,iret,ierr1,iul,ism,ip,ipc,itone
       integer ipct(max_chan,max_tone),ntones(max_chan)
       integer ifanfac,itrk(max_track),ivc(max_bbc)
-      integer irtrk(2+max_track,max_roll_def),iinc,ireinit
+      integer irtrk(18,max_roll_def)
+      integer iinc,ireinit
       double precision posh(max_index,max_headstack)
       integer ih,ihdn(max_track),indexp(max_index),indexl(max_pass)
       character*1 csubpassl(max_pass),csubpass(max_subpass)
@@ -68,9 +76,9 @@ C  LOCAL:
       double precision bitden_das
       integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
-      integer*2 lsb(max_chan),lsg(max_chan),lin(max_ifd)
-      integer*2 ls(max_ifd)
-      integer*2 lpre(4),lp(max_ifd)
+      integer*2 lsb(max_chan),lsg(max_chan)
+      character*2 cin2(max_ifd),cs2(max_ifd),cp2(max_ifd)      !LO, sideband
+      integer*2 lpre(4)
       character*8 cpre
       equivalence(lpre,cpre)
       character*16 cs2m
@@ -107,11 +115,9 @@ C
           ncodes=ncodes+1
           modedefnames(ncodes)=cout
           if (il.gt.16) then
-            write(lu,'(a)')
-     >      "VMOINP02 - Mode name   "//cout(1:il)//
+            write(lu,'(a)')  "VMOINP02 - Mode name   "//cout(1:il)//
      >      " too long for matching in sked catalogs."
-            write(lu,'(a)')
-     >      "Only keeping 16 chars: "//cout(1:16)
+            write(lu,'(a)') "Only keeping 16 chars: "//cout(1:16)
             il=16
           endif
           cmode_cat(ncodes)=cout(1:il)
@@ -133,8 +139,11 @@ C    defined for all stations.
 C    Assign a code to the mode and the same to the name
         writE(ccode(icode)(1:2),'(i2.2)') icode
         cnafrq(icode)=ccode(icode)
-
         do istn=1,nstatn ! for one station at a time
+
+! Initialize this array.
+          call init_itrk_map(itrk_map)
+          kupdate=.false.
 
           il=fvex_len(modedefnames(icode))
           im=fvex_len(stndefnames(istn))
@@ -199,13 +208,12 @@ C         Get $BBC statements.
 
 C         Get $IF statements.
           call vunpif(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,
-     .    cifdref,flo,ls,LIN,lp,fpcal,fpcal_base,nifdefs)
+     .       ivexnum,iret,ierr,lu,
+     .       cifdref,flo,cs2,cIN2,cp2,fpcal,fpcal_base,nifdefs)
           if (ierr.ne.0) then 
             write(lu,'("VMOINP05 - Error getting $IF information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .      iret,ierr
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
             call errormsg(iret,ierr,'IF',lu)
             ierr1=3
           endif
@@ -334,12 +342,12 @@ C           IFD refs
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             else
-              lifinp(i,istn,icode) = lin(ic) ! IF input channel
+              cifinp(i,istn,icode) = cin2(ic) ! IF input channel
+              cosb(i,istn,icode)   = cs2(ic) ! LO sideband
+              cpol(i,istn,icode)   = cp2(ic) ! polarization
               freqlo(i,istn,icode) = flo(ic) ! LO frequency
               freqpcal(i,istn,icode) = fpcal(ic) ! pcal frequency
               freqpcal_base(i,istn,icode) = fpcal_base(ic) ! pcal_base frequency
-              losb(i,istn,icode) = ls(ic) ! LO sideband
-              lpol(i,istn,icode) = lp(ic) ! polarization
             endif
 C           Phase cal refs
 !            ipc=1
@@ -372,7 +380,6 @@ C           Track assignments
                   ism=1 ! sign
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
-!                  if (ichcm_ch(lnetsb(i,istn,icode),1,'L').eq.0) iul=2 ! lsb
                   if(cnetsb(i,istn,icode)(1:1) .eq. "L") iul=2
                   if (klrack) then	! allow for U being flipped L etc.
                     ia=1
@@ -385,9 +392,11 @@ C           Track assignments
                        if (Frf(i).gt.Frf(ia)) iul=1 ! IFP USB channel
                     endif
                   endif
-                  call set_itras(iul,ism,ihdn(ix),i,ip,istn,icode,
-     >               itrk(ix)-3)
-C                                               ! store as Mk3 numbers
+!                  call set_itras(iul,ism,ihdn(ix),i,ip,istn,icode,
+!     >               itrk(ix)-3)
+                 ind=itras_ind(iul,ism,i,ip)
+                 itrk_map(ihdn(ix),itrk(ix))=ind
+                 kupdate=.true.
                 endif
               endif ! matched link
             enddo ! check each fandef
@@ -401,8 +410,6 @@ C         mode name available, put that in LMODE. SPEED checks LMFMT
 C         to determine DR/NDR. drudg modifies LMFMT from user input
 C         for non-VEX.
           if (.not.ks2rec) then
-!            idum = ichmv(LMODE(1,istn,ICODE),1,lm,1,8) ! recording format
-!            idum = ichmv(LMFMT(1,istn,ICODE),1,lm,1,8) ! recording format
             cmode(istn,icode)=cm
             cmfmt(istn,icode)=cm
           endif
@@ -482,6 +489,9 @@ C       Store the procedure prefix by station and code.
            cpre="01_"
         endif ! missing
         cprefix(istn,icode)=cpre
+        if(kupdate) then
+           call add_trk_map(istn,icode,itrk_map)
+        endif
         enddo ! for one station at a time
       enddo ! get all mode information
 

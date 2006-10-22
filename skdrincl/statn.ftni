@@ -9,11 +9,11 @@ C 991101 nrv Add lfirstrec for first recorder to use.
 C 991108 nrv Remove lstform because this is incorporated in K4 rack names.
 C 000605 nrv Add tape_allocation
 C 021010 nrv Add tape_motion_save
+! 2006Aug03 JMGipson. Got rid of glong(max_stn), phi(max_stn), r1(max_stn), r2(max_stn) which were not used anywhere.
 
-      double precision stnxyz,baselen,axisof,
-     .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ
+      double precision stnxyz,stnpos,baselen,axisof,  BX,BY,BZ
 C
-      real stnpos,stnlim,stnrat,stnelv,azhorz,elhorz,co1mask,
+      real stnlim,stnrat,stnelv,azhorz,elhorz,co1mask,
      .co2mask,sefdst,diaman,sefdpar,sefdstel
 C
       integer nstatn,iaxis,maxpas,istcon,nhorz,
@@ -24,6 +24,7 @@ C
      .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed,
      .two_letter_code,lstrec2,lfirstrec
 
+
       logical klineseg
 
       character*128 stndefnames,tape_motion_type,
@@ -31,8 +32,7 @@ C
 C
       character*8 crack_type,crec_type
       COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
-     .       axisof(max_stn),GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
-     .       R1(MAX_STN),R2(MAX_STN),
+     .       axisof(max_stn),
      .       BX(MAX_BASELINE),
      .       BY(MAX_BASELINE),BZ(MAX_BASELINE),
      .       STNPOS(2,MAX_STN),
@@ -80,8 +80,10 @@ C
       equivalence (cs2speed,ls2speed),(cterid,lterid)
 
       character*2 cpocod(max_stn), cstcod(max_stn),  cposid(max_stn)
+      character*2 chccod(max_Stn)
 
       equivalence (cpocod,lpocod), (cstcod,lstcod), (cposid,lposid)
+      equivalence (chccod,lhccod)
 
       COMMON /STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
      > crack_type(max_rack_type),crec_type(max_rec_type),

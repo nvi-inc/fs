@@ -31,11 +31,13 @@ C            that "VLBA" does not match "VLBA4" if only the first
 C            four letters are checked.
 C 17Apr2003  JMG.  Added Mark5 option.
 ! 2005Feb15  JMG. Got rid of most holleriths.
+! 2006Jul20. JMG. Disabled switching to Mark3 rack if not Mark3 mode.
 
 C Input:
       character*(*) cr1
 ! functions
       integer trimlen
+      integer iwhere_in_string_list
 C LOCAL:
       integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ix
       integer irack_in,irec1_in,irec2_in
@@ -44,6 +46,7 @@ C LOCAL:
       character*2 crec1
       character*1 cx(20),cit_rack(20),cit_rec1(20),cit_rec2(20),
      .            cy(20)
+      character*1 lchar
       data cx/'1','2',18*' '/
 
 C 0. Determine current types.
@@ -67,25 +70,30 @@ C       max_rec_local = 7
         enddo
         if(cfirstrec(istn) .eq. '1') cy(1)='*'
         if(cfirstrec(istn) .eq. '2') cy(2)='*'
-        irack_in=1
-        do while (irack_in.le.max_rack_local.and.
-     >        cstrack(istn) .ne. crack_type(irack_in))
-          irack_in=irack_in+1
-        enddo
-        if (irack_in.le.max_rack_local) cit_rack(irack_in)='*'
-        irec1_in=1
-        do while (irec1_in.le.max_rec_local.and.
-     >       cstrec(istn).ne. crec_type(irec1_in))
-          irec1_in=irec1_in+1
-        enddo
-        if (irec1_in.le.max_rec_local) cit_rec1(irec1_in)='*'
-        irec2_in=1
-        do while (irec2_in.le.max_rec_local.and.
-     >       cstrec2(istn) .ne. crec_type(irec2_in))
-          irec2_in=irec2_in+1
-        enddo
-        if (irec2_in.le.max_rec_local) cit_rec2(irec2_in)='*'
 
+        irack_in=iwhere_in_string_list(crack_type,max_rack_local,
+     >    cstrack(istn))
+        if(irack_in .eq. 0) then
+           write(*,*) "Equip_type: Should never get here 1"
+        else
+           cit_rack(irack_in)="*"
+        endif
+
+        irec1_in=iwhere_in_string_list(crec_type,max_rec_local,
+     >    cstrec(istn))
+        if(irec1_in .eq. 0) then
+          write(*,*) "Equip_type2: Should never get here 2"
+        else
+          cit_rec1(irec1_in)="*"
+        endif
+
+        irec2_in=iwhere_in_string_list(crec_type,max_rec_local,
+     >    cstrec2(istn))
+        if(irec2_in .eq. 0) then
+          write(*,*) "Equip_type2: Should never get here 3"
+        else
+          cit_rec2(irec2_in)="*"
+        endif
 C 1. Batch input
 
       if (kbatch) then
@@ -212,7 +220,27 @@ C 3. Modify rack type
 
 C Now modify the common variables and send warnings.
         if (irack.ne.0) then ! modify
-          if ((irack.ge.1.and.irack.le.max_rack_local)) then 
+          if (crack_type(irack) .eq. "unknown") then
+            call write_error_and_pause(luscn,
+     >       "EQUIP_TYPE: Warning! Can't change to unknown rack type!")
+          else if (irack.ge.1.and.irack.le.max_rack_local) then
+            lchar=cmode(istn,1)
+            call capitalize(lchar)
+            if(irack .eq. 2) then
+              if(cstrack(istn) .ne. "Mark4" .and.
+     >           cstrack(istn) .ne. "Mark3A") then
+                nch=trimlen(cstrack(istn))
+                call write_error_and_pause(luscn,
+     >             "WARNING: Can not change "//cstrack(istn)(1:nch)//
+     >             " rack to Mark3A!")
+                return
+              else if(.not. (lchar.ge."A".and.lchar.le."E") ) then
+                call write_error_and_pause(luscn,
+     >          "Can't change to Mark3A rack with non-Mark3A Mode: "//
+     >           cmode(istn,1))
+               return
+              endif
+            endif
             if (cstrack(istn) .ne. crack_type(irack)) then
               write(luscn,901) cantna(istn),
      >          cstrack(istn),crack_type(irack)
@@ -223,9 +251,9 @@ C Now modify the common variables and send warnings.
 C Retain switching from V mode to M if it's a Mk4 or VLBA4 
 C formatter because they can't record V modes.
             if( cmode(istn,1) .eq. "VLBA" .and.
-     >          (cstrack(istn) .eq. "Mark4" .or.
-     >           cstrack(istn) .eq. "Mark3" .or.
-     >           cstrack(istn) .eq. "VLBA4")) then
+     >          (cstrack(istn)(1:5) .eq. "Mark4" .or.
+     >           cstrack(istn)(1:5) .eq. "Mark3" .or.
+     >           cstrack(istn)(1:5) .eq. "VLBA4")) then
               do ic=1,ncodes
                 write(luscn,903) cnafrq(ic)
 903             format('EQUIP01 - WARNING: changed recording ',
@@ -252,9 +280,14 @@ C 4. Modify rec 1
 
       if((irec1.ge.1.and.irec1.le.max_rec_local) .and.
      >     (cstrec(istn) .ne. crec_type(irec1))) then
-         write(luscn,902) cantna(istn),cstrec(istn),crec_type(irec1)
-902      format('EQUIP03-CHANGED ',a,' recorder 1 from ',a,' to ',a)
-         cstrec(istn)=crec_type(irec1)
+         if(crec_type(irec1) .eq. "unknown") then
+            call write_error_and_pause(luscn,
+     >    "EQUIP_TYPE: Warning! Can't change to recorder type unknown!")
+         else
+            write(luscn,902) cantna(istn),cstrec(istn),crec_type(irec1)
+902         format('EQUIP03-CHANGED ',a,' recorder 1 from ',a,' to ',a)
+            cstrec(istn)=crec_type(irec1)
+         endif
       endif
 
 C 5. Modify rec 2

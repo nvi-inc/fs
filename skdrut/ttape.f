@@ -320,9 +320,9 @@ C   3. Now set parameters in common.
                 endif
               else if(cstrec(i) .eq. "Mark5A") then
                 do icode=1,ncodes
-                  bitdens(i,icode)=1.d7   !Very high density means we don't need to worry about it.
+                  bitdens(i,icode)=1.d9   !Very high density means we don't need to worry about it.
                 end do
-                maxtap(i)=1.d6         !set to 10 thousand feet.
+                maxtap(i)=10000         !set to 10 thousand feet.
 
 
               endif

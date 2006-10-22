@@ -2,11 +2,11 @@
 
 struct data_check_mon {
   struct {
-    char mode[6];
+    char mode[33];
     struct m5state state;
   } mode;
   struct {
-    char submode[7]; /* if mode is not tvg or SS */
+    char submode[33]; /* if mode is not tvg or SS */
     long first;      /* if mode is     tvg or SS */
     struct m5state state;
   } submode ;

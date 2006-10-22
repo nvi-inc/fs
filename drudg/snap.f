@@ -216,7 +216,6 @@ C        beginning the current observation
       integer itearl_save
       integer itgap_save
 
-
 ! counter
       integer i
 C
@@ -419,6 +418,16 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 !                   ready_k5 after first source=, and checkk5 where checkmk5a is issued.
 ! 2005Apr22  JMG got rid of apstar code which converted from radians to HA, Dec, called apstar, and then
 !                   converted back again. Used apstar_rad routine.
+! 2005Oct26  JMGipson. Bug in writing out scan name.
+!            Previously used scan_name(obs_now), but should have been scan_name(iskrec(obs_now))
+! 2006Jun13  JMG.  Modified scan name to include station code.
+!                  Changed default disk2file name to be: session_station_scanname.m5a
+! 2006Jul17  JMG.  Fixed problem with icod_next was not initialized. Led to problems in linux version.
+! 2006Jul18  JMG. To see if Mark5, was doing check on cstrec(irec). Should have been on cstrec(istn). Fixed.
+!                 In writing scan_name, was using cpocod(istnsk), should have been using cpocod(istn)
+! 2006Jul24  JMg. Fixed problem with adaptive.  When doing Mark5 and continous schedules, checks to see
+!                 if correlator is VLBA before changing.
+! 2006Jul28  JMG. Changed to make station code 3rd parameter in scan_name
 
 
       icod_old=-1
@@ -477,8 +486,8 @@ C Initialize recorder information.
 
 C    1. Prompt for additional parameters, epoch of source positions
 C    and whether maximal checks are wanted.
-      if(cstrec(irec)(1:4).eq. "VLBA" .or. cstrec(irec) .eq. "Mark3"
-     >   .or. cstrec(irec) .eq. "Mark4") then
+      if(cstrec(istn)(1:4).eq."VLBA" .or. cstrec(istn).eq."Mark3".or.
+     >   cstrec(istn) .eq. "Mark4") then
         call snap_info(cr2,maxchk,dopre)
       else
         maxchk = 'N'
@@ -531,18 +540,21 @@ C
         itime_scan_beg_next(i)=0
       end do
 
+      icod_next=1   !initialize
+
       kadap= (tape_motion_type(istn).eq.'ADAPTIVE')
       kcont= (tape_motion_type(istn).eq.'CONTINUOUS')
 
       if(km5) then
-        itgap_save=itgap(istn)
-        itearl_save=itearl(istn)
-        itearl(istn)=25
-        itgap(istn)=25
-        kcont=.false.
-        if(kcont) then
-          kcont=.false.
-          kadap=.true.
+        if(ccorname .eq. "VLBA") then
+          itgap_save=itgap(istn)
+          itearl_save=itearl(istn)
+          itearl(istn)=25
+          itgap(istn)=25
+          if(kcont) then
+            kcont=.false.
+            kadap=.true.
+          endif
         endif
       endif
 
@@ -703,7 +715,7 @@ C         Force new tape on the first scan on tape.
      >          cspeed, ierr)
               if(ierr .lt. 0) then
                 write(luscn,'("Illegal speed! ",f6.2)') speed_ft*12.d0
-                write(luscn,'("After: ",40a2)') ibuf(1:40)
+                write(luscn,'("After: ",a)') cbuf(1:80)
                 stop
                endif
             endif
@@ -826,8 +838,9 @@ C     3. Output the SNAP commands. Refer to drudg documentation.
 C scan_name command. 
         nch=trimlen(scan_name(iskrec(iobs_now)))
 
-        write(ldum,'("scan_name=",a,",",a,",",i4)')
-     >    scan_name(iobs_now)(1:nch),lsession,idur(istnsk)
+        write(ldum,'("scan_name=",3(a,","),i4)')
+     >    scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
+     >    idur(istnsk)
         call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
 
 C SOURCE command
@@ -913,12 +926,9 @@ C               SOURCE=name,ra,dec,epoch
            endif
         endif
 
-        if(.false.) then
-!        if(kdisk2file_prev) then
+        if(kdisk2file_prev) then
            call snap_wait_time(lu_outfile,itime_disk_abort)
-           call snap_disk2file_abort(lufile,ldisk2file_node,
-     >      ldisk2file_userid,ldisk2file_pass)
-
+           call snap_disk2file_abort(lufile)
            kdisk2file_prev=.false.
         endif
 
@@ -1109,8 +1119,7 @@ C do it every scan for S2.
             endif
             if(kdisk2file_prev) then
               call snap_wait_time(lu_outfile,itime_disk_abort)
-              call snap_disk2file_abort(lufile,ldisk2file_node,
-     >          ldisk2file_userid,ldisk2file_pass)
+              call snap_disk2file_abort(lufile)
               kdisk2file_prev=.false.
             endif
             call snap_setup(ipas,istnsk,icod,iobs,kerr)
@@ -1290,7 +1299,8 @@ C POSTOB
               nch3=trimlen(cstat_code)
               call lowercase(cstat_code)
               ldest=lsession(1:trimlen(lsession))//"_"//
-     >            scan_name(iobs_now)(1:nch)//"."//cstat_code(1:nch3)
+     >           cstat_code(1:nch3)//"_"//
+     >           scan_name(iobs_now)(1:nch)//".m5a"
               nch2=trimlen(ldest)
             endif
             nch3=trimlen(lxfer_options(ixfer_ptr))
@@ -1378,6 +1388,12 @@ C     Copy ibuf_next into IBUF and unpack it.
         else
            write(luFile,'("checkmk5a")')
         endif
+      endif
+
+      if(kdisk2file_prev) then
+         call snap_wait_time(lu_outfile,itime_disk_abort)
+          call snap_disk2file_abort(lufile)
+          kdisk2file_prev=.false.
       endif
 
 C End of schedule

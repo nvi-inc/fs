@@ -22,6 +22,7 @@ C  ICOD - which code in the COMMON list
 C
 ! functions
       integer iwhere_in_string_list
+      integer trimlen
 
 C LOCAL:
       integer i
@@ -37,8 +38,11 @@ C 970114 nrv Change 4 to max_sorlen/2
 C 200310Jun JMG Got rid of holleriths.
       isor=iwhere_in_string_list(csorna,nsourc,csor)
       IF (ISOR.EQ.0) THEN
-        WRITE(LUSCN,9210) cSOR
-9210    FORMAT('CKOBS01 -  SOURCE ',a,' NOT IN YOUR LIST.  QUITTING.')
+        i=trimlen(csor)
+        write(*,*) csorna(1:nsourc)
+        WRITE(cbuf,9210) cSOR(1:i)
+9210    FORMAT('CKOBS01 - SOURCE ',a,' NOT IN YOUR LIST.  QUITTING!')
+        call write_error_and_pause(luscn,cbuf)
         RETURN
       ENDIF
 
@@ -47,18 +51,20 @@ C
       icod=iwhere_in_string_list(ccode,ncodes,ccod)
 
       IF (ICOD.EQ.0) THEN
-        WRITE(LUSCN,9230) cCOD
+        WRITE(cbuf,9230) cCOD
 9230    FORMAT(' CKOBS02 - FREQUENCY CODE ',A,
      .  ' NOT FOUND IN YOUR SCHEDULE. QUITTING')
+        call write_error_and_pause(luscn,cbuf)
         RETURN
       ENDIF
 
 
       if (istnsk.ne.0.and.nchan(istn,icod).eq.0) then
         icod=0
-        WRITE(LUSCN,9240) cCOD
+        WRITE(cbuf,9240) cCOD
 9240    FORMAT(' CKOBS03 - FREQUENCY CODE ',A,
      .  ' not defined for your station. QUITTING')
+        call write_error_and_pause(luscn,cbuf)
         RETURN
       ENDIF
 C

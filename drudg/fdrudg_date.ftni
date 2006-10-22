@@ -1,0 +1,3 @@
+!Include file to set the version. Just change this and leave fdrudg.f alone
+! below is set at compiletime
+      cversion = '2006Oct20'

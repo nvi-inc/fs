@@ -1,5 +1,5 @@
       SUBROUTINE vunpif(modef,stdef,ivexnum,iret,ierr,lu,
-     .cifref,flo,ls,lin,lp,fpcal,fpcal_base,nifdefs)
+     .cifref,flo,cs,cin,cp,fpcal,fpcal_base,nifdefs)
 C
 C     VUNPIF gets the IFD def statements 
 C     for station STDEF and mode MODEF and converts it.
@@ -20,6 +20,8 @@ C 971208 nrv Add phase cal spacing and base frequency.
 C 990910 nrv Change default LO value to -1.0 meaning none.
 C 991110 nrv Allow IF type 3N to be valid.
 ! 2004Oct19 JMGipson.  Removed warning message if LO was negative.
+! 2006Oct06 JMGipson.  changed ls,lin,lp --> (ASCII) cs,cin,cp
+!                      Made IF="1" a valid choice. An S2 VEX schedule had this.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -36,9 +38,10 @@ C                    <0 indicates invalid value for a field
       double precision flo(max_ifd) ! LO frequencies
       double precision fpcal(max_ifd) ! pcal frequencies
       double precision fpcal_base(max_ifd) ! pcal_base frequencies
-      integer*2 ls(max_ifd) ! sideband of the LO
-      integer*2 lin(max_ifd) ! IF input channel
-      integer*2 lp(max_ifd) ! polarization
+      character*2 cs(max_ifd) ! sideband of the LO
+      character*2 cin(max_ifd) ! IF input channel
+      character*2 cp(max_ifd) ! polarization
+
       integer nifdefs ! number of IFDs found
 C
 C  LOCAL:
@@ -46,7 +49,6 @@ C  LOCAL:
       double precision d
       integer idum,id,nch
       character upper
-      integer ichmv_ch ! function
       integer fvex_len,fvex_field,ptr_ch,
      .fvex_double,fvex_units,fget_all_lowl
 C
@@ -57,9 +59,9 @@ C  Initialize
         flo(id)=-1.d0 ! defaults to no LO
         fpcal(id)=-1.d0 ! defaults to off
         fpcal_base(id)=0.d0
-        idum = ichmv_ch(ls(id),1,'  ')
-        idum = ichmv_ch(lin(id),1,'  ')
-        idum = ichmv_ch(lp(id),1,'  ')
+        cs(id)=" "
+        cp(id)=" "
+        cin(id)=" "
       enddo
 C
 C  1. IFD def statements
@@ -101,8 +103,9 @@ C  1.2 IF input
      .        cout(1:nch).eq.'3O'.or.cout(1:nch).eq.'3I'.or.
      .        cout(1:nch).eq.'3N'.or.
      .        cout(1:nch).eq.'A'.or.cout(1:nch).eq.'B'.or.
-     .        cout(1:nch).eq.'C'.or.cout(1:nch).eq.'D') then
-            idum = ichmv_ch(lin(id),1,cout(1:nch))
+     .        cout(1:nch).eq.'C'.or.cout(1:nch).eq.'D'.or.
+     .        cout(1:nch).eq.'1') then
+            cin(id)=cout(1:nch)
           else
             ierr=-2
             write(lu,'("VUNPIFD05 - Invalid IF input ",a)') cout(1:nch)
@@ -131,7 +134,7 @@ C  1.3 Polarization
           ierr=-3
           write(lu,'("VUNPIFD06 - Polarization must be R or L")')
         else
-          idum = ichmv_ch(lp(id),1,cout(1:1))
+          cp(id)=cout(1:1)
         endif
 
 C  1.4 LO frequency
@@ -160,7 +163,7 @@ C  1.5 Sideband
           ierr=-5
           write(lu,'("VUNPIFD03 - Sideband must be U or L")')
         else
-          idum = ichmv_ch(ls(id),1,cout(1:1))
+          cs(id)=cout(1:1)
         endif
 
 C  1.6 Phase cal spacing

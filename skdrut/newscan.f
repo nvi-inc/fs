@@ -20,6 +20,7 @@ C 970721 nrv Add idstart fields following durations
 C 970721 nrv Remove footage, duration, and good data to subroutines
 C 000106 nrv Check the year before converting to 2-digit internal year.
 C 001030 nrv Need one more space before the flag field.
+! 2006Jul17 JMG.  Got rid of some holerith.  Cleaned up.
 
 C Input:
       integer istn ! first station in this scan
@@ -35,23 +36,23 @@ C Input:
 
 C Output:
       integer ierr ! if anything went wrong
+! function
+      integer trimlen
 
 C Local
       integer*2 ibuf(ibuf_len)
-      integer i,ical,nch,idl,iyr
-      integer iflch,ichmv,ichmv_ch,ib2as
-      integer numc2,numc3
+      character*(2*ibuf_len) cbuf
+      equivalence (ibuf,cbuf)
+
+      integer ical,nch,idl,iyr
+      integer ichmv,ichmv_ch,ib2as
       integer feetscan,gdscan,durscan
-
 C Initialized for leading zeros, left justified
-      numc2 = 2+o'40000'+o'400'*2
-      numc3 = 3+o'40000'+o'400'*3
-
 C     First clear out the entire buffer
-      CALL IFILL(IBUF,1,IBUF_LEN*2,oblank)
-C     Source name is first
-      i=iflch(lsorna(1,isor),max_sorlen)
-      NCH = ICHMV(IBUF,1,LSORNA(1,ISOR),1,i)
+
+      cbuf=csorna(isor)
+      nch=trimlen(cbuf)+1
+
 C     Cal time. Define as 10 for now
       ical = 10
       nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,3)
@@ -62,11 +63,12 @@ C     Preob
 C     Start time
       if (istart(1).ge.2000) iyr = istart(1)-2000
       if (istart(1).lt.2000) iyr = istart(1)-1900
-      NCH = NCH + IB2AS(iyr,IBUF,NCH,numc2)
-      NCH = NCH + IB2AS(istart(2),IBUF,NCH,numc3)
-      NCH = NCH + IB2AS(istart(3),IBUF,NCH,numc2)
-      NCH = NCH + IB2AS(istart(4),IBUF,NCH,numc2)
-      NCH = NCH + IB2AS(istart(5),IBUF,NCH,numc2)
+
+      write(cbuf(nch:nch+11),'(i2.2,i3.3,3i2.2)')
+     >  iyr,istart(2),istart(3),istart(4),istart(5)
+
+      nch=nch+12
+
 C     Duration. Use first station's.
       NCH = NCH + 1+IB2AS(idend,IBUF,NCH+1,5)
 C     Midob procedure
@@ -126,9 +128,7 @@ C Store the record in common
       NOBS = NOBS + 1
 C     write(6,'(i5)') nobs
       ISKREC(NOBS) = nobs
-      DO I=1,ibuf_len
-        LSKOBS(I,ISKREC(NOBS)) = IBUF(I)
-      END DO
+      cskobs(iskrec(nobs))=cbuf
 
       return
       end

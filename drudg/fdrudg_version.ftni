@@ -1,0 +1,6 @@
+!Include file to set the version. Just change this and leave fdrudg.f alone
+! below is set at compiletime
+      iVerMajor_FS = VERSION
+      iVerMinor_FS = SUBLEVEL
+      iVerPatch_FS = PATCHLEVEL
+      cversion = '061006'

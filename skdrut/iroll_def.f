@@ -37,7 +37,7 @@
 
 ! passed
       integer istn,icode,ndefs,nsteps
-      integer irtrk(2+max_track,max_roll_def)
+      integer irtrk(18,32)
 
 ! local
       integer iroll

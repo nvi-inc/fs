@@ -71,6 +71,8 @@ C     samprate - sample rate, per frequency code, Mb/s.
      .npctone,ntrkn,nhstack,iroll_inc_period,iroll_reinit_period,
      .nrolldefs,nrollsteps,icantrk,ircan_reinit,ircan_inc,
      .nrcan_defs,nrcan_steps
+      integer ibbc_present        !0=not present.  1=present&used, -1=present & not used.
+
 C     nband  - number of entries in lband
 C     NCODES - number of codes filled in
 C     NFREQ - number of frequencies in each subgroup in each code
@@ -165,6 +167,7 @@ C
      .       nchan(max_stn,max_frq),
      .       invcx(max_chan,max_stn,max_frq),
      .       ibbcx(max_chan,max_stn,max_frq),
+     >       ibbc_present(max_chan,max_stn,max_frq),
      .       ipctone(max_tone,max_chan,max_stn,max_frq),
      .       npctone(max_chan,max_stn,max_frq),
      .       ihdpos(max_headstack,max_pass,max_stn,max_frq),
@@ -228,7 +231,6 @@ C
       character*2 cband(Max_band)
       equivalence (lband,cband)
 
-C
       COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
      .       modedefnames(max_frq),
      .       cpassorderl(max_pass,max_stn,max_frq),

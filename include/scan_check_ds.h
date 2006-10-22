@@ -10,11 +10,11 @@ struct scan_check_mon {
     struct m5state state;
   } label;
   struct {
-    char mode[6];
+    char mode[33];
     struct m5state state;
   } mode;
   struct {
-    char submode[7];
+    char submode[33];
     struct m5state state;
   } submode ;
   struct {

@@ -1,4 +1,4 @@
-      subroutine obs_sort(luscn)
+      subroutine obs_sort(luscn,num_obs)
 C OBS_SORT sorts the index array for observations by time.
 C 000606 nrv New. Algorithm from Numerical Methods.
 C 000616 nrv Add calls to SNAME to generate scan names.
@@ -7,71 +7,64 @@ C 001109 nrv scan_name is character now.
 C 010102 nrv Stop if error parsing an observation.
 C 03July11 JMG Modified to use sktime.
 ! 04Oct15  JMGipson. Completely rewritten.
+! 2005Nov30. Made the num_obs an argument. Previously used nobs.
+! 2006OCt03. Modified to use ctime2dmjd to find djday
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
 C Input
       integer luscn
+      integer num_obs
 ! functions
-      integer julda
+      double precision ctime2dmjd
 C Local
 
-      integer*2 itim1(6)
       character*12 ctim1
-      equivalence (itim1,ctim1)
 
-      integer j,i,irec
-      double precision jday(Max_obs)
-      integer iyear,iday,ihr,imin,is
-      double precision rhr,rmin,rs
+      integer j,i,irec_top,irec_bot
+      double precision djday(Max_obs)
 
       integer iptr,iptr_old
       integer ndup
       character*26 lextra
       data lextra/"abcdefghijklmnopqrstuvwxyz"/
 
-      if (nobs.eq.0) return
+      if (num_obs.eq.0) return
 
 !  1. Sort the obs by time and then by source_name.
 
-      do i=1,nobs
-        call sktime(lskobs(1,iskrec(i)),itim1)
-        read(ctim1,'(i2,i3,3(i2))') iyear,iday,ihr,imin,is
-        if(iyear .lt. 50) then
-           iyear=iyear+2000
-        else
-           iyear=iyear+1900
-        endif
-	rhr=ihr
-	rmin=imin
-	rs=is
-        jday(i)=julda(1,iday,iyear)+(rs+rmin*60.d0+rhr*3600.)/86400.d0
+      do i=1,num_obs
+        iptr=iskrec(i)
+        call sktime(cskobs(iptr),ctim1)
+        djday(iptr)=ctime2dmjd(ctim1)
       end do
 
       write(luscn,'("OBS_SORT00 - Sorting scans by time.")')
-      do j=2,nobs
-        irec=iskrec(j)
-        do i=j-1,1,-1
-          if(jday(irec) .gt. jday(iskrec(i)) .or.
-     >       (jday(irec) .eq. jday(iskrec(i)) .and.
-     >       cskobs(irec)(1:10) .gt. cskobs(iskrec(i)))) goto 10
-          iskrec(i+1)=iskrec(i)
+! Do insertion sort, starting at 2nd element.
+      do j=2,num_obs
+        do i=j,2,-1
+          irec_top=iskrec(i)                !if in order(djday(irec_top))>djday(irec_bot))
+          irec_bot=iskrec(i-1)              ! if not, swap them.
+          if(djday(irec_top) .gt. djday(irec_bot)) goto 10
+          if(djday(irec_top) .eq. djday(irec_bot) .and.
+     >      cskobs(irec_top)(1:10) .gt. cskobs(irec_bot)(1:10)) goto 10
+! Not in order. Swap them.
+          iskrec(i)=irec_bot
+          iskrec(i-1)=irec_top
         end do
-        i=0
-10      iskrec(i+1)=irec
-      enddo
+10      continue
+      end do
+
 
 C  2. Generate scan names
-      call sktime(lskobs(1,iskrec(1)),itim1)
-
       iptr=iskrec(1)
-      call sktime(lskobs(1,iptr),itim1)
+      call sktime(cskobs(iptr),ctim1)
       scan_name(iptr)=ctim1(3:5)//"-"//ctim1(6:9)
       ndup=0
       iptr_old=iptr
 
-      do i=2,nobs
+      do i=2,num_obs
         iptr=iskrec(i)
-        call sktime(lskobs(1,iptr),itim1)
+        call sktime(cskobs(iptr),ctim1)
         scan_name(iptr)=ctim1(3:5)//"-"//ctim1(6:9)
         if(scan_name(iptr)(1:8).eq.scan_name(iptr_old)(1:8))then
           if(ndup .eq. 0) then
@@ -79,7 +72,12 @@ C  2. Generate scan names
             scan_name(iptr_old)(9:9)=lextra(ndup:ndup)
           endif
           ndup=ndup+1
-          scan_name(iptr)(9:9)=lextra(ndup:ndup)
+          if(ndup .le. 26) then
+            scan_name(iptr)(9:9)=lextra(ndup:ndup)
+          else
+            write(luscn,'("OBS_SORT: Ran out of scan letters!")')
+            stop
+          endif
         else
           ndup=0
         endif

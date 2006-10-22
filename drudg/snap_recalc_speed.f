@@ -36,6 +36,7 @@
       else if(.not.kk4) then
         speed_inches = 12.0*speed_ft
         call spdstr(speed_inches,cspeed,ierr)   !return speed as ASCII in ispeed.
+        write(*,*) ierr
       endif
       return
       end

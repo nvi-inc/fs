@@ -1,18 +1,21 @@
-      subroutine snap_disk2file_abort(lufile,ldisk2file_node,
-     >  ldisk2file_userid,ldisk2file_pass)
+      subroutine snap_disk2file_abort(lufile)
+      include '../skdrincl/skparm.ftni'
+      include '../skdrincl/skobs.ftni'
+      include '../skdrincl/data_xfer.ftni'
 
 ! passed
       integer lufile
-      character*128 ldisk2file_node,ldisk2file_userid
-      character*128 ldisk2file_pass
-      character*600 ldum
-      integer nch1,nch2,nch3
-      nch1=len(ldisk2file_node)
-      nch2=len(ldisk2file_userid)
-      nch3=len(ldisk2file_pass)
+      integer trimlen
+      integer nch
 
-      write(ldum,'(a)') "disk2file=abort,"//
-     >  ldisk2file_node//","//ldisk2file_userid//","//ldisk2file_pass
-      call squeezewrite(lufile,ldum)
+      nch =max(trimlen(lautoftp_string),1)
+
+      if(kautoftp) then
+        write(lufile,'(a)')
+     >      "disk2file=abort,autoftp,"//lautoftp_string(1:nch)
+      else
+        write(lufile,'(a)') "disk2file=abort,,"
+      endif
+
       return
       end

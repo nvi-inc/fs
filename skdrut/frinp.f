@@ -7,7 +7,6 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
-
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -23,7 +22,10 @@ C     IERR - error number
       integer iwhere_in_string_list
 C
 C  LOCAL:
-      integer ix,n,ITRK(4,max_subpass,max_headstack)
+      integer ix,n
+
+      integer*4 itrk_map(max_headstack,max_trk)  !Has map of track mappings.
+
       integer*2 LNA(4)
       character*8 cna
       equivalence (lna,cna)
@@ -45,18 +47,17 @@ C  LOCAL:
       integer*2 lbar(2,max_stn),lfmt(2,max_stn)
       character*4 cbar(max_stn),cfmt(max_stn)
       equivalence (cbar,lbar),(cfmt,lfmt)
+      logical kfound
 
       integer ias2b,igtfr,igtst
-
-      integer isb,ibit,ipass,ihd,ival
-      integer iptr
 
       character*1 lchar
       integer*2   itemp
       equivalence (lchar,itemp)
       character*2 cifinptmp
-
       integer ilen2
+
+      save itrk_map
 C
 C  History
 C     880310 NRV DE-COMPC'D
@@ -105,7 +106,7 @@ C
       ilen2=ilen-1
       if(lchar .eq. "C") then
         itype=1
-       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,ITRK,
+       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,itrk_map,
      >     cswit,ivc)
       else if(lchar .eq. "L") then
         itype=2
@@ -124,6 +125,21 @@ C
         CALL UNPFMT(IBUF(2),ilen2,IERR,lc,lst,ns,lfmt)
       endif
       call hol2upper(lc,2) ! uppercase frequency code
+
+! Update the track mapping if neccessary.
+      if(nstsav .eq. 0 .and. lchar .eq. "F") then
+        call init_itrk_map(itrk_map)
+      endif
+
+      if(itype .ne. 1 .and. nstsav .ne. 0) then
+        do j=1,nstsav ! apply to each station on the preceding "F" line
+          is=istsav(j)
+          call add_trk_map(is,ncodes,itrk_map)
+        end do
+        nstsav=0
+        call init_itrk_map(itrk_map)
+      endif
+
 C
 C 1.5 If there are errors, handle them first.
 C
@@ -167,6 +183,9 @@ C
           LSUBVC(icx,is,ICODE) = LSG ! sub-group, i.e. S or X
           FREQRF(icx,is,ICODE) = F1
           VCBAND(icx,is,ICODE) = VB
+          if(vcband(1,is,icode) .eq. 0) then
+             vcband(1,is,icode)=vb
+          endif
           LCODE(ICODE) = LC ! 2-letter code for the sequence
 C         All listed Mk3 frequencies are for USB recording. 
 C         Any LSB to be recorded is specified in track assignments,
@@ -190,14 +209,8 @@ C         Not safe because the mode may be already there from the equip line.
              cs2mode(is,icode) = cm
              cmode(is,icode) = " "
           endif
-!          if (ichcm_ch(ls2mode(1,is,icode),1,' ').eq.0) then ! it's blank
-!            idum = ichmv(ls2mode(1,is,ICODE),1,LM,1,16) ! recording mode
-!            cmode(is,icode)=" "
-!          else ! leave it alone
-!          endif
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
-!          ix = iscn_ch(lmode(1,is,icode),1,16,'1:')
           ix=index(cmode(is,icode), "1:")
 C         iy = iscn_ch(lmode(1,is,icode),1,16,':1') 
           if (ix.ne.0) then ! possible fan-out
@@ -223,28 +236,6 @@ C         If "56000" was specified, use higher station bit density
           endif
 C         Store the bit density by station
           bitdens(is,icode)=bitden
-C         Store the track assignments.
-          DO  Ipass=1,max_subpass
-            do ihd=1,max_headstack
-              do isb=1,2
-                do ibit=1,2
-                  iptr=(ibit-1)*2+isb
-                  ival=itrk(iptr,ipass,ihd)
-                  if(ival .ne. -99) then
-                    call set_itras(isb,ibit,ihd,icx,ipass,is,icode,ival)
-                  endif
-                end do
-              end do
-!              IF (ITRK(1,I,ix).NE.-99)
-!     .        call set_itras(1,1,ix,icx,i,is,icode,itrk(1,i,ix))
-!              IF (ITRK(2,I,ix).NE.-99)
-!     .        call set_itras(2,1,ix,icx,i,is,icode,itrk(2,i,ix))
-!              IF (ITRK(3,I,ix).NE.-99)
-!     .        call set_itras(1,2,ix,icx,i,is,icode,itrk(3,i,ix))
-!              IF (ITRK(4,I,ix).NE.-99)
-!     .        call set_itras(2,2,ix,icx,i,is,icode,itrk(4,i,ix))
-            enddo
-          END DO 
           cset(icx,is,icode) = cswit
           if (ivc.eq.0) then
             ibbcx(icx,is,icode) = icx
@@ -270,6 +261,7 @@ C
 C
         if (nvlist.ne.0) then ! physical BBC info present
           if (nvlist.eq.1) then ! one BBC on this line (new sked)
+          kfound=.false.
           do iv=1,nchan(istn,icode) ! check all frequency channels
             ic=invcx(iv,istn,icode) ! channel index from "C" line
             ib=ibbcx(ic,istn,icode) ! BBC index from "C" line
@@ -286,14 +278,18 @@ C                                    ! this channel on this BBC
      >        "FRINP05 - Code ",lc," inconsistent with ",
      >         lcode(icode), " for channel ",ic,
      >        "station",cstnna(istn)
-
+              kfound=.true.
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
-!              LIFINP(ic,istn,ICODE) = LIN ! IF input channel
-!              losb(ic,istn,icode) = ls ! sideband
               cIFINP(ic,istn,ICODE) = cIN ! IF input channel
               cosb(ic,istn,icode) = cs ! sideband
             endif
           enddo
+          if(kfound) then
+             ibbc_present(ivlist(1),istn,icode)=1
+          else
+             ibbc_present(ivlist(1),istn,icode)=-1
+          endif
+
           else ! many BBCs on this line (from PC-SCHED)
             do iv=1,nvlist
               ic=ivlist(iv)
@@ -325,10 +321,8 @@ C             losb(ic,istn,icode) = ls ! sideband
             if (lsg.eq.lsubvc(iv,istn,icode)) then ! match sub-group
               cifinptmp=cifinp(iv,istn,icode)
               if (cifinptmp .eq. " ") then
-!                LIFINP(iv,istn,ICODE) = LIN
                 cIFINP(iv,istn,ICODE) = cIN
                 FREQLO(iv,ISTN,ICODE) = F
-!               call char2hol('U ',losb(iv,istn,icode),1,2)
                 cosb(iv,istn,icode)="U "
               else ! had a previous LO already
                 rbbc=abs(freqlo(iv,istn,icode)-freqrf(i,istn,icode))
@@ -343,11 +337,9 @@ C             losb(ic,istn,icode) = ls ! sideband
 
                 if ((rbbc.gt.1000.0.and.kvlba).or.
      .              (rbbc.gt.500.0.and.kmk3)) then
-!                  LIFINP(iv,istn,ICODE) = LIN
                   cIFINP(iv,istn,ICODE) = cIN
                   FREQLO(iv,ISTN,ICODE) = F
                   cosb(iv,istn,icode)="U "
-!                  call char2hol('U ',losb(iv,istn,icode),1,2)
                 else ! what?
                 endif
               endif ! previous LO/first time
@@ -406,9 +398,6 @@ C 6. This section for the barrel roll line.
 9401          format('FRINP06 - Station ',a,' not selected. ',
      .        'Barrel roll for this station ignored.')
             else ! save it
-!              idum = ichmv(lbarrel(1,i,icode),1,lbar(1,is),1,4)
-!              if (ichcm_ch(lbarrel(1,i,icode),1,"8").eq.0) ir=1
-!              if (ichcm_ch(lbarrel(1,i,icode),1,"16").eq.0) ir=2
               cbarrel(i,icode)=cbar(is)
               if(cbarrel(i,icode)(1:1) .eq. "8") ir=1
               if(cbarrel(i,icode)(1:2) .eq. "16") ir=2
@@ -436,8 +425,6 @@ C 7. This section for the recording format line.
 9402          format('FRINP07 - Station ',a,' not selected. ',
      .        'Recording format for this station ignored.')
             else ! save it
-!             if(ichcm_ch(lfmt(1,is),1,'N').eq.0) then ! force non-data replacement
-!                idum = ichmv_ch(LMFMT(1,i,ICODE),1,'M') ! recording format
               if (cfmt(is)(1:1) .eq. "N") then
                 cmfmt(i,icode)(1:1)="M"
               endif

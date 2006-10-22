@@ -29,7 +29,7 @@ C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 C
 C LOCAL
-      integer ix,ib,is,j,i,itx,ity,itz,idef,iy,ir
+      integer ix,ib,is,i,j,l,itx,ity,itz,idef,iy,ir
 C DATA
 C     data ((roll_def(i,j,1),j=1,32),i=1,17)/ 
 C    .   02,02,16,14,12,10,08,06,04,0,0,0,0,0,0,0,0,
@@ -133,11 +133,17 @@ C  In statn.ftni
         do j=1,max_frq
           bitdens(i,j)=0.0
           tape_dens(i,j)=0.0
+          do l=1,max_chan
+             ibbc_present(l,i,j)=0
+          end do
         enddo
         cstcod(i)=" "
         cterna(i)=" "
         cantna(i)=" "
       END DO  ! Initialize current variables
+
+
+
 C  Number of selected sources, stations, codes
       NSOURC = 0
       NSTATN = 0
@@ -156,40 +162,37 @@ C  In freqs.ftni
         enddo
       enddo
 
-!      do i=1,max_rack_type
-        crack_type(1) = 'none'
-        crack_type(2) = 'Mark3A'
-        crack_type(3) = 'VLBA'
-        crack_type(4) = 'VLBAG'
-        crack_type(5) = 'VLBA/8'
-        crack_type(6) = 'VLBA4/8'
-        crack_type(7) = 'Mark4'
-        crack_type(8) = 'VLBA4'
-        crack_type(9) = 'K4-1'
-        crack_type(10) = 'K4-2'
-        crack_type(11) = 'K4-1/K3'
-        crack_type(12) = 'K4-2/K3'
-        crack_type(13) = 'K4-1/M4'
-        crack_type(14) = 'K4-2/M4'
-        crack_type(15) = 'LBA'
-        crack_type(16) ='unknown'
-!      enddo
-!      do i=1,max_rec_type
-        crec_type(1) = 'none'
-        crec_type(2) = 'unused'
-        crec_type(3) = 'Mark3A'
-        crec_type(4) = 'VLBA'
-        crec_type(5) = 'VLBA4'
-        crec_type(6) = 'Mark4'
-        crec_type(7) = 'S2'
-        crec_type(8) = 'K4-1'
-        crec_type(9) = 'K4-2'
-        crec_type(10) = 'Mark5A'
-        crec_type(11) = 'Mk5APigW'
-        crec_type(12) = 'Mark5P'
-        crec_type(13) = 'K5'
-        crec_type(14) = 'unknown'
-!      enddo
+      crack_type(1) = 'none'
+      crack_type(2) = 'Mark3A'
+      crack_type(3) = 'VLBA'
+      crack_type(4) = 'VLBAG'
+      crack_type(5) = 'VLBA/8'
+      crack_type(6) = 'VLBA4/8'
+      crack_type(7) = 'Mark4'
+      crack_type(8) = 'VLBA4'
+      crack_type(9) = 'K4-1'
+      crack_type(10) = 'K4-2'
+      crack_type(11) = 'K4-1/K3'
+      crack_type(12) = 'K4-2/K3'
+      crack_type(13) = 'K4-1/M4'
+      crack_type(14) = 'K4-2/M4'
+      crack_type(15) = 'LBA'
+      crack_type(16) ='unknown'
+
+      crec_type(1) = 'none'
+      crec_type(2) = 'unused'
+      crec_type(3) = 'Mark3A'
+      crec_type(4) = 'VLBA'
+      crec_type(5) = 'VLBA4'
+      crec_type(6) = 'Mark4'
+      crec_type(7) = 'S2'
+      crec_type(8) = 'K4-1'
+      crec_type(9) = 'K4-2'
+      crec_type(10) = 'Mark5A'
+      crec_type(11) = 'Mk5APigW'
+      crec_type(12) = 'Mark5P'
+      crec_type(13) = 'K5'
+      crec_type(14) = 'unknown'
 
 C Initialize canned roll defs
 C

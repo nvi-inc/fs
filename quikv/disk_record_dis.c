@@ -68,7 +68,7 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        disk_record_enc(output,&count,&lclc);
+        disk_record_enc(output,&count,&lclc,&lclm);
       }
 
       if(!kcom) {

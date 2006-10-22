@@ -29,8 +29,8 @@ C  OUTPUT:
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       character*4 croll ! either 8:1 or 16:1 or off
-      integer inc_period,reinit_period,
-     .itrk(2+max_track,max_roll_def),ndefs,nsteps
+      integer inc_period,reinit_period
+      integer itrk(18,max_roll_def),ndefs,nsteps
 C
 C  LOCAL:
       character*128 cout

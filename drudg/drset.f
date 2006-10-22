@@ -8,6 +8,7 @@ C
       include '../skdrincl/skobs.ftni'
 ! functions
       integer iStringMinMatch
+      integer trimlen
 C
 C     INPUT VARIABLES:
       integer*2 LINSTQ(*)
@@ -26,10 +27,6 @@ C               - Key word, longest is 22 characters
       parameter (MaxPr=48)
       character*15 listPr(MaxPr)
       character*2  listPrShort(MaxPr)
-
-      character*6 ListAM(2),ListAS(2),ListOO(2)
-      Character*3 listyn(2)
-      characteR*6 lSRCDIST(4)
 
       data listPr/
      > "ALL_BL_GOOD",
@@ -61,14 +58,6 @@ C               - Key word, longest is 22 characters
      >"PI","SP","SA","SO",
      >"ST","SU","SD","SY",
      >"TP","VI","VS","WI"/
-
-
-      data ListAM/"AUTO","MANUAL"/
-      data ListYN/"YES","NO"/
-      data ListAS/"ALL","SUBNET"/
-      data listOO/"ON","OFF"/
-      data lsrcdist/"NONE","UPTIME","SQRT","EVEN"/
-
 C
 C  History
 C 970401 nrv New. Copied from sked's PRSET, leaving only those
@@ -87,7 +76,7 @@ C
       END IF
       NC = IC2-IC1+1
       ckeywd=" "
-      IDUMMY = ICHMV(LKEYWD,3,LINSTQ(2),IC1,NC)
+      IDUMMY = ICHMV(LKEYWD,1,LINSTQ(2),IC1,NC)
       ikey = istringminmatch(listpr,MaxPr,ckeywd)
       IF  (IKEY.EQ.0) THEN  !invalid
 ! Don't issue an error message because it could be a parameter that sked
@@ -106,19 +95,24 @@ C
       endif
 C
 C  Character values
+      ckeywd=" "
+      nc = ic2-ic1+1
+      idummy = ichmv(lkeywd,1,linstq(2),ic1,nc)
+
       if(ckey .eq. "DE") then
         return          !ignore rest of line.
       else IF  (ckey.eq.'PS') then
-        nc = ic2-ic1+1
-        ckeywd=" "
-        idummy = ichmv(lkeywd,3,linstq(2),ic1,nc)
-        ikey=istringMinMatch(listyn,2,ckeywd)
-        IF  (ikey.EQ.0) THEN
-          WRITE(LUSCN,9441)
-9441      FORMAT(' PRSET26 - Error: POSTPASS must be Y or N')
-        ELSE
-          Kpostpass=listyn(ikey).eq."YES"
-        END IF
+        call capitalize(ckeywd)
+        if(ckeywd .eq. "Y") then
+           kpostpass=.true.
+        else if(ckeywd .eq. "N") then
+           continue
+        else
+          write(luscn,'(" DRSET26: Error: POSTPASS must be Y or N")')
+        endif
+      else if(ckey .eq. "TC") then
+        ccorname=ckeywd
+
 C  Numerical values
       elseif  (ckey.eq.'SP'.OR.ckey.eq.'PA'.OR.ckey.eq.'SO'.OR.
      .         ckey.eq.'HD'.OR.ckey.eq.'TP'.OR.ckey.eq.'TE'.or.

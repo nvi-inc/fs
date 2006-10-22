@@ -17,14 +17,11 @@ C                1 or 3 close file
       integer inew ! 1 to start a new ps barcode file
 C OUTPUT: none
 
-! 2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character
-!            tape_label ctape_num. This is so we can use this
-!            for VSN#s.
-
 
 !fucntions
       INTEGER TRIMLEN
       integer copen
+      integer cclose
       real speed ! function
 
 C LOCAL:
@@ -49,7 +46,7 @@ C NLAB - number of labels across a page
       integer mjd,ida,iyr2,iyear,iyr,idayr,ihr,imin,isc,
      .idayr2,ihr2,imin2,isc2,mon
       integer ipsy1,ipsy2,ipsd1,ipsh1,ipsm1,ipsd2,ipsh2,ipsm2
-      integer istnsk,isor,icod,iftold,nout,nlabpr,l,ilen,ical,
+      integer istnsk,isor,icod,iftold,nout,nlabpr,ilen,ical,
      .nstnsk,idir,idirp,ipasp,ierr,ntape
       integer*2 lfreq
       integer IY1(5),ID1(5),IH1(5),IM1(5),
@@ -57,7 +54,7 @@ C NLAB - number of labels across a page
       LOGICAL KNEWT
       LOGICAL KNEW
       integer ic
-      CHARACTER*50 CLASER,ctmp
+      CHARACTER*50 ctmp
       character*8 cstat
       character*1 cid1
       character*2 cid2
@@ -122,6 +119,7 @@ C            ITEARL always. KNEWT was modified to allow more buffer,
 C            but this will not always work. Calculation of IFTOLD is not
 C            correct.
 C 000705 nrv Use standard KNEWT for S2 also.
+
 ! 2004Sep??  JMGipson Added support for dymo printer.
 ! 2004Oct19  JMGipson.  Fixed problem if you were printing out several experiments in a row.
 !
@@ -130,6 +128,9 @@ C 000705 nrv Use standard KNEWT for S2 also.
 ! 2005Jul25  JMGipson. Modifed dymo printer to always be row1, col1.
 !            Also modified psbar (which prints the labels) to put showpage at the end of each label.
 !
+! 2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character
+!            tape_label ctape_num. This is so we can use this for VSN#s
+! 2006Oct17 JMGipson. Added argument to cclose(fp, clabtyp). Clabyp indicates kind of printer.
 
 C 1. First get set up with schedule or SNAP file.
 
@@ -178,11 +179,10 @@ C
 C
       NOUT = 0
       NLABPR = 0
-      ntape=-1
+      ntape=0
       IPASP=-1
       ks2=.false.
-      if(cstrack(istn) .ne. 'unknown' .and.
-     >   cstrec(istn) .ne.  'unknown') then
+      if(cstrack(istn).ne.'unknown'.and.cstrec(istn).ne.'unknown') then
         ks2=cstrec(istn)(1:2) .eq. 'S2'
       endif
 
@@ -190,7 +190,7 @@ C  If label printer is postscript then don't open the file, that
 C  will be done later with a C call.
 C  If pcode is 1 or 2, we want to open up the output, otherwise,
 C  we assume it is already open.
-      if (clabtyp.ne.'POSTSCRIPT' .and.  clabtyp.ne.'DYMO' ) then ! only for laser or epson
+      if (.not.klabel_ps) then ! only for laser or epson
         IF ((PCODE.EQ.1).OR.(PCODE.EQ.2)) THEN !first station
           call setprint(ierr,0)
           IF (IERR.NE.0) THEN
@@ -211,16 +211,13 @@ C                            !set up laser printer
                 return
               endif
             else
-91            WRITE(LUSCN,9101)
-9101          FORMAT(' Make sure the bar code font cartridge is ',
-     .        'installed.'/' Enter position of first label (1 through ',
-     .        '8, 0 to quit)? ',$)
+91            WRITE(LUSCN,'(a)')
+     >        " Make sure the bar code font cartridge is installed."
+              write(luscn,'(a,$)')
+     >        " Enter position of first label (1 through 8, 0 to quit)?"
               READ(LUUSR,*,ERR=91) ILABROW
-              IF (ILABROW.EQ.0) THEN
-                GOTO 990
-              ELSEIF(ILABROW.LT.1.OR.ILABROW.GT.8) THEN
-                GOTO 91
-              endif
+              IF(ILABROW.EQ.0) GOTO 990
+              IF(ILABROW.LT.1.OR.ILABROW.GT.8) GOTO 91
             endif
 C
 C <esc>&l2H   manual paper feed
@@ -234,21 +231,17 @@ C <esc>&a0L   set left margin at left edge of paper
 C <esc>&l0L   perf skip disable
 C <esc>&l6D   6 lines/inch
 C
-                CLASER= CHAR(27)//'&l0O'//CHAR(27)//'&l48d528p2e526F'
-     .      //CHAR(27)//'&a0R'//CHAR(27)//'&a0L'//CHAR(27)//'&l0L'
-     .      //CHAR(27)//'&l6D'//char(13)
-                l=trimlen(claser)
-                WRITE(luprt,9104) CLASER(1:l)
-9104        FORMAT(A)
+             WRITE(luprt,'(a)')  CHAR(27)//'&l0O'//CHAR(27)//
+     >        '&l48d528p2e526F'//CHAR(27)//'&a0R'//CHAR(27)//'&a0L'//
+     >         CHAR(27)//'&l0L'//CHAR(27)//'&l6D'//char(13)
+
           else if (clabtyp.eq.'EPSON24') then ! Epson 24-pin setup
-            claser = char(27)//char(64)//char(27)
-     .      //char(65)//char(12) !<esc>@ power up reset
-C                                 plus <esc> A 12 for 24-pin
-            write(luprt,'(a,$)') claser(1:5)
+            write(luprt,'(a,$)')
+     >             char(27)//char(64)//char(27)//char(65)//char(12)
+!           <esc>@ power up reset  plus <esc> A 12 for 24-pin
             nlab = 1  !1 across
           else ! Epson setup
-            claser = char(27)//char(64)  !<esc>@ power up reset
-            write(luprt,'(a,$)') claser(1:2)
+            write(luprt,'(a,$)') char(27)//char(65) !<esc>@ power up reset
             nlab = 1  !1 across
           ENDIF !set up printers
         endif !first station
@@ -339,8 +332,8 @@ C             leave it alone
                   else ! ask
                     write(luscn,'(" Next available row would be ",i2,
      .              ". Row ",i2," will force a new page of labels."/
-     .              " Is this correct ",
-     .              " (Y,N default Y) ? ",$)') ilabrow,ilabrowin
+     .              " Is this correct  (Y,N default Y) ? ",$)')
+     >                 ilabrow,ilabrowin
                     read(luusr,'(a)') response
                     response(1:1) = upper(response(1:1))
                     if (response(1:1).eq.'Y') then ! take it
@@ -427,9 +420,12 @@ C         Force new tape logic when starting a schedule.
           endif ! one of ours
 C
           IF (KNEW) THEN !NEW TAPE
-            ntape=ntape+1
             IF (NOUT.GE.NLAB.OR.Iob.eq.nobs.or.cbuf(1:1).EQ."$") then !type a row
-              if (clabtyp.ne.'POSTSCRIPT' .and.clabtyp.ne.'DYMO') then ! laser or Epson
+                if(nout .eq. 0) nout=1
+                write(luscn, '(i2,2(2x,i3,"-",i2.2,":",i2.2))')
+     >           ntape,id1(1),ih1(1),im1(1), id2(1),ih2(1),im2(1)
+              if (.not.klabel_ps) then ! laser or Epson
+
                 CALL BLABL(LUprt,NOUT,LEXPER,LSTNNA(1,ISTN),
      .          LSTCOD(ISTN),IY1,ID1,IH1,IM1,iy2,ID2,IH2,IM2,ILABROW,
      .          cprttyp,clabtyp,cprport)
@@ -445,15 +441,11 @@ C
                 ipsd2=id2(1)
                 ipsh2=ih2(1)
                 ipsm2=im2(1)
-                write(luscn,
-     >           '(i2,3x,2(2x,i3,":",i2.2,":",i2.2))')
-     >           nlabpr, ipsd1,ipsh1,ipsm1, ipsd2,ipsh2,ipsm2
 
                 if(clabtyp .eq. "DYMO") then
                   ilabrow=1
                   ilabcol=1
                 endif
-
                 write(ctape_num,'("Tape ",i2)') ntape
                 call make_pslabel(fileptr,cstnna(istn),cstcod(istn),
      >           cexper,clabtyp,ctape_num,
@@ -481,6 +473,7 @@ C
             IM1(NOUT) = iMIN
 c         IS1(NOUT) = ISC
 C         NOB(NOUT) = 0
+           ntape=ntape+1
           END IF !new tape
 C
         if (istnsk.ne.0) then ! one of ours
@@ -503,20 +496,18 @@ C         NOB(NOUT) = NOB(NOUT)+1
       ENDDO !loop on observations
 
 900   continue
-      if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
-!        ierr=cclose(fileptr)
+      if (klabel_ps) then
+         ierr=cclose(fileptr,clabtyp)  !close file, add showpage if necessary.
       else
         IF (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
      .        .or.cprttyp.eq.'FILE') THEN !close laser printer
-          Claser=CHAR(27)// '&l6D' // CHAR(27) // '(8U'
-     .               // CHAR(27) // '(s3T' // char(13)
-          l=trimlen(claser)
-          WRITE(luprt,'(a)') Claser(1:l)
+          WRITE(luprt,'(a)') CHAR(27)//'&l6D'//CHAR(27)//'(8U'// 
+     >      CHAR(27)//'(s3T'// char(13)
         ENDIF
 C if pcode is 1 (one station) or 3 (last station) then close file
         IF (PCODE.EQ.1.OR.PCODE.EQ.3) THEN
-          if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.
-     .         cprttyp.eq.'FILE') then
+          if(clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.
+     >         cprttyp.eq.'FILE') then
             write(luprt,'(a)') char(12) ! FORM FEED
           endif
           close(luprt)
@@ -524,10 +515,8 @@ C if pcode is 1 (one station) or 3 (last station) then close file
         endif
       endif
 C
-990   IF (IERR.NE.0) WRITE(LUSCN,9900) IERR
-9900  FORMAT(' ERROR ',I3,' READING FILE')
-      WRITE(LUSCN,9901) cSTNNA(ISTN), NLABPR
-9901  FORMAT(' NUMBER OF LABELS PRINTED FOR ',A8,': ',I5)
+990   IF (IERR.NE.0) WRITE(LUSCN,"(' ERROR ',I3,' READING FILE')") IERR
+      WRITE(LUSCN,"(i2, '  LABELS PRINTED FOR ',A)")nlabpr,csTNNA(ISTN)
 
       RETURN
       END

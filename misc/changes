@@ -1,4 +1,4 @@
-Version 9.0.5 950905
+ Version 9.0.5 950905
 
 950920 WEH rtelb/rte_fixt.c
            No longer gives a negative centiseconds if the computer clock was
@@ -7448,3 +7448,417 @@ Version 9.8.0 050731
 
 Version 9.8.1 050902
 
+050916 weh include/disk_record_ds.h
+           increase allowed return parameter lengths to 63
+
+050916 weh clib/cshm_init.c
+           include/scan_name_ds.h
+           control/fserr.ctl
+           quikv/scan_name.c
+           help/scan_name.___
+           include use of station name
+
+051013 weh systests/plotlog
+           add plotting of setcl offset
+
+051013 weh logpl/logpl
+           better default output file name and now on /tmp
+
+051101 weh st.default/proc/change_pack.prc
+           st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/m5.prc
+           st.default/proc/s2station.prc
+           st.default/proc/station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           adjusted change pack comments for new problems with key switch
+
+051122 weh vex/vex_put.c
+           vex/vex.h
+           vex/vex.y
+           vex/vex.yy.l
+           vex/test_parser/wh1
+           vex/vex_util.c
+051205 weh vex/vexf_put.c
+           add nutation keywords, fix horizon map problems
+
+051207 weh include/pmodel.h
+           polb/Makefile
+051222 weh include/params.i
+           polb/fln1.f
+           polb/flt1.f
+           error/error.f
+           polb/flt0.f
+           poclb/fln.c
+           poclb/flt.c
+           poclb/gmodl.c
+           polb/gmodl.f
+           pdplt/pdplt
+           add support for 30 parameter models
+
+060118 weh include/rxgain_ds.h
+           include/params.h
+           increase maximum TCAL values per band to 600 per Michael Lindqvist
+
+060120 weh pdplt/pdplt
+           update parameter explantion page to reflect different model sizes
+
+060125 weh polb/flt1.f
+           fix typo
+
+060202 weh gndat/gndat.c
+           gndat/get_rxgain_files.c
+           improve error messages
+
+060314 weh onoff/sample_ds.h
+           fix too small dimension
+
+060328 weh st.default/control/mdlpo.ctl
+           default updated for 30 parameters
+
+060330 weh poclb/gmodl.c
+060331 weh polb/gmodl.f
+           improve error detection
+
+060412 weh quikv/in2net.c
+           fixed so that a query did not cause it to think there was a
+           successful connect after a failed connect and then
+
+060412 weh include/disk2file_ds.h
+           clib/disk2file_util.c
+           control/fserr.ctl
+           help/disk2file.___
+           include/in2net_ds.h
+           help/in2net.___
+           updated to not require specific responses and to use new
+           parameter length guidelines
+
+060414 weh help/mk5.___
+           quikv/mk5_dis.c
+           updated to wrap long responses
+
+060414 weh mk5cn/mk5cn.c
+           prevent garbage from recived by class record reciver by forcing
+           class buffer character to zero, will need to be updated if max
+           class buffer size is changed
+
+060420 weh help/mk5.___
+           help/disk_record.___
+           help/disk2file.___
+
+060425 weh systests/systests.txt
+           systests/Makefile
+           systests/chk1024
+           chk1024 created/added
+
+060426 weh help/form.h__
+           fix typo reported by DLS
+
+060426 weh systests/chk1024
+           improved
+
+060426 weh clib/scan_check_util.c
+           control/fserr.ctl
+           quikv/data_check_pos.c
+           updated to make more general for mark5b
+
+060427 weh clib/cchmod.c
+           fix buffer overflow for long file name
+
+060427 weh newlb/fopen.f
+           only set permissions if this is a new file
+
+060428 weh pfmed/readpl.c
+           add synomyms for "help"
+
+060428 weh newlb/ftn_purge.c
+           add ftn_permissions to retrieve permissions
+
+060428 weh pfmed/pfmed.f
+           pfmed/ffm.f
+           pfmed/fed.i
+           add check for write permission
+
+060428 weh pfmed/pfmed.i
+
+060501 weh pfmed/pfcop.f
+           fix missing error return if find-link(), or others, fail
+
+060502 weh quikv/data_check_pos.f
+           added missing \n
+
+060515 weh vex/vexf_put.c
+060516 weh vex/vex_put.c
+           fix vex writer to handle comments correctly
+
+050520 dls systests/chk1024.prc
+050826 dls systests/vchk1024.prc
+051205 dls systests/chk1024.snp
+051205 dls systests/vchk1024.snp
+060516 weh systests/chk1024
+           systests/systests.txt
+           updated for mark 5 tests: v/chk1024.* from dls
+
+060517 weh systests/chk1024
+           updated
+
+060522 weh vex/print_vex.c
+           fix bug that omits final CR
+
+060522 weh vex/vex_put.c
+           vex/vexf_put.c
+           make handling of empty string correct
+
+060522 weh systests/pcalamp
+           systests/systests.txt
+           add "p" power plot option to pcalamp 
+
+060530 weh newlb/prog.c
+           control/fserr.ctl
+           boss/bwork.f
+           help/terminate.___
+           add "disk_record_ok" parameter to terminate
+
+060531 weh systests/systests.txt
+           improve ftp instructions
+
+060501 weh newlb/Makefile
+060501 weh newlb/append_safe.c
+           created append_safe()
+
+060531 weh control/fscmd.ctl
+060501 weh quikv/Makefile
+060502 weh quikv/quikv.c
+060502 weh quikv/last_check.c
+060506 weh quikv/scan_check_dis.c
+060506 weh quikv/scan_check.c
+060506 weh quikv/data_check.c
+060506 weh quikv/data_check_dis.c
+060506 weh help/scan_check.___
+060506 weh help/last_check.___
+060506 weh help/data_check.___
+           create last_check command
+
+060507 weh help/fivept.___
+           removed old fluxX and beamX references
+           added information about negative "pts"
+
+060513 weh fs.prompt/fs.prompt
+           allow command-line -geometry argument to work
+
+060514 weh mk5cn/mk5cn.c
+060514 weh include/fscom.h
+060514 weh quikv/disk2file.c
+060514 weh misc/autoftp
+060515 weh misc/fs9802up.txt
+060515 weh include/fscom_init.i
+           create autoftp feature
+
+060519 weh boss/spars.f
+060519 weh boss/newpr.f
+060519 weh boss/bwork.f
+060519 weh include/params.i
+           allow longer SNAP proc arguments
+
+060520 weh clib/ntp_synch.c
+           fix argument list in execlp()
+
+060520 weh control/fserr.ctl
+060520 weh quikv/disk2file.c
+           fix bugs
+
+060622 weh systests/pcalamp
+060622 weh systests/systests.txt
+           individual auto-scaling and global editing added to pcalamp
+
+060622 weh newlb/append_safe.c
+           now returns shortage of space
+
+060625 weh st.default/st-0.0.0/autoftp
+060625 weh st.default/st-0.0.0/autoftp/Makefile
+060625 weh st.default/st-0.0.0/Makefile
+060625 weh st.default/st-0.0.0/autoftp/autoftp
+060625 weh Makefile
+           default station autoftp added
+
+060625 weh autoftp
+060625 weh autoftp/Makefile
+060625 weh autoftp/autoftp
+060625 weh Makefile
+           stub autoftp added
+
+060625 weh control/fserr.ctl
+060625 weh quikv/disk2file.c
+060625 weh help/disk2file.___
+           autoftp added
+
+060625 weh poclb/logitn.c
+           fixed bug in lwhat output
+
+060625 weh misc/autoftp
+           old version removed
+
+060626 weh control/fserr.ctl
+060629 weh help/disk2file.___
+060629 weh quikv/disk2file.c
+           updated error messages for new disk2file parameters
+
+
+060629 weh st.default/oper/.Xresources
+060629 weh st.default/prog/.Xresources
+           added new sample autoftp resources
+
+060629 weh misc/autoftp.txt
+           expanded XTERM CUSTOMIZATION section
+
+060630 weh st.default/st-0.0.0/autoftp/autoftp
+           changed "program" name display in recorded comments
+
+060703 weh misc/file_append
+           created file appending utility to cat to multiple files
+
+060705 weh greplog.prc
+           vstation2.prc
+           vstation.prc
+           vs2station.prc
+           v4station.prc
+           v42station.prc
+           v2station.prc
+           station.prc
+           s2station.prc
+           s2s2station.prc
+           ls2station.prc
+           l4s2station.prc
+           k42station.prc
+           k42mk4vstation.prc
+           k42mk4vbstation2.prc
+           k42k3vstation.prc
+           4v4station.prc
+           4station.prc
+           created/added greplog procedure
+
+060714 weh systests/systests.txt
+           misc/autoftp.txt
+           minor wording fixes
+
+060714 weh msg/msg
+           put temporary file on /tmp and append pid
+
+060721 jmg st.default/control/skedf.ctl
+           brought up to date
+
+060727 weh quikv/mk5_dis.c
+           increased maximum response size to 512 characters
+
+060803 ao  gnplt/gnplt
+           new features, bug fixes
+
+060803 jmg lnfch/das2b.f
+           ???
+
+060808 weh st.default/control/mdlpo.ctl
+           expanded to 30 parameters
+
+060808 weh misc/mdlctlfix
+           created
+
+060808 weh poclb/pmdlq.c
+           fixed bug in printed line indices
+
+060809 weh misc/autoftp.txt
+           improved wording
+
+060919 weh systests/pcalamp
+           unknown minor changes
+
+060919 weh systests/systests.txt
+           unknown minor changes
+
+060920 weh st.default/st-0.0.0/include/stparams.h
+           improved default ftok() call
+
+060921 weh ibcon/statbrd.c
+           removed "ST" error code
+
+060925 weh msg/msg
+           removed tape fields
+
+060925 weh misc/30params.txt
+           improved source code update instructions
+
+060925 weh systests/pcalpower
+           "noisy" output improved
+           decoder units more robust if negative difference
+
+061002 weh clib/flux_val.c
+           st.default/control/flux.c
+           update casa values per D. Graham
+
+061003 weh autoftp/autoftp
+           st.default/st-0.0.0/autoftp/autoftp
+           fix default variable values
+
+061003 weh onoff/onoff.c
+           fix SIG record formating include eliminating extraneous value
+
+061004 weh systests/chk1024.prc
+           systests/vchk1024.prc
+           add missing semi-colons at the end of commands
+
+061005 weh st.default/st-0.0.0/autoftp/autoftp
+           autoftp/autoftp
+           misc/autoftp.txt
+           help/disk2file.___
+           st.default/control/skedf.ctl
+           improved autoftp installation and usage documentation
+
+061005 weh clib/go_util.c
+           added ad hoc 20 usecond sleep per D. Graham
+
+061005 weh help/disk2file.___
+           more explanation about autoftp
+
+061011 weh misc/30params.txt
+           improved explanantion of who does not need this
+
+061012 weh misc/autoftp.txt
+           improved explanation on how to activate.
+
+061013 weh quikv/scan_check_dis.c
+           made more mark5b tolerant by accept blank for mode
+
+061013 weh help/data_check.___
+           included that does not work for mark5B
+
+061018 jhfq monit/mout4.c
+061018      chekr/ifpchk.c
+061018      clib/lba_ifp_util.c
+            bugs fixed
+
+061018 jmg st.default/control/skedf.ctl
+           explain default label type
+
+061018 weh gndat/gndat.c
+           fixed counting by one problem
+
+061019 weh quikv/scan_check_dis.c
+           restored old behavior for now
+
+061019 weh systests/plotlog
+           made robust agains control-Ms at the end of lines (DOS line end)
+
+061021 weh help/scan_check.___
+           updated to point out that it doesn't work for Mark5B
+
+Version 9.9.0 061022

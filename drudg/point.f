@@ -55,6 +55,11 @@ C LOCAL:
       character*8 cstatname
       double precision GST,UT,HA,HA2
       integer IC
+
+      logical kfound
+      character*8 lvlba_stat(10)
+      data lvlba_stat/"BR-VLBA","FD-VLBA","HN-VLBA","KP-VLBA","LA-VLBA",
+     >                "MK-VLBA","NL-VLBA","OV-VLBA","PIETOWN","SC-VLBA"/
 Cinteger*4 ifbrk
 
 C Initialized:
@@ -99,6 +104,8 @@ C 970512 nrv Increment IOBSS for VLBAT after the call, because many
 C            tests in VLBAT are done for iobs=0.
 C 970714 nrv Add "crd" to VLBA file names per J. Wrobel request.
 C 000815 nrv Remove all but VLBA option.
+! 2005Sep21 JMGipson.  Modified to check if VLBA station. If so do it, else return
+! 2006Sep26 JMGipson. Changed call for vlbat of lsname to ASCII csname.
 
       kintr = .false.
       if (kbatch) then
@@ -108,6 +115,15 @@ C 000815 nrv Remove all but VLBA option.
 9991      format(' Invalid pointing output selection.')
           return
         endif
+      else if(.true.) then      !cheap way of commenting out else statment that follows.
+        kfound=.false.
+        do i=1,10
+          if(cantna(istn) .eq. lvlba_stat(i)) then
+             kfound=.true.
+          endif
+        end do
+        if(.not.kfound) return
+        istin=6
       else
  1    WRITE(LUSCN,9019) cantna(ISTN)
 9019  FORMAT(' Select type of pointing output for: ',a/
@@ -241,9 +257,9 @@ C
 C*** Removed Haystack
 	     if (istin.eq.1) then !NRAO 85-3
 	       if (.not.kintr) then
-		 write(lu_outfile,9301) lexper,iyr,
+		 write(lu_outfile,9301) cexper,iyr,
      .           cstnna(istn),lstcod(istn),idayr,idayr,iyr
-9301             format('--',1x,a,2x,i4,2x,4a2,2x,a1/
+9301             format('--',1x,a,2x,i4,2x,a,2x,a1/
      .                  '-- Obs.List from day ',i3/
      .                  '-- OBSLIST DAY:',i3,'  YR: ',i4/
      .                  'VLBI'/'EPOCH  1950.0'/'TIME=UT')
@@ -286,9 +302,9 @@ C
 		idum = ichmv(ldsn,1,lstnna(1,istn),4,2)
 		dut = 0.0
 		eeq = 0.0
-		write(lu_outfile,9502) lexper,ldsn,iyr,idayr,ihr,
+		write(lu_outfile,9502) cexper,ldsn,iyr,idayr,ihr,
      .          imin,isc,dut,eeq
-9502            format('*OBSEQ WBRADIOASTRY ',4a2,5x,a2,10x,i4,'/',
+9502            format('*OBSEQ WBRADIOASTRY ',a,5x,a2,10x,i4,'/',
      .          i3,1x,i2,':',i2,':',i2,2x,f7.5,2x,f7.5,1x,'2000')
 		ihrp=ihr
 		minp=imin
@@ -368,7 +384,7 @@ C
             do ix=1,nchan(istn,icod) ! find out if switched
               ksw=cset(invcx(ix,istn,icod),istn,icod).ne.'   '
             end do
-	    CALL VLBAT(ksw,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+	    CALL VLBAT(ksw,cSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .       IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
      .       MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
      .       IPASP,IBLK,IDIRP,IFTOLD,NCHAR,

@@ -44,20 +44,17 @@ C     SPEED - tape speed, fps
 C
 C  LOCAL:
       double precision sp,ohfac,fanfac,totrate
-      integer ichcm_ch
       logical ks2,kk4
+      character*1 lchar
 C
 C
-      if (is.le.0.or.is.gt.nstatn.or.
-     .    icode.le.0.or.icode.gt.ncodes) then ! illegal
-        speed=-1.0
-        return
+      if(is.le.0.or.is.gt.nstatn.or.icode.le.0.or.icode.gt.ncodes) then ! illegal
+       speed=-1.0
+       return
       endif
 
 C Determine type of equipment.
 
-C     ks2 = ichcm_ch(lterna(1,is),1,'S2').eq.0
-C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
       ks2=cstrec(is)(1:2) .eq. "S2"
       kk4=cstrec(is)(1:2) .eq. "K4"
 
@@ -71,8 +68,7 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
           return
         endif
         sp=sp/12.0 ! convert to fps
-
-      else if (kk4) then 
+      else if (kk4) then
         totrate=samprate(icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
         if (totrate.gt.129.0) then
           sp = 423.8 ! mm/sec for 256 Mbps
@@ -82,10 +78,8 @@ C     kk4 = ichcm_ch(lterna(1,is),1,'K4').eq.0
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
         sp=sp/1000.0 ! convert to m/s
-
 C 1. First account for the fan factor.
-
-      else ! Mk3/4
+      else ! Mk3/4 or VLBA
         if (ifan(is,icode).gt.0) then
           fanfac=1/real(ifan(is,icode))
         else
@@ -93,7 +87,8 @@ C 1. First account for the fan factor.
         endif
 C 2. Get the correct overhead factor for DR or NDR.
         ohfac = 1.125    ! factor is 8/9 for Mk3/4 DR format
-        if (ichcm_ch(lmfmt(1,is,icode),1,'V').eq.0) then
+        lchar=cmfmt(is,icode)(1:1)
+        if(lchar .eq. "V" .or. lchar .eq. "v") then
           ohfac = 1.134  ! factor is 9.072/8 for VLBA NDR format
         endif
 C 3. Calculate the tape speed. Sample rate is in Mb/s.

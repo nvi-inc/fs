@@ -1,0 +1,35 @@
+
+2006Jun29 JMGipson. Modified to get rid of old disk2file stuff. Now just processes lines:
+             Autoftp on diskf2file_string
+             disk2file_Dir disk2fiel
+
+2006Jun22  count_freq_tracks.f  Modified so that if freqrf is
+           negative, track is not counted.
+
+2006Jun19  BUGFIX. vmoinp.f vunproll.f ckroll.f
+           Changed size of irtrk (or same array, differently named)
+           to be (18,32), consistent with iroll_def.
+
+2006Jun13  rdctl.f Removed lmysql_* and ldisk2file* from arg list
+           and put in commons.
+
+2006Jan17  BUGFIX.  Modified gnpas to loop over MAX_Chan, not
+           nchan(is,ic). Problem with later is that stations
+           may only record 8 channels, but this may not be spaced
+           sequentially, i.e., 1,2,3,4, 11,12,13,14.
+
+2005Dec08  Modified itras.f to to work with new catalog system.
+
+2005Oct27  BUFIX.  iroll_def.  The routine iroll_def_init had
+           irtrk dimensioned wrong.  This holds the passed
+           Barrell Roll.  This lead to problems in writing Vex
+           files.
+
+2005Oct27  BUGFIX.  Fixed bug in obs_sort.  When calculating time
+           for obs, put result in jday(i), not in
+           jday(iskrec(i)).  Also modified so that sorting is a
+           little clearer.
+
+2005Oct04  Modified frinp to set vcband(1) to bandwidth if not used.
+           This is so that  snr calculations etc are correct.
+

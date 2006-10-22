@@ -14,11 +14,11 @@ struct rtime_mon {
     struct m5state state;
   } percent;
   struct {
-    char mode[6];
+    char mode[33];
     struct m5state state;
   } mode;
   struct {
-    char sub_mode[6];
+    char sub_mode[33];
     struct m5state state;
   } sub_mode;
   struct {
