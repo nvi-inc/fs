@@ -75,7 +75,7 @@ $(PROGRAM): $(OBJECTS)
 #	$(OBJECTS) \
 #               $(LDFLAGS) \
 #	/opt/langtools/lib/end.o;
-	gcc -o $(PROGRAM) \
+	gcc -g -o $(PROGRAM) \
 	$(OBJECTS) /opt/langtools/lib/end.o \
                $(LDFLAGS) 
 	@echo done.

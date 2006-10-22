@@ -151,7 +151,7 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
 
 /* Write showpage if this label will start a new page */
   if(*new_page==1){
-   fprintf(*fp,"showpage\n%%%Trailer\n");
+   fprintf(*fp,"showpage\n%%Trailer\n"); 
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
    if(!strncmp(clabtyp, "DYMO",4)){
     fprintf(*fp,"90 rotate\n");}
@@ -220,10 +220,10 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
       }
    temp >>= 1;
       }
-
+/*
    if(!strncmp(clabtyp, "DYMO",4)){
-    fprintf(*fp,"showpage\n");}
-
+    fprintf(*fp,"%%showpage\n");}
+*/
 
 }
 

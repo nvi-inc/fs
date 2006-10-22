@@ -8,9 +8,11 @@ C 001109 nrv New again. Use new vex parser routines to get
 C            observations scan by scan.
 ! 2004Feb14 JMG.  When checking cable wrap, check for both "&c" and "c", etc.
 ! 2005May05 JMG.  Removed refrences to irec, which is never used.
+! 2006Jul17 JMG. Got rid of using ivtgso, replaced by iwhere_in_string_list
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/sourc.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'
@@ -34,7 +36,7 @@ C
       integer fvex_field,fvex_int,fvex_double,fvex_units,ptr_ch,fvex_len
       integer fget_station_scan,fget_scan
       integer fget_data_transfer_scan
-      integer ivgtso,ivgtmo,ivgtst
+      integer ivgtmo,ivgtst
       integer iwhere_in_string_list
 C  LOCAL:
       integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
@@ -43,7 +45,8 @@ C  LOCAL:
       integer*2 lcb          !cable wrap
       character*2 ccb
       equivalence (lcb,ccb)
-      character*128 cmo,cstart,csor,cout,cunit,cscan_id
+      character*128 cmo,cstart,cout,cunit,cscan_id
+      character*(max_sorlen) csor
       integer istart(5)
       double precision d,start_sec
       integer idstart,idend
@@ -102,8 +105,10 @@ C 1. Get scans one by one.
         iret = fvex_scan_source(1,ptr_ch(csor),len(csor))
         if (iret.ne.0) return
         ierr = 10 ! source index
-        if (ivgtso(csor,isor).le.0) then
-          il=fvex_len(csor)
+        il=fvex_len(csor)
+        isor=iwhere_in_string_list(csorna,nsourc,csor(1:il))
+        if(isor .eq. 0) then
+!        if (ivgtso(csor,isor).le.0) then
           write(lu,'("VOBINP01 - Source ",a," not found")') csor(1:il)
           return
         endif

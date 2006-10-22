@@ -9,11 +9,7 @@
      .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
      .                 dr_rack_type,dr_reca_type,dr_recb_type,
      >                 kequip_over,
-     .                 tpid_prompt,itpid_period,tpid_parm,
-     >                 ldisk2file_dir,ldisk2file_node,ldisk2file_userid,
-     >                 ldisk2file_pass,
-     >         lmysql_user,lmysql_password,lmysql_host,lmysql_socket,
-     >         lmysql_db)
+     .                 tpid_prompt,itpid_period,tpid_parm)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -56,10 +52,20 @@ C            send the names back.
 !             coption(1,2,3) where X =1,4,5.  Made an error in trying to assign to coption(X),
 !             e.g., if X=4, would assign to coption(4).  Fixed to agree with previous usage.
 ! 2005Jul26 JMGipson.  Added disk2file_dir,_node,_userid.
+! 2006Jun13 JMGipson.  Added disk2file_script. Removed all disk2file stuff from argument
+!                      list and put in common.
+! 2006Jun29 JMGipson. Modified to get rid of old disk2file stuff. Now just processes lines:
+!              Autoftp on diskf2file_string
+!              disk2file_Dir disk2fiel
+! 2006Jul19 JMGipson. Changed ldisk2file_string ->lautoftp_string.
+!           For ldisk2file_dir, csnap, and cproc, add an ending "/" if neded.
+! 2006Oct18 JMGipson. Initilaized rlabsize which is used in drudg.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
+      include '../skdrincl/mysql_common.i'
 C
       character*128  source_cat,station_cat,antenna_cat,position_cat,
      .equip_cat,modes_description_cat,cat_program_path,
@@ -69,10 +75,6 @@ C
      .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
      .               tpid_prompt,tpid_parm
-      character*(*) ldisk2file_dir,ldisk2file_node,ldisk2file_userid
-      character*(*) ldisk2file_pass
-      character*(*) lmysql_host,lmysql_socket,lmysql_user
-      character*(*) lmysql_password,lmysql_db
       character*4 cepoch
       character*8 dr_rack_type,dr_reca_type,dr_recb_type
       logical kequip_over
@@ -91,24 +93,40 @@ C  LOCAL VARIABLES
       character*3 lprompt
       integer itemp
       character*20 lkeyword     !keyword
-      character*256 lvalue      !value
+      character*128 lvalue      !value
+
+      integer MaxToken
+      integer NumToken
+      parameter(MaxToken=6)
+      character*128 ltoken(MaxToken)
+      equivalence (lkeyword,ltoken(1))
+      equivalence (lvalue,ltoken(2))
+
       integer lu          !open lu
       integer ic,j,ilen,ierr
       character*256 cbuf
-      logical ktoken,keol,knospace
-      integer istart,inext
+      logical ktoken
       logical keof      !EOF reached in reading in file
 C
 C  1. Open the default control file if it exists.
+
+! Avery 5160. ht,wid,rows,cols,top,left
+      rlabsize(1)=1.0
+      rlabsize(2)=2.625
+      rlabsize(3)=10
+      rlabsize(4)=3
+      rlabsize(5)=0.5
+      rlabsize(6)=0.3125
+
 
       ilen = 0
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
-      ldisk2file_dir=" "
-      ldisk2file_node=" "
-      ldisk2file_userid=" "
-      ldisk2file_pass=" "
+      kautoftp0=.false.
+      ldisk2file_dir0 =" "
+      lautoftp_string0=" "
+
 
 C  2. Process the control file if it exists. This loops through twice, 
 C     once for each control file.
@@ -151,12 +169,8 @@ C     once for each control file.
 C  $CATALOGS
             if (lsecname .eq. "$CATALOGS") then
               do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
-                istart=1
-                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
-     >             knospace, keol)
-                istart=inext
-                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
-     >             knospace, keol)
+
+                call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
                 call capitalize(lkeyword)
 
                 if (lkeyword.eq.'SOURCE') then
@@ -204,12 +218,7 @@ C  $CATALOGS
 ! $MYSQL
             else if(lsecname .eq. "$MYSQL") then
               do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
-                istart=1
-               call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
-     >             knospace, keol)
-                istart=inext
-               call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
-     >             knospace, keol)
+               call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
                call capitalize(lkeyword)
 
                if (lkeyword.eq.'HOST') then
@@ -245,12 +254,14 @@ C  $SNAP
      >               lsecname .eq. "$DRUDG") then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csnap
+                call add_slash_if_needed(csnap)
                 call readline(lu,cbuf,keof,ierr,1)
               end if
 C  $PROC
             else if (lsecname .eq. '$PROC') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') cproc
+                call add_slash_if_needed(cproc)
                 call readline(lu,cbuf,keof,ierr,1)
               end if
 C  $SCRATCH
@@ -262,18 +273,15 @@ C  $SCRATCH
 C  $PRINT
             else if (lsecname .eq.'$PRINT') then
               do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
-! get keyword, value.
-                istart=1
-                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
-     >             knospace, keol)
-                istart=inext
-                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
-     >             knospace, keol)
+                call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
                 call capitalize(lkeyword)
+
+                ktoken=.false.
                 if(lvalue .ne. " ") then
                   nch=trimlen(lvalue)
                   ind=index(cbuf,lvalue(1:nch))
                   nch=trimlen(cbuf)
+                  ktoken=.true.
                 endif
 
                 if (lkeyword .eq.'LABELS') then
@@ -360,14 +368,9 @@ C                 label_size ht wid nrows ncols topoff leftoff
 C  $MISC
             else if (lsecname .eq. '$MISC') then
               do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
-                istart=1
-                call ExtractNextToken(cbuf,istart,inext,lkeyword,ktoken,
-     >             knospace, keol)
-                istart=inext
-                call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
-     >             knospace, keol)
-
+                call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
                 call capitalize(lkeyword)
+
                 if(lkeyword .eq. "EPOCH") then
                   if(lvalue .eq. "1950" .or. lvalue .eq. "2000") then
                      cepoch=lvalue(1:4)
@@ -377,22 +380,27 @@ C  $MISC
                   endif
 ! Disk2file stuff
                 else if (lkeyword .eq. 'DISK2FILE_DIR') then
-                  ldisk2file_dir=lvalue
-                else if (lkeyword .eq. 'DISK2FILE_NODE') then
-                  ldisk2file_node=lvalue
-                else if (lkeyword .eq. 'DISK2FILE_USERID') then
-                  ldisk2file_userid=lvalue
-                else if (lkeyword .eq. 'DISK2FILE_PASS') then
-                  ldisk2file_pass=lvalue
+                  ldisk2file_dir0=lvalue
+                  call add_slash_if_needed(ldisk2file_dir0)
+
+                else if(lkeyword .eq. 'AUTOFTP') then
+                   call capitalize(lvalue)
+                   if(numtoken .eq. 3) lautoftp_string0=ltoken(3)
+                   if(lvalue .eq. "YES" .or. lvalue .eq. "Y" .or.
+     >               lvalue .eq. "ON" .or. lvalue .eq. "TRUE") then
+                     kautoftp0=.true.
+                   else if(lvalue .eq. "NO" .or. lvalue .eq. "N" .or.
+     >               lvalue .eq. "OFF" .or. lvalue .eq. "FALSE") then
+                     kautoftp0=.false.
+                   else
+                     write(*,*) "RDCTL:     Wrong format for autoftp"
+                     write(*,*) "Should be: AUTOFTP [ON|OFF] <String>"
+                   endif
 C         EQUIPMENT
                 else if (lkeyword  .eq.'EQUIPMENT') then
                   dr_rack_type=lvalue(1:8)
-                  istart=inext
-                  call ExtractNextToken(cbuf,istart,inext,dr_reca_type,
-     >              ktoken,knospace, keol)
-                  istart=inext
-                  call ExtractNextToken(cbuf,istart,inext,dr_recb_type,
-     >              ktoken,knospace, keol)
+                  dr_reca_type=ltoken(3)
+                  dr_recb_type=ltoken(4)
                 else if(lkeyword .eq. 'EQUIPMENT_OVERRIDE') then
                   kequip_over=.true.
 C         TPICD
@@ -405,10 +413,7 @@ C         TPICD
                      write(luscn, *)
      >                "RDCTL10 ERROR: TPI prompt must be YES or NO"
                   endif
-                  istart=inext
-                  call ExtractNextToken(cbuf,istart,inext,lvalue,ktoken,
-     >               knospace, keol)
-                  read(lvalue,*) itemp
+                  read(ltoken(3),*) itemp
                   if(itemp .ge. 0) then
                     itpid_period=itemp
                   else
@@ -427,6 +432,11 @@ C         TPICD
           close (lu)
         end if  !"control file exists"
       end do  !"do 1,2"
-      call put_esc_in_string(ldisk2file_userid)
+
+! save original state
+      kautoftp = kautoftp0
+      ldisk2file_dir =ldisk2file_dir0
+      lautoftp_string=lautoFTP_string0
+
       RETURN
       END

@@ -31,7 +31,6 @@ C  Local:
       logical ksta ! set to true when $STATIONS is found
       logical kvlb ! set to true when $VLBA is found
       logical khed ! set to ksta when $HEAD is found
-      real rdum,reio
 
       character*80 cfirstline
 
@@ -75,10 +74,12 @@ C 021014 nrv Set kpostpass=.true. for astro (.not.geo) schedules.
 C 021021 nrv Don't set default tape motion parameters for VEX files
 C            because they have already been read in.
 C
-C
+! 2006Jul24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
+
       close(unit=LU_INFILE)
       open(unit=LU_INFILE,file=LSKDFI,status='old',iostat=IERR)
 
+      nstsav=0   !set a flag in freq.ftni.  This indicates we haven't read a F line yet.
       if (ierr.eq.0) then
         rewind(LU_INFILE)
       else
@@ -105,10 +106,7 @@ C       Read up to the $EXPER section to find the line number
         rewind(lu_infile)
         ireccv=0
         CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-        DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
-          IF (cbuf(1:6) .eq. "$EXPER") then
-            call locf(LU_INFILE,IRECCV)
-          endif
+        DO WHILE (ILEN.GT.0.and.cbuf(1:6) .ne. "$EXPER") !read schedule file
           CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
         enddo !read schedule file
         close(lu_infile)
@@ -120,7 +118,7 @@ C       read stations, codes, sources
 9009      format(' from VREAD iret=',i5,' ierr=',i5)
         endif
 C       Write out experiment information now.
-        write(luscn,'(/"Experiment name: ",4a2)') lexper
+        write(luscn,'(/"Experiment name: ",a)') cexper
         i=trimlen(cexperdes)
         if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
      .  cexperdes(1:i)
@@ -177,7 +175,7 @@ C
           CALL GTFLD(IBUF,ICH,ILEN,IC1,IC2)
           cexper=" "
           IF (IC1.GT.0) IDUMMY = ICHMV(LEXPER,1,IBUF,IC1,IC2-IC1+1)
-          rdum= reio(2,LUSCN,IBUF,-ILEN)
+          write(luscn,*) cexper
 C         Get the next line
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,3)
           DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
@@ -187,7 +185,7 @@ C         Get the next line
 C
         ELSE IF(ctype .eq. "SO" .or. ctype .eq. "ST" .or.
      >          ctype .eq. "FR" .or. ctype .eq. "HD") then
-          rdum= reio(2,LUSCN,IBUF,-ILEN)
+          write(*,*) cbuf(1:ilen)
 C         Get the first line of this section
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
@@ -213,11 +211,10 @@ C
           END DO
 C
         ELSE IF(ctype .eq. "SK") then !schedule
-          rdum= reio(2,LUSCN,IBUF,-ILEN)
+          write(luscn,*) cbuf(1:ilen)
 C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
 C
 C         Read the first line of the schedule
-          call locf(LU_INFILE,IRECSK)
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             IF (IERR.LT.0)  THEN
@@ -242,11 +239,7 @@ C           Read the next schedule entry
           END DO
 C
         ELSE IF(ctype .eq. "PR") then !procedures
-          rdum= reio(2,LUSCN,IBUF,-ILEN)
-C         write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
-C         Get the position of this section
-          call locf(LU_INFILE,IRECPR)
-C         And read the first line
+          write(luscn,*) cbuf(1:ilen)
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
         END IF
       END DO
@@ -261,8 +254,7 @@ C  needed, because it was checked before.
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) !read schedule file
           IF (cbuf(1:6) .eq. "$CODES") then
-            rdum= reio(2,LUSCN,IBUF,-ILEN)
-C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
+            write(luscn,*) cbuf(1:ilen)
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
               ILEN=(ILEN+1)/2
@@ -280,8 +272,8 @@ C Re-read $HEAD section if needed.
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) 
           IF (cBUF(1:5) .eq. "$HEAD") THEN
-            rdum= reio(2,LUSCN,IBUF,-ILEN)
-C           write(luscn,'(20a2)') (ibuf(i),i=1,(ilen+1)/2)
+            write(luscn,*) cbuf(1:ilen)
+
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
               ILEN=(ILEN+1)/2
@@ -298,10 +290,7 @@ C       Look for the string "Cover Letter" in .drg file
           rewind(lu_infile)
           write(luscn,'(" Re-reading to find the cover letter ... ",$)')
           CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
-          DO WHILE (ILEN.GT.0.and.ireccv.eq.0) !read schedule file
-            if(index(cbuf(1:ilen*2),'Cover Letter').gt.0) THEN
-              call locf(LU_INFILE,IRECCV)
-            endif
+          DO WHILE (ILEN.GT.0.and.cbuf(1:12) .ne. 'Cover Letter')
             CALL READF_ASC(lu_infile,iERR,IBUF,ISKLEN,ILEN)
           enddo !read schedule file
           write(luscn,'()')
@@ -313,7 +302,7 @@ C Not needed for VEX because they are read in when station is selected.
         write(luscn,9901)
 9901    format('SREAD02 - No observations found in the schedule')
       else
-        call obs_sort(luscn)   ! order the whole thing
+        call obs_sort(luscn,nobs)   ! order the whole thing
       endif
 C
       endif ! VEX/sked

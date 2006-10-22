@@ -18,7 +18,7 @@
 
       if(km5A .or. km5A_piggy) then
         if(kin2net_on) then
-          write(lufile,'("mk5=net_protocol=tcp:4194304:2097152")')
+          write(lufile,'("mk5=net_protocol=tcp:4194304:2097152;")')
         endif
         write(lufile,'(a)')   "mk5=DTS_id?"
         write(lufile,'(a)')   "mk5=OS_rev1?"

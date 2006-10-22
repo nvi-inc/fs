@@ -1,4 +1,4 @@
-      SUBROUTINE VLBAT(ksw,LSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
+      SUBROUTINE VLBAT(ksw,cSNAME,ICAL,LFREQ,IPAS,LDIR,IFT,LPRE,
      .            IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,LPST,NSTNSK,LSTN,
      .            MJD,UT,GST,MON,IDA,LMON,LDAY,ISTNSK,ISOR,ICOD,
      .            IPASP,IBLK,IDIRP,IFTOLD,NCHAR,
@@ -18,7 +18,8 @@ C
 C
 C  INPUT:
       logical ksw ! true if switching
-      integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LMON(2),
+      character cSNAME(max_sorlen)
+      integer*2 LSTN(MAX_STN),LMON(2),
      .LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn),lfreq,
      .ldsign2
       integer IPAS(MAX_STN),
@@ -32,26 +33,25 @@ C  INPUT:
 C
 C  LOCAL
         integer itemp
-      integer izero2,izero3
-        integer*2 lspdir,lsodir ! tape direction
+      integer izero2
+      character*1 cspdir ! tape direction
       integer iblen
-      integer*2 isname(23),blank10(5)
       integer ispin,irec,idir,ispinoff,ierr,ihead,idx,
      .ispins,iyrs,idayrs,ihrs,mins,iscs,
      .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,iftrem,
      .mino,isco,isp,i,nch,ispm,itu,idayrt,iyrt,ihrt,mint,isct
       real spdips,sps
       logical ktape,ktrack,kcont,kauto
-        logical kspin ! true if we need to spin tape to get to the
+      logical kspin ! true if we need to spin tape to get to the
 C                       next observation
-        logical kspinoff ! true if we need to spin the tape down
+      logical kspinoff ! true if we need to spin the tape down
 C                          to the end before changing it
-        logical kend ! true if tape is positioned at 0 or max
+      logical kend ! true if tape is positioned at 0 or max
       integer Z4000,Z100
-        integer*2 oapostrophe
+
       integer*2 ldirr
       LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
-      INTEGER ib2as,ichmv,ichmv_ch ! function
+      INTEGER ichmv,ichmv_ch ! function
         real tspin,speed ! functions
       integer iSpinDelay
 
@@ -59,11 +59,7 @@ C                          to the end before changing it
 
 C  INITIALIZED:
       DATA ldirr/2HR /
-        data blank10/'  ','  ','  ','  ','  '/
-      DATA isname/'sn','am','e=',''' ','  ','  ','  ','  ',
-     . ' r','a=','00',
-     . 'h0','0m','00','.0','s ','de','c=',' 0','0d','00','''0','0"'/
-      DATA Z4000/Z'4000'/, Z100/Z'100'/, oapostrophe/2h' /
+      DATA Z4000/Z'4000'/, Z100/Z'100'/
 C
 C
 C  HISTORY:
@@ -124,12 +120,11 @@ C 011011 nrv New variable KAUTO used to set up for autoallocate.
 C 011011 nrv Add KAUTO to wrtap call.
 C 021014 nrv Change "seconds" argument in TSPIN to real.
 C 2003Nov13 JMGipson.  Added extra argument to TSPIn
+! 2006Sep28 JMGipson. Got rid of holleriths. Changed lspdir to ASCII
 C
 C  Initialization
 
       izero2 = 2+Z4000 + Z100*2
-      izero3 = 3+Z4000 + Z100*3
-      iblen = 2*IBUF_LEN
       kcont = tape_motion_type(istn).eq.'CONTINUOUS'
 C
 C  Add a comment if a new tape is to mounted before the next observation
@@ -162,32 +157,18 @@ Cdyn
           else ! Turn off recording on the current tape and postpass it
             if (nrecst(istn).eq.2) then !dual recorders
               iftold=0
-              call char2hol('  ',IBUF,1,2) ! blank line
-              CALL writf_asc(LU,IERR,IBUF,1)
+              write(lu,*) " "
 C             Form the line
 C               write=(1,off)   tape=(1,STOP)  dur=0  stop=xxhxxmxxs  !NEXT!
               call tmadd(iyr,idayrp,ihrp,minp,iscp,2,
      .          iyrs,idayrs,ihrs,mins,iscs)
               if (idayrp.ne.idayrs) call wrdate(lu,iyr,idayrs)
-              nch = ichmv_ch(ibuf,1,'write=(')
-              nch = nch + ib2as(irec,ibuf,nch,1)
-              nch = ichmv_ch(ibuf,nch,',off)   tape=(')
-              nch = nch + ib2as(irec,ibuf,nch,1)
-              nch = ichmv_ch(ibuf,nch,',STOP)  dur=0')
-C             Add 2 seconds to previous stop time for this block
-              nch = ichmv_ch(ibuf,nch,'  stop=') 
-              nch = nch+ib2as(ihrs,ibuf,nch,izero2)
-              nch = ichmv_ch(ibuf,nch,'h')
-              nch = nch+ib2as(mins,ibuf,nch,izero2)
-              nch = ichmv_ch(ibuf,nch,'m')
-              nch = nch+ib2as(iscs,ibuf,nch,izero2)
-              nch = ichmv_ch(ibuf,nch,'s  !NEXT! ')
-              CALL writf_asc(LU,IERR,IBUF,nch/2)
+              write(lu,'("write(",i1,",off) tape=(",i1,"STOP) ",$ )')
+     >           irec,irec
+              write(lu,'(" dur=0  stop",2i2,"h",2i2,"m",2i2,"s")')
+     >           ihrs,mins,iscs
 C             Do the postpass command:    tape=(1,POSTPASS)
-              nch = ichmv_ch(ibuf,1,'tape=(')
-              nch = nch + ib2as(irec,ibuf,nch,1)
-              nch = ichmv_ch(ibuf,nch,',POSTPASS) ')
-              call writf_asc(lu,ierr,ibuf,nch/2)
+              write(lu,"('tape=(',i1,',POSTPASS)')") irec
 C             Now swap recorders
               if (irec.eq.1) then
                 irec=2
@@ -196,54 +177,45 @@ C             Now swap recorders
               endif
             endif
           endif
-        call char2hol('  ',IBUF(1),1,2)
-        CALL writf_asc(LU,IERR,IBUF,1)
-        call char2hol('!*   ** NEW TAPE **   *!',ibuf(1),1,24)
-        CALL writf_asc(LU,IERR,IBUF,12)
-        call char2hol('  ',IBUF(1),1,2)
-        CALL writf_asc(LU,IERR,IBUF,1)
-        call ifill(ibuf,1,iblen,32)
+        write(lu,*) " "
+        write(lu,'(a)') '!*   ** NEW TAPE **   *!'
+        write(lu,*) " "
       ENDIF ! new tape
 
 C   Setup block
+        write(lu,*) " "
 
-      call char2hol('  ',IBUF,1,2)
-      CALL writf_asc(LU,IERR,IBUF,1)
-C     if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then 
+C     if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then
 C     Write setup for first scan iobs=0
       if ((kcont.and.iobs.eq.0).or.(kcont.and.idir.ne.idirp)) then 
 C** Don't do this block if 'AUTO' -- no need to run to the end of the
 C   tape with auto allocation. NRV 000614
         if (iobs.gt.1.and..not.knewtp.and.
      .    tape_allocation(istn).ne.'AUTO') then ! run to end of tape
-          call char2hol('!* New Scan *! ',ibuf(1),1,14)
-          CALL writf_asc(LU,IERR,IBUF,7)
-          call wrsor(lsname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,
+          write(lu,'(a)') '!* New Scan *! '
+          call wrsor(csname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,
      .          decs2,lu)
           iftrem=float(maxtap(istn))/speed(icod,istn)
           call tmadd(iyr,idayr_save,ihr_save,min_save,
      .       isc_save,iftrem,IYRt,IDAYRt,IHRt,MINt,ISCt)
           call wrdur(ksw,1,0,1,ihrt,mint,isct,izero2,1,lu,0)
-          call char2hol('  ',IBUF,1,2)
-          CALL writf_asc(LU,IERR,IBUF,1)
+          write(lu,'(a)') " "
         endif ! run to end of tape
-        call char2hol('!* Setup *!    ',ibuf(1),1,14)
+        write(lu,'(a)') '!* Setup *!    '
       else
-        call char2hol('!* New Scan *! ',ibuf(1),1,14)
+        write(lu,'(a)') '!* New Scan *! '
       endif
-      CALL writf_asc(LU,IERR,IBUF,7)
-      call ifill(ibuf,1,iblen,32)
 C  Set dur=0 so that stop time is used by the system
 C  The stop time for the setup block is the start time of the scan,
 C  unless we need to spin the tape to a new position.
 
 C  Set up tape parameters
 
-      call char2hol('-',LSPDIR,1,1)
-      if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp)
-     .  call char2hol('+',LSPDIR,1,1)
-Cdyn 
-      if (kauto) call char2hol('+',LSPDIR,1,1) ! forward, always
+      cspdir="-"
+
+      if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp) cspdir="+"
+Cdyn
+      if (kauto) cspdir="+"
 C  ihead is the head offset position in microns
       IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
 C  ihddir is not really "direction", it is the corresponding pass within
@@ -291,7 +263,7 @@ C     Setup block. None needed for continuous unless change of direction.
 
 C  Source name, ra, dec in J2000 coordinates
 
-      call wrsor(lsname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,decs2,lu)
+      call wrsor(csname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,decs2,lu)
 
 C  Set up tracks for forward or reverse
 
@@ -312,65 +284,55 @@ Cdyn
 Cdyn comment out this call to wrtap. The tape=stop is not needed.
 Cdyn Well, it is needed to get parity checks done.
       IF (.not.kcont.or.(kcont.and.(IDIR.NE.IDIRP.or.iobs.eq.0))) THEN ! 
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto) ! stop/head
+        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto) ! stop/head
         ktape = .false.
       endif
-      call ifill(ibuf,1,iblen,32)
 C************************************************
 C       call vlbap(lu,icod,ierr)
 C************************************************
       if (ktrack) then ! write out new tracks
         call wrtrack(idx,lu,iblen,icod)
-        call ifill(ibuf,1,iblen,32)
       end if
 
 C  Spin tape down to the end before changing it
 
         if (kspinoff) then !write spin block for old tape
-        call char2hol('!* Spin down old tape *!',ibuf,1,24)
-        CALL writf_asc(LU,IERR,IBUF,12)
-        call ifill(ibuf,1,iblen,32)
+        write(lu,'(a)') '!* Spin down old tape *!'
         CALL TMADD(IYR,IDAYRp,IHRp,MINp,ISCp,ispinoff+isortm,
      .         IYR3,IDAYR3,IHR3,MIN3,ISC3)
 C         Stop time of this block is previous stop+ispinoff+isortm
-          if (idayr3.ne.idayrs) call wrdate(lu,iyr3,idayr3)
+        if (idayr3.ne.idayrs) call wrdate(lu,iyr3,idayr3)
         call wrdur(ksw,1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
         ktape = .true.
         iwr = 0
         ispin = 330
-          call char2hol('-',LSoDIR,1,1)
-        call wrtap(lsodir,ispin,ihead,lu,iwr,ktape,irec,kauto)
+        call wrtap("-",ispin,ihead,lu,iwr,ktape,irec,kauto)
 C  Wait block - wait either the time to change the tape
 C               or until the start time
-          call char2hol('!* Wait until new tape is mounted *!',
-     .    ibuf,1,36)
-        CALL writf_asc(LU,IERR,IBUF,18)
-        call ifill(ibuf,1,iblen,32)
-          if (kspin) then ! will spin the new tape after it's mounted
+        write(lu,'(a)') '!* Wait until new tape is mounted *!'
+        if (kspin) then ! will spin the new tape after it's mounted
           call tmsub(iyr,idayr,ihr,imin,isc,ispins+10,
      .      iyro,idayro,ihro,mino,isco)
-          else ! the next thing is the start time
+        else ! the next thing is the start time
             iyro=iyr
             idayro=idayr
             ihro=ihr
             mino=imin
             isco=isc
-          endif
-          if (idayro.gt.idayr3) call wrdate(lu,iyro,idayro)
+        endif
+        if (idayro.gt.idayr3) call wrdate(lu,iyro,idayro)
         call wrdur(ksw,1,0,888,ihro,mino,isco,izero2,3,lu,1)
         ktape = .true.
         iwr = 0
         ispin=0
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
+        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
       endif !write spin block for old tape
 
 C  Spin tape if required
 
       if (kspin) then !write spin blocks
-        call char2hol('!* Spin *!',ibuf,1,10)
-        CALL writf_asc(LU,IERR,IBUF,5)
-        call ifill(ibuf,1,iblen,32)
-          if (kspinoff) then 
+        write(lu,'(a)') '!* Spin *!'
+        if (kspinoff) then
 C           Stop time of this block is just start time minus 10
           call tmsub(iyr,idayr,ihr,imin,isc,10,
      .      iyr3,idayr3,ihr3,min3,isc3)
@@ -385,25 +347,21 @@ C           Stop time of this block is previous stop+ispin+isortm
         ktape = .true.
         iwr = 0
         ispin = 330
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
-        call char2hol('!* Wait *!',ibuf,1,10)
-        CALL writf_asc(LU,IERR,IBUF,5)
-        call ifill(ibuf,1,iblen,32)
+        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
+        write(lu,'(a)') '!* Wait *!'
 C  Wait block - wait until start time
-          if (idayr.gt.idayr3) call wrdate(lu,iyr,idayr)
+        if (idayr.gt.idayr3) call wrdate(lu,iyr,idayr)
         call wrdur(ksw,1,0,888,ihr,imin,isc,izero2,3,lu,1)
         ktape = .true.
         iwr = 0
         ispin=0
-        call wrtap(lspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
+        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
       endif !write spin blocks
 
 C  This is the block for recording
 
       if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then ! write setup comment
-        call char2hol('!* Record *!',ibuf,1,12)
-        CALL writf_asc(LU,IERR,IBUF,6)
-        call ifill(ibuf,1,iblen,32)
+        write(lu,"(a)")'!* Record *!'
       endif
       if (idayr2.gt.idayr) call wrdate(lu,iyr2,idayr2)
 
@@ -414,16 +372,16 @@ C  Start the tape moving
       ISP=SPDIPS*135.0/120.0
 Cdyn  The tape direction has already been set up above
       IF (IDIR.EQ.+1) then
-        call char2hol('+',LSPDIR,1,1)
+        cspdir="+"
       else
-        call char2hol('-',LSPDIR,1,1)
+        cspdir="-"
       end if
 Cdyn  Comment out the above for auto
       iwr = 1
       ktape=.false.
       if (.not.kcont.or.(kcont.and.(idir.ne.idirp))
      ..or.(kcont.and.iobs.eq.0))
-     .call wrtap(lspdir,isp,ihead,lu,iwr,ktape,irec,kauto)
+     .call wrtap(cspdir,isp,ihead,lu,iwr,ktape,irec,kauto)
 
 C  Loop begins in this block
 
@@ -440,19 +398,15 @@ C wrdur(ksw,istart,idur,iqual,ih,im,is,izero2,izero3,lu,setup)
 C  Set up converter frequencies
 
       IF (ksw) THEN !write loop
-        call ifill(ibuf,1,iblen,32)
-
 C       Write out set 1 of BBC frequencies
         do i=1,nbbcbuf(1)
-          call ifill(ibuf,1,iblen,32)
+          cbuf=" "
           nch = ichmv(ibuf,1,ibbcbuf(1,1,i),1,ibbclen(1,i))
           if (i.eq.nbbcbuf(1)) nch = ichmv_ch(ibuf,nch+1,'!NEXT! ')
           call writf_asc(lu,ierr,ibuf,nch/2)
         enddo
 
-        call ifill(ibuf,1,iblen,32)
-        call char2hol(' qual=2 ',ibuf,1,8)
-        CALL writf_asc(LU,IERR,IBUF,4)
+        write(lu,'(a)')' qual=2 '
 
 C       Write out set 2 of BBCs
         do i=1,nbbcbuf(2)
@@ -460,10 +414,7 @@ C       Write out set 2 of BBCs
         enddo
 
 C       Mark end of loop
-        call char2hol('!LOOP BACK! !NEXT!',ibuf,1,18)
-        CALL writf_asc(LU,IERR,IBUF,9)
-        call ifill(ibuf,1,iblen,32)
-
+        write(lu,'(a)') '!LOOP BACK! !NEXT!'
       end if ! write loop
 
 C  (save the last write for the end of outer loop)

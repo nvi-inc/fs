@@ -26,9 +26,7 @@ C 020606 nrv Add kcomment to indicate a comment was found
 	  IF (IERR.LT.0.OR.ILEN.LT.0) THEN
 	    RETURN
 	  ENDIF
-	  IF (JCHAR(IBUF,1).NE.Z2D)   THEN ! whoops - not ours!
-	    call locf(LU_INFILE,IREC)
-	    call aposn(LU_INFILE,IERR,irec-1)
+          if(cbuf(1:1) .ne. "-") then
 C Back up to just before the record
 	    RETURN
 	  ELSE ! continuation record
@@ -38,7 +36,7 @@ C Back up to just before the record
 	  ENDIF
 	ENDIF
 C
-	IF (JCHAR(IBUF,IC1).EQ.Z22) THEN ! comment
+	IF (cbuf(ic1:ic1) .eq. '"') then
           kcomment = .true.
 	  IC2 = ISCNC(IBUF,IC1+1,NCHAR,Z22)
 C Find the next quote

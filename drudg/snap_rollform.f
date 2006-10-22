@@ -1,5 +1,4 @@
       subroutine snap_rollform(lmode)
-      integer itype
       include 'hardware.ftni'
       character*(*) lmode
       character*20 ldum

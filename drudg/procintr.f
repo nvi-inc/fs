@@ -26,48 +26,27 @@ C Input
 !    None.
 
 ! functions
-      integer trimlen
 C  LOCAL:
-      integer*2 IBUF2(80)
-      character*160 cbuf2
-      equivalence (cbuf2,ibuf2)
-      integer iblen
-      integer idummy,nch,kerr
-      integer ichcm_ch,ichmv,ichmv_ch,ib2as
-      character*1 lq
+      character*2 cprfx
 
-      lq='"'
+      cprfx='" '
 C
-      cbuf2="define proc_library 00000000000x"
-      write(lu_outfile,'(a)') cbuf2(1:34)
+      write(lu_outfile,'(a)') "define  proc_library  00000000000x"
 
-      IF (ichcm_ch(LEXPER,1,'        ').EQ.0)  THEN
-        IDUMMY = ichmv_ch(LEXPER,1,'XXX     ')
-      END IF
-      cbuf2=lq
-      nch=3
-      NCH = ICHMV(IBUF2,NCH,LEXPER,1,8)
-      NCH = ICHMV(IBUF2,NCH+3,LSTNNA(1,ISTN),1,8)
-      NCH = ICHMV(IBUF2,NCH+2,LPOCOD(ISTN),1,2)
+      if(cexper .eq.  " ") cexper="XXX"
 
-      nch=trimlen(cbuf2)
-      write(lu_outfile,'(a)') cbuf2(1:nch)
+      write(lu_outfile,'(a,a,3x,a,2x,a)')
+     > cprfx,cexper,cstnna(istn),cpocod(istn)
 
-      CALL IFILL(IBUF2,1,iblen,32)
-      cbuf2='" drudg version '//cversion(1:6)
-      nch=24
-!      nch=ichmv_ch(ibuf2,1,'" drudg version ')
-!      nch=ichmv_ch(ibuf2,nch,cversion(1:6))
-      nch=ichmv_ch(ibuf2,nch,' compiled under FS ')
-      idummy=iVerMajor_FS
-      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
-      nch = ichmv_ch(ibuf2,nch,'.')
-      idummy=iVerMinor_FS
-      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
-      nch = ichmv_ch(ibuf2,nch,'.')
-      idummy=iVerPatch_FS
-      nch = nch + ib2as(idummy,ibuf2,nch,o'100000'+5)
-      write(lu_outfile,'(a)') cbuf2(1:nch)
+      if(iverPatch_FS .le. 9) then
+       write(lu_outfile,
+     >   "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
+     >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      else
+       write(lu_outfile,
+     >   "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i2)")
+     >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      endif
 
 
       write(lu_outfile,'(5a,$)')

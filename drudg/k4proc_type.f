@@ -11,13 +11,13 @@ C OUTPUT
       integer iktype ! type selected
 C
 C LOCAL:
-      integer ikin,i,nch
-      integer ias2b
+      integer ikin,i
 
 C LAST MODIFIED:
 C 980929 nrv New. Copied prompts from point.f
 C 990523 nrv Changed options 2 and 3 to be VLBA and VLBA4 rec.
 C            Add K4-1, DFC2100 option, now there are 12.
+! 2006JMGipson.  Did direct read instead of using Hollerith gtrsp.
 
       if (kbatch) then
         read(cr1,*,err=991) ikin
@@ -53,8 +53,7 @@ C     K4-2C+Mk-3/4     NA       NA       OK       OK
      .       '12 - Mk3/4 rack + DFC2100 recorder'/ 
      .       ' 0 - QUIT '/' ? ',$)
 
-	call gtrsp(ibuf,80,luusr,nch)
-	ikin= ias2b(ibuf(1),1,nch)
+        read(luusr,*) ikin
 	IF (ikin.EQ.0) RETURN
         IF (ikin.LT.1.OR.ikin.GT.12) GOTO 1
       endif

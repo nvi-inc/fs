@@ -1,0 +1,1814 @@
+#!/usr/bin/wish -f
+# Color libery: /usr/lib/X11/rgb.txt
+#**************************************************************************************************#
+#  Program:     msg                                                                                #
+#  Description: This program is a GUI made in Tcl/Tk. It contains Three different message forms,   #
+#               Ready, Start and  Stop, where the operator can type in information about the       #
+#               session. The operator can then email this information by clicking on a button      #
+#               Send. msg can run with or without the Fieldsystem but depending on if it is        #
+#               running or not msg behaves differently. msg also uses another Tcl script           #
+#               process_logfile internaly.                                                         # 
+#                                                                                                  #
+#  Usage:       msg                                                                                #
+#  Example:     msg                                                                                #
+#                                                                                                  #
+#  Input files:  msg.ctl, <session>.log                                                            #
+#  Output files: /tmp/text_message.txt                                                                  #
+#                                                                                                  #
+#  Input programs : lognm, inject_snap, mailx, kill, chmod, process_logfile                              #
+#                                                                                                  #
+#       types of files are:                                                                        #
+#          txt, ctl, log                                                                           #
+#                                                                                                  #
+# 990621 kar Created version                                                                       #
+#**************************************************************************************************#
+global tkVersion
+# Screen layout constants
+
+# Determine the resolution. 
+  set win_sizeX [winfo screenwidth .]
+  set win_sizeY [winfo screenheight .]  
+
+#position window full screen from top left corner.
+  if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
+      set size 0  ;# Multipication factor to change size
+      set fontsize 10
+  } else {
+      set size 0    ;# Multipication factor to change size
+      set fontsize 14
+  }
+
+  wm geometry . +0+0
+
+
+canvas .c -width [expr 180*$size] \
+	  -height [expr 90*$size]
+
+#*************************************** Variables *********************************************#
+set current_form ""
+set pointing_id 0
+set problem_scans_id 0
+set station ""
+set nr_of_pointing_entries 5
+set nr_of_problem_scans_entries 5
+set auto_start 0
+set put_into_log 0
+set get_exp_name 0
+set pid [pid]
+#***********************************************************************************************#
+
+
+#***********************************************************************************************#
+#********************************* Initialization Routines *************************************#
+#***********************************************************************************************#
+
+
+#***********************************************************************************************#
+# Subroutine: read_setup_file                                                                   #
+# Purpose:    This subroutine reads the file msg.ctl if it exists and sets variables such as    #
+#             send_to, cc, station, nr_of_pointing_entries,nr_of_problem_scans_entries,         #
+#             nr_of_tape_entries, auto_start, put_into_log and get_exp_name.                    #
+#***********************************************************************************************#
+proc read_setup_file {} {
+global send_to cc station auto_start put_into_log get_exp_name nr_of_pointing_entries nr_of_problem_scans_entries
+
+ if {[file exists /usr2/control/msg.ctl]} {
+
+  set setup_file [open /usr2/control/msg.ctl r]
+   while {[gets $setup_file line] >=0} {
+
+    #**************************************************#
+    # Pattern matche's the line and then splits it on  #
+    # : to extract the right value.                    # 
+    #**************************************************#
+    if {[regexp {Send to:} $line]} {
+     set send_to [lindex [split $line :] 1]
+    } elseif {[regexp {Cc:} $line]} {
+     set cc [lindex [split $line :] 1]
+    } elseif {[regexp {Station:} $line]} {
+     set station [lindex [split $line :] 1]
+    } elseif {[regexp {Number of pointing entries:} $line]} {
+     set nr_of_pointing_entries [lindex [split $line :] 1]
+    } elseif {[regexp {Number of problem scan entries:} $line]} {
+     set nr_of_problem_scans_entries [lindex [split $line :] 1]
+    } elseif {[regexp {Auto start mode:} $line]} {
+     set auto_start [lindex [split $line :] 1]
+    } elseif {[regexp {Put message into log:} $line]} {
+     set put_into_log [lindex [split $line :] 1]
+    } elseif {[regexp {Get session name:} $line]} {
+     set get_exp_name [lindex [split $line :] 1]
+    }
+   }
+  close $setup_file
+ }
+}
+
+#************************************ End of subroutine ****************************************#
+
+
+#***********************************************************************************************#
+# Subroutine: run_lognm                                                                         #
+# Purpose:    This subroutine runs the program logname to find out if the fieldsystem is        #
+#             running or not. It sets a variable FS_is_running that is used later in the        #
+#             program to determine if the auto start mode is possible or not and if the text    #
+#             message should be inserted into the logfile. If lognm generates a logfile name it #
+#             uses this to set the session name.                                                #  
+#***********************************************************************************************#
+proc run_lognm {} {
+
+
+  #*****************************************************#
+  # Depending on the output from lognm the variable     #
+  # FS_is_running is set.                               #
+  #*****************************************************# 
+   proc set_fieldsystem_mode filename {
+    global session get_exp_name FS_is_running logfile_name logname_is_set
+      if {$filename=="error"} {
+       set FS_is_running 0
+       set logname_is_set 0
+      } elseif {$filename=="station"} {
+       set FS_is_running 1
+       set logname_is_set 0
+      } else { 
+       set FS_is_running 1
+        if {$get_exp_name==1} {
+         #***** Cuts of <two last characters>.log from the logfile name *****#
+         set session [lindex [split $filename .] 0]
+         set logfile_name $session
+         set logname_is_set 1
+         set session [string range $session 0 [expr [string length $session]-3]]
+        }
+      }
+   }
+ 
+  #*****************************************************#
+  # The program lognm is executed. If the fieldsystem   #
+  # is not running an error is caught and the routine   #
+  # set_fieldsystem_mode is called with "error" as input#
+  #*****************************************************# 
+   if [catch {set filename [exec lognm]} error_message] {
+    set_fieldsystem_mode "error"
+   } else {
+    set_fieldsystem_mode $filename
+   }
+
+  
+}
+#************************************ End of subroutine ****************************************#
+
+
+#***********************************************************************************************#
+# Subroutine: create_menubar                                                                    #
+# Purpose:    This subroutine creates the menybar containing menues and menu buttons.           #
+#***********************************************************************************************#
+proc create_menubar {} {
+global read 
+
+frame .menubar -relief raised -bd 1 -bg CadetBlue
+pack .menubar -side top -fill x
+
+menubutton .menubar.setup -text Setup -relief flat -fg white -bg CadetBlue -underline 0 -menu .menubar.setup.options
+
+button .menubar.ready -text Ready -relief raised -bg CadetBlue -fg white -command {form_controler 3}
+button .menubar.start -text Start -relief raised -bg CadetBlue -fg white -command {form_controler 1}
+button .menubar.stop -text Stop -relief raised -bg CadetBlue -fg white -command {form_controler 4}
+button .menubar.exit -text Exit -relief raised -bg red -fg white -command {configure_setup_file; kill_process_logfile; exit}
+
+menu .menubar.setup.options -bg SteelBlue3 -fg white -tearoff 0
+.menubar.setup.options add command -label "Send to.." -command configure_email_adresses
+.menubar.setup.options add command -label "Station.." -command configure_station_name
+.menubar.setup.options add command -label "Dynamic entries.." -command configure_dynamic_entries
+.menubar.setup.options add checkbutton -label "Auto start" -variable auto_start
+.menubar.setup.options add checkbutton -label "Put message into log" -variable put_into_log
+.menubar.setup.options add checkbutton -label "Get session from log" -variable get_exp_name
+
+pack .menubar.setup .menubar.ready .menubar.start .menubar.stop .menubar.exit -side left -fill both
+pack .menubar.exit -side right -fill both
+
+}
+#************************************ End of subroutine ****************************************#
+
+
+#***********************************************************************************************#
+# Subroutine: form_controler                                                                    #
+# Purpose:    This subroutine decides which form that should be present in the application. The #
+#             first part of the routine destroys all existing widgets and unsets all used       #
+#             variables. The second part creates a new form.                                    #
+#***********************************************************************************************#
+proc form_controler which_form {
+global pointing_id problem_scans_id current_form process_file
+   
+  #*****************************************************#
+  # Destroys every singel widget in the start form.     #
+  #*****************************************************# 
+  destroy .start_form .auto_start_label .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .start_form_label \
+          .ready_data_label .ready_border .source_ready_label .source_name .source_time .time_ready_label .session_label\
+          .session_label2 .session_entry .session_name .start_recording_label .start_recording_entry \
+          .start_recording_source .start_recording_source2 .at_label .ut_label .ut_entry .ut_time_label .ut_time_label2 \
+          .source_box_label .source_box_text .source_box_scroll .waiting_frame .waiting_label .current_source_label \
+          .abort_button .send_button
+
+  #*****************************************************#
+  # Destroys every singel widget in the ready and stop  #
+  # forms.                                              #
+  #*****************************************************# 
+  destroy .form .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal9 .internal10 .internal11 .internal12 .internal13 .internal14 \
+          .internal15 .internal16 .internal17 .ready_form_label .stop_form_label .session_label .session_entry \
+          .start_source_label .start_source_entry .comment_label_frame .comment_label .comment_text .comment_scroll \
+          .first_source_label .firts_source_entry .at_label .ut_label .time_entry .problem_scan_label .problem_scan_frame \
+          .add_scan_button .remove_scan_button .scan_source_label .scan_start_label .explanation_label .gps_frame \
+          .gps_fmout .fmout_gps .gps-fmout_entry .gps_unit_label .tape_inventory_label .thin_entry .thin_label .thick_entry \
+           .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label \
+           .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label \
+           .disk_inventory_labelE .packE_entry .packE_label \
+          .thick_label .wx_frame .wx_label .temperature_label .temperature_entry .pressure_label .pressure_entry \
+          .humidity_label .humidity_entry .skycondition_label .skycondition_entry .cable_label .larger_frame \
+          .longer_cable_label .finished_label .finished_entry .ut_label \
+          .is_frame .plus .minus .cable_border .cable_entry .unit_label .is .is_not .nominal_label .pointing_label \
+          .pointing_frame .add_button .remove_button .source_label .az_label .el_label .x-sefd_label .s-sefd_label \
+          .offset1_label .offset2_label .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label \
+          .tsys_value2_entry .tsys_value3_label .tsys_value3_entry .rec-humidity_label .rec-humidity_entry \
+          .send_button_frame .auto
+
+
+          for {set i 0} {$i < $pointing_id} {incr i 1} {
+           destroy .pointing_entry_frame$i .border$i .source_entry$i .az_entry$i \
+                   .el_entry$i .x-sefd_entry$i .s-sefd_entry$i .offset1_entry$i .offset2_entry$i
+          }
+
+          for {set i 0} {$i < $problem_scans_id} {incr i 1} {
+           destroy .problem_scan_frame$i .problem_scan_border$i .source_scan_entry$i .scan_start_entry$i .explanation_entry$i
+          }
+
+
+  #*****************************************************#
+  # Unsets all the variables                            #
+  #*****************************************************#
+  if {$current_form == "start" || $current_form == "auto start"} {
+   global first_source source_time start_time ut_on_source
+   unset start_time ut_on_source 
+   set first_source ""
+   set source_time ""
+  } elseif {$current_form == "ready"} {
+   global gps gps_fmout temperature pressure humidity \
+         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+   unset gps gps_fmout temperature pressure humidity \
+         sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+  } elseif {$current_form == "stop"} {
+   global thin thick packA packB packC packD finished
+   unset thin thick packA packB packC packD finished
+  }
+
+     if {$current_form == "ready"} {
+      global pointing_value_array
+      unset pointing_value_array
+     }
+ 
+     if {$current_form == "stop"} {
+      global problem_scan_value_array
+      unset problem_scan_value_array
+     }
+
+
+  #*****************************************************#
+  # Create a new form. the variable current_form is set #
+  # to determine proceeding functions in the program.   #
+  #*****************************************************#
+  set pointing_id 0
+  set problem_scans_id 0
+  if {$which_form==1} {
+   create_start_form 0
+   set current_form "start"
+  } elseif {$which_form==2} {
+   create_start_form 1
+   set current_form "auto start"
+  } elseif {$which_form==3} {
+   create_form 0
+   set current_form "ready"
+  } elseif {$which_form==4} {
+   create_form 1
+   set current_form "stop"
+  }
+}
+
+
+#************************************************************************************************#
+# Subroutine: create_start_form                                                                  #
+# Purpose:    This subroutine builds up the manual start form and the auto start form containing #
+#             widgets such as frames, labels, entrys, buttons, scrollbars and textareas. The     #
+#             start forms are composed max 7 internal frames where each frame contains different #
+#             type of widgets.                                                                   #   
+#************************************************************************************************#
+proc create_start_form form {
+global session first_source source_time
+
+
+  #*******************************************************************#
+  # process_logfile_line is called when the external Tcl script       #
+  # process_logfile has been outputing data. The line is written in   #
+  # the .source_box_text and the cursor is set to the last line.      #
+  #*******************************************************************#
+  proc process_logfile_line file {
+   global st_time current_source look_for_st
+
+   if [eof $file] {
+     catch {close $file} 
+     return
+   }
+
+   gets $file line
+   .source_box_text insert end "$line\n"    
+   set last_index [.source_box_text index end]
+   set first_index [expr $last_index+2]
+   .source_box_text yview moveto $first_index
+
+   if {[regexp {Finished processing} $line]} {
+    set look_for_st 1
+   }
+
+   # the lable current source is updated if the line matches :source=. 
+   if {[regexp {:source=} $line]} {
+    set current_source [lindex [split [lindex [split $line =] 1] ,] 0]
+    .current_source_label config -text "Current source is: $current_source"
+   }
+
+   # If the beginning of the file is checked then start looking for the pattern :st= #
+   if {$look_for_st==1} {  
+    # if the line matches :st= then the time is set and a text message is sent, auto start mode is done.
+    if {[regexp {:st=} $line] || [regexp {:st1=} $line] || [regexp {:st2=} $line] || [regexp {:disk_record=on} $line]} {
+     stop_auto_start_mode 0
+     set st_time [string range [lindex [split $line s] 0] 5 16]
+     send_mail 
+     .waiting_label config -text "Done"
+     .abort_button config -text "Go to stop" -width 8 -command {form_controler 4}    
+    }
+   }
+
+  }
+
+
+  #*******************************************************************#
+  # start_auto_start_mode starts another process, process_logfile     #
+  # which opens a logfile and outputs every new line that comes in to #
+  # the logfile. to communicate with this process a pipe is opened    #
+  # to read the output from the process and every time a new line has #
+  # been read a fileevent is used to process this line in the routine #
+  # process_logfile_line. If the logfile_name has been set in the     #
+  # routine run_lognm then this is used as input to the               #
+  # process_logfile otherwise the session name is used.               #
+  #*******************************************************************#
+  proc start_auto_start_mode {} {
+   global process_file session logfile_name look_for_st current_source first_source
+    set current_source $first_source
+    set look_for_st 0
+
+     if {[info exists logfile_name]} {
+      set logfile_name "$logfile_name.log"
+     }
+
+   set process_file [open |[list process_logfile $logfile_name] r]
+   fileevent $process_file readable [list process_logfile_line $process_file]
+  }
+
+
+  #*******************************************************************#
+  # stop_auto_start_mode kills the started process, process_logfile.  #
+  # Depending on the input abort_status the .waiting_label and the    #
+  # .abort_button should be reconfigured.                             #
+  #*******************************************************************#
+  proc stop_auto_start_mode abort_status {
+    global process_file
+    exec kill -9 [pid $process_file]
+      if {$abort_status==1} {
+       .waiting_label config -text "Processing Aborted"
+       .abort_button config -text "Return to ready" -width 13 -command {form_controler 3}
+      }    
+  }
+
+#****************** Defines all the internal frames ******************# 
+frame  .start_form -width 29c -height 9c -relief ridge -bg SteelBlue3
+pack   .start_form -side top -fill both -expand 0
+frame  .internal1 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal2 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal3 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal4 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal5 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal6 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7 -width 21c -height 7m -relief flat -bg SteelBlue3
+
+pack .c -in .internal1
+pack .c -in .internal2
+pack .c -in .internal3
+pack .c -in .internal4
+pack .c -in .internal5
+pack .c -in .internal6
+pack .c -in .internal7
+
+if {$form==0} {
+pack   .internal1 .internal2 .internal3 .internal6 .internal7 -in .start_form -side top -fill both -expand 1
+} elseif {$form==1} {
+pack   .internal1 .internal2 .internal4 .internal5 .internal6 .internal7 -in .start_form \
+}
+# the start frame should expand to it't set size.
+pack propagate .start_form 0
+
+#**********************************************************************************************#
+# This part builds up the internal1 frame with one label that tells the name of the form.      #
+#**********************************************************************************************#
+if {$form==0} {
+label  .start_form_label -text "Manual Start Form" -bg SteelBlue3 -fg white -width 20
+pack   .start_form_label -in .internal1 -side top -pady 1m
+} elseif {$form==1} {
+label  .auto_start_label -text "Auto start form" -bg SteelBlue3 -fg white -width 20
+pack   .auto_start_label -in .internal1 -side top -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds up the internal2 frame with five static labels and three dynamic labels.    #
+#**********************************************************************************************#
+label  .ready_data_label -text "Ready Data:" -bg SteelBlue3 -fg white -width 22
+label  .session_label -text "Session: " -bg SteelBlue3 -fg white -width 11
+label  .session_name  -text "$session" -bg SteelBlue3 -fg white -width 9
+label  .source_ready_label -text "First source is: " -bg SteelBlue3 -fg white -width 18
+label  .source_name -text "$first_source" -bg SteelBlue3 -fg white -width 10
+label  .time_ready_label -text "at: " -bg SteelBlue3 -fg white -width 5
+label  .source_time -text "$source_time" -bg SteelBlue3 -fg white -width 10
+label  .ut_time_label -text "UT" -bg SteelBlue3 -fg white -width 4
+pack   .ready_data_label .session_label .session_name .source_ready_label .source_name .time_ready_label \
+.source_time .ut_time_label -in .internal2 -side left -pady 1m
+
+
+#**********************************************************************************************#
+# This part builds up the internal3 frame with three labels and three entries for the manual   #
+# start form.                                                                                  #
+#**********************************************************************************************#
+label  .session_label2 -text "session name:" -bg SteelBlue3 -fg white -width 22
+entry  .session_entry -width 9 -relief sunken -textvariable session
+label  .start_recording_label -text "Started recording with source:" \
+-bg SteelBlue3 -fg white -width 33
+entry  .start_recording_entry -width 10 -relief sunken -textvariable ut_on_source
+label  .at_label -text " at:" -bg SteelBlue3 -fg white -width 6
+entry  .ut_entry -width 9 -relief sunken -textvariable start_time
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 5
+ pack   .session_label2 .session_entry .start_recording_label .start_recording_entry .at_label .ut_entry \
+.ut_label -in .internal3 -side left -pady 0m 
+
+
+#**********************************************************************************************#
+# This part builds up the internal4 frame with one label and a textarea for the auto start     #
+# form.                                                                                        #
+#**********************************************************************************************#
+if {$form==1} {
+label     .source_box_label -text "Log processing:" -bg SteelBlue3 -fg white -width 22
+text      .source_box_text -width 90 -height 3 -wrap none -relief raised -bd 2 \
+           -yscrollcommand ".source_box_scroll set"
+scrollbar .source_box_scroll -command ".source_box_text yview"
+pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -side left -pady 1m -fill both
+}
+
+#**********************************************************************************************#
+# This part builds up the internal5 frame with one static label and one dynamic label for the  #
+# auto start form.                                                                             #
+#**********************************************************************************************#
+frame     .waiting_frame -width 70 -bg SteelBlue3 -relief flat
+label     .current_source_label -text "Current source is: $first_source" \
+-bg SteelBlue3 -fg white -width 30
+label     .waiting_label -text "Waiting for start tape" -bg SteelBlue3 -fg white -width 25
+pack      .waiting_frame -in .internal5 -side top -pady 1m
+pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 1m -fill both
+
+
+#**********************************************************************************************#
+# This part builds up the internal6 frame. Depending on the value of form either a send button #
+# or an Abort button is created. The Send button calls the routine send_mail while the abort   #
+# button calls the routine stop_auto_start_mode.                                               #
+#**********************************************************************************************#
+button .abort_button -text "Abort" -bg SteelBlue3 -fg white -width 6 \
+-relief raised -command {stop_auto_start_mode 1}
+button .send_button -text "Send" -bg SteelBlue3 -fg white -width 6 \
+-relief raised -command {send_mail; .send_button config -text "Go to stop" -width 12 -command {form_controler 4}} 
+
+ if {$form==0} {
+  pack   .send_button -in .internal6 -side top -pady 1m
+ } elseif {$form==1} {
+  pack   .abort_button -in .internal6 -side top -pady 1m
+ }
+
+ #*************** If auto start mode then call the routine start_auto_start_mode *************#
+ if {$form==1} {
+  start_auto_start_mode
+ }
+
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+# Subroutine: create_form                                                                      #
+# Purpose:    This subroutine builds up the ready, stop and wrap up forms depending on the     #
+#             value of the parameter form. Theses forms contains widgets such as frames,       #
+#             labels, entrys, buttons, radiobuttons, checkbuttons, scrollbars and textareas.   #
+#             The data forms is composed of max 16 internal frames where each frame contains   #
+#             different type of widgets.                                                       #   
+#**********************************************************************************************#
+proc create_form form {
+global pointing_id problem_scans_id session first_source source_time
+ 
+  #*******************************************************************#
+  # Four internal subroutines, add_pointing_entrys,                   #
+  # add_problem_scan_entrys, delete_pointing_entrys, and              # 
+  # delet_problem_scan_entrys. These routines are used to add or      #
+  # remove dynamic pointing, problem scan or tape entries. Each       #
+  # dynamic frame has its own id which is used to manipulate the      #
+  # dynamic variables and structures.                                 #
+  #*******************************************************************#
+  proc add_pointing_entrys id {
+   global  pointing_value_array
+   frame  .pointing_entry_frame$id -width 25 -bg SteelBlue3 -relief flat      
+   label  .border$id -text "" -bg SteelBlue3 -width 21
+   entry  .x-sefd_entry$id -width 6 -relief sunken -textvariable pointing_value_array(x_sefd$id)
+   entry  .s-sefd_entry$id -width 6 -relief sunken -textvariable pointing_value_array(s_sefd$id)
+   entry  .source_entry$id -width 10 -relief sunken -textvariable pointing_value_array(source$id)
+   entry  .az_entry$id -width 6 -relief sunken -textvariable pointing_value_array(az$id)
+   entry  .el_entry$id -width 6 -relief sunken -textvariable pointing_value_array(el$id)
+   entry  .offset1_entry$id -width 6 -relief sunken -textvariable pointing_value_array(offset1$id)
+   entry  .offset2_entry$id -width 6 -relief sunken -textvariable pointing_value_array(offset2$id)
+   pack   .pointing_entry_frame$id -in .internal13 -side top  -fill both -expand 1
+   pack   .border$id .x-sefd_entry$id .s-sefd_entry$id .source_entry$id .az_entry$id .el_entry$id .offset1_entry$id \
+          .offset2_entry$id -in .pointing_entry_frame$id \
+          -side left -padx 3m -pady 1m   
+  }
+
+  proc add_problem_scan_entrys id {
+   global  problem_scan_value_array
+   frame  .problem_scan_frame$id -width 25 -bg SteelBlue3 -relief flat      
+   label  .problem_scan_border$id -text "" -bg SteelBlue3 -width 21
+   entry  .source_scan_entry$id -width 10 -relief sunken -textvariable problem_scan_value_array(Source$id)
+   entry  .scan_start_entry$id -width 8 -relief sunken -textvariable problem_scan_value_array(Scan_start$id)
+   entry  .explanation_entry$id -width 20 -relief sunken -textvariable problem_scan_value_array(Explanation$id)
+   pack   .problem_scan_frame$id -in .internal6 -side top -fill both -expand 1
+   pack   .problem_scan_border$id .source_scan_entry$id .scan_start_entry$id \
+          .explanation_entry$id -in .problem_scan_frame$id -side left -padx 3m -pady 1m
+  } 
+
+  proc delete_pointing_entrys id {
+   global pointing_value_array
+   destroy .border$id
+   destroy .source_entry$id; unset pointing_value_array(source$id)
+   destroy .az_entry$id; unset pointing_value_array(az$id)
+   destroy .el_entry$id; unset pointing_value_array(el$id)
+   destroy .x-sefd_entry$id; unset pointing_value_array(x_sefd$id)
+   destroy .s-sefd_entry$id; unset pointing_value_array(s_sefd$id)
+   destroy .offset1_entry$id; unset pointing_value_array(offset1$id)
+   destroy .offset2_entry$id; unset pointing_value_array(offset2$id)
+   destroy .pointing_entry_frame$id
+  }
+
+  proc delete_problem_scan_entrys id {
+   global problem_scan_value_array 
+   destroy .problem_scan_border$id; 
+   destroy .source_scan_entry$id; unset problem_scan_value_array(Source$id) 
+   destroy .scan_start_entry$id; unset problem_scan_value_array(Scan_start$id) 
+   destroy .explanation_entry$id; unset problem_scan_value_array(Explanation$id)
+   destroy .problem_scan_frame$id;
+  }
+
+
+  #*****************************************************************#
+  # This subroutine is called when the add or remove buttons in the #
+  # the ready, or stop form are pressed down. Depending on the      #
+  # current value of the pointing_id, or problem_scans_id it uses   #
+  # the four routines above to add or remove dynamic entries or it  #
+  # outputs en error message. Every time the entries have been      #
+  #  manipulated the corresponding id is changed.                   #
+  #*****************************************************************#
+  proc check_id {which_process which_entry} {
+   global pointing_id problem_scans_id nr_of_pointing_entries nr_of_problem_scans_entries
+    if {$which_process=="add"} {
+
+     if {$which_entry=="pointing"} {
+       if {$pointing_id<$nr_of_pointing_entries} {
+        add_pointing_entrys $pointing_id
+        set pointing_id [expr $pointing_id+1]
+       } else { 
+        output_error 1 "pointing"
+       }
+     } elseif {$which_entry=="problem_scans"} {
+       if {$problem_scans_id<$nr_of_problem_scans_entries} {
+        add_problem_scan_entrys $problem_scans_id
+        set problem_scans_id [expr $problem_scans_id+1]
+       } else { 
+        output_error 1 "Problem scan"
+       }
+     }
+
+    } elseif {$which_process=="remove"} {
+       
+       if {$which_entry=="pointing"} {
+        if {$pointing_id>1} {
+         delete_pointing_entrys [expr $pointing_id-1]
+         set pointing_id [expr $pointing_id-1]
+        } else { 
+         output_error 2 "pointing"
+        }
+       } elseif {$which_entry=="problem_scans"} {
+        if {$problem_scans_id>1} {
+	 delete_problem_scan_entrys [expr $problem_scans_id-1]
+         set problem_scans_id [expr $problem_scans_id-1]
+        } else { 
+         output_error 2 "Problem scan"
+        }
+       }
+    }
+  }
+
+#****************** Defines all the internal frames *****************#    
+frame  .form -width 15c -height 15c -relief ridge -bg SteelBlue3
+pack   .form -side top -fill both -expand 1
+frame  .internal1 -width 21c -height 3c -relief flat -bg SteelBlue3 
+frame  .internal2 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal3 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal4 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal5 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal6 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7a -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7c -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7e -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal8 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal9 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal10 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal11 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal12 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal13 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal14 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal15 -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal16 -width 21c -height 3c -relief flat -bg SteelBlue3
+
+pack .c -in .internal1
+pack .c -in .internal2
+pack .c -in .internal3
+pack .c -in .internal4
+pack .c -in .internal5
+pack .c -in .internal6
+pack .c -in .internal7
+pack .c -in .internal7a
+pack .c -in .internal7c
+pack .c -in .internal7e
+pack .c -in .internal8
+pack .c -in .internal9
+pack .c -in .internal10
+pack .c -in .internal11
+pack .c -in .internal12
+pack .c -in .internal13
+pack .c -in .internal14
+pack .c -in .internal15
+pack .c -in .internal16
+
+ if {$form==0} {
+     frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     pack .c -in .internal17
+ } else {
+     frame  .internal17 -width 22c -height 7m -relief flat -bg SteelBlue3
+     pack .c -in .internal17
+ } 
+
+#**********************************************************************************************#
+# Each form has a different composition of internal frames.                                    #
+#**********************************************************************************************#
+if {$form==0} {
+pack   .internal1 .internal2 .internal3 .internal4 .internal7 .internal8 .internal9 .internal10 .internal11 \
+.internal12 .internal13 .internal14 .internal15 .internal16 .internal17 -in .form -side top -fill both -expand 1
+} elseif {$form==1} {
+pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal16 \
+.internal17 -in .form -side top -fill both -expand 1
+}
+
+#**********************************************************************************************#
+# This part builds up the internal1 frame with a label that tells the name of the form.        #
+#**********************************************************************************************#
+if {$form==0} {
+label  .ready_form_label -text "Ready Form" -bg SteelBlue3 -fg white -width 20
+pack   .ready_form_label -in .internal1 -side top -pady 1m
+} elseif {$form==1} {
+label  .stop_form_label -text "Stop Form" -bg SteelBlue3 -fg white -width 20
+pack   .stop_form_label -in .internal1 -side top -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds up the internal2 frame with one labels and one entry.                       #
+#**********************************************************************************************#
+label  .session_label -text "Session name:" -bg SteelBlue3 -fg white -width 25
+entry  .session_entry -width 15 -relief sunken -textvariable session
+pack   .session_label .session_entry -in .internal2 -side left -pady 1m    
+
+#**********************************************************************************************#
+# This part builds the internal3 frame with one internal frame containing a label, one textarea#
+# and one scrollbar attached to the textarea.                                                  #
+#**********************************************************************************************#
+frame     .comment_label_frame -width 25 -bg SteelBlue3 -relief flat
+label     .comment_label -text "Comments:" -bg SteelBlue3 -fg white -width 25
+text      .comment_text -width 55 -height 5 -relief sunken -bd 2 -yscrollcommand ".comment_scroll set"
+scrollbar .comment_scroll -command ".comment_text yview" 
+pack      .comment_label_frame .comment_text .comment_scroll -in .internal3 -side left -pady 1m -fill both
+pack      .comment_label -in .comment_label_frame -side top
+
+
+#**********************************************************************************************#
+# This part builds up the internal4 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==0} {
+label  .first_source_label -text "First source:" -bg SteelBlue3 -fg white -width 25
+entry  .firts_source_entry -width 12 -relief sunken -textvariable first_source
+label  .at_label -text "at" -bg SteelBlue3 -fg white -width 4
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 4
+entry  .time_entry -width 10 -relief sunken -textvariable source_time
+pack   .first_source_label .firts_source_entry .at_label .time_entry .ut_label -in .internal4 -side left -pady 1m
+} elseif {$form==1} {
+label  .problem_scan_label -text "Problem scan(s):" -bg SteelBlue3 -fg white -width 25
+pack   .problem_scan_label -in .internal4 -side left -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds up the internal5 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==1} {
+label  .problem_scan_frame -width 25 -height 2 -bg SteelBlue3 -relief flat 
+button .add_scan_button -text "Add" -bg SteelBlue3 -fg white -width 4 \
+-relief raised -command {check_id "add" "problem_scans"}
+button .remove_scan_button -text "Remove" -bg SteelBlue3 -fg white -width 4 \
+-relief raised -command {check_id "remove" "problem_scans"}
+label  .scan_source_label -text "Source" -bg SteelBlue3 -fg white -width 8
+label  .scan_start_label -text "Scan start" -bg SteelBlue3 -fg white -width 14
+label  .explanation_label -text "Explanation of problem" -bg SteelBlue3 -fg white -width 21
+pack   .problem_scan_frame -in .internal5 -side left -fill both -pady 1m
+pack   .add_scan_button -in .problem_scan_frame -side left -padx 7m
+pack   .remove_scan_button -in .problem_scan_frame -side left -padx 3m
+pack   .scan_source_label .scan_start_label .explanation_label -in .internal5 -side left -pady 1m -padx 1m
+pack   propagate .problem_scan_frame 0
+}
+
+
+#**********************************************************************************************#
+# This part builds up the internal6 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==1} {
+add_problem_scan_entrys $problem_scans_id
+set problem_scans_id [expr $problem_scans_id+1]
+}
+
+#**********************************************************************************************#
+# This part builds up the internal7 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==0} {
+label  .gps_frame -width 25 -height 3 -bg SteelBlue3 -relief flat
+radiobutton .gps_fmout -text " GPS-FMOUT " -bg SteelBlue3 -fg white -relief flat -variable gps \
+-value 1
+radiobutton .fmout_gps -text " FMOUT-GPS " -bg SteelBlue3 -fg white -variable gps \
+-value 0
+entry  .gps-fmout_entry -width 12 -relief sunken -textvariable gps_fmout
+label  .gps_unit_label -text "microseconds" -bg SteelBlue3 -fg white -width 15
+pack   .gps_fmout .fmout_gps -in .gps_frame -side top
+pack   .gps_frame .gps-fmout_entry .gps_unit_label -in .internal7 -side left -pady 1m
+pack   propagate .gps_frame 0 
+} else {
+
+label  .tape_inventory_label -text "Tape Inventory:" -bg SteelBlue3 -fg white -width 25
+entry  .thin_entry -width 10 -relief sunken -textvariable thin
+label  .thin_label -text "thin" -bg SteelBlue3 -fg white -width 11
+entry  .thick_entry -width 10 -relief sunken -textvariable thick
+label  .thick_label -text "thick" -bg SteelBlue3 -fg white -width 11
+pack   .tape_inventory_label .thin_entry .thin_label .thick_entry .thick_label -in .internal7 -side left -pady 1m
+
+label  .disk_inventory_label -text "Disk Inventory:" -bg SteelBlue3 -fg white -width 25
+entry  .packA_entry -width 10 -relief sunken -textvariable packA
+label  .packA_label -text "A (960 GB)" -bg SteelBlue3 -fg white -width 11
+entry  .packB_entry -width 10 -relief sunken -textvariable packB
+label  .packB_label -text "B (1440 GB)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label -in .internal7a -side left -pady 1m
+
+label  .disk_inventory_labelC -text "               " -bg SteelBlue3 -fg white -width 25
+entry  .packC_entry -width 10 -relief sunken -textvariable packC
+label  .packC_label -text "C (1600 GB)" -bg SteelBlue3 -fg white -width 11
+entry  .packD_entry -width 10 -relief sunken -textvariable packD
+label  .packD_label -text "D (2000 GB)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label -in .internal7c -side left -pady 1m
+label  .disk_inventory_labelE -text "               " -bg SteelBlue3 -fg white -width 25
+entry  .packE_entry -width 10 -relief sunken -textvariable packE
+label  .packE_label -text "(other larger)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelE .packE_entry .packE_label -in .internal7e -side left -pady 1m
+}
+
+#**********************************************************************************************#
+# This part builds up the internal8 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==0} {
+frame  .wx_frame -width 23c -height 3c -relief flat -bg SteelBlue3
+label  .wx_label -text "Wx:" -bg SteelBlue3 -fg white -width 25
+label  .temperature_label -text "Temperature (C):" -bg SteelBlue3 -fg white -width 17
+entry  .temperature_entry -width 7 -relief sunken -textvariable temperature
+label  .pressure_label -text "Pressure (mBar):" -bg SteelBlue3 -fg white -width 18
+entry  .pressure_entry -width 7 -relief sunken -textvariable pressure
+label  .humidity_label -text "Humidity (%):" -bg SteelBlue3 -fg white -width 15
+entry  .humidity_entry -width 7 -relief sunken -textvariable humidity
+pack   .wx_label .wx_frame -in .internal8 -side left
+pack   .temperature_label .temperature_entry .pressure_label .pressure_entry \
+.humidity_label .humidity_entry -in .wx_frame -side left -pady 1m
+} else {
+label  .finished_label -text "Observation finished at:" -bg SteelBlue3 -fg white -width 25
+entry  .finished_entry -width 10 -relief sunken -textvariable finished 
+label  .ut_label -text "UT" -bg SteelBlue3 -fg white -width 7
+pack   .finished_label .finished_entry .ut_label -in .internal8 -side left -pady 1m
+}
+
+#**********************************************************************************************#
+# This part builds up the internal9 frame. Depending on the value of $form a different         #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==0} {
+label  .skycondition_label -text "Sky conditions:" -bg SteelBlue3 -fg white -width 25
+entry  .skycondition_entry -width 55 -relief sunken -textvariable sky_conditions
+pack   .skycondition_label .skycondition_entry -in .internal9 -side left -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds up the internal10 frame. Depending on the value of $form a different        #
+# composition of widgets are used.                                                             #
+#**********************************************************************************************#
+if {$form==0} {
+frame  .larger_frame -width 2c -height 1c -relief flat -bg SteelBlue3
+frame  .is_frame -width 2c -height 1c -relief flat -bg SteelBlue3
+label  .cable_label -text "Cable difference is:" -bg SteelBlue3 -fg white -width 25
+label  .longer_cable_label -text "longer cable makes the reading" -bg SteelBlue3 -fg white -width 31
+radiobutton .plus -text "larger " -bg SteelBlue3 -fg white -relief flat -variable cabel_sign \
+-value 1
+radiobutton .minus -text "smaller" -bg SteelBlue3 -fg white -variable cabel_sign \
+-value 0
+label  .cable_border -text "" -bg SteelBlue3 -width 1
+entry  .cable_entry -width 7 -relief sunken -textvariable cable_differens
+label  .unit_label -text " microseconds " -bg SteelBlue3 -fg white -width 15
+radiobutton .is -text "Is    " -bg SteelBlue3 -fg white -relief flat -variable nominal \
+-value 1
+radiobutton .is_not -text "Is not" -bg SteelBlue3 -fg white -variable nominal \
+-value 0
+label  .nominal_label -text "nominal" -bg SteelBlue3 -fg white -width 10
+pack   .plus  .minus -in .larger_frame -side top
+pack   .is .is_not -in .is_frame -side top
+pack   .cable_label .longer_cable_label .larger_frame .cable_border .cable_entry .unit_label .is_frame .nominal_label \
+-in .internal10 -side left -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds the internal11 frame with one label. The remaning frames are only used in   #
+# the ready form.                                                                              #
+#**********************************************************************************************#
+if {$form==0} {
+label  .pointing_label -text "Pointing values:" -bg SteelBlue3 -fg white -width 25
+pack   .pointing_label -in .internal11 -side left -pady 1m
+}
+
+
+#**********************************************************************************************#
+# This part builds the internal12 frame with one internal frame containing two buttons and 10  #
+# different labels.                                                                            #
+#**********************************************************************************************#
+if {$form==0} {
+label  .pointing_frame -width 25 -height 2 -bg SteelBlue3 -relief flat 
+button .add_button -text "Add" -bg SteelBlue3 -fg white -width 4 \
+-relief raised -command {check_id "add" "pointing"}
+button .remove_button -text "Remove" -bg SteelBlue3 -fg white -width 4 \
+-relief raised -command {check_id "remove" "pointing"}
+label  .x-sefd_label -text "X-sefd" -bg SteelBlue3 -fg white -width 7 
+label  .s-sefd_label -text "S-sefd" -bg SteelBlue3 -fg white -width 10
+label  .source_label -text "Source" -bg SteelBlue3 -fg white -width 11
+label  .az_label -text "Az" -bg SteelBlue3 -fg white -width 10
+label  .el_label -text "El" -bg SteelBlue3 -fg white -width 9
+label  .offset1_label -text "Offset1" -bg SteelBlue3 -fg white -width 9
+label  .offset2_label -text "Offset2" -bg SteelBlue3 -fg white -width 9
+pack   .pointing_frame -in .internal12 -side left -fill both -pady 1m
+pack   .add_button -in .pointing_frame -side left -padx 7m
+pack   .remove_button -in .pointing_frame -side left -padx 3m  
+pack   .x-sefd_label .s-sefd_label .source_label .az_label .el_label .offset1_label \
+.offset2_label -in .internal12 -side left -padx 0m -pady 1m -fill both
+pack   propagate .pointing_frame 0
+
+
+#**********************************************************************************************#
+# This part builds the internal13 frame with one empty label and 13 different entrys. To do    #
+#      this a subroutine add_pointing_entrys is called.                                        #
+#**********************************************************************************************#
+add_pointing_entrys $pointing_id
+set pointing_id [expr $pointing_id+1]
+
+
+#**********************************************************************************************#
+# This part builds the internal14 frame with one label and one entry.                          #
+#**********************************************************************************************#
+label  .tsys_label -text "Tsys values:" -bg SteelBlue3 -fg white -width 25
+label  .tsys_value1_label -text "Tsys(x1): " -bg SteelBlue3 -fg white -width 13
+entry  .tsys_value1_entry -width 7 -relief sunken -textvariable tsys1
+label  .tsys_value2_label -text "Tsys(s): " -bg SteelBlue3 -fg white -width 13
+entry  .tsys_value2_entry -width 7 -relief sunken -textvariable tsys2 
+label  .tsys_value3_label -text "Tsys(x2):" -bg SteelBlue3 -fg white -width 13
+entry  .tsys_value3_entry -width 7 -relief sunken -textvariable tsys3
+pack   .tsys_label .tsys_value1_label .tsys_value1_entry .tsys_value2_label .tsys_value2_entry \
+.tsys_value3_label .tsys_value3_entry -in .internal14 -side left -pady 1m
+
+
+
+#**********************************************************************************************#
+# This part builds the internal15 frame with one label and one entry.                          #
+#**********************************************************************************************#
+label  .rec-humidity_label -text "Recorder humidity (%):" -bg SteelBlue3 -fg white -width 25
+entry  .rec-humidity_entry -width 10 -relief sunken -textvariable rec_humidity
+pack   .rec-humidity_label .rec-humidity_entry -in .internal15 -side left -pady 1m
+}
+
+#**********************************************************************************************#
+# This part builds the internal16 frame with one send button that calls the routine send_mail  #
+# when pressed down. This frame is used by every singel form. If a ready form is composed a    #
+# checkbutton auto start is added next to the send button.                                     #
+#**********************************************************************************************#
+frame  .send_button_frame -width 25 -bg SteelBlue3 -relief flat
+button .send_button -text "Send" -bg SteelBlue3 -fg white -width 6 \
+-relief raised -command send_mail
+pack   .send_button_frame -in .internal16 -side top
+pack   .send_button -in .send_button_frame -side left -pady 1m
+
+ if {$form==0} {
+  checkbutton .auto -text "Auto start" -bg SteelBlue3 -fg white -variable auto_start
+  pack   .auto -in .send_button_frame -side left -pady 1m -padx 2m
+ }
+
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+#************************************ Event Routines ******************************************#
+#**********************************************************************************************#
+
+
+#**********************************************************************************************#
+# Subroutine: kill_process_logfile                                                             #
+# Purpose:    This subroutine kills the process_logfile if it is running, this routine is      #
+#             called when you exit the program.                                                #
+#**********************************************************************************************#
+proc kill_process_logfile {} {
+global process_file
+ if {[file exists process_file]} {
+  puts $process_file
+  exec kill -9 [pid $process_file]
+ }
+}
+
+
+
+#**********************************************************************************************#
+# Subroutine: configure_setup_file                                                             #
+# Purpose:    This subroutine configures the setup file with variabels that have to be saved.  #
+#             The configure_setup_file is called when the one exit the program or when the OK  #
+#             button in the setup boxes are pressed down. it also runs chmod to set user       #
+#             rights.                                                                          # 
+#**********************************************************************************************#
+proc configure_setup_file {} {
+global send_to cc auto_start station put_into_log get_exp_name nr_of_pointing_entries \
+nr_of_problem_scans_entries nr_of_tape_entries
+
+   set setup_file [open /usr2/control/msg.ctl w+]
+    puts -nonewline $setup_file "Send to:"; puts $setup_file $send_to
+    puts -nonewline $setup_file "Cc:"; puts $setup_file $cc
+    puts -nonewline $setup_file "Station:"; puts $setup_file $station
+    puts -nonewline $setup_file "Number of pointing entries:"; puts $setup_file $nr_of_pointing_entries
+    puts -nonewline $setup_file "Number of problem scan entries:"; puts $setup_file $nr_of_problem_scans_entries
+    puts -nonewline $setup_file "Auto start mode:"; puts $setup_file $auto_start
+    puts -nonewline $setup_file "Put message into log:"; puts $setup_file $put_into_log
+    puts -nonewline $setup_file "Get session name:"; puts $setup_file $get_exp_name
+   close $setup_file
+}
+#*********************************** End of subroutine ****************************************#
+
+#**********************************************************************************************#
+# Subroutine: configure_email_adresses                                                         #
+# Purpose:    This subroutine occure when you chose the "Send to" option in the Setup menu.    #
+#             It displays a dialogue box where you can type in which email adresses the data   #
+#             information should be sended to. The email adresses are written into the         #
+#             setup file.                                                                      #
+#**********************************************************************************************#
+proc configure_email_adresses {} {
+global send_to cc
+
+ proc write_email_adresses {} {
+   configure_setup_file 
+   grab release .send-to
+   destroy .send-to
+ }
+
+ proc destroy_send_window {} {
+   grab release .send-to
+   destroy .send-to
+ }
+
+toplevel .send-to -width 13c -height 5c -relief ridge -bg CadetBlue
+grab     .send-to
+frame    .send-to.frame1 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .send-to.frame2 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .send-to.frame3 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .send-to.frame4 -width 13c -height 2c -relief flat -bg CadetBlue
+pack     .send-to.frame1 .send-to.frame2 .send-to.frame3 -side top -fill both -expand 1
+pack     propagate .send-to 0
+
+#**********************************************************************************************#
+# This part builds frame1 with one label and one entry.                                        #
+#**********************************************************************************************#
+label  .send-to.frame1.send_to_label -text "Send to:" -bg CadetBlue -fg white -width 13
+entry  .send-to.frame1.send_to_entry -width 35 -relief sunken -textvariable send_to
+pack   .send-to.frame1.send_to_label .send-to.frame1.send_to_entry -side left -pady 1m
+
+#**********************************************************************************************#
+# This part builds frame2 with one label and one entry.                                        #
+#**********************************************************************************************#
+label  .send-to.frame2.cc_label -text "Cc:" -bg CadetBlue -fg white -width 13
+entry  .send-to.frame2.cc_entry -width 35 -relief sunken -textvariable cc
+pack   .send-to.frame2.cc_label .send-to.frame2.cc_entry -side left -pady 1m
+
+#**********************************************************************************************#
+# This part builds frame3 with one internal frame containing two buttons.                      #
+#**********************************************************************************************#
+frame  .send-to.frame3.buttonframe -width 13c -height 2c -relief flat -bg CadetBlue
+pack   .send-to.frame3.buttonframe -side top
+button .send-to.frame3.buttonframe.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised \
+-command write_email_adresses
+button .send-to.frame3.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
+-relief raised -command destroy_send_window
+pack   .send-to.frame3.buttonframe.ok .send-to.frame3.buttonframe.cancel -side left -pady 1m -padx 2m
+
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+# Subroutine: configure_station_name                                                           #
+# Purpose:    This subroutine occure when you chose the "Station" option in the Setup menu.    #
+#             It displays a dialogue box where you can type in the name of the station from    #
+#             where the program is operated. The station name is written into the setup file.  #
+#**********************************************************************************************#
+proc configure_station_name {} {
+global station
+
+ proc write_station_name {} {
+   configure_setup_file 
+   grab release .station
+   destroy .station
+ }
+
+ proc destroy_station_window {} {
+   grab release .station
+   destroy .station
+ }
+
+toplevel .station -width 13c -height 3c -relief ridge -bg CadetBlue
+grab     .station
+frame    .station.frame1 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .station.frame2 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .station.frame3 -width 13c -height 3m -relief flat -bg CadetBlue
+pack     .station.frame1 .station.frame2 .station.frame3 -side top -fill both -expand 1
+pack     propagate .station 0
+
+#**********************************************************************************************#
+# This part builds up frame1 with one label and one entry.                                     #
+#**********************************************************************************************#
+label  .station.frame1.station_label -text "Station name:" -bg CadetBlue -fg white -width 13
+entry  .station.frame1.name_entry -width 25 -relief sunken -textvariable station
+pack   .station.frame1.station_label .station.frame1.name_entry -side left -pady 1m -padx 3m
+
+#**********************************************************************************************#
+# This part builds frame2 with one internal frame containing two buttons.                      #
+#**********************************************************************************************#
+frame  .station.frame2.buttonframe -width 13c -height 2c -relief flat -bg CadetBlue
+pack   .station.frame2.buttonframe -side top
+button .station.frame2.buttonframe.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised \
+-command write_station_name
+button .station.frame2.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
+-relief raised -command destroy_station_window
+pack   .station.frame2.buttonframe.ok .station.frame2.buttonframe.cancel -side left -pady 1m -padx 2m
+
+}
+#*********************************** End of subroutine ****************************************#
+
+#**********************************************************************************************#
+# Subroutine: configure_dynamic_entries                                                        #
+# Purpose:    This subroutine occure when you chose the "Dynamic entries" option in the Setup  #
+#             menu. It displays a dialogue box where you can configure the number of entries   #
+#             in the dynamic tables.                                                           #
+#**********************************************************************************************#
+proc configure_dynamic_entries {} {
+global nr_of_pointing_entries nr_of_problem_scans_entries nr_of_tape_entries
+
+ proc write_to_setup {} {
+   configure_setup_file 
+   grab release .dynamic-entries
+   destroy .dynamic-entries
+ }
+
+ proc destroy_window {} {
+   grab release .dynamic-entries
+   destroy .dynamic-entries
+ }
+
+toplevel .dynamic-entries -width 13c -height 4c -relief ridge -bg CadetBlue
+grab     .dynamic-entries
+frame    .dynamic-entries.frame1 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .dynamic-entries.frame2 -width 13c -height 2c -relief flat -bg CadetBlue
+frame    .dynamic-entries.frame3 -width 13c -height 2c -relief flat -bg CadetBlue
+pack     .dynamic-entries.frame1 .dynamic-entries.frame2 .dynamic-entries.frame3 -side top -fill both -expand 1
+pack     propagate .dynamic-entries 0
+
+#**********************************************************************************************#
+# This part builds frame1 with one label and one entry.                                        #
+#**********************************************************************************************#
+label  .dynamic-entries.frame1.pointing_label -text "Pointing entries:" -bg CadetBlue -fg white -width 27
+entry  .dynamic-entries.frame1.pointing_entry -width 10 -relief sunken -textvariable nr_of_pointing_entries
+pack   .dynamic-entries.frame1.pointing_label .dynamic-entries.frame1.pointing_entry -side left -pady 1m
+
+#**********************************************************************************************#
+# This part builds frame2 with one label and one entry.                                        #
+#**********************************************************************************************#
+label  .dynamic-entries.frame2.problem_scans_label -text "Problem scan entries:" -bg CadetBlue -fg white -width 27
+entry  .dynamic-entries.frame2.problem_scans_entry -width 10 -relief sunken -textvariable nr_of_problem_scans_entries
+pack   .dynamic-entries.frame2.problem_scans_label .dynamic-entries.frame2.problem_scans_entry -side left -pady 1m
+
+#**********************************************************************************************#
+# This part builds frame3 with one internal frame containing two buttons.                      #
+#**********************************************************************************************#
+frame  .dynamic-entries.frame3.buttonframe -width 13c -height 2c -relief flat -bg CadetBlue
+pack   .dynamic-entries.frame3.buttonframe -side top
+button .dynamic-entries.frame3.buttonframe.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised \
+-command write_to_setup
+button .dynamic-entries.frame3.buttonframe.cancel -text "Cancel" -bg CadetBlue -fg white -width 4 \
+-relief raised -command destroy_window
+pack   .dynamic-entries.frame3.buttonframe.ok .dynamic-entries.frame3.buttonframe.cancel -side left -pady 1m -padx 2m
+
+}
+#*********************************** End of subroutine ****************************************#
+
+#**********************************************************************************************#
+# Subroutine: send_mail                                                                        #
+# Purpose:    This subroutine is called when then Send button on the data forms is pressed.    #
+#             It calls the subroutine check_if_data_values_ok to see if the values in the      #
+#             current data form has been inserted correctly, if they are correct a text        #
+#             message file will be created that will be sent away. Depending on the value of   #
+#             current_form a new form will appear.                                             #
+#**********************************************************************************************#
+proc  send_mail {} {
+global session station send_to cc current_form auto_start put_into_log session FS_is_running logname_is_set pid
+
+  if {[check_if_data_values_ok]} {
+   create_text_message
+   if {$current_form=="start"} {  
+    exec mailx -s "$session, $station, Start-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
+   } elseif {$current_form=="auto start"} {
+    exec mailx -s "$session, $station, Autostart-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
+   } elseif {$current_form=="ready"} {
+    exec mailx -s "$session, $station, Ready-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
+   } elseif {$current_form=="stop"} {
+    exec mailx -s "$session, $station, Stop-message" -c $cc $send_to < "/tmp/text_message.txt.pid" &
+   }
+ 
+   if {$FS_is_running==1} {
+    if {$put_into_log==1} {
+     put_message_into_log
+    }
+   }
+    
+   exec rm "/tmp/text_message.txt.$pid"
+
+   if {$current_form=="ready"} { 
+     if {$auto_start==1} {
+
+      # Run lognm again to check if there is a new logfile name.
+      run_lognm
+
+      # If the logname is set then start auto start mode.
+      if {$logname_is_set==1} {
+       form_controler 2
+      } else {
+        output_error 4 ""
+        .send_button config -text "Go to Manual start" -width 16 -command {form_controler 1}
+      }
+
+     } else {
+       form_controler 1
+     }
+   }
+
+   if {$current_form=="stop"} {
+    form_controler 3
+   }
+
+  }
+}
+#*********************************** End of subroutine ****************************************#
+
+#************************** Subroutines that belongs to Send_mail *****************************#
+
+#**********************************************************************************************#
+# Subroutine: check_if_data_values_ok                                                          #
+# Purpose:    This subroutine creates a set of arrays which contains all the values in the     #
+#             current form. It then checks with pattern matching if the values in the arrays   #
+#             are correct or present. If they are, a boolean variable values_ok is set to 1    #
+#             otherwise an error message will be displayed by calling the subroutine           #
+#             output_error and values_ok is set to 0.                                          #
+#**********************************************************************************************#
+proc check_if_data_values_ok {} {
+global pointing_id problem_scans_id current_form text_entry_array value_entry_array pointing_value_array \
+       problem_scan_value_array
+set values_ok 0
+set text_entry_array(default) {}
+set value_entry_array(default) {}
+unset text_entry_array
+unset value_entry_array
+
+  #*****************************************************************#
+  # Depending on the current form new data structures are created.  #
+  #*****************************************************************#
+  if {$current_form=="start"} {
+   global session start_time ut_on_source
+   set {text_entry_array(Session name:)} $session 
+   set {text_entry_array(Started recording..)} $ut_on_source
+   set {value_entry_array(at:)} $start_time
+   set values_ok 1
+  } elseif {$current_form=="auto start"} {
+   set values_ok 1
+  } elseif {$current_form=="ready"} {
+   global session first_source source_time gps gps_fmout gps_time temperature pressure \
+   humidity cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+   set first_source_entry_array(default) {}; unset first_source_entry_array
+   set gps_entry_array(default) {}; unset gps_entry_array 
+   set cable_entry_array(default) {}; unset cable_entry_array
+   set tsys_entry_array(default) {}; unset tsys_entry_array 
+   set {text_entry_array(session name:)} $session
+   set {first_source_entry_array(First source:)} $first_source
+   set {first_source_entry_array(UT1)} $source_time
+   set {gps_entry_array(GPS-FMOUT)} $gps_fmout
+   set {value_entry_array(Temperature:)} $temperature
+   set {value_entry_array(Pressure:)} $pressure
+   set {value_entry_array(Humidity:)} $humidity
+   set {cable_entry_array(Cable difference is:)} $cable_differens
+   set {tsys_entry_array(Tsys_x1:)} $tsys1
+   set {tsys_entry_array(Tsys_s:)} $tsys2
+   set {tsys_entry_array(Tsys_x2:)} $tsys3
+   set {value_entry_array(Recorder humidity:)} $rec_humidity
+  } elseif {$current_form=="stop"} {
+   global session scan_source scan_start explanation thin thick packA packB packC packD packE finished
+   set tape_inventory_entry_array(default) {}; unset tape_inventory_entry_array
+   set {text_entry_array(session name:)} $session
+   set {tape_inventory_entry_array(thin)} $thin
+   set {tape_inventory_entry_array(thick)} $thick
+   set {value_entry_array(Observation... :)} $finished
+
+   set disk_inventory_entry_array(default) {}; unset disk_inventory_entry_array
+   set {disk_inventory_entry_array(packA)} $packA
+   set {disk_inventory_entry_array(packB)} $packB
+   set {disk_inventory_entry_array(packC)} $packC
+   set {disk_inventory_entry_array(packD)} $packD
+   set {disk_inventory_entry_array(packE)} $packE
+  }
+
+
+   #*****************************************************************#
+   # This part checks if the inserted values are correct or present. #
+   # Depending on current form certain fields and buttons should be  #
+   # checked.                                                        # 
+   #*****************************************************************#
+   if {$current_form=="ready"} {
+    
+    # checks the first_source_entry_array
+     if {[regexp -nocase {^na$} $first_source_entry_array(First source:)]} {
+      set values_ok 1
+     } else {
+      foreach entry [array names first_source_entry_array] {
+       if {[regexp -nocase {^na$} $first_source_entry_array($entry)] || \
+           [regexp -nocase {[a-z,0-9]} $first_source_entry_array($entry)]} {
+        set values_ok 1
+       } else {
+        set values_ok 0 
+        output_error 3 $entry
+        break
+       }
+      }	
+     }
+
+    # checks the gps_entry_array
+    if {$values_ok == 1} {
+     if {[regexp -nocase {^na$} $gps_entry_array(GPS-FMOUT)]} {
+      set values_ok 1
+      set gps 2;
+      set check_gps_radiobuttons 0
+     } else {
+      foreach entry [array names gps_entry_array] {
+       if {[regexp -nocase {^na$} $gps_entry_array($entry)] || [regexp {[0-9]} $gps_entry_array($entry)]} {
+        set values_ok 1
+        set check_gps_radiobuttons 1
+       } else {
+        set values_ok 0 
+        output_error 3 $entry
+        break
+       }
+      }	
+     }
+    }
+
+    # checks the gps radiobuttons if there is something else then NA in the GPS-FMOUT field
+    if {$values_ok == 1} {
+     if {$check_gps_radiobuttons == 1} {
+      if {$gps==0 || $gps==1} {
+       set values_ok 1
+      } else {
+       set values_ok 0
+       output_error 5 ""
+      }
+     }
+    }
+
+    # checks the cable difference value
+     if {$values_ok == 1} { 
+      if {[regexp -nocase {^na$} $cable_entry_array(Cable difference is:)]} {
+       set values_ok 1
+       set cabel_sign 2; set nominal 2
+       set check_cabel_buttons 0
+      } else {
+       if {[regexp {[0-9]} $cable_entry_array(Cable difference is:)]} {
+        set values_ok 1
+        set check_cabel_buttons 1
+       } else {
+        set values_ok 0
+        output_error 3 "Cable difference is" 
+       }
+      }
+     }
+
+
+    # checks the cable difference radiobuttons if there is something else then NA in the field
+    if {$values_ok == 1} {
+     if {$check_cabel_buttons == 1} {
+      if {$cabel_sign==0 || $cabel_sign==1} {
+       if {$nominal==0 || $nominal==1} {
+        set values_ok 1
+       } else {
+        set values_ok 0
+        output_error 7 ""
+       }
+      } else {
+       set values_ok 0
+       output_error 6 ""
+      }
+     }
+    }
+
+
+    # checks the pointing_value_array
+    for {set i 0} {$i < $pointing_id} {incr i 1} {
+     if {$values_ok == 1} {
+      if {[regexp -nocase {^na$} $pointing_value_array(x_sefd$i)]} {
+       set values_ok 1
+      } else {
+       foreach entry [array names pointing_value_array] {
+        if {[regexp -nocase {^na$} $pointing_value_array($entry)] || \
+            [regexp {[0-9]} $pointing_value_array($entry)]} {
+         set values_ok 1
+        } else {
+          set tmp_entry [string range $entry 0 5]
+	  if {$tmp_entry == "source"} {
+	   if {[regexp -nocase {[a-z,0-9]} $pointing_value_array($entry)]} {
+            set values_ok 1
+           } else {
+            set values_ok 0 
+            output_error 3 $entry
+            break
+           }
+          } else {
+           set values_ok 0 
+           output_error 3 $entry
+           break
+          }
+        }
+       }	
+      }
+     }
+    }
+
+    # checks the tsys_entry_array 
+    if {$values_ok == 1} { 
+     if {[regexp -nocase {^na$} $tsys_entry_array(Tsys_x1:)]} {
+      set values_ok 1
+     } else {
+      foreach entry [array names tsys_entry_array] {
+       if {[regexp -nocase {^na$} $tsys_entry_array($entry)] || [regexp {[0-9]} $tsys_entry_array($entry)]} {
+        set values_ok 1
+       } else {
+        set values_ok 0 
+        output_error 3 $entry
+        break
+       }
+      }	
+     }
+    }  
+     
+   } elseif {$current_form=="stop"} {
+      
+    # checks the problem_scan_entry_array
+     for {set i 0} {$i < $problem_scans_id} {incr i 1} {
+      if {[regexp -nocase {^na$} $problem_scan_value_array(Source$i)]} {
+       set values_ok 1
+      } else {
+       foreach entry [array names problem_scan_value_array] {
+        if {[regexp -nocase {^na$} $problem_scan_value_array($entry)] || \
+            [regexp -nocase {[a-z,0-9]} $problem_scan_value_array($entry)]} {
+         set values_ok 1
+        } else {
+         set values_ok 0 
+         output_error 3 $entry
+         break
+	}
+       }	
+      }
+     }
+ 
+    # checks the tape_inventory_entry_array 
+     if {$values_ok == 1} {
+      if {[regexp -nocase {^na$} $tape_inventory_entry_array(thin)]} {
+       set values_ok 1
+      } else {
+       foreach entry [array names tape_inventory_entry_array] {
+        if {[regexp -nocase {^na$} $tape_inventory_entry_array($entry)] || \
+            [regexp {[0-9]} $tape_inventory_entry_array($entry)]} {
+         set values_ok 1
+        } else {
+         set values_ok 0 
+         output_error 3 $entry
+         break
+        }
+       }	
+      }
+     }
+
+    # checks the disk_inventory_entry_array 
+     if {$values_ok == 1} {
+	 if {[regexp -nocase {^na$} $disk_inventory_entry_array(packA)] } {
+	     set values_ok 1
+	 } else {
+	     foreach entry [array names disk_inventory_entry_array] {
+		 if {[regexp -nocase {^na$} $disk_inventory_entry_array($entry)]} {
+		     set values_ok 1
+		     break
+		 } elseif {[regexp {[0-9]} $disk_inventory_entry_array($entry)]} {
+		     set values_ok 1
+		 } else {
+		     set values_ok 0 
+		     output_error 3 $entry
+		     break
+		 }
+	     }	
+	 }
+     }
+ 
+     
+  
+  # checks the text_entry_array
+  if {$values_ok == 1} {
+   foreach entry [array names text_entry_array] {
+    if {[regexp -nocase {^na$} $text_entry_array($entry)] || \
+        [regexp -nocase {[a-z,0-9]} $text_entry_array($entry)]} {
+     set values_ok 1
+    } else {
+     set values_ok 0 
+     output_error 3 $entry
+     break
+    }
+   }
+  }
+
+  # checks the value_entry_array
+  if {$values_ok == 1} {
+   foreach entry [array names value_entry_array] {
+    if {[regexp -nocase {^na$} $value_entry_array($entry)] || \
+        [regexp {[0-9]} $value_entry_array($entry)]} {
+     set values_ok 1
+    } else {
+     set values_ok 0
+     output_error 3 $entry
+     break
+    }
+   }
+  }
+
+ }
+ return $values_ok
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+# Subroutine: create_text_message                                                              #
+# Purpose:    This subroutine creates a text file, /tmp/text_message.txt which is sent in the mail. #
+#             Depending on the current form a different text format is produced.               #
+#**********************************************************************************************#
+proc create_text_message {} {
+global current_form pointing_id problem_scans_id pointing_value_array problem_scan_value_array \
+station pid
+
+set file [open "/tmp/text_message.txt.$pid" w+]
+
+  if {$current_form=="start"} {
+   global session first_source source_time start_time ut_on_source
+    set header "Session $session start message for $station."
+    set header_length [string length $header]
+    puts $file $header
+     for {set i 0} {$i < $header_length} {incr i 1} {
+      puts -nonewline $file "-"
+     }
+    puts $file ""
+    puts -nonewline $file "Started recording with source: "; puts -nonewline $file "$ut_on_source ";
+    puts -nonewline $file "at: "; puts -nonewline $file "$start_time "; puts $file "UT"
+  } elseif {$current_form=="auto start"} {
+    global session first_source source_time current_source st_time
+    set header "Session $session auto-start message for $station."
+    set header_length [string length $header]
+    puts $file $header
+     for {set i 0} {$i < $header_length} {incr i 1} {
+      puts -nonewline $file "-"
+     }
+    puts $file ""
+    puts -nonewline $file "Started recording with source: "; puts -nonewline $file "$current_source "
+    puts -nonewline $file "at "; puts -nonewline $file "$st_time "; puts $file "UT"
+  } elseif {$current_form=="ready"} {
+    global session first_source source_time gps gps_fmout gps_time temperature pressure \
+    humidity sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 rec_humidity
+
+     set header "Session $session ready message for $station."
+     set header_length [string length $header]
+     puts $file $header
+      for {set i 0} {$i < $header_length} {incr i 1} {
+       puts -nonewline $file "-"
+      }
+     puts $file ""
+
+     set comment_text [.comment_text get 1.0 end]
+     if {$comment_text != "\n"} {
+      puts $file "Comments: "; puts $file "$comment_text"
+     } 
+
+     if {[regexp -nocase {^na$} $first_source]} {
+      puts -nonewline $file "First source: "; puts $file "$first_source"
+     } else {
+      puts -nonewline $file "First source: "; puts -nonewline $file $first_source
+      puts -nonewline $file " at "; puts -nonewline $file "$source_time  "; puts $file "UT"
+     }
+ 
+     if {$gps==0} {
+      puts -nonewline $file "FMOUT-GPS: "; puts -nonewline $file $gps_fmout; puts $file " microseconds"
+     } else {
+       if {$gps==1} {
+        puts -nonewline $file "GPS-FMOUT: "; puts -nonewline $file $gps_fmout; puts $file " microseconds"
+       } else {
+        puts -nonewline $file "GPS-FMOUT: "; puts $file "$gps_fmout"
+       }
+     }
+
+     puts -nonewline $file "Wx:  "; puts -nonewline $file "Temperature (C): "; puts -nonewline $file "$temperature  "
+     puts -nonewline $file "Pressure (mBar): "; puts -nonewline $file "$pressure  "
+     puts -nonewline $file "Humidity (%): "; puts $file "$humidity"
+     puts -nonewline $file "Sky Conditions: "; puts $file "$sky_conditions"
+     puts -nonewline $file "Cable difference is: "
+
+     if {$cabel_sign==0} {
+      puts -nonewline $file "longer cable makes the reading "
+      puts $file "smaller by "; puts -nonewline $file [format "%21s" " "];
+      puts -nonewline $file $cable_differens; puts -nonewline $file " microseconds "
+     } else {
+      if {$cabel_sign==1} {
+      puts -nonewline $file "longer cable makes the reading "
+      puts $file "larger by "; puts -nonewline $file [format "%21s" " "];  
+      puts -nonewline $file $cable_differens; puts -nonewline $file " microseconds "
+      } else {
+       puts $file "$cable_differens"
+      }
+     }
+
+     if {$cabel_sign==0 || $cabel_sign==1} {
+      if {$nominal==0} {
+       puts -nonewline $file "and is not "; puts $file "nominal"
+      } else {
+       puts -nonewline $file "and is "; puts $file "nominal"
+      }
+     }
+
+       
+     if {[regexp -nocase {^na$} $pointing_value_array(x_sefd0)]} {
+      puts -nonewline $file "Pointing values: "; puts $file "$pointing_value_array(x_sefd0)" 
+     } else {
+      puts $file "Pointing values:"
+      puts $file "SEFD  X/S       Source          Az/El      Offset1  Offset2"
+
+      for {set i 0} {$i < $pointing_id} {incr i 1} {
+       puts -nonewline $file [format "%7s" $pointing_value_array(x_sefd$i)]; puts -nonewline $file "/"
+       puts -nonewline $file [format "%-8s" $pointing_value_array(s_sefd$i)]
+       puts -nonewline $file [format "%-11s" $pointing_value_array(source$i)]
+       puts -nonewline $file [format "%7s" $pointing_value_array(az$i)]; puts -nonewline $file "/"
+       puts -nonewline $file [format "%-8s" $pointing_value_array(el$i)]
+       puts -nonewline $file [format "%-9s" $pointing_value_array(offset1$i)]
+       puts $file [format "%-9s" $pointing_value_array(offset2$i)]
+      }
+     }
+
+     if {[regexp -nocase {^na$} $tsys1]} {
+      puts -nonewline $file "Tsys values: "; puts $file "$tsys1"
+     } else {
+      puts $file ""; puts -nonewline $file "Tsys (x1/s/x2): "; puts $file "$tsys1/$tsys2/$tsys3"
+     }
+
+    puts -nonewline $file "Recorder Humidity (%): "; puts $file $rec_humidity
+  } elseif {$current_form=="stop"} {
+    global session thin thick packA packB packC packD packE finished
+    set header "Session $session stop message for $station."
+    set header_length [string length $header]
+     puts $file $header
+      for {set i 0} {$i < $header_length} {incr i 1} {
+       puts -nonewline $file "-"
+      }
+     puts $file ""
+
+     set comment_text [.comment_text get 1.0 end]
+     if {$comment_text != "\n"} {
+      puts $file "Comments:"; puts $file "$comment_text"
+     } 
+
+     if {[regexp -nocase {^na$} $problem_scan_value_array(Source0)]} {
+      # Don't print anything. 
+     } else {
+      puts $file "Problem scans: "
+      puts $file "Source   Scan start   Explanation of problem"
+
+      for {set i 0} {$i < $problem_scans_id} {incr i 1} {
+       puts -nonewline $file [format "%-9s" $problem_scan_value_array(Source$i)]
+       puts -nonewline $file [format "%-13s" $problem_scan_value_array(Scan_start$i)]
+       puts $file [format "%-10s" $problem_scan_value_array(Explanation$i)]
+      }
+     
+      puts $file ""
+
+     }
+
+     if {[regexp -nocase {^na$} $thin]} {
+#      puts -nonewline $file "Tape Inventory: "; puts $file "Thin $thin"
+     } else {
+      puts -nonewline $file "Tape Inventory: ";
+      puts -nonewline $file "Thin "
+      puts -nonewline $file "$thin";
+       if {[regexp -nocase {^na$} $thick]} {
+        puts $file ""
+       } else {
+        puts -nonewline $file ", Thick "
+        puts $file "$thick";
+       }
+     }
+
+     if {[regexp -nocase {^na$} $packA]} {
+#	 puts -nonewline $file "Disk Inventory: "; puts $file "$packA"
+     } else {
+	 puts -nonewline $file "Disk Inventory: "; 
+	 puts -nonewline $file "A "
+	 puts -nonewline $file "$packA";
+	 if {[regexp -nocase {^na$} $packB]} {
+	     puts $file ""
+	 } else {
+	     puts -nonewline $file ", B "
+	     puts -nonewline $file "$packB";
+	     if {[regexp -nocase {^na$} $packC]} {
+		 puts $file ""
+	     } else {
+		 puts -nonewline $file ", C "
+		 puts -nonewline $file "$packC";
+		 if {[regexp -nocase {^na$} $packD]} {
+		     puts $file ""
+		 } else {
+		     puts -nonewline $file ", D "
+		     puts -nonewline $file "$packD";
+		     if {[regexp -nocase {^na$} $packE]} {
+		         puts $file ""
+                     } else {
+		         puts -nonewline $file ", (larger) "
+		         puts $file "$packE ";
+		     }
+		 }
+	     }
+	 }
+     }
+
+     puts -nonewline $file "Observation finished at: "; puts -nonewline $file "$finished ";
+      if {[regexp -nocase {^na$} $finished]} {
+       puts $file ""
+      } else {
+       puts $file "UT"
+      } 
+      
+    }
+
+ close $file 
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+# Subroutinee: put_message_into_log                                                            #
+# Purpose:     This subroutine will open the text message file /tmp/text_message.txt, read all the  #
+#              lines and use the program inject_snap to put these lines into the logfile.            #
+#**********************************************************************************************#
+proc put_message_into_log {} {
+global pid
+set message_file [open "/tmp/text_message.txt.$pid" r]
+
+ while {[gets $message_file line] >=0} {
+  exec inject_snap "\"$line"
+ }
+close $message_file
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#**********************************************************************************************#
+# Subroutine: output_error                                                                     #
+# Purpose:    This subroutine outputs an error message in a toplevel window if something is    #
+#             not correct. Different type of errors can occure depending on the input $nr.     #
+#**********************************************************************************************#
+proc output_error {nr field} {
+
+  proc release_error_msg {} {
+   grab release .error
+   destroy .error
+   destroy .error.error-label   
+  }
+
+destroy .error
+toplevel .error -width 7c -height 4c -relief ridge -bg CadetBlue
+grab     .error
+ if {$nr==1} {
+  label .error.error-label -text "Error: You can't add any\nmore $field entrys!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==2} {
+  label .error.error-label -text "Error: You can't remove any\nmore $field entrys!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==3} {
+  label .error.error-label -text "Error: The value in the\nfield '$field'\nis not correct!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==4} {
+  label .error.error-label -text "Error: The logfile name\nis not set,\n Auto start is not valid!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==5} {
+  label .error.error-label -text "Error: You have to push\n one of the GPS buttons!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==6} {
+  label .error.error-label -text "Error: You have to push\n one of the larger or\n smaller buttons!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==7} {
+  label .error.error-label -text "Error: You have to push\n one of the Is or\n Is not nominal buttons!" -bg CadetBlue -fg white -width 27
+ }
+button   .error.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised -command release_error_msg
+pack     .error.error-label .error.ok -side top -pady 1m
+pack     propagate .error 0
+
+}
+#*********************************** End of subroutine ****************************************#
+
+
+#************************************** Main program ******************************************#
+
+read_setup_file
+run_lognm
+create_menubar
+form_controler 3
+
+#************************************ End main program ****************************************#
+
+
+#******************************************* End of program ***********************************************#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

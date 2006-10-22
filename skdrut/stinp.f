@@ -44,12 +44,15 @@ C  LOCAL:
       real*4 DIAM
       real*4 sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
+      character*2 cb(max_band)
+      equivalence (lb,cb)
       real*8 POSXYZ(3),AXOFF
+      real tol
 
 
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band)
-      integer ib,ii,nco,nhz,i,idum
+      integer ib,ii,nco,nhz,i
       integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(4)
 
       character*8 crack,crec1,crec2
@@ -60,6 +63,7 @@ C      - these are used in unpacking station info
       equivalence (cidt,lidt),(cidpos,lidpos),(cidhor,lidhor)
 
       double precision poslat,poslon
+      double precision chklat,chklon,rht
       integer ibitden
       integer nstack
       integer*2 ls2sp(2)
@@ -240,7 +244,7 @@ C
         DIAMAN(I)=DIAM
         cPOCOD(I)   = cIDPOS
         cterid(i)=cidt
-        lhccod(i) = lidhor
+        chccod(i) = cidhor
         NHORZ(I) = 0
         cantna(i)=cname
         return
@@ -280,11 +284,29 @@ C     2.3 Now "I" contains the index into which we will put the
 C     position information.
 C
         cstnna(i)=cname
-        STNPOS(1,I) = POSLON*deg2rad
-        STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
+        ! Do a quick check.
+        call plh(stnxyz(1,i),chklat,chklon,rht)
+        chklat=chklat*rad2deg
+        chklon=-chklon*rad2deg    !note minus sign
+        tol=0.1
+        if(abs(chklat-poslat) .gt. tol .or.
+     >       abs(chklon-poslon) .gt. tol .and.
+     >      abs(360-abs(chklon-poslon)) .gt. tol) then
+           write(lu,'(a,a,a)')
+     >      "STINP Warning: For station ", cname,
+     >      " Inconsistent position information in 'A' line!"
+           write(lu,'(a,2f8.2)')
+     >        "Calculated position: ",chklat,chklon
+           write(lu,'(a,2f8.2)')
+     >        "Input Lat, Lon:      ",poslat,poslon
+           write(lu,'(a)') "Using calculated positions"
+        endif
+        STNPOS(1,I) = CHKLON*deg2rad
+        STNPOS(2,I) = CHKLAT*deg2rad
+
         coccup(i)=ltoken(6)
         return
       else if(itype .eq. 3) then
@@ -366,7 +388,7 @@ C    Store other info depending on the type.
           nheadstack(i)=nstack
         endif
         do ib=1,2
-          idum = igtba(lb(ib),ii)
+          ii = igtba(cb(ib))
           if (ii.ne.0) then ! got frequencies selected already
             sefdst(ii,i) = sefd(ib)
             if (npar(ii).gt.0) then
@@ -402,11 +424,8 @@ C    Store other info depending on the type.
 C           error for no matching value, which is ok
           endif
         END IF  !
-        I = 1
-        DO WHILE (LID.NE.LhcCOD(I).AND.I.LE.NSTATN)
-          I = I+1
-        END DO
-        IF (I.GT.NSTATN) THEN ! matching entry not found
+        i=iwhere_in_String_list(chccod(i),nstatn,cid)
+        IF (I.eq.0 ) THEN ! matching entry not found
           write(lu,'("STINP26 - Pointer not found.  Coordinate mask ")')
           goto 910
         ELSE ! keep it
@@ -425,14 +444,14 @@ C           error for no matching value, which is ok
           if (ierr.lt.-200) then
             write(lu,*) "STINP252 - Horizon mask azimuths are out "//
      >      "of order. Error in field ", -(ierr+200)
-            write(lu,'(80a2)') (ibufx(i),i=2,ilen)
+            write(lu,'(a)') cbufin0(1:80)
             RETURN
           endif
           if (ierr.eq.-99)then
             write(lu,'(a,i5)')
      >       "STINP250 - Too many horizon mask az/el pairs. Max is ",
      >        max_hor
-            write(lu,'(80a2)') (ibufx(i),i=2,ilen)
+            write(lu,'(a)') cbufin0(1:80)
             RETURN
           endif
           if (ierr.eq.-103) then
@@ -443,20 +462,15 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
             kline=.false.
           endif
         END IF   !
-        I =1
-        DO WHILE (LID.NE.LHCCOD(I).AND.I.LE.NSTATN)
-          I=I+1
-        END DO
-        if (i.gt.nstatn) then !check position codes too
+        i=iwhere_in_String_list(chccod,nstatn,cid)
+        if (i.eq.0 ) then !check position codes too
           write(lu,*) "STINP251 - Horizon mask pointer not found. "//
      >      "Checking position code."
-          write(lu,'(40a2)')  (ibufx(i),i=2,min(ilen,40))
-          I =1
-          DO WHILE (LID.NE.LPOCOD(I).AND.I.LE.NSTATN)
-            I=I+1
-          END DO
+          write(lu,'(a)') cbufin0(1:80)
+! try checking against cpocod.
+          i=iwhere_in_String_list(cpocod,nstatn,cid)
         endif
-        IF (I.GT.NSTATN) THEN  !matching entry not found
+        IF (I.eq. 0) THEN  !matching entry not found
           write(lu,'("STINP25 - Pointer not found.  Horizon mask ")')
           goto 910
         ELSE  ! keep it

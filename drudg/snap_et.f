@@ -4,8 +4,6 @@
       include 'hardware.ftni'
 
 ! Output "et" command.
-      integer itime2Stop
-
       kerr=.false.
       if(krec_append) then
         write(luFile,'(a,a1)', err=100) 'et',crec(irec)

@@ -12,7 +12,6 @@ C OUTPUT
 C
 C LOCAL:
       integer ikin,i,nch
-      integer ias2b
 
 C LAST MODIFIED:
 C 980929 nrv New. Copied prompts from point.f
@@ -46,8 +45,7 @@ C     K4-2C+Mk-3/4     NA       NA       OK       OK
      .       ' 7 - K4-2 rack + Mk4 formatter + VLBA4 recorder'/ 
      .       ' 0 - QUIT '/' ? ',$)
 
-	call gtrsp(ibuf,80,luusr,nch)
-	ikin= ias2b(ibuf(1),1,1)
+        read(luusr,*) ikin
 	IF (ikin.EQ.0) RETURN
         IF (ikin.LT.1.OR.ikin.GT.7) GOTO 1
       endif

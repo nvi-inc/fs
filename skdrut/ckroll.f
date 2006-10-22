@@ -13,8 +13,8 @@ C  History:
 C 020112 nrv New. Called by VMOINP.
 C
 C  INPUT:
-      integer ndefs,nsteps,inc_period,reinit_period,
-     .irtrk(2+max_track,max_roll_def)
+      integer ndefs,nsteps,inc_period,reinit_period
+      integer irtrk(18,32)
       integer istn,icode
 C  OUTPUT
       character*4 croll ! code for this roll, M is non-standard

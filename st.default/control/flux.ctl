@@ -40,9 +40,11 @@
 *  Ott et al 1994. John Conway 030205
 *
    dr21     c 21000 24000 1.231  0.000  0.0     20  gauss  100 20s  20s 
-
+*
 * casa is special name with flux decreasing from 1980.0
-   casa     p   300 31000 5.745 -0.770  0       240  disk  4m
+*  casa     p   300 31000 5.745 -0.770  0       240  disk  4m
+* new value for casa decreasing from 2006 per D. Graham 060928
+   casa     p   300 31000 5.660 -0.760  0       240  disk  4m
 * the following points added from FS Manual WEH 0208xx
    3c380    p  2020  2520 1.041  0      0         1  gauss 100 1s
    3c380    p  8080  9080 0.716  0      0         1  gauss 100 1s

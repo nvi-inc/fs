@@ -2,7 +2,7 @@
 
 struct bank_set_mon {
   struct {
-    char active_bank[2];
+    char active_bank[33];
     struct m5state state;
   } active_bank;
   struct {
@@ -10,7 +10,7 @@ struct bank_set_mon {
     struct m5state state;
   } active_vsn;
   struct {
-    char inactive_bank[2];
+    char inactive_bank[33];
     struct m5state state;
   } inactive_bank;
   struct {

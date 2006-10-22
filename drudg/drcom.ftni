@@ -38,12 +38,15 @@ C 021010 nrv Add kpostpass
 C 2003Jul11 JMG added itctim
 ! 2004Nov12 JMGipson. Removed iwidth, csize
 !                     Replaced with  cpaper_size
+! 2006Jun13.  JMG. Removed ldisk2file stuff and put in ../skdrincl/data_xfer.ftni.
+! 2006Oct16. JMGipson. added klabel_ps flag to indicate postscript printer.
 C
 	double precision RA50,DEC50
         real rlabsize
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
+      logical klabel_ps  !is the label printer Postscript?
 c
 	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
@@ -53,15 +56,14 @@ c
      .  ibout,luscn,
      .  ibbclen,nbbcbuf,nchanr,iperm,fileptr,itpid_period
 C
-        integer*2 ld,itim,itims,ibbcbuf,ibuf,
+        integer*2 ld,ibbcbuf,ibuf,
      .  lbname, iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 C
 C
 	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
-     .tpid_prompt,tpid_parm,
-     >ldisk2file_dir,ldisk2file_node,ldisk2file_userid,ldisk2file_pass
+     .tpid_prompt,tpid_parm
 c
         character*2 cpaper_size
 
@@ -72,7 +74,7 @@ C
 	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
-     .       kpostpass,
+     .       kpostpass,klabel_ps,
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,
      .       LUPRT,LUOUT,LULAB,ISTN,
@@ -84,7 +86,7 @@ C
      .       ITPOS(500),ilabrow,ilabcol,inewpage,
      .       IBOUT(40),luscn,itpid_period,
      .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,fileptr,
-     .       LD(500),ITIM(6),ITIMS(6),
+     .       LD(500),
      .       IBUF(ibuf_len),lbname(4),
      .       ibbcbuf(40,2,3),
      .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
@@ -97,8 +99,7 @@ C
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
      >    cpaper_size,coption(3),ctextname,cversion,
-     >    tpid_prompt,tpid_parm,
-     >ldisk2file_dir,ldisk2file_node,ldisk2file_userid,ldisk2file_pass
+     >    tpid_prompt,tpid_parm
 !
 C
 C  IBUF   - buffer for file reads, writes

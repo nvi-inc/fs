@@ -13,8 +13,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *control_key[ ]=         { "off", "on","disconnect", "connect" }; 
-static char *control_display_key[ ]= { "off", "on","disconnect", "connect",
-                                       "inactive","connected","sending" }; 
+static char *control_display_key[ ]= { "off", "on","disconnect", "connect",""};
 
 #define NCONTROL_KEY sizeof(control_key)/sizeof( char *)
 #define NCONTROL_DISPLAY_KEY sizeof(control_display_key)/sizeof( char *)
@@ -32,7 +31,7 @@ char *ptr;
 
     switch (*count) {
       case 1:
-        ierr=arg_key(ptr,control_key,NCONTROL_KEY,
+        ierr=arg_key(ptr,control_key,NCONTROL_DISPLAY_KEY,
 		     &lcl->control.control,0,FALSE);
 	lcl->control.state.known=1;
 	lcl->control.state.error=0;
@@ -64,10 +63,11 @@ char *ptr;
    return ierr;
 }
 
-void in2net_enc(output,count,lcl)
+void in2net_enc(output,count,lclc,lclm)
 char *output;
 int *count;
-struct in2net_cmd *lcl;
+struct in2net_cmd *lclc;
+struct in2net_mon *lclm;
 {
 
   int ivalue;
@@ -76,15 +76,18 @@ struct in2net_cmd *lcl;
 
     switch (*count) {
     case 1:
-      m5key_encode(output,control_display_key,NCONTROL_DISPLAY_KEY,
-		   lcl->control.control,&lcl->control.state);
+      if(lclc->control.control!=NCONTROL_DISPLAY_KEY-1)
+	m5key_encode(output,control_display_key,NCONTROL_DISPLAY_KEY,
+		     lclc->control.control,&lclc->control.state);
+      else
+	m5sprintf(output,"%s",lclm->status.status,&lclm->status.state);
       break;
     case 2:
-      m5sprintf(output,"%s",&lcl->destination.destination,
-		&lcl->destination.state);
+      m5sprintf(output,"%s",&lclc->destination.destination,
+		&lclc->destination.state);
       break;
     case 3:
-      m5sprintf(output,"%s",&lcl->options.options,&lcl->options.state);
+      m5sprintf(output,"%s",&lclc->options.options,&lclc->options.state);
       break;
     default:
       *count=-1;
@@ -161,9 +164,15 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
     goto error;
   }
 
+
+   /* no monitor response */
   m5state_init(&lclc->control.state);
+  lclc->control.control=NCONTROL_DISPLAY_KEY-1;
+  lclc->control.state.known=1;
+
   m5state_init(&lclc->destination.state);
   m5state_init(&lclc->options.state);
+  m5state_init(&lclm->status.state);
   m5state_init(&lclm->received.state);
   m5state_init(&lclm->buffered.state);
     
@@ -187,18 +196,11 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
-	if(m5string_decode(ptr,&string,sizeof(string),
-			   &lclc->control.state)) {
+	if(m5string_decode(ptr,lclm->status.status,sizeof(lclm->status.status),
+			   &lclm->status.state)) {
 	  ierr=-501;
 	  goto error2;
 	}
-	for (i=0;i<NCONTROL_DISPLAY_KEY;i++)
-	  if(strcmp(string,control_display_key[i])==0) {
-	    lclc->control.control=i;
-	    goto found;
-	  }
-	lclc->control.control=-1;
-      found:
 	break;
       case 2:
 	if(m5string_decode(ptr,lclc->destination.destination,

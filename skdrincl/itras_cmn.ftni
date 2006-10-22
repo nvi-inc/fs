@@ -1,12 +1,19 @@
 ! Common array that holds different track assignments.
       include '../skdrincl/skparm.ftni'
-      integer max_val,num_val
-      parameter(max_val = max_stn * max_frq * max_headstack * max_chan)
-!      parameter(max_val=20000)    !way big.
-      integer*4 indvec(max_val)
-      integer   itrasvec(max_val)
-      logical khead(max_headstack,max_stn)  !set to true if using headstack.
 
-      common /itras_cmn/num_val,indvec,itrasvec,khead
+      integer max_trk_map,num_trk_map
+
+      parameter (max_trk_map=(max_stn*max_frq)/4)
+
+      logical khead(max_headstack,max_stn)
+
+      integer istn_cod(max_stn,max_frq)    !Pointer into track maps.
+      integer*4 itrk_map(max_trk_map,max_headstack,max_trk)
+
+      integer num_pass(max_trk_map), num_trks(max_trk_map)
+      integer num_head(max_trk_map), num_bits(max_trk_map)
+
+      common /itras_cmn/num_trk_map,istn_cod,khead
+      common /itras_cmn/num_pass,num_trks,num_head,num_bits,itrk_map
 
 

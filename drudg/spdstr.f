@@ -24,7 +24,7 @@ C OUTPUT:
       integer nspd ! number of characters in lspd, -1 if no match
 
 C Local
-      integer i,maxspd,il
+      integer i,maxspd
       real sp(23)
       character*8 csp(23)
       integer trimlen
@@ -58,16 +58,16 @@ C       320
      .             '160','266.66','270','320'/
 
       i=1
-      do while (i.le.maxspd.and.
-     .   .not.(spd+.05.gt.sp(i).and.spd-.05.le.sp(i)))
-        i=i+1
-      enddo
-      if (i.le.maxspd) then ! match
-        cspd_out=csp(i)
-        nspd=trimlen(cspd_out)
-      else ! error
-        nspd=-1
-      endif
-     
+      do i=1,maxspd
+!        write(*,'("spd",3f8.5)') spd,sp(i), abs(spd-sp(i))
+        if(abs(spd-sp(i)) .le. 0.05) goto 100
+      end do
+      nspd=-1
+      return
+
+100   continue
+      cspd_out=csp(i)
+      nspd=trimlen(cspd_out)
+
       return
       end

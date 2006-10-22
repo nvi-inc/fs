@@ -441,13 +441,18 @@ get_all_lowl(char *station_in, char *mode_in,
   switch(state) {
   case 1:
     goto mode_next;
+    break;
   case 2:
     goto station_next;
+    break;
   case 3:
     goto global_next;
+    break;
   case 4:
     goto done;
+    break;
   default:
+    break;
   }
 
   if (mode==NULL && station==NULL)

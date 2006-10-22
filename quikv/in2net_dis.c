@@ -70,7 +70,7 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        in2net_enc(output,&count,&lclc);
+        in2net_enc(output,&count,&lclc,&lclm);
       }
 
       if(!kcom) {

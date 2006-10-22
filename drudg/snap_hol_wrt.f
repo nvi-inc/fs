@@ -14,7 +14,6 @@
       character*100 cbuf2
       equivalence (cbuf2,ibuf2)
       integer iblen
-      logical kerr
 
       iblen=100
       cbuf2=" "
@@ -26,7 +25,5 @@
       call c2lower(cbuf2(1:nch),cbuf2(1:nch))
       write(lu_outfile,'(a)') cbuf2(1:nch)
 
-!      call hol2lower(ibuf2,(nch2+1))
-!      call writf_asc(LU_OUTFILE,KERR,IBUF2,(nch2+1)/2)
       return
       end

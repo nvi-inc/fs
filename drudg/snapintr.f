@@ -16,7 +16,6 @@ C  INPUT:
       integer ifunc,IYR ! ifunc=1 for " comments, ifunc=2 for !* comments
 C
 C  LOCAL:
-      character*1 lq
       character*2 cprfx
 C     IYR - start time of obs.
       character*4 laxistype(7)
@@ -43,10 +42,10 @@ C 990803 nrv Merge drudg and FS lines and reformat.
 C 991102 nrv Add recorder B.
 C
 C
-      lq='"'
+! 2006Jul19 JMGipson.  Increased format length for tape so don't have overflow.
 ! this is the start of the line
       IF (IFUNC.EQ.1) THEN
-        cprfx=lq
+        cprfx='"'
       ELSE IF (IFUNC.EQ.2) THEN
         cprfx="!*"
       END IF
@@ -73,13 +72,24 @@ C     write antenna line
      > (stnxyz(i,istn),i=1,3), coccup(istn)
 
 C     Write terminal line
-      write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i5)') cprfx,
-     > cterid(istn)(1:4),cterna(istn)(1:8),maxpas(istn),maxtap(istn)
+      if(cstrec(istn) .eq. "Mark5A") then
+        write(lu_outfile,'(a,a4,1x,a8,1x,"Mark5A")') cprfx,
+     >   cterid(istn)(1:4),cterna(istn)(1:8)
+      else
+        write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i8)') cprfx,
+     >   cterid(istn)(1:4),cterna(istn)(1:8),maxpas(istn),maxtap(istn)
+      endif
 
 C  Write drudg version
-      write(lu_outfile,
-     >"(a,'drudg version ',a6,' compiled under FS ',2(i1,'.'),i2.2)")
-     >cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      if(iverPatch_FS .le. 9) then
+        write(lu_outfile,
+     >  "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
+     >  cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      else
+        write(lu_outfile,
+     >  "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
+     >  cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      endif
 
 C       Write equipment line
       IF (IFUNC.EQ.1) THEN ! only for non-VLBA

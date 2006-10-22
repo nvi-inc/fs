@@ -4,6 +4,7 @@ C      (original version by ARW 830812)
 C NRV 950829 for linux use jishft and and
 C NRV 951015 for HP this routine is not needed (no Epson), but
 C                   use ishft and iand
+! JMG 2006Jul21 Removed Jisifht reference which was not used.
 C
 C     Assemble the graphics data to print ICHAR in 3-of-9 barcode,
 C     starting at character IBYTE in IBUF and using the parameters
@@ -28,7 +29,6 @@ C
         integer PARMS(4),llbuf
         integer*2 IBUF(1)
         integer ibyte,ichar,i,ns,j,idum,ip,ichmv
-        integer*4 jishft
 	LOGICAL LSPACE
 	integer*2 ZFF,zero
 	data ZFF/Z'FF'/,zero/0/

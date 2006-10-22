@@ -22,7 +22,7 @@
             write(lufile,'(a)') "in2net=on"
         else
            write(luFile,'("disk_record=on")')
-           write(luFile,'("disk_record")')
+           write(luFile,'("disk_record")')  
         endif
       else if(kk4) then
         write(luFile,"(a,'=record')") lpre(1:npre)       !stX=record, where X is optional "1" or "2"

@@ -127,6 +127,11 @@ C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
       PARAMETER (MAX_FRQ = 20)
+
+!     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
+      integer max_trk
+      parameter (max_trk=33)
+
 C
 C     The maximum number of phase cal tones that can be detected
 C     for each channe.
@@ -330,7 +335,7 @@ C     to be used.
 C
       character*128 cctfil,cownctl
 C this path is for Goddard's HPUX
-C      parameter(cctfil = '/usr/local/bin/skedf.ctl')
+!      parameter(cctfil = '/usr/local/bin/skedf.ctl')
 C this path is for Linux FS
-      parameter(cctfil = '/usr2/control/skedf.ctl')
+       parameter(cctfil = '/usr2/control/skedf.ctl')
       parameter(cownctl = 'skedf.ctl')

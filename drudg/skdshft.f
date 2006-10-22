@@ -12,553 +12,389 @@ C 960223 nrv change permissions on output file
 C 980831 nrv Mods for Y2000. Use IYR2 for 2-digit year, all other
 C            year variables are fully specified.
 C 990427 nrv Require 4-digit input year.
+! 2006Oct3 JMG Completely rewritten.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
+      include '../skdrincl/skobs.ftni'
 
+! functions
+      integer trimlen
+      double precision ctime2dmjd
+      integer iday0
 C Input: none
 C Output:
       integer ierr
 
-C LOCAL:
-	integer iblen    !maximum buffer length
-	INTEGER  IY,IM,IC,ICX,TRIMLEN
-	LOGICAL KFNDMD,KFNDCH,kfndpr
-     	integer iyr,idoyr       ! original first date, fully specified
-        integer iyr2 ! 2-digit year
-	integer*2 itim1(6)        ! first shifted obs time
-	integer*2 itim0(6)        ! original first obs time
-	integer*2 itimn(6)        ! user's target time
-        integer*2 itimo(6)        ! original time of shifted obs
-        character*12 ctim1,ctim0,ctimn,ctimo
-        equivalence (itim1,itim1),(itim0,ctim0)
-        equivalence (itimn,ctimn),(itimo,ctimo)
+! local
+      logical KFNDMD, KFNDCH, kfndpr
+      logical kname,kdone
+      integer nch
+      integer ic1,ic2,ilen
+      integer ifc,ilc
+      character*20 ctemp
+      character*9 cpre
+      integer   itemp
+      integer imodp,ichngp,iprep
+      integer i
+      integer num_obs_new
+
+! shifted schedule
+      integer iy_new                  !4 and 2 digit year of start of new schedule
+      integer imon_new                !starting month
+      integer id_new,idoy_new         !starting day, and starting DOY
+      integer ih_new,im_new,is_new    !starting hour,minute,second
+      integer num_hrs                 !length in hours.
+
+      double precision tau_sid        !sidereal day in units of solar day.
+      double precision tau_shift      !time to shift.
+      integer Nsid_day                !number of sidereal days to shift.
+
+      character*12 ctim_beg           !starting and ending time of original schedule
+      character*12 ctim_end           !in sked format.
+      character*12 ctim_skd
+
+      integer iy_skd,idoy_skd,id_skd  !schedule time
+      integer ih_skd,im_skd,is_skd,imon_skd
+
+      double precision TimeExpBeg     !Jday of Start
+      double precision TimeExpEnd     !Jday of End
+      double precision TimeExpBeg_New !Jday of shifted experiment
+      double precision TimeExpEnd_New !Jday of shifted experiment
+      double precision TimeExpSkd     !Schedule time or shifted schedule time
+      double precision TimeExpFnd     !Time in new experiment
+      double precision dsecond        !Seconds part of day 
+
+      integer iwrite_pos              !position to write time
+      integer iobs                    !Counter over observations
+      integer julian                  !Mjd date
+
+! Initialization
+      tau_sid=365.2422d0/366.2422d0
+
+! Only shift schedules which are ~ 24 hours.
+
+! get time of first obs and parse.
+      call sktime(cskobs(1),ctim_beg)
+      TimeExpBeg=ctime2dmjd(ctim_beg)
+      iwrite_pos=index(cskobs(1),ctim_beg)  !Get the positin in the obs string to write the time.
+
+! get time of last obs and parse.
+      call sktime(cskobs(nobs),ctim_end)
+      TimeExpEnd=ctime2dmjd(ctim_end)
+
+      if(TimeExpEnd-TimeExpBeg .lt. 0.98) then
+         write(*,*) "Experiment is too short. Must be 24 hours!"
+         ierr=1
+         return
+      endif
 
 
-      integer ic1,ic2,imodp,ichngp,iprep,indoyr,inday,inyr,
-     .inhr,inmin,insec,id1,ih1,im1,id,ihn,imn,
-     .isn,idum,ilen,ifc,ilc,i,ih0,im0,is,
-     .nh,idur,ispin,ndskd,ih,
-     .iyx,idx,ihx,imx,isx,idnow,ihnow,imnow
-      integer nhshft,ihshft,isshft,imshft,idshft
-      logical kdone,kname,ktim,kearl
-Cinteger*4 ifbrk
-      integer ias2b,ichmv,iday0,ib2as,ichcm_ch,nhdif ! function
-      INTEGER Z4202,Z4203
-      DATA Z4202/Z'4202'/, Z4203/Z'4203'/
-C Time variables:
-C Original time of first observation: idoyr, ih0, im0
-C First observation of shifted schedule: id1, ih1, im1
-C Last observation of shifted schedule: idnow, ihnow, imnow
+! Continue
+      nch = TRIMLEN(CINNAME)
+      WRITE(LUSCN,'(" Shifting: ",a)')  CINNAME(1:nch)
+      OPEN(LU_INFILE,FILE=CINNAME,STATUS='OLD',IOSTAT=IERR)
+      REWIND(LU_INFILE)
 
-	iblen = ibuf_len*2
+      IF(IERR.NE.0) then
+        WRITE(LUSCN,'(" SKDSHFT01 - ERROR ",I5," opening file: ",A)')
+     >      IERR,CINNAME(1:nch)
+        RETURN
+      end if
 
-	IC = TRIMLEN(CINNAME)
-	WRITE(LUSCN,9100) CINNAME(1:IC)
-9100  FORMAT(' SHIFTING ',A)
-	OPEN(LU_INFILE,FILE=CINNAME,STATUS='OLD',IOSTAT=IERR)
-	REWIND(LU_INFILE)
-       	IF(IERR.NE.0) then
-	WRITE(LUSCN,9110) IERR,CINNAME(1:IC)
-9110  FORMAT(' SKDSHFT01 - ERROR ',I5,' OPENING FILE ',A)
-	RETURN
-	end if
+! Write out stop, start times.
+      do i=1,2
+        if(i .eq. 1) then
+          TimeExpSkd=TimeExpBeg
+          cpre=" Starts: "
+        else
+          TimeExpSkd=TimeExpEnd
+          cpre="Ends:   "
+        endif
+        Julian=Int(TimeExpSkd)                      !Get integer and fracitonal part
+        TimeExpSkd=(TimeExpSkd-Julian)*86400.d0     !this is fractional part.
+        call seconds2hms(TimeExpSkd,ih_skd,im_skd,is_skd)
+        julian=julian+2440000
+        call caldat(julian,imon_skd,id_skd,iy_skd)
+        write(luscn,'(a,i4,2("/",i2.2)," ",i2.2,2(":",i2.2),"   ",$)')
+     >       cpre, iy_skd,imon_skd,id_skd, ih_skd,im_skd,is_skd
+      end do
+! End writing sto start.
+      write(luscn,'()')
+
 C
 C 1.0  Get output file name
-	kdone = .false.
-	kname = .false.
-	do while (.not.kdone)
-	  do while (.not.kname)
-	    WRITE(LUSCN,'(" ENTER NAME OF OUTPUT FILE (:: TO QUIT): ",$)')
-	    READ(LUUSR,'(A)') COUTNAME
-	    ICX = TRIMLEN(COUTNAME)
-	    IF (COUTNAME(1:2).EQ.'::') RETURN
-	    IF (CINNAME.EQ.COUTNAME) THEN
-		WRITE(LUSCN,'(" INPUT, OUTPUT MUST HAVE DIFFERENT NAMES")')
-	    else
-		kname = .true.
-	    ENDIF
-	  end do  ! kname
+      kdone = .false.
+      kname = .false.
+      do while (.not.kdone)
+        do while (.not.kname)
+          WRITE(LUSCN,'(" Enter name of output file (:: to quit): ",$)')
+          READ(LUUSR,'(A)') COUTNAME
+          IF (COUTNAME(1:2).EQ.'::') RETURN
+          IF (CINNAME.EQ.COUTNAME) THEN
+            WRITE(LUSCN,*) "Input and output must have different names!"
+	  else
+	    kname = .true.
+	  ENDIF
+	end do  ! kname
 C
-          call purge_file(coutname,luscn,luusr,kbatch,ierr)
-          if(ierr .ne. 0) return
-          kdone=.true.
-	end do ! kdone
+        call purge_file(coutname,luscn,luusr,kbatch,ierr)
+        if(ierr .ne. 0) return
+        kdone=.true.
+      end do ! kdone
 
-	OPEN(LU_OUTFILE,FILE=COUTNAME,STATUS='NEW',IOSTAT=IERR)
-	IF(IERR.nE.0) then
-	  WRITE(LUSCN,9110) IERR,coutname
-	  return
-	end if
-C
+      OPEN(LU_OUTFILE,FILE=COUTNAME,STATUS='NEW',IOSTAT=IERR)
+      IF(IERR.nE.0) then
+        WRITE(LUSCN,'("SKDSHF ERROR ",i5, " opening file",a)')
+     >      IERR,coutname
+        return
+      end if
 C
 C 2.0  Get target date and time.
 C
-	iy=-1
-	im=-1
-	id=-1
-	do while (iy.lt.0.or.im.lt.0.or.id.lt.0)
-          write(luscn,
-     >     '(" Enter target date (yyyy,mm,dd) (0,0,0 to quit): ",$)')
-	  read(luusr,*,err=201) iy,im,id
-	  if (iy.eq.0.and.im.eq.0.and.id.eq.0) return
+      iy_new=-1
+      imon_new=-1
+      id_new=-1
+      do while (iy_new.lt.0.or.imon_new.lt.0.or.id_new.lt.0)
+        write(luscn,
+     >     '(" Enter starting date (yyyy,mm,dd) (0,0,0 to quit): ",$)')
+        read(luusr,*,err=201) iy_new,imon_new,id_new
+        if (iy_new.eq.0) return
 c       Require 4-digit year.
-201     if ((iy.lt.2000).or.(im.le.0.or.im.gt.12).or.
-     >                      (id.le.0.or.id.gt.31)) then
-	    write(luscn,'(" Invalid number for year, month, or day.")')
-	    iy=-1
-	  endif
-	enddo
-Cif (iy.lt.100) then ! 2-digit year
-C         iyr2=iy
-C         if (iyr2.le.99.and.iyr2.ge.50) iy=iyr2+1900
-C         if (iyr2.le.49.and.iyr2.ge. 0) iy=iyr2+2000
-C       else ! 4-digit year
-          if (iy.lt.2000) iyr2=iy-1900
-          if (iy.ge.2000) iyr2=iy-2000
-C       endif
-	INDOYR = IDAY0(IY,IM) + ID
-	inyr = iy
+201     if ((iy_new.lt.1970).or.(imon_new.le.0.or.imon_new.gt.12).or.
+     >                      (id_new.le.0.or.id_new.gt.31)) then
+          write(luscn,'(" Invalid number for year, month, or day.")')
+	  iy_new=-1
+	endif
+      enddo
 
-	ihn=-2
-	imn=-1
-	isn=-1
-	do while (ihn.lt.0.or.imn.lt.0.or.isn.lt.0)
-	  write(luscn,
+      ih_new=-1
+      im_new=-1
+      is_new=-1
+      do while (ih_new.lt.0.or.im_new.lt.0.or.is_new.lt.0)
+        write(luscn,
      >     '(" Enter target start time (h,m,s) (-1,0,0 to quit): ",$)')
-	  read(luusr,*,err=202) ihn,imn,isn
-	  if (ihn.eq.-1.and.imn.eq.0.and.isn.eq.0) return
-202      if ((ihn.lt.0.or.ihn.gt.24).or.(imn.lt.0.or.imn.gt.59).or.
-     >       (isn.lt.0.or.isn.gt.59)) then
-	    write(luscn,'(a)')
-     >       " Invalid number for hour, minute, or seconds."
-	    ihn=-2
+	 read(luusr,*,err=202) ih_new,im_new,is_new
+	 if(ih_new.eq.-1) return
+202      if((ih_new.lt.0.or.ih_new.gt.24).or.
+     >      (im_new.lt.0.or.im_new.gt.59).or.
+     >      (is_new.lt.0.or.is_new.gt.59)) then
+	   write(luscn,'(a)')"Invalid hour, minute, or seconds."
+           ih_new=-2
 	  endif
-	enddo
+      enddo
 
-	idum = ib2as(iyr2,itimn,1,z4202)
-	idum = ib2as(indoyr,itimn,3,z4203)
-	idum = ib2as(ihn,itimn,6,z4202)
-	idum = ib2as(imn,itimn,8,z4202)
-	idum = ib2as(isn,itimn,10,z4202)
-	write(luscn,9202) iy,indoyr,ihn,imn,isn
-9202  format(' Requested start time of shifted schedule: ',
-     >            i4,1x,i3,'-',i2.2,2(':',i2.2))
+      IDOY_new = IDAY0(IY_new,IMon_new) + ID_new
+
+      write(luscn,9200) ' Requested start time of shifted schedule: ',
+     >                     iy_new,idoy_new,ih_new,im_new,is_new
+9200  format(a, i4,1x,i3,'-',i2.2,2(':',i2.2))
+
+      write(ctim_skd,'(i2,i3.3,3i2.2)') iy_new-2000,idoy_new,
+     >  ih_new,im_new,is_new
+      TimeExpBeg_New=ctime2dmjd(ctim_skd)
+
 C
 C  2.6  Get desired length of schedule
 
-	nhshft=-1
-	do while (nhshft.lt.0)
-	  write(luscn,'(" How long do you want the shifted schedule ",
-     .  "to be "/"  (enter number of hours, 0 to quit): ",$)')
-	  read(luusr,*,err=261) nhshft
-261     if (nhshft.eq.0) return
-	  if (nhshft.lt.0) write(luscn,
-     .  '(" Invalid number of hours.  Try again.")')
-	enddo
+      num_hrs=-1
+      do while (num_hrs.lt.0)
+        write(luscn,'(" Length of shifted schedule (0=quit) ? ",$)')
+        read(luusr,*,err=261) num_hrs
+261     if (num_hrs.eq.0) return
+        if (num_hrs.lt.0) write(luscn,'(" Invalid length. Try again.")')
+      enddo
+      TimeExpEnd_New=TimeExpBeg_New+dble(num_hrs)/24.d0
 C
 C 3.0 Check for proper start of schedule.
 C
-        cbuf="* "
-	do while (cbuf(1:1) .eq. "*")
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-  	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,"(' SKDSHFT02 - READ ERROR ',I5)") ierr
-	    RETURN !
-	  ENDIF
-	end do
+      cbuf="* "
+      do while (cbuf(1:1) .eq. "*")
+        CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+        IF(IERR.NE.0) THEN
+          WRITE(LUSCN,"(' SKDSHFT02 - READ ERROR ',I5)") ierr
+          RETURN !
+        ENDIF
+      end do
 C
-        if(cbuf(1:6) .ne. "$EXPER") then
-          WRITE(LUSCN,"(a)") ' Did not find $EXPER on first line.'
-	  RETURN
-	ENDIF
+      if(cbuf(1:6) .ne. "$EXPER") then
+        WRITE(LUSCN,"(a)") ' Did not find $EXPER on first line.'
+        RETURN
+      ENDIF
 C
 C 4.0  Locate change, modular, and prepass parameters.
 C
-        cbuf="  "
-	do while(cbuf(1:6) .ne. "$PARAM")
-   	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	  IF(IERR.NE.0) THEN
-            write(luscn,
+      cbuf="  "
+      do while(cbuf(1:6) .ne. "$PARAM")
+        CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+        IF(IERR.NE.0) THEN
+          write(luscn,
      >       '("SKDSHFT03: Error found looking for $PARAM",i3)') ierr
-	    RETURN
-	  ENDIF
-	  IF(iLEN.EQ.-1) THEN
-	    WRITE(LUSCN,'("SKDSHFT04: EOF reached looking for $PARAM")')
-	    RETURN
-	  ENDIF
-	end do
+          RETURN
+        ENDIF
+        IF(iLEN.EQ.-1) THEN
+          WRITE(LUSCN,'("SKDSHFT04: EOF reached looking for $PARAM")')
+          RETURN
+        ENDIF
+      end do
 C
-	KFNDMD = .FALSE.
-	KFNDCH = .FALSE.
-	kfndpr = .false.
-	do while ((.not.kfndmd).or.(.not.kfndch).or.(.not.kfndpr))
- 	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-      	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,9420) IERR
+      KFNDMD = .FALSE.
+      KFNDCH = .FALSE.
+      kfndpr = .false.
+      do while ((.not.kfndmd).or.(.not.kfndch).or.(.not.kfndpr))
+        CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+        IF(IERR.NE.0) THEN
+          WRITE(LUSCN,9420) IERR
 9420      FORMAT(' SKDSHFT05 - READ ERROR ',i5,' in $PARAM section')
-	    RETURN
-	  ENDIF
-	  IF(cbuf(1:1) .eq. "$") THEN
-	    WRITE(LUSCN,9430)
-9430      FORMAT(' SKDSHFT06 - Did not find MODULAR and/or CHANGE ',
-     .    'and/or PREPASS in $PARAM section.')
-	    RETURN
-	  ENDIF
+          RETURN
+        ENDIF
+        IF(cbuf(1:1) .eq. "$") THEN
+          WRITE(LUSCN,'(a)')' SKDSHFT06 - Did not find MODULAR and/or'
+     >          //' CHANGE and/or PREPASS in $PARAM section.'
+	  RETURN
+       ENDIF
 C
-	  IFC = 1
-	  ILC = iLEN*2
-	  CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	  do while (ic1.ne.0)
-	    IF (ichcm_ch(IBUF,IC1,'MODULAR').eq.0) then
-C Found "MODULAR" - next field is parameter we want.
-		KFNDMD = .TRUE.
-		CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-		IF(IC1.EQ.0) THEN
-		  WRITE(LUSCN,'(a)')
-     >              ' SKDSHFT07 - No value field after MODULAR'
-		  RETURN
-		ENDIF
-		IMODP = IAS2B(IBUF,IC1,IC2-IC1+1)
+       IFC = 1
+       ILC = iLEN*2
+       CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
+       do while (ic1.ne.0)
+         ctemp=cbuf(ic1:ic2)
+         if(ctemp .eq. "MODULAR" .or. ctemp .eq. "CHANGE" .or.
+     >      ctemp .eq. "PREPASS") then
+           CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
+           if(ic1 .eq. 0) then
+             WRITE(LUSCN,'(a)')'SKDSHFT: No value field after ', ctemp
+             return
+           endif
+           read(cbuf(ic1:ic2),*) itemp
+           if(ctemp .eq. "MODULAR") then
+             kfndmd=.true.
+             imodp=itemp
+           else if(ctemp .eq. "CHANGE") then
+             kfndch=.true.
+             ichngp=itemp
+           else if(ctemp .eq. "PREPASS") then
+             kfndpr=.true.
+             iprep=itemp
+           endif
+         endif
+         CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
+	end do !"while ic1 = 0"
+      end do !"while not kfndch or kfndmd"
 
-	    else IF (ichcm_ch(IBUF,IC1,'CHANGE').eq.0) then
-C found "CHANGE" - next field is parameter we want
-		KFNDCH = .TRUE.
-		CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-		IF(IC1.EQ.0) THEN
-		  WRITE(LUSCN,'(a)')
-     >              ' SKDSHFT08 - No value field after CHANGE'
-		  RETURN
-		ENDIF
-		ICHNGP = IAS2B(IBUF,IC1,IC2-IC1+1)
-
-	    else IF (ichcm_ch(IBUF,IC1,'PREPASS').eq.0) then
-C found "PREPASS" - next field is parameter we want
-		kfndpr = .TRUE.
-		CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-		IF(IC1.EQ.0) THEN
-		  WRITE(LUSCN,'(a)')
-     >             ' SKDSHFT081 - No value field after PREPASS'
-		  RETURN
-		ENDIF
-		IPREP = IAS2B(IBUF,IC1,IC2-IC1+1)
-	    end if
-	    CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	  end do !"while ic1 = 0"
-	end do !"while not kfndch or kfndmd"
-	write(luscn,9470) ichngp,imodp,iprep
+      write(luscn,9470) ichngp,imodp,iprep
 9470  format(' Tape change time = ',i5,
      .       '.  Modular start time = ',i5,
      .       '.  Prepass time = ',i5,'.')
 C
 C 5.0  Copy file up to $SKED section.
 C
-	REWIND(LU_INFILE)
-        cbuf=" "
-	write(luscn,9501)
-9501  format(' Writing out schedule file up to $SKED section.')
-	do while (cbuf(1:5) .ne. '$SKED')
-C  if (ifbrk().lt.0) return
-	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
- 	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,9500) IERR
-9500      FORMAT(' SKDSHFT09 - READ ERROR ',I5,' searching for $SKED')
-	    RETURN
-	  ENDIF
-	  IF(iLEN.EQ.-1) THEN
-	    WRITE(LUSCN,'(a)')
-     >       ' SKDSHFT10 - Did not find $SKED before EOF.'
-	    RETURN
-	  ENDIF
-C
-	  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-      	  IF(IERR.NE.0) THEN
-	   WRITE(LUSCN,9520) IERR
-9520       FORMAT(' SKDSHFT11 - WRITE ERROR ',I5,' before $SKED found.')
-	   RETURN
-	  ENDIF
-	end do !"read until $SKED"
-C
-C 6.0  Get original date and compute shift.
-C    File is positioned to read the first observation in $SKED section.
-C
- 	CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-	IF(IERR.NE.0) THEN
-	  WRITE(LUSCN,9600) IERR
-9600      FORMAT(' SKDSHFT12 - READ ERROR ',I5,' first observation.')
-	  RETURN
-	ENDIF
-	IF(iLEN.EQ.-1) THEN
-	  WRITE(LUSCN,9610)
-9610    FORMAT(' SKDSHFT13 - NO ENTRIES in $SKED section.')
-	  RETURN
-	ENDIF
-	IFC = 1
-	ILC = iLEN*2
-C
-	DO I=1,5
-	  CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	  IF(IC1.EQ.0) THEN
-	    WRITE(LUSCN,9620)
-9620          FORMAT(' SKDSHFT14 - FIELD error skipping to start time')
-	    RETURN
-	  ENDIF
-	end do
-C
-	IDUM = ICHMV(ITIM,1,IBUF,IC1,11)
-        IYR2 = IAS2B(ITIM,1,2) ! 2-digit year
-        if (IYR2.gt.50.and.iyr2.le.99) iyr=iyr2+1900 
-        if (IYR2.ge. 0.and.iyr2.le.50) iyr=iyr2+2000 
-	IDOYR = IAS2B(ITIM,3,3)
-	ih0=ias2b(itim,6,2)
-	im0=ias2b(itim,8,2)
-	is=ias2b(itim,10,2)
-	idum = ichmv(itim0,1,itim,1,11)
-C   ITIM0 holds the original time of the first observation.
-	write(luscn,9631) iyr,idoyr,ih0,im0,is
-9631  format(' Original time of first observation   ',
-     >  i4,1x,i3,'-',i2.2,2(':',i2.2))
+      REWIND(LU_INFILE)
+      write(luscn,"(a)")'Writing out file up to $SKED section.'
 
-C  6.5  If the new schedule time is later than the original time,
-C       find out if the new time is actually within the schedule.
-C       If so, there is no need for an initial shift.
-
-	ktim = .false.
-	if (kearl(itim0,itimn)) then ! search for new time in original
-	  kdone = .false.
-	  do while (.not.kdone) ! check each time
-	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
- 	    IF(IERR.NE.0) THEN
-		WRITE(LUSCN,9650) IERR
-9650        FORMAT(' SKDSHFT69 - READ ERROR ',I5,' looking for time')
-		RETURN
-	    ENDIF
-	    IF(iLEN.EQ.-1.or.cbuf(1:1) .eq."$") THEN !eof
-		kdone = .true.
-		ktim = .false.
-	    else !check time
-		IFC = 1
-		ILC = iLEN*2
-		DO I=1,5
-		  CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-		  IF(IC1.EQ.0) THEN
-		    WRITE(LUSCN,"(' SKDSHFT64 - FIELD error')")
-		    RETURN
-		  ENDIF
-		end do
-		IDUM = ICHMV(ITIM,1,IBUF,IC1,11)
-		if (kearl(itimn,itim)) then
-		  kdone = .true.
-		  ktim = .true.
-		ENDIF
-	    endif ! eof/check time
-	  enddo ! check each time
-	  if (ktim) then !found the time
-	    inyr = iyr
-	    indoyr = idoyr
-	  else !rewind, reposition
-	    REWIND(LU_INFILE)
-            cbuf=" "
-	    do while (cbuf(1:5) .ne. '$SKED')
-		CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-   	    end do !"read until $SKED"
-	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
- 	    IFC = 1
-	    ILC = iLEN*2
-	    DO I=1,5
-		CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	    end do
-	    IDUM = ICHMV(ITIM,1,IBUF,IC1,11)
-	  endif !found/rewind
-	endif !search for new time in original/compute shift
-
-	CALL CMSHF(InYr,IYR,IDOYR,INDOYR,IMODP,
-     .     ISSHFT,IMSHFT,IHSHFT,IDSHFT)
+      do while (cbuf(1:5) .ne. '$SKED')
+       CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+       IF(IERR.NE.0) THEN
+         WRITE(LUSCN,9500) IERR
+9500     FORMAT(' SKDSHFT09 - READ ERROR ',I5,' searching for $SKED')
+         RETURN
+       ENDIF
+       IF(iLEN.EQ.-1) THEN
+         WRITE(LUSCN,'(a)')' SKDSHFT10 - Did not find $SKED before EOF.'
+         RETURN
+       ENDIF
 C
-       WRITE(LUSCN,9630) idshft,ihshft,imshft,isshft
-9630   FORMAT(' Sidereal shift is ',i5,' days, and ',i5,'h ',i5,
-     .'m ',i5,'s')
-C
-C  7.0  Find the observation to start the new schedule with.
-C       We have just read the first observation line, or we are
-C       positioned to the first observation to use.
-C       ITIM and ITIM1 holds the first observation time.
+       write(lu_outfile,'(a)') cbuf(1:2*ilen)
+      end do !"read until $SKED"
+! Here is where we write out the shifted schedule.
 
-	CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,ISSHFT,IMSHFT,IHSHFT,
-     .             IDSHFT)
-	idum = ichmv(itim1,1,itim,1,11)
-	IY = IAS2B(ITIM,1,2)
-	ID1 = IAS2B(ITIM,3,3)
-	ih1=ias2b(itim,6,2)
-	im1=ias2b(itim,8,2)
-	is=ias2b(itim,10,2)
-	write(luscn,9789) iy,id1,ih1,im1,is
-9789    format(' First observation shifts to: '
-     >     i2,1x,i3,'-',i2.2,2(':',i2.2))
+      NSid_day=(TimeExpBeg_New-TimeExpBeg)/tau_sid
 
-	call gtshft(isshft,imshft,ihshft,idshft,itimn,itimo,ierr)
-	if (ierr.eq.-1) return
-C        We are now positioned with the first shifted observation
-C        in IBUF, ITIM.
-	IY = IAS2B(ITIM,1,2)
-	ID1 = IAS2B(ITIM,3,3)
-	ih1=ias2b(itim,6,2)
-	im1=ias2b(itim,8,2)
-	is=ias2b(itim,10,2)
-	write(luscn,9790) iy,id1,ih1,im1,is
-9790    format(' First observation of the shifted schedule   ',
-     >     i2,1x,i3,'-',i2.2,':',i2.2,':',i2.2)
-	IYx = IAS2B(ITIMo,1,2)
-	IDx = IAS2B(ITIMo,3,3)
-	ihx=ias2b(itimo,6,2)
-	imx=ias2b(itimo,8,2)
-	isx=ias2b(itimo,10,2)
-        write(luscn,9791) iyx,idx,ihx,imx,isx
-9791    format(' (shifted from original time   ',
-     >   i2,1x,i3,'-',i2.2,':',i2.2,':',i2.2,')')
+      if(TimeExpBeg .gt. TimeExpBeg_New) NSid_day=Nsid_day-1
 
-C 8.0  Shift and copy shifted schedule from specified start to end.
-C
-	call shfcop(isshft,imshft,ihshft,idshft,ilen,
-     >    id1,ih1,im1,nhshft,ierr)
-	if (ierr.eq.-1) return
-	IY = IAS2B(ITIM,1,2)
-	IDnow = IAS2B(ITIM,3,3)
-	ihnow=ias2b(itim,6,2)
-	imnow=ias2b(itim,8,2)
-	is=ias2b(itim,10,2)
-	write(luscn,9890) iy,idnow,ihnow,imnow,is
-9890  format(' Last shifted observation from original schedule   ',
-     >   i2,1x,i3,'-',i2.2,':',i2.2,':',i2.2)
-C
-C 9.0  Go back to beginning of schedule, shift by +1 day and add
-C    on to the end of the shifted schedule.
-C
-	nh = nhshft - nhdif(idnow,ihnow,imnow,id1,ih1,im1)
-	do while (nh.gt.0)  !need more
-	  write(luscn,9901) nh
-9901      format(' Going back to beginning of schedule to get ',i4,
-     .  ' more hours.')
-	  CALL POSNT(LU_INFILE,IERR,-2)
-	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,9900) IERR
-9900      FORMAT(' SKDSHFT23 - POSNT ERROR ',I5)
-	    RETURN
-	  ENDIF
-    	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-        	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,9910) IERR
-9910        FORMAT(' SKDSHFT24 - ERROR ',I5,' re-reading last obs.')
-	    RETURN
-	  ENDIF
-	  CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	  IDUR = IAS2B(IBUF,IC1,IC2-IC1+1) !longest dur of all stations
-	  ISPIN = 392 ! maximum time to spin whole tape down
-          ISSHFT = IDUR + ISPIN + IPREP + ICHNGP
-	  IDSHFT = 0
-	  IHSHFT = 0
-	  IMSHFT = 0
-	  IDUM = ICHMV(ITIMS,1,ITIM,1,11)
-C
-	  CALL TSHFT(ITIMS,INDAY,INHR,INMIN,INSEC,
-     .       ISSHFT,IMSHFT,IHSHFT,IDSHFT)
-C       ITIMS is the time of the last shifted observation PLUS the
-C       time required to change tapes.  This is the next allowable time.
+      tau_shift=tau_sid*dble(Nsid_day)
+! Now   TimeExpBeg_New-tau_shift should lie within experiment.
 
-C   Now compute a new shift one day later than the original.
-          ndskd = 1  !length of schedule
-	  INDOYR = INDOYR + ndskd
-	  CALL CMSHF(InYr,IYR,IDOYR,INDOYR,IMODP,
-     >       ISSHFT,IMSHFT,IHSHFT,IDSHFT)
-          WRITE(LUSCN,9632) idshft,ihshft,imshft,isshft
-9632      FORMAT(' Sidereal shift of wrapped schedule is ',i5,
-     >      ' days, and ',i5,'h ',i5,'m ',i5,'s')
-C
-	  REWIND(LU_INFILE)
-          cbuf="$SKED"
-	  do while (cbuf(1:5) .ne. "$SKED")
-    	    CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-   	  end do !"read until $SKED"
-    	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
- 	  IFC = 1
-	  ILC = iLEN*2
-	  DO I=1,5
-	    CALL GTFLD(IBUF,IFC,ILC,IC1,IC2)
-	  end do
-	  IDUM = ICHMV(ITIM,1,IBUF,IC1,11)
+      do iobs=1,nobs
+         call sktime(cskobs(iobs),ctim_skd)
+         TimeExpSkd=ctime2dmjd(ctim_skd)+tau_shift
+         if(TimeExpSkd .ge. TimeExpBeg_New) goto 200
+      end do
+      write(luscn,*) "Did not not find starting obs!"
+      ierr=1
+      return
 
-	  CALL TSHFT(ITIM,INDAY,INHR,INMIN,INSEC,ISSHFT,IMSHFT,IHSHFT,
-     .             IDSHFT)
+! located first observation to shift.
+200   continue
+      TimeExpFnd=0
+      num_obs_new=0 
+      do while(TimeExpSkd .lt. TimeExpEnd_New)
+        Julian=Int(TimeExpSkd)                      !Get integer and fracitonal part
+        dsecond=(TimeExpSkd-Julian)*86400.d0     !this is fractional part.
+        call seconds2hms(dsecond,ih_skd,im_skd,is_skd)
 
-	  call gtshft(isshft,imshft,ihshft,idshft,itims,itimo,ierr)
-	  if (ierr.eq.-1) return
-C        We are now positioned with the first shifted observation
-C        in IBUF, ITIM.
-	  IYr2 = IAS2B(ITIM,1,2)
-          if (iyr2.ge.50.and.iyr2.le.99) iyr=iyr2+1900
-          if (iyr2.ge. 0.and.iyr2.lt.50) iyr=iyr2+2000
-	  ID = IAS2B(ITIM,3,3)
-	  ih=ias2b(itim,6,2)
-	  im=ias2b(itim,8,2)
-	  is=ias2b(itim,10,2)
-	  write(luscn,9920) iyr,id,ih,im,is
-9920      format(' First observation of the wrapped schedule   ',
-     >      i4,1x,i3,'-',i2.2,':',i2.2,':',i2.2)
+        julian=julian+2440000
+        call caldat(julian,imon_skd,id_skd,iy_skd)
+        IDOY_skd = IDAY0(IY_skd,IMon_skd) + ID_skd
+        iy_skd=iy_skd-2000
+        cbuf=cskobs(iobs)
+        write(cbuf(iwrite_pos:iwrite_pos+10),'(i2.2,i3.3,3i2.2)')
+     >   iy_skd,idoy_skd,ih_skd,im_skd,is_skd
+        write(lu_outfile,'(a)') cbuf(1:trimlen(cbuf))
+        num_obs_new=num_obs_new+1
+210     continue
+        iobs=iobs+1                     !if we come to the end of original schedule.
+        if(iobs .gt. nobs) then
+          iobs=1
+          Tau_shift=Tau_shift+Tau_sid
+          TimeExpFnd=TimeExpSkd
+          write(*,*) "Wrapping ", TimeExpFnd
+        endif
+        call sktime(cskobs(iobs),ctim_skd)
+        TimeExpSkd=Ctime2dmjd(ctim_skd)+Tau_Shift
+        i=i+1
+!        write(*,'("Sked time ",i4,3f10.3)')
+!     >   iobs,TimeExpSkd, TimeExpEnd_New,TimeExpFnd
+!        if(i .eq. 100) stop
+! When we go back to the beginning, make sure that shifted time is later than
+! last time we have written out.
+        if(TimeExpSkd .lt. TimeExpFnd) goto 210
+      end do
 
-	  call shfcop(isshft,imshft,ihshft,idshft,ilen,
-     .     id1,ih1,im1,nhshft,ierr)
-	  if (ierr.eq.-1) return
-	  idnow = ias2b(itim,3,3)
-	  ihnow = ias2b(itim,6,2)
-	  imnow = ias2b(itim,8,2)
-	  nh = nhshft - nhdif(idnow,ihnow,imnow,id1,ih1,im1)
-	enddo !need more
+! Done writing $SKED part of file.  Need to space to end of section and write rest of file.
 
-	IY = IAS2B(ITIM,1,2)
-	ID = IAS2B(ITIM,3,3)
-	ih=ias2b(itim,6,2)
-	im=ias2b(itim,8,2)
-	is=ias2b(itim,10,2)
-	write(luscn,9990) iy,id,ih,im,is
-9990  format(' Last observation of the shifted schedule   ',i2,1x,
-     .i3,'-',i2.2,':',i2.2,':',i2.2)
-C
 C 10.0  Finish copying the rest of the file.
 C
-	IF(iLEN.EQ.-1) THEN
-	  WRITE(LUSCN,8000) COUTNAME(1:ICX)
-8000    FORMAT(' SHIFTED FILE ',A,' CREATED'/)
-	else
-	  write(luscn,9801)
-9801    format(' Copying rest of schedule file beyond $SKED section.')
-	end if
-C
-	do while (cbuf(1:1).ne."$" .and. ilen .ne.-1) !read to next $
-     	  call readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
-       	  IF(IERR.ne.0) THEN
-	    WRITE(LUSCN,8020) IERR
-8020      FORMAT(' SKDSHFT33 - Error ',I5,' finding end of $SKED')
-	    RETURN
-	  ENDIF
-	enddo !read to next $
+      write(luscn,'(a)')
+     >   ' Copying rest of schedule file beyond $SKED section.'
 
-	do while (ilen.ne.-1) !copy to end
-	  CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
-	  IF(IERR.NE.0) THEN
-	    WRITE(LUSCN,8010) IERR
-8010        FORMAT(' SKDSHFT30 - WRITE ERROR ',I5)
+! Skip over sked section in input.
+      do while (cbuf(1:1).ne."$" .and. ilen .ne.-1) !read to next $
+        call readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+        IF(IERR.ne.0) THEN
+          WRITE(LUSCN,8020) IERR
+8020      FORMAT(' SKDSHFT33 - Error ',I5,' finding end of $SKED')
+          RETURN
+        ENDIF
+      enddo !read to next $
+
+      do while (ilen.ne.-1) !copy to end
+        CALL writf_asc(LU_OUTFILE,IERR,IBUF,iLEN)
+        IF(IERR.NE.0) THEN
+          WRITE(LUSCN,'(" SKDSHFT30 - WRITE ERROR ",I5)') IERR
+          RETURN
+         ENDIF
+   	 CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
+ 	 IF(IERR.ne.0) THEN
+	    WRITE(LUSCN,'(" SKDSHFT31 - READ ERROR ",I5)') IERR
 	    RETURN
 	  ENDIF
-   	  CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
- 	  IF(IERR.ne.0) THEN
-	    WRITE(LUSCN,8030) IERR
-8030        FORMAT(' SKDSHFT31 - READ ERROR ',I5)
-	    RETURN
-	  ENDIF
-	  if (ilen.eq.-1) then
-	    write(luscn,8000) coutname(1:icx)
-	  end if
-	end do !copy to end
+      end do !copy to end
+
+      write(luscn,'("Wrote:", a,a,i5,a)')
+     >    coutname(1:trimlen(coutname))," with ",num_obs_new,    
+     >     " observations." 
+
 C
 990   close(lu_outfile)
       call drchmod(coutname,iperm,ierr)

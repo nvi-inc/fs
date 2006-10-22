@@ -18,6 +18,11 @@ C 970207 nrv Change prompt to use the word "destination"
 C 970207 nrv Remove FILE option in printer type. This is the
 C            same as using a file name in printer port.
 C 970301 nrv Add font size prompt.
+! 2006Jul20 JMGipson. Fixed problem with setting file name for short file names.
+!          If lenght of filename<len(PRINT), then trailing letters of PRINT would be appended.
+!          e.g., instead of dum, would get dumNT.
+! 2006Sep26. Removed call to gtrsp. Now just use fortran read
+
 C
 C  Local:
       character*128 ctemp
@@ -28,13 +33,13 @@ C
 C  1.0  Read the input from user and set port appropriatly.
 
       l=trimlen(cprport)
-      write(luscn,9100) cprport(1:l)
-9100  format(' Output destination set to ',A,'.  Just enter ',
-     .       'return if you do not wish '/' to change, else type a ',
-     .       'file name or PRINT  ? ')
+      write(luscn,'("Output destination set to: ",A)') cprport(1:l)
+      write(luscn,'(a)')
+     > "<RET>=no change, else enter in filename or PRINT."
 
-      call gtrsp(ibuf,25,luusr,nch)
-      if(nch .gt. 0) cprport(1:nch)=cbuf(1:nch)
+      read(luusr,'(a)') cbuf
+      nch=trimlen(cbuf)
+      if(nch .gt. 0) cprport=cbuf
 
       if (cprport(1:5).eq.'print') cprport='PRINT'
 
@@ -43,13 +48,12 @@ C  2.0  Now get printer type.
       ierr=1
       l=trimlen(cprttyp)
       do while (ierr.ne.0)
-        write(luscn,9200) cprttyp(1:l)
-9200    format(' Printer type set to ',A,'.  Just enter return ',
-     .  'if you do not wish to change,'/' else type LASER, EPSON, ',
-     .  'or EPSON24 ? ')
+        write(luscn,'("Printer type set to: ",A)') cprttyp(1:l)
+        write(luscn,'(a)')
+     >  "<RET>=no change, else LASER, EPSON or EPSON24"
 
-        cbuf=" "
-        call gtrsp(ibuf,15,luusr,nch)
+        read(luusr,'(a)') cbuf
+        nch=trimlen(cbuf)
 
         if (nch.gt.0) then
           ctemp=cbuf(1:nch)
@@ -59,7 +63,7 @@ C  2.0  Now get printer type.
             ierr=0
           else
             write(luscn,'(a)') " Invalid printer type.  Only LASER, "//
-     >        "EPSON,  'or EPSON24 allowed.  Try again."
+     >        "EPSON, or EPSON24 allowed.  Try again."
           endif
         else
           ierr=0
@@ -79,12 +83,12 @@ C  3. Now get printer output orientation.
       l=trimlen(ctemp)
       ierr=1
       do while (ierr.ne.0)
-        write(luscn,9300) ctemp(1:l)
-9300    format(' Output orientation set to ',a,'.  Just enter return ',
-     .  'if you do not wish'/' to change else enter (P)ortrait or',
-     .  ' (L)andscape or (D)efault ?  ')
+        write(luscn,'("Output orientation set to ", a)') ctemp(1:l)
+        write(luscn,'(a)')
+     >   "<Ret>=no change (P)ortrait (L)andscape or (D)efault"
 
-        call gtrsp(ibuf,15,luusr,nch)
+        read(luusr,'(a)') cbuf
+        nch=trimlen(cbuf)
 
         if (nch.gt.0) then
           call capitalize(cbuf)
@@ -112,12 +116,12 @@ C  4. Now get font size.
       ierr=1
       l=trimlen(ctemp)
       do while (ierr.ne.0)
-        write(luscn,9400) ctemp(1:l)
-9400    format(' Output font size set to ',a,'.  Just enter return ',
-     .  'if you do not wish'/' to change else enter (S)mall, ',
-     .  '(L)arge or (D)efault ?  ')
+        write(luscn,'("Output font size set to: ",a)') ctemp(1:l)
+        write(luscn,'(a)')
+     >  "<Ret>=no change or (S)mall, (L)arge, (D)efault."
 
-        call gtrsp(ibuf,15,luusr,nch)
+        read(luusr,'(a)') cbuf
+        nch=trimlen(cbuf)
 
         if (nch.gt.0) then
           call capitalize(cbuf)

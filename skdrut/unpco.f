@@ -1,5 +1,5 @@
       SUBROUTINE unpco(IBUF,ILEN,IERR,
-     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,ITRK,cswit,ivc)
+     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,itrk_map,cswit,ivc)
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
@@ -40,20 +40,25 @@ C     FREQPC - phase cal frequency, Hz
 C     Ichan - channel number for this frequency
 C     LMODE - observing mode, max 16 characters
 C     VCBAND - final video bandwidth, MHz
-      integer ITRK(4,max_subpass,max_headstack) ! tracks to be recorded
+      integer*4 itrk_map(max_headstack,max_trk) ! tracks to be recorded
+
       character*3 cswit ! switching
       integer ivc ! physical BBC# for this channel
+
+! function
+      integer*4 itras_ind
 C
 C  LOCAL:
-      integer ic2save,j,idumy,i,ipas
+      integer ic2save,idumy,i,ipas
       double precision d
       integer icnt
-      integer ind
+      integer*4 ind
       double precision DAS2B
 C     ITx - count of tracks found in the last fields
 C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
-      integer k,ihead,ich,nch,ic2,ic1,ict,ip,ix,itx
+      integer ihead,ich,nch,ic2,ic1,ict,ip,ix,itx
+      integer ibit,isb
       integer ichmv,ias2b,iscnc ! functions
 C
 C
@@ -157,14 +162,7 @@ C     t3 is for USB, t4 for LSB for magnitude bit. <<<<<< This is how
 C                                                         2-bit sampling
 C                                                         is specified.
 C
-      DO  I=1,max_subpass ! initialize
-        do j=1,4 ! sb and bits
-          do k=1,max_headstack
-            ITRK(j,I,k) = -99
-          enddo
-        enddo
-      END DO  !initialize
-C
+
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! get first character
       IX = 1
       if (ic1.eq.0) then ! no tracks !
@@ -198,11 +196,18 @@ C                              (        Find the opening parenthesis
           ix=ix+1
           if(cbuf(ict:ict) .ne. ",") then
             read(cbuf(ict:ict+ind-1),*,err=900) itx
-            if(itx.lt. -3  .or. itx .gt. 36) then
+            itx=itx+3
+            if(itx.lt. 1  .or. itx .gt. max_trk) then
+               write(*,*) "UNPCO: Invalid track assignment"
                ierr=-107-ix
                return
             endif
-            if (ihead.le.max_headstack) ITRK(icnt,IPAS,ihead) = itx
+            if (ihead.le.max_headstack)  then
+               ibit=(icnt-1)/2
+               isb=icnt-2*ibit
+               ibit=ibit+1
+               itrk_map(ihead,itx)=itras_ind(isb,ibit,ichan,ipas)
+            endif
           endif
           ict=ict+ind
         end do

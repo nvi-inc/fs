@@ -1,9 +1,10 @@
+!  2006Oct06 JMG.  Save initial state from RDCTL file.
 ! Auxiliariay info for datatransfer.
       integer ixfer_in2net,ixfer_disk2file
       parameter (ixfer_in2net=1,ixfer_disk2file=2)
 
       integer max_xfer
-      parameter(max_xfer=10000)         !Maximum number of data transfer statements.
+      parameter(max_xfer=10000) 	!Maximum number of data transfer statements.
       integer ixfer_stat(max_xfer)      !station number.
       integer ixfer_method(max_xfer)
       character*128 lxfer_destination(max_xfer)      !where to put it
@@ -11,7 +12,7 @@
       real xfer_beg_time(max_xfer)      !beggining and end of xfer/w/rt/ scan
       real xfer_end_time(max_xfer)
 
-      integer ixfer_beg(max_obs)        !1st data_transfer statement for a given scan.
+      integer ixfer_beg(max_obs)     	!1st data_transfer statement for a given scan.
       integer ixfer_end(max_obs)        !last
 
 ! All of these have to do with stations.
@@ -24,12 +25,19 @@
       logical kDisk2File_2_in2net
       logical kNo_data_xfer
       logical kglobal_in2net
+      logical kautoftp,kautoftp0
       character*128 ldestin_in2net,lglobal_in2net
+
+      character*128 lautoftp_string,ldisk2file_dir
+      character*128 lautoftp_string0,ldisk2file_dir0   !initial values of these
 !
       Common /Data_xfer_override/
      >     kno_data_xfer, Kin2Net_2_Disk2File,kDisk2File_2_in2net,
-     >     kglobal_in2net,
-     >     ldestin_in2net,lglobal_in2net
+     >     kglobal_in2net,kautoftp,kautoftp0,
+     >     ldestin_in2net,lglobal_in2net,
+     >     ldisk2file_dir,lautoftp_string,
+     >     ldisk2file_dir0,lautoftp_string0
+
 
       Common /Data_xfer_stat/kstat_in2net,kstat_disk2file,
      >     lstat_first_in2net
@@ -38,4 +46,4 @@
      >     ixfer_stat,ixfer_method,lxfer_destination,lxfer_options,
      >     ixfer_beg,ixfer_end,  xfer_beg_time,xfer_end_time
 
-
+       

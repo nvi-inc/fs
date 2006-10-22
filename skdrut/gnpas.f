@@ -29,6 +29,7 @@ C  LOCAL VARIABLES:
       integer it(max_headstack),np(max_headstack)
       integer j,k,l,itrk(max_subpass,max_headstack),ic1,maxp(max_frq)
       integer ix,iprr,ipmax(max_headstack),ic,m,nvc
+      integer idum
       logical kmiss
 C
 C     880310 NRV DE-COMPC'D
@@ -78,11 +79,14 @@ C
               DO  J=1,max_subpass ! count sub-passes
                 itrk(j,ih)=0
                 IT(ih) = 0
-                do k=1,nchan(is,ic) ! channels
+!                do k=1,nchan(is,ic) ! channels
+                do k=1,max_chan ! channels
                   do l=1,2 ! upper/lower
                     do m=1,2 ! sign/mag
-                      if (itras(l,m,ih,k,j,is,ic).ne.-99) 
-     .                    it(ih)=it(ih)+1
+                      if (itras(l,m,ih,k,j,is,ic).ne.-99) then
+                        idum=itras(l,m,ih,k,j,is,ic)
+                        it(ih)=it(ih)+1
+                      endif
                     enddo
                   END DO ! upper/lower
                 enddo ! channels
@@ -108,14 +112,14 @@ C
                   if (np(ih).ne.npassf(is,ic)) then ! inconsistent
                     write(luscn,9907) lcode(ic),cstnna(is)
 9907                format('GNPAS07 - Inconsistent number of ',
-     .              'sub-passes between headstacks 1 and 2 for ',
-     .              'code ',a2,' at ', a)
+     >              'sub-passes between headstacks 1 and 2 for code ',
+     >               a2,' at ', a)
                   endif ! check for consistency
                   if (itrk(1,1).ne.itrk(1,ih)) then ! inconsistent 
                     write(luscn,9908) lcode(ic),cstnna(is)
 9908                format('GNPAS08 - Inconsistent number of tracks ',
-     .              'per pass between',
-     .              ' headstacks 1 and 2 for code',a2,' at ', a)
+     .              'per pass between  headstacks 1 and 2 for code',
+     >               a2,' at ', a)
                   endif
                 endif ! one head/check second
               endif ! set/check
@@ -188,8 +192,7 @@ C     codes--this should not be attempted in a single experiment.
               if (ip(ih).gt.0.and.ip(ih).ne.ip(1)) then
                 write(luscn,9909) lcode(ic),cstnna(is)
 9909            format('GNPAS09 - Inconsistent number of passes in',
-     .          ' $HEAD',
-     .          ' between headstacks 1 and 2 for ',a2,' at ',a)
+     .          ' $HEAD between headstacks 1 and 2 for ',a2,' at ',a)
               endif
             endif
           enddo ! each headstack

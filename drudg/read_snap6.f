@@ -16,11 +16,11 @@ C Output
 
 C Local
       integer ic1,ic2,ich,ilen
-      integer*2 ibuf(40)
+!  functions
+      integer trimlen
 
 C Convert to hollerith, find length.
-      call char2hol(cbuf,ibuf,1,80)
-      ilen = iflch(ibuf,80)
+      ilen=trimlen(cbuf)
       crack = ' '
       creca = ' '
       crecb = ' '

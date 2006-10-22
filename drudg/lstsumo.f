@@ -40,7 +40,10 @@ C 000529 nrv Add scan name.
 C 021011 nrv Another digit for printing gap time.
 ! 122302 JMG Output tape type in header, also procedure names.
 ! 2004Nov05 JMGipson.  Modified so that only put complete header info on first page.
-!
+! 2006Jul29 JMGipson.  Don't put out line numbers if we don't have a start.
+! 2006Sep26 JMGipson.  Made call to setup name ASCII (cnamep used to be hollerith)
+! 2006Oct06 JMGipson.  Fixed extraneous comma in write statement that caused compiler problems
+!                      for some linux versions.
 
 ! Functions
       integer julda
@@ -84,6 +87,7 @@ C These are modified on return: iline, page,num_scans,ntapes
       real sec
       integer irh,irm
       integer ns,ns2,ns3,ns4
+      logical knew_start
 
 C Local
       integer i,il,iaz,iel,ifeet_print
@@ -101,9 +105,7 @@ C Local
 
 ! Used to output proc names
       integer icode,ipass
-      integer*2 lnamep(6)
       character*12 cnamep
-      equivalence (lnamep,cnamep)
 
       integer*2 lcodeTmp
       character*2 ccodetmp
@@ -231,7 +233,7 @@ C  1. Headers.
               write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
               do ipass=1,num_sub_pass
                 cnamep=" "
-                call setup_name(itype,icode,ipass,lnamep,nch)
+                call setup_name(itype,icode,ipass,cnamep,nch)
                 call c2lower(cnamep,cnamep)
                 write(luprt,'(a,1x,$)') cnamep
               end do
@@ -381,14 +383,23 @@ C  2. Column heads.
         iel=el
       endif
 
+
       cscan(9:9) = lower(cscan(9:9))
-      write(luprt,'(1x,a9,1x,i5,1x,a8,1x,i3,1x,i2,$)') 
-     .cscan,nsline,csor,iaz,iel
+      knew_start=ktimedif(itime_tape_start,itime_tape_start_old)
+      write(luprt,'(1x,a9,1x,$)') cscan
+
+      if(knew_start.or.ks2) then
+         write(luprt,'(i5,$)') nsline
+      else
+         write(luprt,'("     ",$)')
+      endif
+      write(luprt,'(1x,a8,1x,i3,1x,i2,$)') csor,iaz,iel
+
 C  Cable wrap field
       if (kwrap) write(luprt,'(1x,a5,$)') cwrap
 C  Early start, "Tape Start" field
       if (kearl.or.kcont) then
-        if(ktimedif(itime_tape_start,itime_tape_start_old)) then
+        if(knew_start) then
           write(luprt,9100) itime_tape_start(3),
      >              itime_tape_start(4),itime_tape_start(5)
         else

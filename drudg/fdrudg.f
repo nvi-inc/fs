@@ -31,7 +31,6 @@ C Input:
 
 C
 C LOCAL:
-      character*8 cvsn_in
       double precision R,D
       integer*2 lstn
       character*2 cstn
@@ -197,18 +196,15 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2005Feb16 JMGipson added menu item for fake lvex files.
 ! 2005Mar01 JMGipson. Fixed equip_override.  Previously if it was set, you could not change
 !                     equipment type using option 11.
-C
-C Initialize some things.
-!      iVerMajor_FS = 09
-!      iVerMinor_FS = 08
-!      iVerPatch_FS = 01
-      iVerMajor_FS = VERSION
-      iVerMinor_FS = SUBLEVEL
-      iVerPatch_FS = PATCHLEVEL
+! 2006Jun13 JMGipson.  Moved lmysql_** and, ldisk2file from rdctl argument list and put in common.
+! 2006Jul21 JMGipson. Disabled shifting for VEX schedules.
+! 2006Oct04 JMGipson. Disabled shifting for snap files.
+!                     Shifting completely re-written.
+! 2006Oct16 JMGipson. Small changes having to do with printing.
+! Get the version
+      include 'fdrudg_date.ftni'
+      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
 
-
-C Initialize the version date.
-      cversion = '050902'
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -273,17 +269,17 @@ C***********************************************************
      .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
      .           rlabsize,cepoch,coption,luscn,
      .           dr_rack_type,dr_rec1_type,dr_rec2_type,kequip_over,
-     .           tpid_prompt,itpid_period,tpid_parm,
-     >           ldisk2file_dir,ldisk2file_node,ldisk2file_userid,
-     >           ldisk2file_pass,
-     >           cdum,cdum,cdum,cdum,cdum)      !these are mysql values not used in drudg.
+     .           tpid_prompt,itpid_period,tpid_parm)
       kdr_type = .not.
      .   (dr_rack_type.eq.'unknown'.and.
      .    dr_rec1_type.eq.'unknown'.and.
-     .    dr_rec2_type.eq.'none') 
+     .    dr_rec2_type.eq.'none')
+      klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
+
 C
 C     2. Initialize local variables
 C
+      km5A=.false.
 200   continue
       knew_sked=.true.
 
@@ -311,7 +307,6 @@ C
       kprepass = .false.
       km5P_piggy = .false.
       km5A_piggy = .false.
-      km5A=.false.
 
 C  In drcom.ftni
       kmissing = .false.
@@ -325,9 +320,7 @@ C  Initialize lots of things in the common blocks
       nch3=trimlen(command)
 ! Check for label.
       if(index(cfile,".log") .ne. 0) then
-         cvsn_in=" "
-         if(nch2 .ne. 0) cvsn_in=cstnin
-         call lablog(cfile,cvsn_in,ierr)
+         call lablog(cfile,cstnin,command,cr1,ierr)
          stop
       endif
 
@@ -345,7 +338,7 @@ C 3. Get the schedule file name
 C       Opening message
         WRITE(LUSCN,'(a)')
      >   ' DRUDG: Experiment Preparation Drudge Work (NRV & JMGipson '//
-     >    cversion
+     >    cversion(1:trimlen(cversion))//')'
 	write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
      >     iverMinor_fs,iverpatch_fs
 
@@ -355,7 +348,8 @@ C       Opening message
           write(luscn,'(a)')
      >     " Enter schedule file name (.skd or .drg default <return> "
           write(luscn,'(a,$)') "if using a .snp file, :: to quit) ? "
-          CALL GTRSP(IBUF,ISKLEN,LUUSR,NCH)
+          read(luusr,'(a)') cbuf
+          nch=trimlen(cbuf)
         else ! command line file name
           cbuf=cfile
         endif 
@@ -486,15 +480,17 @@ C     Derive number of passes for each code
             write(luscn,'()')
           endif
 C
-            WRITE(LUSCN,9490) NSOURC
-          IF (NSATEL.GT.0) WRITE(LUSCN,9496) NCELES,NSATEL
-          WRITE(LUSCN,9492) NSTATN,NCODES
-9490    FORMAT(' Number of sources: ',I5)
-9496    FORMAT('(',1x,I5,' celestial, ',I5,' satellites)')
-9492    FORMAT(' Number of stations: ',I5/
-     .  ' Number of frequency codes: ',I5)
-        if (.not.kvex) write(luscn,9493) nobs
-9493    format(' Total number of scans in this schedule: ',I5)
+          WRITE(LUSCN,'(a,i4)')
+     >       "  # of sources:         ",NSOURC
+          if(nsatel .gt. 0) write(luscn,'(a,i4,a,i4)')
+     >       "  # quasars: ",nceles, " # satellites ",nsatel
+
+          WRITE(LUSCN,'(a,i4)')
+     >       "  # of stations:        ",nstatn
+          write(luscn,'(a,i4)')
+     >       "  # of frequency codes: ", ncodes
+          if(.not. kvex) write(luscn,'(a,i4)')
+     >       "  # of scans:           ",nobs
 C
 C  Now change J2000 coordinates to 1950 and save for later use
         DO I=1,NCELES
@@ -511,8 +507,7 @@ C  Now change J2000 coordinates to 1950 and save for later use
 C
 C  Check for sufficient information
         IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.ncodes.GT.0) GOTO 500
-        WRITE(LUSCN,9491)
-9491    FORMAT(' Insufficient information in file.'/)
+        WRITE(LUSCN,"(' Insufficient information in file.')")
           ierr=-1
         GOTO 200
 C
@@ -525,9 +520,9 @@ C
       response=" "
       if (.not.kbatch) then
         if (kskd) then
-          WRITE(LUSCN,9053) (lpocod(K),cstnna(K),K=1,NSTATN)
+          WRITE(LUSCN,9053) (cpocod(K),cstnna(K),K=1,NSTATN)
 9053      FORMAT(' Stations: '/
-     .     10(   '  ', 5(A2,' (',A8,')',1X)/))
+     .     10(   '  ', 5(A,' (',A8,')',1X)/))
            WRITE(LUSCN,9050)
 C9050      FORMAT(/' NOTE: Station codes are CaSe SeNsItIvE !'/
 9050       format(/' Output for which station (type a code, :: to ',
@@ -557,8 +552,7 @@ C     Convert to convention upper/lower for 2 letters
           if (.not.kbatch) then !try again interactively
             GOTO 500
           else ! no recovery in batch
-            write(luscn,9059) cstnin
-9059        format(' No such station in schedule: ',a)
+            write(luscn,"(' No such station in schedule: ',a)") cstnin
             goto 990
           endif
         endif
@@ -567,56 +561,35 @@ C     Convert to convention upper/lower for 2 letters
       nstatn=1
       lpocod(1)=lstn
       endif !check for validID
-      kmissing=.true.
-      if (iserr(istn).ne.0) kmissing=.true.
+      kmissing=iserr(istn) .ne. 0
 699   continue
-      if (kvex) then !get the station's observations now
+      if(kvex) then !get the station's observations now
 C getting all the scans (needed to generate scan names)
-
-! This uses vob1inp--which gets the scans for a single station.
-        if(.false.) then
-!        if(.true.) then
-          nobs=0
-          call vob1inp(ivexnum,istn,luscn,ierr,iret,nobs_stn)
-          if (ierr.ne.0) then
-            write(luscn,'("FDRUDG02 - Error from vob1inp=",i5,",
-     >       iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
-            call errormsg(iret,ierr,'SCHED',luscn)
-          else
-            write(luscn,'("  Number of scans for this station: ",i5)') 
-     .      nobs_stn
-         endif
-C       endif ! get one/get all
-        else
 ! This gets in all the scans.
-          call VOBINP(ivexnum,LUscn,iret,IERR)
-           if (ierr.ne.0) then
-             write(luscn,'("FDRUDG02 - Error from vobinp=",i5,",
-     >       iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
-             call errormsg(iret,ierr,'SCHED',luscn)
-           endif
-         endif
-       endif
+         call VOBINP(ivexnum,LUscn,iret,IERR)
+         if (ierr.ne.0) then
+           write(luscn,'("FDRUDG02 - Error from vobinp=",i5,",
+     >     iret=",i5,", scan#=",i5)') ierr,iret,nobs_stn
+           call errormsg(iret,ierr,'SCHED',luscn)
+        endif
+      endif
 C
 C     7. Find out what we are to do.  Set up the outer and inner loops
 C        on stations and schedules, respectively.  Within the loop,
 C        schedule the appropriate segment.
 C
-700   if (.not.kbatch) then
+700   continue
+      if (.not.kbatch) then
 ! Several options for label line.
-         clabprint=" "
-         if(km5A) then
-           clabline=" "
+         if (clabtyp.eq.'POSTSCRIPT') then
+           clabline=  ' 6 = Make PostScript label file       '
+           clabprint= ' 61= Print PostScript label file'
+         else if (clabtyp.eq.'DYMO') then
+           clabline=  ' 6 = Make DYMO label file             '
+           clabprint= ' 61= Print DYMO label file'
          else
-           if (clabtyp.eq.'POSTSCRIPT') then
-             clabline=  ' 6 = Make PostScript label file       '
-             clabprint= ' 61= Print PostScript label file'
-           else if (clabtyp.eq.'DYMO') then
-             clabline=  ' 6 = Make DYMO label file             '
-             clabprint= ' 61= Print DYMO label file'
-           else
-             clabline=  ' 6 = Make tape labels                 '
-           endif
+           clabline=  ' 6 = Make tape labels                 '
+           clabprint=" "
          endif
 
       if (kskd) then !schedule file
@@ -647,44 +620,45 @@ C       Are the equipment types now known?
         if (istn.gt.0) then !one station check equipment
           kknown = .not.
      >      (cstrec(istn).eq.'unknown'.or. cstrack(istn) .eq. 'unknown')
-        if (kknown) then  ! write equipment
-          write(luscn,9069)
-     >      cstnna(istn), cstrack(istn), cstrec(istn), cstrec2(istn)
-9069      format(/' Equipment at ',a,':'/'   Rack: ',a,
-     .    ' Recorder 1: ',a,' Recorder 2: ',a)
-          if (nrecst(istn).eq.2) write(luscn,9070) lfirstrec(istn)
-9070      format(' Schedule will start with recorder ',a1,'.')
-          if(km5a_piggy)
-     >        write(luscn,'("   Mark5A in piggyback mode. ")')
-          if(km5p_piggy)
-     >        write(luscn,'("   Mark5P in piggyback mode. ")')
-        else
-          write(luscn,9169) cstnna(istn)
-9169      format(/' Equipment at ',a,' is unknown. Use Option 11',
-     .    ' to specify equipment.')
-        endif ! write equipment
-        call init_hardware_common(istn)
+          if (kknown) then  ! write equipment
+            write(luscn,9069)
+     >        cstnna(istn), cstrack(istn), cstrec(istn), cstrec2(istn)
+9069        format(/' Equipment at ',a,':'/'   Rack: ',a,
+     .       ' Recorder 1: ',a,' Recorder 2: ',a)
+            if (nrecst(istn).eq.2) write(luscn,9070) lfirstrec(istn)
+9070        format(' Schedule will start with recorder ',a1,'.')
+            if(km5a_piggy)
+     >          write(luscn,'("   Mark5A in piggyback mode. ")')
+            if(km5p_piggy)
+     >          write(luscn,'("   Mark5P in piggyback mode. ")')
+          else
+            write(luscn,9169) cstnna(istn)
+9169        format(/' Equipment at ',a,' is unknown. Use Option 11',
+     .       ' to specify equipment.')
+          endif ! write equipment
+
+          call init_hardware_common(istn)
 C  Write warning messages if control file and schedule do not agree.
-        if (kdr_type) then ! check it
-        if (cstrack(istn).ne. dr_rack_type) then
-          write(luscn,9066) cstrack(istn),dr_rack_type
-9066      format(' WARNING: Schedule rack: ',a,' is different ',
-     .           'from '/'          control file rack: ',a)
-        endif
-        if (cstrec(istn).ne. dr_rec1_type) then
-          write(luscn,9065) cstrec(istn),dr_rec1_type
-9065      format(' WARNING: Schedule recorder 1: ',a,
-     .           ' is different from'/ '          control file ',
-     .           'recorder 1: ',a)
-        endif
-        if (cstrec2(istn) .ne. dr_rec2_type) then
-          write(luscn,9064) cstrec2(istn),dr_rec2_type
-9064      format(' WARNING: Schedule recorder 2: ',a,
-     .           ' is different'/
-     .           '         from control file ',
-     .           'recorder 2: ',a)
-        endif
-        endif ! check it
+          if (kdr_type) then ! check it
+            if (cstrack(istn).ne. dr_rack_type) then
+              write(luscn,9066) cstrack(istn),dr_rack_type
+9066          format(' WARNING: Schedule rack: ',a,' is different ',
+     .             'from '/'          control file rack: ',a)
+            endif
+            if (cstrec(istn).ne. dr_rec1_type) then
+              write(luscn,9065) cstrec(istn),dr_rec1_type
+9065          format(' WARNING: Schedule recorder 1: ',a,
+     .             ' is different from'/ '          control file ',
+     .             'recorder 1: ',a)
+            endif
+            if (cstrec2(istn) .ne. dr_rec2_type) then
+              write(luscn,9064) cstrec2(istn),dr_rec2_type
+9064          format(' WARNING: Schedule recorder 2: ',a,
+     .             ' is different'/
+     .             '         from control file ',
+     .             'recorder 2: ',a)
+            endif
+          endif ! check it
         endif ! one station check equipment
 
         kallowpig=(istn .gt. 0)
@@ -708,6 +682,13 @@ C  Write warning messages if control file and schedule do not agree.
      .       ' (all stations)'/)
         endif ! one station check equipment
 
+        if(istn .gt. 0) then
+          if(cstrec(istn)(1:5) .eq. "Mark5") then !test is case sensitive
+             clabline=" "  
+             clabprint=" "
+          endif
+        endif
+
          write(luscn,'(a)')
      >      ' 1 = Print the schedule               '//
      >     '  7 = Re-specify stations'
@@ -718,9 +699,15 @@ C  Write warning messages if control file and schedule do not agree.
           write(luscn,'(a)')
      >      ' 3 = Make SNAP file (.SNP)            '//
      >      '  9 = Change output destination, format '
-          write(luscn,'(a)')
-     >      ' 4 = Print complete .SNP file         '//
-     >      ' 10 = Shift the .SKD file  '
+
+! Disable shifiting for vex files.
+          if(kvex ) then
+             write(luscn,'(a)') ' 4 = Print complete .SNP file'
+          else
+             write(luscn,'(a)')
+     >        ' 4 = Print complete .SNP file         '//
+     >        ' 10 = Shift the .SKD file  '
+          endif
 
           write(luscn,'(a,$)')
      >      ' 5 = Print summary of .SNP file       '
@@ -732,25 +719,20 @@ C  Write warning messages if control file and schedule do not agree.
             write(luscn,'()')
           endif
 
-          write(luscn,'(a,"12 = Make procedures (.PRC) ")')
-     >       clabline
-          if (clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO') then
-              write(luscn,'(a)') clabprint
-          endif
+          write(luscn,'(a,"12 = Make procedures (.PRC) ")') clabline
+          if (klabel_ps .and.  clabprint .ne. " ")
+     >      write(luscn,'(a)') clabprint
 
           if(kallowpig) then
-                write(luscn,'(38x,a)')
-     >        ' 13 = Toggle Mk5A piggyback mode '
-                write(luscn,'(38x,a)')
-     >        ' 14 = Toggle Mk5P piggyback mode '
-            endif
-            if(istn .ne. 0 .and. km5A .and.
-     >         (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
-                write(luscn,'(38x,a)')
-     >        ' 15 = Data Transfer Overide '
-            endif
+              write(luscn,'(38x,a)')' 13 = Toggle Mk5A piggyback mode '
+              write(luscn,'(38x,a)')' 14 = Toggle Mk5P piggyback mode '
+          endif
+          if(istn .ne. 0 .and. km5A .and.
+     >       (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
+             write(luscn,'(38x,a)') ' 15 = Data Transfer Overide '
+          endif
 
-            if (kdrg_infile.or.kvex) then
+           if (kdrg_infile.or.kvex) then
               write(luscn,'(" 51 = Print PI cover letter")')
             else ! .skd file
               write(luscn,'(" 51 = Print notes file (.TXT)")')
@@ -758,7 +740,6 @@ C  Write warning messages if control file and schedule do not agree.
             write(luscn,'(a)') ' 20 = Make fake lvex'
             write(luscn,'(a)') ' 0  = Done with DRUDG '
             write(luscn,'(a, $)') ' ?'
-C         endif ! known/unknown equipment
         else ! SNAP file
         l=trimlen(cexpna)
         WRITE(LUSCN,9071) cexpna(1:l),lpocod(1)
@@ -770,9 +751,8 @@ C         endif ! known/unknown equipment
 
           write(luscn,'(a," 9 = Change output destination, format")')
      >         clabline
-          if (clabtyp.eq.'POSTSCRIPT'.or.clabtyp .eq. 'DYMO') then
-              write(luscn,'(a)') clabprint
-          endif
+          if(klabel_ps .and. clabprint.ne." ")
+     >        write(luscn,'(a)') clabprint
 
           write(luscn,'(39x," 11 = Show/set equipment type",/)')
           write(luscn,'(" 0 = Done with DRUDG           ",/,"?",$)')
@@ -819,13 +799,16 @@ C         endif ! known/unknown equipment
       ELSE IF (IFUNC.EQ.0) THEN
         GOTO 990
       ELSE IF (IFUNC.EQ.10) THEN
-        CINNAME = LSKDFI
-          if (kbatch) then
-            write(luscn,9994)
-9994        format(' Batch mode not available.')
-            goto 991
-          endif
-        call skdshft(ierr)
+        if(kvex) then
+          call write_error_and_pause(luscn,
+     >       "DRUDG: Shifting of VEX files is not allowed!")
+        else if(kbatch) then
+          write(luscn,'(a)') "DRUDG: Can't shift files in batch mode."
+          goto 991
+        else
+          CINNAME = LSKDFI
+          call skdshft(ierr)
+        endif
         GOTO 700
       ENDIF
 C
@@ -916,27 +899,6 @@ c            I = nstnx
             endif
           else if(ifunc .eq. 15 .and. km5A) then
               call xfer_override(luscn)
-C           CALL PROCS(1) ! Mark III backend procedures OR known equipment
-C         ELSE IF (IFUNC.EQ.13) THEN
-C             CALL PROCS(2) ! VLBA backend procedures
-C         ELSE IF (IFUNC.EQ.14) THEN
-C             CALL PROCS(3) ! hybrid backend procedures
-C         ELSE IF (IFUNC.EQ.15) THEN
-C             CALL PROCS(4) ! Mark IV backend procedures
-C         ELSE IF (IFUNC.EQ.16) THEN
-C             CALL PROCS(5) ! 8-BBC VLBA backend procedures
-C         ELSE IF (IFUNC.EQ.17) THEN
-C             CALL PROCS(6) ! VLBA4 backend procedures
-C         ELSE IF (IFUNC.EQ.18) THEN
-C             call k4proc_type(cr1,iktype)
-C             iptype=6+iktype
-C             if (iktype.gt.0) CALL PROCS(iptype) ! 12 types (7 thru 18)
-C         ELSE IF (IFUNC.EQ.19) THEN
-C             CALL PROCS(19) ! Mk4+VLBA 
-C         ELSE IF (IFUNC.EQ.20) THEN
-C             CALL PROCS(20) ! Mk4+VLBA4 
-C         ELSE IF (IFUNC.EQ.21) THEN
-C             CALL PROCS(21) ! VLBA4+VLBA 
           else if (ifunc.eq.51) then
             if (kdrg_infile) then ! .drg file
               call prcov
@@ -962,10 +924,8 @@ C             CALL PROCS(21) ! VLBA4+VLBA
               klab = .false.
             endif
           ELSE IF (IFUNC.EQ.61.and..not.km5a) then     !only print labels for tape.
-              if ((clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO')
-     >         .and.i.eq.1) then ! only first station
+              if (klabel_ps .and. i.eq.1) then
                 klab = .true.
-                ierr=cclose(fileptr)
                 call prtmp(0)
                 inew=1 ! reset flag for new file
                 klab = .false.
@@ -974,11 +934,11 @@ C             CALL PROCS(21) ! VLBA4+VLBA
               call equip_type(cr1)
               cinname = snpname
               if (kbatch) then
-                write(luscn,9994)
+                write(*,*)
+     >            "DRUDG: Can't change equipment type in batch mode!"
                 goto 991
               endif
               call init_hardware_common(istn)
-C             call snpshft(ierr)
           ELSE IF (IFUNC.EQ.5) THEN
               cinname = snpname
               call lstsum(kskd,ierr)
@@ -1002,7 +962,7 @@ C
 991   write(luscn,9911)
 9911  format(' Invalid function requested.')
 990   close(LU_INFILE,iostat=IERR)
-      if (clabtyp.eq.'POSTSCRIPT') then
+      if (klabel_ps) then
         inquire(file=labname,exist=kex)
         if (kex) then 
           response='x'

@@ -206,7 +206,22 @@ C
         write(6,9000) lnam1
 9000    format("NO changes were made to the procedure: ",a)
       else if (ichange.eq.1) then
-        call fopen(idcb1,ls1,ierr)
+c
+c check for permission
+c
+      call ftn_rw_perm(pathsave,iperm,ierr)
+         if(ierr.ne.0) then
+            write(6,*) 'fed: error checking file permissions: '//
+     &           pathsave(:max(1,trimlen(pathsave)))
+            goto 390
+         else if(iperm.eq.0) then
+            write(6,*) 'Changes discarded because you ',
+     &           'don''t have sufficent permission to update'
+            write(6,*) 'library ',lpsave(:max(1,trimlen(lpsave))),'.'
+            goto 390
+         endif
+
+       call fopen(idcb1,ls1,ierr)
         if (ierr.lt.0) then
           write(lui,9090) ierr
 9090      format(' error ',i4,' opening tmppf1')
