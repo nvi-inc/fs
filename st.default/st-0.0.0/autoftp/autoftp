@@ -11,7 +11,7 @@ $string=$ARGV[2];
 # the value of $string is provided by the SNAP disk2file=abort,string command
 
 $mark5_user="oper";
-$dest="correaltor_ip_address";
+$dest="correlator_ip_address";
 $dest_user="anonymous";
 # be sure to escape any 'at' sign "@" you put the password, e.g. user\@node
 $dest_pass="your_email";
