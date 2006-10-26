@@ -474,7 +474,7 @@ pack      .source_box_label .source_box_text .source_box_scroll -in .internal4 -
 frame     .waiting_frame -width 70 -bg SteelBlue3 -relief flat
 label     .current_source_label -text "Current source is: $first_source" \
 -bg SteelBlue3 -fg white -width 30
-label     .waiting_label -text "Waiting for recording start" -bg SteelBlue3 -fg white -width 25
+label     .waiting_label -text "Waiting for recording start" -bg SteelBlue3 -fg white -width 30
 pack      .waiting_frame -in .internal5 -side top -pady 1m
 pack      .current_source_label .waiting_label -in .waiting_frame -side left -pady 1m -fill both
 
