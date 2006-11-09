@@ -32,12 +32,12 @@ C LOCAL:
       logical kline
       integer ierr1
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
-      integer*2 lant(4),LAXIS(2),lter(4),lsit(4)
-      integer*2 LOCC(4),lrec(4),lrack(4),ls2sp(2)
+      integer*2 lant(4),LAXIS(2),lter(4)
+      integer*2 lrec(4),lrack(4),ls2sp(2)
       character*8 cocc,crec,crack,cs2sp
       character*8 cant,cter,csit
-      equivalence (cant,lant),(cter,lter),(csit,lsit)
-      equivalence (locc,cocc),(crec,lrec),(crack,lrack),(cs2sp,ls2sp)
+      equivalence (cant,lant),(cter,lter)
+      equivalence (crec,lrec),(crack,lrack),(cs2sp,ls2sp)
 
       integer islcon(2),ns2tp
       real AZH(MAX_HOR),ELH(MAX_HOR)
@@ -47,6 +47,7 @@ C LOCAL:
       double precision POSXYZ(3),AOFF
       INTEGER J,nr,maxt,npar(max_band),nhz,i
       integer*2 lidt(2),lid,ltlc
+      character*2 cid
       character*4 cidt
       equivalence (lidt,cidt)
       character cstid(max_stn)
@@ -90,7 +91,7 @@ C     2. Now call routines to retrieve all the station information.
           ierr1=1
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
-     .    LID,lsit,POSXYZ,POSLAT,POSLON,LOCC,nhz,azh,elh)
+     .    CID,csit,POSXYZ,POSLAT,POSLON,cOCC,nhz,azh,elh)
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >     "VSTINP02 - Error getting $SITE information for ",
@@ -114,7 +115,7 @@ C     2. Now decide what to do with this information.
 C
 C       2.1 Antenna information
 
-        LSTCOD(I) = LID
+        cSTCOD(I) = cID
         LPOCOD(I) = lstcod(i)
         call axtyp(laxis,iaxis(i),1)
         STNRAT(1,I) = SLRATE(1)
@@ -140,23 +141,16 @@ C
 C       2.2 Here we handle the position information.
 C     It is not an error to have the occ. code or lat,lon missing.
 C
-!        IDUMMY = ICHMV(LSTNNA(1,I),1,lsit,1,8)
         cstnna(i)=csit
         STNPOS(1,I) = POSLON*deg2rad
         STNPOS(2,I) = POSLAT*deg2rad
         stnxyz(1,i) = posxyz(1)
         stnxyz(2,i) = posxyz(2)
         stnxyz(3,i) = posxyz(3)
-!        idum=ichmv(loccup(1,i),1,locc,1,8)
         coccup(i)=cocc
 C
 C     2.4 Here we handle terminal information
 C
-!        if (ichcm_ch(lter,1,'        ').eq.0) then
-!          IDUMMY = ICHMV(LTERNA(1,I),1,lsit,1,8)
-!        else
-!          IDUMMY = ICHMV(LTERNA(1,I),1,lter,1,8)
-!        endif
         if(cter .eq. ' ') then
            cterna(i)=csit
         else

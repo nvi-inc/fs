@@ -9,6 +9,7 @@ C            observations scan by scan.
 ! 2004Feb14 JMG.  When checking cable wrap, check for both "&c" and "c", etc.
 ! 2005May05 JMG.  Removed refrences to irec, which is never used.
 ! 2006Jul17 JMG. Got rid of using ivtgso, replaced by iwhere_in_string_list
+! 2006Nov06 JMG. Initialize iret
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -18,10 +19,12 @@ C            observations scan by scan.
       include '../skdrincl/data_xfer.ftni'
 C
 C  INPUT:
-      integer ivexnum,lu,iret
+
+      integer ivexnum,lu
 C
 C  OUTPUT:
       integer ierr ! error from this routine
+      integer iret
 
 C  CALLED BY: VREAD
 C  CALLS:  fget_scan                 (get scan block info)
@@ -78,6 +81,7 @@ C 1. Get scans one by one.
       write(lu,"('VOBINP - Generating observations ',$)")
       nobs=0
       ierr = 1 ! station
+      iret=0
       do while (iret.eq.0) ! get all scans
         if(nobs .eq. 0) then
            itemp=ivexnum
@@ -92,7 +96,7 @@ C 1. Get scans one by one.
         if(iret .ne. 0) then
           if(ierr .gt. 0) ierr=0
           if(ierr .eq. 0) iret=0
-          write(lu, '(/,i6," scans in this schedule.")') nobs
+          write(lu, '(i6," scans in this schedule.")') nobs
           return
         endif
         if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs

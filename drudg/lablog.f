@@ -288,6 +288,7 @@ C 1.  Initialize variables
                 inewpage=1
               endif
             endif
+            kfirst_scan=.true.
           endif ! laser/Epson/ps
         endif
         newlab = 1
@@ -295,16 +296,6 @@ C 1.  Initialize variables
       if(kdone) goto 900
 
       vsn_old=vsn_now
-      if (klabel_ps) then
-        nout=0
-        kfirst_scan=.true.
-        goto 100
-      endif
-
-      iy1(1) = iyear
-      id1(1) = idayr
-      ih1(1) = ihr
-      im1(1) = imn
       goto 100
 
 !---------------Done label-------------------------
@@ -323,7 +314,7 @@ C 1.  Initialize variables
           close(luprt)
           endif
         endif
-        call prtmp(0)
+!        call prtmp(0)
         inew=1 ! reset flag for new file
         klab = .false.
       else

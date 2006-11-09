@@ -1,5 +1,5 @@
       SUBROUTINE vunpsit(stdef,ivexnum,iret,ierr,lu,
-     .lidpos,LNAPOS,POSXYZ,POSLAT,POSLON,LOCCUP,nhz,azh,elh)
+     .cidpos,cNAPOS,POSXYZ,POSLAT,POSLON,cOCCUP,nhz,azh,elh)
 C
 C     VUNPSIT gets the site information for station
 C     STDEF and converts it.
@@ -16,6 +16,8 @@ C 960517 nrv New.
 C 960521 nrv Revised.
 C 960605 nrv Allow 1-character site IDs, e.g. VLA=Y
 C 970123 nrv Move initialization to front.
+! 2006Nov08 JMGipson. Fixed problem with horizon masks. (nhz was off by 1.)
+!           Got rid of ASCII
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -26,32 +28,30 @@ C  OUTPUT:
       integer iret ! error return from vex routines
       integer ierr ! error return from this routine, >0 is section
 C          where error occurred, <0 is invalid value
-      integer*2 lidpos ! positon ID, 2 characters
-      integer*2 LNAPOS(4) ! name of the site position
+      character*2 cidpos ! positon ID, 2 characters
+      character*8 cNAPOS ! name of the site position
+      character*8 coCCUP ! occupation code
       double precision POSXYZ(3) ! site coordinates, meters
-      integer*2 LOCCUP(4) ! occupation code
       double precision poslat,poslon !omputer lat, lon
       integer nhz
       real azh(max_hor),elh(max_hor)
 
+! functions
+      integer fget_station_lowl,fvex_field,fvex_double
+      integer ptr_ch,fvex_units,fvex_len
 C  LOCAL:
       character*128 cout,cunit,cunit_save
       double precision d
-      integer i,nch,idumy
-      integer fget_station_lowl,fvex_field,fvex_double,
-     .ptr_ch,fvex_units,fvex_len,ichmv_ch ! function
+      integer i,nch
 C
 C  INITIALIZED:
 C
 C
 C  First initialize everything in case we have to leave early.
 
-      CALL IFILL(LNAPOS,1,8,oblank)
-      CALL IFILL(lidpos,1,2,oblank)
       posxyz(1) = 0.d0
       posxyz(2) = 0.d0
       posxyz(3) = 0.d0
-      CALL IFILL(LOCCUP,1,8,oblank)
       nhz=0
 
 C  1. The site name.
@@ -68,7 +68,7 @@ C
         write(lu,'("VUNPSIT01 - Site name too long")')
         ierr=-1
       else
-        IDUMY = ICHMV_ch(LNAPOS,1,cout(1:NCH))
+        cnapos=cout(1:NCH)
       endif
 C
 C  2. Site ID. Standard 2-letter code.
@@ -84,7 +84,7 @@ C  2. Site ID. Standard 2-letter code.
         write(lu,'("VUNPSIT02 - Site code must be 2 characters")')
         ierr=-2
       else
-        IDUMY = ICHMV_ch(LIDPOS,1,cout(1:nch))
+        cIDPOS=cout(1:nch)
       endif
 
 C  3. Site position
@@ -119,7 +119,6 @@ C     Now compute derived coordinates
 C  4. Occupation code
 
       ierr=4
-      CALL IFILL(LOCCUP,1,8,oblank)
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('occupation_code'//char(0)),
      .ptr_ch('SITE'//char(0)),ivexnum)
@@ -131,7 +130,7 @@ C  4. Occupation code
           write(lu,'("VUNPSIT06 - Occupation code too long")')
           ierr=-6
         else
-          IDUMY = ICHMV_ch(LOCCUP,1,cout(1:NCH))
+          cOCCUP=cout(1:NCH)
         endif
       endif
 
@@ -169,7 +168,7 @@ C  5. AZ fields Horizon map
      >   '("VUNPSIT09 - Too many horizon azs, max is ", i2)') max_hor
           nhz = max_hor
         else
-          nhz = i
+          nhz = i-1
         endif
       else
         iret=0

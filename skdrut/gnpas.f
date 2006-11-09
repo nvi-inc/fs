@@ -84,7 +84,6 @@ C
                   do l=1,2 ! upper/lower
                     do m=1,2 ! sign/mag
                       if (itras(l,m,ih,k,j,is,ic).ne.-99) then
-                        idum=itras(l,m,ih,k,j,is,ic)
                         it(ih)=it(ih)+1
                       endif
                     enddo

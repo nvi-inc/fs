@@ -20,7 +20,7 @@ feetscan.o findscan.o freq_init.o frinit.o  frinp.o \
 gdscan.o getiauname.o gnpas.o hdinp.o hol2lower.o hol2upper.o hms2seconds.o \
 idchk.o ifill4.o ifirst_non_blank.o igtba.o igtfr.o igtst.o igtst2.o \
 iroll_def.o isecdif.o itras.o itimedifsec.o iday0.o igetsrcnum.o \
-istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_string_list.o ind.o i2long.o \
+istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_string_list.o iwhere_in_real8_list.o ind.o i2long.o \
 mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o  knewt.o ktimedif.o \
 lower.o lowercase.o lowercase_and_write.o lyes_no.o mpstar_rad.o m3mode.o \
 newscan.o novas.o null_term.o obs_sort.o pid_str.o \

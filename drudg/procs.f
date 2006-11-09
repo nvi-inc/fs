@@ -521,8 +521,12 @@ C    for procedure names.
             call setup_name(itype,icode,ipass,cnamep)
             call proc_write_define(lu_outfile,luscn,cnamep)
 
-            call trkall(ipass,istn,icode,
-     >        cmode(istn,icode), itrk,cpmode,npmode,ifan(istn,icode))
+            if((ks2rec(irec) .and. klrack) .or. .not. ks2rec(irec)) then
+              call trkall(ipass,istn,icode,
+     >          cmode(istn,icode), itrk,cpmode,npmode,ifan(istn,icode))
+            else
+                cmode(istn,icode)="S2"
+            endif
 
             call c2lower(cpmode,cpmode)
 

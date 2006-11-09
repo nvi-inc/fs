@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/30params.txt  Version: 0.4  Date: 061011
+File: /usr2/fs/misc/30params.txt  Version: 0.5  Date: 061030
 
 	       Updating from 20 to 30 Parameter Pointing Models
 
@@ -11,21 +11,25 @@ This documents is only relevant for stations that use the FS software
 tools for analyzing pointing data and/or applying corections to the
 antenna pointing.  It describes how to modify your local files and
 station software to use the new 30 parameter pointing models in the
-FS.  The FS continues to support 20 parameter models.  They will
-continue to work as expected as long as the pointing model file only
-has 20 parameters in it and as long as any unsed model parameters, in
-particular 19 and 20, have "zero" value control flags in the model
-control file.  However for simplicty and future compatability,
-stations should convert to 30 parameters as soon as is feasible.
-There are two steps in updating: (1) changing your point model control
-file and (2) changing your station software.  These steps are covered
-in sections below titled: UPDATING MDLPO.CTL and UPDATING YOUR
-SOFTWARE.  Both steps must be take to complete the update.  It is
-critical that you check your pointing after these changes are made and
-installed to verify that there is no problem.  There is a separate
-section called TESTING to emphasis this point.  Lastly, the form of
-the new model, which has been augmented to include new parameters, is
-discussed in the final section MODEL PARAMETERS.
+FS.  Please note that updating to 30 parameters does not require
+collecting a large set of pointing data to make a new model; only a
+small amount of pointing data is needed in order to verify that
+pointing is still good after the update has been made. The FS
+continues to support 20 parameter models.  They will continue to work
+as expected as long as the pointing model file only has 20 parameters
+in it and as long as any unsed model parameters, in particular 19 and
+20, have "zero" value control flags in the model control file.
+However for simplicty and future compatability, stations should
+convert to 30 parameters as soon as is feasible.  There are two steps
+in updating: (1) changing your point model control file and (2)
+changing your station software.  These steps are covered in sections
+below titled: UPDATING MDLPO.CTL and UPDATING YOUR SOFTWARE.  Both
+steps must be take to complete the update.  It is critical that you
+check your pointing after these changes are made and installed to
+verify that there is no problem.  There is a separate section called
+TESTING to emphasis this point.  Lastly, the form of the new model,
+which has been augmented to include new parameters, is discussed in
+the final section MODEL PARAMETERS.
 
 
 UPDATING MDLPO.CTL
