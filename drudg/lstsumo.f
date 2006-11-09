@@ -44,6 +44,7 @@ C 021011 nrv Another digit for printing gap time.
 ! 2006Sep26 JMGipson.  Made call to setup name ASCII (cnamep used to be hollerith)
 ! 2006Oct06 JMGipson.  Fixed extraneous comma in write statement that caused compiler problems
 !                      for some linux versions.
+! 2006Nov09 JMGipson.  1st page was 1 line longer than others. Fixed.
 
 ! Functions
       integer julda
@@ -246,7 +247,7 @@ C  1. Headers.
 ! End of put out procedure names.
 
 ! write out additional info.
-          iline=iline+8
+          iline=iline+9
 
           write(luprt,'()')
           write(luprt,'(a)')
@@ -254,21 +255,20 @@ C  1. Headers.
           write(luprt,'(a)') ' Scan   = scan_name command in .snp file'
           write(luprt,'(a)')
      >    ' Line#  = line number in .snp file where this scan starts'
-          write(luprt,'(a)')
-     >    ' Dur    = time interval of on-source data (Start Data to'//
-     >    ' Stop Data) in mmm:ss'
+          write(luprt,'(a)') ' Dur    = time interval of on-source '//
+     >       'data (Start Data to  Stop Data) in mmm:ss'
 ! last line depends on what we are.
           if(ks2) then
             write(luprt,'(a)')
      >     ' Group (min) = group number and nearest minute on tape (S2)'
           elseif(kk4) then
             write(luprt,"(' Counts = tape counts at start of scan')")
-        else if(kdisk) then
+          else if(kdisk) then
             write(luprt,"(' Gbyte  = Gigabytes at start of scan')")
-        else
+          else
             write(luprt,'(a)')
      >     ' Feet   = footage at start of scan, to nearest 10 feet'
-        endif
+          endif
           writE(luprt,'(a)') ' Record Usage:  XXX'//
      >     '    or Rec1=start recorder 1, Rec2=start recorder 2'
           write(luprt,'(a)')

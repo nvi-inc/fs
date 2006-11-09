@@ -19,6 +19,7 @@ C 960409 nrv Allow high-number passes for headstack 2
 C 970206 nrv Remove itr2 and add headstack index
 C 970206 nrv Change max_pass to max_subpass
 C 991122 nrv Change LMODE to allow 16 characters.
+! 2006Nov09 JMG. Changed logical for checking valid bandwidths
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -47,6 +48,8 @@ C     VCBAND - final video bandwidth, MHz
 
 ! function
       integer*4 itras_ind
+      integer iwhere_in_real8_list
+      integer ichmv,ias2b,iscnc ! functions
 C
 C  LOCAL:
       integer ic2save,idumy,i,ipas
@@ -59,7 +62,12 @@ C     IPAS - pass number found in the last fields
 C     ix - count of p(t1,t2,t3,t4) fields found
       integer ihead,ich,nch,ic2,ic1,ict,ip,ix,itx
       integer ibit,isb
-      integer ichmv,ias2b,iscnc ! functions
+      integer num_bw
+      parameter (num_bw=13)
+      double precision bw_valid(num_bw)
+      data bw_valid/14.67, 18.0,
+     >0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0/
+
 C
 C
 C     1. Start decoding this record with the first character.
@@ -145,14 +153,19 @@ C     Final video bandwidth
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       D = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
-      IF  (IERR.LT.0.OR.(D.NE.4.0.AND.D.NE.2.0.AND.D.NE.1.0.AND.D.NE.0.5
-     .     .AND.D.NE.0.25.AND.D.NE.0.125.and.d.ne.18.0.and.d.ne.8.0
-     .     .and.d.ne.16.0.and.d.ne.32.0
-     .     .and.d.ne.14.67))  THEN  !
-        IERR = -107
-        RETURN
-      END IF  !
+
+      if(ierr .lt. 0) then
+         ierr=-107
+         return
+      endif
+      i=iwhere_in_real8_list(bw_valid,num_bw,d)
+      if(i .eq. 0) then
+        write(*,*) "UNPCO: Invalid Bandwidth: ", d
+        ierr=-107
+        return
+      endif
       VCBAND = D
+
 C
 C
 C     Sub-Pass and tracks to be recorded. May be up to 4 tracks

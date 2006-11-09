@@ -43,7 +43,7 @@ C LOCAL:
       integer nch,nci
       character*2  response,scode
       character*8 dr_rack_type, dr_rec1_type, dr_rec2_type
-      integer cclose,inew,ivexnum
+      integer inew,ivexnum
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
       integer nch1,nch2,nch3,iserr(max_stn)

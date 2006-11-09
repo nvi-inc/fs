@@ -1,4 +1,4 @@
-File: /usr2/fs-9.9.0/misc/fs9900up.txt  Version: 2.6 Date: 061022
+File: /usr2/fs-9.9.0/misc/fs9900up.txt  Version: 2.8 Date: 061030
 
 I. Introduction
 
@@ -43,9 +43,9 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of the changes. Items after (8) were added
-after 9.8.0.  Items after 12 were added after 9.8.1. Items 2 and 7
-were updated for 9.9.0.
+The following is a summary of the FS changes. Items after (8) were
+added after 9.8.0.  Items after 12 were added after 9.8.1. Items 2 and
+7 were updated for 9.9.0.
 
 1. Numerous bug fixes
 2. "gnplt" update
@@ -70,7 +70,7 @@ were updated for 9.9.0.
 18. VEX parser/writer now include nutation keywords, horizon map and
     comments fixed in writer.
 19. Pointing model analysis expanded to 30 parameters
-20. Maximum tcal values per band in an rxg increased to 600.
+20. Maximum tcal values per band in a .rxg file increased to 600.
 21. Bug in in2net that caused it to reconnect even if there was
     already a successful connection was fixed.
 22. Low-level "mk5" command handles defined syntax maximum lengths
@@ -97,8 +97,8 @@ A more detailed discussion of these changes follows.
    "disk_record=", "disk2file=",a nd "in2net=" no longer cause an
    abend; printing of time fields in "data_check" and "scan_check"
    fixed; errors from previous command are no longer reported by
-   "scan_name" or other commands. If bugs you are aware have not been
-   fixed, please inform Ed (weh@ivscc.gsfc.nasa.gov).
+   "scan_name" or other commands. If bugs that you are aware have not
+   been fixed, please inform Ed (weh@ivscc.gsfc.nasa.gov).
 
 2. "gnplt" update.  Andrea Orlati has provided an improved version of
    "gnplt" with many bugs fixed.  Some stations may already be using
@@ -319,10 +319,10 @@ A more detailed discussion of these changes follows.
     soon as is feasible.  Instructions for how make this conversion
     can be found in /usr2/fs/misc/30params.txt.
 
-20. Maximum tcal values per band in an rxg increased to 600. The limit
-    on the sum of left and right tcal values in a single rxg file was
-    increased to 600.  This was requested by Michael Lindqvist at
-    Onsala.
+20. Maximum tcal values per band in a .rxg file increased to 600. The
+    limit on the sum of left and right tcal values in a single rxg
+    file was increased to 600.  This was requested by Michael
+    Lindqvist at Onsala.
 
 21. Bug in in2net that caused it to reconnect even if there was
     already a successful connection was fixed.  Not reconnecting when
@@ -454,7 +454,7 @@ A more detailed discussion of these changes follows.
     started or some other program is using the same temporary file
     name.
 
-32. Time variation and default flux for Cas-A upated.  The model used
+32. Time variation and default flux for Cas-A updated.  The model used
     to adjust the variations in Cas-A's flux was updated along with
     the default value in the control files. The new model and flux
     values are provided by D. Graham (MPIfR). The new time variation
@@ -470,7 +470,7 @@ A more detailed discussion of these changes follows.
 
 33. ONOFF "SIG" record formatting improved.  The output was corrected
     to remove an extraneous value and to make the values line up
-    vertically with the VAL
+    vertically with the VAL.
 
 			 B. Changes in DRUDG
 				   
@@ -583,10 +583,10 @@ A more detailed discussion of these changes follows.
    getting the correct number of Mark IV tape labels.  This was fixed.
 
 7. Dymo printer label printing supported with "cups". DRUDG now fully
-   supports the dymo printer. To use dymo printers you need to make
+   supports the Dymo printer. To use Dymo printers you need to make
    several changes in the $printer section of skedf.ctl:
 
-     First, set the label_printer type to dymo:
+     First, set the label_printer type to Dymo:
 
        label_printer dymo
 
@@ -687,8 +687,8 @@ more detail after the list.
 8. No extra spaces allowed in "ibad.ctl" file.
 9. ONOFF and FIVPT programs hang.
 10. FS SNAP command pages don't list tape drive suffix numbers.
-11. LBA rack TPI detector is not usable..
-12. FS "data_check" command does not work with Mark5B.
+11. LBA rack TPI detector is not usable.
+12. FS "data_check" and "scan_check" commands do not work with Mark5B.
 
 A more detailed discussion of these bugs follows.
 
@@ -774,13 +774,13 @@ cases an appropriate error or status message is displayed.  These
 messages are retained in the log.
 
 8. No extra spaces allowed in "ibad.ctl" file.  The format of the
-"ibad.ctl" must not contain any leading or embedded spaces.  In system
-that use the LLP AT-GPIB driver (pre-FS Linux 4), if either the option
-"no_untalk/unlisten_after" is misspelled or an incorrect device name
-is supplied, the driver will cause a segmentation violation when it is
-initialized and the FS will terminate.  Unfortunately there is no way
-to prevent this problem in a general way; it reflects a limitation in
-the driver.
+"ibad.ctl" must not contain any leading or embedded spaces.  In
+systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if either
+the option "no_untalk/unlisten_after" is misspelled or an incorrect
+device name is supplied, the driver will cause a segmentation
+violation when it is initialized and the FS will terminate.
+Unfortunately there is no way to prevent this problem in a general
+way; it reflects a limitation in the driver.
 
 9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
 been known to "hang" mysteriously.  This seems to be caused by some
@@ -827,13 +827,13 @@ temperature calibration, all the setup commands and the TPI detectors
 of the modules of a co-existing Mark IV rack are currently also
 available when the rack type is specified to be LBA4.
 
-12. FS "data_check" command does not work with Mark5B.  The form of
-the Mark5B "data_check?" response is very different from the Mark5A
-form.  As a result it is not straightforward to make the FS
-"data_check?"  command work with Mark5B and Mark5A at the time.  The
-FS "scan_check" command should be used instead.  It actually provides
-a superior check. It is recommended in all cases.  The "data_check"
-command will work with Mark5B in a future release.
+12. FS "data_check" and "scan_check" commands do not work with Mark5B.
+The form of the Mark5B "data_check?" and "scan_check?" responses are
+different from the Mark5A form.  As a result it was not straight
+forward to make the FS "data_check" and "scan_check" commands work
+with both Mark5B and Mark5A at the time of this release.  They do work
+with Mark5A at this time.  The "data_check" and "scan_check" commands
+will work with Mark5B in a future release.
 
 III. Installation
 
@@ -862,47 +862,87 @@ versions of installation notes for these FS versions in the
 
 If you have a version older than 9.4.0, please contact Ed.
 
+There is a way to reduce the amount of typing involved in the
+installation.  This reduces the changes of missing required spaces and
+other easily missed characters (like ".") in the commands.  The steps
+below are described assuming you will be using a VT text terminal
+(Control-Alt-*, where * is 1-6) on the FS computer you are upgrading.
+You can also use a remotely logged in "xterm" or the local X display
+(Control-Alt-7) of the computer.  If you use a remote xterm or the
+local X display, you can have one xterm that you are using to scroll
+through the instructions (with "more" or "less") and another that you
+are using to enter the commands.  This will allow you to use
+cut-and-paste to copy long commands from the instructions to the
+terminal you are using to execute the commands, thus reducing the
+chances of mistyping.  One problem with using the local X display is
+that when you login and logout to change users, you will also kill the
+window that is being used to list the instructions.  A way around this
+is to use SSH in the xterm you are using to enter commands to re-login
+to the system for executing commands that require different
+privileges.  For example, you change to being root by executing:
+
+ ssh -X root@localhost
+
+Please don't forget to log back out when you need to change users
+again.  The steps that require rebooting will of course completely log
+out all of your terminals.  At the end of the update, it is
+recommended that you login as "oper" on the local X display for the
+final testing.  Please note that if you login as "root" to the local X
+display of systems using the typical FS Linux distributions, you will
+need to left (or maybe right) click the mouse on the background to
+bring up a menu that allows you to open an xterm.  There is usually
+another menu option to exit when you wan to logout.  Please also note
+that to paste into the X display login shell window for "oper" and
+"prog", you typically must use Shift-Insert.  It is also possible to
+cut-and-paste between two "VT" text terminals (for example from the
+one for the instructions to the one for the commands) if your mouse is
+configured properly.  If it is, this may be the easiest solution.  If
+you have any questions about how to cut-and-paste please contact Ed
+(weh@ivscc.gsfc.nasa.gov).
+
 (0) Before you begin the upgrade make sure you have a current back-up
-of your system in case something goes wrong.  If you are use FS Linux
-5, we recommend you use the tar based back-up that is part of the
-rotating disk back-up scheme.  A draft document that describes this
-method is available in the docs sub-directory on the FS FTP servers as
-backups2.pdf.  If you have an older FS Linux distribution, please use
-the disk-to-disk back scheme described in Section 5.8 of the FS9
-"Computer Reference" manual.  If you are running one of the Debian
-distribution kernels and do not have documentation on how to make a
-back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
-Reference" manual has a discussion of drive ID numbers if you are
-unsure about these.  Normally you should choose to install the update
-on your primary after having made and verified your back-up.  Once the
-installation is complete, has been tested, and used for a little
-while, you can copy over your back-up with the upgraded primary.  If
-the upgrade fails, you should restore the back-up to the primary for
-operations.  You can then try to make the upgrade again when it is
-convenient.  In a desperate situation, you can use the back-up for
-operations.  You may choose to install the FS on your back-up disk for
-testing and then later copy the back-up onto the primary once you are
-satisfied with the new version.  In any event, please be sure to make
-a fresh back-up before continuing with the installation.
+    of your system in case something goes wrong.  If you are use FS
+    Linux 5, we recommend you use the tar based back-up that is part
+    of the rotating disk back-up scheme.  A draft document that
+    describes this method is available in the docs sub-directory on
+    the FS FTP servers as backups2.pdf.  If you have an older FS Linux
+    distribution, please use the disk-to-disk back scheme described in
+    Section 5.8 of the FS9 "Computer Reference" manual.  If you are
+    running one of the Debian distribution kernels and do not have
+    documentation on how to make a back-up, please contact Ed.
+    Section 5.7 of the FS9 "Computer Reference" manual has a
+    discussion of drive ID numbers if you are unsure about these.
+    Normally you should choose to install the update on your primary
+    after having made and verified your back-up.  Once the
+    installation is complete, has been tested, and used for a little
+    while, you can copy over your back-up with the upgraded primary.
+    If the upgrade fails, you should restore the back-up to the
+    primary for operations.  You can then try to make the upgrade
+    again when it is convenient.  In a desperate situation, you can
+    use the back-up for operations.  You may choose to install the FS
+    on your back-up disk for testing and then later copy the back-up
+    onto the primary once you are satisfied with the new version.  In
+    any event, please be sure to make a fresh back-up before
+    continuing with the installation.
 
 (1) Please be sure that you have at least 40 MB of free space (use the
-"df" UNIX command to check free space) on your "/usr2" partition
-before starting the upgrade.  This would probably only be an issue for
-stations with 200 MB disks.  If you are tight on space, you may want
-to delete old log files and old versions of the FS (except your most
-recent one if you can avoid it of course).  Since you should have
-backed-up your system, you even can delete the "*.[oas]" and
-executable files of your old versions with no risk.  You might want to
-keep the source of the previous versions around for reference if you
-have room.  You can eliminate the non-source files by "cd"-ing to each
-of the old FS directories in turn as "prog" and doing a "make rmdoto
-rmexe".  If you have any questions about how to do this, please
-contact Ed.
+    "df" UNIX command to check free space) on your "/usr2" partition
+    before starting the upgrade.  This would probably only be an issue
+    for stations with 200 MB disks.  If you are tight on space, you
+    may want to delete old log files and old versions of the FS
+    (except your most recent one if you can avoid it of course).
+    Since you should have backed-up your system, you even can delete
+    the "*.[oas]" and executable files of your old versions with no
+    risk.  You might want to keep the source of the previous versions
+    around for reference if you have room.  You can eliminate the
+    non-source files by "cd"-ing to each of the old FS directories in
+    turn as "prog" and doing a "make rmdoto rmexe".  If you have any
+    questions about how to do this, please contact Ed.
 
 (2) Log-in as prog.
 
 (3) Place a copy of the fs-9.9.0 archive in your "/tmp" directory.
-For example you might do the following:
+    For example you might do the following:
 
       cd /tmp
       ftp atri.gsfc.nasa.gov
@@ -913,10 +953,11 @@ For example you might do the following:
       get fs-9.9.0.tgz
       quit
 
-The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
+    The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
 
-If you need to transfer the archive using DOS floppies, please see the
-section "V.  Transferring The Update Archive By DOS Floppy" below.
+    If you need to transfer the archive using DOS floppies, please see
+    the section "V.  Transferring The Update Archive By DOS Floppy"
+    below.
 
 (4) Log-out as prog and log-in as root.
 
@@ -956,16 +997,21 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      pointing model file, typically /usr2/control/mdlpo.ctl, you
      should update your model to 30 parameters before recompiling.
      This only affects stations that use the FS software tools for
-     analyzing pointing data and/or applying corrections to the antenna
-     pointing.  For stations that use FS TOOLS, this step may be
-     omitted for the time being.  As you may expect though, updating
-     this now may save you trouble later.  The FS will work in a
-     backward compatible way with 20 parameter models as long as any
-     unused model parameters, in particular 19 and 20, have "zero"
-     value control flags in your pointing model control file.  For
-     simplicity and future compatibility, stations should convert to 30
-     parameters as soon as is feasible.  The document
-     /usr2/fs/misc/30params.txt covers updating to 30 parameters.
+     analyzing pointing data and/or applying corrections to the
+     antenna pointing.  For stations that use FS software pointing
+     tools, this step may be omitted for the time being.  As you may
+     expect though, updating this now may save you trouble later.  The
+     FS will work in a backward compatible way with 20 parameter
+     models as long as any unused model parameters, in particular 19
+     and 20, have "zero" value control flags in your pointing model
+     control file.  For simplicity and future compatibility, stations
+     should convert to 30 parameters as soon as is feasible.  Please
+     note that updating to 30 parameters does not require collecting a
+     large set of pointing data to make a new model; only a small
+     amount of pointing data is needed in order to verify that
+     pointing is still good after the update has been made.  The
+     document /usr2/fs/misc/30params.txt covers updating to 30
+     parameters.
 
      If you chose not to update your model now, please check that
      parameters 19 and 20 use "zero" for their control flags.
@@ -982,24 +1028,29 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
 (12) Log in as oper
 
-(13) Modify your procedure files.  Three changes are need: (A) update
-     "postob", (B) add the "greplog" station procedure, and (C)
+(13) Modify your procedure files.  Three changes are needed: (A)
+     update "postob", (B) add the "greplog" station procedure, and (C)
      install and customize "systests.prc". These are described in more
      detail below. Step (C) can be deferred until you need to make use
      of the "systests" procedures.
 
      (A) This change is only for stations that use Mark IV formatters.
-         They should add the "form" command to any and all versions of
-         their "postob" procedures that are in procedure libraries
-         (usually just versions of "station.prc") that are used with
-         the Mark IV formatter and that do not already contain the
-         command.  You should used PFMED to make this change.  Please
-         note that the "4form" command can be instead in versions of
-         "postob" that are in procedure libraries that are shared by
-         configurations that use the Mark IV formatter and other
-         systems as well.  In those cases, the use of the "4form"
-         command should prevent getting an error when the Mark IV
-         formatter is not in use.
+         Add the "form" command to the "postob" in your "station"
+         procedure library if it isn't already there.  You should used
+         PFMED to make this change.
+
+         For stations that use multiple hardware configurations:
+
+            If you use the same "station" library with with
+            configurations that both use and do not use the Mark IV
+            formatter, you should use the "4form" command since it
+            will work (and more importantly not generate an error)
+            regardless of what equipment is specified in equip.ctl.
+            
+            If you have different versions of the "station" library
+            for different equipment configurations, you should be sure
+            to update all versions that are used in configurations
+            with the Mark IV formatter.
 
      (B) Add the new standard procedure "greplog" your station.prc
          file. You can do this with:
@@ -1007,20 +1058,28 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
            cd /usr2/proc
            cat /usr2/fs/st.default/proc/greplog.prc >> station.prc
 
-         If your station uses more than one version of "station.prc",
-         the "cat" line should be executed once for each version,
-         substituting the appropriate name for "station.prc" in each
-         case.  Be careful to not update a file twice by doing it once
-         for "station.prc" and once for the file "station.prc" links
-         to.  For doing multiple files at once, you could use the
-         following commands:
+         If your station uses more than one version of "station.prc":
 
-           cd /usr2/proc
-           /usr2/fs/misc/file_append /usr2/fs/st.default/proc/greplog.prc MASK
+           The "cat" line above should be executed once for each
+           version, substituting the appropriate name for
+           "station.prc" in each case.  Be careful to not update a
+           file twice by doing it once for "station.prc" and once for
+           the file "station.prc" currently points to.  If the names
+           of the files are of the form "station.prc.*", you can get a
+           listing of them and where the link is currently pointing
+           using:
 
-         Where MASK is a wildcard file mask (perhaps station.prc.*)
-         that will include all the versions of station.prc you want to
-         update, but exclude "station.prc" itself.
+              cd /usr/proc
+              ls -l station.prc.* station.prc 
+
+           You can update multiple files with the commands:
+
+             cd /usr2/proc
+             /usr2/fs/misc/file_append /usr2/fs/st.default/proc/greplog.prc MASK
+
+           Where MASK is a wildcard file mask (perhaps station.prc.*)
+           that will include all the versions of station.prc you want
+           to update, but exclude "station.prc" itself.
 
      (C) The "systests.prc" procedure library should be set-up if you
          want to be able to use the tests.  You can defer this for the
@@ -1050,25 +1109,32 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
 
      (A) Add the lines for the Mark IV Decoder terminator to all your
          versions of the "equip.ctl" control.  All stations must do
-         this, even if they don't have a Mark IV decoder. This change
-         must be made even for all "equip.ctl" files even versions
-         that are used with hardware.  The additional lines can be
-         added using:
+         this, even if they don't have a Mark IV decoder.  The
+         additional lines can be added using:
 
            cd /usr2/control
            tail -2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
 
-         If your station uses more than one version of "equip.ctl",
-         the "tail" line should be executed once for each version,
-         substituting the appropriate name for the final "equip.ctl"
-         in each case.  Be careful to not update a file twice by doing
-         it once for "equip.ctl" and once for the file "equip.ctl"
-         links to.  If when you start the FS the next time, it
-         complains about not being able to read or decode line 18 of
-         "equip.ctl", there was probably a (or more than one) blank
-         line at the end of the "equip.ctl" file before you did the
-         update.  You can edit the file to delete the blank lines to
-         correct this.
+         If when you start the FS the next time, it complains about
+         not being able to read or decode line 18 of "equip.ctl",
+         there was probably a (or more than one) blank line at the end
+         of the "equip.ctl" file before you did the update.  You can
+         edit the file to delete the blank lines to correct this.
+
+         If your station uses more than one version of "equip.ctl":
+
+           You must update all "equip.ctl" files even versions that
+           are used with other hardware. The "tail" line above should
+           be executed once for each version, substituting the
+           appropriate name for the final "equip.ctl" in each case.
+           Be careful to not update a file twice by doing it once for
+           "equip.ctl" and once for the file "equip.ctl" links to. If
+           the names of the files are of the form "equip.ctl.*", you
+           can get a listing of them and where the link is currently
+           pointing using:
+
+              cd /usr/control
+              ls -l equip.ctl.* equip.ctl
 
      (B) Update the flux for Cas-A in the flux.ctl file.  If you have
          never changed your copy of the flux.ctl from the default
@@ -1083,21 +1149,26 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
          Cas-A, you can install the new file with:
 
            cd /usr2/control
-           cp /usr2/fs-9.9.0/st.default/control/flux.ctl .
+           cp /usr2/fs/st.default/control/flux.ctl .
            chmod a+rw flux.ctl
            chown oper.rtx flux.ctl
 
          If there are other differences between the default file and
          yours, you should probably cut-and-paste the new lines into
-         your file.  Please be sure that the old model for Cas-A is
-         commented out by putting an asterisk (*) in column 1 of that
-         line.
+         your file.  In this case, please be sure that the old model
+         for Cas-A is commented out by putting an asterisk (*) in
+         column 1 of that line.
 
-     (C) If you have a Dymo label printer and the "cups" printing
-         system installed on your system, you can print labels using
-         the Dymo printer.  If you need information on how to install
+         You can recheck your work by re-executing the "diff" command
+         above.
+
+     (C) If you have a Dymo (Dymo is brand name) label printer and the
+         "cups" printing system installed on your system, you can
+         print labels using the Dymo printer.  The "cups" system is
+         not normally installed on systems based on FS Linux
+         distributions.  If you need information on how to install
          "cups", please contact Ed (weh@ivscc.gsfc.nasa.gov).  To use
-         dymo printers you need to make several changes in the
+         Dymo printers you need to make several changes in the
          $printer section of skedf.ctl:
 
            First, set the label_printer type to dymo:
@@ -1123,11 +1194,12 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
          The example /usr2/fs/st.default/control/skedf.ctl file has
          examples of the above.
 
-(15) Install the local version of the "autoftp" script. This script is
-     used to automatically FTP data files from the Mark5 system to a
-     destination correlator, typically for fringe checks.  If your
-     station does not do this, you can skip this step.  If your
-     stations does need this capability, please check the file
+(15) Install the local version of the "autoftp" script.  This script
+     is used to automatically FTP data files from the Mark5 system to
+     a destination correlator, typically for fringe checks.  If your
+     station does not do this, you can skip this step.  Typically,
+     this is only for EVN astronomy stations.  If your stations does
+     need this capability, please check the file
      "/usr2/fs/misc/autoftp.txt" for instructions on how to create a
      station specific version of this script in the section titled
      "CONFIGURING THE AUTOFTP SCRIPT".
@@ -1163,14 +1235,14 @@ section "V.  Transferring The Update Archive By DOS Floppy" below.
      logged in as "prog" and use "prog" in place of "oper" in the
      "grep" commands above.
 
-(17) Log-out and log back in.  This is important for re-initializing
-     the login environment.
+(17) Log-out and log back in as "oper".  This is important for
+     re-initializing the login environment.
 
 (18) Test the FS.  Generally speaking a fairly thorough test is to run
      a test experiment: start with DRUDG-ing a schedule, making
      listings, and any other pre-experiment preparation you normally
      do, then execute part of schedule, and perform any normal
-     post-experiment plotting and clean-up that you do. Please try
+     post-experiment plotting and clean-up that you do.  Please try
      printing Mark5 labels.  If you use tape, you should test a
      section that includes a tape change and a parity check in each
      direction.  The idea here is to verify that everything works as
@@ -1203,3 +1275,5 @@ cat fs9900tg.* >fs-9.9.0.tgz
 This will create an exact image of the original fs-9.9.0.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.
+
+ LocalWords:  pdf

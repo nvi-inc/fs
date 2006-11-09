@@ -63,15 +63,17 @@
       integer itrk_key
 ! Return track that this is written on, or -99 if no track.
 
+      itras=-99
       itrk_key=istn_cod(istn,icode)
       if(itrk_key .eq. 0) then
-!         write(*,*) "ITRAS: Mode # ",imode,
-!     >       "not defined for station # ",istn
+         if(num_trk_map .ne. 0) then
+           write(*,*) "ITRAS: Mode # ",icode,
+     >       " not defined for station # ",istn
+          endif
          return
       endif
 
       ind=itras_ind(isb,ibit,ichn,ipass)
-      itras=-99
       do i=1,max_trk
        if(itrk_map(itrk_key,ihead,i) .eq. ind) then
          itras=i
