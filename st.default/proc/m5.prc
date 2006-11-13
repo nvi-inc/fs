@@ -10,6 +10,7 @@ xdisp=off
 halt
 disk_serial
 disk_pos
+bank_check
 enddef
 define  change_pack   00000000000x
 sy=fs.prompt "bank/vsn '$' should be changed"  &
