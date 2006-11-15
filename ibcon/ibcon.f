@@ -108,6 +108,7 @@ C                        table of time-out values microseconds
 C                        =0 disabled
       character*5 name
       integer*4 centisec(2)
+      logical kclear
 C 
 C 4.  CONSTANTS USED
 C 
@@ -137,6 +138,7 @@ c
 c
 1     continue
       call wait_prog('ibcon',ip)
+      kclear=.true.
       iclass = ip(1)
       nclrec = ip(2)
       iclasr = 0
@@ -269,6 +271,12 @@ C
       endif
       do 900 iclrec = 1,nclrec
         ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
+c
+c to avoid race condition with late clrcl
+c
+        kclear=iclrec.ne.nclrec
+        if(.not.kclear) call clrcl(iclass)
+c
         nchar = ireg
 	imode = ibuf(1)
         if (imode.lt.minmod.or.imode.gt.maxmod) then
@@ -502,8 +510,9 @@ C
          timlst(idev)=it(1)+it(2)*100.+it(3)*60.d2+it(4)*3600.d2
       endif
 900   continue
-
-910   call clrcl(iclass)
+c
+910   continue
+      if(kclear) call clrcl(iclass)
 C
 C 10. Now we have read all of the class records.  There may have
 C     been an error in one record, and there may also be outstanding
