@@ -1,4 +1,4 @@
-File: /usr2/fs-9.9.1/misc/fs9901up.txt  Version: 0.2  Date: 061109
+File: /usr2/fs-9.9.2/misc/fs9902up.txt  Version: 0.3  Date: 061115
 
 I. Introduction
 
@@ -26,17 +26,26 @@ description.
 
 The following is a summary of the FS changes.
 
-None.
+1. The back_check command was added to the "ready_disk" procedure for
+   Mark5 recorders.
 
+A more detailed discussion of these changes follows.
+
+1. The back_check command was added to the "ready_disk" procedure for
+   Mark5 recorders.  This change helps assure that the correct disk
+   VSN is recorded in the log for the first observation in case any
+   manipulation of the installed disk packs is necessary during the
+   "halt" that this procedure executes.
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2006Nov09.  This release of DRUDG
-includes the following changes.
+DRUDG opening message date is 2006Nov15.  This release of DRUDG
+includes the following changes. Item 4 was added after 9.9.1.
 
 1. Extra page in option 5 listing fixed.
 2. S2-support bug fixed.
 3. Mark5 label times fixed.
+4. Missing Mark5 label output in 9.9.1 has been restored.
 
 A more detailed discussion of these changes follows.
 
@@ -52,6 +61,9 @@ A more detailed discussion of these changes follows.
 
 3. Mark5 label times fixed.  In some circumstances the label times
    were off.  This has been fixed.
+
+4. Missing Mark5 label output in 9.9.1 has been restored.  It was
+   accidentally turned off in 9.9.1.
 
 			   C. Known FS Bugs
 
@@ -236,7 +248,7 @@ installation instructions in fs9900up.txt.
 A list of "critical updates" is given below.  These are updates that
 must be applied sequentially.  Please start with the next update with
 a later version number than you have and apply it and the following
-listed versions before upgrading to 9.9.1.  You can find the latest
+listed versions before upgrading to 9.9.2.  You can find the latest
 versions of installation notes for these FS versions in the
 "/usr2/fs/misc" directory. The list of critical updates is:
 
@@ -328,7 +340,7 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.9.1 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.9.2 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -337,7 +349,7 @@ you have any questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.9.1.tgz
+      get fs-9.9.2.tgz
       quit
 
     The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
@@ -351,12 +363,12 @@ you have any questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.9.1.tgz
+      tar -xzpf /tmp/fs-9.9.2.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.9.1 fs
+      ln -sfn fs-9.9.2 fs
 
 (7) It is recommended that your local files have the default ownership
     ("oper.rtx") and permissions ('rw-rw-rw'). To force this, please
@@ -382,7 +394,22 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (11) Log in as oper
 
-(12) Test the FS.  Testing should not be necessary for this patch
+(12) Modify your procedure files.  Only one change is needed: add
+     "bank_check" to the "ready_disk" procedure, if you haven't
+     already done so.  This change is only for stations that use Mark
+     5 recorders.  You should used PFMED to make this change.  The
+     command should be added after the "halt" command.  It is probably
+     best if it occurs right at the end of the procedure.  Please see
+     /usr2/fs/st.default/proc/m5.prc for an example.
+
+     For stations that use multiple hardware configurations:
+            
+        If you have different versions of the "station" library for
+        different equipment configurations, you should be sure to
+        update all versions that are used in configurations with the
+        Mark 5 recorder.
+
+(13) Test the FS.  Testing should not be necessary for this patch
      update. However, if you want to test the new version, then
      generally speaking a fairly thorough test is to run a test
      experiment: start with DRUDG-ing a schedule, making listings, and
@@ -397,19 +424,19 @@ you have any questions about how to cut-and-paste please contact Ed
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.9.1.tgz archive have been placed in
+floppy, "split" files of the fs-9.9.2.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9901tg.aa
-fs9901tg.ab
+fs9902tg.aa
+fs9902tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9901tg.* >fs-9.9.1.tgz
+cat fs9902tg.* >fs-9.9.2.tgz
 
-This will create an exact image of the original fs-9.9.1.tgz archive
+This will create an exact image of the original fs-9.9.2.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.
