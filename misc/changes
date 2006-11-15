@@ -7863,4 +7863,20 @@ Version 9.8.1 050902
 
 Version 9.9.0 061022
 
+061023 weh st.default/st-0.0.0/autoftp/autoftp
+           autoftp/autoftp
+           fixed typo in instructions
+
+061026 weh msg/msg
+           fixed width of autostart "waiting" box
+
 Version 9.9.1 061109
+
+061113 weh st.default/proc/m5.prc
+           add bank_check to ready_disk
+
+061115 weh poclb/refrwn.c
+           poclb/Makefile
+           added refrwn, which is refrw without the TYPOS, thanks JHFQ!
+
+Version 9.9.2 061115

@@ -5,6 +5,7 @@ C  Write tape labels from reading the log file.
 !  2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character VSN.
 !                       Can select on vsn.
 ! 2006Oct17 JMGipson. Added argument to cclose(fp, clabtyp). Clabyp indicates kind of printer.
+! 2006Nov13 JMGipson. Made immune to ^M
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -162,11 +163,17 @@ C 1.  Initialize variables
       iline=0
 10    continue
       iline=mod(iline+1,5)
-      read(lu_infile,'(a)',end=950,err=950) cline(iline)
+      read(lu_infile,'(a80)',end=950,err=950) cline(iline)
       if(index(cline(iline),"drudg") .eq. 0) goto 10
 
 ! Parse the line that looks like:
 !2005.055.18:04:38.83:" R4162     2005 SVETLOE  S  Sv. This is 4 before "drudg", or 1 after.
+
+      ind=trimlen(cline(iline))
+      if(cline(iline)(ind:ind) .eq. char(13)) then
+        write(*,*) "Getting rid of ^M"
+        cline(iline)(ind:ind)=" "
+      endif
 
       iline=mod(iline+1,5)
       istart=24
@@ -178,7 +185,11 @@ C 1.  Initialize variables
 
 ! Read in next line and check to see if Mark5
       read(lu_infile,'(a)') cline(iline)
-      write(*,'(a)') cline(iline)(1:80)
+      ind=trimlen(cline(iline))
+      if(cline(iline)(ind:ind) .eq. char(13)) then
+        cline(iline)(ind:ind)=" "
+      endif
+      write(*,'(a)') cline(iline)
       if(index(cline(iline), "Mark5") .eq. 0) then
          write(*,*) "Can only process log files for Mark5 recorders"
          ierr=-2
@@ -195,6 +206,10 @@ C 1.  Initialize variables
 ! 1. Loop over log records.
 100   continue
       read(lu_infile,'(a)',err=960,end=105,iostat=IERR) ctmp
+      ind=trimlen(ctmp)
+      if(ctmp(ind:ind) .eq. char(13)) then
+        ctmp(ind:ind)=" "
+      endif
       if(ierr .ne. 0) then
         write(*,*) "Lablog: io_error ", ierr
         return
@@ -314,7 +329,7 @@ C 1.  Initialize variables
           close(luprt)
           endif
         endif
-!        call prtmp(0)
+        call prtmp(0)
         inew=1 ! reset flag for new file
         klab = .false.
       else

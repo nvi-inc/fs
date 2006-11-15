@@ -1,4 +1,4 @@
-File: /usr2/fs-9.9.0/misc/fs9900up.txt  Version: 2.8 Date: 061030
+File: /usr2/fs-9.9.0/misc/fs9900up.txt  Version: 2.9 Date: 061115
 
 I. Introduction
 
@@ -45,7 +45,7 @@ description.
 
 The following is a summary of the FS changes. Items after (8) were
 added after 9.8.0.  Items after 12 were added after 9.8.1. Items 2 and
-7 were updated for 9.9.0.
+7 were updated for 9.9.0. Item 34 was added for 9.9.2.
 
 1. Numerous bug fixes
 2. "gnplt" update
@@ -1028,16 +1028,18 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (12) Log in as oper
 
-(13) Modify your procedure files.  Three changes are needed: (A)
-     update "postob", (B) add the "greplog" station procedure, and (C)
-     install and customize "systests.prc". These are described in more
-     detail below. Step (C) can be deferred until you need to make use
-     of the "systests" procedures.
+(13) Modify your procedure files.  Four changes are needed: (A) update
+     "postob", (B) add the "greplog" station procedure, (C) add
+     "bank_check" to "ready_disk", and (D) install and customize
+     "systests.prc". These are described in more detail below. Step
+     (D) can be deferred until you need to make use of the "systests"
+     procedures.
 
      (A) This change is only for stations that use Mark IV formatters.
          Add the "form" command to the "postob" in your "station"
          procedure library if it isn't already there.  You should used
-         PFMED to make this change.
+         PFMED to make this change.  The added command can be added
+         anywhere in the procedure.
 
          For stations that use multiple hardware configurations:
 
@@ -1081,7 +1083,22 @@ you have any questions about how to cut-and-paste please contact Ed
            that will include all the versions of station.prc you want
            to update, but exclude "station.prc" itself.
 
-     (C) The "systests.prc" procedure library should be set-up if you
+     (C) This change is only for stations that use Mark 5 recorders.
+         Add the "bank_check" command to the "ready_disk" in your
+         "station" procedure library if it isn't already there.  You
+         should used PFMED to make this change.  The command should be
+         added after the "halt" command. It is probably best if it
+         occurs right at the end of the procedure.  Please see
+         /usr2/fs/st.default/proc/m5.prc for an example.
+
+         For stations that use multiple hardware configurations:
+            
+            If you have different versions of the "station" library
+            for different equipment configurations, you should be sure
+            to update all versions that are used in configurations
+            with the Mark 5 recorder.
+
+     (D) The "systests.prc" procedure library should be set-up if you
          want to be able to use the tests.  You can defer this for the
          time being, if you are just trying to get this FS update up
          and running for operations or don't have the necessary
