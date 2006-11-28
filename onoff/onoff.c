@@ -127,7 +127,7 @@ main()
 	      onoff.devices[i].lwhat,onoff.devices[i].center);
       jr2as(onoff.devices[i].tcal,buff,-5,3,sizeof(buff));
       strcat(buff," ");
-      jr2as(onoff.devices[i].flux,buff,-7,1,sizeof(buff));
+      jr2as(onoff.devices[i].flux,buff,-7,2,sizeof(buff));
       strcat(buff," ");
       jr2as(onoff.devices[i].dpfu,buff,-9,6,sizeof(buff));
       strcat(buff," ");
