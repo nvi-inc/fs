@@ -17,7 +17,7 @@ if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
 set mainTitleText "Gain Plot"
 set CurrentProgramVersion 1
 set CurrentProgramRelease 1
-set CurrentProgramBuild 2
+set CurrentProgramBuild 3
 
 set current_DefaultDir "/usr2/log"
 set newfile_filename ""
@@ -3736,13 +3736,20 @@ proc curveinFile tckmenu {
 		if {$m!=0} {
 		    set datapoints "$datapoints { $globalymin [expr ($globalymin-$k)/$m] }"
 		    set datapoints "$datapoints { $globalymax [expr ($globalymax-$k)/$m] }"
-		} 
-		set datapoints [lsort -real -index 0 $datapoints]
-		#take the 2 inner points....draw a line between them
-		set xstart [lindex [lindex $datapoints 2] 1]
-		set ystart [lindex [lindex $datapoints 2] 0]
-		set xstop [lindex [lindex $datapoints 3] 1]
-		set ystop [lindex [lindex $datapoints 3] 0]
+		    set datapoints [lsort -real -index 0 $datapoints]
+		    #take the 2 inner points....draw a line between them
+		    set xstart [lindex [lindex $datapoints 2] 1]
+		    set ystart [lindex [lindex $datapoints 2] 0]
+		    set xstop [lindex [lindex $datapoints 3] 1]
+		    set ystop [lindex [lindex $datapoints 3] 0]
+		} else {
+		    set datapoints [lsort -real -index 1 $datapoints]
+		    #take the 2 inner points....draw a line between them
+		    set xstart [lindex [lindex $datapoints 1] 1]
+		    set ystart [lindex [lindex $datapoints 1] 0]
+		    set xstop [lindex [lindex $datapoints 2] 1]
+		    set ystop [lindex [lindex $datapoints 2] 0]
+		}
 		if {$xstart>=$globalxmin && $xstart<=$globalxmax && $ystart>=$globalymin && $ystart<=$globalymax} {
 		    if {$xstop>=$globalxmin && $xstop<=$globalxmax && $ystop>=$globalymin && $ystop<=$globalymax} {
 		        drawTCalCurve $xstart $ystart $xstop $ystop tcalcurve
