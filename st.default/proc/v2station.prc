@@ -465,7 +465,7 @@ xdisp=on
 wakeup 
 xdisp=off
 enddef   
-define  checkmk5a     00000000000 
+define  checkmk5      00000000000 
 scan_check
 enddef
 define  checkk5       00000000000 
@@ -473,5 +473,5 @@ enddef
 define  ready_k5      00000000000 
 enddef
 define  greplog       00000000000x
-sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
 enddef   
