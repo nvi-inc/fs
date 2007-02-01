@@ -5,7 +5,7 @@
 #include "../include/m5state_ds.h"
 #include "../include/m5time_ds.h"
 
-/* m5trim - trim leading a trailing blanks from a M5 response parameter */
+/* m5trim - trim leading and trailing blanks from a M5 response parameter */
 char *m5trim(ptr)
 char *ptr;
 {
@@ -40,7 +40,6 @@ struct m5state *state;
   int len;
 
   ptr=m5trim(ptr);
-
 
   if(strlen(ptr)==0) { /* it was blank */
     if(sizech > 0)
@@ -231,6 +230,8 @@ struct m5state *state;
       sprintf(ptr,format,(char *)value);
     else if(strcmp(format,"%f")==0)
       sprintf(ptr,format,*((float *)value));
+    else if(strcmp(format,"%d")==0)
+      sprintf(ptr,format,*((int *)value));
     else if(strcmp(format,"%ld")==0)
       sprintf(ptr,format,*((long *)value));
     else if(strcmp(format,"%Ld")==0)
@@ -252,6 +253,7 @@ int nkeys;
 int value;
 struct m5state *state;
 {      
+
   if(state->known)
     if (value >=0 && value < nkeys)
       strcpy(ptr,keys[value]);
@@ -264,4 +266,52 @@ struct m5state *state;
     else
       strcpy(ptr,"?");
   }
+}
+
+m5state_encode(ptr,state)
+char *ptr;
+struct m5state *state;
+{      
+  if(state->error) {
+    if(state->known)
+      strcat(ptr," ?");
+    else
+      strcpy(ptr,"?");
+  }
+}
+m5key_decode(ptr,value,keys,nkeys,state)
+char *ptr;
+char *keys[ ];
+int nkeys;
+int *value;
+struct m5state *state;
+{
+  int icount, len;
+
+  ptr=m5trim(ptr);
+
+  if(strlen(ptr)==0) { /* it was blank */
+    state->known=FALSE;
+    state->error=FALSE;
+  } else if(strcmp(ptr,"?")==0) { /* it was '?' */
+    state->known=FALSE;
+    state->error=TRUE;
+  } else {                 /* a real value */ 
+    len=strlen(ptr);
+    state->known=TRUE;
+    if(len > 2 && strcmp(ptr+len-2," ?")==0){  /* with a trailing '?' */
+      state->error=TRUE;
+      ptr[len-2]=0;
+    } else
+      state->error=FALSE;
+    icount=0;
+    while (icount < nkeys) {
+      if(0==strcmp(ptr,keys[icount++])) {
+	*value=icount-1;
+	return 0;
+      }
+    }
+    return -1;
+  }
+  return 0;
 }
