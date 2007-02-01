@@ -121,7 +121,17 @@ loop:
 	s2rec(&command,itask,ip);
 	break;
       case 46:
-	form4(&command,itask,ip);
+	switch(itask) {
+	case 1:
+	  form4(&command,itask,ip);
+	  break;
+	case 2:
+	  vsi4(&command,itask,ip);
+	  break;
+	default:
+	  ierr=-4;
+	  break;
+	}
 	break;
       case 47:
 	tracks4(&command,itask,ip);
@@ -261,6 +271,9 @@ loop:
 	  break;
 	case 12:
 	  last_check(&command,itask,ip);
+	  break;
+	case 13:
+	  mk5b_mode(&command,itask,ip);
 	  break;
 	default:
 	  ierr=-4;

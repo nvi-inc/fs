@@ -305,4 +305,8 @@ typedef struct fscom {
 
   char mk5host[129];
 
+  struct mk5b_mode_cmd mk5b_mode;
+
+  struct vsi4_cmd vsi4;
+
 } Fscom;
