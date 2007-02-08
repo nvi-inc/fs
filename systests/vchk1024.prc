@@ -1,5 +1,5 @@
 define  proc_library  04306203751
-"proc_library - vchk1024.prc - dls - 26 august 2005
+"proc_library - vchk1024.prc - dls - 07 Feb 2007
 enddef               
 define  trkchk64      04306205125x
 trkchk32
@@ -141,6 +141,7 @@ define  setup1g       04306205603
 "to the headstack 1 output of the formatter"
 "connect the set 2 mark 5a recorder input"
 "to the headstack 2 output of the formatter"
+form4=/aux 0 0
 trkf64
 tracks=v0,v1,v2,v3,v4,v5,v6,v7
 bbc4fd
@@ -216,6 +217,7 @@ define  setup512      04306204639
 "to the headstack 1 output of the formatter"
 "connect the set 2 mark 5a recorder input"
 "to the headstack 2 output of the formatter"
+form4=/aux 0 0
 trkf64
 tracks=v0,v1,v2,v3,v4,v5,v6,v7
 bbc4f8
@@ -359,6 +361,7 @@ enddef
 define  setup4f       04306203752
 "connect the set 1 mark 5a recorder input "
 "to the headstack 1 output of the formatter"
+form4=/aux 0 0
 trkf4f
 tracks=v0,v1,v2,v3
 bbc4fd
