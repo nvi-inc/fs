@@ -217,6 +217,7 @@ define  setup512      00000000000
 "the headstack 1 output of the formatter"
 "connect the set 2 mark 5a recorder input to"
 "the headstack 2 output of the formatter"
+form4=/aux 0 0
 trkf64
 tracks=v0,v1,v2,v3,v4,v5,v6,v7
 vc4f8
@@ -331,6 +332,7 @@ enddef
 define  setup4f       00000000000
 "connect the set 1 mark 5a recorder input "
 "to the headstack 1 output of the formatter"
+form4=/aux 0 0
 trkf4f
 tracks=v0,v1,v2,v3
 vc4fd
@@ -346,6 +348,7 @@ define  setup1g       04313191859x
 "the headstack 1 output of the formatter"
 "connect the set 2 mark 5a recorder input to"
 "the headstack 2 output of the formatter"
+form4=/aux 0 0
 trkf64
 tracks=v0,v1,v2,v3,v4,v5,v6,v7
 vc4fd
@@ -372,17 +375,6 @@ vc13=324.99,8.000,u
 vc14=332.99,8.000,u
 !+1s
 valarm
-enddef
-define  stats8        00000000000x
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=start_stats;
 enddef
 define  midob         04313191953x
 vread
@@ -413,5 +405,5 @@ decode4=dqa clear
 decode4=dqa
 enddef
 define  proc_library  04313191901x
-"proc_library - chk1024.prc - dls - 20 may 2005
+"proc_library - chk1024.prc - dls - 07 Feb 2007
 enddef
