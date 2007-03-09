@@ -1,6 +1,13 @@
 "
 "chk1024.snp - 5 december 2005 - Dan Smythe - MIT Haystack Observatory
 "for mark4 rack, mark5 recorder
+"
+" check decoder version weh 7 mar 2007
+decode4=address 6298
+decode4=read
+decode4=address 629a
+decode4=read
+"
 !+1s
 "mark4:32 at 512 Mb/s
 scan_name=mk4-32-512,,240
