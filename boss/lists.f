@@ -153,8 +153,8 @@ C         -give OPRIN time to suspend
           goto 900
         endif
         if(i.eq.icurln) idummy = ichmv_ch(ib,1,'>')
-        idummy = ib2as(i,ib,2,4)
-        ich = ichmv(ib,7,ibuf,1,ilen)-1
+        idummy = ib2as(i,ib,2,5)
+        ich = ichmv(ib,8,ibuf,1,ilen)-1
         call put_cons(ib,ich)
         if(iwait.ne.0) then
            call put_buf(ipinsnp(1),ib,-ich,'  ','  ')
