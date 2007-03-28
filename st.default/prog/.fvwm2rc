@@ -250,6 +250,9 @@ Style "login_sh"   NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "oprin"	   NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "fmset"      NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "*"          Color black/khaki
+Style "monit*" NeverFocus
+Style "xconsole" NeverFocus
+Style "Field System Prompt*" StaysOnTop
 
 #############################################################################
 
