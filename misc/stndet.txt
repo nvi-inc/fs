@@ -1,6 +1,6 @@
-File: /usr2/fs-9.3.213/misc/stndet.txt       Version 0.1
+File: /usr2/fs-9.9.3/misc/stndet.txt       Version 0.2
 
-WEH 990713
+WEH 070405
  
 I. Introduction
 
@@ -12,35 +12,31 @@ pointing measurements using detectors other than the "standard
 detectors": video (base-band) converters and IF distributors of the
 Mark III, Mark IV, VLBA, and VLBA4 racks.
 
+Please note that at this time, the "tpi", "tpical", "tpzero", and
+"tsys" commands only support station detectors if you have a rack type
+other than: mk3, mk4, lba4, vlba, vlba, or LBA.
+
 II. Use
 
 Two station detectors can be used.  They are called "u5" and "u6".
 Either or both (in the case of "onoff") may be specified as the
-detector device for "fivpt" and "onoff".  In addition the commands
-"caltempX", "beamX", and "fluxX", where "X" is "5" or "6" are used to
-define the calibration diode temperature, beam size, and source flux
-model for detectors "u5" and "u6".  The operation of these commands is
-analogous to the commands for defining these quantities for "standard
-detectors" supported by the FS.  Normally these commands need to be
-used to correctly specify the function of the "fivpt" and "onoff".
+detector device for "fivpt" and "onoff".  In addition you must defined
+the characteristics: LO value, side-band, polarization, and center
+frequency, of the device(s) with the "user_device=..." SNAP
+command. This command conceptually takes the place of the "lo=..."
+SNAP command and rack set-up, which define these parameters for
+standard detectors. All of the other information: FWHM, noise diode
+values, gain curves, polarization (which must match that in
+"user_device=..."), and DPFU are looked up from the associated *.rxg
+file, as would occur for a standard detector.
 
-Please note at this time, the "tpi", "tpical", "tpzero", and "tsysX"
-commands do not support station detectors.
-
-As an example for Cas-A being observed by a 26 meter AZ-EL antenna
-with "u5" at X-band and "u6" at S-band and noise diode equivalent
-temperatures of 15 and 16 degrees Kelvin at X and S respectively, the
-following set-up commands might be appropriate:
+As an example, for observing with "u5" at X-band and "u6" at S-band,
+the following set-up commands might be appropriate:
 
 fivept=azel,-2,9,.4,1,u5
 onoff=2,4,u5,u6,60,3
-caltemp5=15
-caltemp6=16
-beam5=0.085d
-beam6=0.360d
-flux5=disk,480,4m
-flux6=disk,1338,4m
-
+user_device=u5,8080,usb,rcp,8480
+user_device=u6,2020,usb,rcp,2300
 
 III. Implementation
   
