@@ -4,7 +4,7 @@
 
 require "getopts.pl";
 
-&Getopts("b:f:g:hr:st:v");
+&Getopts("ab:cdf:g:hlpr:st:uv");
 
 if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
     print STDERR "Try: 'chk1024 -h'\n";
@@ -12,7 +12,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[chk1024 1.0]\n";
+    print "[chk1024 1.3]\n";
     exit -1;
 }
 
@@ -47,7 +47,7 @@ if (defined($opt_g) && $opt_g ne "a" && $opt_g ne "e" && $opt_g ne "f") {
 }
 
 if (defined($opt_h)) {
-    print "Usage: chk1024 -hvs -t track -r track -f frames -b a|e|f -g a|e|f logs\n";
+    print "Usage: chk1024 -acdhlpsuv -b a|e|f -f frames -g a|e|f -r track -t track logs\n";
     print "Synopsis: analyzes results of Mark5 check schedule v/chk1024 logs\n\n";
 
     print "This script will summarize the results of v/chk1024 or other similar Mark5\n";
@@ -56,42 +56,67 @@ if (defined($opt_h)) {
     print "depending on whether or not 'recscan' has been called since the last\n";
     print "'setupX'.\n\n";
 
-    print "By default, chk1024 prints only summary results grouped by setup. The number\n";
-    print "of tracks checked reflect only those found in the log with full results,\n";
-    print "others may only have been partially checked. If a results for a 'setupX',\n";
-    print "'mode', and 'track' combination appear more than once in the log, only the\n";
-    print "last result for each track is considered, i.e., it is best to have each\n";
-    print "appear only once.  Otherwise the output is difficult to describe.\n\n";
+    print "By default, chk1024 prints only the overall summary results grouped by setup.\n";
+    print "The number of tracks checked reflect those that were found in the log to have\n";
+    print "been selected with the Mark5.\n\n";
 
     print "The checks for each track are:\n";
     print "  Aux:    considered good if decoded track number is correct\n";
     print "  Errors: considered good if synch, resynch, parity and CRC errors were zero\n";
     print "  Frames: considered good if more than the minimum frames were processed,\n";
     print "          minimum frames is settable, but defaults to 300 (0x12c)\n\n";
-    print "Additional detail can be displayed by selecting command line options. The\n";
-    print "next level of detail is selected by the -s option, which will print the\n";
-    print "summary for each check by setup and mode and further summarize them by\n";
-    print "set and odd/even track number. The next level is shown with the -t\n";
-    print "which shows the processed data for the selected track. Finally, the -r\n";
-    print "option will print the raw log records for the selected track.\n\n";
 
-    print "Please note that the set (odd/even) statistics and summary results at\n";
-    print "the end only report the total number of tracks found in the log, not the total\n";
-    print "expected.  The user must verify that total tracks are correct for each case.\n";
-    print "In the case of the summary results, where it may not be so obvious that tracks\n";
-    print "are missing, if some other tracks were not fully checked but present, the\n";
-    print "phrase 'other tracks present' is included for the affected setup.\n\n";
+    print "Additional detail can be displayed by selecting command line options. The\n";
+    print "next level of detail is selected by the -s option, which will print a table\n";
+    print "of results for each check by setup and mode, also summarizing them by 'set'\n";
+    print "and odd/even track number. The 'reported' tracks are those for which the\n";
+    print "corresponding decoder output appears. If the 'Total' and 'reported' tracks\n";
+    print "don't agree this usually means there were decoder communication errors. The\n";
+    print "next level is shown with the -t option which shows the processed data for the\n";
+    print "selected track. Finally, the -r option will print the raw log records for the\n";
+    print "selected track.\n\n";
+
+    print "Please note that the set (odd/even) statistics and summary results at the\n";
+    print "end only report the total number of tracks found in the log, not the total\n";
+    print "expected. The user must verify that total tracks are correct for each setup.\n";
+    print "The 'Total Tracks' in the summary table is typically a good measure of the\n";
+    print "expected number of tracks, but they are distributed over the sets.\n\n";
+
+    print "If the scan_check fails for a setup the phrase 'ERROR: scan_check failed'\n";
+    print "is included in the overall summary for the affected setup.\n\n";
+
+    print "If the decoder firmware version is wrong or could not be determined a message\n";
+    print "to that effect is printed.\n\n";
+
+    print "If the same set-up occurs more than once, results from all but the last are\n";
+    print "discarded. Note also that the 'Location' title line is printed once for each\n";
+    print "time it is encountered in the log, with the corresponding log time stamp.\n";
+    print "Typically, this happens for each time the schedule is started. Results from\n";
+    print "previous runs are discarded only for set-ups with the same names. All\n";
+    print "unique set-ups in the log are reported, even if they are from different runs.\n";
+    print "For a given set-up and mode if a track or scan_check appears more than once,\n";
+    print "the results for the last occurance is reported. A warning about 'Duplicate\n";
+    print "DQA records' indicates either a track (or tracks) was checked more than once\n";
+    print "or there was a decoder communication problem\n\n";
 
     print "Options explanation:\n";
+    print " -a        ignore aux data when calculating performance\n";
     print " -b a|e|f  display  bad tracks for one of the Aux|Errors|Frames\n";
     print "           checks, cannot be used with -g, -t, or -r\n";
+    print " -c        show raw scan_check data\n";
+    print " -d        show raw decoder firmware version data\n";
+    print " -f frames sets the minimum level of required frames, default is 300 (0x12c)\n";
     print " -g a|e|f  display good tracks for one if the Aux|Errors|Frames\n";
     print "           checks, cannot be used with -b, -t, or -r\n";
-    print " -f frames sets the minimum level of required frames, default is 300 (0x12c)\n";
+    print " -h        print this help information and stop\n";
+    print " -l        lists each set-up as it is encountered, useful when a log contains\n";
+    print "           more than one run, possibly on different dates\n";
+    print " -p        'permissive', handles some Mark IV decoder old firmware\n";
+    print "           communication errors\n";
     print " -r track  to display raw data for track, cannot be used with -b or -g\n";
     print " -s        print summary statistics\n";
     print " -t track  to display processed data for track, cannot be used with -b or -g\n";
-    print " -h        print this help information and stop\n";
+    print " -u        print tracks with duplicate dqa records\n";
     print " -v        print program version information and stop\n";
     exit -1;
 }
@@ -122,8 +147,7 @@ foreach $file (@ARGV) {
 	$save_file=$file;
     }
     open(FILE,$file) || do {
-	print STDERR "can't open $file: $!\n";
-	next;
+	die "can't open $file: $!\n";
     };
     
     if($bad_tracks) {
@@ -131,20 +155,49 @@ foreach $file (@ARGV) {
     }
 #   print "file $file \n";
     while (<FILE>) {
+	s/\cM$//; # handle bad ftp with control-Ms
+	if (/\#mk5cn\#/||/\#matcn\#/) { #ignore echo output
+	    next;
+	}
 	if(!defined($date)){
 	    $date=substr($_,0,17);
 	}
 	if(/;location,([^,]*)/i) {
 	    $location=$1;
 	    $date=substr($_,0,17);
+	    print "Location: $location, Date: $date, Log: $save_file\n";
+	} elsif(/read 00006298/) {
+	    $r6298=/read 00006298 00002035/;
+	    print if defined($opt_d);
+	} elsif(/read 0000629A/) {
+	    $r629a=/read 0000629A 00002E32/;
+	    print if defined($opt_d);
 	} elsif(/[:;]setup(.*)/i) {
 	    $setup=$1;
+	    if(defined($opt_l)) {
+		print "Set-up $setup encountered\n";
+	    }
 	    $mode='idle';
+	    if(defined($config{$setup}{$mode})) {
+		foreach $modes (keys %{$config{$setup}}) {
+		    undef $config{$setup}{$modes};
+		}
+		undef $scan_check{$setup};
+		foreach $track (keys %{$tracks{$setup}{$mode}}) {
+		    undef $tracks{$setup}{$mode}{$track};
+		    undef $aux{$setup}{$mode}{$track};
+		    undef $frames{$setup}{$mode}{$track};
+		    undef $errors{$setup}{$mode}{$track};
+		    undef $count{$setup}{$mode}{$track};		    
+		}
+		print "Setup $setup seen again, discarding previous results.\n";
+#		die "$setup already seen\n";
+	    } else {
+		$config{$setup}{$mode}=1;
+	    }
+	    $scan_check{$setup}=-1;
 	    if($bad_tracks) {
 		$new=1;
-	    }
-	    if(!defined($config{$setup}{$mode})) {
-		$config{$setup}{$mode}=1;
 	    }
 	} elsif(/recscan/i) {
 	    $mode='play';
@@ -154,9 +207,22 @@ foreach $file (@ARGV) {
 	    if(!defined($config{$setup}{$mode})) {
 		$config{$setup}{$mode}=1;
 	    }
+	} elsif(/\!scan_check\?/i) {
+	    print if defined($opt_c);
+            ($front,@fields)=split('[ ]*[:;][ ]* ');
+	    $scan_check{$setup}=0;
+	    $scan_check{$setup}=1 if $fields[7] eq "0";
+	} elsif(/\/scan_check\//i) {
+	    print if defined($opt_c);
+	    chop;
+            (@fields)=split(',');
+	    $scan_check{$setup}=0;
+	    $scan_check{$setup}=1 if $fields[7] eq "0";
 	} elsif(/track_set\? *0 *: *([^: ]+) *: *([^:; ]+) */i) {
 	    $track1=$1;
 	    $track2=$2;
+	    $tracks{$setup}{$mode}{$track1}=1;
+	    $tracks{$setup}{$mode}{$track2}=1;
 	} elsif(/auxilliary_data/i) {
 	    if(!defined($track1)||!defined($track2)) {
 		print "'track-set?' output not found before first" .
@@ -168,15 +234,19 @@ foreach $file (@ARGV) {
 	    $aux2=substr($fields[6],0,2);
 	    $t1 = $track1;
 	    $t1 = $t1-60 if $t1 >= 100;
+	    $t1 = sprintf "%02d",$t1;
 	    $t2 = $track2;
 	    $t2 = $t2-60 if $t2 >= 100;
-	    $aux{$setup}{$mode}{$track1}=$t1 == $aux1;
-	    $aux{$setup}{$mode}{$track2}=$t2 == $aux2;
+	    $t2 = sprintf "%02d",$t2;
+	    $aux{$setup}{$mode}{$track1}=$t1 eq $aux1;
+	    $aux{$setup}{$mode}{$track2}=$t2 eq $aux2;
 	    if($track1 == $opt_r) {
-		print;
+		print "$setup, $mode, tracks ($track1,$track2), raw: ";
+		print ;
 	    }
 	    if($track2 == $opt_r) {
-		print;
+		print "$setup, $mode, tracks ($track1,$track2), raw: ";
+		print ;
 	    }
 	    if($bad_a || $good_a) {
 		if($good_a == $aux{$setup}{$mode}{$track1}) {
@@ -212,7 +282,7 @@ foreach $file (@ARGV) {
 		    print "$track2 ";
 		}
 	    }
-	} elsif(/decode4\/dqa/i) {
+	} elsif(/decode4\/dqa/i || (defined($opt_p) && /decode4\/[d]?q[a]?/i)) {
 	    if(!defined($track1)||!defined($track2)) {
 		print "'track-set?' output not found before first" .
 		    " 'dqa' decoder data, giving up\n";
@@ -227,10 +297,24 @@ foreach $file (@ARGV) {
 	    $errors{$setup}{$mode}{$track2}=
 		hex($fields[6])==0 && hex($fields[7])==0 &&
 		hex($fields[8])==0 && hex($fields[9])==0;
+	    $count{$setup}{$mode}{$track1}++;
+	    $count{$setup}{$mode}{$track2}++;
+	    if(defined($opt_u)) {
+		if($count{$setup}{$mode}{$track1}>1
+		   && $count{$setup}{$mode}{$track2}>1) {
+		    print "duplicate dqa for tracks ($track1,$track2) in setup $setup mode $mode\n"; 
+		} elsif($count{$setup}{$mode}{$track1}>1) {
+		    print "duplicate dqa for track $track1 in setup $setup mode $mode\n"; 
+		} elsif($count{$setup}{$mode}{$track2}>1) {
+		    print "duplicate dqa for track $track2 in setup $setup mode $mode\n"; 
+		}
+	    }
 	    if($track1 == $opt_r) {
+		print "$setup, $mode, tracks ($track1,$track2), raw: ";
 		print;
 	    }
 	    if($track2 == $opt_r) {
+		print "$setup, $mode, tracks ($track1,$track2), raw: ";
 		print;
 	    }
 	    if(defined($opt_t)) {
@@ -322,10 +406,10 @@ if($bad_tracks) {
 
 # 3.0 print out statistics
 
-print "Location: $location, Date: $date, Log: $save_file\n";
+print "Location: $location, Date: $date, Log: $save_file\n" if $location eq "UNKNOWN";
 if(defined($opt_s)) {
-    print "Setup Mode Frames Errors  Aux   Set1odd  Set1even  Set2odd  Set2even\n";
-    print "           --------------------------bad/total----------------------\n";
+    print "Setup Mode Total  Frames Errors  Aux   Set1odd  Set1even  Set2odd  Set2even\n";
+    print "           Tracks ----------------------bad/reported-----------------------\n";
 }
 
 foreach $setup (keys %config) {
@@ -341,8 +425,10 @@ foreach $setup (keys %config) {
 		$tested_head_aux{int $track/100}{$track%2}{$track}=1;
 		if(!$aux{$setup}{$mode}{$track}) {
 		    $bada++;
-		    $bad{$setup}{$track}=1;
-		    $bad_head{int $track/100}{$track%2}{$track}=1;
+		    if(!defined($opt_a)) {
+			$bad{$setup}{$track}=1;
+			$bad_head{int $track/100}{$track%2}{$track}=1;
+		    }
 		} else {
 		    $gooda++;
 		}
@@ -382,14 +468,25 @@ foreach $setup (keys %config) {
 	}
 	$totale=$goode+$bade;
 
+	if(defined($count{$setup}{$mode})) {	
+	    foreach $track (keys %{$count{$setup}{$mode}}) {
+		if($count{$setup}{$mode}{$track} > 1) {
+		    $dups=1;
+		}
+	    }
+	}
+	if($totala != scalar(keys %{$tracks{$setup}{$mode}})) {
+	    $missing_aux=1;
+	}
+
 	if(defined($opt_s)) {
 	    foreach $stack (0,1) {
 		foreach $odd (0,1) {
 		    $totalh[$stack][$odd]=0;
 		    $badh[$stack][$odd]=0;
-		    foreach $track (keys %{$tested_head_aux{$stack}{$odd}}) {
+		    foreach $track (keys %{$tested_head_frames{$stack}{$odd}}) {
 			if($tested_head_errors{$stack}{$odd}{$track} &&
-			   $tested_head_frames{$stack}{$odd}{$track}) {
+			   (defined($opt_a) || $tested_head_aux{$stack}{$odd}{$track})) {
 			       $totalh[$stack][$odd]++;
 			       if($bad_head{$stack}{$odd}{$track}) {
 				   $badh[$stack][$odd]++;
@@ -398,11 +495,12 @@ foreach $setup (keys %config) {
 		    }
 		}
 	    }
-	    printf "%4s %4s  %2d/%2d  %2d/%2d  %2d/%2d" .
+	    printf "%4s %4s  %4d   %2d/%2d  %2d/%2d  %2d/%2d" .
 		"   %2d/%2d     %2d/%2d    %2d/%2d     %2d/%2d\n",
-	    $setup,$mode,$badf,$totalf,$bade,$totale,$bada,$totala,
-	    $badh[0][1],$totalh[0][1],$badh[0][0],$totalh[0][0],
-	    $badh[1][1],$totalh[1][1],$badh[1][0],$totalh[1][0];
+		$setup,$mode,scalar(keys %{$tracks{$setup}{$mode}}),
+		$badf,$totalf,$bade,$totale,$bada,$totala,
+		$badh[0][1],$totalh[0][1],$badh[0][0],$totalh[0][0],
+		$badh[1][1],$totalh[1][1],$badh[1][0],$totalh[1][0];
 	}
     }
 }
@@ -416,7 +514,6 @@ if(!%config) {
 }
 foreach $setup (keys %config) {
     $totalo=$bado=0;
-    $partially_checked=0;
     @tr_list=((keys %{$tested_aux{$setup}}),(keys %{$tested_errors{$setup}}),
 	      (keys %{$tested_frames{$setup}}));
 #
@@ -431,7 +528,7 @@ foreach $setup (keys %config) {
 	foreach $mode (keys %{$config{$setup}}) {
 	    $fully_checked &&= $tested_errors{$setup}{$track}{$mode} &&
 		$tested_frames{$setup}{$track}{$mode} &&
-		$tested_aux{$setup}{$track}{$mode};
+		($opt_a || $tested_aux{$setup}{$track}{$mode});
 	}
 #	print "setup $setup $track check $fully_checked\n";
 	if($fully_checked) {
@@ -439,20 +536,50 @@ foreach $setup (keys %config) {
 	    if($bad{$setup}{$track}) {
 		$bado++;
 	    }
-	} else {
-	    $partially_checked=1;
 	}
     }
     $goodo=$totalo-$bado;
-    if($totalo == 0) {
+    $totaltr=scalar(keys %{$tracks{$setup}{$mode}});
+#    print "totaltr $totaltr totalo $totalo bado $bado\n";
+    if($totaltr == 0) {
 	$percent=0;
     } else {
-	$percent=int 100.0*($goodo/$totalo)+0.001;
+	$percent=int 100.0*($goodo/$totaltr)+0.001;
     }
-    print "Setup `$setup' tested $totalo tracks, $percent\% were good";
-    if($partially_checked) {
-	print ", other tracks present";
+    print "Setup `$setup' tested $totaltr tracks, $goodo ";
+    if($goodo == 1) {
+	print "was good";
+    } else {
+	print "were good";
+    }
+    print " ($percent\%)";
+    if($scan_check{$setup} == -1) {
+	print ", ERROR: scan_check missing";
+    } elsif($scan_check{$setup} == 0) {
+	print ", ERROR: scan_check failed";
     }
     print ".\n";
-    
+
+}
+
+if((defined($r6298) && !$r6298)||(defined($r629a) && !$r629a)) {
+    print "Error: Decoder has wrong version number.\n";
+} elsif ((defined($r6298) && $r6298 &&!defined($r629a))||
+	 (defined($r629a) && $r629a &&!defined($r6298))) {
+    print "Decoder firmware version only PARTIALLY detected, but correct that far.\n";    
+} elsif (!defined($r6298)||!defined($r629a)) {
+    print "Decoder firmware version number NOT detected.\n";
+}
+if(defined($dups)) {
+    print "Duplicate DQA records exist for some tracks, bad AUX checks\?\n";
+}
+if(defined($missing_aux)) {
+    print "Some AUX records were missing";
+    if(!defined($opt_s)){
+	print ", display summary with -s option";
+    }
+    print ".\n";
+}
+if(defined($opt_a)) {
+    print "AUX data ignored (option -a) for 'Set' summaries and overall statistics.\n";
 }
