@@ -91,7 +91,8 @@ int get_rxgain(file,rxgain)
     rxgain->fwhm.coeff=1.0;
     break;
   case 2:
-    rxgain->fwhm.coeff*=DEG2RAD;
+    if(rxgain->fwhm.model=='c')
+      rxgain->fwhm.coeff*=DEG2RAD;
     break;
   default:
     return -313;
