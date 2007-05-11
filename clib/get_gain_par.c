@@ -60,6 +60,7 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
   else if(shm_addr->rxgain[ir].fwhm.model=='f'
 	  && center*1e6*shm_addr->diaman > 1e-12) {
     *fwhm=1.22*299792458.0e0/(center*1e6*shm_addr->diaman);
+    *fwhm=(*fwhm)*shm_addr->rxgain[ir].fwhm.coeff;
   }
   
   if(gain != NULL) {
