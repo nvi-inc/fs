@@ -118,6 +118,9 @@ C               - true if this message is addressed to the TAPE drive
       parameter (nbaud=7)
       dimension ibaud(nbaud),ibdrt(nbaud)
 C      - list of legal baud rates and corresponding indices
+      logical kclear
+      logical k5b
+      integer it5b(6),it(6)
 C
 C   INITIALIZED VARIABLES
 C
@@ -140,6 +143,7 @@ C
 c     call fc_rte_lock(1)        ! lock into memory
       iold=fc_rte_prior(FS_PRIOR)
 1     call wait_prog('matcn',ip)
+      kclear=.true.
       iclass = ip(1)
       nclrec = ip(2)
       call char2hol('ma',ip(4),1,2)
@@ -181,6 +185,9 @@ C
         if (i.le.maxdev) then
           idum=ichmv(modtbl(1,i),1,ibuf,1,2)
           idum=ichmv(modtbl(2,i),1,ibuf,4,2)
+          if (ichcm_ch(modtbl(2,i),1,'5b').eq.0) then
+             idum=ichmv_ch(modtbl(2,i),1,'5B')
+          endif
           ifc=7
           ix=ias2b(ibuf,ifc,nchar-ifc+1)
           if(ix.eq.-32768) ix=0
@@ -210,8 +217,15 @@ C
         goto 1090
       endif
       call ifill_ch(ibuf,1,180,' ')
+      k5b=.false.
       do 900 iclrec = 1,nclrec
         ireg(2) = get_buf(or(o'020000',iclass),ibuf,-ilen,idum,idum)
+c
+c to avoid race condition with late clrcl
+c
+        kclear=iclrec.ne.nclrec
+        if(.not.kclear) call clrcl( iclass)
+c
         if (ierr.lt.0) goto 900
 C                   If we got an error earlier, skip to end of loop
         if (ireg(1).lt.0) then
@@ -390,7 +404,22 @@ C
 C     8. Send buffer directly.  Address has already been substituted
 C     into first three characters.  Fill in fourth with a blank.
 C 
-800     idum=ichmv_ch(ibuf,4,' ') 
+800     continue
+        if (ichcm_ch(ibuf,1,'#5B').eq.0) then
+c
+c  makr5b needs a very small delay between consecutive commands
+c
+           if(k5b) then
+              call fc_rte_time(it,it(6))
+              idiff=(it(2)-it5b(2))*100+it(1)-it5b(1)
+              if(idiff.lt.0) idiff=idiff+6000
+              if(idiff.lt.2) call susp(1,2)
+           endif
+           idum=ichmv(ibuf,4,ibuf,5,nchar-3)
+           nchar=nchar-1
+        else
+           idum=ichmv_ch(ibuf,4,' ') 
+        endif
         if(imode.eq.9.or.imode.eq.11.or.imode.eq.-54) then
            nchar=nchar+1
            call pchar(ibuf,nchar,10)
@@ -401,6 +430,10 @@ C
         endif
         call fs_get_kecho(kecho)
         call iat(ibuf,nchar,lumat,kecho,ibuf2(2),nch2,ierr,itn)
+        if (ichcm_ch(ibuf,1,'#5B').eq.0) then
+           call fc_rte_time(it5b,it5b(6))
+           k5b=.true.
+        endif
         goto 899
 C 
 C 
@@ -448,12 +481,13 @@ C
         nclrer = 0
       endif
 C
-1090  ip(1) = iclasr
+1090  continue
+      ip(1) = iclasr
       ip(2) = nclrer
       ip(3) = ierr
       call char2hol('ma',ip(4),1,2)
       ip(5) = modtbl(1,idev)
 C                   SUSPEND HERE *********************************
-      call clrcl( iclass)
+      if(kclear) call clrcl( iclass)
       goto 1
       end
