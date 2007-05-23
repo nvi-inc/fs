@@ -143,7 +143,7 @@ main(int argc, char *argv[])
   /* Check for legal tty number. */
   if ( (ttynum < 0) || (ttynum > 1) )
     {
-      if( (ttynum < 16) || (ttynum > 23)) 
+      if( (ttynum < 4) || (ttynum > 23)) 
 	{    
 	  /* Illegal tty number. */
 	  printf("VIKOM - ERROR %d\n", ttynum);
@@ -153,7 +153,7 @@ main(int argc, char *argv[])
   /* Check for legal tty number. */
   if ( (ttynum2 < 0) || (ttynum2 > 1) )
     {
-      if( (ttynum2 < 16) || (ttynum2 > 23)) 
+      if( (ttynum2 < 4) || (ttynum2 > 23)) 
 	{    
 	  /* Illegal tty number. */
 	  printf("VIKOM - ERROR %d\n", ttynum2);
