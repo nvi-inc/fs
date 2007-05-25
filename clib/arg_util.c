@@ -103,13 +103,21 @@ int flag;                            /* TRUE if default is okay */
     }
     if(0==strcmp(ptr,"*")) return ierr;
 
-    if(1 != sscanf(ptr,"%d",iptr)) ierr=-200;
-    for(i=strlen(ptr)-1;i>-1;i--)
-      if(NULL==strchr("+-0123456789 \t\n",ptr[i])) {
-	ierr=-200;
-	goto end;
-      }
-
+    if(strncmp(ptr,"0x",2)==0||strncmp(ptr,"0X",2)==0) {
+      if(1 != sscanf(ptr,"%x",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>1;i--)
+	if(NULL==strchr("0123456789abcdefABCDEF \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    } else {
+      if(1 != sscanf(ptr,"%d",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>-1;i--)
+	if(NULL==strchr("+-0123456789 \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    }
 end:
     return ierr;
 }
