@@ -39,7 +39,7 @@ long ip[5];
       for (i=0;i<ip[1];i++) {
 	if ((nchars =
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	  ip[3] = -401;
+	  ierr = -401;
 	  goto error;
 	}
 	inbuf[nchars]=0;
