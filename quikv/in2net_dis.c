@@ -37,7 +37,8 @@ long ip[5];
 
       if((!kcom) && command->equal == '=') {
 	if(0!=logm5msg(output,command,ip)) {
-	  ip[3]=-400;
+	  ip[2]=-400;
+	  memcpy(ip+3,"5i",2);
 	  goto error;
 	}
 	return;
@@ -50,7 +51,7 @@ long ip[5];
 	  char *ptr;
 	  if ((nchars =
 	       cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	    ip[3] = -401;
+	    ierr = -401;
 	    goto error2;
 	  }
 	  if(i==0) {

@@ -37,7 +37,7 @@ long ip[5];
 	char *ptr;
 	if ((nchars =
 	     cls_rcv(class,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	  ip[3] = -401;
+	  ierr = -401;
 	  goto error;
 	}
 
