@@ -32,7 +32,7 @@ int to;
       if(to!=0) {
 	char *name;
 	name="mcbcn";
-	while(skd_run_to(name,'w',ip,100)==1) {
+	while(skd_run_to(name,'w',ip,120)==1) {
 	  if (nsem_test("fs   ") != 1) {
 	    return 1;
 	  }
@@ -64,7 +64,8 @@ int to;
 
       if(response.state == -1) {
         clr_res(&buffer_out);
-        ip[2]=-284;
+        ip[2]=-990;
+	memcpy(ip+3,"vf",2);
         return 0;
       } 
 
