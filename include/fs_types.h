@@ -66,3 +66,8 @@
 #include "s2bbc_ds.h"
 #include "s2das_check.h"
 #include "scan_check_ds.h"
+#include "mk5b_mode_ds.h"
+#include "vsi4_ds.h"
+#include "dot_ds.h"
+#include "1pps_source_ds.h"
+#include "clock_set_ds.h"
