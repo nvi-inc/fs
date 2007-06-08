@@ -2,7 +2,7 @@
 
 	       Ed Himwich, Brian Corey, and Dan Smythe
 
-			   October 2, 2006
+			     June 8, 2007
 
 INTRODUCTION
 
@@ -26,9 +26,15 @@ else is automatic.  The remainder of this document describes the usage
 and installation of the tools.  The "help" output from the data
 processing scripts is provided for reference.
 
+For stations that are upgrading to VSI4/Mark 5b configurations, a
+"systvsi4.prc" procedure library that will work with the VSI4 board is
+included in /usr2/fs/systests.  An existing installed "systests.prc"
+library can be modified to support the VSI4 board by changing all
+strings "pcalports=" to "vsi4=,".  No other changes are needed.
+
 USAGE
 
-With exception of the Mark 5 tests,after the tools have been
+With exception of the Mark 5 tests, after the tools have been
 installed, you can make the measurements for any observing mode.  You
 should set up the rack in the mode you want to test it in before doing
 any tests.  For example, to use the RD mode at Gc, you could use:
@@ -577,6 +583,16 @@ The steps to install for the first time are described below.
       chmod a+w chk1024.snp                         [or vchk1024.snp]
       chown oper.rtx chk1024.snp                    [or vchk1024.snp]
 
+    If you have a VSI4/Mark 5B equipment configuration, you should
+    replace the line above:
+
+      cp -a /usr2/fs/systests/systests.prc .
+
+    with:
+
+      cp -a /usr2/fs/systests/systvsi4.prc systests.prc
+
+
 (4) Customize the "systests.prc" (or whatever you named it) procedure
     library.  You should use PFMED to make the changes.  The
     procedures: "tpisamp", "bbcmanx", and "bbcagcx" are used only by
@@ -642,10 +658,17 @@ The steps to install for the first time are described below.
 
     For FS Linux 5 systems, please be sure that your
     "/etc/apt/source.list" file does not mention "stable".  All web
-    source references should explicitly use "woody".  If you have any
-    questions about this please contact Ed before attempting the
-    install.  Once you have verified your "sources.list", as "root"
-    please enter:
+    source references should explicitly use "woody".  Since "woody" is
+    no longer the "stable" distribution, you will need to to modify
+    your web references to:
+
+    deb http://archive.debian.org woody main contrib non-free
+    deb http://non-us.debian.org woody/non-US main contrib non-free
+    deb http://security.debian.org woody/updates main contrib non-free
+
+    If you have any questions about this please contact Ed before
+    attempting the install.  Once you have verified your
+    "sources.list", as "root" please enter:
 
       apt-get install pgperl
       apt-get clean
@@ -674,8 +697,17 @@ already in your sysystests.prc library.
 (2) Copy the procedure library holding the new procedures to "/usr2/proc"
 
       cd /usr2/proc
-      cp -a /usr2/fs/systests/systest2.prc systest2.prc
+      cp -a /usr2/fs/systests/systest2.prc .
       chmod a+rw systest2.prc
+
+    If you have a VSI4/Mark 5B equipment configuration, you should
+    replace the line above:
+
+      cp -a /usr2/fs/systests/systest2.prc .
+
+    with:
+
+      cp -a /usr2/fs/systests/systvsi42.prc systest2.prc
 
 (3) Customize the "systest2.prc" library on /usr2/proc.  You should
     use PFMED to make the changes.  Two procedures need to be edited
@@ -756,31 +788,47 @@ For reference the "help" output from each of the three scripts,
 
 			       PCALAMP
 
-Usage: pcalamp  -c string -vhpi -u upper -l lower -f file/device logs
-Synopsis: extracts and plots pcal amplitudes from log files
+Usage: plotlog -1anwprzvhf file/device logs
+Synopsis: extracts and plots data from log files
 
-This script processes log files to produce plots of pcal amplitudes. The
-default is pcal amplitudes for the first set of amplitudes that appear in the
-file. This behavior can be modified with the '-c' option to plot the first
-occurrence of amplitude data after a FS command that contains the specified
-string.
+This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
+fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV
+decoder pcal data in log files and generates time plots of the data. The time
+axis of all the plots is the same. The data is plotted so that it fits entirely
+inside the boxes. Points that appear along the top line of a plot did not decode
+($$$ for example) or were edited out by command line options.
+
+The '1anw' switches can be used to select different IF arrangements for
+calculating phase differences between pcal tones. Any combination of the '1anw'
+switches can be used. No difference is plotted more than once. Some simple
+assumptions are made about the time order of the pcal data in the log. If these
+assumptions are violated the phase difference plots may not make much sense.
+
+The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
+all other plots.
+
+Cable delay is plotted as one-way cable delay change unless the 'r' switch is
+used.
 
 Option explanations:
- -c string plot first set of amplitudes found after a command/procedure
-    matching 'string' was recorded in the log, for this to work; the
-    command/procedure matching 'string' must not be called from a procedure,
-    unless the procedure is logged with 'xlog=on'
- -p plot using power units for comparison to autocorrelation plots
- -i autoscale each plot individually
- -l lower  eliminate points smaller than lower when auto-scaling plots
- -u upper  eliminate points larger  than upper when auto-scaling plots
+ phase-difference plot options:
+  -1 all converters are on one IF
+  -a odd converters are on one IF, even are on another (astronomy)
+  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
+     also useful for wide band geodesy
+  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
+     (wide band geodesy)
+
+ -p plot amplitude versus phase for phase cal tones
+ -r plot cable data in raw units
+ -z value  edit out pcal points with amplitude less than value
  -v print program and PGPLOT version information and stop
  -h print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, an xterm will be used
-    if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used
+    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
     if '-f ?', you will be prompted for standard pgplot devices,
-                be sure to quote '?', like \?
+               be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
 
 
@@ -871,26 +919,31 @@ Option explanations:
 
 			       PLOTLOG
 
-Usage: plotlog -1anwcrvhf file/device logs
+Usage: plotlog -1anwprvh -c value -s string -t value -z value -f file/device logs
 Synopsis: extracts and plots data from log files
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
-fmout-gps/), and single tone per channel Mark IV decoder pcal data in log files
-and generates time plots of the data, The time axis of all the plots is the
-same. The data is plotted so that it fits entirely inside the boxes. Points
-that appear along the top line of a plot did not decode ($$$ for example).
+fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV
+decoder pcal data in log files and generates time plots of the data. The time
+axis of all the plots is the same. The data is plotted so that it fits entirely
+inside the boxes. Points that appear along the top line of a plot did not decode
+($$$ for example) or were edited out by command line options.
 
 The '1anw' switches can be used to select different IF arrangements for
 calculating phase differences between pcal tones. Any combination of the '1anw'
 switches can be used. No difference is plotted more than once. Some simple
 assumptions are made about the time order of the pcal data in the log. If these
 assumptions are violated the phase difference plots may not make much sense.
+These options suppress all other output except option -p.
+
+The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
+all other plots. This option suppresses all other output except options -1anw.
 
 Cable delay is plotted as one-way cable delay change unless the 'r' switch is
 used.
 
 Option explanations:
- phase-difference plot options:
+ phase-difference plot options (suppresses all other output, except -p):
   -1 all converters are on one IF
   -a odd converters are on one IF, even are on another (astronomy)
   -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
@@ -898,19 +951,31 @@ Option explanations:
   -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
      (wide band geodesy)
 
+ -c value  cable cal edit, if greater than zero, delete points that much or
+           more above lowest value, if less than zero, delete points that much
+           or more below largest value; uses plot Y axis units, be careful of
+           the -r option
+ -p plot amplitude versus phase for phase cal tones,
+    suppresses all other output except -1anw
  -r plot cable data in raw units
+ -s string match commands with 'string' instead of 'tsys',
+    option -t still applies for editing
+ -t value  edit out tsys points less than or equal to zero or greater than or
+           equal to value
+ -z value  edit out pcal amplitudes less than value
  -v print program and PGPLOT version information and stop
  -h print this help information and stop
- -f file/device send graphs to 'file' using PGPLOT 'device'
+ -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, an xterm will be used
     if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
     if '-f ?', you will be prompted for standard pgplot devices,
                be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
 
+
 			       CHK1024
 
-Usage: chk1024 -hvs -t track -r track -f frames -b a|e|f -g a|e|f logs
+Usage: chk1024 -acdhlpsuv -b a|e|f -f frames -g a|e|f -r track -t track logs
 Synopsis: analyzes results of Mark5 check schedule v/chk1024 logs
 
 This script will summarize the results of v/chk1024 or other similar Mark5
@@ -919,12 +984,9 @@ calls in the log. Where 'X' is a string. The mode is either 'play' or 'idle'
 depending on whether or not 'recscan' has been called since the last
 'setupX'.
 
-By default, chk1024 prints only summary results grouped by setup. The number
-of tracks checked reflect only those found in the log with full results,
-others may only have been partially checked. If a results for a 'setupX',
-'mode', and 'track' combination appear more than once in the log, only the
-last result for each track is considered, i.e., it is best to have each
-appear only once.  Otherwise the output is difficult to describe.
+By default, chk1024 prints only the overall summary results grouped by setup.
+The number of tracks checked reflect those that were found in the log to have
+been selected with the Mark5.
 
 The checks for each track are:
   Aux:    considered good if decoded track number is correct
@@ -933,27 +995,54 @@ The checks for each track are:
           minimum frames is settable, but defaults to 300 (0x12c)
 
 Additional detail can be displayed by selecting command line options. The
-next level of detail is selected by the -s option, which will print the
-summary for each check by setup and mode and further summarize them by
-set and odd/even track number. The next level is shown with the -t
-which shows the processed data for the selected track. Finally, the -r
-option will print the raw log records for the selected track.
+next level of detail is selected by the -s option, which will print a table
+of results for each check by setup and mode, also summarizing them by 'set'
+and odd/even track number. The 'reported' tracks are those for which the
+corresponding decoder output appears. If the 'Total' and 'reported' tracks
+don't agree this usually means there were decoder communication errors. The
+next level is shown with the -t option which shows the processed data for the
+selected track. Finally, the -r option will print the raw log records for the
+selected track.
 
-Please note that the set (odd/even) statistics and summary results at
-the end only report the total number of tracks found in the log, not the total
-expected.  The user must verify that total tracks are correct for each case.
-In the case of the summary results, where it may not be so obvious that tracks
-are missing, if some other tracks were not fully checked but present, the
-phrase 'other tracks present' is included for the affected setup.
+Please note that the set (odd/even) statistics and summary results at the
+end only report the total number of tracks found in the log, not the total
+expected. The user must verify that total tracks are correct for each setup.
+The 'Total Tracks' in the summary table is typically a good measure of the
+expected number of tracks, but they are distributed over the sets.
+
+If the scan_check fails for a setup the phrase 'ERROR: scan_check failed'
+is included in the overall summary for the affected setup.
+
+If the decoder firmware version is wrong or could not be determined a message
+to that effect is printed.
+
+If the same set-up occurs more than once, results from all but the last are
+discarded. Note also that the 'Location' title line is printed once for each
+time it is encountered in the log, with the corresponding log time stamp.
+Typically, this happens for each time the schedule is started. Results from
+previous runs are discarded only for set-ups with the same names. All
+unique set-ups in the log are reported, even if they are from different runs.
+For a given set-up and mode if a track or scan_check appears more than once,
+the results for the last occurance is reported. A warning about 'Duplicate
+DQA records' indicates either a track (or tracks) was checked more than once
+or there was a decoder communication problem
 
 Options explanation:
+ -a        ignore aux data when calculating performance
  -b a|e|f  display  bad tracks for one of the Aux|Errors|Frames
            checks, cannot be used with -g, -t, or -r
+ -c        show raw scan_check data
+ -d        show raw decoder firmware version data
+ -f frames sets the minimum level of required frames, default is 300 (0x12c)
  -g a|e|f  display good tracks for one if the Aux|Errors|Frames
            checks, cannot be used with -b, -t, or -r
- -f frames sets the minimum level of required frames, default is 300 (0x12c)
+ -h        print this help information and stop
+ -l        lists each set-up as it is encountered, useful when a log contains
+           more than one run, possibly on different dates
+ -p        'permissive', handles some Mark IV decoder old firmware
+           communication errors
  -r track  to display raw data for track, cannot be used with -b or -g
  -s        print summary statistics
  -t track  to display processed data for track, cannot be used with -b or -g
- -h        print this help information and stop
+ -u        print tracks with duplicate dqa records
  -v        print program version information and stop
