@@ -44,7 +44,7 @@ long ip[5];
 	char *ptr;
 	if ((nchars =
 	     cls_rcv(class,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	  ip[3] = -403;
+	  ierr = -403;
 	  goto error;
 	}
 	if(i==0)
@@ -81,13 +81,26 @@ long ip[5];
       append_safe(shm_addr->last_check.string,params,
 		  sizeof(shm_addr->last_check.string));
 
-      if((lclm.mode.state.error || (!lclm.mode.state.known)
-	  || strcmp("?",lclm.mode.mode)==0)) {
-	logit(NULL,-601,"5d");
-	shm_addr->last_check.ip2=-601;
-	strncpy(shm_addr->last_check.who,"5d",
-		sizeof(shm_addr->last_check.who));
-	shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1];
+      if(shm_addr->equip.drive[0] == MK5 &&
+	 (shm_addr->equip.drive_type[0] ==MK5B ||
+	  shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	if((lclm.source.state.error || (!lclm.source.state.known)
+	    || strcmp("?",lclm.source.source)==0)) {
+	  logit(NULL,-601,"5k");
+	  shm_addr->last_check.ip2=-601;
+	  strncpy(shm_addr->last_check.who,"5k",
+		  sizeof(shm_addr->last_check.who));
+	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
+	}
+      } else {
+	if((lclm.mode.state.error || (!lclm.mode.state.known)
+	    || strcmp("?",lclm.mode.mode)==0)) {
+	  logit(NULL,-601,"5d");
+	  shm_addr->last_check.ip2=-601;
+	  strncpy(shm_addr->last_check.who,"5d",
+		  sizeof(shm_addr->last_check.who));
+	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
+	}
       }
 
       return;
