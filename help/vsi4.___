@@ -1,0 +1,57 @@
+vsi4 - control VSI4 board
+
+syntax: vsi4=configuration,pcalx,pcaly
+Response: vsi4/configuration,pcalx,pcaly,version
+
+Settable parameters:
+
+configuation: Sampler set-up. vlba,geo,tvg. Default: not commanded.
+pcalx:        decoder X pcal VC input 1-16. Default: not commanded.
+pcaly:        decoder Y pcal VC input 1-16. Default: not commanded.
+
+Monitor only parameter:
+
+version:      version number, hex
+
+Comments: When used to configure the device, only the parameters
+specified are sent to device.
+
+MARK 4 SAMPLER TO VSI BIT STREAM MAPPING
+
+ MARK 4   VSI                     MARK 4      VSI        VSI
+ SAMPLER OUTPUT #1                SAMPLER  OUTPUT #1  OUTPUT #2
+ OUTPUT  VLBA GEODETIC            OUTPUT   GEODETIC   ALL MODES
+   1US     0     0                  9US       20          0
+   1UM     1     1                  9UM       21          1
+   2US     2     2                 10US       22          2
+   2UM     3     3                 10UM       23          3
+   3US     4     4                 11US       24          4
+   3UM     5     5                 11UM       25          5
+   4US     6     6                 12US       26          6
+   4UM     7     7                 12UM       27          7
+   5US     8     8                 13US       28          8
+   5UM     9     9                 13UM       29          9
+   6US    10     10                14US       30          10
+   6UM    11     11                14UM       31          11
+   7US    12     12                15US                   12
+   7UM    13     13                15UM                   13
+   8US    14     14                16US                   14
+   8UM    15     15                16UM                   15
+   1LS    16     16                 9LS                   16
+   1LM    17     17                 9LM                   17
+   2LS    18                       10LS                   18
+   2LM    19                       10LM                   19
+   3LS    20                       11LS                   20
+   3LM    21                       11LM                   21
+   4LS    22                       12LS                   22
+   4LM    23                       12LM                   23
+   5LS    24                       13LS                   24
+   5LM    25                       13LM                   25
+   6LS    26                       14LS                   26
+   6LM    27                       14LM                   27
+   7LS    28                       15LS                   28
+   7LM    29                       15LM                   29
+   8LS    30     18                16LS                   30
+   8LM    31     19                16LM                   31
+
+18-Dec-03                                 vsi4.txt   DAN SMYTHE
