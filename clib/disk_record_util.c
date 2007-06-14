@@ -34,10 +34,10 @@ char *ptr;
       case 1:
         ierr=arg_key(ptr,record_key,NRECORD_KEY,&lcl->record.record,0,FALSE);
 	if(ierr==0) {
+	  m5state_init(&lcl->record.state);
 	  lcl->record.state.known=1;
-	  lcl->record.state.error=0;
 	} else {
-	  lcl->record.state.known=0;
+	  m5state_init(&lcl->record.state);
 	  lcl->record.state.error=1;
 	} 
         break;
@@ -63,10 +63,10 @@ char *ptr;
 	} else 
 	  strcpy(lcl->label.label,ptr);
 	if(ierr==0) {
+	  m5state_init(&lcl->label.state);
 	  lcl->label.state.known=1;
-	  lcl->label.state.error=0;
 	} else {
-	  lcl->label.state.known=0;
+	  m5state_init(&lcl->label.state);
 	  lcl->label.state.error=1;
 	} 
         break;
@@ -92,7 +92,7 @@ struct disk_record_mon *lclm;
 
     switch (*count) {
     case 1:
-      if(lclc->record.record!=NRECORD_DISPLAY_KEY-1)
+      if(lclc->record.record!=NRECORD_DISPLAY_KEY)
 	m5key_encode(output,record_display_key,NRECORD_DISPLAY_KEY,
 		     lclc->record.record,&lclc->record.state);
       else
@@ -171,17 +171,13 @@ m5_2_disk_record(ptr_in,lclc,lclm,ip) /* return values:
     goto error;
   }
   /* no monitor response */
-  lclc->record.record=NRECORD_DISPLAY_KEY-1;
+  m5state_init(&lclc->record.state);
+  lclc->record.record=NRECORD_DISPLAY_KEY;
   lclc->record.state.known=1;
-  lclc->record.state.error=0;
 
-  lclc->label.state.known=0;
-  lclc->label.state.error=0;
-  lclm->status.state.known=0;
-  lclm->status.state.error=0;
-  lclm->scan.state.known=0;
-  lclm->scan.state.error=0;
-
+  m5state_init(&lclc->label.state);
+  m5state_init(&lclm->status.state);
+  m5state_init(&lclm->scan.state);
 
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
