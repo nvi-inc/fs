@@ -33,8 +33,8 @@ char *ptr;
       case 1:
         ierr=arg_key(ptr,control_key,NCONTROL_DISPLAY_KEY,
 		     &lcl->control.control,0,FALSE);
+	m5state_init(&lcl->control.state);
 	lcl->control.state.known=1;
-	lcl->control.state.error=0;
         break;
       case 2:
 	if(strlen(ptr)>sizeof(lcl->destination.destination)-1)
@@ -43,16 +43,16 @@ char *ptr;
 	  ierr=-100;
 	else
 	  strcpy(lcl->destination.destination,ptr);
+	m5state_init(&lcl->destination.state);
 	lcl->destination.state.known=1;
-	lcl->destination.state.error=0;
         break;
       case 3:
 	if(strlen(ptr)>sizeof(lcl->options.options)-1)
 	  ierr=-200;
 	else
 	  strcpy(lcl->options.options,ptr);
+	m5state_init(&lcl->options.state);
 	lcl->options.state.known=1;
-	lcl->options.state.error=0;
         break;
       default:
        *count=-1;
@@ -76,7 +76,7 @@ struct in2net_mon *lclm;
 
     switch (*count) {
     case 1:
-      if(lclc->control.control!=NCONTROL_DISPLAY_KEY-1)
+      if(lclc->control.control!=NCONTROL_DISPLAY_KEY)
 	m5key_encode(output,control_display_key,NCONTROL_DISPLAY_KEY,
 		     lclc->control.control,&lclc->control.state);
       else
@@ -167,7 +167,7 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
 
    /* no monitor response */
   m5state_init(&lclc->control.state);
-  lclc->control.control=NCONTROL_DISPLAY_KEY-1;
+  lclc->control.control=NCONTROL_DISPLAY_KEY;
   lclc->control.state.known=1;
 
   m5state_init(&lclc->destination.state);
