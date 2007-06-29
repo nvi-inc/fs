@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include<stdlib.h>
 
 #ifdef F2C
 #include "f2c.h"
