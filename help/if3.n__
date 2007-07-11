@@ -3,7 +3,7 @@
 
             Syntax:     if3=atten,mixer,sw1,sw2,sw3,sw4,pcal
 
-            Response:   if3/atten,mixer,sw1,sw2,sw3,sw4,pcl,switch,cntrl,freq,rem/lcl,LOlock,
+            Response:   if3/atten,mixer,sw1,sw2,sw3,sw4,pcal,switch,cntrl,freq,rem/lcl,LOlock,
             TPI
 
 
@@ -75,3 +75,17 @@ The cntrl parameter is only displayed if if3 is set as the
 phase-cal control type in equip.ctl.
 
 Some racks may not have the IF3 module installed.
+
+The standard wiring for the switches is:
+
+  switch 1 is for VC03
+    state 1 for IF1 low and state 2 for IF1 high
+
+  switch 2 is for VC10
+    state 1 is for IF2 low and state 2 is IF2 high
+
+This arrangement is designed to minimize the manual patching changes
+that are needed for standard geodetic observing sequences assuming
+first LO values of 8080 and 2020. If you have different LO
+frequencies, please contact Ed (weh@ivscc.gsfc.nasa.gov), so that a
+suitable configuration can be included.
