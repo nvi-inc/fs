@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# 1.0 Initialize
-
 sub phs {
     my ($i,$j)=@_;
     my ($tim,$phs,$k,$label);
@@ -20,28 +18,62 @@ sub phs {
     &vu(\@tim,\@phs,$label);
 }
 
+sub vup {
+    my($x,$y, $label) = @_;
+    &vuy($x,$y,$label,2);
+}
+
 sub vu {
     my($x,$y, $label) = @_;
-    my ($i,$max,$min,,$ply,$nfirst);
+    &vuy($x,$y,$label,1);
+}
+sub vuy {
+    my($x,$y, $label, $type) = @_;
+    my ($i,$ymax,$ymin,$ply,$nfirst,$xmax,$xmin,$plx);
 
-    $max=0;
-    $min=0;
+    $ymax=0;
+    $ymin=0;
+    $nfirst=0;
     for($i=0;$i<=$#$y;$i++) {
 	next unless $$y[$i]=~/^$float_pattern$/ ;
 	if(!$nfirst) {
-	    $max=$$y[$i];
-	    $min=$$y[$i];
+	    $ymax=$$y[$i];
+	    $ymin=$$y[$i];
 	    $nfirst=1;
 	} else {
-	    $max=$$y[$i] if $$y[$i]>$max;
-	    $min=$$y[$i] if $$y[$i]<$min;
+	    $ymax=$$y[$i] if $$y[$i]>$ymax;
+	    $ymin=$$y[$i] if $$y[$i]<$ymin;
 	}
+    }
+
+    if($type == 2) {
+	$xmax=0;
+	$xmin=0;
+	$nfirst=0;
+	for($i=0;$i<=$#$x;$i++) {
+	    next unless $$x[$i]=~/^$float_pattern$/ ;
+	    if(!$nfirst) {
+		$xmax=$$x[$i];
+		$xmin=$$x[$i];
+		$nfirst=1;
+	    } else {
+		$xmax=$$x[$i] if $$x[$i]>$xmax;
+		$xmin=$$x[$i] if $$x[$i]<$xmin;
+	    }
+	}
+	$xmin=-180.;
+	$xmax=+180.;
     }
 
     if(!$first && $panel==0) {
 #	print "labeling X axis\n";
-	pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
-	pglabel("Time","","");
+	if($type == 1) {
+	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
+	    pglabel("Time","","");
+	} else {
+	    pgbox("BCTN",0.0,0,"BCNVT",0.0,0); 
+	    pglabel("Phase","","");
+	}
 	pgask(-1);
 	pgpanl(1,8);
 	pgpage();
@@ -58,14 +90,15 @@ sub vu {
 #    print "panel $panel\n";
     pgpanl(1,2+$panel);
     pgvport(0.15,.95,0,1);
-    if($min == 0 & $max == 0) {
-	$max = 0.001;
-	$min =-0.001;
-    } elsif($min == $max) {
-	$max=$max*1.001;
-	$min=$min*0.999;
-        if($max < $min) {
-          ($max,$min)=($min,$max);
+
+    if($ymin == 0 && $ymax == 0) {
+	$ymax = 0.001;
+	$ymin =-0.001;
+    } elsif($ymin == $ymax) {
+	$ymax=$ymax*1.001;
+	$ymin=$ymin*0.999;
+        if($ymax < $ymin) {
+          ($ymax,$ymin)=($ymin,$ymax);
         }
     }
     for($i=0;$i<=$#$y;$i++) {
@@ -75,16 +108,46 @@ sub vu {
 	    $ply[$i]=$$y[$i];
 	} else {
 #	    print" not matched ";
-	    $ply[$i]=$max+0.05*($max-$min);
+	    $ply[$i]=$ymax+0.05*($ymax-$ymin);
 	}
 #	print " ply $ply[$i]\n";
     }
+    if($type == 2) {
+	if($xmin == 0 && $xmax == 0) {
+	    $xmax = 0.001;
+	    $xmin =-0.001;
+	} elsif($xmin == $xmax) {
+	    $xmax=$xmax*1.001;
+	    $xmin=$xmin*0.999;
+	    if($xmax < $xmin) {
+		($xmax,$xmin)=($xmin,$xmax);
+	    }
+	}
+	for($i=0;$i<=$#$x;$i++) {
+#	print "$$x[$i] ";
+	    if($$x[$i] =~/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/) {
+#	    print" matched ";
+		$plx[$i]=$$x[$i];
+	    } else {
+#	    print" not matched ";
+		$plx[$i]=$xmax+0.01*($xmax-$xmin);
+	    }
+#	print " plx $plx[$i]\n";
+	}
+    }
 
-    pgswin($tmin-0.01*($tmax-$tmin),$tmax+0.01*($tmax-$tmin),
-	   $min-0.05*($max-$min),$max+0.05*($max-$min));
-    pgtbox("BCTZYH",0.0,0,"BCNVT",0.0,0);
-    pgpoint($#$y+1, $x,\@ply,17);
+    if($type == 1 ){
+	pgswin($tmin-0.01*($tmax-$tmin),$tmax+0.01*($tmax-$tmin),
+	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
+	pgtbox("BCTZYH",0.0,0,"BCNVT",0.0,0);
+	pgpoint($#$y+1, $x,\@ply,17);
 #    pgline($#$y+1, $x, $ply);
+    } else {
+	pgswin($xmin-0.01*($xmax-$xmin),$xmax+0.01*($xmax-$xmin),
+	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
+	pgbox("BCT",45.0,0,"BCNVT",0.0,0);
+	pgpoint($#$y+1, \@plx,\@ply,17);
+    }
     pgvport(0.075,.95,0,1);
     pglabel("",$label,"");
     pgvport(0.15,.95,0,1);
@@ -95,13 +158,26 @@ sub time {
     local ($date) = @_;
 #2005.123.12:23:56.21
 #01234567890123456789
-    $year=substr($date,0,4);
-    $day=substr($date,5,3);
-    $hour=substr($date,9,2);
-    $minute=substr($date,12,2);
-    $second=substr($date,15,5);
+#or
+#9823717225512
+#0123456789012
+    if(substr($date,4,1) eq '.') {
+	$year=substr($date,0,4);
+	$day=substr($date,5,3);
+	$hour=substr($date,9,2);
+	$minute=substr($date,12,2);
+	$second=substr($date,15,5);
+    } else {
+	$year=substr($date,0,2)+1900;
+	$day=substr($date,2,3);
+	$hour=substr($date,5,2);
+	$minute=substr($date,7,2);
+	$second=substr($date,9,4)/100;
+    }
     if(!defined($refdate)) {
-	$refdate=substr($date,0,17);
+#	$refdate=substr($date,0,17);
+	$refdate=sprintf "%04d.%03d.%02d:%02d:%05.2f",
+	    $year,$day,$hour,$minute,$second;
 	$refyear=$year;
 	$refday=$day;
 	$refhour=$hour;
@@ -124,11 +200,13 @@ sub time {
     return $time;
 }
 
+# 1.0 Initialize
+
 use PGPLOT;
 require "getopts.pl";
 
 
-&Getopts("vhrnw1af:");
+&Getopts("c:vhrnw1aps:t:z:f:");
 
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
@@ -139,45 +217,60 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.1]\n";
+    print "[plotlog 1.3]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit -1;
 }
 
 if (defined($opt_h)) {
-    print "Usage: plotlog -1anwcrvhf file/device logs\n";
+    print "Usage: plotlog -1anwprvh -c value -s string -t value -z value -f file/device logs\n";
     print "Synopsis: extracts and plots data from log files\n\n";
 
     print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
-    print "fmout-gps/), setcl#time/, and single tone per channel Mark IV decoder pcal\n";
-    print "data in log files and generates time plots of the data, The time axis of all\n";
-    print "the plots is the same. The data is plotted so that it fits entirely inside the\n";
-    print "boxes. Points that appear along the top line of a plot did not decode (\$\$\$\n";
-    print "for example).\n\n";
+    print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV\n";
+    print "decoder pcal data in log files and generates time plots of the data. The time\n";
+    print "axis of all the plots is the same. The data is plotted so that it fits entirely\n";
+    print "inside the boxes. Points that appear along the top line of a plot did not decode\n";
+    print "(\$\$\$ for example) or were edited out by command line options.\n\n";
 
     print "The '1anw' switches can be used to select different IF arrangements for\n";
     print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
     print "switches can be used. No difference is plotted more than once. Some simple\n";
     print "assumptions are made about the time order of the pcal data in the log. If these\n";
-    print "assumptions are violated the phase difference plots may not make much sense.\n\n";
+    print "assumptions are violated the phase difference plots may not make much sense.\n";
+    print "These options suppress all other output except option -p.\n\n";
+
+    print "The 'p' switch adds amplitude versus phase plots for each phase-cal tone after\n";
+    print "all other plots. This option suppresses all other output except options -1anw.\n\n";
 
     print "Cable delay is plotted as one-way cable delay change unless the 'r' switch is\n";
     print "used.\n\n";
 
     print "Option explanations:\n";
-    print " phase-difference plot options:\n";
+    print " phase-difference plot options (suppresses all other output, except -p):\n";
     print "  -1 all converters are on one IF\n";
     print "  -a odd converters are on one IF, even are on another (astronomy)\n";
     print "  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),\n";
     print "     also useful for wide band geodesy\n";
     print "  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third\n";
-    print "     (wide band geodesy)\n";
-    print "\n";
+    print "     (wide band geodesy)\n\n";
+
+    print " -c value  cable cal edit, if greater than zero, delete points that much or\n";
+    print "           more above lowest value, if less than zero, delete points that much\n";
+    print "           or more below largest value; uses plot Y axis units, be careful of\n";
+    print "           the -r option\n";
+    print " -p plot amplitude versus phase for phase cal tones,\n";
+    print "    suppresses all other output except -1anw\n";
     print " -r plot cable data in raw units\n";
+    print " -s string match commands with 'string' instead of 'tsys',\n";
+    print "    option -t still applies for editing\n";
+    print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
+    print "           equal to value\n";
+    print " -z value  edit out pcal amplitudes less than value\n";
     print " -v print program and PGPLOT version information and stop\n";
     print " -h print this help information and stop\n";
-    print " -f file/device send graphs to 'file' using PGPLOT 'device'\n";
+    print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
     print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
     print "    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used\n";
     print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
@@ -193,6 +286,9 @@ if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
 } else {
     $dev=$opt_f;
 }
+
+$string="tsys";
+$string = $opt_s if defined($opt_s);
 
 # 2.0 extract data
 
@@ -228,7 +324,7 @@ foreach $file (@ARGV) {
 	    $cable[$cablen]=$1;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
-	} elsif(/pcalports=([^,]*),([0-9]+)/i) {
+	} elsif(/pcalports=([^,]*),([0-9]+)/i||/vsi4=[^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
 #	    print "pcalports $1 $2\n";
@@ -261,27 +357,108 @@ foreach $file (@ARGV) {
 	    } elsif($pcalf[$band][$chan]!=$freq) {
 		next;
 	    }
+	    if(defined($opt_z) && $amp < $opt_z) {
+		$amp='$$';
+	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
 	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcaln[$band][$chan]++;
-	} elsif (/\/tsys\//i) {
+	} elsif (/\/$string\//i) {
 	    (undef,undef,@fields)=split('[/,\cM]');
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
 #		print "$detect $tsys\n";
+		if(defined($opt_t)) {
+		    $tsys= "$$$" if $tsys <= 0;
+                    $tsys= "$$$" if $tsys >= $opt_t;
+		}
 		$tsysv{$detect}[$tsysn{$detect}]=$tsys;
 		$tsyst{$detect}[$tsysn{$detect}]=&time($_);
 #		print "tsys $tsysv{$detect}[$tsysn{$detect}]\n" if($detect eq '1u');
 		$tsysn{$detect}++;	 
 	    }
+	} elsif (/\/tsys1=/i) {
+	    (undef,undef,@fields)=split('[/=,\cM]');
+	    $det=0;
+	    while($device=shift(@fields)) {
+		$det++;
+#		print "$det $device\n";
+		$tsys1{$det}=sprintf "%3s", $device;
+	    }
+	} elsif (/\/tsys1\//i) {
+	    (undef,undef,@fields)=split('[/,\cM]');
+	    $det=0;
+	    while($tsys=shift(@fields)) {
+		$det++;
+		$detect=$tsys1{$det};
+#		print "$detect $tsys\n";
+		if(defined($opt_t)) {
+		    $tsys= "$$$" if $tsys <= 0;
+                    $tsys= "$$$" if $tsys >= $opt_t;
+		}
+		$tsysv1{$detect}[$tsysn1{$detect}]=$tsys;
+		$tsyst1{$detect}[$tsysn1{$detect}]=&time($_);
+#		print "tsys $tsysv1{$detect}[$tsysn1{$detect}]\n" if($det ==1);
+		$tsysn1{$detect}++;	 
+	    }
+	} elsif (/\/tsys2=/i) {
+	    (undef,undef,@fields)=split('[/=,\cM]');
+	    $det=0;
+	    while($device=shift(@fields)) {
+		$det++;
+#		print "$det $device\n";
+		$tsys2{$det}=sprintf "%3s", $device;
+	    }
+	} elsif (/\/tsys2\//i) {
+	    (undef,undef,@fields)=split('[/,\cM]');
+	    $det=0;
+	    while($tsys=shift(@fields)) {
+		$det++;
+		$detect=$tsys2{$det};
+#		print "$detect $tsys\n";
+		if(defined($opt_t)) {
+		    $tsys= "$$$" if $tsys <= 0;
+                    $tsys= "$$$" if $tsys >= $opt_t;
+		}
+		$tsysv2{$detect}[$tsysn2{$detect}]=$tsys;
+		$tsyst2{$detect}[$tsysn2{$detect}]=&time($_);
+#		print "tsys $tsysv2{$detect}[$tsysn2{$detect}]\n" if($det ==1);
+		$tsysn2{$detect}++;	 
+	    }
+	} elsif (/\/tsys3=/i) {
+	    (undef,undef,@fields)=split('[/=,\cM]');
+	    $det=0;
+	    while($device=shift(@fields)) {
+		$det++;
+#		print "$det $device\n";
+		$tsys3{$det}=sprintf "%3s", $device;
+	    }
+	} elsif (/\/tsys3\//i) {
+	    (undef,undef,@fields)=split('[/,\cM]');
+	    $det=0;
+	    while($tsys=shift(@fields)) {
+		$det++;
+		$detect=$tsys3{$det};
+#		print "$detect $tsys\n";
+		if(defined($opt_t)) {
+		    $tsys= "$$$" if $tsys <= 0;
+                    $tsys= "$$$" if $tsys >= $opt_t;
+		}
+		$tsysv3{$detect}[$tsysn3{$detect}]=$tsys;
+		$tsyst3{$detect}[$tsysn3{$detect}]=&time($_);
+#		print "tsys $tsysv3{$detect}[$tsysn3{$detect}]\n" if($det == 1);
+		$tsysn3{$detect}++;	 
+	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
             (undef,$cmd,@fields)=split('[/,\cM]');
-            ($value,undef)=split(' ',$fields[$#fields]);
+            ($value,$units)=split(' ',$fields[$#fields]);
+	    next unless $value=~/^$float_pattern$/ ;
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
 #            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
             $rxcount{$fields[0]}++;
+	    $rxunits{$fields[0]}=$units;
 	    $rxcmd=$cmd;
 	} elsif(/#setcl#time\//i) {
 		(undef,@fields)=split('[/,\cM]');
@@ -315,6 +492,10 @@ pgpage();
 $page=1;
 $panel=0;
 $first=1;
+
+goto EXTRAS
+    if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_p);
+
 if(defined(@wxtime)) {
     &vu(\@wxtime, \@temp,"Temperature");
     &vu(\@wxtime, \@pres,"Pressure");
@@ -328,22 +509,92 @@ if(defined(@cablet)) {
             $cablefirst=$cable[$i] if(!defined($cablefirst));
             $cable[$i]=($cable[$i]-$cablefirst)/4e5;
             $cable[$i]/=1e-12;
-         }
-         &vu(\@cablet, \@cable,"Cable Delay (ps)");
+	}
+	if(defined($opt_c)) {
+	    for($i=0;$i<=$#cable;$i++) {
+		next unless $cable[$i]=~/^$float_pattern$/ ;
+		$cablemax=$cable[$i] if(!defined($cablemax));
+		$cablemin=$cable[$i] if(!defined($cablemin));
+		if($cablemax <$cable[$i]) {
+		    $cablemax=$cable[$i];
+		} elsif($cablemin > $cable[$i]) {
+		    $cablemin=$cable[$i];
+		}
+	    }
+#	    printf "$cablemax $cablemin $opt_c\n";
+	    for($i=0;$i<=$#cable;$i++) {
+		next unless $cable[$i]=~/^$float_pattern$/ ;
+		if($opt_c < 0 && $cable[$i] < $cablemax+$opt_c) {
+		    $cable[$i]="$$$";
+                } elsif($opt_c >0 && $cable[$i] > $cablemin+$opt_c) {
+		    $cable[$i]="$$$";
+                }
+	    }
+	}
+	&vu(\@cablet, \@cable,"Cable Delay (ps)");
     } else {
         for($i=0;$i<=$#cable;$i++) {
 	    next unless $cable[$i]=~/^$float_pattern$/ ;
             $cable[$i]*=1e3;
-        }
+	}
+	if(defined($opt_c)) {
+	    for($i=0;$i<=$#cable;$i++) {
+		next unless $cable[$i]=~/^$float_pattern$/ ;
+		$cablemax=$cable[$i] if(!defined($cablemax));
+		$cablemin=$cable[$i] if(!defined($cablemin));
+		if($cablemax <$cable[$i]) {
+		    $cablemax=$cable[$i];
+		} elsif($cablemin > $cable[$i]) {
+		    $cablemin=$cable[$i];
+		}
+	    }
+#	    printf "$cablemax $cablemin $opt_c\n";
+	    for($i=0;$i<=$#cable;$i++) {
+		next unless $cable[$i]=~/^$float_pattern$/ ;
+		if($opt_c < 0 && $cable[$i] < $cablemax+$opt_c) {
+		    $cable[$i]="$$$";
+                } elsif($opt_c >0 && $cable[$i] > $cablemin+$opt_c) {
+		    $cable[$i]="$$$";
+                }
+	    }
+	}
         &vu(\@cablet, \@cable,"Cable Counter (ms)");
     }
 }
 if(defined(@gpst)) {
+    $avg=0;
+    $count=0;
     for($i=0;$i<$gpsn;$i++) {
-	 next unless $gpsv[$i]=~/^$float_pattern$/ ;
-         $gpsv[$i]*=1e6;
-     }
-     &vu(\@gpst, \@gpsv,"gps-fmout (us)");
+	next unless $gpsv[$i]=~/^$float_pattern$/ ;
+	$gpsv[$i]*=1e6;  #microseconds
+	$avg+=$gpsv[$i];
+	$count++;
+    }
+#
+# it seems PGPLOT can't handle lots of significant digits
+#
+#    print "$avg $count\n";
+    $avg=$avg/$count;
+#    print "$avg $count\n";
+    if($avg > 500000) {
+	$offset=1e6;
+	$label="(gps-fmout)-1e6 (us)";
+    } elsif($avg <-500000) {
+	$offset=-1e6;
+	$label="(gps-fmout)+1e6 (us)";
+    } else {
+	$offset=0;
+	$label="gps-fmout (us)";
+    }
+#    print "$offset $label\n";
+    if($offset) {
+#	print "apply offset $offset\n";
+	for($i=0;$i<$gpsn;$i++) {
+	    next unless $gpsv[$i]=~/^$float_pattern$/ ;
+	    $gpsv[$i]-=$offset;
+	}
+    }
+    &vu(\@gpst, \@gpsv,$label);
 }
 if(defined(@setcl)) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
@@ -358,12 +609,74 @@ for($i=1;$i<17;$i++) {
 	    $tim[$j]=$pcalt[1][$i][$j];
 	    $phs[$j]=$pcalp[1][$i][$j];
 	}
-	$label=sprintf("PC Amp U$i",$i);
+	$label=sprintf("$pcalf[1][$i] Hz Amp U$i",$i);
 	&vu(\@tim,\@amp,$label);
-	$label=sprintf("PC Phase U$i",$i);
+	$label=sprintf("$pcalf[1][$i] Hz Phase U$i",$i);
 	&vu(\@tim,\@phs,$label);
     }
 }
+
+foreach $detect (sort keys %tsysn) {
+#    print "Detect $detect $tsysn{$detect}\n";
+    $#amp=-1;
+    $#tim=-1;
+    for($j=0;$j<$tsysn{$detect};$j++) {
+	$amp[$j]=$tsysv{$detect}[$j];
+	$tim[$j]=$tsyst{$detect}[$j];
+    }
+    $label=sprintf("$string %s",$detect);
+    &vu(\@tim,\@amp,$label);
+}	
+foreach $detect (sort keys %tsysn1) {
+#    print "Detect $detect $tsysn1{$detect}\n";
+    $#amp=-1;
+    $#tim=-1;
+    for($j=0;$j<$tsysn1{$detect};$j++) {
+	$amp[$j]=$tsysv1{$detect}[$j];
+	$tim[$j]=$tsyst1{$detect}[$j];
+    }
+    $label=sprintf("Tsys1 %s",$detect);
+    &vu(\@tim,\@amp,$label);
+}	
+foreach $detect (sort keys %tsysn2) {
+#    print "Detect $detect $tsysn2{$detect}\n";
+    $#amp=-1;
+    $#tim=-1;
+    for($j=0;$j<$tsysn2{$detect};$j++) {
+	$amp[$j]=$tsysv2{$detect}[$j];
+	$tim[$j]=$tsyst2{$detect}[$j];
+    }
+    $label=sprintf("Tsys2 %s",$detect);
+    &vu(\@tim,\@amp,$label);
+}	
+foreach $detect (sort keys %tsysn3) {
+#    print "Detect $detect $tsysn3{$detect}\n";
+    $#amp=-1;
+    $#tim=-1;
+    for($j=0;$j<$tsysn3{$detect};$j++) {
+	$amp[$j]=$tsysv3{$detect}[$j];
+	$tim[$j]=$tsyst3{$detect}[$j];
+    }
+    $label=sprintf("Tsys3 %s",$detect);
+    &vu(\@tim,\@amp,$label);
+}	
+foreach $chan (sort keys %rxcount) {
+    $#amp=-1;
+    $#tim=-1;
+    for($j=0;$j<$rxcount{$chan};$j++) {
+	$amp[$j]=$rx{$chan}[$j];
+	$tim[$j]=$rxtime{$chan}[$j];
+    }
+    $units="";
+    $units=" ($rxunits{$chan})" if $rxunits{$chan};
+    $label="$rxcmd $chan$units";
+#    print "$chan\n";
+    &vu(\@tim,\@amp,$label);
+}	
+	
+goto END_EXTRAS;
+
+EXTRAS:
 if(defined($opt_1)) {
     for($i=1;$i<15;$i++) {
 	if(defined($pcaln[1][$i])) {
@@ -452,44 +765,59 @@ if(defined($opt_w)) {
 	}
     }
 }
+END_EXTRAS:
+    $something=0;
 
-foreach $detect (sort keys %tsysn) {
-#    print "Detect $detect $tsysn{$detect}\n";
-    $#amp=-1;
-    $#tim=-1;
-    for($j=0;$j<$tsysn{$detect};$j++) {
-	$amp[$j]=$tsysv{$detect}[$j];
-	$tim[$j]=$tsyst{$detect}[$j];
-    }
-    $label=sprintf("Tsys %s",$detect);
-    &vu(\@tim,\@amp,$label);
-}	
-foreach $chan (sort keys %rxcount) {
-    $#amp=-1;
-    $#tim=-1;
-    for($j=0;$j<$rxcount{$chan};$j++) {
-	$amp[$j]=$rx{$chan}[$j];
-	$tim[$j]=$rxtime{$chan}[$j];
-    }
-    $label="$rxcmd $chan";
-#    print "$chan\n";
-    &vu(\@tim,\@amp,$label);
-}	
-	
 if(!$first) {
     pgtbox("BCTNZYH",0.0,0,"",0.0,0); 
     pglabel("Time","","");
-} else {
+    $something=1;
+} elsif(!defined(opt_p)){
     pgpanl(1,1);
     pgvport(0.15,.95,0,1);
     pgwindow(-0.5,16.5,0,39);
     pgtext(4,10,"$location Log Plots -- $refdate $save_file Page $page");
     pgtext(6,0,"NOTHING FOUND TO PLOT");
 }
-    pgpanl(1,8);
-    pgvport(0.15,.95,0,1);
-    pgwindow(-0.5,16.5,0,39);
-    pgtext(7.25,10,"Last Page");
 
+if(defined($opt_p)) {
+    $first = 1;
+    for($i=1;$i<17;$i++) {
+	if(defined($pcaln[1][$i])) {
+	    $#amp=-1;
+	    $#tim=-1;
+	    $#phs=-1;
+	    for($j=0;$j<$pcaln[1][$i];$j++) {
+		$amp[$j]=$pcala[1][$i][$j];
+		$tim[$j]=$pcalt[1][$i][$j];
+		$phs[$j]=$pcalp[1][$i][$j];
+	    }
+	    $label=sprintf("$pcalf[1][$i] Hz Amp U$i",$i);
+	    if($first == 1 ) {
+		pgask(-1);
+		pgpanl(1,8);
+		pgpage();
+		$panel=0;
+	    }
+	    &vup(\@phs,\@amp,$label);
+	}
+    }
+
+    if(!$first) {
+	pgtbox("BCTN",45.0,0,"",0.0,0); 
+	pglabel("Phase","","");
+    } elsif(!$something) {
+	pgpanl(1,1);
+	pgvport(0.15,.95,0,1);
+	pgwindow(-0.5,16.5,0,39);
+	pgtext(4,10,"$location Log Plots -- $refdate $save_file Page $page");
+	pgtext(6,0,"NOTHING FOUND TO PLOT");
+    }
+}
+
+pgpanl(1,8);
+pgvport(0.15,.95,0,1);
+pgwindow(-0.5,16.5,0,39);
+pgtext(7.25,15,"Last Page");
 
 pgend();
