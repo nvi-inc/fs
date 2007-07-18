@@ -21,13 +21,16 @@ C
 C
       integer MAX_ELEMENTS
       PARAMETER (MAX_ELEMENTS=(MAX_MODEL_PARAM*(MAX_MODEL_PARAM+1))/2)
+      integer MAX_POINTS
+      PARAMETER (MAX_POINTS=1000)
 c
       character*64 iibuf,iobuf,imbuf
       dimension ireg(2),ldum(3)
       integer*2 jbuf(60),lant(4),laxis(2)
-      dimension lon(600),lat(600),wln(600),wlt(600)
-      dimension lonoff(600),latoff(600),luse(32)
-      dimension latres(600),lonres(600)
+      dimension lon(MAX_POINTS),lat(MAX_POINTS),wln(MAX_POINTS)
+      dimension wlt(MAX_POINTS)
+      dimension lonoff(MAX_POINTS),latoff(MAX_POINTS),luse(32)
+      dimension latres(MAX_POINTS),lonres(MAX_POINTS)
       dimension idcbo(2),it(6),ipar(MAX_MODEL_PARAM),ito(6)
       dimension ispar(MAX_MODEL_PARAM)
       double precision pcof(MAX_MODEL_PARAM),pcofer(MAX_MODEL_PARAM),phi
@@ -41,14 +44,18 @@ C
       integer ichcm_ch
       integer*2 l2mny(17)
       integer*2 lnopt(9)
+      integer*2 lsing(14)
 C
+
       data l2mny  /  32,2hto,2ho ,2hma,2hn ,2hin,2hpu,2ht ,2hpo,2hin,
      /             2hts,2h, ,2hli,2hmi,2ht ,2his,2h _/
 C          too man input points, limit is
       data lnopt  /  15,2hno,2h i,2hnp,2hut,2h p,2hoi,2hnt,2hs /
 C          no input points
-      data il/50/,mpts/600/,mpar/MAX_MODEL_PARAM/,itry/-1/,tol/1e-3/
-      data mc/5/,npar/MAX_MODEL_PARAM/
+      data lsing/ 26,2hPa,2hra,2hme,2hte,2hrs,2h a,2hre,2h d,2heg,
+     /             2hen,2her,2hat,2he /
+      data il/50/,mpts/MAX_POINTS/,mpar/MAX_MODEL_PARAM/,itry/-1/
+      data tol/1e-3/,mc/5/,npar/MAX_MODEL_PARAM/
       data feclon/0.0/,feclat/0.0/
 C
       call fc_setup_ids
@@ -228,6 +235,7 @@ C
         call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
      +   phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
      +   nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
+        if (kif(lsing(2),lsing(1),ldum,0,0,ierr.lt.0,lu)) continue
       enddo
       iftry=0
 2105  continue
@@ -236,6 +244,7 @@ C
       call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
      + phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
      + nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
+      if (kif(lsing(2),lsing(1),ldum,0,0,ierr.lt.0,lu)) continue
 211   continue
 C
       imdl=imdl+1

@@ -15,7 +15,7 @@ C
       integer idcb(1)
 C
       integer fmpread, ichcm_ch, trimlen
-      integer*2 lnosr( 9),l2mny(18)
+      integer*2 lnosr( 9),l2mny(18),lnosrs,l2mnys
       character*18 lnosrc
       character*36 l2mnyc
       data lnosrc /  'no source records '/

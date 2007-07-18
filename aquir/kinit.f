@@ -11,6 +11,7 @@ C
 c     character*63 icdbuf
 C
       integer*2 lfs(16),lfs2(16),lfp(16),lnf(16)
+      integer*2 lfs1   ,         lfp1   ,lnf1
       character*32 lfsc,lfs2c,lfpc,lnfc
       integer trimlen
       logical rn_test

@@ -11,9 +11,8 @@ C
      /             2hor,2h i,2hn ,2hrs,2hta,2ht /
 C          fatal internal error in rstat
 C
-      ilen = lfat(1)
       kigp = igp.le.0
-      if (kif(lfat(2),ilen,idum,0,0,kigp,lu)) stop
+      if (kif(lfat(2),lfat(1),idum,0,0,kigp,lu)) stop
       didim1=0
       if (igp.gt.1) didim1=dble(float(igp))/dble(float(igp-1))
 C
