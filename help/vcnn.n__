@@ -40,6 +40,16 @@ For Mark IV, the seldom used internal 0.25 and 1 MHz filters
 were replaced with 16 and 8 MHz filters, respectively, to
 increase the maximum bandwidth.
 
+If the bandwidth is "0.0", the external filter ports are selected.
+For DRUDG generated VC set-up command, the actual MHz bandwidth of the
+required filter(s) is placed in parenthesizes after the "0.0", e.g.,
+"0.0(1.0)" for 1 MHz filters.  The operator can determine whether the
+filters are to be connected to the USB, LSB, or both from the value
+DRUDG inserts for the TPIsel parameter: "u", "l", or "ul",
+respectively.  There is no provision for identifying different BW
+external filters for USB and LSB in one VC, but it is certainly
+possible to connect them.
+
 For Mark III, a power level of 32768 counts corresponds to 1
 volt on the front panel and  0+/-1 dBm output. The detector is
 linear to better than 2% from 5% of full scale to full scale.
