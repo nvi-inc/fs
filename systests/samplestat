@@ -75,14 +75,18 @@ foreach $file (@ARGV) {
 	    $location=$1;
 	}
 	
-	if(/pcalports=([^,]*),([0-9]+)/i) {
+	if(/pcalports=([^,]*),([0-9]+)/i||/vsi4=[^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
 #	    print "Pcalports $x, $y \n";
 	    if($first || $count[0][$x]!=0 || $count[1][$x]!=0
 	       || $count[0][$y]!=0 || $count[1][$y]!=0 ) {
 #		print "end\n";
-		goto PLOT if(!$first);
+		if(!$first) {
+		    print "Detected a repeated measurement,";
+		    print " plotting what I had before and then quiting.\n";
+		    goto PLOT;
+		}
                 $first=0;
 		$date=substr($_,0,17);
 	    }
