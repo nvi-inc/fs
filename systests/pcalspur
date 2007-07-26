@@ -82,14 +82,18 @@ foreach $file (@ARGV) {
 	    $state=2;
 	} elsif(/pcal5moff/i) {
 	    $state=3;
-	} elsif(/pcalports=([^,]*),([0-9]+)/i) {
+	} elsif(/pcalports=([^,]*),([0-9]+)/i||/vsi4=[^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
 	    die "log does not contain necessary strings\n" if ($state < 0);
 #	    print "pcalports $1 $2\n";
 	    if($first || $numb[0][$state][$x]!=0 || $numb[1][$state][$x]!=0
 	       || $numb[0][$state][$y]!=0 || $numb[1][$state][$y]!=0 ) {
-		goto PLOT if(!$first);
+		if(!$first) {
+		    print "Detected a repeated measurement,";
+		    print " plotting what I had before and then quiting.\n";
+		    goto PLOT;
+		}
 		$first=0;
 		$date=substr($_,0,17);
 	    }
