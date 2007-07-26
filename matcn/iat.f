@@ -56,6 +56,7 @@ C  NRSPN  - number of responses possible
       integer*2 irecx(10)
       character*1 cjchar
       logical kprompt
+      integer*4 icent
 C
       equivalence (ireg(1),reg)
 C
@@ -110,6 +111,18 @@ C  2. Write the buffer to the MAT, and read response if expected.
 C     Set the time-out on the MAT depending on the response.
 C
 200   continue
+c
+c special delay for mark4 formatter only
+c
+      call fc_rte_ticks(icent)
+      if(imode.eq.10.and.(i4dcent+3.lt.icent.or.icent.lt.i4dcent)) then
+         if(icent.lt.i4dcent) then
+            icent=3
+         else
+            icent=i4dcent+3-icent
+         endif
+         if(icent.lt.4.and.icent.gt.0) call susp(1,icent)
+      endif
       if (kecho) then
         call echoe(itran,iebuf,nctran,iecho,maxech)
       endif
@@ -185,6 +198,7 @@ c         ireg(1)=0
       else if(imode.eq.10) then
         maxc=178
         ireg(1)=portread(lumat,irecv,ilen,maxc,m4dt,itimeout)
+        call fc_rte_ticks(i4dcent)        
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
       endif
