@@ -1,0 +1,203 @@
+File: /usr2/fs/misc/mk5b_ops.txt  Version: 0.1  Date: 070608
+
+		 FS Operations with Mark 5B Recorders
+
+			      Ed Himwich
+
+INTRODUCTION
+
+This document describes basic FS operations with Mark 5B recorders.
+The Mark 5B is different from most other recorders used by the FS
+(except the S2 and K4) in that it formats and time-tags the data
+rather than a formatter in the acquisition rack or DAS.  The FS
+support for the Mark 5B is designed primarily for use with a VSI4
+board, which typically is used in the form of a Mark 5B sampler
+module, which is a plug replacement for a Mark IV formatter.  Some
+tips are provided in this document for how to use the FS if the Mark
+5B is receiving sampled data from a different source such as a DBE,
+DBBC, or other sampler.  The following sections describe and are
+titled: Use of DRUDG, FS Mark 5B support, FS VSI4 Support, Mark 5B
+operation with VSI4 board operations, Other Mark 5B Operations,
+Understanding Mark 5B Sync Status, and Systests VSI4 Support.
+
+The DIMino program mentioned in this document is the control program
+used in the Mark 5B.  In principle, it could also be run as "Mark5B"
+or "dimino". However, as of the writing of this document, the
+recommended choice is "DIMino".  It is expected that the
+recommendation will eventually change to "dimino".
+
+Use of DRUDG
+
+Using DRUDG with the Mark 5B requires the user to select mark5b as the
+recorder type in option 11 or the skedf.ctl control file.  If the VSI4
+sampler board is in use in MarkIV or VLBA4 rack, the rack type should
+be chosen as either mark5 or vlba5 (also in option 11) depending on
+whether the rack is otherwise a Mark IV or VLBA rack.  Other racks can
+be chosen of course, but they may not be useful.  All other operation
+of DRUDG is same as for other recorder types except that piggyback
+mode is not supported for Mark 5B.  DRUDG will insert the appropriate
+commands for observing into the .snp and .prc files based on the rack
+and recorder selections.
+
+FS Mark 5B Support
+
+FS support for Mark 5B is selected by specifying "mk5b" or "mk5b_bs"
+in the "equip.ctl" control file.  The "mk5b_bs" option enables FS
+controlled "bank switching" and as of the writing of this document is
+the one used for normal operations.  This will probably change when
+and if the Mark 5B supports automatic bank switching, in which case
+"mk5b" would be used.  This is the same situation as wth the "mk5a"
+and "mk5a_bs" recorder types.
+
+Most of the changes for Mark 5B support in the FS are transparent to
+the user.  The most visible changes are: the new "mk5b_mode" command,
+new features in "setcl" and new features on "fmset".
+
+The "mk5b_mode" command is used to select the data source, bit stream
+recording mask, and the decimation ratio.  Please use the
+"help=mk5b_mode" SNAP command to get more details on the "mk5b_mode"
+command.
+
+The "setcl" program is the same as for other systems, except it will
+now communicate with the Mark 5B if it is the selected equipment.  If
+the rack type selected includes a VSI4 board ("mark5" or "vlba5") and
+if any of the Mark 5B parameters: 1PPS source, Clock Frequency, and
+Clock Source are incorrect, they will be reported as errors.  The
+messages for these errors include suggestions to use the "fmset"
+program to fix the problem.  For any type of useful recording, the
+Clock Source must be set to "ext".  Regardless of rack type, "setcl"
+will complain if it is not set to "ext", but for rack types that do
+not include a VSI4 board, it will suggest that it be corrected
+manually, which would be done with a "mk5=..." command.
+
+The "fmset" operates in a similar way as for other systems.  New
+features for Mark 5B equipment include display of the sync status on
+the "time display line" for the Mark 5B and display of the 1PPS
+source, Clock Frequency, and Clock Source of the Mark 5B.  If the rack
+type selected includes a VSI4 board ("mark5" or "vlab4v") and any of
+the last three of these parameters are incorrect, a message suggesting
+use of the 's' key to fix the problem is displayed.  For these racks,
+the 's' key also commands the correct values for these parameters
+before commanding a clock re-sync.  The 's' command performs a clock
+re-sync for the Mark 5B regardless of the rack types.  For other rack
+types, if the Clock Source parameter is incorrect, "fmset" will
+suggest that it be set manually.
+
+FS VSI4 Support
+
+Only small aspects of Field System are different for use with a VSI4
+sampler board: the new "vsi4" command and the changes to the "setcl"
+and "fmset" programs described above under Mark 5B support.  The
+support for the VSI4 board is selected by using either "mark5" or
+"vlba5" as the rack type in the "equip.ctl" control file.
+
+The VSI4 board is controlled through the "vsi4" command.  DRUDG will
+insert the correct form of the command into the set-up procedure based
+on the recording mode of the experiment.  For more information on the
+command, please use the SNAP command "help=vsi4".  Please note that
+the "vsi4" command parameters control both the sampler configuration
+and the sampled data sent to the Mark IV Decoder as the "X" and "Y"
+(pcalports) inputs.  Parameters that are not specified in a "vsi4=..."
+command will not be changed or re-commanded, i.e., there are no
+defaults.
+
+Mark 5B Operations with a VSI4 Board
+
+Each time the DIMino program is started, the operator should run the
+"fmset" program to check the status of the time in the Mark 5B and
+adjust it as necessary.  On the first running of "fmset" after a
+power-up restart of the Mark 5B and before setting the time, the
+operator should use the "s" command to make sure the DIMino 1PPS and
+clock parameters are properly set and the Mark 5B is properly synced.
+The "s" command may be used at other times if necessary to re-command
+the parameters and re-sync.
+
+Other Mark 5B Operations
+
+Mark 5B operations without a VSI4 board are similar to those above but
+with some small differences.  Primarily these are that the operator
+needs to set the DIMino 1PPS_Source and clock_set parameters manually.
+This must be done before running "fmset" to set the time.  It may be
+convenient to write a SNAP procedure that sets these parameters so
+that they don't need to be entered repetitively.  The content of such
+a procedure might be something like:
+
+mk5=1pps_source=vsi;
+mk5=clock_set=64:ext;
+
+The values of the DIMino command parameters from the example above
+should be adjusted as appropriate for the actual configuration.
+Different versions of this procedure can be written if more than one
+configuration is used.  If one particular configuration is used often,
+a call to a SNAP procedure that sets the parameters for that
+configuration can be included in the station "initi" procedure so that
+they are set automatically when the FS is started.  This will work if
+the DIMino program is already running when the FS is started.  If not
+or if it is restarted, this set-up procedure will need to be
+re-executed.
+
+Since the FS does not know the correct values of DIMino 1PPS_Source
+and clock_set parameters unless a VSI4 board is being used, the
+"setcl" and "fmset" programs cannot verify their values.  Also, the
+"fmset" will not command the values when the 's' command is used.
+Extra vigilance by the operators is required to make sure the
+parameters are set properly.  If a non-supported rack (such as a DBE,
+DBBC, or other non_FS supported DAS) that uses the same values for
+these parameters as the VSI4 board (1PPS source: vsi, Clock frequency:
+32, Clock Source: ext), then the rack type in the "equip.ctl" file can
+be set to either "mark5" or "vlba5" and then value will be checked and
+the "fmset" 's' command can be used to set them.  Note this is benign
+since the other commands that are used for these racks will not be
+useful since the rack is not there.  If you use this approach, please
+note you should pick "none" as the rack type when running DRUDG.
+Other rack types can be added to the FS to enable setting and checking
+of different values of these DIMino parameters if it is
+desired. Please contact Ed (Ed.Himwich@nasa.gov) if you would like to
+have this feature added.
+
+Understanding Mark 5B Sync Status
+
+The Mark 5B sync status is a latching error condition that shows if
+the synch test failed since the last time the error condition was
+reset (with the "disk_record=on" command or DOT "force" resync).
+There is no more detailed indication of when this error occurred.  The
+sync test checks for the 1 PPS occurring within a small window of when
+it is expected based on counting cycles of the external clock, usually
+32 MHz.  When the error occurs it may only be intermittant, e.g., if
+the 1 PPS is from a different source than the 32 MHz, they may drift
+apart and back together slowly at some level.  This is the case for
+which the "latching" nature of the error condition is useful, since
+otherwise you may not see it.
+
+The FS only displays the Mark 5B sync status report, in the "fmset"
+program, which is the point at which a resync can be performed. After
+the Mark 5B is "sync'd", the status is normally monitored during
+operation using the "fmout-gps" command.  A synopsis of the reported
+sync status values and their meanings is presented here:
+
+not_synced   - Mark 5B 1 PPS generator has not yet been synced.
+syncerr_eq_0 - Mark 5B 1 PPS is exactly coincident with the external 1 PPS.
+syncerr_le_3 - Mark 5B 1 PPS is within +/-2 clock cycles (usually 94 ns)
+               of the external 1 PPS.
+syncerr_gt_3 - Mark 5B 1 PPS is more than +/-3 clock cycles (usually 94 ns)
+               from the external 1 PPS.
+
+The <syncerr_eq_0/le_3/gt_3> status report is only relevant provided
+the selected external 1 PPS that was used to sync the Mark 5B remains
+connected, selected, and active.  It indicates quantitatively the
+current relationship between the Mark 5B 1 PPS and the external 1 PPS
+to which the Mark 5B clock was originally synced.  Note that if the
+external 1 PPS is asynchronous to the data clock (e.g. comes from a
+GPS receiver), one would not expect that exact synchronization would
+be maintained.
+
+Systests VSI4 Support
+
+This topic is not really relevant to Mark 5B operations, but is
+included here since it is related.  A modified "systvsi4.prc"
+procedure library that will work with the VSI4 board is included in
+/usr2/fs/systests.  An existing installed "systests.prc" library can
+be modified to support the VSI4 board by changing all strings
+"pcalports=" to "vsi4=,".  No other changes are needed.  Please see
+"/usr2/fs/systests/systests.txt" for complete "from scratch"
+installation instructions for "systests".
