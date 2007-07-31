@@ -87,6 +87,11 @@
 #define VLBA42      0x2000000
 #define MK5A        0x4000000
 #define MK5A_BS     0x8000000
+#define MK45        0x10000000
+#define VLBA45      0x20000000
+#define MK5B        0x40000000
+#define MK5B_BS     0x80000000
+
 /*
  * The number of DAS allowed must be less than 8, currently we allow 2
  *   - also add additional SNAP commands in fs/control/fscmd.ctl
