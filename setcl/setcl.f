@@ -25,12 +25,14 @@ C
 C  LOCAL:
 C
       integer*2 ibuf(40),ibuft(10),ibuf2(10),ibuf4(40)
-      integer ilen,trimlen,fc_get_vtime,fc_get_s2time
+      integer ilen,trimlen,fc_get_vtime,fc_get_s2time,fc_get_5btime
       integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
+      integer fc_dad_pid
       integer*4 centiavg,secs_fm,secs_fs,centifs
       integer*4 centidiff,diff,nanosec
       integer*4 diffunix,unixdiff,difffs2unix
       character*63 name
+      character*13 m5sync,m5pps,m5freq,m5clock
       character*6 model
       character*10 set
       character*1  cjchar
@@ -141,11 +143,36 @@ c
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
       call fs_get_drive(drive)
+      call fs_get_drive_type(drive_type)
 c
 50    continue
+
       iclasm = 0
       nrec = 0
-      if(drive(1).eq.S2.or.set.eq."s2das".or.rack.eq.S2) then
+      if (MK5.eq.drive(1).and.
+     &     (MK5B.eq.drive_type(1).or.MK5b_BS.eq.drive_type(1))) then
+        idum=rn_take('fsctl',0)
+        idum=fc_get_5btime(centisec,it,ip,0,m5sync,m5pps,m5freq,m5clock)
+        call rn_put('fsctl')
+c       write(6,*) 'centisec ',centisec(1),centisec(2),
+c    &       centisec(2)-centisec(1)
+c       write(6,*) 'unixsec  ',unixsec(1),unixsec(2)
+c       write(6,*) 'unixhs   ',unixhs(1),unixhs(2)
+c       write(6,*) 'm5sync  ',m5sync
+c       write(6,*) 'm5pps   ',m5pps 
+c       write(6,*) 'm5freq  ',m5freq
+c       write(6,*) 'm5clock ',m5clock
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
+        if(ip(3).lt.0) then
+           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+           nerr=nerr+1
+           if(nerr.le.3) goto 50
+           goto 998
+        endif
+        goto 200
+      else if(drive(1).eq.S2.or.set.eq."s2das".or.rack.eq.S2) then
          idum=rn_take('fsctl',0)
          if(set.ne."s2das".and.drive(1).eq.S2) then
             idum=fc_get_s2time("r1"//char(0),centisec,it,nanosec,ip,0)
@@ -599,5 +626,24 @@ C
       kfm=.false.
       goto 201
 999   continue
+      if (MK5.eq.drive(1).and.
+     &     (MK5B.eq.drive_type(1).or.MK5b_BS.eq.drive_type(1))) then
+        if((MK4.eq.rack.and.MK5.eq.rack_type).or.
+     &       (VLBA4.eq.rack.and.VLBA5.eq.rqck_type)) then
+           if("vsi"//char(0).ne.m5pps(1:4)) then
+              call logit7ci(idum,idum,idum,-1,-19,'sc',0)
+           endif
+           if("32"//char(0).ne.m5freq(1:3)) then
+              call logit7ci(idum,idum,idum,-1,-20,'sc',0)
+           endif
+           if("ext"//char(0).ne.m5clock(1:4)) then
+              call logit7ci(idum,idum,idum,-1,-21,'sc',0)
+           endif
+        else
+           if("ext"//char(0).ne.m5clock(1:4)) then
+              call logit7ci(idum,idum,idum,-1,-22,'sc',0)
+           endif
+        endif
+      endif
       goto 1
       end
