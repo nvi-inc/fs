@@ -140,10 +140,14 @@ c
         nch=ichmv_ch(ib,nch,'vlbag')
       else if(rack.eq.VLBA.and.rack_type.eq.VLBA) then
         nch=ichmv_ch(ib,nch,'vlba')
-      else if(rack.eq.MK4) then
+      else if(rack.eq.MK4.and.rack_type.eq.MK4) then
         nch=ichmv_ch(ib,nch,'mk4')
+      else if(rack.eq.MK4.and.rack_type.eq.MK45) then
+        nch=ichmv_ch(ib,nch,'mk5')
       else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4) then
         nch=ichmv_ch(ib,nch,'vlba4')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA45) then
+        nch=ichmv_ch(ib,nch,'vlba5')
       else if(rack.eq.K4.and.rack_type.eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
       else if(rack.eq.K4.and.rack_type.eq.K41U) then
@@ -225,6 +229,10 @@ c
         nch=ichmv_ch(ib,nch,'mk5a')
       else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5A_BS) then
         nch=ichmv_ch(ib,nch,'mk5a_bs')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5B) then
+        nch=ichmv_ch(ib,nch,'mk5b')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5B_BS) then
+        nch=ichmv_ch(ib,nch,'mk5b_bs')
       else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
