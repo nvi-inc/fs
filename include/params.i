@@ -33,6 +33,10 @@ c
       integer MK5           ! MK5 comparison bit variable
       integer MK5A          ! MK5A comparison bit variable
       integer MK5A_BS       ! MK5A_BS comparison bit variable
+      integer MK45          ! MK45 comparison bit variable
+      integer VLBA45        ! VLBA45 comparison bit variable
+      integer MK5B          ! MK5B comparison bit variable
+      integer MK5B_BS       ! MK5B_BS comparison bit variable
       integer MAX_DAS       ! Max number of LBA DAS allowed
       character*5 FS_ROOT
       integer MAX_BBC
@@ -86,6 +90,10 @@ C rack/drive _types
       parameter ( VLBA42   = z'2000000'  )
       parameter ( MK5A     = z'4000000'  )
       parameter ( MK5A_BS  = z'8000000'  )
+      parameter ( MK45     = z'10000000'  )
+      parameter ( VLBA45   = z'20000000'  )
+      parameter ( MK5B     = z'40000000'  )
+      parameter ( MK5B_BS  = z'80000000'  )
 
 C
 C wx_met
