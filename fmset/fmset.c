@@ -28,9 +28,10 @@ void setup_ids();
 time_t	asktime(); /* ask operator to enter a time */
 
 /* global variables */
-int rack;
-int drive;
+int rack, rack_type;
+char *form;
 int source;
+int hint_row;
 int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 
@@ -70,6 +71,13 @@ int changedfm=0;
  char *model;
  long epoch;
  int index,icomputer;
+int column,i;
+char mk5b_sync[13] ="";
+char mk5b_1pps[10] ="";
+char mk5b_clock_freq[10] ="";
+char mk5b_clock_source[10] ="";
+char blank[ ] = {"                                                                              "};
+int drive, drive_type;
 
  putpname("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -89,10 +97,14 @@ if ( 1 == nsem_take("fmset",1)) {
 rte_prior(CL_PRIOR); /* set our priority */
 
 rack=shm_addr->equip.rack;
+rack_type=shm_addr->equip.rack_type;
 drive=shm_addr->equip.drive[0];
+drive_type=shm_addr->equip.drive_type[0];
 
-if (drive==S2) {
-  source=S2;
+ if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
+  source=drive;
+else if (drive==S2) {
+   source=S2;
   if(rack & MK3 || rack == 0||rack==LBA)
     ;
   else {
@@ -106,7 +118,7 @@ if (drive==S2) {
     fprintf(stderr,"fmset does not support LBA racks - fmset aborting\n");
   else
     fprintf(stderr,
-	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2 rack or S2 RT to set - fmset aborting\n");
+	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT or Mark 5B to set - fmset aborting\n");
   rte_sleep(SLEEP_TIME);
   exit(0);
 } else {
@@ -130,35 +142,48 @@ wrefresh(maindisp);
 box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 
 /* build display screen */
+ column=10;
+ hint_row=8;
 build:
-mvwaddstr( maindisp, 2, 23, "fmset - formatter/S2-DAS/S2-RT time set" );
-if(source == S2)
-   mvwaddstr( maindisp, 4, 10, s2type ? "S2 DAS      " : "S2 RT       " );
- else if((rack& MK4 || rack &VLBA4))
-  mvwaddstr( maindisp, 4, 10, "Mark IV FM  " );
- else 
-  mvwaddstr( maindisp, 4, 10, "VLBA FM     " );
-mvwaddstr( maindisp, 5, 10,   "Field System" );
-mvwaddstr( maindisp, 6, 10,   "Computer" );
-mvwaddstr( maindisp, ROW, 10,
- "Use '+'     to increment formatter time by one second." );
-mvwaddstr( maindisp, ROW+1, 10,
- "    '-'     to decrement formatter time by one second." );
-mvwaddstr( maindisp, ROW+2, 10, 
- "    '='     to be prompted for a new formatter time." );
-mvwaddstr( maindisp, ROW+3, 10,
- "    '.'     to set formatter time to Field System time.");
+mvwaddstr( maindisp, 2, 8, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B time set" );
+ if( source == MK5) {
+   column=6;
+   hint_row=12;
+   form="Mark 5B";
+  mvwaddstr( maindisp, 4, column, "Mark 5B     " );
+ } else if(source == S2) {
+   mvwaddstr( maindisp, 4, column, s2type ? "S2 DAS      " : "S2 RT       " );
+   form=s2type ? "S2 DAS" : "S2 RT ";       
+ } else if((rack& MK4 || rack &VLBA4)) {
+  mvwaddstr( maindisp, 4, column, "Mark IV FM  " );
+  form="formatter";
+ } else { 
+  mvwaddstr( maindisp, 4, column, "VLBA FM     " );
+  form="formatter";
+ }
+mvwaddstr( maindisp, 5, column,   "Field System" );
+mvwaddstr( maindisp, 6, column,   "Computer" );
+
+ sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
+   mvwaddstr( maindisp, hint_row, column,buffer);
+ sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
+ mvwaddstr( maindisp, hint_row+1, column, buffer);
+ sprintf(buffer, "    '='     to be prompted for a new %s time.",form);
+ mvwaddstr( maindisp, hint_row+2, column, buffer);
+ sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
+ mvwaddstr( maindisp, hint_row+3, column, buffer);
 
 irow=4;
- if(source != S2 && (rack& MK4 || rack &VLBA4))
-  mvwaddstr( maindisp, ROW+irow++, 10,
- "    's'/'S' to SYNC formatter (VERY rarely needed)");
+ if(source != S2 && (rack& MK4 || rack &VLBA4)) {
+   sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
+   mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+ } 
 if(toggle) {
-  mvwaddstr( maindisp, ROW+irow++, 10,
+  mvwaddstr( maindisp, hint_row+irow++, column,
  "    't'/'T' to toggle between S2 RT or MarkIV/VLBA formatter/S2 DAS.");
 }
 
- mvwaddstr( maindisp, ROW+irow++, 10,
+ mvwaddstr( maindisp, hint_row+irow++, column,
 	    "    <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 
 leaveok ( maindisp, FALSE); /* leave cursor in place */
@@ -167,11 +192,13 @@ wrefresh ( maindisp );
 
 do 	{
 
-	char fmt[40];
+	char fmt[80];
 
 	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
-                  &formtime,&formhs); /* get times */
-
+		  &formtime,&formhs,mk5b_sync,sizeof(mk5b_sync),
+		  mk5b_1pps,sizeof(mk5b_1pps),
+		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
+		  mk5b_clock_source,sizeof(mk5b_clock_source)); /* get times */
         disptime=formtime;
         disphs=formhs+5;
         if (disphs > 99) {
@@ -181,12 +208,13 @@ do 	{
           
 	if(disptime>=0) {
 	  sprintf(fmt,
-		  "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y",disphs/10);
+		  "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s",disphs/10,
+		  mk5b_sync);
 	  disptm = gmtime(&disptime);
 	  strftime ( buffer, sizeof(buffer), fmt, disptm );
-	  mvwaddstr( maindisp, 4, 25, buffer );
+	  mvwaddstr( maindisp, 4, column+15, buffer );
 	} else                      /* 123456789012345678901234567890123456*/
-	  mvwaddstr( maindisp, 4, 25, "Year out of range: [1970 to 2037]   ");
+	  mvwaddstr( maindisp, 4, column+15, "Year out of range: [1970 to 2037]   ");
 
 	index=01 & shm_addr->time.index;
 	epoch=shm_addr->time.epoch[index];
@@ -219,7 +247,7 @@ do 	{
 		 disphs/10,model);
         disptm = gmtime(&disptime);
 	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 5, 25, buffer );
+	mvwaddstr( maindisp, 5, column+15, buffer );
 
 	disptime=unixtime;
 	disphs=unixhs+5;
@@ -241,8 +269,44 @@ do 	{
 		disphs/10, ntp);
 	disptm = gmtime(&disptime);
 	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 6, 25, buffer );
+	mvwaddstr( maindisp, 6, column+15, buffer );
 
+	if(source==MK5) {
+	  char *pps_status,*freq_status,*source_status;
+	  if((rack == VLBA4 && rack_type == VLBA45) ||
+	     (rack == MK4   && rack_type == MK45  )) {
+	    if(strcmp(mk5b_1pps,"vsi")==0)
+	      pps_status="- okay                         ";
+	    else
+	      pps_status="- incorrect value, fix with 's'";
+	    if(strcmp(mk5b_clock_freq,"32")==0)
+	      freq_status="- okay                         ";
+	    else
+	      freq_status="- incorrect value, fix with 's'";
+	    if(strcmp(mk5b_clock_source,"ext")==0)
+	      source_status="- okay                         ";
+	    else
+	      source_status="- incorrect value, fix with 's'";
+	  } else {
+	    pps_status="                               ";
+	    freq_status="                               ";
+	    if(strcmp(mk5b_clock_source,"ext")==0)
+	      source_status="- okay                         ";
+	    else
+	      source_status="- incorrect value, fix manually";
+	    source_status="                               ";
+	  }
+	      
+	  sprintf(buffer,"1PPS Source:      %10s     %s",
+		  mk5b_1pps,pps_status);
+	  mvwaddstr( maindisp, 8, column, buffer );
+	  sprintf(buffer,"Clock Frequency:  %10s     %s",
+		  mk5b_clock_freq,freq_status);
+	  mvwaddstr( maindisp, 9, column, buffer );
+	  sprintf(buffer,"Clock Source:     %10s     %s",
+		  mk5b_clock_source,source_status);
+	  mvwaddstr( maindisp,10, column, buffer );
+	}
 	wrefresh ( maindisp );
 
 	while (ERR!=(inc=wgetch( maindisp ))) 
@@ -262,6 +326,8 @@ do 	{
 	    changedfm=1;
 	  break;
 	case SET_KEY :  /* Get time from user */
+	  for (i=hint_row;i<hint_row+irow;i++)
+	    mvwaddstr( maindisp, i, 1, blank);
 	  formtime = asktime( maindisp,&flag, formtime);
 	  if(flag) {
 	    setfmtime(formtime,0);
@@ -270,6 +336,7 @@ do 	{
 	    else
 	      changedfm=1;
 	  }
+	  goto build;
 	  break;
 	case EQ_KEY :  /* set form time to fs time */
 	  setfmtime(formtime=fstime+(fshs+50)/100,0);
@@ -292,6 +359,8 @@ do 	{
 	  }
 	case SYNCH_KEY:
 	case SYNCH2_KEY:
+	  for (i=hint_row;i<hint_row+irow;i++)
+	    mvwaddstr( maindisp, i, 1, blank);
 	  if( (rack& MK4 || rack &VLBA4) && asksure( maindisp)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
@@ -299,6 +368,7 @@ do 	{
 	    else
 	      changedfm=1;
 	  }
+	  goto build;
 	  break;
 	default:
 	  running = TRUE;
