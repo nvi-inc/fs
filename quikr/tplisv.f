@@ -110,7 +110,14 @@ C                   We haven't any stored values to pick up here
 C 
         if (ichcm_ch(iprm,1,'formbbc').ne.0) goto 205
         call fs_get_rack(rack)
-        if(rack.eq.VLBA) then
+        call fs_get_rack_type(rack_type)
+        call fs_get_drive(drive)
+        call fs_get_drive_type(drive_type)
+        if(rack.eq.VLBA4.and.rack_type.eq.VLBA45.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+           call fc_mk5bbcd(itpis_vlba)
+        else if(rack.eq.VLBA) then
            call fc_vlbabbcd(itpis_vlba)
         elseif(rack.eq.VLBA4) then
            call fc_mk4bbcd(itpis_vlba)
@@ -120,7 +127,14 @@ c
 205     continue
         if (ichcm_ch(iprm,1,'formif').ne.0) goto 210
         call fs_get_rack(rack)
-        if(rack.eq.VLBA) then
+        call fs_get_rack_type(rack_type)
+        call fs_get_drive(drive)
+        call fs_get_drive_type(drive_type)
+        if(rack.eq.VLBA4.and.rack_type.eq.VLBA45.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+           call fc_mk5bbcd(itpis_test)
+        else if(rack.eq.VLBA) then
            call fc_vlbabbcd(itpis_test)
         elseif(rack.eq.VLBA4) then
            call fc_mk4bbcd(itpis_test)
