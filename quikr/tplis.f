@@ -105,7 +105,14 @@ C                   We haven't any stored values to pick up here
 C 
         if (ichcm_ch(iprm,1,'formvc').ne.0) goto 205
         call fs_get_rack(rack)
-        if(rack.eq.MK3) then
+        call fs_get_rack_type(rack_type)
+        call fs_get_drive(drive)
+        call fs_get_drive_type(drive_type)
+        if(rack.eq.MK4.and.rack_type.eq.MK45.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+           call fc_mk5vcd(itpis)
+        else if(rack.eq.MK3) then
            call fs_get_imodfm(imodfm)
            if(imodfm.eq.0.or.imodfm.eq.2) then
               do ii=1,14
@@ -126,7 +133,14 @@ C
  205    continue
         if(ichcm_ch(iprm,1,'formif').ne.0) goto 210
         call fs_get_rack(rack)
-        if(rack.eq.MK3) then
+        call fs_get_rack_type(rack_type)
+        call fs_get_drive(drive)
+        call fs_get_drive_type(drive_type)
+        if(rack.eq.MK4.and.rack_type.eq.MK45.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+           call fc_mk5vcd(itpis_test)
+        else if(rack.eq.MK3) then
            if(imodfm.eq.0.or.imodfm.eq.2) then
               do ii=1,14
                  itpis_test(ii)=1
