@@ -42,9 +42,15 @@ C LINE #1  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0.and.il.eq.3) then
         rack = MK4
         rack_type = MK4
+      else if (ichcm_ch(ibuf,ic1,'mk5').eq.0.and.il.eq.3) then
+        rack = MK4
+        rack_type = MK45
       else if (ichcm_ch(ibuf,ic1,'vlba4').eq.0.and.il.eq.5) then
         rack = VLBA4
         rack_type = VLBA4
+      else if (ichcm_ch(ibuf,ic1,'vlba5').eq.0.and.il.eq.5) then
+        rack = VLBA4
+        rack_type = VLBA45
       else if (ichcm_ch(ibuf,ic1,'k41').eq.0.and.il.eq.3) then
         rack = K4
         rack_type = K41
@@ -185,6 +191,12 @@ C LINE #2  TYPE OF RECORDER - drive 1
       else if (ichcm_ch(ibuf,ic1,'mk5a_bs').eq.0.and.il.eq.7) then
         drive(1) = MK5
         drive_type(1) = MK5A_BS
+      else if (ichcm_ch(ibuf,ic1,'mk5b').eq.0.and.il.eq.4) then
+        drive(1) = MK5
+        drive_type(1) = MK5B
+      else if (ichcm_ch(ibuf,ic1,'mk5b_bs').eq.0.and.il.eq.7) then
+        drive(1) = MK5
+        drive_type(1) = MK5B_BS
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive(1) = 0
         drive_type(1) = 0
