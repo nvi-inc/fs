@@ -3,14 +3,14 @@
 * Field System Documentation
 * 
 *  VLBI equipment
-mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
+mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 *                     k41, k41u, k41/k3, k41u/k3, k41/mk4, k41u/mk4,
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
 *                     k42c/mk4, lba, lba4, s2, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		            mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a,
-*                           mk5a_bs, or none)
+*                           mk5a_bs, mk5b, mk5b_bs, or none)
 mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
 *                           mk4b, or none)
 mk3     type of decoder (mk3, dqa, mk4, or none)
