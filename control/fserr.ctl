@@ -89,6 +89,15 @@ Rollform output tracks must be null, -1, or 2-23.
 4R -301
 Rollform can not have more than 16 output tracks.
 ""
+55 -401
+error retrieving class for dot query in get_5btime
+""
+55 -402
+error decoding time in get_5btime
+""
+55 -403
+error retrieving class for 1pps_source/clock_set queries in get_5btime
+""
 5B -301
 command does not accept parameters
 ""
@@ -146,6 +155,15 @@ error decoding vsn? original vsn parameter
 5B -525
 error decoding vsn? new vsn parameter
 ""
+5B -534
+error decoding rtime? source parameter
+""
+5B -535
+error decoding rtime? mask parameter
+""
+5B -534
+error decoding rtime? decimate parameter
+""
 5B -901
 query response not received
 ""
@@ -194,6 +212,39 @@ error decoding data_check? bytes parameter
 5D -507
 error decoding data_check? missing parameter
 ""
+5D -511
+error decoding data_check? source parameter
+""
+5D -512
+error decoding data_check? start parameter
+""
+5D -513
+error decoding data_check? date code parameter
+""
+5D -514
+error decoding data_check? frames parameter
+""
+5D -515
+error decoding data_check? frame header period parameter
+""
+5D -516
+error decoding data_check? total recording rate parameter
+""
+5D -517
+error decoding data_check? byte offset parameter
+""
+5D -518
+error decoding data_check? total missing bytes parameter
+""
+5D -522
+error decoding data_check? submode parameter
+""
+5D -523
+error decoding data_check? time parameter
+""
+5D -524
+error decoding data_check? offset parameter
+""
 5D -601
 DATA_CHECK failed
 ""
@@ -201,6 +252,51 @@ DATA_CHECK failed
 query response not received
 ""
 5D -902
+program error: strdup() failed
+""
+5E -501
+error decoding dot? time parameter
+""
+5E -502
+error decoding dot? status parameter
+""
+5E -503
+error decoding dot? FHG_status parameter
+""
+5E -504
+error decoding dot? OS_time parameter
+""
+5E -505
+error decoding dot? DOT_OS_time_diff parameter
+""
+5E -511
+error decoding 1pps_source? source parameter
+""
+5E -521
+error decoding clock_set? freq parameter
+""
+5E -522
+error decoding clock_set? source parameter
+""
+5E -523
+error decoding clock_set? clock_gen parameter
+""
+5E -901
+query response not received
+""
+5E -902
+program error: strdup() failed
+""
+5E -903
+query response not received
+""
+5E -904
+program error: strdup() failed
+""
+5E -905
+query response not received
+""
+5E -906
 program error: strdup() failed
 ""
 5F -201
@@ -267,16 +363,25 @@ error decoding disk2file? end byte parameter
 error decoding disk2file? option parameter
 ""
 5F -511
-error decoding scan_set? scan_number parameter
+error decoding scan_set? scan number parameter
 ""
 5F -512
-error decoding scan_set? scan_name parameter
+error decoding scan_set? scan label parameter
 ""
 5F -513
 error decoding scan_set? start byte parameter
 ""
 5F -514
 error decoding scan_set? end byte parameter
+""
+5F -521
+error decoding scan_set? scan label parameter
+""
+5F -522
+error decoding scan_set? start time parameter
+""
+5F -523
+error decoding scan_set? end time parameter
 ""
 5F -901
 query response not found for disk2file?
@@ -351,13 +456,28 @@ error decoding scan_check? start parameter
 error decoding scan_check? length parameter
 ""
 5K -507
-error decoding scan_check? rate parameter
+error decoding scan_check? track rate parameter
 ""
 5K -508
 error decoding scan_check? missing parameter
 ""
+5K -513
+error decoding scan_check? date type parameter
+""
+5K -514
+error decoding scan_check? data code parameter
+""
+5K -517
+error decoding scan_check? total rate parameter
+""
+5K -519
+error decoding scan_check? error parameter
+""
 5K -601
 SCAN_CHECK failed
+""
+5K -602
+SCAN_CHECK missing bytes is not zero.
 ""
 5K -901
 query response not received
@@ -385,6 +505,15 @@ error decoding position? record position
 ""
 5P -502
 error decoding position? play position
+""
+5P -511
+error decoding pointers? record position
+""
+5P -512
+error decoding pointers? scan start position
+""
+5P -513
+error decoding pointers? scan stop position
 ""
 5P -901
 query response not found
@@ -442,6 +571,36 @@ program error: strdup() failed
 ""
 5S -903
 program error: too many serial numbers
+""
+5T -201
+source parameter must be 'ext', 'tvg', or 'ramp'.
+""
+5T -202
+mask parameter, must be a hex value, e.g. 0xf
+""
+5T -203
+decimate parameter, must be one of 1, 2, 4, 8, or 16
+""
+5T -204
+fpdp parameter, must be one of 1 or 2.
+""
+5T -501
+error decoding mode? source parameter
+""
+5T -502
+error decoding mode? mask parameter
+""
+5T -503
+error decoding mode? decimate parameter
+""
+5T -504
+error decoding mode? fpdp parameter
+""
+5T -901
+query response not found
+""
+5T -902
+program error: strdup() failed
 ""
 AN   -1
 Illegal mode
@@ -2338,6 +2497,9 @@ Verify error
 ""
 MA   -7
 MAT device is /dev/null, MAT devices inaccessible.
+""
+MA   -8
+Did not get Mark IV formatter prompt.
 ""
 MA -100
 Unable to open MAT device, ?WWW
@@ -4623,7 +4785,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mark 3/4/VLBA, S2, K4*/MK4 rack or S2, K4 recorder
+setcl: cannot set fs time without Mark 3/4/VLBA, S2, K4*/MK4 rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -4645,6 +4807,18 @@ setcl: bad argument
 ""
 SC  -18
 setcl: program is already running, try "run setcl" instead.
+""
+SC  -19
+setcl: Mark 5B 1PPS source is wrong, use fmset 's' option to fix.
+""
+SC  -20
+setcl: Mark 5B clock frequency is wrong, use fmset 's' option to fix.
+""
+SC  -21
+setcl: Mark 5B clock source is wrong, use fmset 's' option to fix.
+""
+SC  -22
+setcl: Mark 5B clock source is wrong, correct manually.
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -4802,6 +4976,18 @@ Can't separate S and X band; patching probably wrong
 TE  -32
 Extreme channels in band have the same frequency
 ""
+V4 -201
+VSI4 configuration must be vlba, geo, or tvg.
+""
+V4 -202
+VSI4 pcalx must be 1-16.
+""
+V4 -203
+VSI4 pcaly must be 1-16.
+""
+V4 -301
+VSI4: nothing commanded.
+""
 VB -101
 No default for L.O. frequency.
 ""
@@ -4891,6 +5077,9 @@ program error: incorrect number of responses in need_config.
 ""
 VF -403
 program error: incorrect number of responses in aux_active.
+""
+VF -990
+program error: incorrect number of responses in get_vtime.
 ""
 VI -201
 IF attenuator setting must be 0 or 20.
