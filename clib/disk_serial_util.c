@@ -66,8 +66,6 @@ m5_2_disk_serial(ptr_in,lclm,ip) /* return values:
     ptr_save=ptr;
     ptr=strsep(&ptr_save,":");
     while (ptr!=NULL && count<MK5_DISK_SERIAL_MAX) {
-      lclm->serial[count].state.known=0;
-      lclm->serial[count].state.error=0;
       if(0!=m5string_decode(ptr,&lclm->serial[count].serial,
 			 sizeof(lclm->serial[count].serial),
 			 &lclm->serial[count].state)) {

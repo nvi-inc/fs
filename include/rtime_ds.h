@@ -1,6 +1,9 @@
 /* mk5 rtime data structures */
 
 struct rtime_mon {
+
+/* mark 5a and 5b common members */
+
   struct {
     double seconds;
     struct m5state state;
@@ -14,6 +17,13 @@ struct rtime_mon {
     struct m5state state;
   } percent;
   struct {
+    double total_rate;
+    struct m5state state;
+  } total_rate;
+
+  /* mark5a unique members */
+
+  struct {
     char mode[33];
     struct m5state state;
   } mode;
@@ -25,9 +35,20 @@ struct rtime_mon {
     double track_rate;
     struct m5state state;
   } track_rate;
+
+  /* mark5b unique members */
+
   struct {
-    double total_rate;
+    char source[33];
     struct m5state state;
-  } total_rate;
+  } source;
+  struct {
+    unsigned long mask;
+    struct m5state state;
+  } mask;
+  struct {
+    int decimate;
+    struct m5state state;
+  } decimate;
 };
 

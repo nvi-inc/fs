@@ -17,13 +17,22 @@ extern int source;
 extern int s2type;
 extern char s2dev[2][3];
 
-void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs)
+void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs,m5sync,sz_m5sync,
+	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
 int    *fshs;
 time_t *formtime; /* formatter time */
 int    *formhs;
+char *m5sync;
+int sz_m5sync;
+char *m5pps;
+int sz_m5pps;
+char *m5freq;
+int sz_m5freq;
+char *m5clock;
+int sz_m5clock;
 {
   static long phase =-1;
   long raw, sleep, rawch;
@@ -35,23 +44,33 @@ int    *formhs;
     exit(0);
   }
 
-  if (source == S2) {
-    gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
-  } else {
-    if(rack&VLBA)
-      getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
-    else {
-      rte_sleep(10);
-      rte_ticks(&raw);
-      sleep=102-(raw%100+phase)%100;
-      if(phase >=0) {
-	rte_sleep(sleep); 
-      }
-      get4time(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
-      if(*formhs > -1 && *formhs < 100) {
-	phase=(100+*formhs-rawch%100)%100;
-      }
+  if (source == MK5) {
+    rte_sleep(10);
+    rte_ticks(&raw);
+    sleep=102-(raw%100+phase)%100;
+    if(sleep >=0) {
+      rte_sleep(sleep); 
     }
-  }  
+    get5btime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch,m5sync,
+	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock);
+    if(*formhs > -1 && *formhs < 100) {
+      phase=(100+*formhs-rawch%100)%100;
+    }
+  }  else if (source == S2) {
+    gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
+  } else if(rack&VLBA)
+      getvtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
+  else {
+    rte_sleep(10);
+    rte_ticks(&raw);
+    sleep=102-(raw%100+phase)%100;
+    if(sleep >=0) {
+      rte_sleep(sleep); 
+    }
+    get4time(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
+    if(*formhs > -1 && *formhs < 100) {
+      phase=(100+*formhs-rawch%100)%100;
+    }
+  }
 }
 

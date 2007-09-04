@@ -36,7 +36,12 @@ parse:
       out_recs=0;
       out_class=0;
 
-      strcpy(outbuf,"position?\n");
+      if(shm_addr->equip.drive[0] == MK5 &&
+	 (shm_addr->equip.drive_type[0] ==MK5B ||
+	  shm_addr->equip.drive_type[0] == MK5B_BS))
+	strcpy(outbuf,"pointers?\n");
+      else
+	strcpy(outbuf,"position?\n");
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 

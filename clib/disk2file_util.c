@@ -30,40 +30,40 @@ char *ptr;
 	  ierr=-200;
 	else
 	  strcpy(lcl->scan_label.scan_label,ptr);
+	m5state_init(&lcl->scan_label.state);
 	lcl->scan_label.state.known=1;
-	lcl->scan_label.state.error=0;
         break;
       case 2:
 	if(strlen(ptr)>sizeof(lcl->destination.destination)-1)
 	  ierr=-200;
 	else
 	  strcpy(lcl->destination.destination,ptr);
+	m5state_init(&lcl->destination.state);
 	lcl->destination.state.known=1;
-	lcl->destination.state.error=0;
         break;
       case 3:
 	if(strlen(ptr)>sizeof(lcl->start.start)-1)
 	  ierr=-200;
 	else
 	  strcpy(lcl->start.start,ptr);
+	m5state_init(&lcl->start.state);
 	lcl->start.state.known=1;
-	lcl->start.state.error=0;
         break;
       case 4:
 	if(strlen(ptr)>sizeof(lcl->end.end)-1)
 	  ierr=-200;
 	else
 	  strcpy(lcl->end.end,ptr);
+	m5state_init(&lcl->end.state);
 	lcl->end.state.known=1;
-	lcl->end.state.error=0;
         break;
       case 5:
 	if(strlen(ptr)>sizeof(lcl->options.options)-1)
 	  ierr=-200;
 	else
 	  strcpy(lcl->options.options,ptr);
+	m5state_init(&lcl->options.state);
 	lcl->options.state.known=1;
-	lcl->options.state.error=0;
         break;
       default:
        *count=-1;
@@ -119,6 +119,12 @@ struct disk2file_mon *lcl;
 
     output=output+strlen(output);
 
+    if(*count == 1 && (shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS))) {
+      (*count)++;
+    }
+
     switch (*count) {
     case 1:
       m5sprintf(output,"%ld",&lcl->scan_number.scan_number,
@@ -148,7 +154,6 @@ struct disk2file_mon *lcl;
       *count=-1;
    }
 
-   if(*count>0) *count++;
    return;
 }
 
@@ -314,7 +319,7 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
      long ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
-  int count, ierr;
+  int count, ierr, mk5b;
   int i;
 
   ptr=strchr(ptr_in,'?');
@@ -322,6 +327,10 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
     ierr=-911;
     goto error;
   }
+
+  mk5b=shm_addr->equip.drive[0] == MK5 &&
+    (shm_addr->equip.drive_type[0] ==MK5B ||
+     shm_addr->equip.drive_type[0] == MK5B_BS);
     
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -343,34 +352,65 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
-	if(m5sscanf(ptr,"%d",&lclm->scan_number.scan_number,
-		    &lclm->scan_number.state)) {
-	  ierr=-511;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5sscanf(ptr,"%d",&lclm->scan_number.scan_number,
+		      &lclm->scan_number.state)) {
+	    ierr=-511;
+	    goto error2;
+	  }
+	} else {
+	  if(m5string_decode(ptr,lclc->scan_label.scan_label,
+			     sizeof(lclc->scan_label.scan_label),
+			     &lclc->scan_label.state)) {
+	    ierr=-521;
+	    goto error2;
+	  }
 	}
 	break;
       case 2:
-	if(m5string_decode(ptr,lclc->scan_label.scan_label,
-			   sizeof(lclc->scan_label.scan_label),
-			   &lclc->scan_label.state)) {
-	  ierr=-512;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,lclc->scan_label.scan_label,
+			     sizeof(lclc->scan_label.scan_label),
+			     &lclc->scan_label.state)) {
+	    ierr=-512;
+	    goto error2;
+	  }
+	} else {
+	  if(m5string_decode(ptr,lclc->start.start,
+			     sizeof(lclc->start.start),
+			     &lclc->start.state)) {
+	    ierr=-522;
+	    goto error2;
+	  }
 	}
 	break;
       case 3:
-	if(m5string_decode(ptr,lclc->start.start,
-			   sizeof(lclc->start.start),
-			   &lclc->start.state)) {
-	  ierr=-513;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,lclc->start.start,
+			     sizeof(lclc->start.start),
+			     &lclc->start.state)) {
+	    ierr=-513;
+	    goto error2;
+	  }
+	  break;
+	} else {
+	  if(m5string_decode(ptr,lclc->end.end,
+			     sizeof(lclc->end.end),
+			     &lclc->end.state)) {
+	    ierr=-523;
+	    goto error2;
+	  }
 	}
-	break;
       case 4:
-	if(m5string_decode(ptr,lclc->end.end,
-			   sizeof(lclc->end.end),
-			   &lclc->end.state)) {
-	  ierr=-514;
-	  goto error2;
+	if(!mk5b) {	
+	  if(m5string_decode(ptr,lclc->end.end,
+			     sizeof(lclc->end.end),
+			     &lclc->end.state)) {
+	    ierr=-514;
+	    goto error2;
+	  }
+	} else {
+	  goto done;
 	}
 	break;
       default:

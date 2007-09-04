@@ -3,8 +3,14 @@
             Syntax:     disk2file=scan,destination,start,end,options
                         disk2file=abort,autoftp,string
 
-            Response:   disk2file/scan,destination,start,end,options,
-                                  scan_number,option,start_byte,end_byte,
+            Response:
+
+            MK5A:       disk2file/scan,destination,start,end,options,
+                                  scan_number,m5option,start_byte,end_byte,
+                                  status,current
+
+            MK5A:       disk2file/scan,destination,start,end,options,
+                                  m5option,start_byte,end_byte,
                                   status,current
 
 
@@ -14,14 +20,14 @@ Settable Parameters:
                       recent recording, "abort" to stop current
                       transfer, scan label for monitor response
           destination Filename to store the transfer data to, maximum 128
-                      characters, default uses Mark5A disk2file default. If
+                      characters, default uses Mark5 disk2file default. If
                       scan is "abort", this second optional parameter can
                       used to enable the "autoftp" feature. See the comments
                       section below for more details.
-          start       String to be passed to Mark5A scan_set command to define
+          start       String to be passed to Mark5 scan_set command to define
                       start of data transfer, see comments below, maximum 32
                       characters, for monitor, the start returned by scan_set?
-          end         String to be passed to Mark5A scan_set command to define
+          end         String to be passed to Mark5 scan_set command to define
                       end of data transfer, see comments below. maximum 32
                       characters, for monitor, the end returned by scan_set?
           options     Curently ignored, maximum 32 characters
@@ -33,15 +39,15 @@ Settable Parameters:
                       invoked, see comments
 
 Monitor-only parameters:
-          scan_number Mark5A scan number
-          option      Mark5A disk2file transfer option:
+          scan_number Mark5 scan number, not included for Mark5B
+          m5option    Mark5 disk2file transfer option:
                         n create file; error if existing file
                         w erase existing file, if any; create new file
                         a create file if necessary, or append to existing file
-          start_byte  Mark5A disk2file? start byte for transfer
-          end_byte    Mark5A disk2file? end byte for transfer
-          status      Mark5A disk2file? status: active or inactive
-          current     current Mark5A disk2file? byte of transfer
+          start_byte  Mark5  disk2file? start byte for transfer
+          end_byte    Mark5  disk2file? end byte for transfer
+          status      Mark5  disk2file? status: active or inactive
+          current     current Mark5  disk2file? byte of transfer
 
 Comments:
 The dis2file command can be used to transfer some or all of a recorded
@@ -99,15 +105,17 @@ Each use of autoftp will cause the most recent disk2file destination
 file to be handled even if a previous use of autoftp handled it.
 
 The start and end parameters are fully defined under the "scan_set
-command at "http://web.haystack.mit.edu/mark5/command5a.pdf". For
+command at "http://web.haystack.mit.edu/mark5/command5a.pdf".  For
 typical use start and stop are UT epochs of the form
 "####y###d##h##m##s" are used. The seconds field can include a decimal
 point and fractional part. If fields are omitted the first occuring
-instance in the scan that matches the specified fields is implied. As
-of this writing (Nov 2004), Mark5A programs in the field will refuse
-to accept times outside the actual recording available on disk. An
-update is planned that will use any data within the specified start
-and stop times. This will be more robust.
+instance in the scan that matches the specified fields is
+implied. Using UT epoches to collect data for near-realtime fringes
+tests is the most robust approach. It will allow eac station to select
+the subset of data that is required irrespective of where it is
+recorded on the disks. If the entire time span is not available
+(because for example of observing problems), the Mark 5 will return
+the subset that is.
 
 The "options" settable parameter is currently ignored, but is included
 for future expansion.

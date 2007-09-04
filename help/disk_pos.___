@@ -2,12 +2,16 @@
 
             Syntax:     disk_pos
 
-            Response:   disk_pos/write_pointer, read_pointer
+            Response:
+            MK5A:       disk_pos/write_pointer, read_pointer
+
+            MK5B:       disk_pos/write_pointer, read_pointer, read_stop
 
 
 Monitor-only parameters:
                 write_pointer   Current write pointer byte position
                 read_pointer    Current read pointer byte position
+                read_stop       Last byte of read, Mark 5B only
 
 Comments:
 This command reports the current position of the write and

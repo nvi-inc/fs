@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "../include/m5state_ds.h"
-#include "../include/disk_pos_ds.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 void disk_pos_mon(output,count,lcl)
 char *output;
@@ -22,6 +24,13 @@ struct disk_pos_mon *lcl;
   case 2:
     m5sprintf(output,"%Ld",&lcl->play.play,&lcl->play.state);
     break;
+  case 3:
+    if(shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+      m5sprintf(output,"%Ld",&lcl->stop.stop,&lcl->stop.state);
+      break;
+    }
   default:
     *count=-1;
   }
@@ -43,7 +52,7 @@ m5_2_disk_pos(ptr_in,lclm,ip) /* return values:
      long ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
-  int count, ierr;
+  int count, ierr, mk5b;
 
   ptr=strchr(ptr_in,'?');
   if(ptr == NULL) {
@@ -51,10 +60,13 @@ m5_2_disk_pos(ptr_in,lclm,ip) /* return values:
     goto error;
   }
 
-  lclm->record.state.known=0;
-  lclm->record.state.error=0;
-  lclm->play.state.known=0;
-  lclm->play.state.error=0;
+  mk5b=shm_addr->equip.drive[0] == MK5 &&
+    (shm_addr->equip.drive_type[0] ==MK5B ||
+     shm_addr->equip.drive_type[0] == MK5B_BS);
+
+  m5state_init(&lclm->record.state);
+  m5state_init(&lclm->play.state);
+  m5state_init(&lclm->stop.state);
 
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -76,16 +88,31 @@ m5_2_disk_pos(ptr_in,lclm,ip) /* return values:
       switch (++count) {
       case 1:
 	if(m5sscanf(ptr,"%Ld",&lclm->record.record, &lclm->record.state)) {
-	  ierr=-501;
+	  if(!mk5b)
+	    ierr=-501;
+	  else
+	    ierr=-511;
 	  goto error2;
 	}
 	break;
       case 2:
 	if(m5sscanf(ptr,"%Ld",&lclm->play.play, &lclm->play.state)) {
-	  ierr=-502;
+	  if(!mk5b)
+	    ierr=-502;
+	  else
+	    ierr=-512;
 	  goto error2;
 	}
 	break;
+      case 3:
+	if(!mk5b)
+	  goto done;
+	if(m5sscanf(ptr,"%Ld",&lclm->stop.stop, &lclm->stop.state)) {
+	  ierr=-513;
+	  goto error2;
+	}
+	break;
+	
       default:
 	goto done;
 	break;

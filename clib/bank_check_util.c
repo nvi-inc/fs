@@ -140,7 +140,7 @@ m5_2_rtime(ptr_in,lclm,ip) /* return values:
      long ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
-  int count, ierr;
+  int count, ierr, mk5b;
 
   ptr=strchr(ptr_in,'?');
   if(ptr == NULL) {
@@ -148,13 +148,22 @@ m5_2_rtime(ptr_in,lclm,ip) /* return values:
     goto error;
   }
 
+  mk5b=shm_addr->equip.drive[0] == MK5 &&
+    (shm_addr->equip.drive_type[0] ==MK5B ||
+     shm_addr->equip.drive_type[0] == MK5B_BS);
+
   m5state_init(&lclm->seconds.state);
   m5state_init(&lclm->gb.state);
   m5state_init(&lclm->percent.state);
+  m5state_init(&lclm->total_rate.state);
+
   m5state_init(&lclm->mode.state);
   m5state_init(&lclm->sub_mode.state);
   m5state_init(&lclm->track_rate.state);
-  m5state_init(&lclm->total_rate.state);
+  
+  m5state_init(&lclm->source.state);
+  m5state_init(&lclm->mask.state);
+  m5state_init(&lclm->decimate.state);
 
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -199,26 +208,50 @@ m5_2_rtime(ptr_in,lclm,ip) /* return values:
 	  lclm->percent.percent=0.0;
 	break;
       case 4:
-	if(m5string_decode(ptr,lclm->mode.mode,
-			   sizeof(lclm->mode.mode),
-			   &lclm->mode.state)) {
-	  ierr=-504;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,lclm->mode.mode,
+			     sizeof(lclm->mode.mode),
+			     &lclm->mode.state)) {
+	    ierr=-504;
+	    goto error2;
+	  }
+	} else { /* mk5b */
+	  if(m5string_decode(ptr,lclm->source.source,
+			     sizeof(lclm->source.source),
+			     &lclm->source.state)) {
+	    ierr=-534;
+	    goto error2;
+	  }
 	}
 	break;
       case 5:
-	if(m5string_decode(ptr,lclm->sub_mode.sub_mode,
-			   sizeof(lclm->sub_mode.sub_mode),
-			   &lclm->sub_mode.state)) {
-	  ierr=-505;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,lclm->sub_mode.sub_mode,
+			     sizeof(lclm->sub_mode.sub_mode),
+			     &lclm->sub_mode.state)) {
+	    ierr=-505;
+	    goto error2;
+	  }
+	} else { /* mk5b */
+	  if(m5sscanf(ptr,"%lx",&lclm->mask.mask, &lclm->mask.state)) {
+	    ierr=-535;
+	    goto error2;
+	  }
 	}
 	break;
       case 6:
-	if(m5sscanf(ptr,"%lf",&lclm->track_rate.track_rate,
-		    &lclm->track_rate.state)) {
-	  ierr=-506;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5sscanf(ptr,"%lf",&lclm->track_rate.track_rate,
+		      &lclm->track_rate.state)) {
+	    ierr=-506;
+	    goto error2;
+	  }
+	} else { /* mk5b */
+	  if(m5sscanf(ptr,"%d",&lclm->decimate.decimate,
+		      &lclm->decimate.state)) {
+	    ierr=-536;
+	    goto error2;
+	  }
 	}
 	break;
       case 7:

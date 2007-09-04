@@ -2,21 +2,46 @@
 
             Syntax:     data_check
 
-            Response:   data_check/mode,submode,time,offset,period,bytes,
+            Response:
+            Mark 5A:    data_check/mode,submode,time,offset,period,bytes,
                                    missing
-
+            Mark 5B:    data_check/source,time,code,frame,period,total,
+                                   offset,missing
 
 Settable parameters: None
 
 Monitor-only parameters:
             mode        Data mode: ?, st, mark4, vlba, tvg, SS
+                        (non-Mark 5B only)
             submode     Data submode: 8, 16, 32, 64, mark4, vlba
+                        (non-Mark 5B only)
             time        Data time tag read from first encountered header
             offset      Byte offset from current play pointer to beginning
                         of next 'track' frame header.
+                        (non-Mark 5B only)
             bytes       Total #bytes in recording between track frame headers.
+                        (non-Mark 5B only)
             missing     Number of missing bytes between last and current
-                         'data_check'
+                        'data_check', meaningless if immediately previous
+                        'data_check' was in a different scan, or if data
+                        are not formatted VLBI data. Null if <#missing bytes>
+                        cannot be calculated.
+
+            source      Data source: ext, tvg, or ? (not in Mark 5B format)
+                        (Mark 5B only)
+            code        Three digit date code
+	                (Mark 5B only)
+            frame       Frame number from first disk frame header, always zero
+                        on second tick.
+	                (Mark 5B only)
+            period      Fame header period (time units).
+	                (Mark 5B only)
+            total       Total recording rate (Mbps)
+	                (Mark 5B only)
+            offset      Byte offset from start-scan pointer to first disk
+                        frame header.
+	                (Mark 5B only)
+
 
 Comments: 
 If format is ?, the remaining fields are not valid.
@@ -30,8 +55,7 @@ http://www.haystack.mit.edu/tech/vlbi/mark5/docs/command5a.pdf.
 
 A future version may allow the position of the read pointer to be set
 explicitly, but this can be done with a mk5 SNAP command. To check at
-positon "pos", use:
+another position "pos", use:
 
-mk5=play off pos,data_check?
-
-This command does not work properly for Mark5B recorders.
+mk5=scan_set = : pos ;
+mk5=data_check?

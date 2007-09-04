@@ -26,12 +26,13 @@ if (nsem_test(NSEM_NAME) != 1) {
   exit(0);
 }
 
-  if (source == S2)
+  if (source == MK5 )
+    set5btime(formtime,delta);
+  else if (source == S2)
     sets2time(s2dev[s2type],formtime+delta);
+  else if (rack & VLBA)
+    setvtime((time_t) (formtime + delta));
   else
-    if (rack & VLBA)
-      setvtime((time_t) (formtime + delta));
-    else
-      set4time(formtime,delta);
+    set4time(formtime,delta);
 
 }
