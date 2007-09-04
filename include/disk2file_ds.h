@@ -24,10 +24,9 @@ struct disk2file_cmd {
 };
 
 struct disk2file_mon {
-  struct {
-    int scan_number;
-    struct m5state state;
-  } scan_number;
+
+  /* common parameters */
+
   struct {
     char option[33];
     struct m5state state;
@@ -48,4 +47,15 @@ struct disk2file_mon {
     long long current;
     struct m5state state;
   } current ;
+
+  /* m5a parameters */
+
+  struct {
+    int scan_number;
+    struct m5state state;
+  } scan_number;
+
+  /* m5b parameters */
+
+
 };

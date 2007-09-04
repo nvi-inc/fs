@@ -1,0 +1,17 @@
+mk5b_mode - set mk5b recording mode
+
+syntax: mk5b_mode=source,mask,decimation,fpdp
+Response: mk5b_mode/source,mask,decimation,fpdp
+Settable parameters:
+
+source:     data source: ext, tvg, or ramp. Default: ext.
+mask:       bit-stream mask, hex, for example: 0xf, default 0xffffffff.
+decimation: decimation ratio: 1, 2, 4, 8, or 16. Default: 1.
+fpdp:       fpdp mode, 1 or 2. Default: not commanded.
+
+Monitor only parameter: None
+
+Comments: mask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0,
+etc. The number of bits turned on in the bit-stream mask must be 2^n
+where 0 <= n <= 5, or the Mark5B will reject the command with an
+error.

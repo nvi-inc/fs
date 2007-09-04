@@ -10,18 +10,22 @@
 
 void rte2secs();
 
+extern char *form;
+
 int asksure( maindisp)  /* ask if sure */
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 {
 char	answer[4];
 int kfirst;
 int i,j;
+char buffer[80];
 
 nodelay ( maindisp, FALSE );
 echo ();
 
- mvwprintw( maindisp, ROWA+1, COL0,
-	    "Are you sure you want to re-synch the formatter (y/n) ?     ");
+ sprintf(buffer, "Are you sure you want to re-synch the %9s (y/n) ?      ",
+	 form);
+ mvwprintw( maindisp, ROWA+1, COL0, buffer);
 	  /* 0123456789012345678901234567890123456789012345678901234567890 */
  mvwscanw(  maindisp, ROWA+1, COL0+56, "%1s", answer );
 

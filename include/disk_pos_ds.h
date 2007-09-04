@@ -9,4 +9,8 @@ struct disk_pos_mon {
     long long play;
     struct m5state state;
   } play;
+  struct {
+    long long stop;
+    struct m5state state;
+  } stop;
 };

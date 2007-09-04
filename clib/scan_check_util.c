@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "../include/m5state_ds.h"
-#include "../include/m5time_ds.h"
-#include "../include/scan_check_ds.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 void scan_check_mon(output,count,lcl)
 char *output;
@@ -23,10 +24,22 @@ struct scan_check_mon *lcl;
     m5sprintf(output,"%s",lcl->label.label,&lcl->label.state);
     break;
   case 3:
-    m5sprintf(output,"%s",lcl->mode.mode,&lcl->mode.state);
+    if(shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+      m5sprintf(output,"%s",lcl->type.type,&lcl->type.state);
+    } else {
+      m5sprintf(output,"%s",lcl->mode.mode,&lcl->mode.state);
+    }
     break;
   case 4:
-    m5sprintf(output,"%s",lcl->submode.submode,&lcl->submode.state);
+    if(shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+      m5sprintf(output,"%d",&lcl->code.code,&lcl->code.state);
+    } else {
+      m5sprintf(output,"%s",lcl->submode.submode,&lcl->submode.state);
+    }
     break;
   case 5:
     m5time_encode(output,&lcl->start.start,&lcl->start.state);
@@ -35,16 +48,30 @@ struct scan_check_mon *lcl;
     m5time_encode(output,&lcl->length.length,&lcl->length.state);
     break;
   case 7:
-    m5sprintf(output,"%f",&lcl->rate.rate,&lcl->rate.state);
+    if(shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+      m5sprintf(output,"%f",&lcl->total.total,&lcl->total.state);
+    } else {
+      m5sprintf(output,"%f",&lcl->rate.rate,&lcl->rate.state);
+    }
     break;
   case 8:
     m5sprintf(output,"%Ld",&lcl->missing.missing,&lcl->missing.state);
+    break;
+  case 9:
+    if(shm_addr->equip.drive[0] == MK5 &&
+       (shm_addr->equip.drive_type[0] ==MK5B ||
+	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+      m5sprintf(output,"%s",lcl->error.error,&lcl->error.state);
+    } else {
+      *count=-1;
+    }
     break;
   default:
     *count=-1;
   }
   
-  if(*count > 0) *count++;
   return;
 }
 
@@ -58,7 +85,7 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
      long ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
-  int count, ierr;
+  int count, ierr, mk5b;
 
   ptr=strchr(ptr_in,'?');
   if(ptr == NULL) {
@@ -66,14 +93,25 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
     goto error;
   }
 
+  mk5b=shm_addr->equip.drive[0] == MK5 &&
+    (shm_addr->equip.drive_type[0] ==MK5B ||
+     shm_addr->equip.drive_type[0] == MK5B_BS);
+
   m5state_init(&lclm->scan.state);
   m5state_init(&lclm->label.state);
-  m5state_init(&lclm->mode.state);
-  m5state_init(&lclm->submode.state);
   m5state_init(&lclm->start.state);
   m5state_init(&lclm->length.state);
-  m5state_init(&lclm->rate.state);
   m5state_init(&lclm->missing.state);
+
+  m5state_init(&lclm->mode.state);
+  m5state_init(&lclm->submode.state);
+  m5state_init(&lclm->rate.state);
+
+  m5state_init(&lclm->type.state);
+  m5state_init(&lclm->code.state);
+  m5state_init(&lclm->total.state);
+  m5state_init(&lclm->error.state);
+
     
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -106,22 +144,40 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
 	}
 	break;
       case 3:
-	if(m5string_decode(ptr,&lclm->mode.mode,sizeof(lclm->mode.mode),
-		  &lclm->mode.state)) {
-	  ierr=-500-count;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,&lclm->mode.mode,sizeof(lclm->mode.mode),
+			     &lclm->mode.state)) {
+	    ierr=-500-count;
+	    goto error2;
+	  }
+	  if(0 == lclm->mode.state.known)
+	    goto done;
+	} else {
+	  if(m5string_decode(ptr,&lclm->type.type,sizeof(lclm->type.type),
+			     &lclm->type.state)) {
+	    ierr=-510-count;
+	    goto error2;
+	  }
+	  if(0==lclm->type.state.known)
+	    goto done;
 	}
-	if(0 == lclm->mode.state.known)
-	  goto done;
+
 	break;
       case 4:
-	if(m5string_decode(ptr,&lclm->submode.submode,
-			   sizeof(lclm->submode.submode),
-			   &lclm->submode.state)) {
-	  ierr=-500-count;
-	  goto error2;
+	if(!mk5b) {
+	  if(m5string_decode(ptr,&lclm->submode.submode,
+			     sizeof(lclm->submode.submode),
+			     &lclm->submode.state)) {
+	    ierr=-500-count;
+	    goto error2;
+	  }
+	} else {
+	  if(m5sscanf(ptr,"%d",&lclm->code.code,&lclm->code.state)) {
+	    ierr=-510-count;
+	    goto error2;
+	  }
 	}
-	break;
+ 	break;
       case 5:
 	if(m5time_decode(ptr,&lclm->start.start, &lclm->start.state)) {
 	  ierr=-500-count;
@@ -135,10 +191,17 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
 	}
 	break;
       case 7:
-	if(m5sscanf(ptr,"%f",&lclm->rate.rate, &lclm->rate.state)) {
-	  ierr=-500-count;
-	  goto error2;
-	}
+	if(!mk5b) {
+	  if(m5sscanf(ptr,"%f",&lclm->rate.rate, &lclm->rate.state)) {
+	    ierr=-500-count;
+	    goto error2;
+	  }
+	} else {
+	  if(m5sscanf(ptr,"%f",&lclm->total.total, &lclm->total.state)) {
+	    ierr=-510-count;
+	    goto error2;
+	  }
+	} 
 	break;
       case 8:
 	if(m5sscanf(ptr,"%Ld",&lclm->missing.missing, &lclm->missing.state)) {
@@ -146,6 +209,16 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
 	  goto error2;
 	}
 	break;
+      case 9:
+	if(!mk5b) {
+	  goto done;
+	} else {
+	  if(m5string_decode(ptr,&lclm->error.error,sizeof(lclm->error.error),
+			     &lclm->error.state)) {
+	    ierr=-510-count;
+	    goto error2;
+	  }
+	}
       default:
 	goto done;
 	break;
