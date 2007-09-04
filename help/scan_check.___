@@ -2,8 +2,11 @@
 
             Syntax:     scan_check
 
-            Response:   scan_check/scan,label,mode,submode,time,length,rate,
-                                   missing
+            Response:
+            Mark 5A:    scan_check/scan,label,mode,submode,time,length,rate,
+                                   missing 
+            Mark 5B:    scan_check/scan,label,type,code,time,length,total,
+                                   missing,error
 
 
 Settable parameters: None
@@ -12,19 +15,36 @@ Monitor-only parameters:
             scan        scan number
             label       scan label
             mode        Data mode: ?, st, mark4, vlba, tvg, SS
+	                (non-Mark 5B only)
             submode     Data submode: 8, 16, 32, 64, mark4, vlba
+	                (non-Mark 5B only)
             time        Data time tag read from first encountered header
             length      Scan length (seconds)
             rate        Track data rate, excludes parity bits; will always
                          be 0.125, 0.25, 0.5, 1, 2, 4, 8 or 16 (Mbps)
+	                (non-Mark 5B only)
             missing     Number of missing bytes
+
+            type        Data type: - (i.e., Mark 5B), tvg, SS
+	                (Mark 5B only)
+            code        Three digit date code
+	                (Mark 5B only)
+            total       Total recording rate (Mbps)
+	                (Mark 5B only)
+            error       Mark 5B error codes,
+                        (Mark 5B only)
 
 Comments: 
 If format is ?, the remaining fields are not valid.
 
 This uses the low-level Mark 5 scan_check? command. The displayed
 parameters are the output of this command. More information on the
-response format can be found in the Mark5A program documentation at
-http://www.haystack.mit.edu/tech/vlbi/mark5/docs/command5a.pdf.
+response format can be found in the Mark5A (and dimino) program
+documentation at
+http://www.haystack.mit.edu/tech/vlbi/mark5/software.html. Follow the
+links named "Mark 5A command set" and "Mark 5B command set (Rev
+1.12)".
 
-This command does not work properly for Mark5B recorders.
+The first form of the command above with parameters mode, submode, and
+rate is for non-Mark5B recorders. The second form of the command above
+with parameters type. code, and total is for Mark5B recorders.
