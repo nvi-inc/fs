@@ -87,6 +87,7 @@ int main(int argc, char * argv[])
       ip[4]=fail;
       break;
     case 1:
+    case 4:
     case 5:
       if(!is_init) {
 	cls_clr(ip[1]);
@@ -489,13 +490,14 @@ long ip[5];
     "data_check?",   189,
     "track_check?",  189,
     "scan_check?",   327,
-    "bank_set inc",  395,
-    "bank_set=inc",  395,
-    "bank_set = inc",  395,
+    "bank_set inc",  500,
+    "bank_set=inc",  500,
+    "bank_set = inc",  500,
     "",                0
   };
   char *ptr,*ptrcolon;
   int ierr, mode;
+  int centisec[6];             /* arguments of rte_tick rte_cmpt */
 
   secho[0]=0;
   mode=ip[0];
@@ -573,6 +575,10 @@ long ip[5];
 #ifdef MSG_DONTWAIT
     flags|=MSG_DONTWAIT;
 #endif
+    if(mode==4) {
+      rte_cmpt(centisec+2,centisec+4);
+      rte_ticks (centisec);
+    }
     if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
 #ifdef DEBUG
       (void) fprintf(stderr, /* Nope */ 
@@ -661,6 +667,10 @@ long ip[5];
 	goto try;
       goto error;
     }
+    if(mode==4) {
+      rte_ticks (centisec+1);
+      rte_cmpt(centisec+3,centisec+5);
+    }
     if(iecho) {
       int in, out;
       strcat(secho,"<");
@@ -687,6 +697,10 @@ long ip[5];
                       would require many more changes */
     cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
     out_recs++;
+    if(mode==4) {
+      cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
+      out_recs++;
+    }
 
     /* check errors */
 
