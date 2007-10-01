@@ -94,9 +94,10 @@ $print
 *labels <script name for label printing>
 *labels print2dymo
 *  This is to print to the dymo printer.
-*  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
-*  must be in your path, e.g. in /usr2/oper/bin,
-*  and executable, e.g., chmod a+x print2dymo
+*  Script "print2dymo" must be
+*    1.) In your path, e.g. in /usr2/oper/bin,
+*    2.) Executable, e.g., chmod a+x print2dymo
+*  This script has lines apropriate for FS Linux 5 and FS Linux 6.
 *
 * Tape label printer:
 * Enter the name of the label printer. If no name is specified, drudg
@@ -126,7 +127,7 @@ $print
 * Format:
 * label_size <ht> <wid> <rows> <cols> <top> <left>
 * Examples:
-*label_size   1.417 3.5     1     1    11.0   0.0    Dymo
+*label_size   1.417 3.5     1     1    0.0   0.0    Dymo
 *label_size  1.0   2.625  10     3     0.5   0.3125 Avery 5160
 *label_size  1.333 4.0     7     2     0.5   0.25   Avery 5162
 *label_size  2.0   4.0     5     2     0.5   0.25   Avery 5163
@@ -157,23 +158,30 @@ $misc
 * Station equipment may be specified in drudg. Equipment names are 
 * case sensitive. Allowed rack and recorder names are: 
 *
-* Racks    |  Recorders
-* -------- |  ---------
-* none     |  none     
-* Mark3A   |  Mark3A   
-* VLBA     |  VLBA     
-* VLBAG    |
-* VLBA4    |  VLBA4    
-* Mark4    |  Mark4
-* VLBA/8   |  S2
-* VLBA4/8  |  K4-1
-* K4-1     |  K4-2
-* K4-2     |  unused
-* K4-1/K3  |  Mark5A 
-* K4-2/K3  |  Mark5P           
-* K4-1/M4  |  Mk5APigW           
-* K4-2/M4  |             
-* LBA
+* Station equipment:
+* Station equipment may be specified in drudg or in the equip line below.
+*  Equipment names are NOT case sensitive.
+*  Allowed rack and recorder names are:
+*  Racks   |  Recorders
+*  --------+-----------
+*  none    |  none
+*  Mark3A  |  unused
+*  VLBA    |  Mark3A
+*  VLBAG   | VLBA
+*  VLBA/8  | VLBA4
+*  VLBA4/8 | Mark4
+*  Mark4   | S2
+*  VLBA4   | K4-1
+*  K4-1    | K4-2
+*  K4-2    | Mark5A
+*  K4-1/K3 | Mk5APigW
+*  K4-2/K3 | Mark5P
+*  K4-1/M4 | K5
+*  K4-2/M4 | Mark5B
+*  LBA     | unknown
+*  Mark5   |
+*  VLBA5   |
+*  unknown |
 *
 * Relationship between skedf.ctl and equip.ctl file names:
 *
@@ -197,13 +205,14 @@ $misc
 *
 * If the schedule file does not have equipment specified, then the 
 * equipment in the control file will be used.
-* A warning message is issued if the control file and schedule file 
+* A warning message is issued if the control file and schedule file
 * equipment are different.
 * Format:
 * equipment <rack> <recorder A> <recorder B>
 * Examples:
-*  equipment Mark4  Mark5A  none
-* equipment VLBA   VLBA  VLBA   
+* equipment Mark4  Mark5A  none
+* equipment VLBA   VLBA  VLBA
+*
 * If equipment_override is specified (uncommented below) then the
 * equipment in the control file is used. This then becomes your default
 * equipment regardless of what is in the schedule. This is a useful way of 
