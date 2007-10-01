@@ -158,7 +158,7 @@ parse:
 	  (shm_addr->scan_name.continuous > 0 &&
 	   rtime_mon.seconds.seconds < shm_addr->scan_name.continuous+200.0)) &&
 	  ((shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	   shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS)||
+	   shm_addr->equip.drive_type[shm_addr->select]== MK5B_BS)||
 	  shm_addr->equip.drive[shm_addr->select] != MK5) )){
 	long before, after;
 	unsigned isleep;
@@ -199,11 +199,15 @@ parse:
 	  skd_run("boss ",'n',ip);
 	}
 
+	/* wait 50 centiseconds before checking the first time */
+
+	  rte_sleep(51);
+
 	/* check for bank_set=inc completion */
 
 	done=0;
 	rte_rawt(&after);
-	while((!done) && ((401-(after-before))>0)) {
+	while((!done) && ((601-(after-before))>0)) {
 	  bank_set_check(&done,ip);
 	  if(ip[2]<0) {
 	    if(ip[1]!=0) {
