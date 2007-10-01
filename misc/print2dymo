@@ -1,0 +1,11 @@
+#!/bin/sh
+# This file contains commands to print to dymo.
+#  Script "print2dymo" must be
+#    1.) In your path, e.g. in /usr2/oper/bin,
+#    2.) Executable, e.g., chmod a+x print2dymo
+#  This script has lines apropriate for FS Linux 5 and FS Linux 6.
+# To use this file, uncomment the appropriate line.
+# Below is for FS linux 6
+#perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 45 translate\n";print;goto LINE;}' /tmp/DRlab.tmp |lpr -Pdymo
+#  Below is for FS linux 5
+lpr -Pdymo /tmp/DRlab.tmp
