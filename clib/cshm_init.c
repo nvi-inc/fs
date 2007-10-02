@@ -358,6 +358,18 @@ void cshm_init()
  
   shm_addr->ntp_synch_unknown=0;
 
+  shm_addr->vsi4.config.value=-1;
+  shm_addr->vsi4.config.set=0;
+  shm_addr->vsi4.pcalx.value=-1;
+  shm_addr->vsi4.pcalx.set=0;
+  shm_addr->vsi4.pcaly.value=-1;
+  shm_addr->vsi4.pcaly.set=0;
+
+  m5state_init(&shm_addr->mk5b_mode.source.state);
+  m5state_init(&shm_addr->mk5b_mode.mask.state);
+  m5state_init(&shm_addr->mk5b_mode.decimate.state);
+  m5state_init(&shm_addr->mk5b_mode.fpdp.state);
+
   return;
 }
 
