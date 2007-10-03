@@ -302,9 +302,11 @@ long ip[5];                           /* ipc parameters */
 		  -lcl.devices[i].center;
 		break;
 	      default:
+/*
 		printf(" user device sideband %d ifchain %d \n",
 		      shm_addr->user_device.sideband[lcl.devices[i].ifchain-1],
-		       lcl.devices[i].ifchain);
+		      lcl.devices[i].ifchain);
+*/
 		ierr=-302;
 		goto error;
 		break;
