@@ -145,7 +145,12 @@ char *ptr;
 	} else if(strcmp(ptr,"formvc")==0) {
 	  for(i=0;i<MAX_ONOFF_DET;i++)
 	    itpis_test[i]=0;
-	  if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
+	  if(shm_addr->equip.rack==MK4&&shm_addr->equip.rack_type==MK45 &&
+	     shm_addr->equip.drive[0]==MK5 &&
+	     (shm_addr->equip.drive_type[0]==MK5B ||
+	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	    mk5vcd(itpis_test); 
+	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
 	  else if(shm_addr->equip.rack==MK3) {
 	    if(shm_addr->imodfm==0||shm_addr->imodfm==2)
@@ -166,7 +171,12 @@ char *ptr;
 	} else if(strcmp(ptr,"formif")==0) {
 	  for(i=0;i<MAX_ONOFF_DET;i++)
 	    itpis_test[i]=0;
-	  if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
+	  if(shm_addr->equip.rack==MK4&&shm_addr->equip.rack_type==MK45 &&
+	     shm_addr->equip.drive[0]==MK5 &&
+	     (shm_addr->equip.drive_type[0]==MK5B ||
+	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	    mk5vcd(itpis_test); 
+	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
 	  else if(shm_addr->equip.rack==MK3) {
 	    if(shm_addr->imodfm==0||shm_addr->imodfm==2)
@@ -231,18 +241,32 @@ char *ptr;
 	  goto done;
 
 	} else if(strcmp(ptr,"formbbc")==0) {
-	  if(shm_addr->equip.rack==VLBA4)
+	  if(shm_addr->equip.rack==VLBA4&&shm_addr->equip.rack_type==VLBA45 &&
+	     shm_addr->equip.drive[0]==MK5 &&
+	     (shm_addr->equip.drive_type[0]==MK5B ||
+	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	    mk5bbcd(lcl->itpis); 
+	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&lcl->itpis);
 	  else if(shm_addr->equip.rack==VLBA)
 	    vlbabbcd(&lcl->itpis);
 	  for (i=0;i<MAX_BBC*2;i++)
-	    if(lcl->itpis[i]==1)
+	    if(lcl->itpis[i]==1) {
 	      strncpy(lcl->devices[i].lwhat,lwhat[i],2);
+/*
+	      printf(" device %2s \n",lcl->devices+i);
+*/
+	    }
 	  goto done;
 	} else if(strcmp(ptr,"formif")==0) {
 	  for(i=0;i<MAX_ONOFF_DET;i++)
 	    itpis_test[i]=0;
-	  if(shm_addr->equip.rack==VLBA4)
+	  if(shm_addr->equip.rack==VLBA4&&shm_addr->equip.rack_type==VLBA45 &&
+	     shm_addr->equip.drive[0]==MK5 &&
+	     (shm_addr->equip.drive_type[0]==MK5B ||
+	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	    mk5bbcd(itpis_test); 
+	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&itpis_test);
 	  else if(shm_addr->equip.rack==VLBA)
 	    vlbabbcd(&itpis_test);
