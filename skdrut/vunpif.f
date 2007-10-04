@@ -111,17 +111,6 @@ C  1.2 IF input
             write(lu,'("VUNPIFD05 - Invalid IF input ",a)') cout(1:nch)
           endif
         endif
-C       else ! not there, use last 2 char of ref <<<<<<<<<<< kludge
-C         nch = trimlen(cifref(id))
-C         if (cifref(id)(nch-1:nch).eq.'1A'.or.
-C    .        cifref(id)(nch-1:nch).eq.'2A'.or.
-C    .        cifref(id)(nch-1:nch).eq.'1N'.or.
-C    .        cifref(id)(nch-1:nch).eq.'2N') then ! 2 char
-C           idum = ichmv_ch(lin(id),1,cifref(id)(nch-1:nch))
-C         else ! 1 char
-C           idum = ichmv_ch(lin(id),1,cifref(id)(nch:nch))
-C         endif
-C       endif
 
 C  1.3 Polarization 
 

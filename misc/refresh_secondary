@@ -1,0 +1,9 @@
+#!/bin/sh
+if [[ -n `mdadm --detail /dev/md0 /dev/md1 /dev/md2 | grep /dev/hdc` ]]; then
+        echo "ERROR: \"Secondary\" disk /dev/hdc is already active !!"
+        exit 1
+fi
+echo "Adding \"Secondary\" disk /dev/hdc to RAID arrays"
+mdadm /dev/md0 -a /dev/hdc1
+mdadm /dev/md1 -a /dev/hdc5
+mdadm /dev/md2 -a /dev/hdc

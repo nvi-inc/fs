@@ -154,8 +154,8 @@ C If problems, quit.
           if (ihdpos(1,i,istn,1).ne.0) ih=ih+1
         enddo
         if (ih.eq.0) then
-          write(luscn,9211) (lantna(i,istn),i=1,4)
-9211      format(/'POINT03 - No head position information for ',4a2/)
+          write(luscn,9211) cantna(istn)
+9211      format(/'POINT03 - No head position information for ',a/)
           return
         endif
       end if
@@ -258,7 +258,7 @@ C*** Removed Haystack
 	     if (istin.eq.1) then !NRAO 85-3
 	       if (.not.kintr) then
 		 write(lu_outfile,9301) cexper,iyr,
-     .           cstnna(istn),lstcod(istn),idayr,idayr,iyr
+     .           cstnna(istn),cstcod(istn),idayr,idayr,iyr
 9301             format('--',1x,a,2x,i4,2x,a,2x,a1/
      .                  '-- Obs.List from day ',i3/
      .                  '-- OBSLIST DAY:',i3,'  YR: ',i4/
@@ -299,11 +299,10 @@ C
 9501              format(1x,4a2,6x,i2,':',i2,':',f9.6,2x,a1,i2,':',
      .            i2,':',f8.5,20x,'2000.0')
 		enddo
-		idum = ichmv(ldsn,1,lstnna(1,istn),4,2)
 		dut = 0.0
 		eeq = 0.0
-		write(lu_outfile,9502) cexper,ldsn,iyr,idayr,ihr,
-     .          imin,isc,dut,eeq
+		write(lu_outfile,9502) cexper,cstnna(istn)(3:4),
+     >           iyr,idayr,ihr, imin,isc,dut,eeq
 9502            format('*OBSEQ WBRADIOASTRY ',a,5x,a2,10x,i4,'/',
      .          i3,1x,i2,':',i2,':',i2,2x,f7.5,2x,f7.5,1x,'2000')
 		ihrp=ihr

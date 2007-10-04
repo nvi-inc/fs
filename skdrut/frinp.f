@@ -20,6 +20,9 @@ C  OUTPUT:
 C     IERR - error number
 ! function
       integer iwhere_in_string_list
+      integer igetstatnum
+      integer ias2b,igtfr
+
 C
 C  LOCAL:
       integer ix,n
@@ -49,13 +52,14 @@ C  LOCAL:
       equivalence (cbar,lbar),(cfmt,lfmt)
       logical kfound
 
-      integer ias2b,igtfr,igtst
-
       character*1 lchar
       integer*2   itemp
       equivalence (lchar,itemp)
       character*2 cifinptmp
       integer ilen2
+      character*1 c1
+      equivalence (c1,lid)
+
 
       save itrk_map
 C
@@ -250,9 +254,10 @@ C
 C     3. Next, LO type entries, from the "L" lines.
 C
       IF  (ITYPE.EQ.2) THEN  !LO entry
-        IF  (IGTST(LID,ISTN).EQ.0) THEN  !error
-          write(lu,'(a,a2,a,/,40a2)')
-     >     "FRINP03 - Station ",lid,
+        istn=igetstatnum(c1)
+        IF  (istn.EQ.0) THEN  !error
+          write(lu,'(a,a,a,/,40a2)')
+     >     "FRINP03 - Station ",c1,
      >     " not selected.  LO entry on the following line ignored:",
      >    (ibuf(i),i=2,ilen)
           IERR = MAX_STN
@@ -376,7 +381,6 @@ C            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
           enddo
         endif
-!        idum= ICHMV(LNAFRQ(1,ICODE),1,LNA,1,8)
         cnafrq(icode)=cna
         LCODE(ICODE) = LC
       END IF  !name entry

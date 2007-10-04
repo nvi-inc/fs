@@ -49,8 +49,6 @@ C  LOCAL:
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
 C
 C    Initialize.
-!      CALL IFILL(Ls2M,1,16,oblank)
-!      CALL IFILL(Ls2D,1,8,oblank)
       do in=1,max_track
         cp(in)=' '
         cchref(in)=''
@@ -74,7 +72,6 @@ C
         write(lu,'("VUNPS2M01 - Record mode name too long")')
         iret=-1
       else
-!        IDUMY = ICHMV_ch(LS2M,1,cout(1:NCH))
         cs2m=cout(1:nch)
       END IF  !
 C
@@ -90,7 +87,6 @@ C
         write(lu,'("VUNPS2M01 - data source name too long")')
         iret=-1
       else
-!        IDUMY = ICHMV_ch(LS2D,1,cout(1:NCH))
          cs2d=cout(1:nch)
       END IF  !
 C

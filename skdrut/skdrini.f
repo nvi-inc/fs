@@ -27,6 +27,8 @@ C 020713 nrv Add Mk5 recorder type
 C 021111 jfq Add LBA rack type
 C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
+! 2007May25  JMG   Added Mark5B recorder, MK4V and VLAB4V racks.
+! 2007Jul02  JMG. Removed initializaiotn of fluxes. Done elsewhere.
 C
 C LOCAL
       integer ix,ib,is,i,j,l,itx,ity,itz,idef,iy,ir
@@ -133,7 +135,8 @@ C  In statn.ftni
         do j=1,max_frq
           bitdens(i,j)=0.0
           tape_dens(i,j)=0.0
-          do l=1,max_chan
+          cnahdpos(i,j)=" "
+          do l=1,max_bbc
              ibbc_present(l,i,j)=0
           end do
         enddo
@@ -152,47 +155,6 @@ C  In freqs.ftni
       NCELES = 0
       NSATEL = 0
       nband = 0
-      do ib=1,max_band
-        do is=1,max_sor
-          nflux(ib,is)=0
-          cfltype(ib,is)=' '
-          do j=1,max_flux
-            flux(j,ib,is)=0.0
-          enddo
-        enddo
-      enddo
-
-      crack_type(1) = 'none'
-      crack_type(2) = 'Mark3A'
-      crack_type(3) = 'VLBA'
-      crack_type(4) = 'VLBAG'
-      crack_type(5) = 'VLBA/8'
-      crack_type(6) = 'VLBA4/8'
-      crack_type(7) = 'Mark4'
-      crack_type(8) = 'VLBA4'
-      crack_type(9) = 'K4-1'
-      crack_type(10) = 'K4-2'
-      crack_type(11) = 'K4-1/K3'
-      crack_type(12) = 'K4-2/K3'
-      crack_type(13) = 'K4-1/M4'
-      crack_type(14) = 'K4-2/M4'
-      crack_type(15) = 'LBA'
-      crack_type(16) ='unknown'
-
-      crec_type(1) = 'none'
-      crec_type(2) = 'unused'
-      crec_type(3) = 'Mark3A'
-      crec_type(4) = 'VLBA'
-      crec_type(5) = 'VLBA4'
-      crec_type(6) = 'Mark4'
-      crec_type(7) = 'S2'
-      crec_type(8) = 'K4-1'
-      crec_type(9) = 'K4-2'
-      crec_type(10) = 'Mark5A'
-      crec_type(11) = 'Mk5APigW'
-      crec_type(12) = 'Mark5P'
-      crec_type(13) = 'K5'
-      crec_type(14) = 'unknown'
 
 C Initialize canned roll defs
 C

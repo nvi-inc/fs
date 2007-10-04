@@ -1,21 +1,40 @@
-File: /usr2/fs-9.9.2/misc/fs9902up.txt  Version: 0.3  Date: 061115
+File: /usr2/fs-9.10.0/misc/fs9902up.txt  Version: 0.5 Date: 071001
 
 I. Introduction
 
 This memo is divided into six sections:
 
    I.   Introduction.
-   II.  Changes Since Version 9.9.0
+   II.  Changes Since Version 9.7.7
    III. Installation
    IV.  Transferring The Update Archive By DOS Floppy
 
 Please print this notice and read it carefully before installing the
-new version.
+new version.  The biggest operational change in this version is that
+labels for Mark5 disk modules are printed after the data has been
+recorded, not during the experiment preparation phase.  Please note
+option (6) in DRUDG is only for tape labels.  Mark5 disk module labels
+are printed from the DRUDG command line using the experiment log file.
+Please see item (1) in DRUDG changes section below for more details.
 
 This version is intended for all stations.  We urge all stations to
-upgrade as soon as practical.
+upgrade as soon as practical.  In addition to support for Mark5 disk
+labels, this version includes improvements that resolve issues that
+required .snp and .prc to be made at GSFC for some geodetic
+experiments.  It also includes an implementation of an "autoftp"
+functionality for eVLBI that will be useful for EVN stations.  This
+version is intended to be installed as an update for 9.7.7.
+Relatively few local customizations are required for this update.
 
-II. Changes Since Version 9.9.0
+Please note that the FS "data_check" and "scan_check" commands do not
+work with Mark5B.  The changes of the Mark5B versions of the commands
+that are used to support these FS commands were discovered too late in
+the development process for this FS release to support them.  However
+Mark5B recorders are not in extensive use in the field yet.  Therefore
+it was felt that this issue could wait until the next FS patch release
+in a few weeks time.
+
+II. Changes Since Version 9.7.7
 
 This section is divided into three sub-sections: A. Changes in the FS,
 B. Changes in DRUDG, and C. Known FS Bugs.  Each sub-section starts
@@ -24,46 +43,663 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of the FS changes.
+The following is a summary of the FS changes. Items after (8) were
+added after 9.8.0.  Items after 12 were added after 9.8.1. Items 2 and
+7 were updated for 9.9.0. Item 34 was added after 9.9.1.
 
-1. The back_check command was added to the "ready_disk" procedure for
-   Mark5 recorders.
+1. Numerous bug fixes
+2. "gnplt" update
+3. "msg" doesn't dominate CPU in "auto-start" mode
+4. "form" command added to "postob" for Mark IV formatters
+5. PFMED now handles long lines in procedures
+6. Mark IV "form" command checks for possible bit slips
+7. "msg" expanded to include Type D & E modules
+8. "systests" system test utilities added
+9. Support for different Mark IV Decoder message terminators.
+10. Fixes for bugs in "systests".
+11. Add 4pcalports command so that pcalports can be accessed when
+    not using Mark IV formatter.
+12. Changed margin for bank change to 200 seconds.
+13. Existing Mark5 commands generalized to work with Mark5B, new
+    parameter length limits used through-out.
+14. scan_name/disk_record updated to use station name for scan id.
+15. "systests" utilities updated with new utility and features
+16. "logpl" now puts use "/tmp" as the directory for printer output
+    file.
+17. "change_pack" procedure comments changed for key switch problem
+18. VEX parser/writer now include nutation keywords, horizon map and
+    comments fixed in writer.
+19. Pointing model analysis expanded to 30 parameters
+20. Maximum tcal values per band in a .rxg file increased to 600.
+21. Bug in in2net that caused it to reconnect even if there was
+    already a successful connection was fixed.
+22. Low-level "mk5" command handles defined syntax maximum lengths
+    for Mark5 responses.
+23. "pfmed" now respects write-only files
+24. "terminate" command checks for disk recording active before ending.
+25. "last_check" commanded added for re-display of last Mark5 data
+    quality check
+26. "fs.prompt" now accepts and uses the "wish" "-geometry" command
+    line option.
+27. Arbitrary length (512 character) SNAP procedure arguments now
+    supported
+28. New "autoftp" feature part of "disk2file" command.
+29. New "file_append" utility script.
+30. New "greplog" standard procedure for searching log from command
+    prompt
+31. "msg" places temporary file on "/tmp".
+32. Time variation and default flux for Cas-A updated.
+33. ONOFF "SIG" record formatting improved.
+34. The bank_check command was added to the "ready_disk" procedure for
+    Mark5 recorders.
 
 A more detailed discussion of these changes follows.
 
-1. The back_check command was added to the "ready_disk" procedure for
-   Mark5 recorders.  This change helps assure that the correct disk
-   VSN is recorded in the log for the first observation in case any
-   manipulation of the installed disk packs is necessary during the
-   "halt" that this procedure executes.
+1. Numerous bug fixes. These include: simple "=" versions of:
+   "disk_record=", "disk2file=",a nd "in2net=" no longer cause an
+   abend; printing of time fields in "data_check" and "scan_check"
+   fixed; errors from previous command are no longer reported by
+   "scan_name" or other commands. If bugs that you are aware have not
+   been fixed, please inform Ed (weh@ivscc.gsfc.nasa.gov).
+
+2. "gnplt" update.  Andrea Orlati has provided an improved version of
+   "gnplt" with many bugs fixed.  Some stations may already be using
+   the updated version, but this is the first time it has been
+   distributed with the FS.  Notable bugs fixed:
+
+   (1) Fixed a "division by zero" error that, under some
+       circumstances, could have occurred when plotting the TCal(K)
+       table versus frequency.
+
+   (2) The operation that plots the TCal(K) table written inside the
+       working file versus frequency ("TCal(K) curve in file"
+       operation under "Tools" menu) did not correctly handle cases
+       N=0 and N=1, where N is the number of entries for a
+       polarization.  It also didn't clear the curve if the widget was
+       clicked again.
+
+   (3) Fixed bugs that were reported when trying to "Update Working
+       File" after a TCal(K) curve versus frequency was obtained.
+       GNPLT always wrote the TCal(K) table as it was the result of an
+       average even if the curve was calculated as the median.  Thus
+       the values written to the file differed from what was displayed
+       in this case..  Fine tuning of TCal(K) could be affected by
+       this in same cases.  GNPLT also failed to update the TCal(K) if
+       all the entries of the old table were not inside the frequency
+       boundaries (between minimum and maximum frequency value) of the
+       new one.  Of course this behavior was more probable if the
+       original table had just one entry.  This is the case, reported
+       by many stations, that permitted discovery of the bug.
+
+   (4) GNPLT allowed to "Update Working file" (under "Tools" menu)
+       even if the TCal(K) curve was not fitted yet.  In this way the
+       updated file was the exact copy of the original one.  This
+       operation will now remain disabled until a curve is obtained
+       and the message: "Please, fit for TCal first" is displayed in
+       the status bar.
+
+   (5) An error in the reading of spillover tables from .rxg files
+       both in the FS and "gnplt" ("gndat" actually) was fixed.
+
+   (6) Under the Help menu is added an AboutBox in which it will be
+       displayed the GNPLT version.  This will allows the user to
+       realize easily if he's running an up to date version of GNPLT.
+	
+   (7) A right click when over a point draws a line connecting the
+       points with the same source and time/frequency depending on the
+       selected X-axis quantity.  This line was not deleted when
+       replotting.  Fixed.
+       
+   (8) The new fitted curves for Tcal versus frequency and for Gain
+       versus elevation are now displayed as red dashed lines.  This
+       should make them more visible.
+
+   Please inform Ed (weh@ivscc.gsfc.nasa.gov) and Andrea
+   (a.orlati@ira.cnr.it) of any other bugs you know of or encounter.
+
+3. "msg" doesn't dominate CPU in "auto-start" mode. An extra delay was
+   added to the "process_logfile" subprocess. This seems to reduce the
+   system thrashing without compromising the functionality.
+
+4. "form" command added to "postob" for Mark IV formatters. This
+   command was added to help identify cases where a bit slip may have
+   occurred.
+
+5. "pfmed" now handles long lines in procedures. Line lengths up to
+   about 512 characters are now supported. The new procedure logging
+   facility in "boss" was changed to support longer lines. This was an
+   issue primarily with long Mark IV Decoder commands (about 100
+   characters). All other instances of problems with long lines in the
+   FS have been fixed.
+
+6. Mark IV "form" command checks for possible bit slips. The "form"
+   command will check (and report) the error bit combination (0x600)
+   that indicates a bit slip may have happened.
+
+7. "msg" expanded to include Type D & E modules.  The types of modules
+   in the disk inventory were increased.  The tape inventory (and
+   recorder humidity) entries were eliminated.  The format of the
+   e-mail message for media information was changed to hopefully
+   improve readability.
+
+8. "systests" system test utilities added. An initial version of a
+   suite of SNAP procedures and data analysis and plotting scripts was
+   added.  See "/usr2/fs/systests/systests.txt" for more information.
+
+9. Support for different Mark IV Decoder message terminators.  At
+   least part, if not all the communications problems between the FS
+   and the Mark IV Decoder appear to be due to an interaction between
+   the terminating character used for messages sent to the Mark IV
+   Decoder and MATs in the system.  As far as we can tell, these
+   problems are eliminated by changing to use "return" (0x0d) instead
+   of $" (0x24) as the terminator.  The FS now includes a feature in
+   the "equip.ctl" control file to select which of the three
+   terminators that the Decoder supports should be used (the third is
+   "%" (0x25).  All stations should switch over to using "return"
+   immediately.  However, if it is discovered that this is causing
+   other worse problems, it will be possible in the field to change
+   back to the old terminator.
+
+10. Fixes for bugs in "systests". Some minor procedure and script bugs
+    in "systests" were fixed.  If you are using the tests, updating
+    them is recommended.
+
+11. Add 4pcalports command so that pcalports can be accessed when not
+    using Mark IV formatter. This allows the "4pcalports" command
+    (instead of "pcalports") to be used in procedure files that are
+    shared between Mark IV and non-Mark IV configurations.
+
+12. Changed margin for bank change to 200 seconds. The amount of
+    remaining disk space beyond the minimum require for recording
+    before a bank change is forced was increased from 5 to 200
+    seconds.  This is intended to reduce the number of cases where not
+    enough room is left for a scan because rtime? returns an
+    under estimate because one or more disks is slow.
+
+13. Existing Mark5 commands generalized to work with Mark5B, new
+    parameter length limits used through-out.  The commands that
+    communicate with the Mark5 have been generalized to support both
+    Mark5A and Mark5B.  The changed commands are: data_check,
+    bank_check, bank_status, and scan_check. Only these commands
+    needed to be updated at this time.  However, because of additional
+    changes made to the Mark5B data_check? and scan_check? commands,
+    the FS data_check and scan_check commands will not work correctly
+    with Mark5B.  It is expected in the future that additional changes
+    will be made to correct this situations.  In addition all Mark5
+    command were generalized to support the following rules for Mark5
+    communications:
+
+    (1) The maximum total message size should 256 characters,
+
+    (2) Scan label fields can have a maximum of 64 characters.
+
+    (3) Path/file name fields can be a maximum of 128 characters.
+
+    (4) All other field lengths are limited to 32 characters.
+
+    The only Mark5 responses that currently seem to violate these
+    rules are for the: "SS_rev1?", "SS_rev2?", "OS_rev1?", and
+    "OS_rev2?" query responses. These currently appear to be about 160
+    characters long. However, they currently only accessible with the
+    "mk5=..." command and aren't built into any other SNAP commands.
+
+14. scan_name/disk_record updated to use station name for scan id. The
+    scan_name and disk_record commands were modified to use the new
+    scan_label format: session_station_scan.
+
+15. "systests" utilities updated with new utility and features. 
+
+    (1) A new script, "chk1024", has been added for analyzing the
+        results of "v/chk1024.snp" test schedules.  The
+        "v/chk1024.snp" schedules and associated procedure libraries
+        were developed by Dan Smythe to test Mark 5 recorders in
+        different modes including 1 Gb/s.  The analysis script is
+        provided to assist in evaluating these tests and prints a
+        summary of the results.  More detailed results can be obtained
+        using various command line options (try "chk1024 -h" for
+        details).  A description of the procedure for doing this test
+        in included in the /usr2/fs/systests/systests.txt file.  The
+        "v/chk1024.snp" schedules and "v/chk1024.prc" procedures are
+        included in the systests distribution archive for convenience.
+
+    (2) The "pcalamp" script now includes command line options "-p",
+        "-i", "-u",and "-l". The "-p" option selects power units in
+        the plots.  This makes the results more directly comparable to
+        correlator autocorrelation plots.  In addition the plots now
+        have a slightly different vertical scale.  This raises the
+        "zero" level slightly above the bottom of the plots.  As a
+        result, it is easier to see when the data are zero as opposed
+        to missing.  The "-i" option causes the plots to individually
+        auto-scaled.  The "-l" and "-u" options can be used to set
+        lower and upper limits, respectively, for the auto-scaling.
+        Any value below the "-l" value and any value above the "-u"
+        will not be considered when auto-scaling the plots, either
+        globally or individually.  This provides some means to remove
+        outlier points from the plots.  The limits are specified in
+        the units of the vertical axis, voltage or power, whichever is
+        in use.
+
+    (3) The "plotlog" script has been updated to also plot the "setcl"
+        time formatter/fs time difference.  In addition to its use for
+        system tests, the "plotlog" script is useful for plotting and
+        verifying the ancillary data collected in experiment logs.
+        The data selected to plotting is oriented toward the needs of
+        geodesy sessions. Additional data selections can easily be
+        added for both astronomy and/or geodesy users.  Please send Ed
+        (weh@ivscc.gsfc.nasa.gov) any requests.
+
+16. "logpl" now puts use "/tmp" as the directory for printer output
+    file.  The destination directory for printer output file in the
+    "File|I/O Setup" dialogue box is now "/tmp".
+
+17. "change_pack" procedure comments changed for key switch problem.
+    The warning about the key switch was expanded to include the issue
+    that turning it to locked will cause the Mark5 to stop recording
+    momentarily. The fact that doing this more than once will cause
+    the Mark5 to fail was not included.
+
+18. VEX parser/writer now include nutation keywords, horizon map and
+    comments fixed in writer.  Nutation keys words: "nut_ref_epoch",
+    "num_nut_points", "nut_interval", "delta_eps", "delta_psi", and
+    "nut_model" were added to the "$EOP" lock for the parser and the
+    writer. The handling of "horizon_map_az" and "horizon_map_el" and
+    comments in the writer was fixed.
+
+19. Pointing model analysis expanded to 30 parameters.  This only
+    affects stations that use the FS software tools for analyzing
+    pointing data and/or applying corrections to the antenna pointing.
+    This change was looming for some time, but was finally forced by
+    the form of Shanghai's pointing model.  This affects programs
+    "error" and "pdplt" and the subroutines: "gmodl.f", "gmodl.c",
+    "flt0.f", "flt.c", "fln.f", and fln.c".  FORTRAN code must use
+    "flt1.f" and "fln1.f" to access more than 20 parameters.
+    Otherwise the changes are all backward compatible with 20
+    parameter models as long as any unused model parameters, in
+    particular 19 and 20, have "zero" value control flags in your
+    pointing model control file.  However for simplicity and future
+    compatibility, stations should convert to 30 parameter models as
+    soon as is feasible.  Instructions for how make this conversion
+    can be found in /usr2/fs/misc/30params.txt.
+
+20. Maximum tcal values per band in a .rxg file increased to 600. The
+    limit on the sum of left and right tcal values in a single rxg
+    file was increased to 600.  This was requested by Michael
+    Lindqvist at Onsala.
+
+21. Bug in in2net that caused it to reconnect even if there was
+    already a successful connection was fixed.  Not reconnecting when
+    the target connection is already open is intended to avoid
+    re-connecting when it isn't necessary.
+
+22. Low-level "mk5" command handles defined syntax maximum lengths for
+    Mark5 responses.  As of April 2006, it was agreed between Haystack
+    and GSFC to follow these rules for Mark5 responses:
+
+    (1) The maximum field length should be 32 characters, exceptions
+        noted in (3) and (4).
+
+    (2) The maximum total message size should 256 characters.
+
+    (3) Scan label fields can have a maximum of 64 characters.
+
+    (4) Path/file name fields can be a maximum of 128 characters.
+
+    If the "mk5" command receives a response longer than about 490
+    characters, it will be truncated to that length when it is logged
+    and displayed.
+
+23. "pfmed" now respects write-only files.  If a user has only read
+    access to a procedure file, it will be possible to view the
+    contents, but not modify it.  Please note that in order to use a
+    procedure library in the FS (e.g. with the "proc= command as
+    opposed to just in "pfmed"), read-write permission is required.
+
+24. "terminate" command checks for disk recording active before
+    ending.  If the Mark5 recorder is recording, as specified by the
+    most recent "disk_record=..." command, the "terminate" command
+    will not allow the user to terminate unless the recording is
+    stopped first or the user specifies the command as
+    "terminate=disk_record_ok".  Appropriate error messages are
+    displayed explaining how to proceed if terminating is prevented by
+    the active disk recording.
+
+25. "last_check" commanded added for re-display of last Mark5 data
+    quality check.  This new command can be used to display the
+    results, including the highest level error message if any, of the
+    most recent "data_check" or "scan_check" command.  This facility
+    was requested by Michael Lindqvist at Onsala.
+
+26. "fs.prompt" now accepts and uses the "wish" "-geometry" command
+    line option.  This allows the user to specify the geometry of the
+    prompt window.  This might be used, for example in "change_pack",
+    to place the prompt in a specific location on the screen.  It is
+    recommended that this feature only be used to control the
+    placement (+/-) of the window and not the size (x).  The
+    application adjusts it size according to the prompt text. However,
+    the size can be controlled if it is desired.  The ability to
+    control placement of the prompt window was requested by Paul
+    Burgess at Jodrell Bank.
+
+27. Arbitrary length (512 character) SNAP procedure arguments now
+    supported.  The old historical limit of 12 characters was noted an
+    a limitation by Paul Burgess at Jodrell Bank.
+
+28. New "autoftp" feature part of "disk2file" command. The "disk2file"
+    command can now be used to start an asynchronous process that will
+    FTP the created file to a destination such as a correlator.  This
+    is implemented in the "abort" form of the command, which is used
+    to terminate a transfer when the schedule needs to move on.  The
+    command has the form:
+
+      disk2file=abort,autoftp,string
+
+    The second parameter, if present, must be "autoftp". The string is
+    optional.  This command causes an "xterm" to be started running a
+    script (or program) named "autoftp".  The script is passed the IP
+    address (or node name, whatever is in the mk5ad.ctl file) of the
+    Mark5, the file name that is to be FTP-ed, and the "string" if it
+    is present.  The default "autoftp" script is a stub that just
+    prints a message saying that it does nothing.  A default station
+    version of the "autoftp" script is supplied in
+    "/usr2/fs/st.default/st-0.0.0/autoftp".  This version may be
+    installed in "/usr2/st" and customized for the station to do
+    something useful.  The default stations script includes features
+    to display a progress meter for the transfer, error (and other)
+    messages and inject the messages as comments into the FS log.  The
+    optional "string" can be used to control the behavior of the
+    script, e.g., select different correlators, if this has been
+    programmed in the local version of the script.  The
+    characteristics of the "xterm" (size, position, colors, etc)
+    running "autoftp" can be controlled using Xresources.  Information
+    on how to install and customize the script can be found in
+    /usr2/fs/misc/autoftp.txt.  This command is intended to be used by
+    experiment schedules.  DRUDG's use of autoftp features are
+    controlled by the skedf.ctl and DRUDG option (15) "Data transfer
+    overrides".  Note that option 15 only appears if the .skd file
+    contains data_transfer statements.  The "autoftp" script can also
+    be used to manually transfer files if desired.
+
+29. New "file_append" utility script. A short script was developed for
+    appending the contents of one file to many other files.  This is
+    useful for example for adding a new standard procedure to all of
+    the default versions of the "station" procedures in
+    /usr2/fs/st.default/proc.  This use is intended for FS
+    development, but is included in the FS can be used for other
+    applications as desired. The (executable) script is in
+    /usr2/fs/misc/file_append.
+
+30. New "greplog" standard procedure for searching log from command
+    prompt.  This new standard procedure uses the "sy=..." command to
+    open a background xterm to display the result of searching the
+    log.  The argument of the procedure is a search string for
+    "grep", as in:
+
+         greplog=[0-9]/scan_check/
+
+    The output of "grep" is piped through "less".  It will be
+    necessary to terminate "less" (usually with "q") to dismiss the
+    window.  The example given here will produce a similar output to
+    the "last_check" command, but will display the results for all
+    "/scan_check/" entries from the current log in a separate window
+    (but with no error messages).  It is possible to include arguments
+    to "grep" at the start of the search string.  Note that FS maps
+    all upper case letters to lower case.  No behavior that depends on
+    using upper case will work as expected.
+
+31. "msg" places temporary file on "/tmp".  The temporary file
+    "text_message.txt" is now placed on /tmp to avoid possible
+    problems with not having write permission in the current
+    directory.  The process ID is also appended to the file name.  It
+    is not a good idea to run two copies of "msg" simultaneously.
+    However, the inclusion of the process ID will reduce the chances
+    of a conflict in case more than one copy of "msg" is inadvertently
+    started or some other program is using the same temporary file
+    name.
+
+32. Time variation and default flux for Cas-A updated.  The model used
+    to adjust the variations in Cas-A's flux was updated along with
+    the default value in the control files. The new model and flux
+    values are provided by D. Graham (MPIfR). The new time variation
+    model can be found in /usr2/fs/clib/flux_val.c. The new default
+    flux value can be found in /usr2/fs/st.default/control/flux.ctl.
+    The code that calculates the time variation selects which model is
+    by the value of the first coefficient of the flux model. If the
+    first coefficient is larger than 5.7, it is assumed the old model
+    should be used, otherwise the new model is used.  This approach,
+    also due to D. Graham, allows the users to get consistent results
+    regardless of whether they have update their flux.ctl control file
+    with the new value or not.
+
+33. ONOFF "SIG" record formatting improved.  The output was corrected
+    to remove an extraneous value and to make the values line up
+    vertically with the VAL.
+
+34. The bank_check command was added to the "ready_disk" procedure for
+    Mark5 recorders.  This change helps assure that the correct disk
+    VSN is recorded in the log for the first observation in case any
+    manipulation of the installed disk packs is necessary during the
+    "halt" that this procedure executes.
 
 			 B. Changes in DRUDG
 				   
 DRUDG opening message date is 2006Nov15.  This release of DRUDG
-includes the following changes. Item 4 was added after 9.9.1.
+includes the following.  Items after (6) were added after 9.8.0. Items
+after (9) were added after 9.8.1.  Please note that item (1) was
+updated for 9.9.0 and old item (9) was removed. Items after (18) were
+added after 9.9.0. Item (22) was added after 9.9.1.
 
-1. Extra page in option 5 listing fixed.
-2. S2-support bug fixed.
-3. Mark5 label times fixed.
-4. Missing Mark5 label output in 9.9.1 has been restored.
+1. Labels for Mark 5 disk modules.
+2. "equip_override" bug fixed.
+3. Last scan bug in label command fixed.
+4. S2 tape change time bug fixed.
+5. Mark5 continuous geodetic schedules supported.
+6. Bug in Mark IV label command fixed.
+7. Dymo printer label printing supported for "cups". 
+8. Option to prepend a directory in disk2file.
+9. TPICD = 0 bug fixed.
+10. Minor bug fixes.
+11. Moved BBC/VC and IFD set-ups commands after form=... command.
+12. An internal track table was changed to use Mark4 track
+    assignments.
+13. Recording missing BBCs/VCs.
+14. Scan naming bug fixed.
+15. New scan_name syntax.
+16. Disk2file default name.
+17. Disk2file automatic FTP.
+18. "disk_record" monitor command inserted after "disk_record=on".
+19. Extra page in option 5 listing fixed.
+20. S2-support bug fixed.
+21. Mark5 label times fixed.
+22. Missing Mark5 label output in 9.9.1 has been restored.
 
 A more detailed discussion of these changes follows.
 
-1. Extra page in option 5 listing fixed.  The print-out was changed so
-   that the first page has the same number of lines as subsequent
-   pages.  This caused a minor inconvenience at some stations where an
-   extra page would be printed because the first page was too long.
+1. Labels for Mark5 disk modules.  NOTE: FORMAT OF THIS HAS CHANGED
+   from 9.8.1.  DRUDG now supports generation of media labels for disk
+   modules.  This is not available through the tape label printing
+   option (6).  Please note option (6) is only for tape labels.  Mark5
+   label printing is accessed via the command line.  The log file is
+   used to determine the label contents, so the label printing must
+   occur after the data recording on the module in the experiment has
+   ended.  Please note that if a module is used in more than one
+   experiment, you will need to run DRUDG on each log where it was
+   used to generate the full set of labels.  The format of the command
+   is:
 
-2. S2-support bug fixed. Some S2 schedules w/o an LBA did not read in
-   correctly.  If they read in correctly, then the proc files could
-   not be produced.  This was traced to an unitialized variable, and
-   the way DRUDG handled track assignments.
+     drudg file.log VSN irow icol
 
-3. Mark5 label times fixed.  In some circumstances the label times
-   were off.  This has been fixed.
+   The only required argument is the log file, "file.log". The ".log"
+   must be included in the name.  All the other arguments are
+   optional.  Their default values are:
 
-4. Missing Mark5 label output in 9.9.1 has been restored.  It was
-   accidentally turned off in 9.9.1.
+     VSN="ALL"
+     irow=1
+     icol=1
+
+   If VSN is not "ALL", then DRUDG will only print the given VSN
+   label. For example,
+
+      drudg rd0507gc.log bkg-0060
+
+   will only print the label for bkg-0060.
+
+   If you want to position the paper to a place other than 1,1 you
+   need to specify irow and icol.
+
+   We recognize that it is not convenient to have to wait until the
+   end of an experiment to generate the labels, especially when there
+   are multiple disk module being used in an experiment.
+   Unfortunately, for a variety of reason it is impossible a priori to
+   predict the correct labels.  Even making a good guess in general
+   requires burdensome data input and bookkeeping.  However to reduce
+   the operational problems this may cause, we have included the
+   capability for DRUDG to print the label for just a specific disk
+   pack.  The intent is that just before a disk pack is removed
+   (usually because it is full and needs to be shipped) or when an
+   experiment is over, the label for that pack for that experiment can
+   be printed and attached.  Please note that you can print the label
+   even if the experiment is still running and the log is still open.
+   However, you should wait until the use of the module in the
+   experiment is finish before printing its label.  Printing labels
+   for single modules is described above.
+
+   Label printing for Mark 5 modules is a new feature, (like all
+   features) any feedback on how it works would be appreciated.
+
+2. "equip_override" bug fixed.  The "equip_override" feature was
+   introduced to allow stations to specify Mark5 in their skedf.ctl
+   file.  Unfortunately it had the unintended consequence that you
+   could not change the equipment type using option 11.  This was
+   because the equip_override code was executed after a file was read
+   in, and also after option 11 was executed.  This bug was fixed in
+   9.7.7: A flag was set, and equip_override was only executed once.
+
+   Unfortunately, this had the consequence that if you read in another
+   schedule, drudg would use the equipment type from the schedule, and
+   not the equipment override option.  This bug has now been fixed in
+   9.7.8.  Equipment override will work once for each schedule.
+
+3. Last scan bug in label command fixed.  The ending time of the last
+   label was that of the 2nd-to-last scan, and not that of the last
+   scan.  This has been fixed.
+
+4. S2 tape change time bug fixed.  Bug in S2 tape change time fixed.
+   Previous versions might change the tape one scan too early.  This
+   generally wasn't a problem with long tapes.
+
+5. Mark5 continuous geodetic schedules supported.  Drudg was modified
+   to change these schedules to "start&stop" to avoid wasting disk
+   space.  In addition, an early start of 25 seconds was implemented
+   to allow the VLBA correlator to sync up.
+
+6. Bug in Mark IV label command fixed.  Some stations are still not
+   getting the correct number of Mark IV tape labels.  This was fixed.
+
+7. Dymo printer label printing supported with "cups". DRUDG now fully
+   supports the Dymo printer. To use Dymo printers you need to make
+   several changes in the $printer section of skedf.ctl:
+
+     First, set the label_printer type to Dymo:
+
+       label_printer dymo
+
+     Second, set the label size:
+
+       label_size  1.417  3.5    1      1     11    0      Dymo
+
+     Lastly, you need to specify the appropriate script:
+
+       labels print2dymo
+
+     and you must create this script. It is described in comments in
+     the default skedf.ctl control file:
+ 
+       *  This is to print to the dymo printer.
+       *  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
+       *  must be in your path, e.g. in /usr2/oper/bin,
+       *  and executable, e.g., chmod a+x print2dymo
+
+   The skedf.ctl file included in the distribution has examples of the
+   above.
+
+8. Option to prepend a directory in disk2file.  You can now prepend a
+   directory in the disk2file command.  This can be set in skedf.ctl
+   using the disk2file_dir keyword, e.g. "disk2file_dir /tmp". This
+   can also be changed in drudg using option 15, the data_transfer
+   override option.
+
+9. TPICD = 0 bug fixed.  On start-up DRUDG complained if TPI was set
+   to 0.  This has been fixed.
+
+10. Minor bug fixes. a.) There was an error in generating the if3=
+    command if neither vc3 or vc10 were defined. This was due to an
+    uninitialized variable, and has been fixed. b.) When checking
+    Mark3 modes, checked against lower case letters, when should have
+    checked against upper case letters.  c.) setup_name subroutine had
+    uninitialized variable in call to itras.f.
+
+11. Moved BBC/VC and IFD set-ups commands after form=... command.
+    This was done to allow the formatter more time to complete
+    configuring before the Mark 5 is configured.  This should reduce
+    the chance of the "check serial number even" error from the Mark5.
+
+12. An internal track table was changed to use Mark4 track
+    assignments.  This was done to be consistent with sked.  This
+    required changes in procs.f.  The results should be transparent to
+    the user.
+
+13. Recording missing BBCs/VCs.  If the LO frequency is negative,
+    DRUDG assumes that the BBC/VC is missing.  It will not issue BBC
+    or IF commands for the corresponding BBCs/VC and any IF modules
+    that not used by the non-missing BBCs/VCs.  The tracks for the
+    missing BBCs/VCs are still recorded.  This change was made to make
+    correlation easier for stations with missing BBCs/VCs.
+
+14. Scan naming bug fixed.  If two scans occurred at the same time,
+    was sometimes not appending the correct letter.  Traced to not
+    picking up the correct scan name.
+
+15. New scan_name syntax.  The two letter station code is now inserted
+    as the 3rd argument, viz: scan_name=126-1702,r1231,Gc,r1018,30
+
+16. Disk2file default name.  If no file is specified in the
+    data_transfer statement in the .skd file, DRUDG creates a default
+    disk2file filename of the form session_station_scanname.m5a,
+    e.g. n06c2_ef_No0002.m5a
+
+17. Disk2file automatic FTP.  You can now specify automatic FTP-ing of
+    the output file for disk2file.  This can be done by modifying the
+    "autoftp" keyword in skedf.ctl (see
+    /usr2/fs/st.default/control/skedf.ctl for an example), or
+    interactively using the data transfer override feature in DRUDG
+    (option 15). If autoftp is turned on when the .snp file is
+    generated, the form of the "disk2file=abort" command becomes:
+
+      disk2file=abort,autoftp,string
+
+    where "string" is an optional string that can be specified in the
+    skedf.ctl control or the data transfer override option.
+
+18. "disk_record" monitor command inserted after "disk_record=on". The
+    command was added at the request of the Haystack correlator in
+    order to record the scan_label for each scan in the log file.
+
+19. Extra page in option 5 listing fixed.  The print-out was changed
+    so that the first page has the same number of lines as subsequent
+    pages.  This caused a minor inconvenience at some stations where
+    an extra page would be printed because the first page was too
+    long.
+
+20. S2-support bug fixed. Some S2 schedules w/o an LBA did not read in
+    correctly.  If they read in correctly, then the proc files could
+    not be produced.  This was traced to an unitialized variable, and
+    the way DRUDG handled track assignments.
+
+21. Mark5 label times fixed.  In some circumstances the label times
+    were off.  This has been fixed.
+
+22. Missing Mark5 label output in 9.9.1 has been restored.  It was
+    accidentally turned off in 9.9.1.
 
 			   C. Known FS Bugs
 
@@ -87,151 +723,147 @@ more detail after the list.
 A more detailed discussion of these bugs follows.
 
 1. Do not run "fmset" for extended periods.  For stations that have
-   VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
-   should not be run for extended periods of time.  The "fmset"
-   program should be used only to set or briefly verify that the
-   formatter time is correct.  Do not leave "fmset" running after
-   completing either of these tasks, especially during an experiment.
+VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+should not be run for extended periods of time.  The "fmset" program
+should be used only to set or briefly verify that the formatter time
+is correct.  Do not leave "fmset" running after completing either of
+these tasks, especially during an experiment.
 
-   The "fmset" program dominates the Field System when it is running
-   and this is likely to interfere with the running of an experiment
-   or other activities.  The only way to detect the time from the VLBA
-   formatter with greater precision than one second it to wait for the
-   seconds response from the formatter to change.  This requires the
-   FS to communicate with the formatter almost continuously.  A
-   similar problem exists for the S2 recorder.  This problem is less
-   severe for the Mark IV formatter, but extended use of "fmset" in
-   this case should be avoided as well.  In a future revision, this
-   will be made more robust so that there will probably be less danger
-   if "fmset" is left running.  However, even in the future "fmset"
-   should only be left running for as short a time as possible.  A
-   reminder about this is included in the "fmset" menu.
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
 
 2. "odd"/"even" head types not supported for Mark IV & VLBA4.  The
-   Mark IV and VLBA4 rack version of the "form" command and the Mark
-   IV and VLBA4 recorder versions of the "repro" and "parity" commands
-   do not support the "odd" and "even" parameters for the read and
-   write head types and reproduce electronics in the "head.ctl"
-   control file.  This means that automatic substitution of odd or
-   even head in passes that use only even or odd heads respectively
-   does not occur.  The only correct settings for the read and write
-   head parameters and reproduce electronics is "all".  This will be
-   fixed in a future revision.  Please let Ed know if you are missing
-   some tracks and need to work around this limitation.
+Mark IV and VLBA4 rack version of the "form" command and the Mark IV
+and VLBA4 recorder versions of the "repro" and "parity" commands do
+not support the "odd" and "even" parameters for the read and write
+head types and reproduce electronics in the "head.ctl" control file.
+This means that automatic substitution of odd or even head in passes
+that use only even or odd heads respectively does not occur.  The only
+correct settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
 
 3. "odd"/"even" head types not supported for VLBA style tapeforms.
-   For any mode recorded with VLBA style tapeform (14 index
-   positions), the only correct setting of the read and write head
-   types on the "head.ctl" is "all".  This will be fixed in a future
-   revision.  Please let Ed know if you are missing some tracks and
-   need to work around this limitation.
+For any mode recorded with VLBA style tapeform (14 index positions),
+the only correct setting of the read and write head types on the
+"head.ctl" is "all".  This will be fixed in a future revision.  Please
+let Ed know if you are missing some tracks and need to work around
+this limitation.
 
 4. CHEKR does not check the status of the Mark IV formatter or Mark 5
-   recorder. Now that most communication problems with the Mark IV
-   formatter have been solved, this will be possible and will be done
-   in the future. CHEKR support will be implemented for Mark 5 despite
-   communication problems, they will have to be ignored unless they
-   extend beyond a certain amount of time.
+recorder. Now that most communication problems with the Mark IV
+formatter have been solved, this will be possible and will be done in
+the future. CHEKR support will be implemented for Mark 5 despite
+communication problems, they will have to be ignored unless they
+extend beyond a certain amount of time.
 
 5. Extraneous errors when tape is stopped by low tape sensor.  When a
-   tape drive has been commanded to move the tape and then stops
-   because it hit the low tape sensor (or when S2 recorders hit the
-   BOT or EOT), "CHEKR" will complain periodically that the tape drive
-   is not in the correct state.  In principle the FS should be smarter
-   about this.  However, if the tape is managed correctly by the
-   schedule this error message should never occur.  If it does, then
-   it it an indication that there is either a problem with: (1) the
-   schedule, (2) the check procedures, (3) the recorder, or (4) the
-   tape is too short.  If any of these cases apply they should be
-   corrected.  It is more likely that this error message will occur
-   when the tape is being controlled manually.  In this case, issuing
-   an "ET" command will convince the FS that the tape drive should be
-   stopped and the error message will cease.
+tape drive has been commanded to move the tape and then stops because
+it hit the low tape sensor (or when S2 recorders hit the BOT or EOT),
+"CHEKR" will complain periodically that the tape drive is not in the
+correct state.  In principle the FS should be smarter about this.
+However, if the tape is managed correctly by the schedule this error
+message should never occur.  If it does, then it it an indication that
+there is either a problem with: (1) the schedule, (2) the check
+procedures, (3) the recorder, or (4) the tape is too short.  If any of
+these cases apply they should be corrected.  It is more likely that
+this error message will occur when the tape is being controlled
+manually.  In this case, issuing an "ET" command will convince the FS
+that the tape drive should be stopped and the error message will
+cease.
 
 6. "Comm=" command in logex extracts only the first command.  The
-   "comm=" command in "logex" extracts only the first command
-   commanded and displayed.  This problem was noted by Giuseppe
-   Maccaferri (Medicina).
+"comm=" command in "logex" extracts only the first command commanded
+and displayed.  This problem was noted by Giuseppe Maccaferri
+(Medicina).
 
 7. S2 error scheme clumsy.  The error and status response number
-   reporting scheme for S2 recorders is clumsy.  FS errors that have
-   mnemonic "rl" are mostly error responses from the recorder or the
-   RCL interface library that is used to communicate with the
-   recorder.  If the numeric part of an "rl" error is greater than
-   -130, then it is the error code returned by the recorder.  If the
-   numeric part is less than -130, but greater than -300, then add 130
-   to the value, the absolute value of the result is the error
-   response code from the RCL library.  For values less than or equal
-   to -300, a FS error has been detected.  Status response codes are
-   all reported with mnemonic "rz" and the numeric value is the
-   negative of the status response code.  In all cases an appropriate
-   error or status message is displayed.  These messages are retained
-   in the log.
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic "rl" are mostly error responses from the recorder or the RCL
+interface library that is used to communicate with the recorder.  If
+the numeric part of an "rl" error is greater than -130, then it is the
+error code returned by the recorder.  If the numeric part is less than
+-130, but greater than -300, then add 130 to the value, the absolute
+value of the result is the error response code from the RCL library.
+For values less than or equal to -300, a FS error has been detected.
+Status response codes are all reported with mnemonic "rz" and the
+numeric value is the negative of the status response code.  In all
+cases an appropriate error or status message is displayed.  These
+messages are retained in the log.
 
 8. No extra spaces allowed in "ibad.ctl" file.  The format of the
-   "ibad.ctl" must not contain any leading or embedded spaces.  In
-   systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if either
-   the option "no_untalk/unlisten_after" is misspelled or an incorrect
-   device name is supplied, the driver will cause a segmentation
-   violation when it is initialized and the FS will terminate.
-   Unfortunately there is no way to prevent this problem in a general
-   way; it reflects a limitation in the driver.
+"ibad.ctl" must not contain any leading or embedded spaces.  In
+systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if either
+the option "no_untalk/unlisten_after" is misspelled or an incorrect
+device name is supplied, the driver will cause a segmentation
+violation when it is initialized and the FS will terminate.
+Unfortunately there is no way to prevent this problem in a general
+way; it reflects a limitation in the driver.
 
 9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
-   been known to "hang" mysteriously.  This seems to be caused by some
-   problem with the "go" mechanism that is used to restart the program
-   when it pauses to allow a SNAP procedure, such as CALON or CALOFF
-   to execute.  The "go" that is used to restart the program fails for
-   some reason.  This has been exceedingly difficult to debug because
-   it is intermittent and fairly rare.  There is however a good work
-   around for it.  The CALON and CALOFF procedures are called by
-   procedures CALONFP and CALOFFFP for FIVPT and CALONNF and CALOFFNF
-   for ONOFF.  FIVPT or ONOFF may hang during (or actually just after)
-   the execution of one these procedures that FIVPT and ONOFF will
-   typically hang.  If this happens, you will have to terminate the FS
-   to recover.  You can prevent it from happening again (for this
-   procedure) by adding the lines:
+been known to "hang" mysteriously.  This seems to be caused by some
+problem with the "go" mechanism that is used to restart the program
+when it pauses to allow a SNAP procedure, such as CALON or CALOFF to
+execute.  The "go" that is used to restart the program fails for some
+reason.  This has been exceedingly difficult to debug because it is
+intermittent and fairly rare.  There is however a good work around for
+it.  The CALON and CALOFF procedures are called by procedures CALONFP
+and CALOFFFP for FIVPT and CALONNF and CALOFFNF for ONOFF.  FIVPT or
+ONOFF may hang during (or actually just after) the execution of one
+these procedures that FIVPT and ONOFF will typically hang.  If this
+happens, you will have to terminate the FS to recover.  You can
+prevent it from happening again (for this procedure) by adding the
+lines:
 
-    !+1s
-    sy=go fivpt &
+!+1s
+sy=go fivpt &
 
-  to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
-  add:
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
 
-    !+1s
-    sy=go onoff &
+!+1s
+sy=go onoff &
 
-  If you see other situations where FIVPT or ONOFF hang, please let Ed
-  know.
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
 
 10. FS SNAP command pages don't list tape drive suffix numbers.  The
-    FS SNAP manual pages and the help pages available through the
-    "help=" command do not reflect when multiple versions are
-    available with different suffixes depending on the number of drive
-    specified in the control files.  For example, there is only a
-    "tape" page, no "tape1" or "tape2" page.  However, the help
-    facility will display the version of the command with no suffix
-    when an available command with a suffix is used.  For example, if
-    two drives are defined, then "help=tape1" and "help=tape2" will
-    work, but "help=tape" will not and vice-versa if only one drive is
-    defined.
+FS SNAP manual pages and the help pages available through the "help="
+command do not reflect when multiple versions are available with
+different suffixes depending on the number of drive specified in the
+control files.  For example, there is only a "tape" page, no "tape1"
+or "tape2" page.  However, the help facility will display the version
+of the command with no suffix when an available command with a suffix
+is used.  For example, if two drives are defined, then "help=tape1"
+and "help=tape2" will work, but "help=tape" will not and vice-versa if
+only one drive is defined.
 
 11. LBA rack TPI detector is not usable.  The Australian LBA Data
-    Acquisition System currently lacks a functional total power
-    detector though support has been included.  To allow approximate
-    system temperature calibration, all the setup commands and the TPI
-    detectors of the modules of a co-existing Mark IV rack are
-    currently also available when the rack type is specified to be
-    LBA4.
+Acquisition System currently lacks a functional total power detector
+though support has been included.  To allow approximate system
+temperature calibration, all the setup commands and the TPI detectors
+of the modules of a co-existing Mark IV rack are currently also
+available when the rack type is specified to be LBA4.
 
 12. FS "data_check" and "scan_check" commands do not work with Mark5B.
-    The form of the Mark5B "data_check?" and "scan_check?" responses
-    are different from the Mark5A form.  As a result it was not
-    straight forward to make the FS "data_check" and "scan_check"
-    commands work with both Mark5B and Mark5A at the time of this
-    release.  They do work with Mark5A at this time.  The "data_check"
-    and "scan_check" commands will work with Mark5B in a future
-    release.
+The form of the Mark5B "data_check?" and "scan_check?" responses are
+different from the Mark5A form.  As a result it was not straight
+forward to make the FS "data_check" and "scan_check" commands work
+with both Mark5B and Mark5A at the time of this release.  They do work
+with Mark5A at this time.  The "data_check" and "scan_check" commands
+will work with Mark5B in a future release.
 
 III. Installation
 
@@ -241,14 +873,14 @@ follow the installation instructions in Section 4.5 of the FS9
 of the current FS9 "Control Files and Field System Initialization"
 manual.
 
-The following instructions are for upgrading from 9.9.0.  Please
-follow all the steps. If you have 9.7.7 installed, please follow the
-installation instructions in fs9900up.txt.
+The following instructions are for upgrading from 9.7.7. Please follow
+all the steps. If you have already installed version 9.8.0 or 9.8.1,
+you can omit steps 13A and 14A.
 
 A list of "critical updates" is given below.  These are updates that
 must be applied sequentially.  Please start with the next update with
 a later version number than you have and apply it and the following
-listed versions before upgrading to 9.9.2.  You can find the latest
+listed versions before upgrading to 9.9.0.  You can find the latest
 versions of installation notes for these FS versions in the
 "/usr2/fs/misc" directory. The list of critical updates is:
 
@@ -257,7 +889,6 @@ versions of installation notes for these FS versions in the
   9.5.12
   9.6.9
   9.7.7
-  9.9.0
 
 If you have a version older than 9.4.0, please contact Ed.
 
@@ -389,37 +1020,288 @@ you have any questions about how to cut-and-paste please contact Ed
       cd /usr2/fs
       make
 
-(10) Reboot the computer.  This is important for re-initializing
+(10) Recompile your station software.  This is necessary to pick-up
+     changes to common blocks, shared memory, and library routines.
+ 
+     If you use the FS pointing calibration tools, in particular, the
+     pointing model file, typically /usr2/control/mdlpo.ctl, you
+     should update your model to 30 parameters before recompiling.
+     This only affects stations that use the FS software tools for
+     analyzing pointing data and/or applying corrections to the
+     antenna pointing.  For stations that use FS software pointing
+     tools, this step may be omitted for the time being.  As you may
+     expect though, updating this now may save you trouble later.  The
+     FS will work in a backward compatible way with 20 parameter
+     models as long as any unused model parameters, in particular 19
+     and 20, have "zero" value control flags in your pointing model
+     control file.  For simplicity and future compatibility, stations
+     should convert to 30 parameters as soon as is feasible.  Please
+     note that updating to 30 parameters does not require collecting a
+     large set of pointing data to make a new model; only a small
+     amount of pointing data is needed in order to verify that
+     pointing is still good after the update has been made.  The
+     document /usr2/fs/misc/30params.txt covers updating to 30
+     parameters.
+
+     If you chose not to update your model now, please check that
+     parameters 19 and 20 use "zero" for their control flags.
+
+     To recompile and reload your station software, the following
+     steps should work if you have the "standard" configuration for
+     station software:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+(11) Reboot the computer.  This is important for re-initializing
      shared memory.
 
-(11) Log in as oper
+(12) Log in as oper
 
-(12) Modify your procedure files.  Only one change is needed: add
-     "bank_check" to the "ready_disk" procedure, if you haven't
-     already done so.  This change is only for stations that use Mark
-     5 recorders.  You should used PFMED to make this change.  The
-     command should be added after the "halt" command.  It is probably
-     best if it occurs right at the end of the procedure.  Please see
-     /usr2/fs/st.default/proc/m5.prc for an example.
+(13) Modify your procedure files.  Four changes are needed: (A) update
+     "postob", (B) add the "greplog" station procedure, (C) add
+     "bank_check" to "ready_disk", and (D) install and customize
+     "systests.prc". These are described in more detail below. Step
+     (D) can be deferred until you need to make use of the "systests"
+     procedures.
 
-     For stations that use multiple hardware configurations:
+     (A) This change is only for stations that use Mark IV formatters.
+         Add the "form" command to the "postob" in your "station"
+         procedure library if it isn't already there.  You should used
+         PFMED to make this change.  The added command can be added
+         anywhere in the procedure.
+
+         For stations that use multiple hardware configurations:
+
+            If you use the same "station" library with with
+            configurations that both use and do not use the Mark IV
+            formatter, you should use the "4form" command since it
+            will work (and more importantly not generate an error)
+            regardless of what equipment is specified in equip.ctl.
             
-        If you have different versions of the "station" library for
-        different equipment configurations, you should be sure to
-        update all versions that are used in configurations with the
-        Mark 5 recorder.
+            If you have different versions of the "station" library
+            for different equipment configurations, you should be sure
+            to update all versions that are used in configurations
+            with the Mark IV formatter.
 
-(13) Test the FS.  Testing should not be necessary for this patch
-     update. However, if you want to test the new version, then
-     generally speaking a fairly thorough test is to run a test
-     experiment: start with DRUDG-ing a schedule, making listings, and
-     any other pre-experiment preparation you normally do, then
-     execute part of schedule, and perform any normal post-experiment
-     plotting and clean-up that you do.  If you use tape, you should
-     test a section that includes a tape change and a parity check in
-     each direction.  The idea here is to verify that everything works
-     as you expect for normal operations.  In particular for this
-     upgrade you should test that Mark 5 operations work as expected.
+     (B) Add the new standard procedure "greplog" your station.prc
+         file. You can do this with:
+
+           cd /usr2/proc
+           cat /usr2/fs/st.default/proc/greplog.prc >> station.prc
+
+         If your station uses more than one version of "station.prc":
+
+           The "cat" line above should be executed once for each
+           version, substituting the appropriate name for
+           "station.prc" in each case.  Be careful to not update a
+           file twice by doing it once for "station.prc" and once for
+           the file "station.prc" currently points to.  If the names
+           of the files are of the form "station.prc.*", you can get a
+           listing of them and where the link is currently pointing
+           using:
+
+              cd /usr/proc
+              ls -l station.prc.* station.prc 
+
+           You can update multiple files with the commands:
+
+             cd /usr2/proc
+             /usr2/fs/misc/file_append /usr2/fs/st.default/proc/greplog.prc MASK
+
+           Where MASK is a wildcard file mask (perhaps station.prc.*)
+           that will include all the versions of station.prc you want
+           to update, but exclude "station.prc" itself.
+
+     (C) This change is only for stations that use Mark 5 recorders.
+         Add the "bank_check" command to the "ready_disk" in your
+         "station" procedure library if it isn't already there.  You
+         should used PFMED to make this change.  The command should be
+         added after the "halt" command. It is probably best if it
+         occurs right at the end of the procedure.  Please see
+         /usr2/fs/st.default/proc/m5.prc for an example.
+
+         For stations that use multiple hardware configurations:
+            
+            If you have different versions of the "station" library
+            for different equipment configurations, you should be sure
+            to update all versions that are used in configurations
+            with the Mark 5 recorder.
+
+     (D) The "systests.prc" procedure library should be set-up if you
+         want to be able to use the tests.  You can defer this for the
+         time being, if you are just trying to get this FS update up
+         and running for operations or don't have the necessary
+         equipment.  Instructions for installing "systests.prc" are
+         included in the "/usr2/fs/systests/systests.txt" file.
+         Please note that you can skip through the instructions to the
+         point after the archive has been un-"tar"d. The installation
+         of this version of the FS provides the software.  If you have
+         already installed a version of "systests.prc", you should
+         compare it to the default one included in
+         "/usr2/fs/systests/systests.prc":
+
+           cd /usr2/proc
+           diff systests.prc /usr2/fs/systests|less
+
+         to see what has changed.  You may prefer to compare the new
+         default "systests.prc" to the default you previously modified
+         if you still have it.  This will avoid having customizations
+         you have made show up in the "diff" output.
+
+(14) Update your control files. Two files should be updated: equip.ctl
+     in step A and flux.ctl in step B.  In addition if you want to
+     enable Dymo label printing, your skedf.ctl file will need to be
+     updated in step C.
+
+     (A) Add the lines for the Mark IV Decoder terminator to all your
+         versions of the "equip.ctl" control.  All stations must do
+         this, even if they don't have a Mark IV decoder.  The
+         additional lines can be added using:
+
+           cd /usr2/control
+           tail -2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+         If when you start the FS the next time, it complains about
+         not being able to read or decode line 18 of "equip.ctl",
+         there was probably a (or more than one) blank line at the end
+         of the "equip.ctl" file before you did the update.  You can
+         edit the file to delete the blank lines to correct this.
+
+         If your station uses more than one version of "equip.ctl":
+
+           You must update all "equip.ctl" files even versions that
+           are used with other hardware. The "tail" line above should
+           be executed once for each version, substituting the
+           appropriate name for the final "equip.ctl" in each case.
+           Be careful to not update a file twice by doing it once for
+           "equip.ctl" and once for the file "equip.ctl" links to. If
+           the names of the files are of the form "equip.ctl.*", you
+           can get a listing of them and where the link is currently
+           pointing using:
+
+              cd /usr/control
+              ls -l equip.ctl.* equip.ctl
+
+     (B) Update the flux for Cas-A in the flux.ctl file.  If you have
+         never changed your copy of the flux.ctl from the default
+         contents you can simply replace your version with the new
+         default.  You can see the difference between your version and
+         the default by:
+
+           cd /usr2/control
+           diff flux.ctl /usr2/fs-9.9.2/st.default/control
+
+         If the only differences involve the update to the entries for
+         Cas-A, you can install the new file with:
+
+           cd /usr2/control
+           cp /usr2/fs/st.default/control/flux.ctl .
+           chmod a+rw flux.ctl
+           chown oper.rtx flux.ctl
+
+         If there are other differences between the default file and
+         yours, you should probably cut-and-paste the new lines into
+         your file.  In this case, please be sure that the old model
+         for Cas-A is commented out by putting an asterisk (*) in
+         column 1 of that line.
+
+         You can recheck your work by re-executing the "diff" command
+         above.
+
+     (C) If you have a Dymo (Dymo is brand name) label printer and the
+         "cups" printing system installed on your system, you can
+         print labels using the Dymo printer.  The "cups" system is
+         not normally installed on systems based on FS Linux
+         distributions.  If you need information on how to install
+         "cups", please contact Ed (weh@ivscc.gsfc.nasa.gov).  To use
+         Dymo printers you need to make several changes in the
+         $printer section of skedf.ctl:
+
+           First, set the label_printer type to dymo:
+
+             label_printer dymo
+
+           Second, set the label size:
+
+             label_size  1.417  3.5    1      1     11    0      Dymo
+
+           Lastly, you need to specify the appropriate script:
+
+             labels print2dymo
+
+           and you must create this script. It is described in comments in
+           the default skedf.ctl control file:
+ 
+             *  This is to print to the dymo printer.
+             *  Script "print2dymo" would contain "lpr -Pdymo /tmp/DRlab.tmp" and
+             *  must be in your path, e.g. in /usr2/oper/bin,
+             *  and executable, e.g., chmod a+x print2dymo
+
+         The example /usr2/fs/st.default/control/skedf.ctl file has
+         examples of the above.
+
+(15) Install the local version of the "autoftp" script.  This script
+     is used to automatically FTP data files from the Mark5 system to
+     a destination correlator, typically for fringe checks.  If your
+     station does not do this, you can skip this step.  Typically,
+     this is only for EVN astronomy stations.  If your stations does
+     need this capability, please check the file
+     "/usr2/fs/misc/autoftp.txt" for instructions on how to create a
+     station specific version of this script in the section titled
+     "CONFIGURING THE AUTOFTP SCRIPT".
+
+     If you also want to make "autoftp" the default behavior when a
+     disk2file occurs in the schedule, you should modify the skedf.ctl
+     file to use the AutoFTP keyword.  Please see
+     /usr2/fs/st.default/control/skedf.ctl for more information.  This
+     file also contains information setting a default destination
+     directory for disk2file operations.  You can set the
+     disk2file/in2net features on an experiment by experiment using
+     option (15) "Data transfer overrides" in DRUDG.  Note that option
+     15 only appears if the .skd file contains data_transfer
+     statements.
+
+(16) Update your .Xresources file, first for "greplog":
+
+       cd
+       grep greplog /usr2/fs/st.default/oper/.Xresources >> .Xresources
+    
+
+     and then for "autoftp", if you did not update it for "autoftp" as
+     part of the previous step.
+
+       cd
+       grep autoftp /usr2/fs/st.default/oper/.Xresources >> .Xresources
+
+     You should make this update for future compatibility even if you
+     did not install a local version of the "autoftp" script.
+
+     You should also make these changes for the "prog" account so that
+     that both accounts are the same.  For this, you will need to be
+     logged in as "prog" and use "prog" in place of "oper" in the
+     "grep" commands above.
+
+(17) Log-out and log back in as "oper".  This is important for
+     re-initializing the login environment.
+
+(18) Test the FS.  Generally speaking a fairly thorough test is to run
+     a test experiment: start with DRUDG-ing a schedule, making
+     listings, and any other pre-experiment preparation you normally
+     do, then execute part of schedule, and perform any normal
+     post-experiment plotting and clean-up that you do.  Please try
+     printing Mark5 labels.  If you use tape, you should test a
+     section that includes a tape change and a parity check in each
+     direction.  The idea here is to verify that everything works as
+     you expect for normal operations.  In particular for this upgrade
+     you should test that Mark 5 operations work as expected.  If you
+     use the FS pointing model, you should verify your pointing even
+     if you haven't upgraded to 30 parameters.
+
+(19) If you want to use the plotting scripts for the "systests" tools,
+     you will need to install "pgperl" on your system, if you haven't
+     already.  Instructions for how to do this for FS Linux 5 are
+     included in "/usr2/fs/systests/systests.txt".
 
 VI. Transferring The Update Archive By DOS Floppy
 
@@ -440,3 +1322,5 @@ cat fs9902tg.* >fs-9.9.2.tgz
 This will create an exact image of the original fs-9.9.2.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.
+
+ LocalWords:  pdf

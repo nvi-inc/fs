@@ -4,7 +4,6 @@
      >   kpostpass,kcontpass,kcont,klast_tape)
 ! do end of tape housework
 !
-      implicit none
       include 'hardware.ftni'
 ! funciton
       integer itimeDifSec
@@ -43,7 +42,7 @@
 
 ! stop and unload tape if neccesary.
 ! Take care of some simple cases.
-      if(KM5A .or. KM5P) then
+      if(KM5disk) then
         return
       else if(kk4) then
         call snap_unlod(ntape)

@@ -1,8 +1,6 @@
-      subroutine name_trkf(itype,lmode,lpmode,lpass,lnamep)
-      implicit none
-!      include 'hardware.ftni'
+      subroutine name_trkf(lmode,lpmode,lpass,lnamep)
+      include 'hardware.ftni'
 ! passed.
-      integer itype
       character*(*) lmode
       character*(*) lpmode
       character*1 lpass
@@ -10,10 +8,10 @@
       character*(*) lnamep
       integer ilast_non_blank
 
-      if(itype .gt. 1) then
-        write(lnamep,'("trkf",a,a,a1)') lmode,lpmode,lpass
-      else
+      if(knopass) then
         write(lnamep,'("trkf",a)') lmode
+      else
+        write(lnamep,'("trkf",a,a,a1)') lmode,lpmode,lpass
       endif
 !     call squeezewrite(lufile,ldum)
       call squeezeleft(lnamep,ilast_non_blank)

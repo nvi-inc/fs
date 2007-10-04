@@ -24,14 +24,14 @@ C Local
       character*1 cdir
       integer*2 ibufx(4)
       character*1 pnum ! function
-      integer ib2as,ichcm_ch,ichmv_ch,ichmv
+      integer ib2as,ichmv_ch,ichmv
 
 C  Insert the pass number in the scan, then determine
 C  whether this is a forward or reverse pass by the
 C  evenness or oddness of the pass number.
 C  If it's a non-recording scan, set the pass to '0'.
 
-      if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
+      if (cstrec(istn,1) .eq. "S2") then
         kfor=.true. ! always forward
         nch=ichmv_ch(ibuf,nch+1,cpassorderl(ipas,istn,icod)(1:1)) ! group number
       else ! non-S2

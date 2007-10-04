@@ -102,14 +102,14 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 !            This is because some of D.Graham's schedules did not have tape or disks!
 ! 2004Nov21  Modified Maxline.  lstsumo (called by this) does better job of
 !            calculating line position.
+! 2007Jul28 JMGipson. Replace kdisk by km5disk which is in hardware.ftni
 
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
       include 'lstsum.ftni'
-      include 'hardware.ftni'
 C
 C Input:
       logical kskd
@@ -190,7 +190,6 @@ C Local:
       integer itemp
       integer i
 
-      logical kdisk                     !mark5 or makr5p
       integer icode                     !Read from "SETUPxx" command
       integer icode_old                 !old version
       character*2 ccode_tmp
@@ -282,7 +281,6 @@ C    information from common.
 ! This initializes a common block.
       call lstsum_info(kskd)
 
-      kdisk=km5A.or.km5p
 C
 C Calculate different kinds of scaling.
 
@@ -297,7 +295,7 @@ C   scaled by bandwidth calculations in sked.
 
 
 ! Initialize count counter.
-      counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
+      counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
 C 5. Main loop to read .snp file and print summary of observations.
 
 441   rewind(lu_infile)
@@ -369,7 +367,7 @@ C       Now get the source info for the new scan
           elseif (index(ctmp,'READY2').ne.0) then ! rec 2
             cnewtap = 'Rec2'
           endif
-          counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
+          counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
         else if (index(ctmp,'MIDTP').ne.0) then
           inewp = 1
           idur=-1 ! reset duration so it gets calculated again
@@ -401,7 +399,7 @@ C       Now get the source info for the new scan
 
             endif
             if (counter_now.lt.0) then
-              counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
+              counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
              endif
              do i=1,5
                itime_now(i)=itime_temp(i)       !update running time.
@@ -413,7 +411,7 @@ C       Now get the source info for the new scan
      >          ctmp(1:14) .eq. "DISK_RECORD=ON") then
 
           idur=-1 ! make sure we calculate duration from this point
-          if(kdisk) idir=1  ! disks always go forward.
+          if(km5disk) idir=1  ! disks always go forward.
           do i=1,5
             itime_tape_start(i)=itime_now(i)
           end do
@@ -517,7 +515,7 @@ C         examples: fastf=3m42.34s   fastr=2.35m   fastf=34.56s
           if (ctmp(5:5).eq.'R') id=-1
           if (counter_now.gt.0) counter_now=counter_now+ifdur*id
           if (counter_now.lt.0) then          !if spins us off, then reset tape to 0.
-            counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
+            counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
           endif
 
 ! If the last source command was within 5 minutes, command is probably meant to position tape to start of scan.
@@ -563,7 +561,7 @@ C the counter to zero to start the new forward pass.
               cpass(1:1)=' '
             endif ! shift right
             if (ks2.and.cpass.ne.cpass_old) then
-              counter_now=counter_init(kdisk,kk4,ks2,MaxTap(istn))
+              counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
             endif
           endif ! setup
         endif ! might be setup proc
@@ -591,10 +589,8 @@ C the counter to zero to start the new forward pass.
      >        iDur,counter_print,cpass,cnewtap,cdir,
      >        cscan,ctmp_source)
 
-
-
       write(luprt, "()") ! skip line
-      if(kdisk) then
+      if(km5disk) then
          counter_now=counter_print+idur*speed_recorder
          write(luprt,'("   Total",f8.1, " Gbytes")') counter_now/1000
       else

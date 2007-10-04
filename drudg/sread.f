@@ -127,11 +127,6 @@ C       Write out experiment information now.
         i=trimlen(ccorname)
         if (i.gt.0) write(luscn,'("Correlator: ",a)') ccorname(1:i)
 
-C Find the length of each source name and store it for use by vob1inp.
-        do i=1,nsourc
-          nsorlen(i)=trimlen(csorna(i))
-        enddo
-
 C*********************************************************
 C sked file section
 C*********************************************************
@@ -196,7 +191,7 @@ C         Get the first line of this section
             END IF
             ILEN=(ILEN+1)/2
             IF(ctype .eq. "SO") then
-              CALL SOINP(IBUF,ILEN,LUSCN,IERR)
+              CALL SOINP(cbuf,LUSCN,IERR)
             else IF(ctype .eq. "ST") then
               CALL STINP(IBUF,ILEN,LUSCN,IERR)
             else IF(ctype .eq. "FR" .and. ksta) then
@@ -239,8 +234,10 @@ C           Read the next schedule entry
           END DO
 C
         ELSE IF(ctype .eq. "PR") then !procedures
+          ksked_proc=.true.
           write(luscn,*) cbuf(1:ilen)
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
+
         END IF
       END DO
 C

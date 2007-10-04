@@ -1,18 +1,15 @@
       subroutine ChkGrpAndWrite(itrk2,istart,iend,ihead,
-     >  lname,kfound,ibuf,nch)
+     >  cname,kfound,cbuf,nch)
       implicit none
-! fucntions
-      integer mcoma
-      integer ichmv_ch
 
 ! Passed variables
       integer istart,iend       !starting, ending location for test.
       integer ihead             !which headstack, 1 or 2?
-      character*2 lname         !name of group (if found)
+      character*2 cname         !name of group (if found)
 ! modified
       integer itrk2(36,2)       !If we find group, then we set corresponding tracks to 0.
       logical kfound            !all tracks that we look at have 1.
-      integer ibuf(*)
+      character*(*) cbuf        !buffer to write.
       integer nch               !Number of characters so far.
 ! local
       integer i
@@ -32,8 +29,8 @@
          itrk2(i,ihead)=0
       end do
 ! 2. put info in the buffer.
-      nch=ichmv_ch(ibuf,nch,lname)
-      nch = MCOMA(IBUF,nch)     !append comma
+      cbuf(nch:nch+3)=cname//","
+      nch=nch+3
       return
       end
 

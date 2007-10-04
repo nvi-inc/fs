@@ -1,9 +1,9 @@
 !***********************************************************************
-      subroutine SplitNTokens(ldum,ltokens,NumWant,NumGot)
+      subroutine SplitNTokens(ldum,ltokens,MaxToken,NumGot)
       implicit none
       charactER*(*) ldum
-      integer NumWant,NumGot
-      character*(*) ltokens(NumWant)
+      integer MaxToken,NumGot
+      character*(*) ltokens(MaxToken)
 
       logical ktoken     !got token
       logical knospace   !no more space
@@ -11,7 +11,7 @@
       integer istart,inext,itoken
 
       istart=1
-      do itoken=1,NumWant
+      do itoken=1,MaxToken
         call ExtractNextToken(ldum,istart,inext,ltokens(itoken),ktoken,
      >   knospace, keol)
          if(.not.ktoken) then
@@ -20,7 +20,7 @@
          endif
         istart=inext
       end do
-      NumGot=NumWant
+      NumGot=MaxToken
 
       return
       end

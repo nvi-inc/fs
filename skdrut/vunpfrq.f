@@ -1,5 +1,5 @@
       SUBROUTINE vunpfrq(modef,stdef,ivexnum,iret,ierr,lu,
-     .bitden,srate,lsg,frf,lsb,cchref,vbw,csw,cbbref,
+     .bitden,srate,csg,frf,csb,cchref,vbw,csw,cbbref,
      .cpcalref,nchandefs)
 C
 C     VUNPFRQ gets the channel def statements 
@@ -34,9 +34,9 @@ C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       double precision srate ! sample rate
       double precision bitden ! bit density
-      integer*2 lsg(max_chan) ! subgroup
+      character*2 csg(max_chan) ! subgroup
       double precision frf(max_chan) ! RF frequency
-      integer*2 lsb(max_chan) ! net SB
+      character*2 csb(max_chan) ! net SB
       character*6 cchref(max_chan) ! channel ID
       character*6 cbbref(max_chan) ! BBC ref 
       character*6 cpcalref(max_chan) ! pcal ref 
@@ -48,8 +48,7 @@ C  LOCAL:
       character*128 cout,cunit
       double precision d
       character upper
-      integer j,idum,ic,nch
-      integer ichmv_ch ! function
+      integer j,ic,nch
       integer fvex_double,fvex_len,fvex_int,fvex_field,
      .fvex_units,ptr_ch,fget_all_lowl
 C
@@ -57,9 +56,9 @@ C  Initialize.
 C
       nchandefs=0
       do ic=1,max_chan
-        idum = ichmv_ch(lsg(ic),1,'- ') ! initialize
+        csg(ic)="-"
         frf(ic)=0.d0
-        idum = ichmv_ch(lsb(ic),1,'  ')
+        csb(ic)=" "
         cchref(ic)=''
         vbw(ic)=0.d0
         csw(ic)='   ' ! initialize to blank
@@ -87,7 +86,7 @@ C  1.1 Subgroup
           ierr = -1
           write(lu,'("VUNPFRQ02 - Band ID must be 1 character.")')
         else if (nch.eq.1) then
-          idum = ichmv_ch(lsg(ic),1,cout(1:1))
+          csg(ic)=cout(1:1)
         endif
 C
 C  1.2 Polarization -- skip this for now
@@ -118,7 +117,7 @@ C  1.3 Net SB
           ierr = -3
           write(lu,'("VUNPFRQ04 - Invalid sideband field.")')
         else
-          idum = ichmv_ch(lsb(ic),1,cout(1:1))
+          csb(ic)=cout(1:1)
         endif
 
 C  1.4 Bandwidth

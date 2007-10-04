@@ -2,6 +2,8 @@
       real*8 PI,ROG,ROZ,SECRAD,OMEGA,EPS,ROS,C,TWOPI
       PARAMETER (PI = 3.1415926535897932D0)
       PARAMETER (TWOPI = 2.d0*PI)
+      real*8 piov2
+      parameter(piov2=pi/2.d0)
       real*8 Deg2rad, rad2deg
       parameter (deg2rad=twopi/360.d0, rad2deg=360.d0/twopi)
       real*8 Ha2Rad,Rad2HA

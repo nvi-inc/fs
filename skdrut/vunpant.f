@@ -1,5 +1,5 @@
       SUBROUTINE vunpant(stdef,ivexnum,iret,ierr,lu,
-     .LNAANT,LAXIS,AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,ISLCON)
+     > cNAANT,cAXIS,AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,ISLCON)
 C
 C     VUNPANT gets the antenna information for station
 C     STDEF and converts it.
@@ -38,9 +38,9 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-      integer*2 LNAANT(4) ! name of the antenna
-      integer*2 LAXIS(2) ! axis type
-      integer islcon(2) ! slewing constant
+      character*8 cNAANT   ! name of the antenna
+      character*4 cAXIS    ! axis type
+      integer islcon(2)    ! slewing constant
       double precision AXISOF ! axis offset, meters
       real SLRATE(2),ANLIM1(2),ANLIM2(2),diaman
 C            - antenna slew rates for axis 1 and 2, degrees/minute
@@ -53,9 +53,8 @@ C  LOCAL:
       character*2 cax,cax1,cax2
       double precision R
       real almin1,almax1,almin2,almax2
-      integer*2 ldum(64)
-      integer i,i1,i2,iv,nch1,nch2,nl,nch,idumy,iax
-      integer ichcm_ch,ichmv_ch,ichmv ! function
+      character*4 cdum
+      integer i,i1,i2,iv,nch1,nch2,nl,nch,iax
       character upper
       integer fvex_double,fvex_units,fvex_len,fget_station_lowl,
      .ptr_ch,fvex_field
@@ -63,8 +62,8 @@ C
 C
 C  Initialize at start in case we have to leave early.
 
-      CALL IFILL(LNAANT,1,8,oblank)
-      CALL IFILL(LAXIS,1,4,oblank)
+      cnaant=" "
+      caxis=" "
       axisof = 0.d0
       slrate(1)=0.0
       slrate(2)=0.0
@@ -89,7 +88,7 @@ C
           write(lu,'("VUNPANT01 - Antenna name too long")')
           iret=-1
         else
-          IDUMY = ICHMV_ch(LNAANT,1,cout(1:NCH))
+          cnaant=cout(1:nch)
         ENDIF 
       endif
 C
@@ -106,27 +105,22 @@ C
       iret = fvex_field(2,ptr_ch(cout2),len(cout2))
       if (iret.ne.0) return
       NCH2 = fvex_len(cout2)
-      idumy = ichmv_ch(ldum,1,cout (1:2))
-      idumy = ichmv_ch(ldum,3,cout2(1:2))
+      cdum=cout(1:2)//cout2(1:2)
       if (cout2(1:3).eq.'dec') then ! dec -> dc
-        idumy = ichmv_ch(ldum,3,'dc')
+        cdum(3:4)="dc"
+      elseif (cout2(1:3).eq.'yns') then ! XYNS
+        cdum="xyns"
+      else if(cout2(1:3).eq.'yew') then ! XYEW
+        cdum="xyew"
       endif
-      if (cout2(1:3).eq.'yns') then ! XYNS
-        idumy = ichmv_ch(ldum,1,'xy')
-        idumy = ichmv_ch(ldum,3,'ns')
-      endif
-      if (cout2(1:3).eq.'yew') then ! XYEW
-        idumy = ichmv_ch(ldum,1,'xy')
-        idumy = ichmv_ch(ldum,3,'ew')
-      endif
-      call hol2upper(ldum,4)
-      call axtyp(ldum,iax,1) ! check for legal sked axis type
+      call capitalize(cdum) 
+      call axtyp(cdum,iax,1) ! check for legal sked axis type
       if (iax.eq.0) then
         ierr=-2
         write(lu,'("VUNPANT02 - Axis type not recognized: ",a,":",a)') 
      .  cout(1:nch1),cout2(1:nch2)
       else
-        IDUMY = ICHMV(LAXIS,1,ldum,1,4)
+        caxis=cdum
         cax1(1:2)=upper(cout(1:2))
         cax2(1:2)=upper(cout2(1:2))
       endif
@@ -178,7 +172,7 @@ C       Compare the first letter only.
         cax(1:1)=upper(cax(1:1))
         cax(2:2)=upper(cax(2:2))
 C       i1=1
-C       if (ichcm_ch(laxis,3,cax).eq.0) i1=2
+C       if (caxis(1:3) .eq. cax) i1=2
         i1=0
         if (cax(1:1).eq.cax1(1:1)) i1=1
         if (cax(1:1).eq.cax2(1:1)) i1=2
@@ -234,7 +228,7 @@ C       sample   &cw :az:270 deg:450 deg:el: 0 deg: 88 deg;
         if (iret.ne.0) return
         cax=cout(1:2)
         cax(1:1)=upper(cax(1:1))
-        if (ichcm_ch(laxis,1,cax(1:1)).eq.0) then ! first axis is first
+        if (caxis(1:1) .eq. cax(1:1)) then ! first axis is first 
           i1=3
           i2=6
         else ! second axis is first

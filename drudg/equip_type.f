@@ -1,11 +1,11 @@
       subroutine equip_type(cr1)
 C  equip_set displays the current equipment and prompts the user
 C  to change if desired.
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
-      include 'hardware.ftni'
+      include '../skdrincl/valid_hardware.ftni'
 C History
 C 990730 nrv New.
 C 990910 nrv Add warning message. Change LMODE and LMFMT from 'v' to
@@ -32,6 +32,7 @@ C            four letters are checked.
 C 17Apr2003  JMG.  Added Mark5 option.
 ! 2005Feb15  JMG. Got rid of most holleriths.
 ! 2006Jul20. JMG. Disabled switching to Mark3 rack if not Mark3 mode.
+! 2007Jun13  JMG. Modified so that would all fit on one page.
 
 C Input:
       character*(*) cr1
@@ -39,20 +40,23 @@ C Input:
       integer trimlen
       integer iwhere_in_string_list
 C LOCAL:
-      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic,ix
-      integer irack_in,irec1_in,irec2_in
+      integer ich,ic1,ic2,i,nch,irack,irec1,irec2,ic
+      integer irack_in,irec1_in,irec2_in,ifirst_rec
       integer ias2b
+      integer max_equip_lines
+      parameter (max_equip_lines=max(max_rack_type,max_rec_type))
       integer max_rack_local,max_rec_local,max_rec2_local
+      character*12 crack_slot,crec1_slot,crec2_slot
+      character*4  cfirst_slot
+
+
+
+      character*1 cactive
       character*2 crec1
-      character*1 cx(20),cit_rack(20),cit_rec1(20),cit_rec2(20),
-     .            cy(20)
       character*1 lchar
-      data cx/'1','2',18*' '/
 
 C 0. Determine current types.
 
-C       max_rack_local = 8
-C       max_rec_local = 7
         max_rack_local = max_rack_type
 
         max_rec_local = max_rec_type
@@ -61,39 +65,24 @@ C       max_rec_local = 7
         endif
 
         max_rec2_local = max_rec2_type
-        ix=max(max_rack_local,max_rec_local)
-        do i=1,ix
-          cit_rack(i)=' '
-          cit_rec1(i)=' '
-          cit_rec2(i)=' '
-          cy(i)=' '
-        enddo
-        if(cfirstrec(istn) .eq. '1') cy(1)='*'
-        if(cfirstrec(istn) .eq. '2') cy(2)='*'
+!        max_equip_lines=max(max_rack_local,max_rec_local)
 
         irack_in=iwhere_in_string_list(crack_type,max_rack_local,
      >    cstrack(istn))
-        if(irack_in .eq. 0) then
-           write(*,*) "Equip_type: Should never get here 1"
-        else
-           cit_rack(irack_in)="*"
-        endif
 
         irec1_in=iwhere_in_string_list(crec_type,max_rec_local,
-     >    cstrec(istn))
-        if(irec1_in .eq. 0) then
-          write(*,*) "Equip_type2: Should never get here 2"
-        else
-          cit_rec1(irec1_in)="*"
-        endif
+     >    cstrec(istn,1))
 
         irec2_in=iwhere_in_string_list(crec_type,max_rec_local,
-     >    cstrec2(istn))
-        if(irec2_in .eq. 0) then
-          write(*,*) "Equip_type2: Should never get here 3"
+     >    cstrec(istn,2))
+
+        if(cfirstrec(istn) .eq. "1") then
+           ifirst_rec=1
         else
-          cit_rec2(irec2_in)="*"
+           ifirst_rec=2
         endif
+        
+
 C 1. Batch input
 
       if (kbatch) then
@@ -126,52 +115,64 @@ C 2. Interactive input
 
       else ! interactive
  1      WRITE(LUSCN,9019) cantna(ISTN),
-     >  cstrack(istn),cstrec(istn),cstrec2(istn),lfirstrec(istn)
+     >  cstrack(istn),cstrec(istn,1),cstrec(istn,2)
 
-9019    FORMAT(
-     .       ' Equipment set for ',a8,' is: '/
-     .       '   Rack: ',a8,' Recorder 1: ',a8, ' Recorder 2: ',a8/
-     .       '   Schedule will start with recorder ',a1/
-     .       '|Select rack  |Select Rec 1 |Select Rec 2 '
-     .       '|Select starting recorder')
-          do i=1,ix ! write each line
-            if (i.le.max_rack_local.and.i.le.max_rec_local) then ! full
-              if (i.gt.max_rec2_local) then ! no rec 2 (3=Mk3)
-                write(luscn,9018) cit_rack(i),i,crack_type(i),
-     .          cit_rec1(i),i,crec_type(i),   cy(i),cx(i)
-9018            format('|',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
-     .          12x,         ' |',4x,a1,a1)
-              else ! write them all
-                write(luscn,9020) cit_rack(i),i,crack_type(i),
-     .          cit_rec1(i),i,crec_type(i),
-     .          cit_rec2(i),i,crec_type(i),cy(i),cx(i)
-9020            format('|',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
-     .          a1,i2,'=',a8,' |',4x,a1,a1)
+9019    FORMAT(a8,' equipment: Rack=',a8,' Recorder1=',a8
+     >       ' Recorder2=',a8)
+
+        write(luscn,'(a)')
+     .       '| Select rack  | Select Rec 1 | Select Rec 2 | Start|'
+          do i=1,max_equip_lines ! write each line
+            if(i .le. max_rack_type) then
+              if(irack_in .eq. i) then
+                cactive="*"
+              else
+                cactive=" "
               endif
-            else if (i.le.max_rack_local.and.i.gt.max_rec_local) then ! rack only
-              write(luscn,9021) cit_rack(i),i,crack_type(i),
-     .        cy(i),cx(i)
-9021          format('|',a1,i2,'=',a8,' |',12x,' |',12x,' |',4x,a1,a1)
-            else if (i.gt.max_rack_local.and.i.le.max_rec_local) then ! rec only
-              write(luscn,9022) cit_rec1(i),i,crec_type(i),
-     .        cit_rec2(i),i,crec_type(i),cy(i),cx(i)
-9022          format('|',12x,' |',a1,i2,'=',a8,' |',a1,i2,'=',a8,' |',
-     .        4x,a1,a1)
+              write(crack_slot,'(a1,i2,"=",a8)') cactive,i,crack_type(i)
+            else
+              crack_slot=" "
             endif
+            if(i .le. max_rec_type) then
+              if(irec1_in .eq. i) then
+                cactive="*"
+              else
+                cactive=" "
+              endif
+              write(crec1_slot,'(a1,i2,"=",a8)') cactive,i,crec_type(i)
+            else
+              crec1_slot=" "
+            endif
+            if(i .le. max_rec2_type) then
+              if(irec2_in .eq. i) then
+                cactive="*"
+              else
+                cactive=" "
+              endif
+              write(crec2_slot,'(a1,i2,"=",a8)') cactive,i,crec_type(i)
+            else
+              crec2_slot=" "
+            endif
+            if(i .le. 2) then
+              if(ifirst_rec .eq. i) then
+                 cactive="*"
+              else
+                 cactive=" "
+              endif
+              write(cfirst_slot,'(a,i2)') cactive,i
+            else
+              cfirst_slot=" "
+            endif
+            write(luscn,'("| ",4(a,1x,"|",1x))') crack_slot,crec1_slot,
+     >         crec2_slot,cfirst_slot
           enddo
-          write(luscn,9023)
-9023      format('|  0=no change|  0=no change|  0=no change|'/
-     .       ' Press <return> or type 0 for no change,'
-     .       ' else type <rack> <rec1> <rec2> <start>'/ 
-     .       '   ********************************************',
-     .       '***********************'/
-     .       '   ** CAUTION: Use these selections with care, ',
-     .       'because the schedule **'/
-     .       '   ** as written may not be consistent with ',
-     .       'your choices.           **'/
-     .       '   ********************************************',
-     .       '***********************'/
-     .       ' ? ',$)
+!          write(luscn,'(a)')
+!     >     '|  0=no change |  0=no change |  0=no change | 0=no change'
+          write(luscn,'(a)')
+     >   ' Press <ret> or type 0 for no change. '//
+     >   ' Else <rack><rec1><rec2><start> '
+          write(luscn,'(a)')
+     >      "CAUTION! Be sure the schedule works with your choices!"
 
         irack=0
         irec1=0
@@ -279,35 +280,35 @@ C formatter because they can't record V modes.
 C 4. Modify rec 1
 
       if((irec1.ge.1.and.irec1.le.max_rec_local) .and.
-     >     (cstrec(istn) .ne. crec_type(irec1))) then
+     >     (cstrec(istn,1) .ne. crec_type(irec1))) then
          if(crec_type(irec1) .eq. "unknown") then
             call write_error_and_pause(luscn,
      >    "EQUIP_TYPE: Warning! Can't change to recorder type unknown!")
          else
-            write(luscn,902) cantna(istn),cstrec(istn),crec_type(irec1)
-902         format('EQUIP03-CHANGED ',a,' recorder 1 from ',a,' to ',a)
-            cstrec(istn)=crec_type(irec1)
+           write(luscn,902) cantna(istn),cstrec(istn,1),crec_type(irec1)
+902        format('EQUIP03 - CHANGED ',a,' rec1 from ',a,' to ',a)
+           cstrec(istn,1)=crec_type(irec1)
          endif
       endif
 
 C 5. Modify rec 2
 C    If rec 1 is K4, S2 or Mk3 then can't have rec 2
       if((irec2.ge.1.and.irec2.le.max_rec2_local) .and.
-     >    (cstrec2(istn) .ne. crec_type(irec2))) then
-        write(luscn,909) cantna(istn),cstrec2(istn),crec_type(irec2)
-909     format('EQUIP09 - CHANGED ',a,' recorder 2 from ',a,' to ',a)
-        cstrec2(istn)=crec_type(irec2)
+     >    (cstrec(istn,2) .ne. crec_type(irec2))) then
+        write(luscn,909) cantna(istn),cstrec(istn,2),crec_type(irec2)
+909     format('EQUIP09 - CHANGED ',a,' recor2 from ',a,' to ',a)
+        cstrec(istn,2)=crec_type(irec2)
         if (nrecst(istn).eq.1.and.irec2.gt.1) then
           write(luscn,910) cantna(istn)
 910       format('EQUIP10 - WARNING: Second recorder was added to ',
      .        'the equipment for ',a,'.')
-              nrecst(istn)=2
+          nrecst(istn)=2
         else if (nrecst(istn).eq.2.and.irec2.eq.1) then
-           write(luscn,911) cantna(istn)
-911        format('EQUIP11 - WARNING: Second recorder was removed ',
+          write(luscn,911) cantna(istn)
+911       format('EQUIP11 - WARNING: Second recorder was removed ',
      .        'from equipment for ',a8,'.')
-              nrecst(istn)=1
-         endif
+          nrecst(istn)=1
+        endif
       endif ! modify rec2
 
 C 6. Modify first recorder
@@ -315,9 +316,9 @@ C 6. Modify first recorder
       if(crec1 .eq.'0' .or. cfirstrec(istn) .eq. crec1) then
          continue       ! no change.
       else if((crec1 .eq. '1' .and.
-     >   (cstrec(istn).eq.'unused'.or.cstrec(istn).eq.'none'))
+     >   (cstrec(istn,1).eq.'unused'.or.cstrec(istn,1).eq.'none'))
      >    .or. (crec1 .eq. '2' .and.
-     >   (cstrec2(istn).eq.'unused'.or.cstrec2(istn).eq.'none'))) then
+     >   (cstrec(istn,2).eq.'unused'.or.cstrec(istn,2).eq.'none'))) then
             write(luscn,'(a,a,/,a)')
      >   "EQUIP12 - Can't start the schedule with Recorder ",crec1,
      >   " because it is set to 'none' or 'unused'."

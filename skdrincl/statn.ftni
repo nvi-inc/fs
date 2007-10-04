@@ -1,48 +1,75 @@
-C     STATION INFORMATION COMMON BLOCK
-C
-C 960817 nrv Add S2 variables
-C 990524 nrv Add tape_length, specified by user.
-C 990920 nrv Add valid rack and rec types here.
-C 990921 nrv Add two_letter_code
-C 991028 nrv Add second recorder type.
-C 991101 nrv Add lfirstrec for first recorder to use.
-C 991108 nrv Remove lstform because this is incorporated in K4 rack names.
-C 000605 nrv Add tape_allocation
-C 021010 nrv Add tape_motion_save
-! 2006Aug03 JMGipson. Got rid of glong(max_stn), phi(max_stn), r1(max_stn), r2(max_stn) which were not used anywhere.
-
-      double precision stnxyz,stnpos,baselen,axisof,  BX,BY,BZ
-C
-      real stnlim,stnrat,stnelv,azhorz,elhorz,co1mask,
-     .co2mask,sefdst,diaman,sefdpar,sefdstel
-C
-      integer nstatn,iaxis,maxpas,istcon,nhorz,
-     .ncord,maxtap,nsefdpar,nrecst,nheadstack,ibitden_save,
-     .itearl,itlate,itgap,ns2tapes,tape_length
-C
-      integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
-     .lhccod,lterna,lbsefd,lterid,lstrec,lstrack,ls2speed,
-     .two_letter_code,lstrec2,lfirstrec
+!     STATION INFORMATION COMMON BLOCK
+! 2007Aug10  JMGipson. Obsolete variables removed and reorganized.
 
 
+C
+C two_letter_code is a unique identifier for each DAS.
+C  NSTN   - number of stations
+C  STNPOS - station longitude and latitude, geodetic, radians
+C  STNLIM - limit stops: (1,1) lower limit, axis 1
+C           (degrees)    (2,1) upper limit, axis 1
+C                        (1,2) lower limit, axis 2
+C                        (2,2) upper limit, axis 2
+C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute)
+C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
+C  STNELV - station elevation limit, assigned in SKED
+C  ISTCON - slew overhead time, seconds
+C  NHORZ - number of az, el pairs in horizon mask
+C  AZHORZ, ELHORZ - as, el of horizon mask
+C  NCORD - number of pairs in coordinate mask
+C  CO1MASK, CO2MASK - mask for antenna coordinates
+C  SEFDST - System Equiv. Flux Densities by observing band.
+C  baselen - baseline lengths, meters
+C  stnxyz - station position x,y,z in meters
+C  lantna - antenna names
+C  axisof - axis offset
+C  diaman - antenna diameter
+C  maxtap - maximum tape length for each station
+C  klineseg - true if this station's horizon mask is line segments,
+C             false if it's step functions
+
+! Double precision
+      double precision axisof(max_stn)
+      double precision stnxyz(3,max_Stn)   	!XZY coordiantes
+      double precision stnpos(2,max_stn)        !Long, lat in radians
+      double precision baselen(max_baseline)    !Baseline length
+      double precision BX(max_baseline)         !X-component
+      double precision BY(max_baseline)
+      double precision BZ(max_baseline)
+
+! real
+      real diaman(max_stn)                      !Diameter.
+      real stnlim(2,2,max_stn)                  !Antenna limits (min,max)
+      real stnrat(2,max_stn)                    !Slew rates
+      real AZHORZ(MAX_HOR,MAX_STN)              !AZ mask
+      real ELHORZ(MAX_HOR,MAX_STN)              !El Mask
+      real CO1MASK(MAX_COR,MAX_STN)             !co-ordinate mask1
+      real CO2MASK(MAX_COR,MAX_STN)
+      real STNELV(MAX_STN)                      !el limit
+
+      real  SEFDST(MAX_BAND,MAX_STN)             !SEFD
+      real  sefdpar(max_sefdpar,max_band,max_stn)  !function to determine el dependent SEFD
+      real  sefdstel(max_band,max_stn)          !elevation dependent SEFD
+
+
+! Integer/logical
+      integer nstatn,iaxis,maxpas,istcon,nhorz,ncord,maxtap,nsefdpar
+      integer nrecst,nheadstack,ibitden_save
+      integer itearl,itlate,itgap,ns2tapes,tape_length
       logical klineseg
 
-      character*128 stndefnames,tape_motion_type,
-     > tape_allocation,tape_motion_save
-C
-      character*8 crack_type,crec_type
-      COMMON/STATN/stnxyz(3,max_stn),baselen(max_baseline),
-     .       axisof(max_stn),
-     .       BX(MAX_BASELINE),
-     .       BY(MAX_BASELINE),BZ(MAX_BASELINE),
-     .       STNPOS(2,MAX_STN),
-     .       STNLIM(2,2,MAX_STN),STNRAT(2,MAX_STN),
-     .       STNELV(MAX_STN),AZHORZ(MAX_HOR,MAX_STN),
-     .       ELHORZ(MAX_HOR,MAX_STN),CO1MASK(MAX_COR,MAX_STN),
-     .       CO2MASK(MAX_COR,MAX_STN),
-     .       SEFDST(MAX_BAND,MAX_STN),diaman(max_stn),
-     .       sefdpar(max_sefdpar,max_band,max_stn),
-     .       sefdstel(max_band,max_stn),
+      COMMON/STATN_dbl/
+     >       axisof,
+     >       stnxyz,STNPOS,
+     >       baselen, BX, BY,BZ
+
+      common/statn_real/
+     >       diaman,
+     >       STNLIM,STNRAT,
+     >       AZHORZ,ELHORZ, CO1MASK,CO2MASK,STNELV,
+     >       SEFDST,    sefdpar,     sefdstel
+
+      common/statn_int/
      .       NSTATN,
      .       IAXIS(MAX_STN),
      .       MAXPAS(MAX_STN),
@@ -55,72 +82,31 @@ C
      .       ibitden_save(max_stn),
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
      .       ns2tapes(max_stn),
-     .       LSTNNA(4,MAX_STN),LSTCOD(MAX_STN),
-     .       LPOCOD(MAX_STN),LPOSID(MAX_STN),
-     .       lantna(4,max_stn),lterid(2,max_stn),
-     .       lstrec(4,max_stn),lstrack(4,max_stn),lstrec2(4,max_stn),
-     .       lfirstrec(max_stn),
-     .       loccup(4,max_stn),
-     .       lhccod(max_stn),lterna(4,max_stn),
-     .       lbsefd(max_band,max_stn),
-     .       ls2speed(2,max_stn),two_letter_code(max_stn),
      .       klineseg(max_stn)
 
-! This allows easily manipulation of what are, really, character arrays.
-      character*8 cstnna(max_stn), cterna(max_stn),  cantna(max_stn)
-      equivalence (lstnna,cstnna), (lterna,cterna),  (lantna,cantna)
-      character*8 cstrec(max_stn), cstrack(max_stn), cstrec2(max_stn)
-      equivalence (lstrec,cstrec), (lstrack,cstrack),(lstrec2,cstrec2)
-      character*8 coccup(max_stn)
-      equivalence (coccup,loccup)
-      character*2 cfirstrec(max_stn)
-      equivalence (cfirstrec,lfirstrec)
+! Start of character data.
+      character*8 cstnna(max_stn)            	!Position name.
+      character*8 cantna(max_stn)               !Antenna name (may have multiple antennas)
+      character*8 coccup(max_stn)               !Occupation code
+      character*8 cterna(max_stn)               !Terminal name
+      character*8 cstrack(max_stn)              !rack type
+      character*8 cstrec(max_stn,2)             !recorders, upto 2
+      character*4 cterid(max_stn)               !Terminal ID
+      character*2 cfirstrec(max_stn)            !First recorder: "1" or "2"
+      character*2 cbsefd(max_band,max_stn)      !Code for station dependent SEFD
+      character*4 cs2speed(max_stn)             !Speed for S2 recordes
+      character*2 cpocod(max_stn)               !Position code for station.
+      character*2 chccod(max_Stn)               !Horizon maske code
+      character*1 cstcod(max_stn)               !Single letter code. Only used internally.
 
-      character*4 cs2speed(max_stn),  cterid(max_stn)
-      equivalence (cs2speed,ls2speed),(cterid,lterid)
+      common /statn_ch/cstnna,cantna,coccup,cterna,cstrec,cstrack
+      common /statn_ch/cterid,cfirstrec,cbsefd,cs2speed
+      common /statn_ch/cpocod,chccod,cstcod
 
-      character*2 cpocod(max_stn), cstcod(max_stn),  cposid(max_stn)
-      character*2 chccod(max_Stn)
-
-      equivalence (cpocod,lpocod), (cstcod,lstcod), (cposid,lposid)
-      equivalence (chccod,lhccod)
-
+      character*128 stndefnames
+      character*128 tape_motion_type
+      character*128 tape_allocation
+      character*128 tape_motion_save
       COMMON /STATN_CH/stndefnames(max_stn),tape_motion_type(max_stn),
-     > crack_type(max_rack_type),crec_type(max_rec_type),
      > tape_allocation(max_stn),tape_motion_save(max_stn)
-C
-C two_letter_code is a unique identifier for each DAS.
-C  NSTN   - number of stations
-C  LSTNNA - position names, up to 8 chars
-C  STNPOS - station longitude and latitude, geodetic, radians
-C  STNLIM - limit stops: (1,1) lower limit, axis 1
-C           (degrees)    (2,1) upper limit, axis 1
-C                        (1,2) lower limit, axis 2
-C                        (2,2) upper limit, axis 2
-C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute)
-C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
-C  LSTCOD - station codes, 2 characters
-C  LTERID - terminal ID, up to 4 characters
-C  LSTREC - recorder type
-C  LSTRACK - rack type
-C  STNELV - station elevation limit, assigned in SKED
-C  ISTCON - slew overhead time, seconds
-C  NHORZ - number of az, el pairs in horizon mask
-C  AZHORZ, ELHORZ - as, el of horizon mask
-C  NCORD - number of pairs in coordinate mask
-C  CO1MASK, CO2MASK - mask for antenna coordinates
-C  LPOSID - position ID's
-C  SEFDST - System Equiv. Flux Densities by observing band.
-C  baselen - baseline lengths, meters
-C  stnxyz - station position x,y,z in meters
-C  lantna - antenna names
-C  axisof - axis offset
-C  diaman - antenna diameter
-C  loccup - occupation code
-C  lhccod - code for horizon/coordinate mask
-C  LPOCOD - position codes
-C  maxtap - maximum tape length for each station
-C  lterna - terminal name
-C  lbsefd - band names for sefds, storage until frequencies are known
-C  klineseg - true if this station's horizon mask is line segments,
-C             false if it's step functions
+

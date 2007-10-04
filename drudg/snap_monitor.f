@@ -3,7 +3,7 @@
 
       logical kin2net
 
-      if(km5A.or.KM5P) then
+      if(Km5Disk) then
         if(kin2net) then
           write(luFile,'("in2net")')
         else

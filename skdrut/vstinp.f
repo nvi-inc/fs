@@ -16,6 +16,7 @@ C 991103 nrv Initialize LSTREC2 to 'none', LFIRSTREC to 'A'.
 C 991123 nrv Recorder 1 and 2, not a and b.
 C 001114 nrv For two recorders save second type same as first.
 C 010615 nrv Initialize lstrec2 to blanks.
+! 2006Nov30 JMGipson. Modified to check recorder type.
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -32,12 +33,10 @@ C LOCAL:
       logical kline
       integer ierr1
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
-      integer*2 lant(4),LAXIS(2),lter(4)
-      integer*2 lrec(4),lrack(4),ls2sp(2)
-      character*8 cocc,crec,crack,cs2sp
+      character*4 cs2sp
+      character*8 cocc,crec,crack
       character*8 cant,cter,csit
-      equivalence (cant,lant),(cter,lter)
-      equivalence (crec,lrec),(crack,lrack),(cs2sp,ls2sp)
+      character*4 caxis
 
       integer islcon(2),ns2tp
       real AZH(MAX_HOR),ELH(MAX_HOR)
@@ -46,10 +45,9 @@ C LOCAL:
       integer*2 lb(max_band)
       double precision POSXYZ(3),AOFF
       INTEGER J,nr,maxt,npar(max_band),nhz,i
-      integer*2 lidt(2),lid,ltlc
+      character*2 ctlc
       character*2 cid
       character*4 cidt
-      equivalence (lidt,cidt)
       character cstid(max_stn)
       double precision poslat,poslon
       integer nstack
@@ -81,7 +79,7 @@ C     2. Now call routines to retrieve all the station information.
 
         il=fvex_len(stndefnames(i))
         CALL vunpant(stndefnames(i),ivexnum,iret,ierr,lu,
-     .    lant,LAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)
+     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,
      >    '(a, a,/,"iret=",i5," ierr=",i5)')
@@ -100,9 +98,9 @@ C     2. Now call routines to retrieve all the station information.
           ierr1=2
         endif
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
-     .    LIDT,lter,nstack,maxt,nr,lb,sefd,par,npar,
-     .    lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tp,
-     .    ltlc)
+     .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
+     .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,
+     .    ctlc)
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >    "VSTINP03 - Error getting $DAS information for ",
@@ -116,8 +114,8 @@ C
 C       2.1 Antenna information
 
         cSTCOD(I) = cID
-        LPOCOD(I) = lstcod(i)
-        call axtyp(laxis,iaxis(i),1)
+        cPOCOD(I) = cid
+        call axtyp(caxis,iaxis(i),1)
         STNRAT(1,I) = SLRATE(1)
         STNRAT(2,I) = SLRATE(2)
         ISTCON(1,I) = ISLCON(1)
@@ -158,12 +156,16 @@ C
         endif
 
         cstrack(i)=crack
-        cstrec(i)=crec
-        if (nr.eq.1) then
-          cstrec2(i)='none'
+
+        call check_rec_type(crec)
+
+        cstrec(i,1)=crec
+        if(nr .eq. 1) then
+          cstrec(i,2)='none'
         else
-          cstrec2(i)=crec
+          cstrec(i,2)=crec
         endif
+
         cfirstrec(i)='1'
         nheadstack(i)=nstack ! number of headstacks
         maxtap(i) = maxt     ! tape length
@@ -219,7 +221,6 @@ C         endif
 C
 C      2.6 Here we handle the coordinate mask
 C
-
       enddo ! get all station information
 
 C Check for duplicate 1-letter codes and change any necessary.

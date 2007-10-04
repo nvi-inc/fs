@@ -10,7 +10,7 @@ C 991211 nrv Print file name in error message.
       include 'drcom.ftni'
 
 C Local
-      integer i,ierr,ilen
+      integer i,ierr
       integer printer,trimlen ! function
       character*20 ccmd
       logical kex

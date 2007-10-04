@@ -14,10 +14,15 @@ C     include 'skcom.ftni'
 C
 C  Calls: gtfld, igtst2, ifill, wrerr
 
+! functions
+      integer ias2b,i2long,ichmv,jchar !functions
+      integer igetstatnum2
+
 C  LOCAL
       integer*2 LKEYWD(12)
       integer ival,ich,ic1,ic2,nch,i,idummy,istn
-      integer ias2b,i2long,igtst2,ichmv,jchar !functions
+      character*24 ckeywd
+      equivalence (lkeywd,ckeywd)
 C
 C MODIFICATIONS:
 C 970314 NRV New. Copied from SELEV.
@@ -34,12 +39,9 @@ C
           write(luscn,'("SEARL00 - Select stations first.")')
           RETURN
         END IF  !no stations selected
-        WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  EARLY START (sec)')
+        WRITE(LUDSP,'(" ID  STATION  EARLY START (sec)")')
         DO  I=1,NSTATN
-C
-          WRITE(LUDSP,9111) LpoCOD(I),cSTNNA(I),itearl(i)
-9111      FORMAT(1X,A2,2X,A,1X,i5)
+          WRITE(LUDSP,"(1X,A,3X,A,1X,i5)") cpoCOD(I),cSTNNA(I),itearl(i)
         END DO  !
         RETURN
       END IF  !no input
@@ -76,8 +78,9 @@ C      endif
           END DO
           RETURN
         END IF  !all stations
-        IF  (IGTST2(LKEYWD,ISTN).le.0) THEN  !invalid
-          write(luscn,9901) lkeywd(1)
+        istn=igetstatnum2(ckeywd(1:2))
+        if (istn.le.0) then
+          write(luscn,9901) ckeywd(1:2)
 9901      format('SEARL01 - Invalid station name: ',a2)
 C         skip over matching time and get next station name
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)

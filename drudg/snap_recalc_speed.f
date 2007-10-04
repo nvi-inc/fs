@@ -1,7 +1,6 @@
       subroutine snap_recalc_speed(luscn,kvex,speed_ft,cs2speed,
      >   cspeed,ierr)
 
-      implicit none
       include 'hardware.ftni'
       integer ierr
 ! 2005Apr26  JMGipson  Made cs2speed ascii.
@@ -24,7 +23,7 @@
       endif
 ! get ascii version of speed.
       cspeed=" "
-      if(km5A) then
+      if(km5Disk) then
         continue
       else if(ks2) then
           if(kvex) then
@@ -36,7 +35,6 @@
       else if(.not.kk4) then
         speed_inches = 12.0*speed_ft
         call spdstr(speed_inches,cspeed,ierr)   !return speed as ASCII in ispeed.
-        write(*,*) ierr
       endif
       return
       end

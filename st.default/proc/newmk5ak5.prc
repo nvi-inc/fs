@@ -1,4 +1,4 @@
-define  checkmk5a     00000000000 
+define  checkmk5      00000000000 
 scan_check
 enddef
 define  checkk5       00000000000 

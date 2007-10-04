@@ -58,7 +58,8 @@ C
               endif
               nfreq(isub,is,ic)=nfreq(isub,is,ic)+1 !count number of frequencies
               cs=cset(iv,is,ic)
-              if(freqrf(iv,is,ic) .gt. 0) then
+              if(freqrf(iv,is,ic).gt.0 .and.
+     >            cstrec(is,1)(1:2).ne."S2") then
                 do iul=1,2
                   ip=1
 C               Full addition for sign bit

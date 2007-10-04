@@ -26,6 +26,7 @@ C 970401 nrv Remove itrax -- not used
 ! 25Jul2003 JMG changed itras to a function
 ! 2005Nov29 JMGipson. Itras changed to give Mark4 Track number. Required minor change here.
 ! Got rid of residual holleriths.
+! 2006Nov01 JMGipson.  Recognize and don't complain on fan out 1:1  
 
 C
 C Called by: PROCS
@@ -118,9 +119,10 @@ C                       itrax(isb,ibit,ihd,ichan+6)=it+6
 
 C 3. Fan-in mode. Not implemented.
       iy=index(cmode,":1")
-
-      if (iy.ne.0) then ! fan-in
+! 1:1 is valid mode--no fanout or fanint  
+      if (iy.ne.0. .and. cmode(iy-1:iy-1) .ne. "1") then ! fan-in  
         write(*,*) "TRKALL: Fan in mode not implemented!"
+        write(*,*) "Mode: ", cmode
 !        read(cmode(1:iy-1),*) n
         return
 !       n=ias2b(lmode,iy-1,1)

@@ -1,0 +1,877 @@
+File: /usr2/fs-9.10.0/misc/fs9100up.txt  Version: 0.1  Date: 071004
+
+I. Introduction
+
+This memo is divided into six sections:
+
+   I.   Introduction.
+   II.  Changes Since Version 9.9.2
+   III. Installation
+   IV.  Transferring The Update Archive By DOS Floppy
+
+Please print this notice and read it carefully before installing the
+new version.
+
+This version is intended only for stations with Mark 5B recorders.  It
+has been tested with mark 5B recorders and is required for operations
+with such recorders.  Stations with Mark 5A recorders are requested to
+refrain from using this version for operations until it has been more
+thoroughly tested.  You are welcome to test the new version though and
+we would like to hear about your experiences.  Your input will hasten
+the recommendation to use the new version for Mark 5A.
+
+II. Changes Since Version 9.9.2
+
+This section is divided into three sub-sections: A. Changes in the FS,
+B. Changes in DRUDG, and C. Known FS Bugs.  Each sub-section starts
+with a summary of the items covered followed by a more detailed
+description.
+
+			 A. Changes in the FS
+
+The following is a summary of the FS changes.
+
+1. Support for Mark 5B Recorder added.
+2. Support for Mark 5B Sampler Module added.
+3. Reduced likelihood of Class I/O race condition.
+4. GNPLT Tcal vs frequency plot bug fixed.
+5. Standard procedure "greplog" made case insensitive.
+6. Systest improvements and update.
+7. Method to deny focus to monit and xonsole and to keep "Field System
+   Prompt" on top has been added.
+8. The "/usr2/fs/misc/stndet.txt" station detector documentation
+   brought up to date.
+9. Beamwidth scale factor in .rxg files no longer ignored.
+10. IF3 command help page includes documentation of standard switch
+    wiring.
+11. VC command help page has better external filter documentation.
+12. Typical gpib device names added to
+    /usr2/fs/st.default/control/ibad.ctl comments.
+13. Extra delay added for Mark IV decoder communication to improve
+    robustness.
+14. FS Linux 6 RAID operations notes included.
+
+A more detailed discussion of these changes follows.
+
+1. Support for Mark 5B Recorder added.  This version of the FS is the
+   first to support the Mark 5B recorder.  The Mark 5B should be
+   operated using the "dimino" control program.  The "dimino" program
+   name is actually an alias for the "Mark5A" program used with Mark5A
+   recorders.  Invoking the program with the name "dimino" changes its
+   behavior to support a Mark5B recorder.  Even though some other
+   program names for Mark5A will also support the Mark 5A, the FS
+   compatibility for Mark 5B operations has only be tested with and is
+   only supported when the name "dimino" is used.  The FS requires
+   Mark5A software version 2007y206d or later for Mark 5b support.  FS
+   operation with a Mark 5B recorder is described in
+   /usr2/fs/misc/mk5b_ops.txt.  You are strongly encouraged to read
+   this document to get an overview and also a detailed understanding
+   of how to use the FS with a Mark 5B recorder.
+
+   The user visible manifestations of Mark 5B support in the FS are:
+   new recorder types "mk5b" and "mk5b_bs", new display/control in
+   "fmset" program, new SNAP command "mk5b_mode", small changes in
+   some existing Mark 5B command outputs, and new operations
+   procedures.
+
+   The new recorder types "mk5b" and "mk5b_bs" select simple and FS
+   controlled bank switching Mark 5B operation respectively.  These
+   types are entirely analogous to the "mk5a" and "mk5a_bs" recorder
+   types for Mark 5A.  What is different however is that use of the
+   Mark 5A types in the control file is optional ("mk5a_bs" is implied
+   if a non-Mark5 recorder type was selected), but for Mark 5B, the
+   type must be set explicitly in the control file.
+
+   The "fmset" program now includes addition display information and
+   control functions related to the Mark 5B recorder.  The new
+   functions include commands to correct errors in the configuration
+   based on the hardware in use.  The use a rack with a Mark 5B
+   Sampler module with a Mark5B recorder affects the behavior of
+   "fmset" because there are stricter checks that are possible on the
+   timing configuration of the Mark 5B recorder.  The "setcl" program
+   will report errors if the timing configuration is not correct based
+   on the selected equipment types.  This is all described more fully
+   in /usr2/fs/misc/mk5b_ops.txt.
+
+   A new command "mk5b_mode" was created to allow the setting of the
+   Mark 5B recorder.  It is not sufficient to set the mode with a
+   "mk5=..." command because the FS needs to know the details of the
+   set-up and the "mk5b_mode" is used to communicate this information
+   to the FS.
+
+   Some of the existing Mark 5 commands have changes in their display
+   parameters when used with a Mark 5B.  The differences are
+   documented in the help pages for the commands.  These changes are
+   caused changes in the underlying syntax of the recorder's control
+   program.
+
+   Documentation on new operation procedures is included in the file
+   /usr2/fs/misc/mk5b_ops.txt.  The most important change is that
+   whenever the Mark5B control program "dimino" is restarted, it is
+   necessary for the user to use "fmset" to verify that the Mark 5B
+   has the correct time.  The displayed time of the recorder should
+   compared to a hardware clock.  After a power-up of the Mark 5B, a
+   "synch" commands must be used in "fmset" before setting the time.
+
+   Other internal changes include: "setcl" being able to set the FS
+   time from the Mark 5B; support for mk5_mode selected tracks in
+   detector selections: "formvc", formif", and "formbbc", in ONOFF,
+   TPICD, and various TSYS related commands.
+
+2. Support for Mark 5B Sampler Module added.  This version of the FS
+   is the first to support the Mark 5B Sampler Module.  If a rack with
+   a Mark 5B Sampler modules is in use, it must be specified as "mk5"
+   or "vlba5" as appropriate, in the "equip.ctl" control file.  The
+   Mark 5B Sampler Module contains a VSI4 board, which is controlled
+   by the new "vsi4" SNAP command.  The selection of a "5" rack with a
+   Mark5B recorder affects the behavior of "fmset" and "setcl",
+   because there are stricter checks that are possible on the timing
+   configuration of the Mark 5B recorder.  FS operation with a Mark 5B
+   Sampler Module is described in /usr2/fs/misc/mk5b_ops.txt.  You are
+   strongly encouraged to read this document to get an overview and
+   also a detailed understanding of how to use the FS with the Mark 5B
+   Sampler Module.
+
+3. Reduced likelihood of Class I/O race condition.  Due to the fact that
+   Linux is not a real-time operating system, it is not possible to
+   assure that certain sections of code are executed within the same
+   processor time-slice.  As a result, in certain situations in
+   "matcn", "mcbcn", and "ibcon" a race condition could arise.  This
+   would occur when the last of a series of class records had been
+   read, thereby normally deallocating the class number.  There is
+   normally a subsequent "class clear" operation to clean-up the class
+   number.  However, if the process finished it time-slice on the
+   processor before the clear, the class number might be re-allocated
+   before the class clear finally did occur.  The class clear then
+   might deallocate the class number while it was use by another
+   program and the other program would abort with "class check" error.
+   It is not possible to eliminate the possibility of this happening
+   in all cases without significant recoding.  However, the chances of
+   it happening have been greatly reduced by moving the class clear
+   operation to just after the last class record is read in these
+   three programs.  This minimizes the amount of time during which the
+   race condition could occur.  Previously this amount of time could
+   have been quite significant.  Indications from testing indicate
+   that this has greatly reduced the frequency (eliminated as far as
+   we know) an already rare problem.
+
+4. GNPLT Tcal vs frequency plot bug fixed.  A bug related to plotting
+   the Tcal vs.frequency curve when two points had the same Tcal value
+   was fixed.  Thanks to Andrea Orlati (Medicina) for providing this
+   fix.
+
+5. Standard procedure "greplog" made case insensitive.  Thanks to
+   Michael Lindqvist (Onsala) for suggesting this.
+
+6. Systest improvements and update.  Several improvements were made in
+   the "systests" utilities.  In general, the Mark 5B Sampler Module
+   and recorder are now supported .  Sample procedure libraries
+   systvsi4.prc and systvsi42.prc for use with systems with a vsi4
+   board (Mark 5B Sampler Module) are now included.  The systests.txt
+   file includes directions on how to install these from scratch or
+   change an existing installation to support a vsi4 board.  The
+   plotlog utility: plot pcal amplitude versus phase ("-t" option);
+   can now handle historical logs with old style time-tags; includes
+   more editing features for data plots (cable cal "-c", Tsys "-t",
+   and pcal data "-z"); provides a mechanism to plot "tsys" related
+   data (tpi, tpical, tpdiff, tpzero, tpgain, and tpdiffgain) with the
+   new "-s" option; and separates the "-1anw" and "-p" plots from the
+   regular output.  The samplestat, pcalamp, pcalspur, and pcalimage
+   utilities now plot only the first iteration of samples in a log
+   file and ends with a warning message if it found additional
+   samples.  The v/chk1024 procedures, schedule files, and analysis
+   utility now: report the decoder firmware version; clear the aux
+   data field for easier reading; include "scan_check" as one of the
+   checks, have improved raw output listings; fixed an aux data
+   parsing bug that made bad tracks look good; added skipping the AUX
+   data check as an option; and discard prior results for previous
+   set-ups.
+
+7. Method to deny focus to monit and xonsole and to keep "Field System
+   Prompt" on top has been added.  An annoyance on the X-display has
+   been that sometimes the monit and xconsole windows get the input
+   focus.  A method to defeat this has been included.  A method to
+   keep the "Field System Prompt" on top so it doesn't get lost has
+   also been included.
+
+8. The "/usr2/fs/misc/stndet.txt" station detector documentation
+   brought up to date.  This documentation had not been updated to
+   reflect the new calibration scheme.  This has been corrected.
+
+9. Beamwidth scale factor in .rxg files no longer ignored.  An error
+   in the handling of the beam-width scale factor term causing it to
+   ignored has now been corrected.  Thanks to Andrea Orlati (Medicina)
+   for pointing this out.
+
+10. IF3 command help page includes documentation of standard switch
+    wiring.  This should make it easier for stations to find switch
+    documentation.
+
+11. VC command help page has better external filter documentation.
+    The handling of the values for external filters is now described
+    fully.
+
+12. Typical gpib device names added to
+    /usr2/fs/st.default/control/ibad.ctl comments.  This should make
+    it easier to know what the useful choices are.
+
+13. Extra delay added for Mark IV decoder communication to improve
+    robustness.  An extra delay between consecutive Mark IV Decoder
+    communications was added.  It was determined empirically that the
+    decoder was not ready for input even though it had responded with
+    its prompt.  The FS now makes sure that at least 4 centisecond
+    since the last decoder reply before sending the next command.  No
+    more delay is added than is needed if the previous communication
+    was not to the decoder.  Thanks to Dan Smythe (Haystack) for
+    finding and suggesting a fix to the problem.  Mark IV decoder
+    communications are considerably improved with this change.
+
+14. FS Linux 6 RAID operations notes included.  Documentation on disk
+    rotation, and other procedures required for using the RAID system
+    that is standard in FS Linux 6 (based on sarge) are included in
+    the file /usr2/fs/misc/RAID.txt.  Stations running FS Linux 6 with
+    the software RAID1 installed should read this document.  It does
+    not apply to other stations.
+
+			 B. Changes in DRUDG
+				   
+DRUDG opening message date is 2007Sep28
+
+Major changes that effect the user experience include:
+
+1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
+   Sampler Modules).
+2. Mark5B recorder support.
+3. DRUDG option 11 was modified to add these new rack and recorder types.
+4. New patching algorithm.
+5. Overhaul of equipment and equipment_override options in skedf.ctl.
+6. "postob_mk5a" changed to "postob_mk5".
+7. "checkmk5a" changed to "checkmk5".
+8. Change in the naming convention for procedure names where different
+   stations have different bandwidths.
+9. Support for Dymo printer for the FS Linux 6 (based on "Sarge").
+10. Internal change to procs.f
+11. Internal change to common blocks.
+
+A more detailed discussion of these changes follows.
+
+1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
+   Sampler Modules).  These are Mark4 and VLBA4 racks with Mark IV
+   formatter replaced with a Mark 5B Sampler Module.  In these cases,
+   DRUDG will issue use the new "vsi4" command to set-up the sampler.
+   In these case, formatter setup commands (form/trackform/tracks) are
+   no longer used.
+
+2. Mark5B recorder support.
+   a. no mk5=play_rate command in set-up procedures
+   b. no mk5=mode ... or mk5=mode? commands in set-up procedures
+   c. for racks with Mark 5B samplers (Mark5, VLBA5), new in set-up
+      procedures:
+
+        mk5b_mode=ext, bit_mask, decimation
+
+          "ext" is literal, "bit_mask" is hex, corresponds to tracks
+          from vsi4 board to record, decimation is the 32/sample_rate
+
+      If the rack is not Mark5 or VLBA5, the .prc file contains the
+      following:
+
+        "please change the following mk5b_mode command to reflect
+        "the desired channel assignments and effective sample rate
+        mk5b_mode=ext:0xffffffff:1
+
+   d. add mk5b_mode command to monitor configuration after mk5b_mode=...
+
+   e. In sched_initi replace mk5=os_rev1? and mk5=os_rev2? with
+      mk5=os_rev?  also for "ss_rev?"
+
+3. DRUDG option 11 was modified to add these new rack and recorder
+   types.  They were added at the bottom of the list so that numbers
+   associated with equipment types would be preserved, e.g., recorder
+   type 4=vlba.  In order to keep all of the text on one screen, the
+   output was reformatted.
+
+4. New patching algorithm.  For Mark3/Mark4/Mark5 racks, implemented
+   the following patching algorithm which was designed to minimize
+   cable changes.
+
+   ! For "geodesy" schedules, use these rules :
+   !  0. If on IF3, always High.
+   !  1. If the upper edge of the recorded BandPass (which can possibly be
+   !     double sideband and is BW dependent) is below 230 MHz, pick low.
+   !  2. If the lower edge of the recorded BP is above 210, pick high.
+   !  3. For others if the center is of the recorded BP is below 220, pick
+   !     low, otherwise high.
+   !
+   !    For VC1, 2, 3, and 9, 10
+   !      apply these tests in order 1,2,3.
+   !    For VC4, 11, 12, 13, 14  and 5-8 if IF1 or IF2
+   !      apply them 2,1,3
+   !
+   ! If the schedule is an 'astro' schedule apply the following:
+   !
+   !    I. Calculate all the patches according to geodesy rules.
+   !       A) If frequencies are X/S, use these and stop here;
+   !       B) for others go to step II.
+   !    II. For each LO:
+   !       A) If step (I) results in all high or low for an LO,
+   !    use that.
+   !       B) If for an LO step (I) results in mixed patching, check which
+   !       patch is more common, high or low, then apply one of IIa, IIb,
+   !        or IIc:
+   !    IIa. If high is more common, check low patches, for any channels
+   !    (considering both sidebands if both are recorded) where the lower
+   !    edge is above 210, change those VCs to high.
+   !    IIb. If low is more common, check high patches, for any channels
+   !    considering both sidebands if both are record) where the upper edge
+   !    is below 230, change those VCs to low.
+   !    IIc. If equal high and low, try IIa and IIb, choose the one that
+   !    makes the most patches the same.  If still equal, pick IIa.
+
+
+5. Overhaul of equipment and equipment_override options in skedf.ctl.
+   Code dealing with these options was completely re-written in the
+   process of fixing a bug reported by Kokee during rd0705.
+
+   The equipment specified in the 'equipment' line will be used in the
+   schedule if one of the following two conditions exist:
+
+     a) The rack and recorder in the schedule are specified as unknown.
+     b) The 'equipment_override' option is on.
+
+   If the 'equipment' option is turned on in skedf.ctl, DRUDG will
+   check that the equipment specified is valid.  If not, it will exit
+   with an error message.
+
+   If 'equipment_override' is turned on, DRUDG will check to make sure
+   that equipment has actually been specified, i.e., that the
+   'equipment' line is on, and has valid entries.  If not, DRUDG will
+   exit with an error message.
+
+6. "postob_mk5a" changed to "postob_mk5".  The procedure called by the
+   schedule to execute the local "postob" procedure and collect Mark 5
+   recorder disks statistics.  Since DRUDG generates both the call to
+   the "postob_mk5" procedure and the default version in the
+   experiment procedure library, this change is normally transparent
+   to users.
+
+7. "checkmk5a" changed to "checkmk5".  This procedure is used to
+   execute the "scan_check" or "data_check" command to check on
+   recording quality when the recorder is stopped after an
+   observation.  To be compatible with this change, stations must
+   rename the "checkmk5a" procedure in their station procedure library
+   to "checkmk5".
+
+8. Change in the naming convention for procedure names when different
+   stations have different bandwidths.  DRUDG embeds the bandwidth in
+   some procedure names such as "vcsx8".  Previously if different
+   stations recorded at different bandwidths, DRUDG would use the
+   bandwidth of the first station.  For example, in r1284 Fortaleza,
+   the first station in the sked file, recorded at 4 MHz, and the
+   other stations such as Westford recorded at 8 MHz.  Prior versions
+   of DRUDG incorrectly use 4 MHz in the procedure name for Westford.
+   This new version uses the correct bandwidth.
+
+9. Support for Dymo printer for the FS linux 6 (based on "Sarge").
+   The CUPS driver in FS Linux 6 behaves differently compared to the
+   one in FS Linux 5.  The effect is that Dymo labels in FS Linux
+   printed at 1/3 size.  We have included an example command, in the
+   new example print2dymo procedure in /usr2/fs/misc/print2dymo, that
+   inserts a line in the postscript file to rescale the output.  You
+   will need to uncomment this line (and comment out the FS Linux 5
+   line) and install this version if you have FS Linux 6.  As a result
+   of the FS Linux 6 support, the Dymo "label_size" in skedf.ctl has
+   been changed for FS Linux 5 and FS Linux 6 users.
+
+10. Internal change to procs.f.  The large routine procs.f, which
+    comprised over 3,000 of code, or roughly 40 pages when printed
+    out, was broken into smaller pieces.
+
+11. Internal change to common blocks.  Several items used only by SKED
+    were removed from shared common blocks used by DRUDG & SKED and
+    put in common blocks used only by SKED.  In the process, several
+    obsolete variables which were no longer used were also removed.
+    These changes should have no impact on users, but should make the
+    code easier to maintain.
+
+			   C. Known FS Bugs
+
+The following is a summary list of known bugs.  They are described in
+more detail after the list.
+
+1. Do not run "fmset" for extended periods.
+2. "odd" and "even" head types not supported for Mark IV & VLBA4.
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+   recorder.
+5. Extraneous errors when tape is stopped by low tape sensor.
+6. "Comm=" command in logex extracts only the first command.
+7. S2 error scheme clumsy.
+8. No extra spaces allowed in "ibad.ctl" file.
+9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable.
+12. FS "data_check" and "scan_check" commands do not work with Mark5B.
+
+A more detailed discussion of these bugs follows.
+
+1. Do not run "fmset" for extended periods.  For stations that have
+   VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+   should not be run for extended periods of time.  The "fmset"
+   program should be used only to set or briefly verify that the
+   formatter time is correct.  Do not leave "fmset" running after
+   completing either of these tasks, especially during an experiment.
+
+   The "fmset" program dominates the Field System when it is running
+   and this is likely to interfere with the running of an experiment
+   or other activities.  The only way to detect the time from the VLBA
+   formatter with greater precision than one second it to wait for the
+   seconds response from the formatter to change.  This requires the
+   FS to communicate with the formatter almost continuously.  A
+   similar problem exists for the S2 recorder.  This problem is less
+   severe for the Mark IV formatter, but extended use of "fmset" in
+   this case should be avoided as well.  In a future revision, this
+   will be made more robust so that there will probably be less danger
+   if "fmset" is left running.  However, even in the future "fmset"
+   should only be left running for as short a time as possible.  A
+   reminder about this is included in the "fmset" menu.
+
+2. "odd"/"even" head types not supported for Mark IV & VLBA4.  The
+   Mark IV and VLBA4 rack version of the "form" command and the Mark
+   IV and VLBA4 recorder versions of the "repro" and "parity" commands
+   do not support the "odd" and "even" parameters for the read and
+   write head types and reproduce electronics in the "head.ctl"
+   control file.  This means that automatic substitution of odd or
+   even head in passes that use only even or odd heads respectively
+   does not occur.  The only correct settings for the read and write
+   head parameters and reproduce electronics is "all".  This will be
+   fixed in a future revision.  Please let Ed know if you are missing
+   some tracks and need to work around this limitation.
+
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+   For any mode recorded with VLBA style tapeform (14 index
+   positions), the only correct setting of the read and write head
+   types on the "head.ctl" is "all".  This will be fixed in a future
+   revision.  Please let Ed know if you are missing some tracks and
+   need to work around this limitation.
+
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+   recorder.  Now that most communication problems with the Mark IV
+   formatter have been solved, this will be possible and will be done
+   in the future.  CHEKR support will be implemented for Mark 5 despite
+   communication problems, they will have to be ignored unless they
+   extend beyond a certain amount of time.
+
+5. Extraneous errors when tape is stopped by low tape sensor.  When a
+   tape drive has been commanded to move the tape and then stops
+   because it hit the low tape sensor (or when S2 recorders hit the
+   BOT or EOT), "CHEKR" will complain periodically that the tape drive
+   is not in the correct state.  In principle the FS should be smarter
+   about this.  However, if the tape is managed correctly by the
+   schedule this error message should never occur.  If it does, then
+   it it an indication that there is either a problem with: (1) the
+   schedule, (2) the check procedures, (3) the recorder, or (4) the
+   tape is too short.  If any of these cases apply they should be
+   corrected.  It is more likely that this error message will occur
+   when the tape is being controlled manually.  In this case, issuing
+   an "ET" command will convince the FS that the tape drive should be
+   stopped and the error message will cease.
+
+6. "Comm=" command in logex extracts only the first command.  The
+   "comm=" command in "logex" extracts only the first command
+   commanded and displayed.  This problem was noted by Giuseppe
+   Maccaferri (Medicina).
+
+7. S2 error scheme clumsy.  The error and status response number
+   reporting scheme for S2 recorders is clumsy.  FS errors that have
+   mnemonic "rl" are mostly error responses from the recorder or the
+   RCL interface library that is used to communicate with the
+   recorder.  If the numeric part of an "rl" error is greater than
+   -130, then it is the error code returned by the recorder.  If the
+   numeric part is less than -130, but greater than -300, then add 130
+   to the value, the absolute value of the result is the error
+   response code from the RCL library.  For values less than or equal
+   to -300, a FS error has been detected.  Status response codes are
+   all reported with mnemonic "rz" and the numeric value is the
+   negative of the status response code.  In all cases an appropriate
+   error or status message is displayed.  These messages are retained
+   in the log.
+
+8. No extra spaces allowed in "ibad.ctl" file.  The format of the
+   "ibad.ctl" must not contain any leading or embedded spaces.  In
+   systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if either
+   the option "no_untalk/unlisten_after" is misspelled or an incorrect
+   device name is supplied, the driver will cause a segmentation
+   violation when it is initialized and the FS will terminate.
+   Unfortunately there is no way to prevent this problem in a general
+   way; it reflects a limitation in the driver.
+
+9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
+   been known to "hang" mysteriously.  This seems to be caused by some
+   problem with the "go" mechanism that is used to restart the program
+   when it pauses to allow a SNAP procedure, such as CALON or CALOFF
+   to execute.  The "go" that is used to restart the program fails for
+   some reason.  This has been exceedingly difficult to debug because
+   it is intermittent and fairly rare.  There is however a good work
+   around for it.  The CALON and CALOFF procedures are called by
+   procedures CALONFP and CALOFFFP for FIVPT and CALONNF and CALOFFNF
+   for ONOFF.  FIVPT or ONOFF may hang during (or actually just after)
+   the execution of one these procedures that FIVPT and ONOFF will
+   typically hang.  If this happens, you will have to terminate the FS
+   to recover.  You can prevent it from happening again (for this
+   procedure) by adding the lines:
+
+    !+1s
+    sy=go fivpt &
+
+  to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+  add:
+
+    !+1s
+    sy=go onoff &
+
+  If you see other situations where FIVPT or ONOFF hang, please let Ed
+  know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+    FS SNAP manual pages and the help pages available through the
+    "help=" command do not reflect when multiple versions are
+    available with different suffixes depending on the number of drive
+    specified in the control files.  For example, there is only a
+    "tape" page, no "tape1" or "tape2" page.  However, the help
+    facility will display the version of the command with no suffix
+    when an available command with a suffix is used.  For example, if
+    two drives are defined, then "help=tape1" and "help=tape2" will
+    work, but "help=tape" will not and vice-versa if only one drive is
+    defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+    Acquisition System currently lacks a functional total power
+    detector though support has been included.  To allow approximate
+    system temperature calibration, all the setup commands and the TPI
+    detectors of the modules of a co-existing Mark IV rack are
+    currently also available when the rack type is specified to be
+    LBA4.
+
+12. FS "data_check" and "scan_check" commands do not work with Mark5B.
+    The form of the Mark5B "data_check?" and "scan_check?" responses
+    are different from the Mark5A form.  As a result it was not
+    straight forward to make the FS "data_check" and "scan_check"
+    commands work with both Mark5B and Mark5A at the time of this
+    release.  They do work with Mark5A at this time.  The "data_check"
+    and "scan_check" commands will work with Mark5B in a future
+    release.
+
+III. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual.  In this case you should also get a copy
+of the current FS9 "Control Files and Field System Initialization"
+manual.
+
+The following instructions are for upgrading from 9.9.2.  Please
+follow all the steps.  If you have 9.7.7 installed, please follow the
+installation instructions in fs9902up.txt before applying the
+instructions here.
+
+A list of "critical updates" is given below.  These are updates that
+must be applied sequentially.  Please start with the next update with
+a later version number than you have and apply it and the following
+listed versions before upgrading to 9.10.0.  You can find the latest
+versions of installation notes for these FS versions in the
+"/usr2/fs/misc" directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+
+If you have a version older than 9.4.0, please contact Ed.
+
+There is a way to reduce the amount of typing involved in the
+installation.  This reduces the chances of missing required spaces and
+other easily missed characters (like ".") in the commands.  The steps
+below are described assuming you will be using a VT text terminal
+(Control-Alt-*, where * is 1-6) on the FS computer you are upgrading.
+You can also use a remotely logged in "xterm" or the local X display
+(Control-Alt-7) of the computer.  If you use a remote xterm or the
+local X display, you can have one xterm that you are using to scroll
+through the instructions (with "more" or "less") and another that you
+are using to enter the commands.  This will allow you to use
+cut-and-paste to copy long commands from the instructions to the
+terminal you are using to execute the commands, thus reducing the
+chances of mistyping.  One problem with using the local X display is
+that when you login and logout to change users, you will also kill the
+window that is being used to list the instructions.  A way around this
+is to use SSH in the xterm you are using to enter commands to re-login
+to the system for executing commands that require different
+privileges.  For example, you change to being root by executing:
+
+ ssh -X root@localhost
+
+Please don't forget to log back out when you need to change users
+again.  The steps that require rebooting will of course completely log
+out all of your terminals.  At the end of the update, it is
+recommended that you login as "oper" on the local X display for the
+final testing.  Please note that if you login as "root" to the local X
+display of systems using the typical FS Linux distributions, you will
+need to left (or maybe right) click the mouse on the background to
+bring up a menu that allows you to open an xterm.  There is usually
+another menu option to exit when you want to logout.  Please also note
+that to paste into the X display login shell window for "oper" and
+"prog", you typically must use Shift-Insert.  It is also possible to
+cut-and-paste between two "VT" text terminals (for example from the
+one for the instructions to the one for the commands) if your mouse is
+configured properly.  If it is, this may be the easiest solution.  If
+you have any questions about how to cut-and-paste please contact Ed
+(Ed.Himwich@nasa.gov).
+
+(0) Before you begin the upgrade make sure you have a current back-up
+    of your system in case something goes wrong.  If you are use FS
+    Linux 5, we recommend you use the tar based back-up that is part
+    of the rotating disk back-up scheme.  A draft document that
+    describes this method is available in the docs sub-directory on
+    the FS FTP servers as backups2.pdf.  If you have an older FS Linux
+    distribution, please use the disk-to-disk back scheme described in
+    Section 5.8 of the FS9 "Computer Reference" manual.  If you have
+    an FS Linux 6 (sarge) system configured to run a RAID, please see
+    /usr2/fs/misc/RAID.txt for directions applying an upgrade.  If you
+    are running one of the Debian distribution kernels and do not have
+    documentation on how to make a back-up, please contact Ed.  if you
+    have SCSI disks, Section 5.7 of the FS9 "Computer Reference"
+    manual has a discussion of drive ID numbers if you are unsure
+    about these.  Normally you should choose to install the update on
+    your primary after having made and verified your back-up.  Once
+    the installation is complete, has been tested, and used for a
+    little while, you can copy over your back-up with the upgraded
+    primary.  If the upgrade fails, you should restore the back-up to
+    the primary for operations.  You can then try to make the upgrade
+    again when it is convenient.  In a desperate situation, you can
+    use the back-up for operations.  You may choose to install the FS
+    on your back-up disk for testing and then later copy the back-up
+    onto the primary once you are satisfied with the new version.  In
+    any event, please be sure to make a fresh back-up before
+    continuing with the installation.
+
+(1) Please be sure that you have at least 40 MB of free space (use the
+    "df" UNIX command to check free space) on your "/usr2" partition
+    before starting the upgrade.  This would probably only be an issue
+    for stations with 200 MB disks.  If you are tight on space, you
+    may want to delete old log files and old versions of the FS
+    (except your most recent one if you can avoid it of course).
+    Since you should have backed-up your system, you can even delete
+    the "*.[oas]" and executable files of your old versions with no
+    risk.  You might want to keep the source of the previous versions
+    around for reference if you have room.  You can eliminate the
+    non-source files by "cd"-ing to each of the old FS directories in
+    turn as "prog" and doing a "make rmdoto rmexe".  If you have any
+    questions about how to do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.10.0 archive in your "/tmp" directory.
+    For example you might do the following:
+
+      cd /tmp
+      ftp atri.gsfc.nasa.gov
+      (enter your FS FTP account name at the prompt)
+      (enter your FS FTP password at the prompt)
+      binary
+      cd dist
+      get fs-9.10.0.tgz
+      quit
+
+    The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
+
+    If you need to transfer the archive using DOS floppies, please see
+    the section "V. Transferring The Update Archive By DOS Floppy"
+    below.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+      cd /
+      tar -xzpf /tmp/fs-9.10.0.tgz
+
+(6) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.10.0 fs
+
+(7) It is recommended that your local files have the default ownership
+    ("oper.rtx") and permissions ('rw-rw-rw').  To force this, please
+    execute the script:
+
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults , answer "n".  That is the last chance to abort the
+    execution of the script.
+
+(8) VERY IMPORTANT: Log-out as root, and log-in prog.
+
+(9) Make the FS:
+
+      cd /usr2/fs
+      make
+
+(10) Recompile your station software.  This is necessary to pick-up
+     changes to common blocks, shared memory, and library routines.
+
+     To recompile and reload your station software, the following
+     steps should work if you have the "standard" configuration for
+     station software:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+(11) Reboot the computer.  This is important for re-initializing
+     shared memory.
+
+(12) Log in as oper
+
+(13) Modify your control files.  Only one change is needed.  The
+     "label_size" command for Dymo has changed.  The new version is
+     (shown as commented out):
+
+        *label_size   1.417 3.5     1     1    0.0   0.0    Dymo
+
+     Note the first "0.0" on the line used to be "11.0".  Please
+     change the label_size command in your skedf.ctl to agree with
+     this regardless of whether you have it commented out or not.  If
+     you have it commented out, it is still useful to fix it because
+     it will help prevent future confusion if you ever get a Dymo
+     printer.  You can look at the default file
+     /usr2/fs/st.default/control/skedf.ctl as an example.
+
+(14) Update your systests v/chk1024.snp and .prc files.  If you have
+     not made any local modifications to these files ("diff" to the
+     old default ones in /usr2/fs-9.9.2/systests to check), you can
+     just copy the new ones into your /usr2/sched and /usr2/proc
+     directories.  For Mark III/IV/5 racks use the commands (note the
+     dot "." at the end of the "cp ..."  commands):
+
+       cd /usr2/sched
+       cp -a /usr2/fs/systests/chk1024.snp .
+       chmod a+rw chk1024.snp
+
+       cd /usr2/proc
+       cp -a /usr2/fs/systests/chk1024.prc .
+       chmod a+rw chk1024.prc
+
+     For VLBA/4/5 racks use the commands (note the dot "." at the end
+     of the "cp ..."  commands):
+
+       cd /usr2/sched
+       cp -a /usr2/fs/systests/vchk1024.snp .
+       chmod a+rw vchk1024.snp
+
+       cd /usr2/proc
+       cp -a /usr2/fs/systests/vchk1024.prc .
+       chmod a+rw vchk1024.prc
+
+     If you have modified your local copies of these files from the
+     default and want to preserve the changes, you can use a "diff"
+     comparison of your local copies to the old default versions in
+     /usr2/fs-9.9.2/systests to guide your editing of the new ones.
+
+(15) If you have a vsi4 board (Mark 5B Sampler Module), you should
+     modify or replace your systests.prc file, as appropriate to
+     support this.  Please follow the directions in
+     /usr2/fs/systests/systests.txt to complete this step.
+
+(16) Modify your other procedure files.  Two changes are needed: (A)
+     Renaming "check_mk5a" to "check_mk5" and (B) changing "greplog"
+     to be case insensitive.
+
+    (A) You should used PFMED to make this change:
+
+           pfmed
+           rn,check_mk5a,check_mk5
+           ::
+
+        Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
+        example.
+
+        For stations that use multiple hardware configurations:
+            
+          If you have different versions of the "station" library for
+          different equipment configurations, you should be sure to
+          update all versions that are used in configurations with the
+          Mark 5 recorder.
+
+     (B) Edit the "greplog" procedure in your station.prc library
+         using PFMED.  Change the line:
+
+           sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+
+         to:
+ 
+           sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+
+         The only changed needed is to add the "-i" between "grep" and
+         "$".
+
+         For stations that use multiple hardware configurations:
+            
+           If you have different versions of the "station" library for
+           different equipment configurations, you should be sure to
+           update all "greplog" versions.
+
+(17) Update oper's ~/.fvwm2rc file, by adding the lines:
+
+       Style "monit*" NeverFocus
+       Style "xconsole" NeverFocus
+       Style "Field System Prompt*" StaysOnTop
+
+     as the last Style commands.  If you have the standard .fvwm2rc
+     file, these lines are insert right after line:
+
+       Style "*"          Color black/khaki
+
+     which is line 252.  For .fvwm2rc files that have only been
+     minimally modified, the same line should still be close to line
+     252 and the new lines should be added after this line, wherever
+     it is.  The change will not take effect until the window manager
+     is restarted.  Please see /usr2/fs/st.default/oper/.fvwm2rc for
+     an example file.
+
+     Please log in as "prog" and make the same change to prog's
+     ~/.fvwm2rc file.
+
+(18) Test the FS as "oper". Generally speaking a fairly thorough test
+     is to run a test experiment: start with DRUDG-ing a schedule,
+     making listings, and any other pre-experiment preparation you
+     normally do, then execute part of schedule, and perform any
+     normal post-experiment plotting and clean-up that you do.  If you
+     use tape, you should test a section that includes a tape change
+     and a parity check in each direction.  The idea here is to verify
+     that everything works as you expect for normal operations.  In
+     particular for this upgrade you should test that Mark 5A
+     operations work as expected.
+
+VI. Transferring The Update Archive By DOS Floppy
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.10.0.tgz archive have been placed in
+the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
+enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs9100tg.aa
+fs9100tg.ab
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs9100tg.* >fs-9.10.0.tgz
+
+This will create an exact image of the original fs-9.10.0.tgz archive
+on your computer.  Please be sure to use binary transfer when getting
+the files from atri.

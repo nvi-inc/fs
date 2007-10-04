@@ -8,7 +8,6 @@ C
       include '../skdrincl/skobs.ftni'
 ! functions
       integer iStringMinMatch
-      integer trimlen
 C
 C     INPUT VARIABLES:
       integer*2 LINSTQ(*)

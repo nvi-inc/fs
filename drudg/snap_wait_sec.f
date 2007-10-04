@@ -1,6 +1,5 @@
       subroutine snap_wait_sec(iseconds)
 !     JMGipson   2002Jan02  V1.00
-      implicit none
       include 'hardware.ftni'
       integer iseconds
 

@@ -1,9 +1,8 @@
       subroutine snap_check(BitDens,idirp)
 ! passed
-      implicit none
+      include 'hardware.ftni'
       double precision BitDens
       integer idirp
-      include 'hardware.ftni'
 
 ! local
       character ldir

@@ -9,7 +9,7 @@
 ! list is what we match against.
 ! local
       integer nch
-      character*80 ltemp
+      character*80 ltemp,ltemp2
       integer i
       integer iwidth
 
@@ -27,14 +27,18 @@
       call capitalize(ltemp)
 
       do iStringMinMatch=1,ilen
-        if(ltemp(1:nch).eq.list(iStringMinMatch)(1:nch)) goto 100
+        ltemp2=list(istringMinMatch)
+        call capitalize(ltemp2)
+        if(ltemp(1:nch).eq.ltemp2(1:nch)) goto 100
       end do
       iStringMinMatch=0
       return    !Return with no match.
 
 100   continue
       do i=iStringMinMatch+1,ilen
-        if(ltemp(1:nch) .eq. list(i)(1:nch)) then
+        ltemp2=list(i)
+        call capitalize(ltemp2)
+        if(ltemp(1:nch) .eq. ltemp2(1:nch)) then
           iStringMinMatch=-1
           return
         endif

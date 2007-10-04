@@ -1,13 +1,14 @@
       subroutine snap_setup(ipas,istnsk,icod,iobs,kerr)
 ! include files.
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'           !This contains info only about the recorders.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
-      include 'hardware.ftni'           !This contains info only about the recorders.
-! functions
+! History
+!  2006Nov30. JMG. Code type is 1 for no recorder.
+!  2007Jul27  JMG  Made Mark5 no recorder.
 
 ! passed variables
       integer istnsk    !index #.
@@ -17,20 +18,16 @@
       logical kerr
 
 ! local variables.
-      integer itype
       integer ndx
-
-      integer*2 LNAMEP(6)
       character*12 cnamep
-      equivalence (lnamep,cnamep)
 
       character*80 ldum
 
 ! start of code
-      if (km5A.or. km5p .or.ks2.or.kk4) then ! setup proc names
-        itype=1
+
+      if(knopass) then
+        continue
       else ! mnemonic proc names
-        itype=2
         if (ipas(istnsk).le.0) then ! invalid pass
           write(luscn,9912) ipas(istnsk),icod
           return
@@ -44,11 +41,11 @@
         endif
       endif
 
-      cnamep=" "
-      call setup_name(itype,icod,ndx,lnamep)
+      call setup_name(icod,ndx,cnamep)
       call c2lower(cnamep,cnamep)  		!make it lower case
+
 C     Don't use the pass number for Mk5-only
-      if(km5A .or. KM5P) then
+      if(km5disk) then
          write(lufile,"(a)") cnamep
       else
          write(ldum,"(a,'=',i3)") cnamep,ipas(istnsk)
@@ -56,6 +53,3 @@ C     Don't use the pass number for Mk5-only
       endif
       return
       end
-
-
-

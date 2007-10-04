@@ -1,6 +1,5 @@
       subroutine proc_mk5_init2(lform,
      >   ifan,samprate,ntrack_rec_mk5,luscn,ierr)
-      implicit none
       include 'hardware.ftni'
 ! passed
       character*5 lform        !Form descriptor
@@ -16,24 +15,24 @@
       integer itemp
 
       ierr=0
-
-      if(ifan .gt. 1) then
-        idrate=samprate/ifan        !idrate is the data rate.
-      else
-        idrate=samprate
-      endif
-
+      if(.not. km5b) then             !skip below for Mark5B
+        if(ifan .gt. 1) then
+          idrate=samprate/ifan        !idrate is the data rate.
+        else
+          idrate=samprate
+        endif
 ! Put some instructions out for MK5 recorders.
-      write(ldum,'("mk5=play_rate=data:",i4,";")') idrate
-      call squeezewrite(lufile,ldum)
+        write(ldum,'("mk5=play_rate=data:",i4,";")') idrate
+        call squeezewrite(lufile,ldum)
 
-      if(km5p_piggy) then
-         itemp=32
-      else
-         itemp=ntrack_rec_mk5
+        if(km5p_piggy) then
+           itemp=32
+        else
+           itemp=ntrack_rec_mk5
+        endif
+        write(ldum,'("mk5=mode=",a,":",i2,";")')lform,itemp
+        call squeezewrite(lufile,ldum)
       endif
-      write(ldum,'("mk5=mode=",a,":",i2,";")')lform,itemp
-      call squeezewrite(lufile,ldum)
 
       write(lufile,'("bank_check")')
       end

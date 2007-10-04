@@ -32,9 +32,10 @@ C LOCAL:
       character*1 cs
       integer ipasp,iftold,idirp,idir,ituse
       integer i,j,id
+      integer ld
       real wlon,alat,al11,al12,al21,al22,rt1,rt2
       real az,el,x30,y30,x85,y85,dc,ha1
-      real speed,spdips
+      real speed
       integer irah,iram,idecd,idecm
       integer*2 lhsign,ldsign
       integer irh3,irh2,irm3,irh1,irm1,irm2,ihah,iham
@@ -46,7 +47,7 @@ C LOCAL:
       integer mjdpre,ispre,iyr2,idayr2,ihr2,imin2,isc2
       integer*2 lfreq,lcbpre,lcbnew
       double precision UT,GST,utpre ! previous value required for slewing
-      integer nstnsk,istnsk,isor,nsat,ivc
+      integer nstnsk,istnsk,isor,nsat
       character*7 cwrap ! cable wrap string returned from CBINF 
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
@@ -123,6 +124,8 @@ C 981202 nrv Add warning message about negative slewing times.
 C 990527 nrv Add option for S2 and K4 non-VEX outputs. 
 C 991118 nrv Removed LAXIS variable and use AXTYP subroutine.
 C 991209 nrv Add ITUSE to iftold calculation.
+! 2007   jmg Removed obsolete call to m3inf.  Not used.
+! 2007Jul20 JMG.  Added character LD
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -149,10 +152,9 @@ C
       nlobs = 0 ! number of scan line written
       ks2=.false.
       kk4=.false.
-      if(cstrack(istn) .ne. "unknown" .and.
-     >   cstrec(istn) .ne. "unknown") then
-        ks2= cstrec(istn) .eq. "S2"
-        kk4= cstrec(istn) .eq. "DFC" .or. cstrec(istn) .eq. "K4"
+      if(cstrack(istn) .ne. "unknown") then
+        ks2= cstrec(istn,1) .eq. "S2"
+        kk4= cstrec(istn,1) .eq. "K4"
       endif
       if (kk4) then ! K4 speed
 C       scaling factor is 55 cpd/11.25 fps if the schedule
@@ -270,11 +272,11 @@ C
         call apstar_Rad(tjd,sorp50(1,i),sorp50(2,i),
      >         sorpda(1,i),sorpda(2,i))
         CALL RADED(RA50(I),DEC50(I),0.d0,IRH3,IRM3,RAS3,LDS3,
-     .        IDD3,IDM3,DCS3,LD,ID,ID,D)
+     .        IDD3,IDM3,DCS3,lhsign ,ID,ID,D)
         CALL RADED(SORP50(1,I),SORP50(2,I),0.d0,IRH1,IRM1,RAS1,LDS1,
-     .        IDD1,IDM1,DCS1,LD,ID,ID,D)
+     .        IDD1,IDM1,DCS1,lhsign,ID,ID,D)
         CALL RADED(SORPDA(1,I),SORPDA(2,I),0.d0,IRH2,IRM2,RAS2,LDS2,
-     .        IDD2,IDM2,DCS2,LD,ID,ID,D)
+     .        IDD2,IDM2,DCS2,lhsign,ID,ID,D)
 C
         IF (cs.EQ.'S') then
            WRITE(LUPRT,91) csorna(i)(1:8),IRH3,IRM3,RAS3,LDS3,
@@ -463,7 +465,6 @@ C ENDE source not up
           ENDIF
 C
 C     5. Now write out the observation line.
-          CALL M3INF(ICOD,SPDIPS,IVC)
           call cbinf(ccable(istnsk),cwrap)
           if (kwrap) then ! print cable wrap
           IF (cs.EQ.'S') then

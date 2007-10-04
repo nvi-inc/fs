@@ -13,14 +13,20 @@ C  COMMON:
 C     include 'skcom.ftni'
       include '../skdrincl/statn.ftni'
 C
-C  Calls: gtfld, igtst2, ifill, wrerr
+C  Calls: gtfld,  ifill, wrerr
 
+! functions
+      real*8 DAS2B
+      integer i2long,ichmv,jchar !functions
+      integer igetstatnum2
 C  LOCAL
       integer*2 LKEYWD(12)
-      real*8 DAS2B
       integer ich,ic1,ic2,nch,i,j,idummy,ierr,istn
       real*4 el,val
-      integer i2long,igtst2,ichmv,jchar !functions
+
+      character*24 ckeywd
+      equivalence (lkeywd,ckeywd)
+
 C
 C MODIFICATIONS:
 C   880314 NRV DE-COMPC'D
@@ -40,13 +46,10 @@ C
           write(luscn,'("SELVE00 Error - Select stations first.")')
           RETURN
         END IF  !no stations selected
-        WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  EL LIMIT(deg)')
+        WRITE(LUDSP,' (" ID  STATION  EL LIMIT(deg)")')
         DO  I=1,NSTATN
-C
           EL = STNELV(I)*rad2deg
-          WRITE(LUDSP,9111) LpoCOD(I),cSTNNA(I),EL
-9111      FORMAT(1X,A2,2X,A,1X,F5.1)
+          WRITE(LUDSP,"(1X,A2,2X,A,1X,F5.1)") cpoCOD(I),cSTNNA(I),EL
         END DO  !
         RETURN
       END IF  !no input
@@ -74,8 +77,9 @@ C
           END DO
           RETURN
         END IF  !all stations
-        IF  (IGTST2(LKEYWD,ISTN).le.0) THEN  !invalid
-          write(luscn,9901) lkeywd(1)
+        istn=igetstatnum2(ckeywd(1:2))
+        if (istn.le.0) then
+          write(luscn,9901) ckeywd
 9901      format('SELEV01 - Invalid station name: ',a2)
 C         skip over matching elevation and get next station name
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)

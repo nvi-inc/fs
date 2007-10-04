@@ -4,12 +4,11 @@ C LSTSUM_INFO gets the information for the lstsum routine.
 C Information is retrieved from common or by reading the
 C .snp file directly.
 C 
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include '../skdrincl/statn.ftni'
       include 'drcom.ftni'
 
       include 'lstsum.ftni'
-      include 'hardware.ftni'
 
 C History
 C 991103 nrv New. Removed from LSTSUM.
@@ -93,10 +92,10 @@ C    Read line 3 to get XYZ position
 
 C 4.3  Find out the equipment.
       if (kskd.and.cstrack(istn).ne.'unknown'. and.
-     >             cstrec(istn).ne. 'unknown') then ! got it
+     >             cstrec(istn,1).ne. 'unknown') then ! got it
         crack=cstrack(istn)
-        creca=cstrec(istn)
-        crecb=cstrec2(istn)
+        creca=cstrec(istn,1)
+        crecb=cstrec(istn,2)
 
         call init_hardware_common(istn)
 C NOTE: This logic means that you can't mix (K4,S2) with (VLBA,Mk4)
