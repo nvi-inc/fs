@@ -1,135 +1,142 @@
-      SUBROUTINE SOINP(IBUF,ILEN,lu,IERR)
-C
-C     This routine reads and decodes a source entry
-C     and puts the variables into the source common.
-C
+      SUBROUTINE SOINP(cbuf,lu,IERR)
+! Parse source info contained in cbuf.
+! 2007Jul03 JMG. Rewritten to use ASCII
+! This can handle both sources and satellites (although we don't use satellites anywhere?)
+
+! Typical source line looks like:
+!  0008-264 $        00 11  1.24676914  -26 12 33.3762017 2000.0 0.0
+
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'
-
       include '../skdrincl/sourc.ftni'
 C
 C  INPUT:
-      integer*2 IBUF(*)
-      integer ilen,lu
-C      - buffer holding source entry
-C     ILEN - length of IBUF in words
-C
+      character*(*) cbuf              	!ascii string holding input
+      integer lu                        !LU to write stuff to.
 C  OUTPUT:
       integer ierr
-C     IERR - error number
-C     INUM - number of error message
 
 ! Functions
       integer iwhere_in_String_list
       integer julda             !julian day
-C
-C  LOCAL:
-      LOGICAL KORBIT
-C      -LNFCH routine, local variable for orbit identification
-      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2)
-      integer*2 LRA(8),LDC(7),lname(max_sorlen/2)
 
-      character*(max_sorlen) ciau,cname,ccom,corbit
-      equivalence (lname,cname), (ciau,liau),(lcom,ccom)
+! Local
+! used to parse input line.
+      logical ktoken,knospace,keof
+      character*20 ltoken(20)   !need to be able to hold source name.
+      integer numwant,numgot
 
-C      - temporary variables for unpacking
-      double precision RA,RARAD,DEC,DECRAD,R,D
-C        - temporary for unpacking
-      double precision tjd ! for APSTAR
-      double precision OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,OEDY
-C        - temporary for unpacking
+! temporary name for sources.
+      character*(max_sorlen) cname
 
-      integer iepy
-C        - HOLDS THE ASCII VALUE 8HORBIT   /
-      INTEGER   i,iep,J,irah,iram,idecd,idecm
-      integer*2 lds
-      real epoch
-C
-C  History:
-C     WEH  830523  ADDED SATELLITES
-C     MWH  840915  SUPPORT J2000 COORDINATES
-C     MWH  850605  ALLOW EPOCHS OTHER THAN 1950 & 2000
-C     NRV  880314  DE-COMPC'D
-C     nrv  891110  Changed for new catalog system
-C     NRV 891226 Changed MOVE to APSTAR
-C     NRV  900130 Changed calling sequence to add LU and remove INUM
-C     NRV  900423 Changed APSTAR to MPSTAR for non-1950 positions
-C     nrv  930225 implicit none
-C     nrv  931124 Add arguments to UNPSO to return orbital elements
-C     nrv  940112 Keep common name internally for satellites, not ORBIT.
-C     nrv  950321 Add error message for duplicate source names.
-C 970114 nrv Change 4 to max_sorlen/2
-C 990606 nrv Store IAU name
-C 2003Dec09 JMGipson replace holleriths by characcters.
-C
-      DATA cORBIT/'ORBIT   '/
-C
-C     1. Call UNPSO to unpack the buffer we were passed.
-C     Put all of the fields into temporary variables.
-C
-      J = 17
-      CALL UNPSO(IBUF,ILEN,IERR,LIAU,LCOM,LRA,IRAH,IRAM,RA,RARAD,
-     >  LDS,LDC,IDECD,IDECM,DEC,DECRAD,EPOCH,
-     >  OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IEPY,OEDY,j)
-C
-      IF  (IERR.NE.0) THEN  !
-        write(lu,9100) ierr,(ibuf(i),i=1,ilen)
-9100    format('SOINP01 - Error in field 'i5' of:'/40a2)
+      real*8 rha,  rha_min, rha_sec    !RHA
+      real*8 rdec, rdec_min,rdec_sec   !declination
+      real*8 dsign
+
+      real*8 rarad,decrad,r,d           !ra,dec in radians
+
+      integer i,j                      	!loop counters
+      real*8  epoch                     !epoch of source position
+      integer iep                       !expressed as integer
+      real*8 tjd                        !Time in Julian days.
+
+! Start of code.
+
+! NEed to have at least enough space for names.
+      if(max_sorlen .gt. 20) then
+         writE(*,*) "Recompile soinp and increase token size"
+      endif
+
+      NumWant=12
+      call splitNtokens(cbuf,ltoken,NumWant,NumGot)
+
+      if(NumGot .lt. 9) then
+         write(lu,*) "SOINP:  Not enough tokens in source line: ",NumGot
+         write(lu,*) "    "//cbuf(1:80)
+      endif
+
+      call capitalize(ltoken(2))
+      if(ltoken(2) .eq. "ORBIT") then
+        NSATEL=NSATEL+1
+        IF  (NSATEL.GT.MAX_CEL) THEN  !"celestial overflow"
+          write(lu,"('SOINP02: Too many celestial sources! Max=',i3)")
+     >       max_cel
+          RETURN
+        endif
+        csorna(max_cel+nsatel)=ltoken(1)
+
+        do j=1,7
+          ierr=j+2
+          read(ltoken(ierr),*, err=800) SATP50(j,NSATEL)
+        end do
+        ierr=10
+        read(ltoken(ierr),*,err=800) isaty(nsatel)
+        ierr=11
+        read(ltoken(ierr),*,err=800) satdy(nsatel)
+      else
+! Get the source name(s)
+        if(ltoken(2) .eq. "$") then
+          cname=ltoken(1)
+        else
+          cname=ltoken(2)
+        endif
+
+        i=iwhere_in_string_list(csorna,nsourc,cname)
+
+        IF  (I.ne.0) then ! duplicate source
+          write(lu,9101) csorna(i)
+9101       format('SOINP22: Duplicate source name ',a,
+     .    '. Using the position of the first one.')
         RETURN
-      END IF 
+        endif ! duplicate source
 
-C
-C     2. Decide which source name to use.  If there is a common
-C     name, use that, otherwise use the IAU name. For satellites the
-C     IAU name comes in as ORBIT as a flag. Save the actual satellite
-C     name as the schedule name.
-C     Then check for a duplicate name.  This should not happen
-C     in the SKED environment but might as well check.
-C     For celestial sources, make sure we have 1950 or J2000 coordinates.
-C     (Until flexibility to handle others is built in.)
-C
-      Korbit=Ciau .eq. corbit
-      cname=ciau
-      if(ccom(1:1) .ne. "$") cname=ccom
-C
-      i=iwhere_in_string_list(csorna,nsourc,cname)
-
-      IF  (I.ne.0) then ! duplicate source
-        write(lu,9101) csorna(i)
-9101    format('SOINP22 - Duplicate source name ',a,
-     .  '. Using the position of the first one.')
-        RETURN
-      endif ! duplicate source
-C
-C     2. Now find out if we have too many sources already.
-C     If not, move the new variables into place.
-C
-      IF  (.NOT.KORBIT) THEN  !"not an orbit"
         NCELES=NCELES+1
         IF  (NCELES.GT.MAX_CEL) THEN  !"celestial overflow"
-          write(lu,9201) max_cel
-9201      format('SOINP02 - Too many celestial sources.  Max is 'i3)
+          write(lu,"('SOINP03: Too many celestial sources! Max=',i3)")
+     >       max_cel
           RETURN
         ENDIF
-      ELSE  !"an orbit"
-        NSATEL=NSATEL+1
-        IF  (NSATEL.GT.MAX_SAT) THEN  !"orbit overflow"
-          write(lu,9202) max_sat
-9202      format('SOINP03 - Too many satellites.  Max is 'i3)
-          RETURN
-        END IF  !"orbit overflow"
-      END IF  !"an orbit"
-C
-      NSOURC = NSOURC + 1
-      IF  (NSOURC.GT.MAX_SOR) THEN  !
-        write(lu,9203) max_sor
-9203    format('SOINP04 - Too many sources.  Max is 'i3)
-        RETURN
-      END IF  !
-C
-      IF  (.NOT.KORBIT) THEN  !"non-orbit"
-         ciauna(nceles)= ciau
-         csorna(nceles)= cname
+        ciauna(nceles)=ltoken(1)
+        csorna(nceles)=cname
+
+! Read in HA
+        ierr=3
+        read(ltoken(3),*,end=900) rha
+        if(ltoken(3)(1:1) .eq. "-") then
+          dsign=-1
+          ltoken(3)(1:1)=" "
+        else
+          dsign=1
+        endif
+        read(ltoken(3),*,end=900) rha
+
+        ierr=4
+        read(ltoken(4),*,end=900) rha_min
+        ierr=5
+        read(ltoken(5),*,end=900) rha_sec
+        rarad=dsign*(rha+(rha_min+rha_sec/60.d0)/60.d0)*HA2RAD
+
+! Read in Declination
+        ierr=6
+        read(ltoken(6),*,end=900) rdec
+        if(ltoken(6)(1:1) .eq. "-") then
+          dsign=-1
+          ltoken(6)(1:1) =" "
+        else
+          dsign=1
+        endif
+        read(ltoken(6),*,end=900) rdec
+
+        ierr=7
+        read(ltoken(7),*,end=900) rdec_min
+        ierr=8
+        read(ltoken(8),*,end=900) rdec_sec
+        decrad=dsign*(rdec+(rdec_min+rdec_sec/60.d0)/60.d0)*deg2rad
+
+! Read in the epoch.
+        ierr=9
+        read(ltoken(9),*,end=900) epoch
+        
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
           IEP = EPOCH+.01 
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
@@ -143,21 +150,19 @@ C
         END IF  !"convert to J2000"
         SORP50(1,NCELES) = RARAD   !J2000 position
         SORP50(2,NCELES) = DECRAD  !J2000 position
-        call ckiau(ciau,ccom,rarad,decrad,lu)
-      ELSE  !"satellite"
-C       IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,LIAU,1,max_sorlen)
-!        IDUMMY = ICHMV(LSORNA(1,MAX_CEL+NSATEL),1,lname,1,max_sorlen)
-        csorna(max_cel+nsatel)=cname
-        SATP50(1,NSATEL) = OINC
-        SATP50(2,NSATEL) = OECC
-        SATP50(3,NSATEL) = OPER
-        SATP50(4,NSATEL) = ONOD
-        SATP50(5,NSATEL) = OANM
-        SATP50(6,NSATEL) = OAXS
-        SATP50(7,NSATEL) = OMOT
-        ISATY(NSATEL)=IEPY 
-        SATDY(NSATEL)=OEDY
-      END IF  !"satellite"
-C
+
+        call ckiau(ciauna(nceles),cname,rarad,decrad,lu)
+      endif
+      nsourc=nsourc+1
+
+      
+      ierr=0
       RETURN
-      END
+
+! Error on reading in line.
+800   continue
+900   continue
+      write(lu,'("Error in ",i4, " token of line ",/a)') ierr,
+     >   cbuf(1:80)
+      return
+      end

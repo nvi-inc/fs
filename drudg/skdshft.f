@@ -12,7 +12,8 @@ C 960223 nrv change permissions on output file
 C 980831 nrv Mods for Y2000. Use IYR2 for 2-digit year, all other
 C            year variables are fully specified.
 C 990427 nrv Require 4-digit input year.
-! 2006Oct3 JMG Completely rewritten.
+! 2006Oct3  JMG Completely rewritten.
+! 2007Jan24 JMG. Input part modified.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -89,7 +90,6 @@ C Output:
          return
       endif
 
-
 ! Continue
       nch = TRIMLEN(CINNAME)
       WRITE(LUSCN,'(" Shifting: ",a)')  CINNAME(1:nch)
@@ -157,31 +157,21 @@ C
       id_new=-1
       do while (iy_new.lt.0.or.imon_new.lt.0.or.id_new.lt.0)
         write(luscn,
-     >     '(" Enter starting date (yyyy,mm,dd) (0,0,0 to quit): ",$)')
-        read(luusr,*,err=201) iy_new,imon_new,id_new
+     >  '(" Enter starting time (yyyy mm dd hh mm ss) (0,0,0 to quit): "
+     >    ,$)')
+        read(luusr,*,err=201) iy_new,imon_new,id_new,
+     >      ih_new,im_new,is_new
         if (iy_new.eq.0) return
 c       Require 4-digit year.
-201     if ((iy_new.lt.1970).or.(imon_new.le.0.or.imon_new.gt.12).or.
-     >                      (id_new.le.0.or.id_new.gt.31)) then
-          write(luscn,'(" Invalid number for year, month, or day.")')
-	  iy_new=-1
-	endif
-      enddo
-
-      ih_new=-1
-      im_new=-1
-      is_new=-1
-      do while (ih_new.lt.0.or.im_new.lt.0.or.is_new.lt.0)
-        write(luscn,
-     >     '(" Enter target start time (h,m,s) (-1,0,0 to quit): ",$)')
-	 read(luusr,*,err=202) ih_new,im_new,is_new
-	 if(ih_new.eq.-1) return
-202      if((ih_new.lt.0.or.ih_new.gt.24).or.
+201     if ((iy_new.lt.1970).or.
+     >      (imon_new.le.0.or.imon_new.gt.12).or.
+     >      (id_new.le.0.or.id_new.gt.31).or.
+     >      (ih_new.lt.0.or.ih_new.gt.24).or.
      >      (im_new.lt.0.or.im_new.gt.59).or.
      >      (is_new.lt.0.or.is_new.gt.59)) then
-	   write(luscn,'(a)')"Invalid hour, minute, or seconds."
-           ih_new=-2
-	  endif
+          write(luscn,'(" Invalid number for time, try again.")')
+	  iy_new=-1
+	endif
       enddo
 
       IDOY_new = IDAY0(IY_new,IMon_new) + ID_new

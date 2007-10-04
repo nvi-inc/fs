@@ -29,7 +29,7 @@ C
      /     X,SECDIF,EQEQ,ST,GAST,RM,DM,PMR,PMD,PI,RV,TLIGHT,R,D,
      /     PEB,VEB,PES,VES,POG,VOG,PB,VB,PS,VS,
      /     POS1,VEL1,POS2,VEL2,POS3,POS4,POS5,POS6,POS7,
-     /     DABS,DMOD
+     /     DMOD
       DIMENSION PEB(3), VEB(3), PES(3), VES(3), POG(3), VOG(3),
      /     PB(3), VB(3), PS(3), VS(3),
      /     POS1(3), VEL1(3), POS2(3), VEL2(3),

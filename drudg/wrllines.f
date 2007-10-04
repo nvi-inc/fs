@@ -33,9 +33,6 @@ C  LOCAL VARIABLES
       integer ilen,is,nch
       integer iw
 
-      integer*2 lname(4)
-      character*8 cname
-      equivalence(lname,cname)
       logical lcont
 
       integer MaxToken

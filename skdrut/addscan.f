@@ -1,5 +1,5 @@
       subroutine addscan(irec,istn,icod,idstart,idend,
-     .ifeet,ipas,idrive,lcb,ierr)
+     .ifeet,ipas,idrive,cbl,ierr)
 
 C   ADDSCAN adds a new station to an existing scan.
 C*** ib2as accepts only character indices up to 256
@@ -27,7 +27,7 @@ C Input
       integer ifeet ! footage
       integer ipas ! pass index
       integer idrive ! which recorder, 0=no record
-      integer*2 lcb ! cable
+      character*1 cbl
 
 C Output
       integer ierr ! non-zero trouble
@@ -57,8 +57,8 @@ C                            note direction=0 for a non-recording scan      ^
       nst=(ic2-ic1+1)/2 ! number of stations so far
 C     Add station code and cable wrap
       nch=ic2+1 ! start after the end of the station field
-      NCH = ICHMV(lskobs(1,iskrec(irec)),NCH,LSTCOD(ISTN),1,1)
-      NCH = ICHMV(lskobs(1,iskrec(irec)),NCH,LCB,1,1)
+      cskobs(iskrec(irec))(nch:nch+1)=cstcod(istn)//cbl
+      nch=nch+2
 C     Skip previous stations' footage
       ich = nch
       do i=1,nst 
@@ -76,23 +76,7 @@ C ** why not use cpassorderl for all stations not just S2?
 C ** because FS uses pass numbers not index positions
       nch = feetscan(lskobs(1,iskrec(irec)),nch,ipas,ifeet,idrive,
      .istn,icod)
-C     if (ichcm_ch(lstrec(1,istn),1,'S2').eq.0) then
-C       kfor=.true. ! always forward
-C       cgroup=cpassorderl(ipas,istn,icod)(1:1) ! group number
-C       nch=ichmv_ch(lskobs(1,iskrec(irec)),nch+1,cgroup)
-C     else
-C       NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH+1,pnum(ipas))
-C       i=ipas/2
-C       kfor= ipas.ne.i*2 ! odd forward, even reverse = VEX standard
-C     endif
-C     if (kfor) cdir='F'
-C     if (.not.kfor) cdir='R'
-C     if (idrive.eq.0) cdir='0'
-C     NCH = ICHMV_ch(lskobs(1,iskrec(irec)),NCH,cdir)
-C  Put in footage. For S2 this is in seconds.
-C     NCH=  NCH+IB2AS(ifeet,lskobs(1,iskrec(irec)),NCH,numc5)
-C   Skip procedure flags
-      ich = nch 
+      ich = nch
       CALL GTFLD(lskobs(1,iskrec(irec)),ICH,IBUF_LEN*2,IC1,IC2)
 C   Skip previous stations' duration
       do i=1,nst 

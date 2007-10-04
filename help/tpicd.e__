@@ -20,11 +20,11 @@ Monitor-only parameters:
                 channel as in the tpi, tpical, tpzero, tpgain,and
                 tsys commands. The list is constructed from the
                 VCs selected by the formatter and the IFs that
-                feed them when the pcal=... command is issued. 
+                feed them when the tpicd=... command is issued. 
 
 Comments:
-The form pcald is used to start the extraction. The form
-pcald=stop is used to halt it. The form tpicd=? returns the
+The form tpicd is used to start the extraction. The form
+tpicd=stop is used to halt it. The form tpicd=? returns the
 current set-up information.
 
 If tpic is being controlled by the data_valid command, it

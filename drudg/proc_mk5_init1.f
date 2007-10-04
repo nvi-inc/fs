@@ -1,5 +1,4 @@
       subroutine proc_mk5_init1(ntrack_obs,ntrack_rec_mk5,luscn,ierr)
-      implicit none
       include 'hardware.ftni'
 ! passed
       integer ntrack_obs       !number of tracks we normally record on
@@ -17,9 +16,9 @@
       endif
 
 ! Put some instructions out for MK5 recorders.
-
-
-      if(km5A_piggy.or. KM5P_Piggy) then
+      if(km5B) then
+        continue
+      else if(km5A_piggy.or. KM5P_Piggy) then
 ! Output instructions for the recorders. These are common both piggyback and Mark5P mode.
         if(km4form .or. kvrack) then
           write(lufile,90)  "Connect the tape recorder to the "

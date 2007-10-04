@@ -11,7 +11,7 @@
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
  *
-	Last change:  JG    4 Aug 2005    2:18 pm
+	Last change:  JQ   28 Sep 2007    3:34 pm
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -112,6 +112,8 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
   float lab_ht,lab_wid,lab_topoff,lab_leftoff;
   int lab_nrows,lab_ncols,rightoff,ifont;
 
+  int xoff,yoff;       /* Margins */
+
 /* If we are starting a new file, set *new_file back to zero. */
   if (*new_file == 1) {
     *new_file=0;
@@ -125,13 +127,12 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
   lab_topoff=lab_info[4];
   lab_leftoff=lab_info[5];
 
-/* Set up variables depending on the size of the label */
-   line_width=1.0; /* Width of the finest line in the bar code */
-   line_spacing=1.0; /* Spacing between adjacent lines in the bar code */
 /* The 1/1 combination gives a bar code 2.8 inches wide */
-/* Other valid combinations: width 0.5, spacing 0.7, code is 2 inches wide */
-   if (lab_wid < 4.0) { line_width=0.5; line_spacing = 0.7; }
-   if (lab_wid < 4.0) ifont=8; else ifont=10;
+/* The 0.5/0.7, code is 2 inches wide */
+   if (lab_wid <4.0)
+     { line_width=0.5; line_spacing = 0.7; ifont=8;}
+   else
+     { line_width=1.0; line_spacing = 1.0; ifont=10;}
 
 /* Write file header once */
   if(*new_file==0){ /* write file header */
@@ -146,7 +147,7 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
      }
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
    if(!strncmp(clabtyp, "DYMO",4)){
-    fprintf(*fp,"90 rotate\n");}
+   fprintf(*fp,"90 rotate\n");fprintf(*fp,"0 -792 translate\n");}
    }
 
 /* Write showpage if this label will start a new page */
@@ -154,7 +155,7 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
    fprintf(*fp,"showpage\n%%Trailer\n"); 
    fprintf(*fp,"0 setgray\n%5.1f setlinewidth\n",line_width);
    if(!strncmp(clabtyp, "DYMO",4)){
-    fprintf(*fp,"90 rotate\n");}
+    fprintf(*fp,"90 rotate\n");fprintf(*fp,"0 -792 translate\n");}
     *new_page=0;
   }
 
@@ -169,16 +170,10 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
    the row and column.
    All label values are in inches, convert to units of 1/72 inch. 
 */
-/*
-  irow=*start_lab%lab_nrows;
-  if (irow==0) irow=lab_nrows;
-  icol=1+*start_lab/lab_nrows;
-  if (*start_lab%lab_nrows == 0) icol-=1;
-  if (icol > lab_ncols) icol=icol%lab_ncols;
-  if (icol==0) icol=lab_ncols;
-*/
-  x=36+lab_leftoff*72 + (*icol-1)*lab_wid*72; /* start 0.5" from edge of label */
-  y=792-36-lab_topoff*72-(*irow-1)*lab_ht*72;
+  xoff=-36;
+  yoff=36;
+  x=     xoff+lab_leftoff*72 + (*icol-1)*lab_wid*72; 
+  y=792-(yoff+lab_topoff*72+(*irow-1)*lab_ht*72);
 
 /* Print the text above the barcode. */
   rightoff=100;
@@ -210,7 +205,7 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
   for(i=z=0,ptr=barcode; i<barcnt; i++,z++){
   x1=x2=x+i*line_spacing; 
   y1=y-8; /* start barcode just below tape number */
-  y2=y1-36.0; /* always 0.5 inch high */
+  y2=y1-36; /* always 0.5 inch high */
   if(z==8) z=0;
   if(!z) temp=*ptr++;
   bit=temp&1;

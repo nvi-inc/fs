@@ -32,8 +32,9 @@ lba_ifp.o lba_ifp_dis.o lba_mon.o lba_mon_dis.o lba_trkfrm.o lba_trkfrm_dis.o\
 bank_check.o bank_check_dis.o logm5msg.o disk2file.o disk2file_dis.o\
 in2net.o in2net_dis.o user_device.o user_device_dis.o\
 s2agc.o s2bbc.o s2diag.o s2encode.o s2fs.o s2ifx.o s2version.o s2mode.o\
-s2ping.o s2pwrmon.o s2status.o s2tonedet.o  s2chkr.o s2delay.o\
-scan_check.o scan_check_dis.o last_check.o
+s2ping.o s2pwrmon.o s2status.o s2tonedet.o s2chkr.o s2delay.o\
+scan_check.o scan_check_dis.o last_check.o mk5b_mode.o mk5b_mode_dis.o\
+vsi4.o vsi4_dis.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

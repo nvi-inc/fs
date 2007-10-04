@@ -84,7 +84,7 @@ C  2. Site ID. Standard 2-letter code.
         write(lu,'("VUNPSIT02 - Site code must be 2 characters")')
         ierr=-2
       else
-        cIDPOS=cout(1:nch)
+        CIDPOS=cout(1:nch)
       endif
 
 C  3. Site position
@@ -118,6 +118,7 @@ C     Now compute derived coordinates
 
 C  4. Occupation code
 
+      coccup=" "
       ierr=4
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('occupation_code'//char(0)),

@@ -1,12 +1,13 @@
       logical function kif(imess,len,ib,ic1,ic2,kerr,lu)
 
       logical kerr
-      integer*2 ib(1),imess(1),id
+      integer*2 ib(1),imess(1),id,len
 C
       kif=kerr
       if (.not.kerr) return
       if (len.le.0) goto 1
-      call po_put_i(imess,len)
+      nchar=len
+      call po_put_i(imess,nchar)
 C 
 1     continue
       if (ic1.le.0.or.ic2.lt.ic1) return 

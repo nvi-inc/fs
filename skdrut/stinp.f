@@ -21,8 +21,8 @@ C
 C
 ! functions
       integer igtba              ! functions
-      integer iwhere_in_string_list
       integer trimlen
+      integer iwhere_in_string_list
 
 C  LOCAL:
       integer MaxBufIn
@@ -31,11 +31,11 @@ C  LOCAL:
       character*(2*MaxBufIn) cbufin,cbufin0
       equivalence (ibufin,cbufin)
 
-      logical kline,ks2,kk4
-      integer*2 LNAME(4),LAXIS(2)
+      logical kline
+      integer*2 LAXIS(2)
       character*8 cname
       character*4 caxis
-      equivalence (caxis,laxis) , (cname,lname)
+      equivalence (caxis,laxis)
 
       real*4 SLRATE(2),ANLIM1(2),ANLIM2(2)
 
@@ -43,32 +43,30 @@ C  LOCAL:
       REAL*4 AZH(MAX_HOR),ELH(MAX_HOR),CO1(MAX_COR),CO2(MAX_COR)
       real*4 DIAM
       real*4 sefd(max_band),par(max_sefdpar,max_band)
-      integer*2 lb(max_band)
       character*2 cb(max_band)
-      equivalence (lb,cb)
       real*8 POSXYZ(3),AXOFF
       real tol
+      integer iwhere
 
 
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band)
       integer ib,ii,nco,nhz,i
-      integer*2 lidt(2),lid,lidpos,lidhor,lrack(4),lrec1(4),lrec2(4)
+      integer*2 lid,lidpos,lidhor
 
       character*8 crack,crec1,crec2
-      equivalence (crack,lrack),(crec1,lrec1),(crec2,lrec2)
       character*4 cidt,cidhor,cidpos
       character*2 cid
-      equivalence (cid,lid)
-      equivalence (cidt,lidt),(cidpos,lidpos),(cidhor,lidhor)
+      character*1 c1
+      equivalence (cid,lid), (c1,cid)
+      equivalence (cidpos,lidpos),(cidhor,lidhor)
 
       double precision poslat,poslon
       double precision chklat,chklon,rht
       integer ibitden
       integer nstack
-      integer*2 ls2sp(2)
       character*4 cs2sp
-      equivalence (ls2sp,cs2sp)
+
       real s2sp
       integer nch
 
@@ -87,8 +85,6 @@ C      - these are used in unpacking station info
      >  "Slewrate 2","slew_con2","Ant Lim2_lo","Ant Lim2_hi",
      >  "Diameter",
      >  "PosX","PosY", "PosZ", " ","Latitude", "Longitude"/
-
-
 C
 C  INITIALIZED
 C
@@ -131,6 +127,8 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
+! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
+! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "
@@ -152,7 +150,6 @@ C
          cbufin(i:2*MaxBufin)=" "
       endif
       cbufin0=cbufin    !cbufin is modified below. Want to keep a copy
-
 
       itype=index("APTCH",cbufin(1:1))
       if(itype .eq. 0) then
@@ -211,9 +208,10 @@ C
         endif
         if(NumToken .ge. 16) then
           cidhor=ltoken(16)
+          if(cidhor .eq. "--".or.cidhor.eq."-") cidhor=" "
         endif
 
-        i=iwhere_in_string_list(cstcod(i),nstatn,cid)
+        i=iwhere_in_string_list(cstcod(i),nstatn,c1)
         if(i .eq. 0) then        !new entry.
           if(nstatn .lt. Max_stn) then
              nstatn=nstatn+1
@@ -230,7 +228,7 @@ C     information.
 C NO: Store the position ID temporarily into the first word of STNPOS.
 C     Put the position ID into a permanent place in LPOCOD
 C
-        cSTCOD(I) = cID
+        cSTCOD(I) = c1
         call axtyp(laxis,iaxis(i),1)
         STNRAT(1,I) = SLRATE(1)*deg2rad/60.0d0
         STNRAT(2,I) = SLRATE(2)*deg2rad/60.0d0
@@ -245,6 +243,32 @@ C
         cPOCOD(I)   = cIDPOS
         cterid(i)=cidt
         chccod(i) = cidhor
+
+        if(i .ne. 1) then
+          iwhere=iwhere_in_string_list(cpocod,i-1,cidpos)
+          if(iwhere .ne. 0) then
+            write(*,*) "STINP ERROR: Duplicate position codes: ",
+     >        cidpos
+            goto 960
+          endif
+
+          iwhere=iwhere_in_string_list(cterid,i-1,cidt)
+          if(iwhere .ne. 0) then
+             write(*,*) "STINP ERROR: Duplicate terminal ID code: ",
+     >         cidt
+            goto 960
+          endif
+
+          if(cidhor .ne. " ") then
+            iwhere=iwhere_in_string_list(chccod,i-1,cidhor)
+            if(iwhere .ne. 0.and. cidhor .ne. " ") then
+               write(*,*) "STINP ERROR: Duplicate horizon mask code: ",
+     >         cidhor
+             goto 960
+            endif
+          endif
+        endif
+
         NHORZ(I) = 0
         cantna(i)=cname
         return
@@ -291,7 +315,7 @@ C
         call plh(stnxyz(1,i),chklat,chklon,rht)
         chklat=chklat*rad2deg
         chklon=-chklon*rad2deg    !note minus sign
-        tol=0.1
+        tol=0.4
         if(abs(chklat-poslat) .gt. tol .or.
      >       abs(chklon-poslon) .gt. tol .and.
      >      abs(360-abs(chklon-poslon)) .gt. tol) then
@@ -315,12 +339,10 @@ C
 ! 101  MOJ-VLBA 1x56000  17640    X   750   S   800   X 1.0 0.954 0.0464 S 1.0 0.974 0.0263 VLBA VLBA
         cidt=ltoken(1)
         cname=ltoken(2)
-        kk4=cname(1:2).eq."K4"
-        ks2=cname(1:2).eq."S2"
 
         j=8
-        CALL UNPVT(IBUFX(2),ILEN-1,IERR,LIDT,LNAME,ibitden,
-     >   nstack,maxt,nr,ls2sp,lb,sefd,j,par,npar,lrack,lrec1,lrec2)
+        CALL UNPVT(IBUFX(2),ILEN-1,IERR,cIDT,cNAME,ibitden,
+     >   nstack,maxt,nr,cs2sp,cb,sefd,j,par,npar,crack,crec1,crec2)
         if(ierr .ne. 0) goto 910
 
         i=0
@@ -329,6 +351,7 @@ C
         endif
         if (i.eq. 0) then ! try to match station name
           i=iwhere_in_string_list(cstnna,nstatn,cname)
+          write(*,*) cstnna(1:nstatn)
         endif
         IF  (I.eq.0) THEN  !matching entry not found
           write(lu,'("STINP24 - Name or ID match not found: ",a)') cname
@@ -342,8 +365,8 @@ C  Got a match. Initialize names.
         cterna(i)=cname
 
         cstrack(i)="unknown"
-        cstrec(i)="unknown"
-        cstrec2(i)="none"
+        cstrec(i,1)="unknown"
+        cstrec(i,2)="none"
         cs2speed(i)=" "
 
 C  Store equipment names.
@@ -351,34 +374,37 @@ C  Store equipment names.
           cstrack(i)=crack
         endif
         if (crec1 .ne. " ") then
-           cstrec(i)=crec1
+           call check_rec_type(crec1)
+           cstrec(i,1)=crec1
         endif
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
         if (crec2 .eq. " ") then
          if(nr .eq. 2) nr=1
         else
-          if (crec1 .eq. 'S2')then
+          if(crec1 .eq. 'S2')then
              cs2mode(i,1)=crec2
           else
-            cstrec2(i)=crec2
+            call check_rec_type(crec2)
+            cstrec(i,2)=crec2
           endif
         endif
         cfirstrec(i)="1 "
 
-C       Now set the S2 and K4 switches depending on the recorder type.
-        ks2=cstrec(i).eq."S2"
-        kk4=cstrec(i).eq."K4"
-C    Store other info depending on the type.
+C    Now set the S2 and K4 switches depending on the recorder type.
         nrecst(i) = nr
-        if (ks2) then ! set S2 variables
+        if (cstrec(i,1)(1:2) .eq. "S2") then ! set S2 variables
           cs2speed(i)=cs2sp
-          if(cs2sp.eq.   "LP") s2sp=SPEED_LP
-          if(cs2sp .eq. "SLP") s2sp=SPEED_SLP
+          if(cs2sp.eq.   "LP") then
+            s2sp=SPEED_LP
+          else if(cs2sp .eq. "SLP") then
+            s2sp=SPEED_SLP
+          endif
+
           nheadstack(i)=1
           ibitden_save(i)=1
           maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
-        else if (kk4) then ! set K4 variables
+        else if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
           nheadstack(i)=1
           maxtap(i) = maxt ! conversion??
           ibitden_save(i)=1
@@ -397,7 +423,7 @@ C    Store other info depending on the type.
               enddo
             endif
             nsefdpar(ii,i) = npar(ii)
-            lbsefd(ib,i) = lb(ib)
+            cbsefd(ib,i) = cb(ib)
           else ! store away until frequencies are selected
             sefdst(ib,i) = sefd(ib)
             if (npar(ib).gt.0) then
@@ -406,7 +432,7 @@ C    Store other info depending on the type.
               enddo
             endif
             nsefdpar(ib,i) = npar(ib)
-            lbsefd(ib,i) = lb(ib)
+            cbsefd(ib,i) = cb(ib)
           end if
         enddo
         return
@@ -497,6 +523,7 @@ C! come here on bad line.
 
 910   continue
       write(lu,'("STINP- Problem with: ",a)') cbufin0(1:nch)
+      write(*,*) "ERROR NUMBER: ",ierr
       return
 
 
@@ -504,4 +531,11 @@ C! come here on bad line.
       write(lu,'("STINP - Not enough tokens: ",a)') cbufin0(1:nch)
       return
 
+960   continue
+      write(lu, *) 
+     >     "STINP - duplicate codes in station 'A' lines."// 
+     >     " Please fix before proceeding!" 
+      ierr=100
+      stop
+      return
       END

@@ -1,5 +1,4 @@
-      SUBROUTINE unpfsk(IBUF,ILEN,IERR,
-     .lfr,lc,lst,ns)
+      SUBROUTINE unpfsk(IBUF,ILEN,IERR,lfr,lc,lst,ns)
 C
 C     UNPFR unpacks the "F" lines in the $CODES section.
 C
@@ -18,6 +17,8 @@ C            sub-code and station names are missing!
 C 960117 nrv For compatibility with PC-SCHED, do not blow up if
 C            the fields after the code are different, just ignore.
 C 960405 nrv Remove "lsub" from reading
+! 2007May04 JMG  Used to bomb out if stations were numbers
+!                Don't check for numeric form. This makes imcompatible with PC sked.
 C
 C  INPUT:
       integer*2 IBUF(*) ! buffer having the record
@@ -77,18 +78,13 @@ C
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         if (ic1.gt.0) then
           NCH = IC2-IC1+1
-          n = ias2b(ibuf,ic1,ic2-ic1+1)
-          if (n.gt.0) then ! numeric, so ignore the rest
-            return
-          else
             IF  (NCH.GT.8) THEN 
               IERR = -104-ns
               RETURN
             END IF
-            ns=ns+1
-            CALL IFILL(lst(1,ns),1,8,oblank)
-            IDUMY = ICHMV(lst(1,ns),1,IBUF,IC1,NCH)
-          endif
+          ns=ns+1
+          CALL IFILL(lst(1,ns),1,8,oblank)
+          IDUMY = ICHMV(lst(1,ns),1,IBUF,IC1,NCH)
         endif
       enddo
 C

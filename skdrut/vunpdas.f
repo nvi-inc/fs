@@ -1,6 +1,6 @@
       SUBROUTINE VUNPDAS(stdef,ivexnum,iret,ierr,lu,
-     .lidter,lnater,nstack,maxtaplen,nrec,lb,sefd,par,npar,
-     .lrec,lrack,ctapemo,ite,itl,itg,ls2sp,ns2tap,ltlc)
+     > cidter,cnater,nstack,maxtaplen,nrec,lb,sefd,par,npar,
+     > crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tap,ctlc)
 C
 C     VUNPDAS gets the recording terminal information for station
 C     STDEF and converts it. Returns on error from any vex routine.
@@ -31,6 +31,7 @@ C            list initialized in skdrini.
 C 000907 nrv Get second headstack statement. If there are two of
 C            them, set NSTACK=2.
 C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
+! 2006Nov16 JMG Fixed initialization of ltlc.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -42,39 +43,38 @@ C  OUTPUT:
       integer ierr ! error return from this routine, >0 tells which
 C                    section had vex error, <0 is invalid value
       integer maxtaplen,nrec
-      integer*2 lidter(2) ! terminal ID
+      character*4 cidter
       integer nstack ! number of headstacks
-      integer*2 LNATER(4) ! name of the terminal
-      integer*2 lb(*)  ! bands
+      character*8 cNATER ! name of the terminal
+      integer*2 lb(*)    ! bands
       real sefd(*),par(max_sefdpar,*)
-      integer npar(*)   ! sefds
-      integer*2 lrec(4),lrack(4) ! recorder and rack types
+      integer npar(*)    ! sefds
+      character*8 crec,crack ! recorder and rack types
       character*128 ctapemo ! tape motion type
       integer ite,itl,itg ! early, late, gap 
-      integer*2 ls2sp(2) ! S2 tape speed
+      character*4 cs2sp ! S2 tape speed
       integer ns2tap ! number of S2 tapes
-      integer*2 ltlc ! two_letter_code, if none use LIDTER
+      character*2 ctlc ! two_letter_code, if none use LIDTER
 C
 C  LOCAL:
       character*128 cout,cunit,ctemp
       double precision d
-      integer i,nch,idumy
+      integer i,nch
       logical ks2 ! true for an S2 recorder
-      integer fvex_double,fvex_int,fget_station_lowl,fvex_field,
-     .fvex_units,
-     .ptr_ch,fvex_len,ichcm_ch,ichmv_ch ! function
+      integer fvex_double,fvex_int,fget_station_lowl,fvex_field
+      integer fvex_units,ptr_ch,fvex_len ! function
 C
 C
 C  Initialize in case we have to leave early.
 
-      CALL IFILL(lrec,1,8,oblank)
-      CALL IFILL(lrack,1,8,oblank)
-      idumy = ichmv_ch(lidter,1,'    ')
-      idumy = ichmv_ch(ltlc,1,'    ')
-      CALL IFILL(lnater,1,8,oblank)
+      crec=" "
+      crack=" "
+      cidter=" "
+      ctlc=" "
+      cnater=" "
       nstack=1 ! default
       maxtaplen = MAX_TAPE
-      CALL IFILL(ls2sp,1,8,oblank)
+      cs2sp=" "
       ns2tap=0
       nrec = 1 ! default
       ite=0
@@ -98,19 +98,8 @@ C
      .    cout(1:nch)
           ierr=-1
         else
-          IDUMY = ICHMV_ch(lrec,1,cout(1:nch))
-          if (ichcm_ch(lrec,1,'MARK3A').eq.0) 
-     .    IDUMY = ICHMV_ch(lrec,1,'Mark3A')
-          if (ichcm_ch(lrec,1,'MARK4').eq.0) 
-     .    IDUMY = ICHMV_ch(lrec,1,'Mark4')
-          i=1
-          do while (i.le.max_rec_type.and.cout(1:nch).ne.crec_type(i))
-            i=i+1
-          enddo
-          if (i.gt.max_rec_type) then ! no match
-            write(lu,'("VUNPDAS22 - Unrecognized recorder type: ",a)')
-     .      cout(1:nch)
-          endif ! no match
+          crec=cout(1:nch)
+          call check_rec_type(crec)
           ks2 = cout(1:2).eq.'S2'
         endif
       endif
@@ -130,19 +119,8 @@ C
      .    cout(1:nch)
           ierr=-2
         else
-          IDUMY = ICHMV_ch(lrack,1,cout(1:nch))
-          if (ichcm_ch(lrack,1,'MARK3A').eq.0)
-     .    IDUMY = ICHMV_ch(lrack,1,'Mark3A')
-          if (ichcm_ch(lrack,1,'MARK4').eq.0)
-     .    IDUMY = ICHMV_ch(lrack,1,'Mark4')
-          i=1
-          do while (i.le.max_rack_type.and.cout(1:nch).ne.crack_type(i))
-            i=i+1
-          enddo
-          if (i.gt.max_rack_type) then ! no match
-            write(lu,'("VUNPDAS22 - Unrecognized rack type: ",a)')
-     .      cout(1:nch)
-          endif ! no match
+          crack=cout(1:nch)
+          call check_rack_type(crack)
         endif
       endif
 C
@@ -160,7 +138,7 @@ C
           write(lu,'("VUNPDAS03 - Terminal ID too long")')
           ierr=-3
         else
-          idumy = ichmv_ch(lidter,1,cout(1:nch))
+          cidter=cout(1:nch)
         endif
       endif
 C
@@ -177,7 +155,7 @@ C
           write(lu,'("VUNPDAS04 - Terminal name too long")')
           ierr=-4
         else
-          IDUMY = ICHMV_ch(lnater,1,cout(1:NCH))
+          cnater=cout(1:nch)
         endif
       endif
 C
@@ -253,7 +231,7 @@ C
      .                  " or SLP")')
               ierr=-19
             else
-              IDUMY = ICHMV_ch(ls2sp,1,ctemp(1:NCH))
+              cs2sp=ctemp(1:nch)
             endif ! check S2 speed
           endif
           iret = fvex_field(3,ptr_ch(cout),len(cout)) ! number of tapes

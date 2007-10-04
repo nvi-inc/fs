@@ -30,6 +30,7 @@ C 020926 nrv Change K4 sample rate logic to get correct speed (per S. Kurihara)
 C 021003 nrv Calculate K4 speed in dm/s not m/s. This will make the
 C            footages in the schedule be in dm not meters, for more precision.
 C 030109 jmg Back to m/s on K4
+! 2006Nov29 JMG.  Changed to use cstrec(istn,irec)
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -44,7 +45,6 @@ C     SPEED - tape speed, fps
 C
 C  LOCAL:
       double precision sp,ohfac,fanfac,totrate
-      logical ks2,kk4
       character*1 lchar
 C
 C
@@ -54,11 +54,7 @@ C
       endif
 
 C Determine type of equipment.
-
-      ks2=cstrec(is)(1:2) .eq. "S2"
-      kk4=cstrec(is)(1:2) .eq. "K4"
-
-      if (ks2) then
+      if (cstrec(is,1)(1:2) .eq. "S2") then
         if (cs2speed(is)(1:2) .eq. "LP") then
           sp = speed_lp ! ips
         else if (cs2speed(is)(1:3) .eq. "SLP") then
@@ -68,7 +64,7 @@ C Determine type of equipment.
           return
         endif
         sp=sp/12.0 ! convert to fps
-      else if (kk4) then
+      else if (cstrec(is,1)(1:2) .eq. "K4") then
         totrate=samprate(icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
         if (totrate.gt.129.0) then
           sp = 423.8 ! mm/sec for 256 Mbps

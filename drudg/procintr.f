@@ -3,12 +3,11 @@ C
 C This routine writes out the header information for proc files.
 C into lu_outfile.
 C
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
-      include 'hardware.ftni'
 C
 C History
 C 970225 nrv New. Copied from snapintr.
@@ -21,6 +20,7 @@ C            show recorder A or B.
 C 991210 nrv Write equipment name from common.
 C 991214 nrv Remove calling parameters, not nneeded.
 ! 2005Aug08 JMGipson.  Simplified.
+! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
 
 C Input
 !    None.
@@ -50,9 +50,9 @@ C
 
 
       write(lu_outfile,'(5a,$)')
-     >   '"< ',cstrack(istn),' rack >< ',cstrec(istn), ' recorder 1>'
+     >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'
       if(nrecst(istn) .eq. 2) then
-        write(lu_outfile,'("< ",a," recorder 2>")') cstrec2(istn)
+        write(lu_outfile,'("< ",a," recorder 2>")') cstrec(istn,2)
       else
         write(lu_outfile, '(a)')
       endif

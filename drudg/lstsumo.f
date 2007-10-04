@@ -4,14 +4,13 @@
      >   itime_start,itime_end,itime_tape_start,itime_tape_stop,
      >   iDur,counter,cpass,cnewtap,cdir,cscan,cbuf_source)
 
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/freqs.ftni'
       include 'lstsum.ftni'
-      include 'hardware.ftni'
 
 C Writes an output line for LSTSUM.
 C 960917 nrv New. Removed lines from LSTSUM to make this routine.
@@ -45,6 +44,8 @@ C 021011 nrv Another digit for printing gap time.
 ! 2006Oct06 JMGipson.  Fixed extraneous comma in write statement that caused compiler problems
 !                      for some linux versions.
 ! 2006Nov09 JMGipson.  1st page was 1 line longer than others. Fixed.
+! 2006Nov30 JMGipson. Changed to use cstrec(istn,irec).
+! 2007Jul28 JMGipson. Replace kdisk by km5disk which is in hardware.ftni
 
 ! Functions
       integer julda
@@ -118,12 +119,10 @@ C Local
 ! tape type
       character*6 cTapeType     !THICK,THIN SHORT
       character*4 cTapeDens     !HIGH, LOW
-      logical kdisk
       logical kprint_doy
 
 
       kprint_doy=.false.
-      kdisk=km5A .or. KM5P
 
 ! Initialize
       if(npage .eq. 0 .and. iline .eq. maxline) then
@@ -133,7 +132,7 @@ C Local
         end do
       endif
 
-      kmv=.not.(ks2.or.kk4 .or. kdisk) ! kmv=Mk3/4 or VLBA
+      kmv=.not.(ks2.or.kk4 .or. km5disk) ! kmv=Mk3/4 or VLBA
       kcont=.true. ! if we don't know, include the column
       if (kskd) kcont=tape_motion_type(istn).eq.'CONTINUOUS'.or.
      >                tape_motion_type(istn).eq.'ADAPTIVE'  .or.
@@ -153,14 +152,14 @@ C  1. Headers.
 ! Various header information.
         if(npage .eq. 1) Then
           if (kskd) then
-            write(luprt,9201) cstnna(istn),lpocod(istn),
-     .      lstcod(istn),cexper
+            write(luprt,9201) cstnna(istn),cpocod(istn),
+     .      cstcod(istn),cexper
 9201        format(' Station:    ',5x,a8,' (',a2,') (',a1,')',4x,
      .           ' Session:    ',5x,a)
           else
             write(luprt,9203) cstn,cid,cexpername
 9203        format(' Station: ',9x,a8,' (',a2,')', 7x,'Session:    ',a8)
-            if(kdisk) then
+            if(km5disk) then
               write(luprt)
      >         "Warning! Can't give byte-count without schedule file."
             else if(kk4) then
@@ -185,9 +184,9 @@ C  1. Headers.
               write(luprt,  '(" Recorder type:   S2")')
             else if (kk4) then
               write(luprt,  '(" Recorder type:   K4")')
-            else if(kdisk) then
+            else if(km5disk) then
               write(luprt,  '(" Recorder type:   DISK")')
-            else if(.not. (kdisk)) then
+            else
               if (bitdens(istn,1).gt.56000.0) then
                  cTapeDens='High'
               else
@@ -207,17 +206,12 @@ C  1. Headers.
 
           write(luprt,9210)  cstrack(istn)
 9210      format(" Rack:            ",a)
-          write(luprt, 9211)    cstrec(istn),itearl_local
+          write(luprt, 9211)    cstrec(istn,1),itearl_local
 9211      format(" Recorder 1:      ",a,14x,"Early start: ",i6,1x,"sec")
-          write(luprt, 9212)    cstrec2(istn),itlate_local
+          write(luprt, 9212)    cstrec(istn,2),itlate_local
 9212      format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
 
 ! Put out procedure names
-          if (kdisk .or.ks2.or.kk4) then ! setup proc names
-            itype=1
-          else
-            itype=2
-          endif
 
           num_recs=nrecst(istn)
           if(nrecst(istn) .eq. 2) then
@@ -230,11 +224,11 @@ C  1. Headers.
           do icode=1,ncodes
             do irec=1,num_recs ! loop on number of recorders
               num_sub_pass=npassf(istn,icode)
-              if(kdisk)  num_sub_pass=1
+              if(km5disk)  num_sub_pass=1
               write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
               do ipass=1,num_sub_pass
                 cnamep=" "
-                call setup_name(itype,icode,ipass,cnamep,nch)
+                call setup_name(icode,ipass,cnamep,nch)
                 call c2lower(cnamep,cnamep)
                 write(luprt,'(a,1x,$)') cnamep
               end do
@@ -263,7 +257,7 @@ C  1. Headers.
      >     ' Group (min) = group number and nearest minute on tape (S2)'
           elseif(kk4) then
             write(luprt,"(' Counts = tape counts at start of scan')")
-          else if(kdisk) then
+          else if(km5disk) then
             write(luprt,"(' Gbyte  = Gigabytes at start of scan')")
           else
             write(luprt,'(a)')
@@ -312,7 +306,7 @@ C  2. Column heads.
            cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
         else if(ks2) then
            cbuf=cbuf(1:il)//'      Dur  Group (min)'
-        else if(kdisk) then
+        else if(km5disk) then
            if(kskd) then
              cbuf=cbuf(1:il)//'      Dur    Gbyte'
            else
@@ -434,7 +428,7 @@ C  Duration
       idurs = idur - idurm*60
       write(luprt,'(2x,i3,":",i2.2,$)') iDurM,iDurS
 C  Pass
-      if (.not.(kk4 .or. kdisk)) then ! pass or S2 group
+      if (.not.(kk4 .or. km5disk)) then ! pass or S2 group
         if (cnewtap.eq.'@   ') then
           write(luprt,'(1x,"--",$)') 
         else
@@ -451,7 +445,7 @@ C  Footage
         endif
       else if(ks2) then
         write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
-      else if(kdisk) then
+      else if(km5disk) then
         if(kskd) then
           write(luprt,'(f8.1,$)') counter/1000  !convert megabytes to Gigabytes
         endif

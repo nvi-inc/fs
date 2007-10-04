@@ -36,11 +36,11 @@
 !     write(lutmp,'(a)') " "
 
 
-      write(lutmp,'(a)')   " [0] Return to drudg "
+      write(lutmp,'(a)')   " [0]  or <RET> Return to drudg "
       write(lutmp,'(a)')   " [1] Turn off all overrides"
       write(lutmp,'(a)') " "
 
-      write(lutmp,'(a,a)') " [2] TURN OFF all data transfers: ",
+      write(lutmp,'(a,a)') " [2] TURN OFF all data transers:  ",
      >   lyes_no(kNo_Data_xfer)
       write(lutmp,'(a,a)') " [3] IN2NET changed to DISK2FILE: ",
      >   lyes_no(kin2net_2_disk2file)
@@ -85,24 +85,33 @@
       else
         ltemp="<NONE>"
       endif
-      write(lutmp,'(a,a)')
+      write(lutmp,'(a,a,$)')
      > "[10] Disk2File_Dir:               ", ltemp(1:trimlen(ltemp))
+      if(ltemp .eq. "<NONE>") then
+         write(lutmp,'(a)') "    Uses Mark5 working directory"
+      else
+         write(lutmp,'()')
+      endif
 
 
       if(kreturn) return
 
       write(lutmp,'(a)')
      >"----------------------------------------"
+      write(lutmp,'(a)') " Enter <CMD> <Optional Parameter> "
       write(lutmp,'(a)')
-     > " Enter command and optional argument. "
-      write(lutmp,'(a)')
-     > " If argument is missing, value set to <NONE>."
+     > " If <Optional Parameter> is missing, value set to <NONE>. "
       write(lutmp,'(a)')
      > " Disk2File_Dir absolute path names preferred."
+      write(lutmp,'(a)')
+      write(lutmp,'("? ",$)')
 
 
 ! Read the response
       read(*,'(a256)') ldum
+      ifunc=trimlen(ldum)
+      if(ifunc .eq. 0) return
+
       ltoken(2)=""
       ltoken(1)=""
       call splitNtokens(ldum,ltoken,Maxtoken,NumToken)

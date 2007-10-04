@@ -1,56 +1,49 @@
-      subroutine setup_name(itype,icode,isubpass,cnamep)
+      subroutine setup_name(icode,isubpass,cnamep)
 
 C SETUP_NAME generates the setup procedure name.
 
-      include '../skdrincl/skparm.ftni'
-      include '../skdrincl/statn.ftni'
-      include '../skdrincl/freqs.ftni'
-      include 'drcom.ftni'
       include 'hardware.ftni'
+      include '../skdrincl/freqs.ftni'
+      include '../skdrincl/statn.ftni'
+      include 'drcom.ftni'
 
 C History
 C 991102 nrv New. Removed from PROCS and SNAP.
 C 991205 nrv Use letter codes for passes and not numbers.
 ! 2006Sep26 JMG. changed lnamep to ASCII. Got rid of all hollerith stuff.
+! 2007Jul26 JMG. changed itype to logical knopass. Put in hardware.ftni
+
 ! functions
+!
       integer trimlen
+      character*1 cband_char
 
 C Input
-      integer itype ! 1=SETUP 2=mnemonic name
       integer icode,isubpass
 C Output
 !      integer*2 lnamep(*)
       character*12 cnamep
       integer nch
 C Local
-      integer itrk(max_track,max_headstack),npmode,nco,ib
-!      integer*2 lpmode(2) ! mode for procedure names
+      integer npmode,nco
       character*4 cpmode
-      real spdips
-      character*28 cpass,cvpass
+      character*28 cvpass
       character*1 cp ! selection from cpass or cvpass
 !      integer iflch,ichmv_ch,ichmv
       integer num_trk_rec
-      data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
       data cvpass /'ABCDEFGHIJKLMNOPQRSTUVWXYZAB'/
 
 !      nco = iflch(lcode(icode),2)
       nco=trimlen(ccode(icode))
-      if (itype.eq.1) then ! setup name
-!        nch = ichmv_ch(lnamep,1,'SETUP')
-!        nch = ICHMV(lnamep,nch,LCODE(ICODE),1,nco)   ! ff
-        cnamep="SETUP"//ccode(icode)(1:nco)
+      if (knopass) then ! setup name
+        cnamep="setup"//ccode(icode)(1:nco)
         nch=nco+6
       else ! mnemonic name
         call trkall(isubpass,istn,icode,cmode(istn,icode),
      >   itrk,cpmode,npmode,ifan(istn,icode),num_trk_rec)
 !        nch = ICHMV(lnamep,1,LCODE(ICODE),1,nco)   ! ff
-        CALL M3INF(ICODE,SPDIPS,IB)
-C       choices in LBNAME are D,8,4,2,1,H,Q,E
-!        NCH=ICHMV(lnamep,NCH,LBNAME,IB,1)          ! b
-!        NCH=ICHMV(lnamep,NCH,Lpmode,1,npmode)      ! m
-         cnamep=ccode(icode)(1:nco)//cbname(ib:ib)//cpmode(1:npmode)//
-     >    cvpass(isubpass:isubpass)
+         cnamep=ccode(icode)(1:nco)//cband_char(vcband(1,istn,icode))
+     >     //cpmode(1:npmode)//cvpass(isubpass:isubpass)
          nch=nco+npmode+3
 C       Convert pass index to integer or alpha
 C       if (jchar(lmode,1).eq.ocapv) then         ! p
@@ -61,7 +54,10 @@ C       endif
 !        NCH=ICHMV_ch(lnamep,NCH,cp)
       endif  ! setup or mnemonic
 ! if two recorders, append the recorder number.
-      if(krec_append) cnamep(nch:nch)=crec(irec)
+      if(krec_append) then
+        cnamep(nch:nch)=crec(irec)
+        nch=nch+1
+      endif
 !       nch=ichmv_ch(lnamep,nch,crec(irec))
 
       return

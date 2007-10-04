@@ -40,85 +40,86 @@ C 2003Jul11 JMG added itctim
 !                     Replaced with  cpaper_size
 ! 2006Jun13.  JMG. Removed ldisk2file stuff and put in ../skdrincl/data_xfer.ftni.
 ! 2006Oct16. JMGipson. added klabel_ps flag to indicate postscript printer.
+! 2007Jul10  JMG. Removed lbname.
+! 2007Jul20  JMG. Added ksked_proc flag. Put all logical in same common.
+!                 Got rid of stuff that is no longer used.
 C
-	double precision RA50,DEC50
-        real rlabsize
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
       logical klabel_ps  !is the label printer Postscript?
-c
-	INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
-     .  lu_infile,lu_outfile,luprt,luout,lulab,istn,
-     .  nlab,nllab,lulasr,ludesk,
-     .  irecpr,irbpr,ioffpr,luflop,icrty6,
-     .  itpos,itctim,ilabrow,ilabcol,inewpage,
-     .  ibout,luscn,
-     .  ibbclen,nbbcbuf,nchanr,iperm,fileptr,itpid_period
-C
-        integer*2 ld,ibbcbuf,ibuf,
-     .  lbname, iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
-C
-C
-	CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
-     .lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
-     .tpid_prompt,tpid_parm
-c
-        character*2 cpaper_size
+      logical ksked_proc
 
-        character*2 coption
-	character*6 cpid
-        character*4 cepoch
-C
-	COMMON/DRCOM/RA50(MAX_CEL),DEC50(MAX_CEL),rlabsize(6),
+      common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
-     .       kpostpass,klabel_ps,
-     .       ISKLEN,LUUSR,
-     .       LU_INFILE, LU_OUTFILE,
-     .       LUPRT,LUOUT,LULAB,ISTN,
-     .       NLAB,NLLAB,LULASR,LUDESK,
-     .       ireccv,IRECSK,IRECST,IRECEL,
-     >       itctim,
-     .       IRECPR,IRBPR,IOFFPR,LUFLOP,
-     .       ICRTY6,
-     .       ITPOS(500),ilabrow,ilabcol,inewpage,
-     .       IBOUT(40),luscn,itpid_period,
-     .       ibbclen(2,3),nbbcbuf(2),nchanr,iperm,fileptr,
-     .       LD(500),
-     .       IBUF(ibuf_len),lbname(4),
-     .       ibbcbuf(40,2,3),
-     .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+     .       kpostpass,klabel_ps,ksked_proc
 
-        character*8 cbname
-        equivalence (cbname,lbname)
-        character*(2*ibuf_len) cbuf
-	equivalence (cbuf,ibuf)
-        COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
+      CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
+     .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
+     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
+     .  tpid_prompt,tpid_parm
+c
+      character*2 cpaper_size
+      character*2 coption
+      character*6 cpid
+      character*4 cepoch
+      integer IBUF(ibuf_len)
+      character*(2*ibuf_len) cbuf
+      equivalence (cbuf,ibuf)
+
+      COMMON/DRCOM_CH/cbuf, LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
      >    cpaper_size,coption(3),ctextname,cversion,
      >    tpid_prompt,tpid_parm
-!
+
+
+      double precision RA50(max_cel),DEC50(max_cel)
+      real rlabsize(6)
+c
+      integer iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+      INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
+     .  lu_infile,istn,
+     .  nlab,nllab,
+     .  icrty6,
+     .  itctim,ilabrow,ilabcol,inewpage,
+     .  nchanr,iperm,fileptr,itpid_period
+
+      integer lu_outfile,luprt,luscn
+C
+      integer*2 ibbcbuf(40,2,3)
+      integer ibbclen(2,3)
+      integer nbbcbuf(2)
+
+      COMMON/DRCOM_int/
+     .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS,
+     .       ISKLEN,LUUSR,
+     .       LU_INFILE, LU_OUTFILE,LUPRT,
+     >       ISTN,
+     .       NLAB,NLLAB,
+     .       ireccv,IRECSK,IRECST,IRECEL,
+     >       itctim,
+     .       ICRTY6,
+     .       ilabrow,ilabcol,inewpage,
+     .       luscn,itpid_period,
+     .       nchanr,iperm,fileptr,
+     .       ibbcbuf,ibbclen,nbbcbuf
+
+      common/drcom_real/
+     >       RA50,DEC50,rlabsize
 C
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records
 C  LUUSR  - user's terminal
 C  LUPRT  - printer LU
 C  LUOUT  - output LU for pointing
-C  LULAB  - label typewriter LU
-C  LUFLOP - floppy drive LU
 C  ISTN   - current station being processed
 C  NLAB   - number of labels across a page, max 5
 C  NLLAB  - number of lines per label, min 4
 C  KSPINT - true if we are to spin blank tape at stations
 C           which are not scheduled to participate in the
 C           current observation
-C  IRECSK,IRBSK,IOFFSK
-C         - position of first observation in schedule file
-C  LEXPER - experiment name
-C  IRECPR,IRBPR,IOFFPR
-C         - position of first line in procedures section
+
 C  cprport - printer port for pc
 C  kbrk - true if ifbrk() was true

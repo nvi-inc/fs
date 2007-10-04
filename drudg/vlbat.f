@@ -368,8 +368,7 @@ C  This is the block for recording
 C *** First cycle: specify channel assignments
 C  Start the tape moving
 
-      CALL M3INF(ICOD,SPDIPS,ISP)
-      ISP=SPDIPS*135.0/120.0
+      ISP=1
 Cdyn  The tape direction has already been set up above
       IF (IDIR.EQ.+1) then
         cspdir="+"

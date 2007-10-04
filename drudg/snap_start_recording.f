@@ -1,5 +1,4 @@
       subroutine snap_start_recording(kin2net,cspeed)
-      implicit none
       include 'hardware.ftni'
       logical kin2net
 ! 2005Jul28  JMGipson.  Added "disk_record" after disk_record_on
@@ -17,7 +16,7 @@
         npre=2
       endif
 
-      if(km5A.or.KM5P) then
+      if(km5disk) then
         if(kin2net) then
             write(lufile,'(a)') "in2net=on"
         else

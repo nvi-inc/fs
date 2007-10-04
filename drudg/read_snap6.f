@@ -15,7 +15,7 @@ C Output
       integer ierr
 
 C Local
-      integer ic1,ic2,ich,ilen
+      integer ic1,ich,ilen
 !  functions
       integer trimlen
 

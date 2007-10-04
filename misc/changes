@@ -7880,3 +7880,387 @@ Version 9.9.1 061109
            added refrwn, which is refrw without the TYPOS, thanks JHFQ!
 
 Version 9.9.2 061115
+
+061115 weh matcn/matcn.f
+           ibcon/ibcon.f
+           attempt to reduce severity of class I/O race condition
+
+061120 weh help/if3.n__
+           information on standard switch configuration included
+
+061128 weh onoff/onoff.c
+           increased precision of device flux print-out
+
+070103 ao  gnplt/gnplt
+           fix bug in Tcal vs freq plot when two points have the same Tcal
+
+070112 weh st.default/proc/vstation2.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/k42station.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/greplog.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/4station.prc
+           made greplog case insensitive
+
+070119 weh include/params.i
+           include/params.h
+070122 weh incom/equip.f
+           boss/newlg.f
+           add VSI4 board rack types and Mark 5B recorder types
+
+070122 weh control/fscmd.ctl
+           add vsi4 and mk5b_mode commands
+
+070122 weh clib/disk_record_util.c
+           clib/in2net_util.c
+           fix status display bugs
+
+070122 weh quikv/mk5b_mode_dis.c
+           control/fserr.ctl
+           include/mk5b_mode_ds.h
+070123 weh quikv/mk5b_mode.c
+           clib/mk5b_mode_util.c
+           clib/m5_utils.c
+           include/fs_types.h
+           include/fscom.h
+           quikv/quikv.c
+           quikv/Makefile
+           st.default/control/matad.ctl
+           quikv/vsi4_dis.c
+           include/vsi4_ds.h
+070201 weh quikv/scan_name.c
+           help/scan_name.___
+           clib/Makefile
+           clib/vsi4_util.c
+           quikv/vsi4.c
+           add code and changes for vsi4 and mk5b_mode commands
+
+070208 dls systests/chk1024.prc
+070208 dls systests/vchk1024.prc
+           add form=/aux 0 0 to simplify aux data field for humans
+
+070309 weh systests/chk1024.snp
+070309 weh systests/vchk1024.snp
+           add decoder firmware check
+
+070320 weh boss/lists.f
+           increase line number field in display to 5 digits for really big
+           schedule
+
+070328 JQ  st.default/oper/.fvwm2rc
+           st.default/prog/.fvwm2rc
+           deny focus to monit and xconsole, kepp FS Prompt on top
+
+070405 weh misc/stndet.txt
+           updated for the modern world
+ 
+070413 weh systests/plotlog
+           now supports olds style logs, some editing features, separates
+           -1anw and -p plots from normal output
+
+070417 weh systests/systests.txt
+           updated for new plotlog and chk1024
+
+070417 weh systests/chk1024
+           simplify output tracks tested, add scan_check, improve raw output,
+           fix aux field bug that made some bad tracks look good, add skipping
+           aux field option, discard all prior results for repeated set-ups,
+           show each log opening with a new header, permit some bad decoder
+           communications option, new debug options
+
+070511 weh clib/get_gain_par.c
+           clib/get_rxgain.c
+           gndat/get_gain_par2.c
+           fix ignoring scale factor for FWHM when "frequency" selected
+
+070517 weh help/if3.n__
+           standard switch information expanded
+
+070518 weh gndat/get_gain_par2.c
+           fix array reference for scale factor, no shared memory
+
+070518 weh st.default/control/matad.ctl
+           add 2 second time-out for DE
+
+070522 weh chk_bauds/Makefile
+           brought up to date
+
+070522 weh matcn/matcn.f
+           add delay for mark5b sampler module (vsi4)
+
+070522 weh help/vsi4.___
+           created
+
+070523 weh chk_bauds/chk_bauds.c
+           support new kernel numbering starting with ttyS4
+
+070525 weh clib/arg_util.c
+           support parsing hex 0X and 0x numbers
+
+070525 weh fclib/fc_mk4vvcd.c
+           fclib/fc_mk4vbbcd.c
+           clib/mk4vvcd.c 
+           clib/mk4vbbcd.c
+           created, mark4V and vlba4v detector "detection"
+
+070525 weh control/fscmd.ctl
+           control vsi4 command rack bits to exclude K4MK4 rack
+
+070525 weh incom/equip.f
+           boss/newlg.f
+           quikr/tplis.f
+           quikr/tplisv.f
+           clib/onoff_util.c
+           clib/tpicd_util.c
+           add mk4v and vlba4v rack types
+
+070529 weh quikv/bank_check_dis.c
+           quikv/disk_pos_dis.c
+           quikv/disk_record_dis.c
+           quikv/disk_serial_dis.c
+           quikv/in2net_dis.c
+           quikv/mk5_dis.c
+           quikv/mk5b_mode_dis.c
+           quikv/data_check_dis.c
+           quikv/scan_check_dis.c
+           fix mistake setting error codes
+
+070529 weh clib/dot_util.c
+           created
+
+070530 weh fclib/Makefile
+           updated for 4v detector routines
+
+070530 weh include/dot_ds.h
+           created
+
+070530 weh clib/get_vtime.c
+           fix error code
+
+070531 weh fmset/Makefile
+           add 5b time set/get
+
+070531 weh mk5cn/mk5cn.c
+           add 5b time getting mode
+
+070601 weh include/fs_types.h
+           add new dot_ds, 1pps_source_ds and clock_set_ds includes
+
+070601 weh include/clock_set_ds.h
+           clib/clock_set_util.c
+           fclib/fc_get_5btime.c
+           include/1pps_source_ds.h
+           clib/pps_source_util.c
+           created
+
+070605 weh clib/Makefile
+           add created routines
+
+070606 weh fmset/get5btime.c
+           created
+
+070606 weh fmset/fmset.c
+           fmset/setfmtime.c
+070607 weh fmset/getfmtime.c
+           fmset/asksure.c
+           updated for 5b
+
+070607 weh clib/get_5btime.c
+           created
+
+070607 weh systests/systvsi4.prc
+070608 weh systests/systests.txt
+070608 weh systests/systvsi42.prc
+           updated for 5b
+
+070611 weh include/rtime_ds.h
+070612 weh clib/bank_check_util.c
+           include/disk_pos_ds.h
+           clib/disk_serial_util.c
+           clib/disk_record_util.c
+           clib/in2net_util.c
+           quikv/disk_pos.c
+           clib/disk_pos_util.c
+070614 weh include/data_check_ds.h
+           updated for 5b
+
+070614 weh fmset/set5btime.c
+           created
+
+070614 weh quikv/data_check_dis.c
+           updated for 5b
+
+070626 weh misc/mk5b_ops.txt
+           added syncerr explanation
+
+070629 weh vex/vexf.c
+           vex/vex_util.c
+           vex/print_vex.c
+           vex/vex_put.c
+           changed for compatibility with other distributions
+
+070629 weh setcl/setcl.f
+           updated for 5b
+
+070702 weh clib/vsi4_util.c
+           quikv/vsi4.c
+           created
+
+070711 weh help/if3.n__
+           typos
+
+070712 weh systests/plotlog
+           updated for vsi4
+
+070712 weh clib/mk5b_mode_util.c
+           fix state initialization and other typos
+
+070712 weh clib/data_check_util.c
+           help/disk_pos.___
+           updated for 5b
+
+070718 wehqpolb/kif.f
+           aquir/kgetc.f
+           aquir/kinit.f
+           xtrac/rstat.f
+           error/error.f
+           fix inconsistency in kif call
+
+070719 weh help/vcnn.n__
+           improved external filter description
+
+070723 weh include/m5state_ds.h
+           removed "dash" state info
+
+070723 weh clib/m5_utils.cb
+           add %d p5sprintf option
+
+070723 weh quikv/scan_check_dis.c
+           updated for 5b
+
+070723 weh fmset/fmset.c
+           improved mk5b sync display
+
+070724 weh include/disk2file_ds.h
+           help/disk2file.___
+           clib/disk2file_util.c
+           quikv/disk2file_dis.c
+           include/scan_check_ds.h
+           control/fserr.ctl
+           clib/scan_check_util.c
+           help/scan_check.___
+070726 weh help/mk5b_mode.___
+           updated for 5b
+
+070726 weh systests/pcalimage
+           systests/pcalspur
+           systests/pcalamp
+           systests/samplestat
+           updated for vsi4
+
+070726 weh matcn/matcm.i
+070726 weh matcn/iat.f
+           add extra delay for m4 decoder
+
+070731 WEH misc/mk5b_ops.txt
+           clib/mk5vcd.c
+           clib/Makefile
+           fclib/fc_mk5bbcd.c
+           fclib/fc_mk5vcd.c
+           setcl/setcl.f
+           include/params.h
+           include/params.i
+           quikr/tplis.f
+           fmset/get5btime.c
+           fmset/fmset.c
+           clib/tpicd_util.c
+           boss/newlg.f
+           quikr/tplisv.f
+           fclib/Makefile
+           convert rack 4v to 5
+
+070801 WEH st.default/control/dev.ctl
+           add info about GPIB device choices
+
+070801 WEH st.default/control/equip.ctl
+           add info about 5 rack and 5b recorder options
+
+070801 WEH incom/equip.f
+           clib/mk5bbcd.c
+           clib/onoff_util.c
+           convert rack 4v to 5
+
+070903 WEH control/fserr.ctl
+           quikv/scan_check_dis.c
+           add error if missing bytes in non-zero
+
+070903 WEH quikv/scan_name.c
+           fix error when parameters after the first are defaulted
+
+070904 WEH help/scan_check.___
+           help/data_check.___
+           updated for 5b
+
+070928 WEH quikv/bank_check.c
+           fixed type that broke bank_check for mk5b_bs
+
+070928 WEH fmset/get5btime.c
+           add tvr=0 for dimino power-up initialization bug
+
+070928 WEH mk5cn/mk5cn.c
+           quikv/bank_check.c
+           increased time-out for bank_set=inc for SATA disks
+
+070928 WEH vstation2.prc
+           vstation.prc
+           vs2station.prc
+           v4station.prc
+           v42station.prc
+           v2station.prc
+           station.prc
+           s2station.prc
+           s2s2station.prc
+           newmk5ak5.prc
+           ls2station.prc
+           l4s2station.prc
+           k42station.prc
+           k42mk4vstation.prc
+           k42mk4vbstation2.prc
+           k42k3vstation.prc
+           4v4station.prc
+           4station.prc
+           change checkmk5a to checkmk5
+
+071001 WEH quikv/bank_check.c
+           wait 50 centiseconds after bank_set=inc before querying
+
+071001 JMG st.default/control/skedf.ctl
+           misc/print2dymo
+           updated for new DRUDG
+
+071002 WEH clib/mk5vcd.c
+           clib/mk5bbcd.c
+           clib/cshm_init.c
+           good defaults
+
+071003 WEH quikv/mk5b_mode.c
+           quikv/onoff.c
+           clib/onoff_util.c
+           remove old debug
+
+071004 WEH misc/RAID.txt
+           Disk reset recipe added
+
+Version 9.10.0 071004

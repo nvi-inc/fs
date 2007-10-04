@@ -1,6 +1,5 @@
       subroutine snap_unlod(ntape)
 ! write out unlod command
-      implicit none
       include 'hardware.ftni'
       integer ntape
 ! local

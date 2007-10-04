@@ -3,7 +3,6 @@
 !    sfastf, fastf, fastr, sfastr
 !
 !    JMGipson   2002Jan02  V1.00  output command to move tape fast forward or reverse.
-      implicit none
       include 'hardware.ftni'
 
 C Input:

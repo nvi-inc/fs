@@ -8,6 +8,7 @@ C
 C History
 C 960603 nrv New.
 C 970124 nrv Add iret to call.
+! 2006Nov18 JMGipson. Converted lexper to ASCII.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
@@ -23,12 +24,13 @@ C  CALLS:  fget_global_lowl         (get global info)
 C
 C  LOCAL:
       character*128 cout
-      integer idum,iret,nch,ichmv_ch
+      integer iret,nch
+! functions
       integer fget_global_lowl,fvex_field,ptr_ch,fvex_len
 
 C Initialize.
 
-      call ifill(lexper,1,8,oblank)
+      cexper=" "
       cexperdes=' '
       cpiname=' '
       ccorname=' '
@@ -47,7 +49,7 @@ C 1. Get experiment name
      .  "8 characters")') 
         nch=8
       endif
-      if (nch.gt.0) idum=ichmv_ch(lexper,1,cout(1:nch))
+      cexper=cout(1:nch)
 
 C 2. Get experiment description
 

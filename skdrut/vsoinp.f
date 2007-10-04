@@ -15,6 +15,9 @@ C 970114 nrv Change 8 to max_sorlen
 C 971003 nrv Suppress messages from the IAU name checker
 C 990606 nrv Store IAU name.
 C 2003Dec09 JMGipson replace holleriths by characcters.
+! 2006Nov18.  Got rid of residual holleriths.
+! 2007Jul02. Moved moved sordefnames from sourc.ftni to here (only used here).
+!            Renamed to csrc_name
 
 C
 C INPUT:
@@ -34,11 +37,8 @@ C LOCAL:
       integer isor,ierr1,iep,j,il
       character*128 cout
       integer ptr_ch,fget_source_def,fvex_len
-      LOGICAL kblank
-      integer*2 LIAU(max_sorlen/2),LCOM(max_sorlen/2),
-     .lname(max_sorlen/2)
       character*(max_sorlen) ciau,ccom,cname
-      equivalence (cname,lname),(ciau,liau),(ccom,lcom)
+      character*128 csrc_names(max_sor)
       double precision RARAD,DECRAD,r,d
 C
 C     1. First get all the def names 
@@ -53,7 +53,7 @@ C
           write(lu,'("          Ignored:  ",a)') cout
         else
           nsourc=nsourc+1
-          sordefnames(nsourc)=cout
+          csrc_names(nsourc)=cout
           cout=" "
           iret = fget_source_def(ptr_ch(cout),len(cout),0) ! get next one
         END IF 
@@ -64,14 +64,13 @@ C     2. Now call routines to retrieve all the source information.
       nceles = 0
       nsatel = 0
       do isor=1,nsourc ! get each source information
-
-        CALL vunpso(sordefnames(isor),ivexnum,iret,ierr,lu,
-     .  liau,lcom,RARAD,DECRAD,iep)
+        CALL vunpso(csrc_names(isor),ivexnum,iret,ierr,lu,
+     .  ciau,ccom,RARAD,DECRAD,iep)
         if (ierr.ne.0) then 
-          il=fvex_len(sordefnames(isor))
+          il=fvex_len(csrc_names(isor))
           write(lu,'("VSOINP01: Error getting $SOURCE information for ",
      >     a,"iret=",i5," ierr=",i5)')
-     >       sordefnames(isor)(1:il),  iret,ierr
+     >       csrc_names(isor)(1:il),  iret,ierr
           call errormsg(iret,ierr,'SOURCE',lu)
           ierr1=1
         endif
@@ -81,17 +80,11 @@ C     name, use that, otherwise use the IAU name.  If IAU is blank,
 C     then make both the same.
 C
         if (ierr1.eq.0) then ! continue
-        kblank=.true.
-        kblank=ciau .eq. " "
-        if (kblank) then ! use common name
-!          IDUM = ICHMV(lname,1,lcom,1,max_sorlen)
+        if (ciau .eq. " ") then ! use common name
           cname=ccom
         else
-!          IDUM = ICHMV(lname,1,LIAU,1,max_sorlen)
-!          IF (ichcm_ch(LCOM(1),1,'$ ').ne.0)
-!     .              IDUM = ICHMV(lname,1,LCOM,1,max_sorlen)
-           cname=ciau
-           if(ccom .ne. "$") cname=ccom
+          cname=ciau
+          if(ccom .ne. "$") cname=ccom
         endif
 C
 C     Then check for a duplicate name.  This should not happen
@@ -100,7 +93,7 @@ C     Check up to those source names found so far (isor-1).
         j=iwhere_in_string_list(csorna,isor,cname)
         IF  (j.ne.0) then ! duplicate source
           write(lu,9101) csorna(isor)
-9101      format('SOINP22 - Duplicate source name ',a,
+9101      format('VSOINP22 - Duplicate source name ',a,
      .    '. Using the position of the first one.')
         endif ! duplicate source
 C
@@ -113,8 +106,6 @@ C
           RETURN
         ENDIF
 C
-!        IDUM = ICHMV(LSORNA(1,NCELES),1,lname,1,max_sorlen)
-!        IDUM = ICHMV(LIAUNA(1,NCELES),1,liau,1,max_sorlen)
          ciauna(nceles)= ciau
          csorna(nceles)= cname
 

@@ -7,7 +7,7 @@
      .                 csked,csnap,cproc,
      .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
      .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
-     .                 dr_rack_type,dr_reca_type,dr_recb_type,
+     .                 dr_rack_type,crec_default,
      >                 kequip_over,
      .                 tpid_prompt,itpid_period,tpid_parm)
 C
@@ -60,13 +60,18 @@ C            send the names back.
 ! 2006Jul19 JMGipson. Changed ldisk2file_string ->lautoftp_string.
 !           For ldisk2file_dir, csnap, and cproc, add an ending "/" if neded.
 ! 2006Oct18 JMGipson. Initilaized rlabsize which is used in drudg.
+! 2006Nov30 JMGipson. Combined dr_reca_type, dr_recb_type into crec_default
+! 2007Jul24 JMGipson. Check on valid rack and recorder types in equip.
+!           Also check if equip_override is on that we have actually chosen recorders!
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
       include '../skdrincl/mysql_common.i'
-C
+      include '../skdrincl/valid_hardware.ftni'
+
+! Passed
       character*128  source_cat,station_cat,antenna_cat,position_cat,
      .equip_cat,modes_description_cat,cat_program_path,
      .               par_program_path,
@@ -76,12 +81,13 @@ C
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
      .               tpid_prompt,tpid_parm
       character*4 cepoch
-      character*8 dr_rack_type,dr_reca_type,dr_recb_type
+      character*8 dr_rack_type,crec_default(2)
       logical kequip_over
       real rlabsize(6)
       character*2 coption(3)
       integer luscn,itpid_period
 ! functions
+      integer iwhere_in_string_list
       integer  trimlen     !function call
 C
 C  LOCAL VARIABLES
@@ -103,7 +109,7 @@ C  LOCAL VARIABLES
       equivalence (lvalue,ltoken(2))
 
       integer lu          !open lu
-      integer ic,j,ilen,ierr
+      integer ic,i,j,ilen,ierr
       character*256 cbuf
       logical ktoken
       logical keof      !EOF reached in reading in file
@@ -123,6 +129,10 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
+      dr_rack_type = 'unknown'
+      crec_default(1) = 'unknown'
+      crec_default(2) = 'none'
+
       kautoftp0=.false.
       ldisk2file_dir0 =" "
       lautoftp_string0=" "
@@ -399,8 +409,35 @@ C  $MISC
 C         EQUIPMENT
                 else if (lkeyword  .eq.'EQUIPMENT') then
                   dr_rack_type=lvalue(1:8)
-                  dr_reca_type=ltoken(3)
-                  dr_recb_type=ltoken(4)
+                  crec_default(1)=ltoken(3)
+                  crec_default(2)=ltoken(4)
+                  call capitalize(crec_default(1))
+                  call capitalize(crec_default(2))
+! Now check to see if valid types.
+                  itemp=iwhere_in_string_list(crack_type_cap,
+     >               max_rack_type, dr_rack_type)
+                  if(itemp .eq. 0) then
+                    write(*,*) "Invalid rack_type: ",dr_rack_type
+                    write(*,*) "Please fix in skedf.ctl"
+                    stop
+                  else
+                    dr_rack_type=crack_type(itemp)
+                  endif
+                  do i=1,2
+                    itemp=iwhere_in_string_list(crec_type_cap,
+     >                 max_rec_type,crec_default(i))
+                    if(itemp .eq. 0) then
+                      write(*,*) "For recorder ", i,
+     >                   "Invalid recorder type: ", crec_default(i)
+                      if(crec_default(i)(1:5) .eq. "MARK5") then
+                        write(*,*)
+     >                   "Valid Mark5 recorders: Mark5A, Mark5B, Mark5P"
+                      endif
+                      stop
+                    else
+                      crec_default(i)=crec_type(itemp)
+                    endif
+                  end do
                 else if(lkeyword .eq. 'EQUIPMENT_OVERRIDE') then
                   kequip_over=.true.
 C         TPICD
@@ -437,6 +474,16 @@ C         TPICD
       kautoftp = kautoftp0
       ldisk2file_dir =ldisk2file_dir0
       lautoftp_string=lautoFTP_string0
+
+      if(kequip_over) then
+        if(dr_rack_type .eq. 'unknown' .or.
+     >      crec_default(1) .eq. 'unknown') then
+         write(*,*)
+     >    "If EQUIPMENT_OVERRIDE is on, must set rack and recoders!"
+         write(*,*) "Modify skedf.ctl accordingly!"
+         stop
+       endif
+      endif
 
       RETURN
       END

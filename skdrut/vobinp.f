@@ -45,9 +45,7 @@ C  LOCAL:
       integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
 !      integer irec
 
-      integer*2 lcb          !cable wrap
-      character*2 ccb
-      equivalence (lcb,ccb)
+      character*1 ccb
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
       integer istart(5)
@@ -58,6 +56,7 @@ C  LOCAL:
       character*128 ldata_transfer_method
       integer ixfer_cnt
       integer istat
+      character*1 cbl
 
       integer itemp
       integer nch
@@ -144,7 +143,7 @@ C       Now get each station line that is part of this scan.
             return
           endif ! code not defined
 
-          ks2=cstrec(istn)(1:2).eq."S2"
+          ks2=cstrec(istn,1)(1:2).eq."S2"
           ierr = 2 ! data start
           iret = fvex_field(2,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -177,7 +176,7 @@ C       Keep good data offset and duration separate
           if (iret.ne.0) return
           il = fvex_len(cout)
 ! fixup for Mark5.
-          if(cstrec(istn)(1:5) .eq. "Mark5" .and. il .eq. 0) then
+          if(cstrec(istn,1)(1:5) .eq. "Mark5" .and. il .eq. 0) then
              ip=1
              if(npassl(istn,icod) .eq. 0) then
                 npassl(istn,icod)=1
@@ -194,14 +193,11 @@ C       Keep good data offset and duration separate
           if (iret.ne.0) return
           il = fvex_len(cout)
           if (il.eq.0) then ! null wrap
-            ccb="N "            !None
+            cbl="N"            !None
           else ! check it
-            if (cout(1:il).eq.'&n')  ccb="- "
-            if (cout(1:il).eq.'&cw') ccb="C "
-            if (cout(1:il).eq.'&ccw') ccb="W "
-            if (cout(1:il).eq.'n')  ccb="- "
-            if (cout(1:il).eq.'cw') ccb="C "
-            if (cout(1:il).eq.'ccw') ccb="W "
+            if (cout(1:il).eq.'&n' .or. cout(1:il) .eq. 'n')   cbl='-'
+            if (cout(1:il).eq.'&cw'.or. cout(1:il) .eq. 'cw')  cbl='C'
+            if (cout(1:il).eq.'&ccw'.or.cout(1:il) .eq. 'ccw') cbl='W'
           endif
           ierr = 7 ! drive number
           iret = fvex_field(7,ptr_ch(cout),len(cout))
@@ -214,14 +210,14 @@ C  Make the new scan if this is the first source.
 
          if (istn_scan.eq.1) then  ! first station in this scan--new scan.
            call newscan(istn,isor,icod,istart,idstart,
-     .        idend,ifeet,ip,idrive,lcb,ierr)
+     .        idend,ifeet,ip,idrive,cbl,ierr)
            il = fvex_len(cscan_id)
            scan_name(iskrec(nobs)) = cscan_id(1:il)
            if (ierr.ne.0) write (lu,9108) ierr
 9108       format('VOBINP05 - Error ',i5,' from newscan')
          else ! add
            call addscan(nobs,istn,icod,idstart,idend,
-     .        ifeet,ip,idrive,lcb,ierr)
+     .        ifeet,ip,idrive,cbl,ierr)
            if (ierr.ne.0) then
              write(lu,9103) ierr,istn,istart
 9103         format('VOBINP06 - addscan error ',i3,' istn=',i3,

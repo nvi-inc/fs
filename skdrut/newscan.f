@@ -1,5 +1,5 @@
       subroutine newscan(istn,isor,icod,istart,
-     .      idstart,idend,ifeet,ipas,idrive,lcb,ierr)
+     .      idstart,idend,ifeet,ipas,idrive,cbl,ierr)
 
 C   NEWSCAN forms the inputs into a standard sked/drudg hollerith 
 C   observation. This routine and ADDSCAN determine the internal
@@ -32,7 +32,7 @@ C Input:
       integer ifeet ! footage counter at start
       integer ipas ! pass number, calculate F/R from even/oddness
       integer idrive ! which drive to record on, 0=no recording
-      integer*2 lcb ! cable wrap
+      character*1 cbl ! cable wrap
 
 C Output:
       integer ierr ! if anything went wrong
@@ -81,8 +81,8 @@ C     Postob proc
       NCH = ICHMV_ch(IBUF,NCH,'POSTOB')
       NCH = NCH + 1
 C     Station code
-      NCH = ICHMV(IBUF,NCH,LSTCOD(ISTN),1,1)
-      NCH = ICHMV(IBUF,NCH,LCB,1,1)
+      cbuf(nch:nch+1)=cstcod(istn)//cbl
+      nch=nch+1
 C   Insert blanks for other stations' codes
       nch = nch + nstatn*2
 C   Tape pass, direction, footage for each station

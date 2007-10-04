@@ -49,7 +49,7 @@ C 2. Loop over SNAP records
         if (index(ctmp,'UNLOD').ne.0) then
           if (nout.ge.nlab) then !print a row
             if (clabtyp.ne.'POSTSCRIPT' .and. clabtyp .ne. 'DYMO') then ! laser or Epson
-              call blabl(luprt,nout,lexper,lstnna(1,1),lstcod(1),
+              call blabl(luprt,nout,cexper,cstnna,cstcod,
      .        iy1,id1,ih1,im1,iy2,id2,ih2,im2,ilabrow,
      .        cprttyp,clabtyp,cprport)
               nout = 0
@@ -106,8 +106,7 @@ C 2. Loop over SNAP records
       enddo !read loop
 901   if (clabtyp.ne.'POSTSCRIPT'.and. clabtyp .ne. 'DYM0') then
         if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.cprttyp.eq.'FILE') 
-     .  call blabl(luprt,nout,lexper,
-     .  lstnna(1,1),lstcod(1),
+     .  call blabl(luprt,nout,cexper,cstnna,cstcod,
      .  iy1,id1,ih1,im1,iy2,id2,ih2,im2,ilabrow,cprttyp,clabtyp,cprport)
       else
         ipsy1=mod(iyear,100)

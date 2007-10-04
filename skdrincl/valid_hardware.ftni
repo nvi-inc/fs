@@ -1,0 +1,15 @@
+! Allowed rack types, recorder types.
+C     Number of defined rack and recorder names.
+      integer max_rack_type, max_rec_type, max_rec2_type
+      PARAMETER (MAX_RACK_TYPE= 18)
+      PARAMETER (MAX_REC_TYPE = 15)
+      PARAMETER (MAX_REC2_TYPE = 7)
+
+      character*8 crack_type(max_rack_type)    	! valid rack type
+      character*8 crack_type_cap(max_rack_type) !    capitalized version
+      character*8 crec_type(max_rec_type)       ! valid recorder type
+      character*8 crec_type_cap(max_rec_type)   !   capitalized version
+
+      COMMON /rack_rec_CH/crack_type,crack_type_cap,
+     >                  crec_type,crec_type_cap
+

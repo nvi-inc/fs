@@ -65,6 +65,9 @@ C 2003Jul23 JMG changed to 12 params
 C 2004May14 JMGipson. Removed physical constants-->constants.ftni
 ! 2005May24 JMGipson. Changed max_chart to max_trial
 ! 2005Jun06 JMGipson. Removed things dealing with maximum number of catalog entries.
+! 2006Sep18 JMGipson. Changed max_obs to 10000
+! 2007Feb09 JMGipson. Changed max_stn to 40, max_sor to 500, and max_obs to 20000
+! 2007May26 JMGipson. Changed max_rec_type,max_rack_type for Mark5B hardware
 C
 C********************************************************************
 C
@@ -77,7 +80,7 @@ C
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
      .max_subpass,max_tone,max_roll_def,max_change_list
 
-      PARAMETER (MAX_STN = 30)
+      PARAMETER (MAX_STN = 40)
 C
 C     The maximum number of baselines.
 C
@@ -99,7 +102,7 @@ C *** NOTE: If this value is changed, then at least one of MAX_CEL
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 305)
+      PARAMETER (MAX_SOR = 1000)
 
 C     The maximum number of CHARACTERS in a source name. Should be
 C     an even integer. Maximum size now is 26, to be cmpatible with
@@ -113,7 +116,7 @@ C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
 C *** NOTE: If this value is changed at least one of MAX_SOR
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_CEL = 300)
+      PARAMETER (MAX_CEL = 990)
 C
 C     The maximum number of satellite (orbital element) sources which
 C     can be selected for an experiment at one time. Used in SKED
@@ -121,7 +124,7 @@ C     and DRUDG.
 C *** NOTE: If this value is changed, then at least one of MAX_SOR
 C *** and MAX_CEL must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_SAT = 5)
+      PARAMETER (MAX_SAT = MAX_SOR-MAX_CEL)
 C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
@@ -238,11 +241,11 @@ C     Speeds for S2.
       integer max_sor_esti,max_trial
 
 C     Maximum number of parameters that can be estimated.
-      PARAMETER (MAX_PAR_ESTI=50)
+      PARAMETER (MAX_PAR_ESTI=100)
 C     PARAMETER (MAX_PAR_ESTI=20)
 C
 C     Maximum number of parameters that can be optimized
-      PARAMETER (MAX_PAR_OPTI=30)
+      PARAMETER (MAX_PAR_OPTI=100)
 C     PARAMETER (MAX_PAR_OPTI=10)
 C
 C     Maximum dimension for arrays holding coefficients etc.
@@ -317,13 +320,8 @@ C
 C
 C     The maximum number of scans allowed in a schedule
 C
-      PARAMETER (MAX_OBS = 3000)
+      PARAMETER (MAX_OBS = 20000)
 
-C     Number of defined rack and recorder names.
-      integer max_rack_type, max_rec_type, max_rec2_type
-      PARAMETER (MAX_RACK_TYPE= 16)
-      PARAMETER (MAX_REC_TYPE = 14)
-      PARAMETER (MAX_REC2_TYPE = 6)
 
 C     The name of the control files. These files are
 C     read at run time. cctfil is the default control
@@ -335,7 +333,7 @@ C     to be used.
 C
       character*128 cctfil,cownctl
 C this path is for Goddard's HPUX
-!      parameter(cctfil = '/usr/local/bin/skedf.ctl')
+C      parameter(cctfil = '/usr/local/bin/skedf.ctl')
 C this path is for Linux FS
-       parameter(cctfil = '/usr2/control/skedf.ctl')
+      parameter(cctfil = '/usr2/control/skedf.ctl')
       parameter(cownctl = 'skedf.ctl')

@@ -131,6 +131,7 @@ C 000705 nrv Use standard KNEWT for S2 also.
 ! 2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character
 !            tape_label ctape_num. This is so we can use this for VSN#s
 ! 2006Oct17 JMGipson. Added argument to cclose(fp, clabtyp). Clabyp indicates kind of printer.
+! 2007May25 JMGipson made lstcod, lstnna, lexper ASCII (cstcod,cstnna,cexper)
 
 C 1. First get set up with schedule or SNAP file.
 
@@ -168,7 +169,7 @@ C9001    format(2x,a8,2x,i4,1x,a8,2x,a1)
         endif
         ierr=0
         cstat(1:8)=cstnna(1)(1:8)
-        call char2hol(cid1,lstcod(istn),1,8)
+        cstcod(istn)=cid1
         ic=trimlen(cinname)
         write(luscn,9002) cstat,cinname(1:ic)
 9002    format(' Tape labels for ',a8,' from SNAP file ',a)
@@ -181,10 +182,7 @@ C
       NLABPR = 0
       ntape=0
       IPASP=-1
-      ks2=.false.
-      if(cstrack(istn).ne.'unknown'.and.cstrec(istn).ne.'unknown') then
-        ks2=cstrec(istn)(1:2) .eq. 'S2'
-      endif
+      ks2=cstrack(istn).ne.'unknown'.and.cstrec(istn,1).eq. 'S2'
 
 C  If label printer is postscript then don't open the file, that
 C  will be done later with a C call.
@@ -426,9 +424,9 @@ C
      >           ntape,id1(1),ih1(1),im1(1), id2(1),ih2(1),im2(1)
               if (.not.klabel_ps) then ! laser or Epson
 
-                CALL BLABL(LUprt,NOUT,LEXPER,LSTNNA(1,ISTN),
-     .          LSTCOD(ISTN),IY1,ID1,IH1,IM1,iy2,ID2,IH2,IM2,ILABROW,
-     .          cprttyp,clabtyp,cprport)
+                CALL BLABL(LUprt,NOUT,cEXPER,cSTNNA(ISTN),cSTCOD(ISTN),
+     >            IY1,ID1,IH1,IM1,iy2,ID2,IH2,IM2,ILABROW,
+     .            cprttyp,clabtyp,cprport)
                 NOUT = 0
                 ILABROW=ILABROW+1            !increment vertical label position
                 IF (ILABROW.GT.8) ILABROW=ILABROW-8  !reset to top of page

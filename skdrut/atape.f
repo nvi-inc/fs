@@ -17,6 +17,7 @@ C     include 'skcom.ftni'
 ! functions
       integer istringminmatch
       integer trimlen
+      integer igetstatnum2
 C
 C  Called by: fsked, sread
 
@@ -24,7 +25,7 @@ C  LOCAL
       integer*2 LKEYWD(12)
       integer ikey
       integer ikey_len,ich,ic1,ic2,nch,i,istn,idum,il
-      integer i2long,igtst2,ichmv
+      integer i2long,ichmv
 
       character*24 ckeywd
       equivalence (lkeywd,ckeywd)
@@ -68,10 +69,11 @@ C
        NCH = IC2-IC1+1
         ckeywd=" "
         idum = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
+        istn=igetstatnum2(ckeywd(1:2))
         if(ckeywd .eq. "_") then
           istn=0
-        else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
-          write(luscn,9901) lkeywd(1)
+        else if(istn .le.0) then
+          write(luscn,9901) ckeywd(1:2)
 9901      format('ATAPE01 Error - Invalid station ID: ',a2)
           return ! don't try to decode the rest of the line
         endif

@@ -1,7 +1,9 @@
       subroutine snap_prepass()
       include 'hardware.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/statn.ftni'
 
-      if(MaxTapLen .gt. 17000) then
+      if(MaxTap(istn) .gt. 17000) then
          if(krec_append) then
             write(luFile,'("prepassthin",a1)') crec(irec)
          else

@@ -1,5 +1,5 @@
       SUBROUTINE vunpso(sodef,ivexnum,iret,ierr,lu,
-     .lname1,lname2,rarad,decrad,iep)
+     >   cname1,cname2,rarad,decrad,iep)
 C
 C     VUNPSO gets the source information for source sodef.
 C     **NOTE** Satellites as sources not supported yet.
@@ -15,6 +15,9 @@ C  History:
 C 960527 nrv New.
 C 970114 nrv Change 4 to max_sorlen/2
 C 970124 nrv Move initialization to start
+! 2006Nov18 JMGipson. Converted lname1,lname2 to ASCII
+! 2007Jul02 JMGipson. Changed so that maximum length nch=max_sorlen,
+!                     previously was hardwired to 8.
 C
 C  INPUT:
       character*128 sodef ! source def to get
@@ -26,23 +29,22 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-      integer*2 lname1(max_sorlen/2),lname2(max_sorlen/2)
+      character*(max_sorlen) cname1,cname2
       integer iep ! epoch, 1950 or 2000
       double precision rarad,decrad
 C
 C  LOCAL:
       character*128 cout
       double precision R
-      integer idum,nch
-      integer ichmv_ch ! function
-      integer fvex_ra,fvex_dec,fvex_len,fget_source_lowl,
-     .fvex_field,ptr_ch
+      integer nch
+      integer fvex_ra,fvex_dec,fvex_len,fget_source_lowl,fvex_field
+      integer ptr_ch
 C
 C  Initialize
 C
-      CALL IFILL(lname1,1,max_sorlen,oblank)
-      CALL IFILL(lname2,1,max_sorlen,oblank)
-      rarad = 0.d0
+      cname1 =" "
+      cname2 =" "
+      rarad  = 0.d0
       decrad = 0.d0
       iep=0
 
@@ -58,9 +60,9 @@ C
           write(lu,'("VUNPSO01 - IAU name too long, using first ",i3,
      .    " characters")') max_sorlen
           ierr=-1
-          nch=8
+          nch=max_sorlen
         ENDIF
-        IDUM = ICHMV_ch(lname1,1,cout(1:NCH))
+        cname1=cout(1:nch)
       endif
 C
 C  2. The common name.
@@ -76,9 +78,9 @@ C
           write(lu,'("VUNPSO02 - Comon name too long, using first ",
      .    i3," characters")') max_sorlen
           ierr=-2
-          nch=8
+          nch=max_sorlen
         ENDIF
-        IDUM = ICHMV_ch(lname2,1,cout(1:NCH))
+        cname2=cout(1:nch)
       else
         ierr=-21
         write(lu,'("VUNPSO21 - Source comon name missing")')

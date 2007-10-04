@@ -27,7 +27,7 @@ C            Add K4-1, DFC2100 option, now there are 12.
           return
         endif
       else
- 1      WRITE(LUSCN,9019) (lantna(I,ISTN),I=1,4)
+ 1      WRITE(LUSCN,9019) cantna(istn)
 C From Koyama e-mail on 980325
 C     Bandwidth       2MHz     4MHz     8MHz    16MHz
 C     K4-1 +DFC1100    OK       NA       NA       NA
@@ -38,7 +38,7 @@ C     K4-2A+Mk-3/4     OK       NA       NA       NA
 C     K4-2B+Mk-3/4     OK       NA       NA       OK
 C     K4-2C+Mk-3/4     NA       NA       OK       OK
 
-9019    FORMAT(' Select type of K4 equipment for ',4a2/
+9019    FORMAT(' Select type of K4 equipment for ',a/
      .       ' 1 - K4-1  rack + DFC1100 recorder'/
      .       ' 2 - K4-1  rack + DFC2100 recorder'/
      .       ' 3 - K4-1  rack + K3 formatter + VLBA recorder'/ 

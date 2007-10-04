@@ -20,12 +20,16 @@ C
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
 C
+! fucntiosn
+      integer igtfr ! functions
+      integer igetstatnum
+
 C  LOCAL:
       integer*2 lc,lstn
-      logical ks2,kk4
-      integer ip(MAX_PASS),ihd(MAX_PASS),idir(MAX_PASS),
-     .ih,istn,n,i,icode
-      integer ichcm_ch,igtfr,igtst ! functions
+      integer ip(MAX_PASS),ihd(MAX_PASS),idir(MAX_PASS)
+      integer ih,istn,n,i,icode
+      character*1 cstn
+      equivalence (lstn,cstn)
 C
 C  History
 C  930707 nrv Created.
@@ -47,8 +51,9 @@ C
         RETURN
       END IF 
 C
-      IF  (IGTST(lstn,istn).EQ.0) THEN !not recognized
-        write(lu,9202) lstn,(ibuf(i),i=2,ilen)
+      istn=IGetstatnum(cstn)
+      IF  (istn.EQ.0) THEN !not recognized
+        write(lu,9202) cstn,(ibuf(i),i=2,ilen)
 9202    format('HDINP01 - Unrecognized station: ',a1,' in line:'/
      .  60a2)
         RETURN
@@ -70,9 +75,7 @@ C
 C     ks2 = ichcm_ch(lterna(1,istn),1,'S2').eq.0
 C     kk4 = ichcm_ch(lterna(1,istn),1,'K4').eq.0
 C     Check recorder type, not the terminal name
-      ks2 = ichcm_ch(lstrec(1,istn),1,'S2').eq.0
-      kk4 = ichcm_ch(lstrec(1,istn),1,'K4').eq.0
-      if (.not.ks2.and..not.kk4) then ! save offsets and subpasses
+      if(cstrec(istn,1) .ne. "S2". and. cstrec(istn,2) .ne. "K4") then
         do i=1,n
           if (ip(i).lt.100) then ! headstack 1
             ih=1

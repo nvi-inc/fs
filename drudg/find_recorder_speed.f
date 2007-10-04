@@ -1,10 +1,9 @@
       subroutine find_recorder_speed(icode,spd_rec,kskd)
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
-      include 'hardware.ftni'
 ! passed
       integer icode                     ! current mode
       logical kskd                      ! do we have a sked file? need to get speed for Mark5A or Mark5P
@@ -20,19 +19,19 @@
 
       ipass=1
 
-      if(km5A .or. km5p .or. km5A_piggy .or. km5P_piggy) then
+      if(Km5disk .or. km5A_piggy .or. km5P_piggy) then
         if(kskd) then
           ifan_fact=max(1,ifan(istn,icode))
           call find_num_chans_rec(ipass,istn,icode,
      >            ifan_fact,nchans_obs,ntracks_rec_mk5)
-          if(km5A.or. Km5A_piggy) then
-            conv=(1./8.)     		!= 1byte/8bits
-            spd_rec=ntracks_rec_mk5*samprate(icode)*conv
-          else if(km5p .or. Km5P_piggy) then
+          if(km5p .or. Km5P_piggy) then
 !            if(km5P_piggy) nchans_obs=32/ifan_fact
             conv=(9./8.)*(1./8.)     !=(  (8+1parity)/8bits * bits_per_byte
             nchans_obs=32         !always record 32 tracks for Mark5P.
             spd_rec=nchans_obs*samprate(icode)*conv
+          else
+            conv=(1./8.)     		!= 1byte/8bits
+            spd_rec=ntracks_rec_mk5*samprate(icode)*conv
           endif
 	  spd_rec=spd_rec/ifan_fact
         endif

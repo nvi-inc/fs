@@ -12,12 +12,17 @@ C  COMMON:
 C     include 'skcom.ftni'
       include '../skdrincl/statn.ftni'
 C
-C  Calls: gtfld, igtst2, ifill, wrerr
+C  Calls: gtfld, ifill, wrerr
 
+      integer ias2b,i2long,ichmv,jchar !functions
+      integer igetstatnum2
 C  LOCAL
       integer*2 LKEYWD(12)
       integer ival,ich,ic1,ic2,nch,i,idummy,istn
-      integer ias2b,i2long,igtst2,ichmv,jchar !functions
+
+      character*24 ckeywd
+      equivalence (lkeywd,ckeywd)
+
 C
 C MODIFICATIONS:
 C 990629 nrv New. Copied from SEARL.
@@ -32,12 +37,9 @@ C
           write(luscn,'("SLATE00 - Select stations first.")')
           RETURN
         END IF  !no stations selected
-        WRITE(LUDSP,9110)
-9110    FORMAT(' ID  STATION  LATE STOP (sec)')
+        WRITE(LUDSP,'(" ID  STATION  LATE STOP (sec)")')
         DO  I=1,NSTATN
-C
-          WRITE(LUDSP,9111) LpoCOD(I),cSTNNA(I),itlate(i)
-9111      FORMAT(1X,A2,2X,A,1X,i5)
+          WRITE(LUDSP,"(1X,A,3X,A,1X,i5)") cpoCOD(I),cSTNNA(I),itlate(i)
         END DO  !
         RETURN
       END IF  !no input
@@ -68,8 +70,9 @@ C
           END DO
           RETURN
         END IF  !all stations
-        IF  (IGTST2(LKEYWD,ISTN).le.0) THEN  !invalid
-          write(luscn,9901) lkeywd(1)
+        istn= igetstatnum2(ckeywd(1:2))
+        if (istn.le.0) then
+          write(luscn,9901) ckeywd(1:2)
 9901      format('SLATE01 - Invalid station name: ',a2)
 C         skip over matching time and get next station name
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)

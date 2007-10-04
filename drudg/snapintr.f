@@ -3,14 +3,13 @@ C
 C This routine writes out the header information for snap files and
 C vlba pointing files in the LU_OUTFILE.
 C
-      include '../skdrincl/skparm.ftni'
+      include 'hardware.ftni'
       include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
-      include 'hardware.ftni'
 C
 C  INPUT:
       integer ifunc,IYR ! ifunc=1 for " comments, ifunc=2 for !* comments
@@ -44,6 +43,8 @@ C
 C
 ! 2006Jul19 JMGipson.  Increased format length for tape so don't have overflow.
 ! this is the start of the line
+! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
+
       IF (IFUNC.EQ.1) THEN
         cprfx='"'
       ELSE IF (IFUNC.EQ.2) THEN
@@ -72,7 +73,7 @@ C     write antenna line
      > (stnxyz(i,istn),i=1,3), coccup(istn)
 
 C     Write terminal line
-      if(cstrec(istn) .eq. "Mark5A") then
+      if(cstrec(istn,1) .eq. "Mark5A") then
         write(lu_outfile,'(a,a4,1x,a8,1x,"Mark5A")') cprfx,
      >   cterid(istn)(1:4),cterna(istn)(1:8)
       else
@@ -95,7 +96,7 @@ C       Write equipment line
       IF (IFUNC.EQ.1) THEN ! only for non-VLBA
         write(lu_outfile,
      >  '(a, "Rack=",a8, "  Recorder 1=",a8, "  Recorder 2=",a8)')
-     >     cprfx,cstrack(istn),cstrec(istn),cstrec2(istn)
+     >     cprfx,cstrack(istn),cstrec(istn,1),cstrec(istn,2)
       endif
       if(KM5A_Piggy)  write(lu_outfile,'(a,a)')
      >      cprfx,"Mark5A operating in piggyback mode "

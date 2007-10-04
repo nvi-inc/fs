@@ -29,7 +29,8 @@ C 960814 nrv Comment out debug line that was left in.
 C 970228 nrv Add clabtyp to call
 C
       integer*2 jbuf(80),lbuf(80),label(6),jch
-      integer l,i,ichek,j,ic,idummy,ip,il,i1,idum
+      integer l,i,ichek,j,idummy,ip,il,i1,idum
+      integer*2 ic
       character*43 cCHAR
       CHARACTER*1 CESC                     !<esc>
       CHARACTER*12 CLABEL

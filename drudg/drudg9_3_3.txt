@@ -1,0 +1,145 @@
+DRUDG Release Notes
+
+Version date 2007Sep28
+
+Changes:
+
+Major changes that effect the user experience include:
+
+1) support for two new rack types: Mark5 and VLBA5 (Mark4 and
+    VLBA4 racks with Mark IV formatter replaced with a Mark 5
+    sampler module).
+2) Mark5B recorder support.
+3) DRUDG option 11 was modified to add these new data types.
+4) implementation of new patching algorithm.
+5) overhaul of equipment and equipment_override options in skedf.ctl.
+6) "postob_mk5a" changed to "postob_mk5"
+7) "checkmk5a" changed to "checkmk5"
+8) Change in the naming convention for procedure names where different
+stations have different bandwidths.
+9) Support for dymo printer for the FS linux 6 (based on "Sarge").
+
+Details below.
+
+In addition some internal changes were made to program:
+
+1) the large routine procs.f, which comprised over 3,000 of code, or
+roughly 40 pages when printed out, was broken into smaller pieces.
+
+2) Several items used only by SKED were removed from shared common
+blocks used by DRUDG & SKED and put in common blocks used only by SKED.
+In the process, several obsolete variables which were no longer used
+were also removed.  These changes should have no impact on users, but
+should make the code easier to maintain.
+
+Details of changes for users:
+
+1. Support for VSI4 sampler. There are now two additional rack types:
+Mark5: MarkIV rack with Mark5 sampler module.
+VLBA5:	VLBA4 rack with Mark5 sampler module.
+In both cases DRUDG will issue use vsi4 command to set-up the sampler. In
+this case, formatter setup commands (form/trackform/tracks) are no
+longer used.
+
+2. Support for Mark5B.
+a. no mk5=play_rate command
+b. no mk5=mode ... or mk5=mode? commands
+c. for racks with Mark5 samplers (Mark5, VLBA5):
+    mk5b_mode=ext, bit_mask, decimation
+
+    "ext" is literal, "bit_mask" is hex, corresponds to tracks from
+     vsi4 board to record, decimation is the 32/sample_rate
+
+If the rack is not Mark5 or VLBA5, the .prc file contains the following:
+
+     "please change the following mk5b_mode command to reflect
+     "the desired channel assignments and effective sample rate
+     mk5b_mode=ext:0xffffffff:1
+
+d. add mk5b_mode command to monitor configuration after mk5_mode=...
+e. replace mk5=os_rev1? and mk5=os_rev2? with mk5=os_rev?
+      also for "ss_rev?"
+
+3. Option 11 was modified to add new equipment types, which were added
+at the bottom of the list so that numbers associated with equipment
+types would be preserved, e.g., recorder type 4=vlba. In order to keep
+ all of the text on one screen, the output was reformatted.
+
+4. New patching algorithm.  For Mark3/Mark4/Mark5 racks, implemented the
+following patching algorithm which was designed to minimize cable changes.
+
+! For "geodesy" schedules, use these rules :
+!  0. If on IF3, always High.
+!  1. If the upper edge of the recorded BandPass (which can possibly be
+!     double sideband and is BW dependent) is below 230 MHz, pick low.
+!  2. If the lower edge of the recorded BP is above 210, pick high.
+!  3. For others if the center is of the recorded BP is below 220, pick
+!     low, otherwise high.
+!
+!    For VC1, 2, 3, and 9, 10
+!      apply these tests in order 1,2,3.
+!    For VC4, 11, 12, 13, 14  and 5-8 if IF1 or IF2
+!      apply them 2,1,3
+!
+! If the schedule is an 'astro' schedule apply the following:
+!
+!    I. Calculate all the patches according to geodesy rules.
+!       A) If frequencies are X/S, use these and stop here;
+!       B) for others go to step II.
+!    II. For each LO:
+!       A) If step (I) results in all high or low for an LO,
+!    use that.
+!       B) If for an LO step (I) results in mixed patching, check which
+!       patch is more common, high or low, then apply one of IIa, IIb,
+!        or IIc:
+!    IIa. If high is more common, check low patches, for any channels
+!    (considering both sidebands if both are recorded) where the lower
+!    edge is above 210, change those VCs to high.
+!    IIb. If low is more common, check high patches, for any channels
+!    considering both sidebands if both are record) where the upper edge
+!    is below 230, change those VCs to low.
+!    IIc. If equal high and low, try IIa and IIb, choose the one that
+!    makes the most patches the same. If still equal, pick IIa.
+
+
+5. Overhaul of 'equipment' and 'equipment_override' options in skedf.ctl.
+Code dealing with these options was completely re-written in the process
+of fixing a bug reported by Kokee during rd0705.
+
+The equipment specified in the 'equipment' line will be used in
+the schedule if one of the following two conditions exist:
+a) The rack and recorder in the schedule are specified as unknown.
+b) The 'equipment_override' option is on.
+
+If the 'equipment' option is turned on in skedf.ctl, DRUDG will
+check that the equipment specified is valid. If not, it will exit
+with an error message.
+
+If 'equipment_override' is turned on, DRUDG will check to make
+sure that equipment has actually been specified: That is, that
+the 'equipment' line is on, and has valid entries. If not,
+DRUDG will exit with an error message.
+
+6) "postob_mk5a" changed to "postob_mk5" The procedure called by the
+schedule to execute the local "postob" procedure and collect Mark 5
+recorder disks statistics. DRUDG geneates both the call to the
+"postob_mk5" procedure and the default version in the experiment
+procedure library.
+
+7) "checkmk5a" changed to "checkmk5". This procedure is used to execute
+the "scan_check" or "data_check" command to check on recording quality
+when the recorder is stopped after an observation. To be compatible with
+this change, the stations will need to rename the "checkmk5a" procedure
+in their station procedure library to "checkmk5".
+
+8) Drudg embeds the bandwidth in some procedure names such as "vcsx8".
+Previously if different stations recorded at different bandwidths, drudg
+would use the bandwidth of the first station.  For example, in r1284
+Fortaleza, the first station in the sked file, recorded at 4 MHz, and the
+other stations such as Westford recorded at 8 MHz.  Prior versions of drudg
+incorrectly use 4 MHz in the procedure name for Westford. This new version
+uses the correct bandwidth.
+
+9) The CUPS driver in FS Linux 6 has a bug that makes labels printed on the
+DYMO printer print at 1/3 size.  We have included a script that inserts a
+line in the postscript file to rescale the output.

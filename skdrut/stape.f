@@ -6,7 +6,6 @@ C     and handles the MOTION command.
 C
       include '../skdrincl/skparm.ftni'
 
-
 C
 C  INPUT:
       integer*2 LINSTQ(*)
@@ -16,10 +15,11 @@ C  COMMON:
 C     include 'skcom.ftni'
       include '../skdrincl/statn.ftni'
 C
-C  Calls: gtfld, igtst2, ifill, wrerr
+C  Calls: gtfld,  ifill, wrerr
 ! functions
       integer istringminmatch
-      integer ias2b,trimlen,i2long,igtst2,ichmv
+      integer ias2b,trimlen,i2long,ichmv
+      integer  igetstatnum2
 
 C  LOCAL
       integer*2 lkeywd(12)
@@ -79,13 +79,14 @@ C
         NCH = IC2-IC1+1
         ckeywd=" "
         IDUMMY = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,ikey_len))
+        istn=igetstatnum2(ckeywd(1:2))
         if(ckeywd .eq. "_") then
           istn=0
         else if (ckeywd .eq. 'ADAPTIVE') then !old format
           istn=0
           kold=.true.
-        else if (IGTST2(LKEYWD,ISTN).le.0) THEN !invalid
-          write(luscn,9901) lkeywd(1)
+        else if (istn.le.0) then
+          write(luscn,9901) ckeywd(1:2)
 9901      format('STAPE01 Error - Invalid station ID: ',a2)
 C         skip over matching type and get next station name
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2) ! skip type

@@ -8,12 +8,12 @@ C  Input:
       logical kcomment
 C
 C  Local:
-	integer*4 IREC,ierr,ilen
-	integer Z2D,Z22
-        integer jchar,iscnc ! functions
+	integer*4 ierr,ilen
+	integer Z22
+        integer iscnc ! functions
 
 C Initialized:
-	DATA      Z2D/Z'2D'/, Z22/Z'22'/
+	DATA     Z22/Z'22'/
 C
 C History:
 C nrv 930407 implicit none

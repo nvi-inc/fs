@@ -1,11 +1,18 @@
-      SUBROUTINE LABLOG(clogfile,carg1,carg2,carg3,ierr)
+      SUBROUTINE LABLOG(clogfile,cvsn_use,clab_row,clab_col,cfile,ierr)
 C  Write tape labels from reading the log file.
+!  Arguments are:
+!
 !  Based on labsnp
 !  2005Jul28 JMGipson
 !  2005Aug04 JMGipson.  Modifed make_pslabel to accept 8 character VSN.
 !                       Can select on vsn.
 ! 2006Oct17 JMGipson. Added argument to cclose(fp, clabtyp). Clabyp indicates kind of printer.
 ! 2006Nov13 JMGipson. Made immune to ^M
+! 2007Jan20 JMG. Also accept Mk5APigW as a valid recorder type.
+! 2007Feb01 JMG. Just issue a message on recorder type, don't stop if not Mark5A or Mk5APigW
+!                Modified to get info from sched_info line
+! 2007Feb02 JMG. Take an optional file name to save the PS file in.
+
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -13,9 +20,11 @@ C  Write tape labels from reading the log file.
       include '../skdrincl/skobs.ftni'
 ! passed
       character*(*) clogfile
-      integer ierr              !<>0 means an error.
-      character*(*) carg1,carg2,carg3
-      integer nch1,nch2,nch3
+      integer ierr                      !<>0 means an error.
+      character*(*) cvsn_use            !which vsn to use.
+      character*(*) clab_row,clab_col   !ASCII row and column to print.
+      character*(*) cfile               !file to save the results in. If this is set, we don't print.
+      integer nch1
       character*8 cvsn_in
 ! functions
       integer trimlen
@@ -27,11 +36,11 @@ C Local
       integer ipsy1,ipsd1,ipsh1,ipsm1,ipsy2,ipsd2,ipsh2,ipsm2
       integer isec
       integer nout,newlab
-      integer iyear,idayr,ihr,imn
       integer nlabpr            !number printed.
-      character*128 ctmp
+      character*256 ctmp
       character*80 cline(0:4)
       integer iline
+      integer icount
       integer ind
       integer inew
       integer nch
@@ -59,33 +68,35 @@ C Local
          return
       endif
 
-      nch1=trimlen(carg1)
-      nch2=trimlen(carg2)
-      nch3=trimlen(carg3)
+      nch1=trimlen(cvsn_use)
 
       ilabrow=1
       ilabcol=1
 
+
+
       if(nch1 .eq. 0) then
         cvsn_in="ALL"
       else
-        if(nch1 .le. 8) then
-          cvsn_in=carg1
-        else
-          cvsn_in=carg1(1:8)
+        call capitalize(cvsn_use)
+        if(cvsn_use .eq. "?" .or. cvsn_use .eq. "HELP") goto 950
+
+        cvsn_in=cvsn_use(1:min(8,nch1))
+
+        if(trimlen(clab_row) .ne. 0) then
+           read(clab_row,*,err=910) ilabrow
         endif
-        call capitalize(cvsn_in)
-        if(nch2 .ne. 0) then
-           read(carg2,*,err=910) ilabrow
-        endif
-        if(nch3 .ne. 0) then
-           read(carg3,*,err=910) ilabcol
+        if(trimlen(clab_col) .ne. 0) then
+           read(clab_col,*,err=910) ilabcol
         endif
       endif
-      call capitalize(cvsn_in)
-     
+
 ! Get a handle to the printer.
-      if (cprport.eq.'PRINT') then ! temp file name
+      if(trimlen(cfile) .ne. 0) then
+         cfilnam=cfile                  !specified as an argument.
+         write(luscn,'(a)')
+     >     "Will save output to file:   "//cfilnam(1:trimlen(cfilnam))
+      else if (cprport.eq.'PRINT') then ! temp file name
           cfilnam = labname
       else ! specified file name
           cfilnam = cprport
@@ -145,8 +156,8 @@ C
       open(lu_infile,file=clogfile)
       kfirst_scan=.true.
 
-      vsn_old="VSN_OLD"
-      vsn_now=""
+      vsn_old="VSN_????"
+      vsn_now="VSN_NEW"
 
 ! Now start parsing log file.
 C 1.  Initialize variables
@@ -161,10 +172,33 @@ C 1.  Initialize variables
 ! This is complicated because this information appears in the log file before
 ! the line "drudg version"
       iline=0
+      icount=0
+      cexper="SESSION?"
+      cstnna(1)="STATION?"
+      cstcod(1)="X"       !would like to use "?" but bar-code doesn't know how to handle.
 10    continue
       iline=mod(iline+1,5)
-      read(lu_infile,'(a80)',end=950,err=950) cline(iline)
-      if(index(cline(iline),"drudg") .eq. 0) goto 10
+      icount=icount+1
+      read(lu_infile,'(a80)',end=920,err=920) cline(iline)
+      if(icount .ge. 100) then
+        rewind(lu_infile)
+        goto 30
+      endif
+
+      ind=index(cline(iline),"sched_info")
+      if(ind .ne. 0) then
+! second one has the information.
+         read(lu_infile,'(a80)',end=950,err=950) cline(iline)
+         call splitNtokens(cline(iline)(ind+10:),ltoken,Maxtoken,
+     > NumToken)
+         cexper=ltoken(1)
+         cstnna(1)=ltoken(2)
+         cstcod(1)=ltoken(3)(1:1)
+         goto 30
+      endif
+
+   
+      if(cline(iline)(24:36) .ne. "drudg version") goto 10
 
 ! Parse the line that looks like:
 !2005.055.18:04:38.83:" R4162     2005 SVETLOE  S  Sv. This is 4 before "drudg", or 1 after.
@@ -190,12 +224,14 @@ C 1.  Initialize variables
         cline(iline)(ind:ind)=" "
       endif
       write(*,'(a)') cline(iline)
-      if(index(cline(iline), "Mark5") .eq. 0) then
+      if(index(cline(iline), "Mark5") .eq. 0 .and.
+     >   index(cline(iline), "Mk5APigW") .eq. 0) then
          write(*,*) "Can only process log files for Mark5 recorders"
-         ierr=-2
-         return
+         write(*,*) "Mushing on ahead, but may produce strange results!"
       endif
 
+30    continue
+      rewind(lu_infile)
       ind=trimlen(cexper)
       WRITE(LUSCN,'("Generating disk labels for ",a,1x,a)')
      >  cexper(1:ind)  ,cstnna(1)
@@ -205,10 +241,10 @@ C 1.  Initialize variables
       num_disk=0
 ! 1. Loop over log records.
 100   continue
-      read(lu_infile,'(a)',err=960,end=105,iostat=IERR) ctmp
+      read(lu_infile,'(a)',err=930,end=105,iostat=IERR) ctmp
       ind=trimlen(ctmp)
-      if(ctmp(ind:ind) .eq. char(13)) then
-        ctmp(ind:ind)=" "
+      if(ind .ne. 0) then
+        if(ctmp(ind:ind) .eq. char(13)) ctmp(ind:ind)=" "
       endif
       if(ierr .ne. 0) then
         write(*,*) "Lablog: io_error ", ierr
@@ -269,7 +305,7 @@ C 1.  Initialize variables
      >         num_disk, vsn_old(1:8),
      >         id1(1),ih1(1),im1(1), id2(1),ih2(1),im2(1)
           if (.not.klabel_ps) then
-            call blabl(luprt,nout,lexper,lstnna(1,1),lstcod(1),
+            call blabl(luprt,nout,cexper,cstnna,cstcod,
      .      iy1,id1,ih1,im1,iy2,id2,ih2,im2,ilabrow,
      .      cprttyp,clabtyp,cprport)
             nout = 0
@@ -329,12 +365,15 @@ C 1.  Initialize variables
           close(luprt)
           endif
         endif
-        call prtmp(0)
+        if(trimlen(cfile) .eq. 0) then
+           call prtmp(0)                      !no filename specified as input. Print it out.
+        endif
         inew=1 ! reset flag for new file
         klab = .false.
       else
          write(luscn,'("Lablog: Did not find VSN: ", a)') cvsn_in
          ierr=-1
+         goto 950
       endif
 
       return
@@ -342,19 +381,32 @@ C 1.  Initialize variables
 910   continue
       writE(luscn,'("Lablog: Error reading row or column")')
       ierr=1
-      return
+      goto 950
 
 
-950   continue
+920   continue
       write(luscn,'("Lablog: Did not find DRUDG stamp")')
       ierr=1
       close(lu_infile)
-      return
+      goto 950
 
-960   continue
+930   continue
       write(luscn,'("Lablog: Error reading file.")')
       ierr=2
       close(lu_infile)
-      return
+      goto 950
 
+
+950   continue
+      write(luscn,'(a)') " "
+      write(luscn,'(a)')
+     > "Possible argument error.  Correct way to print labels is: "
+      write(luscn,'(a)')
+     > "  drudg file.log [VSN [irow_beg [icol_beg [fileout]]]] "
+      write(luscn,'(a)') "Some examples: "
+      write(luscn,'(a)') "  drudg r128ho.log"
+      write(luscn,'(a)') "  drudg r128ho.log ALL"
+      write(luscn,'(a)') "  drudg r128ho.log ALL 1 1"
+      write(luscn,'(a)') "  drudg r128ho.log ALL 1 1 temp.ps"
+      return
       end

@@ -1,10 +1,8 @@
       subroutine snap_et
 !     JMGipson   2002Jan02  V1.00
-      logical kerr
       include 'hardware.ftni'
 
 ! Output "et" command.
-      kerr=.false.
       if(krec_append) then
         write(luFile,'(a,a1)', err=100) 'et',crec(irec)
       else
@@ -17,7 +15,7 @@
 
       return
 
-100   kerr=.true.
+100   continue 
       return
       end
 

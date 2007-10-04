@@ -2,7 +2,8 @@
 ! Subroutine to fix the scan name in the snap file.
 ! Scan names will have the time until the next "et" or "disk_record_off" appended.
 !
-!  V1.00    JMGipson  2004Apr05
+!  2004Apr05   JMGipson  First version
+!  2007Jul20   JMGipson  Now searches for disk_record_on. Used to search for data_valid
 
       implicit none
       character*(*) lfile
@@ -50,10 +51,10 @@
         if(.not. kvalidtime) then
            goto 100
         endif
-      else if( index(ctmp(1:11),'"DATA START').ne.0.or.
-     >         index(ctmp(1:13),'DATA_VALID=ON').ne.0.or.
-     >         index(ctmp(1:14),'DATA_VALID1=ON').ne.0.or.
-     >         index(ctmp(1:14),'DATA_VALID2=ON').ne.0) then ! tape start time
+      else if(ctmp(1:14).eq. 'DISK_RECORD=ON' .or.
+     >        ctmp(1:6) .eq. "ST=FOR" .or. ctmp(1:6).eq."ST=REV" .or.
+     >        ctmp(1:7) .eq. "ST1=FOR" .or. ctmp(1:7).eq."ST1=REV" .or.
+     >        ctmp(1:7) .eq. "ST2=FOR" .or. ctmp(1:7).eq."ST2=FOR") then
         iscan_last=iscan_last+1
         do i=1,5
           itime_scan(i,iscan_last)=itime_now(i)
@@ -110,7 +111,11 @@
       i1=trimlen(ltmpfil)
       i2=trimlen(lfile)
       write(ldum,*) "mv ", ltmpfil(1:i1+1),lfile(1:i2)
-      call system(ldum)
+      i1=trimlen(ldum)
+      i1=i1+1
+      ldum(i1+1:i1+1)=char(0)
+      
+      call system(ldum(1:i1))
       return
       end
 

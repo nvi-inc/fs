@@ -3,6 +3,8 @@
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
 
+! 2007Jul07  JMGipson.  Added "q" option for quitting.
+
 C OUTPUT
       integer ierr
 C LOCAL
@@ -17,17 +19,17 @@ C  1. Prompt for output file name cfile=''
       ierr=-1
       cfile=''
       do while (cfile.eq.'')
-        write(luscn,'("Enter name of output file, :: to quit  ",$)')
+        write(luscn,'("Enter name of output file, :: or q to quit ",$)')
         read (luusr,'(a)') cfile
         il = trimlen(cfile)
-        if (cfile(1:2).eq.'::') return
+        if (cfile(1:2).eq.'::' .or. cfile(1:2) .eq. "q") return
         inquire(file=cfile,exist=ex,iostat=ierr)
         if (ex) then ! file exists
           do while (cans(1:1).ne.'o'.and.cans(1:1).ne.'a')
             write(luscn,'("Output file already exists, (o)verwrite",
-     .      " or (a)ppend, :: to quit  ",$)')
+     .      " or (a)ppend, q or :: to quit  ",$)')
             read (luusr,'(a)') cans
-            if (cans(1:2).eq.'::') return
+            if (cans(1:2).eq.'::' .or. cans(1:2) .eq. "q") return
           enddo
           open(unit=LU_outfile,file=cfile,status='old',iostat=IERR)
           if (cans(1:1).eq.'a') then ! read to end

@@ -91,17 +91,11 @@ C       icod=1
         kauto = tape_allocation(istn).eq.'AUTO'
 C * comment with station name frequency code
 
-        call ifill(ibuf,1,iblen,32)
-        call char2hol('!*',ibuf,1,2)
-        nch = ichmv(ibuf,4,lantna(1,istn),1,8)
-        nch = ichmv(ibuf,nch+1,lnafrq(1,icod),1,8)
-        call writf_asc(lu,ierr,ibuf,(nch+1)/2)
+
+        write(lu,'("!*",a," ",a)') cantna(istn), cnafrq(icod)
 
 C program = experiment-name
-
-        call char2hol('program = ',ibuf,1,10)
-        idum = ichmv(ibuf,11,lexper,1,8)
-        call writf_asc(lu,ierr,ibuf,9)
+        write(lu,'("program = ",a)') cexper
 
 C nchanr is the number of channels to be recorded.
 C For Mode A, there will be twice as many as for any mode C.
@@ -124,10 +118,7 @@ C itras(ul,sm,head,chan,,pass,stn,code)
         enddo
 C       if (nchanr.eq.28) imode=2 ! for mode A
 
-        call ifill(ibuf,1,iblen,32)
-        call char2hol('nchan = ',ibuf,1,8)
-        idum = ib2as(nchanr,ibuf,9,2)
-        call writf_asc(lu,ierr,ibuf,5)
+        write(lu,'("nchan = ",a)') nchanr
 
 C format = <mode>
 

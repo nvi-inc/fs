@@ -1,11 +1,11 @@
-      SUBROUTINE unpvt(IBUF,ILEN,IERR,LIDTER,LNATER,ibitden,
-     .nstack,mxtap,nrec,ls2sp,
-     .lb,sefd,pcount,par,npar,lrack,lreca,lrecb)
+      SUBROUTINE unpvt(IBUF_in,ILEN,IERR,cIDTER,cNATER,ibitden,
+     .nstack,mxtap,nrec,cs2sp,cb,sefd,pcount,par,npar,crack,creca,crecb)
 C
 C     UNPVT unpacks a record containing Mark III terminal information.
 C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/valid_hardware.ftni'
 C
 C  Called by: stinp
 C
@@ -36,9 +36,10 @@ C 001017 nrv Allow single-band SEFDs followed by equipment. ** DON't
 C            implement this until a FS upgrade can be done.
 C 011011 nrv If the second recorder field doesn't match a recorder type
 C            and the first recorder is S2, then the second field is mode.
+! 2007Aug07  JMG. Converted all hollerith to ASCII
 C
 C  INPUT:
-      integer*2 IBUF(*)
+      integer*2 IBUF_in(*)
       integer ilen
 C           - buffer containing the record
 C     ILEN  - length of IBUF in words
@@ -46,23 +47,34 @@ C     ILEN  - length of IBUF in words
 C
 C  OUTPUT:
       integer mxtap,ierr,nrec
-      integer*2 lidter(2)
+      character*4 cidter
 C     LIDTER - terminal ID
       integer nstack ! number of headstacks
       integer ibitden
 C     IERR    - error return, 0=ok, -100-n=error in nth field
-      integer*2 LNATER(4) ! name of the terminal
+
+      character*8 cnater  ! name of the terminal
 C     mxtap - maximum tape length for this station
-      integer*2 lb(*)  ! bands
+      character*2 cb(*) !bands
       real*4 sefd(*),par(max_sefdpar,*)
       integer npar(*)   ! sefds
-      integer*2 lrack(4),lreca(4),lrecb(8),ls2sp(2)
+      character*8 crack,creca,crecb  !rack, recorder, names
+      character*4 cs2sp
 C
+
+! functions
+      integer ias2b ! function
+      real*8 das2b
+      integer iwhere_in_string_list
 C  Local:
-      real*8 R,DAS2B
-      integer ich,nch,ic1,ic2,idum,i,ib1,ib2,il
-      integer trimlen,ichmv_ch,ichcm,ichmv,ias2b,ichcm_ch ! function
-      logical kmatch,ks2,kk4
+
+      real*8 R
+      integer ich,nch,ic1,ic2,i,ib1,ib2
+      logical ks2,kk4
+      integer*2 ibuf(64)
+      character*128 cbuf
+      equivalence (ibuf,cbuf)
+      integer iwhere
 C
 C     Initialize
 C
@@ -74,10 +86,19 @@ C
       ibitden=0
       mxtap=0
       ICH = 1
+
+      cbuf=" "
+      ich=min(ilen,64)
+      do i=1,ich
+        ibuf(i)=ibuf_in(i)
+      end do
+      call capitalize(cbuf)    !this makes everything capitalized.
+
+      ich=1
 C
 C     1. The terminal ID. 
 C
-      idum = ichmv_ch(lidter,1,'    ')
+
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
 C     id=ias2b(ibuf,ic1,nch)
@@ -85,7 +106,7 @@ C     id=ias2b(ibuf,ic1,nch)
         ierr=-101
         return
       endif
-      idum = ichmv(lidter,1,ibuf,ic1,nch)
+      cidter=cbuf(ic1:ic1+nch-1)
 C
 C     2. Terminal name, 8 characters.
 C
@@ -95,28 +116,11 @@ C
         IERR = -102
         RETURN
       END IF  !
-      CALL IFILL(LNATER,1,8,oblank)
-      idum = ICHMV(LNATER,1,IBUF,IC1,NCH)
-      ks2=.false.
-      kk4=.false.
-      if (ichcm_ch(lnater,1,'S2').eq.0) ks2=.true.
-      if (ichcm_ch(lnater,1,'K4').eq.0) kk4=.true.
-C
+      cnater=cbuf(ic1:ic1+nch-1)
+      ks2=cnater(1:2) .eq. "S2"
+      kk4=cnater(1:2) .eq. "K4"
+
       if (pcount.le.5) return
-C
-C  3. Maximum number of 28-track passes.  If not present, set to default.
-C
-C     CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-C     NCH = IC2-IC1+1
-C     IF  (IC1.EQ.0) THEN
-C       MAXPAS = MAX_PASS
-C     ELSE
-C       MAXPAS = IAS2B(IBUF,IC1,NCH)
-C     ENDIF
-C     IF  (MAXPAS.EQ.-32768) THEN  !
-C       IERR = -103
-C       RETURN
-C     END IF  !
 
 C  3. Number of headstacks at this station.
 C     Bit density capability at this station.
@@ -143,14 +147,10 @@ C first field reserved
 C second field number of recorders and tape length
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         nrec = 1
-        if (ichcm_ch(ibuf,ic1,'2x').eq.0) then !dual recs
+        if (cbuf(ic1:ic1+1) .eq. "2X") then
           nrec = 2
           ic1 = ic1+2
         endif
-C       if (ichcm_ch(ibuf,ic1,'auto').eq.0.or.
-C    .      ichcm_ch(ibuf,ic1,'AUTO').eq.0) then ! auto alloc
-C         mxtap = -1
-C       else
           NCH = IC2-IC1+1
           mxtap = IAS2B(IBUF,IC1,NCH)
 C       endif
@@ -164,21 +164,23 @@ C first field tape speed, either LP or SLP
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         if (ic1.eq.0) return
         nch=ic2-ic1+1
-        if (nch.gt.8.or.ichcm_ch(ibuf,ic1,'LP').ne.0.and.
-     .    ichcm_ch(ibuf,ic1,'SLP').ne.0) then
+        if(nch .gt. 8) then
+           ierr=-104
+           return
+        endif
+        cs2sp=cbuf(ic1:ic1+nch-1)
+        if(cs2sp .ne. "LP" .and. cs2sp .ne. "SLP") then
           ierr=-104
           return
         endif
-        idum = ichmv(ls2sp,1,ibuf,ic1,nch)
 C field 2 number of recorders and length of tape
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         nrec = 1
-        if (ichcm_ch(ibuf,ic1,'2x').eq.0) then !dual recs
+        if (cbuf(ic1:ic1+1) .eq. "2X") then ! dual recs
           nrec = 2
           ic1 = ic1+2
         endif
-        if (ichcm_ch(ibuf,ic1,'auto').eq.0.or.
-     .      ichcm_ch(ibuf,ic1,'AUTO').eq.0) then ! auto alloc
+        if (cbuf(ic1:ic1+3) .eq. "AUTO") then
           mxtap = -1
         else
           NCH = IC2-IC1+1
@@ -199,7 +201,7 @@ C first field headstacks and density
           return
         endif
         nstack = i
-        if (ichcm_ch(ibuf,ic1+1,'x').eq.0) then ! bit density follows
+        if(cbuf(ic1+1:ic1+1) .eq. "X") then
           ic1 = ic1+2
           NCH = IC2-IC1+1
           i = IAS2B(IBUF,IC1,NCH)
@@ -218,12 +220,11 @@ C second field number of recorders and tape length
           nrec = 1
           return
         endif
-        if (ichcm_ch(ibuf,ic1,'2x').eq.0) then !dual recs
+        if(cbuf(ic1:ic1+1) .eq. "2X") then 
           nrec = 2
           ic1 = ic1+2
         endif
-        if (ichcm_ch(ibuf,ic1,'auto').eq.0.or.
-     .      ichcm_ch(ibuf,ic1,'AUTO').eq.0) then ! auto alloc
+        if(cbuf(ic1:ic1+3) .eq. "AUTO") then 
           mxtap = -1
           nrec = 2
         else
@@ -243,38 +244,28 @@ C   band designator. If none present, set all to zero.
 C   If the first band is neither X nor S don't get a second one.
 C
       do i=1,2 ! X sefd S sefd 
-        call ifill(lb(i),1,2,oblank)
         sefd(i)=0.0
-C********** Wait to implement this when all of FS is updated ********
-C       if (i.eq.1.or.
-C    .   (i.eq.2.and.(ichcm_ch(lb(1),1,'X').eq.0.or.
-C    .    ichcm_ch(lb(1),1,'S').eq.0))) then ! get second of X or S band
-C         Band designator.
-C********************************************************************
-          CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-          if (ic1.ne.0) then 
-            NCH = IC2-IC1+1
-            IF  (NCH.NE.1) THEN  !
-              IERR = -105
-              RETURN
-            END IF  !
-            idum = ICHMV(LB(i),1,IBUF,IC1,NCH)
-          endif
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+        if (ic1.ne.0) then
+          NCH = IC2-IC1+1
+          IF  (NCH.NE.1) THEN  !
+            IERR = -105
+            RETURN
+          END IF  !
+          cb(i)=cbuf(ic1:ic1)
+        endif
 C
 C         SEFD.  If not present, set to zero. 
-          CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-          if (ic1.ne.0) then
-            NCH = IC2-IC1+1
-            R = DAS2B(IBUF,IC1,NCH,IERR)
-            IF (IERR.EQ.0) THEN
-              sefd(i) = R
-            else
-              ierr=-106
-            endif
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+        if (ic1.ne.0) then
+          NCH = IC2-IC1+1
+          R = DAS2B(IBUF,IC1,NCH,IERR)
+          IF (IERR.EQ.0) THEN
+            sefd(i) = R
+          else
+            ierr=-106
           endif
-C**********************************88
-C       endif
-C**********************************88
+        endif
       enddo
 C
 C  X pow t0 t1 ... S pow t0 t1 ...
@@ -282,7 +273,7 @@ C  The SEFD model might be missing, in which case go to the rack/rec part.
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! first band
       nch=ic2-ic1+1
       if (ic1.ne.0.and.nch.eq.1) then ! got some SEFD parameters
-        if (ichcm(ibuf,ic1,lb(1),1,1).eq.0) then
+        if (cbuf(ic1:ic1) .eq. cb(1)(1:1)) then
           ib1=1
           ib2=2
         else
@@ -291,7 +282,7 @@ C  The SEFD model might be missing, in which case go to the rack/rec part.
         endif
         i=0
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! first parameter
-        do while (ic1.ne.0.and.ichcm(ibuf,ic1,lb(ib2),1,1).ne.0) ! first set 
+        do while (ic1.ne.0.and. cbuf(ic1:ic1) .ne. cb(ib2)(1:1)) ! first set
           if (ic1.eq.0) return
           r = das2b(ibuf,ic1,ic2-ic1+1,ierr)
           i=i+1
@@ -317,67 +308,52 @@ C  The SEFD model might be missing, in which case go to the rack/rec part.
       endif ! got some SEFD parameters
 C
 C Rack, Rec types
-      idum = ichmv_ch(lrack,1,'        ')
-      idum = ichmv_ch(lreca,1,'        ')
-      idum = ichmv_ch(lrecb,1,'        ')
 C     GTFLD has already been done above if there were no SEFD parameters.
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field
       if (ic1.ne.0) then ! rack field
         nch = min0(ic2-ic1+1,8)
-        idum = ichmv(lrack,1,ibuf,ic1,nch)
-C       Convert these cases to lower case
-        if (ichcm_ch(lrack,1,'MARK3A').eq.0) 
-     .     idum = ichmv_ch(lrack,1,'Mark3A')
-        if (ichcm_ch(lrack,1,'MARK4').eq.0) 
-     .     idum = ichmv_ch(lrack,1,'Mark4')
-        i=1
-        kmatch=.false.
-        do while (i.le.max_rack_type.and..not.kmatch) ! check rack type
-          il=trimlen(crack_type(i))
-          kmatch = ichcm_ch(lrack,1,crack_type(i)(1:il)).eq.0
-          i=i+1
-        enddo ! check rack type
-        if (i.gt.max_rack_type+1) ierr=-10-2*npar(1)
+        crack=cbuf(ic1:ic1+nch-1)
+        iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
+        if(iwhere .eq. 0) then
+          ierr=-10-2*npar(1)
+          write(*,*) "HEre!"
+          write(*,*) crack
+          return
+        else
+          crack=crack_type(iwhere)
+        endif
+          
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rec A field
         if (ic1.ne.0) then ! rec A field
           nch = min0(ic2-ic1+1,8)
-          idum = ichmv(lreca,1,ibuf,ic1,ic2-ic1+1)
-          if (ichcm_ch(lreca,1,'MARK3A').eq.0) 
-     .     idum = ichmv_ch(lreca,1,'Mark3A')
-          if (ichcm_ch(lreca,1,'MARK4').eq.0) 
-     .     idum = ichmv_ch(lreca,1,'Mark4')
-          i=1
-          kmatch=.false.
-          do while (i.le.max_rec_type.and..not.kmatch) ! check rec A type
-            il=trimlen(crec_type(i))
-            kmatch = ichcm_ch(lreca,1,crec_type(i)(1:il)).eq.0
-            i=i+1
-          enddo ! check rec A type
-          if (i.gt.max_rec_type+1) ierr=-11-2*npar(1)
-          CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+          creca=cbuf(ic1:ic1+nch-1)
+          iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
+          if(iwhere .eq. 0) then
+            ierr=-11-2*npar(1)
+            return
+          else
+            creca=crec_type(iwhere)
+          endif
+          CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+
 C Rec B field or S2 mode
           if (ic1.ne.0) then ! rec B or S2 mode field
             nch = min0(ic2-ic1+1,8)
-            idum = ichmv(lrecb,1,ibuf,ic1,ic2-ic1+1)
-            if (ichcm_ch(lrecb,1,'MARK3A').eq.0) 
-     .       idum = ichmv_ch(lrecb,1,'Mark3A')
-            if (ichcm_ch(lrecb,1,'MARK4').eq.0) 
-     .       idum = ichmv_ch(lrecb,1,'Mark4')
-C           check recorder 
-            i=1
-            kmatch=.false.
-            do while (i.le.max_rec_type.and..not.kmatch) ! check rec B type
-              il=trimlen(crec_type(i))
-              kmatch = ichcm_ch(lrecb,1,crec_type(i)(1:il)).eq.0
-              i=i+1
-            enddo ! check rec B type
-            if (ichcm_ch(lreca,1,'S2').eq.0) then ! field is S2 mode
-            else ! field is rec
-              if (i.gt.max_rec_type+1) ierr=-12-2*npar(1)
-              nrec = 2
-            endif ! S2 mode/error
+            if(creca .eq. "S2") then
+              continue
+            else
+              crecb=cbuf(ic1:ic1+nch-1)
+              iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,
+     >             crecb)
+              if(iwhere .eq. 0) then
+                 ierr=-12-2*npar(1)
+                 return
+              else
+                 crecb=crec_type(iwhere)
+              endif
+            endif
           endif ! rec B or S2 mode field
         endif ! rec A field
       endif ! rack field
