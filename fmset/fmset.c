@@ -174,7 +174,7 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
 
 irow=4;
- if(source != S2 && (rack& MK4 || rack &VLBA4)) {
+ if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5)) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -361,7 +361,8 @@ do 	{
 	case SYNCH2_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
-	  if( (rack& MK4 || rack &VLBA4) && asksure( maindisp)) {
+	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5) &&
+	      asksure( maindisp)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
