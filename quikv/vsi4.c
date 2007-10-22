@@ -54,7 +54,7 @@ long ip[5];                           /* ipc parameters */
 parse:
       ierr=0;
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->form4,sizeof(lcl));
+      memcpy(&lcl,&shm_addr->vsi4,sizeof(lcl));
 
       count=1;
       while( count>= 0) {
