@@ -80,17 +80,7 @@ enddef
 define  dat           00000000000
 bbcsx2
 ifdsx
-form=c,4
-enddef
-define  fastf         00000000000
-ff
-!+$
-et
-enddef
-define  fastr         00000000000
-rw
-!+$
-et
+vsi4=geo
 enddef
 define  ifdsx         00000000000
 ifdab=0,0,nor,nor
@@ -101,7 +91,7 @@ lo=lob,1540.10,usb,rcp,1
 enddef
 define  initi         00000000000
 "welcome to the pc field system
-vlbas2init
+vlba4init
 sy=run setcl &
 enddef
 define  midob         00000000000
@@ -134,52 +124,31 @@ caltsys
 enddef
 define  overnite      00000000000
 log=overnite
-setupa
+setupa=1
 check=*,-tp
 min15@!,15m
 "rxmon@!+2m30s,5m
+repro=byp,8,14
+"dqa=1
+"dqa@!,1m
 enddef
 define  postob        00000000000
-enddef
-define  precond       00000000000
-schedule=prepass,#1
 enddef
 define  preob         00000000000
 onsource
 caltsys
 enddef
-define  prepass       00000000000
-enddef
-define  ready         00000000000
-caltsys
-"rxmon
-newtape
-loader
-label
-check=*,tp
-enddef
-define  loader        00000000000
-rw
-!+20s
-et
-!+10s
-tape=reset
-enddef
 define  setupa        00000000000
 pcalon
-form=c,4.000
-!*
+form=c1,4.000
 bbcsx2
 ifdsx
-!*+8s
 enddef
 define  setupb        00000000000
 pcalon
-form=c,4.000
-!*
+form=c2,4.000
 bbcsx2
 ifdsx
-!*+8s
 enddef
 define  caltsys       00000000000
 bbcman
@@ -201,19 +170,7 @@ caloff
 caltemp=formbbc,formif
 tsys=formbbc,formif
 enddef
-define  unlod         00000000000
-check=*,-tp
-unloader
-xdisp=on
-"**dismount this tape now**"
-wakeup
-xdisp=off
-enddef
-define  unloader      00000000000
-et
-rec=eject
-enddef
-define  vlbas2init    00000000000
+define  vlba4init     00000000000
 bbc01=addr
 bbc02=addr
 bbc03=addr
@@ -228,7 +185,6 @@ bbc11=addr
 bbc12=addr
 bbc13=addr
 bbc14=addr
-form=addr
 ifdab=addr
 ifdcd=addr
 enddef
@@ -242,6 +198,28 @@ define  checkcrc      00000000000
 "comment out the following lines if you do _not_ have a mark iii decoder
 "decode=a,crc
 "decode
+enddef
+define  checkmk5      00000000000 
+scan_check
+mk5=get_stats?
+mk5=status?
+enddef
+define  greplog       00000000000x
+sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+enddef   
+define  ready_disk    00000000000
+mk5close
+xdisp=on
+"mount the mark5 disks for this experiment now
+"recording will begin at current position
+"enter 'mk5relink' when ready or
+"if you can't get the mk5 going then
+"enter 'cont' to continue without the mk5
+xdisp=off
+halt
+disk_serial
+disk_pos
+bank_check
 enddef
 define  change_pack   00000000000x
 sy=fs.prompt "bank/vsn '$' should be changed"  &
@@ -257,15 +235,12 @@ xdisp=on
 wakeup 
 xdisp=off
 enddef   
-define  checkmk5      00000000000 
-scan_check
-mk5=get_stats?
-mk5=status?
-enddef
-define  checkk5       00000000000 
-enddef
-define  ready_k5      00000000000 
-enddef
-define  greplog       00000000000x
-sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+define  mk5panic      000000000000
+"mk5panic - dls - 5 december 2003
+disk_record=off
+mk5=bank_set=inc;
+!+3s
+disk_serial
+mk5=bank_set?
+mk5=vsn?
 enddef   
