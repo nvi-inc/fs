@@ -627,9 +627,9 @@ C
       goto 201
 999   continue
       if (MK5.eq.drive(1).and.
-     &     (MK5B.eq.drive_type(1).or.MK5b_BS.eq.drive_type(1))) then
+     &     (MK5B.eq.drive_type(1).or.MK5B_BS.eq.drive_type(1))) then
         if((MK4.eq.rack.and.MK5.eq.rack_type).or.
-     &       (VLBA4.eq.rack.and.VLBA5.eq.rqck_type)) then
+     &       (VLBA4.eq.rack.and.VLBA5.eq.rack_type)) then
            if("vsi"//char(0).ne.m5pps(1:4)) then
               call logit7ci(idum,idum,idum,-1,-19,'sc',0)
            endif
@@ -643,6 +643,11 @@ C
            if("ext"//char(0).ne.m5clock(1:4)) then
               call logit7ci(idum,idum,idum,-1,-22,'sc',0)
            endif
+        endif
+        if("not_synced"//char(0).eq.m5sync(1:11)) then
+           call logit7ci(idum,idum,idum,-1,-23,'sc',0)
+        elseif("syncerr_gt_3"//char(0).eq.m5sync(1:13)) then
+           call logit7ci(idum,idum,idum,-1,-24,'sc',0)
         endif
       endif
       goto 1
