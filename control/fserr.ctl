@@ -336,7 +336,7 @@ Non-zero exist status ?WWW.
 Non-zero exist status from child when trying to run autoftp script, see above.
 ""
 5F -308
-Parameter after abort must be 'autoftp' or blank.
+Parameter after 'abort' must be 'autoftp' or null (empty).
 ""
 5F -400
 Error retrieving class for response to commands.
@@ -4820,6 +4820,12 @@ setcl: Mark 5B clock source is wrong, use fmset 's' option to fix.
 SC  -22
 setcl: Mark 5B clock source is wrong, correct manually.
 ""
+SC  -23
+setcl: Mark 5B not sync'd, use fmset 's' option to fix.
+""
+SC  -24
+setcl: Mark 5B syncerr_gt_3, use fmset 's' option to fix.
+""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
 ""
@@ -5001,7 +5007,7 @@ VB -104
 No default for LSB bandwidth.
 ""
 VB -201
-L.O. frequency must be between 500.00 MHz and 999.99 MHz.
+L.O. frequency must be between 500.00 MHz and 999.99 MHz (0.01 MHz steps).
 ""
 VB -202
 I.F. input should be one of: a, b, c, or d.
