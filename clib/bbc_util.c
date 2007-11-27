@@ -32,7 +32,7 @@ char *ptr;
     double atof(), gain;
     long bblvcode();
     char buffer[80];
-    int ilen, jlen, klen;
+    int ilen, jlen, klen, mlen;
     char *decloc, *ctemp;
     long freq, ifreq, freq2bbc();
     int i;
@@ -56,6 +56,17 @@ char *ptr;
         decloc = strchr(ptr,'.');
         if (decloc != NULL)
           jlen = strlen(decloc);
+
+   /* no more than 2 digits in frcational part , don't count trailing spaces */
+
+	mlen=jlen;
+	while(mlen > 0 && *(decloc+mlen-1)==' ')
+	  mlen--;
+	if(mlen > 3) {
+	  ierr=-200;
+	  break;
+	}
+
         if (ilen == jlen) 
           klen = ilen;
         else
