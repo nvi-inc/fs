@@ -1,6 +1,7 @@
 /* lba das ifp buffer parsing utilities */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -1319,6 +1320,7 @@ int n_ifp;
 	lcl->bs.i_fir_no = 27;
 	break;
      case _B_NONE:
+       break;
    }
 
    /* Set the Band Splitter Q / I adder/subtractor to AUTO mode */
@@ -1462,6 +1464,7 @@ int n_ifp;
 	lcl->ft.i_fir_no = ft_filter - _F2_Bdiv2 + 23;
 	break;
      case _F_NONE:
+       break;
    }
 
    /* Set the Fine Tuner Q / I adder/subtractor according to NCO test mode */

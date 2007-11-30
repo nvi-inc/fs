@@ -117,8 +117,7 @@ void ifadjust(command,itask,ip)
 	  int ivc,m;
 	  ivc=shm_addr->form4.codes[i]&0xF;
 	  for (m=0;m<j;m++)
-	    if(vcnum_l[m]==ivc)
-	      goto endl;
+	    if(vcnum_l[m]==ivc)    goto endl;
           vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
           /* Look for the patch */
           if(!iuse[vcnum_l[j]]) {
@@ -130,7 +129,7 @@ void ifadjust(command,itask,ip)
           /* */
           lu[0]=1;
           j++;
-	  endl:
+	endl: ;
 	} else if(!((1<<4)&shm_addr->form4.codes[i]) && 
                   !(shm_addr->form4.codes[i]>>6 & 0x3)) {
 	  int ivc,m;
@@ -149,7 +148,7 @@ void ifadjust(command,itask,ip)
           /* */
           lu[1]=1;
           k++;
-	endu:
+	endu: ;
         }
       }
     }

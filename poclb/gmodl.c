@@ -7,6 +7,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <math.h>
 #include "../include/dpi.h"
@@ -78,15 +79,13 @@ struct pmdl *pmodel;
 	*/
         for (i=0; i<MAX_MODEL_PARAM+1; i++) {
 	  ;
-	  while((c=fgetc(mdlfile)) !=EOF && (c == ' ' || c == '\t'))
-	    ;
+	  while((c=fgetc(mdlfile)) !=EOF && (c == ' ' || c == '\t')) ;
 	  if(c==EOF)
 	    goto Ferror;
 	  if(c == '\n') {
 	    mpar=i;
-	    for(j=mpar;j<MAX_MODEL_PARAM;j++)
-	      pmodel->ipar[j]=0;
-	    goto end_flags;
+	    for(j=mpar;j<MAX_MODEL_PARAM;j++)    pmodel->ipar[j]=0;
+	    break;
 	  }
 	  ungetc(c,mdlfile);
 	  if(i >= MAX_MODEL_PARAM) {
@@ -97,7 +96,6 @@ struct pmdl *pmodel;
             goto Ferror;
           n++;
         }
-      end_flags:
       } else {         /* Parameter value records (NLINE values per line) */
         iline++;
         i=(iline-1)*NLINE;

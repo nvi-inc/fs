@@ -361,7 +361,7 @@ Boolean chksum;
 int passes; /* Added this line 12-19-88, DAS */
 {
   Boolean error;
-  char *findchr(),*ptr;
+  char *ptr;
   
   CHECKSUM = 0;
   error = FALSE;

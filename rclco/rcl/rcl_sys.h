@@ -14,7 +14,7 @@ int rcl_portshutdown(void);
 #ifdef UNIX
 int rcl_open(const char* hostname, int* addr, char* errmsg);
 int rcl_close(int addr);
-#endif UNIX
+#endif 
 
 int rcl_setbaud(int baudrate);
 
@@ -29,6 +29,6 @@ int rcl_flushout(int addr);
 #ifdef UNIX
 void rcl_open_list(int* num, int addrs[]);
 const char* rcl_addr_to_hostname(int addr);
-#endif UNIX
+#endif
 
 #endif /* RCL_SYS_DEFD */

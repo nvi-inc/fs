@@ -48,6 +48,7 @@
 /* Include files */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/params.h" /* FS parameters            */
 #include "../include/fs_types.h" /* FS header files        */

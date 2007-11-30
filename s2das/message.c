@@ -1,4 +1,6 @@
 #include "message.h"
+#include <string.h>
+#include <stdio.h>
 
 /* --------------------------------------------------------------------------*/
 #define MAX_BUFFER  90
