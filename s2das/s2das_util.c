@@ -1,6 +1,8 @@
 #include "s2das_util.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 /* --------------------------------------------------------------------------*/
 

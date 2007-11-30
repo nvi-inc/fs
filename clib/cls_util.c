@@ -1,4 +1,5 @@
 #include <stdio.h>	/* standard I/O header file */
+#include <stdlib.h>
 #include <limits.h>     /* limits header file */
 #include <errno.h>	/* error number definitions */
 #include <memory.h>    /* shared memory IPC header file */

@@ -1,5 +1,6 @@
 #include "stats.h"
 #include <float.h>
+#include <string.h>
 
 void StatsInit( STATS *Stats , char *Title )
 {

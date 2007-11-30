@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <errno.h>      /* error code definition header file */
 #include <sys/types.h>
@@ -46,8 +47,6 @@ return( 0);
 void shm_att( key)
 key_t key;
 {
-   char  *shmat();
-
 
    if (C_RES < sizeof(struct fscom)) {
      printf("shm_map: fscom C area too large: %d bytes \n",
