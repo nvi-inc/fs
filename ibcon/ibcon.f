@@ -88,6 +88,7 @@ C        maximum number of devices on IEEE board
       integer idlen,it(6)
       integer rddev, opbrd, iserial,opdev, wrdev, idum,statbrd,rspdev
       integer idum,fc_rte_prior, no_after, no_online, no_write_ren
+      integer no_w_ren_glbl
       integer set_remote_enable,no_interface_clear_board
       integer interface_clear_converter
       double precision timnow,timlst(imaxdev)
@@ -102,6 +103,7 @@ C                 word 2 = 0 for talk/listen devices
 C                          1 for talk-only devices 
 C                          2 for listen-only devices
 C                         +4 if SRQ supported
+C                         +8 if no_write_ren for this device
 C                 word 3 time-out value
       integer tmotbl(16)
 C                        table of time-out values microseconds
@@ -157,7 +159,7 @@ C
       icount=0
       no_after=0
       no_online=0
-      no_write_ren=0
+      no_w_ren_glbl=0
       set_remote_enable=0
       no_interface_clear_board=0
       interface_clear_board=0
@@ -172,7 +174,7 @@ C
             goto 150
          endif
          if(ichcm_ch(ibuf,1,'no_write_ren').eq.0) THEN
-            no_write_ren=1
+            no_w_ren_glbl=1
             goto 150
          endif
          if(ichcm_ch(ibuf,1,'set_remote_enable').eq.0) THEN
@@ -210,7 +212,7 @@ C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE
             modtbl(3,icount) = 12
          else
             idum = ias2b(ibuf,icomma+1,ireg-icomma)
-            do j=1,16
+            do j=2,16
                if(idum.le.tmotbl(j)) then
                   modtbl(3,icount) = j-1
                   goto 148
@@ -283,12 +285,20 @@ c
           ierr = -2 
           goto 910
         endif
+C
+C assume global state for no write ren
+C
+        no_write_ren=no_w_ren_glbl
+C
 C  CHECK DEVICE NAME (FIRST WORD)
       do i=1,ndev 
         if (ichcm(modtbl(1,i),1,ibuf(2),1,2).eq.0) then
            idev = i
            nadev = modtbl(1,i)
            imdev = modtbl(2,i)
+           if(and(modtbl(2,i),8).ne.0) then
+              no_write_ren=1
+           endif
            goto 221
         endif
       end do
