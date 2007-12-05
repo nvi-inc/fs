@@ -22,7 +22,7 @@ char *who;           /* 2-char string identifying the error  */
 {
   char buf[513];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
-  int it[6],ip1,ip2,l;
+  int it[6],ip1,ip2,l, bytes;
  
 /* First get the time and put dddhhmmss into the log entry.
 */
@@ -48,7 +48,13 @@ char *who;           /* 2-char string identifying the error  */
     int2str(buf,ierr,-5,0);
     strcat(buf," ");
   }
-  strcat(buf,msg);
+  if(msg != NULL) {
+    bytes=sizeof(buf)-strlen(buf)-1;
+    if(bytes > strlen(msg))
+      bytes=strlen(msg);
+    if(bytes > 0)
+      strncat(buf,msg,bytes);
+  }
 
 /* Send the complete log entry to ddout via class.
 */
