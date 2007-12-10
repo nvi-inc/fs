@@ -1,3 +1,0 @@
-       subroutine yywrap()
-       return
-       end

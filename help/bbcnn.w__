@@ -14,7 +14,8 @@ Settable Parameters:
               inclusive. No default. This frequency range is
               greater than the normal range over which the BBC
               is specified to lock (500 to 1000 MHz) to allow
-              for testing.
+              for testing. Only two digits (0.01 MHz steps) allowed after
+              the decimal point allowed.
               ifsource      I.F. input source, one of A, B, C, D. No default.
             bwu         Bandwidth for USB in MHz. One of 0.0625, 0.125,
             0.25, 0.5, 1, 2, 4, 8, 16. Default 2.

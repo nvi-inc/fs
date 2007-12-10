@@ -79,7 +79,8 @@ long ip[5];                           /* ipc parameters */
 	  return;
 	}
 	cls_clr(ip[0]);
-	if (command->argv[1]!=NULL) {  /* runs script on Mark 5 */
+	if (command->argv[1]!=NULL && *(command->argv[1])!=0) {
+                                                  /* runs script on Mark 5 */
 	  if(strcmp(command->argv[1],"autoftp")!=0) {
 	    ierr=-308;
 	    goto error;

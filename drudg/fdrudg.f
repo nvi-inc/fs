@@ -260,11 +260,12 @@ C  Initialize lots of things in the common blocks
 C
 C     1. Make up temporary file name, read control file.
 C***********************************************************
-      call rdctl(cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,cdum,
-     .     cdum, cdum, cdum,cdum,cdum,cdum,cdum,cdum,csked,csnap,cproc,
-     .           ctmpnam,
-     .           cprtlan,cprtpor,cprttyp,cprport,cprtlab,clabtyp,
-     .           rlabsize,cepoch,coption,luscn,
+      call rdctl(cdum,cdum,cdum,cdum,   cdum,cdum,cdum,cdum,  !used by sked, not drudg
+     >           cdum,cdum,cdum,cdum,   cdum,cdum,cdum,cdum,
+     >           cdum,cdum,cdum,
+     >           csked,csnap,cproc,
+     .           ctmpnam,cprtlan,cprtpor, cprttyp,cprport,
+     >           cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
      .           dr_rack_type,crec_def,kequip_over,
      .           tpid_prompt,itpid_period,tpid_parm)
       kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
@@ -313,7 +314,7 @@ C  In drcom.ftni
       nch3=trimlen(command)
 ! Check for label.
       if(index(cfile,".log") .ne. 0) then
-         call lablog(cfile,cstnin,command,cr1,ierr)
+         call lablog(cfile,cstnin,command,cr1,cr2,ierr)
          stop
       endif
 

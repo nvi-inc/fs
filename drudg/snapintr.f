@@ -44,6 +44,7 @@ C
 ! 2006Jul19 JMGipson.  Increased format length for tape so don't have overflow.
 ! this is the start of the line
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
+! 2007Dec07 Modified so that  prints version as
 
       IF (IFUNC.EQ.1) THEN
         cprfx='"'
@@ -82,15 +83,9 @@ C     Write terminal line
       endif
 
 C  Write drudg version
-      if(iverPatch_FS .le. 9) then
-        write(lu_outfile,
-     >  "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
-     >  cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
-      else
-        write(lu_outfile,
-     >  "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
-     >  cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
-      endif
+      write(lu_outfile,
+     >   "(a,'drudg version ',a9,' compiled under FS ',i2,2('.',i2.2))")
+     >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
 
 C       Write equipment line
       IF (IFUNC.EQ.1) THEN ! only for non-VLBA

@@ -4,10 +4,6 @@
 !
 !  2004Apr05   JMGipson  First version
 !  2007Jul20   JMGipson  Now searches for disk_record_on. Used to search for data_valid
-!  2007Dec10   JMGipson. Changed back to Data_valid=on.
-!                        Disk_record=on failed if you didn't stop recording.
-!  2007Dec11   JMGipson. Modified so that will handle the case when scans aren't recording.
-!                        Also, uses earliest of disk_Record=on or  data_valid
 
       implicit none
       character*(*) lfile
@@ -25,82 +21,68 @@
       integer idur(MaxScan)
       integer itime_now(5)
       logical kvalidtime
+      logical kfirst
       character*256 ldum
 
       integer iscan_start    !first scan when tape starts moving.
-      integer num_scan       !number of scans.
+      integer iscan_last
       integer iscan
 
       integer i1,i2,i
-      integer j
 
 ! used to hold the input line.
       character*132 ctmp
 
-      logical kdebug
-
-      kdebug=.false.
-!      kdebug=.true.
 ! 1. Read in the file.
       lu_in=9
       lu_out=8
       open(lu_in,file=lfile)
 
-      num_scan=0
+      kfirst=.true.
+      iscan_last=0
 100   continue
       read(lu_in,'(a132)',end=200) ctmp
       call capitalize(ctmp)
 
       if(ctmp(1:1) .eq. '"') then
         goto 100
-      else if(ctmp(1:9) .eq. "SCAN_NAME") then
-        num_scan=num_scan+1
-        idur(num_scan)=0
       else if(ctmp(1:1) .eq. "!") then
         call snap_ReadTime(ctmp,itime_now,kvalidtime)
         if(.not. kvalidtime) then
            goto 100
         endif
-      else if(ctmp(1:14).eq. "DISK_RECORD=ON") then
-        iscan_start=num_scan
+      else if(ctmp(1:14).eq. 'DISK_RECORD=ON' .or.
+     >        ctmp(1:6) .eq. "ST=FOR" .or. ctmp(1:6).eq."ST=REV" .or.
+     >        ctmp(1:7) .eq. "ST1=FOR" .or. ctmp(1:7).eq."ST1=REV" .or.
+     >        ctmp(1:7) .eq. "ST2=FOR" .or. ctmp(1:7).eq."ST2=FOR") then
+        iscan_last=iscan_last+1
         do i=1,5
-          itime_scan(i,num_scan)=itime_now(i)
+          itime_scan(i,iscan_last)=itime_now(i)
         end do
-        if(kdebug) then
-          write(*,'("REC_ON     ",i4,".",i3,".",2(i2.2,"."),i2.2)')
-     >        (itime_now(j),j=1,5)
+        if(kfirst) then
+          kfirst=.false.
+          iscan_start=iscan_last
         endif
-      else if(ctmp(1:14).eq. "DATA_VALID=ON") then
-        if(num_scan .ne.  iscan_start) then
-          do i=1,5
-            itime_scan(i,num_scan)=itime_now(i)
-          end do
-        endif
-        if(kdebug) then
-          write(*,'("DATA_VALID ",i4,".",i3,".",2(i2.2,"."),i2.2)')
-     >        (itime_now(j),j=1,5)
-        endif
+
 ! See if tape has started moving.
-      else if(ctmp(1:10) .eq. 'DISK_END' .or.
-     >        ctmp(1:10) .eq. 'DISC_END' .or.
-     >        ctmp(1:15) .eq. 'DISK_RECORD=OFF') then
+      else if (ctmp(1:2) .eq. 'ET' .or.
+     >         ctmp(1:10) .eq. 'DISK_END' .or.
+     >         ctmp(1:10) .eq. 'DISC_END' .or.
+     >         ctmp(1:15) .eq. 'DISK_RECORD=OFF') then
 
-        if(kdebug) then
-          write(*,'("OFF        ",i4,".",i3,".",2(i2.2,"."),i2.2)')
-     >        (itime_now(j),j=1,5)
-        endif
-
-        do iscan=iscan_start,num_scan
+        do iscan=iscan_start,iscan_last
           idur(iscan)=itimedifsec(itime_now,itime_scan(1,iscan))
-          if(kdebug) then
-            write(*,'(i4,".",i3,".",2(i2.2,"."),i2.2,2x,2i4)')
-     >        (itime_scan(j,iscan),j=1,5),iscan,idur(iscan)
-          endif
         end do
+        kfirst=.true.
       endif
       goto 100
 
 200   continue
+
+!cleanup
+      do iscan=iscan_start,iscan_last
+        idur(iscan)=itimedifsec(itime_now,itime_scan(1,iscan))
+      end do
 
 ! now read through the file once again, appending the total recording time
 ! at the end of every scan name.
@@ -128,7 +110,7 @@
 
       i1=trimlen(ltmpfil)
       i2=trimlen(lfile)
-      write(ldum,*) "mv ",ltmpfil(1:i1+1),lfile(1:i2)
+      write(ldum,*) "mv ", ltmpfil(1:i1+1),lfile(1:i2)
       i1=trimlen(ldum)
       i1=i1+1
       ldum(i1+1:i1+1)=char(0)
@@ -136,3 +118,14 @@
       call system(ldum(1:i1))
       return
       end
+
+
+
+
+
+
+
+
+
+
+

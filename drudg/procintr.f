@@ -38,16 +38,9 @@ C
       write(lu_outfile,'(a,a,3x,a,2x,a)')
      > cprfx,cexper,cstnna(istn),cpocod(istn)
 
-      if(iverPatch_FS .le. 9) then
-       write(lu_outfile,
-     >   "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i1)")
+      write(lu_outfile,
+     >   "(a,'drudg version ',a9,' compiled under FS ',i2,2('.',i2.2))")
      >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
-      else
-       write(lu_outfile,
-     >   "(a,'drudg version ',a9,' compiled under FS ',2(i1,'.'),i2)")
-     >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
-      endif
-
 
       write(lu_outfile,'(5a,$)')
      >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'

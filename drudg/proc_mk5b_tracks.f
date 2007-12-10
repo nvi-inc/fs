@@ -18,7 +18,6 @@
       integer ib
       integer num_tracks
       integer nchan_rec
-      integer iwhere
       integer it
       integer j
       integer*4 itemp
@@ -26,7 +25,6 @@
       logical kgeo_mode
       integer idiv
       character*80 cbuf
-      logical kdebug
       logical kfirst
 
       character*1 lul(2)            !ASCII "U","L"
@@ -58,8 +56,6 @@
       data lul/"U","L"/
       data lsm/"S","M"/
 
-      kdebug =.true.
-      kdebug =.false.
       kfirst=.true.
 ! If we don't have a VSI4 formatter,
 !   write out comments and command and exit.
@@ -95,15 +91,6 @@
                 endif
                 write(lsked_csb(num_tracks),'(i2.2,a1,a1)')
      >            ib, lul(isb), lsm(ibit)
-                 if(kdebug) then
-                   if(kfirst) then 
-                     write(*,*) " "
-                     write(*,*) "Tracks: "
-                   endif
-                   kfirst=.false.
-                   write(*,'(a," ",$)') lsked_csb(num_tracks)
-                   if(mod(num_tracks,16) .eq. 0) write(*,*) " "
-                 endif
               endif
             enddo
           enddo
@@ -114,7 +101,6 @@
 ! Default is assume geo mode is true.
       kgeo_mode =.true.
       imask=0
-      if(kdebug) write(*,*) "Checking geo mode"
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lgeo_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then
@@ -132,7 +118,6 @@
       kgeo_mode=.false.
 ! Check to see if a valid geodetic mode.
       imask=0
-      if(kdebug)  write(*,*) "Checking VLBA mode"
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lvlba_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then

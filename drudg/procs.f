@@ -263,6 +263,7 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 ! 2007Jul10 JMG. Added logical ktrf
 ! 2007Jul27 JMG. Changed itype to logical knopass, put in hardware.ftni, and moved initializaiton
 !           to init_hardware_common
+! 2007Nov05 JMG. Took out postob_mk5  command.
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -415,7 +416,7 @@ C
 
       call proc_exper_initi(lu_outfile,luscn,kin2net_on)
 
-      if(km5disk) call proc_postob_mk5(lu_outfile,luscn)
+!      if(km5disk) call proc_postob_mk5(lu_outfile,luscn)
 C
 C 2. Set up the loop over all frequency codes, and the
 C    inner loop over the number of passes.

@@ -14,6 +14,7 @@ C 021111 jfq Add LBA racks.
 ! 2004Feb15 JMGipson  Added KK5 recorder type.
 !                     Rearranged flag setting to make it tighter.
 !
+! 2007Dec11 JMGipson.  Doesn't apend recorder if Recorder is Mark5
 C Input
       integer istn
 
@@ -104,6 +105,7 @@ C Racks
      >            cstrec(istn,i) .ne. "none"
         end do
       endif
+      if(km5a .or.km5b .or.km5b) krec_append=.false.
 
       kbbc=kvracks.or.kv5rack
       kifp=klrack

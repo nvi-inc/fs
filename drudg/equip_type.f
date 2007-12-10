@@ -122,8 +122,10 @@ C 2. Interactive input
 
         write(luscn,'(a)')
      .       '| Select rack  | Select Rec 1 | Select Rec 2 | Start|'
-          do i=1,max_equip_lines ! write each line
-            if(i .le. max_rack_type) then
+! We subtract 1 from max_equip_lines, max_rack_type and max_rec_type
+!  so we don't display the "unknwon" option.
+          do i=1,max_equip_lines-1 ! write each line
+            if(i .le. max_rack_type-1) then
               if(irack_in .eq. i) then
                 cactive="*"
               else
@@ -133,7 +135,7 @@ C 2. Interactive input
             else
               crack_slot=" "
             endif
-            if(i .le. max_rec_type) then
+            if(i .le. max_rec_type-1) then
               if(irec1_in .eq. i) then
                 cactive="*"
               else
