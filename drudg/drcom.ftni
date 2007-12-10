@@ -64,7 +64,7 @@ c
       character*2 coption
       character*6 cpid
       character*4 cepoch
-      integer IBUF(ibuf_len)
+      integer*2 IBUF(ibuf_len)
       character*(2*ibuf_len) cbuf
       equivalence (cbuf,ibuf)
 

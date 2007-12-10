@@ -37,7 +37,7 @@ label.o lablog.o labsnp.o lists.o lspin.o lstsum.o lstsum_info.o lstsumo.o \
 luff.o lv_open.o  name_trkf.o nhdif.o \
 point.o port.o prcov.o prcov_vex.o proc_check8bbc.o proc_enable_repro.o \
 proc_exper_initi.o proc_form.o proc_ifd.o proc_load_unload.o \
-proc_mk5_init1.o proc_mk5_init2.o proc_postob_mk5.o proc_mk5b_tracks.o proc_norack.o \
+proc_mk5_init1.o proc_mk5_init2.o proc_mk5b_tracks.o proc_norack.o \
 proc_patch.o proc_pcalf.o proc_s2_comments.o proc_sked_proc.o proc_tape.o proc_tapef_name.o \
 proc_tracks.o proc_trkf.o  proc_vc.o proc_vcname.o \
 proc_write_define.o procintr.o procs.o \

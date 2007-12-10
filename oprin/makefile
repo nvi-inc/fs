@@ -12,6 +12,7 @@
 
 # We want the built-in default GNU Make actions to use 'gcc' as our C compiler.
 CC = gcc
+CC = gcc-2.95
 
 # In all default compilation commands involving the C preprocessor,
 # use these preprocessor control flags (include dirs, defines).

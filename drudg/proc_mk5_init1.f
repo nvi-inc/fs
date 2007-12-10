@@ -6,6 +6,8 @@
       integer luscn            !LU to output error messages (normally the screen).
 ! returned
       integer ierr             !some error
+! history
+! 2007Dec11 JMGipson.  Fixed  bug in format statement
 
       ierr=0
       if((km5a_piggy.or.km5p_piggy) .and. ntrack_rec_mk5 .gt. 32)then
@@ -58,7 +60,7 @@
            return
         else if(ntrack_rec_mk5 .gt. 32 .and. kvrack) then
          write(luscn,'(/,a)')"PROC_MK5_INIT1: Too many tracks for VLBA!"
-         write(luscn,'(a)') "Maximum is 32. We have ",ntrack_rec_mk5
+         write(luscn,'(a,i4)') "Maximum is 32. We have ",ntrack_rec_mk5
          ierr=103
         endif
 ! put commands in setup.

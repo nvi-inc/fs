@@ -1,15 +1,15 @@
-      SUBROUTINE rdctl(source_cat,station_cat,antenna_cat,position_cat,
-     .                 equip_cat,mask_cat,freq_cat,rx_cat,loif_cat,
-     .                 modes_cat,modes_description_cat,
-     .                 rec_cat,hdpos_cat,
-     .                 tracks_cat,flux_cat,flux_comments,
-     .                 cat_program_path,par_program_path,
-     .                 csked,csnap,cproc,
-     .                 ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
-     .                 cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
-     .                 dr_rack_type,crec_default,
-     >                 kequip_over,
-     .                 tpid_prompt,itpid_period,tpid_parm)
+      SUBROUTINE rdctl(                                             ! Start with sked params
+     >   source_cat,station_cat,antenna_cat,position_cat,           ! 4 on each line
+     >   equip_cat, mask_cat,   freq_cat,   rx_cat,                 ! 4 on each line
+     >   loif_cat,  modes_cat,  modes_description_cat,  rec_cat,
+     >   hdpos_cat, tracks_cat,flux_cat,flux_comments,
+     >   cmaster_file, cat_program_path, par_program_path,          ! 3
+     .   csked,csnap,cproc,
+     .   ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
+     .   cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
+     .   dr_rack_type,crec_default,
+     >   kequip_over,
+     .   tpid_prompt,itpid_period,tpid_parm)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -77,7 +77,8 @@ C   parameter file
      .               par_program_path,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
-     .               rec_cat,csked,csnap,cproc,ctmpnam,cprtlab,
+     .               rec_cat,cmaster_file,
+     >               csked,csnap,cproc,ctmpnam,cprtlab,
      .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
      .               tpid_prompt,tpid_parm
       character*4 cepoch
@@ -132,11 +133,11 @@ C  1. Open the default control file if it exists.
       dr_rack_type = 'unknown'
       crec_default(1) = 'unknown'
       crec_default(2) = 'none'
+      cmaster_file="NONE"
 
       kautoftp0=.false.
       ldisk2file_dir0 =" "
       lautoftp_string0=" "
-
 
 C  2. Process the control file if it exists. This loops through twice, 
 C     once for each control file.
@@ -219,6 +220,8 @@ C  $CATALOGS
                   cat_program_path=lvalue
                 else if (lkeyword.eq.'PARAMETER') then
                   par_program_path=lvalue
+                else if(lkeyword .eq. 'MASTER') then
+                 cmaster_file=lvalue
                 else
                   write(luscn,9200) lkeyword
 9200              format("RDCTL04 ERROR: Unknown catalog name: ",A)

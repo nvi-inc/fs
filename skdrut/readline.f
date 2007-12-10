@@ -20,13 +20,17 @@ C  OUTPUT:
 C
 C  LOCAL:
 C HISTORY:
+! 2007Nov04  Modified to remove white space (" ", tabs) at front of a line.
+
+! function
+      integer trimlen
+
 !     local
       logical kprint
       character*1024 ldum
       integer ilen
-
-      ilen=min(1024,len(lstring))
-
+      integer ifirst_non_white
+      integer nbeg,nend
 
 C     0. INITIALIZE
 C
@@ -37,7 +41,16 @@ C
 
 100   continue
       read(iunit,'(a1024)',err=500,end=600) ldum
-      lstring=ldum(1:ilen)
+
+      nend=trimlen(ldum)
+      nbeg=ifirst_non_white(ldum)
+      if(nbeg .ge. 1024) then
+         lstring=" "
+      else
+         lstring=ldum(nbeg:)
+      endif
+
+
       if(kprint) write(*,'(a)') lstring(1:40)
       if(imode .eq. 1) then
         if(lstring(1:1) .eq. "$") return

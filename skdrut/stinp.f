@@ -351,7 +351,6 @@ C
         endif
         if (i.eq. 0) then ! try to match station name
           i=iwhere_in_string_list(cstnna,nstatn,cname)
-          write(*,*) cstnna(1:nstatn)
         endif
         IF  (I.eq.0) THEN  !matching entry not found
           write(lu,'("STINP24 - Name or ID match not found: ",a)') cname

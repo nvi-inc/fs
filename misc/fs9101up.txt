@@ -1,4 +1,4 @@
-File: /usr2/fs-9.10.0/misc/fs9100up.txt  Version: 0.1  Date: 071004
+File: /usr2/fs-9.10.1/misc/fs9101up.txt  Version: 0.6  Date: 071212
 
 I. Introduction
 
@@ -12,13 +12,13 @@ This memo is divided into six sections:
 Please print this notice and read it carefully before installing the
 new version.
 
-This version is intended only for stations with Mark 5B recorders.  It
-has been tested with mark 5B recorders and is required for operations
-with such recorders.  Stations with Mark 5A recorders are requested to
-refrain from using this version for operations until it has been more
-thoroughly tested.  You are welcome to test the new version though and
-we would like to hear about your experiences.  Your input will hasten
-the recommendation to use the new version for Mark 5A.
+This update is intended for all stations. We encourage all stations to
+update as soon as convenient.  This version has been tested with both
+Mark 5A and Mark 5B recorders and found to work well.  For Mark 5B
+(and 5B+) recorders, the recorder must be controlled with Mark5A
+software version 2007y206d or later, run as "dimino".  For more
+information on this, please see item (1) in the detailed explanation
+of the FS changes below.
 
 II. Changes Since Version 9.9.2
 
@@ -29,7 +29,8 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of the FS changes.
+The following is a summary of FS changes. Items numbered 15 and larger
+were added beginning with FS 9.10.1.
 
 1. Support for Mark 5B Recorder added.
 2. Support for Mark 5B Sampler Module added.
@@ -50,6 +51,19 @@ The following is a summary of the FS changes.
 13. Extra delay added for Mark IV decoder communication to improve
     robustness.
 14. FS Linux 6 RAID operations notes included.
+15. Created missing k42k5station.prc default procedure.
+16. Fixed bug in 's' in fmset for "rack=none".
+17. Correcte bug for previous (*) values in vsi4=... command
+    parameters.
+18. Updated standard procedures for new checkmk5.
+19. Fixed bank_check to work for Mark5A again.
+20. Minor update to mk5b_ops.txt.
+21. Fixed "setcl" to generate error if Mark5B has no sync or
+    syncerr_gt_3.
+22. Source code updated to compile on more modern gcc.
+23. Added device specifc no_write_ren for ibcon.
+24. Fixed parsing error with BBC frequencies with more than three
+    digits after the decimal place.
 
 A more detailed discussion of these changes follows.
 
@@ -62,7 +76,7 @@ A more detailed discussion of these changes follows.
    program names for Mark5A will also support the Mark 5A, the FS
    compatibility for Mark 5B operations has only be tested with and is
    only supported when the name "dimino" is used.  The FS requires
-   Mark5A software version 2007y206d or later for Mark 5b support.  FS
+   Mark5A software version 2007y206d or later for Mark 5B support.  FS
    operation with a Mark 5B recorder is described in
    /usr2/fs/misc/mk5b_ops.txt.  You are strongly encouraged to read
    this document to get an overview and also a detailed understanding
@@ -104,6 +118,8 @@ A more detailed discussion of these changes follows.
    documented in the help pages for the commands.  These changes are
    caused changes in the underlying syntax of the recorder's control
    program.
+
+   The "data_check" and 'scan_check" commands now work for Mark 5B.
 
    Documentation on new operation procedures is included in the file
    /usr2/fs/misc/mk5b_ops.txt.  The most important change is that
@@ -233,11 +249,71 @@ A more detailed discussion of these changes follows.
     the software RAID1 installed should read this document.  It does
     not apply to other stations.
 
+15. Created missing k42k5station.prc default procedure.  The default
+    example procedure for the K42 rack with a K5 recorder was missing.
+
+16. Fixed bug in 's' in fmset for "rack=none".  This bug made the Mark
+    5B "sync" function unavailable when equip.ctl had the rack set as
+    "none".
+
+17. Corrected bug for previous (*) values in vsi4=... command
+    paremeters.  This bug prevented the "*", used for previously
+    comanded values, for command parameters from working.  Note this
+    is different from the usage in this command of not specifying a
+    value, which is the "default" or null parameter which causes the
+    parameter value to not be commanded.  This behavior is different
+    from most other SNAP commands, where the default (if it is
+    defined) commands that value to the device rather cause no command
+    to be issued..
+
+18. Updated standard procedures for new "checkmk5".  Updated for new
+    contents which now includes "mk5=get_stats?" and "mk5=status?".
+    This was done as part of removing "postob_mk5" from use in the
+    .snp file.  The new scheme places the post-observation Mark 5
+    checks in a single procedure in a similar fashion to the way
+    parity checks were done with tape.  The use of a single
+    "mk5=get_stats?" command is compatible with both single and eight
+    disk modules.  For eight disk modules, each disk will get sampled
+    every eighth observation, which should be more than adequate.
+
+19. Fixed bank_check to work for Mark 5A again. Now Mark 5A is
+    supported properly.
+
+20. Minor update to mk5b_ops.txt. The changes include: some typos for
+    rack names (..."4v" vs ..."5") were fixed, Changed "DIMino" to
+    "dimino", included instructions for updating "matad.ctl" for Mark
+    5 Sampler Module, and noted that for FS operations "Mark 5B" and
+    Mark 5B+" are the same.
+
+21. Fixed "setcl" to generate error if Mark5B has no sync or
+    syncerr_gt_3.  Since "setcl" is run every "midob", this can help
+    isolate when a clock jump may have occured.
+
+22. Source code updated to compile on more modern gcc.  This mainly
+    consisted of improvements in include files to support more modern
+    version of gcc, such as > 4.0.  Thanks to Sekido Mamoru (NICT) an
+    Chris Phillips (CSIRO) for sending changes.
+
+23. Added device specifc no_write_ren for ibcon.  If 8 is added to the
+    value of the parameter after the device name in the ibad.ctl file,
+    the no_write_ren enab;e feature can be turned on selectively for
+    that device (rather than using the no_write_ren global feature in
+    the ibad.ctl control file.  Please see the updated and more
+    extensively commented example file
+    /usr2/fs/st.default/control/ibad.ctl for more details.
+
+24. Fixed parsing error with BBC frequencies with more than three
+    digits after the decimal place.  Previously, the bbcXX commands
+    (for VLBA type racks) failed to report an error and did nothing
+    useful when more than three digits were supplied after the decimal
+    point in the frequency.  This is now fixed; an error is reported.
+
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2007Sep28
+DRUDG opening message date is 2007Dec11.
 
-Major changes that effect the user experience include:
+The following is a summary of DRUDG changes. Items numbered 12 and
+larger were added beginning with FS 9.10.1.
 
 1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
    Sampler Modules).
@@ -252,6 +328,12 @@ Major changes that effect the user experience include:
 9. Support for Dymo printer for the FS Linux 6 (based on "Sarge").
 10. Internal change to procs.f
 11. Internal change to common blocks.
+12. No more "postob_mk5".
+13. "Unknown" option removed from option 11.
+14. DRUDG now strips all leading spaces and tabs from the "skedf.ctl"
+    file.
+15. Anomalous behavior with vex files and "preob" fixed.
+16. Length and continuous times in scan_name command improved.
 
 A more detailed discussion of these changes follows.
 
@@ -394,6 +476,48 @@ A more detailed discussion of these changes follows.
     These changes should have no impact on users, but should make the
     code easier to maintain.
 
+12. No more "postob_mk5". Now the .snp file calls the standard
+    "postob" procedure; no "postob_mk5" procedure is added to the
+    experiment .prc file.  The Mark 5 post-observation checks have
+    been merged into the "checkmk5" local procedure.  .
+
+13. "Unknown" option removed from option 11.  DRUDG will still
+    indicate if the equipment type is unknown, but users won't be able
+    to select "unkown" as an option.
+
+14. DRUDG now strips all leading spaces and tabs from the "skedf.ctl"
+    file.  In reading the "skedf.ctl" file DRUDG kept leading spaces
+    and tabs.  This could lead to problems in specifying directories.
+    For example, if the user specified the schedule directory as:
+
+      <TAB>/usr2/sched
+
+    DRUDG would complain that it couldn't find the schedule.
+
+15. Anomalous behavior with vex files and "preob" fixed.  Cormac
+    Reynolds (JIVE) noticed that some schedules did not generate
+    "preob" commands in .snp files as expected.  It turned out that
+    this was due to two issues interacting together.
+
+      A) The problem schedule specified the VLBA correlator.
+      B) DRUDG implicity assigns 25 seconds early start to sessions
+         processed at the VLBA.
+
+    The behavior of DRUDG was modified as follows:
+
+      1) DRUDG no longer implicitly assigns 25 seconds early start to
+         sessions processed at the VLBA.
+
+16. Length and continuous times in scan_name command improved.  As
+    before, the length parameter reflects the "data valid" time for
+    the scan (as before).  The continuous parameter now properly
+    reflects the actual continuous recording time that is scheduled.
+    The continuous time mayebe longer than length for a single scan if
+    early start is in use.  It is the entire recording time for the
+    first of several scans that are recorded continuously.  After the
+    first one, the continuous parameter is the time from the
+    "data_valid=on" to the end of the multi-scan recording.
+
 			   C. Known FS Bugs
 
 The following is a summary list of known bugs.  They are described in
@@ -411,7 +535,6 @@ more detail after the list.
 9. ONOFF and FIVPT programs hang.
 10. FS SNAP command pages don't list tape drive suffix numbers.
 11. LBA rack TPI detector is not usable.
-12. FS "data_check" and "scan_check" commands do not work with Mark5B.
 
 A more detailed discussion of these bugs follows.
 
@@ -553,15 +676,6 @@ A more detailed discussion of these bugs follows.
     currently also available when the rack type is specified to be
     LBA4.
 
-12. FS "data_check" and "scan_check" commands do not work with Mark5B.
-    The form of the Mark5B "data_check?" and "scan_check?" responses
-    are different from the Mark5A form.  As a result it was not
-    straight forward to make the FS "data_check" and "scan_check"
-    commands work with both Mark5B and Mark5A at the time of this
-    release.  They do work with Mark5A at this time.  The "data_check"
-    and "scan_check" commands will work with Mark5B in a future
-    release.
-
 III. Installation
 
 If you are installing FS9 for the first time with this version, please
@@ -575,12 +689,16 @@ follow all the steps.  If you have 9.7.7 installed, please follow the
 installation instructions in fs9902up.txt before applying the
 instructions here.
 
-A list of "critical updates" is given below.  These are updates that
-must be applied sequentially.  Please start with the next update with
-a later version number than you have and apply it and the following
-listed versions before upgrading to 9.10.0.  You can find the latest
-versions of installation notes for these FS versions in the
-"/usr2/fs/misc" directory.  The list of critical updates is:
+If you are upgrading from 9.10.0, you should skip steps: 13, 14, 15,
+16A, 16C, and 17.
+
+If you are updating from a version older than 9.9.2, a list of
+"critical updates" is given below.  These are updates that must be
+applied sequentially.  Please start with the next update with a later
+version number than you have and apply it and the following listed
+versions before upgrading to 9.10.1.  You can find the latest versions
+of installation notes for these FS versions in the "/usr2/fs/misc"
+directory.  The list of critical updates is:
 
   9.4.0
   9.5.3
@@ -590,6 +708,50 @@ versions of installation notes for these FS versions in the
   9.9.2
 
 If you have a version older than 9.4.0, please contact Ed.
+
+For reference purposes the naming convention for the default station
+libraries for different equipment configurations is listed here.  The
+files are found in /usr2/fs/st.default/proc.  They can be referred to
+and compared to what you have in "/usr2/proc/station.prc".  For a new
+installation (or re-installs), you can copy the default version for
+your equipment to "/usr2/proc" renaming it to "station.prc" in the
+process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The "-i" option will prompt before overwriting an existing
+"station.prc".  The table of correspondance between equipment types
+and default library names is given next.
+
+        Equipment      Prefix letters  Station Library
+        Rack/Drive1/Drive2
+
+        K42/K42            k42         k42station.prc
+        K42K3/VLBA         k42k3v      k42k3vstation.prc
+        K42MK4/VLBA        k42mk4v     k42mk4vstation.prc
+        K42MK4/VLBAB/VLBAB k42mk4vb    k42mk4vstation2.prc
+	K42/K5             k42k5       k42k5station.prc
+        LBA/S2             ls2         ls2station.prc
+        LBA4/S2            l4s2        l4s2station.prc
+        Mk3/Mk3A           3           3station.prc
+        Mk4/Mk4            4           4station.prc
+        Mk4/Mk5A           45          45station.prc
+        Mk4/VLBA4          4v4         4v4station.prc
+        Mk5/Mk5B           5           5station.prc
+        NONE/S2            s2          s2station.prc
+        VLBA/S2            vs2         vs2station.prc
+        VLBA/VLBA          v           vstation.prc
+        VLBA/VLBA2         v2          v2station.prc
+        VLBA/VLBA/VLBA     v           vstation2.prc
+        VLBA4/VLBA4        v4          v4station.prc
+        VLBA4/MK5A         v45         v45station.prc
+        VLBA4/VLBA42       v42         v42station.prc
+        VLBA5/Mk5B         v5          v5station.prc
+
+If your equipment type is missing, please let Ed (Ed.Himwich@nasa.gov)
+so that it will be added.
 
 There is a way to reduce the amount of typing involved in the
 installation.  This reduces the chances of missing required spaces and
@@ -672,7 +834,7 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.10.0 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.10.1 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -681,7 +843,7 @@ you have any questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.10.0.tgz
+      get fs-9.10.1.tgz
       quit
 
     The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
@@ -695,12 +857,12 @@ you have any questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.10.0.tgz
+      tar -xzpf /tmp/fs-9.10.1.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.10.0 fs
+      ln -sfn fs-9.10.1 fs
 
 (7) It is recommended that your local files have the default ownership
     ("oper.rtx") and permissions ('rw-rw-rw').  To force this, please
@@ -736,26 +898,43 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (12) Log in as oper
 
-(13) Modify your control files.  Only one change is needed.  The
-     "label_size" command for Dymo has changed.  The new version is
-     (shown as commented out):
+(13) Modify your control files.  Two changes are needed: (A) Update
+     the skedf.ctl "label_size" command for Dymo, and (B) update
+     "matad.ctl" for Mark 5B Sampler Modules.
 
-        *label_size   1.417 3.5     1     1    0.0   0.0    Dymo
+     (A) The new version of the skedf.ctl "label_size" command for
+         Dymoe is (shown as commented out):
 
-     Note the first "0.0" on the line used to be "11.0".  Please
-     change the label_size command in your skedf.ctl to agree with
-     this regardless of whether you have it commented out or not.  If
-     you have it commented out, it is still useful to fix it because
-     it will help prevent future confusion if you ever get a Dymo
-     printer.  You can look at the default file
-     /usr2/fs/st.default/control/skedf.ctl as an example.
+           *label_size   1.417 3.5     1     1    0.0   0.0    Dymo
+
+         Note the first "0.0" on the line used to be "11.0".  Please
+         change the label_size command in your skedf.ctl to agree with
+         this regardless of whether you have it commented out or not.
+         If you have it commented out, it is still useful to fix it
+         because it will help prevent future confusion if you ever get
+         a Dymo printer.  Please add the line (commented out) if you
+         don't have a Dymo label_size line now.  You can look at the
+         default file /usr2/fs/st.default/control/skedf.ctl as an
+         example.
+
+     (B) Please add the line "5B=5B" to your "matad.ctl" file (even if
+         you do not have a Mark 5B Sampler Module), if it isn't
+         already there.  The commands:
+
+           cd /usr2/control
+           grep 5B=5B /usr2/fs/st.default/control/matad.ctl >>matad.ctl
+
+        should handle this.  You can look at
+        "/usr2/fs/st.default/control/matad.ctl" for an example.
 
 (14) Update your systests v/chk1024.snp and .prc files.  If you have
      not made any local modifications to these files ("diff" to the
      old default ones in /usr2/fs-9.9.2/systests to check), you can
      just copy the new ones into your /usr2/sched and /usr2/proc
-     directories.  For Mark III/IV/5 racks use the commands (note the
-     dot "." at the end of the "cp ..."  commands):
+     directories.  Please note that v/chk1025 will is not appropriate
+     for and will not work woth Mark5 or VLBA5 racks.  For Mark III/IV
+     racks use the commands (note the dot "." at the end of the "cp
+     ..."  commands):
 
        cd /usr2/sched
        cp -a /usr2/fs/systests/chk1024.snp .
@@ -765,8 +944,8 @@ you have any questions about how to cut-and-paste please contact Ed
        cp -a /usr2/fs/systests/chk1024.prc .
        chmod a+rw chk1024.prc
 
-     For VLBA/4/5 racks use the commands (note the dot "." at the end
-     of the "cp ..."  commands):
+     For VLBA/4 racks use the commands (note the dot "." at the end of
+     the "cp ..."  commands):
 
        cd /usr2/sched
        cp -a /usr2/fs/systests/vchk1024.snp .
@@ -786,14 +965,16 @@ you have any questions about how to cut-and-paste please contact Ed
      support this.  Please follow the directions in
      /usr2/fs/systests/systests.txt to complete this step.
 
-(16) Modify your other procedure files.  Two changes are needed: (A)
-     Renaming "check_mk5a" to "check_mk5" and (B) changing "greplog"
-     to be case insensitive.
+(16) Modify your other procedure files.  Three changes are needed: (A)
+     Renaming "checkmk5a" to "checkmk5", (B) update the contents of
+     "checkmk5". and (c) Changing "greplog" to be case insensitive.
 
-    (A) You should used PFMED to make this change:
+    (A) You should used PFMED to make this change in your "station"
+        procedure library:
 
            pfmed
-           rn,check_mk5a,check_mk5
+           pf,station
+           rn,checkmk5a,checkmk5
            ::
 
         Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
@@ -805,24 +986,42 @@ you have any questions about how to cut-and-paste please contact Ed
           different equipment configurations, you should be sure to
           update all versions that are used in configurations with the
           Mark 5 recorder.
-
-     (B) Edit the "greplog" procedure in your station.prc library
-         using PFMED.  Change the line:
-
-           sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
-
-         to:
  
-           sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+    (B) Use PFMED to edit the "checkmk5" procedure in your "station"
+        procedure library. Change the contents to:
 
-         The only changed needed is to add the "-i" between "grep" and
-         "$".
+           scan_check
+           mk5=get_stats?
+           mk5=status?
 
-         For stations that use multiple hardware configurations:
+        Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
+        example.
+
+       For stations that use multiple hardware configurations:
             
-           If you have different versions of the "station" library for
-           different equipment configurations, you should be sure to
-           update all "greplog" versions.
+          If you have different versions of the "station" library for
+          different equipment configurations, you should be sure to
+          update all versions that are used in configurations with the
+          Mark 5 recorder.
+ 
+ 
+    (C) Edit the "greplog" procedure in your station.prc library
+        using PFMED.  Change the line:
+
+          sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+
+        to:
+ 
+          sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+
+        The only changed needed is to add the "-i" between "grep" and
+        "$".
+
+        For stations that use multiple hardware configurations:
+            
+          If you have different versions of the "station" library for
+          different equipment configurations, you should be sure to
+          update all "greplog" versions.
 
 (17) Update oper's ~/.fvwm2rc file, by adding the lines:
 
@@ -830,8 +1029,10 @@ you have any questions about how to cut-and-paste please contact Ed
        Style "xconsole" NeverFocus
        Style "Field System Prompt*" StaysOnTop
 
-     as the last Style commands.  If you have the standard .fvwm2rc
-     file, these lines are insert right after line:
+     as the last Style commands.  (You may also want add additional
+     "NeverFocus" lines for other display only windows you use, e.g.,
+     "monan".)  If you have the standard .fvwm2rc file, these lines
+     are insert right after line:
 
        Style "*"          Color black/khaki
 
@@ -859,19 +1060,19 @@ you have any questions about how to cut-and-paste please contact Ed
 VI. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.10.0.tgz archive have been placed in
+floppy, "split" files of the fs-9.10.1.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9100tg.aa
-fs9100tg.ab
+fs9101tg.aa
+fs9101tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9100tg.* >fs-9.10.0.tgz
+cat fs9101tg.* >fs-9.10.1.tgz
 
-This will create an exact image of the original fs-9.10.0.tgz archive
+This will create an exact image of the original fs-9.10.1.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.

@@ -8264,3 +8264,105 @@ Version 9.9.2 061115
            Disk reset recipe added
 
 Version 9.10.0 071004
+
+071010 WEH st.default/proc/k42k5station.prc
+           created
+
+071022 WEH fmset/fmset.c
+           's' works now for rack type 'none' with 5b recorder
+
+071022 WEH quikv/vsi4.c
+           default to previous values now work
+
+071031 WEH st.default/proc/3station.prc
+           st.default/proc/45station.prc
+           st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/5station.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/newmk5ak5.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           update for new checkmk5 procedure
+
+071102 WEH quikv/bank_check.c
+           works again for mark5a (and 5b still)
+
+071102 WEH help/disk2file.___
+           fixed typo
+
+071102 WEH misc/mk5b_ops.txt
+           fix rack names to be mark5 and vlba5
+           use dimino not DIMino
+           add matad.ctl update instructions
+           identify mark5b and amrk5b+ as interchangable for FS
+
+071113 WEH control/fserr.ctl
+           setcl/setcl.f
+           error message if m5b syncerr_gt_3 or not_synced
+           fix typo in setcl.f for vlba5 rack_type
+
+071113 WEH setcl/setcl.f
+           fix typo for vlba5 rack_type
+
+071126 WEH quikv/disk2fle.c
+           fix parsing problem with abort and blank script name
+
+071127 WEH help/bbcnn_.w__
+           control/fserr.ctl
+           clib/bbc_util.c
+           fix parsing problem with more than two fractional frequency digits
+
+071130 sm  vex/vex_get.c
+           s2das/stats.c
+           s2das/s2das_util.c
+           s2das/message.c
+           quikv/ifadjust.c
+           oprin/Makefile
+           incom/get_rxgain_files.c
+           incom/get_flux_file.c
+           ibcon/echo_out.c
+           fserr/listinit.c
+           fsalloc/fsalloc.c
+           ddout/ddout.c
+           clib/lba_ifp_util.c
+           clib/cls_util.c
+           brk/brk.c
+           antcn/antcn.c
+           clib/shm_util.c
+           drudg/psbar.c
+           poclb/gmodl.c
+           rclco/rcl/rcl_sys.h
+           for compilation with newer distributions/gcc
+
+071130 weh st.default/control/ibad.ctl
+           ibcon/ibcon.f
+           add device specific no_write_ren
+
+071205 weh poclb/logite.c
+           use strncat to make sure no overwrite from msg
+
+071205 weh vex/vex_put.c
+           vex/vex.yy.l
+           include stdlib.h for malloc() and free() instead of malloc.h
+
+071212 weh help/scan_name.___
+           added more explanation of length and continuous parameters
+
+071212 weh help/bank_check.___
+           fixed typo
+
+Version 9.10.1 071210
