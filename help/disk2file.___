@@ -9,7 +9,7 @@
                                   scan_number,m5option,start_byte,end_byte,
                                   status,current
 
-            MK5A:       disk2file/scan,destination,start,end,options,
+            MK5B:       disk2file/scan,destination,start,end,options,
                                   m5option,start_byte,end_byte,
                                   status,current
 

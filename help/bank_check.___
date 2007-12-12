@@ -27,4 +27,4 @@ bank_check determines whether the next scan or continuous recording
 will fit by comparing the recording time remaining on the current bank
 with the length of the scan and continuous recording specified by the
 last scan_name=... command. If the required capacity is greater than five
-seconds less than remaining capacity, the bank will switced.
+seconds less than remaining capacity, the bank will switched.
