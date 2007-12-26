@@ -88,7 +88,7 @@ no "destination" was explicitly established or the FS has been
 restarted since then, the FS will try to determine the most recently
 used file name using "disk2file?". If that also fails to produce a
 file name, the FS will give up. Please see the file
-/usr2/fs/msic/autoftp.txt for information on how to configure this
+/usr2/fs/misc/autoftp.txt for information on how to configure this
 station customizable feature. Unless a local version has been
 configured, a dummy 'stub' "autoftp" that does nothing is used.
 
@@ -111,8 +111,8 @@ typical use start and stop are UT epochs of the form
 point and fractional part. If fields are omitted the first occuring
 instance in the scan that matches the specified fields is
 implied. Using UT epoches to collect data for near-realtime fringes
-tests is the most robust approach. It will allow eac station to select
-the subset of data that is required irrespective of where it is
+tests is the most robust approach. It will allow each station to
+select the subset of data that is required irrespective of where it is
 recorded on the disks. If the entire time span is not available
 (because for example of observing problems), the Mark 5 will return
 the subset that is.
