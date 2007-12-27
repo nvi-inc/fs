@@ -195,6 +195,20 @@ halt
 disk_serial
 disk_pos
 bank_check
+"uncomment the following for Mark 5A
+"mk5=DTS_id?
+"mk5=OS_rev1?
+"mk5=OS_rev2?
+"mk5=SS_rev1?
+"mk5=SS_rev2?
+"mk5=status?
+"uncomment the following for Mark 5B
+"mk5=DTS_id?
+"mk5=OS_rev?
+"mk5=SS_rev?
+"mk5=status?
+"uncomment the following if your station uses in2net transfers
+"mk5=net_protocol=tcp:4194304:2097152;
 enddef
 define  change_pack   00000000000x
 sy=fs.prompt "bank/vsn '$' should be changed"  &
