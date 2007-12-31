@@ -130,9 +130,9 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
-      dr_rack_type = 'unknown'
-      crec_default(1) = 'unknown'
-      crec_default(2) = 'none'
+      dr_rack_type    = "UNKNOWN"
+      crec_default(1) = "UNKNOWN"
+      crec_default(2) = "NONE"
       cmaster_file="NONE"
 
       kautoftp0=.false.
@@ -414,6 +414,7 @@ C         EQUIPMENT
                   dr_rack_type=lvalue(1:8)
                   crec_default(1)=ltoken(3)
                   crec_default(2)=ltoken(4)
+                  call capitalize(dr_rack_type)
                   call capitalize(crec_default(1))
                   call capitalize(crec_default(2))
 ! Now check to see if valid types.
@@ -479,8 +480,8 @@ C         TPICD
       lautoftp_string=lautoFTP_string0
 
       if(kequip_over) then
-        if(dr_rack_type .eq. 'unknown' .or.
-     >      crec_default(1) .eq. 'unknown') then
+        if(dr_rack_type .eq. 'UNKNOWN' .or.
+     >      crec_default(1) .eq. 'UNKNOWN') then
          write(*,*)
      >    "If EQUIPMENT_OVERRIDE is on, must set rack and recoders!"
          write(*,*) "Modify skedf.ctl accordingly!"

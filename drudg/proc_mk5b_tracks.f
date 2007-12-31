@@ -62,7 +62,7 @@
       if(.not.(km5rack .or. kv5rack)) then
         write(lu_outfile,'(a,/,a,/,a,/,a)')
      >  '"Please change the following mk5b_mode command to reflect',
-     >  '"the desired channel assingments and effective sample rate:',
+     >  '"the desired channel assignments and effective sample rate:',
      >  'mk5b_mode=ext,0xffffffff,1',
      >  'mk5b_mode'
          return

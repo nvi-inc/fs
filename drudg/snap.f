@@ -429,6 +429,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2007Dec11  JMG. IF idir=0 is now a flag for "don't record".
 !                 In this case, don't output preob,midob,postob
 ! 2007Dec12 JMG.  Don't emit time for scan_Begin if not recording.
+! 2007Dec27 JMG.  Moved ready_disk before 1st setup
 
       kdebug=.false.
 
@@ -1067,6 +1068,7 @@ C Put READY before SETUP as of 12/97. Do SETUP READY SETUP for first tape.
 C 
 C READY
         IF (KNEWTP.and.krec) THEN ! new tape
+          call snap_ready(ntape,kfirst_tape)
           if (iobss.eq.0) then ! do a SETUP first
             if(kin2net) then
               call snap_in2net_connect(lufile,
@@ -1074,7 +1076,6 @@ C READY
             endif
             call snap_setup(ipas,istnsk,icod,iobs,kerr)
           endif ! do a SETUP first
-          call snap_ready(ntape,kfirst_tape)
           kfirst_tape=.false.
 
 C Prepass new tape

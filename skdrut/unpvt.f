@@ -92,7 +92,7 @@ C
       do i=1,ich
         ibuf(i)=ibuf_in(i)
       end do
-      call capitalize(cbuf)    !this makes everything capitalized.
+!      call capitalize(cbuf)    !this makes everything capitalized.
 
       ich=1
 C
@@ -147,7 +147,7 @@ C first field reserved
 C second field number of recorders and tape length
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         nrec = 1
-        if (cbuf(ic1:ic1+1) .eq. "2X") then
+        if (cbuf(ic1:ic1+1) .eq. "2x") then
           nrec = 2
           ic1 = ic1+2
         endif
@@ -176,7 +176,7 @@ C first field tape speed, either LP or SLP
 C field 2 number of recorders and length of tape
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         nrec = 1
-        if (cbuf(ic1:ic1+1) .eq. "2X") then ! dual recs
+        if (cbuf(ic1:ic1+1) .eq. "2x") then ! dual recs
           nrec = 2
           ic1 = ic1+2
         endif
@@ -201,7 +201,7 @@ C first field headstacks and density
           return
         endif
         nstack = i
-        if(cbuf(ic1+1:ic1+1) .eq. "X") then
+        if(cbuf(ic1+1:ic1+1) .eq. "x") then
           ic1 = ic1+2
           NCH = IC2-IC1+1
           i = IAS2B(IBUF,IC1,NCH)
@@ -220,7 +220,7 @@ C second field number of recorders and tape length
           nrec = 1
           return
         endif
-        if(cbuf(ic1:ic1+1) .eq. "2X") then 
+        if(cbuf(ic1:ic1+1) .eq. "2x") then 
           nrec = 2
           ic1 = ic1+2
         endif
@@ -314,11 +314,10 @@ C Rack field
       if (ic1.ne.0) then ! rack field
         nch = min0(ic2-ic1+1,8)
         crack=cbuf(ic1:ic1+nch-1)
+        call capitalize(crack)
         iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
         if(iwhere .eq. 0) then
           ierr=-10-2*npar(1)
-          write(*,*) "HEre!"
-          write(*,*) crack
           return
         else
           crack=crack_type(iwhere)
@@ -329,6 +328,7 @@ C Rec A field
         if (ic1.ne.0) then ! rec A field
           nch = min0(ic2-ic1+1,8)
           creca=cbuf(ic1:ic1+nch-1)
+          call capitalize(creca)
           iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
           if(iwhere .eq. 0) then
             ierr=-11-2*npar(1)
@@ -345,6 +345,7 @@ C Rec B field or S2 mode
               continue
             else
               crecb=cbuf(ic1:ic1+nch-1)
+              call capitalize(crecb)
               iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,
      >             crecb)
               if(iwhere .eq. 0) then

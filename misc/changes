@@ -8366,3 +8366,18 @@ Version 9.10.0 071004
            fixed typo
 
 Version 9.10.1 071210
+
+071226 weh help/disk2file.___
+           fixed typos
+
+071227 weh st.default/proc/45station.prc
+           st.default/proc/5station.prc
+           st.default/proc/m5.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v5station.prc
+           updated to include m5 version queries and other m5 init
+
+071231 weh oprin/Makefile
+           remove CC=gcc-2.95
+
+Version 9.10.2 071231
