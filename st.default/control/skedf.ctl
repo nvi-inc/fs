@@ -155,10 +155,6 @@ $misc
 *epoch 1950
 *
 * Station equipment:
-* Station equipment may be specified in drudg. Equipment names are 
-* case sensitive. Allowed rack and recorder names are: 
-*
-* Station equipment:
 * Station equipment may be specified in drudg or in the equip line below.
 *  Equipment names are NOT case sensitive.
 *  Allowed rack and recorder names are:

@@ -1,4 +1,4 @@
-File: /usr2/fs-9.10.1/misc/fs9101up.txt  Version: 0.6  Date: 071212
+File: /usr2/fs-9.10.2/misc/fs9102up.txt  Version: 0.7  Date: 071231
 
 I. Introduction
 
@@ -29,8 +29,9 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of FS changes. Items numbered 15 and larger
-were added beginning with FS 9.10.1.
+The following is a summary of FS changes.  Items numbered 15 and
+larger were added beginning with FS 9.10.1.  Items numbered 25 and
+larger were added beginning with FS 9.10.2.
 
 1. Support for Mark 5B Recorder added.
 2. Support for Mark 5B Sampler Module added.
@@ -64,6 +65,7 @@ were added beginning with FS 9.10.1.
 23. Added device specifc no_write_ren for ibcon.
 24. Fixed parsing error with BBC frequencies with more than three
     digits after the decimal place.
+25. Updated "ready_disk" procedure.
 
 A more detailed discussion of these changes follows.
 
@@ -308,12 +310,26 @@ A more detailed discussion of these changes follows.
     useful when more than three digits were supplied after the decimal
     point in the frequency.  This is now fixed; an error is reported.
 
+25. Updated "ready_disk" procedure.  The "ready_disk" procedure was
+    updated to include the Mark 5 recorder query commands that had
+    previously been only in "exper_initi".  This is intended to make
+    sure the query information is retrieved for stations that don't
+    bother to set-up their Mark 5 until the schedule halts in the
+    "ready_disk" procedure.  It is recommended that the Mark 5 be
+    set-up before the schedule is started, but this will help make
+    operations more robust if it iss forgotten.  Please note that
+    during a power failure recovery (or other schedule restart), the
+    "ready_disk" procedure will not normally be executed
+    automatically, therefore the Mark 5 muist be set-up prior to
+    restarting the schedule.
+
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2007Dec11.
+DRUDG opening message date is 2007Dec27.
 
-The following is a summary of DRUDG changes. Items numbered 12 and
-larger were added beginning with FS 9.10.1.
+The following is a summary of DRUDG changes.  Items numbered 12 and
+larger were added beginning with FS 9.10.1.  Items numbered 17 and
+larger were added beginning with FS 9.10.2.
 
 1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
    Sampler Modules).
@@ -334,6 +350,10 @@ larger were added beginning with FS 9.10.1.
     file.
 15. Anomalous behavior with vex files and "preob" fixed.
 16. Length and continuous times in scan_name command improved.
+17. Rack and recorder type in skedf.ctl are now case insensitive.
+18. The "ready_disk" procedure was moved before the first setup
+    procedure call.
+19. Bug in labels for previous 9.10.x versions fixed.
 
 A more detailed discussion of these changes follows.
 
@@ -518,6 +538,21 @@ A more detailed discussion of these changes follows.
     first one, the continuous parameter is the time from the
     "data_valid=on" to the end of the multi-scan recording.
 
+17. Rack and recorder type in skedf.ctl are now case insensitive.  The
+    rack and recorder specified with the "equipment" keyword no longer
+    need to be specified with the correct case.
+
+18. The "ready_disk" procedure was moved before the first setup
+    procedure call.  This is intended to make operation more robust in
+    case a station forgets to set-up their Mark 5 before the schedule
+    is started and only remembers to do it during the halt in the
+    "ready_disk" procedure.  This way the Mark 5 set-up is not lost
+    because the Mark 5 was not ready to accept it.
+
+19. Bug in labels for previous 9.10.x versions fixed.  The bug caused
+    a portion of the labels to be printed off the page.  The labels
+    should be properly positioned again.
+
 			   C. Known FS Bugs
 
 The following is a summary list of known bugs.  They are described in
@@ -690,13 +725,16 @@ installation instructions in fs9902up.txt before applying the
 instructions here.
 
 If you are upgrading from 9.10.0, you should skip steps: 13, 14, 15,
-16A, 16C, and 17.
+16A, 16C, and 17 (note 16B and 16D are new since 9.10.0).
+
+If you are upgrading from 9.10.1, you should skip steps: 13, 14, 15,
+16A, 16B, 16C, and 17 (note 16D is new since 9.10.1).
 
 If you are updating from a version older than 9.9.2, a list of
 "critical updates" is given below.  These are updates that must be
 applied sequentially.  Please start with the next update with a later
 version number than you have and apply it and the following listed
-versions before upgrading to 9.10.1.  You can find the latest versions
+versions before upgrading to 9.10.2.  You can find the latest versions
 of installation notes for these FS versions in the "/usr2/fs/misc"
 directory.  The list of critical updates is:
 
@@ -834,7 +872,7 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.10.1 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.10.2 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -843,7 +881,7 @@ you have any questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.10.1.tgz
+      get fs-9.10.2.tgz
       quit
 
     The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
@@ -857,12 +895,12 @@ you have any questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.10.1.tgz
+      tar -xzpf /tmp/fs-9.10.2.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.10.1 fs
+      ln -sfn fs-9.10.2 fs
 
 (7) It is recommended that your local files have the default ownership
     ("oper.rtx") and permissions ('rw-rw-rw').  To force this, please
@@ -969,60 +1007,93 @@ you have any questions about how to cut-and-paste please contact Ed
      Renaming "checkmk5a" to "checkmk5", (B) update the contents of
      "checkmk5". and (c) Changing "greplog" to be case insensitive.
 
-    (A) You should used PFMED to make this change in your "station"
-        procedure library:
+     (A) You should used PFMED to make this change in your "station"
+         procedure library:
 
            pfmed
            pf,station
            rn,checkmk5a,checkmk5
            ::
 
-        Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
-        example.
+         Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
+         example.
 
-        For stations that use multiple hardware configurations:
+         For stations that use multiple hardware configurations:
             
-          If you have different versions of the "station" library for
-          different equipment configurations, you should be sure to
-          update all versions that are used in configurations with the
-          Mark 5 recorder.
+           If you have different versions of the "station" library for
+           different equipment configurations, you should be sure to
+           update all versions that are used in configurations with
+           the Mark 5 recorder.
  
-    (B) Use PFMED to edit the "checkmk5" procedure in your "station"
-        procedure library. Change the contents to:
+     (B) Use PFMED to edit the "checkmk5" procedure in your "station"
+         procedure library. Change the contents to:
 
-           scan_check
-           mk5=get_stats?
-           mk5=status?
+            scan_check
+            mk5=get_stats?
+            mk5=status?
 
-        Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
-        example.
+         Please see /usr2/fs/st.default/proc/newmk5ak5.prc for an
+         example.
 
-       For stations that use multiple hardware configurations:
+         For stations that use multiple hardware configurations:
             
-          If you have different versions of the "station" library for
-          different equipment configurations, you should be sure to
-          update all versions that are used in configurations with the
-          Mark 5 recorder.
+           If you have different versions of the "station" library for
+           different equipment configurations, you should be sure to
+           update all versions that are used in configurations with
+           the Mark 5 recorder.
  
+     (C) Edit the "greplog" procedure in your station.prc library
+         using PFMED.  Change the line:
+
+           sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+
+         to:
  
-    (C) Edit the "greplog" procedure in your station.prc library
-        using PFMED.  Change the line:
+           sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
 
-          sy=xterm -name greplog -e sh -c 'grep $ /usr2/log/`lognm`.log|less' &
+         The only changed needed is to add the "-i" between "grep" and
+         "$".
 
-        to:
- 
-          sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
-
-        The only changed needed is to add the "-i" between "grep" and
-        "$".
-
-        For stations that use multiple hardware configurations:
+         For stations that use multiple hardware configurations:
             
-          If you have different versions of the "station" library for
-          different equipment configurations, you should be sure to
-          update all "greplog" versions.
+           If you have different versions of the "station" library for
+           different equipment configurations, you should be sure to
+           update all "greplog" versions.
 
+     (D) Use PFMED to edit the "ready_disk" procedure in your
+         "station" procedure library.  If you have a Mark 5A, add the
+         following commands at the end the procedure:
+
+            mk5=DTS_id?
+            mk5=OS_rev1?
+            mk5=OS_rev2?
+            mk5=SS_rev1?
+            mk5=SS_rev2?
+            mk5=status?
+
+         If you have a Mark 5B, add the following commands at the end
+         the procedure:
+
+            mk5=DTS_id?
+            mk5=OS_rev?
+            mk5=SS_rev?
+            mk5=status?
+
+	 If your station is involved in eVLBI operations that make use
+	 of the "in2net" command, also add the following command at
+	 the end of the procedure:
+
+            mk5=net_protocol=tcp:4194304:2097152;
+ 
+         Please see /usr2/fs/st.default/proc/m5.prc for an example.
+
+         For stations that use multiple hardware configurations:
+            
+           If you have different versions of the "station" library for
+           different equipment configurations, you should be sure to
+           update all versions that are used in configurations with
+           the Mark 5 recorder.
+ 
 (17) Update oper's ~/.fvwm2rc file, by adding the lines:
 
        Style "monit*" NeverFocus
@@ -1057,22 +1128,22 @@ you have any questions about how to cut-and-paste please contact Ed
      particular for this upgrade you should test that Mark 5A
      operations work as expected.
 
-VI. Transferring The Update Archive By DOS Floppy
+IV. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.10.1.tgz archive have been placed in
+floppy, "split" files of the fs-9.10.2.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9101tg.aa
-fs9101tg.ab
+fs9102tg.aa
+fs9102tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9101tg.* >fs-9.10.1.tgz
+cat fs9102tg.* >fs-9.10.2.tgz
 
-This will create an exact image of the original fs-9.10.1.tgz archive
+This will create an exact image of the original fs-9.10.2.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.

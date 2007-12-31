@@ -11,7 +11,7 @@
  * Bar code sections are based on modifications of the CodeMaster Bar Code
  * Printing software from Computer Connection.
  *
-	Last change:  JQ   28 Sep 2007    3:34 pm
+	Last change:  JQ   27 Dec 2007   12:31 pm
  */
 #include "stdio.h"
 #include "stdlib.h"
@@ -170,10 +170,10 @@ int *new_file, float lab_info[], int *irow, int*icol, int *new_page)
    the row and column.
    All label values are in inches, convert to units of 1/72 inch. 
 */
-  xoff=-36;
+  xoff=36;
   yoff=36;
   x=     xoff+lab_leftoff*72 + (*icol-1)*lab_wid*72; 
-  y=792-(yoff+lab_topoff*72+(*irow-1)*lab_ht*72);
+  y=792-(yoff+lab_topoff*72+   (*irow-1)*lab_ht*72);
 
 /* Print the text above the barcode. */
   rightoff=100;

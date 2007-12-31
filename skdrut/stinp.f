@@ -165,6 +165,7 @@ C
       end do
 
 ! extract all the tokens and parcel them out.
+!      call capitalize(cbufin)
       call splitNtokens(cbufin,ltoken,Maxtoken,NumToken)
       nch=trimlen(cbufin)
 
