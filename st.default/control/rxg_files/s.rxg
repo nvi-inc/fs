@@ -14,12 +14,12 @@ fixed 2020
 *
 2002 07 18
 *
-* 3rd line: FWHM beamwidthm format:
-*   model value
+* 3rd line: FWHM beamwidth
+* format: model value
 *
-* if type is frequncy, then fwhm=value*1.22*c/(freq*diameter)
-*                      value is 1.0 if omitted
-* if type is constant, then fwhm=value (degrees)
+* if model is frequency, then fwhm=value*1.22*c/(freq*diameter)
+*                        value is 1.0 if omitted
+* if model is constant, then fwhm=value (degrees)
 *
 frequency 1.0
 *
