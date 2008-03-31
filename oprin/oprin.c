@@ -59,7 +59,7 @@ static char prompt[] = ">";
 /* SNAP command that
     - gets recommended to a user who presses ctrl-D (EOF) at the beginning
       of input line to "logout" ie. quit */
-static char termination_command[] = "terminate";
+static char termination_command[] = "end_oprin";
 
 
 /* The dynamically allocated SNAP command table. */
@@ -73,11 +73,14 @@ main(int argc, char **argv)
   char *previous_input;
   int length;
   int kfirst=1;
+  int fs_internal;
 
   setup_ids();
   sig_ignore();
 
-  initialize_readline();
+  fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
+
+  initialize_readline(fs_internal);
 
   previous_input = NULL;
   while (1) {
@@ -103,10 +106,21 @@ main(int argc, char **argv)
     if (input == NULL) {
       /* EOF-warning at interactive terminals only. */
       if (isatty(STDERR_FILENO)) {
-        fprintf(stderr, "Use '%s' to stop the field system.\n", termination_command);
+	if(!fs_internal) {
+	  fprintf(stderr, "Use '%s' to stop this instance of oprin.\n",
+		 termination_command);
+	}
+	fprintf(stderr, "Use 'terminate' to stop the field system.\n");
       }
       continue;  /* no further actions (ie. 'free()') required */
     }
+
+    if(fs_internal && 0 == strcmp(input,termination_command)) {
+      fprintf(stderr,"The '%s' command is only available from a stand-alone 'oprin'.\nUse 'terminate' to stop the field system.\n",termination_command);
+      continue;
+    }
+    if(0 == strcmp(input,termination_command) && !fs_internal)
+      exit(0);
 
     /* Now we have got something that's not EOF,
        perhaps an empty line or a real command. */
@@ -123,6 +137,8 @@ main(int argc, char **argv)
       while (kfirst && shm_addr->iclopr==-1)
 	rte_sleep(2);
       kfirst=0;
+      if(nsem_test("fs   ") != 1)
+	 exit(0);
       cls_snd( &(shm_addr->iclopr), input, length, 0, 0);
       skd_run("boss ",'n',ipr);
 
