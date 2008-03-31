@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <string.h>
 
 /* For tolower. */
 #include <ctype.h>
@@ -175,7 +176,11 @@ prepare_command_pointer_table(void)
 /* Generator function for command completion.  STATE lets us know whether
    to start from scratch; without any state (i.e. STATE == 0), then we
    start at the top of the list. */
+#ifdef READLINE
 static char *
+#else
+rl_compentry_func_t *
+#endif
 snap_command_generator(char *text, int state)
 {
   static int list_index, len;
@@ -194,11 +199,23 @@ snap_command_generator(char *text, int state)
     list_index++;
 
     if (strncmp(name, text, len) == 0)
-      return (dupstr(name));
+      return (
+#ifdef READLINE
+	      (char *)
+#else
+	      (rl_compentry_func_t *)
+#endif
+	      dupstr(name));
   }
 
   /* If no names matched, then return NULL. */
-  return ((char *)NULL);
+  return (
+#ifdef READLINE
+	      (char *)
+#else
+	      (rl_compentry_func_t *)
+#endif
+	      NULL);
 }  /* snap_command_generator */
 
 
@@ -233,7 +250,13 @@ oprin_completion(char *text, int start, int end)
     rl_completion_append_character = '\0';
 #endif
 
-    matches = completion_matches (text, snap_command_generator);
+    matches = 
+#ifdef READLINE
+	      completion_matches (text,(char *)
+#else
+	      rl_completion_matches (text,(rl_compentry_func_t *)
+#endif
+ snap_command_generator);
 
   } else {
 #if AUTO_TRAILING_COMMA_AFTER_COMPLETED_FILENAME
@@ -253,17 +276,26 @@ oprin_completion(char *text, int start, int end)
    on command names if this is the first word in the line, or on filenames
    if not. */
 void
-initialize_readline(void)
+initialize_readline(int fs_internal)
 {
   /* Gee, I didn't know before that one can concatenate constant strings
      by just putting them one after another. */
   static char stcmd_name[] = FS_ROOT "/control/stcmd.ctl";
   static char fscmd_name[] = FS_ROOT "/fs/control/fscmd.ctl";
+  static char end_oprin[]  = "end_oprin \n";
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "oprin";
 
   /* Load SNAP command tables for our completion function. */
+  if(!fs_internal) {
+    commands_size += strlen(end_oprin);
+    if ((commands = realloc(commands, commands_size)) == NULL) {
+      fprintf(stderr, "load_snap_commands: out of memory when allocating SNAP command table 'end_oprin' (%d bytes more)\n", strlen(end_oprin));
+      exit(1);
+    }
+    memcpy(commands,end_oprin,strlen(end_oprin));
+  }
   load_snap_commands(stcmd_name, /*file_must_exist=>*/0);
   load_snap_commands(fscmd_name, 1);
   prepare_command_pointer_table();
