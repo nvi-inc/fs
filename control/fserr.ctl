@@ -996,10 +996,10 @@ BO -302
 TNX action parameter must be 'on' or 'off'.
 ""
 BO -303
-This error not found in TNX list, so it can't be turned 'on'.
+This error has not occured yet, so it can't be turned 'off'.
 ""
 BO -304
-This error already in TNX list, so it is already 'off'.
+This error has not occured yet, so it can't be turned 'on'.
 ""
 BO -305
 TNX=... command cannot be executed from a procedure.
@@ -1015,6 +1015,15 @@ Internal error in help command.
 ""
 BO -309
 Help not available for that command, maybe your equipment type is wrong.
+""
+BO -310
+Error decoding error string '#num' for TNX.
+""
+BO -311
+Error already "on", for TNX.
+""
+BO -312
+Error already "off", for TNX.
 ""
 BO -400
 Error opening flagr.ctl FMP ?FFF
