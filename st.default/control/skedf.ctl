@@ -127,7 +127,9 @@ $print
 * Format:
 * label_size <ht> <wid> <rows> <cols> <top> <left>
 * Examples:
-*label_size   1.417 3.5     1     1    0.0   0.0    Dymo
+*
+label_size  1.    4.0     1     1     0.0   0.0    Dymo Larger Printing
+*label_size  1.    3.5     1     1     0.0   0.0    Dymo Smaller Printing
 *label_size  1.0   2.625  10     3     0.5   0.3125 Avery 5160
 *label_size  1.333 4.0     7     2     0.5   0.25   Avery 5162
 *label_size  2.0   4.0     5     2     0.5   0.25   Avery 5163
