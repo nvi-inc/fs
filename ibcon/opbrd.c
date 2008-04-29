@@ -13,8 +13,12 @@
 #ifdef NI_DRIVER
 #include <sys/ugpib.h>
 #else
+#ifdef REV_3
+#include <gpib/ib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #endif
 #else
 extern int ibsta;
@@ -67,7 +71,7 @@ int *interface_clear_converter;
     *(device + *devlen) = '\0';
 
 /* find the device and assign a file descriptor */
-#ifdef NI_DRIVER
+#if defined(REV_3) || defined(NI_DRIVER)
   if(strcmp(device,"gpib0")==0) {
 #else
   if(strcmp(device,"board")==0) {
@@ -109,8 +113,8 @@ int *interface_clear_converter;
 
   if(!serial) {
 #ifdef CONFIG_GPIB
-#if defined( REV_2) || defined(NI_DRIVER)
-/* this causes some problem for rev 1 */
+#if defined(REV_2) || defined(NI_DRIVER)
+/* this causes some problem for rev 1 & 3 */
     if(!*no_online)
       ierr=ibonl(ID_hpib,1);
     else
