@@ -58,7 +58,10 @@ char *who;           /* 2-char string identifying the error  */
     memcpy(buf+l,name,5);
     buf[l+5]='\0';
     strcat(buf,"#");
-    strcat(buf,msg);
+    if(msg!=NULL)
+      strcat(buf,msg);
+    else
+      strcat(buf,"empty message, program error");
   }
 /* Send the complete log entry to ddout via class.
 */
@@ -68,4 +71,5 @@ char *who;           /* 2-char string identifying the error  */
 /* for testing, send to output PLUS class */
 /*  fprintf(stdout,"%s\n",buf); */
   cls_snd(&shm_addr->iclbox,buf,strlen(buf),ip1,ip2);
+
 }
