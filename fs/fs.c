@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
+#include <fcntl.h>
 
 #include "../include/ipckeys.h"
 #include "../include/params.h"
@@ -48,7 +49,7 @@ static char p_names[MAX_PIDS][6];
 extern struct fscom *shm_addr;
 static long ip[]={0,0,0,0,0};
 
-main()
+main(int argc_in,char *argv_in[])
 {
     int i, ampr, wpid, status, size, err, okay, nsems;
     int les=-1, lesm=-1, lesam=-1, lesm2=-1;
@@ -63,7 +64,29 @@ main()
     int kfirst=TRUE;
     int normal=FALSE;
     int iret;
-
+    int no_X;
+    int val;
+    /*
+    if( (val = fcntl(STDERR_FILENO, F_GETFL, 0)) <0) {
+      perror("STDERR F_GETFL");
+      exit(-1);
+    }
+    val |= O_SYNC;
+    if( fcntl(STDERR_FILENO, F_SETFL, val) <0) {
+      perror("STDERR F_SETFL");
+      exit(-1);
+    }
+    */
+    no_X=FALSE;
+    if(argc_in > 2 ) {
+      fprintf(stderr,"only one argument (-No_X) is allow to fs\n");
+      exit(-1);
+    } else if (argc_in == 2 && 0 != strcmp("-No_X",argv_in[1])) {
+      fprintf(stderr,"only '-No_X' is allowed as an argument to fs\n");
+      exit(-1);
+    } else if (argc_in == 2) {
+      no_X=TRUE;
+    }
     ti=time(NULL);
     tm=gmtime(&ti);
     (void) strftime(file,MAX_LINE,"~/fs.%Y.%b.%d.%H.%M.%S.err",tm);
@@ -148,7 +171,15 @@ main()
       if (line[0] != '*') {
         if( (s1= strrchr( line, '\n')) != NULL) 
            *s1='\0';
-        if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
+	if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
+	  goto cleanup;
+	if(les==2) {
+	  if(no_X) {
+	    fprintf( stderr,"skipping %5.5s, the -No_X option selected\n",name);
+	    continue;
+	  } else
+	    les=0;
+	}
         if (!ampr) {
            fprintf( stderr,"running %5.5s\n",name);
            if( (err=start_prog(argv,'w')) != 0) {
@@ -200,7 +231,15 @@ main()
         if (line[0] != '*') {
           if( (s1= strrchr( line, '\n')) != NULL) 
              *s1='\0';
-          if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
+	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
+	    goto cleanup;
+	  if(les==2) {
+	    if(no_X) {
+	      fprintf( stderr,"skipping %5.5s, the -No_X option was selected\n",name);
+	      continue;
+	    } else
+	      les=0;
+	  }
           if (!ampr) {
              fprintf( stderr,"running %5.5s\n",name);
 	     if( (err=start_prog(argv,'w')) != 0) {
@@ -321,7 +360,9 @@ waitfor:
        else if(iret!=0)
 	 fprintf(stderr,"rm returned %d deleting fs.err file\n",iret);
      }
-	  
+     
+     /*     fsync(STDERR_FILENO);*/
+     rte_sleep(1);
      exit( 0);
     
 }
@@ -344,12 +385,15 @@ int maxl,*ampr,*les;
       return -1;
     } else if (strlen(ptr) == 1 && *ptr == 'n') {
       *les=0;
+    } else if (strlen(ptr) == 1 && *ptr == 'x') {
+      *les=2;
     } else if (strlen(ptr) == 1 && *ptr == 'l') {
       *les=1;
     } else if (strlen(ptr) == 2 && *ptr == 'l' && *(ptr+1) == 'a') {
       *les=-1;
     } else {
-      fprintf(stderr," error 2a\n");
+      fprintf(stderr," error 2a, for program '%s', non-allowed program type '%s'\n",
+	      *name,ptr);
       return -1;
     }
 
