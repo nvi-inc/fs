@@ -118,7 +118,7 @@ fi
 if [ ! -e /usr2/proc ]; then
    echo "Setting up /usr2/proc ..."
    cd /usr2/fs/st.default
-   find proc -print|cpio -pmdu /usr2
+   find proc/station.prc -print|cpio -pmdu /usr2
    chown -R oper /usr2/proc
    chgrp -R rtx  /usr2/proc
    chmod -R a+rw /usr2/proc
