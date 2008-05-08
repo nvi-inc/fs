@@ -1,6 +1,6 @@
 * /usr2/control/dev.ctl
 ********** Field System LU control file
-/dev/null     GPIB board device name, /dev/gpib0 or serial port for GPIB-232CT
+/dev/null     GPIB board device name, gpib0, or serial port /dev/ttyS* for GPIB-232CT
 /dev/null     Mark III MAT device name
 9600          Mark III MAT baud rate
 /dev/null     Mark III Data Buffer device name
