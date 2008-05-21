@@ -1,0 +1,15 @@
+#!/bin/sh
+# for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
+if [[ -n `mdadm --detail /dev/md0 /dev/md2 | grep /dev/hdc` ]]; then
+        echo "ERROR: \"Secondary\" disk /dev/hdc is already active !!"
+        exit 1
+elif [[ -n `mdadm --detail /dev/md1 | grep /dev/hdc5` ]]; then
+	# Sometimes swap partitions don't detect staleness
+        echo "NOTE: \"Secondary\" disk swap partition /dev/hdc5 was active"
+	mdadm /dev/md1 -f /dev/hdc5
+	mdadm /dev/md1 -r /dev/hdc5
+fi
+echo "Adding \"Secondary\" disk /dev/hdc to RAID arrays"
+mdadm /dev/md0 -a /dev/hdc1
+mdadm /dev/md1 -a /dev/hdc5
+mdadm /dev/md2 -a /dev/hdc6
