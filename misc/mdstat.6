@@ -1,0 +1,3 @@
+#!/bin/sh
+#mdstat script of FSL6 IDE disks
+cat /proc/mdstat | sed -e 's/ide\/host0\/bus0\/target0\/lun0\/part/hda/' | sed -e 's/ide\/host0\/bus1\/target0\/lun0\/part/hdc/'
