@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fstime.txt  Version: 0.3  Date: 040707
+File: /usr2/fs/misc/fstime.txt  Version: 0.4  Date: 080522
 
 		  Operational use of time in the FS
 
@@ -285,7 +285,7 @@ steps are recommended:
    script is used for your shell.  You can set the variable at login
    if the user uses "tcsh" as the login shell by adding
 
-     setenv FC_CHECK_NTP
+     setenv FS_CHECK_NTP
 
    to the user's  ~/.login file; if the user uses "bash", add:
 
