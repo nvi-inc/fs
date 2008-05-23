@@ -7,7 +7,10 @@
 
 Settable parameters:
             list        List of total power integrators to read back.
-            Standard detector mnemonics allowed.
+            Standard detector mnemonics allowed.  In addition for VLBA/4/5
+            formif and formbbc are permitted, for Mark III/IV/5,
+            formif and formvc are permitted.
+
 
 Monitor-only parameters:
             readings    List of readings, counts. These values are stored
@@ -35,5 +38,10 @@ VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
 (upper), l (lower), a digit 3-7 for other detectors or 'x' for
 unknown.
+
+For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
+in the list.  These select the detectors for the IF channels and BBC
+sidebands currently being recorded by the formatter.  For Mark
+III/IV/5, formvc is accepted instead of formbbc, as well as formif.
 
 It is assumed the noise calibration signal is off.
