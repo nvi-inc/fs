@@ -8,7 +8,9 @@
 Settable parameters: 
             list        List of modules for which gain levels are to be
             measured. Standard detector mnemonics allowed, but
-            no station detectors.
+            no station detectors.  In addition for VLBA/4/5
+            formif and formbbc are permitted, for Mark III/IV/5,
+            formif and formvc are permitted.
 
 Monitor-only parameters:
             gain levels List of gain levels, counts. These values are needed
@@ -31,4 +33,10 @@ from being displayed. An overflow value, 255, is displayed as
 dollar signs, $$$.
 
 It is assumed that the gain is locked in manual to get a
-stable level.
+stable level. 
+
+For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
+in the list.  These select the detectors for the IF channels and BBC
+sidebands currently being recorded by the formatter.  For Mark
+III/IV/5, formvc is accepted instead of formbbc, as well as formif.
+

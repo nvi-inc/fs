@@ -11,9 +11,9 @@
 
 Settable parameters:
             list        List of modules for which Tsys will be computed.
-            Standard mnemonics allowed. In addition for VLBA/4
-            formif and formbbc are permitted, for Mark III/IV,
-            formif and formbbc are permitted.
+            Standard mnemonics allowed. In addition for VLBA/4/5
+            formif and formbbc are permitted, for Mark III/IV/5,
+            formif and formvc are permitted.
 
 Monitor-only parameters:
             systemps    List of system temperatures paired with the
@@ -88,10 +88,10 @@ by the formatter. For VC detectors, the appropriate sideband
 or sideband combination must be already selected for the
 device.
 
-For VLBA/4, additional mnemonics formif and formbbcc are
-permitted in the list. These select the detectors for the IF
-channels and BBC sidebands currently being recorded by the
-formatter.
+For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
+in the list. These select the detectors for the IF channels and BBC
+sidebands currently being recorded by the formatter. For Mark
+III/IV/5, formvc is accepted instead of formbbc, as well as formif.
 
 A time-out or other error on one more devices for a Mark
 III/IV, LBA, or VLBA/4 detector will not prevent results from
