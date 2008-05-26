@@ -4,8 +4,29 @@
 #    1.) In your path, e.g. in /usr2/oper/bin,
 #    2.) Executable, e.g., chmod a+x print2dymo
 #  This script has lines apropriate for FS Linux 5 and FS Linux 6.
-# To use this file, uncomment the appropriate line.
-# Below is for FS linux 6
-#perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 45 translate\n";print;goto LINE;}' /tmp/DRlab.tmp |lpr -Pdymo
-#  Below is for FS linux 5
-lpr -Pdymo /tmp/DRlab.tmp
+# To use this file, uncomment the appropriate lines.
+#
+# DEBUG: Uncomment below to save a copy of the label file for debugging. 
+#cp /tmp/DRlab.tmp /tmp/DRlab.beg
+#
+# You can adjust the label printing by changing the yoff xoff in
+#    "yoff xoff translate\n" 
+# Units are given in  pts. 72pts=25.4mm 
+# 
+# Uncomment line below for FS linux 7 
+#perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 15 translate\n";print;goto LINE;}' /tmp/DRlab.tmp > /tmp/DRlab.end 
+#
+# Uncomment line below for FS linux 6
+# perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 45 translate\n";print;goto LINE;}' /tmp/DRlab.tmp > /tmp/DRlab.end 
+#
+#  Uncomment line below for FS linux 5
+perl -pe 'if (/^90 rotate/) {print "-21 -15 translate\n";print;goto LINE;}' /tmp/DRlab.tmp  > /tmp/DRlab.end  
+#
+# Use your printer's name.
+#for FSL5 or FSL6
+lpr -PDymo /tmp/DRlab.end
+#for FSL7
+#lpr -P Dymo /tmp/DRlab.end
+#
+# DEBUG: Comment out the line below to save a copy of the file after modifying.
+rm /tmp/DRlab.end
