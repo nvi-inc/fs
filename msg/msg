@@ -212,7 +212,7 @@ global pointing_id problem_scans_id current_form process_file
   # Destroys every singel widget in the ready and stop  #
   # forms.                                              #
   #*****************************************************# 
-  destroy .form .internal6 .internal7 .internal7a .internal7c .internal7e .internal8 .internal9 .internal10 .internal11 .internal12 .internal13 .internal14 \
+  destroy .form .internal6 .internal7 .internal7a .internal7c .internal7e .internal7g .internal7z .internal8 .internal9 .internal10 .internal11 .internal12 .internal13 .internal14 \
           .internal15 .internal16 .internal17 .ready_form_label .stop_form_label .session_label .session_entry \
           .start_source_label .start_source_entry .comment_label_frame .comment_label .comment_text .comment_scroll \
           .first_source_label .firts_source_entry .at_label .ut_label .time_entry .problem_scan_label .problem_scan_frame \
@@ -220,7 +220,9 @@ global pointing_id problem_scans_id current_form process_file
           .gps_fmout .fmout_gps .gps-fmout_entry .gps_unit_label \
            .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label \
            .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label \
-           .disk_inventory_labelE .packE_entry .packE_label .packZ_entry .packZ_label \
+           .disk_inventory_labelE .packE_entry .packE_label .packF_entry .packF_label \
+           .disk_inventory_labelG .packG_entry .packG_label .packH_entry .packH_label \
+           .disk_inventory_labelZ .packZ_entry .packZ_label \
            .wx_frame .wx_label .temperature_label .temperature_entry .pressure_label .pressure_entry \
           .humidity_label .humidity_entry .skycondition_label .skycondition_entry .cable_label .larger_frame \
           .longer_cable_label .finished_label .finished_entry .ut_label \
@@ -255,8 +257,8 @@ global pointing_id problem_scans_id current_form process_file
    unset gps gps_fmout temperature pressure humidity \
          sky_conditions cabel_sign cable_differens nominal tsys1 tsys2 tsys3 
   } elseif {$current_form == "stop"} {
-   global packA packB packC packD packE packZ finished
-   unset packA packB packC packD packE packZ finished
+   global packA packB packC packD packE packF packG packH packZ finished
+   unset packA packB packC packD packE packF packG packH packZ finished
   }
 
      if {$current_form == "ready"} {
@@ -327,7 +329,7 @@ global session first_source source_time
    }
 
    # the lable current source is updated if the line matches :source=. 
-      if {[regexp {[:;]source=} $line]} {
+      if {[regexp {[:;]source=} $line] && ![regexp {[:;]source=[*]} $line]} {
     set current_source [lindex [split [lindex [split $line =] 1] ,] 0]
     .current_source_label config -text "Current source is: $current_source"
    }
@@ -636,6 +638,8 @@ frame  .internal7 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7a -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7c -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal7e -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7g -width 21c -height 3c -relief flat -bg SteelBlue3
+frame  .internal7z -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal8 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal9 -width 21c -height 3c -relief flat -bg SteelBlue3
 frame  .internal10 -width 21c -height 3c -relief flat -bg SteelBlue3
@@ -656,6 +660,8 @@ pack .c -in .internal7
 pack .c -in .internal7a
 pack .c -in .internal7c
 pack .c -in .internal7e
+pack .c -in .internal7g
+pack .c -in .internal7z
 pack .c -in .internal8
 pack .c -in .internal9
 pack .c -in .internal10
@@ -681,7 +687,7 @@ if {$form==0} {
 pack   .internal1 .internal2 .internal3 .internal4 .internal7 .internal8 .internal9 .internal10 .internal11 \
 .internal12 .internal13 .internal14 .internal16 .internal17 -in .form -side top -fill both -expand 1
 } elseif {$form==1} {
-pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7a .internal7c .internal7e .internal8 .internal16 \
+pack   .internal1 .internal2 .internal3 .internal4 .internal5 .internal6 .internal7a .internal7c .internal7e .internal7g .internal7z .internal8 .internal16 \
 .internal17 -in .form -side top -fill both -expand 1
 }
 
@@ -782,7 +788,7 @@ pack   propagate .gps_frame 0
 
 label  .disk_inventory_label -text "Disk Inventory:" -bg SteelBlue3 -fg white -width 25
 entry  .packA_entry -width 10 -relief sunken -textvariable packA
-label  .packA_label -text "A (960 GB) " -bg SteelBlue3 -fg white -width 11
+label  .packA_label -text "A  (960 GB)" -bg SteelBlue3 -fg white -width 11
 entry  .packB_entry -width 10 -relief sunken -textvariable packB
 label  .packB_label -text "B (1440 GB)" -bg SteelBlue3 -fg white -width 11
 pack   .disk_inventory_label .packA_entry .packA_label .packB_entry .packB_label -in .internal7a -side left -pady 1m
@@ -795,10 +801,22 @@ label  .packD_label -text "D (2000 GB)" -bg SteelBlue3 -fg white -width 11
 pack   .disk_inventory_labelC .packC_entry .packC_label .packD_entry .packD_label -in .internal7c -side left -pady 1m
 label  .disk_inventory_labelE -text "               " -bg SteelBlue3 -fg white -width 25
 entry  .packE_entry -width 10 -relief sunken -textvariable packE
-label  .packE_label -text "E (3200 GB)" -bg SteelBlue3 -fg white -width 11
+label  .packE_label -text "E (2400 GB)" -bg SteelBlue3 -fg white -width 11
+entry  .packF_entry -width 10 -relief sunken -textvariable packF
+label  .packF_label -text "F (3200 GB)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelE .packE_entry .packE_label .packF_entry .packF_label -in .internal7e -side left -pady 1m
+
+label  .disk_inventory_labelG -text "               " -bg SteelBlue3 -fg white -width 25
+entry  .packG_entry -width 10 -relief sunken -textvariable packG
+label  .packG_label -text "G (4000 GB)" -bg SteelBlue3 -fg white -width 11
+entry  .packH_entry -width 10 -relief sunken -textvariable packH
+label  .packH_label -text "H (6000 GB)" -bg SteelBlue3 -fg white -width 11
+pack   .disk_inventory_labelG .packG_entry .packG_label .packH_entry .packH_label -in .internal7g -side left -pady 1m
+
+label  .disk_inventory_labelZ -text "               " -bg SteelBlue3 -fg white -width 25
 entry  .packZ_entry -width 10 -relief sunken -textvariable packZ
 label  .packZ_label -text "(other larger)" -bg SteelBlue3 -fg white -width 11
-pack   .disk_inventory_labelE .packE_entry .packE_label .packZ_entry .packZ_label -in .internal7e -side left -pady 1m
+pack   .disk_inventory_labelZ .packZ_entry .packZ_label -in .internal7z -side left -pady 1m
 }
 
 #**********************************************************************************************#
@@ -1254,7 +1272,7 @@ unset value_entry_array
    set {tsys_entry_array(Tsys_s:)} $tsys2
    set {tsys_entry_array(Tsys_x2:)} $tsys3
   } elseif {$current_form=="stop"} {
-   global session scan_source scan_start explanation packA packB packC packD packE packZ finished
+   global session scan_source scan_start explanation packA packB packC packD packE packF packG packH packZ finished
    set {text_entry_array(session name:)} $session
    set {value_entry_array(Observation... :)} $finished
 
@@ -1264,6 +1282,9 @@ unset value_entry_array
    set {disk_inventory_entry_array(packC)} $packC
    set {disk_inventory_entry_array(packD)} $packD
    set {disk_inventory_entry_array(packE)} $packE
+   set {disk_inventory_entry_array(packF)} $packF
+   set {disk_inventory_entry_array(packG)} $packG
+   set {disk_inventory_entry_array(packH)} $packH
    set {disk_inventory_entry_array(packZ)} $packZ
   }
 
@@ -1600,7 +1621,7 @@ set file [open "/tmp/text_message.txt.$pid" w+]
      }
 
   } elseif {$current_form=="stop"} {
-    global session packA packB packC packD packE packZ finished
+    global session packA packB packC packD packE packF packG packH packZ finished
     set header "Session $session stop message for $station."
     set header_length [string length $header]
      puts $file $header
@@ -1656,12 +1677,30 @@ set file [open "/tmp/text_message.txt.$pid" w+]
                      } else {
 		         puts -nonewline $file ", E "
 		         puts -nonewline $file "$packE";
-			 if {[regexp -nocase {^na$} $packZ]} {
+			 if {[regexp -nocase {^na$} $packF]} {
 			     puts $file ""
 			 } else {
-			     puts -nonewline $file ", (other larger) "
-			     puts -nonewline $file "$packZ";
-			     puts $file ""
+			     puts -nonewline $file ", F "
+			     puts -nonewline $file "$packF";
+			     if {[regexp -nocase {^na$} $packG]} {
+				 puts $file ""
+			     } else {
+				 puts -nonewline $file ", G "
+				 puts -nonewline $file "$packG";
+				 if {[regexp -nocase {^na$} $packH]} {
+				     puts $file ""
+				 } else {
+				     puts -nonewline $file ", H "
+				     puts -nonewline $file "$packH";
+				     if {[regexp -nocase {^na$} $packZ]} {
+					 puts $file ""
+				     } else {
+					 puts -nonewline $file ", (other larger) "
+					 puts -nonewline $file "$packZ";
+					 puts $file ""
+				     }
+				 }
+			     }
 			 }
 		     }
 		 }
