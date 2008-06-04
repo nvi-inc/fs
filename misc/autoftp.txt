@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/autoftp.txt  Version: 0.5  Date: 061011
+File: /usr2/fs/misc/autoftp.txt  Version: 0.6  Date: 080604
 
 	       Automatic FTP of Mark5 Files From the FS
 
@@ -180,8 +180,8 @@ follows for the FS Linux 5 (based on Debain "woody") distribution:
    possibilities including the fact that some older Mark5 systems may
    have an old ssh that does not support this feature as well or ssh
    on the Mark5 may not be properly configured.  If you can't solve
-   this with local help, please contact Ed
-   (weh@ivscc.gsfc.nasa.gov). He isn't really an ssh expert, but he
-   may be able to suggest something or an expert to contact.
+   this with local help, please contact Ed (Ed.Himwich@.nasa.gov).  He
+   isn't really an ssh expert, but he may be able to suggest something
+   or an expert to contact.
 
 
