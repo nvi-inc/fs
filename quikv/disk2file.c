@@ -191,6 +191,15 @@ parse:
       out_recs=0;
       out_class=0;
 
+      /*work around for Mark5B (or is it just mark 5 control program Mark5A
+        versions 7y222d and 7y206B ?) problem with scan_set = ...; */
+      {
+	char *str;
+	str="scan_set = ; \n";
+	cls_snd(&out_class, str, strlen(str) , 0, 0);
+	out_recs++;
+      }
+
       disk2file_2_m5_scan_set(outbuf,&lcl);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
