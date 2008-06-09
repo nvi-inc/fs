@@ -1,0 +1,202 @@
+File: /usr2/fs/misc/FSL7_PC_Checkout.txt  Version: 0.8  Date: 080609
+
+	     GSFC FS PC Installation/Check-out Procedure
+
+
+1. Equipment check-list:
+   ____ Motherboard, case (rack mount?), 300W PS, + power cord
+   ____ Monitor + video cable + power cord
+   ____ Two disk receivers
+   ____ Three disks mounted in carriers
+   ____ Mouse
+   ____ Keyboard
+   ____ GPIB device
+   ____ Serial mux card
+   ____ Special instructions for this system, in document: _______________.
+   ____ Other?
+
+2. Labeling
+   ____ Primary disk slot (first SATA controller)
+   ____ Secondary disk slot (second SATA controller)
+   ____ Disks "1", "2", and "3"
+   ____ Byterunner ports 4-11 (if included)
+
+3. Assemble computer:
+   ____ All Components
+   ____ Disk "1" in Primary slot
+   ____ Disk "3" in Secondary slot
+   ____ Disk "2" on shelf
+
+4. Copy Etch DVDs, use copies for installation
+   ____ Copy DVDs
+ 
+5. BIOS Settings
+   ____ Date and Time are UTC
+   ____ ScrollLock off on boot
+   ____ Special Settings?
+
+6. Install FSL7
+   ____ following special instructions in document: ____________
+        but if no special instructions follow instructions in:
+   ____ ftp://ftp.hartrao.ac.za/pub/fs7x/fs7linux_DVD.txt
+
+7. Install and run fsadapt as "root" (use current version in place
+   of 7.0.5):
+
+   ____   cd /root
+   ____   ncftpget ftp://ftp.hartrao.ac.za/pub/fs7x/fs7adapt-7.0.5.tgz
+   ____   tar xzvpf fsdapt-7.0.5.tgz
+   ____   cd fsadapt
+   ____   ./fsadapt
+        (take all defaults in fsadapt, except:
+   ____     on Window 1 set noident
+   ____     on Window 2 unset updates
+   ____     select appropriate serial configuration when prompted
+   ____     on Window 3 set skip
+   ____     on Window 4a set secure, then OK, then OK again
+
+8. Set oper and prog password
+   ____ passwd oper
+   ____ passwd prog
+
+9. Install FS as "root: (use current version in place of 9.10.3):
+
+   ____   (Place fs-9.10.3.tgz on /tmp)
+   ____   cd /
+   ____   tar xzf /tmp/fs-9.10.3.tgz
+   ____   cd /usr2/fs-9.10.3
+   ____   make install
+   ____     (answer question "y")
+
+10. Compile FS as "prog", vt1
+    ____ cd /usr2/fs
+    ____ make
+
+11. Reboot
+    ____ reboot
+
+12. Testing
+    ____ NIC tested by installation process
+    ____ CD/DVD tested by installation process
+    ____ Keyboard tested by use
+    ____ USB ports (insert thumb drive in each)
+    ____ PCI-GPIB card if included
+    ____ ByteRunner 800H if included
+    ____ GPIB-232CT if included
+    ____ Mouse
+
+13. Clean-up as "root", vt1
+          a. Restore /usr2/control/ibad.ctl and dev.ctl
+             ____ cd /usr2/control
+             ____ cp -a /usr2/fs/st.default/control/ibad.ctl
+             ____ cp -a /usr2/fs/st.default/control/dev.ctl
+             ____ chmod a+rw ibad.ctl dev.ctl
+             ____ chown oper.rtx ibad.ctl dev.ctl
+
+    ____  b. Delete logs in /usr2/log
+          c. If no monitor, restore X configuration using:
+
+                dpkg-reconfigure xserver-xorg
+
+    ____     don't select monitor auto-detection
+    ____     Generic Monitor for type
+    ____     advanced configuration
+    ____     no resolution greater than 1024x768
+    ____     H:28-51,
+    ____     V:43-60,
+
+          d. Restore /etc/apt/sources.list:
+    ____     Place web references after CD references.
+    ____     apt-get update
+
+    ____  e. Disconnect network cable
+          f. Delete network configuration (as "root"):
+    ____       cd /root/fsadapt
+    ____       ./netconfig
+    ____          (take defaults and no network)
+
+     g. place appropriate refresh_secondary in /usr/local/sbin:
+
+        ____ cd /usr/local/sbin
+        ____ cp -a /usr2/fs/misc/refresh_secondary.sdb refresh_secondary
+        ____ chown root.root refresh_secondary
+        ____ chmod a+r,u+wx,go-wx refresh_secondary
+
+     h. Place mdstat in /usr/local/bin:
+
+        ____ cd /usr/local/bin
+        ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
+        ____ chown root.root mdstat
+        ____ chmod a+rx,u+w,go-w mdstat
+
+     i. Sign in as oper and prog and make sure no is no incoming mail.
+        ____ oper
+        ____ prog
+
+     j. make oper and prog password undefined
+        ____ oper
+        ____ prog
+
+     k. Edit /etc/aliases so root and prog e-mail goes to oper.
+        ____ change root: testing to root: oper
+        ____ add prog: oper
+
+     l. make root password vlbIcdp1
+        ____ root
+
+____ m. Leave no uncommented clauses in hosts.allow.
+
+____ n. Make hosts.deny as restrictive as possible:
+
+ALL: PARANOID
+#
+ALL: ALL
+
+     o. Delete ssh keys:
+        ____ cd /etc/ssh
+        ____ rm *_key *_key.pub
+
+     p. delete .ssh/ and .history in ~oper, ~prog
+        ____ cd ~oper; rm -rf .ssh .history
+        ____ cd ~prog; rm -rf .ssh .history
+
+     q. delete .ssh/ and .bash_history for root
+        ____ cd /root; rm .ssh .bash_history;exit
+        ____ login as root; rm .bash_history
+
+     r. shutdown system when RAID is no longer rebuilding
+        ____ cat /proc/mdstat
+        ____ shutdown -h now; exit
+
+14. Prepare extra disk:
+
+    ____ a. Insert disk "2" in Primary slot, no disk in second slot.
+    ____ b. Follow fs7linux_DVD.txt through First Stage, step 10,
+            taking the early exit in that step for just initializing a
+            disk
+    ____ c. Re-install "1" in Primary and put "2" in Secondary
+    ____ d. Boot
+    ____ e. Add Secondary disk into array as "root":
+
+             refresh_secondary
+    
+    ____ f. Install GRUB on secondary, follow Second Stage
+            Installation, step 11.
+    ____ g. when cat /proc/mdstat shows rebuild finished, shutdown
+
+15. Repackage and ship
+    ____ All components and cables
+    ____ Etch DVDs
+    ____ FSL7 Install CD, which contains the latest versions of:
+         fs7linux_DVD.txt, fs7.selections, fsadapt-*.tgz, fs-*.tgz,
+         and any special drivers or other files, which will enable you
+         to make a complete re-install even if you don't have an
+         Internet connection
+    ____ Special instructions for this system, in document: _______________.
+    ____ Any extra items specific to the system
+    ____ fs7linux_DVD.txt print-out.
+    ____ End User Set-up Checklist
+    ____ This Check-out checklist, completed
+
+
+Initials: _____________         Date: ______________
