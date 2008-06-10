@@ -3,6 +3,7 @@
 #include <signal.h>
 #include "mparm.h"
 #include <sys/types.h>
+#include <stdlib.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

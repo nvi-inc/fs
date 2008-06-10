@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>
+#include <stdlib.h>
 #include "mparm.h"
 #include "dpi.h"
 #include "../include/params.h"

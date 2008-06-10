@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

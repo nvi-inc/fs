@@ -2,6 +2,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/params.h" /* FS parameters            */
 #include "../include/fs_types.h" /* FS header files        */
@@ -53,7 +54,8 @@ Loop:
       printf("**** ");
       display_it(irow,icol,"M",buffer);
       printf("\n");
-    } else if(strstr(buffer," ib ") ||
+    } else if(strstr(buffer," m5 ") ||
+	      strstr(buffer," 5m ") ||
 	      strstr(buffer," mc ") ||
 	      strstr(buffer," an ")){
       printf("*** ");

@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
+#include <string.h>
 
 #include "fmset.h"
 

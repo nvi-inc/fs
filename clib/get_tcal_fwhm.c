@@ -1,6 +1,7 @@
 #include <stdio.h> 
 #include <sys/types.h>
 #include <math.h>
+#include <string.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"

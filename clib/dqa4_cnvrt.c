@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <sys/types.h>
+#include <stdio.h>
 
 void dqa4_cnvrt(ibuf,jfrms,jperr,jsync,ierr)
 char *ibuf;               /* string to decode */

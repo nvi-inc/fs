@@ -1,6 +1,8 @@
 #include <stdio.h>	/* standard I/O header file */
 #include <sys/types.h>	/* standard data types definitions */
 #include <string.h>    /* shared memory IPC header file */
+#include <stdlib.h>
+#include <unistd.h>
 
 void prog_exec( name)
 char	name[5];

@@ -7,6 +7,8 @@
 #include <signal.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

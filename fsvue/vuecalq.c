@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* A few definitions */
 #define maxops 50             /* maximum number of operators */

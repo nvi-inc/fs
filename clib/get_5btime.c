@@ -1,6 +1,7 @@
 /* get time setting information from mk5cn */
 
 #include <memory.h>
+#include <stdio.h>
 
 #define BUFSIZE 2048
 

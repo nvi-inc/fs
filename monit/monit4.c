@@ -3,6 +3,7 @@
 #include <math.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "mparm.h"
 
 #include "../include/params.h"

@@ -1,5 +1,5 @@
 /* log formatting for vlba et and rw/ff commands */
-
+#include <string.h>
 #include "../include/params.h"
 #include "../include/res_ds.h"
 

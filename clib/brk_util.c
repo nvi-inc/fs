@@ -8,6 +8,7 @@
 #include <sys/shm.h>    /* shared memory IPC header file */
 #include <memory.h>    /* shared memory IPC header file */
 #include <ctype.h>
+#include <stdlib.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

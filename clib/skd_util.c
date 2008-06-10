@@ -8,6 +8,7 @@
 #include <sys/shm.h>    /* shared memory IPC header file */
 #include <memory.h>    /* shared memory IPC header file */
 #include <ctype.h>
+#include <stdlib.h>
 
 #define  MAX_BUF       256
 

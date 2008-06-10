@@ -1,5 +1,6 @@
 /* response buffer utilities */
 
+#include <string.h>
 #include "../include/res_ds.h"
 
 void opn_res(buffer,ip)      /* initialize (open) response structs */

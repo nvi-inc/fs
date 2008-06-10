@@ -3,6 +3,7 @@
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
 #include "../include/params.h"  /* module mnemonics */
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

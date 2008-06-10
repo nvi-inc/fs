@@ -1,5 +1,7 @@
 /* initialization for "C" shared memory area */
 
+#include <string.h>
+#include <stdio.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>
+#include <string.h>
 
 #include "../../fs/include/dpi.h"
 #include "../../fs/include/params.h"

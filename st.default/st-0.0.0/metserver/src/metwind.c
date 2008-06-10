@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <memory.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <termio.h>
 #include <linux/serial.h>

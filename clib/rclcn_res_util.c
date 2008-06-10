@@ -1,6 +1,7 @@
 /* response buffer utilities */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/rclcn_res_ds.h"
 

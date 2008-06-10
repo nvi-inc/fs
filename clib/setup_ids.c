@@ -3,6 +3,7 @@
 #include <sys/ipc.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "../include/ipckeys.h"
 #include "../include/params.h"

@@ -1,5 +1,7 @@
 /* ib or k4ib utilities */
 
+#include <string.h>
+
 #define MAX_BUF 512
 
 ib_req1(ip,device)

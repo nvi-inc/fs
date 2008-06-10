@@ -102,9 +102,11 @@ int rcl_open(const char* hostname, int* addr, char* errmsg)
  * Return value is error code. 
  */
 {
+#ifdef OLD_S2SOURCE_CODE
    extern int sys_nerr;             /* number of SunOS error messages */
 #ifndef LINUX
    extern char *sys_errlist[];      /* SunOS error messages */
+#endif
 #endif
    int result;              /* Unix return code */
    struct sockaddr_in sa;
@@ -128,11 +130,20 @@ int rcl_open(const char* hostname, int* addr, char* errmsg)
    }
 
    if ((rcl_socket[i] = socket(AF_INET, SOCK_STREAM, 0)) == -1)  {
+
+#ifdef OLD_S2SOURCE_CODE
       if (errmsg!=NULL && errno>=0 && errno<sys_nerr)  {
          /* Get system error message. This may not port easily to other Unix
               systems, so if necessary just comment it out. */
          strcpy(errmsg, sys_errlist[errno]);
       }
+#else
+      if (errmsg!=NULL) {
+         /* Get system error message. This may not port easily to other Unix
+              systems, so if necessary just comment it out. */
+         strcpy(errmsg, strerror(errno));
+      }
+#endif
       rcl_socket[i] = 0;
       return(RCL_ERR_NETIO);
    }
@@ -169,27 +180,45 @@ int rcl_open(const char* hostname, int* addr, char* errmsg)
    /* establish connection with target RCL device */
    result = connect(rcl_socket[i], (struct sockaddr *) &sa, sizeof(sa));
    if (result == -1)  {
+#ifdef OLD_S2SOURCE_CODE
       if (errmsg!=NULL && errno>=0 && errno<sys_nerr)  {
          strcpy(errmsg, sys_errlist[errno]);
       }
+#else
+      if (errmsg!=NULL) {
+         strcpy(errmsg, strerror(errno));
+      }
+#endif
       rcl_close(i);
       return(RCL_ERR_NETIO);
    }
 
    rcl_infile[i] = fdopen(rcl_socket[i], "r");
    if (rcl_infile[i] == NULL)  {
+#ifdef OLD_S2SOURCE_CODE
       if (errmsg!=NULL && errno>=0 && errno<sys_nerr)  {
          strcpy(errmsg, sys_errlist[errno]);
       }
+#else
+      if (errmsg!=NULL) {
+         strcpy(errmsg, strerror(errno));
+      }
+#endif
       rcl_close(i);
       return(RCL_ERR_IO);
    }
 
    rcl_outfile[i] = fdopen(rcl_socket[i], "w");
    if (rcl_outfile[i] == NULL)  {
+#ifdef OLD_S2SOURCE_CODE
       if (errmsg!=NULL && errno>=0 && errno<sys_nerr)  {
          strcpy(errmsg, sys_errlist[errno]);
       }
+#else
+      if (errmsg!=NULL) {
+         strcpy(errmsg, strerror(errno));
+      }
+#endif
       rcl_close(i);
       return(RCL_ERR_IO);
    }

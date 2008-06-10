@@ -1,9 +1,9 @@
-
 #include <stdio.h>
 #include <errno.h>      /* error code definition header file */
 #include <sys/types.h>
 #include <sys/ipc.h>    /* interprocess communications header file */
 #include <sys/sem.h>    /* shared memory header file */
+#include <stdlib.h>
 
 #if defined(__GNU_LIBRARY__) && !defined(_SEM_SEMUN_UNDEFINED)
 /* union semun is defined by including <sys/sem.h> */
