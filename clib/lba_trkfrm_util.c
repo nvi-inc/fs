@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <string.h>
 
 #include "../include/macro.h"
 #include "../include/params.h"

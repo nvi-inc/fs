@@ -2,6 +2,7 @@
 
    Put/get program name for logging 
 */
+#include <string.h>
 
 static char sname[5]={' ',' ',' ',' ',' '};
 

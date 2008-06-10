@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <stdlib.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

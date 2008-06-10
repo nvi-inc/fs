@@ -3,6 +3,7 @@
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <memory.h>      /* for memcpy */
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
 
 #include "fmset.h"
 

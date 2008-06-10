@@ -5,6 +5,7 @@
 #include <string.h>
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
 
 #include "fmset.h"
 

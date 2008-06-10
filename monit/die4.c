@@ -1,4 +1,5 @@
 #include <signal.h>
+#include <stdlib.h>
 
 void die4(i)
 int i;

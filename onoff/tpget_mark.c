@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "../include/params.h"
 
 #define MAX_BUF 256

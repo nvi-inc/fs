@@ -8,6 +8,7 @@
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
+#include <stdlib.h>
 #include "../monit/dpi.h"
 /* S2 stuff */
 #include "../rclco/rcl/rcl_def.h"

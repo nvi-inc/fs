@@ -1,5 +1,7 @@
 /* turn off lvdt for vlba recorder */
 
+#include <string.h>
+
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

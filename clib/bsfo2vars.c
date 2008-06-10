@@ -2,6 +2,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

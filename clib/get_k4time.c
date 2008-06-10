@@ -1,6 +1,7 @@
 /* get time setting information from k4con for k4 drive */
 
 #include <memory.h>
+#include <stdio.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

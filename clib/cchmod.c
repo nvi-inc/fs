@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
 void cchmod(filename,permissions,ilen,error,flen)
 char *filename;

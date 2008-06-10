@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/times.h>
+#include <string.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

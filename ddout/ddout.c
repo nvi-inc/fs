@@ -53,9 +53,15 @@ main()
       char ch[2];
       int num;
       struct list *next;
-    } *base = NULL;
-    struct list *ptr, *ptr2, **pptr;
-    int display;
+      struct list *previous;
+      char *string;
+      int on;
+      int count;
+    } *last = NULL;
+    struct list *first=NULL;
+    struct list *ptr;
+    int display, count;
+    char *offon[ ]= {"off","on"};
     int knl=FALSE;
 
 /* SECTION 1 */
@@ -112,56 +118,102 @@ Messenger:
       goto Messenger;
     }
     if (memcmp(cp2,"tn",2)==0) {
-      short ix;
+      short ix, iy;
       memcpy(&ix,buf+2,2);
-      ptr= (struct list *)malloc(sizeof(struct list));
-      if(ptr!=NULL) {
-	if(base==NULL)
-	  base=ptr;
-	else {
-	  for (ptr2=base;ptr2->next!=NULL;ptr2=ptr2->next)
-	    if(ptr2->num == ix && memcmp(ptr2->ch,buf,2)==0) {
-	      logit(NULL,-304,"bo");
+      memcpy(&iy,buf+4,2);
+      for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
+	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+	  if(iy == 0) {
+	    if(ptr->count==1) {
+	      if(ptr->on == 1) {
+		logit(NULL,-311,"bo");
+		goto Messenger;
+	      }
+	      ptr->on=1;
+	      break;
+	    } else {
+	      sprintf(buf2,"tnx/more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
+	      logitf(buf2);
+	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+		  sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+			  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
+		  logitf(buf2);
+		}
+	      }
 	      goto Messenger;
 	    }
-	  if(ptr2->num == ix && memcmp(ptr2->ch,buf,2)==0) {
-	    logit(NULL,-304,"bo");
-	    goto Messenger;
+	  } else if(ptr->count == iy) {
+	      if(ptr->on == 1) {
+		logit(NULL,-311,"bo");
+		goto Messenger;
+	      }
+	      ptr->on=1;
+	      break;
 	  }
-	  ptr2->next=ptr;
 	}
-	memcpy(ptr->ch,buf,2);
-	ptr->num=ix;
-	ptr->next=NULL;
-      } else {
-	shm_addr->abend.other_error=1;
-	perror("!! help! ** getting tnx structure, ddout");
+      }
+      if(ptr == NULL) { /* not found */
+	logit(NULL,-304,"bo");
+	goto Messenger;
       }
       goto Messenger;
     }
     if (memcmp(cp2,"tf",2)==0) {
-      short ix;
-      int found=0;
+      short ix, iy;
       memcpy(&ix,buf+2,2);
-      for(pptr=&base,ptr=base;ptr!=NULL;pptr=&ptr->next,ptr=ptr->next)
+      memcpy(&iy,buf+4,2);
+      for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
 	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  *pptr=ptr->next;
-	  free(ptr);
-	  found=1;
-	  break;
+	  if(iy == 0) {     
+	    if(ptr->count==1) {
+	      if(ptr->on == 0) {
+		logit(NULL,-312,"bo");
+		goto Messenger;
+	      }
+	      ptr->on=0;
+	      break;
+	    } else {
+	      sprintf(buf2,"tnx/more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
+	      logitf(buf2);
+	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+		  sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+			  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
+		  logitf(buf2);
+		}
+	      }
+	      goto Messenger;
+	    }
+	  } else if(ptr->count == iy) {
+	      if(ptr->on == 0) {
+		logit(NULL,-312,"bo");
+		goto Messenger;
+	      }
+	      ptr->on=0;
+	      break;
+	  }
 	}
-      if(!found)
+      }
+      if(ptr == NULL) { /* not found */
 	logit(NULL,-303,"bo");
+	goto Messenger;
+      }
       goto Messenger;
     }
     if (memcmp(cp2,"tl",2)==0) {
-      if(base==NULL)
-	logitf("tnx/disabled");
-      else
-	for(ptr=base;ptr!=NULL;ptr=ptr->next) {
-	  sprintf(buf,"tnx/%2.2s,%d",ptr->ch,ptr->num);
+      int some=0;
+      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+	if(ptr->on == 0) {
+	  sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s",
+		  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
 	  logitf(buf);
+	  some=1;
 	}
+      }
+      if(some==0)
+	logitf("tnx/disabled");
+
       goto Messenger;
     }
    
@@ -309,9 +361,9 @@ Ack:    ich = strtok(NULL, ",");
 	int ierr;
         strncpy(ibur,buf+FIRST_CHAR+8,5);
 	ibur[5]='\0';
-	if(1==sscanf(ibur,"%d",&ierr) && ((sys_nerr>=ierr) && (ierr >=0))) {
-	  strncpy(ibur,sys_errlist[ierr],80);
-	  if(strlen(sys_errlist[ierr])>(80-1))
+	if(1==sscanf(ibur,"%d",&ierr)) {
+	  strncpy(ibur,strerror(ierr),80);
+	  if(strlen(strerror(ierr))>(80-1))
 	    ibur[79]='\0';
 	} else {
 	  ibur[0]='\0';
@@ -353,12 +405,45 @@ Move:
 Append:           /* send message to station error program */
 
       display=1;
-      if(ierrnum!=0) 
-	for(ptr=base;ptr!=NULL;ptr=ptr->next)
+      count=0;
+      if(ierrnum!=0) { 
+	for(ptr=last;ptr!=NULL;ptr=ptr->previous)
 	  if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
-	    display=0;
-	    break;
+	    if(count ==0)
+	      count=ptr->count;
+	    if(strcmp(ptr->string,ibur)==0) {
+	      display=ptr->on;
+	      break;
+	    }
 	  }
+	if(ptr == NULL) { /* not found */
+	  ptr= (struct list *)malloc(sizeof(struct list));
+	  if(ptr!=NULL) {
+	    memcpy(ptr->ch,ierrch,2);
+	    ptr->num=ierrnum;
+	    ptr->previous=last;
+	    ptr->next=NULL;
+	    ptr->on=1;
+	    ptr->count=count+1;
+	    ptr->string=strdup(ibur);
+	    if(ptr->string != NULL) {
+	      if(first == NULL)
+		first=ptr;
+	      else
+		last->next=ptr;
+	      last=ptr;
+	    } else {
+	      free(ptr);
+	      shm_addr->abend.other_error=1;
+	      perror("!! help! ** getting tnx structure string, ddout");
+	    }
+	  } else {
+	    shm_addr->abend.other_error=1;
+	    perror("!! help! ** getting tnx structure, ddout");
+	  }
+	}
+      }
+
       if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
         class=0;
         cls_snd(&class, buf, strlen(buf), 0, 0);

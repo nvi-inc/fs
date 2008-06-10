@@ -27,6 +27,7 @@
 #include <netinet/in.h> /* For socket() with PF_INET */ 
 #include <netdb.h> /* For getservbyname() and gethostbyname() */ 
 #include <unistd.h> /* For close() */ 
+#include <stdlib.h>
 
 extern int h_errno; /* From gethostbyname() for herror() */ 
 extern void herror(const char * s); /* Needed on HP-UX */ 

@@ -5,6 +5,7 @@
 #include <memory.h>      /* for memcpy */
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
 
 #include "../include/fs_types.h"
 
