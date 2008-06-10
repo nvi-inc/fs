@@ -108,19 +108,26 @@ C
       if (nparm.eq.0) goto 200
       idol = iscn_ch(ias,ifc,iec,'$') 
       if (idol.eq.0) goto 200 
-C
-      if (nchar+nparm-1.gt.512) then
-        ierr = -12
-        goto 999
-      endif
-      nch = 1 
-C
-      if (idol.ne.ifc) then
-        nch = ichmv(lbuf,nch,ias,ifc,idol-ifc)
+      istc=ifc 
+      nch=1
+      idolnext=idol
+      do while(idolnext.ne.0)
+         idol=idolnext
+         if (nch+nparm+nchar-istc-1.gt.512) then
+            ierr = -12
+            goto 999
+         endif
+         nch = ichmv(lbuf,nch,ias,istc,idol-istc)
 C                   MOVE THE CHARACTERS UP TO THE $ INTO OUTPUT 
-      endif
-      nch = ichmv(lbuf,nch,lparm,1,nparm) 
+         nch = ichmv(lbuf,nch,lparm,1,nparm) 
 C                   MOVE THE PARAMETERS INTO PLACE
+         istc=idol+1
+         if(idol.ne.iec) then
+            idolnext = iscn_ch(ias,istc,iec,'$') 
+         else
+            idolnext=0
+         endif
+      enddo
       if (idol.ne.iec) then
         nch = ichmv(lbuf,nch,ias,idol+1,nchar-idol) 
 C                   MOVE THE REMAINING CHARACTERS 
