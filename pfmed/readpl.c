@@ -12,9 +12,14 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdlib.h>
+#ifdef READLINE
 #include "../oprin/readline-2.0/readline.h"
 #include "../oprin/readline-2.0/history.h"
+#else
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 /* The names of functions that actually do the manipulation. */
 int com_thru (),com_help();
@@ -263,7 +268,13 @@ pfmed_completion (text, start, end)
   
   matches = (char **)NULL;
   rl_completion_append_character = ' ';
-  rl_completion_entry_function = (Function *)ignore_all;
+  rl_completion_entry_function =
+#ifdef READLINE
+    (Function *)
+#else
+    (rl_compentry_func_t *)
+#endif
+    ignore_all;
 
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is either a procedure name or the 
@@ -293,7 +304,13 @@ pfmed_completion (text, start, end)
     }
 
   if (start == 0) { /* It's a command: */
-    matches = completion_matches (text, command_generator);
+    matches =
+#ifdef READLINE
+      completion_matches
+#else
+      rl_completion_matches
+#endif
+      (text, command_generator);
     if (no_args > 0) rl_completion_append_character = ',';
     } 
 
@@ -301,12 +318,24 @@ pfmed_completion (text, start, end)
            ((no_args > 1) && (start == strcspn(rl_line_buffer+strcspn(rl_line_buffer,rl_basic_word_break_characters)+1,rl_basic_word_break_characters)+strcspn(rl_line_buffer,rl_basic_word_break_characters)+2)))
     {
     if (strncmp(rl_line_buffer,"pf",2) == 0) { /* proc filename arguments: */
-      rl_completion_entry_function = (Function *)
-                     filename_completion_function; /*restores default*/
+      rl_completion_entry_function =
+#ifdef READLINE
+	(Function *) filename_completion_function; /*restores default*/
+#else
+	(rl_compentry_func_t *) rl_filename_completion_function; /*restores default*/
+
+#endif
+
       }
 
     else { /* procname arguments: */
-      matches = completion_matches (text,procname_generator);  
+      matches =
+#ifdef READLINE
+      completion_matches
+#else
+      rl_completion_matches
+#endif
+      (text, procname_generator);
       } 
 
     if ((no_args > 1) && (start == strcspn(rl_line_buffer,rl_basic_word_break_characters)+1))
