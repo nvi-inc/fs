@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <errno.h>      /* error code definition header file */
 #include <sys/types.h>  /* data type definition header file */
 #include <sys/ipc.h>    /* interprocess communications header file */
 #include <sys/shm.h>    /* shared memory header file */
+#include <string.h>
 
 #include "../../fs/include/pmodel.h"
 
@@ -48,7 +50,6 @@ return( 0);
 void stm_att( key)
 key_t key;
 {
-   char  *shmat();
 
    shmid = shmget (key, 0, 0 );
    if ( shmid == -1 ) {
