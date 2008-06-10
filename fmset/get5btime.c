@@ -3,6 +3,7 @@
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <memory.h>      /* for memcpy */
 #include <sys/types.h>   /* data type definition header file */
+#include <stdlib.h>
 
 #include "../include/params.h"
 
@@ -42,12 +43,13 @@ int sz_m5clock;
 	if(synch) {
 	  out_recs=0;
 	  out_class=0;
+
+	  str="tvr = 0;\n";
+	  cls_snd(&out_class, str, strlen(str) , 0, 0);
+	  out_recs++;
+
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
 	     (rack == MK4   && rack_type == MK45  )) {
-
-	    str="tvr = 0;\n";
-	    cls_snd(&out_class, str, strlen(str) , 0, 0);
-	    out_recs++;
 
 	    str="1pps_source = vsi;\n";
 	    cls_snd(&out_class, str, strlen(str) , 0, 0);
