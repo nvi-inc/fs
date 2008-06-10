@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #define PORT 30384 /* the port client will be connecting to */
 
@@ -174,7 +175,7 @@ int main(int argc, char *argv[])
     }
 
     /* Year, Day, and UT time */
-    (int *)ptr=gmtime(&t);
+    ptr=gmtime(&t);
 
     /* HEADER */
     strftime(loc_stamp,sizeof(loc_stamp),"%Y.%j.%H:%M:%S.00",ptr);
