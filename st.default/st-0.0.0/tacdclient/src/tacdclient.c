@@ -16,6 +16,7 @@
 #include <sys/file.h>
 #include <signal.h>
 #include <math.h>
+#include <time.h>
 
 #define MAXLEN 120
 #define TRUE 1
@@ -75,8 +76,7 @@ int main(int argc, char *argv[])
           temp_str[j]=buff[j];
           i++;
           if(buff[0]=='\n') {
-            err_report("tacdlog.ctl:Syntax error-commas NOT allowed as delimeters
-", NULL,0,0);
+            err_report("tacdlog.ctl:Syntax error-commas NOT allowed as delimeters", NULL,0,0);
             fclose(fp);
             sleep(10);
             goto file_err;
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
     }
 
     /* Year, Day, and UT time */
-    (int *)ptr=gmtime(&t);
+    ptr=gmtime(&t);
 
     /* HEADER */
     strftime(loc_stamp,sizeof(loc_stamp),"%Y.%j.%H:%M:%S.00",ptr);

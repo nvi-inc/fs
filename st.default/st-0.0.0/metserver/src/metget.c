@@ -152,6 +152,7 @@ char terminal2[]) /* connection for get wind parameters. */
 	  else sscanf(&buff[5],"%f", &humi);
 	  break;
 	default:
+	  break;
 	}
       } else {
 	temp=(float)err*50.0;
