@@ -11,6 +11,7 @@
 #include <math.h>
 #include <errno.h>
 #include <linux/serial.h>
+#include <stdlib.h>
 
 #ifdef DIGI
 #include "/usr/src/linux/drivers/char/digi.h"
@@ -902,7 +903,7 @@ void isdigiboard()
     struct serial_struct allSerialSettings;
 #ifdef DIGI
     if(ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)==-1) {/*digi! */
-       digi_t di;
+       struct digi_t di;
        digiboard = TRUE;
        if(-1==ioctl(mcb_fildes, DIGI_GETA, &di)) {
          perror("isdigiboard:DIGI_GETA");
