@@ -253,6 +253,7 @@ Style "*"          Color black/khaki
 Style "monit*" NeverFocus
 Style "xconsole" NeverFocus
 Style "Field System Prompt*" StaysOnTop
+IgnoreModifiers L2
 
 #############################################################################
 
@@ -625,8 +626,8 @@ Key t A CS Exec exec xterm -name fmset -e fmset
 Key w A CS Exec exec xterm -ls -g 80x24+75+75 -rw
 #Key Escape	A	SC	CirculateDown
 #Key Escape	A	C	CirculateUp
-Key Escape      A       C       Prev Focus
-Key Escape      A       SC      Next Focus
+Key Escape      A       C       Prev (AcceptsFocus) Focus
+Key Escape      A       SC      Next (AcceptsFocus) Focus
 # Arrow Keys
 # press arrow + control anywhere, and scroll by 1 page
 Key Left	A	C	Scroll -100 0
