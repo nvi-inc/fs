@@ -1,0 +1,417 @@
+File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.3  Date: 080613
+
+		 Upgrading a prior FSL System to FSL7
+
+		    Ed Himwich and Jonathan Quick
+
+INTRODUCTION
+
+This document attempts to describe the steps needed to upgrade a
+computer running a Field System Linux (FSLx, x=1, ..., 6) distribution
+prior to FSL7.  For the most standard systems these instructions
+should be sufficient.  The more a system differs from a standard system
+the more likely that some important step will be missing.  However it
+is likely that the more a system differs from the standard, the more
+knowledgeable, and therefore able to handle discrepancies, the local
+Field System "friend" would be.  The instructions try to anticipate
+some places where additional steps and information may be needed for
+non-standard systems.  It is assumed that non-standard systems will be
+that way because additional packages and software have been added, not
+because something has been removed.  Please note that in order to make
+these instructions as foolproof as possible, they are written in a
+general way that may not be the most efficient.  Other more expedient
+methods may exist.
+
+Systems with less than 3 GB (each) hard disks, 256 MB RAM, or ISA
+peripheral cards are not supported by FSL7.  Stations with computers
+that are not support by FSL7 should consider upgrading their computers
+and/or installing an inexpensive firewall/router to protect their
+older (now obsolete systems) from network attacks.
+
+These directions are complete for upgrading from old distributions
+FSL5 and FSL6.  If you have an older system, they should still be
+basically correct, but some details may be omitted.  Regardless of
+what previous version you are upgrading, if you have problems or
+questions, please contact Ed (Ed.Himwich@nasa.gov).
+
+For reference, this history of FSL distributions is:
+
+  FS Linux 1                       Slackware     Linux 1.2.x
+  FS Linux 2     "bo"              Debian 1.3.1  Linux 2.0.29
+  FS Linux 3     "hamm"            Debian 2.0    Linux 2.0.34
+                 "slink"           Debian 2.1    Linux 2.0.36   
+  FS Linux 4     "potato"          Debian 2.2    Linux 2.2.18
+  FS Linux 5     "woody"           Debian 3.0    Linux 2.2.20
+                                                 Linux 2.4.18
+  FS Linux 6     "sarge"           Debian 3.1    Linux 2.4.27
+  FS Linux 7     "etch"            Debian 4.0    Linux 2.6.18
+
+The remainder of this document is broken into four sections.  The
+PREPARATION section describes information that you should collect that
+will make the rest of the process easier.  This includes both system
+parameters and *.tgz archives of critical files.  The INSTALLATION
+section describes the actual installation of the FSL7, the fsadapt
+sysadm utility, and FS to create a base standard system.  The
+CUSTOMIZATION section points you to additional documentation for
+completing the process of installing the system so that it includes
+your local files and configuration.  The POST INSTALLATION section
+describes the final clean-up after the installation and testing are
+finished.
+
+PREPARATION
+
+The section covers steps that will help prepare you for the upgrade.
+
+1. Obtain Debian 4.0r3 (or later) DVDs/CDs
+
+   Information on how to obtain the Debian DVDs/CDs can be found at 
+
+     http://www.debian.org/distrib/
+
+   You can use DVDs or CDs.  Using DVDs has the advantage that fewer
+   are required, however if they are much larger to transfer as files
+   if downloaded for local burning.  What media you chose also effects
+   how you will set-up /etc/apt/sources.list in step 4 of the Second
+   Stage installation in fs7linux_DVD.txt.  A rough guide to the media
+   to use is:
+
+   A. Fast Internet connection: Get and use all 3 DVDs and put web
+      references at top of sources.list.
+
+   B. Slow Internet connection: Get and use all 3 DVDs and put web
+      references at bottom of sources.list.
+
+   C. For fewer lengthy DVD downloads use just DVD-1 in (A)-(B) above,
+      but then you don't have local copy in case of Internet
+      connection loss.
+
+   D. For an even shorter, CD, download, use just CD-1 in (C) above
+
+   E. No Internet connection: 3 DVDs
+
+   F. Only a CD player (no DVD player): use CDs instead of DVDs in
+      (A)-(E) above
+
+2. Collect System Information
+
+   In order to upgrade your system, you will need to know the
+   following information. For each item a suggestion for how to obtain
+   the information is provided.
+
+   A. Collect network parameters if you have a network connection
+
+      Hostname ___________________________
+      more /etc/hostname <CR> or uname -n <CR>
+
+      Domain   ___________________________
+      hostname --domain <CR> or
+      more /etc/resolv.conf <CR>, look for "search" line
+
+      Network interface device  ________________________
+      more /etc/network/interfaces <CR> and look at appropriate line
+
+      IP address __________________________ 
+      see above
+
+      Netmask   ___________________________
+      see above
+
+      Broadcast address: ______________________
+      see above
+
+      Network Gateway ______________________________
+      see above
+
+      DNS servers   _______________________________
+      more /etc/resolv.conf <CR>, look for "nameserver" lines
+
+        (alternate older methods to find some of the information:
+        route -n < CR > and look for "Iface" field in the line starting 0.0.0.0
+ 
+        ifconfig eth0 < CR > (where "eth0" is network interface device
+        from above) and look for "inet addr" field
+
+        see above "ifconfig" output and look for "Mask" field
+
+        see above "ifconfig" output and look for "Bcast" field
+ 
+        route -n < CR > and look for the "Gateway" field in the line
+        starting with 0.0.0.0
+        )
+
+   B. Other required hardware information:
+
+      Serial Card Information ( mark appropriate box for latter use.)
+       [ ] 4-port VSCom (ByteRunner) 400H
+       [ ] 8-port VSCom (ByteRunner) 800H
+       [ ] other ____________________________________
+      examine card 
+
+      Serial ports used by card on old system __________
+      setserial -g /dev/ttyS* and examine the output, usually 0-3 are
+      on the motherboard, not on the serial card which are typically
+      16-23
+
+   C. In addition it will be helpful if you know:
+
+      nearest (in a network sense) Debian mirror server _____________________
+      for example, see: http://www.debian.org/mirror/list
+
+      Old system Linux version __________
+      uname -r <CR>
+
+      Video card ___________________
+      more /proc/pci | grep -i vga < CR > 
+
+      Mouse device _______________________________
+      grep -i device /etc/gpm.conf or
+      grep -i device /etc/X11/XF86Config<CR> or
+      grep -i device /etc/X11/XF86Config-4<CR>
+
+      Mouse type  _______________________________
+      grep -i type /etc/gpm.conf or
+      grep -i protocol /etc/X11/XF86Config<CR> or
+      grep -i protocol /etc/X11/XF86Config-4<CR>
+
+      CD/DVD device ______________________________
+      ls -l /dev/cdrom < CR >
+
+      Monitor parameters: modes: ___________________________________________
+                          grep -i modes /etc/X11/XF86Config<CR> or
+                          grep -i modes /etc/X11/XF86Config-4<CR>
+
+                          HorizSync _______________________________________
+                          grep -i HorizSync /etc/X11/XF86Config<CR> or
+                          grep -i HorizSync /etc/X11/XF86Config-4<CR>
+
+                          VertRefresh ____________________________________
+                          grep -i VertRefresh /etc/X11/XF86Config<CR> or
+                          grep -i VertRefresh /etc/X11/XF86Config-4<CR>
+
+        or obtain video parameters from manual or WWW.
+
+      Keyboard model _______________________
+      grep -i xkbmodel /etc/X11/XF86Config<CR> or
+      grep -i xkbmodel /etc/X11/XF86Config-4<CR>
+
+      Network Card: ___________________________
+      cat /var/log/dmesg | grep -C1 eth0 | head -2 <CR>
+      use network interface device in place of eth0 if different
+
+      Information in files that will be saved in step 3 when making
+      the "etc.tgz" archive:
+
+        NTP servers, usually in /etc/ntp.conf or /etc/init.d/xntp3
+  
+        SSH keys, usually in *key *_key.pub files in /etc/ssh
+
+        Printers, usually in /etc/printcap or in /etc/cups/*,
+
+        /etc/hosts file listed "hosts"
+
+        /etc/hosts.deny and /etc/hosts.allow configuration
+
+      Customizations of the oper and prog user directories, these will
+      captured in step 3 below in "operprog.tgz" archive
+
+      Additional Debian packages loaded beyond standard FSL packages
+      Obtain from local experts
+
+      Additional directory structures not normally found on FS
+      computers.  Obtain from local experts and/or may be visible on
+      /usr2 with names other than: control, log, sched, oper, proc,
+      prog, fs*, and st*
+
+3. Collect files to be transferred to the new system
+
+   This step will collect the files you need to transfer to the new
+   system.  It will also provide a back-up of your critical files in
+   case you only have one disk drive (which will be overwritten in the
+   upgrade process).  The following steps archive the standard files
+   that are needed.  If you have other files that need to be
+   preserved, you should make additional archives or include then in
+   these.
+
+   In the example steps below suggested *.tgz file names are shown.
+   You many of course use your own names, but these names agree with
+   those used in the FSL7_End_User.txt file which describes how to use
+   them.  The example steps show the archives being created on the
+   /tmp directory.  If the files are too big to fit, you will need to
+   delete unneeded files from the partition that contains /tmp and/or
+   find another place to create them, perhaps on /usr2, and/or you may
+   need to be more judicious about which files you archive.  As
+   "root":
+
+     cd /
+     tar czf /tmp/etc.tgz etc
+     cd /usr2
+     tar czf /tmp/usr2.tgz control log proc sched st*
+     tar czf /tmp/operprog.tgz oper prog
+
+   After creating the *.tgz file you should transfer them by network
+   to another machine or write them to removable media such as a DVD,
+   CD, or a USB drive.  If you only have one disk drive, you should
+   examine the files transferred, or on the removable media, to verify
+   they are complete since you will overwriting the operation disk
+   when you upgrade.
+
+INSTALLATION
+
+This section outlines the detailed steps for the installation. Spaces
+are included to check-off each step as it is completed.
+
+1. Before beginning the installation procedure, you will need to
+   determine how many and which disks to upgrade initially (i.e.,
+   according to this INSTALLATION section).
+   
+   ___ If you have disks of different sizes, you should be sure to
+       include the smallest disk as one of the disks that you upgrade
+       initially.  This will assure that the RAID size will be correct
+       for all the disks.  If your smallest disk is your current
+       operational disk, you should perform a disk rotation and/or
+       back-up (see for example backups2.pdf in the docs/ directory on
+       the FS file servers for FSL5 and /usr2/fs/misc RAID.txt for
+       FSL6, older systems generally had only two disks) to make sure
+       that one of your larger disks is up to date and use it as the
+       "shelf" disk as described next.
+
+   ___ If you have more than one disk, you should remove the current
+       active operational disk (not your smallest disk, see above) and
+       save it "on the shelf" in case you need to return to your old
+       system or need to retrieve a file that was forgotten.
+
+   ___ There are three cases:
+
+       (A) Three or more disks available.  Insert two of your disks,
+           including your smallest, but not including your current
+           operational, disk.  If you have more than three disks, you
+           can make a back-up of the old operational disk on one of
+           the additional disks for safety, but this is not necessary.
+
+       (B) Two disks available.  Insert your smallest, but not your
+           current operational, disk.  In this case you should install
+           FSL7 on only the one disk, instead of the normal two.  You
+           will need to modify the DVD installation instructions to
+           use one disk instead of two.  These changes are described
+           in step 2 below.
+
+       (C) One disk available.  This is similar to case (B) above,
+           however, you will be unable to retain your current
+           operational disk "on the shelf" as a backup in case of
+           problems.  It is better to obtain more disks before
+           continuing, but if you are unable to do this you can
+           upgrade the single disk.  You should be careful to verify
+           the *.tgz files are not corrupt and contain all the files
+           you.  It would be prudent to make other more complete
+           back-ups if that is reasonably easy to do.
+
+2. Install FSL7 from Debian 4.0r3 (or later) DVDs (or CDs) using the
+   instructions found at:
+
+   ____  ftp://ftp.hartrao.ac.za/pub/fs7x/fs7linux_DVD.txt
+
+   The information you collected in the preceding section should be
+   useful in this process.
+
+   Your choice of Debian installation media will affect how you set-up
+   /etc/apt/sources.list in step 4 of the Second Stage installation.
+   Please see item #1 in the PREPARATION section of this document for
+   more details.
+
+   If you are using only one disk for the upgrade (cases (B) and (C)
+   in step 1 above), you will need to modify the DVD installations
+   slightly.  The four needed changes, listed by DVD installation
+   stage (1 or 2) and steps (n) in a format of "stage#step", are:
+
+   1#7 Omit setting up the second disk.
+
+   1#9 Omit this step (configuring the second disk partitions).
+
+   1#10 Set-up the MD devices as indicated, but you will select only
+        the one disk device (/dev/hdaX or /dev/sdbX, X=1,5,6) for each
+        MD device.  This works in spite of the on-screen instructions
+        insisting that you must select two disk devices for each MD
+        device.
+
+   2#11 Omit this step (installing GRUB on the second disk)
+
+3. Install and run fsadapt as "root" (use current version in place
+   of 7.0.6) on vt1 (<Ctrl><Alt><F1>):
+
+   ____   cd /root
+   ____   ncftpget ftp://ftp.hartrao.ac.za/pub/fs7x/fs7adapt-7.0.6.tgz
+   ____   tar xzvpf fsdapt-7.0.6.tgz
+   ____   cd fsadapt
+   ____   ./fsadapt
+        (take all defaults in fsadapt, except:
+   ____     on Window 1 set noident
+   ____     on Window 2 unset updates
+   ____     select appropriate serial configuration when prompted
+   ____     on Window 3 set skip
+   ____     on Window 4a set secure, then OK, then OK again
+
+4. Set oper and prog passwords, use strong passwords:
+
+   ____ passwd oper
+   ____ passwd prog
+
+5. Install FS as "root: (use current version in place of 9.10.3):
+
+   ____ (Place fs-9.10.3.tgz on /tmp)
+   ____ cd /
+   ____ tar xzf /tmp/fs-9.10.3.tgz
+   ____ cd /usr2/fs-9.10.3
+   ____ make install
+   ____  (answer question "y")
+
+6. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
+   using "hdc" or "sdb" for "XXX" as appropriate for your system in
+   the "cp" command:
+
+   ____ cd /usr/local/sbin
+   ____ cp -a /usr2/fs/misc/refresh_secondary.XXX refresh_secondary
+   ____ chown root.root refresh_secondary
+   ____ chmod a+r,u+wx,go-wx refresh_secondary
+
+7. Place mdstat in /usr/local/bin, as "root":
+
+   ____ cd /usr/local/bin
+   ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
+   ____ chown root.root mdstat
+   ____ chmod a+rx,u+w,go-w mdstat
+
+8. Edit /etc/aliases so root and prog e-mail goes to oper, as "root":
+   ____ change "root: testing" to "root: oper"
+   ____ add "prog: oper" at the end
+
+9. Compile FS as "prog" on vt1  (<Ctrl><Alt><F1>):
+   ____ cd /usr2/fs
+   ____ make
+
+7. Reboot
+   ____ reboot
+
+CUSTOMIZATION
+
+After the standard system has been installed according to the
+directions in the preceding section, the system will need to be
+customized for your station.  The steps for this are covered in the
+document FSL7_End_User.txt.  That document is intended primarily for
+installers of new system that have been checked out at GSFC and then
+shipped to the end user.  However, the steps are so similar that it is
+useful for customization while upgrading a system.  A few additional
+comments for upgrading systems have been added enclosed in that
+document within square brackets "[]" and indented.  The information
+and *.tgz archives (particularly, the archive files) created in the
+PREPARATION section of this document should prove useful in completing
+the customization.
+
+POST INSTALLATION
+
+After the customization is complete, you should test all the major
+features of the FS and other operational software you have.  When you
+are satisfied that everything is working and you no longer need your
+old operational system on your third disk (if you have one), you
+should update that disk so that it so that is also running FSL7.
+Follow the direct for initializing a new disk in the REPLACEMENT DISKS
+section of /usr2/fs/misc/RAID.txt.
