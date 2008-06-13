@@ -52,5 +52,7 @@ if (-X fort77) then
 else
  setenv FC f77
 endif
+#check for mail on login
+test ! -f /var/mail/mbox || from
 #setenv FS_CHECK_NTP
 #
