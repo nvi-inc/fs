@@ -201,6 +201,7 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2007May28 JMGipson. Don't allow piggyback for Mark5B mode.
 ! 2007Jul07 JMGipson. Added "q" option for quitting.
 ! 2007Sep05 JMGipson. Changed entry point for re-reading schedules.
+! 2008May23 JMGipson. Make sure output files are lowercase
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
@@ -847,6 +848,10 @@ C
             PRCNAME = cexpna(1:ix)//'.prc'
           endif
         endif
+! Make sure we use lower case
+        call lowercase(SNPNAME)
+        call lowercase(PNTNAME)
+        call lowercase(PRCNAME)
         ierr=0
         IF (IERR.EQ.0)  THEN
           IF (IFUNC.EQ.1) THEN

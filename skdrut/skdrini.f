@@ -29,6 +29,8 @@ C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 ! 2007May25  JMG   Added Mark5B recorder, MK4V and VLAB4V racks.
 ! 2007Jul02  JMG. Removed initializaiotn of fluxes. Done elsewhere.
+! 2007Aug07  JMG. Moved rack, recorder type initialization to block data statement in
+!                 "valid_hardware.f"
 C
 C LOCAL
       integer ix,ib,is,i,j,l,itx,ity,itz,idef,iy,ir
@@ -240,6 +242,8 @@ C Initialize non-standard roll tables to -99.
           nrollsteps(j,i) = 0
         enddo
       enddo
+
+      call valid_hardware_blk
 
       return
       end

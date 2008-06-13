@@ -1,4 +1,4 @@
-File: /usr2/fs-9.10.2/misc/fs9102up.txt  Version: 0.7  Date: 071231
+File: /usr2/fs-9.10.3/misc/fsp103up.txt  Version: 1.2  Date: 080610
 
 I. Introduction
 
@@ -20,6 +20,9 @@ software version 2007y206d or later, run as "dimino".  For more
 information on this, please see item (1) in the detailed explanation
 of the FS changes below.
 
+This version contains support for Field System Linux 7 (FSL7), based
+on Debian Etch.
+
 II. Changes Since Version 9.9.2
 
 This section is divided into three sub-sections: A. Changes in the FS,
@@ -31,7 +34,8 @@ description.
 
 The following is a summary of FS changes.  Items numbered 15 and
 larger were added beginning with FS 9.10.1.  Items numbered 25 and
-larger were added beginning with FS 9.10.2.
+larger were added beginning with FS 9.10.2.  Items numbered 26 and
+larger were added beginning with FS 9.10.3.
 
 1. Support for Mark 5B Recorder added.
 2. Support for Mark 5B Sampler Module added.
@@ -54,7 +58,7 @@ larger were added beginning with FS 9.10.2.
 14. FS Linux 6 RAID operations notes included.
 15. Created missing k42k5station.prc default procedure.
 16. Fixed bug in 's' in fmset for "rack=none".
-17. Correcte bug for previous (*) values in vsi4=... command
+17. Corrected bug for previous (*) values in vsi4=... command
     parameters.
 18. Updated standard procedures for new checkmk5.
 19. Fixed bank_check to work for Mark5A again.
@@ -62,10 +66,29 @@ larger were added beginning with FS 9.10.2.
 21. Fixed "setcl" to generate error if Mark5B has no sync or
     syncerr_gt_3.
 22. Source code updated to compile on more modern gcc.
-23. Added device specifc no_write_ren for ibcon.
+23. Added device specific no_write_ren for ibcon.
 24. Fixed parsing error with BBC frequencies with more than three
     digits after the decimal place.
 25. Updated "ready_disk" procedure.
+26. The "msg" program was enhanced.
+27. VEX parser fixed again for modern versions of flex/compilers.
+28. The oprin Makefile made compatible with more recent systems.
+29. The "fmset" program sends "tvr=0" to Mark 5B regardless of rack
+    type.
+30. New "-No_X option for "fs" program.
+31. TNX command expanded to support multiple instances of the same
+    error mnemonic-number pair.
+32. Support for the Field System Linux 7 (FSL7) distribution.
+33. Fix to .fvw2mrc to make Ctrl-Shift-Esc and Shift-Esc cycle the
+    focus without stopping on windows that refuse the focus.
+34. Suggested command added to make the bell more audible.
+35. Modified disk2file to work around bugs in Mark 5 control program.
+36. SNAP procedures can now have more than one argument expansion per
+    line.
+37. Fix to .fvwm2rc and .xsession to prevent CapsLock, NumLock, and
+    ScrollLock from interferring with short-cut keys and ClickToFocus.
+38. Added "m5" and "5m" to the "red" list in erchk; "ib" was removed
+    from the "red" list.
 
 A more detailed discussion of these changes follows.
 
@@ -117,9 +140,9 @@ A more detailed discussion of these changes follows.
 
    Some of the existing Mark 5 commands have changes in their display
    parameters when used with a Mark 5B.  The differences are
-   documented in the help pages for the commands.  These changes are
-   caused changes in the underlying syntax of the recorder's control
-   program.
+   documented in the help pages for the commands.  These changes were
+   caused by changes in the underlying syntax of the recorder's
+   control program.
 
    The "data_check" and 'scan_check" commands now work for Mark 5B.
 
@@ -129,7 +152,7 @@ A more detailed discussion of these changes follows.
    necessary for the user to use "fmset" to verify that the Mark 5B
    has the correct time.  The displayed time of the recorder should
    compared to a hardware clock.  After a power-up of the Mark 5B, a
-   "synch" commands must be used in "fmset" before setting the time.
+   "sync" commands must be used in "fmset" before setting the time.
 
    Other internal changes include: "setcl" being able to set the FS
    time from the Mark 5B; support for mk5_mode selected tracks in
@@ -237,7 +260,7 @@ A more detailed discussion of these changes follows.
     robustness.  An extra delay between consecutive Mark IV Decoder
     communications was added.  It was determined empirically that the
     decoder was not ready for input even though it had responded with
-    its prompt.  The FS now makes sure that at least 4 centisecond
+    its prompt.  The FS now makes sure that at least 4 centiseconds
     since the last decoder reply before sending the next command.  No
     more delay is added than is needed if the previous communication
     was not to the decoder.  Thanks to Dan Smythe (Haystack) for
@@ -259,8 +282,8 @@ A more detailed discussion of these changes follows.
     "none".
 
 17. Corrected bug for previous (*) values in vsi4=... command
-    paremeters.  This bug prevented the "*", used for previously
-    comanded values, for command parameters from working.  Note this
+    parameters.  This bug prevented the "*", used for previously
+    commanded values, for command parameters from working.  Note this
     is different from the usage in this command of not specifying a
     value, which is the "default" or null parameter which causes the
     parameter value to not be commanded.  This behavior is different
@@ -289,18 +312,18 @@ A more detailed discussion of these changes follows.
 
 21. Fixed "setcl" to generate error if Mark5B has no sync or
     syncerr_gt_3.  Since "setcl" is run every "midob", this can help
-    isolate when a clock jump may have occured.
+    isolate when a clock jump may have occurred.
 
 22. Source code updated to compile on more modern gcc.  This mainly
     consisted of improvements in include files to support more modern
     version of gcc, such as > 4.0.  Thanks to Sekido Mamoru (NICT) an
     Chris Phillips (CSIRO) for sending changes.
 
-23. Added device specifc no_write_ren for ibcon.  If 8 is added to the
-    value of the parameter after the device name in the ibad.ctl file,
-    the no_write_ren enab;e feature can be turned on selectively for
-    that device (rather than using the no_write_ren global feature in
-    the ibad.ctl control file.  Please see the updated and more
+23. Added device specific no_write_ren for ibcon.  If 8 is added to
+    the value of the parameter after the device name in the ibad.ctl
+    file, the no_write_ren enable feature can be turned on selectively
+    for that device (rather than using the no_write_ren global feature
+    in the ibad.ctl control file.  Please see the updated and more
     extensively commented example file
     /usr2/fs/st.default/control/ibad.ctl for more details.
 
@@ -317,24 +340,225 @@ A more detailed discussion of these changes follows.
     bother to set-up their Mark 5 until the schedule halts in the
     "ready_disk" procedure.  It is recommended that the Mark 5 be
     set-up before the schedule is started, but this will help make
-    operations more robust if it iss forgotten.  Please note that
+    operations more robust if it is forgotten.  Please note that
     during a power failure recovery (or other schedule restart), the
     "ready_disk" procedure will not normally be executed
-    automatically, therefore the Mark 5 muist be set-up prior to
+    automatically, therefore the Mark 5 must be set-up prior to
     restarting the schedule.
+
+26. The "msg" program was enhanced. Two changes were made: (1)
+    J. Quick (HartRAO) enhanced the program so that it does not report
+    "*" as the source if that parameter we used as the source name in
+    the most recent "source=..." command. (2) Module sizes F, G, and
+    H were added to the disk inventory.  Please note that you can use
+    the Tab key to advance through the list.  Normally, every input
+    box must be filled, but if you use "na" as your entry in the box
+    that is the first for which you have no modules of that size or
+    larger, no more input will be required.  For example, if you have
+    0 As, 1 B, 2 Cs, and no larger modules, you can put "na" in D
+    entry box and skip the rest.
+
+27. VEX parser fixed again for modern versions of flex/compilers. Due
+    to an oversight in 9.10.2, the wrong version of vex.yy.l was
+    included.  This has been fixed.
+
+28. The oprin Makefile made compatible with more recent systems.  The
+    variable "CC" is no longer set to special version of gcc. This
+    removed a problem with "Making" oprin on some recent Linux
+    distributions.
+
+29. The "fmset" program sends "tvr=0" to Mark 5B regardless of rack
+    type.  This was erroneously limited to only Mark 5 racks before.
+    This caused some confusion about the Mark 5B recorder TVR LED but
+    was otherwise benign.
+
+30. New "-No_X" option for "fs" program.  In order to provide a way to
+    run the FS in an environment where an X interface is not
+    available, the FS's main program "fs" can now be started with a
+    "-No_X" option.  This will cause all programs specified as type
+    "x" in the "fspgm.ctl" and "stpgm.ctl" control files to be
+    skipped, i.e., not run, at FS start-up. The "x" is intended to be
+    mnemonic for 'uses X-windows'.  The program type in the control
+    files is the second parameter on the line and is normally "n".
+    The version of "fspgm.ctl" that comes with the FS distribution has
+    an "x" as the type for "oprin", which is currently the only
+    standard "fspgm.ctl" program that uses X.  (Please don't modify
+    "fspgm.ctl" to change the type of programs or any other items in
+    the file.  This file is internal to the FS.  Modifying this file
+    can impair the functioning of the FS.)  Station programs in the
+    "stpgm.ctl" control file can also be specified as type "x", which
+    extends this functionality to station programs.  Care must be
+    taken with this feature to make sure that some necessary
+    functionality of a station program is not disrupted.  Other
+    mechanisms for suppressing X usage can and will be provided if the
+    "x" program type is not sufficient for some application.
+
+    If "oprin" is disabled by using the "-No_X" option, the FS is
+    essentially running without a way to make input (and any
+    functionality provided "x" type station programs in "stpgm.ctl"
+    will also be absent).  Output will continue to appear as usual in
+    the window where the FS was started.  The operator will need to
+    invoke either the "oprin" or "inject_snap" programs to send
+    operator input to the FS.  Both programs can be run either
+    interactively in a different window or embedded in a script.
+
+    If an "oprin" program is started separately from the FS. i.e.,
+    "stand-alone", it can read its input interactively or from a file.
+    The latter using standard UNIX I/O redirection for the input.
+    This is a feature that Ari Mujunen added many years ago, but has
+    previously not been mentioned.  In the latest version, a
+    stand-alone "oprin" will exit without terminating the FS when it
+    reaches the end of input file.  When a stand-alone "oprin" is
+    being used interactively, it can be stopped without terminating
+    the FS by using the new "end_oprin" command.  This command is only
+    available in a stand-alone "oprin".  An example of how input
+    redirections might be used is to put some commands in a file,
+    maybe named "it", and then while the FS is running (with or
+    without -No_X), you could using the following command in a shell:
+
+       oprin <it
+
+    to execute the commands in the "it" file.  The FS will continue to
+    run after all the commands in the file have been executed (unless
+    one of them is "terminate").  If a stand-alone "oprin" receives
+    input when the FS is not running, it will terminate silently.
+
+    As a reminder, please note that the "inject_snap" program can
+    execute one command at time given to it as an argument and can
+    optionally wait (option "-w") for the command to finish.  If it
+    waits, it can return the log results of simple SNAP commands,
+    which can be captured in scripting languages.  If the
+    "inject_snap" command is embedded in a script, the FS can
+    effectively be controlled to do almost any normal FS function from
+    the script.  In other words, you can embed the FS itself into the
+    scripting language.
+
+31. TNX command expanded to support multiple instances of the same
+    error code-number pair.  The TNX command is used to suppress the
+    display (logging always occurs), of individual error messages if
+    the operator determines they cannot be prevented and/or are
+    benign. (TNX is an abbreviation for "thanks".)  In previous
+    versions of the FS, you could only suppress all of the error
+    messages for a given code-number pair, even though there can be
+    multiple instances.  For example, the error code-number pair for
+    an out of range for Tsys value is qk,-211 for all modules.  If you
+    had suppressed this error with "tnx=qk,-211", all Tsys error
+    messages for all modules would have been suppressed not just a
+    specific module that was known to be broken.  The behavior has
+    become more specific with this FS release. If only one, qk,-211
+    error instance has occurred, then "tnx=qk,-211" would suppress
+    only that instance.  If more than one qk,-211 error instance has
+    occurred, i.e., for different modules, the same command would
+    generate a prompt for the operator to pick which instance to
+    suppress.  This allows the operator to suppress display of
+    specific instances of code-number errors that cannot be avoided,
+    without suppressing ones that would be unexpected and should be
+    investigated.  Please see "help=tnx" help page listing for more
+    details.
+
+32. Support for the Field System Linux 7 (FSL7) distribution.  Several
+    changes were made to make the FS compatible with the FSL7, which
+    is based on Etch.  These changes may also help make the FS
+    compatible with other Linux distributions.  Jonathan Quick
+    (HartRAO) is to be profusely thanked for his hard work both on the
+    FSL7 and modifications he made to ibcon to make it compatible with
+    FSL7.  Thanks also to Ari Mujunen (Metashovi) for tips on how to
+    detect the new version of readline.  The four most significant
+    changes are: (A) changes to oprin and PFMED to make them work with
+    readline5.  If readline version on the system is detected to be
+    compatible with oprin and PFMED without modification, the system
+    version will be used instead of the older modified readline
+    included with the FS source. (B) Support for the third version of
+    the open source GPIB driver.  Like the older versions, this
+    version does NOT with work certain legacy GPIB devices.  However,
+    at this time, this is the only driver supported by FSL7.  If your
+    station has one or more legacy devices that the open source driver
+    does not support, you can consider purchasing an NI 232/GPIB
+    converter to use with a serial port.  If you wish to do this,
+    please contact Ed (Ed.Himwich@nasa.gov) for more details.  (C) The
+    print2dymo script has been revised.  In addition to now including
+    options for FSL5, FSL6, and FSL7, it has been restructured
+    slightly to make it easier to debug problem cases, if they occur.
+    Please see the default version "/usr2/fs/misc/print2dymo" for more
+    details. This is also describe under the "Changes in DRUDG"
+    section below.  (D) Documentation.  Three files were created or
+    updated in /usr2/fs/misc.  The RAID.txt document, which describes
+    the usage of RAID1 disks under FSL6 and (now) FSL7 was updated.
+    Three new files were added: FSL7_PC_Checkout.txt, FSL7_Upgrade.txt
+    and FSL7_End_User.txt were added.  These files describe,
+    respectively, the check-out procedure used at GSFC for new PCs,
+    the procedure for upgrading a PC to FSL7 in the field, and the
+    customization steps for a new or upgraded PC.  They are included
+    in the FS distribution as references for stations doing their own
+    PC check-out or upgrading their system.
+
+33. Fix to .fvw2mrc to make Ctrl-Shift-Esc and Shift-Esc cycle the
+    focus without stopping on windows that refuse the focus.  These
+    keyboard short-cuts, which allow the focus to circulated through
+    the stack of windows, were partially broken by setting the Monit
+    and xconsole windows to to refuse the focus.  A solution for this
+    has been found.  We are still looking for a fix to make the window
+    that gets the focus in this way to come to the top.  If you have
+    any ideas, please sent them to Ed (Ed.Himwich@nasa.gov).  A
+    perhaps sufficient alternative, at least under FSL7, is to press
+    the Alt key and then use the Tab key to cycle through the list of
+    windows.  When the Alt key is released the selected window is moved to
+    the top and gets the focus.
+
+34. Suggested command added to make the bell more audible. An "xset b
+    ..." command can be added to the oper (and prog) .xsession file to
+    make the bell more audible.  An example is included as a comment
+    in the default versions of this file,
+    "/usr2/fs/st.default/oper/.xsession" (and ".../proc/.xsession").
+    This may be helpful if the bell used to report errors is not
+    audible in the room where your computer is located.  Please see
+    "man xset" for more information on the parameters of the "xset"
+    command.
+
+35. Modified disk2file to work around bugs in Mark 5 control program.
+    An extra "scan_set=;" is now transmitted to the Mark 5 to work
+    around a bug in versions 7y222d and 7y206B of Mark5A.
+
+36. SNAP procedures can now have more than one argument expansion per
+    line.  Instead of one, there can now be an arbitrary number of
+    argument replacement characters, "$", in SNAP procedure lines.
+    Each "$" is replaced with the argument passed to the procedure
+    when invoked.  The "arbitrary" limit on the number of replacement
+    characters is actually the total maximum command length of the 512
+    characters for the resulting command.  The total resulting maximum
+    length is also the effective limit on the length of the argument
+    passed.  However, the command invoking the procedures is also
+    subject to the maximum command length and this may limit the
+    length as well.  Note because of log formatting issues, the last
+    few characters (maximum of about 34) of the commands that approach
+    the limit may not be logged.
+
+37. Fix to .fvwm2rc and .xsession to prevent CapsLock, NumLock, and
+    ScrollLock from interferring with short-cut keys and ClickToFocus.
+    These changes correct these problems while allowing NumLock to
+    still be used for keypad entries in xcalc.  Please note that there
+    may still be problems with using the keypad in "msg".  Please see
+    the "xmod" command in the default
+    "/usr2/fs/st.default/oper/.xsession" and "IgnoreModifiers" command
+    in "/usr2/fs/st.default/oper/.fvwm2rc" files for examples.
+
+38. Added "m5" and "5m" to the "red" list in erchk; "ib" was removed
+    from the "red" list.
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2007Dec27.
+DRUDG opening message date is 2008May23.
 
 The following is a summary of DRUDG changes.  Items numbered 12 and
 larger were added beginning with FS 9.10.1.  Items numbered 17 and
-larger were added beginning with FS 9.10.2.
+larger were added beginning with FS 9.10.2.  Items numbered 20 and
+larger were added beginning with FS 9.10.3.
 
 1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
    Sampler Modules).
 2. Mark5B recorder support.
-3. DRUDG option 11 was modified to add these new rack and recorder types.
+3. DRUDG option 11 was modified to add these new rack and recorder
+   types.
 4. New patching algorithm.
 5. Overhaul of equipment and equipment_override options in skedf.ctl.
 6. "postob_mk5a" changed to "postob_mk5".
@@ -354,6 +578,14 @@ larger were added beginning with FS 9.10.2.
 18. The "ready_disk" procedure was moved before the first setup
     procedure call.
 19. Bug in labels for previous 9.10.x versions fixed.
+20. Extraneous "setup" commands while recording removed.
+21. Line numbers added to summary listing when recorder is "none".
+22. Comment added for VCs/BBCs that are set-up but not used.
+23. Additional sample bit-stream mask suggestion for Mark 5B recorders
+    when the rack is none
+24. Dymo printing bugs in FSL6 fixed and support for FSL7 added.
+25. Bug in setting Mark5 equipment from skedf.ctl "equipment" line
+    fixed.
 
 A more detailed discussion of these changes follows.
 
@@ -474,7 +706,7 @@ A more detailed discussion of these changes follows.
    of DRUDG incorrectly use 4 MHz in the procedure name for Westford.
    This new version uses the correct bandwidth.
 
-9. Support for Dymo printer for the FS linux 6 (based on "Sarge").
+9. Support for Dymo printer for the FS Linux 6 (based on "Sarge").
    The CUPS driver in FS Linux 6 behaves differently compared to the
    one in FS Linux 5.  The effect is that Dymo labels in FS Linux
    printed at 1/3 size.  We have included an example command, in the
@@ -503,7 +735,7 @@ A more detailed discussion of these changes follows.
 
 13. "Unknown" option removed from option 11.  DRUDG will still
     indicate if the equipment type is unknown, but users won't be able
-    to select "unkown" as an option.
+    to select "unknown" as an option.
 
 14. DRUDG now strips all leading spaces and tabs from the "skedf.ctl"
     file.  In reading the "skedf.ctl" file DRUDG kept leading spaces
@@ -520,7 +752,7 @@ A more detailed discussion of these changes follows.
     this was due to two issues interacting together.
 
       A) The problem schedule specified the VLBA correlator.
-      B) DRUDG implicity assigns 25 seconds early start to sessions
+      B) DRUDG implicitly assigns 25 seconds early start to sessions
          processed at the VLBA.
 
     The behavior of DRUDG was modified as follows:
@@ -532,7 +764,7 @@ A more detailed discussion of these changes follows.
     before, the length parameter reflects the "data valid" time for
     the scan (as before).  The continuous parameter now properly
     reflects the actual continuous recording time that is scheduled.
-    The continuous time mayebe longer than length for a single scan if
+    The continuous time maybe longer than length for a single scan if
     early start is in use.  It is the entire recording time for the
     first of several scans that are recorded continuously.  After the
     first one, the continuous parameter is the time from the
@@ -552,6 +784,34 @@ A more detailed discussion of these changes follows.
 19. Bug in labels for previous 9.10.x versions fixed.  The bug caused
     a portion of the labels to be printed off the page.  The labels
     should be properly positioned again.
+
+20. Extraneous "setup" commands while recording removed.  These extra
+    commands occurred in certain pathological cases.
+
+21. Line numbers added to summary listing when recorder is "none".
+    The listing of line previous relied on recorder starting and
+    stopping information which isn't present for recorder "none".
+
+22. Comment added to set-up procedures to identify VCs/BBCs that are
+    set-up but not used.  This is intended to make it clearer which
+    converters are not being recorded in set-ups that don't use the
+    full set of converters in the rack.
+
+23. Additional sample bit-stream mask suggestion for Mark 5B recorders
+    when the rack is "none".  In addition to default bit-stream mask
+    of all bits on, the appropriate bit mask for use with a Mark5
+    sampler module is included as a comment for reference, in case
+    this would be useful.
+
+24. Dymo printing bugs in FSL6 fixed and support for FSL7 added.  The
+    positioning the of the printing on Dymo label for FSL6 was
+    improved.  In addition, the script "print2dymo" was modified to
+    provide guidance comments for making it work under FSL7 and
+    changed to make it easier to debug difficult cases, if they occur.
+
+25. Bug in setting Mark 5 equipment from skedf.ctl "equipment" line
+    fixed.  This bug caused the "equipment" line to be reject when
+    Mark 5 equipment was specified.
 
 			   C. Known FS Bugs
 
@@ -720,21 +980,27 @@ of the current FS9 "Control Files and Field System Initialization"
 manual.
 
 The following instructions are for upgrading from 9.9.2.  Please
-follow all the steps.  If you have 9.7.7 installed, please follow the
-installation instructions in fs9902up.txt before applying the
-instructions here.
+follow all the steps.  Special instructions for upgrading from version
+both older and newer than 9.9.2 are included in the next few
+paragraphs.
 
-If you are upgrading from 9.10.0, you should skip steps: 13, 14, 15,
-16A, 16C, and 17 (note 16B and 16D are new since 9.10.0).
+If you are upgrading from 9.10.0, you should skip steps: 13B (note 13A
+has changed since 9.10.0), 14, 15, 16A, 16C, (note 16B and 16D are new
+since 9.10.0), 17A (note 17B and 17C are new since 9.10.0).
 
-If you are upgrading from 9.10.1, you should skip steps: 13, 14, 15,
-16A, 16B, 16C, and 17 (note 16D is new since 9.10.1).
+If you are upgrading from 9.10.1, you should skip steps: 13B (note 13A
+has changed since 9.10.1), 14, 15, 16A, 16B, 16C, (note 16B and 16D
+are new since 9.10.1), 17A (note 17B and 17C are new since 9.10.1).
+
+If you are upgrading from 9.10.2, you should skip steps: 13B (note 13A
+has changed since 9.10.2), 14, 15, 16, and 17A (note 17B and 17C are
+new since 9.10.2).
 
 If you are updating from a version older than 9.9.2, a list of
 "critical updates" is given below.  These are updates that must be
 applied sequentially.  Please start with the next update with a later
 version number than you have and apply it and the following listed
-versions before upgrading to 9.10.2.  You can find the latest versions
+versions before upgrading to 9.10.3.  You can find the latest versions
 of installation notes for these FS versions in the "/usr2/fs/misc"
 directory.  The list of critical updates is:
 
@@ -745,7 +1011,8 @@ directory.  The list of critical updates is:
   9.7.7
   9.9.2
 
-If you have a version older than 9.4.0, please contact Ed.
+If you have a version older than 9.4.0, please contact Ed
+(Ed.Himwich@nasa.gov).
 
 For reference purposes the naming convention for the default station
 libraries for different equipment configurations is listed here.  The
@@ -760,7 +1027,7 @@ process, e.g.:
   chmod a+rw station.prc
 
 The "-i" option will prompt before overwriting an existing
-"station.prc".  The table of correspondance between equipment types
+"station.prc".  The table of correspondence between equipment types
 and default library names is given next.
 
         Equipment      Prefix letters  Station Library
@@ -825,9 +1092,8 @@ that to paste into the X display login shell window for "oper" and
 "prog", you typically must use Shift-Insert.  It is also possible to
 cut-and-paste between two "VT" text terminals (for example from the
 one for the instructions to the one for the commands) if your mouse is
-configured properly.  If it is, this may be the easiest solution.  If
-you have any questions about how to cut-and-paste please contact Ed
-(Ed.Himwich@nasa.gov).
+configured properly.  If you have any questions about how to
+cut-and-paste please contact Ed (Ed.Himwich@nasa.gov).
 
 (0) Before you begin the upgrade make sure you have a current back-up
     of your system in case something goes wrong.  If you are use FS
@@ -837,18 +1103,19 @@ you have any questions about how to cut-and-paste please contact Ed
     the FS FTP servers as backups2.pdf.  If you have an older FS Linux
     distribution, please use the disk-to-disk back scheme described in
     Section 5.8 of the FS9 "Computer Reference" manual.  If you have
-    an FS Linux 6 (sarge) system configured to run a RAID, please see
-    /usr2/fs/misc/RAID.txt for directions applying an upgrade.  If you
-    are running one of the Debian distribution kernels and do not have
-    documentation on how to make a back-up, please contact Ed.  if you
-    have SCSI disks, Section 5.7 of the FS9 "Computer Reference"
-    manual has a discussion of drive ID numbers if you are unsure
-    about these.  Normally you should choose to install the update on
-    your primary after having made and verified your back-up.  Once
-    the installation is complete, has been tested, and used for a
-    little while, you can copy over your back-up with the upgraded
-    primary.  If the upgrade fails, you should restore the back-up to
-    the primary for operations.  You can then try to make the upgrade
+    an FS Linux 6 (sarge) or 7 (etch) system configured to run a RAID,
+    please see /usr2/fs/misc/RAID.txt section APPLYING AN UPDATE for
+    directions applying an update.  If you are running one of the
+    Debian distribution kernels and do not have documentation on how
+    to make a back-up, please contact Ed.  If you have SCSI disks,
+    Section 5.7 of the FS9 "Computer Reference" manual has a
+    discussion of drive ID numbers if you are unsure about these.
+    Normally you should choose to install the update on your primary
+    disk after having made and verified your back-up.  Once the
+    installation is complete, has been tested, and used for a little
+    while, you can copy over your back-up with the upgraded primary.
+    If the upgrade fails, you should restore the back-up to the
+    primary for operations.  You can then try to make the upgrade
     again when it is convenient.  In a desperate situation, you can
     use the back-up for operations.  You may choose to install the FS
     on your back-up disk for testing and then later copy the back-up
@@ -872,7 +1139,7 @@ you have any questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.10.2 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.10.3 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -881,7 +1148,7 @@ you have any questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.10.2.tgz
+      get fs-9.10.3.tgz
       quit
 
     The FS FTP area is also available at http://kurp-www.hut.fi/fs/.
@@ -895,14 +1162,15 @@ you have any questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.10.2.tgz
+      tar -xzpf /tmp/fs-9.10.3.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.10.2 fs
+      ln -sfn fs-9.10.3 fs
 
-(7) It is recommended that your local files have the default ownership
+(7) It is recommended that your local files operations (control, proc,
+    log, and sched directories) have the default ownership
     ("oper.rtx") and permissions ('rw-rw-rw').  To force this, please
     execute the script:
 
@@ -941,19 +1209,26 @@ you have any questions about how to cut-and-paste please contact Ed
      "matad.ctl" for Mark 5B Sampler Modules.
 
      (A) The new version of the skedf.ctl "label_size" command for
-         Dymoe is (shown as commented out):
+         Dymo is:
 
-           *label_size   1.417 3.5     1     1    0.0   0.0    Dymo
+           label_size  1.    4.0     1     1     0.0   0.0    Dymo Larger Printing
 
-         Note the first "0.0" on the line used to be "11.0".  Please
-         change the label_size command in your skedf.ctl to agree with
-         this regardless of whether you have it commented out or not.
-         If you have it commented out, it is still useful to fix it
-         because it will help prevent future confusion if you ever get
-         a Dymo printer.  Please add the line (commented out) if you
-         don't have a Dymo label_size line now.  You can look at the
-         default file /usr2/fs/st.default/control/skedf.ctl as an
-         example.
+         Note that the first two numbers, the size have been changed
+         to more completely fill the label.  If you need the older
+         smaller size an example is included in the default
+         /usr2/fs/misc/st.default/control/skedf.ctl file.  Please note
+         that the sizes are not continuously adjustable.  These are
+         the two sizes that are known to work. Note also that the
+         first "0.0" on the line used to be "11.0".
+
+         Please change the label_size command in your skedf.ctl to
+         agree with this regardless of whether you have it commented
+         out or not.  If you have it commented out, it is still useful
+         to fix it because it will help prevent future confusion if
+         you ever get a Dymo printer.  Please add the line (commented
+         out) if you don't have a Dymo label_size line now.  You can
+         look at the default file
+         /usr2/fs/st.default/control/skedf.ctl as an example.
 
      (B) Please add the line "5B=5B" to your "matad.ctl" file (even if
          you do not have a Mark 5B Sampler Module), if it isn't
@@ -970,7 +1245,7 @@ you have any questions about how to cut-and-paste please contact Ed
      old default ones in /usr2/fs-9.9.2/systests to check), you can
      just copy the new ones into your /usr2/sched and /usr2/proc
      directories.  Please note that v/chk1025 will is not appropriate
-     for and will not work woth Mark5 or VLBA5 racks.  For Mark III/IV
+     for and will not work with Mark5 or VLBA5 racks.  For Mark III/IV
      racks use the commands (note the dot "." at the end of the "cp
      ..."  commands):
 
@@ -1003,9 +1278,10 @@ you have any questions about how to cut-and-paste please contact Ed
      support this.  Please follow the directions in
      /usr2/fs/systests/systests.txt to complete this step.
 
-(16) Modify your other procedure files.  Three changes are needed: (A)
-     Renaming "checkmk5a" to "checkmk5", (B) update the contents of
-     "checkmk5". and (c) Changing "greplog" to be case insensitive.
+(16) Modify your other procedure files.  Four changes are needed: (A)
+     rename "checkmk5a" to "checkmk5", (B) update the contents of
+     "checkmk5", (C) change "greplog" to be case insensitive, and (D)
+     update the contents of "ready_disk".
 
      (A) You should used PFMED to make this change in your "station"
          procedure library:
@@ -1094,30 +1370,129 @@ you have any questions about how to cut-and-paste please contact Ed
            update all versions that are used in configurations with
            the Mark 5 recorder.
  
-(17) Update oper's ~/.fvwm2rc file, by adding the lines:
+(17) Update the ~/.fvwm2rc files. There are three changes: (A) adjust
+     the focus and window raising policies, (B) prevent "lock" keys
+     from being used as modifiers, and (C) fix the focus rotate
+     short-cuts.  Step (D) is to make these changes for prog.
 
-       Style "monit*" NeverFocus
-       Style "xconsole" NeverFocus
-       Style "Field System Prompt*" StaysOnTop
+     (A) adding the lines:
 
-     as the last Style commands.  (You may also want add additional
-     "NeverFocus" lines for other display only windows you use, e.g.,
-     "monan".)  If you have the standard .fvwm2rc file, these lines
-     are insert right after line:
+           Style "monit*" NeverFocus
+           Style "xconsole" NeverFocus
+           Style "Field System Prompt*" StaysOnTop
 
-       Style "*"          Color black/khaki
+         as the last Style commands in ~oper/.fvwm2rc.  (You may also
+         want add additional "NeverFocus" lines for other display only
+         windows you may use, e.g., "monan".)  If you have the
+         standard .fvwm2rc file, these lines are insert right after
+         line:
 
-     which is line 252.  For .fvwm2rc files that have only been
-     minimally modified, the same line should still be close to line
-     252 and the new lines should be added after this line, wherever
-     it is.  The change will not take effect until the window manager
-     is restarted.  Please see /usr2/fs/st.default/oper/.fvwm2rc for
-     an example file.
+           Style "*"          Color black/khaki
 
-     Please log in as "prog" and make the same change to prog's
-     ~/.fvwm2rc file.
+         which is line 252.  For .fvwm2rc files that have only been
+         minimally modified, the same line should still be close to
+         line 252 and the new lines should be added after this line,
+         wherever it is.  The change will not take effect until the
+         window manager is restarted.  Please see
+         /usr2/fs/st.default/oper/.fvwm2rc for an example file.
 
-(18) Test the FS as "oper". Generally speaking a fairly thorough test
+     (B) Add the line:
+
+           IgnoreModifiers L2
+
+         after the line:
+
+           Style "Field System Prompt*" StaysOnTop
+
+         in ~oper/.fvwm2rc as described in step 17A above.  This change
+         fixes the problem with CapsLock and NumLock interferring with
+         keyboard shortcuts and ClickToFocus without disabling this
+         keys.  Please see /usr2/fs/st.default/oper/.fvwm2rc for an
+         example.
+
+     (C) Update the key board short-cuts for Ctrl-Shift-Esc and
+         Shift-Esc in ~oper/.fvwm2rc. The old lines look like:
+
+           Key Escape      A       C       Prev Focus
+           Key Escape      A       SC      Next Focus
+
+         and should be modified to look like:
+
+           Key Escape      A       C       Prev (AcceptsFocus) Focus
+           Key Escape      A       SC      Next (AcceptsFocus) Focus
+
+         The easiest way to identify this lines may be to diff your
+         current .fvwm2rc file (or the previous default) against the
+         new default:
+
+           cd
+           diff .fvwm2rc /usr2/fs/st.default/oper
+
+         and note the differences that are related to just these two
+         specific keyboard short-cuts.
+ 
+     (D) Please log in as "prog" and make the same change to prog's
+         ~/.fvwm2rc file.
+
+(18) Update the ~/.xsession files. There are two changes: (A) to
+     suggested command to improve the audibility of the bell and (B)
+     to cause ScrollLock to be ignored.  Step (C) is make these
+     changes for prog.
+
+     (A) If you would like to change the sound of your bell to make FS
+         errors more audible, you may be able to make a significant
+         change by adding an "xset b ..." command to your .xsession
+         file.  Please see the default file
+         "/usr2/fs/st.default/oper/.xsession", which includes a
+         suggested "xset b ..." command as a comment.  You can include
+         this command, uncommented, in your ~oper/.xsession to change
+         the bell behavior.  There will be no effect until you log out
+         and log back in again.  However, you can manually try "xset b
+         ..." commands from regular shell prompts in xterm windows on
+         the X display using various parameter values to see their
+         effect.  Other parameter values may work better for you.
+         Please see "man xset" for more information on the parameters
+         of the "xset" command.  Press Control-G to sound the bell.
+
+     (B) Add the line:
+
+           xmodmap -e "clear Mod5"
+
+         to ~oper/.xsession before the line:
+
+           fvwm &
+
+         This change fixes the problem with ScrollLock interferring
+         with keyboard shortcuts and ClickToFocus. Actually, it
+         completely disables this key.  Please see the default file
+         "/usr2/fs/st.default/oper/.xsession" for an example.
+
+     (C) Please log in as "prog" and make the same change to prog's
+         ~/.xsession file.
+
+(19) Update your version of the "print2dymo" script if you have one.
+     If, for example, you currently have your print2dymo script in
+     ~oper/bin, then first compare your old script (or better, the old
+     default) to the new default script:
+
+       cd ~/bin
+       diff print2dymo /usr2/fs/misc/print2dymo
+
+     noting any differences between it and the new default. Several
+     things changed in the new version, but you should particularly
+     note what your current Dymo printer name is, then copy the new
+     default over your existing script:
+
+       cp -a /usr2/fs/misc/print2dymo .
+
+     the edit it so that only "Perl" command appropriate for your
+     Linux distribution, FSL5, FSL6, or FSL7 is uncommented (the FSL5
+     command is uncommented by default, but will need to be commented
+     out if you have FSL6 or FSL7).  Finally adjust which "lpr"
+     command appropriate for your system is uncommented, using your
+     Dymo printer name.
+ 
+(20) Test the FS as "oper". Generally speaking a fairly thorough test
      is to run a test experiment: start with DRUDG-ing a schedule,
      making listings, and any other pre-experiment preparation you
      normally do, then execute part of schedule, and perform any
@@ -1125,25 +1500,36 @@ you have any questions about how to cut-and-paste please contact Ed
      use tape, you should test a section that includes a tape change
      and a parity check in each direction.  The idea here is to verify
      that everything works as you expect for normal operations.  In
-     particular for this upgrade you should test that Mark 5A
+     particular for this upgrade you should test that Mark 5
      operations work as expected.
+
+(19) Consider when to update your back-ups.  You certainly should not
+     update them until you have performed the tests described above.
+     It would be prudent to wait until you have successfully run an
+     experiment or two and preferably received word that the
+     experiment(s) produced good data.  The chances of needing your
+     back-up before you update it is fairly small.  If something does
+     happen, you can copy the pre-FS update back-up it to the (now
+     bad) FS updated disk.  You can then either run the recopied disk
+     or apply the FS update again.  Handling this will be a lot safer
+     if you have a third disk.
 
 IV. Transferring The Update Archive By DOS Floppy
 
 In order to assist sites that need to transfer the FS archive by DOS
-floppy, "split" files of the fs-9.10.2.tgz archive have been placed in
+floppy, "split" files of the fs-9.10.3.tgz archive have been placed in
 the /fs/dist directory on atri.gsfc.nasa.gov.  These files are small
 enough to each fit on 1.44 MB 3.5" floppy.  The files are:
 
-fs9102tg.aa
-fs9102tg.ab
+fsp103tg.aa
+fsp103tg.ab
 
 If you need to use DOS floppies to get files to the FS computer,
 please copy these files to some directory such as /tmp on the FS
 computer and then execute the command:
 
-cat fs9102tg.* >fs-9.10.2.tgz
+cat fsp103tg.* >fs-9.10.3.tgz
 
-This will create an exact image of the original fs-9.10.2.tgz archive
+This will create an exact image of the original fs-9.10.3.tgz archive
 on your computer.  Please be sure to use binary transfer when getting
 the files from atri.
