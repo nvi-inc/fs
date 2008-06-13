@@ -1,4 +1,4 @@
- Version 9.0.5 950905
+Version 9.0.5 950905
 
 950920 WEH rtelb/rte_fixt.c
            No longer gives a negative centiseconds if the computer clock was
@@ -8381,3 +8381,279 @@ Version 9.10.1 071210
            remove CC=gcc-2.95
 
 Version 9.10.2 071231
+
+080104 weh oprin/Makefile
+           remove CC=gcc
+
+080110 weh fmset/get5btime.c
+           set tvr =0 regardless of rack type
+
+080219 JQ  msg/msg
+           fixed to ignore "*" as source name
+
+080219 weh st.default/control/rxg_files/s.rxg
+           st.default/control/rxg_files/x.rxg
+           fixed typos in comments
+
+080221 weh st.default/st-0.0.0/stlib/stm_util.c
+           for some newer compilers: removed shmat()declaration,
+           included stdlib.h
+
+080318 weh vex/vex.yy.l
+           restored new flex version,
+           removed "static" declaration of lit() and quote() that
+           some compilers don't like
+
+080324 weh msg/msg
+           added pack types F, G, and H
+
+080331 weh control/fspgm.ctl
+           fs/fs.c
+           implement -No_X option
+
+080331 weh oprin/oprin.c
+           oprin/readl.h
+           oprin/readl.c
+           implement end_oprin command
+
+080401 weh fs/fs.c
+           fix typo in error message
+
+080407 weh control/fserr.ctl
+       weh boss/bwork.f
+080409 weh quikr/Makefile
+       weh ddout/ddout.c
+       weh help/tnx.___
+           expanded TNX command
+
+080416 jmg st.default/control/skedf.ctl
+           New Dymo label sizes
+
+080425 jq  ibcon/statbrd.c
+       jq  ibcon/rspdev.c
+       jq  ibcon/rddev.c
+       jq  ibcon/iclrdev.c
+       jq  ibcon/Makefile
+       jq  ibcon/echo_out.c
+       jq  ibcon/opdev.c
+       jq  ibcon/wrdev.c
+       jq  ibcon/sib.c
+080429 weh oprin/readl.c
+       weh pfmed/readpl.c
+       weh oprin/Makefile
+       weh pfmed/Makefile
+           updated to compile to FSL7
+
+080429 weh fs/fs.c
+           add sleep for orderly termination messages
+
+080429 weh poclb/logit.c
+           fixed potential bug for NULL msg pointer
+
+080429 weh ibcon/opbrd.c
+           updated for FSL7
+
+080430 weh st.default/proc/station.prc
+080501 weh misc/fsinstall
+           just copy default station.prc for new installations
+
+080508 weh st.default/control/dev.ctl
+           improved GPIB device comment
+
+080509 weh st.default/prog/.fvwm2rc
+080509 weh st.default/oper/.fvwm2rc
+           fixed previous/next to not stop at no focus windows
+
+080514 jmg misc/print2dymo
+           generally improved and updated for FSL7
+
+080515 weh misc/mdstat.7
+080521 weh misc/refresh_secondary.sdb
+080521 weh misc/refresh_secondary.hdc
+080521 weh misc/mdstat.6
+           created, mdstat.6 renamed from mdstat
+
+080522 weh misc/RAID.txt
+080522 weh misc/FSL7_PC_Checkout.txt
+080522 weh misc/fstime.txt
+080523 weh misc/FSL7_End_User.txt
+           updated documents
+
+080523 weh help/tsys.___
+           help/caltemp.___
+           help/tpgain.w__
+           help/tpdiffgain.w__
+           help/tpdiff.___
+           help/tpzero.___
+           help/tpi.___
+           help/tpical.___
+           added/imroved formbbc/vc/if documentation
+
+080526 weh misc/print2dymo
+           clarifying comment added
+
+080526 weh misc/FSL7_End_User.txt
+           typo fixed
+
+080527 weh misc/FSL7_PC_Checkout.txt
+           typo fixed
+
+080529 weh st.default/prog/.xsession
+           st.default/oper/.xsession
+           added bell control example comment
+
+080602 weh misc/FSL7_PC_Checkout.txt
+           typo fixed
+
+080604 weh misc/FSL7_End_User.txt
+           misc/FSL7_PC_Checkout.txt
+           fixed typos
+
+080604 weh msg/msg
+           adjustd disk type sizes
+
+080606 weh quikv/disk2file.c
+           updated to handle Mark5 control program (Mark5A) scan_set problem
+
+080604 weh misc/autoftp.txt
+           fixed e-mail address
+
+080609 weh st.default/oper/.fvwmrc
+           st.default/oper/.fvwmrc
+           deleted
+
+080609 weh misc/FSL7_PC_Checkout.txt
+           misc/FSL7_End_User.txt
+           improvements
+
+080610 weh misc/FSL7_Upgrade.txt
+           improvements
+
+080610 weh pfmed/readpl.c
+           fix procname completion bug from FSL7 upgrade changes
+
+080610 weh boss/spars.f
+           expand multiple "$"s for procedure arguments
+
+080610 weh clib/skd_util.c
+           clib/setup_ids.c
+           clib/nsem_util.c
+           clib/brk_util.c
+           clib/sig_ignore.c
+           clib/semid_util.c
+           clib/go_util.c
+           rtelb/rte_rawt.c
+           rtelb/rte_cmpt.c
+           monit/monit1.c
+           monit/die.c
+           monit/monit2.c
+           monit/monit3.c
+           monit/monit4.c
+           monit/die4.c
+           monit/monit5.c
+           mcbcn/mcbcn.c
+           fmset/fmset.c
+           fmset/getfmtime.c
+           fmset/getvtime.c
+           fmset/set4time.c
+           fmset/setfmtime.c
+           fmset/setvtime.c
+           fmset/gets2time.c
+           fmset/sets2time.c
+           fmset/get5btime.c
+           fmset/set5btime.c
+           go/go.c
+           fsvue/vueinfo.c
+           mk5cn/mk5cn.c
+           st.default/st-0.0.0/stalloc/stalloc.c
+           st.default/st-0.0.0/metserver/src/metwind.c
+           st.default/st-0.0.0/sterp/sterp.c
+           clib/prog_exec.c
+           clib/get_vatod.c
+           clib/lvdonn_v.c
+           clib/head_vmov.c
+           clib/res_util.c
+           clib/motion_done.c
+           clib/v2_head_vmov.c
+           clib/v2_motion_done.c
+           clib/v2_vlt_head.c
+           clib/rclcn_res_util.c
+           clib/setMK4FMrec.c
+           clib/ib_util.c
+           clib/v_vlt_head.c
+           clib/get_tcal_fwhm.c
+           poclb/pname.c
+           onoff/onoff.c
+           onoff/tpi_mark.c
+           onoff/get_samples.c
+           onoff/tzero.c
+           onoff/wcounts.c
+           run/run.c
+           fmset/get4time.c
+           lognm/lognm.c
+           pcald/pcald.c
+           tpicd/tpicd.c
+           st.default/st-0.0.0/antcn/antcn.c
+           st.default/st-0.0.0/stlib/stm_util.c
+           st.default/st-0.0.0/cheks/cheks.c
+           st.default/st-0.0.0/pcald/pcald.c
+           clib/lvdofn_v.c
+           fmpsee/fmpopen.c
+           ddout/ddout.c
+           clib/lba_trkfrm_util.c
+           onoff/scmds.c
+           fsvue/vuecalq.c
+           erchk/erchk.c
+           clib/cchmod.c
+           clib/mvdis_v.c
+           flagr/flagr.c
+           clib/cshm_init.c
+           clib/bsfo2code.c
+           clib/bsfo2vars.c
+           clib/get_5btime.c
+           fclib/fc_putln.c
+           rtelb/rte_alarm.c
+           inject_snap/inject_snap.c
+           clib/set_vaux.c
+           clib/dqa4_cnvrt.c
+           clib/get_k3time.c
+           clib/get_k4time.c
+           onoff/tpget_mark.c
+           rclco/rcl/rcl_sysn.c
+           remove compile warnings for FSL7
+
+080610 weh st.default/st-0.0.0/metclient/src/metclient.c
+           st.default/st-0.0.0/tacdclient/src/tacdclient.c
+           st.default/st-0.0.0/metserver/src/MakeDiag
+           st.default/st-0.0.0/metserver/src/metget.c
+           fix FSL7 compile issues
+
+080612 weh st.default/oper/.fvwm2rc
+           st.default/prog/.fvwm2rc
+           st.default/oper/.xsession
+           st.default/prog/.xsession
+           add xmod and IgnoreModifiers to fix various lock key problems
+
+080612 weh misc/FSL7_End_User.txt
+           st.default/oper/.login
+           st.default/prog/.login
+           add "from" to check for mail on login
+
+080612 weh mcbcn/mcbcn.c
+           fix digi_t decl to be be struct
+
+080613 weh misc/RAID.txt
+           misc/FSL7_Upgrade.txt
+           misc/FSL7_End_User.txt
+           typos
+
+080613 weh misc/FSL7_Upgrade.txt
+           st.default/oper/.login
+           st.default/prog/.login
+           use explicit mbox in mail test
+
+080613 weh erhck/erchk.c
+           added "m5" and "5m", removed "ib" from red
+
+Version 9.10.3 080613
+

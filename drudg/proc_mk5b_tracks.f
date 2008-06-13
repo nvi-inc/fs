@@ -25,7 +25,8 @@
       logical kgeo_mode
       integer idiv
       character*80 cbuf
-      logical kfirst
+      logical kcomment_only         !only put out comments.
+      character*2 cprfix           !prefix (Either blank or ")
 
       character*1 lul(2)            !ASCII "U","L"
       character*1 lsm(2)            !ASCII "S","M"
@@ -56,16 +57,17 @@
       data lul/"U","L"/
       data lsm/"S","M"/
 
-      kfirst=.true.
-! If we don't have a VSI4 formatter,
-!   write out comments and command and exit.
+! If we don't have a VSI4 formatter write out comments.
+      kcomment_only=.false.
+      cprfix=" "
       if(.not.(km5rack .or. kv5rack)) then
+        kcomment_only=.true.
+        cprfix='"'
         write(lu_outfile,'(a,/,a,/,a,/,a)')
      >  '"Please change the following mk5b_mode command to reflect',
      >  '"the desired channel assignments and effective sample rate:',
      >  'mk5b_mode=ext,0xffffffff,1',
      >  'mk5b_mode'
-         return
       endif
 
       idiv = 32/nint(samprate(icode))
@@ -84,6 +86,9 @@
                 ib=ibbcx(ic,istn,icode)   !this is the BBC#
                 num_tracks=num_tracks+1
                 if(num_tracks .gt. max_csb) then
+                  if(kcomment_only) then
+                     return
+                  endif
                   write(*,"(a)")
      >              "Proc_mk5b_tracks Error!  Too many channels"
                   write(*,*) "Max is ", max_csb
@@ -104,8 +109,10 @@
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lgeo_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then
-           write(*,*) " "
-           write(*,*) "Invalid m5b_geo  track: ", lsked_csb(ic)
+           if(.not.kcomment_only) then
+             write(*,*) " "
+             write(*,*) "Invalid m5b_geo  track: ", lsked_csb(ic)
+           endif
            goto 200
         endif
         itemp=1
@@ -121,11 +128,12 @@
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lvlba_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then
-          write(*,*) " "
-          write(*,*) "Invalid m5b_vlba track: ", lsked_csb(ic)
+          if(.not.kcomment_only) then
+            write(*,*) " "
+            write(*,*) "Invalid m5b_vlba track: ", lsked_csb(ic)
+          endif
           return
         endif
-
         itemp=1
         itemp=ishft(itemp,ibit-1)
         imask=ior(imask,itemp)    !set the appropriate bit.
@@ -150,10 +158,24 @@
         itemp=ishft(itemp,1)            !shift the bit.
       end do
 
-      write(cbuf,'("mk5b_mode=ext,0x",Z8.8,",",i2)') imask,idiv
+      if(kcomment_only) then
+        if(kgeo_mode) then
+          write(lu_outfile,'(a)')
+     >      '" Track assignments consistent with vsi4=geo'
+        else
+          write(lu_outfile,'(a)')
+     >      '" Track assignments consistent with vsi4=vlba'
+        endif
+        write(lu_outfile,'(a)') '" Appropriate mask follows'
+      endif
+
+      write(cbuf,'(a,"mk5b_mode=ext,0x",Z8.8,",",i2)')
+     >  cprfix,imask,idiv
       call squeezewrite(lu_outfile,cbuf)
+      if(kcomment_only) return
 
       write(lu_outfile,'("mk5b_mode")')
+
 
       if(kgeo_mode) then
         write(lu_outfile,'("vsi4=geo")')

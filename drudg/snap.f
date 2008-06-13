@@ -430,6 +430,9 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 !                 In this case, don't output preob,midob,postob
 ! 2007Dec12 JMG.  Don't emit time for scan_Begin if not recording.
 ! 2007Dec27 JMG.  Moved ready_disk before 1st setup
+! 2007Feb01 JMG.  "Checkm5" had clued off of "iobss<>0". This didn't work if first
+!                 several scans were not recored. Chagned to "iobsst<>0".
+! 2008Mar19 JMG.  Don't issue setup if recording.
 
       kdebug=.false.
 
@@ -920,7 +923,7 @@ C               SOURCE=name,ra,dec,epoch
            write(lufile,'("ready_k5")')
         endif
 
-        if((iobss.ne.0).and.(idir.ne.0) .and.
+        if((iobsst.ne.0).and.(idir.ne.0) .and.
      >     (km5disk.or.km5a_piggy.or.km5p_piggy.or.kk5).and.
      >     .not. (krunning .or. kdata_xfer_prev))  then
            if(kk5) then
@@ -1102,7 +1105,8 @@ C This is called on the first scan, if the setup is wanted on this
 C scan (flag 1=Y), if tape direction changes, or if a check was done
 C prior to this scan. Do only on a new pass for continuous. But
 C do it every scan for S2.
-        if ((.not.kvex.and..not.kcont).or.(kcont.and..not.krunning).or.
+        if ( (.not.kvex.and..not.kcont.and. .not.krunning) .or. 
+     >        (kcont.and..not.krunning).or.
      >        (kvex.and..not.krunning).or.ks2) then
         IF (IOBSs.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
      >       .OR.ICHK.EQ.1) THEN

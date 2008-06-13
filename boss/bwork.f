@@ -27,7 +27,7 @@ C
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
       integer*2 ibuf(256)         !  input buffer containing command
-      integer*2 ibuf2(256),ibufd(2)
+      integer*2 ibuf2(256),ibufd(3)
       character*512 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
@@ -1063,17 +1063,41 @@ c
               if (ierr.ne.0) then
                  call logit7ci(0,0,0,0,-301,'bo',0)
               else 
+                 ioffon=-1
                  ibufd(2)=iparm(1)
                  call gtprm2(ibuf,ich,nchar,0,parm,ierr)
-                   if(ierr.lt.0) then
+                 if(ierr.lt.0) then
                     call logit7ci(0,0,0,0,-302,'bo',0)
                  else if(0.eq.ichcm_ch(parm,1,'on')) then
-                    call put_buf(iclbox,ibufd,-4,'fs','tf')
+                    ioffon=1
                  else if(0.eq.ichcm_ch(parm,1,'off').or.
      &                   ierr.eq.2) then
-                    call put_buf(iclbox,ibufd,-4,'fs','tn')
+                    ioffon=0
                  else   
                     call logit7ci(0,0,0,0,-302,'bo',0)
+                 endif
+                 if(iffon.ne.-1) then
+                    call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+                    if(ierr.lt.0.or.ierr.eq.1) then
+                       call logit7ci(0,0,0,0,-310,'bo',0)
+                    else
+                       ibufd(3)=-32768
+                       if(ierr.eq.2) then
+                          ibufd(3)=0
+                       else if(0.ne.ichcm_ch(parm,1,'#')) then
+                          call logit7ci(0,0,0,0,-310,'bo',0)
+                       else
+                          ic1=iscn_ch(ibuf,1,nchar,'#')
+                          ibufd(3) = ias2b(ibuf,ic1+1,nchar-ic1)
+                       endif
+                       if(ibufd(3).eq.-32768) then
+                          call logit7ci(0,0,0,0,-310,'bo',0)
+                       else if(ioffon.eq.1) then
+                          call put_buf(iclbox,ibufd,-6,'fs','tn')
+                       else if(ioffon.eq.0) then
+                          call put_buf(iclbox,ibufd,-6,'fs','tf')
+                       endif
+                    endif
                  endif
               endif
            endif

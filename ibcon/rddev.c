@@ -12,8 +12,12 @@
 #ifdef NI_DRIVER
 #include <sys/ugpib.h>
 #else
+#ifdef REV_3
+#include <gpib/ib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #endif
 #else
 extern int ibsta;
@@ -132,7 +136,7 @@ int *kecho;
   if (*mode == 0 && (ascii_last!=1 || !serial)) {
     if (!serial) {
 #ifdef CONFIG_GPIB
-#ifdef NI_DRIVER
+#if defined(REV_3) || defined(NI_DRIVER)
       val = REOS | LF;
 #else
       val = (REOS << 8) + LF;

@@ -5,10 +5,18 @@ pfmed.o fed.o ffm.o ffmp.o fnblnk.o kerr.o pfblk.o \
 pfcop.o pfmbd.o purn.o reprc.o ftn_edit.o sortp.o\
 scanp.o sortq.o readpl.o ldsrt.o follow_link.o
 #
-CFLAGS = -I../oprin/readline-2.0
 LIBES = ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a ../flib/flib.a\
- ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a\
- ../oprin/readline-2.0/libreadline.a
+ ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
+ifeq (../oprin/readline-2.0,$(wildcard ../oprin/readline-2.0))
+LIBES := $(LIBES) ../oprin/readline-2.0/libreadline.a
+CFLAGS = -I../oprin/readline-2.0 -DREADLINE
+else
+LIBES := $(LIBES) -lreadline
+READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_completion_append_character' /usr/include/readline/readline.h ; echo $$?)
+ifneq ($(READLINE),0)
+$(error ../oprin/readline-2.0 does not exist, but system readline is incorrect version, make oprin first)
+endif
+endif
 #
 TERMLIB = -lncurses
 ifeq (/usr/lib/libtermcap.a,$(wildcard /usr/lib/libtermcap.a))
@@ -16,7 +24,7 @@ TERMLIB = -ltermcap
 endif
 
 #
-../bin/pfmed: $(OBJECTS) $(LIBS)
+../bin/pfmed: $(OBJECTS) $(LIBES)
 	$(FC)  -o ../bin/pfmed $(OBJECTS) $(LIBES) $(TERMLIB)
 	strip ../bin/pfmed
 #

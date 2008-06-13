@@ -8,6 +8,7 @@
  * board. 
  */
 
+#include <stdio.h>
 #include <memory.h>
 #include <string.h>
 #include <errno.h>
@@ -16,8 +17,12 @@
 #ifdef NI_DRIVER
 #include <sys/ugpib.h>
 #else
+#ifdef REV_3
+#include <gpib/ib.h>
+#else
 #include <ib.h>
 #include <ibP.h>
+#endif
 #endif
 #else
 extern int ibsta;

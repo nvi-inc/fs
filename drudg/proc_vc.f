@@ -25,7 +25,8 @@
       integer ichmv
 
 ! History:
-!  2007Jul09. Split off from procs.
+! 2007Jul09. Split off from procs.
+! 2008Feb26 JMG.  Write out comment if unused BBCs are present.
 
 ! local variables.
       character*80 cbuf2        !temporary text buffer
@@ -46,6 +47,8 @@
       integer ic_hi             !channel # of hiband
       integer i
       integer igotbbc(max_bbc)  !flag indicating that we have this BBC
+      logical kfirst
+      character*2 cprfix
 
 
       character*1 cvc2k42(max_bbc)
@@ -57,6 +60,7 @@
       data cvchan /8*'A',8*'B'/
       data Z4000/Z'4000'/,Z100/Z'100'/
 
+      cprfix='"'
 
       do irec=1,nrecst(istn) ! loop on recorders
 C       If both recorders are in use then do the check to see if
@@ -349,8 +353,14 @@ C                     Normally LSB so login inverts
 
           nch=4
           if (kvc) nch=3
+          kfirst=.true.
           do ib=1,max_bbc
             if(ibbc_present(ib,istn,icode) .eq. -1) then  !present but not used.
+              if(kfirst) then
+                 kfirst=.false.
+                 write(lu_outfile,'(a,a)') cprfix,
+     >             "NOTE: following BBCs/VCs are present but not used"
+              endif
               write(cbuf2(nch:nch+1),'(i2.2)') ib
               call squeezewrite(lu_outfile,cbuf2)
             endif

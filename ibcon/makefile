@@ -8,10 +8,15 @@ CFLAGS :=  -DCONFIG_GPIB -DNI_DRIVER
 GPIB_LIBS := -lgpib
 else
 ifeq (/usr/include/gpib,$(wildcard /usr/include/gpib))
-GPIB_LIBS=-lf2c -lgpib -lfl
 CFLAGS := -I/usr/include/gpib -DCONFIG_GPIB
+ifeq (/usr/include/gpib/gpib_user.h,$(wildcard /usr/include/gpib/gpib_user.h))
+CFLAGS := $(CFLAGS) -DREV_3
+GPIB_LIBS=-lgpib
+else
+GPIB_LIBS=-lf2c -lgpib -lfl
 ifneq (/usr/include/gpib/ugpib.h,$(wildcard /usr/include/gpib/ugpib.h))
 CFLAGS := $(CFLAGS) -DREV_2
+endif
 endif
 endif
 endif

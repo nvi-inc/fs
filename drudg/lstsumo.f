@@ -46,6 +46,8 @@ C 021011 nrv Another digit for printing gap time.
 ! 2006Nov09 JMGipson.  1st page was 1 line longer than others. Fixed.
 ! 2006Nov30 JMGipson. Changed to use cstrec(istn,irec).
 ! 2007Jul28 JMGipson. Replace kdisk by km5disk which is in hardware.ftni
+! 2008Jan07 JMGipson.  Changed so that will ALWAYS print line numbers if recorder type is none.
+!                     Previously relied on recorder starting and stopping info, which is absent in the "none" case.
 
 ! Functions
       integer julda
@@ -113,7 +115,6 @@ C Local
       character*2 ccodetmp
       equivalence (ccodetmp,lcodetmp)
       integer nch
-      integer itype
       integer num_sub_pass,num_recs
       character*12 lfilnam
 ! tape type
@@ -382,7 +383,7 @@ C  2. Column heads.
       knew_start=ktimedif(itime_tape_start,itime_tape_start_old)
       write(luprt,'(1x,a9,1x,$)') cscan
 
-      if(knew_start.or.ks2) then
+      if(knew_start.or.ks2 .or. cstrec(istn,1) .eq. "none") then
          write(luprt,'(i5,$)') nsline
       else
          write(luprt,'("     ",$)')

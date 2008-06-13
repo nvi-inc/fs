@@ -14,26 +14,18 @@
 #CC = gcc
 #CC = gcc-2.95
 
-READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_completion_append_character' /usr/include/readline/readline.h ; echo $$?)
-
 # In all default compilation commands involving the C preprocessor,
 # use these preprocessor control flags (include dirs, defines).
-ifneq ($(READLINE),0)
 CPPFLAGS = -Ireadline-2.0
 
 # Flags for default $(CC) compilations.
-CFLAGS = -Wall -pipe -O2 -fomit-frame-pointer -DREADLINE
+CFLAGS = -Wall -pipe -O2 -fomit-frame-pointer
 # debugging CFLAGS =  -Wall -pipe -g
-endif
 
 # What objects and libraries are linked together.
 OBJECTS = oprin.o readl.o
 LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
-ifneq ($(READLINE),0)
 LIBS := $(LIBS) readline-2.0/libreadline.a
-else
-LIBS := $(LIBS) -lreadline
-endif
 # (Note: ":=" evaluates '$(xxx)'s on right-hand side immediately whereas
 #        "=" stores the '$(xxx)' var references and evaluates them again
 #            whenever the left-hand-side variable is used.)
@@ -57,21 +49,14 @@ endif
 
 # Actually 'oprin.c' is not dependent on the lib archive file
 # but the include files in 'readline-2.0' directory, but still:
-ifneq ($(READLINE),0)
 oprin.o: oprin.c readline-2.0/libreadline.a
 #readl.c too
 readl.o: readl.c readline-2.0/libreadline.a
-else
-oprin.o: oprin.c
-#readl.c too
-readl.o: readl.c
-endif
 # (Note that when we don't specify the command(s) to execute,
 #  GNU make defaults to the built-in rule actions.)
 
 # We (re)create the GNU Realine library by unpacking the original
 # archive, modifying it slightly, and rebuilding the whole thing.
-ifneq ($(READLINE),0)
 readline-2.0/libreadline.a: readline-2.0.tar.gz patch-rl-2.0
 	# Make sure we recreate Readline library again.
 	rm -rf readline-2.0
@@ -83,7 +68,7 @@ readline-2.0/libreadline.a: readline-2.0.tar.gz patch-rl-2.0
 	(cd readline-2.0; rm -f readline; ln -s . readline)
 	# Configure and make.
 	(cd readline-2.0; ./configure; make)
-endif
+
 clean:
 	rm -rf *~ *.o readline-2.0 ../bin/oprin
 

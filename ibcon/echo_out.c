@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
 echo_out(rw,bin,dev,buffer,buflen)
 int rw, bin, dev, buflen;
