@@ -1,121 +1,144 @@
-File: /usr2/fs/misc/RAID.txt  Version: 0.4  Date: 071004
+File: /usr2/fs/misc/RAID.txt  Version: 1.1  Date: 080613
 
-		RAID Usage with FS Linux FS 6 (sarge)
+	    RAID Usage with FS Linux 6 (sarge) & 7 (etch)
 
 		    Ed Himwich and Jonathan Quick
 
 INTRODUCTION
 
 This document describes how to maintain the RAID system that is
-installed as standard in FS Linux 6.  The document is divided into
+installed as standard in FS Linux 6 & 7.  The document is divided into
 several small sections.  The discussion starts with an OVERVIEW
 section that describes the system and the rationale for its use.  The
 disk layout is described as well.  The NORMAL OPERATION describes how
 the system is intended to be used for normal operations and defines
 some nomenclature.  The RAID STATUS section explains how to determine
-if the RAID system is still in process of updating the disks.  The
+if the RAID system is still in process of refreshing the disks.  The
 DISK ROTATION section explains how to rotate the disks to update the
 back-ups.  The REFRESHING A STALE SECONDARY DISK section explains how
 to re-introduce an old disk back into the RAID system to bring it back
 up to date.  The RECOVERING FROM A DISK FAILURE section explains how
-to handle a disk failure. The RECOVERING A LOST FILE OR FILES explains
-how to recover data from a non-active disk.  The APPLYING AN UPDATE
-section describes a method to use for updates so that it is relatively
-easy to recover if the updates fails for some reason.  The RECOVERING
-FROM A STALE SHELF DISK explains how to return the RAID system back to
-the state stored on an inactive disk.  The REPLACEMENT DISKS section
-describes considerations when buying replacement disks.  The SCRIPTS
-section documents two useful scripts.  The APPENDIX A. DISK RESET
-RECIPE describes how to reset the mount count on a bad disk so that a
-back-up can be used to refresh it without having to reboot the back-up
-many times to make it "less stale".
+to handle a disk failure.  The RECOVERING A LOST FILE OR FILES
+explains how to recover data from a inactive disk.  The APPLYING AN
+UPDATE section describes a method to use for updates so that it is
+relatively easy to recover if the updates fails for some reason.  The
+RECOVERING FROM A STALE SHELF DISK explains how to return the RAID
+system back to the state stored on an inactive disk.  The REPLACEMENT
+DISKS section describes considerations when buying replacement disks.
+The SCRIPTS section documents two useful scripts.  The APPENDIX
+A. DISK RESET RECIPE section describes how to reset the mount count on
+a stale disk so that a back-up can be used to refresh it without
+having to reboot the back-up many times to make it "less stale".
 
 OVERVIEW
 
 Beginning with FS Linux 6, the standard disk configuration for a FS
-computer is to use a RAID1 scheme.  In this approach two drives are
-normally inserted all the time.  The operating system maintains these
-as direct mirrors of each other.  If one disk should fail, even during
-operation, there should be no loss of system functionality.  This
-also provides a continuous automatic back-up of the operational
+computer is a RAID1 scheme.  In this approach two drives are normally
+inserted all the time.  The operating system maintains these as direct
+mirrors of each other.  If one disk should fail, even during normal
+operations, there should be no loss of data or system functionality.
+This also provides a continuous automatic back-up of the operational
 software.  The robustness and continuous backup are the primary
 advantages of using the RAID1 approach.  The primary disadvantage is
 that because the back-up occurs automatically and continuously, the
-back-up disk cannot be used to recover a file that accidently deleted
-or recover from a change that was made since the last back-up.
+back-up disk cannot be used to recover a file that was accidentally
+deleted or recover from a change that was made since the last back-up.
 However, stations that have three disks can still maintain a "Shelf"
 back-up disk that can be used to recover from such errors, provided
 the back-up is recent enough.  It is recommended that all stations
-should have three disks.
+have three disks.
 
-Stations with two disks are also recommended to run in in the RAID1
-configuration.  However, disk rotation, nor any other operation in
-this document that utilizes a third disk is not applicable to these
-stations.  The APPLYING AN UPDATE section recommends that in this
-case, an update still be applied to only one disk to allow recovery if
-necessary.
+Stations with only two disks are also recommended to run in the RAID1
+configuration.  However, neither disk rotation, nor any other
+operation in this document that utilizes a third disk is applicable to
+these stations.  The APPLYING AN UPDATE section recommends that in the
+two disk case, an update still be applied to one disk only to allow
+reversal if necessary.
 
-The disk partition layout on the disks is:
+For IDE (PATA) disk, the partition layout on the disks is:
 
 Raid Device  Disk devices  File System
 md0          hda1, hdc1    /
 md1          hda5, hdc5    swap area
 md2          hda6, hdc6    /usr2
-        
+
+For SCSI and SATA disks, the partition layout on the disks is:
+
+Raid Device  Disk devices  File System
+md0          sda1, sdb1    /
+md1          sda5, sdb5    swap area
+md2          sda6, sdb6    /usr2
+
 The RAID system automatically mounts and maintains both disks in a
 mirrored state as long as they are booted together.  If one disk is
 removed before a boot it becomes "stale". The RAID system notes this
-and will not automatically re-use it.  It must be added back into the
-array before it can be used again.  This is true of any "stale" disk
-(mounted fewer times than the other or others).  The process of adding
-a disk back in is described in REFRESHING A STALE SECONDARY DISK.
+and will not automatically re-use it.  It must be "added" back into
+the array before it can be used again.  This is true of any "stale"
+disk (mounted fewer times than the other or others).  The process of
+adding a disk back in is described in REFRESHING A STALE SECONDARY
+DISK.  When a stale disk is being brought back up to date it is
+referred to as a "recovery" taking place.
 
 The system can be shutdown with no special consideration of the RAID
 as long as which disks are installed does not change before the next
 boot.  If the disks are to be changed after a shutdown, it should be
-verified that there is no refreshing ongoing before shutting down.
-The procedure for checking this is described in the RAID STATUS
-section.  If system was shutdown accidently for any reason (power
-failure) without verifying that no refreshing was occurring, they
-should not be changed until the system has been rebooted and it has
-been verified that there is no refreshing in progress.
+verified that there is no recovery ongoing before shutting down.  The
+procedure for checking this is described in the RAID STATUS section.
+If system was shutdown accidently for any reason (power failure)
+without verifying that no recovery was occurring, they should not be
+changed until the system has been rebooted and it has been verified
+that there is no recovery in progress.
 
-The system can be shutdown both accidently and by purpose in many
-ways.  The best way is to use the "shutdown" command as "root", but it
-can also be shutdown using Ctrl-Alt-Del on vt1-vt6 or by a power
-failure, or by a hard re-boot, e.g cycling the power switch to force a
-re-boot.  In any of these cases and with the same disks installed on
-reboot the RAID system on boot-up will restart any mirroring it was in
-the process of doing when it was shutdown.  It is however recommended
-to avoid this if possible and to avoid power failure and hard reboot
-in general.
+The system can be shutdown both accidently and on purpose in many
+ways.  The best way is to use the "shutdown" command as "root", but
+other ways include using Ctrl-Alt-Del on vt1-vt6 (and remove the power
+during the POST of the computer during the boot), by a power failure,
+or by a hard re-boot, e.g cycling the power switch to force a re-boot.
+In any of these cases and with the same disks installed on reboot the
+RAID system on boot-up will restart any recovery that was in process
+when it was shutdown.  It is however recommended to avoid this if
+possible and to avoid power failures and hard reboots in general.  An
+inexpensive un-interruptible power supply (UPS) is a relatively cheap
+way to avoid accidental shutdowns due to short power glitches.
 
-Disk should be only be inserted or removed when the computer power is
+In general it is a good idea to always verify the status of the RAID
+whenever the system is not shutdown cleanly.  The procedure for
+checking this is described in the RAID STATUS section.  The "mdadm"
+utility ("man mdadm" for more information) has various options for
+managing the RAID devices, if the "refresh_secondary" script described
+elsewhere in this document does not solve the problem.
+
+Disks should be only be inserted or removed when the computer power is
 off.  It is not possible to "hot swap" disks.
 
 NORMAL OPERATION
 
-Normal operation of the a FS Linux 6 system requires two hard drives.
-One installed as the master on the primary IDE interface (hda, usually
-labelled "Primary") and a second on the master of the secondary IDE
-interface (hdc, usually labeled "Secondary").  These disk will be
-running normally in RAID1 (mirroring) configuration.  A third disk
-which contains a mirror image of the system in a working state from an
-earlier date is kept on the shelf as a spare.  Periodically, the disks
-should be "rotated" so a more recent copy of the working system can be
-stored on the shelf and the disk that had been on the shelf can be
-exercised.  A period of no more than two months is recommended for
-disk rotation.  A rotation is also recommended before any significant
-or non-reversible update in order to make recovery easier in case of
-problems.
+Normal operation of a FS Linux 6 or 7 system requires two hard drives.
+One installed as the master on the primary IDE (PATA) interface, hda
+(the slot is usually labelled "Primary"), and a second on the master
+of the secondary IDE interface, hdc (the slot is usually labeled
+"Secondary").  For SATA disks, the Primary is in the slot connected to
+lowest numbered SATA interface, sda; the Secondary, the next lowest,
+sdb.  For SCSI disks the Primary disk has the lowest SCSI ID, sda; the
+Secondary, the next lowest, sdb.  Thus for SCSI disks, the disk
+designation does not depend on the actual slots used for the disks.
 
-As a point of nomenclature, the disk inserted as the master for the
-Primary IDE controller (hda) is referred to as the "Primary", and the
-disk inserted as the master for the Secondary IDE controller (hdc), as
-the "Secondary" disk.  A third disk, stored on the shelf is referred
-to as the "Shelf" disk.  The disks are usually labelled "1", "2", and
-"3" to help keep track of which is which, but any suitable labeling
-scheme will do.
+The Primary and Secondary disks will normally be running in a RAID1
+(mirroring) configuration.  A third disk which contains a mirror image
+of the system in a working state from an earlier date is kept on the
+shelf as a spare and is referred to as the "Shelf" disk.
+Periodically, the disks should be "rotated" so a more recent copy of
+the working system can be stored on the shelf and the disk that had
+been on the shelf can be exercised.  A period of no more than two
+months is recommended for disk rotation.  A rotation is also
+recommended before any significant or non-reversible update in order
+to make recovery easier in case of problems.
+
+The disks are usually labelled "1", "2", and "3" to help keep track of
+which is which, but any suitable labeling scheme (distinct from the
+slot labels of "Primary" and "Secondary") will do.  For SCSI disk you
+may want reusable labels that say "Primary" and "Secondary" that can
+be moved between disks "1", "2" and "3" as the SCSI IDs are changed.
 
 RAID STATUS
 
@@ -124,59 +147,71 @@ You can check on the RAID mirroring status using the command:
   cat /proc/mdstat
 
 and looking for messages about expected completion time.  When none of
-the RAID devices are showing activity, the mirroring is done.  A
-script "mdstat", described in the SCRIPTS section, can also be used to
-check th status and produces more readable output than the raw "cat
-/proc/mdstat" command.
+the RAID devices are showing a completion time (i.e. when mdstat shows
+no "recovery="), any mirroring is up to date.  A script "mdstat",
+described in the SCRIPTS section, can also be used to check the status
+and produces more readable output than the raw "cat /proc/mdstat"
+command for FSL6.
 
 It is also possible to get more detailed information about the status
-of a RAID device using:
+of a RAID device using (as "root"):
 
-  mdadm -detail /dev/mdX
+  mdadm --detail /dev/mdX
 
 where X is the number of the RAID device (0, 1, or 2).
 
 DISK ROTATION
 
-When a disk rotation occurs, the system should be checked to make sure
-that the RAID system is not currently mirroring (see RAID STATUS).
-When the system is quiet, shut it down gracefully, e.g., with:
+When rotating the disks, the system should be checked to make sure
+that the RAID system is not currently recovering (see RAID STATUS)
+before shutting down.  When the system is quiet, shut it down
+gracefully, e.g., with:
 
   shutdown -h now
 
 When the system has stopped, turn it off (this may have happened
 automatically), remove the disk in the "Primary" slot, affix a label
 to it with the current date and place it on the shelf.  Move the disk
-in the "Secondary" slot to the "Primary" slot.  Take the _previous_ 
+in the "Secondary" slot to the "Primary" slot.  Take the _previous_
 "Shelf" disk and place it in the "Secondary" slot.  (The new disk in
 Secondary slot will typically have been mounted fewer times than the
-new disk in Primary slot.  However if this is not the case, it will
+new disk in Primary slot.  However if this is not the case, it will be
 necessary to boot the new disk in the Primary slot by itself enough
 times that its mount count is higher.)  Then follow the directions
 below in REFRESHING A STALE SECONDARY DISK.
+
+For SCSI disks, it may be necessary to manipulate the SCSI IDs (change
+the jumpers) of the disks so that the new Primary has a lower SCSI ID
+than the new Secondary.
 
 REFRESHING A STALE SECONDARY DISK
 
 Make sure both slot key latches are turned "on" and then power up the
 system.  Since the new "Secondary" disk is stale (mounted fewer times
-since the last complete mirroring) compared to the new "Primary"
-drive, the system should boot up using only the "Primary" disk (which
-you can confirm by watching the disk activity lights.)  Once it has
-booted, log in as root and add the "Secondary" disk back into the
-array using the commands:
+since it was last current) compared to the new "Primary" drive, the
+system should boot up using only the "Primary" disk (which you can
+confirm by watching the disk activity lights.)  Once it has booted,
+log in as "root" and add the "Secondary" disk back into the array
+using the commands for IDE (PATA) disks:
 
   mdadm /dev/md0 -a /dev/hdc1
   mdadm /dev/md1 -a /dev/hdc5
   mdadm /dev/md2 -a /dev/hdc6
 
+or for SCSI and SATA disks:
+
+  mdadm /dev/md0 -a /dev/sdb1
+  mdadm /dev/md1 -a /dev/sdb5
+  mdadm /dev/md2 -a /dev/sdb6
+
 These commands can alternately be executing using the script
 "refresh_secondary" described in the SCRIPTS section at the end of
-this document.  These commands add the stale disk into the array.
+this document.  These commands re-add the stale disk into the array.
 Once this is accomplished, the RAID system will work to bring the
-"Secondary" disk up to date.  This may take an hour or two depending
-on your disk sizes.  If convenient, it can be started before leaving
-for the evening or the weekend so that it doesn't have to be waited
-for.  The status of the mirroring can be checked with:
+"Secondary" disk up to date, i.e., recover it.  This may take an hour
+or two depending on your disk sizes.  If convenient, it can be started
+before leaving for the evening or the weekend so that it doesn't have
+to be waited for.  The status of the mirroring can be checked with:
 
   cat /proc/mdstat
 
@@ -186,8 +221,7 @@ or the script:
 
 as described in the RAID STATUS section.
 
-Once the disks mirroring is complete, the two disk should now be
-booted together.
+The RAID recovery process should be allow to run to completion.
 
 RECOVERING FROM A DISK FAILURE
 
@@ -201,16 +235,16 @@ system is not otherwise in use.  At that time, shut the system down:
 
 When the system has stopped, turn it off (this may have happened
 automatically), remove the failed disk (which should have shown no
-activity during the shutdown process).  If the failed disk was the
-"Primary" disk, then move the "Secondary" disk to the "Primary" slot,
-and place the "Shelf" disk in "Secondary" slot.  Then follow the
-directions in the section on REFRESHING A STALE SECONDARY DISK above.
+activity during the shutdown process).  Replace the failed disk with
+"Shelf" disk (adjust IDs as appropriate if you have SCSI disks).  Then
+follow the directions in the section on REFRESHING A STALE SECONDARY
+DISK above.  You will then need to obtain a new third disk.
 
 RECOVERING A LOST FILE OR FILES
 
 You can use the RAID system to recover from accidently losing one or
-more files file if the "Shelf" disk still contains the file you want
-to recover.
+more files if the "Shelf" disk still contains the file you want to
+recover.
 
 To recover a lost file, shut the system down and boot with only the
 "Shelf" disk installed in the "Primary" slot.  The "Secondary" slot
@@ -226,36 +260,39 @@ To make it easier to recovery from an error in a significant and/or
 irreversible update to the system, it is recommended that a disk
 rotation be performed just before the update is applied.  Once the
 rotation has refreshed the previously stale "Shelf" disk, shut the
-system down and move the now refreshed "Secondary" disk on the shelf
-as well.  Then boot the system with only the "Primary" disk installed.
-Perform the update on this disk only.  Carefully keep track of the
-number of times that this disk is booted by itself.
+system down and place the new "Secondary" disk on the shelf along with
+the old "Secondary" (now "Shelf") disk.  Then boot the system with
+only the "Primary" disk installed.  Perform the update on this disk
+only.  Carefully keep track of the number of times that this "Primary"
+disk is booted by itself.
 
-If the update is successful, shutdown the system and re-insert the
-"Secondary" disk you just placed on the shelf and follow the directions
-above for REFRESHING A STALE SECONDARY DISK.
+If the update is successful, shutdown the system and re-insert the new
+"Secondary" disk you just placed on the shelf and follow the
+directions above for REFRESHING A STALE SECONDARY DISK.
 
 If the update is not successful, after shutting down you can remove
-the now _bad_ "Primary" disk.  Put the "Secondary" disk from the shelf
-in the "Primary" slot and the "Shelf" disk in the Secondary slot and
-reboot.  Then follow the directions for REFRESHING A STALE SECONDARY
-DISK.  This will return you to your working system.  Then make sure
-that the now refreshed "Primary"/"Secondary" pair is rebooted at least
-one more time than the disk with the failed update was.  Note however
-that now the disk with the failed update, i.e.,. the "Shelf" disk, is
-_bad_.  Be sure to do a another disk rotation to produce an up-to-date
-"Shelf" disk before trying the update again.
+the now _bad_ "Primary" disk.  Put the new "Secondary" disk from the
+shelf in the "Primary" slot and the "Shelf" (old "Secondary") disk in
+the Secondary slot and reboot.  Then follow the directions for
+REFRESHING A STALE SECONDARY DISK.  This will return you to your
+working system.  Then make sure that the now refreshed
+"Primary"/"Secondary" pair is rebooted at least one more time than the
+disk with the failed update was.  Note however that now the disk with
+the failed update, i.e., the "Shelf" disk, is _bad_.  Be sure to do a
+another disk rotation to produce an up-to-date "Shelf" disk before
+trying the update again.
 
 For stations with two disks, no disk rotation is possible of course,
-but the updates should still be applied with only one disk in the
+but updates should still be applied with only one disk in the RAID
 array active.  This will allow recovery from the other disk in case of
 problems.  In this case, it is even more important to keep track of
 the number of times the "Primary" disk is rebooted by itself.  If it
 should become necessary to recover from the "Secondary" disk, that
-disk should be swapped into the "Primary" slot and will then will need
-to be booted by itself at least one more time than the _bad_ disk in
-order to make the RAID recognize it as "less stale" when both disks
-are booted together.
+disk should be swapped into the "Primary" slot (for SCSI disks this
+will require changing IDs instead) and will then will need to be
+booted by itself at least one more time than the _bad_ disk in order
+to make the RAID recognize it as "less stale" when both disks are
+booted together.
 
 RECOVERING FROM A STALE SHELF DISK
 
@@ -266,90 +303,148 @@ stale disk.  This can be accomplished in one of two ways, either reset
 the RAID status of the bad disks by re-initializing them using the
 installation media or reboot the "Shelf" disk by itself enough times
 so that it has booted more often than the bad disks.  The former
-method is describding in APPENDIX A. DISK RESET RECIPE at the end of
-this document.  (This latter is a okay if the bad disks have been
-rebooted only a few more times than the "Shelf" disk and you happen to
-know how many, but in general it is too tedious, reseting the disks is
-safer and easier in this extreme situation.)  Once this has been
-accomplished the "Shelf" disk can be booted as the "Primary" with
-either of the bad disks as the "Secondary".  In this configuration,
-you should then perform REFRESHING A STALE SECONDARY DISK and then do
-a DISK ROTATION to bring the system back to full normal redundancy.
+method is described in APPENDIX A. DISK RESET RECIPE at the end of
+this document.  (The latter method is a okay if the bad disks have
+been rebooted only a few more times than the "Shelf" disk and you
+happen to know how many, but in general it is too tedious, reseting
+the disks is safer and easier in this extreme situation.)  Once this
+has been accomplished the "Shelf" disk can be booted as the "Primary"
+with either of the bad disks as the "Secondary".  In this
+configuration, you should then perform REFRESHING A STALE SECONDARY
+DISK and then do a DISK ROTATION to bring the system back to full
+normal redundancy.
 
 REPLACEMENT DISKS
 
 If you have a disk failure, you should buy a replacement disk that is
-exactly the same size or bigger than the smallest remaining disk.  Make
-sure to initialize it to have each partition at least as big as the same
-partition on your smallest disk.  This will assure that all the disks
-can then be used interchangeably.  Note that the RAID size was determined
-at build time to fit within the smallest of the then included disks.
+exactly the same size or bigger than the smallest remaining disk.
+Make sure to initialize it to have each partition at least as big as
+the same partition on your smallest disk.  This will assure that all
+the disks can then be used interchangeably.  Note that the RAID size
+was determined at build time to fit within the smallest of the
+corresponding partitions on the then included disks.
+
+You can partition the disk using the installer DVD for your system
+according to the directions in, for example, fs7linux_DVD.txt.  After
+setting up the partitions for RAID usage, you can stop at the point of
+creating the MD devices (using fs7linux_DVD.txt, follow the directions
+for ending the installation near the start of step 10 of phase one),
+the disk should added into array as the secondary disk using the
+directions in this document for REFRESHING a STALE SECONDARY DISK.
+After this is done for the first time, GRUB should be installed in the
+master boot record according the directions at the end of the
+installation document (using fs7linux_DVD.txt, following step 11 in
+phase two).
 
 SCRIPTS
 
 Two utility script are described here. The "refresh_secondary" script
 is used by the "root" when adding a stale disk into the RAID array.
 The "mdstat" script is intended for use by any user to check whether
-the mirroring is currently updating.  More flexibility can be achieved
-of course using low-level commands.
+the mirroring is currently recovering.  More flexibility can be
+achieved of course using low-level commands.
 
 			  refresh_secondary
 
-The following utility script "refresh_secondary" can be used by "root"
-to automate adding the disks of a stale secondary into the disk RAID
-array for refreshing.  A copy of this script can be placed in the
-"/usr/local/sbin" directory and set-up by using the following commands
-as "root"
+The following utility scripts "refresh_secondary" can be used by
+"root" to automate adding the disks of a stale secondary into the disk
+RAID array for refreshing.  One version is provided for IDE (PATA)
+disk systems and another for SCSI or SATA disks systems; examples can
+be found in the /usr2/fs/misc/ directory as refresh_secondary.p and
+refresh_secondary.s, respectively.  A copy of the appropriate script
+can be placed in the "/usr/local/sbin" directory and set-up by using
+the following commands as "root":
 
   cd /usr/local/sbin
-  cp -a /usr2/fs/misc/refresh_secondary .
+
+  cp -a /usr2/fs/misc/refresh_secondary.hda refresh_secondary  (for IDE (PATA))
+          or
+  cp -a /usr2/fs/misc/refresh_secondary.sdb refresh_secondary  (for SCSI or SATA)
+
   chown root.root refresh_secondary
   chmod a+r,u+wx,go-wx refresh_secondary
 
 Thereafter it can executed by "root" (only) as a normal command.  The
-contents of the script are:
+contents of the script for IDE (PATA) disks, refresh_secondary.hdc, is:
 
 #!/bin/sh
-if [[ -n `mdadm --detail /dev/md0 /dev/md1 /dev/md2 | grep /dev/hdc` ]]; then
+# for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
+if [[ -n `mdadm --detail /dev/md0 /dev/md2 | grep /dev/hdc` ]]; then
         echo "ERROR: \"Secondary\" disk /dev/hdc is already active !!"
         exit 1
+elif [[ -n `mdadm --detail /dev/md1 | grep /dev/hdc5` ]]; then
+	# Sometimes swap partitions don't detect staleness
+        echo "NOTE: \"Secondary\" disk swap partition /dev/hdc5 was active"
+	mdadm /dev/md1 -f /dev/hdc5
+	mdadm /dev/md1 -r /dev/hdc5
 fi
 echo "Adding \"Secondary\" disk /dev/hdc to RAID arrays"
 mdadm /dev/md0 -a /dev/hdc1
 mdadm /dev/md1 -a /dev/hdc5
 mdadm /dev/md2 -a /dev/hdc6
 
+The contents of the script for SCSI or SATA disks,
+refresh_secondary.sdb, is:
+
+#!/bin/sh
+# for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
+if [[ -n `mdadm --detail /dev/md0 /dev/md2 | grep /dev/sdb` ]]; then
+        echo "ERROR: \"Secondary\" disk /dev/sdb is already active !!"
+        exit 1
+elif [[ -n `mdadm --detail /dev/md1 | grep /dev/sdb5` ]]; then
+	# Sometimes swap partitions don't detect staleness
+        echo "NOTE: \"Secondary\" disk swap partition /dev/sdb5 was active"
+	mdadm /dev/md1 -f /dev/sdb5
+	mdadm /dev/md1 -r /dev/sdb5
+fi
+echo "Adding \"Secondary\" disk /dev/sdb to RAID arrays"
+mdadm /dev/md0 -a /dev/sdb1
+mdadm /dev/md1 -a /dev/sdb5
+mdadm /dev/md2 -a /dev/sdb6
+
 				mdstat
 
 The following utility script "mdstat" can be used to check for
-mirroring activity.  It provides easier to read output than the a raw
-"cat /proc/mdstat" command.  A copy of this script can be placed in
-the "/usr/local/bin" directory and set-up by using the following
-commands as "root"
+mirroring activity.  For FSL6, it provides easier to read output than
+the a raw "cat /proc/mdstat" command.  A copy of this script can be
+placed in the "/usr/local/bin" directory and set-up by using the
+following commands as "root"
 
   cd /usr/local/bin
-  cp -a /usr2/fs/misc/mdstat
+
+  cp -a /usr2/fs/misc/mdstat.6 mdstat    (for FSL6 IDE (PATA) disks)
+         or
+  cp -a /usr2/fs/misc/mdstat.7 mdstat    (for FSL7)
+
   chown root.root mdstat
   chmod a+rx,u+w,go-w mdstat
 
 Thereafter it can executed by any user as a normal command.  The
-contents of the script are:
+contents of the script for FSL6 IDE (PATA) disks, mdstat.6, is:
 
 #!/bin/sh
 cat /proc/mdstat | sed -e 's/ide\/host0\/bus0\/target0\/lun0\/part/hda/' | sed -e 's/ide\/host0\/bus1\/target0\/lun0\/part/hdc/'
 
+The contents of the script for FSL7, mdstat.7, is simply:
+
+#!/bin/sh
+cat /proc/mdstat
+
+This version does nothing to improve the readability of the output,
+just reduces the typing involved slightly.
+
 APPENDIX A. DISK RESET RECIPE
 
-This is a receipe reseting two bad disks in preparation for reloading
-them from a older spare.  It will remove the difficulty of having to
-reboot the good disk enough times so that the RAID systems thinks it
-is newer.  This procedure can be modified to reset a single bad disk
-by installing only that one disk in the primary drive and using only
-the three "mdadm" commands for the "bus0" partitions.
+This is a recipe for reseting two bad disks in preparation for
+reloading them from a older spare.  It will remove the difficulty of
+having to reboot the good disk enough times so that the RAID systems
+thinks it is newer.  This procedure can be modified to reset a single
+bad disk by installing only that one disk in the primary drive and
+using only the first three "mdadm" commands in step 4.
 
 Please note that the use of "mdam --zero-superblock" probably
 irreversibly deletes the RAID copy on the partition, so it should be
-used with only _bad_ disks installed.  Unfortunately using the
+used with only _bad_ disks installed.  Unfortunately using the FSL6
 installer forces the use of the horrible (devfs) file names as shown,
 though fortunately tab-completion does help you with typing them in.
 
@@ -357,14 +452,14 @@ though fortunately tab-completion does help you with typing them in.
 
 2. Boot the Binary-1 DVD and proceed as you would for a standard
    install (instructions available at ftp.hartrao.ac.za in
-   /pub/fs6x/fs6linux_DVD.txt using anonymous ftp) up to the point
-   where it prompts you to erase the whole disk or use manual
-   partitioning.  Then "<Go Back>" twice till you get to the main
-   menu.
+   /pub/fs6x/fs6linux_DVD.txt or /pub/fs7x/fs7linux_DVD.txt, as
+   appropriate, using anonymous ftp) up to the point where it prompts
+   you to erase the whole disk or use manual partitioning.  Then "<Go
+   Back>" twice till you get to the main menu.
 
 3. Select "Start a shell" and press <Enter>
 
-4. At the shell prompt enter:
+4. For FSL6 and IDE disks, at the shell prompt enter:
 
        mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part1
        mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part5
@@ -372,6 +467,24 @@ though fortunately tab-completion does help you with typing them in.
        mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part1
        mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part5
        mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part6
+
+   For FSL7 and IDE disks, at the shell prompt enter:
+
+       mdadm --zero-superblock /dev/hda1
+       mdadm --zero-superblock /dev/hda5
+       mdadm --zero-superblock /dev/hda6
+       mdadm --zero-superblock /dev/hdb1
+       mdadm --zero-superblock /dev/hdb5
+       mdadm --zero-superblock /dev/hdb6
+
+   For FSL7 and SCSI or SATA disks, at the shell prompt enter:
+
+       mdadm --zero-superblock /dev/sda1
+       mdadm --zero-superblock /dev/sda5
+       mdadm --zero-superblock /dev/sda6
+       mdadm --zero-superblock /dev/sdb1
+       mdadm --zero-superblock /dev/sdb5
+       mdadm --zero-superblock /dev/sdb6
 
 5. Then shutdown by entering:
 
