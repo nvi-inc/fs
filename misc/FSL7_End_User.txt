@@ -1,0 +1,668 @@
+File: /usr2/fs/misc/FSL7_End_User.txt  Version: 1.0  Date: 080613
+
+	     End User Set-up for GSFC Checked-out FS PC
+
+Welcome to your new FS PC!  You have a base FSL7 with the latest FS
+installed but not customized.  Please use this document to guide the
+set-up of your PC.  The ISSUES TO BE AWARE OF section at end of this
+document should be read carefully.
+
+  [Although this document is intended for users setting up a new PC,
+  this document is also useful for customization by stations that are
+  upgrading an existing computer from a previous FS Linux distribution
+  to FSL7.  Additional notes and comments for this case are included
+  in the steps below enclosed in square brackets '[]' and indented
+  like this paragraph.  Please read the complete instructions for each
+  step below to check whether there are any special steps (in
+  brackets) when upgrading before following the instructions for the
+  step.  Please also be sure to read the ISSUES TO BE AWARE OF section
+  at end of this document.  If you are upgrading your PC, please
+  follow the instructions in the FSL7_Upgrade.txt document before
+  using this document.  Make sure your computer is connected to the
+  network, if you are using one, then skip ahead to step 9 below.]
+
+In addition to the computer components, you should have received:
+
+____ Etch DVDs
+____ FSL7 Install CD, which contains the latest versions of:
+     fs7linux_DVD.txt, fs7.selections, fsadapt-*.tgz, fs-*.tgz,
+     FSL7_PC_Checkout.txt, FSL7_Upgrade.txt, FSL7_End_User.txt,
+     RAID.txt and any special instructions, drivers or other files for
+     your system.  The contents of this CD will help you to make a
+     complete re-install even if you don't have an Internet connection
+     and/or lose the hard copy of these documents.
+____ fs7linux_DVD.txt print-out.
+____ Special instructions for this system, in document: _______________.
+____ Completed Check-out document Checklist, with annotations
+____ End User Set-up Checklist, (this document)
+
+The computer components and any extra items specific to this system
+should be listed on the Check-out Checklist.
+
+If you need to do a complete re-install, check for any special
+instructions for your system (usually named "motherboard.txt", where
+"motherboard" is the model of your motherboard).  If you find special
+instructions, follow them.  If you don't find special instructions,
+follow the instructions in fs7linux.txt.  The "INSTALLATION" and
+"CUSTOMIZATION" sections of FSL7_Upgrade.txt may prove helpful for
+some of the associated activities needed for a complete install.
+
+The Set-up Checklist follows:
+
+____ 1. Assemble your PC
+
+____ 2. Make sure the PC is not connected to the network
+
+____ 3. Power it up.
+
+____ 4. Switch to vt1 <Ctrl><Alt><F1>
+
+____ 5. Log in as "root", the system was shipped with a root password
+        of "vlbIcdp1".
+
+____ 6. Change the root password using the "passwd" command. Be sure
+        to use a strong password.
+
+     7. Create strong passwords for the "oper" and "prog" accounts:
+
+        ____  passwd oper
+        ____  passwd prog
+   
+____ 8. Switch to the X-display <Ctrl><Alt><F7>. If the display is not
+        correct or if you are supplying your own monitor, you should
+        adjust the X display settings. To do this return to
+        vt1 <Ctrl><Alt><F1> and run:
+
+         dpkg-reconfigure xserver-xorg
+
+       You can accept the defaults for everything, but to adjust the
+       monitor definition, you can try the Monitor Autodetect option
+       (don't confuse this with autodetecting the video hardware,
+       which comes first, just accept the default for the hardware
+       detection option).  If that doesn't work, you can do another
+       reconfiguration, this time disabling the monitor autodetection,
+       select the advanced configuration, answering "Generic Monitor"
+       for the monitor identification, then selecting advanced set-up.
+       no resolution greater than 1024x768, horizontal frequencies of
+       28-51, and vertical 43-60 will return the system to the
+       configuration it arrived with.  You can try other
+       configurations depending on the specifications of your monitor,
+       you may especially want to enable higher resolutions if your
+       monitor supports them.
+
+       If the autodetection of the video hardware doesn't give you the
+       results you want, you could try selecting "No" for that and
+       then selecting "vesa" as your driver.
+
+       After reconfiguring the X server, switch back to X display
+       <Ctrl><Alt><F7> and restart the X server
+       <Ctrl><Alt><Backspace>.  If the gdm login comes up successfully
+       and after logging in as "prog", the display is acceptable, you
+       are done with X set-up.  Please log-out from the login shell on
+       the X display.
+
+9. Set-up your printers.
+
+   ____ 9a. Connect your printers to the computer.
+
+              [Existing computers being upgraded may have parallel
+              ports and these can continue to be used.]
+
+            Newer computers probably do not have a parallel port (IEEE
+            1284).  If not, and your printer requires a parallel
+            connection, you should be able to obtain a USB/Parallel
+            converter locally for less than US$20.
+
+   ____ 9b. Login in to the X-display <Ctrl><Alt><F7> as "oper".
+
+   ____ 9c. Start firefox by entering:
+
+              firefox
+
+   ____ 9d. Enter URL: http://localhost:631
+
+   ____ 9e. Select "Administration" tab.
+
+   ____ 9f. Add the printers.  
+
+              [If you are upgrading an existing computer you may be
+              able to get useful printer configuration information
+              from the /etc/printcap file or the files in /etc/cups
+              directory on your old computer.  You should either be
+              able to examine these files on your old operational disk
+              or from the "etc" archive you made from that disk.
+              Assuming the archive has been placed on /tmp on the new
+              computer, you can extract the files for examination in
+              the /tmp directory using the commands:
+
+                cd /tmp
+                tar xzf etc.tgz etc/printcap
+
+              or
+
+                cd /tmp
+                tar xzf etc.tgz etc/cups
+              ]
+
+            Connected printers may be automatically offered to be
+            added. You will need to supply the root account and
+            password for validation as part of the printer management
+            process.  If CUPS offers you the wrong type of printer to
+            be automatically added or it is unclear what driver to
+            select for a printer, you may be able to get some useful
+            information to help with manually installing your printer
+            by searching the WWW for the string "cups" and your
+            printer model.
+
+            Be sure to select a printer as the default.
+
+   ____ 9g. Quit firefox.
+
+   ____ 9h. Log-out as "oper".
+
+   ____ 9i. If you want simpler device names than the CUPS system uses
+            for automatically configured printers, then on vt1
+            <Ctrl><Alt><F1> as "root" edit the file
+            /etc/cups/printers.conf and change the "..."  (name) in
+            the <Printer ...> lines and in the ppd/ sub-directory
+            rename the corresponding files, then:
+
+              invoke-rc.d cupsys restart         
+
+____ 10. Return to vt1 <Ctrl><Alt><F1>. Change directory to the
+         fsadapt sub-directory:
+
+           cd /root/fsadapt
+
+____ 11. Set your network parameters,
+
+           [Existing computers being upgraded from previous versions
+           of FS Linux should already have their network parameters
+           defined and so can skip this step.]
+
+          Run the "netconfig" script and answer the questions:
+
+            ./netconfig
+
+____ 12. Generate ssh system keys.
+
+           [Existing systems being upgraded from previous versions of
+           FS Linux can either use the new keys already generating in
+           the update process or delete those keys and transfer the
+           keys from the old system to maintain compatibility with
+           other systems expecting the same keys.  You can use the
+           "etc" archive, created as part of the upgrade process, as
+           described in step 12B below.  If you will use the keys
+           already generated, skip to step (13).  If you want to use
+           old keys, then before install them according to 12B below,
+           delete the already generated keys, as "root":
+
+             cd /etc/ssh
+             rm *key *key.pub
+           
+           Note an upgraded system will normally already have a
+           running network connection at this point.]
+
+         You have two choices here, either (A) generate hew keys or
+         (B) use existing keys from a previous system that is being
+         replaced or upgraded.
+
+         (A) To generate new keys, as "root":
+
+               dpkg-reconfigure openssh-server
+
+         (B) To install old key from a system being replaced or
+             upgraded, first make an archive of the /etc directory on
+             the old computer, as "root":
+
+               cd /
+               tar czf /tmp/etc.tgz etc
+
+             If the archive is too large to place on your old
+             computer's /tmp directory, you can place it somewhere
+             else where there is more room, perhaps /usr2.  Then copy
+             the archive to the /tmp directory of the new computer and
+             execute these commands as "root":
+
+               cd /tmp
+               tar xzf /tmp/etc.tgz etc/ssh
+               cd /tmp/etc/ssh
+               cp -a *key *key.pub /etc/ssh
+               invoke-rc.d ssh restart         
+
+             If the method you want to use to copy the archive to /tmp
+             is the over the network (a CD, DVD, or USB drive would
+             work instead) and you do not already have a running
+             network connection (i.e. this is new system), you will
+             need to wait until after you have rebooted in step 15
+             below to make the transfer.  If that is the case, you
+             should generate temporary keys according to step 12A and
+             then after step (15) below, execute as "root":
+
+               cd /etc/ssh
+               rm *key *key.pub
+
+             to delete the temporary keys before using the
+             instructions above in this step (12B) to copy the old
+             keys from the archive.
+
+____ 13. Set hosts.deny and hosts.allow.
+
+         [Systems being upgraded will not already have the shown
+         contents of hosts.deny.  For upgraded systems, the file
+         should be modified to agree with these contents.]
+
+         These files define how TCP wrappers control access to the
+         machine over the network.  As delivered, this is set as
+         restrictively as possible with /etc/hosts.allow only
+         containing comments and /etc/hosts.deny set to:
+
+ALL: PARANOID
+#
+ALL: ALL
+
+         You may wish to allow incoming connections in
+         /etc/hosts.allow.  The syntax of "hosts.deny" and
+         "hosts.allow" is documented in "man 5 hosts_access".  We
+         recommend that your changes are only to add:
+
+sshd: node
+
+         lines to hosts.allow for specific hosts.  This will allow
+         selective incoming ssh access.
+
+____ 14. If the machine resides on a network with NTP available,
+         please configure NTP.  If need be, this step can be deferred
+         until a convenient time.
+
+         You should use a set of up to 10 NTP servers, some local and
+         some remote.  At least one should be local if possible, but
+         having a few is better.  A few should be remote if possible.
+         The idea is to give NTP a population of servers to analyze in
+         order to pick the best one.  Local servers, besides having a
+         shorter round-trip communication delay are available if the
+         connection to the wider network should fail. The remote
+         servers, when available, normally provide a reality check on
+         the local servers, but in some cases may be better.  A TAC
+         running TAC32+ with the NTP server function enabled is
+         suitable as a local server.  If you do not already have a
+         list of NTP servers to use, you may be able to get
+         suggestions from:
+         http://support.ntp.org/bin/view/Servers/WebHome.
+
+           [If you are upgrading from a previous version of FS Linux
+           you can recover the NTP servers from the old system.  To
+           list the previous NTP servers, extract the NTP
+           configuration file from the "etc" archive made during the
+           upgrade process, assume the archive is on /tmp, execute
+           these commands as "root":
+
+             cd /tmp
+             tar xzf /tmp/etc.tgz etc/ntp.conf
+             grep ^server ntp.conf
+
+           Then continue with rest of the instructions in this step.]
+
+         Once you determine a list of servers, you should put them in
+         /etc/ntp.conf on "server" lines, in place of the default
+         "server" lines. You will also need to add a "restrict" line
+         with the "kod notrap nomodify nopeer noquery" qualification
+         for each server. for example (white space added for clarity):
+
+server   timehost.gsfc.nasa.gov
+restrict timehost.gsfc.nasa.gov kod notrap nomodify nopeer noquery
+server   godz.gsfc.nasa.gov
+restrict godz.gsfc.nasa.gov     kod notrap nomodify nopeer noquery
+server   tacggao.gsfc.nasa.gov
+restrict tacggao.gsfc.nasa.gov  kod notrap nomodify nopeer noquery
+server   ntp2.usno.navy.mil
+restrict ntp2.usno.navy.mil     kod notrap nomodify nopeer noquery
+server   navobs1.gatech.edu
+restrict navobs1.gatech.edu     kod notrap nomodify nopeer noquery
+server   tick.usno.navy.mil
+restrict tick.usno.navy.mil     kod notrap nomodify nopeer noquery
+
+         These changes will take effect the next time the system is
+         booted or you can use:
+
+           invoke-rc.d ntp restart         
+ 
+         If you sometimes suffer loss of connection to your domain
+         name servers, typically because they are off site, you should
+         use IP addresses of the servers instead of their node names.
+
+____ 15. Connect the machine to the network and reboot.
+
+           [If you are upgrading an existing computer, this step is
+           probably not needed since it is probably already connected
+           to and accessing the network.]
+
+____ 16. Customize the FS for your station.  If this computer is
+         replacing a computer where the FS is already set-up for your
+         station or you are upgrading to FSL7, please follow the steps
+         in this section.  If the computer is for a new installation,
+         please skip to the step 17.
+
+         For a replacement computer or FSL7 upgrade, please take the
+         following steps:
+
+           [If you are upgrading your existing computer, please skip
+           step 16a.  These archives were already made as part of the
+           upgrade process.]
+
+    ____ 16a. On your old computer, make a back-up of your station
+              software as "root":
+
+                cd /usr2
+                tar czf /tmp/usr2.tgz control log proc sched st-* st
+
+              If you have a lot of customization in oper and prog
+              directories, you can copy them by making another
+              archive.  You can use, as "root":
+
+                tar czf /tmp/operprog.tgz oper prog
+
+              Please note that if the archive files are too large to
+              fit on /tmp, you can make them somewhere else where is
+              more space, possibly /usr2, and/or you may need to only
+              archive only a subset of the contents of the
+              directories.
+
+    ____ 16b. Place the usr2.tgz (and operprog.tgz, if you made one)
+              file on the /tmp/ directory of your new computer via
+              whatever means is convenient, usually _getting_ them
+              using ftp or scp over the network (start the operation
+              _from_ the new machine: incoming ftp and ssh are
+              disabled by default).
+
+    ____ 16c. As "root", remove the default FS files provided and
+              replace them with the files from the old system.
+
+                cd /usr2
+                \rm -rf control proc st-* st
+                tar xzpf /tmp/usr2.tgz
+
+              If you made an operprog.tgz file, expand it into /tmp:
+ 
+                cd /tmp
+                tar xzpf /tmp/operprog.tgz
+
+              and copy or merge the files you need into the files
+              directories of "oper" and "prog".  This should be done
+              carefully to avoid losing new default versions of the
+              files in these directories.  You can use the "diff"
+              command to compare the new default files to your old
+              versions to get an idea of how to merge the two
+              versions.  Typically the "oper" and "prog" versions of
+              the ".fvwm2rc" and ".Xresources" file are the most
+              important files to recover.
+
+    ____ 16d. You will need to make your control files, SNAP
+              procedures, and station software agree with the version
+              of the FS on your new computer.  There are three
+              possible cases: (1) the FS version on the new computer
+              is older than the one on our old computer, (2) the FS
+              version on the new computer is same as the one on our
+              old computer, and (3) the FS version on the new computer
+              is newer than the one on our old computer.  Follow the
+              appropriate instructions below for your case:
+
+             (1) If the FS version on the new computer is older than
+                 the one on our old computer, you should install the
+                 source from the latest version as described in that
+                 version's update notice, then proceed with option (2)
+                 or (3) below as appropriate.
+
+             (2) If the FS version on the new computer is same as the
+                 one on our old computer, relatively little needs to
+                 be done.
+
+                 Login in as "prog" and compile your local software:
+
+                   cd /usr2/st
+                   make rmdoto rmexe all
+
+                 The new C compiler is stricter about some things and
+                 may require you to make some changes to your source
+                 code in order for it to compile.  Warnings, as
+                 opposed to actual errors, can probably be ignored for
+                 now, but should be dealt with eventually.  Typically
+                 they are related to missing '#include' files and can
+                 lead to subtle (new or old) bugs, so should not be
+                 ignored for very long.  They are usually easy to fix.
+
+             (3) If the FS version on the new computer is newer than
+                 the one on our old computer, you should update your
+                 control files, SNAP procedures as described in the
+                 update notice in /usr2/fs/misc. The update notice
+                 file name is of the form: "fs*up.txt".  You should
+                 use the most recent update notice, which should
+                 correspond to the FS version installed.  Please also
+                 see the comment about the stricter compilers in case
+                 (2) above.
+
+         16d. The system items that may have changed as part of moving
+              to the new computer are:
+
+         ____ (1) The serial port devices. On the new system these
+                  are /dev/ttyS4 through /dev/ttyS11. You may need to
+                  adjust your dev.ctl control file depending on which
+                  serial ports you use for which devices.
+
+         ____ (2) The PCI-GPIB board name on the new system is
+                  "gpib0". You may need to adjust the GPIB entry in
+                  the dev.ctl control file to reflect this.
+
+         ____ (3) New print2dymo script.  Please follow the
+                  instructions in /usr2/fs/st.default/skedf.ctl to
+                  set-up a new print2dymo on your new computer, using
+                  your computer's Dymo printer name in place of "Dymo"
+                  in "lpr -P Dymo".  Please note the syntax of the
+                  "-P" parameter may be different for FSL7 than what
+                  you used before, i.e. needs a space after the "P".
+
+    ____ 16e. Any station software you have that runs outside of the
+              FS, including daemons that are started at boot time,
+              such as tacdclient, metserver, and metclient will need
+              to be set-up.  Please refer to the corresponding
+              documentation on how to do this.  The documentation and
+              default source for tacdclient, metserver, and metclient
+              is included the corresponding sub-directories of
+              /usr2/fs/st.default/st-0.0.0.  FS version 9.10.3 (or
+              later) include modifications to the default source code
+              to support use with FSL7.  You should compare the new
+              source to your old source to see what needs to be
+              changed.
+
+    ____ 16f. Reboot your system.
+
+    ____ 16g. Test the FS to verify that it works, including printing
+              labels and schedule listings and running part of a
+              schedule as a test.  You should pay special attention to
+              whether all GPIB devices work since the FSL7 driver may
+              have problems with some older devices. If you have some
+              GPIB device that the new driver cannot communicate with,
+              please contact Ed (Ed.Himwich@nasa.gov); you may want to
+              consider getting a National Instruments 779732-x to
+              allow all your GPIB devices to be supported.
+
+         After completing this section, jump ahead to step 18.
+
+____ 17. New station set-up. A new station set-up will require
+         customizing the control files in /usr2/control, particularly:
+         antenna.ctl, location.ctl, dev.ctl, ibad.ctl, and mk5ad.ctl.
+         You will need to select the correct version of station.prc to
+         copy to /usr2/proc.  You can find a table of the different
+         versions of station.prc in the introductory remarks of the
+         latest FS upgrade notice, for example
+         "/usr2/fs/miscfs9103up.txt".
+
+         It is not necessary now, but in the long run it is desirable
+         to develop a station specific "antcn" program.  This can be
+         done by modifying the code in /usr2/st/antcn to suit your
+         antenna.  Keeping your "antcn" program (and any other local
+         software) in the "/usr2/st" directory tree instead of the
+         "/usr2/fs" tree will make FS upgrades much easier to install
+         and no functionality will be lost.  More information is
+         available from Ed (Ed.Himwich@nasa.gov) on both customizing
+         the control files and developing an "antcn".
+
+____ 18. Configure e-mail.
+
+           [If you are upgrading a computer with a previous version of
+           FS Linux, the contents of the old exim configuration may
+           help you to customize the new version.  To extract the exim
+           configuration file from the "etc" archive made during the
+           upgrade process, assuming the archive is on /tmp, execute
+           these commands as "root":
+
+              cd /tmp
+              tar xzf etc.tgz etc/exim/exim.conf
+
+           ]
+
+         If you want something other than the default installation,
+         which is local mail only, you will need to do (as "root"):
+
+           dpkg-reconfigure exim4-config
+
+         to change the set-up. Typically you would select "internet
+         site" and defaults for all the other prompts.  If you want to
+         receive incoming mail, you will also need to enable SMTP
+         connections in Window 4a of fsadapt.  We recommend that you
+         not receive incoming mail on this computer.  If you follow
+         this recommendation, you should set the "reply-to" address
+         for outgoing messages to a real e-mail account at your
+         institution that is read regularly.  You can do this by added
+         a line (as "root") like:
+
+            *@node.doman email@address Ffr
+
+         to the "rewrite" rules section of
+         /etc/exim4/exim4.conf.template if you selected one big
+         configuration file or in
+         /etc/exim4/conf.d/rewrite/31_exim4-config_rewriting if you
+         selected several small files.  Where "node.domain" is the
+         fully qualified node-name of this computer and "email@address"
+         is the e-mail address you want replies to be addressed
+         to. Then execute:
+
+             invoke-rc.d exim4 restart
+
+         If you have made the above changes to direct replies to other
+         e-mail accounts, you may want to customize the User Name (not
+         login name, this is the fifth field) of "root", "prog", and
+         "oper" in /etc/passwd to append a string like "at
+         node.domain", where node.domain is this machine, e.g., for
+         atri.gsfc.nasa.gov you might change the 5th field for "oper"
+         from
+
+           oper
+
+         to
+
+           oper at atri.gsfc.nasa.gov
+
+         This will help the recipient (possibly you) determine which
+         system generated this message since it may not be obvious to
+         the recipient.  This configuration ("Internet site" in the
+         exim4 configuration, no incoming mail, rewrite rules for
+         reply, and modified user names), provides good support of the
+         FS "msg" utility.
+
+____ 19. Weekly updates. If your computer is connected to the
+         Internet, you should enable weekly security updates in Window
+         2 of fsadapt (all steps in the section must be done as
+         "root"):
+
+           cd /root/fsadapt
+           ./fsadapt
+
+         Hit return on the first screen and "skip" on "Window 1" then
+         "OK", then set _only_ "updates" on "Window 2", then "OK",
+         then "Cancel" on "Window 3".
+
+           [If you are upgrading an existing computer, you may have
+           already performed the next action, configured
+           sources.lists, as part of the upgrade process.]
+
+         You should edit the /etc/apt/sources.list file and move the
+         "deb http..." and #deb-src http..." lines before "deb
+         cdrom..." lines.  This will save you from possibly having to
+         insert DVDs (or CDs), if you ever want to install a new
+         package.  You can change the line with "http.us.debian.org"
+         to use any convenient local mirror which should improve speed
+         compared to the default.  The line with "security.debian.org"
+         must not be changed.
+
+         Make a check for any updates currently needed:
+
+           apt-get update
+           /etc/cron.weekly/apt-get
+
+         If any updates are needed, instructions are displayed, follow
+         them.  This usually means entering:
+
+           apt-get -uy upgrade
+           apt-get clean
+
+         For some motherboards it may be necessary to re-install
+         special drivers, please see any special documentation that
+         came with your system.
+
+         After the updates have been enabled, the Debian security
+         archive will be automatically checked weekly for needed
+         updates.  If there are any security updates that need to be
+         applied, an e-mail will be sent to "root", usually forwarded
+         to "oper".  The account receiving these e-mails must be
+         checked weekly.  The e-mail contains instructions on how to
+         install the updates.
+
+ISSUES TO BE AWARE OF
+
+This section covers some issue you should be aware of when dealing
+with your FSL7 system.
+
+1. If your system is connected to the Internet, it is imperative that
+   you enable weekly updates, as described above, check the e-mail
+   account that the messages about updates are sent to, and apply the
+   updates in a timely fashion.  Once the Linux distribution is no
+   longer current, new security updates should continue to be
+   available for another year.  Before that year expires, you should
+   develop a plan and implement it to transition to the new current
+   version *or* remove the machine from the network.
+
+2. By default, all e-mail is local only.  All "root" and "prog" e-mail
+   is sent to "oper".  It is important that "oper" check e-mail
+   regularly for important system messages.  It is also important that
+   e-mail to this account is NOT forwarded to another machine so that
+   if a problem develops with the network, it will still be possible
+   to get e-mailed error messages.  Please be sure there is a line:
+
+     test ! -f /var/mail/oper || from
+
+   near the bottom of ~oper/.login (or something equivalent if oper
+   uses a different shell than tcsh) so that a list of pending
+   messages is printed if there is any mail at each login (this line
+   will work assuming you choose the more popular "mbox" mail format
+   when configuring exim4).  As of this writing Etch does not
+   automatically do this (if it does later you may want to remove the
+   line you added).  Be sure to handle any messages you see.
+
+3. The two installed disks are set-up as a RAID1 array.  Please read
+   /usr2/fs/misc/RAID.txt to familiarize yourself with features of
+   this set-up and how to use it operationally.
+
+4. If you want to use the Gnome Desktop for non-FS operations, you can
+   create a new user for this, maybe "desktop" with:
+
+     adduser desktop --home /usr2/desktop 
+
+   and answer the prompts. Be sure to give the user a strong password.
+   You can test it by logging in with this account on the X-display
+   <Ctrl><Alt><F7>.  The Desktop has several useful tools including
+   CD/DVD burning software.
+
+5. A special instructions document for your system may contain
+   "special" maintenance procedures that you need to perform.  Please
+   check for these. See: _____________________.
