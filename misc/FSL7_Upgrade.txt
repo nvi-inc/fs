@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.3  Date: 080613
+File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.4  Date: 080618
 
 		 Upgrading a prior FSL System to FSL7
 
@@ -6,12 +6,15 @@ File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.3  Date: 080613
 
 INTRODUCTION
 
-This document attempts to describe the steps needed to upgrade a
-computer running a Field System Linux (FSLx, x=1, ..., 6) distribution
-prior to FSL7.  For the most standard systems these instructions
-should be sufficient.  The more a system differs from a standard system
-the more likely that some important step will be missing.  However it
-is likely that the more a system differs from the standard, the more
+This document attempts to describe the steps needed, primarily, to
+upgrade a computer running a Field System Linux (FSLx, x=1, ..., 6)
+distribution prior to FSL7 but also to install FSL7 from scratch as
+new installation.
+
+For the most standard systems being upgraded these instructions should
+be sufficient.  The more a system differs from a standard system the
+more likely that some important step will be missing.  However it is
+likely that the more a system differs from the standard, the more
 knowledgeable, and therefore able to handle discrepancies, the local
 Field System "friend" would be.  The instructions try to anticipate
 some places where additional steps and information may be needed for
@@ -21,6 +24,11 @@ because something has been removed.  Please note that in order to make
 these instructions as foolproof as possible, they are written in a
 general way that may not be the most efficient.  Other more expedient
 methods may exist.
+
+For systems being installed from scratch, these instrucstions should
+be complete, but please note that the first paragraph at the start of
+Step 2 in the PREPARATION sections includes some advice for this case
+and Step 3 in that section can be omitted.
 
 Systems with less than 3 GB (each) hard disks, 256 MB RAM, or ISA
 peripheral cards are not supported by FSL7.  Stations with computers
@@ -60,7 +68,8 @@ finished.
 
 PREPARATION
 
-The section covers steps that will help prepare you for the upgrade.
+The section covers steps that will help prepare you for the upgrade or
+installation..
 
 1. Obtain Debian 4.0r3 (or later) DVDs/CDs
 
@@ -95,8 +104,11 @@ The section covers steps that will help prepare you for the upgrade.
 2. Collect System Information
 
    In order to upgrade your system, you will need to know the
-   following information. For each item a suggestion for how to obtain
-   the information is provided.
+   following information.  For systems being upgraded, a suggestion
+   for how to obtain the information is provided.  For systems being
+   installed from scratch, the same basic information is required, but
+   you will need to determine the information by other means including
+   possibly from local experts.
 
    A. Collect network parameters if you have a network connection
 
@@ -224,13 +236,15 @@ The section covers steps that will help prepare you for the upgrade.
 
 3. Collect files to be transferred to the new system
 
-   This step will collect the files you need to transfer to the new
-   system.  It will also provide a back-up of your critical files in
-   case you only have one disk drive (which will be overwritten in the
-   upgrade process).  The following steps archive the standard files
-   that are needed.  If you have other files that need to be
-   preserved, you should make additional archives or include then in
-   these.
+   This step is only intended for systems that are being upgraded from
+   a priior FSL distibution running the FS (systems being installed
+   from scratch can omit this step).  It provides a method to collect
+   the files that you will need to transfer to the new system.  It
+   will also provide a back-up of critical files in case you only have
+   one disk drive (which will be overwritten in the upgrade process).
+   The following steps archive the standard files that are needed.  If
+   you have other files that need to be preserved, you should make
+   additional archives or include then in these.
 
    In the example steps below suggested *.tgz file names are shown.
    You many of course use your own names, but these names agree with
@@ -335,7 +349,23 @@ are included to check-off each step as it is completed.
 
    2#11 Omit this step (installing GRUB on the second disk)
 
-3. Install and run fsadapt as "root" (use current version in place
+3. Install Pgperl. If you have a network connection, as "root" on vt1
+   (<Ctrl><Alt><F1>), enter the following commands (using
+   cut-and-paste in a shell window will reduce the chances of making
+   typing mistakes)::
+
+   ____  cd /root
+   ____  aptitude install pgplot5
+   ____  wget http://http.us.debian.org/debian/pool/main/libp/libpng/libpng10-0_1.0.18-1_i386.deb
+   ____  wget http://http.us.debian.org/debian/pool/contrib/p/pgperl/pgperl_2.18-5_i386.deb
+   ____  dpkg -i libpng10-0_1.0.18-1_i386.deb
+   ____  dpkg -i pgperl_2.18-5_i386.deb
+   ____  apt-get clean
+
+   If you do not have a network connection, you should be able to get
+   the needed .deb files from an FSL7Install CD.
+
+4. Install and run fsadapt as "root" (use current version in place
    of 7.0.6) on vt1 (<Ctrl><Alt><F1>):
 
    ____   cd /root
@@ -350,12 +380,12 @@ are included to check-off each step as it is completed.
    ____     on Window 3 set skip
    ____     on Window 4a set secure, then OK, then OK again
 
-4. Set oper and prog passwords, use strong passwords:
+5. Set oper and prog passwords, use strong passwords:
 
    ____ passwd oper
    ____ passwd prog
 
-5. Install FS as "root: (use current version in place of 9.10.3):
+6. Install FS as "root: (use current version in place of 9.10.3):
 
    ____ (Place fs-9.10.3.tgz on /tmp)
    ____ cd /
@@ -364,7 +394,7 @@ are included to check-off each step as it is completed.
    ____ make install
    ____  (answer question "y")
 
-6. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
+7. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
    using "hdc" or "sdb" for "XXX" as appropriate for your system in
    the "cp" command:
 
@@ -373,23 +403,23 @@ are included to check-off each step as it is completed.
    ____ chown root.root refresh_secondary
    ____ chmod a+r,u+wx,go-wx refresh_secondary
 
-7. Place mdstat in /usr/local/bin, as "root":
+8. Place mdstat in /usr/local/bin, as "root":
 
    ____ cd /usr/local/bin
    ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
    ____ chown root.root mdstat
    ____ chmod a+rx,u+w,go-w mdstat
 
-8. Edit /etc/aliases so root and prog e-mail goes to oper, as "root":
+9. Edit /etc/aliases so root and prog e-mail goes to oper, as "root":
    ____ change "root: testing" to "root: oper"
    ____ add "prog: oper" at the end
 
-9. Compile FS as "prog" on vt1  (<Ctrl><Alt><F1>):
-   ____ cd /usr2/fs
-   ____ make
+10. Compile FS as "prog" on vt1  (<Ctrl><Alt><F1>):
+    ____ cd /usr2/fs
+    ____ make
 
-7. Reboot
-   ____ reboot
+11. Reboot
+    ____ reboot
 
 CUSTOMIZATION
 
@@ -399,12 +429,12 @@ customized for your station.  The steps for this are covered in the
 document FSL7_End_User.txt.  That document is intended primarily for
 installers of new system that have been checked out at GSFC and then
 shipped to the end user.  However, the steps are so similar that it is
-useful for customization while upgrading a system.  A few additional
-comments for upgrading systems have been added enclosed in that
-document within square brackets "[]" and indented.  The information
-and *.tgz archives (particularly, the archive files) created in the
-PREPARATION section of this document should prove useful in completing
-the customization.
+useful for customization while upgrading a system or installing a new
+system from scratch.  A few additional comments for upgrading systems
+have been added enclosed in that document within square brackets "[]"
+and indented.  The information and *.tgz archives (particularly, the
+archive files) created in the PREPARATION section of this document
+should prove useful in completing the customization.
 
 POST INSTALLATION
 

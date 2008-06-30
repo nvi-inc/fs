@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL7_End_User.txt  Version: 1.0  Date: 080613
+File: /usr2/fs/misc/FSL7_End_User.txt  Version: 1.1  Date: 080617
 
 	     End User Set-up for GSFC Checked-out FS PC
 
@@ -24,13 +24,14 @@ document should be read carefully.
 In addition to the computer components, you should have received:
 
 ____ Etch DVDs
-____ FSL7 Install CD, which contains the latest versions of:
+____ FSL7Install CD, which contains the latest versions of:
      fs7linux_DVD.txt, fs7.selections, fsadapt-*.tgz, fs-*.tgz,
-     FSL7_PC_Checkout.txt, FSL7_Upgrade.txt, FSL7_End_User.txt,
-     RAID.txt and any special instructions, drivers or other files for
-     your system.  The contents of this CD will help you to make a
-     complete re-install even if you don't have an Internet connection
-     and/or lose the hard copy of these documents.
+     fs*up.txt, FSL7_PC_Checkout.txt, FSL7_Upgrade.txt,
+     FSL7_End_User.txt, RAID.txt the *.deb files needed for Pgperl,
+     and any special instructions, drivers or other files for your
+     system.  The contents of this CD will help you to make a complete
+     re-install even if you don't have an Internet connection and/or
+     lose the hard copy of these documents.
 ____ fs7linux_DVD.txt print-out.
 ____ Special instructions for this system, in document: _______________.
 ____ Completed Check-out document Checklist, with annotations
