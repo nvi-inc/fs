@@ -903,7 +903,11 @@ void isdigiboard()
     struct serial_struct allSerialSettings;
 #ifdef DIGI
     if(ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)==-1) {/*digi! */
+#ifdef USE_STRUCT
        struct digi_t di;
+#else
+       digi_t di;
+#endif
        digiboard = TRUE;
        if(-1==ioctl(mcb_fildes, DIGI_GETA, &di)) {
          perror("isdigiboard:DIGI_GETA");
