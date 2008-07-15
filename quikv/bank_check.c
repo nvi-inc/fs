@@ -271,7 +271,7 @@ parse:
 	  ip[2]=ip[3]=ip[4]=0;
 	  return;
 	}
-      } else if(itask==7 && ipass==1)
+      } else if(itask==7 && ipass==1 && increment)
 	goto parse;
 
       out_recs=0;
