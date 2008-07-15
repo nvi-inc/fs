@@ -30,6 +30,7 @@ long ip[5];
       int len;
       struct vsn_mon vsn_mon;
       struct disk_serial_mon disk_serial_mon;
+      char vsn[8];
 
    /* format output buffer */
 
@@ -74,6 +75,14 @@ long ip[5];
 
       m5sprintf(output+strlen(output),"%s",vsn_mon.vsn.vsn,
 		&vsn_mon.vsn.state);
+
+      /* check for correct VSN form */
+
+      memcpy(vsn,vsn_mon.vsn.vsn,sizeof(vsn));
+      vsn[sizeof(vsn)-1]=0;
+      if(NULL == strchr(vsn,'+') && NULL==strchr(vsn,'-'))
+	logit(NULL,-302,"5b");
+      
       for (i=0;i<disk_serial_mon.count;i++) {
 	strcat(output,",");
 	m5sprintf(output+strlen(output),"%s",disk_serial_mon.serial[i].serial,
