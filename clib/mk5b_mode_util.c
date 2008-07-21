@@ -50,6 +50,12 @@ char *ptr;
     case 3:
       ierr=arg_int(ptr,&lcl->decimate.decimate ,1,TRUE);
       m5state_init(&lcl->decimate.state);
+      if(ierr == 0 && lcl->decimate.decimate!=1 &&
+	 lcl->decimate.decimate!=2 &&
+	 lcl->decimate.decimate!=4 &&
+	 lcl->decimate.decimate!=8 &&
+	 lcl->decimate.decimate!=16)
+	ierr=-200;
       if(ierr==0) {
 	lcl->decimate.state.known=1;
       } else {
@@ -59,6 +65,8 @@ char *ptr;
     case 4:
       ierr=arg_int(ptr,&lcl->fpdp.fpdp ,0,FALSE);
       m5state_init(&lcl->fpdp.state);
+      if(ierr==0 && lcl->fpdp.fpdp != 1 && lcl->fpdp.fpdp != 2)
+	ierr=-200;
       if(ierr==0) {
 	lcl->fpdp.state.known=1;
       } else if(ierr==-100){

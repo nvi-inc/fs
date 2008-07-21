@@ -101,6 +101,9 @@ error retrieving class for 1pps_source/clock_set queries in get_5btime
 5B -301
 command does not accept parameters
 ""
+5B -302
+VSN does not contain + or - in first seven characters
+""
 5B -401
 error retrieving class
 ""
@@ -576,7 +579,7 @@ program error: too many serial numbers
 source parameter must be 'ext', 'tvg', or 'ramp'.
 ""
 5T -202
-mask parameter, must be a hex value, e.g. 0xf
+mask parameter, must specify an int, usually as a hex value, e.g., 0xf
 ""
 5T -203
 decimate parameter, must be one of 1, 2, 4, 8, or 16
