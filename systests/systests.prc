@@ -583,6 +583,7 @@ xdisp=off
 xlog=off
 enddef
 define  pcsample      00000000000x
+decode4=bocf 128
 xlog=on
 pcalports=1,5
 xlog=off
