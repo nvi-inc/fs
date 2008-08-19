@@ -17,7 +17,7 @@ if {$win_sizeX <= 1024 || $win_sizeY <= 768} {
 set mainTitleText "Gain Plot"
 set CurrentProgramVersion 1
 set CurrentProgramRelease 1
-set CurrentProgramBuild 3
+set CurrentProgramBuild 4
 
 set current_DefaultDir "/usr2/log"
 set newfile_filename ""
@@ -759,11 +759,15 @@ proc replot {} {
 		    }
 		}
 	    } elseif {$LOType=="range"} {
+		set j -1
 		foreach lo $LOFirstlist {
+		    incr j
 		    for {set i 1} {$i < $number_of_datalines} {incr i} {
-		        if {$dataMatrix($i,Polarization) == "l"} {
-		            if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
-		                    $leftfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1} {
+		        #MC:AO
+		        #18/08/2008 : workaround to avoid the selection of the second rxg file in case
+		        # more than one rxg is involved
+		        if {$dataMatrix($i,inUse) == 1 } {
+		            if {$dataMatrix($i,LO)>=$lo && $dataMatrix($i,LO)<=[lindex $LOSecondlist $j] } {
 		                set rxg [lindex $LOFilelist [lsearch $LOFirstlist $lo]]
 		                if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
 		                    set currentRXG $rxg.work.$pid
@@ -773,18 +777,31 @@ proc replot {} {
 		                break
 		            }
 		        }
-		        if {$dataMatrix($i,Polarization) == "r"} {
-		            if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
-		                    $rightfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1} {
-		                set rxg [lindex $LOFilelist [lsearch $LOFirstlist $lo]]
-		                if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
-		                    set currentRXG $rxg.work.$pid
-		                } else {
-		                    set currentRXG $rxg
-		                }
-		                break
-		            }
-		        }
+		        #if {$dataMatrix($i,Polarization) == "l"} {
+		        #    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
+		        #            $leftfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1 && } {
+		        #        set rxg [lindex $LOFilelist [lsearch $LOFirstlist $dataMatrix($i,LO)]]
+		        #        if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+		        #            set currentRXG $rxg.work.$pid
+		        #        } else {
+		        #            set currentRXG $rxg
+		        #        }
+		        #        break
+		        #    }
+		        #}
+		        #if {$dataMatrix($i,Polarization) == "r"} {
+		        #    if {$timeAndSourceMatrix($dataMatrix($i,Time),$dataMatrix($i,Source)) == 1 && \
+		        #            $rightfreqArray($dataMatrix($i,Frequency)) == 1 && $dataMatrix($i,inUse)==1} {
+		        #       set rxg [lindex $LOFilelist [lsearch $LOFirstlist $dataMatrix($i,LO)]]
+		        #       if {[string range $rxg [expr [string length $rxg]-3] end]=="rxg"} {
+		        #           set currentRXG $rxg.work.$pid
+		        #       } else {
+		        #           set currentRXG $rxg
+		        #       }
+		        #       break
+		        #   }
+		        #}
+		        #end
 		    }
 		}
 	    }
