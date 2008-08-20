@@ -1,0 +1,19 @@
+FS Mk5 field labels on Dymo
+===========================
+Dymo printer assumed connected directly to USB port 
+of FS. Label stock is standard "Art. 99012" from Dymo,
+also called "large address labels 89*36mm". 
+Example of entries in skedf.ctl:
+*..........................
+label_printer dymo
+labels     /usr2/control/printdymo.pl
+label_size  1.417  3.5    1     1    11.0   0.0   Dymo
+*..........................
+The drudg call writes postscript to /tmp/DRlab.tmp.
+The script 'printdymo.pl' reads this file and converts
+the individual labels to encapsulated ps and
+translates them to pbm bitmap format using ghostscript.
+The pbm file is reformatted with pnmnoraw (package 'netpbm'
+must be installed) and translated to dymo format
+by pbm2lwxl (by Mark Whitis), sent directly to /dev/usb/lp0
+which should appear as soon as printer is connected.
