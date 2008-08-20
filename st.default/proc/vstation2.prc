@@ -93,10 +93,6 @@ vlbainit
 sy=run setcl &
 enddef
 define  midob         00000000000
-tpi=formbbc,formif
-bbcagc
-caltemp=formbbc,formif
-tsys=formbbc,formif
 onsource
 wx
 cable
@@ -139,12 +135,7 @@ define  postob        00000000000
 enddef
 define  preob         00000000000
 onsource
-bbcman
-calon
-!+2s
-tpical=formbbc,formif
-tpgain=formbbc,formif
-caloff
+caltsys
 enddef
 define  caltsys       00000000000
 bbcman

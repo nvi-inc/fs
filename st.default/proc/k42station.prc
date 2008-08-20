@@ -101,6 +101,9 @@ define  initi         00000000000
 "welcome to the pc field system
 sy=run setcl &
 enddef
+define  preob         00000000000
+onsource
+enddef
 define  midob         00000000000
 onsource
 wx
