@@ -52,6 +52,7 @@ enddef
 define  postob        00000000000
 enddef
 define  preob         00000000000
+onsource
 enddef
 define  ready         00000000000
 newtape

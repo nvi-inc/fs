@@ -140,12 +140,6 @@ vform=c,4
 sy=run setcl &
 enddef
 define  midob         00000000000
-bbcman
-tpi=formbbc,formif
-tpgain=formbbc,formif
-bbcagc
-caltemp=formbbc,formif
-tsys=formbbc,formif
 onsource
 wx
 cable
