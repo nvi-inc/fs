@@ -12,7 +12,7 @@
 extern int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kK4drive[2],
   kV4rack,selectm;
 
-m2init()
+m5init()
 {
 
   mvaddstr(ROW1,COL1,"    VSN        Time      GB       %   Check UT");
@@ -20,4 +20,4 @@ m2init()
   mvaddstr(ROW1+2,COL1,"  B");
 
   refresh();
-}  /* end m2init */
+}  /* end m5init */
