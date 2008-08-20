@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/RAID.txt  Version: 1.1  Date: 080613
+File: /usr2/fs/misc/RAID.txt  Version: 1.4  Date: 080820
 
 	    RAID Usage with FS Linux 6 (sarge) & 7 (etch)
 
@@ -6,9 +6,9 @@ File: /usr2/fs/misc/RAID.txt  Version: 1.1  Date: 080613
 
 INTRODUCTION
 
-This document describes how to maintain the RAID system that is
-installed as standard in FS Linux 6 & 7.  The document is divided into
-several small sections.  The discussion starts with an OVERVIEW
+This document describes how to maintain the software RAID system that
+is installed as standard in FS Linux 6 & 7.  The document is divided
+into several small sections.  The discussion starts with an OVERVIEW
 section that describes the system and the rationale for its use.  The
 disk layout is described as well.  The NORMAL OPERATION describes how
 the system is intended to be used for normal operations and defines
@@ -33,8 +33,9 @@ having to reboot the back-up many times to make it "less stale".
 OVERVIEW
 
 Beginning with FS Linux 6, the standard disk configuration for a FS
-computer is a RAID1 scheme.  In this approach two drives are normally
-inserted all the time.  The operating system maintains these as direct
+computer is a software RAID1 scheme.  In this approach two drives are
+normally inserted all the time.  The operating system (this approach
+does NOT use a RAID hardware controller) maintains these as direct
 mirrors of each other.  If one disk should fail, even during normal
 operations, there should be no loss of data or system functionality.
 This also provides a continuous automatic back-up of the operational
@@ -301,18 +302,19 @@ you can still recover from your "Shelf" disk.  In this case, you will
 need to convince the RAID system that the "Shelf" disk is not the
 stale disk.  This can be accomplished in one of two ways, either reset
 the RAID status of the bad disks by re-initializing them using the
-installation media or reboot the "Shelf" disk by itself enough times
-so that it has booted more often than the bad disks.  The former
-method is described in APPENDIX A. DISK RESET RECIPE at the end of
-this document.  (The latter method is a okay if the bad disks have
-been rebooted only a few more times than the "Shelf" disk and you
-happen to know how many, but in general it is too tedious, reseting
-the disks is safer and easier in this extreme situation.)  Once this
-has been accomplished the "Shelf" disk can be booted as the "Primary"
-with either of the bad disks as the "Secondary".  In this
-configuration, you should then perform REFRESHING A STALE SECONDARY
-DISK and then do a DISK ROTATION to bring the system back to full
-normal redundancy.
+installation media or reboot the "Shelf" disk by itself (i.e., with
+the secondary slot empty) enough times so that it has booted more
+often than the bad disks (a power cycle, hard reboot, is not
+necessary, a soft reboot is sufficient).  The former method is
+described in APPENDIX A. DISK RESET RECIPE at the end of this
+document.  (The latter method is a okay if the bad disks have been
+rebooted only a few more times than the "Shelf" disk and you happen to
+know how many, but in general it is too tedious, reseting the disks is
+safer and easier in this extreme situation.)  Once this has been
+accomplished the "Shelf" disk can be booted as the "Primary" with
+either of the bad disks as the "Secondary".  In this configuration,
+you should then perform REFRESHING A STALE SECONDARY DISK and then do
+a DISK ROTATION to bring the system back to full normal redundancy.
 
 REPLACEMENT DISKS
 
@@ -357,7 +359,7 @@ the following commands as "root":
 
   cd /usr/local/sbin
 
-  cp -a /usr2/fs/misc/refresh_secondary.hda refresh_secondary  (for IDE (PATA))
+  cp -a /usr2/fs/misc/refresh_secondary.hdc refresh_secondary  (for IDE (PATA))
           or
   cp -a /usr2/fs/misc/refresh_secondary.sdb refresh_secondary  (for SCSI or SATA)
 
