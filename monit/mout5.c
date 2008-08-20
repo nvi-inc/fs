@@ -38,7 +38,7 @@ mout5()
   printw("        ");
   move(ROW1+1,COL1+4);
   strncpy(vsn,ping->bank[0].vsn,8);
-  vsn[9]=0;
+  vsn[8]=0;
   printw(vsn);
 
   move(ROW1+1,COL1+12);
@@ -81,7 +81,7 @@ mout5()
   printw("        ");
   move(ROW1+2,COL1+4);
   strncpy(vsn,ping->bank[1].vsn,8);
-  vsn[9]=0;
+  vsn[8]=0;
   printw(vsn);
 
   move(ROW1+2,COL1+12);
