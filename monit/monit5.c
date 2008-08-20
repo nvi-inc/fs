@@ -1,9 +1,3 @@
-/*                                                                */
-/*  HISTORY:                                                      */
-/*  WHO  WHEN    WHAT                                             */
-/*  gag  920714  Added a check for Mark IV rack and drive to      */
-/*               to go along with Mark III rack and drive.        */
-/*                                                                */
 #include <ncurses.h>
 #include <signal.h>
 #include <math.h>
@@ -47,7 +41,7 @@ main()
   curs_set(0);
   refresh();
 
-  m2init();
+  m5init();
 
 /*  Initialize the display window */
 
@@ -71,4 +65,4 @@ main()
     }
   }
 
-}  /* end main of monit2 */
+}  /* end main of monit5 */
