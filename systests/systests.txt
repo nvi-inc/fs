@@ -2,7 +2,7 @@
 
 	       Ed Himwich, Brian Corey, and Dan Smythe
 
-			     June 8, 2007
+			  September 3, 2008
 
 INTRODUCTION
 
@@ -650,28 +650,67 @@ The steps to install for the first time are described below.
     analysis scripts from, you will either need to logout and login
     again or type "rehash".
 
-(6) Install pgperl if your computer doesn't already have it.  On a FS
-    Linux 5 system, you should be able to do this with two commands.
-    If you have a different distribution installed, you will need to
-    determine how to do this yourself.  Ed may be able give you some
-    advice if you need it.
+(6) Install pgperl if your computer doesn't already have it.  Three
+    cases are covered here: FS Linux 5 (FSL5), FSL6, and FSL7 (or
+    later).  If you have a different distribution installed, you will
+    need to determine how to do this yourself.  Ed may be able give
+    you some advice if you need it.  Instructions for the three cases
+    covered here follow:
+    
+    FSL5: Be sure that your "/etc/apt/sources.list" file does not
+          mention "stable".  All web references should explicitly use
+          "woody".  Since "woody" is no longer the "stable"
+          distribution, you will need to to modify your web references
+          to include the archive:
 
-    For FS Linux 5 systems, please be sure that your
-    "/etc/apt/source.list" file does not mention "stable".  All web
-    source references should explicitly use "woody".  Since "woody" is
-    no longer the "stable" distribution, you will need to to modify
-    your web references to:
+            deb http://archive.debian.org woody main contrib non-free
+            deb http://non-us.debian.org woody/non-US main contrib non-free
+            deb http://security.debian.org woody/updates main contrib non-free
 
-    deb http://archive.debian.org woody main contrib non-free
-    deb http://non-us.debian.org woody/non-US main contrib non-free
-    deb http://security.debian.org woody/updates main contrib non-free
+          If you have any questions about this please contact Ed
+          before attempting the install.  Once you have verified your
+          "sources.list", as "root" please enter:
 
-    If you have any questions about this please contact Ed before
-    attempting the install.  Once you have verified your
-    "sources.list", as "root" please enter:
+            apt-get update
+            apt-get install pgperl
+            apt-get clean
 
-      apt-get install pgperl
-      apt-get clean
+    FSL6: For these systems, it may still be possible to install
+          pgperl in the normal way.  First, be sure that your
+          "/etc/apt/sources.list" file does not mention "stable".  All
+          web references should explicitly use "sarge".  Then please
+          try:
+
+            apt-get update
+            apt-get install pgperl
+            apt-get clean
+
+          If that does not work, try the directions above for FSL5 for
+          accessing the archive, but use "sarge" in place of "woody"
+          for the web references.  If that also doesn't work, then a
+          third alternative might be the procedure described for FSL7
+          below.
+
+    FSL7: For these (and later) systems, first be sure that your
+          "/etc/apt/sources.list" file does not mention "stable".  All
+          web references should explicitly use "etch" for FLS7 or
+          another name as appropriate for later systems.  Once that is
+          verified, enter the following commands as "root" (using
+          cut-and-paste in a shell window will reduce the chances of
+          making typing mistakes):
+
+            cd /root
+            apt-get update
+            aptitude install pgplot5
+            wget http://http.us.debian.org/debian/pool/main/libp/libpng/libpng10-0_1.0.18-1_i386.deb
+            wget http://http.us.debian.org/debian/pool/contrib/p/pgperl/pgperl_2.18-5_i386.deb
+            dpkg -i libpng10-0_1.0.18-1_i386.deb
+            dpkg -i pgperl_2.18-5_i386.deb
+            apt-get clean
+
+         Over time these ".deb" files will probably move to
+         "archive.debian.org", so you may need to retrieve them from
+         there instead.
    
 (7) Make sure that your print command will print PostScript
     files. This should already be set-up for FS Linux 5 systems with
@@ -788,47 +827,31 @@ For reference the "help" output from each of the three scripts,
 
 			       PCALAMP
 
-Usage: plotlog -1anwprzvhf file/device logs
-Synopsis: extracts and plots data from log files
+Usage: pcalamp  -c string -vhpi -u upper -l lower -f file/device logs
+Synopsis: extracts and plots pcal amplitudes from log files
 
-This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
-fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV
-decoder pcal data in log files and generates time plots of the data. The time
-axis of all the plots is the same. The data is plotted so that it fits entirely
-inside the boxes. Points that appear along the top line of a plot did not decode
-($$$ for example) or were edited out by command line options.
-
-The '1anw' switches can be used to select different IF arrangements for
-calculating phase differences between pcal tones. Any combination of the '1anw'
-switches can be used. No difference is plotted more than once. Some simple
-assumptions are made about the time order of the pcal data in the log. If these
-assumptions are violated the phase difference plots may not make much sense.
-
-The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
-all other plots.
-
-Cable delay is plotted as one-way cable delay change unless the 'r' switch is
-used.
+This script processes log files to produce plots of pcal amplitudes. The
+default is pcal amplitudes for the first set of amplitudes that appear in the
+file. This behavior can be modified with the '-c' option to plot the first
+occurrence of amplitude data after a FS command that contains the specified
+string.
 
 Option explanations:
- phase-difference plot options:
-  -1 all converters are on one IF
-  -a odd converters are on one IF, even are on another (astronomy)
-  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
-     also useful for wide band geodesy
-  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
-     (wide band geodesy)
-
- -p plot amplitude versus phase for phase cal tones
- -r plot cable data in raw units
- -z value  edit out pcal points with amplitude less than value
+ -c string plot first set of amplitudes found after a command/procedure
+    matching 'string' was recorded in the log, for this to work; the
+    command/procedure matching 'string' must not be called from a procedure,
+    unless the procedure is logged with 'xlog=on'
+ -p plot using power units for comparison to autocorrelation plots
+ -i autoscale each plot individually
+ -l lower  eliminate points smaller than lower when auto-scaling plots
+ -u upper  eliminate points larger  than upper when auto-scaling plots
  -v print program and PGPLOT version information and stop
  -h print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, an xterm will be used
-    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
+    if -f omitted and DISPLAY is not defined, 'pcalamp.ps/vps' will be used
     if '-f ?', you will be prompted for standard pgplot devices,
-               be sure to quote '?', like \?
+                be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
 
 
@@ -917,24 +940,40 @@ Option explanations:
                be sure to quote '?', like \?
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
 
+
 			       PLOTLOG
 
-Usage: plotlog -1anwprvh -c value -s string -t value -z value -f file/device logs
+Usage:
+   plotlog [options] logs
 Synopsis: extracts and plots data from log files
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
-fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV
-decoder pcal data in log files and generates time plots of the data. The time
-axis of all the plots is the same. The data is plotted so that it fits entirely
-inside the boxes. Points that appear along the top line of a plot did not decode
-($$$ for example) or were edited out by command line options.
+fmout-gps/), setcl#time/, and the first encountered USB tone per channel for
+Mark IV decoder pcal data in log files and generates time plots of the data.
+The time axis of all the plots is the same. The data is plotted so that it fits
+entirely inside the boxes. Points that appear along the top line of a plot did
+not decode ($$$ for example) or were edited out by command line options.
 
 The '1anw' switches can be used to select different IF arrangements for
 calculating phase differences between pcal tones. Any combination of the '1anw'
-switches can be used. No difference is plotted more than once. Some simple
-assumptions are made about the time order of the pcal data in the log. If these
-assumptions are violated the phase difference plots may not make much sense.
-These options suppress all other output except option -p.
+switches can be used. No difference is plotted more than once.
+
+The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
+for time plots and amplitude versus phase plots. The minimum non-zero Tsys
+(per channel) is used as the reference value for normalization. If this causes
+problems, an explict global reference value can be specified with the 'k'
+option. The 't' option may also be useful for removing bad Tsys values. By
+default dual side-band Tsys is used for normalization if it is available, if
+not then single side-band Tsys data is used. This is usually what is wanted
+but if not, the 'b' option can be used to force use of single side-band Tsys
+for channels that it is available for.
+
+For the 'j1anw' switches a simple model is used to match different data from
+the log. Points from different data types that are the nearest together in time
+are matched. No epoch from one data type is matched to more than one epoch of
+another type in this way. If the resulting matched epochs are within 60 seconds
+of each other, the match is accepted. The tolerance of match can be adjusted
+using the 'u' option.
 
 The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
 all other plots. This option suppresses all other output except options -1anw.
@@ -951,20 +990,34 @@ Option explanations:
   -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
      (wide band geodesy)
 
+ -b        force single-side-band Tsys normalization of pcal amp data
  -c value  cable cal edit, if greater than zero, delete points that much or
            more above lowest value, if less than zero, delete points that much
            or more below largest value; uses plot Y axis units, be careful of
            the -r option
- -p plot amplitude versus phase for phase cal tones,
-    suppresses all other output except -1anw
- -r plot cable data in raw units
+ -e regexp include only plots with labels that DO NOT match 'regexp', where
+           'regexp' is any Perl regular expression pattern, you will need to
+           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
+           or spaces, this option can be combined with the 'g' option as well.
+ -g regexp include only plots with labels that DO match 'regexp', where
+           'regexp' is any Perl regular expression pattern, you will need to
+           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
+           or spaces, this option can be combined with the 'e' option as well.
+ -j        normalize phase-cal amp by Tsys per channel
+ -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
+           'value' for all channels
+ -p        plot amplitude versus phase for phase cal tones,
+           suppresses all other output except -1anw
+ -r        plot cable data in raw units
  -s string match commands with 'string' instead of 'tsys',
-    option -t still applies for editing
+           option -t still applies for editing
  -t value  edit out tsys points less than or equal to zero or greater than or
-           equal to value
- -z value  edit out pcal amplitudes less than value
- -v print program and PGPLOT version information and stop
- -h print this help information and stop
+           equal to 'value'
+ -z value  edit out pcal data with amplitudes less than 'value'
+ -u value  maximum distance in time (seconds) allowed for matching data for
+           '1anwp' option plots is changed to 'value' instead of 60 seconds
+ -v        print program and PGPLOT version information and stop
+ -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, an xterm will be used
     if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
