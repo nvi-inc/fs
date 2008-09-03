@@ -1,36 +1,188 @@
 #!/usr/bin/perl
 
-sub phs {
-    my ($i,$j)=@_;
-    my ($tim,$phs,$k,$label);
-    $#tim=-1;
-    $#phs=-1;
-    for($k=0; $k<$pcaln[1][$i] && $k<$pcaln[1][$j];$k++) {
-	$tim[$k]=$pcalt[1][$i][$k];
-	$phs[$k]=$pcalp[1][$j][$k]-$pcalp[1][$i][$k];
-	if($phs[$k] > 180) {
-	    $phs[$k]-=360;
-	} elsif($phs[$k] < -180) {
-	    $phs[$k]+=360;
+# key to the functioning of this program is that edited out data
+# is replaced with $$$, plotting puts out of range values on the top line
+# all actual values are inside (not on) box
+#
+# if the log values are out of time order, i.e., time was reset back,
+# plots may have odd appearances, but still reflect the log
+
+sub nrml {
+#
+# normalize the pcal in $i-th channel by the tsys value that matches if any
+#
+    my($i,$chan)= @_;
+    my($pv,$pt,$tv,$tt);
+    my($ttref,$tvref,$ptref,$pvref);
+    my($j,$min,$nfirst);
+    $#pv=-1;
+    $#pt=-1;
+    $#tv=-1;
+    $#tt=-1;
+    for($j=0;$j<$pcaln[1][$i];$j++) {
+	$pv[$j]=$pcala[1][$i][$j];
+	$pt[$j]=$pcalt[1][$i][$j];
+    }
+    for($j=0;$j<$tsysn{$chan};$j++) {
+	$tv[$j]=$tsysv{$chan}[$j];
+	$tt[$j]=$tsyst{$chan}[$j];
+    }
+    ($ttref,$tvref,$ptref,$pvref)=match(\@tt,\@tv,\@pt,\@pv);
+#
+# find normalization value
+#
+    $min=1;
+    $nfirst=0;
+    for ($j=0;$j<=$#$ttref;$j++) {
+	if((!($$tvref[$j]=~/^$float_pattern$/)) || 
+	   (!($$pvref[$j]=~/^$float_pattern$/))) {
+	    $$pvref[$j]='$$$';
+	} else {
+	    $$pvref[$j]=$$pvref[$j]*sqrt($$tvref[$j]);
+	    if(!$nfirst && $$tvref[$j]>0) {
+		$min=$$tvref[$j];
+		$nfirst=1;
+	    } else {
+		$min=$$tvref[$j] if $$tvref[$j]<$min && $$tvref[$j]>0;
+	    }
 	}
     }
-    $label="Phase diff $j-$i";
-    &vu(\@tim,\@phs,$label);
+    $min = $opt_k if defined($opt_k);
+#
+# normalize, mark bad values
+#	
+    for ($j=0;$j<=$#$ttref;$j++) {
+	if((!($$tvref[$j]=~/^$float_pattern$/)) || 
+	   (!($$pvref[$j]=~/^$float_pattern$/))) {
+	    $$pvref[$j]='$$$';
+	} else {
+	    $$pvref[$j]=$$pvref[$j]/sqrt($min);
+	}
+    }
+#
+# be sure to return the amp time, so times will match phase times for 'p' plots
+#
+    return($ptref,$pvref);
+}
+
+sub match {
+#
+# find nearest time match for two sets of values
+# $time_dist sets the limit on successful matches
+# each value can match only once
+# 
+# if the log values are out of time order, i.e., time was reset back,
+# this will only find time values nearby in log, probably what you want
+#
+# bad values are preserved
+#
+    my ($t1,$v1,$t2,$v2) = @_;
+    my ($ot1,$ov1,$ot2,$ov2);
+    my ($dist,$dist1,$dist2,$n1,$n2,$on);
+    $n2=0;
+    $on=0;
+    $#ot1=-1;
+    $#ov1=-1;
+    $#ot2=-1;
+    $#ov2=-1;
+  LOOP1:
+    for ($n1=0;$n1<=$#$t1;$n1++) {
+      while($n2<=$#$t2) {
+	  $dist=abs($$t2[$n2] - $$t1[$n1]);
+	  if($n1 < $#$t1) {
+	      $dist1=abs($$t2[$n2] - $$t1[$n1+1]);
+	      next LOOP1 if $dist1<$dist;
+	  }
+	  while($n2<$#$t2) {
+	      $dist2=abs($$t2[$n2+1] - $$t1[$n1]);
+	      last if $dist2 > $dist;
+	      $n2++;
+	      $dist=$dist2;
+	  }
+	  last;
+      }
+      if($n2 <= $#$t2) {
+	  if($time_dist > ($$t2[$n2] - $$t1[$n1])) {
+	      $ot1[$on]=$$t1[$n1];
+	      $ov1[$on]=$$v1[$n1];
+	      $ot2[$on]=$$t2[$n2];
+	      $ov2[$on]=$$v2[$n2];
+	      $on++;
+	      $n2++;
+	  }
+      } else {
+	  last;
+      }
+  }
+
+    return (\@ot1,\@ov1,\@ot2,\@ov2);
+}
+
+sub phs {
+#
+# plot phase differences
+#
+    my ($i,$j)=@_;
+    my ($tim1,$phs1,$tim2,$phs2);
+    my ($tref1,$pref1,$tref2,$pref2,$k,$label);
+    $#tim1=-1;
+    $#phs1=-1;
+    $#tim2=-1;
+    $#phs2=-1;
+    for($k=0; $k<$pcaln[1][$i];$k++) {
+	$tim1[$k]=$pcalt[1][$i][$k];
+	$phs1[$k]=$pcalp[1][$i][$k];
+    }
+    for($k=0; $k<$pcaln[1][$j];$k++) {
+	$tim2[$k]=$pcalt[1][$j][$k];
+	$phs2[$k]=$pcalp[1][$j][$k];
+    }
+    ($tref1,$pref1,$tref2,$pref2)=&match(\@tim1,\@phs1,\@tim2,\@phs2);
+
+    for($k=0; $k<=$#$tref1;$k++) {
+	if((!($$pref1[$k]=~/^$float_pattern$/)) || 
+	   (!($$pref2[$k]=~/^$float_pattern$/))) {
+	    $$pref1[$k]='$$$';
+	} else {
+	    $$pref1[$k]=$$pref2[$k]-$$pref1[$k];
+	    if($$pref1[$k] > 180) {
+		$$pref1[$k]-=360;
+	    } elsif($$pref1[$k] < -180) {
+		$$pref1[$k]+=360;
+	    }
+	}
+    }
+    &vu($tref1,$pref1,"Phase diff $pcall[1][$j]-$pcall[1][$i]");
 }
 
 sub vup {
+#
+# plot something versus phase, fixed -180->+180 x axis
+#
     my($x,$y, $label) = @_;
     &vuy($x,$y,$label,2);
 }
 
 sub vu {
+#
+# regular y value versus time plot
+#
     my($x,$y, $label) = @_;
     &vuy($x,$y,$label,1);
 }
 sub vuy {
+#
+# main plot function, see vuX functions above for options
+#
     my($x,$y, $label, $type) = @_;
     my ($i,$ymax,$ymin,$ply,$nfirst,$xmax,$xmin,$plx);
 
+    if(defined($opt_g)) {
+	return if $label !~/$opt_g/;
+    }
+    if(defined($opt_e)) {
+	return if $label =~/$opt_e/;
+    }
     $ymax=0;
     $ymin=0;
     $nfirst=0;
@@ -70,7 +222,7 @@ sub vuy {
 	if($type == 1) {
 	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
 	    pglabel("Time","","");
-	} else {
+	} elsif($type == 2) {
 	    pgbox("BCTN",0.0,0,"BCNVT",0.0,0); 
 	    pglabel("Phase","","");
 	}
@@ -90,7 +242,9 @@ sub vuy {
 #    print "panel $panel\n";
     pgpanl(1,2+$panel);
     pgvport(0.15,.95,0,1);
-
+#
+# handle pathologies: all y == 0 and just one y value
+#
     if($ymin == 0 && $ymax == 0) {
 	$ymax = 0.001;
 	$ymin =-0.001;
@@ -101,9 +255,12 @@ sub vuy {
           ($ymax,$ymin)=($ymin,$ymax);
         }
     }
+#
+# put edited out values at the top
+#
     for($i=0;$i<=$#$y;$i++) {
 #	print "$$y[$i] ";
-	if($$y[$i] =~/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/) {
+	if($$y[$i] =~/^$float_pattern$/) {
 #	    print" matched ";
 	    $ply[$i]=$$y[$i];
 	} else {
@@ -113,6 +270,9 @@ sub vuy {
 #	print " ply $ply[$i]\n";
     }
     if($type == 2) {
+#
+# handle pathologies: x == 0 and just one x value
+#
 	if($xmin == 0 && $xmax == 0) {
 	    $xmax = 0.001;
 	    $xmin =-0.001;
@@ -123,9 +283,12 @@ sub vuy {
 		($xmax,$xmin)=($xmin,$xmax);
 	    }
 	}
+#
+# put bad values on right edge
+#
 	for($i=0;$i<=$#$x;$i++) {
 #	print "$$x[$i] ";
-	    if($$x[$i] =~/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/) {
+	    if($$x[$i] =~/^$float_pattern$/) {
 #	    print" matched ";
 		$plx[$i]=$$x[$i];
 	    } else {
@@ -155,6 +318,11 @@ sub vuy {
 }
 
 sub time {
+#
+# calculate time of the log entry
+# everything is measured relative to $reftime, first time in log
+# it will make a mess of $reftime is not reasonable
+#
     local ($date) = @_;
 #2005.123.12:23:56.21
 #01234567890123456789
@@ -199,17 +367,19 @@ sub time {
     $tmin=$time if $time<$tmin;
     return $time;
 }
+#
+# main program
+#
 
 # 1.0 Initialize
 
 use PGPLOT;
 require "getopts.pl";
 
-
-&Getopts("c:vhrnw1aps:t:z:f:");
-
+&Getopts("1abc:e:g:jk:rnps:t:u:wz:f:hv");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
+@hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
 
 if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
     print STDERR "Try: 'plotlog -h'\n";
@@ -217,33 +387,47 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.3]\n";
+    print "[plotlog 1.5]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit -1;
 }
 
 if (defined($opt_h)) {
-    print "Usage: plotlog -1anwprvh -c value -s string -t value -z value -f file/device logs\n";
+    print "Usage:\n";
+    print "   plotlog [options] logs\n";
     print "Synopsis: extracts and plots data from log files\n\n";
 
     print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
-    print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel Mark IV\n";
-    print "decoder pcal data in log files and generates time plots of the data. The time\n";
-    print "axis of all the plots is the same. The data is plotted so that it fits entirely\n";
-    print "inside the boxes. Points that appear along the top line of a plot did not decode\n";
-    print "(\$\$\$ for example) or were edited out by command line options.\n\n";
+    print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel for\n";
+    print "Mark IV decoder pcal data in log files and generates time plots of the data.\n";
+    print "The time axis of all the plots is the same. The data is plotted so that it fits\n";
+    print "entirely inside the boxes. Points that appear along the top line of a plot did\n";
+    print "not decode (\$\$\$ for example) or were edited out by command line options.\n\n";
 
     print "The '1anw' switches can be used to select different IF arrangements for\n";
     print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
-    print "switches can be used. No difference is plotted more than once. Some simple\n";
-    print "assumptions are made about the time order of the pcal data in the log. If these\n";
-    print "assumptions are violated the phase difference plots may not make much sense.\n";
-    print "These options suppress all other output except option -p.\n\n";
+    print "switches can be used. No difference is plotted more than once.\n\n";
+
+    print "The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)\n";
+    print "for time plots and amplitude versus phase plots. The minimum non-zero Tsys\n";
+    print "(per channel) is used as the reference value for normalization. If this causes\n";
+    print "problems, an explict global reference value can be specified with the 'k'\n";
+    print "option. The 't' option may also be useful for removing bad Tsys values. By\n";
+    print "default dual side-band Tsys is used for normalization if it is available, if\n";
+    print "not then single side-band Tsys data is used. This is usually what is wanted\n";
+    print "but if not, the 'b' option can be used to force use of single side-band Tsys\n";
+    print "for channels that it is available for.\n\n";
+
+    print "For the 'j1anw' switches a simple model is used to match different data from\n";
+    print "the log. Points from different data types that are the nearest together in time\n";
+    print "are matched. No epoch from one data type is matched to more than one epoch of\n";
+    print "another type in this way. If the resulting matched epochs are within 60 seconds\n";
+    print "of each other, the match is accepted. The tolerance of match can be adjusted\n";
+    print "using the 'u' option.\n\n";
 
     print "The 'p' switch adds amplitude versus phase plots for each phase-cal tone after\n";
     print "all other plots. This option suppresses all other output except options -1anw.\n\n";
-
     print "Cable delay is plotted as one-way cable delay change unless the 'r' switch is\n";
     print "used.\n\n";
 
@@ -256,20 +440,34 @@ if (defined($opt_h)) {
     print "  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third\n";
     print "     (wide band geodesy)\n\n";
 
+    print " -b        force single-side-band Tsys normalization of pcal amp data\n";
     print " -c value  cable cal edit, if greater than zero, delete points that much or\n";
     print "           more above lowest value, if less than zero, delete points that much\n";
     print "           or more below largest value; uses plot Y axis units, be careful of\n";
     print "           the -r option\n";
-    print " -p plot amplitude versus phase for phase cal tones,\n";
-    print "    suppresses all other output except -1anw\n";
-    print " -r plot cable data in raw units\n";
+    print " -e regexp include only plots with labels that DO NOT match 'regexp', where\n";
+    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
+    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
+    print "           or spaces, this option can be combined with the 'g' option as well.\n";
+    print " -g regexp include only plots with labels that DO match 'regexp', where\n";
+    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
+    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
+    print "           or spaces, this option can be combined with the 'e' option as well.\n";
+    print " -j        normalize phase-cal amp by Tsys per channel\n";
+    print " -k value  changes 'j' normalization from minimum non-zero Tsys per channel to\n";
+    print "           'value' for all channels\n";
+    print " -p        plot amplitude versus phase for phase cal tones,\n";
+    print "           suppresses all other output except -1anw\n";
+    print " -r        plot cable data in raw units\n";
     print " -s string match commands with 'string' instead of 'tsys',\n";
-    print "    option -t still applies for editing\n";
+    print "           option -t still applies for editing\n";
     print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
-    print "           equal to value\n";
-    print " -z value  edit out pcal amplitudes less than value\n";
-    print " -v print program and PGPLOT version information and stop\n";
-    print " -h print this help information and stop\n";
+    print "           equal to 'value'\n";
+    print " -z value  edit out pcal data with amplitudes less than 'value'\n";
+    print " -u value  maximum distance in time (seconds) allowed for matching data for\n";
+    print "           '1anwp' option plots is changed to 'value' instead of 60 seconds\n";
+    print " -v        print program and PGPLOT version information and stop\n";
+    print " -h        print this help information and stop\n";
     print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
     print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
     print "    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used\n";
@@ -289,6 +487,9 @@ if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
 
 $string="tsys";
 $string = $opt_s if defined($opt_s);
+
+$time_dist=60;
+$time_dist = $opt_u if defined($opt_u);
 
 # 2.0 extract data
 
@@ -358,11 +559,54 @@ foreach $file (@ARGV) {
 		next;
 	    }
 	    if(defined($opt_z) && $amp < $opt_z) {
-		$amp='$$';
+		$amp='$$$';
+		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
 	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
+	    if($chan > -1 && $chan < 16 && !defined($pcall[$band][$chan])) {
+		$pcall[$band][$chan]="$hex[$chan]$sb";
+	    }
+	    $pcaln[$band][$chan]++;
+	} elsif (/pcaldisp2\/k5ts/i) {
+	    (undef,undef,@fields)=split('[ /\cM]+');
+	    $rec=substr($fields[0],-1);
+            $ch=substr($fields[1],-1);
+	    $chan = 4*($rec-1)+$ch;
+            if(substr($fields[3],-3) ne "bit") {
+		$fields[3] =~ s/hz//i;
+		$freq = $fields[3];
+		$iof=1;
+	    } else {
+		$freq = 10000;
+		$iof=0;
+	    }
+	    $sb=substr($fields[4+$iof],0,1);
+	    $amp=$fields[5+$iof];
+	    $phase=$fields[6+$iof];
+#	    print "chan $chan freq $freq sb $sb amp $amp phase $phase\n";
+#	    print "sb $sb port $2\n";
+	    if($sb eq "u") {
+		$band=1;
+	    } elsif($sb eq "l") {
+		$band=0;
+	    } else {
+		die "unknown side-band $sb\n";
+	    }
+	    if(!defined($pcalf[$band][$chan])) {
+		$pcalf[$band][$chan]=$freq;
+	    } elsif($pcalf[$band][$chan]!=$freq) {
+		next;
+	    }
+	    if(defined($opt_z) && $amp < $opt_z) {
+		$amp='$$$';
+		$phase='$$$';
+	    }
+	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
+	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
+	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
+	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
 	} elsif (/\/$string\//i) {
 	    (undef,undef,@fields)=split('[/,\cM]');
@@ -370,8 +614,8 @@ foreach $file (@ARGV) {
 		$tsys=shift(@fields);
 #		print "$detect $tsys\n";
 		if(defined($opt_t)) {
-		    $tsys= "$$$" if $tsys <= 0;
-                    $tsys= "$$$" if $tsys >= $opt_t;
+		    $tsys= '$$$' if $tsys <= 0;
+                    $tsys= '$$$' if $tsys >= $opt_t;
 		}
 		$tsysv{$detect}[$tsysn{$detect}]=$tsys;
 		$tsyst{$detect}[$tsysn{$detect}]=&time($_);
@@ -394,8 +638,8 @@ foreach $file (@ARGV) {
 		$detect=$tsys1{$det};
 #		print "$detect $tsys\n";
 		if(defined($opt_t)) {
-		    $tsys= "$$$" if $tsys <= 0;
-                    $tsys= "$$$" if $tsys >= $opt_t;
+		    $tsys= '$$$' if $tsys <= 0;
+                    $tsys= '$$$' if $tsys >= $opt_t;
 		}
 		$tsysv1{$detect}[$tsysn1{$detect}]=$tsys;
 		$tsyst1{$detect}[$tsysn1{$detect}]=&time($_);
@@ -418,8 +662,8 @@ foreach $file (@ARGV) {
 		$detect=$tsys2{$det};
 #		print "$detect $tsys\n";
 		if(defined($opt_t)) {
-		    $tsys= "$$$" if $tsys <= 0;
-                    $tsys= "$$$" if $tsys >= $opt_t;
+		    $tsys= '$$$' if $tsys <= 0;
+                    $tsys= '$$$' if $tsys >= $opt_t;
 		}
 		$tsysv2{$detect}[$tsysn2{$detect}]=$tsys;
 		$tsyst2{$detect}[$tsysn2{$detect}]=&time($_);
@@ -442,8 +686,8 @@ foreach $file (@ARGV) {
 		$detect=$tsys3{$det};
 #		print "$detect $tsys\n";
 		if(defined($opt_t)) {
-		    $tsys= "$$$" if $tsys <= 0;
-                    $tsys= "$$$" if $tsys >= $opt_t;
+		    $tsys= '$$$' if $tsys <= 0;
+                    $tsys= '$$$' if $tsys >= $opt_t;
 		}
 		$tsysv3{$detect}[$tsysn3{$detect}]=$tsys;
 		$tsyst3{$detect}[$tsysn3{$detect}]=&time($_);
@@ -525,9 +769,9 @@ if(defined(@cablet)) {
 	    for($i=0;$i<=$#cable;$i++) {
 		next unless $cable[$i]=~/^$float_pattern$/ ;
 		if($opt_c < 0 && $cable[$i] < $cablemax+$opt_c) {
-		    $cable[$i]="$$$";
+		    $cable[$i]='$$$';
                 } elsif($opt_c >0 && $cable[$i] > $cablemin+$opt_c) {
-		    $cable[$i]="$$$";
+		    $cable[$i]='$$$';
                 }
 	    }
 	}
@@ -552,9 +796,9 @@ if(defined(@cablet)) {
 	    for($i=0;$i<=$#cable;$i++) {
 		next unless $cable[$i]=~/^$float_pattern$/ ;
 		if($opt_c < 0 && $cable[$i] < $cablemax+$opt_c) {
-		    $cable[$i]="$$$";
+		    $cable[$i]='$$$';
                 } elsif($opt_c >0 && $cable[$i] > $cablemin+$opt_c) {
-		    $cable[$i]="$$$";
+		    $cable[$i]='$$$';
                 }
 	    }
 	}
@@ -601,18 +845,31 @@ if(defined(@setcl)) {
 }
 for($i=1;$i<17;$i++) {
     if(defined($pcaln[1][$i])) {
-        $#amp=-1;
-        $#tim=-1;
-        $#phs=-1;
+	$#amp=-1;
+	$#tim=-1;
+	$#phs=-1;
 	for($j=0;$j<$pcaln[1][$i];$j++) {
 	    $amp[$j]=$pcala[1][$i][$j];
 	    $tim[$j]=$pcalt[1][$i][$j];
-	    $phs[$j]=$pcalp[1][$i][$j];
+		$phs[$j]=$pcalp[1][$i][$j];
 	}
-	$label=sprintf("$pcalf[1][$i] Hz Amp U$i",$i);
-	&vu(\@tim,\@amp,$label);
-	$label=sprintf("$pcalf[1][$i] Hz Phase U$i",$i);
-	&vu(\@tim,\@phs,$label);
+#
+# fix up to use dual sideband tsys for normalization, BUT specific sideband data
+# if dual doesn't exist
+#
+	$chan=$pcall[1][$i];
+	if(!defined($opt_b)) {
+	    substr($chan,-1)="d";
+	    $chan=$pcall[1][$i] if !defined($tsysn{$chan});
+	}
+
+	if(!defined($opt_j)) {		    
+	    &vu(\@tim,\@amp,"$pcalf[1][$i] Hz Amp $pcall[1][$i]");
+	} elsif(defined($tsysn{$chan})) {
+	    ($ptref,$pvref)= &nrml($i, $chan);
+	    &vu($ptref,$pvref,"$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
+	}
+	&vu(\@tim,\@phs,"$pcalf[1][$i] Hz Phase $pcall[1][$i]");
     }
 }
 
@@ -765,6 +1022,7 @@ if(defined($opt_w)) {
 	}
     }
 }
+
 END_EXTRAS:
     $something=0;
 
@@ -792,14 +1050,37 @@ if(defined($opt_p)) {
 		$tim[$j]=$pcalt[1][$i][$j];
 		$phs[$j]=$pcalp[1][$i][$j];
 	    }
-	    $label=sprintf("$pcalf[1][$i] Hz Amp U$i",$i);
-	    if($first == 1 ) {
-		pgask(-1);
-		pgpanl(1,8);
-		pgpage();
-		$panel=0;
+#
+# fix up to use dual sideband tsys for normalization if specific sideband data
+# doesn't exist
+#
+	    $chan=$pcall[1][$i];
+	    if(!defined($opt_b)) {
+		substr($chan,-1)="d";
+		$chan=$pcall[1][$i] if !defined($tsysn{$chan});
 	    }
-	    &vup(\@phs,\@amp,$label);
+
+	    if(!defined($opt_j)) {		    
+		if($first == 1 && $panel !=0) {
+		    pgask(-1);
+		    pgpanl(1,8);
+		    pgpage();
+		    $panel=0;
+		}
+		$label=sprintf("$pcalf[1][$i] Hz Amp $pcall[1][$i]");
+		&vup(\@phs,\@amp,$label);
+	    } elsif (defined($tsysn{$chan})) {
+		($ptref,$pvref)= &nrml($i, $chan);
+		$#tima=-1;
+		$#vala=-1;
+		for($j=0;$j<=$#$ptref;$j++) {
+		    $tima[$j]=$$ptref[$j];
+		    $vala[$j]=$$pvref[$j];
+		}
+		($ptref,$pvref,$atref,$avref)=&match(\@tim,\@phs,\@tima,\@vala);
+		$label=sprintf("$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
+		&vup($pvref,$avref,$label);
+	    }
 	}
     }
 
