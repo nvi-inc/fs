@@ -1,7 +1,8 @@
-File: /usr2/fs/misc/FSL7_PC_Checkout.txt  Version: 0.8  Date: 080609
+File: /usr2/fs/misc/FSL7_PC_Checkout.txt  Version: 1.2  Date: 080905
 
 	     GSFC FS PC Installation/Check-out Procedure
 
+		   System:________________________
 
 1. Equipment check-list:
    ____ Motherboard, case (rack mount?), 300W PS, + power cord
@@ -13,39 +14,57 @@ File: /usr2/fs/misc/FSL7_PC_Checkout.txt  Version: 0.8  Date: 080609
    ____ GPIB device
    ____ Serial mux card
    ____ Special instructions for this system, in document: _______________.
+   ____ Disk key sets(2 keys each)
    ____ Other?
 
-2. Labeling
+2. ____ Boot with vendor's disk to verify operation. Presevre this disk
+        as long as possible in case it contains a needed driver.
+
+3. Labeling
    ____ Primary disk slot (first SATA controller)
    ____ Secondary disk slot (second SATA controller)
-   ____ Disks "1", "2", and "3"
-   ____ Byterunner ports 4-11 (if included)
+   ____ Vendor's Disk "2" 
+   ____ Disks "1", and "3"
+   ____ Byterunner ports 4-11 (if included), VSCom on main connector (top) 
+        and Chasis
+   ____ System ID, e.g. 2008 July-Ny 1 on chasis, each disk, keyboard,
+        VScom main connector (bottom), and mouse (cord near connector)
 
-3. Assemble computer:
+4. Assemble computer:
    ____ All Components
    ____ Disk "1" in Primary slot
    ____ Disk "3" in Secondary slot
    ____ Disk "2" on shelf
 
-4. Copy Etch DVDs, use copies for installation
+5. Copy Etch DVDs, use copies for installation
    ____ Copy DVDs
  
-5. BIOS Settings
+6. BIOS Settings
    ____ Date and Time are UTC
    ____ ScrollLock off on boot
    ____ Special Settings?
 
-6. Install FSL7
+7. Install FSL7
    ____ following special instructions in document: ____________
         but if no special instructions follow instructions in:
    ____ ftp://ftp.hartrao.ac.za/pub/fs7x/fs7linux_DVD.txt
 
-7. Install and run fsadapt as "root" (use current version in place
-   of 7.0.5):
+8. Install Pgperl.
+
+   ____  cd /root
+   ____  aptitude install pgplot5
+   ____  wget http://http.us.debian.org/debian/pool/main/libp/libpng/libpng10-0_1.0.18-1_i386.deb
+   ____  wget http://http.us.debian.org/debian/pool/contrib/p/pgperl/pgperl_2.18-5_i386.deb
+   ____  dpkg -i libpng10-0_1.0.18-1_i386.deb
+   ____  dpkg -i pgperl_2.18-5_i386.deb
+   ____  apt-get clean
+
+9. Install and run fsadapt as "root" (use current version in place
+   of 7.0.6):
 
    ____   cd /root
-   ____   ncftpget ftp://ftp.hartrao.ac.za/pub/fs7x/fs7adapt-7.0.5.tgz
-   ____   tar xzvpf fsdapt-7.0.5.tgz
+   ____   ncftpget ftp://ftp.hartrao.ac.za/pub/fs7x/fsadapt-7.0.6.tgz
+   ____   tar xzvpf fsdapt-7.0.6.tgz
    ____   cd fsadapt
    ____   ./fsadapt
         (take all defaults in fsadapt, except:
@@ -55,41 +74,45 @@ File: /usr2/fs/misc/FSL7_PC_Checkout.txt  Version: 0.8  Date: 080609
    ____     on Window 3 set skip
    ____     on Window 4a set secure, then OK, then OK again
 
-8. Set oper and prog password
-   ____ passwd oper
-   ____ passwd prog
+10. Set oper and prog password
+    ____ passwd oper
+    ____ passwd prog
 
-9. Install FS as "root: (use current version in place of 9.10.3):
+11. Install FS as "root: (use current version in place of 9.10.3):
 
-   ____   (Place fs-9.10.3.tgz on /tmp)
-   ____   cd /
-   ____   tar xzf /tmp/fs-9.10.3.tgz
-   ____   cd /usr2/fs-9.10.3
-   ____   make install
-   ____     (answer question "y")
+    ____   (Place fs-9.10.3.tgz on /tmp)
+    ____   cd /
+    ____   tar xzf /tmp/fs-9.10.3.tgz
+    ____   cd /usr2/fs-9.10.3
+    ____   make install
+    ____     (answer question "y")
 
-10. Compile FS as "prog", vt1
+12. Compile FS as "prog", vt1
     ____ cd /usr2/fs
     ____ make
 
-11. Reboot
+13. Reboot
     ____ reboot
 
-12. Testing
+14. Testing
     ____ NIC tested by installation process
     ____ CD/DVD tested by installation process
     ____ Keyboard tested by use
+    ____ Mouse tested by use
     ____ USB ports (insert thumb drive in each)
     ____ PCI-GPIB card if included
     ____ ByteRunner 800H if included
-    ____ GPIB-232CT if included
-    ____ Mouse
+         Use dev9 for cable device in ibad.ctl,
+         (test counter had broken address bit 1)
+         Use /dev/ttySX, X=4,...,11 for gpib device in dev.ctl
+    ____ GPIB-RS232 if included (config from MS-Win machine with NI CD:S-mode,
+         38400 BAUD, 8 data bits, 1 stop bit, no parity, no flow control)
 
-13. Clean-up as "root", vt1
+15. Clean-up as "root", vt1
           a. Restore /usr2/control/ibad.ctl and dev.ctl
              ____ cd /usr2/control
-             ____ cp -a /usr2/fs/st.default/control/ibad.ctl
-             ____ cp -a /usr2/fs/st.default/control/dev.ctl
+             ____ cp -a /usr2/fs/st.default/control/ibad.ctl .
+             ____ cp -a /usr2/fs/st.default/control/dev.ctl .
              ____ chmod a+rw ibad.ctl dev.ctl
              ____ chown oper.rtx ibad.ctl dev.ctl
 
@@ -168,7 +191,7 @@ ALL: ALL
         ____ cat /proc/mdstat
         ____ shutdown -h now; exit
 
-14. Prepare extra disk:
+16. Prepare extra disk:
 
     ____ a. Insert disk "2" in Primary slot, no disk in second slot.
     ____ b. Follow fs7linux_DVD.txt through First Stage, step 10,
@@ -184,15 +207,19 @@ ALL: ALL
             Installation, step 11.
     ____ g. when cat /proc/mdstat shows rebuild finished, shutdown
 
-15. Repackage and ship
+17. Repackage and ship
     ____ All components and cables
     ____ Etch DVDs
-    ____ FSL7 Install CD, which contains the latest versions of:
+    ____ FSL7Install CD, which contains the latest versions of:
          fs7linux_DVD.txt, fs7.selections, fsadapt-*.tgz, fs-*.tgz,
-         and any special drivers or other files, which will enable you
-         to make a complete re-install even if you don't have an
-         Internet connection
+         fs*up.txt, FSL7_PC_Checkout.txt, FSL7_Upgrade.txt,
+         FSL7_End_User.txt, RAID.txt the *.deb files needed for
+         Pgperl, and any special instructions, drivers or other files
+         for your system.  The contents of this CD will help you to
+         make a complete re-install even if you don't have an Internet
+         connection and/or lose the hard copy of these documents.
     ____ Special instructions for this system, in document: _______________.
+    ____ RAID.txt
     ____ Any extra items specific to the system
     ____ fs7linux_DVD.txt print-out.
     ____ End User Set-up Checklist
