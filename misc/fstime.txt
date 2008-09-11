@@ -414,7 +414,7 @@ described below:
   synchronized to NTP *and* the Field System time is drifting away
   from the formatter and computer time.  If communication with the
   formatter is re-established, use of formatter calibrated FS time can
-  be restored by execution of "sy=run setl fs &".  Note that when in
+  be restored by execution of "sy=run setcl fs &".  Note that when in
   "computer" model mode, other options, including "adapt" will not
   change the model back to rate, so that, e.g., a "setcl" with an
   "adapt" argument in "midob" will continue to be useful for time
