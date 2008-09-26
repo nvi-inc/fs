@@ -7,7 +7,7 @@ void opn_res(buffer,ip)      /* initialize (open) response structs */
 struct res_buf *buffer;        /* work struct */
 long ip[5];                    /* ip information from mcbcn */
 {
-    buffer->class = ip[0];
+    buffer->class_fs = ip[0];
     buffer->count = ip[1];
     buffer->ifc   = 0;
     buffer->nchars= 0;
@@ -28,7 +28,7 @@ struct res_buf *buffer;        /* response buffer */
 
     if(buffer->ifc>=buffer->nchars && buffer->count > 0) {
       buffer->nchars=
-        cls_rcv(buffer->class,buffer->buf,RES_MAX_BUF,&idum,&idum,0,0);
+        cls_rcv(buffer->class_fs,buffer->buf,RES_MAX_BUF,&idum,&idum,0,0);
       buffer->count--;
       buffer->ifc=0;
     } else if (buffer->ifc>=buffer->nchars && buffer->count <= 0) {
@@ -67,9 +67,9 @@ struct res_buf *buffer;
 {
     void cls_clr();
 
-    if(buffer->count >0) cls_clr(buffer->class);
+    if(buffer->count >0) cls_clr(buffer->class_fs);
 
-    buffer->class=0;
+    buffer->class_fs=0;
     buffer->count=0;
 
     return;

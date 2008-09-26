@@ -11,7 +11,7 @@ void ini_rclcn_req(buffer)               /* initialize buffer */
 struct rclcn_req_buf *buffer;
 {
      buffer->count=0;
-     buffer->class=0;
+     buffer->class_fs=0;
      buffer->nchars=0;
 
      return;
@@ -22,7 +22,7 @@ void add_rclcn_request(struct rclcn_req_buf *buffer, char *device,
  /* add a request to buffer */
 {
   if (2+len+buffer->nchars > RCLCN_REQ_BUF_MAX ) {
-       cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
+       cls_snd(&buffer->class_fs,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
   }
@@ -42,7 +42,7 @@ void add_rclcn_request_string(struct rclcn_req_buf *buffer, char *device,
   int lens=strlen(string)+1;
 
   if (2+len+lens+buffer->nchars > RCLCN_REQ_BUF_MAX ) {
-       cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
+       cls_snd(&buffer->class_fs,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
   }
@@ -63,15 +63,15 @@ void end_rclcn_req(long ip[5],struct rclcn_req_buf *buffer)
 /* end buffer, send if partial */
 {
      if(buffer->nchars>0) {
-       cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
+       cls_snd(&buffer->class_fs,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
      }
      ip[0]=1;
-     ip[1]=buffer->class;
+     ip[1]=buffer->class_fs;
      ip[2]=buffer->count;
 
-     buffer->class=0;
+     buffer->class_fs=0;
      buffer->count=0;
 
      return;
