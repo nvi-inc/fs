@@ -10,7 +10,7 @@ void ini_req(buffer)               /* initialize buffer */
 struct req_buf *buffer;
 {
      buffer->count=0;
-     buffer->class=0;
+     buffer->class_fs=0;
      buffer->nchars=0;
 
      return;
@@ -33,7 +33,7 @@ struct req_rec *request;
 	( type<0 || ( type> (sizeof(tbytes)/sizeof(int)) ) )) type=0;
 
      if(buffer->nchars+tbytes[ type%20]>REQ_BUF_MAX) {
-       cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
+       cls_snd(&buffer->class_fs,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
      }
@@ -71,12 +71,12 @@ long ip[5];
 struct req_buf *buffer;
 {
      if(buffer->nchars>0) {
-       cls_snd(&buffer->class,buffer->buf,buffer->nchars,0,0);
+       cls_snd(&buffer->class_fs,buffer->buf,buffer->nchars,0,0);
        buffer->count++;
        buffer->nchars=0;
      }
      ip[0]=1;
-     ip[1]=buffer->class;
+     ip[1]=buffer->class_fs;
      ip[2]=buffer->count;
 
      return;

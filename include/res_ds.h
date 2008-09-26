@@ -3,7 +3,7 @@
 #define RES_MAX_BUF  512
 
 struct res_buf {
-     int class;
+     int class_fs;
      int count;
      int ifc;
      int nchars;

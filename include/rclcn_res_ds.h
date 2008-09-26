@@ -3,7 +3,7 @@
 #define RCLCN_RES_MAX_BUF  512
 
 struct rclcn_res_buf {
-  int class;
+  int class_fs;
   int count;
   int ifc;
   int nchars;

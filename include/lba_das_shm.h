@@ -1,4 +1,29 @@
 /* LBA DAS shared memory (C data structure) layout */
+enum mode {_AUTO=0, _MANUAL};
+
+struct mux {
+	unsigned char setting;
+	enum mode mode;
+};
+
+struct servo {
+	unsigned short setting;
+	enum mode mode;
+	int readout;	/* Monitor point */
+};
+
+struct digout {
+	enum dsb {_USB=0, _LSB} setting;
+	enum mode mode;
+	enum tristate {_TRISTATE=0, _ENABLE} tristate;
+};
+
+enum source {
+	_BS_USB=0, _BS_LSB, _FT_USB, _FT_LSB,
+	_BS_32, _AS_64
+};
+
+enum bits {_8_BIT=0, _4_BIT};
 
 struct das {
 	char ds_mnem[3];	/* Common dataset mnemonic for a DAS */
@@ -42,17 +67,11 @@ struct das {
 		enum board { _BS=0, _FT} filter_output;
        	 	struct bs {		/* Band Splitter */
 			enum inout {_OUT=0, _IN} image_reject_filter;
-			struct servo {
-				unsigned short setting;
-				enum mode {_AUTO=0, _MANUAL} mode;
-				int readout;	/* Monitor point */
-			       } level;
+			struct servo level;
 			struct servo offset;
 			enum stats magn_stats;
 			enum flipper flip_64MHz_out;
-		        enum bits {
-       				_8_BIT=0, _4_BIT
-			     } digital_format;
+		        enum bits digital_format;
 			enum flipper flip_input;
 			unsigned char p_hilbert_no;
 			unsigned char n_hilbert_no;
@@ -60,10 +79,7 @@ struct das {
 			unsigned char q_fir_no;
 			unsigned char i_fir_no;
 			signed char clock_decimation;
-			struct mux {
-				unsigned char setting;
-				enum mode mode;
-			       } add_sub;
+			struct mux add_sub;
 			struct mux usb_mux;
 			struct mux lsb_mux;
 			unsigned char usb_threshold;
@@ -73,11 +89,7 @@ struct das {
 			enum flipper flip_usb;
 			enum flipper flip_lsb;
 			struct mux monitor;
-			struct digout {
-				enum dsb {_USB=0, _LSB} setting;
-				enum mode mode;
-				enum tristate {_TRISTATE=0, _ENABLE} tristate;
-			       } digout;
+			struct digout digout;
 		       } bs;
 		struct ft {		/* Fine Tuner */
 			enum sync {_SYNC=0, _1PPS_AUX} sync;
@@ -106,10 +118,7 @@ struct das {
 		       } ft;
 		struct out {		/* Backplane Outputs */
 			struct s2_out {
-				enum source {
-					_BS_USB=0, _BS_LSB, _FT_USB, _FT_LSB,
-					_BS_32, _AS_64
-				     } source;
+				enum source source;
 				enum format format;
 			       } s2_lo;
 			struct s2_out s2_hi;
