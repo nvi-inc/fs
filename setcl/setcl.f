@@ -24,7 +24,7 @@ C      - IP(1) = lu for error messages
 C
 C  LOCAL:
 C
-      integer*2 ibuf(40),ibuft(10),ibuf2(10),ibuf4(40)
+      integer*2 ibuf(120),ibuft(10),ibuf2(10),ibuf4(40)
       integer ilen,trimlen,fc_get_vtime,fc_get_s2time,fc_get_5btime
       integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
       integer fc_dad_pid
