@@ -251,6 +251,7 @@ Style "oprin"	   NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "fmset"      NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "*"          Color black/khaki
 Style "monit*" NeverFocus
+Style "monpcal" NeverFocus
 Style "xconsole" NeverFocus
 Style "Field System Prompt*" StaysOnTop
 IgnoreModifiers L2
@@ -519,6 +520,7 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Monit: Tsys C-S-3" Exec exec xterm -name monit3 -e monit3
 +              "Monit: LBA C-S-4" Exec exec xterm -name monit4 -e monit4
 +              "Monit: Mark 5 C-S-5" Exec exec xterm -name monit5 -e monit5
++              "Monit: PCal C-S-6" Exec exec monpcal
 +              "Chekr C-S-C" Exec exec run -w chekr
 +              "Emacs C-S-E" Exec exec emacs
 +              "Logex C-S-L" Exec exec xterm -name logex -e logex
@@ -617,6 +619,7 @@ Key 2 A CS Exec exec xterm -name monit2 -e monit2
 Key 3 A CS Exec exec xterm -name monit3 -e monit3
 Key 4 A CS Exec exec xterm -name monit4 -e monit4
 Key 5 A CS Exec exec xterm -name monit5 -e monit5
+Key 6 A CS Exec exec monpcal
 Key c A CS Exec exec run -w chekr
 Key e A CS Exec exec emacs
 Key l A CS Exec exec xterm -name logex -e logex
