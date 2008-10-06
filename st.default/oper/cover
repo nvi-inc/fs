@@ -1,55 +1,21 @@
-com=wx/ 
-parm=1
-sc=0,0
-plot
-parm=2
-sc=0,0
-plot
-parm=3
-sc=0,0
-plot
-com=pcalr#
-st=v12
-parm=4
-sc=-180,180 
-plot
-parm=3
-sc=0,0
-plot
-st=v6 
-parm=4
-sc=-180,180 
-plot
-parm=3
-sc=0,0
-plot
-com=cable/
-st= 
-parm=1
-sc=0,0
-plot
-com=rx/ 
-parm=9
-st=(front)
-sc=0,0
-plot
-st=(lo) 
-sc=0,0
-plot
-st=(pres) 
-sc=0,0
-plot
-st=(20k)
-sc=0,0
-plot
-com=tsys/
-st=ia
-parm=-1
-sc=0,0
-plot
-com=tsys/
-st=ib
-parm=-1
-st= 
-sc=0,0
-plot
+#command file for logpl2.
+#comments starts with #
+#Scales are automatically set. Therefore, sc=0,0 in logpl1 is not necessary
+#To set scale in logpl2, use scale
+#
+# plot wx, param 1 : Temperature
+plot= Temperature
+#plot wx, parm 2: Pressure
+plot= Pressure
+#plot wx, parm 3: Humidity
+plot= Humidity
+#plot pcalr, str v12, parm4
+plot= Pcal Phase 4$
+#yscale -180,180 not needed... 
+plot= Cable-length
+plot= rx-9-front
+plot= rx-9-lo
+plot= rx-9-pres
+plot= rx-9-20k
+plot= tsys-i1
+plot= tsys-i2
