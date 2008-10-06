@@ -1,41 +1,13 @@
-com=wx/ 
-parm=1
-sc=0,0
-plot
-parm=2
-sc=0,0
-plot
-parm=3
-sc=0,0
-plot
-com=cable/
-st= 
-parm=1
-sc=0,0
-plot
-com=rx/ 
-parm=9
-st=(front)
-sc=0,0
-plot
-st=(lo) 
-sc=0,0
-plot
-st=(pres) 
-sc=0,0
-plot
-st=(20k)
-sc=0,0
-plot
-com=tsys/
-st=ia
-parm=-1
-sc=0,0
-plot
-com=tsys/
-st=ib
-parm=-1
-sc=0,0
-plot
-com="
-list
+#command file for logpl2
+#requires a valid control file
+plot= Temperature
+plot= Pressure
+plot= Humidity
+plot= Cable-length
+plot= rx-9-front
+plot= rx-9-lo
+plot= rx-9-pres
+plot= rx-9-20k
+plot= tsys-i1
+plot= tsys-i2
+list= "
