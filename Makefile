@@ -1,7 +1,7 @@
 #
 VERSION = 9
 SUBLEVEL = 10
-PATCHLEVEL = 3
+PATCHLEVEL = 4
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
@@ -12,7 +12,7 @@ EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
 quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
-gnfit gndat gnplt dscon systests autoftp
+gnfit gndat gnplt dscon systests autoftp monpcal logpl1
 #
 all:	libs execs
 #
@@ -23,6 +23,7 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION) -name '*~'       -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '.*~'      -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'  -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'  -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'  -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
@@ -35,6 +36,7 @@ clean:
 	rm -f `find . -name '#*#' -print`
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
+	rm -f `find . -name '.pyc' -print`
 #
 rmexe:
 	rm -fr bin/*
