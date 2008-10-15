@@ -130,7 +130,8 @@ C
 C  Add a comment if a new tape is to mounted before the next observation
 
       kauto = tape_allocation(istn).eq.'AUTO'
-       irec=irecp
+     
+      irec=irecp
       if (kauto) irec = 1 ! always, for dynamic
       IDIR=+1
       IF (LDIR(ISTNSK).EQ.ldirr) IDIR=-1

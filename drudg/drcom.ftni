@@ -43,7 +43,7 @@ C 2003Jul11 JMG added itctim
 ! 2007Jul10  JMG. Removed lbname.
 ! 2007Jul20  JMG. Added ksked_proc flag. Put all logical in same common.
 !                 Got rid of stuff that is no longer used.
-C
+! 2008Aug19 JMG. Added cbbcbuf which is equivalenced to ibbcbuf.
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -89,6 +89,8 @@ c
       integer lu_outfile,luprt,luscn
 C
       integer*2 ibbcbuf(40,2,3)
+      character*80 cbbcbuf(2,3)
+      equivalence (ibbcbuf,cbbcbuf)
       integer ibbclen(2,3)
       integer nbbcbuf(2)
 

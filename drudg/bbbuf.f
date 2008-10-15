@@ -22,38 +22,33 @@ C NRV 910524 created
 C nrv 930407 implicit none
 
 C LOCAL
-	integer in   ! counter for up to 3 lines with 5 freqs each
-	integer iz   ! counts up to 5 freqs on a line
-      integer ix,iy,iblen,idum
+      integer iline   ! counter for up to 3 lines with 5 freqs each
+      integer iz   ! counts up to 5 freqs on a line
+      integer ix,iy,idum
       integer ichmv
 
+      iline = 0
+      iz = 0
+      do ix=1,nchan(istn,icod)
+        if(mod(iz,5) .eq. 0) then
+          cbuf= ' bbsynth = '
+	  iy = 11 
+        endif
 
-	iblen=ibuf_len*2
-	in = 0
-	iz = 0
-	call ifill(ibuf,1,iblen,32)
-	call char2hol(' bbsynth=',ibuf,1,9)
-	iy = 10
-	do ix=1,nchan(istn,icod)
-	  if (fr(ix).ne.0.0) then
-	    call bbsyn(iy,ix,fr(ix))
-	    iz=iz+1
-	    if (iz.eq.5) then ! line is full
-		in = in+1
-		idum=ichmv(ibbcbuf(1,imode,in),1,ibuf,1,iy)
-		ibbclen(imode,in) = iy
-		nbbcbuf(imode) = in
-		call ifill(ibuf,1,iblen,32)
-		iz = 0
-		call char2hol(' bbsynth=',ibuf,1,9)
-		iy = 10
-	    else
-		call char2hol(',',ibuf,iy,iy+1)
-		iy = iy + 1
-	    end if
-	  end if
-	end do
-
-	return
-	end
+	if (fr(ix).ne.0.0) then
+	  call bbsyn(iy,ix,fr(ix))
+	  iz=iz+1
+	  if (mod(iz,5).eq.0) then ! line is full
+	    iline = iline+1
+            cbbcbuf(imode,iline)=cbuf(1:iy)
+	    ibbclen(imode,iline) = iy
+	    nbbcbuf(imode) = iline
+	  else
+            cbuf(iy:iy)=","
+            iy=iy+1
+	 end if
+        end if
+      end do
+      return
+      end
 

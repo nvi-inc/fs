@@ -1,5 +1,5 @@
 #
-CFLAGS= 
+CFLAGS=
 LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ifeq (/usr/src/linux-1.2.12,\
@@ -9,6 +9,10 @@ endif
 ifeq (/usr/src/linux/drivers/char/digi.h,\
 $(wildcard /usr/src/linux/drivers/char/digi.h ))
 CFLAGS := $(CFLAGS) -DDIGI
+STRUCT :=$(shell fgrep >/dev/null 2>&1 'struct digi_t ' /usr/src/linux/drivers/char/digi.h ; echo $$?)
+ifeq ($(STRUCT),0)
+CFLAGS := $(CFLAGS) -DUSE_STRUCT
+endif
 endif
 #
 OBJECTS = mcbcn.o

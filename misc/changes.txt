@@ -8657,3 +8657,140 @@ Version 9.10.2 071231
 
 Version 9.10.3 080613
 
+080613 weh misc/fs9104up.txt
+080618 weh misc/FSL7_Upgrade.txt
+080618 weh misc/FSL7_PC_Checkout.txt
+080618 weh misc/FSL7_End_User.txt
+080630 weh misc/RAID.txt
+           Updated documentation
+
+080711 weh mcbcn/Makefile
+           mcbcn/mcbcn.c
+           fix digi problem, for the last time?
+
+080715 weh quikv/bank_check_dis.c
+           quikv/bank_check.c
+           removed extraneous Mark5 commands when no change is needed
+
+080721 weh control/fserr.ctl
+           clib/mk5b_mode_util.c
+           add error detections for bad args of mk5_mode command
+
+080722 weh systests/plotlog
+080722 weh systests/systests.txt
+           add Tsys normalization of pcal amp
+
+080722 weh systests/systests.prc
+           add bcof_period 128 to pcsample
+
+080724 weh Makefile
+080724 ptg monpcal/Makefile
+           monpcal/monpcal
+           created monpcal
+
+080725 weh logpl/logpl
+           fixed bug preventing cmd and cfile modes from working
+
+080725 ptg monpcal/monpcal
+           support both vsi4 and pcalports
+
+080728 weh st.default/oper/.fvwm2rc
+           st.default/prog/.fvwm2rc
+           monpcal options added
+
+080729 weh systests/plotlog
+           sytests/systests.txt
+           use DSB Tsys for pcal scaling if SSB data not available
+
+080801 weh systests/plotlog
+           support K5 pcal extraction
+
+080801 weh misc/FSL7_PC_Checkout.txt
+           added key sets to checklist           
+          
+080802 weh st.default/control/equip.ctl
+           fixed comment typo
+
+080819 ao  gnplt/gnplt
+           fixed problem with S/X rxg files
+
+080820 weh st.default/proc/3station.prc
+           st.default/proc/45station.prc
+           st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/5station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42k5station.prc
+           st.default/proc/k42station.prc
+           st.default/proc/s2s2station.prc
+           removed out of date Tsys commands
+
+080820 dg  misc/dymo_non-CUPS
+           added from Dave Graham
+
+080820 weh monit/mout5.c
+           fixed array out of bounds according to jhfq
+
+080820 weh monit/m5init.c
+           monit/monit5.c
+           fixed typos according to jhfq to fix errors
+
+080820 weh misc/RAID.txt
+           make software RAID clearer
+           make explicit nothing should be slot two when "advancing" boot count
+
+080903 weh systests/plotlog
+           use DSB Tsys normalization by default, SSB if DSB not available
+           add -e/-g options to exclude/include specific plots
+
+080903 weh systests/systests.txt
+           improve pgperl installation instructions
+
+080905 weh misc/FSL7_PC_Checkout.txt
+           improved details
+
+080905 weh logpl1/
+           moved old logpl here
+
+080911 weh misc/fstime.txt
+           fix typo
+
+081001 weh setcl/setcl.f
+           fix buffer length problem
+
+081001 weh logpl1/logpl1
+           made internals and control file consistent with new name logpl1
+
+081006 tg  logpl/
+           new version source added
+
+081006 weh st.default/control/logpl.ctl
+           st.default/oper/cover
+           st.default/oper/cexper
+           incorporated
+
+081006 weh st.default/oper/.fvwm2rc
+           st.default/prog/.fvwm2rc
+           fix monpcal focus policy
+
+081014 weh Makefile
+           add .pyc files to clean and dist exclude list
+
+081015 weh fserr/fserr.h
+           increased maximum errors to 5000
+
+081015 tg logpl/IOSettings.py
+          fix exit status value
+
+081014 weh Makefile
+           add logpl1
+
+Version 9.10.4 081015
