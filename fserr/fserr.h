@@ -2,4 +2,4 @@
 #define CTLST "/usr2/control/sterr.ctl"
 #define NULLPTR (char *) '\0'
 #define MAXSTR 120
-#define MAXERRORS 2000
+#define MAXERRORS 5000
