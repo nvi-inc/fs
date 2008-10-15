@@ -179,56 +179,60 @@ C 1.  Initialize variables
 10    continue
       iline=mod(iline+1,5)
       icount=icount+1
-      read(lu_infile,'(a80)',end=920,err=920) cline(iline)
-      if(icount .ge. 100) then
-        rewind(lu_infile)
-        goto 30
-      endif
+      read(lu_infile,'(a80)',end=29,err=29) cline(iline)
 
+! Two possibilities for getting the necessary information.
+! First.
       ind=index(cline(iline),"sched_info")
       if(ind .ne. 0) then
 ! second one has the information.
-         read(lu_infile,'(a80)',end=950,err=950) cline(iline)
+         read(lu_infile,'(a80)',end=29,err=29) cline(iline)
          call splitNtokens(cline(iline)(ind+10:),ltoken,Maxtoken,
      > NumToken)
          cexper=ltoken(1)
          cstnna(1)=ltoken(2)
          cstcod(1)=ltoken(3)(1:1)
          goto 30
-      endif
-
-   
-      if(cline(iline)(24:36) .ne. "drudg version") goto 10
-
+! Second
+      else if(cline(iline)(24:36) .eq. "drudg version") then 
 ! Parse the line that looks like:
 !2005.055.18:04:38.83:" R4162     2005 SVETLOE  S  Sv. This is 4 before "drudg", or 1 after.
+        ind=trimlen(cline(iline))
+        if(cline(iline)(ind:ind) .eq. char(13)) then
+          write(*,*) "Getting rid of ^M"
+          cline(iline)(ind:ind)=" "
+        endif
 
-      ind=trimlen(cline(iline))
-      if(cline(iline)(ind:ind) .eq. char(13)) then
-        write(*,*) "Getting rid of ^M"
-        cline(iline)(ind:ind)=" "
-      endif
-
-      iline=mod(iline+1,5)
-      istart=24
-!      cline(iline)(1:istart)=" "        !get rid of stuff at front that doesn't matter
-      call splitNtokens(cline(iline)(istart:),ltoken,Maxtoken,NumToken)
-      cexper=ltoken(1)
-      cstnna(1)=ltoken(3)
-      cstcod(1)=ltoken(4)
+        iline=mod(iline+1,5)
+        istart=24
+        cline(iline)(1:istart)=" "        !get rid of stuff at front that doesn't matter
+        call splitNtokens(cline(iline),ltoken,Maxtoken,NumToken)
+        cexper=ltoken(1)
+        cstnna(1)=ltoken(3)
+        cstcod(1)=ltoken(4)
 
 ! Read in next line and check to see if Mark5
-      read(lu_infile,'(a)') cline(iline)
-      ind=trimlen(cline(iline))
-      if(cline(iline)(ind:ind) .eq. char(13)) then
-        cline(iline)(ind:ind)=" "
+        read(lu_infile,'(a)') cline(iline)
+        ind=trimlen(cline(iline))
+        if(cline(iline)(ind:ind) .eq. char(13)) then
+          cline(iline)(ind:ind)=" "
+        endif
+        write(*,'(a)') cline(iline)
+        if(index(cline(iline), "Mark5") .eq. 0 .and.
+     >     index(cline(iline), "Mk5APigW") .eq. 0) then
+           write(*,*) "Can only process log files for Mark5 recorders"
+           write(*,*) "Mushing on ahead, may produce strange results!"
+        endif
+        goto 30
+      else
+        goto 10
       endif
-      write(*,'(a)') cline(iline)
-      if(index(cline(iline), "Mark5") .eq. 0 .and.
-     >   index(cline(iline), "Mk5APigW") .eq. 0) then
-         write(*,*) "Can only process log files for Mark5 recorders"
-         write(*,*) "Mushing on ahead, but may produce strange results!"
-      endif
+    
+! Come here if we don't get the station information.
+29    continue
+      rewind(lu_infile)
+      write(*,*) "Did not find station and session information."      
+      write(*,*) "Using default values."
 
 30    continue
       rewind(lu_infile)

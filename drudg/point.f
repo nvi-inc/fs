@@ -1,4 +1,4 @@
-	SUBROUTINE POINT(cr1,cr2,cr3,cr4)
+      SUBROUTINE POINT(cr1,cr2,cr3,cr4)
 
 C Write a file or a tape with pointing controls
 C
@@ -15,6 +15,7 @@ C
       integer trimlen,ichmv ! functions
       integer ichmv_ch,ichcm_ch
       real speed ! function
+      integer iwhere_in_string_list
 
 C LOCAL:
       LOGICAL KINTR,knewtp,knewt,ksw
@@ -106,6 +107,7 @@ C 970714 nrv Add "crd" to VLBA file names per J. Wrobel request.
 C 000815 nrv Remove all but VLBA option.
 ! 2005Sep21 JMGipson.  Modified to check if VLBA station. If so do it, else return
 ! 2006Sep26 JMGipson. Changed call for vlbat of lsname to ASCII csname.
+! 2008Aug19 JMGipson. Check to see if tape motion type is "AUTO" for vlba"
 
       kintr = .false.
       if (kbatch) then
@@ -115,33 +117,15 @@ C 000815 nrv Remove all but VLBA option.
 9991      format(' Invalid pointing output selection.')
           return
         endif
-      else if(.true.) then      !cheap way of commenting out else statment that follows.
-        kfound=.false.
-        do i=1,10
-          if(cantna(istn) .eq. lvlba_stat(i)) then
-             kfound=.true.
-          endif
-        end do
-        if(.not.kfound) return
-        istin=6
-      else
- 1    WRITE(LUSCN,9019) cantna(ISTN)
-9019  FORMAT(' Select type of pointing output for: ',a/
-C    .       ' 1 - NRAO 85-3 '/
-C    .       ' 2 - NRAO 140 '/
-C    .       ' 3 - DSN stations '/
-     .       ' 6 - VLBA antenna'/
-     .       ' 0 - QUIT '/' ? ',$)
-C    .       ' 1 - NRAO 85-3            2 - NRAO_140 '/
-C    .       ' 3 - DSN stations         4 - Bonn     '/
-C    .       ' 5 - VLBA terminal only   6 - VLBA antenna'/
-C    .       ' 7 - Westerbork           0 - QUIT '/' ? ',$)
-
-        read(luusr,*,err=900) istin
-	IF (ISTIN.EQ.0) RETURN
-CIF (ISTIN.LT.1.OR.ISTIN.GT.6) GOTO 1
-        if (istin.ne.2.and.istin.ne.3.and.istin.ne.6) 
-     .  goto 1
+      else  
+        i=iwhere_in_string_list(lvlba_stat,10, cantna(istn))
+        if(i .eq. 0) return        !station not in vlba list.
+        istin=6  
+        if(tape_allocation(istn) .ne. "AUTO") then
+           write(*,*) "WARNING! Skipping ",cantna(istn),
+     >      " because allocation is not AUTO!"
+           return 
+        endif        
       endif
 C
 C 2. First get output file or LU for pointing commands.

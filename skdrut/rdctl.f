@@ -63,6 +63,7 @@ C            send the names back.
 ! 2006Nov30 JMGipson. Combined dr_reca_type, dr_recb_type into crec_default
 ! 2007Jul24 JMGipson. Check on valid rack and recorder types in equip.
 !           Also check if equip_override is on that we have actually chosen recorders!
+! 2008Oct08 JMGipson.  Add "/" if needed for scracth directory and sked directory
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -260,6 +261,7 @@ C  $SCHEDULES
             else if (lsecname .eq.'$SCHEDULES') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csked
+                call add_slash_if_needed(csked)
                 call readline(lu,cbuf,keof,ierr,1)
               end if
 C  $SNAP
@@ -281,6 +283,7 @@ C  $SCRATCH
             else if (lsecname .eq. '$SCRATCH') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') ctmpnam
+                call add_slash_if_needed(ctmpnam)
                 call readline(lu,cbuf,keof,ierr,1)
               end if
 C  $PRINT
