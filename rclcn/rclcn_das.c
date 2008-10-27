@@ -7,12 +7,12 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "/usr2/fs/include/params.h"
-#include "/usr2/fs/include/fs_types.h"
-#include "/usr2/fs/include/fscom.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
 
-#include "/usr2/fs/rclco/rcl/rcl_def.h"
-#include "/usr2/fs/rclco/rcl/rcl_cmd.h"
+#include "../rclco/rcl/rcl_def.h"
+#include "../rclco/rcl/rcl_cmd.h"
 
 #define MAX_NAME 65
 #define RES_MAXLEN RCL_STATUS_DETAIL_MAXLEN+sizeof(int)
