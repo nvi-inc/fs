@@ -31,7 +31,8 @@ struct rxgain_ds {
     float tcal;     /* cal temperature (degrees K) */
   } tcal[MAX_TCAL]; /* group by polarization, then sorted by increasing freq */
 
-  float trec;       /* receiver temperature (degrees K) < 0 undefined */
+  float trec[2];     /* receiver temperature (degrees K), < 0 undefined,
+                      * for polarizations in pol */
 
   int spill_ntable;  /* number of points in table */
   struct {
