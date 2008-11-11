@@ -66,8 +66,10 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal,
     /* ifchain is r */
     if(rxgain[ir].pol[0]=='r') {
       *dpfu=rxgain[ir].dpfu[0];
+      *trec=rxgain[ir].trec[0];
     } else if(rxgain[ir].pol[1]=='r') {
       *dpfu=rxgain[ir].dpfu[1];
+      *trec=rxgain[ir].trec[1];
     }
     ifirst=-1;
     ilast=-1;
@@ -96,8 +98,10 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal,
   case 'l':
     if(rxgain[ir].pol[0]=='l') {
       *dpfu=rxgain[ir].dpfu[0];
+      *trec=rxgain[ir].trec[0];
     } else if(rxgain[ir].pol[1]=='l') {
       *dpfu=rxgain[ir].dpfu[1];
+      *trec=rxgain[ir].trec[1];
     }
     ifirst=-1;
     ilast=-1;
@@ -126,7 +130,6 @@ get_gain_par2(rxgain,maxrx,lo,center,diam,el,pol,fwhm,dpfu,gain,tcal,
   default:
     break;
   }
-  *trec=rxgain[ir].trec;
 
   /* iterpolate spillover */
 
