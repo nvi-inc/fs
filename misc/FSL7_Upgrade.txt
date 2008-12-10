@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.4  Date: 080618
+File: /usr2/fs/misc/FSL7_Upgrade.txt  Version: 0.4  Date: 081208
 
 		 Upgrading a prior FSL System to FSL7
 
@@ -171,9 +171,14 @@ installation..
 
       Old system Linux version __________
       uname -r <CR>
+        or
+      cat /proc/version <CR>      
+
+      Old system Debian version (if Debian) _________
+      cat /etc/debian_version <CR>
 
       Video card ___________________
-      more /proc/pci | grep -i vga < CR > 
+      more /proc/pci | grep -i vga <CR> 
 
       Mouse device _______________________________
       grep -i device /etc/gpm.conf or
@@ -356,8 +361,8 @@ are included to check-off each step as it is completed.
 
    ____  cd /root
    ____  aptitude install pgplot5
-   ____  wget http://http.us.debian.org/debian/pool/main/libp/libpng/libpng10-0_1.0.18-1_i386.deb
-   ____  wget http://http.us.debian.org/debian/pool/contrib/p/pgperl/pgperl_2.18-5_i386.deb
+   ____  wget http://archive.debian.org/debian/pool/main/libp/libpng/libpng10-0_1.0.18-1_i386.deb
+   ____  wget http://archive.debian.org/debian/pool/contrib/p/pgperl/pgperl_2.18-5_i386.deb
    ____  dpkg -i libpng10-0_1.0.18-1_i386.deb
    ____  dpkg -i pgperl_2.18-5_i386.deb
    ____  apt-get clean
