@@ -99,7 +99,7 @@ C
       nfree=npts-npar
       if (nfree.le.0) return
 C
-      rchi=sq*float(npts)/float(nfree)
+      rchi=sq*sqrt(float(npts)/float(nfree))
 
       nxpnt=0
       do i=1,npar
