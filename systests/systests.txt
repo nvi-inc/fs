@@ -2,7 +2,7 @@
 
 	       Ed Himwich, Brian Corey, and Dan Smythe
 
-			  September 3, 2008
+			   January 13, 2009
 
 INTRODUCTION
 
@@ -946,6 +946,7 @@ Option explanations:
 Usage:
    plotlog [options] logs
 Synopsis: extracts and plots data from log files
+Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
 fmout-gps/), setcl#time/, and the first encountered USB tone per channel for
@@ -999,10 +1000,12 @@ Option explanations:
            'regexp' is any Perl regular expression pattern, you will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
            or spaces, this option can be combined with the 'g' option as well.
+           The match is case insensitive.
  -g regexp include only plots with labels that DO match 'regexp', where
            'regexp' is any Perl regular expression pattern, you will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
            or spaces, this option can be combined with the 'e' option as well.
+           The match is case insensitive.
  -j        normalize phase-cal amp by Tsys per channel
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
            'value' for all channels
