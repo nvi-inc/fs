@@ -34,8 +34,6 @@ char *err2 = "ERROR in";
 
 extern FILE * yyin;
 extern struct vex *vex_ptr;
-char *filename;
-FILE *fp;
 
 /*********************************************************************
  * functions:                                                         *

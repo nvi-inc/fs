@@ -4,6 +4,9 @@
 #include "vex.h"
 #include "y.tab.h"
 
+char *filename;
+FILE *fp;
+
 #define NEWSTRUCT(PTR,TYPE)	struct TYPE *PTR;\
 			PTR=(struct TYPE *) malloc(sizeof(struct TYPE));\
 			if(PTR == NULL) {\
