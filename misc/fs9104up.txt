@@ -706,10 +706,11 @@ A more detailed discussion of these changes follows.
 DRUDG opening message date is 2008Oct08.
 
 The following is a summary of DRUDG changes.  Items numbered 12 and
-larger were added beginning with FS 9.10.1.  Items numbered 17 and
-larger were added beginning with FS 9.10.2.  Items numbered 20 and
-larger were added beginning with FS 9.10.3.  Items numbered 26 and
-larger were added beginning with FS 9.10.4.
+larger and number 29 were added beginning with FS 9.10.1.  Items
+numbered 17 and larger (except 29) were added beginning with FS
+9.10.2.  Items numbered 20 and larger (except 29) were added beginning
+with FS 9.10.3.  Items numbered 26 and larger (except 29) were added
+beginning with FS 9.10.4.
 
 1. Support for two new rack types: Mark5 and VLBA5 (racks with Mark5B
    Sampler Modules).
@@ -747,6 +748,8 @@ larger were added beginning with FS 9.10.4.
 27. Printing Mark5 lables improved for logs with long pre-ambles.
 28. A bug was fixed in handling the '$schedule' and the '$tmp'
     parameters in the 'skedf.ctl' control file.
+29. For Mark 5 recorder, the suffixes "1" and "2" are always omitted
+    from recorder commands.
 
 A more detailed discussion of these changes follows.
 
@@ -1000,6 +1003,10 @@ A more detailed discussion of these changes follows.
     DRUDG would look for schedule file '/usr2/schedtest.skd', instead
     of '/usr2/sched/test.skd'.  DRUDG has been modified to supply the
     missing '/'.
+
+29. For Mark 5 recorder, the suffixes "1" and "2" are always omitted
+    from recorder commands.  This true even, and especially, if two
+    recorders are sleteced.
 
 			   C. Known FS Bugs
 
@@ -1345,7 +1352,7 @@ questions about how to cut-and-paste please contact Ed
       get fs-9.10.4.tgz
       quit
 
-    The FS FTP area is also available via http://kurp-www.hut.fi/fs/.
+    The FS FTP area is also available via http://www.metsahovi.fi/fs/.
 
     If you need to transfer the archive using DOS floppies, please see
     the section "V. Transferring The Update Archive By DOS Floppy"
