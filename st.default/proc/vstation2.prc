@@ -150,8 +150,8 @@ calon
 !+2s
 tpical=formbbc,formif
 tpgain=formbbc,formif
-bbcagc
 caloff
+bbcagc
 caltemp=formbbc,formif
 tsys=formbbc,formif
 enddef
