@@ -90,7 +90,7 @@ C        maximum number of devices on IEEE board
       integer idum,fc_rte_prior, no_after, no_online, no_write_ren
       integer no_w_ren_glbl
       integer set_remote_enable,no_interface_clear_board
-      integer interface_clear_converter
+      integer interface_clear_converter,interface_clear_after_read
       double precision timnow,timlst(imaxdev)
       integer*4 oldcmd(imaxdev)
       integer*2 moddev(imaxdev,idevln)
@@ -162,7 +162,8 @@ C
       no_w_ren_glbl=0
       set_remote_enable=0
       no_interface_clear_board=0
-      interface_clear_board=0
+      interface_clear_converter=0
+      interface_clear_after_read=0
       do i=1,nclrec
          ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
          if(ichcm_ch(ibuf,1,'no_untalk/unlisten_after').eq.0) THEN
@@ -187,6 +188,10 @@ C
          endif
          if(ichcm_ch(ibuf,1,'interface_clear_converter').eq.0) THEN
             interface_clear_converter=1
+            goto 150
+         endif
+         if(ichcm_ch(ibuf,1,'interface_clear_after_read').eq.0) THEN
+            interface_clear_after_read=1
             goto 150
          endif
          icount=icount+1
@@ -355,7 +360,7 @@ C
          endif
          call fs_get_kecho(kecho)
          ireg = rddev(ibin,idevid(idev),ibuf,imax,ierr,ipcode,300,
-     &        no_after,kecho)
+     &        no_after,kecho,interface_clear_after_read)
          if (ierr .eq. -4) then
             idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
          endif
@@ -452,7 +457,7 @@ C
          endif
          call fs_get_kecho(kecho)
          ireg = rddev(ibin,idevid(idev),ibuf,imax,ierr,ipcode,300,
-     &        no_after,kecho)
+     &        no_after,kecho,interface_clear_after_read)
          if (ierr .eq. -4) then
             idum=ichmv(ipcode,1,modtbl(1,idev),1,2)
          endif

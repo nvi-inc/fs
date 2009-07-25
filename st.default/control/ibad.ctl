@@ -25,9 +25,10 @@ CA=dev3,0
 *LB=dev28,4
 *T1=dev29,4
 *supported keywords for general behavior (all devices):
-*no_untalk/unlisten_after
-*no_online
-*no_write_ren
-*set_remote_enable
-*no_interface_clear_board
-*interface_clear_converter
+*no_untalk/unlisten_after   - don't untalk & unlisten after read
+*no_online                  - no onlie when opening board or converter
+*no_write_ren               - don't remote enable before write, board only
+*set_remote_enable          - remote enable when opening board
+*no_interface_clear_board   - interface clear when opening board
+*interface_clear_converter  - interface clear when opening converter
+*interface_clear_after_read - adds i/c after each read
