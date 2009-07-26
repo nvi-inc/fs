@@ -82,7 +82,7 @@ C
       call gtprm2(ibuf,ich,nchar,0,parm,ierr)
       if(ichcm_ch(iparm,1,'max').eq.0) then
          kmaxold=.true.
-        call fs_set_iat3if(iat3if)
+        call fs_get_iat3if(iat3if)
         iold=iat3if
         iat=63
       else if(ichcm_ch(iparm,1,'old').eq.0) then
@@ -95,10 +95,10 @@ C
           kdef=.true.
           iat = 0              ! default
         else if (ierr.eq.1) then
-          call fs_set_iat3if(iat3if)
+          call fs_get_iat3if(iat3if)
           iat = iat3if
         else if (iparm(1).lt.0.or.iscn_ch(ibuf,ist,ich-1,'+').ne.0) then
-          call fs_set_iat3if(iat3if)
+          call fs_get_iat3if(iat3if)
           iat = iat3if + iparm(1)
         else
           iat = iparm(1)
