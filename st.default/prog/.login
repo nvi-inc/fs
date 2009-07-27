@@ -53,6 +53,6 @@ else
  setenv FC f77
 endif
 #check for mail on login
-test ! -f /var/mail/mbox || from
+test ! -f /var/mail/prog || from
 #setenv FS_CHECK_NTP
 #
