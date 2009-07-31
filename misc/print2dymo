@@ -3,7 +3,7 @@
 #  Script "print2dymo" must be
 #    1.) In your path, e.g. in /usr2/oper/bin,
 #    2.) Executable, e.g., chmod a+x print2dymo
-#  This script has lines apropriate for FS Linux 5 and FS Linux 6.
+#  This script has lines apropriate for FS Linux 5, 6, 7, & 8.
 # To use this file, uncomment the appropriate lines.
 #
 # DEBUG: Uncomment below to save a copy of the label file for debugging. 
@@ -13,7 +13,7 @@
 #    "yoff xoff translate\n" 
 # Units are given in  pts. 72pts=25.4mm 
 # 
-# Uncomment line below for FS linux 7 
+# Uncomment line below for FS linux 7 and 8
 #perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 15 translate\n";print;goto LINE;}' /tmp/DRlab.tmp > /tmp/DRlab.end 
 #
 # Uncomment line below for FS linux 6
@@ -25,7 +25,7 @@ perl -pe 'if (/^90 rotate/) {print "-21 -15 translate\n";print;goto LINE;}' /tmp
 # Use your printer's name.
 #for FSL5 or FSL6
 lpr -PDymo /tmp/DRlab.end
-#for FSL7
+#for FSL7 and FSL8
 #lpr -P Dymo /tmp/DRlab.end
 #
 # DEBUG: Comment out the line below to save a copy of the file after modifying.
