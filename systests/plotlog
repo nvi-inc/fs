@@ -178,10 +178,10 @@ sub vuy {
     my ($i,$ymax,$ymin,$ply,$nfirst,$xmax,$xmin,$plx);
 
     if(defined($opt_g)) {
-	return if $label !~/$opt_g/;
+	return if $label !~/$opt_g/i;
     }
     if(defined($opt_e)) {
-	return if $label =~/$opt_e/;
+	return if $label =~/$opt_e/i;
     }
     $ymax=0;
     $ymin=0;
@@ -383,20 +383,21 @@ $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 
 if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
     print STDERR "Try: 'plotlog -h'\n";
-    exit -1;
+    exit 0;
 }
 
 if(defined($opt_v)) {
     print "[plotlog 1.5]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
-    exit -1;
+    exit 0;
 }
 
 if (defined($opt_h)) {
     print "Usage:\n";
     print "   plotlog [options] logs\n";
-    print "Synopsis: extracts and plots data from log files\n\n";
+    print "Synopsis: extracts and plots data from log files\n";
+    print "Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.\n\n";
 
     print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
     print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel for\n";
@@ -449,10 +450,12 @@ if (defined($opt_h)) {
     print "           'regexp' is any Perl regular expression pattern, you will need to\n";
     print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
     print "           or spaces, this option can be combined with the 'g' option as well.\n";
+    print "           The match is case insensitive.\n";
     print " -g regexp include only plots with labels that DO match 'regexp', where\n";
     print "           'regexp' is any Perl regular expression pattern, you will need to\n";
     print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
     print "           or spaces, this option can be combined with the 'e' option as well.\n";
+    print "           The match is case insensitive.\n";
     print " -j        normalize phase-cal amp by Tsys per channel\n";
     print " -k value  changes 'j' normalization from minimum non-zero Tsys per channel to\n";
     print "           'value' for all channels\n";
@@ -474,7 +477,7 @@ if (defined($opt_h)) {
     print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
     print "               be sure to quote '?', like \\?\n";
     print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
-    exit -1;
+    exit 0;
 }
 
 if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
@@ -725,7 +728,7 @@ foreach $file (@ARGV) {
 	}
     }
 }
-exit if(!$some);
+exit -1 if(!$some);
 
 pgbegin(0,$dev,1,8);
 pgsch(3);
@@ -1025,17 +1028,19 @@ if(defined($opt_w)) {
 
 END_EXTRAS:
     $something=0;
+    $exit_code=0;
 
 if(!$first) {
     pgtbox("BCTNZYH",0.0,0,"",0.0,0); 
     pglabel("Time","","");
     $something=1;
-} elsif(!defined(opt_p)){
+} elsif($page==1 && !defined($opt_p)){
     pgpanl(1,1);
     pgvport(0.15,.95,0,1);
     pgwindow(-0.5,16.5,0,39);
     pgtext(4,10,"$location Log Plots -- $refdate $save_file Page $page");
     pgtext(6,0,"NOTHING FOUND TO PLOT");
+    $exit_code=-2;
 }
 
 if(defined($opt_p)) {
@@ -1087,12 +1092,13 @@ if(defined($opt_p)) {
     if(!$first) {
 	pgtbox("BCTN",45.0,0,"",0.0,0); 
 	pglabel("Phase","","");
-    } elsif(!$something) {
+    } elsif($page==1 && !$something) {
 	pgpanl(1,1);
 	pgvport(0.15,.95,0,1);
 	pgwindow(-0.5,16.5,0,39);
 	pgtext(4,10,"$location Log Plots -- $refdate $save_file Page $page");
 	pgtext(6,0,"NOTHING FOUND TO PLOT");
+        $exit_code=-2;
     }
 }
 
@@ -1102,3 +1108,4 @@ pgwindow(-0.5,16.5,0,39);
 pgtext(7.25,15,"Last Page");
 
 pgend();
+exit $exit_code;
