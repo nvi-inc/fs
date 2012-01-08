@@ -1,96 +1,95 @@
-             fivept - five or more point source scan
+	       fivept - five or more point source scan
 
-            Syntax:     fivept=axis,rep,pts,stp,intp,dev,wait
+            Syntax:   fivept=axis,rep,pts,stp,intp,dev,wait
 
-            Response:   fivept/axis,rep,pts,stp,intp,dev,cal,wait,beam,flux,chain
+          Response:   fivept/axis,rep,pts,stp,intp,dev,cal,wait,beam,flux,chain
 
 
 Settable parameters:
-            axis        Axis system for scan. 
-                            hadc = Hour Angle/Declination (default)
-                            azel = Azimuth/Elevation
-                            xyns = X/Y, +X East
-                            xyew = X/Y, +X South  (unimplemented)
+          axis      Axis system for scan. 
+                      hadc = Hour Angle/Declination (default)
+                      azel = Azimuth/Elevation
+                      xyns = X/Y, +X East
+                      xyew = X/Y, +X South  (unimplemented)
           rep       Number of repetitions: -10 to -1 and 1 to 10
-          allowed. Default is -2. Negative repetition counts
-          are described in the fivpt manual. The absolute
-          value implies a maximum repetitions count, but once
-          the scans are well s\centered on bth axes,
-          additional repetitions will be skipped.
+                    allowed. Default is -2. Negative repetition counts
+                    are described in the fivpt manual. The absolute
+                    value implies a maximum repetitions count, but once
+                    the scans are well entered on both axes,
+                    additional repetitions will be skipped.
           pts       Number of points on each axis, if even, it is
-          increased by 1. pts must be between -31 to -3 or  3
-          to 31, inclusive. Default is 7. Negative point
-          counts cause the system temperature measurement to
-          be skipped. The absolute value is used as the number
-          of points.
+                    increased by 1. pts must be between -31 to -3 or  3
+                    to 31, inclusive. Default is 7. Negative point
+                    counts cause the system temperature measurement to
+                    be skipped. The absolute value is used as the number
+                    of points.
           stp       Step size for distance between points, in multiples
-          of a beamwidth. Default is 0.5. 
-          intp        Integration period, 1 to 32 seconds.
+                    of a beamwidth. Default is 0.5. 
+          intp      Integration period, 1 to 32 seconds.
           dev       Mnemonic for the device to be used as the detector.
-          Standard devices are allowed. Note that for Mark III
-          equipment, the whether the video converter USB or
-          LSB detector is used is determined by the vc
-          command. The module which has the specified detector 
-          must have been set up. The IF distributor must be
-          set up and, for Mark III, must be in remote. Default
-          detector is i1 for Mark III/IV, ia for VLBA/4.
-          Station dependent detectors u5 and u6 may be
-          available.
-          wait        seconds to wait for onsource for each point, 1-1200
-          seconds allowed, default 120.
+                    Standard devices are allowed. Note that for Mark III
+                    equipment, the whether the video converter USB or
+                    LSB detector is used is determined by the vc
+                    command. The module which has the specified detector 
+                    must have been set up. The IF distributor must be
+                    set up and, for Mark III, must be in remote. Default
+                    detector is i1 for Mark III/IV, ia for VLBA/4 and DBBC.
+                    Station dependent detectors u5 and u6 may be
+                    available.
+          wait      seconds to wait for onsource for each point, 1-1200
+                    seconds allowed, default 120.
 
 Display-only parameters:
-          cal       Calibration noise source temperature in degrees K.
-          For standard detectors this is determined from the
-          .rxg file cal temperature table interpolated using
-          information from the lo command and the vcnn and
-          patch (Mark III/IV and LBA4) or bbcnn (VLBA/4)
-          command for the specified device. For station
-          defined detectors u5 and u6 the value are determine
-          from the user_device=u5,... and user_device=u6,... commands
-          respectively.
-          beam      The full width half maximum beam size degrees. For
-          standard detectors this is determined from the .rxg
-          file cal temperature table interpolated using
-          information from the lo command and the vcnn and
-          patch (Mark III/IV and LBA4) or bbcnn (VLBA/4)
-          command for the specified device.  For station
-          defined detectors u5 and u6 the values are determine
-          from the user_device=u5,... and user_device=u6,... commands
-          respectively.
-          flux       The apparent flux of the source. For standard
-          detectors this is determined from the flux.ctl
-          file cal using information from the lo command and
-          the vcnn and patch (Mark III/IV and LBA4) or bbcnn
-          (VLBA/4) command for the specified device.  For station
-          defined detectors u5 and u6 the value are determine
-          from the user_device=u5,... and user_device=u6,... commands
-          respectively.
-          chain     The IF chain, 1-6, that the detector is on. Chains 5
-          and 6 are for station specific detectors u5 and u6.
-          Mark III/IV and LBA4 racks use IFs 1-3. For VLBA/4
-          racks IFs 1-4 correspond to IFs a-d.
+          cal      Calibration noise source temperature in degrees K.
+                   For standard detectors this is determined from the
+                   .rxg file cal temperature table interpolated using
+                   information from the lo command plus the vcnn and
+                   patch (Mark III/IV and LBA4) or bbcnn (VLBA/4 and DBBC)
+                   command for the specified device. For station
+                   defined detectors u5 and u6 the value are determined
+                   from the user_device=u5,... and user_device=u6,...
+                   commands respectively.
+          beam     The full width half maximum beam size degrees. For
+                   standard detectors this is determined from the .rxg
+                   file cal temperature table interpolated using
+                   information from the lo command and the vcnn and
+                   patch (Mark III/IV and LBA4) or bbcnn (VLBA/4 and DBBC)
+                   command for the specified device.  For station
+                   defined detectors u5 and u6 the values are determined
+                   from the user_device=u5,... and user_device=u6,...
+                   commands respectively.
+          flux     The apparent flux of the source. For standard
+                   detectors this is determined from the flux.ctl
+                   file cal using information from the lo command and
+                   the vcnn and patch (Mark III/IV and LBA4) or bbcnn
+                   (VLBA/4 and DBBC) command for the specified device.
+                   For station defined detectors u5 and u6 the value are
+                   determined from the user_device=u5,... and
+                   user_device=u6,... commands respectively.
+          chain    The IF chain, 1-6, that the detector is on. Chains 5
+                   and 6 are for station specific detectors u5 and u6.
+                   Mark III/IV and LBA4 racks use IFs 1-3. For VLBA/4
+                   and DBBC racks IFs 1-4 correspond to IFs a-d.
  
 Comments: 
-The parameters should be setup with a fivept=  command. A
-scan is started by issuing a simple fivept command (i.e. with
-no parameters), this will determine the current values of the
-display only parameters and then schedule an external program,
-fivpt, which then uses the Field System to perform the
-necessary measurements. See the fivept manual in Volume 2.
 
-The scan is performed about the current commanded position.
-Any offsets that are in use are included. If the scan is
-successful the total offsets for the selected axis type are
-updated.
+The parameters should be setup with a fivept= command. A scan is
+started by issuing a simple fivept command (i.e. with no parameters),
+this will determine the current values of the display only parameters
+and then schedule an external program, fivpt, which then uses the
+Field System to perform the necessary measurements. See the fivept
+manual in Volume 2.
 
-It is recommended that nothing else be done, e.g. running a
-schedule, while this command is executing. Since this command
-may run for an extended period of time, a mechanism has been
-supplied for aborting: enter sy=brk fivpt & as a SNAP command.
-The program will return the antenna to the last good offset
-for each axis. If there was no good offset measurement on an
-axis, then the original offset is used.
+The scan is performed about the current commanded position.  Any
+offsets that are in use are included. If the scan is successful the
+total offsets for the selected axis type are updated.
+
+It is recommended that nothing else be done, e.g. running a schedule,
+while this command is executing. Since this command may run for an
+extended period of time, a mechanism has been supplied for aborting:
+enter sy=brk fivpt & as a SNAP command.  The program will return the
+antenna to the last good offset for each axis. If there was no good
+offset measurement on an axis, then the original offset is used.
 
 In order for this command to work, the following conditions must be
 met: (1) the detector device has been setup by the Field System, (2)
@@ -98,10 +97,11 @@ the appropriate lo= command has been issued, and (3) the IF
 distributor or IF3 module has been setup by the Field System and is in
 remote (Mark III/IV only). If a Mark III/IV video converter is used as
 the detector then the appropriate patch= command must have been issued
-as well.  For a VLBA/4 rack with a BBC selected as a detector the
-appropriate BBC IF input must be selected with a bbcXX= command. If
-estimates of performance based on the source flux are desired, then
-the appropriate fluxX= command must have been issued as well.
+as well.  For a VLBA/4 or DBBC rack with a BBC selected as a detector
+the appropriate BBC IF input must be selected with a bbcXX=
+command. If estimates of performance based on the source flux are
+desired, then the appropriate fluxes must be available from the
+flux,ctl file for the source being observed.well.
 
 If the noise diode temperature is less than zero, it is assumed that
 there is no noise diode to use. All power measurements will be made
@@ -109,6 +109,15 @@ assuming the absolute value of the diode temperature is the system
 temperature. Thus if the noise diode temperature is -100, the power
 measurements will come out as a percentage of the system
 temperature. The SEFD should still be useful measurement.
+
+For continuous calibration with a DBBC rack with an IF detector
+selected, there is no noise diode available. In this case the diode
+temperature is assumed to be -100 and the effects of the preceeding
+paragraph apply.
+
+For continuous calibration with a DBBC, the Tsys measurements samples
+are the larger of the specified integration time and the samples
+specified in cont_cal=on,... command.
 
 If the noise diode temperature is greater than zero, then two
 procedures must be available: calonfp and calofffp, which are
@@ -129,13 +138,12 @@ necessary to turn the noise source on and off, respectively.
 If the number of pts is negative, this will disable the initial system
 temperature measuement. This may be useful for station dependent
 detectors u5 and u6 if there is no way to make a "zero" measurement. A
-nominal conversion factor of unit and offset of zero is assumed in
+nominal conversion factor of unity and offset of zero is assumed in
 converting from detector counts to displayed antenna temperature,
 i.e., measurements are reported in detector units with an assumed zero
 offset.  This allows you to make pointing measurements even if you
-have no way to get a signal off measurement. In addition, if the
-"zero" level is actually 0, then the estimated SEFD should be
-accurate.
+have no way to get a "zero" signal off measurement. If the "zero"
+level is actually 0, then the estimated SEFD should be accurate.
 
 If station dependent detectors u5 or u6 are used and the number of pts
 is not negative, then two procedures must be available: sigonfp and
@@ -168,7 +176,7 @@ The indication that this is needed is if  fivpt seems to hang
 after executing one of these procedures. Please see the "Known
 Bugs" section of the latest update notice for more details.
 
-The default wait time for of 120 seconds is generous, but can
-be adjusted if necessary. Slower antennas may need a longer
-time. Shorter times  are only useful to make fivpt give-up
-sooner if there is a problem getting on-source.
+The default wait time for of 120 seconds is generous, but can be
+adjusted if necessary. Slower antennas may need a longer time. Shorter
+times are only useful to make fivpt give-up sooner if there is a
+problem getting on-source.
