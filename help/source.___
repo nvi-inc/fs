@@ -7,105 +7,169 @@
 
 Settable parameters:
         name    Source name, up to 10 characters. No default. Special
-        source names are recognized by many antenna interface
-        programs. Some names and their meaning are:
-            azel      true corrected coordinates
-            azeluncr  encoder units
-            xy        encoder units
+                source names are recognized by many antenna interface
+                programs. Some names and their meaning are:
+            
+                  azel      true corrected coordinates
+                  azeluncr  encoder units
+                  xy        encoder units
+
                 Other specialized names are described in the comments
-        below. If name is sun or moon, no position is
-        required, and if given it will be ignored.
-          ra        Right ascension, in numeric angle/hours format. No
-          default. If name is azel or azeluncr, this parameter
-          is interpreted as an azimuth. If name is xy, this
-          parameter is interpreted as an X position.
+                below. If name is sun or moon, no position is
+                required, and if given it will be ignored.
+
+        ra      Right ascension, in numeric angle/hours format. No
+                default. If name is azel or azeluncr, this parameter
+                is interpreted as an azimuth. If name is xy, this
+                parameter is interpreted as an X position.
+
         dec     Declination, in numeric angle/degrees format. No
-        default. If name is azel or azeluncr, this parameter
-        is interpreted as an elevation. If name is xy, this
-        parameter is interpreted as an Y position.
+                default. If name is azel or azeluncr, this parameter
+                is interpreted as an elevation. If name is xy, this
+                parameter is interpreted as an Y position.
+
         epoch   Epoch in years. Default 1950.0. This field is checked
-        only if the specified angles are right ascension and
-        declination. A value of -1 inhibits reduction of
-        coordinates, i.e., they are assumed to be topocentric.
+                only if the specified angles are right ascension and
+                declination. A value of -1 inhibits reduction of
+                coordinates, i.e., they are assumed to be topocentric.
+
         wrap    neutral, ccw (counter-clockwise), cw (clockwise), or
-        null to indicate which wrap (or no specific one) the
-        antenna should be on for this source. The local
-        antenna may or may not respect this parameter.
+                null (empty) to indicate which wrap (or no specific
+                one) the antenna should be on for this source or AzEl
+                antenna.  If there is no wrap specified, the antenna
+                should go the shortest way if there is more than one
+                choice.  The local antenna may or may not respect this
+                parameter. Please see extensive remarks about this
+                parameter in the Comments section below. 
 
 Monitor-only parameters:
         ranow   Topocentric right ascension for when the source
-        commanded
+                commanded
         decnow  Topocentric declination for when the source was
-        commanded
+                commanded
         today   Approximate epoch of these coordinates
 
 Comments: 
-The antenna will begin moving to the new source when this
-command is issued. At some antennas, if the source name is
-given as azel or azeluncr, then the ra and dec are recognized
-as azimuth and elevation in degrees; if the source name is xy,
-then the next two fields are recognized as x and y in degrees.
-If the source name is sun or moon, the appropriate coordinates
-will be calculated by the Field System based on the current
-time and the site position as specified in the location.ctl
-file.
+The antenna will begin moving to the new source when this command is
+issued. At some antennas, if the source name is given as azel or
+azeluncr, then the ra and dec are recognized as azimuth and elevation
+in degrees; if the source name is xy, then the next two fields are
+recognized as x and y in degrees.  If the source name is sun or moon,
+the appropriate coordinates will be calculated by the Field System
+based on the current time and the site position as specified in the
+location.ctl file.
 
-Issuing a source=... command will invalidate the calculated
-values for the flux5/6= commands. To indicate this their
-values are set to negative numbers.
+Typical interpretations of the following special names may or may not
+be supported at any given station. Additional parameters, including
+coordinates and cable-wrap are not permitted for these special source
+names.
 
-Typical interpretations of special names may or may not be
-supported at any given station. These are typical meanings:
-
-                  stow      Pre-defined stow position.
-                  service   Pre-defined service position.
-                  disable   Stops antenna communications. This is useful to
+    stow      Pre-defined stow position.
+    service   Pre-defined service position.
+    boresight Pre-defined boresight position.
+    disable   Stops antenna communications. This is useful to
               stop error messages when here is a problem.
-                  idle      Monitor the antenna position, but do not command
+    idle      Monitor the antenna position, but do not command
               it. This is the normal start-up state for the
               Field System.
-                  hold      Maintain the current antenna position.
-                  setup     Prepare antenna for track
-                  track     Re-enable antenna tracking
+    hold      Maintain the current antenna position.
+    setup     Prepare antenna for track
+    track     Re-enable antenna tracking
 
-The wrap parameter is usually provided by drudg in SNAP
-schedules for AZEL antennas for the information of the
-operator in selecting the correct wrap for a source when a
-schedule is started or has to be re-started. Most antenna
-interfaces do enforce this.
+The topocentric place for sources other than the Sun and Moon is
+calculated using USNO's NOVAS routines. As used here, the results
+should be accurate to better than 10 milli-arc-seconds for the time
+that the source is commanded. The effects of light bending and diurnal
+aberration are included. For the effect of diurnal aberration
+(typically less than about 0.3 arc-seconds in magnitude) to be
+calculated accurately the position of the antenna in location.ctl must
+be fairly accurate.
 
-The topocentric place for sources other than the Sun and Moon
-is calculated using USNO's NOVAS routines. As used here, the
-results should be accurate to better than 10 milli-arc-seconds
-for the time that the source is commanded. The effects of
-light bending and diurnal aberration are included. For the
-effect of diurnal aberration (typically less than about 0.3
-arc-seconds in magnitude) to be calculated accurately the
-position of the antenna in location.ctl must be fairly
-accurate.
+If the input epoch is 2000.0, the input coordinates are reduced using
+standard IAU precession and nutation models, plus light bending and
+aberration (annual and diurnal) to yield topocentric coordinates. If
+the input epoch is 1950.0, then the input coordinates are rotated to
+2000.0 using the inverse of the rotation used by drudg to rotate from
+2000.0 to 1950.0, then they are reduced to topocentric. In schedules,
+this has the effect of making the calculated topocentric place of a
+source that has mean coordinates of J2000 in the .drg or .skd schedule
+file independent of whether drudg puts 2000.0 or 1950.0 coordinates in
+the .snp file (to the precision used by drudg in the .snp) file. For
+coordinates of other epochs, the coordinates are assumed to be
+apparent (no diurnal aberration) and are reduced back to mean
+coordinates for 2000.0 using the full theory and then reduced to
+topocentric for the current date.
 
-If the input epoch is 2000.0, the input coordinates are
-reduced using standard IAU precession and nutation models,
-plus light bending and aberration (annual and diurnal) to
-yield topocentric coordinates. If the input epoch is 1950.0,
-then the input coordinates are rotated to 2000.0 using the 
-inverse of the rotation used by drudg to rotate from 2000.0 to
-1950.0, then they are reduced to topocentric. In schedules,
-this has the effect of making the calculated topocentric place
-of a source that has mean coordinates of J2000 in the .drg or
-.skd schedule file independent of whether drudg puts 2000.0 or
-1950.0 coordinates in the .snp file (to the precision used by
-drudg in the .snp) file. For coordinates of other epochs, the
-coordinates are assumed to be apparent (no diurnal aberration)
-and are reduced back to mean coordinates for 2000.0 using the
-full theory and then reduced to topocentric for the current
-date.
+For the Sun and Moon, the topocentric place is calculated to lower
+accuracy than other sources since these are large sources and are
+generally only used for calibrating small antennas with large beams.
 
-For the Sun and Moon, the topocentric place is calculated to
-lower precision than other sources since these are large
-sources and are generally only used for calibrating small
-antennas with large
-beams.
+The following paragraphs explain how the support for the wrap
+parameter should be implemented for AzEl antennas. The last two
+paragraphs of this section also describe the handling of limits for
+all antenna types.
 
+The wrap parameter is provided by DRUDG in SNAP schedules for AzEl
+antennas.  Some antenna interfaces do not implement this parameter.
+However, all should since its use is necessary to execute an observing
+schedule correctly.  If this parameter is not implemented, it can be
+still be used as information by the operator to select the correct
+wrap for a source when a schedule is started or has to be re-started
+or possible to override incorrect antenna motion.
 
-    
+Wrap regions are defined as (viewed from above the antenna):
+counter-clockwise (CCW), Neutral, and clock-wise (CW).  The Neutral
+region is the region where an azimuth can only be reached in one way.
+The Overlap region is where there are two options for azimuth,
+identified as CCW and CW.  Range of motion for the cable wrap of
+greater than or equal to 720 degrees is not currently supported.
+
+Implementation of the cable-wrap parameter has subtleties at the
+boundary between the regions.  To determine the correct actions it is
+necessary to make the assumption that the source is being commanded
+shortly before it will be observed.  This is the situation for normal
+schedule driven observing.  This approach will achieve agreement with
+the scheduling algorithm.  There are three cases to consider:
+
+(1) The source is commanded as "Neutral", but it is currently in the
+Overlap region.  If the source is near the CW end of the Overlap
+region, the antenna should be commanded to the CCW region.
+Alternatively, if the source is near the CCW end of the Overlap
+region, the antenna should be commanded to the CW region.  With this
+approach when the source moves into the Neutral region, the telescope
+should smoothly make the transition to the Neutral region when the
+source reaches it.
+
+(2) The source is commanded as "CCW" and it is in the Neutral region.
+If the source is near the CW end of Neutral region, the antenna should
+be commanded to the CCW limit to wait for the source to enter the
+overlap region.  If the source is near the CCW end of the Neutral
+region, the antenna should be sent to the current source position,
+which by assumption is in the Neutral region.  As with case (1) above
+for the Neutral wrap, this approach will allow the antenna to
+transition smoothly to tracking in the correct wrap, in this case CCW,
+when the source reaches it.
+
+(3) The source is commanded as "CW" and it is in the Neutral region.
+If the source is near the CCW end of Neutral region, the antenna
+should be commanded to the CW limit to wait for the source to enter
+the overlap region.  If the source is near the CW end of the Neutral
+region, the antenna should be sent to the current source position,
+which by assumption is in the Neutral region.  As with case (1) above
+for the Neutral wrap and (2) for the CCW wrap, this approach will
+allow the antenna to transition smoothly to tracking in the correct
+wrap, in this case CW, when the source reaches it.
+
+If a source is commanded that is beyond the limits of the antenna, in
+general the antenna should go to that limit and "track" as close to
+the source as possible (so-called "tracking at the limit") so that
+when the source does come out of the limit it can be tracked as soon
+as possible.  This is straightforward for axes that do not have
+"wraps", i.e., not azimuth.  For azimuth the correct handling of the
+limits is described above.
+
+If the antenna is tracking a source that moves into the limit, the
+antenna should adopt the approach of "tracking at the limit".  This
+will allow the slewing calculation for the next source to have the
+best chance of being accurate.  In particular for azimuth it should
+not attempt to "unwrap" to get to the source.
