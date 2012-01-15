@@ -1,89 +1,88 @@
                     onoff - on-off radiometry
 
-            Syntax:     onoff=rep,intp,cutoff,stp,wait,devices
+            Syntax:     onoff=rep,intp,cutoff,step,proc,wait,devices
 
-            Response:   onoff/rep,intp,cutoff,stp,wait,ssize,mfwhm
-          onoff/device,if,pol,fwhm,center,flux,dpfu,gain,product
+            Response:   onoff/rep,intp,cutoff,step,proc,wait,ssize,mfwhm
+                        onoff/device,if,pol,fwhm,center,flux,dpfu,gain,product
 
 
 Settable parameters:
           rep       Number of repetitions, 1 to 99. Default is 2. 
-            intp        Integration period, 1 to 10 seconds. Default is 1. 
-            cutoff      Elevation above which to step in elevation rather
-            than azimuth, in degrees, default 75.
-          stp       Distance off source for off source and calibration
-          points, in multiples of a beamwidth. Default is 3.0.
-            wait        Seconds to wait for onsource for each point, 1-1200
-            seconds allowed, default 120.
-          devices   One or more of all standard device mnemonics, plus
-          all, allvc, formvc, and formif  for Mark III/IV, plus allbbc, allu,
-          alll, formbbc, and formif for VLBA/4. For all racks station
-          defined detectors u5 and u6 are supported if the station has
-          them implemented.
+          intp      Integration period, 1 to 100 seconds. Default is 1. 
+          cutoff    Elevation above which to step in elevation rather
+                    than azimuth, in degrees, default 75.
+          ste       Distance off source for off source and calibration
+                    points, in multiples of a beamwidth. Default is 3.0.
+          proc      Snap procedure base name. See comments. No default.
+          wait      Seconds to wait for onsource for each point, 1-1200
+                    seconds allowed, default 120.
+          devices   One or more of all standard device mnemonics for
+                    Mark III/IV/5, VLBA/4/5 and DBBC, plus all, allvc,
+                    formvc, and formif for Mark III/IV/5, plus allbbc,
+                    allu, alll, formbbc, and formif for VLBA/4/5 and
+                    DBBC. For all racks: station defined detectors u5
+                    and u6 are supported if the station has them
+                    implemented.
 
 Monitor-only parameters:
           ssize     source size, degrees
           mfwhm     maximum full-width-half-maximum of all selected
-          devices, degrees
-            device      a selected device's mnemonic 
-            if          if chain for device, 1-3 for Mark III/IV and LBA4, a-d
-            for VLBA/4
+                    devices, degrees
+          device    selected device's mnemonic 
+          if        IF chain for device, 1-3 for Mark III/IV/5 and LBA4,
+                    a-d for VLBA/4/5 and DBBC
           pol       polarization for device, l for left and r for right
           fwhm      full-width-half-maximum for device, degrees
-            center      center frequency for device, MHz
-            tcal        Noise diode temperature for center, degrees K
-            flux        Source flux for center, Janskys
-            corr        Source flux correction for center and fwhm,
-            dimensionless
-            dpfu        Degrees-per-Flux-Unit, for band of device, in
-            degrees/Janskys
-            gain        gain curve value for band of device at current
-            elevation, dimensionless
+          center    center frequency for device, MHz
+          tcal      Noise diode temperature for center, degrees K
+          flux      Source flux for center, Janskys
+          corr      Source flux correction for center frequency relative to
+                    fwhm, dimensionless
+          dpfu      Degrees-per-Flux-Unit, for band of device, in
+                    degrees/Janskys
+          gain      gain curve value for band of device at current
+                    elevation, dimensionless
           product   dpfu*gain for device, degrees/Janskys
 
 Comments:
-This version works only with Mark III/IV or VLBA/4 devices,
-i.e.,user defined devices are not supported.
+The parameters should be setup by issuing a onoff=...  command. A
+measurement is started by issuing a simple onoff.  This will recover
+the current values for the display only parameters and schedule the
+external program "onoff". See the onoff manual in Volume 2 (currently
+out-of-date).
 
-The parameters should be setup by issuing a onoff=... 
-command. A measurement is started by issuing a simple onoff.
-This will recover the current values for the display only
-parameters and schedule an external program onoff. See the
-onoff manual in  Volume 2 (currently out-of-date).
-
-The current command antenna position including offsets is
-assumed to be 'onsource.'
+The current command antenna position including offsets is assumed to
+be 'onsource.'
  
-It is recommended that nothing else be done, e.g. running a 
-schedule, while this command is executing. Since this command
-may run for an extended period of time, a mechanism has been
-supplied for aborting: enter sy=brk onoff & as a SNAP command.
-After aborting, the offsets will be returned to their original
-values.
+It is recommended that nothing else be done, e.g., running a schedule,
+while this command is executing. Since this command may run for an
+extended period of time, a mechanism has been supplied for aborting:
+enter "sy=brk onoff &" as a SNAP command.  After aborting, the offsets
+will be returned to their original values.
 
-In order for this command to work, the following conditions
-must be met: (1) the detector devices have been set up by the
-Field System, (2) the appropriate lo=  commands have been
-issued, (3) for a Mark III/IV or LBA4 rack only,  the IF
-distributors have been set up by the Field System and  must be
-in remote, (4) for a Mark III/IV or LBA4 rack only, if  a
-video converter is used as a detector, the appropriate
-patch=  command must have been issued, and (5) for a VLBA/4
-rack only, if a BBC is used as a detector, the appropriate BBC
-IF input must be selected with a bbcXX=  command.
+In order for this command to work, the following conditions must be
+met: (1) the detector device(s) (VCxx, BBCxx, IFDxx, IF3, IFx) have
+been set up by the Field System, (2) the appropriate "lo=..." commands
+have been issued, (3) the IF distributors have been set up by the
+Field System (and must be in remote for Mark III/IV/5), (4) for a Mark
+III/IV/5 and LBA4 racks only, if a video converter is used as a
+detector, the appropriate "patch=..." command have been issued, and
+(5) for a VLBA/4/5 and DBBC racks only, if a BBC is used as a
+detector, the appropriate BBC IF input have be selected with a bbcXX=
+command.
 
 If a noise diode temperature is less than zero, it is assumed that
 there is no noise diode to use for that detector. All measurements for
-that channel will be made assuming the absolute value of the diode
+that detector will be made assuming the absolute value of the diode
 temperature is the system temperature. Thus if the noise diode
-temperature is -100, the power measurements will come out as a
-percentage of the system temperature. Other quantities dependent on
-the noise diode will be displayed as 0.0.
+temperature is -100 (a useful choice), the power measurements will
+come out as a percentage of the system temperature. Other quantities
+dependent on the noise diode will be displayed as 0.0.
 
-If either noise diode temperature is greater than zero, then
-two procedures must be available: calonnf and caloffnf, which
-are used to turn the noise diode on and off respectively. The
-recommended form for these procedures is:
+If either noise diode temperature is greater than zero, then two
+procedures must be available: calonnf and caloffnf, which are used to
+turn the noise diode on and off respectively. The recommended form for
+these procedures is:
 
 CALONNF:  calon
           !+1s
@@ -93,8 +92,8 @@ CALOFFNF: caloff
           !+1s
           sy=go onoff & 
 
-calon and caloff are local procedures that do whatever is
-necessary to turn the noise source on and off, respectively. 
+calon and caloff are local procedures that do whatever is necessary to
+turn the noise source on and off, respectively.
 
 If station dependent detectors u5 and/or u6 are used, two additional
 procedures must be available to turn the signal on and off to the
@@ -108,30 +107,104 @@ SIGOFFNF: sigoff
           !+1s 
           sy=go onoff &
 
-sigon and sigoff are local procedures that do whatever is
-necessary to turn the signal to the station dependent
-detectors on and off, respectively.
+sigon and sigoff are local procedures that do whatever is necessary to
+turn the signal to the station dependent detectors on and off,
+respectively.  The signal needs to be turned off to determine the
+"zero" signal level.
+
+There is a known bug in the use of these procedures: calonnf,
+caloffnf, sigonnf, and sigoffnf, that may require the last two lines
+to be repeated in each procedure. In other words after the first line,
+each procedure should contain:
+
+          !+1s
+          sy=go onoff &
+          !+1s
+          sy=go onoff &
+
+The indication that this is needed is if onoff seems to hang after
+executing one of these procedures. Please see the "Known Bugs" section
+of the latest update notice for more details.
 
 The "formbbc", "formif", and "formvc" detector device parameters will
 cause the BBCs, IFs, or VCs (respectively) that are current defined
 for recording by the formatter to be selected as detectors. This is
-useful for checking SEFDs in all channels to be used in an experiment.
+useful for checking SEFDs in all channels to be used in an experiment
+when the rack has been set-up in the configration of the experiment.
 
-There is a known bug in the use of these procedures: calonnf,
-caloffnf, sigonnf, and sigoffnf,  that may require the last
-two lines to be repeated in each procedure. In other words
-after the first line, each procedure should contain:
+The default wait time for of 120 seconds is generous, but can be
+adjusted if necessary. Slower antennas may need a longer time. Shorter
+times are only useful to make onoff give-up sooner if there is a
+problem getting on-source.
 
+If continous cal is in use ("cont_cal=on,..."), the noise diode
+temperature is expected to be a small fraction of Tsys, a few percent.
+Consequently, it may be necessary to take a large number of samples
+beat the noise level down enough to get reliable gain compression
+results and to calibrate the noise diode. However, SEFD measurements
+should only be about 41% noisier than when the same integration is
+used with non-continuous calibration is used.
+
+If "proc" in non-null, it is the 'base' name for a user defined SNAP
+procedure, referred to hereafter as the measurement SNAP procedure,
+that will be executed for the first on-source and off-source
+points. Typically this procedure would be used to control other user
+organized measurement systems while ONOFF is running. In addition, an
+initialization SNAP procedure, using the 'base' name, is run after the
+antenna is initially onsource before the first measurement.
+
+The name of initialization procedure is constructed from the 'base'
+name specified by "proc" with an "i" appended. When executed, it is
+passed an argument, described farther below.  This procedure might be
+used to initialize the set-up of a device. e.g., an Agilenet N9020A
+Signal Analyzer, prior to the use of the corresponding ("proc"+"p")
+measurement procedure. The following is a sample procedure , "onoffi"
+("onoff"+"i") using this analyzer (HPIB device "SA", defined in
+"ibad.ctl"):
+
+ONOFFI:   hpib=sa,...
+          sy=go onoff & 
           !+1s
+          sy=go onoff & 
+
+The "..." would be replaced with an appropriate initialization string,
+possibly including the procedures argument (represented by "$").
+
+The measurement SNAP procedure is run for, only, the first on-source
+and the first off-source point. Its name is constructed from the base
+name ("proc") with a "p" appended. The following is an example of a
+measurement procedure, "onoffp" ("onoff"+"p"), that might be useful,
+e.g., with a broad-band power measurement using an Agilenet N9020A
+Signal Analyzer. It uses the analyzer (HPIB device "SA", defined in
+"ibad.ctl") to store a power spectrum in an appropriately named file.
+
+ONOFFP:   hpib=sa,trac:type aver
+          !+18s
+          hpib=sa,mmem:stor:trac:data trace1,"$.csv"
           sy=go onoff &
           !+1s
           sy=go onoff &
 
-The indication that this is needed is if onoff seems to hang
-after executing one of these procedures. Please see the "Known
-Bugs" section of the latest update notice for more details.
+Each time they are run, the initialization and meaurement procedures
+are given an argument in the form:
 
-The default wait time for of 120 seconds is generous, but can
-be adjusted if necessary. Slower antennas may need a longer
-time. Shorter times are only useful to make onoff give-up
-sooner if there is a problem getting on-source.
+  ssssssssssxaaaAeeEyyYdddDhhHmmM
+
+where:
+
+ ssssssssss is the source name with (trailing) blanks replaced with
+            underscores ("_")
+ x          is "N" for the on-source point, "F" for the off-source point,
+            "I" for the initialization procedure
+ aaa        is the current azimuth in degrees
+ ee         is the current elevation in degrees
+ yy         is the year modulo 100
+ ddd        is the day of year
+ hh         is the hour
+ mm         is the minutes.
+
+Except for the "F", "I", or "N", the argument has the same value for
+the on and off source points and initialization. Note that the FS will
+convert this argument to all lower-case when it processes the
+command. This argument can be used in the procedures by specifying a
+dollar sign "$" where it should be used.
