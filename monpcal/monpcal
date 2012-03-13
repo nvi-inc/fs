@@ -312,12 +312,7 @@ class LineReader:
 
 
 def main():
-	#run in background
-	pid = os.fork()
-	if pid != 0:
-		pass
-	else:
-		startProg = MainGui()	
+	startProg = MainGui()
 
 
 if __name__ == "__main__":
