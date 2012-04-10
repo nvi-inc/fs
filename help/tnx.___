@@ -13,6 +13,7 @@ Settable parameters:
                         associated with the error "string",
                         default is #1 if only one instance
                         of error code,number has occurred,
+                        negative values match all instances of code,number,
                         otherwise default is null
 
 Monitor-only parameters:
@@ -43,7 +44,10 @@ The #num is only needed if more than instance of an error with the
 specified code,number has ocurred. If there is more than one instance
 and #num is not specified, all instances that have occurred so far are
 displayed with their corresponding "num" values along with a
-suggestion to use the #num form.
+suggestion to use the #num form. If #num is negative, it will match
+all all instances of the code,number. In this case only, the FS will
+not complain if the display status of any of code,number errors are
+already in the requested state.
 
 This command must be used with great care. If misused it may
 turn off important error messages that the operator needs to
