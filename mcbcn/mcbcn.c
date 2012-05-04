@@ -13,6 +13,9 @@
 #include <linux/serial.h>
 #include <stdlib.h>
 
+#include <sys/time.h>
+#include <time.h>
+
 #ifdef DIGI
 #include "/usr/src/linux/drivers/char/digi.h"
 #endif
@@ -756,9 +759,20 @@ int mode;            /* command or monitor */
      }
 
      if(!digiboard) {
-       while((0==(iret=ioctl(mcb_fildes,TIOCSERGETLSR, &statusReg))) &&
-          ((statusReg & TIOCSER_TEMT) != TIOCSER_TEMT))
-             ;
+       /* JanW: checking TEMT to be '1' several times fixes 
+          some mysterious bug in Linux kernels 2.6.xx */
+       int in_row_passes = 0;
+       int in_row_failures = 0;
+       while (in_row_passes < 16) {
+            iret = ioctl(mcb_fildes, TIOCSERGETLSR, &statusReg);
+            if (iret != 0) break;
+            if ((statusReg & TIOCSER_TEMT) != TIOCSER_TEMT) {
+                in_row_failures += in_row_passes;
+                in_row_passes = 0;
+            } else {
+                in_row_passes++;
+            }
+       }
        if(iret != 0) {
           perror("write_mcb:TEMT");
           exit(-1);
