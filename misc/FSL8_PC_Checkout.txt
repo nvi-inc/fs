@@ -1,0 +1,225 @@
+File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
+
+	     GSFC FS PC Installation/Check-out Procedure
+
+		   System:________________________
+
+1. Equipment check-list:
+   ____ Property Tag (ECN) ___________________
+   ____ Motherboard _____________, case (rack mount?), 300W PS, + power cord
+   ____ CPU _______________
+   ____ Memory _____________
+   ____ Monitor _____________ + video cable + power cord
+   ____ Two disk receivers
+   ____ Three disks, _______ GB, mounted in carriers
+   ____ Mouse
+   ____ Keyboard
+   ____ GPIB device
+   ____ Serial mux card
+   ____ Special instructions for this system, in document: _______________.
+   ____ Disk key sets(2 keys each)
+   ____ Other?
+
+2. ____ Boot with vendor's disk to verify operation. Presevre this disk
+        as long as possible in case it contains a needed driver.
+
+3. Labeling
+   ____ Primary disk slot (first SATA controller)
+   ____ Secondary disk slot (second SATA controller)
+   ____ Vendor's Disk "2" 
+   ____ Disks "1", and "3"
+   ____ Byterunner ports 4-11 (if included), VSCom on main connector (top) 
+        and Chasis
+   ____ System ID, e.g. 2008 July-Ny 1 on chasis, each disk, keyboard,
+        VScom main connector (bottom), and mouse (cord near connector)
+
+4. Assemble computer:
+   ____ All Components
+   ____ Disk "1" in Primary slot
+   ____ Disk "3" in Secondary slot
+   ____ Disk "2" on shelf
+
+5. Copy Lenny DVDs, use copies for installation
+   ____ Copy DVDs
+ 
+6. BIOS Settings
+   ____ Date and Time are UTC
+   ____ NumLock off on boot
+   ____ Special Settings?
+
+7. Install FSL8
+   ____ following special instructions in document: ____________
+        but if no special instructions follow instructions in:
+   ____ ftp://ftp.hartrao.ac.za/pub/fs8x/fs8linux_DVD.txt
+   ____ be sure to install Desktop Environment
+
+8. Install gnomebaker as "root"
+
+   ____   apt-get install gnomebaker
+   ____   apt-get clean
+
+9. Install and run fsadapt as "root" (use current latest version in place
+   of 8.0.0):
+
+   ____   cd /root
+   ____   ncftpget ftp://ftp.hartrao.ac.za/pub/fs7x/fsadapt-8.0.0.tgz
+   ____   tar xzvpf fsdapt-8.0.0.tgz
+   ____   cd fsadapt
+   ____   ./fsadapt
+        (take all defaults in fsadapt, except:
+   ____     on Window 1 set noident
+   ____     on Window 2 unset updates
+   ____     select appropriate serial configuration when prompted
+   ____     on Window 3 set skip
+   ____     on Window 4 set secure, then OK, then OK again
+
+10. Set oper and prog password
+    ____ passwd oper
+    ____ passwd prog
+
+11. Install FS as "root: (use current latest version in place of 9.10.4):
+
+    ____   (Place fs-9.10.4.tgz on /tmp)
+    ____   cd /
+    ____   tar xzf /tmp/fs-9.10.4.tgz
+    ____   cd /usr2/fs-9.10.4
+    ____   make install
+    ____     (answer question "y")
+
+12. Compile FS as "prog", vt1
+    ____ cd /usr2/fs
+    ____ make
+
+13. Reboot
+    ____ reboot
+
+14. Testing
+    ____ NIC tested by installation process
+    ____ CD/DVD tested by installation process
+    ____ Keyboard tested by use
+    ____ Mouse tested by use
+    ____ USB ports (insert thumb drive in each)
+    ____ PCI-GPIB card if included
+    ____ ByteRunner 800H if included
+         Use dev9 for cable device in ibad.ctl,
+         (test counter had broken address bit 1)
+         Use /dev/ttySX, X=4,...,11 for gpib device in dev.ctl
+    ____ Test GPIB board if included
+    ____ GPIB-RS232 if included (config from MS-Win machine with NI CD:S-mode,
+         38400 BAUD, 8 data bits, 1 stop bit, no parity, no flow control)
+
+15. Clean-up as "root", vt1
+         a. Restore /usr2/control/ibad.ctl and dev.ctl
+            ____ cd /usr2/control
+            ____ cp -a /usr2/fs/st.default/control/ibad.ctl .
+            ____ cp -a /usr2/fs/st.default/control/dev.ctl .
+            ____ chmod a+rw ibad.ctl dev.ctl
+            ____ chown oper.rtx ibad.ctl dev.ctl
+
+    ____ b. Delete logs in /usr2/log
+         c. Restore /etc/apt/sources.list:
+            ____ Place web references after CD references.
+            ____ apt-get update
+
+    ____ d. Disconnect network cable
+         e. Delete network configuration (as "root"):
+            ____ cd /root/fsadapt
+            ____ /netconfig
+            ____ (take defaults and no network)
+
+         f. place appropriate refresh_secondary in /usr/local/sbin:
+
+            ____ cd /usr/local/sbin
+            ____ cp -a /usr2/fs/misc/refresh_secondary.sdb refresh_secondary
+            ____ chown root.root refresh_secondary
+            ____ chmod a+r,u+wx,go-wx refresh_secondary
+
+         g. Place mdstat in /usr/local/bin:
+
+            ____ cd /usr/local/bin
+            ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
+            ____ chown root.root mdstat
+            ____ chmod a+rx,u+w,go-w mdstat
+
+         h. Sign in as oper, prog, and desktop and make sure no is no
+            incoming mail.
+            ____ oper
+            ____ prog
+            ____ desktop
+
+         i. make oper, prog, and desktop passwords undefined
+            ____ oper
+            ____ prog
+            ____ desktop
+
+         j. Edit /etc/aliases so root and prog e-mail goes to oper.
+            ____ change root: testing to root: oper
+            ____ add prog: oper
+            ____ add desktop: oper
+
+         k. make root password vlbIcdp1
+            ____ root
+
+    ____ l. Leave no uncommented clauses in hosts.allow.
+
+    ____ m. Make hosts.deny as restrictive as possible:
+
+ALL: PARANOID
+#
+ALL: ALL
+
+         n. Delete ssh keys:
+            ____ cd /etc/ssh
+            ____ rm *_key *_key.pub
+
+         o. delete .ssh/ and .history in ~oper, ~prog, ~desktop
+            ____ cd ~oper; rm -rf .ssh .history
+            ____ cd ~prog; rm -rf .ssh .history
+            ____ cd ~desktop; rm -rf .ssh .history
+
+         p. delete .ssh/ and .bash_history for root
+            ____ cd /root; rm -rf .ssh .bash_history;exit
+            ____ login as root; rm .bash_history
+
+         q. shutdown system when RAID is no longer rebuilding
+            ____ cat /proc/mdstat
+            ____ shutdown -h now; exit
+
+16. Prepare extra disk:
+
+    ____ a. Insert disk "2" in Primary slot, no disk in second slot.
+    ____ b. Follow fs8linux_DVD.txt through First Stage, step 10. You
+            can skip the network set-up in step 5 by using "back" and
+            selecting paritition disk, which takes you directly to step 7.
+            In step 7, follow the single disk instructions. In step 10,
+            take the early exit for initializing a single disk
+    ____ c. Re-install "1" in Primary and put "2" in Secondary
+    ____ d. Boot
+    ____ e. Add Secondary disk into array as "root":
+
+              refresh_secondary
+    
+    ____ f. Install GRUB on secondary, follow Second Stage
+            Installation, step 11.
+    ____ g. when cat /proc/mdstat shows rebuild finished, shutdown
+
+17. Repackage and ship
+    ____ All components and cables
+    ____ Lenny DVDs
+    ____ FSL8Install CD, which contains the latest versions of:
+         fs8linux_DVD.txt, fs8.selections, fsadapt-*.tgz, fs-*.tgz,
+         fs*up.txt, FSL8_PC_Checkout.txt, FSL8_Upgrade.txt,
+         FSL8_End_User.txt, RAID.txt, and any special instructions,
+         drivers or other files for your system.  The contents of this
+         CD will help you to make a complete re-install even if you
+         don't have an Internet connection and/or lose the hard copy
+         of these documents.
+    ____ Special instructions for this system, in document: _______________.
+    ____ RAID.txt
+    ____ Any extra items specific to the system
+    ____ fs8linux_DVD.txt print-out.
+    ____ End User Set-up Checklist
+    ____ This Check-out checklist, completed
+
+
+Initials: _____________         Date: ______________
