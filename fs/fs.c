@@ -16,7 +16,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-#define MAX_PIDS    30
+#define MAX_PIDS    60
 #define MAX_LINE    82
 #define MAX_PROG_ARGS    4
 
