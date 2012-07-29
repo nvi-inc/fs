@@ -35,6 +35,10 @@ C
       icnext=icnext+ib2as(ilat,lbuf,icnext,1)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
+      call fs_get_lsorna(lsorna)
+      icnext=ichmv(lbuf,icnext,lsorna,1,10) 
+      icnext=ichmv_ch(lbuf,icnext,' ')
+c
       nchars=icnext-1
       if (1.ne.mod(icnext,2)) icnext=ichmv_ch(lbuf,icnext,' ')
       call logit2(lbuf,nchars)
