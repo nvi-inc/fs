@@ -253,7 +253,8 @@ int get_rxgain(file,rxgain)
   /* check for trec and spill table */
   
  trec:
-  rxgain->trec=0.0;
+  rxgain->trec[0]=0.0;
+  rxgain->trec[1]=0.0;
     rxgain->spill_ntable=0;
     
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
@@ -265,14 +266,22 @@ int get_rxgain(file,rxgain)
 
     lower(buff);
 
-    iread=sscanf(buff,"%f",&rxgain->trec);
+    iread=sscanf(buff,"%f %f",&rxgain->trec[0],&rxgain->trec[1]);
+
+    if(iread>=1) {
+      if(rxgain->trec[0] <0.0 )
+	return -801;
+      if(iread>=2) {
+	if(rxgain->dpfu[1] <0.0 )
+	  return -802;
+      }
+      if(iread==1 && rxgain->pol[1] !=0)
+	return -803;
+      else if(iread==2 && rxgain->pol[1] == 0)
+	return -804;
+    } else
+      return -805;
     
-    if(iread!=1)
-      return -801;
-
-    if(rxgain->trec < 0.0)
-      return -802;
-
     while(1) {
       float el, tk;
       ierr=find_next_noncomment(fp,buff,sizeof(buff));
