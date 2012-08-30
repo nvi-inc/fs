@@ -12,6 +12,7 @@
 #define MAXRX MAX_RXGAIN
 #define MAXDETECTORS 32
 #define BADVALUE -6000000
+#define MISSINGVALUE -7000000
 #define BADSTRVALUE "X"
 #define MAXLINE 1024
 
@@ -20,7 +21,7 @@ int min(int x, int y);
 int main(int argc, char *argv[])
 {
   char onoffFileName[64], *cptr;
-  char parsedFileName[64], tempFileName[64];
+  char parsedFileName[64];
   char rxgFileName[20], controlFileDir[64];
   double azimuth, elevation, skyfreq, gainc, tsys, sefd, tcaljy, tcalk, calratio, tcal_ass;
   double flux_ass, tcalk_over_jy_ass, gcurve_ass, dpfu_gcurve_ass, LO;
@@ -44,11 +45,12 @@ int main(int argc, char *argv[])
   FILE *onoffFile;
   FILE *parsedFile;
   FILE *rxgFile;
-  FILE *tempFile;
   char line[MAXLINE];     /* line buffer for fgets() */
   struct rxgain_ds rxgain[MAXRX];
   char names[MAXRX][256];
   int *ierr;
+  float ctemp,mbprs,rhumi,wspd,wdir;
+  int gndat2;
   a=0.00125;
   b=0.00291;
   c=0.063;
@@ -60,10 +62,10 @@ int main(int argc, char *argv[])
   rxcount=0;
   LOcount=0;
   somethingelse=1;
+  gndat2=strcmp(argv[0],"gndat2")==0;
   strncpy(onoffFileName,argv[1],STL(onoffFileName,argv[1]));
   strncpy(parsedFileName,argv[2],STL(parsedFileName,argv[2]));
   strncpy(controlFileDir,argv[4],STL(controlFileDir,argv[4]));
-  strcpy(tempFileName,"/tmp/temp.txt");
   if(argc >= 4 &&  1!=sscanf(argv[3],"%d",&works)) {
     printf("Pid might be wrong. Please open the log file again.");
     exit(0);
@@ -96,9 +98,6 @@ int main(int argc, char *argv[])
       printf("Error opening file: %s", parsedFileName);
       exit(0);
     }
-  tempFile = fopen(tempFileName, "w");
-  
-  fprintf(tempFile,"%-10s %-10s %-10s %-10s %-10s\n","dpfu","gain","tcalass","tcalk","skyfreq");
   
   fputs("$ANTENNA\n", parsedFile);
   
@@ -136,9 +135,24 @@ int main(int argc, char *argv[])
   fputs("Tsys-Tspill\n", parsedFile);
   /*fputs("Tau\n", parsedFile);*/
   /*fputs("Tau0\n", parsedFile);*/
+  if(gndat2) {
+    fputs("Temperature\n",parsedFile);
+    fputs("Pressure\n",parsedFile);
+    fputs("Humidity\n",parsedFile);
+    fputs("Wind Speed\n",parsedFile);
+    fputs("Wind Azimuth\n",parsedFile);
+  }
   fputs("*\n", parsedFile);
   
   fputs("$DATA\n", parsedFile);
+
+  if(gndat2) {
+    ctemp=MISSINGVALUE;
+    mbprs=MISSINGVALUE;
+    rhumi=MISSINGVALUE;
+    wspd=MISSINGVALUE;
+    wdir=MISSINGVALUE;
+  }
 
   while (fgets(line, MAXLINE, onoffFile) != NULL) {
     /*if(strstr(line,";onoff") != NULL) {
@@ -150,6 +164,24 @@ int main(int argc, char *argv[])
       }
       detcount=0;
       }*/
+    if(gndat2 && strncmp(line+20,"/wx/",4)==0) {
+      printf(" line %s\n",line);
+	if((NULL == (cptr = strtok(line+24," ,\n")) || (1!=sscanf(cptr, "%f", &ctemp)))) {
+	  ctemp=MISSINGVALUE;
+	}
+	if((NULL == (cptr = strtok(NULL," ,\n")) || (1!=sscanf(cptr, "%f", &mbprs)))) {
+	  mbprs=MISSINGVALUE;
+	}
+	if((NULL == (cptr = strtok(NULL," ,\n")) || (1!=sscanf(cptr, "%f", &rhumi)))) {
+	  rhumi=MISSINGVALUE;
+	}
+	if((NULL == (cptr = strtok(NULL," ,\n")) || (1!=sscanf(cptr, "%f", &wspd)))) {
+	  wspd=MISSINGVALUE;
+	}
+	if((NULL == (cptr = strtok(NULL," ,\n")) || (1!=sscanf(cptr, "%f", &wdir)))) {
+	  wdir=MISSINGVALUE;
+	}
+    }
     if(strstr(line,"APR") != NULL) {
       if(firstapr==1 || somethingelse==1) {
 	for (i=0; i<=detcount; i++) {
@@ -349,8 +381,16 @@ int main(int argc, char *argv[])
 	  fprintf(parsedFile, "%s ", sourcetype_array[i]);
 	  fprintf(parsedFile, "%.1f ", trec_array[i]);
 	  fprintf(parsedFile, "%.1f ", tspill_array[i]);
-	  fprintf(parsedFile, "%.2f\n", tsys_array[valcount]-tspill_array[i]);
+	  fprintf(parsedFile, "%.2f ", tsys_array[valcount]-tspill_array[i]);
 	  /*fprintf(parsedFile, "%.4f\n", tau_array[valcount]);*/
+	  if(gndat2) {
+	    fprintf(parsedFile, "%f ", ctemp);
+	    fprintf(parsedFile, "%f ", mbprs);
+	    fprintf(parsedFile, "%f ", rhumi);
+	    fprintf(parsedFile, "%f ", wspd);
+	    fprintf(parsedFile, "%f ", wdir);
+	  }
+	  fprintf(parsedFile,"\n");
 	}
       }
       valcount++;
@@ -385,7 +425,6 @@ int main(int argc, char *argv[])
   }
   fclose(onoffFile);
   fclose(parsedFile);
-  fclose(tempFile);
   printf("%s\n",parsedFileName);
   exit(0);
 }
