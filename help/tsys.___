@@ -36,8 +36,8 @@ For LBA the formula is:
 
 For VLBA/4 the formula is:
 
-      tsys = (tpi/(tpgain*tpgian) -
-tpzero/(tpdiffgain*tpdiffgain))
+      tsys = (tpi/(tpgain*tpgain) -
+              tpzero/(tpdiffgain*tpdiffgain))
             * (caltemp/(tpdiff/(tpdiffgain*tpdiffgain)))
  
 For station specific detectors, the formula is
