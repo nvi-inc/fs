@@ -4827,7 +4827,7 @@ SC  -20
 setcl: Mark 5B clock frequency is wrong, use fmset 's' option to fix.
 ""
 SC  -21
-setcl: Mark 5B clock source is wrong, use fmset 's' option to fix.
+setcl: Mark 5B clock source is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -22
 setcl: Mark 5B clock source is wrong, correct manually.
