@@ -62,9 +62,18 @@ $print
 * indicate the orientation.  Following the key word, all characters 
 * on the line (including blanks) are read as the command.
 * If no commands or scripts are specified, drudg defaults to embedding
-* escape sequences for the output desired into the file and uses
+* escape sequences (Epson MX-80?) for the output desired into the file and uses
 * the system command "recode latin1:ibmpc" piped to "lpr" to print
 * the temporary file.
+*
+* If your printing system is CUPS:
+*  Typically want to specify both portrait and lanscape command.
+*  You can specify font size and lines per page using CUPS options
+*   
+*  Examples:
+* These two examples are for CUPS on A4 paper with optional two-sided output.
+*landscape lpr -o landscape -o cpi=16.66 -o lpi=7.6 -o sides=two-sided-short-edge $*
+*portrait lpr -o cpi=16.66 -o lpi=7.05 -o sides=two-sided-long-edge $*
 * This example is for a laser printer, 6 lines/inch, 10 char/inch:
 *  portrait lpr -ofp10 -olpi6 $*
 * This example is the same as above but for landscape:
@@ -97,7 +106,9 @@ $print
 *  Script "print2dymo" must be
 *    1.) In your path, e.g. in /usr2/oper/bin,
 *    2.) Executable, e.g., chmod a+x print2dymo
-*  This script has lines apropriate for FS Linux 5 and FS Linux 6.
+*  The sample script /usr2/fs/misc/print2dymo
+*       has lines apropriate for FS Linux 5, 6, 7 & 8.
+*    3) You must select dymo as label printer below.
 *
 * Tape label printer:
 * Enter the name of the label printer. If no name is specified, drudg
