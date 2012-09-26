@@ -143,13 +143,14 @@ Messenger:
 	      }
 	      goto Messenger;
 	    }
-	  } else if(ptr->count == iy) {
-	      if(ptr->on == 1) {
+	  } else if(ptr->count == iy || iy < 0) {
+	      if(iy > 0 && ptr->on == 1) {
 		logit(NULL,-311,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=1;
-	      break;
+	      if(iy > 0 || ptr->count == 1)
+		break;
 	  }
 	}
       }
@@ -185,13 +186,14 @@ Messenger:
 	      }
 	      goto Messenger;
 	    }
-	  } else if(ptr->count == iy) {
-	      if(ptr->on == 0) {
+	  } else if(ptr->count == iy || iy < 0) {
+	      if(iy > 0 && ptr->on == 0) {
 		logit(NULL,-312,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=0;
-	      break;
+	      if(iy > 0 || ptr->count == 1)
+		break;
 	  }
 	}
       }
