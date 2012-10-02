@@ -8794,3 +8794,17 @@ Version 9.10.3 080613
            add logpl1
 
 Version 9.10.4 081015
+
+080926 PdV include/req_ds.h
+           include/res_ds.h
+           include/rclcn_req_ds.h
+           include/rclcn_res_ds.h
+           include/lba_das_shm.h
+           clib/req_util.c
+           clib/res_util.c
+           clib/rclcn_req_util.c
+           clib/rclcn_res_util.c
+           make include files C++ compilable (and associated changes)
+
+Version 9.10.5 09xxxx
+

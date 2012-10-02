@@ -64,6 +64,7 @@ C            send the names back.
 ! 2007Jul24 JMGipson. Check on valid rack and recorder types in equip.
 !           Also check if equip_override is on that we have actually chosen recorders!
 ! 2008Oct08 JMGipson.  Add "/" if needed for scracth directory and sked directory
+! 2008Oct20 JMGipson.  Changed readline_skdrut call to readline_skdrut_skdrut
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -173,11 +174,11 @@ C     once for each control file.
         end if
 ! File exists, and we have opened it.
         if (kexist) then
-          call readline(lu,cbuf,keof,ierr,1) !read first $
+          call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $
           do while (.not.keof)
             read(cbuf,'(a)') lsecname
             call capitalize(lsecname)
-            call readline(lu,cbuf,keof,ierr,2)  !space to next valid line.
+            call readline_skdrut(lu,cbuf,keof,ierr,2)  !space to next valid line.
 C  $CATALOGS
             if (lsecname .eq. "$CATALOGS") then
               do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
@@ -227,7 +228,7 @@ C  $CATALOGS
                   write(luscn,9200) lkeyword
 9200              format("RDCTL04 ERROR: Unknown catalog name: ",A)
                 end if
-                call readline(lu,cbuf,keof,ierr,2)
+                call readline_skdrut(lu,cbuf,keof,ierr,2)
               end do
 ! $MYSQL
             else if(lsecname .eq. "$MYSQL") then
@@ -255,14 +256,14 @@ C  $CATALOGS
                   write(luscn,9201) lkeyword
 9201              format("RDCTL04x ERROR: Unknown mysql name: ",A)
                end if
-               call readline(lu,cbuf,keof,ierr,2)
+               call readline_skdrut(lu,cbuf,keof,ierr,2)
              end do
 C  $SCHEDULES
             else if (lsecname .eq.'$SCHEDULES') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csked
                 call add_slash_if_needed(csked)
-                call readline(lu,cbuf,keof,ierr,1)
+                call readline_skdrut(lu,cbuf,keof,ierr,1)
               end if
 C  $SNAP
             else if (lsecname .eq. "$SNAP" .or.
@@ -270,21 +271,21 @@ C  $SNAP
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csnap
                 call add_slash_if_needed(csnap)
-                call readline(lu,cbuf,keof,ierr,1)
+                call readline_skdrut(lu,cbuf,keof,ierr,1)
               end if
 C  $PROC
             else if (lsecname .eq. '$PROC') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') cproc
                 call add_slash_if_needed(cproc)
-                call readline(lu,cbuf,keof,ierr,1)
+                call readline_skdrut(lu,cbuf,keof,ierr,1)
               end if
 C  $SCRATCH
             else if (lsecname .eq. '$SCRATCH') then
               if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') ctmpnam
                 call add_slash_if_needed(ctmpnam)
-                call readline(lu,cbuf,keof,ierr,1)
+                call readline_skdrut(lu,cbuf,keof,ierr,1)
               end if
 C  $PRINT
             else if (lsecname .eq.'$PRINT') then
@@ -379,7 +380,7 @@ C                 label_size ht wid nrows ncols topoff leftoff
                    write(luscn,'(a)') cbuf(1:trimlen(cbuf))
                 endif
 9216            continue
-                call readline(lu,cbuf,keof,ierr,2)
+                call readline_skdrut(lu,cbuf,keof,ierr,2)
               end do
 C  $MISC
             else if (lsecname .eq. '$MISC') then
@@ -464,13 +465,13 @@ C         TPICD
                     write(luscn,*) "RDCTL11 ERROR: Invalid TPI period"
                   endif
                 endif ! TPICD line
-                call readline(lu,cbuf,keof,ierr,2)
+                call readline_skdrut(lu,cbuf,keof,ierr,2)
               enddo
 ! End $MISC
             else ! unrecognized
               write(luscn,9220) lsecname
 9220          format("RDCTL07 ERROR: Unrecognized section name ",A)
-              call readline(lu,cbuf,keof,ierr,1)
+              call readline_skdrut(lu,cbuf,keof,ierr,1)
             end if
           end do
           close (lu)

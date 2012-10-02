@@ -1,41 +1,59 @@
-File: /usr2/fs/misc/RAID.txt  Version: 1.4  Date: 080820
+File: /usr2/fs/misc/RAID.txt  Version: 2.9  Date: 090806
 
-	    RAID Usage with FS Linux 6 (sarge) & 7 (etch)
+      RAID Usage with FS Linux 6 (sarge), 7 (etch), & 8 (lenny)
 
 		    Ed Himwich and Jonathan Quick
 
 INTRODUCTION
 
-This document describes how to maintain the software RAID system that
-is installed as standard in FS Linux 6 & 7.  The document is divided
-into several small sections.  The discussion starts with an OVERVIEW
-section that describes the system and the rationale for its use.  The
-disk layout is described as well.  The NORMAL OPERATION describes how
-the system is intended to be used for normal operations and defines
-some nomenclature.  The RAID STATUS section explains how to determine
-if the RAID system is still in process of refreshing the disks.  The
-DISK ROTATION section explains how to rotate the disks to update the
+This document describes how to use and maintain the software RAID
+system that is installed as standard in FS Linux 6, 7, & 8.  The
+document is divided into several small sections.  The discussion
+starts with an OVERVIEW section that describes the system and the
+rationale for its use.  The disk layout is described as well.  The
+NORMAL OPERATION describes how the system is intended to be used for
+normal operations and defines some nomenclature.  The RAID STATUS
+section explains how to determine if the RAID system is still in
+process of refreshing the disks or if a fault has occurred.  The DISK
+ROTATION section explains how to rotate the disks to update the
 back-ups.  The REFRESHING A STALE SECONDARY DISK section explains how
 to re-introduce an old disk back into the RAID system to bring it back
-up to date.  The RECOVERING FROM A DISK FAILURE section explains how
-to handle a disk failure.  The RECOVERING A LOST FILE OR FILES
-explains how to recover data from a inactive disk.  The APPLYING AN
-UPDATE section describes a method to use for updates so that it is
-relatively easy to recover if the updates fails for some reason.  The
-RECOVERING FROM A STALE SHELF DISK explains how to return the RAID
-system back to the state stored on an inactive disk.  The REPLACEMENT
-DISKS section describes considerations when buying replacement disks.
-The SCRIPTS section documents two useful scripts.  The APPENDIX
-A. DISK RESET RECIPE section describes how to reset the mount count on
-a stale disk so that a back-up can be used to refresh it without
-having to reboot the back-up many times to make it "less stale".
+up to date.  The IF A DISK FALLS OUT OF THE RAID section describes how
+to deal with a report from the RAID system that one of the disks is no
+longer in the RAID.  The RECOVERING FROM A DISK FAILURE section
+explains how to handle a disk failure.  The RECOVERING A LOST FILE OR
+FILES explains how to recover data from an inactive disk.  The
+APPLYING AN UPDATE section describes a method to use for updates so
+that it is relatively easy to recover if the updates fails for some
+reason.  The RECOVERING FROM A STALE SHELF DISK explains how to return
+the RAID system back to the state stored on an inactive disk.  The
+REPLACEMENT DISKS section covers considerations for buying replacement
+disks and procedures for initializing them.  The SCRIPTS section
+documents two useful scripts.  The APPENDIX A. DISK RESET RECIPE
+section describes how to reset the mount count on a stale disk so that
+a back-up can be used to refresh it without having to reboot the
+back-up many times to make it "less stale".  The APPENDIX B. The TWO
+COMPUTER ROTATION section recommends a scheme for preparation and
+handling of computer,and disk, rotation if you have bought two
+identical FS computers for an increased level of reliability.  The
+APPENDIX C. MULTIPLE COMPUTER NIC SUPPORT section describes how to
+modify the system set-up to allow one removable disk to be used in two
+computers that are the same except for the MAC address of the NIC.
+This appendix is used in configuring the two computer rotation
+described in APPENDIX B, but can also be useful for other systems
+where a disk may be used in more than one identical computer.  The
+APPENDIX D. CLONING DISKS section describes how to clone a disk. This
+appendix is referred to from APPENDIX B.  The APPENDIX E. SPARE
+COMPUTER REFRESH SCRIPT section gives an example of a script for
+refreshing the "/usr2" partition of a spare computer for stations that
+have one.  This appendix is referred to from APPENDIX B.
 
 OVERVIEW
 
 Beginning with FS Linux 6, the standard disk configuration for a FS
 computer is a software RAID1 scheme.  In this approach two drives are
 normally inserted all the time.  The operating system (this approach
-does NOT use a RAID hardware controller) maintains these as direct
+does NOT use a RAID hardware controller) maintains these as exact
 mirrors of each other.  If one disk should fail, even during normal
 operations, there should be no loss of data or system functionality.
 This also provides a continuous automatic back-up of the operational
@@ -52,9 +70,10 @@ have three disks.
 Stations with only two disks are also recommended to run in the RAID1
 configuration.  However, neither disk rotation, nor any other
 operation in this document that utilizes a third disk is applicable to
-these stations.  The APPLYING AN UPDATE section recommends that in the
-two disk case, an update still be applied to one disk only to allow
-reversal if necessary.
+these stations.  The APPLYING AN UPDATE section covers two disk
+stations as special case, but as with three disk stations, the update
+is applied to only a single disk initially to allow a relatively easy
+recovery if necessary.
 
 For IDE (PATA) disk, the partition layout on the disks is:
 
@@ -85,44 +104,68 @@ as long as which disks are installed does not change before the next
 boot.  If the disks are to be changed after a shutdown, it should be
 verified that there is no recovery ongoing before shutting down.  The
 procedure for checking this is described in the RAID STATUS section.
-If system was shutdown accidently for any reason (power failure)
-without verifying that no recovery was occurring, they should not be
-changed until the system has been rebooted and it has been verified
-that there is no recovery in progress.
 
 The system can be shutdown both accidently and on purpose in many
-ways.  The best way is to use the "shutdown" command as "root", but
-other ways include using Ctrl-Alt-Del on vt1-vt6 (and remove the power
-during the POST of the computer during the boot), by a power failure,
-or by a hard re-boot, e.g cycling the power switch to force a re-boot.
-In any of these cases and with the same disks installed on reboot the
-RAID system on boot-up will restart any recovery that was in process
-when it was shutdown.  It is however recommended to avoid this if
-possible and to avoid power failures and hard reboots in general.  An
-inexpensive un-interruptible power supply (UPS) is a relatively cheap
-way to avoid accidental shutdowns due to short power glitches.
+ways.  The most graceful way is to use the "shutdown" command as
+"root", but other ways include using Ctrl-Alt-Del on vt1-vt6 (and
+remove the power during the POST of the computer during the boot), by
+a power failure, or by a hard re-boot, e.g., cycling the power switch
+to force a re-boot.  After any shutdown and with the same disks
+installed on reboot the RAID system will recover automatically.  It is
+recommended to avoid accidental shutdowns if possible and to avoid
+power failures and hard reboots in general.  An inexpensive
+un-interruptible power supply (UPS) is a relatively cheap way to avoid
+accidental shutdowns due to short power glitches.
 
-In general it is a good idea to always verify the status of the RAID
-whenever the system is not shutdown cleanly.  The procedure for
-checking this is described in the RAID STATUS section.  The "mdadm"
-utility ("man mdadm" for more information) has various options for
-managing the RAID devices, if the "refresh_secondary" script described
-elsewhere in this document does not solve the problem.
+If the system was shutdown in anyway including accidents, like power
+failures, without verifying that no recovery was occurring, the disks
+should not be changed until the system has been rebooted and it has
+been verified that there is no recovery in progress. The procedure for
+checking this is described in the RAID STATUS section.
+
+The "mdadm" utility ("man mdadm" for more information) has various
+options for managing the RAID devices.  However, the
+"refresh_secondary" script described elsewhere in this document is the
+main tool you will typically need to use.
+
+The md system monitors the status of the disks and sends an e-mail to
+the "root" user if any problem is detected.  It is important that the
+"root" user's mail be check frequently for these messages.  In FSL7
+and later, the standard set-up is for e-mail sent to "root" to be
+redirected to another user that logins in more frequently, typically
+"oper". The IF A DISK FALLS OUT OF THE RAID section describes how to
+deal with a report from the md system that one of the disks is no
+longer in the RAID.
+
+Disks from different computers should not be mixed, nor should disks
+from one computer be cloned for use in another, unless the procedure
+in APPENDIX D. CLONING DISKS is used.  Each RAID (which can be thought
+of as set of disks set-up as a RAID) has its own identity.  If disks
+from different computers with the same RAID identity are mixed the
+results can be difficult to deal with and possibly catastrophic.  For
+this reason, a RAID should either be created from scratch for each
+computer or according to the procedure in APPENDIX D and then not
+mixed with disks from another computer.  Note that can you add a disk
+from one computer to the RAID on another computer if the disk to be
+added is at least as big as the smallest disk in the RAID and you
+re-initialize the disk to be added first.  Please follow the procedure
+in the REPLACEMENT DISKS section to set it up properly.
 
 Disks should be only be inserted or removed when the computer power is
 off.  It is not possible to "hot swap" disks.
 
 NORMAL OPERATION
 
-Normal operation of a FS Linux 6 or 7 system requires two hard drives.
-One installed as the master on the primary IDE (PATA) interface, hda
-(the slot is usually labelled "Primary"), and a second on the master
-of the secondary IDE interface, hdc (the slot is usually labeled
-"Secondary").  For SATA disks, the Primary is in the slot connected to
-lowest numbered SATA interface, sda; the Secondary, the next lowest,
-sdb.  For SCSI disks the Primary disk has the lowest SCSI ID, sda; the
-Secondary, the next lowest, sdb.  Thus for SCSI disks, the disk
-designation does not depend on the actual slots used for the disks.
+Normal operation of a FS Linux 6, 7, or 8 system requires two hard
+drives.  One installed as the master on the primary IDE (PATA)
+interface, hda (the slot is usually labelled "Primary"), and a second
+on the master of the secondary IDE interface, hdc (the slot is usually
+labeled "Secondary").  For SATA disks, the Primary is in the slot
+connected to lowest numbered SATA interface, sda; the Secondary, the
+next lowest, sdb.  For SCSI disks the Primary disk has the lowest SCSI
+ID, sda; the Secondary, the next lowest, sdb.  Thus for SCSI disks,
+the disk designation does not depend on the actual slots used for the
+disks.
 
 The Primary and Secondary disks will normally be running in a RAID1
 (mirroring) configuration.  A third disk which contains a mirror image
@@ -135,11 +178,17 @@ months is recommended for disk rotation.  A rotation is also
 recommended before any significant or non-reversible update in order
 to make recovery easier in case of problems.
 
+The "root" user's (or user that the "root" user's e-mail is redirected
+to, typically "oper") e-mail should be checked at least weekly, but
+preferably more often.  If any messages about the RAID system are
+received, they need to be followed up on promptly or the utility and
+safety provided by the system may be be degraded.
+
 The disks are usually labelled "1", "2", and "3" to help keep track of
 which is which, but any suitable labeling scheme (distinct from the
 slot labels of "Primary" and "Secondary") will do.  For SCSI disk you
 may want reusable labels that say "Primary" and "Secondary" that can
-be moved between disks "1", "2" and "3" as the SCSI IDs are changed.
+be moved between disks "1", "2" and "3" as their roles change.
 
 RAID STATUS
 
@@ -149,17 +198,31 @@ You can check on the RAID mirroring status using the command:
 
 and looking for messages about expected completion time.  When none of
 the RAID devices are showing a completion time (i.e. when mdstat shows
-no "recovery="), any mirroring is up to date.  A script "mdstat",
+no "recovery="), mirroring is up to date.  A script "mdstat",
 described in the SCRIPTS section, can also be used to check the status
 and produces more readable output than the raw "cat /proc/mdstat"
-command for FSL6.
+command if the case of FSL6.
 
-It is also possible to get more detailed information about the status
-of a RAID device using (as "root"):
+Normally each md device will show the string "[2/2]" in the listing of
+its status.  This indicates that both disks are in the array are
+active.  If instead the status shows "[2/1]" for one or more of the md
+devices, one of the disks had fallen out of one or more of the md
+devices and the situation needs to investigated.  This disks in the
+array are listed.  By implication, you can determine which are
+missing.  The section IF A DISK FALLS OUT OF THE RAID contains
+suggestions on what to do if this situation occurs.
+
+It is possible to get more detailed information about the status of a
+RAID device using (as "root"):
 
   mdadm --detail /dev/mdX
 
 where X is the number of the RAID device (0, 1, or 2).
+
+The log file "/var/log/syslog" can be examined (as "root") for
+information on the status of the disk system and clues to what
+happened if something has gone wrong.  Old versions of "syslog":
+syslog.1, syslog2.gz, etc. may also be useful.
 
 DISK ROTATION
 
@@ -174,12 +237,8 @@ When the system has stopped, turn it off (this may have happened
 automatically), remove the disk in the "Primary" slot, affix a label
 to it with the current date and place it on the shelf.  Move the disk
 in the "Secondary" slot to the "Primary" slot.  Take the _previous_
-"Shelf" disk and place it in the "Secondary" slot.  (The new disk in
-Secondary slot will typically have been mounted fewer times than the
-new disk in Primary slot.  However if this is not the case, it will be
-necessary to boot the new disk in the Primary slot by itself enough
-times that its mount count is higher.)  Then follow the directions
-below in REFRESHING A STALE SECONDARY DISK.
+"Shelf" disk and place it in the "Secondary" slot.  Then follow the
+directions below in REFRESHING A STALE SECONDARY DISK.
 
 For SCSI disks, it may be necessary to manipulate the SCSI IDs (change
 the jumpers) of the disks so that the new Primary has a lower SCSI ID
@@ -191,9 +250,13 @@ Make sure both slot key latches are turned "on" and then power up the
 system.  Since the new "Secondary" disk is stale (mounted fewer times
 since it was last current) compared to the new "Primary" drive, the
 system should boot up using only the "Primary" disk (which you can
-confirm by watching the disk activity lights.)  Once it has booted,
-log in as "root" and add the "Secondary" disk back into the array
-using the commands for IDE (PATA) disks:
+confirm by watching the disk activity lights.)  If the Secondary disk
+is booted, you can use the procedure in APPENDIX A. DISK RESET RECIPE
+to reset the Secondary disk so that it will not be selected in
+preference to the Primary disk and try again.
+
+Once it has booted, log in as "root" and add the "Secondary" disk back
+into the array using the commands for IDE (PATA) disks:
 
   mdadm /dev/md0 -a /dev/hdc1
   mdadm /dev/md1 -a /dev/hdc5
@@ -207,12 +270,16 @@ or for SCSI and SATA disks:
 
 These commands can alternately be executing using the script
 "refresh_secondary" described in the SCRIPTS section at the end of
-this document.  These commands re-add the stale disk into the array.
-Once this is accomplished, the RAID system will work to bring the
+this document.  (Using the script in the SCRIPTS section is less error
+prone and it also includes additional commands to make it more
+reliable.)  These commands re-add the stale disk into the array.  Once
+this is accomplished, the RAID system will work to bring the
 "Secondary" disk up to date, i.e., recover it.  This may take an hour
 or two depending on your disk sizes.  If convenient, it can be started
 before leaving for the evening or the weekend so that it doesn't have
-to be waited for.  The status of the mirroring can be checked with:
+to be waited for.  The system, including the FS, can be used as normal
+when a recovery is underway.  The status of the mirroring can be
+checked with:
 
   cat /proc/mdstat
 
@@ -222,24 +289,61 @@ or the script:
 
 as described in the RAID STATUS section.
 
-The RAID recovery process should be allow to run to completion.
+The RAID recovery process should be allowed to run to completion
+before rebooting.
+
+IF A DISK FALLS OUT OF THE RAID
+
+If an e-mail is received from the md system indicating that a disk has
+fallen out of the RAID or it is discovered incidentally by noting that
+the "mdstat" script returns "[2/1]" for one or more of the md devices,
+the situation needs to investigated.  If this is the first time this
+has happened and the same disk has fallen out of any md devices that
+are missing a disk, it may be sufficient to merely re-introduce the
+disk into the array.  You should be able to tell which disk has fallen
+out of each md device from the e-mail messages and/or the output of
+"mdstat" and/or output from "mdadm --detail ..."  commands as
+described in the RAID STATUS section.  If different md devices are
+missing different disks, the recovery will be more complicated, please
+contact Ed (Ed.Himwich@nasa.gov) for advice or suggestions on
+resources to deal with the situation.
+
+If the same disk is missing from all md devices that are missing
+disks, you can attempt to add it back into the array at the next
+convenient opportunity.  At that time, if it is the Primary disk that
+has fallen out of the array, shut the system down gracefully, swap the
+disks (adjust IDs as appropriate if you have SCSI disks), and
+reboot. At this point, the disk that fell out of the array is the
+Secondary disk either because it started off that way or because you
+swapped the disks.  You can then follow the directions in the section
+on REFRESHING A STALE SECONDARY DISK above to recover.
+
+If this is either a recurring problem or there is an opportunity to be
+more thorough, the log file "/var/log/syslog" can be examined (as
+"root") for clues to what happened.  Old versions of "syslog":
+syslog.1, syslog2.gz, etc. may also be useful.  If the disk has
+clearly failed or attempts to add it back into the array are
+unsuccessful, you can refer to the RECOVERING FROM A DISK FAILURE
+section below for advice.
 
 RECOVERING FROM A DISK FAILURE
 
 If one of the disks in the RAID array fails during normal operation
 (which should be reported via e-mail, to the user designated to
-receive "root" e-mail hopefully "oper", by the mdadm monitoring
-daemon), it can removed at the next convenient opportunity when the
-system is not otherwise in use.  At that time, shut the system down:
+receive "root" e-mail, typically "oper", by the md monitoring daemon),
+it can removed at the next convenient opportunity when the system is
+not otherwise in use.  At that time, shut the system down:
 
   shutdown -h now
 
 When the system has stopped, turn it off (this may have happened
 automatically), remove the failed disk (which should have shown no
-activity during the shutdown process).  Replace the failed disk with
-"Shelf" disk (adjust IDs as appropriate if you have SCSI disks).  Then
-follow the directions in the section on REFRESHING A STALE SECONDARY
-DISK above.  You will then need to obtain a new third disk.
+activity during the shutdown process).  If the failed disk was the
+Primary disk, put the still working disk in the Primary slot.  Place
+the "Shelf" disk in Aecondary slot. (Adjust IDs as appropriate if you
+have SCSI disks.)  Then follow the directions in the section on
+REFRESHING A STALE SECONDARY DISK above.  Please see the REPLACEMENT
+DISKS section for information on obtaining a new third disk.
 
 RECOVERING A LOST FILE OR FILES
 
@@ -253,7 +357,7 @@ should be empty.  Once the system boots, copy the file or files you
 wish to recover to another media (floppy, CD, DVD, another computer's
 hard disk via the network etc.)  Then reboot with the normal disks in
 their original positions.  Copy the file or files from the other media
-back the operational system.
+back to the operational system.
 
 APPLYING AN UPDATE
 
@@ -262,10 +366,10 @@ irreversible update to the system, it is recommended that a disk
 rotation be performed just before the update is applied.  Once the
 rotation has refreshed the previously stale "Shelf" disk, shut the
 system down and place the new "Secondary" disk on the shelf along with
-the old "Secondary" (now "Shelf") disk.  Then boot the system with
-only the "Primary" disk installed.  Perform the update on this disk
-only.  Carefully keep track of the number of times that this "Primary"
-disk is booted by itself.
+the old "Secondary" (now "Shelf") disk.  In case you need to undo the
+update, this gives you a second disk to recover from in case one of
+them fails for some reason.  Then boot the system with only the
+"Primary" disk installed.  Perform the update on this disk only.
 
 If the update is successful, shutdown the system and re-insert the new
 "Secondary" disk you just placed on the shelf and follow the
@@ -276,45 +380,40 @@ the now _bad_ "Primary" disk.  Put the new "Secondary" disk from the
 shelf in the "Primary" slot and the "Shelf" (old "Secondary") disk in
 the Secondary slot and reboot.  Then follow the directions for
 REFRESHING A STALE SECONDARY DISK.  This will return you to your
-working system.  Then make sure that the now refreshed
-"Primary"/"Secondary" pair is rebooted at least one more time than the
-disk with the failed update was.  Note however that now the disk with
-the failed update, i.e., the "Shelf" disk, is _bad_.  Be sure to do a
-another disk rotation to produce an up-to-date "Shelf" disk before
-trying the update again.
+working system.  Then use the procedure in APPENDIX A. DISK RESET
+RECIPE to reset the boot count on the disk with the failed update.
+Note that now the disk with the failed update, i.e., the "Shelf" disk,
+is _bad_.  Be sure to do a another disk rotation to produce an
+up-to-date "Shelf" disk before trying the update again.
 
 For stations with two disks, no disk rotation is possible of course,
 but updates should still be applied with only one disk in the RAID
 array active.  This will allow recovery from the other disk in case of
-problems.  In this case, it is even more important to keep track of
-the number of times the "Primary" disk is rebooted by itself.  If it
-should become necessary to recover from the "Secondary" disk, that
-disk should be swapped into the "Primary" slot (for SCSI disks this
-will require changing IDs instead) and will then will need to be
-booted by itself at least one more time than the _bad_ disk in order
-to make the RAID recognize it as "less stale" when both disks are
-booted together.
+problems.  If it should become necessary to recover from the
+"Secondary" disk, reset the boot count on the disk with the failed
+update (old "Primary") using the procedure in APPENDIX A. DISK RESET
+RECIPE.  Then place the old Secondary disk in the Primary slot and the
+old Primary disk in the Secondary slot and refresh the new Secondary.
 
 RECOVERING FROM A STALE SHELF DISK
 
 If for some reason both your active disks are corrupted (i.e. "bad"),
-you can still recover from your "Shelf" disk.  In this case, you will
-need to convince the RAID system that the "Shelf" disk is not the
-stale disk.  This can be accomplished in one of two ways, either reset
-the RAID status of the bad disks by re-initializing them using the
-installation media or reboot the "Shelf" disk by itself (i.e., with
-the secondary slot empty) enough times so that it has booted more
-often than the bad disks (a power cycle, hard reboot, is not
-necessary, a soft reboot is sufficient).  The former method is
-described in APPENDIX A. DISK RESET RECIPE at the end of this
-document.  (The latter method is a okay if the bad disks have been
-rebooted only a few more times than the "Shelf" disk and you happen to
-know how many, but in general it is too tedious, reseting the disks is
-safer and easier in this extreme situation.)  Once this has been
-accomplished the "Shelf" disk can be booted as the "Primary" with
-either of the bad disks as the "Secondary".  In this configuration,
-you should then perform REFRESHING A STALE SECONDARY DISK and then do
-a DISK ROTATION to bring the system back to full normal redundancy.
+you can still recover from your "Shelf" disk.  Before doing this, you
+should consider your situation carefully.  If both active disks become
+corrupt during normal operations, it may be that the computer is at
+fault and putting the "Shelf" disk in the computer will put it at
+risk.  On the other hand, if the corruption occurred due to
+mis-copying or other operational errors, the computer is not a priori
+suspect.
+
+If you are going to recover from the "Shelf" disk, you will need to
+convince the RAID system that the "Shelf" disk is not the stale disk.
+To do this use the procedure described in APPENDIX A. DISK RESET
+RECIPE.  Once this has been accomplished the "Shelf" disk can be
+booted as the "Primary" with either of the bad disks as the
+"Secondary".  In this configuration, you should then perform
+REFRESHING A STALE SECONDARY DISK and then do a DISK ROTATION to bring
+the system back to full normal redundancy.
 
 REPLACEMENT DISKS
 
@@ -324,27 +423,34 @@ Make sure to initialize it to have each partition at least as big as
 the same partition on your smallest disk.  This will assure that all
 the disks can then be used interchangeably.  Note that the RAID size
 was determined at build time to fit within the smallest of the
-corresponding partitions on the then included disks.
+corresponding partitions on the then included disks.  Note that it is
+possible to enlarge the RAID sizes to take advantage of any additional
+space on the smallest of the current set of disks - contact Ed
+(Ed.Himwich@nasa.gov) for more details.
 
 You can partition the disk using the installer DVD for your system
-according to the directions in, for example, fs7linux_DVD.txt.  After
-setting up the partitions for RAID usage, you can stop at the point of
-creating the MD devices (using fs7linux_DVD.txt, follow the directions
-for ending the installation near the start of step 10 of phase one),
-the disk should added into array as the secondary disk using the
-directions in this document for REFRESHING a STALE SECONDARY DISK.
-After this is done for the first time, GRUB should be installed in the
-master boot record according the directions at the end of the
-installation document (using fs7linux_DVD.txt, following step 11 in
-phase two).
+according to the directions in, e.g., fs8linux_DVD.txt.  After setting
+up the partitions for RAID usage, you can stop at the point of
+creating the MD devices (using fs8linux_DVD.txt, follow the directions
+for ending the installation near the start of step 10 of phase one).
+Alternatively, if the disk has previously been set-up for use in a
+RAID using the fs8linux_DVD.txt instructions, you can instead use the
+procedure in APPENDIX A: DISK RESET RECIPE to reset the disks.
+
+Once the disk has been initialized or reset, it should be added into
+array as the secondary disk using the directions in the REFRESHING A
+STALE SECONDARY DISK section.  After this is done for the first time,
+GRUB should be installed in the master boot record according the
+directions at the end of the installation document (using
+fs8linux_DVD.txt, following step 11 in phase two).
 
 SCRIPTS
 
-Two utility script are described here. The "refresh_secondary" script
-is used by the "root" when adding a stale disk into the RAID array.
-The "mdstat" script is intended for use by any user to check whether
-the mirroring is currently recovering.  More flexibility can be
-achieved of course using low-level commands.
+Two utility scripts are described here.  The "refresh_secondary"
+script is used by the "root" when adding a stale disk into the RAID
+array.  The "mdstat" script is intended for use by any user to check
+whether the mirroring is currently recovering.  More flexibility can
+be achieved of course by using low-level commands.
 
 			  refresh_secondary
 
@@ -352,8 +458,8 @@ The following utility scripts "refresh_secondary" can be used by
 "root" to automate adding the disks of a stale secondary into the disk
 RAID array for refreshing.  One version is provided for IDE (PATA)
 disk systems and another for SCSI or SATA disks systems; examples can
-be found in the /usr2/fs/misc/ directory as refresh_secondary.p and
-refresh_secondary.s, respectively.  A copy of the appropriate script
+be found in the /usr2/fs/misc/ directory as refresh_secondary.hdc and
+refresh_secondary.sdb, respectively.  A copy of the appropriate script
 can be placed in the "/usr/local/sbin" directory and set-up by using
 the following commands as "root":
 
@@ -367,7 +473,8 @@ the following commands as "root":
   chmod a+r,u+wx,go-wx refresh_secondary
 
 Thereafter it can executed by "root" (only) as a normal command.  The
-contents of the script for IDE (PATA) disks, refresh_secondary.hdc, is:
+contents of the script for IDE (PATA) disks, refresh_secondary.hdc,
+is:
 
 #!/bin/sh
 # for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
@@ -389,7 +496,7 @@ The contents of the script for SCSI or SATA disks,
 refresh_secondary.sdb, is:
 
 #!/bin/sh
-# for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
+# for IDE (SATA) or SCSI RAID arrays, adds a "stale" secondary disk into the array
 if [[ -n `mdadm --detail /dev/md0 /dev/md2 | grep /dev/sdb` ]]; then
         echo "ERROR: \"Secondary\" disk /dev/sdb is already active !!"
         exit 1
@@ -416,7 +523,7 @@ following commands as "root"
 
   cp -a /usr2/fs/misc/mdstat.6 mdstat    (for FSL6 IDE (PATA) disks)
          or
-  cp -a /usr2/fs/misc/mdstat.7 mdstat    (for FSL7)
+  cp -a /usr2/fs/misc/mdstat.7 mdstat    (for FSL7 & FSL8)
 
   chown root.root mdstat
   chmod a+rx,u+w,go-w mdstat
@@ -427,7 +534,7 @@ contents of the script for FSL6 IDE (PATA) disks, mdstat.6, is:
 #!/bin/sh
 cat /proc/mdstat | sed -e 's/ide\/host0\/bus0\/target0\/lun0\/part/hda/' | sed -e 's/ide\/host0\/bus1\/target0\/lun0\/part/hdc/'
 
-The contents of the script for FSL7, mdstat.7, is simply:
+The contents of the script for FSL7 & FSL8, mdstat.7, is simply:
 
 #!/bin/sh
 cat /proc/mdstat
@@ -439,47 +546,47 @@ APPENDIX A. DISK RESET RECIPE
 
 This is a recipe for reseting two bad disks in preparation for
 reloading them from a older spare.  It will remove the difficulty of
-having to reboot the good disk enough times so that the RAID systems
+having to reboot the good disk enough times so that the RAID system
 thinks it is newer.  This procedure can be modified to reset a single
-bad disk by installing only that one disk in the primary drive and
-using only the first three "mdadm" commands in step 4.
+bad disk by changing step 1 to insert only that one disk in the
+Primary drive and changing step 5 to use only the first three "mdadm"
+commands.
 
 Please note that the use of "mdam --zero-superblock" probably
 irreversibly deletes the RAID copy on the partition, so it should be
 used with only _bad_ disks installed.  Unfortunately using the FSL6
 installer forces the use of the horrible (devfs) file names as shown,
 though fortunately tab-completion does help you with typing them in.
+However, you can use any version of the installer, FSL6, 7, or 8,
+regardless of what system you have installed on the hard disks. So
+using the FSL7 or FSL8 installer will allow you avoid the horrible
+file names.
 
 1. Put the _bad_ disk pair into both "Primary" and "Secondary" slots
 
 2. Boot the Binary-1 DVD and proceed as you would for a standard
    install (instructions available at ftp.hartrao.ac.za in
-   /pub/fs6x/fs6linux_DVD.txt or /pub/fs7x/fs7linux_DVD.txt, as
-   appropriate, using anonymous ftp) up to the point where it prompts
-   you to erase the whole disk or use manual partitioning.  Then "<Go
-   Back>" twice till you get to the main menu.
+   /pub/fs6x/fs6linux_DVD.txt, /pub/fs7x/fs7linux_DVD.txt, or
+   /pub/fs/8x/fs8linux_DVD.txt), as appropriate, using anonymous ftp)
+   up to the point where it prompts you to erase the whole disk or use
+   manual partitioning.  Then "<Go Back>" twice till you get to the
+   main menu.
 
 3. Select "Start a shell" and press <Enter>
 
-4. For FSL6 and IDE disks, at the shell prompt enter:
+4. Check to make sure no "md" devices are active and "stop" them if
+   they are.  To check, use the command:
 
-       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part1
-       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part5
-       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part6
-       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part1
-       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part5
-       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part6
+       cat /proc/mdstat
 
-   For FSL7 and IDE disks, at the shell prompt enter:
+   If any are active, issue the command:
 
-       mdadm --zero-superblock /dev/hda1
-       mdadm --zero-superblock /dev/hda5
-       mdadm --zero-superblock /dev/hda6
-       mdadm --zero-superblock /dev/hdb1
-       mdadm --zero-superblock /dev/hdb5
-       mdadm --zero-superblock /dev/hdb6
+       mdadm /dev/mdX --stop
 
-   For FSL7 and SCSI or SATA disks, at the shell prompt enter:
+   for each "md" device, where "X" is the number of the device.
+
+5. For FSL7 or FSL8 installer, and SCSI or SATA disks, at the shell
+   prompt enter:
 
        mdadm --zero-superblock /dev/sda1
        mdadm --zero-superblock /dev/sda5
@@ -488,6 +595,362 @@ though fortunately tab-completion does help you with typing them in.
        mdadm --zero-superblock /dev/sdb5
        mdadm --zero-superblock /dev/sdb6
 
-5. Then shutdown by entering:
+   For FSL7 or FSL8 installer, and IDE disks, at the shell prompt
+   enter:
+
+       mdadm --zero-superblock /dev/hda1
+       mdadm --zero-superblock /dev/hda5
+       mdadm --zero-superblock /dev/hda6
+       mdadm --zero-superblock /dev/hdb1
+       mdadm --zero-superblock /dev/hdb5
+       mdadm --zero-superblock /dev/hdb6
+
+   For FSL6 installer and IDE disks, at the shell prompt enter:
+
+       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part1
+       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part5
+       mdadm --zero-superblock /dev/ide/host0/bus0/target0/lun0/part6
+       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part1
+       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part5
+       mdadm --zero-superblock /dev/ide/host0/bus1/target0/lun0/part6
+
+6. Then shutdown by entering:
 
        shutdown -h now
+
+APPENDIX B. TWO COMPUTER ROTATION
+
+This section describes how to handle computer, and disk, rotation if
+you purchased two identical FS computers in order to have a higher
+level of reliability.  This approach provides a larger pool of spare
+disks and a spare computer.  For this discussion, the set of disks for
+one computer are designated the "Operational" disks; the disks for the
+other, the "Spare" disks.  In this approach the "Operational" computer
+is whichever one is connected to the VLBI equipment.  Normally, it
+would have the Operational disks installed.  The Spare computer is the
+other one and is probably only connected to the network and not the
+VLBI equipment.
+
+The basic idea of the two computer rotation scheme is that each
+computer, with its disks, is kept as a separate system except when the
+computers are swapped or a disk from the Spare set needs to pressed
+into duty in the Operational computer.  The Spare computer has its own
+IP address and is kept on the network.  This allows it to be exercised
+a bit while it is not in use as the Operational computer to make sure
+it is still working.  The Spare disks are set-up so that they contain
+a complete working system, including the FS, as a "deep" back-up for
+the Operational system.  The Spare computer should keep the same disk
+rotation pattern as the operational computer.
+
+Periodically, about every six months and just after a successful disk
+rotation, the computers should be swapped, disks and all.  The old
+Spare computer with the Spare disks is moved and connected to the VLBI
+equipment.  It is tested briefly to verify that the system on Spare
+disks can still communicate successfully with the VLBI equipment.
+Afterwards the disk are swapped between machines so that the original
+Operational disks go into the machine (newly) connected to the VLBI
+equipment and the Spare disks go into the other machine, which is now
+the "Spare".  Swapping the computers in this way periodically provides
+a more rigorous proof that the Spare computer and disks are really
+good spares.  There are three failure cases where this rotation scheme
+would be interrupted:
+
+(1) One of the installed Operational disks fails.  After pressing the
+    Operational computer Shelf disk into service, some disks from the
+    Spare computer can then be re-initialized and refreshed (follow
+    the procedure in APPENDIX B: DISK RESET RECIPE and then use the
+    procedure in the REFRESHING A STALE SECONDARY section) for use in
+    the Operational computer.
+
+(2) The Operational computer fails.  In this case, the computers can
+    be swapped as would occur at a normal computer rotation.  If some,
+    but not all, of the operational disks failed at the same time you
+    would need to add in some the Spare disks, as in (1) above.  Don't
+    put the Spare disks in the failed computer since it might damage
+    them.
+
+(3) Both installed Operational disks fail.  In the case, it is likely
+    that there is some problem with the Operational computer.  The
+    safe course here would be to swap computers with their disks so
+    that now you are using the (old) Spare Computer and its disks as
+    the (new) Operational computer and disks.  The (old) Operational
+    computer can be debugged off-line.  You should keep the (old)
+    Operational Shelf disk safely on the shelf to use for restoring
+    your system once the problem has solved.  However in a pinch (the
+    Spare disks are too out of date), the (old) Operational computer's
+    Shelf disk could be used as the Primary disk in the (new)
+    Operational computer and one of the (old) Spare computers disks
+    re-initialized and "refresh"ed as the Secondary disk (follow the
+    procedure in APPENDIX B: DISK RESET RECIPE and then use the
+    procedure in the REFRESHING A STALE SECONDARY section).
+
+If a failure happens during an observation, you would not need to
+completely recover the system right away, just enough so that you can
+observe again.  In case (1), the system should be safe to run on the
+remaining disk until the observation is over, at which point the
+recovery can be started.
+
+When you have a failure, you should obtain any replacement hardware
+needed to reconstruct your full system.
+
+In order to set-up this rotation scheme, you will need to pick one
+computer and its set of disks to be the operational ones.  The choice
+can be arbitrary, maybe just the computer you start setting up first.
+Note that for the computer, "Operational" is only a temporary
+designation, since the chassises will get swapped from time-to-time.
+For the disks "Operational" is a more long-lived designation; in
+principle, it would never change unless all the Operational disks
+failed and you had to switch to the Spares.
+
+Both the Operational and Spare computers should be fully checked out
+in the normal way (for example see "FSL8_PC_Checkout.txt") with a
+complete set-up.  This will verify that all aspects of the computer
+are working and properly labeled.  Then both the Operational computer
+and spare computer should be set-up for operational use (see
+"FSL8_End_User.txt"); each computer should have its own name and IP
+address, otherwise everything can be the same.  As an alternative,
+some work can be saved by doing the full check-out and set-up on the
+Operational computer and then cloning the disk for use in the Spare
+computer as described in APPENDIX D. CLONING DISKS.  However after the
+cloning, it is still important to perform the testing and labeling
+steps in the full check-out procedure for the Spare computer to verify
+that all components are working and properly labeled.  Using the disk
+cloning procedure can help avoid subtle differences in the set-ups of
+the two computers and is the recommended approach, but requires
+additional steps and care.
+
+Once the computers are set-up and both verified to work with the
+equipment and if the cloning procedure was not used, the network
+configuration in the disks on both computers will need to be modified
+to support the NICs on both computers.  Please refer to APPENDIX
+C. MULTIPLE COMPUTER NIC SUPPORT.
+
+After cloned disk testing or the NIC support modifications, the
+machines should now be ready for use as an Operational and a Spare
+computer.  Please be sure to apply the weekly updates to both
+machines.  In case you don't log into the spare computer very often to
+check its e-mail, please establish your own reminder system to make
+sure that the Spare gets updated when the primary.  A good approach
+might to be use the Spare computer as a test-bed for the updates in
+order to not affect the Operational disks if something goes wrong.
+
+If you want to be able to handle case (3) above more gracefully, you
+might consider re-copying the contents of the /usr2 system to the
+Spare computer after each FS update on the Operational computer, so
+that the FS installation on the Spare disks doesn't get too out of
+date (you may not have all operating system modifications on the Spare
+disks that you have on the Operational disks unless you have been very
+meticulous in making any changes in parallel, but this is probably a
+minor concern; hopefully you will have been doing the weekly updates
+right along, which are very important).  To copy the "/usr2" contents
+to the Spare disks, you can execute the following commands (as "root")
+on the _Spare_ computer once the update as been verified:
+
+   umount /usr2
+   mkfs.ext3 /dev/md2
+   mount /usr2
+   ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf -)
+
+where "operational" is the node name (a fully qualified host name may
+be needed) or IP address of the Operational computer.  These commands
+should be put in script, checked carefully, and only executed from the
+script because the step that re-initializes "/usr2" ("mkfs.ext3
+/dev/md3") can cause serious problems if there is an error in the form
+of the command.  It would probably be a good idea if the script
+included a warning about the "/usr2" partition on the Spare computer
+being overwritten and requiring confirmation before proceeding.  An
+example script is given in APPENDIX E. SPARE COMPUTER REFRESH SCRIPT.
+The first use of the script should be after a Spare computer disk
+rotation so that it would be possible to recover from a problem using
+the Shelf disk.  Note you will need to have "ssh" connections enabled
+and the "/etc/hosts.allow" file on the Operational computer set-up to
+allow the Spare computer to connect with ssh.  Typically the latter is
+done by adding a line like:
+
+  sshd: spare
+
+where "spare" is the node name (a fully qualified host name may be
+needed) or IP address of the Operational computer.
+
+APPENDIX C. MULTIPLE COMPUTER NIC SUPPORT
+
+This section describes how to modify the system set-up to allow one
+removable disk to be used in two computers that are the same except
+for the MAC address of the NIC.  The result is that node name and IP
+address of the system will move with the disks.  This is used in
+configuring the two computer rotation described in APPENDIX B, but can
+also be useful for other systems where a disk may be used in more than
+one identical computer.  Please note that FSL6 does not require this
+step.  The following procedure can be done in parallel if you already
+have separate RAIDs that boot on each computer.
+
+Start by examining the file
+"/etc/udev/rules.d/70-persistent-net.rules" (in FSL8, for FSL7, the
+file is "z25_persistent-net.rules") on the disks (possibly a single
+non-RAIDed disk, but referred to here as plural because for a RAID,
+the complete active RAID array should be kept together when disks are
+swapped) that you want to use in the other computer.  Please note the
+MAC address (of the form "xx:xx:xx:xx:xx:xx", where the "x"s are hex
+digits) of the interface you are using, typically "eth0".  Edit the
+file as "root" and duplicate the line for the interface you are using.
+On the duplicated line, leave everything else as it is, but change the
+MAC address to that of the one on the other machine (possible found by
+examining the same file on disks that already boot in the other
+machine or examining the NIC), then save the file.  Now shutdown the
+machine and swap the disks to other machine and boot it.  If
+everything was done correctly, the other machine should have access to
+the network with the same IP address and node as used before on the
+original computer.  Once this is verified, you can switch the disks
+back to their original machine.
+
+APPENDIX D. CLONING DISKS
+
+The section describes how to set-up a disk for use in a "second"
+computer by cloning a disk already in use in another computer,
+referred to here as the "original" computer.  This is only useful if
+you have two computers with identical hardware.  The key points are
+that after the actual cloning: (1) the UUID of the disk for the second
+computer array must be updated to avoid possible conflicts if disks
+from the two computers are ever accidently mixed, and (2) the IP and
+node information for the second computer need to be modified so there
+is no address conflict on the network.
+
+1. Initialize the new disk to be created (cloned) using the procedure
+   given in the REPLACEMENT DISKS section
+
+2. On the original machine, boot with the new disk in the Secondary
+   slot and "refresh" it using the procedure in the REFRESHING A STALE
+   SECONDARY DISK.
+
+3. Once the disk has been refreshed, shutdown the system, move the new
+   disk to the second machine Primary slot, make sure its network
+   cable is disconnected, and boot the installer in 'rescue' mode.
+
+4. At the point where you are asked to select a "root" filesystem,
+   back out to the main menu and start a shell.
+
+5. Check the RAID setup using "cat /proc/mdstat" and then use:
+
+     mdadm --stop /dev/md0
+
+   etc. to stop each RAID in turn.
+
+6. Start up each RAID manually, asking that a new UUID be allocated
+   using:
+
+     mdadm --assemble /dev/md0 --update=uuid  /dev/hda1
+
+   etc. (or /dev/sda1 as appropriate)
+
+7. Once all the RAIDs are restarted, exit the shell and from the main
+   menu start rescue mode again and select /dev/md0 as the root
+   filesystem.
+
+8. Start a shell in the environment of the root filesystem and update
+   the RAID configuration stored there using:
+
+     mv /etc/mdadm/mdadm.conf /etc/mdadm/mdadm.conf.old
+     /usr/share/mdadm/mkconf > /etc/mdadm/mdadm.conf
+     update-initramfs -u -k all
+
+9. Exit the shell and reboot the system to the hard disk.
+
+10. Change the MAC address in the file that holds it as described in
+    APPENDIX C above (as "root").  Note that unless you plan to use
+    the resulting disk in both the original machine and the second
+    machine (such as described in APPENDIX B), you don't need to
+    preserve the original MAC address of the original machine and can
+    just replace the MAC address of the interface you are using with
+    the MAC address in the second machine.
+
+11. Update the network configuration on the second computer to use the
+    node name and IP address that you want (or need) it to have, as
+    "root":
+
+      cd /root/fsadapt
+      ./netconfig
+
+    answering the questions asked by the "netconfig" script.
+
+12. If you have modified the user names in "/etc/passwd" file on the
+    original computer to reflect the name of the system (for "root"
+    and "prog" as opposed to the site name (for "oper"), you may want
+    to update the user names on the second computer to reflect its
+    names.  If there are any other places you made customizations like
+    that you may want to update them as well
+
+13. Connect the network cable and reboot to make sure the system is
+    running normally and works on the network.  A reboot may be
+    needed.
+
+14. Once it is confirmed that the second computer is operating
+    normally, you can prepare a second (and third) disk for it using
+    the procedure in the REPLACEMENT DISKS section and "refreshing"
+    them from the cloned disk.
+
+15. Be sure to add the normal second disk back into the original
+    computer and "refresh" it.
+
+APPENDIX E. SPARE COMPUTER REFRESH SCRIPT
+
+The section gives an example spare computer refresh script for
+stations with a spare computer as described in APPENDIX B.  Normally
+the example would reside in the /usr/fs/misc directory, but if not
+available in your FS version, you can obtain a copy from Ed
+(Ed.Himwich@nasa.gov).
+
+Installation instructions are included in the script toward the end.
+
+#!/bin/sh
+echo "*******************************************************************"
+echo "*  This is a script to refresh the contents of the spare computer *"
+echo "*    '/usr2' partition if you have both an Operational and Spare  *"
+echo "     computer. Please refer to 'usr2/fs/misc/RAID.txt' for more   *"
+echo "*    information.                                                 *"
+echo "*******************************************************************"
+echo ""
+echo "CAUTION: This script will automatically overwrite everything on the"
+echo "         /usr2 partition of the computer it is run on.  Use it only"
+echo "         on the Spare computer"
+echo ""
+echo "This script must be executed by 'root' on the Spare computer "
+echo ""
+echo -e "Do you wish to continue with the REFRESH? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo -e "\nO.K. Continuing with install ... "
+           badans=false
+           ;;
+    n|no)  echo -e "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo -e "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+#
+echo "This script must be customized before first use, and it hasn't been."
+echo "  see script for details."
+#To customize this script (as 'root') on the Spare computer:
+#   1. Execute the commands:
+#        cd /usr/local/sbin
+#        cp -a /usr2/fs/misc/refresh_spare_usr2 refresh_spare_usr2
+#        chown root.root refresh_spare_usr2
+3        chmod a+r,u+wx,go-wx refresh_spare_usr2
+#   2. Edit '/usr/local/sbin/refresh_spare_usr2':
+#        A. comment out the two echo commands above (add leading '#'s).
+#        B  change the 'operational' on the ssh command below to the node name
+#           (a fully qualified hostname may be needed) or IP address of
+#           the operational machine
+#        C. uncomment (delete the leading '#'s) out in the six commands
+#            below (#echo ... #echo).
+#        D. Save the results
+#   3. Test it the first time after a Spare computer disk rotation.
+#echo "Refreshing spare computer disk /usr2 partition ..."
+#umount /usr2
+#mkfs.ext3 /dev/md2
+#mount /usr2
+#ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf -)
+#echo "Done."

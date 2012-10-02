@@ -264,6 +264,7 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 ! 2007Jul27 JMG. Changed itype to logical knopass, put in hardware.ftni, and moved initializaiton
 !           to init_hardware_common
 ! 2007Nov05 JMG. Took out postob_mk5  command.
+! 2008OCt20 JMG. Modified so would do TPI command for Mark5 racks
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -676,7 +677,7 @@ C  !*
           endif
 
 C  TPICD=no,period
-          if (km3rack.or.km4rack.or.kvracks) then
+          if (km3rack.or.km4rack.or.kvracks.or.km5rack.or.kv5rack) then
             call snap_tpicd("no",itpid_period_use)
           endif
 

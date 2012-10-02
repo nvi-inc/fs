@@ -1,0 +1,1 @@
+cd .; fort77 -C -c -cpp -DVERSION=0 -DSUBLEVEL=0 -DPATCHLEVEL=0 b3of9.f
