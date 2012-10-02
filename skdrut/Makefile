@@ -26,7 +26,7 @@ mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knewt.o ktimedif.o \
 lower.o lowercase.o lowercase_and_write.o lyes_no.o mpstar_rad.o m3mode.o \
 newscan.o novas.o null_term.o obs_sort.o pid_str.o \
 plh.o pnum.o prefr.o printer.o purge_file.o  put_esc_in_string.o \
-raded.o  rdctl.o readf_asc.o readline.o reads.o \
+raded.o  rdctl.o readf_asc.o readline_skdrut.o reads.o \
 sbit.o secnds.o seconds2hms.o sec2minsec.o selev.o searl.o sidtm.o skdrini.o sktime.o slate.o \
 slewo.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o stape.o stinp.o sunarc.o \
 sunpo.o sunazel.o \

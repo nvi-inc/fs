@@ -33,6 +33,7 @@ C 17Apr2003  JMG.  Added Mark5 option.
 ! 2005Feb15  JMG. Got rid of most holleriths.
 ! 2006Jul20. JMG. Disabled switching to Mark3 rack if not Mark3 mode.
 ! 2007Jun13  JMG. Modified so that would all fit on one page.
+! 2008Oct20  JMG. Better error messages.
 
 C Input:
       character*(*) cr1
@@ -48,8 +49,6 @@ C LOCAL:
       integer max_rack_local,max_rec_local,max_rec2_local
       character*12 crack_slot,crec1_slot,crec2_slot
       character*4  cfirst_slot
-
-
 
       character*1 cactive
       character*2 crec1
@@ -88,24 +87,24 @@ C 1. Batch input
       if (kbatch) then
         read(cr1,*,err=991) irack,irec1,irec2,crec1
 991     if (irack.lt.1.or.irack.gt.max_rack_local) then
-          write(luscn,9991)
-9991      format('EQUIP04 - Invalid rack type.')
+          write(luscn,9991) max_rack_local
+9991      format("ERROR: Max rack types between 1 and ",i4)
           return
         endif
         if (irec1.lt.1.or.irec1.gt.max_rec_local) then
-          write(luscn,9992)
-9992      format('EQUIP05 - Invalid recorder 1 type.')
+          write(luscn,9992) max_rec_local
+9992      format("ERROR: Max rec types1 between 1 and ",i4)
           return
         endif
         if (irec2.lt.1.or.irec2.gt.max_rec_local.or.
      .    irec2.gt.max_rec2_local) then
-          write(luscn,9993)
-9993      format('EQUIP05 - Invalid recorder 2 type.')
+          write(luscn,9993) max_rec2_local
+9993      format("ERROR: Max rec types2 between 1 and ",i4)
           return
         endif
         if (crec1.ne.'1'.and.crec1.ne.'2') then
           write(luscn,9994)
-9994      format('EQUIP06 - Invalid starting recorder.')
+9994      format('EQUIP06 - Invalid starting recorder')
           return
         else
           crec1=" "
@@ -187,14 +186,14 @@ C 2. Interactive input
         if (ic1.eq.0) return
         irack= ias2b(ibuf(1),ic1,ic2-ic1+1)
         IF (irack.LT.0.OR.(irack.GT.max_rack_local)) then
-          write(luscn,9991)
+          write(luscn,9991) max_rack_local
           GOTO 1
         endif
         call gtfld(ibuf,ich,nch,ic1,ic2) ! rec1 field
         if (ic1.ne.0) then ! rec1 specified
           irec1= ias2b(ibuf(1),ic1,ic2-ic1+1)
           IF (irec1.LT.0.OR.(irec1.GT.max_rec_local)) then
-            write(luscn,9992)
+            write(luscn,9992) max_rec_local
             GOTO 1
           endif
           call gtfld(ibuf,ich,nch,ic1,ic2) ! rec2 field
@@ -202,7 +201,7 @@ C 2. Interactive input
             irec2= ias2b(ibuf(1),ic1,ic2-ic1+1)
             IF (irec2.LT.0.OR.(irec2.GT.max_rec_local).or.
      .        irec2.gt.max_rec2_local) then
-              write(luscn,9993)
+              write(luscn,9993) max_rec2_local
               GOTO 1
             endif
             call gtfld(ibuf,ich,nch,ic1,ic2) ! starting rec field

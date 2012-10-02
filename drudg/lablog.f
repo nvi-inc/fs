@@ -12,6 +12,7 @@ C  Write tape labels from reading the log file.
 ! 2007Feb01 JMG. Just issue a message on recorder type, don't stop if not Mark5A or Mk5APigW
 !                Modified to get info from sched_info line
 ! 2007Feb02 JMG. Take an optional file name to save the PS file in.
+! 2008Dec03 JMG. Was getting rid of too much space at start of line
 
 
       include '../skdrincl/skparm.ftni'
@@ -204,7 +205,7 @@ C 1.  Initialize variables
         endif
 
         iline=mod(iline+1,5)
-        istart=24
+        istart=23
         cline(iline)(1:istart)=" "        !get rid of stuff at front that doesn't matter
         call splitNtokens(cline(iline),ltoken,Maxtoken,NumToken)
         cexper=ltoken(1)
