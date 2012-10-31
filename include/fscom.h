@@ -50,7 +50,7 @@ typedef struct fscom {
         double decdat;
         double alat;
         double wlong;
-	float systmp[32];
+	float systmp[MAX_DET];
         int ldsign;
 	char lfreqv[90];
         char lnaant[8];
@@ -91,7 +91,7 @@ typedef struct fscom {
         struct {
 	  int bbc[ MAX_BBC];
 	  long bbc_time[ MAX_BBC];
-	  int dist[ MAX_DIST];
+	  int dist[ MAX_VLBA_DIST];
 	  int vform;
 	  long fm_cn_tm;
 	  int rec[2];
@@ -111,7 +111,7 @@ typedef struct fscom {
         char stcnm[4][2];
         int  stchk[4];
 
-        struct dist_cmd dist[ MAX_DIST];
+        struct dist_cmd dist[ MAX_VLBA_DIST];
 
         struct bbc_cmd bbc[ MAX_BBC];
 
@@ -160,6 +160,10 @@ typedef struct fscom {
           int index;
 	  int icomputer[2];
           char model;
+	  long unsigned ticks_off;
+	  long usecs_off;
+	  int init_error;
+	  int init_errno;
         } time;
 	float posnhd[2][2];
         int class_count;
@@ -308,5 +312,27 @@ typedef struct fscom {
   struct mk5b_mode_cmd mk5b_mode;
 
   struct vsi4_cmd vsi4;
+
+  struct holog_cmd holog;
+
+  struct satellite_cmd satellite;
+
+  struct satellite_ephem ephem[MAX_EPHEM];
+
+  struct satoff_cmd satoff;
+
+  struct tle_cmd tle;
+
+  struct dbbcnn_cmd dbbcnn[ MAX_DBBCNN];
+  struct dbbcifx_cmd dbbcifx[ MAX_DBBCIFX];
+  struct dbbcform_cmd dbbcform;
+
+  int dbbcddcv;
+  int dbbcpfbv;
+  int dbbc_cond_mods;
+
+  struct dbbc_cont_cal_cmd dbbc_cont_cal;
+
+  int dbbc_if_factors[MAX_DBBC_IF];
 
 } Fscom;

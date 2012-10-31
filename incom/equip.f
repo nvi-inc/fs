@@ -5,7 +5,7 @@
 c
       integer ierr,idum,ilen,ich,il,ic1,ic2
       integer*2 ibuf(50)
-      character*4 decoder,pcalc
+      character*4 decoder,pcalc,dbbcv
       double precision das2b
 c
       include '../include/fscom.i'
@@ -121,6 +121,9 @@ C **** Modified mb
         rack = S2
         rack_type = S2
 C **** end modify mb
+      else if (ichcm_ch(ibuf,ic1,'dbbc').eq.0.and.il.eq.4) then
+        rack = DBBC
+        rack_type = DBBC
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -534,13 +537,14 @@ C **** MET3 Sensor line 16
       else
          il=ic2-ic1+1
       endif
-      if (ichcm_ch(ibuf,ic1,'met3').eq.0.and.il.eq.4) then
-        wx_met = MET3
-      else if (ichcm_ch(ibuf,ic1,'cdp').eq.0.and.il.eq.3) then
-        wx_met = 0
-      else
-        call logit7ci(0,0,0,1,-140,'bo',16)
-        goto 990
+      wx_met = ias2b(ibuf,ic1,ic2-ic1+1)
+      if(wx_met.lt.1) then
+         if(ichcm_ch(ibuf,ic1,'cdp').eq.0.and.il.eq.3) then
+            wx_met = 0
+         else
+            call logit7ci(0,0,0,1,-140,'bo',16)
+            goto 990
+         endif
       endif
       call fs_set_wx_met(wx_met)
 C **** end modify rdg
@@ -594,8 +598,106 @@ C mk4 decoder message terminator
          call logit7ci(0,0,0,1,-140,'bo',18)
          goto 990
       endif
+c DBBC DDC firmware version
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',19)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',19)
+        goto 990
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,dbbcv)
+      if(dbbcv.eq.'v100') then
+         dbbcddcv=100
+      else if(dbbcv.eq.'v101') then
+         dbbcddcv=101
+      else if(dbbcv.eq.'v102') then
+         dbbcddcv=102
+      else
+        call logit7ci(0,0,0,1,-140,'bo',19)
+        goto 990
+      endif
+      call fs_set_dbbcddcv(dbbcddcv)
+c DBBC PFB firmware version
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',20)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',20)
+        goto 990
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,dbbcv)
+      if(dbbcv.eq.'v12') then
+         dbbcpfbv=12
+      else
+        call logit7ci(0,0,0,1,-140,'bo',100)
+        goto 990
+      endif
+      call fs_set_dbbcpfbv(dbbcpfbv)
+C number of conditioning modules
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',21)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',21)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      dbbc_cond_mods = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc_cond_mods.lt.1.or.dbbc_cond_mods.gt.4) then
+         call logit7ci(0,0,0,1,-140,'bo',21)
+         goto 990
+      endif
+      call fs_set_dbbc_cond_mods(dbbc_cond_mods)
+C DBBC IF count conversion factors
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',22)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      icount=0
+      ich = 1
+      do i=1,5
+         call gtfld(ibuf,ich,ilen,ic1,ic2)
+         if (ic1.eq.0.and.icount.ne.dbbc_cond_mods) then
+            call logit7ci(0,0,0,1,-140,'bo',22)
+            goto 990
+         else if(ic1.ne.0.and.icount.ge.dbbc_cond_mods) then
+            call logit7ci(0,0,0,1,-140,'bo',22)
+            goto 990
+         else if(ic1.ne.0.and.icount.lt.dbbc_cond_mods) then
+            if_factor = ias2b(ibuf,ic1,ic2-ic1+1)
+            if (if_factor.lt.1.or.if_factor.gt.65535) then
+               call logit7ci(0,0,0,1,-140,'bo',22)
+               goto 990
+            endif
+            icount=icount+1
+            dbbc_if_factors(icount)=if_factor
+         endif
+      enddo
+      call fs_set_dbbc_if_factors(dbbc_if_factors)
+c
       return
-
+c
  990  call fmpclose(idcb,ierr)
   995  continue
       ip(3) = -1

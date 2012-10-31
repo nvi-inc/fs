@@ -192,6 +192,8 @@ c
         nch=ichmv_ch(ib,nch,'lba4')
       else if(rack.eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
+      else if(rack.eq.DBBC) then
+        nch=ichmv_ch(ib,nch,'dbbc')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -301,7 +303,8 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_hwid(hwid)
-      nch=nch+ib2as(hwid,ib,nch,z'8005')
+      ihwid=hwid
+      nch=nch+ib2as(ihwid,ib,nch,z'8005')
 c
       nch=mcoma(ib,nch)
       call fs_get_i70kch(i70kch)
@@ -366,6 +369,26 @@ c
       else if(mk4dec_fs.eq.ichar('%')) then
          nch=ichmv_ch(ib,nch,'%')
       endif
+c
+      nch=mcoma(ib,nch)
+      call fs_get_dbbcddcv(dbbcddcv)
+      nch=ichmv_ch(ib,nch,'v')
+      nch = nch + ib2as(dbbcddcv,ib,nch,z'800F')
+c
+      nch=mcoma(ib,nch)
+      call fs_get_dbbcpfbv(dbbcpfbv)
+      nch=ichmv_ch(ib,nch,'v')
+      nch = nch + ib2as(dbbcpfbv,ib,nch,z'800F')
+c
+      nch=mcoma(ib,nch)
+      call fs_get_dbbc_cond_mods(dbbc_cond_mods)
+      nch = nch + ib2as(dbbc_cond_mods,ib,nch,z'8002')
+
+      call fs_get_dbbc_if_factors(dbbc_if_factors)
+      do i=1,dbbc_cond_mods
+         nch=mcoma(ib,nch)
+         nch = nch + ib2as(dbbc_if_factors(i),ib,nch,z'8005')
+      enddo
 
       call logit3(ib,nch-1,lsor)
 c
