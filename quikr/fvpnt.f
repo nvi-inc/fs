@@ -98,7 +98,7 @@ C                 Default is 1 repetition
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',') 
      .  nrep = iparm(1) 
       if (nrep.ge.-10.and.nrep.le.10.and.nrep.ne.0) goto 230
-        ierr = -204 
+        ierr = -202 
         goto 990
 C 
 C     2.3 Third parm, number of points
@@ -116,7 +116,7 @@ C                 Default is 7 points
          npts = 2*(npts/2)+1
       endif
       if (abs(npts).ge.3.and.abs(npts).le.31) goto 240
-        ierr = -205
+        ierr = -203
         goto 990
 C
 C  2.4  Fourth parm, step size
@@ -130,7 +130,7 @@ C
         step = stepfp
         goto 250
 245   if(ierr.eq.0) goto 247
-        ierr = -208 
+        ierr = -204 
         goto 990
 247   step = parm 
       ierr = 0
@@ -144,16 +144,16 @@ C
       if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
      .   intp = iparm(1)
       if(intp.ge.1.and.intp.le.32) goto 260 
-        ierr = -207 
+        ierr = -205 
         goto 990
 C 
-C     2.6 Sixth parm, detector device.  
+C     2.6 Sixth parm, detector device. (fdfld is right should be gtprm)  
 C 
 260   continue
       call fdfld(ibuf,ich,nchar,ic1,ic2)
       ich=ich+1
       if (ic1.eq.0) then
-        ierr = -202
+        ierr = -106
         goto 990 
       endif
       inumb=ic2-ic1+1
@@ -181,17 +181,23 @@ C                      Default for MK3 and MK4 is IF1
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
 C                      Default for VLBA is IA
         if ((cjchar(ldev,1).eq.'i').or.
-     .      ((cjchar(ldev,1).ge.'1').and.(cjchar(ldev,1).le.'9')).or.
-     .      ((cjchar(ldev,1).ge.'a').and.(cjchar(ldev,1).le.'f')))
-     .    goto 270
-
+     *      index('123456789abcde',cjchar(ldev,1)).ne.0)
+     *    goto 270
+CC  above is MAX_VLBA_BBC
       else if (LBA.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'p1')
 C                      Default for LBA is IFP1
         if(cjchar(ldev,1).eq.'p') goto 270
+      else if (DBBC .eq. rack) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
+C                      Default for DBBC is IA
+CC
+        if ((cjchar(ldev,1).eq.'i').or.
+     *      index('123456789abcde',cjchar(ldev,1)).ne.0)
+     *    goto 270
       endif
 C
-      ierr = -202
+      ierr = -206
       goto 990
 C
 C 7th parameter: wait time
@@ -202,8 +208,8 @@ C
       if(cjchar(parm,1).eq.'*') iwait = IWTFP
       if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
      .   iwait = iparm(1)
-      if(intp.ge.1.and.intp.le.1200) goto 300
-        ierr = -212 
+      if(iwait.ge.1.and.iwait.le.1200) goto 300
+        ierr = -207 
         goto 990
 C           Illegal value entered
 C
@@ -257,7 +263,28 @@ c
         call fs_get_ifp2vc(ifp2vc)
         ichain=iabs(ifp2vc(indvc))
         if(ichain.lt.1.or.ichain.gt.3) then
-          ierr=-209
+          ierr=-216
+          goto 990
+        endif
+      else if(DBBC.eq.rack) then
+        indbc=ia2hx(ldevfp,1)
+        if(ichcm_ch(ldevfp,1,'ia').eq.0) then
+          ichain=1
+        else if(ichcm_ch(ldevfp,1,'ib').eq.0) then
+          ichain=2
+        else if(ichcm_ch(ldevfp,1,'ic').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldevfp,1,'id').eq.0) then
+          ichain=4
+        else if(indbc.ge.1.and.indbx.le.MAX_DBBC_BBC) then
+          call fs_get_dbbc_source(source,indbc)
+          ichain=source+1
+          if(ichain.lt.1.or.ichain.gt.4) then
+            ierr=-217
+            goto 990
+          endif
+        else
+          ierr=-213
           goto 990
         endif
       else    !VLBA
@@ -270,7 +297,9 @@ c
           ichain=3
         else if(ichcm_ch(ldevfp,1,'id').eq.0) then
           ichain=4
+CC
         else if(indbc.ge.1.and.indbx.le.14) then
+CC  above is MAX_VLBA_BBC
           call fs_get_bbc_source(source,indbc)
           ichain=source+1
           if(ichain.lt.1.or.ichain.gt.4) then
@@ -288,11 +317,12 @@ C  Now check the cal and freq values.
       call fc_rte_time(it,it(6))
       epoch=it(6)+it(5)/366.
       call fc_get_tcal_fwhm(ldevfp,cal,bm,epoch,fx,corr,ssize,ierr)
+      ierr=0
       if(cal.ne.0.0) goto 415
-        ierr = -203
+        ierr = -214
         goto 990
 415   if(bm.gt.4.8d-8) goto 420
-        ierr = -206
+        ierr = -215
         goto 990
 420   continue
       calfp = cal
@@ -314,8 +344,6 @@ C          If it's not dormant, then error.
 C
 504   if(.not.rn_test('fivpt')) goto 510
       ierr = -301
-      goto 990
-505   ierr = -302
       goto 990
 510   continue
       call write_quikr
