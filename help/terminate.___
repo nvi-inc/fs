@@ -14,8 +14,9 @@ This is the graceful way to end operation of the Field System.
 Schedule execution is ended, log and schedule files are
 closed, all programs are removed from the system by oprin.
 
-The terminate command will not succeed if disk record has been
-commanded with the disk_record=on command.  Either recording must be
-stopped using disk_record=off first or if you wish to continue
-recording despite terminating the FS, you can use
-"terminate=disk_record_ok".
+The terminate command will not succeed if recording has been commanded
+with the disk_record=on command.  Either recording must be stopped
+using disk_record=off first or if you wish to continue recording
+despite terminating the FS, you can use
+"terminate=disk_record_ok".  Terminating the FS while the disk is
+recording is not recommended.
