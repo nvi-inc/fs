@@ -1,13 +1,14 @@
 mk5b_mode - set mk5b recording mode
 
-syntax: mk5b_mode=source,mask,decimation,fpdp
+syntax: mk5b_mode=source,mask,decimation,fpdp,okay
 Response: mk5b_mode/source,mask,decimation,fpdp
 Settable parameters:
 
 source:     data source: ext, tvg, or ramp. Default: ext.
 mask:       bit-stream mask, hex, for example: 0xf, default 0xffffffff.
 decimation: decimation ratio: 1, 2, 4, 8, or 16. Default: 1.
-fpdp:       fpdp mode, 1 or 2. Default: not commanded.
+fpdp:       fpdp mode: 1 or 2. Default: no command sent to Mark 5B
+okay        literal ascii: disk_record_ok
 
 Monitor only parameter: None
 
@@ -15,3 +16,16 @@ Comments: mask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0,
 etc. The number of bits turned on in the bit-stream mask must be 2^n
 where 0 <= n <= 5, or the Mark5B will reject the command with an
 error.
+
+Non-default values of fpdp are for diagnostic use only. The default is
+that the parameter is not sent to the recorder which causes the device
+to use its own default, which is different for 5B and 5B+. Value 2 is
+not available for Mark 5B, but is for Mark 5B+.
+
+The mk5b_mode command will not succeed if recording has been commanded
+with the disk_record=on command.  Either recording must be stopped
+using disk_record=off first or if you wish to continue set the mode
+despite recording being active, you can use "disk_record_ok" as the
+fifth parameter of the command.  Changing the mode while recording
+will probably cause problems with the recording and is not
+recommended.

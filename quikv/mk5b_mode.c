@@ -48,6 +48,7 @@ parse:
       m5state_init(&lcl.mask.state);
       m5state_init(&lcl.decimate.state);
       m5state_init(&lcl.fpdp.state);
+      m5state_init(&lcl.disk.state);
 
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->mk5b_mode,sizeof(lcl));
@@ -59,6 +60,13 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
+      if(shm_addr->disk_record.record.record==1 &&
+	 shm_addr->disk_record.record.state.known==1)
+	if(lcl.disk.disk!=0 && lcl.disk.state.known==1) {
+	  ierr=-301;
+	  goto error;
+	}
+	  
       memcpy(&shm_addr->mk5b_mode,&lcl,sizeof(lcl));
       
       out_recs=0;
