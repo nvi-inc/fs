@@ -35,6 +35,7 @@ int source;
 int hint_row;
 int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
+int m5rec;
 
 unsigned char inbuf[512];      /* class i-o buffer */
 unsigned char outbuf[512];     /* class i-o buffer */
@@ -45,6 +46,7 @@ int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 int synch=0;
 long nanosec=-1;
 static long ipr[5] = { 0, 0, 0, 0, 0};
+int dbbc_sync=0;
 
 main()  
 {
@@ -310,28 +312,17 @@ do 	{
 	}
 	wrefresh ( maindisp );
 
-	while (ERR!=(inc=wgetch( maindisp ))) 
+	while (ERR!=(inc=wgetch( maindisp ))) {
+	  m5rec=source == MK5 &&
+	    shm_addr->disk_record.record.record==1 &&
+	    shm_addr->disk_record.record.state.known==1;
 	switch ( inc ) {
 	case INC_KEY :  /* Increment seconds */
-	  setfmtime(formtime++,1);
-	  if(source == S2 && s2type == 1)
-	    changeds2das=1;
-	  else
-	    changedfm=1;
-	  break;
-	case DEC_KEY :  /* Decrement seconds */
-	  setfmtime(formtime--,-1);
-	  if(source == S2 && s2type == 1)
-	    changeds2das=1;
-	  else
-	    changedfm=1;
-	  break;
-	case SET_KEY :  /* Get time from user */
-	  for (i=hint_row;i<hint_row+irow;i++)
-	    mvwaddstr( maindisp, i, 1, blank);
-	  formtime = asktime( maindisp,&flag, formtime);
-	  if(flag) {
-	    setfmtime(formtime,0);
+	  if(m5rec)
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
+	    setfmtime(formtime++,1);
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else
@@ -339,12 +330,49 @@ do 	{
 	  }
 	  goto build;
 	  break;
+	case DEC_KEY :  /* Decrement seconds */
+	  if(m5rec)
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
+	    setfmtime(formtime--,-1);
+	    if(source == S2 && s2type == 1)
+	      changeds2das=1;
+	    else
+	      changedfm=1;
+	  }
+	  goto build;
+	  break;
+	case SET_KEY :  /* Get time from user */
+	  if(m5rec)
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	    formtime = asktime( maindisp,&flag, formtime);
+	    if(flag) {
+	      setfmtime(formtime,0);
+	      if(source == S2 && s2type == 1)
+		changeds2das=1;
+	      else
+		changedfm=1;
+	    }
+	  }
+	  goto build;
+	  break;
 	case EQ_KEY :  /* set form time to fs time */
-	  setfmtime(formtime=fstime+(fshs+50)/100,0);
-	  if(source == S2 && s2type == 1)
-	    changeds2das=1;
-	  else
-	    changedfm=1;
+	  if(m5rec)
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
+	    setfmtime(formtime=fstime+(fshs+50)/100,0);
+	    if(source == S2 && s2type == 1)
+	      changeds2das=1;
+	    else
+	      changedfm=1;
+	  }
+	  goto build;
 	  break;
 	case ESC_KEY :  /* ESC character */
 	  running = FALSE;
@@ -363,7 +391,7 @@ do 	{
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5) &&
-	      asksure( maindisp)) {
+	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
@@ -376,6 +404,7 @@ do 	{
 	  running = TRUE;
 	}
 
+	}
 } while ( running );
 
 endwin ();
