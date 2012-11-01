@@ -37,7 +37,7 @@ int count;
                 formtm=gmtime(&formtime);
 		(void) strftime(outbuf,sizeof(outbuf),
                                 "dot_set=%Yy%jd%Hh%Mm%Ss:force;\n",formtm);
-		logit("Mark 5B re-synch command sent.",0,NULL);
+		logit("Mark 5B time-set/sync command sent.",0,NULL);
 	} else if (delta <0)
 		(void) strcpy(outbuf,"dot_inc=-1;\n");
 	else

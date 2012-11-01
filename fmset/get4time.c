@@ -51,7 +51,7 @@ tryagain:
 	if(synch) {
 	  cls_snd(&outclass, sync_buf ,sizeof(sync_buf), 0, 0); 
 	  nrecs++;
-	  logit("Formatter re-synch command sent.",0,NULL);
+	  logit("Formatter sync command sent.",0,NULL);
 	}
 	cls_snd(&outclass, tmget ,sizeof(tmget), 0, 0); 
 	nrecs++;
