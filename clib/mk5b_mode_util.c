@@ -1,5 +1,6 @@
 /* mk5b_mode commmand buffer parsing utilities */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -13,8 +14,10 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *source_key[ ]=         { "ext", "tvg","ramp" }; 
+static char *disk_key[ ]=         { "disk_record_ok" }; 
 
 #define NSOURCE_KEY sizeof(source_key)/sizeof( char *)
+#define NDISK_KEY sizeof(disk_key)/sizeof( char *)
 
 char *m5trim();
 
@@ -74,6 +77,15 @@ char *ptr;
       } else{
 	lcl->fpdp.state.error=1;
       }
+      break;
+    case 5:
+      ierr=arg_key(ptr,disk_key,NDISK_KEY,&lcl->disk.disk,-1,TRUE);
+      m5state_init(&lcl->disk.state);
+      if(ierr==0) {
+	lcl->disk.state.known=1;
+      } else {
+	lcl->disk.state.error=1;
+      } 
       break;
     default:
       *count=-1;

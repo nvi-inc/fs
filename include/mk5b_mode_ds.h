@@ -17,4 +17,8 @@ struct mk5b_mode_cmd {
     int fpdp;
     struct m5state state;
   } fpdp;
+  struct {
+    int disk;
+    struct m5state state;
+  } disk;
 };
