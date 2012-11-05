@@ -360,7 +360,7 @@ class Gui(Frame):
         fdp.sort()
         #add items to menu
         for name in fdp:
-            [frequency, detector, pol] = name.split(' ')
+            [frequency, detector, pol] = name.split()
             self.frequenciesmenu.add_radiobutton(label = name, command = lambda frequency = float(frequency), detector = detector, pol = pol: self.selectData(frequency, 'Frequency', detector, pol))
     
     def buildEditMenu(self):
@@ -452,7 +452,7 @@ class Gui(Frame):
             name = _name[0]
             self.frequencies_chosen[name] = IntVar()
             self.frequencies_chosen[name].set(1)
-            pol = name.split(' ')[-1]
+            pol = name.split()[-1]
             label = name[:-len(pol)].strip()
             if pol == 'l':
                 leftpolmenu.add_checkbutton(label = label, variable = self.frequencies_chosen[name], command = lambda: self.prepPlot())
@@ -792,7 +792,7 @@ class Gui(Frame):
             self.selectAllFrequencies('l', set)
             self.selectAllFrequencies('r', set)
         for fdp in self.frequencies_chosen.keys():
-            if fdp.split(' ')[-1] == pol:
+            if fdp.split()[-1] == pol:
                 self.frequencies_chosen[fdp].set(set)
         
         self.prepPlot()
@@ -1541,7 +1541,7 @@ class Gui(Frame):
                 line = self.removeDoubleSpace(line)
                 if not line[0] == '*': #if not comment
                     if read_dpfu:
-                        _line = line.split(' ')
+                        _line = line.split()
                         for i,k in enumerate(read_dpfu):
                             dpfu = _line[i]
                             if k == 'lcp':
@@ -1550,7 +1550,7 @@ class Gui(Frame):
                                 DPFU_R = float(dpfu)
                         read_dpfu = 0
                     elif read_trec:
-                        _line = line.split(' ')
+                        _line = line.split()
                         if len(_line) == 1:
                             TREC_R = TREC_L = float(_line[0])
                         else:
@@ -1558,19 +1558,19 @@ class Gui(Frame):
                             TREC_R = float(_line[1])
                         read_trec = 0
                     elif line[:5] == 'range':
-                        _line = line.split(' ')
+                        _line = line.split()
                         if len(_line) == 3:
                             LO_RANGE = (float(_line[1].strip()), float(_line[2].strip()), 'range')
                         else:
                             LO_RANGE = (float(_line[1].strip()), float(_line[1].strip()), 'range')
                     elif line[:5] == 'fixed':
-                        _line = line.split(' ')
+                        _line = line.split()
                         if len(_line) == 3:
                             LO_RANGE = (float(_line[1].strip()), float(_line[2].strip()), 'fixed')
                         else:
                             LO_RANGE = (float(_line[1].strip()), float(_line[1].strip()), 'fixed')
                     elif line[:9] == 'ELEV POLY':
-                        _line = line[10:].split(' ')
+                        _line = line[10:].split()
                         if _line[-1] == 'opacity_corrected':
                             _line.pop(-1)
                             Gui.opacity_correction[filename].set('both')
@@ -1583,7 +1583,7 @@ class Gui(Frame):
                         GAIN_ELEV_POLY.reverse()
                         polynomial = [GAIN_ELEV_POLY, 'ELEV']
                     elif line[:10] == 'ALTAZ POLY':
-                        _line = line[11:].split(' ')
+                        _line = line[11:].split()
                         if _line[-1] == 'opacity_corrected':
                             _line.pop(-1)
                             Gui.opacity_correction[filename].set('both')
@@ -1596,17 +1596,17 @@ class Gui(Frame):
                         GAIN_ELEV_POLY.reverse()
                         polynomial = [GAIN_ELEV_POLY, 'ALTAZ']
                     elif (line[:3] == 'lcp' or line[:3] == 'rcp') and not set_dpfu:
-                        _line = line.split(' ')
+                        _line = line.split()
                         read_dpfu = _line
                         set_dpfu = 1
                     elif line[:3] == 'lcp':
-                        _list = line.split(' ')
+                        _list = line.split()
                         if len(_list)==3:
                             freq = float(_list[1])
                             tcal = float(_list[2])
                             TCAL_TABLE_L[freq] = tcal
                     elif line[:3] == 'rcp':
-                        _list = line.split(' ')
+                        _list = line.split()
                         if len(_list)==3:
                             freq = float(_list[1])
                             tcal = float(_list[2])
@@ -1867,7 +1867,7 @@ class Gui(Frame):
                         ##############update dpfu:
                         if self.working_data.has_key('dpfu') and dpfu_order:
                             dpfu = self.working_data.get('dpfu')
-                            ldata = data.split(' ')
+                            ldata = data.split()
                             for j,pol_in_rxg in enumerate(dpfu_order):
                                 if pol_in_rxg == pol_id:
                                     ldata[j] = dpfu
@@ -1875,7 +1875,7 @@ class Gui(Frame):
                             working_rxg_data_updated[i] = '%s\n' % working_rxg_data_updated[i].strip()
                             dpfu_order = 0
                         elif (data[:3] == 'lcp' or data[:3] == 'rcp') and not dpfu_line_set:
-                            dpfu_order = data.split(' ')
+                            dpfu_order = data.split()
                             dpfu_line_set = 1
                         ################update gain polynomial
                         if self.working_data.has_key('gain_poly') and (data[:9] == 'ELEV POLY' or data[:10] == 'ALTAZ POLY'):
@@ -1894,7 +1894,7 @@ class Gui(Frame):
                         #################update TCal table:
                         if self.working_data.has_key('tcal_factor') and (data[:3] == pol_id):
                             #check length, otherwise, might be 'lcp rcp'
-                            ldata = data.split(' ')
+                            ldata = data.split()
                             if len(ldata) == 3:
                                 factor = self.working_data.get('tcal_factor')
                                 old_tcal = float(ldata[2])
@@ -1903,7 +1903,7 @@ class Gui(Frame):
     
                     elif mode == 'tsys-tspill_airmass':
                         if self.working_data.has_key('trec') and trec_line_found:
-                            ldata = data.split(' ')
+                            ldata = data.split()
                             trec = self.working_data.get('trec')
                             if pol == 'l':
                                 out = '%s %s\n' % (trec, ldata[1])
@@ -1923,7 +1923,7 @@ class Gui(Frame):
                 first_id = m
                 for i in range(m):
                     if working_rxg_data[i][:3] == pol_id:
-                        tmp = working_rxg_data[i].split(' ')
+                        tmp = working_rxg_data[i].split()
                         if len(tmp) == 3:
                             working_rxg_data_updated.remove(working_rxg_data[i])
                             first_id = min(first_id, i)
@@ -3057,9 +3057,10 @@ class Plot(Canvas, Coordinate):
         
     def getList(self, name, indices):
         return_data = []
-        for i in indices:
-            data = self.database.get(name)[i]
-            return_data.append(data)
+        if len(self.database) > 0:
+       	    for i in indices:
+                 data = self.database.get(name)[i]
+                 return_data.append(data)
         return return_data
 
     def checkDataCount(self):
