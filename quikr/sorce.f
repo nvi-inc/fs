@@ -71,14 +71,18 @@ C                   in the name from the command
       if (kmoon) goto 340 
       if(ichcm_ch(ls,1,'stow      ').eq.0 .or.
      &   ichcm_ch(ls,1,'service   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'boresight ').eq.0 .or.
      &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
      &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
      &   ichcm_ch(ls,1,'setup     ').eq.0 .or.
      &   ichcm_ch(ls,1,'track     ').eq.0 .or.
      &   ichcm_ch(ls,1,'hold      ').eq.0 ) then
-        ra = ra50
-        dec = dec50
-        ep = ep1950
+        ra = 0.0
+        dec = 0.0
+        ep = 0.0
+        ra50 = 0.0
+        dec50 = 0.0
+        idumm1 = ichmv_ch(cwp,1,'        ')
         kd = .true.
         call gtfld(ibuf,ich,nchar,ic1,ic2)
         if (ic1.ne.0) then
@@ -170,6 +174,8 @@ C
       call fs_set_lsorna(lsorna)
       idumm1 = ichmv(cwrap,1,cwp,1,8)
       call fs_set_cwrap(cwrap)
+      satellite=0
+      call fs_set_satellite_satellite(satellite)
 C                   Pick out today's day-of-year for precession 
       call fc_rte_time(it,it(6))
       kprec = (ep.gt.0.0) .and. .not.(kd.or.ksun.or.kmoon)         
@@ -286,6 +292,7 @@ C
       if (n.ne.0) nch=n 
       if(ichcm_ch(ls,1,'stow      ').eq.0 .or.
      &   ichcm_ch(ls,1,'service   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'boresight ').eq.0 .or.
      &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
      &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
      &   ichcm_ch(ls,1,'setup     ').eq.0 .or.
@@ -301,9 +308,9 @@ C                   Adjust next char to be first blank in source name.
       call fs_get_decdat(decdat)
       call fs_get_epoch(epoch)
       if (kd) then
-        nch = nch + ir2as(sngl(ra50*180.0/RPI),ibuf,nch,7,2)
+        nch = nch + id2as(ra50*RAD2DEG,ibuf,nch,9,4)
         nch = mcoma(ibuf,nch)
-        nch = nch + ir2as(sngl(dec50*180.0/RPI),ibuf,nch,7,2)
+        nch = nch + id2as(dec50*RAD2DEG,ibuf,nch,9,4)
         nch = mcoma(ibuf,nch)
         nch = mcoma(ibuf,nch)
       else
@@ -328,7 +335,12 @@ C                   Adjust next char to be first blank in source name.
          nch=ichmv(ibuf,nch,cwrap,1,ilc)
       endif
       nch = mcoma(ibuf,nch)
-      if(.not.kd) then
+      if (kd) then
+        nch = nch + id2as(radat*RAD2DEG,ibuf,nch,9,4)
+        nch = mcoma(ibuf,nch)
+        nch = nch + id2as(decdat*RAD2DEG,ibuf,nch,9,4)
+        nch = mcoma(ibuf,nch)
+      else 
          call radec(radat,decdat,0.0,irah,iram,ras,
      .        lds,idcd,idcm,dcs,lhs,i,i,d) 
          nch=nch+ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
