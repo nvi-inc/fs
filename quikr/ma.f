@@ -124,6 +124,9 @@ C
         if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
           call run_prog('antcn','wait',4,iclass,nrec,idum,idum)
         else
+          if(nrec.ne.0) then
+             call clrcl(iclass)
+          endif
           ierr= -301
           goto 990
         endif
