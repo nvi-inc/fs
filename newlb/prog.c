@@ -16,7 +16,7 @@
 #define LSKD_N 8
 #define LLOG_N 8
 #define LEXPER_N 8
-#define SYSTMP_N 32
+#define SYSTMP_N MAX_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
 #define LNAANT_N 8
@@ -1733,6 +1733,12 @@ void fs_get_bbc_source__(source,n)
           *source=shm_addr->bbc[*n-1].source;
 	}
 
+void fs_get_dbbc_source__(source,n)
+	int *source, *n;
+	{
+          *source=shm_addr->dbbcnn[*n-1].source;
+	}
+
 void fs_get_wrhd_fs__(wrhd_fs,i)
         int *wrhd_fs,*i;
         {
@@ -2324,4 +2330,77 @@ void fs_get_disk_record_record__(disk_record_record)
         {
           *disk_record_record= shm_addr->disk_record.record.record;
         }
+
+void fs_set_satellite_satellite__(satellite)
+        int *satellite;
+        {
+	  shm_addr->satellite.satellite = *satellite;
+        }
+
+void fs_get_satellite_satellite__(satellite)
+        int *satellite;
+        {
+          *satellite= shm_addr->satellite.satellite;
+        }
+
+void fs_set_dbbcddcv__(dbbcddcv)
+	int *dbbcddcv;
+	{
+          shm_addr->dbbcddcv = *dbbcddcv;
+        }
+
+void fs_get_dbbcddcv__(dbbcddcv)
+	int *dbbcddcv;
+	{
+          *dbbcddcv = shm_addr->dbbcddcv;
+	}
+
+void fs_set_dbbcpfbv__(dbbcpfbv)
+	int *dbbcpfbv;
+	{
+          shm_addr->dbbcpfbv = *dbbcpfbv;
+        }
+
+void fs_get_dbbcpfbv__(dbbcpfbv)
+	int *dbbcpfbv;
+	{
+          *dbbcpfbv = shm_addr->dbbcpfbv;
+	}
+void fs_set_dbbc_cond_mods__(dbbc_cond_mods)
+	int *dbbc_cond_mods;
+	{
+          shm_addr->dbbc_cond_mods = *dbbc_cond_mods;
+        }
+
+void fs_get_dbbc_cond_mods__(dbbc_cond_mods)
+	int *dbbc_cond_mods;
+	{
+          *dbbc_cond_mods = shm_addr->dbbc_cond_mods;
+	}
+void fs_set_dbbc_if_factors__(dbbc_if_factors)
+	int *dbbc_if_factors;
+	{
+	  memcpy(shm_addr->dbbc_if_factors,
+		 dbbc_if_factors,
+		 sizeof(shm_addr->dbbc_if_factors));
+        }
+
+void fs_get_dbbc_if_factors__(dbbc_if_factors)
+	int *dbbc_if_factors;
+	{
+	  memcpy(dbbc_if_factors,
+		 shm_addr->dbbc_if_factors,
+		 sizeof(shm_addr->dbbc_if_factors));
+	}
+void fs_set_dbbc_cont_cal_mode__(dbbc_cont_cal_mode)
+	int *dbbc_cont_cal_mode;
+	{
+	  shm_addr->dbbc_cont_cal.mode=*dbbc_cont_cal_mode;
+        }
+
+void fs_get_dbbc_cont_cal_mode__(dbbc_cont_cal_mode)
+	int *dbbc_cont_cal_mode;
+	{
+	  *dbbc_cont_cal_mode=shm_addr->dbbc_cont_cal.mode;
+	}
 
