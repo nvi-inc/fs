@@ -9,14 +9,14 @@ extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
-int get_samples(ip,itpis,intg,rut,accum,ierr)
+int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
      long ip[5];
-     int itpis[MAX_ONOFF_DET], intg, *ierr;
+     int cont[MAX_ONOFF_DET],itpis[MAX_ONOFF_DET], intg, *ierr;
      float rut;
-     struct sample *accum;
+     struct sample *accum, *accum2;
 {
-  float tpi[MAX_DET],stm;
-     struct sample sample;
+  float tpi[MAX_DET],tpi2[MAX_DET],stm;
+  struct sample sample, sample2;
   int i,j,it[6], iti[6], itim,non_station,kst1,kst2,station;
 
   if(brk_chk("onoff")!=0) {
@@ -41,6 +41,8 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
   rte_time(iti,iti+5);
 
   ini_accum(itpis,accum);
+  ini_accum(itpis,accum2);
+
   for(i=0;i<intg;i++) {
     if(brk_chk("onoff")!=0) {
       *ierr=-1;
@@ -68,7 +70,16 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
 	return -1;
       }
     } else if(shm_addr->equip.rack==LBA) {
-      tpi_lba(ip,itpis,1);
+      tpi_lba(ip,itpis);
+      if(ip[2]<0) {
+	if(ip[1]!=0)
+	  cls_clr(ip[0]);
+	logita(NULL,ip[2],ip+3,ip+4);
+	*ierr=-16;
+	return -1;
+      }
+    } else if(shm_addr->equip.rack==DBBC) {
+      tpi_dbbc(ip,itpis);
       if(ip[2]<0) {
 	if(ip[1]!=0)
 	  cls_clr(ip[0]);
@@ -116,6 +127,14 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=tpi[j];
 	}
+    } else if(shm_addr->equip.rack==DBBC) {
+      if(tpget_dbbc(cont,ip,itpis,ierr,tpi,tpi2))
+	 return -1;
+      for(j=0;j<MAX_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=tpi[j];
+	  sample2.avg[j]=tpi2[j];
+	}
     }
     if(station) {
       if(kst1)
@@ -125,11 +144,14 @@ int get_samples(ip,itpis,intg,rut,accum,ierr)
     }
 
     sample.stm=stm-rut;
+    sample2.stm=stm-rut;
 
     inc_accum(itpis,accum,&sample);
+    inc_accum(itpis,accum2,&sample2);
   }
   
   red_accum(itpis,accum);
+  red_accum(itpis,accum2);
   return 0;
 
 }

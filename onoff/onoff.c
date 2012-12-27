@@ -27,7 +27,7 @@ main()
   double az,el, xoff, yoff, azoff, eloff, haoff, decoff;
   char buff[256],buff2[256],source_type[MAX_ONOFF_DET];
   float rut,astep,estep;
-  struct sample sample,ons,onscal,ofs,ofscal,zero;
+  struct sample sample,sampl2,ons,onscal,ofs,ofscal,zero;
   float gcmp[MAX_ONOFF_DET],tsys[MAX_ONOFF_DET],sefd[MAX_ONOFF_DET];
   float tclj[MAX_ONOFF_DET],tclk[MAX_ONOFF_DET],calr[MAX_ONOFF_DET];
   float gcmp_sig[MAX_ONOFF_DET],tsys_sig[MAX_ONOFF_DET];
@@ -36,6 +36,9 @@ main()
   char lsorna[sizeof(shm_addr->lsorna)+1];
   float beam;
   int use_cal;
+  int ita[6];
+  char lsorna2[sizeof(shm_addr->lsorna)+1];
+  int cont0, cont[MAX_ONOFF_DET], station_det, non_station_det;
 
 /* connect to the FS */
 
@@ -74,6 +77,10 @@ main()
     kagc=TRUE;
     if(agc(onoff.itpis,0,&ierr))
       goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC) {
+    kagc=TRUE;
+    if(agc_dbbc(onoff.itpis,0,&ierr))
+      goto error_recover;
   }
 
   if(local(&az,&el,"azel",&ierr))
@@ -82,8 +89,8 @@ main()
   el*=RAD2DEG;
   az*=RAD2DEG;
 
-  
   memcpy(lsorna,shm_addr->lsorna,sizeof(lsorna)-1);
+
   lsorna[sizeof(lsorna)-1]=0;
   for(j=0;j<sizeof(lsorna)-1;j++)
     if(lsorna[j]==' ') {
@@ -92,9 +99,19 @@ main()
     }
 
   use_cal=FALSE;
+  non_station_det=FALSE;
+  station_det=FALSE;
+  cont0=shm_addr->equip.rack==DBBC && shm_addr->dbbc_cont_cal.mode == 1;
   for(j=0;j<MAX_ONOFF_DET;j++) {
     if(onoff.itpis[j]!=0) {
       use_cal=use_cal ||onoff.devices[j].tcal>0.0;
+      if(j<MAX_DET) {
+	station_det=TRUE;
+	cont[j]=cont0;
+      } else {
+	non_station_det=TRUE;
+	cont[j]=0;
+      }
       source_type[j]='x';
       for(i=0;i<MAX_FLUX;i++){
 	if(shm_addr->flux[i].name[0]==0)
@@ -108,6 +125,12 @@ main()
       }
     }
   }
+  if(cont0) {
+    use_cal=FALSE;
+    if(!station_det)
+      cont0=FALSE;
+  }
+
 
   sprintf(buff2,
  "    De    Center  TCal    Flux    DPFU     Gain    Product   LO    T   FWHM");
@@ -162,6 +185,25 @@ main()
   rte_time(it,it+5);
   rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
 
+  if(onoff.proc[0]!=0) {
+    for(i=0;i<6;i++) 
+      ita[i]=it[i];
+
+    memcpy(lsorna2,shm_addr->lsorna,sizeof(lsorna2)-1);
+    lsorna2[sizeof(lsorna2)-1]=0;
+    for(j=sizeof(lsorna2)-2;j>-1;j--)
+      if(lsorna2[j]==' ') {
+	lsorna2[j]='_';
+      } else
+	break;
+
+    snprintf(buff,sizeof(buff),
+	     "%si=%10.10sI%03.3dA%02.2dE%02.2dY%02.2dD%02.2dH%02.2dM",
+	     onoff.proc,lsorna2,(int) (az+.5), (int) (el+.5),
+	     ita[5]%100,ita[4],ita[3],ita[2]);
+    scmds(buff);
+  }
+
   if(use_cal)
     scmds("caloffnf");
 
@@ -197,7 +239,7 @@ main()
   ini_accum(&onoff.itpis,&ofs);
   ini_accum(&onoff.itpis,&zero);
 
-  if(use_cal) {
+  if(use_cal || cont0) {
     ini_accum(&onoff.itpis,&onscal);
     ini_accum(&onoff.itpis,&ofscal);
   }
@@ -213,14 +255,26 @@ main()
 	koff=FALSE;
     }
 
-    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     wcounts("ONSO",0.0,0.0,&onoff,&sample);
     inc_accum(&onoff.itpis,&ons,&sample);
+    if(cont0) {
+      wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
+      inc_accum(&onoff.itpis,&onscal,&sampl2);
+    }
+
+    if(onoff.proc[0]!=0 && i==0) {
+      snprintf(buff,sizeof(buff),
+	       "%sp=%10.10sN%03.3dA%02.2dE%02.2dY%02.2dD%02.2dH%02.2dM",
+	       onoff.proc,lsorna2,(int) (az+.5), (int) (el+.5),
+	       ita[5]%100,ita[4],ita[3],ita[2]);
+      scmds(buff);
+    }
 
     if(use_cal) {
       scmds("calonnf");
-      if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+      if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
       wcounts("ONSC",0.0,0.0,&onoff,&sample);
       inc_accum(&onoff.itpis,&onscal,&sample);
@@ -234,20 +288,32 @@ main()
       goto error_recover;
 
     if(use_cal) {
-      if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+      if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
       wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
       inc_accum(&onoff.itpis,&ofscal,&sample);
 
       scmds("caloffnf");
     }
-    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
+    if(cont0) {
+      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sampl2);
+      inc_accum(&onoff.itpis,&ofscal,&sampl2);
+    }
     wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample);
     inc_accum(&onoff.itpis,&ofs,&sample);
 
+    if(onoff.proc[0]!=0 && i==0) {
+      snprintf(buff,sizeof(buff),
+	       "%sp=%10.10sF%03.3dA%02.2dE%02.2dY%02.2dD%02.2dH%02.2dM",
+	       onoff.proc,lsorna2,(int) (az+.5), (int) (el+.5),
+	       ita[5]%100,ita[4],ita[3],ita[2]);
+      scmds(buff);
+    }
+
     if(i==0) {
-      if(tzero(ip,&onoff,rut,&sample,&ierr)) {
+      if(tzero(cont,ip,&onoff,rut,&sample,&ierr)) {
 	goto error_recover;
       }
       wcounts("ZERO",isgn*astep,isgn*estep,&onoff,&sample);
@@ -262,14 +328,18 @@ main()
   else
     koff=FALSE;
 
-  if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+  if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
     goto error_recover;
   wcounts("ONSO",0.0,0.0,&onoff,&sample);
   inc_accum(&onoff.itpis,&ons,&sample);
+  if(cont0) {
+    wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
+    inc_accum(&onoff.itpis,&onscal,&sampl2);
+  }
   
   if(use_cal) {
     scmds("calonnf");
-    if(get_samples(ip,&onoff.itpis,onoff.intp,rut,&sample,&ierr))
+    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     wcounts("ONSC",0.0,0.0,&onoff,&sample);
     inc_accum(&onoff.itpis,&onscal,&sample);
@@ -280,7 +350,7 @@ main()
   red_accum(&onoff.itpis,&ons);
   red_accum(&onoff.itpis,&ofs);
   red_accum(&onoff.itpis,&zero);
-  if(use_cal) {
+  if(use_cal || cont0) {
     red_accum(&onoff.itpis,&onscal);
     red_accum(&onoff.itpis,&ofscal);
   }
@@ -296,7 +366,7 @@ main()
 	  i,  onscal.sig[i],ons.sig[i],ofscal.sig[i],ofs.sig[i],zero.sig[i]);
       logit(buff,0,NULL);
 #endif
-      if(use_cal) {
+      if(use_cal || cont[i]) {
       	gcmp[i]=(onscal.avg[i]-ons.avg[i])
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(onscal.avg[i]-ons.avg[i]);
@@ -312,7 +382,7 @@ main()
 	gcmp_sig[i]=0.0;
       }
 	
-      if(use_cal) {
+      if(use_cal || cont[i]) {
 	tsys[i]=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].tcal
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(ofs.avg[i]-zero.avg[i])*onoff.devices[i].tcal;
@@ -337,7 +407,7 @@ main()
 			 +pow(zero.sig[i]*onoff.devices[i].flux/den,2.0)
 			 +pow(ons.sig[i]*num/(den*den),2.0));
 
-      if(use_cal) {
+      if(use_cal || cont[i]) {
 	tclj[i]=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux
 	  /(ons.avg[i]-ofs.avg[i]);
 	num=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux;
@@ -379,12 +449,22 @@ main()
 
   ip2[2]=0;
   if(kagc)
-    if(agc(onoff.itpis,1,&ierr2)) {
-      ip2[0]=0;
-      ip2[1]=0;
-      ip2[2]=ierr2;
-      ip2[4]=0;
-      memcpy(ip2+3,"nf",2);
+    if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+      if(agc(onoff.itpis,1,&ierr2)) {
+	ip2[0]=0;
+	ip2[1]=0;
+	ip2[2]=ierr2;
+	ip2[4]=0;
+	memcpy(ip2+3,"nf",2);
+      }
+    } else if(shm_addr->equip.rack==DBBC) {
+      if(agc_dbbc(onoff.itpis,1,&ierr2)) {
+	ip2[0]=0;
+	ip2[1]=0;
+	ip2[2]=ierr2;
+	ip2[4]=0;
+	memcpy(ip2+3,"nf",2);
+      }
     }
 
   if(kresult) {

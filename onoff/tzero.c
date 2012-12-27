@@ -9,7 +9,8 @@ extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
-int tzero(ip,onoff,rut,accum,ierr)
+int tzero(cont,ip,onoff,rut,accum,ierr)
+     int cont[MAX_ONOFF_DET];
      long ip[5];
      struct onoff_cmd *onoff;
      float rut;
@@ -23,6 +24,7 @@ int tzero(ip,onoff,rut,accum,ierr)
   struct res_buf buff_res;
   struct res_rec response;
   int atten[4], kst1, kst2;
+  struct sample acdum;
 
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
@@ -137,7 +139,7 @@ int tzero(ip,onoff,rut,accum,ierr)
       goto restore;
     }
     clr_res(&buff_res);
-  } else if(shm_addr->equip.rack==LBA) {
+  } else if(shm_addr->equip.rack==LBA ||shm_addr->equip.rack==DBBC) {
     /* digital detetector - assume tpzero=0 */
   }
 
@@ -145,12 +147,22 @@ int tzero(ip,onoff,rut,accum,ierr)
      shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4||
      onoff->itpis[MAX_DET+4]!=0||onoff->itpis[MAX_DET+5]!=0) {
 
-    get_samples(ip,onoff->itpis,onoff->intp,rut,accum,&ierr2);
+    get_samples(cont,ip,onoff->itpis,onoff->intp,rut,accum,&acdum,&ierr2);
 
   } else if(shm_addr->equip.rack==LBA) {
 
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<2*shm_addr->n_das; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
+
+  } else if(shm_addr->equip.rack==DBBC) {
+
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<MAX_DBBC_DET; i++) 
       if (onoff->itpis[i]) {
         accum->avg[i]=0.0;
         accum->sig[i]=0.0;
@@ -243,7 +255,7 @@ int tzero(ip,onoff,rut,accum,ierr)
       goto failed;
     }
     clr_res(&buff_res);
-  } else if(shm_addr->equip.rack==LBA) {
+  } else if(shm_addr->equip.rack==LBA||shm_addr->equip.rack==DBBC) {
     /* digital detetector - assume tpzero=0 */
   }
 

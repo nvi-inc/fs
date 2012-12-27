@@ -1,10 +1,15 @@
-      subroutine volts(tpia,sig,tima,intp,rut,ierr) 
+      subroutine volts(imode,
+     &     tpia,sig,tpia2,sig2,tima,intp,rut,ierr,icont) 
 C 
 C   TOTAL POWER INTEGERATION ROUTINE, THIS ROUTINE READS THE TPI
 C       FOR THE SPECIFIED DEVICE
 C 
 C   INPUT:
 C 
+C       IMODE  - 0= return both non-continuous and continous samples in tpia
+C                0!= if continuous return tpical values in tpia2
+C                    if not continuous: just return tpia
+C
 C       INTP   - INTEGRATION PERIOD IN SECONDS
 C 
 C       NTRY   - EXTRA TRIES TO ALLOW, IF AN ERROR OCCURS 
@@ -20,8 +25,12 @@ C
 C       TIMA   - TIME IN SECONDS OF MEASUREMENT RELATIVE TO RUT 
 C 
 C       IERR = 0 IF NO ERROR OCCURRED 
-C 
+C
+C       ICONT == 0 if not continuous cal
+C             != 0 if continups cal
+C
       double precision timt,dtpi,dri,tpita,sigt,timta,didim1
+      double precision dtpi2,tpita2,sigt2
       integer*2 icmnd(4,18),indata(10),iques,lwho,lwhat
       integer it(5),iti(5)
       integer*4 ip(5)
@@ -74,6 +83,9 @@ c       do nothing
       else if(LBA.eq.rack) then
         id=-1
         goto 11
+      else if(DBBC.eq.rack) then
+        id=-1
+        goto 11
       endif
 c
 c  check M3 devices
@@ -97,6 +109,8 @@ C
       tpia=0
       sig=0 
       tima=0
+      tpia2=0
+      sig2=0
 C 
 C       WAIT FOR A SECOND TO CYCLE TPI
 C        (WE WILL WAIT AN ADDITIONAL SECOND BEFORE THE FIRST READING) 
@@ -108,7 +122,13 @@ C
 C 
 C   1. LOOP GETTING DATA
 C 
-      do i=1,intp
+      icont=0
+C
+      i=0
+10000 continue
+      i=i+1
+      if(i.gt.intp) goto 20000
+        dtpi2=0.0d0
 C 
 C       WAIT TILL THE NEXT SECOND AT LEAST
 C 
@@ -145,6 +165,13 @@ C
            call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
         else if(LBA.eq.rack) then
            call dscon(dtpi,ierr)
+        else if(DBBC.eq.rack) then
+           call dbbcn(dtpi,dtpi2,ierr,icont,isamples)
+           if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
+              if(isamples.gt.intp) then
+                 intp=isamples
+              endif
+           endif
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 
@@ -167,33 +194,71 @@ C
         itry=itry-1
         if (itry.le.0) goto 80010
         goto 12 
+c
+ 16     continue
+        if (icont.eq.0.or.dtpi2.lt.65534.5d0) goto 161 
+        call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
+        itry=itry-1
+        if (itry.le.0) goto 80010
+        goto 12 
 C 
 C       CALCULATE TIME
 C 
-16      continue 
-        dim1=dble(float(i-1))
-        dri=1.0d0/dble(float(i)) 
-        tpita=(tpita*dim1+dtpi)*dri  
-        sigt=(sigt*dim1+dtpi*dtpi)*dri 
+ 161    continue 
+        if(icont.eq.0) then
+           dim1=dble(float(i-1))
+           dri=1.0d0/dble(float(i)) 
+           tpita=(tpita*dim1+dtpi)*dri  
+           sigt=(sigt*dim1+dtpi*dtpi)*dri 
+        else if(imode.eq.0) then
+           dim1=dble(float(2*(i-1)))
+           dri=1.0d0/dble(float(2*i)) 
+           tpita=(tpita*dim1+dtpi+dtpi2)*dri  
+           sigt=(sigt*dim1+dtpi*dtpi+dtpi2*dtpi2)*dri 
+        else
+           dim1=dble(float(i-1))
+           dri=1.0d0/dble(float(i)) 
+           tpita=(tpita*dim1+dtpi)*dri  
+           sigt=(sigt*dim1+dtpi*dtpi)*dri 
+           tpita2=(tpita2*dim1+dtpi2)*dri  
+           sigt2=(sigt2*dim1+dtpi2*dtpi2)*dri 
+        endif
         timt=float(iti(2))+float(iti(3))*60.0+ 
      +       float(iti(4))*3600.0  
         if (timt.lt.dble(rut)) timt=timt+86400.0d0
         timta=(timta*dim1+timt)*dri
-      enddo
+      goto 10000
+20000 continue
 C 
 C        AVERAGE TIME AND COUNTS
 C 
       if (intp.gt.1) goto 30
       sigt=0
+      if(icont.ne.0.and.imode.ne.0)then
+         sigt2=0
+      endif
       goto 35
 C 
 30    continue
-      didim1=dble(float(intp))/dble(float(intp-1))
-      sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
+      if(icont.eq.0) then
+         didim1=dble(float(intp))/dble(float(intp-1))
+         sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
+      else if(imode.eq.0) then
+         didim1=dble(float(2*intp))/dble(float(2*(intp-1)))
+         sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
+      else
+         didim1=dble(float(intp))/dble(float(intp-1))
+         sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
+         sigt2=dsqrt(dabs(sigt2-tpita2*tpita2)*didim1) 
+      endif
 C 
 35    continue
       tpia=tpita
       sig=sigt
+      if(icont.ne.0.and.imode.ne.0)then
+         tpia2=tpita2
+         sig2=sigt2
+      endif
       tima=timta
       goto 90000 
 C 

@@ -118,6 +118,17 @@ C           do nothing ...
                ierr=-81
                goto 80010
             endif
+         else if(DBBC.eq.rack) then
+            call fc_dbbcn_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               ierr=-111
+               goto 80010
+            endif
          endif
       endif
 C 
@@ -173,7 +184,7 @@ C
       call gooff(lonoff,latosv-ltliof,caxfp,nwait*2,ierr)
       if (ierr.ne.0) goto 80010
 C
-      call volts(tpia,sig,tima,nmb,rut,ierr)
+      call volts(0,tpia,sig,tdum,sdum,tima,nmb,rut,ierr,icont)
       if (ierr.ne.0) goto 80010
       tmplin(1)=(tpia-vbase)*vslope-temps
       timlin(1)=tima
@@ -194,7 +205,7 @@ C
           call gooff(lonoff,latoff,caxfp,nwait,ierr)
         endif
         if (ierr.ne.0) goto 80010
-        call volts(tpia,sig,tima,intpfp,rut,ierr)
+        call volts(0,tpia,sig,tdum,sdum,tima,intpfp,rut,ierr,icont)
         if (ierr.ne.0) goto 80010
         temp(i)=(tpia-vbase)*vslope-temps
         tim(i)=tima
@@ -210,7 +221,7 @@ C
       if (abs(nptsfp).ge.5) goto 140 
       call gooff(lonoff,latosv+ltliof,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
-      call volts(tpia,sig,tima,nmb,rut,ierr)    
+      call volts(0,tpia,sig,tdum,sdum,tima,nmb,rut,ierr,icont)    
       if (ierr.ne.0) goto 80010 
       tmplin(2)=(tpia-vbase)*vslope-temps 
       timlin(2)=tima
@@ -282,7 +293,7 @@ C
       lnliof=float(3+(abs(nptsfp)/2))*bstep
       call gooff(lonosv-lnliof,latoff,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
-      call volts(tpia,sig,tima,nmb,rut,ierr)    
+      call volts(0,tpia,sig,tdum,sdum,tima,nmb,rut,ierr,icont)    
       if (ierr.ne.0) goto 80010 
       tmplin(3)=(tpia-vbase)*vslope-temps 
       timlin(3)=tima
@@ -302,7 +313,7 @@ C
           call gooff(lonoff,latoff,caxfp,nwait,ierr) 
         endif
         if (ierr.ne.0) goto 80010
-        call volts(tpia,sig,tima,intpfp,rut,ierr)  
+        call volts(0,tpia,sig,tdum,sdum,tima,intpfp,rut,ierr,icont)  
         if (ierr.ne.0) goto 80010
         temp(i)=(tpia-vbase)*vslope-temps
         tim(i)=tima
@@ -319,7 +330,7 @@ C   FOURTH LINEARITY POINT
 C 
       call gooff(lonosv+lnliof,latoff,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
-      call volts(tpia,sig,tima,nmb,rut,ierr)    
+      call volts(0,tpia,sig,tdum,sdum,tima,nmb,rut,ierr,icont)    
       if (ierr.ne.0) goto 80010 
       tmplin(4)=(tpia-vbase)*vslope-temps 
       timlin(4)=tima
@@ -482,6 +493,12 @@ C
       if(ichcm_ch(ldevfp,1,'u').ne.0) then
          if(VLBA.eq.rack.or.VLBA4.eq.rack) then
             call fc_mcbcn_r(ip)
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+            endif
+         else if(DBBC.eq.rack) then
+            call fc_dbbcn_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
                call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
