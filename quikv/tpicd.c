@@ -28,18 +28,40 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       if (command->equal != '=') {           /* run pcald */
+	  for(i=0;i<MAX_DET;i++)
+	    if(0!=shm_addr->tpicd.itpis[i])
+	      goto Start;
+	  ierr=-302;
+	  goto error;
+      Start:
 	  shm_addr->tpicd.stop_request=0;
+	  shm_addr->tpicd.tsys_request=0;
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
 	  return;
-      } else if (command->argv[0]==NULL)
+      } else if (command->argv[0]==NULL) {
 	goto parse;  /* simple equals */
-      else if (command->argv[1]==NULL) {/* special cases */
+      } else if (command->argv[1]==NULL) {/* special cases */
         if (*command->argv[0]=='?') {
           tpicd_dis(command,ip);
 	  return;
 	} else if(0==strcmp(command->argv[0],"stop")){
 	  shm_addr->tpicd.stop_request=1;
+	  skd_run("tpicd",'w',ip);
+	  ip[0]=ip[1]=ip[2]=0;
+          return;
+	} else if(0==strcmp(command->argv[0],"tsys")){
+	  if(0==shm_addr->dbbc_cont_cal.mode) {
+	    ierr=-301;
+	    goto error;
+	  }
+	  for(i=0;i<MAX_DET;i++)
+	    if(0!=shm_addr->tpicd.itpis[i])
+	      goto Tsys;
+	  ierr=-302;
+	  goto error;
+	Tsys:
+	  shm_addr->tpicd.tsys_request=1;
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
           return;
