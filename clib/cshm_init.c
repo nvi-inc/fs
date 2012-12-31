@@ -2,6 +2,9 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
+
+#include "../include/dpi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -233,14 +236,23 @@ void cshm_init()
   shm_addr->vifd_tpi[3]=65536;
 
   shm_addr->tpicd.continuous=0;
+  shm_addr->tpicd.stop_request=1;
+  shm_addr->tpicd.tsys_request=0;
   shm_addr->tpicd.cycle=0;
-  for(i=0;i<16*2+4;i++)
+  for(i=0;i<MAX_DET;i++)
      shm_addr->tpicd.itpis[i]=0;
 
   for(i=0;i<MAX_ONOFF_DET;i++)
     shm_addr->onoff.itpis[i]=0;
     
   shm_addr->onoff.setup=FALSE;
+  shm_addr->onoff.rep=2;
+  shm_addr->onoff.intp=1;
+  shm_addr->onoff.cutoff=75.*DEG2RAD;
+  shm_addr->onoff.step=3;
+  shm_addr->onoff.wait=120;
+  
+  shm_addr->onoff.proc[0]=0;
 
   for (i=0;i<MAX_RXGAIN;i++)
     shm_addr->rxgain[i].type=0;
@@ -248,7 +260,7 @@ void cshm_init()
   for(i=0;i<MAX_FLUX;i++)
     shm_addr->flux[i].name[0]=0;
 
-  for(i=0;i<2*MAX_DET;i++) {
+  for(i=0;i<MAX_DET;i++) {
     shm_addr->tpigain[i]=128;
     shm_addr->tpidiffgain[i]=128;
   }
@@ -371,6 +383,56 @@ void cshm_init()
   m5state_init(&shm_addr->mk5b_mode.mask.state);
   m5state_init(&shm_addr->mk5b_mode.decimate.state);
   m5state_init(&shm_addr->mk5b_mode.fpdp.state);
+
+  shm_addr->holog.az=0.0;
+  shm_addr->holog.el=0.0;
+  shm_addr->holog.azp=0;
+  shm_addr->holog.elp=0;
+  shm_addr->holog.ical=0;
+  shm_addr->holog.proc[0]=0;
+  shm_addr->holog.stop_request=0;
+  shm_addr->holog.setup=0;
+  shm_addr->holog.wait=0;
+
+  shm_addr->satellite.name[0]=0;
+  shm_addr->satellite.tlefile[0]=0;
+  shm_addr->satellite.mode=0;
+  shm_addr->satellite.wrap=0;
+  shm_addr->satellite.satellite=0;
+  shm_addr->satellite.tle0[0]=0;
+  shm_addr->satellite.tle1[0]=0;
+  shm_addr->satellite.tle2[0]=0;
+ 
+  shm_addr->satoff.seconds=0.0;
+  shm_addr->satoff.cross=0.0;
+  shm_addr->satoff.hold=0;
+
+  shm_addr->tle.tle0[0]=0;
+  shm_addr->tle.tle1[0]=0;
+  shm_addr->tle.tle2[0]=0;
+  shm_addr->tle.catnum[0]=0;
+  shm_addr->tle.catnum[1]=0;
+  shm_addr->tle.catnum[2]=0;
+
+  for (i=0;i<MAX_DBBCNN;i++) {
+    shm_addr->dbbcnn[i].freq=0;
+    shm_addr->dbbcnn[i].source=-1;
+    shm_addr->dbbcnn[i].bw=-1;
+    shm_addr->dbbcnn[i].avper=0;
+  }
+  for (i=0;i<MAX_DBBCIFX;i++) {
+    shm_addr->dbbcifx[i].input=1;
+    shm_addr->dbbcifx[i].att=-1;
+    shm_addr->dbbcifx[i].agc=1;
+    shm_addr->dbbcifx[i].filter=1;
+    shm_addr->dbbcifx[i].target_null=1;
+    shm_addr->dbbcifx[i].target=0;
+  }
+  shm_addr->dbbcform.mode=-1;
+  shm_addr->dbbcform.test=-1;
+
+  shm_addr->dbbc_cont_cal.mode=0;
+  shm_addr->dbbc_cont_cal.samples=10;
 
   return;
 }
