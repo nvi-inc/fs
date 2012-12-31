@@ -587,6 +587,12 @@ decimate parameter, must be one of 1, 2, 4, 8, or 16
 5T -204
 fpdp parameter, must be one of 1 or 2.
 ""
+5T -205
+okay parameter, must be 'disk_record_ok' or null.
+""
+5T -301
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+""
 5T -501
 error decoding mode? source parameter
 ""
@@ -664,6 +670,12 @@ ANTCN failed too many times
 ""
 AQ  -40
 MOON is not available
+""
+BD -301
+must specify at least 1 argument for dbbc command
+""
+BD -401
+error retrieving class
 ""
 BO -101
 Error getting next command FMGR ?FFF
@@ -873,7 +885,7 @@ BO -172
 Parameter for terminate must be disk_record_ok.
 ""
 BO -173
-Disk recording was commanded, either use disk_record=off or terminate=disk_record_ok.
+Don't terminate while recording, either use disk_record=off first or (dangerous) terminate=disk_record_ok.
 ""
 BO -180
 Error opening TIME.CTL FMP ?FFF
@@ -901,6 +913,9 @@ Error initiliazing mk5cn, internal error ?WWW
 ""
 BO -193
 Error initiliazing dscon, internal error ?WWW
+""
+BO -194
+Error initiliazing dbbcn, internal error ?WWW
 ""
 BO -201
 Error vacuum switching field (line 1) in SW.CTL
@@ -1571,6 +1586,222 @@ Frequency Switching is not as expected.
 CH -805
 Frequency Switching sequence has been changed.
 ""
+DB   -1
+dbbcn: error opening dbbad.ctl
+""
+DB   -2
+dbbcn: error pushing back on dbbad.ctl
+""
+DB   -3
+dbbcn: first non-comment line in dbbad.ctl did not contain three tokens
+""
+DB  -11
+dbbcn: error opening socket
+""
+DB  -13
+dbbcn: error from gethostbyname()
+""
+DB  -14
+dbbcn: host had NULL IP address
+""
+DB  -15
+dbbcn: error connecting to host
+""
+DB  -16
+dbbcn: error opening stream
+""
+DB  -17
+dbbcn: error gethostbyname(): HOST_NOT_FOUND
+""
+DB  -18
+dbbcn: error gethostbyname(): TRY_AGAIN
+""
+DB  -19
+dbbcn: error gethostbyname(): NO_RECOVERY
+""
+DB  -20
+dbbcn: error gethostbyname(): NO_ADDRESS
+""
+DB  -21
+dbbcn: error connect(): dbbc device connection open timed-out
+""
+DB  -22
+dbbcn: error from getsockopt(), see above for error
+""
+DB  -23
+dbbcn: error opening, dbbc probably not running, see above for error
+""
+DB  -24
+dbbcn: select for connect() error, see above for error
+""
+DB  -25
+dbbcn: error gethostbyname(): DNS timed-out
+""
+DB  -98
+dbbcn: no dbbc device defined
+""
+DB  -99
+dbbcn: illegal mode
+""
+DB -101
+dbbcn: error getting class buffer
+""
+DB -102
+dbbcn: error sending data, connection closed
+""
+DB -103
+dbbcn: error on select reading data, see above for error, connection closed
+""
+DB -104
+dbbcn: time-out, connection closed
+""
+DB -105
+dbbcn: error on read, see above for error, connection closed
+""
+DB -106
+dbbcn: error and EOF on read, see above for error, connection closed
+""
+DB -107
+dbbcn: EOF on read, dbbc probably crashed, connection closed
+""
+DB -108
+dbbcn: no data on read, but no EOF or error, connection closed
+""
+DB -109
+dbbcn: read too long for input buffer, connection closed
+""
+DB -110
+dbbcn: error pre-draining input, see above for error, connection closed
+""
+DB -111
+dbbcn: error and EOF pre-draining input, see above for error, connection closed
+""
+DB -112
+dbbcn: EOF pre-draining input, dbbc probably crashed, connection closed
+""
+DB -113
+dbbcn: no data pre-draining input, but no EOF or error, connection closed
+""
+DB -201
+dbbcn: ERROR response from DBBC, see db -200 error for text.
+""
+DC -101
+No default for frequency
+""
+DC -201
+Error decoding frequency, must be 10.000000 to 2200.000000.
+""
+DC -202
+Error decoding IF source, must be A, B, C, or D.
+""
+DC -203
+Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16.
+""
+DC -204
+Averaging period must be a positive integer.
+""
+DC -302
+IF source position exceeds number of conditioning modules
+""
+DC -401
+Class buffer error from monitor response.
+""
+DC -403
+Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC -402 for text.
+""
+DC -451
+Class buffer error from command response.
+""
+DD -201
+Mode must be one of: off, on.
+""
+DD -202
+Samples must be a positive integer.
+""
+DD -401
+Class buffer error from monitor response.
+""
+DD -403
+Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DF -402 for text.
+""
+DD -451
+Class buffer error from command response.
+""
+DF -101
+No default for mode.
+""
+DF -102
+No default for test parameter if mode=test.
+""
+DF -201
+Mode must be one of: astro, geo, wastro, test, lba.
+""
+DF -202
+Test must be one of:  0, 1, bin, tvg.
+""
+DF -401
+Class buffer error from monitor response.
+""
+DF -403
+Error decoding dbbcform/ response, could be a DBBC version mis-match, see error DF -402 for text.
+""
+DF -451
+Class buffer error from command response.
+""
+DF -453
+DBBC version does not agree with equip.ctl; dbbc says v100: July 14 2011
+""
+DF -454
+DBBC version does not agree with equip.ctl; dbbc says v101: March 08 2012
+""
+DF -455
+DBBC version does not agree with equip.ctl; dbbc says v102: September 07 2012
+""
+DF -456
+DBBC version does not agree with equip.ctl; dbbc has unknown version, see next mesage.
+""
+DF -457
+DBBC version does not agree with equip.ctl; dbbc says v103: DDC,103,October 04 2012
+""
+DI -101
+No default for IF input.
+""
+DI -102
+No default for gain.
+""
+DI -103
+No default for IF filter.
+""
+DI -104
+No default for AGC target.
+""
+DI -201
+IF input must be 1-8.
+""
+DI -202
+Attenuation must be "man", "agc", or 0 to 63.
+""
+DI -203
+IF filter must be 1 (512-1024), 2 (10-512), 3 (1536-2048), or 4 (1024-1536), 5 (0-1024), 6 (1200-1800), 7&8 (spares).
+""
+DI -204
+AGC target must 0-65535.
+""
+DI -304
+AGC target not available for DBBC versions < v101.
+""
+DI -400
+IF module position exceeds number of conditioning modules
+""
+DI -401
+Class buffer error from monitor response.
+""
+DI -403
+Error decoding dbbcifX/ response, could be a DBBC version mis-match, see error DI -402 for text.
+""
+DI -451
+Class buffer error from command response.
+""
 DQ -1
 Invalid state number for bbc (0 to 64).
 ""
@@ -1892,6 +2123,21 @@ Couldn't reset attenuators after an error
 FP -111
 Couldn't set manual gain control
 ""
+FP -401
+Class buffer error, from monitor response for IF gain control.
+""
+FP -402
+Error decoding IFx response for IF gain control.
+""
+FP -403
+Class buffer error, from voltage read response/
+""
+FP -404
+Error decoding BBCmm response for voltage.
+""
+FP -405
+Error decoding IFx response for voltage.
+""
 FP -112
 Couldn't reset gain to original value
 ""
@@ -1918,6 +2164,33 @@ Program error: less than zero length data object request for device ?W
 ""
 FV -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+HL   -1
+Break Detected in HOLOG
+""
+HL   -3
+HOLOG already running
+""
+HL   -4
+Error occurred while trying to return to source at end. Check offsets.
+""
+HL   -5
+Error occurred forming the command to send.
+""
+HL   -6
+Command formed is too big.
+""
+HL  -20
+Did not reach source in allotted time
+""
+HL  -30
+ANTCN failed too many times
+""
+HL  -40
+Diagnostic: Unknown axis system found in LOCAL
+""
+HL  -60
+HOLOG Diagnostic: Unknown axis system found in GOOFF
 ""
 IB   -1
 Trouble with GPIB class buffer
@@ -2167,6 +2440,21 @@ Break detected in IFADJUST.
 ""
 IF -511
 VC(s) in trackform not patched.
+""
+IF -512
+Mark 5B bit mask not set.
+""
+IF -513
+vsi4 must be configured.
+""
+IF -514
+VC(s) in vsi4 configuration not patched.
+""
+IF -515
+NO VCs selecte when vsi4 configuration is TVG.
+""
+IF -516
+vsi4 has impossible configuration.
 ""
 KA -201
 K4 tape label must have 8 characters or be a "#".
@@ -2513,6 +2801,9 @@ MAT device is /dev/null, MAT devices inaccessible.
 MA   -8
 Did not get Mark IV formatter prompt.
 ""
+MA   -9
+MAT not open.
+""
 MA -100
 Unable to open MAT device, ?WWW
 ""
@@ -2521,6 +2812,18 @@ Number of entries from MATAD control file exceed table limit of ?WWW
 ""
 MA -102
 Unsupported BAUD rate, use one of 110, 300, 600, 1200, 2400, 4800, or 9600.
+""
+MA -103
+Error closing MAT port ?WWW.
+""
+MA -104
+Working around possible serial line problem, there may be a 30 second pause.
+""
+MA -105
+Recovery seemed to succeed.
+""
+MA -106
+Recovery seemed to fail. You'll have to restart the FS to use MAT bus.
 ""
 MA -701
 MK4 DE unknown command 
@@ -2742,13 +3045,13 @@ M5  -21
 mk5cn: error connect(): mk5 device connection open timed-out
 ""
 M5  -22
-mk5cn: error from getsockopt()
+mk5cn: error from getsockopt(), see above for error
 ""
 M5  -23
-mk5cn: socket open error from getsockopt()
+mk5cn: error opening, mark 5 probably not running, see above for error
 ""
 M5  -24
-mk5cn: select for connect() returned error
+mk5cn: select for connect() error, see above for error
 ""
 M5  -25
 mk5cn: error gethostbyname(): DNS timed-out
@@ -2766,13 +3069,37 @@ M5 -102
 mk5cn: error sending data, connection closed
 ""
 M5 -103
-mk5cn: error reading data, connection closed
+mk5cn: error on select reading data, see above for error, connection closed
 ""
 M5 -104
-mk5cn: time-out on mk5 device, connection closed
+mk5cn: time-out, connection closed
 ""
 M5 -105
-mk5cn: select for fgets() returned error, connection closed
+mk5cn: error on read, see above for error, connection closed
+""
+M5 -106
+mk5cn: error and EOF on read, see above for error, connection closed
+""
+M5 -107
+mk5cn: EOF on read, mark 5 probably crashed, connection closed
+""
+M5 -108
+mk5cn: no data on read, but no EOF or error, connection closed
+""
+M5 -109
+mk5cn: read too long for input buffer, connection closed
+""
+M5 -110
+mk5cn: error pre-draining input, see above for error, connection closed
+""
+M5 -111
+mk5cn: error and EOF pre-draining input, see above for error, connection closed
+""
+M5 -112
+mk5cn: EOF pre-draining input, mark 5 probably crashed, connection closed
+""
+M5 -113
+mk5cn: no data pre-draining input, but no EOF or error, connection closed
 ""
 M5 -899
 unable to find or decode return code
@@ -3128,7 +3455,7 @@ Can't read which ports are in use.
 PP -402
 Porgram error: Impossible situation in pcalports_dis.
 ""
-Q1 -106
+Q1 -107
 No default for detectors.
 ""
 Q1 -201
@@ -3144,10 +3471,13 @@ Q1 -204
 Step must be between 0.0 and 90.0.
 ""
 Q1 -205
-Wait must be 1-1200.
+Procedure base name must be 31 or fewers characters long.
 ""
 Q1 -206
-Unknown detectors.
+Wait must be 1-1200.
+""
+Q1 -207
+Unknown detector.
 ""
 Q1 -301
 Un-supported VC detector.
@@ -3162,13 +3492,205 @@ Q1 -304
 No detectors selected.
 ""
 Q1 -305
-ONOFF or FIVPT already running.
+ONOFF, FIVPT, or HOLOG already running.
 ""
 Q1 -306
 BBC patching not defined.
 ""
 Q1 -307
 WARNING: Source structure correction greater than 20% for detector ?W.
+""
+Q1 -308
+Unknown IF filter.
+""
+Q2 -201
+Satellite name longer than 24 characters.
+""
+Q2 -102
+If satellite name or TLE file name is null, the other one must be also.
+""
+Q2 -103
+No default for satellite tracking mode.
+""
+Q2 -202
+TLE file name too long, probably longer than 64 characters.
+""
+Q2 -203
+Satellite tracking mode must be one of: track, radc, azel.
+""
+Q2 -204
+Wrap must be one of: CCW, CW, or NEUTRAL.
+""
+Q2 -301
+No ephmeris found, satellite probably not correct in temporary TLE file.
+""
+Q2 -302
+Premature end to ephmeris file in line ?WWWW.
+""
+Q2 -303
+Wrong number of data entries on line ?WWWW in data file.
+""
+Q2 -304
+Unknown tracking mode, internal program error.
+""
+Q2 -305
+Error from system() trying to run "predict", see above UNIX error.
+""
+Q2 -306
+The "predict" program exited with unexpected status -1.
+""
+Q2 -307
+Time has not reached satellite ephemeris, probably due to satoff=...
+""
+Q2 -308
+Time is beyond ephermis, probably due to satoff=...
+""
+Q2 -309
+Opening ephemris file failed, some one must have deleted it.
+""
+Q2 -310
+The "predict" program did not find the TLE file.
+""
+Q2 -311
+The "predict" program did not find the QTH file.
+""
+Q2 -312
+The "predict" program did not find the TLE or the QTH file.
+""
+Q2 -313
+Error trying to run "predict", is "predict" installed?
+""
+Q2 -314
+The "predict" program exited with an unkown status of ?WWW.
+""
+Q2 -315
+Error creating temporary ephemeris file.
+""
+Q2 -316
+Error creating temporary QTH file.
+""
+Q2 -317
+Error opening temporary QTH file for writing.
+""
+Q2 -318
+The "predict" program could not read the QTH file.
+""
+Q2 -319
+TLE data not have consist catalog number in each line.
+""
+Q2 -320
+TLE data not defined.
+""
+Q2 -321
+Error creating temporary TLE file.
+""
+Q2 -322
+Error opening temporary TLE file for writing.
+""
+Q2 -323
+Can't open TLE file, check UNIX error code above.
+""
+Q2 -324
+Can't decode some line in TLE file.
+""
+Q2 -325
+Some TLE line 1 and/or line 2 don't have correct format in TLE file.
+""
+Q2 -326
+Error reading TLE file, see UNIX error code above.
+""
+Q2 -327
+Did not find satellite in TLE file.
+""
+Q2 -328
+There is a too long line in the TLE file, maybe extra trailing space.
+""
+Q2 -400
+WARNING: ANTCN not being run, antenna device is /dev/null.
+""
+Q3 -101
+No default for seconds.
+""
+Q3 -201
+Seconds did not decode.
+""
+Q3 -102
+No default for cross.
+""
+Q3 -202
+Cross did not decode.
+""
+Q3 -203
+Hold parameter must be "hold" or "track".
+""
+Q3 -301
+Time has not reached satellite ephemeris, probably due to seconds being too negative.
+""
+Q3 -302
+Time is beyond ephermis, probably due to seconds being too positive.
+""
+Q3 -303
+Unknown tracking mode, internal program error.
+""
+Q3 -304
+No Satellite commanded, can't use satellite offsets.
+""
+Q4 -101
+No default for TLE line number
+""
+Q4 -201
+TLE Line number must be 0, 1, or 2.
+""
+Q4 -102
+No default for TLE catalog number
+""
+Q4 -202
+TLE catalog number must be positive.
+""
+Q4 -103
+No default for TLE string.
+""
+Q4 -203
+TLE line 0 too long, maximum 24 characters.
+""
+Q4 -213
+TLE line 1 too long, maximum 69 characters.
+""
+Q4 -223
+TLE line 2 too long, maximum 69 characters.
+""
+Q4 -301
+TLE command program error, impossible line case.
+""
+Q4 -313
+TLE first character in line 1 is not 1.
+""
+Q4 -323
+TLE first character in line 2 is not 2.
+""
+Q4 -413
+TLE can't decode catalog number in line 1.
+""
+Q4 -423
+TLE can't decode catalog number in line 2.
+""
+Q4 -513
+TLE line 1 catalog number does not agree with specified catalog number.
+""
+Q4 -523
+TLE line 2 catalog number does not agree with specified catalog number.
+""
+Q4 -613
+TLE can't decode check sum in line 1.
+""
+Q4 -623
+TLE can't decode check sum in line 2.
+""
+Q4 -713
+TLE line 1 check-sum doesn't match.
+""
+Q4 -723
+TLE line 2 check-sum doesn't match.
 ""
 QA -101
 No default for tape number.
@@ -3366,10 +3888,49 @@ QG -315
 Bandwidth must be set with repro command first.
 ""
 QH -101
-No default for calibration temperature.
+No default for azimuth span.
+""
+QH -102
+No default for elevation span.
+""
+QH -103
+No default for azimuth points.
+""
+QH -104
+No default for elevation points.
+""
+QH -105
+No default for re-calibration period (seconds).
+""
+QH -106
+No default for procedure base name.
 ""
 QH -201
-Calibration temperature must be a number.
+Azimuth span must have an absolute value less than 360.
+""
+QH -202
+Elevation span must have an absolute value less than 90.
+""
+QH -203
+Azimuth points must have an odd absolute value between 2 and 100.
+""
+QH -204
+Elevation points must have odd absolute value between 2 and 100 and the same sign as azimuth points.
+""
+QH -205
+Re-calibration period (seconds) must be "off" (0, default) or positive number less than 10001.
+""
+QH -206
+Procedure base name must be 31 or fewers characters long.
+""
+QH -207
+Onsource wait times (seconds) must be a positive number less than 1001.
+""
+QH -301
+ONOFF, FIVPT, or HOLOG already running.
+""
+QH -302
+HOLOG can't be run until it is set-up, HOLOG=...
 ""
 QI -101
 No default for IF1 attenuator
@@ -3437,6 +3998,9 @@ TPIs must be one of ALL,EVEN,ODD,P1,...Pn,FORMIFP.
 QK -204
 No detectors selected
 ""
+QK -205
+TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...16u,16l,FORMBBC,FORMIF.
+""
 QK -211
 Tsys value for device ?W overflowed or was less than zero.
 ""
@@ -3448,6 +4012,27 @@ Previous detectors not remembered between uses.
 ""
 QK -214
 No rack detectors must be one of u5 or u6
+""
+QK -301
+VC detectors other than must be upper, lower, and dual not supported.
+""
+QK -302
+LO sideband is unknown for detector device.
+""
+QK -303
+Patching not defined for detector device.
+""
+QK -304
+LBA filter mode not defined for detector device.
+""
+QK -306
+IF source not defined for detector device.
+""
+QK -401
+program error: incorrect number of responses in tpput_vlba.
+""
+QK -402
+Error in DBBC communication in tpput_dbbc.
 ""
 QL -101
 No default for the MAT address.
@@ -3749,116 +4334,56 @@ Relay switch positions must be: A or B.
 QY   -1
 Error in response from counter.
 ""
+QZ   -1
+Class error.
+""
+QZ -106
+No default for detector.
+""
 QZ -201
 Axis must be HADC, AZEL, XYEW, or XYSN.
 ""
 QZ -202
-Detector device must be one of the allowed detectors for your equipment or u5 or u6.
+Number (absolute value) of repetitions must be between 1 and 10.
 ""
 QZ -203
-Cal noise source temp not retrievable from COMMON.
-""
-QZ -204
-Number of repetitions must be between 1 and 10.
-""
-QZ -205
 Number (absolute value) of points must be between 3 and 31.
 ""
-QZ -206
-Beam size was not retrievable from COMMON.
-""
-QZ -207
-Integration period must be between 1 and 32.
-""
-QZ -208
+QZ -204
 Step size must be a real number.
 ""
-QZ -209
+QZ -205
+Integration period must be between 1 and 32.
+""
+QZ -206
+Detector device must be one of the allowed detectors for your equipment or u5 or u6.
+""
+QZ -207
+Wait time must be 1-1200
+""
+QZ -213
+Detector device not one of ia/b/c/d, or bbc1 ... bbc14.
+""
+QZ -214
+Cal noise source temp not retrievable from COMMON.
+""
+QZ -215
+Beam size was not retrievable from COMMON.
+""
+QZ -216
 PATCH has not setup the specified VC for FIVPT.
 ""
-QZ -210
-bbc not set-up for ifa or ifb.
-""
-QZ -211
-Detector device not one of ia, ib, or bbc1 ... bbc14.
-""
-QZ -212
-Wait time must be 1-1200
+QZ -217
+bbc not set-up.
 ""
 QZ -301
 FIVPT is not dormant.
-""
-QZ -302
-FIVPT is not present.
 ""
 QZ -303
 The VC specified for FIVPT was not setup.
 ""
 QZ -304
 Parameters were not successfully set up for FIVPT.
-""
-QZ -401
-Number of repetitions must be between 1 and 99.
-""
-QZ -402
-Integration period must be between 1 and 10.
-""
-QZ -403
-Detector device 1 must be one of the allowed detectors for your equipment or u5 or u6.
-""
-QZ -404
-Cal noise source temp for device 1 not retrievable from COMMON.
-""
-QZ -405
-Beam size for device 1 was not retrievable from COMMON.
-""
-QZ -406
-Detector device 1 must be one of the allowed detectors for your equipment or u5 or u6.
-""
-QZ -407
-Cal noise source temp for device 2 not retrievable from COMMON.
-""
-QZ -408
-Beam size for device 2 was not retrievable from COMMON.
-""
-QZ -409
-Cutoff angle must be 0.0 to 90.0 degrees
-""
-QZ -410
-Step size must be 0.0 to 99.0
-""
-QZ -411
-VC for device 1 was not setup with PATCH.
-""
-QZ -412
-VC for device 2 was not setup with PATCH.
-""
-QZ -413
-bbc for device 1 not set-up for one of ifa ... ifd.
-""
-QZ -414
-Detector device 1 not one of ifa ... ifd or bbc1 ... bbc14.
-""
-QZ -415
-bbc for device 2 not set-up for one of ifa ... ifd.
-""
-QZ -416
-Detector device 2 not one of ifa ... ifd or bbc1 ... bbc14.
-""
-QZ -501
-ONOFF is not dormant.
-""
-QZ -502
-ONOFF is not present.
-""
-QZ -503
-Parameters were not successfully set up for ONOFF.
-""
-QZ -504
-VC for device 1 was not setup.
-""
-QZ -505
-VC for device 2 was not setup.
 ""
 Q* -101
 No default for LO channel
@@ -3870,7 +4395,7 @@ Q* -105
 No default for LO pcal spacing
 ""
 Q* -201
-LO channel must be loa/b/c/d for VLBA/VLBA4, lo1/2/3 for MK3/MK4/K4
+Channel must be loa-d: VLBA/4/5+DBBC, lo1-3: MK3/4/5+K4, lo1-4: LBA/4+all others
 ""
 Q* -202
 LO frequency must be a positive real number
@@ -3904,6 +4429,9 @@ Previous value not permitted for LO pcal spacing.
 ""
 Q* -306
 Previous value not permitted for LO pcal offset.
+""
+Q* -401
+LO channel position exceeds number of conditioning modules
 ""
 Q- -101
 No default for User Device channel
@@ -4788,10 +5316,22 @@ SC   -3
 setcl: setting system time not supported
 ""
 SC   -4
-setcl: formatter to cpu time difference greater than 248 days
+setcl: formatter to cpu boot time difference greater than 248 days
 ""
 SC   -5
 setcl: formatter time garbled
+""
+SC   -6
+setcl: more than 248 days since last boot, reboot required
+""
+SC   -7
+setcl: times() has passed -1, reboot required
+""
+SC   -8
+setcl: less than 30 days until time error, reboot as soon as possible
+""
+SC   -9
+setcl: less than 30 days until times() returns -1, reboot as soon as possible
 ""
 SC  -10
 setcl: failed too many times, couldn't check formatter time
@@ -4837,6 +5377,9 @@ setcl: Mark 5B not sync'd, use fmset 's' option to fix.
 ""
 SC  -24
 setcl: Mark 5B syncerr_gt_3, use fmset 's' option to fix.
+""
+SC  -25
+setcl: rte_check got error from times(), see above for error
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -4962,10 +5505,16 @@ TC -102
 cycle period has no default.
 ""
 TC -201
-continuous parameter must be "no" or "yes".
+Continuous parameter must be "no" or "yes" (or "stop" or "tsys").
 ""
 TC -202
-cycle period must be a non-negative integer.
+Cycle period must be a non-negative integer.
+""
+TC -301
+Continuous cal not enabled for DBBC.
+""
+TC -302
+TPICD not set-up: no detectors selected.
 ""
 TE   -9
 Video converter frequency has not been set
@@ -5025,10 +5574,10 @@ VB -202
 I.F. input should be one of: a, b, c, or d.
 ""
 VB -203
-USB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16.
+USB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32.
 ""
 VB -204
-LSB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16.
+LSB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32.
 ""
 VB -205
 TPI averaging period must be one of: 0, 1, 2, 4, 10, 20, 40, or 60.
