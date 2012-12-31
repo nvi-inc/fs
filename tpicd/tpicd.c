@@ -25,6 +25,7 @@ main()
   long ip[5];
   struct tpicd_cmd tpicd;
   struct data_valid_cmd data_valid[2];
+  struct dbbc_cont_cal_cmd dbbc_cont_cal;
   int i,j,k,l,idata,nch,ilen, nchstart, nchar;
   char buff[120];
   unsigned before,after,isleep;
@@ -33,6 +34,9 @@ main()
   int iclass,nrec,idum,nr;
   short int buf2[80];
   char buf3[MAX_BUF];
+
+  int samples;
+  double dbbc_tpi[MAX_DBBC_DET],dbbc_tpical[MAX_DBBC_DET];
 
 /* connect to the FS */
 
@@ -63,18 +67,36 @@ main()
 
  wakeup_block:
   memcpy(&tpicd,&shm_addr->tpicd,sizeof(tpicd));
+  shm_addr->tpicd.tsys_request=0;
   memcpy(&data_valid,&shm_addr->data_valid,sizeof(data_valid));
+  memcpy(&dbbc_cont_cal,&shm_addr->dbbc_cont_cal,sizeof(dbbc_cont_cal));
+
+  if(dbbc_cont_cal.mode==1) {
+    samples=0;
+    for(i=0;i<MAX_DBBC_DET;i++) {
+      dbbc_tpi[i]=0.0;
+      dbbc_tpical[i]=0.0;
+    }
+  }
+
+  if(shm_addr->equip.rack==DBBC) {
+    if(dbbc_cont_cal.mode==1)
+      strcpy(buff,"tpcont/");
+    else
+      strcpy(buff,"tpi/");
+    nchstart=nch=strlen(buff)+1;
+  }
 
 #ifdef TESTX
   printf(" copied structures\n");
 #endif
-  if(tpicd.stop_request!=0)
+  if(tpicd.stop_request!=0 && tpicd.tsys_request == 0)
     goto loop;
   
 #ifdef TESTX
   printf(" not stopped\n");
 #endif
-  if(tpicd.continuous==0 &&
+  if(tpicd.continuous==0 && tpicd.tsys_request==0 &&
      (data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0))
     goto loop;
 
@@ -195,9 +217,55 @@ main()
     } else if(shm_addr->equip.rack==LBA) {
       tpi_lba(ip,tpicd.itpis);   /* sample tpi(s) */
       tpput_lba(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
+    } else if(shm_addr->equip.rack==DBBC) {
+#ifdef TESTX
+    printf(" collecting dBBC data \n");
+#endif
+      tpi_dbbc(ip,tpicd.itpis);   /* sample tpi(s) */
+      if(dbbc_cont_cal.mode!=1) {
+#ifdef TESTX
+    printf(" put non-cont dBBC data \n");
+#endif
+	tpput_dbbc(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
+      } else {
+#ifdef TESTX
+    printf(" put cont dBBC data \n");
+#endif
+	tpput_dbbc(ip,tpicd.itpis,-11,buff,&nch,ilen); /* put tpcont */
+	for(k=0;k<MAX_DBBC_DET;k++) {
+	  if(1==tpicd.itpis[k]) {
+	    if(dbbc_tpi[k]<-0.5 ||shm_addr->tpi[k]<=0 ||
+	       shm_addr->tpi[k]>65534.5)
+	      dbbc_tpi[k]=-1.0;
+	    else
+	      dbbc_tpi[k]+=shm_addr->tpi[k];
+	    if(k >= MAX_DBBC_BBC*2)
+	      continue;
+	    if(dbbc_tpical[k]<-0.5 ||shm_addr->tpical[k]<=0
+	       || shm_addr->tpical[k]>65534.5)
+	      dbbc_tpical[k]=-1.0;
+	    else
+	      dbbc_tpical[k]+=shm_addr->tpical[k];
+	  }
+	}
+	if(++samples >= dbbc_cont_cal.samples) {
+	  int tsys_disp=tpicd.tsys_request;
+	  tpicd.tsys_request=0;
+	  cont_dbbc(tpicd.itpis,dbbc_tpi,dbbc_tpical,samples,3,tsys_disp);
+	  cont_dbbc(tpicd.itpis,dbbc_tpi,dbbc_tpical,samples,4,tsys_disp);
+	  cont_dbbc(tpicd.itpis,dbbc_tpi,dbbc_tpical,samples,10,tsys_disp);
+	  cont_dbbc(tpicd.itpis,dbbc_tpi,dbbc_tpical,samples,5,tsys_disp);
+	  samples=0;
+	  for(i=0;i<MAX_DBBC_DET;i++) {
+	    dbbc_tpi[i]=0.0;
+	    dbbc_tpical[i]=0.0;
+	  }
+	  if(tsys_disp)
+	    goto wakeup_block;
+	}
+      }
     }
     
-
 #ifdef TESTX
     printf(" finished collecting \n");
 #endif
@@ -208,6 +276,9 @@ main()
       isleep=0;
     else
       isleep=tpicd.cycle;
+
+    isleep++;
+      
 #ifdef TESTX
     printf(" isleep %d\n",isleep);
 #endif
