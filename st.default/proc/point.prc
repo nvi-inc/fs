@@ -6,11 +6,15 @@ log=station
 enddef
 define  sband         00000000000
 device=i2
+"or
+"device=ib
+"or
+"device=ic
 fivept
 enddef
 define  prep          00000000000
 wx
-xyoff=0d,0d
+azeloff=0d,0d
 !+2s
 track
 sy=go aquir &
@@ -42,27 +46,27 @@ define  termp         00000000000
 sy=go aquir &
 enddef
 define  initp         00000000000
-setupa=1
+setupa
 caloff
 "sample fivept set-up for azel antenna with Mark III/IV rack
 "fivept=azel,-2,9,.4,1,i1,120
-"sample fivept set-up for xyns antenna with VLBA/4 rack
-fivept=xyns,-2,9,.4,1,ia,120
+"sample fivept set-up for azel antenna with VLBA/4 rack or DBBC
+fivept=azel,-2,9,.4,1,ia,120
 " sample onoff set-up for Mark III/IV
-"onoff=2,1,75,3,120,all
-" sample onoff set-up for VLBA/4
-onoff=2,1,75,3,120,allu,ia,ib,ic
+"onoff=2,1,75,3,,120,all
+" sample onoff set-up for VLBA/4 or DBBC
+onoff=2,1,75,3,,120,allu,ia,ib,ic
 check=
 sy=go aquir &
 enddef
 define  acquire       00000000000
 sy=run aquir /usr2/control/ctlpo.ctl $ &
 log=sx
-calrx=x,fixed,8080,8580.1
-calrx=s,fixed,2020
 enddef
 define  xband         00000000000
 device=i1
+"or
+"device=ia
 fivept
 enddef
 define  calonfp       00000000000
