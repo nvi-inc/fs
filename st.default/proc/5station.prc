@@ -46,9 +46,14 @@ if3
 vc01
 vc05
 vc09
+" the shown order of the commands from here to the end of this procedure is
+" strongly recommended
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
-sy=run setcl &
+mk5b_mode
+!+1s
+mk5=dot?
+sy=run setcl adapt &
 enddef
 define  midtp         00000000000
 "rxmon
