@@ -1,7 +1,7 @@
 #
 VERSION = 9
-SUBLEVEL = 10
-PATCHLEVEL = 5
+SUBLEVEL = 11
+PATCHLEVEL = 0
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
@@ -12,7 +12,8 @@ EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
 quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
-gnfit gndat gnplt dscon systests autoftp monpcal logpl1
+gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
+dbbcn
 #
 all:	libs execs
 #
@@ -36,7 +37,7 @@ clean:
 	rm -f `find . -name '#*#' -print`
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
-	rm -f `find . -name '.pyc' -print`
+	rm -f `find . -name '*.pyc' -print`
 #
 rmexe:
 	rm -fr bin/*
@@ -44,6 +45,7 @@ rmexe:
 rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0
+	rm -f `find . -name '*.pyc' -print`
 #
 libs:
 	for dir in $(LIB_DIR); do\
