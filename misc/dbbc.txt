@@ -1,0 +1,269 @@
+File: /usr2/fs-9.11.0/misc/dbbc.txt  Version:0.3  Date: 130121
+
+		    FS Operations with DBBC Racks
+
+			      Ed Himwich
+
+INTRODUCTION
+
+This document is provided as an introduction to changes in the FS to
+support DBBC racks and how operations are affected.
+
+Starting with version 9.11.0, the FS supports DBBCs with the DDC
+personality.  As of this time only versions v100, v101, and v102 are
+supported.  Version v103 is not supported yet (but may work with the
+FS, if you select v102 in the equip.ctl file, but doing so will cause
+a version conflict error to be generated each time the "form=..."
+command issued.).  The PFB personality is not support yet either.
+
+SNAP COMMANDS
+
+The following SNAP commands were modified or added to support the DBBC:
+
+bbcNN     digital converter control, converters NN=01-16
+ifX       If Conditioning Module control, modules, X=a, b, c, d
+fivept    Antenna pointing offsets measurements
+onoff     Antenna gain calibration measurements
+tpi       Tsys TPI measurements
+tpical    Tsys TPICAL measurements
+tpdiff    Tsys TPDIFF calculation
+caltemp   Detector noise diode calibration value retrieval
+tsys      Tsys calculation
+tpicd     Background tpi/tpical sampling 
+cont_cal  controls selection of cont_cal in DBBC and FS Tsys measurements
+dbbc      direct communication with the DBBC
+
+There is no support in chekr (periodic module checking) for the DBBC yet.
+
+TSYS Measurements
+
+For the DBBC, there are two available styles of Tsys measurements. One
+style is using non-continuous (or "high cal" or "on-off cal")
+measurements.  This style is similar to what is used with Mark IV and
+VLBA4 racks (which are only supported with non-continuous cal in the
+FS).  There is one significant difference though. The normal approach
+is to make a Tsys measurement during each PREOB.  After that during
+the observations, the tpicd daemon samples the TPI data at a user
+specified interval.  The difference for DBBCs is that unlike the usage
+with the VLBA4, after the Tsys measurement during PREOB, the IF gains
+are left locked until the next set-up.  The set-up for the next scan
+will set the gains back to AGC mode so that the level can reach an
+appropriate level before the next scan.  In PREOB, four seconds should
+be given to allow the levels to stabilize before the gain is locked.
+The example PREOB is structured to do this and leave room for other
+commands that may be needed in PREOB to be executed during the four
+seconds.
+
+This difference allows the TPI data sampled during the observations to
+be related to the gain levels in the PREOB Tsys measurement.  This
+provides higher resolution than using the gains as a proxy for the
+signal levels (as is done with the VLBA4 rack).  This approach is
+possible because BBCs in the DBBC continuously adjust the sample
+threshold, so even if the levels of the IF conditioning modules are
+off slightly during the scans, the data samples should still have the
+correct statistics.  An example special version of the CALTSYS
+procedure, CALTSYS_MAN, is provided for use in PREOB.  A "normal"
+example CALTSYS procedure (that returns the gains to AGC) is also
+provided for stand-alone Tsys measurements and tests.
+
+The second Tsys style is continuous cal (or "low cal" or "80 Hz cal").
+This style is selected when the "cont_cal=on" command is given.  The
+second parameter of this command can be used to specify how many
+samples are needed to get a precise enough Tsys measurement for
+operations (the default value is 10).  This command places the DBBC in
+continuous calibration mode and changes the way the FS works with the
+DBBC detectors.
+
+In the continuous cal mode, all Tsys measurements (except for FIVEPT
+and ONOFF), are made by the "tpicd" daemon.  This has the effect of
+completely removing Tsys related commands from PREOB/MIDOB/POSTOB.
+During scans, the "tpicd" daemon samples the TPI/TPICAL values
+periodically.  After the number of samples specified in the "cont_cal"
+command have been collected, "tpicd" calculates a Tsys value that is
+logged, but not displayed (the TPI/TPICAL samples are also logged but
+not displayed, in "tpcont/" log records).  The Tsys values are used
+internally by the FS and in display windows.  In this approach PREOB
+is not used to make a pre-scan Tsys measurement. 
+
+For continuous cal, the CALTSYS procedure can still be used to get
+Tsys measurements on demand.  The procedure consists of a single
+command "tpicd=tsys".  This command triggers the "tpicd" daemon to
+start collecting a fresh set of TPI/TPICAL samples and then log and
+display: average TPI and TPICAL samples, CALTEMP values, and Tsys
+values for all currently selected detectors for tpicd.  This is very
+similar to the operation of CALTSYS for non-continuous cal except that
+a number of samples are collected and averaged.  After displaying the
+results, tpicd returns to whatever it was doing before the
+"tpicd=tsys" command, so this command can be use both during or
+outside of scans.
+
+Please note for continuous cal that: (1) it is impossible to estimate
+Tsys values for the IF conditioning module detectors (no separate
+TPICAL value is available), but tpicd does report their TPI values
+(which are actually a combination of TPI and TPICAL values), (2)
+"tpicd" must be set-up to operate before "tpicd=tsys" will display
+anything useful, the set-up is normally done by the mode set-up
+procedure, and (3) the tpicd sampling interval should be set to 100
+centiseconds.
+
+FIVPT and ONOFF work in continuous cal mode, with four caveats.
+First, in ONOFF you will probably want to set the integration time to
+be at least as large as the averaging time specified in "cont_cal".
+This will be necessary to get sufficiently precise values for Tsys and
+the Tcal in Janskys (useful values of which cannot be calculated for
+IF conditioning module detectors in continuous cal mode).  However,
+the SEFDs should be reasonable even with single second integration.
+Second, in FIVPT the use of an IF conditioning module as a detector
+will cause system temperature to be assumed to be 100% and the antenna
+temperature for the samples to be reported as a percentage of system
+temperature (as if the cal value were set to -100).  Third, in FIVPT
+when the detector is a BBC sideband, the TPI and TPICAL values will be
+averaged for each second of data. This gives a slightly higher Tsys
+value than using the TPI value alone, but unless the diode is very
+strong (which it should not be for continuous cal) the combined TPI
+and TPICAL values will give more SNR when peaking on a source than
+just using the TPI data.  Fourth, in FIVPT if a BBC sideband detector
+is used, the number of samples for the Tsys measurement is the larger
+of the specified integration time and the number of samples to average
+specified by cont_cal.  This is necessary to make sure that there is a
+reasonable (positive) value for the Tsys so that the peak fitting will
+work.  The cont_cal number of averages can be increased if necessary
+to make the Tsys results reliable,
+
+There may be some TPZERO issues with the TPI/TPICAL for the BBC
+sidebands in either calibration mode, in particular if the count level
+is very low, say under 1000 counts. It is expected that it will
+possible to reduce the significance of these issues with v103 of the
+DDC personality, which had not been finalized as of this writing.
+Also for such low levels, there may be significant quantization
+issues.  For pointing, it is certainly permissible to raise the IF
+module target levels to raise the BBC sideband counts for better
+resolution, BBC sideband counts of 3000+ are suitable for pointing.
+
+There is some question whether the IF power detectors are useful in
+continuous cal mode.  Some strange results have been noticed.  There
+have also been some strange RMS values in FIVPT in continues cal
+mode.  These issues will be investigated in the future.
+
+EXAMPLE PROCEDURE LIBRARIES
+
+Two example procedure libraries are provided as starting points for
+developing station procedure libraries for use with the DBBC.  These
+can be found in /usr2/fs/st.default/proc. The "dstation.prc" example
+is for non-continuous cal.  The "dstationcc.prc" example is for
+continuous cal.
+
+SET-UP
+
+Six things need to be set-up to use the FS with DBBC: (1) equip.ctl,
+(2) skedf.ctl, (3) dbbad.ctl, (4) station.prc,(5) point.prc, and (6)
+.Xresources.
+
+For equip.ctl, you need to set:
+
+ (A) the rack type to "dbbc". 
+ (B) the DDC personality version number to agree with your DBBC
+ (C) the number of condition modules, usually 4
+ (D) the IF power conversion factors, there must be the same number
+     of these as the number of conditioning modules.
+
+If you do not have measured IF power conversion factors, you can use
+the default value of 15000. A standardized procedure will developed in
+the future for measuring the conversion factors. If you don't have
+measured values you should treat Tsys results from the IF conditioning
+modules as provisional at best.
+
+For skedf.ctl:
+
+There are two new keywords related to DBBCs.
+
+(A) cont_cal, which controls how the cont_cal command is set in your
+    DRUDG generated set-up procedure, choices are "ON", "OFF", and
+    "ASK" (to be prompted).
+
+(B) default_dbbc_if_inputs, this selects which IF inputs are selected
+    by default in the DRUDG generated set-up procedures.  This may be
+    useful for stations that always, or at least most of the time, use
+    the same IF inputs.  This is probably most useful for stations
+    that do geodesy most of the time.  Eventually, these inputs will
+    flow from the .skd and .vex schedule files, but all stations must
+    upgrade to 9.11.0 before this change can be made.
+
+The ddbad.ctl file must have the correct network address for the
+DBBC. An example file is available in
+/usr2/fs/st.default/control/dbbad.ctl
+
+The station.prc file must be set-up for the DBBC and calibration mode
+you will be using.  Please see step (14), sub-step (B) in the
+installation instructions in fs9110up.txt for more details.
+
+The point.prc file will need to be modified for the DBBC. Please see
+step (14), sub-step (C) in the installation instructions in
+fs9110up.txt for more details.
+
+For the .Xresources file, please see step (15) in fs9110tp.txt.
+
+IF DETECTOR POWER CONVERSIONS
+
+The DBBC IF conditioning module power detectors use a logarithmic scale
+from 0-65535 counts. The FS converts these "raw" counts to linear
+"cooked" power levels using the (C language expressed) formula:
+
+  power=65535.*pow((counts-65535.)/factor,10.)
+
+where "factor" is the conversion factor specified in the equip.ctl
+file for the detector in use.  Typically, the value of "factor" is
+around 15000. This expression was chosen to make an overflow in counts
+(65535) also appear as an overflow in power (65535).
+
+In version 9.11.0 the reporting of the IF values in the log is not
+uniform with respect to being power or counts.  In "ifX", TPI (not
+from tpicd), and TPICAL commands, and TPCONT (from tpicd) raw counts
+are reported.  In TPDIFF, and ONOFF outputs, the units are power.  The
+average TPI from tpicd for the IF detector in continuous cal mode is
+an average of the raw counts, not the average power.  For consistency
+in the next release, power values will be used in all cases except for
+the "ifX" command, which will report raw counts.  The "ifX" is the
+command conceptually closest to hardware and this will provide a way
+to check the operating level which is specified in raw counts.
+
+FMSET
+
+The FMSET program was modified for the DBBC. The change is that the
+when user requests a Mark 5B sync, the user will be offered an option
+to sync the DBBC first.  Generally speaking, the user should probably
+always go ahead and sync the DBBC.  The sync for the Mark 5B will be
+changed anyway and it would make sense to make sure the DBBC is sync'd
+before sync-ing the Mark 5B.
+
+OPERATIONS
+
+Operations for observing follow the normal pattern for supported
+equipment, but with a few small changes. The .snp and .prc files
+should be generated as usual, but the DBBC selected as the rack type
+if it isn't already. 
+
+The operator should check three things:
+
+1. in experiment .prc file, update dbbc if inputs if necessary
+2. in experiment .prc file, update tpicd interval is 100 if
+   continuous cal is being used.
+3. the correct version of station.prc file is in use, if more than one
+   is available.
+
+At least steps (1) and (2) will automated. The former by catalog
+updates. The latter by a new feature in DRUDG.
+
+STANDARD DETECTOR DEVICE MNEMONICS
+
+The mnemonics for detector devices for the DBBC follow the usual two
+character pattern.pattern used in the FS for other rack types.
+
+Base-band converter detectors are identified with a number (or letter)
+for the first character, representing the ordinal position of the
+converter (1,...9,a,..,g) for converters (1-16) for the first
+character and either "u" (for upper) or "l" (for lower) for the
+sideband of the detector as the second character.
+
+For IF detectors, the first character is "i" followed a letter, (a-d)
+for the detector in the corresponding IF channel.
