@@ -36,7 +36,8 @@ static char *key_mode4[]={ "m"  , "a"  , "b1" , "b2" , "c1" , "c2" ,
 
 extern struct fscom *shm_addr;
 extern int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kM3rack,kM4rack,
-  kV4rack, kLrack, kK4drive[2],kK41drive_type[2],kK42drive_type[2], selectm;
+  kV4rack, kLrack, kK4drive[2],kK41drive_type[2],kK42drive_type[2], kDrack,
+  selectm;
 
 mout2(it,iyear)
 
@@ -55,7 +56,7 @@ int iyear;
   double xxx={0.0},yyy={0.0};
   float outxxx={0.0},outyyy={0.0};
   float ras;
-  double dtemp, htemp;
+  double dtemp, htemp,aztemp,eltemp;
   char feet[6];
   char dig[3];
   char outfloat[80];
@@ -95,9 +96,17 @@ int iyear;
   printw("%s",outfloat);
   move(ROW1,COL1+62);
   standout();
-  printw("%.10s",shm_addr->lsorna);
+  if(shm_addr->satellite.satellite == 0||shm_addr->satellite.mode!=0)
+    printw("%.10s",shm_addr->lsorna);
   posdeg = 0;
-  if (memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
+  if(shm_addr->satellite.satellite == 1 && shm_addr->satellite.mode==0) {
+    posdeg=1;
+    printw("%.10s",shm_addr->satellite.name);
+    satpos(it,&aztemp,&eltemp);
+    /* Convert az/el in common to actual ra/dec */
+    cnvrt(2,aztemp,eltemp,&raxx,&dcxx,it,
+	  shm_addr->alat,shm_addr->wlong);
+  } else if (memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
       memcmp(shm_addr->lsorna,"azeluncr  ",10)==0 ) {
     posdeg = 1; 
     /* Convert az/el in common to actual ra/dec */
@@ -436,7 +445,8 @@ int iyear;
   preint(outf,idecm,-2,1);
   printw("%s",outfloat);
   move(ROW1+2,COL1+76);
-  if(memcmp(shm_addr->lsorna,"          ",10)==0)  {
+  if(memcmp(shm_addr->lsorna,"          ",10)==0
+     ||(shm_addr->satellite.satellite==1 && shm_addr->satellite.mode==0))  {
     addstr("    ");
   } else {
     preflt(outf,shm_addr->ep1950,-5,0);
@@ -453,7 +463,11 @@ int iyear;
   if (posdeg==0) {
     cnvrt(1,shm_addr->radat,shm_addr->decdat,&azim,&elev,it,
         shm_addr->alat,shm_addr->wlong);
-  } else if (memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
+  } else if(shm_addr->satellite.satellite == 1 &&
+	    shm_addr->satellite.mode==0) {
+    azim=aztemp;
+    elev=eltemp;
+  } else if(memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
              memcmp(shm_addr->lsorna,"azeluncr  ",10)==0 ) {
         azim = shm_addr->ra50;
         elev = shm_addr->dec50;
@@ -571,7 +585,7 @@ int iyear;
   } else
       printw("       ");
 
-  if(kMrack||kVrack||kV4rack) {
+  if(kMrack) {
     move(ROW1+4,COL1+29);
     preint(outf,(int)(shm_addr->systmp[28]+.5),-3,0);
     printw("%s",outfloat);
@@ -583,10 +597,43 @@ int iyear;
     move(ROW1+4,COL1+37);
     preint(outf,(int)(shm_addr->systmp[30]+.5),-3,0);
     printw("%s",outfloat);
+
+  } else if(kVrack || kV4rack) {
+    move(ROW1+4,COL1+29);
+    preint(outf,(int)(shm_addr->systmp[2*MAX_BBC+0]+.5),-3,0);
+    printw("%s",outfloat);
+     
+    move(ROW1+4,COL1+33);
+    preint(outf,(int)(shm_addr->systmp[2*MAX_BBC+1]+.5),-3,0);
+    printw("%s",outfloat);
     
-    if(kVrack || kV4rack) {
+    move(ROW1+4,COL1+37);
+    preint(outf,(int)(shm_addr->systmp[2*MAX_BBC+2]+.5),-3,0);
+    printw("%s",outfloat);
+
+    move(ROW1+4,COL1+41);
+    preint(outf,(int)(shm_addr->systmp[2*MAX_BBC+3]+.5),-3,0);
+    printw("%s",outfloat);
+  } else if(kDrack) {
+    move(ROW1+4,COL1+29);
+    preint(outf,(int)(shm_addr->systmp[2*MAX_DBBC_BBC+0]+.5),-3,0);
+    printw("%s",outfloat);
+     
+    if(shm_addr->dbbc_cond_mods > 1) {
+      move(ROW1+4,COL1+33);
+      preint(outf,(int)(shm_addr->systmp[2*MAX_DBBC_BBC+1]+.5),-3,0);
+      printw("%s",outfloat);
+    }
+    
+    if(shm_addr->dbbc_cond_mods > 2) {
+      move(ROW1+4,COL1+37);
+      preint(outf,(int)(shm_addr->systmp[2*MAX_DBBC_BBC+2]+.5),-3,0);
+      printw("%s",outfloat);
+    }
+
+    if(shm_addr->dbbc_cond_mods > 3) {
       move(ROW1+4,COL1+41);
-      preint(outf,(int)(shm_addr->systmp[31]+.5),-3,0);
+      preint(outf,(int)(shm_addr->systmp[2*MAX_DBBC_BBC+3]+.5),-3,0);
       printw("%s",outfloat);
     }
   }
