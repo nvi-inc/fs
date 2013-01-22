@@ -159,6 +159,9 @@ $misc
 * Sets up AutoFTP
 *EXAMPLE
 * AutoFTP ON arbitrary_string_with_out_spaces 
+* Can specify abort time for AutoFTP. If not set the abort time is 300 seconds
+*EXAMPLE
+* AutoFTP_abort_time 250 
 *
 * Epoch:
 * Enter the epoch for drudg to use on the SOURCE commands in SNAP files.
@@ -243,4 +246,14 @@ $misc
 * tpicd  NO      100   <<<<<<< always use 1 sec period
 * tpicd  YES      0    <<<<<<< prompt for period, default is OFF
 * tpicd  YES     500   <<<<<<< prompt for period, default is 5 sec
+*--------------------------------------------------------------
+*
+* Cont_cal setup
+* Applicable only for DBBCs
+* cont_cal ON       !turn it on
+* cont_cal OFF       !turn it off 
+* cont_cal ASK      !ask the user at runtime.
+*--------------------------------------------------------------
+* default DBBC IF inputs if absent from schedule file
+* default_dbbc_if_inputs 1 4 2 2
 *--------------------------------------------------------------
