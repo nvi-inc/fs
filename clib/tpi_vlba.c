@@ -12,16 +12,16 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-static char ch[ ]={"123456789abcde"};
+static char ch[ ]={"123456789abcdefg"};
 static char *lwhat[ ]={
-"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
-"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
+"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
+"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
 "ia","ib","ic","id"};
 
 void tpi_vlba(ip,itpis_vlba,isub)                    /* sample tpi(s) */
 long ip[5];                                     /* ipc array */
 int itpis_vlba[MAX_DET]; /* detector selection array */
-                      /* in order: L: bbc1...bbc14, U: bbc1...bbc14(U)       */
+                      /* in order: L: bbc1...bbc16, U: bbc1...bbc16(U)       */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
 int isub;
 {
@@ -37,7 +37,7 @@ int isub;
 	if(1==itpis_vlba[i]) {
 	  if(i<(2*MAX_BBC)) {                   /* bbc(s): */
 	    request.device[0]='b';
-	    request.device[1]=ch[i%MAX_BBC];                /* '1'-'e' */
+	    request.device[1]=ch[i%MAX_BBC];                /* '1'-'g' */
 	  } else {                              /* ifd(s): */
 	    request.device[0]='i';
 	    request.device[1]=ch[((i-2*MAX_BBC)/2)*2+9];   /* 'a' or 'c' */
@@ -58,7 +58,7 @@ int isub;
       for(i=0;i<MAX_BBC;i++) {
 	if(1==itpis_vlba[i]||1==itpis_vlba[i+MAX_BBC]) {
 	  request.device[0]='b';
-	  request.device[1]=ch[i%MAX_BBC];                /* '1'-'e' */
+	  request.device[1]=ch[i%MAX_BBC];                /* '1'-'g' */
 	  
 	  request.addr=0x05;
   
@@ -174,11 +174,11 @@ int ilen;                /* number of characters ibuf can hold, ignored */
     lenstart=strlen(ibuf);
     iclass=0;
     nrec=0;
-    for(j=-1;j<4;j++) {
+    for(j=-1;j<MAX_IF;j++) {
       int k;
       for(k=0;k<MAX_BBC*2;k++) {
-	i=14*(k%2)+k/2;
-	if(itpis_vlba[ i] == 1 && shm_addr->bbc[i%14].source==j) {
+	i=MAX_BBC*(k%2)+k/2;
+	if(itpis_vlba[ i] == 1 && shm_addr->bbc[i%MAX_BBC].source==j) {
 	  if(strlen(ibuf)>60) {
 	    if(isubin > 0) {
 	      cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
@@ -255,7 +255,7 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
       if(itask==5) {
 	int kskip;
 	kskip=i<2*MAX_BBC&&
-	  (shm_addr->bbc[i%14].source<0||shm_addr->bbc[i%14].source>3);
+  (shm_addr->bbc[i%MAX_BBC].source<0||shm_addr->bbc[i%MAX_BBC].source>3);
 	tpi=shm_addr->tpi[ i];             /* various pieces */
 	tpic=shm_addr->tpical[ i];
 	tpiz=shm_addr->tpizero[ i];
@@ -296,6 +296,11 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	epoch=-1.0;
 	get_tcal_fwhm(lwhat[i],&shm_addr->caltemps[i],&fwhm,
 		      epoch,&dum, &dum,&dum,&ierr);
+	if(ierr!=0) {
+	  ip[0]=ip[1]=0;
+	  ip[2]=ierr;
+	  return;
+	}
       }
     }
   }
@@ -304,14 +309,14 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
   lenstart=strlen(ibuf);
   iclass=0;
   nrec=0;
-  for(j=-1;j<4;j++) {
+  for(j=-1;j<MAX_IF;j++) {
     int k;
     for(k=0;k<MAX_BBC*2;k++) {
       if(k%2==0)
 	i=k/2;
       else
-	i=14+k/2;
-      if(itpis_vlba[ i] == 1 && shm_addr->bbc[i%14].source==j) {
+	i=MAX_BBC+k/2;
+      if(itpis_vlba[ i] == 1 && shm_addr->bbc[i%MAX_BBC].source==j) {
 	if(strlen(ibuf)>60) {
 	  cls_snd(&iclass,ibuf,strlen(ibuf)-1,0,0);
 	  nrec=nrec+1;

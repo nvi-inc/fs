@@ -15,6 +15,20 @@ C 021111 jfq Add LBA racks.
 !                     Rearranged flag setting to make it tighter.
 !
 ! 2007Dec11 JMGipson.  Doesn't apend recorder if Recorder is Mark5
+! 2012Sep13 JMG. Introduced km3form,kvform,km5form
+
+! Just some notes:
+!  The difference between
+!  VLBA    VLBA4 and VLBA5
+!  Mark3   Mark4 and Mark5
+!  Is the formatter.  
+! VLBA =VLBA   rack VLBA formmatter
+! VLBA4=VLBA  rack Mark4 formmater
+! VLBA5=VLBA  rack Mark5 formmater
+! Mark3=Mark3 rack Mark3 formattter.
+! Mark4=Mark3 Rack Mark4 formatter.
+! Mark5=Mark3 Rack Mark5 formatter
+
 C Input
       integer istn
 
@@ -80,7 +94,7 @@ C Racks
       klrack  = cstrack(istn) .eq. "LBA"
 
       kmracks =km3rack  .or. km4rack .or. km5rack
-      kvracks =kv4rack.or.kvrack
+      kvracks =kv4rack.or.kvrack .or. KV5rack 
 
       km4fmk4rack =cstrack(istn)(1:3) .eq. "K4-" .and.
      >             cstrack(istn)(5:7) .eq. "/M4"
@@ -88,8 +102,13 @@ C Racks
      >             cstrack(istn)(5:7) .eq. "/K3"
       k8bbc =   cstrack(istn) .eq. "VLBA/8" .or.
      >          cstrack(istn) .eq. "VLBA4/8"
+      kdbbc_rack  = cstrack(istn) .eq.  "DBBC" 
 
+      kvform  = kvrack
+      km3form = Km3rack .or. kk3fmk4rack
       km4form = km4rack .or. kv4rack .or. km4fmk4rack
+      km5form = km5rack .or. kv5rack 
+
 
 ! Set up krec_append flag.
       if(cstrec(istn,2) .eq. "none") then
@@ -107,7 +126,7 @@ C Racks
       endif
       if(km5a .or.km5b .or.km5b) krec_append=.false.
 
-      kbbc=kvracks.or.kv5rack
+      kbbc=kvracks
       kifp=klrack
       kvc= kmracks .or. kk41rack.or.kk42rack
 

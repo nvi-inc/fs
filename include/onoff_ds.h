@@ -7,6 +7,7 @@ struct onoff_cmd {
   float step;           /* step size in FWHMs */
   int wait;             /* wait time for on to off transition */
   float ssize;           /* source size, radians */
+  char proc[33];        /* procedure for first points */
   struct onoff_devices {
     char lwhat[2];      /* device ID */
     char pol;           /* polarization */
@@ -18,8 +19,8 @@ struct onoff_cmd {
     float tcal;        /* cal temperature */
     float dpfu;         /* degrees per flux unit (gain) */
     float gain;        /* gain curve, maximum=1.0 */
-  } devices[38];
-  int itpis[38];        /* control array for which devices */
+  } devices[MAX_ONOFF_DET];
+  int itpis[MAX_ONOFF_DET];        /* control array for which devices */
   float fwhm;        /* FWHM for detector with the widest beam */
   int stop_request;     /* stop request issued? */
   int setup;            /* have we been set-up */

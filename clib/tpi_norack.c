@@ -146,6 +146,11 @@ int itask;
 	     epoch=-1.0;
 	     get_tcal_fwhm(lwhat[i],&shm_addr->caltemps[i],&fwhm,
 			   epoch,&dum, &dum,&dum,&ierr);
+	     if(ierr!=0) {
+	       ip[0]=ip[1]=0;
+	       ip[2]=ierr;
+	       return;
+	     }
 	   }
 	 }
        }

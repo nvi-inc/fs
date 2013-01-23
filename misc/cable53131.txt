@@ -1,0 +1,66 @@
+File: /usr2/fs/misc/cable53131.txt  Version: 0.2 Date: 100618
+
+	      Cable calibration with an HP 53131 counter
+
+		    Ed Himwich and Jonathan Quick
+
+The file describes how to use a HP (or Agilent) 53131 counter for
+cable cal.
+
+1. Set the counter's IB address to agree with the value used for
+   device "CA" in "ibad.ctl".
+
+2. Include (or modify existing) lines in "stcmd.ctl" for "cable" and
+   "cablelong" to look like:
+
+     cable        qkr 1300 01 FFFFFFFFF
+     cablelong    qkr 7600 01 FFFFFFFFF
+
+3. Create two SNAP procedures:
+
+     cablen:   cable=:fetc?
+               cable
+
+     cablel:   cablelong=:fetc?
+               cablelong
+
+4. In "midob" put "cablen" where you would normally put "cable".
+
+5. When doing pre- and/or post- check of the cable cal system, use
+   "cablen" in place of "cable" and "cablel" in place of "cablelong".
+   Of course a subsequent "cablediff" will calculated the delta and
+   sign for you.
+
+6. You can create a "cableinit" procedure to automate setting-up the
+   counter in case it loses it configuration because of power failure
+   or other issue.
+
+   cableinit:  hpib=ca,*rst
+               hpib=ca,:func 'tint 1,2'
+               hpib=ca,:even1:hyst:rel 10
+               hpib=ca,:even1:lev:abs 1.8
+               hpib=ca,:even1:slop pos
+               hpib=ca,:inp1:att 1
+               hpib=ca,:inp1:coup dc
+               hpib=ca,:inp1:filt off
+               hpib=ca,:inp1:imp 1000000
+               hpib=ca,:even2:hyst:rel 10
+               hpib=ca,:even2:lev:abs 1.8
+               hpib=ca,:even2:slop pos
+               hpib=ca,:inp2:att 1
+               hpib=ca,:inp2:coup dc
+               hpib=ca,:inp2:filt off
+               hpib=ca,:inp2:imp 1000000
+               hpib=ca,:init:auto off
+               hpib=ca,:init:cont on
+
+   You may need or want to change some of the values and/or make other
+   improvements in this procedure.  You can consider calling it from
+   "initi" so that each time the FS is started, the counter will be
+   set-up, if it isn't too slow.
+
+   A similar set-up procedure can be made for a gps-fmout (or
+   fmout-gps) counter and has the advantage of making the triggering
+   more repeatable.  To do this basically you would need to adjust the
+   device mnemonic (from "ca") and set apprporiate trigger levels for
+   the signals on each input.

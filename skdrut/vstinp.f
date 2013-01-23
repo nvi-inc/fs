@@ -97,6 +97,7 @@ C     2. Now call routines to retrieve all the station information.
           call errormsg(iret,ierr,'SITE',lu)
           ierr1=2
         endif
+
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
      .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,
@@ -194,24 +195,7 @@ C
 C      2.5 Here we handle the horizon mask
 C
         kline=.true.
-C           write(lu,'("VSTINP252 - Horizon mask azimuths are out ",
-C    .      "of order. Error in field ",i5)') -(ierr+200)
-C           write(lu,'("VSTINP250 - Too many horizon mask az/el pairs. ",
-C    .      "Max is ",i5)') max_hor 
-C           write(lu,'("VSTINP251 - No matching el for last azimuth,",
-C    .      " wraparound value used.")')
-C           elh(nhz)=elh(1)
-C           kline=.false.
-C         if (kline) then
-C           klineseg(i)=.true.
-C           write(lu,'("VSTINP255 - Line segment horizon mask being ",
-C    .      "used for ",4a2)') (lstnna(j,ii),j=1,4)
-C         else
-C           klineseg(i)=.false.
-C           write(lu,'("VSTINP255 - Step function horizon mask being ",
-C    .      "used for ",4a2)') (lstnna(j,ii),j=1,4)
-C         endif
-          NHORZ(I) = NHZ
+         NHORZ(I) = NHZ
           if (nhorz(i).gt.0) then
             DO J=1,NHORZ(I)
               AZHORZ(J,I) = AZH(J)

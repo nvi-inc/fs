@@ -25,8 +25,8 @@ static char chanl[] = "01234";
 static char hex[]= "0123456789abcdef";
 static char det[] = "dlu34567";
 static char *lwhat[ ]={
-"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
-"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
+"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
+"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
 "ia","ib","ic","id"};
 
 int tpicd_dec(lcl,count,ptr)
@@ -45,7 +45,7 @@ char *ptr;
     switch (*count) {
     case 1:
       ierr=arg_key(ptr,cont_key,CONT_KEY,&lcl->continuous,0,TRUE);
-      for(i=0;i<16*2+4;i++)
+      for(i=0;i<MAX_DET;i++)
 	lcl->itpis[i]=0;
       break;
     case 2:
@@ -83,6 +83,11 @@ char *ptr;
 	mk4bbcd(lcl->itpis);
       } else if(shm_addr->equip.rack==LBA) {
 	lbaifpd(lcl->itpis);
+      } else if(shm_addr->equip.rack==DBBC &&
+		shm_addr->equip.drive[0]==MK5 &&
+		(shm_addr->equip.drive_type[0]==MK5B ||
+		 shm_addr->equip.drive_type[0]==MK5B_BS)) {
+	mk5dbbcd(lcl->itpis); 
       }
 
       if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
@@ -106,20 +111,19 @@ char *ptr;
 	    lcl->lwhat[i][1]=hex[i-13];
 	  }
       }else if (shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
-	for (i=0;i<2*MAX_BBC;i++)
+	for (i=0;i<2*MAX_VLBA_BBC;i++)
 	  if(lcl->itpis[i]!=0){
 	    lcl->ifc[i]=shm_addr->bbc[i%MAX_BBC].source+1;
-	    if(lcl->ifc[i]<0||lcl->ifc[i]>4)
+	    if(lcl->ifc[i]<0||lcl->ifc[i]>MAX_IF)
 	      lcl->ifc[i]=0;
 	    if(lcl->ifc[i]!=0)
 	      lcl->itpis[2*MAX_BBC+lcl->ifc[i]-1]=1;
 	    strncpy(lcl->lwhat[i],lwhat[i],2);
 	  }
-	for (i=2*MAX_BBC;i<MAX_DET;i++)
+	for (i=2*MAX_BBC;i<(2*MAX_BBC+MAX_VLBA_IF);i++)
 	  if(lcl->itpis[i]!=0) {
 	    lcl->ifc[i]=i-(2*MAX_BBC-1);
-	    lcl->lwhat[i][0]='i';
-	    lcl->lwhat[i][1]=hex[i-(2*MAX_BBC)+10];
+	    strncpy(lcl->lwhat[i],lwhat[i],2);
 	  }
       }else if (shm_addr->equip.rack==LBA) {
         for (i=0;i<2*shm_addr->n_das;i++)
@@ -129,6 +133,21 @@ char *ptr;
 	      lcl->ifc[i]=0;
 	    strncpy(lcl->lwhat[i],lwhat[i+MAX_BBC],2);
 	    lcl->lwhat[i][1]=det[0];
+	  }
+      }else if (shm_addr->equip.rack==DBBC) {
+	for (i=0;i<2*MAX_DBBC_BBC;i++)
+	  if(lcl->itpis[i]!=0){
+	    lcl->ifc[i]=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;
+	    if(lcl->ifc[i]<0||lcl->ifc[i]>MAX_DBBC_IF)
+	      lcl->ifc[i]=0;
+	    if(lcl->ifc[i]!=0)
+	      lcl->itpis[2*MAX_DBBC_BBC+lcl->ifc[i]-1]=1;
+	    strncpy(lcl->lwhat[i],lwhat[i],2);
+	  }
+	for (i=2*MAX_DBBC_BBC;i<2*MAX_DBBC_BBC+MAX_DBBC_IF;i++)
+	  if(lcl->itpis[i]!=0) {
+	    lcl->ifc[i]=i-(2*MAX_DBBC_BBC-1);
+	    strncpy(lcl->lwhat[i],lwhat[i],2);
 	  }
       } 
 
@@ -180,6 +199,9 @@ struct tpicd_cmd *lcl;
       }else if (shm_addr->equip.rack==LBA) {
 	sprintf(output+strlen(output),"%c",chanl[j]);
 	limit=2*shm_addr->n_das;
+      }else if (shm_addr->equip.rack==DBBC) {
+	sprintf(output+strlen(output),"%c",chanv[j]);
+	limit=MAX_DBBC_DET;
       }
       lenstart=strlen(output);
       for (k=0;k<limit;k++) {
@@ -187,11 +209,16 @@ struct tpicd_cmd *lcl;
 	  i=k;
 	}else if (shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
 	  if(k<2*MAX_BBC)
-	    i=14*(k%2)+k/2;
+	    i=MAX_BBC*(k%2)+k/2;
 	  else
 	    i=k;
 	}else if (shm_addr->equip.rack==LBA) {
 	  i=k;
+	}else if (shm_addr->equip.rack==DBBC) {
+	  if(k<2*MAX_DBBC_BBC)
+	    i=MAX_DBBC_BBC*(k%2)+k/2;
+	  else
+	    i=k;
 	}
 	if(lcl->itpis[i]!=0 && lcl->ifc[i]==j) {
 	  int len;

@@ -12,7 +12,8 @@ C  Write tape labels from reading the log file.
 ! 2007Feb01 JMG. Just issue a message on recorder type, don't stop if not Mark5A or Mk5APigW
 !                Modified to get info from sched_info line
 ! 2007Feb02 JMG. Take an optional file name to save the PS file in.
-! 2008Dec03 JMG. Was getting rid of too much space at start of line
+! 2008Dec03 JMG. Was getting rid of too much space at start of line--
+!                    removed first letter of !session code.
 
 
       include '../skdrincl/skparm.ftni'
@@ -73,8 +74,6 @@ C Local
 
       ilabrow=1
       ilabcol=1
-
-
 
       if(nch1 .eq. 0) then
         cvsn_in="ALL"

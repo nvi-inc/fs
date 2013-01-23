@@ -41,18 +41,6 @@ You also have a widget to do this with named vue_metdisp.
    prompt> vue_metdisp & - will bring up a useful display.
                            (Click on [i] for help)
 
-
-It can also be compiled and run standalone.
-
-cp /usr2/fs/st.default/st-0.0.0/metserver/src/metwind.c
-cp /usr2/fs/st.default/st-0.0.0/metserver/src/met.ctl
-cp /usr2/fs/st.default/st-0.0.0/metserver/src/MakeDiag
-cp /usr2/fs/st.default/st-0.0.0/metserver/src/vue_metdisp
-
-To whatever directory you want.
-run make
-prompt> make -f MakeDiag
-
 define the ports in met.ctl file.
 prompt> emacs or vi met.ctl
 /dev/ttySx whatever port you metsensor is attached to.
@@ -65,4 +53,4 @@ OR
 run metwind.
 prompt> metwind "xxxxxx" get the commands from the manual.
 
-If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.
+If you have any problems, you can contact Ed.Himwich@nasa.gov.

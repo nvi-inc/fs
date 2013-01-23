@@ -38,26 +38,32 @@ char *ptr;
 	ierr = -201;
       break;
     case 0:
-      if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41U)
-	code=rp2codek41(ptr);
-      else if(shm_addr->equip.rack_type==K42 ||
-	      shm_addr->equip.rack_type==K42A ||
-	      shm_addr->equip.rack_type==K42B ||
-	      shm_addr->equip.rack_type==K42BU ||
-	      shm_addr->equip.rack_type==K42C)
-	code=rp2codek42(ptr);
-      else
-	code=rp2code(ptr);
-      if(code == 0) {
+      if(shm_addr->equip.rack == K4) {
 	if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41U)
-	  ierr=-202;
+	  code=rp2codek41(ptr);
 	else if(shm_addr->equip.rack_type==K42 ||
 		shm_addr->equip.rack_type==K42A ||
 		shm_addr->equip.rack_type==K42B ||
 		shm_addr->equip.rack_type==K42BU ||
 		shm_addr->equip.rack_type==K42C)
-	  ierr=-203;
+	  code=rp2codek42(ptr);
 	else
+	  code=rp2code(ptr);
+      } else
+	code=rp2code(ptr);
+      if(code == 0) {
+	if(shm_addr->equip.rack == K4) {
+	  if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41U)
+	    ierr=-202;
+	  else if(shm_addr->equip.rack_type==K42 ||
+		  shm_addr->equip.rack_type==K42A ||
+		  shm_addr->equip.rack_type==K42B ||
+		  shm_addr->equip.rack_type==K42BU ||
+		  shm_addr->equip.rack_type==K42C)
+	    ierr=-203;
+	  else
+	    ierr=-204;
+	} else
 	  ierr=-204;
       } else
 	lcl->ports[itrk-1]=code;
@@ -94,15 +100,18 @@ struct k4recpatch_cmd *lcl;
     for(i=ilast+1;i<16;i++){
       if (lcl->ports[i]!=0){
 	ilast=i;
-	if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41)
-	  sprintf(output,"%2d,%3s",i+1,code2rpk41(lcl->ports[i]));
-	else if(shm_addr->equip.rack_type==K42 ||
-	      shm_addr->equip.rack_type==K42A ||
-	      shm_addr->equip.rack_type==K42B ||
-	      shm_addr->equip.rack_type==K42BU ||
-	      shm_addr->equip.rack_type==K42C)
-	  sprintf(output,"%2d,%3s",i+1,code2rpk42(lcl->ports[i]));
-	else
+	if(shm_addr->equip.rack == K4) {
+	  if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41)
+	    sprintf(output,"%2d,%3s",i+1,code2rpk41(lcl->ports[i]));
+	  else if(shm_addr->equip.rack_type==K42 ||
+		  shm_addr->equip.rack_type==K42A ||
+		  shm_addr->equip.rack_type==K42B ||
+		  shm_addr->equip.rack_type==K42BU ||
+		  shm_addr->equip.rack_type==K42C)
+	    sprintf(output,"%2d,%3s",i+1,code2rpk42(lcl->ports[i]));
+	  else
+	    sprintf(output,"%2d,%3s",i+1,code2rp(lcl->ports[i]));
+	} else
 	  sprintf(output,"%2d,%3s",i+1,code2rp(lcl->ports[i]));
 	goto done;
       }

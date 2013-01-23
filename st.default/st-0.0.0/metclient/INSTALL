@@ -35,16 +35,16 @@ Field System software.
     metclient
      |-- Makefile    - The make file for compiling Library, Server and Client.
      |-- INSTALL     - Installation instructions for client(s).
-     |-- README      - Information.
-     |-- metclient.sh - bootup script.
-     |-- metclient   - executable.
-     |-- lib       - Source directory empty left for future use?.
-     |-- metlog.ctl    - example of file logging and station information.
-     `-- src           - Source directory for Client and Server.
-         |-- Makefile  - The make file for compiling Server and Client.
-         |-- err_report.c - Error handler.
-         |-- logwx.c   - Format and send information to logging file.
-         `-- metclient.c  - Client source for logging weather information.
+     |-- README              - Information.
+     |-- metclient.sh        - bootup script.
+     |-- metclient           - executable.
+     |-- lib                 - Source directory empty left for future use?.
+     |-- metlog.ctl.example  - example of file logging and station information.
+     `-- src                 - Source directory for Client and Server.
+         |-- Makefile        - The make file for compiling client.
+         |-- err_report.c    - Error handler.
+         |-- logwx.c         - Format and send information to logging file.
+         `-- metclient.c     - Client source for logging weather information.
 
 
 3.) If you would like to startup a client for logging data.
@@ -83,26 +83,38 @@ Field System software.
     example metlog.ctl.example file:
 	*=COMMENT.
 	*metget.ctl
-	GG            station two-letter code
+	gg            station two-letter code
 	0             place holder for sampling period for wind data (not used)
-	1200          logging period for all data (seconds)
-	/usr2/log     directory for logging data, must be < 27 characters
+	60            logging period for all data (seconds)
+	/usr2/log/wx  directory for logging data, must be < 27 characters
 	GGAO7108      Station Name
 	76.8265       Longitude
 	39.0219       Latitude
 	14.99         Station Elevation
 	*
+   
+    The directory listed must exist. On a FS computer, we recommend you 
+    create it logged in as "root" woth these commands:
+
+       cd /usr2/log
+       mkdir wx
+       chmod a+rw wx
+       chown oper.rtx wx
 
 STARTING CLIENT:
 ----------------
 
 1.) Running the metclient. Please run metclient from root.
 
-    NOTE: Only one parameter is needed for metclient; the control file 
-          which was created by you in the /usr2/st/metclient directory.
+    NOTE: The first parameter is the control file that was created by you
+            in the /usr2/st/metclient directory.
+          The second parameter is the network port of the server, if
+            you are not using the default, you must specify
+            it after the first parameter, 50001 is the default
+
 
    prompt> log in as root.
-   prompt> /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl&
+   prompt> /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl 50001 &
 
 2.) If you would like metclient to startup at boot time.
 
@@ -112,6 +124,9 @@ STARTING CLIENT:
     If you name the control file by any other name, other then 'metlog.ctl'
     and/or you don't put it the '/usr2/st/metclient' directory you MUST 
     MUST change the metclient.sh script. 
+
+    Likewise if you aren't using the default network port you must specify
+    it in the metclient.sh script.
     ----------------------------------------------------------------------
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

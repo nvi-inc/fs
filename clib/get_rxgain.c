@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "../include/dpi.h"
+#include "../include/params.h"
 #include "../include/fs_types.h"
 
 int get_rxgain(file,rxgain)

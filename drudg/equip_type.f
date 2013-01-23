@@ -34,6 +34,7 @@ C 17Apr2003  JMG.  Added Mark5 option.
 ! 2006Jul20. JMG. Disabled switching to Mark3 rack if not Mark3 mode.
 ! 2007Jun13  JMG. Modified so that would all fit on one page.
 ! 2008Oct20  JMG. Better error messages.
+! 2012Sep13  JMG. Tempoary fix so that don't show Mark5C.  (Search for 2012Sep13)
 
 C Input:
       character*(*) cr1
@@ -58,7 +59,8 @@ C 0. Determine current types.
 
         max_rack_local = max_rack_type
 
-        max_rec_local = max_rec_type
+! 2012Sep13 
+        max_rec_local = max_rec_type-1
         if(Km5A_piggy .or.km5p_piggy) then
           max_rec_local=max_rec_local-3   !exclude Mark5A & Mark5P modes.
         endif
@@ -80,6 +82,9 @@ C 0. Determine current types.
         else
            ifirst_rec=2
         endif
+        write(*,*) "RACK ",irack_in, irec1_in, irec2_in 
+        write(*,*) cstrack(istn), cstrec(istn,1), cstrec(istn,2)
+           
         
 
 C 1. Batch input
@@ -91,8 +96,9 @@ C 1. Batch input
 9991      format("ERROR: Max rack types between 1 and ",i4)
           return
         endif
-        if (irec1.lt.1.or.irec1.gt.max_rec_local) then
-          write(luscn,9992) max_rec_local
+        if (irec1.lt.1.or.irec1.gt.max_rec_local-1) then
+!2012Sep13
+          write(luscn,9992) max_rec_local-1
 9992      format("ERROR: Max rec types1 between 1 and ",i4)
           return
         endif
@@ -134,7 +140,8 @@ C 2. Interactive input
             else
               crack_slot=" "
             endif
-            if(i .le. max_rec_type-1) then
+! JMG 2012Sep13  Temporary fix!!!
+            if(i .le. max_rec_type-2) then
               if(irec1_in .eq. i) then
                 cactive="*"
               else
@@ -192,7 +199,8 @@ C 2. Interactive input
         call gtfld(ibuf,ich,nch,ic1,ic2) ! rec1 field
         if (ic1.ne.0) then ! rec1 specified
           irec1= ias2b(ibuf(1),ic1,ic2-ic1+1)
-          IF (irec1.LT.0.OR.(irec1.GT.max_rec_local)) then
+!2012Sep13
+          IF (irec1.LT.0.OR.(irec1.GT.max_rec_local-1)) then
             write(luscn,9992) max_rec_local
             GOTO 1
           endif

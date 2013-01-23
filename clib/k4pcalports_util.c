@@ -76,15 +76,18 @@ struct k4pcalports_mon *lclm;
   case 1:
   case 2:
     chan=shm_addr->k4recpatch.ports[lclc->ports[*count-1]-1];
-    if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41)
-      sprintf(output,"%3s",code2rpk41(chan));
-    else if(shm_addr->equip.rack_type==K42 ||
-	    shm_addr->equip.rack_type==K42A ||
-	    shm_addr->equip.rack_type==K42B ||
-	    shm_addr->equip.rack_type==K42BU ||
-	    shm_addr->equip.rack_type==K42C)
-      sprintf(output,"%3s",code2rpk42(chan));
-    else
+    if(shm_addr->equip.rack == K4) {
+      if(shm_addr->equip.rack_type==K41 || shm_addr->equip.rack_type==K41U)
+	sprintf(output,"%3s",code2rpk41(chan));
+      else if(shm_addr->equip.rack_type==K42 ||
+	      shm_addr->equip.rack_type==K42A ||
+	      shm_addr->equip.rack_type==K42B ||
+	      shm_addr->equip.rack_type==K42BU ||
+	      shm_addr->equip.rack_type==K42C)
+	sprintf(output,"%3s",code2rpk42(chan));
+      else
+	sprintf(output,"%3s",code2rp(chan));
+    } else
       sprintf(output,"%3s",code2rp(chan));
     break;
   case 3:

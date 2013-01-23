@@ -1,8 +1,7 @@
 #
-LIB_DIR = lib
-ST_ROOT = /usr2/st
+LIB_DIR = port
 #
-EXEC_DIR = src lib
+EXEC_DIR = src
 #
 all:	libs execs
 #

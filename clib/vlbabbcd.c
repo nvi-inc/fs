@@ -12,7 +12,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 void vlbabbcd(itpis)
-int itpis[28];
+int itpis[2*MAX_BBC];
 {
   int i;
   static int kfirst = TRUE;
@@ -37,6 +37,6 @@ int itpis[28];
     if(det<0)
       itpis[-1-det]=1;
     else if (det>0)
-      itpis[13+det]=1;
+      itpis[MAX_BBC-1+det]=1;
   }
 }

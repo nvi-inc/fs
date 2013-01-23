@@ -22,13 +22,16 @@ C     CALLED SUBROUTINES: TPLIS
 C 
 C 3.  LOCAL VARIABLES 
       dimension itpis(17) 
-      integer itpis_vlba(32) 
+      integer itpis_vlba(MAX_DET) 
       integer itpis_lba(2*MAX_DAS) 
+      integer itpis_dbbc(MAX_DBBC_DET) 
       integer itpis_norack(2)
 C      - which TPIs to read back, filled in by TPLIS
 C        ICH    - character counter 
 C     NCHAR  - character count
-      integer*2 ibuf(156)               ! class buffer, holding command
+      integer*2 ibuf((10+MAX_DET*12)/2)  ! class buffer, holding command
+c                              CALTEMPS/32(xx,xxxxxxxx,) +\0
+c                          197=(10+32x12)/2                    
       dimension ireg(2)                   !  registers from exec calls
       character*1 cjchar
       integer*2 lwho,lwhat(17)
@@ -38,7 +41,7 @@ C     NCHAR  - character count
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
-      data ilen/312/                          !  length of ibuf, characters
+      data ilen/394/ ! 10+MAX_DET*12 !  length of ibuf, characters
       data lwho/2hqk/
       data lwhat/2hv1,2hv2,2hv3,2hv4,2hv5,2hv6,2hv7,2hv8,2hv9,
      &           2hva,2hvb,2hvc,2hvd,2hve,2hi1,2hi2,2hi3/
@@ -54,6 +57,7 @@ C     1. Call TPLIS to parse the command for us.  Check for errors.
 C     If none, we have the requested TPI readings in ITPIS. 
 C     Then start fixing up the output buffer for the response.
 C 
+      ilen=10+MAX_DET*12         !  length of ibuf, characters
       ierr = 0
       indtmp = mod(nsub-4 ,10)
 C                   Pick up the Tsys1 or 2 index
@@ -65,6 +69,8 @@ C                   Pick up the Tsys1 or 2 index
         call tplisv(ip,itpis_vlba)
       else if (LBA.eq.rack) then
         call tplisl(ip,itpis_lba)
+      else if (DBBC.eq.rack) then
+        call tplisd(ip,itpis_dbbc)
       else
         call tplisn(ip,itpis_norack)
       endif
@@ -115,6 +121,7 @@ C
                   epoch=-1.0
                   call fc_get_tcal_fwhm(lwhat(i),caltemps(j),fwhm,
      &                 epoch,flux,corr,ssize,ierr)
+                  ierr=0
                endif
             endif
          enddo
@@ -187,6 +194,9 @@ C
         return
       else if (LBA.eq.rack) then
         call fc_tsys_lba(ip,itpis_lba,ibuf,nch,nsub)
+        return
+      else if (DBBC.eq.rack) then
+        call fc_tsys_dbbc(ip,itpis_dbbc,ibuf,nch,nsub)
         return
       else
         call fc_tsys_norack(ip,itpis_norack,ibuf,nch,nsub)

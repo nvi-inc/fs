@@ -88,7 +88,6 @@ long ip[5];
 
       ip[0]=out_class;
       ip[1]=out_recs;
-      ip[2]=0;
 
       return;
 
@@ -96,6 +95,8 @@ error:
       cls_clr(ip[0]);
       ip[0]=0;
       ip[1]=0;
+      if(ip[2]!=0)
+	logit(NULL,ip[2],ip+3);
       ip[2]=ierr;
       memcpy(ip+3,"5m",2);
       return;

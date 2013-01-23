@@ -1,0 +1,68 @@
+          bbcnn - digital baseband converter (DBBC racks)
+
+            Syntax:     bbcnn=freq,IF,bw,tpint
+            Response:   bbcnn/freq,IF,bw,tpint,gainctrl,gainU,gainL,tpUcalon,tpLcalon,tpUcaloff,tpLcaloff
+
+
+nn is the BBC index number corresponding to its order in position in the DBBC rack, 01 to 16.
+
+Settable Parameters:
+
+            freq      L.O. frequency in MHz, between 0.000001-2200 inclusive.
+                      Some DBBC versions do not support frequncies 2048 and
+                      above. No default. This frequency may be specified to 1 Hz
+                      precison, i.e. 6 places after the decimal point.
+
+            IF        I.F. input source, one of A, B, C, D. Defaults to A for
+                      converters 01-04, B for 05-08, C for 09-12, and
+                      D for 13-16. This parameter does not affect
+                      equipment set-up, it is for informaton only.
+
+            bw        Sideband bandwidth in MHz. One of 1, 2, 4, 8, 16.
+                      Default 2.
+
+            tpint     Averaging period in seconds for TPI. Positive
+                      integers allowed, Default is 1. The averaging
+                      period is common to both upper and lower
+                      sideband. The averaging period is synchronous
+                      with the 1 pps.
+
+Monitor-only Parameters:
+
+             gainctrl  Gain control mode, either agc or man. The gain
+                       mode is common to both sidebands.
+
+             gainU     Gain value for USB in steps, 0-255.
+             gainL     Gain value for LSB in steps, 0-255.
+	     
+             tpUcalon  Power in upper sideband in counts with the cal
+                       on for synchronous radiometry or TP for
+                       non-synchronous. Range 0 to 65535. nominal
+                       operating level is ....
+             tpLcalon  Power in lower sideband in counts with the cal
+                       on for synchronous radiometry or TP for
+                       non-synchronous. Range 0 to 65535. nominal
+                       operating level is ....
+             tpUcaloff Power in upper sideband in counts with the cal
+                       off for synchronous radiometry or 0 for
+                       non-synchronous. Range 0 to 65535. nominal
+                       operating level is ....
+             tpLcaloff Power in lower sideband in counts with the cal
+                       off for synchronous radiometry or 0 for
+                       non-synchronous. Range 0 to 65535. nominal
+                       operating level is ....
+
+Comments:
+This command sets up the digital channel converters in the DBBC rack.
+This command is analogous to the Mark IV vcnn and VLBA bbcnn commands.
+
+Unlike the output of most other commands which have no embedded
+blanks, the output for this command is organized in columns so when
+multiple comands are used in sequence it is easy to read gains and
+power levels.
+
+The IF inputs are typically hardwired so that channels 01-04 get IF A,
+05-08 get IF B, 09-12 get IF C, and 13-16 get IF D. The IF selection
+parameter is provided for information only. CAUTION: This command does
+not check whether you have specified a valid IF source for the
+channel.

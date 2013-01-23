@@ -17,16 +17,13 @@
       integer iwhere
       character*8 crectmp
 
-      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)
-      if(iwhere .eq. 0) return           !valid rec type.
-
-! Didn't find. Capitalize and try again.
+!  Capitalize and try to find 
       crectmp=crec
       call capitalize(crectmp)
       iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crectmp)
       if(iwhere .eq. 0) then
-        write(*,*) "Check_rec_type: Invalid recorder ",crec,
-     >     " setting to unknown!"
+!        write(*,*) "Check_rec_type: Invalid recorder ",crec,
+!     >     " setting to unknown!"
         crec="unknown"
       else
         crec=crec_type(iwhere)

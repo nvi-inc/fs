@@ -44,6 +44,9 @@ C 980924 nrv Remove "auto" for RDV11.
 C 990106 nrv Add back in for RDVs.
 C 020103 nrv Change 7010 to 5010 for phase cal freqs.
 ! 2008Aug19 JMG.  Rearranged and cleaned up in the process of debugging.
+! 2009Sep15 JMG. Had error when computing how many bits.  Fixed.
+! 2009Sep22 JMG. Got rid of unused variables
+!
 
 C
 C
@@ -56,11 +59,11 @@ C  OUTPUT:
 C
 C   SUBROUTINES
 C     CALLED BY: POINT
-C     CALLED: ifill,char2hol,ichmv,writf_ascc,ib2as,wrhead,getqual,
+C     CALLED: ifill,char2hol,writf_ascc,ib2as,wrhead,getqual,
 C             bbsyn,ir2as
 C
 ! functions
-      integer ib2as,ichcm_ch,ir2as,ichmv,ichmv_ch ! functions
+      integer ib2as,ichcm_ch,ir2as,ichmv_ch ! functions
       integer itras
 
 C  LOCAL VARIABLES
@@ -80,7 +83,7 @@ C  LOCAL VARIABLES
       character*3 cs   !set character
  
       integer*2 ldum
-      integer nch,idum,ivcb,ix,iy,iz,ixy,nw,i,n,imode,k,ileft,im,iysave
+      integer idum,ivcb,ix,iy,iz,ixy,i,imode,k,ileft,im,iysave
       double precision fr
       integer iset 
 
@@ -113,8 +116,10 @@ C itras(ul,sm,head,chan,,pass,stn,code)
               nchanr=nchanr+1
               if (i.eq.2) imode=2 ! BOTH u/l in this mode
             endif
+            if(i .eq. 1) then 
             i2bit(k,istn,icod)=1
             if (itras(i,2,1,k,1,istn,icod).ne.-99) i2bit(k,istn,icod)=2
+            endif
           enddo
         enddo
 C       if (nchanr.eq.28) imode=2 ! for mode A

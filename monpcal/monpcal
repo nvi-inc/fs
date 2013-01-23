@@ -7,48 +7,43 @@ import time
 import threading
 import os
 import popen2
-import tkMessageBox
+
 
 class MainGui:
+	"""MainGui makes graphic stuf...
+	"""
 	filename = ''
 	pid = 0
 	
-	def __init__(self, title = 'monpcal'):
-		#handle arguments:
-		geom = None
-		if len(sys.argv)>2:
-			if sys.argv[1]=='-geometry':
-				geom = sys.argv[2]
+	def __init__(self, title = 'Logreader'):
+
+
 		global master
 		#make Tk object:
-		master = Tk(className = title, baseName = title)
+		master = Tk()
 
 		#make tools, make it global so object has the same reference to all classes
 		global tools
 		tools = Tools()
 		master.title(title)
-		#master.wm_positionfrom('program')
-		#name is title
-		#set geometry:
-		try:
-			master.geometry(geom)
-		except TclError:
-			print 'Incorrect Geometry Setting'
+
+		master.protocol('WM_DELETE_WINDOW', lambda:tools.exitProg())
+
+		#menubar:
+		menubar = Menu(master)
+		filemenu = Menu(menubar, tearoff = 0)
+		filemenu.add_command(label="Open", command=tools.openLog)
+		filemenu.add_command(label="Quit", command=tools.exitProg)
+		menubar.add_cascade(label="File", menu = filemenu)
+
+		runmenu = Menu(menubar, tearoff = 0)
+		runmenu.add_command(label='Read file', command = tools.startUp)
+		runmenu.add_command(label='Stop reading', command = tools.stop)
+		runmenu.add_command(label='Clear', command = tools.clearTable)
+		runmenu.add_command(label='Find log file', command = tools.findFile)
+		menubar.add_cascade(label = "Tools", menu =runmenu)
 		
-
-		master.protocol('WM_DELETE_WINDOW', lambda:tools.exitProg())		
-
-
-
-		self.popup = Menu(master, tearoff = 0)
-		#runmenu.add_command(label='Read file', command = tools.startUp)
-		self.popup.add_command(label='Stop reading', command = lambda: tools.stop())
-		self.popup.add_command(label='Start Reading', command = lambda: tools.findFile())
-		self.popup.add_command(label='Clear', command = lambda:tools.clearTable())
-		self.popup.add_separator()
-		self.popup.add_command(label='Log Info', command = lambda: tools.infoBox())
-		self.popup.add_separator()
-		self.popup.add_command(label="Quit", command=tools.exitProg)
+		master.config(menu=menubar)
 
 		#master frame:
 		frame = Frame(master)
@@ -69,55 +64,32 @@ class MainGui:
 		
 		#setting header labels
 		k=0
-		for i in ['Amp', 'Phase', 'Time']:
+		for i in ['Amplitude', 'Phase', 'Time']:
 			label[0][k].set(i)
 			k+=1
 		#create table
-		labelcol1 = []
-		labelcol2 = []
-		labelcol3 = []
-		labelcol4 = []
 		for i in range(15):
 			w.append(Frame(frame, borderwidth = 0))
-			w[i].pack(side = TOP, fill = X, expand = 0)
-			w[i].bind('<Motion>', self.rightClick)
-			if i == 0:
-				labelcol1.append(Label(w[i], text = '', width = 2, pady = 0, bd = 0, anchor = E))
-				labelcol1[-1].pack(side=LEFT)
-				labelcol1[-1].bind('<Button-3>', self.rightClick)
-			else:
-				labelcol1.append(Label(w[i], text = i, width = 2, pady = 0, bd = 0, anchor = E))
-				labelcol1[-1].pack(side=LEFT)
-				labelcol1[-1].bind('<Button-3>', self.rightClick)
-			labelcol2.append(Label(w[i], textvariable = label[i][0], width = 4, pady = 0, bd = 0, anchor = E))
-			labelcol2[-1].pack(side=LEFT)
-			labelcol2[-1].bind('<Button-3>', self.rightClick)
-			labelcol3.append(Label(w[i], textvariable = label[i][1], width = 6, pady = 0,bd = 0, anchor = E))
-			labelcol3[-1].pack(side=LEFT)
-			labelcol3[-1].bind('<Button-3>', self.rightClick)
-			labelcol4.append(Label(w[i], textvariable = label[i][2], width = 9, pady = 0, bd = 0))
-			labelcol4[-1].pack(side=LEFT)
-			labelcol4[-1].bind('<Button-3>', self.rightClick)
+			w[i].pack(side = TOP, fill = X)
+			Label(w[i], text = i, width = 3, pady=0, bd=0).pack(side=LEFT)
+			Label(w[i], textvariable = label[i][0], width = 10, pady=0, bd=0).pack(side=LEFT)
+			Label(w[i], textvariable = label[i][1], width = 6, pady=0, bd=0).pack(side=LEFT)
+			Label(w[i], textvariable = label[i][2], pady=0, bd=0, width = 9).pack(side=LEFT)
+
 
 		
-		#start log reading automatically
+		statusbar = Frame(master)
+		statusbar.pack(side = BOTTOM, fill = X)
+		Label(statusbar, textvariable = tools.status, relief = SUNKEN).pack(fill = X)
 		tools.findFile()
-		
 		master.mainloop()
 
-	def rightClick(self,event):
-		#self.popup is menu
-		try:
-			self.popup.tk_popup(event.x_root, event.y_root, 0)
-		finally:
-			self.popup.grab_release()
-		
+
 
 class Tools:
 	def __init__(self):
 		self.status = StringVar()
-		self.status.set('No file opened')
-		self.first_run = 1
+		self.status.set('idle')
 	def startUp(self):
 		#initiate thread if file chosen
 		if MainGui.filename:
@@ -128,15 +100,13 @@ class Tools:
 		else: 
 			self.message('Pick a log file')
 
-	def infoBox(self):
-		tkMessageBox.showinfo(title='Log File Info', message=self.status.get())
-		
 	def message(self, text):
 		win = Toplevel()
 		Label(win, text=text).pack()
 		Button(win, text='OK', command = win.destroy).pack()
 
 	def qmessage(self, label, text):
+		import tkMessageBox
 		x = tkMessageBox.askokcancel(label,text)
 		# x=1 : ok, x=0 : Cancel
 		return x
@@ -150,6 +120,7 @@ class Tools:
 			MainGui.pid = 0
 
 	def exitProg(self):
+		
 		self.exitFileReader()
 		master.destroy()
 		sys.exit()
@@ -160,20 +131,16 @@ class Tools:
 
 
 	def findFile(self):
-		self.clearTable()
-		MainGui.filename = ''
 		lf = LogFinder()
 		lf.setDaemon(1)
 		lf.start()
 
 	def stop(self):
 		#stops FileReader from reading, sets status to idle and clears the table
-		#
-		self.status.set('No file opened')
 		self.exitFileReader()
-		#do not clear table
-		#self.clearTable()
-		
+		self.clearTable()
+		self.status.set('idle')
+			
 
 	def clearTable(self):
 		for i in range(1,15):
@@ -190,7 +157,7 @@ class FileReader(threading.Thread):
 			output = child.fromchild
 			MainGui.pid = child.pid
 		#in case of an error:
-		except:
+		except NameError:
 			tools.stop()
 			tools.message("Failed to run tail!")
 		else: #if no error
@@ -213,13 +180,13 @@ class LogFinder(threading.Thread):
 		while 1:
 			try:
 				_child = popen2.Popen3('lognm')
-			except:
+			except NameError:
 				tools.message('Could not run lognm')
 				break
 			else:
 				logfile = _child.fromchild
 				_filename = logfile.read().rstrip()
-				_child.wait()
+				logfile.close()
 				filename = "%s%s%s" % ('/usr2/log/',_filename,'.log')
 				if _filename=='': #no log, quit, remove """ to get question
 					"""
@@ -232,18 +199,15 @@ class LogFinder(threading.Thread):
 						#if cancel, stop thread:
 						break
 					"""
-					if tools.first_run == 1:
-						tkMessageBox.showinfo(title='No Log found', message='Field System not running\n Press OK to exit')
 					tools.exitProg()
 				elif not filename==MainGui.filename: #change of logfile!
-					tools.first_run = 0
 					#give MainGui the new filename
 					MainGui.filename = filename
 					#kill the Filereader thread if there is one:
 					tools.exitFileReader()
 					#start new thread with new filename
 					tools.startUp()
-				#re-check every 1s
+				#re-check every 10s
 				time.sleep(1)
 		
 class LineReader:
@@ -258,27 +222,20 @@ class LineReader:
 		self.firstday = 0
 
 	def getData(self, line):
-		identification_table = ['usbx', 'usby', '/vsi4=', '/pcalports=']
+		identification_table = ['usbx', 'usby', '/pcalports=', '/vsi4=,']
 		for match in identification_table:
 			listpos = 0
 			position = line.find(match)
 			if (position !=-1):
 				position += len(match)
-				if (match == '/vsi4='):
-					#might be '/vsi4=geo'
-					if line[position]==',':
-						_nfind = line[position+1:-1].split(',')
-						xchannel = _nfind[0]
-						ychannel = _nfind[1]
-						self.setChannel([xchannel, ychannel])
-				elif (match == '/pcalports='):
+				if (match == '/pcalports=') or (match =='/vsi4=,'):
 					_nfind = line[position:-1].split(',')
 					xchannel = _nfind[0]
 					ychannel = _nfind[1]
 					self.setChannel([xchannel, ychannel])
 				#check if xy channels are set
 				elif (self.xchannel and self.ychannel): 
-					data = ''
+					data = 'something new'
 					#check if xy channels are set
 					if (match == 'usbx'):
 						listpos = self.xchannel
@@ -310,16 +267,11 @@ class LineReader:
 
 			
 
-
-def main():
+if __name__ == "__main__":
 	startProg = MainGui()
 
 
-if __name__ == "__main__":
-	sys.exit(main())
-
-
 			
-#By Tomas Gille - 2008
+
 
 

@@ -156,7 +156,9 @@ C                   Write the buffer to the MAT bus
 c
 c wait for the output to drain
 c
-      ierr=portoutdrain(lumat)
+C removing output drain maybe a 
+C solution for an intermittent kernel 2.6 problem with SuperMicro C7SIM-Q?
+c     ierr=portoutdrain(lumat)
 C
 C  For actual communications, use o'2000' in the read request.
 C  For terminal tests, use o'400' instead.

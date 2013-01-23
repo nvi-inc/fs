@@ -1,5 +1,6 @@
 /* mk5 rtime decoding for bank_check SNAP command */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>

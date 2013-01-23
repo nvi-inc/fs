@@ -1,0 +1,170 @@
+                    holog - holography control command
+
+            Syntax:     holog=azs,els,azp,elp,recal,proc,wait
+                        holog
+
+            Response:   holog/azr,elr,azp,elp,recal,proc,wait
+
+
+Settable parameters:
+          azs       Azimuth   Span: -360. to +360, non-inclusive. No default.
+          els       Elevation Span:  -90. to  +90, non-inclusive. No default.
+          azp       Azimuth   Points: positive or negative odd values 3-99.
+	            No default.
+          elp       Elevation Points: positive or negative odd values 3-99.
+	            Sign must agree with azp. See comments. No default. 
+          recal     Re-calibration period. Seconds: 0-10000 or "off".
+                    0="off", Default is "off".
+          proc      Snap procedure base name. See comments. No default.
+          wait      Seconds to wait for onsource for each point, 1-1000
+                    seconds allowed, default 120.
+
+Monitor-only parameters: None
+
+
+Comments:
+This command uses the external program "holog" to perform a
+Boustrophedon ("as the ox plows") scan centered on the current antenna
+position with the specified Az and El spans ("azs" and "els").
+
+For this program to work, the local antenna interface must implement
+Az-El offsets, e.g., to support the "azeloff=..." command. 
+
+The center point of the scan is determined from the currently
+commanded "source=.." position including the application of currently
+commanded AzEl offsets, i.e., "azeloff=...".  The effect of
+"radc" and "xy" offsets is not included (so these should be zero
+before starting this program), but could be easily added.  The current
+position can be commanded as either a regular celestial source or an
+"azel" position, but not fixed "hadc" ror "xy" pointing. However, the
+missing ones could be easily added.
+
+Within and up to the limits of the span, the antenna stops at a grid
+of points, specified by the number of points for each axis ("azp" and
+"elp") to execute a SNAP procedure with a name constructed from the
+base name ("proc") with a "p" appended, referred to hereafter as the
+measurement SNAP procedure.  For positive spans, the scan starts at
+the most counterclockwise (viewed from above) azimuth and lowest
+elevation grid point. The antenna traverses the azimuth positions
+clockwise at the lowest elevation, then proceeds to the next elevation
+and traverses the azimuths counterclockwise at that elevation. Then it
+proceeds to the next elevation, where the azimuths are tranversed
+clockwise again.  This pattern is repeated as necessary to visit all
+the grid points, ending with the most clockwise azimuth and highest
+elevation point.
+
+The starting and ending points of the scan can be switched to
+different corners of the grid by using a negative span for either or
+both axes.  The long "furrows" of the scan are always along azimuth.
+
+This command must be set-up, i.e., commanded with parameters
+("holog=...") before the scan be run.  The scan is initated by
+entering the command "holog".
+
+If the "recal" value is not "off" (0) then before the scan is started,
+the measurement SNAP procedure is executed at the center point.  This
+is repeated after the scan ends.  In addition, if "recal" seconds have
+passed since the last execution at the center point, the antenna is
+moved there and the measurement SNAP procedure is re-executed.  This
+is intended to provide periodic re-calibration points for antenna
+holography.  The center point of the grid is omitted during the actual
+scan.  If "recal" is "off" (0), the initial and final center point
+scans are omitted and the center point of the grid is not omitted.
+
+If the number of points for both axes are negative, a single cut is
+done in each azimuth and elevation with the specified span and the
+absolute value of number of points for the respective axes.
+
+The azimuth span is adjusted by 1/cos(El) of the center point of the
+scan to space the azimuth grid points in anglar rather than coordinate
+units.
+
+It is recommended that nothing else be done, e.g. running a 
+schedule, while this command is executing. Since this command
+may run for an extended period of time, a mechanism has been
+supplied for aborting, enter:
+
+   sy=brk holog &
+
+as a SNAP command. After aborting, the antenna will be returned to
+the center position.
+
+The measurement SNAP procedure is run at each grid point.  Each time
+the procedure is run, it is given an argument of the form:
+
+   sa_se
+
+where:
+      a is the azimuth offset applied, printed in degrees with format %.3f
+      e is the elevation offset applied, printed in degrees with format %.3f
+      s is the sign of the offset
+      _ is a separator character
+
+This argument can be used in the procedure by specifying a dollar sign
+"$" where it should be used.
+
+The following is an example of a procedure, perhaps called "hologp"
+("holog"+"p"), that might be useful for holography. It runs a script
+on a remote computer and records s small amount of data with a Mark
+5A/B recorder:
+
+HOLOGP:   scan_name=$
+          sy=ssh host scriptp $
+          disk_pos
+	  mk5=record=on:$;
+          !+2s
+          disk_record=off
+          disk_pos
+          sy=go holog & 
+
+where "scriptp" is a shell script to run on the remote host.  Note
+that since there is no ampersand "&" at the end of the "sy=ssh ..."
+command the FS will wait for the ssh command to complete before
+continuing.  Please note that if the actually used is script takes
+less than one second to execute, a line:
+
+          !+1s
+
+should be inserted before the "sy=go holog &" line to avoid race
+conditions in the coordination with the holog program.
+
+The remote computer should be set to accept a connection from the FS
+computer with prompting for a password, perhaps by sharing keys.
+
+An initialization SNAP procedure is run after the antenna is onsource
+for the first measurement on the center point. The name of procedure
+is constructed from the base name ("proc") with an "i" appended,
+referred to hereafter as the initialization SNAP procedure. The
+initialization SNAP procedure is run with an argument that is the
+date/time in the format: yyyy.ddd.hh:mm:ss (yyyy=year,ddd=day of year,
+hh=hour, mm=minute, ss=second). This procedure can be used for any
+initialization that should be done at the start of each holography
+run. A sample script, "hologi" ("holog"+"i") is:
+
+HOLOGI:   sy=ssh host scripti $
+          !+1s
+          sy=go holog & 
+
+where "scripti" is shell script to run on remote host.  Note that
+since there is no ampersand "&" at the end of the "sy=ssh ..." command
+the FS will wait for the ssh command to complete before continuing. A
+useful thing that this script might do is to set-up a link to a
+directory that includes the date/time in its name to make sure that
+data from each "holog" run goes into a unique directory, which is
+documented incidently by the date/time. For example the remote script
+might contain:
+
+     mkdir $1
+     ln -s $1 hologdata
+
+assuming that "hologdata" is the directory name that "scriptp" uses to
+store its data.
+
+There is no requirement that this command be used for holography. It
+can be used whenever it would be useful to execute a specific script
+at different grid points around a central position.
+
+The default wait time for of 120 seconds is generous, but can be
+adjusted if necessary.  Slower antennas may need a longer time.
+Shorter times are only useful to make holog give-up sooner if there is
+a problem getting on-source.

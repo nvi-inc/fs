@@ -8,9 +8,14 @@ echo "*******************************************************************"
 echo ""
 echo "CAUTION: This script will automatically overwrite everything on the"
 echo "         /usr2 partition of the computer it is run on.  Use it only"
-echo "         on the Spare computer"
+echo "         on the Spare computer.  It will stop any processes that"
+echo "         are using the /usr2 partition.  Rebooting afterwards is"
+echo "         recommended."
 echo ""
-echo "This script must be executed by 'root' on the Spare computer "
+echo "This script must be executed by 'root' on the Spare computer. "
+echo "You must be logged-in as 'root', do not use 'su' or 'ssh' to"
+echo "become 'root' locally. Remote login via 'ssh' as 'root' is okay."
+echo "Make sure all other users are logged-out before proceeding."
 echo ""
 echo -e "Do you wish to continue with the REFRESH? (y=yes, n=no) : \c" 
 badans=true
@@ -18,7 +23,7 @@ while [ "$badans" = "true" ]
 do
   read ans
   case "$ans" in
-    y|yes) echo -e "\nO.K. Continuing with install ... "
+    y|yes) echo -e "\nO.K. Continuing with refresh ... "
            badans=false
            ;;
     n|no)  echo -e "\nO.K. Exiting."
@@ -29,25 +34,34 @@ do
 done
 #
 echo "This script must be customized before first use, and it hasn't been."
-echo "  see script for details."
+echo "See script for details."
 #To customize this script (as 'root') on the Spare computer:
 #   1. Execute the commands:
 #        cd /usr/local/sbin
 #        cp -a /usr2/fs/misc/refresh_spare_usr2 refresh_spare_usr2
 #        chown root.root refresh_spare_usr2
-3        chmod a+r,u+wx,go-wx refresh_spare_usr2
+#        chmod a+r,u+wx,go-wx refresh_spare_usr2
 #   2. Edit '/usr/local/sbin/refresh_spare_usr2':
 #        A. comment out the two echo commands above (add leading '#'s).
 #        B  change the 'operational' on the ssh command below to the node name
 #           (a fully qualified hostname may be needed) or IP address of
 #           the operational machine
-#        C. uncomment (delete the leading '#'s) out in the six commands
-#            below (#echo ... #echo).
+#        C. uncomment (delete the leading '#'s) the 15 commands
+#            below (#echo "Refreshing ..." ... #echo "Done. ...").
 #        D. Save the results
 #   3. Test it the first time after a Spare computer disk rotation.
 #echo "Refreshing spare computer disk /usr2 partition ..."
+#fuser -k -m /usr2
 #umount /usr2
 #mkfs.ext3 /dev/md2
 #mount /usr2
+#echo ""
+#echo "You may be prompted for your operational machine's root password, then"
+#echo "there will be a long pause without any output unless there are errors."
+#echo "If there are errors, please note them and report them to Ed.Himwich@nasa.gov."
+#echo "The refresh is finished when you see a line that starts: 'Done. ...',"
+#echo "and get a prompt. Please follow the directions on the 'Done. ...' line."
+#echo ""
 #ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf -)
-#echo "Done."
+#echo ""
+#echo "Done. Wait until 'mdstat' does not show an active recovery and then reboot."

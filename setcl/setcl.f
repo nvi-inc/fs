@@ -420,18 +420,29 @@ c
       centifs=centiavg
       call fc_rte_fixt(secs_fs,centifs)
       diff=(secs_fm-secs_fs)*100+it(1)-centifs
-
-      if (abs(secs_fs-secs_fm).gt.86400*248) then
-         call logit7ci(idum,idum,idum,-1,-4,'sc',0)
-        goto 999
-      endif
 c
  201  continue
       unixdiff=unixsec(2)-unixsec(1)
       unixdiff=unixdiff*100+unixhs(2)-unixhs(1)
       unixhs(1)=unixhs(1)+unixdiff/2
       unixsec(1)=unixsec(1)+unixhs(1)/100
-      unixhs(1)=mod(unixhs,100)
+      unixhs(1)=mod(unixhs(1),100)
+c
+      call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &     rateti_fs,spanti_fs,modelti_fs,icomputer)
+c
+      if (kfm.and.cjchar(modelti_fs,1).ne.'c') then
+         call fc_rte_check(iErr)
+         if(iErr.eq.-5) then
+            call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+         else if(iErr.ne.0) then
+            call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
+         endif
+         if(abs(dble(secsoffti_fs)-dble(secs_fm)).gt.86400*248) then
+            call logit7ci(idum,idum,idum,-1,-4,'sc',0)
+            goto 999
+         endif
+      endif
 c
       diffunix=(secs_fm-unixsec(1))*100+it(1)-unixhs(1)
       difffs2unix=(secs_fs-unixsec(1))*100+centifs-unixhs(1)
@@ -440,9 +451,6 @@ c
          diff=diffunix
          difffs2unix=0
       endif
-c
-      call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &     rateti_fs,spanti_fs,modelti_fs,icomputer)
 c
       inxtc=ichmv_ch(ibuf,1,'time/')
       inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,o'100000'+12)
@@ -461,7 +469,8 @@ c
       inxtc=ichmv_ch(ibuf,inxtc,'.')
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      if ((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0) then
+      if ((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0
+     &     .or.cjchar(modelti_fs,1).eq.'c') then
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
@@ -619,6 +628,7 @@ c
          else if(ntp_synch.ne.1) then
             call logit7ci(idum,idum,idum,-1,-15,'sc',0)
          endif
+         goto 1
       endif
       goto 999
 C
@@ -628,8 +638,8 @@ C
 999   continue
       if (MK5.eq.drive(1).and.
      &     (MK5B.eq.drive_type(1).or.MK5B_BS.eq.drive_type(1))) then
-        if((MK4.eq.rack.and.MK5.eq.rack_type).or.
-     &       (VLBA4.eq.rack.and.VLBA5.eq.rack_type)) then
+        if((MK4.eq.rack.and.MK45.eq.rack_type).or.
+     &       (VLBA4.eq.rack.and.VLBA45.eq.rack_type)) then
            if("vsi"//char(0).ne.m5pps(1:4)) then
               call logit7ci(idum,idum,idum,-1,-19,'sc',0)
            endif

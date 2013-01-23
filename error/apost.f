@@ -1,5 +1,5 @@
       subroutine apost(x1,x2,aux,wy1,wy2,par,ipar,phi,a,npar,f1,f2,
-     +     fec1,fec2,rchi,ap1,ap2)
+     +     fec1,fec2,rchi,ap1,ap2,coslt,iflags)
 C
 C calculate a posterior sigmas
 C
@@ -14,7 +14,11 @@ C
 C
 C DIMENSION A(NPAR*(NPAR+1)/2)
 C
-      wln1=wy1*wy1+sign(fec1*fec1,fec1)
+      if(and(iflags,1).eq.1) then
+         wln1=wy1*wy1+sign((fec1*fec1)/(coslt*coslt),fec1)
+      else
+         wln1=wy1*wy1+sign((fec1*fec1),fec1)
+      endif
       wlt1=wy2*wy2+sign(fec2*fec2,fec2)
 C
       do i=1,npar

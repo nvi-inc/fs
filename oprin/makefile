@@ -14,7 +14,7 @@
 #CC = gcc
 #CC = gcc-2.95
 
-READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_completion_append_character' /usr/include/readline/readline.h ; echo $$?)
+READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_compentry_func_t' /usr/include/readline/readline.h ; echo $$?)
 
 # In all default compilation commands involving the C preprocessor,
 # use these preprocessor control flags (include dirs, defines).

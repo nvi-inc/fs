@@ -10,6 +10,7 @@ C  Common blocks:
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
+      include 'bbc_freq.ftni' 
 
 ! called functions
       logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
@@ -27,7 +28,6 @@ C Input:
       character*(*) cr2
       character*(*) cr3
       character*(*) cr4
-
 C
 C LOCAL:
       double precision R,D
@@ -44,6 +44,7 @@ C LOCAL:
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
       integer nch1,nch2,nch3,iserr(max_stn)
+      logical kexist 
 
       character*2 cbnd(2)   !used in count_freq_tracks
       integer     nbnd      ! ditto
@@ -202,6 +203,8 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2007Jul07 JMGipson. Added "q" option for quitting.
 ! 2007Sep05 JMGipson. Changed entry point for re-reading schedules.
 ! 2008May23 JMGipson. Make sure output files are lowercase
+! 2012Sep25 JMGipson. Modified to use drudg_rdctl.f instead of rdctl.f 
+! 2013Jan23 JMGipson. Modified so that equipment_override is done when in batch mode. 
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
@@ -253,25 +256,25 @@ c Initialize no. entries in lband (freqs.ftni)
       ierr=0
       tpid_prompt = 'no'
       itpid_period = 0
-      tpid_parm = ''
+      contcal_prompt='NO'
+      do i=1,4
+        ldbbc_if_inputs(i)=" "
+      end do 
 
 C  Initialize lots of things in the common blocks
 100   continue
       call skdrini
 C
 C     1. Make up temporary file name, read control file.
-C***********************************************************
-      call rdctl(cdum,cdum,cdum,cdum,   cdum,cdum,cdum,cdum,  !used by sked, not drudg
-     >           cdum,cdum,cdum,cdum,   cdum,cdum,cdum,cdum,
-     >           cdum,cdum,cdum,
-     >           csked,csnap,cproc,
-     .           ctmpnam,cprtlan,cprtpor, cprttyp,cprport,
-     >           cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
-     .           dr_rack_type,crec_def,kequip_over,
-     .           tpid_prompt,itpid_period,tpid_parm)
+C***********************************************************   
+
+
+      call drudg_rdctl(csked,csnap,cproc,ctmpnam,            
+     >           dr_rack_type,crec_def,kequip_over,ldbbc_if_inputs)
       kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
      >               crec_def(1).eq.'unknown'.and.crec_def(2).eq.'none')
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
+!      stop 
 
 C
 C     2. Initialize local variables
@@ -326,29 +329,30 @@ C   Check for non-interactive mode.
 C 3. Get the schedule file name
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
-         if (kskdfile.and.kdrgfile) then ! reinitialize on 3rd time
+          if (kskdfile.and.kdrgfile) then ! reinitialize on 3rd time
            kskdfile=.false.
            kdrgfile=.false.
-         endif
+          endif
 C       Opening message
-        WRITE(LUSCN,'(a)')
+          WRITE(LUSCN,'(a)')
      >   ' DRUDG: Experiment Preparation Drudge Work (NRV & JMGipson '//
      >    cversion(1:trimlen(cversion))//')'
-	write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
+	  write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
      >     iverMinor_fs,iverpatch_fs
 
-        nch = trimlen(cfile)
-        if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
-          if (kbatch) goto 990
-          write(luscn,'(a)')
-     >     " Enter schedule file name (.skd or .drg default <return> "
-          write(luscn,'("if using a .snp file, :: or q to quit) ?",$)')
-          read(luusr,'(a)') cbuf
-          nch=trimlen(cbuf)
-        else ! command line file name
-          cbuf=cfile
-        endif 
-      endif
+          nch = trimlen(cfile)
+          if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
+            if (kbatch) goto 990
+            write(luscn,'(a)')
+     >       " Enter schedule file name (.skd or .drg default <return> "
+            write(luscn,
+     >          '("if using a .snp file, :: or q to quit) ?",$)')
+            read(luusr,'(a)') cbuf
+            nch=trimlen(cbuf)
+          else ! command line file name
+            cbuf=cfile
+          endif 
+        endif
         IF (NCH.GT.0) THEN !got a name
           if(cbuf(1:2) .eq. "::" .or. cbuf(1:1) .eq. "q") goto 990
           if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
@@ -372,6 +376,10 @@ C       Opening message
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
               lskdfi=lskdfi(1:l)//'.skd'
+              inquire(file=lskdfi,exist=kexist)
+              if(.not.kexist) then 
+                lskdfi=lskdfi(1:l)//'.vex'
+              endif 
               ctextname = lskdfi(1:l)//'.txt'
               kskdfile = .true.
               kdrg_infile=.false.
@@ -393,22 +401,22 @@ C       Opening message
             ix=index(lskdfi(ixp:),'/')
             if (ix.gt.0) ixp=ixp+ix
           enddo
-        cexpna=lskdfi(ixp:) ! exp name is root of file name
-        IX = INDEX(cexpna,'.')-1
-        if (ix.gt.6) then ! too many letters
-          write(luscn,'(a)')
+          cexpna=lskdfi(ixp:) ! exp name is root of file name
+          IX = INDEX(cexpna,'.')-1
+          if (ix.gt.6) then ! too many letters
+            write(luscn,'(a)')
      >      " ERROR: Schedule name is too long. Please rename the file "
-          write(luscn,'(a)')
-     >       "to have 6 characters or less before the file extension."
-          goto 990
-        endif
-        kskd = .true.
-      else ! none
-        write(luscn,'(" Enter schedule name (e.g. ca036): ",$)')
-        read(luusr,'(A)') cbuf
-        l = trimlen(cbuf)
-        if (l.gt.0) cexpna = cbuf(1:l)
-        kskd = .false.
+            write(luscn,'(a)')
+     >         "to have 6 characters or less before the file extension."
+            goto 990
+          endif
+          kskd = .true.
+        else ! none
+          write(luscn,'(" Enter schedule name (e.g. ca036): ",$)')
+          read(luusr,'(A)') cbuf
+          l = trimlen(cbuf)
+          if (l.gt.0) cexpna = cbuf(1:l)
+          kskd = .false.
         ENDIF !got a name
       END DO !get schedule file name
 C  ********************************************************
@@ -504,6 +512,7 @@ C  Now change J2000 coordinates to 1950 and save for later use
 C
 C  Check for sufficient information
         IF (NSTATN.GT.0.AND.NSOURC.GT.0.AND.ncodes.GT.0) GOTO 500
+
         WRITE(LUSCN,"(' Insufficient information in file.')")
           ierr=-1
         GOTO 200
@@ -512,6 +521,15 @@ C     5. Ask for the station(s) to be processed.  These will be done
 C        in the outer loop.
 C
 500   CONTINUE
+! Set all second recorders to "none"
+      do istn=1,nstatn
+         if(cstrec(istn,2) .ne. "none") then
+           write(*,'(a,a,a)') "Warning: Recorder 2 for ",  
+     >     cstnna(istn)," set to 'none'." 
+           cstrec(istn,2)="none"
+          endif 
+      end do
+!
       km5A_piggy=.false.
       km5p_piggy=.false.
       response=" "
@@ -576,21 +594,8 @@ C        on stations and schedules, respectively.  Within the loop,
 C        schedule the appropriate segment.
 C
 700   continue
-      if (.not.kbatch) then
-! Several options for label line.
-         if (clabtyp.eq.'POSTSCRIPT') then
-           clabline=  ' 6 = Make PostScript label file       '
-           clabprint= ' 61= Print PostScript label file'
-         else if (clabtyp.eq.'DYMO') then
-           clabline=  ' 6 = Make DYMO label file             '
-           clabprint= ' 61= Print DYMO label file'
-         else
-           clabline=  ' 6 = Make tape labels                 '
-           clabprint=" "
-         endif
-
-      if (kskd) then !schedule file
-        l=trimlen(lskdfi)
+      if(kskd) then 
+! This part sees if we should do equip_override. 
         if (istn.gt.0) then !one station
 C  Set equipment from control file, if equipment is unknown, and
 C  if it was not set by the schedule.
@@ -625,6 +630,26 @@ C  if it was not set by the schedule.
      >         cstrack(i) .eq. 'unknown') kknown=.false.
           enddo
         endif
+      endif
+
+
+
+      if (.not.kbatch) then
+! Several options for label line.
+         if (clabtyp.eq.'POSTSCRIPT') then
+           clabline=  ' 6 = Make PostScript label file       '
+           clabprint= ' 61= Print PostScript label file'
+         else if (clabtyp.eq.'DYMO') then
+           clabline=  ' 6 = Make DYMO label file             '
+           clabprint= ' 61= Print DYMO label file'
+         else
+           clabline=  ' 6 = Make tape labels                 '
+           clabprint=" "
+         endif
+
+      if (kskd) then !schedule file
+        l=trimlen(lskdfi)
+    
 C       Are the equipment types now known?
         if (istn.gt.0) then !one station check equipment
           kknown = .not.
@@ -978,6 +1003,5 @@ C         ierr=cclose(fileptr)
           endif
         endif
       endif
-      WRITE(LUSCN,9090)
-9090  FORMAT(' DRUDG DONE')
+      WRITE(LUSCN,'("DRUDG DONE")')
       END

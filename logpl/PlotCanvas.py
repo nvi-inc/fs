@@ -643,43 +643,41 @@ class PlotCanvas:
         #myfile = open(filename, 'wb')
         self.canvas.postscript(file = filename, colormode = 'color')
 
-    def engNumber(self, number_list): #receives a list of numbers and returns it with proper number of digits
+    def engNumber(self, number_list): #receives a list of numbers and returns it with proper number of digits, print with powers 10 exponents multiples of 3
         number_list = map(float, number_list)
         min_number = min(number_list)
         max_number = max(number_list)
+        abs_number = max(abs(min_number),abs(max_number))
         deltanumber = max_number - min_number
-        if min_number == 0:
-            proc = 1
-        else:
-            proc = deltanumber/min_number
-        #if proc>.10, keep first to digits, if proc>0.01, keep first 3.....
-        #len(str(int(1/proc)))+1
-        try:
-            number_of_digits = len(str(int(1/proc)))+2
-        except ZeroDivisionError:
-            number_of_digits = 2
-        number_list = map(str, number_list)
+        if abs_number > 1e-323:
+            exp0=math.log10(abs_number)
+            if deltanumber/abs_number > 1e-14:
+                digits=int(math.log10(deltanumber/abs_number))
+                digits=-digits+2
+            else:
+                digits=3
+            if exp0 > 0:
+                exp=int(exp0)
+                exp1=(exp/3)*3
+                digits=digits-(exp-exp1)
+            else:
+                exp=int(exp0-1)
+                exp1=((-exp+2)/3)*-3
+                digits=digits-(exp-exp1)
+            if digits < 3:
+                digits = 3;
+            form = '%.' + str(digits) + 'f'
         return_list = []
         for number in number_list:
-            _numbers = number.split('.')
-            if len(_numbers)==1:
-                return_list.append(_numbers[0][:number_of_digits])
-            else: #decimal number
-                if not _numbers[0]=='0':
-                    digits_before_dot = len(_numbers[0])
-                    if number_of_digits>digits_before_dot:
-                        _number = _numbers[0] + '.' +_numbers[1][:number_of_digits-digits_before_dot]
-                    else:
-                        _number = _numbers[0]
-                    return_list.append(_number)
-                else: #first is zero
-                    _s = _numbers[1].lstrip('0')
-                    zeros = len(_numbers[1])-len(_s)
-                    _a = _s[:number_of_digits]
-                    _number = '0.' + '0'*zeros + _a
-                    return_list.append(_number)
+            if abs_number > 1e-323:
+                numbers = form % (number/math.pow(10,exp1))
+                if exp1 != 0:
+                    numbers = numbers + ('e%-d' % exp1)
+            else:
+                numbers = "%g" % number
+            return_list.append(numbers)
         return return_list
-        
+      
 
     def getAverage(self):
         try:

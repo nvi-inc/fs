@@ -1,0 +1,67 @@
+          ifx - IF distributor (DBBC racks)
+
+            Syntax:     ifx=input,att,filter,target
+            Response:   ifx/input,att,filter,target,attV,counts
+
+
+x is the IFD index letter corresponding to its order in position in
+the DBBC rack, a to d
+
+Settable Parameters:
+
+            input     input channel, 1 to 4, No default.
+
+            att       attenuation, "man" for manual control at current level,
+                      "agc" for automatic gain control, or 0-63 which
+		      represent steps of 0.5 dB. A numeric value implies
+                      manual control. On monitor, only "agc" or "man" are
+                      displayed (attV monitor parameter is current value).
+                      Default is "agc". Some DBBCs (v101 and below) only
+                      accept 1-9 for numeric values.
+
+            filter    IF filter, 1-4 or 1-8 depending on DBBC version, see
+                      comments. No default.
+                      Usually 1 is  512-1024 MHz,
+                              2 is   10- 512 MHz,
+                              3 is 1536-2028 MHz,
+                              4 is 1024-1536 MHz,
+                              5 is    0-1024 MHz,
+                              6 is 1200-1800 MHz (L Band),
+                              7 is spare,
+                              8 is spare.
+                              
+            target    level target for AGC, 0-65535. No default
+                      This normally is not set here, but by the DBBC
+                      configuration file. There is no command/monitor
+                      read back of this value for DBBC version v100.
+		      At least some DBBC versions do not accept "0".
+
+Monitor-only Parameters:
+
+            attV      attenuation value, 0-63 which represent
+		      steps of 0.5 dB. The value adjusts as the DBBC
+                      tracks the target in AGC mode.
+
+            counts    Level in the bandpass for one second integration
+                      in counts. Range 0 to 65535. The value tracks the
+                      target level in AGC mode. Nominal operating level is
+                      system dependent and can be found in the dbbc
+                      configuration file. See notes for units.
+
+Comments:
+Each ifx has four separate inputs (i.e. there are 16 total inputs)
+that are selected among, for that ifx, by the input parameter.
+
+DBBC DDC personality version v100 does not support command or monitor
+for the target value
+
+DBBC DDC personality version v101 only supports a limited range, 1-9,
+of command att values.
+
+Only DBBC DDC personality version v102 supports filters 5-8 (UNICA4
+must be present).
+
+The counts output converts to linear power scale approximately using
+the (C-language) expression:
+
+  power=pow(10.0,counts/19000.)

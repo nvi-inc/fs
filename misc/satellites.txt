@@ -1,0 +1,422 @@
+File: /usr2/fs/misc/satellites.txt  Version: 0.2  Date: 120530
+
+I. Introduction
+
+This memo describes satellite support in the FS. It is divided into
+nine sections:
+
+   I.    Introduction
+   II.   The "predict" program
+   III   New Directory and Files
+   IV.   Satellite SNAP commands
+   V.    Getting and updating Satellite TLEs
+   VI.   Tracking Modes
+   VII.  Installation
+   VIII. Operations
+   IX.   Future Work
+
+
+II. The "predict" program.
+
+FS support for satellites is organized around the Linux version of
+open source "predict" program (version 2.2.3) by John Magliacane
+(KD2BD). A slightly modified version of this porgram for FS use is
+included in the FS distribution begining with FS version 9.10.5. This
+program was originally developed for amateur radio satellite
+operations. It uses an implementation of the highly accurate SGP4
+propagator (few kilometer level accuracy). The program has been shown
+to agree with another SGP4 implementation at the few meter level. It
+uses TLEs (two line elements) as input for satellite information. Only
+very small changes were required to integrate it into the FS. The
+modified program source can be found in "/usr2/fs/predict" and the
+original documentation in the "docs/" sub-directory thereof.
+
+Besides minor formatting and exit code changes, the one
+significant difference between the FS version of "predict" and the
+original is that vocalizer (sound card) support has been disabled.
+This was not need for the FS and its removal made inclusion of
+"predict" into the FS less cumbersome.
+
+Operationally, use of "predict" by the FS is different from what is
+described in its documentation primarily because the "-t" (TLE file
+specification) and "-q" (QTH file specification) are always used. This
+gives more flexibility and avoids the use of a hidden directory
+(".predict") in each user's home directory.  This makes the operation
+independent of the login account and more transparent.
+
+The "predict" program can also be used independently of the FS to
+check on satellite visibility. This is described further below in the
+"Operations" section (VIII).
+
+III. New Directory and Files
+
+A brief aside about TLEs (two line elements).  There are actually
+_three_ lines in a set of elements, but the first line is just a
+common name for the satellite, up to 24 characters.  The actual data
+is carried in the final two lines.
+ 
+The following description is merely a recommendation.  There is almost
+complete freedom to organize the data anyway you want.  The
+organization given here is suggested in hopes that stations will use
+it as a standard approach.  As described here, it is well suited to
+use with the FS and possible future satellite observations run from
+schedules.
+
+The FS support for the satellites utilizes a new directory,
+"/usr2/tle_files". There are three types of files in this directory:
+
+*.txt - These are raw TLEs files, probably obtained from the Internet.
+*.tle - Files of up to 24 TLEs, formatted by the predict program
+*.qth - Files with station locations for use by predict, usually just one
+
+Each is described in a sub-section below;
+
+			    "*.txt" FILES
+
+These files contain raw TLEs from the Internet.  The ".txt" file
+suffix is used here for consistency with the default source for TLEs
+on the Internet, CelesTrak. These are in text format, typically DOS,
+but that is not required.  There can be any number of "*.txt" files
+with TLEs in them.  Each file can have an arbitrary number of TLEs.
+It is convenient if these are the raw files obtained from the
+Internet.  A sample script to obtain "*.txt" files is described in
+the "Getting and updating Satellite TLEs" section (V).
+
+			    "*.tle" FILES
+
+These files are same as "*.txt" files, except that they may be in UNIX
+text format.  There should only be a maximum of 24 TLEs per "*.tle"
+file.  The advantage of these files is that the satellites in them can
+be given locally meaningful names that "predict" will preserve if it
+is used to update their elements.  A sample script to update the files
+is described in the "Getting and updating Satellite TLEs" section
+(V).
+
+You can use the "predict" program with these files to check satellite
+visibility of as described in the "Operations" section (VIII) item
+(3).
+
+The "*.tle" files can be used to maintain a library of satellites that
+are useful and have locally recognizable names. You can create "*.tle"
+files for your station by starting with the raw "*.txt" entries for
+the satellites you want, placing them in a "*.tle" file, say
+"station.tle" (and then next one can be "station1.tle" if you need
+more than 24, and, then "station2.tle" etc.).  You can modify the
+common name (the first line of the TLEs) to be anything you want, up
+to 24 characters. Case in the names is not significant.  All
+non-trailing blanks in the name are significant and must be used when
+commanding the satellite from the FS.  Do not modify in anyway the
+final two lines of each TLE (beginning with "1" and "2" respectively).
+
+DRUDG may some day generate "*.tle" files for experiments.  They would
+be named in parallel to experiment "*.snp" and "*.prc" files,
+e.g. "rd1205gg.tle".  However, the names may be modified to include an
+integer number between the two letter station code and the dot (".")
+if more than 24 satellites are needed in an experiment, e.g.,
+"rd1205gg1.tle".  The "*.tle" type is used for these to simplify
+updating the elements if that is needed and to make "predict" useful
+for checking their visibility.
+
+			    "*.qth" FILES
+
+Normally, a station would have only one "*.qth" file, named
+"station.qth".  It is only needed if you want to run "predict" outside
+the FS, for example, to check satellite visibilities.  The file format
+is four lines (no comment lines):
+
+name - up to 16 character station name, padded with trailing blanks to
+       the right
+lat   - NORTH geodetic latitude, decimal degrees 
+long  - WEST geodetic longitude, decimal degrees
+alt   - station height, integer meters
+
+A sample file is provided in 
+
+  /usr2/fs/st.default/tle_files/station.qth
+
+It can be copied to "/usr2/tle_files" and customized.  The data in the
+file is the same as the first four non-comments lines in
+
+  /usr2/control/location.ctl
+
+except that: (1) the station name is 16 characters (blank padded to
+the right), (2) the order of the latitude and longitude lines is
+reversed, and (3) the altitude is an integer.
+
+IV. Satellite SNAP commands
+
+The SNAP commands for use with satellites are described more completely
+in the help page in the FS for each command:
+
+  satellite=name,file,mode,wrap
+
+  tle=line,catnum,data
+
+  satoff=seconds,cross,hold
+
+The "satellite" command is the main command for commanding the antenna
+to a satellite.  The "name" is the common name of the satellite or its
+catalog number.  The "file", assumed to be in the "/usr2/tle_files"
+directory, can be either a "*.txt" or a "*.tle" file (as described
+above), or null (in which case "name" must be null also), if the TLEs
+are defined by "tle" commands.
+
+If a name and file are specified, the "satellite" command searches the
+specified file for the corresponding TLE, generates temporary "*.tle"
+and "*.qth" files (the latter automatically created from the
+information the FS read from the "/usr2/control/location.ctl" file) on
+"/tmp", and uses them for "predict".  The process is similar if no
+file is specified, but in this case the TLEs come from the "tle"
+commands.
+
+As a record of which elements are being used, the "satellite" command
+writes them into the log file.
+
+See the "Tracking Modes: section (VI) for a description of the
+tracking modes.
+
+The "tle" command can be used to input satellite elements directly
+from oprin, or more likely, from a schedule file or a SNAP procedure.
+
+The "satoff" command can be used to command along-track and
+cross-track offsets. Currently for "radc" and "azel" mode only the
+along-track offsets is defined. For the "track" mode what is available
+depends on the local implementation.
+
+V. Getting and updating Satellite TLEs
+
+A sample script for getting TLEs from the Internet is provided in
+"/usr2/fs/st.default/oper/bin/update_sats". In the sample script all
+of the lines are commented out. Uncomment and/or modify them as
+needed.
+
+You can add more "wget" lines to get other TLE sets. Many other sets
+are available from the web site. You can find what is available by
+looking at
+
+  http://www.celestrak.com/NORAD/elements/
+
+The "predict" lines are examples of how to update the elements in the
+"station *.tle" files. When predict is used in this way, the satellite
+common names in the "*.tle" files will be preserved across updates.
+
+Of course you may need to modify the "update_sats" script if the
+satellites aren't among those already included. More precise usage in
+the "predict" command, i.e., avoiding file name wild-cards like "*"
+may be needed depending on what files you have in "/usr2/tle_files".
+
+VI.  Tracking Modes
+
+The tracking modes available are highly station dependent. The modes
+available from the "satellite" command are:
+
+  radc:  satellite position converted radc and command as normal source
+  azel:  satellite position commanded as fixed Az/El pointing
+  track: track satellite position
+
+The only mode guaranteed to work at all antennas is "radc". However,
+in that mode unless the satellite appears to be stationary on the
+celestial sphere, the antenna will drift off the satellite.  For
+antennas that implement fixed "azel" pointing (source name "azel") ,
+the "azel" mode should be useful for geostationary satellites and
+other slow moving satellites.
+
+Please note that for both the "radc" and "azel" modes, a periodic
+re-command of the antenna can be made using SNAP time scheduling
+commands. If the antenna can tolerate this type of motion, e.g.:
+
+  satellite=gps-24,station.tle,azel@!,5m
+
+or at whatever interval is needed to keep the antenna close enough to
+the satellite. Some antennas may deviate significantly from the
+desired position while this update is being processed.
+
+PLEASE NOTE: SOME ANTENNAS MAY NOT BE ABLE TO TOLERATE THE STRESS OF
+THE PERIODIC RECOMMAND OR THE PERIOD OF THE RECOMMAND MAY NEED TO BE
+INCREASED TO BE SAFE. YOU MUST DETERMINE WHAT YOUR ANTENNA CAN HANDLE
+SAFELY.
+
+For stations that implement satellite tracking in their antenna
+interface ("antcn", mode 9), the "track" mode can be used to follow an
+arbitrary satellite track, if the antenna can keep up.  This mode can
+use the 24 hour, one second tabular ephemeris that the "satellite"
+command puts in "fscom.h" to guide the antenna.  Another option would
+be transmit the TLEs directly to antenna control system if it supports
+them. It is desirable if this mode supports the "satoff" offsets as
+well as local antenna coordinate offsets, e.g. Az-El.
+
+VII. Installation
+
+If the satellite track support has not been installed at your station
+before, you need to take the following step to enable it:
+
+1. Create /usr2/tle_files if it doesn't exist. As "root":
+
+     cd /usr2
+     mkdir tle_files
+     chmod a+rw tle_files
+     chown oper.rtx tle_files
+
+2. Create a /usr2/tle_files/station.qth file. As "oper":
+
+     cd /usr2/tle_files
+     cp -a /usr2/fs/st.default/tle_files/station.qth .
+
+   Then edit the file so that is correct for your station. The lines
+   should be (in order), left justified:
+
+     (i) Station name from location.ctl, padded out to 16 characters
+         with spaces.
+
+     (ii) Station geodetic latitude, also probably from location.ctl.
+
+     (iii) Station longtiude, also probably from location.ctl, West of
+           Greenwich is positive.
+
+     (iv) Station height in integer meters, also probably from
+          location.ctl.
+
+3. Install the "update_sats" script. As "oper";
+
+     cd /usr2/oper/bin
+     cp -a /usr2/fs/st.default/oper/bin/update_sats .
+
+   Then edit the "update_sats" script, to un-comment the "wget" and
+   "chmod" lines. You can remove or add files from the web-site if you
+   want. You should adjust the chmod line appropriately if you do.
+
+4. Run update_sats. as "oper":
+
+     update_sats
+
+5. If want to have "station" satellite names, now is a good time to
+   do it. Alternatively, you can do this later or use this step as a
+   guide to update your "station" satellites when you want to add new
+   ones
+
+   To make, or add to, "station" satellites, it is recommended that
+   you put them in files named "station.tle", "station1.tle",
+   "station2.tle", and so on, in "/usr2/tle_files". It is recommended
+   that you put elements for no more than 24 satellites in each
+   file. This allows "predict" to be used to update the elements
+   without changing any local command names you want to use and also
+   to use "predict" to check satellite visibility (both of these
+   topics are covered further in the "Operations" section (VIII).  You
+   can also group the satellites into types using file names like
+   "gps1.tle" and "gps2.tle", which may be easier to keep track of.
+
+   You should select sets of three lines (common name, TLE 1, and
+   TLE2) from the "*.txt" files retrieved with "update_sats" and place
+   each set together (in the original order within each set), in the
+   "station*.tle" you are creating.  You change the common name in
+   your station file to a name that you find more convenient, maybe
+   "GPS-32" instead of "GPS BIIA-10 (PRN 32)". Case in the names is
+   not significant.  All non-trailing blanks in the name are
+   significant. Note that in the FS (and "predict") you can refer to
+   the satellite by its common name "GPS-32" or its catalog number,
+   20959 in this case. However, "predict" uses the catalog number to
+   match the satellites when it is used to update the elements in a
+   "*.tle" file. In that case it does not update the common name, so
+   your common name will be preserved.
+
+   Make all your "*.tle" file read/write for everyone:
+
+     cd /usr2/tle_files
+     chmod a+rw *.tle
+
+   Finally, in your copy of "update_sats" (in "/usr2/oper/bin") you
+   should uncomment or add "predict" lines to "update_sats" as
+   appropriate to make sure each of the station "*.tle" files is
+   updated by "predict".  The downloaded "*.txt" files for all the
+   satellites in the file being updated need to included on the
+   command line as shown in the example "update_sats"
+
+6. Other typical refinements, like making SNAP procedures with
+   "satellite=..." commands for easy reuse are possible.
+
+VIII. Operational use
+
+   Three operational issues are covered here: (1) using the FS to
+   command the antenna to a satellite, (2) updating the satellite
+   elements, and (3) checking satellite visibility.
+
+   (1) Commanding the antenna to a satellite. Please see the
+       "Satellite SNAP commands" section (IV) above or the "help=..."
+       command for details on the satellite related command. You can
+       use the "satellite=..." command to select a satellite and
+       command the antenna to point to it.
+
+       There is also a "satoff=..." command to enter along-track and
+       cross-track pointing offsets ("help=satoff"). The cross-track
+       offset is not currently implemented for "radc" and "azel"
+       modes, but the along track mode is. Please check "help=satoff"
+       for more details and current status of the implementation. The
+       use of the "satoff" offsets in "track" mode will depend on the
+       local implementation.
+
+       The "fivept" and "onoff" commands should work for the "radc"
+       and "azel" tracking modes using the normal local offsets.
+       However, the results may be distorted if the satellite deviates
+       significantly from the "tracked" position. If the "track" mode
+       is implemented and supports offset types used by "fivept" and
+       "onoff", they should also work in this case.
+ 
+   (2) Updating the satellite elements. The elements in the "*.txt"
+       and locally defined "*.tle" files can be updated using the
+       "update_sats" script, assuming this has been set-up as
+       described in the "Installation" section (VI). Simply type:
+
+         update_sats
+
+       If no error occurs, all the elements should be correctly
+       updated with the latest information. It will be necessary to
+       recommand any satellite currently being tracked to get the
+       effect of the new elements.
+
+       If you need to a update a special "*.tle" file that is not part
+       of your normal station "*.tle" files, perhaps for an
+       observation schedule, with the *.tle" file perhaps named
+       "rd1205gg.tle", the following commands would probably work:
+
+         update_sats
+         cd /usr2/tle_files
+         predict -t rd1205gg.tle -u *.txt
+
+   (3) Checking Satellite Visibility. The "predict" program can be
+       used to check the visibility of any satellite in a "*.tle" file
+       if the "*.qth" file and the "*.tle" file have be set-up as
+       described in the "Installation" section (VII). If the
+       satellites of interest are in "station.tle", then enter the
+       commands:
+
+         cd /usr2/tle_files
+         predict -t station.tle -q station.qth
+
+       in the main menu type "m" for multi-satellite visibility (other
+       available options are shown in the menu). Among other
+       information, the Azimuths and Elevations of the satellites in
+       the "*.tle" file are shown (for the first 24 satellites in a
+       "*.txt" file). You can exit by typing "q" to return to main
+       menu and a second "q" to end the program.
+
+IX. Further Work
+
+Four main improvements are foreseen:
+
+(1) Implementation of the "cross-track" offset in the "satoff"
+    command for "radc" and "azel" tracking modes.
+
+(2) A internal periodic re-command of the antenna in the "radc" and
+    "azel" tracking modes.  This would be implemented using a separate
+    program that re-commands "antcn" with updated coordinates including
+    the effect of the "satoff" offsets.
+
+(3) Implementation of peaking up on a satellite with "fivept" and
+    On-Off measurements with "onoff" using the "satoff" offsets.
+
+(4) A package of programming tools to implement the "track" mode in
+    antcn.  This mode is necessarily station specific, but it should
+    be possible to have some basic tools that most stations can use to
+    find the positions and rates for the satellites and include the
+    effects of the offsets.  Most of the tools for this are present in
+    existing code, but are not suitably packaged.

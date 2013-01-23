@@ -122,6 +122,51 @@ end:
     return ierr;
 }
 
+int arg_uns(ptr,iptr,dflt,flag)   /* parse arg string for int */
+char *ptr;                           /* ptr to string */
+unsigned *iptr;                           /* ptr to store result */
+unsigned dflt;                            /* default result value */
+int flag;                            /* TRUE if default is okay */
+
+/* this routine handles SNAP argument interpretation for int arguments */
+/* "*" use current value (already stored in *iptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as int */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+    int ierr,i;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *iptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*")) return ierr;
+
+    if(strncmp(ptr,"0x",2)==0||strncmp(ptr,"0X",2)==0) {
+      if(1 != sscanf(ptr,"%x",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>1;i--)
+	if(NULL==strchr("0123456789abcdefABCDEF \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    } else {
+      if(1 != sscanf(ptr,"%u",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>-1;i--)
+	if(NULL==strchr("+0123456789 \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    }
+end:
+    return ierr;
+}
+
 int arg_float(ptr,fptr,dflt,flag)  /* parse arg string for float */
 char *ptr;                         /* ptr to string */
 float *fptr;                       /* ptr to store result */

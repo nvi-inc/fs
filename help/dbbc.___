@@ -1,0 +1,13 @@
+       dbbc - general DBBC communication
+
+            Syntax:     dbbc=data
+
+            Response:   dbbc/data
+
+
+Settable parameters:
+            data        complete message to be sent to DBBC system,
+                        No checking is done.
+
+Monitor-only parameters:
+            data        response of DBBC system, if any.

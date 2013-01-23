@@ -3,7 +3,7 @@ C
       integer*2 ibuf(1)
       integer nchar
 c
-      write(6,'(1x,256a2)') (ibuf(i),i=1,nchar/2)
+      call fc_putln2(ibuf,nchar)
 C
       return
       end

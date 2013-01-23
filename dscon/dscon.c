@@ -60,6 +60,8 @@
 #include <math.h>
 #include <errno.h>
 
+clock_t rte_times(struct tms *);
+
 #include "../include/params.h"   /* FS parameters            */
 #include "../include/fs_types.h" /* FS header files          */
 #include "../include/fscom.h"    /* FS shared mem. structure */
@@ -521,7 +523,7 @@ int read_bus(buffer,nbyte)	/* Receive nbyte bytes from Datsset device */
    long end;
    int iret;
 
-   end = times(&tms_buff)+TIME_OUT+1;	/* calculate end time */
+   end = rte_times(&tms_buff)+TIME_OUT+1;	/* calculate end time */
 
    /* Loop until enough response bytes have been collected */
    if ((buffer[0] = next_ack) != NUL) {
@@ -542,9 +544,9 @@ int read_bus(buffer,nbyte)	/* Receive nbyte bytes from Datsset device */
                   fflush(stdout);
                }
 #endif
-               if (end-times(&tms_buff) <= 0) {
+               if (end-rte_times(&tms_buff) <= 0) {
 #ifdef DEBUG
-                  printf("DSCON: Timed out after %3.1fs\n",(float)(times(&tms_buff)-(end-TIME_OUT-1))/100.0);
+                  printf("DSCON: Timed out after %3.1fs\n",(float)(rte_times(&tms_buff)-(end-TIME_OUT-1))/100.0);
 #endif
                   next_ack = NUL;
                   buffer[0] = NUL;
@@ -616,9 +618,9 @@ int read_bus(buffer,nbyte)	/* Receive nbyte bytes from Datsset device */
             }
 #endif
             if (iret == 1 && next_ack == ESC) iret=0;
-            else if (end-times(&tms_buff) <= 0) {
+            else if (end-rte_times(&tms_buff) <= 0) {
 #ifdef DEBUG
-               printf("DSCON: Timed out after %3.1fs\n",(float)(times(&tms_buff)-(end-TIME_OUT-1))/100.0);
+               printf("DSCON: Timed out after %3.1fs\n",(float)(rte_times(&tms_buff)-(end-TIME_OUT-1))/100.0);
 #endif
                next_ack = NUL;
                return(FALSE);
@@ -639,7 +641,7 @@ int read_bus(buffer,nbyte)	/* Receive nbyte bytes from Datsset device */
 	   return(FALSE);
       }
 #ifdef DEBUG
-      printf("DSCON: actual read delay %6.4fs\n",(float)(times(&tms_buff)-(end-TIME_OUT-1))/100.0);
+      printf("DSCON: actual read delay %6.4fs\n",(float)(rte_times(&tms_buff)-(end-TIME_OUT-1))/100.0);
 #endif
    }
 

@@ -21,7 +21,7 @@ C  Calls: gtfld,  ifill, wrerr
       integer igetstatnum2
 C  LOCAL
       integer*2 LKEYWD(12)
-      integer ich,ic1,ic2,nch,i,j,idummy,ierr,istn
+      integer ich,ic1,ic2,nch,i,idummy,ierr,istn
       real*4 el,val
 
       character*24 ckeywd

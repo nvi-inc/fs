@@ -9,6 +9,7 @@
 ! History
 !  2006Nov30. JMG. Code type is 1 for no recorder.
 !  2007Jul27  JMG  Made Mark5 no recorder.
+!  2012Oct09  JMG. If no recorder don't issue pass number etc. 
 
 ! passed variables
       integer istnsk    !index #.
@@ -44,8 +45,8 @@
       call setup_name(icod,ndx,cnamep)
       call c2lower(cnamep,cnamep)  		!make it lower case
 
-C     Don't use the pass number for Mk5-only
-      if(km5disk) then
+C     Don't use the pass number for Mk5-only OR for no recorder.
+      if(km5disk .or. knorec(1)) then 
          write(lufile,"(a)") cnamep
       else
          write(ldum,"(a,'=',i3)") cnamep,ipas(istnsk)

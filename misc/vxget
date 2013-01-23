@@ -1,0 +1,74 @@
+#!/bin/bash 
+# - Script to download an FS schedule from EVN host.   
+# Requires: ncftp installed; host sched dir is current or next month. 
+#
+# 2008-12-03 pb get file xxxxx.vex from vlbeer 
+# 2010-06-08 pb get vex version, rename, copy to sched dir 
+# 2010-06-11 pb if no .vex, try for .skd version. 
+# 2010-07-10 pb if not found, try the next month.
+# 2010-09-29 pb PWD variable is tidier 
+# 2011-04-11 pb mod. dir to '.latest' 
+#
+# Useage: in oper, vxget <file> where <file> is a .vex or .skd file.
+# Purpose: fetches a schedule file from named host, looks for 
+# first .vex then .skd file version, then copies to /usr2/sched.
+# 
+# Insert current EVN password here.
+PWD="morevlbeer"
+#
+get_schedule() 
+{
+YEAR=$(date +"%y")
+VDIR=`echo vlbi_arch/$MONTH$YEAR/.latest/ | tr A-Z a-z` 
+echo "Dir: $VDIR "
+#  
+echo "Getting VLBI Schedule (v2.4 vex/skd)..$FILE " 
+ncftpget -u evn -p $PWD vlbeer.ira.inaf.it . $VDIR$FILE.vex
+result=$?
+if [ "$result" -eq 0 ]
+then
+ echo "Copying Vex file to skd in ~/sched.."
+ cp $FILE.vex /usr2/sched/$FILE.skd
+ exit 0 
+else 
+ echo "No Vex file found; looking for .skd..."
+ ncftpget -u evn -p $PWD vlbeer.ira.inaf.it . $VDIR$FILE.skd
+ result=$?
+ if [ "$result" -eq 0 ]
+ then
+  echo "Copying skd file to skd in ~/sched.."
+  cp $FILE.skd /usr2/sched/$FILE.skd
+  exit 0
+ else
+  echo "No Skd file found." 
+ fi
+fi
+} 
+
+# Begin main routine 
+echo "Fetch VLBI Schedule v2.4.."
+
+ if [ $# -lt 1 ];
+   then
+    echo "Syntax: $(basename $0) <filename> "
+    exit 1
+ fi
+
+FILE=`echo $1 |cut -f1 -d '.'`
+MONTH=$(date +"%b")
+get_schedule 
+
+if [ "$result" -ne 0 ]; 
+then 
+ echo "Trying Next Month.." 
+ MONTH=$(date +"%b" --date="next month")
+ get_schedule
+ if [ "$result" -eq 0 ]; 
+ then 
+  echo "Schedule Found"
+ else 
+  echo "Schedule still not found."  
+ fi 
+fi
+
+### EOF ###

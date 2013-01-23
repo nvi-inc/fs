@@ -14,7 +14,8 @@ Settable parameters:
                  Default is unknown.
         pol      Polarization for this channel, unknown, rcp, or lcp.
                  Default is unknown.
-        ifcenter Center frequency for this detector, MHz. No default.
+        ifcenter Center frequency for this detector, relative to the
+                 LO frequency, in MHz. No default.
 
 Monitor-only Parameters: none
 

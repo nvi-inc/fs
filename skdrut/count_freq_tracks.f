@@ -11,6 +11,7 @@ C   COMMON BLOCKS USED
 !  V1.01  2004Oct04, modified to include effect of fanout.
 !  2006Jun22  JMGipson.  Modified to assume we only use freqrf>0.
 !  2006Oct06  Assume cbarrel=" " is valid.
+!  2008Jun10  Wasn't counting tracks if recorder was S2?
 
 ! functions
       integer itras
@@ -58,8 +59,9 @@ C
               endif
               nfreq(isub,is,ic)=nfreq(isub,is,ic)+1 !count number of frequencies
               cs=cset(iv,is,ic)
-              if(freqrf(iv,is,ic).gt.0 .and.
-     >            cstrec(is,1)(1:2).ne."S2") then
+!              if(freqrf(iv,is,ic).gt.0 .and.
+!     >            cstrec(is,1)(1:2).ne."S2") then
+               if(freqrf(iv,is,ic).gt.0) then
                 do iul=1,2
                   ip=1
 C               Full addition for sign bit

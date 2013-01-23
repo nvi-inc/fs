@@ -54,6 +54,12 @@ char *ptr;
 	  ierr=arg_key(ptr,lov_key,LOV_KEY,&lo,0,FALSE);
 	else if(shm_addr->equip.rack==LBA || shm_addr->equip.rack==LBA4)
 	  ierr=arg_key(ptr,lol_key,LOL_KEY,&lo,0,FALSE);
+	else if(shm_addr->equip.rack==DBBC) {
+	  ierr=arg_key(ptr,lov_key,LOV_KEY,&lo,0,FALSE);
+	if(ierr==0 && lo >= shm_addr->dbbc_cond_mods)
+	  ierr=-400;
+	} else
+	  ierr=arg_key(ptr,lol_key,LOL_KEY,&lo,0,FALSE);
 	if(ierr==-100) {
 	  for (i=0;i<4;i++) {
 	    lcl->lo[i]=-1;
@@ -156,6 +162,10 @@ struct lo_cmd *lcl;
   else if(shm_addr->equip.rack==VLBA4 || shm_addr->equip.rack==VLBA)
     strcpy(output,lov_key[ilo]);
   else if(shm_addr->equip.rack==LBA || shm_addr->equip.rack==LBA4)
+    strcpy(output,lol_key[ilo]);
+  else if(shm_addr->equip.rack==DBBC) {
+    strcpy(output,lov_key[ilo]);
+  } else
     strcpy(output,lol_key[ilo]);
   strcat(output,",");
   

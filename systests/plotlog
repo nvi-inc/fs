@@ -387,7 +387,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.5]\n";
+    print "[plotlog 1.6]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -528,7 +528,7 @@ foreach $file (@ARGV) {
 	    $cable[$cablen]=$1;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
-	} elsif(/pcalports=([^,]*),([0-9]+)/i||/vsi4=[^,]*,([^,]*),([0-9]+)/i) {
+	} elsif(/pcalports[=\/]([^,]*),([0-9]+)/i||/vsi4[=\/][^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
 #	    print "pcalports $1 $2\n";

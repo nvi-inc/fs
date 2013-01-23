@@ -38,6 +38,13 @@ C
         itscb(1,i) = -1
       enddo
 C
+C     1.18 Start first log file
+C
+      call char2hol('station ',illog,1,8)
+      call fs_set_llog(illog)
+      call char2hol('::',ldum,1,2)
+      call newlg(ibuf,ldum)
+C
       call fc_putln('station config init')
 C
 C
@@ -67,12 +74,12 @@ C
           itp = ias2b(ibuf,16,1)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)*256+ia2hx(ibuf,27,1)*16
-     .           + ia2hx(ibuf,28,1)
-          ieq2 = ia2hx(ibuf,29,1)*256+ia2hx(ibuf,30,1)*16
-     .           + ia2hx(ibuf,31,1)
-          ieq3 = ia2hx(ibuf,32,1)*256+ia2hx(ibuf,33,1)*16
-     .           + ia2hx(ibuf,34,1)
+          ieq1 = ia2hx(ibuf,26,1)*4096+ia2hx(ibuf,27,1)*256
+     .           + ia2hx(ibuf,28,1)*16 + ia2hx(ibuf,29,1)
+          ieq2 = ia2hx(ibuf,30,1)*4096+ia2hx(ibuf,31,1)*256
+     .           + ia2hx(ibuf,32,1)*16 +ia2hx(ibuf,33,1)
+          ieq3 = ia2hx(ibuf,34,1)*4096+ia2hx(ibuf,35,1)*256
+     .           + ia2hx(ibuf,36,1)*16 + ia2hx(ibuf,37,1)
           idummy = ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           if(itp.ge.0.and.itp.le.3) then
@@ -82,17 +89,17 @@ C
           endif
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.4095) then
+          if (ieq1.ge.1 .and. ieq1.le.65535) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.0 .and. ieq2.le.4095) then
+          if (ieq2.ge.0 .and. ieq2.le.65535) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
-          if (ieq3.ge.0 .and. ieq3.le.4095) then
+          if (ieq3.ge.0 .and. ieq3.le.65535) then
             lnames(13,iname) = ieq3
           else
             lnames(13,iname) = 0
@@ -124,12 +131,12 @@ C
           itp = ias2b(ibuf,16,1)
           iss = ias2b(ibuf,18,4)
           ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)*256+ia2hx(ibuf,27,1)*16
-     .           + ia2hx(ibuf,28,1)
-          ieq2 = ia2hx(ibuf,29,1)*256+ia2hx(ibuf,30,1)*16
-     .           + ia2hx(ibuf,31,1)
-          ieq3 = ia2hx(ibuf,32,1)*256+ia2hx(ibuf,33,1)*16
-     .           + ia2hx(ibuf,34,1)
+          ieq1 = ia2hx(ibuf,26,1)*4096+ia2hx(ibuf,27,1)*256
+     .           + ia2hx(ibuf,28,1)*16 + ia2hx(ibuf,29,1)
+          ieq2 = ia2hx(ibuf,30,1)*4096+ia2hx(ibuf,31,1)*256
+     .           + ia2hx(ibuf,32,1)*16 +ia2hx(ibuf,33,1)
+          ieq3 = ia2hx(ibuf,34,1)*4096+ia2hx(ibuf,35,1)*256
+     .           + ia2hx(ibuf,36,1)*16 + ia2hx(ibuf,37,1)
           idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           if(itp.ge.0.and.itp.le.3) then
@@ -139,17 +146,17 @@ C
           endif
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if (ieq1.ge.1 .and. ieq1.le.4095) then
+          if (ieq1.ge.1 .and. ieq1.le.65535) then
             lnames(11,iname) = ieq1
           else
             lnames(11,iname) = 0
           endif
-          if (ieq2.ge.0 .and. ieq2.le.4095) then
+          if (ieq2.ge.0 .and. ieq2.le.65535) then
             lnames(12,iname) = ieq2
           else
             lnames(12,iname) = 0
           endif
-          if (ieq3.ge.0 .and. ieq3.le.4095) then
+          if (ieq3.ge.0 .and. ieq3.le.65535) then
             lnames(13,iname) = ieq3
           else
             lnames(13,iname) = 0
@@ -272,13 +279,29 @@ c
       else
         call fc_putln('dscon initialized')
       endif
+c
+c  initialize dbbcn
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('dbbcn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-194,'bo',ierr)
+        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call fc_putln('dbbcn initialization failed')
+        if(ip(5).eq.0) then
+           ip(3)=0
+           ierr=0
+        endif
+      else
+        call fc_putln('dbbcn initialized')
+      endif
 C
-C     1.18 Start first log file
-C
-      call char2hol('station ',illog,1,8)
-      call fs_set_llog(illog)
-      call char2hol('::',ldum,1,2)
-      call newlg(ibuf,ldum)
+      call run_prog('flagr','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call fc_putln('flagr initialized')
+
 c    
       icloprx=0
       call put_buf_ch(icloprx,'"Boss Initialization Complete','  ','  ')

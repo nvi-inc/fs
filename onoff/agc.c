@@ -12,11 +12,11 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-static char ch[ ]={"123456789abcde"};
+static char ch[ ]={"123456789abcdefg"};
 
 int agc(itpis_vlba,agc,ierr)                    /* sample tpi(s) */
 int itpis_vlba[MAX_DET]; /* detector selection array */
-                      /* in order: L: bbc1...bbc14, U: bbc1...bbc14(U)       */
+                      /* in order: L: bbc1...bbc16, U: bbc1...bbc16(U)       */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
 int agc;              /* value to send 0=fixed,1=before fixed */
 int *ierr;

@@ -10,7 +10,7 @@
 #include "../include/shm_addr.h"
 
 extern int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kK4drive[2],
-  kV4rack,selectm;
+  kV4rack,kDrack, selectm;
 
 m2init()
 {
@@ -96,6 +96,16 @@ m2init()
     mvaddstr(ROW1+3,COL1+33,"IFB");
     mvaddstr(ROW1+3,COL1+37,"IFC");
     mvaddstr(ROW1+3,COL1+41,"IFD");
+  } else if (kDrack) {
+    mvaddstr(ROW1+3,COL1+23,"TSYS:");
+    mvaddstr(ROW1+3,COL1+29,"IFA");
+  
+    if(shm_addr->dbbc_cond_mods > 1) 
+      mvaddstr(ROW1+3,COL1+33,"IFB");
+    if(shm_addr->dbbc_cond_mods > 2) 
+      mvaddstr(ROW1+3,COL1+37,"IFC");
+    if(shm_addr->dbbc_cond_mods > 3) 
+      mvaddstr(ROW1+3,COL1+41,"IFD");
   }
   mvaddstr(ROW1+3,COL1+46,"CABLE");
   standend();

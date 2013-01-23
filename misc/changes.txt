@@ -3487,6 +3487,9 @@ Version 9.3.22 980210
 
 Version 9.3.23 980216
 
+980327 WEH quikr/ma.f
+           allow escaping of commas with "\" in commands
+
 980407 WEH control/fserr.ctl
            add ?WWW to MA -100 error (unable to open dev)
 
@@ -4424,10 +4427,6 @@ Version 9.3.24 980604
 980210 WEH st.default/prog/.login
            st.default/oper/.login
            add path redundancy prevention logic
-
-980216 WEH st.default/prog.1.2.12
-           st.default/oper.1.2.12
-           created and moved the .*.1.2.12 files from prog and oper
 
 980218 WEH control/fserr.ctl
            improve fivept/onoff command detector device error messages
@@ -8769,7 +8768,7 @@ Version 9.10.3 080613
 081001 weh logpl1/logpl1
            made internals and control file consistent with new name logpl1
 
-081006 tg  logpl/
+081006 ptg logpl/
            new version source added
 
 081006 weh st.default/control/logpl.ctl
@@ -8787,13 +8786,16 @@ Version 9.10.3 080613
 081015 weh fserr/fserr.h
            increased maximum errors to 5000
 
-081015 tg logpl/IOSettings.py
-          fix exit status value
+081015 ptg logpl/IOSettings.py
+           fix exit status value
 
 081014 weh Makefile
            add logpl1
 
 Version 9.10.4 081015
+
+080703 ptg monpcal/monpcal
+           new version
 
 080926 PdV include/req_ds.h
            include/res_ds.h
@@ -8806,5 +8808,1307 @@ Version 9.10.4 081015
            clib/rclcn_res_util.c
            make include files C++ compilable (and associated changes)
 
-Version 9.10.5 09xxxx
+081016 WEH Makefile
+           clean-up compiled Python
 
+081027 WEH rclcn/rclcn_das.c
+           made includes relative
+
+081111 WEH include/rxgain_ds.h
+           clib/get_rxgain.c
+           gndat/get_gain_par2.c
+	   add second rx temp to rxg files
+
+081113 WEH misc/FSL7_PC_Checkout.txt
+           updated for archive status of distribution
+
+081202 ptg gndat/gndat.c
+           eliminated tempfile
+
+081210 WEH misc/FSL7_Upgrade.txt
+           corrected for pgperl move to Debian archives
+
+081216 ptg gndat/gndat.c
+           gndat2
+
+081219 WEH gnfit/fit2.f
+           fixed rchi to right units
+
+081219 PTG gnplt/gnplt.py
+           gnplt/PrintCanvas.py
+           gnplt/GndatReader.py
+           gnplt/GnPltError.py
+           gnplt/Coordinate.py
+           gnplt/AutoBreakMenu.py
+           gnplt/main.py
+           gnplt/NumericTools.py
+           gnplt/Makefile
+           created
+
+090113 WEH systests/systests.txt
+           add plotlog exit code documentation
+
+090122 WEH vex/vex.h
+           vex/vex_put.c
+           vex/vex_util.c
+           correctd external decl/defs of  filename & fp
+
+090204 WEH vex/vexf.c
+           corrected seconds in a year
+
+090224 WEH gnplt/gnplt2_documentation.pdf
+090420 WEH gnplt/gnplt2_documentation.doc
+           initial version
+
+090305 WEH misc/fs9104up.txt
+           typographic updates
+
+090602 WEH help/tsys.___
+           typographic updates
+
+090615 WEH gndat/Makefile
+           add missing gndat2 in "rm ..."
+
+090623 WEH st.default/proc/v4station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation2.prc
+           st.default/proc/vstation.prc
+           turn cal off before reactiviting, more time for cal to stablize
+ 
+090701 WEH help/schedule.___
+           formating improved, added hints about DRUDG listing line numbers
+
+090715 WEH misc/mdstat.7
+           mention later version in comment
+
+090724 WEH fs/fs.c
+           increased maximum processes to 60
+
+090725 WEH ibcon/ibcon.f
+           ibcon/rddev.c
+           st.default/control/ibad.ctl
+           add interface_clear_after_read keyword
+
+090726 WEH ddout/ddout.c
+           fix error in tnx on/off handling
+
+090726 WEH help/tnx.___
+           explanatory comment about negative #num
+
+090726 WEH quikr/if3.f
+           corrected "sets" of att. value  that should have been "gets" so
+           previous value is picked up properly
+
+090727 WEH st.default/prog/.login
+           fixed mailbox reference
+
+090731 WEH st.default/control/skedf.ctl
+           added more print2dymo explanatory comments and examples for A4 paper
+
+090731 WEH misc/print2dymo
+           Add comments about FSL8 being supported
+
+090804 WEH mcbcn/mcbcn.c
+
+090806 HS  gnplt/NumericTools.py
+           gnplt/gnplt2_documentation.doc
+           gnplt/gnplt2_documentation.pdf
+           gnplt/main.py
+           updated for simulation
+
+090903 WEH st.default/oper/bin/update
+           safety error checking
+
+090921 WEH rtelb/rte_prior.c
+           corrected if clause in set
+
+091020 JQ  misc/refresh_secondary.sdb
+           misc/refresh_secondary.hdc
+           improved for FSL8, safer and more informative
+
+091020 WEH clib/Makefile
+           fclib/Makefile
+           ddout.new/ddout.c
+           fslb/bell.f
+           fclib/fc_play_wav.c
+           clib/play_wav.c
+           misc/beep-4.wav
+           misc/beep-4a.wav
+           play wav file for FS_ERROR_WAV and FS_WAKEUP_WAV
+
+091028 WEH misc/refresh_spare_usr2
+           added
+
+091106 WEH misc/RAID.docx
+091106 WEH misc/RAID.pdf
+           updated for FSL8
+
+091112 WEH systests/samplestat
+           ask about decoder being disconnected if a channel is all zeroes
+
+100118 WEH misc/lgput.txt
+           misc/lgput
+           created: information about Paul Burgess' lgput script
+
+100407 WEH clib/bbc_util.c
+           clib/get_tcal_fwhm.c
+100408 WEH quikv/onoff.c
+           add 32 MHZ BW for SAO DAS
+           
+100408 WEH control/fserr.ctl
+           error for miss +/- in VSN added
+           mk5b_mode mask parameter error clarified
+           CONSIDER added to using fmset 's' to find mk5b clock source
+           32 MHz BW added to BBC BW
+
+100506 WEH help/mk5b_mode.___
+           clarify commend about default fpdp mode
+
+100524 WEH quikv/Makefile
+           control/fserr.ctl
+           Makefile
+           clib/cshm_init.c
+           quikv/holog_dis.c
+           quikv/onoff.c
+100601 WEH include/holog_ds.h
+100608 WEH holog/
+           control/fspgm.ctl
+100609 WEH holog/next.c
+           holog/local.c
+100615 WEH holog/Makefule
+           holog/scmd.c
+107006 WEH holog/scmds.c
+100707 WEH quikv/holog.c
+           include/fs_types.h
+           clib/holog_util.c
+100708 WEH help/holog.___
+100709 WEH holog/holog.c
+100712 WEH quikv/quikv.c
+           control/fscmd.ctl
+           clib/Makefile
+           include/fscom.h
+120727 weh Makefile
+           add holog
+
+100608 WEH control/fspgm.ctl
+           remove interrupt from oprin xterm
+
+100527 WEH help/onoff.___
+           correct maximum integration to 100
+
+100610 WEH misc/lgput
+           updated
+
+100617 WEH help/cable.___
+           help/cablelong.___
+           corrected information on stpgm.ctl entry
+
+100618 WEH misc/cable53131.txt
+           created: description of how to use 53131 for cable cal
+
+100707 WEH quikv/sat.c
+           quikv/antcn.c
+100712 WEH quikv/quikv.c
+           control/fscmd.ctl
+           newlb/prog.c
+           include/fscom_dum.i
+           quikr/sorce.f
+           monit/Makefile
+           quikv/satellite_dis.c
+           clib/Makefile
+           quikv/satoff_dis.c
+           include/fscom.h
+100713 WEH clib/csh_init.c
+           clib/satelllite_util.c
+           monit/satpos.c
+           include/satellite_ds.h
+100714 WEH clib/satoff_util.c
+           flagr/flagr.c
+100716 WEH include/params.h
+           quikv/Makefile
+           monit/mout2.c
+           control/fserr.ctl
+           help/satellite.___
+           help/satoff.___
+           quikv/satellite.c
+           quikv/satpos.c
+           quikv/satoff.c
+100727 WEH antcn/antcn.c
+           added satellite tracking
+
+100708 WEH rtelb/Makefile
+           rtelb/sec_time.c
+           returns rte time from UNIX time
+
+101001 JW  mk5cn/mk5cn.c
+           first version with read_response
+
+101110 JW  mk5cn/mk5cn.c
+           improved read_response
+
+110513 WEH misc/vxget
+           created: add Paul Burgess' script
+
+110627 WEH st.default/control/mk5ad.ctl
+           add comment about local times should be 500
+
+110810 WEH systests/plotlog
+           acccept either pcalports/vsi4 commands or responses
+
+110928 WEH help/user_device.___
+           clarifed ifcenter frequency meaning
+
+111007 WEH aquir/aquir.f
+           goto next source, don't give up if source can't be reached
+
+111130 WEH st.default/st-0.0.0/metserver/src/metserver.c
+111220 WEH st.default/st-0.0.0/metserver/src/metget.c
+111223 WEH st.default/st-0.0.0/metclient/src/metclient.c
+111223 WEH st.default/st-0.0.0/metserver/src/metwind.c
+           improved, still need a real client/server solution
+
+111203 WEH error/inism.f
+       WEH error/kpst.f
+111204 WEH error/rstat.f
+111205 WEH xtrac/xtrac.f
+           resid/resid.f
+111206 WEH error/kpfit.f
+111209 WEH error/incsm.f
+111210 WEH error/fit2.f
+           error/apost.f
+111215 WEH polb/kgant.f
+           xtrac/kgetp.f
+           polb/Makefile
+           polb/kpant.f
+           polb/igthx.f
+           polb/ihxw2as.f
+111220 WEH error/fecon.f
+120101 WEH pdplt/pdplt
+120103 WEH error/error.f
+120130 WEH st.default/control/parpo.ctl
+           add display and/or FEC in x-EL/DC/Y
+
+111223 WEH logpl/MainGUI.py
+           offer .log file by default
+           handle multiple spaces as one delimiter
+
+120104 WEH misc/FSL8_PC_Checkout.txt
+120104 WEH misc/FSL8_Upgrade.txt
+120210 WEH misc/FSL8_End_User.txt
+           fix typos
+
+120209 WEH monit/monit3.c
+           fix freq string size and use snprintf to avoid overwrites
+
+120223 WEH misc/fstime.txt
+           5B/5B+ sync, FS restart and computer option clarifications,
+
+120313 WEH monpcal/monpcal
+           work for both Mark IV and vsi4
+
+120405 WEH gnplt1
+           gnplt1/gnplt1
+           gnplt1/gnplt1.tex
+           gnplt1/Makefile
+           program renamed to gnplt1 from gnplt
+
+120405 WEH misc/rxgfix2
+           created to fix rxgfiles to have two trec
+
+120410 WEH help/tnx.___
+           removed typo
+
+120411 WEH mk5cn/mk5cn.c
+           more improvements
+
+120412 WEH quikv/onoff.c
+           merge holog changes and 32 MHz BW
+
+120412 WEH clib/Makefile
+           merge holog and play_wav changes
+
+120413 WEH Makefile
+           include gnplt1
+           add *.pyc to rmdoto
+
+120413 WEH monit/satpos.c
+           fix includes, within FS tree
+
+120413 WEH gnplt1/Makefile
+           some gnplt's not originally changed to gnplt1's
+
+120420 WEH st.default/st-0.0.0/metclient/src/metclient.c
+           improved phasing to stay on the second modulo the interval
+
+120420 WEH st.default/st-0.0.0/metserver/src/MakeDiag
+           remove -lf2c
+
+120420 WEH st.default/st-0.0.0/metserver/src/metwind.c
+           fix default case bar/mbar
+
+120420 WEH st.default/st-0.0.0/metserver/src/metserver.c
+            reduce delay in select
+
+120420 WEH st.default/st-0.0.0/metserver/src/metget.c
+           fix default case compile error
+
+120416 WEH quikv/antcn.c
+120417 WEH predict
+           predict/Makefile
+           include/fscom.h
+           quikv/quikv.c
+           control/fscmd.ctl
+           quikv/Makefile
+120418 WEH help/tle.___
+120419 WEH quikv/tle.c
+           clib/cshm_init.c
+           quikv/satellite_dis.c
+           include/satellite_ds.h
+           predict/predict.c
+120423 WEH Makefile
+           quikv/satellite.c
+           quikv/satoff.c
+           control/fserr.ctl
+           help/satellite.___
+           help/satoff.___
+           misc/satellites.txt
+           st.default/oper/bin/update_sats
+120424 WEH clib/satellite_util.c
+           misc/satellites.txt
+           fully integrate predict into FS, add TLE command
+
+120424 WEH misc/FSL8_End_User.txt
+           fix typos in e-mail set-up, step 20.
+
+120426 WEH control/fserr.ctl
+120426 WEH help/holog.___
+120426 WEH clib/holog_util.c
+           fix point limits
+
+120427 WEH misc/rxgfix2
+           handle one pol and wrong number of pol/Trecs
+
+120427 WEH quikv/satelllite.c
+           include satellite name for monitor output if TLE command elements
+
+120430 WEH fsalloc/fsalloc.c
+           rtelb/rte_rawt.c
+           rtelb/Makefile
+           clib/head_vmov.c
+           clib/v2_head_vmov.c
+           include/fscom.h
+           rtelb/rte_ticks.c
+120501 WEH dscon/dscon.c
+           mcbcn/mcbcn.c
+           rtelb/rte_times.c
+           rtelb/rte_sleep.c
+           rtelb/rte_secs.c
+120503 WEH mk5cn/mk5cn_fgetc_first.c
+120504 WEH fs/fs.c
+           changes for times() wrap-around
+
+120504 WEH st.default/st-0.0.0/metserver/src/metget.c
+           st.default/st-0.0.0/metclient/metlog.ctl
+           st.default/st-0.0.0/metclient/src/logwx.c
+           st.default/st-0.0.0/metserver/Makefile
+           st.default/st-0.0.0/metserver/src/metserver.c
+           st.default/st-0.0.0/metclient/src/metclient.c
+           st.default/st-0.0.0/metserver/INSTALL
+           st.default/st-0.0.0/metserver/README
+           st.default/st-0.0.0/metserver/README_mw
+           st.default/st-0.0.0/metclient/README
+           st.default/st-0.0.0/metserver/metserver.sh
+           st.default/st-0.0.0/metclient/metclient.sh
+120505 WEH st.default/st-0.0.0/metclient/metlog.ctl.example
+           st.default/st-0.0.0/metclient/INSTALL
+           clean-up, improved, but still not great
+
+120505 WEH port/portopen.c
+           typo in new time-out (ticks0)
+
+120502 WEH mk5cn/mk5cn.c
+           control/fserr.ctl
+           fix bug for server crash so no infinite loop
+
+120505 WEH st.default/st-0.0.0/metserver/lib/portread.c
+           work around for times() wrap-around
+
+120505 WEH st.default/st-0.0.0/metserver/src/metwind.c
+           st.default/st-0.0.0/metserver/src/MakeDiag
+           st.default/st-0.0.0/metserver/README_mw
+           st.default/st-0.0.0/metclient/metlog.ctl
+           st.default/st-0.0.0/metserver/met.ctl
+           st.default/st-0.0.0/metserver/met.ctl.example
+           more clean-up
+
+120506 WEH mk5cn/mk5cn.c
+           control/fserr.ctl
+           rationalize error numbers and complete check in drain_input_stream
+
+120507 WEH quikv/mk5_dis.c
+           quikv/mk5.c
+           fix m5 output for error
+
+120507 WEH st.default/st-0.0.0/metserver/port
+120507 WEH st.default/st-0.0.0/metserver/Makefile
+120507 WEH st.default/st-0.0.0/metserver/src/Makefile
+120507 WEH st.default/st-0.0.0/metserver/src/MakeDiag
+120507 WEH st.default/st-0.0.0/metserver/src/metwind.c
+120507 WEH st.default/st-0.0.0/metserver/src/metget.c
+120507 WEH st.default/st-0.0.0/metserver/INSTALL
+           removed references to lib and used copy of FS port lib
+           this makes it easier to propogate updates
+
+120507 WEH st.default/st-0.0.0/metserver/metserver.sh
+120507 WEH st.default/st-0.0.0/metserver/INSTALL
+120507 WEH st.default/st-0.0.0/metclient/metclient.sh
+120507 WEH st.default/st-0.0.0/metclient/metclient.sh.example
+120507 WEH st.default/st-0.0.0/metclient/INSTALL
+           changed default server port to 50001 
+
+120507 WEH st.default/st-0.0.0/metserver/src/metget.c
+120507 WEH st.default/st-0.0.0/metclient/src/err_report.c
+120507 WEH st.default/st-0.0.0/metserver/src/err_report.c
+120507 WEH st.default/st-0.0.0/metclient/src/metclient.c
+120507 WEH st.default/st-0.0.0/metserver/src/metserver.c
+120507 WEH st.default/st-0.0.0/metserver/metserver.sh.example
+120507 WEH st.default/st-0.0.0/metserver/metserver.sh
+120507 WEH st.default/st-0.0.0/metserver/met.ctl.example
+           more clean-up
+
+120507 WEH include/params.h
+           include/params.i
+           quikr/wx.f
+           clib/fsmetc.c
+           incom/equip.f
+           st.default/control/equip.ctl
+           use port number for met3 server, not "met3"
+
+120509 WEH st.default/st-0.0.0/metserver/src/metget.c
+           add error messages to syslog/e-mail for open errors and time-outs
+
+120509 WEH include/onoff_ds.h
+           control/fserr.ctl
+           st.default/proc/point.prc
+           clib/onoff_util.c
+           clib/cshm_init.c
+120510 WEH help/onoff.___
+120511 WEH misc/onoff_fix
+           onoff/onoff.c
+           add "proc" parameter to onoff
+
+120512 WEH quikr/wx.f
+120512 WEH clib/fsmetc.c
+           handle port correctly
+
+120512 WEH quikr/sorce.f
+           more digits in az/el output
+
+120515 WEH misc/FSL8_PC_Checkout.txt
+           typo fix
+
+120517 WEH matcn/iat.f
+120517 WEH control/fserr.ctl
+120517 WEH matcn/matcn.f
+           made "self-healing" for Lenny/SuperMicor C7SIM-Q mboard
+
+120517 WEH st.default/st-0.0.0/metserver/src/err_report.c
+           st.default/st-0.0.0/metclient/src/err_report.c
+           unlink error mesage file when done
+
+120517 WEH st.default/st-0.0.0/metclient/src/metclient.c
+           null output for wind if server times out
+
+120520 WEH oprin/Makefile
+           fix for readline detection
+
+120520 WEH mk5cn/mk5cn.c
+           handle SHUT_RDWR not being available before etch
+
+120520 WEH fs/fs.c
+           statement order for old compilers in FSL3 fir test code
+
+120520 WEH rtelb/secs_time.c
+           wrong include files for FSL3
+
+120521 WEH st.default/oper/bin/update_sats
+           add chmod line
+        
+120521 WEH misc/satellites.txt
+           help/satellite.___
+           help/tle.___
+           help/satoff.___
+           Dan Smythe suggested wording improvements
+
+120522 WEH st.default/st-0.0.0/metserver/src/metget.c
+           st.default/st-0.0.0/metserver/src/err_report.c
+           st.default/st-0.0.0/metclient/src/err_report.c
+           st.default/st-0.0.0/metclient/src/logwx.c
+           st.default/st-0.0.0/metclient/src/metclient.c
+           st.default/st-0.0.0/metserver/src/metserver.c
+           only offer port to local hosts and err_report improvements
+
+120522 WEH control/fserr.ctl
+           matcn/matcn.f
+           report when serial bug fix-up is being used
+
+120522 WEH pfmed/Makefile
+            make readline logic agree with oprin/Makefile
+
+120522 WEH ibcon/Makefile
+           fixed logic for REV_2
+
+120523 00:17 ./st.default/st-0.0.0/metserver/src/metserver.c
+             zero sin_zero based on size
+
+120523 WEH help/tle.___
+           more typos from Dan Smythe
+
+120523 WEH control/fspgm.ctl
+           change interrupt remapping, ^- didn't work with FSL3
+           
+120524 WEH rtelb/rte_cmpt.c
+           rtelb/secs_time.c
+           don't round, instead truncate to centiseconds
+
+120525 WEH matcn/matcn.f
+           reduce supurios work around attempts
+
+120525 WEH rtelb/Makefile
+           fclib/fc_rte_check.c
+           fclib/Makefile
+           rtelb/rte_check.c
+           control/fserr.ctl
+           setcl/setcl.f
+           add checking of times/ticks error conditions
+
+120525 WEH rtelb/rte_rawt.c
+           removed times() declaration
+
+120525 WEH quikr/quikr.f
+           quikr/wx.f
+           control/fspgm.ctl
+           wxcdp command for stations that have both
+
+120526 WEH setcl/setcl.f
+           add show tentative rate as zero if model is computer
+ 
+120530 WEH misc/satellites.txt
+           fix typo
+
+120530 WEH dbbcn/Makefile
+           control/fspgm.ctl
+           quikv/dbbc_dis.c
+           quikv/Makefile
+120601 WEH boss/binit.f
+           Makefile
+           dbbcn/dbbcn.c
+           control/fserr.ctl
+           st.default/control/dbbad.ctl
+           control/fscmd.ctl
+           initial version of dbbcn and dbbc= command
+
+120601 WEH mk5cn/serv2.py
+           keep test code in distribution
+
+120601 WEH include/dbbcxx_ds.h
+           include/fs_types.h
+           include/params.h
+           include/fscom.h
+           quikv/dbbcxx.c
+           quikv/dbbcxx_dis.c
+           preliminary code for dbbcxx command
+
+120603 WEH quikv/dbbc.c
+           combine comma separate parameters into one command
+
+120608 WEH quikv/quikv.c
+           ddout/ddout.c
+           poclb/logit.c
+           create "(n)o (d)isplay" record type for logging only
+
+120703 WEH st.default/st-0.0.0/metclient/src/metclient.c
+120703 WEH st.default/st-0.0.0/metserver/src/metget.c
+           improve error reports for bad met4 data
+
+120705 WEH dbbcn.c
+           send \n\0 at end of every message
+
+120705 WEH poclb/flt.c
+           polb/flt1.f
+           pdplt/pdplt
+           add p23, dELcot(EL)
+
+120705 WEH pdplt/pdplt
+           add tilt angle explanation
+
+120705 WEH quikv/quikv.c
+120705 WEH include/fs_types.h
+120705 WEH include/fscom.h
+120705 WEH include/dbbcnn_ds.h
+120705 WEH quikv/dbbcnn_dis.c
+120705 WEH quikv/dbbcnn.c
+           change from dbbcxx to dbbcnn
+
+120710 WEH fclib/Makefile
+           polb/po_put_i.f
+           fclib/fc_putln2.c
+           improve error reports: honor old style FORTRAN last character
+           "_" input suppressing new line
+
+120710 WEH error/error.f
+           increased number of points to 4000
+
+120710 WEH logpl/PlotCanvas.py
+           incremental improvement in plot labels
+
+120723 WEH clib/Makefile
+       WEH quikv/Makefile
+       WEH quikv/dbbcnn_dis.c
+       WEH quikv/logmsg_dbbc.c
+       WEH include/dbbcnn_ds.h
+       WEH control/fserr.ctl
+120724 WEH help/dbbcnn.___
+       WEH quikv/quikv.c
+       WEH control/fscmd.ctl
+       WEH include/fs_types.h
+       WEH include/fscom.h
+       WEH include/params.h
+       WEH quikv/dbbcnn.c
+           dbbcnn command implementation
+
+120724 WEH help/bbcnn.w__
+           improve formatting
+
+120724 WEH quikv/dbbcifx_dis.c
+       WEH quikv/dbbcifx.c
+       WEH clib/dbbcnn_util.c
+       WEH include/dbbcifx_ds.h
+       WEH clib/dbbcifx_util.c
+           dbbcifx support
+
+120725 WEH help/source.___
+           expanded explanation of wrap parameter to provide
+           guidance for implementation
+
+120725 WEH clib/arg_util.c
+           add arg_uns
+
+120725 WEH include/fs_types.h
+       WEH include/dbbcifx_ds.h
+       WEH clib/dbbcnn_util.c
+120726 WEH clib/Makefile
+       WEH quikv/Makefile
+       WEH control/fserr.ctl
+       WEH quikv/dbbcifx.c
+       WEH quikv/dbbcifx_dis.c
+       WEH help/dbbcifx.___
+       WEH clib/dbbcifx_util.c
+           dbbcifx commands implementation
+
+120726 WEH clib/cshm_init.c
+           initialize dbbcnn and dbbcifx shared memory
+
+120726 WEH setcl/setcl.f
+           don't complain about 5B clock source wrong if no 5B communication
+
+120727 WEH control/fscmd.ctl
+       WEH include/fs_types.h
+       WEH include/dbbcform_ds.h
+       WEH clib/Makefile
+       WEH quikv/Makefile
+       WEH include/fscom.h
+       WEH quikv/dbbcform_dis.c
+       WEH quikv/dbbcform.c
+       WEH control/fserr.ctl
+       WEH clib/dbbcform_util.c
+       WEH quikv/quikv.c
+       WEH help/dbbcform.___
+       WEH clib/cshm_init.c
+           initial dbbcform implementation
+
+120727 WEH clib/dbbcnn_util.c
+       WEH clib/dbbcifx_util.c
+       WEH help/dbbcifx.___
+           correct small errors
+
+120730 WEH logpl/MainGUI.py
+120730 WEH logpl/PlotCanvas.py
+           improved Y axis label and cursor precision digits
+
+120814 WEH st.default/st-0.0.0/metserver/README
+           removed references to metsever "buffer"
+
+120814 WEH st.default/prog/.cshrc
+           don't show .pyc files in "latest"
+
+120815 WEH setcl/setcl.f
+           correctly test for config error when vsi4
+
+120815 WEH clib/dqa_util.c
+           clib/trkfrm_util.c
+           clib/vform_util.c
+           clib/k4pcalports_util.c
+           clib/k4recpatch_util.c
+           handle "any" rack types more gracefully
+
+120815 WEH clib/mk5bbcd.c
+           corrected benign typo
+
+120815 WEH include/params.h
+           annotated each _type for racks and records
+
+120816 WEH control/fserr.ctl
+           quikv/ifadjust.c
+           added support for MK5 rack
+
+120816 WEH st.default/control/mcbad.ctl
+
+120816 WEH include/fscom_dum.i
+           include/fscom_quik.i
+           newlb/prog.c
+           gndat/gndat.c
+           include/fscom.h
+           quikr/tpi.f
+           include/tpicd_ds.h
+           include/onoff_ds.h
+           clib/dtlkup.c
+           onoff/agc.c
+120828 WEH clib/vlbabbcd.c
+120829 WEH clib/tpi_vlba.c
+           clib/mk5bbcd.c
+           clib/mk4bbcd.c
+120830 WEH clib/tpicd_util.c
+           include/params.h
+           include/params.i
+           quikr/fvpnt.f
+           quikr/tplisv.f
+           quikr/tsys.f
+           clib/mcbcn_v.c
+           clib/mcbcn_v2.c
+           update for separation of MAX_BBC from MAX_VLBA_BBC
+
+120817 WEH help/bbcnn.w__
+120829 WEH help/tpicd.e__
+           improved readability
+
+120830 WEH clib/mcbcn_v.c
+           clib/mcbcn_v2.c
+           clib/get_s2time.c
+           clib/onoff_util.c
+           clib/fsmetc.c
+           clib/get_rxgain.c
+           clib/disk_serial_util.c
+           poclb/logit.c
+           quikv/tacd.c
+           fmset/sets2time.c
+           fsvue/vueinfo.c
+           poclb/logita.c
+           poclb/logite.c
+           quikv/tacd_dis.c
+           poclb/logitf.c
+           poclb/logitn.c
+           fix use of includes for params.h
+
+120831 WEH dbbcn/dbbcn.c
+           newlb/prog.c
+           include/fscom.h
+           include/fscom_dum.i
+           include/dbbcnn_ds.h
+           clib/dbbcnn_util.c
+           clib/cshm_init.c
+           adjustments for DBBC v101
+
+120831 WEH clib/disk_record_util.c
+           clib/bank_check_util.c
+           clib/disk2file_util.c
+           clib/in2net_util.c
+           clib/mk5b_mode_util.c
+           clib/dot_util.c
+           clib/pps_source_util.c
+           clib/clock_set_util.c
+           include stdlib.h
+
+120902 WEH ddout/ddout.c
+           allow "nd" no display if xdisp=on
+
+120903 WEH quikv/dbbcifx.c
+           clib/dbbcifx_util.c
+           clib/dbbcform_util.c
+           quikv/bank_check.c
+           include/params.h
+           include/params.i
+           misc/cmdctlfix5
+           boss/binit.f
+           boss/helpstr.c
+           boss/newlg.f
+           incom/equip.f
+           bosslb/gtnam.f
+           st.default/control/equip.ctl
+           add DBBC rack type
+
+120903 WEH help/ifx.d__
+           help/form.d__
+           help/bbcnn.d__
+           names adjusted and made for DBBC rack
+
+120903 WEH clib/lo_util.c
+           add DBBC rack for ifa ... ifd
+
+120903 WEH control/fscmd.ctl
+           add DBBC rack type support and rename DBBC commands
+
+120904 WEH rtelb/rte_check.c
+           improve 30 day warning message
+
+120904 WEH control/fserr.ctl
+           add "days" after "248"
+
+120904 WEH st.default/control/equip.ctl
+           add DBBC version lines (4 with comments)
+
+120904 WEH include/params.h
+           quikr/tpi.f
+           quikr/Makefile
+           fclib/fc_mk5dbbcd.c
+           newlb/prog.c
+           fclib/fc_tpi_dbbc.c
+           fclib/Makefile
+120906 WEH include/params.i
+           clib/Makefile
+           fslb/dtnam.f
+120907 WEH quikr/tplisv.f
+           help/lo.a__
+           control/fserr.ctl
+           clib/dbbcnn_util.c
+           quikr/tsys.f
+           quikr/fvpnt.f
+           clib/get_tcal_fwhm.c
+           control/fscmd.ctl
+           clib/lo_util.c
+           clib/mk5dbbcd.c
+           quikr/tplisd.f
+           help/tsys.___
+           clib/tpi_dbbc.c
+           add tpi/tpical/tsys for dbbc
+
+120908 WEH matcn/matcn.f
+           fixed /dev/null processing
+
+120909 WEH misc/onoff_fix
+           correct help text
+
+120911 WEH include/lo_ds.h
+           clib/lo_util.c
+120912 WEH help/lo.a__
+           4 inputs per IF
+
+120912 WEH fivpt/dbbcn.f
+           fclib/fc_dbbcn_v.c
+           fclib/Makefile
+           FIVPT for DBBC
+
+120913 WEH st.default/prog/.Xresources
+           st.default/oper/.Xresources
+           monit/monit2.c
+           monit/m2init.c
+           monit/mout2.c
+           monit/monit3.c
+           monitX for DBBC
+
+120913 WEH help/bbcnn.d__
+           help/dbbc.___
+           update
+
+120913 WEH clib/get_tcal_fwhm.c
+           clib/tpi_vlba.c
+           clib/tpi_lba.c
+           clib/tpi_norack.c
+           clib/tpi_dbbc.c
+           control/fserr.ctl
+           repor LO errors proper
+
+120913 WEH fivpt/Makefile
+           fivpt/fivpt.f
+           clib/Makefile
+120914 WEH quikr/fvpnt.f
+           fivpt/volts.f
+           clib/dbbcn_v.c
+           fivpt/onsor.f
+           fivpt/tsys.f
+           control/fserr.ctl
+           FIVPT for DBBC
+
+120914 WEH monit/monit3.c
+           overwrite "+" when no longer needed
+
+120914 WEH help/ifx.d__
+           typos
+
+120914 WEH quikv/dbbcform.c
+           control/fserr.ctl
+           add DBBC version checking
+
+120914 WEH clib/dbbcnn_util.c
+           clib/dbbcform_util.c
+           clib/dbbcifx_util.c
+           quikv/logmsg_dbbc.c
+           quikv/dbbcform_dis.c
+           quikv/dbbcifx_dis.c
+           quikv/dbbcnn_dis.c
+           control/fserr.ctl
+           DBBC error response checking
+
+120915 WEH onoff/onoff.c
+120916 WEH onoff/Makefile
+           onoff/get_samples.c
+           control/fserr.ctl
+           clib/onoff_util.c
+           quikv/onoff.c
+           quikv/onoff_dis.c
+120917 WEH onoff/agc_dbbc.c
+           onoff/tpget_dbbc.c
+           onoff/tzero.c
+           add dbbc support
+
+120917 WEH quikv/logmsg_dbbc.c
+           control/fserr.ctl
+           tag version v102 as mismatched
+
+120917 WEH dbbcn/dbbcn.c
+           don't return last trailing newline in a response
+
+120917 WEH clib/dbbcifx_util.c
+           only accept 0-63 for att
+	   null is okay for v100 only
+
+120917 WEH clib/get_tcal_fwhm.c
+           clib/dbbcnn_util.c
+           quikv/onoff.c
+           update DBBC filters and BWs
+
+120917 WEH clib/tpi_dbbc.c
+           fclib/fc_tpi_dbbc.c
+           quikr/tpi.f
+           remove extraneous parameter in call to tpi_dbbc 
+
+120917 WEH onoff/get_samples.c
+           remove extraneous parameter in call to tpi_dbbc & tpi_lba
+
+120917 WEH help/bbcnn.d__
+           help/ifx.d__
+           control/fserr.ctl
+           corrections
+
+120917 WEH clib/tpicd_util.c
+           tpicd/tpicd.c
+           support DBBC
+
+120917 WEH incom/equip.f
+           accept v102 DBBC version
+
+120918 WEH dbbcn/dbbcn.c
+           quikv/dbbcnn_dis.c
+           clib/dbbcifx_util.c
+           quikv/dbbcform_dis.c
+           clib/dbbcform_util.c
+           quikv/dbbcifx_dis.c
+           quikv/logmsg_dbbc.c
+           control/fserr.ctl
+           move error response detection to dbbcn
+
+120918 WEH help/bbcnn.d__
+           correction
+
+120918 WEH include/fscom.h
+           newlb/prog.c
+           boss/newlg.f
+           clib/lo_util.c
+           clib/dbbcnn_util.c
+           incom/equip.f
+           include/fscom_dum.i
+           control/fserr.ctl
+           quikv/dbbcifx.c
+           st.default/control/equip.ctl
+120920 WEH monit/mout2.c
+           monit/m2init.c
+           monit/monit3.c
+           specify number of conditioning modules in equip.ctl
+
+120919 WEH quikv/Makefile
+           quikv/quikv.c
+           control/fscmd.ctl
+           remove calrx
+
+120919 WEH control/fscmd.ctl
+           make pcald for every rack
+
+120920 WEH help/onoff.___
+           add DBBC information
+
+120920 WEH clib/cshm_init.c
+           give DBBC ifX commands reasonable initial values for "*" in commands.
+
+120920 WEH gnplt1/Makefile
+           fix link
+
+120920 WEH gnplt1/gnplt1
+           make executable
+
+120920 WEH quikv/dbbc_cont_cal_dis.c
+           include/fs_types.h
+           include/fscom.h
+           include/dbbc_cont_cal_ds.h
+           clib/dbbc_cont_cal_util.c
+           clib/Makefile
+           quikv/Makefile
+           control/fscmd.ctl
+           quikv/dbbc_cont_cal.c
+           quikv/quikv.c
+           clib/cshm_init.c
+           help/cont_cal.d__
+           create continuous cal for dbbc
+
+120923 WEH quikv/dbbc_cont_cal.c
+           trigger tpicd on any change
+
+120924 WEH polb/flt1.f
+           poclb/flt.c
+           fix term 23 for Godwin's "excess" refraction
+
+120925 WEH st.default/control/skedf.ctl
+           add cont_cal control and default DBBC IF input examples
+
+120926 WEH ddout/ddout.c
+           add delay so boss finishes its messages first at start
+
+120926 WEH st.default/proc/dstation.prc
+           created for dbbc stations with nin-continuous cal
+
+120927 WEH boss/binit.f
+           start log file before other initializations so error
+           message are reported
+
+120927 WEH flagr/flagr.c
+           make missing initialization section in flagr
+
+120927 WEH help/source.___
+           quikr/sorce.f
+           add boresight as special name
+
+121001 WEH quikv/logmsg_dbbc.c
+           add more versions to detect
+
+121001 WEH onoff/agc_dbbc.c
+           only set IFs that are/were in AGC
+
+121002 WEH fivpt/fivpt.f
+           don't need to check 'l' for first device letter if reseting
+
+Version 9.10.5 121002
+
+121016 WEH Makefile
+           now 9.10.6
+
+121029 WEH include/fscom_dum.i
+           newlb/prog.c
+           include/fscom.h
+           boss/newlg.f
+           incom/equip.f
+121031 WEH clib/Makefile
+           onoff/tpget_dbbc.c
+           clib/tpi_dbbc.c
+           clib/dbbc_if_power.c
+           clib/dbbcn_v.c
+           add use of DBBC IF power factors in equip.ctl
+
+121031 WEH clib/dbbcn_v.c
+           correct detector calculation
+
+121031 WEH quikr/fvpnt.f
+           control/fserr.ctl
+           correct 6th parm error code
+
+121101 WEH fmset/fmset.c
+           fmset/asksure.c
+           require confirmation before sync/time-set if 5b is recording
+
+121101 WEH fmset/get5btime.c
+           sync DBBC if rack type and 5B
+
+121101 WEH fmset/set5btime.c
+           fmset/get4time.c
+           clarify log message for sync
+
+121101 WEH st.default/control/equip.ctl
+           add DBBC IFs number and IF power conversion factors
+
+121101 WEH include/mk5b_mode_ds.h
+           quikv/mk5b_mode.c
+           clib/mk5b_mode_util.c
+           help/mk5b_mode.___
+           control/fserr.ctl
+           require override to set mode while recording
+
+121101 WEH help/terminate.___
+           Improved explanation of disk_record_ok override
+
+121102 WEH clib/onoff_util.c
+       WEH control/fserr.ctl
+       WEH st.default/proc/point.prc
+       WEH misc/onoff_fix
+           move procedure name before wait time
+
+121105 PdV gnplt/main.py
+           fix all split(' ') to split() and add error handling in one spot
+
+121106 WEH st.default/st-0.0.0/metclient/src/metclient.c
+           don't complain if metserver returned NULLS, that's its business to
+           report
+
+121128 WEH quikr/sorce.f
+           set input epoch and angles to zero for special case sources
+
+121206 WEH quikr/ma.f
+           clean-up class records if antenna device is /dev/null
+
+121210 WEH include/tpicd_ds.h
+           clib/cshm_init.c
+           quikv/tpicd.c
+           control/fserr.ctl
+           add tpicd.tsys_request
+
+121210 WEH clib/tpi_dbbc.c
+           tpicd/tpicd.c
+           add display option
+
+121210 WEH fivpt/fivpt.f
+           fivpt/dbbcn.f
+           fclib/fc_dbbcn_v.c
+           include/fscom_dum.i
+           newlb/prog.c
+           adapted for continuous cal
+
+121212 WEH st.default/proc/m5bstation.prc
+           st.default/proc/v5bstation.prc
+           created/renamed from 5station.prc, corrected default midob
+
+121212 WEH quikv/logmsg_dbbc.c
+           control/fserr.ctl
+           recognize DBBC v103
+
+121214 WEH clib/dbbc_if_power.c
+           comment out debug printf()
+
+121217 WEH fivpt/tsys.f
+           clib/dbbcn_v.c
+           fivpt/volts.f
+121218 WEH onoff/tzero.c
+           onoff/onoff.c
+           onoff/Makefile
+           onoff/get_samples.c
+121227 WEH onoff/tpget_dbbc.c
+           adapted for continuous cal
+          
+121228 WEH help/tpicd.e__
+           updated for DBBC, continuous cal, and tsys form
+
+121228 WEH st.default/proc/dstation_cc.prc
+           created from dstation.prc for continuous cal
+
+121228 WEH onoff/Makefile
+           control/fserr.ctl
+           clib/tpi_dbbc.c
+           help/onoff.___
+           fixed typos
+
+121231 WEH quikv/logmsg_dbbc.c
+           correct typo in v103 strcmp()
+
+121231 WEH help/cont_cal.d__
+           fix typos
+
+121231 WEH clib/cshm_init.c
+           quikv/tpicd.c
+           control/fserr.ctl
+           tpicd/tpicd.c
+           better return to previous behavior after tpicd=tsys
+
+121231 WEH clib/tpi_dbbc.c
+           use caltemp/ not caltemps/
+
+130102 WEH st.default/control/equip.ctl
+           better comments for DBBC CoMo conversion factors
+
+130102 WEH fclib/fc_dbbcn_v.c
+       WEH fivpt/dbbcn.f
+130103 WEH clib/dbbcn_v.c
+           fivpt/volts.f
+           adjust Tsys samples if continuous cal device
+
+130107 WEH st.default/proc/dstation.prc
+           st.default/proc/dstation_cc.prc
+           remove old commands
+
+130107 WEH st.default/proc/point.prc
+           added notation about DBBC examples
+
+130108 WEH st.default/prog.1.2.12
+           st.default/oper.1.2.12
+           removed: old Slackware support files
+
+120108 WEH help/fivept.___
+           updated for DBBC
+
+120108 WEH misc/dbbc.txt
+           created
+
+120115 WEH st.default/proc/dstation.prc
+           remove ifagc from postob
+
+120115 WEH help/source.___
+           clarify which special names don't accep coordinates
+
+120115 WEH help/onoff.___
+           corrected position of proc parameter
+
+130116 WEH st.default/proc/5station.prc
+           st.default/proc/v5station.prc
+           renamed from m5b and v5b
+
+130117 WEH Makefile
+           updated for 9.11.0
+
+130117 WEH misc/fs9110up.txt
+           created
+
+130117 WEH st.default/proc/dstationcc.prc
+           renamed from dstation_cc.prc
+
+130119 WEH fmset/get5btime.c
+           increase delay between dbbc sync and 5B sync to improve reliability
+
+130119 WEH misc/dbbc.txt
+           improved
+
+130119 WEH st.default/control/dbbad.ctl
+           comment out by default
+
+130121 WEH monit/mout2.c
+           fixed wrong VLBA IF channels
+
+130121 WEH misc/ddbc.txt
+           misc/fs9110up.txt
+           add updating .Xresources for monit3 w/DBBC
+
+130122 WEH st.default/control/skedf.ctl
+           new AutoFTP_ABORT_TIME parameter
+
+130123 WEH misc/fs9110up.txt
+           finalized
+
+Version 9.11.0 130123

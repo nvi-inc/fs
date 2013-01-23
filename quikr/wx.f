@@ -1,4 +1,4 @@
-      subroutine wx(ip)
+      subroutine wx(ip,itask)
 C
 C  weather module
 C 
@@ -65,7 +65,7 @@ C
       endif
       call fs_get_wx_met(wx_met)
 C Call the metserver server for MET3 information.
-      if(MET3.eq.wx_met) then
+      if(wx_met.gt.0.and.itask.ne.9) then
          istate = fsmetc()
          call char2hol('wx',ip(4),1,2)
          if(istate.ne.0) then
@@ -170,7 +170,7 @@ C
       if (humiwx.GE.0.0) then
          nch = nch + ir2as(humiwx,ibuf2,nch,5,1) 
       endif
-      if(MET3.eq.wx_met) then
+      if(wx_met.gt.0.and.itask.ne.9) then
          if (speedwx.GE.0.0) then
             nch = mcoma(ibuf2,nch)
             nch = nch + ir2as(speedwx,ibuf2,nch,7,1) 
@@ -187,7 +187,7 @@ C
       ip(1) = iclass
       ip(2) = 1
       ip(3) = ierr
-      if(MET3.eq.wx_met) then
+      if(wx_met.gt.0.and.itask.ne.9) then
          call char2hol('wx',ip(4),1,2)
       else
          call char2hol('qx',ip(4),1,2)

@@ -1,19 +1,20 @@
-      subroutine fecon(feclon,feclat,lonoff,wln,latoff,wlt,npts,luse,
-     &                 emnln,emnlt)
+      subroutine fecon(feclono,feclato,lonoff,wln,latoff,wlt,npts,luse,
+     &                 emnln,emnlt,lat,iflags)
       real lonoff(npts),latoff(npts)
-      double precision lonsum,latsum,di,dim1di
+      double precision lonsum,latsum,di,dim1di,lat(npts),feclon,feclat
+      double precision flon1,flon2,flat1,flat2
       real wln(npts),wlt(npts)
       logical kbit
       include '../include/dpi.i'
 C
       flon1=-emnln
       flat1=-emnlt
-      flon2=max(+2.0*deg2rad,2.0d0*emnln)
-      flat2=max(+2.0*deg2rad,2.0d0*emnlt)
+      flon2=max(+2.0*deg2rad,5.0d0*emnln)
+      flat2=max(+2.0*deg2rad,5.0d0*emnlt)
 C
       do itry=1,64
-        feclon=flon1+.5*(flon2-flon1)
-        feclat=flat1+.5*(flat2-flat1)
+         feclon=flon1+.5*(flon2-flon1)
+         feclat=flat1+.5*(flat2-flat1)
 C
         lonsum=0.0d0
         latsum=0.0d0
@@ -23,10 +24,16 @@ C
 C
           if (.not.kbit(luse,i)) goto 210
           ipts=ipts+1
+          coslt=cos(lat(i))
           dim1di=dble(float(ipts-1))/dble(float(ipts))
           di=1.0d0/dble(float(ipts))
-          lonsum=lonsum*dim1di+((lonoff(i)*lonoff(i))/
-     +       (wln(i)*wln(i)+sign(feclon*feclon,feclon)))*di
+          if(and(iflags,1).eq.1) then
+            lonsum=lonsum*dim1di+((lonoff(i)*lonoff(i))/
+     +      (wln(i)*wln(i)+sign(feclon*feclon/(coslt*coslt),feclon)))*di
+         else
+            lonsum=lonsum*dim1di+((lonoff(i)*lonoff(i))/
+     +      (wln(i)*wln(i)+sign(feclon*feclon,feclon)))*di
+         endif
           latsum=latsum*dim1di+((latoff(i)*latoff(i))/
      +       (wlt(i)*wlt(i)+sign(feclat*feclat,feclat)))*di
 210     continue
@@ -46,5 +53,7 @@ C
       feclat=0.0
 C
 510   continue
+      feclono=feclon
+      feclato=feclat
       return
       end

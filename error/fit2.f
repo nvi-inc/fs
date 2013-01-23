@@ -1,6 +1,6 @@
       subroutine fit2(x1,x2,y1,y2,wy1,wy2,npts,par,epar,ipar,phi,
      +  aux,scale,a,b,npar,tol,ntry,f1,f2,rchi,r1nr,r2nr,
-     +  nfree,ierr,luse,igp,fec1,fec2,y1r,y2r,rcond)
+     +  nfree,ierr,luse,igp,fec1,fec2,y1r,y2r,rcond,iflags)
 C
 C     LEAST SQUARES FITTING ROUTINE...FITS TO FUNCTIONS F1 & F2
 C     WHICH MUST BE DECLARED EXTERNAL IN THE CALLING ROUTINE.
@@ -47,7 +47,13 @@ C
         do k=1,npts
           if (kbit(luse,k)) then
             r=y1(k)-f1(0,x1(k),x2(k),par,ipar,phi)
-            w=1.0d0/(wy1(k)*wy1(k)+sign(fec1*fec1,fec1))
+            if(and(iflags,1).eq.1) then
+               coslt=cos(x2(k))
+               w=1.0d0/(wy1(k)*wy1(k)
+     +              +sign(fec1*fec1/(coslt*coslt),fec1))
+            else
+               w=1.0d0/(wy1(k)*wy1(k)+sign(fec1*fec1,fec1))
+            endif
             do i=1,npar
               aux(i)=f1(i,x1(k),x2(k),par,ipar,phi)
             enddo
@@ -107,7 +113,13 @@ C
         y1r(i)=r1
         y2r(i)=r2
         if (.not.kbit(luse,i)) goto 120
-        wyt1=1.0/(wy1(i)*wy1(i)+sign(fec1*fec1,fec1))
+        if(and(iflags,1).eq.1) then
+           coslt=cos(x2(i))
+           wyt1=1.0/(wy1(i)*wy1(i)
+     +          +sign(fec1*fec1/(coslt*coslt),fec1))
+        else
+           wyt1=1.0/(wy1(i)*wy1(i)+sign(fec1*fec1,fec1))
+        endif
         wyt2=1.0/(wy2(i)*wy2(i)+sign(fec2*fec2,fec2))
         sq=sq+r1*r1*wyt1+r2*r2*wyt2
         sq1=sq1+r1*r1*wyt1

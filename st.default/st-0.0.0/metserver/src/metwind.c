@@ -1,24 +1,14 @@
 #include <stdio.h>
+#include <string.h>
+
 #include <memory.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <termio.h>
 #include <linux/serial.h>
 #include <sys/errno.h>
 /*
-#include "../include/fs_types.h"      * general header file for all fs data
-                                      * structure definations *
-#include "../include/params.h"        * general fs parameter header *
-#include "../include/fscom.h"         * shared memory (fscom C data 
-                                      * structure) layout *
-#include "../include/shm_addr.h"      * declaration of pointer to fscom *
-  */
-#include "/usr2/fs/include/fs_types.h"  /* general header file for all fs data
-					 * structure definations */
-#include "/usr2/fs/include/params.h"        /* general fs parameter header */
-#include "/usr2/fs/include/fscom.h"         /* shared memory (fscom C data 
-                                       * structure) layout */
-#include "/usr2/fs/include/shm_addr.h"      /* declaration of pointer to fscom */
 /*  */
 
 #define MAXLEN 4095
@@ -26,19 +16,19 @@
 int portopen_();
 int portwrite_();
 int portread_();
-char *metcmd[14] = {"*0100Q3\r\n",   /* MET3 temperature measurement. */
+char *metcmd[14] = {"*0100TT\r\n",   /* MET3 temperature measurement. */
 		   "*0100P3\r\n",   /* MET3 pressure measurement. */
 		   "*0100RH\r\n",   /* MET3 humidity measurement. */
 		   "*0100UN\r\n",   /* MET3 pressure determination (doc's) */
 		   "*9900VR\r\n",   /* MET3 stop any commands in progress,
 				       reset. */
-		   "*0100EW*0100UN=2\r\n",  /* MET3 change to mbar. */
+		   "*0100EW*0100UN=3\r\n",  /* MET3 change to bar. */
 		   "*0100AR\r\n",   /* MET3 resolution determination (doc's) */
 		   "*0100EW*0100AR=0\r\n",  /* MET3 
 					     * output resolution to 0.1*/
 		   "*0100EW*0100AR=1\r\n",  /* MET3 
 					     * output resolution to 0.01*/
-		   "*0100EW*0100UN=3\r\n",  /* MET3 change to mbar. */
+		   "*0100EW*0100UN=2\r\n",  /* MET3 change to mbar. */
 		   "*0100N1\r\n",  /* return int cnt for one analog chan.*/
 		   "*0100Z1\r\n",  /* return 0 adj coef. for analog chans.*/
 		   "*0100M1\r\n",  /* return span adj coef. for analog chans.*/
@@ -109,13 +99,13 @@ main(int argc, char *argv[])
       if(strstr(met_cmd_str,"temp")) metcnt=0;
       else if(strstr(met_cmd_str,"pres")) metcnt=1;
       else if(strstr(met_cmd_str,"humi")) metcnt=2;
-      else if(strstr(met_cmd_str,"borm")) metcnt=3;
+      else if(strstr(met_cmd_str,"ask")) metcnt=3;
       else if(strstr(met_cmd_str,"rese")) metcnt=4;
-      else if(strstr(met_cmd_str,"chan")) metcnt=5;
+      else if(strstr(met_cmd_str,"bar")) metcnt=5;
       else if(strstr(met_cmd_str,"res0")) metcnt=6;
       else if(strstr(met_cmd_str,"res1")) metcnt=7;
       else if(strstr(met_cmd_str,"res2")) metcnt=8;
-      else if(strstr(met_cmd_str,"bar")) metcnt=9;
+      else if(strstr(met_cmd_str,"mbar")) metcnt=9;
       else if(strstr(met_cmd_str,"N1")) metcnt=10;
       else if(strstr(met_cmd_str,"Z1")) metcnt=11;
       else if(strstr(met_cmd_str,"M1")) metcnt=12;
@@ -127,10 +117,8 @@ main(int argc, char *argv[])
   }
 
   /* Opening met file. */
-  if ((fp=fopen(FS_ROOT"/control/met.ctl","r")) == 0) {
+  if ((fp=fopen("/usr2/st/metserver/met.ctl","r")) == 0) {
     /* If the file does not exist complain only once. */
-    if(!status)
-      logit(NULL,-1,"ta");
     printf("write to file\n");
     exit(0);
   } else {
@@ -144,8 +132,6 @@ main(int argc, char *argv[])
 	  temp_str[j]=buff[j];
 	  i++;
 	  if(buff[0]=='\n') {
-	    if(!status)
-	      logit(NULL,-8,"ta");
 	    printf("write to file\n");
 	    exit(0);
 	  }
@@ -216,6 +202,10 @@ main(int argc, char *argv[])
     buff2[len2]='\0';
     printf("cmd: %sresponse: %s\n", met_cmd_str,
 	   &buff2[5]);
+    if(metcnt==13) {
+      nema(buff2,&pres,&temp,&humi);
+      printf("pres %f, temp %f humi %f\n",pres,temp,humi);
+    }
   } else {
     strcat(wind_cmd_str,"\r\n");
     printf("command: %s",wind_cmd_str);
@@ -223,6 +213,9 @@ main(int argc, char *argv[])
     err = portwrite_(&ttynum2, wind_cmd_str, &len);
     len = 80;
     err = portread_(&ttynum2, buff2, &count, &len, &termch, &to);
+    if(err==-1) printf("wrong number of chars. read\n");
+    if(err==-2) printf("timed out\n");
+    if(err==-3) printf("read error\n");
     len = strlen(buff2);
     buff2[len-5]='\0';
     if (!strstr(&wind_cmd_str[0],"W5")) {
@@ -238,3 +231,40 @@ main(int argc, char *argv[])
   portclose_(&ttynum2);
   return 0;
 }
+
+nema(buf,pres,tmp,humi)
+char *buf;
+float *pres, *tmp, *humi;
+{
+  char *p,comma[]=",";
+
+  *pres=-1;
+  *tmp==51;
+  *humi=-1;
+
+  p=strtok(buf,comma);
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  if(p==NULL)
+    return;
+  sscanf(p,"%f",pres);
+
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  if(p==NULL)
+    return;
+  sscanf(p,"%f",tmp);
+
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  p=strtok(NULL,comma);
+  if(p==NULL)
+    return;
+  sscanf(p,"%f",humi);
+
+  return;
+}
+

@@ -16,6 +16,8 @@
 #include <sys/time.h>
 #include <time.h>
 
+clock_t rte_times(struct tms *);
+
 #ifdef DIGI
 #include "/usr/src/linux/drivers/char/digi.h"
 #endif
@@ -76,7 +78,6 @@ void cls_snd();
 int cls_rcv();
 void cls_clr();
 void skd_wait();
-long times();
 int putout();    /* fill and dispatch output buffer */
 void wait_mcb(); /* wait a fraction of a second */
 int rte_prior();
@@ -626,8 +627,8 @@ long *ip4;
                     devdata = inbuf[inptr+6] + (inbuf[inptr+5]<<8);
                     
                     cnt=0;
-                    end=times(&tms_buff)+110;  /* calculate ending time */
-                    while(end>times(&tms_buff)) {
+                    end=rte_times(&tms_buff)+110;  /* calculate ending time */
+                    while(end>rte_times(&tms_buff)) {
                         done = FALSE;
 			rte_cmpt(centisec+2,centisec+4);
 			rte_ticks (centisec);
@@ -706,7 +707,7 @@ int nch;  /* number of characters to read */
 
     cnt = 0;
 
-    end=times(&tms_buff)+TIME_OUT;  /* calculate ending time */
+    end=rte_times(&tms_buff)+TIME_OUT;  /* calculate ending time */
 
     while (cnt <nch) {
       iret=0;
@@ -714,7 +715,7 @@ int nch;  /* number of characters to read */
         iret=read(mcb_fildes,&inch,1);
         if(iret==1)
           break;
-        else if (end-times(&tms_buff) <= 0) {
+        else if (end-rte_times(&tms_buff) <= 0) {
            return FALSE;                    /* time-out */
         } else if(iret == -1)
           return FALSE;                    /* read error */
@@ -724,7 +725,7 @@ int nch;  /* number of characters to read */
        cnt++;
     }
 #ifdef DEBUG
-    printf(" actual delay %d \n",times(&tms_buff)-(end-TIME_OUT));
+    printf(" actual delay %d \n",rte_times(&tms_buff)-(end-TIME_OUT));
 #endif
     return(TRUE);
 }

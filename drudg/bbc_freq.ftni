@@ -1,0 +1,13 @@
+! This commmon block stores bbc freqs. 
+! These are computed in proc_vc and used in proc_ifd.
+      real*8 fvc(max_bbc)		!VC frequencies
+      real*8 fvc_lo(max_bbc)            !lower edge
+      real*8 fvc_hi(max_bbc)            !upper edge
+      real*8 flo(max_bbc)               !frequency of LO
+      real*8 rfmin, rfmax               !maximum allowable frequency  
+      integer ibbc_filter(max_bbc)      !Filter numbers 1-4. Only for DBBC
+      character*1 cbbc_pol(max_bbc)     !Polarization   
+      character*5 cbbc                  !something like "bbc01 " or "vc13"
+      character*1 ldbbc_if_inputs(4)    !
+      common /bbc_freq/fvc,fvc_lo, fvc_hi,flo, ibbc_filter, 
+     >  rfmin, rfmax, cbbc_pol,cbbc,ldbbc_if_inputs 

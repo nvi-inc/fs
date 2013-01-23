@@ -25,7 +25,7 @@ c
      . TPERER(2), TPSOR(31), TPSPC(31), TPZERO(31), VADCRX,
      . VADCST, VLTPK_FS(2), VMINPK_FS(2),
      . SLOWFW(2,2),SLOWRV(2,2),
-     . tpidiff(32),caltemps(32),SSIZFP
+     . tpidiff(MAX_DET),caltemps(MAX_DET),SSIZFP
 
       INTEGER IADCRX, IADCST, IATLVC(15),
      . IATUVC(15), IBUGPC, IBWTAP(2), IBXHRX,

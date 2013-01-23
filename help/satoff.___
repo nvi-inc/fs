@@ -1,0 +1,37 @@
+                satoff - satellite tracking offsets
+
+            Syntax:     satoff=seconds,cross,hold
+
+            Response:   satoff/seconds,cross,hold
+
+
+Settable parameters:
+        seconds Along track offset in seconds, positive leads the
+                satellite. No default.
+        cross   Cross track offset in degrees. Positive to the left
+                of the satellite as view from below facing the direction
+                of the satellite's motion. No default.
+        hold    track or hold, Default: track.
+
+Monitor-only parameters: None
+
+
+Comments:
+This command allows an offset relative to the nominal position of the
+satellite to be commanded.  This command only affects pointing when
+the antenna is commanded with the "satellite" command.  See the
+"satellite" command for more details.
+
+The seconds parameter is only supported to 0.01 second
+resolution. However, to only about one second accuracy if the
+satellite mode is not "track".
+
+The cross parameter may not be supported.
+
+The hold option can be used to cause the antenna to stop at the
+commanded position in order to, for example, perform a drift scan.
+This is most useful if the satellite tracking mode for the satellite
+SNAP command is implemented in the antenna interface. For the radc
+tracking mode, it is unliklely that the hold option will do anything
+useful but depends on the local implementation.  In azel mode the
+parameter is meangingless since positioning is stationary by design.

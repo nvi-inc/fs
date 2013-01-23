@@ -323,17 +323,3 @@ C
       PARAMETER (MAX_OBS = 20000)
 
 
-C     The name of the control files. These files are
-C     read at run time. cctfil is the default control
-C     file that SKED reads each time it is run and should
-C     be in the users path. cownctl is a
-C     personal control file that should be in the 
-C     directory of the user when running SKED if it is
-C     to be used.
-C
-      character*128 cctfil,cownctl
-C this path is for Goddard's HPUX
-C      parameter(cctfil = '/usr/local/bin/skedf.ctl')
-C this path is for Linux FS
-      parameter(cctfil = '/usr2/control/skedf.ctl')
-      parameter(cownctl = 'skedf.ctl')

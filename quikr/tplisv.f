@@ -1,6 +1,6 @@
       subroutine tplisv(ip,itpis_vlba)
 C  parse tpi list c#870115:04:30# 
-C 
+C
 C 1.1.   TPLISV parses the list of possible TPI detectors for
 C        a VLBA rack.
 C 
@@ -20,6 +20,7 @@ C        IP(4) - who we are
 C 
 C     CALLED SUBROUTINES: FDFLD,JCHAR,DTNAM 
 C
+C
 C 2.2.   COMMON BLOCKS USED 
       include '../include/fscom.i'
 C 
@@ -37,7 +38,7 @@ C        ILEN   - length of IBUF, chars
 C               - registers from EXEC calls 
       character cjchar
 C
-      integer itpis_test(32)
+      integer itpis_test(MAX_DET)
 C 
       equivalence (reg,ireg(1))
 C 
@@ -88,13 +89,13 @@ C                   ODDL - odd-numbered BBCs LSB
 C                   IFn - IF a, b, c, or d 
 C                   nu or nl, n=1,...,14
 C 
-      do i=1,32 
+      do i=1,MAX_DET
         itpis_vlba(i) = 0
         itpis_test(i) = 0
       enddo
 C                   Turn off all of the TPIs to start 
       ich = 1+ieq 
-      do 290 i=1,32 
+      do 290 i=1,MAX_DET
         call fdfld(ibuf,ich,nchar,ic1,ic2)
         if(ic1.eq.0) go to 280
 c
@@ -139,12 +140,12 @@ c
         elseif(rack.eq.VLBA4) then
            call fc_mk4bbcd(itpis_test)
         endif
-        do j=0,3
-           do ii=1,14
-              if(itpis_test(ii).ne.0.or.itpis_test(ii+14).ne.0) then
+        do j=0,MAX_VLBA_IF-1
+           do ii=1,MAX_BBC
+            if(itpis_test(ii).ne.0.or.itpis_test(ii+MAX_BBC).ne.0) then
                  call fs_get_bbc_source(isrce,ii)
                  if(isrce.eq.j) then
-                    itpis_vlba(29+j)=1
+                    itpis_vlba(MAX_BBC*2+1+j)=1
                  endif
               endif
            enddo
@@ -153,62 +154,62 @@ c
 c
  210    continue
         if (ichcm_ch(iprm,1,'all').ne.0) goto 220
-        do ii=1,32
+        do ii=1,MAX_VLBA_BBC
            itpis_vlba(ii) = 1
+           itpis_vlba(ii+MAX_BBC) = 1
+        enddo
+        do ii=1,MAX_VLBA_IF
+           itpis_vlba(ii+2*MAX_BBC) = 1
         enddo
         goto 289
  
 220     if (ichcm_ch(iprm,1,'evenu').ne.0) goto 225
-        do ii=16,28,2
+        do ii=MAX_BBC+2,MAX_BBC+MAX_VLBA_BBC,2
           itpis_vlba(ii) = 1
         enddo
         goto 289
 C
 225     if (ichcm_ch(iprm,1,'evenl').ne.0) goto 230
-        do ii=2,14,2
+        do ii=2,MAX_VLBA_BBC,2
           itpis_vlba(ii) = 1
         enddo
         goto 289
 C 
 230     if (ichcm_ch(iprm,1,'oddu').ne.0) goto 235
-        do ii=15,27,2
+        do ii=MAX_BBC+1,MAX_BBC+MAX_VLBA_BBC,2
           itpis_vlba(ii) = 1
         enddo
         goto 289
 C
-235     if (ichcm_ch(iprm,1,'oddu').ne.0) goto 240
-        do ii=1,13,2
+235     if (ichcm_ch(iprm,1,'oddl').ne.0) goto 240
+        do ii=1,MAX_VLBA_BBC,2
           itpis_vlba(ii) = 1
         enddo
         goto 289
 C 
 240     continue 
         if (lprm.eq.0) goto 285
-        if (((cjchar(lprm,1).ge.'1').and.(cjchar(lprm,1).le.'9')).or.
-     .      ((cjchar(lprm,1).ge.'a').and.(cjchar(lprm,1).le.'e'))) then
-          ii=jchar(lprm,1) - 48  !! turns hollerith into integer
-          if (ii.gt.9) ii=ii-39  !! if a thru e subtract to get correct
-C                              !! integer
-          if (ii.lt.1 .or. ii.gt.14) goto 285
-          if (cjchar(lprm,2).eq.'u') then
-            itpis_vlba(14+ii) = 1
-          else if (cjchar(lprm,2).eq.'l') then
-            itpis_vlba(ii) = 1
-          else
-            goto 285
-          endif
-          goto 289
+        ii=index('123456789abcdefg',cjchar(lprm,1))
+        if(ii.ge.1.and.ii.le.MAX_VLBA_BBC) then
+           if (cjchar(lprm,2).eq.'u') then
+              itpis_vlba(MAX_BBC+ii) = 1
+           else if (cjchar(lprm,2).eq.'l') then
+              itpis_vlba(ii) = 1
+           else
+              goto 285
+           endif
+           goto 289
         endif
 C 
 250     if (ichcm_ch(lprm,1,'i').ne.0) goto 285
           if (ichcm_ch(lprm,2,'a').eq.0) then
-            itpis_vlba(29) = 1
+            itpis_vlba(MAX_BBC*2+1) = 1
           else if (ichcm_ch(lprm,2,'b').eq.0) then
-            itpis_vlba(30) = 1
+            itpis_vlba(MAX_BBC*2+2) = 1
           else if (ichcm_ch(lprm,2,'c').eq.0) then
-            itpis_vlba(31) = 1
+            itpis_vlba(MAX_BBC*2+3) = 1
           else if (ichcm_ch(lprm,2,'d').eq.0) then
-            itpis_vlba(32) = 1
+            itpis_vlba(MAX_BBC*2+4) = 1
           else
             goto 285
           endif
@@ -225,7 +226,7 @@ C
         if(ich.gt.nchar) go to 291
 290     continue
  291    continue
-        do i=1,32
+        do i=1,MAX_DET
            if(itpis_vlba(i).ne.0) goto 990
         enddo
 c

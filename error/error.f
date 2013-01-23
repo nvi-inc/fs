@@ -7,7 +7,7 @@ C
       logical kif,kgetm,kptri,kpant,kgant,kbit,kpcon,kfixed,kpdat2
 C
       double precision lonsum,lonrms,latsum,latrms,dirms
-      double precision wlnsum,wltsum,wdisum
+      double precision wlnsum,wltsum,wdisum,crssum,crsrms,wcrsum
 C
       logical kuse
 C
@@ -22,14 +22,16 @@ C
       integer MAX_ELEMENTS
       PARAMETER (MAX_ELEMENTS=(MAX_MODEL_PARAM*(MAX_MODEL_PARAM+1))/2)
       integer MAX_POINTS
-      PARAMETER (MAX_POINTS=1000)
+      PARAMETER (MAX_POINTS=4000)
+      integer MAX_LUSE
+      PARAMETER (MAX_LUSE=(MAX_POINTS/32)+1)
 c
       character*64 iibuf,iobuf,imbuf
       dimension ireg(2),ldum(3)
       integer*2 jbuf(60),lant(4),laxis(2)
       dimension lon(MAX_POINTS),lat(MAX_POINTS),wln(MAX_POINTS)
       dimension wlt(MAX_POINTS)
-      dimension lonoff(MAX_POINTS),latoff(MAX_POINTS),luse(32)
+      dimension lonoff(MAX_POINTS),latoff(MAX_POINTS),luse(MAX_LUSE)
       dimension latres(MAX_POINTS),lonres(MAX_POINTS)
       dimension idcbo(2),it(6),ipar(MAX_MODEL_PARAM),ito(6)
       dimension ispar(MAX_MODEL_PARAM)
@@ -84,7 +86,7 @@ C
       call fmpopen(idcbo,iibuf,ierr,'r+',idcbos)
       if (kopn(lu,ierr,iibuf,0)) goto 10010
 C
-      if (kgant(lu,idcbo,lant,laxis,iibuf,jbuf,il)) goto 10000
+      if (kgant(lu,idcbo,lant,laxis,iflags,iibuf,jbuf,il)) goto 10000
 C
       inp=0
 C
@@ -96,14 +98,22 @@ C
       inp=inp+1
 C
       if (inp.eq.1) then
-        emnln=wlnr
+         if(and(iflags,1).eq.1) then
+            emnln=wlnr*cos(latr)
+         else
+            emnln=wlnr
+         endif
         emnlt=wltr
       endif
 C
       call sbit(luse,inp,0)
       if (kuse) then
         call sbit(luse,inp,1)
-        emnln=min(emnln,wlnr)
+        if(and(iflags,1).eq.1) then
+           emnln=min(emnln,wlnr*cos(latr))
+        else
+           emnln=min(emnln,wlnr)
+        endif
         emnlt=min(emnlt,wltr)
       endif
       lon(inp)=lonr
@@ -120,17 +130,18 @@ C
       if (koutp(lu,idcbo,idcbos,iapp,iobuf)) goto 10000
 C
       if (kpout_ch(lu,idcbo,'$antenna',iobuf,lst)) goto 10000
-      if (kpant(lu,idcbo,lant,laxis,jbuf,il,lst,iobuf)) goto 10000
+      if (kpant(lu,idcbo,lant,laxis,iflags,jbuf,il,lst,iobuf))
+     &     goto 10000
 C
       if (kpout_ch(lu,idcbo,'$observed ',iobuf,lst)) goto 10000
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
-     &           wdisum,igp)
+     &           wdisum,crssum,crsrms,wcrsum,igp)
       do i=1,inp
         coslt=cos(lat(i))
         distr=sqrt(lonoff(i)*lonoff(i)*coslt*coslt+latoff(i)*latoff(i))
         call incsm(luse,lonsum,lonrms,wlnsum,lonoff(i),wln(i),latsum,
-     +             latrms,wltsum,latoff(i),wlt(i),dirms,wdisum,distr,
-     +             i,igp,feclon,feclat,coslt)
+     +            latrms,wltsum,latoff(i),wlt(i),dirms,wdisum,distr,
+     +            crssum,crsrms,wcrsum,i,igp,feclon,feclat,coslt,iflags)
         kuse=kbit(luse,i)
         if (kpdat(lu,idcbo,kuse,lon(i),lat(i),lonoff(i),latoff(i),distr,
      +           mc,iobuf,lst,jbuf,il)) goto 10000
@@ -139,13 +150,13 @@ C
       if (kpout_ch(lu,idcbo,'$observed_stats ',iobuf,lst)) goto 10000
 C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
-     &           igp,lu)
+     &           crssum,crsrms,wcrsum,igp,lu)
 C
-      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,igp,inp,
-     +        iobuf,lst,jbuf,il)) goto 10000
+      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,crssum,crsrms,
+     +        igp,inp,iobuf,lst,jbuf,il)) goto 10000
 C
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
-     &           wdisum,igp)
+     &           wdisum,crssum,crsrms,wcrsum,igp)
 C
       if (kpout_ch(lu,idcbo,'$old_model',iobuf,lst)) goto 10000
       if (kplin(lu,idcbo,pcof,mpar,ddum,0,imdl,ito,ipar,phi,iobuf,lst,
@@ -184,8 +195,8 @@ C
         distr=sqrt(lonoff(i)*lonoff(i)*coslt*coslt+latoff(i)*latoff(i))
 C
         call incsm(luse,lonsum,lonrms,wlnsum,lonoff(i),wln(i),latsum,
-     +             latrms,wltsum,latoff(i),wlt(i),dirms,wdisum,distr,
-     +             i,igp,feclon,feclat,coslt)
+     +            latrms,wltsum,latoff(i),wlt(i),dirms,wdisum,distr,
+     +            crssum,crsrms,wcrsum,i,igp,feclon,feclat,coslt,iflags)
         kuse=kbit(luse,i)
         if (kpdat(lu,idcbo,kuse,lon(i),lat(i),lonoff(i),latoff(i),distr,
      +     mc,iobuf,lst,jbuf,il)) goto 10000
@@ -193,13 +204,13 @@ C
       enddo
 C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
-     &           igp,lu)
+     &           crssum,crsrms,wcrsum,igp,lu)
 C
       if (kpout_ch(lu,idcbo,'$uncorrected_stats',iobuf,lst))
      +  goto 10000
 C
-      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,igp,inp,
-     +        iobuf,lst,jbuf,il)) goto 10000
+      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,crssum,crsrms,
+     +        igp,inp,iobuf,lst,jbuf,il)) goto 10000
 C
 C  FIX IPAR
 C
@@ -220,7 +231,7 @@ C
         iftry=itryfe
 C
         call fecon(feclnn,fecltn,lonres,wln,latres,wlt,inp,luse,
-     &           emnln,emnlt)
+     &           emnln,emnlt,lat,iflags)
 C
         if (abs(feclnn-feclon).le.0.01*abs(feclnn).and.
      +     abs(fecltn-feclat).le.0.01*abs(fecltn)) goto 211
@@ -234,7 +245,7 @@ C
 9905    format(' iteration ',i3,'       fec:',2(1x,f10.5))
         call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
      +   phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
-     +   nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
+     +   nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond,iflags)
         if (kif(lsing(2),lsing(1),ldum,0,0,ierr.lt.0,lu)) continue
       enddo
       iftry=0
@@ -243,7 +254,7 @@ C
       feclat=0.0
       call fit2(lon,lat,lonoff,latoff,wln,wlt,inp,pcof,pcofer,ipar,
      + phi,aux,scale,a,b,npar,tol,itry,fln1,flt1,rchi,rlnnr,rltnr,
-     + nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond)
+     + nfree,ierr,luse,igp,feclon,feclat,lonres,latres,rcond,iflags)
       if (kif(lsing(2),lsing(1),ldum,0,0,ierr.lt.0,lu)) continue
 211   continue
 C
@@ -256,7 +267,7 @@ C
 C
       if (kpout_ch(lu,idcbo,'$fit_stats',iobuf,lst)) goto 10000
       if (kpfit(lu,idcbo,ierr,rchi,rlnnr,rltnr,nfree,feclon,feclat,
-     +         iftry,iobuf,lst,jbuf,il)) goto 10000
+     +         iftry,iflags,iobuf,lst,jbuf,il)) goto 10000
 C
       if (rcond.ne.0) then
         cond=1.0/rcond
@@ -287,7 +298,7 @@ C
       if (kptri(lu,idcbo,c,npar,iobuf,lst,jbuf,il)) goto 10000
 C
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
-     &           wdisum,igp)
+     &           wdisum,crssum,crsrms,wcrsum,igp)
 C
       if (kpout_ch(lu,idcbo,'$corrected',iobuf,lst)) goto 10000
 C
@@ -296,25 +307,30 @@ C
         distr=sqrt(lonres(i)*lonres(i)*coslt*coslt+latres(i)*latres(i))
 C
         call incsm(luse,lonsum,lonrms,wlnsum,lonres(i),wln(i),latsum,
-     +           latrms,wltsum,latres(i),wlt(i),dirms,wdisum,distr,
-     +           i,igp,feclon,feclat,coslt)
+     +            latrms,wltsum,latres(i),wlt(i),dirms,wdisum,distr,
+     +            crssum,crsrms,wcrsum,i,igp,feclon,feclat,coslt,iflags)
 C
         kuse=kbit(luse,i)
-        wln1=rchi*sqrt(wln(i)*wln(i)+sign(feclon*feclon,feclon))
+        if(and(iflags,1).eq.1) then
+           wln1=rchi*sqrt(wln(i)*wln(i)
+     +          +sign(feclon*feclon/(coslt*coslt),feclon))
+        else
+           wln1=rchi*sqrt(wln(i)*wln(i)+sign(feclon*feclon,feclon))
+        endif
         wlt1=rchi*sqrt(wlt(i)*wlt(i)+sign(feclat*feclat,feclat))
         call apost(lon(i),lat(i),aux,wln(i),wlt(i),par,ipar,phi,a,npar,
-     +       fln1,flt1,feclon,feclat,rchi,apos1,apos2)
+     +       fln1,flt1,feclon,feclat,rchi,apos1,apos2,coslt,iflags)
         if (kpdat2(lu,idcbo,kuse,lon(i),lat(i),lonres(i),latres(i),
      +     distr,wln1,wlt1,apos1,apos2,mc,iobuf,lst,jbuf,il)) goto 10000
       enddo
 C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
-     &           igp,lu)
+     &           crssum,crsrms,wcrsum,igp,lu)
 C
       if (kpout_ch(lu,idcbo,'$corrected_stats',iobuf,lst)) goto 10000
 C
-      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,igp,inp,
-     +        iobuf,lst,jbuf,il)) goto 10000
+      if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,crssum,crsrms,
+     +        igp,inp,iobuf,lst,jbuf,il)) goto 10000
 C
       do i=1,mpar
         if ((ispar(i).lt.3.and.kfixed).or.(ispar(i).eq.2)) then

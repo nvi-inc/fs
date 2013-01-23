@@ -24,7 +24,7 @@ main()
 {
     int i;
     int cls_rcv();
-    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE;
+    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE, knd=FALSE;
     int iwl, iw1, iwm;
     char *llogndx;
     int irga;
@@ -39,7 +39,7 @@ main()
     char sllog[9], sllog0[9];
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
     int irgb, iburl;
-    char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs;
+    char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
     long class;
     long offset;
     long lseek();
@@ -74,6 +74,7 @@ main()
 /* SECTION 2 */
 
     llog0[0]=0;
+    rte_sleep(100); /* let boss print its messages first */
 
 Messenger:
     /* get next message */
@@ -85,6 +86,7 @@ Messenger:
     strcpy(bul,buf);
     bull=bufl;
     cp2 = (char *) &rtn2;
+    prtn1 = (char *) &rtn1;
     if (memcmp(cp2,"dn",2)==0){
       kxd = TRUE;
       goto Messenger;
@@ -252,6 +254,7 @@ Messenger:
 	fprintf(stderr,
 		"\007!! help! ** error opening/creating log file %.8s\n",
 		sllog);
+	play_wav(1);
 	perror("!! help! ** ddout");
 	  
 	/* try previous log file now */
@@ -271,15 +274,18 @@ Messenger:
 	  fprintf(stderr,
 		  "\007!! help! ** now trying to re-open log file %.8s\n",
 		  sllog);
+	  play_wav(1);
 	  fd = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS);
 	  if(fd >=0) {
 	    memcpy(shm_addr->LLOG,llog0,8);
 	    fprintf(stderr,
 		    "\007!! help! ** succesfully re-opened log file %.8s\n",
 		    sllog);
+	    play_wav(1);
 	  } else {
 	    fprintf(stderr,
 		    "\007!! help! ** error re-opening log file %.8s\n",sllog);
+	    play_wav(1);
 	    perror("!! help! ** ddout");
 	  }
 	}
@@ -302,9 +308,10 @@ Messenger:
 	  shm_addr->abend.other_error=1;
 	  perror("finding end of log file, ddout");
 	}
-      } else
+      } else {
 	fprintf(stderr,"\007!! help! ** no file is now open\n");
-      
+      	play_wav(1);
+      }
       goto Append;  /* always write first message */
     }
 /* SECTION 4 */
@@ -338,8 +345,9 @@ Ack:    ich = strtok(NULL, ",");
     kp = (buf[FIRST_CHAR-1] == '$');
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
       strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0;
-    if(((!kpcald) && (kxd || (rtn2 == -1) || (!kp && !kack &&!kdebug))) ||
-       (kpcald && kpd)){
+    knd= memcmp("nd",prtn1,2)==0;
+    if( !kpcald && (kxd || (rtn2 == -1) || !kp && !kack && !kdebug && !knd )
+	|| kpcald && kpd){
       ierrnum=0;
       if (*cp2 != 'b') goto Append;
       iwhe = NULL;
@@ -465,8 +473,10 @@ Append:           /* send message to station error program */
 	printf("%.8s",buf+9);
 /* not Y10K compliant */
 	printf("%s",buf+20);
-	if (*cp2 == 'b')
+	if (*cp2 == 'b') {
 	  printf("\007");
+	  play_wav(1);
+	}
 	printf("\n");
       }
     }
@@ -501,6 +511,7 @@ Trouble:
       fprintf(stderr,
 	      "\007!! help! ** log file '%.8s' not open, can't write to disk\n",
 	     sllog);
+      play_wav(1);
     }
     if (rtn2 != -1)
       goto Messenger;

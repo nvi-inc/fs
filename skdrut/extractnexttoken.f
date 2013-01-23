@@ -2,7 +2,12 @@
      >  knospace, keol)
       implicit none
 ! written
-!     character*80 ltag/"ExtractNextToken  JMGipson 2003Mar04"/
+
+! History
+!  2003Mar04    JMGipson First Version
+!  2009Sep03    JMG. Modified to return as much of a token as possible. 
+!               Previously, exited with error, but did not return token
+     
 
 ! Given string specified by lstring, and starting point istart
 ! return token and next starting point.
@@ -18,7 +23,7 @@
       CHARACTER*(*) ltoken
       logical ktoken            !returned token?
       logical knospace          !no space left.
-      logical keol               !end of line
+      logical keol              !end of line
 
 ! local
       INTEGER ilen,itoken_len
@@ -48,9 +53,12 @@
 
 200   continue
       kNoSpace=itoken_len .lt. inext-ibeg
-      if(kNoSpace) return
-
-      ltoken=lstring(ibeg:inext-1)
+!      if(kNoSpace) return
+      if(kNoSpace) then
+          ltoken=lstring(ibeg:ibeg+itoken_len-1)
+      else
+        ltoken=lstring(ibeg:inext-1)
+      endif
       ktoken=.true.
       return
 

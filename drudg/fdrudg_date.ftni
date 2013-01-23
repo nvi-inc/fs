@@ -1,3 +1,5 @@
 !Include file to set the version. Just change this and leave fdrudg.f alone
 ! below is set at compiletime
-      cversion = '2008Oct20'
+      cversion = '2013Jan23'
+! This version is 9.11.0
+!

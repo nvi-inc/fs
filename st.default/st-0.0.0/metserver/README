@@ -7,7 +7,7 @@ Field System Homepage:  http://lupus.gsfc.nasa.gov/fs
 
 The metserver gets Paroscientific, Inc. MET3 (Meteorological 
 Measurement System) and Handar TSI Company (Ultrasonic Wind Sensors) 
-information and stores it in its own buffers.
+information on rquest from client.
 
 Read the INSTALL for installation instructions.
 
@@ -18,9 +18,8 @@ metserver will call on metget to retrive information from MET3 and Wind
 Sensor by using the ports that you have designated. 
 example: /dev/ttySx /dev/ttySx
 
-Information will be read continuously from the named /dev/ports and placed 
-on the servers buffer. The server will listen for requests from client(s) on 
-socket 30384, and send the information.
+Information will be read from named /dev/ports on request for the
+client returned to the client.
 
 ERRORS:
 -------
@@ -53,4 +52,4 @@ example:
    prompt> kill 13526 13630
 
 
-If you have any problems, you can contact rgonzale@gemini.gsfc.nasa.gov.
+If you have any problems, you can contact Ed.Himwich@nasa.gov.

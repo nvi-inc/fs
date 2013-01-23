@@ -109,47 +109,164 @@ void ifadjust(command,itask,ip)
   }
 
   if(shm_addr->equip.rack == MK4) {
-    /* Get trackform information. vcnum=vc#, sb_ul=sideband */
-    for(i=0,j=0,k=0;i<64;i++) {
-      if(shm_addr->form4.codes[i]!=-1) {
-        if(((1<<4)&shm_addr->form4.codes[i]) && 
-           !(shm_addr->form4.codes[i]>>6 & 0x3)) {
-	  int ivc,m;
-	  ivc=shm_addr->form4.codes[i]&0xF;
-	  for (m=0;m<j;m++)
-	    if(vcnum_l[m]==ivc)    goto endl;
-          vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
-          /* Look for the patch */
-          if(!iuse[vcnum_l[j]]) {
-            ierr=-511;
-            goto error;
-          }
-          l=patch_id[vcnum_l[j]];
-          lp[l-1]=l;
-          /* */
-          lu[0]=1;
-          j++;
-	endl: ;
-	} else if(!((1<<4)&shm_addr->form4.codes[i]) && 
-                  !(shm_addr->form4.codes[i]>>6 & 0x3)) {
-	  int ivc,m;
-	  ivc=shm_addr->form4.codes[i]&0xF;
-	  for (m=0;m<k;m++)
-	    if(vcnum_u[m]==ivc)
-	      goto endu;
-          vcnum_u[k]=shm_addr->form4.codes[i]&0xF;
-          /* Look for the patch */
-          if(!iuse[vcnum_u[k]]) {
-            ierr=-511;
-            goto error;
-          }
-          l=patch_id[vcnum_u[k]];
-          up[l-1]=l;
-          /* */
-          lu[1]=1;
-          k++;
-	endu: ;
-        }
+    if(shm_addr->equip.rack_type == MK45) { /* VSI4 */
+      int vc;
+      if(shm_addr->mk5b_mode.mask.state.known == 0) {
+	ierr=-512;
+	goto error;
+      }
+      if(shm_addr->vsi4.config.set == 0 ) {
+	ierr=-513;
+	goto error;
+      }
+      j=k=0;
+      if(shm_addr->vsi4.config.value == 0 ) { /*vlba */
+	for (i=0;i<16;i+=2) {
+	  vc=i/2;
+	  if((shm_addr->mk5b_mode.mask.mask & (1<<i)) ||
+	     (shm_addr->mk5b_mode.mask.mask & (1<<(i+1)))) {
+	    vcnum_u[k]=vc;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_u[k]]) {
+	      ierr=-514;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_u[k]];
+	    up[l-1]=l;
+	    /* */
+	    lu[1]=1;
+	    k++;
+	  }
+	  if((shm_addr->mk5b_mode.mask.mask & (1<<(i+16))) ||
+	     (shm_addr->mk5b_mode.mask.mask & (1<<(i+17)))) {
+	    vcnum_l[j]=vc;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_l[j]]) {
+	      ierr=-514;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_l[j]];
+	    lp[l-1]=l;
+	    /* */
+	    lu[0]=1;
+	    j++;
+	  }
+	}
+      } else if(shm_addr->vsi4.config.value == 1 ) { /*geo */
+	for (i=0;i<16;i+=2) {
+	  if((shm_addr->mk5b_mode.mask.mask & (1<<i)) ||
+	     (shm_addr->mk5b_mode.mask.mask & (1<<(i+1)))) {
+	    vc=i/2;
+	    vcnum_u[k]=vc;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_u[k]]) {
+	      ierr=-514;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_u[k]];
+	    up[l-1]=l;
+	    /* */
+	    lu[1]=1;
+	    k++;
+	  }
+	}
+	if((shm_addr->mk5b_mode.mask.mask & (1<<16)) ||
+	   (shm_addr->mk5b_mode.mask.mask & (1<<17))) {
+	  vc=0;
+	  vcnum_l[j]=vc;
+	  /* Look for the patch */
+	  if(!iuse[vcnum_l[j]]) {
+	    ierr=-514;
+	    goto error;
+	  }
+	  l=patch_id[vcnum_l[j]];
+	  lp[l-1]=l;
+	  /* */
+	  lu[0]=1;
+	  j++;
+	}
+	if((shm_addr->mk5b_mode.mask.mask & (1<<18)) ||
+	   (shm_addr->mk5b_mode.mask.mask & (1<<19))) {
+	  vc=7;
+	  vcnum_l[j]=vc;
+	  /* Look for the patch */
+	  if(!iuse[vcnum_l[j]]) {
+	    ierr=-514;
+	    goto error;
+	  }
+	  l=patch_id[vcnum_l[j]];
+	  lp[l-1]=l;
+	  /* */
+	  lu[0]=1;
+	  j++;
+	}
+	for (i=20;i<31;i+=2) {
+	  if((shm_addr->mk5b_mode.mask.mask & (1<<i)) ||
+	     (shm_addr->mk5b_mode.mask.mask & (1<<(i+1)))) {
+	    vc=(i-20)/2+8;
+	    vcnum_u[k]=vc;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_u[k]]) {
+	      ierr=-514;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_u[k]];
+	    up[l-1]=l;
+	    /* */
+	    lu[1]=1;
+	    k++;
+	  }
+	}
+      } else if(shm_addr->vsi4.config.value == 2 ) { /*geo */
+	ierr=-515;
+	goto error;
+      } else {
+	ierr=-516;
+	goto error;
+      }
+    } else { /* Mark IV */
+      /* Get trackform information. vcnum=vc#, sb_ul=sideband */
+      for(i=0,j=0,k=0;i<64;i++) {
+	if(shm_addr->form4.codes[i]!=-1) {
+	  if(((1<<4)&shm_addr->form4.codes[i]) && 
+	     !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+	    int ivc,m;
+	    ivc=shm_addr->form4.codes[i]&0xF;
+	    for (m=0;m<j;m++)
+	      if(vcnum_l[m]==ivc)    goto endl;
+	    vcnum_l[j]=shm_addr->form4.codes[i]&0xF;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_l[j]]) {
+	      ierr=-511;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_l[j]];
+	    lp[l-1]=l;
+	    /* */
+	    lu[0]=1;
+	    j++;
+	  endl: ;
+	  } else if(!((1<<4)&shm_addr->form4.codes[i]) && 
+		    !(shm_addr->form4.codes[i]>>6 & 0x3)) {
+	    int ivc,m;
+	    ivc=shm_addr->form4.codes[i]&0xF;
+	    for (m=0;m<k;m++)
+	      if(vcnum_u[m]==ivc)
+		goto endu;
+	    vcnum_u[k]=shm_addr->form4.codes[i]&0xF;
+	    /* Look for the patch */
+	    if(!iuse[vcnum_u[k]]) {
+	      ierr=-511;
+	      goto error;
+	    }
+	    l=patch_id[vcnum_u[k]];
+	    up[l-1]=l;
+	    /* */
+	    lu[1]=1;
+	    k++;
+	  endu: ;
+	  }
+	}
       }
     }
   } else /* Mark III */ {
@@ -537,11 +654,22 @@ sample2:
     } else {
       strcpy(output,command->name);
       strcat(output,"/");
-      
-      sprintf(output+strlen(output),
-	      "%d,00,00,00,trackform NOT setup",
-	      itp_ref);
-      
+
+      if(shm_addr->equip.rack == MK4) {
+	if(shm_addr->equip.rack_type == MK45) { /* VSI4 */
+	  sprintf(output+strlen(output),
+		  "%d,00,00,00,vsi4 NOT setup",
+		  itp_ref);
+	} else {
+	  sprintf(output+strlen(output),
+		  "%d,00,00,00,trackform NOT setup",
+		  itp_ref);
+	}
+      } else {
+	  sprintf(output+strlen(output),
+		  "%d,00,00,00,formatter NOT setup",
+		  itp_ref);
+      }
       for (i=0;i<5;i++) ip[i]=0;
       cls_snd(&ip[0],output,strlen(output),0,0);
       ip[1]=1;

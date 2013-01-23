@@ -1,8 +1,8 @@
       subroutine rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,
-     +                 dirms,wdisum,igp,lu)
+     +                 dirms,wdisum,crssum,crsrms,wcrsum,igp,lu)
 C
       double precision lonsum,lonrms,latsum,latrms,dirms,wlnsum,wltsum
-      double precision wdisum
+      double precision wdisum,crssum,crsrms,wcrsum
       logical kif
 C
       integer*2 lfat(13)
@@ -17,14 +17,17 @@ C
 C
       lonsum=lonsum/wlnsum
       latsum=latsum/wltsum
+      crssum=crssum/wcrsum
 C
       lonrms=lonrms/wlnsum
       latrms=latrms/wltsum
       dirms= dirms/wdisum
+      crsrms=crsrms/wcrsum
 C
       lonrms=dsqrt(dabs(lonrms-lonsum*lonsum)*didim1)
       latrms=dsqrt(dabs(latrms-latsum*latsum)*didim1)
       dirms =dsqrt(dirms*didim1)
+      crsrms=dsqrt(dabs(crsrms-crssum*crssum)*didim1)
 C
       return
       end

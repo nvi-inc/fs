@@ -43,7 +43,7 @@
 
 /* Defined variables */
 #define MINMODE 0  /* min,max modes for our operation */
-#define MAXMODE 7
+#define MAXMODE 9
 
 /* Include files */
 
@@ -160,6 +160,8 @@ Continue:
 
     case 6:            /* reserved */
       ierr = -1;
+      strcpy(buf,"TBD focus control");
+      logit(buf,0,NULL);
       goto End;
       break;
 
@@ -168,7 +170,25 @@ Continue:
       strcpy(buf,"Checking onsource status, log tracking data");
       logit(buf,0,NULL);
       fs->ionsor = 1;
+      break;
 
+  case 8:
+      ierr = 0;
+      strcpy(buf,"Station dependent detectors access");
+      logit(buf,0,NULL);
+      break;
+
+  case 9:
+      ierr = 0;
+      strcpy(buf,"Satellite tracking mode");
+      logit(buf,0,NULL);
+      break;
+
+  default:
+      ierr = -1;
+      strcpy(buf,"Impossible to reach");
+      logit(buf,0,NULL);
+      break;
   }  /* end of switch */
 
 End:

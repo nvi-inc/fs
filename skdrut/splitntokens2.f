@@ -7,8 +7,6 @@
       character*(*) ltokens(MaxToken)
       integer istart_vec(*)
 ! function
-      integer ifirst_non_blank
-
       logical ktoken     !got token
       logical knospace   !no more space
       logical keol       !eol.

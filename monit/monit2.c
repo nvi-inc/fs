@@ -17,7 +17,7 @@
 
 extern struct fscom *shm_addr;
 int kMrack, kMdrive[2], kS2drive[2],kVrack,kVdrive[2],kM3rack,kM4rack,kV4rack,
-  kLrack,kK4drive[2],kK41drive_type[2],kK42drive_type[2], selectm;
+  kLrack,kK4drive[2],kK41drive_type[2],kK42drive_type[2], kDrack, selectm;
 
 main()
 {
@@ -45,6 +45,7 @@ main()
   kVrack=rack==VLBA;
   kV4rack=rack==VLBA4;
   kLrack=rack==LBA || rack==LBA4;
+  kDrack=rack==DBBC;
 
   for (i=0;i<2;i++) {
     drive=shm_addr->equip.drive[i];

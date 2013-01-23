@@ -83,7 +83,7 @@ int rlen;
 	                  LBA4  == *rack)) ||
 	  (ch1 == 'e' && (MK3   == *rack || MK4   == *rack ||
 			  VLBA  == *rack || VLBA4 == *rack ||
-	                  LBA4  == *rack )) ||
+	                  LBA4  == *rack || DBBC  == *rack)) ||
 	  (ch1 == 'f' && (MK3   == *rack || MK4   == *rack ||
 			  K4K3  == *rack || K4MK4 == *rack ||
 			  K4    == *rack || LBA4  == *rack)) ||
@@ -101,6 +101,7 @@ int rlen;
 	  (ch1 == 'k' && (K4K3  == *rack || K4MK4 == *rack ||
 			  K4    == *rack)) ||
 	  (ch1 == 'l' && (LBA   == *rack || LBA4 == *rack)) ||
+	  (ch1 == 'd' &&  DBBC  == *rack) ||
 	  (ch1 == 'a' &&  0     != *rack)) &&
 	 (ch2 == '_' || ch2 == '+' ||
 	  (ch2 == 'k' &&  K4    == *drive1) ||

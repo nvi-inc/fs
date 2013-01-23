@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>   /* data type definition header file */
 
+#include "../include/params.h"
 #include "../rclco/rcl/rcl_def.h"
 #include "../include/fs_types.h"
 

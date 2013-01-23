@@ -28,7 +28,6 @@ C HISTORY:
 !     local
       logical kprint
       character*1024 ldum
-      integer ilen
       integer ifirst_non_white
       integer nbeg,nend
 

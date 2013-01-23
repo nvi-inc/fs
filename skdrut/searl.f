@@ -28,6 +28,7 @@ C MODIFICATIONS:
 C 970314 NRV New. Copied from SELEV.
 C 970317 nrv Early must be > CAL.
 C 970321 nrv Add warning that this works only for non-Mk3 correlators.
+! 2010Mar20 JMG. Removed obsolete warning message. 
 C
 
 C     1. Check for some input.  If none, write out current.
@@ -102,9 +103,7 @@ C            write(luscn,9904) lkeywd(1)
 C9904        format('SEARL03 - Early start must be > CAL for ',a2)
           else ! valid
             ITEARL(ISTN) = ival
-            write(luscn,'(a)')  "SEARL05 Warning - Early start "//
-     >       "by station is not supported at Mark III correlators."
-C           get next station name
+C            get next station name
           endif ! invalid/valid time
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
         endif ! invalid/valid station name

@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fstime.txt  Version: 0.4  Date: 080522
+File: /usr2/fs/misc/fstime.txt  Version: 0.5  Date: 120223
 
 		  Operational use of time in the FS
 
@@ -369,7 +369,10 @@ described below:
   command is used to reset the time model after the formatter time has
   been changed.  Note that if model is "computer" in "time.ctl", no
   offset will be determined since the FS time is always the computer
-  time in this case.
+  time in this case.  Please also note that the last determined offset
+  survives restarts of the FS.  This allows a long span to be
+  developed for determining therate even if the FS needs to stopped
+  and rstarted.
 
   "rate" - This option causes the rate model parameter to be adjusted
   if the time span since the last "offset" operation is greater than
@@ -419,10 +422,14 @@ described below:
   change the model back to rate, so that, e.g., a "setcl" with an
   "adapt" argument in "midob" will continue to be useful for time
   monitoring even when the operator has forced the model to
-  "computer".
+  "computer".  Please note that the "computer" model survives restarts
+  of the FS.  You must explicitly tell "setcl" to change the model
+  back.
 
   "fs" - This option can be used to re-establish use of the FS time
-  model if it has been disabled by the "computer" option.
+  model if it has been disabled by the "computer" option. If an offset
+  was determined before communication with the formatter was lost, the
+  value is preserved.
 
   "a positive or negative integer or zero" - This option is used to
   inform "setcl" of a formatter clock jump, in centiseconds (in
@@ -497,11 +504,11 @@ formatter time may appear to be up to around 0.1 seconds off,
 typically late, compared to the hardware clock because of processing
 delays in the FS computer.
 
-For the Mark IV formatters, the "fmset" program also includes an
-option to send a command to the formatter to cause it to synchronize
-itself to the 1 PPS input signal.  This should not be necessary except
-when the formatter needs to have its time set.  It is however, a
-recommended first step as part of changing the time.
+For the Mark IV formatters, and Mark 5B/5B+ recorders, the "fmset"
+program also includes an option to send a command to the formatter to
+cause it to synchronize itself to the 1 PPS input signal.  This should
+not be necessary except when the formatter (or Mark 5B/B+) needs to be 
+re-synched.
 
 The "fmset" program will automatically run the "setcl" program in the
 "offset" mode if either the time is changed or the Mark IV formatter

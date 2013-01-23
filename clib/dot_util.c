@@ -1,5 +1,6 @@
 /* mk5b_mode commmand buffer parsing utilities */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>

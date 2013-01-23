@@ -7,7 +7,6 @@ C  correspond to any of the standard Mark3 modes.
       include '../skdrincl/freqs.ftni'
 
 ! function
-      integer itras_size
       integer itras
 
 C INPUT

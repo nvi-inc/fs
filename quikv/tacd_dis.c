@@ -5,9 +5,9 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/shm_addr.h"      /* shared memory pointer */
-#include "../include/params.h"
 #include "../include/fscom.h"
 #include "../include/pmodel.h"
 

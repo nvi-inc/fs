@@ -32,7 +32,7 @@ control the parsing of the response by placing the uncommented
 line below in your stcmd.ctl file:
 
 *command     seg sbpa bo eq
-cablelong    qkr 76xx 01 FFFFFF
+cablelong    qkr 76xx 01 FFFFFFFFF
 
 where xx is the number of the character position to begin
 decoding at. The first character position is counted as

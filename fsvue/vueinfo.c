@@ -14,9 +14,9 @@
 #include "../rclco/rcl/rcl_def.h"
 #include "../rclco/rcl/rcl_cmd.h"
 
+#include "../include/params.h"        /* general fs parameter header */
 #include "../include/fs_types.h"      /* general header file for all fs data
                                        * structure definations */
-#include "../include/params.h"        /* general fs parameter header */
 #include "../include/fscom.h"         /* shared memory (fscom C data 
                                        * structure) layout */
 #include "../include/shm_addr.h"      /* declaration of pointer to fscom */

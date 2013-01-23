@@ -59,8 +59,8 @@ c
           call ma(ip,itask)
         else if (itask.eq.2) then
           call ib(ip)
-        else if (itask.eq.4) then
-          call wx(ip)
+        else if (itask.eq.4.or.itask.eq.9) then
+          call wx(ip,itask)
         else if (itask.eq.5) then
           call wakop(ip)
         else if (itask.eq.6) then

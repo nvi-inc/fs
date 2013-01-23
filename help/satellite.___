@@ -1,0 +1,66 @@
+                satellite - satellite tracking
+
+            Syntax:     satellite=name,file,mode,wrap
+
+            Response:   satellite/name,file,mode,wrap
+                        satellite/tle0,name
+                        satellite/tle1,tle_1
+                        satellite/tle2,tle_2
+
+Settable parameters:
+        name    Satellite name or catalog number, up to 24 characters.
+                All non-trailing blanks are significant. Default is the
+                name defined by the TLE command if file is also null.
+        file    File in /usr2/tle_files containing the TLE (Two Line
+                Elements) for the satellite. Default is to use
+                data defined by TLE commands.
+        mode    tracking mode: track, radc, azel. Default: track.
+        wrap    neutral, ccw (counter-clockwise), cw (clockwise), or
+                null to indicate which wrap (or no specific one) the
+                antenna should be on for this source. The local
+                antenna may or may not respect this parameter.
+
+Monitor-only parameters:
+        tle_1  TLE line 1, maximum 69 characters
+        tle_2  TLE line 2, maximum 69 characters
+
+
+Comments:
+If both the satellite name and file name are both null, the most
+recently input TLEs from the TLE SNAP command are used. Both satellite
+name and file must be null or both must have non-null values.
+
+The antenna will begin moving to the new satellite position according to
+the mode:
+
+  radc:  satellite position converted radc and command as normal source
+  azel:  satellite position commanded as fixed Az/El pointing
+  track: track satellite position
+
+The only mode guaranteed to work at all antennas is "radc". However,
+in that mode unless the satellite appears to be stationary on the
+celestial sphere, the antenna will drift off the satellite. For
+antennas that implement fixed "azel" pointing (source name "azel"),
+the "azel" mode should be useful for geostationary satellites and
+other slow moving satellites. For stations that implement satellite
+tracking in the their antenna interface ("antcn", mode 9), the "track"
+mode can be used to follow an arbitrary track, if the antenna can keep
+up.
+
+This command generates 24 hours of ephemeris looking forward from the
+current FS time.  The ephemeris is generated using a modified version
+of the "predict" program, which is installed with the FS.
+
+The wrap parameter is only relevent for Az/El antennas and may or may
+not be implemented for any given antenna.
+
+The commanded position reflects the effect of the most recent "satoff"
+command, but only the first parameter of that command, seconds, is
+guaranteed to work for "radc" and "azel" modes and only to about one
+second accuracy.  What works in tracking mode depends on the local
+implementation.  See the "satoff" command for additional information.
+
+On command, the three(!) lines of the TLEs are logged for information
+once the ephemeris is successfully generated. The monitor include the
+TLEs as well.
+    

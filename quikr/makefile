@@ -22,7 +22,7 @@ tp.o tpdis.o tpform.o tpi.o tplis.o tplisv.o tppos.o\
 tpput.o track.o tsys.o\
 vc.o vcdis.o vlt_read.o wakop.o wohd.o\
 worm.o wx.o xyoff.o gtradd.o rec.o recds.o\
-tplisn.o get_att.o get_at3.o tplisl.o
+tplisn.o get_att.o get_at3.o tplisl.o tplisd.o
 #
 ../bin/quikr: $(OBJECTS)
 	$(FC) -o ../bin/quikr $(OBJECTS) $(LIBES)

@@ -36,7 +36,7 @@ Field System software.
      |-- README      - Information.
      |-- metserver.sh - bootup script.
      |-- metserver   - executable.
-     |-- lib         - Source directory for opening and closing selected ports.
+     |-- port        - Source directory for opening and closing selected ports.
      |   |-- Makefile - The make file for making port.a library archive.
      |   |-- port.a
      |   |-- portbaud.c
@@ -75,18 +75,22 @@ STARTING MET SERVER:
 
 IMPORTANT NOTE: The first parameter should be the MET3 Sensor.
                 The second parameter should be the WIND Sensor.
-                (if you don't have the wind sensor simply use '/dev/null' 
-                 or leave blank.)
+                  (if you don't have the wind sensor simply use '/dev/null' 
+                   or leave blank.)
+                The third parameter is the network port that is served, if
+                  you are not using the default, you must specify
+                  it after the first two parameters, 50001 is the default
 
     prompt> log in as root
-    prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 &
+    prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 50001 &
                                          (metsensor) (windsensor)
 
 2.) If you would like metserver to startup at boot time.
     Special NOTICE: Please edit the script to use your port locations,
                     before you proceed.
 
-    Modify MET= and WIND= with your own port numbers in the metserver.sh file.
+    Modify MET= and WIND= with your own port numbers and PORT= with your
+    own network port number (if not default) in the metserver.sh file.
 
     prompt> log in as root
     prompt> cd /etc/init.d

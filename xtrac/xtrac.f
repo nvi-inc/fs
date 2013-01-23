@@ -67,7 +67,7 @@ C
       if (kinit(lu,iibuf,iobuf,iapp,ipbuf,lst)) goto 10020
 C
       if (kgetp(lu,idcb,idcbz,ipbuf,jbuf,il,iedit,widmin,widmax,pkrlim,
-     + lpaxis,lant)) goto 10020
+     + lpaxis,lant,iflags)) goto 10020
 C
       call fmpopen(idcb,iibuf,ierr,'r',id)
       if (kopn(lu,ierr,iibuf,0)) goto 10020
@@ -76,7 +76,8 @@ C
 C
       if (kpout_ch(lu,idcbo,'$antenna',iobuf,lst)) goto 10000
 C
-      if (kpant(lu,idcbo,lant,lpaxis,jbuf,il,lst,iobuf)) goto 10000
+      if (kpant(lu,idcbo,lant,lpaxis,iflags,jbuf,il,lst,iobuf))
+     +     goto 10000
 C
       if (kpout_ch(lu,idcbo,'$data ',iobuf,lst)) goto 10000
 C

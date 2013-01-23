@@ -10,7 +10,7 @@
 #define STL(dest,source) min(sizeof((dest)),strlen((source))+1)
 
 #define MAXRX MAX_RXGAIN
-#define MAXDETECTORS 32
+#define MAXDETECTORS MAX_DET
 #define BADVALUE -6000000
 #define MISSINGVALUE -7000000
 #define BADSTRVALUE "X"
