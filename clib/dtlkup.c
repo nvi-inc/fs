@@ -7,7 +7,7 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-static char nums[ ] = {"123456789abcde"}; /* possible bbc's */
+static char nums[ ] = {"123456789abcdefg"}; /* possible bbc's */
 
 void dtlkup(request,device, ierr)
 struct req_rec *request;               /* request record to set-up */

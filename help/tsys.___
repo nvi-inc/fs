@@ -1,27 +1,27 @@
              tsys - compute and display system temps
 
             Syntax:     tsys=list
-          tsys5=list
-          tsys6=list
+                        tsys5=list
+                        tsys6=list
 
             Response:   tsys/systemps
-          tsys5/systemps
-          tsys6/systemps
+                        tsys5/systemps
+                        tsys6/systemps
 
 
 Settable parameters:
             list        List of modules for which Tsys will be computed.
-            Standard mnemonics allowed. In addition for VLBA/4/5
-            formif and formbbc are permitted, for Mark III/IV/5,
-            formif and formvc are permitted.
+                        Standard mnemonics allowed. In addition: for VLBA/4/5
+                        and DBBC formif and formbbc are permitted;
+                        for Mark III/IV/5 formif and formvc are permitted.
 
 Monitor-only parameters:
             systemps    List of system temperatures paired with the
-            corresponding detector mnemonics. Computed from
-            values retrieved by the tpi, tpical, tpzero,
-            tpdiff, tpgain, tpidiffgain ,and caltemp commands
-            as needed.  -1.0 means no caltemp value could be
-            found for this detector.
+                        corresponding detector mnemonics. Computed from
+                        values retrieved by the tpi, tpical, tpzero,
+                        tpdiff, tpgain, tpidiffgain ,and caltemp commands
+                        as needed.  -1.0 means no caltemp value could be
+                        found for this detector.
 
 Comments: 
 This command calculates and displays system temperatures for
@@ -30,7 +30,7 @@ III/IV and  LBA4 is:
  
             tsys = (tpi - tpzero) * (caltemp/tpdiff)
 
-For LBA the formula is:
+For LBA and DBBC the formula is:
 
                  tsys = tpi * (caltemp/tpdiff)
 
@@ -46,19 +46,19 @@ For station specific detectors, the formula is
 
 where:
 tsys          system temperature, as reported in tsys command
-            tpi         cal-off reading, from tpi command
-              tpzero        zero-level reading, from tpzero command
-              tpical        cal-on reading, from tpical command
-              caltemp       noise calibration source temperature, from
+tpi           cal-off reading, from tpi command
+tpzero        zero-level reading, from tpzero command
+tpical        cal-on reading, from tpical command
+caltemp       noise calibration source temperature, from
               caltemp command.
-              tpgain        VLBA TPI gain reading, from tpgain command
-                tpdiff          TPICAL-TPI reading, from tpdiff command
-                tpdiffgain      VLBA TPDIFF gain reading, from tpdiffgain
-                command
+ tpgain       VLBA TPI gain reading, from tpgain command
+ tpdiff       TPICAL-TPI reading, from tpdiff command
+ tpdiffgain   VLBA TPDIFF gain reading, from tpdiffgain
+              command
 
-For VLBA/4 tpgain must be a measurement of the gain level 
+For VLBA/4/5 tpgain must be a measurement of the gain level 
 when tpi is measured and likewise tpdiffgain must be a
-measurement of  the gain level when tpzero and tpdiff are
+measurement of the gain level when tpzero and tpdiff are
 measured. However, if tpgain  and/or tpidffgain return
 incorrect values when used because of some problem, they  can
 be omitted as long as the gain level is the same for all of
@@ -81,26 +81,24 @@ more than one line. For station defined detectors, accessed by
 the tsys5 and tsys6 commands, the results are just displayed
 in order: u5, u6.
 
-For Mark III/IV and LBA, additional mnemonics formif and
-formvc are permitted in the list. These select the detectors
-for the IF channels and VC sidebands currently being recorded
-by the formatter. For VC detectors, the appropriate sideband
-or sideband combination must be already selected for the
-device.
+For Mark III/IV5 and LBA, additional mnemonics formif and formvc are
+permitted in the list. These select the detectors for the IF channels
+and VC sidebands currently being recorded by the formatter. For VC
+detectors, the appropriate sideband or sideband combination must be
+already selected for the device.
 
-For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
-in the list. These select the detectors for the IF channels and BBC
-sidebands currently being recorded by the formatter. For Mark
-III/IV/5, formvc is accepted instead of formbbc, as well as formif.
+For VLBA/4/5 and DBBC, additional mnemonics formif and formbbcc are
+permitted in the list. These select the detectors for the IF channels
+and BBC sidebands currently being recorded by the formatter.
 
-A time-out or other error on one more devices for a Mark
-III/IV, LBA, or VLBA/4 detector will not prevent results from
-other detectors from being displayed. A negative integer will
-be shown for each channel that had an error that prevented an
-actual measurement from being displayed. An overflow value,
-larger than 999999.9 is displayed as dollar signs, $$$$$$$$.
+A time-out or other error on one more devices for a Mark III/IV/5,
+LBA, VLBA/4/5 or DBBC detector will not prevent results from other
+detectors from being displayed. A negative integer will be shown for
+each channel that had an error that prevented an actual measurement
+from being displayed. An overflow value, larger than 999999.9 is
+displayed as dollar signs, $$$$$$$$.
 
-For Mark III/IV and LBA4 racks the detector mnemonics for the
+For Mark III/IV/5 and LBA4 racks the detector mnemonics for the
 VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
 (upper), l (lower), a digit 3-7 for other detectors or 'x' for

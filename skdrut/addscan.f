@@ -34,7 +34,6 @@ C Output
 
 C Local
       integer nst,ich,nch,i,ic1,ic2
-      integer ichmv
       integer feetscan,gdscan,durscan
 
       ierr=0

@@ -68,7 +68,7 @@ C
       if (ierr.ne.0) goto 10010
 C
       call onsor(isrcwt,ierr)
-      if (ierr.eq.-20) goto 100
+      if (ierr.eq.-20) goto 90
       if (ierr.ne.0) goto 10010
 C
       call scmd(lcpre(1,i),iwpre(i),mprc,ierr)

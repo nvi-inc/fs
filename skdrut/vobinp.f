@@ -45,7 +45,6 @@ C  LOCAL:
       integer isor,icod,il,ip,ifeet,i,idrive,istn_scan,istn
 !      integer irec
 
-      character*1 ccb
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
       integer istart(5)

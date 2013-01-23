@@ -30,6 +30,7 @@
 
       character*128 lautoftp_string,ldisk2file_dir
       character*128 lautoftp_string0,ldisk2file_dir0   !initial values of these
+      integer iautoftp_abort_time      ! maximum length of time before we abort
 !
       Common /Data_xfer_override/
      >     kno_data_xfer, Kin2Net_2_Disk2File,kDisk2File_2_in2net,
@@ -44,6 +45,7 @@
 
       Common/Data_xfer/
      >     ixfer_stat,ixfer_method,lxfer_destination,lxfer_options,
-     >     ixfer_beg,ixfer_end,  xfer_beg_time,xfer_end_time
+     >     ixfer_beg,ixfer_end,  xfer_beg_time,xfer_end_time,
+     >     iautoftp_abort_time
 
        

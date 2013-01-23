@@ -54,7 +54,6 @@ mk5cn:
       skd_run("mk5cn",'w',ip);
       skd_par(ip);
 
-      if(ip[2]<0) return;
       mk5_dis(command,itask,ip);
       return;
 

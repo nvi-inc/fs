@@ -8,12 +8,13 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/params.h"
 #include "../include/fs_types.h"
 
 static struct req_rec request[2];        /* request records set-up by dtlkup */
 static char dev1[2],dev2[2];
 static unsigned word2d1,word2d2;
-static char bbcs[]={"123456789abcde"};
+static char bbcs[]={"123456789abcdefg"};
 static int b1, b2;
 static int kuser1, kuser2;
 
@@ -27,7 +28,7 @@ long ip[5];
     struct req_buf buffer;
     struct res_buf buff_res;
     struct res_rec response;
-    static char bbcs[]={"123456789abcde"};
+    static char bbcs[]={"123456789abcdefg"};
 
     *ierr=0;
     dtlkup( &request[0],device1,ierr);

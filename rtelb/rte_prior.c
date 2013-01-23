@@ -13,10 +13,11 @@ int ivalue;
        perror("rte_prior: getting priority");
        iret= 0;
      }
-     if( -1 == setpriority(PRIO_PROCESS, 0, ivalue))
-/*
+     if( -1 == setpriority(PRIO_PROCESS, 0, ivalue)) {
+       /*
        perror("rte_prior: setting priority");
-*/
+       */
+     }
   
      return iret;
 }

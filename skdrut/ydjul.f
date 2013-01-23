@@ -12,7 +12,7 @@ C
       implicit none
       integer iyear,iday
       real*8 FJD,xjd
-      integer nyr,ic,inyr,itime
+      integer nyr,ic,inyr
 C
 C**** XJD = DAYS SINCE 0 JANUARY, 1600
       XJD = FJD - 2305447.0D0 + 0.5D0

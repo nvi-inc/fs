@@ -66,6 +66,7 @@ C 970114 nrv Change 8 to max_sorlen
 C 970728 nrv Add IOFF to call, decode offsets
 C 980910 nrv Move JULDA call to after CLNDR so that the year
 C            is the full 4-digit value.
+C 2013Jan08  Modified so that if hour is 24:00:00 
 C
       integer*2 LPASS(56)
 C
@@ -176,6 +177,13 @@ C     CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2) <-- already done above
           Ioff(I)=0
         ENDDO
       ENDIF !read/default durations
+
+! Here we fix things if the hour is 24:00:00
+      if(ihr .eq. 24) then
+        ihr=ihr-24
+        idayr=idayr+1
+      endif 
+
 
       RETURN
       END

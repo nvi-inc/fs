@@ -16,3 +16,9 @@
 *
     0    0.075  0.115  1.25
 *
+* 3rd line Parameters
+*
+*  1. hex control flag, bit 0: 0 =FEC in Az(X,HA), 1 =FEC in X-El (X-Y,X-DC)
+*                       bit 1: 0 =pdplt uses Az(X,HA) offset, 1=X-EL (X-Y, X-DC)
+*
+   3

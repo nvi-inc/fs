@@ -149,4 +149,13 @@ if [ -e /etc/gpib.conf ]; then
    chmod a+r,ug+w,o-w gpib.conf
 fi
 #
+if [ ! -e /usr2/tle_files ]; then
+   echo "Setting up /usr2/tle_files ..."
+   cd /usr2/fs/st.default
+   find tle_files/station.qth -print|cpio -pmdu /usr2
+   chown -R oper /usr2/tle_files
+   chgrp -R rtx  /usr2/tle_files
+   chmod -R a+rw /usr2/tle_files
+fi
+#
 echo "Done."

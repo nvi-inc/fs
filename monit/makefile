@@ -12,7 +12,7 @@ OBJECTS1 = monit1.o die.o
 	strip ../bin/monit1
 #
 OBJECTS2 = monit2.o die.o azel.o sider.o pre_str.o m2init.o\
-mout2.o
+mout2.o satpos.o
 #
 ../bin/monit2: $(OBJECTS2)
 	cc -o ../bin/monit2 $(OBJECTS2) $(LIBES) -lm

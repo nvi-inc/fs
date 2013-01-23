@@ -1,4 +1,4 @@
 #
-../bin/gnplt: gnplt
-	rm -f ../bin/gnplt
-	ln -s ../gnplt/gnplt ../bin/gnplt
+../bin/gnplt1: gnplt1
+	rm -f ../bin/gnplt1
+	ln -s ../gnplt1/gnplt1 ../bin/gnplt1

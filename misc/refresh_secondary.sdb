@@ -9,7 +9,36 @@ elif [[ -n `mdadm --detail /dev/md1 | grep /dev/sdb5` ]]; then
 	mdadm /dev/md1 -f /dev/sdb5
 	mdadm /dev/md1 -r /dev/sdb5
 fi
-echo "Adding \"Secondary\" disk /dev/sdb to RAID arrays"
+echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md0 ... "
 mdadm /dev/md0 -a /dev/sdb1
+while [[ -n `grep recovery /proc/mdstat` ]]; do 
+	recovery=`grep recovery /proc/mdstat | cut -c32-`
+	echo -e -n '\r'$recovery
+	sleep 1;
+done
+echo -e "\ndone."
+echo "Installing GRUB bootloader on \"Secondary\" disk /dev/sdb ... "
+/usr/sbin/grub --batch << EOT
+device (hd0) /dev/sdb
+root (hd0,0)
+setup (hd0)
+quit
+EOT
+echo "done."
+echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md1 ... "
 mdadm /dev/md1 -a /dev/sdb5
+while [[ -n `grep recovery /proc/mdstat` ]]; do 
+	recovery=`grep recovery /proc/mdstat | cut -c32-`
+	echo -e -n '\r'$recovery
+	sleep 1;
+done
+echo -e "\ndone."
+echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md2 ... "
+echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
 mdadm /dev/md2 -a /dev/sdb6
+while [[ -n `grep recovery /proc/mdstat` ]]; do 
+	recovery=`grep recovery /proc/mdstat | cut -c32-`
+	echo -e -n '\r'$recovery
+	sleep 1;
+done
+echo -e "\ndone."

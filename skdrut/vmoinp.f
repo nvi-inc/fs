@@ -40,7 +40,8 @@ C 021111 jfq Extend S2 mode to support LBA rack
 ! 2006Nov18. Converted remaining holleriths to ASCII.
 ! 2006Nov29  Capitalize before checking on recorder.
 ! 2007Jul13  Fixed bug if nchdefs=0.  Was trying to check roll, but this wouldn't work
-
+! 2010.06.15 Fixed bug if recorder was K5. Wasn't initializing tracks. 
+! 2012Sep14  Fixed bug with not initializing bbc_present for VEX schedules
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -99,9 +100,11 @@ C  LOCAL:
       character*128 cout
       integer ptr_ch,fvex_len,fget_mode_def
       logical km3rack,km4rack,kvrack,klrack
-      logical km5rec,km4rec,km3rec,kvrec,ks2rec
+      logical kDiskRec,km4rec,km3rec,kvrec,ks2rec
+      logical kk4rec
 
       character*8 crecorder  !temporary holding
+      integer ibbc   !index 
 
  
 C 1. First get all the mode def names. Station names have already
@@ -140,7 +143,7 @@ C    defined for all stations.
       do icode=1,ncodes ! get all mode information
 
 C    Assign a code to the mode and the same to the name
-        writE(ccode(icode)(1:2),'(i2.2)') icode
+        write(ccode(icode)(1:2),'(i2.2)') icode
         cnafrq(icode)=ccode(icode)
         do istn=1,nstatn ! for one station at a time
 
@@ -153,11 +156,34 @@ C    Assign a code to the mode and the same to the name
 
           crecorder=cstrec(istn,1)
           call capitalize(crecorder)
-          kvrec=crecorder.eq.'VLBA'.or. crecorder.eq. 'VLBA4'
-          km3rec=crecorder.eq.'MARK3'
-          km4rec=crecorder.eq.'MARK4'
-          ks2rec=crecorder.eq.'S2'
-          km5rec=crecorder(1:5).eq. 'MARK5'
+       
+! Find what kind of recorder.
+          kvrec=.false.
+          km3rec=.false.
+          km4rec=.false.
+          kk4rec=.false.
+          ks2rec=.false.
+          kDiskRec=.false.
+
+          if(crecorder .eq. "VLBA" .or. crecorder .eq. "VLBA4") then
+             kvrec  =.true.
+          else if(crecorder .eq. "MARK3") then
+            km3rec =.true.
+          else if(crecorder .eq. "MARK4") then 
+            km4rec =.true.
+          else if(crecorder .eq. "K4-1" .or.
+     >             crecorder .eq. "K4-2") then
+            kk4rec=.true.
+          else if(crecorder .eq. "S2") then
+            ks2rec = .true.
+          else if(crecorder.eq."MARK5A" .or. 
+     >            crecorder .eq. "MARK5B" .or.
+     >            crecorder.eq. "K5") then 
+            kdiskRec=.true.
+          else 
+            write(*,*) "VMOINP: Unknown recorder ", crecorder
+          end if 
+ 
 
 C         Recognized rack types
           klrack=cstrack(istn).eq.'LBA'
@@ -201,13 +227,17 @@ C         (Get other procedure timing info later.)
         if (nchdefs.gt.0) then ! chandefs > 0
 C         Get $BBC statements.
           call vunpbbc(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,
-     .    cbbcref,ivc,cbbifdref,nbbcdefs)
+     >     ivexnum,iret,ierr,lu,cbbcref,ivc,cbbifdref,nbbcdefs)
+          do ibbc=1,max_bbc
+            if(ivc(ibbc) .ne. 0) then
+               ibbc_present(ivc(ibbc),istn,icode)=1
+            endif
+          end do 
+
           if (ierr.ne.0) then 
             write(lu,'("VMOINP04 - Error getting $BBC information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .      iret,ierr
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
             call errormsg(iret,ierr,'BBC',lu)
             ierr1=2
           endif
@@ -225,12 +255,13 @@ C         Get $IF statements.
           endif
   
 C         Get $TRACKS statements (i.e. fanout).
+          write(*,*) "Reading tracks !",ks2rec 
           if (ks2rec) then
             call vunps2m(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,cs2m,
      .      cs2d,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac)
           else
-            call vunptrk(modedefnames(icode),stndefnames(istn),km5rec,
+            call vunptrk(modedefnames(icode),stndefnames(istn),kDiskRec,
      .      ivexnum,iret,ierr,lu,
      .      cm,cp,ctrchanref,csm,itrk,nfandefs,ihdn,ifanfac,cmodu)
           endif
@@ -251,7 +282,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
           if (ks2rec) then
             call vunps2g(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,cpassl,npl)
-          else if(km5rec) then
+          else if(kDiskRec) then
             npl=1
             nhdpos=1
             cpassl(1)="1A"
@@ -348,7 +379,7 @@ C           IFD refs
      .        " for mode ",a," station ",a)') i,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             else
-              cifinp(i,istn,icode) = cin2(ic) ! IF input channel
+              cifinp(i,istn,icode) = cin2(ic) ! IF input channel          
               cosb(i,istn,icode)   = cs2(ic) ! LO sideband
               cpol(i,istn,icode)   = cp2(ic) ! polarization
               freqlo(i,istn,icode) = flo(ic) ! LO frequency
@@ -373,7 +404,8 @@ C           Phase cal refs
               enddo
             endif
 C           Track assignments
-            if (km3rec.or.km4rec.or.km5rec.or.kvrec.or.ks2rec) then
+            if (km3rec.or.km4rec.or.kk4rec.or.kDiskRec 
+     >          .or.kvrec.or.ks2rec) then
             do ix=1,nfandefs ! check each fandef
               if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link
                 ip=iwhere_in_String_list(csubpass,nsubpass,cp(ix))
@@ -440,7 +472,7 @@ C           If "56000" was specified, for this station, use higher bit density
                 bitden=56250 ! Mark3/4 data replacement
               endif
             endif
-            if (bitden_das.ne.bitden .and. .not. km5rec) then
+            if (bitden_das.ne.bitden .and. .not. kDiskRec) then
               write(lu,'("VMOINP12 - Bit density ",f6.0," for ",a," ",a,
      .        " changed to ",f6.0)') bitden_das,
      .        modedefnames(icode)(1:il),stndefnames(istn)(1:im),bitden

@@ -22,7 +22,6 @@ C  OUTPUT:
 
 ! Local
 ! used to parse input line.
-      logical ktoken,knospace,keof
       character*20 ltoken(20)   !need to be able to hold source name.
       integer numwant,numgot
 

@@ -33,8 +33,10 @@ main()
     shm_addr->time.epoch[1] = 0;
     shm_addr->time.icomputer[0]=0;
     shm_addr->time.icomputer[1]=0;
-    shm_addr->time.secs_off = rte_secs();
-
+    shm_addr->time.secs_off = rte_secs(&shm_addr->time.usecs_off,
+				       &shm_addr->time.ticks_off,
+				       &shm_addr->time.init_error,
+				       &shm_addr->time.init_errno);
     key = SEM_KEY;
     nsems = SEM_NUM;
     if( (sem_id = sem_get( key, nsems)) == -1) {

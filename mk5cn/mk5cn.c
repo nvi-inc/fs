@@ -23,7 +23,12 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <sys/types.h> /* For socket() and connect() */
+
 #include <sys/socket.h> /* For socket() and connect() */
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 2
+#endif
+
 #include <netinet/in.h> /* For socket() with PF_INET */ 
 #include <netdb.h> /* For getservbyname() and gethostbyname() */ 
 #include <unistd.h> /* For close() */ 
@@ -60,6 +65,10 @@ int port;
 int is_open=FALSE;
 int time_out;
 int is_init=FALSE;
+
+static void close_socket();
+static int read_response(char*, int, FILE*, int);
+static int drain_input_stream(FILE*);
 
 int main(int argc, char * argv[])
 {
@@ -408,7 +417,7 @@ int open_mk5(char *host, int port)
       return -22; /* Error */ } 
     if(error!=0) {
       close(sock);
-      logit(NULL,errno,"un");
+      logit(NULL,error,"un");
       return -23;
     }
   } else if (iret < 0) { /* Connect, errors? */ 
@@ -434,6 +443,7 @@ int open_mk5(char *host, int port)
     perror("error");
 #endif
     logit(NULL,errno,"un");
+	(void) shutdown(sock, SHUT_RDWR);
     (void) close(sock); /* Error */ 
     return -16; /* Error */ } 
 #ifdef DEBUG
@@ -466,8 +476,6 @@ long ip[5];
   int out_recs=0;
   int i, j, nchars;
 
-  fd_set rfds;
-  struct timeval tv;
   int retval;
   int error;
   int flags;
@@ -499,6 +507,7 @@ long ip[5];
   char *ptr,*ptrcolon;
   int ierr, mode;
   int centisec[6];             /* arguments of rte_tick rte_cmpt */
+  int itbefore[6];
 
   secho[0]=0;
   mode=ip[0];
@@ -576,6 +585,10 @@ long ip[5];
 #ifdef MSG_DONTWAIT
     flags|=MSG_DONTWAIT;
 #endif
+    ip[2] = drain_input_stream(fsock);
+    if(ip[2]!=0)
+      goto retry_check;
+      
     if(mode==4) {
       rte_cmpt(centisec+2,centisec+4);
       rte_ticks (centisec);
@@ -588,18 +601,13 @@ long ip[5];
 #endif
       logit(NULL,errno,"un");
       ip[2] = -102; /* Error */
-      goto error;
+      goto error0;
     }
 #ifdef DEBUG
     (void) fprintf(stderr, /* Yes */ 
 		   "%s DEBUG:  Sent inLine[%s] to socket\n",
 		   me, inbuf,sock); 
 #endif
-
-      /* check for data to read */
-
-    FD_ZERO(&rfds);
-    FD_SET(fileno(fsock), &rfds);
 
     /* determine time-out */
 
@@ -609,69 +617,10 @@ long ip[5];
 	time_out_local+=list[j].to;
       }
     }
-	 
-    /* Wait up to time_out centiseconds. */
-    tv.tv_sec = time_out_local/100;
-    tv.tv_usec = (time_out_local%100)*10000;
-
-#ifdef DEBUG
-    { int itb[6],ita[6];
-    printf ("time-out sec %d usec %d\n",tv.tv_sec,tv.tv_usec);
-    rte_time(itb,itb+5);
-#endif
-
-    retval = select(fileno(fsock)+1, &rfds, NULL, NULL, &tv);
-    /* Don't rely on the value of tv now! */
-#ifdef DEBUG
-    rte_time(ita,ita+5);
-    printf(" itb[5...0] = %d %d %02d %02d %02d %02d\n",
-    itb[5],itb[4],itb[3],itb[2],itb[1],itb[0]);
-    printf(" ita[5...0] = %d %d %02d %02d %02d %02d\n",
-    ita[5],ita[4],ita[3],ita[2],ita[1],ita[0]);
-   }
-#endif
- 
-    if(retval == -1) {
-      if(itry>0)
-	logit(NULL,errno,"un");
-      fclose(fsock);
-      close(sock);
-      is_open=FALSE;
-      ip[2]=-105;
-      if(++itry<2)
-	goto try;
-      goto error;
-    } else if (!retval) {
-      fclose(fsock);
-      close(sock);
-      is_open=FALSE;
-      ip[2]=-104;
-      if(++itry<2)
-	goto try;
-      goto error;
-    }
 
     /* * Read reply * */ 
-    if (fgets(outbuf, sizeof(outbuf), fsock) == NULL) { /* OK? */ 
-#ifdef DEBUG
-      (void) fprintf(stderr, /* Nope */ 
-		       "%s ERROR: \007 fgets() on socket returned ", me); 
-      perror("error"); 
-#endif
-      if(itry>0)
-	logit(NULL,errno,"un");
-      fclose(fsock);
-      close(sock);
-      is_open=FALSE;
-      ip[2] = -103;
-      if(++itry<2)
-	goto try;
-      goto error;
-    }
-    if(mode==4) {
-      rte_ticks (centisec+1);
-      rte_cmpt(centisec+3,centisec+5);
-    }
+    ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local);
+
     if(iecho) {
       int in, out;
       strcat(secho,"<");
@@ -686,6 +635,20 @@ long ip[5];
       strcat(secho,">");
       logit(secho,0,NULL);
       secho[0]=0;
+    }
+    
+  retry_check:
+    if(ip[2]!=0) {
+      close_socket();
+      //if(++itry<2) {
+      //	logit(NULL,ip[2],"m5");
+      //goto try;
+      //}
+      goto error;
+    }
+    if(mode==4) {
+      rte_ticks (centisec+1);
+      rte_cmpt(centisec+3,centisec+5);
     }
 #ifdef DEBUG
       /* * Print reply * */ 
@@ -754,12 +717,12 @@ long ip[5];
   ip[2]=0;
   return 0;
 
-error:
+error0:
   if(iecho && strlen(secho)> 0) {
     logit(secho,0,NULL);
     secho[0]=0;
   }
-error2:
+error:
   cls_clr(in_class);
   ip[0]=out_class;
   ip[1]=out_recs;
@@ -773,12 +736,8 @@ long ip[5];
 
   ip[0]=ip[1]=0;
 
-  if(is_open) {
-    is_open=FALSE;
-    fclose(fsock);
-    close(sock);
-  }
-
+  /* re-open */
+  close_socket();
   if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
 #ifdef DEBUG
     printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
@@ -800,6 +759,7 @@ long ip[5];
   if(is_open) {
     is_open=FALSE;
     fclose(fsock);
+    shutdown(sock, SHUT_RDWR);
     close(sock);
   }
 
@@ -821,4 +781,155 @@ int sig;
   fprintf(stderr,"nullfcn: can't get here\n");
 
   exit(-1);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+// close_socket: cleanly close the TCP socket, can be used _after_ a open_mk5()
+////////////////////////////////////////////////////////////////////////////////////
+
+static void close_socket()
+{
+   if (FALSE != is_open) {
+      is_open = FALSE;
+      (void) fclose(fsock);
+      (void) shutdown(sock, SHUT_RDWR);
+      (void) close(sock);
+      sock = -1;
+      fsock = NULL;
+   }
+   return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// read_response:
+//  Reads a single Mk5 response delimited by a newline.
+//  All characters are preserved.
+//  Underlying fd (or stream itself?) must be non-blocking
+//  On any error, the last (partial) response is returned.
+////////////////////////////////////////////////////////////////////////////////
+// Features of this implementation:
+// (1) Does not us the dreaded fgets(), thanks to Jan Wagner
+// (2) select() is never called unless there is no input available
+//     (but that is almost sure to happen on the first call)
+// (3) if there is no data available when a time-out is first detected
+//     it polls one more time in case we were swapped if select()
+//     times-out, it polls one more time, I don't have any guarantee that
+//     that select() didn't return early so the code will try again just
+//     in case. This also means there is only one time-out exit from the
+//     loop. Oddly, "man select_tut" seems to think you should not use
+//     select() for time-outs if you can avoid it
+// (4) a server crash does not cause an infinite loop
+// (5) assumes anything after \n in the response is cleared by
+//    draining the input buffer before the next write to the Mark 5
+//    (drain_input_stream() below).
+//
+// It is a bit pendantic on checking all the cases of EOF and error,
+// including using clearerr() before each fgetc(). It seems like it
+// would be safe to not call clearerr(), and then check feof() first
+// after fgetc(). Maybe better safe than sorry though.
+////////////////////////////////////////////////////////////////////////////////
+
+static int read_response(char *str, int num, FILE* stream,
+			 int time_out_local)
+{
+  int c, iret;
+    char* cs = str;
+    struct timeval to;
+    unsigned long start,end,now;
+    fd_set rfds;
+
+    iret=0;
+    rte_ticks(&start);
+
+    /* we don't know where we are in current tick, so add one to be safe */ 
+    end=start+time_out_local+1; 
+    
+    while(num > 1) {
+
+      clearerr(stream);
+      c=fgetc(stream);
+      if(c==EOF && !feof(stream) && ferror(stream) && errno == 11) {
+
+	rte_ticks(&now);
+	if(end <= now)       /* poll one more time */
+	  time_out_local=0;
+	else
+	  time_out_local=end-now;
+
+	to.tv_sec=time_out_local/100;
+	to.tv_usec=(time_out_local%100)*10000;
+
+	/* Read when data available */
+	FD_ZERO(&rfds);
+	FD_SET(fileno(stream), &rfds);
+
+	c = select(fileno(stream) + 1, &rfds, NULL, NULL, &to);
+	if (c < 0) { /* error */
+	  logit(NULL,errno,"un");
+	  iret = -103;
+	  goto done;
+	} else if(c == 0) {
+	  if(end <= now) {  /* last poll failed, we can be sure we are done */
+	    iret = -104;
+	    goto done;
+	  } else        /* select() returned early so not timed-out yet */
+	    continue; 
+	} else 	       /* there is data, we check at the top */
+	  continue;
+
+      } else if(c==EOF) {
+	if(!feof(stream) && ferror(stream)) { /* error */
+	  logit(NULL,errno,"un");
+	  iret = -105;
+	} else if(feof(stream) && ferror(stream)) { /* error & EOF */
+	  logit(NULL,errno,"un");
+	  iret = -106;
+	} else if(feof(stream)) { /* EOF, server probably crashed */
+	  iret = -107;
+	} else if(c==EOF) { /* not sure what this is, but not valid input */
+	  iret = -108;
+	}
+	goto done;
+      }  
+	   
+      /* Append */
+      *cs++ = c;
+      num--;
+      
+      if(c=='\n')
+	goto done;
+    }
+    iret = -109; /* ended before newline */
+   
+ done:
+    *cs = '\0';
+    return iret;
+}
+////////////////////////////////////////////////////////////////////////////////
+// drain_input_stream:
+//  Empties input stream of any lingering characters
+//  Underlying fd (or stream itself?) must be non-blocking
+////////////////////////////////////////////////////////////////////////////////
+static int drain_input_stream(FILE* stream)
+{
+  int iret;
+
+  clearerr(stream);
+  while(EOF != fgetc(stream))
+    ;
+  if(!feof(stream) && ferror(stream) && errno == 11) {
+    iret= 0;
+  } else if(!feof(stream) && ferror(stream)) { /* error */
+    logit(NULL,errno,"un");
+    iret = -110;
+  } else if(feof(stream) && ferror(stream)) { /* error & EOF */
+    logit(NULL,errno,"un");
+    iret = -111;
+  } else if(feof(stream)) { /* EOF, server probably crashed */
+    iret = -112;
+  } else {         /* not sure what this is, but not possible */
+    iret = -113;
+  }
+
+  return iret;
 }

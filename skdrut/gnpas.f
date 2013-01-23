@@ -29,7 +29,7 @@ C  LOCAL VARIABLES:
       integer it(max_headstack),np(max_headstack)
       integer j,k,l,itrk(max_subpass,max_headstack),ic1,maxp(max_frq)
       integer ix,iprr,ipmax(max_headstack),ic,m,nvc
-      logical kmiss
+      logical kmiss,kfirst
 C
 C     880310 NRV DE-COMPC'D
 C     930225 nrv implicit none
@@ -59,6 +59,7 @@ C 010817 nrv Not for K4 either.
 ! 2006Nov29 Put the Mark5 test back in. With it removed, drudged failed for v215a.skd
 ! 2006Nov30. Use cstrec(istn,irec)
 ! 2007Jul18 JMG. Modified Mark5 test so that it is now called.
+! 2010.06.15 JMG.  Modified to work with K5
 C
 C
 C     1. For each code, go through all possible passes and add
@@ -102,7 +103,7 @@ C
      .          ipmax(ih)=ihddir(ih,j,is,ic)
               enddo ! check sub-passes
               if (ih.eq.1) then ! set npassf and increment ntrakf
-                npassf(is,ic)=np(ih) 
+                npassf(is,ic)=np(ih)             
                 ntrakf(is,ic)=ntrakf(is,ic)+itrk(np(ih),ih)
                 nhstack(is,ic) = 1
               else ! must be the same for both headstacks 
@@ -125,7 +126,8 @@ C
                 endif ! one head/check second
               endif ! set/check
             enddo ! for each headstack
-            if(cstrec(is,1)(1:5) .eq. "Mark5") then
+            if(cstrec(is,1)(1:5) .eq. "Mark5" .or. 
+     >         cstrec(is,1)(1:2) .eq. "K5") then
               npassf(is,ic)=1
             else
 ! check various consistency things for tapes.
@@ -174,8 +176,11 @@ C     Check for different numbers of passes used in different frequency
 C     codes--this should not be attempted in a single experiment. 
 
       do is=1,nstatn ! stations
-        if (cstrec(is,1).ne.'S2' .and. cstrec(is,1)(1:2).ne.'K4' .and.
-     >      cstrec(is,1)(1:5) .ne. "Mark5") then
+        if (cstrec(is,1)(1:2).ne.'S2'    .and. 
+     >      cstrec(is,1)(1:2).ne.'K4'    .and.
+     >      cstrec(is,1)(1:5).ne.'Mark5' .and. 
+     >      cstrec(is,1)(1:2).ne.'K5') then
+        
         ic1=0
         do ic=1,ncodes ! codes
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
@@ -228,14 +233,18 @@ C 3. Check for LOs present and issue warning if not.
       do ic=1,ncodes
         do is=1,nstatn
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
-          kmiss=.false.
-          do ix=1,nchan(is,ic)
-            nvc=invcx(ix,is,ic)
-            if ( cifinp(nvc,is,ic) .eq. "  ") kmiss=.true.
-!            freqlo(nvc,is,ic).lt.0.0.or.
-          enddo
-          if (kmiss) write(luscn,9906) ccode(ic),cstnna(is)
+            kmiss=.false.
+            kfirst=.true. 
+            do ix=1,nchan(is,ic)
+              nvc=invcx(ix,is,ic)
+              if ( cifinp(nvc,is,ic) .eq. "  ") then
+                if(kfirst) then
+                  kfirst=.false. 
+                  write(luscn,9906) ccode(ic),cstnna(is)
 9906     format('GNPAS06: Warning: ',a,' LO information missing for ',a)
+                endif              
+              endif
+            enddo                
           endif ! defined
         enddo
       enddo

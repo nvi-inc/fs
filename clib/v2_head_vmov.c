@@ -8,6 +8,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+clock_t rte_times(struct tms *);
+
 void v2_head_vmov(ihead,volt,ip,indxtp)
 int ihead;                     /* head 1-4 */
 float volt;                    /* voltage to set head to */
@@ -76,8 +78,8 @@ int indxtp;
 
        rte_sleep( 12); /*wait for vlba2 drive to set "moving" bit on */
 
-       end=times(&tms_buff)+1502;  /* give it at most 15 seconds to complete*/
-       while(end>times(&tms_buff) && !v2_motion_done(ip,indx))
+       end=rte_times(&tms_buff)+1502;  /* give it at most 15 seconds to complete*/
+       while(end>rte_times(&tms_buff) && !v2_motion_done(ip,indx))
            rte_sleep(50);
        if(ip[2]<0) return;        /* error or still moving */
 

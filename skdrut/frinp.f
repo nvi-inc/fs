@@ -32,7 +32,7 @@ C  LOCAL:
       integer*2 LNA(4)
       character*8 cna
       equivalence (lna,cna)
-      integer ib,ic,iv,ivc,i,icode,istn,inum,itype,is,ns,ibad,j
+      integer ib,ic,iv,ivc,i,icode,istn,inum,is,ns,ibad,j
       integer icx,nvlist,ivlist(max_chan),ir
       integer*2 lc,lsg,lm(8),lid,lin,ls
       character*2 cs,cin
@@ -53,8 +53,8 @@ C  LOCAL:
       logical kfound
 
       character*1 lchar
-      integer*2   itemp
-      equivalence (lchar,itemp)
+      integer*2   iDoNotUse
+      equivalence (lchar,iDoNotUse)
       character*2 cifinptmp
       integer ilen2
       character*1 c1
@@ -100,32 +100,27 @@ C            overwrite it.
 C 020114 nrv Fill in roll defs.
 C 2003Jul25 JMG  ITRAS changed to function
 ! 2005May2  JMG  Converted losb and lifinp to Characters
+! 2008Sep25 JMG. Modified so won;'t set bitdens if recorder is Mark5 or K5
+!2011Aug11  JMG. Reformatted some warning messages
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
-      ITYPE=0
-      itemp=ibuf(1)   !this bit of code makes lchar=first character in ibuf
+      iDoNotUse=ibuf(1)   !this bit of code makes lchar=first character in ibuf
 
       ilen2=ilen-1
       if(lchar .eq. "C") then
-        itype=1
        CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,itrk_map,
      >     cswit,ivc)
       else if(lchar .eq. "L") then
-        itype=2
         CALL UNPLO(IBUF(2),ilen2,IERR,LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
       else if(lchar .eq. "F") then
-        itype=3
         CALL UNPFSK(IBUF(2),ilen2,IERR,LNA,LC,lst,ns)
       else if(lchar .eq. "R") then
-        itype=4
         CALL UNPRAT(IBUF(2),ilen2,IERR,lc,srate)
       else if(lchar .eq. "B") then
-        itype=5
         CALL UNPBAR(IBUF(2),ilen2,IERR,lc,lst,ns,lbar)
       else if(lchar .eq. "D") then
-        itype=6
         CALL UNPFMT(IBUF(2),ilen2,IERR,lc,lst,ns,lfmt)
       endif
       call hol2upper(lc,2) ! uppercase frequency code
@@ -135,7 +130,7 @@ C
         call init_itrk_map(itrk_map)
       endif
 
-      if(itype .ne. 1 .and. nstsav .ne. 0) then
+      if(lchar .ne. "C" .and. nstsav .ne. 0) then
         do j=1,nstsav ! apply to each station on the preceding "F" line
           is=istsav(j)
           call add_trk_map(is,ncodes,itrk_map)
@@ -156,7 +151,7 @@ C
 C  Lines need not be in order, so we may encounter a new code
 C  on any line. But this is a bad practice.
       IF  (IGTFR(LC,ICODE).EQ.0) THEN !a new code
-        if (itype.eq.3) then ! "F" line
+        if (lchar .eq. "F") then ! "F" line
           NCODES = NCODES + 1
           IF  (NCODES.GT.MAX_FRQ) THEN !too many codes
             IERR = MAX_FRQ
@@ -178,7 +173,7 @@ C
 C     2. Now decide what to do with this information.
 C     First, handle code type entries, "C" with frequencies.
 C
-      IF  (ITYPE.EQ.1) THEN  !code entry
+      IF  (lchar .eq. "C") THEN  !code entry
         do j=1,nstsav ! apply to each station on the preceding "F" line
           is=istsav(j)
           if (is.gt.0) then ! valid station
@@ -239,7 +234,12 @@ C         If "56000" was specified, use higher station bit density
             endif
           endif
 C         Store the bit density by station
-          bitdens(is,icode)=bitden
+          if(cstrec(is,1) .eq. "Mark5A" .or. 
+     >       cstrec(is,1) .eq. "K5") then
+             continue
+          else
+            bitdens(is,icode)=bitden  
+          endif
           cset(icx,is,icode) = cswit
           if (ivc.eq.0) then
             ibbcx(icx,is,icode) = icx
@@ -253,7 +253,7 @@ C
 C
 C     3. Next, LO type entries, from the "L" lines.
 C
-      IF  (ITYPE.EQ.2) THEN  !LO entry
+      IF  (lchar.eq. "L") THEN  !LO entry
         istn=igetstatnum(c1)
         IF  (istn.EQ.0) THEN  !error
           write(lu,'(a,a,a,/,40a2)')
@@ -276,13 +276,13 @@ C                                    ! this channel on this BBC
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP04 - Subgroup ", lsg," inconsistent with ",
      >        lsubvc(ic,istn,icode), " for channel ",ic,
-     >        "station",cstnna(istn)
+     >        " station",cstnna(istn)
 
               if (lc.ne.lcode(icode)) 
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP05 - Code ",lc," inconsistent with ",
      >         lcode(icode), " for channel ",ic,
-     >        "station",cstnna(istn)
+     >        " station",cstnna(istn)
               kfound=.true.
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
               cIFINP(ic,istn,ICODE) = cIN ! IF input channel
@@ -357,7 +357,7 @@ C
 C     4. This is the name type entry section.
 C        Index for icode has already been found above.
 C
-      IF (ITYPE.EQ.3) THEN  !name entry
+      IF (lchar.eq. "F") THEN  !name entry
 C       Check the list of station names.
         ibad=0
         if (ns.gt.0) then ! station names on "F" line
@@ -387,13 +387,13 @@ C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C
 C 5. This is the sample rate line.
 
-      if (itype.eq.4) then ! sample rate
+      if (lchar.eq. "R") then ! sample rate
         samprate(icode)=srate
       endif ! sample rate
 
 C 6. This section for the barrel roll line.
 
-      if (itype.eq.5) then ! barrel
+      if (lchar .eq. "B") then ! barrel
         if (ns.gt.0) then ! station names on "B" line
           do is=1,ns ! for each station name found on the line
             i=iwhere_in_string_list(cstnna,nstatn,cst(is))
@@ -420,7 +420,7 @@ C 6. This section for the barrel roll line.
 
 C 7. This section for the recording format line.
 
-      if (itype.eq.6) then ! format
+      if (lchar .eq."D" ) then ! format
         if (ns.gt.0) then ! station names on the line
           do is=1,ns ! for each station name found on the line
             i=iwhere_in_string_list(cstnna,nstatn,cst(is))

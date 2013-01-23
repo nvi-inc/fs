@@ -1,4 +1,11 @@
 #!/bin/tcsh
+if ($#argv == 0) then
+        echo Argument required.
+        exit -1
+else if (! -e /usr2/log/err$1) then
+        echo /usr2/log/err$1 doesn''t exist.
+        exit -1
+endif
 cd /usr2/control
 rm -f mdlpo.new
 sed 's/^ /*/' mdlpo.ctl >mdlpo.new

@@ -20,6 +20,8 @@ C 970206 nrv Remove itr2 and add headstack index
 C 970206 nrv Change max_pass to max_subpass
 C 991122 nrv Change LMODE to allow 16 characters.
 ! 2006Nov09 JMG. Changed logical for checking valid bandwidths
+! 2010.06.15 JMG. Better error message if bad track #. 
+! 2010.10.11 JMG. Increased number of valid BWs
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -63,10 +65,11 @@ C     ix - count of p(t1,t2,t3,t4) fields found
       integer ihead,ich,nch,ic2,ic1,ict,ip,ix,itx
       integer ibit,isb
       integer num_bw
-      parameter (num_bw=13)
+      parameter (num_bw=16)
       double precision bw_valid(num_bw)
       data bw_valid/14.67, 18.0,
-     >0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0/
+     >0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0,256.0,512.0,
+     >  1024.0/
 
 C
 C
@@ -211,7 +214,9 @@ C                              (        Find the opening parenthesis
             read(cbuf(ict:ict+ind-1),*,err=900) itx
             itx=itx+3
             if(itx.lt. 1  .or. itx .gt. max_trk) then
-               write(*,*) "UNPCO: Invalid track assignment"
+               write(*,*) " "
+               write(*,'("UNPCO: Invalid track assignment: ",i4)') itx-3
+               write(*,*) "                 Valid numbers: -2 to 30"
                ierr=-107-ix
                return
             endif
@@ -220,6 +225,7 @@ C                              (        Find the opening parenthesis
                isb=icnt-2*ibit
                ibit=ibit+1
                itrk_map(ihead,itx)=itras_ind(isb,ibit,ichan,ipas)
+!               write(*,"(i3,' | ', 66i4)") ichan, itrk_map(1,1:33)
             endif
           endif
           ict=ict+ind

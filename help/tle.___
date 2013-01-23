@@ -1,0 +1,28 @@
+		  tle - satellite two line elements
+
+            Syntax:     tle=line,catnum,string
+
+            Response:   tle/0,catnum,name
+                        tle/1,catnum,tle_1
+                        tle/2,catnum,tle_2
+
+
+Settable parameters:
+        line    Which line is being defined. No default.
+        catnum  Catalog number of the satellite
+        string  Variable meaning string, see name, tle_1, and
+                tle_2 under Monitor-only parameters.
+
+Monitor-only parameters:
+        name    Satellite common name, maximum 24 characters
+        tle_1   TLE line 1, maximum 69 characters
+        tle_2   TLE line 2, maximum 69 characters
+
+
+Comments: 
+This command is used to input a TLE for use with the "satellite"
+command.
+
+For tle_1 and tle_2 three checks are made: (1) the line starts with
+the right character, '1' or '2', respectively, (2) the internal
+catalog number agrees with catnum, and (3) the check-sum is correct.

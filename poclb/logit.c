@@ -6,19 +6,37 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "../include/fs_types.h"
-#include "../include/shm_addr.h"      /* shared memory pointer */
-#include "../include/params.h"
-#include "../include/fscom.h"
+#include "../../fs/include/params.h"
+#include "../../fs/include/fs_types.h"
+#include "../../fs/include/shm_addr.h"      /* shared memory pointer */
+#include "../../fs/include/fscom.h"
 
 void cls_snd();
 void pname();
 void rte_time();
+static logit0();
 
 logit(msg,ierr,who)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
+
+{
+  logit0(msg,ierr,who,NULL);
+}
+logit_nd(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+
+{
+  logit0(msg,ierr,who,"nd");
+}
+static logit0(msg,ierr,who,type)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char *type;          /* data type NULL = "fs", "nd" = no display */
 
 {
   char buf[513];    /* Holds the complete log entry */
@@ -65,7 +83,10 @@ char *who;           /* 2-char string identifying the error  */
   }
 /* Send the complete log entry to ddout via class.
 */
-  memcpy(&ip1,"fs",2);
+  if(type == NULL)
+    memcpy(&ip1,"fs",2);
+  else
+    memcpy(&ip1,type,2);
   memcpy(&ip2,"  ",2);
   if (ierr != 0) memcpy(&ip2,"b1",2);
 /* for testing, send to output PLUS class */

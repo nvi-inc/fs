@@ -3,13 +3,13 @@
      >   equip_cat, mask_cat,   freq_cat,   rx_cat,                 ! 4 on each line
      >   loif_cat,  modes_cat,  modes_description_cat,  rec_cat,
      >   hdpos_cat, tracks_cat,flux_cat,flux_comments,
-     >   cmaster_file, cat_program_path, par_program_path,          ! 3
+     >   cmaster_dir, cat_program_path, par_program_path,          ! 3
      .   csked,csnap,cproc,
      .   ctmpnam,cprtlan,cprtpor,cprttyp,cprport,
      .   cprtlab,clabtyp,rlabsize,cepoch,coption,luscn,
      .   dr_rack_type,crec_default,
      >   kequip_over,
-     .   tpid_prompt,itpid_period,tpid_parm)
+     >   tpid_prompt,itpid_period,contcal_prompt)
 C
 C  This routine will open the default control file for 
 C  directories and devices to use with SKED. Then it will
@@ -65,6 +65,9 @@ C            send the names back.
 !           Also check if equip_override is on that we have actually chosen recorders!
 ! 2008Oct08 JMGipson.  Add "/" if needed for scracth directory and sked directory
 ! 2008Oct20 JMGipson.  Changed readline_skdrut call to readline_skdrut_skdrut
+! 2009Sep09 JMGipson.  Added cat_dir = default catalog directory.
+! 2012Sep20 JMGipson.  If default 'global' skedf.ctl does not exist, try alternatives.
+!                     Added Cont_Cal option.
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -79,10 +82,12 @@ C   parameter file
      .               par_program_path,
      .               mask_cat,freq_cat,rx_cat,loif_cat,modes_cat,
      .               hdpos_cat,tracks_cat,flux_cat,flux_comments,
-     .               rec_cat,cmaster_file,
+     .               rec_cat,cmaster_dir,
      >               csked,csnap,cproc,ctmpnam,cprtlab,
-     .               cprtlan,cprtpor,cprttyp,cprport,clabtyp,
-     .               tpid_prompt,tpid_parm
+     .               cprtlan,cprtpor,cprttyp,cprport,clabtyp
+
+      character*4  tpid_prompt
+      character*4  contcal_prompt
       character*4 cepoch
       character*8 dr_rack_type,crec_default(2)
       logical kequip_over
@@ -95,14 +100,16 @@ C   parameter file
 C
 C  LOCAL VARIABLES
       integer ind,nch
-      integer itmplen     !variable for filename length
+      integer itmplen          !variable for filename length
       logical*4 kexist         !control file existence
-      character*128 ctemp   !temporary control file variable
+      character*128 ctemp      !temporary control file variable
       character*10 lsecname
       character*3 lprompt
       integer itemp
       character*20 lkeyword     !keyword
       character*128 lvalue      !value
+      character*128 cat_dir     !default catalog directory
+      integer nch_cat_dir       !length
 
       integer MaxToken
       integer NumToken
@@ -116,9 +123,18 @@ C  LOCAL VARIABLES
       character*256 cbuf
       logical ktoken
       logical keof      !EOF reached in reading in file
-C
-C  1. Open the default control file if it exists.
+      logical kfound_global_file
 
+      character*32 cskedf(3)   
+      data cskedf/
+     > "/usr/local/bin/skedf.ctl", "/usr2/control/skedf.ctl",
+     > "skedf.ctl"/ 
+
+C  1. Open the default control file if it exists.   
+
+! Initialization
+
+      kfound_global_file=.false. 
 ! Avery 5160. ht,wid,rows,cols,top,left
       rlabsize(1)=1.0
       rlabsize(2)=2.625
@@ -127,7 +143,6 @@ C  1. Open the default control file if it exists.
       rlabsize(5)=0.5
       rlabsize(6)=0.3125
 
-
       ilen = 0
       ierr = 0
       lu = 11
@@ -135,99 +150,125 @@ C  1. Open the default control file if it exists.
       dr_rack_type    = "UNKNOWN"
       crec_default(1) = "UNKNOWN"
       crec_default(2) = "NONE"
-      cmaster_file="NONE"
+      cmaster_dir="NONE"
+      cat_dir=" "
+      nch_cat_dir=0
 
       kautoftp0=.false.
       ldisk2file_dir0 =" "
       lautoftp_string0=" "
 
-C  2. Process the control file if it exists. This loops through twice, 
-C     once for each control file.
+C  2. Process the control file if it exists. Loop throug 3 times.
+!     The first two times check for the global skedf.ctl
+!     The last time for the local file. 
 
-      do j=1,2
-        if(j .eq. 1) then
-          ctemp=cctfil
-        else
-          ctemp = cownctl
-        endif
-        itmplen = trimlen(ctemp)
-        kexist = .false.
-        inquire(file=ctemp,exist=kexist)
-        if(kexist) then
-          open(lu,file=ctemp,iostat=ierr,status='old')
-          if (ierr.ne.0) then
-            write(luscn,9100) ctemp(1:itmplen)
-9100        format("RDCTL01 ERROR: Error opening control file ",A)
-            close(lu)
-            return
-           end if
-           if(j .eq. 1) then
-             write(luscn,9105) ctemp(1:itmplen)
-9105         format("RDCTL02 - Reading system control file ",A)
-           else
-             write(luscn,9106) ctemp(1:itmplen)
-9106         format("RDCTL02 - Reading local control file ",A)
-           endif
-        else if(j .eq. 1) then              !output an error if we can'f find the system.
-          write(luscn,9110) ctemp(1:itmplen)
-9110      format("RDCTL03 ERROR: Can't find system control file ",A)
+      do j=1,3      
+! If already found the global file, don't need to check the alternative.
+        if(j .eq. 2 .and. kfound_global_file) goto 500    !quick exit. 
+! If we are the start of the third round and haven't found the global file, 
+! write a warning message but try to read the local file. 
+        if(j .eq. 3 .and. .not.kfound_global_file) then
+         write(luscn,
+     >   '("WARNING! Rdctl: Did not find global skedf.ctl file:",a)')
+     >       cskedf(1)(1:trimlen(cskedf(1)))
+         write(luscn,
+     >    '("                or alternate global skedf.ctl file:",a)') 
+     >       cskedf(2)(1:trimlen(cskedf(2)))                 
         end if
-! File exists, and we have opened it.
-        if (kexist) then
-          call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $
-          do while (.not.keof)
-            read(cbuf,'(a)') lsecname
-            call capitalize(lsecname)
-            call readline_skdrut(lu,cbuf,keof,ierr,2)  !space to next valid line.
+
+        itmplen = trimlen(cskedf(j))
+        kexist = .false.
+        inquire(file=cskedf(j),exist=kexist)      
+        if(.not.kexist) goto 500                !quick exit. 
+
+        open(lu,file=cskedf(j),iostat=ierr,status='old')
+        if (ierr.ne.0) then
+          write(luscn,9100) cskedf(j)(1:itmplen)
+9100      format("RDCTL01 ERROR: Error opening control file ",A)
+          close(lu)
+          return
+        end if
+
+        if(j .le. 2) then
+          write(luscn,9105) cskedf(j)(1:itmplen)
+9105      format("RDCTL02 - Reading system control file ",A)
+          kfound_global_file=.true. 
+        else
+          write(luscn,9106) cskedf(j)(1:itmplen)
+9106      format("RDCTL02 - Reading local control file ",A)
+        endif
+
+! File exists, and we have opened it.    
+        call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $
+        do while (.not.keof)
+          read(cbuf,'(a)') lsecname
+          call capitalize(lsecname)
+          call readline_skdrut(lu,cbuf,keof,ierr,2)  !space to next valid line.
+
 C  $CATALOGS
-            if (lsecname .eq. "$CATALOGS") then
-              do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
+          if (lsecname .eq. "$CATALOGS") then
+            do while(.not.keof .and.(cbuf(1:1) .ne. "$"))
+              call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
+              call capitalize(lkeyword)
+! Special case--setting default catalog.
+              if(lkeyword .eq. 'CAT_DIR') then
+                cat_dir=lvalue
+                nch_cat_dir=trimlen(cat_dir)
+                if(cat_dir(nch_cat_dir:nch_cat_dir) .ne. "/") then
+                   nch_cat_dir=nch_cat_dir+1
+                   cat_dir(nch_cat_dir:nch_cat_dir)="/"
+                endif
+                goto 9200
+              endif
+! It is assumed that the rest of the values are catalog paths
+              if(lvalue(1:1) .ne. "/") then     ! If we don't start with '/', prepend catalog directory
+                  nch=trimlen(lvalue)
+                  ctemp=cat_dir(1:nch_cat_dir)//lvalue(1:nch)
+                  lvalue=ctemp
+              endif
 
-                call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
-                call capitalize(lkeyword)
-
-                if (lkeyword.eq.'SOURCE') then
-                  source_cat=lvalue
-                else if (lkeyword.eq.'STATION') then
-                  station_cat=lvalue
-                else if (lkeyword.eq.'ANTENNA') then
-                  antenna_cat=lvalue
-                else if (lkeyword.eq.'POSITION') then
-                  position_cat=lvalue
-                else if (lkeyword.eq.'EQUIP') then
-                  equip_cat=lvalue
-                else if (lkeyword.eq.'MASK') then
-                  mask_cat=lvalue
-                else if (lkeyword.eq.'FREQ') then
-                  freq_cat=lvalue
-                else if (lkeyword.eq.'RX') then
-                  rx_cat=lvalue
-                else if (lkeyword.eq.'LOIF') then
-                  loif_cat=lvalue
-                else if (lkeyword.eq.'MODES') then
-                  modes_cat=lvalue
-                else if (lkeyword.eq.'MODES_DESCRIPTION') then
-                  modes_description_cat=lvalue
-                else if (lkeyword.eq.'REC') then
-                  rec_cat=lvalue
-                else if (lkeyword.eq.'HDPOS') then
-                  hdpos_cat=lvalue
-                else if (lkeyword.eq.'TRACKS') then
-                  tracks_cat=lvalue
-                else if (lkeyword.eq.'FLUX') then
-                  flux_cat=lvalue
-                else if (lkeyword.eq.'COMMENTS') then
-                  flux_comments=lvalue
-                else if (lkeyword.eq.'PROGRAM') then
-                  cat_program_path=lvalue
-                else if (lkeyword.eq.'PARAMETER') then
-                  par_program_path=lvalue
-                else if(lkeyword .eq. 'MASTER') then
-                 cmaster_file=lvalue
-                else
-                  write(luscn,9200) lkeyword
-9200              format("RDCTL04 ERROR: Unknown catalog name: ",A)
+              if (lkeyword.eq.'SOURCE') then
+                 source_cat=lvalue
+              else if (lkeyword.eq.'STATION') then
+                 station_cat=lvalue
+              else if (lkeyword.eq.'ANTENNA') then
+                 antenna_cat=lvalue
+              else if (lkeyword.eq.'POSITION') then
+                 position_cat=lvalue
+              else if (lkeyword.eq.'EQUIP') then
+                 equip_cat=lvalue
+              else if (lkeyword.eq.'MASK') then
+                 mask_cat=lvalue
+              else if (lkeyword.eq.'FREQ') then
+                 freq_cat=lvalue
+              else if (lkeyword.eq.'RX') then
+                 rx_cat=lvalue
+              else if (lkeyword.eq.'LOIF') then
+                 loif_cat=lvalue
+              else if (lkeyword.eq.'MODES') then
+                 modes_cat=lvalue
+              else if (lkeyword.eq.'MODES_DESCRIPTION') then
+                 modes_description_cat=lvalue
+              else if (lkeyword.eq.'REC') then
+                 rec_cat=lvalue
+              else if (lkeyword.eq.'HDPOS') then
+                 hdpos_cat=lvalue
+              else if (lkeyword.eq.'TRACKS') then
+                 tracks_cat=lvalue
+              else if (lkeyword.eq.'FLUX') then
+                 flux_cat=lvalue
+              else if (lkeyword.eq.'COMMENTS') then
+                 flux_comments=lvalue
+              else if (lkeyword.eq.'PROGRAM') then
+                cat_program_path=lvalue
+              else if (lkeyword.eq.'PARAMETER') then
+                par_program_path=lvalue
+              else if(lkeyword .eq. 'MASTER') then
+                cmaster_dir=lvalue                                
+              else
+                write(luscn,'("RDCTL04: Unknown catalog ", A)') lkeyword
                 end if
+9200            continue
                 call readline_skdrut(lu,cbuf,keof,ierr,2)
               end do
 ! $MYSQL
@@ -464,6 +505,17 @@ C         TPICD
                   else
                     write(luscn,*) "RDCTL11 ERROR: Invalid TPI period"
                   endif
+! New option for DBBC
+               elseif (lkeyword .eq. 'CONT_CAL') then
+                  lprompt=lvalue(1:3)
+                  call capitalize(lprompt)
+                  if(lprompt .eq. "ON" .or. lprompt .eq. "OFF" .or. 
+     >               lprompt .eq. "ASK") then
+                    contcal_prompt=lprompt
+                  else
+                     write(luscn, *)
+     >             "Error:  Valid CONT_CAL options are ON, OFF, ASK."
+                  endif 
                 endif ! TPICD line
                 call readline_skdrut(lu,cbuf,keof,ierr,2)
               enddo
@@ -473,9 +525,9 @@ C         TPICD
 9220          format("RDCTL07 ERROR: Unrecognized section name ",A)
               call readline_skdrut(lu,cbuf,keof,ierr,1)
             end if
-          end do
-          close (lu)
-        end if  !"control file exists"
+        end do
+        close (lu)   
+500     continue           !quick exit. 
       end do  !"do 1,2"
 
 ! save original state

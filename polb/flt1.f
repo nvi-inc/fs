@@ -30,7 +30,7 @@ C
      +           60,  70,  80,  90, 100,
      +          110,1000,1000,1000, 150,
      +          160,1000,1000, 190, 200,
-     +          210,220) iwhich+1
+     +          210, 220, 230) iwhich+1
       goto 1000
 C
 1     continue
@@ -47,6 +47,7 @@ C
       if (ipar(20).ne.0) f=f+p(20)*sin8y
       if (ipar(21).ne.0) f=f+p(21)*cosx
       if (ipar(22).ne.0) f=f+p(22)*sinx
+      if (ipar(23).ne.0) f=f+p(23)*cosy/siny
       goto 1000
 C
 50    continue
@@ -99,6 +100,10 @@ C
 C
 220   continue
       if (ipar(22).ne.0) f=sinx
+      goto 1000
+C
+230   continue
+      if (ipar(23).ne.0) f=cosy/siny
       goto 1000
 C
 1000  continue

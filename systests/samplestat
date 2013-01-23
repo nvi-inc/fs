@@ -109,17 +109,21 @@ foreach $file (@ARGV) {
 	    }
 	    ($time,$type,$mm,$m,$p,$pp)=split(' ');
 	    $total=$mm+$m+$p+$pp;
-	    $st[$band][$chan][0]=$mm*100/$total;
-	    $st[$band][$chan][1]=$m*100/$total;
-	    $st[$band][$chan][2]=$p*100/$total;
-	    $st[$band][$chan][3]=$pp*100/$total;
-	    if(!defined($opt_r)) {
-		for($l=0;$l<4;$l++) {
-		    $st[$band][$chan][$l]-=$th[$l];
+            if($total <= 0 ) {
+		print STDERR "counts are zero for $chan$sb, is formatter connected to decoder?\n";
+	    } else {
+		$st[$band][$chan][0]=$mm*100/$total;
+		$st[$band][$chan][1]=$m*100/$total;
+		$st[$band][$chan][2]=$p*100/$total;
+		$st[$band][$chan][3]=$pp*100/$total;
+		if(!defined($opt_r)) {
+		    for($l=0;$l<4;$l++) {
+			$st[$band][$chan][$l]-=$th[$l];
+		    }
 		}
+		$count[$band][$chan]++;
+		$some=1;
 	    }
-	    $count[$band][$chan]++;
-	    $some=1;
 	}
     }
 }

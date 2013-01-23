@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "../include/params.h"
 #include "../include/fs_types.h"
 
 char *m5trim();

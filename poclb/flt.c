@@ -45,6 +45,7 @@ struct pmdl *pmodel;
       if (pmodel->ipar[19] != 0) f=f+pmodel->pcof[19]*sin8y;
       if (pmodel->ipar[20] != 0) f=f+pmodel->pcof[20]*cosx;
       if (pmodel->ipar[21] != 0) f=f+pmodel->pcof[21]*sinx;
+      if (pmodel->ipar[22] != 0) f=f+pmodel->pcof[22]*cosy/siny;
       break;
     case 4:
       if (pmodel->ipar[ 4] != 0) f=cosx;
@@ -84,6 +85,9 @@ struct pmdl *pmodel;
       break;
     case 21:   
       if (pmodel->ipar[21] != 0) f=sinx;
+      break;
+    case 22:   
+      if (pmodel->ipar[22] != 0) f=cosy/siny;
       break;
   default:
     f=0.0;

@@ -11,9 +11,9 @@
 
 static char *if_key[ ]={ "a", "b", "c", "d" }; /* if input source */
 /*static double bw_key[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0};*/
-static char *bw_key[ ]={"0.0625","0.125","0.25","0.5","1","2","4","8","16"};
-static int bwbits[ ]={ 0x00, 0x01, 0x02, 0x04, 0x08, 0x11, 0x24, 0x6f, 0xfb};
-static int bwbitc[ ]={ 0x2b, 0x29, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40};
+static char *bw_key[ ]={"0.0625","0.125","0.25","0.5","1","2","4","8","16","32"};
+static int bwbits[ ]={ 0x00, 0x01, 0x02, 0x04, 0x08, 0x11, 0x24, 0x6f, 0xfb, 0xfc};
+static int bwbitc[ ]={ 0x2b, 0x29, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 static char *gm_key[ ]={ "man","agc"};
 static char *av_key[ ]={ "0","1","2","4","10","20","40","60"};/* av. period */
 

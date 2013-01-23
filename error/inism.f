@@ -1,8 +1,8 @@
       subroutine inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
-     +                 wdisum,igp)
+     +                 wdisum,crssum,crsrms,wcrsum,igp)
 C
       double precision lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms
-      double precision wdisum
+      double precision wdisum,crssum,crsrms,wcrsum
 C
       lonsum=0.d0
       latsum=0.d0
@@ -12,6 +12,9 @@ C
       wltsum=0.d0
       dirms=0.d0
       wdisum=0.0d0
+      crssum=0.0d0
+      crsrms=0.0d0
+      wcrsum=0.0d0
       igp=0
 C
       return

@@ -27,12 +27,15 @@ char *ptr;
     ierr=0;
 
     if (kfirst) {
-      if(shm_addr->equip.rack_type == VLBA)
-	type="vlba";
-      else if(shm_addr->equip.rack_type == VLBAG)
-	type="vlbag";
-      else
-	ierr=-300;
+      if(shm_addr->equip.rack == VLBA) {
+	if(shm_addr->equip.rack_type == VLBA)
+	  type="vlba";
+	else if(shm_addr->equip.rack_type == VLBAG)
+	  type="vlbag";
+	else
+	  ierr=-300;
+      } else
+	type="vlbag";  /* only VLBAG were every modified to include other formatters: VLBA4 or VLBA45 */
       kfirst=FALSE;
     }  
       
@@ -86,12 +89,15 @@ struct vform_cmd *lcl;
     static int itrk, ilast;
 
     if (kfirst) {
-      if(shm_addr->equip.rack_type == VLBA)
-	type="vlba";
-      else if(shm_addr->equip.rack_type == VLBAG)
-	type="vlbag";
-      else
-	type="";
+      if(shm_addr->equip.rack == VLBA) {
+	if(shm_addr->equip.rack_type == VLBA)
+	  type="vlba";
+	else if(shm_addr->equip.rack_type == VLBAG)
+	  type="vlbag";
+	else
+	  type="";
+      } else
+	type="vlbag";  /* only VLBAG were every modified to include other formatters: VLBA4 or VLBA45 */
       kfirst=FALSE;
     }  
 

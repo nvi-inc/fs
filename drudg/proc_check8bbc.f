@@ -15,6 +15,7 @@
       integer ib
       logical kinclude  !
 
+      kinclude=.true. 
       ib=ichan          !default
       if (km3be) then
 !        ib=ichan

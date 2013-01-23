@@ -2,24 +2,27 @@
 #include <sys/types.h>
 #include <sys/times.h>
 #include <time.h>
+#include <unistd.h>
 
-void usleep();
+clock_t rte_times(struct tms *buf);
 
 unsigned rte_sleep( centisec)
 unsigned centisec;
 {
-     clock_t times();
      struct tms buffer;
-     long wait, end;
+     unsigned long wait, end, now;
+     unsigned int usecs;
 
-     end=times(&buffer)+centisec;
+     end=rte_times(&buffer)+centisec+1;
 
-     wait=end-times(&buffer);        /* must be a signed int for comparison */
-     while(wait>0) {
-       if(wait>214748)
-         wait=214748;
-       usleep((unsigned) wait*10000);
-       wait=end-times(&buffer);
+     now=rte_times(&buffer);
+     while(end > now) {
+       wait=end-now;
+       if(wait>429496) /* max unsigned we can multiple up to fit */
+         wait=429496;
+       usecs=wait*10000;
+       usleep(usecs);
+       now=rte_times(&buffer);
      }
 
      return( (unsigned) 0);

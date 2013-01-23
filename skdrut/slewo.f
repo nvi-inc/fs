@@ -46,7 +46,7 @@ C     CALLING SUBROUTINES: OBSCM,CHCMD, and others
 C     CALLED SUBROUTINES: CVPOS,CABLW
 C
 C   LOCAL VARIABLES
-       LOGICAL KCONT
+       LOGICAL kcont
       REAL*4 RSTCON(2),tslewp,tslewc,delaz,delel,deldc,delha,
      .delx30,dely30,delx85,dely85,aznow,aznew,elnow,elnew,hanow,
      .hanew,decnow,decnew,x30now,x30new,y30now,y30new,x85now,x85new,
@@ -78,6 +78,7 @@ C     900511  NRV         "       "      "     7 (ALGO)
 C     930308  nrv    implicit none
 C     931012  nrv    Add in the constants when calculating slew times for
 C                    type 7 (ALGO)
+!   2008Jun20 JMG. Changed arg list for kcontn.
 C
 C
 C     1. First we find the position of the telescope at the end of
@@ -174,7 +175,7 @@ C
       IF ((ABS(TSLEWC-TSLEWP).LT.10).OR.(NLOOPS.GE.5)) GOTO 110
       GOTO 100
 C     We get here if the slew has converged OR we iterated 5 times.
-110   IF  (KCONT(UT+TSLEWC,TSLEWP-TSLEWC,NSNEW,ISTN,LWRCUR,MJD))
+110   IF  (kcont(mjd,UT+TSLEWC,TSLEWP-TSLEWC,NSNEW,ISTN,LWRCUR))
      .  THEN  !continuity OK
         TSLEW = TSLEWC
         RSTCON(1) = FLOAT(ISTCON(1,ISTN))

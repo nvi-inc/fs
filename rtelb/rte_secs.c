@@ -1,19 +1,35 @@
 /* rte_secs.c - find seconds offset from times value */
 
-#include <sys/types.h>
 #include <sys/times.h>
+#include <sys/time.h>
 #include <time.h>
+#include <errno.h>
 
-void rte_rawt();
-
-long rte_secs()
+long rte_secs(long *usec_off,unsigned long *ticks_off,int *error, int *perrno)
 {
-     time_t clock1, clock2;
-     long centisec;
+  struct tms buf;
+  struct timeval tv;
+  clock_t ticks;
 
-     rte_ticks(&centisec);
-     clock2=time(&clock2);
+  ticks=times(&buf);
+  if(ticks == (clock_t) -1) {
+    perror("rte_secs, using times()");
+    *error = -1;
+    *perrno=errno;
+    return 0;
+  }
 
-     return (clock2-(centisec/100));
+  if(0!= gettimeofday(&tv, NULL)) {
+    perror("rte_secs, using gettimeofday()");
+    *error = -2;
+    *perrno=errno;
+    return 0;
+  }
+
+  *error=0;
+  *perrno=0;
+  *ticks_off=(unsigned long) ticks;
+  *usec_off=tv.tv_usec;
+  return tv.tv_sec;
 
 }

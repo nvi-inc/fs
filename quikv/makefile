@@ -26,7 +26,7 @@ reset_vc.o set_att.o tacd.o tacd_dis.o cablediff.o mk5.o mk5_dis.o\
 disk_record.o disk_record_dis.o\
 disk_pos.o disk_pos_dis.o disk_serial.o disk_serial_dis.o\
 data_check.o data_check_dis.o data_check_pos.o mk5relink.o mk5close.o\
-rollform.o rollform_dis.o tpicd.o tpicd_dis.o onoff.o onoff_dis.o calrx.o\
+rollform.o rollform_dis.o tpicd.o tpicd_dis.o onoff.o onoff_dis.o\
 calrx_dis.o ds.o ds_dis.o lba_cor.o lba_cor_dis.o lba_ft.o lba_ft_dis.o\
 lba_ifp.o lba_ifp_dis.o lba_mon.o lba_mon_dis.o lba_trkfrm.o lba_trkfrm_dis.o\
 bank_check.o bank_check_dis.o logm5msg.o disk2file.o disk2file_dis.o\
@@ -34,7 +34,10 @@ in2net.o in2net_dis.o user_device.o user_device_dis.o\
 s2agc.o s2bbc.o s2diag.o s2encode.o s2fs.o s2ifx.o s2version.o s2mode.o\
 s2ping.o s2pwrmon.o s2status.o s2tonedet.o s2chkr.o s2delay.o\
 scan_check.o scan_check_dis.o last_check.o mk5b_mode.o mk5b_mode_dis.o\
-vsi4.o vsi4_dis.o
+vsi4.o vsi4_dis.o holog.o holog_dis.o satellite.o satellite_dis.o antcn.o\
+satoff.o satoff_dis.o satpos.o tle.o dbbc.o dbbc_dis.o dbbcnn.o dbbcnn_dis.o\
+logmsg_dbbc.o dbbcifx.o dbbcifx_dis.o dbbcform.o dbbcform_dis.o\
+dbbc_cont_cal.o dbbc_cont_cal_dis.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

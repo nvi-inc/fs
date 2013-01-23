@@ -1,0 +1,31 @@
+From: Paul Burgess <paul.burgess@manchester.ac.uk>
+To: Zsolt Paragi <zparagi@jive.nl>
+CC: EVNtech <EVNtech@jb.man.ac.uk>
+Sender: "owner-evntech@jb.man.ac.uk" <owner-evntech@jb.man.ac.uk>
+Date: Tue, 24 Nov 2009 08:25:43 -0600
+Subject: Re: EVNtech: logs/antabfs for 19-20 November
+
+Hi,
+
+  If anyone is interested I wrote a small script 'lgput' which I
+attach to this email. I keep it in /usr2/st/bin, chmod og+rwx
+
+  You can call it from the Field System with a procedure 'sendlog'
+called from 'sched_end' like this -
+
+sendlog
+!+10s
+
+Procedure 'sendlog is then :
+
+   "send the logfile to vlbeer 081211
+  sy =exec lgput `lognm`.log cm &
+
+  No doubt script experts will want to improve it, but it seems to
+have worked well enough for a while. I also have another one to send
+the tsys files.
+
+  Note: it works out the upload directory from the current month.
+
+Cheers
+Paul

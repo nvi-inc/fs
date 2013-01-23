@@ -38,14 +38,15 @@
       logical km4fmk4rack
       logical kk3fmk4rack
       logical k8bbc
+      logical kdbbc_rack 
 
       common /hardware/km3rack,km4rack,km5rack,kmracks
       common /hardware/kvrack,kv4rack,kv5rack,kvracks
       common /hardware/kk41rack,kk42rack,klrack
-      common /hardware/km4fmk4rack,kk3fmk4rack,k8bbc
+      common /hardware/km4fmk4rack,kk3fmk4rack,k8bbc,kdbbc_rack 
 ! Mark4 formatter.
-      logical km4form
-      common /hardware/km4form
+      logical kvform,km3form,km4form,km5form 
+      common /hardware/kvform,km3form,km4form,km5form
 
 ! Kinds of recorders.
       logical km3rec(2)

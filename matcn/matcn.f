@@ -112,6 +112,7 @@ C               - alarm message **NOTE** this should remain at a
 C                 max of 20 characters for longest message from MATCN 
       integer ichcm_ch, iflch, fc_rte_prior, portopen, portbaud
       integer*4 ibmatl
+      integer portclose
       logical ktp 
 C               - true if this message is addressed to the TAPE drive
       equivalence (reg,ireg(1))
@@ -121,6 +122,7 @@ C      - list of legal baud rates and corresponding indices
       logical kclear
       logical k5b
       integer it5b(6),it(6)
+      logical kfirst
 C
 C   INITIALIZED VARIABLES
 C
@@ -131,6 +133,7 @@ C
       data ibaud/110,300,600,1200,2400,4800,9600/
 C effective read character rates from Blue Books
       data ibdrt/10,29.8,57.4,110,203,341,500/
+      data kfirst/.true./
 C
 C
 C     1. First get parameters and initialize if necessary.
@@ -168,13 +171,20 @@ C
       ibits=7
       ibmatl=ibmat
       knull=ichcm_ch(idevmat,1,'/dev/null ').eq.0
-      lumat=0
+      lumat=-1
       if(.not.knull) then
-        ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
-        if (ierr.ne.0) call logit7ci(0,0,0,1,-100,'ma',ierr)
+         ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
+         if (ierr.ne.0) then
+            call logit7ci(0,0,0,1,-100,'ma',ierr)
+            if(lumat.ge.0) then
+               ierr=portclose(lumat)
+               if (ierr.ne.0) call logit7ci(0,0,0,1,-103,'ma',ierr)
+               lumat=-1
+            endif
+         endif
       endif
 C
-      if (lumat.lt.0) goto 1090
+      if (lumat.lt.0.and..not.knull) goto 1090
 C
 C     1.2  Read in device address table.
 C     Read table from class buffer
@@ -215,6 +225,10 @@ C
       if(knull) then
         ierr=-7
         goto 1090
+      endif
+      if(lumat.lt.0) then
+         ierr=-9
+         goto 1090
       endif
       call ifill_ch(ibuf,1,180,' ')
       k5b=.false.
@@ -440,6 +454,33 @@ C
 C     9.  End of outer loop on class records. 
 C 
  899    continue
+c on first read, if time-out close and re-open, maybe a 
+C solution for an intermittent kernel 2.6 problem with SuperMicro C7SIM-Q?
+        if(kfirst.and.ierr.eq.-4) then
+           call logit7ci(0,0,0,1,-104,'ma',ierr)
+           ierr=portclose(lumat)
+           if (ierr.ne.0) call logit7ci(0,0,0,1,-103,'ma',ierr)
+           lumat=-1
+           nchar=iflch(idevmat,64)
+           ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
+           if (ierr.ne.0) then
+              call logit7ci(0,0,0,1,-100,'ma',ierr)
+              if(lumat.ge.0) then
+                 ierr=portclose(lumat)
+                 if (ierr.ne.0) call logit7ci(0,0,0,1,-103,'ma',ierr)
+                 lumat=-1
+              endif
+           endif
+           if(lumat.ge.0) then
+              call logit7ci(0,0,0,1,-105,'ma',ierr)
+           else
+              call logit7ci(0,0,0,1,-106,'ma',ierr)
+           endif
+c this was still a time-out even if we recovered
+           ierr=-4
+        endif
+c never again
+        kfirst=.false.
         if (imode.eq.-21.or.imode.eq.-22) then
            call put_buf(iclasr,ierr,-4,'fs','  ')
            nclrer = nclrer + 1 

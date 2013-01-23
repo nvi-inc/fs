@@ -10,6 +10,11 @@ C     Only generic error messages are written. The calling
 C     routine should list the station name for clarity.
 C
       include '../skdrincl/skparm.ftni'
+! functions
+      integer iwhere_in_string_list
+      character upper
+      integer fvex_len,fvex_field,ptr_ch,fvex_double
+      integer fvex_units,fget_all_lowl
 C
 C  History:
 C 960522 nrv New.
@@ -22,6 +27,8 @@ C 991110 nrv Allow IF type 3N to be valid.
 ! 2004Oct19 JMGipson.  Removed warning message if LO was negative.
 ! 2006Oct06 JMGipson.  changed ls,lin,lp --> (ASCII) cs,cin,cp
 !                      Made IF="1" a valid choice. An S2 VEX schedule had this.
+! 2012Sep17 JMGipson.  Madef a1,a2..a4,...d4 valid choices since this is what DBBCs expect.
+!            Also if an unrecognized value, issue warning message but leave alone. 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -40,17 +47,25 @@ C                    <0 indicates invalid value for a field
       double precision fpcal_base(max_ifd) ! pcal_base frequencies
       character*2 cs(max_ifd) ! sideband of the LO
       character*2 cin(max_ifd) ! IF input channel
+      character*2 cin_tmp
       character*2 cp(max_ifd) ! polarization
-
+      integer iwhere                !where in a list.
       integer nifdefs ! number of IFDs found
+
+      integer num_valid_if
+      parameter (num_valid_if=27)
+      character*2 cvalid_if(num_valid_if) 
+
 C
 C  LOCAL:
       character*128 cout,cunit
       double precision d
-      integer idum,id,nch
-      character upper
-      integer fvex_len,fvex_field,ptr_ch,
-     .fvex_double,fvex_units,fget_all_lowl
+      integer id,nch
+      data cvalid_if/"A", "B", "C", "D", "1",     !5
+     >               "1N","2N","2A","30","3I","3N",    !+6=11
+     >   "A1","A2","A3","A4","B1","B2","B3","B4",
+     >   "C1","C2","C3","C4","D1","D2","D3","D4"/ !+16=27
+
 C
 C  Initialize
       nifdefs=0
@@ -82,7 +97,7 @@ C  1.1 IF def
         nch = fvex_len(cout)
         if (nch.gt.len(cifref(id)).or.nch.le.0) then
           ierr=-1
-          write(lu,'("VUNPIFD01 - IFD ref too long")')
+          write(lu,'("VUNPIF01 - IFD ref too long")')
         else
           cifref(id)=cout(1:nch)
         endif
@@ -96,19 +111,15 @@ C  1.2 IF input
         if (nch.ne.1.and.nch.ne.2) then
           ierr=-2
           write(lu,'(a)')
-     >       "VUNPIFD04 - IF input must be 1 or 2 characters"
+     >       "VUNPIF04 - IF input must be 1 or 2 characters"
         else
-          if (cout(1:nch).eq.'1N'.or.cout(1:nch).eq.'1A'.or.
-     .        cout(1:nch).eq.'2N'.or.cout(1:nch).eq.'2A'.or.
-     .        cout(1:nch).eq.'3O'.or.cout(1:nch).eq.'3I'.or.
-     .        cout(1:nch).eq.'3N'.or.
-     .        cout(1:nch).eq.'A'.or.cout(1:nch).eq.'B'.or.
-     .        cout(1:nch).eq.'C'.or.cout(1:nch).eq.'D'.or.
-     .        cout(1:nch).eq.'1') then
-            cin(id)=cout(1:nch)
-          else
-            ierr=-2
-            write(lu,'("VUNPIFD05 - Invalid IF input ",a)') cout(1:nch)
+          cin(id)=cout(1:nch) 
+          cin_tmp=cin(id) 
+          call capitalize(cin_tmp)
+          iwhere=iwhere_in_string_list(cvalid_if,num_valid_if,cin_tmp) 
+          if(iwhere .eq. 0) then                     
+            write(lu,'("VUNPIF05: Warning. Unrecognized IF ",a)') 
+     >        cin(id)
           endif
         endif
 
@@ -121,7 +132,7 @@ C  1.3 Polarization
         cout(1:1) = upper(cout(1:1))
         if (nch.ne.1.or.(cout(1:1).ne.'R'.and.cout(1:1).ne.'L')) then
           ierr=-3
-          write(lu,'("VUNPIFD06 - Polarization must be R or L")')
+          write(lu,'("VUNPIF06 - Polarization must be R or L")')
         else
           cp(id)=cout(1:1)
         endif
@@ -136,7 +147,7 @@ C  1.4 LO frequency
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
         if (iret.ne.0.or.d.lt.0.d0) then
 !          ierr=-4
-!          write(lu,'("VUNPIFD02 - Invalid LO frequency",d10.2)') d
+!          write(lu,'("VUNPIF02 - Invalid LO frequency",d10.2)') d
         else
           flo(id) = d/1.d6
         endif
@@ -150,7 +161,7 @@ C  1.5 Sideband
         cout(1:1) = upper(cout(1:1))
         if (nch.ne.1.or.(cout(1:1).ne.'U'.and.cout(1:1).ne.'L')) then
           ierr=-5
-          write(lu,'("VUNPIFD03 - Sideband must be U or L")')
+          write(lu,'("VUNPIF03 - Sideband must be U or L")')
         else
           cs(id)=cout(1:1)
         endif
@@ -165,7 +176,7 @@ C  1.6 Phase cal spacing
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0.or.d.lt.0.d0) then
             ierr=-6
-            write(lu,'("VUNPIFD04 - Invalid phase cal frequency",
+            write(lu,'("VUNPIF04 - Invalid phase cal frequency",
      .          d10.2)') d
           else
             fpcal(id) = d/1.d6 ! convert to MHz
@@ -182,7 +193,7 @@ C  1.7 Phase cal base
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
           if (iret.ne.0.or.d.lt.0.d0) then
             ierr=-7
-            write(lu,'("VUNPIFD05 - Invalid phase cal base frequency",
+            write(lu,'("VUNPIF05 - Invalid phase cal base frequency",
      .          d10.2)') d
           else
             fpcal_base(id) = d/1.d6 ! convert to MHz

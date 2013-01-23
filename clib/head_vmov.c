@@ -8,6 +8,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+clock_t rte_times(struct tms *);
+
 void head_vmov(ihead,idir,ispdhd,jm,ip,indxtp)
 int ihead;                     /* head 1-4 */
 int idir;                      /* direction (0|1 = SLOW|FAST) */
@@ -76,8 +78,8 @@ int indxtp;
 
        rte_sleep( jm/250+2);    /* sleep at least as long at it might take */
 
-       end=times(&tms_buff)+200;    /* give it 2 more seconds to complete*/
-       while(end>times(&tms_buff) && !motion_done(ip,indx))
+       end=rte_times(&tms_buff)+200;    /* give it 2 more seconds to complete*/
+       while(end>rte_times(&tms_buff) && !motion_done(ip,indx))
 	;
        if(ip[2]<0) return;        /* error or still moving */
 

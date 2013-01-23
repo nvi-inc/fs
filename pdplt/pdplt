@@ -157,8 +157,8 @@ proc readErrorFile {} {
     global global_antennatype statusMsg text_reading_errorfile
     global text_reading_xtrac reprocFlag
     global currentErrorBar statusVariable noOfGood current_XTRAC current_ERROR
-    global XmeanRes YmeanRes XrmsRes YrmsRes
-    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw
+    global XmeanRes YmeanRes XrmsRes YrmsRes CYmeanRes CYrmsRes Iflags XFEC YFEC
+    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw CYmeanRaw CYrmsRaw RChi DFree
 
     set fileID [open $current_ERROR r]
     set statusMsg $text_reading_errorfile
@@ -170,8 +170,16 @@ proc readErrorFile {} {
 	set correct [string first "\$observed_stats" $readline]
     }
     set EOF [gets $fileID readline]
-    set conversions [scan $readline "%f%f%f%f" XmeanRaw XrmsRaw YmeanRaw YrmsRaw]
-    if {$conversions != 4} {set XmeanRaw ???; set XrmsRaw ???; set YmeanRaw ???; set YrmsRaw ???}
+    set conversions [scan $readline "%f%f%f%f%f%f%f%f%f" XmeanRaw XrmsRaw YmeanRaw YrmsRaw Drms Gpts Tpts CYmeanRaw CYrmsRaw]
+    if {$conversions != 9} {set XmeanRaw ???; set XrmsRaw ???; set YmeanRaw ???; set YrmsRaw ???; set CYmeanRaw ???; set CYrmsRaw ???}
+    set correct -1
+    while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
+	set EOF [gets $fileID readline]
+	set correct [string first "\$fit_stats" $readline]
+    }
+    set EOF [gets $fileID readline]
+    set conversions [scan $readline "%f%f%f%f%f%f%f%f%x" Ierr RChi NlonR NLatR DFree XFEC YFEC Itry Iflags]
+    if {$conversions != 9} {set Iflags 0}
     set correct -1
     while {[expr {$correct < 0}] && [expr {$EOF != -1}]} {
 	set EOF [gets $fileID readline]
@@ -192,6 +200,12 @@ proc readErrorFile {} {
 	    set conversions [scan $readline "%d%f%f%f%f%f%f%f%f%f" status nodeDataMatrix($noOfNodes,1) nodeDataMatrix($noOfNodes,2) nodeDataMatrix($noOfNodes,3) nodeDataMatrix($noOfNodes,4) nodeDataMatrix($noOfNodes,5) nodeDataMatrix($noOfNodes,8) nodeDataMatrix($noOfNodes,9) nodeDataMatrix($noOfNodes,14) nodeDataMatrix($noOfNodes,15)]
 	    set nodeDataMatrix($noOfNodes,6) $currentPos
 	    set nodeDataMatrix($noOfNodes,7) [expr $status-1]
+	    if {($Iflags & 2)==2} {
+		set coslt [expr cos($nodeDataMatrix($noOfNodes,2)*3.141592654/180.)]
+		set nodeDataMatrix($noOfNodes,3) [format "%.5f" [expr $nodeDataMatrix($noOfNodes,3)*$coslt]]
+		set nodeDataMatrix($noOfNodes,8) [format "%.5f" [expr $nodeDataMatrix($noOfNodes,8)*$coslt]]
+		set nodeDataMatrix($noOfNodes,14) [format "%.5f" [expr $nodeDataMatrix($noOfNodes,14)*$coslt]]
+	    }
 	    set nodeDataMatrix($noOfNodes,17) $nodeDataMatrix($noOfNodes,3)
 	    set nodeDataMatrix($noOfNodes,18) $nodeDataMatrix($noOfNodes,4)
 	    if {$conversions >= 6} {
@@ -212,8 +226,8 @@ proc readErrorFile {} {
 	set correct [string first "\$" $readline]
     }
     set EOF [gets $fileID readline]
-    set conversions [scan $readline "%f%f%f%f" XmeanRes XrmsRes YmeanRes YrmsRes]
-    if {$conversions != 4} {set XmeanRes ???; set XrmsRes ???; set YmeanRes ???; set YrmsRes ???}
+    set conversions [scan $readline "%f%f%f%f%f%f%f%f%f" XmeanRes XrmsRes YmeanRes YrmsRes Drms Gpts Tpts CYmeanRes CYrmsRes]
+    if {$conversions != 9} {set XmeanRes ???; set XrmsRes ???; set YmeanRes ???; set YrmsRes ???; set CYmeanRes ???; set CYrmsRes ???}
     close $fileID
 #
     # Build error menu according to whether sigma values were found in error
@@ -282,6 +296,11 @@ proc readErrorFile {} {
 	    if {$conversions == 9} {
 		while 1 {
 		    if {[expr {$nodeDataMatrix($counter,1)==$col1}] && [expr {$nodeDataMatrix($counter,2)==$col2}]} {
+			if {($Iflags & 2)==2} {
+			    set coslt [expr cos($col2*3.141592654/180.)]
+			    set col3 [format "%.5f" [expr $col3*$coslt]]
+			    set col5 [format "%.5f" [expr $col5*$coslt]]
+			}
 			set nodeDataMatrix($counter,12) $col5
 			set nodeDataMatrix($counter,13) $col6
 			set nodeDataMatrix($counter,10) $col7
@@ -325,7 +344,7 @@ proc readErrorFile {} {
 
 # Input: Data for statistics menu
 
-proc settypedata {Xmean Xrms Ymean Yrms} {
+proc settypedata {Xmean Xrms Ymean Yrms CYmean CYrms Iflags XFEC YFEC RChi DFree type } {
     global global_antennatype XPointLabel YPointLabel XPointOffsetLabel YPointOffsetLabel XPointSigmaLabel YPointSigmaLabel
     set typeval 0
     foreach typestr {concat XYNS XYEW HADC AZEL NONE} {
@@ -338,84 +357,174 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	1 {
 	    set XPointLabel "X........:"
 	    set YPointLabel "Y........:"
-	    set XPointOffsetLabel "X-offset.:"
+	    if {($Iflags & 2)==2} {
+		set XPointOffsetLabel "xY-offset.:"
+		set XPointSigmaLabel "xY-sigma..:"
+	    } else {
+		set XPointOffsetLabel "X-offset.:"
+		set XPointSigmaLabel "X-sigma..:"
+	    }
+	    if {($Iflags & 1)==1} {
+		set XFECLabel "xY FEC:"
+	    } else {
+		set XFECLabel " X FEC:"
+	    }
 	    set YPointOffsetLabel "Y-offset.:"
-	    set XPointSigmaLabel "X-sigma..:"
 	    set YPointSigmaLabel "Y-sigma..:"
-	    set xmeanlabel "X-mean.:"
-	    set xrmslabel "X-rms..:"
-	    set ymeanlabel "Y-mean.:"
-	    set yrmslabel "Y-rms..:"
+	    set YFECLabel " Y FEC:"
+	    set xmeanlabel " X-mean.:"
+	    set xrmslabel " X-rms..:"
+	    set ymeanlabel " Y-mean.:"
+	    set yrmslabel " Y-rms..:"
+	    set cymeanlabel "xY-mean.:"
+	    set cyrmslabel "xY-rms..:"
 	    .mbar.graph.menu add radio -label "X-axis   vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xY-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "Y-offset vs X-axis" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xY-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "Y-offset vs Y-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	2 {
 	    set XPointLabel "X........:"
 	    set YPointLabel "Y........:"
-	    set XPointOffsetLabel "X-offset.:"
+	    if {($Iflags & 2)==2} {
+		set XPointOffsetLabel "xY-offset.:"
+		set XPointSigmaLabel "xY-sigma..:"
+	    } else {
+		set XPointOffsetLabel "X-offset.:"
+		set XPointSigmaLabel "X-sigma..:"
+	    }
+	    if {($Iflags & 1)==1} {
+		set XFECLabel "xY FEC:"
+	    } else {
+		set XFECLabel " X FEC:"
+	    }
 	    set YPointOffsetLabel "Y-offset.:"
-	    set XPointSigmaLabel "X-sigma..:"
 	    set YPointSigmaLabel "Y-sigma..:"
-	    set xmeanlabel "X-mean.:"
-	    set xrmslabel "X-rms..:"
-	    set ymeanlabel "Y-mean.:"
-	    set yrmslabel "Y-rms..:"
+	    set YFECLabel " Y FEC:"
+	    set xmeanlabel " X-mean.:"
+	    set xrmslabel " X-rms..:"
+	    set ymeanlabel " Y-mean.:"
+	    set yrmslabel " Y-rms..:"
+	    set ycmeanlabel "xY-mean.:"
+	    set ycrmslabel "xY-rms..:"
 	    .mbar.graph.menu add radio -label "X-axis   vs Y-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xY-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "X-offset vs X-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "Y-offset vs X-axis" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xY-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "X-offset vs Y-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "Y-offset vs Y-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	3 {
 	    set XPointLabel "Hour ang.:"
 	    set YPointLabel "Decl.....:"
-	    set XPointOffsetLabel "HA-offset:"
+	    if {($Iflags & 2)==2} {
+		set XPointOffsetLabel "xDC-offset:"
+		set XPointSigmaLabel "xDC-sigma.:"
+	    } else {
+		set XPointOffsetLabel "HA-offset:"
+		set XPointSigmaLabel "HA-sigma.:"
+	    }
+	    if {($Iflags & 1)==1} {
+		set XFECLabel "xDC FEC:"
+	    } else {
+		set XFECLabel " HA FEC:"
+	    }
 	    set YPointOffsetLabel "DC-offset:"
-	    set XPointSigmaLabel "HA-sigma.:"
 	    set YPointSigmaLabel "DC-sigma.:"
-	    set xmeanlabel "HA-mean:"
-	    set xrmslabel "HA-rms.:"
-	    set ymeanlabel "DC-mean:"
-	    set yrmslabel "DC-rms.:"
+	    set YFECLabel " DC FEC:"
+	    set xmeanlabel " HA-mean:"
+	    set xrmslabel " HA-rms.:"
+	    set ymeanlabel " DC-mean:"
+	    set yrmslabel " DC-rms.:"
+	    set cymeanlabel "xDC-mean:"
+	    set cyrmslabel "xDC-rms.:"
 	    .mbar.graph.menu add radio -label "HA-axis   vs DC-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "HA-offset vs HA-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xDC-offset vs HA-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "HA-offset vs HA-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "DC-offset vs HA-axis" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "HA-offset vs DC-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xDC-offset vs DC-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label "HA-offset vs DC-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    }
 	    .mbar.graph.menu add radio -label "DC-offset vs DC-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	4 {
 	    set XPointLabel "Azimuth..:"
 	    set YPointLabel "Elevation:"
-	    set XPointOffsetLabel "AZ-offset:"
+	    if {($Iflags & 2)==2} {
+		set XPointOffsetLabel "xEL-offset:"
+		set XPointSigmaLabel "xEL-sigma.:"
+	    } else {
+		set XPointOffsetLabel "AZ-offset:"
+		set XPointSigmaLabel "AZ-sigma.:"
+	    }
+	    if {($Iflags & 1)==1} {
+		set XFECLabel "xEL FEC:"
+	    } else {
+		set XFECLabel " AZ FEC:"
+	    }
 	    set YPointOffsetLabel "EL-offset:"
-	    set XPointSigmaLabel "AZ-sigma.:"
 	    set YPointSigmaLabel "EL-sigma.:"
-	    set xmeanlabel "AZ-mean:"
-	    set xrmslabel "AZ-rms..:"
-	    set ymeanlabel "EL-mean:"
-	    set yrmslabel "EL-rms..:"
-	    .mbar.graph.menu add radio -label "AZ-axis   vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
+	    set YFECLabel " EL FEC:"
+	    set xmeanlabel " AZ-mean:"
+	    set xrmslabel " AZ-rms..:"
+	    set ymeanlabel " EL-mean:"
+	    set yrmslabel " EL-rms..:"
+	    set cymeanlabel "xEL-mean:"
+	    set cyrmslabel "xEL-rms..:"
+	    .mbar.graph.menu add radio -label " AZ-axis   vs EL-axis" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
-	    .mbar.graph.menu add radio -label "AZ-offset vs AZ-axis" -variable currentPlot -value 2 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "EL-offset vs AZ-axis" -variable currentPlot -value 3 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "AZ-offset vs EL-axis" -variable currentPlot -value 4 -command {plotdefault}
-	    .mbar.graph.menu add radio -label "EL-offset vs EL-axis" -variable currentPlot -value 5 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+	    .mbar.graph.menu add radio -label "xEL-offset vs AZ-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    } else {
+	    .mbar.graph.menu add radio -label " AZ-offset vs AZ-axis" -variable currentPlot -value 2 -command {plotdefault}
+	    }
+	    .mbar.graph.menu add radio -label " EL-offset vs AZ-axis" -variable currentPlot -value 3 -command {plotdefault}
+	    if {($Iflags & 2)==2} {
+		.mbar.graph.menu add radio -label "xEL-offset vs EL-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    } else {
+		.mbar.graph.menu add radio -label " AZ-offset vs EL-axis" -variable currentPlot -value 4 -command {plotdefault}
+	    }
+	    .mbar.graph.menu add radio -label " EL-offset vs EL-axis" -variable currentPlot -value 5 -command {plotdefault}
 	}
 	5 {
 	    set XPointLabel "???:"
 	    set YPointLabel "???:"
 	    set XPointOffsetLabel "???:"
 	    set YPointOffsetLabel "???:"
+	    set XPointSigmaLabel "???:"
+	    set YPointSigmaLabel "???:"
+	    set XFECLabel "???:"
+	    set YFECLabel "???:"
 	    set xmeanlabel "???:"
 	    set xrmslabel "???:"
 	    set ymeanlabel "???:"
 	    set yrmslabel "???:"
+	    set cymeanlabel "???:"
+	    set cyrmslabel "???:"
 	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 1 -command {plotdefault}
 	    .mbar.graph.menu add separator
 	    .mbar.graph.menu add radio -label "??? vs ???" -variable currentPlot -value 2 -command {plotdefault}
@@ -425,10 +534,31 @@ proc settypedata {Xmean Xrms Ymean Yrms} {
 	}
     }
     .mbar.stat.menu delete 0 last
-    .mbar.stat.menu add command -label [format "%s  %+f" $xmeanlabel $Xmean]
-    .mbar.stat.menu add command -label [format "%s  %+f" $xrmslabel $Xrms]
+    if {($Iflags & 2)==2} {
+	.mbar.stat.menu add command -label [format "%s  %+f" $cymeanlabel $CYmean]
+	.mbar.stat.menu add command -label [format "%s  %+f" $cyrmslabel $CYrms]
+    } else {
+	.mbar.stat.menu add command -label [format "%s  %+f" $xmeanlabel $Xmean]
+	.mbar.stat.menu add command -label [format "%s  %+f" $xrmslabel $Xrms]
+    }
     .mbar.stat.menu add command -label [format "%s  %+f" $ymeanlabel $Ymean]
     .mbar.stat.menu add command -label [format "%s  %+f" $yrmslabel $Yrms]
+    .mbar.stat.menu add separator
+    if {($Iflags & 2)==0} {
+	.mbar.stat.menu add command -label [format "%s  %+f" $cymeanlabel $CYmean]
+	.mbar.stat.menu add command -label [format "%s  %+f" $cyrmslabel $CYrms]
+    } else {
+	.mbar.stat.menu add command -label [format "%s  %+f" $xmeanlabel $Xmean]
+	.mbar.stat.menu add command -label [format "%s  %+f" $xrmslabel $Xrms]
+    }
+    if { $type != 0 } {
+	.mbar.stat.menu add separator
+	.mbar.stat.menu add command -label [format "%s  %+f" $XFECLabel $XFEC]
+	.mbar.stat.menu add command -label [format "%s  %+f" $YFECLabel $YFEC]
+	.mbar.stat.menu add separator
+	.mbar.stat.menu add command -label [format "RChi     %.4f" $RChi]
+	.mbar.stat.menu add command -label [format "DFree    %.0f"  $DFree]
+    }
 }
 
 # Procedure for creating/updating sources menu
@@ -798,7 +928,7 @@ proc nodeCoordY {y ymin ymax} {
 # ------------------------------------------------------
 
 proc labelheader {} {
-    global currentPlot global_antennaname global_antennatype
+    global currentPlot global_antennaname global_antennatype Iflags XFEC YFEC RChi DFree
     .c dchars title 0 end
     .c insert title 0 [format "%s %s antenna" $global_antennaname $global_antennatype]
     set typeval 0
@@ -811,36 +941,76 @@ proc labelheader {} {
 	1 {
 	    switch $currentPlot {
 		1 {set xlabel "X-axis"; set ylabel "Y-axis"}
-		2 {set xlabel "X-axis"; set ylabel "X-offset"}
+		2 {if {($Iflags & 2)==2} {
+		    set xlabel "X-axis"; set ylabel "xY-offset"
+		} else {
+		    set xlabel "X-axis"; set ylabel "X-offset"
+		}
+		}
 		3 {set xlabel "X-axis"; set ylabel "Y-offset"}
-		4 {set xlabel "Y-axis"; set ylabel "X-offset"}
+		4 {if {($Iflags & 2)==2} {
+		    set xlabel "Y-axis"; set ylabel "xY-offset"
+		} else {
+		    set xlabel "Y-axis"; set ylabel "X-offset"
+		}
+		}
 		5 {set xlabel "Y-axis"; set ylabel "Y-offset"}
 	    }
 	}
 	2 {
 	    switch $currentPlot {
 		1 {set xlabel "X-axis"; set ylabel "Y-axis"}
-		2 {set xlabel "X-axis"; set ylabel "X-offset"}
+		2 {if {($Iflags & 2)==2} {
+		    set xlabel "X-axis"; set ylabel "xY-offset"
+		} else {
+		    set xlabel "X-axis"; set ylabel "X-offset"
+		}
+		}
 		3 {set xlabel "X-axis"; set ylabel "Y-offset"}
-		4 {set xlabel "Y-axis"; set ylabel "X-offset"}
+		4 {if {($Iflags & 2)==2} {
+		    set xlabel "Y-axis"; set ylabel "xY-offset"
+		} else {
+		    set xlabel "Y-axis"; set ylabel "X-offset"
+		}
+		}
 		5 {set xlabel "Y-axis"; set ylabel "Y-offset"}
 	    }
 	}
 	3 {
 	    switch $currentPlot {
 		1 {set xlabel "Hour angle"; set ylabel "Declination"}
-		2 {set xlabel "Hour angle"; set ylabel "HA-offset"}
+		2 {if {($Iflags & 2)==2} {
+		    set xlabel "Hour Angle"; set ylabel "xDC-offset"
+		} else {
+		    set xlabel "Hour Angle"; set ylabel "HA-offset"
+		}
+		}
 		3 {set xlabel "Hour angle"; set ylabel "Decl-offset"}
-		4 {set xlabel "Declination"; set ylabel "HA-offset"}
+		4 {if {($Iflags & 2)==2} {
+		    set xlabel "Declination"; set ylabel "xDC-offset"
+		} else {
+		    set xlabel "Declination"; set ylabel "HA-offset"
+		}
+		}
 		5 {set xlabel "Declination"; set ylabel "Decl-offset"}
 	    }
 	}
 	4 {
 	    switch $currentPlot {
 		1 {set xlabel "Azimuth"; set ylabel "Elevation"}
-		2 {set xlabel "Azimuth"; set ylabel "AZ-offset"}
+		2 {if {($Iflags & 2)==2} {
+		    set xlabel "Azimuth"; set ylabel "xEL-offset"
+		} else {
+		    set xlabel "Azimuth"; set ylabel "AZ-offset"
+		}
+		}
 		3 {set xlabel "Azimuth"; set ylabel "EL-offset"}
-		4 {set xlabel "Elevation"; set ylabel "AZ-offset"}
+		4 {if {($Iflags & 2)==2} {
+		   set xlabel "Elevation"; set ylabel "xEL-offset"
+		} else {
+		   set xlabel "Elevation"; set ylabel "AZ-offset"
+		}
+		}
 		5 {set xlabel "Elevation"; set ylabel "EL-offset"}
 	    }
 	}
@@ -1621,9 +1791,12 @@ label .explanation.param2 -text "Parameter 2:${XFlagLabel}-angle Sag"
 label .explanation.param3 -text "Parameter 3:Axis Skew"
 label .explanation.param4 -text "Parameter 4:Box Offset"
 label .explanation.param5 -text "Parameter 5:Tilt Out (tilt of ${YFlagLabel}=+90 toward \
-	{$XFlagLabel},{$YFlagLabel}=(0,0))"
+	(${XFlagLabel},${YFlagLabel})=(0,0))"
 label .explanation.param6 -text "Parameter 6:Tilt Over (tilt of ${YFlagLabel}=+90 toward \
-	{$XFlagLabel},{$YFlagLabel}=(+90,0))"
+	(${XFlagLabel},${YFlagLabel})=(+90,0))"
+label .explanation.param6a -text "Tilt Amplitude = sqrt(P5^2+p6^2)"
+label .explanation.param6b -text "Tilt of ${YFlagLabel}=+90 is toward \
+	(${XFlagLabel},${YFlagLabel})=(atan2(P6,P5),0))"
 label .explanation.param7 -text "Parameter 7:${YFlagLabel}-angle Encoder Offset"
 label .explanation.param8 -text "Parameter 8:${YFlagLabel}-angle Sag"
 label .explanation.param9 -text "Parameter 9:ad hoc ${YFlagLabel}-angle Slope (degrees/radian)"
@@ -1652,7 +1825,8 @@ label .explanation.param21 -text "Parameter 21:ad hoc delta${YFlagLabel}cos${XFl
 	Coefficient"
 label .explanation.param22 -text "Parameter 22:ad hoc delta${YFlagLabel}sin${XFlagLabel} \
 	Coefficient"
-label .explanation.param23 -text "Parameter 23:unused (zero)"
+label .explanation.param23 -text "Parameter 23:ad hoc delta${YFlagLabel}cot${YFlagLabel} \
+	Coefficient"
 label .explanation.param24 -text "Parameter 24:unused (zero)"
 label .explanation.param25 -text "Parameter 25:unused (zero)"
 label .explanation.param26 -text "Parameter 26:unused (zero)"
@@ -1663,6 +1837,10 @@ label .explanation.param30 -text "Parameter 30:unused (zero)"
 
 for {set i 1} {$i<=[expr $flagRows*$flagColumns]} {incr i} {
     pack .explanation.param$i -in .explanation -side top -anchor w
+    if {$i == 6} {
+	pack .explanation.param6a -in .explanation -side top -anchor w
+	pack .explanation.param6b -in .explanation -side top -anchor w
+    }
 }
 button .explanation.okButton -text "OK" -command {destroy .explanation}
 pack .explanation.okButton -in .explanation -side top -anchor center
@@ -1845,20 +2023,20 @@ set currentData 2
 proc changeData {} {
 
     global currentData currentPlot nodeDataMatrix noOfNodes
-    global XmeanRes YmeanRes XrmsRes YrmsRes
-    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw
+    global XmeanRes YmeanRes XrmsRes YrmsRes CYmeanRes CYrmsRes Iflags XFEC YFEC
+    global XmeanRaw YmeanRaw XrmsRaw YrmsRaw CYmeanRaw CYrmsRaw RChi DFree
     
     for {set counter 1} {$counter < $noOfNodes} {incr counter} {
 	switch $currentData {
             1 {
                 set nodeDataMatrix($counter,3) $nodeDataMatrix($counter,19)
                 set nodeDataMatrix($counter,4) $nodeDataMatrix($counter,20)
-                settypedata $XmeanRaw $XrmsRaw $YmeanRaw $YrmsRaw
+                settypedata $XmeanRaw $XrmsRaw $YmeanRaw $YrmsRaw $CYmeanRaw $CYrmsRaw $Iflags $XFEC $YFEC $RChi $DFree 0
             }
             2 {
                 set nodeDataMatrix($counter,3) $nodeDataMatrix($counter,17)
                 set nodeDataMatrix($counter,4) $nodeDataMatrix($counter,18)
-                settypedata $XmeanRes $XrmsRes $YmeanRes $YrmsRes
+                settypedata $XmeanRes $XrmsRes $YmeanRes $YrmsRes $CYmeanRes $CYrmsRes $Iflags $XFEC $YFEC $RChi $DFree 1
             }
         }
     }

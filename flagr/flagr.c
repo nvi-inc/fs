@@ -24,21 +24,32 @@ main()
   int new, acquired, lost;
   double last_ra, last_dec;
   char last_lsorna[10];
+  int last_satellite;
+  char last_satellite_name[17];
 
 /* connect to the FS */
 
   putpname("flagr");
   setup_ids();
+  skd_wait("flagr",ip,(unsigned) 0);
 
   last_ra=shm_addr->radat;
   last_dec=shm_addr->decdat;
   strncpy(last_lsorna,shm_addr->lsorna,sizeof(last_lsorna));
+
+  last_satellite=shm_addr->satellite.satellite;
+  strncpy(last_satellite_name,
+	  shm_addr->satellite.name,
+	  sizeof(last_satellite_name));
+  
   acquired=FALSE;
   new=FALSE;
 
 #ifdef TESTX
   printf(" iapdflg %d\n",shm_addr->iapdflg);
 #endif
+
+  skd_end(ip);
 
   if(shm_addr->iapdflg<=0 || strncmp(shm_addr->idevant,"/dev/null ",10)==0)
     while(TRUE)
@@ -50,13 +61,19 @@ main()
 #endif
   while(TRUE) {
     skd_wait("flagr",ip,shm_addr->iapdflg);
-    if(nsem_test("onoff") == 1 || nsem_test("fivpt") == 1)
+    if(nsem_test("onoff") == 1 || nsem_test("fivpt") == 1
+       ||nsem_test("holog") == 1)
       continue;
 #ifdef TESTX
   printf(" woke-up\n");
 #endif
-    if(strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||
-       last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat) {
+    if(last_satellite!=shm_addr->satellite.satellite
+       || (last_satellite == 0  
+	   && (strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||
+	       last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat))
+       || (last_satellite == 1
+	   && (strcmp(last_satellite_name,shm_addr->satellite.name)!=0))
+       ) {
 #ifdef TESTX
   printf(" new\n");
 #endif
@@ -66,6 +83,10 @@ main()
       last_ra=shm_addr->radat;
       last_dec=shm_addr->decdat;
       strncpy(last_lsorna,shm_addr->lsorna,sizeof(last_lsorna));
+      last_satellite=shm_addr->satellite.satellite;
+      strncpy(last_satellite_name,
+	      shm_addr->satellite.name,
+	      sizeof(last_satellite_name));
     }
     if (new && !acquired) {
 #ifdef TESTX

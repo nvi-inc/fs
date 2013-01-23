@@ -57,9 +57,10 @@ c
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion,
-     .  tpid_prompt,tpid_parm
-c
+     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
+
+      character*4 tpid_prompt, contcal_prompt
+
       character*2 cpaper_size
       character*2 coption
       character*6 cpid
@@ -72,7 +73,7 @@ c
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
      >    cpaper_size,coption(3),ctextname,cversion,
-     >    tpid_prompt,tpid_parm
+     >    tpid_prompt,contcal_prompt
 
 
       double precision RA50(max_cel),DEC50(max_cel)

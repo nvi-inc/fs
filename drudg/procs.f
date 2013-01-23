@@ -221,7 +221,7 @@ C 020510 nrv Add tpi sideband to VC commands.
 C 020514 nrv Check head 2 for BBC connections.
 C 020515 nrv Correct the placement of TPI daemon commands.
 C 020522 nrv Correct the reading of prompt for TPI.
-C 020524 nrv Move statement initializing itpid_period_use out of
+C 020524 nrv Move statement initializing itpicd_period_use out of
 C            prompt block.
 C 020606 nrv Initialize IBUF2 for writing out procedures. Add kcomment
 C            to GTSNP call.
@@ -265,6 +265,10 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 !           to init_hardware_common
 ! 2007Nov05 JMG. Took out postob_mk5  command.
 ! 2008OCt20 JMG. Modified so would do TPI command for Mark5 racks
+! 2010.06.16 JMG. Modified so that would put in pcalform for VLBA5 racks 
+! 2012.09.08 JMG. Modified so that always issues TPICD commands (WEH says this is OK.)
+!             Numerous changes to support DBBC.
+! 2012.09.20 JMG. If an error in some routine, then delete the partial ".prc" file that was written 
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -276,13 +280,16 @@ C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
 
 C LOCAL VARIABLES:
 C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
-      integer IC,ierr,i,nch,ipass,icode,it
+      integer IC,ierr,i,j
+      integer nch,ipass,icode,it
       integer irecbw,ir,idef,ival
       integer npmode
       integer ibit,ichan,nprocs
       logical kpcal_d,kpcal
       logical kroll             !barrel roll on
       logical kman_roll         !manual barrel roll on
+!      logical ktpicd
+
 
 C     real speed,spd
 C     integer*2 lspd(4)
@@ -293,12 +300,10 @@ C     integer nspd
       character*12 cname_ifd
 
       logical kdone
-      real fvc(max_bbc)
-      real fvc_lo(max_bbc),fvc_hi(max_bbc)
-
+   
       real samptest
       integer Z4000,Z100
-      integer il,itpid_period_use
+      integer il,itpicd_period_use
       logical khead2active       !head2 is used?
       logical kk4vcab
 
@@ -321,7 +326,9 @@ C     integer nspd
 
       logical ktrkf                     !write out trf procedure?
       character*1 lwhich8               ! which8 BBCs used: F=first, L=last
-
+      character*2 cifinp_save(max_chan,max_frq)
+      character*4 contcal_out
+  
 C
 C INITIALIZED VARIABLES:
       data Z4000/Z'4000'/,Z100/Z'100'/
@@ -352,8 +359,8 @@ C INITIALIZED VARIABLES:
       kk4vcab=.false.
       if ((kk41rack.or.kk42rack).and..not.km4fmk4rack) then
         if (nrecst(istn).eq.2) then
-          if (kk41rec(1).and.kk42rec(2)) kk4vcab=.true.
-          if (kk42rec(1).and.kk41rec(2)) kk4vcab=.true.
+          if (kk41rec(1).and.kk41rec(2)) kk4vcab=.true.
+          if (kk42rec(1).and.kk42rec(2)) kk4vcab=.true.
         endif
       endif
 
@@ -363,7 +370,7 @@ C
       if(ierr .ne. 0) return
 
       luFile=lu_outfile
-      itpid_period_use = itpid_period
+      itpicd_period_use = itpid_period
       if (tpid_prompt.eq."YES") then ! get TPID period
         kdone = .false.
         do while (.not.kdone)
@@ -373,12 +380,12 @@ C
           read(luusr,'(A)') response
           il=trimlen(response)
           if (il.eq.0) then ! default
-            itpid_period_use = itpid_period
+            itpicd_period_use = itpid_period
             kdone = .true.
           else ! decode it
             read(response,'(i10)',ERR=9932) ival
             if (ival.ge.0) then
-              itpid_period_use = ival
+              itpicd_period_use = ival
               kdone = .true.
             else 
               write(luscn,'("Invalid period, must be >=0.")')
@@ -386,6 +393,19 @@ C
           endif ! default/decode
         enddo
       endif ! get TPID period
+
+! Initialize contcal_out
+      if(kdbbc_rack) then
+        contcal_out=contcal_prompt
+        call lowercase(contcal_out)
+        do while(.not. (contcal_out .eq. "on".or.
+     >                  contcal_out .eq. "off".or.
+     >                  contcal_out .eq. " "))      
+         write(*,*) "Enter in cont_cal action: (on/off)"
+         read(*,*) contcal_out
+         call lowercase(contcal_out)
+       end do
+      endif 
 
       ic=trimlen(prcname)
       WRITE(LUSCN,"(' PROCEDURE LIBRARY FILE ',A,' FOR ',a8)")
@@ -456,7 +476,7 @@ C    for procedure names.
         num_sub_pass=npassf(istn,icode)
         if(num_sub_pass.gt.1.and.km5disk) num_sub_pass=1
 
-        DO IPASS=1,num_sub_pass  !loop on number of sub passes
+        DO IPASS=1,num_sub_pass  !loop on number of sub passes    
         do irec=1,nrecst(istn) ! loop on number of recorders
           if (.not.kuse(irec)) goto 300   !Go to end of loop.
 
@@ -505,10 +525,12 @@ C Find out if any channel is LSB, to decide what procedures are needed.
      >    ((kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)      ! Valid recorders
      >      .or. Km5Disk.or.kk41rec(ir).or.kk42rec(ir)))
      >     .and.
-     >     ((km4rack.or.kvracks.or.kk41rack.or.kk42rack).and.        ! Valid rack types.
+     >     ((km4rack.or.kvrack.or.kv4rack.or.kk41rack.or.kk42rack).and.        ! Valid rack types.
      >       (.not.kpiggy_km3mode  .or.Km5A_piggy .or.klsblo         ! valid "modes"
      >       .or.((km3be.or.km3ac).and.k8bbc)))
      >      .or. (ks2rec(ir) .and. klrack)
+
+! Note. Do not do track for VLBA5 or Mark5.  
 
 
           if(km5disk .or. km5A_piggy .or. km5P_piggy) then
@@ -531,7 +553,7 @@ C Find out if any channel is LSB, to decide what procedures are needed.
             endif
             call proc_mk5_init1(num_chans_obs,num_tracks_rec_mk5,
      >            luscn,ierr)
-            if(ierr .ne. 0) return
+            if(ierr .ne. 0) goto 9100 
           endif
 C
 C 3. Write out the following lines in the setup procedure:
@@ -558,7 +580,9 @@ C  PCALON or PCALOFF
           endif
 
 C  TPICD=STOP
-          write(lu_outfile,'(a)') 'tpicd=stop'
+!          if(ktpicd) then
+             write(lu_outfile,'(a)') 'tpicd=stop'
+!          endif 
 
           if (kvrec(irec).or.kv4rec(irec)
      >       .or.km3rec(irec).or.km4rec(irec) .or.Km5disk) then
@@ -593,9 +617,9 @@ c..2hd..if piggy make sure mk3 modes are written
               write(lufile,'(a)') cnamep
             endif
 C  PCALFff
-             if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
-               call snap_pcalf(codtmp)
-             endif
+            if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
+              call snap_pcalf(codtmp)
+            endif
 C  ROLLFORMff
             if(ktrkf .and. kman_roll .and.
      >         (km4rack.or.kvracks.or.km4fmk4rack)) then
@@ -645,15 +669,16 @@ C  PCALD=
 C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b)
 C  For S2, leave out command entirely
 C  For 8-BBC stations, use "M" for Mk3 modes
-          if((kvracks.or.km3rack.or.km4rack
-     >          .or.km4fmk4rack.or.kk3fmk4rack) .and. .not.
+! Note: Don't do Form or tracks command for Mark5 formatters
+       
+        if((km3form .or. km4form .or. kvform) .and. .not.
      >        (ks2rec(irec) .or. kk41rec(irec) .or. kk42rec(irec))) then
               call proc_form(icode,ipass,kroll,kman_roll,lform)
           endif ! kvracks or km3rac.or.km4rack but not S2 or K4
 
 C  BBCffb, IFPffb  or VCffb
-          if (kbbc .or. kifp .or. kvc) then
-            call proc_vcname(kk4vcab,      !Make the VC procedure name.
+          if (kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
+            call proc_vcname(kk4vcab,                     !Make the VC procedure name.
      >        ccode(icode),vcband(1,istn,icode),cname_vc)
 
             write(lu_outfile,'(a)') cname_vc
@@ -666,6 +691,10 @@ C  BBCffb, IFPffb  or VCffb
             writE(lu_outfile,'(a)') cname_ifd
           endif ! kbbc kvc kfid
 
+          if(kdbbc_rack) then   
+            write(lu_outfile,'("cont_cal=", a)') contcal_out
+          endif        
+
 C  FORM=RESET
           if (km3rack.and..not.(ks2rec(irec).or. km5Disk))then
             write(lu_outfile,'(a)') 'form=reset'
@@ -677,9 +706,9 @@ C  !*
           endif
 
 C  TPICD=no,period
-          if (km3rack.or.km4rack.or.kvracks.or.km5rack.or.kv5rack) then
-            call snap_tpicd("no",itpid_period_use)
-          endif
+!          if(ktpicd) then 
+            call snap_tpicd("no",itpicd_period_use)
+!          endif
 
 C  BIT_DENSITY=
 C  SYSTRACKS=
@@ -715,7 +744,6 @@ C !*+8s for VLBA formatter
           if(km5disk .or. km5A_piggy) then
             call proc_mk5_init2(lform,ifan(istn,icode),
      >             samprate(icode),num_tracks_rec_mk5,luscn,ierr)
-            if(ierr .ne. 0) return
           endif
 
 C !*+20s for K4 type 2 recorder
@@ -727,7 +755,10 @@ C  PCALD
             write(lu_outfile,'(a)') 'pcald'
           endif
 C  TPICD always issued
-          write(lu_outfile,'(a)') "tpicd"
+!          if(ktpicd) then
+            write(lu_outfile,'(a)') "tpicd"
+!          endif 
+  
           if(km5a .or. km5a_piggy) write(lu_outfile,'(a)') "mk5=mode?"
           write(lu_outfile,'(a)') "enddef"
 300     continue
@@ -747,16 +778,28 @@ C on the type of recorder, so two procedures may be necessary
 C if the two recorders are different.
 C For most cases only one copy of this proc should be made.
 
-      if(kbbc .or. kifp .or. kvc) then
-         call proc_vc(cname_vc,cpmode,icode,
-     >    kk4vcab, fvc,fvc_lo,fvc_hi,lwhich8)
-      endif
+      if(kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
+         do i=1,max_chan
+           do j=1,max_frq
+            cifinp_save(i,j)=  cifinp(i,istn,j)
+           enddo 
+         end do      
+         call proc_vc_cmd(cname_vc,icode, kk4vcab, lwhich8,ierr)
+         if(ierr .ne. 0) then
+           do i=1,max_chan
+            do j=1,max_frq
+             cifinp(i,istn,j)= cifinp_save(i,j)  
+            enddo 
+           end do     
+           goto 9100 
+         endif 
 
-!      goto 9000
-C
-C 4. Write out the IF distributor setup procedure.
-      if (KVC .or. kbbc .or. kifp) then
-        call proc_ifd(cname_ifd,icode,kpcal, fvc,fvc_lo,fvc_hi)
+         call proc_ifd(cname_ifd,icode,kpcal)
+         do i=1,max_chan
+           do j=1,max_frq
+            cifinp(i,istn,j)= cifinp_save(i,j)  
+           enddo 
+         end do           
       endif
 
 !      goto 9000
@@ -777,7 +820,7 @@ C Therefore, use the index of the recorder in use for all the tests
 C in this section.
       if(ktrkf) then
         call proc_trkf(icode,num_sub_pass,lwhich8,ierr)
-        if(ierr .ne. 0) return
+        if(ierr .ne. 0) goto 9100
       endif ! kvrec.or.kv4rec.or.km3rec.or.km4rec
 !     goto 9000
 
@@ -791,7 +834,7 @@ C Therefore, use index 1 for all the tests in this section.
       if (kpcal_d) then 
       if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
      >   .or.Km5Disk) then
-        if ((km4rack.or.kvracks).and.
+        if ((km4rack.or.kvracks.or.kv5rack).and.
      .      (.not.kpiggy_km3mode.or.klsblo
      .      .or.((km3be.or.km3ac).and.k8bbc))) then
           call proc_pcalf(icode,lwhich8)
@@ -807,7 +850,7 @@ C in this section.
 C If barrel roll is "M" then write these procedures. Not needed for
 C the canned "8" or "16" roll tables.
 C    
-      if (km4rack.or.kvracks.or.km4fmk4rack) then
+      if (km4form .or. klrack ) then
         if (kman_roll) then
           cnamep="rollform"//ccode(icode)
           call proc_write_define(lu_outfile,luscn,cnamep)
@@ -849,7 +892,12 @@ C Read each line and if our station is mentioned, write out the proc.
       call proc_write_define(-1,luscn," ")  !this flushes a buffer.
       CLOSE(LU_OUTFILE,IOSTAT=IERR)
       call drchmod(prcname,iperm,ierr)
-C
-      RETURN
+      if(ierr.ne.0) goto 9100 
+      return
+
+! Come here on error. Delete the prc file. 
+9100  continue
+      close(lu_outfile,status="Delete")
+      return 
       END
 

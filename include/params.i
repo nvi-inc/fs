@@ -31,6 +31,7 @@ c
       integer LBA           ! LBA comparison bit variable
       integer LBA4          ! LBA4 comparison bit variable
       integer MK5           ! MK5 comparison bit variable
+      integer DBBC          ! DBBC comparison bit variable
       integer MK5A          ! MK5A comparison bit variable
       integer MK5A_BS       ! MK5A_BS comparison bit variable
       integer MK45          ! MK45 comparison bit variable
@@ -40,13 +41,20 @@ c
       integer MAX_DAS       ! Max number of LBA DAS allowed
       character*5 FS_ROOT
       integer MAX_BBC
+      integer MAX_VLBA_BBC
+      integer MAX_VLBA_DIST
+      integer MAX_IF
+      integer MAX_VLBA_IF
+      integer MAX_DET
+      integer MAX_DBBC_BBC
+      integer MAX_DBBC_IF
+      integer MAX_DBBC_DET
       integer CH_PRIOR      ! chekr        realtime priority
       integer CL_PRIOR      ! clock func.  realtime priority
       integer FS_PRIOR      ! Field System realtime priority
       integer AN_PRIOR      ! Antenna      realtime priority
       integer MAX_RXCODES   ! Max number of entries in rxdef.ctl
       integer MAX_HOR      ! Max number of horizon mask entries
-      integer MET3          ! MET Sensor with/without wind sensor
       integer MAX_MODEL_PARAM ! maximum pointing model parameters
 c
       integer MAX_PROC_PARAM_CHARS ! maximum chars in a proc parameter
@@ -73,6 +81,7 @@ C rack/drive
       parameter ( LBA = z'100'   )
       parameter ( LBA4 = z'200'   )
       parameter ( MK5 = z'400'   )
+      parameter ( DBBC = z'800'   )
 C rack/drive _types
       parameter ( VLBAG    = z'1000' )
       parameter ( VLBA2    = z'2000' )
@@ -93,15 +102,21 @@ C rack/drive _types
       parameter ( MK45     = z'10000000'  )
       parameter ( VLBA45   = z'20000000'  )
       parameter ( MK5B     = z'40000000'  )
-      parameter ( MK5B_BS  = z'80000000'  )
-
-C
-C wx_met
-      parameter ( MET3     = z'1' )
+      parameter ( MK5B_BS  = z'10000000'  )
 C
       parameter ( MAX_DAS = 2 )
       parameter ( FS_ROOT='/usr2')
-      parameter ( MAX_BBC = 14 )
+C
+      parameter ( MAX_BBC = 16 )
+      parameter ( MAX_VLBA_BBC = 14 )
+      parameter ( MAX_VLBA_DIST = 2 )
+      parameter ( MAX_IF        = 4 )
+      parameter ( MAX_VLBA_IF   = 2*MAX_VLBA_DIST)
+      parameter ( MAX_DET = MAX_BBC*2+MAX_IF )
+      parameter ( MAX_DBBC_BBC  =16)
+      parameter ( MAX_DBBC_IF   = 4)
+      parameter ( MAX_DBBC_DET  = 2*MAX_DBBC_BBC+MAX_DBBC_IF)
+C
       parameter ( CH_PRIOR=-04)
       parameter ( CL_PRIOR=-08)
       parameter ( FS_PRIOR=-12)

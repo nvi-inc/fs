@@ -59,11 +59,12 @@ Monitor-only Parameters:
 
 Comments:
 This command sets up the baseband converters in the VLBA rack.
-This command is analogous to the Mark III vcnn commands.
+This command is analogous to the Mark IV vcnn commands.
 
-Unlike the output of most other commands which have no
-embedded blanks, the output for this command is organized in
-columns for easy reading of gains and power levels.
+Unlike the output of most other commands which have no embedded
+blanks, the output for this command is organized in columns so when
+multiple comands are used in sequence it is easy to read gains and
+power levels.
 
 MCB module functions are available. See section 1.0 of this
 manual.
@@ -78,30 +79,20 @@ The gain value will stay at the value it had when the AGC was
 changed to man. Then use agc to return to AGC control. This
 method is used for radiometry by onoff and fivpt.
 
-On terminals wired like the geodetic (VLBAG)  racks, the
-following table shows which BBCs have which IF inputs
-available. Essentially all VLBA racks controlled by the FS are
-wired in this way.
+On terminals wired like the geodetic (VLBAG) racks, the following
+table shows which BBCs have which IF inputs available.  All VLBA4
+racks are believed to have VLBAG IF wiring.  Essentially all VLBA
+racks controlled by the FS are wired in this way.
 
+Geodetic (VLBAG & VLBA4) Rack BBC-to-IF input availability
 
-Geodetic (VLBAG) Rack BBC-to-IF input availability
+BBC numbers: IF input channels
 
+1, 2: A, B, C, D
 
-BBC numbers
-IF input channels
+3, 4, 5, 6, 7, 8: A, C
 
+9, 10, 11, 12, 13, 14: B, D
 
-1, 2
-A, B, C, D
-
-
-3, 4, 5, 6, 7, 8
-A, C
-
-
-9, 10, 11, 12, 13, 14
-B, D
-
-
-CAUTION: This command does not check whether you have
-specified a valid IF source for the BBC.
+CAUTION: This command does not check whether you have specified a
+valid IF source for the BBC.

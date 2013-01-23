@@ -23,7 +23,7 @@ long *plCentiSec;
        exit(-1);
      }
      *poClock=tv.tv_sec;
-     *plCentiSec=(tv.tv_usec+5000)/10000;
+     *plCentiSec=tv.tv_usec/10000;
      if(*plCentiSec>99) {
        *plCentiSec-=100;
        (*poClock)++;

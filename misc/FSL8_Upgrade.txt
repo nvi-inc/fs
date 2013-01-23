@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL8_Upgrade.txt  Version: 0.9  Date: 090803
+File: /usr2/fs/misc/FSL8_Upgrade.txt  Version: 1.4  Date: 120104
 
 		 Upgrading a prior FSL System to FSL8
 
@@ -44,16 +44,16 @@ questions, please contact Ed (Ed.Himwich@nasa.gov).
 
 For reference, this history of FSL distributions is:
 
-  FS Linux 1                       Slackware     Linux 1.2.x
-  FS Linux 2     "bo"              Debian 1.3.1  Linux 2.0.29
-  FS Linux 3     "hamm"            Debian 2.0    Linux 2.0.34
-                 "slink"           Debian 2.1    Linux 2.0.36   
-  FS Linux 4     "potato"          Debian 2.2    Linux 2.2.18
-  FS Linux 5     "woody"           Debian 3.0    Linux 2.2.20
+  FS Linux 1                       Slackware     Linux 1.2.x    1994
+  FS Linux 2     "bo"              Debian 1.3.1  Linux 2.0.29   1997
+  FS Linux 3     "hamm"            Debian 2.0    Linux 2.0.34   1998
+                 "slink"           Debian 2.1    Linux 2.0.36   1999
+  FS Linux 4     "potato"          Debian 2.2    Linux 2.2.18   2000
+  FS Linux 5     "woody"           Debian 3.0    Linux 2.2.20   2002
                                                  Linux 2.4.18
-  FS Linux 6     "sarge"           Debian 3.1    Linux 2.4.27
-  FS Linux 7     "etch"            Debian 4.0    Linux 2.6.18
-  FS Linux 8     "lenny"           Debian 5.0    Linux 2.6.26
+  FS Linux 6     "sarge"           Debian 3.1    Linux 2.4.27   2005
+  FS Linux 7     "etch"            Debian 4.0    Linux 2.6.18   2007
+  FS Linux 8     "lenny"           Debian 5.0    Linux 2.6.26   2009
 
 The remainder of this document is broken into four sections.  The
 PREPARATION section describes information that you should collect that
@@ -300,7 +300,7 @@ are included to check-off each step as it is completed.
        for all the disks.  If your smallest disk is your current
        operational disk, you should perform a disk rotation and/or
        back-up (see for example backups2.pdf in the docs/ directory on
-       the FS file servers for FSL5 and /usr2/fs/misc RAID.txt for
+       the FS file servers for FSL5 and /usr2/fs/misc RAID.pdf for
        FSL6, older systems generally had only two disks) to make sure
        that one of your larger disks is up to date and use it as the
        "shelf" disk as described next.
@@ -388,12 +388,21 @@ are included to check-off each step as it is completed.
    ____     on Window 3 set skip
    ____     on Window 4 set secure, then OK, then OK again
 
-5. Set oper and prog passwords, use strong passwords:
+4b. Disable Avahi daemon
+    ____    update-rc.d -f avahi-daemon remove
+    ____    update-rc.d avahi-daemon stop 14 2 3 4 5 .
+    ____    invoke-rc.d avahi-daemon stop
+
+5. Configure sound card support
+
+   ____ alsaconf, take all defaults     
+       
+6. Set oper and prog passwords, use strong passwords:
 
    ____ passwd oper
    ____ passwd prog
 
-6. Install FS as "root: (use current version in place of 9.10.4):
+7. Install FS as "root: (use current version in place of 9.10.4):
 
    ____ (Place fs-9.10.4.tgz on /tmp)
    ____ cd /
@@ -402,7 +411,7 @@ are included to check-off each step as it is completed.
    ____ make install
    ____  (answer question "y")
 
-7. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
+8. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
    using "hdc" or "sdb" for "XXX" as appropriate for your system in
    the "cp" command:
 
@@ -411,23 +420,23 @@ are included to check-off each step as it is completed.
    ____ chown root.root refresh_secondary
    ____ chmod a+r,u+wx,go-wx refresh_secondary
 
-8. Place mdstat in /usr/local/bin, as "root":
+9. Place mdstat in /usr/local/bin, as "root":
 
    ____ cd /usr/local/bin
    ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
    ____ chown root.root mdstat
    ____ chmod a+rx,u+w,go-w mdstat
 
-9. Edit /etc/aliases so root and prog e-mail goes to oper, as "root":
+10. Edit /etc/aliases so root and prog e-mail goes to oper, as "root":
    ____ change "root: testing" to "root: oper"
    ____ add "prog: oper" at the end
    ____ add "desktop: oper" at the end
 
-10. Compile FS as "prog" on vt1  (<Ctrl><Alt><F1>):
+11. Compile FS as "prog" on vt1  (<Ctrl><Alt><F1>):
     ____ cd /usr2/fs
     ____ make
 
-11. Reboot
+12. Reboot
     ____ reboot
 
 CUSTOMIZATION
@@ -453,4 +462,4 @@ are satisfied that everything is working and you no longer need your
 old operational system on your third disk (if you have one), you
 should update that disk so that it so that is also running FSL8.
 Follow the direct for initializing a new disk in the REPLACEMENT DISKS
-section of /usr2/fs/misc/RAID.txt.
+section of /usr2/fs/misc/RAID.pdf.

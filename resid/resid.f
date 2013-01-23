@@ -35,7 +35,7 @@ C
       call fmpopen(idcbo,iibuf,ierr,'r+',id)
       if (kopn(lu,ierr,iibuf,0)) goto 10010
 C
-      if (kgant(lu,idcbo,lant,laxis,iibuf,jbuf,il)) goto 10005
+      if (kgant(lu,idcbo,lant,laxis,iflags,iibuf,jbuf,il)) goto 10005
 C
       inp=0
 10    continue

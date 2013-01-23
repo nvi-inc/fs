@@ -15,8 +15,9 @@ static char hex[]= "0123456789abcdef";
 static char det[] = "dlu34567";
 static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0}; 
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
-static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0};
+static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0};
 static char *lwhat[ ]={
 "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
 "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
@@ -48,13 +49,14 @@ long ip[5];                           /* ipc parameters */
 
       if (command->equal != '=') {           /* run onoff */
 	int set;
-	if ( 1 == nsem_test("onoff") || 1 == nsem_test("fivpt")) {
+	if ( 1 == nsem_test("onoff") || 1 == nsem_test("fivpt") ||
+	     1 == nsem_test("holog") ) {
 	  ierr=-305;
 	  goto error;
 	}
 	set=FALSE;
 	for (i=0;i<MAX_ONOFF_DET;i++) {
-	  set= set ||(lcl.itpis[i]!=0);
+	  set= set ||(shm_addr->onoff.itpis[i]!=0);
 	}
 	if(!set) {
 	  ierr=-304;
@@ -278,6 +280,74 @@ long ip[5];                           /* ipc parameters */
 	      } else {
 		ierr=-306;
 		goto error;
+	      }
+	    }
+	  }
+	} else if(shm_addr->equip.rack==DBBC) {
+	  for (i=0;i<MAX_DBBC_BBC*2;i++) {
+	    if(lcl.itpis[i]!=0) {
+	      lcl.devices[i].ifchain=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;
+	      if(lcl.devices[i].ifchain<1||lcl.devices[i].ifchain>4)
+		lcl.devices[i].ifchain=0;
+	      if(lcl.devices[i].ifchain!=0) {
+		long bbc2freq();
+		float freq, bbcbw;
+		
+		freq=shm_addr->dbbcnn[i%MAX_BBC].freq/1.0e6;
+		bbcbw=bw_dbbc[shm_addr->dbbcnn[i%MAX_BBC].bw];
+		if(i<MAX_DBBC_BBC)
+		  freq-=bbcbw*.5;
+		else
+		  freq+=bbcbw*.5;
+		switch(shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
+		case 1:
+		  lcl.devices[i].center=
+		    shm_addr->lo.lo[lcl.devices[i].ifchain-1]+freq;
+		  break;
+		case 2:
+		  lcl.devices[i].center=
+		    shm_addr->lo.lo[lcl.devices[i].ifchain-1]-freq;
+		  break;
+		default:
+		  ierr=-302;
+		  goto error;
+		  break;
+		}
+	      } else {
+		ierr=-306;
+		goto error;
+	      }
+	    }
+	  }
+	  for (i=MAX_DBBC_BBC*2;i<MAX_DBBC_DET;i++) {
+	    if(lcl.itpis[i]!=0) {
+	      float upper, lower;
+
+	      lcl.devices[i].ifchain=i-MAX_DBBC_BBC*2+1;
+
+	      switch(shm_addr->dbbcifx[lcl.devices[i].ifchain-1].filter) {
+	      case 1:  lower= 512; upper=1024; break;
+	      case 2:  lower=  10; upper= 512; break;
+	      case 3:  lower=1536; upper=2048; break;
+	      case 4:  lower=1024; upper=1536; break;
+	      case 5:  lower=   0; upper=1024; break;
+	      case 6:  lower=1200; upper=1800; break;
+	      default: ierr=-308; goto error; break;
+	      }
+
+	      switch (shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
+	      case 1:
+		lcl.devices[i].center=shm_addr->lo.lo[lcl.devices[i].ifchain-1]+
+		  (lower+upper)*0.5;
+		break;
+	      case 2:
+		lcl.devices[i].center=shm_addr->lo.lo[lcl.devices[i].ifchain-1]-
+		  (lower+upper)*0.5;
+		break;
+	      default:
+		ierr=-302;
+		goto error;
+		break;
 	      }
 	    }
 	  }

@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL8_End_User.txt  Version: 1.0  Date: 090805
+File: /usr2/fs/misc/FSL8_End_User.txt  Version: 1.9  Date: 120424
 
 	     End User Set-up for GSFC Checked-out FS PC
 
@@ -7,7 +7,7 @@ installed but not customized.  Please use this document to guide the
 set-up of your PC.  The ISSUES TO BE AWARE OF section at end of this
 document should be read carefully.  If you have purchased two
 identical PCs for added reliability, please refer to APPENDIX B. TWO
-COMPUTER ROTATION in RAID.txt for information on configuring and using
+COMPUTER ROTATION in RAID.pdf for information on configuring and using
 the second PC. In the set-up instructions in that appendix, the
 initial check-out has been completed and the systems are ready for
 customization according to this document.
@@ -38,13 +38,16 @@ customization according to this document.
 In addition to the computer components, you should have received:
 
 ____ Lenny DVDs
+____ Lenny CD-1
 ____ FSL8Install CD, which contains the latest versions of:
      fs8linux_DVD.txt, fs8.selections, fsadapt-*.tgz, fs-*.tgz,
      fs*up.txt, FSL8_PC_Checkout.txt, FSL8_Upgrade.txt,
-     FSL8_End_User.txt, RAID.txt and any special instructions, drivers
-     or other files for your system.  The contents of this CD will
-     help you to make a complete re-install even if you don't have an
-     Internet connection and/or lose the hard copy of these documents.
+     FSL8_End_User.txt, RAID.pdf, refresh_secondary.hdc,
+     refresh_secondary.sdb, mdstat.7, refresh_spare_usr2, 
+     and any special instructions, drivers or other files for
+     your system.  The contents of this CD will help you to make
+     a complete re-install even if you don't have an Internet
+     connection and/or lose the hard copy of these documents.
 ____ fs8linux_DVD.txt print-out.
 ____ Special instructions for this system, in document: _______________.
 ____ Completed Check-out document Checklist, with annotations
@@ -184,7 +187,7 @@ ____ 8. Switch to the X-display <Ctrl><Alt><F7>. Normally the X-server
             the <Printer ...> lines and in the ppd/ sub-directory
             rename the corresponding files, then:
 
-              invoke-rc.d cupsys restart         
+              invoke-rc.d cups restart         
 
 ____ 10. Return to vt1 <Ctrl><Alt><F1>. Change directory to the
          fsadapt sub-directory:
@@ -201,7 +204,12 @@ ____ 11. Set your network parameters,
 
             ./netconfig
 
-____ 12. Generate ssh system keys.
+           In the "/etc/hesiod.conf", you should update the "rhs="
+           line to reflect your domain.
+
+____ 12. Reboot.
+
+____ 13. Generate ssh system keys.
 
            [Existing systems being upgraded from previous versions of
            FS Linux can either use the new keys already generating in
@@ -209,10 +217,10 @@ ____ 12. Generate ssh system keys.
            keys from the old system to maintain compatibility with
            other systems expecting the same keys.  You can use the
            "etc.tgz" archive, created as part of the upgrade process,
-           as described in step 12B below.  If you will use the keys
-           already generated, skip to step (13).  If you want to use
-           old keys, then before install them according to 12B below,
-           delete the already generated keys, as "root":
+           as described in step 13B below.  If you will use the keys
+           already generated, skip to step (14).  If you want to use
+           old keys, then before installing them according to 13B
+           below, delete the already generated keys, as "root":
 
              cd /etc/ssh
              rm *key *key.pub
@@ -220,7 +228,7 @@ ____ 12. Generate ssh system keys.
            Note an upgraded system will normally already have a
            running network connection at this point.]
 
-         You have two choices here, either (A) generate hew keys or
+         You have two choices here, either (A) generate new keys or
          (B) use existing keys from a previous system that is being
          replaced or upgraded.
 
@@ -264,7 +272,7 @@ ____ 12. Generate ssh system keys.
              instructions above in this step (12B) to copy the old
              keys from the archive.
 
-____ 13. Set hosts.deny and hosts.allow.
+____ 14. Set hosts.deny and hosts.allow.
 
          [Systems being upgraded will not already have the shown
          contents of hosts.deny.  For upgraded systems, the file
@@ -289,7 +297,7 @@ sshd: node
          lines to hosts.allow for specific hosts.  This will allow
          selective incoming ssh access.
 
-____ 14. If the machine resides on a network with NTP available,
+____ 15. If the machine resides on a network with NTP available,
          please configure NTP.  If need be, this step can be deferred
          until a convenient time.
 
@@ -350,26 +358,30 @@ restrict tick.usno.navy.mil     kod notrap nomodify nopeer noquery
          name servers, typically because they are off site, you should
          use IP addresses of the servers instead of their node names.
 
-____ 15. Connect the machine to the network and reboot.
+____ 16. Update the emacs configuration:
+
+           dpkg-reconfigure emacs22
+
+____ 17. Connect the machine to the network and reboot.
 
            [If you are upgrading an existing computer, this step is
            probably not needed since it is probably already connected
            to and accessing the network.]
 
-____ 16. Customize the FS for your station.  If this computer is
+____ 18. Customize the FS for your station.  If this computer is
          replacing a computer where the FS is already set-up for your
          station or you are upgrading to FSL8, please follow the steps
          in this section.  If the computer is for a new installation,
-         please skip to the step 17.
+         please skip to the step 19.
 
          For a replacement computer or FSL8 upgrade, please take the
          following steps:
 
            [If you are upgrading your existing computer, please skip
-           step 16a.  These archives were already made as part of the
+           step 18a.  These archives were already made as part of the
            upgrade process.]
 
-    ____ 16a. On your old computer, make a back-up of your station
+    ____ 18a. On your old computer, make a back-up of your station
               software as "root":
 
                 cd /usr2
@@ -387,7 +399,7 @@ ____ 16. Customize the FS for your station.  If this computer is
               archive only a subset of the contents of the
               directories.
 
-    ____ 16b. If they aren't already there, place the etc.tgz,
+    ____ 18b. If they aren't already there, place the etc.tgz,
               usr2.tgz (and operprog.tgz, if you made one) files in
               the /usr2/old_pc/ directory (you may need to create it)
               of your new computer via whatever means is convenient,
@@ -400,7 +412,7 @@ ____ 16. Customize the FS for your station.  If this computer is
               directory) owned by "root" and read-only for user,
               group, and others.
 
-    ____ 16c. As a first attempt at customizing the "oper" and "prog"
+    ____ 18c. As a first attempt at customizing the "oper" and "prog"
               home directories, the easiest choice will probably be to
               start using the default files on the new system and
               customize them by hand as you find changes that were on
@@ -420,7 +432,7 @@ ____ 16. Customize the FS for your station.  If this computer is
               "prog" versions of the ".fvwm2rc" and ".Xresources" file
               are the most important files to recover.
 
-    ____ 16d. You will need to make your control files, SNAP
+    ____ 18d. You will need to make your control files, SNAP
               procedures, and station software agree with the version
               of the FS on your new computer.  There are three
               possible cases: (1) the FS version on the new computer
@@ -464,7 +476,7 @@ ____ 16. Customize the FS for your station.  If this computer is
                  version installed.  Please also see the comment about
                  the stricter compilers in case (2) above.
 
-         16d. The system items that may have changed as part of moving
+         18e. The system items that may have changed as part of moving
               to the new computer are:
 
          ____ (1) The serial port devices. On the new system these
@@ -487,7 +499,7 @@ ____ 16. Customize the FS for your station.  If this computer is
                   indicated for FSL8, please use the lines for
                   FSL7. They also work for FLS8.
 
-    ____ 16e. Any station software you have that runs outside of the
+    ____ 18f. Any station software you have that runs outside of the
               FS, including daemons that are started at boot time,
               such as tacdclient, metserver, and metclient will need
               to be set-up.  Please refer to the corresponding
@@ -500,9 +512,9 @@ ____ 16. Customize the FS for your station.  If this computer is
               well.  You should compare the new source to your old
               source to see what needs to be changed.
 
-    ____ 16f. Reboot your system.
+    ____ 18g. Reboot your system.
 
-    ____ 16g. Test the FS to verify that it works, including printing
+    ____ 18h. Test the FS to verify that it works, including printing
               labels and schedule listings and running part of a
               schedule as a test.  You should pay special attention to
               whether all GPIB devices work since the FSL8 driver may
@@ -512,13 +524,13 @@ ____ 16. Customize the FS for your station.  If this computer is
               consider getting a National Instruments 779732-x to
               allow all your GPIB devices to be supported.
 
-    ____ 16h. Set-up the time.ctl file. Please see the SETUP section
+    ____ 18i. Set-up the time.ctl file. Please see the SETUP section
               of /usr2/fs/misc/fstime.txt for instructions on how to
               do this.
 
-         After completing this section, jump ahead to step 18.
+         After completing this section, jump ahead to step 20.
 
-____ 17. New station set-up. A new station set-up will require
+____ 19. New station set-up. A new station set-up will require
          customizing the control files in /usr2/control, particularly:
          antenna.ctl, location.ctl, dev.ctl, ibad.ctl, and mk5ad.ctl.
          You will need to select the correct version of station.prc to
@@ -541,7 +553,7 @@ ____ 17. New station set-up. A new station set-up will require
          available from Ed (Ed.Himwich@nasa.gov) on both customizing
          the control files and developing an "antcn".
 
-____ 18. Configure e-mail.
+____ 20. Configure e-mail.
 
            [If you are upgrading a computer with a previous version of
            FS Linux, the contents of the old exim configuration may
@@ -561,37 +573,52 @@ ____ 18. Configure e-mail.
 
            ]
 
-         If you want something other than the default installation,
-         which is local mail only, you will need to do (as "root"):
+         As "root", enter:
 
            dpkg-reconfigure exim4-config
 
-         to change the set-up. Typically you would select "internet
-         site" and defaults for all the other prompts.  If you want to
-         receive incoming mail, you will also need to enable SMTP
-         connections in Window 4a of fsadapt.  We recommend that you
-         not receive incoming mail on this computer.  If you follow
-         this recommendation, you should set the "reply-to" address
-         for outgoing messages to a real e-mail account at your
-         institution that is read regularly.  You can do this by added
-         a line (as "root") like:
+         to change the set-up. Typically you should select "internet
+         site" and defaults for all the other prompts.  (The only
+         other recommended choices are "local delivery only" or "mail
+         sent by smarthost; received via SMTP or fetchmail") If you
+         want to receive incoming mail, you will also need to enable
+         SMTP connections in Window 4a of fsadapt.  We recommend that
+         you not receive incoming mail on this computer.
 
-            *@node.doman email@address Ffr
+         If you follow the recommendation not to receive incoming
+         mail, you should set the "reply-to" address for outgoing
+         messages to a real e-mail account at your institution that is
+         read regularly.  You can do this by (all as "root"):
 
-         to the "rewrite" rules section of
-         /etc/exim4/exim4.conf.template if you selected one big
-         configuration file or in
-         /etc/exim4/conf.d/rewrite/31_exim4-config_rewriting if you
-         selected several small files.  Where "node.domain" is the
-         fully qualified node-name of this computer and "email@address"
-         is the e-mail address you want replies to be addressed
-         to. Then execute:
+           (1) Create a file /etc/exim4/reply-to-filter with contents
+               (four lines from between the dashed lines):
 
-             invoke-rc.d exim4 restart
+---------------------------------------------
+# Exim filter          << THIS LINE REQUIRED
 
-         If you have made the above changes to direct replies to other
-         e-mail accounts, you should customize the User Name (not
-         login name, the User Name is the fifth field) of "root",
+headers remove "Reply-To"
+headers add "Reply-To: email@address"
+--------------------------------------------
+
+               Where "email@address" is the e-mail address you want
+               replies to be addressed to.
+
+
+           (2) In /etc/exim4/exim4.conf.template, at the beginning of
+               the fill add (two lines from between the dashed lines):
+
+--------------------------------------------
+#set reply to
+system_filter = /etc/exim4/reply-to-filter
+--------------------------------------------
+
+           (3) Then execute
+
+               /etc/init.d/exim4 restart
+
+         If you have made the above changes to direct replies to
+         another e-mail account, you should customize the User Name
+         (not login name, the User Name is the fifth field) of "root",
          "prog", and "oper" in "/etc/passwd" to identify the source of
          the message. For "root" and "prog", it is recommended to
          append a string like "at node.domain", where node.domain is
@@ -606,21 +633,58 @@ ____ 18. Configure e-mail.
 
          For "oper", you might instead prepend your site name to the
          accounts for clearer reading in "ops" e-mail messages, e.g.,
-         for "oper" on "atri", you might you might change the 5th
-         field for "oper" to:
+         for "oper" on "atri" at GSFC, we changed the 5th field for
+         "oper" to:
 
            GSFC VLBI Operator
+
+         and for completeness, for "prog" use:
+
+           GSFC VLBI Programmer
 
          These changes will help the recipient (possibly you)
          determine which system generated this message since it may
          not be obvious given the modified return address.
 
          The configuration described here ("Internet site" in the
-         exim4 configuration, no incoming mail, rewrite rules for
-         reply, and modified user names), provides good support of the
-         FS "msg" utility.
+         exim4 configuration, no incoming mail, reply-to-filter,
+         and modified user names), provides good support of the FS
+         "msg" utility.
 
-____ 19. Weekly updates. If your computer is connected to the
+         If you use the recommended configuration, your /etc/alias
+         file is set-up to forward all mail to "oper".  This is
+         recommended as a "catch all" since the "oper" account is
+         presumably under regular use and any messages sent there are
+         more likely to be noticed. This is particularly important for
+         system error messages since they should be delivered to a
+         mail box on the system in case there is a network problem
+         that might prevent them from being delivered off system.  You
+         can however add additional off machine delivery of these
+         messages to whatever addressees you wish and we recommend
+         this as well.  These should include an e-mail account at your
+         institution that is read regularly (maybe the same address as
+         the "Reply-To" address you may have set above would be a good
+         choice).  To do this, create a ".forward" file on "oper"s
+         home directory. The contents should be similar to (left
+         justfied):
+
+           \oper
+           user@node.domain
+
+         where "user@node,domain" is the off machine addressee you
+         want the messages to go to.  You can add additional lines for
+         additional addressees. The backslash ("\") before "oper"
+         prevents the mail system from getting into an infinite loop
+         re-checking "oper"s .forward file.
+
+         Lastly, check the default mailbox /var/mail/mail for any
+         messages that may have arrived before the e-mail system was
+         configured. Be sure to resolve any system messages that may
+         have been received:
+
+           mail -f /var/mail/mail
+
+____ 21. Weekly updates. If your computer is connected to the
          Internet, you should enable weekly security updates in Window
          2 of fsadapt (all steps in the section must be done as
          "root"):
@@ -632,20 +696,29 @@ ____ 19. Weekly updates. If your computer is connected to the
          "OK", then set _only_ "updates" on "Window 2", then "OK",
          then "Cancel" on "Window 3".
 
+         It is possible to set-up the weekly update script to
+         automatically install the updates instead of just downloading
+         them by making changes to the script.  However, in order to
+         avoid unexpected changes in your system, particularly during
+         experiments, this is not recommend.  The weekly check for
+         updates can be turned off by deleting the script file
+         /etc/cron.weekly/apt-get.  If later you wish to re-install
+         it, please follow the directions above.
+
            [If you are upgrading an existing computer, you may have
            already performed the next action, configured
            sources.lists, as part of the upgrade process.]
 
          You should edit the /etc/apt/sources.list file and move the
-         "deb http..." and #deb-src http..." lines before "deb
+         "deb http..." and deb-src http..." lines before "deb
          cdrom..." lines.  This will save you from possibly having to
          insert DVDs (or CDs), if you ever want to install a new
-         package.  You can change the line with "http.us.debian.org"
-         to use any convenient local mirror which should improve speed
+         package.  You can change the line with "ftp.us.debian.org" to
+         use any convenient local mirror, which should improve speed
          compared to the default.  The line with "security.debian.org"
          must not be changed.
 
-         Make a check for any updates currently needed:
+         Make a manual check for any updates currently needed:
 
            apt-get update
            /etc/cron.weekly/apt-get
@@ -657,16 +730,33 @@ ____ 19. Weekly updates. If your computer is connected to the
            apt-get clean
 
          For some motherboards it may be necessary to re-install
-         special drivers, please see any special documentation that
-         came with your system.
+         special drivers after an "upgrade", please see any special
+         documentation that came with your system.  If the PC was
+         checked out at GSFC, the document (if it exists) is
+         identified at the end of the printed out version of this
+         document supplied with the PC, in the ISSUES TO BE AWARE OF
+         section.
 
          After the updates have been enabled, the Debian security
          archive will be automatically checked weekly for needed
          updates.  If there are any security updates that need to be
          applied, an e-mail will be sent to "root", usually forwarded
-         to "oper".  The account receiving these e-mails must be
+         to "oper".  The account receiving these e-mails should be
          checked weekly.  The e-mail contains instructions on how to
-         install the updates.
+         install the updates.  See the previous step (20) on enabling
+         e-mail for more useful details on this.
+
+         As long as the machine will be continuous operation, and this
+         is the assumption for FS computers, even spare computers,
+         since this is needed to keep them healthy, we recommend that
+         you remove the "anacron" package. Doing so will ensure that
+         the apt-get script is running at time that is likely to not
+         be busy, typicall 0647 UT Sunday morning. To remove
+         "anacron", enter the command (as "root"):
+
+            aptitude purge anacron
+
+         answer the prompt to continue affirmatively.
 
 ISSUES TO BE AWARE OF
 
@@ -684,11 +774,15 @@ with your FSL8 system.
 
 2. By default, all incoming e-mail is local only.  All "root" and
    "prog" e-mail is sent to "oper".  It is important that "oper" check
-   e-mail regularly for important system messages.  It is also
-   important that e-mail to this account is NOT forwarded to another
-   machine so that if a problem develops with the network, it will
-   still be possible to get e-mailed error messages.  Please be sure
-   there is a line:
+   e-mail regularly, at least weekly, for important system messages.
+   There are two types of messages you will normally receive: (i)
+   messages about patches that need to be applied and (ii) messages
+   about degraded RAID arrays when you do a disk rotation.  If you get
+   a message you do not know how to handle, please contact Ed
+   (Ed.Himwich@nasa.gov).  It is also important that e-mail to this
+   account is NOT forwarded to another machine so that if a problem
+   develops with the network, it will still be possible to get
+   e-mailed error messages.  Please be sure there is a line:
 
      test ! -f /var/mail/oper || from
 
@@ -703,7 +797,7 @@ with your FSL8 system.
    attention.
 
 3. The two installed disks are set-up as a RAID1 array.  Please read
-   /usr2/fs/misc/RAID.txt to familiarize yourself with features of
+   /usr2/fs/misc/RAID.pdf to familiarize yourself with features of
    this set-up and how to use it operationally.
 
 4. If you have a new PC checked out by GSFC or you installed on new PC

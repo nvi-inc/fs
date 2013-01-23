@@ -9,30 +9,25 @@
       character*12 cnamep
 ! funcions
       character*1 cband_char
-
+  
 ! local
-      integer nch
-      integer nco
-
-      nch=4
-      if(kbbc) then
+      character*30 ctemp   !temporary array.
+      integer nch 
+    
+      if(kdbbc_rack) then
+        cnamep="dbbc"
+      else if(kbbc) then
         cnamep="bbc"
       else if(kifp) then
         cnamep="ifp"
       elseif (kvc) then
-        cnamep="vc"
-        nch=3
-      endif
+        cnamep="vc"      
+      endif   
 
-      if(code(2:2) .eq. " ") then
-        nco=1
-      else
-        nco=2
-      endif
-
-      cnamep(nch:nch+nch)=code//cband_char(vcband)
-
-      nch=nch+1+nco
+      ctemp=cnamep//code//cband_char(vcband)
+      call squeezeleft(ctemp,nch)
+      nch=nch+1
+      cnamep=ctemp   
       if (kk4vcab.and.krec_append) cnamep(nch:nch)=crec(irec)
       call lowercase(cnamep)
       return

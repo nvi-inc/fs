@@ -4,7 +4,7 @@
 all: ../metserver diag
 #
 CC= cc
-LIBES = ../lib/port.a
+LIBES = ../port/port.a
 OBJECT_S = ./metserver.o ./metget.o ./err_report.o
 #
 ../metserver: $(OBJECT_S)

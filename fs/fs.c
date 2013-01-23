@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <termio.h>
 #include <sys/types.h>
+#include <sys/times.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <fcntl.h>
@@ -115,12 +116,34 @@ main(int argc_in,char *argv_in[])
 
     strncpy((char *)&fs,"fs",2);
 
+
     klesam=FALSE;
     okay = FALSE;
     npids=0;
     ipids=-1;
 
     setup_ids();
+
+
+    if(100!=sysconf(_SC_CLK_TCK)) {
+      printf("sysconf(_SC_CLK_TCK) not equal to 100 on this system,");
+      printf(" measured value is %ld.\nFS can't run, aborting.\n",
+	      sysconf(_SC_CLK_TCK));
+	exit(-1);
+    }
+    if(shm_addr->time.init_error==-1) {
+      errno=shm_addr->time.init_errno;
+      perror("fsalloc: rte_secs() using times()");
+      exit(-1);
+    } else if(shm_addr->time.init_error ==-2) {
+      errno=shm_addr->time.init_errno;
+      perror("fsalloc: rte_secs() using gettimeofday()");
+      exit(-1);
+    } else if(shm_addr->time.init_error != 0) {
+      perror("fsalloc: rte_secs() unknown error()");
+      exit(-1);
+    }
+    //    exit(-1);
 
     if ( 1 == nsem_take("fs   ",1)) {
        fprintf( stderr,"fs already running\n");

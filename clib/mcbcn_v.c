@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/params.h"
 #include "../include/fs_types.h"
 
 static struct req_rec request;            /* request record set-up by _d */
@@ -29,7 +30,7 @@ long ip[5];
      dtlkup(&request,device,ierr);
      dev[0]=device[0];
      dev[1]=device[1];
-     if(*ierr !=0 ||strchr("123456789abcde",dev[0])==NULL )
+     if(*ierr !=0 ||strchr("123456789abcdefg",dev[0])==NULL )
        return;
 
 /* now lock bbc gain in manual */
@@ -126,7 +127,7 @@ long ip[5];
     struct req_rec request1;
 
     ip[2]=0;
-    if(strchr("123456789abcde",dev[0])==NULL)
+    if(strchr("123456789abcdefg",dev[0])==NULL)
        return;
 
     ini_req(&buffer);              /* initialize structure */

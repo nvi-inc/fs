@@ -1293,17 +1293,8 @@ its border red"""
     def engNumber(self, number, delta): #lite version of engNumber. Only receives one number.
         """engNumber receives a number and the percentage change of max and min in the series the number comes from. 
         Returns the number with appropriate number of digits"""
-        try:
-            number_of_digits = len(str(int(1/delta)))+1
-        except ZeroDivisionError:
-            number_of_digits = 2
-        number = str(number)
-        num = len(number.split('.'))
-        if num == 1:
-            return number
-        else:
-            expr = '%.' + str(number_of_digits) +'f'
-            return expr % float(number)
+# greatly simplied to give and gives better precision
+        return '%.6g' % number
             
     def setMaxMinXY(self, plotname):
         """setMaxMinXY sets the max/min X's and Y's of the active plot in the right plot detail frame"""
@@ -1497,7 +1488,10 @@ its border red"""
         self.closeFile()
         self.status_text.set('Opening file')
         if not _filename:
-            _filename = tkFileDialog.askopenfilename(initialdir = IOSettings.default_directory)
+            _filename = tkFileDialog.askopenfilename(initialdir = IOSettings.default_directory, filetypes=[
+                    ('Log files','*.log'),
+                    ("Any file", "*"),
+                    ])
         if _filename and not os.path.isfile(_filename):
             self.status_text.set('Error: file ' + _filename + ' does not exist')
             _filename = None
@@ -2408,7 +2402,7 @@ class LineReader:
                 #read settings
                 splitsign = self.settings_dict[key][1]
                 match_string = self.settings_dict.get(key)[3]
-                if splitsign == '':
+                if splitsign.strip() == '':
                     splitsign = None
                 offset = int(self.settings_dict[key][2])-1
                 if channel_locator==1:

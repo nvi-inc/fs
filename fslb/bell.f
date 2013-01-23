@@ -16,6 +16,7 @@ C  statement works.  gag
 C
       print 9100
 9100  format('',$)
+      call fc_play_wav(2)
         if (ieb.eq.0) itime=25-2*i 
         if (ieb.ne.0) itime=5+2*i
         call susp(1,itime) 

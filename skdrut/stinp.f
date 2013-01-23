@@ -129,6 +129,7 @@ C     1. Find out what type of entry this is.  Decode as appropriate.
 C
 ! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
 ! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
+! 2009Mar03  JMG. Fixed bug in OR statement with K5.
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "
@@ -400,7 +401,6 @@ C    Now set the S2 and K4 switches depending on the recorder type.
           else if(cs2sp .eq. "SLP") then
             s2sp=SPEED_SLP
           endif
-
           nheadstack(i)=1
           ibitden_save(i)=1
           maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
@@ -408,6 +408,11 @@ C    Now set the S2 and K4 switches depending on the recorder type.
           nheadstack(i)=1
           maxtap(i) = maxt ! conversion??
           ibitden_save(i)=1
+        else if(cstrec(i,1) .eq. "Mark5A" .or.         
+     >          cstrec(i,1) .eq.  "K5") then          
+          maxtap(i)=10000         !set to 10 thousand feet.
+          bitdens(i,1)=1.000d11   !very high means we don't need to worry about it. 
+          nheadstack(i)=nstack 
         else ! set Mk34 variables
           maxtap(i) = maxt
           ibitden_save(i)=ibitden
@@ -537,5 +542,4 @@ C! come here on bad line.
      >     " Please fix before proceeding!" 
       ierr=100
       stop
-      return
       END

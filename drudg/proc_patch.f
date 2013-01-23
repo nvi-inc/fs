@@ -1,14 +1,13 @@
-      subroutine proc_patch(icode,ifd,fvc_lo,fvc_hi)
+      subroutine proc_patch(icode,ifd)
 
 ! Write out patch commands for Mk3/4 and for kk4
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
+      include 'bbc_freq.ftni' 
 
       integer icode     ! Code
-      integer ifd(*)            !<>0, this IF used.
-      real fvc_lo(*)    ! lower bandpass
-      real fvc_hi(*)    ! Upper bandpass
+      integer ifd(*)            !<>0, this IF used.     
 
 ! History:
 ! V1.00 2007Jul06.  First version. Separated from procs.f
@@ -83,14 +82,14 @@
       character*1 l_LH(2)
 
       character*5 ck41_bbc(4)
-      integer ick41_bbc_len(4)
+!      integer ick41_bbc_len(4)
       character*2 ck42_bbc(16)
       real fr
 
 
       data l_LH/"l","h"/
       data ck41_bbc/"1-4","5-8","9-12","13-16"/
-      data ick41_bbc_len/3,3,4,5/
+!      data ick41_bbc_len/3,3,4,5/
 
       data ck42_bbc/'a1','a2','a3','a4','a5','a6','a7','a8',
      >              'b1','b2','b3','b4','b5','b6','b7','b8'/
@@ -119,7 +118,6 @@
           endif
         end do
       endif
-
 
       do i=1,max_bbc
         igotbbc(i)=0

@@ -12,7 +12,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 void mk5bbcd(itpis)
-int itpis[28];
+int itpis[MAX_BBC*2];
 {
   int vc,i;
 
@@ -23,14 +23,14 @@ int itpis[28];
     for (i=0;i<16;i++) {
       if(shm_addr->mk5b_mode.mask.mask & (1<<i)){
 	vc=i/2;
-	if(-1 < vc && vc <14)
-	  itpis[vc+14]=1; /* usb */
+	if(-1 < vc && vc <8)
+	  itpis[vc+MAX_BBC]=1; /* usb */
       }
     }
     for (i=16;i<32;i++) {
       if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
 	vc=(i-16)/2;
-	if(-1 < vc && vc <14)
+	if(-1 < vc && vc <8)
 	  itpis[vc]=1;  /* lsb */
       }
     }
@@ -39,7 +39,7 @@ int itpis[28];
       if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
 	vc=i/2;
 	if(-1 < vc && vc <14)
-	  itpis[vc+14]=1;  /* usb */
+	  itpis[vc+MAX_BBC]=1;  /* usb */
       }
     }
     for (i=16;i<18;i++) {
@@ -56,11 +56,11 @@ int itpis[28];
 	  itpis[vc]=1; /*lsb*/
       }
     }
-    for (i=20;i<31;i++) {
+    for (i=20;i<32;i++) {
       if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
 	vc=(i-20)/2+8;
 	if(-1 < vc && vc <14)
-	  itpis[vc+14]=1; /* usb */
+	  itpis[vc+MAX_BBC]=1; /* usb */
       }
     }
   }

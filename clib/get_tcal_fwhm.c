@@ -13,11 +13,12 @@ float flux_val();
 
 static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0}; 
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
-static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0};
+static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0, 32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0};
 static char *lwhat[ ]={
-"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
-"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
+  "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
+  "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fl","gl",
 "ia","ib","ic","id"};
 static char *lwhatm[ ]={
 "v1","v2","v3","v4","v5","v6","v7","v8","v9","va","vb","vc","vd","ve",
@@ -238,7 +239,7 @@ int *ierr;
 	      ifpf+=ifpbw*2.5;	/* Valid only for 8MHz BW */
 	    break;
 	  default:
-	    *ierr=-301;
+	    *ierr=-304;
 	    goto error;
 	    break;
 	  }
@@ -257,6 +258,68 @@ int *ierr;
 	} else {
 	  *ierr=-306;
 	  goto error;
+	}
+	break;
+      }
+    }
+  } else if(shm_addr->equip.rack==DBBC) {
+    for(i=0;i<sizeof(lwhat)/sizeof(char *);i++) {
+      if(strncmp(device,lwhat[i],2)==0) {
+	if(i<2*MAX_DBBC_BBC) {
+	  ifchain=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;
+	  if(ifchain<1||ifchain>4)
+	    ifchain=0;
+	  if(ifchain!=0) {
+	    float freq, bbcbw;
+	    
+	    freq=shm_addr->dbbcnn[i%MAX_DBBC_BBC].freq/1.e6;
+	    bbcbw=bw_dbbc[shm_addr->dbbcnn[i%MAX_DBBC_BBC].bw];
+	    if(i<MAX_DBBC_BBC)
+	      freq-=bbcbw*.5;
+	    else
+	      freq+=bbcbw*.5;
+	    switch(shm_addr->lo.sideband[ifchain-1]) {
+	    case 1:
+	      center=shm_addr->lo.lo[ifchain-1]+freq;
+	      break;
+	    case 2:
+	      center=shm_addr->lo.lo[ifchain-1]-freq;
+	      break;
+	    default:
+	      *ierr=-302;
+	      goto error;
+	      break;
+	    }
+	  } else {
+	    *ierr=-306;
+	    goto error;
+	  }
+	} else if(MAX_DBBC_BBC*2 <= i && i< MAX_DBBC_DET) {
+	  float upper, lower;
+
+	  ifchain=i-MAX_DBBC_BBC*2+1;
+	  switch(shm_addr->dbbcifx[ifchain-1].filter) {
+	  case 1:  lower= 512; upper=1024; break;
+	  case 2:  lower=  10; upper= 512; break;
+	  case 3:  lower=1536; upper=2048; break;
+	  case 4:  lower=1024; upper=1536; break;
+	  case 5:  lower=   0; upper=1024; break;
+	  case 6:  lower=1200; upper=1800; break;
+	  default: *ierr=-307; goto error; break;
+	  }
+
+	  switch (shm_addr->lo.sideband[ifchain-1]) {
+	  case 1:
+	    center=shm_addr->lo.lo[ifchain-1]+(lower+upper)*0.5;
+	    break;
+	  case 2:
+	    center=shm_addr->lo.lo[ifchain-1]-(lower+upper)*0.5;
+	    break;
+	  default:
+	    *ierr=-302;
+	    goto error;
+	    break;
+	  }
 	}
 	break;
       }

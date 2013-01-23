@@ -29,14 +29,16 @@ C     CALLED SUBROUTINES: TPLIS,TPPUT,IF2MA
 C
 C 3.  LOCAL VARIABLES
       integer itpis(17)
-      integer itpis_vlba(32)
+      integer itpis_vlba(MAX_DET)
+      integer itpis_dbbc(MAX_DBBC_DET)
       integer itpis_lba(2*MAX_DAS)
       integer itpis_norack(2)
 C      - which TPIs to read back
 C        ICH    - character counter
 C     NCHAR  - character count
-      parameter (ibufln=156)     ! worst case: TPZERO/32($$$$$$$$,) + '\0'
-      integer*2 ibuf(ibufln)     !         148 =(  7  + 32*9 + 1)/2
+      parameter (ibufln=(8+MAX_DET*9)/2)
+c                                ! worst case: TPZERO/36(xx,$$$$$,) + '\0'
+      integer*2 ibuf(ibufln)     !         166 =(  7  + 36*9  + 1)/2
 C               - class buffer, holding command
 C        ILEN   - length of IBUF, chars
       dimension ireg(2)
@@ -69,6 +71,8 @@ C                     Retain class for later response
         call tplisv(ip,itpis_vlba)
       else if (LBA.eq.rack) then
         call tplisl(ip,itpis_lba)
+      else if (DBBC.eq.rack) then
+        call tplisd(ip,itpis_dbbc)
       else
          call tplisn(ip,itpis_norack)
       endif
@@ -113,6 +117,9 @@ C
       else if (LBA.eq.rack) then
         call fc_tpi_lba(ip,itpis_lba)
         if(ip(3).lt.0) return
+      else if (DBBC.eq.rack) then
+        call fc_tpi_dbbc(ip,itpis_dbbc)
+        if(ip(3).lt.0) return
       else
          call fc_tpi_norack(ip,itpis_norack)
          if(ip(3).lt.0) return
@@ -136,6 +143,9 @@ C                     Get the command part of the response set up
         return
       else if (LBA.eq.rack) then
         call fc_tpput_lba(ip,itpis_lba,isub,ibuf,nch,ilen)
+        return
+      else if (DBBC.eq.rack) then
+        call fc_tpput_dbbc(ip,itpis_dbbc,isub,ibuf,nch,ilen)
         return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)

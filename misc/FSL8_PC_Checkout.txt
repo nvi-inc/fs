@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
+File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 2.4  Date: 120515
 
 	     GSFC FS PC Installation/Check-out Procedure
 
@@ -20,7 +20,7 @@ File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
    ____ Disk key sets(2 keys each)
    ____ Other?
 
-2. ____ Boot with vendor's disk to verify operation. Presevre this disk
+2. ____ Boot with vendor's disk to verify operation. Preserve this disk
         as long as possible in case it contains a needed driver.
 
 3. Labeling
@@ -70,15 +70,19 @@ File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
    ____     on Window 1 set noident
    ____     on Window 2 unset updates
    ____     select appropriate serial configuration when prompted
-   ____     on Window 3 set skip
+   ____     on Window 3, set skip
    ____     on Window 4 set secure, then OK, then OK again
+
+9b. Disable Avahi daemon
+    ____    update-rc.d -f avahi-daemon remove
+    ____    update-rc.d avahi-daemon stop 14 2 3 4 5 .
+    ____    invoke-rc.d avahi-daemon stop
 
 10. Set oper and prog password
     ____ passwd oper
     ____ passwd prog
 
 11. Install FS as "root: (use current latest version in place of 9.10.4):
-
     ____   (Place fs-9.10.4.tgz on /tmp)
     ____   cd /
     ____   tar xzf /tmp/fs-9.10.4.tgz
@@ -86,19 +90,30 @@ File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
     ____   make install
     ____     (answer question "y")
 
-12. Compile FS as "prog", vt1
+12. Configure sound card support
+    ____ alsaconf, take all defaults     
+       
+
+13. Copy various files to disk
+    ____  Put Debian DVDs, CD1 and FSL8_InstallCD images in /usr2/FSL8.
+    ____  Put fs-9.10.4.tgz in /usr2/prog
+    ____  chown prog.rtx /usr2/prog/fs-9.10.4/tgz
+
+14. Compile FS as "prog", vt1
     ____ cd /usr2/fs
     ____ make
 
-13. Reboot
+15. Reboot
     ____ reboot
 
-14. Testing
+16. Testing
+
     ____ NIC tested by installation process
     ____ CD/DVD tested by installation process
     ____ Keyboard tested by use
     ____ Mouse tested by use
     ____ USB ports (insert thumb drive in each)
+    ____ speaker-test
     ____ PCI-GPIB card if included
     ____ ByteRunner 800H if included
          Use dev9 for cable device in ibad.ctl,
@@ -108,7 +123,7 @@ File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
     ____ GPIB-RS232 if included (config from MS-Win machine with NI CD:S-mode,
          38400 BAUD, 8 data bits, 1 stop bit, no parity, no flow control)
 
-15. Clean-up as "root", vt1
+17. Clean-up as "root", vt1
          a. Restore /usr2/control/ibad.ctl and dev.ctl
             ____ cd /usr2/control
             ____ cp -a /usr2/fs/st.default/control/ibad.ctl .
@@ -117,75 +132,81 @@ File: /usr2/fs/misc/FSL8_PC_Checkout.txt  Version: 1.8  Date: 090803
             ____ chown oper.rtx ibad.ctl dev.ctl
 
     ____ b. Delete logs in /usr2/log
+
          c. Restore /etc/apt/sources.list:
             ____ Place web references after CD references.
             ____ apt-get update
 
     ____ d. Disconnect network cable
+
          e. Delete network configuration (as "root"):
             ____ cd /root/fsadapt
-            ____ /netconfig
+            ____ ./netconfig
             ____ (take defaults and no network)
 
-         f. place appropriate refresh_secondary in /usr/local/sbin:
+    ____ f. Change the "rhs=" line in "/etc/hesiod.conf" to 
+            "rhs=.domain".
 
+    ____ g. Reboot
+
+         h. place appropriate refresh_secondary in /usr/local/sbin:
             ____ cd /usr/local/sbin
             ____ cp -a /usr2/fs/misc/refresh_secondary.sdb refresh_secondary
             ____ chown root.root refresh_secondary
             ____ chmod a+r,u+wx,go-wx refresh_secondary
 
-         g. Place mdstat in /usr/local/bin:
+         i. Place mdstat in /usr/local/bin:
 
             ____ cd /usr/local/bin
             ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
             ____ chown root.root mdstat
             ____ chmod a+rx,u+w,go-w mdstat
 
-         h. Sign in as oper, prog, and desktop and make sure no is no
-            incoming mail.
+    ____ j. dpkg-reconfigure exim4-config (take all defaults)
+
+         k. Resolve any system issues reported in e-mail and clean
+            default mail destination:
+            ____ mail -f /var/mail/mail
+
+         l. make oper, prog, and desktop passwords undefined
             ____ oper
             ____ prog
             ____ desktop
 
-         i. make oper, prog, and desktop passwords undefined
-            ____ oper
-            ____ prog
-            ____ desktop
-
-         j. Edit /etc/aliases so root and prog e-mail goes to oper.
-            ____ change root: testing to root: oper
+         m. Edit /etc/aliases so root and prog e-mail goes to oper.
+            ____ change root: desktop to root: oper
             ____ add prog: oper
             ____ add desktop: oper
 
-         k. make root password vlbIcdp1
+         n. make root password vlbIcdp1
             ____ root
 
-    ____ l. Leave no uncommented clauses in hosts.allow.
+    ____ o. Leave no uncommented clauses in hosts.allow.
 
-    ____ m. Make hosts.deny as restrictive as possible:
+    ____ p. Make hosts.deny as restrictive as possible:
 
 ALL: PARANOID
 #
 ALL: ALL
 
-         n. Delete ssh keys:
+         q. Delete ssh keys:
             ____ cd /etc/ssh
             ____ rm *_key *_key.pub
 
-         o. delete .ssh/ and .history in ~oper, ~prog, ~desktop
+         r. delete .ssh/ and .history in ~oper, ~prog, ~desktop
             ____ cd ~oper; rm -rf .ssh .history
             ____ cd ~prog; rm -rf .ssh .history
             ____ cd ~desktop; rm -rf .ssh .history
 
-         p. delete .ssh/ and .bash_history for root
+         s. delete .ssh/ and .bash_history for root
             ____ cd /root; rm -rf .ssh .bash_history;exit
             ____ login as root; rm .bash_history
 
-         q. shutdown system when RAID is no longer rebuilding
+         t. shutdown system when RAID is no longer rebuilding
             ____ cat /proc/mdstat
             ____ shutdown -h now; exit
 
-16. Prepare extra disk:
+18. Prepare extra disk:
 
     ____ a. Insert disk "2" in Primary slot, no disk in second slot.
     ____ b. Follow fs8linux_DVD.txt through First Stage, step 10. You
@@ -198,24 +219,25 @@ ALL: ALL
     ____ e. Add Secondary disk into array as "root":
 
               refresh_secondary
-    
-    ____ f. Install GRUB on secondary, follow Second Stage
-            Installation, step 11.
-    ____ g. when cat /proc/mdstat shows rebuild finished, shutdown
 
-17. Repackage and ship
+            This script also installs GRUB on the Secondary disk.
+    ____ f. When cat /proc/mdstat shows rebuild finished, shutdown
+
+19. Repackage and ship
     ____ All components and cables
     ____ Lenny DVDs
+    ____ Lenny CD-1
     ____ FSL8Install CD, which contains the latest versions of:
          fs8linux_DVD.txt, fs8.selections, fsadapt-*.tgz, fs-*.tgz,
          fs*up.txt, FSL8_PC_Checkout.txt, FSL8_Upgrade.txt,
-         FSL8_End_User.txt, RAID.txt, and any special instructions,
-         drivers or other files for your system.  The contents of this
-         CD will help you to make a complete re-install even if you
-         don't have an Internet connection and/or lose the hard copy
-         of these documents.
+         FSL8_End_User.txt, RAID.pdf, refresh_secondary.hdc,
+         refresh_secondary.sdb, mdstat.7, refresh_spare_usr2, 
+         and any special instructions, drivers or other files for
+         your system.  The contents of this CD will help you to make
+         a complete re-install even if you don't have an Internet
+         connection and/or lose the hard copy of these documents.
     ____ Special instructions for this system, in document: _______________.
-    ____ RAID.txt
+    ____ RAID.pdf print-out
     ____ Any extra items specific to the system
     ____ fs8linux_DVD.txt print-out.
     ____ End User Set-up Checklist

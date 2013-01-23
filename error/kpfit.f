@@ -1,5 +1,5 @@
       logical function kpfit(lu,idcbo,ierr,rchi,rlnnr,rltnr,nfree,
-     + feclon,feclat,iftry,iobuf,lst,ibuf,il)
+     + feclon,feclat,iftry,iflags,iobuf,lst,ibuf,il)
 C
       integer*2 ibuf(1)
       character*(*) iobuf
@@ -25,6 +25,8 @@ C
       inext=ichmv_ch(ibuf,inext,'  ')
       inext=inext+ib2as(iftry,ibuf,inext,4)
       inext=ichmv_ch(ibuf,inext,'  ')
+      inext=inext+ib2as(iflags,ibuf,inext,6)
+      inext=ichmv_ch(ibuf,inext,'    ')
 C
       if (0.eq.mod(inext,2)) inext=ichmv_ch(ibuf,inext,' ')
       kpfit=kpout(lu,idcbo,ibuf,inext,iobuf,lst)

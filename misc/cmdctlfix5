@@ -1,0 +1,111 @@
+#!/usr/bin/perl
+# Usage: cmdctlfix4 file
+
+if ($#ARGV < 0) {
+    print "Usage: cmdctlfix5 file\n";
+    print "\n";
+    print "Fixes a pre-DBBC stcmd.ctl file for use with a FS version that supposts the DBBC\n";
+    print "\n";
+    print "file  is the control file to be fixed\n";
+    print "\n";
+    print "the original file is renamed with a '.bak' extension\n";
+
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try 'cmdctlfix4' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$name=$ARGV[0];
+
+if ($name =~ /(.*)\.ctl$/ ) {
+    $bak = $1 . ".bak";
+    $out = $name;
+    if (!-e $out) {
+	die "Can't find $out. Quitting.\n";
+    }
+}
+
+# rename the original if we can and open the files
+
+if (-e $bak) {
+    die "Backup-file $bak already exists, giving up.\n";
+}
+
+rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+if(!open(BAK,$bak)) {
+    print "Failed to open $bak: $!\n";
+    if(!rename($bak,$out)) {
+	print "Unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open $out: $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) { 
+	print "Unable to rename $bak to $out: $!\n";
+	die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+	die "I renamed $bak to $out for you.\n";
+    }
+}
+
+
+#okay now process the file
+
+$not=0;
+
+while(<BAK>) {
+    if (/^\*/) {
+	print OUT;
+	next;
+    } elsif(/^[ ]*$/) {
+	next;
+    }
+
+    $rack=substr($_,25,3);
+    $drive1=substr($_,28,3);
+    $drive2=substr($_,31,3);
+
+    $not = $not || $rack  !~ /[123456789ABCDEF]/;
+    $not = $not || $drive1 !~ /[123456789ABCDEF]/;
+    $not = $not || $drive2 !~ /[123456789ABCDEF]/;
+
+    substr($_,25,1)='0';
+    if (substr($rack,0,3) eq 'FFF') {
+	substr($_,25,1)='F';
+    }
+    substr($_,26,3)=$rack;
+
+    substr($_,29,1)='0';
+    if (substr($drive1,0,3) eq 'FFF') {
+	substr($_,29,1)='F';
+    }
+    substr($_,30,3)=$drive1;
+
+    substr($_,33,1)='0';
+    if (substr($drive2,0,3) eq 'FFF') {
+	substr($_,33,1)='F';
+    }
+    substr($_,34,3)=$drive2;
+
+    substr($_,37,1)="\n";
+    print OUT;
+}
+
+if ($not) {
+    print "Warning: Some non-comments lines had rack or drive designators outside 0-F.\n";
+    print "There is probably something wrong, like $out wasn't a command list file\n";
+    print "or $out had already been fixed.\n";
+    print "In order to recover you will probably want to rename $bak to $out,\n";
+    print "using: \"mv $bak $out\"\n";
+}

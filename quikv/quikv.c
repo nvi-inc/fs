@@ -275,6 +275,9 @@ loop:
 	case 13:
 	  mk5b_mode(&command,itask,ip);
 	  break;
+	case 20:
+	  dbbc(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  goto error;
@@ -287,11 +290,20 @@ loop:
 	tpicd(&command,itask,ip);
 	break;
       case 81:
-	onoff(&command,itask,ip);
+	switch (itask) {
+	case  1: onoff(&command,itask,ip); break;
+	case  2: holog(&command,itask,ip); break;
+	case  3: satellite(&command,itask,ip); break;
+	case  4: satoff(&command,itask,ip); break;
+	case  5: tle(&command,itask,ip); break;
+        default:
+	  ierr=-4;
+	  goto error;
+        }
 	break;
       case 82:
-	calrx(&command,itask,ip);
-	break;
+        dbbc_cont_cal(&command,ip);
+        break;
       case 83:
         ds(&command,itask,ip);
         break;
@@ -346,6 +358,22 @@ loop:
 	goto error;
         }
         break;
+      case 94:
+	dbbcnn(&command,itask,ip);
+	break;
+      case 95:
+	switch (itask) {
+	case 0:
+	  dbbcform(&command,ip);
+	  break;
+	case 1: case 2: case 3: case 4:
+	  dbbcifx(&command,itask,ip);
+	  break;
+	default:
+	  ierr=-4;
+	  goto error;
+	}
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

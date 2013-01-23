@@ -1,4 +1,4 @@
-      logical function kgant(lu,idcb,lant,laxis,iibuf,jbuf,il)
+      logical function kgant(lu,idcb,lant,laxis,iflags,iibuf,jbuf,il)
 
       integer*2 idcb(1)
       integer*2 jbuf(1),laxis(2),lant(5)
@@ -55,6 +55,7 @@ C
 100   continue
       call gtchr(lant,1,8,jbuf,ifc,ilc,ifield,iferr)
       call gtchr(laxis,1,4,jbuf,ifc,ilc,ifield,iferr) 
+      iflags=igthx(jbuf,ifc,ilc,ifield,iferr) 
       if (iferr.ne.0) goto 8020 
       call gtfld(jbuf,ifc,ilc,ic1,ic2)
       if (ic1.gt.0) goto 8005 

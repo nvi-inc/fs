@@ -31,6 +31,7 @@ C 021003 nrv Calculate K4 speed in dm/s not m/s. This will make the
 C            footages in the schedule be in dm not meters, for more precision.
 C 030109 jmg Back to m/s on K4
 ! 2006Nov29 JMG.  Changed to use cstrec(istn,irec)
+! 2009Oct01 JMG.  Made special speed for disk recording
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -74,6 +75,11 @@ C Determine type of equipment.
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
         sp=sp/1000.0 ! convert to m/s
+! is disk based?
+       else if(cstrec(is,1)(1:2) .eq. "K5" .or. 
+     &         cstrec(is,1)(1:5) .eq. "Mark5") then
+          sp=1.d-6
+
 C 1. First account for the fan factor.
       else ! Mk3/4 or VLBA
         if (ifan(is,icode).gt.0) then
@@ -93,6 +99,7 @@ C 3. Calculate the tape speed. Sample rate is in Mb/s.
       endif ! S2/K4/Mk3/4
 
       speed=sp
+!      write(*,*) "SPEED", cstnna(is), speed
 
       RETURN
       END

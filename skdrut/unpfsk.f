@@ -32,8 +32,8 @@ C  OUTPUT
       integer ns ! number of station names found
 C
 C  LOCAL:
-      integer ic1,ic2,nch,ich,n,idumy
-      integer ichmv,ias2b
+      integer ic1,ic2,nch,ich,idumy
+      integer ichmv
 C
 C
       IERR = 0

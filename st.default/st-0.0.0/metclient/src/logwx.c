@@ -12,7 +12,7 @@ logwx(
       char logfile[])
 {
   /*            /usr2/log/wx99001gg.log   */
-  char file[]= "                                        ";
+static  char file[]= "                                        ";
   char new[sizeof(file)];
   char new2[sizeof(file)];
   int error,total,ncopy;
@@ -22,10 +22,11 @@ logwx(
   char ch;
   static FILE *fildes= (FILE *) NULL;
   long offset;
+  int kopen;
 
   t=time(NULL);
   if(((time_t) -1) == t) {
-    err_report("Error getting time in logwx",NULL,1,0);
+    err_report("Error getting time in logwx",NULL,errno,0);
     return;
   }
 
@@ -35,72 +36,87 @@ logwx(
   strftime(new+strlen(new),sizeof(new),"/wx%y%j",ptr);
   if(-1==snprintf(new+strlen(new),sizeof(new)-strlen(new),
 		  "%c%c.log",sn[0],sn[1])) {
-    err_report("Error formatting entry for log in logwx",new,1,0);
+    err_report("Error formatting entry for log in logwx",new,errno,0);
     return;
   }
 
+  kopen=0;
   if(strcmp(new,file)!=0) {
+    kopen=1;
     if(fildes != (FILE *) NULL) {
       if(EOF == fclose(fildes)) {
-	err_report("Closing old log in logwx",file,1,0);
+	err_report("Closing old log in logwx",file,errno,0);
 	return;
       }
     }
 
     fildes=(fopen(new,"a+"));
     if(fildes == (FILE *) NULL) {
-      err_report("Opening new log in logwx",new,1,0);
+      err_report("Opening new log in logwx",new,errno,0);
       return;
     }
     if(0!=chmod(new,0666)) {
-      err_report("Setting permissions in logwx",new,1,0);
+      err_report("Setting permissions in logwx",new,errno,0);
       return;
     }
 
     strncpy(file,new,sizeof(file));
-    offset=ftell(fildes);
-    if(offset==(long)-1) {
-      err_report("Opening checking log position in logwx",new,1,0);
+
+    /* position to end for our reading here */
+    if(EOF==fseek(fildes, (long) 0,SEEK_END)) {
+      err_report("Error positioning to EOF in logwx",new,errno,0);
       return;
     }
+
+    offset=ftell(fildes);
+    if(offset==(long)-1) {
+      err_report("Opening checking log position in logwx",new,errno,0);
+      return;
+    }
+
     if(offset!=(long)0){
       if(EOF==fseek(fildes, (long) -1,SEEK_END)) {
-	err_report("Error positioning log in logwx",new,1,0);
+	err_report("Error positioning log in logwx",new,errno,0);
 	return;
       }
       if(EOF==fread(&ch,1,1,fildes)) {
-	err_report("Error reading log in logwx",new,1,0);
+	err_report("Error reading log in logwx",new,errno,0);
+	return;
+      }
+      /* must seek between reads and writes */
+      if(EOF==fseek(fildes, (long) 0,SEEK_END)) { 
+	err_report("Error positioning to EOF2 in logwx",new,errno,0);
 	return;
       }
       if(ch!='\n') {
 	ch='\n';
 	if(1!=fwrite(&ch,1,1,fildes)) {
-	  err_report("Error adding newline to log in logwx",new,1,0);
+	  err_report("Error adding newline to log in logwx",new,errno,0);
 	  return;
 	}
       }
     }
   }
 
-  if(ftell(fildes)==0) {
+  if(kopen) {
     if(strlen(fsloc_str)+1!=fprintf(fildes,"%s\n",fsloc_str)) {
-      err_report("Error writing entry to log in logwx",new,1,0);
+      err_report("Error writing entry to log in logwx",new,errno,0);
       return;
     }
   }
 
   if(-1==snprintf(buffer,sizeof(buffer)-strlen(buffer),"%s",wx_str)){
-    err_report("Error formatting entry for log in logwx",new,1,0);
+    err_report("Error formatting entry for log in logwx",new,errno,0);
     return;
   }
       
   if(strlen(buffer)+1!=fprintf(fildes,"%s\n",buffer)) {
-    err_report("Error writing entry to log in logwx",new,1,0);
+    err_report("Error writing entry to log in logwx",new,errno,0);
     return;
   }
 
   if(EOF == fflush(fildes)) {
-    err_report("Error flushing log stream in logwx",new,1,0);
+    err_report("Error flushing log stream in logwx",new,errno,0);
     return;
   }
 

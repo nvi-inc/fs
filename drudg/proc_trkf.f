@@ -21,6 +21,7 @@
 
 ! History
 ! 2007Jul11 Split off from procs.f
+! 2009Sep08 Fixed bug in filling up extra tracks if used 2nd headstack
 
 ! local
       character*12 cnamep               !function name
@@ -81,7 +82,7 @@
 
       ir = 1
       if (kuse(2).and..not.kuse(1)) ir = 2
-
+      
       Do  IPASS=1,num_sub_pass !loop on subpasses
         call trkall(ipass,istn,icode,
      >    cmode(istn,icode), itrk,cpmode,npmode,ifan(istn,icode))
@@ -340,6 +341,10 @@ C             Use BBC number, not channel number
             im5chn_dup =im5chn_dup-1
 ! find a free spot in the track assignment table.
 ! Start with 2 on head 1. If can't find even, go to odds. If can't find odds, go to head 2.
+            if(iptr .eq. 33) then
+               ihead=ihead+1
+               iptr=2
+            endif
             do while(ihead .le. 2 .and. iptr .le. 32 .and.
      >        itrackvec(iptr,ihead) .eq. 1)
               do while(iptr.le.32.and.itrackvec(iptr,ihead).eq.1)
@@ -351,12 +356,8 @@ C             Use BBC number, not channel number
                   iptr=iptr+2*ifan_fact
                 end do
               endif
-              if(iptr .gt.33) then  !Didn't find a free slot. Try second head.
-                ihead=ihead+1
-                iptr=2
-                i=NumTracks/2+1
-              endif
             end do
+
             if(iptr .le. 33 .and. ihead .le. 2 .and.   !found unused track!
      >         itrackvec(iptr,ihead) .eq. 0) then
                itrackvec(iptr,ihead)=1

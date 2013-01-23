@@ -133,11 +133,13 @@ char *ptr;
 	    }
 	  }
 	} else if (lcl->mode > 2) {            /* m3 mode a, b, or c */
-	  if(shm_addr->equip.rack_type != VLBAG &&
-	     shm_addr->equip.rack_type != VLBA4 &&
-	     lcl->mode < 10){
-	    ierr=-300;
-	    break;
+	  if(shm_addr->equip.rack == VLBA) {     /* non-VLBA racks are supported for vform */
+	    if(shm_addr->equip.rack_type != VLBAG &&
+	       shm_addr->equip.rack_type != VLBA  &&
+	       lcl->mode < 10){
+	      ierr=-300;
+	      break;
+	    }
 	  }
 	  lcl->enable.low   =0;
 	  lcl->enable.high  =0;

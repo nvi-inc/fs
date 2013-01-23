@@ -45,7 +45,7 @@ c
       do i=1,6
         if (cicr(1:1).eq.cistcr(i:i)) goto 105 
       enddo
-      goto 170   !! if start with a number 0-9 or a,c,d,f
+      goto 170   !! if start with a number 0-9 or a,c,d,f,g
 105   goto (110,120,130,140,150,160) i 
 C            o   e   i   v   b   p
 C
@@ -266,7 +266,7 @@ C  Take care of other baseband detectors not leading with a "b"
           endif
         endif
       else if ((cicr(1:1).eq.'1').and.(cicr(2:2).ge.'0').and.
-     .                                (cicr(2:2).le.'5')) then
+     .                                (cicr(2:2).le.'6')) then
         if ((cicr(3:3).eq.'u').or.(cicr(3:3).eq.'l')) then
           call char2hol(cicr(2:2),ic2,1,1)
           ic2=ic2+49
@@ -281,7 +281,7 @@ C  Take care of other baseband detectors not leading with a "b"
         if (cicr(3:3).eq.' ') then
           call char2hol(cicr(1:2),dtnam,1,2)
         endif
-      else if ((cicr(1:1).ge.'a').and.(cicr(1:1).le.'f')) then
+      else if ((cicr(1:1).ge.'a').and.(cicr(1:1).le.'g')) then
         if ((cicr(2:2).eq.'u').or.(cicr(2:2).eq.'l')) then
           if (cicr(3:3).eq.' ') then
             call char2hol(cicr(1:2),dtnam,1,2)

@@ -1,5 +1,5 @@
       logical function kgetp(lut,idcb,idcbs,ipbuf,jbuf,il,
-     +   iedit,widmin,widmax,pkrlim,laxis,lant)
+     +   iedit,widmin,widmax,pkrlim,laxis,lant,iflags)
 C
       integer idcb(1)
       integer*2 jbuf(1),laxis(2),lant(4)
@@ -7,9 +7,11 @@ C
       character*(*) ipbuf
       integer fmpread, ichcm_ch
 C
-      data mrec/2/
+      data mrec/3/
 C
       kgetp=.true.
+      iedit=0
+      iflags=0
 C
 C   OPEN THE DATA FILE
 C
@@ -45,7 +47,7 @@ C
 C
 C GET DATA
 C
-      goto (100,200), irec
+      goto (100,200,300), irec
 C
 C  1ST RECORD: SITE INFO
 C
@@ -80,6 +82,15 @@ C   PEAK TEMPERATURE RATIO LIMIT
 C
       pkrlim=gtrel(jbuf,ifc,ilc,ifield,iferr)
       goto 50
+C
+C  3rd RECORD: CONTROL FLAGS
+C
+ 300  continue
+C
+C   control flag, 0=FEC in AZ, 1=FEC in XEL
+C
+       iflags=igthx(jbuf,ifc,ilc,ifield,iferr)
+       goto 50
 C
 C FIELD ERROR
 C

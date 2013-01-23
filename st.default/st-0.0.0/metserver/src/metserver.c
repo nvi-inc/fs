@@ -16,7 +16,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-#define MYPORT 30384    /* the port users will be connecting to */
+#define MYPORT 50001    /* the port users will be connecting to */
 
 #define BACKLOG 5       /* how many pending connections queue will hold */
 #define TRUE 1
@@ -45,33 +45,35 @@ main(argc, argv)
   int   flags;
   int sockcnt;                   /* counter for testing connections */
   pid_t pid;
+  unsigned int myport;
+
+  errno=0;
 
   if( argc <= 1) {
-  ports_err:
     err_report("metserver: ports NOT specifed, check INSTALL", NULL,0,0);
     strcpy(port1,"/dev/null");
-    port2[strlen(port2)]='\0';
     strcpy(port2,"/dev/null");
-    port2[strlen(port2)]='\0';
-    sleep(10);
-    goto ports_err;
+    exit(-1);
   } else if(argc == 2) {
     strcpy(port1,argv[1]);
-    port1[strlen(port1)]='\0';
     strcpy(port2,"/dev/null");
-    port2[strlen(port2)]='\0';
-  } else {
+    myport=MYPORT;
+  } else if(argc == 3) {
     strcpy(port1,argv[1]);
-    port1[strlen(port1)]='\0';
     strcpy(port2,argv[2]);
-    port2[strlen(port2)]='\0';
+    myport=MYPORT;
+  } else if(argc == 4) {
+    strcpy(port1,argv[1]);
+    strcpy(port2,argv[2]);
+    myport=atoi(argv[3]);
   }
+  if(myport <= 0)
+    err_report("metserver: socket invalid value, check INSTALL", NULL,0,0);
 
- 
  socket_err:
   if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     /* Hopefully this will never happen. */
-    err_report("metserver: socket error", NULL,0,0);
+    err_report("socket error", NULL,errno,0);
     /* Be nice to others and I give me some time before I try again. */
     sleep(10);
     goto socket_err;
@@ -81,19 +83,20 @@ main(argc, argv)
   fcntl(sockfd, F_SETFL, O_NONBLOCK);
 
   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-    err_report("metserver: setsocketopt error", NULL,0,0);
+    err_report("setsocketopt error", NULL,errno,0);
     sleep(10);
     goto socket_err;
   }
     
   my_addr.sin_family = AF_INET;         /* host byte order */
-  my_addr.sin_port = htons(MYPORT);     /* short, network byte order */
-  my_addr.sin_addr.s_addr = INADDR_ANY; /* automatically fill with my IP */
-  memset(&(my_addr.sin_zero), '\0', 8); /* zero the rest of the struct */
+  my_addr.sin_port = htons(myport);     /* short, network byte order */
+  my_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); /* localhost only */
+  //  my_addr.sin_addr.s_addr = htonl(INADDR_ANY); /* remote connections too */
+  memset(&my_addr.sin_zero, 0, sizeof(my_addr.sin_zero)); /* zero the restt */
   
   if (bind(sockfd, (struct sockaddr *)&my_addr, 
 	   sizeof(struct sockaddr)) == -1) {
-    err_report("metserver: binding socket error", NULL,0,0);
+    err_report("binding socket error", NULL,errno,0);
     sleep(10);
     goto socket_err;
   }
@@ -105,7 +108,7 @@ main(argc, argv)
   do { 
 
     if (listen(sockfd, BACKLOG) == -1) {
-      err_report("metserver: listen socket error", NULL,0,0);
+      err_report("listen socket error", NULL,errno,0);
     sleep(10);
     goto socket_err;
     }
@@ -114,52 +117,47 @@ main(argc, argv)
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-      err_report("metserver: sigaction error", NULL,0,0);
+      err_report("sigaction error", NULL,errno,0);
     }
     sin_size = sizeof(struct sockaddr_in);
   
     /* Set socket nonblocking   */
     if ((flags = fcntl (sockfd, F_GETFL, 0)) < 0) {
-      err_report("metserver: fcntl f_getfl error", NULL,0,0);
+      err_report("fcntl f_getfl error", NULL,errno,0);
     }
     
     flags |= O_NONBLOCK; 
     
     if (( fcntl (sockfd, F_SETFL, flags )) < 0) {
-      err_report("metserver: fcntl f_setfl error", NULL,0,0);
+      err_report("fcntl f_setfl error", NULL,errno,0);
     }
     
-    to.tv_sec = 1;
-    to.tv_usec = 250000;
+    to.tv_sec = 3600;
+    to.tv_usec = 0;
     
     FD_ZERO(&ready);
     FD_SET(sockfd,&ready);
 
     if (select(sockfd + 1, &ready, (fd_set *)0,
 	       (fd_set *)0, &to) < 0) {
-      err_report("metserver: socket select error", NULL,0,0);
+      err_report("socket select error", NULL,errno,0);
       continue;
     }
 
-    new_fd = accept(sockfd,(struct sockaddr *)0,(int *)0);
     if(FD_ISSET(sockfd, &ready)) {
+      new_fd = accept(sockfd,(struct sockaddr *)0,(int *)0);
       if( new_fd == -1) {
-	err_report("metserver: socket accept error", NULL,0,0);
-	/*} else if (send(new_fd, buf, len, 0) == -1) {*/
-      } else if (send(new_fd, buf, len, MSG_DONTWAIT) == -1) {
-	err_report("metserver: socket send error", NULL,0,0);
+	err_report("socket accept error", NULL,errno,0);
+       continue;
       }
-      close(new_fd);
       sprintf(buf,"%s",(char *)metget(&port1,&port2));
       len=strlen(buf);
-      buf[len]='\0';
+      if (send(new_fd, buf, len, 0) == -1) {
+	/* } else if (send(new_fd, buf, len, MSG_DONTWAIT) == -1) { */
+	err_report("socket send error", NULL,errno,0);
+      }
+      close(new_fd);
     } else close(new_fd);
   } while(TRUE);
   exit(0);
 }
-
-
-
-
-
-

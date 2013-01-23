@@ -11,6 +11,9 @@ C     gag   900104 created
 C 960206 nrv Variable holding station id must be i*2
 C 970513 nrv Remove printout because it's confusing and not
 C            really needed with 2-letter code usage.
+! 2009Oct12  JMG. Modified because with large networks (>26) was getting strange characters
+!            Now tries to find free space among approved list of character letters.
+!
 C
 C   COMMON BLOCKS USED
       include '../skdrincl/skparm.ftni'
@@ -22,6 +25,14 @@ C
       character cstnid(max_stn)
 ! function
       integer iwhere_in_string_list
+      integer max_valid
+      parameter (max_valid=72)
+
+      character*(max_valid) cvalid
+      character*1 cvec(max_valid)
+      equivalence (cvec,cvalid)
+      integer itry
+
 
 C     inum - number of entries in array
 C     cstnid - array with entries
@@ -32,16 +43,33 @@ C     CALLED: CHAR2HOL,HOL2CHAR
 C
 C  LOCAL VARIABLES
       integer iwhere
-
+      cvalid=
+     >"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"//      !36
+     >"@#$%<>[]()abcdefghijklmnopqrstuvwxyz"      !36
+      
+      itry=0
       if(inum .le. 1) then
         return
       else
-        iwhere=1
+! First check to see if name is valid.
+        iwhere=iwhere_in_string_list(cvalid,max_valid,cstnid(inum))
+        if(iwhere .eq. 0) then   !not valid.  Set it to the first valid character
+            cstnid(inum)=cvec(1)
+        endif
+        if(inum .eq. 1) return
+
+! Now make sure character is unique.
+        iwhere =1
 ! search for match among earlier entries
         do while(iwhere .ne. 0)
           iwhere=iwhere_in_string_list(cstnid,inum-1,cstnid(inum))
           if(iwhere .ne. 0) then                        !A match.
-             cstnid(inum)=char(ichar(cstnid(inum))+1)   !Change the 1 char ID.
+             itry=itry+1
+             if(itry .gt. max_valid) then
+                write(*,*) "IDCHK: No more 1 character station IDs"
+                stop
+             endif
+             cstnid(inum) = cvec(itry)
           endif
         end do
       endif

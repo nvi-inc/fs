@@ -14,7 +14,6 @@
 void rte_rawt(lRawTime)
 long *lRawTime;
 {
-     long times();
      struct tms buffer;
      struct timeval tv;
      int index;
@@ -23,14 +22,14 @@ long *lRawTime;
      if(shm_addr->time.model!='c'
 	&& shm_addr->time.epoch[index]!=0
 	&& shm_addr->time.icomputer[index]==0 ) {
-       *lRawTime=times(&buffer);
+       rte_ticks(lRawTime);
      } else {
        if(0!= gettimeofday(&tv, NULL)) {
 	 perror("getting timeofday, fatal\n");
 	 exit(-1);
        }
        *lRawTime=(tv.tv_sec-shm_addr->time.secs_off)*100
-	 +(tv.tv_usec+5000)/10000;
+	 +tv.tv_usec/10000;
      }
 
      return;
