@@ -25,16 +25,21 @@ onsource
 wx
 cable
 ifa
-ifd
+ifb
 ifc
 ifd
 bbc01
 bbc05
 bbc09
 bbc13
+" the shown order of the commands from here to the end of this procedure is
+" strongly recommended
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
-sy=run setcl &
+mk5b_mode
+!+1s
+mk5=dot?
+sy=run setcl adapt &
 enddef
 define  midtp         00000000000
 "rxmon
@@ -160,4 +165,13 @@ mk5=status?
 enddef
 define  greplog       00000000000x
 sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
+enddef   
+define  mk5panic      000000000000
+"mk5panic - dls - 5 december 2003
+disk_record=off
+mk5=bank_set=inc;
+!+3s
+disk_serial
+mk5=bank_set?
+mk5=vsn?
 enddef   
