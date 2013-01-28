@@ -1,4 +1,4 @@
-I ********* equip.ctl Equipment Control File *********
+********* equip.ctl Equipment Control File *********
 * Please refer to the Control Files Manual in Volume 1 of the 
 * Field System Documentation
 * 
