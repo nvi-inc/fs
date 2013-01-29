@@ -1682,6 +1682,9 @@ dbbcn: EOF pre-draining input, dbbc probably crashed, connection closed
 DB -113
 dbbcn: no data pre-draining input, but no EOF or error, connection closed
 ""
+DB -114
+dbbcn: re-open after pre-drain error was okay, proceeding to transaction.
+""
 DB -201
 dbbcn: ERROR response from DBBC, see db -200 error for text.
 ""
@@ -3100,6 +3103,9 @@ mk5cn: EOF pre-draining input, mark 5 probably crashed, connection closed
 ""
 M5 -113
 mk5cn: no data pre-draining input, but no EOF or error, connection closed
+""
+M5 -114
+mk5cn: re-open after pre-drain error was okay, proceeding to transaction.
 ""
 M5 -899
 unable to find or decode return code
