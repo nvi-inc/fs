@@ -63,6 +63,7 @@ FILE * fsock; /* Socket also as a stream */
 char host[sizeof(shm_addr->mk5host)]; /* maximum width plus one */
 int port;
 int is_open=FALSE;
+int first_transaction=FALSE;
 int time_out;
 int is_init=FALSE;
 
@@ -457,6 +458,7 @@ int open_mk5(char *host, int port)
 #endif
 
   is_open=TRUE;
+  first_transaction=TRUE;
   return 0;
 }
 int doproc(ip)
@@ -468,7 +470,6 @@ long ip[5];
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
-  int itry;
 
   long in_class;
   long out_class=0;
@@ -550,23 +551,11 @@ long ip[5];
 #endif
     // not needed as v101    inbuf[nchars++]='\n';  /* new-line */
     inbuf[nchars++]=0;  /* zero */
-    itry=0;
-  try:
+
     if(iecho && strlen(secho)> 0) {
       logit(secho,0,NULL);
       secho[0]=0;
     }
-  if(!is_open) {
-    if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
-#ifdef DEBUG
-      printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
-#endif
-      ip[2]=error;
-      goto error;
-    }
-    rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
-                      a Mark 5 or Linux problem? */
-  }
     if(iecho) {
       int in, out;
       strcpy(secho,"[");
@@ -591,9 +580,24 @@ long ip[5];
 #ifdef MSG_DONTWAIT
     flags|=MSG_DONTWAIT;
 #endif
-    ip[2] = drain_input_stream(fsock);
-    if(ip[2]!=0)
-      goto retry_check;
+    if(!first_transaction) {
+      ip[2] = drain_input_stream(fsock);
+      if(ip[2]!=0) {
+	logit(NULL,ip[2],"db");
+	close_socket();
+	if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+	  ip[2]=error;
+	  goto error;
+	} else {
+	  rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
+			     a Mark 5 or Linux problem? */
+	  logit(NULL,-114,"db");
+	  first_transaction=FALSE;
+	}
+      }
+    } else {
+      first_transaction=FALSE;
+    }
       
     if(mode==4) {
       rte_cmpt(centisec+2,centisec+4);
@@ -646,13 +650,8 @@ long ip[5];
       secho[0]=0;
     }
     
-  retry_check:
     if(ip[2]!=0) {
       close_socket();
-      //if(++itry<2) {
-      //	logit(NULL,ip[2],"m5");
-      //goto try;
-      //}
       goto error;
     }
     if(mode==4) {
@@ -740,6 +739,7 @@ long ip[5];
 
   if(is_open) {
     is_open=FALSE;
+    first_transaction=FALSE;
     fclose(fsock);
     shutdown(sock, SHUT_RDWR);
     close(sock);
@@ -773,6 +773,7 @@ static void close_socket()
 {
    if (FALSE != is_open) {
       is_open = FALSE;
+      first_transaction=FALSE;
       (void) fclose(fsock);
       (void) shutdown(sock, SHUT_RDWR);
       (void) close(sock);
