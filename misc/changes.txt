@@ -10112,3 +10112,20 @@ Version 9.10.5 121002
            finalized
 
 Version 9.11.0 130123
+
+130128 WEH st.default/control/equip.ctl
+           correct typo in first line
+
+130128 WEH st.default/proc/dstation.prc
+           st.default/proc/dstationcc.prc
+           fix MIDOB, add mk5panic
+
+130129 WEH control/fserr.ctl
+           dbbcn/dbbcn.c
+           mk5cn/mk5cn.c
+           smoothly handle restarts of device
+
+130130 WEH misc/fs9111up.txt
+           updated
+
+Version 9.11.1 130130
