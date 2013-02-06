@@ -198,6 +198,7 @@ mout3()
         k = (i-1)*6;
 	ptfreq[0]=' ';
         memcpy(ptfreq+1,shm_addr->lfreqv+k,6);
+	ptfreq[7]=0;
       }
       move(ROW1+2+i,COL1+5);
       printw("%7s",ptfreq);
