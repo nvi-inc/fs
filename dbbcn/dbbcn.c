@@ -60,7 +60,7 @@ static jmp_buf sig_buf;
 
 int sock; /* Socket */ 
 FILE * fsock; /* Socket also as a stream */ 
-char host[sizeof(shm_addr->mk5host)]; /* maximum width plus one */
+char host[129]; /* maximum width plus one */
 int port;
 int is_open=FALSE;
 int first_transaction=FALSE;
@@ -170,8 +170,6 @@ int doinit()
    
     if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
       return -3;
-
-    strcpy(shm_addr->mk5host,host);
 
     if(time_out <200)
       time_out= 200;
