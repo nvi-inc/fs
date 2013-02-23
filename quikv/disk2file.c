@@ -158,7 +158,6 @@ long ip[5];                           /* ipc parameters */
 	    }
 	  } else { /* we are in the parent process */
 	    waitpid(fork_result,&result,0);
-	    printf(" result %d\n",result);
 	    if(WIFEXITED(result) ==0 ) {
 	      ierr=-304;
 	      goto error;
