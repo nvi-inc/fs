@@ -65,6 +65,9 @@ class NumericTools:
     def getMean(self, list):
         return float(sum(list))/len(list)
     
+    def getScale(self, y, x):
+        return sum(array(y)/array(x))/float(len(x))
+    
     def getList(self, name, indices):
         """not used"""
         return_data = []
