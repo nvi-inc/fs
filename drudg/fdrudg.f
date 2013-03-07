@@ -256,7 +256,7 @@ c Initialize no. entries in lband (freqs.ftni)
       ierr=0
       tpid_prompt = 'no'
       itpid_period = 0
-      contcal_prompt='NO'
+      contcal_prompt='OFF'
       do i=1,4
         ldbbc_if_inputs(i)=" "
       end do 
@@ -528,6 +528,10 @@ C
      >     cstnna(istn)," set to 'none'." 
            cstrec(istn,2)="none"
           endif 
+! Make a copy of the original configuration now
+          cstrack_orig(istn) =cstrack(istn)
+          cstrec_orig(istn,1)=cstrec(istn,1)
+          cstrec_orig(istn,2)=cstrec(istn,2)
       end do
 !
       km5A_piggy=.false.

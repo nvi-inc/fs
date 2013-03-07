@@ -10129,3 +10129,27 @@ Version 9.11.0 130123
            updated
 
 Version 9.11.1 130130
+
+120729 WEH fivpt/xoffot.f
+           add source name to xoffset output
+
+130206 WEH monit/monit3.c
+           remove extra garbage characters in display for Mark III/IV/5
+
+130221 WEH dbbcn/dbbcn.c
+           clean-up mk5host in fscom issue
+
+130223 WEH quikv/disk2file.c
+           restore 9.10.4 version, but remove debug output
+
+130304 WEH gnplt/main.py
+           gnplt/NumericTools.py
+           fix updating DPFU only
+
+130307 WEH gnplt/main.py
+           fix scaling Tcal for gain changes
+
+130307 WEH misc/fs9112up.txt
+           updated
+
+Version 9.11.2 130307

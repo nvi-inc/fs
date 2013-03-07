@@ -269,6 +269,7 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 ! 2012.09.08 JMG. Modified so that always issues TPICD commands (WEH says this is OK.)
 !             Numerous changes to support DBBC.
 ! 2012.09.20 JMG. If an error in some routine, then delete the partial ".prc" file that was written 
+! 2012.02.21 JMG. Modified to issue TPICD only in some cases. WEH changed his mind. 
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -288,7 +289,7 @@ C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       logical kpcal_d,kpcal
       logical kroll             !barrel roll on
       logical kman_roll         !manual barrel roll on
-!      logical ktpicd
+      logical ktpicd
 
 
 C     real speed,spd
@@ -363,7 +364,12 @@ C INITIALIZED VARIABLES:
           if (kk42rec(1).and.kk42rec(2)) kk4vcab=.true.
         endif
       endif
-
+    
+      ktpicd = Km3rack.or.km4rack.or.kvrack.or.kv4rack.or. klrack .or.
+     >         kdbbc_rack .or.
+     >        ((km5rack .or. kv5rack) .and. km5brec(1)) 
+ 
+   
       WRITE(LUSCN,'( "Procedures for ",a)') cstnna(istn)
 C
       call purge_file(prcname,luscn,luusr,kbatch,ierr)
@@ -398,8 +404,10 @@ C
       if(kdbbc_rack) then
         contcal_out=contcal_prompt
         call lowercase(contcal_out)
+        write(*,*) "Contcal: ",contcal_out
         do while(.not. (contcal_out .eq. "on".or.
      >                  contcal_out .eq. "off".or.
+     >                  contcal_out .eq. "no" .or. 
      >                  contcal_out .eq. " "))      
          write(*,*) "Enter in cont_cal action: (on/off)"
          read(*,*) contcal_out
@@ -580,9 +588,9 @@ C  PCALON or PCALOFF
           endif
 
 C  TPICD=STOP
-!          if(ktpicd) then
+          if(ktpicd) then
              write(lu_outfile,'(a)') 'tpicd=stop'
-!          endif 
+          endif 
 
           if (kvrec(irec).or.kv4rec(irec)
      >       .or.km3rec(irec).or.km4rec(irec) .or.Km5disk) then
@@ -706,9 +714,9 @@ C  !*
           endif
 
 C  TPICD=no,period
-!          if(ktpicd) then 
+          if(ktpicd) then 
             call snap_tpicd("no",itpicd_period_use)
-!          endif
+          endif
 
 C  BIT_DENSITY=
 C  SYSTRACKS=
@@ -755,9 +763,9 @@ C  PCALD
             write(lu_outfile,'(a)') 'pcald'
           endif
 C  TPICD always issued
-!          if(ktpicd) then
+          if(ktpicd) then
             write(lu_outfile,'(a)') "tpicd"
-!          endif 
+          endif 
   
           if(km5a .or. km5a_piggy) write(lu_outfile,'(a)') "mk5=mode?"
           write(lu_outfile,'(a)') "enddef"

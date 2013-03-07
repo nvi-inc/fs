@@ -113,7 +113,12 @@
          write(*,"('Proc_mk5b_tracks Error! max_tracks is: ',i3)")
      >        max_csb
          write(*,"('But specfied ', i3)") num_tracks
-         if(kcomment_only) return
+         stop 
+!         if(kcomment_only) then
+!           return
+!         else
+!          stop
+!         endif 
        endif
 
 ! Check to see if a valid geo mode.
@@ -123,10 +128,6 @@
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lgeo_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then
-!          if(.not.kcomment_only) then
-!             write(*,*) " "
-!             write(*,*) "Invalid m5b_geo  track: ", lsked_csb(ic)
-!           endif
             goto 200
         endif
         itemp=1
@@ -143,12 +144,12 @@
       do ic=1,num_tracks
         ibit=iwhere_in_string_list(lvlba_csb,max_csb,lsked_csb(ic))
         if(ibit .eq. 0) then
+           write(*,*) 
+           write(*,*) 
+     > "WARNING: Channels inconsistent with m5b_geo and m5b_vlba mode!!"         
           if(.not.kcomment_only) then
-            write(*,*) 
-            write(*,*) 
-     >         "Channels inconsistent with m5b_geo and m5b_vlba mode"
-          endif
-          stop 
+             stop 
+          endif     
         endif
         itemp=1
         itemp=ishft(itemp,ibit-1)
@@ -174,7 +175,7 @@
         nchan_rec=nchan_rec*2
       end do      
 
-! If we need to, turn on extra bits until we get to 8, 16, or 32 channels.
+! If we need to, turn on extra bits until we get to 1,2, 4, 8, 16, or 32 channels.
       itemp=1
       do while(num_tracks .lt. nchan_rec)
         if(iand(itemp,imask) .eq. 0) then
@@ -187,10 +188,10 @@
       if(kcomment_only) then
         if(kgeo_mode) then
           write(lu_outfile,'(a)')
-     >      '" Track assignments consistent with vsi4=geo'
+     >      '" Channel assignments consistent with vsi4=geo'
         else
           write(lu_outfile,'(a)')
-     >      '" Track assignments consistent with vsi4=vlba'
+     >      '" Channel assignments consistent with vsi4=vlba'
         endif
         write(lu_outfile,'(a)') '" Appropriate mask follows'
       endif
