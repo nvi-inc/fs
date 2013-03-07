@@ -1780,7 +1780,7 @@ class Gui(Frame):
         #deleted = set(self.plot.deleted_list)
         #indices = list(all_pol - deleted)
         indices = self.plot.data_indices
-        
+
         xdata = []
         ydata = []
         for i in indices:
@@ -1793,10 +1793,9 @@ class Gui(Frame):
         xdata.extend(x_virt)
         ydata.extend(y_virt)
         
-        degree = 2
-        poly = self.numTools.polyfitData(xdata, ydata, degree)
+        poly = GAIN_ELEV_POLY[0]
         c = self.numTools.evalPoly(poly,xdata)
-        DPFU = max(c)#self.numTools.getDPFU(poly)
+        DPFU=self.numTools.getScale(ydata,c)
         return DPFU
     
     def updateTCalTable(self):
@@ -1898,7 +1897,7 @@ class Gui(Frame):
                             if len(ldata) == 3:
                                 factor = self.working_data.get('tcal_factor')
                                 old_tcal = float(ldata[2])
-                                new_tcal = old_tcal*(1+factor)
+                                new_tcal = old_tcal/(1+factor)
                                 working_rxg_data_updated[i] = '%s %s %s\n' %(ldata[0], ldata[1], new_tcal)
     
                     elif mode == 'tsys-tspill_airmass':
