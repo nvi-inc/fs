@@ -40,6 +40,7 @@
       cif=cifinp(ic,istn,icode)  
       call capitalize(cif)   !capitalize for the check. 
       iwhere= iwhere_in_string_list(cif_valid,16,cif)
+      if(cstrack_orig(istn) .ne. "DBBC") iwhere=0
       if(iwhere .ne. 0) then 
         kvalid_if=.true.       
       else

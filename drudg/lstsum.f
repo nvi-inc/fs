@@ -476,6 +476,7 @@ C           Update running time
           kunload=.true.
         else if (index(ctmp(1:15),'DATA_VALIDA=OFF').ne.0  .or.
      .           index(ctmp(1:15),'DATA_VALIDB=OFF').ne.0  .or.
+     .           index(ctmp(1:15),'DATA_VALID=OFF') .ne.0  .or.
      .           index(ctmp(1:10),'"DATA STOP').ne.0.or.
      .           index(ctmp(1:6),'POSTOB').ne.0) then ! data stop time
           kdata_stop=.true.

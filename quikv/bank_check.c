@@ -158,7 +158,7 @@ parse:
 	  (shm_addr->scan_name.continuous > 0 &&
 	   rtime_mon.seconds.seconds < shm_addr->scan_name.continuous+200.0)) &&
 	  ((shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	   shm_addr->equip.drive_type[shm_addr->select]== MK5B)||
+	   shm_addr->equip.drive_type[shm_addr->select]== MK5B_BS)||
 	   (shm_addr->equip.drive[shm_addr->select] == MK5 &&
 	    shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS)||
 	  shm_addr->equip.drive[shm_addr->select] != MK5) )){

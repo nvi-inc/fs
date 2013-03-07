@@ -61,6 +61,12 @@ C  1. Open the default control file if it exists.
       
 ! Initialization
 
+      ldbbc_if_inputs(1)=" "
+      ldbbc_if_inputs(2)=" "
+      ldbbc_if_inputs(3)=" "
+      ldbbc_if_inputs(4)=" "
+
+
       kfound_global_file=.false. 
 ! Avery 5160. ht,wid,rows,cols,top,left
       rlabsize(1)=1.0
@@ -362,7 +368,7 @@ C         TPICD
                elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
                  if(NumToken .gt. 5) then 
                      write(*,*)
-     >        "drudg_rdctl: Too many tokens for defualt_dbbc_if_inputs"
+     >        "drudg_rdctl: Too many tokens for default_dbbc_if_inputs"
                      write(*,*) "can specify upto 4 inputs"
                   else
 ! Temporarily undo indent. 

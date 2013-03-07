@@ -123,9 +123,7 @@ C             For 8-BBC stations use the loop index number to get 1-7
      >            cbuf2(nch+2:nlast)
               endif
             end do
-         endif 
-   
-    
+         endif        
 
          if (kmracks) then
            write(lu_outfile,"('!+1s')")

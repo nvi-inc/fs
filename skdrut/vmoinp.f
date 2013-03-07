@@ -255,7 +255,6 @@ C         Get $IF statements.
           endif
   
 C         Get $TRACKS statements (i.e. fanout).
-          write(*,*) "Reading tracks !",ks2rec 
           if (ks2rec) then
             call vunps2m(modedefnames(icode),stndefnames(istn),
      .      ivexnum,iret,ierr,lu,cs2m,
