@@ -23,7 +23,7 @@ extern struct fscom *shm_addr;
 main()
 {
     int i;
-    int cls_rcv();
+    int cls_rcv(), fserr_rcv();
     int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE, knd=FALSE;
     int iwl, iw1, iwm;
     char *llogndx;
@@ -63,6 +63,7 @@ main()
     int display, count;
     char *offon[ ]= {"off","on"};
     int knl=FALSE;
+    unsigned last_sync,now;
 
 /* SECTION 1 */
     
@@ -78,7 +79,11 @@ main()
 
 Messenger:
     /* get next message */
-    
+    /* ddout and any programs it waits for, specifically fserr
+     * must not call cls_snd() because this to can lead to a deadlock
+     * if class system fills
+     */
+
     status = cls_rcv(shm_addr->iclbox,buf,MAX_BUF,&rtn1,&rtn2,0,1);
     bufl = status;
     /* set buf up as a string */
@@ -230,6 +235,7 @@ Messenger:
 	if(close(fd) < 0) {
 	  shm_addr->abend.other_error=1;
 	  perror("!! help! ** closing file, ddout");
+	  play_wav(1);
 	}
       }
 
@@ -248,7 +254,8 @@ Messenger:
 
       strcat(lnamef, sllog);
       strcat(lnamef, ".log");
-      fd = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS);
+      fd = open(lnamef, O_RDWR|O_CREAT,PERMISSIONS);
+      rte_rawt(&last_sync);
       if (fd < 0) {  /* if open/create failed, try recovering */
 	shm_addr->abend.other_error=1;
 	fprintf(stderr,
@@ -275,7 +282,8 @@ Messenger:
 		  "\007!! help! ** now trying to re-open log file %.8s\n",
 		  sllog);
 	  play_wav(1);
-	  fd = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS);
+	  fd = open(lnamef, O_RDWR|O_CREAT,PERMISSIONS);
+          rte_rawt(&last_sync);
 	  if(fd >=0) {
 	    memcpy(shm_addr->LLOG,llog0,8);
 	    fprintf(stderr,
@@ -298,6 +306,7 @@ Messenger:
 	  if (offset < 0) {
 	    shm_addr->abend.other_error=1;
 	    perror("!! help! ** error positioning log file, ddout");
+	    play_wav(1);
 	  }
 	  read(fd,&ch,1);
 	  if(ch != '\n')
@@ -307,6 +316,7 @@ Messenger:
 	} else if(offset < 0) {
 	  shm_addr->abend.other_error=1;
 	  perror("finding end of log file, ddout");
+	  play_wav(1);
 	}
       } else {
 	fprintf(stderr,"\007!! help! ** no file is now open\n");
@@ -344,7 +354,10 @@ Ack:    ich = strtok(NULL, ",");
 
     kp = (buf[FIRST_CHAR-1] == '$');
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
-      strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0;
+      strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0 ||
+      (strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0 &&
+       strncmp(buf+7+FIRST_CHAR-1,"<",1)!=0) ;
+;
     knd= memcmp("nd",prtn1,2)==0;
     if( !kpcald && (kxd || (rtn2 == -1) || !kp && !kack && !kdebug && !knd )
 	|| kpcald && kpd){
@@ -378,13 +391,15 @@ Ack:    ich = strtok(NULL, ",");
 	} else {
 	  ibur[0]='\0';
 	}
+	if(iwl != 0 && strlen(ibur) < 74) {
+	  strcpy(ibur+strlen(ibur),": ");
+	  iwhat[iwl]=0;
+	  strcpy(ibur+strlen(ibur),iwhat);
+	}
       } else {
-	class=0;
-	cls_snd(&class, buf, 80, 0, 0);
-	ip[0]=class;
+	fserr_snd(buf, 80);
 	skd_run("fserr", 'w', ip); 
-	skd_par(ip);
-	iburl=cls_rcv(ip[0], ibur, 118, &rtn1f, &rtn2f, 0,0);
+	iburl=fserr_rcv(ibur, 118);
 	/*      iburl=0;
 	 */
 	ibur[iburl]='\0';
@@ -446,28 +461,28 @@ Append:           /* send message to station error program */
 	      free(ptr);
 	      shm_addr->abend.other_error=1;
 	      perror("!! help! ** getting tnx structure string, ddout");
+	      play_wav(1);
 	    }
 	  } else {
 	    shm_addr->abend.other_error=1;
 	    perror("!! help! ** getting tnx structure, ddout");
+	    play_wav(1);
 	  }
 	}
       }
 
       if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
-        class=0;
-        cls_snd(&class, buf, strlen(buf), 0, 0);
-        ip[0]=class;
-        skd_run("sterp", 'n', ip); 
+        skd_run_arg("sterp", 'n', ip,buf); 
       }
       /* send message to station erchk program */
       if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
-        class=0;
-        cls_snd(&class, buf, strlen(buf), 0, 0);
-        ip[0]=class;
-        skd_run("erchk", 'n', ip); 
+        skd_run_arg("erchk", 'n', ip,buf); 
       }
-
+      { /*trim trailing blanks before output*/
+	int iend=strlen(buf+20);
+	while(iend>0 && buf[20+iend-1]==' ')
+	  buf[20+(iend--)-1]=0;
+      }	
       if(display) {
 /* not Y10K compliant */
 	printf("%.8s",buf+9);
@@ -485,14 +500,35 @@ Append:           /* send message to station error program */
 /*  write information to the log file if conditions are met */
 
     if (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0) {
+      int ret;
       if (fd <0)
 	goto Trouble;
       strcat(buf,"\n");
       bull = strlen(buf);
-      if(bull != write(fd, buf, bull)) {
+      ret = write(fd, buf, bull);
+      if(bull != ret) {
 	shm_addr->abend.other_error=1;
-	fprintf(stderr,"!! wrong length written, file probably too large\n");
-	goto Trouble;
+	if(ret >= 0)
+	  fprintf(stderr,"!! wrong length written, file probably too large\n");
+	else
+    	  perror("!! help! ** writing file, ddout");
+	play_wav(1);
+	goto Post;
+      }
+      rte_rawt(&now);
+      if(now-last_sync>100) {
+        unsigned diff;
+        int ierr;
+	diff=now-last_sync;
+	rte_rawt(&last_sync);
+	ierr=fsync(fd);
+        // printf("synced %u ierr %d '%.40s'\n",diff,ierr,buf);
+	if(ierr < 0) {
+	  shm_addr->abend.other_error=1;
+	  perror("!! help! ** syncing file, ddout");
+	  play_wav(1);
+	  goto Post;
+	}
       }
     }
 
