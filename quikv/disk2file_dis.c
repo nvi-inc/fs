@@ -39,7 +39,7 @@ long ip[5];
 	if(0!=logm5msg(output,command,ip)) {
 	  ip[2]=-400;
 	  memcpy(ip+3,"5f",2);
-	  goto error;
+	  return;
 	}
 	return;
       } else if(kcom) {
