@@ -63,7 +63,8 @@ char *what;          /* 2-char string with more info         */
     memcpy(buf+l,name,5);
     buf[l+5]='\0';
     strcat(buf,"#");
-    strcat(buf,msg);
+    if(msg!=NULL)
+      strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
   }
 /* Send the complete log entry to ddout via class.
 */

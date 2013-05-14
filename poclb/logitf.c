@@ -40,7 +40,8 @@ char *msg;           /* a message to be logged, NULL if none */
   int2str(buf,it[0],-2,1);
 
   strcat(buf,"/");
-  strcat(buf,msg);
+  if(msg!=NULL)
+    strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
 
 /* Send the complete log entry to ddout via class.
 */
