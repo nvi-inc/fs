@@ -28,7 +28,7 @@ C
 C
 C NUMBER OF POINTS PER AXIS
 C
-      icnext=icnext+ib2as(nptsfp,lbuf,icnext,2)
+      icnext=icnext+ib2as(nptsfp,lbuf,icnext,3)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C STEP SIZE
