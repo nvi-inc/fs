@@ -1014,6 +1014,8 @@ Option explanations:
  -r        plot cable data in raw units
  -s string match commands with 'string' instead of 'tsys',
            option -t still applies for editing
+ -2 n      n is 1 or 2, useful for selecting which values to plot for -s tpicd#tpcont
+           1 is for tpi values, 2 is for tpical values
  -t value  edit out tsys points less than or equal to zero or greater than or
            equal to 'value'
  -z value  edit out pcal data with amplitudes less than 'value'
