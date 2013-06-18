@@ -376,7 +376,7 @@ sub time {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("1abc:e:g:jk:rnps:t:u:wz:f:hv");
+&Getopts("12:abc:e:g:jk:rnps:t:u:wz:f:hv");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -387,7 +387,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.6]\n";
+    print "[plotlog 1.7]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -464,6 +464,8 @@ if (defined($opt_h)) {
     print " -r        plot cable data in raw units\n";
     print " -s string match commands with 'string' instead of 'tsys',\n";
     print "           option -t still applies for editing\n";
+    print " -2 n      n is 1 or 2, useful for selecting which values to plot for -s tpicd#tpcont\n";
+    print "           1 is for tpi values, 2 is for tpical values\n";
     print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
     print "           equal to 'value'\n";
     print " -z value  edit out pcal data with amplitudes less than 'value'\n";
@@ -611,10 +613,21 @@ foreach $file (@ARGV) {
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
-	} elsif (/\/$string\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	} elsif (/$string\/(.*)/i) {
+	    @fields=split('[,\cM]',$1);
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
+		if(defined($opt_2)) {
+		    if($opt_2 == 1) {
+			$detect="$detect (1)";
+			shift(@fields);
+		    } elsif(@fields) {
+			$detect="$detect (2)";
+			$tsys=shift(@fields);
+		    } else {
+			next;
+		    }
+		}
 #		print "$detect $tsys\n";
 		if(defined($opt_t)) {
 		    $tsys= '$$$' if $tsys <= 0;
