@@ -34,6 +34,35 @@ int itpis[MAX_DBBC_BBC*2];
 	  itpis[vc]=1;  /* lsb */
       }
     }
+  } else if(shm_addr->dbbcform.mode==5) { /*astro2 */
+    for (i=0;i<8;i++) {
+      if(shm_addr->mk5b_mode.mask.mask & (1<<i)){
+	vc=i/2;
+	if(-1 < vc && vc <4)
+	  itpis[vc+MAX_DBBC_BBC]=1; /* usb */
+      }
+    }
+    for (i=8;i<16;i++) {
+      if(shm_addr->mk5b_mode.mask.mask & (1<<i)){
+	vc=4+i/2;
+	if(7 < vc && vc <12)
+	  itpis[vc+MAX_DBBC_BBC]=1; /* usb */
+      }
+    }
+    for (i=16;i<24;i++) {
+      if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
+	vc=(i-16)/2;
+	if(-1 < vc && vc <8)
+	  itpis[vc]=1;  /* lsb */
+      }
+    }
+    for (i=24;i<32;i++) {
+      if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
+	vc=4+(i-16)/2;
+	if(7 < vc && vc <12)
+	  itpis[vc]=1;  /* lsb */
+      }
+    }
   } else if(shm_addr->dbbcform.mode==4 ) { /* lba */
     for (i=0;i<4;i++) {
       if(shm_addr->mk5b_mode.mask.mask & (1<<i)){

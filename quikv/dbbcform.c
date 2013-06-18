@@ -55,6 +55,10 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
+      if(ierr==0 && shm_addr->dbbcddcv<104 && lcl.mode == 5) {
+	  ierr=-301;
+	  goto error;
+      }
       memcpy(&shm_addr->dbbcform,&lcl,sizeof(lcl));
       
 /* format buffer for dbbcn */

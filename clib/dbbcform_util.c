@@ -8,7 +8,7 @@
 #include "../include/params.h"
 #include "../include/dbbcform_ds.h"
 
-static char *mode_key[ ]={"astro","geo","wastro","test","lba"};
+static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2"};
 static char *test_key[ ]={"0","1","bin","tvg"};
 
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
