@@ -619,6 +619,8 @@ C
          dbbcddcv=101
       else if(dbbcv.eq.'v102') then
          dbbcddcv=102
+      else if(dbbcv.eq.'v104') then
+         dbbcddcv=104
       else
         call logit7ci(0,0,0,1,-140,'bo',19)
         goto 990
