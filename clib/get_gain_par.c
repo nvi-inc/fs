@@ -121,7 +121,7 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
     ilast=-1;
     for(i=0;i<shm_addr->rxgain[ir].tcal_ntable;i++)
       if(shm_addr->rxgain[ir].tcal[i].pol=='l' &&
-	 shm_addr->rxgain[ir].tcal[i].freq < center)
+	 shm_addr->rxgain[ir].tcal[i].freq <= center)
 	ifirst=i;
       else if(shm_addr->rxgain[ir].tcal[i].pol=='l' &&
 	      center < shm_addr->rxgain[ir].tcal[i].freq) {
