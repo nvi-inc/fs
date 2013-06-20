@@ -44,12 +44,20 @@ long ip[5];
        else if(strncmp(inbuf+8,"March 08 2012",13)==0)
 	 iversion =101;
        /*                       12345678901234567890123 */
-       else if(strncmp(inbuf+8,"102 - September 07 2012",23)==0||
-	       strncmp(inbuf+8,"July 04 2012",12)==0)
+       else if(strncmp(inbuf+8,"102 - September 07 2012",23)==0)
 	 iversion =102;
+       /*                       123456789012 */
+       else if(strncmp(inbuf+8,"July 04 2012",12)==0)
+	 iversion =-102;
        /*                       12345678901234567890123 */
        else if(strncmp(inbuf+8,"DDC,103,October 04 2012",23)==0)
 	 iversion =103;
+       /*                       123456789012345678901 */
+       else if(strncmp(inbuf+8,"DDC,104,March 19 2013",21)==0)
+	 iversion = -104;
+       /*                       12345678901234567890 */
+       else if(strncmp(inbuf+8,"DDC,104,June 20 2013",20)==0)
+	 iversion =104;
        if(iversion!=shm_addr->dbbcddcv) {
 	 switch(iversion) {
 	 case 100:
@@ -63,6 +71,15 @@ long ip[5];
 	   break;
 	 case 103:
 	   ierr = -7;
+	   break;
+	 case 104:
+	   ierr = -8;
+	   break;
+	 case -102:
+	   ierr = -9;
+	   break;
+	 case -104:
+	   ierr = -10;
 	   break;
 	 default:
 	   ierr = -6;
