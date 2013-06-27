@@ -99,18 +99,24 @@ long ip[5];
       memcpy(ip+3,"fp",2);
       return;
     }
-    if(savec.agc!=0) {
-      savec.target_null=1;
-      memcpy(&lclc,&savec,sizeof(lclc));
-      lclc.agc=0;
-      lclc.att=-1;
-      savec.target_null=1;
+    if(savec.agc!=0 || (shm_addr->dbbcddcv > 102 && det < 2*MAX_DBBC_BBC)) {
       out_recs=0;
       out_class=0;
-      dbbcifx_2_dbbc(buf,ifchain,&lclc);
-
-      cls_snd(&out_class, buf, strlen(buf) , 0, 0);
-      out_recs++;
+      if(savec.agc!=0) {
+	savec.target_null=1;
+	memcpy(&lclc,&savec,sizeof(lclc));
+	lclc.agc=0;
+	lclc.att=-1;
+	savec.target_null=1;
+	dbbcifx_2_dbbc(buf,ifchain,&lclc);
+	cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+	out_recs++;
+      }
+      if(shm_addr->dbbcddcv > 102 && det < 2*MAX_DBBC_BBC) {
+	strcpy(buf,"dbbcgain=all,man");
+	cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+	out_recs++;
+      }
 
       ip[0]=1;
       ip[1]=out_class;
@@ -227,17 +233,23 @@ int *icont, *isamples;
 void dbbcn_r(ip)
 long ip[5];
 {
-    if(savec.agc!=0) {
+    if(savec.agc!=0 || (shm_addr->dbbcddcv > 102 && det < 2*MAX_DBBC_BBC)) {
       int out_recs, out_class;
       char buf[BUFSIZE];
-      savec.att=-1;
       out_recs=0;
       out_class=0;
-      dbbcifx_2_dbbc(buf,ifchain,&savec);
-
-      cls_snd(&out_class, buf, strlen(buf) , 0, 0);
-      out_recs++;
-
+      if(savec.agc!=0 ) {
+	savec.att=-1;
+	dbbcifx_2_dbbc(buf,ifchain,&savec);
+	cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+	out_recs++;
+      }
+      if(shm_addr->dbbcddcv > 102 && det < 2*MAX_DBBC_BBC) {
+	strcpy(buf,"dbbcgain=all,agc");
+	cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+	out_recs++;
+      }
+    
       ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;

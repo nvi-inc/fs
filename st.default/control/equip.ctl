@@ -42,7 +42,7 @@ cdp     cdp or met3 server port, use cdp if you don't have either
 *mk4 decoder transmission terminator
  return return, $, or %
 *DBBC DDC version
- v101   v100, v101, or v102 only
+ v101   v100, v101, v102, or v104 only
 *DBBC PFB version
  v12    v12 only
 *DBBC number of conditioning modules
