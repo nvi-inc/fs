@@ -335,4 +335,6 @@ typedef struct fscom {
 
   int dbbc_if_factors[MAX_DBBC_IF];
 
+  struct dbbcgain_cmd dbbcgain;
+
 } Fscom;

@@ -394,6 +394,7 @@ ifa          qkr 9501 01 0800FFFFFFFF
 ifb          qkr 9502 01 0800FFFFFFFF
 ifc          qkr 9503 01 0800FFFFFFFF
 ifd          qkr 9504 01 0800FFFFFFFF
+bbc_gain     qkr 9600 01 0800FFFFFFFF
 * boss internal
 cont         *xx 0000 02 FFFFFFFFFFFF
 halt         *xx 0000 03 FFFFFFFFFFFF

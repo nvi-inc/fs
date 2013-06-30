@@ -374,6 +374,9 @@ loop:
 	  goto error;
 	}
 	break;
+      case 96:
+	dbbcgain(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;
