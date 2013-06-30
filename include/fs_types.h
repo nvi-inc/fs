@@ -77,3 +77,4 @@
 #include "dbbcifx_ds.h"
 #include "dbbcform_ds.h"
 #include "dbbc_cont_cal_ds.h"
+#include "dbbcgain_ds.h"
