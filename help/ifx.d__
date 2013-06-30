@@ -58,8 +58,8 @@ for the target value
 DBBC DDC personality version v101 only supports a limited range, 1-9,
 of command att values.
 
-Only DBBC DDC personality version v102 supports filters 5-8 (UNICA4
-must be present).
+Only DBBC DDC personality versions v102 and later support filters 5-8
+(UNICA4 must be present).
 
 The counts output converts to linear power scale approximately using
 the (C-language) expression:
