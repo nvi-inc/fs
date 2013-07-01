@@ -66,7 +66,7 @@ char *ptr;
         break;
       case 4:
         ierr=arg_int(ptr,&lcl->avper,1,TRUE);
-	if(ierr == 0 && lcl->avper <= 0)
+	if(ierr == 0 && (lcl->avper <= 0 || lcl->avper > 60))
 	  ierr=-200;
         break;
       default:
