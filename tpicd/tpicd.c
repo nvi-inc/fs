@@ -19,6 +19,7 @@ extern struct fscom *shm_addr;
 
 static char *lvcn[]= { "v1","v2","v3","v4","v5","v6","v7","v8","v9","va", 
 	       "vb","vc","vd","ve","vf" };
+double dbbc_if_power(unsigned counts, int como);
 
 main()
 {
@@ -237,8 +238,11 @@ main()
 	    if(dbbc_tpi[k]<-0.5 ||shm_addr->tpi[k]<=0 ||
 	       shm_addr->tpi[k]>65534.5)
 	      dbbc_tpi[k]=-1.0;
-	    else
+	    else if(k < MAX_DBBC_BBC*2)
 	      dbbc_tpi[k]+=shm_addr->tpi[k];
+	    else {
+	      dbbc_tpi[k]+=dbbc_if_power(shm_addr->tpi[k], k-MAX_DBBC_BBC*2);
+	    }
 	    if(k >= MAX_DBBC_BBC*2)
 	      continue;
 	    if(dbbc_tpical[k]<-0.5 ||shm_addr->tpical[k]<=0
