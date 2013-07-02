@@ -46,14 +46,14 @@
 #define MAX_VLBA_BBC   14
 #define MAX_VLBA_DIST   2
 #define MAX_IF          4
-#define MAX_VLBA_IF     2*MAX_VLBA_DIST
-#define MAX_DET          MAX_BBC*2+MAX_IF
+#define MAX_VLBA_IF     (2*MAX_VLBA_DIST)
+#define MAX_DET         (MAX_BBC*2+MAX_IF)
 #define MAX_USER_DEV    6
-#define MAX_ONOFF_DET    MAX_DET+MAX_USER_DEV
+#define MAX_ONOFF_DET   (MAX_DET+MAX_USER_DEV)
 
 #define MAX_DBBC_BBC   16
 #define MAX_DBBC_IF     4
-#define MAX_DBBC_DET    2*MAX_DBBC_BBC+MAX_DBBC_IF
+#define MAX_DBBC_DET    (2*MAX_DBBC_BBC+MAX_DBBC_IF)
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
