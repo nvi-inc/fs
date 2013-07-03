@@ -19,10 +19,10 @@ Settable Parameters:
                       equipment set-up, it is for informaton only.
 
             bw        Sideband bandwidth in MHz. One of 1, 2, 4, 8, 16.
-                      Default 2.
+                      Default 8.
 
             tpint     Averaging period in seconds for TPI. Positive
-                      integers allowed, Default is 1. The averaging
+                      integers 1-60 allowed, Default is 1. The averaging
                       period is common to both upper and lower
                       sideband. The averaging period is synchronous
                       with the 1 pps.
@@ -34,27 +34,34 @@ Monitor-only Parameters:
 
              gainU     Gain value for USB in steps, 0-255.
              gainL     Gain value for LSB in steps, 0-255.
-	     
+
              tpUcalon  Power in upper sideband in counts with the cal
                        on for synchronous radiometry or TP for
-                       non-synchronous. Range 0 to 65535. nominal
-                       operating level is ....
+                       non-synchronous. Range 0 to 65535.  See the
+                       comments for information about the nominal
+                       operating level.
+
              tpLcalon  Power in lower sideband in counts with the cal
                        on for synchronous radiometry or TP for
-                       non-synchronous. Range 0 to 65535. nominal
-                       operating level is ....
+                       non-synchronous. Range 0 to 65535.  See the
+                       comments for information about the nominal
+                       operating level.
+
              tpUcaloff Power in upper sideband in counts with the cal
                        off for synchronous radiometry or 0 for
-                       non-synchronous. Range 0 to 65535. nominal
-                       operating level is ....
+                       non-synchronous. Range 0 to 65535.   See the
+                       comments for information about the nominal
+                       operating level.
+
              tpLcaloff Power in lower sideband in counts with the cal
                        off for synchronous radiometry or 0 for
-                       non-synchronous. Range 0 to 65535. nominal
-                       operating level is ....
+                       non-synchronous. Range 0 to 65535.   See the
+                       comments for information about the nominal
+                       operating level.
 
 Comments:
 This command sets up the digital channel converters in the DBBC rack.
-This command is analogous to the Mark IV vcnn and VLBA bbcnn commands.
+This command is analogous to the Mark IV VCnn and VLBA BBCnn commands.
 
 Unlike the output of most other commands which have no embedded
 blanks, the output for this command is organized in columns so when
@@ -66,3 +73,13 @@ The IF inputs are typically hardwired so that channels 01-04 get IF A,
 parameter is provided for information only. CAUTION: This command does
 not check whether you have specified a valid IF source for the
 channel.
+
+gainU and gainL can be controlled with the bbc_gain command for DDC
+versions 103 and higher.
+
+The nominal operating level for TP counts depends on the configuration
+of the system.  If firmware version v103 or later is in use, the level
+is set by the BBC_GAIN command, typically 16000 in AGC mode.  For
+earlier firmware versions, the operating level is arbitrary but
+depends on the target levels of the IF modules, but can range from a
+few hundred to a several thousand.
