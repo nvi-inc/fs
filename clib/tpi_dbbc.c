@@ -154,7 +154,10 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	  // if(isub==4) {
 	  //  lclm.tp+=10000;
 	  // }
-	  ptr[i]=lclm.tp;
+	  if(isub==11)
+	    ptr2[i]=lclm.tp;
+	  else
+	    ptr[i]=lclm.tp;
 	}
       }
     }
@@ -210,11 +213,21 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	  }
 	  strcat(ibuf,lwhat[i]);
 	  strcat(ibuf,",");
-	  if(ptr[i] > 65534 ) {
-	    strcat(ibuf,"$$$$$,");
+	  if(isub==11) {
+	    if(ptr2[i] > 65534 ) {
+	      strcat(ibuf,"$$$$$,");
+	    } else {
+	      printf("tpput ptr2[%d] tpi %d\n",i,ptr2[i]);
+	      flt2str(ibuf,dbbc_if_power(ptr2[i], j),8,2);
+	      strcat(ibuf,",");
+	    }
 	  } else {
-	    int2str(ibuf,ptr[i],5);
-	    strcat(ibuf,",");
+	    if(ptr[i] > 65534 ) {
+	      strcat(ibuf,"$$$$$,");
+	    } else {
+	      flt2str(ibuf,dbbc_if_power(ptr[i], j),8,2);
+	      strcat(ibuf,",");
+	    }
 	  }
 	}
       }
@@ -268,7 +281,10 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	    shm_addr->caltemps[ i]/tpid;
 	} else {
 	  shm_addr->systmp[ i]=(dbbc_if_power(tpi, i-2*MAX_DBBC_BBC)-tpiz)*
-	    shm_addr->caltemps[ i]/tpid;
+	    shm_addr->caltemps[ i]/
+	    (dbbc_if_power(tpic,i-2*MAX_DBBC_BBC)-
+	     dbbc_if_power(tpi,i-2*MAX_DBBC_BBC));
+
 	}
 	if(shm_addr->systmp[ i]>999999.95 || shm_addr->systmp[ i] <0.0)
 	  logita(NULL,-211,"qk",lwhat[i]);
@@ -345,7 +361,13 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	if(itask==5) 
 	  flt2str(ibuf,shm_addr->systmp[ i],8,1);
 	else if(itask==6) {
-	  int2str(ibuf,shm_addr->tpidiff[i],5);
+	  if(shm_addr->tpidiff[i] > 99999)
+	    int2str(ibuf,shm_addr->tpidiff[i],5);
+	  else
+	    flt2str(ibuf,
+		    dbbc_if_power(shm_addr->tpical[i],i-2*MAX_DBBC_BBC)-
+		    dbbc_if_power(shm_addr->tpi[i],i-2*MAX_DBBC_BBC),
+		    8,2);
 	} else if(itask==10) 
 	  flt2str(ibuf,shm_addr->caltemps[ i],8,3);
 	strcat(ibuf,",");
@@ -497,7 +519,7 @@ int disp;    /* non-zero means display tsys data as regular user data */
 	}
 	strcat(ibuf,lwhat[i]);
 	strcat(ibuf,",");
-	flt2str(ibuf,dbbc_tpi[ i],7,1);
+	flt2str(ibuf,dbbc_tpi[ i],8,2);
 	strcat(ibuf,",");
       }
     }
