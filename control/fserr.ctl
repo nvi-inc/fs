@@ -1701,7 +1701,7 @@ DC -203
 Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16.
 ""
 DC -204
-Averaging period must be a positive integer.
+Averaging period must be a positive integer 60 or less.
 ""
 DC -302
 IF source position exceeds number of conditioning modules
@@ -1737,10 +1737,13 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of: astro, geo, wastro, test, lba.
+Mode must be one of: astro, geo, wastro, test, lba (or astro2 for versions 103 and above).
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
+""
+DF -301
+astro2 mode not supppored for DBBC DDC version less than 104
 ""
 DF -401
 Class buffer error from monitor response.
@@ -1752,19 +1755,58 @@ DF -451
 Class buffer error from command response.
 ""
 DF -453
-DBBC version does not agree with equip.ctl; dbbc says v100: July 14 2011
+DBBC version does not agree with equip.ctl; dbbc has v100: July 14 2011 or Feb 21 2011
 ""
 DF -454
-DBBC version does not agree with equip.ctl; dbbc says v101: March 08 2012
+DBBC version does not agree with equip.ctl; dbbc has v101: March 08 2012
 ""
 DF -455
-DBBC version does not agree with equip.ctl; dbbc says v102: September 07 2012
+DBBC version does not agree with equip.ctl; dbbc has v102: September 07 2012
 ""
 DF -456
-DBBC version does not agree with equip.ctl; dbbc has unknown version, see next mesage.
+DBBC version does not agree with equip.ctl; dbbc has unknown version, see next message.
 ""
 DF -457
-DBBC version does not agree with equip.ctl; dbbc says v103: DDC,103,October 04 2012
+DBBC version does not agree with equip.ctl; dbbc has (unsupported) v103: DDC,103,October 04 2012
+""
+DF -458
+DBBC version does not agree with equip.ctl; dbbc has v104: DDC,104,June 20 2013
+""
+DF -459
+DBBC has unsupported date code for version 102, ddbc has: July 04 2012
+""
+DF -460
+DBBC has unsupported date code for version 104, ddbc has: DDC,104,March 19 2013
+""
+DG -101
+No default for bbc, should be "all" or 1,2,...16.
+""
+DG -102
+No default for 2nd parameter, if first parameter is "all".
+""
+DG -103
+No default for 3rd parameter, if second parameter is gain for upper channel.
+""
+DG -201
+Error decoding bbc, should be "all" or 1,2,..,16.
+""
+DG -202
+Error decoding state/gainU, should be null or state: "man", "agc", or gainU: 1-255.
+""
+DG -203
+Error decoding target/gainL, should be null or target: 0-65525, or gainL: 1-255.
+""
+DG -300
+Monitor form requires bbc to read as a parameter, e.g., bbc_gain=1
+""
+DG -401
+Class buffer error from monitor response.
+""
+DG -403
+Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error DG -402 for text.
+""
+DG -451
+Class buffer error from command response.
 ""
 DI -101
 No default for IF input.
@@ -1779,7 +1821,7 @@ DI -104
 No default for AGC target.
 ""
 DI -201
-IF input must be 1-8.
+IF input must be 1-4.
 ""
 DI -202
 Attenuation must be "man", "agc", or 0 to 63.
@@ -5367,22 +5409,22 @@ SC  -18
 setcl: program is already running, try "run setcl" instead.
 ""
 SC  -19
-setcl: Mark 5B 1PPS source is wrong, use fmset 's' option to fix.
+setcl: Mark 5B 1PPS source is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -20
-setcl: Mark 5B clock frequency is wrong, use fmset 's' option to fix.
+setcl: Mark 5B clock frequency is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -21
 setcl: Mark 5B clock source is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -22
-setcl: Mark 5B clock source is wrong, correct manually.
+setcl: Mark 5B clock source is wrong, CONSIDER correcting manually.
 ""
 SC  -23
-setcl: Mark 5B not sync'd, use fmset 's' option to fix.
+setcl: Mark 5B not sync'd, CONSIDER using fmset 's' option to fix.
 ""
 SC  -24
-setcl: Mark 5B syncerr_gt_3, use fmset 's' option to fix.
+setcl: Mark 5B syncerr_gt_3, CONSIDER uisng fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
