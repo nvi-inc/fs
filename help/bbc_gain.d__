@@ -1,0 +1,42 @@
+          bbc_gain - bbc gain control and monitor (DBBC racks)
+
+            Syntax:     bbc_gain=bbc,2ndpar,3rdpar
+                        bbc_gain=bbc
+            Response:   bbc_gain/bbc,gainU,gainL,agc,target
+
+
+Settable Parameters:
+
+            bbc       bbc number, 1,2,...16, or 'all', a numeric value implies
+                      2ndpar and 3rdpar will specify 1-255 gain steps in manual,
+                      mode, "all" implies 2ndpar will be "man" or "agc", for
+                      monitor only numeric value are allowed (and displayed).
+
+            2ndpar    "man" for manual control at current level,
+                      "agc" for automatic gain control, or 1-255 which
+		      represent linear steps in voltage. A numeric value
+                      implies manual control.
+
+            3rdpar    if 2ndpar is "agc", 0-65535 target value; if bbc
+                      is bbc number (1-16), then 1-255 which represent
+                      linear steps in voltage and implies manual
+                      control.
+
+Monitor-only Parameters:
+
+            gainU     upper sideband gain, 1-255 which represent steps of
+                      gain (0.5 dB?)
+
+            gainL     lower sideband gain, 1-255 which represent steps of
+                      gain (0.5 dB?)
+
+            agc      'man' for manual gain control, 'agc' for automatic.
+
+            target    target level for AGC, 0-65535, null if agc is 'man' 
+
+
+Comments:
+This commmand controls the gain for BBC sideband power read-out.
+
+The monitor form requires a single parameter specifying which BBC to
+monitor.
