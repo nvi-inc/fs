@@ -249,11 +249,25 @@ $misc
 *--------------------------------------------------------------
 *
 * Cont_cal setup
-* Applicable only for DBBCs
+* Applicable only for DBBCs,
+* default is "off" if not present
 * cont_cal ON       !turn it on
-* cont_cal OFF       !turn it off 
+* cont_cal OFF      !turn it off 
 * cont_cal ASK      !ask the user at runtime.
 *--------------------------------------------------------------
-* default DBBC IF inputs if absent from schedule file
+* default DBBC IF inputs when converting from a non-DBBC rack type
+* this selects the inputs that should be assumed for each IF by DRUDG
+* default is nulls if not present
 * default_dbbc_if_inputs 1 4 2 2
 *--------------------------------------------------------------
+* DBBC target values for IF counts in set-up procedure, up to 4
+* values for up to four IFs, in order, this will cause an error
+* in IFx=... command execution if used for DBBC DDC versions
+* before v101 
+* default is nulls if not present
+* dbbc_if_targets  35000 35000 35000 35000
+*--------------------------------------------------------------
+* DBBC BBC TPI target levels
+* has no effect for DDC versions before v103
+* default is null if not present
+* dbbc_bbc_target 16000
