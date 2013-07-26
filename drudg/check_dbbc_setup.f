@@ -32,20 +32,23 @@
             ib0=ib
           else           
             if(flo(ib0) .ne. flo(ib)) then
+               call write_return_if_needed(luscn,kwrite_return)
                write(luscn, '("DBBC_error: For BBCs ",2i4,
-     >              " lo frequencies differ",2f8.2)')
+     >              " LO frequencies differ",2f10.2)')
      >             ib0, ib, flo(ib0), flo(ib)   
                ierr=1
             endif
             if(ibbc_filter(ib0) .ne. ibbc_filter(ib)) then
+               call write_return_if_needed(luscn,kwrite_return)
                write(luscn,'("DBBC_error: For BBCs ",2i4,
-     >           "filters differ ", 2i8)') 
+     >           "filters differ ", 2i10)') 
      >             ib0, ib, ibbc_filter(ib0), ibbc_filter(ib)
                ierr=1
             endif          
            if(cbbc_pol(ib0) .ne. cbbc_pol(ib)) then
+               call write_return_if_needed(luscn,kwrite_return)
                write(luscn,'("DBBC_error: For BBCs ",2i4,
-     >           " polarizations differ: ", 2a4)') 
+     >           " polarizations differ: ", "      ",2a3)') 
      >             ib0, ib,   cbbc_pol(ib0), cbbc_pol(ib)
                ierr=1
             endif        

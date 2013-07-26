@@ -1,5 +1,5 @@
       SUBROUTINE drudg_rdctl(csked,csnap,cproc,cscratch,
-     >   dr_rack_type,crec_default,  kequip_over,ldbbc_if_inputs)
+     >   dr_rack_type,crec_default,  kequip_over)
       
 C
 ! This routine will open the default control file for drudg. 
@@ -12,12 +12,14 @@ C   parameter file
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
       include '../skdrincl/valid_hardware.ftni'
       include 'drcom.ftni' 
+      include 'bbc_freq.ftni'
+     
 
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
       character*8 dr_rack_type,crec_default(2)
       logical kequip_over
-      character*1 ldbbc_if_inputs(4) 
+    
           
 ! functions
       integer iwhere_in_string_list
@@ -33,7 +35,9 @@ C  LOCAL VARIABLES
       integer itemp
       character*25 lkeyword     !keyword
       character*128 lvalue      !value
-      character*1 lvalid_dbbc_if_inputs(4)   
+      integer max_dbbc_if_inputs
+      parameter(max_dbbc_if_inputs=4)
+      character*2 lvalid_dbbc_if_inputs(max_dbbc_if_inputs)
 
       integer MaxToken
       integer NumToken
@@ -52,19 +56,22 @@ C  LOCAL VARIABLES
 
       character*32 cskedf(3)   
       data cskedf/
-     > "/usr/local/bin/skedf.ctl", "/usr2/control/skedf.ctl",
+     > "/usr/local/bin/skedf.ctl",  "/usr2/control/skedf.ctl",
      > "skedf.ctl"/ 
 
-      data lvalid_dbbc_if_inputs/"1","2","3","4"/
+      data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
 
 C  1. Open the default control file if it exists.   
       
 ! Initialization
+! Stuff for DBBC
+      do i=1,4
+        ldbbc_if_inputs(i)=" "
+        idbbc_if_targets(i)=-1
+      end do
+      idbbc_bbc_target=-1   
 
-      ldbbc_if_inputs(1)=" "
-      ldbbc_if_inputs(2)=" "
-      ldbbc_if_inputs(3)=" "
-      ldbbc_if_inputs(4)=" "
+      contcal_prompt="off" 
 
 
       kfound_global_file=.false. 
@@ -136,8 +143,9 @@ C  2. Process the control file if it exists. Loop throug 3 times.
         write(*,'(a,$)') "   "
    
 ! File exists, and we have opened it.    
-        call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $     
+        call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $           
         do while (.not.keof)
+!          write(*,*) "**>",cbuf(1:60) 
           do while(cbuf(1:1) .eq. "$")
             read(cbuf,'(a)') lsecname
             call capitalize(lsecname)    
@@ -271,7 +279,9 @@ C              label_size ht wid nrows ncols topoff leftoff
             end do
 C  $MISC
           else if (lsecname .eq. '$MISC') then
+!            write(*,*) "-->",cbuf(1:60)
             do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
+!              write(*,*) "-->",cbuf(1:60) 
               call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
               lkeyword=ltoken(1) 
               call capitalize(lkeyword)   
@@ -308,25 +318,35 @@ C         EQUIPMENT
               else if (lkeyword  .eq.'EQUIPMENT') then          
                 dr_rack_type=lvalue(1:8)
                 crec_default(1)=ltoken(3)
-                crec_default(2)=ltoken(4)
+                if(NumToken .eq. 3) then
+                   crec_default(2)="NONE"
+                else
+                   crec_default(2)=ltoken(4)
+                endif 
+              
                 call capitalize(dr_rack_type)
                 call capitalize(crec_default(1))
-                call capitalize(crec_default(2))
+                call capitalize(crec_default(2))         
 ! Now check to see if valid types.
                 itemp=iwhere_in_string_list(crack_type_cap,
      >                 max_rack_type, dr_rack_type)
                 if(itemp .eq. 0) then
+                   write(*,*) "Error in line: "//cbuf(1:60) 
                    write(*,*) "Invalid rack_type: ",dr_rack_type
                    write(*,*) "Please fix in control file!"                   
                 else
                   dr_rack_type=crack_type(itemp)
                 endif
                 do i=1,2
+                  ltoken(2)=crec_default(i)
+                  call capitalize(ltoken(2)) 
                   itemp=iwhere_in_string_list(crec_type_cap,
-     >                 max_rec_type,crec_default(i))
+     >                 max_rec_type,ltoken(2))
+ 
                   if(itemp .eq. 0) then
+                    write(*,*) "Error in line: "//cbuf(1:60) 
                     write(*,*) "For recorder ", i,
-     >                   "Invalid recorder type: ", crec_default(i)
+     >                   " Invalid recorder type: ", crec_default(i)
                     if(crec_default(i)(1:5) .eq. "MARK5") then
                        write(*,*)
      >                  "Valid Mark5 recorders: Mark5A, Mark5B, Mark5P"
@@ -365,28 +385,67 @@ C         TPICD
                    write(luscn, *)
      >              "Error:  Valid CONT_CAL options are ON, OFF, ASK."
                  endif 
-               elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
-                 if(NumToken .gt. 5) then 
-                     write(*,*)
-     >        "drudg_rdctl: Too many tokens for default_dbbc_if_inputs"
-                     write(*,*) "can specify upto 4 inputs"
-                  else
+              elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
+                if(NumToken .gt. 5) then 
+                   write(*,*) "drudg_rdctl: Too many tokens for "//      
+     >                        "DEFALUT_DBBC_IF_INPUTS"
+                   write(*,*) "can specify upto 4 inputs"
+                else
 ! Temporarily undo indent. 
-                    do i=2,NumToken
-          itemp=iwhere_in_string_list(lvalid_dbbc_if_inputs,4,ltoken(i))
-          if(itemp .eq. 0) then
-             write(*,*) "drudg_rdctl: Invalid dbbc_if_input ", 
-     >        ltoken(i)(1:trimlen(ltoken(i)))
-          else
-            ldbbc_if_inputs(i-1)=ltoken(i) 
-          endif
-                    end do                                        
-                  endif 
-                endif ! TPICD line
-                call readline_skdrut(lu,cbuf,keof,ierr,2)
-              enddo
+                  do i=2,NumToken
+                    call capitalize(ltoken(i))
+                    itemp=iwhere_in_string_list(
+     >              lvalid_dbbc_if_inputs,max_dbbc_if_inputs,ltoken(i))
+                    if(itemp .eq. 0) then
+                      write(*,*) "drudg_rdctl: Invalid dbbc_if_input ", 
+     >                   ltoken(i)(1:trimlen(ltoken(i)))
+                    else
+                      ldbbc_if_inputs(i-1)=ltoken(i) 
+                    endif
+                  end do                                        
+                endif 
+              elseif(lkeyword .eq. "DBBC_IF_TARGETS") then
+                if(NumToken .gt. 5) then 
+                   write(*,*) "drudg_rdctl: Too many tokens for"//      
+     >                          "DBBC_IF_TARGETS"
+                   write(*,*) "can specify upto 4 inputs"                  
+                else
+! Temporarily undo indent. 
+                  do i=1,4
+                    read(ltoken(i+1),*,err=900) idbbc_if_targets(i)
+                    if(idbbc_if_targets(i) .gt. 65535 .or. 
+     >                 idbbc_if_targets(i) .lt. 0) then
+                      write(*,*) " "
+                      write(*,*)
+     >                  "drudg_rdctl: Warning! DBBC_IF_TARGET ", 
+     >                   idbbc_if_targets(i), " out of range!"
+                      write(*,*) "Valid values between 1 and 65535"
+                      write(*,*) "Setting to 0."
+                     idbbc_if_targets(i)=0
+                   endif 
+                  end do                                        
+                endif 
+              else if(lkeyword .eq. "DBBC_BBC_TARGET") then 
+                if(NumToken .ne. 2) then
+                   write(*,*) "drudg_rdctl: No argument given for"//      
+     >                          "DBBC_BBC_TARGET"
+                endif
+                read(ltoken(2),*,err=900) idbbc_bbc_target
+                if(idbbc_bbc_target .gt. 65535 .or. 
+     >             idbbc_bbc_target .lt. 0) then
+                   write(*,*) " " 
+                   write(*,*)
+     >               "drudg_rdctl: Warning! DBBC_BBC_TARGET ", 
+     >               idbbc_bbc_target,      " out of range!"
+                   write(*,*) "Valid values between 1 and 65535"
+                   write(*,*) "Setting to 0."
+                   idbbc_bbc_target=0
+                endif 
+              endif
+              call readline_skdrut(lu,cbuf,keof,ierr,2)        
 ! End $MISC
-           else ! unrecognized
+              enddo
+           else ! Some unrecognized section....
               if(kfirst_skip) then
                  write(luscn,'("Skipping non-drudg section: ",$)') 
                  kfirst_skip=.false.
@@ -416,6 +475,10 @@ C         TPICD
        endif
       endif
 !      write(*,*) " " 
-
       RETURN
+
+! Come here on error parsing line
+900   continue
+      write(*,*) "drudg_rdctl: Error parsing line: "//
+     >     cbuf(1:Trimlen(Cbuf))
       END

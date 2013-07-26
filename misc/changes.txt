@@ -10153,3 +10153,104 @@ Version 9.11.1 130130
            updated
 
 Version 9.11.2 130307
+
+130610 AM  fivpt/fivp.f
+           fix formatting of steps for negative values
+
+130613 WEH control/fserr.ctl
+           incom/equip.f
+           quikv/logmsg_dbbc.c
+           help/form.d__
+130618 WEH clib/dbbcform_util.c
+           quikv/dbbcform.c
+           clib/mk5dbbc.c
+           support DBBC DDC v104 and astro2 mode
+
+130618 WEH systests/plotlog
+           systests/systests.txt
+           allow -s string like tpicd#tpi ...tpical and tpcont
+           -2 option to select data for tpcont
+
+130620 WEH clib/get_gain_par.c
+           fix LCP error if center is on tabular point
+
+130620 WEH quikv/logmsg_dbbc.c
+           control/fserr.ctl
+           version 104 and better messages for some other cases
+
+130620 WEH st.default/control/equip.ctl
+           v104 added
+
+130625 WEH control/fscmd.ctl
+           include/fs_types.h
+130626 WEH include/fscom.h
+           quikv/dbbcgain_dis.c
+130627 WEH quikv/Makefile
+           clib/Makefile
+           include/dbbcgain_ds.h
+           quikv/quikv.c
+           quikv/dbbcgain.c
+130628 WEH clib/dbbcgain_util.c
+130630 WEH help/bbc_gain.d__
+           bbc_gain command added
+
+130627 WEH clib/dbbcn_v.c
+130627 WEH onoff/agc_dbbc.c
+           v104 added
+
+130628 WEH st.default/proc/dstation.prc
+130628 WEH st.default/proc/dstationcc.prc
+           bbc_gain usage added including bbc_level procedure
+
+130628 WEH help/form.d__
+           astro2 added
+
+130630 WEH help/bbcnn.d__
+           help/ifx.d__
+           typos fixed
+
+130630 WEH clib/dbbcnn_util.c
+130701 WEH control/fserr.ctl
+           limit averaging period to 60 seconds
+
+130071 WEH tpicd/tpicd.c
+           clib/tpi_dbbc.c
+           make IF count display uniformly in power units
+
+130702 WEH misc/dbbc.txt
+           update for v104
+
+130702 WEH st.default/proc/dstation.prc
+           move bbc_gain=all,... out of if... procs
+
+130702 WEH include/params.h
+           use parens in parameter defs to avoid arithmatic issues
+
+130703 WEH clib/tpi_dbbc.c
+           decrease IF power precision to two places after decimal
+
+130703 WEH st.default/proc/bbc_level.prc
+           complete bbc_level procedure by itself for upgrades
+
+130703 WEH misc/dbbc.txt
+           correct typos identified by J. Quick
+
+130715 WEH control/fserr.ctl
+           all errors recommending fmset 's', now say to only CONSIDER it
+ 
+130716 WEH help/bbc_gain.d__
+           correct gain step size
+
+130724 WEH st.default/control/skedf.ctl
+           added DBBC target value comments
+
+130725 WEH misc/dbbc.txt
+           add DBBC configuration table
+
+130725 WEH help/form.h__
+           add Mark IV formatter error codes listing.
+
+130726 WEH help/form.h__
+           the correct error code listing.
+
+Version 9.11.3 130726

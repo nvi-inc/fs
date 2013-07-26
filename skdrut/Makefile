@@ -37,7 +37,8 @@ valid_hardware_blk.o \
 vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o vglinp.o vunpso.o \
 vunpif.o vunpbbc.o vunptrk.o vunphp.o vsoinp.o vmoinp.o vstinp.o vread.o \
 vunps2m.o vunps2g.o vunproll.o vunpprc.o vobinp.o  vunppcal.o \
-write_error_and_pause.o writf_asc.o writf_asc_ch.o xat.o xyz2latlon.o ydjul.o ymday.o
+write_error_and_pause.o write_return_if_needed.o writf_asc.o writf_asc_ch.o \
+xat.o xyz2latlon.o ydjul.o ymday.o
 
 
 #

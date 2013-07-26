@@ -9,6 +9,7 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/statn.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'
+      include 'bbc_freq.ftni'
 C
 C History
 C 930714  nrv  created,copied from procs
@@ -701,6 +702,11 @@ C  BBCffb, IFPffb  or VCffb
 
           if(kdbbc_rack) then   
             write(lu_outfile,'("cont_cal=", a)') contcal_out
+            ldum="bbc_gain=all,agc"
+            if(idbbc_bbc_target .gt. 0) then
+               write(ldum(20:30),'(",",i5)') idbbc_bbc_target
+            endif 
+            call squeezewrite(lu_outfile,ldum)           
           endif        
 
 C  FORM=RESET

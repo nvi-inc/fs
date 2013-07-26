@@ -11,6 +11,7 @@
       include 'drcom.ftni'
       include 'bbc_freq.ftni'
       integer icode, ic, ib,ichan              !channel anb BBC number we are considering. 
+!                                              Note: Does not use ichan here at all.
 !functions        
 
 ! local variables.                   

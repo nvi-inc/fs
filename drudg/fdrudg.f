@@ -205,6 +205,8 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2008May23 JMGipson. Make sure output files are lowercase
 ! 2012Sep25 JMGipson. Modified to use drudg_rdctl.f instead of rdctl.f 
 ! 2013Jan23 JMGipson. Modified so that equipment_override is done when in batch mode. 
+! 2013Jun18 JMGipson. Capitalize original rack equipment. 
+! 2013Jul11 JMGipson. Issue error if file is not found and stop.
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
@@ -270,7 +272,7 @@ C***********************************************************
 
 
       call drudg_rdctl(csked,csnap,cproc,ctmpnam,            
-     >           dr_rack_type,crec_def,kequip_over,ldbbc_if_inputs)
+     >           dr_rack_type,crec_def,kequip_over)
       kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
      >               crec_def(1).eq.'unknown'.and.crec_def(2).eq.'none')
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
@@ -353,6 +355,7 @@ C       Opening message
             cbuf=cfile
           endif 
         endif
+    
         IF (NCH.GT.0) THEN !got a name
           if(cbuf(1:2) .eq. "::" .or. cbuf(1:1) .eq. "q") goto 990
           if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
@@ -363,7 +366,7 @@ C       Opening message
             else
               lskdfi = cbuf(1:nch) 
             endif
-          endif ! path/no path
+          endif ! path/no path  
           if (lskdfi(1:2).eq.'..') then
             ix=index(lskdfi(3:),'.')
           else if (lskdfi(1:1).eq.'.') then
@@ -371,14 +374,20 @@ C       Opening message
           else
             ix=index(lskdfi(1:),'.')
           endif
-          l=trimlen(lskdfi)
-          ctextname = ''
+          l=trimlen(lskdfi)   
+          ctextname = ''        
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
               lskdfi=lskdfi(1:l)//'.skd'
               inquire(file=lskdfi,exist=kexist)
               if(.not.kexist) then 
                 lskdfi=lskdfi(1:l)//'.vex'
+                inquire(file=lskdfi,exist=kexist)
+                if(.not.kexist) then
+                   write(*,*) 
+     >           "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
+                   stop
+                endif
               endif 
               ctextname = lskdfi(1:l)//'.txt'
               kskdfile = .true.
@@ -395,6 +404,13 @@ C       Opening message
             endif
             if (lskdfi(ix:l).eq.'.drg') kdrg_infile=.true.
           endif ! automatic extension
+          inquire(file=lskdfi,exist=kexist)
+          if(.not.kexist) then 
+            write(*,*) 
+     >         "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
+            stop
+          endif           
+
           ixp=1
           ix=1
           do while (ix.ne.0) ! find the last '/'
@@ -532,6 +548,9 @@ C
           cstrack_orig(istn) =cstrack(istn)
           cstrec_orig(istn,1)=cstrec(istn,1)
           cstrec_orig(istn,2)=cstrec(istn,2)
+          call capitalize(cstrack_orig(istn))
+          call capitalize(cstrec_orig(istn,1))
+          call capitalize(cstrec_orig(istn,2))
       end do
 !
       km5A_piggy=.false.
