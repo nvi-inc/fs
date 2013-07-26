@@ -10,6 +10,7 @@
 ! 2012Sep05 JMG.  Changes to support DBBC. 
 !                 fvc,fvc_lo, fvc_hi put in bbc_freq.ftni 
 ! 2012Sep19  Checking of valid IFs made case independnent. 
+! 2013Jul11 JMG. Added "if_targets"
 
 ! passed
       character*12 cname_ifd   !name of procedure.
@@ -36,7 +37,7 @@ C               patch=lo2,b1,b2,...
 C               lo=same as Mk3
 C    for K4-1:  patch=lo1,1-4,5-8,etc.
 C    for LBA:   lo=same as Mk3 ( but allow up to 4 IFs)
-!    for DBBC   loX=input,agc,freq#  where X=A,B,C,D and input=1,2,3,4
+!    for DBBC   ifX=input,agc,filter#,target  where X=A,B,C,D and input=1,2,3,4, target=1-65535
 ! 
 
 C Later: add a check of patching to determine how the IF3 switches
@@ -48,12 +49,13 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       integer ifd(4)            !ifd(j)<>0 indicates we have IF
       integer ibd(4)            !ib(j)<>   is one of the BBCs the IF connects to. 
                                 !This is used because we can find the filter from the BBC#.
-      integer ibbc 
+     
       character*4 lvalid_if     !Valid IF characters
       integer ivc3_patch        !VC3,VC10 patch hi or lo?
       integer ivc10_patch
       integer itemp
       integer ib                !ibbc#
+      integer ichan             !loop over channels
       integer ic                !channel index
       integer iv                !channel#
       integer ilo               !LO index
@@ -61,6 +63,7 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       integer nch               !character counter  
       character*2  cif          !Holds IF name.
       character*1 ch1           !Single character 
+      logical kdone_bbc(max_bbc) 
  
       call proc_write_define(lu_outfile,luscn,cname_ifd)
 
@@ -69,25 +72,39 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
        ifd(j)=0
        ibd(j) =0
       end do
+
+      do ib=1,max_bbc
+         kdone_bbc(ib)=.false. 
+      enddo
      
       if(kbbc .or. kdbbc_rack) then 
         lvalid_if="ABCD"     
       else 
         lvalid_if="1234"
-      endif
+      endif 
 ! 
-      do ic=1,nchan(istn,icode) ! which IFs are in use
-        iv=invcx(ic,istn,icode) ! channel number
-        ibbc=ibbcx(ic,istn,icode) ! BBC number
-        if(freqrf(iv,istn,icode) .gt. 0) then
-          ch1=cifinp(iv,istn,icode)(1:1) 
+      do ichan=1,nchan(istn,icode) ! which IFs are in use
+        ic=invcx(ichan,istn,icode) ! channel number       
+        ib=ibbcx(ic,istn,icode) ! BBC number
+        if(.false.) then
+          call write_return_if_needed(luscn,kwrite_return)
+          write(luscn,*) ichan, " ", ic," ", " ", ib," Cifinp-->",
+     >    cifinp(ic,istn,icode)     
+        endif
+       
+        if(.not.kdone_bbc(ib) .and. 
+     >     freqrf(ic,istn,icode) .gt. 0) then
+          ch1=cifinp(ic,istn,icode)(1:1)
+  
           call capitalize(ch1) 
           j=index(lvalid_if,ch1)
           if(j .ge. 1) then
-            if(ifd(j) .eq. 0) ifd(j)=iv     
-            if(ibbc_present(ibbc,istn,icode) .gt. 0) ibd(j)=ibbc           
+            if(ifd(j) .eq. 0) ifd(j)=ic     
+            if(ibbc_present(ib,istn,icode) .gt. 0) ibd(j)=ib           
           endif
         endif
+
+        kdone_bbc(ib)=.true.
       enddo ! which IFs are in use
  
       if(kdbbc_rack) then
@@ -96,7 +113,10 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
           if(ifd(j) .ne. 0) then  
             cif=cifinp(iv,istn,icode)  
             write(cbuf,'("if",a1,"=",a1,",agc,",i1)') 
-     >        cif(1:1), cif(2:2), ibbc_filter(ibd(j))     
+     >          cif(1:1), cif(2:2), ibbc_filter(ibd(j))     
+           if(idbbc_if_targets(j) .ge. 0) then
+              write(cbuf(15:20),'(",",i5)') idbbc_if_targets(j) 
+            endif 
             call squeezeleft(cbuf,nch)      
             call lowercase_and_write(lu_outfile,cbuf)
           endif
@@ -104,10 +124,12 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
         write(lu_outfile,'(a)') 'lo='
         do ilo=1,4         
           iv=ifd(ilo)
-          if(iv .ne. 0) then             
+          if(iv .ne. 0) then      
+!            write(*,*) "ilo ", ilo, " iv ", iv        
             call proc_lo(iv,icode,lvalid_if(ilo:ilo)) 
            endif ! this LO in use
-        end do 
+        end do   
+!        writE(*,*) "freq: ", (freqlo(j,istn,1), j=1,16)
       endif 
  
       if(kmracks) then ! mk3/4/5 IFD

@@ -5,9 +5,19 @@
       real*8 fvc_hi(max_bbc)            !upper edge
       real*8 flo(max_bbc)               !frequency of LO
       real*8 rfmin, rfmax               !maximum allowable frequency  
+      common /bbc_freq_real7/fvc,fvc_lo, fvc_hi,flo,rfmin, rfmax
+
       integer ibbc_filter(max_bbc)      !Filter numbers 1-4. Only for DBBC
+      integer*4 idbbc_if_targets(4)        ! valud values between 0-65535.  -1 indicates not found.
+      integer*4 idbbc_bbc_target           ! valid values between 0-65535   -1 indicates not found. 
+      common /bbc_freq_int/ibbc_filter,idbbc_if_targets,idbbc_bbc_target 
+
+      logical kwrite_return        ! do we need to write a return?
+      common /bbc_freq_log/kwrite_return
+
       character*1 cbbc_pol(max_bbc)     !Polarization   
       character*5 cbbc                  !something like "bbc01 " or "vc13"
-      character*1 ldbbc_if_inputs(4)    !
-      common /bbc_freq/fvc,fvc_lo, fvc_hi,flo, ibbc_filter, 
-     >  rfmin, rfmax, cbbc_pol,cbbc,ldbbc_if_inputs 
+      character*1 ldbbc_if_inputs(4)    !Something "1", ..."4".   
+  
+ 
+      common /bbc_freq_char/ cbbc_pol,cbbc,ldbbc_if_inputs 

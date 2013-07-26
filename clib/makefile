@@ -41,7 +41,7 @@ scan_check_util.o mk5b_mode_util.o vsi4_util.o mk5vcd.o mk5bbcd.o\
 dot_util.o get_5btime.o pps_source_util.o clock_set_util.o play_wav.o\
 holog_util.o satellite_util.o satoff_util.o dbbcnn_util.o dbbcifx_util.o\
 dbbcform_util.o tpi_dbbc.o mk5dbbcd.o dbbcn_v.o dbbc_cont_cal_util.o\
-dbbc_if_power.o
+dbbc_if_power.o dbbcgain_util.o
 #
 #FFLAGS = 
 #

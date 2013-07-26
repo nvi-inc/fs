@@ -14,6 +14,7 @@ C            year variables are fully specified.
 C 990427 nrv Require 4-digit input year.
 ! 2006Oct3  JMG Completely rewritten.
 ! 2007Jan24 JMG. Input part modified.
+! 2013Jul17 JMG. No longer need to find 'modular' or 'prepass' or 'cont'
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -227,10 +228,12 @@ C
           RETURN
         ENDIF
       end do
-C
-      KFNDMD = .FALSE.
-      KFNDCH = .FALSE.
-      kfndpr = .false.
+C     
+      ichngp=1
+      imodp=1
+      iprep=1
+       goto 9460
+
       do while ((.not.kfndmd).or.(.not.kfndch).or.(.not.kfndpr))
         CALL readf_asc(LU_INFILE,IERR,IBUF,ISKLEN,iLEN)
         IF(IERR.NE.0) THEN
@@ -272,6 +275,7 @@ C
 	end do !"while ic1 = 0"
       end do !"while not kfndch or kfndmd"
 
+9460  continue
       write(luscn,9470) ichngp,imodp,iprep
 9470  format(' Tape change time = ',i5,
      .       '.  Modular start time = ',i5,
@@ -279,6 +283,7 @@ C
 C
 C 5.0  Copy file up to $SKED section.
 C
+
       REWIND(LU_INFILE)
       write(luscn,"(a)")'Writing out file up to $SKED section.'
 
@@ -319,7 +324,7 @@ C
       TimeExpFnd=0
       num_obs_new=0 
       do while(TimeExpSkd .lt. TimeExpEnd_New)
-        Julian=Int(TimeExpSkd)                      !Get integer and fracitonal part
+        Julian=Int(TimeExpSkd)                   !Get integer and fractional part of the day. 
         dsecond=(TimeExpSkd-Julian)*86400.d0     !this is fractional part.
         call seconds2hms(dsecond,ih_skd,im_skd,is_skd)
 

@@ -1,4 +1,4 @@
-File: /usr2/fs-9.11.2/misc/fs9112up.txt  Version: 2.6  Date: 130307
+File: /usr2/fs-9.11.3/misc/fs9113up.txt  Version: 3.2  Date: 130726
 
 I. Introduction
 
@@ -11,56 +11,97 @@ This memo is divided into three sections:
 Please print this notice and read it carefully before installing the
 new version.
 
-This update is intended for all stations.  Stations with a previous
-version of 9.11.x should upgrade as soon as possible if any of the
-following issues affects them: (1) MAT serial I/O problems (described
-in FS update item 11 below), (2) extraneous garabage characters are
-displayed in Tsys/monit3 window (see FS update item 20 below), and (3)
-stations with non-standard racks, such as the KVAZAR stations have
-trouble DRUDG-ing schedules that use non-VSI4 track maps with non-VSI4
-racks (see DRUDG update item 15).
+This update is intended for all stations.  All stations should upgrade
+to this version as soon as possible.  Most of the changes in this
+version are related to DBBCs.  However, we ask all stations to upgrade
+to this version so that we can get all stations on the same, modern,
+version of DRUDG.  This will also make it easier to apply future
+updates.
+
+There are a few small bugs fixes in this version, but the major change
+is support for DBBC DDC personality version v104.  This version of the
+DDC personality supports "astro2" formatter mode and provides more
+precision for TPI measurements with the BBC sideband detectors.  If
+you are using DDC version v104, it is very strongly recommended that
+your read the section "V104 Support" in /usr2/fs/misc/dbbc.txt; it
+provides details on a gain issue with v104 and how to fix it using the
+"BBC_LEVEL" procedure.
+
+An additional important change for DBBC support is that if the
+"cont_cal" keyword is not used in skedf.ctl, the default will be
+"cont_cal=off", whereas in previous versions it was "cont_cal=on".  If
+you have a DBBC and want any continuous cal configuration other than
+"off", you must use the "cont_cal" keyword in skedf.ctl.
+
+We would like to acknowledge the significant contributions that
+Jonathan Quick made to this version (and many others) of the FS
+including sharing his experience operating DBBCs, methods of
+organizing operations, and testing.  However to be clear, Ed Himwich
+and John Gipson take responsibility for any remaining shortcomings.
+
+The full list of changes, by FS version number is given in the
+"Changes Since Version 9.10.4" section below.
+
+The remaining material in this "Introduction" section relates to
+changes in previous versions of 9.11.x.
+
+In the prior version 9.11.2, four significant problems were fixed
+from previous versions of 9.11.x:
+
+(1) MAT serial I/O problems (described in FS update item 11 below)
+
+(2) Extraneous garbage characters were displayed in Tsys/monit3 window
+    (see FS update item 20 below)
+
+(3) Stations with non-standard racks, such as the KVAZAR stations had
+    trouble DRUDG-ing schedules that use non-VSI4 track maps with
+    non-VSI4 racks (see DRUDG update item 15).
+
+(4) The "bank_check" command did correctly detect a full pack for
+    Mark 5B recorders.
 
 Please note that despite a significant amount of pre-release testing,
 the new version of gnplt has been found to have some bugs.  The two
-that have been discovered, poor scaling if only the DPFU or Tcal is
-updated from the gain data (adjusting the DPFU and the gain curve
-together seems to be okay) has been fixed for 9.11.2.  However, there
-may be other problems, particularly if your station uses ALTAZ (vs
-ELEV) gain curves.  If there is any doubt that you are getting good
-results (and probably if you use ALTAZ gain curves at all), please use
-the old gnplt, which is available as gnplt1.  (However, there are
-rumors of long standing problems with ALTAZ in gnplt1 as well.)  The
-FS 9.11.x version of gnplt1 supports two Trec values per RXG file so
-it can be used with 9.11.x RXG files without modification.  The new
-gnplt will be more thouroghly debugged later this year.  This is a
-very complex program and it is difficult to test it completely.  If
-you notice particular problems, please be sure to inform Ed so that we
-can make sure they are addressed.
+that have been discovered so far, poor scaling if only the DPFU or
+Tcal is updated from the gain data (adjusting the DPFU and the gain
+curve together seems to be okay) has been fixed for 9.11.2.  However,
+there may be other problems, particularly if your station uses ALTAZ
+(vs ELEV) gain curves.  If there is any doubt that you are getting
+good results (and probably if you use ALTAZ gain curves at all),
+please use the old gnplt, which is available as gnplt1.  (However,
+there are rumors of long standing problems with ALTAZ in gnplt1 as
+well.)  The FS 9.11.x version of gnplt1 supports two Trec values per
+RXG file so it can be used with 9.11.x RXG files without modification.
+The new gnplt will be more thoroughly debugged later this year.  This
+is a very complex program and it is difficult to test it completely.
+If you notice particular problems, please be sure to inform Ed so that
+we can make sure they are addressed.
 
 All stations should be aware that experiment procedure generated with
 previous FS versions may not work with the new one.  In particular
 set-up procedures for Mark 5 and VLBA5 racks may not work because of
-changes in the handling of tpicd.  You should always DRUDG the .snp
-and .prc files for an experiment with the version of DRUDG that came
-with the version of the FS you will be using to run the experiment.
+changes in the handling of the TPICD command.  You should always DRUDG
+the .snp and .prc files for an experiment with the version of DRUDG
+that came with the version of the FS you will be using to run the
+experiment.
 
-This version, 9.11.2 is a minor update to 9.11.1.  The only
+Prior version 9.11.2, was a minor update to 9.11.1.  The only
 significant change in the installation procedure is that if you have a
-VSI4 device (typically for MArk5 and VLBA5 rqcks) you should make sure
+VSI4 device (typically for Mark5 and VLBA5 racks) you should make sure
 that you have a "vsi4" read back command at the start of "initi".
 Please see FS update item (11) and installation step (14D) for more
 details.  The installation instructions identify the sub-set of steps
 need to bring everything up to date from 9.11.1.
 
-If you have version 9.11.0 installed in addition to the information
-about about upgrading from 9.11.1, the folowing information is
-relevent to updating to 9.11.2: There is one significant change and
+If you have version 9.11.0 installed, in addition to the information
+above about upgrading from 9.11.1, the following information is
+relevant to updating to 9.11.2.  There is one significant change and
 some update instruction corrections and improvements.  The change in
 the new version is that both Mark 5 and DBBC communications will now
 reconnect to the device on the next attempted transaction if the
 device is restarted while the FS is running.  This is described more
 fully as FS change (19) below.  There is also now a DRUDG change (14),
-the default_dbc_if_inputs parameter in skedf.ctl.  The description of
+the default_dbbc_if_inputs parameter in skedf.ctl.  The description of
 which was omitted from the 9.11.0 update notice (but the feature was
 in DRUDG).  The update instruction improvements are the addition of
 step (13F) for updating skedf.ctl, if needed, and step (14E) to
@@ -80,8 +121,9 @@ description.
 			 A. Changes in the FS
 
 The following is a summary of FS changes since 9.10.4.  Item 19 was
-added for 9.11.1.  Items 3 and 11 was expanded and items 20 and above were
-addded for 9.11.2.
+added for 9.11.1.  Items 3 and 11 was expanded and items 20-23 were
+added for 9.11.2.  Item 1 was changed and items 24 and above were
+added for 9.11.3.
 
 1.  Support for DBBC DDC personality added.
 2.  The "day 49 bug" is fixed.
@@ -105,10 +147,22 @@ addded for 9.11.2.
 17. Installation and customization documents for FSL8 are included in
     /usr2/fs/misc.
 18. New example station procedure files for DBBCs.
-19. Improve Mark 5 and DDBC processing if Mark 5 or DBBC is restarted.
+19. Improved Mark 5 and DBBC processing if Mark 5 or DBBC is restarted.
 20. Fix Tsys/monit3 display problem for Mark III/IV/5 racks.
 21. The fivpt "xoffset" record now includes the source name.
 22. Fix autoftp for DBBC racks.
+23. Fix bug in bank_check for Mark 5B recorders.
+24. Support for DBBC DDC version v104, including astro2 format mode
+    and the BBC_GAIN command.
+25. Improved error messages for mismatches of DBBC DDC version numbers.
+26. plotlog support for plotting tpicd data.
+27. Bug fix for LCP Tcal frequency table exactly equal to detector center
+    frequency.
+28. Bug fix for fivpt program output.
+28. Fixed parameters definitions in params.h
+30. Display of power for DBBC IF modules now consistent.
+31. Improved error messages about the need to use the fmset 's'
+    option.
 
 A more detailed discussion of these changes follows.
 
@@ -118,11 +172,14 @@ A more detailed discussion of these changes follows.
     DBBC.  Tsys, pointing, and gain measurements are supported with
     both continuous (low) cal and non-continuous (high) cal.  The
     fmset program supports the DBBC 1 PPS sync. Only versions v100,
-    v101, and v102 of the DBBC DDC personality are supported.  Version
-    v103 is not supported yet (but may work with the FS, if you select
-    v102 in the equip.ctl file, but doing so will cause a version
-    conflict error to be generated each time the "form=..."  command
-    is issued.).
+    v101, v102, and v104 of the DBBC DDC personality are supported.
+    Version v103 is not supported.  If you are using v104, it is very
+    strongly recommended that your read the section "V104 Support" in
+    /usr2/fs/misc/dbbc.txt; it provides details on a gain issue with
+    v104 and how to fix it using the "BBC_LEVEL" procedure.  Support
+    for DDC version v104, including the "astro2" mode and the
+    "bbc_gain" command were added in FS version 9.11.3 and is
+    discussed in FS change #24.
 
     To enable DBBC support the rack type in the equip.ctl file must be
     selected as "dbbc".  New lines were added to equip.ctl to specify:
@@ -167,7 +224,7 @@ A more detailed discussion of these changes follows.
     the FS.  It is written in Python and is much quicker than the
     previous version, especially for large data sets.  Its operation
     is similar to the old version which is available also as gnplt1 in
-    case a serious bugs is discovered.  The two that have been
+    case any serious bugs are discovered.  The two that have been
     discovered, poor scaling if only the DPFU or Tcal is updated from
     the gain data (adjusting the DPFU and the gain curve together
     seems to be okay) has been fixed for 9.11.2.  However, there may
@@ -175,9 +232,9 @@ A more detailed discussion of these changes follows.
     ELEV) gain curves.  If there is any doubt that you are getting
     good results (and probably if you use ALTAZ gain curves at all),
     please use the old gnplt: gnplt1. (However, there are rumors of
-    long standing problems with ALTAZ in gnplt1 as well.) 
+    long standing problems with ALTAZ in gnplt1 as well.)
 
-    The new gnplt will be more thouroghly debugged later this year.
+    The new gnplt will be more thoroughly debugged later this year.
     This is a very complex program and it is difficult to test it
     completely.  If you notice particular problems, please be sure to
     inform Ed so that we can make sure they are addressed.
@@ -198,24 +255,24 @@ A more detailed discussion of these changes follows.
     available in /usr2/fs/gnplt/gnplt2_documentation.pdf,
 
 4.  The FS and gain calibration tools support two Trec values in .rxg
-    files.  Values can now be specified for each polarization.
+    files.  Values can now be specified for up to two polarizations
+    per file.
 
 5.  Protection from issuing "problematic" commands during Mark 5B
     recording.  There are now inter-locks to make it more difficult to
-    accidently send a Mark 5B commands that may cause problems while
-    it is recording.  Specifically, the "mk5b_mode" command and
-    "fmset" sync and time-setting functions require over-rides if the
-    Mark 5B is recording.  In the case of the "mk5_mode" command, the
-    user must supply an additional parameter to override the
-    inter-lock (much like the over-ride needed for the "terminate"
-    command if a Mark 5 is recording).  See the output of
-    "help=mk5b_mode" for more details.  For "fmset", the user must
-    answer an extra query to override the interlock.  The approach of
-    allowing the interlocks to be overridden is intended to give the
-    operator full functionality if it is needed while discouraging
-    accidental use of these functions while recording since they can
-    cause problems.  It is recommanded to NOT override the
-    inter-locks.
+    accidently send a Mark 5B command that may cause problems while it
+    is recording.  Specifically, the "mk5b_mode" command and "fmset"
+    sync and time-setting functions require over-rides if the Mark 5B
+    is recording.  In the case of the "mk5_mode" command, the user
+    must supply an additional parameter to override the inter-lock
+    (much like the over-ride needed for the "terminate" command if a
+    Mark 5 is recording).  See the output of "help=mk5b_mode" for more
+    details.  For "fmset", the user must answer an extra query to
+    override the interlock.  The approach of allowing the interlocks
+    to be overridden is intended to give the operator full
+    functionality if it is needed while discouraging accidental use of
+    these functions while recording since they can cause problems.  It
+    is recommended to NOT override the inter-locks.
 
     An important point to understand is that these interlocks depend
     on the last commanded recording state given by "disk_record=..."
@@ -226,7 +283,7 @@ A more detailed discussion of these changes follows.
     handled more gracefully in the next FS release.
 
 6.  New SATELLITE command.  This is a new command to support pointing
-    the antenna at satellites. This is based on the amateur radio
+    the antenna at satellites.  It is based on the amateur radio
     program, predict, which uses the SGP4 propagation model.  The
     provided "satellite" command is useful for pointing the antenna at
     a satellite in R.A./Dec. coordinates of date, or fixed Az/El
@@ -236,10 +293,10 @@ A more detailed discussion of these changes follows.
     This command cannot by itself be used to track an arbitrary
     satellite trajectory.  However, it does internally generate a one
     second ephemeris for the next 24 hours for a satellite so it can
-    be tracked by antcn if that capability is implemented.  There is
-    also a "satoff" command that allows the tracking to be offset with
-    a time-like offset. Documentation for these features, including
-    installation instructions, is available in
+    be tracked by antcn if that capability has been implemented.
+    There is also a "satoff" command that allows the tracking to be
+    offset with a time-like offset. Documentation for these features,
+    including installation instructions, is available in
     /usr2/fs/satellites.txt.
 
     It is expected that this capability will be expanded in the next
@@ -270,13 +327,14 @@ A more detailed discussion of these changes follows.
     In this approach for plotting, offsets of the first antenna
     coordinate (which is longitude-like) is corrected by the cosine of
     the second antenna coordinate (which is latitude-like) to give the
-    "Cross" coordinate.  This results in the size of offsets at
-    different positions of the second antenna coordinate being
-    directly comparable.  This is useful for evaluating the solution
-    residuals.  However it does not change the pointing model or the
-    results of the pointing analysis (the model expressed in "cross"
-    coorinates gives identical result to the model in "non-cross"
-    coordinates), just the visual presentation of the results.
+    "Cross" coordinate.  This results in the size of offsets for the
+    first coordinate at different positions of the second antenna
+    coordinate being directly comparable.  This is useful for
+    evaluating the solution residuals.  However it does not change the
+    pointing model or the results of the pointing analysis (the model
+    expressed in "cross" coordinates gives identical result to the
+    model in "non-cross" coordinates), just the visual presentation of
+    the results has changed.
 
     The formal error constants (for modeling the misfit of the data)
     can now be determined for the first antenna coordinate as a
@@ -314,7 +372,7 @@ A more detailed discussion of these changes follows.
 10. Improved metserver/metclient software. These sample programs for
     serving and recording MET3/4 have been improved.  They now report
     current (and correctly time-tagged) data and the error reporting
-    is better and mroe uniform.  The epoch for recording data in
+    is better and more uniform.  The epoch for recording data in
     metclient is now modulo the recording interval, e.g,. if the
     interval is 60 seconds, the data are sampled and recorded on whole
     minutes.  The socket for TCP/IP is now more easily adjusted and a
@@ -332,7 +390,7 @@ A more detailed discussion of these changes follows.
     printed in this case.  Please be aware that this pause will be
     frustrating if occurs during an attempt to quickly start (or
     restart) the FS.  Please make allowances for this if possible.  As
-    unpleasent as it is, this is the only solution we have been able
+    unpleasant as it is, this is the only solution we have been able
     to find.
 
     In order for the work around to work correctly, the first MAT
@@ -346,13 +404,14 @@ A more detailed discussion of these changes follows.
     After the work around is executed (or if it is not needed on the
     first MAT read communication) it will not be needed again until
     the next FS start.  The problem seems to occur only on systems
-    that are using anither serial line for communication.  If you find
-    that the workaround is ever being executed on your system, please
-    contact Ed (Ed.Himwich@ansa.gov).  It may be that this problem can
-    be avoided by recoding MAT serial I/O to use termios.h structures
-    rather than termio.h structures.  That may also obviate the need
-    for a serial I/O work-around previously implemented in MCBCN.
-    These issues will be investigated for a future release.
+    that are using another serial line for some other communication.
+    If you find that the workaround is ever being executed on your
+    system, please contact Ed (Ed.Himwich@ansa.gov).  It may be that
+    this problem can be avoided by recoding MAT serial I/O to use
+    termios.h structures rather than termio.h structures.  That may
+    also obviate the need for a serial I/O work-around previously
+    implemented in MCBCN.  These issues will be investigated for a
+    future release.
 
 12. Change in mk5cn handling of input from Mark 5 recorders.  The use
     fgets() calls to read from Mark5 devices was changed to use
@@ -365,7 +424,8 @@ A more detailed discussion of these changes follows.
     of the special source names that don't allow coordinates to be
     commanded (see help=source) is used, the command coordinates are
     automatically set to zero.  There is now a new special source name
-    in this category, "boresight" as well.
+    in this category, "boresight" as well.  Please see help=source for
+    details.
 
 14. Antenna= command bug with antenna device /dev/null fixed.  This
     bug caused class numbers to be exhausted, causing a FS crash, if
@@ -390,39 +450,108 @@ A more detailed discussion of these changes follows.
     In addition, the previous 5station.prc file (Mk5 rack/Mk5B
     recorder) was renamed m5station.prc for consistency.
 
-19. Improve Mark 5 and DDBC processing if Mark 5 or DBBC is restarted.
-    One of the changes made in mk5cn for 9.11.0 was to remove the
-    automatic re-trying of commands if there is a failure; it was felt
-    that this did more harm than good.  An unintended consequence of
-    this change was that if the Mark 5 control program is restarted,
-    the next transaction would fail.  The code was changed so that the
-    closure is detected, a new connection is attempted, and then the
-    transaction is tried.  This transaction should succeed.  Of course
-    any transacation attemped before the Mark 5 is restarted will
-    fail.  Since dbbcn is modeled on mk5cn, the changes were made to
-    both programs, so they behave the same way in this situation.
+19. Improved Mark 5 and DDBC processing if Mark 5 or DBBC is
+    restarted.  One of the changes made in mk5cn for 9.11.0 was to
+    remove the automatic re-trying of commands if there is a failure;
+    it was felt that this did more harm than good.  An unintended
+    consequence of this change was that if the Mark 5 control program
+    is restarted, the next transaction would fail.  The code was
+    changed so that the closure is detected, a new connection is
+    attempted, and then the transaction is tried.  This transaction
+    should succeed.  Of course any transaction attempted before the
+    Mark 5 has completed restarting will fail.  Since dbbcn is modeled
+    on mk5cn, the changes were made to both programs, so they behave
+    the same way in this situation.
 
 20. Fix Tsys/monit3 display problem for Mark III/IV/5 racks.  For
-    these rack types, some extraneous garabage characters were printed
-    in the display window.  Thanks goes to Michael Linqvist at Onsala
+    these rack types, some extraneous garbage characters were printed
+    in the display window.  Thanks goes to Michael Lindqvist at Onsala
     for reporting this.
 
 21. The fivpt "xoffset" record now includes the source name.  This
     change makes it easier to select pointing data results by source,
     for example using "grep".
 
-22. Fix autoftp for DBBC racks.  Version 9.11.0 and 9.11.1 brok the
-    autoftp feature of disk2file for sttaion with DBBCs. This has been
-    fixed.
+22. Fix autoftp for DBBC racks.  Versions 9.11.0 and 9.11.1 broke the
+    autoftp feature of disk2file for stations with DBBCs.  This has
+    been fixed.
+
+23. Fix bug in bank_check for Mark 5B recorders. Versions 9.11.0 and
+    9.11.1 broke the automatic bank switching for a full disk pack for
+    Mark 5B recorders by bank_check.  This has been fixed.
+
+24. Support for DBBC DDC version v104, including "astro2" format mode
+    and the BBC_GAIN command.  This version supports the DDC version
+    v104.  The main features of this change are support for "astro2"
+    format mode and the BBC_GAIN to control BBC sideband gain levels.
+    There were additional changes to standard procedures and FIVPT and
+    ONOFF.  It is very strongly recommended that your read the section
+    "V104 Support" in /usr2/fs/misc/dbbc.txt; it provides details on a
+    gain issue with v104 and how to fix it using the "BBC_LEVEL"
+    procedure.
+ 
+25. Improved error messages for mismatches of DBBC DDC version
+    numbers.  These error messages are generated when the version
+    number in the equip,ctl does not agree with the version read back
+    from the DBBC by the form=....  The error messages were expanded
+    to recognize some intermediate versions that are known to have
+    problems.  Thanks to Jonathan Quick for suggesting this.
+
+26. plotlog support for plotting tpicd data.  The plotlog utility was
+    expanded to allow plotting data logged by the tpicd daemon. The
+    options -s and -2 were expanded/added.  Thanks to Michael Lindqvist
+    for requesting this. Please see 'plotlog -h' for more information.
+
+27. Bug fix for LCP Tcal frequency table exactly equal to detector
+    center frequency.  A fix was made for a bug in the code preventing
+    the correct Tcal value being found when the detector center
+    frequency fell exactly on a tabular point in the rxg file.  This
+    was only a problem for LCP.  Thanks to Jonathan Quick for
+    reporting this bug.
+
+28. Bug fix for fivpt program output.  The number of steps was not
+    displayed correctly for values less than -9.  Thanks to Andrey
+    Mikhailov for reporting this bug and a fix.
+
+29. Fixed parameters definitions in params.h.  There was an error in
+    formation of calculated parameters that caused them to generate
+    incorrect values.  This was fixed by placing the calculations
+    within parentheses.  The only apparent impact of this was that
+    station specific detector support was broken.  Thanks to Mamuro
+    Sekido for reporting this bug.
+
+30. Display of power for DBBC IF modules is now consistent.  In 9.11.x
+    versions before 9.11.3 the reporting of the IF values in the log
+    was not uniform with respect to being power or counts.  In the
+    previous versions "ifX", TPI, and TPICAL commands, and the tpicd
+    TPCONT output raw counts were reported; in the TPDIFF command and
+    the ONOFF output, the units were power.  The averaged tpicd TPI
+    values were not correct for any usage.  For consistency as of
+    9.11.3, power values are used in all cases except for the "ifX"
+    command, which still reports raw counts.  The "ifX" command is the
+    command conceptually closest to hardware and this provides a way
+    to check the operating level, which is specified in raw counts,
+    for the IF modules.
+
+31. Improved error messages about the need to use the fmset 's'
+    option. Several error messages related to need to re-sync with
+    fmset were revised to merely suggest the that the operator
+    "CONSIDER" re-syncing.  This change was made because in many cases
+    the correct action is to NOT re-sync and the messages seemed to
+    recommending re-syncing too strongly.  This was leading to
+    unnecessary re-syncs which were causing confusion and other
+    problems.
+
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2013Feb22.
+DRUDG opening message date is 2013Jul23
 
-The following is a summary of DRUDG changes since 9.10.4. Item 14 was
-omitted from the 9.11.0 update notice, but the feature was in the
-9.11.0 release. Items 11 and 14 were revised and items 15 and above
-were added in 9.11.2.
+The following is a summary of DRUDG changes since 9.10.4. Items 14-16
+were omitted from the 9.11.0 update notice, but the features were in
+the 9.11.0 release.  Items 11 and 14 were revised and items 17-18 were
+added in 9.11.2.  Item 14 was revised and items 19 and above were
+added in 9.11.3.
 
 1.  Support for DBBC.
 2.  AutoFTP_ABORT_TIME skedf.ctl parameter added to $MISC section.
@@ -438,8 +567,18 @@ were added in 9.11.2.
 12. Bug in equipment override in 'command line mode'.
 13. More forgiving behavior for unknown recorder types.
 14. New skedf.ctl $MISC section parameter: default_dbbc_if_inputs.
-15. Mixed non-VSI4 modes error for non-VSI4 racks fixed.
-16. Missing scans in option 5 listing for continuous recorder restored.
+15. Mixed sampling rates and bandwidths allowed in VEX schedules.
+16  cont_cal skedf.ctl parameter added to $MISC section.
+17. Mixed non-VSI4 modes error for non-VSI4 racks fixed.
+18. Missing scans in option 5 listing for continuous recorder restored.
+19. Support for DBBC DDC version v104 including astro2 mode and the
+    BBC_GAIN command
+20. DRUDG respects the IF configurations and inputs in the VEX file for 
+    DBBCs if the rack type is "None" or "DBBC".
+21. New skedf.ctl control file $MISC section parameter "dbbc_if_targets".
+22. New skedf.ctl control file $MISC section parameter "dbbc_bbc_target".
+23. The DRUDG "Shift a .SKD file" option (10) has been fixed and
+    should work again.
 
 A more detailed discussion of these changes follows.  For most fixes
 the files that were changed are listed.  Files are listed with respect
@@ -514,11 +653,11 @@ to the drudg/ source directory.
     hand. This has been fixed. 
     Affected files: lablog.f
 
-10. VEX is now a default schedulde file type. The user no longer has
+10. VEX is now a default schedule file type.  The user no longer has
     to specify the '.vex' extension explicitly.  If no file extension
     is given DRUDG will try first to open a '.skd' file.  If it does
-    not find one it will then try to open a '.vex' file.
-    Affected files: fdrudg.f
+    not find one it will then try to open a '.vex' file.  Affected
+    files: fdrudg.f
 
 11. TPICD bug for fixed Mark 5 & VLBA5 rack types.  For 9.11.0 DRUDG
     write the TPICD commands for all rack types.  In 9.11.2 this was
@@ -534,7 +673,7 @@ to the drudg/ source directory.
 
        drudg r1453.skd tc 12
 
-    Will produe the PRC files for TC and exit.  In previous releases
+    Will produce the PRC files for TC and exit.  In previous releases
     DRUDG would ignore the equipment_override option in command line
     mode.  It now has the same behavior in interactive and command
     line mode.
@@ -548,28 +687,139 @@ to the drudg/ source directory.
     ../skdrut/check_rec_type.f, ../skdrut/unpvt.f 
 
 14. New skedf.ctl $MISC section parameter: default_dbbc_if_inputs.
-    This paremeter can be used to define default IF input selections
-    for a DBBC if the schedule does not specify any.  It will not be
-    possible to distribute schedules that specify the DBBC IF inputs
-    until all stations the schedules are distributed to have updated
-    to FS version 9.11.0 or later.  In the meantime, this parameter
-    can be helpful for stations that used a fixed, or nearly fixed, IF
-    input configuration, which probably includes all geodesy only
-    stations.  The schedulers will start sending schedules with DBBC
-    IF input information as possible, i.e., when the stations have
-    updated to 9.11.x and when the stations with DBBCs have informed
-    the schedulers of their IF configurations.  Prioer to 9.11.2 this
-    feature was using a non-DBBC rack's defined IFs instead of the
-    specified defaults once the rack type was changed to DBBC.
+    This parameter can be used to define default IF input selections
+    for a DBBC if the schedule specifies a rack type other than "None"
+    and "DBBC" (and the user changes rack to DBBC in DRUDG).  The four
+    values for this parameter are the inputs to be used.  If the
+    parameter is not used, DRUDG leaves the IF input parameter in the
+    IFx=... command blank in the setup procedure for the operator to
+    edit.  If it is not edited to an allowed value it will generate an
+    error when executed.
 
-15. Mixed non-VSI4 modes error for non-VSI4 racks fixed.  This bug
-    caused DRUDG to stop with no error message if non-VSI4 track map
-    was used with non-VSI4 rack (something other than Mark 5 and
+    In version 9.11.2, this parameter was used to specify a default
+    DBBC IF input configuration for all schedules that did not contain
+    an IF configuration.  This was found to be counterproductive.
+    Prior to 9.11.2 this parameter specified the DBBC IFs when the
+    schedule was originally written for a non-DBBC rack.  This case is
+    the same as 9.11.3, except that it no longer applies to rack type
+    "None".
+
+15. Mixed sampling rates and bandwidths allowed in VEX schedules. This
+    allows schedules that use different bandwidths and sample rates
+    for other stations, including values that are not supported by
+    DRUDG for the station that the files are being processed for, to
+    exist in the schedule file without causing an error. For example,
+    a different station can have a sample of 128 Mb/s even though for
+    the station DRUDG is being run for it can't be supported.
+
+16. cont_cal skedf.ctl parameter added to $MISC section.  This
+    parameter controls how the cont_cal command is set in DRUDG
+    generated setup procedures for DBBC racks, choices are "ON",
+    "OFF", and "ASK" (to be prompted).  If the parameter is not
+    present, it is assumed continuous cal should be off.
+
+17. Mixed non-VSI4 modes error for non-VSI4 racks fixed.  This bug
+    caused DRUDG to stop with no error message if a non-VSI4 track map
+    was used with a non-VSI4 rack (something other than Mark 5 and
     VLBA5).
 
-16. Missing scans in option 5 listing for continuous recorder restored.
+18. Missing scans in option 5 listing for continuous recorder restored.
     This bug caused the start and stop times scans other than the first
     and last in a continuous recording to omitted from the listing.
+
+19. Support for DBBC DDC version v104 including "astro2" format mode
+    and the BBC_GAIN command.  The "astro2" mode allows DBBCs that use
+    IFA for BBCs 1-8 and IFB for BBCs 9-16 to support recording for
+    two IFs (configuration #3 in DRUDG change item (20) below).  The
+    BBC_GAIN command allows higher resolution from BBC TPI
+    measurements.  The gains are set to AGC in the setup procedure
+    with the command "bbc_gain=all,agc,target" at the end of the
+    procedure.  The ",target" is omitted if there no "dbbc_bbc_target"
+    parameter in the skedf.ctl file (see DRUDG change item (22)
+    below).
+
+20. DRUDG respects the IF configurations and inputs in the VEX file
+    for DBBCs if the scheduled file rack type is "None" or "DBBC".
+    This allows DRUDG to support the several varieties of DBBC
+    configurations in the field (notation thanks to Jonathan Quick):
+
+            BBCs on
+            each IF
+      #      ABCD            Total BBCs
+      -      ----               --
+      1.     4444               16
+      2.     448                16
+      3.     88                 16
+      4.     44                  8
+
+
+    For example in the second configuration, IFA->BBC01-04,
+    IFB->BBC05-BBC08, and IFC->BBC09-16.
+
+    The IF inputs In a schedule file must be in the form "cn", where
+    "c" is "A", "B", "C", or "D" and the "n" is "1", "2", "3", "4", or
+    blank.  If blank, DRUDG leaves the IF input parameter in the
+    IFx=... command blank in the setup procedure for the operator to
+    edit.  If it is not edited to an allowed value it will generate an
+    error when executed.
+
+    If the schedule file rack type is something other than "None" or
+    "DBBC", DRUDG assumes configuration "4444" and uses the IF inputs
+    defined by "dbb_default_if_inputs" if it is present in skedf.ctl.
+
+21. New skedf.ctl control file $MISC section parameter
+    "dbbc_if_targets".  Up to four target values may be provided.
+    These define target levels for the DBBC
+    "IFx=input,agc,filter,target" commands for up to four IFs in the
+    mode setup procedures.  If the parameter is not present, the
+    target levels in the "IFx=..."  commands are omitted.  Using a
+    target value (and hence this parameter) for DDC versions less than
+    v101 will generate an error on execution of the resulting SNAP
+    command.
+
+22. New skedf.ctl control file $MISC section parameter
+    "dbbc_bbc_target".  This sets BBC TPI target level in the
+    BBC_GAIN=all,agc,target command in the mode setup procedures. If
+    the parameter is not present, the target level in the
+    BBC_GAIN=... command is omitted.  Using a target value (and hence
+    this parameter) for DDC version less than v103 will have no
+    effect.
+
+23. The DRUDG "Shift a .SKD file" option (10) has been fixed and
+    should work again.  This feature is only intended to provide a way
+    to use existing schedules to make test schedules in the field.  It
+    is used at your own risk.  This feature still does not yet support
+    VEX schedules.
+
+    This feature only works for schedules that are 24 hours or longer.
+    The user specifies: 1) a new file to hold the shifted schedule; 2)
+    the desired time of the first observation; and 3) how long to make
+    the new schedule.
+
+    The fundamental idea is that if an observation can be observed
+    today, it can be observed on another day at the same sidereal
+    time.  The algorithm works by calculating the sidereal time of the
+    start of the shifted schedule.  It then finds the first
+    observation in the original schedule that has a sidereal time that
+    occurs AFTER this.  DRUDG then writes out this observation,
+    changing the absolute epoch, but keeping the same sidereal time.
+    Subsequent observations are written out in the same fashion.  When
+    it reaches the end of the original schedule it will begin taking
+    observations that occur after that sidereal time from the
+    beginning of the schedule until it has scheduled observations for
+    a sufficient length of time (possibly multiple days).  The
+    cable-wrap and slew-time may not match at the boundary (or
+    boundaries) between the shifted ends of the original schedule, but
+    this may only be a minor problem.  However, the uncertainty about
+    this issue is what makes this feature one you use at your own
+    risk.
+
+    This feature has been used very rarely recently which is one of
+    the reasons it fell into disrepair.  SKED no longer outputs all of
+    the information for recording on tape.  However the subroutine
+    that shifts the schedule searched for some of this information in
+    the schedule file and when it did not find it exited with a
+    warning message.
 
 			   C. Known FS Bugs
 
@@ -735,43 +985,65 @@ A more detailed discussion of these bugs follows.
 
 III. Installation
 
+Detailed instructions are provided for below for installing 9.11.3.
+The immediately following paragraphs describe the necessary steps for
+each possible starting base installation to be upgraded, working
+backwards in terms of already installed version numbers.  All cases
+make use of the numbered steps (0-17) in this section.  The complete
+set of steps was developed for upgrading from 9.10.4.
+
+If you have version 9.11.2 installed, a subset of the installation
+steps can be followed to update to 9.11.3.  In this case, please
+follow steps (1)-(6), (8)-(9), (10) but only the two commands at the
+end should be needed for step 10, (11)-(12), (13G), (14F), and at
+least some basic testing in step (16) to make sure there were no
+unexpected complications.  Steps (13G & 14F) are only for stations
+that have a DBBC.  This shortened process omits most of the detailed
+control and procedure file updates that were needed for the update to
+9.11.0.
+
+If you have version 9.11.1 installed, a subset of the installation
+steps can be followed to update to 9.11.3.  In this case, please
+follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
+should be needed for step 10, (11)-(12), (13G), (14D), (14F), and at
+least some basic testing in step (16) to make sure there were no
+unexpected complications.  Step (14D) is only for stations that have
+MAT devices.  Steps (13G & 14F) are only for stations that have a
+DBBC.  This shortened process omits most of the detailed control and
+procedure file updates that were needed for the update to 9.11.0.
+
+If you have version 9.11.0 installed, a subset of the installation
+steps can be followed to update to 9.11.3.  In this case, please
+follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
+should be needed for step 10, (11)-(12), (13F-G), (14D-F) and at least
+some basic testing in step (16) to make sure there were no unexpected
+complications.  Step (14D) is only for stations that have MAT devices.
+Steps (13G, 14E, & 14F) are only for stations that have a DBBC.  This
+shortened process omits most of the detailed control and procedure
+file updates that were needed for the update to 9.11.0.
+
+If you have a post 9.10.4 and pre 9.11.0 version (either 9.10.5 or
+9.10.6) the full instructions below should also work, but you will not
+need some of the control (Step 13) and procedure (Step 14) file
+updates (in this case, please contact Ed, Ed.Himwich@nasa.gov, for
+more details).
+
+To upgrade from 9.10.4, please follow all numbered steps below.
+
+If you have an older version than 9.10.4, please upgrade to 9.10.4
+first (see fs9104up.txt). 
+
 If you are installing FS9 for the first time with this version, please
 follow the installation instructions in Section 4.5 of the FS9
 "Computer Reference" manual.  In this case you should also get a copy
 of the current FS9 "Control Files and Field System Initialization"
 manual.
 
-The following instructions are for upgrading from 9.10.4 or 9.11.0.
-Please follow all the steps.  If you have an older version than
-9.10.4, please upgrade to 9.10.4 first (see fs9104up.txt).  If you
-have a post 9.10.4 and pre 9.11.0 version than 9.10.4 (either 9.10.5
-or 9.10.6) the instructions below should also work, but you will not
-need some of the control (Step 13) and procedure (Step 14) file
-updates (in this case, please contact Ed, Ed.Himwich@nasa.gov, for
-more details).
-
-If you already have version 9.11.1 installed, a subset of the
-installation steps can be followed to update to 9.11.2.  In this case,
-please follow steps (1)-(6), (8)-(9), (11)-(12), (14D), and at least
-some basic testing in step (16) to make sure there were no unexpected
-complications.  Step (14D) is only for stations that have MAT devices.
-This shortened process omits most of the detailed control and
-procedure file updates that were needed for the 9.11.0 update.
-
-If you have already installed 9.11.0, a subset of the installation
-steps can be followed to update to 9.11.2.  In this case, please
-follow steps (1)-(6), (8)-(9), (11)-(12), (13F), (14D), and (14E) and
-at least some basic testing in step (16) to make sure there were no
-unexpected complications.  Step (14D) is only for stations that have
-MAT devices.  Step (14E) is only for stations that have a DBBC.  This
-shortened process omits most of the detailed control and procedure
-file updates that were needed for the 9.11.0 update.
-
 For reference, the list of the most recent "critical updates" is given
 below.  These are updates that must be applied sequentially.  Please
 start with the next update with a later version number than what you
 have and apply it and the following listed versions before upgrading
-to 9.11.0.  You can find the latest versions of installation notes for
+to 9.11.3.  You can find the latest versions of installation notes for
 these FS versions in the "/usr2/fs/misc" directory.  The list of
 critical updates is:
 
@@ -799,8 +1071,9 @@ default version for your equipment to "/usr2/proc" renaming it to
   chmod a+rw station.prc
 
 The "-i" option will prompt before overwriting an existing
-"station.prc".  The table of correspondence between equipment types
-and default library names is given next.
+"station.prc" to give you a chance to recover if you did not realize
+you already had a station.prc file.  The table of correspondence
+between equipment types and default library names is given next.
 
       Equipment        Prefix letters  Station Library
       Rack/Drive1/Drive2
@@ -911,7 +1184,7 @@ questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.11.2 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.11.3 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -920,7 +1193,7 @@ questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.11.2.tgz
+      get fs-9.11.3.tgz
       quit
 
     The FS FTP area is also available via http://www.metsahovi.fi/fs/.
@@ -934,12 +1207,12 @@ questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.11.2.tgz
+      tar -xzpf /tmp/fs-9.11.3.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.11.2 fs
+      ln -sfn fs-9.11.3 fs
 
 (7) It is recommended that your local files operations (control, proc,
     log, and sched directories) have the default ownership
@@ -964,10 +1237,10 @@ questions about how to cut-and-paste please contact Ed
 (10) Recompile your station software.  This is necessary to pick-up
      changes to common blocks, shared memory, and library routines.
 
-     Depending on the form of your source code, it may be necessary to
-     make some changes before you will be able to successfully compile
-     your station code.  The only known change that is expected is
-     that if your C language source code includes the FS header files
+     When updating from 9.10.4, it may be necessary to make some
+     changes before you will be able to successfully compile your
+     station code.  The only known change that is expected is that if
+     your C language source code includes the FS header files
      "params.h" and "fs_types.h", you will need to make sure that the
      "params.h" include occurs before the "fs_types.h" include.
 
@@ -990,9 +1263,9 @@ In file included from ../../fs/include/fs_types.h:47,
      module that needs to be fixed.  The tedious part is that only one
      module per source directory will be discovered per "make".
 
-     To recompile and reload your station software, the following
-     steps should work if you have the "standard" configuration for
-     station software:
+     In any event, to recompile and reload your station software, the
+     following steps should work if you have the "standard"
+     configuration for station software:
 
        cd /usr2/st
        make rmdoto rmexe all
@@ -1002,15 +1275,20 @@ In file included from ../../fs/include/fs_types.h:47,
 
 (12) Log in as oper
 
-(13) Modify your control files.  Four changes are needed: (A) Update
-     your stcmd.ctl file for the increased number of supported
+(13) Modify your control files.  Up to seven changes are needed: (A)
+     Update your stcmd.ctl file for the increased number of supported
      devices, (B) update your dual polarization .rxg files to have two
      Trec values, (C) update your equip.ctl for new additional lines
      and the metserver port number, (D) create a dbbad.ctl file with
      the DBBC network communication parameters, (E) update your
-     parpo.ctl file for the new field in line 1, and (F) update your
-     skedf.ctl file if you want to use the new parameters
-     AutoFTP_ABORT_TIME and/or default_dbbc_if_inputs with DRUDG.
+     parpo.ctl file to include the new third non-comment line, (F)
+     update your skedf.ctl file if you want to use the new parameters
+     AutoFTP_ABORT_TIME and/or default_dbbc_if_inputs with DRUDG, and
+     (G) update your skedf.ctl file if you want to use the new
+     keywords cont_cal, dbbc_if_targets, and/or dbbc_bbc_target with
+     DRUDG.  If you have a DBBC and want any continuous cal
+     configuration other than "off", you must use the "cont_cal"
+     keyword with the appropriate setting in skedf.ctl.
 
      (A) Update your stcmd.ctl file with:
 
@@ -1019,18 +1297,19 @@ In file included from ../../fs/include/fs_types.h:47,
 
          The procedure will save the original version of stcmd.ctl as
          stcmd.bak.  If the script complains that you already have a
-         stcmd.bak file, you need to either delete or rename it before
-         re-running cmdctlfix5.
+         stcmd.bak file, you need to either delete or rename ("mv") it
+         before re-running cmdctlfix5.
 
      (B) Update your .rxg files with:
 
            cd /usr2/control/rxg_files
+	   mv *.bak /tmp
            /usr2/fs/misc/rxgfix2 *.rxg
 
          The procedure will save the original versions of .rxg files
-         that it updates with the a .bak extension.  If the script
-         complains that you already have ".bak" files, you will need
-         to delete or rename them before re-running rxgfix2.
+         that it updates with the a ".bak" extension.  The "mv" step
+         will move any already existing "*.bak" files to "/tmp".  They
+         can be recovered from there if they are needed.
 
      (C) Update your equip.ctl file:
 
@@ -1057,17 +1336,17 @@ In file included from ../../fs/include/fs_types.h:47,
          needed.
 
          If you have a DBBC, it is critical to update the DBBC DDC
-         version number (one of v100, v101, or v102) and the number of
-         conditioning modules to the correct number (if you don't have
-         the typical number of four). The IF power conversion factor
-         line must have the same number of entries as the number of
-         conditioning modules.  If you do not know the actual IF power
-         conversion factors for your DBBC, it should be fine to use
-         the default value of 15000 for each.  This will only impact
-         the accuracy of the power and Tsys for the IF power
-         detectors.  The IF Tsys values will probably still be close
-         to being reasonable.  The readings for individual BBC
-         sidebands are unaffected.
+         version number (one of v100, v101, v102, or v104) and the
+         number of conditioning modules to the correct number (if you
+         don't have the typical number of four). The IF power
+         conversion factor line must have the same number of entries
+         as the number of conditioning modules.  If you do not know
+         the actual IF power conversion factors for your DBBC, it
+         should be fine to use the default value of 15000 for each.
+         This will only impact the accuracy of the power and Tsys for
+         the IF power detectors.  The IF Tsys values will probably
+         still be close to being reasonable.  The readings for
+         individual BBC sidebands are unaffected.
 
      (D) Create a dbbad.ctl file:
 
@@ -1084,29 +1363,36 @@ In file included from ../../fs/include/fs_types.h:47,
            cd /usr2/control
            tail -7 /usr2/fs/st.default/control/parpo.ctl >>parpo.ctl 
 
-         These lines include comments explaining the effect of this
-         change.  If you want to recover the previous behavior of the
-         pointing analysis programs, you change the value of "3" in
-         the last line to "0".  However, "3" is the recommended value.
+         The added lines include comments explaining the effect of
+         this change.  If you want to recover the previous behavior of
+         the pointing analysis programs, you change the value of "3"
+         in the last line to "0".  However, "3" is the recommended
+         value.
 
-     (F) Update your skedf.ctl file if you want use the
-         AutoFTP_ABORT_TIME and/or default_dbbc_if_inputs parameters
-         with DRUDG.
+     (F) Update your skedf.ctl file if you want to use the new
+         parameters AutoFTP_ABORT_TIME and/or default_dbbc_if_inputs
+         with DRUDG (the latter for stations with DBBCs only).
 
          The AutoFTP_ABORT_TIME parameter will be useful for stations
          that make DRUDG controlled disk2file transfers (typically in
          EVN astronomy schedules) and have large gaps between scans.
          This parameter will allow a station to have the transfer
-         abort time (in case the transfer is going too slowly) after
-         some reaonable interval after it is started rather waiting
-         what may be many minutes untiil the next scan.
+         abort (in case the transfer is going too slowly) after some
+         reasonable interval after it is started rather waiting what
+         may be many minutes until the next scan.  The single value
+         for the parameter is in seconds.
 
          The default_dbbc_if_inputs parameter will be useful for
-         stations that have a fixed, or nearly fixed, DBBC IF input
+         stations that receiver schedules written for a different rack
+         type and have a fixed, or nearly fixed, DBBC IF input
          configuration.  DRUDG will insert the specified configuration
-         if the scheduled does not specify one.  This can reduce the
-         amout if procedure file editing that is needed after DRUDG
-         generates the file.
+         if the scheduled is not written for a "None" or "DBBC" rack.
+         This can reduce the amount of procedure file editing that is
+         needed after DRUDG generates the file for a schedule written
+         for a different type of rack.  Although this parameter was
+         available in 9.11.0, the installation instructions were
+         omitted in 9.11.0; however some stations may have already
+         started using it.
 
          To enable either or both of these parameters, you will need
          to edit:
@@ -1119,7 +1405,51 @@ In file included from ../../fs/include/fs_types.h:47,
 
          for more information about the format of these parameters.
 
-(14) Modify your procedure files.  Up to five changes may be needed:
+     (G) Update your skedf.ctl file if you have a DBBC and want to use
+         the new parameters cont_cal, dbbc_if_targets and/or
+         dbbc_bbc_target with DRUDG.  If you have a DBBC and want any
+         continuous cal configuration other than "off", you must use
+         the "cont_cal" keyword with the appropriate setting in
+         skedf.ctl.
+
+         This cont_cal parameter controls how the cont_cal command is
+         set in DRUDG generated setup procedures for DBBC racks,
+         choices are "ON", "OFF", and "ASK" (to be prompted).  If the
+         parameter is not present, it is assumed continuous cal should
+         be off.  Although this parameter was available in 9.11.0, the
+         installation instructions were omitted from the instructions
+         before 9.11.3; however some stations may have already started
+         using it.  If you have a DBBC and want any continuous cal
+         configuration other than "off", you must use the "cont_cal"
+         keyword with the appropriate setting in skedf.ctl.
+
+         The dbbc_if_targets parameter is useful for specifying
+         default IF targets levels for the DBBC.  Up to four values
+         may be specified, one for each IF: A, B, C, and D in order.
+         If the parameter is omitted, no target is used, which causes
+         the last commanded values to be used.  A target level will
+         generate an error, invalidating the IF set-up, for DDC
+         versions before v101, which will probably be a serious
+         problem; be careful to avoid this.
+
+         The dbbc_bbc_target parameter is useful for specifying
+         default BBC TPI targets levels for the DBBC.  One value is
+         specified.  If the parameter is omitted, no target is used,
+         which causes the last commanded value to be used.  A target
+         level for DDC versions before v103 will have no effect.
+
+         To enable any or all of these parameters, you will need
+         to edit:
+
+           /usr2/control/skedf.ctl
+
+         and add either or both as appropriate. Please see:
+
+           /usr2/fs/st.default/control/skedf.ctl
+
+         for more information about the format of these parameters.
+
+(14) Modify your procedure files.  Up to six changes may be needed:
      (A) update "onoff=..." set-up commands in your procedure for the
      added parameter (this step also removes any instances of the
      obsolete "calrx" command), (B) if you have a DBBC: create a
@@ -1128,8 +1458,9 @@ In file included from ../../fs/include/fs_types.h:47,
      your pointing procedure library, probably point.prc, and (D) if
      you use MAT devices, make sure there is an initial read of a MAT
      device in "initi".  Step (E) is only for stations upgrading from
-     9.11.0.  Please note that before making these changes, you should
-     make sure that the FS is not running.
+     9.11.0.  Step (F) is only for stations upgrading from 9.11.x,
+     x=0, 1, or 2.  Please note that before making these changes, you
+     should make sure that the FS is not running.
 
      (A) Update your procedure files with:
 
@@ -1243,7 +1574,7 @@ In file included from ../../fs/include/fs_types.h:47,
          discussed in FS update item 11 given above.  This step is
          only for stations that use MAT devices and only for stations
          with an MAT device that is accessed with a command that only
-         writes to, i.e. does not do readback,. Typically this is only
+         writes to, i.e. does not do read-back,. Typically this is only
          VSI4 devices (typically at stations with Mark 5 or VLBA5
          racks).  These stations should put a "vsi4" as the first
          command in their "initi" procedures.
@@ -1256,7 +1587,8 @@ In file included from ../../fs/include/fs_types.h:47,
      (E) This step is only for stations that are updating from 9.11.0
          and have a DBBC.  Please note the following changes have been
          made to the default versions dstation.prc and dstationcc.prc
-         procedure libraries since 9.11.0:
+         procedure libraries since 9.11.0 and should be made in your
+         local copies:
 
          (i)   The first "ifd" command in MIDOB was changed to "ifb".
 
@@ -1299,6 +1631,38 @@ In file included from ../../fs/include/fs_types.h:47,
             st,mk5panic::stationold,mk5panic
             ex
 
+     (F) This step is only for stations with DBBCs that are updating
+         from previous version of 9.11.x, x=0, 1, or 2. Three changes
+         are needed to the station.prc library:
+
+         (i) Please insert the command "bbc_gain=all,agc" at the end
+               of your SETUPA procedure.  This command is a "no-op"
+               for DDC version less than v103, but including it is
+               recommended for future compatibility.  For stations
+               with v104 or higher, as additional parameter specifying
+               the target count level can be added if it is desired,
+               e.g., "bbc_gain=all,agc,16000"
+
+         (ii)  Add the procedure "BBC_LEVEL" to your station.prc
+               library.  This can probably done most easily with the
+               following commands:
+
+                 cd /usr2/proc
+                 cp /usr2/fs/st.default/proc/bbc_level.prc .
+                 pfmed
+                   st,bbc_level::bbc_level,bbc_level
+                   ex
+                 rm bbc_level.prc
+
+         (iii) This step is only for stations with non-continuous cal and has
+               two parts.
+
+               (a) Edit the CALTSYS_MAN procedure and insert the command
+                   "bbc_gain=all,man" right after the "IFMAN" command.
+
+               (b) Edit the CALTSYS procedure and insert the command
+                   "bbc_gain=all,agc" right after the "IFAGC" command.
+
 (15) If you have a DBBC, you will need to update your .Xresources
      file. Please edit the ~oper/.Xresources. File the line:
 
@@ -1313,9 +1677,9 @@ In file included from ../../fs/include/fs_types.h:47,
      parameters and/or want to make other changes in the default
      position or size of the monit3 (Tsys) window.
 
-     After you have saved the file, if you are loggeing on the
+     After you have saved the file, if you are logged-in on the
      X-display on the machine, you should either log-out and log back
-     in or just reload the X Resouces Data Base. You can do the latter
+     in or just reload the X Resources Data Base. You can do the latter
      with the alias commanded, if you have it defined:
 
        xrdb
@@ -1324,10 +1688,10 @@ In file included from ../../fs/include/fs_types.h:47,
 
        xrdb -merge ~/.Xresources
 
-     Logging out and logging back in again is simpe and safe.
+     Logging out and logging back in again is simple and safe.
 
      You should also update the ~prog/.Xresources file (as "prog"). Be
-     sure tolog out as "prog" when done.
+     sure to log out as "prog" when done.
      
 (16) Test the FS as "oper". Generally speaking a fairly thorough test
      is to run a test experiment: start with DRUDG-ing a schedule,

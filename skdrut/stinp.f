@@ -48,7 +48,6 @@ C  LOCAL:
       real tol
       integer iwhere
 
-
 C      - these are used in unpacking station info
       INTEGER J,itype,nr,maxt,npar(max_band)
       integer ib,ii,nco,nhz,i
@@ -130,6 +129,7 @@ C
 ! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
 ! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
 ! 2009Mar03  JMG. Fixed bug in OR statement with K5.
+! 2013Jul23  JMG. Fixed incorrect error message for latitude. Said "A line" but was "P line".
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "
@@ -323,7 +323,7 @@ C
      >      abs(360-abs(chklon-poslon)) .gt. tol) then
            write(lu,'(a,a,a)')
      >      "STINP Warning: For station ", cname,
-     >      " Inconsistent position information in 'A' line!"
+     >      " Inconsistent position information in 'P' line!"
            write(lu,'(a,2f8.2)')
      >        "Calculated position: ",chklat,chklon
            write(lu,'(a,2f8.2)')
