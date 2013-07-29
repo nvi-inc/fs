@@ -125,7 +125,7 @@ FILE: foreach $name (@ARGV) {
 		print "Warning: use 'mv $bak $out'\n";
 	    }
 	} elsif($rename) {
-	    print "Warning: I renamed '$bak' to '$out' for you.\n" if($two == $one);
+	    print "Warning: I renamed '$bak' to '$out' for you.\n";
 
 	}
     }
