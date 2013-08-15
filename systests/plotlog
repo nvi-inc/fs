@@ -613,7 +613,7 @@ foreach $file (@ARGV) {
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
-	} elsif (/$string\/(.*)/i) {
+	} elsif (/[#\/]$string\/(.*)/i) {
 	    @fields=split('[,\cM]',$1);
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
