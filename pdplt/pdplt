@@ -193,7 +193,7 @@ proc readErrorFile {} {
     set linenumber 1
     set noOfGood 1
     set errorversion 1
-    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+    while {[expr {$correct != 0}] && [expr {$EOF != -1}]} {
 	set conversions [scan $readline "%d" status]
 	if {$conversions != 1} {set status -1}
 	if {[expr {$status == 0}] || [expr {$status == 1}]} {
@@ -288,7 +288,7 @@ proc readErrorFile {} {
     set errorFlag 0
     set counter 1
     set linenumber 1
-    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+    while {[expr {$correct != 0}] && [expr {$EOF != -1}]} {
 	set conversions [scan $readline "%d" status]
 	if {$conversions != 1} {set status -1}
 	if {[expr {$status == 0}] || [expr {$status == 1}]} {
@@ -609,7 +609,7 @@ proc fileRemovePoints {} {
     set errorFlag 0
     set counter 1
     set linenumber 1
-    while {[expr {$correct == -1}] && [expr {$EOF != -1}]} {
+    while {[expr {$correct != 0}] && [expr {$EOF != -1}]} {
 	set conversions [scan $readline "%d" status]
 	if {$conversions != 1} {set status -1}
 	if {[expr {$status == 0}] || [expr {$status == 1}]} {
