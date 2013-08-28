@@ -12,7 +12,10 @@ LIBES := $(LIBES) ../oprin/readline-2.0/libreadline.a
 CFLAGS = -I../oprin/readline-2.0 -DREADLINE
 else
 LIBES := $(LIBES) -lreadline
+READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_completion_append_character' /usr/include/readline/readline.h ; echo $$?)
+ifneq ($(READLINE),0)
 READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_compentry_func_t' /usr/include/readline/readline.h ; echo $$?)
+endif
 ifneq ($(READLINE),0)
 $(error ../oprin/readline-2.0 does not exist, but system readline is incorrect version, make oprin first)
 endif
