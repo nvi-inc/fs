@@ -55,8 +55,9 @@ long ip[5];
        /*                       123456789012345678901 */
        else if(strncmp(inbuf+8,"DDC,104,March 19 2013",21)==0)
 	 iversion = -104;
-       /*                       12345678901234567890 */
-       else if(strncmp(inbuf+8,"DDC,104,June 20 2013",20)==0)
+       /*                       1234567890123456789012 */
+       else if(strncmp(inbuf+8,"DDC,104,June 20 2013",20)==0 ||
+               strncmp(inbuf+8,"DDC,104,August 01 2013",22)==0)
 	 iversion =104;
        if(iversion!=shm_addr->dbbcddcv) {
 	 switch(iversion) {
