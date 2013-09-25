@@ -271,3 +271,9 @@ $misc
 * has no effect for DDC versions before v103
 * default is null if not present
 * dbbc_bbc_target 16000
+*--------------------------------------------------------------
+* Uncomment the next line to add IF_CONFIG as the last line in IF procedure 
+* if_config YES
+*--------------------------------------------------------------
+* Uncomment the next line to add target_time= after each scan_name=
+*  target_time YES 
