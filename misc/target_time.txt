@@ -1,0 +1,73 @@
+File: /usr2/fs/misc/target_time.txt       Version: 0.2  Date: 130926
+
+			  target_time command
+
+The "target_time=..." command provides the time the antenna should be
+settled on the source before a scan begins.  It is intended only for
+stations that can implement a variable slewing speed for their antenna
+so that it will settled on the source "just in time", with some
+additional antenna dependent small margin of cushion.  The
+"target_time" command is a local station implemented command only.
+
+Use of he "target_time" command is enabled for experiment .snp files
+if the TARGET_TIME keyword is set to "ON" in /usr2/control/skedf.ctl.
+Please see /usr2/fs/st.default/skedf.ctl for an example.  If it is
+enabled, DRUDG will insert a "target_time=TIME" command in the .snp
+file between each "scan_name=..." and "source=..."  command pair.  The
+"TIME" is the time the antenna is expected to be fully on source in FS
+time format (yyyy.ddd.hh:mm:ss).
+
+The following are recommendations for the local implementation of this
+command:
+
+1. The "target_time" value should be stored in local station shared
+   memory or can be stored internally in antcn.  In the latter case,
+   the command can use a "mode" reserved for station dependent use,
+   for this: modes 100 - 32767 to transmit the value in a class
+   buffer.
+
+2. The command "target_time=" (null parameter) should set the target
+   time to null.
+
+3. The command "target_time" (no parameters) should log the current
+   target as a normal log display entry, e.g.,
+
+     (time tag)/target_time/yyyy.ddd.hh:mm:ss
+
+   where the displayed value (yyyy.ddd.hh:mm:ss) would be empty if the
+   value is null.
+
+4. When the FS is started, the target time value should be initialized
+   to null.  This can be done in antcn's initialization phase (mode
+   0).
+
+5. When a "source=..." command is given (antcn mode 1), the antenna
+   should slew as fast as possible to the source if any of the
+   following are true:
+
+   A. The target time is null.
+
+   B. The target time is in the past.
+
+   C. The source being commanded is a different source than the first
+      source commanded after the target time was last set.  In this
+      case, the stored target time should be set to null as well.
+
+6. Otherwise the antenna should slew to the source to arrive "just in
+   time."  Please note that enough speed should be used so that the
+   antenna has fully settled on the source by the target time, with
+   some cushion.
+
+7. It is recommended that a "/usr2/st/help/target_time.___" file be
+   created with help information for use with the help command.
+
+The conditions in (5) are chosen so that during a schedule the antenna
+will normally slew just in time, but for other purposes (pointing
+checks, manual tests), the antenna will by _default_ slew quickly to
+the target.  They also allow the source to be re-commanded manually if
+necessary by operator (source=*,*,*,*,*) before a scan starts and
+still take full advantage of the target time value.  For experimemts
+that use phase-referencing the target will be set to null for scans
+during continuous tape motion to get the antenna onsource as soon as
+possible.
+
