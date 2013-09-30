@@ -90,10 +90,11 @@ C  LOCAL:
       double precision bitden
       character*4 cmodu, croll ! ON or OFF
       character*3 cs(max_chan)
-      character*6 cfrbbref(max_chan),cbbcref(max_bbc),
-     .cbbifdref(max_chan),cifdref(max_ifd),cfrpcalref(max_chan),
-     .cpcalref(max_chan)
+      character*6 cifdref(max_ifd),cfrbbref(max_chan),cbbcref(max_bbc)
+      character*6 cbbifdref(max_chan),cfrpcalref(max_chan)
+      character*6 cpcalref(max_chan)
       character*6 cchanidref(max_chan),ctrchanref(max_track)
+
       character*1 cp(max_track),csm(max_track)
       double precision frf(max_chan),flo(max_chan),vbw(max_chan),srate
       double precision fpcal(max_chan),fpcal_base(max_chan)
@@ -105,6 +106,10 @@ C  LOCAL:
 
       character*8 crecorder  !temporary holding
       integer ibbc   !index 
+
+      logical kvunppcal_first    !first call to vunppcall
+
+      kvunppcal_first=.true. 
 
  
 C 1. First get all the mode def names. Station names have already
@@ -127,6 +132,7 @@ C
             il=16
           endif
           cmode_cat(ncodes)=cout(1:il)
+          write(*,*) "Found mode: ", cout(1:il)
         END IF
         iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
       enddo
@@ -153,6 +159,8 @@ C    Assign a code to the mode and the same to the name
 
           il=fvex_len(modedefnames(icode))
           im=fvex_len(stndefnames(istn))
+!          write(*,*) "stndefnames: ", stndefnames(istn)
+!          write(*,*) "modeefnames: ", modedefnames(icode)
 
           crecorder=cstrec(istn,1)
           call capitalize(crecorder)
@@ -163,7 +171,7 @@ C    Assign a code to the mode and the same to the name
           km4rec=.false.
           kk4rec=.false.
           ks2rec=.false.
-          kDiskRec=.false.
+          kDiskRec=.true.
 
           if(crecorder .eq. "VLBA" .or. crecorder .eq. "VLBA4") then
              kvrec  =.true.
@@ -176,26 +184,39 @@ C    Assign a code to the mode and the same to the name
             kk4rec=.true.
           else if(crecorder .eq. "S2") then
             ks2rec = .true.
+!            write(*,*) "VMOINP. Where did you get an S2 recorder?"
+!            ks2rec = .false. 
           else if(crecorder.eq."MARK5A" .or. 
      >            crecorder .eq. "MARK5B" .or.
      >            crecorder.eq. "K5") then 
             kdiskRec=.true.
-          else 
-            write(*,*) "VMOINP: Unknown recorder ", crecorder
+          else          
+            kdiskRec=.true. 
           end if 
+          if(.not.kdiskRec) then
+            write(*,'("VMOINP. For station ", a, " recorder= ", a,
+     >       "...assuming final recorder will be disk based.")') 
+     >       cstnna(istn), crecorder
+            kdiskRec=.true.
+ !           ks2rec  =.false. 
+          endif 
  
+          if(cstrack(istn) .eq. 'LBA') then
+            klrack=.true.
+          else if(cstrack(istn) .eq. 'VLBA'  .or.
+     >            cstrack(istn) .eq. 'VLBAG' .or. 
+     >            cstrack(istn) .eq. 'VLBA4') then
+            kvrack=.true.
+          else if(cstrack(istn) .eq. 'Mark3') then
+            km3rack=.true.
+          else if(cstrack(istn) .eq. 'Mark4') then
+            km4rack=.true.       
+          endif            
 
-C         Recognized rack types
-          klrack=cstrack(istn).eq.'LBA'
-          kvrack=cstrack(istn).eq.'VLBA'.or.cstrack(istn).eq.'VLBAG'.or.
-     >           cstrack(istn).eq. 'VLBA4'
-
-          km3rack=cstrack(istn).eq.'Mark3'
-          km4rack=cstrack(istn).eq.'Mark4'
 C         Initialize roll to blank
           cbarrel(istn,icode)=" "
 
-
+         
 C         Get $FREQ statements. If there are no chan_defs for this
 C         station, then skip the other sections.
           CALL vunpfrq(modedefnames(icode),stndefnames(istn),
@@ -279,24 +300,23 @@ C         Get $TRACKS statements (i.e. fanout).
 
 C         Get $HEAD_POS and $PASS_ORDER statements.
           if (ks2rec) then
-            call vunps2g(modedefnames(icode),stndefnames(istn),
-     .      ivexnum,iret,ierr,lu,cpassl,npl)
+            call vunps2g(modedefnames(icode),stndefnames(istn),ivexnum,
+     >          iret,ierr,lu,cpassl,npl)
           else if(kDiskRec) then
             npl=1
             nhdpos=1
             cpassl(1)="1A"
             csubpassl(1)="A"
           else
-            call vunphp(modedefnames(icode),stndefnames(istn),
-     .      ivexnum,iret,ierr,lu,
-     .      indexp,posh,nhdpos,nhd,cpassl,indexl,csubpassl,npl)
+            call vunphp(modedefnames(icode),stndefnames(istn),ivexnum,
+     .        iret,ierr,lu,
+     .        indexp,posh,nhdpos,nhd,cpassl,indexl,csubpassl,npl)
           endif
           if (ierr.ne.0) then 
             write(lu,'("VMOINP07 - Error getting $HEAD_POS and",
-     .      "$PASS_ORDER information",
-     .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .      iret,ierr
+     .        "$PASS_ORDER information for mode",a, " station ",a,
+     .         /, " iret=",i5," ierr=",i5)') 
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
             if (ks2rec) then
               call errormsg(iret,ierr,'S2_HEAD_POS',lu)
             else
@@ -306,20 +326,20 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
           endif
 
 C         Get $ROLL statements.
-          call vunproll(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,croll,irtrk,iinc,ireinit,nrdefs,nrsteps)
+          call vunproll(modedefnames(icode),stndefnames(istn),ivexnum,
+     .      iret,ierr,lu,croll,irtrk,iinc,ireinit,nrdefs,nrsteps)
           if (ierr.ne.0) then 
             write(lu,'("VMOINP08 - Error getting $ROLL information",
      .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .      iret,ierr
+     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
             call errormsg(iret,ierr,'ROLL',lu)
             ierr1=6
           endif
 
 C         Get $PHASE_CAL_DETECT statements.
-          call vunppcal(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,cpcalref,ipct,ntones,npcaldefs)
+          call vunppcal(modedefnames(icode),stndefnames(istn),ivexnum,
+     >        iret,ierr,lu,cpcalref,ipct,ntones,npcaldefs,
+     >         kvunppcal_first)
 C
 C 3. Now decide what to do with this information. If we got to this
 C    point there were no reading or content errors for this station/mode
@@ -338,9 +358,9 @@ C         else ! non-S2
               if(ix .eq. 0) then  !not found. A new pass.
                 if (nsubpass.gt.max_subpass) then
                   write(lu,'("VMOINP15 - Too many subpasses for mode",
-     .            a," station ",a,". Max is ",i5,".")') 
-     .            modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .            max_subpass
+     .              a," station ",a,". Max is ",i5,".")') 
+     .              modedefnames(icode)(1:il),stndefnames(istn)(1:im),
+     .              max_subpass
                 else
                   nsubpass=nsubpass+1
                   csubpass(nsubpass)=cp(i)
@@ -451,7 +471,7 @@ C         for non-VEX.
             cmfmt(istn,icode)=cm
           endif
 C         Sample rate.
-          samprate(icode)=srate ! sample rate
+          samprate(istn,icode)=srate ! sample rate
           if (ks2rec) then
             cs2mode(istn,icode)=cs2m
             cs2data(istn,icode)=cs2d

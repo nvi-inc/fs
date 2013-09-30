@@ -1,4 +1,6 @@
       subroutine proc_form(icode,ipass,kroll,kman_roll,lform)
+! 2013Sep19  JMGipson made sample rate station dependent
+
 C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b)
 C  For 8-BBC stations, use "M" for Mk3 modes
       include 'hardware.ftni'
@@ -95,7 +97,7 @@ C      ... but not for LSB case
          endif ! add group or subpass
 C      Add sample rate
          nch = MCOMA(IBUF,nch)
-         nch = nch+IR2AS(samprate(ICODE),IBUF,nch,6,3)
+         nch = nch+IR2AS(samprate(istn,ICODE),IBUF,nch,6,3)
          if (.not.ks2rec(irec)) then ! non-S2 only
 C      If no fan, or if fan is 1:1, skip it unless we have roll
 C      or modulation.

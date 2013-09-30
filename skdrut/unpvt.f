@@ -309,21 +309,33 @@ C  The SEFD model might be missing, in which case go to the rack/rec part.
 C
 C Rack, Rec types
 C     GTFLD has already been done above if there were no SEFD parameters.
-      crack=" "
-      creca=" "
-      crecb=" "
-     
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field
       if (ic1.ne.0) then ! rack field
         nch = min0(ic2-ic1+1,8)
         crack=cbuf(ic1:ic1+nch-1)
-           
+        call capitalize(crack)
+        iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
+        if(iwhere .eq. 0) then
+          ierr=-10-2*npar(1)
+          return
+        else
+          crack=crack_type(iwhere)
+        endif
+          
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rec A field
         if (ic1.ne.0) then ! rec A field
           nch = min0(ic2-ic1+1,8)
           creca=cbuf(ic1:ic1+nch-1)
+          call capitalize(creca)
+          iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
+          if(iwhere .eq. 0) then
+            ierr=-11-2*npar(1)
+            return
+          else
+            creca=crec_type(iwhere)
+          endif
           CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 
 C Rec B field or S2 mode
@@ -333,6 +345,15 @@ C Rec B field or S2 mode
               continue
             else
               crecb=cbuf(ic1:ic1+nch-1)
+              call capitalize(crecb)
+              iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,
+     >             crecb)
+              if(iwhere .eq. 0) then
+                 ierr=-12-2*npar(1)
+                 return
+              else
+                 crecb=crec_type(iwhere)
+              endif
             endif
           endif ! rec B or S2 mode field
         endif ! rec A field

@@ -51,6 +51,8 @@ C LOCAL:
       logical kallowpig
       character*39 clabline  !used to hold label description,e.g. 6= Make Postscript label
       character*39 clabprint !used to hold print line
+      logical krec2_found
+      logical kmark5c_rec_found
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -538,12 +540,25 @@ C        in the outer loop.
 C
 500   CONTINUE
 ! Set all second recorders to "none"
+      krec2_found=.false.
+      Kmark5c_rec_found=.false. 
       do istn=1,nstatn
+  
          if(cstrec(istn,2) .ne. "none") then
-           write(*,'(a,a,a)') "Warning: Recorder 2 for ",  
-     >     cstnna(istn)," set to 'none'." 
+           if(.not.krec2_found) then                 
+             write(*,'(a)') 
+     >        "Warning! All 2nd recorders set to 'none'"  
+             krec2_found=.true.
+           endif 
            cstrec(istn,2)="none"
           endif 
+            
+        if(cstrec(istn,1).eq. 'Mark5C') then
+           write(*,'("Warning! For station ", a, a)')
+     >       cstnna(istn), " Mark5C recorder set to 'none'"!         
+          cstrec(istn,1)='none'
+        endif     
+
 ! Make a copy of the original configuration now
           cstrack_orig(istn) =cstrack(istn)
           cstrec_orig(istn,1)=cstrec(istn,1)

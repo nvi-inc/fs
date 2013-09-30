@@ -32,6 +32,7 @@ C            footages in the schedule be in dm not meters, for more precision.
 C 030109 jmg Back to m/s on K4
 ! 2006Nov29 JMG.  Changed to use cstrec(istn,irec)
 ! 2009Oct01 JMG.  Made special speed for disk recording
+! 2013Sep19  JMGipson made sample rate station dependent
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -66,7 +67,7 @@ C Determine type of equipment.
         endif
         sp=sp/12.0 ! convert to fps
       else if (cstrec(is,1)(1:2) .eq. "K4") then
-        totrate=samprate(icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
+        totrate=samprate(is,icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
         if (totrate.gt.129.0) then
           sp = 423.8 ! mm/sec for 256 Mbps
         else if (totrate.lt.65.0) then
@@ -94,7 +95,7 @@ C 2. Get the correct overhead factor for DR or NDR.
           ohfac = 1.134  ! factor is 9.072/8 for VLBA NDR format
         endif
 C 3. Calculate the tape speed. Sample rate is in Mb/s.
-        SP = ohfac * fanfac * samprate(icode)*1.d6/ bitdens(is,icode) ! ips
+        SP = ohfac * fanfac * samprate(is,icode)*1.d6/ bitdens(is,icode) ! ips
         sp=sp/12.0 ! convert to fps
       endif ! S2/K4/Mk3/4
 

@@ -80,8 +80,9 @@ C  1.1 Subgroup
 
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
+  
         if (iret.ne.0) return
-        NCH = fvex_len(cout)
+        NCH = fvex_len(cout)       
         if (nch.gt.1) then
           ierr = -1
           write(lu,'("VUNPFRQ02 - Band ID must be 1 character.")')
@@ -161,7 +162,7 @@ C  1.6 BBC ref
           cbbref(ic)=cout(1:nch)
         endif
 
-C  1.7 Phase cal -- skip
+C  1.7 Phase cal 
 
         ierr = 17
         iret = fvex_field(7,ptr_ch(cout),len(cout)) ! get pcal ref

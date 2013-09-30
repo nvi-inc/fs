@@ -66,7 +66,7 @@ char   *fname, *labels, *orien;
 
 /* call system with command line */
 
-/*      printf("printer command string: %s\n",command); */
+      printf("printer command string: %s\n",command); 
       return(system(command));
 
 }

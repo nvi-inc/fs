@@ -860,6 +860,7 @@ C scan_name command.
      >    scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
      >    idur(istnsk)
 
+
 !        if(.true.) then
         if(kdebug) then
           write(*,'("scan_name=",3(a,","),i4)')
@@ -869,6 +870,17 @@ C scan_name command.
         endif
 
         call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
+
+        if(ktarget_time) then
+! This is test for phase reference.  If doing phase_reference then get there ASAP
+          if(kvex .and. krunning) then 
+            write(lufile,'("target_time=")')
+          else
+            write(lufile,
+     >       '("target_time=",i4.4,".",i3.3,".",2(i2.2,":"),i2.2)')
+     >       itime_cal
+          endif 
+        endif 
 
 C SOURCE command
         IOBSP = IOBSP+1

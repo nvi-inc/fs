@@ -19,6 +19,7 @@ C 970117 nrv Remove "track_frame_format", irrelevant for S2.
 C 970124 nrv Remove "lsm" from call.
 C 021111 jfq Add ls2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac
 C            - supporting S2_data_source and fanout_def
+! 2013Sep19 JMGipson. Fixed problem if sub-pass was missing.Nowjust assign it "a") 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -106,11 +107,14 @@ C  2.1 Subpass
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subpass
         if (iret.ne.0) return
         NCH = fvex_len(cout)
-        if (nch.ne.1) then
+        if(nch .eq. 0) then
+          cp(in)="A"        
+        else if(nch .eq.  1) then
+          cp(in) = cout(1:1)
+        else 
           ierr = -2
           write(lu,'("VUNPS2M02 - Subpass must be 1 character.")')
-        else
-          cp(in) = cout(1:1)
+          write(lu,'("    got: ", a)') cout(1:nch)              
         endif
 C
 C  2.2 Chan ref

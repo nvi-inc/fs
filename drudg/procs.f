@@ -649,7 +649,7 @@ C !* to mark the time
           if (kk42rec(irec).or.kk41rec(irec)) then ! K4 recorder
             call snap_rec('=synch_on')
             if (kk42rec(irec)) then ! type 2 rec_mode
-              irecbw = 16.0*samprate(icode)
+              irecbw = 16.0*samprate(istn,icode)
               if(krec_append) then
                  write(ldum,'("rec_mode",a1,"=",i3)') crec(irec), irecbw
               else
@@ -742,7 +742,7 @@ C DECODE=a,crc
 C replaced with CHECKCRC station-specific procedure
           if ((kv4rack.or.km3rack.or.km4rack).and..not.
      .       (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec))) then ! decode commands
-            samptest = samprate(icode)
+            samptest = samprate(istn,icode)
             if (ifan(istn,icode).gt.0)
      .        samptest=samptest/ifan(istn,icode)
             if (samptest.lt.7.5) then ! no double speed decoding
@@ -757,7 +757,7 @@ C !*+8s for VLBA formatter
 
           if(km5disk .or. km5A_piggy) then
             call proc_mk5_init2(lform,ifan(istn,icode),
-     >             samprate(icode),num_tracks_rec_mk5,luscn,ierr)
+     >             samprate(istn,icode),num_tracks_rec_mk5,luscn,ierr)
           endif
 
 C !*+20s for K4 type 2 recorder

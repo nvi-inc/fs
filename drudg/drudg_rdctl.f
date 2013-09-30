@@ -72,6 +72,9 @@ C  1. Open the default control file if it exists.
       idbbc_bbc_target=-1   
 
       contcal_prompt="off" 
+      ktarget_time=.false.
+      klo_config=.false. 
+
 
 
       kfound_global_file=.false. 
@@ -429,18 +432,41 @@ C         TPICD
                 if(NumToken .ne. 2) then
                    write(*,*) "drudg_rdctl: No argument given for"//      
      >                          "DBBC_BBC_TARGET"
-                endif
-                read(ltoken(2),*,err=900) idbbc_bbc_target
-                if(idbbc_bbc_target .gt. 65535 .or. 
-     >             idbbc_bbc_target .lt. 0) then
-                   write(*,*) " " 
-                   write(*,*)
-     >               "drudg_rdctl: Warning! DBBC_BBC_TARGET ", 
-     >               idbbc_bbc_target,      " out of range!"
-                   write(*,*) "Valid values between 1 and 65535"
-                   write(*,*) "Setting to 0."
-                   idbbc_bbc_target=0
+                else
+                  read(ltoken(2),*,err=900) idbbc_bbc_target
+                  if(idbbc_bbc_target .gt. 65535 .or. 
+     >               idbbc_bbc_target .lt. 0) then
+                     write(*,*) " " 
+                     write(*,*)
+     >                 "drudg_rdctl: Warning! DBBC_BBC_TARGET ", 
+     >                 idbbc_bbc_target,      " out of range!"
+                     write(*,*) "Valid values between 1 and 65535"
+                     write(*,*) "Setting to 0."
+                     idbbc_bbc_target=0
+                  endif 
                 endif 
+              else if(lkeyword .eq. "LO_CONFIG") then
+                if(NumToken .ne. 2) then
+                  write(*,*) 
+     >             "drudg_rdctl: No argument given for LO_CONFIG"
+                else 
+                  call capitalize(ltoken(2))
+                  klo_config = ltoken(2) .eq. "Y" .or. 
+     >                         ltoken(2) .eq. "YES" .or.
+     >                         ltoken(2) .eq."ON"
+                endif                              
+              else if(lkeyword .eq. "TARGET_TIME") then 
+               if(NumToken .ne. 2) then
+                  write(*,*) 
+     >             "drudg_rdctl: No argument given for TARGET_TIME"
+                else 
+                  call capitalize(ltoken(2))
+                  ktarget_time = ltoken(2) .eq. "Y" .or. 
+     >                         ltoken(2) .eq. "YES" .or.
+     >                         ltoken(2) .eq."ON"
+                endif
+
+
               endif
               call readline_skdrut(lu,cbuf,keof,ierr,2)        
 ! End $MISC
