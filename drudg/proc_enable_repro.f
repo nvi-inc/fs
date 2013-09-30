@@ -3,6 +3,9 @@
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
+
+! 2013Sep19  JMGipson made sample rate station dependent
+
 ! write out ENABLE and REPRO.
 C  Remember that tracks are VLBA track numbers in itrk.
 
@@ -142,9 +145,9 @@ C REPRO=byp,itrka,itrkb,equalizer,,,bitrate   VLBA,VLBA4
       nch = nch+ib2as(itrkb,ibuf,nch,Z8000+2)
       if (km4rec(irec).or.kv4rec(irec).or.kvrec(irec)) then ! bitrate
         if (ifan(istn,icode).gt.0) then
-          itrkrate = samprate(icode)/ifan(istn,icode)
+          itrkrate = samprate(istn,icode)/ifan(istn,icode)
         else
-          itrkrate = samprate(icode)
+          itrkrate = samprate(istn,icode)
         endif
         if (itrkrate.ne.4) then
           nch = MCOMA(IBUF,nch)

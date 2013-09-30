@@ -126,6 +126,7 @@ C 991118 nrv Removed LAXIS variable and use AXTYP subroutine.
 C 991209 nrv Add ITUSE to iftold calculation.
 ! 2007   jmg Removed obsolete call to m3inf.  Not used.
 ! 2007Jul20 JMG.  Added character LD
+! 2013Sep19  JMGipson made sample rate station dependent
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -162,7 +163,7 @@ C       was produced using sked with Mk/VLBA footage calculations
 C       and no fan-out or fan-in. Footages were therefore already
 C       scaled by bandwidth calculations in sked.
         conv_k4 = 55.389387393 ! counts/sec
-        speed_k4 = conv_k4*samprate(1)/4.0 ! 55, 110, or 220 cps
+        speed_k4 = conv_k4*samprate(istn,1)/4.0 ! 55, 110, or 220 cps
         speed_k4=speed_k4*12.d0/80.d0 ! converts feet to counts
 C       ifeet0_k4 = 54 ! this is the zero counts
         ffeet0_k4 = 54.d0/speed_k4 ! this is the zero feet
@@ -170,7 +171,7 @@ C       ifeet0_k4 = 54 ! this is the zero counts
       if (ks2) then ! S2 scaling
 C       Fake it with high density stations, long footage tapes.
 C       Scale by sample rate.
-        conv_s2 = 60.d0*6.667*(samprate(1)/4.0)
+        conv_s2 = 60.d0*6.667*(samprate(istn, 1)/4.0)
       endif
       kwrap=(iaxis(istn).eq.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
 C     CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)

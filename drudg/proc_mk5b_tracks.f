@@ -100,7 +100,7 @@
      >  'mk5b_mode'
       endif
 
-      idiv = 32/nint(samprate(icode))
+      idiv = 32/nint(samprate(istn,icode))
 
 ! Remainder of code assumes that we have VSI4 formatter.
       ipass=1            !only 1 pass for Mark5B (or any disk)

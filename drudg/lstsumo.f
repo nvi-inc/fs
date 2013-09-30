@@ -82,6 +82,8 @@ C These are modified on return: iline, page,num_scans,ntapes
 ! Parsed for cbuf_source
       character*8 csor
       double precision rarad,dcrad
+      double precision rarad_prcs,dcrad_prcs   !precessed positions.
+      real*8 tjd         
       character*7 cwrap
       double precision az,el
 
@@ -362,10 +364,18 @@ C  2. Column heads.
           cwrap=' '
         endif
 ! Compute the az and el
-        if (kazel) then
-          mjd=julda(1,itime_start(2),itime_start(1)-1900)
+        mjd=julda(1,itime_start(2),itime_start(1)-1900)
+        tjd=mjd+2440000.d0
+      
+! Should really get the epoch from the snap line. But we know that the epoch
+! in the snap line is generated based on cepoch. 
+        if(cepoch .eq. '1950') tjd=tjd+18262
+        call apstar_Rad(tjd, rarad, dcrad, rarad_prcs,dcrad_prcs)
+           
+
+        if (kazel) then    
           ut=itime_start(3)*3600.d0+itime_start(4)*60.d0+itime_start(5)
-          call cazel(rarad,dcrad,xpos,ypos,zpos,mjd,ut,az,el)
+          call cazel(rarad_prcs,dcrad_prcs,xpos,ypos,zpos,mjd,ut,az,el)
           iaz = (az*rad2deg)+0.5
           iel = (el*rad2deg)+0.5
         endif

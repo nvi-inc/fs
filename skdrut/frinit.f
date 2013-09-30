@@ -12,6 +12,7 @@ C 011011 nrv Initialize LS2MODE.
 C 021111 jfq Add initialization of LS2DATA
 C 31Jul2003  JMG Made itras virtual.
 C 26Aug2003  JMG made cbarrel, cinfip character strings.
+! 2013Sep19  JMGipson made sample rate station dependent
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -21,12 +22,10 @@ C Input
 
 C Local
       integer i,j,k,ih
-
-      do i=1,nco
-        samprate(i)=0.0
-      enddo
+    
       do j=1,nco
         do i=1,nst
+          samprate(i,j)=0.d0 
           nchan(i,j)=0
           do k=1,max_band
             trkn(k,i,j)=0.0

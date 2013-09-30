@@ -10221,10 +10221,14 @@ Version 9.11.2 130307
            update for v104
 
 130702 WEH st.default/proc/dstation.prc
+           st.default/proc/dstationcc.prc
            move bbc_gain=all,... out of if... procs
 
 130702 WEH include/params.h
            use parens in parameter defs to avoid arithmatic issues
+
+130703 WEH help/bbcnn.d__
+           complete description of nominal level and typos from J. Quick.
 
 130703 WEH clib/tpi_dbbc.c
            decrease IF power precision to two places after decimal
@@ -10254,3 +10258,40 @@ Version 9.11.2 130307
            the correct error code listing.
 
 Version 9.11.3 130726
+
+130729 WEH misc/onoff_fix
+           removed extraenous test in error message
+
+130730 WEH misc/dbbc_ifx
+           user script to set DBBC IF inputs
+
+130730 WEH Makefile
+           set PATCHLEVEL to 4
+
+130815 WEH systests/plotlog
+           improved test for non-standard Tsys plot string
+           now works for normal Tsys again
+
+130827 WEH pdplt/pdplt
+           don't match '$' in comment lines of xtr files
+
+130828 WEH oprin/Makefile
+           pfmed/Makefile
+           make test for updated readline package on system backward compatible
+           with 9.10.4
+
+130925 WEH st.default/control/skedf.ctl
+           upated with IF_CONFIG and target_time examples
+
+130925 WEH quikv/logmsg_dbbc.c
+           also accept "August 01 2013" as a date code for v104
+
+130926 WEH misc/lo_config.txt
+           misc/target_time.txt
+           created
+
+130926 WEH misc/VENIX_changes.txt
+           renamed from changes.VENIX
+
+
+Version 9.11.4 130930

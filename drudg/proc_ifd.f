@@ -238,6 +238,11 @@ C LO command for VLBA
             endif ! this LO in use
           end do 
         endif
+        if(klo_config) then
+          write(lu_outfile,'(a)') "lo_config" 
+        endif 
+
+
         write(lu_outfile,"(a)") 'enddef'
         return
         end

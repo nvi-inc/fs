@@ -44,16 +44,20 @@ C 2003Jul11 JMG added itctim
 ! 2007Jul20  JMG. Added ksked_proc flag. Put all logical in same common.
 !                 Got rid of stuff that is no longer used.
 ! 2008Aug19 JMG. Added cbbcbuf which is equivalenced to ibbcbuf.
+! 2013Sep19 JMG. Added klo_config, ktarget_time
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
       logical klabel_ps  !is the label printer Postscript?
       logical ksked_proc
 
+      logical klo_config, ktarget_time
+
       common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
-     .       kpostpass,klabel_ps,ksked_proc
+     .       kpostpass,klabel_ps,ksked_proc,
+     >       klo_config,ktarget_time
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,

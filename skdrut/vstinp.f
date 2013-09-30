@@ -27,8 +27,10 @@ C OUTPUT:
 
 ! functions
       integer ptr_ch,fget_station_def,fvex_len
+      integer trimlen
+      logical kvalid_rack
+      logical kvalid_rec  
 
-C
 C LOCAL:
       logical kline
       integer ierr1
@@ -54,6 +56,7 @@ C LOCAL:
       integer il,ite,itl,itg
       integer iret ! return from vex routines
       character*128 cout,ctapemo
+      integer nch 
 
 C
 C     1. First get all the def names 
@@ -79,7 +82,7 @@ C     2. Now call routines to retrieve all the station information.
 
         il=fvex_len(stndefnames(i))
         CALL vunpant(stndefnames(i),ivexnum,iret,ierr,lu,
-     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)
+     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)      
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,
      >    '(a, a,/,"iret=",i5," ierr=",i5)')
@@ -90,6 +93,7 @@ C     2. Now call routines to retrieve all the station information.
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
      .    CID,csit,POSXYZ,POSLAT,POSLON,cOCC,nhz,azh,elh)
+         
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >     "VSTINP02 - Error getting $SITE information for ",
@@ -136,6 +140,11 @@ C       For VEX 1.3, antenna name is not there, so use site name
        else
           cantna(i)=cant
        endif
+       if(cantna(i) .eq. "TIGOCONC") then
+          cantna(i) ="TIGO"
+       endif 
+
+
 C
 C       2.2 Here we handle the position information.
 C     It is not an error to have the occ. code or lat,lon missing.
@@ -156,14 +165,29 @@ C
            cterna(i)=cter
         endif
 
-        cstrack(i)=crack
+        nch = trimlen(stndefnames(i)) 
 
-        call check_rec_type(crec)
 
+        if(.not.kvalid_rack(crack)) then        
+            write(lu,'(a)') "VSTINP: for station "// 
+     >        stndefnames(i)(1:nch)//" unrecognized rack type: "//
+     >        crack// "setting to none!"
+            crack='none'
+        endif 
+        cstrack(i)=crack         
+
+        if(.not.kvalid_rec(crec)) then        
+            write(lu,'(a)') "VSTINP: for station "// 
+     >         stndefnames(i)(1:nch)//" unrecognized recorder type: "//
+     >         crec(1:nch)// "setting to none!"
+            crec='none'
+        endif   
         cstrec(i,1)=crec
+        
         if(nr .eq. 1) then
           cstrec(i,2)='none'
         else
+          nr=1
           cstrec(i,2)=crec
         endif
 

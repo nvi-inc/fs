@@ -1,4 +1,4 @@
-      subroutine check_rack_type(crack)
+      subroutine check_rack_type(crack,kvalid)
       include '../skdrincl/valid_hardware.ftni'
 
 ! Passed.
@@ -17,9 +17,7 @@
 ! local
       integer iwhere
       character*8 cracktmp
-      write(*,*) crack_type
-      write(*,*) "In: ", crack 
-
+     
       iwhere=iwhere_in_string_list(crack_type, max_rack_type,crack)
       if(iwhere .ne. 0) return           !valid rack type.
 

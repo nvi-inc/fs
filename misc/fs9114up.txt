@@ -1,4 +1,4 @@
-File: /usr2/fs-9.11.3/misc/fs9113up.txt  Version: 3.2  Date: 130726
+File: /usr2/fs/misc/fs9114up.txt        Version: 3.4  Date: 130930
 
 I. Introduction
 
@@ -12,22 +12,48 @@ Please print this notice and read it carefully before installing the
 new version.
 
 This update is intended for all stations.  All stations should upgrade
-to this version as soon as possible.  Most of the changes in this
-version are related to DBBCs.  However, we ask all stations to upgrade
-to this version so that we can get all stations on the same, modern,
-version of DRUDG.  This will also make it easier to apply future
-updates.
+to this version as soon as possible. If version 9.11.3 is installed,
+the installation steps are very quick and simple (see III. Installation).
 
-There are a few small bugs fixes in this version, but the major change
-is support for DBBC DDC personality version v104.  This version of the
-DDC personality supports "astro2" formatter mode and provides more
-precision for TPI measurements with the BBC sideband detectors.  If
-you are using DDC version v104, it is very strongly recommended that
-your read the section "V104 Support" in /usr2/fs/misc/dbbc.txt; it
-provides details on a gain issue with v104 and how to fix it using the
-"BBC_LEVEL" procedure.
+Most of the changes in this version are related to DRUDG with some
+minor bug fixes in the FS itself.  The changes to DRUDG are needed to
+enable handling of upcoming EVN and LBA schedules.  However, we ask
+all stations to upgrade to this version so that we can get all
+stations on the same, modern, version of DRUDG.  This will also make
+it easier to apply future updates.
 
-An additional important change for DBBC support is that if the
+The most significant changes in DRUDG since 9.11.3 include:
+
+    i. Different BWs at different stations are handled (different BWs
+       cannot be used at one station in one mode).
+   ii. Unsupported rack and recorder types will not cause DRUDG to
+       fail (they are converted to type "none").
+  iii. More than 16 phase-cal tones in a channel will not cause DRUDG
+       to fail (only the first 16 are supported for now).
+
+The most significant changes in the FS since 9.11.3 include:
+
+    i. For DBBC DDC v104, date code "August 01 2013" is accepted as
+       valid.
+   ii. The "plotlog" script was fixed to work again for normal Tsys
+       data.
+
+The full list of changes, by FS version number, is given in the
+"Changes Since Version 9.10.4" section below.
+
+The remaining material in this "Introduction" section relates to
+changes in previous versions of 9.11.x.
+
+In the prior version 9.11.3 there were a few small bugs fixes, but the
+major change was support for DBBC DDC personality version v104.  This
+version of the DDC personality supports "astro2" formatter mode and
+provides more precision for TPI measurements with the BBC sideband
+detectors.  If you are using DDC version v104, it is very strongly
+recommended that your read the section "V104 Support" in
+/usr2/fs/misc/dbbc.txt; it provides details on a gain issue with v104
+and how to fix it using the "BBC_LEVEL" procedure.
+
+An additional important change for DBBC support was that if the
 "cont_cal" keyword is not used in skedf.ctl, the default will be
 "cont_cal=off", whereas in previous versions it was "cont_cal=on".  If
 you have a DBBC and want any continuous cal configuration other than
@@ -38,12 +64,6 @@ Jonathan Quick made to this version (and many others) of the FS
 including sharing his experience operating DBBCs, methods of
 organizing operations, and testing.  However to be clear, Ed Himwich
 and John Gipson take responsibility for any remaining shortcomings.
-
-The full list of changes, by FS version number is given in the
-"Changes Since Version 9.10.4" section below.
-
-The remaining material in this "Introduction" section relates to
-changes in previous versions of 9.11.x.
 
 In the prior version 9.11.2, four significant problems were fixed
 from previous versions of 9.11.x:
@@ -122,8 +142,8 @@ description.
 
 The following is a summary of FS changes since 9.10.4.  Item 19 was
 added for 9.11.1.  Items 3 and 11 was expanded and items 20-23 were
-added for 9.11.2.  Item 1 was changed and items 24 and above were
-added for 9.11.3.
+added for 9.11.2.  Item 1 was changed and items 24-31 were added for
+9.11.3.  Items 32 and above were added for 9.11.4.
 
 1.  Support for DBBC DDC personality added.
 2.  The "day 49 bug" is fixed.
@@ -163,6 +183,14 @@ added for 9.11.3.
 30. Display of power for DBBC IF modules now consistent.
 31. Improved error messages about the need to use the fmset 's'
     option.
+32. Accepts DBBC DDC v104 date code August 01 2023 without an error.
+33. Script "dbbc_ifx" provided to help change DBBC IF inputs in .prc
+    files.
+34. The "plotlog" Tsys plotting was fixed to handle Tsys data again.
+35. The "pdplt" program now handles comment lines in XTR files with
+    dollar signs ('$') in them.
+36. The Makefiles for oprin and pfmed were corrected to be backward
+    compatible with the behavior in 9.10.4.
 
 A more detailed discussion of these changes follows.
 
@@ -542,16 +570,56 @@ A more detailed discussion of these changes follows.
     unnecessary re-syncs which were causing confusion and other
     problems.
 
+32. Accepts DBBC DDC v104 date code August 01 2023 without an error.
+
+33. Script "dbbc_ifx" provided to help change DBBC IF inputs in .prc
+    files.  In FS Version 9.11.3, the behavior of the
+    "default_dbbc_if_inputs" keyword in skedf.ctl for DRUDG was
+    changed to only apply if the rack type was not "DBBC" or "none".
+    This script is provided to compensate somewhat for this change.
+    It provides a way to override the selected DBBC inputs in the .prc
+    file if the schedule file did not specify any when the rack type
+    is "DBBC" or "none".  In that case the inputs would not be
+    specified in the commands.  The script will substitute the
+    supplied arguments as values for missing inputs.  It can also be
+    used to change the inputs even if they are specified values in the
+    .prc file (use the "-f") option.  Please note that the IF inputs
+    for all modes in the .prc file are modified by this script. To use
+    this script, copy it to the /usr2/oper/bin directory (as "oper"):
+
+      cd /usr2/oper/bin
+      cp -a /usr2/fs/misc/dbbc_ifx .
+      rehash
+
+    Execute the script with no arguments for help output:
+
+      dbbc_ifx
+
+34. The "plotlog" Tsys plotting was fixed to handle Tsys data again.
+    In FS Version 9.11.3, a change was introduced to allow plotting of
+    tpicd data.  Unfortunately this broke the normal Tsys data
+    plotting.  This has been fixed.
+
+35. The "pdplt" program now handles comment lines in XTR files with
+    dollar signs ('$') in them.  Previously these were mis-interpreted
+    as starting a new data section.
+
+36. The Makefiles for oprin and pfmed were corrected to be backward
+    compatible with the behavior in 9.10.4.  In FS Version 9.11.0, the
+    Makefiles for these two programs were changed to work for some
+    systems they did not work for before.  Unfortunately, this lost
+    the previous behavior of 9.10.4.  The change was made backward
+    compatible.
 
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2013Jul23
+DRUDG opening message date is 2013Sep19
 
 The following is a summary of DRUDG changes since 9.10.4. Items 14-16
 were omitted from the 9.11.0 update notice, but the features were in
 the 9.11.0 release.  Items 11 and 14 were revised and items 17-18 were
-added in 9.11.2.  Item 14 was revised and items 19 and above were
-added in 9.11.3.
+added in 9.11.2.  Item 14 was revised and items 19-23 were added in
+9.11.3.  Items 24 and above were added in 9.11.4.
 
 1.  Support for DBBC.
 2.  AutoFTP_ABORT_TIME skedf.ctl parameter added to $MISC section.
@@ -579,6 +647,13 @@ added in 9.11.3.
 22. New skedf.ctl control file $MISC section parameter "dbbc_bbc_target".
 23. The DRUDG "Shift a .SKD file" option (10) has been fixed and
     should work again.
+24. Mixed bandwidth modes fixed.
+25. DRUDG doesn't die if there are unrecognized rack and recorders
+    types for VEX schedules
+26. DRUDG doesn't die if there are more than 16 phase-cal tones in a
+    channel.
+27. IF_CONFIG skedf.ctl option added for local "if_config" command
+28. TARGET_TIME skedf.ctl option added for local "target_time" command.
 
 A more detailed discussion of these changes follows.  For most fixes
 the files that were changed are listed.  Files are listed with respect
@@ -821,6 +896,50 @@ to the drudg/ source directory.
     the schedule file and when it did not find it exited with a
     warning message.
 
+24. Mixed bandwidth modes fixed.  The changes that allow different
+    bandwidths at different stations in a schedule were lost.  They
+    have been restored.
+
+25. DRUDG doesn't die if there are unrecognized rack and recorders
+    types for VEX schedules.  Previously, they were only accepted for
+    .skd files.  The unknown equipment is converted to type "none".
+    This allows stations with unrecognized equipment types to be
+    included in schedules without causing DRUDG to fail.  This is
+    currently useful for schedules that include RDBE and Mark 5C
+    recorders.
+
+26. DRUDG doesn't die if there are more than 16 phase-cal tones in a
+    channel.  This allows bandwidths wide enough to include more than
+    16 phase-cal tones per channel to be used.  However, only the
+    first 16 tones are included in the pcald setup for stations with a
+    pcald implementation.  We believe the only stations that have this
+    implemented (DSN) do not have more than 16 tones per channel.
+    Phase-cal tones cannot be specified in .skd schedules.
+
+27. LO_CONFIG skedf.ctl option added for local "lo_config" command.
+    This option causes an "lo_config" command to be appended to the
+    end of every IF set-up procedure generate by DRUDG.  This feature
+    is intended for use by stations that have a local "lo" command for
+    FS controlled of their LO system.  It provides a way to set all
+    the LOs in one transaction rather then individual transactions for
+    each "lo=..." command.  The "lo_config" command must be
+    implemented as a local station command.  Please see
+    /usr2/fs/misc/lo_config.txt for more information.
+
+28. TARGET_TIME skedf.ctl option added for local "target_time"
+    command.  This option causes a "target_time=TIME" command to be
+    inserted in the .snp file between each "scan_name=..." and
+    "source=..."  command pair.  The "TIME" is the time the antenna is
+    expected to reach the source in FS time format
+    (yyyy.ddd.hh:mm:ss).  This command provides information for the
+    antenna interface so that it can adjust antenna slew speed to the
+    minimum necessary to reach the source and settle on the source in
+    time.  The "target_time" command must be implemented as a local
+    station command and the antcn program must be implemented to
+    support this.  Please see see /usr2/fs/misc/target_time.txt for
+    more information.
+
+
 			   C. Known FS Bugs
 
 (No changes have been made in this section since version 9.10.4,
@@ -985,15 +1104,23 @@ A more detailed discussion of these bugs follows.
 
 III. Installation
 
-Detailed instructions are provided for below for installing 9.11.3.
-The immediately following paragraphs describe the necessary steps for
-each possible starting base installation to be upgraded, working
-backwards in terms of already installed version numbers.  All cases
-make use of the numbered steps (0-17) in this section.  The complete
-set of steps was developed for upgrading from 9.10.4.
+Detailed instructions are provided below for installing 9.11.3.  The
+immediately following paragraphs describe the necessary steps for each
+possible starting base installation to be upgraded, working backwards
+in terms of already installed version numbers.  All cases make use of
+the numbered steps (0-17) in this section.  The complete set of steps
+was developed for upgrading from 9.10.4.
+
+If you have version 9.11.3 installed, a subset of the installation
+steps can be followed to update to 9.11.4.  In this case, please
+follow steps (1)-(6), (8)-(9), (11), and at least some basic testing
+in step (16) to make sure there were no unexpected complications. .
+This shortened process omits most of the detailed control and
+procedure file updates that were needed for the update to previous
+versions of 9.11.
 
 If you have version 9.11.2 installed, a subset of the installation
-steps can be followed to update to 9.11.3.  In this case, please
+steps can be followed to update to 9.11.4.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) but only the two commands at the
 end should be needed for step 10, (11)-(12), (13G), (14F), and at
 least some basic testing in step (16) to make sure there were no
@@ -1003,7 +1130,7 @@ control and procedure file updates that were needed for the update to
 9.11.0.
 
 If you have version 9.11.1 installed, a subset of the installation
-steps can be followed to update to 9.11.3.  In this case, please
+steps can be followed to update to 9.11.4.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
 should be needed for step 10, (11)-(12), (13G), (14D), (14F), and at
 least some basic testing in step (16) to make sure there were no
@@ -1013,7 +1140,7 @@ DBBC.  This shortened process omits most of the detailed control and
 procedure file updates that were needed for the update to 9.11.0.
 
 If you have version 9.11.0 installed, a subset of the installation
-steps can be followed to update to 9.11.3.  In this case, please
+steps can be followed to update to 9.11.4.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
 should be needed for step 10, (11)-(12), (13F-G), (14D-F) and at least
 some basic testing in step (16) to make sure there were no unexpected
@@ -1043,7 +1170,7 @@ For reference, the list of the most recent "critical updates" is given
 below.  These are updates that must be applied sequentially.  Please
 start with the next update with a later version number than what you
 have and apply it and the following listed versions before upgrading
-to 9.11.3.  You can find the latest versions of installation notes for
+to 9.11.4.  You can find the latest versions of installation notes for
 these FS versions in the "/usr2/fs/misc" directory.  The list of
 critical updates is:
 
@@ -1184,7 +1311,7 @@ questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.11.3 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.11.4 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -1193,10 +1320,10 @@ questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.11.3.tgz
+      get fs-9.11.4.tgz
       quit
 
-    The FS FTP area is also available via http://www.metsahovi.fi/fs/.
+    An FS server is also available at http://www.metsahovi.fi/fs/.
 
     The instructions for transferring the archive using DOS floppies
     are no longer included in this notice.  If you need to do this,
@@ -1207,12 +1334,12 @@ questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.11.3.tgz
+      tar -xzpf /tmp/fs-9.11.4.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.11.3 fs
+      ln -sfn fs-9.11.4 fs
 
 (7) It is recommended that your local files operations (control, proc,
     log, and sched directories) have the default ownership

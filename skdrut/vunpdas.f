@@ -55,14 +55,16 @@ C                    section had vex error, <0 is invalid value
       character*4 cs2sp ! S2 tape speed
       integer ns2tap ! number of S2 tapes
       character*2 ctlc ! two_letter_code, if none use LIDTER
+! functions
+      integer fvex_double,fvex_int,fget_station_lowl,fvex_field
+      integer fvex_units,ptr_ch,fvex_len ! function
+  
 C
 C  LOCAL:
       character*128 cout,cunit,ctemp
       double precision d
       integer i,nch
-      logical ks2 ! true for an S2 recorder
-      integer fvex_double,fvex_int,fget_station_lowl,fvex_field
-      integer fvex_units,ptr_ch,fvex_len ! function
+      logical ks2 ! true for an S2 recorder   
 C
 C
 C  Initialize in case we have to leave early.
@@ -98,14 +100,13 @@ C
      .    cout(1:nch)
           ierr=-1
         else
-          crec=cout(1:nch)
-          call check_rec_type(crec)
+          crec=cout(1:nch)        
           ks2 = cout(1:2).eq.'S2'
         endif
       endif
 
 C  2. The rack type
-C
+C    
       ierr = 2
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('electronics_rack_type'//char(0)),
@@ -119,10 +120,10 @@ C
      .    cout(1:nch)
           ierr=-2
         else
-          crack=cout(1:nch)
-          call check_rack_type(crack)
+          crack=cout(1:nch)       
         endif
       endif
+    
 C
 C  3. The terminal ID. 
 C

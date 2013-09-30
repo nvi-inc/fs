@@ -22,7 +22,7 @@ gdscan.o getiauname.o gnpas.o hdinp.o hol2lower.o hol2upper.o hms2seconds.o \
 idchk.o ifill4.o ifirst_non_blank.o ifirst_non_white.o igtba.o igtfr.o  \
 iroll_def.o isecdif.o itras.o itimedifsec.o iday0.o igetstatnum.o igetstatnum2.o igetsrcnum.o \
 istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_string_list.o iwhere_in_real8_list.o ind.o i2long.o \
-mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knewt.o ktimedif.o \
+mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knewt.o ktimedif.o kvalid_rack.o kvalid_rec.o \
 lower.o lowercase.o lowercase_and_write.o lyes_no.o mpstar_rad.o m3mode.o \
 newscan.o novas.o null_term.o obs_sort.o pid_str.o \
 plh.o pnum.o prefr.o printer.o purge_file.o  put_esc_in_string.o \
