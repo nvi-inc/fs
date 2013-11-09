@@ -84,6 +84,7 @@ C
       inp=0 
       igp=0 
       ibp=0 
+      idum=char2hol('__________',lsorna,1,10)
       call inism(lonsum,lonrms,latsum,latrms,dirms) 
 10    continue
       ipt=getdp(lsorna,ra,dec,epoch,iyr,idoy,ihr,im,is, 
