@@ -129,6 +129,12 @@ C           do nothing ...
                ierr=-111
                goto 80010
             endif
+         else if(RDBE.eq.rack) then
+            call fc_rdbcn_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
          endif
       endif
 C 
