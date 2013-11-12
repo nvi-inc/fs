@@ -28,7 +28,7 @@ C
 C
 C NUMBER OF POINTS PER AXIS
 C
-      icnext=icnext+ib2as(nptsfp,lbuf,icnext,2)
+      icnext=icnext+ib2as(nptsfp,lbuf,icnext,3)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C STEP SIZE
@@ -43,7 +43,7 @@ C
 C
 C DEVICE MNEMONIC
 C
-      icnext=ichmv(lbuf,icnext,ldevfp,1,2)
+      icnext=ichmv(lbuf,icnext,ldevfp,1,4)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C CALIBRATION NOISE SOURCE

@@ -95,7 +95,7 @@ C
       iadcrx =  0
       lswcal = 0
       call char2hol(' ',laxfp,1,4)
-      call char2hol(' ',ldevfp,1,2)
+      call char2hol(' ',ldevfp,1,4)
       call char2hol(' ',ldv1nf,1,2)
       call char2hol(' ',ldv2nf,1,2)
       do i=1,2
