@@ -27,6 +27,7 @@ C        ILEN   - length of IBUF, chars
       integer*2 iprm(20)
 C               - parameter returned from FDFLD
       integer*2 dtnam
+      integer*2 ldev(2)
       dimension iparm(2)
 C               - parameters returned from GTPRM
       dimension ireg(2) 
@@ -160,17 +161,27 @@ C
       call ifill_ch(iprm,1,40,' ')
       idum = ichmv(iprm,1,ibuf,ic1,inumb)
 
-      if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',')
-     .  ldev=dtnam(iprm,1,inumb)
+      if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',') then
+         call fs_get_rack(rack)
+         if(RDBE.ne.rack) then
+            ldev(1)=dtnam(iprm,1,inumb)
+            call char2hol(' ',ldev,3,4)
+         else
+            idum=ichmv(ldev,1,iprm,1,4)
+         endif
+         goto 270
+      endif
       if (cjchar(iprm,1).eq.'*') then
-        idumm1 = ichmv(ldev,1,ldevfp,1,2)
+        idumm1 = ichmv(ldev,1,ldevfp,1,4)
         goto 270
       endif
       if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
         idumm1 = ichmv(ldev,1,iprm,1,2)
+        call char2hol(' ',ldev,3,4)
         goto 270
       endif
 C
+      call char2hol(' ',ldev,3,4)
       call fs_get_rack(rack)
       if (MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
@@ -195,6 +206,10 @@ CC
         if ((cjchar(ldev,1).eq.'i').or.
      *      index('123456789abcde',cjchar(ldev,1)).ne.0)
      *    goto 270
+      else if(RDBE .eq. rack) then
+         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'01a0')
+         if(index('abcd',cjchar(ldev,3)).ne.0) goto 270
+         goto 270
       endif
 C
       ierr = -206
@@ -217,7 +232,7 @@ C  3.0  Set common variables to their new values
 C
 300   continue
       idumm1 = ichmv(laxfp,1,lax,1,4)
-      idumm1 = ichmv(ldevfp,1,ldev,1,2)
+      idumm1 = ichmv(ldevfp,1,ldev,1,4)
       nrepfp = nrep
       nptsfp = npts
       intpfp = intp
@@ -287,6 +302,16 @@ c
           ierr=-213
           goto 990
         endif
+      else if(RDBE.eq.rack) then
+         ichan=ias2b(ldevfp,1,2)
+         irdbe=index("abcdefghihklm",cjchar(ldevfp,3))
+         ifc=index("01234567",cjchar(ldevfp,4))
+         if(irdbe.lt.1.or.irdbe.gt.MAX_RDBE .or.
+     *        ifc.lt.1.or.ifc.gt.MAX_RDBE_IF.or.
+     *        ichan.lt.0.or.ichan.ge.MAX_RDBE_CH) then
+            ierr=-218
+            goto 990
+         endif
       else    !VLBA
         indbc=ia2hx(ldevfp,1)
         if(ichcm_ch(ldevfp,1,'ia').eq.0) then
