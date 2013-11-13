@@ -19,6 +19,7 @@ static char *sb_key[ ]={"unknown","usb","lsb"};
 static char *pol_key[ ]={"unknown","rcp","lcp"};
 static char *pcal_key[ ]={"unknown","off"};
 static char *star_key[ ]={"*"};
+static char lets[]="abcdefghijklm";
 
 #define LOM_KEY sizeof(lom_key)/sizeof( char *)
 #define LOV_KEY sizeof(lov_key)/sizeof( char *)
@@ -45,7 +46,14 @@ char *ptr;
       ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
       if(ierr == 0 && dum == 0)
 	ierr=-300;
-      else {
+      else if(ierr==-100) {
+	  for (i=0;i<MAX_LO;i++) {
+	    lcl->lo[i]=-1;
+	    lcl->sideband[i]=0;
+	  }
+	  ierr=0;
+	  *count=-1;
+      } else {
 	if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3 ||
 	   shm_addr->equip.rack==K4 || shm_addr->equip.rack==K4MK4||
 	   shm_addr->equip.rack==K4K3 )
@@ -56,17 +64,30 @@ char *ptr;
 	  ierr=arg_key(ptr,lol_key,LOL_KEY,&lo,0,FALSE);
 	else if(shm_addr->equip.rack==DBBC) {
 	  ierr=arg_key(ptr,lov_key,LOV_KEY,&lo,0,FALSE);
-	if(ierr==0 && lo >= shm_addr->dbbc_cond_mods)
-	  ierr=-400;
-	} else
-	  ierr=arg_key(ptr,lol_key,LOL_KEY,&lo,0,FALSE);
-	if(ierr==-100) {
-	  for (i=0;i<4;i++) {
-	    lcl->lo[i]=-1;
-	    lcl->sideband[i]=0;
-	  }
+	  if(ierr==0 && lo >= shm_addr->dbbc_cond_mods)
+	    ierr=-400;
+	} else if(shm_addr->equip.rack==RDBE) {
+	  int iscan, ifc, irdbe;
+	  char *prdbe, crdbe;
+
 	  ierr=0;
-	  *count=-1;
+	  iscan=sscanf(ptr,"lo%1c%1d",&crdbe,&ifc);
+	  prdbe=strchr(lets,crdbe);
+	  if(prdbe!=NULL)
+	    irdbe=prdbe-lets;
+	  if(iscan!=2 ||
+	     prdbe == NULL || irdbe <0 || irdbe >= MAX_RDBE ||
+	     ifc < 0 || ifc >= MAX_RDBE_IF)
+	    ierr=-200;
+	  lo=irdbe*MAX_RDBE_IF+ifc;
+	} else {
+	  int iscan, ifc;
+	  ierr=0;
+	  iscan=sscanf(ptr,"lo%d",&lo);
+	  if(iscan!=1 ||
+	     lo < 1 || lo > MAX_LO)
+	    ierr=-200;
+	  lo-=1;
 	}
       }
       break;
@@ -145,9 +166,9 @@ struct lo_cmd *lcl;
   else
     ilo++;
 
-  while(ilo<4 && lcl->lo[ilo] <0)
+  while(ilo<MAX_LO && lcl->lo[ilo] <0)
     ilo++;
-  if(ilo >= 4) {
+  if(ilo >= MAX_LO) {
     if(*count==1)
       strcpy(output,"undefined");
     else
@@ -165,8 +186,10 @@ struct lo_cmd *lcl;
     strcpy(output,lol_key[ilo]);
   else if(shm_addr->equip.rack==DBBC) {
     strcpy(output,lov_key[ilo]);
+  } else if(shm_addr->equip.rack==RDBE) {
+    sprintf(output,"lo%c%d",lets[ilo/MAX_RDBE_IF],ilo%MAX_RDBE_IF);
   } else
-    strcpy(output,lol_key[ilo]);
+    sprintf(output,"lo%d",ilo+1);
   strcat(output,",");
   
   idec=16;
