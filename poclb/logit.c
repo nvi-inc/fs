@@ -6,10 +6,10 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "../../fs/include/params.h"
-#include "../../fs/include/fs_types.h"
-#include "../../fs/include/shm_addr.h"      /* shared memory pointer */
-#include "../../fs/include/fscom.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/shm_addr.h"      /* shared memory pointer */
+#include "../include/fscom.h"
 
 void cls_snd();
 void pname();
@@ -71,13 +71,16 @@ char *type;          /* data type NULL = "fs", "nd" = no display */
 */
   else {
     pname(name);
-    strcat(buf,"#");
-    l=strlen(buf);
-    memcpy(buf+l,name,5);
-    buf[l+5]='\0';
-    strcat(buf,"#");
+    if(0!=memcmp(name,"     ",5)) {
+      strcat(buf,"#");
+      l=strlen(buf);
+      memcpy(buf+l,name,5);
+      buf[l+5]='\0';
+      strcat(buf,"#");
+    } else
+      strcat(buf,"/");
     if(msg!=NULL)
-      strcat(buf,msg);
+      strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
     else
       strcat(buf,"empty message, program error");
   }
