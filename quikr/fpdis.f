@@ -46,8 +46,14 @@ C
       nch = nch + ir2as(stepfp,ibuf,nch,6,2)
       nch = mcoma(ibuf,nch) 
       nch = nch + ib2as(intpfp,ibuf,nch,o'100002')
-      nch = mcoma(ibuf,nch) 
-      nch = ichmv(ibuf,nch,ldevfp,1,2)
+      nch = mcoma(ibuf,nch)
+      if(0.eq.ichcm_ch(ldevfp,3,'  ')) then
+         nch = ichmv(ibuf,nch,ldevfp,1,2)
+      elseif(0.eq.ichcm_ch(ldevfp,4,' ')) then
+         nch = ichmv(ibuf,nch,ldevfp,1,3)
+      else
+         nch = ichmv(ibuf,nch,ldevfp,1,4)
+      endif
       nch = mcoma(ibuf,nch) 
       nch = nch + ib2as(iwtfp,ibuf,nch,o'100004')
       nch = mcoma(ibuf,nch) 

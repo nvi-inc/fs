@@ -8,7 +8,7 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       117*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       136*PAGE_SIZE /* reserves bytes for Fscom     */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
@@ -46,14 +46,16 @@
 #define MAX_VLBA_BBC   14
 #define MAX_VLBA_DIST   2
 #define MAX_IF          4
-#define MAX_VLBA_IF     2*MAX_VLBA_DIST
-#define MAX_DET          MAX_BBC*2+MAX_IF
+#define MAX_VLBA_IF     (2*MAX_VLBA_DIST)
+#define MAX_DET         (MAX_BBC*2+MAX_IF)
+#define MAX_RDBE_DET    (MAX_RDBE_CH*MAX_RDBE_IF*MAX_RDBE)
 #define MAX_USER_DEV    6
-#define MAX_ONOFF_DET    MAX_DET+MAX_USER_DEV
+//#define MAX_ONOFF_DET    (MAX_DET+MAX_USER_DEV)
+#define MAX_ONOFF_DET    (MAX_RDBE_DET+MAX_USER_DEV)
 
 #define MAX_DBBC_BBC   16
 #define MAX_DBBC_IF     4
-#define MAX_DBBC_DET    2*MAX_DBBC_BBC+MAX_DBBC_IF
+#define MAX_DBBC_DET    (2*MAX_DBBC_BBC+MAX_DBBC_IF)
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
@@ -64,7 +66,11 @@
 
 /* rack/drive, some are also _types.
    Hierarchy: rack/drive, then rack_type/drive_type
-   "*_type" must be unqiue within each "equip" */ 
+   "*_type" must be unique within each "equip" */ 
+#define RDBE        0x2000
+  /* rack_types: RDBE, drive_types: none  */
+#define MK6        0x1000
+  /* rack_types: none, drive_types: MK6  */
 #define DBBC        0x800
   /* rack_types: DBBC, drive_types: none  */
 #define MK5         0x400
@@ -119,6 +125,9 @@
 #define MK5B        0x40000000
 #define MK5B_BS     0x10000000
 
+#define MK5C        0x1
+#define MK5C_BS     0x2
+
 /*
  * The number of DAS allowed must be less than 8, currently we allow 2
  *   - also add additional SNAP commands in fs/control/fscmd.ctl
@@ -137,9 +146,17 @@
 #define AN_PRIOR   -16
 
 #define MAX_RXGAIN 20
-#define MAX_FLUX   50
+#define MAX_FLUX   100
 
 #define MAX_EPHEM 14400
 
 #define MAX_DBBCNN 16
 #define MAX_DBBCIFX 4
+
+#define MAX_MK6    2
+
+#define MAX_RDBE    4
+#define MAX_RDBE_CH  16
+#define MAX_RDBE_IF   2
+
+#define MAX_LO     (MAX_RDBE*MAX_RDBE_IF)

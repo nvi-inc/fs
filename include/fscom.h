@@ -125,6 +125,7 @@ typedef struct fscom {
 	   int drive_type[2];
 	   int rack_type;
 	   int wx_met;
+	   char wx_host[65];
 	  int mk4sync_dflt;
         } equip; 
 
@@ -334,5 +335,61 @@ typedef struct fscom {
   struct dbbc_cont_cal_cmd dbbc_cont_cal;
 
   int dbbc_if_factors[MAX_DBBC_IF];
+
+  struct dbbcgain_cmd dbbcgain;
+
+  int m5b_crate;
+
+  char dbbcddcvl[1];
+  char dbbcddcvs[16];
+  int  dbbcddcvc;
+
+  int mk6_units[MAX_MK6];
+  int mk6_active[MAX_MK6];
+
+  struct mk6_record_cmd mk6_record[MAX_MK6+1];
+
+  struct {
+    char string[256];
+    int ip2;
+    char who[3];
+    char what[3];
+  } mk6_last_check[MAX_MK6];
+
+  int rdbe_units[MAX_RDBE];
+  int rdbe_active[MAX_RDBE];
+
+  struct rdbe_tsys_data {
+    struct rdbe_tsys_cycle {;
+      char epoch[14];
+      float tsys[MAX_RDBE_CH+1][MAX_RDBE_IF];
+      float pcal_amp[1024];
+      float pcal_phase[1024];
+      int pcal_ifx;
+      float sigma;
+      int raw_ifx;
+      double dot2gps;
+    } data[2];
+    int iping;
+  } rdbe_tsys_data[MAX_RDBE];
+
+  char rdbehost[MAX_RDBE][129];
+
+  struct rdbe_atten_cmd  rdbe_atten[MAX_RDBE+1];
+
+  struct rdtcn {
+    struct rdtcn_control {
+      int continuous;
+      int cycle;
+      int stop_request;
+      struct data_valid_cmd data_valid;
+    } control[2];
+    int iping;
+  } rdtcn [MAX_RDBE];
+
+  struct fserr_cls {
+    char buf[125];
+    int nchars;
+  } fserr_cls;
 
 } Fscom;
