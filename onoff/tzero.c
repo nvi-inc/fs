@@ -139,7 +139,8 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       goto restore;
     }
     clr_res(&buff_res);
-  } else if(shm_addr->equip.rack==LBA ||shm_addr->equip.rack==DBBC) {
+  } else if(shm_addr->equip.rack==LBA ||shm_addr->equip.rack==DBBC ||
+	    shm_addr->equip.rack==RDBE) {
     /* digital detetector - assume tpzero=0 */
   }
 
@@ -163,6 +164,15 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
 
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_DBBC_DET; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
+  } else if(shm_addr->equip.rack==RDBE) {
+
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<MAX_RDBE_DET; i++) 
       if (onoff->itpis[i]) {
         accum->avg[i]=0.0;
         accum->sig[i]=0.0;
@@ -255,7 +265,8 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       goto failed;
     }
     clr_res(&buff_res);
-  } else if(shm_addr->equip.rack==LBA||shm_addr->equip.rack==DBBC) {
+  } else if(shm_addr->equip.rack==LBA||shm_addr->equip.rack==DBBC ||
+	    shm_addr->equip.rack==RDBE) {
     /* digital detetector - assume tpzero=0 */
   }
 

@@ -16,6 +16,7 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
      struct sample *accum, *accum2;
 {
   float tpi[MAX_DET],tpi2[MAX_DET],stm;
+  double dtpi[MAX_RDBE_DET], dtpi2[MAX_RDBE_DET];
   struct sample sample, sample2;
   int i,j,it[6], iti[6], itim,non_station,kst1,kst2,station;
 
@@ -25,14 +26,14 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
   }
 
   non_station=FALSE;
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_RDBE_DET;i++)
     if(itpis[i]!=0) {
       non_station=TRUE;
       break;
     }
 
-  kst1=itpis[MAX_DET+4];
-  kst2=itpis[MAX_DET+5];
+  kst1=itpis[MAX_RDBE_DET+4];
+  kst2=itpis[MAX_RDBE_DET+5];
   station=kst1||kst2;
   
   if(non_station) {
@@ -135,12 +136,20 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	  sample.avg[j]=tpi[j];
 	  sample2.avg[j]=tpi2[j];
 	}
+    } else if(shm_addr->equip.rack==RDBE) {
+      if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
+	return -1;
+      for(j=0;j<MAX_RDBE_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=dtpi[j];
+	  sample2.avg[j]=dtpi2[j];
+	}
     }
     if(station) {
       if(kst1)
-	sample.avg[MAX_DET+4]=shm_addr->user_dev1_value;
+	sample.avg[MAX_RDBE_DET+4]=shm_addr->user_dev1_value;
       if(kst2)
-	sample.avg[MAX_DET+5]=shm_addr->user_dev2_value;
+	sample.avg[MAX_RDBE_DET+5]=shm_addr->user_dev2_value;
     }
 
     sample.stm=stm-rut;
