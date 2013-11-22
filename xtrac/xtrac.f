@@ -12,7 +12,7 @@ C
       integer irrec(12)
       integer numlon(31),numlat(31),numlin(31)
 C
-      integer nrep,npts,intp,ldev 
+      integer nrep,npts,intp,ldev(2) 
       integer iayr,iadoy,iahr,iam,ias,iats
       integer iqlat,iqlon 
       integer nlin,ierlin,ndlin
@@ -84,6 +84,7 @@ C
       inp=0 
       igp=0 
       ibp=0 
+      idum=char2hol('__________',lsorna,1,10)
       call inism(lonsum,lonrms,latsum,latrms,dirms) 
 10    continue
       ipt=getdp(lsorna,ra,dec,epoch,iyr,idoy,ihr,im,is, 
