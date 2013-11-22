@@ -8,11 +8,12 @@
 
 #include "sample_ds.h"
 
-void wcounts(label,azoff,eloff,onoff,accum)
+void wcounts(label,azoff,eloff,onoff,accum, rack)
      char *label;
      double azoff,eloff;
      struct onoff_cmd *onoff;
      struct sample *accum;
+     int rack;
 {
   char buff[256];
   int i, kfirst;
@@ -25,9 +26,12 @@ void wcounts(label,azoff,eloff,onoff,accum)
     if(onoff->itpis[i]==0)
       continue;
 
-    if((onoff->intp==1 &&strlen(buff)>70)
-       ||(onoff->intp!=1 &&strlen(buff)>61)
-    ){
+    if(
+       (rack!=RDBE && ((onoff->intp==1 &&strlen(buff)>70)
+		       ||(onoff->intp!=1 &&strlen(buff)>61))) ||
+       (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>68)
+		       ||(onoff->intp!=1 &&strlen(buff)>59)))
+       ){
       logit(buff,0,NULL);
       buff[0]=0;
     }
@@ -47,16 +51,25 @@ void wcounts(label,azoff,eloff,onoff,accum)
     }
 
     strcat(buff," ");
-    buff[strlen(buff)+2]=0;
-    memcpy(buff+strlen(buff),onoff->devices[i].lwhat,2);
+    buff[strlen(buff)+4]=0;
+    memcpy(buff+strlen(buff),onoff->devices[i].lwhat,4);
     strcat(buff," ");
     if(onoff->intp==1) {
-      flt2str(buff,(float) accum->avg[i],-7,0);
+      if(rack!=RDBE)
+	flt2str(buff,(float) accum->avg[i],-7,0);
+      else
+	dble2str(buff,       accum->avg[i],-9,0);
       buff[strlen(buff)-1]=0;
     } else {
-      flt2str(buff,(float) accum->avg[i],-8,1);
+      if(rack!=RDBE)
+	flt2str(buff,(float) accum->avg[i],-8,1);
+      else
+	dble2str(buff,       accum->avg[i],-9,1);
       strcat(buff," ");
-      flt2str(buff,(float) accum->sig[i],-8,1);
+      if(rack!=RDBE)
+	flt2str(buff,(float) accum->sig[i],-8,1);
+      else
+	dble2str(buff,       accum->sig[i],-9,1);
     }
   }
   if(strlen(buff)!=0)
