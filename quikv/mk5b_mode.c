@@ -26,14 +26,21 @@ long ip[5];                           /* ipc parameters */
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
-      if (command->equal != '=' ) {
-	char *str;
-	out_recs=0;
-	out_class=0;
-	str="mode?\n";
-	cls_snd(&out_class, str, strlen(str) , 0, 0);
-	out_recs++;
-	goto mk5cn;
+      if (command->equal != '=') {
+	if(13 == itask) {
+	  char *str;
+	  out_recs=0;
+	  out_class=0;
+	  str="mode?\n";
+	  cls_snd(&out_class, str, strlen(str) , 0, 0);
+	  out_recs++;
+	  goto mk5cn;
+	} else {
+	  command->argv[1]=NULL;
+	  command->argv[0]="?";
+	  mk5b_mode_dis(command,itask,ip);
+	  return;
+	}
       } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
       else if (command->argv[1]==NULL) /* special cases */
 	if (*command->argv[0]=='?') {
@@ -69,6 +76,11 @@ parse:
 	  
       memcpy(&shm_addr->mk5b_mode,&lcl,sizeof(lcl));
       
+      if(13!=itask) {
+	ip[0]=ip[1]=ip[3]=0;
+	return;
+      }
+
       out_recs=0;
       out_class=0;
 

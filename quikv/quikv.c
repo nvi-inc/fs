@@ -273,6 +273,7 @@ loop:
 	  last_check(&command,itask,ip);
 	  break;
 	case 13:
+	case 14:
 	  mk5b_mode(&command,itask,ip);
 	  break;
 	case 20:
