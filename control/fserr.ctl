@@ -1004,6 +1004,9 @@ Procedure file name too long, 8 characters maximum.
 BO -261
 Schedule file name too long, 8 characters maximum.
 ""
+BO -262
+Cannot change schedules while recording, use disk_record=off to stop.
+""
 BO -300
 There must be two character error mnemonic for TNX.
 ""
@@ -1662,7 +1665,7 @@ DB -106
 dbbcn: error and EOF on read, see above for error, connection closed
 ""
 DB -107
-dbbcn: EOF on read, dbbc probably crashed, connection closed
+dbbcn: EOF on read, dbbc may have crashed, connection closed
 ""
 DB -108
 dbbcn: no data on read, but no EOF or error, connection closed
@@ -1677,7 +1680,7 @@ DB -111
 dbbcn: error and EOF pre-draining input, see above for error, connection closed
 ""
 DB -112
-dbbcn: EOF pre-draining input, dbbc probably crashed, connection closed
+dbbcn: EOF pre-draining input, dbbc may have crashed, connection closed
 ""
 DB -113
 dbbcn: no data pre-draining input, but no EOF or error, connection closed
@@ -3126,7 +3129,7 @@ M5 -106
 mk5cn: error and EOF on read, see above for error, connection closed
 ""
 M5 -107
-mk5cn: EOF on read, mark 5 probably crashed, connection closed
+mk5cn: EOF on read, mark 5 may have crashed, connection closed
 ""
 M5 -108
 mk5cn: no data on read, but no EOF or error, connection closed
@@ -3141,7 +3144,7 @@ M5 -111
 mk5cn: error and EOF pre-draining input, see above for error, connection closed
 ""
 M5 -112
-mk5cn: EOF pre-draining input, mark 5 probably crashed, connection closed
+mk5cn: EOF pre-draining input, mark 5 may have crashed, connection closed
 ""
 M5 -113
 mk5cn: no data pre-draining input, but no EOF or error, connection closed
