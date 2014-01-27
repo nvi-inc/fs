@@ -526,6 +526,11 @@ C  User requested schedule name, format response and log it.
                ipinsnp(2)=ipinsnp(2)+1
             endif
             goto 600
+         endif
+         call fs_get_disk_record_record(disk_record_record)
+         if(disk_record_record.eq.1) then
+             call logit7ci(0,0,0,0,-262,'bo',0)
+             goto 600
           endif
         irnprc = rn_take('pfmed',1)
         if (irnprc.eq.0) then
