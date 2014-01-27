@@ -1,7 +1,9 @@
-mk5b_mode - set mk5b recording mode
+mk5b_mode/bit_streams - set mk5b recording mode
 
-syntax: mk5b_mode=source,mask,decimation,fpdp,okay
-Response: mk5b_mode/source,mask,decimation,fpdp
+syntax:   mk5b_mode=source,mask,decimation,fpdp,okay
+        bit_streams=source,mask,decimation,fpdp,okay
+Response:   mk5b_mode/source,mask,decimation,fpdp
+          bit_streams/source,mask,decimation,fpdp
 Settable parameters:
 
 source:     data source: ext, tvg, or ramp. Default: ext.
@@ -12,7 +14,19 @@ okay        literal ascii: disk_record_ok
 
 Monitor only parameter: None
 
-Comments: mask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0,
+Comments:
+
+bit_streams is an alias for the mk5b_mode command that does not
+communicate with the Mark 5B recorder.  All other aspects of its
+operation are identical to the mk5b_mode command.  The main purpose of
+bit_streams is to provide a way to set the bitstream mask for correct
+sampling of Tsys when no recorder is being is used (typically during
+eVLBI) when a Mark 5B compatible rack, such as a Mark 5, VLBA5, or
+DBBC (or none) is in use.  For such racks, if the recorder is set
+"none" in DRUDG, the bit_stream command will be generated instead of
+mk5b_mode.
+
+Mask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0,
 etc. The number of bits turned on in the bit-stream mask must be 2^n
 where 0 <= n <= 5, or the Mark5B will reject the command with an
 error.
