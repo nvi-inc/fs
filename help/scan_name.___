@@ -38,13 +38,19 @@ command. The scan_name=  command defines the start of each
 scan. If a schedule is started in the middle it should be
 started at this command for that scan.
 
-When a Mark 5A unit is in use with FS implemented automatic bank
-switching (this is the case for all piggyback operations and when the
-recorder type one in equip.ctl is "mk5a_bs").  The length of the scan
-and the continuous recording time are used by the FS to decide when to
-switch banks.  The length value should always be less than or equal to
-continuous.  Note that length refers to number of seconds when "data
-is valid", while continuous refers to the number of seconds of
-recording.  If continuous is omitted, the length is assumed to also
-represent the recording time. See the bank_check command for further
-details.
+When a Mark 5 unit is in use with FS implemented automatic bank
+switching (this is the case when the recorder type one in equip.ctl is
+"mk5a_bs" or "mk5b_bs"), the length of the scan and the continuous
+recording time are used by the FS to decide when to switch banks.  The
+length value should always be less than or equal to continuous.  Note
+that length refers to number of seconds when "data is valid", while
+continuous refers to the number of seconds of recording.  If
+continuous is omitted, the length is assumed to also represent the
+recording time. For continuous recording scans after the the initial
+scan, the continuous recording time refers to the time from the
+previous data_valid=off until the end of recording. Note that even if
+a Mark 5 unit is selected in equip.ctl, but if the schedule was
+DRUDG'd with the recorder as "none" (e.g., for eVLBI), the schedule
+will contain no recorder commands, so there will be no recorder use or
+bank switching.  See the bank_check command for further details on
+automatic bank switching.
