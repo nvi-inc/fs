@@ -40,14 +40,15 @@ C 021011 nrv Another digit for printing gap time.
 ! 122302 JMG Output tape type in header, also procedure names.
 ! 2004Nov05 JMGipson.  Modified so that only put complete header info on first page.
 ! 2006Jul29 JMGipson.  Don't put out line numbers if we don't have a start.
-! 2006Sep26 JMGipson.  Made call to setup name ASCII (cnamep used to be hollerith)
+! 2006Sep26 JMGipson.  Made call to setup name ASCII (csetup_name used to be hollerith)
 ! 2006Oct06 JMGipson.  Fixed extraneous comma in write statement that caused compiler problems
 !                      for some linux versions.
 ! 2006Nov09 JMGipson.  1st page was 1 line longer than others. Fixed.
 ! 2006Nov30 JMGipson. Changed to use cstrec(istn,irec).
 ! 2007Jul28 JMGipson. Replace kdisk by km5disk which is in hardware.ftni
 ! 2008Jan07 JMGipson.  Changed so that will ALWAYS print line numbers if recorder type is none.
-!                     Previously relied on recorder starting and stopping info, which is absent in the "none" case.
+!             Previously relied on recorder starting and stopping info, which is absent in the "none" case.
+! 2014Jan17 JMGipson. Modified call to setup_name.  Removed pass info. 
 
 ! Functions
       integer julda
@@ -96,7 +97,7 @@ C These are modified on return: iline, page,num_scans,ntapes
       logical knew_start
 
 C Local
-      integer i,il,iaz,iel,ifeet_print
+      integer i,il,iaz,iel
       logical kcont,kearl
 !
 ! Saved local variables.
@@ -110,18 +111,15 @@ C Local
       double precision ut               !UT of scan
 
 ! Used to output proc names
-      integer icode,ipass
-      character*12 cnamep
+      integer icode
+      character*12 csetup_name
 
       integer*2 lcodeTmp
       character*2 ccodetmp
-      equivalence (ccodetmp,lcodetmp)
-      integer nch
+      equivalence (ccodetmp,lcodetmp)     
       integer num_sub_pass,num_recs
       character*12 lfilnam
-! tape type
-      character*6 cTapeType     !THICK,THIN SHORT
-      character*4 cTapeDens     !HIGH, LOW
+! tape type    
       logical kprint_doy
 
 
@@ -190,20 +188,7 @@ C  1. Headers.
             else if(km5disk) then
               write(luprt,  '(" Recorder type:   DISK")')
             else
-              if (bitdens(istn,1).gt.56000.0) then
-                 cTapeDens='High'
-              else
-                 cTapeDens='Low'
-              endif
-              if(maxtap(istn) .lt. 5000) then
-                 cTapeType="Short"
-              else if(maxtap(istn) .lt. 10000) then
-                 cTapeType="Thick"
-              else
-                 cTapeType="Thin"
-              endif
-              write(luprt,'(" Tape type:       ",a6,2x,a4)')
-     >             cTapeType,cTapeDens
+             
             endif
           endif            !end kskd
 
@@ -229,12 +214,8 @@ C  1. Headers.
               num_sub_pass=npassf(istn,icode)
               if(km5disk)  num_sub_pass=1
               write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
-              do ipass=1,num_sub_pass
-                cnamep=" "
-                call setup_name(icode,ipass,cnamep,nch)
-                call c2lower(cnamep,cnamep)
-                write(luprt,'(a,1x,$)') cnamep
-              end do
+              call setup_name(ccode(icode),csetup_name)                
+              write(luprt,'(a,1x,$)') csetup_name            
               lcodeTmp=lcode(icode)
               call c2lower(ccodetmp,ccodetmp)
               write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
@@ -262,11 +243,8 @@ C  1. Headers.
             write(luprt,"(' Counts = tape counts at start of scan')")
           else if(km5disk) then
             write(luprt,"(' Gbyte  = Gigabytes at start of scan')")
-          else
-            write(luprt,'(a)')
-     >     ' Feet   = footage at start of scan, to nearest 10 feet'
           endif
-          writE(luprt,'(a)') ' Record Usage:  XXX'//
+          writE(luprt,'(a)') ' Info:  XXX'//
      >     '    or Rec1=start recorder 1, Rec2=start recorder 2'
           write(luprt,'(a)')
      >     '              *=parity check, @=no tape motion'
@@ -290,7 +268,7 @@ C  2. Column heads.
         if (ks2) then
             cbuf=cbuf(1:il)//'             Record' ! no stops
         else
-            cbuf=cbuf(1:il)//'                      Record '
+            cbuf=cbuf(1:il)//'                       '
         endif
         il=trimlen(cbuf)
         write(luprt,'(a)') cbuf(1:il)
@@ -305,26 +283,19 @@ C  2. Column heads.
         il=trimlen(cbuf)
         if (kcont) cbuf=cbuf(1:il)//'   Record'
         il=trimlen(cbuf)
-        if(kmv) then
-           cbuf=cbuf(1:il)//'      Dur  Pass Feet Usage'
-        else if(ks2) then
-           cbuf=cbuf(1:il)//'      Dur  Group (min)'
-        else if(km5disk) then
+       
+        if(km5disk) then
            if(kskd) then
              cbuf=cbuf(1:il)//'      Dur    Gbyte'
            else
              cbuf=cbuf(1:il)//'      Dur '
-           endif
-        else if(kk4) then
-           if(kskd) then
-              cbuf=cbuf(1:il)//'      Dur  Counts Usage'
-            else
-              cbuf=cbuf(1:il)//'      Dur  Usage'
-            endif
+           endif      
         else
-           cbuf=cbuf(1:il)//'      Beats me!!'
-        endif
+            cbuf=cbuf(1:il)//'      Dur '
+        endif 
         il=trimlen(cbuf)
+        cbuf=cbuf(1:il)//'  Info'
+        il=trimlen(cbuf) 
         write(luprt,'(a)') cbuf(1:il)
         call wrday(luprt,itime_start(1),itime_start(2))
         kprint_doy=.true.
@@ -372,7 +343,6 @@ C  2. Column heads.
         if(cepoch .eq. '1950') tjd=tjd+18262
         call apstar_Rad(tjd, rarad, dcrad, rarad_prcs,dcrad_prcs)
            
-
         if (kazel) then    
           ut=itime_start(3)*3600.d0+itime_start(4)*60.d0+itime_start(5)
           call cazel(rarad_prcs,dcrad_prcs,xpos,ypos,zpos,mjd,ut,az,el)
@@ -387,7 +357,6 @@ C  2. Column heads.
         iaz=az
         iel=el
       endif
-
 
       cscan(9:9) = lower(cscan(9:9))
       knew_start=ktimedif(itime_tape_start,itime_tape_start_old)
@@ -438,35 +407,15 @@ C  Duration
       idurm = idur/60
       idurs = idur - idurm*60
       write(luprt,'(2x,i3,":",i2.2,$)') iDurM,iDurS
-C  Pass
-      if (.not.(kk4 .or. km5disk)) then ! pass or S2 group
-        if (cnewtap.eq.'@   ') then
-          write(luprt,'(1x,"--",$)') 
-        else
-          write(luprt,'(1x,a2,$)') cpass
-        endif
-      endif ! pass or S2 group
-C  Footage
-      if (kmv) then
-        ifeet_print = 10*ifix((counter+5.)/10.) ! nearest 10 feet
-        if (cnewtap.eq.'@   ') then
-          write(luprt,'("-",1x,i5,$)') ifeet_print
-        else
-          write(luprt,'(a1,1x,i5,$)') cdir(1:1),ifeet_print
-        endif
-      else if(ks2) then
-        write(luprt,'(i5,$)') int(counter/60.+.5)  !convert seconds to minutes.
-      else if(km5disk) then
+
+C  Footage     
+      if(km5disk) then
         if(kskd) then
           write(luprt,'(f8.1,$)') counter/1000  !convert megabytes to Gigabytes
-        endif
-      else if(kk4) then
-        if(kskd) then
-          write(luprt,'(i7,$)') int(counter)      !counts
-        endif
+        endif    
       endif
-C  New tape flag
-      write(luprt,'(1x,a)') cnewtap
+
+      write(luprt,'(3x,a)') cnewtap
 
       iline=iline+1
       num_scans = num_scans + 1 ! count of observations

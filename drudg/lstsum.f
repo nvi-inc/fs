@@ -167,6 +167,7 @@ C Local:
       character*3 cdir_p                !direction
       character*2 cpass_p               !Current pass
       character*6 cnewtap_p             !Newtape
+      character*6 cnewtap_store
 
       character*2 cpass_old
 
@@ -311,6 +312,7 @@ C 5. Main loop to read .snp file and print summary of observations.
         if (ctmp(1:1).eq.'"') then !non-comment line
           continue
         else if(ctmp(1:10) .eq."scan_name=") then
+          cnewtap_store=" "
           cscan_p=cscan                 	!save old
           nsline_p=nsline               	!save old
           read(ctmp(11:),'(a)') cscan
@@ -373,7 +375,7 @@ C       Now get the source info for the new scan
           idur=-1 ! reset duration so it gets calculated again
           kmidtp=.true.
         else if (index(ctmp,'MIDOB').ne.0) then ! data start time
-! Print the PREVIOUS SCAN. Need to do this becuse sometimes get
+! Print the PREVIOUS SCAN. Need to do this because sometimes get
 ! UNLOD command after a scan, but before the data starts. This allows to
 ! output tape unload correctly.
           if (kdata_stop) then
@@ -547,6 +549,7 @@ C the counter to zero to start the new forward pass.
                    call find_recorder_speed(icode,speed_recorder,kskd)
                    write(cnewtap,"('Mode',i2)") icode
                    icode_old=icode
+                   cnewtap_store=cnewtap
                  endif
              endif
            end do
@@ -580,8 +583,7 @@ C the counter to zero to start the new forward pass.
             counter_print=counter_tape_start
        endif
 
-
-
+      if(cnewtap_store .ne. " ") cnewtap=cnewtap_store
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
      >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
      >        nsline,

@@ -12,7 +12,7 @@ C INPUT
       character*(*) cr1,cr2,cr3,cr4
 C
 ! functions
-      integer trimlen,ichmv ! functions
+      integer trimlen ! functions
       integer ichmv_ch,ichcm_ch
       real speed ! function
       integer iwhere_in_string_list
@@ -34,7 +34,7 @@ C LOCAL:
       integer*2 ldsign,lhsign,ldsign2,lhsign2,ldsn
       integer*2 LPROC(4) !  The procedure name for NRAO
       integer*2 ldirr !REV,FOR
-      integer nchar,idum,itnum
+      integer nchar,itnum
       real dut,eeq
       integer ih
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
@@ -57,7 +57,6 @@ C LOCAL:
       double precision GST,UT,HA,HA2
       integer IC
 
-      logical kfound
       character*8 lvlba_stat(10)
       data lvlba_stat/"BR-VLBA","FD-VLBA","HN-VLBA","KP-VLBA","LA-VLBA",
      >                "MK-VLBA","NL-VLBA","OV-VLBA","PIETOWN","SC-VLBA"/
@@ -374,9 +373,9 @@ C
      .       IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .       IYR2,IDAYR2,IHR2,MIN2,ISC2,LU_OUTFILE,IDAYP,
      .       idayrp,ihrp,minp,iscp,iobss,irecp,
-     .            idayr_save,ihr_save,min_save,isc_save)
+     .       idayr_save,ihr_save,min_save,isc_save)
             iobss=iobss+1 ! increment this station's obs
-            icodp=icod
+            icodp=icod              
 C
 	    END IF !if istin
 C
@@ -394,9 +393,12 @@ C
 C  When finished with vlba point file, write the quit statement
 C  at the end.
       if (istin.eq.5.or.istin.eq.6) then !vlba observe file
-C        Turn off recording on the current tape
-         write(lu_outfile,"(a,i1,a,i1,a)")
-     >  'write=(',irecp,',off) tape=(',irecp,',stop) '
+	 CALL TMADD(IYR2,IDAYR2,IHR2,MIN2,5, ISC2,IYR,IDAYR,
+     .         IHR,iMIN,ISC)      
+        write(lu_outfile,'(a)') "disk=off"
+        write(lu_outfile,
+     >    '("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+     >    ihr,imin,isc
          write(lu_outfile,"('!QUIT!')")
       end if
 
@@ -409,7 +411,9 @@ C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
 990   CLOSE(LU_OUTFILE)
+      write(*,*) "Before: "
       call drchmod(pntname,iperm,ierr)
+      write(*,*) "After: "
 
 900   continue
       RETURN

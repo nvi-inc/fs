@@ -16,12 +16,13 @@
 
 ! Recorder state.
       logical kdrum 		!drum_on command was written
-      logical ket 		!stop tape for this scan
+      logical kstop_tape	!stop tape for this scan
       logical krunning 		!tape is running
       logical kspin    		!tape is spinning
-      common /hardware/kdrum,ket,krunning,kspin
+      common /hardware/kdrum,kstop_tape,krunning,kspin
 
 ! Racks
+      logical knorack
       logical km3rack
       logical km4rack
       logical km5rack
@@ -40,7 +41,7 @@
       logical k8bbc
       logical kdbbc_rack 
 
-      common /hardware/km3rack,km4rack,km5rack,kmracks
+      common /hardware/knorack,km3rack,km4rack,km5rack,kmracks
       common /hardware/kvrack,kv4rack,kv5rack,kvracks
       common /hardware/kk41rack,kk42rack,klrack
       common /hardware/km4fmk4rack,kk3fmk4rack,k8bbc,kdbbc_rack 

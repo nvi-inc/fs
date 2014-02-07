@@ -10293,5 +10293,54 @@ Version 9.11.3 130726
 130926 WEH misc/VENIX_changes.txt
            renamed from changes.VENIX
 
-
 Version 9.11.4 130930
+
+131021 WEH control/fserr.ctl
+           changed dbbc, mark 5 may have crashed to probably crashed
+           as suggested by DLS
+
+131024 WEH help/pfmed.___
+           created with explanatory information
+
+131024 WEH help/schedule.___
+           add explanation of schedule vs station procedures and
+           the relationship between exper_initi and sched_initi
+
+131024 WEH help/proc.___
+           added pointed to the help file for the schedule command for
+           explanation of schedule vs station procefdures
+
+131109 WEH xtrac/xtrac.f
+           initialize source name to all underscores in case first scan in
+           log is incomplete, prevents format problems
+
+131119 WEH poclb/logit.c
+           Corrected includes to not mention "../fs" so they stay within the
+           current source tree.
+
+131215 WEH quikv/quikv.c
+131215 WEH quikv/mk5b_mode.c
+131215 WEH control/fscmd.ctl
+131215 WEH help/mk5b_mode.___
+           add bit_streams command
+
+140127 WEH control/fscmd.ctl
+           help/mk5b_mode.___
+           allow bit_streams for all rack types (including none)
+
+140127 WEH boss/bwork.f
+           control/fserr.ctl
+           help/schedule.___
+           prohibit schedule change when disk recording has been commanded
+
+140129 WEH misc/rc.fs
+           updated for FSL9
+
+140129 WEH help/schedule.___
+           fix typo
+
+140207 WEH help/scan_name.___
+           modernizd and updated continuous length comment
+             for scans after the first
+          
+Version 9.11.5 140207

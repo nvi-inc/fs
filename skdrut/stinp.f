@@ -387,11 +387,11 @@ C  Got a match. Initialize names.
 
 C  Store equipment names.
         if (crack .ne. " ") then
+          if(.not.kvalid_rack(crack)) crack='none'
           cstrack(i)=crack
-        endif
+        endif       
         if (crec1 .ne. " ") then
-           if(.not.kvalid_rec(crec1)) crec1='none'       
-           cstrec(i,1)=crec1
+           if(.not.kvalid_rec(crec1)) crec1='none'                 
         endif
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.

@@ -80,23 +80,24 @@ C 1. Get scans one by one.
       nobs=0
       ierr = 1 ! station
       iret=0
-      do while (iret.eq.0) ! get all scans
+      do while (iret.eq.0) ! get all scans     
         if(nobs .eq. 0) then
            itemp=ivexnum
         else
            itemp=0
-        endif
+        endif     
         iret = fget_scan(ptr_ch(cstart),len(cstart),
      .         ptr_ch(cmo),len(cmo),
      .         ptr_ch(cscan_id),len(cscan_id),
      .         itemp)
-
+       
         if(iret .ne. 0) then
           if(ierr .gt. 0) ierr=0
           if(ierr .eq. 0) iret=0
           write(lu, '(i6," scans in this schedule.")') nobs
           return
         endif
+      
         if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
 
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
@@ -130,15 +131,15 @@ C       Now get each station line that is part of this scan.
           if (iret.ne.0) then
             return
           endif
-
-          il = fvex_len(cout)
+                il = fvex_len(cout)
           if (ivgtst(cout,istn).le.0) then
             write(lu,*) "VOBINP04 - Station ",cout(1:il)," not found!"
             return
           endif
-          if (nchan(istn,icod).eq.0) then ! code not defined
+          if (nchan(istn,icod).eq.0) then ! code not defined          
             write(lu,*) "VOBINP03 - Mode ",
-     >      cmo(1:il)," not defined for this station!!"
+     >      cmo(1:fvex_len(cmo))," not defined for station: ", 
+     >      cout(1:fvex_len(cout))
             return
           endif ! code not defined
 
@@ -174,8 +175,10 @@ C       Keep good data offset and duration separate
           iret = fvex_field(5,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
           il = fvex_len(cout)
-! fixup for Mark5.
-          if(cstrec(istn,1)(1:5) .eq. "Mark5" .and. il .eq. 0) then
+! fixup for Mark5.     
+          if((cstrec(istn,1)(1:5) .eq. "Mark5" .or.   
+     >        cstrec(istn,1)(1:4) .eq. "none"  .or.  
+     >        cstrec(istn,1)(1:5) .eq. "Mark6") .and. il .eq. 0) then
              ip=1
              if(npassl(istn,icod) .eq. 0) then
                 npassl(istn,icod)=1
@@ -184,6 +187,7 @@ C       Keep good data offset and duration separate
             ip =iwhere_in_string_list(cpassorderl(1,istn,icod),
      >         npassl(istn,icod),cout(1:il))
           endif
+            
 
           if(ip .eq. 0) return     ! pass not found
 

@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs9114up.txt        Version: 3.4  Date: 130930
+File: /usr2/fs/misc/fs9115up.txt        Version: 3.9  Date: 140208
 
 I. Introduction
 
@@ -11,38 +11,56 @@ This memo is divided into three sections:
 Please print this notice and read it carefully before installing the
 new version.
 
-This update is intended for all stations.  All stations should upgrade
-to this version as soon as possible. If version 9.11.3 is installed,
-the installation steps are very quick and simple (see III. Installation).
+All stations should upgrade to this version as soon as possible. This
+update is essential for stations that make RadioAstron observations,
+it is strongly recommended for stations that make eVLBI observations
+in the EVN.  In any event, we ask all stations to upgrade to this
+version so that we can get all stations on the same, modern, version
+of DRUDG.  This will also make it easier to apply future updates. If
+version 9.11.3 or 9.11.4 is installed, the installation steps are very
+quick and simple (see III. Installation).
 
-Most of the changes in this version are related to DRUDG with some
-minor bug fixes in the FS itself.  The changes to DRUDG are needed to
-enable handling of upcoming EVN and LBA schedules.  However, we ask
-all stations to upgrade to this version so that we can get all
-stations on the same, modern, version of DRUDG.  This will also make
-it easier to apply future updates.
+The most significant changes in 9.11.5 are (i) to allow FS stations to
+DRUDG schedules that have RDBE and Mark 5C equipment at other stations
+and (ii) to allow Tsys to work correctly for systems with Mark 5B (and
+Mark 5A) recorders during eVLBI by selecting "none" as the recorder
+type in DRUDG.  Item (ii) should remove the need to run a script to
+"fix" the .snp and .prc files for eVLBI. i.e., the operator can just
+select "none" in DRUDG as the recorder type.  Additionally, a new
+interlock was introduced in the "schedule=..."  command to prevent
+changing schedules (or changing to a different line number in the
+current schedule) when disk recording has been commanded.
 
-The most significant changes in DRUDG since 9.11.3 include:
+The full list of changes, by FS version number, is given in the
+"Changes Since Version 9.10.4" section below.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+various and significant contributions.
+
+The remaining material in this "Introduction" section relates to
+changes in previous versions of 9.11.x.
+
+In prior version 9.11.4, most of the changes were related to DRUDG
+with some minor bug fixes in the FS itself.  The changes to DRUDG are
+needed to enable handling of upcoming EVN and LBA schedules.
+
+The most significant changes in DRUDG in 9.11.4 include:
 
     i. Different BWs at different stations are handled (different BWs
        cannot be used at one station in one mode).
-   ii. Unsupported rack and recorder types will not cause DRUDG to
-       fail (they are converted to type "none").
+   ii. Some improvement in the handling of schedules with unsupported
+       rack and recorder types at other stations, reducing the number
+       of cases where DRUDG to fails (they are converted to type
+       "none").
   iii. More than 16 phase-cal tones in a channel will not cause DRUDG
        to fail (only the first 16 are supported for now).
 
-The most significant changes in the FS since 9.11.3 include:
+The most significant changes in the FS in 9.11.4 include:
 
     i. For DBBC DDC v104, date code "August 01 2013" is accepted as
        valid.
    ii. The "plotlog" script was fixed to work again for normal Tsys
        data.
-
-The full list of changes, by FS version number, is given in the
-"Changes Since Version 9.10.4" section below.
-
-The remaining material in this "Introduction" section relates to
-changes in previous versions of 9.11.x.
 
 In the prior version 9.11.3 there were a few small bugs fixes, but the
 major change was support for DBBC DDC personality version v104.  This
@@ -143,7 +161,8 @@ description.
 The following is a summary of FS changes since 9.10.4.  Item 19 was
 added for 9.11.1.  Items 3 and 11 was expanded and items 20-23 were
 added for 9.11.2.  Item 1 was changed and items 24-31 were added for
-9.11.3.  Items 32 and above were added for 9.11.4.
+9.11.3.  Items 32-36 and were added for 9.11.4.  Items 37 and above
+were added for 9.1.5.
 
 1.  Support for DBBC DDC personality added.
 2.  The "day 49 bug" is fixed.
@@ -191,6 +210,15 @@ added for 9.11.2.  Item 1 was changed and items 24-31 were added for
     dollar signs ('$') in them.
 36. The Makefiles for oprin and pfmed were corrected to be backward
     compatible with the behavior in 9.10.4.
+37. The bit_streams command was added.
+38. Mark 5/DBBC error messages about a lost connection have been
+    improved.
+39. Include statements in poclb/logit.c were improved.
+40. PFMED and procedure library documentation improvements.
+41. Improvement in 'xtrac' program for handling incomplete FIVPT
+    scans.
+42. Prevent "schedule=..." command when disk recording has been
+    commanded.
 
 A more detailed discussion of these changes follows.
 
@@ -611,15 +639,79 @@ A more detailed discussion of these changes follows.
     the previous behavior of 9.10.4.  The change was made backward
     compatible.
 
+37. The bit_streams command was added.  This command can be used to
+    set the Mark 5B bit-stream mask within the FS without
+    communicating with a Mark 5B.  Except for not communicating with a
+    Mark 5B, this command is identical in all respects to the
+    mk5b_mode command.  This command is useful to allow Tsys data to
+    be collected normally when a Mark 5B that would normally be used
+    is not being used, for example for eVLBI.  DRUDG uses this command
+    in place of the mk5b_mode command when the operator selects a rack
+    type (Mark5, VLBA5, DBBC or as a special case none) that would
+    normally use a Mark 5B recorder, but selects "none" for the
+    recorder.
+
+38. Mark 5/DBBC error messages about a lost connection have been
+    improved.  The error messages that included the phrase 'probably
+    crashed' referring to the Mark 5 or DBBC now say 'may have
+    crashed'.  Hopefully, this is clearer.  This change was suggested
+    by Dan Smythe.  The errors that include this phrase are for cases
+    where there was an existing connection to the device, but a
+    closure was detected when attempting to access it.
+
+39. Include statements in poclb/logit.c were improved.  The include
+    statements for the FS include files erroneously included "../fs" in
+    the path.  While not breaking the FS itself, this inclusion
+    defeated one of the features of the source, which is that
+    different versions of the FS (9.11.4, 9.11.5, etc) can be
+    compiled even if the current /usr2/fs link does not point to that
+    version.  Thanks to Zhang Ming (Urumqi) who found this error.  It
+    was verified that this problem does not occur anywhere elsewhere
+    in the includes (or FS library references in Makefiles) in the FS.
+    Note that the local station software in the /usr2/st directory
+    must include explicit use of "../fs" in paths in includes and
+    Makefiles to reference the current version of the FS when it is
+    compiled.
+
+40. PFMED and procedure library documentation improvements.  A help
+    page (accessed by help=...) was added for PFMED even though it is
+    not a SNAP command in order to explain its basic operation.  The
+    help page for the 'proc' command was updated to explain the
+    difference between schedule and station procedure libraries.  The
+    help page for the 'schedule' command was updated to explain the
+    relationship between the 'exper_initi' and 'sched_initi'
+    procedures.
+
+41. Improvement in 'xtrac' program for handling incomplete FIVPT
+    scans.  The program now initializes the source name to all
+    underscores ('_') so that it is printable in case the scan
+    encountered is incomplete and does not include a source name.
+
+42. Prevent "schedule=..." command when disk recording has been
+    commanded.  A new interlock was introduced in the "schedule=..."
+    command to prevent changing schedules (or changing to a different
+    line number in the current schedule) when disk recording has been
+    commanded.  Note that the current schedule (if any) will continue
+    to execute if the disk recording was commanded.  If the
+    "disk_record=off" command is executed, a "schedule=..."  command
+    can then be executed.  Note also that the FS does not check
+    whether disk recording is occurring, only whether it has been
+    commanded.  Consequently if recording is already occurring when
+    the FS is started, the interlock will not operate.  No override
+    was provided for the interlock, so using the "disk_record=off"
+    command is the only way to release it.
+
 			 B. Changes in DRUDG
 				   
-DRUDG opening message date is 2013Sep19
+DRUDG opening message date is 2014Feb07.
 
 The following is a summary of DRUDG changes since 9.10.4. Items 14-16
 were omitted from the 9.11.0 update notice, but the features were in
 the 9.11.0 release.  Items 11 and 14 were revised and items 17-18 were
 added in 9.11.2.  Item 14 was revised and items 19-23 were added in
-9.11.3.  Items 24 and above were added in 9.11.4.
+9.11.3.  Items 24-28 were added in 9.11.4.  Items 29 and above were
+added in 9.11.5.
+
 
 1.  Support for DBBC.
 2.  AutoFTP_ABORT_TIME skedf.ctl parameter added to $MISC section.
@@ -648,12 +740,18 @@ added in 9.11.2.  Item 14 was revised and items 19-23 were added in
 23. The DRUDG "Shift a .SKD file" option (10) has been fixed and
     should work again.
 24. Mixed bandwidth modes fixed.
-25. DRUDG doesn't die if there are unrecognized rack and recorders
-    types for VEX schedules
+25. DRUDG dies in fewer cases when there are unrecognized rack and
+    recorders types for VEX schedules
 26. DRUDG doesn't die if there are more than 16 phase-cal tones in a
     channel.
 27. IF_CONFIG skedf.ctl option added for local "if_config" command
 28. TARGET_TIME skedf.ctl option added for local "target_time" command.
+29. Further improvements in the handling of unknown rack and recorder
+    types.
+30. Support for 'bit_streams' command.
+31. IF3 command usage improvement.
+32. Improvement in handling alternate IF input usage in VEX files.
+
 
 A more detailed discussion of these changes follows.  For most fixes
 the files that were changed are listed.  Files are listed with respect
@@ -900,13 +998,14 @@ to the drudg/ source directory.
     bandwidths at different stations in a schedule were lost.  They
     have been restored.
 
-25. DRUDG doesn't die if there are unrecognized rack and recorders
-    types for VEX schedules.  Previously, they were only accepted for
-    .skd files.  The unknown equipment is converted to type "none".
-    This allows stations with unrecognized equipment types to be
-    included in schedules without causing DRUDG to fail.  This is
-    currently useful for schedules that include RDBE and Mark 5C
-    recorders.
+25. DRUDG dies in fewer cases when there are unrecognized rack and
+    recorders types for VEX schedules. Previously, they were only
+    accepted for .skd files.  The unknown equipment is converted to
+    type "none".  This allows stations with unrecognized equipment
+    types to be included in schedules without causing DRUDG to fail.
+    This is currently useful for schedules that include RDBE and Mark
+    5C recorders. See also #29 for the continuation of this
+    improvement in 9.11.5.
 
 26. DRUDG doesn't die if there are more than 16 phase-cal tones in a
     channel.  This allows bandwidths wide enough to include more than
@@ -939,6 +1038,39 @@ to the drudg/ source directory.
     support this.  Please see see /usr2/fs/misc/target_time.txt for
     more information.
 
+29. Further improvements in the handling of unknown rack and recorder
+    types.  This completes the previous effort in item #25 for 9.11.4.
+    DRUDG was modified to not abort for unrecognized rack and recorder
+    types, including RDBEs and Mark5Cs, which are currently used in
+    schedules at non-FS stations.  Although the FS does not yet
+    support RDBEs and Mark 5C recorders explicitly, FS station may run
+    schedules that include stations that do have these pieces of
+    equipment. As previously stated in item #25, the unrecognized rack
+    and recorder types are set to none, but some other details needed to
+    make this work were not included. This has been fixed.
+
+30. Support for 'bit_streams' command.  DRUDG now substitutes the
+    'bit_streams' command in place of the 'mk5b_mode' command when
+    generating procedures for a rack that requires a Mark 5B for
+    recording (rack types: Mark5, VLBA5, DBBC, and as a special case
+    none), when the operator selects 'none' as the recorder type.
+    This is intended to be useful for eVLBI where the recorder is
+    controlled remotely and the FS just controls the rack.  The
+    bit_streams command sets the Mark 5B bit-stream mask internally in
+    the FS so that Tsys data can be recorded normally without
+    requiring communication with the Mark 5B recorder.
+
+31. IF3 command usage improvement.  For racks (Mark III, IV, and LBA4)
+    that support use of a Mark III IF3 module, the IF3 command is only
+    included in the setup for the rack if the frequencies of LO1 and
+    LO3 are either same or LO3 is 500.1 MHz higher than LO1.
+    Normally, these two configurations imply the usage of an IF3
+    module.  Otherwise the station is probably providing its own IF
+    for LO3.
+
+32. Improvement in handling alternate IF input usage in VEX files.
+    DRUDG no longer generates an (incorrect) warning if the alternate
+    IF input is specified for a Mark III/IV/LBA4 rack in VEX file.
 
 			   C. Known FS Bugs
 
@@ -1104,15 +1236,23 @@ A more detailed discussion of these bugs follows.
 
 III. Installation
 
-Detailed instructions are provided below for installing 9.11.3.  The
+Detailed instructions are provided below for installing 9.11.5.  The
 immediately following paragraphs describe the necessary steps for each
 possible starting base installation to be upgraded, working backwards
 in terms of already installed version numbers.  All cases make use of
 the numbered steps (0-17) in this section.  The complete set of steps
 was developed for upgrading from 9.10.4.
 
+If you have version 9.11.4 installed, a subset of the installation
+steps can be followed to update to 9.11.5.  In this case, please
+follow steps (1)-(6), (8)-(9), (11), and at least some basic testing
+in step (16) to make sure there were no unexpected complications. .
+This shortened process omits most of the detailed control and
+procedure file updates that were needed for the update to previous
+versions of 9.11.
+
 If you have version 9.11.3 installed, a subset of the installation
-steps can be followed to update to 9.11.4.  In this case, please
+steps can be followed to update to 9.11.5.  In this case, please
 follow steps (1)-(6), (8)-(9), (11), and at least some basic testing
 in step (16) to make sure there were no unexpected complications. .
 This shortened process omits most of the detailed control and
@@ -1120,7 +1260,7 @@ procedure file updates that were needed for the update to previous
 versions of 9.11.
 
 If you have version 9.11.2 installed, a subset of the installation
-steps can be followed to update to 9.11.4.  In this case, please
+steps can be followed to update to 9.11.5.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) but only the two commands at the
 end should be needed for step 10, (11)-(12), (13G), (14F), and at
 least some basic testing in step (16) to make sure there were no
@@ -1130,7 +1270,7 @@ control and procedure file updates that were needed for the update to
 9.11.0.
 
 If you have version 9.11.1 installed, a subset of the installation
-steps can be followed to update to 9.11.4.  In this case, please
+steps can be followed to update to 9.11.5.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
 should be needed for step 10, (11)-(12), (13G), (14D), (14F), and at
 least some basic testing in step (16) to make sure there were no
@@ -1140,7 +1280,7 @@ DBBC.  This shortened process omits most of the detailed control and
 procedure file updates that were needed for the update to 9.11.0.
 
 If you have version 9.11.0 installed, a subset of the installation
-steps can be followed to update to 9.11.4.  In this case, please
+steps can be followed to update to 9.11.5.  In this case, please
 follow steps (1)-(6), (8)-(9), (10) only the two commands at the end
 should be needed for step 10, (11)-(12), (13F-G), (14D-F) and at least
 some basic testing in step (16) to make sure there were no unexpected
@@ -1170,7 +1310,7 @@ For reference, the list of the most recent "critical updates" is given
 below.  These are updates that must be applied sequentially.  Please
 start with the next update with a later version number than what you
 have and apply it and the following listed versions before upgrading
-to 9.11.4.  You can find the latest versions of installation notes for
+to 9.11.5.  You can find the latest versions of installation notes for
 these FS versions in the "/usr2/fs/misc" directory.  The list of
 critical updates is:
 
@@ -1311,7 +1451,7 @@ questions about how to cut-and-paste please contact Ed
 
 (2) Log-in as prog.
 
-(3) Place a copy of the fs-9.11.4 archive in your "/tmp" directory.
+(3) Place a copy of the fs-9.11.5 archive in your "/tmp" directory.
     For example you might do the following:
 
       cd /tmp
@@ -1320,7 +1460,7 @@ questions about how to cut-and-paste please contact Ed
       (enter your FS FTP password at the prompt)
       binary
       cd dist
-      get fs-9.11.4.tgz
+      get fs-9.11.5.tgz
       quit
 
     An FS server is also available at http://www.metsahovi.fi/fs/.
@@ -1334,12 +1474,12 @@ questions about how to cut-and-paste please contact Ed
 (5) Extract the source from the archive:
 
       cd /
-      tar -xzpf /tmp/fs-9.11.4.tgz
+      tar -xzpf /tmp/fs-9.11.5.tgz
 
 (6) Set the link for the new FS version:
 
       cd /usr2
-      ln -sfn fs-9.11.4 fs
+      ln -sfn fs-9.11.5 fs
 
 (7) It is recommended that your local files operations (control, proc,
     log, and sched directories) have the default ownership

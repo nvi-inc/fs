@@ -42,8 +42,7 @@
         endif
       endif
 
-      call setup_name(icod,ndx,cnamep)
-      call c2lower(cnamep,cnamep)  		!make it lower case
+      call setup_name(icod,cnamep)     
 
 C     Don't use the pass number for Mk5-only OR for no recorder.
       if(km5disk .or. knorec(1)) then 

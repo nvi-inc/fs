@@ -12,9 +12,7 @@ C  Common blocks:
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
       include 'bbc_freq.ftni' 
 
-! called functions
-      logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
-!      integer GETPID
+! called functions    
       
 
 C Subroutine interface:
@@ -53,6 +51,7 @@ C LOCAL:
       character*39 clabprint !used to hold print line
       logical krec2_found
       logical kmark5c_rec_found
+      character*20 cstat_tmp
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -329,7 +328,7 @@ C  In drcom.ftni
       cexpna = ' '
 C   Check for non-interactive mode.
       if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
-
+    
 C 3. Get the schedule file name
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
@@ -661,29 +660,17 @@ C  if it was not set by the schedule.
             if(cstrec(istn,2) .ne. 'none' .and.
      >        cstrec(istn,1) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
-        else !all stations
-          write(luscn,9067) lskdfi(1:l)
+        else !all stations                 
           do i=1,nstatn
             if(cstrec(i,1)  .eq. 'unknown' .or.
      >         cstrack(i) .eq. 'unknown') kknown=.false.
           enddo
         endif
       endif
-
-
-
+     
       if (.not.kbatch) then
 ! Several options for label line.
-         if (clabtyp.eq.'POSTSCRIPT') then
-           clabline=  ' 6 = Make PostScript label file       '
-           clabprint= ' 61= Print PostScript label file'
-         else if (clabtyp.eq.'DYMO') then
-           clabline=  ' 6 = Make DYMO label file             '
-           clabprint= ' 61= Print DYMO label file'
-         else
-           clabline=  ' 6 = Make tape labels                 '
-           clabprint=" "
-         endif
+       
 
       if (kskd) then !schedule file
         l=trimlen(lskdfi)
@@ -698,11 +685,7 @@ C       Are the equipment types now known?
 9069        format(/' Equipment at ',a,':'/'   Rack: ',a,
      .       ' Recorder 1: ',a,' Recorder 2: ',a)
             if (nrecst(istn).eq.2) write(luscn,9070) cfirstrec(istn)
-9070        format(' Schedule will start with recorder ',a1,'.')
-            if(km5a_piggy)
-     >          write(luscn,'("   Mark5A in piggyback mode. ")')
-            if(km5p_piggy)
-     >          write(luscn,'("   Mark5P in piggyback mode. ")')
+9070        format(' Schedule will start with recorder ',a1,'.')         
           else
             write(luscn,9169) cstnna(istn)
 9169        format(/' Equipment at ',a,' is unknown. Use Option 11',
@@ -712,34 +695,17 @@ C       Are the equipment types now known?
 
         endif ! one station check equipment
 
-        kallowpig=(istn .gt. 0)
+        kallowpig=.false. 
         if (istn.gt.0) then !one station check equipment
-          WRITE(LUSCN,9068) lskdfi(1:l),cstnna(istn)
-9068      FORMAT(/' Select DRUDG option for schedule ',A,' at ',A8)
-          if(kheaduse(2,istn).or.               !can't do piggy if 2nd head is active.
-     >       (cstrack(istn) .eq. "Mark3A") .or. !or for mark3 formatters
-     >       (cstrack(istn)(1:2).eq."K4".and.   !or k4 (non-mk4 formatters)
-     >               cstrack(istn)(6:7) .ne."M4") .or.
-     >        cstrec(istn,1) .eq. "S2"      .or.     !Can't do piggyback with S2 recorders
-     >        cstrec(istn,1) .eq. "Mark5A"  .or.     !Can't do piggyback with Mark5A or Mark5P recorders.
-     >        cstrec(istn,1) .eq. "Mk5APigW" .or.
-     >        cstrec(istn,1) .eq. "Mark5P"  .or. 
-     >        cstrec(istn,1) .eq. "Mark5B") then
-              kallowpig=.false.
-           endif
+          cstat_tmp=cstnna(istn)
         else
-          write(luscn,9067) lskdfi(1:l)
-9067      FORMAT(/' Select DRUDG option for schedule ',A,
-     .       ' (all stations)'/)
-        endif ! one station check equipment
-
-        if(istn .gt. 0) then
-          if(cstrec(istn,1)(1:5) .eq. "Mark5") then !test is case sensitive
-             clabline=" "
-             clabprint=" "
-          endif
+          cstat_tmp=" all stations"
         endif
-
+        write(luscn,
+     >   '("Select DRUDG option for schedule ", a, " at ",a)')
+     >   lskdfi(1:l), cstat_tmp 
+     
+      
          write(luscn,'(a)')
      >      ' 1 = Print the schedule               '//
      >     '  7 = Re-specify stations'
@@ -770,14 +736,9 @@ C       Are the equipment types now known?
             write(luscn,'()')
           endif
 
-          write(luscn,'(a,"12 = Make procedures (.PRC) ")') clabline
-          if (klabel_ps .and.  clabprint .ne. " ")
-     >      write(luscn,'(a)') clabprint
-
-          if(kallowpig) then
-              write(luscn,'(38x,a)')' 13 = Toggle Mk5A piggyback mode '
-              write(luscn,'(38x,a)')' 14 = Toggle Mk5P piggyback mode '
-          endif
+          write(luscn,'(38x," 12 = Make procedures (.PRC) ")')
+         
+      
           if(istn .ne. 0 .and. km5Disk .and.
      >       (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
              write(luscn,'(38x,a)') ' 15 = Data Transfer Overide '
@@ -927,31 +888,7 @@ c            I = nstnx
           ELSE IF (IFUNC.EQ.4) THEN
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
-            call procs
-          ELSE IF (IFUNC.EQ.13) THEN
-            if (km5A_piggy) then
-              write(luscn,"('Mark5A piggyback mode turned OFF')")
-              km5A_piggy = .false.
-            else
-              write(luscn,"('Mark5A piggyback mode turned ON')")
-              km5A_piggy = .true.
-              if(km5P_piggy) then
-                write(luscn,"('Mark5P piggyback mode turned OFF')")
-                km5P_piggy=.false.
-              endif
-            endif
-          ELSE IF (IFUNC.EQ.14) THEN
-            if (km5P_piggy) then
-              write(luscn,"('Mark5P piggyback mode turned OFF')")
-              km5P_piggy = .false.
-            else
-              write(luscn,"('Mark5P piggyback mode turned ON')")
-              km5P_piggy = .true.
-              if(km5A_piggy) then
-                write(luscn,"('Mark5A piggyback mode turned OFF')")
-                km5A_piggy=.false.
-              endif
-            endif
+            call procs       
           else if(ifunc .eq. 15 .and. km5Disk) then
               call xfer_override(luscn)
           else if (ifunc.eq.51) then

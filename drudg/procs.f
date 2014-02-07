@@ -1,5 +1,4 @@
         SUBROUTINE PROCS
-
 C PROCS writes procedure file for the Field System.
 C Version 9.0 is supported with this routine.
 
@@ -271,85 +270,59 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 !             Numerous changes to support DBBC.
 ! 2012.09.20 JMG. If an error in some routine, then delete the partial ".prc" file that was written 
 ! 2012.02.21 JMG. Modified to issue TPICD only in some cases. WEH changed his mind. 
+! 2014.01.17 JMG. Moved 'setup' stuff into separate subroutine. Got rid of unused variables.
+! 2014Jan21 JMG.  Commented out calls to loader/unloader since no more tapes.      
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
 
 ! Functions
-      character upper     
-      integer ib2as,mcoma,trimlen ! functions
-      integer iroll_def
+      integer trimlen ! functions     
 
 C LOCAL VARIABLES:
-C     integer itrax(2,2,max_headstack,max_chan) ! fanned-out version of itras
       integer IC,ierr,i,j
-      integer nch,ipass,icode,it
-      integer irecbw,ir,idef,ival
-      integer npmode
-      integer ibit,ichan,nprocs
+      integer icode
+      integer ir
+      integer nprocs
       logical kpcal_d,kpcal
-      logical kroll             !barrel roll on
-      logical kman_roll         !manual barrel roll on
-      logical ktpicd
-
+      integer itemp 
+      integer itpicd_period_use
+      character*80  ldum 
+ 
 
 C     real speed,spd
 C     integer*2 lspd(4)
-C     integer nspd
-      CHARACTER*128 RESPONSE
-      character*12 cnamep
+C     integer nspd     
       character*12 cname_vc
-      character*12 cname_ifd
-
-      logical kdone
-   
-      real samptest
-      integer Z4000,Z100
-      integer il,itpicd_period_use
-      logical khead2active       !head2 is used?
+      character*12 cname_ifd     
+       
       logical kk4vcab
-
-      character*1 cvpass(28)
-      character*28 cvpassTmp
-      equivalence (cvpass,cvpassTmp)
+    
       character*2 codtmp
-      integer*2   icodtmp
-      equivalence (codtmp,icodtmp)     	!cheap trick to convert form Holerith to ascii
-      character*4 cpmode                !mode for procedure names  
-      integer num_chans_obs         	!number of channels observer
-      integer num_tracks_rec_mk5        !number we record=num obs * ifan
-      character*80 ldum
-      integer ifan_fact                 !identical to ifan(,) unless ifan(,)=0, in which case this is 1.
-      integer num_sub_pass              !number of passes we loop on.
-                                        !For mark5 mode this is 1. For other recorders is npassf
-      integer NumTracks
-      character*5 lform                 !Mark4 or VLBA
+      character*4 cpmode                !mode for procedure names          
+     
       logical kin2net_on                !Is in2net on?
 
       logical ktrkf                     !write out trf procedure?
       character*1 lwhich8               ! which8 BBCs used: F=first, L=last
       character*2 cifinp_save(max_chan,max_frq)
-      character*4 contcal_out
   
 C
-C INITIALIZED VARIABLES:
-      data Z4000/Z'4000'/,Z100/Z'100'/
-      data CvpassTmp /'abcdefghijklmnopqrstuvwxyzab'/
+C INITIALIZED VARIABLES:      
 
       if (kmissing) then
-        write(luscn,9101)
-9101    format(/' PROCS00 - Missing or inconsistent head/track/pass',
-     .  ' information.'/' Your procedures may be incorrect, or ',
-     .  ' may cause a program abort.')
+        write(luscn,'(a)') 
+     > ' PROCS00: Missing or inconsistent head/track/pass information.'
+        write(luscn,'(a)')
+     >' Your procedures may be incorrect, or may cause a program abort.'
       endif
 
       if(cstrack(istn).eq. "unknown" .or.
      >   cstrec(istn,1) .eq. "unknown") then
-        write(luscn,9102)
-9102    format(/' PROCS01 - Rack or recorder type is unknown. Please',
-     .  ' specify your '/
-     .  ' equipment using Option 11 or the EQUIPMENT line in the ',
-     .  ' control file.')
+        write(luscn,'(a)')' PROCS01: Rack or recorder type is unknown!'
+        write(luscn,'(a)') 
+     >  'Please specify your  equipment using Option 11 OR'
+        write(luscn,'(a)') 'the EQUIPMENT line in the  control file.'
         return
       endif
 
@@ -365,57 +338,36 @@ C INITIALIZED VARIABLES:
           if (kk42rec(1).and.kk42rec(2)) kk4vcab=.true.
         endif
       endif
+
+      itpicd_period_use = itpid_period
+      if (tpid_prompt.eq."YES") then ! get TPID period
+50      continue       
+        write(luscn,9132) itpid_period
+9132    format(' Enter TPI period in centiseconds (default is',I5,
+     >         ', 0 for OFF):  ',$)
+        read(luusr,'(A)') ldum
+        itemp=trimlen(ldum)
+        if (itemp.eq.0) then ! default
+          itpicd_period_use = itpid_period         
+        else ! decode it
+          read(ldum,'(i10)',ERR=50) itemp
+          if (itemp.ge.0) then
+            itpicd_period_use = itemp   
+          else 
+            write(luscn,'("Invalid period, must be >=0.")')
+            goto 50 
+          endif
+        endif ! default/decode      
+      endif ! get TPID period
     
-      ktpicd = Km3rack.or.km4rack.or.kvrack.or.kv4rack.or. klrack .or.
-     >         kdbbc_rack .or.
-     >        ((km5rack .or. kv5rack) .and. km5brec(1)) 
- 
-   
+      
       WRITE(LUSCN,'( "Procedures for ",a)') cstnna(istn)
 C
       call purge_file(prcname,luscn,luusr,kbatch,ierr)
       if(ierr .ne. 0) return
 
       luFile=lu_outfile
-      itpicd_period_use = itpid_period
-      if (tpid_prompt.eq."YES") then ! get TPID period
-        kdone = .false.
-        do while (.not.kdone)
-9932      write(luscn,9132) itpid_period
-9132      format(' Enter TPI period in centiseconds (default is',
-     .    i5,', 0 for OFF):  ',$)
-          read(luusr,'(A)') response
-          il=trimlen(response)
-          if (il.eq.0) then ! default
-            itpicd_period_use = itpid_period
-            kdone = .true.
-          else ! decode it
-            read(response,'(i10)',ERR=9932) ival
-            if (ival.ge.0) then
-              itpicd_period_use = ival
-              kdone = .true.
-            else 
-              write(luscn,'("Invalid period, must be >=0.")')
-            endif
-          endif ! default/decode
-        enddo
-      endif ! get TPID period
-
-! Initialize contcal_out
-      if(kdbbc_rack) then
-        contcal_out=contcal_prompt
-        call lowercase(contcal_out)
-        write(*,*) "Contcal: ",contcal_out
-        do while(.not. (contcal_out .eq. "on".or.
-     >                  contcal_out .eq. "off".or.
-     >                  contcal_out .eq. "no" .or. 
-     >                  contcal_out .eq. " "))      
-         write(*,*) "Enter in cont_cal action: (on/off)"
-         read(*,*) contcal_out
-         call lowercase(contcal_out)
-       end do
-      endif 
-
+ 
       ic=trimlen(prcname)
       WRITE(LUSCN,"(' PROCEDURE LIBRARY FILE ',A,' FOR ',a8)")
      >   PRCNAME(1:ic), cstnna(istn)
@@ -423,7 +375,7 @@ C
       write(luscn,'(a)')
      >      ' NOTE: These procedures are for the following equipment:'
       write(luscn,'(3x,"Rack:       ",a8)')  cstrack(istn)
-      write(luscn,     '(3x,"Recorder 1: ",a8)')  cstrec(istn,1)
+      write(luscn,'(3x,"Recorder 1: ",a8)')  cstrec(istn,1)
       if(nrecst(istn) .eq. 2)
      >     write(luscn,'(3x,"Recorder 2: ",a8)')  cstrec(istn,2)
 
@@ -454,11 +406,13 @@ C    Generate the procedure name, then write into proc file.
 C    Get the track assignments first, and the mode name to use
 C    for procedure names.
 
+
+! Note. Do not do track for VLBA5 or Mark5.  
       DO ICODE=1,NCODES !loop on codes
       if (nchan(istn,icode).gt.0) then ! this mode defined
         nprocs=0
         codtmp=ccode(icode)
-        call c2lower(codtmp,codtmp)
+        call lowercase(codtmp)
 
         kpcal = .true.    ! on/off switch, default is on for non-VEX files
         kpcal_d = .false. ! detection or not
@@ -470,314 +424,14 @@ C    for procedure names.
           end do
         endif ! check for on/off
 
-        kroll = .false.
-        kman_roll = .false.   !default is canned roll.
-        if(km5disk) then
-           continue
-        else if (.not.(cbarrel(istn,icode) .eq. " " .or.
-     >            cbarrel(istn,icode) .eq. "off " .or.
-     >            cbarrel(istn,icode) .eq. "NONE")) then
-          kroll = .true.
-          kman_roll=cbarrel(istn,icode)(1:1) .eq. "M"
-        endif ! a roll mode
 
-! don't have sub-passes for mk5-mode
-        num_sub_pass=npassf(istn,icode)
-        if(num_sub_pass.gt.1.and.km5disk) num_sub_pass=1
-
-        DO IPASS=1,num_sub_pass  !loop on number of sub passes    
-        do irec=1,nrecst(istn) ! loop on number of recorders
-          if (.not.kuse(irec)) goto 300   !Go to end of loop.
-
-          call setup_name(icode,ipass,cnamep)
-          call proc_write_define(lu_outfile,luscn,cnamep)
-
-          if((ks2rec(irec) .and. klrack) .or. .not. ks2rec(irec)) then
-            call trkall(ipass,istn,icode,
-     >          cmode(istn,icode), itrk,cpmode,npmode,ifan(istn,icode))
-          else
-                cmode(istn,icode)="S2"
-          endif
-
-          call c2lower(cpmode,cpmode)
-
-          km3mode=cpmode(1:1).ge."a".and. cpmode(1:1).le."e"
-          km3be=  cpmode(1:1).eq."b".or.  cpmode(1:1).eq."e"
-          km3ac=  cpmode(1:1).eq."a".or.  cpmode(1:1).eq."c"
-c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
-          kpiggy_km3mode =km3mode               !2hd mk3 on mk5  !------2hd---
-
-          if(km5p_piggy .or. km5A_piggy .or. km5disk)
-     >       kpiggy_km3mode=.false.
-
-          if(k8bbc.and.(cpmode(1:1).eq."a".or.cpmode(1:1).eq."c"))then
-            write(luscn,"(/,a)")
-     >        " This is a Mode A or C experiment at an 8-BBC station."
-            lwhich8=" "
-            do while (lwhich8 .ne. "F" .or. lwhich8 .ne. "L")
-              write(luscn,'(a)')
-     >          " Do you want the first or last 8 channels(F/L) ? "
-              read(luusr,'(A)') lwhich8
-              lwhich8 = upper(lwhich8)
-            end do
-          endif
-
-C Find out if any channel is LSB, to decide what procedures are needed.
-          klsblo=.false.
-          DO ichan=1,nchan(istn,icode) !loop on channels
-            ic=invcx(ichan,istn,icode) ! channel number
-            if (abs(freqrf(ic,istn,icode)).lt.freqlo(ic,istn,icode))
-     >         klsblo=.true.
-          enddo
-
-          ktrkf =
-     >    ((kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)      ! Valid recorders
-     >      .or. Km5Disk.or.kk41rec(ir).or.kk42rec(ir)))
-     >     .and.
-     >     ((km4rack.or.kvrack.or.kv4rack.or.kk41rack.or.kk42rack).and.        ! Valid rack types.
-     >       (.not.kpiggy_km3mode  .or.Km5A_piggy .or.klsblo         ! valid "modes"
-     >       .or.((km3be.or.km3ac).and.k8bbc)))
-     >      .or. (ks2rec(ir) .and. klrack)
-
-! Note. Do not do track for VLBA5 or Mark5.  
-
-
-          if(km5disk .or. km5A_piggy .or. km5P_piggy) then
-            ifan_fact=max(1,ifan(istn,icode))
-            call find_num_chans_rec(ipass,istn,icode,
-     >            ifan_fact,num_chans_obs,num_tracks_rec_mk5)
-            NumTracks=num_chans_obs*ifan_fact
-            if(NumTracks .gt. 32) then
-              if(km5p) then
-                write(luscn,'(/,a,i3)')
-     >           "PROCS10 - Can only record 32 tracks in MK5P mode. "//
-     >           "Tried to record: ",numTracks
-                return
-              else if(Km5ApigWire(1).or.Km5APigWire(2)) then
-                write(luscn,'(/,a,i3)')
-     >          "PROCS11 - Can only record 32 tracks in MK5APigwire "//
-     >          " mode. Tried to record: ",numTracks
-                return
-              endif
-            endif
-            call proc_mk5_init1(num_chans_obs,num_tracks_rec_mk5,
-     >            luscn,ierr)
-            if(ierr .ne. 0) goto 9100 
-          endif
-C
-C 3. Write out the following lines in the setup procedure:
-C
-C Setup name for IFADJUST data base reference.
-C SETUP_NAME=experiment
-
-C SELECT=A/B
-C DRIVEA/B
-          if(nrecst(istn).gt.1.and.krec_append) then ! dual drives
-            if (kvrec(irec).or.km3rec(irec).or.km4rec(irec).or.
-     .          kv4rec(irec).or.ks2rec(irec).or.kk41rec(irec).or.
-     .          kk42rec(irec)) then
-                write(lu_outfile,'("select=",a1)') crec(irec)
-                write(lu_outfile,'("drive",a1)') crec(irec)
-            endif
-          endif ! dual drives
-
-C  PCALON or PCALOFF
-          if (kpcal) then
-            write(lu_outfile,'(a)') 'pcalon'
-          else
-            write(lu_outfile,'(a)') 'pcaloff'
-          endif
-
-C  TPICD=STOP
-          if(ktpicd) then
-             write(lu_outfile,'(a)') 'tpicd=stop'
-          endif 
-
-          if (kvrec(irec).or.kv4rec(irec)
-     >       .or.km3rec(irec).or.km4rec(irec) .or.Km5disk) then
-C  PCALD=STOP
-            if (kpcal_d)  write(lu_outfile,'(a)') 'pcald=stop'
-c check if 2nd head active, i.e. hd posns are set
-            khead2active=.false.
-            do i=1,max_pass !2hd
-              if (ihdpos(2,i,istn,icode).ne.9999)khead2active=.true.       !2hd
-            enddo !2hd
-C  TAPEFffm
-            if(.not.km5disk) then ! no TAPEFORM for mk5
-              call proc_tapef_name(codtmp,cpmode,cnamep)
-              write(lu_outfile,'(a)') cnamep
-
-C  PASS=$,SAME
-              if((km3rec(irec).or.km4rec(irec).or.kv4rec(irec)) .and.
-     >           .not.khead2active) then
-                 call snap_pass('=$,same')
-              else if((km4rec(irec).or.kv4rec(irec))
-     >                 .and.khead2active)then
-                 call snap_pass('=$,mk4')
-               else
-                 call snap_pass('=$')
-               endif
-            endif  ! no TAPEFORM for mk5
-C  TRKFffmp
-C  Also write trkf for Mk3 modes if it's an 8 BBC station or LSB LO
-c..2hd..if piggy make sure mk3 modes are written
-            if(ktrkf .and. .not. klrack) then !For LBA, write trkf latter
-              call name_trkf(codtmp,cpmode,cvpass(ipass),cnamep)
-              write(lufile,'(a)') cnamep
-            endif
-C  PCALFff
-            if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
-              call snap_pcalf(codtmp)
-            endif
-C  ROLLFORMff
-            if(ktrkf .and. kman_roll .and.
-     >         (km4rack.or.kvracks.or.km4fmk4rack)) then
-                call snap_rollform(codtmp)
-            endif ! non-canned roll
-C  TRACKS=tracks
-C  Also write tracks for Mk3 modes if it's an 8 BBC station or LSB LO
-            call proc_tracks(icode,num_tracks_rec_mk5)
-          endif ! all these for only km3rec km4rec kvrec kv4rec km5prec
-
-! Output S2 Mode stuff.
-          if (ks2rec(irec)) then ! S2 mode
-            call proc_s2_comments(icode,kroll)
-          endif ! ks2rec
-
-C REC_MODE=<mode> for K4
-C !* to mark the time
-          if (kk42rec(irec).or.kk41rec(irec)) then ! K4 recorder
-            call snap_rec('=synch_on')
-            if (kk42rec(irec)) then ! type 2 rec_mode
-              irecbw = 16.0*samprate(istn,icode)
-              if(krec_append) then
-                 write(ldum,'("rec_mode",a1,"=",i3)') crec(irec), irecbw
-              else
-                 write(ldum,'("rec_mode=",i3)') irecbw
-              endif
-              call squeezewrite(lu_outfile,ldum)
-              write(lu_outfile,'("!*")')
-            endif ! type 2 rec_mode
-C  RECPff
-C           No RECP procedure if it's a Mk3 mode.
-            if ((km4rack.or.kvracks.or.kk41rack.or.kk42rack)
-     .       .and. (.not.kpiggy_km3mode.or.klsblo
-     .      .or.((km3be.or.km3ac).and.k8bbc))) then
-              call snap_recp(codtmp)
-            endif
-          endif ! K4 recorder
-C  NONE rack gets comments
-          if(cstrack(istn).eq."none" .or.cstrack(istn).eq."NONE") then
-            call proc_norack(icode)
-          endif ! none rack comments
-C  PCALD=
-          if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
-            write(lu_outfile,'(a)') 'pcald='
-          endif
-
-C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b)
-C  For S2, leave out command entirely
-C  For 8-BBC stations, use "M" for Mk3 modes
-! Note: Don't do Form or tracks command for Mark5 formatters
-       
-        if((km3form .or. km4form .or. kvform) .and. .not.
-     >        (ks2rec(irec) .or. kk41rec(irec) .or. kk42rec(irec))) then
-              call proc_form(icode,ipass,kroll,kman_roll,lform)
-          endif ! kvracks or km3rac.or.km4rack but not S2 or K4
-
-C  BBCffb, IFPffb  or VCffb
-          if (kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
-            call proc_vcname(kk4vcab,                     !Make the VC procedure name.
-     >        ccode(icode),vcband(1,istn,icode),cname_vc)
-
-            write(lu_outfile,'(a)') cname_vc
-!  TRKFffmp for LBA rack +s2 recorder.  Must come after IFPffb commmand.
-            if (ks2rec(irec)) then
-              call name_trkf(codtmp,cpmode,cvpass(ipass),cnamep)
-              write(lufile,'(a)') cnamep
-            endif ! klrack.and.ks2rec
-            cname_ifd="ifd"//codtmp
-            writE(lu_outfile,'(a)') cname_ifd
-          endif ! kbbc kvc kfid
-
-          if(kdbbc_rack) then   
-            write(lu_outfile,'("cont_cal=", a)') contcal_out
-            ldum="bbc_gain=all,agc"
-            if(idbbc_bbc_target .gt. 0) then
-               write(ldum(20:30),'(",",i5)') idbbc_bbc_target
-            endif 
-            call squeezewrite(lu_outfile,ldum)           
-          endif        
-
-C  FORM=RESET
-          if (km3rack.and..not.(ks2rec(irec).or. km5Disk))then
-            write(lu_outfile,'(a)') 'form=reset'
-          endif
-C  !*
-          if (kvrack.and..not.
-     >       (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec))) then
-             write(lu_outfile,'(a)') '!*'
-          endif
-
-C  TPICD=no,period
-          if(ktpicd) then 
-            call snap_tpicd("no",itpicd_period_use)
-          endif
-
-C  BIT_DENSITY=
-C  SYSTRACKS=
-          if (kv4rec(irec).or.kvrec(irec)) then ! bit_density & SYSTRACK
-            ibit=bitdens(istn,icode)
-            call snap_bit_density(ibit)
-            call snap_systracks(" ")
-          endif
-C  TAPE=LOW
-C  ENABLE=tracks
-          if (kvrec(irec).or.kv4rec(irec).or.km3rec(irec).or.
-     .      km4rec(irec)) then
-            call snap_tape("=low")
-            call proc_enable_repro(icode,khead2active)
-          endif
-C DECODE=a,crc
-C replaced with CHECKCRC station-specific procedure
-          if ((kv4rack.or.km3rack.or.km4rack).and..not.
-     .       (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec))) then ! decode commands
-            samptest = samprate(istn,icode)
-            if (ifan(istn,icode).gt.0)
-     .        samptest=samptest/ifan(istn,icode)
-            if (samptest.lt.7.5) then ! no double speed decoding
-              write(lu_outfile,'(a)') 'checkcrc'
-            endif
-          endif ! decode commands
-C !*+8s for VLBA formatter
-          if (kvrack.and..not.
-     >      (ks2rec(irec).or.kk41rec(irec).or.kk42rec(irec))) then ! formatter wait
-            write(lu_outfile,"('!*+8s')")
-          endif
-
-          if(km5disk .or. km5A_piggy) then
-            call proc_mk5_init2(lform,ifan(istn,icode),
-     >             samprate(istn,icode),num_tracks_rec_mk5,luscn,ierr)
-          endif
-
-C !*+20s for K4 type 2 recorder
-          if (kk42rec(irec)) then ! formatter wait
-            write(lu_outfile,"('!*+20s')")
-          endif
-C  PCALD
-          if (kpcal_d.and.(km4rack.or.kvrack.or.kv4rec(irec))) then
-            write(lu_outfile,'(a)') 'pcald'
-          endif
-C  TPICD always issued
-          if(ktpicd) then
-            write(lu_outfile,'(a)') "tpicd"
-          endif 
-  
-          if(km5a .or. km5a_piggy) write(lu_outfile,'(a)') "mk5=mode?"
-          write(lu_outfile,'(a)') "enddef"
-300     continue
-        enddo ! loop on number of recorders
-        ENDDO ! loop on number of passes
+! Here we write out the setup procedure.     
+        call proc_setup(icode,codtmp,ktrkf,kpcal,kpcal_d,kk4vcab,
+     >   itpicd_period_use, cname_ifd,cname_vc,lwhich8,cpmode,ierr)
+        if(ierr .ne. 0) goto 9100 
+   
+!********  END SETUP PROCEDURE **************************************************************
+     
 C
 C Now continue with procedures that are code-based only.
 ! Debug JMG
@@ -820,7 +474,7 @@ C For most cases only one copy of this proc should be made.
 C
 C 5. Write TAPEFffm procedure.
 C    command format: TAPEFORM=index,offset lists
-      call proc_tape(icode,codtmp,cpmode)
+!      call proc_tape(icode,codtmp,cpmode)
 
  !     goto 9000
 C
@@ -831,9 +485,9 @@ C These procedures do not depend on the type of recorder.
 C The check for recorder type is included only so that the
 C same logic can be used for TRKF and RECP.
 C Therefore, use the index of the recorder in use for all the tests 
-C in this section.
+C in this section.     
       if(ktrkf) then
-        call proc_trkf(icode,num_sub_pass,lwhich8,ierr)
+        call proc_trkf(icode,lwhich8,ierr)
         if(ierr .ne. 0) goto 9100
       endif ! kvrec.or.kv4rec.or.km3rec.or.km4rec
 !     goto 9000
@@ -846,14 +500,14 @@ C same logic can be used for TRKF and RECP.
 C Therefore, use index 1 for all the tests in this section.
 
       if (kpcal_d) then 
-      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
-     >   .or.Km5Disk) then
+!      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
+!     >   .or.Km5Disk) then
         if ((km4rack.or.kvracks.or.kv5rack).and.
      .      (.not.kpiggy_km3mode.or.klsblo
      .      .or.((km3be.or.km3ac).and.k8bbc))) then
           call proc_pcalf(icode,lwhich8)
         endif ! km4rack.or.kvracks
-      endif ! kvrec.or.kv4rec.or.km3rec.or.km4rec
+!      endif ! kvrec.or.kv4rec.or.km3rec.or.km4rec
       endif ! only vex knows pcal
 
 C 8. Write ROLLFORM procedures, one per pass.
@@ -864,34 +518,16 @@ C in this section.
 C If barrel roll is "M" then write these procedures. Not needed for
 C the canned "8" or "16" roll tables.
 C    
-      if (km4form .or. klrack ) then
-        if (kman_roll) then
-          cnamep="rollform"//ccode(icode)
-          call proc_write_define(lu_outfile,luscn,cnamep)
-C ROLLFORM=
-          write(lu_outfile,'(a)') 'rollform='
-C ROLLFORM commands
-          DO idef = 1,nrolldefs(istn,icode) ! loop on roll defs
-            cbuf="rollform="
-            nch=10
-            do it=1,2+nrollsteps(istn,icode)
-              nch = nch + ib2as(iroll_def(it,idef,istn,icode),ibuf,
-     .              nch,Z4000+2*Z100+2) ! tracks
-              nch = mcoma(ibuf,nch)
-            enddo
-            write(lu_outfile,'(a)') cbuf(1:nch-2)  ! get rid of last comma
-          enddo ! loop on roll defs
-          write(lu_outfile,"(a)") 'enddef'
-        endif ! manual roll
-      endif ! km4rack.or.kvracks.or.km4fmk4rack
-
+    
 C  End of major loop for each code
       endif ! this mode defined
 !      write(luscn,'()')
       ENDDO ! loop on codes
 
+
 C 9. Write out standard tape loading and unloading procedures
-      call proc_load_unload()
+! Don't need since we no longer have tapes. 
+!      call proc_load_unload()
 
 C 10. Finally, write out the procedures in the $PROC section of the sked file.
 C Read each line and if our station is mentioned, write out the proc.

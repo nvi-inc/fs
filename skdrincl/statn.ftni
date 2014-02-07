@@ -100,13 +100,14 @@ C             false if it's step functions
       character*1 cstcod(max_stn)               !Single letter code. Only used internally.
       character*8 cstrack_orig(max_stn)         !This keeps track of original configuration.
       character*8 cstrec_orig(max_stn,2)
-
+      character*8 cstrack_cap(max_stn)
 
 
       common /statn_ch/cstnna,cantna,coccup,cterna,cstrec,cstrack
       common /statn_ch/cterid,cfirstrec,cbsefd,cs2speed
       common /statn_ch/cpocod,chccod,cstcod
       common /statn_ch/cstrack_orig, cstrec_orig
+      common /statn_ch/cstrack_cap
 
       character*128 stndefnames
       character*128 tape_motion_type

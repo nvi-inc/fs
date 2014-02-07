@@ -53,7 +53,7 @@ C                    <0 indicates invalid value for a field
       integer nifdefs ! number of IFDs found
 
       integer num_valid_if
-      parameter (num_valid_if=27)
+      parameter (num_valid_if=29)
       character*2 cvalid_if(num_valid_if) 
 
 C
@@ -62,9 +62,9 @@ C  LOCAL:
       double precision d
       integer id,nch
       data cvalid_if/"A", "B", "C", "D", "1",     !5
-     >               "1N","2N","2A","30","3I","3N",    !+6=11
-     >   "A1","A2","A3","A4","B1","B2","B3","B4",
-     >   "C1","C2","C3","C4","D1","D2","D3","D4"/ !+16=27
+     >   "1N","1A","2N","2A","3N","3A","3O","3I", !8
+     >   "A1","A2","A3","A4","B1","B2","B3","B4", !8
+     >   "C1","C2","C3","C4","D1","D2","D3","D4"/ !8
 
 C
 C  Initialize
