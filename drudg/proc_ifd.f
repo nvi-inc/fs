@@ -40,8 +40,7 @@ C    for LBA:   lo=same as Mk3 ( but allow up to 4 IFs)
 !    for DBBC   ifX=input,agc,filter#,target  where X=A,B,C,D and input=1,2,3,4, target=1-65535
 ! 
 
-C Later: add a check of patching to determine how the IF3 switches
-C should really be set. 
+C Later: add a check of patching to determine how the IF3 switches should really be set. 
 C         if (VC3  is LOW) switch 1 = 1, else 2
 C         if (VC11 is LOW) switch 2 = 1, else 2
 
@@ -63,8 +62,11 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       integer nch               !character counter  
       character*2  cif          !Holds IF name.
       character*1 ch1           !Single character 
-      logical kdone_bbc(max_bbc) 
+      real*8  rlo_dif31         !LO freq3-lo freq1 (if both definied)
+      real*8  tol               !tolerance: How close to zero do we need to be. 
+      logical kdone_bbc(max_bbc)       
  
+      tol=0.00001
       call proc_write_define(lu_outfile,luscn,cname_ifd)
 
 ! Initialize IFDs to not used.
@@ -178,15 +180,22 @@ C  First determine the patching for VC3 and VC10.
             endif
           endif
         enddo
-        if(ifd(3).ne.0) then ! IF3 exists, write the command
+      endif 
+
+! Mk3/4, K4  and LBA
+! Put out IF3 if it exits
+      if(kvc .or. klrack) then 
+        if(ifd(1) .ne. 0 .and. ifd(3) .ne. 0) then 
+          rlo_dif31=freqlo(ifd(3),istn,icode)-freqlo(ifd(1),istn,icode)
+          if(rlo_dif31 .eq. 0.d0 .or. abs(rlo_dif31-500.1).lt.tol) then 
+  
 ! Make a string that looks something like:
 !          if3=,in,ivc3_patch,ivc_10_path,,,on
-          cbuf="if3=,in,"    !default case.
-          nch=9
+            cbuf="if3=,in,"    !default case.
+            nch=9
 ! check " if3=,out" possibility. Different for VEX and non-vex.
-          if(kvex.and.cifinp(ifd(3),istn,ICODE)(2:2).eq. 'O' .or.
-     >       .not.kvex .and. ifd(1).ne.0 .and.
-     >     freqlo(ifd(3),istn,icode).eq.freqlo(ifd(1),istn,icode))then
+            if(kvex.and.cifinp(ifd(3),istn,ICODE)(2:2).eq. 'O' .or.
+     >         .not.kvex  .and. rlo_dif31 .eq. 0.d0) then      
            cbuf="if3=,out,"
            nch=10
           endif
@@ -200,6 +209,7 @@ C              Add phase cal on/off info as 7th parameter.
             nch=ichmv_ch(ibuf,nch,'off')
           endif ! value/off
           write(lu_outfile,'(a)') cbuf(1:nch)
+          endif 
         endif ! we know/don't know about IF3  
       endif 
 

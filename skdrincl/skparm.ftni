@@ -149,7 +149,7 @@ C       only S/X observations. ***
 C     Several frequency codes may be selected, as long as they
 C     are composed of a maximum of two bands, e.g. S and X.
 C
-      integer max_band,max_flux,max_vlba,max_sefdpar,max_nrs
+      integer max_band,max_flux,max_vlba,max_sefdpar
       PARAMETER (MAX_BAND = 2)
 C
 C     The maximum size of flux arrays. For source models, this number
@@ -170,8 +170,6 @@ C     Maximum number of VLBA entries.
 C
 C     Maximum number of rise/set times in arrays.
 
-      parameter (MAX_NRS = 4)
-C
 C     Maximum number of parameters for the calculation of
 C     elevation-dependent SEFDs.
 

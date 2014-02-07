@@ -20,7 +20,7 @@
       return
       end
 !************************************************************
-      subroutine snap_last_wait_time(itimeout)
+      subroutine snap_get_last_wait_time(itimeout)
       implicit none
       integer itimeout(5)
       integer i
