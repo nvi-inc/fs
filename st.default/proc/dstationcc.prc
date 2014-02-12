@@ -39,6 +39,7 @@ bbc13
 mk5b_mode
 !+1s
 mk5=dot?
+mk5=bank_set?
 sy=run setcl adapt &
 enddef
 define  midtp         00000000000
@@ -163,6 +164,13 @@ xdisp=off
 enddef   
 define  checkmk5      00000000000 
 scan_check
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
 mk5=get_stats?
 mk5=status?
 enddef
