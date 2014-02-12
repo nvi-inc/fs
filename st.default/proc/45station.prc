@@ -49,6 +49,7 @@ vc05
 vc09
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
+mk5=bank_set?
 sy=run setcl &
 enddef
 define  midtp         00000000000
@@ -169,6 +170,13 @@ define  checkcrc      00000000000
 enddef
 define  checkmk5      00000000000 
 scan_check
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
+mk5=get_stats?
 mk5=get_stats?
 mk5=status?
 enddef
