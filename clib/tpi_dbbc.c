@@ -217,7 +217,6 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	    if(ptr2[i] > 65534 ) {
 	      strcat(ibuf,"$$$$$,");
 	    } else {
-	      printf("tpput ptr2[%d] tpi %d\n",i,ptr2[i]);
 	      flt2str(ibuf,dbbc_if_power(ptr2[i], j),8,2);
 	      strcat(ibuf,",");
 	    }
