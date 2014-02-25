@@ -1,0 +1,74 @@
+============================================================
+2014-02-25 JBO FS Procedures to send log files from schedule
+2014-02-25 'sendlog' should go in sched_end. 
+============================================================
+
+ Useage: edit the procedure call 'sendlog' into your local end_sched
+procedure, and add a 'logsw_xx' to the experiment procedures at the start in
+or near 'sched_initi'.
+
+ 'sendlog' expects a script called 'lgput' It can be used as-is
+for one destination, or you can include scripts for other destinations,
+eg Radioastron: 'lgput_ra'. Then the FS procedure 'logsw_xx is 
+called to link the appropriate version of 'lgput'. Make sure file
+permissions are set to allow this (eg  oper> chmod og+rw lgput*')  
+
+NB: Edit the strings called <PASSWD> or similar to be the current 
+appropriate password. 
+
+ We usually test them with a small text file (delete.me) manually. 
+
+ Example calls in a recent evlbi '.prc' file: 
+
+define  exper_initi   00000000000x
+sched_initi
+logsw_jv 
+" mk5=DTS_id?
+(.. etc) 
+enddef
+
+ .. and in 'sched_end:'
+sendlog
+!+15s
+
+--------------------------------------------
+
+ Procedures to put in 'station.prc' (use 'pfmed'):
+
+ procedure name 'sendlog': 
+
+ "send the logfile to vlbeer 090126
+ " 2014-02-03 now switch log destination with logsw_xx
+ " 2014-12-13 add line for radioastron
+ "sy=exec lgput_ra `lognm`.jog jb &
+ sy =exec lgput `lognm`.log jb &
+
+----------------------------------------------
+
+ procedure name 'logsw_jv':
+
+"switch the log file script to jive
+ "2014-02-03 pb v1.0
+ sy=rm /usr2/st/bin/lgput
+ sy=ln -s /usr2/st/jbscr/lgput_jv /usr2/st/bin/lgput
+ "log destination switched to jive.
+
+----------------------------------------------
+
+ procedure name 'logsw_ra' 
+
+ "switch the log file script to radioastron
+ "2014-02-03 pb v1.0
+ sy=rm /usr2/st/bin/lgput
+ sy=ln -s /usr2/st/jbscr/lgput_ra /usr2/st/bin/lgput
+ "log destination switched to radioastron.
+
+--------------------------------------------------
+
+Note 1: Location of scripts: we keep all the JBO FS scripts
+in a directory /usr2/st/jbscr. There is a Makefile in this 
+directory which links required scripts to /usr2/st/bin so 
+they get reinstalled after software updates. The 'lgput'
+link is switched by 'logsw_xx' above. 
+
+===================================================== 
