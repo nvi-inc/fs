@@ -6,10 +6,6 @@
 # Procedure call sy =exec lgput `lognm`.log cm
 #
 echo "Send VLBI Logfile v1.0.."
-#replace USER and PASSWORD as appropriate and delete this line through #DELETE
-echo "Edit lgput, following the direction in the comments"
-exit 1
-#DELETE
 
  if [ $# -lt 2 ];
    then
@@ -41,7 +37,7 @@ VDIR=`echo vlbi_arch/$MONTH$YEAR/ | tr A-Z a-z`
 echo "Dir: $VDIR "
 #  
 echo "Sending VLBI Logfile (v1.0)..$FILE $OUTF" 
-ncftpput -u USER -p PASSWORD vlbeer.ira.inaf.it $VDIR $OUTF.log 2>&1
+ncftpput -u evn -p <PASSWDHERE> vlbeer.ira.inaf.it $VDIR $OUTF.log 2>&1
 echo "sendlog result code $?"
 result="sendlog result code $?, $OUTF"
 inject_snap "\"$result\""
@@ -49,3 +45,4 @@ mv $OUTF.log $FILE.log
 cd
 
 ### EOF ###
+ 
