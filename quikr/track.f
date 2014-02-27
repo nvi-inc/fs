@@ -21,7 +21,7 @@ C
       nchar = ireg(2)
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) goto 200
-      ierr = -1
+      ierr = -99
       goto 990
 C
 C
