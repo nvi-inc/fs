@@ -223,6 +223,15 @@ main()
     printf(" collecting dBBC data \n");
 #endif
       tpi_dbbc(ip,tpicd.itpis);   /* sample tpi(s) */
+      if(ip[2]<0) {
+	logit(NULL,ip[2],ip+3);
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	logit(NULL,-1,"cd");
+	goto while_end;
+      }
       if(dbbc_cont_cal.mode!=1) {
 #ifdef TESTX
     printf(" put non-cont dBBC data \n");
@@ -269,7 +278,8 @@ main()
 	}
       }
     }
-    
+   
+  while_end:
 #ifdef TESTX
     printf(" finished collecting \n");
 #endif
