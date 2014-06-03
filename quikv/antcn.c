@@ -12,6 +12,7 @@
 
 int antcn(long ip[5])
 {
+  int ip0;
 
   if(0==strncmp(shm_addr->idevant,"/dev/null ",10)) {
     ip[0]=0;
@@ -21,10 +22,12 @@ int antcn(long ip[5])
     return;
   }
 
+  ip0=ip[0];
   ip[2]=0;
   skd_run("antcn",'w',ip);
 
-  if(ip[2] >= 0) {
+  if(ip[2] >= 0 && (ip0 == 1 || ip0 == 9)) {
+    ip[0]=1;
     ip[2]=0;
     skd_run("flagr",'n',ip);
   }
