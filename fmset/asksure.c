@@ -6,10 +6,6 @@
 
 #include "fmset.h"
 
-#define ROWA  ROW+6
-#define COL0  5 
-#define COL   COL0+22
-
 void rte2secs();
 
 extern char *form;
@@ -63,9 +59,8 @@ echo ();
 
  if ( rack == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
  sprintf(buffer,
-	 "Do you also want to sync the DBBC first (recommended) (y/n) ?      ",
+	 "Do you also want to sync the DBBC first (recommended) (y/n) ?      ");
        /* 0123456789012345678901234567890123456789012345678901234567890 */
-	 form);
  mvwprintw( maindisp, ROWA+6, COL0, buffer);
  mvwscanw(  maindisp, ROWA+6, COL0+60, "%1s", answer2 );
  dbbc_sync= answer2[0] == 'Y' || answer2[0] == 'y';

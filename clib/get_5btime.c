@@ -24,7 +24,7 @@ int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
 {
-      int out_recs, nrecs, i, ierr;
+      int out_recs, nrecs, irec, ierr;
       long out_class, iclass;
       char *str;
       struct pps_source_cmd pps_lclc;
@@ -68,8 +68,13 @@ int sz_m5clock;
 	}
       }	else
 	skd_run("mk5cn",'w',ip);
+
       skd_par(ip);
-      if(ip[2] <0) return 0;
+      if(ip[2] <0) {  /* my caller does not clear class records */
+	if(ip[1]!=0) 
+	  cls_clr(ip[0]);
+	return 0;
+      }
 
       iclass=ip[0];
       nrecs=ip[1];
@@ -77,7 +82,7 @@ int sz_m5clock;
       printf(" get_5btime: iclass %d nrecs %d\n",iclass,nrecs);
 #endif
 
-      for (i=0;i<nrecs;i++) {
+      for (irec=0;irec<nrecs;irec++) {
 	char *ptr;
 	if ((nchars =
 	     cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
@@ -87,11 +92,11 @@ int sz_m5clock;
 #ifdef DEBUG
 	printf(" get_5btime: i %d nchars %d\n",i,nchars);
 #endif
-	if(i==0) {
+	if(irec==0) {
 	  if(0!=m5_2_pps_source(inbuf,&pps_lclc,ip)) {
 	    goto error;
 	  }
-	} else if (i==1) {
+	} else if (irec==1) {
 	  if(0!=m5_2_clock_set(inbuf,&clock_lclc,ip)) {
 	    goto error;
 	  }
@@ -126,19 +131,23 @@ int sz_m5clock;
       }	else
 	skd_run("mk5cn",'w',ip);
       skd_par(ip);
-      if(ip[2] <0) return 0;
 
 #ifdef DEBUG
       printf("get_5btime ierr %d\n",ip[2]);
 #endif
-      if(ip[2] <0) return 0;
+
+      if(ip[2] <0) {  /* my caller does not clear class records */
+	if(ip[1]!=0) 
+	  cls_clr(ip[0]);
+	return 0;
+      }
 
       iclass=ip[0];
       nrecs=ip[1];
 #ifdef DEBUG
       printf(" get_5btime: iclass %d nrecs %d\n",iclass,nrecs);
 #endif
-      for (i=0;i<nrecs;i++) {
+      for (irec=0;irec<nrecs;irec++) {
 	char *ptr;
 	if ((nchars =
 	     cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
@@ -148,11 +157,11 @@ int sz_m5clock;
 #ifdef DEBUG
 	printf(" get_5btime: i %d nchars %d\n",i,nchars);
 #endif
-	if(i==0) {
+	if(irec==0) {
 	  if(0!=m5_2_dot(inbuf,&lclm,ip)) {
 	    goto error;
 	  }
-	} else if (i==1) {
+	} else if (irec==1) {
 	  memcpy(centisec,inbuf,24);
 #ifdef DEBUG
 	  printf(" get_5btime: centisecs %d %d %d %d %d %d\n",
@@ -246,6 +255,7 @@ error2:
       ip[2]=ierr;
       memcpy(ip+3,"55",2);
 error:
-      cls_clr(iclass);
+      if(nrecs>irec+1)
+	cls_clr(iclass);
       return 0;
 }

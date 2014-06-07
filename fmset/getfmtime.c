@@ -48,13 +48,18 @@ int sz_m5clock;
   if (source == MK5) {
     rte_sleep(10);
     rte_ticks(&raw);
-    sleep=102-(raw%100+phase)%100;
+    if(phase != -2) {
+      sleep=102-(raw%100+phase)%100;
+    } else
+      sleep=101;
     if(sleep >=0) {
       rte_sleep(sleep); 
     }
     get5btime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch,m5sync,
 	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock);
-    if(*formhs > -1 && *formhs < 100) {
+    if(*formtime < 0) {
+      phase = -2;
+    } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
   }  else if (source == S2) {
@@ -69,7 +74,9 @@ int sz_m5clock;
       rte_sleep(sleep); 
     }
     get4time(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
-    if(*formhs > -1 && *formhs < 100) {
+    if(*formtime < 0) {
+      phase = -2;
+    } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
   }
