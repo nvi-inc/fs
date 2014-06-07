@@ -34,8 +34,9 @@ long *raw;
 {
 	int it[6],ms,nbytes,nrecs,ierr;
         long centisec[6], centiavg, centidiff;
-	int cnt=0;
 	char *name;
+	char buff[80];
+	int isynch;
 
 	if (tmget[0] == 0) {
 		tmget[0]=-54;
@@ -45,7 +46,6 @@ long *raw;
 		memcpy(sync_buf+1,"fm",2);
 		memcpy(sync_buf+2,"/syn",4);
 	}
-tryagain:
 	outclass = 0;
         nrecs=0;
 	if(synch) {
@@ -67,6 +67,7 @@ tryagain:
 	  if (nsem_test(NSEM_NAME) != 1) {
 	    endwin();
 	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    rte_sleep(SLEEP_TIME);
 	    exit(0);
 	  }
 	  name=NULL;
@@ -78,56 +79,51 @@ tryagain:
 	inclass = ip[0];
         nrecs = ip[1];
         ierr= ip[2];
-	if( ierr < 0 )
-		{
-		endwin();
-		fprintf(stderr,"Error reply from matcn - error %d\n", ierr );
-                logita(NULL,ip[2],ip+3,ip+4);
-		cls_clr(outclass);
-		cls_clr(inclass);
-                rte_sleep(SLEEP_TIME);
-		exit(0);
-		}
-	msgflg = save = 0;
-	if(synch) {
-	  if ( (nbytes = cls_rcv(inclass, inbuf, 512, 
-				 &rtn1, &rtn2, msgflg, save)) <0)
-	    {
-	      endwin();
-	      fprintf(stderr,"Error rec. msg - %d bytes received\n" ,nbytes);
-	      logita(NULL,-6,"fv"," ");
-	      cls_clr(outclass);
-	      cls_clr(inclass);
-	      rte_sleep(SLEEP_TIME);
-	      exit(0);
-	    }
+	if( ierr < 0 ){
+	  logita(NULL,ip[2],ip+3,ip+4);
+	  logit(NULL,-10,"fv");
+	  *formtime=-1;
+	  *raw=0;
+	  if(nrecs > 0)
+	    cls_clr(inclass);
 	  synch=0;
+	  return;
+	}
+	msgflg = save = 0;
+	isynch=0;
+	if(synch) {
+	  synch=0;
+	  isynch=1;
+	  if ( (nbytes = cls_rcv(inclass, inbuf, 512, 
+				 &rtn1, &rtn2, msgflg, save)) <0) {
+	    logit(NULL,-6,"fv");
+	    *formtime=-1;
+	    *raw=0;
+	    if(nrecs > 1) 
+	      cls_clr(inclass);
+	    return;
+	  }
 	}
 	if ( (nbytes = cls_rcv(inclass, inbuf, 512, 
-                               &rtn1, &rtn2, msgflg, save)) <0)
-		{
-		endwin();
-		fprintf(stderr,"Error rec. msg - %d bytes received\n" ,nbytes);
-                logita(NULL,-1,"fv"," ");
-		cls_clr(outclass);
-		cls_clr(inclass);
-                rte_sleep(SLEEP_TIME);
-		exit(0);
-		}
+                               &rtn1, &rtn2, msgflg, save)) <0) {
+	  logit(NULL,-1,"fv");
+	  *formtime=-1;
+	  *raw=0;
+	  if(nrecs > 1+isynch) 
+	    cls_clr(inclass);
+	  return;
+	}
 	inbuf[nbytes]='\0';
 
 	if ( (nbytes = cls_rcv(inclass, centisec, 24, 
-                               &rtn1, &rtn2, msgflg, save)) <0)
-		{
-		endwin();
-		fprintf(stderr,
-			"Error rec. time - %d bytes received\n" ,nbytes);
-                logita(NULL,-2,"fv"," ");
-		cls_clr(outclass);
-		cls_clr(inclass);
-                rte_sleep(SLEEP_TIME);
-		exit(0);
-		}
+                               &rtn1, &rtn2, msgflg, save)) <0) {
+	  logit(NULL,-2,"fv");
+	  *formtime=-1;
+	  *raw=0;
+	  if(nrecs > 2+isynch) 
+	    cls_clr(inclass);
+	  return;
+	}
 
 	sscanf(inbuf+2,"%d %d %d:%d:%d.%d",it+5,it+4,it+3,it+2,it+1,&ms);
         it[0]=ms/10;
@@ -138,22 +134,15 @@ tryagain:
 	  formtime++;
 	}
 
-	cls_clr(outclass); /* clear class numbers just in case */
-	cls_clr(inclass);
+	if(nrecs > 2+isynch) 
+	  cls_clr(inclass);  /* clear class numbers just in case */
 
-	  /*
-        if(*formtime<0) 
-		if(cnt++>5) {
-		endwin();
-		fprintf(stderr,"Error year less than 1970 for 5 tries\n");
-                logita(NULL,-3,"fv"," ");
-		cls_clr(outclass);
-		cls_clr(inclass);
-                rte_sleep(SLEEP_TIME);
-		exit(0);
-		} else
-			goto tryagain;
-			*/
+        if(*formtime<0) {
+	  logit(NULL,-3,"fv");
+	  *formtime=-1;
+	  *raw=0;
+	  return;
+	} 
 	/* for mark IV, first sample closest to truth, but preserve averaging
            logic */
 
