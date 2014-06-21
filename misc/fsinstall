@@ -1,30 +1,30 @@
-echo "*******************************************************************"
+echo "********************************************************************"
 echo "*  This is the INSTALLATION script for Field System version $FS_VERSION *"
-echo "*  This script must be excuted by root to work correctly.         *"
-echo "*  Refer to instructions in the Update Notice.                    *"
-echo "*******************************************************************"
-echo ""
+echo "*  This script must be excuted by root to work correctly.          *"
+echo "*  Please refer to instructions in the Update Notice.              *"
+echo "********************************************************************"
 if [ ! $FS_VERSION ]; then
    echo "This script must be run by 'make install' in '/usr2/fs', aborting."
    exit
 fi
 echo "CAUTION: This script will automatically modify some of your directories."
-echo ""
 echo "On /usr2 each of the following directories will be created and filled"
-echo "with their default contents, unless they already exist: oper, prog,"
-echo "control, sched, proc, log, and st. If the /usr2/oper directory is created,"
-echo "the /home/oper directory will be copied to /home/oper.FSCOPY (unless it"
-echo "exists already), and /home/oper will be made a link to /usr2/oper. A"
-echo "parallel operation will occur for /usr2/prog. The link /usr2/fs" will
-echo "be deleted and made to point to this version of the Field System. A"
-echo "similar link structure will be used for /usr2/st. The permissions and"
-echo "ownerships of the files will be set (including for /etc/gpib.conf)."
-echo ""
+echo "  with their default contents (unless they already exist): oper, prog,"
+echo "  control, sched, proc, log, and st. The permissions and ownerships of all"
+echo "  the files will be set (including for /etc/gpib.conf)."
+echo "If the /usr2/oper directory is created, any existing /home/oper directory"
+echo "  will be renamed to /home/oper.FSCOPY (unless it exists already), and if"
+echo "  /home is a link (it must be a symbolic link to /usr2), any existing"
+echo "  /usr2/oper will be renamed to /usr2/oper.FSCOPY (unless it exists already)."
+echo "  If /home is not a symbolic link, /home/oper will be made a link to"
+echo "  /usr2/oper. A parallel operation will occur for /usr2/prog".
+echo "The link /usr2/fs will be deleted and made to point to this version of"
+echo "  the Field System. A similar link structure will be used for /usr2/st."
 echo "This is a fairly benign operation on most systems and always safe on a"
-echo "standard system. To get the default versions of any already existing"
-echo "directories, you will need to delete them before continuing with this"
-echo "script."
-echo ""
+echo "  standard system. To get the default versions of any already existing"
+echo "  directories, you will need to delete them before continuing with this"
+echo "  script."
+echo "** This script must be excuted by root to work correctly. ** "
 echo -e "Do you wish to continue with the INSTALLATION? (y=yes, n=no) : \c" 
 badans=true
 while [ "$badans" = "true" ]
@@ -72,7 +72,9 @@ if [ ! -e st-0.0.0 -a ! -e st ]; then
   chmod -R a+r,u+w,go-w st st-0.0.0
 fi
 #
-if [ ! -e /usr2/oper ]; then
+# the following works for both /home and /usr2 separate OR /home -> /usr2
+#
+if [ ! -e /usr2/oper/.xsession ]; then
    echo "Setting up /usr2/oper ..."
    if [ -e /home/oper.FSCOPY -o -L /home/oper.FSCOPY ]; then
       if [ -e /home/oper -o -L /home/oper ]; then
@@ -80,30 +82,64 @@ if [ ! -e /usr2/oper ]; then
          exit
       fi
    fi
+#
+   cd /home
+   if [ -e oper -o -L oper ]; then
+      mv oper oper.FSCOPY
+   fi
+#
+# in case /usr2 is distinct
+   cd /usr2
+   if [ -e oper -o -L oper ]; then
+      mv oper oper.FSCOPY
+   fi
+#
    cd /usr2/fs/st.default
    find oper -print|cpio -pmdu /usr2
    chown -R oper /usr2/oper
    chgrp -R rtx  /usr2/oper
    chmod -R a+r,u+w,go-w /usr2/oper
-   cd /home
-   if [ -e oper -o -L oper ]; then
-      mv oper oper.FSCOPY
+#
+   if [ ! -L /home ]; then
+     cd /home
+     ln -s /usr2/oper oper
    fi
-   ln -s /usr2/oper oper
+#
 fi
 #
-if [ ! -e /usr2/prog ]; then
+# the following works for both /home and /usr2 separate OR /home -> /usr2
+#
+if [ ! -e /usr2/prog/.xsession ]; then
    echo "Setting up /usr2/prog ..."
+   if [ -e /home/prog.FSCOPY -o -L /home/prog.FSCOPY ]; then
+      if [ -e /home/prog -o -L /home/prog ]; then
+         echo "/home/prog.FSCOPY already exists. Please move or remove it."
+         exit
+      fi
+   fi
+#
+   cd /home
+   if [ -e prog -o -L prog ]; then
+      mv prog prog.FSCOPY
+   fi
+#
+# in case /usr2 is distinct
+   cd /usr2
+   if [ -e prog -o -L prog ]; then
+      mv prog prog.FSCOPY
+   fi
+#
    cd /usr2/fs/st.default
    find prog -print|cpio -pmdu /usr2
    chown -R prog /usr2/prog
    chgrp -R rtx  /usr2/prog
    chmod -R a+r,u+w,go-w /usr2/prog
-   cd /home
-   if [ ! -e prog.FSCOPY ]; then
-      mv prog prog.FSCOPY
+#
+   if [ ! -L /home ]; then
+     cd /home
+     ln -s /usr2/prog prog
    fi
-   ln -s /usr2/prog prog
+#
 fi
 #
 if [ ! -e /usr2/control ]; then
