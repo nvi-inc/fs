@@ -2404,3 +2404,14 @@ void fs_get_dbbc_cont_cal_mode__(dbbc_cont_cal_mode)
 	  *dbbc_cont_cal_mode=shm_addr->dbbc_cont_cal.mode;
 	}
 
+void fs_set_m5b_crate__(m5b_crate)
+	int *m5b_crate;
+	{
+	  shm_addr->m5b_crate=*m5b_crate;
+        }
+
+void fs_get_m5b_crate__(m5b_crate)
+	int *m5b_crate;
+	{
+	  *m5b_crate=shm_addr->m5b_crate;
+	}

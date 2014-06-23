@@ -434,6 +434,8 @@ void cshm_init()
   shm_addr->dbbc_cont_cal.mode=0;
   shm_addr->dbbc_cont_cal.samples=10;
 
+  shm_addr->m5b_crate=32;
+
   return;
 }
 

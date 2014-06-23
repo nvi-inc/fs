@@ -337,4 +337,6 @@ typedef struct fscom {
 
   struct dbbcgain_cmd dbbcgain;
 
+  int m5b_crate;
+
 } Fscom;
