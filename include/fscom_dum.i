@@ -36,7 +36,7 @@ c
      $ ITPIVC(15),iapdflg, iswif3_fs(4),ipcalif3, directionwx,
      $ ibds, ndas, idasfilt, idasbits, ichlba(2*MAX_DAS), mk4sync_dflt,
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
-     $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode
+     $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode, m5b_crate
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -78,7 +78,7 @@ c
      $ ITPIVC,iapdflg,iswif3_fs, ipcalif3, directionwx,
      $ ibds, ndas, idasfilt, idasbits, ichlba, mk4sync_dflt,
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
-     $ dbbc_if_factors, dbbc_cont_cal_mode,
+     $ dbbc_if_factors, dbbc_cont_cal_mode, m5b_crate,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 

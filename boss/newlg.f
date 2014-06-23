@@ -389,7 +389,11 @@ c
          nch=mcoma(ib,nch)
          nch = nch + ib2as(dbbc_if_factors(i),ib,nch,z'8005')
       enddo
-
+c
+      nch=mcoma(ib,nch)
+      call fs_get_m5b_crate(m5b_crate)
+      nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+c
       call logit3(ib,nch-1,lsor)
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
