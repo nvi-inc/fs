@@ -49,3 +49,7 @@ cdp     cdp or met3 server port, use cdp if you don't have either
   4     1-4 (a,...,d)
 *DBBC IF power conversion factors, one for each module specified above, no trailing comments or extra fields
   15000 15000 15000 15000
+*Mark5B clock rate (MHz): "nominal" is 32 for Mark5, VLBA5, DBBC, 0 otherwise, except
+*   "nominal" is not allow for rack=none
+* a clock rate value of "none" will suppress clock_set command in FMSET
+   32   one of: none, nominal, 2, 4, 8, 16, 32, 64
