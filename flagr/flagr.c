@@ -15,20 +15,35 @@
 
 #define MAX_BUF 256
 
+#define NEW_SOURCE  \
+  (last_satellite!=shm_addr->satellite.satellite                        \
+   || (last_satellite == 0                                              \
+       && (strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||               \
+           last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat))       \
+   || (last_satellite == 1                                              \
+       && (strcmp(last_satellite_name,shm_addr->satellite.name)!=0)))
+
 extern struct fscom *shm_addr;
 
 main()
 {
-  long ip[5];
+  long ip[5],ipr[5];
   long ipa[5] ={ 5, 0, 0, 0, 0};
   int new, acquired, lost;
   double last_ra, last_dec;
   char last_lsorna[10];
   int last_satellite;
   char last_satellite_name[17];
+  char lskd[8];
+  int suppress_antcn_errors;
 
 /* connect to the FS */
 
+  if(getenv("FS_FLAGR_SUPPRESS_ANTCN_ERRORS")==NULL)
+    suppress_antcn_errors=0;
+  else
+    suppress_antcn_errors=1;
+  
   putpname("flagr");
   setup_ids();
   skd_wait("flagr",ip,(unsigned) 0);
@@ -44,6 +59,8 @@ main()
   
   acquired=FALSE;
   new=FALSE;
+
+  memcpy(lskd,shm_addr->LSKD,8);
 
 #ifdef TESTX
   printf(" iapdflg %d\n",shm_addr->iapdflg);
@@ -65,18 +82,18 @@ main()
        ||nsem_test("holog") == 1)
       continue;
 #ifdef TESTX
-  printf(" woke-up\n");
+    printf(" woke-up dad_pid %d ip[0] %d\n",dad_pid(),ip[0]);
 #endif
-    if(last_satellite!=shm_addr->satellite.satellite
-       || (last_satellite == 0  
-	   && (strncmp(last_lsorna,shm_addr->lsorna,10)!=0 ||
-	       last_ra!=shm_addr->radat||last_dec!=shm_addr->decdat))
-       || (last_satellite == 1
-	   && (strcmp(last_satellite_name,shm_addr->satellite.name)!=0))
-       ) {
+    if(dad_pid()!=0 && ip[0]!=0) {
 #ifdef TESTX
-  printf(" new\n");
+      printf(" new\n");
+      printf("new %d acquired %d LSKD %8.8s lskd %8.8s\n",
+	     new,acquired,shm_addr->LSKD,lskd);
 #endif
+      if(new && !acquired && memcmp(shm_addr->LSKD,"none    ",8)!=0 &&
+	 memcmp(shm_addr->LSKD,lskd,8)==0)
+	logit(NULL,-1,"fl");
+      
       logit("flagr/antenna,new-source",0,NULL);
       new=TRUE;
       acquired=FALSE;
@@ -87,13 +104,21 @@ main()
       strncpy(last_satellite_name,
 	      shm_addr->satellite.name,
 	      sizeof(last_satellite_name));
+      memcpy(lskd,shm_addr->LSKD,8);
+
+    }
+    skd_run("antcn",'w',ipa);
+    skd_par(ipr);
+    if(ipr[2]!=0 && !suppress_antcn_errors) {
+      logit(NULL,ipr[2],ipr+3);
+      logit(NULL,-2,"fl");
+      continue;
     }
     if (new && !acquired) {
 #ifdef TESTX
   printf(" not acquired\n");
 #endif
-      skd_run("antcn",'w',ipa);
-      if(shm_addr->ionsor==1) {
+      if(shm_addr->ionsor==1 && !NEW_SOURCE) {
 	logit("flagr/antenna,acquired",0,NULL);
         acquired=TRUE;
 	new=FALSE;
@@ -103,8 +128,7 @@ main()
 #ifdef TESTX
   printf(" not lost\n");
 #endif
-      skd_run("antcn",'w',ipa);
-      if(shm_addr->ionsor==0) {
+      if(shm_addr->ionsor==0 && !NEW_SOURCE) {
 	logit("flagr/antenna,off-source",0,NULL);
         lost=TRUE;
       }
@@ -112,8 +136,7 @@ main()
 #ifdef TESTX
   printf(" lost\n");
 #endif
-      skd_run("antcn",'w',ipa);
-      if(shm_addr->ionsor==1) {
+      if(shm_addr->ionsor==1 && !NEW_SOURCE) {
 	logit("flagr/antenna,re-acquired",0,NULL);
         lost=FALSE;
       }
