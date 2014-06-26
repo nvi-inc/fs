@@ -7,6 +7,7 @@ c
       integer*2 ibuf(50)
       character*4 decoder,pcalc,dbbcv
       double precision das2b
+      character*7 m5bcrate
 c
       include '../include/fscom.i'
 c
@@ -644,7 +645,7 @@ C
       if(dbbcv.eq.'v12') then
          dbbcpfbv=12
       else
-        call logit7ci(0,0,0,1,-140,'bo',100)
+        call logit7ci(0,0,0,1,-140,'bo',20)
         goto 990
       endif
       call fs_set_dbbcpfbv(dbbcpfbv)
@@ -697,6 +698,50 @@ C DBBC IF count conversion factors
          endif
       enddo
       call fs_set_dbbc_if_factors(dbbc_if_factors)
+C 5B clock rate
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        goto 990
+      endif
+      call hol2char(ibuf,ic1,ic2,m5bcrate)
+      if(m5bcrate.eq.'nominal') then
+         if(drive(1).eq.MK5.and.
+     &        (drive_type(1).eq.MK5B.or.drive_type(1).eq.MK5B_BS)) then
+            if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
+     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
+     &           rack.eq.DBBC) then
+               m5b_crate=32
+            else if(rack.eq.0) then
+               call logit7ci(0,0,0,1,-140,'bo',23)
+               goto 990
+            else
+               m5b_crate=0
+            endif
+         else
+            m5b_crate=0
+         endif
+      else if(m5bcrate.eq.'none') then
+         m5b_crate=0
+      else
+         m5b_crate = ias2b(ibuf,ic1,ic2-ic1+1)
+         do i=1,6
+            if(m5b_crate.eq.2**i) then
+               goto 2300
+            endif
+         enddo
+         call logit7ci(0,0,0,1,-140,'bo',23)
+         goto 990
+      endif
+ 2300 continue
+      call fs_set_m5b_crate(m5b_crate)
 c
       return
 c
