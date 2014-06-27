@@ -48,7 +48,7 @@ m5_2_disk_serial(ptr_in,lclm,ip) /* return values:
     goto error;
   }
 
-  lclm->count=0;
+  count=0;
 
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -63,7 +63,6 @@ m5_2_disk_serial(ptr_in,lclm,ip) /* return values:
     if(ptr2!=NULL)
       *ptr2=0;
 
-    count=0;
     ptr_save=ptr;
     ptr=strsep(&ptr_save,":");
     while (ptr!=NULL && count<MK5_DISK_SERIAL_MAX) {
@@ -76,12 +75,11 @@ m5_2_disk_serial(ptr_in,lclm,ip) /* return values:
       count++;
       ptr=strsep(&ptr_save,":");
     }
-  }
-  free(new_str);
-
-  if(ptr!=NULL && count >= MK5_DISK_SERIAL_MAX) {
-    ierr=-903;
-    goto error;
+    free(new_str);
+    if(ptr!=NULL && count >= MK5_DISK_SERIAL_MAX) {
+      ierr=-903;
+      goto error;
+    }
   }
 
   lclm->count=count;

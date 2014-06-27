@@ -27,6 +27,7 @@ long ip[5];
       char inbuf[BUFSIZE];
       struct disk_serial_mon lclm;
       long class, nrecs;
+      int lenout;
 
    /* get data */
 
@@ -52,6 +53,7 @@ long ip[5];
 
       strcpy(output,command->name);
       strcat(output,"/");
+      lenout=strlen(output);
 
       count=0;
       while( count>= 0) {
@@ -60,7 +62,7 @@ long ip[5];
         disk_serial_mon(output,&count,&lclm);
       }
 
-      if(strlen(output)>0) output[strlen(output)-1]='\0';
+      if(strlen(output)>lenout) output[strlen(output)-1]='\0';
 
       for (i=0;i<5;i++) ip[i]=0;
       cls_snd(&ip[0],output,strlen(output),0,0);
