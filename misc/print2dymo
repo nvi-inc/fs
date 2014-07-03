@@ -13,7 +13,7 @@
 #    "yoff xoff translate\n" 
 # Units are given in  pts. 72pts=25.4mm 
 # 
-# Uncomment line below for FS linux 7 and 8
+# Uncomment line below for FS linux 7 and 8 and 9
 #perl -pe 'if (/^90 rotate/) {print "3 3 scale\n";print "-15 15 translate\n";print;goto LINE;}' /tmp/DRlab.tmp > /tmp/DRlab.end 
 #
 # Uncomment line below for FS linux 6
@@ -25,7 +25,7 @@ perl -pe 'if (/^90 rotate/) {print "-21 -15 translate\n";print;goto LINE;}' /tmp
 # Use your printer's name.
 #for FSL5 or FSL6
 lpr -PDymo /tmp/DRlab.end
-#for FSL7 and FSL8
+#for FSL7 and FSL8 and FSL9
 #lpr -P Dymo /tmp/DRlab.end
 #
 # DEBUG: Comment out the line below to save a copy of the file after modifying.
