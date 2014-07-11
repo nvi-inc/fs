@@ -60,7 +60,7 @@ static  char log_str[MAXLOG];
 			&met_baud_rate, &parity, &bits, &stop);
     if(open_err!=0) {
       err_report("error opening met device", terminal,0,open_err);
-      if(open_err <= -2)
+      if(open_err < -2 && open_err != -16 && open_err != -19)
 	portclose_(&ttynum);
       ttynum=0;
     }
@@ -72,7 +72,7 @@ static  char log_str[MAXLOG];
 
     if(open2_err!=0) {
       err_report("error opening wind device", terminal2,0,open2_err);
-      if(open2_err <= -2)
+      if(open2_err < -2 && open2_err != -16 && open2_err != -19)
 	portclose_(&ttynum2);
       ttynum2=0;
     }

@@ -100,7 +100,7 @@ int *interface_clear_converter;
     stop=1;
     ierr = portopen_(&ID_hpib,device,&len,&baud,&parity,&bits,&stop);
     if(ierr <0) {
-      if(ierr==-2 || ierr==-3 || (-7 < ierr && ierr < -11))
+      if(ierr==-2 || ierr==-3 || (-7 < ierr && ierr > -20))
 	 logit(NULL,errno,"un");
       *error=-500+ierr;
       memcpy((char *)ipcode,"BP",2);
