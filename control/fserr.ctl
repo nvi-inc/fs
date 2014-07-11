@@ -1091,6 +1091,9 @@ Final procedure library link does contain '.prc'.
 BO -999
 WARNING: Log file just opened is already larger than 10 MB.
 ""
+CD  -1
+Error from DBBCN in TPICD, see above for error.
+""
 CH   -1
 Trouble with class buffer in CHEKR
 ""
@@ -2045,6 +2048,12 @@ Dataset ?W ERROR: an internal program error has been detected (xpaderr).
 ER -902
 Unable to find ":" in S2 error decode response.
 ""
+FL   -1
+Previous source in this schedule not reached before new source was commanded
+""
+FL   -2
+FLAGR detected error in ANTCN, see above for error.
+""
 FM  007
 Checksum error
 ""
@@ -2195,6 +2204,9 @@ fmset: Error receiving message from matcn
 FV   -2
 fmset: Error receiving time from matcn
 ""
+FV   -3
+fmset: Mark IV Formatter date less than 1970 or greater than Jan 2038.
+""
 FV   -4
 fmset: Error receiving message from mcbcn
 ""
@@ -2203,6 +2215,24 @@ fmset: Bad completion code from mcbcn
 ""
 FV   -6
 fmset: Error receiving message from matcn
+""
+FV   -7
+fmset: Error resetting FS time, please see messages above.
+""
+FV   -8
+fmset: Error from MK5CN, please see messages above.
+""
+FV   -9
+fmset: Error from DBBCN, please see messages above.
+""
+FV  -10
+fmset: Error from MATCN, please see messages above.
+""
+FV  -11
+fmset: Error from MK5CN, please see messages above.
+""
+FV  -12
+fmset: Error from MATCN, please see messages above.
 ""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -2376,43 +2406,70 @@ IB -420
 Error decoding device ID in opdev. Check ibad.ctl.
 ""
 IB -501
-Internal error in portopen, device name length illegal, ?W
+Error in portopen, device name length illegal, ?W
 ""
 IB -502
-Internal error in portopen, open failed, see message above, ?W
+Error in portopen, open failed, see message above, ?W
 ""
 IB -503
-Internal error in portopen, TCGETA failed, see message above, ?W
+Error in portopen, TCGETA failed, see message above, ?W
 ""
 IB -504
-Internal error in portopen, invalid stop bits, ?W
+Error in portopen, invalid stop bits, ?W
 ""
 IB -505
-Internal error in portopen, invalid data bits, ?W
+Error in portopen, invalid data bits, ?W
 ""
 IB -506
-Internal error in portopen, invalid parity, ?W
+Error in portopen, invalid parity, ?W
 ""
 IB -507
-Internal error in portopen, invalid BAUD, ?W
+Error in portopen, invalid BAUD, ?W
 ""
 IB -508
-Internal error in portopen, TCSETA or DIGI_SETAW failed, see message above,?W
+Error in portopen, TCSETA failed, see message above,?W
 ""
 IB -509
-Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+Error in portopen, TIOCGSERIAL failed EINVAL not DIGI , see message above, ?W
 ""
 IB -510
-Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+Error in portopen, TIOCSSERIAL failed, see message above, ?W
+""
+IB -511
+Error in portopen, DIGI TCGETA failed, see message above, ?W
+""
+IB -512
+Error in portopen, DIGI_GETA failed, see message above, ?W
+""
+IB -513
+Error in portopen, DIGI_SETAW failed, see message above, ?W
+""
+IB -514
+Error in portopen, DIGI TCSETA failed, see message above, ?W
+""
+IB -515
+Error in portopen, TIOCGSERIAL failed not EINVAL, see message above, ?W
+""
+IB -516
+Error in portopen, non-blocking open failed, see message above, ?W
+""
+IB -517
+Error in portopen, non-blocking TCGETA failed, see message above, ?W
+""
+IB -518
+Error in portopen, non-blocking TCSETA failed, see message above, ?W
+""
+IB -519
+Error in portopen, non-blocking close failed, see message above, ?W
 ""
 IB -521
-Internal error in sib, portflush failed, see message above, ?W
+Error in sib, portflush failed, see message above, ?W
 ""
 IB -522
-Internal error in sib, portwrite failed, see message above, ?W
+Error in sib, portwrite failed, see message above, ?W
 ""
 IB -523
-Internal error in sib, portread buffer had no extent, ?W
+Error in sib, portread buffer had no extent, ?W
 ""
 IB -524
 GPIB/232 converter timed out, ?W
@@ -4110,6 +4167,21 @@ QN -201
 Error in request. Unknown module or does not match your equipment.
 ""
 QO   -1
+Class error in command processing: onsource, offset command, or track.
+""
+QO  -11
+Error specifying onsource time-out. must be >0 and <=84600 seconds.
+""
+QO  -12
+Error specifying onsource Tracking command to execute, must be 12 characters or less
+""
+QO  -13
+Error specifying onsource slewing command to execute, must be 12 characters or less
+""
+QO  -20
+Break detected in onsource check while waiting for time-out.
+""
+QO  -99
 No parameters permitted for track command.
 ""
 QO -101
@@ -5427,7 +5499,7 @@ SC  -23
 setcl: Mark 5B not sync'd, CONSIDER using fmset 's' option to fix.
 ""
 SC  -24
-setcl: Mark 5B syncerr_gt_3, CONSIDER uisng fmset 's' option to fix.
+setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
