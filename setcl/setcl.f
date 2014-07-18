@@ -38,6 +38,7 @@ C
       character*1  cjchar
       logical rn_test,kfm
       integer idum,fc_rte_prior,rn_take,fc_ntp_synch,ntp_synch
+      character*13 crate
 c
       include '../include/time_arrays.i'
 C
@@ -639,15 +640,26 @@ C
       if (MK5.eq.drive(1).and.
      &     (MK5B.eq.drive_type(1).or.MK5B_BS.eq.drive_type(1))) then
         if((MK4.eq.rack.and.MK45.eq.rack_type).or.
-     &       (VLBA4.eq.rack.and.VLBA45.eq.rack_type)) then
+     &       (VLBA4.eq.rack.and.VLBA45.eq.rack_type).or.
+     &        DBBC.eq.rack) then
            if("vsi"//char(0).ne.m5pps(1:4)) then
               call logit7ci(idum,idum,idum,-1,-19,'sc',0)
            endif
-           if("32"//char(0).ne.m5freq(1:3)) then
-              call logit7ci(idum,idum,idum,-1,-20,'sc',0)
-           endif
-           if("ext"//char(0).ne.m5clock(1:4)) then
-              call logit7ci(idum,idum,idum,-1,-21,'sc',0)
+           call fs_get_m5b_crate(m5b_crate)
+           if(m5b_crate.ne.0) then 
+              idum=1+ib2as(m5b_crate,ibuf,1,o'100000'+12)
+              call char2hol(char(0),ibuf,idum,idum)
+              call hol2char(ibuf,1,idum,crate)
+              if(crate(1:idum).ne.m5freq(1:idum)) then
+                 call logit7ci(idum,idum,idum,-1,-20,'sc',0)
+              endif
+              if("ext"//char(0).ne.m5clock(1:4)) then
+                 call logit7ci(idum,idum,idum,-1,-21,'sc',0)
+              endif
+           else
+              if("ext"//char(0).ne.m5clock(1:4)) then
+                 call logit7ci(idum,idum,idum,-1,-22,'sc',0)
+              endif
            endif
         else
            if("ext"//char(0).ne.m5clock(1:4)) then
