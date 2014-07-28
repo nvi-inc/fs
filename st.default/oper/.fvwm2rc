@@ -234,7 +234,7 @@ Style "FvwmBanner" StaysOnTop
 Style "FvwmButtons"  NoTitle, NoHandles, Sticky, WindowListSkip,BorderWidth 0
 Style "*lock"      NoTitle, NoHandles, Sticky, WindowListSkip
 Style "xbiff"      NoTitle,            Sticky, WindowListSkip
-Style "rxvt"       Icon  term.xpm
+#Style "rxvt"       Icon  term.xpm
 Style "xterm"      Icon xterm.xpm
 #, Color black/grey
 Style "Appointment" Icon datebook.xpm
@@ -330,69 +330,69 @@ AddToFunc "Resize-or-Raise" "M" Resize
 
 AddToMenu "Shells" "Shells" Title
 +              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 7x14
-+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14 -ls
-+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 7x14
+#+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14 -ls
+#+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 7x14
 +              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 10x20
-+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20 -ls
-+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 10x20
+#+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20 -ls
+#+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 10x20
 
-AddToMenu "Screensaver" "Screensaver" Title
-+              "Bat" Exec exec xlock -nolock -nice 0 -mode bat
-+              "Blank" Exec exec xlock -nolock -nice 0 -mode blank
-+              "Blot" Exec exec xlock -nolock -nice 0 -mode blot
-+              "Bob" Exec exec xlock -nolock -nice 0 -mode bob
-+              "Bounce" Exec exec xlock -nolock -nice 0 -mode bounce
-+              "Flame" Exec exec xlock -nolock -nice 0 -mode flame
-+              "Galaxy" Exec exec xlock -nolock -nice 0 -mode galaxy
-+              "Grav" Exec exec xlock -nolock -nice 0 -mode grav
-+              "Helix" Exec exec xlock -nolock -nice 0 -mode helix
-+              "Hop" Exec exec xlock -nolock -nice 0 -mode hop
-+              "Hyper" Exec exec xlock -nolock -nice 0 -mode hyper
-+              "Kaleid" Exec exec xlock -nolock -nice 0 -mode kaleid
-+              "Life" Exec exec xlock -nolock -nice 0 -mode life
-+              "Life3d" Exec exec xlock -nolock -nice 0 -mode life3d
-+              "Maze" Exec exec xlock -nolock -nice 0 -mode maze
-+              "Pyro" Exec exec xlock -nolock -nice 0 -mode pyro
-+              "Qix" Exec exec xlock -nolock -nice 0 -mode qix
-+              "Random" Exec exec xlock -nolock -nice 0 -mode random
-+              "Rect" Exec exec xlock -nolock -nice 0 -mode rect
-+              "Rock" Exec exec xlock -nolock -nice 0 -mode rock
-+              "Rotor" Exec exec xlock -nolock -nice 0 -mode rotor
-+              "Sphere" Exec exec xlock -nolock -nice 0 -mode sphere
-+              "Spline" Exec exec xlock -nolock -nice 0 -mode spline
-+              "Swarm" Exec exec xlock -nolock -nice 0 -mode swarm
-+              "Wator" Exec exec xlock -nolock -nice 0 -mode wator
-+              "Worm" Exec exec xlock -nolock -nice 0 -mode worm
-+              "World" Exec exec xlock -nolock -nice 0 -mode world
+#AddToMenu "Screensaver" "Screensaver" Title
+#+              "Bat" Exec exec xlock -nolock -nice 0 -mode bat
+#+              "Blank" Exec exec xlock -nolock -nice 0 -mode blank
+#+              "Blot" Exec exec xlock -nolock -nice 0 -mode blot
+#+              "Bob" Exec exec xlock -nolock -nice 0 -mode bob
+#+              "Bounce" Exec exec xlock -nolock -nice 0 -mode bounce
+#+              "Flame" Exec exec xlock -nolock -nice 0 -mode flame
+#+              "Galaxy" Exec exec xlock -nolock -nice 0 -mode galaxy
+#+              "Grav" Exec exec xlock -nolock -nice 0 -mode grav
+#+              "Helix" Exec exec xlock -nolock -nice 0 -mode helix
+#+              "Hop" Exec exec xlock -nolock -nice 0 -mode hop
+#+              "Hyper" Exec exec xlock -nolock -nice 0 -mode hyper
+#+              "Kaleid" Exec exec xlock -nolock -nice 0 -mode kaleid
+#+              "Life" Exec exec xlock -nolock -nice 0 -mode life
+#+              "Life3d" Exec exec xlock -nolock -nice 0 -mode life3d
+#+              "Maze" Exec exec xlock -nolock -nice 0 -mode maze
+#+              "Pyro" Exec exec xlock -nolock -nice 0 -mode pyro
+#+              "Qix" Exec exec xlock -nolock -nice 0 -mode qix
+#+              "Random" Exec exec xlock -nolock -nice 0 -mode random
+#+              "Rect" Exec exec xlock -nolock -nice 0 -mode rect
+#+              "Rock" Exec exec xlock -nolock -nice 0 -mode rock
+#+              "Rotor" Exec exec xlock -nolock -nice 0 -mode rotor
+#+              "Sphere" Exec exec xlock -nolock -nice 0 -mode sphere
+#+              "Spline" Exec exec xlock -nolock -nice 0 -mode spline
+#+              "Swarm" Exec exec xlock -nolock -nice 0 -mode swarm
+#+              "Wator" Exec exec xlock -nolock -nice 0 -mode wator
+#+              "Worm" Exec exec xlock -nolock -nice 0 -mode worm
+#+              "World" Exec exec xlock -nolock -nice 0 -mode world
 
-AddToMenu "Screenlock" "Lock Screen" Title
-+              "Bat" Exec exec xlock -nice 0 -mode bat
-+              "Blank" Exec exec xlock -nice 0 -mode blank
-+              "Blot" Exec exec xlock -nice 0 -mode blot
-+              "Bob" Exec exec xlock -nice 0 -mode bob
-+              "Bounce" Exec exec xlock -nice 0 -mode bounce
-+              "Flame" Exec exec xlock -nice 0 -mode flame
-+              "Galaxy" Exec exec xlock -nice 0 -mode galaxy
-+              "Grav" Exec exec xlock -nice 0 -mode grav
-+              "Helix" Exec exec xlock -nice 0 -mode helix
-+              "Hop" Exec exec xlock -nice 0 -mode hop
-+              "Hyper" Exec exec xlock -nice 0 -mode hyper
-+              "Kaleid" Exec exec xlock -nice 0 -mode kaleid
-+              "Life" Exec exec xlock -nice 0 -mode life
-+              "Life3d" Exec exec xlock -nice 0 -mode life3d
-+              "Maze" Exec exec xlock -nice 0 -mode maze
-+              "Pyro" Exec exec xlock -nice 0 -mode pyro
-+              "Qix" Exec exec xlock -nice 0 -mode qix
-+              "Random" Exec exec xlock -nice 0 -mode random
-+              "Rect" Exec exec xlock -nice 0 -mode rect
-+              "Rock" Exec exec xlock -nice 0 -mode rock
-+              "Rotor" Exec exec xlock -nice 0 -mode rotor
-+              "Sphere" Exec exec xlock -nice 0 -mode sphere
-+              "Spline" Exec exec xlock -nice 0 -mode spline
-+              "Swarm" Exec exec xlock -nice 0 -mode swarm
-+              "Wator" Exec exec xlock -nice 0 -mode wator
-+              "Worm" Exec exec xlock -nice 0 -mode worm
-+              "World" Exec exec xlock -nice 0 -mode world
+#AddToMenu "Screenlock" "Lock Screen" Title
+#+              "Bat" Exec exec xlock -nice 0 -mode bat
+#+              "Blank" Exec exec xlock -nice 0 -mode blank
+#+              "Blot" Exec exec xlock -nice 0 -mode blot
+#+              "Bob" Exec exec xlock -nice 0 -mode bob
+#+              "Bounce" Exec exec xlock -nice 0 -mode bounce
+#+              "Flame" Exec exec xlock -nice 0 -mode flame
+#+              "Galaxy" Exec exec xlock -nice 0 -mode galaxy
+#+              "Grav" Exec exec xlock -nice 0 -mode grav
+#+              "Helix" Exec exec xlock -nice 0 -mode helix
+#+              "Hop" Exec exec xlock -nice 0 -mode hop
+#+              "Hyper" Exec exec xlock -nice 0 -mode hyper
+#+              "Kaleid" Exec exec xlock -nice 0 -mode kaleid
+#+              "Life" Exec exec xlock -nice 0 -mode life
+#+              "Life3d" Exec exec xlock -nice 0 -mode life3d
+#+              "Maze" Exec exec xlock -nice 0 -mode maze
+#+              "Pyro" Exec exec xlock -nice 0 -mode pyro
+#+              "Qix" Exec exec xlock -nice 0 -mode qix
+#+              "Random" Exec exec xlock -nice 0 -mode random
+#+              "Rect" Exec exec xlock -nice 0 -mode rect
+#+              "Rock" Exec exec xlock -nice 0 -mode rock
+#+              "Rotor" Exec exec xlock -nice 0 -mode rotor
+#+              "Sphere" Exec exec xlock -nice 0 -mode sphere
+#+              "Spline" Exec exec xlock -nice 0 -mode spline
+#+              "Swarm" Exec exec xlock -nice 0 -mode swarm
+#+              "Wator" Exec exec xlock -nice 0 -mode wator
+#+              "Worm" Exec exec xlock -nice 0 -mode worm
+#+              "World" Exec exec xlock -nice 0 -mode world
 
 AddToMenu "Games" "Games" Title
 #        Exec    "Maze"          exec maze &
@@ -414,21 +414,21 @@ AddToMenu "Games" "Games" Title
 #        Exec    "Xgas"          exec xgas &
 
 AddToMenu "Applications" "Applications" Title
-+              "Ghostview" Exec exec ghostview
+#+              "Ghostview" Exec exec ghostview
 +              "GNU Emacs" Exec exec emacs
 #        Exec    "Lucid Emacs"   exec lemacs &
 #        Exec    "Seyon"         exec seyon -modem /dev/modem &
-+              "XV" Exec exec xv
++              "Gv" Exec exec gv
 #        Exec    "X3270"         exec x3270 &
 +              "Xedit" Exec exec xedit
 #        Exec    "Xfig"          exec xfig &
 #        Exec    "Xfilemanager"  exec xfilemanager &
-+              "Xfm" Exec exec xfm
+#+              "Xfm" Exec exec xfm
 #        Exec    "Xfractint"     exec rxvt -font 7x14 -e xfractint map=chroma &
 #        Exec    "Xgrab"         exec xgrab &
 #        Exec    "Xpaint"        exec xpaint &
-+              "Xspread" Exec exec xspread
-+              "Xxgdb" Exec exec xxgdb
+#+              "Xspread" Exec exec xspread
+#+              "Xxgdb" Exec exec xxgdb
 
 # This menu is invoked as a sub-menu - it allows you to quit,
 # restart, or switch to another WM.
@@ -456,7 +456,7 @@ AddToMenu "Module-Popup" "Modules" Title
 
 # This menu will fire up some very common utilities
 AddToMenu "Extras" "Extras" Title
-+              "Top" Exec exec rxvt -font 7x14 -T Top -n Top -e top
+#+              "Top" Exec exec rxvt -font 7x14 -T Top -n Top -e top
 +              "Calculator" Exec exec xcalc
 +              "Xman" Exec exec xman
 +              "Xmag" Exec exec xmag
@@ -468,15 +468,15 @@ AddToMenu "Extras" "Extras" Title
 +              "" Nop
 +              "Games" Popup Games
 +              "" Nop
-+              "Screensaver" Popup Screensaver
-+              "" Nop
-+              "Lock Screen" Popup Screenlock
-+              "" Nop
+#+              "Screensaver" Popup Screensaver
+#+              "" Nop
+#+              "Lock Screen" Popup Screenlock
+#+              "" Nop
 +              "Modules" Popup Module-Popup
 +              "" Nop
 +              "Exit Fvwm" Popup Quit-Verify
 +              "" Nop
-+              "Refresh Screen" Refresh
+#+              "Refresh Screen" Refresh
 
 #Simple Utilities
 AddToMenu "Utilities" "Utilities" Title
