@@ -410,10 +410,9 @@ C at the end.  **NOTE: this outputs for first freq. code ONLY.
 C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
-990   CLOSE(LU_OUTFILE)
-      write(*,*) "Before: "
+990   CLOSE(LU_OUTFILE)   
       call drchmod(pntname,iperm,ierr)
-      write(*,*) "After: "
+     
 
 900   continue
       RETURN

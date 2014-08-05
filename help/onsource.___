@@ -1,13 +1,79 @@
               onsource - get antenna pointing status
 
             Syntax:     onsource
+                        onsource=time-out,on-command,off-command
 
             Response:   onsource/status
 
 
-Settable Parameters: none
+Settable Parameters:
+              time-out:     Time-out for the source condition, seconds, 0-86400,
+                            Default 0.
+              on-command:    Command to execute if status is tracking, i.e.,
+                            "on". Default is no command.
+              off-command:   Command to execute if status is slewing, i.e.,
+                            "off". Default is no command.
 
 Monitor-only Parameters:
               status        tracking or slewing, depending on the errors in
               pointing.
 
+Comments:
+
+The form without parameters is used to check the current onsource
+status. An error message is generated if the status is slewing.
+
+The form with parameters can be used to cause the command stream to
+pause until the source is reached or the time-out time expires,
+whichever is first.  The second and third parameters are executed as
+commands in the operator stream depending on whether the status of
+tracking is achieved (on-command) or not (off-command).  If the
+time-out is zero, the onsource status is checked and the appropriate
+supplied command, if any, is executed.
+
+Note that since the commands are executed in operator stream, they are
+not necessarily useful from within a schedule.  However, when used in
+operator stream (manually entered or an operator executed SNAP
+procedure), the form with parameters can be used to construct an
+awkward, but workable conditional execution mechanism based on the
+onsource status. One way to do this is to place the command at the end
+of a SNAP procedure to link to the next SNAP procedure in a sequence or a
+termination procedure if onsource was not achieved. For example:
+
+  onsource=60,next,end
+
+where the time-out was sent to 60 seconds and the procedure (or
+command) "next" is executed next if onsource "tracking" was achieved
+or a clean-up procedure (or command) "end" is executed if not. This
+approach can lead to having a series of small procedure that do each
+step of a more complicated sequence.  A more compact approach would be
+to just use the time-out to delay the execution of the next command in
+a procedure until onsource is reach, e.g.:
+
+  onsource=60
+
+However, this approach does not provide any error recovery.
+
+Care must be taken when using non-zero time-out since that can cause
+the FS to effectively "stop" for a long period of time.  Generally,
+this is only useful to help automate local ad hoc measurement
+procedures with the antenna.  Non-zero times should not be used in
+observing schedules.
+
+Since a non-zero time-out can cause the command to execute for a long
+time, an option has been included to interrupt execution by sending a
+"break".  From a Linux shell prompt, enter:
+
+  brk quikr
+
+Note that you cannot send the "break" with the "sy=..." command since
+the FS is tied up executing the onsource command and will not process
+the "sy=..."  until it finishes.
+
+The form without parameters is equivalent to:
+
+   onsource=0
+
+When a non-zero time-out is used, the antcn program is used in mode 5
+(no extended error messages) instead of mode 3 (extended error
+messages) used when the time-out is zero.

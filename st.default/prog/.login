@@ -55,4 +55,5 @@ endif
 #check for mail on login
 test ! -f /var/mail/prog || from
 #setenv FS_CHECK_NTP
+#setenv FS_SERIAL_CLOCAL 1
 #

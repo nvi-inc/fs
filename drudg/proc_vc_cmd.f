@@ -57,7 +57,7 @@ C         Initialize the bbc array to "not written yet"
         
           DO ichan=1,nchan(istn,icode) !loop on channels
             ic=invcx(ichan,istn,icode) ! channel number
-            ib=ibbcx(ic,istn,icode) ! BBC number
+            ib=ibbcx(ic,istn,icode)    ! BBC number
       
 ! Check for some quick exits...
             if(kdone_bbc(ib)) goto 500

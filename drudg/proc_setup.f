@@ -125,7 +125,7 @@ C Find out if any channel is LSB, to decide what procedures are needed.
 !     >       .or.((km3be.or.km3ac).and.k8bbc)))
 !     >      .or. (ks2rec(ir) .and. klrack)
       
-      ktrkf=km4rack .or. kvrack .or. kv4rack .or. kk41rack .or. kk42rack 
+      ktrkf=km4rack .or. kvrack .or. kv4rack .or. km4fmk4rack 
     
       if(km5disk .or. knorec(1) .and. km4form) then 
         ifan_fact=max(1,ifan(istn,icode))
@@ -151,7 +151,7 @@ C  TPICD=STOP
 
       if (kvrec(irec).or.kv4rec(irec)  .or. 
      >    km3rec(irec).or.km4rec(irec) .or. 
-     >    Km5disk.or. knorec(irec)) then
+     >    Km5disk.or. knorec(irec).or.ktrkf) then
 C  PCALD=STOP
          if (kpcal_d)  write(lu_outfile,'(a)') 'pcald=stop'
 

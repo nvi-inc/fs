@@ -1,7 +1,9 @@
       subroutine proc_mracks_vc(icode,ic,ib,ichan) 
+      implicit none 
 ! Write out the VC commands. 
  
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
+!  2014Jun02  JMGipson. Changed starting count in looping over channels from 'ic' to 1 
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -9,9 +11,11 @@
       include '../skdrincl/statn.ftni'
       include 'drcom.ftni'
       include 'bbc_freq.ftni'
-      integer icode,ic, ib             !channel anb BBC number we are considering. 
+      integer icode
+      integer ic, ib                  !channel and BBC number we are considering. 
+      integer ichan                   !external channel counter (not used). 
 !functions
-      integer itras            !track assignment function. Returns -99 if not set 
+      integer itras                    !track assignment function. Returns -99 if not set 
       integer ir2as
       integer mcoma
       integer ichmv_ch     
@@ -19,7 +23,7 @@
 ! local variables.     
       integer nch    
       logical ku,kl             !is this channel upper or lower     
-      integer ichan,ichanx      !Channel Counters
+      integer ichanx            !Internal channlel counter 
       integer icx               !alternate channel#
     
       character*1 cvc2k42(max_bbc)
@@ -109,7 +113,7 @@
       if(kmracks) then
         ku=.false.
         kl=.false. 
-        DO ichanx=ic,nchan(istn,icode) !remaining channels
+        DO ichanx=1,nchan(istn,icode) !remaining channels
            icx=invcx(ichanx,istn,icode) ! channel number
            if (ib.eq.ibbcx(icx,istn,icode)) then ! Same BBC?               
              if(itras(1,1,1,icx,1,istn,icode).ne.-99 .or. 
