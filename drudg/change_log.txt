@@ -1,0 +1,32 @@
+This file contains a summary of changes made and why.
+
+2014Jun02 proc_mracks_vc.f
+This routine is called: call proc_mracks_vc(icode,ic,ib,ichan)
+ic=channel #
+ib=BBC #
+
+The main idea is that this routine cycles through all channels one at a time and write lines like:
+vc11=245.99,8.00,u
+or
+vc01=210.00,8.0,ul
+
+
+To determine whether to write out "u", "l", or "ul" it checks to see if there are any channels that have the same channel # and bbc # that it was called with.  The code fragment that did the checking was:
+        DO ichanx=ic,nchan(istn,icode) !remaining channels
+           icx=invcx(ichanx,istn,icode) ! channel number
+           if (ib.eq.ibbcx(icx,istn,icode)) then ! Same BBC?               
+             if(itras(1,1,1,icx,1,istn,icode).ne.-99 .or. 
+     >          itras(1,1,2,icx,1,istn,icode).ne.-99) ku=.true. 
+             if(itras(2,1,1,icx,1,istn,icode).ne.-99 .or.
+     >          itras(2,1,2,icx,1,istn,icode).ne.-99) kl=.true.                  
+           endif
+        enddo
+
+This normally works because usually ic=ichan.   However in some cases ic>ichan, and hence it would not find the appropriate sideband in doing the check. (It would miss the channel number it was called with.) The routine was changed to start at 1.
+Bug check:  Easiest to see the effect if you change the order of the 'codes' lines in a sked file. 
+
+
+
+
+
+

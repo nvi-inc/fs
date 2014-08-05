@@ -89,6 +89,7 @@ C  LOCAL VARIABLES
       integer idum,ivcb,ix,iy,iz,imode,k,ileft,im
       double precision fr
       integer iset 
+      integer icnt
       
       character*1 lchar
 
@@ -204,9 +205,13 @@ C itras(ul,sm,head,chan,,pass,stn,code)
           enddo
         enddo
 C       if (nchanr.eq.28) imode=2 ! for mode A
+! JMG 2014May20
+        nchanr=4 
+! End 2014May20
         write(lu,'("nchan = ",i3)') nchanr
 
 C format = <mode>
+        if(.false.) then 
         lchar=cmode(istn,icod)(1:1)
         call capitalize(lchar)
         if(lchar .ge. "A" .and. lchar .le. "E") then
@@ -214,18 +219,22 @@ C format = <mode>
         else ! other
           write(lu,'("format = ",a)') cmode(istn,icod)
         endif
+        else
+          write(lu,'("format = vlba1:2")')
+        endif 
 
 C ifdistr = (1,0),(2,0),(3,0),(4,0)   for all codes
         write(lu,'(a)') 'ifdistr = (1,0),(2,0),(3,0),(4,0) '
 
 C should perhaps be an indirect array instead of invcx, like ivix??
 C invcx IS an indirect array -- should not use one
-        call wrhead(lu,ierr,'baseband = ',idum,ibbcx,ldum,3,imode,icod)
-        if (ierr.ne.0) then
-          write(luscn,'(A)') 
-     >   ' VLBAH04 - Error writing baseband section of header.'
-          ierr = 0
-        end if
+        write(lu,'(a)') "baseband=(1,1),(2,2),(3,3),(4,4)"
+!        call wrhead(lu,ierr,'baseband = ',idum,ibbcx,ldum,3,imode,icod)
+!        if (ierr.ne.0) then
+!          write(luscn,'(A)') 
+!     >   ' VLBAH04 - Error writing baseband section of header.'
+!          ierr = 0
+!        end if
 
 C ifchan = (n,IFchan(n)), ... where n=1 to nchan
         call wrhead(lu,ierr,'ifchan = ',idum,idum,lifinp,4,imode,icod)
@@ -310,7 +319,9 @@ C  Now write out the unswitched frequencies in the header
         ileft = o'100002'
         iz = 0 ! channel counter
 
-        do ix=1,nchan(istn,icod)
+! Changed 2014May21    
+        do ix=2,5                  
+!        do ix=1,nchan(istn,icod)
           if(mod(iz,5) .eq. 0) then    !start a new line. 
             cbuf="bbsynth ="
             iy=11 ! character counter within buffer
@@ -321,11 +332,19 @@ C  Now write out the unswitched frequencies in the header
            do im=1,imode
               iy = ichmv_ch(ibuf,iy,'(')
 	      iz = iz + 1
-C             Use iz counter for mode A, imode=2
-              if (imode.eq.1) iy = iy + ib2as(ix,ibuf,iy,ileft)
+C             Use iz counter for mode A, imode=2             
+              if (imode.eq.1) then
+! 2014May21
+!                icnt=ix   
+                 icnt=ix-1
+!
 C             Use actual ix counter for "normal" modes
-              if (imode.eq.2) iy = iy + ib2as(iz,ibuf,iy,ileft)
+              else if (imode.eq.2) then
+                icnt=iz                       
+              endif 
+              iy = iy + ib2as(icnt,ibuf,iy,ileft)
               iy = ichmv_ch(ibuf,iy,',')
+
               iy = iy + ir2as(synthv(ix),ibuf,iy,6,2)
               iy = ichmv_ch(ibuf,iy,')')
               if (mod(iz,5).eq.0) then ! have 5 frequencies on the line
@@ -382,6 +401,18 @@ C   These lines allow the use of the pcal extractors on the DS board.
      >     '(1,10),(2,10),(3,10),(4,10),(5,10),(6,10),(7,10),(8,10)'
           write(lu,'(A)') 'pcalxfreq2= (1,990),(2,990),'//
      >     '(3,990),(4,990),(5,990),(6,990),(7,990),(8,990)'
+! Added 2014May20
+       else if(nchanr .eq. 4) then    
+          write(lu,'(a)') 'pcalxbit1=(1,S1),(2,S3),(3,S1),(4,S3),'//
+     >      '(5,S1),(6,S2),(7,S3),(8,S4)'
+          write(lu,'(a)') 'pcalxbit2=(1,S2),(2,S4),(3,S2),(4,S4),'//
+     >       '(5,M1),(6,M2),(7,M3),(8,M4)'
+        write(lu,'(a)') 
+     >   'pcalxfreq1=(1,250),(2,250),(3,6250),(4,6250),'//
+     >       '(5,0),(6,0),(7,0),(8,0)'
+         write(lu,'(a)') 
+     >    'pcalxfreq1=(1,250),(2,250),(3,6250),(4,6250),'//
+     >       '(5,0),(6,0),(7,0),(8,0)'
 C   If nchan=14 use these lines.
         else if (nchan(istn,icod).eq.14) then
           write(lu,'(a)') 'pcalxbit1=(1,S1),(2,S3),(3,S5),(4,S7),'//

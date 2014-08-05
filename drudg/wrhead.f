@@ -53,21 +53,28 @@ C
 
 C  insert string into array
 C  loop on the number of channels read from schedule file
-        do ix=1,nchan(istn,icod) ! is=recorded channel index
+! Changed 2014May21
+         iy=0
+         do ix=2,5
+!        do ix=1,nchan(istn,icod) ! is=recorded channel index
           if(mod(iout,8) .eq. 0) then                 !initialize front of string
              cbuf=cs
              nch=len(cs)+1
           endif
 
           ichan=invcx(ix,istn,icod) ! ichan=total#channel index
+! End change 
           do im=1,imode
             nch = ichmv_ch(ibuf,nch,'(')
-            if (imode.eq.1) then !only one entry, use ix
-              nch = nch + ib2as(ix,ibuf,nch,ileft)
-            else !two entries, use iy
-              iy = (ix-1)*2 + im
-              nch = nch + ib2as(iy,ibuf,nch,ileft)
-            endif
+            iy=iy+1
+!            if (imode.eq.1) then !only one entry, use ix
+! Changed 2014May21
+!              iy=ix-1         
+!            else !two entries, use iy
+!              iy = (ix-1)*2 + im      
+!            endif
+            nch = nch + ib2as(iy,ibuf,nch,ileft)
+
             nch = ichmv_ch(ibuf,nch,',')
 
 	  if ((ido.eq.1).or.(ido.eq.2)) then ! single value
@@ -100,8 +107,10 @@ C             For the lsb, take the other one
           nch = ichmv_ch(ibuf,nch,')')
           iout = iout + 1
 C  write out buffer if reached 8 channels written into it
-	  if (mod(iout,8).eq.0) then
+          if(mod(iout,4).eq.0) then
+!	  if (mod(iout,8).eq.0) then
             write(lu,'(a)') cbuf(1:nch)    
+            return 
 	  else
             nch = ichmv_ch(ibuf,nch,',')
 	  end if

@@ -10342,5 +10342,215 @@ Version 9.11.4 130930
 140207 WEH help/scan_name.___
            modernizd and updated continuous length comment
              for scans after the first
-          
+
 Version 9.11.5 140207
+
+140212 WEH clib/tpi_dbbc.c
+           removed debug output for continuous cal per U. Bach
+
+140212 WEH st.default/proc/3station.prc
+           st.default/proc/45station.prc
+           st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/5station.prc
+           st.default/proc/dstation.prc
+           st.default/proc/dstationcc.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/newmk5ak5.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           changed checkmk5 use 8 mk5=get_stats?
+
+140212 WEH 45station.prc
+           5station.prc
+           dstation.prc
+           dstationcc.prc
+           v45station.prc
+           v5station.prc
+           add mk5=bank_set? to midob
+
+140214 WEH st.default/control/mk5ad.ctl
+
+140225 PB  misc/lgput
+           updated lgput scripts and everything consolidated to this directory
+
+140226 WEH quikr/quikr.f
+           quikr/onsor.f
+           control/fserr.ctl
+           quikr/track.f
+140227 WEH help/onsoure.___
+           expanded onsource to take parameters and cleaned up error messages
+
+140521 WEH tpicd/tpicd.c
+           Fix bug causing crash if DBBC communication error occurs
+
+140530 WEH flagr/flagr.c
+           control/fserr.ctl
+           Add error message for previous source not reached during schedule
+
+140531 WEH quikr/sorce.f
+140602 WEH quikv/antcn.c
+140603 WEH flagr/flagr.c
+           control/fserr.ctl
+           update flagr to eliminate race conditions identified by J. Quick
+
+140602 WEH fmset/getfmtime.c
+           fmset/get4time.c
+140604 WEH fmset/fmset.h
+           fmset/asktime.c
+           fmset/asksure.c
+           fmset/fmset.c
+140605 WEH fmset/set4time.c
+           fmset/set5btime.c
+140606 WEH clib/get_5btime.c
+           fmset/get5btime.c
+140607 WEH control/fserr.ctl
+           update fmset, not abort on error and handle jive5ab, thanks J. Quick
+
+140605 WEH help/disk_pos.___
+           improved 5B parameters, thanks  E. Rastorgueva-Foi
+
+140621 WEH misc/fsinstall
+           updated for FSL9
+
+140622 WEH include/fscom_dum.i
+           clib/cshm_init.c
+           newlb/prog.c
+           boss/newlg.f
+           include/fscom.h
+140623 WEH incom/equip.f
+           fmset/fmset.c
+           fmset/get5btime.c
+           add Mark 5B Clock rate seting from equip.ctl 
+
+140623 WEH flagr/flagr.c
+140624 WEH st.default/control/equip.ctl
+           added ability to suppress ANTCN errors with env variable
+             FS_FLAGR_SUPPRESS_ANTCN_ERRORS
+
+140624 WEH Makefile
+           Set version to 9.11.6
+
+140626 WEH incom/equip.f
+           fix clock rate comment
+
+140626 WEH control/fserr.ctl
+           fix typo in SC -24
+
+140627 WEH clib/disk_serial_util.c
+           quikv/disk_serial_dis.c
+           fix bug and formatting when the key is not turned for jive5ab
+
+140627 WEH setcl/setcl.f
+           fmset/fmset.c
+           update tests of clock rate for user settable value
+
+140628 WEH fmset/fmset.c
+           modified 5B clock message for rate=none
+
+140630 WEH misc/print2dymo
+140703 WEH misc/refresh_secondary.sdb.9
+           misc/refresh_secondary.hdc.9
+           misc/FSL9_PC_Checkout.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_Upgrade.txt
+           FSL9
+
+140711 WEH misc/refresh_secondary.sdb.9
+140711 WEH misc/refresh_secondary.hdc.9
+           use bash and fix grub installation for second disk
+
+140711 WEH misc/FSL9_PC_Checkout.txt
+       WEH misc/FSL9_End_User.txt
+       WEH misc/FSL9_Upgrade.txt
+           improvements
+
+140711 WEH st.default/st-0.0.0/metserver/port/portopen.c
+           port/portopen.c
+           mcbcn/mcbcn.c
+           ibcon/opbrd.c
+           control/fserr.ctl
+           st.default/st-0.0.0/metserver/src/metget.c
+           support for setting CLOCAL on serial ports
+
+140713 WEH misc/FSL9_PC_Checkout.txt
+           minor updates
+
+140717 WEH misc/refresh_spare_usr2
+           warning added
+
+140717 WEH misc/refresh_secondary.sd156
+           misc/refresh_secondary.sd123
+           created for FSL9
+
+140717 WEH misc/refresh_secondary.sdb.9
+           misc/refresh_secondary.hdc.9
+           deleted, no longer needed
+
+140718 WEH setcl/setcl.f
+           fmset/fmset.c
+           5B clock rate error messages improved
+
+140723 WEH port/Makefile
+           st.default/st-0.0.0/metserver/port/portopen.c
+           port/portopen.c
+           st.default/st-0.0.0/metserver/port/Makefile
+           mcbcn/Makefile
+           mcbcn/mcbcn.c
+           Makefile
+           add FS_SERIAL_CLOCAL environment variable for conditional
+           compilation of non-blocking open/CLOCAL serial support
+
+140725 WEH misc/refresh_spare_usr2
+           changed to bash
+
+140726 WEH misc/FSL9_End_User.txt
+           misc/FSL9_PC_Checkout.txt
+           minor corrections
+
+140727 WEH st.default/st-0.0.0/metserver/port/portopen.c
+       WEH port/portopen.c
+           add missing TGETA, improve error comments
+
+140728 WEH st.default/prog/.config/user-dirs.conf
+           st.default/oper/.config/user-dirs.conf
+           defeat creation of "Desktop directories in ~
+
+140728 WEH st.default/prog/.fvwm2rc
+           st.default/oper/.fvwm2rc
+           remove deadwood, old versions now .fvwm2rc-before-FSL9
+
+140728 WEH misc/refresh_secondary.sd234
+           created. removed .sd123
+
+140728 WEH misc/refresh_spare_usr2.9
+           created
+
+140801 WEH misc/FSL9_PC_Checkout.txt
+           misc/FSL9_Upgrade.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_RAID.docx
+           misc/FSL9_RAID.pdf
+           misc/fs9116up.txt
+           clean-up
+
+140805 WEH misc/FSL9_PC_Checkout.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_Upgrade.txt
+           misc/fs9116up.txt
+           clean-up
+
+Version 9.11.6 140805

@@ -17,6 +17,9 @@ ifeq (/usr/src/linux/drivers/char/digi.h,\
 $(wildcard /usr/src/linux/drivers/char/digi.h ))
 CFLAGS := $(CFLAGS) -DDIGI
 endif
+ifdef FS_SERIAL_CLOCAL
+CFLAGS := $(CFLAGS) -DFS_SERIAL_CLOCAL
+endif
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The

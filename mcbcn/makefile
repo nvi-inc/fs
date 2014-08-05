@@ -14,6 +14,9 @@ ifeq ($(STRUCT),0)
 CFLAGS := $(CFLAGS) -DUSE_STRUCT
 endif
 endif
+ifdef FS_SERIAL_CLOCAL
+CFLAGS := $(CFLAGS) -DFS_SERIAL_CLOCAL
+endif
 #
 OBJECTS = mcbcn.o
 #

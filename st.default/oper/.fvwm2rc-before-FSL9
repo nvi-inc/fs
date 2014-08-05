@@ -1,0 +1,751 @@
+# Trying to compile an old .fvwrc to the new fvwm-2.xx Format
+###########################################################################
+# set up the colors
+#
+# OK some people like bright clear colors on their window decorations.
+# These people, I guess would mostly be from nice sunny/good weather places
+# line California.
+#
+# StdForeColor 		Black
+# StdBackColor		LightSkyBlue
+# HiForeColor 		yellow
+# HiBackColor		PeachPuff1
+# PagerBackColor	BlanchedAlmond
+
+# Me, I'm from Upstate New York, and live in New Hampshire, so I prefer
+# these dark muddy colors...
+# this is used for non-selected windows, menus, and the panner
+#!StdForeColor 		Black (new command=Style "*" Color f/b)
+Style "*" ForeColor Black
+#!StdBackColor 		#60a0c0 (new command=Style "*" Color f/b)
+Style "*" BackColor #60a0c0
+
+# this is used for the selected window
+#!HiForeColor 		Black (new command=HilightColor)
+#HiBackColor 		#c06077
+#!HiBackColor		PaleGreen3 (new command=HilightColor)
+
+#Set the foreground and background color for selected windows
+HilightColor   Black PaleGreen3
+
+#! PagerBackColor		#5c54c0 [deleted]
+#! An FvwmPager config to emulate builtin pager would be as follows:
+# *FvwmPagerBack SlateGrey
+# *FvwmPagerFore Black
+# *FvwmPagerFont none
+# *FvwmPagerHilight SlateBlue4
+# *FvwmPagerGeometry <xsize> <ysize>
+# *FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
+# *FvwmPagerDeskTopScale 32
+# #! Now start pager
+# Module FvwmPager 0 0
+#! PagerForeColor		orchid [deleted]
+#! An FvwmPager config to emulate builtin pager would be as follows:
+# *FvwmPagerBack SlateGrey
+# *FvwmPagerFore Black
+# *FvwmPagerFont none
+# *FvwmPagerHilight SlateBlue4
+# *FvwmPagerGeometry <xsize> <ysize>
+# *FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
+# *FvwmPagerDeskTopScale 32
+# #! Now start pager
+# Module FvwmPager 0 0
+#PagerForeColor          PaleGreen3
+
+#! StickyForeColor		Black (not supported in FVWM2)
+#! StickyBackColor		#60c0a0 (not supported in FVWM2)
+
+# Menu colors
+#!MenuForeColor           Black
+MenuStyle * Foreground Black
+#MenuBackColor           grey
+#!MenuBackColor		PaleGreen3
+MenuStyle * Background PaleGreen3
+#!MenuStippleColor        SlateGrey
+MenuStyle * Greyed SlateGrey
+
+############################################################################
+# Now the fonts - one for menus, another for window titles, another for icons
+#Font			-adobe-helvetica-medium-r-*-*-14-*-*-*-*-*-*-*
+#Font			-*-times-medium-i-*-*-*-140-*-*-*-*-*-*
+#!Font			10x20
+MenuStyle * Font 10x20
+#Font			9x15
+#Font			-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
+#WindowFont		-adobe-helvetica-bold-r-*-*-12-*-*-*-*-*-*-*
+WindowFont		10x20
+#WindowFont		9x15
+#WindowFont		-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
+#IconFont		-adobe-helvetica-medium-r-*-*-11-*-*-*-*-*-*-*
+#IconFont		fixed
+IconFont		10x20
+#IconFont		9x15
+#IconFont		-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
+###########################################################################
+# Set up the major operating modes
+#
+########################      FOCUS STUFF     ##############################
+# Set windows to auto-raise after 750 milliseconds if you like it.
+# Autoraise can sometimes obscure pop-up windows. Performance is now
+# similar to olvwm's auto-raise feature.
+#AutoRaise 750
+
+# Normally, we'll be in focus-follows mouse mode, but uncomment this 
+# for mwm-style click-to-focus
+Style "*" ClickToFocus
+
+########################      ICON STUFF     ##############################
+# Auto Place Icons is a nice feature....
+# This creates two icon boxes, one on the left side, then one on the
+# bottom. Leaves room in the upper left for my clock and xbiff,
+# room on the bottom for the Pager.
+#IconBox -150 90 -5 -140
+#IconBox 5 -140 -140 -5
+#IconBox -70 1 -1 -140
+Style "*" IconBox -175 -250 -1 -1
+Style "*" IconBox 0 -250 -175 -100
+
+# If you uncomment this, and make sure that the WindowList is bound to
+# something, it works pretty much like an icon manager.
+#SuppressIcons
+
+# StubbornIcons makes icons de-iconify into their original position on the
+# desktop, instead of on the current page.
+#StubbornIcons
+
+# With AutoPlacement, icons will normally place themselves underneath active
+# windows. This option changes that.
+#StubbornIconPlacement
+
+# If you want ALL you icons to follow you around the desktop (Sticky), try
+# this
+#StickyIcons
+
+########################      MWM EMULATION     #######################
+#
+# My feeling is that everyone should use MWMDecorHints and MWMFunctionHints,
+# since some applications depend on having the window manager respect them
+# MWMFunction hints parses the function information in the MOTIF_WM_HINTS
+# property, and prohibits use of these functions on the window. Appropriate
+# portions of the window decorations are removed.
+Style "*" MWMFunctions
+
+# MWM is kinda picky about what can be done to transients, and it was keeping
+# me from iconifying some windows that I like to iconify, so here's an
+# over-ride that will allow me to do the operation, even tough the menu
+# item is shaded out.
+Style "*" HintOverride
+
+# MWMDecor hints parses the decoration information in the MOTIF_WM_HINTS
+# property, and removes these decoratons from the window. This does not affect
+# the functions that can be performed via the menus.
+Style "*" MWMDecor
+
+# These are affect minor aspects for the look-and-feel.
+# Sub-menus placement mwm-style?
+#!MWMMenus
+MenuStyle * mwm
+# mwm-style border reliefs (less deep than default fvwm) ?
+#MWMBorders
+# Maximize button does mwm-inversion thingy
+Style "*" MWMButtons
+########################      MISCELLANEOUS STUFF     #######################
+# If you don't like the default 150 msec click delay for the complex functions
+# change this and uncomment it.
+#ClickTime 150
+
+# OpaqueMove has a number (N) attached to it (default 5).
+# if the window occupies less than N% of the screen, 
+# then opaque move is used. 0 <= N <= 100
+OpaqueMoveSize 100
+
+# flip by whole pages on the edge of the screen.
+EdgeScroll 100 100
+
+# A modest delay before flipping pages seems to be nice...
+# I thresh in a 50 pixel Move-resistance too, just so people
+# can try it out.
+#EdgeResistance 250 50
+
+# I like to use a large virtual screen and move from page to page with the
+# pager.
+EdgeResistance 10000 0
+
+
+########################      WINDOW PLACEMENT     #######################
+# RandomPlacement prevents user interaction while placing windows:
+Style "*" RandomPlacement
+
+# SmartPlacement makes new windows pop-up in blank regions of screen 
+# if possible, or falls back to random or interactive placement.
+Style "*" SmartPlacement
+
+# With SmartPlacement, windows will normally place themselves over icons. 
+# Uncomment this to change that.
+#StubbornPlacement
+
+# NoPPosition instructs fvwm to ignore the PPosition field in window 
+# geometry hints. Emacs annoyingly sets PPosition to (0,0)!
+Style "*" NoPPosition
+
+
+########################      DECORATIONS     #######################
+# If you want decorated transient windows, uncomment this:
+#DecorateTransients
+
+###########################################################################
+# Set up the virtual desktop and pager
+
+#set the desk top size in units of physical screen size
+DeskTopSize 3x3
+
+# and the reduction scale used for the panner/pager
+#!DeskTopScale 36 (new command=*FvwmPagerDeskTopScale <scale>)
+*FvwmPagerDeskTopScale 36
+
+# Use the Fvwm Pager
+#Pager -5 -5
+
+##########################################################################
+# Module path and paths to the icons
+#
+# ModulePath is a colon-separated list, just like regular unix PATH
+#! (ModulePath command commented out)
+#ModulePath /usr/lib/X11/fvwm
+PixmapPath /usr/include/X11/pixmaps/
+IconPath   /usr/include/X11/bitmaps/
+
+############################################################################
+# Set the decoration styles and window options
+# Order is important!!!!
+# If compatible styles are set for a single window in multiple Style
+# commands, then the styles are ORed together. If conflicting styles
+# are set, the last one specified is used.
+
+# These commands should command before any menus or functions are defined,
+# and before the internal pager is started.
+
+# change the default width.
+Style "*" BorderWidth 5, HandleWidth 5, Color Black/#60a0c0,Icon unknown1.xpm
+
+Style "Fvwm*"      NoTitle, Sticky, WindowListSkip
+Style "Fvwm Pager" StaysOnTop
+Style "FvwmBanner" StaysOnTop
+Style "FvwmButtons"  NoTitle, NoHandles, Sticky, WindowListSkip,BorderWidth 0
+Style "*lock"      NoTitle, NoHandles, Sticky, WindowListSkip
+Style "xbiff"      NoTitle,            Sticky, WindowListSkip
+Style "rxvt"       Icon  term.xpm
+Style "xterm"      Icon xterm.xpm
+#, Color black/grey
+Style "Appointment" Icon datebook.xpm
+Style "xcalc"      Icon xcalc.xpm
+Style "xbiff"      Icon mail1.xpm
+Style "xmh"        Icon mail1.xpm, StartsOnDesk 2
+Style "xman"	   Icon xman.xpm
+Style "xvgr"	   Icon graphs.xpm
+Style "xmag"	   Icon mag_glass.xpm
+Style "xgraph"	   Icon graphs.xpm
+Style "FvwmButtons"  Icon toolbox.xpm
+Style "login_sh"   NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "oprin"	   NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "fmset"      NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "*"          Color black/khaki
+Style "monit*" NeverFocus
+Style "monpcal" NeverFocus
+Style "xconsole" NeverFocus
+Style "Field System Prompt*" StaysOnTop
+IgnoreModifiers L2
+
+#############################################################################
+
+# Stuff to do at start-up
+
+#	Module	"I"	FvwmBanner
+#	Exec	"I"	xpmroot /usr/include/X11/pixmaps/fvwm.xpm &
+#	Module	"I"	GoodStuff
+#	Module	"I"	FvwmPager 0 3
+#	Exec	"I"	exec xterm -geometry 80x64+0+0 &
+#	Wait	"I"	xterm
+#	Desk	"I"	0 2
+#	Exec	"I"	exec xmh -font fixed -geometry 507x750+0+0 &
+#	Wait	"I"	xmh
+#	Desk 	"I"	0 0
+
+#	Exec	"I"	xsetroot -solid "#266294"      
+#	Module	"I"	GoodStuff
+#	Module	"I"	FvwmPager 0 3
+
+
+############################################################################
+# Now define some handy complex functions
+
+# This one moves and then raises the window if you drag the mouse,
+# only raises the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Move-or-Raise" "M" Move
++              "M" Raise
++              "C" Raise
++              "D" RaiseLower
+
+# This one maximizes vertically if you click (leaving room for the GoodStuff bar at the
+# bottom, or does a full maximization if you double click, or a true full vertical 
+# maximization if you just hold the mouse button down.
+AddToFunc "maximize_func" "M" Maximize 0 100
++              "C" Maximize 0 80
++              "D" Maximize 100 100
+
+
+# This one moves and then lowers the window if you drag the mouse,
+# only lowers the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Move-or-Lower" "M" Move
++              "M" Lower
++              "C" Lower
++              "D" RaiseLower
+
+# This one moves or (de)iconifies:
+AddToFunc "Move-or-Iconify" "M" Move
++              "D" Iconify
+
+# This one resizes and then raises the window if you drag the mouse,
+# only raises the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Resize-or-Raise" "M" Resize
++              "M" Raise
++              "C" Raise
++              "D" RaiseLower
+
+
+# This is provided as a hint only.
+# Move to a known page on the desktop, then start an application in a 
+# known location. Could also switch to a known desktop, I guess
+#Function "abs_coord"
+#	GoToPage "Immediate"	1,1
+#	Exec	"Immediate"	exec xcalc -geometry +100+100&
+#EndFunction
+
+
+##############################################################################
+#now define the menus - defer bindings until later
+
+AddToMenu "Shells" "Shells" Title
++              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 7x14
++              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14 -ls
++              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 7x14
++              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 10x20
++              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20 -ls
++              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 10x20
+
+AddToMenu "Screensaver" "Screensaver" Title
++              "Bat" Exec exec xlock -nolock -nice 0 -mode bat
++              "Blank" Exec exec xlock -nolock -nice 0 -mode blank
++              "Blot" Exec exec xlock -nolock -nice 0 -mode blot
++              "Bob" Exec exec xlock -nolock -nice 0 -mode bob
++              "Bounce" Exec exec xlock -nolock -nice 0 -mode bounce
++              "Flame" Exec exec xlock -nolock -nice 0 -mode flame
++              "Galaxy" Exec exec xlock -nolock -nice 0 -mode galaxy
++              "Grav" Exec exec xlock -nolock -nice 0 -mode grav
++              "Helix" Exec exec xlock -nolock -nice 0 -mode helix
++              "Hop" Exec exec xlock -nolock -nice 0 -mode hop
++              "Hyper" Exec exec xlock -nolock -nice 0 -mode hyper
++              "Kaleid" Exec exec xlock -nolock -nice 0 -mode kaleid
++              "Life" Exec exec xlock -nolock -nice 0 -mode life
++              "Life3d" Exec exec xlock -nolock -nice 0 -mode life3d
++              "Maze" Exec exec xlock -nolock -nice 0 -mode maze
++              "Pyro" Exec exec xlock -nolock -nice 0 -mode pyro
++              "Qix" Exec exec xlock -nolock -nice 0 -mode qix
++              "Random" Exec exec xlock -nolock -nice 0 -mode random
++              "Rect" Exec exec xlock -nolock -nice 0 -mode rect
++              "Rock" Exec exec xlock -nolock -nice 0 -mode rock
++              "Rotor" Exec exec xlock -nolock -nice 0 -mode rotor
++              "Sphere" Exec exec xlock -nolock -nice 0 -mode sphere
++              "Spline" Exec exec xlock -nolock -nice 0 -mode spline
++              "Swarm" Exec exec xlock -nolock -nice 0 -mode swarm
++              "Wator" Exec exec xlock -nolock -nice 0 -mode wator
++              "Worm" Exec exec xlock -nolock -nice 0 -mode worm
++              "World" Exec exec xlock -nolock -nice 0 -mode world
+
+AddToMenu "Screenlock" "Lock Screen" Title
++              "Bat" Exec exec xlock -nice 0 -mode bat
++              "Blank" Exec exec xlock -nice 0 -mode blank
++              "Blot" Exec exec xlock -nice 0 -mode blot
++              "Bob" Exec exec xlock -nice 0 -mode bob
++              "Bounce" Exec exec xlock -nice 0 -mode bounce
++              "Flame" Exec exec xlock -nice 0 -mode flame
++              "Galaxy" Exec exec xlock -nice 0 -mode galaxy
++              "Grav" Exec exec xlock -nice 0 -mode grav
++              "Helix" Exec exec xlock -nice 0 -mode helix
++              "Hop" Exec exec xlock -nice 0 -mode hop
++              "Hyper" Exec exec xlock -nice 0 -mode hyper
++              "Kaleid" Exec exec xlock -nice 0 -mode kaleid
++              "Life" Exec exec xlock -nice 0 -mode life
++              "Life3d" Exec exec xlock -nice 0 -mode life3d
++              "Maze" Exec exec xlock -nice 0 -mode maze
++              "Pyro" Exec exec xlock -nice 0 -mode pyro
++              "Qix" Exec exec xlock -nice 0 -mode qix
++              "Random" Exec exec xlock -nice 0 -mode random
++              "Rect" Exec exec xlock -nice 0 -mode rect
++              "Rock" Exec exec xlock -nice 0 -mode rock
++              "Rotor" Exec exec xlock -nice 0 -mode rotor
++              "Sphere" Exec exec xlock -nice 0 -mode sphere
++              "Spline" Exec exec xlock -nice 0 -mode spline
++              "Swarm" Exec exec xlock -nice 0 -mode swarm
++              "Wator" Exec exec xlock -nice 0 -mode wator
++              "Worm" Exec exec xlock -nice 0 -mode worm
++              "World" Exec exec xlock -nice 0 -mode world
+
+AddToMenu "Games" "Games" Title
+#        Exec    "Maze"          exec maze &
+#        Exec    "Spider"        exec spider &
+#        Exec    "Xcolormap"     exec xcolormap &
+#        Exec    "Workman"       exec workman &
+#        Exec    "Xboard"        exec xboard &
+#        Exec    "Xcuckoo"       exec xcuckoo &
++              "Xeyes" Exec exec xeyes
+#        Exec    "Xhextris"      exec xhextris &
+#        Exec    "Xlander"       exec xlander &
++              "Xlogo" Exec exec xlogo
+#        Exec    "Xmahjongg"     exec xmahjongg &
+#        Exec    "Xroach"        exec xroach &
+#        Exec    "Xtetris"       exec xtetris &
+#        Exec    "Xvier"         exec xvier &
+#        Exec    "Xbombs"        exec xbombs &
+#        Exec    "Puzzle"        exec puzzle &
+#        Exec    "Xgas"          exec xgas &
+
+AddToMenu "Applications" "Applications" Title
++              "Ghostview" Exec exec ghostview
++              "GNU Emacs" Exec exec emacs
+#        Exec    "Lucid Emacs"   exec lemacs &
+#        Exec    "Seyon"         exec seyon -modem /dev/modem &
++              "XV" Exec exec xv
+#        Exec    "X3270"         exec x3270 &
++              "Xedit" Exec exec xedit
+#        Exec    "Xfig"          exec xfig &
+#        Exec    "Xfilemanager"  exec xfilemanager &
++              "Xfm" Exec exec xfm
+#        Exec    "Xfractint"     exec rxvt -font 7x14 -e xfractint map=chroma &
+#        Exec    "Xgrab"         exec xgrab &
+#        Exec    "Xpaint"        exec xpaint &
++              "Xspread" Exec exec xspread
++              "Xxgdb" Exec exec xxgdb
+
+# This menu is invoked as a sub-menu - it allows you to quit,
+# restart, or switch to another WM.
+AddToMenu "Quit-Verify" "Really Quit Fvwm?" Title
++              "Yes, Really Quit" Quit
++              "" Nop
++              "Restart fvwm2" Restart fvwm2
++              "" Nop
++              "No, Don't Quit" Nop
+
+AddToMenu "Restart-Verify" "Really Restart fvwm2?" Title
++              "Yes" Restart fvwm2
++              "" Nop
++              "No" Nop
+
+# Provides a list of modules to fire off
+AddToMenu "Module-Popup" "Modules" Title
++              "FvwmButtons" Module FvwmButtons
++              "Clean-Up" Module FvwmClean
++              "Identify" Module FvwmIdent
++              "SaveDesktop" Module FvwmSave
++              "Debug" Module FvwmDebug
++              "Pager" Module FvwmPager 0
++              "FvwmWinList" Module FvwmWinList
+
+# This menu will fire up some very common utilities
+AddToMenu "Extras" "Extras" Title
++              "Top" Exec exec rxvt -font 7x14 -T Top -n Top -e top
++              "Calculator" Exec exec xcalc
++              "Xman" Exec exec xman
++              "Xmag" Exec exec xmag
++              "Oclock" Exec exec oclock
++              "" Nop
++              "Applications" Popup Applications
++              "" Nop
++              "Shells" Popup Shells
++              "" Nop
++              "Games" Popup Games
++              "" Nop
++              "Screensaver" Popup Screensaver
++              "" Nop
++              "Lock Screen" Popup Screenlock
++              "" Nop
++              "Modules" Popup Module-Popup
++              "" Nop
++              "Exit Fvwm" Popup Quit-Verify
++              "" Nop
++              "Refresh Screen" Refresh
+
+#Simple Utilities
+AddToMenu "Utilities" "Utilities" Title
++              "Clock" Exec exec xclock
++              "Calculator" Exec exec xcalc
++              "Load" Exec exec xload
++              "Top" Exec exec xterm -T Top -n Top -e top
++              "Xman" Exec exec xman
+
+# Root menu
+AddToMenu "Root Menu" "Root Menu" Title
++              "New Window" Exec exec xterm -ls -g 80x24+75+75 -rw
+#	CirculateUp	"Shuffle Up"
+#	CirculateDown	"Shuffle Down"
++              "Refresh" Refresh
++              "" Nop
++              "Utilities" Popup Utilities
++              "" Nop
++              "Restart" Popup Restart-Verify
++              "Extras" Popup Extras
+
+# This defines the most common window operations
+AddToMenu "Window Ops" "Window Ops" Title
++              "Move" Function Move-or-Raise
++              "Resize" Function Resize-or-Raise
++              "Raise" Raise
++              "Lower" Lower
++              "(De)Iconify" Iconify
++              "(Un)Stick" Stick
++              "(Un)Maximize" Function maximize_func
++              "" Nop
++              "Destroy" Destroy
++              "Delete" Delete
++              "" Nop
++              "Refresh Screen" Refresh
+
+# Operator menu
+AddToMenu "Operator Menu" "Operator Menu" Title
++              "Monit: time C-S-1" Exec exec xterm -name monit1 -e monit1
++              "Monit: status C-S-2" Exec exec xterm -name monit2 -e monit2
++              "Monit: Tsys C-S-3" Exec exec xterm -name monit3 -e monit3
++              "Monit: LBA C-S-4" Exec exec xterm -name monit4 -e monit4
++              "Monit: Mark 5 C-S-5" Exec exec xterm -name monit5 -e monit5
++              "Monit: PCal C-S-6" Exec exec monpcal
++              "Chekr C-S-C" Exec exec run -w chekr
++              "Emacs C-S-E" Exec exec emacs
++              "Logex C-S-L" Exec exec xterm -name logex -e logex
++              "Pfmed C-S-P" Exec exec xterm -name pfmed -e pfmed
++              "Setcl C-S-S" Exec exec run -w setcl
++              "Fmset C-S-T" Exec exec xterm -name fmset -e fmset
++              "New window C-S-W" Exec exec xterm -ls -g 80x24+75+75
++              "" Nop
++              "Window Ops" Popup Window Ops
+
+# A trimmed down version of "Window Ops", good for binding to decorations
+AddToMenu "Window Ops2" "Move" Function Move-or-Raise
++              "Resize" Function Resize-or-Raise
++              "Raise" Raise
++              "Lower" Lower
++              "Iconify" Iconify
++              "(Un)Stick" Stick
++              "" Nop
++              "Destroy" Destroy
++              "Delete" Delete
++              "" Nop
++              "ScrollBar" Module FvwmScroll 2 2
+#############################################################################
+# One more complex function - couldn't be defined earlier because it used 
+# pop-up menus
+#
+# This creates a motif-ish sticky menu for the title-bar window-ops
+# pop-up
+# Menu acts like normal twm menu if you just hold the button down,
+# but if you click instead, the menu stays up, motif style
+AddToFunc "window_ops_func" "C" PopUp "Window Ops2"
++              "M" PopUp "Window Ops2"
+# Motif would add
+#       Delete  "DoubleClick"  
+
+
+##############################################################################
+# This defines the mouse bindings
+
+# First, for the mouse in the root window
+# Button 1 gives the Utilities menu
+# Button 2 gives the Window Ops menu
+# Button 3 gives the WindowList (like TwmWindows)
+# I use the AnyModifier (A) option for the modifier field, so you can hold down
+# any shift-control-whatever combination you want!
+
+#     Button	Context Modifi 	Function
+Mouse 1		R   	A       PopUp "Root Menu"
+Mouse 2		R    	A      	PopUp "Operator Menu"
+Mouse 3         R       A       WindowList
+#Mouse 3		R    	A      	Module "winlist" FvwmWinList transient
+
+
+
+# Now the title bar buttons
+# Any button in the left title-bar button gives the window ops menu
+# Any button in the right title-bar button Iconifies the window
+# Any button in the rightmost title-bar button maximizes
+# Note the use of "Mouse 0" for AnyButton.
+
+#     Button	Context Modifi 	Function
+Mouse 0		1    	A      	Function "window_ops_func"
+Mouse 0		2    	A     	Function "maximize_func"
+Mouse 0		4    	A     	Iconify
+
+# Now the rest of the frame
+# Here I invoke my complex functions for Move-or-lower, Move-or-raise,
+# and Resize-or-Raise. 
+# Button 1 in the corner pieces, with any modifiers, gives resize or raise
+Mouse 1		F	A	Function "Resize-or-Raise"
+# Button 1 in the title, sides, or icon, w/ any modifiers, gives move or raise
+Mouse 1		TS	A	Function "Move-or-Raise"
+
+# Button 1 in an icons gives move for a drag, de-iconify for a double-click,
+# nothing for a single click
+# Button 2 in an icon, w/ any modifiers, gives de-iconify
+
+Mouse 1		I	A	Function "Move-or-Iconify"
+Mouse 2		I	A	Iconify
+
+# Button 2 in the corners, sides, or title-bar gives the window ops menu
+Mouse 2		FST	A	Function "window_ops_func"
+# Button 3 anywhere in the decoration (except the title-bar buttons)
+# does a raise-lower
+Mouse 3		TSIF	A	RaiseLower
+
+# Button 3 in the window, with the Modifier-1 key (usually alt or diamond)
+# gives Raise-Lower. Used to use control here, but that interferes with xterm
+Mouse 3         W       M       RaiseLower
+
+############################################################################
+# Now some keyboard shortcuts.
+
+Key 1 A CS Exec exec xterm -name monit1 -e monit1
+Key 2 A CS Exec exec xterm -name monit2 -e monit2
+Key 3 A CS Exec exec xterm -name monit3 -e monit3
+Key 4 A CS Exec exec xterm -name monit4 -e monit4
+Key 5 A CS Exec exec xterm -name monit5 -e monit5
+Key 6 A CS Exec exec monpcal
+Key c A CS Exec exec run -w chekr
+Key e A CS Exec exec emacs
+Key l A CS Exec exec xterm -name logex -e logex
+Key p A CS Exec exec xterm -name pfmed -e pfmed
+Key s A CS Exec exec run -w setcl
+Key t A CS Exec exec xterm -name fmset -e fmset
+Key w A CS Exec exec xterm -ls -g 80x24+75+75 -rw
+#Key Escape	A	SC	CirculateDown
+#Key Escape	A	C	CirculateUp
+Key Escape      A       C       Prev (AcceptsFocus) Focus
+Key Escape      A       SC      Next (AcceptsFocus) Focus
+# Arrow Keys
+# press arrow + control anywhere, and scroll by 1 page
+Key Left	A	C	Scroll -100 0
+Key Right	A	C	Scroll +100 +0
+Key Up		A	C	Scroll +0   -100
+Key Down	A	C	Scroll +0   +100
+
+# press arrow + meta key, and scroll by 1/10 of a page
+Key Left	A	M	Scroll -10 +0
+Key Right	A	M	Scroll +10 +0
+Key Up		A	M	Scroll +0   -10
+Key Down	A	M	Scroll +0   +10
+
+# press shift arrow + control anywhere, and move the pointer by 1% of a page
+Key Left	A	SC	CursorMove -1 0
+Key Right	A	SC	CursorMove +1 +0
+Key Up		A	SC	CursorMove +0   -1
+Key Down	A	SC	CursorMove +0   +1
+
+# press shift arrow + meta key, and move the pointer by 1/10 of a page
+Key Left	A	SM	CursorMove -10 +0
+Key Right	A	SM	CursorMove +10 +0
+Key Up		A	SM	CursorMove +0   -10
+Key Down	A	SM	CursorMove +0   +10
+
+# Keyboard accelerators
+Key F1		A	M	Popup "Utilities"
+Key F1		A	M	Popup "Utilities"
+Key F2		A	M	Popup "Window Ops"
+Key F3 A M Module FvwmWinList
+Key F4		A	M	Iconify
+Key F5		A	M	Move
+Key F6		A	M	Resize
+Key F7		A	M	CirculateUp
+Key F8		A	M	CirculateDown
+
+#Page Up/Dapge Down keys are used to scroll by one desktop page
+# in any context, press page up/down + control
+# in root context, just pressing page up/down is OK
+# 
+# I prefer the non-wrapping scroll. These are for example purposes only
+#Key Next	A       C       Scroll 100000 0
+#Key Next	R       N       Scroll 100000 0  
+#Key Prior	A       C       Scroll -100000 0
+#Key Prior	R       N       Scroll -100000 0
+
+
+############################################################################
+############################################################################
+#Definitions used by the modules
+
+###################### GoodStuff button-bar ################################
+# Colors
+*FvwmButtonsFore Black
+*FvwmButtonsBack #908090
+
+# Font
+*FvwmButtonsFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+# Geometry - really likes to pick its own size, but giving a position is OK
+*FvwmButtonsGeometry -1-90
+
+# Layout: specify rows or columns, not both
+*FvwmButtonsColumns 1
+
+# Define the buttons to use.....
+*FvwmButtons Kill    rbomb.xpm    Destroy
+
+# xterm or rxvts on remote machines can be done like this
+# Output re-direction is csh style, not sh style
+# You will want to substitute your own hosts here!
+
+#*GoodStuff Dopey   rterm.xpm   Exec "dopey" rsh dopey "exec xterm -T dopey -display $HOSTDISPLAY </dev/null >&/dev/null & "&
+#*GoodStuff Grumpy  rterm.xpm   Exec "grumpy" rsh grumpy "exec xterm -T grumpy -display $HOSTDISPLAY </dev/null >&/dev/null & "&
+#*GoodStuff Snoopy  rterm.xpm   Exec "snoopy" rsh snoopy "exec xterm -T snoopy -display $HOSTDISPLAY </dev/null >&/dev/null & "&
+#*GoodStuff Xcalc   rcalc.xpm   Exec "Calculator" xcalc &
+#*GoodStuff mail    mail2.xpm    Exec "xmh" xmh &
+
+#*GoodStuff Paging  clamp.xpm   TogglePage
+#*GoodStuff xclock  clock.xpm   Swallow "xclock" xclock -bg \#908090 -geometry -1500-1500 -padding 0 &
+
+
+######################### No Clutter ########################################
+# I only wrote NoClutter as a simple test case, but maybe some big sites like
+# universities really have usage problems (too many open windows)....
+# Time delays are in seconds.
+*FvwmNoClutter 3600 Iconify 1
+*FvwmNoClutter 86400 Delete
+*FvwmNoCLutter 172800 Destroy
+
+########################## Window-Identifier ###############################
+# Just choose colors and a fonts
+*FvwmIdentBack MidnightBlue
+*FvwmIdentFore Yellow
+*FvwmIdentFont -adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*
+
+########################### Pager #########################################
+*FvwmPagerBack #908090
+*FvwmPagerFore #484048
+*FvwmPagerFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+*FvwmPagerHilight #cab3ca
+*FvwmPagerGeometry -1-1
+*FvwmPagerLabel 0 Misc
+*FvwmPagerLabel 1 FrameMaker
+*FvwmPagerLabel 2 Mail
+*FvwmPagerLabel 3 Matlab
+*FvwmPagerSmallFont 5x8
+
+
+##########################FvwmWinList##################################
+*FvwmWinListBack #908090
+*FvwmWinListFore Black
+*FvwmWinListFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+*FvwmWinListAction Click1 Iconify -1,Focus
+*FvwmWinListAction Click2 Iconify
+*FvwmWinListAction Click3 Module "FvwmIdent" FvwmIdent
+*FvwmWinListUseSkipList
+*FvwmWinListGeometry +0-1
+                                      
