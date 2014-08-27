@@ -53,7 +53,7 @@ C  NRSPN  - number of responses possible
       parameter (maxlog=512,maxmess=maxlog-18,maxlogwd=maxmess/2)
       integer*2 echo_log(maxlogwd)
       integer*2 dbg_buf(maxlogwd)
-      integer*2 irecx(10)
+      integer*2 irecx(13)
       character*1 cjchar
       logical kprompt
       integer*4 icent
@@ -179,7 +179,7 @@ C  at this time, don't know how many characters are expected 7/16/92
         idum=ichmv(irecv,2,irecx(2),1,maxc-1)
         ilen=ilen+1
       else if(imode.eq.-54) then
-        maxc=40
+        maxc=26
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
         if(ireg(1).eq.0.and.ilen.eq.1) then
            call fc_rte_ticks(centisec(2))
