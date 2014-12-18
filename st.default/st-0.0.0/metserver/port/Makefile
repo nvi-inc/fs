@@ -2,12 +2,6 @@
 #  Note that the backslash character has been used at the end of each line
 #  to indicate continuation.
 #
-# If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
-#  the port library will be compiled with a O_NONBLOCK
-#  open of the serial port, then set CLOCAL, and then closed and re-opened
-#  without O_NONBLOCK. This also impacts and programs that call
-#  portopen(), including metserver.
-#
 OBJECTS=\
 portopen.o portread.o portwrite.o portbaud.o portflush.o portoutdrain.o\
 portdelay.o portclose.o
@@ -19,12 +13,9 @@ ifeq (/usr/src/linux-1.2.12,\
 $(wildcard /usr/src/linux-1.2.12 ))
 CFLAGS := $(CFLAGS) -DUSE_OLD_SPECIAL_FLAGS
 endif
-ifeq (/usr/src/linux/drivers/char/digi.h,\
-$(wildcard /usr/src/linux/drivers/char/digi.h ))
+ifeq (/usr/src/linux/include/digi.h,\
+$(wildcard /usr/src/linux/include/digi.h ))
 CFLAGS := $(CFLAGS) -DDIGI
-endif
-ifdef FS_SERIAL_CLOCAL
-CFLAGS := $(CFLAGS) -DFS_SERIAL_CLOCAL
 endif
 #
 #  The following line that has a ":" in it is a "dependency line".

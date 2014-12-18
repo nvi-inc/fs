@@ -19,7 +19,7 @@
 clock_t rte_times(struct tms *);
 
 #ifdef DIGI
-#include "/usr/src/linux/drivers/char/digi.h"
+#include "/usr/src/linux/include/digi.h"
 #endif
 
 #include "../include/params.h"
