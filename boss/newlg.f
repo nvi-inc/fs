@@ -235,6 +235,10 @@ c
         nch=ichmv_ch(ib,nch,'mk5b')
       else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5B_BS) then
         nch=ichmv_ch(ib,nch,'mk5b_bs')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C) then
+        nch=ichmv_ch(ib,nch,'mk5c')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C_BS) then
+        nch=ichmv_ch(ib,nch,'mk5c_bs')
       else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -371,9 +375,11 @@ c
       endif
 c
       nch=mcoma(ib,nch)
-      call fs_get_dbbcddcv(dbbcddcv)
       nch=ichmv_ch(ib,nch,'v')
-      nch = nch + ib2as(dbbcddcv,ib,nch,z'800F')
+      call fs_get_dbbcddcvs(dbbcddcvs)
+      call fs_get_dbbcddcvc(dbbcddcvc)
+      call char2hol(dbbcddcvs,ib,nch,nch+dbbcddcvc-1)
+      nch=nch+dbbcddcvc
 c
       nch=mcoma(ib,nch)
       call fs_get_dbbcpfbv(dbbcpfbv)

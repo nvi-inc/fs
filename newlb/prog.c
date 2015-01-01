@@ -16,6 +16,8 @@
 #define LSKD_N 8
 #define LLOG_N 8
 #define LEXPER_N 8
+#define DBBCDDCVL_N 1
+#define DBBCDDCVS_N 16
 #define SYSTMP_N MAX_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
@@ -2353,6 +2355,50 @@ void fs_get_dbbcddcv__(dbbcddcv)
 	int *dbbcddcv;
 	{
           *dbbcddcv = shm_addr->dbbcddcv;
+	}
+
+void fs_set_dbbcddcvl__(dbbcddcvl)
+	char *dbbcddcvl;
+	{
+          size_t N;
+	  N = DBBCDDCVL_N;
+	  memcpy(shm_addr->dbbcddcvl,dbbcddcvl,N);
+	}
+
+void fs_get_dbbcddcvl__(dbbcddcvl)
+	char *dbbcddcvl;
+	{
+          size_t N;
+	  N = DBBCDDCVL_N;
+	  memcpy(dbbcddcvl,shm_addr->dbbcddcvl,N);
+	}
+
+void fs_set_dbbcddcvs__(dbbcddcvs)
+	char *dbbcddcvs;
+	{
+          size_t N;
+	  N = DBBCDDCVS_N;
+	  memcpy(shm_addr->dbbcddcvs,dbbcddcvs,N);
+	}
+
+void fs_get_dbbcddcvs__(dbbcddcvs)
+	char *dbbcddcvs;
+	{
+          size_t N;
+	  N = DBBCDDCVS_N;
+	  memcpy(dbbcddcvs,shm_addr->dbbcddcvs,N);
+	}
+
+void fs_set_dbbcddcvc__(dbbcddcvc)
+	int *dbbcddcvc;
+	{
+          shm_addr->dbbcddcvc = *dbbcddcvc;
+        }
+
+void fs_get_dbbcddcvc__(dbbcddcvc)
+	int *dbbcddcvc;
+	{
+          *dbbcddcvc = shm_addr->dbbcddcvc;
 	}
 
 void fs_set_dbbcpfbv__(dbbcpfbv)
