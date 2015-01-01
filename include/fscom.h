@@ -339,4 +339,7 @@ typedef struct fscom {
 
   int m5b_crate;
 
+  char dbbcddcvl[1];
+  char dbbcddcvs[16];
+  int  dbbcddcvc;
 } Fscom;
