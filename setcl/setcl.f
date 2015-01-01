@@ -151,7 +151,7 @@ c
       iclasm = 0
       nrec = 0
       if (MK5.eq.drive(1).and.
-     &     (MK5B.eq.drive_type(1).or.MK5b_BS.eq.drive_type(1))) then
+     &     (MK5B.eq.drive_type(1).or.MK5B_BS.eq.drive_type(1))) then
         idum=rn_take('fsctl',0)
         idum=fc_get_5btime(centisec,it,ip,0,m5sync,m5pps,m5freq,m5clock)
         call rn_put('fsctl')
