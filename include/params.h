@@ -64,7 +64,7 @@
 
 /* rack/drive, some are also _types.
    Hierarchy: rack/drive, then rack_type/drive_type
-   "*_type" must be unqiue within each "equip" */ 
+   "*_type" must be unqiue within each specific rack or drive */ 
 #define DBBC        0x800
   /* rack_types: DBBC, drive_types: none  */
 #define MK5         0x400
@@ -118,6 +118,9 @@
 #define MK5A_BS     0x8000000
 #define MK5B        0x40000000
 #define MK5B_BS     0x10000000
+
+#define MK5C        0x1
+#define MK5C_BS     0x2
 
 /*
  * The number of DAS allowed must be less than 8, currently we allow 2

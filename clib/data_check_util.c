@@ -22,7 +22,9 @@ struct data_check_mon *lcl;
   case 1:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+	shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%s",lcl->source.source,&lcl->source.state);
     } else {
       m5sprintf(output,"%s",lcl->mode.mode,&lcl->mode.state);
@@ -31,7 +33,9 @@ struct data_check_mon *lcl;
   case 2:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5time_encode(output,&lcl->start.start,&lcl->start.state);
     } else {
       tvgss=lcl->mode.state.known &&
@@ -46,7 +50,9 @@ struct data_check_mon *lcl;
   case 3:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%d",&lcl->code.code,&lcl->code.state);
     } else {
       tvgss=lcl->mode.state.known &&
@@ -61,7 +67,9 @@ struct data_check_mon *lcl;
   case 4:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%d",&lcl->frames.frames,&lcl->frames.state);
     } else {
       tvgss=lcl->mode.state.known &&
@@ -76,7 +84,9 @@ struct data_check_mon *lcl;
   case 5:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5time_encode(output,&lcl->header.header,&lcl->header.state);
     } else {
       m5time_encode(output,&lcl->period.period,&lcl->period.state);
@@ -85,7 +95,9 @@ struct data_check_mon *lcl;
   case 6:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%f",&lcl->total.total,&lcl->total.state);
     } else {
       m5sprintf(output,"%ld",&lcl->bytes.bytes,&lcl->bytes.state);
@@ -94,7 +106,9 @@ struct data_check_mon *lcl;
   case 7:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%ld",&lcl->byte.byte,&lcl->byte.state);
     } else {
       m5sprintf(output,"%Ld",&lcl->missing.missing,&lcl->missing.state);
@@ -103,7 +117,9 @@ struct data_check_mon *lcl;
   case 8:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%Ld",&lcl->missing.missing,&lcl->missing.state);
       break;
     }
@@ -136,7 +152,9 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
 
   mk5b=shm_addr->equip.drive[0] == MK5 &&
     (shm_addr->equip.drive_type[0] ==MK5B ||
-     shm_addr->equip.drive_type[0] == MK5B_BS);
+     shm_addr->equip.drive_type[0] == MK5B_BS ||
+     shm_addr->equip.drive_type[0] ==MK5C ||
+     shm_addr->equip.drive_type[0] == MK5C_BS);
 
   m5state_init(&lclm->missing.state);
 

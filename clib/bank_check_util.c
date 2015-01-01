@@ -151,7 +151,9 @@ m5_2_rtime(ptr_in,lclm,ip) /* return values:
 
   mk5b=shm_addr->equip.drive[0] == MK5 &&
     (shm_addr->equip.drive_type[0] ==MK5B ||
-     shm_addr->equip.drive_type[0] == MK5B_BS);
+     shm_addr->equip.drive_type[0] == MK5B_BS ||
+     shm_addr->equip.drive_type[0] ==MK5C ||
+     shm_addr->equip.drive_type[0] == MK5C_BS);
 
   m5state_init(&lclm->seconds.state);
   m5state_init(&lclm->gb.state);

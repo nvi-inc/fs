@@ -26,7 +26,9 @@ struct scan_check_mon *lcl;
   case 3:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+	shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%s",lcl->type.type,&lcl->type.state);
     } else {
       m5sprintf(output,"%s",lcl->mode.mode,&lcl->mode.state);
@@ -35,7 +37,9 @@ struct scan_check_mon *lcl;
   case 4:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+	shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%d",&lcl->code.code,&lcl->code.state);
     } else {
       m5sprintf(output,"%s",lcl->submode.submode,&lcl->submode.state);
@@ -50,7 +54,9 @@ struct scan_check_mon *lcl;
   case 7:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+	shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%f",&lcl->total.total,&lcl->total.state);
     } else {
       m5sprintf(output,"%f",&lcl->rate.rate,&lcl->rate.state);
@@ -62,7 +68,9 @@ struct scan_check_mon *lcl;
   case 9:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+	shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%s",lcl->error.error,&lcl->error.state);
     } else {
       *count=-1;
@@ -95,7 +103,9 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
 
   mk5b=shm_addr->equip.drive[0] == MK5 &&
     (shm_addr->equip.drive_type[0] ==MK5B ||
-     shm_addr->equip.drive_type[0] == MK5B_BS);
+     shm_addr->equip.drive_type[0] == MK5B_BS ||
+     shm_addr->equip.drive_type[0] ==MK5C ||
+     shm_addr->equip.drive_type[0] == MK5C_BS);
 
   m5state_init(&lclm->scan.state);
   m5state_init(&lclm->label.state);

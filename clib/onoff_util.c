@@ -158,7 +158,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==MK4&&shm_addr->equip.rack_type==MK45 &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5vcd(itpis_test); 
 	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
@@ -184,7 +186,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==MK4&&shm_addr->equip.rack_type==MK45 &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5vcd(itpis_test); 
 	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
@@ -262,7 +266,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==VLBA4&&shm_addr->equip.rack_type==VLBA45 &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5bbcd(lcl->itpis); 
 	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&lcl->itpis);
@@ -289,7 +295,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==VLBA4&&shm_addr->equip.rack_type==VLBA45 &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5bbcd(itpis_test); 
 	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&itpis_test);
@@ -377,7 +385,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==DBBC &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5dbbcd(lcl->itpis); 
 	  else
 	    for(i=0;i<2*MAX_DBBC_BBC;i++)
@@ -403,7 +413,9 @@ char *ptr;
 	  if(shm_addr->equip.rack==DBBC &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
-	      shm_addr->equip.drive_type[0]==MK5B_BS))
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS) )
 	    mk5dbbcd(itpis_test); 
 	  for (j=0;j<MAX_DBBC_IF;j++)
 	    for(i=0;i<MAX_DBBC_BBC;i++)

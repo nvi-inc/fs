@@ -86,7 +86,9 @@ long ip[5];
 
       if(shm_addr->equip.drive[0] == MK5 &&
 	 (shm_addr->equip.drive_type[0] ==MK5B ||
-	  shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	  shm_addr->equip.drive_type[0] == MK5B_BS ||
+	  shm_addr->equip.drive_type[0] ==MK5C ||
+	  shm_addr->equip.drive_type[0] == MK5C_BS) ) {
 	if(lclm.type.state.error || (!lclm.type.state.known)
 	    || strcmp("?",lclm.type.type)==0) {
 	  logit(NULL,-601,"5k");
