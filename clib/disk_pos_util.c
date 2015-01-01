@@ -27,7 +27,9 @@ struct disk_pos_mon *lcl;
   case 3:
     if(shm_addr->equip.drive[0] == MK5 &&
        (shm_addr->equip.drive_type[0] ==MK5B ||
-	shm_addr->equip.drive_type[0] == MK5B_BS)) {
+	shm_addr->equip.drive_type[0] == MK5B_BS ||
+        shm_addr->equip.drive_type[0] ==MK5C ||
+	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%Ld",&lcl->stop.stop,&lcl->stop.state);
       break;
     }
@@ -62,7 +64,9 @@ m5_2_disk_pos(ptr_in,lclm,ip) /* return values:
 
   mk5b=shm_addr->equip.drive[0] == MK5 &&
     (shm_addr->equip.drive_type[0] ==MK5B ||
-     shm_addr->equip.drive_type[0] == MK5B_BS);
+     shm_addr->equip.drive_type[0] == MK5B_BS ||
+     shm_addr->equip.drive_type[0] ==MK5C ||
+     shm_addr->equip.drive_type[0] == MK5C_BS);
 
   m5state_init(&lclm->record.state);
   m5state_init(&lclm->play.state);
