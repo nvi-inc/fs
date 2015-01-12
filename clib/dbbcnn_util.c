@@ -11,7 +11,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *if_key[ ]={ "a", "b", "c", "d" }; /* if input source */
-static char *bw_key[ ]={"1","2","4","8","16"};
+static char *bw_key[ ]={"1","2","4","8","16","32"};
 static char *agc_key[ ]={"man","agc"};
 
 #define NIF_KEY sizeof(if_key)/sizeof( char *)
@@ -63,6 +63,11 @@ char *ptr;
         break;
       case 3:
 	ierr=arg_key_flt(ptr,bw_key,NBW_KEY,&lcl->bw,3,TRUE);
+	if(0 == ierr) 
+	  if(0==lcl->bw && shm_addr->dbbcddcvl[0] != ' ')
+	    ierr=-210;
+	  else if(5==lcl->bw && NULL == index("ef",shm_addr->dbbcddcvl[0]))
+	    ierr=-220;
         break;
       case 4:
         ierr=arg_int(ptr,&lcl->avper,1,TRUE);
