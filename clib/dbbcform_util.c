@@ -6,9 +6,11 @@
 #include <limits.h>
 #include <math.h>
 #include "../include/params.h"
-#include "../include/dbbcform_ds.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"         /* shared memory definition */
+#include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2"};
+static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2","astro3"};
 static char *test_key[ ]={"0","1","bin","tvg"};
 
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
@@ -29,6 +31,14 @@ char *ptr;
     switch (*count) {
       case 1:
 	ierr=arg_key(ptr,mode_key,NMODE_KEY,&lcl->mode,0,FALSE);
+	if(0 == ierr)
+	  if(5==lcl->mode && shm_addr->dbbcddcv < 104)
+	    ierr=-210;
+	  else if(6==lcl->mode && shm_addr->dbbcddcvl[0] == ' ')
+	    ierr=-220;
+	  else if(NULL != index("ef",shm_addr->dbbcddcvl[0]) &&
+		  3!=lcl->mode && 6!=lcl->mode)
+	    ierr=-230;
         break;
       case 2:
 	if(lcl->mode == 3)
@@ -89,9 +99,9 @@ struct dbbcform_cmd *lcl;
 
   sprintf(buff,"dbbcform=");
 
-  if(lcl->mode >= 0 && lcl->mode < NMODE_KEY) 
+  if(lcl->mode >= 0 && lcl->mode < NMODE_KEY)
     strcat(buff,mode_key[lcl->mode]);
-
+      
   if(lcl->mode == 3) {
     strcat(buff,",");
     if(lcl->test >= 0 && lcl->test < NTEST_KEY) 
