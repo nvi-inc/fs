@@ -27,6 +27,7 @@ int *count;
 char *ptr;
 {
     int ierr, i, arg_key();
+    float sample;
     
     ierr=0;
     if(ptr == NULL) ptr="";
@@ -51,7 +52,8 @@ char *ptr;
       } 
       break;
     case 3:
-      ierr=arg_int(ptr,&lcl->decimate.decimate ,1,TRUE);
+      lcl->decimate.decimate=0;
+      ierr=arg_int(ptr,&lcl->decimate.decimate ,1,FALSE);
       m5state_init(&lcl->decimate.state);
       if(ierr == 0 && lcl->decimate.decimate!=1 &&
 	 lcl->decimate.decimate!=2 &&
@@ -61,11 +63,53 @@ char *ptr;
 	ierr=-200;
       if(ierr==0) {
 	lcl->decimate.state.known=1;
+      } else if(ierr!=-100) {
+	lcl->decimate.state.error=1;
+      } 
+      if(ierr==-100)
+	ierr=0;
+      break;
+    case 4:
+      ierr=arg_float(ptr,&sample,0.0,FALSE);
+      if(lcl->decimate.state.known != 0) {
+	if(ierr != -100)
+	  ierr=-300;
+	else if(ierr == -100) {
+	  ierr = 0;
+	  break;
+	}
+      } else if(lcl->decimate.state.known == 0 && ierr == -100) {
+	if(0 == shm_addr->m5b_crate)
+	  ierr=-100;
+	else {
+	  sample=shm_addr->m5b_crate;
+	  ierr=0;
+	}
+      }
+      if(ierr == 0 ) {
+	if(sample <= 0.124) {
+	  ierr=-200;
+	} else {
+	  lcl->decimate.decimate=(shm_addr->m5b_crate/sample)+0.5;
+	  if( fabs(lcl->decimate.decimate*sample-shm_addr->m5b_crate)/
+	      shm_addr->m5b_crate > 0.001)
+	    ierr=-210;
+	  else if( lcl->decimate.decimate!=1 &&
+		   lcl->decimate.decimate!=2 &&
+		   lcl->decimate.decimate!=4 &&
+		   lcl->decimate.decimate!=8 &&
+		   lcl->decimate.decimate!=16) {
+	    ierr=-210;
+	  }
+	}
+      }
+      if(ierr==0) {
+	lcl->decimate.state.known=1;
       } else {
 	lcl->decimate.state.error=1;
       } 
       break;
-    case 4:
+    case 5:
       ierr=arg_int(ptr,&lcl->fpdp.fpdp ,0,FALSE);
       m5state_init(&lcl->fpdp.state);
       if(ierr==0 && lcl->fpdp.fpdp != 1 && lcl->fpdp.fpdp != 2)
@@ -78,7 +122,7 @@ char *ptr;
 	lcl->fpdp.state.error=1;
       }
       break;
-    case 5:
+    case 6:
       ierr=arg_key(ptr,disk_key,NDISK_KEY,&lcl->disk.disk,-1,TRUE);
       m5state_init(&lcl->disk.state);
       if(ierr==0) {
@@ -96,10 +140,11 @@ char *ptr;
    return ierr;
 }
 
-void mk5b_mode_enc(output,count,lclc)
+void mk5b_mode_enc(output,count,lclc,itask)
 char *output;
 int *count;
 struct mk5b_mode_cmd *lclc;
+int itask;
 {
 
   int ivalue;
@@ -120,6 +165,16 @@ struct mk5b_mode_cmd *lclc;
       m5state_encode(output,&lclc->decimate.state);
       break;
     case 4:
+      if(13 == itask || 14 == itask)
+	sprintf(output,"(%.3f)",
+		(float) (shm_addr->m5b_crate/lclc->decimate.decimate) );
+      else if(15==itask)
+	sprintf(output,"%.3f",lclc->fpdp.fpdp/1000000. );
+      m5state_encode(output,&lclc->decimate.state);
+      break;
+    case 5:
+      if(15==itask)
+	break;
       sprintf(output,"%d",lclc->fpdp.fpdp);
       m5state_encode(output,&lclc->fpdp.state);
       break;
@@ -131,9 +186,10 @@ struct mk5b_mode_cmd *lclc;
    return;
 }
 
-mk5b_mode_2_m5(ptr,lclc)
+mk5b_mode_2_m5(ptr,lclc,itask)
 char *ptr;
 struct mk5b_mode_cmd *lclc;
+int itask;
 {
   strcpy(ptr,"mode = ");
 
@@ -143,8 +199,11 @@ struct mk5b_mode_cmd *lclc;
   sprintf(ptr+strlen(ptr),"0x%x",lclc->mask.mask);
   strcat(ptr," : ");
 
-  sprintf(ptr+strlen(ptr),"%d",lclc->decimate.decimate);
-  strcat(ptr," : ");
+  if(15 != itask) {
+    sprintf(ptr+strlen(ptr),"%d",lclc->decimate.decimate);
+    strcat(ptr," : ");
+  } else
+    strcat(ptr," 1 : ");
 
   if(lclc->fpdp.state.known==1) {
     sprintf(ptr+strlen(ptr),"%d ;\n",lclc->fpdp.fpdp);
@@ -153,6 +212,18 @@ struct mk5b_mode_cmd *lclc;
 
   return;
 }
+mk5c_clock_set_2_m5(ptr,lclc)
+char *ptr;
+struct mk5b_mode_cmd *lclc;
+{
+  strcpy(ptr,"clock_set = ");
+
+  sprintf(ptr+strlen(ptr),"%d : ext ; \n",
+	  shm_addr->m5b_crate/lclc->decimate.decimate);
+
+  return;
+}
+
 m5_2_mk5b_mode(ptr_in,lclc,ip) /* return values:
 				  *  0 == no error
 				  *  0 != error
