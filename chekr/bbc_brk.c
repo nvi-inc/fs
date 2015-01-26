@@ -33,6 +33,7 @@ int *ierr;
   get_res(&response, &buffer); mc01bbc(&lclc, response.data);
   get_res(&response, &buffer); mc02bbc(&lclc, response.data);
   get_res(&response, &buffer); mc03bbc(&lclc, response.data);
+  get_res(&response, &buffer); mc04bbc(&lclm, response.data);
 /*  get_res(&response, &buffer); mc05bbc(&lclc, response.data);
   not implemented yet
 */
@@ -59,6 +60,7 @@ int *ierr;
 /*  if (lcomm.gain.value[1] != lclc.gain.value[1]) icherr[8]=1; */
 /* not implemented yet */
   if (lcomm.avper != lclc.avper) icherr[9]=1;
+  if (lclm.lock==0) icherr[10]=1;
   shm_addr->bbc_tpi[ind][0]=lclm.pwr[0];
   shm_addr->bbc_tpi[ind][1]=lclm.pwr[1];
   return;
