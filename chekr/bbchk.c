@@ -38,6 +38,7 @@ int *ierr;
   request.addr=0x01; add_req(&buffer,&request);
   request.addr=0x02; add_req(&buffer,&request);
   request.addr=0x03; add_req(&buffer,&request);
+  request.addr=0x04; add_req(&buffer,&request);
 /*  request.addr=0x05; add_req(&buffer,&request);
   not implemented yet
 */
