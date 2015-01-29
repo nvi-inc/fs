@@ -274,11 +274,15 @@ loop:
 	  break;
 	case 13:
 	case 14:
+	case 15:
 	  mk5b_mode(&command,itask,ip);
 	  break;
 	case 20:
 	  dbbc(&command,itask,ip);
 	  break;
+    case 21:
+      mk5_status(&command, itask, ip);
+      break;
 	default:
 	  ierr=-4;
 	  goto error;
