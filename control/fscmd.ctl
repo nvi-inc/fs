@@ -324,7 +324,9 @@ scan_check   qkr 7811 01 FFFFFFFFFFFF
 last_check   qkr 7812 01 FFFFFFFFFFFF
 mk5b_mode    qkr 7813 01 FFFFFFFFFFFF
 bit_streams  qkr 7814 01 FFFFFFFFFFFF
+mk5c_mode    qkr 7815 01 FFFFFFFFFFFF
 dbbc         qkr 7820 01 FFFFFFFFFFFF
+mk5_status   qkr 7821 01 FFFFFFFFFFFF
 rollform     qkr 7901 01 0254FFFFFFFF
 tpicd        qkr 8001 01 FFFFFFFFFFFF
 onoff        qkr 8101 01 FFFFFFFFFFFF
