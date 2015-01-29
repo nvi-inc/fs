@@ -37,8 +37,8 @@ long ip[5];
       if((!kcom) && command->equal == '=') {
 	if(0!=logm5msg(output,command,ip)) {
 	  ip[2]=-400;
-	  memcpy(ip+3,"5r",2);
-	  goto error;
+	  memcpy(ip+3,"5t",2);
+	  return;
 	}
 	return;
       } else if(kcom) {
@@ -68,7 +68,7 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        mk5b_mode_enc(output,&count,&lclc);
+        mk5b_mode_enc(output,&count,&lclc,itask);
       }
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';
@@ -82,7 +82,7 @@ error2:
       ip[0]=0;
       ip[1]=0;
       ip[2]=ierr;
-      memcpy(ip+3,"5r",2);
+      memcpy(ip+3,"5t",2);
 error:
       cls_clr(iclass);
       return;
