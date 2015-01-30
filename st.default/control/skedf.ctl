@@ -156,12 +156,19 @@ $misc
 *     directory of the Mark5A program.
 *EXAMPLE
 * disk2file_Dir /r1234/data
+*
 * Sets up AutoFTP
 *EXAMPLE
-* AutoFTP ON arbitrary_string_with_out_spaces 
+* AutoFTP ON arbitrary_string_without_spaces 
+*
 * Can specify abort time for AutoFTP. If not set the abort time is 300 seconds
 *EXAMPLE
 * AutoFTP_abort_time 250 
+*
+* Ignores bad mask for Mark5B recorders (but will put out warning message!)
+* values are "yes" or "no". If keyword is not present, default is "no"
+*EXAMPLE
+* ignore_mark5B_bad_mask no
 *
 * Epoch:
 * Enter the epoch for drudg to use on the SOURCE commands in SNAP files.
