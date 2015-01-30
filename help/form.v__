@@ -68,6 +68,13 @@ x.xx.
 Comments:
 MCB functions are available. See section 1.0 of this manual.
 
+NOTE: The VLBA formatter is no longer used to record data
+operationally.  Checking it with CHEKR has been disabled.  Normally
+functionality like this is not removed.  In case it is helpful.  It
+allows the formatter to be set-up to support rack timing for VLBA4/5
+systems without having to set the formatter time to avoid getting a
+bad time complaint from CHEKR.
+
 The formatter CPU can be reset manually. After manual reset
 you must issue the command form=addr to re-initialize the
 module.
