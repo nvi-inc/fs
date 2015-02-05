@@ -1,0 +1,56 @@
+	 mk5_status - Mark 5 (ABC) "status?" + "error?" query
+
+            Syntax:     mk5_status
+
+            Response:   mk5_status/status,0xXXXXXXXX,<pending>
+                        mk5_status/error,<number>,<error text>
+
+Monitor-only parameters:
+            status        literal string "status" indicating that
+                          this is a device status report line
+            0xXXXXXXXX    hex status word
+            <pending>     literal string: "error(s) pending" is printed
+                          if error bit, 0x2, is set in the staturs word
+            error         literal string "error" indicating that
+                          this is a device error report line
+            <number>      the Mark 5 error number of the error
+            <error text>  the text for the error reported by Mark 5
+
+Comments: This command will produce status and error report lines in
+pairs until all errors (to a maximum of five in a single invocation)
+have been reported, concluding with a final status report line showing
+a status word. If there are no more errors to report the status work
+will not have the the error bit set (0x2). If the last reported status
+message shows more errors pending, a warning is issued.  This command
+returns only the current status if there is no error.
+
+The rationale for the error queueing/retrieval mechanism is that
+sometimes (hardware) errors may happen in the background, without
+being the direct cause of a command or query.  All Mark 5 control
+software support this mechanism, although not all of them provide the
+queueing facility of multiple errors.  Depending on the actual control
+code driving the Mark 5 this command may ("jive5ab") or may not
+(Mark5A/DIMino) return more than one error at a time.
+
+An example where this can can be useful is running out of disk space
+during a "disk2file" command.  The "disk2file?" query only indicates
+whether a "disk2file" is currently active but not the reason of
+inactivity, should it not be active.  Thus if a "disk2file" terminates
+because of an error, this fact would go by completely unnoticed.
+
+To allow users to retrieve errors like these, the Mark 5 control
+software retains an internal queue of errors (in Mark5A/DIMino it is
+limited to a length of one) that have happened in the background.  If
+the queue is non-empty, this fact will be reflected in the error bit
+in the status word being set.  The actual error code and message can
+then be retrieved using the "error?" query.
+
+This "mk5_status" SNAP command will first retrieve the (hexadecimal)
+status word and log it.  Should the error bit be set, it follows up by
+sending an "error?" query to the Mark 5 to retrieve and log the actual
+error.  This sequence repeats until the error bit is cleared.  Thus,
+if called, "mk5_status" will clear the error queue.
+
+It is advised to run this command at regular intervals (typically during
+"checkmk5") in order to identify errors that may be occurring and in what
+scan they occurred.
