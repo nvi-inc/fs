@@ -19,6 +19,7 @@
 ! History
 ! 2007Jul11 Split off from procs.f
 ! 2009Sep08 Fixed bug in filling up extra tracks if used 2nd headstack
+! 2014Dec10 JMG. Modified test to switch tracks to only work when in non-VEX mode. 
 
 ! local
       character*12 cnamep               !function name
@@ -141,7 +142,7 @@ C             Use BBC number, not channel number
                if(kinclude) then
                  isb_out=isb
                  if(abs(freqrf(ic,istn,icode)).lt.
-     >                  freqlo(ic,istn,icode)) then
+     >                freqlo(ic,istn,icode)) then 
                     isb_out=3-isb    !swap the sidebands
                  endif ! reverse sidebands
                  if(.true.) then    

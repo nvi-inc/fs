@@ -4,6 +4,7 @@
  
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
 !  2014Jun02  JMGipson. Changed starting count in looping over channels from 'ic' to 1 
+!  2015Jan29  JMGipson. Handle case of invered LO. 
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -25,6 +26,7 @@
       logical ku,kl             !is this channel upper or lower     
       integer ichanx            !Internal channlel counter 
       integer icx               !alternate channel#
+      logical knormal_lo
     
       character*1 cvc2k42(max_bbc)
       character*1 cvchan(max_bbc)
@@ -40,6 +42,7 @@
       else
          fvc(ib) = abs(dble(freqrf(ic,istn,icode))-flo(ib))   ! BBCfreq = RFfreq - LOfreq                
       endif
+      knormal_lo= abs(freqrf(ic,istn,icode)).gt.freqlo(ic,istn,icode)
   
       if(kmracks) then
         write(cbuf,'("vc",i2.2,"=")') ib
@@ -117,9 +120,21 @@
            icx=invcx(ichanx,istn,icode) ! channel number
            if (ib.eq.ibbcx(icx,istn,icode)) then ! Same BBC?               
              if(itras(1,1,1,icx,1,istn,icode).ne.-99 .or. 
-     >          itras(1,1,2,icx,1,istn,icode).ne.-99) ku=.true. 
+     >          itras(1,1,2,icx,1,istn,icode).ne.-99) then
+                 if(knormal_lo) then 
+                    ku=.true.
+                 else
+                    kl=.true.
+                 endif 
+             endif
              if(itras(2,1,1,icx,1,istn,icode).ne.-99 .or.
-     >          itras(2,1,2,icx,1,istn,icode).ne.-99) kl=.true.                  
+     >          itras(2,1,2,icx,1,istn,icode).ne.-99) then
+                if(knormal_lo) then
+                  kl=.true.
+                else
+                  ku=.true.                  
+                endif 
+             endif 
            endif
         enddo
         if(ku .and. kl) then 

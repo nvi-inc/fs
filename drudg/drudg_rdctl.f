@@ -74,6 +74,7 @@ C  1. Open the default control file if it exists.
       contcal_prompt="off" 
       ktarget_time=.false.
       klo_config=.false. 
+      kignore_mark5b_bad_mask=.false.
 
 
 
@@ -281,7 +282,7 @@ C              label_size ht wid nrows ncols topoff leftoff
               call readline_skdrut(lu,cbuf,keof,ierr,2)
             end do
 C  $MISC
-          else if (lsecname .eq. '$MISC') then
+          else if (lsecname .eq. '$MISC') then           
 !            write(*,*) "-->",cbuf(1:60)
             do while(.not.keof.and.(cbuf(1:1) .ne. '$'))
 !              write(*,*) "-->",cbuf(1:60) 
@@ -454,7 +455,20 @@ C         TPICD
                   klo_config = ltoken(2) .eq. "Y" .or. 
      >                         ltoken(2) .eq. "YES" .or.
      >                         ltoken(2) .eq."ON"
-                endif                              
+                endif     
+              else if(lkeyword .eq. "IGNORE_MARK5B_BAD_MASK") then  
+                if(NumToken .ne. 2) then
+                  write(*,*) 
+     >       "drudg_rdctl: No argument given for IGNORE_MARK5B_BAD_MASK"
+                else 
+                  call capitalize(ltoken(2))
+                  kignore_mark5b_bad_mask = 
+     >                        ltoken(2) .eq. "Y" .or. 
+     >                         ltoken(2) .eq. "YES" .or.
+     >                         ltoken(2) .eq."ON"
+                endif     
+
+                         
               else if(lkeyword .eq. "TARGET_TIME") then 
                if(NumToken .ne. 2) then
                   write(*,*) 

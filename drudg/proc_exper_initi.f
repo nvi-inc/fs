@@ -10,6 +10,7 @@
       character*12 lname
 ! History
 ! 2007May28 JMGipson.  Modified to add Mark5B support.
+! 2014Dec06 JMG. Added Mark5C support            
 
 
       lname="exper_initi"
@@ -29,7 +30,7 @@
         write(lufile,'(a)')   "mk5=SS_rev1?"
         write(lufile,'(a)')   "mk5=SS_rev2?"
         write(lufile,'(a)')   "mk5=status?"
-      else if(km5B) then
+      else if(km5B .or. Km5C) then
         write(lufile,'(a)')   "mk5=DTS_id?"
         write(lufile,'(a)')   "mk5=OS_rev?"
         write(lufile,'(a)')   "mk5=SS_rev?"

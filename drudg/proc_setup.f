@@ -57,7 +57,7 @@
       ktpicd= 
      >  Km3rack.or.km4rack.or.kvrack.or.kv4rack.or.klrack.or.kdbbc_rack
      > .or. 
-     > ( (km5rack.or.kv5rack) .and. (km5brec(1).or.knorec(1)) ) .or.
+     > ( (km5rack.or.kv5rack) .and. (km5b .or. km5c.or.knorec(1)) ) .or.
      > knorack 
     
 

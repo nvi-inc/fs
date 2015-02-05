@@ -100,9 +100,9 @@ C
               ipmax(ih)=0
               do j=1,max_pass ! check sub-passes
                 if (ihddir(ih,j,is,ic).gt.ipmax(ih)) 
-     .          ipmax(ih)=ihddir(ih,j,is,ic)
-              enddo ! check sub-passes
-              if (ih.eq.1) then ! set npassf and increment ntrakf
+     >              ipmax(ih)=ihddir(ih,j,is,ic)
+              enddo ! check sub-passes             
+              if (ih.eq.1 .and. np(ih) .ge. 1) then ! set npassf and increment ntrakf             
                 npassf(is,ic)=np(ih)             
                 ntrakf(is,ic)=ntrakf(is,ic)+itrk(np(ih),ih)
                 nhstack(is,ic) = 1

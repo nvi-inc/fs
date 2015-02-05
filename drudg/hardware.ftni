@@ -54,6 +54,7 @@
       logical km4rec(2)
       logical km5Arec(2)
       logical km5Brec(2)
+      logical km5Crec(2)
       logical km5APigWire(2)
       logical km5Prec(2)
       logical ks2rec(2)
@@ -64,7 +65,7 @@
       logical kk5rec(2)
       logical knorec(2)
 
-      common /hardware/km3rec,km4rec,km5Arec,km5Brec,km5aPigWire
+      common /hardware/km3rec,km4rec,km5Arec,km5Brec,km5Crec,km5aPigWire
       common /hardware/km5prec,ks2rec,kvrec,kv4rec
       common /hardware/kk41rec,kk42rec,kk5rec,knorec
 
@@ -78,9 +79,11 @@
       logical km5p
       logical km5A                !config info
       logical km5B
+      logical km5C 
+      
       logical km5disk
       logical knopass
-      common /hardware/ks2,kk4,kk5,km5A,km5B,km5p,km5disk,knopass
+      common /hardware/ks2,kk4,kk5,km5A,km5B,km5C,km5p,km5disk,knopass
 
       logical km5A_piggy,km5P_piggy
       logical kpiggy_km3mode         !piggy back on 2nd headstack

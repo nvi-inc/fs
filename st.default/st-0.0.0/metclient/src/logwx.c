@@ -4,39 +4,45 @@
 #include <string.h>
 #include <syslog.h>
 
-#define MAX_BUF 90
 logwx(
       char fsloc_str[],
       char wx_str[],
       char sn[],
-      char logfile[])
+      char logfile[],
+      struct tm *ptr)
 {
-  /*            /usr2/log/wx99001gg.log   */
-static  char file[]= "                                        ";
+  static char file[] =
+    "                                                                ";
+ /*  1234567890123456789012345678901234567890123456789012345678901234
+ /*  /usr2/log/wx/wx99001gg.log   */
   char new[sizeof(file)];
-  char new2[sizeof(file)];
   int error,total,ncopy;
-  struct tm *ptr;
   time_t t;
-  char buffer[MAX_BUF];
   char ch;
   static FILE *fildes= (FILE *) NULL;
   long offset;
   int kopen;
-
-  t=time(NULL);
-  if(((time_t) -1) == t) {
-    err_report("Error getting time in logwx",NULL,errno,0);
-    return;
-  }
+  int len;
+  size_t size;
 
   /* Setup new logfile. */
-  ptr=gmtime(&t);
+  if(strlen(logfile)+1 > sizeof(new)) {
+    err_report("Error formatting directory in log file name in logwx",
+	       logfile,0,strlen(logfile)+1);
+    return;
+  }
   strcpy(new,logfile);
-  strftime(new+strlen(new),sizeof(new),"/wx%y%j",ptr);
-  if(-1==snprintf(new+strlen(new),sizeof(new)-strlen(new),
-		  "%c%c.log",sn[0],sn[1])) {
-    err_report("Error formatting entry for log in logwx",new,errno,0);
+  size=sizeof(new)-strlen(new);
+  len=strftime(new+strlen(new),size,"/wx%y%j",ptr);
+  if(0==len||size == len) {
+    err_report("Error formatting date in log file name in logwx",NULL,0,len);
+    return;
+  }
+  size=sizeof(new)-strlen(new);
+  len=snprintf(new+strlen(new),size,"%c%c.log",sn[0],sn[1]);
+  if(-1 == len || len >= size) {
+    err_report("Error formatting station code in log file name in logwx",
+	       new,0,len);
     return;
   }
 
@@ -105,12 +111,7 @@ static  char file[]= "                                        ";
     }
   }
 
-  if(-1==snprintf(buffer,sizeof(buffer)-strlen(buffer),"%s",wx_str)){
-    err_report("Error formatting entry for log in logwx",new,errno,0);
-    return;
-  }
-      
-  if(strlen(buffer)+1!=fprintf(fildes,"%s\n",buffer)) {
+  if(strlen(wx_str)+1!=fprintf(fildes,"%s\n",wx_str)) {
     err_report("Error writing entry to log in logwx",new,errno,0);
     return;
   }
