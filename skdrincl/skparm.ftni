@@ -129,7 +129,7 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 20)
+      PARAMETER (MAX_FRQ = 40)
 
 !     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
       integer max_trk

@@ -8,7 +8,7 @@ LIBES = ../port/port.a
 OBJECT_S = ./metserver.o ./metget.o ./err_report.o
 #
 ../metserver: $(OBJECT_S)
-	$(CC) $(OBJECT_S) $(LIBES) -o ../metserver
+	$(CC) $(OBJECT_S) $(LIBES) -o ../metserver -lpthread
 #
 diag: 
 	$(MAKE) -f MakeDiag

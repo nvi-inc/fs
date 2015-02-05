@@ -459,7 +459,7 @@ C For most cases only one copy of this proc should be made.
              cifinp(i,istn,j)= cifinp_save(i,j)  
             enddo 
            end do     
-           goto 9100 
+!           goto 9100 
          endif 
 
          call proc_ifd(cname_ifd,icode,kpcal)

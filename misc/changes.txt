@@ -10554,3 +10554,197 @@ Version 9.11.5 140207
            clean-up
 
 Version 9.11.6 140805
+
+140827 PB  matcn/iat.f
+           fix sleeping bug in fmset time reading response for Mark IV
+
+141113 UB  clib/dbbcnn_util.c 
+           add 32 MHz BW
+
+141218 PdV port/Makefile
+           port/portopen.c
+           mcbcn/Makefile
+           mcbcn/mcbcn.c
+           st.default/st-0.0.0/metserver/port/portopen.c
+           st.default/st-0.0.0/metserver/port/Makefile
+           switch include file to new driver version; for systems with 
+           old driver create link: /usr/src/linux/include/digi.h
+           pointing to  /usr/src/linux/drivers/char/digi.h
+
+141231 WEH include/fscom_dum.i
+           include/fscom.h
+           newlb/prog.c
+           quikv/logmsg_dbbc.c
+           boss/newlg.f
+150101 WEH incom/equip.f
+           st.default/control/equip.ctl
+           control/fserr.ctl
+           new DBBC DDC version numbering scheme
+
+150101 WEH setcl/setcl.f
+           fix upper/lower case Mk5B typo
+
+150101 WEH include/params.i
+           include/params.h
+           quikv/scan_check_dis.c
+           quikv/disk_pos.c
+           quikv/data_check_dis.c
+           quikv/bank_check.c
+           clib/tpicd_util.c
+           clib/scan_check_util.c
+           clib/onoff_util.c
+           clib/disk_pos_util.c
+           clib/disk2file_util.c
+           clib/bank_check_util.c
+           clib/data_check_util.c
+           control/fserr.ctl
+           incom/equip.f
+           st.default/control/equip.ctl
+           make MK5C[_BS] the same as MK5B[_BS]
+
+150101 WEH control/fscmd.ctl
+           quikv/quikv.c
+150103 WEH control/fserr.ctl
+150104 WEH quikv/mk5b_mode_dis.c
+           clib/mk5b_mode_util.c
+           quikv/mk5b_mode.c
+           help/mk5b_mode.__
+           add mk5c_mode command
+
+150104 WEH boss/newpr.f
+           fix end of year wrap error in procedure logging
+
+150105 WEH st.default/control/equip.ctl
+           quikv/mk5b_mode.c
+           help/mk5b_mode.__
+           suppress clock_set in mk5c_mode when MK5B clock rate is zero
+
+151015 WEH quikv/mk5b_mode.c
+           adjust response to reflect hardware
+           
+151016 WEH quikv/logmsg_dbbc.c
+           handle upper case verion letters
+
+151016 WEH boss/newpr.f
+           restore deleted line
+
+151017 WEH clib/dbbcform_util.c
+           clib/mk5dbbcd.c
+           add astro3 code
+
+151017 WEH clib/get_tcal_fwhm.c
+           add 32 MHz BW and fix 15u and 16u detector codes
+
+151017 WEH help/mk5b_mode.___
+           remove integer limitation on sample
+
+151017 WEH quikr/tplis.f
+           quikr/tplisv.f
+           quikr/tplisd.f
+           mark5c for Tsys
+
+151018 WEH clib/mk5b_mode_util.c
+           format sample rate as float
+
+151018 WEH control/fserr.ctl
+           improve mk5b_mode error messages
+
+150112 WEH clib/dbbcnn_util.c
+           control/fserr.ctl
+           help/form.d__
+           clib/dbbcform_util.c
+           trap illegal BW and form codes or E/F and non E/F DBBC DC fimware
+
+150112 WEH st.default/control/equip.ctl
+           document nu trailing _x for DBBC DDC versions less than 105
+
+150113 WEH control/fserr.ctl.
+           clib/mk5b_mode_util.c
+           help/mk5b_mode.__
+           check sample is an integer
+           output parentheses around sample for 5B
+           output square brackets around sample for 5B
+
+150113 WEH clib/mk5b_mode_util.c
+           remove unused variables
+           print decimiation for bi_streams response
+
+150114 WEH help/mk5b_mode.___
+           help/form.d__
+           control/fserr.ctl
+           typos fixed
+
+150114 WEH help/mk5b_mode.___
+           control/fserr.ctl
+           clib/dbbcform_util.c
+           clib/mk5b_mode_util.c
+           switch E/F device format code to "astro3"
+           trap use of non BBC01 with E/F "astro"          
+
+150114 WEH misc/fs9117up.txt
+           updated
+           
+150115 WEH misc/fs9117up.txt
+           clib/mk5b_mode_util.c
+           help/mk5b_mode.___
+           read back and display clock rate for 5C instead of fpdp
+
+150115 WEH control/fserr.ctl
+           clib/mk5b_mode_util.c
+150119 WEH help/mk5b_mode.___
+           improve sample rate error messages
+
+150121 WEH clib/mk5b_mode_util.c
+           control/fserr.ctl
+           clib/dbbcform_util.c
+           help/form.d__
+           remove checking for astro mode for E/F with BBC01
+           no more translating astro to astro3 for E/F
+
+150123 WEH misc/fs9117up.txt
+           fix typos
+
+150126 WEH misc/fs9117up.txt
+           fix MHZ typos
+
+150126 WEH chekr/bbchk.c
+           chekr/bbc_brk.c
+           control/fserr.ctl
+           check VLBA BBC lock
+
+150116 HV  clib/mk5_status_util.c
+           quikv/mk5_status.c
+150127 HV  quikv/quikv.c
+           quikv/Makefile
+           control/fserr.ctl
+           control/fscmd.ctl
+           clib/Makefile
+150129 HV  help/mk5_status.___
+           add mk5_status command
+
+150127 WEH chekr/chekr.f
+           quikv/vform.c
+           chekr/vlbarack.f
+           help/form.v___
+           reenable VLBA/4/5 checking, but disable formatter checking 
+
+150129 WEH quikv/mk5b_mode.c
+           fserr.ctl
+           quikv/mk5b_mode_dis.c
+           fix error codes
+
+150130 WEH help/form.v__
+           improved text
+
+150130 WEH misc/fs9117up.txt
+           st.default/control/skedf.ctl
+           ignore_mark5B_bad_mask added
+
+150131 JQ  clib/mk5_status_util.c
+150204 JQ  quikv/mk5_status.c
+150204 WEH control/fserr.ctl
+           help/mk5_status.___
+150205 WEH misc/fs9117up.txt
+           final tweaks
+
+Version 9.11.7 150205

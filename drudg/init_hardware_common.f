@@ -50,22 +50,25 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         KK42rec(i) =cstrec(istn,i)  .eq. "K4-2"
         km5Arec(i) =cstrec(istn,i)  .eq. "Mark5A"
         km5Brec(i) =cstrec(istn,i)  .eq. "Mark5B"
+        km5Crec(i) =cstrec(istn,i)  .eq. "Mark5C"
         Km5APigwire(i) =cstrec(istn,i) .eq. "Mk5APigW"
         Km5Prec(i) =cstrec(istn,i)  .eq. "Mark5P"
         KK5Rec(i)  =cstrec(istn,i) .eq. "K5"
         Knorec(i)  =cstrec(istn,i) .eq. "none"
       end do
 
-      km5disk=.false.
-      do i=1,2
-        if(Km5Prec(i).or.Km5Arec(i).or.km5brec(i).or. Km5ApigWire(i))
-     >    Km5disk=.true.
-      end do
+!      km5disk=.false.
+!     do i=1,2
+!       if(Km5Prec(i).or.Km5Arec(i).or.km5brec(i).or. Km5ApigWire(i))
+!    >    Km5disk=.true.
+!     end do
 
       km5A=km5Arec(1) .or. km5Arec(2) .or.
      >     Km5Apigwire(1) .or.Km5APigwire(2)
       km5p=km5prec(1) .or. km5prec(2)
       km5B=km5Brec(1) .or. km5Brec(2)
+      km5C=km5Crec(1) .or. km5Crec(2)
+      km5disk = km5A .or. km5B .or. Km5C
 
       kk4=kk41rec(1) .or. kk41rec(2) .or. kk42rec(1) .or. kk42rec(2)
 

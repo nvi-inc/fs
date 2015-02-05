@@ -110,11 +110,20 @@ STARTING CLIENT:
             in the /usr2/st/metclient directory.
           The second parameter is the network port of the server, if
             you are not using the default, you must specify
-            it after the first parameter, 50001 is the default
+            it after the first parameter, 50001 is the default.
+          The third parameter is the host for the server, if you are not
+            using the default you must specify it after the second 
+            parameter. Default value is 'localhost'. The host can be
+            either a hostname, or an IPv4 address in standard dot notation.
+            If the metserver is run on the same computer 'localhost' will
+            always work. Providing the name or ip-address of the computer 
+            will only let the metclient connect to the metserver if the 
+            server enabled remote connections.
 
 
    prompt> log in as root.
-   prompt> /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl 50001 &
+   prompt> /usr2/st/metclient/metclient /usr2/st/metclient/metlog.ctl 50001
+           localhost &
 
 2.) If you would like metclient to startup at boot time.
 
@@ -144,6 +153,43 @@ STARTING CLIENT:
 	/etc/init.d/metclient.sh start (will start it up again)
 	/etc/init.d/metclient.sh restart (will stop then start)
 
+    b.) If you no longer want the server to startup at boot time you have
+        two options. You can either remove the service or disable it.
+        
+        Removing:
+        prompt> log in as root
+        prompt> cd /etc/init.d
+        prompt> rm metclient.sh
+        prompt> update-rc.d -f metclient.sh remove
+ 
+        Disabling:
+        There is no option to use when calling update-rc.d that will
+        disable the script (yet). This can be achieved manually by 
+        renaming the script in /etc/init.d, for example:
+        prompt> cd /etc/init.d
+        prompt> mv metclient.sh metclient.sh.disabled
+
+        NOTE: When invoking update-rc.d with the remove option the script
+              should have been deleted already. Flag '-f' will force removal
+              of symlinks even if /etc/init.d/metclient.sh still exists
+
  ===== Read the README file for logfile names and log file information. =====
 
 You're done!
+
+NOTES:
+------
+
+1. If the metclient saved a string without met data in the log file we might 
+   be able to tell from the string what happened.
+   There are two possible "error" strings that give us information:
+
+   a) A string with only date, time and 'wx' tell us that the metclient
+      did not retrieve any data at all from the metserver. 
+      Example: 2013.119.14:07:00/wx/
+      This will happen if the metserver is no longer running.
+
+   b) A string with date, time, 'wx' and three commas tell us that the 
+      metclient did retrieve data from the metserver, but the data was
+      badly formatted.
+      Example: 2013.119.14:07:00/wx/,,,

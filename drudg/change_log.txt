@@ -1,5 +1,49 @@
 This file contains a summary of changes made and why.
 
+2015Jan29.  
+../vmoinp.f  2014Dec09 change removed. Now all sidebands are treated as if normal LO. 
+proc_disk_trakcs.f:   Flip sideband if inverted LOs. 
+     
+proc_trkf.f           Flip sideband for VEX if inverted LO. Previously only did for SKD files
+proc_ifd.f            Added warning message if it doesn't find any valid LO inputs.
+proc_mracks_vc.f      Added support for inverted Los. 
+proc_disk_tracks.f, proc_trakcs.f 
+                      Also added "ignore_mark5b_bad_mask"  flag. If mask is bad, will issue warning and continue. 
+                      User needs to set flag in $misc section of skedf.ctl
+procs.f               Previously did silent 'abort' if BBC frequencies were wrong. Now mushes on. 
+
+
+
+2015Jan22 (Incorporate changes made from Jan13) Changes by JMG and JFHQ
+Modifications to support astro2 and astro3 modes with DBBC 
+BW written out to 3 places. Abort conditions all go to label 900.
+../proc_disk_tracks.f 
+
+
+2014Dec09 Changes to support 'inverted' IF.
+../vmoinp.f.   Flip Sideband if LO freq>sky_freqls 
+
+2014Dec06  Changes to support Mark5C. Affected files were:
+proc_disk_tracks.f
+fdrudg.f
+proc_setup.f
+proc_mk5_init1.f
+proc_mk5_init2.f
+proc_exper_initi.f
+init_hardware_common.f
+hardware.ftni
+equip_type.ftni
+../skdrut/stinp.f
+../skdrut/ttape.f
+
+2014Sep24
+Increased number of modes from 20 to 40.  
+../skdrincl/skparm.ftni  (max_frq =>40).
+Removed warning message for about mode being not defined for a station.
+../skdrut/itras.f
+Fixed bug if VEX file did not define any passes, ie, PASS_ORDER not defined. 
+../skdrut/gnpas.f
+
 2014Jun02 proc_mracks_vc.f
 This routine is called: call proc_mracks_vc(icode,ic,ib,ichan)
 ic=channel #

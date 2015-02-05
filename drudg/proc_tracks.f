@@ -31,7 +31,8 @@
 
 ! Output Mark5B  recorder stuff.    
       if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then 
-        call proc_disk_tracks(lu_outfile,istn,icode)
+        call proc_disk_tracks(lu_outfile,istn,icode,
+     >                  kignore_mark5b_bad_mask)
         return
       endif
 

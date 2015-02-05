@@ -1,6 +1,4 @@
 ! These routines return the track mapping in Mark4 format.
-! NOTE: SIDEBANDS assume normal LO. If inverted need to fix downstream. 
-! 
 ! Valid Mark3 tracks are 1-28, which correspond to
 ! Valid Mark4 tracks are 2-33.
 ! To map from Mark3+3=Mark4, i.e., Mark3 track 1=Mark4 track 4.
@@ -69,8 +67,8 @@
       itrk_key=istn_cod(istn,icode)
       if(itrk_key .eq. 0) then
          if(num_trk_map .ne. 0) then
-!           write(*,*) "ITRAS: Mode # ",icode,
-!     >       " not defined for station # ",istn
+           write(*,*) "ITRAS: Mode # ",icode,
+     >       " not defined for station # ",istn
           endif
          return
       endif

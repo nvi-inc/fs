@@ -215,10 +215,7 @@ C
            anlim2(2)=anlim2(2)+360
         endif
         endif 
-                                      
-
-
-
+  
         cidpos=ltoken(14)
         if(NumToken .ge. 15) then
           cidt=ltoken(15)
@@ -391,8 +388,10 @@ C  Store equipment names.
           cstrack(i)=crack
         endif       
         if (crec1 .ne. " ") then
-           if(.not.kvalid_rec(crec1)) crec1='none'                 
+           if(.not.kvalid_rec(crec1)) crec1='none'  
+           cstrec(i,1)=crec1               
         endif
+            
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
         if (crec2 .eq. " ") then

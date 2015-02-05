@@ -22,6 +22,8 @@ int flag,ierr;
   static time_t old=-1;
   char buff[MAX_BUF];
 
+  buff[0]=0;
+
   if(old==-1)
 #if 1
     openlog("metclient",LOG_CONS|LOG_PID,LOG_DAEMON);
@@ -41,8 +43,8 @@ int flag,ierr;
   if(ierr!=0)
     snprintf(buff+strlen(buff),-1+sizeof(buff)-strlen(buff),", Error =%d",
 	     ierr);
-
-  syslog(LOG_DAEMON|LOG_ERR,"%s",buff);
+  /* extra space after '%s' seems to help show trailing control chars */
+  syslog(LOG_DAEMON|LOG_ERR,"%s ",buff);
 
   t=time(NULL);
   if(old==-1||t-old >= 3600) {

@@ -45,6 +45,7 @@ C 2003Jul11 JMG added itctim
 !                 Got rid of stuff that is no longer used.
 ! 2008Aug19 JMG. Added cbbcbuf which is equivalenced to ibbcbuf.
 ! 2013Sep19 JMG. Added klo_config, ktarget_time
+! 2015Jan30 JMG. Added kignore_bad_mask 
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -52,12 +53,13 @@ c
       logical ksked_proc
 
       logical klo_config, ktarget_time
+      logical kignore_Mark5B_bad_mask 
 
       common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
      .       kpostpass,klabel_ps,ksked_proc,
-     >       klo_config,ktarget_time
+     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask 
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,

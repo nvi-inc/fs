@@ -9,11 +9,12 @@
 ! history
 ! 2007Dec11 JMGipson.  Fixed  bug in format statement
 ! 2014Jan30 JMGipson.  Removed some piggyback stuff. 
+! 2014Dec06 JMGipson. Support Mark5C
 
       ierr=0  
 
 ! Put some instructions out for MK5 recorders.
-      if(km5B) then
+      if(km5B.or. km5c) then
         continue  
       else if(km5A .or. knorec(1)) then 
 ! setup for number of tracks observed and recorded.

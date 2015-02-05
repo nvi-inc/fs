@@ -13,6 +13,8 @@ DESC="MET Server"
 MET=/dev/null
 WIND=/dev/null
 PORT=50001
+REMOTE=local
+DEVICE=MET4
 
 test -x $DAEMON || exit 0
 test -f $LFILE || exit 0
@@ -20,7 +22,7 @@ test -f $LFILE || exit 0
 case "$1" in
   start)
         echo -n "Starting $DESC: $NAME"
-        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND $PORT &
+        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND $PORT $REMOTE $DEVICE &
         echo "."
 	;;
   stop)
@@ -37,7 +39,7 @@ case "$1" in
         echo -n "Restarting $DESC: $NAME"
 	start-stop-daemon --quiet --stop --exec $DAEMON
 	sleep 2
-        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND &
+        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND $PORT $REMOTE $DEVICE &
 	echo "."
 	;;
   *)

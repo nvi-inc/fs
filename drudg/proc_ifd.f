@@ -2,8 +2,8 @@
 ! write out IFD and LO procedures
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
-      include 'drcom.ftni'
       include 'bbc_freq.ftni'
+      include 'drcom.ftni' 
 
 !History
 ! 2007Jul09. Split off from procs.
@@ -108,6 +108,10 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
 
         kdone_bbc(ib)=.true.
       enddo ! which IFs are in use
+      if(ifd(1)+ifd(2)+ifd(3)+ifd(4) .eq. 0) then
+        write(*,*)
+        write(*,*) "ERROR (proc_ifd):  No valid LO inputs in schedule!"
+      endif 
  
       if(kdbbc_rack) then
         do j=1,4      !upto 4 IFs
