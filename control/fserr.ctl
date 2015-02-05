@@ -398,6 +398,33 @@ query response not found for scan_set?
 5F -912
 program error: strdup() failed for scan_set?
 ""
+5H -301
+command does not accept parameters
+""
+5H -302
+background Mark 5 error(s) detected - see below
+""
+5H -303
+more Mark 5 error messages are pending
+""
+5H -401
+error retrieving class in mk5cn_exec
+""
+5H -501
+unexpected number of replies (expected 1) from mk5cn
+""
+5H -900
+status? query response not received
+""
+5H -901
+error decoding status word: overflow or not hex number or too big
+""
+5H -910
+error? query response not received
+""
+5H -912
+strdup failed initializing get_error
+""
 5I -101
 No default for control parameter
 ""
@@ -575,6 +602,9 @@ program error: strdup() failed
 5S -903
 program error: too many serial numbers
 ""
+5T -104
+No default sample rate if clock rate (from equip.ctl) is "none".
+""
 5T -201
 source parameter must be 'ext', 'tvg', or 'ramp'.
 ""
@@ -585,13 +615,34 @@ mask parameter, must specify an int, usually as a hex value, e.g., 0xf
 decimate parameter, must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-fpdp parameter, must be one of 1 or 2.
+Sample rate must be a number greater than 0.124
 ""
 5T -205
+fpdp parameter, if specified, must be 1 or 2.
+""
+5T -206
 okay parameter, must be 'disk_record_ok' or null.
 ""
+5T -214
+Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
+""
 5T -301
-Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
+""
+5T -304
+Can't specify sample rate and decimate parameters simultaneously
+""
+5T -400
+error retrieving acknowledgement of command
+""
+5T -401
+error retrieving class
+""
+5T -402
+Use "mk5b_mode" for Mark 5B recorders only.
+""
+5T -403
+Use "mk5c_mode" for Mark 5C recorders only.
 ""
 5T -501
 error decoding mode? source parameter
@@ -796,6 +847,12 @@ Error opening EQUIP.CTL ?FFF
 ""
 BO -140
 Error decoding EQUIP.CTL line ?WWW
+""
+BO -141
+Illegal version string in DBBC DDC version in EQUIP.CTL line ?WWW
+""
+BO -142
+No 'nominal' rate for that DBBC version number, rate in EQUIP.CTL line ?WWW
 ""
 BO -143
 Error opening RXDEF.CTL FMP ?FFF
@@ -1162,6 +1219,9 @@ CH -210
 ""
 CH -211
 ?W averaging period does not check with requested setting
+""
+CH -212
+?W LO unlocked.
 ""
 CH -222
 ?W attenuator for IF channel A does not check with requested setting
@@ -1704,10 +1764,19 @@ DC -202
 Error decoding IF source, must be A, B, C, or D.
 ""
 DC -203
-Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16.
+Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, or 32.
 ""
 DC -204
 Averaging period must be a positive integer 60 or less.
+""
+DC -213
+BW 1 can only be used with non-lettered (NOT e/f) DDC versions.
+""
+DC -223
+BW 32 can only be used with lettered (e/f) DDC versions.
+""
+DC -301
+Even BBCs not supported for DDC firmware E/F.
 ""
 DC -302
 IF source position exceeds number of conditioning modules
@@ -1743,10 +1812,19 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of: astro, geo, wastro, test, lba (or astro2 for versions 103 and above).
+Mode must be one of: astro, geo, wastro, test, lba, astro2, or astro3.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
+""
+DF -211
+Mode astro2 not supported before DBBC version 104.
+""
+DF -221
+Mode astro3 cannot be used with non-lettered (NOT e/f) DDC versions.
+""
+DF -231
+Lettered DDC versions (e/f) only support modes astro3 and test modes.
 ""
 DF -301
 astro2 mode not supppored for DBBC DDC version less than 104
@@ -1770,7 +1848,7 @@ DF -455
 DBBC version does not agree with equip.ctl; dbbc has v102: September 07 2012
 ""
 DF -456
-DBBC version does not agree with equip.ctl; dbbc has unknown version, see next message.
+DBBC version does not agree with equip.ctl; see next message for DBBC's version.
 ""
 DF -457
 DBBC version does not agree with equip.ctl; dbbc has (unsupported) v103: DDC,103,October 04 2012
