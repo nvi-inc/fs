@@ -16,6 +16,8 @@
 #define LSKD_N 8
 #define LLOG_N 8
 #define LEXPER_N 8
+#define DBBCDDCVL_N 1
+#define DBBCDDCVS_N 16
 #define SYSTMP_N MAX_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
@@ -2355,6 +2357,50 @@ void fs_get_dbbcddcv__(dbbcddcv)
           *dbbcddcv = shm_addr->dbbcddcv;
 	}
 
+void fs_set_dbbcddcvl__(dbbcddcvl)
+	char *dbbcddcvl;
+	{
+          size_t N;
+	  N = DBBCDDCVL_N;
+	  memcpy(shm_addr->dbbcddcvl,dbbcddcvl,N);
+	}
+
+void fs_get_dbbcddcvl__(dbbcddcvl)
+	char *dbbcddcvl;
+	{
+          size_t N;
+	  N = DBBCDDCVL_N;
+	  memcpy(dbbcddcvl,shm_addr->dbbcddcvl,N);
+	}
+
+void fs_set_dbbcddcvs__(dbbcddcvs)
+	char *dbbcddcvs;
+	{
+          size_t N;
+	  N = DBBCDDCVS_N;
+	  memcpy(shm_addr->dbbcddcvs,dbbcddcvs,N);
+	}
+
+void fs_get_dbbcddcvs__(dbbcddcvs)
+	char *dbbcddcvs;
+	{
+          size_t N;
+	  N = DBBCDDCVS_N;
+	  memcpy(dbbcddcvs,shm_addr->dbbcddcvs,N);
+	}
+
+void fs_set_dbbcddcvc__(dbbcddcvc)
+	int *dbbcddcvc;
+	{
+          shm_addr->dbbcddcvc = *dbbcddcvc;
+        }
+
+void fs_get_dbbcddcvc__(dbbcddcvc)
+	int *dbbcddcvc;
+	{
+          *dbbcddcvc = shm_addr->dbbcddcvc;
+	}
+
 void fs_set_dbbcpfbv__(dbbcpfbv)
 	int *dbbcpfbv;
 	{
@@ -2404,3 +2450,83 @@ void fs_get_dbbc_cont_cal_mode__(dbbc_cont_cal_mode)
 	  *dbbc_cont_cal_mode=shm_addr->dbbc_cont_cal.mode;
 	}
 
+void fs_set_m5b_crate__(m5b_crate)
+	int *m5b_crate;
+	{
+	  shm_addr->m5b_crate=*m5b_crate;
+        }
+
+void fs_get_m5b_crate__(m5b_crate)
+	int *m5b_crate;
+	{
+	  *m5b_crate=shm_addr->m5b_crate;
+	}
+void fs_set_mk6_units__(mk6_units)
+	int *mk6_units;
+	{
+	  memcpy(shm_addr->mk6_units,
+		 mk6_units,
+		 sizeof(shm_addr->mk6_units));
+        }
+void fs_get_mk6_units__(mk6_units)
+	int *mk6_units;
+	{
+	  memcpy(mk6_units,
+		 shm_addr->mk6_units,
+		 sizeof(shm_addr->mk6_units));
+	}
+void fs_set_mk6_active__(mk6_active)
+	int *mk6_active;
+	{
+	  memcpy(shm_addr->mk6_active,
+		 mk6_active,
+		 sizeof(shm_addr->mk6_active));
+        }
+void fs_get_mk6_active__(mk6_active)
+	int *mk6_active;
+	{
+	  memcpy(mk6_active,
+		 shm_addr->mk6_active,
+		 sizeof(shm_addr->mk6_active));
+	}
+void fs_set_wx_host__(wx_host)
+        char *wx_host;
+        {
+          memcpy(shm_addr->equip.wx_host,wx_host,
+		 sizeof(shm_addr->equip.wx_host));
+        }
+
+void fs_get_wx_host__(wx_host)
+        char *wx_host;
+        {
+          memcpy(wx_host,shm_addr->equip.wx_host,
+		 sizeof(shm_addr->equip.wx_host));
+        }
+void fs_set_rdbe_units__(rdbe_units)
+	int *rdbe_units;
+	{
+	  memcpy(shm_addr->rdbe_units,
+		 rdbe_units,
+		 sizeof(shm_addr->rdbe_units));
+        }
+void fs_get_rdbe_units__(rdbe_units)
+	int *rdbe_units;
+	{
+	  memcpy(rdbe_units,
+		 shm_addr->rdbe_units,
+		 sizeof(shm_addr->rdbe_units));
+	}
+void fs_set_rdbe_active__(rdbe_active)
+	int *rdbe_active;
+	{
+	  memcpy(shm_addr->rdbe_active,
+		 rdbe_active,
+		 sizeof(shm_addr->rdbe_active));
+        }
+void fs_get_rdbe_active__(rdbe_active)
+	int *rdbe_active;
+	{
+	  memcpy(rdbe_active,
+		 shm_addr->rdbe_active,
+		 sizeof(shm_addr->rdbe_active));
+	}
