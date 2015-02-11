@@ -5,8 +5,11 @@
 c
       integer ierr,idum,ilen,ich,il,ic1,ic2
       integer*2 ibuf(50)
-      character*4 decoder,pcalc,dbbcv
+      character*4 decoder,pcalc
+      character*18 dbbcv
       double precision das2b
+      character*7 m5bcrate
+      logical kmove
 c
       include '../include/fscom.i'
 c
@@ -124,6 +127,9 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'dbbc').eq.0.and.il.eq.4) then
         rack = DBBC
         rack_type = DBBC
+      else if (ichcm_ch(ibuf,ic1,'rdbe').eq.0.and.il.eq.4) then
+        rack = RDBE
+        rack_type = RDBE
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -200,6 +206,15 @@ C LINE #2  TYPE OF RECORDER - drive 1
       else if (ichcm_ch(ibuf,ic1,'mk5b_bs').eq.0.and.il.eq.7) then
         drive(1) = MK5
         drive_type(1) = MK5B_BS
+      else if (ichcm_ch(ibuf,ic1,'mk5c').eq.0.and.il.eq.4) then
+        drive(1) = MK5
+        drive_type(1) = MK5C
+      else if (ichcm_ch(ibuf,ic1,'mk5c_bs').eq.0.and.il.eq.7) then
+        drive(1) = MK5
+        drive_type(1) = MK5C_BS
+      else if (ichcm_ch(ibuf,ic1,'mk6').eq.0.and.il.eq.3) then
+        drive(1) = MK6
+        drive_type(1) = MK6
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive(1) = 0
         drive_type(1) = 0
@@ -545,8 +560,24 @@ C **** MET3 Sensor line 16
             call logit7ci(0,0,0,1,-140,'bo',16)
             goto 990
          endif
+      else
+         call gtfld(ibuf,ich,ilen,ic1,ic2)
+         if (ic1.eq.0) then
+            call logit7ci(0,0,0,1,-140,'bo',16)
+            goto 990
+         else
+            il=ic2-ic1+1
+            if(il.gt.64) then
+               call logit7ci(0,0,0,1,-140,'bo',16)
+               goto 990
+            else
+               idum=ichmv(wx_host,1,ibuf,ic1,il)
+               call pchar(wx_host,idum,0)
+            endif
+         endif
       endif
       call fs_set_wx_met(wx_met)
+      call fs_set_wx_host(wx_host)
 C **** end modify rdg
 C mk4 synch test parameter
       call readg(idcb,ierr,ibuf,ilen)
@@ -613,17 +644,50 @@ c DBBC DDC firmware version
       endif
 C
       call hol2char(ibuf,ic1,ic2,dbbcv)
-      if(dbbcv.eq.'v100') then
-         dbbcddcv=100
-      else if(dbbcv.eq.'v101') then
-         dbbcddcv=101
-      else if(dbbcv.eq.'v102') then
-         dbbcddcv=102
-      else
-        call logit7ci(0,0,0,1,-140,'bo',19)
-        goto 990
+      kmove=dbbcv(1:1).eq.'v'
+      do i=1,17
+         if(kmove) then
+            dbbcv(i:i)=dbbcv(i+1:i+1)
+         endif
+         if(dbbcv(i:i).ne.' ') idbbcvc=i
+      enddo
+      if(idbbcvc.gt.16) then
+         call logit7ci(0,0,0,1,-141,'bo',19)
+         goto 990
       endif
+      idbbcv=0
+      do i=1,3
+        ind=index('01234567890',dbbcv(i:i))
+        if(ind.eq.0) then
+           call logit7ci(0,0,0,1,-141,'bo',19)
+           goto 990
+        endif
+        idbbcv=idbbcv*10+(ind-1)
+      enddo
+      if(idbbcv.lt.100.or.idbbcv.eq.103) then
+         call logit7ci(0,0,0,1,-141,'bo',19)
+      endif
+      if(0.eq.index('abcdefghijklmnopqrstuvwxyz_ ',dbbcv(4:4))) then
+c                    12345678901234567890123456
+         call logit7ci(0,0,0,1,-141,'bo',19)
+         goto 990
+      endif
+      if(idbbcv.gt.104.and.dbbcv(4:4).ne.'_') then
+         dbbcddcvl=dbbcv(4:4)
+      else if(idbbcv.lt.105.and.dbbcv(4:4).ne.' ') then
+         call logit7ci(0,0,0,1,-141,'bo',19)
+         goto 990
+      else
+         dbbcddcvl=' '
+      endif
+c
+      dbbcddcv =idbbcv
+      dbbcddcvs= dbbcv
+      dbbcddcvc=idbbcvc
       call fs_set_dbbcddcv(dbbcddcv)
+      call fs_set_dbbcddcvl(dbbcddcvl)
+      call fs_set_dbbcddcvs(dbbcddcvs)
+      call fs_set_dbbcddcvc(dbbcddcvc)
 c DBBC PFB firmware version
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
@@ -642,7 +706,7 @@ C
       if(dbbcv.eq.'v12') then
          dbbcpfbv=12
       else
-        call logit7ci(0,0,0,1,-140,'bo',100)
+        call logit7ci(0,0,0,1,-140,'bo',20)
         goto 990
       endif
       call fs_set_dbbcpfbv(dbbcpfbv)
@@ -695,6 +759,65 @@ C DBBC IF count conversion factors
          endif
       enddo
       call fs_set_dbbc_if_factors(dbbc_if_factors)
+C 5B clock rate
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ich = 1
+      call gtfld(ibuf,ich,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',23)
+        goto 990
+      endif
+      call hol2char(ibuf,ic1,ic2,m5bcrate)
+      call fs_get_dbbcddcvl(dbbcddcvl)
+      call fs_get_dbbcddcv(dbbcddcv)
+      if(m5bcrate.eq.'nominal') then
+         if(drive(1).eq.MK5.and.
+     &        (drive_type(1).eq.MK5B.or.drive_type(1).eq.MK5B_BS.or.
+     &         drive_type(1).eq.MK5C.or.drive_type(1).eq.MK5C_BS)) then
+C note that MK45 and VLBA45 cannot connect to MK5C or MK5C_BS,
+c      so only DBBC matters for 5C
+            if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
+     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
+     &           (rack.eq.DBBC.and.
+     &           (dbbcddcv.le.104.or.dbbcddcvl.eq.' '))) then
+               m5b_crate=32
+            else if(rack.eq.DBBC.and.
+     &             (dbbcddcv.ge.105.and.
+     &              0.ne.index('ef',dbbcddcvl))) then
+               m5b_crate=64
+            else if(rack.eq.DBBC.and.
+     &             (dbbcddcv.ge.105.and.
+     &              0.eq.index(' ef',dbbcddcvl))) then
+               call logit7ci(0,0,0,1,-142,'bo',23)
+               goto 990
+            else if(rack.eq.0) then
+               call logit7ci(0,0,0,1,-140,'bo',23)
+               goto 990
+            else
+               m5b_crate=0
+            endif
+         else
+            m5b_crate=0
+         endif
+      else if(m5bcrate.eq.'none') then
+         m5b_crate=0
+      else
+         m5b_crate = ias2b(ibuf,ic1,ic2-ic1+1)
+         do i=1,6
+            if(m5b_crate.eq.2**i) then
+               goto 2300
+            endif
+         enddo
+         call logit7ci(0,0,0,1,-140,'bo',23)
+         goto 990
+      endif
+ 2300 continue
+      call fs_set_m5b_crate(m5b_crate)
 c
       return
 c
