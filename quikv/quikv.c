@@ -8,6 +8,8 @@
 
 extern struct fscom *shm_addr;
 
+char unit_letters[ ] = {" abcdefghijklm"}; /* mk6/rdbe unit letters */
+
 main()
 {
     long ip[5];
@@ -22,6 +24,7 @@ main()
 
     setup_ids();
     iold=rte_prior(FS_PRIOR);
+    putpname("     ");
 
 loop:
       skd_wait("quikv",ip,(unsigned) 0);
@@ -273,11 +276,16 @@ loop:
 	  last_check(&command,itask,ip);
 	  break;
 	case 13:
+	case 14:
+	case 15:
 	  mk5b_mode(&command,itask,ip);
 	  break;
 	case 20:
 	  dbbc(&command,itask,ip);
 	  break;
+    case 21:
+      mk5_status(&command, itask, ip);
+      break;
 	default:
 	  ierr=-4;
 	  goto error;
@@ -373,6 +381,33 @@ loop:
 	  ierr=-4;
 	  goto error;
 	}
+	break;
+      case 96:
+	dbbcgain(&command,itask,ip);
+	break;
+      case 100:
+	mk6(&command,itask,ip);
+	break;
+	//      case 101:
+	//mk6_record(&command,itask,ip);
+	//break;
+      case 102:
+	mk6_disk_pos(&command,itask,ip);
+	break;
+      case 111:
+	mk6_scan_check(&command,itask,ip);
+	break;
+      case 112:
+	mk6_active(&command,itask,ip);
+	break;
+      case 120:
+	rdbe(&command,itask,ip);
+	break;
+      case 121:
+	active_rdbes(&command,itask,ip);
+	break;
+      case 122:
+	rdbe_atten(&command,itask,ip);
 	break;
 /* end modified mb */
       default:

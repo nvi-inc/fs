@@ -72,14 +72,14 @@ C
           endif
           idummy = ichmv(lseg,1,ibuf,14,4)
           itp = ias2b(ibuf,16,1)
-          iss = ias2b(ibuf,18,4)
-          ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)*4096+ia2hx(ibuf,27,1)*256
-     .           + ia2hx(ibuf,28,1)*16 + ia2hx(ibuf,29,1)
-          ieq2 = ia2hx(ibuf,30,1)*4096+ia2hx(ibuf,31,1)*256
-     .           + ia2hx(ibuf,32,1)*16 +ia2hx(ibuf,33,1)
-          ieq3 = ia2hx(ibuf,34,1)*4096+ia2hx(ibuf,35,1)*256
-     .           + ia2hx(ibuf,36,1)*16 + ia2hx(ibuf,37,1)
+          iss = ias2b(ibuf,18,5)
+          ity = ias2b(ibuf,24,2)
+          ieq1 = ia2hx(ibuf,27,1)*4096+ia2hx(ibuf,28,1)*256
+     .           + ia2hx(ibuf,29,1)*16 + ia2hx(ibuf,30,1)
+          ieq2 = ia2hx(ibuf,31,1)*4096+ia2hx(ibuf,32,1)*256
+     .           + ia2hx(ibuf,33,1)*16 +ia2hx(ibuf,34,1)
+          ieq3 = ia2hx(ibuf,35,1)*4096+ia2hx(ibuf,36,1)*256
+     .           + ia2hx(ibuf,37,1)*16 + ia2hx(ibuf,38,1)
           idummy = ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           if(itp.ge.0.and.itp.le.3) then
@@ -129,14 +129,14 @@ C
           endif
           idummy = ichmv(lseg,1,ibuf,14,2)
           itp = ias2b(ibuf,16,1)
-          iss = ias2b(ibuf,18,4)
-          ity = ias2b(ibuf,23,2)
-          ieq1 = ia2hx(ibuf,26,1)*4096+ia2hx(ibuf,27,1)*256
-     .           + ia2hx(ibuf,28,1)*16 + ia2hx(ibuf,29,1)
-          ieq2 = ia2hx(ibuf,30,1)*4096+ia2hx(ibuf,31,1)*256
-     .           + ia2hx(ibuf,32,1)*16 +ia2hx(ibuf,33,1)
-          ieq3 = ia2hx(ibuf,34,1)*4096+ia2hx(ibuf,35,1)*256
-     .           + ia2hx(ibuf,36,1)*16 + ia2hx(ibuf,37,1)
+          iss = ias2b(ibuf,18,5)
+          ity = ias2b(ibuf,24,2)
+          ieq1 = ia2hx(ibuf,27,1)*4096+ia2hx(ibuf,28,1)*256
+     .           + ia2hx(ibuf,29,1)*16 + ia2hx(ibuf,30,1)
+          ieq2 = ia2hx(ibuf,31,1)*4096+ia2hx(ibuf,32,1)*256
+     .           + ia2hx(ibuf,33,1)*16 +ia2hx(ibuf,34,1)
+          ieq3 = ia2hx(ibuf,35,1)*4096+ia2hx(ibuf,36,1)*256
+     .           + ia2hx(ibuf,37,1)*16 + ia2hx(ibuf,38,1)
           idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           if(itp.ge.0.and.itp.le.3) then
@@ -298,10 +298,123 @@ c
       else
         call fc_putln('dbbcn initialized')
       endif
+c
+c  initialize mk6ca
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('mk6ca','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-195,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('mk6ca initialization failed')
+        ierr=0
+      else
+        call fc_putln('mk6ca initialized')
+      endif
+c    
+c
+c  initialize mk6cb
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('mk6cb','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-196,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('mk6cb initialization failed')
+        ierr=0
+      else
+        call fc_putln('mk6cb initialized')
+      endif
+C
+C ultimate expansion max is 13.
+C
+      if(MAX_MK6.gt.2) then
+        call logit7ci(0,0,0,1,-199,'bo',2)
+        ierr=-1
+      endif
+c
+c  initialize rdbca
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('rdbca','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-295,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('rdbca initialization failed')
+        ierr=0
+      else
+        call fc_putln('rdbca initialized')
+      endif
+c    
+c
+c  initialize rdbcb
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('rdbcb','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-296,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('rdbcb initialization failed')
+        ierr=0
+      else
+        call fc_putln('rdbcb initialized')
+      endif
+c    
+c
+c  initialize rdbcc
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('rdbcc','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-297,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('rdbcc initialization failed')
+        ierr=0
+      else
+        call fc_putln('rdbcc initialized')
+      endif
+c    
+c
+c  initialize rdbcd
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('rdbcd','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-298,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('rdbcd initialization failed')
+        ierr=0
+      else
+        call fc_putln('rdbcd initialized')
+      endif
+C
+C ultimate expansion max is 13.
+C
+      if(MAX_RDBE.gt.4) then
+        call logit7ci(0,0,0,1,-299,'bo',4)
+        ierr=-1
+      endif
 C
       call run_prog('flagr','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call fc_putln('flagr initialized')
-
 c    
       icloprx=0
       call put_buf_ch(icloprx,'"Boss Initialization Complete','  ','  ')
