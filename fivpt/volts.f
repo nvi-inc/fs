@@ -86,12 +86,15 @@ c       do nothing
       else if(DBBC.eq.rack) then
         id=-1
         goto 11
+      else if(RDBE.eq.rack) then
+        id=-1
+        goto 11
       endif
 c
 c  check M3 devices
 c
       do 8 i=1,ndev 
-        if (icmnd(1,i).ne.ldevfp) goto 8 
+        if (icmnd(1,i).ne.ldevfp(1)) goto 8 
         id=i 
         goto 11 
 8     continue 
@@ -172,6 +175,14 @@ C
                  intp=isamples
               endif
            endif
+        else if(RDBE.eq.rack) then
+           call rdbcn(dtpi,dtpi2,ierr,icont,isamples)
+           if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
+              if(isamples.gt.intp) then
+                 intp=isamples
+              endif
+           endif
+c           write(6,*) 'volts ',dtpi,dtpi2
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 
@@ -189,14 +200,14 @@ c         write(6,9953) dtpi,(cjchar(indata,i),i=1,12)
 C 
 C       CHECK FOR TPI SATURATION
 C 
-        if (dtpi.lt.65534.5d0) goto 16 
+        if (dtpi.lt.65534.5d0.or.RDBE.eq.rack) goto 16 
         call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
         itry=itry-1
         if (itry.le.0) goto 80010
         goto 12 
 c
  16     continue
-        if (icont.eq.0.or.dtpi2.lt.65534.5d0) goto 161 
+        if (icont.eq.0.or.dtpi2.lt.65534.5d0.or.RDBE.eq.rack) goto 161 
         call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
         itry=itry-1
         if (itry.le.0) goto 80010

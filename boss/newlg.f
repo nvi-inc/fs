@@ -10,7 +10,7 @@ C  INPUT:
 C
       integer*2 ibuf(1)
 C      - buffer to use, assumed to be at least 50 characters long
-      integer*2 ib(60)
+      integer*2 ib(128)
       integer*2 lprocdumm(6)
       character*1 model,cjchar
 C     LSOR - source of this message
@@ -194,6 +194,8 @@ c
         nch=ichmv_ch(ib,nch,'s2')
       else if(rack.eq.DBBC) then
         nch=ichmv_ch(ib,nch,'dbbc')
+      else if(rack.eq.RDBE) then
+        nch=ichmv_ch(ib,nch,'rdbe')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -235,6 +237,12 @@ c
         nch=ichmv_ch(ib,nch,'mk5b')
       else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5B_BS) then
         nch=ichmv_ch(ib,nch,'mk5b_bs')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C) then
+        nch=ichmv_ch(ib,nch,'mk5c')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C_BS) then
+        nch=ichmv_ch(ib,nch,'mk5c_bs')
+      else if(drive(1).eq.MK6.and.drive_type(1).eq.MK6) then
+        nch=ichmv_ch(ib,nch,'mk6')
       else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -349,8 +357,17 @@ c
       call fs_get_wx_met(wx_met)
       if (wx_met.eq.0) then
          nch=ichmv_ch(ib,nch,'cdp')
-      else if (wx_met.eq.MET3) then
-         nch=ichmv_ch(ib,nch,'met3')
+      else
+         call fs_get_wx_host(wx_host)
+         nch = nch + ib2as(wx_met,ib,nch,z'8005')
+         nch=ichmv_ch(ib,nch,':')
+         do i=1,65
+            if(jchar(wx_host,i).eq.0) then
+               nch=ichmv(ib,nch,wx_host,1,i-1)
+               goto 1000
+            endif
+         enddo
+ 1000    continue
       endif
 
       nch=mcoma(ib,nch)
@@ -371,9 +388,11 @@ c
       endif
 c
       nch=mcoma(ib,nch)
-      call fs_get_dbbcddcv(dbbcddcv)
       nch=ichmv_ch(ib,nch,'v')
-      nch = nch + ib2as(dbbcddcv,ib,nch,z'800F')
+      call fs_get_dbbcddcvs(dbbcddcvs)
+      call fs_get_dbbcddcvc(dbbcddcvc)
+      call char2hol(dbbcddcvs,ib,nch,nch+dbbcddcvc-1)
+      nch=nch+dbbcddcvc
 c
       nch=mcoma(ib,nch)
       call fs_get_dbbcpfbv(dbbcpfbv)
@@ -389,7 +408,11 @@ c
          nch=mcoma(ib,nch)
          nch = nch + ib2as(dbbc_if_factors(i),ib,nch,z'8005')
       enddo
-
+c
+      nch=mcoma(ib,nch)
+      call fs_get_m5b_crate(m5b_crate)
+      nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+c
       call logit3(ib,nch-1,lsor)
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
