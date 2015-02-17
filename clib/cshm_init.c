@@ -120,15 +120,10 @@ void cshm_init()
   shm_addr->wvolt[1].volts[1]=0;
   shm_addr->wvolt[1].set[1]=0;
 
-  shm_addr->lo.lo[0]=-1.0;
-  shm_addr->lo.lo[1]=-1.0;
-  shm_addr->lo.lo[2]=-1.0;
-  shm_addr->lo.lo[3]=-1.0;
-
-  shm_addr->lo.sideband[0]=0;
-  shm_addr->lo.sideband[1]=0;
-  shm_addr->lo.sideband[2]=0;
-  shm_addr->lo.sideband[3]=0;
+  for (i=0;i<MAX_LO;i++) {
+    shm_addr->lo.lo[i]=-1.0;
+    shm_addr->lo.sideband[i]=0;
+  }
 
   for (i=0;i<2;i++)
     for (j=0;j<16;j++) {
@@ -312,19 +307,10 @@ void cshm_init()
   shm_addr->mk5vsn_logchg=0;
   shm_addr->logchg=0;
 
-  shm_addr->user_device.lo[0]=-1.0;
-  shm_addr->user_device.lo[1]=-1.0;
-  shm_addr->user_device.lo[2]=-1.0;
-  shm_addr->user_device.lo[3]=-1.0;
-  shm_addr->user_device.lo[4]=-1.0;
-  shm_addr->user_device.lo[5]=-1.0;
-
-  shm_addr->user_device.sideband[0]=0;
-  shm_addr->user_device.sideband[1]=0;
-  shm_addr->user_device.sideband[2]=0;
-  shm_addr->user_device.sideband[3]=0;
-  shm_addr->user_device.sideband[4]=0;
-  shm_addr->user_device.sideband[5]=0;
+  for (i=0;i<MAX_USER_DEV;i++) {
+    shm_addr->user_device.lo[i]=-1.0;
+    shm_addr->user_device.sideband[i]=0;
+  }
 
   shm_addr->disk_record.record.record=-1;
   m5state_init(&shm_addr->disk_record.record.state);
@@ -433,6 +419,36 @@ void cshm_init()
 
   shm_addr->dbbc_cont_cal.mode=0;
   shm_addr->dbbc_cont_cal.samples=10;
+
+  shm_addr->m5b_crate=32;
+
+  for(i=0;i<MAX_MK6;i++) {
+    shm_addr->mk6_units[i]=0;
+    shm_addr->mk6_active[i]=0;
+  }
+
+  for (i=0;i<MAX_MK6+1;i++) {
+    shm_addr->mk6_record[i].action.action[0]=0;
+    m5state_init(&shm_addr->mk6_record[i].action.state);
+    
+    shm_addr->mk6_record[i].duration.duration=0;
+    m5state_init(&shm_addr->mk6_record[i].duration.state);
+  }
+
+  for(i=0;i<MAX_RDBE;i++) {
+    shm_addr->rdbe_units[i]=0;
+    shm_addr->rdbe_active[i]=0;
+  }
+
+  for(i=0;i<MAX_RDBE;i++) {
+    for (j=0;j<2;j++) {
+      shm_addr->rdtcn[i].control[j].continuous=0;
+      shm_addr->rdtcn[i].control[j].cycle=0;
+      shm_addr->rdtcn[i].control[j].stop_request=1;
+      shm_addr->rdtcn[i].control[j].data_valid.user_dv=0;
+    }
+    shm_addr->rdtcn[i].iping=0;
+  }
 
   return;
 }
