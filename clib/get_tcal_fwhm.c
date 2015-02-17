@@ -15,10 +15,10 @@ static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0};
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0, 32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
-static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
 static char *lwhat[ ]={
   "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
-  "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fl","gl",
+  "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
 "ia","ib","ic","id"};
 static char *lwhatm[ ]={
 "v1","v2","v3","v4","v5","v6","v7","v8","v9","va","vb","vc","vd","ve",
@@ -26,8 +26,10 @@ static char *lwhatm[ ]={
 static char *lwhatl[ ]={
 "p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe","pf"};
 
+static char lets[]="abcdefghijklm";
+
 void get_tcal_fwhm(device,tcal,fwhm,epoch,flux,corr,ssize,ierr)
-char device[2];
+char device[4];
 float *tcal;
 float *fwhm;
 float epoch;
@@ -46,17 +48,17 @@ int *ierr;
 
   if(strncmp(device,"u",1) == 0) {
     if(strncmp(device,"u5",2) == 0)
-      ifchain=5;
+      ifchain=MAX_LO+5;
     else
-      ifchain=6;
+      ifchain=MAX_LO+6;
 
-    center=shm_addr->user_device.center[ifchain-1];
-    switch(shm_addr->user_device.sideband[ifchain-1]) {
+    center=shm_addr->user_device.center[ifchain-(1+MAX_LO)];
+    switch(shm_addr->user_device.sideband[ifchain-(1+MAX_LO)]) {
     case 1:
-      center=shm_addr->user_device.lo[ifchain-1]+center;
+      center=shm_addr->user_device.lo[ifchain-(1+MAX_LO)]+center;
       break;
     case 2:
-      center=shm_addr->user_device.lo[ifchain-1]-center;
+      center=shm_addr->user_device.lo[ifchain-(1+MAX_LO)]-center;
       break;
     default:
       *ierr=-302;
@@ -324,13 +326,36 @@ int *ierr;
 	break;
       }
     }
+  } else if(shm_addr->equip.rack==RDBE) {
+    int iscan, ifc, irdbe, ichan;
+    char *prdbe, crdbe;
+
+    iscan=sscanf(device,"%2d%1c%1d",&ichan,&crdbe,&ifc);
+//    printf(" iscan %d ichan %d crdbe %c ifc %d\n",iscan,ichan,crdbe,ifc);
+    prdbe=strchr(lets,crdbe);
+    if(prdbe!=NULL)
+      irdbe=prdbe-lets;
+    ifchain=1+irdbe*MAX_RDBE_IF+ifc;
+//    printf(" ifchain1 %d\n",ifchain);
+    if(iscan!=3 ||
+       prdbe == NULL || irdbe <0 || irdbe >= MAX_RDBE ||
+       ifc < 0 || ifc >= MAX_RDBE_IF)
+      ifchain=0;
+    if(ifchain!=0 && 0 <= ichan && ichan <= MAX_RDBE_CH) {
+      center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+    } else {
+      *ierr=-306;
+      goto error;
+    }
   }
+//  printf(" ifchain2 %d center %f\n",ifchain, center );
   if(ifchain!=0) {
     get_gain_par(ifchain,center,fwhm,&dpfu,NULL,tcal);
   } else {
     *fwhm=-1.0;
     *tcal=-1.0;
   }
+//  printf(" fwhm %f tcal %f\n",*fwhm*180./3.14159,*tcal);
 
   if(epoch <0.0)
     return;

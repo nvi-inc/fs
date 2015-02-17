@@ -22,12 +22,12 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
   if(gain!=NULL)
     *gain=0.0;
 
-  if(1 <= ifchain && ifchain <= 4) {
+  if(1 <= ifchain && ifchain <= MAX_LO) {
     lo=shm_addr->lo.lo[ifchain-1];
     pol=shm_addr->lo.pol[ifchain-1];
-  } else if (5 <= ifchain && ifchain <= 6) {
-    lo=shm_addr->user_device.lo[ifchain-1];
-    pol=shm_addr->user_device.pol[ifchain-1];
+  } else if (MAX_LO+1 <= ifchain && ifchain <= MAX_LO+6) {
+    lo=shm_addr->user_device.lo[ifchain-(1+MAX_LO)];
+    pol=shm_addr->user_device.pol[ifchain-(1+MAX_LO)];
   } else
     return;
 
@@ -121,7 +121,7 @@ get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
     ilast=-1;
     for(i=0;i<shm_addr->rxgain[ir].tcal_ntable;i++)
       if(shm_addr->rxgain[ir].tcal[i].pol=='l' &&
-	 shm_addr->rxgain[ir].tcal[i].freq < center)
+	 shm_addr->rxgain[ir].tcal[i].freq <= center)
 	ifirst=i;
       else if(shm_addr->rxgain[ir].tcal[i].pol=='l' &&
 	      center < shm_addr->rxgain[ir].tcal[i].freq) {
