@@ -17,11 +17,7 @@ static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0};
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
-static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0};
-static char *lwhat[ ]={
-"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el",
-"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu",
-"ia","ib","ic","id"};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
 
 float flux_val();
 
@@ -121,8 +117,6 @@ long ip[5];                           /* ipc parameters */
 	  for (i=14;i<16;i++)
 	    if(lcl.itpis[i]!=0) {
 	      lcl.devices[i].ifchain=i-13;
-	      lcl.devices[i].lwhat[0]='i';
-	      lcl.devices[i].lwhat[1]=hex[i-13];
 	      switch (shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
 	      case 1:
 		lcl.devices[i].center=
@@ -142,8 +136,6 @@ long ip[5];                           /* ipc parameters */
 	    if(lcl.itpis[i]!=0) {
 	      float upper;
 	      lcl.devices[i].ifchain=i-13;
-	      lcl.devices[i].lwhat[0]='i';
-	      lcl.devices[i].lwhat[1]=hex[i-13];
 	      if(shm_addr->imixif3==1)
 		upper=400.0;
 	      else
@@ -351,24 +343,32 @@ long ip[5];                           /* ipc parameters */
 	      }
 	    }
 	  }
+	} else if(shm_addr->equip.rack==RDBE) {
+	  int ifch, ichan, irdbe, ifchain;
+	  for(i=0;i<MAX_RDBE_DET;i++) {
+	    irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
+	    ifch=(i%(MAX_RDBE_IF*MAX_RDBE_CH))/MAX_RDBE_CH;
+	    ifchain=irdbe*MAX_RDBE_IF+ifch+1;
+	    ichan=(i%(MAX_RDBE_IF*MAX_RDBE_CH))%MAX_RDBE_CH;
+	    lcl.devices[i].ifchain=ifchain;
+	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+	  }
 	}
 	/* user devices */
-	for (i=MAX_DET;i<MAX_ONOFF_DET;i++)
+	for (i=MAX_RDBE_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_DET+1;
-	      lcl.devices[i].lwhat[0]='u';
-	      lcl.devices[i].lwhat[1]=hex[i-MAX_DET+1];
+	      lcl.devices[i].ifchain=i-MAX_RDBE_DET+MAX_LO+1;
 	      lcl.devices[i].center=
-		shm_addr->user_device.center[lcl.devices[i].ifchain-1];
-	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-1]) {
+		shm_addr->user_device.center[i-MAX_RDBE_DET];
+	      switch(shm_addr->user_device.sideband[i-MAX_RDBE_DET]) {
 	      case 1:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  shm_addr->user_device.lo[i-MAX_RDBE_DET]
 		  +lcl.devices[i].center;
 		break;
 	      case 2:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  shm_addr->user_device.lo[i-MAX_RDBE_DET]
 		  -lcl.devices[i].center;
 		break;
 	      default:
@@ -397,10 +397,10 @@ long ip[5];                           /* ipc parameters */
 	  if(lcl.itpis[i]!=0) {
 	    int pol,ifchain;
 	    ifchain=lcl.devices[i].ifchain;
-	    if(1 <= ifchain && ifchain <= 4) {
+	    if(1 <= ifchain && ifchain <= MAX_LO) {
 	      pol=shm_addr->lo.pol[ifchain-1];
-	    } else if (5 <= ifchain && ifchain <= 6) {
-	      pol=shm_addr->user_device.pol[ifchain-1];
+	    } else if (MAX_LO+1 <= ifchain && ifchain <= MAX_LO+6) {
+	      pol=shm_addr->user_device.pol[ifchain-(1+MAX_LO)];
 	    } 
 	    switch(pol) {
 	    case 1:
