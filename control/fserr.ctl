@@ -1,4 +1,217 @@
 ""
+2A -301
+Parameters must since single characters
+""
+2A -302
+Parameters must be 'a', 'b', ...,  'd' (to maximum possible number of RDBEs).
+""
+2B -201
+Error decoding attenuator 0 setting, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
+""
+2B -202
+Error decoding attenuator 1 setting, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
+""
+2B -301
+No active rdbes defined for parallel operaiton.
+""
+2B -302
+All arguments may not be NULL.
+""
+2B -401
+error retrieving class for IF0 query for dbe_atten, rdb?W
+""
+2B -402
+error retrieving class for IF1 query for dbe_atten, rdb?W
+""
+2B -501
+error decording for IF0 query for dbe_atten, rdb?W
+""
+2B -502
+error decording for IF1 query for dbe_atten, rdb?W
+""
+2B -901
+query response not received for dbe_atten
+""
+2B -902
+program error: strdup() failed for dbe_atten
+""
+2M -301
+must specify at least 1 argument for rdbe command
+""
+2M -302
+No RDBEs active, see rdbe_active command.
+""
+2M -401
+error retrieving class from ?W
+""
+2T -501
+Error decoding dbe_tsys response from rdb?W.
+""
+2T -502
+Non-zero return code in dbe_tsys response from rdb?W.
+""
+2T -503
+Internal error in decoding dbe_tsys response from rdb?W.
+""
+2T -504
+Wrong number of channels in dbe_tsys response from rdb?W.
+""
+3A -301
+Error decoding argument
+""
+3A -302
+Argument must be 1 ... 4 (maximum possible number of Mark 5Cs).
+""
+35 -401
+error retrieving class for dot query in get_RDBEtime
+""
+35 -402
+error decoding time in get_RDBEtime
+""
+35 -403
+unknown RDBE unit in get_RDBEtime
+""
+3E -501
+error decoding dot? time parameter
+""
+3E -502
+error decoding dot? status parameter
+""
+3E -503
+error decoding dot? OS_time parameter
+""
+3E -504
+error decoding dot? DOT_OS_time_diff parameter
+""
+3E -505
+error decoding dot? Actual_DOT_time parameter
+""
+3E -901
+query response not received
+""
+3E -902
+program error: strdup() failed
+""
+3K -301
+command does not accept parameters
+""
+3K -302
+No Mark 5Cs active, see mk5c_active command.
+""
+3K -401
+error retrieving class for scan_check response, ?W
+""
+3K -501
+error decoding scan_check? scan parameter
+""
+3K -502
+error decoding scan_check? label parameter
+""
+3K -503
+error decoding scan_check? data type parameter
+""
+3K -504
+error decoding scan_check? date code parameter
+""
+3K -505
+error decoding scan_check? start parameter
+""
+3K -506
+error decoding scan_check? length parameter
+""
+3K -507
+error decoding scan_check? total rate parameter
+""
+3K -508
+error decoding scan_check? missing parameter
+""
+3K -509
+error decoding scan_check? error parameter
+""
+3K -601
+SCAN_CHECK failed
+""
+3K -602
+SCAN_CHECK missing bytes is not zero.
+""
+3K -603
+SCAN_CHECK (trailing) error field is not empty.
+""
+3K -901
+query response not received
+""
+3K -902
+program error: strdup() failed
+""
+3M -301
+must specify at least 1 argument for mk5c command
+""
+3M -302
+No Mark 5Cs active, see mk5c_active command.
+""
+3M -401
+error retrieving class from ?W
+""
+3P -301
+command does not accept parameters
+""
+3P -302
+No Mark 5Cs active, see mk5c_active command.
+""
+3P -401
+error retrieving class, ?W
+""
+3P -501
+error decoding pointers? record position, ?W
+""
+3P -502
+error decoding pointers? scan start position, ?W
+""
+3P -503
+error decoding pointers? scan stop position, ?W
+""
+3P -901
+query response not found, ?W
+""
+3P -902
+program error: strdup() failed, ?W
+""
+3R -101
+no default for record parameter
+""
+3R -201
+record parameter must be 'on' or 'off'.
+""
+3R -202
+scan label parameter too long
+""
+3R -301
+No Mark 5Cs active, see mk5c_active command.
+""
+3R -302
+scan_name defined scan label too long
+""
+3R -400
+error retrieving acknowledgement of command, ?W
+""
+3R -401
+error retrieving class, ?W
+""
+3R -501
+error decoding record? status parameter, ?W
+""
+3R -502
+error decoding record? scan number parameter, ?W
+""
+3R -503
+error decoding record? scan label parameter, ?W
+""
+3R -901
+query response not found, ?W
+""
+3R -902
+program error: strdup() failed, ?W
+""
 4F -101
 No default for mode.
 ""
@@ -398,6 +611,33 @@ query response not found for scan_set?
 5F -912
 program error: strdup() failed for scan_set?
 ""
+5H -301
+command does not accept parameters
+""
+5H -302
+background Mark 5 error(s) detected - see below
+""
+5H -303
+more Mark 5 error messages are pending
+""
+5H -401
+error retrieving class in mk5cn_exec
+""
+5H -501
+unexpected number of replies (expected 1) from mk5cn
+""
+5H -900
+status? query response not received
+""
+5H -901
+error decoding status word: overflow or not hex number or too big
+""
+5H -910
+error? query response not received
+""
+5H -912
+strdup failed initializing get_error
+""
 5I -101
 No default for control parameter
 ""
@@ -575,6 +815,9 @@ program error: strdup() failed
 5S -903
 program error: too many serial numbers
 ""
+5T -104
+No default sample rate if clock rate (from equip.ctl) is "none".
+""
 5T -201
 source parameter must be 'ext', 'tvg', or 'ramp'.
 ""
@@ -585,13 +828,34 @@ mask parameter, must specify an int, usually as a hex value, e.g., 0xf
 decimate parameter, must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-fpdp parameter, must be one of 1 or 2.
+Sample rate must be a number greater than 0.124
 ""
 5T -205
+fpdp parameter, if specified, must be 1 or 2.
+""
+5T -206
 okay parameter, must be 'disk_record_ok' or null.
 ""
+5T -214
+Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
+""
 5T -301
-Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
+""
+5T -304
+Can't specify sample rate and decimate parameters simultaneously
+""
+5T -400
+error retrieving acknowledgement of command
+""
+5T -401
+error retrieving class
+""
+5T -402
+Use "mk5b_mode" for Mark 5B recorders only.
+""
+5T -403
+Use "mk5c_mode" for Mark 5C recorders only.
 ""
 5T -501
 error decoding mode? source parameter
@@ -634,6 +898,9 @@ Antenna communications restored.
 ""
 AN   -8
 Pointing system NOT present.
+""
+AN   -9
+Antenna= command error, see above errors.
 ""
 AN -101
 Pointing computer year, day, or time is incorrect.
@@ -797,6 +1064,12 @@ Error opening EQUIP.CTL ?FFF
 BO -140
 Error decoding EQUIP.CTL line ?WWW
 ""
+BO -141
+Illegal version string in DBBC DDC version in EQUIP.CTL line ?WWW
+""
+BO -142
+No 'nominal' rate for that DBBC version number, rate in EQUIP.CTL line ?WWW
+""
 BO -143
 Error opening RXDEF.CTL FMP ?FFF
 ""
@@ -917,6 +1190,15 @@ Error initiliazing dscon, internal error ?WWW
 BO -194
 Error initiliazing dbbcn, internal error ?WWW
 ""
+BO -195
+Error initiliazing mk6ca, internal error ?WWW
+""
+BO -196
+Error initiliazing mk6cb, internal error ?WWW
+""
+BO -199
+More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
+""
 BO -201
 Error vacuum switching field (line 1) in SW.CTL
 ""
@@ -1004,6 +1286,24 @@ Procedure file name too long, 8 characters maximum.
 BO -261
 Schedule file name too long, 8 characters maximum.
 ""
+BO -262
+Cannot change schedules while recording, use disk_record=off to stop.
+""
+BO -295
+Error initiliazing rdbca, internal error ?WWW
+""
+BO -296
+Error initiliazing rdbcb, internal error ?WWW
+""
+BO -297
+Error initiliazing rdbcc, internal error ?WWW
+""
+BO -298
+Error initiliazing rdbcd, internal error ?WWW
+""
+BO -299
+More than ?WWW RDBEs requires mods to binit.f (plus fspgm.ctl, fserr.ctl, fmset.c, and rdbcn.c).
+""
 BO -300
 There must be two character error mnemonic for TNX.
 ""
@@ -1088,6 +1388,9 @@ Final procedure library link does contain '.prc'.
 BO -999
 WARNING: Log file just opened is already larger than 10 MB.
 ""
+CD  -1
+Error from DBBCN in TPICD, see above for error.
+""
 CH   -1
 Trouble with class buffer in CHEKR
 ""
@@ -1156,6 +1459,9 @@ CH -210
 ""
 CH -211
 ?W averaging period does not check with requested setting
+""
+CH -212
+?W LO unlocked.
 ""
 CH -222
 ?W attenuator for IF channel A does not check with requested setting
@@ -1653,7 +1959,7 @@ DB -103
 dbbcn: error on select reading data, see above for error, connection closed
 ""
 DB -104
-dbbcn: time-out, connection closed
+dbbcn: time-out, connection closed, will reopen on next attempt
 ""
 DB -105
 dbbcn: error on read, see above for error, connection closed
@@ -1662,7 +1968,7 @@ DB -106
 dbbcn: error and EOF on read, see above for error, connection closed
 ""
 DB -107
-dbbcn: EOF on read, dbbc probably crashed, connection closed
+dbbcn: EOF on read, dbbc may have crashed, connection closed
 ""
 DB -108
 dbbcn: no data on read, but no EOF or error, connection closed
@@ -1677,7 +1983,7 @@ DB -111
 dbbcn: error and EOF pre-draining input, see above for error, connection closed
 ""
 DB -112
-dbbcn: EOF pre-draining input, dbbc probably crashed, connection closed
+dbbcn: EOF pre-draining input, dbbc may have crashed, connection closed
 ""
 DB -113
 dbbcn: no data pre-draining input, but no EOF or error, connection closed
@@ -1698,10 +2004,19 @@ DC -202
 Error decoding IF source, must be A, B, C, or D.
 ""
 DC -203
-Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16.
+Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, or 32.
 ""
 DC -204
-Averaging period must be a positive integer.
+Averaging period must be a positive integer 60 or less.
+""
+DC -213
+BW 1 can only be used with non-lettered (NOT e/f) DDC versions.
+""
+DC -223
+BW 32 can only be used with lettered (e/f) DDC versions.
+""
+DC -301
+Even BBCs not supported for DDC firmware E/F.
 ""
 DC -302
 IF source position exceeds number of conditioning modules
@@ -1737,10 +2052,22 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of: astro, geo, wastro, test, lba.
+Mode must be one of: astro, geo, wastro, test, lba, astro2, or astro3.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
+""
+DF -211
+Mode astro2 not supported before DBBC version 104.
+""
+DF -221
+Mode astro3 cannot be used with non-lettered (NOT e/f) DDC versions.
+""
+DF -231
+Lettered DDC versions (e/f) only support modes astro3 and test modes.
+""
+DF -301
+astro2 mode not supppored for DBBC DDC version less than 104
 ""
 DF -401
 Class buffer error from monitor response.
@@ -1752,19 +2079,58 @@ DF -451
 Class buffer error from command response.
 ""
 DF -453
-DBBC version does not agree with equip.ctl; dbbc says v100: July 14 2011
+DBBC version does not agree with equip.ctl; dbbc has v100: July 14 2011 or Feb 21 2011
 ""
 DF -454
-DBBC version does not agree with equip.ctl; dbbc says v101: March 08 2012
+DBBC version does not agree with equip.ctl; dbbc has v101: March 08 2012
 ""
 DF -455
-DBBC version does not agree with equip.ctl; dbbc says v102: September 07 2012
+DBBC version does not agree with equip.ctl; dbbc has v102: September 07 2012
 ""
 DF -456
-DBBC version does not agree with equip.ctl; dbbc has unknown version, see next mesage.
+DBBC version does not agree with equip.ctl; see next message for DBBC's version.
 ""
 DF -457
-DBBC version does not agree with equip.ctl; dbbc says v103: DDC,103,October 04 2012
+DBBC version does not agree with equip.ctl; dbbc has (unsupported) v103: DDC,103,October 04 2012
+""
+DF -458
+DBBC version does not agree with equip.ctl; dbbc has v104: DDC,104,June 20 2013
+""
+DF -459
+DBBC has unsupported date code for version 102, ddbc has: July 04 2012
+""
+DF -460
+DBBC has unsupported date code for version 104, ddbc has: DDC,104,March 19 2013
+""
+DG -101
+No default for bbc, should be "all" or 1,2,...16.
+""
+DG -102
+No default for 2nd parameter, if first parameter is "all".
+""
+DG -103
+No default for 3rd parameter, if second parameter is gain for upper channel.
+""
+DG -201
+Error decoding bbc, should be "all" or 1,2,..,16.
+""
+DG -202
+Error decoding state/gainU, should be null or state: "man", "agc", or gainU: 1-255.
+""
+DG -203
+Error decoding target/gainL, should be null or target: 0-65525, or gainL: 1-255.
+""
+DG -300
+Monitor form requires bbc to read as a parameter, e.g., bbc_gain=1
+""
+DG -401
+Class buffer error from monitor response.
+""
+DG -403
+Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error DG -402 for text.
+""
+DG -451
+Class buffer error from command response.
 ""
 DI -101
 No default for IF input.
@@ -1779,7 +2145,7 @@ DI -104
 No default for AGC target.
 ""
 DI -201
-IF input must be 1-8.
+IF input must be 1-4.
 ""
 DI -202
 Attenuation must be "man", "agc", or 0 to 63.
@@ -2000,6 +2366,12 @@ Dataset ?W ERROR: an internal program error has been detected (xpaderr).
 ER -902
 Unable to find ":" in S2 error decode response.
 ""
+FL   -1
+Previous source in this schedule not reached before new source was commanded
+""
+FL   -2
+FLAGR detected error in ANTCN, see above for error.
+""
 FM  007
 Checksum error
 ""
@@ -2084,6 +2456,21 @@ Device returned wrong number of characters
 FP  -72
 Device communication failed too many times
 ""
+FP  -73
+device rdbe multicast sample time changed while reading data.
+""
+FP  -74
+device rdbe multicast may not be running: error decoding multicast time
+""
+FP  -75
+device rdbe multicast may not be running: error converting multicast time
+""
+FP  -76
+device rdbe error converting FS time
+""
+FP  -77
+device rdbe multicast may not be running: multicast time more than 2 seconds in past
+""
 FP  -80
 TPI Overflowed
 ""
@@ -2126,29 +2513,35 @@ Couldn't reset attenuators after an error
 FP -111
 Couldn't set manual gain control
 ""
-FP -401
-Class buffer error, from monitor response for IF gain control.
-""
-FP -402
-Error decoding IFx response for IF gain control.
-""
-FP -403
-Class buffer error, from voltage read response/
-""
-FP -404
-Error decoding BBCmm response for voltage.
-""
-FP -405
-Error decoding IFx response for voltage.
-""
 FP -112
 Couldn't reset gain to original value
+""
+FP -401
+Class buffer error, from monitor response for DBBC IF gain control.
+""
+FP -402
+Error decoding IFx response for DBBC IF gain control.
+""
+FP -403
+Class buffer error, from DBBC voltage read response.
+""
+FP -404
+Error decoding BBCnn response for voltage from DBBC.
+""
+FP -405
+Error decoding IFx response for voltage from DBBC.
+""
+FP -410
+Class buffer error, for monitor response from RBDE.
 ""
 FV   -1
 fmset: Error receiving message from matcn
 ""
 FV   -2
 fmset: Error receiving time from matcn
+""
+FV   -3
+fmset: Mark IV Formatter date less than 1970 or greater than Jan 2038.
 ""
 FV   -4
 fmset: Error receiving message from mcbcn
@@ -2158,6 +2551,24 @@ fmset: Bad completion code from mcbcn
 ""
 FV   -6
 fmset: Error receiving message from matcn
+""
+FV   -7
+fmset: Error resetting FS time, please see messages above.
+""
+FV   -8
+fmset: Error from MK5CN, please see messages above.
+""
+FV   -9
+fmset: Error from DBBCN, please see messages above.
+""
+FV  -10
+fmset: Error from MATCN, please see messages above.
+""
+FV  -11
+fmset: Error from MK5CN, please see messages above.
+""
+FV  -12
+fmset: Error from MATCN, please see messages above.
 ""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -2331,43 +2742,70 @@ IB -420
 Error decoding device ID in opdev. Check ibad.ctl.
 ""
 IB -501
-Internal error in portopen, device name length illegal, ?W
+Error in portopen, device name length illegal, ?W
 ""
 IB -502
-Internal error in portopen, open failed, see message above, ?W
+Error in portopen, open failed, see message above, ?W
 ""
 IB -503
-Internal error in portopen, TCGETA failed, see message above, ?W
+Error in portopen, TCGETA failed, see message above, ?W
 ""
 IB -504
-Internal error in portopen, invalid stop bits, ?W
+Error in portopen, invalid stop bits, ?W
 ""
 IB -505
-Internal error in portopen, invalid data bits, ?W
+Error in portopen, invalid data bits, ?W
 ""
 IB -506
-Internal error in portopen, invalid parity, ?W
+Error in portopen, invalid parity, ?W
 ""
 IB -507
-Internal error in portopen, invalid BAUD, ?W
+Error in portopen, invalid BAUD, ?W
 ""
 IB -508
-Internal error in portopen, TCSETA or DIGI_SETAW failed, see message above,?W
+Error in portopen, TCSETA failed, see message above,?W
 ""
 IB -509
-Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+Error in portopen, TIOCGSERIAL failed EINVAL not DIGI , see message above, ?W
 ""
 IB -510
-Internal error in portopen, TIOCSSERIAL failed, see message above, ?W
+Error in portopen, TIOCSSERIAL failed, see message above, ?W
+""
+IB -511
+Error in portopen, DIGI TCGETA failed, see message above, ?W
+""
+IB -512
+Error in portopen, DIGI_GETA failed, see message above, ?W
+""
+IB -513
+Error in portopen, DIGI_SETAW failed, see message above, ?W
+""
+IB -514
+Error in portopen, DIGI TCSETA failed, see message above, ?W
+""
+IB -515
+Error in portopen, TIOCGSERIAL failed not EINVAL, see message above, ?W
+""
+IB -516
+Error in portopen, non-blocking open failed, see message above, ?W
+""
+IB -517
+Error in portopen, non-blocking TCGETA failed, see message above, ?W
+""
+IB -518
+Error in portopen, non-blocking TCSETA failed, see message above, ?W
+""
+IB -519
+Error in portopen, non-blocking close failed, see message above, ?W
 ""
 IB -521
-Internal error in sib, portflush failed, see message above, ?W
+Error in sib, portflush failed, see message above, ?W
 ""
 IB -522
-Internal error in sib, portwrite failed, see message above, ?W
+Error in sib, portwrite failed, see message above, ?W
 ""
 IB -523
-Internal error in sib, portread buffer had no extent, ?W
+Error in sib, portread buffer had no extent, ?W
 ""
 IB -524
 GPIB/232 converter timed out, ?W
@@ -3075,7 +3513,7 @@ M5 -103
 mk5cn: error on select reading data, see above for error, connection closed
 ""
 M5 -104
-mk5cn: time-out, connection closed
+mk5cn: time-out, connection closed, will reopen on next attempt
 ""
 M5 -105
 mk5cn: error on read, see above for error, connection closed
@@ -3084,7 +3522,7 @@ M5 -106
 mk5cn: error and EOF on read, see above for error, connection closed
 ""
 M5 -107
-mk5cn: EOF on read, mark 5 probably crashed, connection closed
+mk5cn: EOF on read, mark 5 may have crashed, connection closed
 ""
 M5 -108
 mk5cn: no data on read, but no EOF or error, connection closed
@@ -3099,7 +3537,7 @@ M5 -111
 mk5cn: error and EOF pre-draining input, see above for error, connection closed
 ""
 M5 -112
-mk5cn: EOF pre-draining input, mark 5 probably crashed, connection closed
+mk5cn: EOF pre-draining input, mark 5 may have crashed, connection closed
 ""
 M5 -113
 mk5cn: no data pre-draining input, but no EOF or error, connection closed
@@ -3111,28 +3549,160 @@ M5 -899
 unable to find or decode return code
 ""
 M5 -901
-MARK5 return code 1: action initiated or enabled, but not completed
+Mark5 return code 1: action initiated or enabled, but not completed
 ""
 M5 -902
-MARK5 return code 2: command not implemented or not relevant to this DTS
+Mark5 return code 2: command not implemented or not relevant to this DTS
 ""
 M5 -903
-MARK5 return code 3: syntax (or parameter error)
+Mark5 return code 3: syntax (or parameter error)
 ""
 M5 -904
-MARK5 return code 4: error encountered (during attempt to execute)
+Mark5 return code 4: error encountered (during attempt to execute)
 ""
 M5 -905
-MARK5 return code 5: currently too busy to service request; try again later
+Mark5 return code 5: currently too busy to service request; try again later
 ""
 M5 -906
-MARK5 return code 6: inconsistent or conflicting request
+Mark5 return code 6: inconsistent or conflicting request
 ""
 M5 -907
-MARK5 return code 7: no such keyword
+Mark5 return code 7: no such keyword
 ""
 M5 -908
-MARK5 return code 8: parameter error
+Mark5 return code 8: parameter error
+""
+M5 -909
+Mark5 return code 9: indeterminate state
+""
+M6   -1
+mk6c.: error opening mk6?W.ctl
+""
+M6   -2
+mk6c.: error pushing back on mk6?W.ctl
+""
+M6   -3
+mk6c.: first non-comment line in mk6?W.ctl did not contain three tokens
+""
+M6  -11
+mk6?W: error opening socket
+""
+M6  -13
+mk6?W: error from gethostbyname()
+""
+M6  -14
+mk6?W: host had NULL IP address
+""
+M6  -15
+mk6?W: error connecting to host
+""
+M6  -16
+mk6?W: error opening stream
+""
+M6  -17
+mk6?W: error gethostbyname(): HOST_NOT_FOUND
+""
+M6  -18
+mk6?W: error gethostbyname(): TRY_AGAIN
+""
+M6  -19
+mk6?W: error gethostbyname(): NO_RECOVERY
+""
+M6  -20
+mk6?W: error gethostbyname(): NO_ADDRESS
+""
+M6  -21
+mk6?W: error connect(): mk6 device connection open timed-out
+""
+M6  -22
+mk6?W: error from getsockopt(), see above for error
+""
+M6  -23
+mk6?W: error opening, mark 5 probably not running, see above for error
+""
+M6  -24
+mk6?W: select for connect() error, see above for error
+""
+M6  -25
+mk6?W: error gethostbyname(): DNS timed-out
+""
+M6  -98
+mk6?W: no mk6 device defined
+""
+M6  -99
+mk6?W: illegal mode
+""
+M6 -101
+mk6?W: error getting class buffer
+""
+M6 -102
+mk6?W: error sending data, connection closed
+""
+M6 -103
+mk6?W: error on select reading data, see above for error, connection closed
+""
+M6 -104
+mk6?W: time-out, connection closed, will reopen on next attempt
+""
+M6 -105
+mk6?W: error on read, see above for error, connection closed
+""
+M6 -106
+mk6?W: error and EOF on read, see above for error, connection closed
+""
+M6 -107
+mk6?W: EOF on read, mark 5 may have crashed, connection closed
+""
+M6 -108
+mk6?W: no data on read, but no EOF or error, connection closed
+""
+M6 -109
+mk6?W: read too long for input buffer, connection closed
+""
+M6 -110
+mk6?W: error pre-draining input, see above for error, connection closed
+""
+M6 -111
+mk6?W: error and EOF pre-draining input, see above for error, connection closed
+""
+M6 -112
+mk6?W: EOF pre-draining input, mark 5 may have crashed, connection closed
+""
+M6 -113
+mk6?W: no data pre-draining input, but no EOF or error, connection closed
+""
+M6 -114
+mk6?W: re-open after pre-drain error was okay, proceeding to transaction.
+""
+M6 -899
+mk6?W: unable to find or decode return code
+""
+M6 -901
+mk6?W: Mark6 return code 1: action initiated or enabled, but not completed
+""
+M6 -902
+mk6?W: Mark6 return code 2: command not implemented or not relevant to this DTS
+""
+M6 -903
+mk6?W: Mark6 return code 3: syntax (or parameter error)
+""
+M6 -904
+mk6?W: Mark6 return code 4: error encountered (during attempt to execute)
+""
+M6 -905
+mk6?W: Mark6 return code 5: currently too busy to service request; try again later
+""
+M6 -906
+mk6?W: Mark6 return code 6: inconsistent or conflicting request
+""
+M6 -907
+mk6?W: Mark6 return code 7: no such keyword
+""
+M6 -908
+mk6?W: Mark6 return code 8: parameter error
+""
+M6 -909
+mk6?W: Mark6 return code 9: indeterminate state
 ""
 NF   -1
 Break Detected in ONOFF
@@ -3238,6 +3808,21 @@ Couldn't set manual gain control
 ""
 NF -112
 Couldn't reset gain to original value
+""
+NF -113
+Error retrieving BBCnn response from dbbcn
+""
+NF -114
+Error retrieving IFx response from dbbcn
+""
+NF -115
+Error retrieving dbe_tsys response from rdb?W
+""
+NF -116
+Error decoding dbe_tsys response from rdb?W
+""
+NF -117
+Incorrect IF channel in dbe_tsys response from rdb?W
 ""
 PC   -1
 program error: portopen8: devdb incorrect size.
@@ -4065,6 +4650,21 @@ QN -201
 Error in request. Unknown module or does not match your equipment.
 ""
 QO   -1
+Class error in command processing: onsource, offset command, or track.
+""
+QO  -11
+Error specifying onsource time-out. must be >0 and <=84600 seconds.
+""
+QO  -12
+Error specifying onsource Tracking command to execute, must be 12 characters or less
+""
+QO  -13
+Error specifying onsource slewing command to execute, must be 12 characters or less
+""
+QO  -20
+Break detected in onsource check while waiting for time-out.
+""
+QO  -99
 No parameters permitted for track command.
 ""
 QO -101
@@ -4382,6 +4982,9 @@ PATCH has not setup the specified VC for FIVPT.
 QZ -217
 bbc not set-up.
 ""
+QZ -218
+Unrecognizd RDBE detector.
+""
 QZ -301
 FIVPT is not dormant.
 ""
@@ -4401,7 +5004,7 @@ Q* -105
 No default for LO pcal spacing
 ""
 Q* -201
-Channel must be loa-d: VLBA/4/5+DBBC, lo1-3: MK3/4/5+K4, lo1-4: LBA/4+all others
+Channel must be loa-d: VLBA/4/5+DBBC, lo1-3: MK3/4/5+K4, loa0-lod1: RDBE, lo1-8: (no rack), lo1-4: LBA/4+all others
 ""
 Q* -202
 LO frequency must be a positive real number
@@ -4846,6 +5449,144 @@ if3 switch 3 not available, check equip.ctl.
 ""
 Q+ -306
 if3 switch 4 not available, check equip.ctl.
+""
+RA   -1
+rdbc.: error opening rdb?W.ctl
+""
+RA   -2
+rdbc.: error pushing back on rdb?W.ctl
+""
+RA   -3
+rdbc.: first non-comment line in rdb?W.ctl did not contain three tokens
+""
+RA  -11
+rdb?W: error opening socket
+""
+RA  -13
+rdb?W: error from gethostbyname()
+""
+RA  -14
+rdb?W: host had NULL IP address
+""
+RA  -15
+rdb?W: error connecting to host
+""
+RA  -16
+rdb?W: error opening stream
+""
+RA  -17
+rdb?W: error gethostbyname(): HOST_NOT_FOUND
+""
+RA  -18
+rdb?W: error gethostbyname(): TRY_AGAIN
+""
+RA  -19
+rdb?W: error gethostbyname(): NO_RECOVERY
+""
+RA  -20
+rdb?W: error gethostbyname(): NO_ADDRESS
+""
+RA  -21
+rdb?W: error connect(): rdbe device connection open timed-out
+""
+RA  -22
+rdb?W: error from getsockopt(), see above for error
+""
+RA  -23
+rdb?W: error opening, RDBE probably not running, see above for error
+""
+RA  -24
+rdb?W: select for connect() error, see above for error
+""
+RA  -25
+rdb?W: error gethostbyname(): DNS timed-out
+""
+RA  -98
+rdb?W: device not defined
+""
+RA  -99
+rdb?W: illegal mode
+""
+RA -101
+rdb?W: error getting class buffer
+""
+RA -102
+rdb?W: error sending data, connection closed
+""
+RA -103
+rdb?W: error on select reading data, see above for error, connection closed
+""
+RA -104
+rdb?W: time-out, connection closed, will reopen on next attempt
+""
+RA -105
+rdb?W: error on read, see above for error, connection closed
+""
+RA -106
+rdb?W: error and EOF on read, see above for error, connection closed
+""
+RA -107
+rdb?W: EOF on read, RDBE may have crashed, connection closed
+""
+RA -108
+rdb?W: no data on read, but no EOF or error, connection closed
+""
+RA -109
+rdb?W: read too long for input buffer, connection closed
+""
+RA -110
+rdb?W: error pre-draining input, see above for error, connection closed
+""
+RA -111
+rdb?W: error and EOF pre-draining input, see above for error, connection closed
+""
+RA -112
+rdb?W: EOF pre-draining input, RDBE may have crashed, connection closed
+""
+RA -113
+rdb?W: no data pre-draining input, but no EOF or error, connection closed
+""
+RA -114
+rdb?W: re-open after pre-drain error was okay, proceeding to transaction.
+""
+RA -120
+rdb?W: format error in dbe_dot? response for mode 4
+""
+RA -121
+rdb?W: time field too long for dbe_dot? response for mode 4
+""
+RA -122
+rdb?W: did not find change of second in alloted time
+""
+RA -899
+rdb?W: unable to find or decode return code
+""
+RA -901
+rdb?W: RDBE return code 1: action initiated or enabled, but not completed
+""
+RA -902
+rdb?W: RDBE return code 2: command not implemented or not relevant to this DTS
+""
+RA -903
+rdb?W: RDBE return code 3: syntax (or parameter error)
+""
+RA -904
+rdb?W: RDBE return code 4: error encountered (during attempt to execute)
+""
+RA -905
+rdb?W: RDBE return code 5: currently too busy to service request; try again later
+""
+RA -906
+rdb?W: RDBE return code 6: inconsistent or conflicting request
+""
+RA -907
+rdb?W: RDBE return code 7: no such keyword
+""
+RA -908
+rdb?W: RDBE return code 8: parameter error
+""
+RA -909
+rdb?W: RDBE return code 9: indeterminate state
 ""
 RB -101
 No default for label.
@@ -5312,6 +6053,15 @@ No signal from bar code reader.
 RW   -2
 Successive readings from bar code reader differ.
 ""
+RZ   -1
+rdt?W: Error from select(), see above message for details.
+""
+RZ   -2
+rdt?W: multicast may not be running, no message received
+""
+RZ   -3
+rdt?W: receiving multicast messages again
+""
 SC   -1
 setcl: incorrect number of class buffers.
 ""
@@ -5367,22 +6117,22 @@ SC  -18
 setcl: program is already running, try "run setcl" instead.
 ""
 SC  -19
-setcl: Mark 5B 1PPS source is wrong, use fmset 's' option to fix.
+setcl: Mark 5B 1PPS source is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -20
-setcl: Mark 5B clock frequency is wrong, use fmset 's' option to fix.
+setcl: Mark 5B clock frequency is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -21
 setcl: Mark 5B clock source is wrong, CONSIDER using fmset 's' option to fix.
 ""
 SC  -22
-setcl: Mark 5B clock source is wrong, correct manually.
+setcl: Mark 5B clock source is wrong, CONSIDER correcting manually.
 ""
 SC  -23
-setcl: Mark 5B not sync'd, use fmset 's' option to fix.
+setcl: Mark 5B not sync'd, CONSIDER using fmset 's' option to fix.
 ""
 SC  -24
-setcl: Mark 5B syncerr_gt_3, use fmset 's' option to fix.
+setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
@@ -5850,37 +6600,46 @@ WS -305
 No previous value allowed for continuous recording length.
 ""
 WX   -1
-MET: Can not open the socket or someone else is using it.
+Could not look-up server by name, see above for error.
 ""
 WX   -2
-MET: Can not connect to server.
+Unable to create socket, see above for error.
 ""
 WX   -3
-MET: fcntl f_getfl set error.
+Unable to set socket non-blocking, see above for error.
 ""
 WX   -4
-MET: fcntl f_getfl set error.
+Unable to connect to server, see above for error.
 ""
 WX   -5
-MET: Can not select on socket.
+Unable to get host address info, see above for error.
 ""
 WX   -6
-MET: Can not receive data from socket.
+Unable to create socket on last GETADDRINFO, see above for error.
 ""
 WX   -7
-MET: Server not running.
+Unable to set socket non-blocking on last GETADDRINFO, see above for error.
 ""
 WX   -8
-MET: Can not get localhost information.
+Unable to connect to server on last GETADDRINFO, see above for error.
 ""
 WX   -9
-MET: Error in temperature response from met sensor.
+No useful host address info returned.
 ""
 WX   -10
-MET: Error in pressure response from met sensor.
+Select call failed, server timed-out, see above for error.
 ""
 WX   -11
-MET: Error in humidity response from met sensor.
+Met server timed-out.
 ""
 WX   -12
-MET: Error in wind and speed response wind sensor.
+Error connecting to server/retrieving met. data, see above for error.   
+""
+WX   -13
+Error closing socket after GETADDRINFO fcntl, see above for error.
+""
+WX   -14
+Error closing socket after GETADDRINFO connect, see above for error.
+""
+WX   -15
+Error closing socket at end, see above for error.
