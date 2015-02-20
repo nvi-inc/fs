@@ -1,9 +1,16 @@
+
 #
 VERSION = 9
-SUBLEVEL = 11
+SUBLEVEL = 12
 PATCHLEVEL = 2
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
+#
+# If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
+#  the port library and mcbcn program will be compiled with a O_NONBLOCK
+#  open of the serial port, then set CLOCAL, and then closed and re-opened
+#  without O_NONBLOCK. This also impacts and programs that call
+#  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
 poclb skdrut vex rclco/rcl s2das
@@ -13,7 +20,7 @@ fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
 quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
-dbbcn
+dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client
 #
 all:	libs execs
 #
