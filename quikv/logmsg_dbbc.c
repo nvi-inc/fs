@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -36,6 +37,7 @@ long ip[5];
        /*              12345678 */
      if(strncmp(inbuf,"version/",8)==0) {
        int iversion=0;
+       int j;
        /*                   123456789012 */
        if (strncmp(inbuf+8,"July 14 2011",12)==0||
 	   strncmp(inbuf+8,"Feb 21 2011",11)==0)
@@ -44,12 +46,32 @@ long ip[5];
        else if(strncmp(inbuf+8,"March 08 2012",13)==0)
 	 iversion =101;
        /*                       12345678901234567890123 */
-       else if(strncmp(inbuf+8,"102 - September 07 2012",23)==0||
-	       strncmp(inbuf+8,"July 04 2012",12)==0)
+       else if(strncmp(inbuf+8,"102 - September 07 2012",23)==0)
 	 iversion =102;
+       /*                       123456789012 */
+       else if(strncmp(inbuf+8,"July 04 2012",12)==0)
+	 iversion =-102;
        /*                       12345678901234567890123 */
        else if(strncmp(inbuf+8,"DDC,103,October 04 2012",23)==0)
 	 iversion =103;
+       /*                       123456789012345678901 */
+       else if(strncmp(inbuf+8,"DDC,104,March 19 2013",21)==0)
+	 iversion = -104;
+       /*                       1234567890123456789012 */
+       else if(strncmp(inbuf+8,"DDC,104,June 20 2013",20)==0 ||
+               strncmp(inbuf+8,"DDC,104,August 01 2013",22)==0)
+	 iversion =104;
+       else if(strncmp(inbuf+8 ,"DDC,",4)==0) {
+	 char test_buf[sizeof(shm_addr->dbbcddcvs)];
+
+	 strncpy(test_buf,inbuf+12,sizeof(shm_addr->dbbcddcvs));
+         for(j=0;j<shm_addr->dbbcddcvc;j++)
+            test_buf[j]=tolower(test_buf[j]);
+
+	 if(strncmp(test_buf,shm_addr->dbbcddcvs,shm_addr->dbbcddcvc)==0)
+	   iversion=shm_addr->dbbcddcv;
+       }
+	 
        if(iversion!=shm_addr->dbbcddcv) {
 	 switch(iversion) {
 	 case 100:
@@ -63,6 +85,15 @@ long ip[5];
 	   break;
 	 case 103:
 	   ierr = -7;
+	   break;
+	 case 104:
+	   ierr = -8;
+	   break;
+	 case -102:
+	   ierr = -9;
+	   break;
+	 case -104:
+	   ierr = -10;
 	   break;
 	 default:
 	   ierr = -6;
@@ -84,7 +115,7 @@ long ip[5];
    if(i<ip[1]-1)
      cls_clr(ip[0]);
    ip[0]=ip[1]=0;
-   if(ierr==-6 |ierr==0) {
+   if(ierr==-6 ||ierr==0) {
      cls_snd(ip+0,output,strlen(output),0,0);
      ip[1]++;
    }
