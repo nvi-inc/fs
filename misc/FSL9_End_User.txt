@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/FSL9_End_User.txt  Version: 2.7  Date: 140805
+File: /usr2/fs/misc/FSL9_End_User.txt  Version: 2.8  Date: 150409
 
 	     End User Set-up for GSFC Checked-out FS PC
 
@@ -169,6 +169,7 @@ ____ 9. Configure the network, still logged in as "root" on vt1
         ____ Click on the Network icon in the upper right corner
         ____ Select Network Settings
         ____ Highlight the wired entry that is connected
+        ____ You *may* need to switch it to "on" to make "Options" available
         ____ Select Options
         ____ Select IPv4 Setting
         ____ Select Manual method
