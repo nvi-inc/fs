@@ -78,3 +78,4 @@
 #include "dbbcform_ds.h"
 #include "dbbc_cont_cal_ds.h"
 #include "dbbcgain_ds.h"
+#include "fila10g_mode_ds.h"
