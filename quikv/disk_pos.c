@@ -36,6 +36,17 @@ parse:
       out_recs=0;
       out_class=0;
 
+      if(! (shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	  (shm_addr->equip.drive_type[shm_addr->select] == MK5A ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5A_BS ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS))
+	 ) {
+	ierr=-402;
+	goto error;
+      }
       if(shm_addr->equip.drive[0] == MK5 &&
 	 (shm_addr->equip.drive_type[0] ==MK5B ||
 	  shm_addr->equip.drive_type[0] == MK5B_BS ||
