@@ -76,7 +76,7 @@ skd_par(ip);
    cls_clr(ip[0]);
  if( ip[2] < 0 )	{
    logita(NULL,ip[2],ip+3,ip+4);
-   logit(NULL,-11,"fv");
+   logit(NULL,-8,"fv");
  }
 
 }
