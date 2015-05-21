@@ -117,7 +117,8 @@ C
         if(rack.eq.DBBC.and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-     &        drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
      &       ) then
            call fc_mk5dbbcd(itpis_dbbc)
         endif
@@ -132,7 +133,8 @@ c
         if(rack.eq.DBBC.and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
      &       ) then
            call fc_mk5dbbcd(itpis_test)
         endif
