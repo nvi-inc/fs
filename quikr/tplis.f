@@ -111,8 +111,9 @@ C
         if(rack.eq.MK4.and.rack_type.eq.MK45.and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-     &        drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
-     &     ) then
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
+     &       ) then
            call fc_mk5vcd(itpis)
         else if(rack.eq.MK3) then
            call fs_get_imodfm(imodfm)
@@ -141,7 +142,8 @@ C
         if(rack.eq.MK4.and.rack_type.eq.MK45.and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
      &       ) then
            call fc_mk5vcd(itpis_test)
         else if(rack.eq.MK3) then
