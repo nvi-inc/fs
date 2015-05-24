@@ -37,6 +37,7 @@ long ip[5];
        /*              12345678 */
      if(strncmp(inbuf,"version/",8)==0) {
        int iversion=0;
+       int j;
        /*                   123456789012 */
        if (strncmp(inbuf+8,"July 14 2011",12)==0||
 	   strncmp(inbuf+8,"Feb 21 2011",11)==0)
@@ -62,15 +63,23 @@ long ip[5];
 	 iversion =104;
        else if(strncmp(inbuf+8 ,"DDC,",4)==0) {
 	 char test_buf[sizeof(shm_addr->dbbcddcvs)];
+	 char *comma;
 
-	 strncpy(test_buf,inbuf+12,sizeof(shm_addr->dbbcddcvs));
-         for(i=0;i<shm_addr->dbbcddcvc;i++)
-            test_buf[i]=tolower(test_buf[i]);
+         strncpy(test_buf,inbuf+12,sizeof(test_buf));
+	 test_buf[sizeof(test_buf)-1]=0;
 
-	 if(strncmp(test_buf,shm_addr->dbbcddcvs,shm_addr->dbbcddcvc)==0)
+	 comma=strchr(test_buf,',');
+	 if(NULL!=comma)
+	   *comma=0;
+
+         for(j=0;j<strlen(test_buf);j++)
+            test_buf[j]=tolower(test_buf[j]);
+
+	 if(strncmp(test_buf,shm_addr->dbbcddcvs,shm_addr->dbbcddcvc)==0 &&
+	    strlen(test_buf)==shm_addr->dbbcddcvc)
 	   iversion=shm_addr->dbbcddcv;
        }
-	 
+
        if(iversion!=shm_addr->dbbcddcv) {
 	 switch(iversion) {
 	 case 100:
@@ -96,6 +105,7 @@ long ip[5];
 	   break;
 	 default:
 	   ierr = -6;
+	   break;
 	 }
 	 if(ierr==-6) {	   
 	   if(output[strlen(output)-1]!='/')
@@ -114,7 +124,7 @@ long ip[5];
    if(i<ip[1]-1)
      cls_clr(ip[0]);
    ip[0]=ip[1]=0;
-   if(ierr==-6 |ierr==0) {
+   if(ierr==-6 ||ierr==0) {
      cls_snd(ip+0,output,strlen(output),0,0);
      ip[1]++;
    }
