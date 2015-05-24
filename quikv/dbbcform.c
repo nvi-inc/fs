@@ -81,6 +81,11 @@ dbbcn:
       skd_par(ip);
 
       if(ip[2]<0) {
+	if(command->equal == '=' && -201 == ip[2]) {
+	  logitn(NULL,ip[2],ip+3,ip[4]);
+	  ip[2]=-302;
+	  memcpy(ip+3,"df",2);
+	}
 	if(ip[0]!=0) {
 	  cls_clr(ip[0]);
 	  ip[0]=ip[1]=0;
