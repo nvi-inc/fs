@@ -11,6 +11,7 @@ void setvtime();
 void set4time();
 
 extern int rack;
+extern int rack_type;
 extern int source;
 extern int s2type;
 extern char s2dev[2][3];
@@ -27,8 +28,11 @@ if (nsem_test(NSEM_NAME) != 1) {
   exit(0);
 }
 
+
   if (source == MK5 )
     set5btime(formtime,delta);
+  else if (rack == DBBC && rack_type == FILA10G)
+    setfila10gtime(formtime,delta);
   else if (source == S2)
     sets2time(s2dev[s2type],formtime+delta);
   else if (rack & VLBA)
