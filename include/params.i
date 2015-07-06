@@ -36,10 +36,14 @@ c
       integer MK5A_BS       ! MK5A_BS comparison bit variable
       integer MK45          ! MK45 comparison bit variable
       integer VLBA45        ! VLBA45 comparison bit variable
+      integer FILA10G       ! FILA10G comparison bit variable
+      integer VLBA4C        ! VLBA4C comparison bit variable
+      integer VLBA4CDAS     ! VLBA4CDAS comparison bit variable
       integer MK5B          ! MK5B comparison bit variable
       integer MK5B_BS       ! MK5B_BS comparison bit variable
       integer MK5C          ! MK5C comparison bit variable
       integer MK5C_BS       ! MK5C_BS comparison bit variable
+      integer FLEXBUFF      ! FLEXBUFF comparison bit variable
       integer MAX_DAS       ! Max number of LBA DAS allowed
       character*5 FS_ROOT
       integer MAX_BBC
@@ -103,10 +107,14 @@ C rack/drive _types
       parameter ( MK5A_BS  = z'8000000'  )
       parameter ( MK45     = z'10000000'  )
       parameter ( VLBA45   = z'20000000'  )
+      parameter ( FILA10G  = z'40000000'  )
+      parameter ( VLBA4C   = z'1' )
+      parameter ( VLBA4CDAS= z'2' )
       parameter ( MK5B     = z'40000000'  )
       parameter ( MK5B_BS  = z'10000000'  )
       parameter ( MK5C     = z'1'  )
       parameter ( MK5C_BS  = z'2'  )
+      parameter ( FLEXBUFF = z'4'  )
 C
       parameter ( MAX_DAS = 2 )
       parameter ( FS_ROOT='/usr2')
