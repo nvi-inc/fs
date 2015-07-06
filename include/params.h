@@ -111,6 +111,12 @@
 #define VLBA42      0x2000000
 #define MK45        0x10000000
 #define VLBA45      0x20000000
+#define FILA10G     0x40000000
+
+/*sub types of VLBA4 rack, like VLBA45 */
+
+#define VLBA4C        0x1
+#define VLBA4CDAS     0x2
 
 /* Mark 5 drive_types */
 
@@ -121,6 +127,8 @@
 
 #define MK5C        0x1
 #define MK5C_BS     0x2
+#define FLEXBUFF    0x4
+
 
 /*
  * The number of DAS allowed must be less than 8, currently we allow 2
