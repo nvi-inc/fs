@@ -12,9 +12,10 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 
-/* For tolower. */
+/* For tolower, etc. */
 #include <ctype.h>
 
 /* For assert. */
@@ -74,18 +75,36 @@ main(int argc, char **argv)
   int length;
   int kfirst=1;
   int fs_internal;
+  int start, termination;
 
   setup_ids();
   sig_ignore();
 
   fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
 
+  if(nsem_test("fs   ") != 1 && !fs_internal) {
+    fprintf(stderr, "FS not running.\n");
+    exit(0);
+  }
+
   initialize_readline(fs_internal);
 
   previous_input = NULL;
   while (1) {
 
+    if(nsem_test("fs   ") != 1 && !fs_internal) {
+      fprintf(stderr, "FS no longer running.\n");
+      exit(0);
+    }
+
     input = readline(prompt);
+
+    if(nsem_test("fs   ") != 1 && !fs_internal) {
+      if(input == NULL)
+      fprintf(stderr, "\n");
+      fprintf(stderr, "FS no longer running.\n");
+      exit(0);
+    }
 
     /* After a user has completed a new input line,
        get rid of the previous one (if it exists). */
@@ -114,14 +133,30 @@ main(int argc, char **argv)
       }
       continue;  /* no further actions (ie. 'free()') required */
     }
+    
+    termination = 0;
+  
+    for (start=0; input[start] != 0 && isspace(input[start]); start++)
+      ;
+    termination = 0 == strncmp(input+start,termination_command,strlen(termination_command));
 
-    if(fs_internal && 0 == strcmp(input,termination_command)) {
+    if(termination && strlen(input+start) > strlen(termination_command)) {
+      for(start=strlen(termination_command); input[start] != 0 && isspace(input[start]); start++)
+	;
+      if(input[start]!=0) {
+	fprintf(stderr,"The '%s' command was rejected because it had\nextraneous trailing non-blank characters.\n",
+		termination_command);
+	continue;
+      }
+    }
+      
+    if(termination)
+      if(fs_internal) {
       fprintf(stderr,"The '%s' command is only available from a stand-alone 'oprin'.\nUse 'terminate' to stop the field system.\n",termination_command);
       continue;
-    }
-    if(0 == strcmp(input,termination_command) && !fs_internal)
-      exit(0);
-
+      } else
+	exit(0);
+    
     /* Now we have got something that's not EOF,
        perhaps an empty line or a real command. */
 
@@ -137,8 +172,10 @@ main(int argc, char **argv)
       while (kfirst && shm_addr->iclopr==-1)
 	rte_sleep(2);
       kfirst=0;
-      if(nsem_test("fs   ") != 1)
-	 exit(0);
+      if(nsem_test("fs   ") != 1 && !fs_internal) {
+	fprintf(stderr, "FS no longer running.\n");
+	exit(0);
+      }
       cls_snd( &(shm_addr->iclopr), input, length, 0, 0);
       skd_run("boss ",'n',ipr);
 
