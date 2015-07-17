@@ -181,26 +181,30 @@ $misc
 * Station equipment may be specified in drudg or in the equip line below.
 *  Equipment names are NOT case sensitive.
 *  Allowed rack and recorder names are:
-*  Racks   |  Recorders
-*  --------+-----------
-*  none    |  none
-*  Mark3A  |  unused
-*  VLBA    |  Mark3A
-*  VLBAG   | VLBA
-*  VLBA/8  | VLBA4
-*  VLBA4/8 | Mark4
-*  Mark4   | S2
-*  VLBA4   | K4-1
-*  K4-1    | K4-2
-*  K4-2    | Mark5A
-*  K4-1/K3 | Mk5APigW
-*  K4-2/K3 | Mark5P
-*  K4-1/M4 | K5
-*  K4-2/M4 | Mark5B
-*  LBA     | unknown
-*  Mark5   |
-*  VLBA5   |
-*  unknown |
+*  Racks        |  Recorders
+*  -------------+-----------
+*  none         |  none
+*  unknown      |  unknown
+*  Mark3A       |  unused
+*  VLBA         |  Mark3A
+*  VLBAG        | VLBA
+*  VLBA/8       | VLBA4
+*  VLBA4/8      | Mark4
+*  Mark4        | S2
+*  VLBA4        | K4-1
+*  K4-1         | K4-2
+*  K4-2         | Mark5A
+*  K4-1/K3      | Mk5APigW
+*  K4-2/K3      | Mark5P
+*  K4-1/M4      | K5
+*  K4-2/M4      | Mark5B
+*  LBA          | Mark5C
+*  Mark5        | Flexbuff
+*  VLBA5        | 
+*  DBBC         |
+*  DBBC/FILA10G |
+*  VLABC        |
+*  CDAS         |
 *
 * Relationship between skedf.ctl and equip.ctl file names:
 *
@@ -261,6 +265,15 @@ $misc
 * cont_cal ON       !turn it on
 * cont_cal OFF      !turn it off 
 * cont_cal ASK      !ask the user at runtime.
+*
+* polarity is only used for cont_cal ON or 
+* cont_cal ASK and the user selected on
+* cont_cal_polarity 0    !value 0, no polarity change and no on/off swap
+* cont_cal_polarity 1    !value 1,    polarity change and no on/off swap
+* cont_cal_polarity 2    !value 2, no polarity change and    on/off swap
+* cont_cal_polarity 3    !value 3,    polarity change and    on/off swap
+* cont_cal_polarity NONE !omit parameter
+* cont_cal_polarity ASK  !ask the user at runtime.
 *--------------------------------------------------------------
 * default DBBC IF inputs when converting from a non-DBBC rack type
 * this selects the inputs that should be assumed for each IF by DRUDG
