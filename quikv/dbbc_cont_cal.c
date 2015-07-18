@@ -53,7 +53,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr);
+        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol);
         if(ierr !=0 ) goto error;
       }
 
