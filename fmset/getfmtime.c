@@ -14,6 +14,7 @@
 void getvtime();
 void get4time();
 extern int rack;
+extern rack_type;
 extern int source;
 extern int s2type;
 extern char s2dev[2][3];
@@ -37,6 +38,7 @@ int sz_m5clock;
 {
   static long phase =-1;
   long raw, sleep, rawch;
+  int it[6];
 
   if (nsem_test(NSEM_NAME) != 1) {
     endwin();
@@ -62,6 +64,8 @@ int sz_m5clock;
     } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
+  } else if (rack == DBBC && rack_type == FILA10G) {
+    getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
   }  else if (source == S2) {
     gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
   } else if(rack&VLBA)
