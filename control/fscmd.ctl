@@ -310,6 +310,7 @@ tacd         qkr 7501 01 FFFFFFFFFFFF
 cablelong    qkr 7604 01 FFFFFFFFFFFF
 cablediff    qkr 7701 01 FFFFFFFFFFFF
 mk5          qkr 7800 01 FFFFFFFFFFFF
+jive5ab      qkr 7800 01 FFFFFFFFFFFF
 disk_record  qkr 7801 01 FFFFFFFFFFFF
 disk_pos     qkr 7802 01 FFFFFFFFFFFF
 disk_serial  qkr 7803 01 FFFFFFFFFFFF
@@ -327,6 +328,8 @@ bit_streams  qkr 7814 01 FFFFFFFFFFFF
 mk5c_mode    qkr 7815 01 FFFFFFFFFFFF
 dbbc         qkr 7820 01 FFFFFFFFFFFF
 mk5_status   qkr 7821 01 FFFFFFFFFFFF
+fila10g      qkr 7822 01 FFFFFFFFFFFF
+fila10g_mode qkr 7823 01 FFFFFFFFFFFF
 rollform     qkr 7901 01 0254FFFFFFFF
 tpicd        qkr 8001 01 FFFFFFFFFFFF
 onoff        qkr 8101 01 FFFFFFFFFFFF
