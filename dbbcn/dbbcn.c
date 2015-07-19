@@ -22,6 +22,7 @@
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/times.h>
 #include <sys/types.h> /* For socket() and connect() */
 
 #include <sys/socket.h> /* For socket() and connect() */
@@ -33,6 +34,8 @@
 #include <netdb.h> /* For getservbyname() and gethostbyname() */ 
 #include <unistd.h> /* For close() */ 
 #include <stdlib.h>
+
+clock_t rte_times(struct tms *);
 
 extern int h_errno; /* From gethostbyname() for herror() */ 
 extern void herror(const char * s); /* Needed on HP-UX */ 
@@ -50,6 +53,7 @@ extern struct fscom *shm_addr;
  */
 static unsigned char inbuf[BUFSIZE];   /* input message buffer */
 static unsigned char outbuf[BUFSIZE];  /* output message buffer */
+static unsigned char saved[BUFSIZE];  /* copy of output message buffer for mode 4 */
 
 char me[]="dbbcn" ; /* My name */ 
 int iecho;
@@ -68,7 +72,7 @@ int time_out;
 int is_init=FALSE;
 
 static void close_socket();
-static int read_response(char*, int, FILE*, int);
+static int read_response(char*, int, FILE*, int, int, int);
 static int drain_input_stream(FILE*);
 
 int main(int argc, char * argv[])
@@ -100,6 +104,8 @@ int main(int argc, char * argv[])
     case 1:
     case 4:
     case 5:
+    case 6:
+    case 7:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -468,7 +474,7 @@ long ip[5];
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
-
+  char lbuf[10+BUFSIZE];
   long in_class;
   long out_class=0;
   int in_recs;
@@ -507,6 +513,12 @@ long ip[5];
   int ierr, mode;
   int centisec[6];             /* arguments of rte_tick rte_cmpt */
   int itbefore[6];
+  int fila10g;
+  int newline;
+
+  struct tms tms_buff;
+  int first, changed;
+  long end;
 
   secho[0]=0;
   mode=ip[0];
@@ -550,26 +562,6 @@ long ip[5];
     // not needed as v101    inbuf[nchars++]='\n';  /* new-line */
     inbuf[nchars++]=0;  /* zero */
 
-    if(iecho && strlen(secho)> 0) {
-      logit(secho,0,NULL);
-      secho[0]=0;
-    }
-    if(iecho) {
-      int in, out;
-      strcpy(secho,"[");
-      for(in=0,out=strlen(secho);in <nchars;in++) {
-	if(inbuf[in]=='\n') {
-	  secho[out++]='\\';
-	  secho[out++]='n';
-	} else if(inbuf[in]==0) {
-	  secho[out++]='\\';
-	  secho[out++]='0';
-	} else
-	  secho[out++]=inbuf[in];
-      }
-      secho[out]=0;
-      strcat(secho,"]");
-    }
     /* * Send command * */ 
     flags=0;
 #ifdef MSG_NOSIGNAL
@@ -597,26 +589,6 @@ long ip[5];
       first_transaction=FALSE;
     }
       
-    if(mode==4) {
-      rte_cmpt(centisec+2,centisec+4);
-      rte_ticks (centisec);
-    }
-    if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
-#ifdef DEBUG
-      (void) fprintf(stderr, /* Nope */ 
-		     "%s ERROR: \007 send() on socket returned ",me); 
-      perror("error"); 
-#endif
-      logit(NULL,errno,"un");
-      ip[2] = -102; /* Error */
-      goto error0;
-    }
-#ifdef DEBUG
-    (void) fprintf(stderr, /* Yes */ 
-		   "%s DEBUG:  Sent inLine[%s] to socket\n",
-		   me, inbuf,sock); 
-#endif
-
     /* determine time-out */
 
     time_out_local=time_out;
@@ -626,47 +598,126 @@ long ip[5];
       }
     }
 
-    /* * Read reply * */ 
-    ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local);
+    if(6 == mode || 4 == mode | 7 == mode)
+      fila10g=TRUE;
+    else
+      fila10g=FALSE;
 
-    if(iecho) {
-      int in, out;
-      strcat(secho,"<");
-      for(in=0,out=strlen(secho);outbuf[in]!=0;in++) {
-	if(outbuf[in]=='\n') {
-	  secho[out++]='\\';
-	  secho[out++]='n';
-	} else if(outbuf[in]==0) {
-	  secho[out++]='\\';
-	  secho[out++]='0';
-	} else
-	  secho[out++]=outbuf[in];
+    newline = 7 == mode;
+
+    first=TRUE;
+    changed=FALSE;
+    end=rte_times(&tms_buff)+130;  /* calculate ending time */
+    while(first ||
+	  (mode==4 && ip[2]==0 && end > rte_times(&tms_buff) && !changed) ) {
+      outbuf[0]=0;
+
+      if(iecho && strlen(secho)> 0) {
+	logit(secho,0,NULL);
+	secho[0]=0;
       }
-      secho[out]=0;
-      strcat(secho,">");
-      logit(secho,0,NULL);
-      secho[0]=0;
-    }
-    
-    if(ip[2]!=0) {
-      close_socket();
-      goto error;
-    }
-    if(mode==4) {
-      rte_ticks (centisec+1);
-      rte_cmpt(centisec+3,centisec+5);
-    }
+      if(iecho) {
+	int in, out;
+	strcpy(secho,"[");
+	for(in=0,out=strlen(secho);in <nchars;in++) {
+	  if(inbuf[in]=='\n') {
+	    secho[out++]='\\';
+	    secho[out++]='n';
+	  } else if(inbuf[in]==0) {
+	    secho[out++]='\\';
+	    secho[out++]='0';
+	  } else
+	    secho[out++]=inbuf[in];
+	}
+	secho[out]=0;
+	strcat(secho,"]");
+      }
+
+      if(mode==4) {
+	rte_cmpt(centisec+2,centisec+4);
+	rte_ticks (centisec);
+      }
+
+      if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
 #ifdef DEBUG
-      /* * Print reply * */ 
-      (void) fputs(outbuf, stdout); /* Print to stdout */ 
+	(void) fprintf(stderr, /* Nope */ 
+		       "%s ERROR: \007 send() on socket returned ",me); 
+	perror("error"); 
+#endif
+	logit(NULL,errno,"un");
+	ip[2] = -102; /* Error */
+	goto error0;
+      }
+#ifdef DEBUG
+      (void) fprintf(stderr, /* Yes */ 
+		     "%s DEBUG:  Sent inLine[%s] to socket\n",
+		     me, inbuf,sock); 
 #endif
 
-/*trim a trailing new-line */
+      /* * Read reply * */ 
+    read:
+      ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
+			    fila10g, newline);
+      
+      if(mode==4) {
+	rte_ticks (centisec+1);
+	rte_cmpt(centisec+3,centisec+5);
+      }
 
-      if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
-	 outbuf[strlen(outbuf)-1]=0;
+      if(mode == 4)
+	if(first)
+	  strcpy(saved,outbuf);
+	else
+	  changed = strcmp(saved,outbuf);
 
-    outbuf[511]=0; /* truncate to maximum class record size, cls_snd
+      first=FALSE;
+
+      if(iecho) {
+	int in, out;
+	strcat(secho,"<");
+	for(in=0,out=strlen(secho);outbuf[in]!=0;in++) {
+	  if(outbuf[in]=='\n') {
+	    secho[out++]='\\';
+	    secho[out++]='n';
+	  } else if(outbuf[in]=='\r') {
+	    secho[out++]='\\';
+	    secho[out++]='r';
+	  } else if(outbuf[in]==0) {
+	    secho[out++]='\\';
+	    secho[out++]='0';
+	  } else
+	    secho[out++]=outbuf[in];
+	}
+	secho[out]=0;
+	strcat(secho,">");
+	logit(secho,0,NULL);
+	secho[0]=0;
+      }
+    }
+
+#ifdef DEBUG
+    /* * Print reply * */ 
+    (void) fputs(outbuf, stdout); /* Print to stdout */ 
+#endif
+
+    /*trim a trailing new-line */
+
+    if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
+      outbuf[strlen(outbuf)-1]=0;
+    if(1==ip[2]) {
+      int i, is;
+      strcpy(lbuf,"fila10g/");
+      is=strlen(lbuf);
+      for(i=0;outbuf[i]!=0;i++)
+	if(isprint(outbuf[i]))
+	  lbuf[is++]=outbuf[i];
+      lbuf[is]=0;
+      logit(lbuf,0,NULL);
+      outbuf[0]=0;
+      goto read;
+    }
+
+    outbuf[1023]=0; /* truncate to maximum class record size, cls_snd
                       can't do this because it doesn't know it is a string,
                       cls_rcv() calling should do it either since this 
                       would require many more changes */
@@ -679,10 +730,16 @@ long ip[5];
 
     /* check errors */
 
+    if(ip[2]!=0) {
+      if(ip[2]!=-109)
+	close_socket();
+      goto error;
+    }
+
     if(mode==5)   /* no error report here */
       continue;
 
-    if(index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL) {
+    if(7!= mode && (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
       logite(outbuf,-200,"db");
       ip[2]=-201;
       goto error;
@@ -811,31 +868,35 @@ static void close_socket()
 ////////////////////////////////////////////////////////////////////////////////
 
 static int read_response(char *str, int num, FILE* stream,
-			 int time_out_local)
+			 int time_out_local, int fila10g, int newline)
 {
   int c, iret;
     char* cs = str;
     struct timeval to;
     unsigned long start,end,now;
     fd_set rfds;
+    char fila10g_term[ ]= "FiLa10G % ";
+    int term_count;
+    char term_start;
 
+    term_count=0;
     iret=0;
     rte_ticks(&start);
 
     /* we don't know where we are in current tick, so add one to be safe */ 
     end=start+time_out_local+1; 
     
-    while(num > 1) {
+    while(num > 2) {
 
       clearerr(stream);
       c=fgetc(stream);
       if(c==EOF && !feof(stream) && ferror(stream) && errno == 11) {
 
- /* no \n is used, so we assume that once we have some data the next pause
-  * means we are done */
+ /* some early firmwares has no \n terminator
+  * so we assume that once we have some data the next pause means we are done */
 
-	if(cs!=str)
-	  goto done;
+        if(cs!=str)
+          goto done;
 	rte_ticks(&now);
 	if(end <= now)       /* poll one more time */
 	  time_out_local=0;
@@ -881,9 +942,21 @@ static int read_response(char *str, int num, FILE* stream,
       /* Append */
       *cs++ = c;
       num--;
-      
-      if(c=='\n')
-	goto done;
+
+      if(!fila10g) {
+	if(c=='\n')
+	  goto done;
+      }	else { /* fila10g comm ends with a string rather than a \n */
+	if(c=='\n' && newline) {
+	  iret=1;
+	  goto done;
+	}
+ 	if(c==fila10g_term[term_count]) { /* got one */
+	  if(++term_count>=sizeof(fila10g_term)-1) /* if full match: done */
+	    goto done;
+	} else /* start over */
+	  term_count=0;
+      }
     }
     iret = -109; /* ended before newline */
    
