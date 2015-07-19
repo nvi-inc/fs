@@ -9,8 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define MAX_OUT 512
-#define BUFSIZE 513
+#define MAX_OUT 1025
+#define BUFSIZE 1025
 
 void dbbc_dis(command,itask,ip)
 struct cmd_ds *command;
@@ -26,7 +26,7 @@ long ip[5];
       int nchars;
       long out_class=0;
       int out_recs=0;
-      char inbuf[BUFSIZE],*first;
+      char inbuf[BUFSIZE],*first,*end;
       int n;
 
    /* format output buffer */
@@ -43,38 +43,28 @@ long ip[5];
 	  goto error;
 	}
 	inbuf[nchars]=0;
-
 	first=inbuf;
+	if(*first=='\r')
+	  first++;
 	while(strlen(first)>0) {
 	  *start=0;
-	  if(strlen(first)+1<=sizeof(output)-strlen(output)) {
-	    strcpy(start,first);
-	    if(strlen(output)>0 && output[strlen(output)-1]=='\n')
-	      output[strlen(output)-1]='\0';
-	    first+=strlen(first);
+	  end=strchr(first,'\n');
+	  if(NULL==end) {
+	    end=first+strlen(first)-1;
+	  }
+	  if(1+end-first<=sizeof(output)-strlen(output)) {
+	    strncpy(start,first,1+end-first);
+	    if(start[end-first]=='\n')
+	      start[end-first]=0;
+	    else
+	      start[1+end-first]=0;
+	    first=end+1;
+	    if(*first == '\r')
+	      first++;
 	  } else {
-	    int last;
 	    n=sizeof(output)-strlen(output)-1;
-	    for(last=n;last>(n-35) && last>0;last--) {
-	      if(first[last-1]==':') {
-		n=last;
-		break;
-	      }
-	    }
-	    if(index(":",first[n-1])==NULL)
-	      for(last=n;last>(n-35) && last>0;last--) {
-		if(first[last-1]==',') {
-		  n=last;
-		  break;
-		}
-	      }
-	    if(index(":,",first[n-1])==NULL)
-	      for(last=n;last>(n-35) && last>1;last--) {
-		if(first[last-1]==' ') {
-		  n=last-1;
-		  break;
-		}
-	      }
+	    if(1+end-first<n)
+	      n=1+end-first;
 	    strncpy(start,first,n);
 	    start[n]=0;
 	    first+=n;
