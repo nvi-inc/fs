@@ -25,6 +25,8 @@ DBBC DDC v100 does not support monitor for the "test" values.
 
 DBBC DDC versions before v104 do not support "astro2".
 
+DBBC DDC versions before v105 do not support "astro2" on VSI2.
+
 Only DBBC DDC vXXXe/f (XXX=105 or greater) support "astro3".
 
 DBBC versions vXXXe/f (XXX=105 or greater) use only VSI1 and support
