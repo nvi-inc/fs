@@ -382,6 +382,7 @@ void cshm_init()
   m5state_init(&shm_addr->mk5b_mode.source.state);
   m5state_init(&shm_addr->mk5b_mode.mask.state);
   m5state_init(&shm_addr->mk5b_mode.decimate.state);
+  m5state_init(&shm_addr->mk5b_mode.samplerate.state);
   m5state_init(&shm_addr->mk5b_mode.fpdp.state);
 
   shm_addr->holog.az=0.0;
@@ -432,9 +433,13 @@ void cshm_init()
   shm_addr->dbbcform.test=-1;
 
   shm_addr->dbbc_cont_cal.mode=0;
+  shm_addr->dbbc_cont_cal.polarity=-1;
   shm_addr->dbbc_cont_cal.samples=10;
 
   shm_addr->m5b_crate=32;
+
+  m5state_init(&shm_addr->fila10g_mode.mask.state);
+  m5state_init(&shm_addr->fila10g_mode.decimate.state);
 
   return;
 }
