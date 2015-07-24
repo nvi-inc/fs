@@ -26,9 +26,9 @@ C
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(256)         !  input buffer containing command
-      integer*2 ibuf2(256),ibufd(3)
-      character*512 ibc
+      integer*2 ibuf(512)         !  input buffer containing command
+      integer*2 ibuf2(512),ibufd(3)
+      character*1024 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
@@ -82,7 +82,7 @@ C     ICLASS - general variable for class with command/response
 C     ICLOP2 - secondary operator class after immediate commands
 C             have been stripped
 C     MAXPR1,2 - Maximum number of procs allowed in each lists
-      data iblen/256/
+      data iblen/512/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
@@ -820,6 +820,20 @@ C
            iret=fc_skd_end_insnp('boss ',ipinsnp)
            if(iret.ne.0) then
               call clrcl(ipinsnp(1))
+           endif
+        endif
+        call fc_antcn_term(iout)
+        if(iout.ge.0) then
+           ip(1)=iout
+           call run_prog('antcn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+           call rmpar(ip)
+           ierr = ip(3)
+           if (ierr.ne.0) then
+              call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+              call logit7ci(0,0,0,1,-998,'bo',ierr)
+           else
+              call fc_rte_sleep(10)
+              call fc_putln('antenna termination succeeded')
            endif
         endif
         call fc_rte_sleep( 10)
