@@ -14,7 +14,10 @@
        5 = on/off source status for pointing programs
        6 = reserved for future focus control
        7 = log tracking data (from TRACK command)
-  8 - 99 = reserved for future use
+       8 = Station detectors, see /usr2/fs/misc/stndet.txt
+       9 = Satellite traking, see /usr2/fs/misc/satellites.txt
+      10 = termination mode, must return promptly
+ 11 - 99 = reserved for future use
 100 - 32767 = for site specific use
 
    IP(2) = class number (mode 4 only)
@@ -42,7 +45,7 @@
 
 /* Defined variables */
 #define MINMODE 0  /* min,max modes for our operation */
-#define MAXMODE 7
+#define MAXMODE 10
 
 /* Include files */
 
@@ -168,6 +171,30 @@ Continue:
       logit(buf,0,NULL);
       fs->ionsor = 1;
 
+  case 8:
+      ierr = 0;
+      strcpy(buf,"Station dependent detectors access");
+      logit(buf,0,NULL);
+      break;
+
+  case 9:
+      ierr = 0;
+      strcpy(buf,"Satellite tracking mode");
+      logit(buf,0,NULL);
+      break;
+
+  case 10:  /*normally triggered on FS termination if evironment
+	     variable FS_ANTCN_TERMINATION has been defined */
+      ierr = 0;
+      strcpy(buf,"Termination mode");
+      logit(buf,0,NULL);
+      break;
+
+  default:
+      ierr = -1;
+      strcpy(buf,"Impossible to reach");
+      logit(buf,0,NULL);
+      break;
   }  /* end of switch */
 
 End:
