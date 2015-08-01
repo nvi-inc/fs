@@ -1,0 +1,28 @@
+       fila10g - general FiLa10G communication
+
+            Syntax:     fila10g=data
+
+            Response:   fila10g/data
+
+
+Settable parameters:
+            data        complete message to be sent to FiLa10G system,
+                        No checking is done.
+
+Monitor-only parameters:
+            data        response of FiLa10G system, if any.
+
+Comments:
+This command sends low-level communication messags to the FiLa10G and
+presents the response.  The response will span multiple lines
+corresponding to the lines sent by the FiLa10G.  The final response
+line will be the FiLa10G prompt unles the output exeeeds the internal
+buffer limits of the FS (currently 1024 characters).  In the latter
+case, as much data as will fit will be presented and an error
+reported.
+
+Communication with the FiLa10G is accomplished through the DBBC.
+However, the user should not put "fila10g=" at the start of the *data*
+field as the command will do this automatically.
+
+See the FiLA10G documentation for a list of FiLa10G commands.
