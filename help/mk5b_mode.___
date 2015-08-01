@@ -1,15 +1,19 @@
 mk5b_mode/bit_streams/mk5c_mode - set mk5b recording mode
 
 syntax:   mk5b_mode=source,mask,decimation,sample,fpdp,okay
-        bit_streams=source,mask,decimation,sample,fpdp,okay
-      :   mk5c_mode=source,mask,decimation,sample,fpdp,okay
-Response:   mk5b_mode/source,mask,decimation,(sample),fpdp
-          bit_streams/source,mask,decimation,(sample),fpdp
-            mk5c_mode/source,mask,decimation,sample
+        bit_streams=source,mask,decimation,sample
+          mk5c_mode=source,mask,decimation,sample,okay
+
+Response:   mk5b_mode/source,mask,decimation,sample,fpdp
+          bit_streams/source,mask,decimation,sample,fpdp
+            mk5c_mode/source,mask,decimation,sample,format,tracks,tbitrate,frame
 
 Settable parameters:
-source:     data source: ext, tvg, or ramp. Default: ext.
-mask:       bit-stream mask, hex, for example: 0xf, default 0xffffffff.
+source:     data source: ext, tvg, ramp, or vdif. Default: ext.
+            On display may be the "magic" recording mode specifier used
+            by jive5ab. 
+mask:       bit-stream mask, hex, non-zero 32-bit wide maximum,
+            for example: 0xf, default 0xffffffff.
 decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless sample
             (next parameter) is specified.
 sample:     sample rate: must be greater than 0.124.  The value divided 
@@ -18,66 +22,73 @@ sample:     sample rate: must be greater than 0.124.  The value divided
             (decimation becomes "1") unless the specified rate is "none",
             in which case this command will report an error.
 fpdp:       fpdp mode: 1 or 2. Default: no command sent to Mark 5B
-okay        literal ascii: disk_record_ok
+okay        overide to allow command while recording, literal ascii:
+            disk_record_ok
 
-Monitor only parameter: None
+Monitor only parameter:
+format      VDIF or possibly others (see jive5ab mode? query response)
+tracks      number of tracks
+tbitrate    total bit rate (Mbps)
+frame       frame size in bytes
 
 Comments:
+"bit_streams" is an alias for the "mk5b_mode" and "mk5c_mode" commands
+that does not communicate with the recorder.  All other aspects of its
+operation are identical for the first four parameters.  The main
+purpose of "bit_streams" is to provide a way to set the bitstream mask
+for correct sampling of Tsys when no recorder is being used (typically
+during eVLBI) when a Mark 5B/C compatible rack, such as a Mark 5,
+VLBA5, DBBC, or DDBC/FiLA10G (or none) is in use.  For such racks, if
+the recorder is set to "none" in DRUDG, the "bit_stream" command will be
+generated instead of mk5b_mode.
 
-"bit_streams" is an alias for the" mk5b_mode" command that does not
-communicate with the Mark 5B recorder.  All other aspects of its
-operation are identical to the mk5b_mode command.  The main purpose of
-"bit_streams" is to provide a way to set the bitstream mask for
-correct sampling of Tsys when no recorder is being is used (typically
-during eVLBI) when a Mark 5B compatible rack, such as a Mark 5, VLBA5,
-or DBBC (or none) is in use.  For such racks, if the recorder is set
-"none" in DRUDG, the "bit_stream" command will be generated instead of
-mk5b_mode.
+"mk5c_mode" is an alias for the "mk5b_mode" command, but is used with
+Mark 5C recorders only.  The recorder must be controlled by the
+"jive5ab" control program for this command to work.  When the
+"mk5c_mode=..."  command is used, a "clock_set" command specifying the
+actual sample rate of the data is sent to the recorder.  The
+decimation factor, regardless of the SNAP command value specified,
+sent to the recorder is always "1" for the Mark 5C since there is no
+decimation.  The sample rate can be specified in the SNAP command
+either explicitly with the "sample" parameter or implicitly with the
+"decimate" parameter.  In the latter case, the actual sample rate (of
+the recorded data) is calculated using the Mark 5B clock rate
+specified in "equip.ctl".  If the specified clock rate is "none", the
+"clock_set" command is suppressed.  The use of "clock_set" is
+necessary for the "bank_check" SNAP command (which uses the low-level
+Mark 5 command "rtime?") to work for for Mark 5C.
 
-"mk5c_mode" is an alias for "mk5b_mode", but is used with Mark 5C
-recorders only.  The recorder must be controlled by the 'jive5ab"
-control program for this command to work.  When the "mk5c_mode=..."
-command is used, a "clock_set" command specifying the actual sample
-rate of the data is sent to the recorder.  The decimation factor,
-regardless of the SNAP command value specified, sent to the recorder
-is always "1" for the Mark 5C since there is no decimation.  The
-sample rate can be specified in the SNAP command either explicitly
-with the "sample" parameter or implicitly with the "decimate"
-parameter.  In the latter case, the actual sample rate (of the
-recorded data) is calculated using the Mark 5B clock rate specified in
-"equip.ctl".  If the specified clock rate is "none", the clock_set
-command is suppressed.  The use of "clock_set" is necessary for the
-"bank_check" SNAP (which uses the low-level Mark 5 command "rtime?")
-command to work for Mark 5C and is not supported for Mark 5B.
-
-Except for "mk5c_mode", the query output includes the expected sample
-rate in parentheses for information purposes only since the actual
-clock rate is not read back from the recorder to determine the actual
-effective sample rate in use.
+In query response for these commands, if the sample rate is not known
+and the bitrate is not available, the commanded sample rate is shown
+in parentheses for informational purposes.
 
 For "mk5c_mode", a query of the FS's model of the state of the device
-("mk5c_mode=?") prints the sample rate as zero and decimation that is
-implied by the commanded sample rate given the defined Mark 5B clock
-rate, even though the decimation is actually "1" and the clock rate
-commanded to the recorder is actually the requested sample rate.
+("mk5c_mode=?") prints the sample rate as zero and the decimation that
+is implied by the commanded sample rate given the defined Mark 5B
+clock rate, even though the decimation is actually "1" and the clock
+rate commanded to the recorder is actually the requested sample rate.
+For VDIF format the mask, decimation, and sample are not returned by
+the Mark 5C.
 
-Mask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0,
-etc. The number of bits turned on in the bit-stream mask must be 2^n
-where 0 <= n <= 5, or the Mark5B will reject the command with an
-error.
+Bitmask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0, etc.
+The number of bits turned on in the bit-stream mask must be 2^n where
+0 <= n <= 5, or the Mark5B will reject the command with an error.
 
 Only one of "decimation" and "sample" may be specified.
 
-Non-default values of "fpdp" are for diagnostic use only. The default
+Non-default values of "fpdp" are for diagnostic use only.  The default
 is that the parameter is not sent to the recorder which causes the
-device to use its own default, which is different for 5B and
-5B+. Value 2 is not supported by Mark 5B recorders, but is by Mark
-5B+ recorders..
+device to use its own default, which is different for 5B and 5B+.
+Value 2 is not supported by Mark 5B recorders, but is by Mark 5B+
+recorders.
 
 The "mk5b_mode=" and "mk5c_mode=" command will not succeed if
 recording has been commanded with the "disk_record=on" command.
 Either recording must be stopped using "disk_record=off" command first
-or if you wish to continue set the mode despite recording being
-active, you can use "disk_record_ok" as the sixth parameter of the
-command.  Changing the mode while recording will probably cause
-problems with the recording and is not recommended.
+or if you wish to continue to set the mode despite recording being
+recording being active (not recommended), you can use "disk_record_ok"
+as the sixth parameter of the command as an override.  If "jive5ab" is
+being used to run the recorder and the override is used while
+recording is active, the command will cause an error response from the
+recorder and not be effective.  Changing the mode while recording will
+probably cause problems with the recording and is not recommended.
