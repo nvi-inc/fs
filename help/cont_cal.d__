@@ -1,13 +1,16 @@
 	cont_cal - continuous calibration control (DBBC racks)
 
 
-            Syntax:     cont_cal=state,samples
+            Syntax:     cont_cal=state,polarity,samples
 
-            Response:   cont_cal/state,samples
+            Response:   cont_cal/state,polarity,samples
 
 
 Settable parameters:
             state       off or on, Default is off.
+            polarity    0, 1, 2, or 3. Default is the previous value. For
+                        DBBC versions less than v105X_1, numeric values are
+                        not permitted.
             samples     number of samples to use for Tsys, positive integer,
                         Default is 10.
 
@@ -18,5 +21,20 @@ This command does not enable continuous (switched) noise diode control
 in the front-end receiver. It only commands the state of the DBBC. The
 receiver must inject a switched calibration signal for this to be
 useful.
+
+For polarity, the previous value is used as the default to have
+parallelism with how the device works if no value is sent to it.  This
+is atypical for how FS commands normally work; they normally have a
+specific value for any default.  On FS start-up, the default for
+polarity is to send no value.
+
+Polarity values affect cont_cal signal polarity and the order of on/off
+values in the device responses:
+
+ Value    Polarity        On/Off Response
+   0     no change          not swapped
+   1        changed         not swapped
+   2     no change              swapped
+   3        changed             swapped
 
 The number of samples is used internally by the FS to form Tsys.
