@@ -10,7 +10,7 @@ C  INPUT:
 C
       integer*2 ibuf(1)
 C      - buffer to use, assumed to be at least 50 characters long
-      integer*2 ib(60)
+      integer*2 ib(128)
       integer*2 lprocdumm(6)
       character*1 model,cjchar
 C     LSOR - source of this message
@@ -148,6 +148,10 @@ c
         nch=ichmv_ch(ib,nch,'vlba4')
       else if(rack.eq.VLBA4.and.rack_type.eq.VLBA45) then
         nch=ichmv_ch(ib,nch,'vlba5')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4C) then
+        nch=ichmv_ch(ib,nch,'vlbac')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS) then
+        nch=ichmv_ch(ib,nch,'cdas')
       else if(rack.eq.K4.and.rack_type.eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
       else if(rack.eq.K4.and.rack_type.eq.K41U) then
@@ -192,8 +196,10 @@ c
         nch=ichmv_ch(ib,nch,'lba4')
       else if(rack.eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
-      else if(rack.eq.DBBC) then
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC) then
         nch=ichmv_ch(ib,nch,'dbbc')
+      else if(rack.eq.DBBC.and.rack_type.eq.FILA10G) then
+        nch=ichmv_ch(ib,nch,'dbbc/fila10g')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -239,6 +245,8 @@ c
         nch=ichmv_ch(ib,nch,'mk5c')
       else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C_BS) then
         nch=ichmv_ch(ib,nch,'mk5c_bs')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.FLEXBUFF) then
+        nch=ichmv_ch(ib,nch,'flexbuff')
       else if(drive(1).eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -399,6 +407,13 @@ c
       nch=mcoma(ib,nch)
       call fs_get_m5b_crate(m5b_crate)
       nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+c
+      nch=mcoma(ib,nch)
+      call fs_get_fila10gvsi_in(fila10gvsi_in)
+      ilast=index(fila10gvsi_in,' ')
+      if(ilast.eq.0) ilast=len(fila10gvsi_in)
+      call char2hol(fila10gvsi_in,ib,nch,nch+ilast-1)
+      nch=nch+ilast
 c
       call logit3(ib,nch-1,lsor)
 c
