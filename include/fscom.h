@@ -342,4 +342,11 @@ typedef struct fscom {
   char dbbcddcvl[1];
   char dbbcddcvs[16];
   int  dbbcddcvc;
+  int dbbcddcsubv;
+  int dbbccontcalpol;
+
+  struct fila10g_mode_cmd fila10g_mode;
+
+  char fila10gvsi_in[16];
+
 } Fscom;
