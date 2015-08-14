@@ -18,6 +18,7 @@
 #define LEXPER_N 8
 #define DBBCDDCVL_N 1
 #define DBBCDDCVS_N 16
+#define FILA10GVSI_IN_N 16
 #define SYSTMP_N MAX_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
@@ -2401,6 +2402,30 @@ void fs_get_dbbcddcvc__(dbbcddcvc)
           *dbbcddcvc = shm_addr->dbbcddcvc;
 	}
 
+void fs_set_dbbcddcsubv__(dbbcddcsubv)
+	int *dbbcddcsubv;
+	{
+          shm_addr->dbbcddcsubv = *dbbcddcsubv;
+        }
+
+void fs_get_dbbcddcsubv__(dbbcddcsubv)
+	int *dbbcddcsubv;
+	{
+          *dbbcddcsubv = shm_addr->dbbcddcsubv;
+	}
+
+void fs_set_dbbccontcalpol__(dbbccontcalpol)
+	int *dbbccontcalpol;
+	{
+          shm_addr->dbbccontcalpol = *dbbccontcalpol;
+        }
+
+void fs_get_dbbccontcalpol__(dbbccontcalpol)
+	int *dbbccontcalpol;
+	{
+          *dbbccontcalpol = shm_addr->dbbccontcalpol;
+	}
+
 void fs_set_dbbcpfbv__(dbbcpfbv)
 	int *dbbcpfbv;
 	{
@@ -2461,3 +2486,20 @@ void fs_get_m5b_crate__(m5b_crate)
 	{
 	  *m5b_crate=shm_addr->m5b_crate;
 	}
+
+void fs_set_fila10gvsi_in__(fila10gvsi_in)
+	char *fila10gvsi_in;
+	{
+          size_t N;
+	  N = FILA10GVSI_IN_N;
+	  memcpy(shm_addr->fila10gvsi_in,fila10gvsi_in,N);
+	}
+
+void fs_get_fila10gvsi_in__(fila10gvsi_in)
+	char *fila10gvsi_in;
+	{
+          size_t N;
+	  N = FILA10GVSI_IN_N;
+	  memcpy(fila10gvsi_in,shm_addr->fila10gvsi_in,N);
+	}
+
