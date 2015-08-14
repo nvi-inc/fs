@@ -3,6 +3,7 @@
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
+#include <string.h>
 #include <stdlib.h>
 #include "../include/params.h"  /* module mnemonics */
 #include "../include/fs_types.h"
@@ -117,14 +118,20 @@ else if (drive==S2) {
     toggle=TRUE;
     other=rack;
   }
-} else if (rack & MK3 || rack==0||rack==LBA) {
+ } else if (rack==DBBC && rack_type==FILA10G) {
+  ;
+ } else if ((rack & MK3 || rack==0||rack==LBA) ||
+	    ((( rack == MK4 && rack_type != MK4) ||
+	      (rack == VLBA4 && rack_type != VLBA4)) &&
+	     ( drive = MK5 && drive_type != MK5B && drive_type != MK5B_BS))
+	    ){
   if(rack & MK3)
     fprintf(stderr,"fmset does not support Mark 3 racks - fmset aborting\n");
   else if(rack & LBA)
     fprintf(stderr,"fmset does not support LBA racks - fmset aborting\n");
   else
     fprintf(stderr,
-	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT or Mark 5B to set - fmset aborting\n");
+	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT/Mark5B or FILA10G to set - fmset aborting\n");
   rte_sleep(SLEEP_TIME);
   exit(0);
 } else {
@@ -151,12 +158,15 @@ box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
  column=10;
  hint_row=8;
 build:
-mvwaddstr( maindisp, 2, 8, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B time set" );
+mvwaddstr( maindisp, 2, 5, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/FiLa10G time set" );
  if( source == MK5) {
    column=6;
    hint_row=12;
    form="Mark 5B";
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
+ }  else if (rack==DBBC && rack_type==FILA10G) {
+   mvwaddstr( maindisp, 4, column, "FiLa10G     " );
+   form="FiLa10g";
  } else if(source == S2) {
    mvwaddstr( maindisp, 4, column, s2type ? "S2 DAS      " : "S2 RT       " );
    form=s2type ? "S2 DAS" : "S2 RT ";       
@@ -180,7 +190,8 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
 
 irow=4;
- if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5)) {
+ if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
+		     (rack == DBBC && rack_type == FILA10G))) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -200,6 +211,8 @@ do 	{
 
 	char fmt[80];
 
+	memset(mk5b_sync,' ',sizeof(mk5b_sync)-1);
+	mk5b_sync[sizeof(mk5b_sync)-1]=0;
 	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
 		  &formtime,&formhs,mk5b_sync,sizeof(mk5b_sync),
 		  mk5b_1pps,sizeof(mk5b_1pps),
@@ -291,6 +304,8 @@ do 	{
 	if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
+	     (rack == VLBA4 && rack_type == VLBA4C ) || 
+	     (rack == VLBA4 && rack_type == VLBA4CDAS ) || 
 	     (rack == MK4   && rack_type == MK45  ) || 
 	     rack == DBBC ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
@@ -416,7 +431,8 @@ do 	{
 	case SYNCH2_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
-	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5) &&
+	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
+			      (rack==DBBC && rack_type == FILA10G)) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
