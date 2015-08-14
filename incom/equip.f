@@ -10,9 +10,14 @@ c
       double precision das2b
       character*7 m5bcrate
       logical kmove
+      integer*2 line1(16),line2(2)
 c
       include '../include/fscom.i'
-c
+c                 1    2    3    4    5    6    7    8    9   10
+      data line1/25,2heq,2hui,2hp.,2hct,2hl ,2hli,2hne,2h t,2hha,
+     &         2ht ,2hfa,2hil,2hed,2h: ,2h' /
+      data line2/ 1,2h' /
+
       call fmpopen(idcb,name,ierr,'r',idum)
       if (ierr.lt.0) then
         call logit7ci(0,0,0,1,-139,'bo',ierr)
@@ -22,7 +27,7 @@ C LINE #1  TYPE OF RACK - rack
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) then
          call logit7ci(0,0,0,1,-140,'bo',1)
-         goto 990
+         goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -54,6 +59,12 @@ C LINE #1  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'vlba5').eq.0.and.il.eq.5) then
         rack = VLBA4
         rack_type = VLBA45
+      else if (ichcm_ch(ibuf,ic1,'vlbac').eq.0.and.il.eq.5) then
+        rack = VLBA4
+        rack_type = VLBA4C
+      else if (ichcm_ch(ibuf,ic1,'cdas').eq.0.and.il.eq.4) then
+        rack = VLBA4
+        rack_type = VLBA4CDAS
       else if (ichcm_ch(ibuf,ic1,'k41').eq.0.and.il.eq.3) then
         rack = K4
         rack_type = K41
@@ -127,6 +138,9 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'dbbc').eq.0.and.il.eq.4) then
         rack = DBBC
         rack_type = DBBC
+      else if (ichcm_ch(ibuf,ic1,'dbbc/fila10g').eq.0.and.il.eq.12) then
+        rack = DBBC
+        rack_type = FILA10G
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -141,7 +155,7 @@ C LINE #2  TYPE OF RECORDER - drive 1
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) then
          call logit7ci(0,0,0,1,-140,'bo',2)
-         goto 990
+         goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -209,6 +223,9 @@ C LINE #2  TYPE OF RECORDER - drive 1
       else if (ichcm_ch(ibuf,ic1,'mk5c_bs').eq.0.and.il.eq.7) then
         drive(1) = MK5
         drive_type(1) = MK5C_BS
+      else if (ichcm_ch(ibuf,ic1,'flexbuff').eq.0.and.il.eq.8) then
+        drive(1) = MK5
+        drive_type(1) = FLEXBUFF
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         drive(1) = 0
         drive_type(1) = 0
@@ -226,7 +243,7 @@ C LINE #3  TYPE OF RECORDER - drive 2
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) then
          call logit7ci(0,0,0,1,-140,'bo',3)
-         goto 990
+         goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -282,7 +299,7 @@ c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',4)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ifc=1
@@ -308,7 +325,7 @@ C LINE #5  if3 lo freq.
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',5)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -339,7 +356,7 @@ C LINE #6  if3 switches
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',6)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -355,7 +372,7 @@ C LINE #7 DS board in vlba FM ?
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',7)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -376,7 +393,7 @@ C LINE #8 HARDWARE ID - hwid
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',8)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -394,7 +411,7 @@ C LINE #9 RECEIVER 70K STAGE CHECK TEMPERATURE - i70kch
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',9)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -412,7 +429,7 @@ C LINE #10 RECEIVER 20K STAGE CHECK TEMPERATURE - i20kch
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',10)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -430,7 +447,7 @@ c pcal control
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',11)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ifc=1
@@ -453,7 +470,7 @@ C ** Mk4 formatter firmware
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',12)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -473,7 +490,7 @@ C LINE #13 NO Of INSTALLED DAS - ndas
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',13)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -491,7 +508,7 @@ C LINE #14 DAS IMAGE REJECT FILTERS - idasfilt
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',14)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -512,7 +529,7 @@ C LINE #15 DAS DIGITAL INPUT FORMAT - idasbits
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',15)
-        goto 990
+        goto 991
       endif
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -535,7 +552,7 @@ C **** MET3 Sensor line 16
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) then
          call logit7ci(0,0,0,1,-140,'bo',16)
-         goto 990
+         goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -561,7 +578,7 @@ C mk4 synch test parameter
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',17)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -586,7 +603,7 @@ C mk4 decoder message terminator
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',18)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -611,7 +628,7 @@ c DBBC DDC firmware version
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',19)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ifc=1
@@ -635,7 +652,7 @@ C
       endif
       idbbcv=0
       do i=1,3
-        ind=index('01234567890',dbbcv(i:i))
+        ind=index('0123456789',dbbcv(i:i))
         if(ind.eq.0) then
            call logit7ci(0,0,0,1,-141,'bo',19)
            goto 990
@@ -658,19 +675,40 @@ c                    12345678901234567890123456
       else
          dbbcddcvl=' '
       endif
+
+      idbbcddc_subv=0
+      ius=index(dbbcv(1:idbbcvc),'_')
+      if(ius.ne.0) then
+         do i=ius+1,idbbcvc
+            ind=index('0123456789',dbbcv(i:i))
+            if(ind.eq.0) then
+               call logit7ci(0,0,0,1,-141,'bo',19)
+               goto 990
+            endif
+            idbbcddc_subv=idbbcddc_subv*10+(ind-1)
+         enddo
+      endif
+      icont_cal_pol=0
+      if(idbbcv.ge.106 .or.(idbbcv.eq.105.and.idbbcddc_subv.ge.1)) then
+         icont_cal_pol=1
+      endif
 c
       dbbcddcv =idbbcv
       dbbcddcvs= dbbcv
       dbbcddcvc=idbbcvc
+      dbbcddcsubv=idbbcddc_subv
+      dbbccontcalpol=icont_cal_pol
       call fs_set_dbbcddcv(dbbcddcv)
       call fs_set_dbbcddcvl(dbbcddcvl)
       call fs_set_dbbcddcvs(dbbcddcvs)
       call fs_set_dbbcddcvc(dbbcddcvc)
+      call fs_set_dbbcddcsubv(dbbcddcsubv)
+      call fs_set_dbbccontcalpol(dbbccontcalpol)
 c DBBC PFB firmware version
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',20)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ifc=1
@@ -692,7 +730,7 @@ C number of conditioning modules
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',21)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -713,7 +751,7 @@ C DBBC IF count conversion factors
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',22)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       icount=0
@@ -741,7 +779,7 @@ C 5B clock rate
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',23)
-        goto 990
+        goto 991
       endif
       call lower(ibuf,ilen)
       ich = 1
@@ -756,17 +794,20 @@ C 5B clock rate
       if(m5bcrate.eq.'nominal') then
          if(drive(1).eq.MK5.and.
      &        (drive_type(1).eq.MK5B.or.drive_type(1).eq.MK5B_BS.or.
-     &         drive_type(1).eq.MK5C.or.drive_type(1).eq.MK5C_BS)) then
-C note that MK45 and VLBA45 cannot connect to MK5C or MK5C_BS,
-c      so only DBBC matters for 5C
+     &         drive_type(1).eq.MK5C.or.drive_type(1).eq.MK5C_BS.or.
+     &         drive_type(1).eq.FLEXBUFF)) then
+C note that MK45/VLBA45/VLBAC/VLBACDAS cannot connect to MK5C/MK5C_BS/FLEXBUFF,
+c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
             if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
      &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
+     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA4C).or.
      &           (rack.eq.DBBC.and.
      &           (dbbcddcv.le.104.or.dbbcddcvl.eq.' '))) then
                m5b_crate=32
-            else if(rack.eq.DBBC.and.
+            else if((rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS).or.
+     &              (rack.eq.DBBC.and.
      &             (dbbcddcv.ge.105.and.
-     &              0.ne.index('ef',dbbcddcvl))) then
+     &              0.ne.index('ef',dbbcddcvl)))) then
                m5b_crate=64
             else if(rack.eq.DBBC.and.
      &             (dbbcddcv.ge.105.and.
@@ -797,9 +838,41 @@ c      so only DBBC matters for 5C
  2300 continue
       call fs_set_m5b_crate(m5b_crate)
 c
+c FiLA10G VSI input
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 991
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,fila10gvsi_in)
+      if(fila10gvsi_in.ne.'vsi1' .and.
+     &     fila10gvsi_in.ne.'vsi2' .and.
+     &     fila10gvsi_in.ne.'vsi1-2' .and.
+     &     fila10gvsi_in.ne.'vsi1-2-3-4' .and.
+     &     fila10gvsi_in.ne.'gps'.and.
+     &     fila10gvsi_in.ne.'tvg'
+     & ) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      endif
+      call fs_set_fila10gvsi_in(fila10gvsi_in)
+c
       return
 c
- 990  call fmpclose(idcb,ierr)
+ 990  continue
+      call put_cons_raw(line1(2),line1(1))
+      call put_cons_raw(ibuf,ilen)
+      call put_cons(line2(2),line2(1))
+ 991  continue
+      call fmpclose(idcb,ierr)
   995  continue
       ip(3) = -1
        return
