@@ -42,6 +42,11 @@ long ip[5];                           /* ipc parameters */
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
+      if(shm_addr->equip.drive[shm_addr->select] != MK5 ) {
+	ierr=-402;
+	goto error;
+      }
+
       if (command->equal != '=' ) {
 	char *str;
 	out_recs=0;
