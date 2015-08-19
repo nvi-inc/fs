@@ -88,9 +88,9 @@ long ip[5];
 	  shm_addr->equip.drive_type[0] == MK5C_BS) ) {
 	if((lclm.source.state.error || (!lclm.source.state.known)
 	    || strcmp("?",lclm.source.source)==0)) {
-	  logit(NULL,-601,"5k");
+	  logit(NULL,-601,"5d");
 	  shm_addr->last_check.ip2=-601;
-	  strncpy(shm_addr->last_check.who,"5k",
+	  strncpy(shm_addr->last_check.who,"5d",
 		  sizeof(shm_addr->last_check.who));
 	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
 	}
