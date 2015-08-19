@@ -24,6 +24,11 @@ long ip[5];                           /* ipc parameters */
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
+      if(shm_addr->equip.drive[shm_addr->select] != MK5 ) {
+	ierr=-402;
+	goto error;
+      }
+
       shm_addr->last_check.string[0]=0;
       append_safe(shm_addr->last_check.string,command->name,
 		  sizeof(shm_addr->last_check.string));
