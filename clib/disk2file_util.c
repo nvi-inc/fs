@@ -124,7 +124,8 @@ struct disk2file_mon *lcl;
        (shm_addr->equip.drive_type[0] ==MK5B ||
 	shm_addr->equip.drive_type[0] == MK5B_BS ||
 	shm_addr->equip.drive_type[0] ==MK5C ||
-	shm_addr->equip.drive_type[0] == MK5C_BS) )) {
+	shm_addr->equip.drive_type[0] == MK5C_BS ||
+	shm_addr->equip.drive_type[0] == FLEXBUFF) )) {
       (*count)++;
     }
 
@@ -335,7 +336,8 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
     (shm_addr->equip.drive_type[0] ==MK5B ||
      shm_addr->equip.drive_type[0] == MK5B_BS ||
      shm_addr->equip.drive_type[0] ==MK5C ||
-     shm_addr->equip.drive_type[0] == MK5C_BS);
+     shm_addr->equip.drive_type[0] == MK5C_BS ||
+     shm_addr->equip.drive_type[0] == FLEXBUFF);
     
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
