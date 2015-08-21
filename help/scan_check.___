@@ -1,12 +1,12 @@
-             scan_check - check Mark 5 recorded data
+             scan_check - check Mark 5/Mark 6/FlexBuff recorded data
 
-            Syntax:     scan_check
+            Syntax:      scan_check
 
             Response:
-            Mark 5A:    scan_check/scan,label,mode,submode,time,length,rate,
-                                   missing 
-            Mark 5B:    scan_check/scan,label,type,code,time,length,total,
-                                   missing,error
+            Mark 5A:     scan_check/scan,label,mode,submode,time,length,rate,
+                                    missing 
+            non-Mark 5A: scan_check/scan,label,type,code,time,length,total,
+                                    missing,error,field
 
 
 Settable parameters: None
@@ -15,24 +15,34 @@ Monitor-only parameters:
             scan        scan number
             label       scan label
             mode        Data mode: ?, st, mark4, vlba, tvg, SS
-	                (non-Mark 5B only)
-            submode     Data submode: 8, 16, 32, 64, mark4, vlba
-	                (non-Mark 5B only)
+	                (Mark 5A only)
+            submode     Data submode:
+                        "8", "16", "32", or "64", if the mode is "mark4" or "vlba";
+                        "mark4" or "vlba" if the mode is "st".
+	                (Mark 5A only)
             time        Data time tag read from first encountered header
             length      Scan length (seconds)
             rate        Track data rate, excludes parity bits; will always
                          be 0.125, 0.25, 0.5, 1, 2, 4, 8 or 16 (Mbps)
-	                (non-Mark 5B only)
+	                (Mark 5A only)
             missing     Number of missing bytes
 
             type        Data type: - (i.e., Mark 5B), tvg, SS
-	                (Mark 5B only)
-            code        Three digit date code
-	                (Mark 5B only)
+	                (non-Mark 5A only)
+            code        For Mark 5B: the three digit date code, last three
+                          digits of MJD.
+                        For Mark 5C: undefined, may be null
+                        For FlexBuff: estimated number of bitstreams recorded,
+                          should be correct for 'simple'
+                          VDIF (roughly nTrack*nVDIFthread).
             total       Total recording rate (Mbps)
-	                (Mark 5B only)
-            error       Mark 5B error codes,
-                        (Mark 5B only)
+	                (non-Mark 5A only)
+            error       Mark 5B: " S", " E" or " SE", indicating whether or
+                        not the start ("S") or end ("E") (or both "SE")
+                        do not fall on an integer second boundary.
+                        VDIF: this is not error field for VDIF, if the
+                        format is 'simple' VDIF, then the frame size,
+                        typically 8032.
 
 Comments: 
 If format is ?, the remaining fields are not valid.
@@ -46,5 +56,6 @@ links named "Mark 5A command set" and "Mark 5B command set (Rev
 1.12)".
 
 The first form of the command above with parameters mode, submode, and
-rate is for non-Mark5B recorders. The second form of the command above
-with parameters type. code, and total is for Mark5B recorders.
+rate is for Mark5A recorders. The second form of the command above
+with parameters type. code, and total is for all non-Mark5A recorders
+including Mark 5B, Mark 5C, FlexBuff, as well as Mark6.
