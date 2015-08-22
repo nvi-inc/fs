@@ -184,7 +184,7 @@ mk5=get_stats?
 mk5=get_stats?
 mk5=get_stats?
 mk5=get_stats?
-mk5=status?
+mk5_status
 enddef
 define  greplog       00000000000x
 sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
@@ -212,12 +212,12 @@ bank_check
 "mk5=OS_rev2?
 "mk5=SS_rev1?
 "mk5=SS_rev2?
-"mk5=status?
+"mk5_status
 "uncomment the following for Mark 5B
 "mk5=DTS_id?
 "mk5=OS_rev?
 "mk5=SS_rev?
-"mk5=status?
+"mk5_status
 "uncomment the following if your station uses in2net transfers
 "mk5=net_protocol=tcp:4194304:2097152;
 enddef
