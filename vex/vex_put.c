@@ -364,8 +364,8 @@ create_version(char *str)
   version_list = NULL;
   version_number=(char *)strdup(str);
   version_list = add_list(version_list,
-			  make_lowl(T_VEX_REV, 
-			  make_dvalue(version_number,NULL)));
+			  make_lowl(T_VEX_REV,version_number));
+
   b_list=NULL;
 }
 /*-------------------------------------------------------------------*/

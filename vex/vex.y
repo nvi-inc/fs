@@ -168,7 +168,7 @@ struct s2_data_source  *dsptr;
 %token <sval>	T_NAME T_LINK T_ANGLE
 %token <sval>   T_COMMENT T_COMMENT_TRAILING
 
-%type  <dvptr>  version
+%type  <sval>   version
 %type  <llptr>  version_lowls
 %type  <lwptr>  version_lowl
 
@@ -370,7 +370,7 @@ version_lowl:	version			{$$=make_lowl(T_VEX_REV,$1);}
 ;
 /* version number */
 
-version:	T_VEX_REV '=' value ';'	{$$=$3;}
+version:	T_VEX_REV '=' T_NAME ';'	{$$=$3;}
 ;
 
 /* blocks */

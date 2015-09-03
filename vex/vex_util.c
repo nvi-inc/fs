@@ -892,7 +892,6 @@ char **units)
   case T_CHAN_DEF:
     ierr=get_chan_def_field(ptr,n,link,name,value,units);
     break;
-  case T_VEX_REV:
   case T_SAMPLE_RATE:
   case T_BITS_PER_SAMPLE:
   case T_ANTENNA_DIAM:
@@ -940,6 +939,7 @@ char **units)
   case T_ORBIT_EPOCH:
     ierr=get_date_field(ptr,n,link,name,value,units);
     break;
+  case T_VEX_REV:
   case T_MODE:
   case T_SOURCE:
   case T_RECORD_TRANSPORT_TYPE:
