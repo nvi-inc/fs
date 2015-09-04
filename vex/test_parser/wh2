@@ -678,7 +678,12 @@ $ANTENNA; *antenna parameters
   def VLBA;
     antenna_diam = 25 m;
     axis_type = az : el;
+*other test cases:
+    axis_type = x : yew;
+    axis_type = x : yew : 90 deg;
+    axis_type = x;
     axis_offset = .123 m;
+*
 *                    type   slew     settle
     antenna_motion = az : 90 deg/min : 2 sec;
     antenna_motion = el : 30 deg/min : 1 sec;

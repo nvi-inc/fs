@@ -119,6 +119,7 @@ typedef struct data_transfer Data_transfer;
 struct axis_type {
   char *axis1;
   char *axis2;
+  struct dvalue *orientation;
 };
 
 typedef struct axis_type Axis_type;
@@ -376,7 +377,8 @@ struct data_transfer  *make_data_transfer(char *key, char *method,
 					  struct dvalue *start,
 					  struct dvalue *stop, 
 					  char *options);
-struct axis_type *make_axis_type(char *axis1, char *axis2);
+struct axis_type *make_axis_type(char *axis1, char *axis2,
+				 struct dvalue *orientation);
 struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
 					   struct dvalue *offset); 
 struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
@@ -692,7 +694,7 @@ void *
 create_antenna_diam(char *str, char *str2);
 
 void *
-create_axis_type(char *str, char *str2);
+create_axis_type(char *str, char *str2, char *str3, char *str4);
 
 void *
 create_axis_offset(char *str, char *str2);

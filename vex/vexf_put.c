@@ -617,27 +617,37 @@ fcreate_axis_type__
 #else
 fcreate_axis_type
 #endif
-(str, str2)
+(str, str2, str3, str4)
 char **str;
 char **str2;
+char **str3;
+char **str4;
 /*<      subroutine fcreate_axis_type(ptr_ch(str)//(char *)0, >*/
-/*<                                   ptr_ch(str2)//(char *)0) >*/
+/*<                                   ptr_ch(str2)//(char *)0, >*/
+/*<                                   ptr_ch(str3)//(char *)0, >*/
+/*<                                   ptr_ch(str4)//(char *)0) >*/
 /*<      implicit none >*/
 /*<      character*(*) str; >*/
 /*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
 
 /* ... */
 
 /* input: */
 /*   character*(*) str       - string 1 */
 /*   character*(*) str2      - string 2 */
+/*   character*(*) str3      - string 3 */
+/*   character*(*) str4      - string 4 */
 
 /* output: */
 /*   VEX format */
 /* */
 {
   create_axis_type(*str,
-		   *str2);
+		   *str2,
+		   *str3,
+		   *str4);
   return;
 }
 /* ----------------------------------------------------------------------- */

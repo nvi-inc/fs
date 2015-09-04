@@ -490,12 +490,14 @@ struct data_transfer  *make_data_transfer(char *key, char *method,
   return new;
 }
 
-struct axis_type *make_axis_type(char *axis1, char *axis2)
+struct axis_type *make_axis_type(char *axis1, char *axis2,
+				 struct dvalue *orientation)
 {
   NEWSTRUCT(new,axis_type);
 
   new->axis1=axis1;
   new->axis2=axis2;
+  new->orientation=orientation;
 
   return new;
 }
@@ -1299,7 +1301,16 @@ get_axis_type_field(Axis_type *axis_type,int n,int *link,
     *value=axis_type->axis1;
     break;
   case 2:
+    if(axis_type->axis2==NULL)
+      return -1;
     *value=axis_type->axis2;
+    break;
+  case 3:
+    if(axis_type->orientation==NULL||axis_type->orientation->value == NULL)
+      return -1;
+    *value=axis_type->orientation->value;
+    *units=axis_type->orientation->units;
+    *name=0;
     break;
   default:
     return -1;

@@ -587,12 +587,14 @@ create_antenna_diam(char *str, char *str2)
 }  
 /*-------------------------------------------------------------------*/
 void *
-create_axis_type(char *str, char *str2)
+create_axis_type(char *str, char *str2, char *str3, char *str4)
 {
   char *axis_type_az,*axis_type_el;
+  char *axis_type_orientation_value;
+  char *axis_type_orientation_units;
+  struct dvalue *dvp;
 
-  if(str==NULL || strlen(str) ==0 ||
-     str2==NULL|| strlen(str2)==0)
+  if(str==NULL || strlen(str) ==0)
     {
       printf("%s \'axis_type\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -600,10 +602,23 @@ create_axis_type(char *str, char *str2)
   else
     {
       axis_type_az=(char *)strdup(str);
-      axis_type_el=(char *)strdup(str2);
+      if(str2==NULL|| strlen(str2)==0)
+	axis_type_el=NULL;
+      else
+	axis_type_el=(char *)strdup(str2);
+      if(str3==NULL || strlen(str3) == 0 ||
+	 str4==NULL || strlen(str4)==0)
+	dvp=NULL;
+      else  {
+	axis_type_orientation_value=(char *)strdup(str3);
+	axis_type_orientation_units=(char *)strdup(str4);
+	dvp=make_dvalue(axis_type_orientation_value,
+			axis_type_orientation_units);
+      }
       qref_list = add_list(qref_list,make_lowl(T_AXIS_TYPE,
-				     make_axis_type(axis_type_az,
-				     axis_type_el)));
+					       make_axis_type(axis_type_az,
+							      axis_type_el,
+							      dvp)));
     }
 }  
 /*-------------------------------------------------------------------*/

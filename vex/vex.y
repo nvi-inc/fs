@@ -600,7 +600,11 @@ antenna_lowl:	antenna_diam		{$$=make_lowl(T_ANTENNA_DIAM,$1);}
 antenna_diam:	T_ANTENNA_DIAM '=' unit_value ';'		{$$=$3;}
 ;
 axis_type:	T_AXIS_TYPE '=' T_NAME ':' T_NAME ';'
-		{$$=make_axis_type($3,$5);}
+                {$$=make_axis_type($3,$5,make_dvalue(NULL,NULL));}
+                | T_AXIS_TYPE '=' T_NAME ';'
+		{$$=make_axis_type($3,NULL,make_dvalue(NULL,NULL));}
+                | T_AXIS_TYPE '=' T_NAME ':' T_NAME ':' unit_value ';'
+		{$$=make_axis_type($3,$5,$7);}
 ;
 axis_offset:	T_AXIS_OFFSET '=' unit_value ';'	{$$=$3;}
 ;
