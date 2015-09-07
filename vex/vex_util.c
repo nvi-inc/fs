@@ -26,6 +26,10 @@
 char *filename;
 FILE *fp;
 
+extern struct vex *vex_ptr;
+
+struct vex_version vex_version;
+
 #define NEWSTRUCT(PTR,TYPE)	struct TYPE *PTR;\
 			PTR=(struct TYPE *) malloc(sizeof(struct TYPE));\
 			if(PTR == NULL) {\
@@ -54,6 +58,9 @@ get_antenna_motion_field(Antenna_motion *antenna_motion,int n,int *link,
 			  int *name, char **value, char **units);
 static int
 get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_nasmyth_field(Nasmyth *nasmyth, int n,int *link,
 			  int *name, char **value, char **units);
 static int
 get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
@@ -207,6 +214,7 @@ static  struct {
   {"axis_offset", T_AXIS_OFFSET},
   {"antenna_motion", T_ANTENNA_MOTION},
   {"pointing_sector", T_POINTING_SECTOR},
+  {"nasmyth", T_NASMYTH},
   
   {"BBC_assign", T_BBC_ASSIGN},
   
@@ -329,6 +337,14 @@ static  struct {
   {NULL, 0}
 };
 
+char *make_version(char *str)
+{
+
+  vex_version.version=str;
+  vex_version.lessthan2=strncmp("1",str,1)==0;
+  return str;
+}
+  
 struct llist *add_list(struct llist *start,void *ptr)
 {
   struct llist *last;
@@ -519,7 +535,8 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *hilimit1,
 					     char *axis2,
 					     struct dvalue *lolimit2,
-					     struct dvalue *hilimit2)
+					     struct dvalue *hilimit2,
+					     char *name)
 {
   NEWSTRUCT(new,pointing_sector);
 
@@ -530,6 +547,16 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
   new->axis2=axis2;
   new->lolimit2=lolimit2;
   new->hilimit2=hilimit2;
+  new->name=name;
+
+  return new;
+}
+struct nasmyth *make_nasmyth(char *band, char *platform)
+{
+  NEWSTRUCT(new,nasmyth);
+
+  new->band=band;
+  new->platform=platform;
 
   return new;
 }
@@ -992,6 +1019,9 @@ char **units)
   case T_POINTING_SECTOR:
     ierr=get_pointing_sector_field(ptr,n,link,name,value,units);
     break;
+  case T_NASMYTH:
+    ierr=get_nasmyth_field(ptr,n,link,name,value,units);
+    break;
   case T_BBC_ASSIGN:
     ierr=get_bbc_assign_field(ptr,n,link,name,value,units);
     break;
@@ -1359,7 +1389,13 @@ get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
   *units=NULL;
   *value=NULL;
 
+  if(!vex_version.lessthan2)
+    n--;
+
   switch(n) {
+  case 0:
+    *value=pointing_sector->name;
+    break;
   case 1:
     *value=pointing_sector->sector;
     *link=1;
@@ -1378,17 +1414,50 @@ get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
     *name=0;
     break;
   case 5:
+    if(pointing_sector->axis2==NULL)
+      return -1;
     *value=pointing_sector->axis2;
     break;
   case 6:
+    if(pointing_sector->lolimit2->value==NULL||
+       pointing_sector->lolimit2->units==NULL)
+      return -1;
     *value=pointing_sector->lolimit2->value;
     *units=pointing_sector->lolimit2->units;
     *name=0;
     break;
   case 7:
+    if(pointing_sector->hilimit2->value==NULL||
+       pointing_sector->hilimit2->units==NULL)
+      return -1;
     *value=pointing_sector->hilimit2->value;
     *units=pointing_sector->hilimit2->units;
     *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+
+static int
+get_nasmyth_field(Nasmyth *namsyth,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=namsyth->band;
+    *link=1;
+    break;
+  case 2:
+    *value=namsyth->platform;
     break;
   default:
     return -1;

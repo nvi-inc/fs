@@ -26,6 +26,8 @@
 #include "vex.h"
 #include "y.tab.h"
 
+extern struct vex_version vex_version;
+
 #define TRUE 1
 #define FALSE 0
 
@@ -136,6 +138,9 @@ extern struct vex *vex_ptr;
  * All the calls to these functions are basically the same the        *
  * definitions can be found in the "VEX File Definition/Example" doc. *
  * and the VEX Parameters Tables                                      *
+ *                                                                    *
+ * for VEX2 create_pointing_sector takes the first field as the       *
+ * last argument, for VEX1 that field must be zero lenght string      *
  * ------------------------------------------------------------------ *
  * These are all purpose routines that help utilities build lists.    *
  * ------------------------------------------------------------------ *
@@ -362,7 +367,7 @@ create_version(char *str)
   char *version_number;
 
   version_list = NULL;
-  version_number=(char *)strdup(str);
+  version_number=make_version((char *)strdup(str));
   version_list = add_list(version_list,
 			  make_lowl(T_VEX_REV,version_number));
 
@@ -607,9 +612,11 @@ create_axis_type(char *str, char *str2, char *str3, char *str4)
       else
 	axis_type_el=(char *)strdup(str2);
       if(str3==NULL || strlen(str3) == 0 ||
-	 str4==NULL || strlen(str4)==0)
+	 str4==NULL || strlen(str4)==0) {
+	axis_type_orientation_value=NULL;
+	axis_type_orientation_units=NULL;
 	dvp=NULL;
-      else  {
+      } else  {
 	axis_type_orientation_value=(char *)strdup(str3);
 	axis_type_orientation_units=(char *)strdup(str4);
 	dvp=make_dvalue(axis_type_orientation_value,
@@ -679,7 +686,7 @@ create_antenna_motion(char *str, char *str2, char *str3, char *str4,
 void *
 create_pointing_sector(char *str, char *str2, char *str3, char *str4,
 		       char *str5, char *str6, char *str7, char *str8,
-		       char *str9, char *str10, char *str11)
+		       char *str9, char *str10, char *str11, char *str0)
 {
   char *sector;
   char *axis1;
@@ -692,19 +699,18 @@ create_pointing_sector(char *str, char *str2, char *str3, char *str4,
   char *lolimit2_units;
   char *hilimit2_value;
   char *hilimit2_units;
+  char *name;
 
-  if(str==NULL || strlen(str)==0 ||
+  struct dvalue *dvp1,*dvp2;
+
+  if((str==NULL || strlen(str)==0 ||
      str2==NULL || strlen(str2)==0 ||
      str3==NULL || strlen(str3)==0 ||
      str4==NULL || strlen(str4)==0 ||
      str5==NULL || strlen(str5)==0 ||
-     str6==NULL || strlen(str6)==0 ||
-     str7==NULL || strlen(str7)==0 ||
-     str8==NULL || strlen(str8)==0 ||
-     str9==NULL || strlen(str9)==0 ||
-     str10==NULL || strlen(str10)==0 ||
-     str11==NULL || strlen(str11)==0 )
-       
+      str6==NULL || strlen(str6)==0) ||
+     ((str0==NULL || strlen(str0)==0) &&
+      !vex_version.lessthan2))
     {
       printf("%s \'pointing_sector\' %s %s block\n",
 	     err1, err2, int2block(blk));
@@ -717,23 +723,56 @@ create_pointing_sector(char *str, char *str2, char *str3, char *str4,
       lolimit1_units=(char *)strdup(str4);
       hilimit1_value=(char *)strdup(str5);
       hilimit1_units=(char *)strdup(str6);
-      axis2=(char *)strdup(str7);
-      lolimit2_value=(char *)strdup(str8);
-      lolimit2_units=(char *)strdup(str9);
-      hilimit2_value=(char *)strdup(str10);
-      hilimit2_units=(char *)strdup(str11);
+      if(vex_version.lessthan2)
+	name=NULL;
+      else
+	name=(char *)strdup(str0);
 
+      if(str7==NULL || strlen(str7)==0 ||
+	 str8==NULL || strlen(str8)==0 ||
+	 str9==NULL || strlen(str9)==0 ||
+	 str10==NULL || strlen(str10)==0 ||
+	 str11==NULL || strlen(str11)==0 ) {
+	axis2=NULL;
+	dvp1=NULL;
+	dvp2=NULL;
+      } else {
+	axis2=(char *)strdup(str7);
+	lolimit2_value=(char *)strdup(str8);
+	lolimit2_units=(char *)strdup(str9);
+	hilimit2_value=(char *)strdup(str10);
+	hilimit2_units=(char *)strdup(str11);
+	dvp1=make_dvalue(lolimit2_value,lolimit2_units);
+	dvp2=make_dvalue(hilimit2_value,hilimit2_units);
+      }
       qref_list = add_list(qref_list,make_lowl(T_POINTING_SECTOR,
 	 			     make_pointing_sector(sector, axis1,
 				     make_dvalue(lolimit1_value,
 						 lolimit1_units),
 				     make_dvalue(hilimit1_value,
 						 hilimit1_units),
-				     axis2,
-				     make_dvalue(lolimit2_value,
-						 lolimit2_units),
-				     make_dvalue(hilimit2_value,
-						 hilimit2_units))));
+				    axis2,dvp1,dvp2,name)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_nasmyth(char *str, char *str2)
+{
+  char *band;
+  char *platform;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
+    {
+      printf("%s \'namsmyth\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      band=(char *)strdup(str);
+      platform=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_NASMYTH,
+					       make_nasmyth(band,platform)));
     }
 }  
 /*-------------------------------------------------------------------*/

@@ -357,6 +357,7 @@ char *quote()
 <LINE>axis_offset	{BEGIN(INITIAL);return T_AXIS_OFFSET;}
 <LINE>antenna_motion	{BEGIN(INITIAL);return T_ANTENNA_MOTION;}
 <LINE>pointing_sector	{BEGIN(INITIAL);return T_POINTING_SECTOR;}
+<LINE>nasmyth            {BEGIN(INITIAL);return T_NASMYTH;}
 
 <LINE>BBC_assign	{BEGIN(INITIAL);return T_BBC_ASSIGN;}
 

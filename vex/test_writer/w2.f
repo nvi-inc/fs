@@ -1,25 +1,6 @@
-*
-* Copyright (c) 2020 NVI, Inc.
-*
-* This file is part of VLBI Field System
-* (see http://github.com/nvi-inc/fs).
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-      program w
+      program w2
       integer ptr_ch
-      call fcreate_version(ptr_ch('1.5'//char(0)))
+      call fcreate_version(ptr_ch('2.0'//char(0)))
       call fcreate_comment(ptr_ch(char(0)),ptr_ch('* comment'//char(0)))
 
 C  2. $GLOBAL
@@ -86,10 +67,33 @@ c
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)))
-      call fcreate_axis_type(ptr_ch(char(0)),
+      call fcreate_pointing_sector(ptr_ch('ccw'//char(0)),
+     &                       ptr_ch('az'//char(0)),
+     &                       ptr_ch('-90'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('90'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)))
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('ccw'//char(0)))
+      call fcreate_pointing_sector(ptr_ch('cw'//char(0)),
+     &                       ptr_ch('az'//char(0)),
+     &                       ptr_ch('270'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('450'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('el'//char(0)),
+     &                       ptr_ch('0'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('88'//char(0)),
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('cw'//char(0)))
+      call fcreate_nasmyth(ptr_ch('X'//char(0)),
+     &                       ptr_ch('left'//char(0)))
+      
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

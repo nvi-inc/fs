@@ -1,4 +1,4 @@
-VEX_rev = 2.0; *defines file format; must start at first character on first line of VEX file.
+VEX_rev = 1.5; *defines file format; must start at first character on first line of VEX file.
 *
 *VLBI experiment (VEX) definition and example file                                                        ARW 5 Nov 1996
 *
@@ -670,13 +670,12 @@ $ANTENNA; *antenna parameters
     antenna_motion = el : 30 deg/min : 1 sec;
 *                   Sector  Axis   LoLimit  HiLimit  Axis  LoLimit HiLimit
 *                     ID
-    pointing_sector = ccw : &ccw : az : -90 deg : 90 deg : el : 0 deg : 88 deg; *ccw cable wrap zone
-    pointing_sector = n : &n : az : 90 deg : 270 deg : el : 0 deg : 88 deg; *neutral cable wrap zone
-    pointing_sector = cw : &cw : az : 270 deg : 450 deg : el : 0 deg : 88 deg; *cw cable wrap zone
-    pointing_sector = ccw : &ccw : az : -90 deg : 90 deg; *ccw cable wrap zone
-    pointing_sector = n : &n : az : 90 deg : 270 deg; *neutral cable wrap zone
-    pointing_sector = cw : &cw : az : 270 deg : 450 deg; *cw cable wrap zone
-    nasmyth = &X : left;
+    pointing_sector = &ccw : az : -90 deg : 90 deg : el : 0 deg : 88 deg; *ccw cable wrap zone
+    pointing_sector = &n : az : 90 deg : 270 deg : el : 0 deg : 88 deg; *neutral cable wrap zone
+    pointing_sector = &cw : az : 270 deg : 450 deg : el : 0 deg : 88 deg; *cw cable wrap zone
+    pointing_sector = &ccw : az : -90 deg : 90 deg; *ccw cable wrap zone
+    pointing_sector = &n : az : 90 deg : 270 deg; *neutral cable wrap zone
+    pointing_sector = &cw : az : 270 deg : 450 deg; *cw cable wrap zone
   enddef;
 *
   def VLBA;
@@ -693,12 +692,12 @@ $ANTENNA; *antenna parameters
     antenna_motion = el : 30 deg/min : 1 sec;
 *                    Sector  Axis   LoLimit  HiLimit  Axis  LoLimit HiLimit
 *                     ID
-    pointing_sector = ccw : &ccw : az : -90 deg : 90 deg : el : 0 deg : 88 deg; *ccw cable wrap zone
-    pointing_sector = n : &n : az : 90 deg : 270 deg : el : 0 deg : 88 deg; *neutral cable wrap zone
-    pointing_sector = cw : &cw : az : 270 deg : 450 deg : el : 0 deg : 88 deg; *cw cable wrap zone
-    pointing_sector = ccwp : &ccwp : az : -90 deg : 90 deg : el : 92 deg : 120 deg; *ccw cable wrap zone, plunge mode
-    pointing_sector = np : &np : az : 90 deg : 270 deg : el : 92 deg : 120 deg; *neutral cable wrap zone, plunge mode
-    pointing_sector = cwp : &cwp : az : 270 deg : 450 deg : el : 92 deg : 120 deg; *cw cable wrap zone, plunge mode
+    pointing_sector = &ccw : az : -90 deg : 90 deg : el : 0 deg : 88 deg; *ccw cable wrap zone
+    pointing_sector = &n : az : 90 deg : 270 deg : el : 0 deg : 88 deg; *neutral cable wrap zone
+    pointing_sector = &cw : az : 270 deg : 450 deg : el : 0 deg : 88 deg; *cw cable wrap zone
+    pointing_sector = &ccwp : az : -90 deg : 90 deg : el : 92 deg : 120 deg; *ccw cable wrap zone, plunge mode
+    pointing_sector = &np : az : 90 deg : 270 deg : el : 92 deg : 120 deg; *neutral cable wrap zone, plunge mode
+    pointing_sector = &cwp : az : 270 deg : 450 deg : el : 92 deg : 120 deg; *cw cable wrap zone, plunge mode
   enddef;
 *
   def HAYSTACK;

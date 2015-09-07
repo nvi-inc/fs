@@ -53,6 +53,7 @@ struct data_transfer   *dtptr;
 struct axis_type       *atptr;
 struct antenna_motion  *amptr;
 struct pointing_sector *psptr;
+struct nasmyth         *nsptr;
 
 struct bbc_assign      *baptr;
 
@@ -101,7 +102,7 @@ struct s2_data_source  *dsptr;
 %token <ival>	T_START T_SOURCE T_MODE T_STATION T_DATA_TRANSFER
 
 %token <ival>	T_ANTENNA_DIAM T_AXIS_OFFSET T_ANTENNA_MOTION T_POINTING_SECTOR
-%token <ival>   T_AXIS_TYPE
+%token <ival>   T_AXIS_TYPE T_NASMYTH
 
 %token <ival>   T_BBC_ASSIGN
 
@@ -209,6 +210,7 @@ struct s2_data_source  *dsptr;
 %type  <atptr>  axis_type
 %type  <amptr>  antenna_motion
 %type  <psptr>  pointing_sector
+%type  <nsptr>  nasmyth
 
 %type  <llptr>  bbc_block bbc_defs bbc_lowls 
 %type  <dfptr>	bbc_def
@@ -370,7 +372,7 @@ version_lowl:	version			{$$=make_lowl(T_VEX_REV,$1);}
 ;
 /* version number */
 
-version:	T_VEX_REV '=' T_NAME ';'	{$$=$3;}
+version:	T_VEX_REV '=' T_NAME ';'	{$$=make_version($3);}
 ;
 
 /* blocks */
@@ -593,6 +595,7 @@ antenna_lowl:	antenna_diam		{$$=make_lowl(T_ANTENNA_DIAM,$1);}
 		| axis_offset		{$$=make_lowl(T_AXIS_OFFSET,$1);}
 		| antenna_motion	{$$=make_lowl(T_ANTENNA_MOTION,$1);}
 		| pointing_sector	{$$=make_lowl(T_POINTING_SECTOR,$1);}
+		| nasmyth   	        {$$=make_lowl(T_NASMYTH,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -620,7 +623,29 @@ pointing_sector:	T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
 			unit_value ':'
 			unit_value ';'
-			{$$=make_pointing_sector($3,$5,$7,$9,$11,$13,$15);}
+              {$$=make_pointing_sector($3,$5,$7,$9,$11,$13,$15,NULL);}
+                      | T_POINTING_SECTOR '=' T_LINK ':'
+			T_NAME ':'
+			unit_value ':'
+			unit_value ';'
+	      {$$=make_pointing_sector($3,$5,$7,$9,NULL,NULL,NULL,NULL);}
+                      | T_POINTING_SECTOR '=' T_NAME ':' T_LINK ':'
+			T_NAME ':'
+			unit_value ':'
+			unit_value ':'
+			T_NAME ':'
+			unit_value ':'
+			unit_value ';'
+		      {$$=make_pointing_sector($5,$7,$9,$11,$13,$15,$17,$3);}
+                      | T_POINTING_SECTOR '=' T_NAME ':' T_LINK ':'
+			T_NAME ':'
+			unit_value ':'
+			unit_value ';'
+		      {$$=make_pointing_sector($5,$7,$9,$11,
+					       NULL,NULL,NULL,$3);}
+;
+nasmyth:	      T_NASMYTH '=' T_LINK ':' T_NAME ';'
+		      {$$=make_nasmyth($3,$5);}
 ;
 /* $BBC block */
 

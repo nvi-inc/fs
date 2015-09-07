@@ -732,7 +732,7 @@ fcreate_pointing_sector__
 #else
 fcreate_pointing_sector
 #endif
-(str, str2, str3, str4, str5, str6, str7, str8, str9,str10,str11)
+(str, str2, str3, str4, str5, str6, str7, str8, str9,str10,str11, str0)
 char **str;
 char **str2;
 char **str3;
@@ -744,6 +744,7 @@ char **str8;
 char **str9;
 char **str10;
 char **str11;
+char **str0;
 /*<      subroutine fcreate_pointing_sector(ptr_ch(str)//(char *)0, >*/
 /*<                                    ptr_ch(str2)//(char *)0, >*/
 /*<                                    ptr_ch(str3)//(char *)0, >*/
@@ -755,6 +756,7 @@ char **str11;
 /*<                                    ptr_ch(str9)//(char *)0, >*/
 /*<                                    ptr_ch(str10)//(char *)0, >*/
 /*<                                    ptr_ch(str11)//(char *)0) >*/
+/*<                                    ptr_ch(str0)//(char *)0) >*/
 /*<      implicit none >*/
 /*<      character*(*) str; >*/
 /*<      character*(*) str2; >*/
@@ -767,6 +769,7 @@ char **str11;
 /*<      character*(*) str9; >*/
 /*<      character*(*) str10; >*/
 /*<      character*(*) str11; >*/
+/*<      character*(*) str0; >*/
 
 /* ... */
 
@@ -782,6 +785,7 @@ char **str11;
 /*   character*(*) str9      - string */
 /*   character*(*) str10     - string */
 /*   character*(*) str11     - string */
+/*   character*(*) str0     - string */
 
 /* output: */
 /*   VEX format */
@@ -797,7 +801,38 @@ char **str11;
 			 *str8,
 			 *str9,
 			 *str10,
-			 *str11);
+			 *str11,
+			 *str0);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_nasmyth__
+#else
+fcreate_nasmyth
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_namsmyth(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_nasmyth(*str,
+                 *str2);
   return;
 }
 /* ----------------------------------------------------------------------- */

@@ -33,6 +33,13 @@ struct vex {
 
 typedef struct vex Vex;
 
+struct vex_version {
+  char *version;
+  int lessthan2;
+};
+
+typedef struct vex_version Vex_version;
+
 struct block {
   int block;
   struct llist *items;
@@ -140,9 +147,17 @@ struct pointing_sector {
   char *axis2;
   struct dvalue *lolimit2;
   struct dvalue *hilimit2;
+  char *name;
 };
 
 typedef struct pointing_sector Pointing_sector;
+
+struct nasmyth {
+  char *band;
+  char *platform;
+};
+
+typedef struct nasmyth Nasmyth;
 
 struct bbc_assign {
   char *bbc_id;
@@ -354,6 +369,7 @@ typedef struct vlba_frmtr_sys_trk Vlba_frmtr_sys_trk;
 
 /* prototypes */
 
+char *make_version(char *str);
 struct llist     *add_list(struct llist *start,void *ptr);
 struct llist     *ins_list(void *ptr, struct llist *start);
 struct qref      *make_qref(int primitive,char *name,struct llist *qualifiers);
@@ -386,7 +402,9 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *hilimit1,
 					     char *axis2,
 					     struct dvalue *lolimit2,
-					     struct dvalue *hilimit2);
+					     struct dvalue *hilimit2,
+					     char *name);
+struct nasmyth *make_nasmyth(char *band, char *platform);
 struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
 				   char *if_id);
 struct clock_early *make_clock_early(char *start,struct dvalue *offset,
@@ -706,7 +724,10 @@ create_antenna_motion(char *str, char *str2, char *str3, char *str4,
 void *
 create_pointing_sector(char *str, char *str2, char *str3, char *str4,
 		       char *str5, char *str6, char *str7, char *str8,
-		       char *str9, char *str10, char *str11);
+		       char *str9, char *str10, char *str11, char *str12);
+void *
+create_nasmyth(char *str, char *str2);
+
 /*---------------------------------------------------------------------------*/
 /* BBC block builders                                                        */
 /*---------------------------------------------------------------------------*/
