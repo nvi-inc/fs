@@ -88,7 +88,9 @@ long ip[5];
 	 (shm_addr->equip.drive_type[0] ==MK5B ||
 	  shm_addr->equip.drive_type[0] == MK5B_BS ||
 	  shm_addr->equip.drive_type[0] ==MK5C ||
-	  shm_addr->equip.drive_type[0] == MK5C_BS) ) {
+	  shm_addr->equip.drive_type[0] == MK5C_BS ||
+	  shm_addr->equip.drive_type[0] == FLEXBUFF )
+	 ) {
 	if(lclm.type.state.error || (!lclm.type.state.known)
 	    || strcmp("?",lclm.type.type)==0) {
 	  logit(NULL,-601,"5k");
@@ -96,8 +98,8 @@ long ip[5];
 	  strncpy(shm_addr->last_check.who,"5k",
 		  sizeof(shm_addr->last_check.who));
 	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
+	  return;
 	}
-	return;
       } else {
 	if(lclm.mode.state.error || (!lclm.mode.state.known)
 	    || strcmp("?",lclm.mode.mode)==0) {
@@ -106,8 +108,8 @@ long ip[5];
 	  strncpy(shm_addr->last_check.who,"5k",
 		  sizeof(shm_addr->last_check.who));
 	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
+	  return;
 	}
-	return;
       }
       if(lclm.missing.state.error || (!lclm.missing.state.known)
 	 || lclm.missing.missing !=0 ) {
@@ -116,7 +118,7 @@ long ip[5];
 	  strncpy(shm_addr->last_check.who,"5k",
 		  sizeof(shm_addr->last_check.who));
 	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
-	}
+      }
 
       return;
 
