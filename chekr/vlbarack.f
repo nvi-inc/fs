@@ -59,7 +59,7 @@ C
 C Check the if distributors
 C
       do idist=1,ndist
-        do j=1,nbbcerr
+        do j=1,niferr
           icherr(j)=0
         enddo
         call fs_get_ichvlba(ichvlba(nbbc+idist),nbbc+idist)
@@ -82,7 +82,8 @@ C
      &     goto 299
         do j=1,niferr
           if (icherr(j).ne.0) then
-            call logit7(0,0,0,0,-201-j-nbbcerr,lwho,ldistna(idist))
+            call logit7(0,0,0,0,-201-j-nbbcerr-(idist-1)*18,lwho,
+     &            ldistna(idist))
           endif
         enddo
 299     continue
