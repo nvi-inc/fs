@@ -91,12 +91,12 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     if (ifc[0]||ifc[1]) {
       memcpy(request.device,"ia",2);             /* set 'ia' atten */
 
+      atten[0]=shm_addr->dist[0].atten[0];
       if(ifc[0]) {
-	atten[0]=shm_addr->dist[0].atten[0];
         shm_addr->dist[0].atten[ 0]=1;
       }
+      atten[1]=shm_addr->dist[0].atten[1];
       if(ifc[1]) {
-	atten[1]=shm_addr->dist[0].atten[1];
         shm_addr->dist[0].atten[ 1]=1;
       }
       dist01mc(&request.data,&shm_addr->dist[0]);
@@ -105,12 +105,12 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     
     if (ifc[2]||ifc[3]) {
       memcpy(request.device,"ic",2);             /* set 'ic' atten */
+      atten[2]=shm_addr->dist[1].atten[0];
       if (ifc[2])  {
-	atten[2]=shm_addr->dist[1].atten[0];
         shm_addr->dist[1].atten[ 0]=1;
       }
+      atten[3]=shm_addr->dist[1].atten[1];
       if (ifc[3])  {
-	atten[3]=shm_addr->dist[1].atten[1];
         shm_addr->dist[1].atten[ 1]=1;
       }
       dist01mc(&request.data,&shm_addr->dist[1]);
