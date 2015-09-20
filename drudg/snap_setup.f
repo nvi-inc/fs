@@ -10,7 +10,7 @@
 !  2006Nov30. JMG. Code type is 1 for no recorder.
 !  2007Jul27  JMG  Made Mark5 no recorder.
 !  2012Oct09  JMG. If no recorder don't issue pass number etc. 
-
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
 ! passed variables
       integer istnsk    !index #.
       integer ipas(*)   !Pass number
@@ -49,7 +49,7 @@ C     Don't use the pass number for Mk5-only OR for no recorder.
          write(lufile,"(a)") cnamep
       else
          write(ldum,"(a,'=',i3)") cnamep,ipas(istnsk)
-         call squeezewrite(lufile,ldum)
+         call drudg_write(lufile,ldum)
       endif
       return
       end

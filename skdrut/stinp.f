@@ -56,7 +56,7 @@ C      - these are used in unpacking station info
       integer ib,ii,nco,nhz,i
       integer*2 lid,lidpos,lidhor
 
-      character*8 crack,crec1,crec2
+      character*12 crack,crec1,crec2
       character*4 cidt,cidhor,cidpos
       character*2 cid
       character*1 c1
@@ -134,6 +134,7 @@ C
 ! 2009Mar03  JMG. Fixed bug in OR statement with K5.
 ! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630) 
 ! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line". 
+! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars. 
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "

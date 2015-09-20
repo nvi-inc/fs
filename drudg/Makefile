@@ -27,9 +27,10 @@ PROGRAM = drudg
 #
 OBJECTS=\
 b3of9.o bar1.o bbbuf.o bbsyn.o bcode.o blabl.o \
-cazel.o cband_char.o cbinf.o checkmk5xlat.o check_dbbc_setup.o chkgrpandwrite.o ckobs.o clist.o \
+cazel.o cband_char.o cbinf.o checkmk5xlat.o check_dbbc_setup.o check_csb_list.o \
+chkgrpandwrite.o ckobs.o clist.o \
 copen.o copy_time.o counter_init.o \
-delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o dsnout.o \
+delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o drudg_write.o dsnout.o \
 equip_type.o fakesum.o fc_chmod.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
 get_version.o getqual.o getstr.o gtsnp.o \
 iaddpc.o iaddtr.o init_hardware_common.o k4proc_type.o kcheckgrpor.o \

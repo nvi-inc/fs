@@ -1,11 +1,13 @@
-      subroutine drchmod(cname,iperm,ierr)
+      subroutine drchmod(cname,ierr)
+      implicit none 
 ! 2013Jan15 JMGipson. Rewritten and modified.
-! Does not use iperm at all!
+! 2015Mar30 JMG. Got rid of obsolete argument iperm. 
 C Input
-      character*128 cname 
-      integer iperm
+      character*128 cname   
 C Output
       integer ierr    
+! Function
+      integer system 
 C Local
       integer trimlen
       integer nch 

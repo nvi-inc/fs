@@ -16,6 +16,7 @@ C 021111 jfq Add LBA racks.
 !
 ! 2007Dec11 JMGipson.  Doesn't apend recorder if Recorder is Mark5
 ! 2012Sep13 JMG. Introduced km3form,kvform,km5form
+! 2015May08 JMG. Added support for Rack type DBBC/Fila10g
 
 ! Just some notes:
 !  The difference between
@@ -57,6 +58,14 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         Knorec(i)  =cstrec(istn,i) .eq. "none"
       end do
 
+      kflexbuff = cstrec(istn,1) .eq. 'FlexBuff'
+      if(kflexbuff) then
+        km5crec(1)=.true.
+      endif
+
+      cstrack_cap(istn)=cstrack(istn)
+      call capitalize(cstrack_cap(istn))
+
 !      km5disk=.false.
 !     do i=1,2
 !       if(Km5Prec(i).or.Km5Arec(i).or.km5brec(i).or. Km5ApigWire(i))
@@ -68,7 +77,7 @@ C Equipment type has been set by schedule file, Option 11, or control file.
       km5p=km5prec(1) .or. km5prec(2)
       km5B=km5Brec(1) .or. km5Brec(2)
       km5C=km5Crec(1) .or. km5Crec(2)
-      km5disk = km5A .or. km5B .or. Km5C
+      km5disk = km5A .or. km5B .or. Km5C .or. kflexbuff 
 
       kk4=kk41rec(1) .or. kk41rec(2) .or. kk42rec(1) .or. kk42rec(2)
 
@@ -97,6 +106,11 @@ C Racks
      >          cstrack_cap(istn) .eq. "VLBA4/8"
       kv5rack = cstrack_cap(istn) .eq. "VLBA5"
 
+      kvlbac_rack =cstrack_cap(istn) .eq. "VLBAC"
+      kcdas_rack  =cstrack_cap(istn) .eq. "CDAS"
+      kv5rack=kv5rack .or. kvlbac_rack .or. kcdas_rack
+
+
 
       kk41rack= cstrack_cap(istn)(1:4) .eq. "K4-1"
       kk42rack= cstrack_cap(istn)(1:4) .eq. "K4-2"
@@ -111,7 +125,9 @@ C Racks
      >             cstrack_cap(istn)(5:7) .eq. "/K3"
       k8bbc =   cstrack_cap(istn) .eq. "VLBA/8" .or.
      >          cstrack_cap(istn) .eq. "VLBA4/8"
-      kdbbc_rack  = cstrack_cap(istn) .eq.  "DBBC" 
+      kdbbc_rack        = cstrack_cap(istn) .eq.  "DBBC" .or.
+     &                    cstrack_cap(istn) .eq."DBBC/FILA10G"
+      kfila10g_rack     =cstrack_cap(istn) .eq. "DBBC/FILA10G"
 
       kvform  = kvrack
       km3form = Km3rack .or. kk3fmk4rack

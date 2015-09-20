@@ -3,9 +3,9 @@
       character*(*) lstring
       integer iperiod
       character*20 ldum
-
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
       write(ldum,'("tpicd=",a,",",i10)') lstring,iperiod
-      call squeezewrite(lufile,ldum)
+      call drudg_write(lufile,ldum)
 
       return
       end

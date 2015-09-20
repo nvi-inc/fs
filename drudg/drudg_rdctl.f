@@ -6,6 +6,11 @@ C
 ! Based on old routine rdctl that handlled both sked and drudg.
 ! This just handles handles drudg.
 
+! 2015Jun05. JMGipson. Size of dr_rack_type, crec_default set by calling program. Previously hardwired. 
+! 2015Jul06  JMGipson. Initialized "dr_rack_Type, crec_default to " ". 
+! 2015Jul17 JMG. Added cont_cal_polarity.
+! 2015Jul21 JMG. Made "ASK" valid option ofr cont_cal_polarity 
+
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -17,9 +22,8 @@ C   parameter file
 
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
-      character*8 dr_rack_type,crec_default(2)
-      logical kequip_over
-    
+      character*(*) dr_rack_type,crec_default(2)
+      logical kequip_over    
           
 ! functions
       integer iwhere_in_string_list
@@ -54,13 +58,17 @@ C  LOCAL VARIABLES
       logical kfound_global_file
       logical kfirst_skip    
 
+      character*4 lvalid_polarity(6)
+
       character*32 cskedf(3)   
       data cskedf/
      > "/usr/local/bin/skedf.ctl",  "/usr2/control/skedf.ctl",
      > "skedf.ctl"/ 
 
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
-
+      data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
+       
+      
 C  1. Open the default control file if it exists.   
       
 ! Initialization
@@ -71,7 +79,8 @@ C  1. Open the default control file if it exists.
       end do
       idbbc_bbc_target=-1   
 
-      contcal_prompt="off" 
+      cont_cal_prompt="off" 
+      cont_cal_polarity=" "    !default is none!
       ktarget_time=.false.
       klo_config=.false. 
       kignore_mark5b_bad_mask=.false.
@@ -91,9 +100,9 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
-      dr_rack_type    = "UNKNOWN"
-      crec_default(1) = "UNKNOWN"
-      crec_default(2) = "NONE"
+      dr_rack_type    = " "
+      crec_default(1) = " "
+      crec_default(2) = " "
    
 
       kautoftp0=.false.
@@ -320,7 +329,7 @@ C  $MISC
 
 C         EQUIPMENT
               else if (lkeyword  .eq.'EQUIPMENT') then          
-                dr_rack_type=lvalue(1:8)
+                dr_rack_type=lvalue
                 crec_default(1)=ltoken(3)
                 if(NumToken .eq. 3) then
                    crec_default(2)="NONE"
@@ -384,11 +393,28 @@ C         TPICD
                 call capitalize(lprompt)
                 if(lprompt .eq. "ON" .or. lprompt .eq. "OFF" .or. 
      >             lprompt .eq. "ASK") then
-                   contcal_prompt=lprompt
+                   cont_cal_prompt=lprompt
                 else
                    write(luscn, *)
      >              "Error:  Valid CONT_CAL options are ON, OFF, ASK."
                  endif 
+              elseif (lkeyword .eq. 'CONT_CAL_POLARITY') then
+                call capitalize(lvalue)
+                itemp=iwhere_in_string_list(lvalid_polarity,6,lvalue)
+                if(itemp .eq. 0) then
+                  write(*,*) "drudg_rdctl: Invalid cont_cal_polarity: ",
+     >              lvalue
+                  write(*,*) "  valid options are: ", 
+     >              lvalid_polarity
+                else if(itemp .le. 4) then
+                    cont_cal_polarity=lvalue
+                else if(lvalue .eq. "NONE") then    !value set to "NONE"
+                    cont_cal_polarity=" "
+                else if(lvalue .eq. "ASK") then
+                    cont_cal_polarity="ASK"
+                endif 
+                                    
+        
               elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
                 if(NumToken .gt. 5) then 
                    write(*,*) "drudg_rdctl: Too many tokens for "//      

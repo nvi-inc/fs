@@ -2,6 +2,7 @@
 
 C Write a file or a tape with pointing controls
 C
+      implicit none 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -107,6 +108,7 @@ C 000815 nrv Remove all but VLBA option.
 ! 2005Sep21 JMGipson.  Modified to check if VLBA station. If so do it, else return
 ! 2006Sep26 JMGipson. Changed call for vlbat of lsname to ASCII csname.
 ! 2008Aug19 JMGipson. Check to see if tape motion type is "AUTO" for vlba"
+! 2015Mar30 JMG. got rid of obsolete arg in drchmod
 
       kintr = .false.
       if (kbatch) then
@@ -411,7 +413,7 @@ C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
 990   CLOSE(LU_OUTFILE)   
-      call drchmod(pntname,iperm,ierr)
+      call drchmod(pntname,ierr)
      
 
 900   continue

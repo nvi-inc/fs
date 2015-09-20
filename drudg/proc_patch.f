@@ -12,6 +12,7 @@
 ! History:
 ! V1.00 2007Jul06.  First version. Separated from procs.f
 ! V1.01 2007Jul19.  Put in test for KSX
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
 
 ! K41 and K42 rules fairly simple.
 
@@ -263,7 +264,7 @@
                 endif
             end do
           endif
-          call squeezewrite(lu_outfile,cbuf)
+          call drudg_write(lu_outfile,cbuf)
         endif ! this LO in use
       ENDDO ! three Mk3/4 IFs need a patch command
       return

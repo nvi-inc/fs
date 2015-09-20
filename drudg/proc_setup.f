@@ -20,11 +20,16 @@
       character*4 cpmode
       integer ierr
 ! functions
+      integer iwhere_in_string_list
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
+! 2015Jul17 JMG. Added cont_cal_polarity.
+! 2015Jul20 JMG. Only write cont_cal_polarity if "cont_cal=on"
+! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
    
 
 ! local
       character*12 cnamep
-      character*4 contcal_out
+      character*4 cont_cal_out
       integer ipass              !No longer have tapes
       integer ichan, ic          !counters.
       integer ifan_fact
@@ -37,13 +42,16 @@
       logical kroll              !barrel roll on
       logical kman_roll          !manual barrel roll on   
       logical ktpicd
+      integer iwhere
     
       real samptest
       integer num_chans_obs         	!number of channels observed
       integer num_tracks_rec_mk5        !number we record=num obs * ifan
-      integer NumTracks
-     
+      integer NumTracks     
+    
       character*80 ldum          !temporary string
+      character*4 lvalid_polarity(5)
+      data lvalid_polarity/"0","1","2","3","NONE"/
      
 ! Start of code
       ipass=1
@@ -90,19 +98,31 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
       endif
 
 
-! Initialize contcal_out
+! Initialize cont_cal_out
       if(kdbbc_rack) then
-        contcal_out=contcal_prompt
-        call lowercase(contcal_out)
-        write(*,*) "Contcal: ",contcal_out
-        do while(.not. (contcal_out .eq. "on".or.
-     >                  contcal_out .eq. "off".or.
-     >                  contcal_out .eq. "no" .or. 
-     >                  contcal_out .eq. " "))      
-         write(*,*) "Enter in cont_cal action: (on/off)"
-         read(*,*) contcal_out
-         call lowercase(contcal_out)
-       end do
+        cont_cal_out=cont_cal_prompt
+        call lowercase(cont_cal_out)
+        write(*,*) "cont_cal: ",cont_cal_out
+        do while(.not. (cont_cal_out .eq. "on".or.
+     >                  cont_cal_out .eq. "off".or.
+     >                  cont_cal_out .eq. "no" .or. 
+     >                  cont_cal_out .eq. " "))      
+          write(*,*) "Enter in cont_cal action: (on/off)"
+          read(*,*) cont_cal_out
+          call lowercase(cont_cal_out)
+        end do
+        if(cont_cal_out .eq. "on" .and. 
+     &     cont_cal_polarity .eq. "ASK") then
+          iwhere=0
+          do while(iwhere .eq. 0)       
+            write(*,*) "Enter in cont_cal_polarity (0-3, or none): "
+            read(*,*) cont_cal_polarity
+            call capitalize(cont_cal_polarity)
+            iwhere = iwhere_in_string_list(lvalid_polarity,5,
+     &                                        cont_cal_polarity)
+            if(cont_cal_polarity .eq. "NONE") cont_cal_polarity=" " 
+          end do 
+        end if      
       endif 
 
 
@@ -190,7 +210,7 @@ C !* to mark the time
               else
                  write(ldum,'("rec_mode=",i3)') irecbw
               endif
-              call squeezewrite(lu_outfile,ldum)
+              call drudg_write(lu_outfile,ldum)
               write(lu_outfile,'("!*")')
             endif ! type 2 rec_mode
 C  RECPff
@@ -231,12 +251,17 @@ C  BBCffb, IFPffb  or VCffb
        endif ! kbbc kvc kfid
 
        if(kdbbc_rack) then   
-          write(lu_outfile,'("cont_cal=", a)') contcal_out
+          if(cont_cal_out .eq. "on") then 
+             write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
+          else if(cont_cal_out .eq. "off") then
+             write(lu_outfile,'("cont_cal=off")')
+          endif   
+            
           ldum="bbc_gain=all,agc"
           if(idbbc_bbc_target .gt. 0) then
              write(ldum(20:30),'(",",i5)') idbbc_bbc_target
           endif 
-          call squeezewrite(lu_outfile,ldum)           
+          call drudg_write(lu_outfile,ldum)           
        endif        
 
 C  FORM=RESET

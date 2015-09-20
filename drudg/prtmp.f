@@ -7,6 +7,7 @@ C  nrv 951015 Revert to using cprtpor and cprtlan , and if blank
 C             then "printer" will handle them.
 C 960226 nrv Send "cprtlab" as script name for labels
 C 970207 nrv Add iopt to call and use it instead of iwidth.
+! 2015Mar30  JMG. modified to change mode of tmpname.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -20,6 +21,7 @@ C 970207 nrv Add iopt to call and use it instead of iwidth.
       if (klab) then ! labels
         ierr = printer(labname,'l',cprtlab)
       else ! normal prinout
+        call drchmod(tmpname,ierr) 
         if (iopt.eq.0) then
           ierr = printer(tmpname,'t',cprtpor)
         else if (iopt.eq.1) then
