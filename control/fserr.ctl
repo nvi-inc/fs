@@ -107,6 +107,9 @@ VSN does not contain + or - in first seven characters
 5B -401
 error retrieving class
 ""
+5B -402
+Use "bank_check" and "bank_status" for Mark 5A, 5B, and 5C recorders only.
+""
 5B -411
 error retrieving class, rtime/bank_set
 ""
@@ -189,10 +192,13 @@ program error: strdup() failed
 command does not accept parameters
 ""
 5D -301
-command does not accept parameters
+data_check command does not accept parameters
 ""
 5D -403
 error retrieving class for data_check response
+""
+5D -404
+Use "data_check" for Mark 5A, 5B, and 5C recorders only.
 ""
 5D -501
 error decoding data_check? mode parameter
@@ -347,6 +353,9 @@ Error retrieving class for response to commands.
 5F -401
 Error retrieving class for response to query.
 ""
+5F -402
+Use "disk2file" for Mark 5 and FlexBuff (including Mark 6) recorders only.
+""
 5F -501
 error decoding disk2file? status parameter
 ""
@@ -462,13 +471,16 @@ query response not found
 program error: strdup() failed
 ""
 5K -301
-command does not accept parameters
+scan_check command does not accept parameters
 ""
 5K -401
 error retrieving class for scan_check response
 ""
+5K -402
+Use "scan_check" for Mark 5 and FlexBuff (including Mark 6) recorders only.
+""
 5K -501
-error decoding data_check? scan parameter
+error decoding scan_check? scan parameter
 ""
 5K -502
 error decoding scan_check? label parameter
@@ -492,7 +504,7 @@ error decoding scan_check? track rate parameter
 error decoding scan_check? missing parameter
 ""
 5K -513
-error decoding scan_check? date type parameter
+error decoding scan_check? data type parameter
 ""
 5K -514
 error decoding scan_check? data code parameter
@@ -529,6 +541,9 @@ command does not accept parameters
 ""
 5P -401
 error retrieving class
+""
+5P -402
+Use "disk_pos" for Mark 5A, 5B, and 5C recorders only.
 ""
 5P -501
 error decoding position? record position
@@ -606,10 +621,10 @@ program error: too many serial numbers
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
 5T -201
-source parameter must be 'ext', 'tvg', or 'ramp'.
+source parameter must be 'ext', 'tvg', 'ramp', or "vdif".
 ""
 5T -202
-mask parameter, must specify an int, usually as a hex value, e.g., 0xf
+mask parameter, must specify a non-zero integer, maximum 32 bits, usually as a hex value, e.g., 0xf
 ""
 5T -203
 decimate parameter, must be one of 1, 2, 4, 8, or 16
@@ -622,6 +637,9 @@ fpdp parameter, if specified, must be 1 or 2.
 ""
 5T -206
 okay parameter, must be 'disk_record_ok' or null.
+""
+5T -221
+source parameter must be 'ext', 'tvg', or 'ramp'.
 ""
 5T -214
 Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
@@ -642,25 +660,43 @@ error retrieving class
 Use "mk5b_mode" for Mark 5B recorders only.
 ""
 5T -403
-Use "mk5c_mode" for Mark 5C recorders only.
+Use "mk5c_mode" for Mark 5C and Flexbuff recorders only.
 ""
 5T -501
-error decoding mode? source parameter
+error decoding mode? source/magic  parameter
 ""
 5T -502
-error decoding mode? mask parameter
+error decoding mode? mask or format parameter
 ""
 5T -503
-error decoding mode? decimate parameter
+error decoding mode? decimate or tracks parameter
 ""
 5T -504
-error decoding mode? fpdp parameter
+error decoding mode? fpdp or track bit rate parameter
+""
+5T -505
+error decoding mode? vdif frame size parameter
+""
+5T -512
+error decoding mode? format parameter
+""
+5T -513
+error decoding mode? tracks parameter
+""
+5T -514
+error decoding mode? track bit rate parameter
 ""
 5T -901
 query response not found
 ""
 5T -902
 program error: strdup() failed
+""
+10 -401
+error retrieving class for time query in get_fila10gtime
+""
+10 -402
+error decoding time in get_fila10gtime
 ""
 AN   -1
 Illegal mode
@@ -685,6 +721,9 @@ Antenna communications restored.
 ""
 AN   -8
 Pointing system NOT present.
+""
+AN   -9
+antenna=... command error, see above errors.
 ""
 AN -101
 Pointing computer year, day, or time is incorrect.
@@ -1145,6 +1184,9 @@ Procedure library link was empty.
 BO -508
 Final procedure library link does contain '.prc'.
 ""
+BO -998
+ANTCN termination mode failed, see above error.
+""
 BO -999
 WARNING: Log file just opened is already larger than 10 MB.
 ""
@@ -1276,6 +1318,21 @@ CH -238
 ""
 CH -239
 ?W tape drive should be recording but no groups are enabled.
+""
+CH -240
+?W attenuator for IF channel C does not check with requested setting
+""
+CH -241
+?W attenuator for IF channel D does not check with requested setting 
+""
+CH -242
+?W input source for IF channel C does not check with requested setting
+""
+CH -243
+?W input source for IF channel D does not check with requested setting 
+""
+CH -244
+?W averaging period does not check with requested setting
 ""
 CH -288
 Head is moving.
@@ -1734,7 +1791,7 @@ DB -108
 dbbcn: no data on read, but no EOF or error, connection closed
 ""
 DB -109
-dbbcn: read too long for input buffer, connection closed
+dbbcn: read too long for input buffer, only returning partial response
 ""
 DB -110
 dbbcn: error pre-draining input, see above for error, connection closed
@@ -1794,6 +1851,12 @@ DD -201
 Mode must be one of: off, on.
 ""
 DD -202
+Polarity control must one of: 0, 1, 2, or 3.
+""
+DD -212
+Continuous cal polarity control not supported for firmware versions < 105x_1.
+""
+DD -203
 Samples must be a positive integer.
 ""
 DD -401
@@ -1828,6 +1891,9 @@ Lettered DDC versions (e/f) only support modes astro3 and test modes.
 ""
 DF -301
 astro2 mode not supppored for DBBC DDC version less than 104
+""
+DF -302
+Above error probably caused by a DBBC version mismatch, check equip.ctl and a dbbc=version response.
 ""
 DF -401
 Class buffer error from monitor response.
@@ -1891,6 +1957,36 @@ Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error 
 ""
 DG -451
 Class buffer error from command response.
+""
+DH -103
+No default sample rate if clock rate (from equip.ctl) is "none".
+""
+DH -201
+mask parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+""
+DH -202
+decimate parameter, must be 1-255
+""
+DH -203
+Sample rate must be a number greater than 0.124
+""
+DH -213
+Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255 within 0.1 percent.
+""
+DH -303
+Can't specify sample rate and decimate parameters simultaneously
+""
+DH -400
+error retrieving acknowledgement of command
+""
+DH -401
+error retrieving class
+""
+DH -501
+error decoding vsi_bitmask response
+""
+DH -502
+error decoding vsi_samplerate response
 ""
 DI -101
 No default for IF input.
@@ -2304,12 +2400,6 @@ FV   -9
 fmset: Error from DBBCN, please see messages above.
 ""
 FV  -10
-fmset: Error from MATCN, please see messages above.
-""
-FV  -11
-fmset: Error from MK5CN, please see messages above.
-""
-FV  -12
 fmset: Error from MATCN, please see messages above.
 ""
 FV -401
@@ -5538,7 +5628,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mark 3/4/VLBA, S2, K4*/MK4 rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
