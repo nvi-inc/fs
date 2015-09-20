@@ -43,6 +43,7 @@
       write(cbbc,'("bbc",i2.2)') ib 
   
       if(cstrack_orig(istn) .eq. "DBBC" .or. 
+     >   cstrack_orig(istn) .eq. "DBBCFILA10G" .or. 
      >   cstrack_orig(istn) .eq. "NONE") then
          kdbbc=.true.
 !        Check to see if the IF is valid. Should be of the form:

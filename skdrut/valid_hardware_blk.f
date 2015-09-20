@@ -22,8 +22,11 @@
       crack_type(15)=    'LBA'
       crack_type(16)=    'Mark5'
       crack_type(17)=    'VLBA5'
-      crack_type(18)=    'DBBC'
-      crack_type(19)=    'unknown'
+      crack_type(18)=    'DBBC'                         
+      crack_type(19)=    'DBBC/Fila10g'
+      crack_type(20)=    'VLBAC'
+      crack_type(21)=    'CDAS'
+      crack_type(22)=    'unknown'
 
 ! Valid recorder types
       crec_type(1)=     'none'
@@ -41,7 +44,8 @@
       crec_type(13)=    'K5'
       crec_type(14)=    'Mark5B'
       crec_Type(15)=    'Mark5C'
-      crec_type(16)=    'unknown'
+      crec_type(16)=    'FlexBuff'
+      crec_type(17)=    'unknown'
 
 ! Make version of the above in capitalform.
       do i=1,max_rack_type

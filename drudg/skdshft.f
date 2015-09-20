@@ -15,7 +15,8 @@ C 990427 nrv Require 4-digit input year.
 ! 2006Oct3  JMG Completely rewritten.
 ! 2007Jan24 JMG. Input part modified.
 ! 2013Jul17 JMG. No longer need to find 'modular' or 'prepass' or 'cont'
-
+! 2015Mar30 JMG. got rid of obsolete arg in drchmod
+      implicit none 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/skobs.ftni'
@@ -392,6 +393,6 @@ C
 
 C
 990   close(lu_outfile)
-      call drchmod(coutname,iperm,ierr)
+      call drchmod(coutname,ierr)
       RETURN
       END

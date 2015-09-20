@@ -89,7 +89,7 @@ C             false if it's step functions
       character*8 cantna(max_stn)               !Antenna name (may have multiple antennas)
       character*8 coccup(max_stn)               !Occupation code
       character*8 cterna(max_stn)               !Terminal name
-      character*8 cstrack(max_stn)              !rack type
+      character*12 cstrack(max_stn)              !rack type
       character*8 cstrec(max_stn,2)             !recorders, upto 2
       character*4 cterid(max_stn)               !Terminal ID
       character*2 cfirstrec(max_stn)            !First recorder: "1" or "2"
@@ -98,9 +98,9 @@ C             false if it's step functions
       character*2 cpocod(max_stn)               !Position code for station.
       character*2 chccod(max_Stn)               !Horizon maske code
       character*1 cstcod(max_stn)               !Single letter code. Only used internally.
-      character*8 cstrack_orig(max_stn)         !This keeps track of original configuration.
+      character*12 cstrack_orig(max_stn)         !This keeps track of original configuration.
       character*8 cstrec_orig(max_stn,2)
-      character*8 cstrack_cap(max_stn)
+      character*12 cstrack_cap(max_stn)
 
 
       common /statn_ch/cstnna,cantna,coccup,cterna,cstrec,cstrack

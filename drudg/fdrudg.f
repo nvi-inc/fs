@@ -37,7 +37,8 @@ C LOCAL:
       logical kequip_over,knew_sked
       integer nch,nci
       character*2  response,scode
-      character*8 dr_rack_type, crec_def(2)
+      character*12 dr_rack_type, crec_def(2)
+      character*12 crack_tmp_cap,crec_tmp_cap
       integer inew,ivexnum
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
@@ -207,6 +208,9 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2013Jan23 JMGipson. Modified so that equipment_override is done when in batch mode. 
 ! 2013Jun18 JMGipson. Capitalize original rack equipment. 
 ! 2013Jul11 JMGipson. Issue error if file is not found and stop.
+! 2015Jun05 JMG.      Increased size of dr_rack_type, crec_def from Char*8-->char*12
+! 2015Jul06 JMG.      If recorder or rack is "UNKNOWN" change to none. 
+! 2015Aug31 JMG.      Don't quit on "q"
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
@@ -258,7 +262,7 @@ c Initialize no. entries in lband (freqs.ftni)
       ierr=0
       tpid_prompt = 'no'
       itpid_period = 0
-      contcal_prompt='OFF'
+      cont_cal_prompt='OFF'
       do i=1,4
         ldbbc_if_inputs(i)=" "
       end do 
@@ -273,8 +277,8 @@ C***********************************************************
 
       call drudg_rdctl(csked,csnap,cproc,ctmpnam,            
      >           dr_rack_type,crec_def,kequip_over)
-      kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
-     >               crec_def(1).eq.'unknown'.and.crec_def(2).eq.'none')
+      kdr_type = .not.(dr_rack_type.eq.' '.and.
+     >               crec_def(1).eq.' '.and.crec_def(2).eq.' ')
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
 !      stop 
 
@@ -345,19 +349,18 @@ C       Opening message
           nch = trimlen(cfile)
           if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
             if (kbatch) goto 990
-            write(luscn,'(a)')
-     >       " Enter schedule file name (.skd or .drg default <return> "
+            write(luscn,'(a,$)')
+     >" Enter schedule file name (.skd, .vex or .drg default <return> "
             write(luscn,
-     >          '("if using a .snp file, :: or q to quit) ?",$)')
+     >          '("if using a .snp file, :: to quit) ?",$)')
             read(luusr,'(a)') cbuf
             nch=trimlen(cbuf)
           else ! command line file name
             cbuf=cfile
           endif 
-        endif
-    
+        endif     
         IF (NCH.GT.0) THEN !got a name
-          if(cbuf(1:2) .eq. "::" .or. cbuf(1:1) .eq. "q") goto 990
+          if(cbuf(1:2) .eq. "::" ) goto 990
           if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
             lskdfi = cbuf(1:nch)
           else  ! no path given
@@ -410,7 +413,7 @@ C       Opening message
      >         "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
             stop
           endif           
-
+        
           ixp=1
           ix=1
           do while (ix.ne.0) ! find the last '/'
@@ -629,19 +632,26 @@ C
         if (istn.gt.0) then !one station
 C  Set equipment from control file, if equipment is unknown, and
 C  if it was not set by the schedule.      
-          kknown = .not.
-     >     (cstrec(istn,1).eq.'unknown'.or. cstrack(istn).eq.'unknown')
-          if (.not.kknown.and.kdr_type .or.
-     >        kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
+ 
+          crec_tmp_cap=cstrec(istn,1)
+          call capitalize(crec_tmp_cap)
+          if(crec_tmp_cap .eq. "UNKNOWN") cstrec(istn,1)="none"
+
+          crack_tmp_cap=cstrack(istn)
+          call capitalize(crack_tmp_cap)
+          if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none" 
+
+
+          if (kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
             if(cstrack(istn) .ne. dr_rack_type .or.
      >         cstrec(istn,1) .ne. crec_def(1) .or.
      >         cstrec(istn,2) .ne. crec_def(2)) then
               Write(luscn,*)
-     >           "WARNING! Using equipment from control file:"
+     >           "WARNING! Using equipment from skedf.ctl:"
               write(luscn,  '(5x,"Replacing rack ",a," by ", a)')
      >          cstrack(istn), dr_rack_type
               do i=1,2
-                write(luscn,'(5x,"Replacing rec",i1,1x, a, " by ",a)')
+                write(luscn,'(5x,"Replacing rec",i1,5x, a, " by ",a)')
      >              i, cstrec(istn,i), crec_def(i)
               end do
               cstrack(istn) =dr_rack_type

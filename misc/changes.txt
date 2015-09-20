@@ -10748,3 +10748,404 @@ Version 9.11.6 140805
            final tweaks
 
 Version 9.11.7 150205
+
+150218 WEH quikv/onoff.c
+           add 32 MHz BW for DBBC for ONOFF
+
+150302 WEH quikv/logmsg_dbbc.c
+           fix version handling bug for versions after 104
+
+150409 WEH misc/FSL9_End_User.txt
+           clarification on using Network dialog
+
+150512 WEH include/params.h
+           boss/newlg.f
+           incom/equip.f
+           include/params.i
+           ad FiLa10G and Flexbuff equipment
+
+150514 WEH Makefile
+           Now 9.11.8
+
+150514 WEH quikv/dbbc.c
+           add fila10G communication
+
+150515 WEH clib/cls_util.c
+           poclb/logit.c
+           ddout/ddout.c
+           boss/bwork.f
+           quikv/dbbc_dis.c
+           poclb/logita.c
+           poclb/logite.c
+           poclb/logitf.c
+           poclb/logitn.c
+           mk5cn/mk5cn.c
+           dbbcn/dbbcn.c
+           increase maximum class message length to 1024
+
+150515 WEH mk5cn/mk5cn.c
+           dbbcn/dbbcn.c
+           fix end of buffer test when collecting response
+
+150517 WEH include/fscom.h
+           include/fs_types.h
+           include/fila10g_mode_ds.h
+           quikv/Makefile
+           control/fscmd.ctl
+           quikv/quikv.c
+           quikv/fila10g_mode_dis.c
+           clib/fila10g_mode_util.c
+           quikv/fila10g_mode.c
+           clib/Makefile
+           add fila10g_mode command
+
+150517 WEH clib/m5_utils.c
+           add long hex output for m5sprintf
+
+150518 WEH clib/onoff_util.c
+           clib/tpicd_util.c
+           respect flexbuff as Mark5 recorder_type for identifying detectors
+
+150518 WEH quikv/disk2file.c
+           quikv/data_check.c
+           quikv/scan_check.c
+           quikv/bank_check.c
+           quikv/disk_pos.c
+           trap Flexbuff not being supported
+
+150518 WEH incom/equip.f
+           respect FLEXBUFF for determining "nominal" clock rate
+
+150519 WEH clib/cshm_init.c
+           initialize new variables for fil10g_mode and mk5b_mode
+
+150519 WEH include/mk5b_mode_ds.h
+           quikv/mk5b_mode_dis.c
+           clib/mk5b_mode_util.c
+150520 WEH quikv/mk5b_mode.c
+           rework mk5X_mode command to use better work with existing data
+
+150520 WEH clib/fila10g_mode_util.c
+           quikv/fila10g_mode.c
+           fixes
+
+150520 WEH clib/Makefile
+           clib/daymy.c
+           fmset/getfila10gtime.c
+           fmset/setfmtime.c
+           fmset/Makefile
+           fmset/getfmtime.c
+           fmset/set5btime.c
+           fmset/set4time.c
+           fmset/setfila10gtime.c
+           control/fserr.ctl
+           clib/get_fila10gtime.c
+           fmset/fmset.c
+           dbbcn/dbbcn.c
+           add FMSET support for FiLa10G
+
+150520 WEH help/mk5b_mode.___
+           updated
+
+150520 WEH help/fila10g_mode.___
+           help/fila10g.___
+           added
+
+150521 WEH st.default/control/equip.ctl
+           st.default/proc/fila10g.prc
+           new examples for FiLa10G and FlexBuff
+
+150521 WEH quikr/tplisd.f
+           quikr/tplis.f
+           quikr/tplisv.f
+           respect Flexbuff as a Mark5 recorder type for determining detectors
+
+150521 WEH fmset/asksure.c
+150522 WEH fmset/get5btime.c
+150523 WEH fmset/fmset.c
+           fmset/getfila10gtime.c
+           add sync feature for FiLA10g
+
+150523 WEH quikv/mk5b_mode.c
+           remove net_protocol= command for m5c_mode=vdif for Mark 5C recorders
+
+150523 WEH quikv/logmsg_dbbc.c
+150524 WEH quikv/dbbcform.c
+           control/fserr.ctl
+           better handling of v105/E/F version match errors
+
+150524 WEH dbbcn/dbbcn.c
+           control/fserr.ctl
+           don't close connection on buffer overflow
+
+150525 WEH fmset/setfmtime.c
+150527 WEH fmset/setfila10gtime.c
+           adjusted from prompter fila10g response
+
+150528 WEH st.default/proc/fila10g.prc
+           add fila10g=vdif_enc on
+
+150706 WEH include/params.h
+150706 WEH boss/newlg.f
+150706 WEH incom/equip.f
+150706 WEH include/params.i
+150706 WEH quikr/tplisv.f
+           Add VLBAC and CDAS rack types
+
+150706 WEH help/vsi4.___
+           add VLBAC sampler outputs
+
+150715 WEH popen/popen.c
+           created
+
+150716 WEH oprin/oprin.c
+           fixed to remove leading and trailing spaces
+
+150717 WEH st.default/control/skedf.ctl
+           added missing recently supporte rack/recorder types
+           add cont_cal_polarity examples
+
+150718 WEH st.default/control/equip.ctl
+           add VLBAC, and CDAS racks
+
+150718 WEH fclib/fc_get_fila10gtime.c
+           created
+
+150718 WEH setcl/setcl.f
+           add FiLa10G, VLBAC, and CDAS
+
+150718 WEH fmset/getfmtime.c
+           remove extraneous phasing for fila10g
+
+150718 WEH fmset/getfila10gtime.c
+           adjust phasing of time set and read to work also for non-NTP systems
+           added extra monitor command to prevent pps_sync from being the
+             last command in DBBC's queue
+
+150719 WEH dbbcn/dbbcn.c
+           read FilA10G time repetitively looking for change
+
+150718 WEH fmset/get5btime.c
+           added extra monitor command to prevent pps_sync from being the
+             last command in DBBC's queue
+  
+150718 WEH fmset/fmset.c
+           add VLBAC and CDAS racks
+           simplify use of setcl (return to earlier incarnation)
+
+150718 WEH st.default/control/time.ctl
+           add note about "offset" and "none" should not be used
+           add note about need a reboot if model is changed
+
+150718 WEH control/fscmd.ctl
+           add "jive5ab" as a synonym for "mk5"
+
+150718 WEH newlb/prog.c
+           include/fscom_dum.i
+           include/fscom.h
+           add dbbcddcsubv (sub version, i.e., _x)
+           and dbbccontcalpol (continuous cal polarity)
+
+150718 WEH incom/equip.f
+           add dbbcddcsubv (sub version, i.e., _x)
+
+150718 WEH include/dbbc_cont_cal_ds.h
+           quikv/dbbc_cont_cal.c
+           clib/dbbc_cont_cal_util.c
+           incom/equip.f
+           add dbbccontcalpol (continuous cal polarity)
+
+150719 WEH clib/Makefile
+           clib/antcn_term.c
+           fclib/fc_antcn_term.c
+           fclib/Makefile
+           control/fserr.ctl
+           antcn/antcn.c
+           boss/bwork.f
+           st.default/st-0.0.0/antcn/antcn.c
+           add antcn termination mode
+
+150719 WEH quikv/dbbc.c
+150719 WEH quikv/dbbc_dis.c
+150719 WEH dbbcn/dbbcn.c
+           add logging multline FiLa10G responses
+
+150719 WEH help/sy.___
+           revised for popen
+
+150719 WEH help/form.d__
+           type
+
+150721 WEH clib/dbbc_cont_cal_util.c
+           clib/cshm_init.c
+           help/cont_cal.d__
+           make default for polarity the "previous" value
+
+150724 WEH clib/antcn_term.c
+           boss/bwork.f
+           changed FS_ANTCN_TERM to FS_ANTCN_TERMINATION
+           isolated value default setting to antcn_term.c
+
+150728 WEH misc/cont_cal_fix
+           created
+
+150729 WEH help/fila10g_mode.___
+           help/mk5b_mode.___
+           fix typos
+
+150729 WEH misc/fs9118up.txt
+           updated
+
+150729 WEH st.default/st-0.0.0/antcn/antcn.c
+           antcn/antcn.c
+           added explanatory comment about FS_ANTCN_TERMINATION
+
+150801 WEH Makefile
+           add popen
+
+150801 WEH control/fserr.ctl
+           help/fila10g.___
+           help/mk5b_mode.___
+           help/cont_cal.d__
+           fix typos reported by J. Quick
+
+150804 WEH fmset/setfila10gtime.c
+           fmset/asktime.c
+	   use -1 year for fila10g 'bare' timesync
+
+150814 WEH fmset/asksure.c
+           fix formatting of DBBC sync response for FiLa10G
+
+150814 WEH fmset/fmset.c
+150814 WEH setcl/setcl.f
+           don't look for MK4 formatter for other MK4/VLBA4 sub-types
+
+150814 WEH newlb/prog.c
+           include/fscom.h
+           include/fscom_dum.i
+           boss/newlg.f
+           incom/equip.f
+           fmset/getfila10gtime.c
+           st.default/control/equip.ctl
+           add use of vsi input field in equip.ctl and use in FMSET
+
+150814 WEH st.default/proc/fila10g.prc
+           consolidate into one procedure: fila10g_cfg
+             without inputselect, vsi_samplerrate, reset, timesync
+                     & dbbc: pps_sync
+
+150817 WEH fmset/getfila10gtime.c
+           add decimation to 'vsi_samplerate'
+           remove 'keepsync' from 'reset;
+
+150818 WEH quikv/mk5b_mode.c
+           rearrange buffers sent depending on device
+             to minimze code and messages
+
+150819 WEH quikv/disk2file.c
+           allow for all MK5x (including FlexBuff) recorders
+
+150819 WEH control/fserr.ctl
+           fix minor errors snd allow scan_check/disk2file for FlexBuff
+
+150819 WEH quikv/data_check_dis.c
+           fix error code mnemonics
+
+150819 WEH st.default/proc/fila10g.prc
+           comments improved
+
+150819 WEH clib/disk2file_util.c
+           include FLEXBUFF
+
+150819 WEH quikv/scan_check.c
+           include FLEXBUFF
+
+150820 WEH misc/fs9118up.txt
+           correct typos
+
+150820 WEH clib/scan_check_util.c
+           include FlexBuff, which is like 5B
+
+150821 WEH quikv/scan_check_dis.c
+           updated for FlexBuff
+
+150821 WEH help/scan_check.___
+            modernized and new information from Harro added
+
+150821 WEH st.default/proc/fila10g.prc
+           new information from Harro added
+
+150822 WEH mk5cn/mk5cn.c
+           report everything after return codes other than 0 and 1
+             as the error mssage
+
+150822 WEH st.default/proc/vstation2.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/newmk5ak5.prc
+           st.default/proc/m5.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/k42station.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/dstationcc.prc
+           st.default/proc/dstation.prc
+           st.default/proc/5station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/4station.prc
+           st.default/proc/45station.prc
+           st.default/proc/3station.prc
+           change mk5=status? to mk5_status
+
+150822 WEH misc/fs9118up.txt
+           add cont_cal_polarity update instructions
+           add mk5_status use
+
+150901 WEH misc/fs911up,txt
+           include DRUDG not terminating on "q" in DRUDG changes
+
+150909 WEH clib/daymy.c
+           fix indexing bug
+
+150916 WEH quikv/scan_check_dis.c
+           report all scan_check errors
+
+150916 WEH misc/comment_mk5_dot
+           created
+
+150916 WEH misc/fs9118up.txt
+           updated for scan_check, comment_mk5_dot
+
+150917 WEH quikv/scan_check_dis.c
+           report at most one error per scan_check, but include
+              missing bytes as a case, that was being omiited before 150916
+
+150919 WEH chekr/vlbarack.f
+           control/fserr.ctl
+           fix error reporting for VLBA module IC (IFDCD)
+
+150919 WEH onoff/tzero.c
+           properly handle using only on IF of a VLBA IF module
+
+150919 WEH misc/fs9118up.txt
+           add explanation on how to handle "non-zero missing byte" errors for
+             Mark 5C and FlexBuff
+
+150920 WEH ddout/ddout.c
+           help/tnx.___
+           change TNX display for error message with no text to be have a null
+             string
+
+150920 WEH control/fserr.ctl
+           add AN -9
+
+Version 9.11.8 150920

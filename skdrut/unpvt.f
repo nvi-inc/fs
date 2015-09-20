@@ -37,6 +37,7 @@ C            implement this until a FS upgrade can be done.
 C 011011 nrv If the second recorder field doesn't match a recorder type
 C            and the first recorder is S2, then the second field is mode.
 ! 2007Aug07  JMG. Converted all hollerith to ASCII
+! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
 C
 C  INPUT:
       integer*2 IBUF_in(*)
@@ -58,7 +59,7 @@ C     mxtap - maximum tape length for this station
       character*2 cb(*) !bands
       real*4 sefd(*),par(max_sefdpar,*)
       integer npar(*)   ! sefds
-      character*8 crack,creca,crecb  !rack, recorder, names
+      character*12 crack,creca,crecb  !rack, recorder, names
       character*4 cs2sp
 C
 
@@ -312,7 +313,7 @@ C     GTFLD has already been done above if there were no SEFD parameters.
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field
       if (ic1.ne.0) then ! rack field
-        nch = min0(ic2-ic1+1,8)
+        nch = min0(ic2-ic1+1,12)
         crack=cbuf(ic1:ic1+nch-1)
         call capitalize(crack)
         iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
@@ -326,7 +327,7 @@ C Rack field
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rec A field
         if (ic1.ne.0) then ! rec A field
-          nch = min0(ic2-ic1+1,8)
+          nch = min0(ic2-ic1+1,12)
           creca=cbuf(ic1:ic1+nch-1)
           call capitalize(creca)
           iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
@@ -340,7 +341,7 @@ C Rec A field
 
 C Rec B field or S2 mode
           if (ic1.ne.0) then ! rec B or S2 mode field
-            nch = min0(ic2-ic1+1,8)
+            nch = min0(ic2-ic1+1,12)
             if(creca .eq. "S2") then
               continue
             else

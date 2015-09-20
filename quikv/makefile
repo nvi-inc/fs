@@ -37,7 +37,8 @@ scan_check.o scan_check_dis.o last_check.o mk5b_mode.o mk5b_mode_dis.o mk5_statu
 vsi4.o vsi4_dis.o holog.o holog_dis.o satellite.o satellite_dis.o antcn.o\
 satoff.o satoff_dis.o satpos.o tle.o dbbc.o dbbc_dis.o dbbcnn.o dbbcnn_dis.o\
 logmsg_dbbc.o dbbcifx.o dbbcifx_dis.o dbbcform.o dbbcform_dis.o\
-dbbc_cont_cal.o dbbc_cont_cal_dis.o dbbcgain.o dbbcgain_dis.o
+dbbc_cont_cal.o dbbc_cont_cal_dis.o dbbcgain.o dbbcgain_dis.o\
+fila10g_mode.o fila10g_mode_dis.o
 #
 ../bin/quikv: $(OBJECTS)
 	cc $(CFLAGS)  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm

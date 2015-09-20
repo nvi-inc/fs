@@ -271,7 +271,8 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 ! 2012.09.20 JMG. If an error in some routine, then delete the partial ".prc" file that was written 
 ! 2012.02.21 JMG. Modified to issue TPICD only in some cases. WEH changed his mind. 
 ! 2014.01.17 JMG. Moved 'setup' stuff into separate subroutine. Got rid of unused variables.
-! 2014Jan21 JMG.  Commented out calls to loader/unloader since no more tapes.      
+! 2014Jan21 JMG.  Commented out calls to loader/unloader since no more tapes.  
+! 2015Mar30 JMG. Removed obsolete arg from drchmod.    
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -502,7 +503,7 @@ C Therefore, use index 1 for all the tests in this section.
       if (kpcal_d) then 
 !      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
 !     >   .or.Km5Disk) then
-        if ((km4rack.or.kvracks.or.kv5rack).and.
+        if ((km4rack.or.kvracks).and.
      .      (.not.kpiggy_km3mode.or.klsblo
      .      .or.((km3be.or.km3ac).and.k8bbc))) then
           call proc_pcalf(icode,lwhich8)
@@ -541,7 +542,7 @@ C Read each line and if our station is mentioned, write out the proc.
 9000  continue
       call proc_write_define(-1,luscn," ")  !this flushes a buffer.
       CLOSE(LU_OUTFILE,IOSTAT=IERR)
-      call drchmod(prcname,iperm,ierr)
+      call drchmod(prcname,ierr)
       if(ierr.ne.0) goto 9100 
       return
 

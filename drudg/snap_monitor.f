@@ -7,7 +7,7 @@
       if(Km5Disk) then
         if(kin2net) then
           write(luFile,'("in2net")')
-        else
+        else if(.not.kflexbuff) then 
           write(luFile,'("disk_pos")')
         endif     
       endif

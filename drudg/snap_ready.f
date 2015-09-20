@@ -2,6 +2,7 @@
 ! write out ready commands
       include 'hardware.ftni'
       integer ntape
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
 ! local
       character*7 lprefix
       integer nch
@@ -31,7 +32,7 @@
         nch=nch+1
         lprefix(nch:nch)="="
         write(ldum,'(a,i3)') lprefix(1:nch),ntape
-        call squeezewrite(lufile,ldum)
+        call drudg_write(lufile,ldum)
       else
         write(lufile,'(a)') lprefix(1:nch)
       endif
