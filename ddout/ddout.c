@@ -14,7 +14,7 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
-#define MAX_BUF 512
+#define MAX_BUF 1024
 /* not Y10K compliant */
 #define FIRST_CHAR 21
 
@@ -389,7 +389,8 @@ Ack:    ich = strtok(NULL, ",");
 	 */
 	ibur[iburl]='\0';
 	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
-	  ibur[0]='X';
+	  iburl=0;
+	  ibur[0]=0;
 	  goto Append;
 	}
 
