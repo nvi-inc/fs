@@ -55,6 +55,7 @@ main()
       struct list *next;
       struct list *previous;
       char *string;
+      char *example;
       int on;
       int count;
     } *last = NULL;
@@ -138,8 +139,14 @@ Messenger:
 	      logitf(buf2);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-		  sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
-			  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
+		  if(ptr->example==NULL)
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+			    ptr->ch,ptr->num,offon[ptr->on],
+			    ptr->count,ptr->string);
+		  else
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+			    ptr->ch,ptr->num,offon[ptr->on],
+			    ptr->count,ptr->string,ptr->example);
 		  logitf(buf2);
 		}
 	      }
@@ -181,8 +188,14 @@ Messenger:
 	      logitf(buf2);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-		  sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
-			  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
+		  if(ptr->example==NULL)
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+			    ptr->ch,ptr->num,offon[ptr->on],
+			    ptr->count,ptr->string);
+		  else
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+			    ptr->ch,ptr->num,offon[ptr->on],
+			    ptr->count,ptr->string,ptr->example);
 		  logitf(buf2);
 		}
 	      }
@@ -209,8 +222,14 @@ Messenger:
       int some=0;
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 	if(ptr->on == 0) {
-	  sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s",
-		  ptr->ch,ptr->num,offon[ptr->on],ptr->count,ptr->string);
+	  if(ptr->example==NULL)
+	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s",
+		    ptr->ch,ptr->num,offon[ptr->on],
+		    ptr->count,ptr->string);
+	  else
+	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+		    ptr->ch,ptr->num,offon[ptr->on],
+		    ptr->count,ptr->string,ptr->example);
 	  logitf(buf);
 	  some=1;
 	}
@@ -436,6 +455,16 @@ Append:           /* send message to station error program */
 	    ptr->next=NULL;
 	    ptr->on=1;
 	    ptr->count=count+1;
+
+	    if(strlen(ibur) == 0) {
+	      ptr->example=strdup(buf+FIRST_CHAR+14);
+	      if(ptr->example == NULL) {  /* ptr->example is NULL */
+		shm_addr->abend.other_error=1;
+		perror("!! help! ** getting tnx structure example, ddout");
+	      }
+	    } else
+	      ptr->example=NULL;
+
 	    ptr->string=strdup(ibur);
 	    if(ptr->string != NULL) {
 	      if(first == NULL)
@@ -443,8 +472,7 @@ Append:           /* send message to station error program */
 	      else
 		last->next=ptr;
 	      last=ptr;
-	    } else {
-	      free(ptr);
+	    } else { /* ptr->string is already NULL */
 	      shm_addr->abend.other_error=1;
 	      perror("!! help! ** getting tnx structure string, ddout");
 	    }
@@ -474,7 +502,7 @@ Append:           /* send message to station error program */
 	printf("%.8s",buf+9);
 /* not Y10K compliant */
 	printf("%s",buf+20);
-	if (*cp2 == 'b') {
+	if (*cp2 == 'b' && ierrnum < 0) {
 	  printf("\007");
 	  play_wav(1);
 	}
