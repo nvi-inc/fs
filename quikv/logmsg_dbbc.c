@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -59,6 +60,17 @@ long ip[5];
        else if(strncmp(inbuf+8,"DDC,104,June 20 2013",20)==0 ||
                strncmp(inbuf+8,"DDC,104,August 01 2013",22)==0)
 	 iversion =104;
+       else if(strncmp(inbuf+8 ,"DDC,",4)==0) {
+	 char test_buf[sizeof(shm_addr->dbbcddcvs)];
+
+	 strncpy(test_buf,inbuf+12,sizeof(shm_addr->dbbcddcvs));
+         for(i=0;i<shm_addr->dbbcddcvc;i++)
+            test_buf[i]=tolower(test_buf[i]);
+
+	 if(strncmp(test_buf,shm_addr->dbbcddcvs,shm_addr->dbbcddcvc)==0)
+	   iversion=shm_addr->dbbcddcv;
+       }
+	 
        if(iversion!=shm_addr->dbbcddcv) {
 	 switch(iversion) {
 	 case 100:
