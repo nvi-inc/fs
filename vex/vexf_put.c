@@ -815,7 +815,7 @@ fcreate_nasmyth
 (str, str2)
 char **str;
 char **str2;
-/*<      subroutine fcreate_namsmyth(ptr_ch(str)//(char *)0, >*/
+/*<      subroutine fcreate_nasmyth(ptr_ch(str)//(char *)0, >*/
 /*<                                    ptr_ch(str2)//(char *)0) >*/
 /*<      implicit none >*/
 /*<      character*(*) str; >*/
