@@ -57,6 +57,10 @@ struct nasmyth         *nsptr;
 
 struct bbc_assign      *baptr;
 
+struct stream_def      *sdptr;
+struct stream_sample_rate *ssptr;
+struct stream_label    *slptr;
+
 struct headstack       *hsptr;
 
 struct clock_early     *ceptr;
@@ -105,6 +109,8 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_AXIS_TYPE T_NASMYTH
 
 %token <ival>   T_BBC_ASSIGN
+
+%token <ival>   T_STREAM_DEF T_STREAM_SAMPLE_RATE T_STREAM_LABEL
 
 %token <ival>	T_CLOCK_EARLY
 
@@ -162,7 +168,7 @@ struct s2_data_source  *dsptr;
 %token <ival>	B_EXPER B_SCHEDULING_PARAMS B_PROCEDURES B_EOP B_FREQ B_CLOCK
 %token <ival>	B_ANTENNA B_BBC B_CORR B_DAS B_HEAD_POS B_PASS_ORDER
 %token <ival>	B_PHASE_CAL_DETECT B_ROLL B_IF B_SEFD B_SITE B_SOURCE B_TRACKS
-%token <ival>   B_TAPELOG_OBS
+%token <ival>   B_TAPELOG_OBS B_BITSTREAMS
 
 %token <llptr>	T_LITERAL
 
@@ -216,6 +222,13 @@ struct s2_data_source  *dsptr;
 %type  <dfptr>	bbc_def
 %type  <lwptr>  bbc_lowl bbc_defx
 %type  <baptr>  bbc_assign
+
+%type  <llptr>  bitstreams_block bitstreams_defs bitstreams_lowls 
+%type  <dfptr>	bitstreams_def
+%type  <lwptr>  bitstreams_lowl bitstreams_defx
+%type  <sdptr>  stream_def
+%type  <ssptr>  stream_sample_rate
+%type  <slptr>  stream_label
 
 %type  <llptr>  clock_block clock_defs clock_lowls 
 %type  <dfptr>	clock_def
@@ -352,7 +365,7 @@ struct s2_data_source  *dsptr;
 %type  <llptr>  literal
 %type  <llptr>  unit_list name_list value_list
 %type  <llptr>  unit_more
-%type  <dvptr>  unit_value value
+%type  <dvptr>  unit_value value value2
 %type  <dvptr>  unit_option
 %type  <sval>   name_value
 
@@ -387,6 +400,7 @@ block:	global_block			{$$=make_block(B_GLOBAL,$1);}
 	| sched_block			{$$=make_block(B_SCHED,$1);}
  	| antenna_block			{$$=make_block(B_ANTENNA,$1);}
  	| bbc_block			{$$=make_block(B_BBC,$1);}
+ 	| bitstreams_block		{$$=make_block(B_BITSTREAMS,$1);}
  	| clock_block			{$$=make_block(B_CLOCK,$1);}
  	| das_block			{$$=make_block(B_DAS,$1);}
  	| eop_block			{$$=make_block(B_EOP,$1);}
@@ -459,6 +473,7 @@ primitive:	B_EXPER			{$$=B_EXPER;}
 		| B_FREQ		{$$=B_FREQ;}
 		| B_ANTENNA		{$$=B_ANTENNA;}
 		| B_BBC			{$$=B_BBC;}
+		| B_BITSTREAMS		{$$=B_BITSTREAMS;}
 		| B_CLOCK		{$$=B_CLOCK;}
 		| B_CORR		{$$=B_CORR;}
 		| B_DAS			{$$=B_DAS;}
@@ -673,6 +688,47 @@ bbc_lowl:	bbc_assign		{$$=make_lowl(T_BBC_ASSIGN,$1);}
 ;
 bbc_assign:	T_BBC_ASSIGN '=' T_LINK ':' value ':' T_LINK ';'
 		{$$=make_bbc_assign($3,$5,$7);}
+;
+/* $BITSTREAMS block */
+
+bitstreams_block:	B_BITSTREAMS ';' bitstreams_defs	{$$=$3;}
+		| B_BITSTREAMS ';'		{$$=NULL;}
+;
+bitstreams_defs:	bitstreams_defs bitstreams_defx	{$$=add_list($1,$2);}
+		| bitstreams_defx		{$$=add_list(NULL,$1);}
+;
+bitstreams_defx:	bitstreams_def			{$$=make_lowl(T_DEF,$1);}
+		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
+		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+bitstreams_def:	T_DEF T_NAME ';' bitstreams_lowls T_ENDDEF ';' {$$=make_def($2,$4);}
+		| T_DEF T_NAME ';' T_ENDDEF ';'
+						{$$=make_def($2,NULL);}
+;
+bitstreams_lowls:	bitstreams_lowls bitstreams_lowl	{$$=add_list($1,$2);}
+		| bitstreams_lowl		{$$=add_list(NULL,$1);}
+;
+bitstreams_lowl:	stream_def		{$$=make_lowl(T_STREAM_DEF,$1);}
+		| stream_sample_rate	{$$=make_lowl(T_STREAM_SAMPLE_RATE,$1);}
+		| stream_label	{$$=make_lowl(T_STREAM_LABEL,$1);}
+		| external_ref		{$$=make_lowl(T_REF,$1);}
+		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
+		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+stream_def:	T_STREAM_DEF '=' T_LINK ':' T_NAME ':' value2 ':' value ':' T_LINK ';'
+                {$$=make_stream_def($3,$5,$7,$9,$11);}
+                | T_STREAM_DEF '=' T_LINK ':' T_NAME ':' value2 ':' value ';'
+                {$$=make_stream_def($3,$5,$7,$9,NULL);}
+;
+stream_sample_rate: T_STREAM_SAMPLE_RATE '=' unit_value ':' T_LINK ';'
+                    {$$=make_stream_sample_rate($3,$5);}
+                    | T_STREAM_SAMPLE_RATE '=' unit_value ';'
+                    {$$=make_stream_sample_rate($3,NULL);}
+;
+stream_label:       T_STREAM_LABEL '=' T_NAME ':' T_LINK ';'
+                    {$$=make_stream_label($3,$5);}
+                    | T_STREAM_LABEL '=' T_NAME ';'
+                    {$$=make_stream_label($3,NULL);}
 ;
 /* $CLOCK block */
 
@@ -1585,6 +1641,9 @@ value_list:	value_list ':' value		{$$=add_list($1,$3);}
                 | value 			{$$=add_list(NULL,$1);}
 ;
 value:		T_NAME  			{$$=make_dvalue($1,NULL);}
+;
+value2:	        /* empty */ 			{$$=make_dvalue(NULL,NULL);}
+		| T_NAME  			{$$=make_dvalue($1,NULL);}
 ;
 %%
 

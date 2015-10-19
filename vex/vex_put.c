@@ -803,6 +803,84 @@ create_bbc_assign(char *str, char *str2, char *str3)
     }
 }  
 /*-------------------------------------------------------------------*/
+/* BITSTREAMS block builders                                                */
+/*-------------------------------------------------------------------*/
+void *
+create_stream_def(char *str, char *str2, char *str3, char *str4, char *str5)
+{
+  char *chan_link, *bit, *input, *ondisk, *bitstream_link;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 || 
+     str5==NULL || strlen(str5)==0)
+    {
+      printf("%s \'stream_def\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      chan_link=(char *)strdup(str);
+      bit=(char *)strdup(str2);
+      input=(char *)strdup(str3);
+      ondisk=(char *)strdup(str4);
+      bitstream_link=(char *)strdup(str5);
+
+      qref_list = add_list(qref_list,make_lowl(T_STREAM_DEF,
+					       make_stream_def(chan_link,bit,
+				   make_dvalue(input,NULL),
+				   make_dvalue(ondisk,NULL),
+				   bitstream_link)));
+    }
+}  
+void *
+create_stream_sample_rate(char *str, char *str2, char *str3)
+{
+  char *s1,*s2, *s3;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0)
+    {
+      printf("%s \'stream_sample_rate\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      s3=(char *)strdup(str3);
+
+      qref_list = 
+	add_list(qref_list,make_lowl(T_STREAM_SAMPLE_RATE,
+				     make_stream_sample_rate(
+				   make_dvalue(s1,s2),
+				   s3)));
+    }
+}  
+void *
+create_stream_label(char *str, char *str2)
+{
+  char *s1,*s2;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
+    {
+      printf("%s \'stream_label\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+
+      qref_list = 
+	add_list(qref_list,make_lowl(T_STREAM_LABEL,
+				     make_stream_label(s1,s2)));
+    }
+}  
+/*-------------------------------------------------------------------*/
 /* CLOCK block builders                                              */
 /*-------------------------------------------------------------------*/
 void *

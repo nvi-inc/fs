@@ -95,6 +95,22 @@ c
      &                       ptr_ch('left'//char(0)))
       
       call fend_def
+      call fcreate_block(ptr_ch('BITSTREAMS'//char(0)))
+      call fcreate_def(ptr_ch('Hb'//char(0)))
+      call fcreate_stream_def(ptr_ch('CH01'//char(0)),
+     &                       ptr_ch('sign'//char(0)),
+     &                       ptr_ch('1'//char(0)),
+     &                       ptr_ch('33'//char(0)),
+     &                       ptr_ch('bitstream1'//char(0))
+     &     )
+      call fcreate_stream_sample_rate(ptr_ch('8'//char(0)),
+     &                       ptr_ch('Ms/sec'//char(0)),
+     &                       ptr_ch('bitstream1'//char(0))
+     &     )
+      call fcreate_stream_label(ptr_ch('stream1'//char(0)),
+     &                       ptr_ch('bitstream1'//char(0))
+     &     )
+      call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))
 c

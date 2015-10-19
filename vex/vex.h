@@ -167,6 +167,30 @@ struct bbc_assign {
 
 typedef struct bbc_assign Bbc_assign;
 
+struct stream_def {
+  char *chan_link;
+  char *bit;
+  struct dvalue *input;
+  struct dvalue *ondisk;
+  char *bitstream_link;
+};
+
+typedef struct stream_def Stream_def;
+
+struct stream_sample_rate {
+  struct dvalue *rate;
+  char *bitstream_link;
+};
+
+typedef struct stream_sample_rate Stream_sample_rate;
+
+struct stream_label {
+  char *label;
+  char *bitstream_link;
+};
+
+typedef struct stream_label Stream_label;
+
 struct clock_early {
   char *start;
   struct dvalue *offset;
@@ -407,6 +431,14 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 struct nasmyth *make_nasmyth(char *band, char *platform);
 struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
 				   char *if_id);
+struct stream_def *make_stream_def(char *chan_link,char *bit,
+				   struct dvalue *input,
+				   struct dvalue *ondisk,
+				   char *bitstream_link);
+struct stream_sample_rate *make_stream_sample_rate(struct dvalue *rate,
+				   char *bitstream_link);
+struct stream_label *make_stream_label(char *label,
+				   char *bitstream_link);
 struct clock_early *make_clock_early(char *start,struct dvalue *offset,
 				     char *origin, struct dvalue *rate);
 struct headstack *make_headstack(struct dvalue *stack,char *type,

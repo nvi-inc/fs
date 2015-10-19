@@ -873,6 +873,109 @@ char **str3;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_stream_def__
+#else
+fcreate_stream_def
+#endif
+(str, str2, str3, str4, str5)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+/*<      subroutine fcreate_stream_def(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0, >*/
+/*<                                    ptr_ch(str4)//(char *)0, >*/
+/*<                                    ptr_ch(str5)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+/*<      character*(*) str5; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_stream_def(*str,*str2, *str3, *str4, *str5);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_stream_sample_rate__
+#else
+fcreate_stream_sample_rate
+#endif
+(str, str2, str3)
+char **str;
+char **str2;
+char **str3;
+/*<      subroutine fcreate_stream_sample_rate(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_stream_sample_rate(*str,*str2, *str3);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_stream_label__
+#else
+fcreate_stream_label
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_stream_sample_rate(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_stream_label(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_clock__
 #else
 fcreate_clock

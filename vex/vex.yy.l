@@ -320,6 +320,7 @@ char *quote()
 <LINE,REF>"$"CLOCK	{BEGIN(INITIAL);return B_CLOCK;}
 <LINE,REF>"$"ANTENNA	{BEGIN(INITIAL);return B_ANTENNA;}
 <LINE,REF>"$"BBC		{BEGIN(INITIAL);return B_BBC;}
+<LINE,REF>"$"BITSTREAMS		{BEGIN(INITIAL);return B_BITSTREAMS;}
 <LINE,REF>"$"CORR		{BEGIN(INITIAL);return B_CORR;}
 <LINE,REF>"$"DAS		{BEGIN(INITIAL);return B_DAS;}
 <LINE,REF>"$"HEAD_POS	{BEGIN(INITIAL);return B_HEAD_POS;}
@@ -360,6 +361,10 @@ char *quote()
 <LINE>nasmyth            {BEGIN(INITIAL);return T_NASMYTH;}
 
 <LINE>BBC_assign	{BEGIN(INITIAL);return T_BBC_ASSIGN;}
+
+<LINE>stream_def	{BEGIN(INITIAL);return T_STREAM_DEF;}
+<LINE>stream_sample_rate	{BEGIN(INITIAL);return T_STREAM_SAMPLE_RATE;}
+<LINE>stream_label	{BEGIN(INITIAL);return T_STREAM_LABEL;}
 
 <LINE>clock_early	{BEGIN(INITIAL);return T_CLOCK_EARLY;}
 

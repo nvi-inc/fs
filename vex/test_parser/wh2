@@ -763,6 +763,29 @@ $BBC; *BBC and IF assignments
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------
+$BITSTREAMS; *BITSTREAM assignments
+*----------------------------------------------------------------------------------------------------------------------
+*Notes:
+*
+  def EF/S4X4;
+    ref <external_file>:$BITSTREAMS = EF/SX;
+  enddef;
+*
+  def VLBA/S4X4;
+*                channel bit   input ondisk bistream
+*                 link    BBC#              link
+    stream_def = &CH01 : sign : 1 : 33 : &bitstream1;
+    stream_def = &CH01 : mag : 2 : 34 : &bitstream1;
+    stream_def = &CH02 : sign : : 35 : &bitstream1;
+    stream_def = &CH02 : mag : : 36;
+    stream_def = &CH02 : sign : 3 : 37;
+    stream_sample_rate = 8 Ms/sec : &bitstream1;
+    stream_sample_rate = 4 Ms/sec;
+    stream_label = Stream1 : &bitstream2;
+    stream_label = Stream2;
+  enddef;
+*
+*----------------------------------------------------------------------------------------------------------------------
 $CLOCK; *clock parameters 
 *----------------------------------------------------------------------------------------------------------------------
 * 

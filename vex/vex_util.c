@@ -66,6 +66,15 @@ static int
 get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_stream_def_field(Stream_def *stream_def,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_stream_sample_rate_field(Stream_sample_rate *stream_sample_rate,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_stream_label_field(Stream_label *stream_label,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_clock_early_field(Clock_early *clock_early,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -178,6 +187,7 @@ static struct {
   {"CLOCK", B_CLOCK},
   {"ANTENNA", B_ANTENNA},
   {"BBC", B_BBC},
+  {"BITSTREAMS", B_BITSTREAMS},
   {"CORR", B_CORR},
   {"DAS", B_DAS},
   {"HEAD_POS", B_HEAD_POS},
@@ -217,6 +227,10 @@ static  struct {
   {"nasmyth", T_NASMYTH},
   
   {"BBC_assign", T_BBC_ASSIGN},
+
+  {"stream_def", T_STREAM_DEF},
+  {"stream_sample_rate", T_STREAM_SAMPLE_RATE},
+  {"stream_label", T_STREAM_LABEL},
   
   {"clock_early", T_CLOCK_EARLY},
     
@@ -568,6 +582,41 @@ struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
   new->bbc_id=bbc_id;
   new->physical=physical;
   new->if_id=if_id;
+
+  return new;
+}
+struct stream_def *make_stream_def(char *chan_link,char *bit,
+				   struct dvalue *input,
+				   struct dvalue *ondisk,
+				   char *bitstream_link)
+{
+  NEWSTRUCT(new,stream_def);
+
+  new->chan_link=chan_link;
+  new->bit=bit;
+  new->input=input;
+  new->ondisk=ondisk;
+  new->bitstream_link=bitstream_link;
+
+  return new;
+}
+struct stream_sample_rate *make_stream_sample_rate(struct dvalue *rate,
+				   char *bitstream_link)
+{
+  NEWSTRUCT(new,stream_sample_rate);
+
+  new->rate=rate;
+  new->bitstream_link=bitstream_link;
+
+  return new;
+}
+struct stream_label *make_stream_label(char *label,
+				       char *bitstream_link)
+{
+  NEWSTRUCT(new,stream_label);
+
+  new->label=label;
+  new->bitstream_link=bitstream_link;
 
   return new;
 }
@@ -1024,6 +1073,15 @@ char **units)
     break;
   case T_BBC_ASSIGN:
     ierr=get_bbc_assign_field(ptr,n,link,name,value,units);
+    break;
+  case T_STREAM_DEF:
+    ierr=get_stream_def_field(ptr,n,link,name,value,units);
+    break;
+  case T_STREAM_SAMPLE_RATE:
+    ierr=get_stream_sample_rate_field(ptr,n,link,name,value,units);
+    break;
+  case T_STREAM_LABEL:
+    ierr=get_stream_label_field(ptr,n,link,name,value,units);
     break;
   case T_HEADSTACK:
     ierr=get_headstack_field(ptr,n,link,name,value,units);
@@ -1495,6 +1553,104 @@ get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
   }
   return 0;
 }
+
+static int
+get_stream_def_field(Stream_def *stream_def,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=stream_def->chan_link;
+    *link=1;
+    break;
+  case 2:
+    *value=stream_def->bit;
+    break;
+  case 3:
+    *value=stream_def->input->value;
+    *units=stream_def->input->units;
+    *name=0;
+    break;
+  case 4:
+    *value=stream_def->ondisk->value;
+    *units=stream_def->ondisk->units;
+    *name=0;
+    break;
+  case 5:
+    if(stream_def->bitstream_link ==NULL)
+      return -1;
+    *value=stream_def->bitstream_link;
+    *link=1;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+
+static int
+get_stream_sample_rate_field(Stream_sample_rate *stream_sample_rate,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=stream_sample_rate->rate->value;
+    *units=stream_sample_rate->rate->units;
+    *name=0;
+    break;
+  case 2:
+    if(stream_sample_rate->bitstream_link ==NULL)
+      return -1;
+    *value=stream_sample_rate->bitstream_link;
+    *link=1;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+
+static int
+get_stream_label_field(Stream_label *stream_label,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=stream_label->label;
+    break;
+  case 2:
+    if(stream_label->bitstream_link ==NULL)
+      return -1;
+    *value=stream_label->bitstream_link;
+    *link=1;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+
 static int
 get_clock_early_field(Clock_early *clock_early,int n,int *link,
 			  int *name, char **value, char **units)
