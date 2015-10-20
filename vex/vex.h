@@ -196,6 +196,9 @@ struct clock_early {
   struct dvalue *offset;
   char *origin;
   struct dvalue *rate;
+  struct dvalue *accel;
+  struct dvalue *jerk;
+  struct dvalue *peculiar;
 };
 
 typedef struct clock_early Clock_early;
@@ -440,7 +443,9 @@ struct stream_sample_rate *make_stream_sample_rate(struct dvalue *rate,
 struct stream_label *make_stream_label(char *label,
 				   char *bitstream_link);
 struct clock_early *make_clock_early(char *start,struct dvalue *offset,
-				     char *origin, struct dvalue *rate);
+				     char *origin, struct dvalue *rate,
+				     struct dvalue *accel, struct dvalue *jerk,
+				     struct dvalue *peculiar);
 struct headstack *make_headstack(struct dvalue *stack,char *type,
 				 struct dvalue *offset);
 struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
@@ -769,7 +774,9 @@ create_bbc_assign(char *str, char *str2, char *str3);
 /* CLOCK block builders                                                      */
 /*---------------------------------------------------------------------------*/
 void *
-create_clock(char *str, char *str2, char *str3, char *str4, char *str5);
+create_clock(char *str, char *str2, char *str3, char *str4, char *str5,
+	     char *str6, char *str7, char *str8, char *str9, char *str10,
+	     char *str11,char *str12);
 /*---------------------------------------------------------------------------*/
 /* DAS block builders                                                        */
 /*---------------------------------------------------------------------------*/

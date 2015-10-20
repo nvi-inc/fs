@@ -806,7 +806,17 @@ $CLOCK; *clock parameters
   def JB; *other test cases, this is not a meaningful def
     clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12;
     clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec;
+    clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 : 10 sec/sec^2;
+    clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : 10 sec/sec^2;
+    clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : 10 sec/sec^2 : 10 sec/sec^2 : 11 sec/sec^3;
+    clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 : 10 sec/sec^2 : 10 sec/sec^2 : 11 sec/sec^3;
+    clock_early = : 2.5 usec : : : : : 12 sec;
+    clock_early = : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 : : : 12 sec;
     clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec;
+    clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : 10 sec/sec^2 : 11 sec/sec^3 : 12 sec;
+    clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : 10 sec/sec^2 : : 12 sec;
+    clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : : : 12 sec;
+    clock_early = 1995y263d06h00m : 2.5 usec : : : : : 12 sec;
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------

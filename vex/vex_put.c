@@ -884,73 +884,80 @@ create_stream_label(char *str, char *str2)
 /* CLOCK block builders                                              */
 /*-------------------------------------------------------------------*/
 void *
-create_clock(char *str, char *str2, char *str3, char *str4, char *str5)
+create_clock(char *str, char *str2, char *str3, char *str4, char *str5,
+	     char *str6, char *str7, char *str8, char *str9, char *str10,
+	     char *str11, char *str12)
 {
-  char *valid_from, *clock_early_value, *clock_early_units,
-       *clock_early_epoch, *rate;
+  char *valid_from, *early_value, *early_units,
+    *epoch, *rate_value, *rate_units, *accel_value, *accel_units,
+    *jerk_value, *jerk_units, *peculiar_value, *peculiar_units;
+
+  struct dvalue *early, *rate, *accel, *jerk, *peculiar;
 
   if(str2==NULL || strlen(str2)==0 ||
-     str3==NULL || strlen(str3)==0) 
-    {
-      printf("%s \'clock\' %s %s block\n",
-	     err1, err2, int2block(blk));
-    }
-  else
-    {
-      if(str==NULL || strlen(str)==0)
-	{
-	  if(str4==NULL || strlen(str4)==0 ||
-	     str5==NULL || strlen(str5)==0)
-	    {
-	      clock_early_value=(char *)strdup(str2);
-              clock_early_units=(char *)strdup(str3);
-	      qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
-					     make_clock_early(NULL,
-					     make_dvalue(clock_early_value,
-					                 clock_early_units),
-					     NULL,NULL)));
-	    }
-	  else
-	    {
-	      clock_early_value=(char *)strdup(str2);
-              clock_early_units=(char *)strdup(str3);
-	      clock_early_epoch=(char *)strdup(str4);
-	      rate=(char *)strdup(str5);
-	      qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
-					     make_clock_early(NULL,
-					     make_dvalue(clock_early_value,
-					                 clock_early_units),
- 				             clock_early_epoch,
-                 		             make_dvalue(rate,NULL))));
-	    }
-	}
-      else if(str4==NULL || strlen(str4)==0 ||
-	      str5==NULL || strlen(str5)==0)
-	{ 
-	  valid_from=(char *)strdup(str);
-	  clock_early_value=(char *)strdup(str2);
-	  clock_early_units=(char *)strdup(str3);
-	  qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
-	   			         make_clock_early(valid_from,
-				         make_dvalue(clock_early_value,
-						     clock_early_units),
-				         NULL,NULL)));
-	}
+     str3==NULL || strlen(str3)==0)
+    printf("%s \'clock\' %s %s block\n",
+	   err1, err2, int2block(blk));
+  else {
+    early_value=(char *)strdup(str2);
+    early_units=(char *)strdup(str3);
+    early=make_dvalue(early_value,early_units);
+    
+    if(str==NULL || strlen(str)==0)
+      valid_from=NULL;
+    else
+      valid_from=(char *)strdup(str);
+
+    if(str4==NULL || strlen(str4)== 0)
+      epoch=NULL;
+    else
+      epoch=(char *)strdup(str4);
+
+    if(str5==NULL || strlen(str5) == 0)
+      rate=NULL;
+    else {
+      rate_value=(char *)strdup(str5);
+      if(str6==NULL || strlen(str6) == 0)
+	rate_units=NULL;
       else
-	{
-	  valid_from=(char *)strdup(str);
-	  clock_early_value=(char *)strdup(str2);
-	  clock_early_units=(char *)strdup(str3);
-	  clock_early_epoch=(char *)strdup(str4);
-	  rate=(char *)strdup(str5);
-	  qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
-				         make_clock_early(valid_from,
-				         make_dvalue(clock_early_value,
-					             clock_early_units),
-				         clock_early_epoch,
-				         make_dvalue(rate,NULL))));
-	}
-    }  
+	rate_units=(char *)strdup(str6);
+      rate=make_dvalue(rate_value,rate_units);
+    }
+
+    if(str7==NULL || strlen(str7) == 0 ||
+       str8==NULL || strlen(str8) == 0 )
+      accel=NULL;
+    else {
+      accel_value=(char *)strdup(str7);
+      accel_units=(char *)strdup(str8);
+      accel=make_dvalue(accel_value,accel_units);
+    }
+
+    if(str9==NULL || strlen(str9) == 0 ||
+       str10==NULL || strlen(str10) == 0 )
+      jerk=NULL;
+    else {
+      jerk_value=(char *)strdup(str9);
+      jerk_units=(char *)strdup(str10);
+      jerk=make_dvalue(jerk_value,jerk_units);
+    }
+
+    if(str11==NULL || strlen(str11) == 0 ||
+       str12==NULL || strlen(str12) == 0 )
+      peculiar=NULL;
+    else {
+      peculiar_value=(char *)strdup(str11);
+      peculiar_units=(char *)strdup(str12);
+      peculiar=make_dvalue(peculiar_value,peculiar_units);
+    }
+
+    qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
+					     make_clock_early(valid_from,
+							      early, epoch,
+							      rate, accel,
+							      jerk,
+							      peculiar)));
+  }
 }
 /*-------------------------------------------------------------------*/
 /* DAS block builders                                                */

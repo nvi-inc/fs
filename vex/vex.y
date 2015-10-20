@@ -369,6 +369,9 @@ struct s2_data_source  *dsptr;
 %type  <dvptr>  unit_option
 %type  <sval>   name_value
 
+%type  <sval>   name_or_not empty_name
+%type  <dvptr>  empty_value
+
 %%
 
 /* start rule */
@@ -755,6 +758,7 @@ clock_lowl:	clock_early		{$$=make_lowl(T_CLOCK_EARLY,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
+/*
 clock_early:	T_CLOCK_EARLY '=' ':' unit_value ';'
 				{$$=make_clock_early(NULL,$4,NULL,NULL);}
 		| T_CLOCK_EARLY '=' T_NAME ':' unit_value ';'
@@ -763,10 +767,36 @@ clock_early:	T_CLOCK_EARLY '=' ':' unit_value ';'
 				{$$=make_clock_early($3,$5,$7,$9);}
 	| T_CLOCK_EARLY '=' ':' unit_value ':' T_NAME ':' unit_option ';'
 				{$$=make_clock_early(NULL,$4,$6,$8);}
-	| T_CLOCK_EARLY '=' T_NAME ':' unit_value ':' T_NAME ':' unit_value ';'
+*/
+/*
+clock_early:	T_CLOCK_EARLY '=' name_or_not ':' unit_value ';'
+				{$$=make_clock_early($3,$5,NULL,NULL);}
+	| T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ';'
 				{$$=make_clock_early($3,$5,$7,$9);}
-	| T_CLOCK_EARLY '=' ':' unit_value ':' T_NAME ':' unit_value ';'
-				{$$=make_clock_early(NULL,$4,$6,$8);}
+*/
+clock_early:	T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ':' unit_value ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,$13,$15);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,$13,NULL);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ':' empty_value ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,$13,$15);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,NULL,NULL);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' empty_value ':' empty_value ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,$13,$15);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ';'
+                {$$=make_clock_early($3,$5,$7,$9,NULL,NULL,NULL);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' empty_name ':' empty_value ':' empty_value ':' empty_value ':' unit_value ';'
+                {$$=make_clock_early($3,$5,$7,$9,$11,$13,$15);}
+                | T_CLOCK_EARLY '=' name_or_not ':' unit_value ';'
+                {$$=make_clock_early($3,$5,NULL,NULL,NULL,NULL,NULL);}
+;
+name_or_not: /* empty */  {$$=NULL;}
+             | T_NAME     {$$=$1;}
+;
+empty_value: /* empty */  {$$=NULL;}
+;
+empty_name: /* empty */   {$$=NULL;}
 ;
 /* $DAS block */
 

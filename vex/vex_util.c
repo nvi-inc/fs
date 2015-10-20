@@ -621,7 +621,9 @@ struct stream_label *make_stream_label(char *label,
   return new;
 }
 struct clock_early *make_clock_early(char *start,struct dvalue *offset,
-				     char *origin, struct dvalue *rate)
+				     char *origin, struct dvalue *rate,
+				     struct dvalue *accel, struct dvalue *jerk,
+				     struct dvalue *peculiar)
 {
   NEWSTRUCT(new,clock_early);
 
@@ -629,6 +631,9 @@ struct clock_early *make_clock_early(char *start,struct dvalue *offset,
   new->offset=offset;
   new->origin=origin;
   new->rate=rate;
+  new->accel=accel;
+  new->jerk=jerk;
+  new->peculiar=peculiar;
 
   return new;
 }
@@ -1672,18 +1677,46 @@ get_clock_early_field(Clock_early *clock_early,int n,int *link,
     *name=0;
     break;
   case 3:
-    if(clock_early->origin == NULL)
+    if(clock_early->origin == NULL && clock_early->peculiar == NULL)
       return -1;
     *value=clock_early->origin;
     break;
   case 4:
-    if(clock_early->origin == NULL)
-      return -1;
-    if(clock_early->rate!=NULL) {
-      *value=clock_early->rate->value;
-      *units=clock_early->rate->units;
-    }
     *name=0;
+    if(clock_early->rate == NULL)
+      if(clock_early->peculiar == NULL)
+	return -1;
+      else
+	return 0;
+    *value=clock_early->rate->value;
+    *units=clock_early->rate->units;
+    break;
+  case 5:
+    *name=0;
+    if(clock_early->accel == NULL)
+      if(clock_early->peculiar == NULL)
+	return -1;
+      else
+	return 0;
+    *value=clock_early->accel->value;
+    *units=clock_early->accel->units;
+    break;
+  case 6:
+    *name=0;
+    if(clock_early->jerk == NULL)
+      if(clock_early->peculiar == NULL)
+	return -1;
+      else
+	return 0;
+    *value=clock_early->jerk->value;
+    *units=clock_early->jerk->units;
+    break;
+  case 7:
+    *name=0;
+    if(clock_early->peculiar == NULL)
+      return -1;
+    *value=clock_early->peculiar->value;
+    *units=clock_early->peculiar->units;
     break;
   default:
     return -1;
