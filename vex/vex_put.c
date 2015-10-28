@@ -883,14 +883,12 @@ create_bbc_assign(char *str, char *str2, char *str3)
 void *
 create_stream_def(char *str, char *str2, char *str3, char *str4, char *str5)
 {
-  char *chan_link, *bit, *input, *ondisk, *bitstream_link;
+  char *chan_link, *bit, *input_value, *ondisk_value, *bitstream_link;
+  struct dvalue *input,*ondisk;
 
   if(str==NULL || strlen(str)==0 ||
      str2==NULL || strlen(str2)==0 ||
-     str3==NULL || strlen(str3)==0 ||
-     str4==NULL || strlen(str4)==0 || 
-     str5==NULL || strlen(str5)==0)
-    {
+     str4==NULL || strlen(str4)==0)    {
       printf("%s \'stream_def\' %s %s block\n",
 	     err1, err2, int2block(blk));
     }
@@ -898,15 +896,24 @@ create_stream_def(char *str, char *str2, char *str3, char *str4, char *str5)
     {
       chan_link=(char *)strdup(str);
       bit=(char *)strdup(str2);
-      input=(char *)strdup(str3);
-      ondisk=(char *)strdup(str4);
-      bitstream_link=(char *)strdup(str5);
+      ondisk_value=(char *)strdup(str4);
+      ondisk=make_dvalue(ondisk_value,NULL);
+
+      if(str3==NULL || strlen(str2)==0)
+	input=NULL;
+      else {
+	input_value=(char *)strdup(str3);
+	input=make_dvalue(input_value,NULL);
+      }
+      if(str5==NULL || strlen(str5)==0)
+	bitstream_link=NULL;
+      else
+	bitstream_link=(char *)strdup(str5);
 
       qref_list = add_list(qref_list,make_lowl(T_STREAM_DEF,
 					       make_stream_def(chan_link,bit,
-				   make_dvalue(input,NULL),
-				   make_dvalue(ondisk,NULL),
-				   bitstream_link)));
+					       input,ondisk,
+					       bitstream_link)));
     }
 }  
 void *

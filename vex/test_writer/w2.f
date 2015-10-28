@@ -103,6 +103,18 @@ c
      &                       ptr_ch('33'//char(0)),
      &                       ptr_ch('bitstream1'//char(0))
      &     )
+      call fcreate_stream_def(ptr_ch('CH01'//char(0)),
+     &                       ptr_ch('mag'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('34'//char(0)),
+     &                       ptr_ch(char(0))
+     &     )
+      call fcreate_stream_def(ptr_ch('CH01'//char(0)),
+     &                       ptr_ch('mag'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('35'//char(0)),
+     &                       ptr_ch('bitstream1'//char(0))
+     &     )
       call fcreate_stream_sample_rate(ptr_ch('8'//char(0)),
      &                       ptr_ch('Ms/sec'//char(0)),
      &                       ptr_ch('bitstream1'//char(0))
