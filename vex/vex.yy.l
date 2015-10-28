@@ -377,6 +377,13 @@ char *quote()
 <LINE>recording_system_ID	{BEGIN(INITIAL);return T_RECORDING_SYSTEM_ID;}
 <LINE>tape_motion		{BEGIN(INITIAL);return T_TAPE_MOTION;}
 <LINE>tape_control		{BEGIN(INITIAL);return T_TAPE_CONTROL;}
+<LINE>equip		        {BEGIN(INITIAL);return T_EQUIP;}
+<LINE>composite_equip	        {BEGIN(INITIAL);return T_COMPOSITE_EQUIP;}
+<LINE>equip_set	                {BEGIN(INITIAL);return T_EQUIP_SET;}
+<LINE>equip_info                {BEGIN(INITIAL);return T_EQUIP_INFO;}
+<LINE>connection                {BEGIN(INITIAL);return T_CONNECTION;}
+<LINE>record_method             {BEGIN(INITIAL);return T_RECORD_METHOD;}
+<LINE>record_control            {BEGIN(INITIAL);return T_RECORD_CONTROL;}
 
 <LINE>TAI-UTC			{BEGIN(INITIAL);return T_TAI_UTC;}
 <LINE>A1-TAI			{BEGIN(INITIAL);return T_A1_TAI;}

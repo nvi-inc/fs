@@ -236,6 +236,56 @@ struct tape_motion {
 
 typedef struct tape_motion Tape_Motion;
 
+struct equip {
+  char *type;
+  char *device;
+  char *link;
+  char *label;
+};
+
+typedef struct equip Equip;
+
+struct composite_equip {
+  char *link;
+  struct llist *sub;
+};
+
+typedef struct composite_equip Composite_equip;
+
+struct equip_set {
+  char *link;
+  char *function;
+  struct llist *settings;
+};
+
+typedef struct equip_set Equip_set;
+
+struct equip_info {
+  char *link;
+  char *name;
+  struct llist *values;
+};
+
+typedef struct equip_info Equip_info;
+
+struct connection {
+  char *signal_link;
+  char *equip_link;
+  char *label;
+  char *direction;
+  char *type;
+};
+
+typedef struct connection Connection;
+
+struct record_method {
+  char *pattern;
+  struct dvalue *early;
+  struct dvalue *gap;
+};
+
+typedef struct record_method Record_method;
+
 struct headstack_pos {
   struct dvalue *index;
   struct llist *positions;
@@ -452,6 +502,16 @@ struct tape_length *make_tape_length(struct dvalue *duration, char *speed,
 				     struct dvalue *tapes);
 struct tape_motion *make_tape_motion(char *type, struct dvalue *early,
 				     struct dvalue *late, struct dvalue *gap);
+struct equip *make_equip(char *type, char *device, char *link, char *label);
+struct composite_equip *make_composite_equip(char *link, struct llist *sub);
+struct equip_set *make_equip_set(char *link, char *function,
+				 struct llist *settings);
+struct equip_info *make_equip_info(char *link, char *name,
+				   struct llist *values);
+struct connection *make_connection(char *signal_link, char *equipment_link,
+				   char *label, char *direction, char *type);
+struct record_method *make_record_method(char *pattern, struct dvalue *early,
+				   struct dvalue *gap);
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
 struct if_def *make_if_def(char *if_id, char *physical, char *polar,
@@ -806,6 +866,27 @@ create_tape_motion(char *str, char *str2, char *str3, char *str4,
                    char *str5, char *str6, char *str7);
 void *
 create_tape_control(char *str);
+
+void *
+create_equip(char *str, char *str2, char *str3, char *str4);
+
+void *
+create_composite_equip(char *str);
+
+void *
+create_equip_set(char *str,char *str2);
+
+void *
+create_equip_info(char *str,char *str2);
+
+void *
+create_connection(char *str, char *str2, char *str3, char *str4, char *str5);
+
+void *
+create_record_method(char *str, char *str2, char *str3, char *str4, char *str5);
+
+void *
+create_record_control(char *str);
 /*---------------------------------------------------------------------------*/
 /* EOP block builders                                                        */
 /*---------------------------------------------------------------------------*/

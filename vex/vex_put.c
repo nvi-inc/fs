@@ -46,6 +46,7 @@ static struct llist *qref_list=NULL;     /* To help build a ref list */
 static struct llist *b_list=NULL;        /* To help build a block list */
 static struct llist *q_list=NULL;        /* To help build a list */
 static struct llist *q2_list=NULL;       /* To help build a list when
+
 					    two (2) lists are needed. */
 static struct llist *version_list=NULL;
 
@@ -1174,6 +1175,208 @@ create_tape_control(char *str)
     {
       s1=(char *)strdup(str);
       qref_list = add_list(qref_list,make_lowl(T_TAPE_CONTROL,s1));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_equip(char *str, char *str2, char *str3, char *str4)
+{
+  char *s1, *s2, *s3, *s4;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2) ==0 ||
+     str3==NULL || strlen(str3) ==0)
+    {
+      printf("%s \'equip\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      s3=(char *)strdup(str3);
+      if(str4==NULL || strlen(str4)==0)
+	s4=NULL;
+      else
+	s4=(char *)strdup(str4);
+      qref_list = add_list(qref_list,make_lowl(T_EQUIP,
+					       make_equip(s1,s2,s3,s4)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_svalue_list(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'svalue_list\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      q_list=add_list(q_list,s1);
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_lvalue_list(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'lvalue_list\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      q_list=add_list(q_list,s1);
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_composite_equip(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0 ||
+     q_list == NULL)
+    {
+      printf("%s \'composite_equip\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_COMPOSITE_EQUIP,
+					       make_composite_equip(s1,q_list)));
+      q_list=NULL;
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_equip_set(char *str, char *str2)
+{
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     q_list==NULL)
+    {
+      printf("%s \'equip_set\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_EQUIP_SET,
+					       make_equip_set(s1,s2,q_list)));
+      q_list=NULL;
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_equip_info(char *str, char *str2)
+{
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     q_list==NULL)
+    {
+      printf("%s \'equip_info\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_EQUIP_INFO,
+					       make_equip_set(s1,s2,q_list)));
+      q_list=NULL;
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_connection(char *str, char *str2, char *str3, char *str4, char *str5)
+{
+  char *s1, *s2, *s3, *s4, *s5;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2) ==0 ||
+     str3==NULL || strlen(str3) ==0)
+    {
+      printf("%s \'connection\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      s3=(char *)strdup(str3);
+      if(str4==NULL || strlen(str4)==0)
+	s4=NULL;
+      else
+	s4=(char *)strdup(str4);
+      if(str5==NULL || strlen(str5)==0)
+	s5=NULL;
+      else
+	s5=(char *)strdup(str5);
+      qref_list = add_list(qref_list,
+			   make_lowl(T_CONNECTION,
+				     make_connection(s1,s2,s3,s4,s5)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_record_method(char *str, char *str2, char *str3, char *str4, char *str5)
+{
+  char *s1;
+  struct dvalue *s2, *s4;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'record_method\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0 ||
+	 str3==NULL || strlen(str3)==0)
+	s2=NULL;
+      else
+	s2=make_dvalue(str2,str3);
+      if(str4==NULL || strlen(str4)==0 ||
+	 str5==NULL || strlen(str5)==0)
+	s4=NULL;
+      else
+	s4=make_dvalue(str4,str5);
+      qref_list = add_list(qref_list,
+			   make_lowl(T_RECORD_METHOD,
+				     make_record_method(s1,s2,s4)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_record_control(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'record_control\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_RECORD_CONTROL,s1));
     }
 }  
 /*-------------------------------------------------------------------*/

@@ -87,6 +87,24 @@ static int
 get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_equip_field(Equip *equip,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_composite_equip_field(Composite_equip *composite_equip,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_equip_set_field(Equip_set *equip_set,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_equip_info_field(Equip_info *equip_info,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_connection_field(Connection *connection,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_record_method_field(Record_method *record_method,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_headstack_pos_field(Headstack_pos *headstack_pos,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -160,6 +178,9 @@ get_svalue_field(char *svalue,int n,int *link, int *name,
 		 char **value, char **units);
 static int
 get_svalue_list_field(Llist *list,int n,int *link,int *name,
+		      char **value, char **units);
+static int
+get_lvalue_list_field(Llist *list,int n,int *link,int *name,
 		      char **value, char **units);
 static int
 get_date_field(char *date,int n,int *link, int *name, char **value,
@@ -243,6 +264,13 @@ static  struct {
   {"recording_system_ID", T_RECORDING_SYSTEM_ID},
   {"tape_motion", T_TAPE_MOTION},
   {"tape_control", T_TAPE_CONTROL},
+  {"equip", T_EQUIP},
+  {"composite_equip", T_COMPOSITE_EQUIP},
+  {"equip_set", T_EQUIP_SET},
+  {"equip_info", T_EQUIP_INFO},
+  {"connection", T_CONNECTION},
+  {"record_method", T_RECORD_METHOD},
+  {"record_control", T_RECORD_CONTROL},
   
   {"TAI-UTC", T_TAI_UTC},
   {"A1-TAI", T_A1_TAI},
@@ -672,6 +700,72 @@ struct tape_motion *make_tape_motion(char *type, struct dvalue *early,
 
   return new;
 }
+struct equip *make_equip(char *type, char *device, char *link, char *label)
+{
+  NEWSTRUCT(new,equip);
+ 
+  new->type=type;
+  new->device=device;
+  new->link=link;
+  new->label=label;
+
+  return new;
+}
+struct composite_equip *make_composite_equip(char *link, struct llist *sub)
+{
+  NEWSTRUCT(new,composite_equip);
+ 
+  new->link=link;
+  new->sub=sub;
+
+  return new;
+}
+struct equip_set *make_equip_set(char *link, char *function,
+				 struct llist *settings)
+{
+  NEWSTRUCT(new,equip_set);
+ 
+  new->link=link;
+  new->function=function;
+  new->settings=settings;
+
+  return new;
+}
+struct equip_info *make_equip_info(char *link, char *name,
+				   struct llist *values)
+{
+  NEWSTRUCT(new,equip_info);
+ 
+  new->link=link;
+  new->name=name;
+  new->values=values;
+
+  return new;
+}
+struct connection *make_connection(char *signal_link, char *equip_link,
+				   char *label, char *direction, char *type)
+{
+  NEWSTRUCT(new,connection);
+ 
+  new->signal_link=signal_link;
+  new->equip_link=equip_link;
+  new->label=label;
+  new->direction=direction;
+  new->type=type;
+
+  return new;
+}
+struct record_method *make_record_method(char *pattern, struct dvalue *early,
+				   struct dvalue *gap)
+{
+  NEWSTRUCT(new,record_method);
+ 
+  new->pattern=pattern;
+  new->early=early;
+  new->gap=gap;
+
+  return new;
+}
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions)
 {
@@ -1028,6 +1122,7 @@ char **units)
   case T_RECORD_TRANSPORT_TYPE:
   case T_ELECTRONICS_RACK_TYPE:
   case T_TAPE_CONTROL:
+  case T_RECORD_CONTROL:
   case T_NUT_MODEL:
   case T_EXPER_NAME:
   case T_EXPER_DESCRIPTION:
@@ -1096,6 +1191,24 @@ char **units)
     break;
   case T_TAPE_MOTION:
     ierr=get_tape_motion_field(ptr,n,link,name,value,units);
+    break;
+  case T_EQUIP:
+    ierr=get_equip_field(ptr,n,link,name,value,units);
+    break;
+  case T_COMPOSITE_EQUIP:
+    ierr=get_composite_equip_field(ptr,n,link,name,value,units);
+    break;
+  case T_EQUIP_SET:
+    ierr=get_equip_set_field(ptr,n,link,name,value,units);
+    break;
+  case T_EQUIP_INFO:
+    ierr=get_equip_info_field(ptr,n,link,name,value,units);
+    break;
+  case T_CONNECTION:
+    ierr=get_connection_field(ptr,n,link,name,value,units);
+    break;
+  case T_RECORD_METHOD:
+    ierr=get_record_method_field(ptr,n,link,name,value,units);
     break;
   case T_UT1_UTC:
   case T_X_WOBBLE:
@@ -1821,6 +1934,205 @@ get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
     *value=tape_motion->gap->value;
     *units=tape_motion->gap->units;
     *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_equip_field(Equip *equip,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=equip->type;
+    break;
+  case 2:
+    *value=equip->device;
+    break;
+  case 3:
+    *value=equip->link;
+    *link=1;
+    break;
+  case 4:
+    if(equip->label == NULL)
+      return -1;
+    *value=equip->label;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_composite_equip_field(Composite_equip *composite_equip,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=composite_equip->link;
+    *link=1;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_lvalue_list_field(composite_equip->sub,n-1,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_composite_equip_field %d\n",ierr);
+      exit(1);
+    }
+  }
+  return 0;
+}
+static int
+get_equip_set_field(Equip_set *equip_set,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=equip_set->link;
+    *link=1;
+    break;
+  case 2:
+    *value=equip_set->function;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_svalue_list_field(equip_set->settings,n-2,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_equip_set_field %d\n",ierr);
+      exit(1);
+    }
+  }
+  return 0;
+}
+static int
+get_equip_info_field(Equip_info *equip_info,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=equip_info->link;
+    *link=1;
+    break;
+  case 2:
+    *value=equip_info->name;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_svalue_list_field(equip_info->values,n-2,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_equip_info_field %d\n",ierr);
+      exit(1);
+    }
+  }
+  return 0;
+}
+static int
+get_connection_field(Connection *connection,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=connection->signal_link;
+    *link=1;
+    break;
+  case 2:
+    *value=connection->equip_link;
+    *link=1;
+    break;
+  case 3:
+    *value=connection->label;
+    break;
+  case 4:
+    if(connection->direction == NULL && connection->type == NULL)
+      return -1;
+    *value=connection->direction;
+    break;
+  case 5:
+    if(connection->type == NULL)
+      return -1;
+    *value=connection->type;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_record_method_field(Record_method *record_method,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=record_method->pattern;
+    break;
+  case 2:
+    *name=0;
+    if(record_method->early == NULL && record_method->gap == NULL)
+      return -1;
+    else if(record_method->early == NULL)
+      return 0;
+    *value=record_method->early->value;
+    *units=record_method->early->units;
+    break;
+  case 3:
+    *name=0;
+    if(record_method->gap==NULL)
+      return -1;
+    *value=record_method->gap->value;
+    *units=record_method->gap->units;
     break;
   default:
     return -1;
@@ -2623,6 +2935,29 @@ get_svalue_list_field(Llist *list,int n,int *link,int *name,
     list=list->next;
   }
   fprintf(stderr,"impossible condition in get_svalue_list_field\n");
+  return -999;
+}
+static int
+get_lvalue_list_field(Llist *list,int n,int *link,int *name,
+		      char **value, char **units)
+{
+  int i;
+
+  *link=1;
+  *name=0;
+  *units=NULL;
+  *value=NULL;
+
+  for(i=1; i<=n; i++) {
+    if(list==NULL)
+      return -1;
+    if(i==n) {
+      *value=(char *) list->ptr;
+      return 0;
+    }
+    list=list->next;
+  }
+  fprintf(stderr,"impossible condition in get_lvalue_list_field\n");
   return -999;
 }
 static int

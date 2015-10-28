@@ -67,6 +67,12 @@ struct clock_early     *ceptr;
 
 struct tape_length     *tlptr;
 struct tape_motion     *tmptr;
+struct equip           *eqptr;
+struct composite_equip *cqptr;
+struct equip_set       *esptr;
+struct equip_info      *eiptr;
+struct connection      *coptr;
+struct record_method   *rmptr;
 
 struct headstack_pos   *hpptr;
 
@@ -117,6 +123,8 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_RECORD_TRANSPORT_TYPE T_ELECTRONICS_RACK_TYPE T_NUMBER_DRIVES
 %token <ival>   T_HEADSTACK T_RECORD_DENSITY T_TAPE_LENGTH
 %token <ival>   T_RECORDING_SYSTEM_ID T_TAPE_MOTION T_TAPE_CONTROL
+%token <ival>   T_EQUIP T_COMPOSITE_EQUIP T_EQUIP_SET T_EQUIP_INFO T_CONNECTION
+%token <ival>   T_RECORD_METHOD T_RECORD_CONTROL
 
 %token <ival>   T_TAI_UTC T_A1_TAI T_EOP_REF_EPOCH T_NUM_EOP_POINTS
 %token <ival>   T_EOP_INTERVAL T_UT1_UTC T_X_WOBBLE T_Y_WOBBLE
@@ -244,6 +252,14 @@ struct s2_data_source  *dsptr;
 %type  <hsptr>  headstack
 %type  <tlptr>  tape_length
 %type  <tmptr>  tape_motion
+%type  <eqptr>  equip
+%type  <cqptr>  composite_equip
+%type  <llptr>  link_list
+%type  <esptr>  equip_set
+%type  <eiptr>  equip_info
+%type  <coptr>  connection
+%type  <rmptr>  record_method
+%type  <sval>   record_control
 
 %type  <llptr>  eop_block eop_defs eop_lowls 
 %type  <dfptr>  eop_def
@@ -582,7 +598,7 @@ method:		/* empty */			{$$=NULL;}
 destination:	/* empty */			{$$=NULL;}
 		| T_NAME			{$$=$1;}
 ;
-unit_value2:	/* empty */ 			{$$=make_dvalue(NULL,NULL);}
+unit_value2:	/* empty */ 			{$$=NULL;}
 		| T_NAME T_NAME 		{$$=make_dvalue($1,$2);}
 ;
 options:	/* empty */			{$$=NULL;}
@@ -827,6 +843,13 @@ das_lowl:	record_transport_type {$$=make_lowl(T_RECORD_TRANSPORT_TYPE,$1);}
 				{$$=make_lowl(T_RECORDING_SYSTEM_ID,$1);}
 		| tape_motion		{$$=make_lowl(T_TAPE_MOTION,$1);}
 		| tape_control		{$$=make_lowl(T_TAPE_CONTROL,$1);}
+		| equip		        {$$=make_lowl(T_EQUIP,$1);}
+		| composite_equip       {$$=make_lowl(T_COMPOSITE_EQUIP,$1);}
+		| equip_set	        {$$=make_lowl(T_EQUIP_SET,$1);}
+		| equip_info	        {$$=make_lowl(T_EQUIP_INFO,$1);}
+		| connection	        {$$=make_lowl(T_CONNECTION,$1);}
+		| record_method	        {$$=make_lowl(T_RECORD_METHOD,$1);}
+		| record_control        {$$=make_lowl(T_RECORD_CONTROL,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -861,6 +884,41 @@ tape_motion:	T_TAPE_MOTION '=' T_NAME ';'
 				{$$=make_tape_motion($3,$5,$7,$9);}
 ;
 tape_control:	T_TAPE_CONTROL '=' T_NAME ';' {$$=$3;}
+;
+equip:	        T_EQUIP '=' T_NAME ':' T_NAME ':' T_LINK ':' T_NAME ';'
+                {$$=make_equip($3,$5,$7,$9);}
+                | T_EQUIP '=' T_NAME ':' T_NAME ':' T_LINK ';'
+                {$$=make_equip($3,$5,$7,NULL);}
+;
+composite_equip: T_COMPOSITE_EQUIP '=' T_LINK ':' T_LINK ':' T_LINK ';'
+                 {$$=make_composite_equip($3,ins_list($5,add_list(NULL,$7)));}
+                 | T_COMPOSITE_EQUIP '=' T_LINK ':' T_LINK ':' T_LINK ':' link_list ';'
+                 {$$=make_composite_equip($3,ins_list($5,ins_list($7,$9)));}
+;
+link_list:	link_list ':' T_LINK    	{$$=add_list($1,$3);}
+                | T_LINK			{$$=add_list(NULL,$1);}
+;
+equip_set:      T_EQUIP_SET '=' T_LINK ':' T_NAME ':' name_list ';'
+                {$$=make_equip_set($3,$5,$7);}
+;
+equip_info:     T_EQUIP_INFO '=' T_LINK ':' T_NAME ':' name_list ';'
+                {$$=make_equip_info($3,$5,$7);}
+;
+connection:     T_CONNECTION '=' T_LINK ':' T_LINK ':' T_NAME ':' name_or_not ':' T_NAME ';'
+                {$$=make_connection($3,$5,$7,$9,$11);}
+                | T_CONNECTION '=' T_LINK ':' T_LINK ':' T_NAME ':' T_NAME ';'
+                {$$=make_connection($3,$5,$7,$9,NULL);}
+                | T_CONNECTION '=' T_LINK ':' T_LINK ':' T_NAME ';'
+                {$$=make_connection($3,$5,$7,NULL,NULL);}
+;
+record_method:  T_RECORD_METHOD '=' T_NAME ':' unit_value2 ':' unit_value ';'
+                {$$=make_record_method($3,$5,$7);}
+                | T_RECORD_METHOD '=' T_NAME ':' unit_value ';'
+                {$$=make_record_method($3,$5,NULL);}
+                | T_RECORD_METHOD '=' T_NAME ';'
+                {$$=make_record_method($3,NULL,NULL);}
+;
+record_control:	T_RECORD_CONTROL '=' T_NAME ';' {$$=$3;}
 ;
 /* $EOP block */
 

@@ -1337,6 +1337,283 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_equip__
+#else
+fcreate_equip
+#endif
+(str,str2,str3,str4)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+/*<      subroutine fcreate_equip(ptr_ch(str)//(char *)0, >*/
+/*<                               ptr_ch(str2)//(char *)0, >*/
+/*<                               ptr_ch(str3)//(char *)0, >*/
+/*<                               ptr_ch(str4)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_equip(*str,*str2,*str3,*str4);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_svalue_list__
+#else
+fcreate_svalue_list
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_svalue_list(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_svalue_list(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_lvalue_list__
+#else
+fcreate_lvalue_list
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_lvalue_list(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_lvalue_list(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_composite_equip__
+#else
+fcreate_composite_equip
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_composite_equip(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_composite_equip(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_equip_set__
+#else
+fcreate_equip_set
+#endif
+(str,str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_equip_set(ptr_ch(str)//(char *)0, >*/
+/*<                                  ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_equip_set(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_equip_info__
+#else
+fcreate_equip_info
+#endif
+(str,str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_equip_info(ptr_ch(str)//(char *)0, >*/
+/*<                                   ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_equip_info(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_connection__
+#else
+fcreate_connection
+#endif
+(str,str2,str3,str4,str5)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+/*<      subroutine fcreate_equip(ptr_ch(str)//(char *)0, >*/
+/*<                               ptr_ch(str2)//(char *)0, >*/
+/*<                               ptr_ch(str3)//(char *)0, >*/
+/*<                               ptr_ch(str4)//(char *)0, >*/
+/*<                               ptr_ch(str5)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+/*<      character*(*) str5; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_connection(*str,*str2,*str3,*str4,*str5);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_record_method__
+#else
+fcreate_record_method
+#endif
+(str,str2,str3,str4,str5)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+/*<      subroutine fcreate_record_method(ptr_ch(str)//(char *)0, >*/
+/*<                                      ptr_ch(str2)//(char *)0, >*/
+/*<                                      ptr_ch(str3)//(char *)0, >*/
+/*<                                     ptr_ch(str4)//(char *)0, >*/
+/*<                                     ptr_ch(str5)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+/*<      character*(*) str5; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_record_method(*str,*str2,*str3,*str4,*str5);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_record_control__
+#else
+fcreate_record_control
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_record_control(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_record_control(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_tai_utc__
 #else
 fcreate_tai_utc

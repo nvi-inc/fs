@@ -261,6 +261,72 @@ c
      &     )
       call fend_def
 c
+      call fcreate_block(ptr_ch('DAS'//char(0)))
+      call fcreate_def(ptr_ch('VEX2'//char(0)))
+      call fcreate_equip(ptr_ch('rack'//char(0)),
+     &     ptr_ch('RDBE'//char(0)),
+     &     ptr_ch('RDBEA'//char(0)),
+     &     ptr_ch('A'//char(0)))
+      call fcreate_equip(ptr_ch('rack'//char(0)),
+     &     ptr_ch('RDBE'//char(0)),
+     &     ptr_ch('RDBEB'//char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_lvalue_list(ptr_ch('RBEA1'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('RBEA2'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('RBEA3'//char(0)))
+      call fcreate_composite_equip(ptr_ch('RBEA'//char(0)))
+
+      call fcreate_svalue_list(ptr_ch('on'//char(0)))
+      call fcreate_equip_set(ptr_ch('RBEA'//char(0)),
+     &                       ptr_ch('AGC'//char(0)))
+      call fcreate_svalue_list(ptr_ch('on'//char(0)))
+      call fcreate_svalue_list(ptr_ch('on1'//char(0)))
+      call fcreate_equip_set(ptr_ch('RBEA'//char(0)),
+     &                       ptr_ch('AGC'//char(0)))
+      call fcreate_svalue_list(ptr_ch('G'//char(0)))
+      call fcreate_equip_info(ptr_ch('RBEA'//char(0)),
+     &                       ptr_ch('model'//char(0)))
+      call fcreate_svalue_list(ptr_ch('1'//char(0)))
+      call fcreate_svalue_list(ptr_ch('2'//char(0)))
+c
+      call fcreate_connection(ptr_ch('vdif'//char(0)),
+     &                       ptr_ch('rdbea'//char(0)),
+     &                       ptr_ch('out1'//char(0)),
+     &                       ptr_ch('out'//char(0)),
+     &                       ptr_ch('ETH'//char(0)))
+      call fcreate_connection(ptr_ch('vdif'//char(0)),
+     &                       ptr_ch('rdbea'//char(0)),
+     &                       ptr_ch('out1'//char(0)),
+     &                       ptr_ch('out'//char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_connection(ptr_ch('vdif'//char(0)),
+     &                       ptr_ch('rdbea'//char(0)),
+     &                       ptr_ch('out1'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_connection(ptr_ch('vdif'//char(0)),
+     &                       ptr_ch('rdbea'//char(0)),
+     &                       ptr_ch('out1'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('ETH'//char(0)))
+      call fcreate_record_method(ptr_ch('start_stop'//char(0)),
+     &                       ptr_ch('10'//char(0)),
+     &                       ptr_ch('seconds'//char(0)),
+     &                       ptr_ch('20'//char(0)),
+     &                       ptr_ch('minutes'//char(0)))
+      call fcreate_record_method(ptr_ch('continuous'//char(0)),
+     &                       ptr_ch('11'//char(0)),
+     &                       ptr_ch('hours'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_record_method(ptr_ch('adaptive'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('21'//char(0)),
+     &                       ptr_ch('days'//char(0)))
+      call fcreate_record_control(ptr_ch('master'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

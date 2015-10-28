@@ -935,6 +935,26 @@ $DAS; *data-acquisition system parameters
     tape_control = master;
   enddef;
 *
+  def VEX2;
+    equip = rack : RDBE : &RDBEA : A;
+    equip = rack : RDBE : &RDBEB;
+    composite_equip = &RDBEA : &RDBEA1 : &DBEA2;
+    composite_equip = &RDBEB : &RDBEB1 : &RDBEB2 : &RDBEB3;
+    composite_equip = &RDBEC : &RDBEC1 : &RDBEC2 : &RDBEC3 : &RDBEC4;
+    equip_set = &RDBEA : AGC : on;
+    equip_set = &RDBEA : AGC : on : on2;
+    equip_info = &RDBEA : model : G;
+    equip_info = &RDBEA : version : 1 : 2;
+    connection = &vdif : &rdbea : out1;
+    connection = &ifa : &rdbea : in1 : in;
+    connection = &ifb : &rdbea : in2 : in : analog;
+    connection = &ifc : &rdbeb : in1 : b : analog;
+    record_method = start_stop : 10 seconds : 20 minutes;
+    record_method = continuous : 11 hours;
+    record_method = adaptive : : 21 days;
+    record_control = master;
+  enddef;
+*
 *----------------------------------------------------------------------------------------------------------------------
 $EOP; *earth-orientation parameters
 *----------------------------------------------------------------------------------------------------------------------
