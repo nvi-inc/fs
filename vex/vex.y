@@ -637,9 +637,9 @@ antenna_lowl:	antenna_diam		{$$=make_lowl(T_ANTENNA_DIAM,$1);}
 antenna_diam:	T_ANTENNA_DIAM '=' unit_value ';'		{$$=$3;}
 ;
 axis_type:	T_AXIS_TYPE '=' T_NAME ':' T_NAME ';'
-                {$$=make_axis_type($3,$5,make_dvalue(NULL,NULL));}
+                {$$=make_axis_type($3,$5,NULL);}
                 | T_AXIS_TYPE '=' T_NAME ';'
-		{$$=make_axis_type($3,NULL,make_dvalue(NULL,NULL));}
+		{$$=make_axis_type($3,NULL,NULL);}
                 | T_AXIS_TYPE '=' T_NAME ':' T_NAME ':' unit_value ';'
 		{$$=make_axis_type($3,$5,$7);}
 ;
@@ -1714,7 +1714,7 @@ value_list:	value_list ':' value		{$$=add_list($1,$3);}
 ;
 value:		T_NAME  			{$$=make_dvalue($1,NULL);}
 ;
-value2:	        /* empty */ 			{$$=make_dvalue(NULL,NULL);}
+value2:	        /* empty */ 			{$$=NULL;}
 		| T_NAME  			{$$=make_dvalue($1,NULL);}
 ;
 %%
