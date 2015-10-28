@@ -1693,6 +1693,8 @@ get_stream_def_field(Stream_def *stream_def,int n,int *link,
     *value=stream_def->bit;
     break;
   case 3:
+    if(stream_def->input==NULL)
+      return 0;
     *value=stream_def->input->value;
     *units=stream_def->input->units;
     *name=0;
@@ -1884,12 +1886,14 @@ get_tape_length_field(Tape_Length *tape_length,int n,int *link,
     *name=0;
     break;
   case 2:
-    if(tape_length->speed==NULL)
+    if(tape_length->speed==NULL && tape_length->tapes==NULL)
       return -1;
+    else if(tape_length->speed==NULL)
+      return 0;
     *value=tape_length->speed;
     break;
   case 3:
-    if(tape_length->speed==NULL)
+    if(tape_length->tapes==NULL)
       return -1;
     *value=tape_length->tapes->value;
     *units=tape_length->tapes->units;
