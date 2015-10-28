@@ -572,16 +572,16 @@ struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
   return new;
 }
 
-struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
+struct pointing_sector *make_pointing_sector(char *name, char *sector, char *axis1,
 					     struct dvalue *lolimit1,
 					     struct dvalue *hilimit1,
 					     char *axis2,
 					     struct dvalue *lolimit2,
-					     struct dvalue *hilimit2,
-					     char *name)
+					     struct dvalue *hilimit2)
 {
   NEWSTRUCT(new,pointing_sector);
 
+  new->name=name;
   new->sector=sector;
   new->axis1=axis1;
   new->lolimit1=lolimit1;
@@ -589,7 +589,6 @@ struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
   new->axis2=axis2;
   new->lolimit2=lolimit2;
   new->hilimit2=hilimit2;
-  new->name=name;
 
   return new;
 }
@@ -1570,6 +1569,8 @@ get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
 
   switch(n) {
   case 0:
+    if(vex_version.lessthan2)
+      return -1;
     *value=pointing_sector->name;
     break;
   case 1:

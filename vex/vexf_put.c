@@ -732,7 +732,7 @@ fcreate_pointing_sector__
 #else
 fcreate_pointing_sector
 #endif
-(str, str2, str3, str4, str5, str6, str7, str8, str9,str10,str11, str0)
+(str, str2, str3, str4, str5, str6, str7, str8, str9,str10,str11)
 char **str;
 char **str2;
 char **str3;
@@ -744,8 +744,83 @@ char **str8;
 char **str9;
 char **str10;
 char **str11;
-char **str0;
 /*<      subroutine fcreate_pointing_sector(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0, >*/
+/*<                                    ptr_ch(str4)//(char *)0, >*/
+/*<                                    ptr_ch(str5)//(char *)0, >*/
+/*<                                    ptr_ch(str6)//(char *)0, >*/
+/*<                                    ptr_ch(str7)//(char *)0, >*/
+/*<                                    ptr_ch(str8)//(char *)0, >*/
+/*<                                    ptr_ch(str9)//(char *)0, >*/
+/*<                                    ptr_ch(str10)//(char *)0, >*/
+/*<                                    ptr_ch(str11)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4 >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7 >*/
+/*<      character*(*) str8; >*/
+/*<      character*(*) str9; >*/
+/*<      character*(*) str10; >*/
+/*<      character*(*) str11; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+/*   character*(*) str6      - string */
+/*   character*(*) str7      - string */
+/*   character*(*) str8      - string */
+/*   character*(*) str9      - string */
+/*   character*(*) str10     - string */
+/*   character*(*) str11     - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_pointing_sector(*str,
+			 *str2,
+			 *str3,
+			 *str4,
+			 *str5,
+			 *str6,
+			 *str7,
+			 *str8,
+			 *str9,
+			 *str10,
+			 *str11);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_pointing_sector2__
+#else
+fcreate_pointing_sector2
+#endif
+(str, str2, str3, str4, str5, str6, str7, str8, str9,str10,str11, str12)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+char **str8;
+char **str9;
+char **str10;
+char **str11;
+char **str12;
+/*<      subroutine fcreate_pointing_sector2(ptr_ch(str)//(char *)0, >*/
 /*<                                    ptr_ch(str2)//(char *)0, >*/
 /*<                                    ptr_ch(str3)//(char *)0, >*/
 /*<                                    ptr_ch(str4)//(char *)0, >*/
@@ -769,7 +844,7 @@ char **str0;
 /*<      character*(*) str9; >*/
 /*<      character*(*) str10; >*/
 /*<      character*(*) str11; >*/
-/*<      character*(*) str0; >*/
+/*<      character*(*) str12; >*/
 
 /* ... */
 
@@ -785,13 +860,13 @@ char **str0;
 /*   character*(*) str9      - string */
 /*   character*(*) str10     - string */
 /*   character*(*) str11     - string */
-/*   character*(*) str0     - string */
+/*   character*(*) str12     - string */
 
 /* output: */
 /*   VEX format */
 /* */
 {
-  create_pointing_sector(*str,
+  create_pointing_sector2(*str,
 			 *str2,
 			 *str3,
 			 *str4,
@@ -802,7 +877,7 @@ char **str0;
 			 *str9,
 			 *str10,
 			 *str11,
-			 *str0);
+			 *str12);
   return;
 }
 /* ----------------------------------------------------------------------- */

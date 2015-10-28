@@ -86,18 +86,17 @@ c
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)))
-      call fcreate_pointing_sector(ptr_ch('ccw'//char(0)),
-     &                       ptr_ch('az'//char(0)),
-     &                       ptr_ch('-90'//char(0)),
-     &                       ptr_ch('deg'//char(0)),
-     &                       ptr_ch('90'//char(0)),
-     &                       ptr_ch('deg'//char(0)),
-     &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)))
+c      call fcreate_pointing_sector(ptr_ch('ccw'//char(0)),
+c     &                       ptr_ch('az'//char(0)),
+c     &                       ptr_ch('-90'//char(0)),
+c     &                       ptr_ch('deg'//char(0)),
+c     &                       ptr_ch('90'//char(0)),
+c     &                       ptr_ch('deg'//char(0)),
+c     &                       ptr_ch(char(0)),
+c     &                       ptr_ch(char(0)),
+c     &                       ptr_ch(char(0)),
+c     &                       ptr_ch(char(0)),
+c     &                       ptr_ch(char(0)))
       call fcreate_pointing_sector(ptr_ch('cw'//char(0)),
      &                       ptr_ch('az'//char(0)),
      &                       ptr_ch('270'//char(0)),
@@ -108,8 +107,25 @@ c
      &                       ptr_ch('0'//char(0)),
      &                       ptr_ch('deg'//char(0)),
      &                       ptr_ch('88'//char(0)),
-     &                       ptr_ch('deg'//char(0)),
-     &                       ptr_ch(char(0)))
+     &                       ptr_ch('deg'//char(0)))
+      call fend_def
+      call fcreate_block(ptr_ch('CLOCK'//char(0)))
+      call fcreate_def(ptr_ch('Hb'//char(0)))
+      call fcreate_clock(ptr_ch('1995y263d06h00m'//char(0)),
+     &     ptr_ch('2.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_clock(ptr_ch(char(0)),
+     &     ptr_ch('3.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_clock(ptr_ch('1995y263d05h00m'//char(0)),
+     &     ptr_ch('2.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch('1995y263d06h20m'//char(0)),
+     &     ptr_ch('1e-12'//char(0)))
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))
