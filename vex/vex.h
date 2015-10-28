@@ -838,7 +838,7 @@ create_bbc_assign(char *str, char *str2, char *str3);
 /* CLOCK block builders                                                      */
 /*---------------------------------------------------------------------------*/
 void *
-create_clock(char *str, char *str2, char *str3, char *str4, char *str5,
+create_clock_early(char *str, char *str2, char *str3, char *str4, char *str5,
 	     char *str6, char *str7, char *str8, char *str9, char *str10,
 	     char *str11,char *str12);
 /*---------------------------------------------------------------------------*/

@@ -959,7 +959,79 @@ create_stream_label(char *str, char *str2)
 /* CLOCK block builders                                              */
 /*-------------------------------------------------------------------*/
 void *
-create_clock(char *str, char *str2, char *str3, char *str4, char *str5,
+create_clock(char *str, char *str2, char *str3, char *str4, char *str5)
+{
+  char *valid_from, *clock_early_value, *clock_early_units,
+       *clock_early_epoch, *rate;
+
+  if(str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0) 
+    {
+      printf("%s \'clock\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      if(str==NULL || strlen(str)==0)
+	{
+	  if(str4==NULL || strlen(str4)==0 ||
+	     str5==NULL || strlen(str5)==0)
+	    {
+	      clock_early_value=(char *)strdup(str2);
+              clock_early_units=(char *)strdup(str3);
+	      qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
+					     make_clock_early(NULL,
+					     make_dvalue(clock_early_value,
+					                 clock_early_units),
+					     NULL,NULL,NULL,NULL,NULL)));
+	    }
+	  else
+	    {
+	      clock_early_value=(char *)strdup(str2);
+              clock_early_units=(char *)strdup(str3);
+	      clock_early_epoch=(char *)strdup(str4);
+	      rate=(char *)strdup(str5);
+	      qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
+					     make_clock_early(NULL,
+					     make_dvalue(clock_early_value,
+					                 clock_early_units),
+ 				             clock_early_epoch,
+   				             make_dvalue(rate,NULL),
+					     NULL,NULL,NULL)));
+	    }
+	}
+      else if(str4==NULL || strlen(str4)==0 ||
+	      str5==NULL || strlen(str5)==0)
+	{ 
+	  valid_from=(char *)strdup(str);
+	  clock_early_value=(char *)strdup(str2);
+	  clock_early_units=(char *)strdup(str3);
+	  qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
+	   			         make_clock_early(valid_from,
+				         make_dvalue(clock_early_value,
+						     clock_early_units),
+					 NULL,NULL,NULL,NULL,NULL)));
+	}
+      else
+	{
+	  valid_from=(char *)strdup(str);
+	  clock_early_value=(char *)strdup(str2);
+	  clock_early_units=(char *)strdup(str3);
+	  clock_early_epoch=(char *)strdup(str4);
+	  rate=(char *)strdup(str5);
+	  qref_list = add_list(qref_list,make_lowl(T_CLOCK_EARLY,
+				         make_clock_early(valid_from,
+				         make_dvalue(clock_early_value,
+					             clock_early_units),
+				         clock_early_epoch,
+					 make_dvalue(rate,NULL),
+					 NULL,NULL,NULL)));
+	}
+    }  
+}
+/*-------------------------------------------------------------------*/
+void *
+create_clock_early(char *str, char *str2, char *str3, char *str4, char *str5,
 	     char *str6, char *str7, char *str8, char *str9, char *str10,
 	     char *str11, char *str12)
 {
@@ -971,7 +1043,7 @@ create_clock(char *str, char *str2, char *str3, char *str4, char *str5,
 
   if(str2==NULL || strlen(str2)==0 ||
      str3==NULL || strlen(str3)==0)
-    printf("%s \'clock\' %s %s block\n",
+    printf("%s \'clock_early\' %s %s block\n",
 	   err1, err2, int2block(blk));
   else {
     early_value=(char *)strdup(str2);

@@ -774,22 +774,6 @@ clock_lowl:	clock_early		{$$=make_lowl(T_CLOCK_EARLY,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
-/*
-clock_early:	T_CLOCK_EARLY '=' ':' unit_value ';'
-				{$$=make_clock_early(NULL,$4,NULL,NULL);}
-		| T_CLOCK_EARLY '=' T_NAME ':' unit_value ';'
-				{$$=make_clock_early($3,$5,NULL,NULL);}
-	| T_CLOCK_EARLY '=' T_NAME ':' unit_value ':' T_NAME ':' unit_option ';'
-				{$$=make_clock_early($3,$5,$7,$9);}
-	| T_CLOCK_EARLY '=' ':' unit_value ':' T_NAME ':' unit_option ';'
-				{$$=make_clock_early(NULL,$4,$6,$8);}
-*/
-/*
-clock_early:	T_CLOCK_EARLY '=' name_or_not ':' unit_value ';'
-				{$$=make_clock_early($3,$5,NULL,NULL);}
-	| T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ';'
-				{$$=make_clock_early($3,$5,$7,$9);}
-*/
 clock_early:	T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ':' unit_value ':' unit_value ';'
                 {$$=make_clock_early($3,$5,$7,$9,$11,$13,$15);}
                 | T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_option ':' unit_value ':' unit_value ';'
@@ -1741,5 +1725,3 @@ char *s;
   fprintf(stderr,"%s at line %d\n",s,lines);
   exit(1);
 }
-
-

@@ -116,7 +116,7 @@ c
 c
 c    clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12 sec/sec : 10 sec/sec^2 : 11 sec/sec^3 : 12 usec;
 c
-      call fcreate_clock(ptr_ch('1995y263d06h00m'//char(0)),
+      call fcreate_clock_early(ptr_ch('1995y263d06h00m'//char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -129,7 +129,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -142,7 +142,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -155,7 +155,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -168,7 +168,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -181,7 +181,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch(char(0)),
@@ -194,7 +194,7 @@ c
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch(char(0)),
@@ -207,7 +207,7 @@ c
      &     ptr_ch('12'//char(0)),
      &     ptr_ch('usec'//char(0))
      &     )
-      call fcreate_clock(ptr_ch('1995y263d06h00m'//char(0)),
+      call fcreate_clock_early(ptr_ch('1995y263d06h00m'//char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch(char(0)),
@@ -220,7 +220,7 @@ c
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -233,7 +233,7 @@ c
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
@@ -246,7 +246,7 @@ c
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0))
      &     )
-      call fcreate_clock(ptr_ch(char(0)),
+      call fcreate_clock_early(ptr_ch(char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y132d00h08m0s'//char(0)),
