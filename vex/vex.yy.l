@@ -323,6 +323,7 @@ char *quote()
 <LINE,REF>"$"BITSTREAMS		{BEGIN(INITIAL);return B_BITSTREAMS;}
 <LINE,REF>"$"CORR		{BEGIN(INITIAL);return B_CORR;}
 <LINE,REF>"$"DAS		{BEGIN(INITIAL);return B_DAS;}
+<LINE,REF>"$"DATASTREAMS	{BEGIN(INITIAL);return B_DATASTREAMS;}
 <LINE,REF>"$"HEAD_POS	{BEGIN(INITIAL);return B_HEAD_POS;}
 <LINE,REF>"$"PASS_ORDER	{BEGIN(INITIAL);return B_PASS_ORDER;}
 <LINE,REF>"$"PHASE_CAL_DETECT	{BEGIN(INITIAL);return B_PHASE_CAL_DETECT;}
@@ -384,6 +385,11 @@ char *quote()
 <LINE>connection                {BEGIN(INITIAL);return T_CONNECTION;}
 <LINE>record_method             {BEGIN(INITIAL);return T_RECORD_METHOD;}
 <LINE>record_control            {BEGIN(INITIAL);return T_RECORD_CONTROL;}
+
+<LINE>datastream	        {BEGIN(INITIAL);return T_DATASTREAM;}
+<LINE>thread	                {BEGIN(INITIAL);return T_THREAD;}
+<LINE>channel	                {BEGIN(INITIAL);return T_CHANNEL;}
+<LINE>merged_datastream	        {BEGIN(INITIAL);return T_MERGED_DATASTREAM;}
 
 <LINE>TAI-UTC			{BEGIN(INITIAL);return T_TAI_UTC;}
 <LINE>A1-TAI			{BEGIN(INITIAL);return T_A1_TAI;}

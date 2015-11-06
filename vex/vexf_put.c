@@ -1741,6 +1741,162 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_datastream__
+#else
+fcreate_datastream
+#endif
+(str, str2, str3)
+char **str;
+char **str2;
+char **str3;
+/*<      subroutine fcreate_datastream(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_datastream(*str,*str2, *str3);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_thread__
+#else
+fcreate_thread
+#endif
+(str, str2, str3, str4, str5, str6, str7, str8, str9)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+char **str8;
+char **str9;
+/*<      subroutine fcreate_thread(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0, >*/
+/*<                                    ptr_ch(str4)//(char *)0, >*/
+/*<                                    ptr_ch(str5)//(char *)0, >*/
+/*<                                    ptr_ch(str6)//(char *)0, >*/
+/*<                                    ptr_ch(str7)//(char *)0, >*/
+/*<                                    ptr_ch(str8)//(char *)0, >*/
+/*<                                    ptr_ch(str9)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7; >*/
+/*<      character*(*) str8; >*/
+/*<      character*(*) str9; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+/*   character*(*) str6      - string */
+/*   character*(*) str7      - string */
+/*   character*(*) str8      - string */
+/*   character*(*) str9      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_thread(*str,*str2, *str3, *str4, *str5, *str6, *str7, *str8, *str9);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_channel__
+#else
+fcreate_channel
+#endif
+(str, str2, str3, str4)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+/*<      subroutine fcreate_thread(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0, >*/
+/*<                                    ptr_ch(str3)//(char *)0, >*/
+/*<                                    ptr_ch(str4)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_channel(*str,*str2, *str3, *str4);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_merged_datastream__
+#else
+fcreate_merged_datastream
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_thread(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_merged_datastream(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_tai_utc__
 #else
 fcreate_tai_utc

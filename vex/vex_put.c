@@ -1533,6 +1533,153 @@ create_record_control(char *str)
     }
 }  
 /*-------------------------------------------------------------------*/
+/* DATASTREAM block builders                                                */
+/*-------------------------------------------------------------------*/
+void *
+create_datastream(char *str, char *str2, char *str3)
+{
+  char *datastream_link, *format, *label;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
+    {
+      printf("%s \'datastream\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      datastream_link=(char *)strdup(str);
+      format=(char *)strdup(str2);
+
+      if(str3==NULL || strlen(str3)==0)
+	label=NULL;
+      else
+	label=(char *)strdup(str3);
+
+      qref_list = add_list(qref_list,make_lowl(T_DATASTREAM,
+					       make_datastream(datastream_link,
+							       format,
+							       label)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_thread(char *str, char *str2, char *str3, char *str4, char *str5,
+	      char *str6, char *str7, char *str8, char *str9)
+{
+  char *datastream_link, *thread_link, *number_value, *channels_value;
+  char *sample_value, *sample_units, *bits_value, *type, *bytes_value;
+  struct dvalue *number, *channels, *sample, *bits, *bytes;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 ||
+     str5==NULL || strlen(str5)==0 ||
+     str6==NULL || strlen(str6)==0 ||
+     str7==NULL || strlen(str7)==0 ||
+     str8==NULL || strlen(str8)==0 ||
+     str9==NULL || strlen(str9)==0)
+    {
+      printf("%s \'thread\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      datastream_link=(char *)strdup(str);
+
+      thread_link=(char *)strdup(str2);
+
+      number_value=(char *)strdup(str3);
+      number=make_dvalue(number_value,NULL);
+
+      channels_value=(char *)strdup(str4);
+      channels=make_dvalue(channels_value,NULL);
+
+      sample_value=(char *)strdup(str5);
+      sample_units=(char *)strdup(str6);
+      sample=make_dvalue(sample_value,sample_units);
+
+      bits_value=(char *)strdup(str7);
+      bits=make_dvalue(bits_value,NULL);
+
+      type=(char *)strdup(str8);
+
+      bytes_value=(char *)strdup(str9);
+      bytes=make_dvalue(bytes_value,NULL);
+
+      qref_list = add_list(qref_list,make_lowl(T_THREAD,
+					       make_thread(datastream_link,
+							   thread_link,
+							   number,
+							   channels,
+							   sample,
+							   bits,
+							   type,
+							   bytes)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_channel(char *str, char *str2, char *str3, char *str4)
+{
+  char *datastream_link, *thread_link, *channel_link, *number_value;
+  struct dvalue *number;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0)
+    {
+      printf("%s \'channel\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      datastream_link=(char *)strdup(str);
+      thread_link=(char *)strdup(str2);
+      channel_link=(char *)strdup(str3);
+      number_value=(char *)strdup(str4);
+      number=make_dvalue(number_value,NULL);
+
+      qref_list = add_list(qref_list,make_lowl(T_CHANNEL,
+				 make_channel(datastream_link,
+					      thread_link,
+					      channel_link,
+					      number)));
+    }
+}  
+/*-------------------------------------------------------------------*/
+void *
+create_merged_datastream(char *str, char *str2)
+{
+  char *merged_link, *merged_label;
+
+  if(q_list == NULL)
+    {
+      printf("%s \'merged_datastream\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      if(str==NULL || strlen(str)==0)
+	merged_link=NULL;
+      else
+	merged_link=(char *)strdup(str);
+
+      if(str2==NULL || strlen(str2)==0)
+	merged_label=NULL;
+      else
+	merged_label=(char *)strdup(str2);
+
+      qref_list = add_list(qref_list,make_lowl(T_MERGED_DATASTREAM,
+			       make_merged_datastream(merged_link,
+						      merged_label,
+						      q_list)));
+      q_list=NULL;
+    }
+}
+/*-------------------------------------------------------------------*/
 /* EOP block builders                                                */
 /*-------------------------------------------------------------------*/
 void *

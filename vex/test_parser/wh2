@@ -956,6 +956,75 @@ $DAS; *data-acquisition system parameters
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------
+$DATASTREAMS; *datastream parameters
+*----------------------------------------------------------------------------------------------------------------------
+  def DS12;
+* Merged Merged Constituent Constituent 
+*                     datastream Datastream datastream1 datastream2 
+*                         link     label        link        link
+    merged_datastream = : SX : &DS1 : &DS2;
+*
+  enddef;
+*
+*Define VDIF datastream
+  def DS1; *X-band VDIF datastream(1024Mbps total,2 threads, 4 chns/thread)
+*
+*           datastream   format  datastream
+*              lnk                 label
+    datastream = &DS1 : VDIF : X;
+*
+*Define threads within datastream
+*          datastream thrd   thrd  #    sample    b/s  type data bytes/
+*            lnk      link     #  chns   rate                 packet
+    thread = &DS1 : &thread0 : 0 : 4 : 64 Ms/sec : 2 : real : 8000;
+    thread = &DS1 : &thread1 : 1 : 4 : 64 Ms/sec : 2 : real : 8000;
+*
+*Define channels within each thread
+*        &datastream   &thread    &chn  chn# in
+*           lnk         lnk       link   thrd
+    channel = &DS1 : &thread0 : &CH-XR0 : 0;
+    channel = &DS1 : &thread0 : &CH-XR1 : 1;
+    channel = &DS1 : &thread0 : &CH-XR2 : 2;
+    channel = &DS1 : &thread0 : &CH-XR3 : 3;
+    channel = &DS1 : &thread1 : &CH-XL0 : 0;
+    channel = &DS1 : &thread1 : &CH-XL1 : 1;
+    channel = &DS1 : &thread1 : &CH-XL2 : 2;
+    channel = &DS1 : &thread1 : &CH-XL3 : 3;
+  enddef;
+*
+  def DS2; *S-band VDIF datastream(1024Mbps total,2 threads, 4 chns/thread)
+*
+*           datastream format datastream
+*              lnk              label
+    datastream = &DS2 : VDIF : S;
+*
+*Define threads within datastream
+*       datastream    thrd   thrd  #    sample    b/s  type data bytes/
+*         lnk         link     #  chns   rate                packet
+    thread = &DS2 : &thread0 : 0 : 4 : 64 Ms/sec : 2 : real : 8000;
+    thread = &DS2 : &thread1 : 1 : 4 : 64 Ms/sec : 2 : real : 8000;
+*
+*Define channels within each thread
+*        &datastream &thread     &chn  chn# in
+*           lnk         lnk      link   thrd
+    channel = &DS2 : &thread0 : &CH-SR0 : 0;
+    channel = &DS2 : &thread0 : &CH-SR1 : 1;
+    channel = &DS2 : &thread0 : &CH-SR2 : 2;
+    channel = &DS2 : &thread0 : &CH-SR3 : 3;
+    channel = &DS2 : &thread1 : &CH-SL0 : 0;
+    channel = &DS2 : &thread1 : &CH-SL1 : 1;
+    channel = &DS2 : &thread1 : &CH-SL2 : 2;
+    channel = &DS2 : &thread1 : &CH-SL3 : 3;
+  enddef;
+*
+  def VEX2; *other syntatic cases
+    merged_datastream = &merged : SX : &DS1 : &DS2;
+    merged_datastream = &merged : : &DS1 : &DS2;
+    merged_datastream = : : &DS1 : &DS2;
+    merged_datastream = : : &DS1 : &DS2 : &DS3;
+    datastream = &DS1 : VDIF;
+  enddef;
+*----------------------------------------------------------------------------------------------------------------------
 $EOP; *earth-orientation parameters
 *----------------------------------------------------------------------------------------------------------------------
 *

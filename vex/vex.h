@@ -286,6 +286,44 @@ struct record_method {
 
 typedef struct record_method Record_method;
 
+struct datastream {
+  char *link;
+  char *format;
+  char *label;
+};
+
+typedef struct datastream Datastream;
+
+struct thread {
+  char *datastream_link;
+  char *thread_link;
+  struct dvalue *number;
+  struct dvalue *channels;
+  struct dvalue *sample;
+  struct dvalue *bits;
+  char *type;
+  struct dvalue *bytes;
+};
+
+typedef struct thread Thread;
+
+struct channel {
+  char *datastream_link;
+  char *thread_link;
+  char *channel_link;
+  struct dvalue *number;
+};
+
+typedef struct channel Channel; 
+
+struct merged_datastream {
+  char *merged_link;
+  char *label;
+  struct llist *constituent_links;
+};
+
+typedef struct merged_datastream Merged_datastream; 
+
 struct headstack_pos {
   struct dvalue *index;
   struct llist *positions;
@@ -511,6 +549,16 @@ struct connection *make_connection(char *signal_link, char *equipment_link,
 				   char *label, char *direction, char *type);
 struct record_method *make_record_method(char *pattern, struct dvalue *early,
 				   struct dvalue *gap);
+struct datastream *make_datastream(char *link,char *format,
+				   char *label);
+struct thread *make_thread(char *datastream_link,char *thread_link,
+			   struct dvalue *number, struct dvalue *channnels,
+			   struct dvalue *sample, struct dvalue *bits,
+			   char *type, struct dvalue *bytes);
+struct channel *make_channel(char *datastream_link,char *thread_link,
+			     char *channel_link, struct dvalue *number);
+struct merged_datastream *make_merged_datastream(char *merged_link,
+			       char *label, struct llist *constituent_links);
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
 struct if_def *make_if_def(char *if_id, char *physical, char *polar,

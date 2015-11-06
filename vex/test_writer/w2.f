@@ -338,6 +338,42 @@ c
      &                       ptr_ch('days'//char(0)))
       call fcreate_record_control(ptr_ch('master'//char(0)))
       call fend_def
+
+      call fcreate_block(ptr_ch('DATASTREAMS'//char(0)))
+      call fcreate_def(ptr_ch('Hb'//char(0)))
+      call fcreate_datastream(ptr_ch('DS1'//char(0)),
+     &                       ptr_ch('VDIF'//char(0)),
+     &                       ptr_ch('label1'//char(0)))
+      call fcreate_datastream(ptr_ch('DS2'//char(0)),
+     &                       ptr_ch('VDIF_legacy'//char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_thread(ptr_ch('DS3'//char(0)),
+     &                       ptr_ch('TH3'//char(0)),
+     &                       ptr_ch('1'//char(0)),
+     &                       ptr_ch('8'//char(0)),
+     &                       ptr_ch('16'//char(0)),
+     &                       ptr_ch('Ms/s'//char(0)),
+     &                       ptr_ch('2'//char(0)),
+     &                       ptr_ch('real'//char(0)),
+     &                       ptr_ch('8000'//char(0)))
+      call fcreate_channel(ptr_ch('DS4'//char(0)),
+     &                       ptr_ch('TH4'//char(0)),
+     &                       ptr_ch('CH03'//char(0)),
+     &                       ptr_ch('3'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS9'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS10'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS11'//char(0)))
+      call fcreate_merged_datastream(ptr_ch('MS1'//char(0)),
+     &                               ptr_ch('ML1'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS20'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS21'//char(0)))
+      call fcreate_merged_datastream(ptr_ch(char(0)),
+     &                               ptr_ch('ML2'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS30'//char(0)))
+      call fcreate_lvalue_list(ptr_ch('DS31'//char(0)))
+      call fcreate_merged_datastream(ptr_ch('ML3'//char(0)),
+     &                               ptr_ch(char(0)))
+      call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))
 c

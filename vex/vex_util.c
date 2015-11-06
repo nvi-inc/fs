@@ -105,6 +105,18 @@ static int
 get_record_method_field(Record_method *record_method,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_datastream_field(Datastream *datastream,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_thread_field(Thread *thread,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_channel_field(Channel *channel,int n,int *link,
+			  int *name, char **value, char **units);
+static int
+get_merged_datastream_field(Merged_datastream *merged_datastream,int n,
+			    int *link,  int *name, char **value, char **units);
+static int
 get_headstack_pos_field(Headstack_pos *headstack_pos,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -211,6 +223,7 @@ static struct {
   {"BITSTREAMS", B_BITSTREAMS},
   {"CORR", B_CORR},
   {"DAS", B_DAS},
+  {"DATASTREAMS", B_DATASTREAMS},
   {"HEAD_POS", B_HEAD_POS},
   {"PASS_ORDER", B_PASS_ORDER},
   {"PHASE_CAL_DETECT", B_PHASE_CAL_DETECT},
@@ -271,6 +284,11 @@ static  struct {
   {"connection", T_CONNECTION},
   {"record_method", T_RECORD_METHOD},
   {"record_control", T_RECORD_CONTROL},
+
+  {"datastream", T_DATASTREAM},
+  {"thread", T_THREAD},
+  {"channel", T_CHANNEL},
+  {"merged_datastream", T_MERGED_DATASTREAM},
   
   {"TAI-UTC", T_TAI_UTC},
   {"A1-TAI", T_A1_TAI},
@@ -765,6 +783,58 @@ struct record_method *make_record_method(char *pattern, struct dvalue *early,
 
   return new;
 }
+struct datastream *make_datastream(char *link,char *format,
+				   char *label)
+{
+  NEWSTRUCT(new,datastream);
+
+  new->link=link;
+  new->format=format;
+  new->label=label;
+
+  return new;
+}
+struct thread *make_thread(char *datastream_link,char *thread_link,
+			   struct dvalue *number, struct dvalue *channels,
+			   struct dvalue *sample, struct dvalue *bits,
+			   char *type, struct dvalue *bytes)
+{
+  NEWSTRUCT(new,thread);
+
+  new->datastream_link=datastream_link;
+  new->thread_link=thread_link;
+  new->number=number;
+  new->channels=channels;
+  new->sample=sample;
+  new->bits=bits;
+  new->type=type;
+  new->bytes=bytes;
+
+  return new;
+}
+struct channel *make_channel(char *datastream_link,char *thread_link,
+			     char *channel_link, struct dvalue *number)
+{
+  NEWSTRUCT(new,channel);
+
+  new->datastream_link=datastream_link;
+  new->thread_link=thread_link;
+  new->channel_link=channel_link;
+  new->number=number;
+
+  return new;
+}
+struct merged_datastream *make_merged_datastream(char *merged_link,
+			       char *label, struct llist *constituent_links)
+{
+  NEWSTRUCT(new,merged_datastream);
+
+  new->merged_link=merged_link;
+  new->label=label;
+  new->constituent_links=constituent_links;
+
+  return new;
+}
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions)
 {
@@ -1208,6 +1278,18 @@ char **units)
     break;
   case T_RECORD_METHOD:
     ierr=get_record_method_field(ptr,n,link,name,value,units);
+    break;
+  case T_DATASTREAM:
+    ierr=get_datastream_field(ptr,n,link,name,value,units);
+    break;
+  case T_THREAD:
+    ierr=get_thread_field(ptr,n,link,name,value,units);
+    break;
+  case T_CHANNEL:
+    ierr=get_channel_field(ptr,n,link,name,value,units);
+    break;
+  case T_MERGED_DATASTREAM:
+    ierr=get_merged_datastream_field(ptr,n,link,name,value,units);
     break;
   case T_UT1_UTC:
   case T_X_WOBBLE:
@@ -2141,6 +2223,150 @@ get_record_method_field(Record_method *record_method,int n,int *link,
     break;
   default:
     return -1;
+  }
+  return 0;
+}
+static int
+get_datastream_field(Datastream *datastream,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=datastream->link;
+    *link=1;
+    break;
+  case 2:
+    *value=datastream->format;
+    break;
+  case 3:
+    if(datastream->label==NULL)
+      return -1;
+    *value=datastream->label;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static
+get_thread_field(Thread *thread,int n,int *link,
+		 int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=thread->datastream_link;
+    *link=1;
+    break;
+  case 2:
+    *value=thread->thread_link;
+    *link=1;
+    break;
+  case 3:
+    *value=thread->number->value;
+    *name=0;
+    break;
+  case 4:
+    *value=thread->channels->value;
+    *name=0;
+    break;
+  case 5:
+    *value=thread->sample->value;
+    *units=thread->sample->units;
+    *name=0;
+    break;
+  case 6:
+    *value=thread->bits->value;
+    *name=0;
+    break;
+  case 7:
+    *value=thread->type;
+    break;
+  case 8:
+    *value=thread->bytes->value;
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_channel_field(Channel *channel,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=channel->datastream_link;
+    *link=1;
+    break;
+  case 2:
+    *value=channel->thread_link;
+    *link=1;
+    break;
+  case 3:
+    *value=channel->channel_link;
+    *link=1;
+    break;
+  case 4:
+    *value=channel->number->value;
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_merged_datastream_field(Merged_datastream *merged_datastream,int n,
+			    int *link, int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=merged_datastream->merged_link;
+    *link=1;
+    break;
+  case 2:
+    *value=merged_datastream->label;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_lvalue_list_field(merged_datastream->constituent_links
+			       ,n-2,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_merged_datastream_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }

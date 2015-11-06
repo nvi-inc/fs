@@ -74,6 +74,11 @@ struct equip_info      *eiptr;
 struct connection      *coptr;
 struct record_method   *rmptr;
 
+struct datastream      *daptr;
+struct thread          *thptr;
+struct channel         *chptr;
+struct merged_datastream *mdptr;
+
 struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
@@ -126,6 +131,8 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_EQUIP T_COMPOSITE_EQUIP T_EQUIP_SET T_EQUIP_INFO T_CONNECTION
 %token <ival>   T_RECORD_METHOD T_RECORD_CONTROL
 
+%token <ival>   T_DATASTREAM T_THREAD T_CHANNEL T_MERGED_DATASTREAM
+
 %token <ival>   T_TAI_UTC T_A1_TAI T_EOP_REF_EPOCH T_NUM_EOP_POINTS
 %token <ival>   T_EOP_INTERVAL T_UT1_UTC T_X_WOBBLE T_Y_WOBBLE
 %token <ival>   T_NUT_REF_EPOCH T_NUM_NUT_POINTS T_NUT_INTERVAL T_DELTA_PSI
@@ -176,7 +183,7 @@ struct s2_data_source  *dsptr;
 %token <ival>	B_EXPER B_SCHEDULING_PARAMS B_PROCEDURES B_EOP B_FREQ B_CLOCK
 %token <ival>	B_ANTENNA B_BBC B_CORR B_DAS B_HEAD_POS B_PASS_ORDER
 %token <ival>	B_PHASE_CAL_DETECT B_ROLL B_IF B_SEFD B_SITE B_SOURCE B_TRACKS
-%token <ival>   B_TAPELOG_OBS B_BITSTREAMS
+%token <ival>   B_TAPELOG_OBS B_BITSTREAMS B_DATASTREAMS
 
 %token <llptr>	T_LITERAL
 
@@ -260,6 +267,14 @@ struct s2_data_source  *dsptr;
 %type  <coptr>  connection
 %type  <rmptr>  record_method
 %type  <sval>   record_control
+
+%type  <llptr>  datastreams_block datastreams_defs datastreams_lowls 
+%type  <dfptr>	datastreams_def
+%type  <lwptr>  datastreams_lowl datastreams_defx
+%type  <daptr>  datastream
+%type  <thptr>  thread
+%type  <chptr>  channel
+%type  <mdptr>  merged_datastream
 
 %type  <llptr>  eop_block eop_defs eop_lowls 
 %type  <dfptr>  eop_def
@@ -385,7 +400,7 @@ struct s2_data_source  *dsptr;
 %type  <dvptr>  unit_option
 %type  <sval>   name_value
 
-%type  <sval>   name_or_not empty_name
+%type  <sval>   name_or_not empty_name link_or_not
 %type  <dvptr>  empty_value
 
 %%
@@ -422,6 +437,7 @@ block:	global_block			{$$=make_block(B_GLOBAL,$1);}
  	| bitstreams_block		{$$=make_block(B_BITSTREAMS,$1);}
  	| clock_block			{$$=make_block(B_CLOCK,$1);}
  	| das_block			{$$=make_block(B_DAS,$1);}
+ 	| datastreams_block		{$$=make_block(B_DATASTREAMS,$1);}
  	| eop_block			{$$=make_block(B_EOP,$1);}
  	| exper_block			{$$=make_block(B_EXPER,$1);}
  	| head_pos_block		{$$=make_block(B_HEAD_POS,$1);}
@@ -496,6 +512,7 @@ primitive:	B_EXPER			{$$=B_EXPER;}
 		| B_CLOCK		{$$=B_CLOCK;}
 		| B_CORR		{$$=B_CORR;}
 		| B_DAS			{$$=B_DAS;}
+		| B_DATASTREAMS		{$$=B_DATASTREAMS;}
 		| B_HEAD_POS		{$$=B_HEAD_POS;}
 		| B_PASS_ORDER		{$$=B_PASS_ORDER;}
 		| B_PHASE_CAL_DETECT	{$$=B_PHASE_CAL_DETECT;}
@@ -597,9 +614,6 @@ method:		/* empty */			{$$=NULL;}
 ;
 destination:	/* empty */			{$$=NULL;}
 		| T_NAME			{$$=$1;}
-;
-unit_value2:	/* empty */ 			{$$=NULL;}
-		| T_NAME T_NAME 		{$$=make_dvalue($1,$2);}
 ;
 options:	/* empty */			{$$=NULL;}
 		| T_NAME			{$$=$1;}
@@ -791,13 +805,6 @@ clock_early:	T_CLOCK_EARLY '=' name_or_not ':' unit_value ':' T_NAME ':' unit_op
                 | T_CLOCK_EARLY '=' name_or_not ':' unit_value ';'
                 {$$=make_clock_early($3,$5,NULL,NULL,NULL,NULL,NULL);}
 ;
-name_or_not: /* empty */  {$$=NULL;}
-             | T_NAME     {$$=$1;}
-;
-empty_value: /* empty */  {$$=NULL;}
-;
-empty_name: /* empty */   {$$=NULL;}
-;
 /* $DAS block */
 
 das_block:	B_DAS ';' das_defs	{$$=$3;}
@@ -879,9 +886,6 @@ composite_equip: T_COMPOSITE_EQUIP '=' T_LINK ':' T_LINK ':' T_LINK ';'
                  | T_COMPOSITE_EQUIP '=' T_LINK ':' T_LINK ':' T_LINK ':' link_list ';'
                  {$$=make_composite_equip($3,ins_list($5,ins_list($7,$9)));}
 ;
-link_list:	link_list ':' T_LINK    	{$$=add_list($1,$3);}
-                | T_LINK			{$$=add_list(NULL,$1);}
-;
 equip_set:      T_EQUIP_SET '=' T_LINK ':' T_NAME ':' name_list ';'
                 {$$=make_equip_set($3,$5,$7);}
 ;
@@ -903,6 +907,49 @@ record_method:  T_RECORD_METHOD '=' T_NAME ':' unit_value2 ':' unit_value ';'
                 {$$=make_record_method($3,NULL,NULL);}
 ;
 record_control:	T_RECORD_CONTROL '=' T_NAME ';' {$$=$3;}
+;
+/* $DATASTREAMS block */
+
+datastreams_block: B_DATASTREAMS ';' datastreams_defs	{$$=$3;}
+		   | B_DATASTREAMS ';'		{$$=NULL;}
+;
+datastreams_defs:  datastreams_defs datastreams_defx	{$$=add_list($1,$2);}
+		   | datastreams_defx		{$$=add_list(NULL,$1);}
+;
+datastreams_defx:  datastreams_def		       {$$=make_lowl(T_DEF,$1);}
+		   | T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
+		   | T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+datastreams_def:   T_DEF T_NAME ';' datastreams_lowls T_ENDDEF ';'
+                     {$$=make_def($2,$4);}
+		   | T_DEF T_NAME ';' T_ENDDEF ';' {$$=make_def($2,NULL);}
+;
+datastreams_lowls: datastreams_lowls datastreams_lowl	{$$=add_list($1,$2);}
+		   | datastreams_lowl		{$$=add_list(NULL,$1);}
+;
+datastreams_lowl:  datastream		{$$=make_lowl(T_DATASTREAM,$1);}
+                   | thread	        {$$=make_lowl(T_THREAD,$1);}
+                   | channel	        {$$=make_lowl(T_CHANNEL,$1);}
+                   | merged_datastream  {$$=make_lowl(T_MERGED_DATASTREAM,$1);}
+		   | external_ref		{$$=make_lowl(T_REF,$1);}
+		   | T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
+		   | T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+datastream:	T_DATASTREAM '=' T_LINK ':' T_NAME ':' T_NAME ';'
+                {$$=make_datastream($3,$5,$7);}
+                | T_DATASTREAM '=' T_LINK ':' T_NAME ';'
+                {$$=make_datastream($3,$5,NULL);}
+;
+thread: 	T_THREAD '=' T_LINK ':' T_LINK ':' value ':' value ':' unit_value ':' value ':' T_NAME ':' value ';'
+                {$$=make_thread($3,$5,$7,$9,$11,$13,$15,$17);}
+;
+channel: 	T_CHANNEL '=' T_LINK ':' T_LINK ':' T_LINK ':' value ';'
+                {$$=make_channel($3,$5,$7,$9);}
+;
+merged_datastream: 	T_MERGED_DATASTREAM '=' link_or_not ':' name_or_not ':' T_LINK ':' T_LINK ':' link_list ';'
+                   {$$=make_merged_datastream($3,$5,ins_list($7,ins_list($9,$11)));}
+ 	                | T_MERGED_DATASTREAM '=' link_or_not ':' name_or_not ':' T_LINK ':' T_LINK ';'
+			{$$=make_merged_datastream($3,$5,ins_list($7,add_list(NULL,$9)));}
 ;
 /* $EOP block */
 
@@ -1716,6 +1763,22 @@ value:		T_NAME  			{$$=make_dvalue($1,NULL);}
 ;
 value2:	        /* empty */ 			{$$=NULL;}
 		| T_NAME  			{$$=make_dvalue($1,NULL);}
+;
+unit_value2:	/* empty */ 			{$$=NULL;}
+		| T_NAME T_NAME 		{$$=make_dvalue($1,$2);}
+;
+name_or_not: /* empty */  {$$=NULL;}
+             | T_NAME     {$$=$1;}
+;
+link_list:	link_list ':' T_LINK    	{$$=add_list($1,$3);}
+                | T_LINK			{$$=add_list(NULL,$1);}
+;
+link_or_not: /* empty */  {$$=NULL;}
+             | T_LINK     {$$=$1;}
+;
+empty_value: /* empty */  {$$=NULL;}
+;
+empty_name: /* empty */   {$$=NULL;}
 ;
 %%
 
