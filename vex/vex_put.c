@@ -899,7 +899,7 @@ create_stream_def(char *str, char *str2, char *str3, char *str4, char *str5)
       ondisk_value=(char *)strdup(str4);
       ondisk=make_dvalue(ondisk_value,NULL);
 
-      if(str3==NULL || strlen(str2)==0)
+      if(str3==NULL || strlen(str3)==0)
 	input=NULL;
       else {
 	input_value=(char *)strdup(str3);
