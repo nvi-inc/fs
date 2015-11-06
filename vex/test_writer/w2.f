@@ -298,8 +298,6 @@ c
       call fcreate_svalue_list(ptr_ch('G'//char(0)))
       call fcreate_equip_info(ptr_ch('RBEA'//char(0)),
      &                       ptr_ch('model'//char(0)))
-      call fcreate_svalue_list(ptr_ch('1'//char(0)))
-      call fcreate_svalue_list(ptr_ch('2'//char(0)))
 c
       call fcreate_connection(ptr_ch('vdif'//char(0)),
      &                       ptr_ch('rdbea'//char(0)),
