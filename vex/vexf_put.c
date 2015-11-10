@@ -1501,6 +1501,35 @@ char **str4;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_dvalue_list__
+#else
+fcreate_dvalue_list
+#endif
+(str,str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_dvalue_list(ptr_ch(str)//(char *)0) >*/
+/*<                               ptr_ch(str2)//(char *)0, >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_dvalue_list(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_svalue_list__
 #else
 fcreate_svalue_list
@@ -2287,6 +2316,110 @@ char **str;
 /* */
 {
   create_nut_model(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_eop_origin__
+#else
+fcreate_eop_origin
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_eop_origin(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_eop_origin(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_delta_x_nut__
+#else
+fcreate_delta_x_nut
+#endif
+()
+/*<      subroutine fcreate_delta_x_nut >*/
+/*<      implicit none >*/
+
+/* ... */
+
+/* input: */
+/*   none */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_delta_x_nut();
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_delta_y_nut__
+#else
+fcreate_delta_y_nut
+#endif
+()
+/*<      subroutine fcreate_delta_y_nut >*/
+/*<      implicit none >*/
+
+/* ... */
+
+/* input: */
+/*   none */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_delta_y_nut();
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_nut_origin__
+#else
+fcreate_nut_origin
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_nut_origin(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_nut_origin(*str,*str2);
   return;
 }
 /* ----------------------------------------------------------------------- */

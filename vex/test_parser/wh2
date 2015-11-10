@@ -1044,6 +1044,18 @@ $EOP; *earth-orientation parameters
     delta_psi = 0.431 asec : 0.432 asec : 0.433 asec : 0.434 asec : 0.435;
     nut_model = IAU1980;
   enddef;
+  def VEX2;
+    eop_origin = RAPID;
+    eop_origin = FINAL : 2015y300d;
+    nut_origin = GSFC;
+    nut_origin = BKG : 2015y301d;
+    nut_ref_epoch = 2015y128d;
+    num_nut_points = 3;
+    nut_interval = 24 hr;
+    delta_x_nut = 331 masec : 0.332 asec : 0.333;
+    delta_y_nut = 431 masec : 0.432 asec : 0.433;
+    nut_model = IAU200A;
+  enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------
 $EXPER; *general experiment information

@@ -79,6 +79,9 @@ struct thread          *thptr;
 struct channel         *chptr;
 struct merged_datastream *mdptr;
 
+struct eop_origin      *eoptr;
+struct nut_origin      *noptr;
+
 struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
@@ -137,6 +140,7 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_EOP_INTERVAL T_UT1_UTC T_X_WOBBLE T_Y_WOBBLE
 %token <ival>   T_NUT_REF_EPOCH T_NUM_NUT_POINTS T_NUT_INTERVAL T_DELTA_PSI
 %token <ival>   T_DELTA_EPS T_NUT_MODEL
+%token <ival>   T_EOP_ORIGIN T_DELTA_X_NUT T_DELTA_Y_NUT T_NUT_ORIGIN
 
 %token <ival>   T_EXPER_NUM T_EXPER_NAME T_EXPER_NOMINAL_START 
 %token <ival>   T_EXPER_NOMINAL_STOP T_PI_NAME T_PI_EMAIL T_CONTACT_NAME 
@@ -286,6 +290,9 @@ struct s2_data_source  *dsptr;
 %type  <dvptr>  num_nut_points nut_interval
 %type  <llptr>  delta_psi delta_eps
 %type  <sval>   nut_model
+%type  <eoptr>  eop_origin
+%type  <llptr>  delta_x_nut delta_y_nut
+%type  <noptr>  nut_origin
 
 %type  <llptr>  exper_block exper_defs exper_lowls 
 %type  <dfptr>  exper_def
@@ -984,6 +991,10 @@ eop_lowl:	tai_utc			{$$=make_lowl(T_TAI_UTC,$1);}
 		| delta_psi          	{$$=make_lowl(T_DELTA_PSI,$1);}
 		| delta_eps          	{$$=make_lowl(T_DELTA_EPS,$1);}
 		| nut_model     	{$$=make_lowl(T_NUT_MODEL,$1);}
+		| eop_origin     	{$$=make_lowl(T_EOP_ORIGIN,$1);}
+		| delta_x_nut          	{$$=make_lowl(T_DELTA_X_NUT,$1);}
+		| delta_y_nut          	{$$=make_lowl(T_DELTA_Y_NUT,$1);}
+		| nut_origin     	{$$=make_lowl(T_NUT_ORIGIN,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -1020,6 +1031,22 @@ delta_eps:      T_DELTA_EPS '=' unit_list ';'	{$$=$3;}
 		| T_DELTA_EPS '=' ';'		{$$=NULL;}
 ;
 nut_model:	T_NUT_MODEL '=' T_NAME ';'	{$$=$3;}
+;
+eop_origin:	T_EOP_ORIGIN '=' T_NAME ';'
+                {$$=make_eop_origin($3,NULL);}
+                | T_EOP_ORIGIN '=' T_NAME ':' T_NAME ';'
+		{$$=make_eop_origin($3,$5);}
+;
+delta_x_nut:    T_DELTA_X_NUT '=' unit_list ';'	{$$=$3;}
+		| T_DELTA_X_NUT '=' ';'		{$$=NULL;}
+;
+delta_y_nut:    T_DELTA_Y_NUT '=' unit_list ';'	{$$=$3;}
+		| T_DELTA_Y_NUT '=' ';'		{$$=NULL;}
+;
+nut_origin:	T_NUT_ORIGIN '=' T_NAME ';'
+                {$$=make_nut_origin($3,NULL);}
+                | T_NUT_ORIGIN '=' T_NAME ':' T_NAME ';'
+		{$$=make_nut_origin($3,$5);}
 ;
 /* $EXPER block */
 

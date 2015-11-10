@@ -324,6 +324,20 @@ struct merged_datastream {
 
 typedef struct merged_datastream Merged_datastream; 
 
+struct eop_origin {
+  char *source;
+  char *version;
+};
+
+typedef struct eop_origin Eop_origin; 
+
+struct nut_origin {
+  char *source;
+  char *version;
+};
+
+typedef struct nut_origin Nut_origin; 
+
 struct headstack_pos {
   struct dvalue *index;
   struct llist *positions;
@@ -559,6 +573,10 @@ struct channel *make_channel(char *datastream_link,char *thread_link,
 			     char *channel_link, struct dvalue *number);
 struct merged_datastream *make_merged_datastream(char *merged_link,
 			       char *label, struct llist *constituent_links);
+
+struct eop_origin *make_eop_origin(char *source, char *version);
+struct nut_origin *make_nut_origin(char *source, char *version);
+
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
 struct if_def *make_if_def(char *if_id, char *physical, char *polar,
@@ -983,6 +1001,18 @@ create_delta_eps(char *str, char *str2);
 
 void *
 create_nut_model(char *str);
+
+void *
+create_eop_orign(char *str, char *str2);
+
+void *
+create_delta_x_nut();
+
+void *
+create_delta_y_nut();
+
+void *
+create_nut_orign(char *str, char *str2);
 /*---------------------------------------------------------------------------*/
 /* EXPER block builders                                                      */
 /*---------------------------------------------------------------------------*/

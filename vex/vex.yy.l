@@ -397,14 +397,18 @@ char *quote()
 <LINE>num_eop_points		{BEGIN(INITIAL);return T_NUM_EOP_POINTS;}
 <LINE>eop_interval		{BEGIN(INITIAL);return T_EOP_INTERVAL;}
 <LINE>ut1-utc			{BEGIN(INITIAL);return T_UT1_UTC;}
-<LINE>x_wobble		{BEGIN(INITIAL);return T_X_WOBBLE;}
-<LINE>y_wobble		{BEGIN(INITIAL);return T_Y_WOBBLE;}
+<LINE>x_wobble		        {BEGIN(INITIAL);return T_X_WOBBLE;}
+<LINE>y_wobble		        {BEGIN(INITIAL);return T_Y_WOBBLE;}
 <LINE>nut_ref_epoch		{BEGIN(INITIAL);return T_NUT_REF_EPOCH;}
 <LINE>num_nut_points		{BEGIN(INITIAL);return T_NUM_NUT_POINTS;}
 <LINE>nut_interval		{BEGIN(INITIAL);return T_NUT_INTERVAL;}
 <LINE>delta_psi			{BEGIN(INITIAL);return T_DELTA_PSI;}
-<LINE>delta_eps		{BEGIN(INITIAL);return T_DELTA_EPS;}
+<LINE>delta_eps		        {BEGIN(INITIAL);return T_DELTA_EPS;}
 <LINE>nut_model			{BEGIN(INITIAL);return T_NUT_MODEL;}
+<LINE>eop_origin		{BEGIN(INITIAL);return T_EOP_ORIGIN;}
+<LINE>delta_x_nut		{BEGIN(INITIAL);return T_DELTA_X_NUT;}
+<LINE>delta_y_nut		{BEGIN(INITIAL);return T_DELTA_Y_NUT;}
+<LINE>nut_origin		{BEGIN(INITIAL);return T_NUT_ORIGIN;}
 
 <LINE>exper_num		{BEGIN(INITIAL);return T_EXPER_NUM;}
 <LINE>exper_name		{BEGIN(INITIAL);return T_EXPER_NAME;}

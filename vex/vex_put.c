@@ -1358,6 +1358,24 @@ create_equip(char *str, char *str2, char *str3, char *str4)
 }  
 /*-------------------------------------------------------------------*/
 void *
+create_dvalue_list(char *str, char *str2)
+{
+  char *s1,*s2;
+
+  if(str==NULL && strlen(str)==0)
+    {
+      printf("%s \'dvalue_list\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else {
+      /* Create a list of things */
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      q_list = add_list(q_list,make_dvalue(s1,s2));
+    }
+} 
+/*-------------------------------------------------------------------*/
+void *
 create_svalue_list(char *str)
 {
   char *s1;
@@ -1944,6 +1962,82 @@ create_nut_model(char *str)
     {
       s1=(char *)strdup(str);
       qref_list = add_list(qref_list,make_lowl(T_NUT_MODEL,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_eop_origin(char *str, char *str2)
+{
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'eop_origin\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0)
+	s2=NULL;
+      else
+	s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_EOP_ORIGIN,
+					       make_eop_origin(s1,s2)));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_delta_x_nut()
+{
+
+  if(q_list==NULL)
+    {
+      printf("%s \'delta_x_nut\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      qref_list = add_list(qref_list,make_lowl(T_DELTA_X_NUT, q_list));
+      q_list=NULL;
+    }
+} 
+/*-------------------------------------------------------------------*/
+void *
+create_delta_y_nut()
+{
+
+  if(q_list==NULL)
+    {
+      printf("%s \'delta_y_nut\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      qref_list = add_list(qref_list,make_lowl(T_DELTA_Y_NUT, q_list));
+      q_list=NULL;
+    }
+} 
+/*-------------------------------------------------------------------*/
+void *
+create_nut_origin(char *str, char *str2)
+{
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'nut_origin\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0)
+	s2=NULL;
+      else
+	s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_NUT_ORIGIN,
+					       make_nut_origin(s1,s2)));
     }
 }
 /*-------------------------------------------------------------------*/

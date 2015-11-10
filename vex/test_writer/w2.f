@@ -336,7 +336,35 @@ c
      &                       ptr_ch('days'//char(0)))
       call fcreate_record_control(ptr_ch('master'//char(0)))
       call fend_def
+C
+      call fcreate_block(ptr_ch('EOP'//char(0)))
+      call fcreate_def(ptr_ch('VEX2'//char(0)))
+      call fcreate_eop_origin(ptr_ch('RAPID'//char(0)),
+     &                       ptr_ch('2001y012d'//char(0)))
+      call fcreate_eop_origin(ptr_ch('FINAL'//char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_dvalue_list(ptr_ch('330'//char(0)),
+     &     ptr_ch('masec'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('0.330'//char(0)),
+     &     ptr_ch('asec'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('0.331'//char(0)),
+     &     ptr_ch(char(0)) )
+      call fcreate_delta_x_nut
 
+      call fcreate_dvalue_list(ptr_ch('430'//char(0)),
+     &     ptr_ch('masec'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('0.430'//char(0)),
+     &     ptr_ch('asec'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('0.331'//char(0)),
+     &     ptr_ch(char(0)) )
+      call fcreate_delta_y_nut
+
+      call fcreate_nut_origin(ptr_ch('GSFC'//char(0)),
+     &                       ptr_ch('2011y012d'//char(0)))
+      call fcreate_nut_origin(ptr_ch('BKG'//char(0)),
+     &                       ptr_ch(char(0)))
+      call fcreate_nut_model(ptr_ch('IAU2000A'//char(0)))
+      call fend_def
       call fcreate_block(ptr_ch('DATASTREAMS'//char(0)))
       call fcreate_def(ptr_ch('Hb'//char(0)))
       call fcreate_datastream(ptr_ch('DS1'//char(0)),
@@ -371,7 +399,6 @@ c
       call fcreate_lvalue_list(ptr_ch('DS31'//char(0)))
       call fcreate_merged_datastream(ptr_ch('ML3'//char(0)),
      &                               ptr_ch(char(0)))
-      call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))
 c

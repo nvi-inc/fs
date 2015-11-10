@@ -117,6 +117,12 @@ static int
 get_merged_datastream_field(Merged_datastream *merged_datastream,int n,
 			    int *link,  int *name, char **value, char **units);
 static int
+get_eop_origin_field(Eop_origin *eop_origin,int n,
+		     int *link,  int *name, char **value, char **units);
+static
+get_nut_origin_field(Nut_origin *nutp_origin,int n,
+		     int *link,  int *name, char **value, char **units);
+static int
 get_headstack_pos_field(Headstack_pos *headstack_pos,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -304,6 +310,10 @@ static  struct {
   {"delta_psi", T_DELTA_PSI},
   {"delta_eps", T_DELTA_EPS},
   {"nut_model", T_NUT_MODEL},
+  {"eop_origin", T_EOP_ORIGIN},
+  {"delta_x_nut", T_DELTA_X_NUT},
+  {"delta_y_nut", T_DELTA_Y_NUT},
+  {"nut_origin", T_NUT_ORIGIN},
   
   {"exper_num", T_EXPER_NUM},
   {"exper_name", T_EXPER_NAME},
@@ -835,6 +845,24 @@ struct merged_datastream *make_merged_datastream(char *merged_link,
 
   return new;
 }
+struct eop_origin *make_eop_origin(char *source, char *version)
+{
+  NEWSTRUCT(new,eop_origin);
+
+  new->source=source;
+  new->version=version;
+
+  return new;
+}
+struct nut_origin *make_nut_origin(char *source, char *version)
+{
+  NEWSTRUCT(new,nut_origin);
+
+  new->source=source;
+  new->version=version;
+
+  return new;
+}
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions)
 {
@@ -1296,12 +1324,20 @@ char **units)
   case T_Y_WOBBLE:
   case T_DELTA_PSI:
   case T_DELTA_EPS:
+  case T_DELTA_X_NUT:
+  case T_DELTA_Y_NUT:
   case T_S2_GROUP_ORDER:
   case T_ROLL_DEF:
   case T_HORIZON_MAP_AZ:
   case T_HORIZON_MAP_EL:
   case T_VLBA_TRNSPRT_SYS_TRK:
     ierr=get_dvalue_list_field(ptr,n,link,name,value,units);
+    break;
+  case T_EOP_ORIGIN:
+    ierr=get_eop_origin_field(ptr,n,link,name,value,units);
+    break;
+  case T_NUT_ORIGIN:
+    ierr=get_nut_origin_field(ptr,n,link,name,value,units);
     break;
   case T_HEADSTACK_POS:
     ierr=get_headstack_pos_field(ptr,n,link,name,value,units);
@@ -2367,6 +2403,56 @@ get_merged_datastream_field(Merged_datastream *merged_datastream,int n,
       fprintf(stderr,"unknown error in get_merged_datastream_field %d\n",ierr);
       exit(1);
     }
+  }
+  return 0;
+}
+static int
+get_eop_origin_field(Eop_origin *eop_origin,int n,int *link,
+		     int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=eop_origin->source;
+    break;
+  case 2:
+    if(eop_origin->version==NULL)
+      return -1;
+    *value=eop_origin->version;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_nut_origin_field(Nut_origin *nut_origin,int n,int *link,
+		     int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=nut_origin->source;
+    break;
+  case 2:
+    if(nut_origin->version==NULL)
+      return -1;
+    *value=nut_origin->version;
+    break;
+  default:
+    return -1;
   }
   return 0;
 }
