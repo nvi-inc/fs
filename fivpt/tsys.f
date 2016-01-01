@@ -42,10 +42,15 @@ C
 C MAKE SURE THE CAL IS OFF
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
       if(calfp.gt.0.0.and.
      &     (rack.ne.DBBC.or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0))) then
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
+     &     (rack.eq.DBBC.and.
+     &     (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
+     &     dbbc_cont_cal_mode.eq.0))) then
          call scmds('calofffp',1)
       endif
 C
@@ -144,10 +149,16 @@ C
 C  NOW DO TPICAL
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
       if(calfp.gt.0.0.and.
      &     (rack.ne.DBBC.or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0))) then
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
+     &     (rack.eq.DBBC.and.
+     &     (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
+     &     dbbc_cont_cal_mode.eq.0))) then
+
 C
 C       TURN CAL ON
 C 

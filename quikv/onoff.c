@@ -283,7 +283,9 @@ long ip[5];                           /* ipc parameters */
 	      }
 	    }
 	  }
-	} else if(shm_addr->equip.rack==DBBC) {
+	} else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
 	  for (i=0;i<MAX_DBBC_BBC*2;i++) {
 	    if(lcl.itpis[i]!=0) {
 	      lcl.devices[i].ifchain=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;

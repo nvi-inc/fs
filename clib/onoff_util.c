@@ -345,7 +345,9 @@ char *ptr;
 	  ierr=-207;
 	  return ierr;
 	}
-      } else if(shm_addr->equip.rack==DBBC) {
+      } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_DDC || shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	    ) {
 	if(strcmp(ptr,"allbbc")==0) {
 	  for (i=0;i<MAX_DBBC_BBC;i++) {
 	    lcl->itpis[i]=1;
@@ -386,7 +388,10 @@ char *ptr;
 	  goto done;
 
 	} else if(strcmp(ptr,"formbbc")==0) {
-	  if(shm_addr->equip.rack==DBBC &&
+	  if((shm_addr->equip.rack==DBBC && 
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G))
+	    &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
@@ -415,7 +420,10 @@ char *ptr;
 	} else if(strcmp(ptr,"formif")==0) {
 	  for(i=0;i<MAX_ONOFF_DET;i++)
 	    itpis_test[i]=0;
-	  if(shm_addr->equip.rack==DBBC &&
+	  if(shm_addr->equip.rack==DBBC && 
+	     (shm_addr->equip.rack_type == DBBC_DDC ||
+	      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	     &&
 	     shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||

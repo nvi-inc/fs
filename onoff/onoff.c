@@ -77,7 +77,9 @@ main()
     kagc=TRUE;
     if(agc(onoff.itpis,0,&ierr))
       goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC) {
+  } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
     kagc=TRUE;
     if(agc_dbbc(onoff.itpis,0,&ierr))
       goto error_recover;
@@ -101,7 +103,10 @@ main()
   use_cal=FALSE;
   non_station_det=FALSE;
   station_det=FALSE;
-  cont0=shm_addr->equip.rack==DBBC && shm_addr->dbbc_cont_cal.mode == 1;
+  cont0=shm_addr->equip.rack==DBBC  &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+    && shm_addr->dbbc_cont_cal.mode == 1;
   for(j=0;j<MAX_ONOFF_DET;j++) {
     if(onoff.itpis[j]!=0) {
       use_cal=use_cal ||onoff.devices[j].tcal>0.0;
@@ -457,7 +462,9 @@ main()
 	ip2[4]=0;
 	memcpy(ip2+3,"nf",2);
       }
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       if(agc_dbbc(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;

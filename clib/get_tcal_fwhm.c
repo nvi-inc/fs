@@ -262,7 +262,9 @@ int *ierr;
 	break;
       }
     }
-  } else if(shm_addr->equip.rack==DBBC) {
+  } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_DDC || shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	    ){
     for(i=0;i<sizeof(lwhat)/sizeof(char *);i++) {
       if(strncmp(device,lwhat[i],2)==0) {
 	if(i<2*MAX_DBBC_BBC) {

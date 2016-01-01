@@ -31,7 +31,7 @@ if (nsem_test(NSEM_NAME) != 1) {
 
   if (source == MK5 )
     set5btime(formtime,delta);
-  else if (rack == DBBC && rack_type == FILA10G)
+  else if (rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G))
     setfila10gtime(formtime,delta);
   else if (source == S2)
     sets2time(s2dev[s2type],formtime+delta);
