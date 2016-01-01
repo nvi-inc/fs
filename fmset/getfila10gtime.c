@@ -104,43 +104,6 @@ int    *formhs;
 	    mvwaddstr( maindisp, 4,25+17+i, " ");
 	    iwait=1;
 
-	    if(rack == DBBC && rack_type == DBBC) {
-	      /* send a harmless monitor command so  last command
-		 in DBBC buffer is not pps_sync, not neeede for FiLa10g  */
-
-	      out_recs=0;
-	      out_class=0;
-	      
-	      str="dbbcifa";
-	      cls_snd(&out_class, str, strlen(str) , 0, 0);
-	      out_recs++;
-
-	      ip[0]=1;
-	      ip[1]=out_class;
-	      ip[2]=out_recs;
-	      
-	      nsem_take("fsctl",0);
-	      name="dbbcn";
-	      while(skd_run_to(name,'w',ip,120)==1) {
-		if (nsem_test("fs   ") != 1) {
-		  endwin();
-		  fprintf(stderr,"Field System not running - fmset aborting\n");
-		  rte_sleep(SLEEP_TIME);
-		  exit(0);
-		}
-		name=NULL;
-	      }
-	      skd_par(ip);
-	      nsem_put("fsctl");
-	      if(ip[1]!=0)
-		cls_clr(ip[0]);
-	      if(ip[2] != 0) {
-		logita(NULL,ip[2],ip+3,ip+4);
-		logit(NULL,-9,"fv");
-		*formtime=-1;
-		return;
-	      }
-	    }
 	  }
 	  /* now set time */
 
