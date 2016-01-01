@@ -33,7 +33,7 @@ nodelay ( maindisp, FALSE );
 echo ();
 
   *flag = FALSE;
-  fila10g = rack == DBBC && rack_type == FILA10G;
+  fila10g = rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G);
 
   tp = gmtime( &ut);
 

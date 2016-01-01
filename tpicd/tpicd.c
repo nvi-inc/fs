@@ -80,7 +80,9 @@ main()
     }
   }
 
-  if(shm_addr->equip.rack==DBBC) {
+  if(shm_addr->equip.rack==DBBC &&
+     (shm_addr->equip.rack_type == DBBC_DDC ||
+      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
     if(dbbc_cont_cal.mode==1)
       strcpy(buff,"tpcont/");
     else
@@ -218,9 +220,11 @@ main()
     } else if(shm_addr->equip.rack==LBA) {
       tpi_lba(ip,tpicd.itpis);   /* sample tpi(s) */
       tpput_lba(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
 #ifdef TESTX
-    printf(" collecting dBBC data \n");
+      printf(" collecting dBBC data \n");
 #endif
       tpi_dbbc(ip,tpicd.itpis);   /* sample tpi(s) */
       if(ip[2]<0) {

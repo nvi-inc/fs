@@ -1,4 +1,4 @@
-/* mk5dbbcd.c make list of bbc detectors needed for DBBC rack */
+/* mk5dbbcd.c make list of bbc detectors needed for DBBC_DDC rack */
 
 #include <stdio.h>
 #include <string.h>

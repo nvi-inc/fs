@@ -75,6 +75,7 @@ C
       endif
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id=-1
         goto 11
@@ -83,7 +84,9 @@ c       do nothing
       else if(LBA.eq.rack) then
         id=-1
         goto 11
-      else if(DBBC.eq.rack) then
+      else if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G)
+     &       )then
         id=-1
         goto 11
       endif
@@ -165,7 +168,9 @@ C
            call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
         else if(LBA.eq.rack) then
            call dscon(dtpi,ierr)
-        else if(DBBC.eq.rack) then
+        else if(DBBC.eq.rack.and.
+     &          (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G)
+     &          ) then
            call dbbcn(dtpi,dtpi2,ierr,icont,isamples)
            if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
               if(isamples.gt.intp) then

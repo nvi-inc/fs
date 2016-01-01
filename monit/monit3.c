@@ -75,7 +75,9 @@ m3init()
       mvaddstr(ROW1+1,COL1+13,"(IFC)");
     if(shm_addr->dbbc_cond_mods > 3)
       mvaddstr(ROW1+1,COL1+26,"(IFD)");
-    mvaddstr(ROW1+2,COL1,"BBC");
+    if(shm_addr->equip.rack_type == DBBC_DDC ||
+       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+      mvaddstr(ROW1+2,COL1,"BBC");
   } else if(shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) {
     mvaddstr(ROW1+2,COL1+1,"IFP");
   } else {
@@ -90,22 +92,27 @@ m3init()
   mvaddstr(ROW1+2,COL1+24,"Ts-L");
   standend();
 
-  for(j=1;j<=14;j++) {
-    if ((shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) 
-        && j > 2*shm_addr->n_das) break;
-    move(ROW1+2+j,COL1+1);
-    preint(outpt,j,-2,1);
-    printw("%s",outarr);
-  }
-  iend=14;
-  if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4)
-    iend=MAX_VLBA_BBC;
-  if(shm_addr->equip.rack == DBBC)
-    iend=MAX_DBBC_BBC;
-  for(j=15;j<=iend;j++) {
-    move(ROW1+2+j,COL1+1);
-    preint(outpt,j,-2,1);
-    printw("%s",outarr);
+  if(shm_addr->equip.rack != DBBC || 
+     (shm_addr->equip.rack == DBBC &&
+     (shm_addr->equip.rack_type == DBBC_DDC ||
+      shm_addr->equip.rack_type == DBBC_DDC_FILA10G))) {
+    for(j=1;j<=14;j++) {
+      if ((shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) 
+	  && j > 2*shm_addr->n_das) break;
+      move(ROW1+2+j,COL1+1);
+      preint(outpt,j,-2,1);
+      printw("%s",outarr);
+    }
+    iend=14;
+    if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4)
+      iend=MAX_VLBA_BBC;
+    if(shm_addr->equip.rack == DBBC)
+      iend=MAX_DBBC_BBC;
+    for(j=15;j<=iend;j++) {
+      move(ROW1+2+j,COL1+1);
+      preint(outpt,j,-2,1);
+      printw("%s",outarr);
+    }
   }
   refresh();
 }
@@ -177,50 +184,55 @@ mout3()
       }
     }
 
-    for (i=1;i<=MAX_BBC;i++) {
-      if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
-        long bbc2freq(),freqv;
-	if(MAX_VLBA_BBC < i)
-	  continue;
-        freqv=bbc2freq(shm_addr->bbc[i-1].freq);
-        snprintf(ptfreq,sizeof(freq)," %7.2f",(float)freqv/100);
-      } else if(shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) {
-        if (i > 2*shm_addr->n_das) break;
-        snprintf(ptfreq,sizeof(freq),"%-06.2lf",shm_addr->das[(i-1)/2].ifp[(i-1)%2].frequency);
-      } else if(shm_addr->equip.rack == DBBC) {
-	if(MAX_DBBC_BBC < i)
-	  continue;
-	snprintf(ptfreq,sizeof(freq),"%7.2f",
-		 ((float)(shm_addr->dbbcnn[i-1].freq/10000)/100));
-      } else {
-	if(14 < i)
-	  continue;
-        k = (i-1)*6;
-	ptfreq[0]=' ';
-        memcpy(ptfreq+1,shm_addr->lfreqv+k,6);
-	ptfreq[7]=0;
+    if(shm_addr->equip.rack != DBBC ||
+       (shm_addr->equip.rack == DBBC &&
+	  (shm_addr->equip.rack_type == DBBC_DDC ||
+	   shm_addr->equip.rack_type == DBBC_DDC_FILA10G))) {
+      for (i=1;i<=MAX_BBC;i++) {
+	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
+	  long bbc2freq(),freqv;
+	  if(MAX_VLBA_BBC < i)
+	    continue;
+	  freqv=bbc2freq(shm_addr->bbc[i-1].freq);
+	  snprintf(ptfreq,sizeof(freq)," %7.2f",(float)freqv/100);
+	} else if(shm_addr->equip.rack == LBA || shm_addr->equip.rack == LBA4) {
+	  if (i > 2*shm_addr->n_das) break;
+	  snprintf(ptfreq,sizeof(freq),"%-06.2lf",shm_addr->das[(i-1)/2].ifp[(i-1)%2].frequency);
+	} else if(shm_addr->equip.rack == DBBC) {
+	  if(MAX_DBBC_BBC < i)
+	    continue;
+	  snprintf(ptfreq,sizeof(freq),"%7.2f",
+		   ((float)(shm_addr->dbbcnn[i-1].freq/10000)/100));
+	} else {
+	  if(14 < i)
+	    continue;
+	  k = (i-1)*6;
+	  ptfreq[0]=' ';
+	  memcpy(ptfreq+1,shm_addr->lfreqv+k,6);
+	  ptfreq[7]=0;
+	}
+	move(ROW1+2+i,COL1+5);
+	printw("%7s",ptfreq);
+	if(shm_addr->equip.rack == DBBC &&
+	   shm_addr->dbbcnn[i-1].freq%10000 !=0)
+	  printw("+");
+	else
+	  printw(" ");
+	move(ROW1+2+i,COL1+15);
+	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
+	   shm_addr->equip.rack == DBBC) 
+	  preflt(outpt,shm_addr->systmp[i+MAX_BBC-1],-6,1);
+	else
+	  preflt(outpt,shm_addr->systmp[i+13],-6,1);
+	printw("%s",outarr);
+	move(ROW1+2+i,COL1+23);
+	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
+	   shm_addr->equip.rack == DBBC) 
+	  preflt(outpt,shm_addr->systmp[i-1],-6,1);
+	else
+	  preflt(outpt,shm_addr->systmp[i-1],-6,1);
+	printw("%s",outarr);
       }
-      move(ROW1+2+i,COL1+5);
-      printw("%7s",ptfreq);
-      if(shm_addr->equip.rack == DBBC &&
-	 shm_addr->dbbcnn[i-1].freq%10000 !=0)
-	printw("+");
-      else
-	printw(" ");
-      move(ROW1+2+i,COL1+15);
-      if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
-	 shm_addr->equip.rack == DBBC) 
-	preflt(outpt,shm_addr->systmp[i+MAX_BBC-1],-6,1);
-      else
-	preflt(outpt,shm_addr->systmp[i+13],-6,1);
-      printw("%s",outarr);
-      move(ROW1+2+i,COL1+23);
-      if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
-	 shm_addr->equip.rack == DBBC) 
-	preflt(outpt,shm_addr->systmp[i-1],-6,1);
-      else
-	preflt(outpt,shm_addr->systmp[i-1],-6,1);
-      printw("%s",outarr);
     }
   refresh();
 }

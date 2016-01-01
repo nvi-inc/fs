@@ -64,14 +64,17 @@ C
       if (iclcm.eq.0) return
 C                     Retain class for later response
       call fs_get_rack(rack)
-
+      call fs_get_rack_type(rack_type)
+c
       if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tplis(ip,itpis)
       else if (VLBA .eq. rack .or. VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
       else if (LBA.eq.rack) then
         call tplisl(ip,itpis_lba)
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call tplisd(ip,itpis_dbbc)
       else
          call tplisn(ip,itpis_norack)
@@ -117,7 +120,9 @@ C
       else if (LBA.eq.rack) then
         call fc_tpi_lba(ip,itpis_lba)
         if(ip(3).lt.0) return
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call fc_tpi_dbbc(ip,itpis_dbbc)
         if(ip(3).lt.0) return
       else
@@ -144,7 +149,9 @@ C                     Get the command part of the response set up
       else if (LBA.eq.rack) then
         call fc_tpput_lba(ip,itpis_lba,isub,ibuf,nch,ilen)
         return
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call fc_tpput_dbbc(ip,itpis_dbbc,isub,ibuf,nch,ilen)
         return
       else

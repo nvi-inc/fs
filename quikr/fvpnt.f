@@ -172,6 +172,7 @@ C
       endif
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if (MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
 C                      Default for MK3 and MK4 is IF1
@@ -266,7 +267,9 @@ c
           ierr=-216
           goto 990
         endif
-      else if(DBBC.eq.rack) then
+      else if(DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         indbc=ia2hx(ldevfp,1)
         if(ichcm_ch(ldevfp,1,'ia').eq.0) then
           ichain=1

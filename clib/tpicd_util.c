@@ -89,7 +89,10 @@ char *ptr;
 	mk4bbcd(lcl->itpis);
       } else if(shm_addr->equip.rack==LBA) {
 	lbaifpd(lcl->itpis);
-      } else if(shm_addr->equip.rack==DBBC &&
+      } else if(shm_addr->equip.rack==DBBC && 
+		(shm_addr->equip.rack_type == DBBC_DDC ||
+		 shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+		&&
 		shm_addr->equip.drive[0]==MK5 &&
 		(shm_addr->equip.drive_type[0]==MK5B ||
 		 shm_addr->equip.drive_type[0]==MK5B_BS ||
@@ -143,7 +146,10 @@ char *ptr;
 	    strncpy(lcl->lwhat[i],lwhat[i+MAX_BBC],2);
 	    lcl->lwhat[i][1]=det[0];
 	  }
-      }else if (shm_addr->equip.rack==DBBC) {
+      }else if (shm_addr->equip.rack==DBBC && 
+		(shm_addr->equip.rack_type == DBBC_DDC ||
+		 shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+		) {
 	for (i=0;i<2*MAX_DBBC_BBC;i++)
 	  if(lcl->itpis[i]!=0){
 	    lcl->ifc[i]=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;
@@ -208,7 +214,10 @@ struct tpicd_cmd *lcl;
       }else if (shm_addr->equip.rack==LBA) {
 	sprintf(output+strlen(output),"%c",chanl[j]);
 	limit=2*shm_addr->n_das;
-      }else if (shm_addr->equip.rack==DBBC) {
+      }else if (shm_addr->equip.rack==DBBC && 
+		(shm_addr->equip.rack_type == DBBC_DDC ||
+		 shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+		) {
 	sprintf(output+strlen(output),"%c",chanv[j]);
 	limit=MAX_DBBC_DET;
       }
@@ -223,7 +232,10 @@ struct tpicd_cmd *lcl;
 	    i=k;
 	}else if (shm_addr->equip.rack==LBA) {
 	  i=k;
-	}else if (shm_addr->equip.rack==DBBC) {
+	}else if (shm_addr->equip.rack==DBBC && 
+		  (shm_addr->equip.rack_type == DBBC_DDC ||
+		   shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+		  ) {
 	  if(k<2*MAX_DBBC_BBC)
 	    i=MAX_DBBC_BBC*(k%2)+k/2;
 	  else

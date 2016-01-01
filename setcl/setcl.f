@@ -261,7 +261,9 @@ C             two return buffers with imode = -53
            goto 998
         endif
         goto 200
-      else if (DBBC.eq.rack.and.FILA10G.eq.rack_type) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC_FILA10G.eq.rack_type.or.
+     &       DBBC_PFB_FILA10G.eq.rack_type)) then
         idum=rn_take('fsctl',0)
         idum=fc_get_fila10gtime(centisec,it,ip,0)
         call rn_put('fsctl')

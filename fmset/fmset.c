@@ -118,7 +118,7 @@ else if (drive==S2) {
     toggle=TRUE;
     other=rack;
   }
- } else if (rack==DBBC && rack_type==FILA10G) {
+ } else if (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) {
   ;
  } else if ((rack & MK3 || rack==0||rack==LBA) ||
 	    ((( rack == MK4 && rack_type != MK4) ||
@@ -164,7 +164,7 @@ mvwaddstr( maindisp, 2, 5, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
    hint_row=12;
    form="Mark 5B";
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
- }  else if (rack==DBBC && rack_type==FILA10G) {
+ }  else if (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) {
    mvwaddstr( maindisp, 4, column, "FiLa10G     " );
    form="FiLa10g";
  } else if(source == S2) {
@@ -191,7 +191,7 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
 
 irow=4;
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     (rack == DBBC && rack_type == FILA10G))) {
+		     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)))) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -307,7 +307,8 @@ do 	{
 	     (rack == VLBA4 && rack_type == VLBA4C ) || 
 	     (rack == VLBA4 && rack_type == VLBA4CDAS ) || 
 	     (rack == MK4   && rack_type == MK45  ) || 
-	     rack == DBBC ) {
+	     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G))
+	     ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
 	      pps_status="- okay                         ";
 	    else
@@ -432,7 +433,8 @@ do 	{
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-			      (rack==DBBC && rack_type == FILA10G)) &&
+			      (rack==DBBC && 
+			       (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G))) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)

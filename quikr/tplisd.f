@@ -115,6 +115,8 @@ C
         call fs_get_drive(drive)
         call fs_get_drive_type(drive_type)
         if(rack.eq.DBBC.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       .and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
      &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
@@ -131,6 +133,8 @@ c
         call fs_get_drive(drive)
         call fs_get_drive_type(drive_type)
         if(rack.eq.DBBC.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       .and.
      &       drive(1).eq.mk5.and.
      &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
      &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.

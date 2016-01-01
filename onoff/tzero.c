@@ -159,8 +159,10 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       }
     accum->count=1;
 
-  } else if(shm_addr->equip.rack==DBBC) {
-
+  } else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+    
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_DBBC_DET; i++) 
       if (onoff->itpis[i]) {

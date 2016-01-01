@@ -36,7 +36,10 @@ c
       integer MK5A_BS       ! MK5A_BS comparison bit variable
       integer MK45          ! MK45 comparison bit variable
       integer VLBA45        ! VLBA45 comparison bit variable
-      integer FILA10G       ! FILA10G comparison bit variable
+      integer DBBC_DDC      ! FILA10G_DDC comparison bit variable
+      integer DBBC_DDC_FILA10G       ! FILA10G_DDC_FILA10G comparison bit variable
+      integer DBBC_PFB      ! FILA10G_PFB comparison bit variable
+      integer DBBC_PFB_FILA10G       ! FILA10G_PFB_FILA10G comparison bit variable
       integer VLBA4C        ! VLBA4C comparison bit variable
       integer VLBA4CDAS     ! VLBA4CDAS comparison bit variable
       integer MK5B          ! MK5B comparison bit variable
@@ -107,7 +110,10 @@ C rack/drive _types
       parameter ( MK5A_BS  = z'8000000'  )
       parameter ( MK45     = z'10000000'  )
       parameter ( VLBA45   = z'20000000'  )
-      parameter ( FILA10G  = z'40000000'  )
+      parameter ( DBBC_DDC_FILA10G  = z'40000000'  )
+      parameter ( DBBC_DDC = z'1'  )
+      parameter ( DBBC_PFB_FILA10G  = z'2'  )
+      parameter ( DBBC_PFB = z'4'  )
       parameter ( VLBA4C   = z'1' )
       parameter ( VLBA4CDAS= z'2' )
       parameter ( MK5B     = z'40000000'  )

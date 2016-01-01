@@ -69,7 +69,9 @@ C                   Pick up the Tsys1 or 2 index
         call tplisv(ip,itpis_vlba)
       else if (LBA.eq.rack) then
         call tplisl(ip,itpis_lba)
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call tplisd(ip,itpis_dbbc)
       else
         call tplisn(ip,itpis_norack)
@@ -195,7 +197,9 @@ C
       else if (LBA.eq.rack) then
         call fc_tsys_lba(ip,itpis_lba,ibuf,nch,nsub)
         return
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call fc_tsys_dbbc(ip,itpis_dbbc,ibuf,nch,nsub)
         return
       else

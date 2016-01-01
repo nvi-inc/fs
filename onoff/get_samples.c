@@ -78,7 +78,9 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	*ierr=-16;
 	return -1;
       }
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       tpi_dbbc(ip,itpis);
       if(ip[2]<0) {
 	if(ip[1]!=0)
@@ -127,7 +129,9 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=tpi[j];
 	}
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       if(tpget_dbbc(cont,ip,itpis,ierr,tpi,tpi2))
 	 return -1;
       for(j=0;j<MAX_DET;j++)
