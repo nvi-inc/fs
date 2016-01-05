@@ -386,6 +386,9 @@ loop:
       case 96:
 	dbbcgain(&command,itask,ip);
 	break;
+      case 97:
+	dbbc_vsix(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;
