@@ -401,6 +401,8 @@ ifb          qkr 9502 01 0800FFFFFFFF
 ifc          qkr 9503 01 0800FFFFFFFF
 ifd          qkr 9504 01 0800FFFFFFFF
 bbc_gain     qkr 9600 01 0800FFFFFFFF
+vsi1         qkr 9700 01 0800FFFFFFFF
+vsi2         qkr 9701 01 0800FFFFFFFF
 * boss internal
 cont         *xx 0000 02 FFFFFFFFFFFF
 halt         *xx 0000 03 FFFFFFFFFFFF

@@ -1,4 +1,4 @@
-""
+"
 4F -101
 No default for mode.
 ""
@@ -888,7 +888,7 @@ BO -140
 Error decoding EQUIP.CTL line ?WWW
 ""
 BO -141
-Illegal version string in DBBC DDC version in EQUIP.CTL line ?WWW
+Illegal version string in DBBC DDC or PFB version in EQUIP.CTL line ?WWW
 ""
 BO -142
 No 'nominal' rate for that DBBC version number, rate in EQUIP.CTL line ?WWW
@@ -1709,6 +1709,18 @@ Frequency Switching is not as expected.
 CH -805
 Frequency Switching sequence has been changed.
 ""
+CH -810
+Communication error for DBBC.
+""
+CH -811
+Error retrieving communication buffer for DBBC.
+""
+CH -812
+Incorrect response from DBBC.
+""
+CH -813
+DBBC firmware version/personality does not match equip.ctl, compare to dbbc=version.
+""
 DB   -1
 dbbcn: error opening dbbad.ctl
 ""
@@ -1847,6 +1859,9 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DC -451
 Class buffer error from command response.
 ""
+DC -501
+Only DBBC DDC rack types supported in bbcNN commands.
+""
 DD -201
 Mode must be one of: off, on.
 ""
@@ -1868,6 +1883,9 @@ Error decoding cont_cal/ response, could be a DBBC version mis-match, see error 
 DD -451
 Class buffer error from command response.
 ""
+DD -501
+Only DBBC DDC rack types supported in cont_cal command.
+""
 DF -101
 No default for mode.
 ""
@@ -1875,7 +1893,7 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of: astro, geo, wastro, test, lba, astro2, or astro3.
+Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, or astro3, (PFB): flex.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
@@ -1928,6 +1946,18 @@ DBBC has unsupported date code for version 102, ddbc has: July 04 2012
 DF -460
 DBBC has unsupported date code for version 104, ddbc has: DDC,104,March 19 2013
 ""
+DF -461
+DBBC version should be DDC, but is PFB; see next message for DBBC's version.
+""
+DF -462
+DBBC version should be PFB, but is DDC; see next message for DBBC's version.
+""
+DF -463
+Unknown rack type in logmsg_dbbc().
+""
+DF -501
+Only DDC and PFB types suppoterd in DBBC form command.
+""
 DG -101
 No default for bbc, should be "all" or 1,2,...16.
 ""
@@ -1958,22 +1988,31 @@ Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error 
 DG -451
 Class buffer error from command response.
 ""
-DH -103
+DG -501
+Only DBBC DDC rack types supported in bbcgain command.
+""
+DH -104
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
 DH -201
-mask parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+mask2 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
 ""
 DH -202
-decimate parameter, must be 1-255
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
 ""
 DH -203
+decimate parameter, must be 1-255
+""
+DH -204
 Sample rate must be a number greater than 0.124
 ""
-DH -213
+DH -205
+okay parameter must be disk_record_ok or null
+""
+DH -214
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255 within 0.1 percent.
 ""
-DH -303
+DH -304
 Can't specify sample rate and decimate parameters simultaneously
 ""
 DH -400
@@ -2218,6 +2257,114 @@ Dataset ?W ERROR: the previous function is still executing, request ignored.
 ""
 DS -908
 Dataset ?W ERROR: an internal program error has been detected (xpaderr).
+""
+DV -201
+Error decoding channel number of parameter 1
+""
+DV -202
+Error decoding channel number of parameter 2
+""
+DV -203
+Error decoding channel number of parameter 3
+""
+DV -204
+Error decoding channel number of parameter 4
+""
+DV -205
+Error decoding channel number of parameter 5
+""
+DV -206
+Error decoding channel number of parameter 6
+""
+DV -207
+Error decoding channel number of parameter 7
+""
+DV -208
+Error decoding channel number of parameter 8
+""
+DV -209
+Error decoding channel number of parameter 9
+""
+DV -210
+Error decoding channel number of parameter 10
+""
+DV -211
+Error decoding channel number of parameter 11
+""
+DV -212
+Error decoding channel number of parameter 12
+""
+DV -213
+Error decoding channel number of parameter 13
+""
+DV -214
+Error decoding channel number of parameter 14
+""
+DV -215
+Error decoding channel number of parameter 15
+""
+DV -216
+Error decoding channel number of parameter 16
+""
+DV -221
+No such channel for parameter 1
+""
+DV -222
+No such channel for parameter 2
+""
+DV -223
+No such channel for parameter 3
+""
+DV -224
+No such channel for parameter 4
+""
+DV -225
+No such channel for parameter 5
+""
+DV -226
+No such channel for parameter 6
+""
+DV -227
+No such channel for parameter 7
+""
+DV -228
+No such channel for parameter 8
+""
+DV -229
+No such channel for parameter 9
+""
+DV -230
+No such channel for parameter 10
+""
+DV -231
+No such channel for parameter 11
+""
+DV -232
+No such channel for parameter 12
+""
+DV -233
+No such channel for parameter 13
+""
+DV -234
+No such channel for parameter 14
+""
+DV -235
+No such channel for parameter 15
+""
+DV -236
+No such channel for parameter 16
+""
+DV -300
+Maximum 16 parameters for vsiX command.
+""
+DV -301
+No monitor form of vsiX command.
+""
+DV -451
+Class buffer error from command response.
+""
+DV -501
+Only DBBC PFB rack types supported in vsiX commands.
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
