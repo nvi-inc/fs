@@ -3,7 +3,6 @@
             Syntax:     bbcnn=freq,IF,bw,tpint
             Response:   bbcnn/freq,IF,bw,tpint,gainctrl,gainU,gainL,tpUcalon,tpLcalon,tpUcaloff,tpLcaloff
 
-
 nn is the BBC index number corresponding to its order in position in the DBBC rack, 01 to 16.
 
 Settable Parameters:
