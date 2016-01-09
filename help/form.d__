@@ -5,18 +5,20 @@
 
 Settable Parameters:
 
-            mode      output mode: astro, geo, wastro, test, lba, astro2, or
-                      astro3.  No default. The "astro2" mode is not available
-                      for DDC versions before 104. The "astro3" mode is
-                      only available on E/F DDC versions, which start with
-                      version 105.  For E/F versions only ""astro3" and
-                      "test" modes are available and there is no output on
-                      VSI2.  Output pin assignments described in the comments
-                      below.
+            mode      output mode (DDC): astro, geo, wastro, test, lba,
+                      astro2, or astro3, (PFB): flex. No default. The
+                      "astro2" mode is not available for DDC versions
+                      before 104. The "astro3" mode is only available
+                      on E/F DDC versions, which start with version
+                      105.  For E/F DDC versions only ""astro3" and
+                      "test" modes are available and there is no
+                      output on VSI2.  DDC Output pin assignments
+                      described in the comments below. See comments for
+                      PFB output.
 
-            test      Test mode: 0, 1, bin, tvg. No default. Ignored unless
-                      mode=test. Not available for readback from dbbc in
-                      DBBC version v100.
+            test      DDC only Test mode: 0, 1, bin, tvg. No default.
+                      Ignored unless mode=test. Not available for
+                      readback from dbbc in DBBC version v100.
 
 Monitor-only Parameters: None
 
@@ -32,7 +34,10 @@ Only DBBC DDC vXXXe/f (XXX=105 or greater) support "astro3".
 DBBC versions vXXXe/f (XXX=105 or greater) use only VSI1 and support
 only "astro3" and "test" modes.
 
-The output pin assignments for the modes are:
+For the PFB "flex" mode.  The output is determined by the preceeding
+vsi1=... and vsi2=... commands.
+
+The output pin assignments for the DDC modes are:
 
 VSI1 GEO ASTRO WASTRO ASTRO2 ASTRO3 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG
  1   1US   1US    1US    1US   1US  1US   0      1     BinC0     TVG0
