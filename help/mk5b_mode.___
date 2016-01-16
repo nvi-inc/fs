@@ -12,8 +12,8 @@ Settable parameters:
 source:     data source: ext, tvg, ramp, or vdif. Default: ext.
             On display may be the "magic" recording mode specifier used
             by jive5ab. 
-mask:       bit-stream mask, hex, non-zero 32-bit wide maximum,
-            for example: 0xf, default 0xffffffff.
+mask:       bit-stream mask, hex, non-zero 64-bit wide maximum,
+            for example: 0xf, default 0xffffffff (least 32 bits on).
 decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless sample
             (next parameter) is specified.
 sample:     sample rate: must be greater than 0.124.  The value divided 
@@ -32,15 +32,16 @@ tbitrate    total bit rate (Mbps)
 frame       frame size in bytes
 
 Comments:
+
 "bit_streams" is an alias for the "mk5b_mode" and "mk5c_mode" commands
 that does not communicate with the recorder.  All other aspects of its
 operation are identical for the first four parameters.  The main
 purpose of "bit_streams" is to provide a way to set the bitstream mask
 for correct sampling of Tsys when no recorder is being used (typically
 during eVLBI) when a Mark 5B/C compatible rack, such as a Mark 5,
-VLBA5, DBBC, or DDBC/FiLA10G (or none) is in use.  For such racks, if
-the recorder is set to "none" in DRUDG, the "bit_stream" command will be
-generated instead of mk5b_mode.
+VLBA5, DBBC_DDC, or DDBC_DDC/FiLA10G (or none) is in use.  For such
+racks, if the recorder is set to "none" in DRUDG, the "bit_stream"
+command will be generated instead of mk5b_mode or mk5c_mode.
 
 "mk5c_mode" is an alias for the "mk5b_mode" command, but is used with
 Mark 5C recorders only.  The recorder must be controlled by the
@@ -87,8 +88,9 @@ recording has been commanded with the "disk_record=on" command.
 Either recording must be stopped using "disk_record=off" command first
 or if you wish to continue to set the mode despite recording being
 recording being active (not recommended), you can use "disk_record_ok"
-as the sixth parameter of the command as an override.  If "jive5ab" is
-being used to run the recorder and the override is used while
-recording is active, the command will cause an error response from the
-recorder and not be effective.  Changing the mode while recording will
-probably cause problems with the recording and is not recommended.
+as the sixth parameter of the command as an override for Mark 5B
+recorders controllled with DIMino.  If "jive5ab" is being used to run
+the recorder and the override is used while recording is active, the
+command will cause an error response from the recorder and not be
+effective.  Changing the mode while recording will probably cause
+problems with the recording and is not recommended.
