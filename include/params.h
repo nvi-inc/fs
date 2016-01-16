@@ -8,7 +8,10 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       117*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       118*PAGE_SIZE /* reserves bytes for Fscom     */
+/* for C_RES */
+/* take 'x' size from " setup_ids: Fscom C structure too large: x bytes */
+/* divide by PAGE_SIZE, round up to next integer */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
@@ -111,7 +114,10 @@
 #define VLBA42      0x2000000
 #define MK45        0x10000000
 #define VLBA45      0x20000000
-#define FILA10G     0x40000000
+#define DBBC_DDC_FILA10G     0x40000000
+#define DBBC_DDC    0x1
+#define DBBC_PFB_FILA10G    0x2
+#define DBBC_PFB    0x4
 
 /*sub types of VLBA4 rack, like VLBA45 */
 
