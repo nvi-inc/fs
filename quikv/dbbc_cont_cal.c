@@ -29,6 +29,11 @@ long ip[5];                           /* ipc parameters */
 
       int kdiff;
 
+      if(DBBC_DDC != shm_addr->equip.rack_type &&
+	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
+	ierr=-501;
+	goto error;
+      }
       if (command->equal != '=') {            /* read module */
 	out_recs=0;
 	out_class=0;
