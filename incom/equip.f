@@ -135,12 +135,20 @@ C **** Modified mb
         rack = S2
         rack_type = S2
 C **** end modify mb
-      else if (ichcm_ch(ibuf,ic1,'dbbc').eq.0.and.il.eq.4) then
+      else if (ichcm_ch(ibuf,ic1,'dbbc_ddc').eq.0.and.il.eq.8) then
         rack = DBBC
-        rack_type = DBBC
-      else if (ichcm_ch(ibuf,ic1,'dbbc/fila10g').eq.0.and.il.eq.12) then
+        rack_type = DBBC_DDC
+      else if (ichcm_ch(ibuf,ic1,'dbbc_ddc/fila10g').eq.0.and.
+     &       il.eq.16) then
         rack = DBBC
-        rack_type = FILA10G
+        rack_type = DBBC_DDC_FILA10G
+      else if (ichcm_ch(ibuf,ic1,'dbbc_pfb').eq.0.and.il.eq.8) then
+        rack = DBBC
+        rack_type = DBBC_PFB
+      else if (ichcm_ch(ibuf,ic1,'dbbc_pfb/fila10g').eq.0.and.
+     &       il.eq.16) then
+        rack = DBBC
+        rack_type = DBBC_PFB_FILA10G
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -719,14 +727,68 @@ c DBBC PFB firmware version
       endif
 C
       call hol2char(ibuf,ic1,ic2,dbbcv)
-      if(dbbcv.eq.'v12') then
-         dbbcpfbv=12
-      else
-        call logit7ci(0,0,0,1,-140,'bo',20)
-        goto 990
+      kmove=dbbcv(1:1).eq.'v'
+      do i=1,17
+         if(kmove) then
+            dbbcv(i:i)=dbbcv(i+1:i+1)
+         endif
+         if(dbbcv(i:i).ne.' ') idbbcvc=i
+      enddo
+      if(idbbcvc.gt.16) then
+         call logit7ci(0,0,0,1,-141,'bo',20)
+         goto 990
       endif
+      idbbcv=0
+      do i=1,2
+        ind=index('0123456789',dbbcv(i:i))
+        if(ind.eq.0) then
+           call logit7ci(0,0,0,1,-141,'bo',20)
+           goto 990
+        endif
+        idbbcv=idbbcv*10+(ind-1)
+      enddo
+      if(idbbcv.lt.12) then
+         call logit7ci(0,0,0,1,-141,'bo',20)
+      endif
+      if(0.eq.index('abcdefghijklmnopqrstuvwxyz_ ',dbbcv(3:3))) then
+c                    12345678901234567890123456
+         call logit7ci(0,0,0,1,-141,'bo',20)
+         goto 990
+      endif
+      if(idbbcv.gt.15.and.dbbcv(3:3).ne.'_') then
+         dbbcpfbvl=dbbcv(3:3)
+      else if(idbbcv.lt.15.and.dbbcv(3:3).ne.' ') then
+         call logit7ci(0,0,0,1,-141,'bo',20)
+         goto 990
+      else
+         dbbcpfbvl=' '
+      endif
+
+      idbbcpfb_subv=0
+      ius=index(dbbcv(1:idbbcvc),'_')
+      if(ius.ne.0) then
+         do i=ius+1,idbbcvc
+            ind=index('0123456789',dbbcv(i:i))
+            if(ind.eq.0) then
+               call logit7ci(0,0,0,1,-141,'bo',20)
+               goto 990
+            endif
+            idbbcpfb_subv=idbbcpfb_subv*10+(ind-1)
+         enddo
+      endif
+
+      dbbcpfbv =idbbcv
+      dbbcpfbvs= dbbcv
+      dbbcpfbvc=idbbcvc
+      dbbcpfbsubv=idbbcpfb_subv
       call fs_set_dbbcpfbv(dbbcpfbv)
-C number of conditioning modules
+      call fs_set_dbbcpfbvl(dbbcpfbvl)
+      call fs_set_dbbcpfbvs(dbbcpfbvs)
+      call fs_set_dbbcpfbvc(dbbcpfbvc)
+      call fs_set_dbbcpfbsubv(dbbcpfbsubv)
+c
+C number of conditioning modules and cores per each
+C
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
         call logit7ci(0,0,0,1,-140,'bo',21)
@@ -734,18 +796,37 @@ C number of conditioning modules
       endif
       call lower(ibuf,ilen)
       ich = 1
-      call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) then
-        call logit7ci(0,0,0,1,-140,'bo',21)
-        goto 990
-      else
-         il=ic2-ic1+1
-      endif
-      dbbc_cond_mods = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc_cond_mods.lt.1.or.dbbc_cond_mods.gt.4) then
+      dbbc_cores=0
+      do i=1,5
+         call gtfld(ibuf,ich,ilen,ic1,ic2)
+         if (ic1.eq.0.and.i.eq.1) then
+            call logit7ci(0,0,0,1,-140,'bo',21)
+            goto 990
+         else if(ic1.eq.0) then
+            goto 2100
+         else if(ic1.ne.0.and.i.eq.5) then
+            call logit7ci(0,0,0,1,-140,'bo',21)
+            goto 990
+         else
+            il=ic2-ic1+1
+         endif
+         dbbc_cond_mods = i
+         dbbc_como_cores(i)= ias2b(ibuf,ic1,ic2-ic1+1)
+         if (dbbc_como_cores(i).lt.0.or.dbbc_como_cores(i).gt.4) then
+            call logit7ci(0,0,0,1,-140,'bo',21)
+            goto 990
+         endif
+         dbbc_cores=dbbc_cores+dbbc_como_cores(i)
+      enddo
+c
+ 2100 continue
+      if(dbbc_cores.lt.1.or.dbbc_cores.gt.4) then
          call logit7ci(0,0,0,1,-140,'bo',21)
          goto 990
       endif
+c
+      call fs_set_dbbc_como_cores(dbbc_como_cores)
+      call fs_set_dbbc_cores(dbbc_cores)
       call fs_set_dbbc_cond_mods(dbbc_cond_mods)
 C DBBC IF count conversion factors
       call readg(idcb,ierr,ibuf,ilen)
@@ -801,16 +882,21 @@ c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
             if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
      &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
      &           (rack.eq.VLBA4.and.rack_type.eq.VLBA4C).or.
-     &           (rack.eq.DBBC.and.
+     &           (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
+     &           rack_type.eq.DBBC_DDC_FILA10G).and.
      &           (dbbcddcv.le.104.or.dbbcddcvl.eq.' '))) then
                m5b_crate=32
             else if((rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS).or.
-     &              (rack.eq.DBBC.and.
-     &             (dbbcddcv.ge.105.and.
-     &              0.ne.index('ef',dbbcddcvl)))) then
+     &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
+     &              rack_type.eq.DBBC_DDC_FILA10G).and.
+     &              (dbbcddcv.ge.105.and.
+     &              0.ne.index('ef',dbbcddcvl))).or.
+     &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_PFB.or.
+     &              rack_type.eq.DBBC_PFB_FILA10G))) then
                m5b_crate=64
             else if(rack.eq.DBBC.and.
-     &             (dbbcddcv.ge.105.and.
+     &             (dbbcddcv.ge.105.and.(rack_type.eq.DBBC_DDC.or.
+     &              rack_type.eq.DBBC_DDC_FILA10G).and.
      &              0.eq.index(' ef',dbbcddcvl))) then
                call logit7ci(0,0,0,1,-142,'bo',23)
                goto 990

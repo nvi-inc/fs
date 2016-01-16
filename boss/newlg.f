@@ -196,10 +196,14 @@ c
         nch=ichmv_ch(ib,nch,'lba4')
       else if(rack.eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
-      else if(rack.eq.DBBC.and.rack_type.eq.DBBC) then
-        nch=ichmv_ch(ib,nch,'dbbc')
-      else if(rack.eq.DBBC.and.rack_type.eq.FILA10G) then
-        nch=ichmv_ch(ib,nch,'dbbc/fila10g')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_DDC) then
+        nch=ichmv_ch(ib,nch,'dbbc_ddc')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_DDC_FILA10G) then
+        nch=ichmv_ch(ib,nch,'dbbc_ddc/fila10g')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB) then
+        nch=ichmv_ch(ib,nch,'dbbc_pfb')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G) then
+        nch=ichmv_ch(ib,nch,'dbbc_pfb/fila10g')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -361,8 +365,8 @@ c
       call fs_get_wx_met(wx_met)
       if (wx_met.eq.0) then
          nch=ichmv_ch(ib,nch,'cdp')
-      else if (wx_met.eq.MET3) then
-         nch=ichmv_ch(ib,nch,'met3')
+      else
+         nch = nch + ib2as(wx_met,ib,nch,z'8006')
       endif
 
       nch=mcoma(ib,nch)
@@ -390,13 +394,19 @@ c
       nch=nch+dbbcddcvc
 c
       nch=mcoma(ib,nch)
-      call fs_get_dbbcpfbv(dbbcpfbv)
       nch=ichmv_ch(ib,nch,'v')
-      nch = nch + ib2as(dbbcpfbv,ib,nch,z'800F')
+      call fs_get_dbbcpfbvs(dbbcpfbvs)
+      call fs_get_dbbcpfbvc(dbbcpfbvc)
+      call char2hol(dbbcpfbvs,ib,nch,nch+dbbcpfbvc-1)
+      nch=nch+dbbcpfbvc
 c
-      nch=mcoma(ib,nch)
       call fs_get_dbbc_cond_mods(dbbc_cond_mods)
-      nch = nch + ib2as(dbbc_cond_mods,ib,nch,z'8002')
+      call fs_get_dbbc_como_cores(dbbc_como_cores)
+      call fs_get_dbbc_cores(dbbc_cores)
+      do i=1,dbbc_cond_mods
+         nch=mcoma(ib,nch)
+         nch = nch + ib2as(dbbc_como_cores(i),ib,nch,z'8002')
+      enddo
 
       call fs_get_dbbc_if_factors(dbbc_if_factors)
       do i=1,dbbc_cond_mods
