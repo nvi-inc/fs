@@ -7,8 +7,8 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 *                     k41, k41u, k41/k3, k41u/k3, k41/mk4, k41u/mk4,
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
-*                     k42c/mk4, lba, lba4, s2, dbbc, dbbc/fila10g, vlbac,
-                      cdas, or none)
+*                     k42c/mk4, lba, lba4, s2, dbbc_ddc, dbbc_ddc/fila10g,
+*                     dbbc_pfb, dbbc_pfb/fila10g, vlbac, cdas, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		    mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a, mk5a_bs,
 *                   mk5b, mk5b_bs, mk5c, mk5c_bs, flexbuff, or none)
@@ -45,9 +45,10 @@ cdp     cdp or met3 server port, use cdp if you don't have either
 *DBBC DDC version (v optional,then max 16 characters, no trailing _x until v105)
  v101   v100, v101, v102, v104, v105, v105e, v105f, ...
 *DBBC PFB version
- v12    v12 only
-*DBBC number of conditioning modules
-  4     1-4 (a,...,d)
+ v15_1    v15_1 or later
+*DBBC Cores per CoMo, Max of 4 values, range of values 0-4,
+* total of values <= 4, one value for each CoMo present in order: A B C D
+  1 1 1 1    
 *DBBC IF power conversion factors, one for each module specified above, no trailing comments or extra fields
   15000 15000 15000 15000
 *Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
