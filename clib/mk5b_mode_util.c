@@ -55,7 +55,7 @@ int itask;
       } 
       break;
     case 2:
-      ierr=arg_int(ptr,&lcl->mask.mask ,0xffffffff,TRUE);
+      ierr=arg_long_long_uns(ptr,&lcl->mask.mask , 0xffffffffULL,TRUE);
       if(0==lcl->mask.mask)
 	ierr=-200;
       m5state_init(&lcl->mask.state);
@@ -186,7 +186,7 @@ int itask;
       break;
     case 2:
       if(lclc->mask.state.known)
-	sprintf(output,"0x%x",lclc->mask.mask);
+	sprintf(output,"0x%llx",lclc->mask.mask);
       m5state_encode(output,&lclc->mask.state);
       break;
     case 3:
@@ -258,7 +258,7 @@ int itask;
     strcat(ptr,source_key[lclc->source.source]);
     strcat(ptr," : ");
 
-    sprintf(ptr+strlen(ptr),"0x%x",lclc->mask.mask);
+    sprintf(ptr+strlen(ptr),"0x%llx",lclc->mask.mask);
     strcat(ptr," : ");
 
     if(15 != itask) {
@@ -277,17 +277,17 @@ int itask;
 
   } else {
     int bits=0;
-    int bitmask=lclc->mask.mask;
+    long long unsigned bitmask=lclc->mask.mask;
     int bits_p_chan = 0 ;
     int data_rate = 0;
     int channels = 0;
     int i;
     
-    for(i=0;i<32;i++) 
-      if(bitmask & 0x1<<i)
+    for(i=0;i<64;i++) 
+      if(bitmask & 0x1ULL<<i)
 	bits++;
     
-    if((0xaaaaaaaa & bitmask) && (0x5555555 & bitmask))
+    if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
       bits_p_chan = 2 ;
     else if(bitmask)
       bits_p_chan = 1 ;  
@@ -392,7 +392,7 @@ m5_2_mk5b_mode(ptr_in,lclc,lclm,itask,ip) /* return values:
 	    ierr=-512;
 	    goto error2;
 	  } 
-	} else if(m5sscanf(ptr,"%lx",&lclc->mask.mask,&lclc->mask.state)) {
+	} else if(m5sscanf(ptr,"%llx",&lclc->mask.mask,&lclc->mask.state)) {
 	  ierr=-502;
 	  goto error2;
 	}
