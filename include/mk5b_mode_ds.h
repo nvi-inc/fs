@@ -7,7 +7,7 @@ struct mk5b_mode_cmd {
     struct m5state state;
   } source;
   struct {
-    unsigned long mask;
+    unsigned long long mask;
     struct m5state state;
   } mask;
   struct {
