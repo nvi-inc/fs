@@ -760,8 +760,11 @@ int iyear;
         strcat(checkln,dig);
       }
     }
+  } else if(kDrack) {
+    if (shm_addr->check.dbbc_form<=0) {
+        strcat(checkln," fm");
+    }
   }
-
   if (kMdrive[0]) {
     if (shm_addr->ICHK[17]<=0) {
       strcat(checkln," t1");
