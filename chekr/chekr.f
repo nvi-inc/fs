@@ -101,6 +101,8 @@ C
         call lbarack(lwho,ichecks)
       else if(rack.eq.S2) then
         call s2daschk(lwho)
+      else if(rack.eq.DBBC) then
+        call dbbcchk(lwho)  
       endif
       if (MK3.eq.drive(1).or.MK4.eq.drive(1)) then
         call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
