@@ -107,6 +107,7 @@ typedef struct fscom {
 	  struct k4rec_check k4rec;
 	  int ifp[2*MAX_DAS];
 	  long ifp_time[2*MAX_DAS];
+	  int dbbc_form;
         } check;
         char stcnm[4][2];
         int  stchk[4];
@@ -348,5 +349,15 @@ typedef struct fscom {
   struct fila10g_mode_cmd fila10g_mode;
 
   char fila10gvsi_in[16];
+
+  char dbbcpfbvl[1];
+  char dbbcpfbvs[16];
+  int  dbbcpfbvc;
+  int  dbbcpfbsubv;
+
+  int dbbc_como_cores[4];
+  int dbbc_cores;
+
+  struct dbbc_vsix_cmd dbbc_vsix[2];
 
 } Fscom;
