@@ -490,23 +490,6 @@ long ip[5];
     char string[80];
     int to;
   } list[ ] = {
-    "scan_set=",     500,
-    "scan_set =",    500,
-    "record on",      26,
-    "record=on",      26,
-    "record = on",      26,
-    "record off",    400,
-    "record=off",    400,
-    "record = off",    400,
-    "play on",       300,
-    "play=on",       300,
-    "play = on",     300,
-    "data_check?",   189,
-    "track_check?",  189,
-    "scan_check?",   327,
-    "bank_set inc",  500,
-    "bank_set=inc",  500,
-    "bank_set = inc",  500,
     "",                0
   };
   char *ptr,*ptrcolon;
@@ -519,6 +502,10 @@ long ip[5];
   struct tms tms_buff;
   int first, changed;
   long end;
+
+  unsigned long now;
+  static unsigned long last_dbbctrk;
+  static int dbbctrk=0;
 
   secho[0]=0;
   mode=ip[0];
@@ -598,6 +585,25 @@ long ip[5];
       }
     }
 
+    /*check for ddctrk... to allow delay */
+
+    if(NULL != strstr(inbuf,"dbbctrk")) {
+ /* make sure "dbbctrk" commands have at least a one second between
+    them, we might be able to save a little time by distinguishing
+    between dbbctrk1, dbbctrk2, abd dbbctrk commands, but it is very
+    little savings and a lot more complication (and testing), so not
+    for now, this may also need some adjustment if these commands get
+    a monitor form so that isn't too slow */
+      rte_ticks(&now);
+      if(dbbctrk) {
+	if(now-last_dbbctrk < 102) {
+	  rte_sleep(102-(now-last_dbbctrk));
+	}
+      }
+      last_dbbctrk=now;
+      dbbctrk=TRUE;
+    }
+    
     if(6 == mode || 4 == mode | 7 == mode)
       fila10g=TRUE;
     else
@@ -706,6 +712,8 @@ long ip[5];
       outbuf[strlen(outbuf)-1]=0;
     if(1==ip[2]) {
       int i, is;
+      char *failed =strstr(outbuf,"Failed");
+
       strcpy(lbuf,"fila10g/");
       is=strlen(lbuf);
       for(i=0;outbuf[i]!=0;i++)
@@ -713,6 +721,10 @@ long ip[5];
 	  lbuf[is++]=outbuf[i];
       lbuf[is]=0;
       logit(lbuf,0,NULL);
+      if(failed!=NULL) {
+	logite(failed,-200,"db");
+	logit(NULL,-201,"db");
+      }
       outbuf[0]=0;
       goto read;
     }
@@ -739,8 +751,33 @@ long ip[5];
     if(mode==5)   /* no error report here */
       continue;
 
-    if(7!= mode && (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
+    if(7!= mode && 6 != mode &&
+       (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
       logite(outbuf,-200,"db");
+      ip[2]=-201;
+    } else if ((7==mode || 6==mode) &&
+	       (strstr(outbuf,"Failed")!=NULL ||strstr(outbuf,"WARNING")!=NULL)
+	       ) {
+      char *failed=strstr(outbuf,"Failed");
+      char *warning=strstr(outbuf,"WARNING");
+      int i;
+
+      if(NULL!=failed) {
+	for(i=0;failed[i]!=0;i++)
+	  if(index("\r\n",failed[i])!=NULL) {
+	    failed[i]=0;
+	    break;
+	  }
+	  logite(failed,-200,"db");
+      } else if(NULL!=warning) {
+	for(i=0;warning[i]!=0;i++)
+	  if(index("\r\n",warning[i])!=NULL) {
+	    warning[i]=0;
+	    break;
+	  }
+	  logite(warning,-200,"db");
+      } else
+	logite(outbuf,-200,"db"); /* for safety, just in case */
       ip[2]=-201;
       goto error;
     }
