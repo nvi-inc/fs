@@ -33,15 +33,24 @@ char *ptr;
 
     switch (*count) {
     case 1:
-      ierr=arg_int(ptr,&lcl->mask.mask ,0xffffffff,TRUE);
-      m5state_init(&lcl->mask.state);
+      ierr=arg_uns(ptr,&lcl->mask2.mask2 ,0x0,TRUE);
+      m5state_init(&lcl->mask2.state);
       if(ierr==0) {
-	lcl->mask.state.known=1;
+	lcl->mask2.state.known=1;
       } else {
-	lcl->mask.state.error=1;
+	lcl->mask2.state.error=1;
       } 
       break;
     case 2:
+      ierr=arg_uns(ptr,&lcl->mask1.mask1 ,0xffffffff,TRUE);
+      m5state_init(&lcl->mask1.state);
+      if(ierr==0) {
+	lcl->mask1.state.known=1;
+      } else {
+	lcl->mask1.state.error=1;
+      } 
+      break;
+    case 3:
       lcl->decimate.decimate=0;
       ierr=arg_int(ptr,&lcl->decimate.decimate ,1,FALSE);
       m5state_init(&lcl->decimate.state);
@@ -56,7 +65,7 @@ char *ptr;
       if(ierr==-100)
 	ierr=0;
       break;
-    case 3:
+    case 4:
       ierr=arg_float(ptr,&sample,0.0,FALSE);
       if(lcl->decimate.state.known != 0) {
 	if(ierr != -100)
@@ -93,7 +102,7 @@ char *ptr;
 	lcl->decimate.state.error=1;
       } 
       break;
-    case 4:
+    case 5:
       ierr=arg_key(ptr,disk_key,NDISK_KEY,&lcl->disk.disk,-1,TRUE);
       m5state_init(&lcl->disk.state);
       if(ierr==0) {
@@ -123,13 +132,19 @@ struct fila10g_mode_cmd *lclc;
 
     switch (*count) {
     case 1:
-      strcpy(output,"0x");
-      m5sprintf(output+2,"%lx",&lclc->mask.mask,&lclc->mask.state);
+      if(lclc->mask2.state.known && lclc->mask2.mask2) {
+	strcpy(output,"0x");
+	m5sprintf(output+2,"%lx",&lclc->mask2.mask2,&lclc->mask2.state);
+      }
       break;
     case 2:
-      m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
+      strcpy(output,"0x");
+      m5sprintf(output+2,"%lx",&lclc->mask1.mask1,&lclc->mask1.state);
       break;
     case 3:
+      m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
+      break;
+    case 4:
       if(shm_addr->fila10g_mode.decimate.state.known &&
 	 shm_addr->fila10g_mode.decimate.decimate!=0) {
 	sprintf(output,"(%.3f)",
@@ -172,8 +187,12 @@ vsi_bitmask_2_fila10g(ptr,lclc)
 char *ptr;
 struct fila10g_mode_cmd *lclc;
 {
-
-  sprintf(ptr,"fila10g=vsi_bitmask 0x%x",lclc->mask.mask);
+  if(lclc->mask2.mask2)
+    sprintf(ptr,"fila10g=vsi_bitmask 0x%x 0x%x",
+	    lclc->mask2.mask2,
+	    lclc->mask1.mask1);
+  else
+    sprintf(ptr,"fila10g=vsi_bitmask 0x%x",lclc->mask1.mask1);
 
   return;
 }
@@ -191,24 +210,29 @@ char *ptr;
 struct fila10g_mode_cmd *lclc;
 {
   int bits=0;
-  int bitmask=lclc->mask.mask;
+  unsigned bitmask2=lclc->mask2.mask2;
+  unsigned bitmask1=lclc->mask1.mask1;
   int bits_p_chan = 0 ;
   int channels = 0;
   int i;
     
-  for(i=0;i<32;i++) 
-    if(bitmask & 0x1<<i)
+  for(i=0;i<32;i++) {
+    if(bitmask2 & 0x1<<i)
       bits++;
-  
-  if((0xaaaaaaaa & bitmask) && (0x5555555 & bitmask))
+    if(bitmask1 & 0x1<<i)
+      bits++;
+  }
+
+  if((0xaaaaaaaU & bitmask2 || 0xaaaaaaaU & bitmask1 ) &&
+     (0x5555555U & bitmask2 || 0x5555555U & bitmask1 ))
     bits_p_chan = 2 ;
-  else if(bitmask)
+  else if(bitmask1 || bitmask2)
     bits_p_chan = 1 ;  
   
   if(bits_p_chan > 0)
     channels = bits/bits_p_chan;
 
-  sprintf(ptr,"fila10g=vdif_frame %d  %d 8000", bits_p_chan,channels);
+  sprintf(ptr,"fila10g=vdif_frame %d %d 8000", bits_p_chan,channels);
 
   return;
 }
@@ -223,15 +247,24 @@ int fila10g_2_vsi_bitmask(ptr,lclc) /* return values:
 {
   char string[]= "VSI input bitmask :";
 
-  m5state_init(&lclc->mask.state);
+  m5state_init(&lclc->mask2.state);
+  m5state_init(&lclc->mask1.state);
 
   ptr=strstr(ptr,string);
   if(ptr == NULL) {
     return -1;
   }
 
-  if(m5sscanf(ptr+sizeof(string),"%lx",&lclc->mask.mask,&lclc->mask.state)) {
+  ptr=strtok(ptr+strlen(string)," \n\r");
+  if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
     return -1;
+  }
+  ptr=strtok(NULL," \n\r");
+  if(ptr!=NULL && strncmp(ptr,"0x",2)==0) {
+    memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
+    if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
+      return -1;
+    }
   }
 
   return 0;
