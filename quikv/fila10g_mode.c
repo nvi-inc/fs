@@ -50,7 +50,8 @@ long ip[5];                           /* ipc parameters */
 /* if we get this far it is a set-up command so parse it */
 
 parse:
-      m5state_init(&lcl.mask.state);
+      m5state_init(&lcl.mask2.state);
+      m5state_init(&lcl.mask1.state);
       m5state_init(&lcl.decimate.state);
 
       ilast=0;                                      /* last argv examined */
