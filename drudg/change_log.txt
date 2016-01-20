@@ -1,4 +1,20 @@
 This file contains a summary of changes made and why.
+2015Jan19 Lots of changes having to do with supporting DBBC_PFB. Here is a quick summary.
+1. ../skdrincl/skparm.ftni: Max_bbc=16-->32
+2. proc_setup.f:  Different handling of DBBC_DDC and DBBC_PFB. Modifed to not emit BBC commands if DBBC_PFB. 
+3. proc_tracks.f: Call proc_dbbc_pfb_tracks instead of proc_disk_tracks for DBBC_PFB. 
+3. proc_dbbc_pfb_tracks.f: New routine to handle various track stuff for DBBC_PFB
+4. proc_ifd.f:  Fixed so that emit commands for all IFs. The issue is that DBBCs can re-use the same BBC number.
+5. proc_mracks_vc.f:  Changed initialization of some variables since max_bbc-->32.
+6. proc_vc_name.f.  Only write out command if cname_vc<> " ". (if DBBC_PFB/* then cname_vc=" ")
+7. ../skdrincl/statn.ftni, ../skdrincl/valid_hardware.ftni.  dimensions of cstrack and cstrack_cap increased to handle longer names.
+8. ../skdrincl/valid_hardware.ftni.  Increased number of valid racks. 
+9. ../skdrut/valid_hardware_blk.f.   DBBC-->DBBC_DDC, added DBBC_PFB, DBBC_PFB/fila10g
+10. ../skdrut/vmoinp.f, vunptrk.f  max_tracks-->2*max_tracks. This is because sign, magnitude can now be on same track (but drudg expects to be on different tracks.
+11. ../skdrut/indexx_int2.f.   New routine. Sort an integer*2 array.
+12. ../skdrut/indexx_string.f  New routine. Sort an array of strings. Used by proc_dbbc_pfb_tracks.f
+
+
 2015Aug31 fdrudg.f Previously quit if first character of filename was "q" or "Q".  
 2015Aug20 snap.f.  Allow disk2file for flexbuff.
 2015Aug13 proc_norack.f    Output more information about lo, sidebands, etc.  proc_exper_initi.f  Minor changes.  

@@ -9,6 +9,7 @@
 
 ! History
 ! 2007Jul13 JMGipson. Separated from procs.f
+! 2016Jan15 JMGipson. Added call to proc_dbbc_pfb_tracks
 
 ! functions
       integer mcoma     !lnfch stuff
@@ -29,7 +30,13 @@
 
       izero=0
 
-! Output Mark5B  recorder stuff.    
+! output for DBBC_PFB rack.
+      if(cstrack_cap(istn)(1:8) .eq. "DBBC_PFB") then
+        call proc_dbbc_pfb_tracks(lu_outfile,istn,icode)
+        return
+      endif 
+
+! Output Mark5B  recorder stuff.       
       if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then 
         call proc_disk_tracks(lu_outfile,istn,icode,
      >                  kignore_mark5b_bad_mask)

@@ -180,6 +180,8 @@ void cshm_init()
 
   shm_addr->check.systracks[0]=0;
   shm_addr->check.systracks[1]=0;
+  
+  shm_addr->check.dbbc_form=0;
 
   shm_addr->IRDYTP[0]=-1;
   shm_addr->IRDYTP[1]=-1;
@@ -438,8 +440,14 @@ void cshm_init()
 
   shm_addr->m5b_crate=32;
 
-  m5state_init(&shm_addr->fila10g_mode.mask.state);
+  m5state_init(&shm_addr->fila10g_mode.mask2.state);
+  m5state_init(&shm_addr->fila10g_mode.mask1.state);
   m5state_init(&shm_addr->fila10g_mode.decimate.state);
+
+  for(i=0;i<16;i++) {
+    shm_addr->dbbc_vsix[0].core[i]=0;
+    shm_addr->dbbc_vsix[1].core[i]=0;
+  }
 
   return;
 }

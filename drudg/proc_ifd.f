@@ -2,6 +2,8 @@
 ! write out IFD and LO procedures
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
+      include '../skdrincl/statn.ftni'
+      
       include 'bbc_freq.ftni'
       include 'drcom.ftni' 
 
@@ -11,6 +13,7 @@
 !                 fvc,fvc_lo, fvc_hi put in bbc_freq.ftni 
 ! 2012Sep19  Checking of valid IFs made case independnent. 
 ! 2013Jul11 JMG. Added "if_targets"
+! 2016Jan19 JMG. Modified to handle DBBC_PFB which can have several DBBs with same number. 
 
 ! passed
       character*12 cname_ifd   !name of procedure.
@@ -90,12 +93,15 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
         ib=ibbcx(ic,istn,icode) ! BBC number
         if(.false.) then
           call write_return_if_needed(luscn,kwrite_return)
-          write(luscn,*) ichan, " ", ic," ", " ", ib," Cifinp-->",
+          write(luscn,'(3i4,a,1x,a)') ichan,  ic, ib," Cifinp-->",
      >    cifinp(ic,istn,icode)     
         endif
        
-        if(.not.kdone_bbc(ib) .and. 
-     >     freqrf(ic,istn,icode) .gt. 0) then
+! Note: For PFB can have several BBCs with the same number...
+        if(freqrf(ic,istn,icode) .gt. 0 .and.
+     &    (.not.kdone_bbc(ib) .or. 
+     &      cstrack_cap(istn)(1:8) .eq."DBBC_PFB")) then 
+
           ch1=cifinp(ic,istn,icode)(1:1)
   
           call capitalize(ch1) 
@@ -113,6 +119,7 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
         write(*,*) "ERROR (proc_ifd):  No valid LO inputs in schedule!"
       endif 
  
+!      write(*,*) "IFD: ", ifd(1:4) 
       if(kdbbc_rack) then
         do j=1,4      !upto 4 IFs
           iv=ifd(j)

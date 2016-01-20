@@ -17,6 +17,8 @@ C 021111 jfq Add LBA racks.
 ! 2007Dec11 JMGipson.  Doesn't apend recorder if Recorder is Mark5
 ! 2012Sep13 JMG. Introduced km3form,kvform,km5form
 ! 2015May08 JMG. Added support for Rack type DBBC/Fila10g
+! 2015Jan05 JMG. DBBC-->DBBC_DDC, DBBC/Fila10g-->DBBC_DDC/Fila10g
+!                also added support for DBBC_PFB and DBBC_PFB/Fila10g
 
 ! Just some notes:
 !  The difference between
@@ -125,9 +127,8 @@ C Racks
      >             cstrack_cap(istn)(5:7) .eq. "/K3"
       k8bbc =   cstrack_cap(istn) .eq. "VLBA/8" .or.
      >          cstrack_cap(istn) .eq. "VLBA4/8"
-      kdbbc_rack        = cstrack_cap(istn) .eq.  "DBBC" .or.
-     &                    cstrack_cap(istn) .eq."DBBC/FILA10G"
-      kfila10g_rack     =cstrack_cap(istn) .eq. "DBBC/FILA10G"
+      kdbbc_rack        = cstrack_cap(istn)(1:4) .eq.  "DBBC"   
+      kfila10g_rack     = cstrack_cap(istn)(10:16) .eq. "FILA10G"
 
       kvform  = kvrack
       km3form = Km3rack .or. kk3fmk4rack

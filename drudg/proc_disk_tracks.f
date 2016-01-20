@@ -4,7 +4,7 @@
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
      
-     
+    
 ! Write out Mark5B mode command.
 ! functions
       integer itras
@@ -35,6 +35,7 @@
 ! 2015Jun10 JMG. Added support chinese VLBAC and CDAS racks.  Put checking of tracks in routine check_csb_list.f
 ! 2015Jul06 JMG. In output changed "geo-r" to geo_r, etc. 
 ! 2015Jul28 JMG. Emit 'fila10g_mode' after 'fila10g_mode=...."
+! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
 
 ! local
       integer ipass
@@ -418,9 +419,15 @@
       endif
 
        if(kfila10g_rack) then
-        write(cbuf,'(a,"=0x",Z8.8,",,",f9.3)')
+! put in a null argument if kddbc_rack before mask 
+         if(kdbbc_rack) then  
+          write(cbuf,'(a,",=0x",Z8.8,",,",f9.3)')
      >    'fila10g_mode', imask,samprate(istn,icode)                   
-          call drudg_write(lu_outfile,cbuf)
+        else
+           write(cbuf,'(a,"=0x",Z8.8,",,",f9.3)')
+     >     'fila10g_mode', imask,samprate(istn,icode)                   
+        endif
+        call drudg_write(lu_outfile,cbuf)
         write(lu_outfile,'("fila10g_mode")') 
        endif 
 

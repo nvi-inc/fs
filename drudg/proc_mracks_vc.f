@@ -4,7 +4,8 @@
  
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
 !  2014Jun02  JMGipson. Changed starting count in looping over channels from 'ic' to 1 
-!  2015Jan29  JMGipson. Handle case of invered LO. 
+!  2015Jan29  JMGipson. Handle case of inverted LO. 
+!  2016Jan19  JMGipson. Increased dimension of data statements since max_bbc 16-->32
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -32,8 +33,10 @@
       character*1 cvchan(max_bbc)
     
       data cvc2k42/'1','2','3','4','5','6','7','8',
-     .             '1','2','3','4','5','6','7','8'/
-      data cvchan /8*'A',8*'B'/                        
+     &             '1','2','3','4','5','6','7','8',
+     &             16*'-'/              
+
+      data cvchan /8*'A',8*'B',16*'-'/                        
 ! Start of code.                     
 
       flo(ib) = FREQLO(ic,ISTN,ICODE)

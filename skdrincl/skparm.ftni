@@ -68,6 +68,7 @@ C 2004May14 JMGipson. Removed physical constants-->constants.ftni
 ! 2006Sep18 JMGipson. Changed max_obs to 10000
 ! 2007Feb09 JMGipson. Changed max_stn to 40, max_sor to 500, and max_obs to 20000
 ! 2007May26 JMGipson. Changed max_rec_type,max_rack_type for Mark5B hardware
+! 2016Jan19 JMGipson. Changed max_bbc to 32
 C
 C********************************************************************
 C
@@ -207,7 +208,7 @@ C     Maximum number of IFs in a system.
 
 C     Maximum number of BBCs in a system.
 
-      parameter (max_bbc = 16)
+      parameter (max_bbc = 32)
 
 C     Maximum number of video channels.
 C     Formerly this was 16 because u/l are handled as sub-parts of
