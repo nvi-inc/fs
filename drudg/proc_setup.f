@@ -25,6 +25,7 @@
 ! 2015Jul17 JMG. Added cont_cal_polarity.
 ! 2015Jul20 JMG. Only write cont_cal_polarity if "cont_cal=on"
 ! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
+! 2016Jan19 JMG. Distinguish between DBBC_DDC and DBBC_PFB
    
 
 ! local
@@ -99,7 +100,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
 
 
 ! Initialize cont_cal_out
-      if(kdbbc_rack) then
+      if(cstrack_cap(istn)(1:10) .eq. "DBBC_DDC") then
         cont_cal_out=cont_cal_prompt
         call lowercase(cont_cal_out)
         write(*,*) "cont_cal: ",cont_cal_out
@@ -241,16 +242,21 @@ C  For 8-BBC stations, use "M" for Mk3 modes
       endif ! kvracks or km3rac.or.km4rack but not S2 or K4
 
 C  BBCffb, IFPffb  or VCffb
-      if (kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
+      cname_vc=" "
+      if (kbbc .or. kifp .or. kvc.or.
+     &   cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
          call proc_vcname(kk4vcab,                    !Make the VC procedure name.
      >        ccode(icode),vcband(1,istn,icode),cname_vc)
-
-         write(lu_outfile,'(a)') cname_vc
+          write(lu_outfile,'(a)') cname_vc
+      endif 
+ 
+      if (kbbc .or. kifp .or. kvc.or.                  
+     &   cstrack_cap(istn)(1:4) .eq. "DBBC") then
          cname_ifd="ifd"//codtmp
          writE(lu_outfile,'(a)') cname_ifd
        endif ! kbbc kvc kfid
 
-       if(kdbbc_rack) then   
+       if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then   
           if(cont_cal_out .eq. "on") then 
              write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
           else if(cont_cal_out .eq. "off") then

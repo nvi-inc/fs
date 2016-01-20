@@ -1,0 +1,94 @@
+check_dbbc_setup.f:      subroutine check_dbbc_setup(icode,ierr)
+check_dbbc_setup.f:! Some simple checking of dbbc.
+check_dbbc_setup.f:               write(luscn, '("DBBC_error: For BBCs ",2i4,
+check_dbbc_setup.f:               write(luscn,'("DBBC_error: For BBCs ",2i4,
+check_dbbc_setup.f:               write(luscn,'("DBBC_error: For BBCs ",2i4,
+drudg_rdctl.f:      integer max_dbbc_if_inputs
+drudg_rdctl.f:      parameter(max_dbbc_if_inputs=4)
+drudg_rdctl.f:      character*2 lvalid_dbbc_if_inputs(max_dbbc_if_inputs)
+drudg_rdctl.f:      data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
+drudg_rdctl.f:! Stuff for DBBC
+drudg_rdctl.f:        ldbbc_if_inputs(i)=" "
+drudg_rdctl.f:        idbbc_if_targets(i)=-1
+drudg_rdctl.f:      idbbc_bbc_target=-1   
+drudg_rdctl.f:! New option for DBBC
+drudg_rdctl.f:              elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
+drudg_rdctl.f:     >                        "DEFALUT_DBBC_IF_INPUTS"
+drudg_rdctl.f:     >              lvalid_dbbc_if_inputs,max_dbbc_if_inputs,ltoken(i))
+drudg_rdctl.f:                      write(*,*) "drudg_rdctl: Invalid dbbc_if_input ", 
+drudg_rdctl.f:                      ldbbc_if_inputs(i-1)=ltoken(i) 
+drudg_rdctl.f:              elseif(lkeyword .eq. "DBBC_IF_TARGETS") then
+drudg_rdctl.f:     >                          "DBBC_IF_TARGETS"
+drudg_rdctl.f:                    read(ltoken(i+1),*,err=900) idbbc_if_targets(i)
+drudg_rdctl.f:                    if(idbbc_if_targets(i) .gt. 65535 .or. 
+drudg_rdctl.f:     >                 idbbc_if_targets(i) .lt. 0) then
+drudg_rdctl.f:     >                  "drudg_rdctl: Warning! DBBC_IF_TARGET ", 
+drudg_rdctl.f:     >                   idbbc_if_targets(i), " out of range!"
+drudg_rdctl.f:                     idbbc_if_targets(i)=0
+drudg_rdctl.f:              else if(lkeyword .eq. "DBBC_BBC_TARGET") then 
+drudg_rdctl.f:     >                          "DBBC_BBC_TARGET"
+drudg_rdctl.f:                  read(ltoken(2),*,err=900) idbbc_bbc_target
+drudg_rdctl.f:                  if(idbbc_bbc_target .gt. 65535 .or. 
+drudg_rdctl.f:     >               idbbc_bbc_target .lt. 0) then
+drudg_rdctl.f:     >                 "drudg_rdctl: Warning! DBBC_BBC_TARGET ", 
+drudg_rdctl.f:     >                 idbbc_bbc_target,      " out of range!"
+drudg_rdctl.f:                     idbbc_bbc_target=0
+fdrudg.f:        ldbbc_if_inputs(i)=" "
+init_hardware_common.f:! 2015May08 JMG. Added support for Rack type DBBC/Fila10g
+init_hardware_common.f:! 2015Jan05 JMG. DBBC-->DBBC_DDC, DBBC/Fila10g-->DBBC_DDC/Fila10g
+init_hardware_common.f:!                also added support for DBBC_PFB and DBBC_PFB/Fila10g
+init_hardware_common.f:      kdbbc_rack        = cstrack_cap(istn)(1:4) .eq.  "DBBC"   
+proc_dbbc_bbc.f:      subroutine proc_dbbc_bbc(icode,ic,ib,ichan)
+proc_dbbc_bbc.f:! Write out the BBC commands for channel ic for the DBBC racks
+proc_dbbc_bbc.f:      logical kdbbc
+proc_dbbc_bbc.f:      if(cstrack_orig(istn) .eq. "DBBC" .or. 
+proc_dbbc_bbc.f:     >   cstrack_orig(istn) .eq. "DBBCFILA10G" .or. 
+proc_dbbc_bbc.f:         kdbbc=.true.
+proc_dbbc_bbc.f:     >   "proc_dbbc_bbc: Warning! For BBC ",ib, " IF '", cif,
+proc_dbbc_bbc.f:     >   "proc_dbbc_bbc: Warning! For BBC ",ib, " IF '", cif,
+proc_dbbc_bbc.f:       kdbbc=.false.
+proc_dbbc_bbc.f:          cif="a"//ldbbc_if_inputs(1)
+proc_dbbc_bbc.f:          cif="b"//ldbbc_if_inputs(2)
+proc_dbbc_bbc.f:          cif="c"//ldbbc_if_inputs(3)   
+proc_dbbc_bbc.f:          cif="d"//ldbbc_if_inputs(4)         
+proc_dbbc_bbc.f:        if(kdbbc) then 
+proc_disk_tracks.f:!  2012Sep13 JMGipson.  Modified to handle DBBC rack 
+proc_disk_tracks.f:!  2015Jan13 JFHQ.      Support for DBBC E/F 'astro3' track layout.
+proc_disk_tracks.f:! 2015Jan22  JFHQ       Only allow (DBBC) 32 MHz bandwidth with E/F 'astro3'.
+proc_disk_tracks.f:! 2015Feb04  JMG.       Minor typographic change if not DBBC. 
+proc_disk_tracks.f:! 2015May08  JMG.       Support for DBBC/Fila10G
+proc_disk_tracks.f:! If we don't have a VSI4 formatter or a DBBC write out comments.
+proc_disk_tracks.f:      if(.not.(km5rack .or. kv5rack .or. kdbbc_rack .or.
+proc_disk_tracks.f:!     >  '"The following mode command assumes a VSi4/DBBC input',
+proc_disk_tracks.f:! Ckeck DBBC racks....
+proc_disk_tracks.f:! Pre-check to see if a valid astro3 mode, but only for DBBC/Unknown racks
+proc_disk_tracks.f:      if(.not.(kdbbc_rack .or. kcomment_only)) goto 110
+proc_disk_tracks.f:      if(kdbbc_rack .and. (idiv.lt.1)) then
+proc_disk_tracks.f:      if(.not.(kdbbc_rack .or. kcomment_only)) goto 900        
+proc_disk_tracks.f:     >   '" Following command assumes VSi4/DBBC input'
+proc_disk_tracks.f:      if(kdbbc_rack) then
+proc_exper_initi.f:      if(kdbbc_rack)     write(lufile,'("dbbc=version")') 
+proc_ifd.f:! 2012Sep05 JMG.  Changes to support DBBC. 
+proc_ifd.f:!    for DBBC   ifX=input,agc,filter#,target  where X=A,B,C,D and input=1,2,3,4, target=1-65535
+proc_ifd.f:      if(kbbc .or. kdbbc_rack) then 
+proc_ifd.f:      if(kdbbc_rack) then
+proc_ifd.f:           if(idbbc_if_targets(j) .ge. 0) then
+proc_ifd.f:              write(cbuf(15:20),'(",",i5)') idbbc_if_targets(j) 
+proc_setup.f:     >  Km3rack.or.km4rack.or.kvrack.or.kv4rack.or.klrack.or.kdbbc_rack
+proc_setup.f:      if(kdbbc_rack) then
+proc_setup.f:      if (kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
+proc_setup.f:       if(kdbbc_rack) then   
+proc_setup.f:          if(idbbc_bbc_target .gt. 0) then
+proc_setup.f:             write(ldum(20:30),'(",",i5)') idbbc_bbc_target
+proc_tracks.f:      if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then 
+proc_vc_cmd.f:            else if(kdbbc_rack) then
+proc_vc_cmd.f:              call proc_dbbc_bbc(icode,ic,ib,ichan) 
+proc_vc_cmd.f:! Here we do some checking for DBBC racks to make sure that BBCs 
+proc_vc_cmd.f:       if(kdbbc_rack) then
+proc_vc_cmd.f:         if(cstrack_orig(istn) .eq. "DBBC" .or. 
+proc_vc_cmd.f:! But only check if the original rack is NOT  DBBC or NONE
+proc_vc_cmd.f:           call check_dbbc_setup(icode,ierr)
+proc_vcname.f:      if(kdbbc_rack) then
+proc_vcname.f:        cnamep="dbbc"
+procs.f:!             Numerous changes to support DBBC.
+procs.f:      if(kbbc .or. kifp .or. kvc.or. kdbbc_rack) then

@@ -42,7 +42,7 @@ dot_util.o get_5btime.o mk5_status_util.o pps_source_util.o clock_set_util.o pla
 holog_util.o satellite_util.o satoff_util.o dbbcnn_util.o dbbcifx_util.o\
 dbbcform_util.o tpi_dbbc.o mk5dbbcd.o dbbcn_v.o dbbc_cont_cal_util.o\
 dbbc_if_power.o dbbcgain_util.o fila10g_mode_util.o daymy.o get_fila10gtime.o\
-antcn_term.o
+antcn_term.o dbbc_vsix_util.o dbbc_version_check.o
 #
 #FFLAGS = 
 #

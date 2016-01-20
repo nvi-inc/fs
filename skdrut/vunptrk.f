@@ -1,5 +1,5 @@
       SUBROUTINE vunptrk(modef,stdef,km5rec,ivexnum,iret,ierr,lu,
-     .cm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
+     &     cm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
 C
 C     VUNPTRK gets the track assignments and fanout information
 C     for station STDEF and mode MODEF and converts it.
@@ -19,6 +19,7 @@ C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
 C 020327 nrv Get data_modulation.
 C 021111 jfq Don't allow track 0 or headstack 0
 ! 2004Dec8. Changed lm from holerrith to ASCII
+! 2016Jan19 JMG.  Doubled dimension of several variables that had max_track to 2*max_track becuase now sign& magnitude can be on same track 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -34,11 +35,11 @@ C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
 !      integer*2 lm(4) ! recording format
       character*8 cm
-      character*1 cp(max_track) ! subpass
-      character*6 cchref(max_track) ! channel ID ref
-      character*1 csm(max_track) ! sign/mag
-      integer ihdn(max_track) ! headstack number
-      integer itrk(max_track) ! first track of the fanout assignment
+      character*1 cp(max_track*2) ! subpass
+      character*6 cchref(max_track*2) ! channel ID ref
+      character*1 csm(max_track*2) ! sign/mag
+      integer ihdn(max_track*2) ! headstack number
+      integer itrk(max_track*2) ! first track of the fanout assignment
       integer nfandefs ! number of def statements
       integer ifanfac ! fanout factor determined from list of tracks
       character*3 modu ! data modulation, on or off
@@ -131,7 +132,7 @@ C  2.2 Chan ref
           ierr=-3
         else
           cchref(in) = cout(1:nch)
-        ENDIF 
+        ENDIF   
 
 C  2.3 Sign/magnitude
 

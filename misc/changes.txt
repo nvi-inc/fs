@@ -11149,3 +11149,17 @@ Version 9.11.7 150205
            add AN -9
 
 Version 9.11.8 150920
+
+150920 WEH Makefile
+           9.11.9 now
+
+150923 WEH help/tnx.___
+150924 WEH ddout/ddout.c
+           include example for variable error messages in TNX output
+           ring bell only if error is < 0
+
+150928 WEH include/dpi.h
+           parenthesises (for safety) around all calculated constant expressions
+
+151013 WEH st.default/control/equip.ctl
+           restored leading comment character '*', thanks Jon

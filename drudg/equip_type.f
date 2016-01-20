@@ -37,6 +37,7 @@ C 17Apr2003  JMG.  Added Mark5 option.
 ! 2012Sep13  JMG. Tempoary fix so that don't show Mark5C.  (Search for 2012Sep13)
 ! 2014Dec06  JMG. Now show Mark5C
 ! 2015May08  JMG. Made Rack wider
+! 2016Jan05  JMG. Made it wider still
 
 C Input:
       character*(*) cr1
@@ -50,7 +51,7 @@ C LOCAL:
       integer max_equip_lines
       parameter (max_equip_lines=max(max_rack_type,max_rec_type))
       integer max_rack_local,max_rec_local,max_rec2_local
-      character*16 crack_slot
+      character*20 crack_slot
       character*12  crec1_slot,crec2_slot
       character*4  cfirst_slot
 
@@ -125,7 +126,7 @@ C 2. Interactive input
      &   cantna(ISTN),cstrack(istn),cstrec(istn,1)
  
         write(luscn,'(a)')
-     .       '| Select rack      | Select Rec 1 | Select Rec 2 | Start|'
+     &  '| Select rack          | Select Rec 1 | Select Rec 2 | Start|'
 ! We subtract 1 from max_equip_lines, max_rack_type and max_rec_type
 !  so we don't display the "unknown" option.
           do i=1,max_equip_lines-1 ! write each line
@@ -135,7 +136,7 @@ C 2. Interactive input
               else
                 cstar=" "
               endif
-              write(crack_slot,'(a1,i2,"=",a12)')  cstar,i,crack_type(i)
+              write(crack_slot,'(a1,i2,"=",a16)')  cstar,i,crack_type(i)
             else
               crack_slot=" "
             endif
