@@ -18,7 +18,7 @@ long ip[5];                           /* ipc parameters */
       int ilast, ierr,count;
       char *ptr;
       struct dbbcform_cmd lcl;  /* local instance of dbbcform command struct */
-      int out_recs, out_class;
+      int out_recs, out_class, ichold;
       char outbuf[BUFSIZE];
 
       int dbbcform_dec();               /* parsing utilities */
@@ -26,6 +26,16 @@ long ip[5];                           /* ipc parameters */
 
       void dbbcform_dis();
       void skd_run(), skd_par();      /* program scheduling utilities */
+
+      ichold= -99;                    /* check vlaue holder */
+
+      if(DBBC_DDC != shm_addr->equip.rack_type &&
+	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type &&
+	 DBBC_PFB != shm_addr->equip.rack_type &&
+	 DBBC_PFB_FILA10G != shm_addr->equip.rack_type) {
+	ierr=-501;
+	goto error;
+      }
 
       if (command->equal != '=') {            /* read module */
 	out_recs=0;
@@ -55,6 +65,9 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
+      ichold=shm_addr->check.dbbc_form;
+      shm_addr->check.dbbc_form=0;
+
       if(ierr==0 && shm_addr->dbbcddcv<104 && lcl.mode == 5) {
 	  ierr=-301;
 	  goto error;
@@ -79,6 +92,12 @@ dbbcn:
       ip[2]=out_recs;
       skd_run("dbbcn",'w',ip);
       skd_par(ip);
+
+      if (ichold != -99) {
+	if (ichold >= 0)
+	  ichold=ichold % 1000 + 1;
+	shm_addr->check.dbbc_form=ichold;
+      }
 
       if(ip[2]<0) {
 	if(command->equal == '=' && -201 == ip[2]) {
