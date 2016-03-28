@@ -1,0 +1,7 @@
+#!/usr/bin/tcsh
+
+if ($#argv >= 1) then
+    echo "$2" | nc -w 1 $1 10000
+else
+    echo "I don't know what to do"
+endif

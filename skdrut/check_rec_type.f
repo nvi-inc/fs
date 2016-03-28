@@ -17,7 +17,10 @@
       integer iwhere
       character*8 crectmp
 
-!  Capitalize and try to find 
+      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)
+!      if(iwhere .eq. 0) return           !valid rec type.
+
+! Didn't find. Capitalize and try again.
       crectmp=crec
       call capitalize(crectmp)
       iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crectmp)

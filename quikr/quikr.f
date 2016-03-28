@@ -20,6 +20,7 @@ C
 C 3.  LOCAL VARIABLES
       integer*4 ip(5)                     !  rmpar variables
       integer idum,fc_rte_prior
+      logical kbreak
 C
 C 6.  PROGRAMMERS: NRV (1980), LEF (1987), LAR (1988)
 C  WHO  WHEN    DESCRIPTION
@@ -36,6 +37,8 @@ C
       idum=fc_rte_prior(FS_PRIOR)
 1     continue
       call wait_prog('quikr',ip)
+      if(kbreak('quikr')) continue
+c
       call read_quikr
       isub = ip(2)/100
       itask = ip(2) - 100*isub

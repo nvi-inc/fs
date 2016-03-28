@@ -12,6 +12,7 @@ NAME=metclient
 DESC="MET Client"
 LFILE=/usr2/st/metclient/metlog.ctl || exit 0
 PORT=50001
+HOST=localhost
 
 test -x $DAEMON || exit 0
 test -f $LFILE || exit 0
@@ -19,7 +20,7 @@ test -f $LFILE || exit 0
 case "$1" in
   start)
         echo -n "Starting $DESC: $NAME"
-        start-stop-daemon --start --quiet --exec $DAEMON $LFILE $PORT &
+        start-stop-daemon --start --quiet --exec $DAEMON $LFILE $PORT $HOST &
         echo "."
 	;;
   stop)
@@ -36,7 +37,7 @@ case "$1" in
         echo -n "Restarting $DESC: $NAME"
 	start-stop-daemon --quiet --stop --exec $DAEMON
 	sleep 2
-        start-stop-daemon --start --quiet --exec $DAEMON $LFILE &
+        start-stop-daemon --start --quiet --exec $DAEMON $LFILE $PORT $HOST &
 	echo "."
 	;;
   *)

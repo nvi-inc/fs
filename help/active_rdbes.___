@@ -1,0 +1,15 @@
+                    active_rdbes - set/display active RDBEs
+
+            Syntax:     active_rdbes=<list>
+
+            Response:   active_rdbes/<list>
+
+
+Settable parameters:
+        <list>     list of comma separated RDBE letters: 'a','b', 'c', 'd',
+                   up to the maximum, currently four
+
+Monitor-only parameters: none
+
+Comments: 
+The letters may be given in any order. Duplicated letters are ignored.

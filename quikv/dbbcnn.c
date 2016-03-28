@@ -30,6 +30,11 @@ long ip[5];                           /* ipc parameters */
 
       ind=itask-1;                    /* index for this converter */
 
+      if(1==ind%2 &&  NULL != index("ef",shm_addr->dbbcddcvl[0])) {
+	ierr=-301;
+	goto error;
+      }
+
       if (command->equal != '=') {            /* read module */
 	out_recs=0;
 	out_class=0;

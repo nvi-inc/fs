@@ -68,17 +68,18 @@ C 2004May14 JMGipson. Removed physical constants-->constants.ftni
 ! 2006Sep18 JMGipson. Changed max_obs to 10000
 ! 2007Feb09 JMGipson. Changed max_stn to 40, max_sor to 500, and max_obs to 20000
 ! 2007May26 JMGipson. Changed max_rec_type,max_rack_type for Mark5B hardware
+! 2008Apr11 JMGipson. Changed max_obs to 30000
+! 2014Aug20 JMGipson. Removed implicit none. Now must appear in each subroutine
 C
 C********************************************************************
-C
-      implicit none
+
 C
 C     The maximum number of stations which can be selected for
 C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone,max_roll_def,max_change_list
+     .max_subpass,max_tone,max_roll_def
 
       PARAMETER (MAX_STN = 40)
 C
@@ -129,11 +130,11 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 20)
+      PARAMETER (MAX_FRQ = 50)
 
 !     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
       integer max_trk
-      parameter (max_trk=33)
+      parameter (max_trk=128)
 
 C
 C     The maximum number of phase cal tones that can be detected
@@ -149,7 +150,7 @@ C       only S/X observations. ***
 C     Several frequency codes may be selected, as long as they
 C     are composed of a maximum of two bands, e.g. S and X.
 C
-      integer max_band,max_flux,max_vlba,max_sefdpar,max_nrs
+      integer max_band,max_flux,max_vlba,max_sefdpar
       PARAMETER (MAX_BAND = 2)
 C
 C     The maximum size of flux arrays. For source models, this number
@@ -167,10 +168,6 @@ C
 C     Maximum number of VLBA entries. 
 
       parameter (max_vlba = MAX_STN*MAX_FRQ)
-C
-C     Maximum number of rise/set times in arrays.
-
-      parameter (MAX_NRS = 4)
 C
 C     Maximum number of parameters for the calculation of
 C     elevation-dependent SEFDs.
@@ -218,11 +215,6 @@ C     in VEX file, so this probably has to be 32 now.
 C
       PARAMETER (MAX_CHAN = 32)
 
-C     Maximum number of tapes for which tape change times will be
-C     displayed in the summary listing. This does not limit
-C     the number of tapes that can be scheduled.
-
-      PARAMETER (max_change_list = 10)
 
 C     Lengths for thick and thin tape.
 
@@ -320,6 +312,6 @@ C
 C
 C     The maximum number of scans allowed in a schedule
 C
-      PARAMETER (MAX_OBS = 20000)
+      PARAMETER (MAX_OBS = 30000)
 
 

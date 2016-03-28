@@ -1,5 +1,5 @@
       SUBROUTINE vunppcal(modef,stdef,ivexnum,iret,ierr,lu,
-     .cpcalref,ipct,ntones,npcaldefs)
+     .cpcalref,ipct,ntones,npcaldefs,kfirst_call)
 C
 C     VUNPPCAL gets the PHASE_CAL_DETECT def statements 
 C     for station STDEF and mode MODEF. 
@@ -18,6 +18,7 @@ C  INPUT:
       character*128 modef ! mode def to get
       integer ivexnum ! vex file ref
       integer lu ! unit for writing error messages
+      logical kfirst_call     !first call to this routine? Allows initialization.
 C
 C  OUTPUT:
       integer iret ! error return from vex routines, !=0 is error
@@ -33,6 +34,12 @@ C  LOCAL:
       character*128 cout
       integer i,ip,nch,it,j
       integer fvex_int,fvex_len,fvex_field,ptr_ch,fget_all_lowl
+      logical kwarning_large_tone_number
+      
+      if(kfirst_call) then
+         kfirst_call=.false. 
+         kwarning_large_tone_number=.false.
+      endif 
 C
 C  Initialize
       npcaldefs=0
@@ -55,7 +62,6 @@ C
         ip=ip+1
 
 C  1.1 IF def
-
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get pcal ref
         if (iret.ne.0) return
@@ -74,11 +80,14 @@ C  1.2 List of tones
         iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get tone
         do while (i.le.max_tone+1.and.iret.eq.0) ! get tones
           if (iret.eq.0) then ! a tone
-            iret = fvex_int(ptr_ch(cout),j) ! convert to binary
-            if (j.lt.0.or.j.gt.max_tone) then
-              ierr = -2
-              write(lu,'("VUNPPCAL01 - Invalid tone number ",i3,
-     .        "must be between 1 and ",i3)') j,max_tone
+            iret = fvex_int(ptr_ch(cout),j) ! convert to binary   
+            if (j.lt.0.or.j.gt.max_tone) then              
+              if(.not.kwarning_large_tone_number) then
+                 kwarning_large_tone_number=.true.
+                 write(lu,'(a)') 
+     >             'VUNPPCAL01: Warning! All phase tones greater'//
+     >              ' than 16 ignored at all stations'
+               endif          
             else
               ipct(ip,i-1)=j
             endif

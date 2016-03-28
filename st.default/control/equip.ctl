@@ -7,10 +7,10 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 *                     k41, k41u, k41/k3, k41u/k3, k41/mk4, k41u/mk4,
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
-*                     k42c/mk4, lba, lba4, s2, dbbc, or none)
+*                     k42c/mk4, lba, lba4, s2, dbbc, rdbe, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		            mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a,
-*                           mk5a_bs, mk5b, mk5b_bs, or none)
+*                           mk5a_bs, mk5b, mk5b_bs, mk5c, mk5c_bs, mk6, or none)
 mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
 *                           mk4b, or none)
 mk3     type of decoder (mk3, dqa, mk4, or none)
@@ -35,17 +35,26 @@ none    type of phase cal control (if3 or none)
    1    No of LBA DAS installed (up to MAX_DAS - see "params.h")
    in   160MHz IF input filters (in or out)
   8bit	Digital input setting (8bit internal sampler or 4bit external at ATCA)
-* met sensor type
-cdp     cdp or met3 server port, use cdp if you don't have either
+*met sensor type: cdp or two fields for metserver: port hostname 
+*default choice for metserver is  50001 localhost      
+cdp     cdp or met3 server port & host, use cdp if you don't have either
 * default mk4 form command synch test value
   3     off or 0, 1, ..., 16
 *mk4 decoder transmission terminator
  return return, $, or %
-*DBBC DDC version
- v101   v100, v101, or v102 only
+*DBBC DDC version (v optional,then max 16 characters, no trailing _x until v105)
+ v101   v100, v101, v102, v104, v105, v105e, v105f, ...
 *DBBC PFB version
  v12    v12 only
 *DBBC number of conditioning modules
   4     1-4 (a,...,d)
 *DBBC IF power conversion factors, one for each module specified above, no trailing comments or extra fields
   15000 15000 15000 15000
+*Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
+*                                             rack=DBBC DDC, version not-E/F,
+*                                      64 for rack=DBBC DDC, version E/F,
+*                                       0 otherwise except rack=none
+*                         "nominal" is not allow for rack=none
+* a clock rate value of "none" will suppress clock_set command in FMSET
+*                                            and mk5c_mode command
+   nominal   one of: none, nominal, 2, 4, 8, 16, 32, 64

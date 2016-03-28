@@ -19,7 +19,7 @@
 clock_t rte_times(struct tms *);
 
 #ifdef DIGI
-#include "/usr/src/linux/drivers/char/digi.h"
+#include "/usr/src/linux/include/digi.h"
 #endif
 
 #include "../include/params.h"
@@ -957,12 +957,43 @@ char *devnm;
     if (knull)
        return TRUE;
 
-    if ( (mcb_fildes = open(devnm, O_RDWR)) < 0 ) {
+#ifdef FS_SERIAL_CLOCAL
+/* first open port non-blocking so CLOCAL can be set */
+
+    if ( (mcb_fildes = open(devnm, O_RDWR|O_NONBLOCK)) < 0 ) {
         return(FALSE);
+    }
+
+
+    if (ioctl(mcb_fildes, TCGETA, &mcb) == -1) {
+      perror("open_mcb:getting non-blocking terminal settings");
+      return(FALSE);
+    }
+
+    mcb.c_cflag |= CLOCAL;
+    
+    if (ioctl (mcb_fildes, TCSETA, &mcb)==-1) {
+      perror("open_mcb:setting non-blocking terminal settings");
+      return(FALSE);
+    }
+
+    if(close(mcb_fildes)<0) {
+      perror("open_mcb:closing non-blocking port");
+      return(FALSE);
+    }
+#endif
+
+    if ( (mcb_fildes = open(devnm, O_RDWR)) < 0 ) {
+#ifdef FS_SERIAL_CLOCAL
+      perror("open_mcb:re-opening port");
+#else
+      perror("open_mcb:re-open port");
+#endif
+      return(FALSE);
     } else {
         if(-1==ioctl (mcb_fildes,TCGETA,&mcb)){  /* get terminal settings */
             perror("open_mcb:getting terminal settings");
-            exit(-1);
+	    return(FALSE);
         }
         isdigiboard();
         set_mcb (1);                      /* set baud, etc */

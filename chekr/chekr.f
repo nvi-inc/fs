@@ -32,7 +32,6 @@ C  LOCAL VARIABLES:
       parameter (ifastr=2 )      ! repeat period for tape footage
 C 
 C     IDAREF - reference day number, from HP, re-set every loop 
-      integer rack
       dimension ip(5)             ! - for RMPAR
       integer itbuf1(5)
 C      - the buffers from MATCN
@@ -96,7 +95,7 @@ C
 C
       if (MK3.eq.rack.or.MK4.eq.rack) then
         call mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr)
-      else if (VLBA.eq.rack)  then
+      else if (VLBA.eq.rack.or.VLBA4.eq.rack)  then
         call vlbarack(lwho)
       else if (LBA.eq.rack.or.LBA4.eq.rack)  then
         call lbarack(lwho,ichecks)

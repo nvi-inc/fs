@@ -102,8 +102,11 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 !            This is because some of D.Graham's schedules did not have tape or disks!
 ! 2004Nov21  Modified Maxline.  lstsumo (called by this) does better job of
 !            calculating line position.
-! 2007Jul28 JMGipson. Replace kdisk by km5disk which is in hardware.ftni
+! 2007Jul28 JMGipson. Replace kdisk by km5disk which is hardware.ftni.
+! 2015Feb30 JMG. Simplified code. Got rid of a lot of stuff for Tape recorders. Added support for Mark6.
+!
 
+      implicit none 
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -117,7 +120,7 @@ C Output:
       INTEGER   IERR
 
 ! Functions.
-      real counter_init        !Initialize counter
+    
       integer itimedifsec       !function
       INTEGER TRIMLEN           !length of string excluding blanks.
 
@@ -125,14 +128,15 @@ C Local:
       integer itlate_local,itearl_local
       INTEGER IC
       integer nline,num_tapes,npage,maxwidth,maxline,iline
-      integer inewp,ne,nm,l,ifdur,id,ieq
+      integer inewp
+      integer ieq
       real dif
 
       logical kvalidtime                !valid time read?
 
       integer num_scans                 !number of scans
       integer nsline                    !snapfile line
-      integer itime_now(5)      	!time now. Latest time from snap file.
+      integer itime_now(5)      	 !time now. Latest time from snap file.
       integer itime_start(5)            !scan start.
       integer itime_stop(5)             !scan
       integer itime_source(5)
@@ -145,17 +149,10 @@ C Local:
       character*3 cdir                  !direction
       character*2 cpass                 !Current pass
       character*6 cnewtap               !Newtape
-      real counter_now                  !current counter. Stored as real for greater precision.
-      real counter_source               !counter when on source given.
-      real counter_tape_start           !counter when tape started.
-      real counter_print                !counter we print.
-      real counter_data_valid_on        !counter when we reached this.
-      real counter_prev                 !counter at end of last scan.
+      real        data_mByte		 !storage in mega-bytes for current disk              
 
-
-! this is for previous scan.
-      real counter_print_p              !counter we print.
-      real counter_source_p
+! this is for previous scan.    
+   
       integer nsline_p                  !snapfile line
       integer itime_start_p(5)          !scan start.
       integer itime_stop_p(5)           !scan
@@ -167,6 +164,7 @@ C Local:
       character*3 cdir_p                !direction
       character*2 cpass_p               !Current pass
       character*6 cnewtap_p             !Newtape
+      character*6 cnewtap_store
 
       character*2 cpass_old
 
@@ -177,25 +175,24 @@ C Local:
       logical kdata_stop                !stoped taking data.
       logical ksource                   !found source command
       logical kmidtp                    !Found midtp command.
-      logical kunload                   !Unload tape.
+    
 
-      real rifdur
       real speed_snap 			! speed from SNAP file
       double precision speed_recorder   ! speed of recorder in this mode.
 
-      LOGICAL   kexist
+      LOGICAL   kexist                  !does a file exist 
       character*128 ctmp,ctmp_in
 
-      real temp
+    
       integer itemp
       integer i
 
       integer icode                     !Read from "SETUPxx" command
       integer icode_old                 !old version
       character*2 ccode_tmp
-      integer iSpinDelay
+   
       character*2 csize                 !what is paper orientation, font size
-                                        !values are ls,ll,ps,pl
+                                         !values are ls,ll,ps,pl
 
 
 C 1.0  Check existence of SNAP file.
@@ -242,23 +239,12 @@ C 3. Initialize local variables
       kmidtp=.false.
       kdata_stop=.false.
       krunning=.false.
-      counter_prev=0
-      counter_now=0
-      counter_data_valid_on=0
-
+     
       do i=1,5
         itime_tape_stop(i)=0
         itime_tape_start(i)=0
       end do
-
-! for mark3 or mark4, takes a second to get the tapes moving.
-      if(km3rec(1) .or. km3rec(2) .or. km4rec(1).or.km4rec(2)) then
-         iSpinDelay=1
-      else
-         iSpinDelay=0
-      endif
-
-      counter_source_p=0
+     
       cpass_old="NO"
       cpass= " "
 
@@ -281,21 +267,14 @@ C    information from common.
 ! This initializes a common block.
       call lstsum_info(kskd)
 
-C
-C Calculate different kinds of scaling.
-
-C   K4 scaling factor is 55 cpd/11.25 fps if the schedule
-C   was produced using sked with Mk/VLBA counter calculations
-C   and no fan-out or fan-in. counters were therefore already
-C   scaled by bandwidth calculations in sked.
-
       icode=1
       icode_old=1
       call find_recorder_speed(icode,speed_recorder,kskd)
-
-
+  
+      data_mbyte=0.d0 
+      
 ! Initialize count counter.
-      counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
+   
 C 5. Main loop to read .snp file and print summary of observations.
 
 441   rewind(lu_infile)
@@ -311,6 +290,7 @@ C 5. Main loop to read .snp file and print summary of observations.
         if (ctmp(1:1).eq.'"') then !non-comment line
           continue
         else if(ctmp(1:10) .eq."scan_name=") then
+          cnewtap_store=" "
           cscan_p=cscan                 	!save old
           nsline_p=nsline               	!save old
           read(ctmp(11:),'(a)') cscan
@@ -345,15 +325,7 @@ C           Here is where we determine early start without the schedule
           cnewtap_p	=cnewtap             !save old
           cdir_p        =cdir
           cpass_p       =cpass
-
-          if(tape_motion_type(istn) .eq. "CONTINUOUS" .or.
-     >       tape_motion_type(istn) .eq. "ADAPTIVE") then
-            counter_print_p=counter_data_valid_on
-          else
-            counter_print_p=counter_tape_start
-          endif
-
-          counter_source=counter_now
+    
 
           idur=-1                               !recalculate for next scan.
           cnewtap= " "
@@ -367,43 +339,39 @@ C       Now get the source info for the new scan
           elseif (index(ctmp,'READY2').ne.0) then ! rec 2
             cnewtap = 'Rec2'
           endif
-          counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
+          data_mbyte=0.d0         
         else if (index(ctmp,'MIDTP').ne.0) then
           inewp = 1
           idur=-1 ! reset duration so it gets calculated again
           kmidtp=.true.
         else if (index(ctmp,'MIDOB').ne.0) then ! data start time
-! Print the PREVIOUS SCAN. Need to do this becuse sometimes get
+! Print the PREVIOUS SCAN. Need to do this because sometimes get
 ! UNLOD command after a scan, but before the data starts. This allows to
-! output tape unload correctly.
-          if (kdata_stop) then
+! output tape unload correctly. 
+          if (kdata_stop) then          
             call lstsumo(kskd,itearl_local,itlate_local,maxline,
      >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
      >        nsline_p,
      >        itime_start_p,itime_stop_p,
      >        itime_tape_start_p,itime_tape_stop,
-     >        iDur_p,counter_print_p,cpass_p,cnewtap_p,cdir_p,
+     >        iDur_p,data_mbyte ,cpass_p,cnewtap_p,cdir_p,
      >        cscan_p,ctmp_source_p)
           endif
           kdata_stop=.false.
+  
+          dif = itimedifsec(itime_stop_p, itime_start_p)            
+          data_mbyte=data_mbyte+dif*speed_recorder
+      
 
 ! Wait till time. command.
         else if (index(ctmp,'!').ne.0) then ! time
           call snap_readTime(ctmp,itime_temp,kvalidtime)
           if(kvalidtime) then
-            if(krunning) then   !if recorder is going, update count.
-              dif = itimedifsec(itime_temp,itime_now)
-! if mark5, should subtract 0.9 seconds from idif.
-!              counter_now=counter_now+(dif-0.9)*idir*speed_recorder
-              counter_now=counter_now+dif*idir*speed_recorder
-
-            endif
-            if (counter_now.lt.0) then
-              counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
-             endif
-             do i=1,5
+            if(krunning) then   !if recorder is going, update count.      
+              do i=1,5
                itime_now(i)=itime_temp(i)       !update running time.
-             end do
+              end do
+            endif 
           endif
 ! Data start command.
         else if(ctmp(1:10) .eq. "DISK_START" .or.
@@ -411,55 +379,29 @@ C       Now get the source info for the new scan
      >          ctmp(1:14) .eq. "DISK_RECORD=ON") then
 
           idur=-1 ! make sure we calculate duration from this point
-          if(km5disk) idir=1  ! disks always go forward.
+          if(kdisk) idir=1  ! disks always go forward.
           do i=1,5
             itime_tape_start(i)=itime_now(i)
           end do
           krunning=.true.
-          counter_tape_start=counter_now
-        else if (ctmp(1:2) .eq. "ST") then
-          idur=-1 ! make sure we calculate duration from this point
-          do i=1,5
-            itime_tape_start(i)=itime_now(i)
-          end do
-          if (.not.krunning) then ! this is a true start
-              if(.not. ks2 .and. .not. kk4) then
-                nm = index(ctmp,',') ! find the ,
-                read(ctmp(nm+1:),*,iostat=ierr) speed_snap
-                speed_recorder=speed_snap/12.    !convert to count.
-                if (ierr.ne.0) then ! valid speed
-                  write(*,*)"LSTSUM: Error reading speed ",ctmp(1:40)
-                endif
-              endif
-              idir = 1
-              nm = index(ctmp,'=') ! find the =
-              cdir = ctmp(nm+1:nm+3) ! really should parse this
-              if (cdir.eq.'REV') idir=-1
-          else ! update counter
-            continue
-          endif
-          krunning=.true.
-          counter_tape_start  =counter_now
-! Data start command.          123456789x123
+  
         else if(ctmp(1:10).eq.'DATA START'   .or.
      >          ctmp(1:13).eq.'DATA_VALID=ON' .or.
      >          ctmp(1:14).eq.'DATA_VALID1=ON'.or.
      >          ctmp(1:14).eq.'DATA_VALID2=ON'.or.
      >          ctmp(1:5) .eq.'PREOB') then
-
+           krunning=.true.
            do i=1,5
              itime_start(i)=itime_now(i)
            end do
-           if(itime_tape_start(1) .eq. 0) then
+           if(itime_tape_start(1) .eq. 0 .or. km6disk) then 
              do i=1,5
                itime_tape_start(i)=itime_start(i)
              end do
-           endif
-
+            endif
            kdata_start=.true.
-           counter_prev=counter_data_valid_on           !previous start of data.
-           counter_data_valid_on=counter_now
-        else if (ctmp(1:2) .eq. 'ET' .or.
+     
+        else if(
      >           ctmp(1:10) .eq. 'DISK_END' .or.
      >           ctmp(1:10) .eq. 'DISC_END' .or.
      >           ctmp(1:15) .eq. 'DISK_RECORD=OFF') then
@@ -471,9 +413,7 @@ C       Now get the source info for the new scan
           if (idur.eq.-1) then ! no dur yet this scan
             idur = itimedifsec(itime_tape_stop,itime_start)
 C           Update running time
-          endif ! no dur yet this scan
-        else if(ctmp(1:5) .eq. 'UNLOD') then
-          kunload=.true.
+          endif ! no dur yet this scan 
         else if (index(ctmp(1:15),'DATA_VALIDA=OFF').ne.0  .or.
      .           index(ctmp(1:15),'DATA_VALIDB=OFF').ne.0  .or.
      .           index(ctmp(1:15),'DATA_VALID=OFF') .ne.0  .or.
@@ -482,60 +422,12 @@ C           Update running time
           kdata_stop=.true.
           do i=1,5
             itime_stop(i)=itime_now(i)
+            itime_tape_stop(i)=itime_now(i)  !Note this may be overwritten later. 
           end do
 
           if (idur.eq.-1) then ! no stop yet
             idur = itimedifsec(itime_stop,itime_start)
           endif ! no stop yet
-        else if (ctmp(1:4) .eq. 'FAST'.or.
-     >           ctmp(1:5) .eq. 'SFAST') then !add spin count
-C         examples: fastf=3m42.34s   fastr=2.35m   fastf=34.56s
-          krunning=.false.      !recorder is stopped after this command.
-          ne = index(ctmp,'=')
-          nm = index(ctmp,'M')
-          if (nm.gt.0) then ! "M" found
-            read(ctmp(ne+1:nm-1),*) temp
-            ifdur = ifix(60.0*temp)
-          else
-            nm=ne
-            ifdur=0
-          endif ! "M" found
-          l=trimlen(ctmp)
-          read(ctmp(nm+1:l-1),*) temp
-
-          rifdur = ifdur + temp -iSpinDelay ! seconds of time for spin
-
-          if(ctmp(1:1) .eq. "S") then
-             spin_speed=27.5                  !330 ips
-          else
-             spin_speed=22.5                  !270 ips
-          endif
-          ifdur=rifdur*Spin_Speed
-
-          id=+1
-          if (ctmp(5:5).eq.'R') id=-1
-          if (counter_now.gt.0) counter_now=counter_now+ifdur*id
-          if (counter_now.lt.0) then          !if spins us off, then reset tape to 0.
-            counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
-          endif
-
-! If the last source command was within 5 minutes, command is probably meant to position tape to start of scan.
-          if(itimedifsec(itime_now,itime_source) .le. 300) then
-            counter_source=counter_now
-          endif
-
-! update itime_now because of command.
-          itemp=ifix(rifdur)
-          call timeadd(itime_now,itemp,itime_now)
-
-C If there was a recent MIDTP then assume that this FASTR is meant to return
-C the counter to zero to start the new forward pass.
-!
-!          if (id.eq.-1 .and. kmidtp) then
-!             count_now=counter_init(km5,kk4,ks2,MaxTap(istn))
-!             kmidtp=.false.
-!          endif ! this was FASTR
-
         else if (ctmp(1:5) .eq. 'CHECK') then
           cnewtap = ' *  '
         else if (ctmp(1:5) .eq. "SETUP" .and. kskd) then  !We get code info from Setup. Can only do if have sked file.
@@ -547,6 +439,7 @@ C the counter to zero to start the new forward pass.
                    call find_recorder_speed(icode,speed_recorder,kskd)
                    write(cnewtap,"('Mode',i2)") icode
                    icode_old=icode
+                   cnewtap_store=cnewtap
                  endif
              endif
            end do
@@ -561,9 +454,6 @@ C the counter to zero to start the new forward pass.
               cpass(2:2)=cpass(1:1)
               cpass(1:1)=' '
             endif ! shift right
-            if (ks2.and.cpass.ne.cpass_old) then
-              counter_now=counter_init(km5disk,kk4,ks2,MaxTap(istn))
-            endif
           endif ! setup
         endif ! might be setup proc
 
@@ -572,28 +462,24 @@ C the counter to zero to start the new forward pass.
 990   continue
       ierr=0
 
-!      counter_print=counter_data_valid_on
-       if(tape_motion_type(istn) .eq. "CONTINUOUS" .or.
-     >       tape_motion_type(istn) .eq. "ADAPTIVE") then
-          counter_print=counter_data_valid_on
-       else
-            counter_print=counter_tape_start
-       endif
+!      counter_print=counter_data_valid_on         
+ 
+  
 
-
-
+      if(cnewtap_store .ne. " ") cnewtap=cnewtap_store
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
      >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
      >        nsline,
      >        itime_start,itime_stop,
      >        itime_tape_start,itime_tape_stop,
-     >        iDur,counter_print,cpass,cnewtap,cdir,
+     >        iDur,data_mbyte,cpass,cnewtap,cdir,
      >        cscan,ctmp_source)
 
       write(luprt, "()") ! skip line
-      if(km5disk) then
-         counter_now=counter_print+idur*speed_recorder
-         write(luprt,'("   Total",f8.1, " Gbytes")') counter_now/1000
+      if(kdisk) then
+         data_mbyte=data_mbyte+idur*speed_recorder
+         write(luprt,   '("   Total",f8.1, " Gbytes")') data_mbyte/1024
+
       else
         write(luprt, '("   Total number of tapes: ",i3)')num_tapes
       endif

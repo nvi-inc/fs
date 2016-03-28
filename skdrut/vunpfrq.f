@@ -70,8 +70,7 @@ C  1. Channel def statements
 C
       ierr = 1
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('chan_def'//char(0)),
-     .ptr_ch('FREQ'//char(0)),ivexnum)
+     >  ptr_ch('chan_def'//char(0)),ptr_ch('FREQ'//char(0)),ivexnum)
       ic=0
       do while (ic.lt.max_chan.and.iret.eq.0) ! get all fanout defs
         ic=ic+1
@@ -80,8 +79,9 @@ C  1.1 Subgroup
 
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
+        
         if (iret.ne.0) return
-        NCH = fvex_len(cout)
+        NCH = fvex_len(cout)       
         if (nch.gt.1) then
           ierr = -1
           write(lu,'("VUNPFRQ02 - Band ID must be 1 character.")')
@@ -96,6 +96,7 @@ C  1.2 RF frequency
 
         ierr = 12
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get frequency
+     
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit))
         if (iret.ne.0) return
@@ -110,7 +111,7 @@ C  1.2 RF frequency
 C  1.3 Net SB
 
         ierr = 13
-        iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get sideband
+        iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get sideband  
         if (iret.ne.0) return
         cout(1:1) = upper(cout(1:1))
         if (cout(1:1).ne.'U'.and.cout(1:1).ne.'L') then
@@ -161,7 +162,7 @@ C  1.6 BBC ref
           cbbref(ic)=cout(1:nch)
         endif
 
-C  1.7 Phase cal -- skip
+C  1.7 Phase cal 
 
         ierr = 17
         iret = fvex_field(7,ptr_ch(cout),len(cout)) ! get pcal ref

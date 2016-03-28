@@ -1,6 +1,8 @@
       subroutine proc_mk5_init2(lform,
      >   ifan,samprate,ntrack_rec_mk5,luscn,ierr)
       include 'hardware.ftni'
+! History:
+!  2014Dec06. Added Mark5C support
 ! passed
       character*5 lform        !Form descriptor
       integer ifan              !fanout
@@ -15,7 +17,7 @@
       integer itemp
 
       ierr=0
-      if(.not. km5b) then             !skip below for Mark5B
+      if(.not. (km5b .or. km5c)) then             !skip below for Mark5B
         if(ifan .gt. 1) then
           idrate=samprate/ifan        !idrate is the data rate.
         else

@@ -1,4 +1,4 @@
-      subroutine trkall(ipass,istn,icode,cmode,itrk,cm,nm,ifan)
+      subroutine trkall(ipass,istn,icode,cmode,itrk,cm,ifan)
 
 C  TRKALL returns the complete list of tracks to be
 C  recorded, given the mode and list of tracks assigned
@@ -27,6 +27,7 @@ C 970401 nrv Remove itrax -- not used
 ! 2005Nov29 JMGipson. Itras changed to give Mark4 Track number. Required minor change here.
 ! Got rid of residual holleriths.
 ! 2006Nov01 JMGipson.  Recognize and don't complain on fan out 1:1  
+! 2014Jan17. Got rid of 'nm' which was length of cm
 
 C
 C Called by: PROCS
@@ -47,8 +48,7 @@ C  OUTPUT:
       integer itrk(max_track,max_headstack) ! tracks to be recorded/enabled
 C           VLBA track # assignments
 !      integer*2 lm(2) ! 3-character mode for procedure names
-      character*4 cm
-      integer nm ! number of characters in lm, 1 or 3
+      character*4 cm  
 C     integer itrax(2,2,max_headstack,max_chan) ! a fanned-out version of itras
 C
 C  LOCAL:
@@ -58,8 +58,7 @@ C
 !     call ifill(lm,1,4,oblank)
 !     idum = ichmv(lm,1,lmode,1,1) ! first character is mode
       cm=cmode(1:1)//"   "
-      nm = 1
-C
+
 C 1. Initialize the itrax array to itras values.
 C    Initialize itrk to 0.
 
@@ -91,7 +90,6 @@ C     If this is a VLBA mode or Mk4 mode, check for fan-out
 !         idum = ichmv_ch(lm,2,'1') ! fan-out 1:
 !         idum = ib2as(ifan,lm,3,1) ! fan-out   n
 
-          nm=3 ! 3 characters in mode name
           if (ifan.gt.1) then ! add fanout tracks
             do isb=1,2 ! u/l
               do ibit=1,2 ! s/m
@@ -125,13 +123,6 @@ C 3. Fan-in mode. Not implemented.
         write(*,*) "Mode: ", cmode
 !        read(cmode(1:iy-1),*) n
         return
-!       n=ias2b(lmode,iy-1,1)
-!        if (n.eq.1.or.n.eq.2.or.n.eq.4) then ! valid fan
-!          idum = ichmv_ch(lm,1,'V 1 ')
-!          idum = ib2as(n,lm,2,1)
-!          nm=3
-!        endif
-C       No fan-in track handling at this time
       endif
 C
       endif ! VLBA mode and check for fan

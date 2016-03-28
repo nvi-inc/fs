@@ -3,8 +3,8 @@ C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
 ! 2010Jan27  JMGipson. Increased number of recorder types to accomodate Mark5C.
 ! 2012Sep04  JMG.  Increased MAX_RACK_TYPE to 19 to accomodate DBBC
-      PARAMETER (MAX_RACK_TYPE= 19)
-      PARAMETER (MAX_REC_TYPE = 16)
+      PARAMETER (MAX_RACK_TYPE= 20)
+      PARAMETER (MAX_REC_TYPE = 17)
       PARAMETER (MAX_REC2_TYPE = 7)
 
       character*8 crack_type(max_rack_type)    	! valid rack type

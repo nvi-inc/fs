@@ -31,18 +31,70 @@ Monitor-only parameters:
         line    The line number to be executed next.
 
 Comments: 
-If the schedule is started successfully, a log file having the
-same name as the schedule is automatically started, and the
-procedure file having the same name as the schedule is
-automatically established as the schedule procedure library.
-Any previously time-scheduled procedures from this library are
-cancelled. If a # of lines is specified, an automatic halt
-will be issued after execution of these lines. The schedule
-may then be continued using the cont command.
+If the schedule is started successfully, a log file having the same
+name as the schedule is automatically started, and the procedure file
+having the same name as the schedule is automatically established as
+the schedule procedure library.  Any previously time-scheduled
+procedures from this library are cancelled. If a # of lines is
+specified, an automatic halt will be issued after execution of these
+lines. The schedule may then be continued using the cont command.
 
 Line numbers for starting, or restarting, a schedule can found in
 the DRUDG option 5 listing.  Only line numbers where the schedule
 can be cleanly restarted at the start of a recording are shown.
 
-Note: If the schedule file is larger than 100,000 lines,
-execution will halt after 100,000 lines.
+There is an interlock that causes a "schedule=..." command to be
+rejected if either PFMED is running or disk recording has been
+commanded.  In the former case, the problem can be rectified by
+exiting PFMED; in the latter, issuing the "disk_record=off" command
+will disarm the interlock.  In either case, a following "schedule=..."
+command should execute correctly.  Note that the current schedule (if
+any) will continue to execute if either error occurs.  Note also that
+the FS does not check whether disk recording is actually occurring,
+only whether it has been commanded.  Consequently if recording is
+already occurring when the FS is started, the interlock will not
+operate.
+
+Note: If the schedule file is larger than 100,000 lines, execution
+will halt after 100,000 lines.
+
+The procedure file opened by the "schedule=..." command is called the
+'schedule' procedure file.  The "proc=..." command can also be used to
+open a 'schedule' procedure file.  In the case of "schedule=...", this
+is always a file with the same name (up to the dot ".") as the
+schedule file.  There is another procedure file, called the 'station'
+procedure file (and actually named "station") that is always open in
+the FS.
+
+The rule for determining precedence between the procedure files is
+that the procedures in the schedule procedure file take priority over
+procedures in the station procedure library.
+
+For a given set of station equipment (i.e., the equipment at the
+station), DRUDG places any commands that need to be executed at the
+start of an experiment in the "exper_initi" procedure file in the
+experiment's schedule procedure file.  The "exper_inti" procedure is
+executed automatically by the "schedule=..." command.  To allow for
+any station specific commands that need to be executed at the start of
+an experiment, a call to "sched_initi" is included in "exper_initi"
+procedure by DRUDG.  The idea is that "sched_initi" will be in the
+station procedure file and include the station specific commands that
+are needed.  There should at least be an empty "sched_initi" file in
+the station library if no commands are needed.
+
+You can override this behavior for any particular experiment in
+several possible ways.  You can change the commands in the
+"exper_initi" procedure in anyway.  Specifically, you can remove the
+call to "sched_initi" in "exper_initi" or you can change the procedure
+to call something else.  Another option is to put an experiment
+specific "sched_initi" in the experiment's schedule procedure library.
+
+You could also remove "exper_initi" from the experiment's schedule
+library.  In that case, an "exper_initi" in the station procedure
+library (if the procedure exists) would be used.  Depending on what
+you want, a default "exper_initi" prcoedure could either be empty or
+contain a call to "sched_init" and/or any commands you want.  Not
+having an "exper_initi" in the station library would cause an error
+message which might be useful as an indication that something was
+missed.  It all depends on what is convenient, but this is a rather
+obscure case.

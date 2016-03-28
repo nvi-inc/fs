@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #ifdef DIGI
-#include "/usr/src/linux/drivers/char/digi.h"  /* yechh, abs. path... */
+#include "/usr/src/linux/include/digi.h"  /* yechh, abs. path... */
 #endif
 
 int portopen_(port, name, len, baud, parity, bits, stop)

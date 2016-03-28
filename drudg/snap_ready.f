@@ -24,6 +24,11 @@
         write(luFile,'(a)') 'ready_disk'
         kfirst_tape=.false.
       endif
+      
+      if(km6disk) then
+         kfirst_tape=.false.
+         return
+      endif 
 
       if(km5disk) then
          return              !don't need to do tape ready.

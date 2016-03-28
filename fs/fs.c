@@ -90,7 +90,7 @@ main(int argc_in,char *argv_in[])
     }
     ti=time(NULL);
     tm=gmtime(&ti);
-    (void) strftime(file,MAX_LINE,"~/fs.%Y.%b.%d.%H.%M.%S.err",tm);
+    (void) strftime(file,MAX_LINE,"~/fs_%Y_%j_%H:%M:%S.err",tm);
     strcpy(line,"/usr/bin/tee ");
     strcat(line,file);
     

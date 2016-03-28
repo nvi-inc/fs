@@ -1,0 +1,9 @@
+#!/usr/bin/tcsh
+
+if ($#argv == 1) then
+	echo "updown 0000.0 0 0 0 0\n" | nc -w 3 $1 9050
+else if ($#argv == 4) then
+	echo "updown $2 $3 $4 0 0\n" | nc -w 3 $1 9050 
+else
+	echo "I don't know what to do"
+endif

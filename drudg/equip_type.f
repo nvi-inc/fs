@@ -35,6 +35,7 @@ C 17Apr2003  JMG.  Added Mark5 option.
 ! 2007Jun13  JMG. Modified so that would all fit on one page.
 ! 2008Oct20  JMG. Better error messages.
 ! 2012Sep13  JMG. Tempoary fix so that don't show Mark5C.  (Search for 2012Sep13)
+! 2014Dec06  JMG. Now show Mark5C
 
 C Input:
       character*(*) cr1
@@ -60,7 +61,8 @@ C 0. Determine current types.
         max_rack_local = max_rack_type
 
 ! 2012Sep13 
-        max_rec_local = max_rec_type-1
+!      max_rec_local = max_rec_type-1
+       max_rec_local = max_rec_type
         if(Km5A_piggy .or.km5p_piggy) then
           max_rec_local=max_rec_local-3   !exclude Mark5A & Mark5P modes.
         endif
@@ -128,7 +130,7 @@ C 2. Interactive input
         write(luscn,'(a)')
      .       '| Select rack  | Select Rec 1 | Select Rec 2 | Start|'
 ! We subtract 1 from max_equip_lines, max_rack_type and max_rec_type
-!  so we don't display the "unknwon" option.
+!  so we don't display the "unknown" option.
           do i=1,max_equip_lines-1 ! write each line
             if(i .le. max_rack_type-1) then
               if(irack_in .eq. i) then
@@ -141,7 +143,8 @@ C 2. Interactive input
               crack_slot=" "
             endif
 ! JMG 2012Sep13  Temporary fix!!!
-            if(i .le. max_rec_type-2) then
+! Undid.  was max_rec_type-2
+            if(i .le. max_rec_type-1) then
               if(irec1_in .eq. i) then
                 cactive="*"
               else

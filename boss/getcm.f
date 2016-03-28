@@ -64,7 +64,6 @@ C
       do i=1,nchar
          if(cjchar(ibuf,i).eq.'"') goto 201
          if(cjchar(ibuf,i).ne.' ') then
-            call lower(ibuf,nchar)
             goto 201
          endif
       enddo

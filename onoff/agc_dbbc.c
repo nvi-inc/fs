@@ -26,13 +26,16 @@ int *ierr;
   long ip[5];                                     /* ipc array */
   int out_recs, out_class;
   char buf[BUFSIZE];
+  static bbcs;
 
     if(agcin==0) {
+      bbcs=0;
       for (i=0;i<MAX_DBBC_IF;i++)
 	mode[i]=0;
       
       for (i=0;i<MAX_DBBC_BBC;i++) {
 	if(1==itpis_dbbc[i]||1==itpis_dbbc[i+MAX_BBC]) {
+	  bbcs=1;
 	  ifchain=shm_addr->dbbcnn[i].source+1;
 	  if(ifchain <1 || ifchain >4)
 	    continue;
@@ -67,6 +70,14 @@ int *ierr;
 	cls_snd(&out_class, buf, strlen(buf) , 0, 0);
 	out_recs++;
       }
+    }
+    if(bbcs && shm_addr->dbbcddcv > 102) {
+      if(agcin==0)
+	strcpy(buf,"dbbcgain=all,man");
+      else
+	strcpy(buf,"dbbcgain=all,agc");
+      cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+      out_recs++;
     }
     if(out_recs!=0) {
       ip[0]=1;

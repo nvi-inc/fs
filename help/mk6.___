@@ -1,0 +1,23 @@
+		    mk6 - Mark6 low level communication.
+
+            Syntax:     mk6X=<InString>
+
+            Response:   mk6X/<OutString>
+
+
+Settable parameters:
+        X           letter: 'a', 'b', or null for all active Mark6s
+        <InString>  string to be sent to Mark6(s). If the string does not end
+                    with a semi-colon ";", one will be added.
+
+Monitor-only parameters:
+        <OutString> resulting ouput from Mark6 X
+
+Comments:
+Like all commands that start with "mk6", this command can either
+operate on an individual Mark6 if the letter for that Mark6 is
+appended to the command, or all active Mark6s if no letter is
+appended.  The response always includes the letter of the Mark6 the
+response came from.  Active Mark6s are defined by the "active_mk6s"
+command (yet to be implemented).  At start-up all configured Mark6s
+are considered active.

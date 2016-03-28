@@ -95,6 +95,7 @@ C
 C HISTORY:
 C WHO  WHEN    WHAT
 C gag  920901  Added calls to char2low after a few readstring calls.
+C weh  150325  remove char2low
 C
 C     PROGRAM STRUCTURE
 C
@@ -134,7 +135,6 @@ cxx        read(lui,'(a)') lnam2
         return
       end if
       lnam1 = lnam2(ipos:nch)
-      call lower(lnam1,nch-ipos+1)
       if (lnam1.eq.'::') goto 900
 C     Initialize flags and counters.
       knew = .false.
@@ -156,12 +156,10 @@ C     Write EOF to initialize.
       if(kerr(ierr,me,'rewinding',' ',0,0)) return
 C     Search for procedure name given.
       call f_readstring(idcb3,ierr,ibc,len)
-      call char2low(ibc)
       if(kerr(ierr,me,'reading',' ',0,0)) continue
       do while(ierr.ge.0.and.len.ge.0)
         if(ibc(1:6).eq.'define'.and.ibc(9:20).eq.lnam1) goto 130
         call f_readstring(idcb3,ierr,ibc,len)
-        call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
       enddo
       write(lui,1105)
@@ -171,7 +169,6 @@ C     Search for procedure name given.
 c
 130   continue
       call f_readstring(idcb3,ierr,ibc,len)
-      call char2low(ibc)
       if(kerr(ierr,me,'reading',' ',0,0)) continue
       do while(ibc(1:6).ne.'enddef'.and.ierr.ge.0.and.len.ge.0)
         nch = trimlen(ibc)
@@ -180,7 +177,6 @@ c
           if(kerr(ierr,me,'writing',' ',0,0)) continue
         end if
         call f_readstring(idcb3,ierr,ibc,len)
-        call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
       enddo
 150   continue
@@ -248,7 +244,6 @@ C
 C   copy down to the old procedure if it existed, to the end otherwise
 C
         call f_readstring(idcb3,ierr,ibc,len)
-        call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
         do while(ierr.ge.0.and.len.ge.0)
           if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
@@ -259,7 +254,6 @@ C
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
           if(kerr(ierr,me,'writing',' ',0,0)) continue
           call f_readstring(idcb3,ierr,ibc,len)
-          call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
         enddo
 160     continue
@@ -273,14 +267,12 @@ C
 C  copy the new procedure in
 C
         call f_readstring(idcb1,ierr,ibc,len)
-        call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
         do while(ierr.ge.0.and.len.ge.0)
           nch = trimlen(ibc)
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
           if(kerr(ierr,me,'writing',' ',0,0)) continue
           call f_readstring(idcb1,ierr,ibc,len)
-          call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
         enddo
 C
@@ -293,19 +285,16 @@ C  copy through the old routine if it existed, otherwise we are at EOF
 C
         if (.not.knew) then
           call f_readstring(idcb3,ierr,ibc,len)
-          call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
           do while(ibc(1:6).ne.'enddef')
             if(ierr.lt.0.or.len.le.0) goto 180
             call f_readstring(idcb3,ierr,ibc,len)
-            call char2low(ibc)
             if(kerr(ierr,me,'reading',' ',0,0)) continue
           enddo
 C
 C  okay, now copy the remaining procedures
 C
           call f_readstring(idcb3,ierr,ibc,len)
-          call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
           do while(ierr.ge.0.and.len.ge.0)
             if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
@@ -315,7 +304,6 @@ C
             if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
             if(kerr(ierr,me,'writing',' ',0,0)) continue
             call f_readstring(idcb3,ierr,ibc,len)
-            call char2low(ibc)
             if(kerr(ierr,me,'reading',' ',0,0)) continue
           enddo
         end if

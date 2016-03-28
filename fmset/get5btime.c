@@ -12,8 +12,10 @@
 extern long ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
+extern int m5b_crate;
 
 extern dbbc_sync;
+extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
 void rte2secs();
 
@@ -41,8 +43,22 @@ int sz_m5clock;
 	char *str;
 	int out_recs;
 	long out_class;
+	char buff[80];
 
 	if(synch) {
+	  int i, iwait;
+
+	  iwait=0;
+	  synch=0;
+	  mvwaddstr( maindisp, 4, 6+15,
+		     "                                       ");
+	  mvwaddstr( maindisp, 4, 6+15+39 , "               ");
+	  mvwaddstr( maindisp, 5, 6+15,
+		     "                                       ");
+	  mvwaddstr( maindisp, 5, 6+15+39 , "               ");
+	  mvwaddstr( maindisp, 6, 6+15,
+		     "                                       ");
+	  mvwaddstr( maindisp, 6, 6+15+39 , "               ");
 	  if(rack == DBBC && dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
@@ -63,21 +79,36 @@ int sz_m5clock;
 	      if (nsem_test("fs   ") != 1) {
 		endwin();
 		fprintf(stderr,"Field System not running - fmset aborting\n");
+		rte_sleep(SLEEP_TIME);
 		exit(0);
 	      }
 	      name=NULL;
 	    }
 	    skd_par(ip);
 	    nsem_put("fsctl");
-	    if(ip[2] != 0)
-	      {
-		logita(NULL,ip[2],ip+3,ip+4);
-	      }
 	    if(ip[1]!=0)
 	      cls_clr(ip[0]);
-	    rte_sleep(226);  /*wait for 2nd next 1 PPS before continuing */
+	    if(ip[2] != 0) {
+	      logita(NULL,ip[2],ip+3,ip+4);
+	      logit(NULL,-9,"fv");
+	      *formtime=-1;
+	      *raw=0;
+	      return;
+	    }
+	    wstandout(maindisp);
+	    mvwaddstr( maindisp, 4, 21, "Waiting for DBBC ");
+	    leaveok ( maindisp, FALSE); /* leave cursor in place */
+	    wrefresh ( maindisp );
+	    for(i=0;i<2;i++) {  /*wait for 2nd next 1 PPS before continuing */
+	      rte_sleep(100); 
+	      mvwaddstr( maindisp, 4,21+17+i, ".");
+	      leaveok ( maindisp, FALSE); /* leave cursor in place */
+	      wrefresh ( maindisp );
+	    }
+	    rte_sleep(26);
+	    mvwaddstr( maindisp, 4,21+17+i, " ");
+	    iwait=1;
 	  }
-
 	  out_recs=0;
 	  out_class=0;
 
@@ -90,14 +121,12 @@ int sz_m5clock;
 	  cls_snd(&out_class, str, strlen(str) , 0, 0);
 	  out_recs++;
 
-	  if((rack == VLBA4 && rack_type == VLBA45) ||
-	     (rack == MK4   && rack_type == MK45  ) ||
-	     (rack == DBBC) ) {
-
-	    str="clock_set = 32 : ext;\n";
-	    cls_snd(&out_class, str, strlen(str) , 0, 0);
+	  if(m5b_crate > 1 && m5b_crate <= 64) {
+	    sprintf(buff,"clock_set = %d : ext;\n",m5b_crate);
+	    cls_snd(&out_class, buff, strlen(buff) , 0, 0);
 	    out_recs++;
-	    logit("Mark 5B clock_set command sent.",0,NULL);
+	    sprintf(buff,"Mark 5B clock_set (%d MHz) command sent.",m5b_crate);
+	    logit(buff,0,NULL);
 	  }
 	  str="dot_set= : force;\n";
 	  cls_snd(&out_class, str, strlen(str) , 0, 0);
@@ -114,23 +143,35 @@ int sz_m5clock;
 	    if (nsem_test("fs   ") != 1) {
 	      endwin();
 	      fprintf(stderr,"Field System not running - fmset aborting\n");
+	      rte_sleep(SLEEP_TIME);
 	      exit(0);
 	    }
 	    name=NULL;
 	  }
 	  skd_par(ip);
 	  nsem_put("fsctl");
-	  if(ip[2] != 0)
-	    {
-	      endwin();
-	      fprintf(stderr,"Error %d from Mark5B\n",ip[2]);
-	      logita(NULL,ip[2],ip+3,ip+4);
-	      rte_sleep(SLEEP_TIME);
-	      exit(0);
-	    }
+
 	  if(ip[1]!=0)
 	    cls_clr(ip[0]);
-	  synch=0;
+	  if(ip[2] != 0) {
+	    logita(NULL,ip[2],ip+3,ip+4);
+	    logit(NULL,-8,"fv");
+	    *formtime=-1;
+	    *raw=0;
+	    return;
+	  }
+	  wstandout(maindisp);
+	  mvwaddstr( maindisp, 4, 21+iwait*20, "Waiting for Mark 5B ");
+	  leaveok ( maindisp, FALSE); /* leave cursor in place */
+	  wrefresh ( maindisp );
+	  for(i=0;i<2;i++) {  /*wait for 2nd next 1 PPS before continuing */
+	    rte_sleep(100); 
+	    mvwaddstr( maindisp, 4, 21+iwait*20+20+i, ".");
+	    leaveok ( maindisp, FALSE); /* leave cursor in place */
+	    wrefresh ( maindisp );
+	  }
+	  wstandend(maindisp);
+	  rte_sleep(26); 
 	}
 
 
@@ -139,17 +180,17 @@ int sz_m5clock;
 		      m5freq,sz_m5freq,m5clock,sz_m5clock)!=0) {
 	  endwin();
 	  fprintf(stderr,"Field System not running - fmset aborting\n");
+	  rte_sleep(SLEEP_TIME);
 	  exit(0);
 	}
         nsem_put("fsctl");
-	if( ip[2] != 0 )
-		{
-		endwin();
-		fprintf(stderr,"Error %d from Mark5B\n",ip[2]);
-                logita(NULL,ip[2],ip+3,ip+4);
-                rte_sleep(SLEEP_TIME);
-		exit(0);
-		}
+	if( ip[2] != 0 ) {
+	  logita(NULL,ip[2],ip+3,ip+4);
+	  logit(NULL,-8,"fv");
+	  *formtime=-1;
+	  *raw=0;
+	  return;
+	}
 
 	/* time before is more accurate */
 	

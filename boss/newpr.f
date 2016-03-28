@@ -75,7 +75,6 @@ C
       if (ierr.lt.0) goto 800
       if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
-      call char2low(ibc)
       if (ierr.lt.0.or.ilen.lt.0) goto 800
       if (ibc(1:6).ne.'define') goto 800
 C
@@ -104,8 +103,11 @@ c
       endif
 C
       itpr(6)=ias2b(ib,23,2)
-      if(itpr(6).gt.mod(itmlog(6),100)) then
-         itpr(6)=itpr(6)+(itmlog(6)/100-1)*100
+c
+c fix century wrap
+c
+      if(itpr(6).lt.mod(itmlog(6),100)) then
+         itpr(6)=itpr(6)+(itmlog(6)/100+1)*100
       else
          itpr(6)=itpr(6)+itmlog(6)-mod(itmlog(6),100)
       endif
@@ -118,10 +120,16 @@ c
       if(itpr(5).eq.0) goto 400 
       call fc_rte2secs(itpr,prsecs)
       if(prsecs.lt.0) call logit7ci(0,0,0,1,-257,'bo',0)
-c 
-      if (prsecs.gt.logsecs) goto 600
-C                   Finally check the time of day, if the dates are equal
 C
+C     Finally check the times
+C
+C the .gt. vs .ge.
+C  will cause procedures that were executed the second the log opened
+C (like initi when the FS starts and opens station.log) to be logged
+C the second time they are executed (sometimes), but will make sure
+C all procedures are logged at least once in the log.
+C
+      if (prsecs.gt.logsecs) goto 600
 C
 C     4. This procedure needs logging.  Read/log each record.
 C     First pull off the procedure name.
@@ -130,7 +138,6 @@ C
       idummy = ichmv(lprocn,1,ib,9,12)
 410   if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
-      call char2low(ibc)
       if (ilen.lt.0.or.ibc(1:6).eq.'define'.or.ibc(1:6).eq.'enddef')
      .   goto 500
       if (ierr.lt.0.or.ilen.lt.0) goto 800
@@ -148,7 +155,6 @@ C
       if (ierr.lt.0) goto 800
       if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
-      call char2low(ibc)
       call fc_rte_time(itime,itime(6))
       idummy = ib2as(mod(itime(6),100),ib,23,o'40000'+o'400'*2+2)
       idummy = ib2as(itime(5),ib,25,o'40000'+o'400'*3+3)

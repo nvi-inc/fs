@@ -26,7 +26,6 @@ C     DL - list procedures in active procedure file.
         do while (len.ge.0)
 
           call f_readstring(idcb3,ierr,ibc2,len)
-          call char2low(ibc2)
           if(ierr.lt.0.or.len.lt.0) go to 130
 
 C     Check for DEFINE:

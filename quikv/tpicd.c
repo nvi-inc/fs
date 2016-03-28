@@ -28,11 +28,13 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       if (command->equal != '=') {           /* run pcald */
+	if(RDBE!=shm_addr->equip.rack) {
 	  for(i=0;i<MAX_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Start;
 	  ierr=-302;
 	  goto error;
+	}
       Start:
 	  shm_addr->tpicd.stop_request=0;
 	  shm_addr->tpicd.tsys_request=0;
@@ -55,11 +57,13 @@ long ip[5];                           /* ipc parameters */
 	    ierr=-301;
 	    goto error;
 	  }
-	  for(i=0;i<MAX_DET;i++)
-	    if(0!=shm_addr->tpicd.itpis[i])
-	      goto Tsys;
-	  ierr=-302;
-	  goto error;
+	  if(RDBE!=shm_addr->equip.rack) {
+	    for(i=0;i<MAX_DET;i++)
+	      if(0!=shm_addr->tpicd.itpis[i])
+		goto Tsys;
+	    ierr=-302;
+	    goto error;
+	  }
 	Tsys:
 	  shm_addr->tpicd.tsys_request=1;
 	  skd_run("tpicd",'w',ip);

@@ -4,10 +4,6 @@
 
 #include "fmset.h"
 
-#define ROWA  ROW+6
-#define COL0  5 
-#define COL   COL0+22
-
 void rte2secs();
 
 time_t asktime( maindisp, flag, ut)  /* ask for a time */

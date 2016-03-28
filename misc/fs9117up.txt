@@ -1,0 +1,682 @@
+File: /usr2/fs/misc/fs9117up.txt        Version:5.4  Date: 150205
+
+I. Introduction
+
+This memo is divided into three sections:
+
+   I.   Introduction.
+   II.  Changes Since Version 9.11.6
+   III. Installation
+
+Please print this notice and read it carefully before installing the
+new version.
+
+This update is intended for all stations.  This version is required
+for any station running DBBC versions v105, v105e, or v105f.  It also
+supports use of a single Mark5C recorder running "jive5ab"; however,
+the FILA10G that is required for using the Mark 5C is not yet
+supported by the FS and would need to be configured manually.
+
+We encourage all stations to upgrade now because doing so will make
+future upgrades easier.  The upgrade from versions 9.11.6 is
+particularly quick and easy (see section "III. Installation").
+
+The most significant changes in version 9.11.7 are:
+
+  (i) Support for DBBC DDC firmware versions 105, 105E, and 105F,
+      particularly for the 32 MHz BW option in the E/F versions.  At
+      this time, firmware version E/F is intended _only_ for use with
+      32 MHz BW channels.  Users should change between the non-E/F and
+      E/F versions depending on the BW of the channels, using the
+      non-E/F version if the BW is 16 MHz or less.  Note that DRUDG
+      will only select among DBBC IF input filters 1-4, so if a wider
+      input IF band is needed for 105F, it will have to be selected by
+      the user manually.
+      
+ (ii) Support for operational use of 64 MHz Mark 5B clock rates.
+
+(iii) Support for a single Mark 5C recorder running "jive5ab" as its
+      control program.  This allows use of a Mark 5C as a substitute
+      for a Mark 5B, if the FILA10G feeding it is configured manually.
+
+ (iv) New "mk5_status" command.  This command, developed by Harro
+      Verkouter (JIVE), correctly reads the status message and returns
+      any pending error messages.  This feature is necessary for
+      correct monitoring of the Mark 5 status and has heretofore being
+      missing from the FS.  At this time this command is considered
+      experimental and should not be used for normal operations.
+      However, we expect that sufficient testing will occur before the
+      next FS release, so it is included in this version to allow
+      field testing and inclusion in normal operations once sufficient
+      testing has occurred.  Please use 'help=mk5_status' for more
+      details on the operation of this command.
+
+The full list of changes in 9.11.7 versions, by version number, is
+given in the "Changes Since Version 9.11.6" section below.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+various and significant contributions.
+
+II. Changes Since Version 9.11.6
+
+This section is divided into three sub-sections: A. Changes in the FS,
+B. Changes in DRUDG, and C. Known FS Bugs.  Each sub-section starts
+with a summary of the items covered followed by a more detailed
+description.
+
+			 A. Changes in the FS
+
+The following is a summary of FS changes since 9.11.6.
+
+ 1. Support for DBBC DDC firmware versions 105, 105E, and 105F.
+ 2. Support for operational use of 64 MHz Mark 5B clock rates.
+ 3. The "mk5b_mode" command was enhanced to accept the target sample
+    rate as an additional parameter.
+ 4. Support for a single Mark 5C recorder.
+ 5. Upgraded support for DBBC DDC version numbers.
+ 6. Fix for a sleeping bug in Mark IV formatter support.
+ 7. Support for the current Digiboard serial driver.
+ 8. New "mk5_status" command.
+ 9. CHEKR re-enabled for VLBA4/5 racks.
+10. Fixed benign bug in procedure logging when the year wraps.
+
+A more detailed discussion of these changes follows.
+
+ 1. Support for DBBC DDC firmware versions 105, 105E, and 105F. In
+    particular, this provides support for the 32 MHz BW option in the
+    E/F versions.  Users should change between non-E/F and E/F
+    versions depending on the BW of the channels, using the non-E/F
+    version if 16 MHz BW or less.  For the E/F DDC versions, only odd
+    BBCs can be used.  The E/F DDC firmware only accepts the "astro3"
+    and "test" format codes.
+
+ 2. Support for operational use of 64 MHz Mark 5B clock rates. If the
+    "nominal" value is used for the Mark 5B clock rate in equip.ctl,
+    the value 64 MHz will be used from DBBC DDC letter E/F versions.
+    In combination with the existing support for "nominal" meaning 32
+    MHz clock rate for non-E/F firmware, this allows the FS to switch
+    automatically between 32 and 64 MHz clock rate for non-E/F and E/F
+    versions respectively by just changing the DDC firmware version in
+    equip.ctl and restarting the FS.
+
+ 3. The "mk5b_mode" command was enhanced to accept the target sample
+    rate as an additional parameter.  This new parameter is added
+    after the "decimation" parameter and before the "fpdp" parameter.
+    DRUDG now uses this sample rate parameter instead of the
+    decimation factor for mode set-up.  The FS now calculates the
+    correct decimation factor for the configured Mark 5B clock rate.
+    Consequently, DRUDG does not need to know the clock rate.
+
+ 4. Support for a single Mark 5C recorder.  The recorder must be
+    running "jive5ab" as its control program.  This is designed to
+    make a Mark 5C usable as a substitute for a Mark 5B, if the
+    FILA10G feeding it is configured manually.  Support for FILA10G is
+    expected later this year.  Support for the Mark 5C is identical to
+    the Mark 5B support except for three things:
+  
+    (1) FMSET does not support the Mark 5C. It will instead support
+        the FILA10G in due course.
+
+    (2) Similarly, SETCL does not support the Mark 5C.
+        Unfortunately, SETCL will not be useful for systems with Mark
+        5C recorders until the FILA10G is supported by the FS, in due
+        course.
+
+    (3) The new SNAP "mk5c_mode" command is used with the Mark 5C,
+        instead of "mk5b_mode".  The Mark 5C version of the command is
+        essentially identical to the Mark 5B version, except that it
+        always commands the decimation factor as "1" and it issues a
+        "clock_set" command to the Mark 5C with the target sample rate
+        as the clock rate.  Due to the features of "jive5ab" (which
+        are a superset of those of "DIMino"), this allows the recorder
+        "rtime?" command to return useful information which then
+        enables automated back switching using the SNAP command
+        "bank_check" as with the Mark 5B.
+
+ 5. Upgraded support for DBBC DDC version numbers. Starting with
+    version v105, the use of E/F after the version number, as well as
+    an possible trailing "_x", where "x" is an integer representing a
+    release, is supported.  Any three digit version number larger than
+    104 will be accepted so that new firmware versions (when properly
+    set in equip.ctl) will not generate "warning" errors when the
+    "form=..."  command is used.  Of course problems may occur if
+    there is some incompatibility between some future firmware version
+    and the FS.  Note that for v104 and below, there can be no "_x" in
+    the version number in the control file.
+
+ 6. Fix for a sleeping bug in Mark IV formatter support.  This bug in
+    MATCN prevented FMSET from working.
+
+ 7. Support for the current Digiboard serial driver. Systems with the
+    old driver, which should be very rare if they exist at all, will
+    need to have a link created, as described in the installation
+    instructions, to be able to compile the FS.
+
+ 8. New "mk5_status" command.  This command, developed by Harro
+    Verkouter (JIVE), correctly reads the status message and returns
+    any pending error messages.  This feature is necessary for correct
+    monitoring of the Mark 5 status and has heretofore being missing
+    from the FS.  At this time this command is considered experimental
+    and should not be used for normal operations.  However, we expect
+    that sufficient testing will occur before the next FS release, so
+    it is included in this version to allow field testing and
+    inclusion in normal operations once sufficient testing has
+    occurred.
+
+ 9. CHEKR re-enabled for VLBA4/5 racks. Previously CHEKR did not check
+    the VLBA rack modules even though it did for the VLBA rack type.
+    This was oversight that has been corrected.  Checking of the
+    VLBA/4/5 BBC LO lock was added as part of this change.  Checking
+    of the _VLBA_ formatter was disabled altogether.  This latter
+    change was made because that formatter is no longer used in
+    systems that are supported by the FS.  This allows VLBA formatter
+    to be set-up (with "vform=...") to support rack timing for VLBA45
+    systems without having to set the formatter time to avoid getting
+    a bad time complaint from CHEKR.
+
+10. Fixed benign bug in procedure logging when the year wraps.  This
+    bug caused extra logging of procedures when a log was open across
+    the change in year.
+
+			 B. Changes in DRUDG
+				   
+DRUDG opening message date is 2015Jan29.
+
+The following is a summary of DRUDG changes since 9.11.6.
+
+ 1. Mark5C support added.
+ 2. LSB first LO support bug fix.
+ 3. Astro3 mode support added.
+ 4. Number of modes has been increased from 20 to 40.
+ 5. Support for VEX files that do not define PASS_ORDER.
+
+A more detailed discussion of these changes follows.
+
+ 1. Mark5C support added.  Previous versions of DRUDG would set the
+    recorder to "none" if the schedule file indicated a Mark5C
+    recorder.  This version recognizes Mark5C as a valid recorder type
+    and will generate appropriate .snp and .prc files.  The only
+    change from Mark 5B support is that the name of the "mk5b_mode"
+    commands put in the .prc file is "mk5c_mode".
+
+ 2. LSB first LO support bug fixed.  Previous versions of DRUDG
+    supported LSB first LOs only for non-Mark 5B recorder systems.
+    The current version extends this support to Mark 5B/5C.  This was
+    a very old bug.  Thanks to Jamie McCallum at AuScope for reporting
+    it.
+
+    As a result of this change DRUDG will no longer produce .prc files
+    for non-"astro" format modes ("geo") for VSI4/DBBC DDC systems
+    when a LSB first LO is in use. It will stop with an error message
+    instead.  Previously it produced .prc files with an incorrect bit
+    masks).  However, to accommodate stations with a LSB first LO that
+    have been using DRUDG to produce incorrect .prc files and then
+    fixing them (specifically SESHAN), a new keyword is provided in
+    the skedf.ctl control file:
+
+      ignore_mark5B_bad_mask
+
+    This keyword must be followed by "yes" or "no" to indicate that
+    DRUDG should not stop for a bad mask or should stop, respectively.
+    If this keyword is not present, it will stop.  If "yes" is used, a
+    warning message will still be printed.  Use this feature at your
+    own risk because if it is not needed, there will be no forced stop
+    of DRUDG for an impossible observing mode. Please see
+
+      /usr2/fs/st-default/control/skedf.ctl
+
+    for an example of its use.  Note that the selection of channels
+    for Tsys measurements in the FS will be wrong if the warning
+    message is printed.
+
+ 3. Astro3 mode support added.  This version of DRUDG supports DBBC
+    DDC E/F firmware` which uses format mode "astro3". Thanks to
+    Jonathan Quick for this code.  Note that DRUDG will only select
+    among DBBC input filters 1-4, so if a wider input band is needed
+    for 105F, it will have to be selected by the operator.
+
+    The support for the E/F firmware in DRUDG is triggered by the
+    absence of any even numbered BBCs in the requested mode, or
+    alternatively by combinations of BBC and sideband that are not
+    available in the geo/astro/astro2 bitstream patterns.  However
+    some common astronomy modes, specifically those utilizing only one
+    BBC per polarization, also use only odd BBCs, namely 1 and/or 5 or
+    9 with either astro or astro2 respectively.  Hence DRUDG will
+    assume that E/F firmware is _not_ being used for such modes,
+    unless the bandwidth of the BBCs being greater than 16 MHz
+    indicates that it must be in use.  Since there should be no
+    operational modes that use other combinations of odd BBCs besides
+    1, 1+5 and 1+9 this should be safe for operations, but will allow
+    other combinations to used for testing for BWs smaller than 32 MHz
+    with the E/F firmware.
+
+ 4. Number of modes has been increased from 20 to 40.  This allows
+    more modes in schedules.
+
+ 5. Support for VEX files that do not define PASS_ORDER.  DRUDG was
+    written in the era when we recorded on tapes.  Overtime most of
+    the code that assumes the schedules use tapes has been removed,
+    but occasionally some is still discovered.  This happened most
+    recently when someone tried using a VEX file that did not define
+    PASS_ORDER which resulted in DRUDG trying to address an invalid
+    array element.  This bug has been fixed.
+
+			   C. Known FS Bugs
+
+(The only change in this section since the previous version is the
+addition of item #12.)
+
+The following is a summary list of known bugs. They are described in more
+detail after the list.
+
+1. Do not run "fmset" for extended periods.
+2. "odd" and "even" head types not supported for Mark IV & VLBA4.
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+   recorder.
+5. Extraneous errors when tape is stopped by low tape sensor.
+6. "Comm=" command in logex extracts only the first command.
+7. S2 error scheme clumsy.
+8. No extra spaces allowed in "ibad.ctl" file.
+9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable.
+12. mk5b_mode and bit_stream commands only report the expected sample
+    rate.
+
+A more detailed discussion of these bugs follows.
+
+1. Do not run "fmset" for extended periods.  For stations that have
+   VLBA, Mark IV back-ends and/or an S2 recorder, the "fmset" program
+   should not be run for extended periods of time.  The "fmset"
+   program should be used only to set or briefly verify that the
+   formatter time is correct.  Do not leave "fmset" running after
+   completing either of these tasks, especially during an experiment.
+
+   The "fmset" program dominates the Field System when it is running
+   and this is likely to interfere with the running of an experiment
+   or other activities.  The only way to detect the time from the VLBA
+   formatter with greater precision than one second it to wait for the
+   seconds response from the formatter to change.  This requires the
+   FS to communicate with the formatter almost continuously.  A
+   similar problem exists for the S2 recorder.  This problem is less
+   severe for the Mark IV formatter, but extended use of "fmset" in
+   this case should be avoided as well.  In a future revision, this
+   will be made more robust so that there will probably be less danger
+   if "fmset" is left running.  However, even in the future "fmset"
+   should only be left running for as short a time as possible.  A
+   reminder about this is included in the "fmset" menu.
+
+2. "odd"/"even" head types not supported for Mark IV & VLBA4.  The
+   Mark IV and VLBA4 rack version of the "form" command and the Mark
+   IV and VLBA4 recorder versions of the "repro" and "parity" commands
+   do not support the "odd" and "even" parameters for the read and
+   write head types and reproduce electronics in the "head.ctl"
+   control file.  This means that automatic substitution of odd or
+   even head in passes that use only even or odd heads respectively
+   does not occur.  The only correct settings for the read and write
+   head parameters and reproduce electronics is "all".  This will be
+   fixed in a future revision.  Please let Ed know if you are missing
+   some tracks and need to work around this limitation.
+
+3. "odd"/"even" head types not supported for VLBA style tapeforms.
+   For any mode recorded with VLBA style tapeform (14 index
+   positions), the only correct setting of the read and write head
+   types on the "head.ctl" is "all".  This will be fixed in a future
+   revision.  Please let Ed know if you are missing some tracks and
+   need to work around this limitation.
+
+4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+   recorder.  Now that most communication problems with the Mark IV
+   formatter have been solved, this will be possible and will be done
+   in the future.  CHEKR support will be implemented for Mark 5 despite
+   communication problems, they will have to be ignored unless they
+   extend beyond a certain amount of time.
+
+5. Extraneous errors when tape is stopped by low tape sensor.  When a
+   tape drive has been commanded to move the tape and then stops
+   because it hit the low tape sensor (or when S2 recorders hit the
+   BOT or EOT), "CHEKR" will complain periodically that the tape drive
+   is not in the correct state.  In principle the FS should be smarter
+   about this.  However, if the tape is managed correctly by the
+   schedule this error message should never occur.  If it does, then
+   it it an indication that there is either a problem with: (1) the
+   schedule, (2) the check procedures, (3) the recorder, or (4) the
+   tape is too short.  If any of these cases apply they should be
+   corrected.  It is more likely that this error message will occur
+   when the tape is being controlled manually.  In this case, issuing
+   an "ET" command will convince the FS that the tape drive should be
+   stopped and the error message will cease.
+
+6. "Comm=" command in logex extracts only the first command.  The
+   "comm=" command in "logex" extracts only the first command
+   commanded and displayed.  This problem was noted by Giuseppe
+   Maccaferri (Medicina).
+
+7. S2 error scheme clumsy.  The error and status response number
+   reporting scheme for S2 recorders is clumsy.  FS errors that have
+   mnemonic "rl" are mostly error responses from the recorder or the
+   RCL interface library that is used to communicate with the
+   recorder.  If the numeric part of an "rl" error is greater than
+   -130, then it is the error code returned by the recorder.  If the
+   numeric part is less than -130, but greater than -300, then add 130
+   to the value, the absolute value of the result is the error
+   response code from the RCL library.  For values less than or equal
+   to -300, a FS error has been detected.  Status response codes are
+   all reported with mnemonic "rz" and the numeric value is the
+   negative of the status response code.  In all cases an appropriate
+   error or status message is displayed.  These messages are retained
+   in the log.
+
+8. No extra spaces allowed in "ibad.ctl" file.  The format of the
+   "ibad.ctl" must not contain any leading or embedded spaces.  In
+   systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if either
+   the option "no_untalk/unlisten_after" is misspelled or an incorrect
+   device name is supplied, the driver will cause a segmentation
+   violation when it is initialized and the FS will terminate.
+   Unfortunately there is no way to prevent this problem in a general
+   way; it reflects a limitation in the driver.
+
+9. ONOFF and FIVPT programs hang.  The ONOFF and FIVPT programs have
+   been known to "hang" mysteriously.  This seems to be caused by some
+   problem with the "go" mechanism that is used to restart the program
+   when it pauses to allow a SNAP procedure, such as CALON or CALOFF
+   to execute.  The "go" that is used to restart the program fails for
+   some reason.  This has been exceedingly difficult to debug because
+   it is intermittent and fairly rare.  There is however a good work
+   around for it.  The CALON and CALOFF procedures are called by
+   procedures CALONFP and CALOFFFP for FIVPT and CALONNF and CALOFFNF
+   for ONOFF.  FIVPT or ONOFF may hang during (or actually just after)
+   the execution of one these procedures that FIVPT and ONOFF will
+   typically hang.  If this happens, you will have to terminate the FS
+   to recover.  You can prevent it from happening again (for this
+   procedure) by adding the lines:
+
+    !+1s
+    sy=go fivpt &
+
+  to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+  add:
+
+    !+1s
+    sy=go onoff &
+
+  If you see other situations where FIVPT or ONOFF hang, please let Ed
+  know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+    FS SNAP manual pages and the help pages available through the
+    "help=" command do not reflect when multiple versions are
+    available with different suffixes depending on the number of drive
+    specified in the control files.  For example, there is only a
+    "tape" page, no "tape1" or "tape2" page.  However, the help
+    facility will display the version of the command with no suffix
+    when an available command with a suffix is used.  For example, if
+    two drives are defined, then "help=tape1" and "help=tape2" will
+    work, but "help=tape" will not and vice-versa if only one drive is
+    defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+    Acquisition System currently lacks a functional total power
+    detector though support has been included.  To allow approximate
+    system temperature calibration, all the setup commands and the TPI
+    detectors of the modules of a co-existing Mark IV rack are
+    currently also available when the rack type is specified to be
+    LBA4.
+
+12. mk5b_mode and bit_streams_commands only report the expected sample
+    rate.  The value of the actual clock rate is not read back from
+    the recorder in order to calculate the actual effective sample
+    rate.  Consequently, the query log output includes parenthesis
+    around the sammple rate as indication that it is not read, but
+    expected.  The mk5c_modes does report the actual sample sample
+    rate.
+
+III. Installation
+
+Detailed instructions are provided below for installing 9.11.7. This
+version is intended to installed as upgrade to 9.11.6.  To upgrade
+from 9.11.6, please follow all numbered steps below.  If you have an
+older version than 9.11.6, please upgrade to 9.11.6 first (see
+fs9116up.txt).
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual.  In this case you should also get a copy
+of the current FS9 "Control Files and Field System Initialization"
+manual.
+
+For reference, the list of the most recent "critical updates" is given
+below.  These are updates that must be applied sequentially.  Please
+start with the next update with a later version number than what you
+have and apply it and the following listed versions before upgrading
+to 9.11.7.  You can find the latest versions of installation notes for
+these FS versions in the "/usr2/fs/misc" directory.  The list of
+critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+  9.10.4
+  9.11.6
+
+If you have a version older than 9.4.0, please contact Ed
+(Ed.Himwich@nasa.gov).
+
+For reference purposes the naming convention for the default station
+libraries for different equipment configurations is listed here.  The
+files are found in /usr2/fs/st.default/proc.  They can be referred to
+and compared to what you have in "/usr2/proc/station.prc".  **ONLY**
+for new installations (or completer re-installs), you can copy the
+default version for your equipment to "/usr2/proc" renaming it to
+"station.prc" in the process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The "-i" option will prompt before overwriting an existing
+"station.prc" to give you a chance to recover if you did not realize
+you already had a station.prc file.  The table of correspondence
+between equipment types and default library names is given next.
+
+      Equipment        Prefix letters  Station Library
+      Rack/Drive1/Drive2
+
+      K42/K42              k42         k42station.prc
+      K42K3/VLBA           k42k3v      k42k3vstation.prc
+      K42MK4/VLBA          k42mk4v     k42mk4vstation.prc
+      K42MK4/VLBAB/VLBAB   k42mk4vb    k42mk4vstation2.prc
+      K42/K5               k42k5       k42k5station.prc
+      LBA/S2               ls2         ls2station.prc
+      LBA4/S2              l4s2        l4s2station.prc
+      Mk3/Mk3A             3           3station.prc
+      Mk4/Mk4              4           4station.prc
+      Mk4/Mk5A             45          45station.prc
+      Mk4/VLBA4            4v4         4v4station.prc
+      Mk5/Mk5B             5           5station.prc
+      NONE/S2              s2          s2station.prc
+      VLBA/S2              vs2         vs2station.prc
+      VLBA/VLBA            v           vstation.prc
+      VLBA/VLBA2           v2          v2station.prc
+      VLBA/VLBA/VLBA       v           vstation2.prc
+      VLBA4/VLBA4          v4          v4station.prc
+      VLBA4/MK5A           v45         v45station.prc
+      VLBA4/VLBA42         v42         v42station.prc
+      VLBA5/Mk5B           v5          v5station.prc
+      DBBC/Mk5B            d           dstation.prc
+      DBBC(cont.cal)/Mk5B  d           dstationcc.prc
+
+If your equipment type is missing, please let Ed (Ed.Himwich@nasa.gov)
+know so that it will be added.
+
+You can use cut-and-paste to reduce the amount of typing involved in
+the installation.  This reduces the chances of missing required spaces
+and other easily missed characters (like ".") in the commands.  The
+basic idea is to have two different terminals open, either two
+different VT text terminals (Control-Alt-F*, where * is 1-6) on the FS
+computer you are upgrading or two different xterm terminals either on
+the local X display or remotely logged in.  You can then switch back
+and forth between the terminals, reading the instructions as you
+scroll through them (with "more" or "less") on one terminal and
+entering commands on the other.  You can cut-and-paste complicated
+commands from the terminal with the instructions to the terminal where
+you are entering commands as needed.  For VT text terminals you can
+log in and out to change users as needed on the terminal where you are
+executing commands.  With xterms, you can use "ssh" or "su" to
+'switch' to users as needed on the terminal where you are entering
+commands. For example, you can change to being 'prog' by executing:
+
+ ssh -X prog@localhost
+
+or
+
+ su - prog
+
+Please don't forget to log back out when you need to change users
+again or you may develop a series of 'nested' logins.  The steps that
+require rebooting will of course completely log out all of your
+terminals; you will need to re-login again from scratch to continue.
+At the end of the update, it is recommended that you login as "oper"
+on the local X display for the final testing.  Please also note that
+in order to paste into the X display login shell window for "oper" and
+"prog", you typically must use Shift-Insert.  If you have any
+questions about how to cut-and-paste please contact Ed
+(Ed.Himwich@nasa.gov).
+
+(0) Before you begin the upgrade make sure you have a current back-up
+    of your system in case something goes wrong.  If you are use FS
+    Linux 5 (FSL5), we recommend you use the tar based back-up that is
+    part of the rotating disk back-up scheme.  A draft document that
+    describes this method is available in the docs sub-directory on
+    the FS FTP servers as backups2.pdf.  If you have an older FS Linux
+    distribution, please use the disk-to-disk back scheme described in
+    Section 5.8 of the FS9 "Computer Reference" manual.  If you have
+    an FSL6 (sarge), FSL7 (etch) FSL8 (lenny) or FSL9 (wheezy) system
+    configured to run a RAID, please see /usr2/fs/misc/RAID.pdf (for
+    FSL9, see /usr2/fs/misc/FSL9_RAID.pdf) section APPLYING AN UPDATE
+    for directions for applying an update.  If you are running one of
+    the FSL distributions and do not have documentation on how to make
+    a back-up, please contact Ed.  If you have SCSI disks, Section 5.7
+    of the FS9 "Computer Reference" manual has a discussion of drive
+    ID numbers if you are unsure about these.
+
+    Normally you should choose to install the update on your primary
+    disk after having made and verified your back-up.  Once the
+    installation is complete, has been tested, and used for a little
+    while, you can copy over your back-up with the upgraded primary.
+    If the upgrade fails, you should restore the back-up to the
+    primary for operations.  You can then try to make the upgrade
+    again when it is convenient.  In a desperate situation, you can
+    use the back-up for operations.  You may choose to install the FS
+    on your back-up disk for testing and then later copy the back-up
+    onto the primary once you are satisfied with the new version.  In
+    any event, please be sure to make a fresh back-up before
+    continuing with the installation.
+
+(1) Please be sure that you have at least 40 MB of free space (use the
+    "df" UNIX command to check free space) on your "/usr2" partition
+    before starting the upgrade.  This would probably only be an issue
+    for stations with 200 MB disks.  If you are tight on space, you
+    may want to delete old log files and old versions of the FS
+    (except your most recent one if you can avoid it of course).
+    Since you should have backed-up your system, you can even delete
+    the "*.[oas]" and executable files of your old versions with no
+    risk.  You might want to keep the source of the previous versions
+    around for reference if you have room.  You can eliminate the
+    non-source files by "cd"-ing to each of the old FS directories in
+    turn as "prog" and doing a "make rmdoto rmexe".  If you have any
+    questions about how to do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.11.7 archive in your "/tmp" directory.
+    For example you might do the following:
+
+      cd /tmp
+      ftp atri.gsfc.nasa.gov
+      (enter your FS FTP account name at the prompt)
+      (enter your FS FTP password at the prompt)
+      binary
+      cd dist
+      get fs-9.11.7.tgz
+      quit
+
+    Another FS server is also available at:
+    http://www.metsahovi.fi/fs/.
+
+    (The instructions for transferring the archive using DOS floppies
+    are no longer included in this notice.  If you need to do this,
+    please contact Ed (Ed.Himwich@nasa.gov).)
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+      cd /
+      tar xzpf /tmp/fs-9.11.7.tgz
+
+(6) Set the link for the new FS version:
+
+      cd /usr2
+      ln -sfn fs-9.11.7 fs
+
+(7) It is recommended that your local files operations (control, proc,
+    log, and sched directories) have the default ownership
+    ("oper.rtx") and permissions ('rw-rw-rw').  To force this, please
+    execute the script:
+
+      /usr2/fs/misc/fix_perm
+
+    Answer "y" to the prompt if you wish to proceed.  It is good idea
+    to do this, unless you have purposely changed the ownerships and
+    permissions to some other values.  If you don't want to restore
+    the defaults, answer "n" (this is the last chance to abort the
+    execution of the script).
+
+(8) If you are using the old Digiboard serial driver, you should
+    create a symbolic link to the header file:
+
+      ln -fsn /usr/src/linux/drivers/char/digi.h /usr/src/linux/include/digi.h
+
+    Do NOT create this link if the file
+    
+      /usr/src/linux/drivers/char/digi.h
+
+    does not exist on your system.  If this file does not already
+    exist, you are not using the old Digiboard serial driver.
+
+(9) VERY IMPORTANT: Log-out as root, and log-in as prog.
+
+(10) Make the FS:
+
+       cd /usr2/fs
+       make 
+
+(11) Reboot the computer.  This is important for re-initializing
+     shared memory.
+
+(12) Log in as oper
+     
+(13) Test the FS as "oper". Generally speaking a fairly thorough test
+     is to run a test experiment: start with DRUDG-ing a schedule,
+     making listings, and any other pre-experiment preparation you
+     normally do, then execute part of schedule, and perform any
+     normal post-experiment plotting and clean-up that you do.  The
+     idea here is to verify that everything works as you expect for
+     normal operations.  In particular for this upgrade you should
+     test that Mark 5 operations work as expected.
+
+(14) Consider when to update your back-ups.  You certainly should not
+     update them until you have performed the tests described above.
+     It would be prudent to wait until you have successfully run an
+     experiment or two and preferably received word that the
+     experiment(s) produced good data.  The chances of needing your
+     back-up before you update it is fairly small.  If something does
+     happen, you can copy the pre-FS update back-up it to the (now
+     assumed bad) FS updated disk.  You can then either run the
+     recopied disk or apply the FS update again.  Handling this will
+     be a lot safer if you have a third disk.

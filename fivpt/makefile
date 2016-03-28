@@ -2,7 +2,7 @@ OBJECTS = fivpt.o antcn.o dpoin.o errot.o fgaus.o fit2.o \
 fitot.o fivp.o gooff.o jr2as.o local.o matcn.o matin.o \
 offco.o offot.o onsor.o orign.o prfot.o reoff.o scmds.o \
 site.o sorce.o tsys.o unslp.o volts.o wtsys.o mcbcn.o xoffot.o \
-dscon.o dbbcn.o
+dscon.o dbbcn.o rdbcn.o
 #
 #FFLAGS = -c  -i2
 FFLAGS = -c 

@@ -19,6 +19,7 @@ extern struct fscom *shm_addr;
 
 static char *lvcn[]= { "v1","v2","v3","v4","v5","v6","v7","v8","v9","va", 
 	       "vb","vc","vd","ve","vf" };
+double dbbc_if_power(unsigned counts, int como);
 
 main()
 {
@@ -37,6 +38,9 @@ main()
 
   int samples;
   double dbbc_tpi[MAX_DBBC_DET],dbbc_tpical[MAX_DBBC_DET];
+
+  struct rdtcn_control rdtcn_control[MAX_RDBE];
+  int iping[MAX_RDBE];
 
 /* connect to the FS */
 
@@ -71,6 +75,23 @@ main()
   memcpy(&data_valid,&shm_addr->data_valid,sizeof(data_valid));
   memcpy(&dbbc_cont_cal,&shm_addr->dbbc_cont_cal,sizeof(dbbc_cont_cal));
 
+  if(RDBE == shm_addr->equip.rack) {
+    for(i=0;i<MAX_RDBE;i++) {
+      rdtcn_control[i].continuous=shm_addr->tpicd.continuous;
+      rdtcn_control[i].cycle=shm_addr->tpicd.cycle;
+      rdtcn_control[i].stop_request=shm_addr->tpicd.stop_request;
+      memcpy(&rdtcn_control[i].data_valid,&data_valid,
+	     sizeof(struct data_valid_cmd));
+      iping[i]=1-shm_addr->rdtcn[i].iping;
+      if(iping[i]!=0)
+	iping[i]=1;
+      memcpy(&shm_addr->rdtcn[i].control[iping[i]],&rdtcn_control,
+	     sizeof(struct rdtcn_control));
+      shm_addr->rdtcn[i].iping=iping[i];
+    }
+    goto loop;
+  }
+
   if(dbbc_cont_cal.mode==1) {
     samples=0;
     for(i=0;i<MAX_DBBC_DET;i++) {
@@ -97,7 +118,8 @@ main()
   printf(" not stopped\n");
 #endif
   if(tpicd.continuous==0 && tpicd.tsys_request==0 &&
-     (data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0))
+     ((data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0)||
+      shm_addr->KHALT !=0 || 0==strncmp(shm_addr->LSKD,"none    ",8)))
     goto loop;
 
   if(tpicd.cycle<=0)
@@ -222,6 +244,15 @@ main()
     printf(" collecting dBBC data \n");
 #endif
       tpi_dbbc(ip,tpicd.itpis);   /* sample tpi(s) */
+      if(ip[2]<0) {
+	logit(NULL,ip[2],ip+3);
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	logit(NULL,-1,"cd");
+	goto while_end;
+      }
       if(dbbc_cont_cal.mode!=1) {
 #ifdef TESTX
     printf(" put non-cont dBBC data \n");
@@ -237,8 +268,11 @@ main()
 	    if(dbbc_tpi[k]<-0.5 ||shm_addr->tpi[k]<=0 ||
 	       shm_addr->tpi[k]>65534.5)
 	      dbbc_tpi[k]=-1.0;
-	    else
+	    else if(k < MAX_DBBC_BBC*2)
 	      dbbc_tpi[k]+=shm_addr->tpi[k];
+	    else {
+	      dbbc_tpi[k]+=dbbc_if_power(shm_addr->tpi[k], k-MAX_DBBC_BBC*2);
+	    }
 	    if(k >= MAX_DBBC_BBC*2)
 	      continue;
 	    if(dbbc_tpical[k]<-0.5 ||shm_addr->tpical[k]<=0
@@ -265,7 +299,8 @@ main()
 	}
       }
     }
-    
+   
+  while_end:
 #ifdef TESTX
     printf(" finished collecting \n");
 #endif

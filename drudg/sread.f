@@ -94,7 +94,6 @@ C
       kvlb = .false.
       khed = .false.
       call frinit(max_stn,max_frq)
-C
       read(lu_infile,'(a)') cfirstline
 C*********************************************************
 C vex file section
@@ -135,9 +134,8 @@ C*********************************************************
         kgeo=.true.
         rewind(lu_infile)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-
-      DO WHILE (ILEN.GT.0) !read schedule file
-        IF (IERR.NE.0)  THEN
+           DO WHILE (ILEN.GT.0) !read schedule file
+         IF (IERR.NE.0)  THEN
           WRITE(LUSCN,9210) IERR
 9210      FORMAT(' Error ',I5,' reading schedule file.')
           RETURN
@@ -180,8 +178,7 @@ C         Get the next line
 C
         ELSE IF(ctype .eq. "SO" .or. ctype .eq. "ST" .or.
      >          ctype .eq. "FR" .or. ctype .eq. "HD") then
-          write(*,*) cbuf(1:ilen)
-C         Get the first line of this section
+C      Get the first line of this section
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             IF (IERR.LT.0)  THEN
@@ -310,6 +307,9 @@ C
       isortm = 5
       ihdtm = 6
       call drprrd(ivexnum)
+      if(.not.kvex) then
+        call read_broadband_section
+      endif 
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.
 C

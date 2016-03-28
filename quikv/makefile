@@ -33,14 +33,19 @@ bank_check.o bank_check_dis.o logm5msg.o disk2file.o disk2file_dis.o\
 in2net.o in2net_dis.o user_device.o user_device_dis.o\
 s2agc.o s2bbc.o s2diag.o s2encode.o s2fs.o s2ifx.o s2version.o s2mode.o\
 s2ping.o s2pwrmon.o s2status.o s2tonedet.o s2chkr.o s2delay.o\
-scan_check.o scan_check_dis.o last_check.o mk5b_mode.o mk5b_mode_dis.o\
+scan_check.o scan_check_dis.o last_check.o mk5b_mode.o mk5b_mode_dis.o mk5_status.o\
 vsi4.o vsi4_dis.o holog.o holog_dis.o satellite.o satellite_dis.o antcn.o\
 satoff.o satoff_dis.o satpos.o tle.o dbbc.o dbbc_dis.o dbbcnn.o dbbcnn_dis.o\
 logmsg_dbbc.o dbbcifx.o dbbcifx_dis.o dbbcform.o dbbcform_dis.o\
-dbbc_cont_cal.o dbbc_cont_cal_dis.o
+dbbc_cont_cal.o dbbc_cont_cal_dis.o dbbcgain.o dbbcgain_dis.o\
+mk6.o mk6_dis.o \
+mk6_disk_pos.o mk6_disk_pos_dis.o mk6_scan_check.o\
+mk6_scan_check_dis.o rdbe.o rdbe_dis.o mk6_active.o active_rdbes.o\
+logm6msg.o rdbe_atten.o rdbe_atten_dis.o logmsg_rdbe.o
+#mk6_record.o mk6_record_dis.o 
 #
 ../bin/quikv: $(OBJECTS)
-	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
+	cc $(CFLAGS)  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
 	strip ../bin/quikv
 #
 quikv:

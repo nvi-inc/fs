@@ -17,9 +17,11 @@
 ! local
       integer iwhere
       character*8 cracktmp
+      write(*,*) crack_type
+      write(*,*) "In: ", crack 
 
       iwhere=iwhere_in_string_list(crack_type, max_rack_type,crack)
-      if(iwhere .eq. 0) return           !valid rack type.
+      if(iwhere .ne. 0) return           !valid rack type.
 
 ! Didn't find. Capitalize and try again.
       cracktmp=crack

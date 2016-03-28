@@ -1,0 +1,52 @@
+"pfmed" is not a FS SNAP command.  It is a utility for managing and
+editing SNAP procedure file.  This help page has some tips on using
+it.
+
+"pfmed" has a "help" command that will display the available commands
+and a terse description of each.  Generally the commands that start
+with "pf" operate on the procedure files and the ones that operate on
+the procedures within a file (plus some utility ones) don't.  The most
+unusual thing about "pfmed", and it takes some getting use to, is that
+commas are used to separate parts of commands instead of spaces.  The
+terms 'procedure file', 'procedure library', and 'procedure file
+library' are used interchangeably.
+
+When "pfmed" starts-up, it lists:
+
+ (1) the name of the active 'schedule' procedure file,
+ (2) the name of active 'station' procedure file, and
+ (3) the name of the procedure file currently open in "pfmed".
+
+The adjective "active" for (1) and (2) indicates that listed files are
+currently in use in the FS, unless they are "none".  The 'schedule'
+procedure file is the procedure file opened in the FS by the
+"schedule=" or the "proc=" commands.  In the case of "schedule=", this
+is the procedure file with the same name (up to the dot ".")  as the
+schedule file.  The 'station' procedure file is always "station"
+unless the FS is not running, in which case it is "none".  The file
+currently open in "pfmed" is the one that the commands that operate on
+procedures work with.  You can change which file is active with the
+"pf" command.
+
+EXTREMELY IMPORTANT: Always edit procedure files using "pfmed".  This is
+a little more cumbersome than editing it directly with your favorite
+editor, but procedures files have an internal structure and "pfmed"
+maintains that.  If structure is damaged the file will not work
+correctly with the FS.
+
+While it is possible to 'get away' with not using "pfmed" when the FS
+is not running, it is absolutely necessary to use it when the FS is
+running.  Otherwise the procedure file is likely to be corrupted when
+the FS accesses it and the FS may crash or misbehave.  Always using
+"pfmed" is strongly recommended as a small discipline that will help
+prevent accidently forgetting to use it when the FS is running.
+Please follow this advice; it will make life easier for everyone.
+
+The "vi" and "emacs" editors are integrated into "pfmed" and you can
+specify any other editor you want to use by setting the EDITOR
+environment variable in your account (usually "oper").  Please see the
+"ed" command in the "pfmed" "help" command output.
+
+A description of how the schedule and station procedure files interact
+is included in the comments section of the help page for the
+"schedule" command.

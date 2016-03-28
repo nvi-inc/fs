@@ -137,7 +137,6 @@ C     DL - list procedures in active procedure file.
 
         do while (len.ge.0)
           call f_readstring(idcb3,ierr,ibc2,len)
-          call char2low(ibc2)
           if(ierr.lt.0.or.len.lt.0) go to 130
 C     Check for DEFINE.
           if (ibc2(1:6).eq.'define') then
@@ -194,8 +193,6 @@ C     Search file for DEFINE  procedurenam.
         len = 0
         do while (len.ge.0)
           call f_readstring(idcb3,ierr,ibc,len)
-c         turn to lower case for easy comparison
-          call char2low(ibc)
           if(ierr.lt.0.or.len.lt.0) go to 226
           if(ibc(1:6).eq.'define'.and.ibc(9:20).eq.lnam1(1:12)) goto 221
         end do
@@ -203,7 +200,6 @@ C     Output body of procedure.
 221     len = 0
         do while(len.ge.0)
           call f_readstring(idcb3,ierr,ibc,len)
-          call char2low(ibc)
           if(ierr.lt.0.or.len.lt.0) goto 230
           if(ibc(1:6).eq.'enddef') goto 230
           nch = trimlen(ibc)
@@ -238,7 +234,6 @@ C     Copy scratch file minus purged procedure.
         len = 0
         call f_readstring(idcb3,ierr,ibc,len)
         do while (len.ge.0)
-          call char2low(ibc)
           if (ierr.lt.0) then
             write(lui,11065)
 11065       format(1x,"error reading procedure file")
@@ -324,7 +319,6 @@ C     Copy to scratch file.
         len = 0
         call f_readstring(idcb3,ierr,ibc,len)
         do while (len.ge.0)
-          call char2low(ibc)
           if(ierr.lt.0) then
             write(lui,1112)
 1112        format(1x,"error reading procedure file")
@@ -429,7 +423,6 @@ C     Read until procedure found.
         len = 0
         do while(len.ge.0)
           call f_readstring(idcb1,ierr,ibc,len)
-          call char2low(ibc)
           if(ierr.lt.0.or.len.lt.0) then
             write(lui,1118) lnam1(:nch1)
 1118        format(1x,"procedure ",a," not found")
@@ -456,7 +449,6 @@ C     Copy procedure to scratch.
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),id)
           if(ierr.lt.0) go to 687
           call f_readstring(idcb1,ierr,ibc,len)
-          call char2low(ibc)
           if(ierr.lt.0.or.len.lt.0) go to 685
 C     Check for ENDDEF.
           if(ibc(1:6).eq.'enddef') go to 625
@@ -475,7 +467,6 @@ C     Copy active file.
         len = 0
         do while(len.ge.0)
           call f_readstring(idcb3,ierr,ibc,len)
-          call char2low(ibc)
           if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
              ibc(21:)='  00000000000x'
           endif

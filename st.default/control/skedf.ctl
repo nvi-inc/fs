@@ -156,12 +156,19 @@ $misc
 *     directory of the Mark5A program.
 *EXAMPLE
 * disk2file_Dir /r1234/data
+*
 * Sets up AutoFTP
 *EXAMPLE
-* AutoFTP ON arbitrary_string_with_out_spaces 
+* AutoFTP ON arbitrary_string_without_spaces 
+*
 * Can specify abort time for AutoFTP. If not set the abort time is 300 seconds
 *EXAMPLE
 * AutoFTP_abort_time 250 
+*
+* Ignores bad mask for Mark5B recorders (but will put out warning message!)
+* values are "yes" or "no". If keyword is not present, default is "no"
+*EXAMPLE
+* ignore_mark5B_bad_mask no
 *
 * Epoch:
 * Enter the epoch for drudg to use on the SOURCE commands in SNAP files.
@@ -249,11 +256,31 @@ $misc
 *--------------------------------------------------------------
 *
 * Cont_cal setup
-* Applicable only for DBBCs
+* Applicable only for DBBCs,
+* default is "off" if not present
 * cont_cal ON       !turn it on
-* cont_cal OFF       !turn it off 
+* cont_cal OFF      !turn it off 
 * cont_cal ASK      !ask the user at runtime.
 *--------------------------------------------------------------
-* default DBBC IF inputs if absent from schedule file
+* default DBBC IF inputs when converting from a non-DBBC rack type
+* this selects the inputs that should be assumed for each IF by DRUDG
+* default is nulls if not present
 * default_dbbc_if_inputs 1 4 2 2
 *--------------------------------------------------------------
+* DBBC target values for IF counts in set-up procedure, up to 4
+* values for up to four IFs, in order, this will cause an error
+* in IFx=... command execution if used for DBBC DDC versions
+* before v101 
+* default is nulls if not present
+* dbbc_if_targets  35000 35000 35000 35000
+*--------------------------------------------------------------
+* DBBC BBC TPI target levels
+* has no effect for DDC versions before v103
+* default is null if not present
+* dbbc_bbc_target 16000
+*--------------------------------------------------------------
+* Uncomment the next line to add IF_CONFIG as the last line in IF procedure 
+* if_config YES
+*--------------------------------------------------------------
+* Uncomment the next line to add target_time= after each scan_name=
+*  target_time YES 

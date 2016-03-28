@@ -3,6 +3,7 @@ C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
 C  Common blocks:
+      implicit none 
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -12,9 +13,7 @@ C  Common blocks:
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
       include 'bbc_freq.ftni' 
 
-! called functions
-      logical kheaduse          !kheaduse(ihead,istn) .eq. true if use ihead at istn
-!      integer GETPID
+! called functions    
       
 
 C Subroutine interface:
@@ -51,6 +50,8 @@ C LOCAL:
       logical kallowpig
       character*39 clabline  !used to hold label description,e.g. 6= Make Postscript label
       character*39 clabprint !used to hold print line
+      logical krec2_found
+       character*20 cstat_tmp
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -205,14 +206,15 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2008May23 JMGipson. Make sure output files are lowercase
 ! 2012Sep25 JMGipson. Modified to use drudg_rdctl.f instead of rdctl.f 
 ! 2013Jan23 JMGipson. Modified so that equipment_override is done when in batch mode. 
+! 2013Jun18 JMGipson. Capitalize original rack equipment. 
+! 2013Jul11 JMGipson. Issue error if file is not found and stop.
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
 
 C Initialize FS version
 
-C PeC Permissions on output files
-      iperm=o'0666'
+
 C Initialize LU's
       LU_INFILE = 20
       LU_OUTFILE =21
@@ -270,7 +272,7 @@ C***********************************************************
 
 
       call drudg_rdctl(csked,csnap,cproc,ctmpnam,            
-     >           dr_rack_type,crec_def,kequip_over,ldbbc_if_inputs)
+     >           dr_rack_type,crec_def,kequip_over)
       kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
      >               crec_def(1).eq.'unknown'.and.crec_def(2).eq.'none')
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
@@ -325,7 +327,7 @@ C  In drcom.ftni
       cexpna = ' '
 C   Check for non-interactive mode.
       if (nch1.ne.0.and.nch2.ne.0.and.nch3.ne.0) kbatch=.true.
-
+    
 C 3. Get the schedule file name
       DO WHILE (cexpna(1:1).EQ.' ') !get schedule file name
         if (.not.kskdfile.or.kdrgfile) then ! first or 3rd time
@@ -353,6 +355,7 @@ C       Opening message
             cbuf=cfile
           endif 
         endif
+    
         IF (NCH.GT.0) THEN !got a name
           if(cbuf(1:2) .eq. "::" .or. cbuf(1:1) .eq. "q") goto 990
           if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
@@ -363,7 +366,7 @@ C       Opening message
             else
               lskdfi = cbuf(1:nch) 
             endif
-          endif ! path/no path
+          endif ! path/no path  
           if (lskdfi(1:2).eq.'..') then
             ix=index(lskdfi(3:),'.')
           else if (lskdfi(1:1).eq.'.') then
@@ -371,14 +374,20 @@ C       Opening message
           else
             ix=index(lskdfi(1:),'.')
           endif
-          l=trimlen(lskdfi)
-          ctextname = ''
+          l=trimlen(lskdfi)   
+          ctextname = ''        
           if (ix.eq.0) then ! automatic extension
             if (.not.kskdfile) then ! try .skd
               lskdfi=lskdfi(1:l)//'.skd'
               inquire(file=lskdfi,exist=kexist)
               if(.not.kexist) then 
                 lskdfi=lskdfi(1:l)//'.vex'
+                inquire(file=lskdfi,exist=kexist)
+                if(.not.kexist) then
+                   write(*,*) 
+     >           "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
+                   stop
+                endif
               endif 
               ctextname = lskdfi(1:l)//'.txt'
               kskdfile = .true.
@@ -395,6 +404,13 @@ C       Opening message
             endif
             if (lskdfi(ix:l).eq.'.drg') kdrg_infile=.true.
           endif ! automatic extension
+          inquire(file=lskdfi,exist=kexist)
+          if(.not.kexist) then 
+            write(*,*) 
+     >         "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
+            stop
+          endif           
+
           ixp=1
           ix=1
           do while (ix.ne.0) ! find the last '/'
@@ -432,7 +448,7 @@ C
         WRITE(LUSCN,9300) LSKDFI(1:IC),cexpna(1:ix)
 9300      FORMAT(' Opening file ',A,' for schedule ',A)
         CALL SREAD(IERR,ivexnum)
-        IF (IERR.NE.0) goto 201
+         IF (IERR.NE.0) goto 201
 
         if (kgeo) then
           write(luscn,'(a)') ' This is a geodetic schedule.'
@@ -522,16 +538,26 @@ C        in the outer loop.
 C
 500   CONTINUE
 ! Set all second recorders to "none"
+      krec2_found=.false.
+
       do istn=1,nstatn
-         if(cstrec(istn,2) .ne. "none") then
-           write(*,'(a,a,a)') "Warning: Recorder 2 for ",  
-     >     cstnna(istn)," set to 'none'." 
+           if(cstrec(istn,2) .ne. "none") then
+           if(.not.krec2_found) then                 
+             write(*,'(a)') 
+     >        "Warning! All 2nd recorders set to 'none'"  
+             krec2_found=.true.
+           endif 
            cstrec(istn,2)="none"
           endif 
+ 
+
 ! Make a copy of the original configuration now
           cstrack_orig(istn) =cstrack(istn)
           cstrec_orig(istn,1)=cstrec(istn,1)
           cstrec_orig(istn,2)=cstrec(istn,2)
+          call capitalize(cstrack_orig(istn))
+          call capitalize(cstrec_orig(istn,1))
+          call capitalize(cstrec_orig(istn,2))
       end do
 !
       km5A_piggy=.false.
@@ -602,7 +628,7 @@ C
 ! This part sees if we should do equip_override. 
         if (istn.gt.0) then !one station
 C  Set equipment from control file, if equipment is unknown, and
-C  if it was not set by the schedule.
+C  if it was not set by the schedule.      
           kknown = .not.
      >     (cstrec(istn,1).eq.'unknown'.or. cstrack(istn).eq.'unknown')
           if (.not.kknown.and.kdr_type .or.
@@ -627,29 +653,17 @@ C  if it was not set by the schedule.
             if(cstrec(istn,2) .ne. 'none' .and.
      >        cstrec(istn,1) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
-        else !all stations
-          write(luscn,9067) lskdfi(1:l)
+        else !all stations                 
           do i=1,nstatn
             if(cstrec(i,1)  .eq. 'unknown' .or.
      >         cstrack(i) .eq. 'unknown') kknown=.false.
           enddo
         endif
       endif
-
-
-
+     
       if (.not.kbatch) then
 ! Several options for label line.
-         if (clabtyp.eq.'POSTSCRIPT') then
-           clabline=  ' 6 = Make PostScript label file       '
-           clabprint= ' 61= Print PostScript label file'
-         else if (clabtyp.eq.'DYMO') then
-           clabline=  ' 6 = Make DYMO label file             '
-           clabprint= ' 61= Print DYMO label file'
-         else
-           clabline=  ' 6 = Make tape labels                 '
-           clabprint=" "
-         endif
+       
 
       if (kskd) then !schedule file
         l=trimlen(lskdfi)
@@ -664,11 +678,7 @@ C       Are the equipment types now known?
 9069        format(/' Equipment at ',a,':'/'   Rack: ',a,
      .       ' Recorder 1: ',a,' Recorder 2: ',a)
             if (nrecst(istn).eq.2) write(luscn,9070) cfirstrec(istn)
-9070        format(' Schedule will start with recorder ',a1,'.')
-            if(km5a_piggy)
-     >          write(luscn,'("   Mark5A in piggyback mode. ")')
-            if(km5p_piggy)
-     >          write(luscn,'("   Mark5P in piggyback mode. ")')
+9070        format(' Schedule will start with recorder ',a1,'.')         
           else
             write(luscn,9169) cstnna(istn)
 9169        format(/' Equipment at ',a,' is unknown. Use Option 11',
@@ -678,34 +688,17 @@ C       Are the equipment types now known?
 
         endif ! one station check equipment
 
-        kallowpig=(istn .gt. 0)
+        kallowpig=.false. 
         if (istn.gt.0) then !one station check equipment
-          WRITE(LUSCN,9068) lskdfi(1:l),cstnna(istn)
-9068      FORMAT(/' Select DRUDG option for schedule ',A,' at ',A8)
-          if(kheaduse(2,istn).or.               !can't do piggy if 2nd head is active.
-     >       (cstrack(istn) .eq. "Mark3A") .or. !or for mark3 formatters
-     >       (cstrack(istn)(1:2).eq."K4".and.   !or k4 (non-mk4 formatters)
-     >               cstrack(istn)(6:7) .ne."M4") .or.
-     >        cstrec(istn,1) .eq. "S2"      .or.     !Can't do piggyback with S2 recorders
-     >        cstrec(istn,1) .eq. "Mark5A"  .or.     !Can't do piggyback with Mark5A or Mark5P recorders.
-     >        cstrec(istn,1) .eq. "Mk5APigW" .or.
-     >        cstrec(istn,1) .eq. "Mark5P"  .or. 
-     >        cstrec(istn,1) .eq. "Mark5B") then
-              kallowpig=.false.
-           endif
+          cstat_tmp=cstnna(istn)
         else
-          write(luscn,9067) lskdfi(1:l)
-9067      FORMAT(/' Select DRUDG option for schedule ',A,
-     .       ' (all stations)'/)
-        endif ! one station check equipment
-
-        if(istn .gt. 0) then
-          if(cstrec(istn,1)(1:5) .eq. "Mark5") then !test is case sensitive
-             clabline=" "
-             clabprint=" "
-          endif
+          cstat_tmp=" all stations"
         endif
-
+        write(luscn,
+     >   '("Select DRUDG option for schedule ", a, " at ",a)')
+     >   lskdfi(1:l), cstat_tmp 
+     
+      
          write(luscn,'(a)')
      >      ' 1 = Print the schedule               '//
      >     '  7 = Re-specify stations'
@@ -736,14 +729,9 @@ C       Are the equipment types now known?
             write(luscn,'()')
           endif
 
-          write(luscn,'(a,"12 = Make procedures (.PRC) ")') clabline
-          if (klabel_ps .and.  clabprint .ne. " ")
-     >      write(luscn,'(a)') clabprint
-
-          if(kallowpig) then
-              write(luscn,'(38x,a)')' 13 = Toggle Mk5A piggyback mode '
-              write(luscn,'(38x,a)')' 14 = Toggle Mk5P piggyback mode '
-          endif
+          write(luscn,'(38x," 12 = Make procedures (.PRC) ")')
+         
+      
           if(istn .ne. 0 .and. km5Disk .and.
      >       (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
              write(luscn,'(38x,a)') ' 15 = Data Transfer Overide '
@@ -893,31 +881,7 @@ c            I = nstnx
           ELSE IF (IFUNC.EQ.4) THEN
             CALL CLIST(kskd)
           ELSE IF (IFUNC.EQ.12) THEN
-            call procs
-          ELSE IF (IFUNC.EQ.13) THEN
-            if (km5A_piggy) then
-              write(luscn,"('Mark5A piggyback mode turned OFF')")
-              km5A_piggy = .false.
-            else
-              write(luscn,"('Mark5A piggyback mode turned ON')")
-              km5A_piggy = .true.
-              if(km5P_piggy) then
-                write(luscn,"('Mark5P piggyback mode turned OFF')")
-                km5P_piggy=.false.
-              endif
-            endif
-          ELSE IF (IFUNC.EQ.14) THEN
-            if (km5P_piggy) then
-              write(luscn,"('Mark5P piggyback mode turned OFF')")
-              km5P_piggy = .false.
-            else
-              write(luscn,"('Mark5P piggyback mode turned ON')")
-              km5P_piggy = .true.
-              if(km5A_piggy) then
-                write(luscn,"('Mark5A piggyback mode turned OFF')")
-                km5A_piggy=.false.
-              endif
-            endif
+            call procs       
           else if(ifunc .eq. 15 .and. km5Disk) then
               call xfer_override(luscn)
           else if (ifunc.eq.51) then

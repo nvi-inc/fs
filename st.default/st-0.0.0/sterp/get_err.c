@@ -17,10 +17,7 @@ int maxlen;
 long ip[5];
 {
 
-  int rtn1, rtn2,len;
-
-  len=cls_rcv(ip[0], buffer, maxlen-1, &rtn1, &rtn2, 0, 0);
-  buffer[len]='\0';
+  skd_arg_buff(buffer,maxlen);
 
   return;
 }

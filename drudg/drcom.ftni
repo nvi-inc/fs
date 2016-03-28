@@ -44,16 +44,24 @@ C 2003Jul11 JMG added itctim
 ! 2007Jul20  JMG. Added ksked_proc flag. Put all logical in same common.
 !                 Got rid of stuff that is no longer used.
 ! 2008Aug19 JMG. Added cbbcbuf which is equivalenced to ibbcbuf.
+! 2013Sep19 JMG. Added klo_config, ktarget_time
+! 2015Jan30 JMG. Added kignore_bad_mask 
+! 2015Mar20 JMG. Added imark6_off 
+! 2015Mar30 JMG. Got rid of iperm. 
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
       logical klabel_ps  !is the label printer Postscript?
       logical ksked_proc
 
+      logical klo_config, ktarget_time
+      logical kignore_Mark5B_bad_mask 
+
       common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
-     .       kpostpass,klabel_ps,ksked_proc
+     .       kpostpass,klabel_ps,ksked_proc,
+     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask 
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
@@ -85,7 +93,7 @@ c
      .  nlab,nllab,
      .  icrty6,
      .  itctim,ilabrow,ilabcol,inewpage,
-     .  nchanr,iperm,fileptr,itpid_period
+     .  nchanr,fileptr,itpid_period
 
       integer lu_outfile,luprt,luscn
 C
@@ -94,6 +102,7 @@ C
       equivalence (ibbcbuf,cbbcbuf)
       integer ibbclen(2,3)
       integer nbbcbuf(2)
+      integer imark6_off
 
       COMMON/DRCOM_int/
      .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS,
@@ -106,8 +115,8 @@ C
      .       ICRTY6,
      .       ilabrow,ilabcol,inewpage,
      .       luscn,itpid_period,
-     .       nchanr,iperm,fileptr,
-     .       ibbcbuf,ibbclen,nbbcbuf
+     .       nchanr,fileptr,
+     .       ibbcbuf,ibbclen,nbbcbuf,imark6_off 
 
       common/drcom_real/
      >       RA50,DEC50,rlabsize

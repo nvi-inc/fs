@@ -1,5 +1,5 @@
 Paroscientific, Inc.
-MET3
+MET3/MET4/MET4A
 Meteorological Measurement System
 
 and 
@@ -73,13 +73,32 @@ STARTING MET SERVER:
 1.) Running the metserver. The ports mentioned here might not be the ports 
     you are connected to, so make sure you have the right ports.
 
-IMPORTANT NOTE: The first parameter should be the MET3 Sensor.
-                The second parameter should be the WIND Sensor.
+IMPORTANT NOTE: You must supply values (even if the default) for all
+                parameters that preceed a parameter with a non-default
+                value.
+
+                The first parameter should be the MET3 Sensor device.
+                The second parameter should be the WIND Sensor device.
                   (if you don't have the wind sensor simply use '/dev/null' 
                    or leave blank.)
                 The third parameter is the network port that is served, if
                   you are not using the default, you must specify
                   it after the first two parameters, 50001 is the default
+                The fourth parameter is used to make the 
+                  server allow connections from a remote host. To accept 
+                  remote connections the parameter should be 'remote'. 
+                  Default is to NOT allow remote connections.
+                  If the parameter is not used only metclients run 
+                  on the same computer with the third parameter 'localhost'
+                  will be able to connect. 
+                  If the metclient is called with the hostname/ip-address 
+                  of the server it will not be allowed to connect unless 
+                  the 'remote' option is used.
+                The fifth parameter is the met device. Currently
+                  the device is assumed to be MET4, but if MET4A is specified
+                  the fan is monitored and an error is reported. Any other
+                  values are currently equivalent to MET4, which also supports
+                  MET3.
 
     prompt> log in as root
     prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 50001 &
@@ -105,6 +124,26 @@ IMPORTANT NOTE: The first parameter should be the MET3 Sensor.
         /etc/init.d/metserver.sh start (will start it up again)
         /etc/init.d/metserver.sh restart (will stop then start)
 
+    b.) If you no longer want the server to startup at boot time you have
+        two options. You can either remove the service or disable it.
+        
+        Removing:
+        prompt> log in as root
+        prompt> cd /etc/init.d
+        prompt> rm metserver.sh
+        prompt> update-rc.d -f metserver.sh remove
+ 
+        Disabling:
+        There is no option to use when calling update-rc.d that will
+        disable the script (yet). This can be achieved manually by 
+        renaming the script in /etc/init.d, for example: 
+        prompt> cd /etc/init.d
+        prompt> mv metserver.sh metserver.sh.disabled
+
+        NOTE: When invoking update-rc.d with the remove option the script
+              should have been deleted already. Flag '-f' will force removal
+              of symlinks even if /etc/init.d/metserver.sh still exists.   
+
  ===== Read the README information. =====
 
 You're done!
@@ -112,11 +151,10 @@ You're done!
 NOTES:
 ------
 
-Because this is hardware that may or may not exist for your system. You
-must make sure to include the cdp(default) or met3 to your existing 
+1. Because this is hardware that may or may not exist for your system. You
+must make sure to include the cdp(default) or port & server in your existing 
 /usr2/control/equip.ctl file.
 
-- add the line to the end of the equip.ctl file.
 Example:
 
 * Please refer to the Control Files Manual in Volume 1 of the 
@@ -127,11 +165,29 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4,
 .
 .
 .   
-* met sensor type
-cdp	cdp or met3, use cdp if you don't have either
+* met sensor type: cdp or two fields for metserver: port hostname 
+*default choice for metserver is  50001   localhost      
+cdp     cdp or met3 server port & host, use cdp if you don't have either
 
 
-NOTE: NOTE: NOTE: If you don't have a equip.ctl file in /usr2/control.
+2. If the kernel you are using is older than version 2.6 the command 
+'metserver.sh start' will result in three processes running for the 
+metserver. This is due to the 'one process per thread' model. The
+metserver consists of one initial thread and creates one thread.
+The third process corresponds to the 'thread manager' thread.
+This is not an error, but it will cause a warning when trying to
+stop the metserver with the command 'metserver.sh stop'. After
+killing the first process it will try to kill the other two,
+but they disappear after killing the first one resulting in a 
+warning looking like:
 
-   prompt> cd /usr2/control/
-   prompt> cp /usr2/fs/st.default/control/equip.ctl .
+"Stopping MET Server: metserver start-stop-daemon: warning: 
+failed to kill 1211: No such process
+start-stop-daemon: warning: failed to kill 1212: No such process"
+
+Here 1211 and 1212 are just examples of what the PID might be for
+the extra processes.
+There will not be more than one process for the metserver on most modern
+Linux systems if they are using NPTL.
+
+

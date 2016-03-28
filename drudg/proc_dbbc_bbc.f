@@ -12,19 +12,26 @@
       include 'drcom.ftni'
       include 'bbc_freq.ftni'
       integer icode, ic, ib,ichan              !channel and BBC number we are considering. 
+                                               !NOTE: Does not use ichan at all. 
 !functions      
       integer iwhere_in_string_list
 
 ! local             
-      integer nch                
-      character*2 cif_valid(16)
+      integer nch           
+      integer max_if_valid
+      parameter (max_if_valid=20)     
+      character*2 cif_valid(max_if_valid)
       integer iwhere
           
       logical kvalid_if
+      logical kdbbc
       character*2 cif    
-      data cif_valid/"A1","A2","A3","A4","B1","B2","B3","B4",
-     >               "C1","C2","C3","C4","D1","D2","D3","D4"/
-  
+      character*1 lq
+    
+      data cif_valid/"A ","A1","A2","A3","A4","B ","B1","B2","B3","B4",
+     >               "C ","C1","C2","C3","C4","D ","D1","D2","D3","D4"/
+      
+      lq="'"     
 ! Start of code. 
       flo(ib) = FREQLO(ic,ISTN,ICODE)
       if (flo(ib).lt.0.d0) then ! missing LO 
@@ -34,13 +41,32 @@
       endif
 
       write(cbbc,'("bbc",i2.2)') ib 
-! Skip checking for right now.
-! check to see if the IF is valid. Should be of the form:
-!   A1,A2...A4,  B1,B2...B4, .... D1...D4 
-      cif=cifinp(ic,istn,icode)  
-      call capitalize(cif)   !capitalize for the check. 
-      iwhere= iwhere_in_string_list(cif_valid,16,cif)
-      if(cstrack_orig(istn) .ne. "DBBC") iwhere=0
+  
+      if(cstrack_orig(istn) .eq. "DBBC" .or. 
+     >   cstrack_orig(istn) .eq. "NONE") then
+         kdbbc=.true.
+!        Check to see if the IF is valid. Should be of the form:
+!        A1,A2...A4,  B1,B2...B4, .... D1...D4 
+        cif=cifinp(ic,istn,icode)  
+        call capitalize(cif)   !capitalize for the check. 
+        iwhere= iwhere_in_string_list(cif_valid,max_if_valid,cif)
+        if(iwhere .eq. 0) then    
+          call write_return_if_needed(luscn,kwrite_return)           
+          write(luscn,'(a,i3,a,a,a)') 
+     >   "proc_dbbc_bbc: Warning! For BBC ",ib, " IF '", cif,
+     >         "' is not valid! "
+        else if(cif(2:2) .eq. " ") then       
+          call write_return_if_needed(luscn,kwrite_return)
+          write(luscn,'(a,i3,a,a,a)') 
+     >   "proc_dbbc_bbc: Warning! For BBC ",ib, " IF '", cif,
+     >       "' has blank as second character!"         
+        endif         
+      else
+       kdbbc=.false.
+       iwhere=0
+      endif   
+
+
       if(iwhere .ne. 0) then 
         kvalid_if=.true.       
       else
@@ -55,9 +81,14 @@
         else if(ib .ge. 13 .and. ib .le. 16) then          
           cif="d"//ldbbc_if_inputs(4)         
         endif 
-        write(luscn,'("Converted IF ", a, " to ", a)')
-     >     cifinp(ic,istn,icode), cif 
-           cifinp(ic,istn,icode)=cif
+        call write_return_if_needed(luscn,kwrite_return)
+        if(kdbbc) then 
+           write(luscn,'(a,a,a)') lq,cif,lq
+        else
+          write(luscn,'("For BBC ",i3, " Converted IF ", a, " to ", a)')
+     >    ib,  cifinp(ic,istn,icode), cif  
+        endif
+          cifinp(ic,istn,icode)=cif
       endif    
 
       rfmin=10.0
@@ -78,8 +109,7 @@
       else
          ibbc_filter(ib)=0
       endif 
-!      write(*,*) fvc(ib), ibbc_filter(ib) 
-          
+!      write(*,*) fvc(ib), ibbc_filter(ib)          
   
 ! Make a string that looks like:
 ! bbc01=612.99,a,8.000

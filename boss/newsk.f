@@ -36,7 +36,6 @@ C  First check 1st line of schedule for experiment name and year
       irecln = 1
       ilen = fmpreadstr(idcbsk,ierr,ibc)
       irecln = irecln + 1
-      call char2low(ibc)
       if(ilen.le.0) then
         ierr = -1
         goto 100
@@ -131,7 +130,6 @@ C
 200   continue
       ilen = fmpreadstr(idcbsk,ierr,ibc)
       irecln = irecln + 1
-      call char2low(ibc)
       if (ilen.le.0) then
         ierr = -1
         call logit6c(0,0,0,0,-124,'bo')
@@ -148,9 +146,12 @@ C                     Remember the location of the last SOURCE command
       if (ktime) goto 200
       if (cjchar(ib,1).ne.'!') goto 200
 C                          ! -- a wait-for command
+      if (cjchar(ib,2).eq.'+') goto 200
+C                          + -- relative wait, which we ignore
       iec = iflch(ib,ilen*2)
       call gttim(ib,2,iec,0,it1,it2,it3,ierr)
       ktime=.true.
+      if(ierr.lt.0) goto 200
       if (kpast(it1,it2,it3,it)) goto 200
 C                   If this time is in the past, go back and read some more
       if (irec.le.0) then

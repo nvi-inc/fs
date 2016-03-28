@@ -1,0 +1,80 @@
+#!/usr/bin/python
+
+import socket
+#import netstring
+import atexit
+import os
+import readline
+import rlcompleter
+import sys
+import getopt
+import string
+import select
+
+historyPath = os.path.expanduser("~/pyhistory")
+
+def save_history(historyPath=historyPath):
+    import readline
+    readline.write_history_file(historyPath)
+
+if os.path.exists(historyPath):
+    readline.read_history_file(historyPath)
+    
+parms = {'-h': '127.0.0.1', '-p':5000, '-t':1, '-c': "dbe_alc=0:0:off:1:0:off;"}
+try:
+    opts, pargs = getopt.getopt(sys.argv[1:], "h:p:c:t:")
+except getopt.GetoptError, msg:
+    sys.exit(msg)
+
+for o,v in opts:
+    #print o,v
+    parms[o] = v
+
+host = str(parms['-h'])
+port = int(parms['-p'])
+mycmd = str(parms['-c'])
+timeout=float(parms['-t'])
+#print "Host:", host, "port:", port, "cmd:", mycmd," Timeout: ",timeout
+print os.path.basename(sys.argv[0])
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect ((host,port))
+
+arg = mycmd
+while 1:
+##     try:
+##         arg = raw_input(">> ")
+##     except EOFError:
+##         print ''
+##         break
+
+    if arg in ('', ';'):
+        continue
+    
+    #IF NOT QUIT 
+    if arg != "quit":
+
+        # ADD ; TO END IF NOT THERE
+        arg = string.strip(arg)
+        arg = arg + '\n'
+        
+        # SEND COMMAND
+        rv = s.send(arg)
+        if rv <= 0 :
+            print "Fail to send ", rv
+            
+        # WAIT FOR RESPONSE
+        ready=select.select([s], [], [],timeout)
+	if ready[0]:
+            ret = s.recv(8192)
+            print ret
+        else:
+            print "time-out"
+        arg = "quit"
+    # ELSE TERMINATE SESSION
+    else:
+        break
+
+s.close()
+atexit.register(save_history)
+

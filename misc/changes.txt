@@ -10153,3 +10153,826 @@ Version 9.11.1 130130
            updated
 
 Version 9.11.2 130307
+
+130610 AM  fivpt/fivp.f
+           fix formatting of steps for negative values
+
+130613 WEH control/fserr.ctl
+           incom/equip.f
+           quikv/logmsg_dbbc.c
+           help/form.d__
+130618 WEH clib/dbbcform_util.c
+           quikv/dbbcform.c
+           clib/mk5dbbc.c
+           support DBBC DDC v104 and astro2 mode
+
+130618 WEH systests/plotlog
+           systests/systests.txt
+           allow -s string like tpicd#tpi ...tpical and tpcont
+           -2 option to select data for tpcont
+
+130620 WEH clib/get_gain_par.c
+           fix LCP error if center is on tabular point
+
+130620 WEH quikv/logmsg_dbbc.c
+           control/fserr.ctl
+           version 104 and better messages for some other cases
+
+130620 WEH st.default/control/equip.ctl
+           v104 added
+
+130625 WEH control/fscmd.ctl
+           include/fs_types.h
+130626 WEH include/fscom.h
+           quikv/dbbcgain_dis.c
+130627 WEH quikv/Makefile
+           clib/Makefile
+           include/dbbcgain_ds.h
+           quikv/quikv.c
+           quikv/dbbcgain.c
+130628 WEH clib/dbbcgain_util.c
+130630 WEH help/bbc_gain.d__
+           bbc_gain command added
+
+130627 WEH clib/dbbcn_v.c
+130627 WEH onoff/agc_dbbc.c
+           v104 added
+
+130628 WEH st.default/proc/dstation.prc
+130628 WEH st.default/proc/dstationcc.prc
+           bbc_gain usage added including bbc_level procedure
+
+130628 WEH help/form.d__
+           astro2 added
+
+130630 WEH help/bbcnn.d__
+           help/ifx.d__
+           typos fixed
+
+130630 WEH clib/dbbcnn_util.c
+130701 WEH control/fserr.ctl
+           limit averaging period to 60 seconds
+
+130071 WEH tpicd/tpicd.c
+           clib/tpi_dbbc.c
+           make IF count display uniformly in power units
+
+130702 WEH misc/dbbc.txt
+           update for v104
+
+130702 WEH st.default/proc/dstation.prc
+           st.default/proc/dstationcc.prc
+           move bbc_gain=all,... out of if... procs
+
+130702 WEH include/params.h
+           use parens in parameter defs to avoid arithmatic issues
+
+130703 WEH help/bbcnn.d__
+           complete description of nominal level and typos from J. Quick.
+
+130703 WEH clib/tpi_dbbc.c
+           decrease IF power precision to two places after decimal
+
+130703 WEH st.default/proc/bbc_level.prc
+           complete bbc_level procedure by itself for upgrades
+
+130703 WEH misc/dbbc.txt
+           correct typos identified by J. Quick
+
+130715 WEH control/fserr.ctl
+           all errors recommending fmset 's', now say to only CONSIDER it
+ 
+130716 WEH help/bbc_gain.d__
+           correct gain step size
+
+130724 WEH st.default/control/skedf.ctl
+           added DBBC target value comments
+
+130725 WEH misc/dbbc.txt
+           add DBBC configuration table
+
+130725 WEH help/form.h__
+           add Mark IV formatter error codes listing.
+
+130726 WEH help/form.h__
+           the correct error code listing.
+
+Version 9.11.3 130726
+
+130729 WEH misc/onoff_fix
+           removed extraenous test in error message
+
+130730 WEH misc/dbbc_ifx
+           user script to set DBBC IF inputs
+
+130730 WEH Makefile
+           set PATCHLEVEL to 4
+
+130815 WEH systests/plotlog
+           improved test for non-standard Tsys plot string
+           now works for normal Tsys again
+
+130827 WEH pdplt/pdplt
+           don't match '$' in comment lines of xtr files
+
+130828 WEH oprin/Makefile
+           pfmed/Makefile
+           make test for updated readline package on system backward compatible
+           with 9.10.4
+
+130925 WEH st.default/control/skedf.ctl
+           upated with IF_CONFIG and target_time examples
+
+130925 WEH quikv/logmsg_dbbc.c
+           also accept "August 01 2013" as a date code for v104
+
+130926 WEH misc/lo_config.txt
+           misc/target_time.txt
+           created
+
+130926 WEH misc/VENIX_changes.txt
+           renamed from changes.VENIX
+
+Version 9.11.4 130930
+
+131021 WEH control/fserr.ctl
+           changed dbbc, mark 5 may have crashed to probably crashed
+           as suggested by DLS
+
+131024 WEH help/pfmed.___
+           created with explanatory information
+
+131024 WEH help/schedule.___
+           add explanation of schedule vs station procedures and
+           the relationship between exper_initi and sched_initi
+
+131024 WEH help/proc.___
+           added pointed to the help file for the schedule command for
+           explanation of schedule vs station procefdures
+
+131109 WEH xtrac/xtrac.f
+           initialize source name to all underscores in case first scan in
+           log is incomplete, prevents format problems
+
+131119 WEH poclb/logit.c
+           Corrected includes to not mention "../fs" so they stay within the
+           current source tree.
+
+131215 WEH quikv/quikv.c
+131215 WEH quikv/mk5b_mode.c
+131215 WEH control/fscmd.ctl
+131215 WEH help/mk5b_mode.___
+           add bit_streams command
+
+140127 WEH control/fscmd.ctl
+           help/mk5b_mode.___
+           allow bit_streams for all rack types (including none)
+
+140127 WEH boss/bwork.f
+           control/fserr.ctl
+           help/schedule.___
+           prohibit schedule change when disk recording has been commanded
+
+140129 WEH misc/rc.fs
+           updated for FSL9
+
+140129 WEH help/schedule.___
+           fix typo
+
+140207 WEH help/scan_name.___
+           modernizd and updated continuous length comment
+             for scans after the first
+
+Version 9.11.5 140207
+
+140212 WEH clib/tpi_dbbc.c
+           removed debug output for continuous cal per U. Bach
+
+140212 WEH st.default/proc/3station.prc
+           st.default/proc/45station.prc
+           st.default/proc/4station.prc
+           st.default/proc/4v4station.prc
+           st.default/proc/5station.prc
+           st.default/proc/dstation.prc
+           st.default/proc/dstationcc.prc
+           st.default/proc/k42k3vstation.prc
+           st.default/proc/k42mk4vbstation2.prc
+           st.default/proc/k42mk4vstation.prc
+           st.default/proc/k42station.prc
+           st.default/proc/l4s2station.prc
+           st.default/proc/ls2station.prc
+           st.default/proc/newmk5ak5.prc
+           st.default/proc/s2s2station.prc
+           st.default/proc/s2station.prc
+           st.default/proc/v2station.prc
+           st.default/proc/v42station.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v4station.prc
+           st.default/proc/v5station.prc
+           st.default/proc/vs2station.prc
+           st.default/proc/vstation.prc
+           st.default/proc/vstation2.prc
+           changed checkmk5 use 8 mk5=get_stats?
+
+140212 WEH 45station.prc
+           5station.prc
+           dstation.prc
+           dstationcc.prc
+           v45station.prc
+           v5station.prc
+           add mk5=bank_set? to midob
+
+140214 WEH st.default/control/mk5ad.ctl
+
+140225 PB  misc/lgput
+           updated lgput scripts and everything consolidated to this directory
+
+140226 WEH quikr/quikr.f
+           quikr/onsor.f
+           control/fserr.ctl
+           quikr/track.f
+140227 WEH help/onsoure.___
+           expanded onsource to take parameters and cleaned up error messages
+
+140521 WEH tpicd/tpicd.c
+           Fix bug causing crash if DBBC communication error occurs
+
+140530 WEH flagr/flagr.c
+           control/fserr.ctl
+           Add error message for previous source not reached during schedule
+
+140531 WEH quikr/sorce.f
+140602 WEH quikv/antcn.c
+140603 WEH flagr/flagr.c
+           control/fserr.ctl
+           update flagr to eliminate race conditions identified by J. Quick
+
+140602 WEH fmset/getfmtime.c
+           fmset/get4time.c
+140604 WEH fmset/fmset.h
+           fmset/asktime.c
+           fmset/asksure.c
+           fmset/fmset.c
+140605 WEH fmset/set4time.c
+           fmset/set5btime.c
+140606 WEH clib/get_5btime.c
+           fmset/get5btime.c
+140607 WEH control/fserr.ctl
+           update fmset, not abort on error and handle jive5ab, thanks J. Quick
+
+140605 WEH help/disk_pos.___
+           improved 5B parameters, thanks  E. Rastorgueva-Foi
+
+140621 WEH misc/fsinstall
+           updated for FSL9
+
+140622 WEH include/fscom_dum.i
+           clib/cshm_init.c
+           newlb/prog.c
+           boss/newlg.f
+           include/fscom.h
+140623 WEH incom/equip.f
+           fmset/fmset.c
+           fmset/get5btime.c
+           add Mark 5B Clock rate seting from equip.ctl 
+
+140623 WEH flagr/flagr.c
+140624 WEH st.default/control/equip.ctl
+           added ability to suppress ANTCN errors with env variable
+             FS_FLAGR_SUPPRESS_ANTCN_ERRORS
+
+140624 WEH Makefile
+           Set version to 9.11.6
+
+140626 WEH incom/equip.f
+           fix clock rate comment
+
+140626 WEH control/fserr.ctl
+           fix typo in SC -24
+
+140627 WEH clib/disk_serial_util.c
+           quikv/disk_serial_dis.c
+           fix bug and formatting when the key is not turned for jive5ab
+
+140627 WEH setcl/setcl.f
+           fmset/fmset.c
+           update tests of clock rate for user settable value
+
+140628 WEH fmset/fmset.c
+           modified 5B clock message for rate=none
+
+140630 WEH misc/print2dymo
+140703 WEH misc/refresh_secondary.sdb.9
+           misc/refresh_secondary.hdc.9
+           misc/FSL9_PC_Checkout.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_Upgrade.txt
+           FSL9
+
+140711 WEH misc/refresh_secondary.sdb.9
+140711 WEH misc/refresh_secondary.hdc.9
+           use bash and fix grub installation for second disk
+
+140711 WEH misc/FSL9_PC_Checkout.txt
+       WEH misc/FSL9_End_User.txt
+       WEH misc/FSL9_Upgrade.txt
+           improvements
+
+140711 WEH st.default/st-0.0.0/metserver/port/portopen.c
+           port/portopen.c
+           mcbcn/mcbcn.c
+           ibcon/opbrd.c
+           control/fserr.ctl
+           st.default/st-0.0.0/metserver/src/metget.c
+           support for setting CLOCAL on serial ports
+
+140713 WEH misc/FSL9_PC_Checkout.txt
+           minor updates
+
+140717 WEH misc/refresh_spare_usr2
+           warning added
+
+140717 WEH misc/refresh_secondary.sd156
+           misc/refresh_secondary.sd123
+           created for FSL9
+
+140717 WEH misc/refresh_secondary.sdb.9
+           misc/refresh_secondary.hdc.9
+           deleted, no longer needed
+
+140718 WEH setcl/setcl.f
+           fmset/fmset.c
+           5B clock rate error messages improved
+
+140723 WEH port/Makefile
+           st.default/st-0.0.0/metserver/port/portopen.c
+           port/portopen.c
+           st.default/st-0.0.0/metserver/port/Makefile
+           mcbcn/Makefile
+           mcbcn/mcbcn.c
+           Makefile
+           add FS_SERIAL_CLOCAL environment variable for conditional
+           compilation of non-blocking open/CLOCAL serial support
+
+140725 WEH misc/refresh_spare_usr2
+           changed to bash
+
+140726 WEH misc/FSL9_End_User.txt
+           misc/FSL9_PC_Checkout.txt
+           minor corrections
+
+140727 WEH st.default/st-0.0.0/metserver/port/portopen.c
+       WEH port/portopen.c
+           add missing TGETA, improve error comments
+
+140728 WEH st.default/prog/.config/user-dirs.conf
+           st.default/oper/.config/user-dirs.conf
+           defeat creation of "Desktop directories in ~
+
+140728 WEH st.default/prog/.fvwm2rc
+           st.default/oper/.fvwm2rc
+           remove deadwood, old versions now .fvwm2rc-before-FSL9
+
+140728 WEH misc/refresh_secondary.sd234
+           created. removed .sd123
+
+140728 WEH misc/refresh_spare_usr2.9
+           created
+
+140801 WEH misc/FSL9_PC_Checkout.txt
+           misc/FSL9_Upgrade.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_RAID.docx
+           misc/FSL9_RAID.pdf
+           misc/fs9116up.txt
+           clean-up
+
+140805 WEH misc/FSL9_PC_Checkout.txt
+           misc/FSL9_End_User.txt
+           misc/FSL9_Upgrade.txt
+           misc/fs9116up.txt
+           clean-up
+
+Version 9.11.6 140805
+
+140827 PB  matcn/iat.f
+           fix sleeping bug in fmset time reading response for Mark IV
+
+141113 UB  clib/dbbcnn_util.c 
+           add 32 MHz BW
+
+141218 PdV port/Makefile
+           port/portopen.c
+           mcbcn/Makefile
+           mcbcn/mcbcn.c
+           st.default/st-0.0.0/metserver/port/portopen.c
+           st.default/st-0.0.0/metserver/port/Makefile
+           switch include file to new driver version; for systems with 
+           old driver create link: /usr/src/linux/include/digi.h
+           pointing to  /usr/src/linux/drivers/char/digi.h
+
+141231 WEH include/fscom_dum.i
+           include/fscom.h
+           newlb/prog.c
+           quikv/logmsg_dbbc.c
+           boss/newlg.f
+150101 WEH incom/equip.f
+           st.default/control/equip.ctl
+           control/fserr.ctl
+           new DBBC DDC version numbering scheme
+
+150101 WEH setcl/setcl.f
+           fix upper/lower case Mk5B typo
+
+150101 WEH include/params.i
+           include/params.h
+           quikv/scan_check_dis.c
+           quikv/disk_pos.c
+           quikv/data_check_dis.c
+           quikv/bank_check.c
+           clib/tpicd_util.c
+           clib/scan_check_util.c
+           clib/onoff_util.c
+           clib/disk_pos_util.c
+           clib/disk2file_util.c
+           clib/bank_check_util.c
+           clib/data_check_util.c
+           control/fserr.ctl
+           incom/equip.f
+           st.default/control/equip.ctl
+           make MK5C[_BS] the same as MK5B[_BS]
+
+150101 WEH control/fscmd.ctl
+           quikv/quikv.c
+150103 WEH control/fserr.ctl
+150104 WEH quikv/mk5b_mode_dis.c
+           clib/mk5b_mode_util.c
+           quikv/mk5b_mode.c
+           help/mk5b_mode.__
+           add mk5c_mode command
+
+150104 WEH boss/newpr.f
+           fix end of year wrap error in procedure logging
+
+150105 WEH st.default/control/equip.ctl
+           quikv/mk5b_mode.c
+           help/mk5b_mode.__
+           suppress clock_set in mk5c_mode when MK5B clock rate is zero
+
+151015 WEH quikv/mk5b_mode.c
+           adjust response to reflect hardware
+           
+151016 WEH quikv/logmsg_dbbc.c
+           handle upper case verion letters
+
+151016 WEH boss/newpr.f
+           restore deleted line
+
+151017 WEH clib/dbbcform_util.c
+           clib/mk5dbbcd.c
+           add astro3 code
+
+151017 WEH clib/get_tcal_fwhm.c
+           add 32 MHz BW and fix 15u and 16u detector codes
+
+151017 WEH help/mk5b_mode.___
+           remove integer limitation on sample
+
+151017 WEH quikr/tplis.f
+           quikr/tplisv.f
+           quikr/tplisd.f
+           mark5c for Tsys
+
+151018 WEH clib/mk5b_mode_util.c
+           format sample rate as float
+
+151018 WEH control/fserr.ctl
+           improve mk5b_mode error messages
+
+150112 WEH clib/dbbcnn_util.c
+           control/fserr.ctl
+           help/form.d__
+           clib/dbbcform_util.c
+           trap illegal BW and form codes or E/F and non E/F DBBC DC fimware
+
+150112 WEH st.default/control/equip.ctl
+           document nu trailing _x for DBBC DDC versions less than 105
+
+150113 WEH control/fserr.ctl.
+           clib/mk5b_mode_util.c
+           help/mk5b_mode.__
+           check sample is an integer
+           output parentheses around sample for 5B
+           output square brackets around sample for 5B
+
+150113 WEH clib/mk5b_mode_util.c
+           remove unused variables
+           print decimiation for bi_streams response
+
+150114 WEH help/mk5b_mode.___
+           help/form.d__
+           control/fserr.ctl
+           typos fixed
+
+150114 WEH help/mk5b_mode.___
+           control/fserr.ctl
+           clib/dbbcform_util.c
+           clib/mk5b_mode_util.c
+           switch E/F device format code to "astro3"
+           trap use of non BBC01 with E/F "astro"          
+
+150114 WEH misc/fs9117up.txt
+           updated
+           
+150115 WEH misc/fs9117up.txt
+           clib/mk5b_mode_util.c
+           help/mk5b_mode.___
+           read back and display clock rate for 5C instead of fpdp
+
+150115 WEH control/fserr.ctl
+           clib/mk5b_mode_util.c
+150119 WEH help/mk5b_mode.___
+           improve sample rate error messages
+
+150121 WEH clib/mk5b_mode_util.c
+           control/fserr.ctl
+           clib/dbbcform_util.c
+           help/form.d__
+           remove checking for astro mode for E/F with BBC01
+           no more translating astro to astro3 for E/F
+
+150123 WEH misc/fs9117up.txt
+           fix typos
+
+150126 WEH misc/fs9117up.txt
+           fix MHZ typos
+
+150126 WEH chekr/bbchk.c
+           chekr/bbc_brk.c
+           control/fserr.ctl
+           check VLBA BBC lock
+
+150116 HV  clib/mk5_status_util.c
+           quikv/mk5_status.c
+150127 HV  quikv/quikv.c
+           quikv/Makefile
+           control/fserr.ctl
+           control/fscmd.ctl
+           clib/Makefile
+150129 HV  help/mk5_status.___
+           add mk5_status command
+
+150127 WEH chekr/chekr.f
+           quikv/vform.c
+           chekr/vlbarack.f
+           help/form.v___
+           reenable VLBA/4/5 checking, but disable formatter checking 
+
+150129 WEH quikv/mk5b_mode.c
+           fserr.ctl
+           quikv/mk5b_mode_dis.c
+           fix error codes
+
+150130 WEH help/form.v__
+           improved text
+
+150130 WEH misc/fs9117up.txt
+           st.default/control/skedf.ctl
+           ignore_mark5B_bad_mask added
+
+150131 JQ  clib/mk5_status_util.c
+150204 JQ  quikv/mk5_status.c
+150204 WEH control/fserr.ctl
+           help/mk5_status.___
+150205 WEH misc/fs9117up.txt
+           final tweaks
+
+Version 9.11.7 150205
+
+130312 WEH ddout/ddout.c
+           append who to "un" errors to identify source device
+
+130314 WEH clib/skd_util.c
+           handle parallel running of programs with run_index
+
+130314 WEH boss/bwork.f
+           record log entires before errors for operator visibility
+
+130401 WEH clib/cls_util.c
+           don't try to clear class if negative
+
+130401 WEH quikv/disk2file_dis.c
+           quikv/in2net_dis.c
+           quikv/disk_record_dis.c
+           don't clear non-existent class if logm5msg had an error
+
+130426 WEH rdbcn/Makefile
+131113 WEH rdbcn/rdbcn.c
+           created
+
+130501 WEH include/rdbe_dot_ds.h
+           clib/rdbe_dot_util.c
+           created
+
+130501 WEH fmset/setfmtime.c
+130502 WEH fmset/Makefile
+           add rdbe
+
+130514 WEH quikv/rdbe_active.c
+           created
+
+130514 WEH poclb/logitf.c
+           poclb/logitn.c
+           poclb/logita.c
+           poclb/logit.c
+           protect against NULL msg
+
+130611 WEH clib/fsmetc.c
+           modified for GETADDINFO and using server hots
+
+130805 WEH quikv/rdbe.c
+           quikv/rdbe_dis.c
+           created
+
+131025 WEH rdtcn/Makefile
+131122 WEH rdtcn/rdtcn.c
+           created
+
+131111 WEH fivpt/tsys.f
+           fivpt/Makefile
+131112 WEH fivpt/fivpt.f
+           updated for rdbe
+
+131111 WEH fivpt/rdtcn.c
+           created 
+
+131112 WEH incom/sincom.f
+           fivpt/fivp.f
+           include/fscom_quik.i
+           increase ldevfp to 4 characters
+
+131112 WEH fclib/Makefile
+           fclib/fc_rdtcn.c
+           fc_rdtcn.f created
+
+131112 WEH include/lo_ds.h
+           changed from hardwired 4 to MAX_LO
+
+131113 WEH clib/lo_util.c
+           add RDBE, improve none rack LO handling
+
+131113 WEH quikr/fvpnt.f
+           add RDBE, wtih 4 char device names
+
+131115 WEH fivpt/volts.f
+           add RDBE
+
+131119 WEH poclb/logit.c
+           handle missing pname as normal logit response
+
+131121 WEH quikr/fpdis.f
+           include;/onoff_ds.h
+           4 char device names
+
+131122 WEH onoff/onoff.c
+           onoff/wcounts.c
+	   onoff/Makefile
+           4 char devices names and RDBE added
+
+131122 WEH onoff/get_samples.c
+           onoff/tzero.c
+           onoff/tpget_rdbe.c
+           clib/rdtcn_v.c
+           RDBE support added
+
+131122 WEH xtrac/xtrac.f
+           xtrac/defiv.f
+           xtrac/getdp.f
+           4 character device names
+
+150128 WEH boss/bwork.f
+           incorporate not permitting schedule change when Mark 5 is recording
+
+150128 WEH include/mk6_disk_record_ds.h
+150129 WEH clib/mk6_disk_record_util.c
+150210 WEH include/mk6_disk_pos_ds.h
+           clib/mk6_disk_pos_util.c
+           include/mk6_scan_check_ds.h
+           clib/mk6_scan_check_util.c
+           quikv/mk6_scan_check_dis.c
+           modified to mk6 from previous mk5c naming, may be wrong for mk6
+
+150210 WEH newlb/prog.c
+           include/fscom_dum.i
+           add wx_host, mk6, and rdbe
+
+150210 WEH st.default/control/mk6c1.ctl
+           st.default/control/mk6c2.ctl
+           created from 5c equivalents
+
+150210 WEH include/fs_types.h
+           add mk6 and rdbe types
+
+150211 WEH fmset/fsmet.c
+           fmset/getfmtime.c
+           boss/newlg.f
+           incom/equip.f
+           add RDBE
+
+150211 WEH incom/equip.f
+           add metserver port/host
+
+150211 WEH quikv/mk6_scan_check.c
+           quikv/mk6_active.c
+           created from 5c equivalents  may be wrong for mk6
+
+150211 WEH quikv/Makefile
+           add mk6 and rdbe
+
+150211 WEH control/fscmd.ctl
+           expand sub column, add mk6/rdbe commands
+
+150211 WEH boss/binit.f
+           updated for RDBEs and Mark 6
+
+150211 WEH quikv/mk6.c
+           created from mk5c version
+
+150211 WEH quikv/quikv.c
+           updated for RDBEs and Mark 6
+
+150211 WEH quikv/logm6msg.c
+           created from mk5c version
+
+150212 WEH quikv/mk6_disk_record.c
+           quikv/mk6_disk_record_dis.c
+           quikv/mk6_disk_pos.c
+           quikv/mk6_disk_pos_dis.c
+           quikv/mk6_dis.c
+           created from mk5c version
+
+150212 WEH quikv/Makefile
+           add rdbcn and rdtcn
+
+150212 WEH control/fspgm.ctl
+           add mk6cX, rdbcX, and rdtcX
+
+150213 WEH clib/Makefile
+           include/params.i
+           include/params.h
+           updated for RDBE and Mark6
+
+150217 WEH clib/get_gain_par.c
+           clib/get_tcal_fwhm.c
+           updated for MAX_LO, RDBE
+
+150217 WEH clib/cshm_init.c
+           updated for MAX_LO, MAX_USER_DEV, and RDBE, MK6
+
+150217 WEH quikv/onoff.c
+           updated for RDBE, MAX_LO, removed extraneous lwhat
+
+150218 WEH quikv/onoff.c
+           updated for 32 MHZ DBBC BW
+
+150219 WEH mk6cn/Makefile
+           control/fspgm.ctl
+           mk6cn/mk6cn.c
+           st.default/control/mk6ca.ctl
+           st.default/control/mk6cb.ctl
+           Mark 6 cloned from old prototype Mark 5C
+
+150219 WEH st.default/control/rdbcd.ctl
+           st.default/control/rdbca.ctl
+           st.default/control/rdbcb.ctl
+           st.default/control/rdbcc.ctl
+           defaults brought up to date
+
+150219 WEH quikv/rdbe_dis.c
+           fixed error mneonic from 3m to 2m
+
+150219 WEH control/fserr.ctl
+           merged in 9.12.1 messages: MK6(was mk5C), RDBE, WX
+
+150220 WEH Makefile
+           add mk6cn
+
+150302 WEH quikv/logmsg_dbbc.c
+           fix version handling bug for versions after 104
+
+150302 WEH quikv/Makefile
+           chame logm5cmsg.o to logmk6msg.o
+
+150302 WEH quikv/mk6_disk_record.c
+           quikv/mk6_disk_record_dis.c
+           fix calls to m5 utilitesi to m6 versions
+
+150409 WEH pre_FSL9_RAID.docx
+           pre_FSL9_RAID.pdf
+           renamed from "RAID.*" versions
+
+150409 WEH FSL9_RAID.docx
+           FSL9_RAID.pdf
+           pre_FSL9_RAID.docx
+           pre_FSL9_RAID.pdf
+           moved to FTP server

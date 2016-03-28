@@ -41,7 +41,7 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(i<ip[1]-1) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
+	  *ierr=-113;
 	  return -1;
 	}
 	inbuf[nchars]=0;
@@ -80,7 +80,7 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(i<ip[1]-1) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
+	  *ierr=-114;
 	  return -1;
 	}
 	inbuf[nchars]=0;

@@ -67,7 +67,9 @@ char *ptr;
       } else if(shm_addr->equip.rack==MK4&&shm_addr->equip.rack_type==MK45 &&
 		shm_addr->equip.drive[0]==MK5 &&
 		(shm_addr->equip.drive_type[0]==MK5B ||
-		 shm_addr->equip.drive_type[0]==MK5B_BS)) {
+		 shm_addr->equip.drive_type[0]==MK5B_BS ||
+		 shm_addr->equip.drive_type[0]==MK5C ||
+		 shm_addr->equip.drive_type[0]==MK5C_BS) ) {
 	mk5vcd(lcl->itpis);
       } else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	mk4vcd(lcl->itpis);
@@ -77,7 +79,9 @@ char *ptr;
 		shm_addr->equip.rack_type==VLBA45 &&
 		shm_addr->equip.drive[0]==MK5 &&
 		(shm_addr->equip.drive_type[0]==MK5B ||
-		 shm_addr->equip.drive_type[0]==MK5B_BS)) {
+		 shm_addr->equip.drive_type[0]==MK5B_BS ||
+		 shm_addr->equip.drive_type[0]==MK5C ||
+		 shm_addr->equip.drive_type[0]==MK5C_BS) ) {
 	mk5bbcd(lcl->itpis); 
       } else if(shm_addr->equip.rack==VLBA4) {
 	mk4bbcd(lcl->itpis);
@@ -86,7 +90,9 @@ char *ptr;
       } else if(shm_addr->equip.rack==DBBC &&
 		shm_addr->equip.drive[0]==MK5 &&
 		(shm_addr->equip.drive_type[0]==MK5B ||
-		 shm_addr->equip.drive_type[0]==MK5B_BS)) {
+		 shm_addr->equip.drive_type[0]==MK5B_BS ||
+		 shm_addr->equip.drive_type[0]==MK5C ||
+		 shm_addr->equip.drive_type[0]==MK5C_BS) ) {
 	mk5dbbcd(lcl->itpis); 
       }
 
@@ -202,6 +208,8 @@ struct tpicd_cmd *lcl;
       }else if (shm_addr->equip.rack==DBBC) {
 	sprintf(output+strlen(output),"%c",chanv[j]);
 	limit=MAX_DBBC_DET;
+      }else if (shm_addr->equip.rack==RDBE) {
+	limit=0; /* we always do all */
       }
       lenstart=strlen(output);
       for (k=0;k<limit;k++) {

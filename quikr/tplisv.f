@@ -116,7 +116,9 @@ C
         call fs_get_drive_type(drive_type)
         if(rack.eq.VLBA4.and.rack_type.eq.VLBA45.and.
      &       drive(1).eq.mk5.and.
-     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       ) then
            call fc_mk5bbcd(itpis_vlba)
         else if(rack.eq.VLBA) then
            call fc_vlbabbcd(itpis_vlba)
@@ -133,7 +135,9 @@ c
         call fs_get_drive_type(drive_type)
         if(rack.eq.VLBA4.and.rack_type.eq.VLBA45.and.
      &       drive(1).eq.mk5.and.
-     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       ) then
            call fc_mk5bbcd(itpis_test)
         else if(rack.eq.VLBA) then
            call fc_vlbabbcd(itpis_test)

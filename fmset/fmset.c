@@ -36,6 +36,10 @@ int hint_row;
 int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
+int m5b_crate;
+int iRDBE;
+
+WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
 unsigned char inbuf[512];      /* class i-o buffer */
 unsigned char outbuf[512];     /* class i-o buffer */
@@ -51,7 +55,6 @@ int dbbc_sync=0;
 main()  
 {
 /* local variable declarations */
-WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 time_t unixtime; /* local computer system time */
 int    unixhs;
 time_t fstime; /* field systm time */
@@ -103,8 +106,24 @@ rack=shm_addr->equip.rack;
 rack_type=shm_addr->equip.rack_type;
 drive=shm_addr->equip.drive[0];
 drive_type=shm_addr->equip.drive_type[0];
+m5b_crate=shm_addr->m5b_crate;
 
- if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
+ if (rack == RDBE) {
+   if(shm_addr->rdbe_units[0])
+     iRDBE=1;
+   else if(shm_addr->rdbe_units[1])
+     iRDBE=2;
+   else if(shm_addr->rdbe_units[2])
+     iRDBE=3;
+   else if(shm_addr->rdbe_units[3])
+     iRDBE=4;
+   else {
+    fprintf(stderr,
+	    "no RDBEs available, correct rdbc?.ctl, and restart FS - fmset aborting\n");
+    rte_sleep(SLEEP_TIME);
+    exit(0);
+   }
+ } else if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
   source=drive;
 else if (drive==S2) {
    source=S2;
@@ -148,8 +167,23 @@ box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
  column=10;
  hint_row=8;
 build:
-mvwaddstr( maindisp, 2, 8, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B time set" );
- if( source == MK5) {
+mvwaddstr( maindisp, 2, 8, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/RDBE time set" );
+ if(rack == RDBE) {
+   column=6;
+   if(1==iRDBE) {
+     form="rdbe-A";
+     mvwaddstr( maindisp, 4, column, "rdbe-A      " );
+   } else if(2==iRDBE) {
+     form="rdbe-B";
+     mvwaddstr( maindisp, 4, column, "rdbe-B      " );
+   } else if(3==iRDBE) {
+     form="rdbe-C";
+     mvwaddstr( maindisp, 4, column, "rdbe-C      " );
+   } else if(4==iRDBE) {
+     form="rdbe-D";
+     mvwaddstr( maindisp, 4, column, "rdbe-D      " );
+   }
+ } else if( source == MK5) {
    column=6;
    hint_row=12;
    form="Mark 5B";
@@ -177,13 +211,28 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
 
 irow=4;
- if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5)) {
+ if(source != S2 &&
+    (rack& MK4 || rack &VLBA4 || source == MK5 ||rack == RDBE)) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
 if(toggle) {
   mvwaddstr( maindisp, hint_row+irow++, column,
  "    't'/'T' to toggle between S2 RT or MarkIV/VLBA formatter/S2 DAS.");
+}
+if(rack == RDBE) {
+  if(shm_addr->rdbe_units[0])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'a'/'A' to select rdbe-A.");
+  if(shm_addr->rdbe_units[1])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'b'/'B' to select rdbe-B.");
+  if(shm_addr->rdbe_units[2])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'c'/'C' to select rdbe-C.");
+  if(shm_addr->rdbe_units[3])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'd'/'D' to select rdbe-D.");
 }
 
  mvwaddstr( maindisp, hint_row+irow++, column,
@@ -202,94 +251,117 @@ do 	{
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
 		  mk5b_clock_source,sizeof(mk5b_clock_source)); /* get times */
-        disptime=formtime;
-        disphs=formhs+5;
-        if (disphs > 99) {
-           disphs-=100;
-           disptime++;
-        }
+
+	if(formtime>=0) {
+	  disptime=formtime;
+	  disphs=formhs+5;
+	  if (disphs > 99) {
+	    disphs-=100;
+	    disptime++;
+	  }
           
-	if(disptime>=0) {
 	  sprintf(fmt,
-		  "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s",disphs/10,
+		  "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s   ",disphs/10,
 		  mk5b_sync);
 	  disptm = gmtime(&disptime);
 	  strftime ( buffer, sizeof(buffer), fmt, disptm );
 	  mvwaddstr( maindisp, 4, column+15, buffer );
-	} else                      /* 123456789012345678901234567890123456*/
-	  mvwaddstr( maindisp, 4, column+15, "Year out of range: [1970 to 2037]   ");
-
-	index=01 & shm_addr->time.index;
-	epoch=shm_addr->time.epoch[index];
-	icomputer=shm_addr->time.icomputer[index];
-	if(shm_addr->time.model == 'c'||epoch==0 || icomputer!=0) {
-	  fstime=unixtime;
-	  fshs=unixhs;
+	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
+	  wstandout(maindisp);
+	  mvwaddstr( maindisp, 4, column+15, "Error from device, see log for details.");
+	  wstandend(maindisp);
+	  mvwaddstr( maindisp, 4, column+15+39, "               ");
 	}
 
-        disptime=fstime;
-        disphs=fshs+5;
+	if(formtime >= 0) {
+	  index=01 & shm_addr->time.index;
+	  epoch=shm_addr->time.epoch[index];
+	  icomputer=shm_addr->time.icomputer[index];
+	  if(shm_addr->time.model == 'c'||epoch==0 || icomputer!=0) {
+	    fstime=unixtime;
+	    fshs=unixhs;
+	  }
 
-        if (disphs > 99) {
-           disphs-=100;
-           disptime++;
-        }
- 
-	if(shm_addr->time.model == 'c'||epoch==0||icomputer!=0)
-	  model="computer";
-	else if(shm_addr->time.model=='n')
-	  model="none    ";
-	else if(shm_addr->time.model=='o')
-	  model="offset  ";
-	else if(shm_addr->time.model=='r')
-	  model="rate    ";
-	else
-	  model="unknown ";
+	  disptime=fstime;
+	  disphs=fshs+5;
+	  
+	  if (disphs > 99) {
+	    disphs-=100;
+	    disptime++;
+	  }
+	  
+	  if(shm_addr->time.model == 'c'||epoch==0||icomputer!=0)
+	    model="computer";
+	  else if(shm_addr->time.model=='n')
+	    model="none    ";
+	  else if(shm_addr->time.model=='o')
+	    model="offset  ";
+	  else if(shm_addr->time.model=='r')
+	    model="rate    ";
+	  else
+	    model="unknown ";
 	    
-        sprintf( fmt, "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y model: %s",
-		 disphs/10,model);
-        disptm = gmtime(&disptime);
-	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 5, column+15, buffer );
+	  sprintf( fmt, "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y model: %s",
+		   disphs/10,model);
+	  disptm = gmtime(&disptime);
+	  strftime ( buffer, sizeof(buffer), fmt, disptm );
+	  mvwaddstr( maindisp, 5, column+15, buffer );
+	} else                             /* 123456789012345678901234567890123456789012345678901234 */
+	  mvwaddstr( maindisp, 5, column+15, "                                                      ");
 
-	disptime=unixtime;
-	disphs=unixhs+5;
-	if (disphs > 99) {
-	  disphs-=100;
-	  disptime++;
-	}
+	if(formtime >= 0) {
+	  disptime=unixtime;
+	  disphs=unixhs+5;
+	  if (disphs > 99) {
+	    disphs-=100;
+	    disptime++;
+	  }
+	  
+	  intp=ntp_synch(0);
+	  if(intp==1)
+	    ntp="sync'd    ";
+	  else if(intp==0)
+	    ntp="not sync'd";
+	  else
+	    ntp="unknown   ";
+	  
+	  sprintf(fmt,
+		  "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y NTP: %s",
+		  disphs/10, ntp);
+	  disptm = gmtime(&disptime);
+	  strftime ( buffer, sizeof(buffer), fmt, disptm );
+	  mvwaddstr( maindisp, 6, column+15, buffer );
+	} else                             /* 123456789012345678901234567890123456789012345678901234 */
+	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
 
-	intp=ntp_synch(0);
-	if(intp==1)
-	  ntp="sync'd    ";
-	else if(intp==0)
-	  ntp="not sync'd";
-	else
-	  ntp="unknown   ";
-	
-	sprintf(fmt,
-		"%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y NTP: %s",
-		disphs/10, ntp);
-	disptm = gmtime(&disptime);
-	strftime ( buffer, sizeof(buffer), fmt, disptm );
-	mvwaddstr( maindisp, 6, column+15, buffer );
-
-	if(source==MK5) {
+	if(rack != RDBE && source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
-	     (rack == MK4   && rack_type == MK45  )) {
+	     (rack == MK4   && rack_type == MK45  ) || 
+	     rack == DBBC ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
 	      pps_status="- okay                         ";
 	    else
 	      pps_status="- incorrect value, fix with 's'";
-	    if(strcmp(mk5b_clock_freq,"32")==0)
-	      freq_status="- okay                         ";
-	    else
-	      freq_status="- incorrect value, fix with 's'";
-	    if(strcmp(mk5b_clock_source,"ext")==0)
-	      source_status="- okay                         ";
-	    else
-	      source_status="- incorrect value, fix with 's'";
+	    if(m5b_crate!=0) {
+	      int crate;
+	      if(1 != sscanf(mk5b_clock_freq,"%d",&crate)) {
+		freq_status="- error decoding clock rate    ";
+	      } else if(crate!=m5b_crate)
+		freq_status="- incorrect value, fix with 's'";
+	      else
+		freq_status="- okay                         ";
+	      if(strcmp(mk5b_clock_source,"ext")==0)
+		source_status="- okay                         ";
+	      else
+		source_status="- incorrect value, fix with 's'";
+	    } else {
+	        freq_status="- no value set in equip.ctl    ";
+	      if(strcmp(mk5b_clock_source,"ext")==0)
+		source_status="- okay                         ";
+	      else
+		source_status="- incorrect value, fix manually";
+	    }
 	  } else {
 	    pps_status="                               ";
 	    freq_status="                               ";
@@ -384,13 +456,34 @@ do 	{
 	    source=other;
 	    other=temp;
             s2type = 1-s2type;
-	    goto build;
 	  }
+	  goto build;
+	case 'a':
+	case 'A':
+	  if(rack== RDBE && shm_addr->rdbe_units[0])
+	    iRDBE=1;
+	  goto build;
+	case 'b':
+	case 'B':
+	  if(rack== RDBE && shm_addr->rdbe_units[1])
+	    iRDBE=2;
+	  goto build;
+	case 'c':
+	case 'C':
+	  if(rack== RDBE && shm_addr->rdbe_units[2])
+	    iRDBE=3;
+	  goto build;
+	case 'd':
+	case 'D':
+	  if(rack== RDBE && shm_addr->rdbe_units[3])
+	    iRDBE=4;
+	  goto build;
 	case SYNCH_KEY:
 	case SYNCH2_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
-	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5) &&
+	  if(source != S2 &&
+	     (rack& MK4 || rack &VLBA4 || source == MK5 ||rack == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
@@ -408,13 +501,23 @@ do 	{
 } while ( running );
 
 endwin ();
- if(changedfm) {
+ if(changedfm && rack!=RDBE) {
    logit("Formatter time reset.",0,NULL);
    if(shm_addr->time.model != 'c' && shm_addr->time.model!='n'
       && shm_addr->time.icomputer[01 & shm_addr->time.index]==0)
-     skd_run_arg("setcl",' ',ipr,"setcl offset");
+     if(formtime < 0) {
+       logit("Last FMSET formatter communication returned an error.",0,NULL);
+       logit("Please reset FS time manually.",0,NULL);
+       fprintf(stderr,"\n**\nLast FMSET formatter communication returned an error.\n");
+       fprintf(stderr,"Please reset FS time manually.\n**\n\n");
+       rte_sleep(SLEEP_TIME);
+       logit(NULL,-7,"fv");
+
+     } else 
+       skd_run_arg("setcl",' ',ipr,"setcl offset");
    else
-     skd_run_arg("setcl",' ',ipr,"setcl");
+     if(formtime >0 )
+       skd_run_arg("setcl",' ',ipr,"setcl");
  }
  if(changeds2das) {
    logit("S2DAS time reset.",0,NULL);

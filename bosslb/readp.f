@@ -64,7 +64,6 @@ C
       if(ierr.lt.0)goto 800
       if (indexp.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (indexp.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
-      call char2low(ibc)
       if (ierr.lt.0) goto 800
       if (ilen.lt.0.or.ibc(1:6).eq.'enddef'.or.ibc(1:6).eq.'define')
      .   goto 200
@@ -81,7 +80,6 @@ C
       nchar = iflch(ib,512)
       if (ibc.eq.' ') goto 100
       nchar=fblnk(ib,1,nchar)
-      call lower(ib,nchar)
       id = ichmv(ibuf,1,ib,1,nchar)
       call prpop(lstack,nparm,1,ierr)
 C                     Pop up the # parm ...
@@ -119,7 +117,6 @@ C
       id = fmpsetpos(idcbp1,ierr,irecl,-irecl)
       if (ierr.lt.0) goto 800
       ilen = fmpreadstr(idcbp1,ierr,ibc)
-      call char2low(ibc)
       if (ierr.lt.0.or.ilen.lt.0) goto 800
       idummy = ichmv(lprocn,1,ib,9,12)
       goto 100
@@ -129,7 +126,6 @@ C
       id = fmpsetpos(idcbp2,ierr,irecl,-irecl)
       if (ierr.lt.0) goto 800
       ilen = fmpreadstr(idcbp2,ierr,ibc)
-      call char2low(ibc)
       if (ierr.lt.0.or.len.lt.0) goto 800
       idummy = ichmv(lprocn,1,ib,9,12)
       goto 100

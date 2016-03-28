@@ -23,7 +23,7 @@ c
       iw = ((ibit-1)/INT_BITS)+1
       ib = ibit - (iw-1)*INT_BITS
 c 
-      kbit = bjtest(iarray(iw),ib-1) 
+      kbit = btest(iarray(iw),ib-1) 
 c 
       return
       end 

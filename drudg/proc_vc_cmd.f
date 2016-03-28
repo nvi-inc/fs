@@ -36,8 +36,10 @@
       integer ib,ic             !BBC#, Channel#, alternate channel#    
       logical kdone_bbc(max_bbc)  !flag indicating that we have this BBC     
       logical kfirst
-      integer nlast              
-     
+      integer nlast  
+            
+      kwrite_return = .true.   
+!If true, then need to write a <CR> before outputting error or warning info.     
       do irec=1,nrecst(istn) ! loop on recorders
 C       If both recorders are in use then do the check to see if
 C       we should do one or both procs
@@ -55,8 +57,8 @@ C         Initialize the bbc array to "not written yet"
         
           DO ichan=1,nchan(istn,icode) !loop on channels
             ic=invcx(ichan,istn,icode) ! channel number
-            ib=ibbcx(ic,istn,icode) ! BBC number
-
+            ib=ibbcx(ic,istn,icode)    ! BBC number
+      
 ! Check for some quick exits...
             if(kdone_bbc(ib)) goto 500
             if(freqrf(ic,istn,icode) .lt. 0) goto 500
@@ -97,18 +99,25 @@ C             For 8-BBC stations use the loop index number to get 1-7
 ! Here we do some checking for DBBC racks to make sure that BBCs 
 ! 1-4 are in the same frequency band, 
 ! 5-8 are in the same frequency band... etc.
-       if(kdbbc_rack) then
-          call check_dbbc_setup(icode,ierr)
-          if(ierr .ne. 0) return 
-        endif     
 
-          if(kvracks .or. kmracks) then
+       if(kdbbc_rack) then
+         if(cstrack_orig(istn) .eq. "DBBC" .or. 
+     >      cstrack_orig(istn) .eq. "NONE") then      
+           continue
+         else
+! But only check if the original rack is NOT  DBBC or NONE
+           call check_dbbc_setup(icode,ierr)
+           if(ierr .ne. 0) return 
+         endif 
+       endif     
+
+       if(kvracks .or. kmracks) then
 ! Here we pick up the BBCs that are present, but not used. Put in for RDVs. 
-            if(kmracks) then    ! "VC" command.
-              nch=3   
-            else
-              nch=4              ! "BBC" command.   
-            endif 
+          if(kmracks) then    ! "VC" command.
+            nch=3   
+          else
+            nch=4              ! "BBC" command.   
+          endif 
             nlast=trimlen(cbuf2) 
             kfirst=.true.
             do ib=1,max_bbc

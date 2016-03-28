@@ -12,6 +12,8 @@
 #define MAXLOG  80
 /* Some commands are here for later use. */
 
+extern char metdevice[20];
+
 char *metget(
 char terminal[], /* connection for getting temp,humidity,pressure */ 
 char terminal2[]) /* connection for get wind parameters. */
@@ -19,6 +21,8 @@ char terminal2[]) /* connection for get wind parameters. */
 
   /* Passed arguments */
 char metcmd[] = "*0100P9\n";
+char fancmd[] = "*0100FS\n";
+char fanspd[] = "*0100FR\n";
 char windcmd[] = "W5";
 static  int ttynum;         /* write to com port: 1-2 or Vikom: 16-23 */
 static  int ttynum2;        /* read from com port: 1-2 or Vikom: 16-23 */
@@ -34,6 +38,7 @@ static  int ttynum2;        /* read from com port: 1-2 or Vikom: 16-23 */
   int wdir;
   float temp,pres,humi,wsp;
   char buff[MAXBUF];
+  char buff2[MAXBUF];
 static  char log_str[MAXLOG];
   int len, ierr;
 
@@ -63,6 +68,7 @@ static  char log_str[MAXLOG];
       if(open_err <= -2)
 	portclose_(&ttynum);
       ttynum=0;
+      sleep(1); /* don't retry too often */
     }
   }
   if (ttynum2==0 && !strstr(terminal2,"/dev/null")) {
@@ -75,6 +81,7 @@ static  char log_str[MAXLOG];
       if(open2_err <= -2)
 	portclose_(&ttynum2);
       ttynum2=0;
+      sleep(1); /* don't retry too often */
     }
   }
 
@@ -85,16 +92,57 @@ static  char log_str[MAXLOG];
     len = sizeof(buff);
     err = portread_(&ttynum, buff, &count, &len, &termch, &to);
     if(err!=0) {
-      err_report("error reading met device", terminal,0,err);
+      err_report("error reading met device nmea string", terminal,0,err);
       temp=51.0*(pres=humi=err);
       portclose_(&ttynum);
       ttynum=0;
     }  else {
       buff[count]=0;
-      nema(buff,&pres,&temp,&humi);
+      nmea(buff,&pres,&temp,&humi);
       if(pres < 0 || temp <-50 || humi < 0)
-	err_report("error decoding met nema string", buff,0,0);
+	err_report("error decoding met nmea string", buff,0,0);
       pres*=1000;
+    }
+    if(0==strcmp(metdevice,"MET4A")){  /* check on fan */
+      ierr = portflush_(&ttynum);
+      len = strlen(fancmd);
+      err = portwrite_(&ttynum, fancmd, &len);
+      len = sizeof(buff);
+      err = portread_(&ttynum, buff, &count, &len, &termch, &to);
+      if(err!=0) {
+	err_report("error reading met fan status", terminal,0,err);
+	portclose_(&ttynum);
+	ttynum=0;
+      }  else {
+	int status;
+	buff[count]=0;
+	if(1!=sscanf(buff,"*0001FS=%d",&status))
+	  err_report("error decoding met fan status", buff,0,0);
+	else if(1!=status) {
+	  ierr = portflush_(&ttynum);
+	  len = strlen(fanspd);
+	  err = portwrite_(&ttynum, fanspd, &len);
+	  len = sizeof(buff2);
+	  err = portread_(&ttynum, buff2, &count, &len, &termch, &to);
+	  if(err!=0) {
+	    err_report("fan status bad, and now error reading actual speed",
+		       terminal,0,err);
+	    portclose_(&ttynum);
+	    ttynum=0;
+	  }  else {
+	    int speed;
+	    buff2[count]=0;
+	    if(1!=sscanf(buff2,"*0001FR=%d",&speed))
+	      err_report("fan staus bad, and now error decoding actual speed"
+			 , buff2,0,0);
+	    else {
+	      snprintf(buff2,sizeof(buff2),"fan status bad, speed %d RPM",
+		       speed);
+	      err_report(buff2, NULL,0,0);
+	    }
+	  }
+	}
+      }
     }
   }
 
@@ -126,7 +174,7 @@ static  char log_str[MAXLOG];
 
 }
 
-nema(bufin,pres,tmp,humi)
+nmea(bufin,pres,tmp,humi)
 char *bufin;
 float *pres, *tmp, *humi;
 {

@@ -38,12 +38,12 @@ C
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED: 800831 
 C 
-C     1. Get RMPAR parameters and check for errors from our I/O request.
+C     1. Get RMPAR parameters, errors are okay but will be reported
 C 
       iclass = ip(1)
       ncrec = ip(2) 
       ierr = ip(3)
-      if (ierr.lt.0 .or. iclass.eq.0 .or. iclcm.eq.0) return
+      if (ncrec.eq.0 .or. iclass.eq.0 .or. iclcm.eq.0) return
 C 
 C     2. Get class buffer with command in it.  Set up first part
 C     of output buffer.  Get first buffer from MATCN. 
@@ -90,8 +90,9 @@ C
 C 
       ip(1) = iclass
       ip(2) = 1 
-      ip(3) = 0
-      call char2hol('qb',ip(4),1,2)
-      ip(5) = 0 
+c errors come from the device controller
+c      ip(3) = 0
+c      call char2hol('qb',ip(4),1,2)
+c      ip(5) = 0 
       return
       end 

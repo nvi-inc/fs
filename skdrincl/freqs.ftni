@@ -158,8 +158,7 @@ C
      .       wavei(max_band,max_stn,max_frq),
      .       bwrms(max_band,max_stn,max_frq),
      .       trkn(max_band,max_stn,max_frq),
-     .       samprate(max_frq),
-     .
+     .       samprate(max_stn,max_frq),
      .       NCODES,nband,
      .       NFREQ(MAX_BAND,max_stn,MAX_FRQ), 
      .       NPASSF(max_stn,MAX_FRQ),

@@ -10,25 +10,52 @@ Settable parameters:
 
 Comments: 
 
-This command is used to execute UNIX systems from within the
-Field System. The UNIX command is executed under your default
-shell. Any response or error from the command will be
-displayed in the Field System Log and Display widow, the
-response will not go in the log.
+This command is used to execute a UNIX program from within the Field
+System.  The UNIX program is executed by using the system() call,
+which executes 'command' by calling
 
-Normally, if you need to execute a UNIX command, use the
-operator menu to open a new window temporarily and type your
-commands and see the output there. The sy command should be
-used only if there is a need for a system command in a
-procedure or schedule.
+    /bin/sh -c command
 
-Any valid UNIX command that does not require input may be
-used. There is no facility for accepting user input when you
-use the sy command.
+See 'man system' for more details.  Any response or error from the
+command will be displayed on the terminal that the FS run on, usually
+the Field System Log and Display widow, the response will not go in
+the log.
 
-Since commands could take some time to execute and therefore
-tie up the Field System, it is recommended that commands used
-with sy be executed in the background. To have a command run
-in background and not wait for its completion, append an & to
-the command. If you do want to wait until the command
-finishes, do not use the &.
+Normally if you need to execute a UNIX program, use the operator menu
+to open a new window temporarily and type your commands and see the
+output there.  The 'sy=...' command should be used only if there is a
+need for a system command in a procedure or schedule.
+
+Any valid '/bin/sh' command that does not require input may be used.
+There is no facility for accepting user input when you use the
+'sy=...'  command.
+
+Since a UNIX program could take some time to execute and therefore tie
+up the Field System, it is recommended that the commands used with
+'sy=...' be executed in the background by appending an '&' to the
+line.  If you do want to wait until the command finishes, do not use
+the '&'.  That may be necesary if some action needs to be completed
+before schedule execution can continue.  However, if the command
+blocks for an extended period of time, the schedule may be delayed.
+
+Output from the command can be included in the log by using the FS
+utility program, 'popen' (pronounced "p-open"), which uses the popen()
+system call, in the 'sy=...' command.  For example:
+
+  sy=popen 'ls -l' -n ls &
+
+In this case, the 'popen' program executes the 'ls' command with
+argument '-l' in background (due to the '&'), reads the command's
+_stdout_ output, and logs it in the FS log.  Quotes around the command
+to be executed and its arguments are required unless there are no
+interior spaces (i.e., there is a single token).  The '-n ls' is an
+optional argument to 'popen' and causes the log entries to have 'ls/'
+prepended.  This 'name' string is also used in any error messages from
+the 'popen' program itself.  In this example, an 'ls:' would be
+prepended to an error message.  This 'name' option can be used to give
+some identification to the log entries which be may useful to figure
+out what command the entries came from.  If the '-n' option is omitted
+'popen' is used as the name for prepending.  If an optional '-l' is
+used as an argument for the popen progam, the result is logged only,
+and not displayed to the operator.  See 'man popen' for more details
+on the popen() call.

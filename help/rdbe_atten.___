@@ -1,0 +1,28 @@
+		    rdbe_atten - RDBE attenuation
+
+            Syntax:     rdbe_attenX=<value0>,<value1>
+
+            Response:   rdbe_attenX/<value0>,<value1>
+
+
+Settable parameters:
+        X          letter: 'a','b', 'c', 'd', or null for all active RDBEs
+        <value0>   attenutation value for IF0, 0-31.5 in 0.5 steps, or "auto"
+                   when commanding to cause the RDBE(s) to automatically
+                   adjust the level to get a raw sample RMS of 32, a null
+                   value when commanding means to not set the attenuation
+        <value1>   attenutation value for IF1, 0-31.5 in 0.5 steps, or "auto"
+                   when commanding to cause the RDBE(s) to automatically
+                   adjust the level to get a raw sample RMS of 32, a null
+                   value when commanding means to not set the attenuation
+
+
+Monitor-only parameters: none
+
+Comments:
+Like all commands that start with "rdbe", this command can either
+operate on an individual RDBE if the letter for that RDBE is appended
+to the command, or all active RDBEs if no letter is appended.  The
+response always includes the letter of the RDBE the response came
+from.  Active RDBEs are defined by the "active_rdbes" command.  At
+start-up all configured RDBEs are considered active.

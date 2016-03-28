@@ -101,7 +101,8 @@ C 020114 nrv Fill in roll defs.
 C 2003Jul25 JMG  ITRAS changed to function
 ! 2005May2  JMG  Converted losb and lifinp to Characters
 ! 2008Sep25 JMG. Modified so won;'t set bitdens if recorder is Mark5 or K5
-!2011Aug11  JMG. Reformatted some warning messages
+! 2011Aug11  JMG. Reformatted some warning messages
+! 2013Sep19  JMGipson made sample rate station dependent
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -388,7 +389,9 @@ C
 C 5. This is the sample rate line.
 
       if (lchar.eq. "R") then ! sample rate
-        samprate(icode)=srate
+        do is=1,ns
+          samprate(is,icode)=srate
+         end do 
       endif ! sample rate
 
 C 6. This section for the barrel roll line.

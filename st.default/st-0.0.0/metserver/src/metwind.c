@@ -16,23 +16,27 @@
 int portopen_();
 int portwrite_();
 int portread_();
-char *metcmd[14] = {"*0100TT\r\n",   /* MET3 temperature measurement. */
-		   "*0100P3\r\n",   /* MET3 pressure measurement. */
-		   "*0100RH\r\n",   /* MET3 humidity measurement. */
-		   "*0100UN\r\n",   /* MET3 pressure determination (doc's) */
-		   "*9900VR\r\n",   /* MET3 stop any commands in progress,
+char *metcmd[18] = {"*0100TT\n",   /* MET3 temperature measurement. */
+		   "*0100P3\n",   /* MET3 pressure measurement. */
+		   "*0100RH\n",   /* MET3 humidity measurement. */
+		   "*0100UN\n",   /* MET3 pressure determination (doc's) */
+		   "*9900VR\n",   /* MET3 stop any commands in progress,
 				       reset. */
-		   "*0100EW*0100UN=3\r\n",  /* MET3 change to bar. */
-		   "*0100AR\r\n",   /* MET3 resolution determination (doc's) */
-		   "*0100EW*0100AR=0\r\n",  /* MET3 
+		   "*0100EW*0100UN=3\n",  /* MET3 change to bar. */
+		   "*0100AR\n",   /* MET3 resolution determination (doc's) */
+		   "*0100EW*0100AR=0\n",  /* MET3 
 					     * output resolution to 0.1*/
-		   "*0100EW*0100AR=1\r\n",  /* MET3 
+		   "*0100EW*0100AR=1\n",  /* MET3 
 					     * output resolution to 0.01*/
-		   "*0100EW*0100UN=2\r\n",  /* MET3 change to mbar. */
-		   "*0100N1\r\n",  /* return int cnt for one analog chan.*/
-		   "*0100Z1\r\n",  /* return 0 adj coef. for analog chans.*/
-		   "*0100M1\r\n",  /* return span adj coef. for analog chans.*/
-		   "*0100P9\r\n"};   /* MET3 temp, humi, press */
+		   "*0100EW*0100UN=2\n",  /* MET3 change to mbar. */
+		   "*0100N1\n",  /* return int cnt for one analog chan.*/
+		   "*0100Z1\n",  /* return 0 adj coef. for analog chans.*/
+		   "*0100M1\n",  /* return span adj coef. for analog chans.*/
+		    "*0100P9\n",   /* MET3 temp, humi, press */
+		    "*0100IF\n",  /* paroscientific diagnostic */
+                    "*0100FS\n", /* fan okay? */
+                    "*0100FR\n", /* fan speed */
+                    "*0100VR\n"}; /* version */
 char *windcmd[6] = {"C0.0\r\n",     /* WindSensor coast. */
 		    "D\r\n",        /* WindSensor Diagnostics. */
 		    "H\r\n",        /* WinddSensor heater control 
@@ -80,7 +84,7 @@ main(int argc, char *argv[])
   if(argc==1) {
     printf("metwind has parameters:\n");
     printf("For the MET Sensor(one parameter at a time):\n");
-    printf("metwind temperature, pressure, humidity, or reset\n");
+    printf("metwind temperature, pressure, humidity, if, fan, or reset\n");
     printf("For the WIND Sensor:\n");
     printf("metwind wind\n");
     exit (0);
@@ -110,6 +114,10 @@ main(int argc, char *argv[])
       else if(strstr(met_cmd_str,"Z1")) metcnt=11;
       else if(strstr(met_cmd_str,"M1")) metcnt=12;
       else if(strstr(met_cmd_str,"all")) metcnt=13;
+      else if(strstr(met_cmd_str,"if")) metcnt=14;
+      else if(strstr(met_cmd_str,"fan")) metcnt=15;
+      else if(strstr(met_cmd_str,"speed")) metcnt=16;
+      else if(strstr(met_cmd_str,"version")) metcnt=17;
       else metcnt=-1;
       /*else {printf("Try Again %0.4s\n",met_cmd_str); exit(0);}*/
 	      wind_or_met=1;
@@ -181,12 +189,15 @@ main(int argc, char *argv[])
   buff2[0]='\0';
   /* printf("Port information from /usr2/control/met.ctl file\n");*/
   if(wind_or_met) {
+    err = portflush_(&ttynum);
     if(metcnt==-1) {
       len = strlen(met_cmd_str);
       err = portwrite_(&ttynum, met_cmd_str, &len);
-    } else {
+       printf(" command sent '%s'\n",met_cmd_str);
+   } else {
       len = strlen(metcmd[metcnt]);
       err = portwrite_(&ttynum, metcmd[metcnt], &len);
+      printf(" command sent '%s'\n",metcmd[metcnt]);
     }
     /* read from a port */
     if(err==-2) printf("write error\n");
@@ -200,8 +211,12 @@ main(int argc, char *argv[])
     logfile=location_str[5];
     len2 = strlen(buff2);
     buff2[len2]='\0';
-    printf("cmd: %sresponse: %s\n", met_cmd_str,
-	   &buff2[5]);
+    printf("cmd: %sresponse: '%s'\n chars %d\n", met_cmd_str,
+    	   &buff2[5],count);
+    //    {int i;
+    //  for (i=0;i<count;i++)
+    //	printf(" buff2[%d] %d %x '%c'\n",i,buff2[i],buff2[i],buff2[i]);
+    //}
     if(metcnt==13) {
       nema(buff2,&pres,&temp,&humi);
       printf("pres %f, temp %f humi %f\n",pres,temp,humi);

@@ -7,8 +7,37 @@
 #include <limits.h>
 
 #ifdef DIGI
-#include "/usr/src/linux/drivers/char/digi.h"  /* yechh, abs. path... */
+#include "/usr/src/linux/include/digi.h"  /* yechh, abs. path... */
 #endif
+
+/* error codes
+ *
+ *   old=FS 9.11.5 and earlier
+ *   new=FS 9.11.6 and later
+ *   errno indicates when errno contains additional (system) information
+ *
+ *   new   old errno   meaning
+ *     0    0   no     no error
+ *    -1   -1   no     name len bad: <0 or >64
+ *    -2   -2   yes    open failed
+ *    -3   -3   yes    TCGETA failed
+ *    -4   -4   no     Stop bits bad, not 1 or 2
+ *    -5   -5   no     bits per char bad: not 5, 6, 7, or 8
+ *    -6   -6   no     Parity bad, not 0 (none), 1 (odd), or 2 (even)
+ *    -7   -7   no     BAUD bad
+ *    -8   -8   yes    TCSETA failed
+ *    -9   -9   yes    TIOCGSERIAL failed with EINVAL and not DIGI
+ *   -10  -10   yes    TIOCSSERIAL failed
+ *   -11   -3   yes    Digi TCGETA failed
+ *   -12   -3   yes    DIGI_GETA failed
+ *   -13   -8   yes    DIGI_SETAW failed
+ *   -14   -8   yes    DIGI TCSETA failed
+ *   -15   -9   yes    TIOCGSERIAL failed with some other than EINVAL
+ *   -16        yes    non-blocking open failed
+ *   -17        yes    non-blocking TCGETA failed
+ *   -18        yes    non-blocking TCSETA failed
+ *   -19        yes    non-blocking close failed
+ */
 
 int portopen_(port, name, len, baud, parity, bits, stop)
 int *port;
@@ -32,8 +61,29 @@ int *stop;
   else
     *(device + *len) = '\0';
 
-  if ((*port = open(device, O_RDWR) )<0)
+#ifdef FS_SERIAL_CLOCAL
+  if ((*port = open(device, O_RDWR | O_NONBLOCK) )<0) {
+    return -16;
+  }
+
+  if (ioctl(*port, TCGETA, &term) == -1) {
+    return -17;
+  }
+
+  term.c_cflag |= CLOCAL;
+
+  if (ioctl (*port, TCSETA, &term)==-1) {
+    return -18;
+  }
+
+  if(close(*port)<0) {
+    return -19;
+  }
+#endif
+
+  if ((*port = open(device, O_RDWR) )<0) {
     return -2;
+  }
 
   if (ioctl(*port, TCGETA, &term) == -1) {
     return -3;
@@ -220,11 +270,11 @@ int *stop;
 
         /* We start by re-getting the current termio + Digi settings: */
         if (ioctl(*port, TCGETA, &term) != 0) {
-          return -3;
+          return -11;
         }
         oldSettings = term;
         if (ioctl(*port, DIGI_GETA, &digiSettings) != 0) {
-          return -3;  /* xxx: perhaps a new code? */
+          return -12;
         }
         oldDigiSettings = digiSettings;
 
@@ -255,12 +305,12 @@ int *stop;
         /* if either Digi or std. baud rate changed. */
         if (digiSettings.digi_flags != oldDigiSettings.digi_flags) {
           if (ioctl(*port, DIGI_SETAW, &digiSettings) != 0) {
-            return -8;  /* xxx: perhaps a new code? */
+            return -13;
           }
         }
         if (term.c_cflag != oldSettings.c_cflag) {
           if (ioctl (*port, TCSETA, &term) != 0) {
-            return -8;
+            return -14
           }
         }
 #else
@@ -269,7 +319,7 @@ int *stop;
       } else {
         /* Getting Linux-specific serial settings failed */
         /* in other way than EINVAL... */
-        return -9;
+        return -15;
       }
     }  /* else couldn't use 'serial.c'-style high speeds */
   }  /* if > 0 baud ie. baud rate change required */

@@ -35,6 +35,9 @@ C
       icnext=icnext+ib2as(ilat,lbuf,icnext,1)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
+      icnext=ichmv(lbuf,icnext,ldevfp,1,4) 
+      icnext=ichmv_ch(lbuf,icnext,' ')
+c
       call fs_get_lsorna(lsorna)
       icnext=ichmv(lbuf,icnext,lsorna,1,10) 
       icnext=ichmv_ch(lbuf,icnext,' ')

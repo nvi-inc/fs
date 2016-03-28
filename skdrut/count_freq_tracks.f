@@ -12,6 +12,7 @@ C   COMMON BLOCKS USED
 !  2006Jun22  JMGipson.  Modified to assume we only use freqrf>0.
 !  2006Oct06  Assume cbarrel=" " is valid.
 !  2008Jun10  Wasn't counting tracks if recorder was S2?
+! 2013Sep19  JMGipson made sample rate station dependent
 
 ! functions
       integer itras
@@ -77,9 +78,16 @@ C                        Two-thirds of the data on a switched track are used
                          ntrkn(isub,is,ic)=ntrkn(isub,is,ic)+1
                       endif
                     endif
-C                 Add another 0.978 for magnitude bit
+!C                 Add another 0.978 for magnitude bit
+! This is wrong! Contribution of magnitude bit is ~ 0.2411 sign 
+! Quick derivation:  
+! 1-bit efficiency is 0.571429
+! 2-bit efficiency is 0.63662 
+! (2-bit)/(1-bit) = 0.63622/0.571529=sqrt(1.241184)
+
                     if (itras(iul,2,ih,iv,ip,is,ic).ne.-99) then
-                      trkn(isub,is,ic)=trkn(isub,is,ic)+0.978
+                      trkn(isub,is,ic) =trkn(isub,is,ic)+0.978
+!                       trkn(isub,is,ic) =trkn(isub,is,ic)+0.24118
                       ntrkn(isub,is,ic)=ntrkn(isub,is,ic)+1
                     endif
                   enddo
@@ -111,9 +119,11 @@ C                 Add another 0.978 for magnitude bit
 C  1.5 Calculate sample rate if not specified.
 
 C
-      do ic=1,ncodes
-        if (samprate(ic).eq.0) samprate(ic)=2.0*vcband(1,1,ic)
-      enddo
+      do is=1,nstatn
+        do ic=1,ncodes
+          if (samprate(is,ic).eq.0) samprate(is,ic)=2.0*vcband(1,1,ic)
+        enddo
+      end do 
 
       RETURN
       END

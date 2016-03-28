@@ -116,7 +116,9 @@ C
         call fs_get_drive_type(drive_type)
         if(rack.eq.DBBC.and.
      &       drive(1).eq.mk5.and.
-     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &        drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       ) then
            call fc_mk5dbbcd(itpis_dbbc)
         endif
         goto 289
@@ -129,7 +131,9 @@ c
         call fs_get_drive_type(drive_type)
         if(rack.eq.DBBC.and.
      &       drive(1).eq.mk5.and.
-     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs)) then
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
+     &       ) then
            call fc_mk5dbbcd(itpis_test)
         endif
         do j=0,MAX_DBBC_IF-1

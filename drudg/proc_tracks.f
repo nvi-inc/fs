@@ -29,10 +29,10 @@
 
       izero=0
 
-
-! Output Mark5B  recorder stuff.
-      if(km5brec(irec)) then
-        call proc_mk5b_tracks(lu_outfile,istn,icode)
+! Output Mark5B  recorder stuff.    
+      if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then 
+        call proc_disk_tracks(lu_outfile,istn,icode,
+     >                  kignore_mark5b_bad_mask)
         return
       endif
 
@@ -49,9 +49,8 @@
             write(lu_outfile,'(a)') "tracks=v4,v5,v6,v7"
           else
             writE(*,*) "Proc_track error: Should never get here!"
-            write(*,*) "emai: jmg@gemini.gsfc.nasa.gov"
-            stop
-            return
+            write(*,*) "email: john.m.gipson@nasa.gov"
+            stop            
           endif
         else
           if(num_tracks_rec_mk5 .eq. 8) then

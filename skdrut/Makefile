@@ -12,7 +12,7 @@
 ARC = skdrut
 
 OBJECTS=\
-add_slash_if_needed.o  addscan.o apstar_rad.o atape.o axtyp.o  \
+add_slash_if_needed.o  addscan.o apstar_rad.o atape.o azwrap.o axtyp.o  \
 cablw.o caldat.o capitalize.o ckiau.o ckroll.o clndr.o cvpos.o \
 check_rec_type.o check_rack_type.o \
 count_freq_tracks.o ctime2ydhms.o ctime2dmjd.o c2lower.o c2upper.o \
@@ -22,7 +22,7 @@ gdscan.o getiauname.o gnpas.o hdinp.o hol2lower.o hol2upper.o hms2seconds.o \
 idchk.o ifill4.o ifirst_non_blank.o ifirst_non_white.o igtba.o igtfr.o  \
 iroll_def.o isecdif.o itras.o itimedifsec.o iday0.o igetstatnum.o igetstatnum2.o igetsrcnum.o \
 istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_string_list.o iwhere_in_real8_list.o ind.o i2long.o \
-mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knewt.o ktimedif.o \
+mjd2yrdoy.o julda.o kbit.o kcont.o kearl.o knewt.o ktimedif.o kvalid_rack.o kvalid_rec.o \
 lower.o lowercase.o lowercase_and_write.o lyes_no.o mpstar_rad.o m3mode.o \
 newscan.o novas.o null_term.o obs_sort.o pid_str.o \
 plh.o pnum.o prefr.o printer.o purge_file.o  put_esc_in_string.o \
@@ -37,7 +37,8 @@ valid_hardware_blk.o \
 vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o vglinp.o vunpso.o \
 vunpif.o vunpbbc.o vunptrk.o vunphp.o vsoinp.o vmoinp.o vstinp.o vread.o \
 vunps2m.o vunps2g.o vunproll.o vunpprc.o vobinp.o  vunppcal.o \
-write_error_and_pause.o writf_asc.o writf_asc_ch.o xat.o xyz2latlon.o ydjul.o ymday.o
+write_error_and_pause.o write_return_if_needed.o writf_asc.o writf_asc_ch.o \
+xat.o xyz2latlon.o ydjul.o ymday.o
 
 
 #

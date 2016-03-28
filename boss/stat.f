@@ -115,7 +115,6 @@ C
       if (icurln.gt.0) idum = fmpsetline(idcbsk,ierr,ir2)
 200   if(kendo.and.kendtp.and.ksto.and.ksttp) goto 300
       ilen = fmpreadstr(idcbsk,ierr,ibc)
-      call char2low(ibc)
       if (ierr.lt.0) goto 500
       if(ilen.ge.0) goto 210
         if(nch.ne.0) then
@@ -303,7 +302,6 @@ C
       ir2 = icurln-1
       if (icurln.gt.0) idum = fmpsetline(idcbsk,ierr,ir2)
       ilen = fmpreadstr(idcbsk,ierr,ibc)
-      call char2low(ibc)
       idum = fmpsetpos(idcbsk,ierr,irec,ioff)
 C
 C  6.  Display current line of schedule.

@@ -37,7 +37,7 @@ C  LOCAL
       save cstrec_old
 
       integer ilist_len
-      parameter (ilist_len=6)
+      parameter (ilist_len=7)
       character*12 list(ilist_len)
 
       integer ilist_hl
@@ -50,7 +50,7 @@ C  LOCAL
 
       integer ikey,ikeyhl,ikeys2
 
-      data list/"SHORT","THICK","THIN","MARK5A","MARK5B","K5"/
+      data list/"SHORT","THICK","THIN","MARK5A","MARK5B","MARK5C","K5"/
       data list_hl/'HIGH','LOW','SUPER','DUPER'/
       data listS2/'LP','SLP'/
 
@@ -73,6 +73,7 @@ C 021003 nrv Adjust K4 output for speed being in dm internally.
 ! 2007Jan11 Wasn't leaving a space after station name under Linux
 ! 2008Jun04 JMG fixed rounding problem with S2 tapes.  Would change the input footage
 ! 2009Sep22 JMG. Added Mark5B as a valid mode
+! 2014Dec02 JMG. Mark5C support
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN  
         write(luscn,*)
@@ -128,6 +129,7 @@ C
             if (maxtap(i).lt.5000) cTapeType(i)='Short'
             if(cstrec(i,1) .eq. "Mark5A" .or.
      >         cstrec(i,1) .eq. "Mark5B" .or. 
+     >         cstrec(i,1) .eq. "Mark5C" .or. 
      >         cstrec(i,1) .eq. "K5") then
                write(ludsp,'(a)') cstrec(i,1)
             else
@@ -193,13 +195,15 @@ C       Station ID is valid. Check tape type now.
               endif
               write(luscn,'("  Valid types: ",10a)') (list(i),i=1,6)
               return
-            else if(ikey .ge. 4 .and. ikey .le. 6) then
+            else if(ikey .ge. 4 .and. ikey .le. 7) then
                ckeywd=list(ikey)
                if(ikey .eq. 4) then
                   ckeywd="Mark5A"
                else if(ikey .eq. 5) then
                   ckeywd="Mark5B"
                else if(ikey .eq. 6) then
+                  ckeywd="Mark5C"
+               else if(ikey .eq. 7) then 
                   ckeywd="K5"
                endif
                if(istn .eq. 0) then

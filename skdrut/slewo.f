@@ -1,5 +1,5 @@
-      SUBROUTINE SLEWo(NSNOW,MJD,UT,NSNEW,ISTN,LWRCUR,LWRNEW,TSLEW,
-     .lookah,trise)
+      SUBROUTINE SLEWo(NSNOW,MJD,UT,NSNEW,ISTN,cwrap_cur,cwrap_new,
+     > TSLEW,lookah,trise)
 C
 C   SLEWT calculates the slew time and the cable wrap
 C   ***NOTE*** This is the version as of 10/93 before the pre-calculated
@@ -13,7 +13,7 @@ C 040623  ZMM  removed trailing RETURN
 C
 C     INPUT VARIABLES:
          integer nsnow,mjd,nsnew,istn,lookah
-         integer*2 lwrcur
+         character*2 cwrap_cur
          real*8 ut
 C        NSNOW  - current source index into DB arrays
 C        NSNEW  - new source index, i.e. the one to slew to
@@ -29,7 +29,7 @@ C        lookah - number of seconds of lookahead time for checking rising
 C
 C     OUTPUT VARIABLES:
          real*4 tslew
-         integer*2 lwrnew
+         character*2 cwrap_new
 C        TSLEW  - time for ISTN to slew from NSNOW to NSNEW, seconds
 C                 -1 = not up
 C                 -2 = slew does not converge
@@ -52,7 +52,11 @@ C   LOCAL VARIABLES
      .hanew,decnow,decnew,x30now,x30new,y30now,y30new,x85now,x85new,
      .y85now,y85new,az1,az2,trise,elrate,tslew1,tslew2
       integer nloops,il
-      integer*2 lwr1,lwr2,lwr2p
+      character*2 cwrap1, cwrap2
+      character cwraptmp
+      integer idir     !<>0, some error on kcont
+      
+
       LOGICAL KUP ! Returned from CVPOS, TRUE if source within limits
 C        TSLEWP,TSLEWC - previous, current slew times.  For iterating.
 C        DELAZ,DELEL,DELDC,DELHA,DELX30,DELY30,DELX85,DELY85
@@ -79,6 +83,7 @@ C     930308  nrv    implicit none
 C     931012  nrv    Add in the constants when calculating slew times for
 C                    type 7 (ALGO)
 !   2008Jun20 JMG. Changed arg list for kcontn.
+!   2014Apr23 JMG. Made cable parameters char*2 instead of int*2
 C
 C
 C     1. First we find the position of the telescope at the end of
@@ -91,17 +96,17 @@ C        does not change by more than 30sec, or when 5 tries have
 C        been made.
 C
       CALL CVPOS(NSNOW,ISTN,MJD,UT,AZNOW,ELNOW,HANOW,DECNOW,
-     .X30NOW,Y30NOW,X85NOW,Y85NOW,KUP)
+     >   X30NOW,Y30NOW,X85NOW,Y85NOW,KUP)
 C                    this calculates the current telescope position
       trise=-1.0
       TSLEWC = 0.0
       NLOOPS = 0
 100   NLOOPS = NLOOPS + 1
       TSLEWP = TSLEWC
-      LWR2P = LWR2
+    
 C     This calculates the new source location:
       CALL CVPOS(NSNEW,ISTN,MJD,UT+TSLEWC,
-     .AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
+     >   AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
       if (aznew.gt.100.or.aznew.lt.-100.d0) then
         write(7,*) 'SLEWT: bad aznew ',aznew
         stop
@@ -109,7 +114,7 @@ C     This calculates the new source location:
 C
       if (.not.kup) then !Check for source being up within lookahead
         CALL CVPOS(NSNEW,ISTN,MJD,UT+lookah,
-     .  AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
+     >  AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
 C       Check for the minute it rises
         if (kup) then !rising within lookahead
           kup=.false.
@@ -130,11 +135,11 @@ C       Compute slewing time to this position.
       endif !check within an hour
       IF (.NOT.KUP) GOTO 980
 C
-      AZ1=AZNOW
-      LWR1=LWRCUR
+      AZ1=AZNOW      
+      cwrap1=cwrap_cur
       AZ2=AZNEW
-      LWR2=LWRNEW
-      DELAZ = CABLW(ISTN,AZ1,LWR1,AZ2,LWR2)
+      cwrap2=cwrap_new
+      DELAZ = CABLW(ISTN,AZ1,cwrap1,AZ2,cwrap2)
 C                   Function to compute az move including cable wrap
       DELEL = ABS(ELNEW-ELNOW)
       DELHA = ABS(HANEW-HANOW)
@@ -175,14 +180,14 @@ C
       IF ((ABS(TSLEWC-TSLEWP).LT.10).OR.(NLOOPS.GE.5)) GOTO 110
       GOTO 100
 C     We get here if the slew has converged OR we iterated 5 times.
-110   IF  (kcont(mjd,UT+TSLEWC,TSLEWP-TSLEWC,NSNEW,ISTN,LWRCUR))
+110   IF  (kcont(mjd,UT+TSLEWC,TSLEWP-TSLEWC,NSNEW,ISTN,cwrap_cur,idir))
      .  THEN  !continuity OK
         TSLEW = TSLEWC
         RSTCON(1) = FLOAT(ISTCON(1,ISTN))
         RSTCON(2) = FLOAT(ISTCON(2,ISTN))
-        IF(TSLEW.LE.(AMAX1(RSTCON(1),RSTCON(2))+5.))
-     .      TSLEW=0.0
-        LWRNEW = LWR2
+        IF(TSLEW.LE.(AMAX1(RSTCON(1),RSTCON(2))+5.))   TSLEW=0.0
+        cwrap_new=cwrap2
+      
 C       Final slewing time is the larger of
 C       "time to rise" (trise) and "slew to risen position" (tslew
 C       calculated using az,el at UT+trise).

@@ -46,7 +46,8 @@ Monitor-only Parameters:
 rev     Formatter firmware revision number, displayed as an
 integer.
           rack      Rack ID, reported as a hex value. 
-          error     Error status, okay or the hex value.
+          error     System error status, okay or the hex value. See
+                    meaning in comments below.
 
 Comments:
 The Mark IV formatter clock is set with the fmset program. If
@@ -110,3 +111,31 @@ formatter when a different rack type is in use. See also
 4tracks and 4trackform in the  tracks (LBA4, Mark IV, VLBA/4,
 K4MK4 racks) and trackform (Mark IV, VLBA/4, K4MK4 racks)
 command manual pages respectively.
+
+Hex error error bit assignements, duplicated from mk4vocab.txt:
+
+/******************************
+*    system ERROR bit assignments  
+*    scconfig.error 
+*******************************/
+SYNC_ERROR          BIT15 /* site 1pps sync error */ 0x8000
+1MSEC_ERROR         BIT14 /* internal clock alignment error */
+FIRMWARE_ERROR      BIT13        
+COMMUNICATION_ERROR BIT12 /* uart error */ 0x1000
+(Error bits 15-12 are also put on the tape 
+      in bits 15-12 of the aux data field.)
+
+undefined         BIT11
+CK_ALIGN_ERROR    BIT10 /* altera clock misalign error */ 0x0400
+SY_ALIGN_ERROR    BIT9  /* altera sync  misalign error */ 0x0200
+SY_PHASE_ERROR    BIT8  /* altera sync vs 1pps misalign error */
+
+undefined         BIT7
+undefined         BIT6
+XBAR_ERROR        BIT5  /* interface board crossbar error */
+RAM_ERROR         BIT4  /* interface board ram access error */
+
+undefined         BIT3
+RECV_ERROR        BIT2  /* uart receiver error */ 0x0004
+OVRUN_ERROR       BIT1  /* uart overrun error */
+XMIT_ERROR        BIT0  /* uart transmit conflict */

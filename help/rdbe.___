@@ -1,0 +1,22 @@
+		    rdbe - RDBE low level communication.
+
+            Syntax:     rdbeX=<InString>
+
+            Response:   rdbeX/<OutString>
+
+
+Settable parameters:
+        X           letter: 'a','b', 'c', 'd', or null for all active RDBEs
+        <InString>  string to be sent RDBE(s). If the string does not end
+                    with a semi-colon ";", one will be added.
+
+Monitor-only parameters:
+        <OutString> resulting ouput from RDBE X
+
+Comments:
+Like all commands that start with "rdbe", this command can either
+operate on an individual RDBE if the letter for that RDBE is appended
+to the command, or all active RDBEs if no letter is appended.  The
+response always includes the letter of the RDBE the response came
+from.  Active RDBEs are defined by the "active_rdbes" command.  At
+start-up all configured RDBEs are considered active.

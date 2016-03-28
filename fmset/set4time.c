@@ -65,6 +65,7 @@ nsem_take("fsctl",0);
 	  if (nsem_test(NSEM_NAME) != 1) {
 	    endwin();
 	    fprintf(stderr,"Field System not running - fmset aborting\n");
+	    rte_sleep(SLEEP_TIME);
 	    exit(0);
 	  }
 	  name=NULL;
@@ -74,19 +75,11 @@ nsem_put("fsctl");
 
 /* get reply from matcn */
 skd_par(ip);
-inclass = ip[0];
-if( ip[2] < 0 )
-	{
-	endwin();
-	fprintf(stderr,"Error %d from formatter\n",ip[2]);
-        logita(NULL,ip[2],ip+3,ip+4);
-	cls_clr(outclass);
-	cls_clr(inclass);
-        rte_sleep(SLEEP_TIME);
-	exit(0);
-	}
-
-cls_clr(outclass); /* clear class numbers just in case */
-cls_clr(inclass);
+ if(ip[1]!=0)
+   cls_clr(ip[0]);
+if( ip[2] < 0 )	{
+  logita(NULL,ip[2],ip+3,ip+4);
+  logit(NULL,-12,"fv");
+ }
 
 }

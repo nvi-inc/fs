@@ -1,5 +1,5 @@
       subroutine init_hardware_common(istn)
-
+      implicit none 
 C SET_TYPE sets the logical variables indicating equipment types.
       include 'hardware.ftni'
       include '../skdrincl/statn.ftni'
@@ -50,60 +50,69 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         KK42rec(i) =cstrec(istn,i)  .eq. "K4-2"
         km5Arec(i) =cstrec(istn,i)  .eq. "Mark5A"
         km5Brec(i) =cstrec(istn,i)  .eq. "Mark5B"
+        km5Crec(i) =cstrec(istn,i)  .eq. "Mark5C"
         Km5APigwire(i) =cstrec(istn,i) .eq. "Mk5APigW"
         Km5Prec(i) =cstrec(istn,i)  .eq. "Mark5P"
+        km6rec(i)  =cstrec(istn,i) .eq. "Mark6" 
         KK5Rec(i)  =cstrec(istn,i) .eq. "K5"
         Knorec(i)  =cstrec(istn,i) .eq. "none"
       end do
 
-      km5disk=.false.
-      do i=1,2
-        if(Km5Prec(i).or.Km5Arec(i).or.km5brec(i).or. Km5ApigWire(i))
-     >    Km5disk=.true.
-      end do
+
 
       km5A=km5Arec(1) .or. km5Arec(2) .or.
      >     Km5Apigwire(1) .or.Km5APigwire(2)
       km5p=km5prec(1) .or. km5prec(2)
       km5B=km5Brec(1) .or. km5Brec(2)
+      km5C=km5Crec(1) .or. km5Crec(2)
+      km5disk = km5A .or. km5B .or. Km5C
+      km6disk=km6rec(1) 
+      kdisk=km5disk .or. km6disk
 
       kk4=kk41rec(1) .or. kk41rec(2) .or. kk42rec(1) .or. kk42rec(2)
 
 ! set flag to indicate that recorder does not do "passes".
-      knopass=km5disk    !Mark5 disks have no passes.
+      knopass=kdisk       !Mark5 disks have no passes.
 ! other kinds of disks do as well
       do i=1,2
         if(ks2rec(i).or.kk41rec(i).or.kk42rec(i)) knopass=.true.
       end do
 
-C Racks
-      km3rack = cstrack(istn) .eq. "Mark3A"
-      km4rack = cstrack(istn) .eq. "Mark4"
-      km5rack = cstrack(istn) .eq. "Mark5"
+      do i=1,max_stn
+         cstrack_cap(istn)=cstrack(istn)
+         call capitalize(cstrack_cap(istn))
+      end do 
 
-      kvrack  = cstrack(istn) .eq. "VLBA" .or.
-     >          cstrack(istn) .eq. "VLBA/8" .or.
-     >          cstrack(istn) .eq. "VLBAG"
-      kv4rack = cstrack(istn) .eq. "VLBA4" .or.
-     >          cstrack(istn) .eq. "VLBA4/8"
-      kv5rack = cstrack(istn) .eq. "VLBA5"
+C Racks     
+      knorack = cstrack_cap(istn) .eq. "NONE"
+      km3rack = cstrack_cap(istn) .eq. "MARK3A"
+      km4rack = cstrack_cap(istn) .eq. "MARK4"
+      km5rack = cstrack_cap(istn) .eq. "MARK5"
+
+      kvrack  = cstrack_cap(istn) .eq. "VLBA" .or.
+     >          cstrack_cap(istn) .eq. "VLBA/8" .or.
+     >          cstrack_cap(istn) .eq. "VLBAG"
+      kv4rack = cstrack_cap(istn) .eq. "VLBA4" .or.
+     >          cstrack_cap(istn) .eq. "VLBA4/8"
+      kv5rack = cstrack_cap(istn) .eq. "VLBA5"
 
 
-      kk41rack= cstrack(istn)(1:4) .eq. "K4-1"
-      kk42rack= cstrack(istn)(1:4) .eq. "K4-2"
-      klrack  = cstrack(istn) .eq. "LBA"
+      kk41rack= cstrack_cap(istn)(1:4) .eq. "K4-1"
+      kk42rack= cstrack_cap(istn)(1:4) .eq. "K4-2"
+      klrack  = cstrack_cap(istn) .eq. "LBA"
 
-      kmracks =km3rack  .or. km4rack .or. km5rack
-      kvracks =kv4rack.or.kvrack .or. KV5rack 
+      kmracks =km3rack .or. km4rack .or. km5rack
+      kvracks =kv4rack .or. kvrack  .or. KV5rack 
 
-      km4fmk4rack =cstrack(istn)(1:3) .eq. "K4-" .and.
-     >             cstrack(istn)(5:7) .eq. "/M4"
-      kk3fmk4rack =cstrack(istn)(1:3) .eq. "K4-" .and.
-     >             cstrack(istn)(5:7) .eq. "/K3"
-      k8bbc =   cstrack(istn) .eq. "VLBA/8" .or.
-     >          cstrack(istn) .eq. "VLBA4/8"
-      kdbbc_rack  = cstrack(istn) .eq.  "DBBC" 
-
+      km4fmk4rack =cstrack_cap(istn)(1:3) .eq. "K4-" .and.
+     >             cstrack_cap(istn)(5:7) .eq. "/M4"
+      kk3fmk4rack =cstrack_cap(istn)(1:3) .eq. "K4-" .and.
+     >             cstrack_cap(istn)(5:7) .eq. "/K3"
+      k8bbc =   cstrack_cap(istn) .eq. "VLBA/8" .or.
+     >          cstrack_cap(istn) .eq. "VLBA4/8"
+      kdbbc_rack  = cstrack_cap(istn) .eq.  "DBBC" 
+      krdbe_rack  = cstrack_cap(istn)  .eq. "RDBE" 
+     
       kvform  = kvrack
       km3form = Km3rack .or. kk3fmk4rack
       km4form = km4rack .or. kv4rack .or. km4fmk4rack

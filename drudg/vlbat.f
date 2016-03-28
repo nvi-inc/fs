@@ -7,7 +7,7 @@
      .            idayrp,ihrp,minp,iscp,iobs,irecp,
      .            idayr_save,ihr_save,min_save,isc_save)
 C
-C     VLBAT makes an observing file for VLBA DAR/REC systems
+C     VLBAT makes an observing file for VLBA DAR/REC systemsf
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -32,34 +32,29 @@ C  INPUT:
       real ras2,decs2
 C
 C  LOCAL
-        integer itemp
-      integer izero2
+      integer itemp
       character*1 cspdir ! tape direction
-      integer iblen
-      integer ispin,irec,idir,ispinoff,ierr,ihead,idx,
-     .ispins,iyrs,idayrs,ihrs,mins,iscs,
-     .iwr,iyr3,idayr3,ihr3,min3,isc3,iyro,idayro,ihro,iftrem,
-     .mino,isco,isp,i,nch,ispm,itu,idayrt,iyrt,ihrt,mint,isct
-      real spdips,sps
+      integer irec,idir,ispinoff,ihead,idx
+     
+      integer iwr
+      integer isp,ispm,itu
+      real sps
       logical ktape,ktrack,kcont,kauto
-      logical kspin ! true if we need to spin tape to get to the
-C                       next observation
+     
       logical kspinoff ! true if we need to spin the tape down
 C                          to the end before changing it
-      logical kend ! true if tape is positioned at 0 or max
-      integer Z4000,Z100
-
+     
+   
       integer*2 ldirr
       LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
-      INTEGER ichmv,ichmv_ch ! function
-        real tspin,speed ! functions
+      real tspin ! functions
       integer iSpinDelay
 
       Data iSpinDelay/0/
 
 C  INITIALIZED:
       DATA ldirr/2HR /
-      DATA Z4000/Z'4000'/, Z100/Z'100'/
+     
 C
 C
 C  HISTORY:
@@ -121,10 +116,10 @@ C 011011 nrv Add KAUTO to wrtap call.
 C 021014 nrv Change "seconds" argument in TSPIN to real.
 C 2003Nov13 JMGipson.  Added extra argument to TSPIn
 ! 2006Sep28 JMGipson. Got rid of holleriths. Changed lspdir to ASCII
+! 2014Feb04 JMGipson. Modified for new VLBI hardware.
 C
 C  Initialization
 
-      izero2 = 2+Z4000 + Z100*2
       kcont = tape_motion_type(istn).eq.'CONTINUOUS'
 C
 C  Add a comment if a new tape is to mounted before the next observation
@@ -156,27 +151,7 @@ Cdyn
           if (iobs.le.1) then
             irec=1
           else ! Turn off recording on the current tape and postpass it
-            if (nrecst(istn).eq.2) then !dual recorders
-              iftold=0
-              write(lu,*) " "
-C             Form the line
-C               write=(1,off)   tape=(1,STOP)  dur=0  stop=xxhxxmxxs  !NEXT!
-              call tmadd(iyr,idayrp,ihrp,minp,iscp,2,
-     .          iyrs,idayrs,ihrs,mins,iscs)
-              if (idayrp.ne.idayrs) call wrdate(lu,iyr,idayrs)
-              write(lu,'("write(",i1,",off) tape=(",i1,"STOP) ",$ )')
-     >           irec,irec
-              write(lu,'(" dur=0  stop",2i2,"h",2i2,"m",2i2,"s")')
-     >           ihrs,mins,iscs
-C             Do the postpass command:    tape=(1,POSTPASS)
-              write(lu,"('tape=(',i1,',POSTPASS)')") irec
-C             Now swap recorders
-              if (irec.eq.1) then
-                irec=2
-              else
-                irec=1
-              endif
-            endif
+            
           endif
         write(lu,*) " "
         write(lu,'(a)') '!*   ** NEW TAPE **   *!'
@@ -186,36 +161,10 @@ C             Now swap recorders
 C   Setup block
         write(lu,*) " "
 
-C     if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then
-C     Write setup for first scan iobs=0
-      if ((kcont.and.iobs.eq.0).or.(kcont.and.idir.ne.idirp)) then 
-C** Don't do this block if 'AUTO' -- no need to run to the end of the
-C   tape with auto allocation. NRV 000614
-        if (iobs.gt.1.and..not.knewtp.and.
-     .    tape_allocation(istn).ne.'AUTO') then ! run to end of tape
-          write(lu,'(a)') '!* New Scan *! '
-          call wrsor(csname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,
-     .          decs2,lu)
-          iftrem=float(maxtap(istn))/speed(icod,istn)
-          call tmadd(iyr,idayr_save,ihr_save,min_save,
-     .       isc_save,iftrem,IYRt,IDAYRt,IHRt,MINt,ISCt)
-          call wrdur(ksw,1,0,1,ihrt,mint,isct,izero2,1,lu,0)
-          write(lu,'(a)') " "
-        endif ! run to end of tape
-        write(lu,'(a)') '!* Setup *!    '
-      else
-        write(lu,'(a)') '!* New Scan *! '
-      endif
-C  Set dur=0 so that stop time is used by the system
-C  The stop time for the setup block is the start time of the scan,
-C  unless we need to spin the tape to a new position.
-
 C  Set up tape parameters
 
       cspdir="-"
 
-      if (ift(istnsk).gt.iftold.or.iobs.eq.0.or.knewtp) cspdir="+"
-Cdyn
       if (kauto) cspdir="+"
 C  ihead is the head offset position in microns
       IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
@@ -231,40 +180,25 @@ C  mode. It is not simply the direction, except for modes B and C.
 
 C  Calculate tape spin time and block stop time
 
-      ispins = ifix((270.0/330.0)*
-     >        TSPIN(IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS,ispindelay))
-      kend = ift(istnsk).eq.0.or.ift(istnsk).eq.maxtap(istn)
-      kspin = ispins.gt.10 .and. .not.kend .and. .not.kcont
-      ispin=0
-      if (ispins.gt.10.and.kend) ispin=330
-      if (kcont) ispin=0
+     
 C  If this observation starts at either end of the tape,
 C  then we don't need to have the spin blocks, just put REWIND in setup block.
 
-      if (kspin.or.kspinoff) then !use previous stop+source time as the
-C                                    stop time for the "setup" block
-        if (iobs.eq.0) then !create fake previous stop
-          call tmsub(iyr,idayr,ihr,imin,isc,2*isortm+ispins,
-     .    iyr,idayrp,ihrp,minp,iscp)
-        endif
-        call tmadd(iyr,idayrp,ihrp,minp,iscp,isortm,
-     .    iyrs,idayrs,ihrs,mins,iscs)
-      else !use start time of scan
-          iyrs=iyr
-          idayrs=idayr
-        ihrs=ihr
-        mins=imin
-        iscs=isc
-      endif
-        if (iobs.eq.0.or.idayrs.gt.idayrp) call wrdate(lu,iyr,idayrs)
+   
+      if (iobs.eq.0.or.idayr.gt.idayrp) call wrdate(lu,iyr,idayr)
 C     Setup block. None needed for continuous unless change of direction.
-      if ((kcont.and.iobs.eq.0).or..not.kcont.or.
-     .    (kcont.and.idir.ne.idirp))
-     .call wrdur(ksw,1,0,999,ihrs,mins,iscs,izero2,3,lu,1)
-
+  
 C  Source name, ra, dec in J2000 coordinates
 
       call wrsor(csname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,decs2,lu)
+      write(lu,'(a)') "qual=999"
+      write(lu,'(a)') "disk=off"
+      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+     >   ihr,imin,isc
+      write(lu,'(a)') "qual=  0"
+      write(lu,'(a)') "disk=off"
+      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+     >  ihr2,min2,isc2
 
 C  Set up tracks for forward or reverse
 
@@ -282,88 +216,13 @@ Cdyn
       if (kauto) ktrack = .false. ! always, for dynamic
       if (kauto) ktape = .true.   ! always, for dynamic
 Cdyn
-Cdyn comment out this call to wrtap. The tape=stop is not needed.
-Cdyn Well, it is needed to get parity checks done.
-      IF (.not.kcont.or.(kcont.and.(IDIR.NE.IDIRP.or.iobs.eq.0))) THEN ! 
-        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto) ! stop/head
-        ktape = .false.
-      endif
 C************************************************
 C       call vlbap(lu,icod,ierr)
 C************************************************
-      if (ktrack) then ! write out new tracks
-        call wrtrack(idx,lu,iblen,icod)
-      end if
-
-C  Spin tape down to the end before changing it
-
-        if (kspinoff) then !write spin block for old tape
-        write(lu,'(a)') '!* Spin down old tape *!'
-        CALL TMADD(IYR,IDAYRp,IHRp,MINp,ISCp,ispinoff+isortm,
-     .         IYR3,IDAYR3,IHR3,MIN3,ISC3)
-C         Stop time of this block is previous stop+ispinoff+isortm
-        if (idayr3.ne.idayrs) call wrdate(lu,iyr3,idayr3)
-        call wrdur(ksw,1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
-        ktape = .true.
-        iwr = 0
-        ispin = 330
-        call wrtap("-",ispin,ihead,lu,iwr,ktape,irec,kauto)
-C  Wait block - wait either the time to change the tape
-C               or until the start time
-        write(lu,'(a)') '!* Wait until new tape is mounted *!'
-        if (kspin) then ! will spin the new tape after it's mounted
-          call tmsub(iyr,idayr,ihr,imin,isc,ispins+10,
-     .      iyro,idayro,ihro,mino,isco)
-        else ! the next thing is the start time
-            iyro=iyr
-            idayro=idayr
-            ihro=ihr
-            mino=imin
-            isco=isc
-        endif
-        if (idayro.gt.idayr3) call wrdate(lu,iyro,idayro)
-        call wrdur(ksw,1,0,888,ihro,mino,isco,izero2,3,lu,1)
-        ktape = .true.
-        iwr = 0
-        ispin=0
-        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
-      endif !write spin block for old tape
-
-C  Spin tape if required
-
-      if (kspin) then !write spin blocks
-        write(lu,'(a)') '!* Spin *!'
-        if (kspinoff) then
-C           Stop time of this block is just start time minus 10
-          call tmsub(iyr,idayr,ihr,imin,isc,10,
-     .      iyr3,idayr3,ihr3,min3,isc3)
-            if (idayr3.gt.idayro) call wrdate(lu,iyr3,idayr3)
-          else ! no previous spin
-C           Stop time of this block is previous stop+ispin+isortm
-            CALL TMADD(IYR,IDAYRp,IHRp,MINp,ISCp,ispins+isortm,IYR3,
-     .      IDAYR3,IHR3,MIN3,ISC3)
-            if (idayr3.gt.idayrs) call wrdate(lu,iyr3,idayr3)
-          endif
-        call wrdur(ksw,1,0,888,ihr3,min3,isc3,izero2,3,lu,1)
-        ktape = .true.
-        iwr = 0
-        ispin = 330
-        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
-        write(lu,'(a)') '!* Wait *!'
-C  Wait block - wait until start time
-        if (idayr.gt.idayr3) call wrdate(lu,iyr,idayr)
-        call wrdur(ksw,1,0,888,ihr,imin,isc,izero2,3,lu,1)
-        ktape = .true.
-        iwr = 0
-        ispin=0
-        call wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
-      endif !write spin blocks
+    
 
 C  This is the block for recording
-
-      if (.not.kcont.or.(kcont.and.idir.ne.idirp)) then ! write setup comment
-        write(lu,"(a)")'!* Record *!'
-      endif
+  
       if (idayr2.gt.idayr) call wrdate(lu,iyr2,idayr2)
 
 C *** First cycle: specify channel assignments
@@ -379,43 +238,9 @@ Cdyn  The tape direction has already been set up above
 Cdyn  Comment out the above for auto
       iwr = 1
       ktape=.false.
-      if (.not.kcont.or.(kcont.and.(idir.ne.idirp))
-     ..or.(kcont.and.iobs.eq.0))
-     .call wrtap(cspdir,isp,ihead,lu,iwr,ktape,irec,kauto)
-
+ 
 C  Loop begins in this block
-
-      IF (ksw) THEN
-
-C  Scan stop time = end of loop blocks
-
-C wrdur(ksw,istart,idur,iqual,ih,im,is,izero2,izero3,lu,setup)
-        call wrdur(ksw,14,15,1,ihr2,min2,isc2,izero2,1,lu,0)
-      ELSE
-        call wrdur(ksw,1,0,1,ihr2,min2,isc2,izero2,1,lu,0)
-      ENDIF
-
-C  Set up converter frequencies
-
-      IF (ksw) THEN !write loop
-C       Write out set 1 of BBC frequencies
-        do i=1,nbbcbuf(1)
-          cbuf=" "
-          nch = ichmv(ibuf,1,ibbcbuf(1,1,i),1,ibbclen(1,i))
-          if (i.eq.nbbcbuf(1)) nch = ichmv_ch(ibuf,nch+1,'!NEXT! ')
-          call writf_asc(lu,ierr,ibuf,nch/2)
-        enddo
-
-        write(lu,'(a)')' qual=2 '
-
-C       Write out set 2 of BBCs
-        do i=1,nbbcbuf(2)
-          call writf_asc(lu,ierr,ibbcbuf(1,2,i),ibbclen(2,i)/2)
-        enddo
-
-C       Mark end of loop
-        write(lu,'(a)') '!LOOP BACK! !NEXT!'
-      end if ! write loop
+  
 
 C  (save the last write for the end of outer loop)
 C  Save tape info for checking on next pass
@@ -426,8 +251,7 @@ C    .              SPEED(ICOD,istn))
       itu=itearl(istn)
       if (tape_motion_type(istn).eq.'CONTINUOUS'.and.
      .idir.eq.idirp) itu=0
-      IFTOLD=IFT(ISTNSK)+IFIX(IDIR*(itu+IDUR(ISTNSK))*
-     .              SPEED(ICOD,istn))
+  
       IDAYP=IDAYR
       idayrp=idayr2
       ihrp=ihr2

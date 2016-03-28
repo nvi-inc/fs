@@ -2,6 +2,7 @@
 C
 C     SNAP reads a schedule file and writes a file with SNAP commands
 C
+      implicit none 
       include 'hardware.ftni'           !This contains info only about the recorders.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -11,21 +12,17 @@ C
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'   !This includes info about
 
-C INPUT
+C INPUTf
       character*(*) cr2  ! Responses to three prompts for
 C          1) epoch 1950 or 2000 <<<<<<< moved to control file
 C          2) add checks Y or N <<<< not for S2
 C          3) force checks Y or N <<<<<<< removed
 
-! functions
       integer iTimeDifSec               !difference in seconds between two times
-      real   tspin,speed ! functions
+      real   speed ! functions
       integer trimlen ! functions
       integer julda
 
-C  LOCAL:
-C     IFTOLD - foot count at end of previous observation
-C     TSPINS - time, in seconds, to spin tape
 
 ! Arguments to UNPSK
       integer ilen
@@ -46,10 +43,7 @@ C     TSPINS - time, in seconds, to spin tape
       integer*2 lmon(2),lday(2)
 !      logical kflg(4)
       integer ierr
-      integer itime_scan_beg(5)   !iyr,iday,ihr,imin,isec
-      integer itime_disk_abort(5) !time to end disk2file
-      integer itime_disk2file_beg(5)
-      integer itime_disk2file_end(5)
+    
       integer isec_beg,isec_end   !integer part of disk2file offset
       real    rsec_beg,rsec_end   !total seconds part of disk2file beg or end
       integer idur(max_stn)
@@ -86,8 +80,7 @@ C     TSPINS - time, in seconds, to spin tape
       integer mjd_next,mon_next,ida_next
       integer*2 lmon_next(2),lday_next(2)
       logical kflg_next(4)
-      integer ierr_next
-      integer itime_scan_beg_next(5)
+      integer ierr_next   
       integer ilast_wait_time(5)
       integer idur_next(max_stn)
       integer ioff_next(max_stn)
@@ -107,7 +100,7 @@ C     TSPINS - time, in seconds, to spin tape
 ! End arguments to unpsk
 
 ! Other variables dealing with next scan
-      integer istnsk_next,isor_next,icod_next,ifeet_next
+      integer istnsk_next,isor_next,icod_next
 
       integer istnsk,isor,icod
 
@@ -116,7 +109,7 @@ C     TSPINS - time, in seconds, to spin tape
       equivalence (lds,cds)
       equivalence (cdirp,ldirp)
       character*8 cmodep          !previous mode
-      integer idirsp
+    
       character*8 cspeed          !speed of the recorder in ascii IPS or SLP for S2
 
       integer iobs_now,iobs_this_stat,iobs,iobsp,iobs_this_stat_rec
@@ -129,7 +122,7 @@ C     TSPINS - time, in seconds, to spin tape
       logical kdata_xfer_prev
       character*128 ldest          !destination
       integer ixfer_ptr !points to the appropriate plac
-
+   
 !  Variables dealing with source position
       integer irah,iram,iras,iras_frac,idcd,idcm,idcs,idcs_frac
       real ras,dcs
@@ -142,16 +135,20 @@ C     TSPINS - time, in seconds, to spin tape
       integer nch,nch2,nch3
 
       integer l,idirp,idurp,iftchk,idirn,iftrem,ilatestop
-      integer ispm,ic,ichk,iset,isppl,mjdpre
+      integer ic,ichk,iset,isppl,mjdpre
 
-      real tspins,sps,d,epoc,tslew,dum
-
-      integer*2 lcbpre,lcbnow        !must be integer*2
-
+      real d,epoc,tslew,dum
+      integer itemp                  !short lived temporary variable
+      logical kdo_monitor            !used as flag to determine if we should do a monitor. 
+      logical kPhaseRefNext          !Phase reference data.  No stop between this scan and next scan.
+      logical kPhaseRefPrev          !Phase reference data.  No stop between this scan and previous scan. 
+     
+      character*2 cwrap_pre          !previous wrap
+      character*2 cwrap_now          !current wrap
+    
       integer idt,ituse
       double precision utpre
-C     character*28 cpass,cvpass
-      character*1  maxchk,dopre
+C     character*28 cpass,cvpass  
 
 C     LMODEP - mode of previous observation
 C     LDIRP  - direction of previous observation
@@ -164,12 +161,13 @@ C     iobs_this_stat_rec - number of obs for this station that are recorded on t
 
       character*7 cwrap ! cable wrap from CBINF
       character*8 cwrap2
-      logical KNEWTP,KNEWT
+      logical KNEWTP
 C      - true if a new tape needs to be mounted before
 C        beginning the current observation
 
       logical krec  ! true if the recorder is NOT "none"
       integer ntape ! count of tapes used in the schedule
+      character*12 csetup_name
 
 ! JMG variables
       integer iwait5sec
@@ -177,38 +175,61 @@ C        beginning the current observation
       integer itime_scan_end(5)             !end of scan    =istart+idur
       integer itime_early(5)                !early start    =istart-itearl
       integer itime_tape_stop(5)            !late end       =iend+ilate
-      integer itime_tape_stop_spin(5)       !time when a tape stops spinning (after last obs on tape).
       integer itime_cal(5)         	    !cal		=istart-ical
       integer itime_check(5)                !time to do a check.
       integer itime_tape_start(5)           !
       integer itime_data_valid(5)           !when is the scan valid?
-      integer itime_tape_need(5)            !When do we need the tape?
-!
+   !
       integer itime_scan_beg_prev(5)        !ditto for previous measurement
       integer itime_scan_end_prev(5)
       integer itime_early_prev(5)
+      integer itime_tape_start_prev(5)      !Previous start time
       integer itime_tape_stop_prev(5)
+      integer itime_data_valid_prev(5)      !
+      integer itime_scan_beg_next(5)
+      integer itime_scan_beg(5)   !iyr,iday,ihr,imin,isec
+      integer itime_disk_abort(5) !time to end disk2file
+      integer itime_disk2file_beg(5)
+      integer itime_disk2file_end(5)
+      integer itime_buf_write_end(5)     !end of time to write buffer
 
       integer itime_pass_end(5)              !Time when we reach the end of this pass
       real    speed_ft          !Speed in feet.
       real    rmax_scan_time    !Length of scan in time.
       integer icod_old          !previous code.
-      integer imin,isec         !iminutes, seconds
+
+! Following are used in continuous/adaptive recording to keep track of:
+! A.) Scan starting time.
+! B.) Total time (seconds) until recording stops.
+! C.) 
+      integer itime_beg(5,Max_obs)        !     Time each scan begins
+      integer itime_total_record(Max_obs) !     Total time from scan until recording stops
+      integer iscan_calc_start            !     Scan to start calculating recording time on
+      integer lu_in                       !     Logical lus
+      character*128 ltmpfil               !     temporary file
+      integer i1,i2                       !     temporary ints
+    
 ! Logical variables
       logical kcont 		! true for CONTINUOUS recording
       logical kadap 		! true for ADAPTIVE recording in VEX file
       logical kcontpass       	! true if a pass is actually continuous
       logical kcontpass_prev    ! Continuous before this obs?
       logical knewpass  	! true if this obs on new pass.
-      logical klast_tape        ! last tape?
-      logical kfirst_tape       ! first tape
-!
-      character*180 ldum
-      character*12 lsession      !filename
+      logical kfirst_tape       ! first tape  
+      logical klast_obs         ! doing last observation
+      logical kfirst_obs   
 
-      integer iSpinDelay    !time in seconds for tape to start spinning
+! Variables associated with Mark6 recording       
+      integer idata_mk6_scan_mb       !Data recorded for a scan.
+      integer idata_mk6_scan_mb_prev  !for previous scan  
+      real*8  rmk6_buf_time           !buffer time
+  !
+      character*180 ldum     
+      character*12  lsession           !filename
+      character*10   lscan_name_now    !current scan name 
+      
       double precision speed_recorder   ! speed of recorder in this mode.
-
+    
 ! counter
       integer i,j               !counters
       logical kdebug
@@ -435,10 +456,21 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2008Mar19 JMG.  Don't issue setup if recording.
 ! 2013Jan18 JMG.  Added in auto_ftp_abort_time. Will abort auto_ftp if longer than some specified time.
 ! 2013Jan22 JMG.  Don't do POSTOB if a a vex file and recording. (used for phase reference.) 
-!           
+! 2014Jan17 JMG.  Modified call to setup_name   
+! 2014Jan21-31 JMG.  Commented out various calls referencing tapes.        
+! 2014Feb04 JMG. Introduced kphase_ref flag. This is true if the next scan starts IMMEDIATELY after the previous.
+! 2014Apr23  JMG.  Changed lcbpre, lcbnow to cwrap_pre, cwrap_now. Updated call to slewo.f
+! 2015MAr10 JMG. A.) Set krunning=false after taking data. 2) Don't do setup if system is running. Theser were lost from 11.4-->11.5 
+! 2015Mar15 JMG. Support for Mark6 
+! 2015Mar30 JMG. got rid of obsolete arg in drchmod
+! 2015Mar31 JMG. More changes to fix issues with phase_reference.
+! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
+! 2015Nov04 JMG. Fixed bug with writing out 'rtime'. Index should be istn, was istnsk 
 
       kdebug=.false.
-
+      kfirst_obs=.true. 
+      klast_obs=.false. 
+           
       icod_old=-1
       iblen = ibuf_len*2
       if (kmissing) then
@@ -468,14 +500,9 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
       kcontpass_prev=.true.
       kfirst_tape=   .true.
       kdisk2file_prev=.false.
-      idirp=1           !
-
-! for mark3 or mark4, takes a second to get the tapes moving.
-      if(km3rec(1) .or. km3rec(2) .or. km4rec(1).or.km4rec(2)) then
-         iSpinDelay=1
-      else
-         iSpinDelay=0
-      endif
+      idirp=1     
+    
+      iscan_calc_start=1      !which scan do we start calculating recording differences on
 
       WRITE(LUSCN,'("SNAP output for ", a)') cSTNNA(ISTN)
       ierr=1
@@ -492,28 +519,22 @@ C Initialize recorder information.
 
 C    1. Prompt for additional parameters, epoch of source positions
 C    and whether maximal checks are wanted.
-      if(km3rec(irec).or.km4rec(irec).or.
-     >   kvrec(irec).or. kv4rec(irec)) then
-        call snap_info(cr2,maxchk,dopre)
-      else
-        maxchk = 'N'
-        dopre =  'N'
-      endif
+  
 
 C     1. Create output file for SNAP commands.  If problems, quit.
 C     check to see if the file exists first, and if so, purge it.
       call purge_file(snpname,luscn,luusr,kbatch,ierr)
       if(ierr .ne. 0) return
 
-      luFile=lu_outFile
+      lufile=lu_outfile
 
       WRITE(LUSCN,*) "Translation for ", cstnna(istn)
       write(luscn,*) "  From file: ",lskdfi(1:trimlen(lskdfi)),
      >  " To snap file: ",        SNPNAME(1:trimlen(snpname))
 
-      open(unit=LU_OUTFILE,file=SNPNAME,status="NEW",iostat=IERR)
+      open(unit=lufile,file=SNPNAME,status="NEW",iostat=IERR)
       IF (IERR.eq.0) THEN
-        rewind(LU_OUTFILE)
+        rewind(lufile)
       ELSE
         WRITE(LUSCN, "(' SNAP02 - Error ',I6,' creating file ',A)")
      >    IERR,SNPNAME(1:trimlen(snpname))
@@ -529,13 +550,12 @@ C
       icheck=0
       icheckp=0
       cmodep=" "
-      tspins=0.0
       IPASP = -1
       IFTOLD = 0
       kerr=0
       ilen = 999
-      kspin = .false.
-      ket = .false.
+     
+      kstop_tape = .false.
       krunning = .false.
       ilatestop=0
       istnsk=0
@@ -550,7 +570,6 @@ C
 
       kadap= (tape_motion_type(istn).eq.'ADAPTIVE')
       kcont= (tape_motion_type(istn).eq.'CONTINUOUS')
-
 
       do i=1,max_stn
         cstn(i)=" "          !initialize
@@ -574,8 +593,8 @@ C
           ilen=-1
         endif
       enddo ! get first scan for this station into IBUF
-
-C  Precess the sources to today's date for slewing calculations.
+     
+C  Precess the sources to today's date for slewing calculations.  
       TJD = JULDA(MON,IDA,itime_scan_beg(1)-1900) + 2440000.0D0
       DO I=1,NCELES
         call apstar_Rad(tjd,sorp50(1,i),sorp50(2,i),
@@ -584,9 +603,9 @@ C  Precess the sources to today's date for slewing calculations.
 
       call snapintr(1,itime_scan_beg(1))
 
+      klast_obs = .false. 
       DO WHILE (ILEN.GT.0.AND.KERR.EQ.0.and.ierr.eq.0 .AND.
      >             cbuf(1:1) .ne. "$")
-
         istnsk_next=0
         iobs_now = iobs ! save current obs number for scan ID
         do while (istnsk_next.eq.0) ! Get NEXT scan for this station into ibuf_next
@@ -608,18 +627,18 @@ C  Precess the sources to today's date for slewing calculations.
      >        isor_next,ISTNSK_next,ICOD_next)
             IF (ISOR_next.EQ.0.OR.ICOD_next.EQ.0) RETURN
           else
-            ilen=-1
+            ilen=-1    
+            klast_obs =.true. 
             istnsk_next=999
           endif
         enddo ! get NEXT scan for this station into ibuf_next
 !        write(*,*) "NEXT ",itime_scan_beg_next
-
-        if(istnsk_next .ne. 999) ifeet_next=ift(istnsk_next)
+  
 ! Here we see if we have a data transfer scan.
 ! See if have data transfer statements.
         kin2net=.false.
         kdisk2file=.false.    
-
+   
         if(.not.kno_data_xfer .and.
      >     (kstat_in2net(istn) .or. kstat_disk2file(istn))) then
           if(km5disk .and. ixfer_beg(iobs_now) .ne. 0) then
@@ -656,7 +675,7 @@ C  Precess the sources to today's date for slewing calculations.
           endif
 111       continue
         endif
-C
+      
         IF (ISTNSK.NE.0)  THEN ! our station is in this scan
           if(cdir(istnsk)(1:1) .eq. "R") then
              idir=-1
@@ -682,23 +701,11 @@ C****************************************************************
 C  2.5  Calculate all the times and flags we will need. 
 
 C  Does this obs start a new tape?
-          if (.not.km5disk.and.idir.ne.0) then
-            KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
-     .      IDIRP,IFTOLD)
-          else
-            knewtp = .false.
-          endif
+
 C         Force new tape on the first scan on tape.
           if (iobs_this_stat_rec.eq.0) knewtp=.true.
 
-          if(iobs_this_stat_rec .gt. 0) then
-            do i=1,5
-              itime_early_prev(i)	=itime_early(i)
-              itime_scan_beg_prev(i)	=itime_scan_beg(i)
-              itime_scan_end_prev(i)	=itime_scan_end(i)
-              itime_tape_stop_prev(i)	=itime_tape_stop(i)
-            end do
-          endif
+ 
           kcontpass_prev=kcontpass
 
           if(knewtp .or. icod .ne. icod_old) then
@@ -716,43 +723,48 @@ C         Force new tape on the first scan on tape.
             icod_old=icod
           endif
 
-          if(ks2) then
-! need to put this in, because KS2 only has one pass.
-            knewPass=knewtp
-          else
-            kNewPass = (ipasp.ne.ipas(istnsk))
-          endif         
-
+          kNewPass = (ipasp.ne.ipas(istnsk))
+               
 ! Data end time=itime_scan_beg+duration.
           call TimeAdd(itime_scan_beg,idur(istnsk),itime_scan_end)
 ! Cal time= itime_scan_beg-ical
           call TimeSub(itime_scan_beg,ical,itime_cal)
 
-! Calculate time to abort autoftp for previous scan. Only need to do if a previous scan.
+
+          kPhaseRefPrev=.false.
+              
           if(iobs_this_stat .gt. 0) then 
 ! itime_disk_abort=itime_scan_beg-(ical+isettm+5)     
-! Calculate how much time we have.
-!            writE(*,*) "PREV ",itime_scan_end_prev
-!            write(*,*) "CAL  ",itime_cal
-!            write(*,*) "BEG  ",itime_scan_beg
-         
+! Calculate how much time we have.                          
             idt=iTimeDifSec(iTime_scan_beg,iTime_scan_end_prev)
-            idt=idt-(isettm+ical+5)          !isettm is time for setup. 
+            kPhaseRefPrev= idt .le. itgap(istn) 
+    
+! Calculate time to abort autoftp for previous scan. Only need to do if a previous scan.   
+            idt=idt-(isettm+ical+5)     !isettm is time for setup. 
                                         ! 5 is for execution of disk2file         
-            idt=min(idt,iautoftp_abort_time)
-        
+            idt=min(idt,iautoftp_abort_time)        
             call TimeAdd(itime_scan_end_prev,idt,itime_disk_abort)
-          endif 
-  
+          endif        
 
+! This indicates start of phase reference.     
+          idt=iTimeDifSec(iTime_scan_beg_next,iTime_scan_end)
+          kPhaseRefNext= idt .le. itgap(istn) 
+             
 !     itime_early=itime_scan_beg - early_start
-          call TimeSub(itime_scan_beg,itearl(istn),itime_early)
-          do i=1,5
-            itime_tape_start(i)=itime_early(i)
-          end do
+          call TimeSub(itime_scan_beg,itearl(istn),itime_early)  
+          call copy_time(itime_early,itime_tape_start)
 !     itime_tape_stop=itime_scan_end+itlate
           call TimeAdd(itime_scan_end,itlate(istn),itime_tape_stop)
-          call TimeAdd(itime_early,ioff(istnsk),itime_data_valid)
+          call TimeAdd(itime_scan_beg,ioff(istnsk),itime_data_valid)
+          if(km6disk) then 
+             idata_mk6_scan_mb=
+     >       (itearl(istnsk)+itlate(istnsk)+idur(istnsk))
+     >          *idata_mbps(istnsk) 
+            rmk6_buf_time=
+     >      float(idata_mk6_scan_mb_prev)/isink_mbps(istn)+imark6_off   
+            call TimeAdd(itime_tape_start_prev,int(rmk6_buf_time),
+     >              itime_buf_write_end)          
+          endif 
 
       if(kdebug) then
         write(*,'("Time_early ",i4,".",i3,".",2(i2.2,"."),i2.2)')
@@ -763,10 +775,10 @@ C         Force new tape on the first scan on tape.
      >        (itime_data_valid(j),j=1,5)
         write(*,'("Tape Stop  ",i4,".",i3,".",2(i2.2,"."),i2.2)')
      >        (itime_tape_stop(j),j=1,5)
-        pause
+!        pause
       endif
 
-C     Now determine whether the tape will be stopped (ket).
+C     Now determine whether the tape will be stopped (kstop_tape).
 C     For "adaptive" motion, stop the tape if the time between one
 C     tape stop and the next tape start is longer than the specified 
 C     time gap. For "continuous" tape is nominally never stopped.
@@ -777,41 +789,30 @@ C
         endif
 
         if(kadap) then
-          if(ks2) then          !s2
-            if (iobs_this_stat_rec.gt.0) then ! got a previous scan
-              idt = iTimeDifSec(itime_early,itime_tape_stop_prev)
-              ket = idt.gt.itgap(istn)
-            else ! first scan
-              ket = .false.
-            endif
-C Restore the following for adaptive -- using gap time.
-C This is restricted to "adaptive" coming from VEX files.
-          else  		!not ks2
-            if (istnsk_next.ne.999) then ! next scan
+          if (.not.klast_obs) then ! next scan
 C             Use the offsets instead of slewing to determine good data time
               if (idirn.eq.idir) then ! same direction, check gap
                 idt=iTimeDifSec(itime_scan_beg_next,itime_tape_stop)-
      >                              itearl(istn)
-                ket = idt.gt.itgap(istn)
-                if (ket) then
+                kstop_tape = idt.gt.itgap(istn)
+                if (kstop_tape) then
                   kcontpass = .false. ! this pass not continuous
                 endif
               else ! new direction, must stop
-                ket = .true.
+                kstop_tape = .true.
                 kcontpass = .true. ! reset to true at start of a new pass
               endif ! same/new direction
             else ! no next
-              ket = .true.
+              kstop_tape = .true.
             endif ! next/last
-          endif                 !S2 OR NOT S2
 C Use this section only for continuous
         else if (kcont) then
           ilatestop=0
-          ket = .false.
+          kstop_tape = .false.
           if (iobs_this_stat_rec.ne.0) then    ! calculate new times based
-            lcbnow=lcable(istnsk)  !need to do this becase slewo CHANGES lcable(istnsk)
-            call slewo(isorp,mjdpre,utpre,isor,istn,lcbpre,
-     >        lcbnow,tslew,0,dum)
+            cwrap_now=ccable(istnsk)  !need to do this becase slewo CHANGES lcable(istnsk)
+            call slewo(isorp,mjdpre,utpre,isor,istn,
+     >        cwrap_pre,cwrap_now,tslew,0,dum)    
             if (tslew.lt.0) tslew=0.0
             if (kNewPass) then ! New pass.
               if(idirp .eq. +1) iftrem=ift(istnsk)-iftold
@@ -825,21 +826,15 @@ C Use this section only for continuous
      >                 itime_scan_beg)
               call TimeSub(itime_scan_beg,ical,itime_cal)
               call TimeSub(itime_scan_beg,itearl(istn),itime_early)
-              do i=1,5
-                itime_tape_start(i)=itime_early(i)
-              end do
+              call copy_time(itime_early,itime_tape_start)  
             endif ! same pass/new pass
           endif !  calculate new times
         else ! start& stop OR new direction
-          ket = .true.
+          kstop_tape = .true.
         endif
 
 C       always stop on the last scan but not for late stop.
-        if (istnsk_next.eq.999.and.itlate(istn).eq.0) ket=.true.
-C         always stop if S2 mode changes for the next scan.
-        if(ks2.and.cmode(istn,icod_next) .ne. cmode(istn,icod)) then
-           ket=.true.
-        endif
+        if (klast_obs.and.itlate(istn).eq.0) kstop_tape=.true.
 
 C <<<previous>>>>  <<<<<<<<<<current>>>>>>>>>>>>>>>>>>>>>>  <<<next>>>>>>>>>
 C data     tape    tape           data   data         tape    tape
@@ -854,22 +849,29 @@ C
 C     3. Output the SNAP commands. Refer to drudg documentation.
 
 C scan_name command. 
-        nch=trimlen(scan_name(iskrec(iobs_now)))
+!        nch=trimlen(scan_name(iskrec(iobs_now)))          
 
-        write(ldum,'("scan_name=",3(a,","),i4)')
-     >    scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
-     >    idur(istnsk)
-
-!        if(.true.) then
-        if(kdebug) then
-          write(*,'("scan_name=",3(a,","),i4)')
-     >      scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
-     >      idur(istnsk)
-         pause
-        endif
-
+        lscan_name_now=scan_name(iskrec(iobs_now)) 
+        write(ldum,'("scan_name=",3(a,","),i4)')  lscan_name_now,
+     >    lsession, cpocod(istn), idur(istnsk)-ioff(istnsk)
+        call lowercase(ldum) 
         call squeezewrite(lufile,ldum)       !get rid of spaces, and write it out.
 
+        if(.false.) then
+           write(*,*) kphaseRefPrev, " | ",kPhaseRefNext, " | ",ldum   
+        endif 
+
+        if(ktarget_time) then
+! This is test for phase reference.  If doing phase_reference then get there ASAP
+          if(kPhaseRefNext) then 
+            write(lufile,'("target_time=")')
+          else
+            write(lufile,
+     >       '("target_time=",i4.4,".",i3.3,".",2(i2.2,":"),i2.2)')
+     >       itime_cal
+          endif 
+        endif 
+      
 C SOURCE command
         IOBSP = IOBSP+1
         ituse=0
@@ -941,7 +943,14 @@ C               SOURCE=name,ra,dec,epoch
 
         if(iobs_this_stat .eq. 0 .and. kk5) then
            write(lufile,'("ready_k5")')
-        endif
+        endif 
+        if(iobs_this_stat .ne. 0 .and. km6disk) then  
+          call snap_wait_time(lufile,itime_buf_write_end)
+            
+          write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+          call squeezewrite(lufile,ldum)
+          write(lufile,'("checkmk6")') 
+        endif 
 
         if((iobs_this_stat_rec.ne.0).and.(idir.ne.0) .and.
      >     (km5disk.or.km5a_piggy.or.km5p_piggy.or.kk5).and.
@@ -949,102 +958,15 @@ C               SOURCE=name,ra,dec,epoch
            if(kk5) then
               write(lufile,'("checkk5")')
            else
-              write(luFile,'("checkmk5")')
+              write(lufile,'("checkmk5")')
            endif
         endif
 
         if(kdisk2file_prev) then
-           call snap_wait_time(lu_outfile,itime_disk_abort)
+           call snap_wait_time(lufile,itime_disk_abort)
            call snap_disk2file_abort(lufile)
            kdisk2file_prev=.false.
-        endif
-
-C  For S2 or continuous, stop tape if needed after the SOURCE command
-        if((krec.and. idir.ne.0 .and. iobs_this_stat_rec.ne.0.and. 
-     >    .not.km5disk)
-     >   .and.(
-     >      (ks2.and.itlate(istn).gt.0.and.ipasp.ge.0.and.            !S2 stuff
-     >      (knewtp.or.ket.or.kNewPass.or.(cmodep.ne.cmode(istn,icod)))) !S2
-     >           .or.
-     >      (.not.ks2.and.kcont.and.                                  !Not S2
-     >      (ilatestop.gt.0.or.knewtp .or.idirp.ne.idir))             !Not S2
-     >                                                   )) then
-            krunning=.false.
-! This is time to reach end of tape.
-!           TSPINS = TSPIN(IFTREM,ISPM,SPS)
-            call snap_wait_time(lu_outfile,itime_pass_end)
-            call snap_et
-        endif
-
-        if (idir.ne.0.and.krec) then ! skip tape stuff if not recording
-C MIDTP procedure when changing direction
-C Note this will never be called for S2 because it only records forward.
-!          if (.not.(kk4 .or. ks2.or.km5)) then ! check for mid-tape
-! 2003Sep13. Put in midtape command for mark5
-           if (.not.(kk4 .or. ks2)) then ! check for mid-tape
-            IF (KNEWTP) IOBSP = 1  ! first observation on this pass
-            IF (LDIR(ISTNSK).NE.LDIRP.AND..NOT.KNEWTP.AND.IPASP.GT.-1)
-     >        THEN
-              icheck = 1 !do a check after this observation
-              IOBSP = 1
-              call snap_midtp()
-            else
-              icheck=0
-            END IF
-          endif ! check for mid-tape
-
-C Calculate tape spin time. But don't do for ks2,kk4,km5 or continuous.
-         if (.not.(knopass.or.kcont)) then
-            TSPINS = TSPIN(IABS(IFT(ISTNSK)-IFTOLD),ISPM,SPS,iSpinDelay)
-            IF (IFT(ISTNSK).LT.IFTOLD) idirsp=-1
-            IF (IFT(ISTNSK).gT.IFTOLD) idirsp=+1
-          endif
-C
-C Unload tape.
-          IF (.not.km5disk.and.krec.and.
-     >         (KNEWTP.AND.iobs_this_stat_rec.NE.0)) THEN !unload old tape
-            klast_tape=.false.
-            call TimeSub(itime_tape_start,itctim,itime_tape_need)
-            if(ks2) then
-              call snap_wait_time(lu_outfile,itime_pass_end)
-            endif
-
-            call snap_unload_tape(luscn,itime_tape_stop_prev,
-     >          itime_tape_stop_spin,itime_tape_need,iSpinDelay,
-     >          nrecst(istn),ntape,
-     >          kpostpass,kcontpass_prev,kcont,klast_tape)
-
-            idt=iTimeDifSec(iTime_tape_stop_spin,iTime_tape_need) !tape_stop-tape_start
-            if(idt .gt. 0 .and. .not. Km5disk) then    !not enough time.
-               imin=itctim/60
-               isec=itctim-imin*60
-               write(luscn,'(a,$)')
-     >             "SNAP05: Not enough time to change tape!"
-               write(luscn,'(a,i2.2,"m",1x,i2.2,"s",a)')
-     >            " Schedule says you need ",imin,isec,
-     >            " seconds to change tape."
-               write(luscn,'(a,$)') "Tape stops moving at:   "
-               call snap_wait_time(luscn,itime_tape_stop_spin)
-               write(luscn,'(a,$)') "Next obs is at:         "
-               call snap_wait_time(luscn,itime_tape_start)
-               write(luscn,'(a,$)') "Should have stopped by: "
-               call snap_wait_time(luscn,itime_tape_need)
-            endif
-
-            iobs_this_stat_rec=0
-C Switch recorders if we have two of them, and they are both used.
-            if(nrecst(istn) .eq. 2 .and. kuse(1) .and. kuse(2)) then
-              if (irec.eq.1) then
-                irec=2
-              else
-                irec=1
-              endif
-              ks2 = ks2rec(irec)
-              krec= .not.(knorec(irec) .or. kk5rec(irec))
-            endif ! don't/switch
-! do end of tape housework
-          END IF !unload old tape.
-        endif ! skip the tape stuff if not recording       
+        endif     
 C
 C Check procedure
 C For continuous tape motion, check after tape stops at end of a pass
@@ -1054,14 +976,13 @@ C         Add "not krunning" so we don't try a check while it's moving!
           IF (.not.krunning.and..not.knopass
      .      .and..NOT.KNEWTP.AND.iobs_this_stat_rec.GT.0) THEN !check procedure
           IF ((.not.kcont.and.KFLG(2).and.(iobsp.eq.2.or.icheckp.eq.1))
-     .       .or.(kcont.and.kflg(2).and.iobsp.eq.1)
-     .       .or.MAXCHK.eq.'Y') THEN ! see if there's time to do a check
+     .       .or.(kcont.and.kflg(2).and.iobsp.eq.1)) THEN ! see if there's time to do a check
 C        Do check if flag is set, but only if there is enough time.
 C        Or, do check if MAXCHK and if there is enough time.
 C        Enough time = (SOURCE+SPIN+SETUP+TAPE+3S+head) < IPARTM
             iset=0
             if (ldirp.ne.ldir(istnsk).or..not.kflg(1)) iset=isettm
-            ISPPL = TSPINS + ISET+ISORTM+ITAPTM+3
+            ISPPL = ISET+ISORTM+ITAPTM+3
 C           Add the procedure times to the previous data stop (time4).
             if (ilatestop.eq.0) then
               call TimeAdd(itime_scan_end_prev,isppl,itime_check)
@@ -1088,219 +1009,190 @@ C NOTE: 55 sec should really be IPARTM
             ENDIF !do the check
           END IF !check procedure
         endif ! recording
-C
-C Put READY before SETUP as of 12/97. Do SETUP READY SETUP for first tape.
-C 
-C READY
+
+
+! Do READY 
         IF (KNEWTP.and.krec) THEN ! new tape
           call snap_ready(ntape,kfirst_tape)
           if (iobs_this_stat.eq.0) then ! do a SETUP first
             if(kin2net) then
               call snap_in2net_connect(lufile,
      >           ldest,lxfer_options(ixfer_ptr))
-            endif
-            call snap_setup(ipas,istnsk,icod,iobs,kerr)
+            endif         
           endif ! do a SETUP first
           kfirst_tape=.false.
-
-C Prepass new tape
-          IF (dopre.eq.'Y'.and.KFLG(3)) THEN !prepass
-            call snap_prepass()
-          END IF !prepass
-          IF (.not.knopass .and.IFT(ISTNSK).GT.100) THEN !spin up
-            TSPINS=TSPIN(IFT(ISTNSK),ISPM,SPS,iSpinDelay)
-            call snap_fast(ifstfor,ISPM,SPS,nrecst(istn))     !fast forward
-          END IF ! spin up
-C Set TSPINS zero here so that no other spin is done
-C (move out from previous if test)
-          TSPINS=0.0
-        END IF ! new tape
-
-C UNLOADER 
-C Called for S2 if the group changed since the last pass
-        if (ks2.and..not.knewtp.and.ipasp.ne.-1.and.kNewPass) then
-          call snap_s2_unloader()
-        endif
+        END IF ! new tape  
       
 C SETUP procedure 
 C This is called on the first scan, if the setup is wanted on this
 C scan (flag 1=Y), if tape direction changes, or if a check was done
-C prior to this scan. Do only on a new pass for continuous. But
-C do it every scan for S2.
-        if ( (.not.kvex.and..not.kcont.and. .not.krunning) .or. 
-     >        (kcont.and..not.krunning).or.
-     >        (kvex.and..not.krunning).or.ks2) then
+C prior to this scan. Do only on a new pass for continuous. 
+     
+      if(.not. (kPhaseRefPrev.or.krunning)) then    !issue SETUP          
         IF (iobs_this_stat.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
-     >       .OR.ICHK.EQ.1) THEN
-          if (iobs_this_stat.eq.0.and.(ks2.or.km5disk)) then
-               ! don't do second setup at start for S2 or Mk5
-          else ! do it
-            if(kin2net) then
+     >       .OR.ICHK.EQ.1) THEN                
+           if(kin2net) then
               call snap_in2net_connect(lufile,
      >           ldest,lxfer_options(ixfer_ptr))
-            endif
+            endif        
             if(kdisk2file_prev) then
-              call snap_wait_time(lu_outfile,itime_disk_abort)
+              call snap_wait_time(lufile,itime_disk_abort)
               call snap_disk2file_abort(lufile)
               kdisk2file_prev=.false.
+            endif  
+            if(km6disk) then
+              csetup_name="setupbb"
+            else
+              call setup_name(ccode(icod),csetup_name)
+            endif 
+            call squeezewrite(lufile,csetup_name)               
+           
+            if(km6disk) then
+            write(ldum,'("mk6=record=",i4.4,"y",i3.3,"d",i2.2,"h",
+     >       i2.2,"m",i2.2,"s",":",i6,":",i6,":",a,":",a,":",a,";")')
+     >      (itime_scan_beg(i),i=1,5),idur(istnsk),
+     >       idata_mk6_scan_mb/(1024*8),          
+     >      lscan_name_now,lsession, cpocod(istn)
+            call lowercase(ldum) 
+            call squeezewrite(lufile,ldum) 
             endif
-            call snap_setup(ipas,istnsk,icod,iobs,kerr)
-          endif ! don't do second setup at start for S2 or Mk5
-        END IF
-        endif
-C
-C LOADER 
-C Called for S2 if the group changed since the last pass
-        if (ks2.and..not.knewtp.and.ipasp.ne.-1.and. knewPass) then
-          call snap_s2_loader()
-        endif
-C
-C Spin new tape if necessary to reach footage
-C Don't spin if we're already running. (? shouldn't happen?)
-        IF (idir.ne.0.and..not.krunning.and..not.knopass
-     .     .and.TSPINS.GT.5.0.and.krec) THEN
-          call snap_fast(idirsp,ISPM,SPS, nrecst(istn))
-          TSPINS = 0.0
-        END IF
-C K4 initialize whether drum command was written.
-        kdrum=.false.
+   
+         END IF
+       endif
 
+     
 C Early start 
         if (idir.ne.0.and.krec) then ! this is a non-zero recording scan
         if (itearl(istn).gt.0) then ! early start
         if (.not.kcont.or.(kcont.and..not.krunning)) then ! continuous
 C       always do unless continuous and already running
-C         If FASTx preceeded, add a wait for tape to slow down
-          if (kspin) then
-            call snap_wait_sec(iwait5sec)
-            kspin = .false.
-          endif
+       
 C  Wait until ITEARL before start time
           if (.not.krunning) ituse=1 ! Don't use early start if already running
-          call snap_wait_time(lu_outfile,itime_tape_start)
+          call snap_wait_time(lufile,itime_tape_start)
           call snap_monitor(kin2net)
-! Always issue the "Start recording command" for ks2. This is done so that if the
-! tape is stopped for some reason, the schedule can be restarted.
-          if(.not. krunning.or. ks2) then
-!          if(.not.krunning) then
-            call snap_start_recording(kin2net,cspeed)
+          if(.not. krunning) then
+            call snap_start_recording(kin2net)
            endif
         endif ! continuous
         endif !start tape early/issue ST again
         endif !non-zero scan
 
 C Wait until CAL time. Antenna is on-source as of this time.
-C No PREOB if tape is running in a VEX file.
-        IF (ICAL.GE.1.and.idir .ne. 0 .and.
-     >   (.not.kvex.or.(kvex.and..not.krunning))) THEN ! cal and preob
-           call snap_wait_time(lu_outfile,itime_cal)
+        IF (ICAL.GE.1.and. .not. 
+     >      (kPhaseRefPrev.or.krunning)) then ! PREOB
+           call snap_wait_time(lufile,itime_cal)
 C PREOB procedure
            call lowercase(cpre)
-           write(lu_outfile,'(a)') cpre
+           call squeezewrite(lufile,cpre)   
+          if(km6disk) then 
+          write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+          call squeezewrite(lufile,ldum)      
+          endif  
         ENDIF ! cal and preob
-
-C Wait until data start time
-        if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write time
-        else ! do write it
-           if(idir .ne. 0) then    !Don't put out time if we aren't recording
-             call snap_wait_time(lu_outfile,itime_scan_beg)
-           endif
-        endif ! don't/do write
-
-! Special case: Recorder set to none. Still issue data_valid commands at appropriate times.
-        if(.not. krec) then
-          idt = iTimeDifSec(itime_scan_end,itime_tape_start)
-          if (idt.gt.0) then ! some valid data
-            idt=iTimeDifSec(ilast_wait_Time,itime_data_valid)
-            if (kvex.and. idt .ne. 0) then ! good data time
-              call snap_wait_time(lu_outfile,itime_data_valid)
-            endif ! good data time
-C Good data flag -- AFTER the ST command or good-data time
-            call snap_data_valid('=on')
-          endif ! some valid data
-        endif
-! End special case.
-
-C S2 DATA_VALID
-        if (krec.and.idir.ne.0) then ! non-zero recording scan
-          if (ks2) then
-            call snap_data_valid('=on')
-          endif
-C TAPE monitor command
-          if (kvex.and.kadap.and.krunning.and..not.ks2) then ! don't write tape
-          else ! do write it
-            call snap_last_wait_time(ilast_wait_time)
-            call snap_monitor(kin2net)
+   
+!--------------------- Begin  DATA_VALID   -------------------------------------
+! write out 
+!   !YYYY.DDD.HH:MM:SS
+!   disk_pos  OR in2net        <---only if MK5B
+        if(krec .and. idir .ne. 0)  then                     !have a recorder and are recording
+          if (kvex.and.kadap.and.krunning) then ! don't write time
+            continue 
+          else ! do write it             
+!  Write out monitor command. 
+            call snap_wait_time(lufile,itime_scan_beg)          
           endif ! don't/do write
+!Turn on running if necessary. 
+          kdo_monitor=.true.                  !indicate that we should issue monitor command before data_valid
+          if(.not.krunning) then
+! Need to insert a 'disk_pos' command if we start recording. 
+! This also means that we do not need to insert it later. 
+            call snap_monitor(kin2net)       
+            kdo_monitor=.false. 
+            call snap_start_recording(kin2net)    
+          endif     
+        endif
+! Turn on flag indicating 
+        krunning=.true.
 
-C Start tape if not already running.
-          if (.not.krunning)  then
-             call snap_start_recording(kin2net,cspeed)
-          endif
+! ISSUE:
+!  !YYYY.DDD.HH:MM:SS    <--but only if differs from last time. 
+!  data_valid=on
+        call snap_get_last_wait_time(ilast_wait_time)        !Get the last wait time.
 
-C Wait until good data time for VEX files
-          idt = iTimeDifSec(itime_scan_end,itime_tape_start)
-          if (idt.gt.0) then ! some valid data
-            idt=iTimeDifSec(ilast_wait_Time,itime_data_valid)
-            if (kvex.and..not.ks2 .and. idt .ne. 0) then ! good data time
-              call snap_wait_time(lu_outfile,itime_data_valid)
-              call snap_monitor(kin2net)
+! First if:
+!   A) Have recorder AND are recording OR B) recorder ='none'               
+        if(krec .and. idir .ne. 0 .or. .not. krec) then
+! Second if.
+!   A) non VEX files OR B) VEX files if there is still good data left. 
+          if(.not. kvex.   or. (kvex .and.
+     >      iTimeDifSec(itime_scan_end,itime_tape_start) .gt. 0)) then   !some            
+! Check if we need to issue a wait command. 
+            if(iTimeDifSec(itime_data_valid,ilast_wait_Time).gt.0) then  
+! If we insert a wait time, need to insert a 'disk_pos' command before 'data_valid=on'
+               call snap_wait_time(lufile,itime_data_valid)              
+               kdo_monitor=.true.                            
             endif ! good data time
-C Good data flag -- AFTER the ST command or good-data time
-            if (.not.ks2) then ! non-S2 data valid
-              call snap_data_valid('=on')
-            endif ! non-S2 data valid
+            if(kdo_monitor) call snap_monitor(kin2net)
+            call snap_data_valid('=on')         
           endif ! some valid data
-        endif ! non-zero recording scan
+        endif  
+! end ---------------- DATA_VALID  -----------------------------------
+        
 C MIDOB procedure
         if(idir .ne. 0) then
+
+        if(km6disk) then 
+          write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+          call squeezewrite(lufile,ldum)      
+         endif  
           call lowercase(cmid)
-          write(lu_outfile,'(a)') cmid
+          call squeezewrite(lufile,cmid)     
         endif
 C Wait until data end time
-        call snap_wait_time(lu_outfile,itime_scan_end)
+        call snap_wait_time(lufile,itime_scan_end)
 
-        if(.not. krec) then
+        if((krec .and. idir .ne.0) .or. .not. krec) then
           call snap_data_valid('=off')
         endif
-
-C Stop data flag
-        if (krec.and.idir.ne.0) then ! non-zero recording scan
-          call snap_data_valid('=off')
-C ET command
-          if ((.not.ks2.and..not.kcont.and.
-     .        (ket.or.ipas_next(istnsk).ne.ipas(istnsk)))
-     .        .or.
-     .        (ks2.and.ket.and.itlate(istn).eq.0)) then !ET command
-C         Wait until late stop time before issuing ET
+ 
+C Stop data flag      
+        if (krec.and.idir.ne.0) then ! non-zero recording scan      
+          if(.not.kcont .and. kstop_tape) then     
+!         Wait until late stop time before issuing ET
             if (itlate(istn).gt.0) then
-               call snap_wait_time(lu_outfile,itime_tape_stop)
-            endif
-            krunning = .false.
-            if (km5disk .or. KM5A_piggy .or. KM5P_piggy) then
+               call snap_wait_time(lufile,itime_tape_stop)
+            endif    
+            krunning=.false.       
+            if (km5disk) then
               if(kin2net) then
                 write(lufile,'(a)') 'in2net=off'
               else
-                write(luFile,'(a)') 'disk_record=off'
+                write(lufile,'(a)') 'disk_record=off'
               endif
-            endif
-            if(.not. km5disk) call snap_et
+            endif          
           endif! ET command
           call snap_monitor(kin2net)
-C Do DISK_CHECK for Mk5 in piggyback mode. (Can't do if tape is running!)
-C S2 DATA_VALID
-          if (ks2.and..not.krunning) then ! need another data_valid off
-            call snap_data_valid('=off')
-          endif
-        endif ! non-zero recording scan
-
+        endif ! non-zero recording scan     
+   
 C Save information about this scan before going on to the next one
         cmodep=cmode(istn,icod)
         IPASP = IPAS(ISTNSK)
         isorp = isor
         icheckp=icheck
-        lcbpre = lcable(istnsk)
+        cwrap_pre = ccable(istnsk)       
         iobs_this_stat = iobs_this_stat + 1
+        call copy_time(itime_scan_beg,itime_beg(1,iobs_this_stat))
+            
+        if(kstop_tape) then
+           krunning=.false.      
+           do i=iscan_calc_start, iobs_this_stat
+              itime_total_record(i)=
+     >           iTimeDifSec(iTime_tape_stop,itime_beg(1,i))      
+           end do   
+           iscan_calc_start=iobs_this_stat+1
+        endif
+
         if (idir.ne.0) then ! update direction and footage
           iobs_this_stat_rec = iobs_this_stat_rec + 1
           LDIRP = LDIR(ISTNSK)
@@ -1310,13 +1202,14 @@ C Save information about this scan before going on to the next one
      .        IDUR(ISTNSK))*speed_ft)
         endif ! update direction and footage
 C POSTOB    
-        IF (idir .ne. 0 .and.
-     >   (.not.kvex.or.(kvex.and..not.krunning))) THEN ! cal and preob    
-          call lowercase(cpst)
-          write(lu_outfile,'(a)') cpst
-        endif   
 
-        if(km5disk.or.km5a_piggy .and. idir .ne. 0) then
+        IF (idir .ne. 0 .and. (klast_obs .or. 
+     &     .not. (kPhaseRefNext .or. krunning))) then 
+          call lowercase(cpst)
+          call squeezewrite(lufile, cpst)         
+        endif   
+           
+        if(km5disk) then
           if(kdisk2file) then
             nch=trimlen(scan_name(iobs_now))
             nch2=trimlen(ldest)
@@ -1361,9 +1254,8 @@ C POSTOB
             kdisk2file_prev=.true.
           endif
         endif     
-
-!       utpre = ihr4*3600.d0+min4*60.d0+isc4 + idur(istnsk)
-        mjdpre = JULDA(1,itime_scan_end(2),itime_scan_end(1)-1900)
+  
+        mjdpre = JULDA(1,itime_scan_end(2),itime_scan_end(1)-1900) 
         utpre= itime_scan_end(3)*3600.+itime_scan_end(4)*60.
      >       +itime_scan_end(5)
         if (utpre.gt.86400.d0) then
@@ -1382,51 +1274,87 @@ C     Copy ibuf_next into IBUF and unpack it.
      >      IDUR,LMID,LPST,NSTNSK,LSTN,LCABLE,
      >      MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
         call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
-      endif  
+      endif       
+!      pause  
 
       kdata_xfer_prev=kdisk2file .or. kin2net
 
+! Now we save the state of this scan.   
+        call copy_time(itime_early,     itime_early_prev)
+        call copy_time(itime_scan_beg,  itime_scan_beg_prev)
+        call copy_time(itime_scan_end,  itime_scan_end_prev)
+        call copy_time(itime_tape_stop, itime_tape_stop_prev)
+        call copy_time(itime_tape_start,itime_tape_start_prev)
+        call copy_time(itime_data_valid,itime_data_valid_prev) 
+        idata_mk6_scan_mb_prev=idata_mk6_scan_mb          
       END DO ! ilen.gt.0,kerr.eq.0,ierr.eq.0
 
-! Finish up.
-      klast_tape=.true.
-      if(ks2) then
-        call TimeAdd(itime_scan_end,itlate(istn), itime_pass_end)
-        call snap_wait_time(lu_outfile,itime_pass_end)
-      endif
-
-      if(krec) then
-      call snap_unload_tape(luscn,itime_tape_stop_prev,
-     >    itime_tape_stop_spin,itime_tape_need,iSpinDelay,
-     >    nrecst(istn),ntape,
-     >    kpostpass,kcontpass,kcont,klast_tape)
-      endif
-
-      if ((km5disk.or.km5a_piggy.or.km5p_piggy.or.kk5) .and.
-     >      .not. (krunning .or. kdata_xfer_prev))  then
-        if(kk5) then
+! Do any cleanup we need to do
+      do i=iscan_calc_start, iobs_this_stat
+           itime_total_record(i)=
+     >         iTimeDifSec(iTime_tape_stop,itime_beg(1,i))     
+      end do             
+  
+      if(.not.(krunning .or. kdata_xfer_prev)) then        
+         if(kk5) then
            write(lufile,'("checkk5")')
-        else
-           write(luFile,'("checkmk5")')
+        else if(km5disk) then 
+           write(lufile,'("checkmk5")')
         endif
       endif
 
       if(kdisk2file_prev) then
          call TimeAdd(itime_scan_end,iautoftp_abort_time,
      >     itime_disk_abort)
-         call snap_wait_time(lu_outfile,itime_disk_abort)
+         call snap_wait_time(lufile,itime_disk_abort)
          call snap_disk2file_abort(lufile)
          kdisk2file_prev=.false.
       endif
 
 C End of schedule
-      write(Lu_outFile,'(a)') "sched_end"
-      close(LU_OUTFILE,iostat=IERR)
+      write(lufile,'(a)') "sched_end"
+      close(lufile,iostat=IERR)
 
-      if(km5disk) then
-        call fix_snap_file(snpname)     !changes scan name
-      endif
-      call drchmod(snpname,iperm,ierr)
+
+! Here we fixup the snap file     
+      lu_in=9
+      open(lu_in,file=snpname)
+      i=trimlen(snpname)
+      ltmpfil=snpname(1:i)//".tmp"
+      open(lufile,file=ltmpfil)
+
+      iobs_this_stat=0
+      do while(.true.) 
+        read(lu_in,'(a)',end=1100) ldum
+        if(ldum(1:9) .eq. "scan_name") then
+          iobs_this_stat=iobs_this_stat+1
+          i=trimlen(ldum)+1
+          itemp=itime_total_record(iobs_this_stat)+itearl(istn)        
+          write(ldum(i:),'(",",i10)') itemp
+          call squeezewrite(lufile,ldum)
+        else
+         i=trimlen(ldum)
+         write(lufile,'(a)') ldum(1:i)    
+        endif            
+      end do       
+
+
+1100  continue
+      close(lu_in)
+      close(lufile)
+
+      if(.true.) then 
+      i1=trimlen(ltmpfil)
+      i2=trimlen(snpname)
+      write(ldum,*) "mv ",ltmpfil(1:i1+1),ltmpfil(1:i2)
+      i1=trimlen(ldum)
+      i1=i1+1
+      ldum(i1+1:i1+1)=char(0)      
+      call system(ldum(1:i1))
+      endif 
+
+
+      call drchmod(snpname,ierr)
       IF (KERR.NE.0) WRITE(LUSCN,9902) KERR,SNPNAME(1:ic)
 9902  FORMAT(' SNAP03 - Error ',I5,' writing SNAP output file ',A)
 
