@@ -251,9 +251,11 @@ loop:
 	  data_check(&command,itask,ip);
 	  break;
 	case 5:
+	case 24:
 	  mk5relink(&command,itask,ip);
 	  break;
 	case 6:
+	case 25:
 	  mk5close(&command,itask,ip);
 	  break;
 	case 7:

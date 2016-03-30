@@ -330,6 +330,8 @@ dbbc         qkr 7820 01 FFFFFFFFFFFF
 mk5_status   qkr 7821 01 FFFFFFFFFFFF
 fila10g      qkr 7822 01 FFFFFFFFFFFF
 fila10g_mode qkr 7823 01 FFFFFFFFFFFF
+dbbcrelink   qkr 7824 01 FFFFFFFFFFFF
+dbbcclose    qkr 7825 01 FFFFFFFFFFFF
 rollform     qkr 7901 01 0254FFFFFFFF
 tpicd        qkr 8001 01 FFFFFFFFFFFF
 onoff        qkr 8101 01 FFFFFFFFFFFF
