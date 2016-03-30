@@ -6,12 +6,11 @@
 
 
 Comments:
-This command can be used to open a new connection to the Mark
-5 recorder. If the connection is already open, it will be
-closed and new one established. Opening a new connection is
-needed after  after the Mark 5's control program has been
-restarted or its power has been cycled. This may happen for
-example for a disk swap.
+bThis command can be used to open a new connection to the Mark 5
+recorder. If the connection is already open, it will be closed and new
+one established. Opening a new connection is needed after the Mark 5's
+control program has been restarted or its power has been cycled. This
+may happen for example for a disk swap.
 
 If a schedule is running, but halted, this command will
 release the halt if a connection is successfully re-
