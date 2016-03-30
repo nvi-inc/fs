@@ -1,0 +1,12 @@
+              dbbcclose - Close the DBBC connection
+
+            Syntax:     dbbcclose
+
+            Response:   none
+
+
+Comments:
+
+This command can be used to close the connection to the DBBC.  This
+may be needed to allow another client to connect to the DBBC.  The
+connection can be re-opened with the dbbcrelink command.
