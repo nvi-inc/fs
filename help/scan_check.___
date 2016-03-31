@@ -1,6 +1,7 @@
              scan_check - check Mark 5/Mark 6/FlexBuff recorded data
 
             Syntax:      scan_check
+                         scan_check=force
 
             Response:
             Mark 5A:     scan_check/scan,label,mode,submode,time,length,rate,
@@ -9,7 +10,10 @@
                                     missing,error,field
 
 
-Settable parameters: None
+Settable parameters:
+            force       the literal string "force" to force a scan_check if
+                        a schedule is running and scan_name=... has not been
+                        issued twice since it started. See comments below.
 
 Monitor-only parameters:
             scan        scan number
@@ -55,7 +59,13 @@ http://www.haystack.mit.edu/tech/vlbi/mark5/software.html. Follow the
 links named "Mark 5A command set" and "Mark 5B command set (Rev
 1.12)".
 
-The first form of the command above with parameters mode, submode, and
-rate is for Mark5A recorders. The second form of the command above
-with parameters type. code, and total is for all non-Mark5A recorders
+The first form of the response above with parameters mode, submode,
+and rate is for Mark5A recorders. The second form of the response with
+parameters type. code, and total is for all non-Mark5A recorders
 including Mark 5B, Mark 5C, FlexBuff, as well as Mark6.
+
+If a schedule is running and if "scan_name=..." command has been
+executed twice since the schedule was started, the command is a no-op
+that ends with a warning.  This is to prevent extraneous errors when a
+schedule is started in the middle.  The literal string "force" can be
+used as the first parameter to force a check.
