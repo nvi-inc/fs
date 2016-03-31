@@ -21,6 +21,7 @@ long ip[5];                           /* ipc parameters */
       char *arg_next();
       int out_recs, out_class;
       char outbuf[BUFSIZE];
+      int iOverRide;
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -34,11 +35,19 @@ long ip[5];                           /* ipc parameters */
 		  sizeof(shm_addr->last_check.string));
       shm_addr->last_check.ip2=0;
 
-      if (command->equal == '=' ) {
-	ierr=-301;
+      iOverRide = 0;
+      if (command->equal == '=' && !strcasecmp(command->argv[0],"force")) {
+	iOverRide = 1;
+      } else if (command->equal == '=') {
+ 	ierr=-301;
 	goto error;
       }
 
+      if(0!=memcmp(shm_addr->LSKD,"none ",5) &&
+	 !shm_addr->scan_name.name_old[0] && !iOverRide) {
+	ierr=302;
+	goto error;
+      }
 
 /* if we get this far it is a set-up command so parse it */
 
