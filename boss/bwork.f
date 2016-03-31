@@ -428,11 +428,13 @@ C
           end if
         end if
         call rmpar(ip)
+        if (ip(3).ne.0) then
+           call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        endif
         if (ip(3).lt.0) then
           if (kts) iclass=0
 C                   If we got ICLASS from time-scheduling, don't kill
 C                   it here, wait until CANTS
-          call logit7(0,0,0,0,ip(3),ip(4),ip(5))
           if(iwait.ne.0) then
              ipinsnp(3)=ip(3)
              ipinsnp(4)=ip(4)
@@ -704,6 +706,10 @@ C
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
         end if
+        scan_name_old(1:1)=char(0)
+        call fs_set_scan_name_old(scan_name_old)
+        scan_name(1:1)=char(0)
+        call fs_set_scan_name(scan_name)
         idum=ichmv_ch(ibuf,1,"exper_initi")
         nchar=idum-1
         idum=ichmv_ch(lsor,1,"::")
