@@ -142,7 +142,8 @@ c
      &       ) then
            call fc_mk5dbbcd(itpis_test)
         endif
-        do j=0,MAX_DBBC_IF-1
+        call fs_get_dbbc_cond_mods(dbbc_cond_mods)
+        do j=0,dbbc_cond_mods-1
            do ii=1,MAX_DBBC_BBC
               if(itpis_test(ii).ne.0.or.
      &             itpis_test(ii+MAX_DBBC_BBC).ne.0) then
@@ -157,11 +158,13 @@ c
 c
  210    continue
         if (ichcm_ch(iprm,1,'all').ne.0) goto 220
-        do ii=1,MAX_DBBC_BBC
+        call fs_get_dbbc_cores(dbbc_cores)
+        do ii=1,dbbc_cores*4
            itpis_dbbc(ii) = 1
            itpis_dbbc(ii+MAX_DBBC_BBC) = 1
         enddo
-        do ii=1,MAX_DBBC_IF
+        call fs_get_dbbc_cond_mods(dbbc_cond_mods)
+        do ii=1,dbbc_cond_mods
            itpis_dbbc(ii+2*MAX_DBBC_BBC) = 1
         enddo
         goto 289
