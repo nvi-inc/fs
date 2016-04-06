@@ -7,8 +7,8 @@ c
 
       REAL AZOFF, DECOFF, ELOFF, ISTPTP(2), ITACTP(2), RAOFF,
      . XOFF, YOFF, ep1950, tempwx, preswx, humiwx, speedwx,
-     . cablev, systmp(MAX_DET), epoch, height, diaman, slew1, slew2,
-     . lolim1, lolim2, uplim1, uplim2,
+     . cablev, systmp(MAX_GLOBAL_DET), epoch, height, diaman, slew1,
+     .  slew2, lolim1, lolim2, uplim1, uplim2,
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv(2), inscint(2),inscsl(2),
      . outscint(2), outscsl(2), wrvolt(2), rateti_fs, POSNHD(2,2),
      . FREQVC(15), motorv2(2), wrvolt2(2), wrvolt4(2), wrvolt42(2),
@@ -94,8 +94,9 @@ c
       character*16 dbbcddcvs, dbbcpfbvs
       character*1 dbbcddcvl, dbbcpfbvl
       character*16 fila10gvsi_in
+      character*17 scan_name,scan_name_old
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
-     $			 dbbcpfbvl
+     $			 dbbcpfbvl,scan_name,scan_name_old
 
