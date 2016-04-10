@@ -123,6 +123,10 @@ Repeat:
       inbuf[i]=toupper(inbuf[i]);
   }
 
+  entry.buf[0]=0;
+  entry.off=0;
+  device[0]=0;
+  device[1]=0;
   i = sscanf(inbuf,"%2s %d (%2c)",entry.buf,&entry.off, device);
   if(i==3 && strncmp(entry.buf,"RL",2)==0 && entry.off > -129 
      && entry.off < 0 ) {
