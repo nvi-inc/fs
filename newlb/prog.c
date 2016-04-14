@@ -21,7 +21,9 @@
 #define FILA10GVSI_IN_N 16
 #define DBBCPFBVL_N 1
 #define DBBCPFBVS_N 16
-#define SYSTMP_N MAX_DET
+#define SCANNAME_N 17
+#define SCANNAMEOLD_N 17
+#define SYSTMP_N MAX_GLOBAL_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
 #define LNAANT_N 8
@@ -2402,6 +2404,24 @@ void fs_get_dbbcddcvs__(dbbcddcvs)
 	  N = DBBCDDCVS_N;
 	  memcpy(dbbcddcvs,shm_addr->dbbcddcvs,N);
 	}
+
+void fs_set_scan_name_old__(scan_name_old)
+	char *scan_name_old;
+	{
+          size_t N;
+	  N = SCANNAMEOLD_N;
+	  memcpy(shm_addr->scan_name.name_old,scan_name_old,N);
+	}
+
+
+void fs_set_scan_name__(scan_name)
+	char *scan_name;
+	{
+          size_t N;
+	  N = SCANNAME_N;
+	  memcpy(shm_addr->scan_name.name,scan_name,N);
+	}
+
 
 void fs_set_dbbcddcvc__(dbbcddcvc)
 	int *dbbcddcvc;
