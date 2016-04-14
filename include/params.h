@@ -52,11 +52,18 @@
 #define MAX_VLBA_IF     (2*MAX_VLBA_DIST)
 #define MAX_DET         (MAX_BBC*2+MAX_IF)
 #define MAX_USER_DEV    6
-#define MAX_ONOFF_DET   (MAX_DET+MAX_USER_DEV)
 
 #define MAX_DBBC_BBC   16
 #define MAX_DBBC_IF     4
 #define MAX_DBBC_DET    (2*MAX_DBBC_BBC+MAX_DBBC_IF)
+#define MAX_DBBC_PFB    64
+#define MAX_DBBC_PFB_DET  (MAX_DBBC_PFB+MAX_DBBC_IF)
+
+/* must be the largest number of detectors possible */
+
+#define MAX_GLOBAL_DET    MAX_DBBC_PFB_DET
+#define MAX_ONOFF_DET   (MAX_GLOBAL_DET+MAX_USER_DEV)
+
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
