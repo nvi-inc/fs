@@ -192,6 +192,7 @@ void cshm_init()
   shm_addr->knewtape[0]=0;
   shm_addr->knewtape[1]=0;
 
+  shm_addr->scan_name.name_old[0]=0;
   shm_addr->scan_name.name[0]=0;
   shm_addr->scan_name.session[0]=0;
   shm_addr->scan_name.station[0]=0;
@@ -241,7 +242,7 @@ void cshm_init()
   shm_addr->tpicd.stop_request=1;
   shm_addr->tpicd.tsys_request=0;
   shm_addr->tpicd.cycle=0;
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_GLOBAL_DET;i++)
      shm_addr->tpicd.itpis[i]=0;
 
   for(i=0;i<MAX_ONOFF_DET;i++)
@@ -424,10 +425,10 @@ void cshm_init()
     shm_addr->dbbcnn[i].avper=0;
   }
   for (i=0;i<MAX_DBBCIFX;i++) {
-    shm_addr->dbbcifx[i].input=1;
+    shm_addr->dbbcifx[i].input=-1;
     shm_addr->dbbcifx[i].att=-1;
-    shm_addr->dbbcifx[i].agc=1;
-    shm_addr->dbbcifx[i].filter=1;
+    shm_addr->dbbcifx[i].agc=-1;
+    shm_addr->dbbcifx[i].filter=-1;
     shm_addr->dbbcifx[i].target_null=1;
     shm_addr->dbbcifx[i].target=0;
   }
