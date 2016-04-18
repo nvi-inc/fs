@@ -51,10 +51,18 @@ long ip[5];                           /* ipc parameters */
 	  ip[0]=ip[1]=ip[2]=0;
           return;
 	} else if(0==strcmp(command->argv[0],"tsys")){
-	  if(0==shm_addr->dbbc_cont_cal.mode) {
-	    ierr=-301;
+	  if(shm_addr->equip.rack==DBBC && 
+	     (shm_addr->equip.rack_type == DBBC_DDC ||
+	      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+	    if(0==shm_addr->dbbc_cont_cal.mode) {
+	      ierr=-301;
+	      goto error;
+	    }
+	  } else {
+	    ierr=-303;
 	    goto error;
 	  }
+
 	  for(i=0;i<MAX_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Tsys;
