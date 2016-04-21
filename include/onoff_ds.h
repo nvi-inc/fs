@@ -9,7 +9,7 @@ struct onoff_cmd {
   float ssize;           /* source size, radians */
   char proc[33];        /* procedure for first points */
   struct onoff_devices {
-    char lwhat[2];      /* device ID */
+    char lwhat[4];      /* device ID */
     char pol;           /* polarization */
     int ifchain;        /* which IF */
     float flux;         /* source flux */
