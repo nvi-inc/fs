@@ -55,7 +55,7 @@ C
         tpsor(i)=0
         tpspc(i)=0
       enddo
-      do i=1,32
+      do i=1,MAX_GLOBAL_DET
         systmp(i)= 0.0
       enddo
       call fs_set_systmp(systmp)
@@ -95,7 +95,7 @@ C
       iadcrx =  0
       lswcal = 0
       call char2hol(' ',laxfp,1,4)
-      call char2hol(' ',ldevfp,1,2)
+      call char2hol(' ',ldevfp,1,4)
       call char2hol(' ',ldv1nf,1,2)
       call char2hol(' ',ldv2nf,1,2)
       do i=1,2
