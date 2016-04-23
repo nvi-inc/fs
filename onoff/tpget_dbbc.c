@@ -37,11 +37,12 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	struct dbbcnn_mon lclm;
 	int tpon[2],tpoff[2];
 
+	ip[1]--;
 	if ((nchars =
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	  if(i<ip[1]-1) 
+	  if(ip[1]>0) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
+	  *ierr=-17;
 	  return -1;
 	}
 	inbuf[nchars]=0;
@@ -55,6 +56,11 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	  tpon[0]=lclm.tpon[0];
 	  tpoff[1]=lclm.tpoff[1];
 	  tpoff[0]=lclm.tpoff[0];
+	} else {
+	  if(ip[1]>0) 
+	    cls_clr(ip[0]);
+	  *ierr=-18;
+	  return -1;
 	}
 	if(1==itpis_dbbc[i]) {
 	  if(cont[i]) {
@@ -76,20 +82,24 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	struct dbbcifx_cmd lclc;
 	struct dbbcifx_mon lclm;
 
+	ip[1]--;
 	if ((nchars =
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	  if(i<ip[1]-1) 
+	  if(ip[1]>0) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
+	  *ierr=-17;
 	  return -1;
 	}
 	inbuf[nchars]=0;
 
 	cont[i]=0;
 	tpi2[i]=-1;
-	if( dbbc_2_dbbcifx(&lclc,&lclm,inbuf) !=0)
-	  tpi[i]=-1;
-	else
+	if( dbbc_2_dbbcifx(&lclc,&lclm,inbuf) !=0) {
+	  if(ip[1]>0) 
+	    cls_clr(ip[0]);
+	  *ierr=-18;
+	  return -1;
+	} else
 	  tpi[i]=dbbc_if_power(lclm.tp,i-2*MAX_DBBC_BBC);
       }
     }

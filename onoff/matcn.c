@@ -21,6 +21,6 @@ int matcn(ip,iclass,nrec,ierr)
   }
   logita(NULL,ip[2],ip+3,ip+4);
 
-  *ierr=-70;
+  *ierr=-17;
   return -1;
 }
