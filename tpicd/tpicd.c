@@ -54,6 +54,11 @@ main()
   } else if(shm_addr->equip.rack==LBA) {
     strcpy(buff,"tpi/");
     nchstart=nch=strlen(buff)+1;
+  } else if(shm_addr->equip.rack==DBBC &&
+     (shm_addr->equip.rack_type == DBBC_PFB ||
+      shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    strcpy(buff,"tpi/");
+    nchstart=nch=strlen(buff)+1;
   }
 
  loop:
@@ -82,7 +87,9 @@ main()
 
   if(shm_addr->equip.rack==DBBC &&
      (shm_addr->equip.rack_type == DBBC_DDC ||
-      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) { /* continuous or not
+							   can change between
+							   iterations */
     if(dbbc_cont_cal.mode==1)
       strcpy(buff,"tpcont/");
     else
@@ -236,16 +243,34 @@ main()
 	logit(NULL,-1,"cd");
 	goto while_end;
       }
-      if(dbbc_cont_cal.mode!=1) {
+      if(dbbc_cont_cal.mode!=1) { /* non-continuous cal */
 #ifdef TESTX
-    printf(" put non-cont dBBC data \n");
+	printf(" put non-cont dBBC data \n");
 #endif
 	tpput_dbbc(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
-      } else {
+	if(ip[2]<0) {
+	  logit(NULL,ip[2],ip+3);
+	  if(ip[0]!=0) {
+	    cls_clr(ip[0]);
+	    ip[0]=ip[1]=0;
+	  }
+	  logit(NULL,-2,"cd");
+	  goto while_end;
+	}
+      } else { /* continuous cal */
 #ifdef TESTX
-    printf(" put cont dBBC data \n");
+	printf(" put cont dBBC data \n");
 #endif
 	tpput_dbbc(ip,tpicd.itpis,-11,buff,&nch,ilen); /* put tpcont */
+	if(ip[2]<0) {
+	  logit(NULL,ip[2],ip+3);
+	  if(ip[0]!=0) {
+	    cls_clr(ip[0]);
+	    ip[0]=ip[1]=0;
+	  }
+	  logit(NULL,-2,"cd");
+	  goto while_end;
+	}
 	for(k=0;k<MAX_DBBC_DET;k++) {
 	  if(1==tpicd.itpis[k]) {
 	    if(dbbc_tpi[k]<-0.5 ||shm_addr->tpi[k]<=0 ||
@@ -280,6 +305,35 @@ main()
 	  if(tsys_disp)
 	    goto wakeup_block;
 	}
+      }
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+#ifdef TESTX
+      printf(" collecting dBBC PFB data \n");
+#endif
+      tpi_dbbc_pfb(ip,tpicd.itpis);   /* sample tpi(s) */
+      if(ip[2]<0) {
+	logit(NULL,ip[2],ip+3);
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	logit(NULL,-1,"cd");
+	goto while_end;
+      }
+#ifdef TESTX
+      printf(" put non-cont dBBC data \n");
+#endif
+      tpput_dbbc_pfb(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
+      if(ip[2]<0) {
+	logit(NULL,ip[2],ip+3);
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	logit(NULL,-2,"cd");
+	goto while_end;
       }
     }
    
