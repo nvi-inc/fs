@@ -99,7 +99,6 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(i<ip[1]-1) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
 	  ip[2]=-401;
 	  memcpy(ip+3,"qk",2);
 	  return;
@@ -141,16 +140,19 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(i<ip[1]-1) 
 	    cls_clr(ip[0]);
-	  logita(NULL,ip[2],ip+3,ip+4);
 	  ip[2]=-401;
 	  memcpy(ip+3,"qk",2);
 	  return;
 	}
 	inbuf[nchars]=0;
 
-	if( dbbc_2_dbbcifx(&lclc,&lclm,inbuf) !=0)
-	  ptr[i]=-1;
-	else {
+	if( dbbc_2_dbbcifx(&lclc,&lclm,inbuf) !=0) {
+	  if(i<ip[1]-1) 
+	    cls_clr(ip[0]);
+	  ip[2]=-402;
+	  memcpy(ip+3,"qk",2);
+	  return;
+	} else {
 	  // if(isub==4) {
 	  //  lclm.tp+=10000;
 	  // }
