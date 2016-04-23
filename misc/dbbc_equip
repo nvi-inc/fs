@@ -11,18 +11,18 @@ if ($#ARGV < 0) {
     print "\n  Usage: dbbc_equip 'coresA [coresB [coresC [coresD]]]' files\n\n";
     print "    Fixes equip.ctl files to use dbbc_ddc and dbbc_ddc/filag10 in place\n";
     print "      of equipment types dbbc and dbbc/fila10g, respectively. Also,\n";
-    print "      re-writes non-comment 21 to list the number of cores per\n";
+    print "      re-writes non-comment line 21 to list the number of cores per\n";
     print "      conditioning module in order of A, B, C and D. The cores must be\n";
     print "      specified as one argument, e.g., within quotes '....',\n";
-    print "      seperated by whitespace, with values 0-4 with only values\n";
+    print "      seperated by whitespace, with values 0-4, with only values for\n";
     print "      conditioning modules that are present, since the number of\n";
-    print "      entries implicitly specified the number of condtionong modules.\n";
-    print "      The number of conditioning modules must be in the range 1-5.\n";
+    print "      entries implicitly specifies the number of condtionong modules.\n";
+    print "      The number of conditioning modules must be in the range 1-4.\n";
     print "      The total number of cores must be in the range 1-4.\n\n";
-    print "    The script will remove any comment that matches the comment\n";
-    print "      that preceeds corresponding comment in the previous example\n";
-    print "      equip.ctl file. In any event it adds a new comment describing\n";
-    print "      the line format\n\n";
+    print "    The script will remove the comment that preceeded non-comment\n";
+    print "      line 21 in the previous equip.ctl, if there is an exact match.\n";
+    print "      In any event it adds new comments describing the new line\n";
+    print "      format\n\n";
     print "    The original files are preserved with a '.bak' extension.\n\n";
     exit -1;
 }
