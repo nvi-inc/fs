@@ -473,6 +473,9 @@ program error: strdup() failed
 5K -301
 scan_check command does not accept parameters
 ""
+5K  302
+There have not been two scan_name=... commands since the schedule started, use scan_check=force to force check
+""
 5K -401
 error retrieving class for scan_check response
 ""
@@ -1192,6 +1195,9 @@ WARNING: Log file just opened is already larger than 10 MB.
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.
+""
+CD  -2
+Error retrieving processing buffers from DBBCN in TPICD, see above for error.
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -2501,6 +2507,9 @@ Couldn't reset attenuators after an error
 FP -111
 Couldn't set manual gain control
 ""
+FP -112
+Couldn't restore automatic gain control (AGC)
+""
 FP -401
 Class buffer error, from monitor response for IF gain control.
 ""
@@ -2515,6 +2524,9 @@ Error decoding BBCmm response for voltage.
 ""
 FP -405
 Error decoding IFx response for voltage.
+""
+FP -406
+Error decoding power=n response for voltage.
 ""
 FP -112
 Couldn't reset gain to original value
@@ -3588,7 +3600,13 @@ NF  -15
 MCBCN failed resetting IF attenuators
 ""
 NF  -16
-MCBCN failed getting TPI
+Device communication failed getting TPI
+""
+NF  -17
+Error retrieving reponses.
+""
+NF  -18
+Error decoding response.
 ""
 NF  -20
 Did not reach source in allotted time
@@ -3925,6 +3943,9 @@ WARNING: Source structure correction greater than 20% for detector ?W.
 ""
 Q1 -308
 Unknown IF filter.
+""
+Q1 -309
+Unknown IF filter or unsupported IF filter for PFB BBC.
 ""
 Q2 -201
 Satellite name longer than 24 characters.
@@ -4424,6 +4445,9 @@ No detectors selected
 QK -205
 TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...16u,16l,FORMBBC,FORMIF.
 ""
+QK -206
+TPIs are ALL, FORMBBC, FORMIF, IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*Cores available on CoMo X
+""
 QK -211
 Tsys value for device ?W overflowed or was less than zero.
 ""
@@ -4435,6 +4459,21 @@ Previous detectors not remembered between uses.
 ""
 QK -214
 No rack detectors must be one of u5 or u6
+""
+QK -215
+Tsys value for device a?W overflowed or was less than zero.
+""
+QK -216
+Tsys value for device b?W overflowed or was less than zero.
+""
+QK -217
+Tsys value for device c?W overflowed or was less than zero.
+""
+QK -218
+Tsys value for device d?W overflowed or was less than zero.
+""
+QK -219
+Tsys value for device i?W overflowed or was less than zero.
 ""
 QK -301
 VC detectors other than must be upper, lower, and dual not supported.
@@ -4451,11 +4490,20 @@ LBA filter mode not defined for detector device.
 QK -306
 IF source not defined for detector device.
 ""
+QK -307
+Filter not defined for detector device IF source.
+""
+QK -308
+Detector not found.
+""
+QK -309
+IF not defined for station device.
+""
 QK -401
-program error: incorrect number of responses in tpput_vlba.
+Error retrieving device response buffers.
 ""
 QK -402
-Error in DBBC communication in tpput_dbbc.
+Error decoding device response buffers.
 ""
 QL -101
 No default for the MAT address.
@@ -4813,6 +4861,9 @@ PATCH has not setup the specified VC for FIVPT.
 ""
 QZ -217
 bbc not set-up.
+""
+QZ -218
+Detector must be one of IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*Cores available on CoMo X
 ""
 QZ -301
 FIVPT is not dormant.
@@ -5949,10 +6000,13 @@ TC -202
 Cycle period must be a non-negative integer.
 ""
 TC -301
-Continuous cal not enabled for DBBC.
+Continuous cal not enabled for DBBC DDC.
 ""
 TC -302
 TPICD not set-up: no detectors selected.
+""
+TC -303
+Continuous cal Tsys only available for DBBC DDC.
 ""
 TE   -9
 Video converter frequency has not been set
