@@ -3,8 +3,7 @@
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
-     
-    
+         
 ! Write out Mark5B mode command.
 ! functions
       integer itras
@@ -36,6 +35,7 @@
 ! 2015Jul06 JMG. In output changed "geo-r" to geo_r, etc. 
 ! 2015Jul28 JMG. Emit 'fila10g_mode' after 'fila10g_mode=...."
 ! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
+! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 
 ! local
       integer ipass
@@ -421,7 +421,7 @@
        if(kfila10g_rack) then
 ! put in a null argument if kddbc_rack before mask 
          if(kdbbc_rack) then  
-          write(cbuf,'(a,",=0x",Z8.8,",,",f9.3)')
+          write(cbuf,'(a,"=,0x",Z8.8,",,",f9.3)')
      >    'fila10g_mode', imask,samprate(istn,icode)                   
         else
            write(cbuf,'(a,"=0x",Z8.8,",,",f9.3)')

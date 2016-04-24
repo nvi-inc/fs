@@ -1,5 +1,8 @@
 This file contains a summary of changes made and why.
-2015Jan19 Lots of changes having to do with supporting DBBC_PFB. Here is a quick summary.
+2016Apr07.
+1. Fixed typographic bug in proc_disk_tracks with filag10 mode. 
+
+2016Jan19 Lots of changes having to do with supporting DBBC_PFB. Here is a quick summary.
 1. ../skdrincl/skparm.ftni: Max_bbc=16-->32
 2. proc_setup.f:  Different handling of DBBC_DDC and DBBC_PFB. Modifed to not emit BBC commands if DBBC_PFB. 
 3. proc_tracks.f: Call proc_dbbc_pfb_tracks instead of proc_disk_tracks for DBBC_PFB. 
