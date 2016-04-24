@@ -5,6 +5,9 @@
 #include "../include/dpi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
+#include "../include/fscom.h"
+
+extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
@@ -16,7 +19,11 @@ void wcounts(label,azoff,eloff,onoff,accum)
 {
   char buff[256];
   int i, kfirst;
+  int dbbc2_pfb;
 
+  dbbc2_pfb =shm_addr->equip.rack==DBBC && 
+    (shm_addr->equip.rack_type == DBBC_PFB ||
+     shm_addr->equip.rack_type == DBBC_PFB_FILA10G);
   buff[0]=0;
 
   kfirst=TRUE;
@@ -25,8 +32,13 @@ void wcounts(label,azoff,eloff,onoff,accum)
     if(onoff->itpis[i]==0)
       continue;
 
-    if((onoff->intp==1 &&strlen(buff)>70)
-       ||(onoff->intp!=1 &&strlen(buff)>61)
+    if(
+       (dbbc2_pfb &&
+       (onoff->intp==1 &&strlen(buff)>68)
+	||(onoff->intp!=1 &&strlen(buff)>59)) ||
+       (!dbbc2_pfb &&
+	(onoff->intp==1 &&strlen(buff)>70)
+	||(onoff->intp!=1 &&strlen(buff)>61))
     ){
       logit(buff,0,NULL);
       buff[0]=0;
@@ -47,16 +59,23 @@ void wcounts(label,azoff,eloff,onoff,accum)
     }
 
     strcat(buff," ");
-    buff[strlen(buff)+2]=0;
-    memcpy(buff+strlen(buff),onoff->devices[i].lwhat,2);
+    strcat(buff,onoff->devices[i].lwhat);
     strcat(buff," ");
     if(onoff->intp==1) {
-      flt2str(buff,(float) accum->avg[i],-7,0);
-      buff[strlen(buff)-1]=0;
+      if(dbbc2_pfb)
+	dble2str(buff,       accum->avg[i],-9,3);
+      else
+	flt2str(buff,(float) accum->avg[i],-7,0);
     } else {
-      flt2str(buff,(float) accum->avg[i],-8,1);
-      strcat(buff," ");
-      flt2str(buff,(float) accum->sig[i],-8,1);
+      if(dbbc2_pfb) {
+	dble2str(buff,       accum->avg[i],-9,3);
+	strcat(buff," ");
+	dble2str(buff,       accum->sig[i],-9,3);
+      } else {
+	flt2str(buff,(float) accum->avg[i],-8,1);
+	strcat(buff," ");
+	flt2str(buff,(float) accum->sig[i],-8,1);
+      }
     }
   }
   if(strlen(buff)!=0)

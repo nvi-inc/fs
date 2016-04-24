@@ -16,6 +16,7 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
      struct sample *accum, *accum2;
 {
   float tpi[MAX_DET],tpi2[MAX_DET],stm;
+  double dtpi[MAX_DBBC_PFB];
   struct sample sample, sample2;
   int i,j,it[6], iti[6], itim,non_station,kst1,kst2,station;
 
@@ -89,6 +90,17 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	*ierr=-16;
 	return -1;
       }
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      tpi_dbbc_pfb(ip,itpis);
+      if(ip[2]<0) {
+	if(ip[1]!=0)
+	  cls_clr(ip[0]);
+	logita(NULL,ip[2],ip+3,ip+4);
+	*ierr=-16;
+	return -1;
+      }
     }
     if(station) {
       if(kst1)
@@ -139,12 +151,21 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	  sample.avg[j]=tpi[j];
 	  sample2.avg[j]=tpi2[j];
 	}
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      if(tpget_dbbc_pfb(cont,ip,itpis,dtpi,ierr))
+	 return -1;
+      for(j=0;j<MAX_DBBC_PFB_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=dtpi[j];
+	}
     }
     if(station) {
       if(kst1)
-	sample.avg[MAX_DET+4]=shm_addr->user_dev1_value;
+	sample.avg[MAX_GLOBAL_DET+4]=shm_addr->user_dev1_value;
       if(kst2)
-	sample.avg[MAX_DET+5]=shm_addr->user_dev2_value;
+	sample.avg[MAX_GLOBAL_DET+5]=shm_addr->user_dev2_value;
     }
 
     sample.stm=stm-rut;

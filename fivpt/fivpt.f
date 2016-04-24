@@ -132,6 +132,19 @@ C           do nothing ...
                ierr=-111
                goto 80010
             endif
+         else if(DBBC.eq.rack.and.
+     &           (DBBC_PFB.eq.rack_type.or.
+     &           DBBC_PFB_FILA10G.eq.rack_type)) then
+            call fc_dbbcn_pfb_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               ierr=-111
+               goto 80010
+            endif
          endif
       endif
 C 
@@ -507,6 +520,14 @@ C
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
                call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+         else if(DBBC.eq.rack.and.
+     &           (DBBC_PFB.eq.rack_type.or.
+     &           DBBC_PFB_FILA10G.eq.rack_type)) then
+            call fc_dbbcn_pfb_r(ip)
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+            endif
             endif
          endif
       endif
