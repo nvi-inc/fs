@@ -26,7 +26,7 @@ C               - class buffer
 C        ILEN   - length of IBUF, chars 
       integer*2 iprm(20)
 C               - parameter returned from FDFLD
-      integer*2 dtnam
+      integer*2 dtnam,ldev(2)
       dimension iparm(2)
 C               - parameters returned from GTPRM
       dimension ireg(2) 
@@ -156,14 +156,23 @@ C
         ierr = -106
         goto 990 
       endif
-      inumb=ic2-ic1+1
+      inumb=min(ic2-ic1+1,4)
       call ifill_ch(iprm,1,40,' ')
       idum = ichmv(iprm,1,ibuf,ic1,inumb)
-
-      if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',')
-     .  ldev=dtnam(iprm,1,inumb)
+      call ifill_ch(ldev,1,4,' ')
+      if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',') then
+         call fs_get_rack(rack)
+         call fs_get_rack_type(rack_type)
+         if (DBBC .eq. rack.and.
+     &        (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &        ) then
+            idum=ichmv(ldev(1),1,ibuf,ic1,inumb)
+         else
+            ldev(1)=dtnam(iprm,1,inumb)
+         endif
+      endif
       if (cjchar(iprm,1).eq.'*') then
-        idumm1 = ichmv(ldev,1,ldevfp,1,2)
+        idumm1 = ichmv(ldev,1,ldevfp,1,4)
         goto 270
       endif
       if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
@@ -189,12 +198,32 @@ CC  above is MAX_VLBA_BBC
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'p1')
 C                      Default for LBA is IFP1
         if(cjchar(ldev,1).eq.'p') goto 270
-      else if (DBBC .eq. rack) then
+      else if (DBBC .eq. rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
-C                      Default for DBBC is IA
+C                      Default for DBBC DDC is IA
 CC
         if ((cjchar(ldev,1).eq.'i').or.
      *      index('123456789abcde',cjchar(ldev,1)).ne.0)
+     *    goto 270
+      else if (DBBC .eq. rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ifa')
+C                      Default for DBBC DFB is IFA
+CC
+        if (ichcm_ch(ldev,1,'ia').eq.0) then
+           idum=ichmv_ch(ldev,1,'ifa')
+        else if (ichcm_ch(ldev,1,'ib').eq.0) then
+           idum=ichmv_ch(ldev,1,'ifb')
+        else if (ichcm_ch(ldev,1,'ic').eq.0) then
+           idum=ichmv_ch(ldev,1,'ifc')
+        else if (ichcm_ch(ldev,1,'id').eq.0) then
+           idum=ichmv_ch(ldev,1,'ifd')
+        endif
+        if (cjchar(ldev,1).eq.'i'.or.
+     *      index('abcd',cjchar(ldev,1)).ne.0)
      *    goto 270
       endif
 C
@@ -218,7 +247,7 @@ C  3.0  Set common variables to their new values
 C
 300   continue
       idumm1 = ichmv(laxfp,1,lax,1,4)
-      idumm1 = ichmv(ldevfp,1,ldev,1,2)
+      idumm1 = ichmv(ldevfp,1,ldev,1,4)
       nrepfp = nrep
       nptsfp = npts
       intpfp = intp
@@ -279,7 +308,7 @@ c
           ichain=3
         else if(ichcm_ch(ldevfp,1,'id').eq.0) then
           ichain=4
-        else if(indbc.ge.1.and.indbx.le.MAX_DBBC_BBC) then
+        else if(indbc.ge.1.and.indbc.le.MAX_DBBC_BBC) then
           call fs_get_dbbc_source(source,indbc)
           ichain=source+1
           if(ichain.lt.1.or.ichain.gt.4) then
@@ -290,6 +319,37 @@ c
           ierr=-213
           goto 990
         endif
+      else if(DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+         if(ichcm_ch(ldevfp,1,'ifa').eq.0) then
+            ichain=1
+         else if(ichcm_ch(ldevfp,1,'ifb').eq.0) then
+            ichain=2
+         else if(ichcm_ch(ldevfp,1,'ifc').eq.0) then
+            ichain=3
+         else if(ichcm_ch(ldevfp,1,'ifd').eq.0) then
+            ichain=4
+         else
+            call fs_get_dbbc_cond_mods(dbbc_cond_mods)
+            call fs_get_dbbc_como_cores(dbbc_como_cores)
+            do i=1,dbbc_cond_mods
+               if(index('abcd',cjchar(ldevfp,1)).eq.i) then
+                  idum=ichmv(ldev,1,ldevfp,2,2)
+                  indx=ia22h(ldev)
+                  if(indx.ge.1.and.indx.le.16*dbbc_como_cores(i)) then
+                     ifchain=i
+                  else
+                     ierr=-218
+                     goto 990
+                  endif
+               endif
+            enddo
+            if(ifchain.lt.1.or.ifchain.gt.4) then
+               ierr=-218
+               goto 990
+            endif
+         endif
       else    !VLBA
         indbc=ia2hx(ldevfp,1)
         if(ichcm_ch(ldevfp,1,'ia').eq.0) then

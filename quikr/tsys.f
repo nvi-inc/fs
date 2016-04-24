@@ -25,6 +25,7 @@ C 3.  LOCAL VARIABLES
       integer itpis_vlba(MAX_DET) 
       integer itpis_lba(2*MAX_DAS) 
       integer itpis_dbbc(MAX_DBBC_DET) 
+      integer itpis_dbbc_pfb(MAX_DBBC_PFB_DET) 
       integer itpis_norack(2)
 C      - which TPIs to read back, filled in by TPLIS
 C        ICH    - character counter 
@@ -62,6 +63,7 @@ C
       indtmp = mod(nsub-4 ,10)
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
 
       if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tplis(ip,itpis)
@@ -73,6 +75,10 @@ C                   Pick up the Tsys1 or 2 index
      &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
      &       ) then
         call tplisd(ip,itpis_dbbc)
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call tplisd_pfb(ip,itpis_dbbc_pfb)
       else
         call tplisn(ip,itpis_norack)
       endif
@@ -201,6 +207,11 @@ C
      &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
      &       ) then
         call fc_tsys_dbbc(ip,itpis_dbbc,ibuf,nch,nsub)
+        return
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call fc_tsys_dbbc_pfb(ip,itpis_dbbc_pfb,ibuf,nch,nsub)
         return
       else
         call fc_tsys_norack(ip,itpis_norack,ibuf,nch,nsub)

@@ -94,7 +94,7 @@ c
 c  check M3 devices
 c
       do 8 i=1,ndev 
-        if (icmnd(1,i).ne.ldevfp) goto 8 
+        if (ichcm(icmnd(1,i),1,ldevfp,1,2).ne.0) goto 8 
         id=i 
         goto 11 
 8     continue 
@@ -177,6 +177,10 @@ C
                  intp=isamples
               endif
            endif
+        else if(DBBC.eq.rack.and.
+     &          (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &          ) then
+           call dbbcn_pfb(dtpi,ierr)
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 
@@ -194,7 +198,13 @@ c         write(6,9953) dtpi,(cjchar(indata,i),i=1,12)
 C 
 C       CHECK FOR TPI SATURATION
 C 
-        if (dtpi.lt.65534.5d0) goto 16 
+        if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &       ) then
+           if(dpti.lt.160000.5d0) goto 16
+        else
+           if (dtpi.lt.65534.5d0) goto 16 
+        endif
         call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
         itry=itry-1
         if (itry.le.0) goto 80010

@@ -31,6 +31,7 @@ C 3.  LOCAL VARIABLES
       integer itpis(17)
       integer itpis_vlba(MAX_DET)
       integer itpis_dbbc(MAX_DBBC_DET)
+      integer itpis_dbbc_pfb(MAX_DBBC_PFB_DET)
       integer itpis_lba(2*MAX_DAS)
       integer itpis_norack(2)
 C      - which TPIs to read back
@@ -76,6 +77,10 @@ c
      &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
      &       ) then
         call tplisd(ip,itpis_dbbc)
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call tplisd_pfb(ip,itpis_dbbc_pfb)
       else
          call tplisn(ip,itpis_norack)
       endif
@@ -125,6 +130,11 @@ C
      &       ) then
         call fc_tpi_dbbc(ip,itpis_dbbc)
         if(ip(3).lt.0) return
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call fc_tpi_dbbc_pfb(ip,itpis_dbbc_pfb)
+        if(ip(3).lt.0) return
       else
          call fc_tpi_norack(ip,itpis_norack)
          if(ip(3).lt.0) return
@@ -153,6 +163,11 @@ C                     Get the command part of the response set up
      &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
      &       ) then
         call fc_tpput_dbbc(ip,itpis_dbbc,isub,ibuf,nch,ilen)
+        return
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call fc_tpput_dbbc_pfb(ip,itpis_dbbc_pfb,isub,ibuf,nch,ilen)
         return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)

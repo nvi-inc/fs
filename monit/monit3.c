@@ -87,9 +87,20 @@ m3init()
     mvaddstr(ROW1+2,COL1+1,"VC");
   }
 
-  mvaddstr(ROW1+2,COL1+7,"Freq"); 
-  mvaddstr(ROW1+2,COL1+16,"Ts-U");
-  mvaddstr(ROW1+2,COL1+24,"Ts-L");
+  if(shm_addr->equip.rack != DBBC ||
+     (shm_addr->equip.rack_type != DBBC_PFB &&
+      shm_addr->equip.rack_type != DBBC_PFB_FILA10G)) {
+    mvaddstr(ROW1+2,COL1+7,"Freq"); 
+    mvaddstr(ROW1+2,COL1+16,"Ts-U");
+    mvaddstr(ROW1+2,COL1+24,"Ts-L");
+  } else {
+    mvaddstr(ROW1+2,COL1,"vsi1");
+    mvaddstr(ROW1+2,COL1+5,"Freq"); 
+    mvaddstr(ROW1+2,COL1+12,"Ts");
+    mvaddstr(ROW1+2,COL1+17,"vsi2");
+    mvaddstr(ROW1+2,COL1+22,"Freq"); 
+    mvaddstr(ROW1+2,COL1+29,"Ts");
+  }    
   standend();
 
   if(shm_addr->equip.rack != DBBC || 
@@ -161,29 +172,41 @@ mout3()
       preflt(outpt,shm_addr->systmp[2*MAX_BBC+3],-5,1);
       printw("%s",outarr);
     } else if(shm_addr->equip.rack == DBBC) {
+      int istart;
+
+      if (shm_addr->equip.rack_type == DBBC_DDC ||
+	  shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	istart=2*MAX_DBBC_BBC;
+      else if (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)
+	istart=MAX_DBBC_PFB;
+      else
+	goto BBCS;
+
       move(ROW1,COL1+7);
-      preflt(outpt,shm_addr->systmp[2*MAX_DBBC_BBC+0],-5,1);
+      preflt(outpt,shm_addr->systmp[istart+0],-5,1);
       printw("%s",outarr);
 
       if(shm_addr->dbbc_cond_mods > 1) {
 	move(ROW1,COL1+20);
-	preflt(outpt,shm_addr->systmp[2*MAX_DBBC_BBC+1],-5,1);
+	preflt(outpt,shm_addr->systmp[istart+1],-5,1);
 	printw("%s",outarr);
       }
 
       if(shm_addr->dbbc_cond_mods > 2) {
 	move(ROW1+1,COL1+7);
-	preflt(outpt,shm_addr->systmp[2*MAX_DBBC_BBC+2],-5,1);
+	preflt(outpt,shm_addr->systmp[istart+2],-5,1);
 	printw("%s",outarr);
       }
 
       if(shm_addr->dbbc_cond_mods > 3) {
 	move(ROW1+1,COL1+20);
-	preflt(outpt,shm_addr->systmp[2*MAX_DBBC_BBC+3],-5,1);
+	preflt(outpt,shm_addr->systmp[istart+3],-5,1);
 	printw("%s",outarr);
       }
     }
 
+ BBCS:
     if(shm_addr->equip.rack != DBBC ||
        (shm_addr->equip.rack == DBBC &&
 	  (shm_addr->equip.rack_type == DBBC_DDC ||
@@ -233,6 +256,93 @@ mout3()
 	  preflt(outpt,shm_addr->systmp[i-1],-6,1);
 	printw("%s",outarr);
       }
+    } else if (shm_addr->equip.rack == DBBC &&
+	       (shm_addr->equip.rack_type == DBBC_PFB ||
+		shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      int i, core, ifc, chan, ik, zone, filter;
+      char  output[4];
+      float freqv;
+
+      static char letters[ ]=" abcd";
+      static int zone_table[] = {2, 1, 4,3}; /* DBBC filter Nyquist zones */
+      static char sb[ ]= "lu";
+
+      for(i=0;i<16;i++) {
+
+	/* vsi1 */
+	core=shm_addr->dbbc_vsix[0].core[i];
+	ifc=1;
+	move(ROW1+3+i,COL1);
+	clrtoeol();
+	ik=shm_addr->dbbc_vsix[0].chan[i]+(core-1)*16;
+	if(core>0) {
+	  for(j=1;j<=shm_addr->dbbc_cond_mods &&
+		core>shm_addr->dbbc_como_cores[j-1];j++) {
+	    ifc+=1;
+	    core-=shm_addr->dbbc_como_cores[j-1];
+	  }
+
+	  /* core is now core on this IF */
+	  chan=shm_addr->dbbc_vsix[0].chan[i]+(core-1)*16;
+	  snprintf(output,4,"%c%02d",letters[ifc],chan);
+	  move(ROW1+3+i,COL1);
+	  printw("%s",output);
+
+	  freqv=(chan%16)*32-16; /* center */
+	  filter=shm_addr->dbbcifx[ifc-1].filter;
+	  if(filter >0 &&  filter < 4) {
+	    zone=zone_table[filter-1];
+	    if(1==zone%2) /*odd zone */
+	      freqv=(zone-1)*512+freqv;
+	    else /* even */
+	      freqv=zone*512-freqv;
+	    snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
+	    move(ROW1+3+i,COL1+3);
+	    printw("%5s",ptfreq); 
+	  }
+	  move(ROW1+3+i,COL1+10);
+	  preflt(outpt,shm_addr->systmp[ik],-5,1);
+	  printw("%s",outpt);
+	}
+	/* vsi2 */
+	core=shm_addr->dbbc_vsix[1].core[i];
+	ifc=1;
+	move(ROW1+3+i,COL1+17);
+	clrtoeol();
+	ik=shm_addr->dbbc_vsix[1].chan[i]+(core-1)*16;
+	if(core>0) {
+	  for(j=1;j<=shm_addr->dbbc_cond_mods &&
+		core>shm_addr->dbbc_como_cores[j-1];j++) {
+	    ifc+=1;
+	    core-=shm_addr->dbbc_como_cores[j-1];
+	  }
+
+	  /* core is now core on this IF */
+	  chan=shm_addr->dbbc_vsix[1].chan[i]+(core-1)*16;
+	  snprintf(output,4,"%c%02d",letters[ifc],chan);
+	  move(ROW1+3+i,COL1+17);
+	  printw("%s",output);
+
+	  freqv=(chan%16)*32-16; /* center */
+	  filter=shm_addr->dbbcifx[ifc-1].filter;
+	  if(filter >0 &&  filter < 4) {
+	    zone=zone_table[filter-1];
+	    if(1==zone%2) /*odd zone */
+	      freqv=(zone-1)*512+freqv;
+	    else /* even */
+	      freqv=zone*512-freqv;
+	    snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
+	    move(ROW1+3+i,COL1+20);
+	    printw("%5s",ptfreq); 
+	  }
+	  move(ROW1+3+i,COL1+27);
+	  preflt(outpt,shm_addr->systmp[ik],-5,1);
+	  printw("%s",outpt);
+	}
+
+      }
     }
-  refresh();
+    move(ROW1+4,COL1);
+    curs_set(0);
+    refresh();
 }
