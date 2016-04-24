@@ -19,8 +19,8 @@ Settable parameters:
 Monitor-only parameters:
           string      the error message instance associated with
                       code,number and #num. This is null if the
-                      code,number is not defined in fserr.ctl or
-                      sterr.ctl.
+                      code,number is not defined in fserr.ctl,
+                      sterr.ctl, or the list of OS error messages.
           example     example of message if not defined in fserr.ctl or
                       sterr.ctl
 
@@ -53,17 +53,17 @@ only, the FS will not complain if the display status of any of
 code,number errors are already in the requested state.
 
 If the displayed error string is null (empty) but when the error
-occurs a string is displayed that may because the programmer is supply
-the string in a call to logite() along with the error code,number.
-This may because the string contents are variable.  Note that in this
-case TNX will not distiguish between such variable strings.  It can
-only suppress all errors with that error code,number.  This is
-different from how it handles different error strings from fserr.ctl
-and sterr.ctl, all of which are individually suppressable, but have
-more a more limited range of variation.  For the code,number with
+occurs a string is displayed that may because the programmer is
+supplying the string in a call to logite() along with the error
+code,number.  This may be because the string contents are variable.
+Note that in this case TNX will not distiguish between such variable
+strings.  It can only suppress all errors with that error code,number.
+This is different from how it handles different error strings from
+fserr.ctl and sterr.ctl, all of which are individually suppressable,
+but have a more limited range of variation.  For the code,number with
 completely variable error strings, the TNX command prints an example
 string to help identify it.  This is most helpful if all the errors
-for this code,number are related, maybe only differing by a numeric
+for this code,number are related, maybe only differing by a specific
 value in an otherwise fixed string.
 
 This command must be used with great care.  If misused it may turn off
