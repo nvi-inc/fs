@@ -11163,3 +11163,203 @@ Version 9.11.8 150920
 
 151013 WEH st.default/control/equip.ctl
            restored leading comment character '*', thanks Jon
+
+151229 WEH fivpt/fivpt.f
+           fivpt/tsys.f
+           quikr/fvpnt.f
+           quikr/tpi.f
+           quikr/tsys.f
+           setcl/setcl.f
+151230 WEH fmset/asktime.c
+           fmset/getfmtime.c
+           fmset/setfmtime.c
+           monit/monit3.c
+           onoff/get_samples.c
+           onoff/onoff.c
+           onoff/tzero.c
+           quikv/onoff.c
+           tpicd/tpicd.c
+           include/params.i
+160101 WEH fivpt/volts.f
+           fmset/fmset.c
+           clib/get_tcal_fwhm.c
+           quikr/tplisd.f
+           clib/mk5dbbcd.c
+           clib/onoff_util.c
+           clib/tpicd_util.c
+           updated for new rack_type to distinguish PFB from DDC
+
+160101 WEH fmset/getfila10gtime.c
+           add benign command so last command in DBBC input buffer
+           is not pps_sync
+
+160101 WEH misc/dbbc_equip
+           script to fix # of cores to #/CoMo and DBBC rack types created
+
+160104 WEH include/fs_types.h
+           include/dbbc_vsix_ds.h
+160105 WEH quikv/Makefile
+           quikv/dbbc_vsix.c
+           quikv/dbbc_vsix_dis.c
+           quikv/quikv.c
+           control/fscmd.ctl
+           control/fserr.ctl
+           created vsi1/2 commands
+           
+160109 WEH help/form.d__
+           updated for PFB (flex)
+
+160109 WEH help/bbcnn.d__
+           remove extra line
+
+160109 WEH help/vsin.d__
+           created for vsi1 and vsi2
+
+160110 WEH include/params.h
+160116 WEH incom/equip.f
+           boss/newlg.f
+           updated for new DBBC rack_types
+
+160116 WEH clib/dbbcform_util.c
+           add flex for DBBC PFB and new rack_types
+ 
+160116 WEH quikv/dbbcgain.c
+           quikv/dbbcnn.c
+           quikv/dbbc_cont_cal.c
+           error if not DDC
+
+160116 WEH include/mk5b_mode_ds.h
+           64 bit mask
+
+160116 WEH clib/arg_util.c
+           add arg_long_long_uns
+
+160116 WEH clib/m5_utils.c
+           add printing of 'long long unsigned' as %llx
+
+160116 WEH help/mk5b_mode.___
+           expanded commens, new DBBC rack_typepes, 64 bit mas
+
+160116 WEH st.default/control/equip.ctl
+           new DBBC rack_type, number of Cores to Cores/CoMo
+
+160116 WEH clib/mk5b_mode_util.c
+
+160117 WEH quikv/logmsg_dbbc.c
+           clib/Makefile
+           clib/dbbc_version_check.c
+           create and use dbbc_version_check()
+
+160117 WEH chekr/chekr.f
+           add DBBC and personality checking
+
+160117 WEH include/fscom.h
+           add DBBC PFB version, Cores/CoMo and vsix command
+
+160117 WEH chekr/Makefile
+           updated for dbbcchk.c
+
+160117 WEH quikv/dbbcform.c
+
+160117 WEH quikr/chk.f
+           monit/mout2.c
+           add DBBC: FM for check control/display
+
+160117 WEH chekr/dbbcchk.c
+           created
+
+160118 WEH quikv/dbbc_vsix.c
+           created
+
+160118 WEH include/fila10g_mode_ds.h
+160118 WEH quikv/fila10g_mode.c
+           add second mask
+
+160118 WEH dbbcn/dbbcn.c
+           remove old Mk5 delays, add ddbctrk delay, improve error handling for
+           FiLa10
+
+160118 WEH clib/fila10g_mode_util.c
+           help/fila10g_mode.d__
+           add second mask
+
+160120 WEH clib/dbbc_vsix_util.c
+           created
+
+160330 WEH control/fscmd.ctl
+           quikv/mk5relink.c
+           quikv/mk5close.c
+           quikv/quikv.c
+           help/dbbcrelink.___
+           help/dbbcclose.___
+           add dbbcclose and dbbcrelink
+
+160330 WEH clib/cshm_init.c
+           include/scan_name_ds.h
+           include/fscom_dum.i
+           newlb/prog.c
+           quikv/scan_name.c
+           add scan_check interlock based on previous value of scan_name
+ 
+160330 WEH help/mk5relink.___
+           typo corrected
+
+160331 WEH boss/bwork.f
+           allow logging of positive error codes (warnings)
+
+160331 WEH help/schedule.___
+           improved parameter names to avoid confusion with #line
+
+160331 WEH ddout/ddout.c
+           allow logging of positive error codes  (warnings)
+
+160331 WEH quikv/scan_check.c
+           control/fserr.ctl
+           help/scan_check.___
+           add scan_check interlock based on previous value of scan_name
+
+150402 WEH quikr/Makefile
+150403 WEH quikr/tplisd.f
+150405 WEH include/params.i
+150406 WEH include/fscom.h
+150406 WEH include/fscom_dum.i
+150406 WEH newlb/prog.c
+150406 WEH incom/sincom.f
+150406 WEH fclib/fc_mk5dbbcd_pfb.c
+150406 WEH clib/Makefile
+150407 WEH drudg/proc_disk_tracks.f
+150407 WEH drudg/fdrudg_date.ftni
+150407 WEH drudg/change_log.txt
+150409 WEH Makefile
+150409 WEH fclib/fc_tpi_dbbc_pfb.c
+150409 WEH fclib/Makefile
+150410 WEH fserr/fserr.c
+150411 WEH quikr/tpi.f
+150413 WEH quikr/tsys.f
+150414 WEH include/tpicd_ds.h
+150414 WEH clib/cshm_init.c
+150416 WEH clib/tpi_dbbc.c
+150418 WEH tpicd/tpicd.c
+150418 WEH quikv/tpicd.c
+150419 WEH monit/monit3.c
+150421 WEH clib/tpicd_util.c
+150421 WEH include/params.h
+150421 WEH include/onoff_ds.h
+150422 WEH clib/mk5dbbcd_pfb.c
+150422 WEH quikr/tplisd_pfb.f
+150422 WEH onoff/onoff.c
+150422 WEH onoff/tpget_dbbc.c
+150422 WEH onoff/matcn.c
+150422 WEH onoff/get_samples.c
+150422 WEH onoff/wcounts.c
+150422 WEH onoff/Makefile
+150422 WEH onoff/tpget_dbbc_pfb.c
+150423 WEH clib/onoff_util.c
+150423 WEH clib/get_tcal_fwhm.c
+150423 WEH clib/tpi_dbbc_pfb.c
+150423 WEH ddout/ddout.c
+150423 WEH control/fserr.ctl
+150423 WEH quikv/onoff.c
+150423 WEH misc/dbbc_equip
+
+Version 9.11.10 1604xx
