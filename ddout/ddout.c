@@ -30,7 +30,7 @@ main()
     int irga;
     long ip[5];
     char lnamef[65];
-    char ibur[120];
+    char ibur[150];
     char buf[MAX_BUF+2];
     char buf2[MAX_BUF+2];
     char *iwhs, *iwhe;
@@ -88,39 +88,39 @@ Messenger:
     bull=bufl;
     cp2 = (char *) &rtn2;
     prtn1 = (char *) &rtn1;
-    if (memcmp(cp2,"dn",2)==0){
+    if (memcmp(cp2,"dn",2)==0){ /* extended display on */
       kxd = TRUE;
       goto Messenger;
     }
-    if (memcmp(cp2,"df",2)==0){
+    if (memcmp(cp2,"df",2)==0){ /* extended display off */
       kxd = FALSE;
       goto Messenger;
     }
-    if (memcmp(cp2,"ln",2)==0){
+    if (memcmp(cp2,"ln",2)==0){ /* extended logging on */
       kxl = TRUE;
       goto Messenger;
     }
-    if (memcmp(cp2,"lf",2)==0){
+    if (memcmp(cp2,"lf",2)==0){ /* extended logging off */
       kxl = FALSE;
       goto Messenger;
     }
-    if (memcmp(cp2,"to",2)==0){
+    if (memcmp(cp2,"to",2)==0){ /* raw display output with new-line */
       printf("%s\n", buf);
       goto Messenger;
     }
-    if (memcmp(cp2,"tr",2)==0){
+    if (memcmp(cp2,"tr",2)==0){ /* raw display output without new-line */
       printf("%s", buf);
       goto Messenger;
     }
-    if (memcmp(cp2,"pn",2)==0) {
+    if (memcmp(cp2,"pn",2)==0) { /* tpicd display on */
       kpd = TRUE;
       goto Messenger;
     }
-    if (memcmp(cp2,"pf",2)==0) {
+    if (memcmp(cp2,"pf",2)==0) { /* tpocd display off */
       kpd = FALSE;
       goto Messenger;
     }
-    if (memcmp(cp2,"tn",2)==0) {
+    if (memcmp(cp2,"tn",2)==0) { /* TNX on */
       short ix, iy;
       memcpy(&ix,buf+2,2);
       memcpy(&iy,buf+4,2);
@@ -169,7 +169,7 @@ Messenger:
       }
       goto Messenger;
     }
-    if (memcmp(cp2,"tf",2)==0) {
+    if (memcmp(cp2,"tf",2)==0) { /* TNX off */
       short ix, iy;
       memcpy(&ix,buf+2,2);
       memcpy(&iy,buf+4,2);
@@ -218,7 +218,7 @@ Messenger:
       }
       goto Messenger;
     }
-    if (memcmp(cp2,"tl",2)==0) {
+    if (memcmp(cp2,"tl",2)==0) {  /* TNX list */
       int some=0;
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 	if(ptr->on == 0) {
@@ -353,42 +353,59 @@ Ack:    ich = strtok(NULL, ",");
     }
     strcpy(buf,buf2);
 
+
+/* SECTION 5 */
+
     st="/form/debug:";
     kdebug=strncmp(buf+FIRST_CHAR-1,st,strlen(st))==0;
     st="#matcn#debug:";
     kdebug = kdebug || strncmp(buf+FIRST_CHAR-1,st,strlen(st))==0;
 
-/* SECTION 5 */
-/*  error recognition and message expansion */
+    kp = (buf[FIRST_CHAR-1] == '$'); /* procedure execution logging */
 
-    kp = (buf[FIRST_CHAR-1] == '$');
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
-      strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0;
-    knd= memcmp("nd",prtn1,2)==0;
-    if( !kpcald && (kxd || (rtn2 == -1) || !kp && !kack && !kdebug && !knd )
-	|| kpcald && kpd){
+      strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0; /*phasecal or tsys record */
+
+    knd= memcmp("nd",prtn1,2)==0;  /* no display */
+    if(kxd || !(kp || kack || kdebug || knd || kpcald) || kpcald && kpd ){
+
+      /* process log entry for display if conditions are met,
+        all errors get processed (needed for logging), but display of errors
+        may be overridden depending on TNX settings,
+	everything else is only available for logging */
+
+      /*  error recognition and message expansion */
+
       ierrnum=0;
-      if (*cp2 != 'b') goto Append;
-      iwhe = NULL;
-      iwhs = NULL;
+      if (*cp2 != 'b') /* then not an error */
+	goto Append;
+
+      /*  else it is an error or warning */
+
+      /* does the error log entry have text (additional error info) in parentheses? 
+	 no  => iwl == 0
+	 yes => iwl is text length up to 4
+	 iwhs == pointer to '('
+      */
+
       iwl =  0;
       iwhs = memchr(buf+FIRST_CHAR, '(', bufl-FIRST_CHAR);
       if(iwhs != NULL) {
-        iwhe = memchr(iwhs+1, ')',bufl-(iwhs+1-buf));
-        if (iwhe != NULL){
-          iwl = 4 < iwhe-iwhs+1 ? 4 : iwhe-iwhs-1;
-          strncpy(iwhat, iwhs+1, iwl);
-        }
+	iwhe = memchr(iwhs+1, ')',bufl-(iwhs+1-buf));
+	if (iwhe != NULL){
+	  iwl = 4 < iwhe-iwhs+1 ? 4 : iwhe-iwhs-1;
+	  strncpy(iwhat, iwhs+1, iwl);
+	  iwhat[iwl]=0;
+	}
       }
-      else iwhs = buf + bufl + 1;
-
+      
       strncpy(ibur,buf+FIRST_CHAR+8,5);
       ibur[5]='\0';
       sscanf(ibur,"%d",&ierrnum);
       memcpy(&ierrch,buf+FIRST_CHAR+6,2);
       if(strncmp(buf+FIRST_CHAR+6,"un",2)==0) {
 	int ierr;
-        strncpy(ibur,buf+FIRST_CHAR+8,5);
+	strncpy(ibur,buf+FIRST_CHAR+8,5);
 	ibur[5]='\0';
 	if(1==sscanf(ibur,"%d",&ierr)) {
 	  strncpy(ibur,strerror(ierr),80);
@@ -396,6 +413,7 @@ Ack:    ich = strtok(NULL, ",");
 	    ibur[79]='\0';
 	} else {
 	  ibur[0]='\0';
+	  goto Append;
 	}
       } else {
 	class=0;
@@ -404,40 +422,39 @@ Ack:    ich = strtok(NULL, ",");
 	skd_run("fserr", 'w', ip); 
 	skd_par(ip);
 	iburl=cls_rcv(ip[0], ibur, 118, &rtn1f, &rtn2f, 0,0);
-	/*      iburl=0;
-	 */
 	ibur[iburl]='\0';
 	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
-	  iburl=0;
 	  ibur[0]=0;
 	  goto Append;
 	}
-
+	
 	if(iwl != 0){
 	  dxpm(ibur, "?W", &ptrs, &irgb); 
 	  if(ptrs != NULL) {
 	    iwm= irgb < iwl? irgb: iwl;
 	    memcpy(ptrs,iwhat,iwm);
 	  }
+	  *iwhs=0;
 	}
-	memcpy(iwhs,"  ",2);
       }
-/* move returned info into output message for display */
-Move:
-/*      memcpy(&buf[(int) iwhs+1], ibur, iburl); */
-        *iwhs='\0';
-        strcat(buf, " ");
-        strcat(buf, ibur);
-/*      bufl = iwhs - buf + iburl + 1; */
-
-/* append bell if an error */
-
-Append:           /* send message to station error program */
-
-      display=1;
-      count=0;
-      if(ierrnum!=0) { 
-	for(ptr=last;ptr!=NULL;ptr=ptr->previous)
+      /* append returned info (if not empty) to output message for display, 
+	 otherwise we jumped to Append
+      */
+      
+      strcat(buf, " ");
+      strcat(buf, ibur);
+      
+    Append:
+      display=1;  /* always display unless tnx overrides for errors */
+      
+      if(*cp2 == 'b') { /* could have gotten here from outside block for new log
+			   or from inside block for non-error, we don't want those
+			*/
+	
+	/* tnx command error filtering */
+	
+	count=0;
+	for(ptr=last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
 	  if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
 	    if(count ==0)
 	      count=ptr->count;
@@ -446,7 +463,7 @@ Append:           /* send message to station error program */
 	      break;
 	    }
 	  }
-	if(ptr == NULL) { /* not found */
+	if(ptr == NULL) { /* not found, add it */
 	  ptr= (struct list *)malloc(sizeof(struct list));
 	  if(ptr!=NULL) {
 	    memcpy(ptr->ch,ierrch,2);
@@ -455,7 +472,7 @@ Append:           /* send message to station error program */
 	    ptr->next=NULL;
 	    ptr->on=1;
 	    ptr->count=count+1;
-
+	    
 	    if(strlen(ibur) == 0) {
 	      ptr->example=strdup(buf+FIRST_CHAR+14);
 	      if(ptr->example == NULL) {  /* ptr->example is NULL */
@@ -464,7 +481,7 @@ Append:           /* send message to station error program */
 	      }
 	    } else
 	      ptr->example=NULL;
-
+	    
 	    ptr->string=strdup(ibur);
 	    if(ptr->string != NULL) {
 	      if(first == NULL)
@@ -472,7 +489,10 @@ Append:           /* send message to station error program */
 	      else
 		last->next=ptr;
 	      last=ptr;
-	    } else { /* ptr->string is already NULL */
+	    } else {  /* get rid of it since we can't add it */
+	      if(ptr->example!=NULL)
+		free(ptr->example);
+	      free(ptr);
 	      shm_addr->abend.other_error=1;
 	      perror("!! help! ** getting tnx structure string, ddout");
 	    }
@@ -481,27 +501,30 @@ Append:           /* send message to station error program */
 	    perror("!! help! ** getting tnx structure, ddout");
 	  }
 	}
-      }
 
-      if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
-        class=0;
-        cls_snd(&class, buf, strlen(buf), 0, 0);
-        ip[0]=class;
-        skd_run("sterp", 'n', ip); 
-      }
-      /* send message to station erchk program */
-      if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
-        class=0;
-        cls_snd(&class, buf, strlen(buf), 0, 0);
-        ip[0]=class;
-        skd_run("erchk", 'n', ip); 
+	/* send message to station error program */
+	if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
+	  class=0;
+	  cls_snd(&class, buf, strlen(buf), 0, 0);
+	  ip[0]=class;
+	  skd_run("sterp", 'n', ip); 
+	}
+	
+	/* send message to station erchk program */
+	if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
+	  class=0;
+	  cls_snd(&class, buf, strlen(buf), 0, 0);
+	  ip[0]=class;
+	  skd_run("erchk", 'n', ip); 
+	}
       }
 
       if(display) {
-/* not Y10K compliant */
+	/* not Y10K compliant */
 	printf("%.8s",buf+9);
-/* not Y10K compliant */
+	/* not Y10K compliant */
 	printf("%s",buf+20);
+	/* sound bell if an error */
 	if (*cp2 == 'b' && ierrnum < 0) {
 	  printf("\007");
 	  play_wav(1);
@@ -513,7 +536,7 @@ Append:           /* send message to station error program */
 /* SECTION 6 */
 /*  write information to the log file if conditions are met */
 
-    if (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0) {
+    if (kxl || !(kp || kack) || memcmp(cp2,"nl",2)==0) {
       if (fd <0)
 	goto Trouble;
       strcat(buf,"\n");
@@ -542,8 +565,8 @@ Trouble:
 	     sllog);
       play_wav(1);
     }
-    if (rtn2 != -1)
-      goto Messenger;
+
+    goto Messenger;
 
 /* SECTION 9 */
 /*  exit from program */
@@ -557,6 +580,13 @@ Bye:
 void dxpm(ibur, ipt, ptrs, len)
 char *ibur, *ipt, **ptrs;
 int *len;
+/*input:
+   ibur - raw error message
+   ipt  - substring to find
+  output:
+   ptrs - location of substring in ibur, NULL if not present
+   len  - length of substring in ibur to last repeated end character
+*/
 {
   char last;
 
@@ -565,11 +595,12 @@ int *len;
   *ptrs=NULL;
   while(strlen(ibur) >= *len) {
     *ptrs=strchr(ibur,ipt[0]);
-    if( *ptrs == NULL) return;
-    ibur=*ptrs+*len;
-    if(strncmp(*ptrs,ipt,*len) == 0) {
-      while (*ibur == last){
-        (*len)++;
+    if( *ptrs == NULL)
+      return;
+    ibur=*ptrs+*len;          /* next place to start looking */
+    if(strncmp(*ptrs,ipt,*len) == 0) {  /* if we match */
+      while (*ibur == last){            /*   extend length of match if the */
+        (*len)++;                       /*   last character is repeated    */
         ibur++;
       }
       return;
