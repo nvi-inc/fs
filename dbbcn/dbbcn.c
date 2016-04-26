@@ -755,6 +755,7 @@ long ip[5];
        (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
       logite(outbuf,-200,"db");
       ip[2]=-201;
+      goto error;
     } else if ((7==mode || 6==mode) &&
 	       (strstr(outbuf,"Failed")!=NULL ||strstr(outbuf,"WARNING")!=NULL)
 	       ) {
