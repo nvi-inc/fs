@@ -41,6 +41,8 @@ parse:
       outbuf[0]=0;
 
       while( ptr != NULL) {
+	if(22 == itask)
+	  strcat(outbuf,"fila10g=");
 	strcat(outbuf,ptr);
 	strcat(outbuf,",");
 	ptr=arg_next(command,&ilast);
@@ -51,7 +53,10 @@ parse:
       out_recs++;
 
 dbbcn:
-      ip[0]=1;
+      if(22==itask)
+	ip[0]=7;
+      else
+	ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;
       skd_run("dbbcn",'w',ip);

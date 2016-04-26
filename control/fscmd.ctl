@@ -327,6 +327,7 @@ bit_streams  qkr 07814 01 FFFFFFFFFFFF
 mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
+fila10g      qkr 07822 01 FFFFFFFFFFFF
 rollform     qkr 07901 01 0254FFFFFFFF
 tpicd        qkr 08001 01 FFFFFFFFFFFF
 onoff        qkr 08101 01 FFFFFFFFFFFF

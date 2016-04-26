@@ -3,7 +3,6 @@
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
-#include <string.h>
 #include <stdlib.h>
 #include "../include/params.h"  /* module mnemonics */
 #include "../include/fs_types.h"
@@ -38,6 +37,7 @@ int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
+int iRDBE;
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
@@ -108,7 +108,22 @@ drive=shm_addr->equip.drive[0];
 drive_type=shm_addr->equip.drive_type[0];
 m5b_crate=shm_addr->m5b_crate;
 
- if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
+ if (rack == RDBE) {
+   if(shm_addr->rdbe_units[0])
+     iRDBE=1;
+   else if(shm_addr->rdbe_units[1])
+     iRDBE=2;
+   else if(shm_addr->rdbe_units[2])
+     iRDBE=3;
+   else if(shm_addr->rdbe_units[3])
+     iRDBE=4;
+   else {
+    fprintf(stderr,
+	    "no RDBEs available, correct rdbc?.ctl, and restart FS - fmset aborting\n");
+    rte_sleep(SLEEP_TIME);
+    exit(0);
+   }
+ } else if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
   source=drive;
 else if (drive==S2) {
    source=S2;
@@ -118,22 +133,14 @@ else if (drive==S2) {
     toggle=TRUE;
     other=rack;
   }
- } else if (rack==DBBC 
-	    /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-	    ) {
-  ;
- } else if ((rack & MK3 || rack==0||rack==LBA) ||
-	    ((( rack == MK4 && rack_type != MK4) ||
-	      (rack == VLBA4 && rack_type != VLBA4)) &&
-	     ( drive = MK5 && drive_type != MK5B && drive_type != MK5B_BS))
-	    ){
+} else if (rack & MK3 || rack==0||rack==LBA) {
   if(rack & MK3)
     fprintf(stderr,"fmset does not support Mark 3 racks - fmset aborting\n");
   else if(rack & LBA)
     fprintf(stderr,"fmset does not support LBA racks - fmset aborting\n");
   else
     fprintf(stderr,
-	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT/Mark5B or FILA10G to set - fmset aborting\n");
+	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT or Mark 5B to set - fmset aborting\n");
   rte_sleep(SLEEP_TIME);
   exit(0);
 } else {
@@ -160,17 +167,27 @@ box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
  column=10;
  hint_row=8;
 build:
-mvwaddstr( maindisp, 2, 5, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/FiLa10G time set" );
- if( source == MK5) {
+mvwaddstr( maindisp, 2, 8, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/RDBE time set" );
+ if(rack == RDBE) {
+   column=6;
+   if(1==iRDBE) {
+     form="rdbe-A";
+     mvwaddstr( maindisp, 4, column, "rdbe-A      " );
+   } else if(2==iRDBE) {
+     form="rdbe-B";
+     mvwaddstr( maindisp, 4, column, "rdbe-B      " );
+   } else if(3==iRDBE) {
+     form="rdbe-C";
+     mvwaddstr( maindisp, 4, column, "rdbe-C      " );
+   } else if(4==iRDBE) {
+     form="rdbe-D";
+     mvwaddstr( maindisp, 4, column, "rdbe-D      " );
+   }
+ } else if( source == MK5) {
    column=6;
    hint_row=12;
    form="Mark 5B";
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
- }  else if (rack==DBBC 
-    /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-	     ) {
-   mvwaddstr( maindisp, 4, column, "FiLa10G     " );
-   form="FiLa10g";
  } else if(source == S2) {
    mvwaddstr( maindisp, 4, column, s2type ? "S2 DAS      " : "S2 RT       " );
    form=s2type ? "S2 DAS" : "S2 RT ";       
@@ -194,16 +211,28 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
 
 irow=4;
- if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     (rack==DBBC
-     /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-		      ))) {
+ if(source != S2 &&
+    (rack& MK4 || rack &VLBA4 || source == MK5 ||rack == RDBE)) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
 if(toggle) {
   mvwaddstr( maindisp, hint_row+irow++, column,
  "    't'/'T' to toggle between S2 RT or MarkIV/VLBA formatter/S2 DAS.");
+}
+if(rack == RDBE) {
+  if(shm_addr->rdbe_units[0])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'a'/'A' to select rdbe-A.");
+  if(shm_addr->rdbe_units[1])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'b'/'B' to select rdbe-B.");
+  if(shm_addr->rdbe_units[2])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'c'/'C' to select rdbe-C.");
+  if(shm_addr->rdbe_units[3])
+    mvwaddstr( maindisp, hint_row+irow++, column,
+	       "    'd'/'D' to select rdbe-D.");
 }
 
  mvwaddstr( maindisp, hint_row+irow++, column,
@@ -217,8 +246,6 @@ do 	{
 
 	char fmt[80];
 
-	memset(mk5b_sync,' ',sizeof(mk5b_sync)-1);
-	mk5b_sync[sizeof(mk5b_sync)-1]=0;
 	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
 		  &formtime,&formhs,mk5b_sync,sizeof(mk5b_sync),
 		  mk5b_1pps,sizeof(mk5b_1pps),
@@ -307,16 +334,11 @@ do 	{
 	} else                             /* 123456789012345678901234567890123456789012345678901234 */
 	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
 
-	if(source==MK5) {
+	if(rack != RDBE && source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
-	     /* (rack == VLBA4 && rack_type == VLBA4C ) || */
-	     /* (rack == VLBA4 && rack_type == VLBA4CDAS ) || */
 	     (rack == MK4   && rack_type == MK45  ) || 
-	     (rack==DBBC
-  /* && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
-   */
-	      )) {
+	     rack == DBBC ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
 	      pps_status="- okay                         ";
 	    else
@@ -434,16 +456,34 @@ do 	{
 	    source=other;
 	    other=temp;
             s2type = 1-s2type;
-	    goto build;
 	  }
+	  goto build;
+	case 'a':
+	case 'A':
+	  if(rack== RDBE && shm_addr->rdbe_units[0])
+	    iRDBE=1;
+	  goto build;
+	case 'b':
+	case 'B':
+	  if(rack== RDBE && shm_addr->rdbe_units[1])
+	    iRDBE=2;
+	  goto build;
+	case 'c':
+	case 'C':
+	  if(rack== RDBE && shm_addr->rdbe_units[2])
+	    iRDBE=3;
+	  goto build;
+	case 'd':
+	case 'D':
+	  if(rack== RDBE && shm_addr->rdbe_units[3])
+	    iRDBE=4;
+	  goto build;
 	case SYNCH_KEY:
 	case SYNCH2_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
-	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-			      (rack==DBBC 
-   /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-			       )) &&
+	  if(source != S2 &&
+	     (rack& MK4 || rack &VLBA4 || source == MK5 ||rack == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
@@ -461,7 +501,7 @@ do 	{
 } while ( running );
 
 endwin ();
- if(changedfm) {
+ if(changedfm && rack!=RDBE) {
    logit("Formatter time reset.",0,NULL);
    if(shm_addr->time.model != 'c' && shm_addr->time.model!='n'
       && shm_addr->time.icomputer[01 & shm_addr->time.index]==0)
@@ -475,7 +515,7 @@ endwin ();
 
      } else 
        skd_run_arg("setcl",' ',ipr,"setcl offset");
-   else if(rack != DBBC)/* temporary since we don't have fila10g in setcl yet */
+   else
      if(formtime >0 )
        skd_run_arg("setcl",' ',ipr,"setcl");
  }

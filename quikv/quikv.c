@@ -281,6 +281,7 @@ loop:
 	  mk5b_mode(&command,itask,ip);
 	  break;
 	case 20:
+	case 22:
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:

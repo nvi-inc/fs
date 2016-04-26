@@ -37,10 +37,10 @@ echo ();
  if ( m5rec && (answer[0] == 'Y' || answer[0] == 'y' || !sync)) {
    if(sync)
      sprintf(buffer,
-"The recorder is recording. Sync-ing while recording is not recommended.");
+	"The Mark5B is recording. It should not be sync'd while recording.");
    else
      sprintf(buffer,
-"The recorder is recording. Setting the time while recording is not recommended.");
+"The Mark5B is recording. It should not have its time set while recording.");
    mvwprintw( maindisp, ROWA+3, COL0, buffer);
    if (sync)
    sprintf(buffer,
@@ -60,9 +60,9 @@ echo ();
  if ( rack == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
  sprintf(buffer,
 	 "Do you also want to sync the DBBC first (recommended) (y/n) ?      ");
-       /* 012345678901234567890123456789012345678901234567890123456789012 */
+       /* 0123456789012345678901234567890123456789012345678901234567890 */
  mvwprintw( maindisp, ROWA+6, COL0, buffer);
- mvwscanw(  maindisp, ROWA+6, COL0+62, "%1s", answer2 );
+ mvwscanw(  maindisp, ROWA+6, COL0+60, "%1s", answer2 );
  dbbc_sync= answer2[0] == 'Y' || answer2[0] == 'y';
  }
 

@@ -1959,7 +1959,7 @@ DB -103
 dbbcn: error on select reading data, see above for error, connection closed
 ""
 DB -104
-dbbcn: time-out, connection closed, will reopen on next attempt
+dbbcn: time-out, connection closed
 ""
 DB -105
 dbbcn: error on read, see above for error, connection closed
@@ -1974,7 +1974,7 @@ DB -108
 dbbcn: no data on read, but no EOF or error, connection closed
 ""
 DB -109
-dbbcn: read too long for input buffer, connection closed
+dbbcn: read too long for input buffer, only returning partial response
 ""
 DB -110
 dbbcn: error pre-draining input, see above for error, connection closed

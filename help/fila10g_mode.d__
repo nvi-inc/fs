@@ -1,0 +1,29 @@
+fila10g_mode - set fila10g recording mode
+
+syntax:   fila10g_mode=mask2,mask1,decimation,sample,okay
+Response: fila10g_mode/mask2,mask1,decimation,sample,sps
+
+Settable parameters:
+
+mask2:      VSI2 input bit-stream mask, hex, non-zero 32-bit wide maximum,
+            for example: 0xf, default 0, null on display iif zero.
+mask1:      VSI1 input bit-stream mask, hex, non-zero 32-bit wide maximum,
+            for example: 0xf, default 0xffffffff
+decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless sample
+            (next parameter) is specified. On monitor, not displayed.
+sample:     sample rate: must be greater than 0.124.  The value divided 
+            into the Mark 5B clock rate (from equip.ctl) must yield a valid
+            decimation factor.  Default is the clock rate from equip.ctl
+            (decimation becomes "1") unless the specified rate is "none",
+            in which case this command will report an error. On monitor, no
+            output unless the decimation factor was most recently specifed,
+            in which case the implied commanded sample rate is shown in
+            parenthesizes for reference. The actual sample rate is shown
+            as monitor only parameter "sps".
+okay        overide to allow command while recording, literal ascii:
+            disk_record_ok
+
+Monitor only parameter:
+sps         actual sample rate in samples per second
+
+Comments:

@@ -2,12 +2,7 @@
 #include <sys/types.h>   /* data type definition header file */
 #include <time.h>
 
-#include "../include/params.h"
-
 #include "fmset.h"
-
-extern int rack;
-extern rack_type;
 
 void rte2secs();
 
@@ -23,7 +18,6 @@ int it[6];
 int kfirst;
 int i,j;
 struct tm *tp;
-int fila10g;
 
 month[0] = 365; month[1] = 31; month[2] = 28; month[3] = 31; month[4] = 30;
 month[5] = 31; month[6] = 30; month[7] = 31; month[8] = 31;
@@ -33,34 +27,17 @@ nodelay ( maindisp, FALSE );
 echo ();
 
   *flag = FALSE;
-  fila10g = rack == DBBC 
-    /* && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */;
-
   tp = gmtime( &ut);
-
-  if (fila10g)
-    mvwprintw( maindisp, ROWA, COL0,
-	       "If your FiLa10G has GPS, you can use year -1 for GPS time.");
-
   mvwprintw( maindisp, ROWA+1, COL0,
     "Press <return> to keep present value. Use month 0 for day of year.");
 
   kfirst = TRUE;
-  while ( kfirst ||
-	  ((setyy <1970 ||setyy >2037) && !fila10g)||
-	  (((setyy !=-1 && setyy <1970) ||setyy >2037) && fila10g)
-	  ) {  /* prompt for Year */
+  while ( kfirst || setyy <1970 ||setyy >2037) {  /* prompt for Year */
     setyy = 1900+tp->tm_year;
     mvwprintw( maindisp, ROWA+2, COL0, "Year   (1970-2037)  ?       " );
     mvwscanw(  maindisp, ROWA+2, COL, "%d", &setyy ); 
     kfirst = FALSE;
   }
-  if (fila10g && setyy < 0) {
-    ut=-1;
-    *flag=TRUE;
-    goto End;
-  }
-
   /* not Y2.1K compliant */
   if(setyy % 4 == 0) {
     month[0] = 366;
