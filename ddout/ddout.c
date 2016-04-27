@@ -430,12 +430,14 @@ Ack:    ich = strtok(NULL, ",");
 	
 	if(iwl != 0){
 	  dxpm(ibur, "?W", &ptrs, &irgb); 
-	  if(ptrs != NULL) {
+	  if(ptrs != NULL) { /* replace ?W... in ibur with non-empty "()" */
 	    iwm= irgb < iwl? irgb: iwl;
 	    memcpy(ptrs,iwhat,iwm);
 	  }
+	  *iwhs=0;       /* get rid of non-empty "()" even if "?W" not found */
+	} else if(NULL!=iwhs) /* get rid of empty "()" */ 
 	  *iwhs=0;
-	}
+
       }
       /* append returned info (if not empty) to output message for display, 
 	 otherwise we jumped to Append
