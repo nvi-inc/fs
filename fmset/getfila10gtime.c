@@ -204,11 +204,10 @@ int    *formhs;
 	if( ip[2] != 0 )
 		{
 		endwin();
-		fprintf(stderr,"Error %d from formatter\n",ip[2]);
                 logita(NULL,ip[2],ip+3,ip+4);
 		logit(NULL,-9,"fv");
-                rte_sleep(SLEEP_TIME);
-		exit(0);
+                *formtime=-1;
+		return;
 		}
 
 	/* time before is more accurate */
