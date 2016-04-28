@@ -14,7 +14,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define BUFSIZE 100
+#define BUFSIZE 200
 
 static char *lwhati[ ]={
   "ifa","ifb","ifc","ifd"};
@@ -46,7 +46,7 @@ long ip[5];
   int i,j,k,icore;
 
   *ierr=0;
-
+  savec.agc=0;
   icore=0;
   for (i=0;i<shm_addr->dbbc_cond_mods;i++)
     for (j=0;j<shm_addr->dbbc_como_cores[i];j++) {
@@ -54,13 +54,13 @@ long ip[5];
       for(k=1;k<16;k++) {
 	snprintf(idevice,4,"%c%02d",ifds[i],k+j*16);
 	if(strncmp(idevice,device,3)==0) {
-	  ifchain=i;
+	  ifchain=i+1;
 	  det=k+(icore-1)*16;
 	  goto found;
 	}
       }
       if(strncmp(lwhati[i],device,3)==0) {
-	ifchain=i;
+	ifchain=i+1;
 	det=i+MAX_DBBC_PFB;
 	goto found;
       }
@@ -78,7 +78,7 @@ long ip[5];
 
   out_recs=0;
   out_class=0;
-  
+
   sprintf(buf,"dbbcif%c",ifds[ifchain-1]);
   cls_snd(&out_class, buf, strlen(buf) , 0, 0);
   out_recs++;
@@ -108,8 +108,32 @@ long ip[5];
     ip[2] = -402;
     memcpy(ip+3,"fp",2);
     return;
+  }
+
+  if(savec.agc!=0) {
+    out_recs=0;
+    out_class=0;
+    if(savec.agc!=0) {
+      savec.target_null=1;
+      memcpy(&lclc,&savec,sizeof(lclc));
+      lclc.agc=0;
+      lclc.att=-1;
+      dbbcifx_2_dbbc(buf,ifchain,&lclc);
+      cls_snd(&out_class, buf, strlen(buf) , 0, 0);
+      out_recs++;
     }
 
+    ip[0]=1;
+    ip[1]=out_class;
+    ip[2]=out_recs;
+    skd_run("dbbcn",'w',ip);
+    skd_par(ip);
+    
+    if(ip[0]!=0) {
+      cls_clr(ip[0]);
+      ip[0]=ip[1]=0;
+    }
+  }
   return;
 }     
 
