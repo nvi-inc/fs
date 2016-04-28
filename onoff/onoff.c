@@ -83,6 +83,12 @@ main()
     kagc=TRUE;
     if(agc_dbbc(onoff.itpis,0,&ierr))
       goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    kagc=TRUE;
+    if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
+      goto error_recover;
   }
 
   if(local(&az,&el,"azel",&ierr))
@@ -463,6 +469,16 @@ main()
 	      (shm_addr->equip.rack_type == DBBC_DDC ||
 	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       if(agc_dbbc(onoff.itpis,1,&ierr2)) {
+	ip2[0]=0;
+	ip2[1]=0;
+	ip2[2]=ierr2;
+	ip2[4]=0;
+	memcpy(ip2+3,"nf",2);
+      }
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      if(agc_dbbc_pfb(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
 	ip2[2]=ierr2;
