@@ -89,6 +89,11 @@ c       do nothing
      &       )then
         id=-1
         goto 11
+      else if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &       )then
+        id=-1
+        goto 11
       endif
 c
 c  check M3 devices
