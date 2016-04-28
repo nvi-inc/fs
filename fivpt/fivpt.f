@@ -520,6 +520,7 @@ C
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
                call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+            endif
          else if(DBBC.eq.rack.and.
      &           (DBBC_PFB.eq.rack_type.or.
      &           DBBC_PFB_FILA10G.eq.rack_type)) then
@@ -527,7 +528,6 @@ C
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
                call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
-            endif
             endif
          endif
       endif
