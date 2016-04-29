@@ -26,14 +26,14 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
   }
 
   non_station=FALSE;
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_GLOBAL_DET;i++)
     if(itpis[i]!=0) {
       non_station=TRUE;
       break;
     }
 
-  kst1=itpis[MAX_DET+4];
-  kst2=itpis[MAX_DET+5];
+  kst1=itpis[MAX_GLOBAL_DET+4];
+  kst2=itpis[MAX_GLOBAL_DET+5];
   station=kst1||kst2;
   
   if(non_station) {
@@ -154,7 +154,7 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
     } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_PFB ||
 	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
-      if(tpget_dbbc_pfb(cont,ip,itpis,dtpi,ierr))
+      if(tpget_dbbc_pfb(ip,itpis,dtpi,ierr))
 	 return -1;
       for(j=0;j<MAX_DBBC_PFB_DET;j++)
 	if(itpis[j]!=0) {
