@@ -34,7 +34,7 @@ int *ierr;
   char inbuf[BUFSIZE], *sptr;
   int icore;
   int overflow;
-  float value;
+  double dvalue;
 
   /* retrieve device responses */
 
@@ -48,7 +48,7 @@ int *ierr;
       for(k=1;k<16 && !(found=itpis_dbbc_pfb[k+(icore-1)*16]);k++)
 	;
       if(found) {
-	ip[i]--;
+	ip[1]--;
 	if ((nchars =
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(ip[1]>0) 
@@ -73,7 +73,7 @@ int *ierr;
 
 	for(k=1;k<16;k++) {
 	  sptr=strtok(NULL," ,");
-	  if(NULL==sptr || 1!=sscanf(sptr,"%f",&value)) {
+	  if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
 	    if(ip[1]>0) 
 	      cls_clr(ip[0]);
 	    ip[0]=ip[1]=0;
@@ -82,9 +82,9 @@ int *ierr;
 	  }
 	  if(itpis_dbbc_pfb[k+(icore-1)*16]) {
 	    if(overflow) {
-	      dtpi[k+(icore-1)*16]=1600001;
+	      dtpi[k+(icore-1)*16]=1e9;
 	    } else
-	      dtpi[k+(icore-1)*16]=value*1000+.5;
+	      dtpi[k+(icore-1)*16]=dvalue;
 	  }
 	}
       }
@@ -113,7 +113,7 @@ int *ierr;
 	*ierr=-18;
 	return -1;
       } else { 
-	  dtpi[i+MAX_DBBC_PFB]=lclm.tp;
+	  dtpi[i+MAX_DBBC_PFB]=dbbc_if_power(lclm.tp,i);
       }
     }
   }
