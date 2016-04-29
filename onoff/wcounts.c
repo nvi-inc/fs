@@ -63,14 +63,14 @@ void wcounts(label,azoff,eloff,onoff,accum)
     strcat(buff," ");
     if(onoff->intp==1) {
       if(dbbc2_pfb)
-	dble2str(buff,       accum->avg[i],-9,3);
+	dble2str(buff,       accum->avg[i],-8,3);
       else
 	flt2str(buff,(float) accum->avg[i],-7,0);
     } else {
       if(dbbc2_pfb) {
-	dble2str(buff,       accum->avg[i],-9,3);
+	dble2str(buff,       accum->avg[i],-9,4);
 	strcat(buff," ");
-	dble2str(buff,       accum->sig[i],-9,3);
+	dble2str(buff,       accum->sig[i],-9,4);
       } else {
 	flt2str(buff,(float) accum->avg[i],-8,1);
 	strcat(buff," ");
