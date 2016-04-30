@@ -1,0 +1,101 @@
+#!/usr/bin/perl
+# Usage: fix_define files
+
+require "getopts.pl";
+
+&Getopts("f");
+
+if ($#ARGV < 0) {
+    print "\n  Usage: fix_define [-f] files\n\n";
+    print "    Fixes define lines in .prc procedure files to have the correct format.\n\n";
+    print "    The -f flag forces all the date/time fields to zero and puts a \n";
+    print "      space at the end: as PFMED creates it.\n\n";
+    print "    The original files are preserved with a '.bak' extension,\n";
+    print "      unless no change was made in which case the original is retained.\n\n";
+    exit -1;
+}
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+	die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+    if(!open(BAK,$bak)) {
+	print "Failed to open $bak: $!\n";
+	if(!rename($bak,$out)) {
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+    
+    if(!open(OUT,">" . $out)) {
+	print "Failed to open $out: $!\n";
+	if((!close(BAK)) || (!rename($bak,$out))) { 
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+
+
+#process
+
+    $line=0;
+    $change=0;
+    while(<BAK>) {
+	$line++;
+	if(!defined($opt_f) && /^define  [^ ]{1,12}[ ]{0,11}  \d{11}.{0,1}$/) {
+# if boss has opened it, it will have an 'x' at the end if there was anything
+# after the date/time field
+	    print OUT;
+	} elsif(/^define [ ]{0,1}([^ ]{1,12})/) {		
+	    $change=1;
+# canonical form is with space at the end
+	    printf OUT "define  %-12s  00000000000 \n", $1;
+	} else {
+	    print OUT;
+	}
+    }
+
+    $rename=0;
+    if(!close(OUT)) {
+	$rename=1;
+	print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+	$rename=1;
+	print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($rename || $change == 0) {
+	if(!rename($bak,$out)) { 
+	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
+	    if($rename) {
+		print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+		print "Warning: probably using 'mv $bak $out'\n";
+	    } else {
+		print "Warning: It appears that $out did not need any changes,\n";
+		print "Warning: but to be safe you should probably \"";
+		print "Warning: use 'mv $bak $out'\n";
+	    }
+	} elsif($rename) {
+	    print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+	}
+    }
+}
