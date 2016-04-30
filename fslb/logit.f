@@ -43,8 +43,8 @@ C      - buffer in which log entry is formatted
 C     NARGS - number of arguments passed to us
       character*2 copt2
 C     IOPT2/COPT2 - sent as optional parameter 2 on the class I/O.
-C             "B1" appends a bell to the terminal display,
-C                  normally used for error messages.
+C             "B1" indicates an error, a bell is used on the terminal display
+C                  for negative values, positive values are warnings
 C 
 C  INITIALIZED: 
 C 
@@ -56,7 +56,7 @@ C
       iopt2 = 0 
       copt2 =' '
       if (nargs.gt.5) then
-        if (ierr.lt.0) copt2='b1'
+        copt2='b1'
       endif
       if (nargs.eq.5) then
         iopt2 = ierr
