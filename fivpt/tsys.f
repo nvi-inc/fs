@@ -116,7 +116,7 @@ C
 C  OKAY GET THE VOLTS
 C
       if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
-     .   VLBA.eq.rack.or.VLBA4.eq.rack) then
+     .   VLBA.eq.rack.or.VLBA4.eq.rack.or.kst) then
         call volts(0,vbase,sig,vdum,sigdum,tdum,intp,rut,ierr,icont)
       else if(LBA.eq.rack.or.rack.eq.DBBC) then
 c       digital detector - assume tpzero=0
