@@ -329,8 +329,8 @@ long ip[5];                           /* ipc parameters */
 	      case 2:  lower=  10; upper= 512; break;
 	      case 3:  lower=1536; upper=2048; break;
 	      case 4:  lower=1024; upper=1536; break;
-	      case 5:  lower=   0; upper=1024; break;
-	      case 6:  lower=1200; upper=1800; break;
+	      case 5:  lower=1200; upper=1800; break;
+	      case 6:  lower=   0; upper=1024; break;
 	      default: ierr=-308; goto error; break;
 	      }
 
@@ -380,10 +380,10 @@ long ip[5];                           /* ipc parameters */
 		  
 		  switch(shm_addr->lo.sideband[ifchain-1]) {
 		  case 1:
-		    center=shm_addr->lo.lo[ifchain-1]+freq;
+		    lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]+freq;
 		    break;
 		  case 2:
-		    center=shm_addr->lo.lo[ifchain-1]-freq;
+		    lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]-freq;
 		    break;
 		  default:
 		    ierr=-302;
@@ -394,29 +394,35 @@ long ip[5];                           /* ipc parameters */
 	      }
 	    }
 
-	    float upper, lower, center;
+	    ik=i+MAX_DBBC_PFB;
+	    if(lcl.itpis[ik]!=0) {
+	      float upper, lower, center;
+
+	      lcl.devices[ik].ifchain=ifchain;
+	      switch(shm_addr->dbbcifx[ifchain-1].filter) {
+	      case 1:  lower= 512; upper=1024; break;
+	      case 2:  lower=  10; upper= 512; break;
+	      case 3:  lower=1536; upper=2048; break;
+	      case 4:  lower=1024; upper=1536; break;
+	      case 5:  lower=1200; upper=1800; break;
+	      case 6:  lower=   0; upper=1024; break;
+	      default: ierr=-308; goto error; break;
+	      }
 	
-	    switch(shm_addr->dbbcifx[ifchain-1].filter) {
-	    case 1:  lower= 512; upper=1024; break;
-	    case 2:  lower=  10; upper= 512; break;
-	    case 3:  lower=1536; upper=2048; break;
-	    case 4:  lower=1024; upper=1536; break;
-	    case 5:  lower=   0; upper=1024; break;
-	    case 6:  lower=1200; upper=1800; break;
-	    default: ierr=-308; goto error; break;
-	    }
-	
-	    switch (shm_addr->lo.sideband[ifchain-1]) {
-	    case 1:
-	      center=shm_addr->lo.lo[ifchain-1]+(lower+upper)*0.5;
-	      break;
-	    case 2:
-	      center=shm_addr->lo.lo[ifchain-1]-(lower+upper)*0.5;
-	      break;
-	    default:
-	      ierr=-302;
-	      goto error;
-	      break;
+	      switch (shm_addr->lo.sideband[ifchain-1]) {
+	      case 1:
+		lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]+
+		  (lower+upper)*0.5;
+		break;
+	      case 2:
+		lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]-
+		  (lower+upper)*0.5;
+		break;
+	      default:
+		ierr=-302;
+		goto error;
+		break;
+	      }
 	    }
 	  }
 	}
