@@ -29,10 +29,10 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
-  kst1=onoff->itpis[MAX_DET+4];
-  kst2=onoff->itpis[MAX_DET+5];
+  kst1=onoff->itpis[MAX_GLOBAL_DET+4];
+  kst2=onoff->itpis[MAX_GLOBAL_DET+5];
 
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_GLOBAL_DET;i++)
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
 
@@ -143,13 +143,28 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     /* digital detetector - assume tpzero=0 */
   }
 
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4||
-     shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4||
-     onoff->itpis[MAX_DET+4]!=0||onoff->itpis[MAX_DET+5]!=0) {
+  if(shm_addr->equip.rack==MK3||
+     shm_addr->equip.rack==MK4||
+     shm_addr->equip.rack==LBA4||
+     shm_addr->equip.rack==VLBA||
+     shm_addr->equip.rack==VLBA4||
+     kst1 || kst2) {
+    int itpis[MAX_ONOFF_DET]; /* if it is digital detector don't sample zero */
 
-    get_samples(cont,ip,onoff->itpis,onoff->intp,rut,accum,&acdum,&ierr2);
+    for(i=0;i<MAX_ONOFF_DET;i++)
+      itpis[i]=onoff->itpis[i];
+    if(shm_addr->equip.rack!=MK3&&
+       shm_addr->equip.rack!=MK4&&
+       shm_addr->equip.rack!=LBA4&&
+       shm_addr->equip.rack!=VLBA&&
+       shm_addr->equip.rack!=VLBA4) /* doctor up a local copy */
+      for(i=0;i<MAX_GLOBAL_DET;i++)
+	itpis[i]=0;
 
-  } else if(shm_addr->equip.rack==LBA) {
+    get_samples(cont,ip,itpis,onoff->intp,rut,accum,&acdum,&ierr2);
+
+  }
+  if(shm_addr->equip.rack==LBA) {
 
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<2*shm_addr->n_das; i++) 
@@ -165,6 +180,18 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_DBBC_DET; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
+
+  } else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_PFB ||
+	     shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<MAX_DBBC_PFB_DET; i++) 
       if (onoff->itpis[i]) {
         accum->avg[i]=0.0;
         accum->sig[i]=0.0;
