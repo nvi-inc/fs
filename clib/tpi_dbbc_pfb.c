@@ -18,10 +18,6 @@
 double dbbc_if_power(unsigned counts, int como);
 
 static char ch[ ]={"abcd"};
-static char *lwhat[ ]={
-"1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
-"1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
-"ia","ib","ic","id"};
 static char *lwhatn[ ]={
   "00","01","02","03","04","05","06","07","08","09","10","11","12","13",
   "14","15"};
@@ -99,7 +95,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
   char inbuf[BUFSIZE], *sptr;
   int icore, ik;
   int overflow;
-  float value;
+  double dvalue;
 
   isub=abs(isubin);
 
@@ -149,7 +145,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	for(k=1;k<16;k++) {
 	  ik=k+(icore-1)*16;
 	  sptr=strtok(NULL," ,");
-	  if(NULL==sptr || 1!=sscanf(sptr,"%f",&value)) {
+	  if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
 	    if(i<ip[1]-1) 
 	      cls_clr(ip[0]);
 	    ip[0]=ip[1]=0;
@@ -161,7 +157,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	    if(overflow) {
 	      ptr[ik]=1600001;
 	    } else
-	      ptr[ik]=value*1000+.5;
+	      ptr[ik]=dvalue*1000+.5;
 	  }
 	}
       }
