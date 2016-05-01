@@ -320,8 +320,8 @@ int *ierr;
 	  case 2:  lower=  10; upper= 512; break;
 	  case 3:  lower=1536; upper=2048; break;
 	  case 4:  lower=1024; upper=1536; break;
-	  case 5:  lower=   0; upper=1024; break;
-	  case 6:  lower=1200; upper=1800; break;
+	  case 5:  lower=1200; upper=1800; break;
+	  case 6:  lower=   0; upper=1024; break;
 	  default: *ierr=-307; goto error; break;
 	  }
 
@@ -392,8 +392,8 @@ int *ierr;
 	case 2:  lower=  10; upper= 512; break;
 	case 3:  lower=1536; upper=2048; break;
 	case 4:  lower=1024; upper=1536; break;
-	case 5:  lower=   0; upper=1024; break;
-	case 6:  lower=1200; upper=1800; break;
+	case 5:  lower=1200; upper=1800; break;
+	case 6:  lower=   0; upper=1024; break;
 	default: *ierr=-307; goto error; break;
 	}
 	
