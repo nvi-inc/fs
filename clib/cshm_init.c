@@ -425,10 +425,10 @@ void cshm_init()
     shm_addr->dbbcnn[i].avper=0;
   }
   for (i=0;i<MAX_DBBCIFX;i++) {
-    shm_addr->dbbcifx[i].input=-1;
+    shm_addr->dbbcifx[i].input=1;
     shm_addr->dbbcifx[i].att=-1;
-    shm_addr->dbbcifx[i].agc=-1;
-    shm_addr->dbbcifx[i].filter=-1;
+    shm_addr->dbbcifx[i].agc=1;
+    shm_addr->dbbcifx[i].filter=1;
     shm_addr->dbbcifx[i].target_null=1;
     shm_addr->dbbcifx[i].target=0;
   }
