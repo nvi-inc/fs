@@ -1995,7 +1995,10 @@ DG -451
 Class buffer error from command response.
 ""
 DG -501
-Only DBBC DDC rack types supported in bbcgain command.
+Only DBBC DDC rack types supported in bbc_gain command.
+""
+DG  502
+bbc_gain is a no-op for DBBC PFB rack types.
 ""
 DH -104
 No default sample rate if clock rate (from equip.ctl) is "none".
@@ -2517,7 +2520,7 @@ FP -402
 Error decoding IFx response for IF gain control.
 ""
 FP -403
-Class buffer error, from voltage read response/
+Class buffer error, from voltage read response.
 ""
 FP -404
 Error decoding BBCmm response for voltage.
@@ -2527,9 +2530,6 @@ Error decoding IFx response for voltage.
 ""
 FP -406
 Error decoding power=n response for voltage.
-""
-FP -112
-Couldn't reset gain to original value
 ""
 FV   -1
 fmset: Error receiving message from matcn
