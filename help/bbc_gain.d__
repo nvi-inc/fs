@@ -40,3 +40,11 @@ This commmand controls the gain for BBC sideband power read-out.
 
 The monitor form requires a single parameter specifying which BBC to
 monitor.
+
+If this command is used with DBBC PFB personality specified, a warning
+is issued (positive error number with no bell) instead of an error
+(negative error number with bell).  This is intended to help
+facilitate using DBBC personality independent version of the
+"caltsys_man" SNAP procedure.  Otherwise to avoid an error bell for
+the PFB personality, there would need to be a different version of
+"caltsys_man" that omits "bbc_gain=all,man".
