@@ -1,7 +1,7 @@
       subroutine defiv(jbuf,ifc,ilc,laxis,nrep,npts,step,intp,ldev,cal, 
      +                 freq,iferr)
 C
-      integer*2 jbuf(1),laxis(1),ldev
+      integer*2 jbuf(1),laxis(1),ldev(2)
 C 
       iferr=1 
       ifield=0
@@ -28,7 +28,7 @@ C
 C 
 C DETECTOR DEVICE 
 C 
-      call gtchr(ldev,1,2,jbuf,ifc,ilc,ifield,iferr)
+      call gtchr(ldev,1,4,jbuf,ifc,ilc,ifield,iferr)
 C 
 C CALIBRATION NOISE TEMP
 C 
