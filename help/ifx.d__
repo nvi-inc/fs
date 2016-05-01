@@ -9,6 +9,21 @@ the DBBC rack, a to d
 
 Settable Parameters:
 
+**NOTE: The FS starts with the values of these parameters set to
+  reasonable defaults, for backward functional compatibility with
+  version 9.11.8.  Although technically a bug, this avoids extraneous
+  error messages from the "ifman" procedure in "caltsys_man" for ifX
+  modules that are not being used.
+
+  However, this may prevent easy detection of incomplete set-up for
+  determing the cal noise value for standalone (non-DRUDG configured)
+  Tsys, FIVPT, and ONOFF measurements.  This may lead to incorrect
+  results, which may only differ from correct results in subtle hard to
+  detect ways.  Users are encouraged to make sure that ifX modules
+  being used in an standalone operations have been fully set-up in the
+  FS first.  As of FS of the first offical release after 9.11.8, a
+  plan is being developed to eliminate this problem.
+
             input     input channel, 1 to 4, No default.
 
             att       attenuation, "man" for manual control at current level,
@@ -25,8 +40,8 @@ Settable Parameters:
                               2 is   10- 512 MHz,
                               3 is 1536-2028 MHz,
                               4 is 1024-1536 MHz,
-                              5 is    0-1024 MHz,
-                              6 is 1200-1800 MHz (L Band),
+                              5 is 1200-1800 MHz (L Band),
+                              6 is    0-1024 MHz,
                               7 is spare,
                               8 is spare.
                               
