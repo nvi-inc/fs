@@ -56,7 +56,7 @@ C      IERLON variables respectively, as the number of records with errors
 C      NLIN, NLAT, and NLON hold the number of each type found with no error
 C 
       integer iyr,idoy,ihr,im,is 
-      integer nrep,npts,intp,ldev 
+      integer nrep,npts,intp,ldev(2) 
       integer*2 laxis(1),lant(1),lsaxis(1),lsorna(1),jbuf(1) 
       integer imodel
       integer iayr,iadoy,iahr,iam,ias,iats

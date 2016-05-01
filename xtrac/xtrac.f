@@ -12,7 +12,7 @@ C
       integer irrec(12)
       integer numlon(31),numlat(31),numlin(31)
 C
-      integer nrep,npts,intp,ldev 
+      integer nrep,npts,intp,ldev(2) 
       integer iayr,iadoy,iahr,iam,ias,iats
       integer iqlat,iqlon 
       integer nlin,ierlin,ndlin

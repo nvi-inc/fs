@@ -10,11 +10,12 @@
 #define STL(dest,source) min(sizeof((dest)),strlen((source))+1)
 
 #define MAXRX MAX_RXGAIN
-#define MAXDETECTORS MAX_DET
+#define MAXDETECTORS MAX_ONOFF_DET
 #define BADVALUE -6000000
 #define MISSINGVALUE -7000000
 #define BADSTRVALUE "X"
 #define MAXLINE 1024
+#define MAX_DET_STR 5
 
 int min(int x, int y); 
 
@@ -25,8 +26,8 @@ int main(int argc, char *argv[])
   char rxgFileName[20], controlFileDir[64];
   double azimuth, elevation, skyfreq, gainc, tsys, sefd, tcaljy, tcalk, calratio, tcal_ass;
   double flux_ass, tcalk_over_jy_ass, gcurve_ass, dpfu_gcurve_ass, LO;
-  char onetime[22], time[22], source[11], dummy[31], detector[3], ifchan[2], polarization[2], sourcetype[2];
-  char source_array[MAXDETECTORS][11], detector_array[MAXDETECTORS][3];
+  char onetime[22], time[22], source[11], dummy[31], detector[MAX_DET_STR], ifchan[2], polarization[2], sourcetype[2];
+  char source_array[MAXDETECTORS][11], detector_array[MAXDETECTORS][MAX_DET_STR];
   char ifchan_array[MAXDETECTORS][2], polarization_array[MAXDETECTORS][2], sourcetype_array[MAXDETECTORS][2];
   char namearray[MAXRX][265], typearray[MAXRX][6];
   double azimuth_array[MAXDETECTORS], elevation_array[MAXDETECTORS], skyfreq_array[MAXDETECTORS];
@@ -227,7 +228,7 @@ int main(int argc, char *argv[])
 	strcpy(sourcetype,BADSTRVALUE);
       }
       
-      strncpy(detector_array[detcount],detector,min(MAXDETECTORS,strlen(detector))+1);
+      strncpy(detector_array[detcount],detector,min(MAX_DET_STR,strlen(detector))+1);
       skyfreq_array[detcount] = skyfreq;
       tcal_log_array[detcount] = tcal_ass;
       flux_ass_array[detcount] = flux_ass;
