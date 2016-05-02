@@ -3,17 +3,37 @@
 
 require "getopts.pl";
 
-&Getopts("f");
+&Getopts("fho");
 
-if ($#ARGV < 0) {
-    print "\n  Usage: fix_define [-f] files\n\n";
-    print "    Fixes define lines in .prc procedure files to have the correct format.\n\n";
-    print "    The -f flag forces all the date/time fields to zero and puts a \n";
-    print "      space at the end: as PFMED creates it.\n\n";
-    print "    The original files are preserved with a '.bak' extension,\n";
-    print "      unless no change was made in which case the original is retained.\n\n";
+if ($#ARGV < 0 || defined($opt_h)) {
+    print "\n  Usage: fix_define [-fho] files\n\n";
+    print "    This command fixes the 'define' lines in .prc procedure files to have the\n";
+    print "    correct format to work properly in the FS. Without the '-f' flag it will\n";
+    print "    only make minimal changes to achieve this goal. Without the '-o' flag it\n";
+    print "    will not execute if the FS is running. It does not correct or detect other\n";
+    print "    possible .prc file structural defects.\n\n";
+    print "    Flags:\n";
+    print "      -f    forces all the date/time fields to zero and puts a space at the end,\n";
+    print "            which is as PFMED would create it.\n";
+    print "      -h    flag (or no arguments) prints this help message.\n";
+    print "      -o    overrides the interlock preventing execution if the FS is active.\n";
+    print "            This option must be used with extreme care. It must not be used on\n";
+    print "            .prc files that are open in the FS, for example:\n";
+    print "             /usr2/proc/station.prc\n";
+    print "\n";
+    print "    The original files are preserved with a '.bak' extension, unless no change\n";
+    print "      was made in which case the original is retained as is.\n\n";
+    if(`lognm`) {
+	die "  FYI: The FS is currently active.\n\n";
+    } else {
+	die "  FYI: As far as I can tell, the FS is currently NOT active.\n\n";
+    }
     exit -1;
 }
+
+    if(`lognm` && !defined($opt_o)) {
+	die " Cannot be used when the FS is active without '-o' flag,\n please check '$0 -h' and be careful.\n";
+    }
 
 FILE: foreach $name (@ARGV) {
 
@@ -23,13 +43,15 @@ FILE: foreach $name (@ARGV) {
 	die "Can't find $name Quitting.\n";
     }
 
-
 # rename the original if we can and open the files
 
     if (-e $bak) {
 	die "Backup-file $bak already exists, giving up.\n";
     }
 
+    if(`lognm` && !defined($opt_o)) {
+	die " $0 is already running and the FS became active, giving up.\n";
+    }
     rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
  
     if(!open(BAK,$bak)) {
@@ -57,6 +79,7 @@ FILE: foreach $name (@ARGV) {
 
     $line=0;
     $change=0;
+    $rename=0;
     while(<BAK>) {
 	$line++;
 	if(!defined($opt_f) && /^define  [^ ]{1,12}[ ]{0,11}  \d{11}.{0,1}$/) {
@@ -67,12 +90,15 @@ FILE: foreach $name (@ARGV) {
 	    $change=1;
 # canonical form is with space at the end
 	    printf OUT "define  %-12s  00000000000 \n", $1;
+	} elsif(/^define/) {
+	    print "File '$out' has a 'define' problem I can't fix at line $line\n";
+	    $rename=1;
+	    print OUT;
 	} else {
 	    print OUT;
 	}
     }
 
-    $rename=0;
     if(!close(OUT)) {
 	$rename=1;
 	print "Warning: Unable to close to $out: $!\n";
@@ -83,6 +109,11 @@ FILE: foreach $name (@ARGV) {
     }
 
     if($rename || $change == 0) {
+	if(`lognm` && !defined($opt_o)) {
+	    print " $0 is already running and the FS became active.\n";
+	    print " I can't risk renaming '$bak' to '$out' for you.\n";
+	    die " Please stop the FS and use 'mv $bak $out', giving up.\n";
+	}
 	if(!rename($bak,$out)) { 
 	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
 	    if($rename) {
@@ -99,3 +130,4 @@ FILE: foreach $name (@ARGV) {
 	}
     }
 }
+
