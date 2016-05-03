@@ -600,6 +600,7 @@ long ip[5];
 	  rte_sleep(102-(now-last_dbbctrk));
 	}
       }
+      rte_ticks(&now);
       last_dbbctrk=now;
       dbbctrk=TRUE;
     }
@@ -664,7 +665,10 @@ long ip[5];
     read:
       ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
 			    fila10g, newline);
-      
+      if(NULL != strstr(inbuf,"dbbctrk")) {
+	rte_ticks(&now);
+	last_dbbctrk=now;
+      }
       if(mode==4) {
 	rte_ticks (centisec+1);
 	rte_cmpt(centisec+3,centisec+5);
