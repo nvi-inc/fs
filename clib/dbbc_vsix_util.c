@@ -123,7 +123,7 @@ int core;
 {
   int i;
 
-  sprintf(buff,"dbbctrk%d=%d",itask+1,core);
+  sprintf(buff,"dbbctrk=%d,%d",core,itask+1);
 
   for(i=0;i<16;i++) {
     strcat(buff,",");
