@@ -335,8 +335,7 @@ c
             call fs_get_dbbc_como_cores(dbbc_como_cores)
             do i=1,dbbc_cond_mods
                if(index('abcd',cjchar(ldevfp,1)).eq.i) then
-                  idum=ichmv(ldev,1,ldevfp,2,2)
-                  indx=ia22h(ldev)
+                  indx=ias2b(ldevfp,2,2)
                   if(indx.ge.1.and.indx.le.16*dbbc_como_cores(i)) then
                      ifchain=i
                   else
