@@ -587,17 +587,15 @@ long ip[5];
 
     /*check for ddctrk... to allow delay */
 
-    if(NULL != strstr(inbuf,"dbbctrk")) {
- /* make sure "dbbctrk" commands have at least a one second between
-    them, we might be able to save a little time by distinguishing
-    between dbbctrk1, dbbctrk2, abd dbbctrk commands, but it is very
-    little savings and a lot more complication (and testing), so not
-    for now, this may also need some adjustment if these commands get
-    a monitor form so that isn't too slow */
+    if(NULL != strstr(inbuf,"dbbctrk=")) {
+ /* make sure "dbbctrk=" commands have at least a one second between them
+    there is another section related to this to get the time at the
+    end of the response below after read_response()
+ */
       rte_ticks(&now);
       if(dbbctrk) {
-	if(now-last_dbbctrk < 102) {
-	  rte_sleep(102-(now-last_dbbctrk));
+	if(now-last_dbbctrk < 101) {
+	  rte_sleep(101-(now-last_dbbctrk));
 	}
       }
       rte_ticks(&now);
@@ -665,7 +663,7 @@ long ip[5];
     read:
       ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
 			    fila10g, newline);
-      if(NULL != strstr(inbuf,"dbbctrk")) {
+      if(NULL != strstr(inbuf,"dbbctrk=")) {
 	rte_ticks(&now);
 	last_dbbctrk=now;
       }
