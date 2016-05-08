@@ -43,7 +43,7 @@ C
 C
 C DEVICE MNEMONIC
 C
-      icnext=ichmv(lbuf,icnext,ldevfp,1,2)
+      icnext=ichmv(lbuf,icnext,ldevfp,1,4)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C CALIBRATION NOISE SOURCE

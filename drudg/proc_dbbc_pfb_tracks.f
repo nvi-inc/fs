@@ -11,13 +11,13 @@
 
 ! History
 !  2016Jan18 JMGipson.  First working version.
+!  2016May07 WEH        reorder vsi1/vsi2, remove unitialized ichan bug
 
 ! local
       integer ic   
       integer num_out     !number written out
       integer nch         !character  location 
       integer i           !counter 
-      integer ichan       !channel number
     
       integer*4 itemp
       integer*4 imask(2)  !Mask can be 64 bits long. 
@@ -90,8 +90,8 @@
       call drudg_write(lu_outfile,lmode_cmd)     
 ! Now we have to write out the vsi1 and vsi2 commands. These look like...
 !>>   form=flex 
-!>>   vsi1=a02,a03,a04,a05,a06, c04,c05,c06    ....upto 16 channels.
-!>>   vsi2=... for the next 16
+!>>   vsi2=a02,a03,a04,a05,a06, c04,c05,c06    ....upto 16 channels.
+!>>   vsi1=... for the first 16
 
 ! make an array of the stuff we will write out
       do ic=1,nchan(istn,icode)
@@ -103,31 +103,40 @@
       call indexx_string(itemp,ltmp_array,ikey)
 
       write(lu_outfile,'(a)') "form=flex"
-      num_out=0
+
+      if(nchan(istn,icode). gt. 16) then
+         cbuf="vsi2="
+         nch=6
+         num_out=0
+         DO ic=17,nchan(istn,icode) !loop on channels
+            if(num_out .ne. 0) then
+               cbuf(nch:nch)=","
+               nch=nch+1
+            endif      
+            write(cbuf(nch:nch+2),'(a)')  ltmp_array(ikey(ic)) 
+            nch=nch+3
+            num_out=num_out+1
+         enddo
+         call drudg_write(lu_outfile,cbuf) !write out the line. 
+      endif
+
       cbuf="vsi1="
       nch=6
-
-      DO ic=1,nchan(istn,icode)  !loop on channels
+      num_out=0
+      DO ic=1,min(16,nchan(istn,icode)) !loop on channels on vsi1
 ! put in a comma if not the first one. 
          if(num_out .ne. 0) then
-           cbuf(nch:nch)=","
-           nch=nch+1
+            cbuf(nch:nch)=","
+            nch=nch+1
          endif      
          write(cbuf(nch:nch+2),'(a)')  ltmp_array(ikey(ic)) 
          nch=nch+3
-        
          num_out=num_out+1
-         if(num_out .eq. 16) then
-           call drudg_write(lu_outfile,cbuf)    !write out the line. 
-           cbuf="vsi2="
-           nch=6
-           num_out=0
-         endif 
-       end do
-       if(ichan .gt. 17) then  !need to write out last line.
-         call drudg_write(lu_outfile,cbuf)    !write out the line. 
-       endif
-       return   
+      end do
+      if(num_out.gt.0) then    !need to write out last line.
+         call drudg_write(lu_outfile,cbuf) !write out the line. 
+      endif
+      return   
 
 900   continue
       write(*,*) 

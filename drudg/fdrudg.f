@@ -37,8 +37,9 @@ C LOCAL:
       logical kequip_over,knew_sked
       integer nch,nci
       character*2  response,scode
-      character*12 dr_rack_type, crec_def(2)
-      character*12 crack_tmp_cap,crec_tmp_cap
+      character*12 crec_def(2)
+      character*12 crec_tmp_cap
+      character*20 dr_rack_type,crack_tmp_cap
       integer inew,ivexnum
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
@@ -211,6 +212,7 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2015Jun05 JMG.      Increased size of dr_rack_type, crec_def from Char*8-->char*12
 ! 2015Jul06 JMG.      If recorder or rack is "UNKNOWN" change to none. 
 ! 2015Aug31 JMG.      Don't quit on "q"
+! 2016May07 WEH.      Increased size of dr_rack_type, crack_tmp_cap from Char*12-->char*20
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)

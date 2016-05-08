@@ -4,6 +4,7 @@
 ! History:
 !  2014Dec06. Added Mark5C support
 !  2015Jun05 JMG. Repalced drudg_write by drudg_write. 
+!  2016May07 WEH. bank_check if only 2 Gbps or less
 ! passed
       character*5 lform        !Form descriptor
       integer ifan              !fanout
@@ -18,12 +19,12 @@
       integer itemp
 
       ierr=0
+      if(ifan .gt. 1) then
+         idrate=samprate/ifan   !idrate is the data rate.
+      else
+         idrate=samprate
+      endif
       if(.not. (km5b .or. km5c)) then             !skip below for Mark5B
-        if(ifan .gt. 1) then
-          idrate=samprate/ifan        !idrate is the data rate.
-        else
-          idrate=samprate
-        endif
 ! Put some instructions out for MK5 recorders.
         write(ldum,'("mk5=play_rate=data:",i4,";")') idrate
         call drudg_write(lufile,ldum)
@@ -36,7 +37,8 @@
         write(ldum,'("mk5=mode=",a,":",i2,";")')lform,itemp
         call drudg_write(lufile,ldum)
       endif
-      if(.not. kflexbuff) then 
+      if(.not. kflexbuff .and. .not.
+     &     (km5c .and. idrate*ntrack_rec_mk5.gt.2048)) then 
       write(lufile,'("bank_check")')
       endif 
       end
