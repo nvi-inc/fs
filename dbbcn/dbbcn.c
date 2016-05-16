@@ -187,6 +187,7 @@ int doinit()
     fclose (fp);
  
     is_init=TRUE;
+    shm_addr->dbbc_defined=1;
     if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
 #ifdef DEBUG
       printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
@@ -757,12 +758,16 @@ long ip[5];
       ip[2]=-201;
       goto error;
     } else if ((7==mode || 6==mode) &&
-	       (strstr(outbuf,"Failed")!=NULL ||strstr(outbuf,"WARNING")!=NULL)
+	       (strstr(outbuf,"Failed")!=NULL 
+		||strstr(outbuf,"ERROR")!=NULL
+		||strstr(outbuf,"WARNING")!=NULL)
 	       ) {
       char *failed=strstr(outbuf,"Failed");
       char *warning=strstr(outbuf,"WARNING");
       int i;
 
+      if(NULL==failed)
+	failed=strstr(outbuf,"ERROR");
       if(NULL!=failed) {
 	for(i=0;failed[i]!=0;i++)
 	  if(index("\r\n",failed[i])!=NULL) {

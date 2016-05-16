@@ -15,7 +15,6 @@ extern int rack_type;
 extern int source;
 extern int s2type;
 extern char s2dev[2][3];
-extern int iRDBE;
 
 void setfmtime(formtime,delta)
 time_t formtime;
@@ -28,11 +27,11 @@ if (nsem_test(NSEM_NAME) != 1) {
   rte_sleep(SLEEP_TIME);
   exit(0);
 }
-  if (source == RDBE) 
-    setRDBEtime(formtime,delta);
-  else if (source == MK5 )
+
+
+  if (source == MK5 )
     set5btime(formtime,delta);
-  else if (source == DBBC
+  else if (rack == DBBC
   /* && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
 	   )
     setfila10gtime(formtime,delta);

@@ -2564,12 +2564,6 @@ fmset: Error from DBBCN, please see messages above.
 FV  -10
 fmset: Error from MATCN, please see messages above.
 ""
-FV  -11
-fmset: Error from MK5CN, please see messages above.
-""
-FV  -12
-fmset: Error from MATCN, please see messages above.
-""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
 ""

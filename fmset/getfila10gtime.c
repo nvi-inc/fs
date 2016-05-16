@@ -18,6 +18,7 @@ extern long ip[5];           /* parameters for fs communications */
 extern unsigned char outbuf[512];     /* class i-o buffer */
 extern int synch;
 extern int rack, rack_type;
+extern int source;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -55,7 +56,7 @@ int    *formhs;
 	  mvwaddstr( maindisp, 6, 10+15,
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 10+15+39 , "               ");
-	  if(rack == DBBC && dbbc_sync) {
+	  if(source == DBBC && dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
 	    out_class=0;
@@ -110,24 +111,8 @@ int    *formhs;
 	  out_recs=0;
 	  out_class=0;
 	  
-	  {/*
-	    int ilast; 
-	    char *plastp1;
-	    plastp1=memchr(shm_addr->fila10gvsi_in,' ',
-			   sizeof(shm_addr->fila10gvsi_in));
-	    if(plastp1) 
-	      ilast=plastp1-shm_addr->fila10gvsi_in;
-	    else
-	      ilast=sizeof(shm_addr->fila10gvsi_in);
-	    sprintf(outbuf,"fila10g=inputselect %.*s",ilast,
-		    shm_addr->fila10gvsi_in);
-	   */
-	    sprintf(outbuf,"fila10g=inputselect vsi1");
-	  }
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-
           decimate=1;
+	  /* we don't have these variables yet */
 	  /*
 	  if(shm_addr->fila10g_mode.decimate.state.known)
 	    decimate=shm_addr->fila10g_mode.decimate.decimate;

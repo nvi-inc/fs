@@ -392,4 +392,6 @@ typedef struct fscom {
     int nchars;
   } fserr_cls;
 
+  int dbbc_defined;
+
 } Fscom;

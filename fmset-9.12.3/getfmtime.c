@@ -38,6 +38,7 @@ int sz_m5clock;
 {
   static long phase =-1;
   long raw, sleep, rawch;
+  int it[6];
 
   if (nsem_test(NSEM_NAME) != 1) {
     endwin();
@@ -46,23 +47,7 @@ int sz_m5clock;
     exit(0);
   }
 
-  if (source == RDBE) {
-    rte_sleep(10);
-    rte_ticks(&raw);
-    if(phase != -2) {
-      sleep=102-(raw%100+phase)%100;
-    } else
-      sleep=101;
-    if(sleep >=0) {
-      rte_sleep(sleep); 
-    }
-    getRDBEtime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
-    if(*formtime < 0) {
-      phase = -2;
-    } else if(*formhs > -1 && *formhs < 100) {
-      phase=(100+*formhs-rawch%100)%100;
-    }
-  } else if (source == MK5) {
+  if (source == MK5) {
     rte_sleep(10);
     rte_ticks(&raw);
     if(phase != -2) {
@@ -79,7 +64,7 @@ int sz_m5clock;
     } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
-  } else if (source == DBBC 
+  } else if (rack == DBBC 
    /* && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
 	     ) {
     getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);

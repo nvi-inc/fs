@@ -449,6 +449,7 @@ void cshm_init()
     }
     shm_addr->rdtcn[i].iping=0;
   }
+  shm_addr->dbbc_defined=0;
 
   return;
 }

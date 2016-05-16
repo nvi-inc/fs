@@ -12,7 +12,6 @@ extern char *form;
 extern int dbbc;
 extern int dbbc_sync;
 extern int rack;
-extern int source;
 
 int asksure( maindisp,m5rec,sync)  /* ask if sure */
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -58,7 +57,7 @@ echo ();
  mvwscanw(  maindisp, ROWA+4, COL0+55, "%1s", answer );
  }
 
- if ( source == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
+ if ( rack == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
  sprintf(buffer,
 	 "Do you also want to sync the DBBC first (recommended) (y/n) ?      ");
        /* 012345678901234567890123456789012345678901234567890123456789012 */
