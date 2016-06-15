@@ -557,7 +557,7 @@ struct onoff_cmd *lcl;
     strcat(output,",");
     sprintf(output+strlen(output),"%d",lcl->intp);
     strcat(output,",");
-    sprintf(output+strlen(output),"%.1f",lcl->cutoff*RAD2DEG);
+    sprintf(output+strlen(output),"%.1f",lcl->cutoff);
     strcat(output,",");
     sprintf(output+strlen(output),"%.1f",lcl->step);
     strcat(output,",");
