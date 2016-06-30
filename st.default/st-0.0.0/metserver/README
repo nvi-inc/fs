@@ -14,8 +14,10 @@ Read the INSTALL for installation instructions.
 THE SERVER:
 -------------
 
-metserver will call on metget to retrive information from MET3 and Wind 
-Sensor by using the ports that you have designated. 
+metserver will call on metget to retrive information from
+MET3/MET4/MET4A meteorological sensor and Vaisala WMT70x wind sensor
+by using the ports that you have designated.
+
 example: /dev/ttySx /dev/ttySx
 
 Information will be read from named /dev/ports on request for the
