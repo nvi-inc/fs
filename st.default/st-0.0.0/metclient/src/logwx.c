@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
@@ -24,6 +27,7 @@ logwx(
   int kopen;
   int len;
   size_t size;
+  int fd;
 
   /* Setup new logfile. */
   if(strlen(logfile)+1 > sizeof(new)) {
@@ -56,14 +60,30 @@ logwx(
       }
     }
 
-    fildes=(fopen(new,"a+"));
-    if(fildes == (FILE *) NULL) {
+    /* have to open O_EXCL to see if we need chmod() */
+
+    fd=open(new,O_RDWR|O_APPEND|O_CREAT|O_EXCL,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+
+    if(fd == -1 && errno == EEXIST) {
+      fildes=fopen(new,"a+");
+      if(fildes == (FILE *) NULL) {
+	err_report("Opening existing log in logwx",new,errno,0);
+	return;
+      }
+    } else if(fd==-1) {
       err_report("Opening new log in logwx",new,errno,0);
       return;
-    }
-    if(0!=chmod(new,0666)) {
-      err_report("Setting permissions in logwx",new,errno,0);
+    } else {
+      if(0!=chmod(new,S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)) {
+	err_report("Setting permissions in logwx",new,errno,0);
+	return;
+      }
+      fildes=fdopen(fd,"a+");
+      if(fildes == (FILE *) NULL) {
+      err_report("fdopen-ing new log in logwx",new,errno,0);
       return;
+      }
     }
 
     strncpy(file,new,sizeof(file));
