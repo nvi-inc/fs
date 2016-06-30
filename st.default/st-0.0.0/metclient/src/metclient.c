@@ -97,8 +97,7 @@ file_err:
   /* Opening met file. */
   if ((fp=fopen(argv[1],"r")) == 0) {
     /* If the file does not exist complain only once. */
-    err_report("metlog.ctl does not exist", NULL,errno,0);
-    fclose(fp);
+    err_report("metlog.ctl does not exist", argv[1],errno,0);
     sleep(60);
     goto file_err;
   } else {
@@ -340,27 +339,25 @@ port_err:
       err_report("recv error, metserver not responding", NULL,errno,0);
       buff[0] = 0; /* Will make us print no met data, only time and wx. */
     } else { /*This is where we end up if we successfully got the data.*/
-      int icount;
-      buf[numbytes]='\0';
-      icount=sscanf(buf,"%f,%f,%f,%f,%d",&twx,&pwx,&hwx,&swx,&dwx);
-      buff[0]=0;
-      if(icount != 5) {
-	err_report("error decoding met string", buf,0,0);
-      } else {
-	if(twx >= -50.0) sprintf(buff,"%.1f",twx);
-	strcat(buff,",");
-	if(pwx >= 0.0) sprintf(buff+strlen(buff),"%.1f",pwx);
-	strcat(buff,",");
-	if(hwx >= 0.0) sprintf(buff+strlen(buff),"%.1f",hwx);  
-	if(swx >= 0.0) {
-	  strcat(buff,",");
-	  sprintf(buff+strlen(buff),"%.1f",swx);
-	  strncat(buff,",",1);
-	  sprintf(buff+strlen(buff),"%d",dwx);
-	}
-      }
+     int i;
+     char *ptr;
+     
+     buf[numbytes]='\0';
+     ptr=buf;
+     for(i=0;i<5;i++) {
+       ptr=strchr(ptr,',');
+       if(ptr==NULL) {
+	 err_report("error decoding met string", buf,0,0);
+	 strcpy(buff,",,,,");
+	 goto time_tag;
+       }
+       ptr=ptr+1;
+     }
+     *(ptr-1)=0;
+     strcpy(buff,buf);
     }
-
+    
+ time_tag:
     t=tv1.tv_sec;
     csec=(tv1.tv_usec+5000L)/10000L;
     if(csec>=100) {
